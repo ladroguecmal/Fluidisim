@@ -8,6 +8,7 @@ pub struct Gpu {
     pub format: wgpu::TextureFormat,
     pub adapter: wgpu::Adapter,
     ocean: wgpu::RenderPipeline,
+    pub sky_cache: crate::sky_cache::SkyCache,
     sky: wgpu::RenderPipeline,
     compute: wgpu::ComputePipeline,
     bind: wgpu::BindGroup,
@@ -279,14 +280,16 @@ impl Gpu {
         };
         let lattice_read = lattice_group(&lattice_read_layout);
         let lattice_write = lattice_group(&lattice_write_layout);
+        let shader = device.create_shader_module(wgpu::include_wgsl!("water.wgsl"));
+        let sky_cache = crate::sky_cache::SkyCache::new(&device, &layout, &shader, !feature.is_empty());
         let render_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
-            bind_group_layouts: &[Some(&layout), None, Some(&lattice_read_layout)],
+            bind_group_layouts: &[Some(&layout), None, Some(&lattice_read_layout), Some(&sky_cache.read_layout)],
             immediate_size: 0,
         });
         let compute_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
-            bind_group_layouts: &[Some(&layout), Some(&probe_layout), Some(&lattice_read_layout)],
+            bind_group_layouts: &[Some(&layout), Some(&probe_layout), Some(&lattice_read_layout), Some(&sky_cache.read_layout)],
             immediate_size: 0,
         });
         let bake_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -294,7 +297,6 @@ impl Gpu {
             bind_group_layouts: &[Some(&layout), None, None, Some(&lattice_write_layout)],
             immediate_size: 0,
         });
-        let shader = device.create_shader_module(wgpu::include_wgsl!("water.wgsl"));
         let make_pipeline = |vs, fs, write_depth| {
             device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some(vs),
@@ -382,6 +384,7 @@ impl Gpu {
             format,
             adapter,
             ocean,
+            sky_cache,
             sky,
             compute,
             bind,
@@ -470,10 +473,14 @@ impl Gpu {
         for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, tail, if frame.cwm { 1. } else { 0. }] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
-        for v in [frame.reflection_order as f32, 0., 0., 0.] {
+        for v in [frame.reflection_order as f32, if frame.sky_cache { 1. } else { 0. }, 0., 0.] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
+        if frame.reflection_order > 0 && frame.sky_cache {
+            self.sky_cache.prepare(&self.device, &self.queue, &self.bind, frame.clear_sky);
+        }
+
         self.bytes.clear();
         let eye = frame.camera.eye;
         for slot in &frame.impacts {
@@ -597,6 +604,7 @@ impl Gpu {
             pass.set_bind_group(0, &self.bind, &[]);
             // Mise en page partagée avec l'eau : le groupe de la grille doit être posé.
             pass.set_bind_group(2, &self.lattice_read, &[]);
+            pass.set_bind_group(3, &self.sky_cache.read, &[]);
             pass.draw(0..3, 0..1);
         }
         {
@@ -635,6 +643,7 @@ impl Gpu {
             pass.set_pipeline(&self.ocean);
             pass.set_bind_group(0, &self.bind, &[]);
             pass.set_bind_group(2, &self.lattice_read, &[]);
+            pass.set_bind_group(3, &self.sky_cache.read, &[]);
             pass.set_index_buffer(self.indices.slice(..), wgpu::IndexFormat::Uint32);
             pass.draw_indexed(0..(self.nx - 1) * (self.ny - 1) * 6, 0, 0..1);
         }
@@ -645,6 +654,18 @@ impl Gpu {
             }
         }
         self.queue.submit([encoder.finish()]);
+    }
+    pub fn report_sky_cache(&self) -> Result<(),String> {
+        let mut ms = None;
+        if self.sky_cache.timed() {
+            let bytes = self.read(&self.sky_cache.timestamps)?;
+            let a = u64::from_le_bytes(bytes[..8].try_into().unwrap());
+            let b = u64::from_le_bytes(bytes[8..16].try_into().unwrap());
+            ms = Some(b.checked_sub(a).ok_or("horodatage ciel inversé")? as f64 * self.queue.get_timestamp_period() as f64 / 1e6);
+        }
+        println!("CIEL_CACHE taille={} memoire_Mio={} cuissons={} derniere_cuisson_GPU_ms={ms:?}",
+            crate::sky_cache::SIZE, 6*crate::sky_cache::SIZE*crate::sky_cache::SIZE*8/(1024*1024), self.sky_cache.count);
+        Ok(())
     }
     fn read(&self, b: &wgpu::Buffer) -> Result<Vec<u8>, String> {
         let (tx, rx) = mpsc::channel();
@@ -856,6 +877,7 @@ impl Gpu {
             pass.set_bind_group(0, &self.bind, &[]);
             pass.set_bind_group(1, &bind, &[]);
             pass.set_bind_group(2, &self.lattice_read, &[]);
+            pass.set_bind_group(3, &self.sky_cache.read, &[]);
             pass.dispatch_workgroups((points.len() as u32).div_ceil(64), 1, 1);
         }
         encoder.copy_buffer_to_buffer(&dst, 0, &read, 0, size);

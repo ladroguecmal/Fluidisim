@@ -22,6 +22,10 @@ struct Params {
 @group(0) @binding(5) var<storage, read> tail: array<vec4<f32>>;
 @group(2) @binding(0) var<storage, read> lattice: array<vec4<f32>>;
 @group(3) @binding(0) var<storage, read_write> lattice_out: array<vec4<f32>>;
+@group(3) @binding(1) var sky_cache: texture_cube<f32>;
+@group(3) @binding(2) var sky_sampler: sampler;
+@group(3) @binding(3) var sky_cache_out: texture_storage_2d_array<rgba16float,write>;
+
 
 fn spectral_weight(k: f32, h: f32) -> f32 {
     let t = clamp(2.0*k*h/3.141592653589793 - 1.0, 0.0, 1.0);
@@ -265,6 +269,12 @@ fn perturbations(q: vec2<f32>, h: f32, v0: vec3<f32>) -> vec3<f32> {
 fn verify(@builtin(global_invocation_id) id: vec3<u32>) {
     if (id.x < arrayLength(&probes)) {
         let probe = probes[id.x];
+        if (probe.w > 8.5) {
+            let ray = normalize(probe.xyz);
+            if (probe.w > 9.5) { results[id.x] = textureSampleLevel(sky_cache,sky_sampler,ray,0.0); }
+            else { results[id.x] = vec4<f32>(sky_detail(ray,2u),1.0); }
+            return;
+        }
         // S265 : contrôle des moments de quadrature, fonctions consommées par le fragment.
         if (probe.w > 6.5) {
             var m = vec3<f32>(0.0);
@@ -388,6 +398,27 @@ fn sky_detail(ray: vec3<f32>, octaves: u32) -> vec3<f32> {
     return mix(vec3<f32>(0.66,0.78,0.84),vec3<f32>(0.18,0.39,0.65),clamp(ray.z,0.0,1.0))
         + vec3<f32>(1.0,0.84,0.6)*pow(max(dot(ray,sun),0.0),512.0);
 }
+// S266 : directions des six faces selon la convention de l'échantillonneur cubique.
+@compute @workgroup_size(8,8)
+fn bake_sky(@builtin(global_invocation_id) id: vec3<u32>) {
+    let size = textureDimensions(sky_cache_out);
+    if (id.x >= size.x || id.y >= size.y || id.z >= 6u) { return; }
+    let uv = (vec2<f32>(id.xy)+vec2<f32>(0.5))/vec2<f32>(size)*2.0-1.0;
+    var ray = vec3<f32>(0.0);
+    switch id.z {
+        case 0u: { ray = vec3<f32>(1.0,-uv.y,-uv.x); }
+        case 1u: { ray = vec3<f32>(-1.0,-uv.y,uv.x); }
+        case 2u: { ray = vec3<f32>(uv.x,1.0,uv.y); }
+        case 3u: { ray = vec3<f32>(uv.x,-1.0,-uv.y); }
+        case 4u: { ray = vec3<f32>(uv.x,-uv.y,1.0); }
+        default: { ray = vec3<f32>(-uv.x,-uv.y,-1.0); }
+    }
+    textureStore(sky_cache_out,vec2<i32>(id.xy),i32(id.z),vec4<f32>(sky_detail(normalize(ray),2u),1.0));
+}
+fn reflection_sky(ray: vec3<f32>) -> vec3<f32> {
+    if (p.reflection.y > 0.5) { return textureSampleLevel(sky_cache,sky_sampler,ray,0.0).xyz; }
+    return sky_detail(ray,2u);
+}
 // Éclairage de banc identique au chemin historique, intégré avant la conversion sRGB.
 fn sample_light(slope: vec2<f32>, ray: vec3<f32>) -> vec3<f32> {
     let n = normalize(vec3<f32>(-slope,1.0));
@@ -397,10 +428,10 @@ fn sample_light(slope: vec2<f32>, ray: vec3<f32>) -> vec3<f32> {
     let glint = pow(max(dot(reflection,sun),0.0),180.0);
     if (p.eye.w > 0.5) {
         let body = vec3<f32>(0.004,0.060,0.170)*(0.6+0.4*max(dot(n,sun),0.0));
-        return mix(body,sky_detail(reflection,2u),fresnel)+vec3<f32>(1.0,0.95,0.85)*glint*1.2;
+        return mix(body,reflection_sky(reflection),fresnel)+vec3<f32>(1.0,0.95,0.85)*glint*1.2;
     }
     let base = vec3<f32>(0.012,0.105,0.13)*(0.65+0.35*max(dot(n,sun),0.0));
-    return mix(base,sky(reflection),fresnel)+vec3<f32>(1.0,0.9,0.7)*glint*0.65;
+    return mix(base,reflection_sky(reflection),fresnel)+vec3<f32>(1.0,0.9,0.7)*glint*0.65;
 }
 fn filtered_fragment(v: Vertex) -> vec4<f32> {
     let h = max(length(dpdx(v.lag)),length(dpdy(v.lag)));

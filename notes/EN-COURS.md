@@ -71,8 +71,8 @@ contre R7 ; préserver le chemin historique et les requêtes. Pas de nouveau ré
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — consigner R7 accepté ; choisir et contractualiser une optimisation mesurable
   de l'éclairage (pré-calcul du ciel de banc), critères d'erreur et de coût avant construction.
-- [>] **P3** — implémenter et tester le pré-calcul réutilisé sur le chemin de l'hôte.
-- [ ] **P4** — vérifier images, coût, invariance et tests ; retenir ou rejeter selon les critères.
+- [x] **P3** — implémenter et tester le pré-calcul réutilisé sur le chemin de l'hôte.
+- [>] **P4** — vérifier images, coût, invariance et tests ; retenir ou rejeter selon les critères.
 - [ ] **P5** — rituel §6, capacités, limites, file entière, journal et jeton.
 
 ### Notes de reprise
@@ -82,3 +82,7 @@ réévalué neuf fois par fragment. Aspect accepté ne reçoit ni coût ni conve
 Le lot J2 bords ouverts reste utile, mais rendre le visuel accepté moins cher est la suite explicite.
 
 P2 : R7 accepté consigné ; ADR-162 et critères CIEL-CACHE-S266 écrits avant code.
+
+P3 : cache cubique 512² RGBA16Float, cuisson GPU et réutilisation/invalidation construits.
+Tests hôte 18/1/0. 8 501 directions par ciel ; cycle clair/brume/clair identique,
+aucune recuisson caméra/temps. Cuisson 0,056 ms mesurée, 12 Mio. Images P4 en cours.

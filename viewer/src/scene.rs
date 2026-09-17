@@ -698,6 +698,7 @@ pub struct FrameData<'a> {
     pub modulation: f32,
     /// S265 : 0 = miroir historique, 3/5 = quadrature des pentes non résolues.
     pub reflection_order: u32,
+    pub sky_cache: bool,
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -759,6 +760,7 @@ impl<'a> FrameData<'a> {
             tail_count: TAIL_COMPONENTS,
             modulation: 0.,
             reflection_order: 0,
+            sky_cache: true,
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,
