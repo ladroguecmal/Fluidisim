@@ -80,7 +80,7 @@ Défauts restants, publiés en S260–S261, dans l'ordre de traitement :
 ### Plan
 
 - [>] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — ligne d'horizon : distance lointaine en uniforme et dans `lod::Projection`, raccord ;
+- [x] **P2** — ligne d'horizon : distance lointaine en uniforme et dans `lod::Projection`, raccord ;
   brume au bit (R2–R4, `--spectral-verify`), rendu clair vérifié.
 - [ ] **P3** — coût : décomposition mesurée, fusion des boucles de bande par sommet, invariants de
   la queue précalculés ; accord CPU/GPU ; coût.
@@ -91,3 +91,8 @@ Défauts restants, publiés en S260–S261, dans l'ordre de traitement :
 
 ### Notes de reprise
 
+P2 : `Projection::far`, `FrameData::far_distance` (brume 1 500 ; ciel clair √(2·6 371 km·h), 9,44 km à 7 m),
+uniforme `impact.y`, raccord à la couleur d'horizon sur le dernier tiers. R2, R3, R4 et `--spectral-verify`
+identiques au bit ; afficheur 16/1/0. Rendu clair : tirets de fin de grille disparus. **Incident** : le rendu
+de contrôle `--revue=r5` a réécrit `captures/s261` (images R5 de S261, non versionnées ; reproductibles au
+commit 1e89da7, empreintes publiées) ; nouveaux rendus sous `--revue=r6` → `captures/s262`.

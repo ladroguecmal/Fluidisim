@@ -221,6 +221,8 @@ pub struct Projection {
     pub up: [f32; 3],
     pub tan_half: f32,
     pub aspect: f32,
+    /// S262 : distance lointaine de la grille (m) — 1 500 sous la brume, horizon géométrique sous le ciel clair.
+    pub far: f32,
 }
 
 impl Projection {
@@ -252,7 +254,7 @@ impl Projection {
                 + self.right[i] * x * self.tan_half * self.aspect
                 + self.up[i] * y * self.tan_half
         });
-        let distance = (self.eye[2] / (-ray[2]).max(0.00001)).min(1500.);
+        let distance = (self.eye[2] / (-ray[2]).max(0.00001)).min(self.far);
         [ray[0] * distance, ray[1] * distance]
     }
 }
@@ -404,6 +406,7 @@ mod tests {
             up: [0., -sp, cp],
             tan_half: 25f32.to_radians().tan(),
             aspect: 16. / 9.,
+            far: 1500.,
         };
         let mut kept = Vec::new();
         for (nx, ny) in [(481u32, 271u32), (321, 181), (481, 271)] {
@@ -434,6 +437,7 @@ mod tests {
             up: [-sy * sp, -cy * sp, cp],
             tan_half: 25f32.to_radians().tan(),
             aspect: 16. / 9.,
+            far: 1500.,
         };
         let (poly, longest) = footprint(&p, 481, 271);
         assert!(longest > 1. && poly.len() == 2 * (481 + 271) - 4);

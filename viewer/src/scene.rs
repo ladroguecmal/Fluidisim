@@ -779,6 +779,7 @@ impl<'a> FrameData<'a> {
                 up,
                 tan_half: (50.0f32.to_radians() / 2.).tan(),
                 aspect,
+                far: self.far_distance(),
             };
             crate::lod::footprint_into(&p, nx, ny, &mut self.footprint);
             framed = true;
@@ -940,6 +941,16 @@ impl<'a> FrameData<'a> {
         let det = jxx * jyy - jxy * jxy;
         let e = [(jyy * s[0] - jxy * s[1]) / det, (-jxy * s[0] + jxx * s[1]) / det];
         (d, s, e, det, eta)
+    }
+    /// S262 — distance lointaine de la grille projetée. Brume S211 : 1 500 m, inchangé au bit. Ciel
+    /// clair : horizon géométrique `√(2·R·h)`, R = 6 371 km (rayon moyen terrestre), au moins 1 500 m.
+    /// Le plan d'eau reste plat : au-delà de l'horizon, la courbure le cacherait.
+    pub fn far_distance(&self) -> f32 {
+        if self.clear_sky {
+            ((2.0 * 6_371_000.0 * self.camera.eye[2] as f64).sqrt() as f32).max(1500.)
+        } else {
+            1500.
+        }
     }
     pub fn tail_reference(&self, q: [f32; 2], h: f32) -> [f64; 2] {
         let mut s = [0f64; 2];

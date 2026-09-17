@@ -236,7 +236,7 @@ fn grid_point(index: vec2<f32>) -> vec2<f32> {
     let horizon = clamp(-p.forward.z/(p.up.z*p.forward.w), -0.95, 1.2);
     let y = -1.18 + (horizon-0.003+1.18)*index.y/f32(ny-1u);
     let ray = p.forward.xyz + p.right.xyz*x*p.forward.w*p.right.w + p.up.xyz*y*p.forward.w;
-    let distance = min(p.eye.z/max(-ray.z,0.00001),1500.0);
+    let distance = min(p.eye.z/max(-ray.z,0.00001),p.impact.y);
     return ray.xy*distance;
 }
 fn grid_spacing(index: vec2<f32>, q: vec2<f32>) -> f32 {
@@ -333,7 +333,11 @@ fn sky(ray: vec3<f32>) -> vec3<f32> {
         // Habillage « ciel clair » : eau bleu profond (photo B), air clair, reflet du soleil plus franc.
         let body = vec3<f32>(0.004,0.060,0.170)*(0.6+0.4*max(dot(n,sun),0.0));
         let clear = mix(body,sky(reflection),fresnel)+vec3<f32>(1.0,0.95,0.85)*glint*1.2;
-        return vec4<f32>(mix(clear,CLEAR_HORIZON,1-exp(-length(v.local)/6000.0)),1.0);
+        // S262 : air clair sur 6 km, et raccord à la couleur d'horizon dans le dernier tiers de la
+        // grille (horizon géométrique `p.impact.y`), où la courbure cacherait l'eau.
+        let d = length(v.local.xy);
+        let haze = max(1.0 - exp(-d/6000.0), smoothstep(0.66*p.impact.y, p.impact.y, d));
+        return vec4<f32>(mix(clear,CLEAR_HORIZON,haze),1.0);
     }
     let base = vec3<f32>(0.012,0.105,0.13)*(0.65+0.35*max(dot(n,sun),0.0));
     let color = mix(base,sky(reflection),fresnel)+vec3<f32>(1.0,0.9,0.7)*glint*0.65;

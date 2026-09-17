@@ -437,6 +437,7 @@ fn lod_mesh(
         up,
         tan_half: 25f32.to_radians().tan(),
         aspect: w as f32 / h as f32,
+        far: 1500.,
     };
     let horizon = p.horizon();
     let point = |ix: u32, iy: u32| {
@@ -665,6 +666,7 @@ fn lod_charge(frame: &mut FrameData<'_>) {
             up: u,
             tan_half: 25f32.to_radians().tan(),
             aspect: w as f32 / h as f32,
+            far: 1500.,
         };
         let horizon = p.horizon();
         let point = |ix: u32, iy: u32| {
@@ -1582,7 +1584,9 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// S256 : `tag` = `r1` (S254, `captures/s254`, à reproduire avec `--no-tail`) ou `r2` (queue
 /// spectrale, `captures/s256`) — mêmes poses et âges.
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
-    let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", "r4" => "captures/s260", _ => "captures/s261" };
+    // S262 : un dossier par revue ; un nouveau rendu n'écrase plus une revue envoyée.
+    let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", "r4" => "captures/s260",
+        t if t.starts_with("r5") => "captures/s261", _ => "captures/s262" };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -1704,7 +1708,7 @@ fn spectral_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
             frame.camera = camera;
             let [forward, right, up] = frame.camera.vectors();
             let p = lod::Projection { eye: frame.camera.eye, forward, right, up,
-                tan_half: (50f32.to_radians()/2.).tan(), aspect: width as f32/height as f32 };
+                tan_half: (50f32.to_radians()/2.).tan(), aspect: width as f32/height as f32, far: 1500. };
             let mut probes = Vec::new();
             let mut points = Vec::new();
             let mut spacings = Vec::new();
@@ -1894,6 +1898,11 @@ fn run() -> Result<(), String> {
     if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue=r5")) {
         if multi {
             return revue_images(&mut frame, &format!("r5{tag}"));
+        }
+    }
+    if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue=r6")) {
+        if multi {
+            return revue_images(&mut frame, &format!("r6{tag}"));
         }
     }
     // S260 (VAGUES-POINTUES-S260, critères 5, 6 et 8) : CWM GPU contre référence CPU f64.

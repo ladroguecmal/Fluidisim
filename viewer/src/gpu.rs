@@ -459,6 +459,8 @@ impl Gpu {
         params[3] = if frame.clear_sky { 1. } else { 0. };
         // S261, ADR-158 : intensité de modulation dans `up.w` (0 : sans).
         params[15] = frame.modulation;
+        // S262 : distance lointaine de la grille dans `impact.y` (1 500 sous la brume, au bit).
+        params[17] = frame.far_distance();
         for v in params {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
