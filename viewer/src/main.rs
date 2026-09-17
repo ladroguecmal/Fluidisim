@@ -1586,7 +1586,7 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
     // S262 : un dossier par revue ; un nouveau rendu n'écrase plus une revue envoyée.
     let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", "r4" => "captures/s260",
-        t if t.starts_with("r5") => "captures/s261", _ => "captures/s262" };
+        t if t.starts_with("r5") => "captures/s261", t if t.starts_with("r6_v") => "captures/s263", _ => "captures/s262" };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -1812,7 +1812,15 @@ fn run() -> Result<(), String> {
     // S259, ADR-156 : `--houle` — mer de vent et houle longue, étalement cos^2s (scène déclarée).
     // S260, ADR-157 : `--vagues` — recette `--houle`, queue d'équilibre f⁻⁴ et CWM.
     let vagues = args.iter().any(|a| a == "--vagues");
-    let scene = Scene::build(vagues || args.iter().any(|a| a == "--houle"), vagues);
+    // S263, ADR-160 : `--vent=U` (m/s), avec `--vagues --modulation`.
+    let wind = args.iter().find_map(|a| a.strip_prefix("--vent=")).and_then(|v| v.parse::<f32>().ok());
+    if wind.is_some() && !(vagues && args.iter().any(|a| a == "--modulation")) {
+        return Err("--vent demande --vagues --modulation".into());
+    }
+    let scene = Scene::build(vagues || args.iter().any(|a| a == "--houle"), vagues, wind);
+    if let Some([u, hs, tp, ratio, mss, target]) = scene.wind_report {
+        println!("VENT U={u} Hs={hs:.3} Tp={tp:.3} coupure_fp={ratio:.1} queue_lignes={} mss={mss:.4} cox_munk={target:.4}", scene.tail_count_28);
+    }
     let mut storage = vec![[0.; 2]; 256 * scene.impact.table_len(scene.step).unwrap()];
     let table = scene.impact.bake_table(scene.step, &mut storage).unwrap();
     // S212 : sillage prescrit admis au journal de pression du cœur, préparé à chaque image.

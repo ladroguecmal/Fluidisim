@@ -381,3 +381,38 @@ fn equilibrium_tail_continues_band_in_f_minus_four_s260() {
     assert_ne!(tail.hash(), jonswap.hash());
     assert_eq!(bake(wind).unwrap().hash(), bake(wind).unwrap().hash());
 }
+
+/// S263, ADR-160 — mer de vent de Pierson–Moskowitz, Cox–Munk et coupure de la queue par la `mss`.
+#[test]
+fn wind_sea_and_tail_cut_follow_observations_s263() {
+    use crate::background_spectrum::{assemble, bake_directional, bake_tail_equilibrium, capillary_ratio,
+        cox_munk_mss, fully_developed_wind_sea, tail_count_for_mss, Recipe};
+    let g = 9.81f32;
+    let r = fully_developed_wind_sea(8.37, 0.12, 32, 201, g);
+    assert!((r.sea.hs - 1.5).abs() < 2e-3, "Hs {}", r.sea.hs);
+    assert!((r.sea.tp - 6.113).abs() < 5e-3, "Tp {}", r.sea.tp);
+    assert!((cox_munk_mss(8.0) - 0.04396).abs() < 1e-6);
+    assert!((capillary_ratio(6.0, g) - 57.46).abs() < 0.05);
+    let swell = Recipe {
+        sea: SeaState { hs: 2.0, tp: 12.0, theta_turns: 0.0, components: 32, graine: 202 },
+        gravity: g, gamma: 7.0, min_ratio: 0.7, max_ratio: 1.6, spread_turns: 0.0,
+    };
+    let mut previous = 0usize;
+    for u in [3.0f32, 5.0, 8.37] {
+        let wind = fully_developed_wind_sea(u, 0.12, 32, 201, g);
+        let sea = assemble(&[&bake_directional(wind, 10.0).unwrap(), &bake_directional(swell, 75.0).unwrap()]).unwrap();
+        let ratio = capillary_ratio(wind.sea.tp, g).min(32.0);
+        let tail = bake_tail_equilibrium(wind, 10.0, ratio, 64).unwrap();
+        let target = cox_munk_mss(u);
+        let (n, mss) = tail_count_for_mss(sea.components(), tail.components(), target);
+        println!("S263 vent={u} Hs={:.3} Tp={:.2} coupure={ratio:.1} queue_lignes={n} mss={mss:.4} cible={target:.4}", wind.sea.hs, wind.sea.tp);
+        // À une composante près : l'écart ne dépasse pas la plus grande contribution gardée ou suivante.
+        let step = tail.components().iter().map(|c| {
+            let k = c.k_turns_per_m as f64 * core::f64::consts::TAU;
+            0.5 * (c.amplitude as f64 * k).powi(2)
+        }).fold(0f64, f64::max);
+        assert!(((mss - target) as f64).abs() <= step + 1e-6, "vent {u} : {mss} contre {target}");
+        assert!(n >= previous, "la queue gardée croît avec le vent");
+        previous = n;
+    }
+}

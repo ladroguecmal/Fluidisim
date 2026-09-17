@@ -305,6 +305,54 @@ pub fn assemble(systems: &[&Cooked]) -> Result<Cooked, Error> {
     Ok(out)
 }
 
+/// S263, ADR-160 — mer de vent **pleinement développée** de Pierson–Moskowitz pour un vent `u` (m/s) :
+/// `Hs = 0,21·u²/g`, `Tp = 2πu/(0,877·g)` (SPEC-001 §1 sexies), γ 3,3, bande `[0,5 ; 4] fp`.
+pub fn fully_developed_wind_sea(u: f32, theta_turns: f32, components: usize, graine: u64, gravity: f32) -> Recipe {
+    Recipe {
+        sea: SeaState {
+            hs: 0.21 * u * u / gravity,
+            tp: core::f32::consts::TAU * u / (0.877 * gravity),
+            theta_turns,
+            components,
+            graine,
+        },
+        gravity,
+        gamma: 3.3,
+        min_ratio: 0.5,
+        max_ratio: 4.0,
+        spread_turns: 0.25,
+    }
+}
+
+/// S263 — pente quadratique moyenne de Cox et Munk (1954), surface propre, vent `u` en m/s.
+pub fn cox_munk_mss(u: f32) -> f32 {
+    0.003 + 5.12e-3 * u
+}
+
+/// S263 — rapport `f/fp` de la limite gravité-capillarité (`λ` = 1,7 cm) en eau profonde.
+pub fn capillary_ratio(tp: f32, gravity: f32) -> f32 {
+    (gravity * tp * tp / (core::f32::consts::TAU * 0.017)).sqrt()
+}
+
+/// S263, ADR-160 — nombre de composantes de queue gardées, par `k` croissant, pour que la `mss` totale
+/// (`band` + queue) approche `target` au plus près. Rend ce nombre et la `mss` obtenue.
+pub fn tail_count_for_mss(band: &[Component], tail: &[Component], target: f32) -> (usize, f32) {
+    let slope = |c: &Component| {
+        let k = c.k_turns_per_m as f64 * core::f64::consts::TAU;
+        0.5 * (c.amplitude as f64 * k).powi(2)
+    };
+    let mut mss: f64 = band.iter().map(slope).sum();
+    let (mut best, mut best_mss) = (0usize, mss);
+    for (i, c) in tail.iter().enumerate() {
+        mss += slope(c);
+        if (mss - target as f64).abs() < (best_mss - target as f64).abs() {
+            best = i + 1;
+            best_mss = mss;
+        }
+    }
+    (best, best_mss as f32)
+}
+
 /// Profil V1 : gamma1..7, N32..256 et bande dans [0.5,4] contenant fp.
 /// Ces bornes délimitent la cuisson reçue, pas les mers autorisées du jeu.
 /// Les refus ne mutent aucun pool ni allocateur ; le résultat entier est publié sur succès.

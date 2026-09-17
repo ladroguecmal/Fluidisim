@@ -78,10 +78,17 @@ les scènes restent au bit.
 
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — verdict R5 consigné ; ADR-160 (vent de scène) et protocole, avant code.
-- [ ] **P3** — hôte : recette de vent, queue coupée à la `mss` de Cox–Munk ; instrument statistique
+- [x] **P3** — hôte : recette de vent, queue coupée à la `mss` de Cox–Munk ; instrument statistique
   par vent (`mss`, pointe, replis) ; scènes existantes au bit.
 - [ ] **P4** — rendus de calibration R6 (trois vents × poses) envoyés, consignés.
 - [ ] **P5** — rituel §6.
 
 ### Notes de reprise
 
+P3 : cœur `fully_developed_wind_sea`, `cox_munk_mss`, `capillary_ratio`, `tail_count_for_mss` (essai s263) ; hôte
+`Scene::build(houle, vagues, wind)`, `--vent=U`, `wind_report`. Queue gardée / mss / Cox–Munk : 3 m/s 43 lignes (coupure
+capillaire 21 fp) 0,0182/0,0184 ; 5 m/s 50 lignes 0,0290/0,0286 ; 8,37 m/s 64 lignes (limite de cuisson 32 fp)
+0,0446/0,0459. Instrument `vent_rugosite` : mss rendue 0,0184/0,0295/0,0457, c40 0,124/0,234/0,359, c22 0,046/0,081/0,122,
+c04 0,139/0,234/0,364, 0 repli. Sans vent : R2 et scène complète identiques au code S262 final (empreintes
+`captures/s262/revue-s262-final.txt`). `--cwm-verify --vent=5` pente 2,05e-4, `--cwm-query-verify --vent=5` 0,29 mm ;
+`--vent=3` pente 1,26e-4 ; 0 repli.

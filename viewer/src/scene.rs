@@ -39,8 +39,11 @@ pub struct Scene {
     pub background: Background,
     /// S256 : même recette que `background`, prolongée ; jamais évaluée en hauteur.
     pub tail: Background,
-    /// S261, ADR-158 : nombre de composantes de la queue jusqu'à 28 fp (k croissant).
+    /// S261, ADR-158 : nombre de composantes de la queue jusqu'à 28 fp (k croissant) ; S263, ADR-160 :
+    /// sous vent de scène, nombre qui porte la `mss` totale à Cox–Munk.
     pub tail_count_28: usize,
+    /// S263 : `[U, Hs, Tp, coupure (fp), mss obtenue, mss de Cox–Munk]` sous vent de scène.
+    pub wind_report: Option<[f32; 6]>,
     pub impact: RadialImpact<256>,
     pub step: f32,
     /// S214 : de quoi reconstruire l'impact **par le cœur**, depuis un journal d'événements.
@@ -53,9 +56,11 @@ impl Scene {
     /// (`s_max` 10) et houle longue (`Hs` 2 m, `Tp` 12 s, γ 7, `[0,7 ; 1,6] fp`, `s_max` 75), queue
     /// directionnelle. Sans `houle`, la scène S201 au bit.
     /// S260, ADR-157 : `vagues` (avec `houle`) — queue d'équilibre en f⁻⁴ à la place de la queue JONSWAP.
-    pub fn build(houle: bool, vagues: bool) -> Self {
+    /// S263, ADR-160 : `wind` — vent de scène ; mer de vent de Pierson–Moskowitz, queue coupée à la `mss`
+    /// de Cox–Munk (et à la limite capillaire). `None` : recette S201 au bit.
+    pub fn build(houle: bool, vagues: bool, wind: Option<f32>) -> Self {
         // Scène S201/S203/S205, pas une nouvelle calibration.
-        let recipe = Recipe {
+        let s201 = Recipe {
             sea: SeaState {
                 hs: 1.5,
                 tp: 6.,
@@ -68,6 +73,12 @@ impl Scene {
             min_ratio: 0.5,
             max_ratio: 4.,
             spread_turns: 0.25,
+        };
+        let recipe = wind.map_or(s201, |u| background_spectrum::fully_developed_wind_sea(u, 0.12, 32, 201, 9.81));
+        let tail_ratio = if wind.is_some() {
+            background_spectrum::capillary_ratio(recipe.sea.tp, 9.81).min(TAIL_RATIO)
+        } else {
+            TAIL_RATIO
         };
         let (cooked, tail_cooked) = if houle {
             let swell = Recipe {
@@ -83,7 +94,7 @@ impl Scene {
             (
                 background_spectrum::assemble(&[&wind, &swell]).expect("mer S259"),
                 if vagues {
-                    background_spectrum::bake_tail_equilibrium(recipe, 10., TAIL_RATIO, TAIL_COMPONENTS)
+                    background_spectrum::bake_tail_equilibrium(recipe, 10., tail_ratio, TAIL_COMPONENTS)
                         .expect("queue S260")
                 } else {
                     background_spectrum::bake_tail_directional(recipe, 10., TAIL_RATIO, TAIL_COMPONENTS)
@@ -107,9 +118,16 @@ impl Scene {
             WorldPos::from_units(0, 0, 0),
         )
         .unwrap();
-        let tail_count_28 = {
-            let limit = (core::f64::consts::TAU * 28.0 / 6.0).powi(2) / 9.81 / core::f64::consts::TAU;
-            tail_cooked.components().iter().filter(|c| c.k_turns_per_m as f64 <= limit).count()
+        let (tail_count_28, wind_report) = match wind {
+            Some(u) => {
+                let target = background_spectrum::cox_munk_mss(u);
+                let (n, mss) = background_spectrum::tail_count_for_mss(cooked.components(), tail_cooked.components(), target);
+                (n, Some([u, recipe.sea.hs, recipe.sea.tp, tail_ratio, mss, target]))
+            }
+            None => {
+                let limit = (core::f64::consts::TAU * 28.0 / 6.0).powi(2) / 9.81 / core::f64::consts::TAU;
+                (tail_cooked.components().iter().filter(|c| c.k_turns_per_m as f64 <= limit).count(), None)
+            }
         };
         let tail = Background::from_spectrum(
             &mut HostServices {
@@ -166,6 +184,7 @@ impl Scene {
             background,
             tail,
             tail_count_28,
+            wind_report,
             impact,
             step: wavelength_m / 16.,
             event,
