@@ -7,7 +7,7 @@ struct Params {
     impact: vec4<f32>, info: vec4<f32>, wake_rect: vec4<f32>, wake_info: vec4<f32>,
     lattice: vec4<f32>, // pas (m), nx, ny, 1 = grille / 0 = somme directe par sommet
     spectral: vec4<f32>, // activé, k_max de la recette ; huit bandes ADR-148
-    reflection: vec4<f32>, // S265 : ordre 0 (historique), 3 ou 5
+    reflection: vec4<f32>, // ordre 0/3/5 ; y : sommes suffixes et boucles fixes (S266)
 }
 @group(0) @binding(0) var<uniform> p: Params;
 @group(0) @binding(1) var<storage, read> waves: array<vec4<f32>>;
@@ -82,7 +82,12 @@ fn filtered_tail(q: vec2<f32>, h: f32) -> TailMoments {
     var o: TailMoments;
     for (var i = 0u; i < u32(p.spectral.z); i++) {
         let c = tail[i]; let inv = tail[TAIL_OFFSET + i]; let k = inv.x;
-        let w = spectral_weight(k, h)*exp(-0.5*k*k*h*h);
+        let cutoff = spectral_weight(k,h);
+        if (p.reflection.y > 0.5 && cutoff == 0.0) {
+            o.covariance += tail[2u*TAIL_OFFSET+i].xyz;
+            break;
+        }
+        let w = cutoff*exp(-0.5*k*k*h*h);
         o.covariance += (0.5*c.x*c.x*(1.0-w*w))*vec3<f32>(c.y*c.y,c.y*c.z,c.z*c.z);
         if (w > 0.0) {
             let phase = dot(c.yz,q)+c.w;
@@ -420,6 +425,17 @@ fn filtered_fragment(v: Vertex) -> vec4<f32> {
         var l10 = 0.0;
         if (l00 > 0.0) { l10 = c.y/l00; }
         let l11 = sqrt(max(c.z-l10*l10,0.0));
+        // S266 : bornes constantes pour spécialiser la quadrature sans changer son ordre.
+        if (u32(p.reflection.x) == 3u && p.reflection.y > 0.5) {
+            for (var j=0u; j<3u; j++) {
+                let y = gh(j,3u);
+                for (var i=0u; i<3u; i++) {
+                    let x = gh(i,3u);
+                    let offset = vec2<f32>(l00*x.x,l10*x.x+l11*y.x);
+                    color += x.y*y.y*sample_light(slope+offset,ray);
+                }
+            }
+        } else {
         let order = u32(p.reflection.x);
         for (var j=0u; j<order; j++) {
             let y = gh(j,order);
@@ -428,6 +444,7 @@ fn filtered_fragment(v: Vertex) -> vec4<f32> {
                 let offset = vec2<f32>(l00*x.x,l10*x.x+l11*y.x);
                 color += x.y*y.y*sample_light(slope+offset,ray);
             }
+        }
         }
     }
     if (p.eye.w > 0.5) {

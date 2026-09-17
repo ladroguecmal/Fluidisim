@@ -54,3 +54,56 @@ Critères : GPU contre oracle aux trois vents (tolérances S265), images sept po
 0,25 / 2 / 16, update sans allocation, baisse d'au moins 10 % aux deux poses dans le même
 passage. Aucun seuil modifié après mesure ; budget 2 ms toujours distinct. Si reçu, intégrer ;
 sinon publier aussi le rejet et conserver R7.
+
+## Résultat retenu : sommes suffixes et boucles fixes (ADR-163)
+
+Le premier regroupement seul donnait 14,8 % en référence mais 8,2 % en rasante : critère de
+coût encore manqué. Les boucles 3×3 ont ensuite été spécialisées à bornes constantes,
+sans changement des poids, nœuds ou ordre. Le témoin conserve les boucles dynamiques.
+
+### Qualité et tests
+
+- **19 tests hôte réussis, 1 ignoré, 0 échec** ; test des suffixes contre somme f64 avec
+  composante exclue, queue vide et phases sans effet. Cœur inchangé.
+- 5 000 sondes par vent à 3/5/8,37 m/s : erreurs pente 2,400e-5 / 5,307e-5 / 9,319e-5,
+  covariance 8,538e-8 / 2,154e-7 / 7,427e-7 ; déterminants min 0,513524 / 0,530496 /
+  0,325611. Critères S265 tenus ; covariance positive et valeurs finies.
+- **Sept témoins finaux identiques au bit à R7 S265**, par comparaison intégrale des PPM.
+- Sept images optimisées : **maximum 1 niveau/255, P99 zéro**, MAE au plus 1,049e-5.
+  Nombre de canaux changés / 2 764 800 : référence 7, fond seul 8, haute 17, plongeante 29,
+  rasante 3, impact proche 2, large horizon 5. Ce sont les arrondis de sommation prévus.
+  La spécialisation des boucles ne change aucun pixel par rapport aux suffixes seuls.
+- Les sept poses incluent le sillage à 29 s hors de son horizon honnête historique ; cette
+  limite est toujours annoncée et n'est pas reçue par cette comparaison.
+
+### Coût reçu
+
+Même machine/profil que le protocole, **aucune capture concurrente**, secteur 99 % début/fin,
+ordre 3, 5 m/s, 1280×720, 120 images après chauffe, âge initial 12 s. Grille sillage, filtre
+spectral, visibilité et ciel procédural actifs ; CPU un fil, LOD temporel absent.
+
+| pose | témoin médiane ms | optimisé médiane ms | gain | p95 optimisé ms |
+|---|---:|---:|---:|---:|
+| référence | 2,737344 | 2,258912 | 17,48 % | 2,287136 |
+| rasante | 2,493600 | 2,239232 | 10,20 % | 2,260512 |
+
+Cuisson grille incluse : 1,082 / 1,064 ms sur les deux poses optimisées. Maximum eau optimisé
+2,301 / 2,278 ms. CPU préparation/transfert/soumission médian 4,162 / 4,212 ms (témoin
+4,350 / 4,127), pas de gain CPU revendiqué. `allocations_update_max=0` aux quatre passages.
+Surcoût mémoire : buffer GPU +1 Kio, tableau temporaire CPU de pile 1 Kio ; aucune texture de ciel.
+
+**Critère de gain tenu sur ce passage ; budget 2 ms toujours non tenu.** Le gain rasante est
+proche de la borne de réception : ce passage n'est pas une garantie universelle ni une
+caractérisation statistique inter-machines. Pas de réception temporelle ou multiplateforme.
+
+### Reproduire
+
+Depuis `viewer/`, options communes `--multi --vagues --modulation --ciel-clair --vent=5
+--reflets-filtres` :
+- `--revue=r8_final` : sept images optimisées ;
+- `--reflets-somme-directe --revue=r8_temoinfinal` : témoin R7 ;
+- `--reflets-suffixe-bench` : comparaison de coût ;
+- `--reflets-verify` : oracle, à rejouer aussi aux vents 3 et 8,37.
+
+Journaux locaux : `specialise-bench.log`, `final.log`, `temoinfinal.log`, `suffixe-verify-*.log`.
+Image de référence optimisée : `r8_final_reference_12s.png`.

@@ -158,3 +158,12 @@ cargo run --release --offline --locked -- --multi --vagues --modulation --ciel-c
 La revue écrit ses sept poses dans `captures/s265`, le contrôle compare le GPU à un oracle f64
 et vérifie les moments de quadrature, le banc compare les ordres 0/3/5 à poses et charge identiques.
 Le vent 5 m/s est un témoin de comparaison, pas un choix de l'utilisateur.
+
+### Optimisation S266 des reflets
+
+Les reflets filtrés regroupent désormais la covariance des ondes entièrement coupées et
+emploient des boucles fixes pour la quadrature 3×3 (ADR-163). `--reflets-somme-directe` retrouve
+le témoin S265 ; `--reflets-suffixe-bench` compare les deux chemins en 1280×720.
+Les captures `--multi --revue=r8_<nom>` vont dans `captures/s266`.
+Le cache de ciel essayé puis rejeté n'est pas conservé ; aucune option de cache disponible.
+Voir [réception](../docs/validation/CIEL-CACHE-S266.md).

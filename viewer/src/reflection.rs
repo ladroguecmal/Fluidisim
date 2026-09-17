@@ -1,6 +1,21 @@
 //! ADR-161 : oracle f64 indépendant de la fermeture de la queue, et réception GPU.
 use crate::{gpu, scene::FrameData};
 
+/// Même covariance que le shader, groupée depuis la dernière ligne ; zéro hors queue active.
+pub fn suffix_covariance<const N: usize>(tail: &[[f32; 4]; N], count: usize) -> [[f32; 4]; N] {
+    let mut suffix = [[0.; 4]; N];
+    let mut sum = [0.; 4];
+    for i in (0..count).rev() {
+        let c = tail[i];
+        let v = 0.5 * c[0] * c[0];
+        sum[0] += v * (c[1] * c[1]);
+        sum[1] += v * (c[1] * c[2]);
+        sum[2] += v * (c[2] * c[2]);
+        suffix[i] = sum;
+    }
+    suffix
+}
+
 fn weight(k: f64, h: f64) -> f64 {
     let t = (2. * k * h / std::f64::consts::PI - 1.).clamp(0., 1.);
     (1. - t * t * (3. - 2. * t)) * (-0.5 * (k * h).powi(2)).exp()
@@ -143,6 +158,29 @@ pub fn verify(frame: &mut FrameData<'_>) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn suffix_uses_only_active_modes_and_ignores_phases() {
+        let rows = [
+            [0.2, 3., 4., 99.],
+            [0.1, -2., 5., -70.],
+            [900., 90., 90., 0.],
+        ];
+        let values = suffix_covariance(&rows, 2);
+        assert_eq!(values[2], [0.; 4]);
+        assert_eq!(suffix_covariance(&rows, 0), [[0.; 4]; 3]);
+        for i in 0..2 {
+            let mut reference = [0f64; 3];
+            for row in &rows[i..2] {
+                let [a, x, y, _] = row.map(f64::from);
+                for (j, v) in [x * x, x * y, y * y].into_iter().enumerate() {
+                    reference[j] += a * a * 0.5 * v;
+                }
+            }
+            for j in 0..3 {
+                assert!((values[i][j] as f64 - reference[j]).abs() < 1e-7);
+            }
+        }
+    }
     #[test]
     fn missing_variance_matches_phase_integral() {
         // Onde oblique : oracle par 4096 phases, sans reprendre la formule de covariance.

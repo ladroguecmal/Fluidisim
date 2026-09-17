@@ -73,9 +73,9 @@ contre R7 ; préserver le chemin historique et les requêtes. Pas de nouveau ré
   de l'éclairage (pré-calcul du ciel de banc), critères d'erreur et de coût avant construction.
 - [x] **P3** — implémenter et tester le pré-calcul réutilisé sur le chemin de l'hôte.
 - [x] **P4** — vérifier images, coût, invariance et tests ; retenir ou rejeter selon les critères.
-- [>] **P5** — optimisation algébrique : sommes suffixes de covariance, témoin conservé,
+- [x] **P5** — optimisation algébrique : sommes suffixes de covariance, témoin conservé,
   tests et réception aux critères écrits dans CIEL-CACHE-S266.
-- [ ] **P6** — rituel §6, capacités, limites, file entière, journal et jeton.
+- [>] **P6** — rituel §6, capacités, limites, file entière, journal et jeton.
 
 ### Notes de reprise
 
@@ -95,3 +95,10 @@ après fin des captures. Ne pas employer ce passage comme preuve de gain.
 
 P4 : cache rejeté 512/1024 (maximum RGB 22/19 >16 ; gain1024 <5 % contre 10 requis).
 Code cache retiré, expérience conservée à e60b8fa. P5 déclaré avant construction.
+
+P5 intermédiaire : sommes suffixes précises (1 niveau RGB max), gain référence 14,8 %,
+rasante 8,2 % encore sous 10 requis. Spécialiser aussi les boucles 3×3 à bornes constantes,
+sans changer les nœuds, poids ou ordre, puis rejouer images/coût avant rétention.
+
+P5 : variante reçue (ADR-163), 19/1/0 ; 7 témoins au bit, images max1/255.
+GPU 2,259/2,239 ms contre 2,737/2,494 : gain17,48/10,20 %. Budget2 ms non tenu.

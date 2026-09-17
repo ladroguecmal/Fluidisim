@@ -152,8 +152,8 @@ impl Gpu {
         let tail = buffer(
             &device,
             "B spectral tail",
-            // S262 : seconde moitié — `k` et direction unitaire de chaque composante.
-            crate::scene::TAIL_COMPONENTS as u64 * 32,
+            // S262 : deuxième tiers k/direction ; S266 : troisième tiers covariance suffixe.
+            crate::scene::TAIL_COMPONENTS as u64 * 48,
             wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         );
         let profile = buffer(
@@ -470,7 +470,7 @@ impl Gpu {
         for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, tail, if frame.cwm { 1. } else { 0. }] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
-        for v in [frame.reflection_order as f32, 0., 0., 0.] {
+        for v in [frame.reflection_order as f32, if frame.reflection_suffix { 1. } else { 0. }, 0., 0.] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
@@ -504,6 +504,11 @@ impl Gpu {
                 for v in [k, row[1] / k, row[2] / k, 0.] {
                     self.bytes.extend_from_slice(&v.to_le_bytes());
                 }
+            }
+            // S266 : covariance de toutes les lignes à partir de i (phase indépendante).
+            let suffix = crate::reflection::suffix_covariance(&frame.tail, frame.tail_count);
+            for row in suffix {
+                for v in row { self.bytes.extend_from_slice(&v.to_le_bytes()); }
             }
             self.queue.write_buffer(&self.tail, 0, &self.bytes);
         }
