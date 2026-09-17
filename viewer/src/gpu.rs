@@ -140,7 +140,7 @@ impl Gpu {
         let uniform = buffer(
             &device,
             "camera",
-            160,
+            176,
             wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         );
         let waves = buffer(
@@ -468,6 +468,9 @@ impl Gpu {
         }
         let tail = if frame.tail_background.is_some() { frame.tail_count as f32 } else { 0. };
         for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, tail, if frame.cwm { 1. } else { 0. }] {
+            self.bytes.extend_from_slice(&v.to_le_bytes());
+        }
+        for v in [frame.reflection_order as f32, 0., 0., 0.] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);

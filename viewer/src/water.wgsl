@@ -7,6 +7,7 @@ struct Params {
     impact: vec4<f32>, info: vec4<f32>, wake_rect: vec4<f32>, wake_info: vec4<f32>,
     lattice: vec4<f32>, // pas (m), nx, ny, 1 = grille / 0 = somme directe par sommet
     spectral: vec4<f32>, // activé, k_max de la recette ; huit bandes ADR-148
+    reflection: vec4<f32>, // S265 : ordre 0 (historique), 3 ou 5
 }
 @group(0) @binding(0) var<uniform> p: Params;
 @group(0) @binding(1) var<storage, read> waves: array<vec4<f32>>;
@@ -74,6 +75,41 @@ fn tail_cwm(q: vec2<f32>, h: f32) -> Cwm {
         o.g -= a*k*sn*vec3<f32>(u.x*u.x, u.x*u.y, u.y*u.y);
     }
     return o;
+}
+// ADR-161 : même queue, moyenne filtrée et covariance complémentaire (xx, xy, yy).
+struct TailMoments { cwm: Cwm, covariance: vec3<f32> }
+fn filtered_tail(q: vec2<f32>, h: f32) -> TailMoments {
+    var o: TailMoments;
+    for (var i = 0u; i < u32(p.spectral.z); i++) {
+        let c = tail[i]; let inv = tail[TAIL_OFFSET + i]; let k = inv.x;
+        let w = spectral_weight(k, h)*exp(-0.5*k*k*h*h);
+        o.covariance += (0.5*c.x*c.x*(1.0-w*w))*vec3<f32>(c.y*c.y,c.y*c.z,c.z*c.z);
+        if (w > 0.0) {
+            let phase = dot(c.yz,q)+c.w;
+            o.cwm.s += w*c.x*cos(phase)*c.yz;
+            let u = inv.yz;
+            o.cwm.g -= w*c.x*k*sin(phase)*vec3<f32>(u.x*u.x,u.x*u.y,u.y*u.y);
+        }
+    }
+    return o;
+}
+fn covariance_transport(c: vec3<f32>, g: vec3<f32>) -> vec3<f32> {
+    let det = (1.0+g.x)*(1.0+g.z)-g.y*g.y;
+    if (det < 0.1) { return c; }
+    let a = (1.0+g.z)/det; let b = -g.y/det; let d = (1.0+g.x)/det;
+    return vec3<f32>(a*a*c.x+2.0*a*b*c.y+b*b*c.z,
+        a*b*c.x+(a*d+b*b)*c.y+b*d*c.z, b*b*c.x+2.0*b*d*c.y+d*d*c.z);
+}
+// Nœuds et poids de Gauss-Hermite pour N(0,1), pas pour exp(-x²).
+fn gh(i: u32, order: u32) -> vec2<f32> {
+    if (order == 5u) {
+        let nodes = array<f32,5>(-2.8569700139,-1.3556261800,0.0,1.3556261800,2.8569700139);
+        let weights = array<f32,5>(0.011257411328,0.222075922006,0.533333333333,0.222075922006,0.011257411328);
+        return vec2<f32>(nodes[i],weights[i]);
+    }
+    let nodes = array<f32,3>(-1.73205080757,0.0,1.73205080757);
+    let weights = array<f32,3>(0.166666666667,0.666666666667,0.166666666667);
+    return vec2<f32>(nodes[i],weights[i]);
 }
 // Pente eulérienne J⁻ᵀ·s, J = I + g (symétrique) ; `det` rendu pour le repli.
 fn euler_slope(s: vec2<f32>, g: vec3<f32>) -> vec3<f32> {
@@ -229,6 +265,26 @@ fn perturbations(q: vec2<f32>, h: f32, v0: vec3<f32>) -> vec3<f32> {
 fn verify(@builtin(global_invocation_id) id: vec3<u32>) {
     if (id.x < arrayLength(&probes)) {
         let probe = probes[id.x];
+        // S265 : contrôle des moments de quadrature, fonctions consommées par le fragment.
+        if (probe.w > 6.5) {
+            var m = vec3<f32>(0.0);
+            for (var i=0u; i<u32(probe.z); i++) {
+                let v = gh(i,u32(probe.z));
+                if (probe.w < 7.5) { m += v.y*vec3<f32>(1.0,v.x,v.x*v.x); }
+                else { m += v.y*vec3<f32>(v.x*v.x*v.x*v.x,v.x*v.x*v.x,1.0); }
+            }
+            results[id.x] = vec4<f32>(m,0.0); return;
+        }
+        if (probe.w > 4.5) {
+            let b = band_cwm(probe.xy,probe.z);
+            let t = filtered_tail(probe.xy,probe.z);
+            let energy = max(0.0,1.0+p.up.w*b.e);
+            let g = b.g+sqrt(energy)*t.cwm.g;
+            let e = euler_slope(b.s+sqrt(energy)*t.cwm.s,g);
+            if (probe.w > 5.5) { results[id.x] = vec4<f32>(covariance_transport(energy*t.covariance,g),0.0); }
+            else { results[id.x] = vec4<f32>(e.xy,e.z,0.0); }
+            return;
+        }
         // S256 : sonde de queue (w = 2) — pentes de queue seules, empreinte imposée.
         // S260 : w = 3 — déplacement de la bande ; w = 4 — pente eulérienne CWM (bande + queue), det.
         if (probe.w > 3.5) {
@@ -332,7 +388,57 @@ fn sky_detail(ray: vec3<f32>, octaves: u32) -> vec3<f32> {
     return mix(vec3<f32>(0.66,0.78,0.84),vec3<f32>(0.18,0.39,0.65),clamp(ray.z,0.0,1.0))
         + vec3<f32>(1.0,0.84,0.6)*pow(max(dot(ray,sun),0.0),512.0);
 }
+// Éclairage de banc identique au chemin historique, intégré avant la conversion sRGB.
+fn sample_light(slope: vec2<f32>, ray: vec3<f32>) -> vec3<f32> {
+    let n = normalize(vec3<f32>(-slope,1.0));
+    let fresnel = 0.02+0.98*pow(1.0-max(dot(-ray,n),0.0),5.0);
+    let sun = normalize(vec3<f32>(-0.4,0.3,0.8));
+    let reflection = reflect(ray,n);
+    let glint = pow(max(dot(reflection,sun),0.0),180.0);
+    if (p.eye.w > 0.5) {
+        let body = vec3<f32>(0.004,0.060,0.170)*(0.6+0.4*max(dot(n,sun),0.0));
+        return mix(body,sky_detail(reflection,2u),fresnel)+vec3<f32>(1.0,0.95,0.85)*glint*1.2;
+    }
+    let base = vec3<f32>(0.012,0.105,0.13)*(0.65+0.35*max(dot(n,sun),0.0));
+    return mix(base,sky(reflection),fresnel)+vec3<f32>(1.0,0.9,0.7)*glint*0.65;
+}
+fn filtered_fragment(v: Vertex) -> vec4<f32> {
+    let h = max(length(dpdx(v.lag)),length(dpdy(v.lag)));
+    let t = filtered_tail(v.lag,h);
+    let energy = max(0.0,1.0+p.up.w*v.eps);
+    let g = v.g+sqrt(energy)*t.cwm.g;
+    let lag_slope = v.slope+sqrt(energy)*t.cwm.s;
+    let e = euler_slope(lag_slope,g);
+    let slope = select(lag_slope,e.xy,e.z >= 0.1);
+    let c = covariance_transport(energy*t.covariance,g);
+    let ray = normalize(v.local);
+    var color = vec3<f32>(0.0);
+    if (c.x+c.z <= 0.0) { color = sample_light(slope,ray); }
+    else {
+        // Cholesky semi-définie : le clamp retire uniquement l'arrondi négatif.
+        let l00 = sqrt(max(c.x,0.0));
+        var l10 = 0.0;
+        if (l00 > 0.0) { l10 = c.y/l00; }
+        let l11 = sqrt(max(c.z-l10*l10,0.0));
+        let order = u32(p.reflection.x);
+        for (var j=0u; j<order; j++) {
+            let y = gh(j,order);
+            for (var i=0u; i<order; i++) {
+                let x = gh(i,order);
+                let offset = vec2<f32>(l00*x.x,l10*x.x+l11*y.x);
+                color += x.y*y.y*sample_light(slope+offset,ray);
+            }
+        }
+    }
+    if (p.eye.w > 0.5) {
+        let d = length(v.local.xy);
+        let haze = max(1.0-exp(-d/6000.0),smoothstep(0.66*p.impact.y,p.impact.y,d));
+        return vec4<f32>(mix(color,CLEAR_HORIZON,haze),1.0);
+    }
+    return vec4<f32>(mix(color,vec3<f32>(0.66,0.78,0.84),1.0-exp(-length(v.local)/500.0)),1.0);
+}
 @fragment fn ocean_fragment(v: Vertex) -> @location(0) vec4<f32> {
+    if (p.reflection.x > 0.5) { return filtered_fragment(v); }
     // S256 : empreinte du pixel sur l'eau, puis pentes de la queue spectrale (normales seulement).
     let footprint = max(length(dpdx(v.local.xy)), length(dpdy(v.local.xy)));
     var slope = vec2<f32>(0.0);

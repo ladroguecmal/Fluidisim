@@ -138,3 +138,23 @@ pas imposé par la capacité. La cuisson est chronométrée et incluse dans `GPU
 La grille projetée a un pas nominal de deux pixels et un surbalayage de 18 % ; elle s'arrête à
 1500 m. La précision de hauteur aux sondes ne valide pas à elle seule toute cette géométrie,
 ni les angles rasants, ni les coûts sur le matériel cible de livraison.
+
+## Reflets filtrés de la queue (S265, variante)
+
+`--vagues --reflets-filtres` intègre la variance des petites ondes retirées du détail des normales
+au reflet, par quadrature 3×3. `--reflets-ordre=5` porte cette quadrature à 5×5 pour comparaison.
+Spectre, vent, modulation et géométrie restent identiques. Sans l'option, rendu historique.
+C'est une fermeture gaussienne de l'éclairage de banc, pas une BRDF physique complète ; voir
+[ADR-161](../docs/adr/ADR-161-reflets-de-la-queue-non-resolue.md).
+
+Depuis `viewer/` :
+
+```powershell
+cargo run --release --offline --locked -- --multi --vagues --modulation --ciel-clair --vent=5 --reflets-filtres --revue=r7_filtre3
+cargo run --release --offline --locked -- --multi --vagues --modulation --vent=5 --reflets-filtres --reflets-verify
+cargo run --release --offline --locked -- --multi --vagues --modulation --ciel-clair --vent=5 --reflets-bench
+```
+
+La revue écrit ses sept poses dans `captures/s265`, le contrôle compare le GPU à un oracle f64
+et vérifie les moments de quadrature, le banc compare les ordres 0/3/5 à poses et charge identiques.
+Le vent 5 m/s est un témoin de comparaison, pas un choix de l'utilisateur.

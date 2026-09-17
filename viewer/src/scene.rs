@@ -696,6 +696,8 @@ pub struct FrameData<'a> {
     /// S261, ADR-158 : lignes de queue lues (coupure) et intensité `M` de la modulation par la bande.
     pub tail_count: usize,
     pub modulation: f32,
+    /// S265 : 0 = miroir historique, 3/5 = quadrature des pentes non résolues.
+    pub reflection_order: u32,
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -756,6 +758,7 @@ impl<'a> FrameData<'a> {
             clear_sky: false,
             tail_count: TAIL_COMPONENTS,
             modulation: 0.,
+            reflection_order: 0,
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,

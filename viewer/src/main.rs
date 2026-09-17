@@ -1,3 +1,4 @@
+mod reflection;
 mod counting;
 mod gpu;
 mod topologie;
@@ -1586,6 +1587,7 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
     // S262 : un dossier par revue ; un nouveau rendu n'écrase plus une revue envoyée.
     let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", "r4" => "captures/s260",
+        t if t.starts_with("r7") => "captures/s265",
         t if t.starts_with("r5") => "captures/s261", t if t.starts_with("r6_v") => "captures/s263", _ => "captures/s262" };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
@@ -1855,6 +1857,17 @@ fn run() -> Result<(), String> {
         frame.tail_background = Some(&scene.tail);
     }
     frame.cwm = vagues;
+    if args.iter().any(|a| a == "--reflets-filtres") {
+        if !vagues { return Err("--reflets-filtres demande --vagues".into()); }
+        frame.reflection_order = 3;
+        if let Some(value) = args.iter().find_map(|a| a.strip_prefix("--reflets-ordre=")) {
+            frame.reflection_order = value.parse().map_err(|_| "ordre de reflets invalide")?;
+            if ![3, 5].contains(&frame.reflection_order) { return Err("ordre de reflets : 3 ou 5".into()); }
+        }
+    } else if args.iter().any(|a| a.starts_with("--reflets-ordre=")) {
+        return Err("--reflets-ordre demande --reflets-filtres".into());
+    }
+
     frame.clear_sky = args.iter().any(|a| a == "--ciel-clair");
     // S261, ADR-158 : `--modulation` (avec `--vagues`) — queue coupée à 28 fp, modulation M = 2.
     if vagues && args.iter().any(|a| a == "--modulation") {
@@ -1893,6 +1906,29 @@ fn run() -> Result<(), String> {
     }
     if multi && args.iter().any(|a| a == "--revue") {
         return revue_images(&mut frame, "r1");
+    }
+    if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue=r7")) {
+        if multi && tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+            return revue_images(&mut frame, &format!("r7{tag}"));
+        }
+        return Err("revue R7 : --multi et suffixe alphanumérique requis".into());
+    }
+    if args.iter().any(|a| a == "--reflets-verify") { return reflection::verify(&mut frame); }
+    if args.iter().any(|a| a == "--reflets-bench") {
+        let instance = instance();
+        let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, 1280, 720,
+            frame.profile.len(), scene::WAKE_CAPACITY))?;
+        frame.cull = true;
+        frame.viewport = Some((1280./720., g.nx, g.ny));
+        for (name, camera) in [("reference", Camera::default()), ("rasante", grazing_camera())] {
+            frame.camera = camera;
+            for order in [0, 3, 5] {
+                frame.reflection_order = order;
+                println!("REFLETS_BENCH pose={name} ordre={order}");
+                g.benchmark(&mut frame, 12.)?;
+            }
+        }
+        return Ok(());
     }
     if multi && args.iter().any(|a| a == "--revue=r2") {
         return revue_images(&mut frame, "r2");
