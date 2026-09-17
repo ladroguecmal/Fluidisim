@@ -1,4 +1,3 @@
-mod sky_cache;
 mod reflection;
 mod counting;
 mod gpu;
@@ -1588,7 +1587,6 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
     // S262 : un dossier par revue ; un nouveau rendu n'écrase plus une revue envoyée.
     let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", "r4" => "captures/s260",
-        t if t.starts_with("r8") => "captures/s266",
         t if t.starts_with("r7") => "captures/s265",
         t if t.starts_with("r5") => "captures/s261", t if t.starts_with("r6_v") => "captures/s263", _ => "captures/s262" };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
@@ -1870,7 +1868,6 @@ fn run() -> Result<(), String> {
         return Err("--reflets-ordre demande --reflets-filtres".into());
     }
 
-    frame.sky_cache = !args.iter().any(|a| a == "--reflets-directs");
     frame.clear_sky = args.iter().any(|a| a == "--ciel-clair");
     // S261, ADR-158 : `--modulation` (avec `--vagues`) — queue coupée à 28 fp, modulation M = 2.
     if vagues && args.iter().any(|a| a == "--modulation") {
@@ -1909,30 +1906,6 @@ fn run() -> Result<(), String> {
     }
     if multi && args.iter().any(|a| a == "--revue") {
         return revue_images(&mut frame, "r1");
-    }
-    if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue=r8")) {
-        if multi && tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
-            return revue_images(&mut frame, &format!("r8{tag}"));
-        }
-        return Err("revue R8 : --multi et suffixe alphanumérique requis".into());
-    }
-    if args.iter().any(|a| a == "--ciel-cache-verify") { return reflection::verify_sky(&mut frame); }
-    if args.iter().any(|a| a == "--ciel-cache-bench") {
-        let mut g = pollster::block_on(gpu::Gpu::new(&instance(), None, 1280, 720,
-            frame.profile.len(), scene::WAKE_CAPACITY))?;
-        frame.cull = true;
-        frame.viewport = Some((1280./720., g.nx, g.ny));
-        frame.reflection_order = 3;
-        for (name, camera) in [("reference", Camera::default()), ("rasante", grazing_camera())] {
-            frame.camera = camera;
-            for cached in [false,true] {
-                frame.sky_cache = cached;
-                println!("CIEL_CACHE_BENCH pose={name} cache={cached}");
-                g.benchmark(&mut frame,12.)?;
-            }
-        }
-        g.report_sky_cache()?;
-        return Ok(());
     }
     if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue=r7")) {
         if multi && tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {

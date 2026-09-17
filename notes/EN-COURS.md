@@ -72,8 +72,10 @@ contre R7 ; préserver le chemin historique et les requêtes. Pas de nouveau ré
 - [x] **P2** — consigner R7 accepté ; choisir et contractualiser une optimisation mesurable
   de l'éclairage (pré-calcul du ciel de banc), critères d'erreur et de coût avant construction.
 - [x] **P3** — implémenter et tester le pré-calcul réutilisé sur le chemin de l'hôte.
-- [>] **P4** — vérifier images, coût, invariance et tests ; retenir ou rejeter selon les critères.
-- [ ] **P5** — rituel §6, capacités, limites, file entière, journal et jeton.
+- [x] **P4** — vérifier images, coût, invariance et tests ; retenir ou rejeter selon les critères.
+- [>] **P5** — optimisation algébrique : sommes suffixes de covariance, témoin conservé,
+  tests et réception aux critères écrits dans CIEL-CACHE-S266.
+- [ ] **P6** — rituel §6, capacités, limites, file entière, journal et jeton.
 
 ### Notes de reprise
 
@@ -86,3 +88,10 @@ P2 : R7 accepté consigné ; ADR-162 et critères CIEL-CACHE-S266 écrits avant 
 P3 : cache cubique 512² RGBA16Float, cuisson GPU et réutilisation/invalidation construits.
 Tests hôte 18/1/0. 8 501 directions par ciel ; cycle clair/brume/clair identique,
 aucune recuisson caméra/temps. Cuisson 0,056 ms mesurée, 12 Mio. Images P4 en cours.
+
+P4 : 512² rejeté en précision (maximum RGB 22 > 16, MAE ≤0,074). Essai 1024² prévu par
+ADR-162. Premier coût 512² NON RECEVABLE : capture GPU concurrente encore active ; à refaire
+après fin des captures. Ne pas employer ce passage comme preuve de gain.
+
+P4 : cache rejeté 512/1024 (maximum RGB 22/19 >16 ; gain1024 <5 % contre 10 requis).
+Code cache retiré, expérience conservée à e60b8fa. P5 déclaré avant construction.

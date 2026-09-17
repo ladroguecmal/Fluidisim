@@ -21,3 +21,36 @@ R7 acceptée par l'utilisateur le 2026-09-17 : « Très bien continue ».
 
 Arrêt : optimisation intégrée si les critères sont tenus ; sinon conserver la mesure du rejet
 et le témoin. L'erreur de quadrature 3/5 et le budget CPU du sillage restent des limites distinctes.
+
+## Résultat : cache rejeté, 2026-09-18
+
+Construction conservée dans Git à `e60b8fa` (512²) ; variante 1024² testée par changement
+unique de SIZE. Aucun cache conservé dans l'hôte final : le code S265 est rétabli avant
+l'optimisation suivante. Cette issue applique le critère d'arrêt, sans relever de seuil.
+
+512² : MAE RGB des sept images 0,0017–0,0737, P99 ≤1, maximum 22 >16 : rejet précision.
+1024² : MAE 0,0013–0,0300, P99 ≤1, maximum 19 >16 sur référence et fond seul : rejet précision.
+Les sept témoins directs sont identiques au bit aux PPM R7 S265.
+
+1024², 48 Mio, secteur 99 % début/fin, RTX 5070 Laptop DX12, 1280×720, ordre 3,
+120 images après chauffe : médiane GPU eau référence 2,785→2,669 ms (**4,2 %**),
+rasante 2,507→2,392 ms (**4,6 %**), sous le minimum de gain 10 % : rejet coût.
+Cuisson initiale 0,151 ms, une seule sur les deux poses ; update zéro allocation.
+Premier passage de coût 512² écarté : il avait chevauché la fin des captures GPU.
+
+Contrôle directionnel : 8 501 directions, clair/brume/clair, retour au bit et réutilisation
+caméra/temps reçus. Au ciel clair 1024² : erreur HDR moyenne 0,000760, P99 0,027453,
+max 0,474048 ; brume 0,000220 / 0,000527 / 0,001195. Diagnostic, pas réception radiométrique.
+Journaux et images dans `viewer/captures/s266` (`cache1024-verify.log`, `bench1024.log`).
+
+## Replanification : sommes de covariance, avant construction
+
+Le filtre de la queue est strictement nul après Nyquist, les composantes étant triées par k.
+À partir du premier poids nul, la covariance manquante est exactement la somme de toutes les
+covariances restantes, indépendante de la caméra. Précalculer cette somme suffixe dans le
+buffer de queue ; conserver le témoin par `--reflets-somme-directe`. Pas de changement
+architectural : même fermeture ADR-161, même quadrature et même ciel, ordre de sommation seul changé.
+Critères : GPU contre oracle aux trois vents (tolérances S265), images sept poses mêmes seuils
+0,25 / 2 / 16, update sans allocation, baisse d'au moins 10 % aux deux poses dans le même
+passage. Aucun seuil modifié après mesure ; budget 2 ms toujours distinct. Si reçu, intégrer ;
+sinon publier aussi le rejet et conserver R7.
