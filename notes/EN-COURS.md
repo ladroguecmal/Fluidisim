@@ -58,48 +58,35 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S259 — terminée
+Session : S260 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-16 23:06) : « continue ». Master propre fdc0f1c, copie unique, maillons 2 : cette
-session doit livrer une capacité. Lot recommandé en S257 d'après le verdict R2 (« grand lac soumis
-au vent ») et A287 (stries : direction liée au rang de fréquence).
+Entrée (2026-09-17 07:00), verdict R3 de l'utilisateur avec **deux références photographiques** :
+« la haute mer reste trop lisse, il y a trop de petites bosses et pas assez de mini pics » ; « de
+haut, on perçoit grâce au vent la houle ou la formation des vagues » ; « sur la photo proche, la
+haute mer est une combinaison de pics moyens et de petits pics, rien n'est uniforme ». Master propre
+1b16986, copie unique, jeton libre, maillons 0.
 
-Objectif : B **multimodal** — plusieurs systèmes (houle longue + mer de vent), chacun avec sa
-bande, son pic et une **loi d'étalement directionnel** (cos^2s, s selon f/fp, Mitsuyasu ;
-s_max de Goda), directions tirées **indépendamment du rang de fréquence**. Queue d'ADR-155 selon la
-même loi. **Aucune migration silencieuse** : `bake` V1, son empreinte figée et la scène par défaut
-restent au bit ; la scène multimodale est une variante déclarée (`--houle`) de l'afficheur.
+Hypothèses à éprouver, par grandeurs : (1) rugosité insuffisante — `mss` 0,0195 contre 0,044
+(A287, déjà mesuré) ; (2) **distribution des pentes gaussienne** — une somme linéaire à phases
+indépendantes n'a ni pointe (`c40`, `c22`, `c04`) ni asymétrie (`c21`, `c03`), alors que Cox & Munk
+publient des coefficients de Gram-Charlier non nuls ; (3) **crêtes et creux symétriques** —
+asymétrie de l'élévation nulle, contre environ `3kσ` au second ordre (Longuet-Higgins 1963).
 
-Réception écrite avant code (ADR-156, protocole) : amplitudes, `k` et fréquences identiques au bit
-à `bake` par système ; `E[cos θ] = s/(s+1)` pour l'inverse de la loi ; décorrélation rang/direction
-bornée par 3/√N ; `Hs` total = √Σ Hs² ; hauteurs GPU contre cœur ≤ 3 mm sur la scène `--houle` ;
-scène par défaut identique (R2 rejoué au bit, `--tail-verify` inchangé) ; coût GPU ; rendus R3.
+Méthode : mesurer ces grandeurs sur le champ rendu (`--houle`, bande + queue), puis évaluer **par le
+calcul** les remèdes candidats — modèle à vagues pointues de Lagrange (CWM), harmoniques liées du
+second ordre, niveau de la queue — **avant** d'en construire un. Critères écrits avant mesure.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — SPEC-001 §1 septies (Mitsuyasu, Goda, moment `s/(s+1)`), ADR-156, protocole
-  MER-MULTIMODALE-S259, avant code.
-- [x] **P3** — cœur : loi d'étalement et son inverse, `bake_directional`, queue directionnelle,
-  assemblage de systèmes ; essais.
-- [x] **P4** — hôte : nombre de composantes de B variable, scène `--houle`, vérification CPU/GPU.
-- [x] **P5** — réception : hauteurs, scène par défaut au bit, coût, rendus R3 envoyés.
-- [x] **P6** — rituel §6 : liste du projet fini (2.2), A287, file, journal, jeton.
+- [>] **P1** — amorce, jeton et plan seuls.
+- [ ] **P2** — verdict R3 et références consignés ; SPEC-001 : coefficients de Gram-Charlier de
+  Cox–Munk, asymétrie du second ordre ; protocole et critère de confirmation.
+- [ ] **P3** — instrument : statistiques des pentes et de l'élévation du champ rendu (linéaire),
+  et des candidats (CWM, second ordre) ; verdict confirmé ou non.
+- [ ] **P4** — ADR du remède choisi sur ces chiffres, et protocole de réception.
+- [ ] **P5** — cœur et hôte du remède, vérification CPU/GPU.
+- [ ] **P6** — réception : statistiques, coût, rendus R4 envoyés.
+- [ ] **P7** — rituel §6.
 
 ### Notes de reprise
 
-P3 : `bake_directional`, `bake_tail_directional`, `assemble`, `spread_offset_turns` (table de répartition
-1 024 trapèzes, densité coupée au-delà de exp(−32) — `decay` n'accepte que 0..=32, premier jet en
-dépassement). Essai `multimodal_sea_and_directional_spreading_s259` : E[cos] 0,23078/0,50000/0,90910/
-0,98684 contre 0,23077/0,5/0,90909/0,98684 ; Spearman 0,012 (fixture 1,000, borne 0,530) ; largeur
-0,063 tour au pic (7 comp.) contre 0,155 au-delà de 2 fp (11) ; m0 0,390625 exact, Hs 2,5 m. Spectre et
-queue au bit ; empreinte V1 et essais du spectre 8/8.
-
-P4 : `Scene::build(houle)`, `B_CAPACITY` 64, nombre de composantes passé au shader (était 32 en dur),
-`--houle`, `--b-verify`, `--revue=r3`. `--multi --houle --b-verify` : 64 composantes, max η 0,379 mm
-(âges 3/12/29) ; défaut 32 composantes, 0,368 mm. R2 rejoué : sept empreintes identiques ;
-`--tail-verify` ligne identique à S256.
-
-P5 : coût 1280×720 (secteur 99 %) défaut 1,771/1,833 ms, houle 1,844/1,867 ms (max 2,15/2,63 non
-attribués). R3 rendue deux fois, empreintes identiques, envoyée. Plus de stries, mer croisée ; houle
-peu lisible depuis 7 m.
