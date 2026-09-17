@@ -58,55 +58,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S260 — terminée
+Session : S261 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-17 07:00), verdict R3 de l'utilisateur avec **deux références photographiques** :
-« la haute mer reste trop lisse, il y a trop de petites bosses et pas assez de mini pics » ; « de
-haut, on perçoit grâce au vent la houle ou la formation des vagues » ; « sur la photo proche, la
-haute mer est une combinaison de pics moyens et de petits pics, rien n'est uniforme ». Master propre
-1b16986, copie unique, jeton libre, maillons 0.
+Entrée (2026-09-17 07:25) : « Change le ciel et la couleur comme sur ma photo, puis je trouve que la
+mer a l'air trop rugueuse, la surface entre pics est plutôt lisse, mais il y a beaucoup de petites
+vaguelettes. » Master propre a69259f, jeton libre, maillons 0.
 
-Hypothèses à éprouver, par grandeurs : (1) rugosité insuffisante — `mss` 0,0195 contre 0,044
-(A287, déjà mesuré) ; (2) **distribution des pentes gaussienne** — une somme linéaire à phases
-indépendantes n'a ni pointe (`c40`, `c22`, `c04`) ni asymétrie (`c21`, `c03`), alors que Cox & Munk
-publient des coefficients de Gram-Charlier non nuls ; (3) **crêtes et creux symétriques** —
-asymétrie de l'élévation nulle, contre environ `3kσ` au second ordre (Longuet-Higgins 1963).
+Deux demandes, dans l'ordre donné.
 
-Méthode : mesurer ces grandeurs sur le champ rendu (`--houle`, bande + queue), puis évaluer **par le
-calcul** les remèdes candidats — modèle à vagues pointues de Lagrange (CWM), harmoniques liées du
-second ordre, niveau de la queue — **avant** d'en construire un. Critères écrits avant mesure.
+**A. Habillage « ciel clair » de la référence A** : ciel bleu profond dégradé vers un horizon pâle,
+nuages blancs, eau bleu saturé, air clair. Réglage de l'hôte sans physique, **étiqueté comme
+habillage** (REVUE-VISUELLE §4), sélectionnable : l'habillage brumeux reste disponible pour rejouer
+R1–R4 au bit. Aperçu envoyé dès qu'il existe.
+
+**B. Verdict R4 sur la rugosité.** Consigner, classer, mesurer, puis corriger. Hypothèses : (1) `mss`
+13 % au-dessus de Cox–Munk (0,0495 contre 0,0437) ; (2) rugosité fine **uniforme dans l'espace**,
+alors que l'observation décrit des facettes lisses entre les pics et des vaguelettes groupées :
+c'est la modulation des ondes courtes par les plus longues, que Cox–Munk mesure par la pointe `c40`
+(0,40, contre 0,21 construit) ; (3) grain des ondes proches de la résolution. Remèdes évalués par
+l'instrument S260 avant construction ; tout ajustement contre Cox–Munk sera déclaré comme tel.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — verdict R3 et références consignés ; SPEC-001 : coefficients de Gram-Charlier de
-  Cox–Munk, asymétrie du second ordre ; protocole et critère de confirmation.
-- [x] **P3** — instrument : statistiques des pentes et de l'élévation du champ rendu (linéaire),
-  et des candidats (CWM, second ordre) ; verdict confirmé ou non.
-- [x] **P4** — ADR du remède choisi sur ces chiffres, et protocole de réception.
-- [x] **P5** — cœur et hôte du remède, vérification CPU/GPU.
-- [x] **P6** — réception : statistiques, coût, rendus R4 envoyés.
-- [x] **P7** — rituel §6.
+- [>] **P1** — amorce, jeton et plan seuls.
+- [ ] **P2** — verdict R4 et demande d'habillage consignés et classés.
+- [ ] **P3** — habillage « ciel clair » (hôte, sélectionnable), scènes brumeuses au bit, aperçu envoyé.
+- [ ] **P4** — mesure : `mss`, pointe et intermittence de la rugosité des candidats (modulation par
+  échelles, coupure), critère écrit avant.
+- [ ] **P5** — ADR et protocole du remède retenu.
+- [ ] **P6** — construction cœur/hôte, vérification CPU/GPU.
+- [ ] **P7** — réception : statistiques, coût, rendus R5 envoyés.
+- [ ] **P8** — rituel §6.
 
 ### Notes de reprise
 
-P3 : `examples/statistiques_surface.rs`, journal `code/target/s260-statistiques.log`. Confirmé.
-Candidats calculés : CWM seul c40 0,057 ; second ordre par composante nul ; **f⁻⁴ seul mss 0,0483** ;
-**f⁻⁴ + CWM : c40 0,208, c22 0,072, c04 0,208** (dans les incertitudes de Cox–Munk), sans ajustement ;
-modulation M = 2 : c40 0,39 (ajusté, non retenu) ; M ≥ 10 : replis. Non reproduits : c03, λ3,
-anisotropie u/c (0,96 contre 1,37). Choix pour P4 : queue d'équilibre f⁻⁴ + CWM.
-
-P5 (cœur) : `bake_tail_equilibrium`, `cells_with`/`Weights` (poids analytiques q(b)·b⁴·(x₁⁻³ − x₂⁻³)/3).
-Essai `equilibrium_tail_continues_band_in_f_minus_four_s260` : variance 5,98185e-4 contre 5,98186e-4 ;
-mss vent + queue 0,04781 contre 0,04779 ; continuité 0,8349 contre 0,8369 ; spectre 9/9.
-
-P5 (hôte) : `--vagues` (recette houle, queue f⁻⁴, `frame.cwm`), `band_cwm`/`tail_cwm`/`euler_slope` au shader,
-sommets déplacés de D_B, fragment J⁻ᵀ, sondes w=3/w=4, `cwm_reference`, `--cwm-verify`, `--revue=r4`.
-`--cwm-verify` : 22 368 sondes, déplacement 1,59e-6 m, pente 4,15e-4 (tol. 5e-4), pente max 0,697,
-det min 0,400, 0 repli ; **déplacement max 1,75 m, écart vertical au jeu 0,365 m** (ADR-157 annonçait
-« ordre k·a² » : l'ordre est juste, mais l'amplitude vient de la houle, à publier et A288). R2 et R3
-identiques au bit ; `--tail-verify` et `--b-verify --houle` identiques.
-
-P6 : coût `--vagues` 2,153/2,178 ms contre `--houle` 1,867/1,924 (dépassement de 2 ms, boucle de bande
-doublée par sommet) ; R4 rendue deux fois, empreintes identiques, envoyée ; suite 466/18/0, afficheur
-16/1/0. Note datée ADR-157 (écart au jeu 0,365 m).
