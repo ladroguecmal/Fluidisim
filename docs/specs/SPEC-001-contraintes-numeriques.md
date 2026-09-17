@@ -203,6 +203,24 @@ C'est la référence analytique de l'inverse numérique de `D`.
 **Domaine.** L'ajustement de Mitsuyasu est observé autour du pic, pas dans la queue lointaine :
 au-delà de la bande représentée, une extrapolation est une convention, et elle se déclare.
 
+## 1 octies. Intervalle d'équilibre et vagues pointues de Lagrange — S260, ADR-157
+
+**Intervalle d'équilibre.** Au-dessus du pic, une mer de vent suit `S(ω) ∝ ω⁻⁴` (Toba, *Local
+balance in the air-sea boundary processes*, J. Oceanogr. Soc. Japan 29, 1973 ; Donelan, Hamilton et
+Hui, *Directional spectra of wind-generated waves*, Phil. Trans. R. Soc. A 315, 1985 ; Phillips,
+*Spectral and statistical properties of the equilibrium range in wind-generated gravity waves*,
+JFM 156, 1985). La forme JONSWAP en `f⁻⁵` décrit mal cet intervalle. Pour la queue, on continue
+donc depuis le bord de bande `b` : `S(f) = S(b·fp)·(b·fp/f)⁴`. Sur une cellule `[x₁, x₂]`, avec
+`q` la forme du §1 bis, on obtient `∫ q(b)·b⁴·x⁻⁴ dx = q(b)·b⁴·(x₁⁻³ − x₂⁻³)/3`. La pente croît alors
+comme `ln` de la coupure en `f⁻⁵`, et **linéairement** en `f⁻⁴`.
+
+**Modèle de vagues pointues** (CWM : Nouguier, Chapron et Guérin, *Choppy wave model for nonlinear
+gravity waves*, JFM 630, 2009 ; forme de Gerstner et Pierson). Pour `η = Σ a·sin ψ` en eau
+profonde, un point de Lagrange `α` est déplacé en `x = α + D(α)`, avec `D = Σ a·d·cos ψ`. Les
+crêtes se resserrent et les creux s'étalent. Le jacobien vaut `J = I + ∂D`, avec
+`∂D_ij = −Σ a·k·d_i·d_j·sin ψ`. Les pentes eulériennes valent `J⁻ᵀ·∇αη`, et une statistique
+eulérienne se pondère par `det J`. Un repli (`det J ≤ 0`) marque la limite du modèle.
+
 ## 2. Stabilité et coût d'un solveur volumétrique
 
 ### 2.1 CFL

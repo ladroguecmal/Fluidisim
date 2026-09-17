@@ -55,6 +55,7 @@
 - [Prolongement du fond au-dessus du plan moyen : règle bornée, oracle et fournisseur B](validation/PROLONGEMENT-FOND-S254.md).
 - [Queue spectrale de B en pentes par pixel : rugosité, filtre et coût](validation/QUEUE-SPECTRALE-S256.md).
 - [Mer multimodale et étalement directionnel : houle longue, mer de vent, R3](validation/MER-MULTIMODALE-S259.md).
+- [Queue d'équilibre et vagues pointues (CWM) : statistiques de Cox–Munk, R4](validation/VAGUES-POINTUES-S260.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -227,6 +228,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-154](adr/ADR-154-prolongement-borne-du-fond.md) | Prolonger le fond au-dessus du plan moyen : vitesse horizontale constante, par mode |
 | [ADR-155](adr/ADR-155-queue-spectrale-en-pentes-par-pixel.md) | La queue du spectre de B se rend en pentes par pixel |
 | [ADR-156](adr/ADR-156-mer-multimodale-et-etalement.md) | Une mer à plusieurs systèmes, chacun avec sa loi d'étalement directionnel |
+| [ADR-157](adr/ADR-157-queue-d-equilibre-et-vagues-pointues.md) | Queue d'équilibre en f⁻⁴ et vagues pointues de Lagrange |
 
 ## Travail et historique
 

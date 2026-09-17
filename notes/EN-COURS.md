@@ -83,7 +83,7 @@ second ordre, niveau de la queue — **avant** d'en construire un. Critères éc
   Cox–Munk, asymétrie du second ordre ; protocole et critère de confirmation.
 - [x] **P3** — instrument : statistiques des pentes et de l'élévation du champ rendu (linéaire),
   et des candidats (CWM, second ordre) ; verdict confirmé ou non.
-- [ ] **P4** — ADR du remède choisi sur ces chiffres, et protocole de réception.
+- [x] **P4** — ADR du remède choisi sur ces chiffres, et protocole de réception.
 - [ ] **P5** — cœur et hôte du remède, vérification CPU/GPU.
 - [ ] **P6** — réception : statistiques, coût, rendus R4 envoyés.
 - [ ] **P7** — rituel §6.
