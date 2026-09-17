@@ -78,8 +78,8 @@ second ordre, niveau de la queue — **avant** d'en construire un. Critères éc
 
 ### Plan
 
-- [>] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — verdict R3 et références consignés ; SPEC-001 : coefficients de Gram-Charlier de
+- [x] **P1** — amorce, jeton et plan seuls.
+- [x] **P2** — verdict R3 et références consignés ; SPEC-001 : coefficients de Gram-Charlier de
   Cox–Munk, asymétrie du second ordre ; protocole et critère de confirmation.
 - [ ] **P3** — instrument : statistiques des pentes et de l'élévation du champ rendu (linéaire),
   et des candidats (CWM, second ordre) ; verdict confirmé ou non.

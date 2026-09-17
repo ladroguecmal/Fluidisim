@@ -70,7 +70,7 @@ tel quel, et c'est la réception qu'on réexamine d'abord.
 |---|---|---|---|---|---|
 | **R1** | 2026-09-16 | sept rendus J1, §6 | demandées, §6.3 ; aucune reçue au premier verdict | **« La mer est trop lisse, on dirait un lac »** (22:13) | **confirmé par mesure** : physique juste mais incomplète — `mss` de B 0,0075 contre 0,044 observés (Cox–Munk), spectre coupé à `4 fp` (§7) |
 | **R2** | 2026-09-16 | sept rendus aux poses de R1, queue spectrale d'ADR-155 ([empreintes](QUEUE-SPECTRALE-S256.md) §3) | — | **« Le résultat se raffine, mais le rendu paraît un grand lac soumis à beaucoup de vent ; la haute mer est plus déchaînée, chaotique, et la houle se forme vers les terres »** (22:45) | **physique juste mais incomplète**, établie par construction (§8) : mer de vent locale seule, sans houle longue, crêtes linéaires, fond uniforme ; écume hors capacité |
-| **R3** | 2026-09-16 | sept rendus aux poses de R1, scène `--houle` : mer de vent + houle longue, étalement cos^2s (ADR-156, [empreintes](MER-MULTIMODALE-S259.md) §3) | — | **en attente** | questions : paraît-elle une haute mer ? la houle se lit-elle ? reste-t-il des stries ? |
+| **R3** | 2026-09-16 | sept rendus aux poses de R1, scène `--houle` : mer de vent + houle longue, étalement cos^2s (ADR-156, [empreintes](MER-MULTIMODALE-S259.md) §3) | **deux photographies** (§10), conditions inconnues | **« La haute mer reste trop lisse ; trop de petites bosses, pas assez de mini pics ; pics moyens et petits pics combinés, rien n'est uniforme »** (2026-09-17 07:00) | provisoire : rugosité insuffisante (A287), pentes gaussiennes, crêtes symétriques ; mesure au §10 |
 
 ## 6. R1 — la scène J1 telle qu'elle est, S254
 
@@ -249,4 +249,42 @@ d'optimisation de J1-bis (ADR-131). Il n'est **pas prioritaire pour le coût auj
 1280×720, le GPU eau (1,8 ms) va surtout à la cuisson de la grille du sillage (1,25 ms). Il le
 deviendra avec l'altitude et la grande échelle. Le seuil de décalage se fixera avec l'utilisateur :
 c'est une question de perception.
+
+## 10. R3 — « trop de petites bosses, pas assez de mini pics, rien n'est uniforme »
+
+**Reçu le 2026-09-17 à 07:00**, avec **deux références** : les premières reçues.
+
+| référence | ce qu'elle montre | conditions |
+|---|---|---|
+| A — proche, presque rasante | mer bleu vif sous ciel clair ; vagues courtes (quelques mètres) à **crêtes pointues** et creux plus larges ; rides fines sur les pentes ; reflets du ciel très contrastés, par taches | inconnues : vent, hauteur, distance |
+| B — plus haute, vers l'horizon | mer bleu sombre ; texture fine partout, **trains de vagues** et motifs dus au vent lisibles jusqu'au loin ; horizon net | inconnues |
+
+Sans conditions connues, elles servent à la perception, pas à la mesure (§3). Elles ne sont pas
+versionnées.
+
+**Verdict.** La haute mer reste trop lisse. Il y a trop de petites bosses et pas assez de mini pics.
+De haut, on perçoit la houle et la formation des vagues grâce au vent. De près, la haute mer combine
+des pics moyens et des petits pics, et rien n'est uniforme. Les stries de R2 ne sont plus
+mentionnées.
+
+**Hypothèses, écrites avant mesure** (SPEC-001 §1 sexies) :
+
+1. **rugosité insuffisante** : `mss` 0,0195 contre 0,044, déjà mesuré (A287) ;
+2. **pentes gaussiennes** : la somme linéaire annule la pointe (`c40`, `c22`, `c04`) et
+   l'asymétrie (`c21`, `c03`) que Cox & Munk mesurent. Des pentes gaussiennes sont
+   « uniformément rugueuses », sans facettes raides rares ;
+3. **crêtes symétriques** : `λ3 = 0`, contre environ `3kσ` au second ordre.
+
+**Mesure et critère.** On mesure, sur le champ rendu de la scène `--houle` (bande et queue, pentes
+analytiques, 10⁶ points tirés dans l'espace et le temps), les coefficients de Gram-Charlier dans les
+axes du vent et l'asymétrie de l'élévation.
+
+- **Hypothèse 2 confirmée** si `c40` et `c22` mesurés sont chacun inférieurs à la moitié des
+  valeurs de Cox–Munk (0,20 et 0,06).
+- **Hypothèse 3 confirmée** si `|λ3|` est inférieur à la moitié de `3·k_m·σ`, avec `k_m` le nombre
+  d'onde moyen pondéré par la variance.
+
+Les mêmes grandeurs sont ensuite calculées pour deux remèdes candidats, sans les construire : le
+modèle de vagues pointues de Lagrange (CWM, déplacement horizontal de chaque composante), et les
+harmoniques liées du second ordre de chaque composante.
 

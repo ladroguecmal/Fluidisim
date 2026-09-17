@@ -163,6 +163,21 @@ photographs of the sun's glitter*, JOSA 44(11), 838–850, 1954.
 `Hs = 4√m0 = 2√(α/β)·U²/g ≈ 0,21·U²/g`. Une mer limitée par le fetch atteint le même `Hs` avec un
 vent **plus fort**. Ce vent est donc une **borne basse** : `U ≥ √(Hs·g/0,21)`.
 
+**Composantes et forme de la distribution** (même source, surface propre, `W` en m/s à 12,5 m) :
+`σu² = 3,16·10⁻³·W` (dans l'axe du vent) et `σc² = 0,003 + 1,92·10⁻³·W` (en travers), à ±0,004.
+Pentes réduites `ξ = zc/σc` (en travers) et `η = zu/σu` (dans l'axe). La densité est gaussienne,
+corrigée par une série de Gram-Charlier. Les coefficients d'**asymétrie** sont
+`c21 = 0,01 − 0,0086·W` (±0,03) et `c03 = 0,04 − 0,033·W` (±0,12). Ceux de **pointe** sont
+`c40 = 0,40` (±0,23), `c22 = 0,12` (±0,06) et `c04 = 0,23` (±0,41). Ils valent, dans l'ordre,
+`E[ξ²η]`, `E[η³]`, `E[ξ⁴] − 3`, `E[ξ²η²] − 1` et `E[η⁴] − 3`. **Une somme linéaire de composantes à
+phases indépendantes les annule tous** : ses pentes sont gaussiennes. Le signe de `c21` et `c03`
+dépend de l'orientation de l'axe ; seule leur amplitude se compare sans convention établie.
+
+**Asymétrie de l'élévation au second ordre** (Longuet-Higgins, *The effect of non-linearities on
+statistical distributions in the theory of sea waves*, JFM 17, 459–480, 1963) : pour une mer
+gaussienne à bande étroite en eau profonde, `λ3 = E[(η − η̄)³]/σ³ ≈ 3·k·σ`. Crêtes plus hautes et
+plus aiguës, creux plus plats. Une somme linéaire donne `λ3 = 0`.
+
 **Pente d'un spectre coupé** (§1 bis) : `mss = (2π)⁴m4/g²` en Airy profond, et `m4` croît comme
 `ln(b)` pour une queue en `f⁻⁵`. Une bande `[a fp, b fp]` sous-estime donc la `mss` observée par
 construction. La comparaison à Cox–Munk dit **de combien**, pas quelle coupure est juste.
