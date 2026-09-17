@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S266 — en cours
+Session : S266 — terminée
 Agent : Codex, GPT-6 ; fichiers, git, cargo, Python, GPU local et accès web.
 Entrée : « Très bien continue », après l'avant/après R7. Aspect filtré accepté ; poursuivre
 la réduction du coût en conservant cet aspect. Master propre c4f9bb9, copie unique, jeton libre.
@@ -75,7 +75,7 @@ contre R7 ; préserver le chemin historique et les requêtes. Pas de nouveau ré
 - [x] **P4** — vérifier images, coût, invariance et tests ; retenir ou rejeter selon les critères.
 - [x] **P5** — optimisation algébrique : sommes suffixes de covariance, témoin conservé,
   tests et réception aux critères écrits dans CIEL-CACHE-S266.
-- [>] **P6** — rituel §6, capacités, limites, file entière, journal et jeton.
+- [x] **P6** — rituel §6, capacités, limites, file entière, journal et jeton.
 
 ### Notes de reprise
 
@@ -102,3 +102,5 @@ sans changer les nœuds, poids ou ordre, puis rejouer images/coût avant rétent
 
 P5 : variante reçue (ADR-163), 19/1/0 ; 7 témoins au bit, images max1/255.
 GPU 2,259/2,239 ms contre 2,737/2,494 : gain17,48/10,20 %. Budget2 ms non tenu.
+
+P6 : rituel terminé, maillons0 ; suite cuisson du sillage, jeton libre.

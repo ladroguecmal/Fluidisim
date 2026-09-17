@@ -469,3 +469,11 @@ la vue montrée ; poursuivre la réduction du coût en conservant cet aspect. Ce
 ni les vues non montrées, ni l'animation, ni le budget, ni la BRDF physique complète, et ne
 vaut pas sélection explicite d'un vent représentatif. Lot suivant : ciel de banc précalculé,
 ADR-162, contrôlé contre la version R7 acceptée.
+
+### Conservation de R7 — fin S266, 2026-09-18
+
+Le cache du ciel a été rejeté aux critères déclarés. L'optimisation retenue (ADR-163) regroupe
+les covariances entièrement filtrées et fixe les bornes des boucles 3×3 : **sept images à un
+niveau RGB près** de R7, sept témoins identiques au bit. Ce contrôle ne demande pas de nouveau
+choix esthétique. Aperçu `viewer/captures/s266/r8_final_reference_12s.png`, mêmes pose, âge,
+vent et couches que R7. Coût et limites : [CIEL-CACHE-S266](CIEL-CACHE-S266.md).

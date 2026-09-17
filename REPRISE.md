@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-18 00:08 +02:00
+JETON            : libre
+Battement        : 2026-09-18 00:09 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S266 — coût des reflets validés
-Dernière session : S265 — reflets filtrés en variante (ADR-161), R7 à juger, coût au-dessus de 2 ms
-Session suivante : S266 — verdict R7 ; si accepté, réduire coût et erreur de quadrature des reflets
+Session en cours : aucune
+Dernière session : S266 — R7 accepté, reflets optimisés (ADR-163), 2,24–2,26 ms GPU ; cache ciel rejeté
+Session suivante : S267 — coût de cuisson GPU du sillage (1,06–1,08 ms), avec erreur et I-09 reçues
 Maillons        : 0
 
 ```

@@ -60,6 +60,7 @@
 - [Défauts restants réparés : horizon, coût GPU, requête de jeu sous CWM](validation/DEFAUTS-S262.md).
 - [Le vent comme paramètre de scène : Pierson–Moskowitz, Cox–Munk, calibration R6](validation/VENT-S263.md).
 - [Reflets de la queue non résolue, comparaison R7 et coût](validation/REFLETS-S265.md).
+- [Optimisation des reflets validés : cache rejeté, sommes exactes retenues](validation/CIEL-CACHE-S266.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -237,6 +238,8 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-159](adr/ADR-159-requete-de-jeu-sous-cwm.md) | La requête de jeu suit la surface rendue sous CWM |
 | [ADR-160](adr/ADR-160-vent-parametre-de-scene.md) | Le vent est un paramètre de la scène, calibré à l'œil |
 | [ADR-161](adr/ADR-161-reflets-de-la-queue-non-resolue.md) | Filtrer les reflets de la queue non résolue |
+| [ADR-162](adr/ADR-162-ciel-precalcule-des-reflets.md) | Ciel précalculé des reflets (candidat rejeté, remplacé par ADR-163) |
+| [ADR-163](adr/ADR-163-sommes-des-ondes-filtrees.md) | Regrouper les ondes filtrées sans changer le reflet |
 
 ## Travail et historique
 

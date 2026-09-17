@@ -3664,3 +3664,10 @@ variance perdue de la bande géométrique non transférée. Quadrature 3×3/5×5
 surtout vue haute (P99 RGB 25/255), budget eau dépassé à 2,49–2,71 ms en 3×3. Réception temporelle
 absente. Déclencheur : verdict R7 ; si aspect accepté, intégrer/précalculer l'éclairage pour réduire
 coût et erreur de quadrature avant adoption. [Preuve](../validation/REFLETS-S265.md).
+
+*S266, 2026-09-18 — A287 toujours partielle.* R7 accepté pour la vue présentée. Sommes
+suffixes et boucles 3×3 fixes (ADR-163) reçues : 10–17 % de coût GPU en moins, sept images
+à un niveau RGB près, 15 000 sondes conservées. GPU eau 2,24–2,26 ms, dont cuisson sillage
+1,06–1,08 ms, budget non tenu. Cache ciel ADR-162 rejeté (précision et gain), retiré du code.
+La quadrature, la BRDF et la réception temporelle gardent leurs limites S265 ; coût du sillage
+prioritaire avant approfondissement des reflets acceptés. [Preuve](../validation/CIEL-CACHE-S266.md).

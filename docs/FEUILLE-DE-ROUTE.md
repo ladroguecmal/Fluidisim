@@ -146,8 +146,11 @@ queue coupée à Cox–Munk au même vent, conforme à 3, 5 et 8,37 m/s. Scènes
 [réception](validation/VENT-S263.md). R6 a reçu en S265 un verdict sur les zones entre les pics, sans choix de vent.
 **S265 : reflets filtrés en variante** `--reflets-filtres` (ADR-161), covariance manquante de la
 queue intégrée à l'éclairage. Contrôle CPU/GPU reçu, géométrie inchangée, témoin R6 au bit ;
-[preuve](validation/REFLETS-S265.md). R7 attend le verdict. Approximation gaussienne, quadrature
-3×3 non convergée partout ; **2,49–2,71 ms GPU**, budget non tenu. Pas d'adoption par défaut.
+[preuve](validation/REFLETS-S265.md). **R7 accepté S266** dans la vue présentée. Approximation gaussienne,
+quadrature 3×3 non convergée partout. **S266 : sommes suffixes et boucles fixes** (ADR-163),
+image à un niveau RGB près, gain GPU **10–17 %**, **2,24–2,26 ms** (1280×720, 5 m/s),
+budget toujours non tenu ; [preuve](validation/CIEL-CACHE-S266.md). Cache de ciel ADR-162 rejeté.
+Variante `--reflets-filtres` optimisée ; scène historique par défaut conservée.
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 

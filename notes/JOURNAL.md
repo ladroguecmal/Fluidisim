@@ -13550,3 +13550,39 @@ registre de revue actualisés. I-03 : témoin inchangé localement, pas de réce
 I-06 : buffers réutilisés et `update` mesuré ; I-13 : éclairage sans autorité ; I-14 : fermeture,
 quadrature et largeur à calibrer déclarées. δ, V, B2, bathymétrie et seconde cible gardent leurs
 déclencheurs. Jeton libre, aucune copie isolée à fermer.
+
+## S266 — R7 accepté, même aspect pour 10 à 17 % de GPU en moins
+
+**2026-09-17–18, Codex GPT-6.** Entrée « Très bien continue », puis « continue ». Aspect R7
+accepté dans la vue montrée, pas choix d'un vent ni réception de l'animation. Master propre
+c4f9bb9, copie unique. Plan 902dc05, protocole ab231cd, cache e60b8fa, rejet/replanification
+d95b46e, optimisation retenue 594dfac.
+
+**Cache rejeté.** ADR-162 : cubemap 512² puis 1024². Critère maximum RGB16 manqué (22 puis19),
+gain1024 seulement4–5 % au lieu des10 % requis, pour48 Mio. Code retiré ; expérience et
+mesures conservées. Premier coût512 écarté car capture GPU encore concurrente.
+
+**Capacité reçue, maillons0.** Le chemin `--reflets-filtres` conserve l'aspect accepté avec
+moins de travail par pixel : covariances des modes entièrement filtrés regroupées, quadrature
+3×3 spécialisée (ADR-163). Consommateurs : fenêtre et captures de l'hôte. Preuve :
+[CIEL-CACHE-S266](../docs/validation/CIEL-CACHE-S266.md) — **2,259 / 2,239 ms** contre
+2,737 / 2,494, référence/rasante, soit17,48/10,20 %, secteur RTX5070 Laptop DX12 1280×720.
+Sept images :2–29 canaux changés sur2 764 800, au plus1/255 ; sept témoins R7 au bit.
+15 000 sondes GPU aux trois vents reçues. Tests hôte **19 réussis,1 ignoré,0 échec**.
+Update sans allocation ; buffer GPU +1 Kio, temporaire CPU de pile1 Kio. Aucun cache de ciel.
+
+**Limites :** budget2 ms encore dépassé ; gain rasante près du critère, pas de garantie
+inter-machine. Aucun gain CPU revendiqué ; quadrature3/5 et approximation CWM inchangées.
+Pas de réception d'animation/multiplateforme ni de modification du cœur, dont la suite complète
+n'est pas rejouée.
+
+**Suite choisie :** cuisson GPU du sillage, encore1,06–1,08 ms : prochain levier de coût utile
+pour approcher2 ms, avec réception de l'erreur et d'I-09 avant cadence réduite. Les reflets ont
+leur aspect accepté ; prolonger automatiquement leur calibration n'est plus prioritaire.
+Comparé au lot J2 bords ouverts : celui-ci conserve son déclencheur, la demande de poursuivre
+le rendu a motivé S266. La prochaine session doit garder cette comparaison explicite.
+
+**Rituel :** file active entière et invariants I-03/I-06/I-13/I-14 relus ; feuille de route,
+A287, registre de revue et index actualisés. Ordre de somme modifié documenté, cœur inchangé,
+aucune valeur physique recalibrée. δ,V,B2,bathymétrie et seconde cible restent dans la file.
+Jeton libéré, aucune copie isolée à fermer.
