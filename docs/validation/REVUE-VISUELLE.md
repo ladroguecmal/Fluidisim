@@ -71,7 +71,7 @@ tel quel, et c'est la réception qu'on réexamine d'abord.
 | **R1** | 2026-09-16 | sept rendus J1, §6 | demandées, §6.3 ; aucune reçue au premier verdict | **« La mer est trop lisse, on dirait un lac »** (22:13) | **confirmé par mesure** : physique juste mais incomplète — `mss` de B 0,0075 contre 0,044 observés (Cox–Munk), spectre coupé à `4 fp` (§7) |
 | **R2** | 2026-09-16 | sept rendus aux poses de R1, queue spectrale d'ADR-155 ([empreintes](QUEUE-SPECTRALE-S256.md) §3) | — | **« Le résultat se raffine, mais le rendu paraît un grand lac soumis à beaucoup de vent ; la haute mer est plus déchaînée, chaotique, et la houle se forme vers les terres »** (22:45) | **physique juste mais incomplète**, établie par construction (§8) : mer de vent locale seule, sans houle longue, crêtes linéaires, fond uniforme ; écume hors capacité |
 | **R3** | 2026-09-16 | sept rendus aux poses de R1, scène `--houle` : mer de vent + houle longue, étalement cos^2s (ADR-156, [empreintes](MER-MULTIMODALE-S259.md) §3) | **deux photographies** (§10), conditions inconnues | **« La haute mer reste trop lisse ; trop de petites bosses, pas assez de mini pics ; pics moyens et petits pics combinés, rien n'est uniforme »** (2026-09-17 07:00) | provisoire : rugosité insuffisante (A287), pentes gaussiennes, crêtes symétriques ; mesure au §10 |
-| **R4** | 2026-09-17 | sept rendus aux poses de R1, scène `--vagues` : queue d'équilibre f⁻⁴ et CWM (ADR-157, [empreintes](VAGUES-POINTUES-S260.md) §3) | références A et B de R3 | **en attente** | questions : encore trop lisse ? des « mini pics » ? l'écart restant tient-il au ciel et à la couleur ? |
+| **R4** | 2026-09-17 | sept rendus aux poses de R1, scène `--vagues` : queue d'équilibre f⁻⁴ et CWM (ADR-157, [empreintes](VAGUES-POINTUES-S260.md) §3) | références A et B de R3 | **« Change le ciel et la couleur comme sur ma photo ; la mer a l'air trop rugueuse, la surface entre les pics est plutôt lisse, mais il y a beaucoup de petites vaguelettes »** (07:25) | habillage demandé (ciel, couleur) ; rugosité : trop forte et trop uniforme, à mesurer (§11) |
 
 ## 6. R1 — la scène J1 telle qu'elle est, S254
 
@@ -322,3 +322,26 @@ points sur 4 km × 4 km × 1 h ; axes du vent de la mer de vent). Cox–Munk pou
 - Une modulation des ondes courtes par les longues atteint la pointe centrale pour `M` ≈ 2, mais
   c'est un **ajustement**. Au-delà de `M` ≈ 10, la surface se replie. Elle n'est pas retenue sans
   source indépendante.
+
+## 11. R4 — « trop rugueuse ; lisse entre les pics ; beaucoup de petites vaguelettes »
+
+**Reçu le 2026-09-17 à 07:25.** Le verdict porte deux demandes.
+
+**1. Habillage.** « Change le ciel et la couleur comme sur ma photo » : la référence A montre un ciel
+bleu profond, des nuages blancs bas et une eau bleu saturé. Classe **habillage de banc** : réglage
+libre de l'hôte, sans physique, étiqueté comme tel. L'habillage brumeux S211 reste sélectionnable,
+pour que R1 à R4 se rejouent au bit.
+
+**2. Rugosité.** La mer a l'air trop rugueuse ; la surface entre les pics est plutôt lisse, avec
+beaucoup de petites vaguelettes. Hypothèses, écrites avant mesure :
+
+1. **excès de rugosité moyenne** : `mss` 0,0495 contre 0,0437 observé (Cox–Munk), soit +13 % ;
+2. **rugosité fine trop uniforme** : l'observation décrit des facettes lisses entre les pics et des
+   vaguelettes groupées, c'est-à-dire une énergie des ondes courtes **modulée** par les plus
+   longues. Cox–Munk la mesure par la pointe `c40` (0,40 ± 0,23), contre 0,21 construit ;
+3. **grain** des ondes proches de la résolution, entre deux et quatre pixels, perçu comme une
+   rugosité uniforme.
+
+Classe provisoire : physique incomplète (modulation absente) et possible artefact numérique
+(grain). Mesure au §11 suite, avant toute correction.
+

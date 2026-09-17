@@ -80,8 +80,8 @@ l'instrument S260 avant construction ; tout ajustement contre Cox–Munk sera d�
 
 ### Plan
 
-- [>] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — verdict R4 et demande d'habillage consignés et classés.
+- [x] **P1** — amorce, jeton et plan seuls.
+- [x] **P2** — verdict R4 et demande d'habillage consignés et classés.
 - [ ] **P3** — habillage « ciel clair » (hôte, sélectionnable), scènes brumeuses au bit, aperçu envoyé.
 - [ ] **P4** — mesure : `mss`, pointe et intermittence de la rugosité des candidats (modulation par
   échelles, coupure), critère écrit avant.
