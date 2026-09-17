@@ -86,7 +86,7 @@ l'instrument S260 avant construction ; tout ajustement contre Cox–Munk sera d�
 - [x] **P4** — mesure : `mss`, pointe et intermittence de la rugosité des candidats (modulation par
   échelles, coupure), critère écrit avant.
 - [x] **P5** — ADR et protocole du remède retenu.
-- [ ] **P6** — construction cœur/hôte, vérification CPU/GPU.
+- [x] **P6** — construction cœur/hôte, vérification CPU/GPU.
 - [ ] **P7** — réception : statistiques, coût, rendus R5 envoyés.
 - [ ] **P8** — rituel §6.
 
@@ -101,3 +101,7 @@ P3 : habillage « ciel clair » (`--ciel-clair`, `eye.w`) : ciel dégradé horiz
 P4 : `examples/modulation_rugosite.rs`. Retenu bQ 28, bande, M 2 (mss 0,0435 ; c40 0,353 ; score 0,150) ;
 cascade M 1,5 proche (0,169). Surface « lisse » 0,3 % seulement : Cox–Munk borne la modulation ; vent plus
 faible ou transition BRDF nommés. P5 : ADR-158 et protocole RUGOSITE-S261.
+
+P6 : `--modulation` (queue 60 lignes ≤ 28 fp, M 2 dans `up.w`, ε de bande en varying), `cwm_reference` coupée et
+modulée. `--cwm-verify --modulation` : pente 2,82e-4, det min 0,337, 0 repli, pente max 0,751 ; sans modulation,
+ligne S260 identique. Compte analytique : centres 4·8^((i+½)/64) ≤ 28 ⇒ i ≤ 59 ⇒ 60. R2, R3, R4 identiques au bit.

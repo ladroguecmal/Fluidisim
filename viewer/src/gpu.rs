@@ -457,10 +457,12 @@ impl Gpu {
         );
         // S261 : habillage dans `eye.w` (0 brume S211, 1 ciel clair), sans effet physique.
         params[3] = if frame.clear_sky { 1. } else { 0. };
+        // S261, ADR-158 : intensité de modulation dans `up.w` (0 : sans).
+        params[15] = frame.modulation;
         for v in params {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
-        let tail = if frame.tail_background.is_some() { frame.tail.len() as f32 } else { 0. };
+        let tail = if frame.tail_background.is_some() { frame.tail_count as f32 } else { 0. };
         for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, tail, if frame.cwm { 1. } else { 0. }] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }

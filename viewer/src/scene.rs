@@ -39,6 +39,8 @@ pub struct Scene {
     pub background: Background,
     /// S256 : même recette que `background`, prolongée ; jamais évaluée en hauteur.
     pub tail: Background,
+    /// S261, ADR-158 : nombre de composantes de la queue jusqu'à 28 fp (k croissant).
+    pub tail_count_28: usize,
     pub impact: RadialImpact<256>,
     pub step: f32,
     /// S214 : de quoi reconstruire l'impact **par le cœur**, depuis un journal d'événements.
@@ -105,6 +107,10 @@ impl Scene {
             WorldPos::from_units(0, 0, 0),
         )
         .unwrap();
+        let tail_count_28 = {
+            let limit = (core::f64::consts::TAU * 28.0 / 6.0).powi(2) / 9.81 / core::f64::consts::TAU;
+            tail_cooked.components().iter().filter(|c| c.k_turns_per_m as f64 <= limit).count()
+        };
         let tail = Background::from_spectrum(
             &mut HostServices {
                 alloc: &mut alloc,
@@ -159,6 +165,7 @@ impl Scene {
         Self {
             background,
             tail,
+            tail_count_28,
             impact,
             step: wavelength_m / 16.,
             event,
@@ -667,6 +674,9 @@ pub struct FrameData<'a> {
     pub cwm: bool,
     /// S261 : habillage « ciel clair » d'après la référence A (sans physique) ; faux = brume S211.
     pub clear_sky: bool,
+    /// S261, ADR-158 : lignes de queue lues (coupure) et intensité `M` de la modulation par la bande.
+    pub tail_count: usize,
+    pub modulation: f32,
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -725,6 +735,8 @@ impl<'a> FrameData<'a> {
             spectral: true,
             cwm: false,
             clear_sky: false,
+            tail_count: TAIL_COMPONENTS,
+            modulation: 0.,
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,
@@ -882,7 +894,7 @@ impl<'a> FrameData<'a> {
             let t = (2.0 * k * h as f64 / std::f64::consts::PI - 1.0).clamp(0.0, 1.0);
             1.0 - t * t * (3.0 - 2.0 * t)
         };
-        let (mut d, mut s, mut g, mut eta) = ([0f64; 2], [0f64; 2], [0f64; 3], 0f64);
+        let (mut d, mut s, mut g, mut eta, mut eps) = ([0f64; 2], [0f64; 2], [0f64; 3], 0f64, 0f64);
         let count = self.background.component_count();
         for c in &self.components[..count] {
             let (kx, ky) = (c[1] as f64, c[2] as f64);
@@ -895,6 +907,7 @@ impl<'a> FrameData<'a> {
             let (sn, cs) = phase.sin_cos();
             let (ux, uy) = (kx / k, ky / k);
             eta += a * sn;
+            eps += a * k * sn;
             d[0] += a * cs * ux;
             d[1] += a * cs * uy;
             s[0] += a * cs * kx;
@@ -904,14 +917,15 @@ impl<'a> FrameData<'a> {
             g[2] -= a * k * sn * uy * uy;
         }
         if self.tail_background.is_some() {
-            for c in &self.tail {
+            let v = if self.modulation > 0. { (1.0 + self.modulation as f64 * eps).max(0.0).sqrt() } else { 1.0 };
+            for c in &self.tail[..self.tail_count] {
                 let (kx, ky) = (c[1] as f64, c[2] as f64);
                 let k = (kx * kx + ky * ky).sqrt();
                 let w = weight(k);
                 if w == 0.0 {
                     break;
                 }
-                let a = w * c[0] as f64;
+                let a = v * w * c[0] as f64;
                 let phase = kx * q[0] as f64 + ky * q[1] as f64 + c[3] as f64;
                 let (sn, cs) = phase.sin_cos();
                 let (ux, uy) = (kx / k, ky / k);

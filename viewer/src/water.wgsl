@@ -36,7 +36,7 @@ fn spectral_band(k: f32) -> u32 {
 
 // S260, ADR-157 — CWM : déplacement de Lagrange et ∂D (xx, xy, yy) de la bande (poids d'ADR-148),
 // pentes et ∂D de la queue (poids d'ADR-155, arrêt au premier poids nul).
-struct Cwm { d: vec2<f32>, s: vec2<f32>, g: vec3<f32> }
+struct Cwm { d: vec2<f32>, s: vec2<f32>, g: vec3<f32>, e: f32 }
 fn band_cwm(q: vec2<f32>, h: f32) -> Cwm {
     var o: Cwm;
     for (var i = 0u; i < u32(p.info.x); i++) {
@@ -48,6 +48,7 @@ fn band_cwm(q: vec2<f32>, h: f32) -> Cwm {
         let u = c.yz/k;
         let cs = cos(phase); let sn = sin(phase);
         o.d += a*cs*u;
+        o.e += a*k*sn;
         o.s += a*cs*c.yz;
         o.g -= a*k*sn*vec3<f32>(u.x*u.x, u.x*u.y, u.y*u.y);
     }
@@ -216,7 +217,8 @@ fn verify(@builtin(global_invocation_id) id: vec3<u32>) {
         // S256 : sonde de queue (w = 2) — pentes de queue seules, empreinte imposée.
         // S260 : w = 3 — déplacement de la bande ; w = 4 — pente eulérienne CWM (bande + queue), det.
         if (probe.w > 3.5) {
-            let b = band_cwm(probe.xy, probe.z); let t = tail_cwm(probe.xy, probe.z);
+            let b = band_cwm(probe.xy, probe.z); var t = tail_cwm(probe.xy, probe.z);
+            if (p.up.w > 0.0) { let m = sqrt(max(0.0, 1.0 + p.up.w*b.e)); t.s *= m; t.g *= m; }
             let e = euler_slope(b.s + t.s, b.g + t.g);
             results[id.x] = vec4<f32>(e.z, e.xy, probe.z); return;
         }
@@ -227,7 +229,7 @@ fn verify(@builtin(global_invocation_id) id: vec3<u32>) {
         results[id.x] = vec4<f32>(water(q, h), h);
     }
 }
-struct Vertex { @builtin(position) clip: vec4<f32>, @location(0) local: vec3<f32>, @location(1) slope: vec2<f32>, @location(2) lag: vec2<f32>, @location(3) g: vec3<f32> }
+struct Vertex { @builtin(position) clip: vec4<f32>, @location(0) local: vec3<f32>, @location(1) slope: vec2<f32>, @location(2) lag: vec2<f32>, @location(3) g: vec3<f32>, @location(4) eps: f32 }
 fn grid_point(index: vec2<f32>) -> vec2<f32> {
     let nx = u32(p.info.y); let ny = u32(p.info.z);
     let x = (index.x/f32(nx-1u)*2-1)*1.18;
@@ -262,6 +264,7 @@ fn grid_spacing(index: vec2<f32>, q: vec2<f32>) -> f32 {
         let b = band_cwm(q, h);
         local = vec3<f32>(q + b.d, w.x-p.eye.z);
         o.g = b.g;
+        o.eps = b.e;
     }
     let depth = max(dot(local,p.forward.xyz),0.01);
     o.clip = vec4<f32>(dot(local,p.right.xyz)/(p.forward.w*p.right.w),dot(local,p.up.xyz)/p.forward.w,depth-0.1,depth);
@@ -312,7 +315,9 @@ fn sky(ray: vec3<f32>) -> vec3<f32> {
     var slope = vec2<f32>(0.0);
     if (p.spectral.w > 0.5) {
         // S260 : pente eulérienne J⁻ᵀ·(∇η_B + ∇η_T) ; repli (det < 0,1) : pente de Lagrange.
-        let t = tail_cwm(v.lag, footprint);
+        var t = tail_cwm(v.lag, footprint);
+        // S261, ADR-158 : modulation des ondes courtes par la bande (M ajusté à Cox–Munk).
+        if (p.up.w > 0.0) { let m = sqrt(max(0.0, 1.0 + p.up.w*v.eps)); t.s *= m; t.g *= m; }
         let e = euler_slope(v.slope + t.s, v.g + t.g);
         slope = select(v.slope + t.s, e.xy, e.z >= 0.1);
     } else {

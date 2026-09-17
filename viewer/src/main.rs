@@ -1844,6 +1844,12 @@ fn run() -> Result<(), String> {
     }
     frame.cwm = vagues;
     frame.clear_sky = args.iter().any(|a| a == "--ciel-clair");
+    // S261, ADR-158 : `--modulation` (avec `--vagues`) — queue coupée à 28 fp, modulation M = 2.
+    if vagues && args.iter().any(|a| a == "--modulation") {
+        frame.tail_count = scene.tail_count_28;
+        frame.modulation = 2.;
+        println!("MODULATION queue_lignes={} M={}", frame.tail_count, frame.modulation);
+    }
     // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
     frame.lod = !args.iter().any(|a| a == "--no-lod");
     frame.spectral = !args.iter().any(|a| a == "--no-spectral");
