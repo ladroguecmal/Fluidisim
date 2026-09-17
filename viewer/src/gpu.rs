@@ -14,6 +14,8 @@ pub struct Gpu {
     probe_layout: wgpu::BindGroupLayout,
     /// S234 : grille locale du sillage — cuisson compute, lecture au rendu et à la vérification.
     bake: wgpu::ComputePipeline,
+    bake_named: wgpu::ComputePipeline,
+    pub bake_named_enabled: bool,
     #[allow(dead_code)]
     lattice: wgpu::Buffer,
     lattice_read: wgpu::BindGroup,
@@ -243,7 +245,7 @@ impl Gpu {
             &device,
             "W wake lattice",
             crate::lod::LATTICE_CAPACITY as u64 * 16 * (crate::spectral::BANDS as u64 + 1),
-            wgpu::BufferUsages::STORAGE,
+            wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
         );
         let storage_layout = |label, stages, read_only| {
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -349,6 +351,12 @@ impl Gpu {
             compilation_options: Default::default(),
             cache: None,
         });
+        let bake_named = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+            label: Some("wake lattice named accumulators"),
+            layout: Some(&bake_layout), module: &shader,
+            entry_point: Some("bake_named"),
+            compilation_options: Default::default(), cache: None,
+        });
         let query = if feature.is_empty() {
             None
         } else {
@@ -387,6 +395,8 @@ impl Gpu {
             bind,
             probe_layout,
             bake,
+            bake_named,
+            bake_named_enabled: !std::env::args().any(|a| a == "--sillage-cuisson-directe"),
             lattice,
             lattice_read,
             lattice_write,
@@ -557,7 +567,7 @@ impl Gpu {
                 None
             },
         });
-        pass.set_pipeline(&self.bake);
+        pass.set_pipeline(if self.bake_named_enabled { &self.bake_named } else { &self.bake });
         pass.set_bind_group(0, &self.bind, &[]);
         pass.set_bind_group(3, &self.lattice_write, &[]);
         pass.dispatch_workgroups(nx.div_ceil(8), ny.div_ceil(8), 1);
@@ -877,6 +887,19 @@ impl Gpu {
                 }
             })
             .collect()
+    }
+    /// S267 : banc hors boucle d'image, comparaison de toutes les valeurs cuites.
+    pub fn lattice_bytes(&self, spectral: bool) -> Result<Vec<u8>, String> {
+        let (nx, ny) = self.baked.ok_or("aucune grille active")?;
+        let bands = if spectral { 9 } else { 1 };
+        let size = u64::from(nx)*u64::from(ny)*16*bands;
+        let dst = buffer(&self.device, "lattice verification", size,
+            wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST);
+        let mut encoder = self.device.create_command_encoder(&Default::default());
+        self.encode_bake(&mut encoder, false);
+        encoder.copy_buffer_to_buffer(&self.lattice, 0, &dst, 0, size);
+        self.queue.submit([encoder.finish()]);
+        self.read(&dst)
     }
     pub fn target(&self) -> wgpu::Texture {
         self.device.create_texture(&wgpu::TextureDescriptor {

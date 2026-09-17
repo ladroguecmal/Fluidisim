@@ -1587,6 +1587,7 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
     // S262 : un dossier par revue ; un nouveau rendu n'écrase plus une revue envoyée.
     let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", "r4" => "captures/s260",
+        t if t.starts_with("r9") => "captures/s267",
         t if t.starts_with("r8") => "captures/s266",
         t if t.starts_with("r7") => "captures/s265",
         t if t.starts_with("r5") => "captures/s261", t if t.starts_with("r6_v") => "captures/s263", _ => "captures/s262" };
@@ -1908,6 +1909,64 @@ fn run() -> Result<(), String> {
     }
     if multi && args.iter().any(|a| a == "--revue") {
         return revue_images(&mut frame, "r1");
+    }
+    if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue=r9")) {
+        if multi && tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+            return revue_images(&mut frame, &format!("r9{tag}"));
+        }
+        return Err("revue R9 : --multi et suffixe alphanumerique requis".into());
+    }
+    if args.iter().any(|a| a == "--sillage-cuisson-verify") {
+        let mut g = pollster::block_on(gpu::Gpu::new(&instance(), None, 1280, 720,
+            frame.profile.len(), scene::WAKE_CAPACITY))?;
+        frame.lod = true;
+        frame.cull = false;
+        frame.viewport = Some((1280./720., g.nx, g.ny));
+        for (name, camera) in [("reference", Camera::default()), ("rasante", grazing_camera())] {
+            frame.camera = camera;
+            for spectral in [false,true] {
+                frame.spectral = spectral;
+                let mut first = None;
+                for age in [1.,3.,12.,16.,1.] {
+                    frame.update(age,age,true);
+                    g.upload(&frame);
+                    g.bake_named_enabled = false;
+                    let reference = g.lattice_bytes(spectral)?;
+                    g.bake_named_enabled = true;
+                    let candidate = g.lattice_bytes(spectral)?;
+                    if reference != candidate {
+                        let changed = reference.chunks_exact(4).zip(candidate.chunks_exact(4))
+                            .filter(|(a,b)| a != b).count();
+                        return Err(format!("cuisson differente pose={name} spectral={spectral} age={age} valeurs={changed}"));
+                    }
+                    if !candidate.chunks_exact(4).all(|b| f32::from_le_bytes(b.try_into().unwrap()).is_finite()) {
+                        return Err("cuisson non finie".into());
+                    }
+                    if age == 1. {
+                        if let Some(previous) = &first {
+                            if previous != &candidate { return Err("retour temporel different".into()); }
+                        } else { first = Some(candidate.clone()); }
+                    }
+                    println!("CUISSON_IDENTIQUE pose={name} spectral={spectral} age={age} flottants={}", candidate.len()/4);
+                }
+            }
+        }
+        return Ok(());
+    }
+    if args.iter().any(|a| a == "--sillage-cuisson-bench") {
+        let mut g = pollster::block_on(gpu::Gpu::new(&instance(), None, 1280, 720,
+            frame.profile.len(), scene::WAKE_CAPACITY))?;
+        frame.cull = true;
+        frame.viewport = Some((1280./720., g.nx, g.ny));
+        for (name, camera) in [("reference", Camera::default()), ("rasante", grazing_camera())] {
+            frame.camera = camera;
+            for named in [false,true] {
+                g.bake_named_enabled = named;
+                println!("CUISSON_BENCH pose={name} accumulateurs_nommes={named}");
+                g.benchmark(&mut frame,12.)?;
+            }
+        }
+        return Ok(());
     }
     if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue=r8")) {
         if multi && tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {

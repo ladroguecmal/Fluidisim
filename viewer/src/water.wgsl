@@ -176,6 +176,63 @@ fn bake(@builtin(global_invocation_id) id: vec3<u32>) {
     }
     lattice_out[index] = total;
 }
+// S267 : same ordered sums, explicit accumulators.
+@compute @workgroup_size(8, 8)
+fn bake_named(@builtin(global_invocation_id) id: vec3<u32>) {
+    let nx = u32(p.lattice.y); let ny = u32(p.lattice.z);
+    if (id.x >= nx || id.y >= ny) { return; }
+    let q = p.wake_rect.xy + vec2<f32>(f32(id.x), f32(id.y))*p.lattice.x;
+    let index = id.y*nx + id.x;
+    if (p.spectral.x < 0.5) { lattice_out[index] = wake_direct(q); return; }
+    var b0 = vec4<f32>(0.0);
+    var b1 = vec4<f32>(0.0);
+    var b2 = vec4<f32>(0.0);
+    var b3 = vec4<f32>(0.0);
+    var b4 = vec4<f32>(0.0);
+    var b5 = vec4<f32>(0.0);
+    var b6 = vec4<f32>(0.0);
+    var b7 = vec4<f32>(0.0);
+    // S262 : bande précalculée par l'hôte (même boucle, mêmes flottants), ligne `capacité + i`.
+    let offset = u32(p.wake_info.z);
+    for (var i = 0u; i < u32(p.wake_info.x); i++) {
+        let c = wake[i];
+        let phase = dot(c.zw, q);
+        let s = sin(phase); let co = cos(phase);
+        let e = c.x*co - c.y*s;
+        let d = -(c.x*s + c.y*co);
+        let v = vec4<f32>(e, d*c.zw, -e*c.z*c.w);
+        switch u32(wake[offset + i].x) {
+            case 0u: { b0 += v; }
+            case 1u: { b1 += v; }
+            case 2u: { b2 += v; }
+            case 3u: { b3 += v; }
+            case 4u: { b4 += v; }
+            case 5u: { b5 += v; }
+            case 6u: { b6 += v; }
+            default: { b7 += v; }
+        }
+    }
+    // S262 : le total est la somme des huit bandes, et non une seconde accumulation par mode
+    // (ordre de sommation différent : écart d'arrondi seulement).
+    var total = vec4<f32>(0.0);
+    total += b0;
+    lattice_out[1u*nx*ny + index] = b0;
+    total += b1;
+    lattice_out[2u*nx*ny + index] = b1;
+    total += b2;
+    lattice_out[3u*nx*ny + index] = b2;
+    total += b3;
+    lattice_out[4u*nx*ny + index] = b3;
+    total += b4;
+    lattice_out[5u*nx*ny + index] = b4;
+    total += b5;
+    lattice_out[6u*nx*ny + index] = b5;
+    total += b6;
+    lattice_out[7u*nx*ny + index] = b6;
+    total += b7;
+    lattice_out[8u*nx*ny + index] = b7;
+    lattice_out[index] = total;
+}
 // Mêmes opérations que `lod::hermite`.
 fn wake_lattice(q: vec2<f32>, band: u32) -> vec3<f32> {
     let s = p.lattice.x; let nx = u32(p.lattice.y); let ny = u32(p.lattice.z);
