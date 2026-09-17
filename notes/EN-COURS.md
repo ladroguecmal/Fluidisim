@@ -58,41 +58,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S265 — terminée
-Agent : Codex, GPT-6 ; fichiers, git, cargo, Python, accès web ; GPU à vérifier.
-Entrée : verdict R6, « la surface a l'air trop rugueuse, entre les pic moyen et pic même plus petit
-la surface doit etre plus lisse ». Aucun choix de vent explicite. Master propre 34dcf7d, copie unique.
+Session : S266 — en cours
+Agent : Codex, GPT-6 ; fichiers, git, cargo, Python, GPU local et accès web.
+Entrée : « Très bien continue », après l'avant/après R7. Aspect filtré accepté ; poursuivre
+la réduction du coût en conservant cet aspect. Master propre c4f9bb9, copie unique, jeton libre.
 
-Objectif : identifier et traiter la rugosité entre les crêtes sur le chemin de rendu,
-sans assimiler le retour à un choix de vent ou déformer sans preuve le spectre physique.
-Comparaison à vent fixé pour isoler le changement ; aucun vent représentatif adopté par défaut.
+Objectif : réduire le coût de la variante de reflets consommée par l'image, à qualité vérifiée
+contre R7 ; préserver le chemin historique et les requêtes. Pas de nouveau réglage de vent.
 
 ### Plan
 
-- [x] **P1** — amorce et plan seuls.
-- [x] **P2** — consigner le verdict ; examiner queue, modulation et réflexion ; définir le
-  remède et les critères avant code (ADR si décision nouvelle).
-- [x] **P3** — construire le remède borné dans l'hôte avec ses contrôles numériques ciblés.
-- [x] **P4** — recevoir le chemin GPU, comparer avant/après aux mêmes poses, fournir R7.
-- [x] **P5** — rituel §6 : preuves, file, feuille de route, journal, jeton.
+- [x] **P1** — amorce, jeton, plan seuls.
+- [>] **P2** — consigner R7 accepté ; choisir et contractualiser une optimisation mesurable
+  de l'éclairage (pré-calcul du ciel de banc), critères d'erreur et de coût avant construction.
+- [ ] **P3** — implémenter et tester le pré-calcul réutilisé sur le chemin de l'hôte.
+- [ ] **P4** — vérifier images, coût, invariance et tests ; retenir ou rejeter selon les critères.
+- [ ] **P5** — rituel §6, capacités, limites, file entière, journal et jeton.
 
 ### Notes de reprise
 
-Le travail visuel est explicitement demandé. Les bords ouverts J2 restent un lot de capacité
-indépendant ; cette session vise une correction consommée par l'image, pas une nouvelle calibration
-indéfinie. Si les preuves infirment le remède, publier ce résultat et replanifier avant construction.
-
-P2 : miroir par pixel après coupure de pente confirmé dans le shader ; ADR-161 et protocole
-REFLETS-S265 écrits. Fermeture gaussienne de seconds moments, limites CWM déclarées.
-
-P3 : variante `--reflets-filtres`, covariance transférée, quadrature 3/5, oracle f64 et sondes GPU
-construits. Tests hôte 18 réussis / 1 ignoré / 0 échec. Premier contrôle 5 m/s : pente 5,307e-5,
-covariance 2,154e-7, déterminant min 0,530496. Matériel RTX 5070 Laptop DX12 confirmé.
-P4 : campagne locale lancée (3 vents, témoin puis quadratures 3/5) dans `viewer/captures/s265`.
-
-P4 : 15 000 sondes GPU reçues aux trois vents ; 7 témoins identiques au bit à R6 ; 21 images R7.
-Query CWM 0,288 mm / 0 refus. Hôte 18/1/0. Reflets ordre3 : 2,49–2,71 ms GPU contre 1,80–1,83,
-secteur 99 % début/fin ; budget non tenu. Écart 3/5 non nul, publié dans REFLETS-S265 ; reste optionnel.
-
-P5 : rituel terminé, maillons 0 pour le filtrage consommé par l’image et reçu numériquement.
-R7 reste en attente de verdict perceptif ; jeton libre.
+S265 : eau GPU 2,49–2,71 ms en 3×3 dont cuisson du sillage 1,06–1,11 ms ; ciel procédural
+réévalué neuf fois par fragment. Aspect accepté ne reçoit ni coût ni convergence de la quadrature.
+Le lot J2 bords ouverts reste utile, mais rendre le visuel accepté moins cher est la suite explicite.

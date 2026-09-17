@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-17 23:50 +02:00
+JETON            : occupé
+Battement        : 2026-09-17 23:52 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S266 — coût des reflets validés
 Dernière session : S265 — reflets filtrés en variante (ADR-161), R7 à juger, coût au-dessus de 2 ms
 Session suivante : S266 — verdict R7 ; si accepté, réduire coût et erreur de quadrature des reflets
 Maillons        : 0
