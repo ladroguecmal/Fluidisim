@@ -1099,7 +1099,7 @@ impl Camera {
             WAKE_MAX[1] - self.eye[1],
             wake_count as f32,
             if wake_active { 1. } else { 0. },
-            0.,
+            WAKE_CAPACITY as f32,
             0.,
             l[0],
             l[1],

@@ -152,7 +152,8 @@ impl Gpu {
         let tail = buffer(
             &device,
             "B spectral tail",
-            crate::scene::TAIL_COMPONENTS as u64 * 16,
+            // S262 : seconde moitié — `k` et direction unitaire de chaque composante.
+            crate::scene::TAIL_COMPONENTS as u64 * 32,
             wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         );
         let profile = buffer(
@@ -164,7 +165,8 @@ impl Gpu {
         let wake = buffer(
             &device,
             "W wake components",
-            wake_len as u64 * 16,
+            // S262 : seconde moitié — bande spectrale précalculée de chaque mode.
+            wake_len as u64 * 32,
             wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         );
         let impacts = buffer(
@@ -493,6 +495,13 @@ impl Gpu {
                     self.bytes.extend_from_slice(&v.to_le_bytes());
                 }
             }
+            // S262 : invariants `[k, ux, uy, 0]`, avec la même opération que `length` du shader.
+            for row in &frame.tail {
+                let k = (row[1] * row[1] + row[2] * row[2]).sqrt();
+                for v in [k, row[1] / k, row[2] / k, 0.] {
+                    self.bytes.extend_from_slice(&v.to_le_bytes());
+                }
+            }
             self.queue.write_buffer(&self.tail, 0, &self.bytes);
         }
         if frame.active {
@@ -511,6 +520,16 @@ impl Gpu {
                 }
             }
             self.queue.write_buffer(&self.wake, 0, &self.bytes);
+            // S262 : bande de chaque mode, même boucle que `spectral_band` et même `length`.
+            self.bytes.clear();
+            for row in &frame.wake {
+                let k = (row[2] * row[2] + row[3] * row[3]).sqrt();
+                let b = crate::spectral::band(k, frame.spectral_max) as f32;
+                for v in [b, 0., 0., 0.] {
+                    self.bytes.extend_from_slice(&v.to_le_bytes());
+                }
+            }
+            self.queue.write_buffer(&self.wake, crate::scene::WAKE_CAPACITY as u64 * 16, &self.bytes);
         }
     }
     /// S234 : cuisson de la grille du sillage, avant toute lecture de `lattice` dans l'encodeur.

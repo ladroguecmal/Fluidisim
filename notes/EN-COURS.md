@@ -82,7 +82,7 @@ Défauts restants, publiés en S260–S261, dans l'ordre de traitement :
 - [>] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — ligne d'horizon : distance lointaine en uniforme et dans `lod::Projection`, raccord ;
   brume au bit (R2–R4, `--spectral-verify`), rendu clair vérifié.
-- [ ] **P3** — coût : décomposition mesurée, fusion des boucles de bande par sommet, invariants de
+- [x] **P3** — coût : décomposition mesurée, fusion des boucles de bande par sommet, invariants de
   la queue précalculés ; accord CPU/GPU ; coût.
 - [ ] **P4** — ADR et protocole de la requête eulérienne CWM (A288).
 - [ ] **P5** — cœur : requête, convergence, refus ; essais.
@@ -96,3 +96,13 @@ uniforme `impact.y`, raccord à la couleur d'horizon sur le dernier tiers. R2, R
 identiques au bit ; afficheur 16/1/0. Rendu clair : tirets de fin de grille disparus. **Incident** : le rendu
 de contrôle `--revue=r5` a réécrit `captures/s261` (images R5 de S261, non versionnées ; reproductibles au
 commit 1e89da7, empreintes publiées) ; nouveaux rendus sous `--revue=r6` → `captures/s262`.
+
+P3 (coût) : décomposition 1280×720 référence avant : total 2,284, cuisson 1,272, queue par pixel ≈ 0,49, CWM
+sommets + queue f⁻⁴ ≈ 0,33, nuages ≈ 0,05 ms. Faits : (a) bande de chaque mode de sillage précalculée par l'hôte
+(seconde moitié du tampon, `spectral::band`, même `sqrt`) ; (b) `k` et direction unitaire de la queue
+précalculés ; (c) sommet CWM à une seule boucle de bande (`band_cwm` rend hauteur et pente, `perturbations`) ;
+(d) total de la grille = somme des 8 bandes ; (e) nuages à 2 octaves dans les reflets (habillage). Après :
+1280×720 1,985–2,005 (référence), 1,978–1,988 (rasante) ; 960×540 1,54–1,60 ms ; cuisson 1,06–1,10.
+Images : R2 0–3 octets sur 2,76 M (±1) après (a)–(c) ; scène complète 9–27 octets (≤ 8 niveaux, reflets) ;
+arrondi. `--spectral-verify` : chemin grille à la 7e décimale, reste au bit ; `--tail-verify`, `--cwm-verify`
+identiques ; `--multi --verify` 46 contrôles, max η 0,368 mm, LOD intérieur ≤ 0,39 mm (borne 2,5–3), coutures 4 µm.

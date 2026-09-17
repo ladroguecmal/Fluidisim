@@ -36,7 +36,7 @@ fn spectral_band(k: f32) -> u32 {
 
 // S260, ADR-157 — CWM : déplacement de Lagrange et ∂D (xx, xy, yy) de la bande (poids d'ADR-148),
 // pentes et ∂D de la queue (poids d'ADR-155, arrêt au premier poids nul).
-struct Cwm { d: vec2<f32>, s: vec2<f32>, g: vec3<f32>, e: f32 }
+struct Cwm { d: vec2<f32>, s: vec2<f32>, g: vec3<f32>, e: f32, h: f32 }
 fn band_cwm(q: vec2<f32>, h: f32) -> Cwm {
     var o: Cwm;
     for (var i = 0u; i < u32(p.info.x); i++) {
@@ -48,22 +48,27 @@ fn band_cwm(q: vec2<f32>, h: f32) -> Cwm {
         let u = c.yz/k;
         let cs = cos(phase); let sn = sin(phase);
         o.d += a*cs*u;
+        o.h += a*sn;
         o.e += a*k*sn;
         o.s += a*cs*c.yz;
         o.g -= a*k*sn*vec3<f32>(u.x*u.x, u.x*u.y, u.y*u.y);
     }
     return o;
 }
+// S262 : `k` et la direction unitaire de chaque composante de queue sont précalculés par l'hôte
+// dans la seconde moitié du tampon, identiques à `length(c.yz)` et `c.yz/k`.
+const TAIL_OFFSET = 64u;
 fn tail_cwm(q: vec2<f32>, h: f32) -> Cwm {
     var o: Cwm;
     for (var i = 0u; i < u32(p.spectral.z); i++) {
         let c = tail[i];
-        let k = length(c.yz);
+        let inv = tail[TAIL_OFFSET + i];
+        let k = inv.x;
         let w = spectral_weight(k, h);
         if (w == 0.0) { break; }
         let a = w*c.x;
         let phase = dot(c.yz, q) + c.w;
-        let u = c.yz/k;
+        let u = inv.yz;
         let cs = cos(phase); let sn = sin(phase);
         o.s += a*cs*c.yz;
         o.g -= a*k*sn*vec3<f32>(u.x*u.x, u.x*u.y, u.y*u.y);
@@ -82,7 +87,7 @@ fn tail_slope(q: vec2<f32>, h: f32) -> vec2<f32> {
     var s = vec2<f32>(0.0);
     for (var i = 0u; i < u32(p.spectral.z); i++) {
         let c = tail[i];
-        let w = spectral_weight(length(c.yz), h);
+        let w = spectral_weight(tail[TAIL_OFFSET + i].x, h);
         if (w == 0.0) { break; }
         s += w*c.x*cos(dot(c.yz, q) + c.w)*c.yz;
     }
@@ -111,20 +116,24 @@ fn bake(@builtin(global_invocation_id) id: vec3<u32>) {
     let index = id.y*nx + id.x;
     if (p.spectral.x < 0.5) { lattice_out[index] = wake_direct(q); return; }
     var bands: array<vec4<f32>, 8>;
-    var total = vec4<f32>(0.0);
+    // S262 : bande précalculée par l'hôte (même boucle, mêmes flottants), ligne `capacité + i`.
+    let offset = u32(p.wake_info.z);
     for (var i = 0u; i < u32(p.wake_info.x); i++) {
         let c = wake[i];
         let phase = dot(c.zw, q);
         let s = sin(phase); let co = cos(phase);
         let e = c.x*co - c.y*s;
         let d = -(c.x*s + c.y*co);
-        let v = vec4<f32>(e, d*c.zw, -e*c.z*c.w);
-        let b = spectral_band(length(c.zw));
-        bands[b] += v;
-        total += v;
+        bands[u32(wake[offset + i].x)] += vec4<f32>(e, d*c.zw, -e*c.z*c.w);
+    }
+    // S262 : le total est la somme des huit bandes, et non une seconde accumulation par mode
+    // (ordre de sommation différent : écart d'arrondi seulement).
+    var total = vec4<f32>(0.0);
+    for (var b = 0u; b < 8u; b++) {
+        total += bands[b];
+        lattice_out[(b+1u)*nx*ny + index] = bands[b];
     }
     lattice_out[index] = total;
-    for (var b = 0u; b < 8u; b++) { lattice_out[(b+1u)*nx*ny + index] = bands[b]; }
 }
 // Mêmes opérations que `lod::hermite`.
 fn wake_lattice(q: vec2<f32>, band: u32) -> vec3<f32> {
@@ -165,6 +174,12 @@ fn water(q: vec2<f32>, spacing: f32) -> vec3<f32> {
         let a = c.x * spectral_weight(length(c.yz), h);
         v += vec3<f32>(a * sin(phase), a * cos(phase) * c.yz);
     }
+    return perturbations(q, h, v);
+}
+// S262 : impacts et sillage ajoutés à une somme de bande déjà faite, dans le même ordre qu'avant.
+// `h` est l'empreinte déjà sélectionnée par `water` (ou par le chemin CWM du sommet).
+fn perturbations(q: vec2<f32>, h: f32, v0: vec3<f32>) -> vec3<f32> {
+    var v = v0;
     for (var m = 0u; m < u32(p.info.w); m++) {
         let c = impacts[m];
         let d = q - c.xy;
@@ -255,16 +270,21 @@ fn grid_spacing(index: vec2<f32>, q: vec2<f32>) -> f32 {
     let q = grid_point(index);
     var h = 0.0;
     if (p.spectral.x > 0.5) { h = grid_spacing(index, q); }
-    let w = water(q, h);
-    var local = vec3<f32>(q,w.x-p.eye.z);
     var o: Vertex;
     o.lag = q;
+    var w = vec3<f32>(0.0);
+    var local = vec3<f32>(0.0);
     // S260, ADR-157 : sommet déplacé de D_B ; W reste évalué au point de Lagrange.
+    // S262 : la bande n'est plus parcourue deux fois — `band_cwm` rend aussi la hauteur et la pente.
     if (p.spectral.w > 0.5) {
         let b = band_cwm(q, h);
+        w = perturbations(q, h, vec3<f32>(b.h, b.s));
         local = vec3<f32>(q + b.d, w.x-p.eye.z);
         o.g = b.g;
         o.eps = b.e;
+    } else {
+        w = water(q, h);
+        local = vec3<f32>(q,w.x-p.eye.z);
     }
     let depth = max(dot(local,p.forward.xyz),0.01);
     o.clip = vec4<f32>(dot(local,p.right.xyz)/(p.forward.w*p.right.w),dot(local,p.up.xyz)/p.forward.w,depth-0.1,depth);
@@ -287,23 +307,26 @@ fn value_noise(q: vec2<f32>) -> f32 {
     let c = hash2(i + vec2<f32>(0.0, 1.0)); let d = hash2(i + vec2<f32>(1.0, 1.0));
     return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
-fn clouds(ray: vec3<f32>) -> f32 {
+fn clouds(ray: vec3<f32>, octaves: u32) -> f32 {
     if (ray.z <= 0.0) { return 0.0; }
     // Plan de nuages à 1,2 km ; quatre octaves ; couverture faible, basse sur l'horizon, bords doux.
     // Sous 3° d'élévation, le plan projeté dégénère : les nuages s'effacent dans la brume d'horizon.
     let fade = smoothstep(0.05, 0.12, ray.z)*(1.0 - smoothstep(0.30, 0.55, ray.z));
     if (fade <= 0.0) { return 0.0; }
     let q = ray.xy/ray.z*1.3;
-    let n = 0.50*value_noise(q) + 0.25*value_noise(q*2.03 + 17.0) + 0.15*value_noise(q*4.11 + 41.0)
-        + 0.10*value_noise(q*8.17 + 83.0);
+    var n = 0.50*value_noise(q) + 0.25*value_noise(q*2.03 + 17.0);
+    // S262 : dans les reflets, deux octaves suffisent (reflet flou, habillage) ; le ciel en garde quatre.
+    if (octaves > 2u) { n += 0.15*value_noise(q*4.11 + 41.0) + 0.10*value_noise(q*8.17 + 83.0); }
+    else { n += 0.25*0.5; }
     return smoothstep(0.52, 0.80, n)*fade;
 }
-fn sky(ray: vec3<f32>) -> vec3<f32> {
+fn sky(ray: vec3<f32>) -> vec3<f32> { return sky_detail(ray, 4u); }
+fn sky_detail(ray: vec3<f32>, octaves: u32) -> vec3<f32> {
     let sun = normalize(vec3<f32>(-0.4,0.3,0.8));
     if (p.eye.w > 0.5) {
         let t = pow(clamp(ray.z, 0.0, 1.0), 0.35);
         var c = mix(CLEAR_HORIZON, CLEAR_ZENITH, t);
-        c = mix(c, vec3<f32>(0.92, 0.93, 0.95), clouds(ray));
+        c = mix(c, vec3<f32>(0.92, 0.93, 0.95), clouds(ray, octaves));
         return c + vec3<f32>(1.0,0.95,0.85)*(pow(max(dot(ray,sun),0.0),1024.0)*4.0 + pow(max(dot(ray,sun),0.0),32.0)*0.15);
     }
     return mix(vec3<f32>(0.66,0.78,0.84),vec3<f32>(0.18,0.39,0.65),clamp(ray.z,0.0,1.0))
@@ -332,7 +355,7 @@ fn sky(ray: vec3<f32>) -> vec3<f32> {
     if (p.eye.w > 0.5) {
         // Habillage « ciel clair » : eau bleu profond (photo B), air clair, reflet du soleil plus franc.
         let body = vec3<f32>(0.004,0.060,0.170)*(0.6+0.4*max(dot(n,sun),0.0));
-        let clear = mix(body,sky(reflection),fresnel)+vec3<f32>(1.0,0.95,0.85)*glint*1.2;
+        let clear = mix(body,sky_detail(reflection, 2u),fresnel)+vec3<f32>(1.0,0.95,0.85)*glint*1.2;
         // S262 : air clair sur 6 km, et raccord à la couleur d'horizon dans le dernier tiers de la
         // grille (horizon géométrique `p.impact.y`), où la courbure cacherait l'eau.
         let d = length(v.local.xy);
