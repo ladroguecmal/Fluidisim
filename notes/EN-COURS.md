@@ -66,8 +66,8 @@ Objectif : réduire le coût de cuisson GPU du sillage en préservant le rendu a
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [>] **P2** — lectures, diagnostic du calcul du sillage et contrat de réception avant code ; comparer avec J2.
-- [ ] **P3** — construire une optimisation bornée avec témoin conservé et vérifications ciblées.
+- [x] **P2** — lectures, diagnostic du calcul du sillage et contrat de réception avant code ; comparer avec J2.
+- [>] **P3** — construire une optimisation bornée avec témoin conservé et vérifications ciblées.
 - [ ] **P4** — recevoir précision, images et coût ; retenir ou rejeter sur les critères déclarés.
 - [ ] **P5** — rituel §6, file entière, journal, index et jeton.
 
