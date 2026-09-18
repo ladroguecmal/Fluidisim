@@ -73,6 +73,7 @@
 - [δ visible dans l'afficheur : protocole et revue](validation/DELTA-VISIBLE-S275.md).
 - [δ en direct : coût d'un pas dans l'image](validation/COUT-DIRECT-S276.md).
 - [L'onde injectée dans δ, et ce que la houle lui fait](validation/ONDE-INJECTEE-S277.md).
+- [L'ordonnanceur : ce qui décide qu'une zone est simulée](validation/ORDONNANCEUR-S278.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

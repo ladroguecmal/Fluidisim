@@ -5652,3 +5652,37 @@ rien dans la demande ne disait que la scène était appauvrie exprès, ni pourqu
    remarques de l'utilisateur pointaient la même chose : δ est une tranche 2D sous une houle
    idéalisée, et les vaguelettes ne sont qu'un habillage hors du domaine simulé. Mesurer avant de
    répondre (`bandes_s277.rs`) a transformé une impression en quatre nombres.
+
+## L334 — Un banc qui ne peut pas échouer ne prouve rien
+
+*(S278)* Le banc de l'ordonnanceur devait montrer que le budget n'est jamais dépassé. Sa première
+version faisait longer au bateau trois îlots espacés de 150 m : il ne rencontrait qu'un domaine à
+la fois, le budget maximal distribué valait 0,800 ms pour 2,0 déclarés, et les quatre assertions
+passaient. **Le sac à dos n'avait jamais été sollicité.** Le banc ne mesurait pas la propriété
+annoncée — il mesurait qu'elle n'avait pas eu l'occasion d'être fausse.
+
+1. **Une assertion qui passe ne dit pas que la propriété tient** : elle dit que le cas exécuté ne
+   l'a pas contredite. Tant que la contrainte n'a pas mordu, une borne jamais approchée et une
+   borne jamais dépassée rendent la même mesure.
+2. **Le remède est une assertion sur la difficulté du cas, pas sur son résultat.** Ici, une ligne
+   qui refuse de passer si la demande simultanée tenait dans le budget. Elle a immédiatement
+   échoué, et c'est ce qui a rendu le banc utile.
+3. Cela vaut pour tout banc dont le scénario est **choisi par l'auteur de la propriété** : la
+   tentation n'est pas de tricher, elle est de prendre un cas propre. Écrire ce qui rend le cas
+   difficile force à vérifier que la difficulté est là.
+
+## L335 — Deux documents qui ne se raccordent pas ne se voient qu'au moment où quelqu'un calcule
+
+*(S278)* ADR-012 §2 définit la priorité comme un produit de trois poids dont aucun n'est borné, et
+dont l'un — `W_urgence = 1/temps` — diverge. ADR-013 §5 définit le score d'activation comme
+« `s ∈ [0,1]`, composé selon ADR-012 §2, avec hystérésis 0,60 / 0,40 ». Les deux sont cohérents
+séparément, lisibles, et **incompatibles**. Ils ont vécu ainsi de S01 à S278, à travers six audits
+et deux revues croisées.
+
+1. **Une incohérence entre deux documents ne se lit pas, elle se calcule.** Personne ne compare
+   les domaines de définition en relisant ; le compilateur, lui, demande quelle valeur mettre.
+2. **C'est le second argument d'écrire le code** (S21 : le code est un instrument de mesure de la
+   conception). Le premier est de trouver les erreurs de physique ; le second, plus discret, est de
+   trouver les endroits où deux textes justes ne se raccordent pas.
+3. La réparation appartient à un **nouvel** ADR (ADR-170), jamais à une retouche des deux anciens :
+   ce qui a été décidé reste lisible, et ce qui manquait devient une décision datée.

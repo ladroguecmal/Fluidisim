@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S278 — en cours
+Session : S278 — terminée
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
 Entrée : l'utilisateur demande si le système qui décide entre simulation volumétrique, haute mer
 analytique et zone de transition existe — réponse S277 : **conçu depuis S01, jamais écrit** — puis
@@ -86,7 +86,7 @@ décision ne batte. Déterministe (I-03), sans allocation à l'exécution (I-06)
   fenêtre d'engagement 1 s. Essai : rien ne meurt avant son terme.
 - [x] **P6** — le banc qui prouve : un domaine s'allume à l'approche, suit l'objet, s'éteint après
   son départ ; sans battement, sous budget, mêmes décisions à deux exécutions.
-- [ ] **P7** — rituel §6.
+- [x] **P7** — rituel §6.
 
 ### Notes de reprise
 

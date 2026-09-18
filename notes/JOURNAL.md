@@ -14006,3 +14006,67 @@ suite automatique de S276 (cadence découplée, δ GPU), qui garde son déclench
 **Rituel :** journal, L333, file active relue (rendu de δ actualisé, orchestrateur ajouté),
 feuille de route J3, index (ONDE-INJECTEE-S277), REVUE-VISUELLE (verdict R10). Invariants relus :
 I-12 (naissance au repos — l'onde injectée est une naissance, pas une exception), I-03, I-06.
+
+---
+
+## S278 — l'ordonnanceur : ce qui décide qu'une zone est simulée
+
+**2026-09-18, Claude Opus 5 (Claude Code desktop).** Entrée : « fais le rituel, puis l'objectif est
+d'établir ce système » — après que S277 eut répondu que le système de décision des régimes était
+conçu depuis S01 et jamais écrit. master 4265d22. Plan 3703bbb ; étapes 8091470, 6b42c2e, 5cedb67,
+3c7298f, f526a68.
+
+**Maillons : 1, et c'est volontaire.** La règle demande trois choses ; il en manque une. *Ce qui
+devient possible* : décider quels domaines vivent, sous budget, sans battement et de façon
+reproductible. *La preuve* : le banc, quatre propriétés tenues
+([mesure](../docs/validation/ORDONNANCEUR-S278.md)). *Le chemin qui le consomme* : **aucun** — rien
+n'est branché sur l'ordonnanceur, et la bande δ de l'afficheur reste câblée en dur. C'est
+exactement le cas que la règle des maillons veut attraper, et le compter zéro serait se payer de
+mots. S279 doit brancher.
+
+**Construit** : `code/water-core/src/scheduler.rs`, sans dépendance, sans allocation à l'exécution.
+Le sac à dos d'ADR-012 §1 — candidats `(P, C)`, tri par `P/C` décroissant **comparé en croix**
+(pas de division, pas de cas particulier à coût nul, égalités départagées par identité), allocation
+jusqu'au budget, `budget_ms` distribué. **Le budget donné est le coût annoncé, pas une part du
+reliquat** : une borne, pas une enveloppe — la somme des bornes ne dépasse donc jamais le profil, et
+c'est ce qui ferme le chemin vers un pic d'image. Hystérésis 0,60 / 0,40, durée de vie 750 ms,
+délai d'extinction 1,0 s de séjour **continu** sous le seuil, horloge qui recule refusée. Seize
+essais.
+
+**[ADR-170](../docs/adr/ADR-170-les-trois-poids-sont-bornes.md) — les trois poids sont bornés.**
+ADR-012 §2 ne borne pas les poids et définit `W_urgence = 1/temps`, qui diverge ; ADR-013 §5 veut
+un score dans `[0,1]` avec des seuils 0,60 / 0,40. **Les deux ne se raccordaient pas depuis S01**,
+à travers six audits et deux revues croisées. Décision : les trois poids sont des fractions par
+contrat, `s = P` sans facteur d'échelle, et la normalisation de `W_urgence` passe à l'hôte avec un
+horizon déclaré — un horizon mal choisi se voit alors dans les décisions au lieu de se cacher dans
+une échelle implicite.
+
+**Le banc** (`ordonnanceur_s278.rs`) : un bateau longe cinq îlots serrés à 15 m/s, 1 200 pas à
+30 Hz. **Cinq domaines vivants simultanément demandent 4,0 ms ; 1,600 ms sont distribués** pour 2,0
+déclarés. Transitions : **2 par îlot**, une naissance et une mort, aucun battement. Plus courte vie
+10 267 ms pour 750 minimum. Empreinte `6aebff024c734fc9`, identique à deux exécutions. Suite
+complète 500 essais, 0 échec.
+
+**Le banc refuse de passer si le budget n'a pas été disputé**, et c'est ce garde qui a sauvé la
+mesure : sa première version espaçait les îlots de 150 m, un seul domaine vivait à la fois, tout
+passait et rien n'était prouvé (L334).
+
+**Limites, toutes écrites dans la mesure.** Seuils **non calibrés** — valeurs de départ d'ADR-013
+§5, banc B8 inexistant. Poids déclarés à la main : aucun hôte réel ne les produit, `W_perception`
+n'a jamais été calculé depuis une caméra. Coût constant dans le banc là où ADR-012 §3 le veut
+mesuré en continu. Famine possible d'un gros candidat (glouton). Un vivant non financé reste
+vivant : la dégradation d'ADR-012 §4 n'est pas écrite. **Rien de la forme des domaines** — grille,
+blocs épars, fusion/séparation, substitutif et son critère `0,35·Hs_local` jamais calibré.
+
+**Suite S279 : brancher.** Faire décider la bande δ de l'afficheur par l'ordonnanceur plutôt que
+par le code — c'est le chemin qui consomme la capacité, et ce qui remettra les maillons à zéro.
+Demandent d'abord un `W_perception` calculé depuis la caméra de la scène et un coût réinjecté
+depuis `delta_budget`.
+
+**Arbitrage utilisateur :** aucun. Reste en attente depuis S277 : le verdict visuel sur l'onde
+injectée, que l'utilisateur regardait quand la session a tourné vers l'ordonnanceur.
+
+**Rituel :** journal, L334 et L335, file active relue (orchestrateur actualisé), feuille de route
+J3, index (ADR-170, ORDONNANCEUR-S278), liste 1.4 passée à *partiel*. Invariants relus : I-03
+(décision reproductible, empreinte à deux exécutions), I-06 (capacité fixée à la construction,
+mémoire demandée à l'hôte).

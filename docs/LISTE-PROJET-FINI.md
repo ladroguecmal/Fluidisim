@@ -41,7 +41,11 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
   *partiel* : allocateur, tâches, horloge, journal d'hôte, `BackgroundSample`, `Volume`.
   Manquent solides, bathymétrie et GPU côté cœur.
 - [ ] **1.4 Point d'entrée unique, orchestrateur des régimes** (`WaterSystem`, SPEC-004 §3) —
-  *absent*, conçu.
+  *partiel* **depuis S278** : `scheduler.rs` décide quels domaines vivent et avec quel budget —
+  sac à dos d'ADR-012 §1, hystérésis et durées de vie d'ADR-013 §5, poids bornés par ADR-170 ;
+  éprouvé ([ORDONNANCEUR-S278](validation/ORDONNANCEUR-S278.md)). Manquent le point d'entrée
+  `WaterSystem` lui-même, la dégradation (ADR-012 §4), la forme des domaines, et **tout
+  consommateur** : rien n'est encore branché dessus.
 - [ ] **1.5 Grille 3D de référence stable** : adressage, zones actives, échanges client/serveur —
   *absent*, conçu (ADR-006).
 - [ ] **1.6 Cellules, domaines et solveurs distincts, niveaux d'activité des cellules** — *absent*,
