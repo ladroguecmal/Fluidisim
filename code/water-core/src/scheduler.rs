@@ -29,6 +29,7 @@
 //! `W_gameplay` vient du jeu, `W_perception` du rendu — **surface à l'écran**, jamais distance
 //! (ADR-012 §2) — et `C` est mesuré en continu par le solveur, jamais théorique.
 use crate::host::HostServices;
+use crate::types::SimTime;
 
 /// Identité stable d'un domaine entre deux pas. Sert aussi à départager deux candidats de même
 /// rapport `P/C` : sans elle, la décision dépendrait de l'ordre de soumission.
@@ -87,12 +88,23 @@ impl Bid {
 pub const ON: f32 = 0.60;
 pub const OFF: f32 = 0.40;
 
+/// Durée de vie minimale d'un domaine (ADR-013 §5) : au-delà du temps de réaction du joueur, en
+/// deçà de sa mémoire perceptuelle. Rien ne meurt avant, quel que soit son score.
+pub const LIFETIME_US: u64 = 750_000;
+/// Délai avant extinction une fois le score passé sous `OFF` (ADR-013 §5). Remonter au-dessus
+/// d'`OFF` l'efface : c'est un séjour continu qui tue, pas un passage.
+pub const OFF_DELAY_US: u64 = 1_000_000;
+
 /// L'état d'un domaine d'un pas à l'autre. C'est la seule mémoire de l'ordonnanceur : sans elle,
 /// l'hystérésis n'existe pas, puisqu'elle porte sur la décision précédente.
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct Live {
     id: DomainId,
     active: bool,
+    /// Instant d'allumage : porte la durée de vie minimale.
+    born_us: u64,
+    /// Depuis quand le score est continûment sous `OFF`. `None` dès qu'il repasse au-dessus.
+    below_since_us: Option<u64>,
 }
 
 /// Ce qu'un domaine retenu reçoit : le droit de vivre ce pas, et son budget.
@@ -110,6 +122,9 @@ pub enum Error {
     Capacity,
     /// Deux soumissions portent la même identité dans le même pas.
     Duplicate,
+    /// Le temps fourni est antérieur à celui du pas précédent. L'horloge n'est jamais implicite,
+    /// et une horloge qui recule ferait vivre éternellement ce qui devrait mourir.
+    Clock,
 }
 
 /// L'ordonnanceur. Sa capacité est fixée à la construction et sa mémoire demandée à l'hôte :
@@ -119,6 +134,7 @@ pub struct Scheduler {
     bids: Vec<Bid>,
     grants: Vec<Grant>,
     live: Vec<Live>,
+    last_us: Option<u64>,
 }
 
 impl Scheduler {
@@ -138,6 +154,7 @@ impl Scheduler {
             bids: Vec::with_capacity(capacity),
             grants: Vec::with_capacity(capacity),
             live: Vec::with_capacity(capacity),
+            last_us: None,
         })
     }
 
@@ -185,36 +202,41 @@ impl Scheduler {
         &self.grants
     }
 
-    /// Décision d'un pas, hystérésis seule : chaque soumission allume au-dessus de `ON`, éteint
-    /// en dessous de `OFF`, et **garde son état entre les deux**. Un candidat qu'on ne revoit pas
-    /// s'éteint — ne pas soumissionner, c'est renoncer.
+    /// Décision d'un pas : allumage au-dessus de `ON`, extinction sous `OFF` **et** seulement
+    /// une fois les deux délais tenus — durée de vie minimale depuis l'allumage, séjour continu
+    /// sous le seuil. Entre les deux seuils, rien ne change.
     ///
-    /// Le budget n'intervient pas encore (P4) : ce que rend cette étape est l'ensemble des
-    /// domaines qui *veulent* vivre, pas celui qui vivra.
-    pub fn decide(&mut self) {
+    /// **Ne pas soumissionner vaut un score nul**, pas une mort immédiate : une source qui
+    /// clignote ferait battre son domaine, et le battement est plus visible que ce qu'il évite.
+    ///
+    /// Le budget n'intervient pas ici : ce que rend cette étape est l'ensemble des domaines qui
+    /// *veulent* vivre, pas celui qui vivra — c'est `allocate` qui tranche.
+    pub fn decide(&mut self, now: SimTime) -> Result<(), Error> {
+        if self.last_us.is_some_and(|t| now.0 < t) {
+            return Err(Error::Clock);
+        }
+        self.last_us = Some(now.0);
         for l in self.live.iter_mut() {
-            if !self.bids.iter().any(|b| b.id == l.id) {
+            let s = self.bids.iter().find(|b| b.id == l.id).map_or(0., |b| b.priority());
+            if s < OFF {
+                l.below_since_us.get_or_insert(now.0);
+            } else {
+                l.below_since_us = None;
+            }
+            let vecu = now.0.saturating_sub(l.born_us) >= LIFETIME_US;
+            let bas = l.below_since_us.is_some_and(|t| now.0.saturating_sub(t) >= OFF_DELAY_US);
+            if vecu && bas {
                 l.active = false;
             }
         }
         for b in &self.bids {
-            let s = b.priority();
-            match self.live.iter_mut().find(|l| l.id == b.id) {
-                Some(l) => {
-                    if l.active {
-                        if s < OFF {
-                            l.active = false;
-                        }
-                    } else if s > ON {
-                        l.active = true;
-                    }
-                }
-                // Inconnu : il n'entre dans la mémoire que s'il franchit le seuil d'allumage.
-                None if s > ON => self.live.push(Live { id: b.id, active: true }),
-                None => {}
+            // Inconnu : il n'entre dans la mémoire que s'il franchit le seuil d'allumage.
+            if b.priority() > ON && !self.live.iter().any(|l| l.id == b.id) {
+                self.live.push(Live { id: b.id, active: true, born_us: now.0, below_since_us: None });
             }
         }
         self.live.retain(|l| l.active);
+        Ok(())
     }
 
     /// Le sac à dos d'ADR-012 §1 : trier les vivants par `P/C` décroissant, allouer jusqu'à
@@ -376,26 +398,31 @@ mod tests {
     #[test]
     fn un_candidat_qui_oscille_dans_l_intervalle_ne_bat_pas_s278() {
         let mut s = scheduler(4);
-        let pas = |s: &mut Scheduler, score: f32| {
+        // Deux secondes par pas : au-delà des deux délais, donc l'essai ne teste que l'hystérésis.
+        let mut t = 0u64;
+        let pas = |s: &mut Scheduler, t: &mut u64, score: f32| {
+            *t += 2_000_000;
             s.begin();
             s.submit(bid(1, score, 1., 1., 1.)).unwrap();
-            s.decide();
+            s.decide(SimTime(*t)).unwrap();
             s.is_active(DomainId(1))
         };
         // Sous le seuil d'allumage, rien ne s'allume — même à un cheveu.
-        assert!(!pas(&mut s, 0.59));
-        assert!(pas(&mut s, 0.61), "franchi ON, le domaine vit");
+        assert!(!pas(&mut s, &mut t, 0.59));
+        assert!(pas(&mut s, &mut t, 0.61), "franchi ON, le domaine vit");
         // Entre OFF et ON, dix oscillations ne changent rien : c'est exactement le battement
         // qu'un seuil unique produirait.
         for score in [0.45, 0.55, 0.41, 0.59, 0.42, 0.58, 0.44, 0.56, 0.43, 0.57] {
-            assert!(pas(&mut s, score), "le domaine ne doit pas s'éteindre dans l'intervalle");
+            assert!(pas(&mut s, &mut t, score), "le domaine ne doit pas s'éteindre dans l'intervalle");
         }
-        assert!(!pas(&mut s, 0.39), "sous OFF, il s'éteint");
+        // Passer sous `OFF` ne tue pas : il faut y séjourner. Le premier pas ouvre le compte.
+        assert!(pas(&mut s, &mut t, 0.39), "le délai d'extinction n'est pas encore écoulé");
+        assert!(!pas(&mut s, &mut t, 0.39), "après le délai, il s'éteint");
         // Et il ne se rallume pas en remontant dans l'intervalle : l'hystérésis est symétrique.
         for score in [0.41, 0.5, 0.59] {
-            assert!(!pas(&mut s, score));
+            assert!(!pas(&mut s, &mut t, score));
         }
-        assert!(pas(&mut s, 0.61));
+        assert!(pas(&mut s, &mut t, 0.61));
     }
 
     /// Ne pas soumissionner, c'est renoncer : un domaine qu'on ne revoit pas s'éteint, sans quoi
@@ -406,12 +433,78 @@ mod tests {
         s.begin();
         s.submit(bid(1, 0.9, 1., 1., 1.)).unwrap();
         s.submit(bid(2, 0.9, 1., 1., 1.)).unwrap();
-        s.decide();
+        s.decide(SimTime(0)).unwrap();
         assert_eq!(s.active().count(), 2);
+        // Il cesse de soumissionner : son score vaut zéro, mais il ne meurt qu'au bout des délais.
         s.begin();
         s.submit(bid(1, 0.9, 1., 1., 1.)).unwrap();
-        s.decide();
+        s.decide(SimTime(900_000)).unwrap();
+        assert!(s.is_active(DomainId(2)), "ni la durée de vie ni le délai ne sont tenus");
+        s.begin();
+        s.submit(bid(1, 0.9, 1., 1., 1.)).unwrap();
+        // Le compte a commencé à 900 ms, quand il a cessé de soumissionner : il meurt une
+        // seconde plus tard, pas une seconde après sa dernière soumission.
+        s.decide(SimTime(1_900_000)).unwrap();
         assert!(s.is_active(DomainId(1)) && !s.is_active(DomainId(2)));
+    }
+
+    /// Rien ne meurt avant sa durée de vie minimale, même tombé à zéro aussitôt né (ADR-013 §5).
+    #[test]
+    fn rien_ne_meurt_avant_sa_duree_de_vie_s278() {
+        let mut s = scheduler(4);
+        s.begin();
+        s.submit(bid(1, 0.9, 1., 1., 0.5)).unwrap();
+        s.decide(SimTime(0)).unwrap();
+        // Score nul dès le pas suivant : le délai d'extinction court, la durée de vie aussi.
+        for t in [100_000u64, 500_000, 740_000] {
+            s.begin();
+            s.submit(bid(1, 0., 1., 1., 0.5)).unwrap();
+            s.decide(SimTime(t)).unwrap();
+            assert!(s.is_active(DomainId(1)), "mort à {t} µs, avant ses 750 ms");
+        }
+        // Le séjour sous le seuil a commencé à 100 ms — au premier pas à score nul, pas à la
+        // naissance. Il meurt donc à 1,1 s, et pas avant.
+        s.begin();
+        s.submit(bid(1, 0., 1., 1., 0.5)).unwrap();
+        s.decide(SimTime(1_099_000)).unwrap();
+        assert!(s.is_active(DomainId(1)), "le délai court depuis la chute, pas depuis la naissance");
+        s.begin();
+        s.submit(bid(1, 0., 1., 1., 0.5)).unwrap();
+        s.decide(SimTime(1_100_000)).unwrap();
+        assert!(!s.is_active(DomainId(1)));
+    }
+
+    /// Un score qui replonge sous `OFF` puis remonte ne cumule pas : c'est un séjour **continu**
+    /// qui tue. Sans cette remise à zéro, un domaine sain finirait par mourir de vieux passages.
+    #[test]
+    fn le_delai_d_extinction_se_remet_a_zero_s278() {
+        let mut s = scheduler(4);
+        let mut jouer = |s: &mut Scheduler, t: u64, score: f32| {
+            s.begin();
+            s.submit(bid(1, score, 1., 1., 0.5)).unwrap();
+            s.decide(SimTime(t)).unwrap();
+        };
+        jouer(&mut s, 0, 0.9);
+        // Neuf dixièmes de seconde sous le seuil, puis une remontée, puis neuf dixièmes encore :
+        // 1,8 s cumulées sous `OFF`, et pourtant il vit.
+        jouer(&mut s, 900_000, 0.1);
+        jouer(&mut s, 1_000_000, 0.9);
+        jouer(&mut s, 1_900_000, 0.1);
+        assert!(s.is_active(DomainId(1)), "le cumul ne doit pas tuer");
+        jouer(&mut s, 2_950_000, 0.1);
+        assert!(!s.is_active(DomainId(1)), "un séjour continu de plus d'une seconde, lui, tue");
+    }
+
+    /// L'horloge n'est jamais implicite : un temps qui recule est refusé plutôt que subi.
+    #[test]
+    fn une_horloge_qui_recule_est_refusee_s278() {
+        let mut s = scheduler(4);
+        s.begin();
+        s.submit(bid(1, 0.9, 1., 1., 0.5)).unwrap();
+        assert!(s.decide(SimTime(2_000_000)).is_ok());
+        s.begin();
+        s.submit(bid(1, 0.9, 1., 1., 0.5)).unwrap();
+        assert_eq!(s.decide(SimTime(1_999_999)), Err(Error::Clock));
     }
 
     /// La propriété à défendre avant toutes les autres (ADR-012 §1) : la somme des budgets
@@ -424,7 +517,7 @@ mod tests {
         for i in 0..6 {
             s.submit(bid(i, 0.9, 1., 1., 0.8)).unwrap();
         }
-        s.decide();
+        s.decide(SimTime(9_000_000)).unwrap();
         s.allocate();
         assert_eq!(s.active().count(), 6, "les six veulent vivre");
         assert_eq!(s.grants().len(), 2, "deux seulement sont financés");
@@ -439,7 +532,7 @@ mod tests {
         s.begin();
         s.submit(bid(1, 1., 1., 1., 1.75)).unwrap();  // P = 1,00  C = 1,75  → 0,57
         s.submit(bid(2, 0.7, 1., 1., 0.25)).unwrap(); // P = 0,70  C = 0,25  → 2,80
-        s.decide();
+        s.decide(SimTime(9_000_000)).unwrap();
         s.allocate();
         assert_eq!(s.grants()[0].id, DomainId(2), "le rapport commande");
         // Et le budget restant sert au plus cher : 0,25 + 1,75 = 2,0 ms, exactement le profil.
@@ -455,7 +548,7 @@ mod tests {
         let mut s = scheduler(4);
         s.begin();
         s.submit(bid(1, 0.5, 1., 1., 0.01)).unwrap(); // rapport 50, score 0,50 < ON
-        s.decide();
+        s.decide(SimTime(9_000_000)).unwrap();
         s.allocate();
         assert!(!s.is_active(DomainId(1)));
         assert!(s.grants().is_empty());
@@ -469,7 +562,7 @@ mod tests {
         s.begin();
         s.submit(bid(1, 1., 1., 1., 3.0)).unwrap(); // seul, il dépasse le budget de 2 ms
         s.submit(bid(2, 0.9, 1., 1., 0.5)).unwrap();
-        s.decide();
+        s.decide(SimTime(9_000_000)).unwrap();
         s.allocate();
         assert_eq!(s.grants().len(), 1);
         assert_eq!(s.grants()[0].id, DomainId(2));
@@ -485,7 +578,7 @@ mod tests {
             for id in ordre {
                 s.submit(bid(id, 0.9, 1., 1., 0.5)).unwrap();
             }
-            s.decide();
+            s.decide(SimTime(9_000_000)).unwrap();
             s.allocate();
             s.grants().iter().map(|g| g.id).collect::<Vec<_>>()
         };
@@ -502,7 +595,7 @@ mod tests {
         s.begin();
         s.submit(bid(1, 1., 1., 1., 1.5)).unwrap();
         s.submit(bid(2, 0.9, 1., 1., 1.5)).unwrap();
-        s.decide();
+        s.decide(SimTime(9_000_000)).unwrap();
         s.allocate();
         assert_eq!(s.grants().len(), 1);
         assert!(s.is_active(DomainId(1)) && s.is_active(DomainId(2)));

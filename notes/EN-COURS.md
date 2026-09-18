@@ -82,7 +82,7 @@ décision ne batte. Déterministe (I-03), sans allocation à l'exécution (I-06)
   0,60 / 0,40 (ADR-013 §5). Essai : un candidat qui oscille autour d'un seuil ne bat pas.
 - [x] **P4** — le sac à dos : tri par `P/C` décroissant, allocation jusqu'au budget, distribution
   d'un `budget_ms` par domaine retenu. Essais : budget jamais dépassé, décision déterministe.
-- [ ] **P5** — le temps : durée de vie minimale 0,75 s, délai d'extinction 1,0 s sous le seuil,
+- [x] **P5** — le temps : durée de vie minimale 0,75 s, délai d'extinction 1,0 s sous le seuil,
   fenêtre d'engagement 1 s. Essai : rien ne meurt avant son terme.
 - [ ] **P6** — le banc qui prouve : un domaine s'allume à l'approche, suit l'objet, s'éteint après
   son départ ; sans battement, sous budget, mêmes décisions à deux exécutions.
@@ -95,6 +95,12 @@ perception en **surface écran** et non en distance), §3 (profil : ressources s
 capacité dérivée inscrite dans un profil finit par contredire ses ressources) ; ADR-013 §5
 (seuils de départ, **tous à calibrer**) ; ADR-006 §4 (hystérésis, durée de vie, pool — le vrai
 risque est le battement d'**allocation**, pas le battement logique).
+
+**P5 : le délai d'extinction court depuis la chute sous `OFF`, pas depuis la naissance ni depuis
+la dernière soumission.** Trois essais écrits l'ignoraient et ont échoué — le code appliquait
+ADR-013, c'est le test qui se trompait. Conséquence à retenir : un domaine qui cesse de
+soumissionner vit encore `1,0 s` après sa **dernière chute**, et un score qui replonge puis remonte
+ne cumule pas.
 
 **P4 : le seuil d'activation est absolu et le rapport ne le rachète pas.** Un candidat presque
 gratuit mais sous `ON` ne s'allume pas — le score dit qu'un domaine mérite d'exister, le rapport
