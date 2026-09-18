@@ -315,8 +315,10 @@ ouvert et sa première pièce est reçue (S278)** : `scheduler.rs` décide quels
 avec quel budget, éprouvé sur cinq domaines qui demandent le double du profil
 ([ORDONNANCEUR-S278](validation/ORDONNANCEUR-S278.md), ADR-170). **S279 l'a branché sur la bande δ de
 l'afficheur** : elle s'éteint et se rallume toute seule aux bons instants (ADR-171,
-[ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md)). Défaut ouvert : l'exclusion par le coût
-est absorbante (L336). Restent la dégradation, la
+[ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md)). **S280 lève l'exclusion absorbante** : l'estimation
+est une médiane qui sait oublier, et la bande survit au budget qui la tuait
+([COUT-ROBUSTE-S280](validation/COUT-ROBUSTE-S280.md)). Reste la famine, qui demande la
+dégradation d'ADR-012 §4. Restent la dégradation, la
 forme des domaines et le régime substitutif ; les seuils attendent le banc **B8**.
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),

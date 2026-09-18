@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S280 — en cours
+Session : S280 — terminée
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
 Entrée : « Continue », jeton libre, master 5a3500e. La file porte en tête le défaut ouvert de
 S279 : **l'exclusion par le coût est absorbante** (L336) — un domaine qu'un pic fait sortir du
@@ -92,7 +92,7 @@ l'hôte, pas au cœur.
 - [x] **P3** — réception : `--delta-budget=<ms>` pour éprouver le cas serré ; la bande survit à
   33 ms là où S279 la voyait mourir à 0,352 s ; relevé dynamique de S279 inchangé ; douze
   empreintes de R10 inchangées.
-- [ ] **P4** — rituel §6.
+- [x] **P4** — rituel §6.
 
 ### Notes de reprise
 

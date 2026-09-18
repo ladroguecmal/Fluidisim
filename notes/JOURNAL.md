@@ -14135,3 +14135,62 @@ ou la forme des domaines. Reste en attente depuis S277 : le verdict visuel sur l
 **Rituel :** journal, L336, file active relue, feuille de route J3, index (ADR-171,
 ORDONNANCEUR-S279), liste 1.4. Invariants relus : I-06 (l'ordonnanceur alloue à la construction,
 rien par image), I-12 (renaissance au repos d'un domaine rallumé), I-03 (décision reproductible).
+
+---
+
+## S280 — un pic ne condamne plus un domaine
+
+**2026-09-19, Claude Opus 5 (Claude Code desktop).** Entrée : « Continue », jeton libre, master
+5a3500e — la file portait en tête le défaut ouvert de S279. Plan 06ababb ; étapes 366f530, 3c215e8.
+
+**Capacité reçue, maillons 0.** *Ce qui devient possible* : un domaine survit à un pic de coût au
+lieu d'être condamné par lui. *Le chemin qui le consomme* : la bande δ de l'afficheur, au budget
+même qui la tuait. *La preuve* : à 33 ms, 689 pas payés sur 689 vivants, là où S279 la voyait mourir
+à 0,352 s ([mesure](../docs/validation/COUT-ROBUSTE-S280.md)).
+
+**Trois remèdes écartés par l'analyse, avant d'écrire une ligne.** Distribuer le reliquat au lieu
+d'exclure — juste en général (ADR-012 §1 point 5), **inapplicable à δ**, dont le pas couplé est tout
+ou rien (ADR-152). Admettre d'office un affamé — viole la seule propriété qu'ADR-012 §1 demande de
+défendre avant les autres. Faire décroître l'estimation dans l'ordonnanceur — ce n'est pas son
+travail, et il ne doit pas inventer un chiffre que personne n'a mesuré.
+
+**Le vrai défaut était écrit dans ADR-012 §3 depuis S01** : « la cible de mesure est le 99ᵉ centile
+de la contribution par frame, jamais la moyenne ». L'hôte estimait par **le dernier pas**. Une
+valeur isolée n'est pas une estimation.
+
+**Correction, côté hôte :** médiane des **huit derniers pas payés**, prise du côté prudent ; le
+compte d'échantillons **décroît d'une unité par pas non payé**, et vidé le domaine retombe sur son
+nominal et retente. Un domaine qui ne tourne plus ne sait plus ce qu'il coûte, et le dire est plus
+honnête que de garder son pire chiffre. Le cœur ne change que d'un `set_profile`, qui permet à un
+banc d'éprouver un budget serré sans rien réallouer.
+
+| budget | pas vivants | pas payés | estimation maximale |
+|---|---|---|---|
+| 20 ms | 689 / 937 | **0** | 22,0 ms |
+| 33 ms | 689 / 937 | **689** | 29,7 ms |
+| 50 ms | 689 / 937 | **689** | 28,4 ms |
+
+**Trois lectures.** Le budget de 33 ms ne tue plus : des pas individuels le dépassent, l'estimation
+jamais. **La décision ne dépend pas du budget** — 689 pas vivants dans les trois cas, aux mêmes
+instants : le score dit qui a le droit de vivre, le budget seulement qui tourne, et c'est la
+séparation qu'ADR-012 §1 demande. À 20 ms le domaine est **affamé, pas absorbé** : vivant,
+estimation au nominal, servable dès que le budget le permettrait.
+
+**Inchangé** : douze empreintes de R10, relevé dynamique de S279 (allumée 0 s, éteinte 6,016 s,
+rallumée 10,0 s, trois transitions), banc S278 (empreinte `6aebff024c734fc9`), onde injectée de
+S277. Suite complète **502 essais, 0 échec** (390 cœur, 14 + 2 + 1 intégrations, 95 harnais) ;
+28 essais viewer.
+
+**Limites.** La **famine reste** — un domaine trop cher ne tourne pas, et aucune dégradation ne
+vient le rétrécir ; les sept rangs d'ADR-012 §4 ne sont pas écrits, et le rang 1 demande la forme
+des domaines, qui n'existe pas. **Huit échantillons est un choix, pas une mesure** : aucun banc ne
+l'a éprouvé, B8 n'existe toujours pas. Le régime oscillant — médiane durablement au-dessus du
+budget — n'a pas été observé : le cas à 20 ms ne l'atteint pas.
+
+**Suite S281 :** au choix de l'utilisateur. La file porte la dégradation (ADR-012 §4 rang 1,
+rétrécir au lieu d'exclure), plusieurs candidats réels dans l'afficheur, et la forme des domaines
+(liste 1.5/1.6). **En attente depuis S277** : le verdict visuel sur l'onde injectée.
+
+**Rituel :** journal, L336 complétée d'une levée datée, file active relue, index
+(COUT-ROBUSTE-S280). Invariants relus : I-06 (l'anneau des coûts est un tableau fixe, rien par
+image), I-03.

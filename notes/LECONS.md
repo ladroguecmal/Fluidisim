@@ -5706,3 +5706,12 @@ s'est éteinte au bout de 0,352 s et n'est jamais revenue, alors que rien à l'�
    dire ainsi : le mécanisme reste absorbant, et il reviendra au premier budget serré. Sortir
    demande soit une estimation qui décroît tant qu'on ne tourne pas — un droit de retenter — soit
    une dégradation qui **rétrécit** au lieu d'exclure (ADR-012 §4 rang 1).
+
+**Levée en S280** ([mesure](../docs/validation/COUT-ROBUSTE-S280.md)) : l'estimation est devenue la
+**médiane des huit derniers pas payés**, et le compte d'échantillons décroît d'une unité par pas non
+payé — vidé, le domaine retombe sur son nominal et retente. Au budget qui le condamnait, la bande
+paie désormais tous ses pas ; à un budget réellement insuffisant, elle est **affamée et non
+absorbée** — vivante, estimation honnête, servable dès que le budget le permettrait. La quatrième
+leçon est celle-là : **l'antidote d'une boucle absorbante est l'oubli**. Une mesure qu'on ne peut
+plus rafraîchir doit se périmer, faute de quoi elle devient un jugement définitif rendu sur une
+seule observation.
