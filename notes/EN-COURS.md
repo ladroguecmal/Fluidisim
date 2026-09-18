@@ -83,7 +83,7 @@ annoncée quand un calcul est nécessaire.
   résolution du domaine (`DX` = 2 m, il faut `λ ≥ 8·DX` = 16 m, et `σ` = 8 m y est déjà). Cas
   `Hs`/`Tp` : 2/8 (référence, 15 %), 4/8 (31 %), 4/6 (41 %), 6/6 (62 %) ; durée réduite à 10 s,
   onde sur mer plate calculée une seule fois.
-- [ ] **P6b** — ce qu'il regarde : pose qui montre l'onde traverser la houle, capture, commande.
+- [x] **P6b** — ce qu'il regarde : pose qui montre l'onde traverser la houle, capture, commande.
 - [ ] **P7** — rituel §6.
 
 **P4 relevé** (`--delta --onde-mesure`, bosse 0,6 m, σ 8 m) : la bosse se sépare en deux fronts

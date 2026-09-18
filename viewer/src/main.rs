@@ -2208,7 +2208,20 @@ fn run() -> Result<(), String> {
     let impacts = scene::scene_impacts(&scene, if multi { scene::IMPACTS.len() } else { 1 });
     // S275, ADR-168 : `--delta` — houle à crêtes longues à la place de B, bande δ rejouée.
     let delta_scene = args.iter().any(|a| a == "--delta");
-    let swell = if delta_scene { Some(delta::swell_background()?) } else { None };
+    // S277 — `--delta-hs=<m>` / `--delta-tp=<s>` : la houle de la scène δ, pour voir l'onde se
+    // déformer. Sans eux, la houle de S275 au bit. La cambrure commande (ONDE-INJECTEE-S277) :
+    // 4 m / 8 s déforme l'onde de 28 %, 2 m / 8 s de 9 % seulement.
+    let nombre = |cle: &str, defaut: f32, min: f32, max: f32| -> Result<f32, String> {
+        let Some(v) = args.iter().find_map(|a| a.strip_prefix(cle)) else { return Ok(defaut) };
+        let v: f32 = v.parse().map_err(|_| format!("{cle} : nombre attendu"))?;
+        if !(v.is_finite() && v >= min && v <= max) {
+            return Err(format!("{cle} : {min} à {max}"));
+        }
+        Ok(v)
+    };
+    let recette = delta::swell_recipe().sea;
+    let (hs, tp) = (nombre("--delta-hs=", recette.hs, 0.1, 6.)?, nombre("--delta-tp=", recette.tp, 3., 20.)?);
+    let swell = if delta_scene { Some(delta::swell_background_for(hs, tp)?) } else { None };
     // S276 : `--delta-direct` — δ avance d'un pas par image au lieu d'être rejoué.
     let onde = onde_amplitude(&args)?;
     // Amplitude nulle : profil plat à `REST`, c'est-à-dire la naissance au repos de S276.

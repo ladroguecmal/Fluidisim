@@ -86,5 +86,16 @@ Deux réserves, et elles comptent :
   nécessairement une limite physique, ce peut être la hauteur libre du domaine (`REST` = 96 m sous
   un sommet à 102 m). À reprendre avant d'en conclure quoi que ce soit.
 
+## 5. Ce qu'on regarde
+
+```
+cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --delta --onde --delta-hs=4
+```
+
+`--onde[=<m>]` pose l'onde et implique le mode direct ; `--delta-hs=<m>` et `--delta-tp=<s>`
+règlent la houle de la scène (sans eux, la houle de S275 au bit). **Début** fait renaître l'onde,
+donc la traversée se rejoue autant de fois qu'on veut ; **D** compare avec et sans δ. Fenêtre
+ouverte en 0,8 à 1,4 s depuis la racine, essais 21/21.
+
 Rien de ceci ne touche aux réceptions de S275 et S276 : le pas, le coût et l'identité au bit sont
 inchangés.
