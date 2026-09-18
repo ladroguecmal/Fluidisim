@@ -66,8 +66,8 @@ Objectif : mesurer la réflexion du pas couplé mobile avec l'éponge ADR-164.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [>] **P2** — montage du paquet, témoins, fenêtres et critères déclarés avant mesure.
-- [ ] **P3** — banc consommant le pas réel, contrôle du paquet et des fenêtres.
+- [x] **P2** — montage du paquet, témoins, fenêtres et critères déclarés avant mesure.
+- [>] **P3** — banc consommant le pas réel, contrôle du paquet et des fenêtres.
 - [ ] **P4** — mesures bornées, réception ou diagnostic honnête, régressions adaptées.
 - [ ] **P5** — rituel §6, journal, file, index et jeton.
 
