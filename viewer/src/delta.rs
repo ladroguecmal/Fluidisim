@@ -54,6 +54,20 @@ pub fn swell_background() -> Result<Background, String> {
     .map_err(|e| format!("houle δ : {e:?}"))
 }
 
+/// S277 — **mer plate** : mêmes composantes, mêmes directions, `Hs = 0`, donc amplitudes nulles.
+/// C'est la référence qui isole ce que la houle fait à l'onde injectée : même onde, même domaine,
+/// même pas, et pour seule différence un fond au repos.
+pub fn flat_background() -> Result<Background, String> {
+    let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 22);
+    let sea = SeaState { hs: 0., ..swell_recipe().sea };
+    Background::configure(
+        &mut HostServices { alloc: &mut alloc, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink },
+        sea,
+        WorldPos::from_units(0, 0, 0),
+    )
+    .map_err(|e| format!("mer plate : {e:?}"))
+}
+
 struct Frozen;
 impl MonotonicClock for Frozen {
     fn now_ns(&self) -> u64 {

@@ -2023,10 +2023,71 @@ fn onde_mesure(background: &water_core::background::Background, amplitude: f32) 
     Ok(())
 }
 
+/// S277 — **ce que la houle fait à l'onde**, par différence. Trois domaines δ identiques au pas
+/// près : l'onde sous la houle, la houle seule, et l'onde sur mer plate. Retrancher la houle seule
+/// isole l'onde telle que la houle la transforme ; la comparer à l'onde sur mer plate donne
+/// l'interaction — c'est le second retour de R10, chiffré.
+///
+/// Le système est non linéaire : cette soustraction n'est pas exacte, et c'est précisément là que
+/// vit l'effet cherché. Tout est relevé sur le domaine utile, hors éponge (`|x| ≤ 96 m`).
+fn onde_interaction(amplitude: f32) -> Result<(), String> {
+    let (swell, flat) = (delta::swell_background()?, delta::flat_background()?);
+    let onde = delta::initial_wave(amplitude);
+    let mut sous_houle = delta::Live::new(&swell, onde)?;
+    let mut houle_seule = delta::Live::new(&swell, delta::initial_wave(0.))?;
+    let mut sur_plat = delta::Live::new(&flat, onde)?;
+    let (mut a, mut b, mut c) = ([0f32; delta::NX], [0f32; delta::NX], [0f32; delta::NX]);
+    let utile: Vec<usize> = (0..delta::NX)
+        .filter(|i| (delta::X0 + (*i as f32 + 0.5) * delta::DX).abs() <= 96.)
+        .collect();
+    let x = |i: usize| (delta::X0 + (i as f32 + 0.5) * delta::DX) as f64;
+    println!("ONDE_INTERACTION_S277 amplitude_m={amplitude} colonnes_utiles={}", utile.len());
+    let steps = (delta::DURATION_US / delta::FRAME_US) as usize;
+    for n in 0..=steps {
+        let t = n as f64 * delta::FRAME_US as f64 * 1e-6;
+        sous_houle.advance(t, &mut a)?;
+        houle_seule.advance(t, &mut b)?;
+        sur_plat.advance(t, &mut c)?;
+        if n % 125 != 0 {
+            continue;
+        }
+        // L'onde telle que la houle la rend, et l'onde sans houle.
+        let rendue = |i: usize| (a[i] - b[i]) as f64;
+        let libre = |i: usize| c[i] as f64;
+        let rms = |f: &dyn Fn(usize) -> f64| {
+            (utile.iter().map(|i| f(*i) * f(*i)).sum::<f64>() / utile.len() as f64).sqrt()
+        };
+        // Centroïde d'énergie de chaque côté : lisse, contrairement au maximum qui saute.
+        let centre = |f: &dyn Fn(usize) -> f64, droite: bool| {
+            let cote: Vec<usize> = utile.iter().copied().filter(|i| (x(*i) > 0.) == droite).collect();
+            let e: f64 = cote.iter().map(|i| f(*i) * f(*i)).sum();
+            if e <= 0. { return (0., 0.); }
+            (cote.iter().map(|i| x(*i) * f(*i) * f(*i)).sum::<f64>() / e, e)
+        };
+        let ecart = |i: usize| rendue(i) - libre(i);
+        let (rr, rl) = (rms(&rendue), rms(&libre));
+        let (cgr, egr) = centre(&rendue, false);
+        let (cdr, edr) = centre(&rendue, true);
+        let (cgl, egl) = centre(&libre, false);
+        let (cdl, edl) = centre(&libre, true);
+        println!(
+            "ONDE_INTERACTION_S277 t_s={t:.1} rms_m rendue={rr:.5} libre={rl:.5} ecart={:.5}              ecart_sur_libre={:.3} centre_m gauche rendue={cgr:.1} libre={cgl:.1}              droite rendue={cdr:.1} libre={cdl:.1} energie_droite_sur_gauche rendue={:.3} libre={:.3}",
+            rms(&ecart), if rl > 0. { rms(&ecart) / rl } else { 0. },
+            if egr > 0. { edr / egr } else { 0. }, if egl > 0. { edl / egl } else { 0. }
+        );
+    }
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     if args.iter().any(|a| a == "--delta-mesure") {
         return delta_replays(&delta::swell_background()?).map(|_| ());
+    }
+    // S277 — ce que la houle fait à l'onde, par différence (trois domaines), sans GPU.
+    if args.iter().any(|a| a == "--onde-interaction") {
+        let amplitude = onde_amplitude(&args)?.unwrap_or(0.6);
+        return onde_interaction(amplitude);
     }
     // S277 — relevé de l'onde injectée, sans GPU.
     if args.iter().any(|a| a == "--onde-mesure") {

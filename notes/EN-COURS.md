@@ -76,7 +76,7 @@ annoncée quand un calcul est nécessaire.
 - [x] **P4** — onde injectée : `Live` accepte une surface initiale, `--onde` la pose (bosse
   gaussienne au centre du domaine) ; elle naît, se propage, renaît sur **Début**. Relevé de
   l'amplitude et de la position du maximum sur 30 s.
-- [ ] **P5** — l'interaction, mesurée : la même onde sur la houle et sur une mer plate ; la
+- [x] **P5** — l'interaction, mesurée : la même onde sur la houle et sur une mer plate ; la
   différence est l'effet de B sur l'onde, et c'est exactement ce que l'utilisateur veut voir.
 - [ ] **P6** — ce qu'il regarde : pose qui montre l'onde traverser la houle, capture, commande.
 - [ ] **P7** — rituel §6.
@@ -90,6 +90,14 @@ c'est la seule chose qui brise la symétrie — mais le relevé suit le maximum 
 d'une oscillation à l'autre : **P5 doit le prouver par différence, pas par ce relevé**. Au-delà de
 24 s le maximum tombe dans l'éponge (|x| > 96 m) et ne désigne plus le front : restreindre P5 au
 domaine utile.
+
+**P5 : l'interaction est faible — 4 à 8 % de l'onde en régime** ([mesure](../docs/validation/ONDE-INJECTEE-S277.md)).
+Symétrie gauche/droite brisée de 1 à 4 % seulement ; contrôle interne : sur mer plate l'énergie des
+deux côtés reste égale à 1,000 exactement. Cohérent avec `u_orbital/c ≈ 15 %` (0,785 m/s contre
+≈ 5,1 m/s de vitesse de phase, λ ≈ 16,6 m). **Donc invisible à l'œil dans cette houle** : 5 % de
+10 cm font 5 mm. Ce que l'utilisateur veut voir demande un régime à `u_orbital/c` grand — houle plus
+cambrée ou onde plus courte — **non mesuré**, c'est la suite. Une exécution coûte 2 min 16 (trois
+domaines × 30 s) : raccourcir la durée pour un balayage de régimes.
 
 *Découpage déclaré le 2026-09-18 à 21:41 : l'utilisateur a demandé l'onde injectée maintenant.
 Le rituel, déclaré P3 puis P4, devient P7 — il reste la dernière étape.*
