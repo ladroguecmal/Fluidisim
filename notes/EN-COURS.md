@@ -58,67 +58,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S274 — terminée
-Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo et Python.
-Entrée : consigne utilisateur du 2026-09-18 — vérifier que la précision recherchée sert le
-résultat final avant tout raffinement ; critères rattachés à ce qu'ils protègent ; écart
-traduit en hauteur, pente, déphasage ; extrapolation vérifiée (troisième amplitude, pas de
-temps) ; usage réel et rendu ; puis blocage suivant de la feuille de route. master 43385bd.
-Objectif : établir le niveau nécessaire de la houle progressive, l'atteindre ou le proposer,
-puis ouvrir le blocage suivant.
+Session : S275 — en cours
+Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
+Entrée : suite de S274 dans la même conversation (consigne utilisateur : continuer sans attendre,
+solliciter pour un jugement visuel). master d0ab484, copie unique.
+Objectif : rendre δ visible pour la première fois — un domaine couplé sous une houle à crêtes
+longues, rejoué dans `viewer/`, B seul contre B+δ, au pas de référence et au pas d'image — et
+soumettre des captures à l'utilisateur (liste 8.7).
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — lecture d'usage sur les traces S273, sans calcul nouveau : ce que protège chaque
-  critère ; écart en hauteur absolue, pente, déphasage (mode k en quadrature, harmonique 2k) ;
-  signature séculaire de l'ordre trois contre la dispersion de Stokes ; critères de la
-  campagne P3 écrits avant mesure (HOULE-USAGE-S274).
-- [x] **P3** — campagne unique : a = 2 cm et dt = 0,5 ms admis par l'exemple ; trois amplitudes
-  × trois mailles à 1 ms, contrôle 0,5 ms à la fine ; coefficient d'ordre deux jugé au budget
-  d'ADR-120, sans le présenter comme la houle complète.
-- [x] **P4** — verdict d'usage : garanties de fonctionnement, seuils justifiés par l'usage ou
-  proposés à l'utilisateur, raccord δ→rendu manquant, besoins découverts dans liste et file.
-- [x] **P5** — blocage suivant, choisi : coût du pas couplé mobile (A276, ADR-147 point 5).
-  *Amendement 19:39* : lot découpé en P5–P8, rituel en P9. P5 = ADR-167 et critères écrits
-  avant le code (COUT-MOBILE-S274).
-- [x] **P6** — multigrille mobile : niveaux grossiers recalculés par pas depuis les mailles
-  mouillées (Dirichlet vers l'air, Neumann vers le solide), mémoire comptée à la configuration,
-  chemin ordinaire inchangé au bit ; essais de symétrie et de positivité.
-- [x] **P7** — branchement dans `project` en mode mobile, témoin Jacobi conservé en essai ;
-  essais d'accord avec le témoin, refus/expiration/allocation ; suite complète.
-- [x] **P8** — mesure : itérations et ms par pas, S253 128 colonnes et houle fine ; réceptions
-  S253 rejouées ; techniques présentes/absentes/domaine (ADR-131).
-- [x] **P9** — rituel §6.
+- [ ] **P2** — ADR-168 et protocole écrits avant le code : scène `--delta` (houle unidirectionnelle),
+  domaine, pas de temps, bande extrudée le long des crêtes et fondus, ce qui n'est pas revendiqué,
+  critères de fonctionnement et questions de revue.
+- [ ] **P3** — précalcul de δ dans l'afficheur (module `delta.rs`) : échantillons de B de la scène,
+  pas couplé mobile au pas de référence et au pas d'image ; essais (échantillons plans, pas reçus,
+  écart entre les deux pas en hauteur).
+- [ ] **P4** — couche δ côté GPU : tampon et paramètres, lecture Hermite le long de x, fondus,
+  bascule clavier ; vérification GPU contre CPU de la couche.
+- [ ] **P5** — captures de revue (poses de jeu, trois variantes) et demande de revue à l'utilisateur.
+- [ ] **P6** — rituel §6.
 
 ### Notes de reprise
 
-ADR-120 : 2 % décidés par l'utilisateur, budget conjoint spatial + temporel + référence ;
-seul un arbitrage explicite les change. Le rendu (`viewer/`) ne consomme aucun domaine δ.
-Repères d'usage existants : hauteur d'image 3 mm (S201), horloge 20 ms (ADR-003, Δz ≈ Aω·Δt).
-Traces S273 dans TEMP (fluidisim-s273-*.log), à réutiliser en P2.
-
-P2 : écart fin = 5,8 µm rms (0,058 % de a), pente 1,9e-5, déphasage 1,35e-3 rad à 2 s ;
-D = N(a)−N(a/2) croît sur sin θ à 0,85–0,87 × Stokes (ω₂ = 0,611(ak)²ω), indépendant de dx.
-ADR-122 : une troncature d'ordre deux ne juge pas la phase. Besoin découvert : cohérence
-de phase δ/B (B linéaire). Outil outils/usage_houle.py.
-
-P3 : coefficient d'ordre deux 1,16 % (1 ms) / 0,88 % (0,5 ms) ; troisième amplitude non
-qualifiante à la fine (1,94 %) : crête 2 cm > centre de maille 1,56 cm ; budget ADR-120
-2,26–2,43 % → non reçu, aucun seuil relevé. Traces fluidisim-s274-<dx>-<a>-<dt>.log.
-
-P4 : 2 % d'ADR-120 ≈ 3 mm d'image à Hs 4 m / ak 0,1 ; J1 demande ≈ 13 %. Aucun seuil changé.
-Banc arrêté ; réception cambrée différée (déclencheur). A289 et liste 4.21 (120 points), 8.7.
-
-P5 : référence Jacobi 279,9/279,7 ms médiane, 1 145 itérations max (secteur, 200 pas).
-ADR-167 et COUT-MOBILE-S274 écrits avant le code.
-
-P6 (branchement fait en même temps, P7 = suite) : symétrie 1,2e-9 ; 20 pas couplés 64 col.,
-266 itérations contre 4 920 (Jacobi), écart de vitesse 6e-8 pour 5,9e-3, hauteur au bit.
-
-P7 : suite debug 370+17+95 ok (17/4 ignorés), release lib 373 ok. Comptabilité mémoire
-recomptée (+832 flottants à 32×16). S253 128 : témoin Jacobi garde l'affinage ADR-153 ;
-multigrille reçoit le 1er pas en 18 itérations sans affinage (D franche 6,6e-6, D toutes 4,1e-4).
-
-P8 : 48,9/48,8 ms (×5,7), max 76,6/78,7 (×8,5), 18 itérations ; S253 128 identique ;
-houle fine 5,7752 % ; mémoire +8 %. Précision à dt = image non mesurée (prochain lot coût).
+Pas couplé mobile ≈ 49 ms à 16 384 mailles (S274) : le précalcul est hors budget et déclaré tel.
+δ x-z exige des échantillons plans : houle à `spread_turns = 0`. Similitude de Froude : le pas
+d'image à λ = 100 m équivaut en `ωdt` à ≈ 3,5 ms sur le banc de 4 m.

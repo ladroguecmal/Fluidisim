@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 20:02 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 20:04 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : aucune
+Session en cours : S275 — δ visible dans viewer/, revue de l'utilisateur
 Dernière session : S274 — précision de la houle rapportée à l'usage ; pas couplé mobile 280 → 49 ms (ADR-167)
 Session suivante : S275 — δ visible : domaine couplé rejoué dans viewer/ (1 ms et pas d'image), revue de l'utilisateur
 Maillons        : 0
