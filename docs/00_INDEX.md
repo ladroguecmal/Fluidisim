@@ -69,6 +69,7 @@
 - [Résidu progressif temporel : refus et diagnostic de quadrature](validation/RESIDU-TEMPOREL-S272.md).
 - [Bande du fond en quadrature linéaire : critères et réception](validation/BANDE-LINEAIRE-S273.md).
 - [Houle progressive : quelle précision sert l'usage](validation/HOULE-USAGE-S274.md).
+- [Coût du pas couplé mobile : multigrille](validation/COUT-MOBILE-S274.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -251,6 +252,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-164](adr/ADR-164-relaxation-hauteur-perturbative.md) | Relaxation de la hauteur perturbative dans l’éponge mobile |
 | [ADR-165](adr/ADR-165-bande-du-fond-aux-frontieres.md) | Flux de bande du fond aux frontières latérales |
 | [ADR-166](adr/ADR-166-quadrature-lineaire-de-la-bande.md) | Quadrature linéaire de la bande du fond |
+| [ADR-167](adr/ADR-167-multigrille-du-mode-mobile.md) | La multigrille préconditionne le mode à surface mobile |
 
 ## Travail et historique
 

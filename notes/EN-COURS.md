@@ -79,10 +79,10 @@ puis ouvrir le blocage suivant.
   d'ADR-120, sans le présenter comme la houle complète.
 - [x] **P4** — verdict d'usage : garanties de fonctionnement, seuils justifiés par l'usage ou
   proposés à l'utilisateur, raccord δ→rendu manquant, besoins découverts dans liste et file.
-- [>] **P5** — blocage suivant, choisi : coût du pas couplé mobile (A276, ADR-147 point 5).
+- [x] **P5** — blocage suivant, choisi : coût du pas couplé mobile (A276, ADR-147 point 5).
   *Amendement 19:39* : lot découpé en P5–P8, rituel en P9. P5 = ADR-167 et critères écrits
   avant le code (COUT-MOBILE-S274).
-- [ ] **P6** — multigrille mobile : niveaux grossiers recalculés par pas depuis les mailles
+- [>] **P6** — multigrille mobile : niveaux grossiers recalculés par pas depuis les mailles
   mouillées (Dirichlet vers l'air, Neumann vers le solide), mémoire comptée à la configuration,
   chemin ordinaire inchangé au bit ; essais de symétrie et de positivité.
 - [ ] **P7** — branchement dans `project` en mode mobile, témoin Jacobi conservé en essai ;
@@ -109,3 +109,6 @@ qualifiante à la fine (1,94 %) : crête 2 cm > centre de maille 1,56 cm ; budge
 
 P4 : 2 % d'ADR-120 ≈ 3 mm d'image à Hs 4 m / ak 0,1 ; J1 demande ≈ 13 %. Aucun seuil changé.
 Banc arrêté ; réception cambrée différée (déclencheur). A289 et liste 4.21 (120 points), 8.7.
+
+P5 : référence Jacobi 279,9/279,7 ms médiane, 1 145 itérations max (secteur, 200 pas).
+ADR-167 et COUT-MOBILE-S274 écrits avant le code.

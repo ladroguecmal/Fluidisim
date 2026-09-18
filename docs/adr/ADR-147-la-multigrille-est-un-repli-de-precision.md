@@ -73,3 +73,7 @@ Corrigée, elle s'arrête au plancher à 32 768 mailles (`D = 1,585·10⁻⁵`) 
 l'affinage d'[ADR-151](ADR-151-affinage-au-pas-fixe-et-travail-compte.md). La décision 1 reste
 appliquée tant qu'un nouvel ADR ne l'a pas remplacée ; sa prémisse de vitesse est réfutée.
 [Mesures](../validation/MULTIGRILLE-BETA-S252.md).
+
+**Note S274, 2026-09-18.** Le point 5 (« le mode à surface mobile ne l'a pas ») est remplacé par
+[ADR-167](ADR-167-multigrille-du-mode-mobile.md) : niveaux grossiers recalculés par pas depuis les
+mailles mouillées. Le chemin à couvercle et le point 1 sont inchangés.
