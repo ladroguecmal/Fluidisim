@@ -80,7 +80,7 @@ décision ne batte. Déterministe (I-03), sans allocation à l'exécution (I-06)
   état d'un domaine. Aucune logique de tri ; essais de forme et de contrat.
 - [x] **P3** — priorité `P = gameplay × perception × urgence` (ADR-012 §2) et score à hystérésis
   0,60 / 0,40 (ADR-013 §5). Essai : un candidat qui oscille autour d'un seuil ne bat pas.
-- [ ] **P4** — le sac à dos : tri par `P/C` décroissant, allocation jusqu'au budget, distribution
+- [x] **P4** — le sac à dos : tri par `P/C` décroissant, allocation jusqu'au budget, distribution
   d'un `budget_ms` par domaine retenu. Essais : budget jamais dépassé, décision déterministe.
 - [ ] **P5** — le temps : durée de vie minimale 0,75 s, délai d'extinction 1,0 s sous le seuil,
   fenêtre d'engagement 1 s. Essai : rien ne meurt avant son terme.
@@ -95,6 +95,12 @@ perception en **surface écran** et non en distance), §3 (profil : ressources s
 capacité dérivée inscrite dans un profil finit par contredire ses ressources) ; ADR-013 §5
 (seuils de départ, **tous à calibrer**) ; ADR-006 §4 (hystérésis, durée de vie, pool — le vrai
 risque est le battement d'**allocation**, pas le battement logique).
+
+**P4 : le seuil d'activation est absolu et le rapport ne le rachète pas.** Un candidat presque
+gratuit mais sous `ON` ne s'allume pas — le score dit qu'un domaine mérite d'exister, le rapport
+seulement dans quel ordre servir ceux qui le méritent. Le premier essai écrit l'ignorait et a
+échoué : c'est la bonne interaction, pas un défaut. Limite connue et non éprouvée : un gros
+candidat peut jeûner tant que de petits se présentent (banc B8, inexistant).
 
 **P3 a trouvé une ambiguïté de conception, close par ADR-170** : ADR-012 §2 ne borne pas les
 poids et `W_urgence = 1/temps` diverge, alors qu'ADR-013 §5 veut un score dans `[0,1]`. Les deux

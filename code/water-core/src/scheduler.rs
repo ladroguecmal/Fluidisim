@@ -217,6 +217,49 @@ impl Scheduler {
         self.live.retain(|l| l.active);
     }
 
+    /// Le sac à dos d'ADR-012 §1 : trier les vivants par `P/C` décroissant, allouer jusqu'à
+    /// épuisement du budget, donner à chaque retenu son `budget_ms`.
+    ///
+    /// **Le budget donné est le coût annoncé**, pas une part du reliquat. Un budget est une
+    /// **borne**, pas une enveloppe à consommer : la somme des bornes ne dépasse jamais le profil,
+    /// et c'est ce qui ferme tout chemin par lequel l'eau provoquerait un pic d'image. Un solveur
+    /// qui déborde son estimation est coupé à sa borne (contrat d'ADR-007) ; ce qui reste non
+    /// distribué est une marge, pas une perte.
+    ///
+    /// **Le rapport se compare en croix**, `P_a·C_b` contre `P_b·C_a` : aucune division, donc rien
+    /// à décider pour un coût nul, et l'égalité se départage par identité — sans quoi la décision
+    /// dépendrait de l'ordre de soumission.
+    ///
+    /// Un candidat trop gros est **sauté**, pas bloquant : les suivants remplissent le reliquat.
+    /// Un gros domaine peut donc jeûner tant que de petits se présentent — limite connue, à
+    /// éprouver au banc B8, qui n'existe pas.
+    pub fn allocate(&mut self) {
+        self.grants.clear();
+        self.bids.sort_unstable_by(|a, b| {
+            (b.priority() * a.cost_ms)
+                .total_cmp(&(a.priority() * b.cost_ms))
+                .then(a.id.cmp(&b.id))
+        });
+        let (mut ms, mut blocks) = (0f32, 0u32);
+        for bid in &self.bids {
+            if !self.live.iter().any(|l| l.id == bid.id && l.active) {
+                continue;
+            }
+            if ms + bid.cost_ms > self.profile.cpu_sim_ms || blocks + bid.blocks > self.profile.blocks {
+                continue;
+            }
+            ms += bid.cost_ms;
+            blocks += bid.blocks;
+            self.grants.push(Grant { id: bid.id, budget_ms: bid.cost_ms });
+        }
+    }
+
+    /// Somme des budgets distribués. Ne dépasse jamais `profile.cpu_sim_ms` : c'est la propriété
+    /// que le banc doit défendre en premier.
+    pub fn granted_ms(&self) -> f32 {
+        self.grants.iter().map(|g| g.budget_ms).sum()
+    }
+
     /// Les domaines que la décision laisse vivants, dans l'ordre où ils se sont allumés.
     pub fn active(&self) -> impl Iterator<Item = DomainId> + '_ {
         self.live.iter().filter(|l| l.active).map(|l| l.id)
@@ -369,6 +412,100 @@ mod tests {
         s.submit(bid(1, 0.9, 1., 1., 1.)).unwrap();
         s.decide();
         assert!(s.is_active(DomainId(1)) && !s.is_active(DomainId(2)));
+    }
+
+    /// La propriété à défendre avant toutes les autres (ADR-012 §1) : la somme des budgets
+    /// distribués ne dépasse jamais le profil, quelle que soit la demande.
+    #[test]
+    fn le_budget_n_est_jamais_depasse_s278() {
+        let mut s = scheduler(8);
+        s.begin();
+        // Six domaines qui demandent 0,8 ms chacun, soit 4,8 ms pour un budget de 2 ms.
+        for i in 0..6 {
+            s.submit(bid(i, 0.9, 1., 1., 0.8)).unwrap();
+        }
+        s.decide();
+        s.allocate();
+        assert_eq!(s.active().count(), 6, "les six veulent vivre");
+        assert_eq!(s.grants().len(), 2, "deux seulement sont financés");
+        assert!(s.granted_ms() <= s.profile().cpu_sim_ms, "{} ms", s.granted_ms());
+    }
+
+    /// Le tri d'ADR-012 §1 est par `P/C`, pas par `P` : un domaine deux fois moins prioritaire mais
+    /// dix fois moins cher passe devant. C'est tout l'intérêt du sac à dos.
+    #[test]
+    fn le_meilleur_rapport_passe_devant_la_meilleure_priorite_s278() {
+        let mut s = scheduler(4);
+        s.begin();
+        s.submit(bid(1, 1., 1., 1., 1.75)).unwrap();  // P = 1,00  C = 1,75  → 0,57
+        s.submit(bid(2, 0.7, 1., 1., 0.25)).unwrap(); // P = 0,70  C = 0,25  → 2,80
+        s.decide();
+        s.allocate();
+        assert_eq!(s.grants()[0].id, DomainId(2), "le rapport commande");
+        // Et le budget restant sert au plus cher : 0,25 + 1,75 = 2,0 ms, exactement le profil.
+        assert_eq!(s.grants().len(), 2);
+        assert_eq!(s.granted_ms(), 2.);
+    }
+
+    /// Le seuil d'activation est **absolu**, et le rapport ne le rachète pas : un candidat presque
+    /// gratuit mais sous `ON` ne s'allume pas. Le score dit qu'un domaine mérite d'exister, le
+    /// rapport dit seulement dans quel ordre on sert ceux qui le méritent.
+    #[test]
+    fn un_rapport_excellent_ne_rachete_pas_un_score_trop_bas_s278() {
+        let mut s = scheduler(4);
+        s.begin();
+        s.submit(bid(1, 0.5, 1., 1., 0.01)).unwrap(); // rapport 50, score 0,50 < ON
+        s.decide();
+        s.allocate();
+        assert!(!s.is_active(DomainId(1)));
+        assert!(s.grants().is_empty());
+    }
+
+    /// Un candidat trop gros est sauté, et les suivants remplissent le reliquat plutôt que de le
+    /// perdre.
+    #[test]
+    fn un_candidat_trop_gros_ne_bloque_pas_la_file_s278() {
+        let mut s = scheduler(4);
+        s.begin();
+        s.submit(bid(1, 1., 1., 1., 3.0)).unwrap(); // seul, il dépasse le budget de 2 ms
+        s.submit(bid(2, 0.9, 1., 1., 0.5)).unwrap();
+        s.decide();
+        s.allocate();
+        assert_eq!(s.grants().len(), 1);
+        assert_eq!(s.grants()[0].id, DomainId(2));
+    }
+
+    /// L'ordre de soumission ne doit rien changer : deux candidats de même rapport se départagent
+    /// par identité, jamais par l'ordre d'arrivée (I-03).
+    #[test]
+    fn l_ordre_de_soumission_ne_change_pas_la_decision_s278() {
+        let decision = |ordre: [u32; 3]| {
+            let mut s = scheduler(4);
+            s.begin();
+            for id in ordre {
+                s.submit(bid(id, 0.9, 1., 1., 0.5)).unwrap();
+            }
+            s.decide();
+            s.allocate();
+            s.grants().iter().map(|g| g.id).collect::<Vec<_>>()
+        };
+        assert_eq!(decision([1, 2, 3]), decision([3, 1, 2]));
+        assert_eq!(decision([1, 2, 3]), decision([2, 3, 1]));
+    }
+
+    /// Un domaine vivant mais non financé ne s'éteint pas : l'hystérésis porte sur le score, pas
+    /// sur le budget. Ce qu'il devient après plusieurs pas sans budget relève de la dégradation
+    /// (ADR-012 §4), qui n'est pas écrite.
+    #[test]
+    fn un_vivant_non_finance_reste_vivant_s278() {
+        let mut s = scheduler(4);
+        s.begin();
+        s.submit(bid(1, 1., 1., 1., 1.5)).unwrap();
+        s.submit(bid(2, 0.9, 1., 1., 1.5)).unwrap();
+        s.decide();
+        s.allocate();
+        assert_eq!(s.grants().len(), 1);
+        assert!(s.is_active(DomainId(1)) && s.is_active(DomainId(2)));
     }
 
     #[test]
