@@ -779,3 +779,82 @@ fn production_background_extended_feeds_coupled_mobile_steps_s254(){
     assert!(v.u.iter().chain(&v.w).chain(&v.p).chain(&v.eta).all(|x|x.is_finite()));
     assert!(b.differential_local([0.,0.,0.03],SimTime(0),1025.).is_err(),"ADR-113 refuse toujours z > 0");
 }
+
+
+#[test]
+fn surface_sponge_exact_decay_compensation_and_interior_s268() {
+    let sponge=Sponge{width_m:2.,rate_per_s:4.};
+    for sign in [-1.,1.] {
+        for steps in [1,1000] {
+            let mut v=volume();
+            let rest=3.;
+            v.set_free_surface(&[rest;16],rest).unwrap();
+            for i in 0..16 {v.eta[i]+=sign*0.05;v.eta_roundoff[i]=sign*3e-8;}
+            let initial=v.eta.clone();let remainders=v.eta_roundoff.clone();
+            let dt=0.25/steps as f64;
+            for _ in 0..steps {v.relax_surface(sponge,dt,&mut Control::unlimited()).unwrap();}
+            for i in 0..16 {
+                let x=(i as f64+0.5)*0.5;
+                let ramp=(1.-x.min(8.-x)/2.).max(0.);
+                let amplitude=initial[i] as f64-rest as f64-remainders[i] as f64;
+                let expected=rest as f64+amplitude*(-4.*ramp*ramp*0.25).exp();
+                let got=v.eta[i] as f64-v.eta_roundoff[i] as f64;
+                let bound=8.*f32::EPSILON as f64*rest as f64
+                    +8.*f32::EPSILON as f64*steps as f64*amplitude.abs();
+                assert!((got-expected).abs()<=bound,"{steps} {i}: {got} / {expected}");
+                assert!((got-rest as f64).abs()<=amplitude.abs()+bound);
+                if ramp==0. {
+                    assert_eq!(v.eta[i].to_bits(),initial[i].to_bits());
+                    assert_eq!(v.eta_roundoff[i].to_bits(),remainders[i].to_bits());
+                }
+            }
+            let before=(v.eta.clone(),v.eta_roundoff.clone());
+            v.relax_surface(Sponge::default(),0.25,&mut Control::unlimited()).unwrap();
+            assert!(same_bits(&v.eta,&before.0)&&same_bits(&v.eta_roundoff,&before.1));
+        }
+    }
+    // Un reliquat sub-ulp doit lui aussi décroître, pas revenir intégralement au pas suivant.
+    let mut v=volume();v.rest=3.;v.eta.fill(3.);v.eta_roundoff.fill(1e-7);
+    let f=sponge.factor(0.25,8.,0.25);
+    v.relax_surface(sponge,0.25,&mut Control::unlimited()).unwrap();
+    assert!((v.eta_roundoff[0]-f*1e-7).abs()<1e-14);
+}
+
+#[test]
+fn mobile_step_consumes_surface_sponge_without_damping_background_s268() {
+    let wave=standing::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let nx=16;
+    let mut a=standing_case(nx,&wave,&vec![2.;nx]);
+    let mut b=standing_case(nx,&wave,&vec![2.;nx]);
+    let sponge=Sponge{width_m:0.5,rate_per_s:4.};
+    let mut changed=0;
+    for n in 0..20 {
+        // Témoin depuis exactement le même état, nouvelle préparation à chaque pas.
+        b.u.copy_from_slice(&a.u);b.w.copy_from_slice(&a.w);b.p.copy_from_slice(&a.p);
+        b.eta.copy_from_slice(&a.eta);b.eta_roundoff.copy_from_slice(&a.eta_roundoff);
+        let (u,w)=standing_faces(&a,&wave,n as f64*0.001);
+        let snapshots=(format!("{u:?}"),format!("{w:?}"));
+        let bg=BackgroundFaces{domain:a.domain,time:SimTime(n*1000),density:1025.,gravity:9.81,u:&u,w:&w};
+        HEIGHT_RELAXATION_OFF.with(|v|v.set(true));
+        let witness=b.step_perturbation_mobile(bg.time,1000,4000,1_000_000,&bg,sponge,&Jobs,&Clock);
+        HEIGHT_RELAXATION_OFF.with(|v|v.set(false));
+        assert_eq!(witness.unwrap().advanced_us,1000);
+        let r=a.step_perturbation_mobile(bg.time,1000,4000,1_000_000,&bg,sponge,&Jobs,&Clock).unwrap();
+        assert_eq!(r.advanced_us,1000);
+        assert!(same_bits(&a.u,&b.u)&&same_bits(&a.w,&b.w)&&same_bits(&a.p,&b.p));
+        for i in 0..nx {
+            let x=(i as f64+0.5)*2./nx as f64;
+            let ramp=(1.-x.min(2.-x)/0.5).max(0.);
+            let factor=(-4.*ramp*ramp*0.001).exp();
+            let expected=2.+(b.eta[i] as f64-2.-b.eta_roundoff[i] as f64)*factor;
+            let got=a.eta[i] as f64-a.eta_roundoff[i] as f64;
+            assert!((got-expected).abs()<8.*f32::EPSILON as f64*2.);
+            if ramp==0. {assert!(same_bits(&a.eta[i..i+1],&b.eta[i..i+1]));}
+            changed+=usize::from(a.eta[i].to_bits()!=b.eta[i].to_bits()
+                || a.eta_roundoff[i].to_bits()!=b.eta_roundoff[i].to_bits());
+        }
+        assert_eq!((format!("{u:?}"),format!("{w:?}")),snapshots);
+    }
+    assert!(changed>0,"le témoin doit distinguer la relaxation");
+    println!("S268 integration : 20 pas, {changed} hauteurs/restes modifies, fond intact");
+}

@@ -66,6 +66,12 @@ fn surface_residuals_on() -> bool { !SURFACE_RESIDUALS_OFF.with(|c| c.get()) }
 #[inline]
 fn surface_residuals_on() -> bool { true }
 
+// Témoin S268 : même pas et éponge de vitesse, sans relaxation de hauteur.
+#[cfg(test)]
+thread_local! {
+    static HEIGHT_RELAXATION_OFF: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
+}
+
 fn validate_sample(s: &BackgroundSample, rho: f32) -> Result<(), Error> {
     s.momentum_residual(rho, 0.).map_err(|_| Error::NotFinite)?;
     if s.u[1] != 0. || s.du_dt[1] != 0. || s.grad_eta[1] != 0.
@@ -84,6 +90,24 @@ fn extra(s: &BackgroundSample, axis: usize, v: [f32; 2], dv: [f32; 2], rho: f32)
 }
 
 impl Volume {
+    /// ADR-164 : étape locale exacte de relaxation de η', après transport. Le reste
+    /// compensé fait partie du champ amorti ; le fond n'entre pas dans cette opération.
+    fn relax_surface(&mut self, sponge: Sponge, dt: f64, ctl: &mut Control) -> Result<(), Error> {
+        if sponge.rate_per_s == 0. { return Ok(()); }
+        let dx = self.domain.dx;
+        let length = self.domain.nx as f32 * dx;
+        for i in 0..self.domain.nx {
+            ctl.poll(Phase::Correct)?;
+            let factor = sponge.factor((i as f32 + 0.5)*dx, length, dt);
+            if factor == 1. { continue; }
+            let increment = (factor - 1.)*(self.eta[i] - self.rest)
+                - factor*self.eta_roundoff[i];
+            let height = self.eta[i] + increment;
+            self.eta_roundoff[i] = (height - self.eta[i]) - increment;
+            self.eta[i] = height;
+        }
+        Ok(())
+    }
     /// ADR-152 : géométrie totale `ζ = η' + ζ_fond` et valeurs fantômes du fond, depuis les
     /// échantillons du pas. `ζ_fond` est le champ `eta` des faces w de la colonne, identique au bit
     /// sur toute la colonne. Allume `surface_coupled` ; l'appelant l'éteint sur tout chemin de sortie.
@@ -238,7 +262,8 @@ impl Volume {
     /// fantômes corrigées du fond, transport de `η'` avec la bande du fond. `eta` porte `repos + η'` ;
     /// les échantillons sont comptés depuis le repos, plan moyen d'un fond **linéaire** prolongé de
     /// façon incompressible, sans flux au fond du domaine. Refus atomiques ; expiration = zéro
-    /// avancée ; u/w/p, `η'` et restes restaurés. Pas d'affinage ADR-150/151 dans ce mode.
+    /// avancée ; u/w/p, `η'` et restes restaurés. Affinage ADR-153 et relaxation de hauteur
+    /// ADR-164 : Sponge amortit aussi η' après transport, sans toucher au fond.
     pub fn step_perturbation_mobile(&mut self, time: SimTime, duration_us: u64, max_iters: u32,
         budget_us: u64, bg: &BackgroundFaces<'_>, sponge: Sponge,
         jobs: &dyn JobSystem, clock: &dyn MonotonicClock) -> Result<SurfaceReport, Error> {
@@ -296,6 +321,10 @@ impl Volume {
             if report.degraded {return Err(Error::Convergence);}
             self.extrapolate_mobile(&mut ctl)?;
             self.transport_coupled(transport,bg,&mut ctl)?;
+            #[cfg(test)] let relax = !HEIGHT_RELAXATION_OFF.with(|v| v.get());
+            #[cfg(not(test))] let relax = true;
+            if relax { self.relax_surface(sponge,dt,&mut ctl)?; }
+
             ctl.check(Phase::Validate)?;
             for value in self.u.iter().chain(&self.w).chain(&self.p).chain(&self.eta)
                 .chain(&self.eta_roundoff).chain(&self.us).chain(&self.ws)

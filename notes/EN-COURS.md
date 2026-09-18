@@ -67,8 +67,8 @@ Objectif : faire progresser les bords ouverts du pas volumique couplé J2.
 
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — lire les contrats et le code, définir le lot borné et ses critères avant construction.
-- [>] **P3** — construire le raccordement retenu et ses contrôles analytiques ciblés.
-- [ ] **P4** — vérifier le chemin consommateur et les régressions ; publier preuves et limites.
+- [x] **P3** — construire le raccordement retenu et ses contrôles analytiques ciblés.
+- [>] **P4** — vérifier le chemin consommateur et les régressions ; publier preuves et limites.
 - [ ] **P5** — rituel §6 : journal, file entière, feuille de route, index et jeton.
 
 ### Notes de reprise
@@ -78,3 +78,7 @@ perturbative et éponge aux bords, sans prétendre recevoir les frontières du t
 
 P2 : absence confirmée de relaxation de hauteur ; lot ADR-164, critères avant code.
 Frontière transparente et réflexion de paquet restent la suite, pas reçues par ce lot.
+
+P3 : ADR-164 intégré après transport, somme compensée et reste amortis.
+Deux tests unitaires passent ; consommateur 20 pas, 160 hauteurs/restes changés.
+Test runtime : 607 expirations, rollback/reprise au bit, zéro allocation. Suite complète à lancer.
