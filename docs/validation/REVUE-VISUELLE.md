@@ -486,3 +486,54 @@ Revue demandée le 2026-09-18 : [DELTA-VISIBLE-S275](DELTA-VISIBLE-S275.md), cap
 mouvement. Mesure préalable : δ change 10 à 24 % des pixels de plus de 4 niveaux à hauteur d'œil
 et en incidence rasante, rien vue d'en haut ; le pas d'image ne se distingue pas du pas de 4 ms.
 Aucune conclusion d'invisibilité n'est tirée avant le verdict.
+
+### Verdict R10 — reçu S277, 2026-09-18
+
+Deux retours, tous deux sur la **scène**, aucun sur la couche δ elle-même :
+
+1. **« Le motif de surface est trop répétitif et ne fait pas réaliste ; la mer a trop de petites
+   variations. »**
+2. **« Les variations, vagues et vaguelettes de la mer doivent interagir avec l'onde. »**
+
+L'utilisateur a par ailleurs dit ne pas savoir quel retour on attendait de lui. C'est un défaut de
+la demande, pas de la réponse : R10 lui a montré une scène de mesure en lui demandant un jugement
+esthétique, sans dire que la mer y était volontairement appauvrie.
+
+#### Ce que le premier retour mesure — `code/water-core/examples/bandes_s277.rs`
+
+| | houle de `--delta` | mer de la scène S201 |
+|---|---|---|
+| longueurs d'onde | 40,1 à 198,7 m, rapport **5,0** | 3,7 à 210,7 m, rapport **56,2** |
+| étalement des directions | **0,00°** | 87,19° |
+| écart-type de `η` **le long des crêtes** | **0,0000 m** | 0,2872 m |
+| écart-type de `η` en travers | 0,2906 m | 0,3048 m |
+
+La houle de `--delta` ne contient **aucune vague de moins de 40 m** et ne varie **pas du tout** le
+long de ses crêtes : le même profil de 128 colonnes est répété à l'identique sur 200 m de large.
+Le constat de l'utilisateur est donc exact, et prévisible : c'est la mer la plus pauvre que le
+dépôt sache produire.
+
+Elle n'a pas été choisie pour son aspect. Le domaine δ est une **tranche 2D**,
+`Domain { nx, nz, dx }` — aucune dimension `y`. Une houle étalée ne serait pas constante le long
+des crêtes, et la tranche ne saurait pas la porter ; l'étalement nul est la condition pour que les
+échantillons du fond soient exactement plans (`viewer/src/delta.rs`, ADR-168).
+
+#### Ce que le second retour désigne
+
+Les vaguelettes que l'utilisateur voit à l'écran sont la **queue spectrale S256**, un habillage de
+pentes par pixel **non couplé à δ** — le protocole de S275 le dit déjà. Elles ne peuvent donc pas
+interagir avec l'onde : elles ne sont pas dans le domaine simulé. Et δ n'a pas d'onde propre à
+faire interagir : le domaine naît au repos sous la houle, et ne porte que la correction couplée de
+celle-ci, au plus 10,6 cm pour `Hs` = 2 m.
+
+Les deux retours désignent ainsi une seule et même limite, structurelle : **δ est aujourd'hui une
+tranche verticale sous une houle idéalisée**. Ce que l'utilisateur veut voir — une onde qui
+traverse une vraie mer et s'y déforme — demande δ sur les deux dimensions horizontales, c'est-à-dire
+**δ général** au sens d'[ADR-127](../adr/ADR-127-ambition-complete-construction-progressive.md).
+
+#### Ce que ce verdict ne dit pas
+
+Il ne rejette rien de mesuré en S275 et S276 : la couche δ reste identique au bit entre rejeu et
+direct, son coût reste celui de COUT-DIRECT-S276, et la question « le pas de 16 ms suffit-il ? »
+reste tranchée par la mesure, pas par l'image. **Aucune conclusion d'invisibilité de δ n'est tirée**
+— la scène ne permettait pas de la poser.

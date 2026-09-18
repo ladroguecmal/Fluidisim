@@ -71,7 +71,7 @@ annoncée quand un calcul est nécessaire.
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — cache sous `viewer/` quel que soit le dossier courant ; `--delta-direct` sans
   rejeux ; message et progression du précalcul ; essai du lancement depuis la racine.
-- [ ] **P3** — verdict R10 : les deux retours de l'utilisateur, leurs causes mesurées, la suite
+- [x] **P3** — verdict R10 : les deux retours de l'utilisateur, leurs causes mesurées, la suite
   en file. *(Découpage déclaré en cours de session : le verdict est arrivé pendant S277.)*
 - [ ] **P4** — rituel §6.
 
@@ -91,7 +91,10 @@ cache : une revue lancée depuis la racine écrivait ses images à la racine.
 **Verdict R10 reçu le 2026-09-18, en deux points** : (1) le motif de surface est trop répétitif,
 pas réaliste ; (2) les vagues et vaguelettes doivent interagir avec l'onde.
 
-Causes lues dans le code avant d'écrire le verdict, à vérifier en P3 :
+Causes **mesurées** en P3 par `code/water-core/examples/bandes_s277.rs` — houle δ contre mer
+S201 : λ 40,1–198,7 m (rapport 5,0) contre 3,7–210,7 m (56,2) ; étalement 0,00° contre 87,19° ;
+écart-type de η le long des crêtes **0,0000 m** contre 0,2872 m. Le constat de l'utilisateur est
+exact. Lecture du code qui l'explique :
 - la houle de `--delta` est la plus pauvre du dépôt **par choix de mesure** : `spread_turns: 0.`
   (étalement nul), bande `0,7–1,6 fp`, 32 composantes colinéaires. La scène S201 a `spread_turns:
   0.25` et une bande `0,5–4 fp` ; `--houle` y assemble en plus une houle longue et 64 composantes
