@@ -3723,3 +3723,14 @@ Le pas réel tend vers ce transport à petit dt. Pas d'ordre deux spatial ni de
 réception après propagation revendiqués. Déclencheur S272 : oracle temporel
 indépendant du résidu d'ordre deux, puis fenêtre sans retour contaminant.
 [Preuve](../validation/HOULE-PROGRESSIVE-S271.md).
+
+
+**Suivi A92/A50 — S272, 2026-09-18 (sévérités conservées).** L'oracle modal
+Neumann d'ordre deux reçoit ses contrôles indépendants, mais le résidu progressif
+MAC manque 2 % : 8,68 % à dx0,03125 sur 2 s. Demi-dt 8,62 %, sensibilité 0,669 % ;
+amplitude moitié 6,58 %, normalisation a² variant de 2,392 % : ne pas tout attribuer
+au solveur quand l'ordre deux n'est pas qualifié. Erreur de quadrature verticale
+isolée : bande partielle évaluée au centre de cellule, 1,60 % contre intégrale
+exacte ; reconstruction linéaire 0,0162 % sur ce flux. Déclencheur S273 : intégrer
+la reconstruction au transport réel (intérieur/bords), puis refaire le verdict,
+sans extrapoler ce gain isolé à l'erreur temporelle. [Preuve](../validation/RESIDU-TEMPOREL-S272.md).

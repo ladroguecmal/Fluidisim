@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-18 18:49 +02:00
+JETON            : libre
+Battement        : 2026-09-18 18:51 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S272
-Dernière session : S271 — démarrage progressif contrôlé, liste du projet actualisée ; durée utile non reçue
-Session suivante : S272 — référence temporelle indépendante et résidu progressif sur durée utile
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S272 — résidu temporel refusé à 8,68 %, erreur de quadrature de bande isolée
+Session suivante : S273 — reconstruire linéairement les flux de bande dans le pas réel et recevoir le correctif
+Maillons        : 2
 
 ```
 

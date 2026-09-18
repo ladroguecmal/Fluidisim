@@ -253,7 +253,10 @@ hauteur artificielle est corrigé, 638 expirations/reprises sans allocation
 ([preuve](validation/FOND-TRAVERSANT-S270.md)). **S271 : démarrage progressif contrôlé**, erreur cinématique
 initiale 0,58 % à dx=0,03125, décroissante, pas réel cohérent à petit dt
 ([preuve](validation/HOULE-PROGRESSIVE-S271.md)). La houle progressive sur durée
-utile reste à recevoir contre une référence temporelle indépendante. La fermeture extérieure de la perturbation reste réfléchissante ;
+utile **refusée S272** : écart de résidu 8,68 % sur 2 s à dx=0,03125,
+contre oracle modal indépendant ; contrôles de dt/amplitude encore insuffisants.
+Erreur de quadrature de bande isolée, reconstruction linéaire à intégrer S273
+([preuve](validation/RESIDU-TEMPOREL-S272.md)). La fermeture extérieure de la perturbation reste réfléchissante ;
 ces reçus bornés ne valent pas frontière transparente universelle.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;

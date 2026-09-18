@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S272 — en cours
+Session : S272 — terminée
 Agent : Codex, GPT-6 ; fichiers, git, cargo et Python.
 Entrée : « continue », master propre b92ba0b, copie unique, jeton libre.
 Objectif : comparer le résidu progressif sur une durée finie à un oracle temporel indépendant.
@@ -69,7 +69,7 @@ Objectif : comparer le résidu progressif sur une durée finie à un oracle temp
 - [x] **P2** — référence d'ordre deux et critères déclarés avant campagne.
 - [x] **P3** — oracle et consommateur réel, contrôles indépendants de l'instrument.
 - [x] **P4** — mesures spatiales/temporelles, verdict ou diagnostic, pas de seuil relevé.
-- [>] **P5** — rituel §6, liste/file, journal, index et jeton.
+- [x] **P5** — rituel §6, liste/file, journal, index et jeton.
 
 ### Notes de reprise
 

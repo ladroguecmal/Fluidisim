@@ -13751,3 +13751,38 @@ l'oracle. Cette étape garde le critère d'arrêt avant toute campagne.
 I-04/I-05/I-06/I-08 inchangés dans le produit, I-14 oracle dérivé et fixtures
 explicites. δ général, V, B2, bathymétrie et seconde cible restent dans la file.
 Jeton libre ; aucune copie isolée à fermer, aucun arbitrage utilisateur requis.
+
+
+## S272 — Résidu temporel refusé, quadrature de bande isolée
+
+**2026-09-18, Codex GPT-6.** Entrée « continue », master propre b92ba0b, copie unique.
+Plan 345986b, contrat 6629ce1, instrument 77bbd8c, mesures 11cf3de. Pas de nouvel ADR.
+Le reçu temporel J2 manque encore, priorité comparée à V et au coût ; aucun nouveau
+lot cosmétique. [Preuve](../docs/validation/RESIDU-TEMPOREL-S272.md).
+
+**Résultat : refus explicite.** Oracle modal indépendant avec Neumann pour la
+perturbation, conditions de surface à l'ordre deux dérivées ; trois tests Python
+(projections, RK4, limites des conditions exactes) passent. Les cinq simulations
+consomment le pas réel et terminent 6 000 pas. Erreur de η' seul sur 2 s : 22,52 /
+13,04 / 8,68 % aux trois mailles. Demi-dt 8,62 %, sensibilité 0,669 % >0,5 % ;
+amplitude moitié 6,58 %, champs/a² différant de 2,392 % >1 %. Aucun seuil relevé.
+Ne pas attribuer tout l'écart au solveur : l'approximation d'ordre deux n'est pas
+qualifiée à ces amplitudes. L'oracle 128/256 modes varie de <0,053 %.
+
+**Diagnostic et limite :** la quadrature de bande utilise U au centre de cellule,
+alors que la bande peut être partielle. Intégrale indépendante : erreur 1,60 %,
+reconstruction linéaire avec ∂zU déjà fourni 0,0162 % sur le flux fin. C'est un
+correctif concret à construire, pas une preuve que toute l'erreur temporelle vient
+de là. Aucun code produit changé ; suite complète S270 non rejouée. Aucun rendu.
+
+**Maillons 2. Suite S273 : construction de la reconstruction linéaire dans le
+transport réel**, faces intérieures/extérieures, bandes signées et coupées,
+identité du fond nul et transaction. Ce lot lève un défaut mesuré de J2 et prime
+V ou le coût dans cette suite locale ; un troisième lot d'instruments seuls serait
+injustifié. A276 reste prioritaire avant toute étude de coût. Rejouer ensuite le
+résidu et qualifier dt/amplitude ; pas de campagne infinie de raffinements.
+
+**Rituel :** file active entière relue, J2, A92/A50, index et liste utilisateur
+actualisés (décompte inchangé 119=3+48+68). I-04/I-05/I-06/I-08 produit inchangés,
+I-14 oracle dérivé et critères conservés. δ général, V, B2, bathymétrie et seconde
+cible gardent leurs déclencheurs. Jeton libre, aucune copie isolée à fermer.
