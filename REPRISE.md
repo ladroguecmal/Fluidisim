@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 07:30 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 07:42 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S268
 Dernière session : S267 — cuisson sillage −46 % au bit, GPU eau médian 1,74 ms ; CPU et pointes ouverts
 Session suivante : S268 — bords ouverts du pas couplé J2 (relaxation de hauteur et éponge)
 Maillons        : 0

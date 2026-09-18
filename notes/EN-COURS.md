@@ -58,32 +58,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S267 — terminée
-Agent : Codex, GPT-6 ; fichiers, git, cargo, Python et GPU local.
-Entrée : « continue ». Copie unique master propre c476631, jeton libre.
-Objectif : réduire le coût de cuisson GPU du sillage en préservant le rendu accepté et I-09.
+Session : S268 — en cours
+Agent : Codex, GPT-6 ; fichiers, git, cargo, Python, GPU local et accès web.
+Entrée : « continue ». Copie unique master propre c9fd0d3, jeton libre.
+Objectif : faire progresser les bords ouverts du pas volumique couplé J2.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — lectures, diagnostic du calcul du sillage et contrat de réception avant code ; comparer avec J2.
-- [x] **P3** — construire une optimisation bornée avec témoin conservé et vérifications ciblées.
-- [x] **P4** — recevoir précision, images et coût ; retenir ou rejeter sur les critères déclarés.
-- [x] **P5** — rituel §6, file entière, journal, index et jeton.
+- [>] **P2** — lire les contrats et le code, définir le lot borné et ses critères avant construction.
+- [ ] **P3** — construire le raccordement retenu et ses contrôles analytiques ciblés.
+- [ ] **P4** — vérifier le chemin consommateur et les régressions ; publier preuves et limites.
+- [ ] **P5** — rituel §6 : journal, file entière, feuille de route, index et jeton.
 
 ### Notes de reprise
 
-S266 : GPU eau 2,24–2,26 ms dont sillage 1,06–1,08 ms. Ne pas réduire la cadence
-sans preuve d'erreur et I-09. Aspect R7 accepté, optimisation doit le préserver.
-
-P3 : huit accumulateurs nommés, témoin --sillage-cuisson-directe, bancs intégrés.
-Tests hôte 19/1/0. Vingt comparaisons de grilles au bit et retours temporels reçus.
-Premier coût : cuisson 0,585/0,574 ms contre 1,083/1,064 ; eau 1,744/1,737 ms.
-Pointe référence 2,962 ms à conserver ; images et réception spectrale encore à faire.
-
-P4 : sept images au bit S266, 36 cas spectraux <=0,340 mm. Deux passages de coût
-reçus (46 % cuisson, 22–23 % total). Premier maximum 2,962 ms conservé ; second
-maximum 1,836 ms. CPU toujours ~4,1 ms. Preuve CUISSON-SILLAGE-S267 complète.
-
-P5 : rituel terminé ; suite S268 bords ouverts J2. Coût CPU et pointes gardés dans
-la file, critères et limites dans CUISSON-SILLAGE-S267. Copie unique.
+Le rendu accepté reste celui de S267. Lot physique distinct : relaxation de la hauteur
+perturbative et éponge aux bords, sans prétendre recevoir les frontières du total ni B4 global.
