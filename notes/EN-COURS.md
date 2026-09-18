@@ -66,8 +66,8 @@ Objectif : éprouver la houle progressive traversante et actualiser LISTE-PROJET
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [>] **P2** — choisir l'oracle indépendant et déclarer les critères ; actualiser la liste sur preuves.
-- [ ] **P3** — construire le cas progressif et ses contre-épreuves.
+- [x] **P2** — choisir l'oracle indépendant et déclarer les critères ; actualiser la liste sur preuves.
+- [>] **P3** — construire le cas progressif et ses contre-épreuves.
 - [ ] **P4** — réception, limites, mise à jour finale de la liste et décompte.
 - [ ] **P5** — rituel §6, file entière, journal, index et jeton.
 
@@ -79,3 +79,7 @@ l'affinage du rendu accepté : vérifier le passage d'un fond variable est néce
 Liste utilisateur encore datée S263 ; corriger notamment 4.6/4.7, 8.10 et 9.11,
 ainsi que l'ancienne absence A288 déjà close S262. Ne pas cocher le périmètre final
 à partir d'un reçu local.
+
+P2 : liste actualisée sur S262–S270, périmètres finaux toujours partiels.
+Oracle initial W(ζ)-W(0)-U(ζ)ζ_x déclaré avant campagne ; ne pas viser η'=0
+pour une houle linéaire. Réception temporelle entière explicitement non acquise.

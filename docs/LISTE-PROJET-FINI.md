@@ -23,8 +23,9 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S263, 2026-09-17** (remplissage partiel, points 2.1, 2.2, 8.2, 8.8, 8.9, 8.10, 9.11, 10.9 et 13.2). Voir le décompte en
-fin de document.
+**État au S271, 2026-09-18** — actualisation demandée par l’utilisateur, sur les preuves
+S262–S270 ; les résultats S271 sont précisés aux points concernés. Le décompte porte
+sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 
 ---
 
@@ -58,8 +59,9 @@ fin de document.
   pointues CWM : rugosité et pointe des pentes dans les mesures de Cox–Munk (S260, `--vagues`),
   ajustées à leurs valeurs centrales (S261, `--modulation`) ; vent de scène, rugosité conforme à
   Cox–Munk à chaque vent (S263, `--vent`).
-  Manquent l'anisotropie et l'asymétrie des pentes, la cohérence avec les requêtes (A288), B1
-  complet et plusieurs régions.
+  Requête CWM cohérente avec l'image à 0,30 mm (S262, A288 close, ADR-159).
+  Manquent l'anisotropie, l'asymétrie des pentes, B1 complet et plusieurs régions ;
+  le branchement de la requête au jeu reste au point 10.9.
 - [ ] **2.2 Houles longues, mers croisées, marée, niveau moyen variable** — *partiel* : mer à plusieurs
   systèmes avec étalement `cos^2s` (ADR-156, S259), houle de 225 m dans la scène déclarée `--houle`,
   verdict R3 attendu. Manquent la marée, le niveau moyen variable, des houles issues d'une météo et
@@ -108,10 +110,15 @@ fin de document.
   *partiel* : naissance à zéro reçue sous fond couplé (S251, S253). Manquent la croissance, la
   réduction et la disparition.
 - [ ] **4.6 Entrée des vagues de B/W dans le domaine** — *partiel* : source volumique, surface
-  mobile couplée, fond B prolongé (ADR-149 à 154), en bassin à murs ; B4 partiel. Manquent les bords ouverts et
-  W au-dessus du plan moyen.
+  mobile couplée, fond B prolongé (ADR-149 à 154). Flux de bande aux frontières reçus
+  sur courant/niveau uniformes (S270, [preuve](validation/FOND-TRAVERSANT-S270.md), ADR-165).
+  Manquent la houle progressive traversante reçue sur une durée utile, les frontières
+  générales du total et W au-dessus du plan moyen ; B4 reste partiel.
 - [ ] **4.7 Frontière sans réflexion ni rupture visible** (C05) — *partiel* : éponge quadratique
-  sur la vitesse (S250). Manquent les bords ouverts, la relaxation de la hauteur et C05 sur le système.
+  sur la vitesse (S250) et relaxation de hauteur reçue (S268, ADR-164). Effet du bord
+  absorbant 0,14–0,16 % sur un paquet à fond nul, par différence contrôlée aux domaines
+  longs ([S269](validation/REFLEXION-PAQUET-S269.md)). Manquent les autres régimes,
+  la transparence générale et C05 sur le système ; la mesure brute S269 reste refusée.
 - [ ] **4.8 Sortie des perturbations vers W** (transduction δ→W, W local cosmétique ; coupure W–δ et `λ_cut` de B2) — *absent*.
 - [ ] **4.9 Fusion et séparation de domaines** sans rupture — *absent*.
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
@@ -186,7 +193,9 @@ fin de document.
 - [ ] **8.2 LOD de la géométrie de surface** — *partiel* : grille projetée à pas écran. Manquent le LOD
   du maillage et le choix déplacement ou normales selon la vue (critère de parallaxe chiffré S257).
 - [ ] **8.3 LOD par source** : grille du sillage, visibilité, filtre spectral — *partiel* (S234,
-  S235, S249). Manquent le filtre des impacts, le LOD spectral et le LOD temporel.
+  S235, S249) : filtre spectral reçu pour B et sillage ; cuisson des huit bandes
+  accélérée de 46 % au bit (S267). Manquent le filtre des impacts, la généralisation
+  aux autres sources et le LOD temporel.
 - [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent*.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *absent*.
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *absent*.
@@ -199,7 +208,9 @@ fin de document.
   Manquent les capillaires, la queue des perturbations W et le LOD de la queue.
 - [ ] **8.10 Crédibilité perçue validée par un regard humain** — *partiel* : protocole de revue
   ([REVUE-VISUELLE](validation/REVUE-VISUELLE.md)). Premier verdict (R1, « trop lisse ») mesuré et
-  traité ; R2 en attente.
+  traité ; **R7 accepté S266**, après lissage des reflets entre les crêtes (ADR-161).
+  Optimisations S266/S267 reçues ; autres poses, animation et scénarios restent à
+  valider perceptivement. Ce verdict local ne clôt pas la crédibilité du système.
 
 ## 9. Activation, prédiction, budget et dégradation
 
@@ -216,16 +227,17 @@ fin de document.
   perceptuelle — *partiel* : W retiré hors champ et restitué au bit au retour (S235). Manque la
   condensation.
 - [ ] **9.8 Aucun solveur ne dépasse son budget** (I-05, ordonnanceur ADR-012) — *partiel* : arrêt
-  coopératif atomique de δ (S230). L'ordonnanceur manque.
+  coopératif atomique de δ (S230), y compris hauteur relaxée (S268) et flux de bord
+  (S270 : 638 interruptions/reprises exactes). L'ordonnanceur et la borne murale manquent.
 - [ ] **9.9 Dégradation contrôlée dans l'ordre prescrit** : taille, résolution, interactions
   lointaines, fréquence, effets — *absent*.
 - [ ] **9.10 Profils de qualité, adaptation au matériel et à la charge** (I-16) — *absent*.
 - [ ] **9.11 60 images/s avec 2 ms pour l'eau sur une scène représentative** (ADR-125) — *partiel* :
-  GPU eau de la scène la plus riche (houle, vagues pointues, modulation, ciel clair) 1,54–1,60 ms en
-  960×540 et 1,98–2,01 ms en 1280×720 (S262) ; préparation CPU du sillage 3,1 ms pendant le forçage ;
-  δ hors budget.
+  scène filtrée S267 : GPU eau médian ~1,74 ms en 1280×720, cuisson 0,574–0,585 ms,
+  pointe 2,962 ms au premier passage ; CPU ~4,1 ms, pointes ~26 ms
+  ([preuve](validation/CUISSON-SILLAGE-S267.md)). Le budget global n'est pas reçu ; δ hors budget.
 - [ ] **9.12 Aucune allocation à l'exécution** (I-06) — *partiel* : pas de δ et boucle d'image de
-  l'hôte reçus (S200, S240). Système entier non éprouvé.
+  l'hôte reçus (S200, S240), pas couplé avec flux de bord reçu S270. Système entier non éprouvé.
 - [ ] **9.13 Dépassement critique temporaire** sans retard global perceptible — *absent*.
 
 ## 10. Multijoueur, autorité et persistance
@@ -257,7 +269,8 @@ fin de document.
 - [ ] **11.3 Très grands événements** (tsunami, crash, très grand navire) : macroscopique au large,
   3D locale à l'interaction — *absent*.
 - [ ] **11.4 Nombreuses sources simultanées à coût maîtrisé** — *partiel* : mutualisation des
-  sillages d'un journal, table de Bessel partagée (S222, S235). LOD spectral et temporel absents.
+  sillages d'un journal, table de Bessel partagée (S222, S235), filtre spectral B/sillage
+  reçu (S249), cuisson optimisée (S267). Manquent la généralisation et le LOD temporel.
 - [ ] **11.5 Matériel cible de livraison et seconde cible** (B7 complet, A98) — *absent*.
 
 ## 12. Outillage auteur et données cuites
