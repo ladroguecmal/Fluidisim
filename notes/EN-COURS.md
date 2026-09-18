@@ -74,7 +74,7 @@ faux.
 ### Plan
 
 - [ ] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — `W_perception` pour de vrai : fraction d'écran de l'emprise de la bande, projetée
+- [x] **P2** — `W_perception` pour de vrai : fraction d'écran de l'emprise de la bande, projetée
   depuis la caméra, coupée au plan proche puis au cadre. Essais : de face, de dos, hors champ.
 - [ ] **P3** — le branchement : soumission, décision et allocation à chaque image ; δ n'avance et
   ne s'affiche que retenu ; coût réinjecté depuis la mesure du pas précédent.
@@ -83,6 +83,13 @@ faux.
 - [ ] **P5** — rituel §6.
 
 ### Notes de reprise
+
+**P2 : deux attentes fausses, corrigées par la mesure.** (1) Dans la pose de R10 la caméra est
+**à l'intérieur** de l'emprise (256 × 200 m, œil au milieu) : la bande remplit le cadre quel que
+soit le regard, et c'est pour cela qu'elle y vivra en permanence. (2) **La part d'écran n'est pas
+monotone en lacet** — mesurée à 0,0308 de face et 0,0323 à 0,3 rad depuis l'extérieur : l'aire
+projetée d'un rectangle ne décroît pas avec l'angle. Ce dont l'hystérésis a besoin n'est pas la
+monotonie mais l'absence de saut ; mesuré : **moins de 0,01 par pas de 0,05 rad** sur un demi-tour.
 
 `W_gameplay` et `W_urgence` n'ont **pas** de source dans un afficheur : il n'y a ni acteur ni
 objectif. Ils seront déclarés, avec leur raison écrite — c'est exactement ce que l'ordonnanceur

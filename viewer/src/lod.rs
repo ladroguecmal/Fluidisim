@@ -243,6 +243,93 @@ impl Projection {
         }
         h
     }
+    /// S279 — **`W_perception` pour de vrai** (ADR-012 §2) : la fraction du cadre qu'occupe une
+    /// emprise rectangulaire posée au niveau de l'eau. C'est la seule des trois pondérations de
+    /// l'ordonnanceur qui se calcule ; les deux autres n'ont pas de source dans un afficheur.
+    ///
+    /// ADR-012 §2 insiste : **surface à l'écran, jamais distance** — à budget égal, la distance
+    /// sur-sert le proche insignifiant et sous-sert le lointain spectaculaire.
+    ///
+    /// Le quadrilatère est coupé au plan proche **avant** d'être projeté : derrière l'œil, la
+    /// division par la profondeur renverrait un point à l'infini du mauvais côté, et une emprise
+    /// qu'on tourne le dos paraîtrait immense. Il est ensuite coupé aux quatre bords du cadre, et
+    /// son aire rapportée à celle du cadre. Aucune allocation (I-06).
+    pub fn screen_fraction(&self, min: [f32; 2], max: [f32; 2]) -> f32 {
+        const NEAR: f32 = 0.05;
+        let dot = |a: [f32; 3], b: [f32; 3]| a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+        // Coins de l'emprise en repère caméra : (droite, haut, profondeur).
+        let mut poly = [[0f32; 3]; 16];
+        let mut n = 4;
+        for (k, [x, y]) in [[min[0], min[1]], [max[0], min[1]], [max[0], max[1]], [min[0], max[1]]]
+            .into_iter()
+            .enumerate()
+        {
+            let d = [x - self.eye[0], y - self.eye[1], -self.eye[2]];
+            poly[k] = [dot(d, self.right), dot(d, self.up), dot(d, self.forward)];
+        }
+        // Coupe au plan proche, puis projection perspective.
+        let mut cut = [[0f32; 3]; 16];
+        let mut m = 0;
+        for i in 0..n {
+            let (a, b) = (poly[i], poly[(i + 1) % n]);
+            let (ia, ib) = (a[2] >= NEAR, b[2] >= NEAR);
+            if ia {
+                cut[m] = a;
+                m += 1;
+            }
+            if ia != ib {
+                let t = (NEAR - a[2]) / (b[2] - a[2]);
+                cut[m] = core::array::from_fn(|k| a[k] + t * (b[k] - a[k]));
+                m += 1;
+            }
+        }
+        if m < 3 {
+            return 0.;
+        }
+        let mut flat = [[0f32; 2]; 16];
+        for i in 0..m {
+            flat[i] = [
+                cut[i][0] / (cut[i][2] * self.tan_half * self.aspect),
+                cut[i][1] / (cut[i][2] * self.tan_half),
+            ];
+        }
+        // Coupe aux quatre bords du cadre normalisé.
+        n = m;
+        for (axe, signe) in [(0usize, 1f32), (0, -1.), (1, 1.), (1, -1.)] {
+            let dedans = |p: [f32; 2]| p[axe] * signe <= 1.;
+            let mut out = [[0f32; 2]; 16];
+            let mut k = 0;
+            for i in 0..n {
+                let (a, b) = (flat[i], flat[(i + 1) % n]);
+                if dedans(a) {
+                    out[k] = a;
+                    k += 1;
+                }
+                if dedans(a) != dedans(b) {
+                    let (da, db) = (a[axe] * signe - 1., b[axe] * signe - 1.);
+                    let t = da / (da - db);
+                    out[k] = core::array::from_fn(|c| a[c] + t * (b[c] - a[c]));
+                    k += 1;
+                }
+                if k + 2 > out.len() {
+                    break;
+                }
+            }
+            flat = out;
+            n = k;
+            if n < 3 {
+                return 0.;
+            }
+        }
+        // Aire par la formule du lacet, rapportée au cadre — qui vaut 2 × 2.
+        let mut aire = 0f32;
+        for i in 0..n {
+            let (a, b) = (flat[i], flat[(i + 1) % n]);
+            aire += a[0] * b[1] - b[0] * a[1];
+        }
+        (aire.abs() * 0.5 / 4.).clamp(0., 1.)
+    }
+
     /// Ordonnée écran de la dernière rangée, comme `ocean_vertex`.
     pub fn horizon(&self) -> f32 {
         (-self.forward[2] / (self.up[2] * self.tan_half)).clamp(-0.95, 1.2) - 0.003
@@ -576,5 +663,82 @@ mod tests {
         let h = isotropic_step(0.05);
         // Cellule carrée h×h : R² = h²/2, erreur ≤ ½·M·R².
         assert!((0.5 * 0.05 * h * h / 2. - TOLERANCE_M).abs() < 1e-7);
+    }
+}
+
+#[cfg(test)]
+mod perception_s279 {
+    use super::Projection;
+    use crate::scene::Camera;
+
+    /// Emprise de la bande δ : 256 m de long, 200 m de large, au niveau de l'eau.
+    const MIN: [f32; 2] = [-128., -100.];
+    const MAX: [f32; 2] = [128., 100.];
+
+    fn vue(eye: [f32; 3], yaw: f32, pitch: f32) -> Projection {
+        let [forward, right, up] = Camera { eye, yaw, pitch }.vectors();
+        Projection { eye, forward, right, up, tan_half: 25f32.to_radians().tan(),
+            aspect: 16. / 9., far: 1500. }
+    }
+
+    #[test]
+    fn de_face_la_bande_occupe_une_grande_part_du_cadre_s279() {
+        // Pose de la revue R10 : œil bas, regard légèrement plongeant vers la bande.
+        let f = vue([0., -60., 6.], 0., -0.08).screen_fraction(MIN, MAX);
+        assert!(f > 0.5, "la bande devrait remplir le cadre, et vaut {f}");
+        assert!(f <= 1.);
+    }
+
+    /// Le cas que la coupe au plan proche existe pour : dos tourné, l'emprise est **derrière**
+    /// l'œil. Sans elle, la division par une profondeur négative la rendrait immense.
+    #[test]
+    fn de_dos_la_bande_ne_compte_pas_s279() {
+        let f = vue([0., -400., 6.], core::f32::consts::PI, -0.08).screen_fraction(MIN, MAX);
+        assert_eq!(f, 0., "une emprise derrière l'œil ne s'affiche pas");
+    }
+
+    #[test]
+    fn de_tres_loin_la_bande_devient_negligeable_s279() {
+        let proche = vue([0., -300., 40.], 0., -0.1).screen_fraction(MIN, MAX);
+        let loin = vue([0., -3000., 40.], 0., -0.02).screen_fraction(MIN, MAX);
+        assert!(loin < proche, "{loin} contre {proche}");
+        assert!(loin < 0.05, "à trois kilomètres elle ne pèse plus rien : {loin}");
+    }
+
+    /// Ce dont l'hystérésis a besoin n'est pas la monotonie, c'est l'**absence de saut** : un
+    /// signal qui bondit ferait franchir les deux seuils d'un pas, et le battement reviendrait par
+    /// où on croyait l'avoir chassé.
+    ///
+    /// **L'œil est hors de l'emprise**, et il le faut : dans la pose de R10 la caméra est *dedans*
+    /// — 256 m sur 200, et elle se tient au milieu — si bien que la bande remplit le cadre quelle
+    /// que soit la direction du regard.
+    ///
+    /// **La part n'est pas monotone en lacet, et c'est correct** : mesuré ici, elle remonte de
+    /// 0,0308 à 0,0323 entre 0 et 0,3 rad. Une emprise qui se présente de biais occupe l'écran
+    /// autrement qu'une emprise vue de face — l'aire projetée d'un rectangle ne décroît pas avec
+    /// l'angle. Le premier essai écrit attendait une décroissance qui n'avait pas lieu d'être.
+    #[test]
+    fn la_part_ne_saute_pas_quand_le_regard_balaye_s279() {
+        let part = |angle: f32| vue([0., -300., 20.], angle, -0.08).screen_fraction(MIN, MAX);
+        let (mut precedent, mut saut, mut minimum) = (part(0.), 0f32, f32::MAX);
+        for i in 1..=63 {
+            let f = part(i as f32 * 0.05);
+            saut = saut.max((f - precedent).abs());
+            minimum = minimum.min(f);
+            precedent = f;
+        }
+        assert!(saut < 0.01, "la part bondit de {saut} en 0,05 rad — l'hystérésis n'y résisterait pas");
+        assert!(minimum < 0.001, "dos tourné, il ne doit rien rester : {minimum}");
+    }
+
+    /// Depuis l'intérieur de l'emprise, au contraire, elle occupe le cadre quelle que soit la
+    /// direction — c'est le cas de la pose de R10, et c'est pour cela que la bande y vit en
+    /// permanence.
+    #[test]
+    fn depuis_l_interieur_l_emprise_occupe_le_cadre_s279() {
+        for angle in [0., 1.5, 3., 4.5] {
+            let f = vue([0., -60., 6.], angle, -0.08).screen_fraction(MIN, MAX);
+            assert!(f > 0.4, "à {angle} rad la bande ne vaut que {f}");
+        }
     }
 }
