@@ -73,7 +73,16 @@ annoncée quand un calcul est nécessaire.
   rejeux ; message et progression du précalcul ; essai du lancement depuis la racine.
 - [x] **P3** — verdict R10 : les deux retours de l'utilisateur, leurs causes mesurées, la suite
   en file. *(Découpage déclaré en cours de session : le verdict est arrivé pendant S277.)*
-- [ ] **P4** — rituel §6.
+- [ ] **P4** — onde injectée : `Live` accepte une surface initiale, `--onde` la pose (bosse
+  gaussienne au centre du domaine) ; elle naît, se propage, renaît sur **Début**. Relevé de
+  l'amplitude et de la position du maximum sur 30 s.
+- [ ] **P5** — l'interaction, mesurée : la même onde sur la houle et sur une mer plate ; la
+  différence est l'effet de B sur l'onde, et c'est exactement ce que l'utilisateur veut voir.
+- [ ] **P6** — ce qu'il regarde : pose qui montre l'onde traverser la houle, capture, commande.
+- [ ] **P7** — rituel §6.
+
+*Découpage déclaré le 2026-09-18 à 21:41 : l'utilisateur a demandé l'onde injectée maintenant.
+Le rituel, déclaré P3 puis P4, devient P7 — il reste la dernière étape.*
 
 ### Notes de reprise
 
