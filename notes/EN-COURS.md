@@ -80,11 +80,23 @@ faux.
   déclaré à 23:05, imposé par une mesure : voir les notes.*
 - [x] **P3b** — le branchement : soumission, décision et allocation à chaque image ; δ n'avance et
   ne s'affiche que retenu ; coût réinjecté depuis la mesure du pas précédent.
-- [ ] **P4** — réception : scène R10 identique au bit quand la bande reste visible ; relevé de
+- [x] **P4** — réception : scène R10 identique au bit quand la bande reste visible ; relevé de
   l'extinction et de la renaissance quand la caméra se détourne ; coût réinjecté vérifié.
 - [ ] **P5** — rituel §6.
 
 ### Notes de reprise
+
+**P4 : l'exclusion par le coût est absorbante — défaut trouvé par le relevé.** Avec un budget de
+33 ms (une image à 30 Hz), la bande s'éteignait à 0,352 s et ne revenait jamais, part de cadre
+inchangée. Cycle : le pire pas vaut 45,8 ms (S276) → exclusion → **un domaine exclu n'exécute plus
+de pas, donc ne produit plus de mesure, donc reste exclu**. Budget porté à 50 ms : le cas observé
+est refermé, **le défaut de fond non**. Avec les 2 ms d'un jeu il revient aussitôt. Traitement
+possible non tranché : coût annoncé décroissant tant qu'on ne tourne pas, ou dégradation
+(ADR-012 §4) qui rétrécit au lieu d'exclure.
+
+**P4 reçu** : 12 empreintes R10 identiques ; relevé dynamique 3 transitions — allumée à 0, éteinte
+à 6,016 s (soit 1,016 s après l'éloignement : le délai d'ADR-013 plus un pas), rallumée à 10,0 s
+sans délai.
 
 **P3b : les douze empreintes de R10 sont identiques**, pose haute comprise — alors qu'ADR-171
 prévoyait de l'éteindre. Explication, et elle est juste : `--revue-delta` appelle `update` à

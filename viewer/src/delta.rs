@@ -500,11 +500,18 @@ fn fade(s: f64, width: f64) -> (f64, f64) {
 /// le profil de l'afficheur. **Ce n'est pas le profil du jeu** : ADR-012 §3 vise 2 ms de
 /// simulation par pas, et δ en direct en coûte ≈ 22 (S276), onze fois trop. Déclarer 2 ms ici
 /// n'améliorerait rien — la bande serait simplement toujours éteinte, et le dépassement resterait
-/// entier. L'afficheur déclare donc ce qu'il a, une image à 30 Hz, et le dépassement reste ce
-/// qu'il était : un fait mesuré, consigné dans COUT-DIRECT-S276.
+/// entier. L'afficheur déclare donc ce qu'il consent à payer, et le dépassement reste ce qu'il
+/// était : un fait mesuré, consigné dans COUT-DIRECT-S276.
+///
+/// **50 ms, et pas 33.** Le premier essai déclarait une image à 30 Hz ; la bande s'est éteinte au
+/// bout de 0,35 s et n'est jamais revenue, alors que rien à l'écran n'avait changé. Le pire pas
+/// mesuré en S276 vaut 45,8 ms : un seul dépassement suffit à exclure le domaine, et **un domaine
+/// exclu n'exécute plus de pas, donc ne produit plus de mesure, donc reste exclu** — l'exclusion
+/// par le coût est absorbante. Le budget couvre désormais le pire pas connu. Le défaut de fond,
+/// lui, n'est pas corrigé : voir ORDONNANCEUR-S279 et L336.
 ///
 /// Les seuils, eux, sont calibrés : 0,45 / 0,35, sur la mesure de S275 (ADR-171).
-const PROFILE: Profile = Profile { cpu_sim_ms: 33., blocks: 1, on: 0.45, off: 0.35 };
+const PROFILE: Profile = Profile { cpu_sim_ms: 50., blocks: 1, on: 0.45, off: 0.35 };
 
 /// `W_gameplay` et `W_urgence` n'ont aucune source dans un afficheur : il n'y a ni acteur, ni
 /// objectif, ni rien dont l'absence deviendrait visible à une échéance connue. Ils sont donc

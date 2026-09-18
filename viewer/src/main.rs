@@ -2138,10 +2138,60 @@ fn onde_interaction(amplitude: f32) -> Result<(), String> {
     Ok(())
 }
 
+/// S279 — **la preuve que l'ordonnanceur décide**, et elle ne peut être que dynamique : à temps
+/// figé, ni la durée de vie minimale ni le délai d'extinction ne s'écoulent, et rien ne s'éteint
+/// jamais. Trois phases au pas d'image de δ (16 ms) : la caméra regarde la bande, s'en éloigne
+/// jusqu'à la pose haute où S275 a mesuré que δ ne change aucun pixel, puis revient.
+///
+/// Relève chaque transition avec l'instant, la part de cadre qui l'a causée et le coût réinjecté.
+fn delta_arbitrage(background: &water_core::background::Background, amplitude: f32) -> Result<(), String> {
+    let mut layer = delta::Layer::direct(background, delta::initial_wave(amplitude))?;
+    let pas = delta::FRAME_US as f64 * 1e-6;
+    let images = (15.0 / pas) as usize;
+    let mut transitions = 0;
+    let mut precedent = false;
+    println!("DELTA_ARBITRAGE_S279 images={images} pas_s={pas} seuils=0.45/0.35");
+    for n in 0..=images {
+        let t = n as f64 * pas;
+        // Trois phases : près, loin (pose haute de R10), puis retour.
+        let (eye, pitch) = match t {
+            _ if t < 5. => ([0f32, -60., 6.], -0.08f32),
+            _ if t < 10. => ([0., -200., 60.], -0.35),
+            _ => ([0., -60., 6.], -0.08),
+        };
+        let camera = Camera { eye, yaw: 0., pitch };
+        let [forward, right, up] = camera.vectors();
+        let vue = lod::Projection { eye, forward, right, up,
+            tan_half: (50.0f32.to_radians() / 2.).tan(), aspect: 1280. / 720., far: 1500. };
+        let part = vue.screen_fraction(
+            [delta::X0, -delta::HALF_WIDTH],
+            [delta::X0 + delta::NX as f32 * delta::DX, delta::HALF_WIDTH],
+        );
+        layer.update(t, eye, Some(&vue));
+        if layer.is_granted() != precedent {
+            transitions += 1;
+            println!("DELTA_ARBITRAGE_S279 t_s={t:.3} part={part:.4} bande={}",
+                if layer.is_granted() { "allumee" } else { "eteinte" });
+            precedent = layer.is_granted();
+        }
+    }
+    println!("DELTA_ARBITRAGE_S279 transitions={transitions} attendu=3 fin={}",
+        if precedent { "allumee" } else { "eteinte" });
+    if transitions != 3 {
+        return Err(format!("l'ordonnanceur n'a pas décidé comme prévu : {transitions} transitions"));
+    }
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     if args.iter().any(|a| a == "--delta-mesure") {
         return delta_replays(&delta::swell_background()?).map(|_| ());
+    }
+    // S279 — l'ordonnanceur décide la bande δ : relevé dynamique, sans GPU.
+    if args.iter().any(|a| a == "--delta-arbitrage") {
+        let amplitude = onde_amplitude(&args)?.unwrap_or(0.);
+        return delta_arbitrage(&delta::swell_background()?, amplitude);
     }
     // S277 — balayage des régimes de houle, sans GPU.
     if args.iter().any(|a| a == "--onde-regime") {
