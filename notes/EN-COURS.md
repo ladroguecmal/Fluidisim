@@ -75,7 +75,7 @@ l'utilisateur (ADR-127 §6). Je propose où poser la porte et ce qu'elle contien
 ### Plan
 
 - [ ] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — section « Portes de version » dans FEUILLE-DE-ROUTE : par porte, ce qu'on crée,
+- [x] **P2** — section « Portes de version » dans FEUILLE-DE-ROUTE : par porte, ce qu'on crée,
   comment on l'éprouve, ce qui vaut réception ; et la v1 **proposée**, marquée comme non tranchée.
 - [ ] **P3** — rituel §6.
 

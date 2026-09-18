@@ -348,6 +348,61 @@ Les protocoles restent ceux de [PLAN-BENCHMARK](validation/PLAN-BENCHMARK.md).
 son domaine de validité ; son verdict porte sur l'implémentation mesurée, jamais sur une
 fonctionnalité ; le budget s'éprouve sur la combinaison des techniques (ADR-131).
 
+## 3 bis. Portes de version — un système à la fois, et où poser la v1
+
+*Écrit en S281, 2026-09-19, à la demande de l'utilisateur : « création / test / validation d'un
+système puis d'un autre, déclaration de la v1 ».*
+
+Cette section **ne double pas §2** : elle le regroupe. Les jalons disent les dépendances ; les
+portes disent dans quel ordre on amène un système jusqu'à sa réception, et laquelle vaut version.
+Si les deux divergent un jour, **§2 fait foi** et cette section est fausse (L137).
+
+**Une porte se franchit quand sa colonne « reçu si » est vraie, pas quand le code existe.** Un
+système qu'on n'a pas éprouvé n'est pas construit : il est écrit.
+
+| porte | ce qu'on crée | ce qui l'éprouve | reçu si |
+|---|---|---|---|
+| **A — ce qui décide** *(en cours)* | l'ordonnanceur : quels domaines vivent, où, de quelle forme, et ce qu'on dégrade quand le budget manque | banc **B8** (seuils, inexistant) ; la bande δ de l'afficheur comme premier consommateur | plusieurs candidats réels se disputent un budget ; un domaine **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint ; la dégradation d'ADR-012 §4 rang 1 existe, donc la famine a une issue |
+| **B — δ sur les deux dimensions horizontales** | le solveur volumique qui n'est plus une tranche : domaine 3D, mer étalée, interaction avec des vagues réelles | banc **B3** (technique δ), cas **C10**, **C11** ; revue visuelle de l'utilisateur | une onde traverse une mer **étalée** et s'y déforme, jugée convaincante par l'utilisateur ; les réceptions 2D (S253, S268–S274) tiennent encore à trois dimensions |
+| **C — δ sous budget** | cadence découplée de l'image (I-05), δ sur GPU (décision d'architecture, ADR), multigrille hors repli | **B7** (matériel cible), cartes de coût selon ADR-131 | le pas tient le budget déclaré du profil sur la scène de la porte B, **techniques présentes et absentes publiées** ; plus de dépassement de onze fois |
+| **D — solides et flottabilité** | corps flottants pris dans B+W+δ, forces rendues au jeu | **B6** (flottabilité), **B4** (forces et perception), cas **C13**, **C14** | un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le gameplay (I-04) |
+| **E — V articulé avec δ** | inondations : V expose sa surface, déclenche un δ local, la masse reste celle de V | cas **C17**, **C21**, **C19** complet | la comptabilité de masse est identique **avec et sans** δ (C21) |
+| **F — grande échelle** | référentiels multiples, bathymétrie, hauts-fonds, conformité multiplateforme | **B7** complet, **A98** | une scène lointaine et une scène proche coexistent sans rupture ni perte de précision |
+
+### Où poser la v1 — proposition, non tranchée
+
+**Une v1 après la porte D**, c'est-à-dire : mer crédible parcourue en temps réel (J1, tenu),
+perturbations locales **décidées par le système** et non câblées (porte A), δ qui tient sur une
+vraie mer (porte B) et dans le budget (porte C), objets qui flottent et remuent l'eau (porte D).
+
+C'est ce qu'il faut pour qu'un jeu s'en serve : quelqu'un navigue, l'eau réagit, et rien ne saccade.
+
+**Ce que cette v1 ne contiendrait pas** : les inondations complexes et V articulé (porte E), la
+grande échelle (porte F), les phénomènes secondaires — écume, spray, bulles, glace — et le
+multijoueur au-delà de ce qui est déjà déterministe. **Ce sont des reports, pas des retraits** :
+l'ambition complète reste celle d'ADR-127 §1, et aucune session ne la réduit.
+
+**Cette proposition n'est pas une décision.** Fixer ce qu'une version contient appartient à
+l'utilisateur (ADR-127 §6). Tant qu'il ne l'a pas tranché, aucune session ne doit parler d'une
+« v1 » comme d'un périmètre acquis.
+
+### Ce que l'état réel dit de la distance
+
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 49 partiels,
+68 absents — décompte antérieur à S278–S280, dont la section 9 a bougé. Ce chiffre ne mesure pas
+l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté. Il mesure autre chose,
+qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la réception**.
+
+Les quatre manques qui commandent l'ordre ci-dessus, tous mesurés :
+
+1. δ est une **tranche 2D** (`Domain { nx, nz, dx }`, aucune dimension `y`) sous une houle sans
+   étalement — c'est ce que le [verdict R10](validation/REVUE-VISUELLE.md#verdict-r10--reçu-s277-2026-09-18)
+   a désigné, et aucune session ne peut le contourner ;
+2. son coût vaut **≈ 11 fois** le budget d'ADR-012 §3 ([COUT-DIRECT-S276](validation/COUT-DIRECT-S276.md)) ;
+3. l'ordonnanceur décide **qu'un** domaine vit, pas où ni de quelle forme
+   ([ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md)) ;
+4. **V a un noyau reçu et aucune articulation** avec δ.
+
 ## 4. Arbitrages explicites
 
 **Aucun accord de dépendances du lot S210/S211 n'est encore attendu.** GPU séparé choisi en

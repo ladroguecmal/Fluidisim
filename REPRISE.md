@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 00:22 +02:00
+Battement        : 2026-09-19 00:26 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
 Session en cours : S281 — trajectoire par portes et proposition de v1, demandées par l'utilisateur
 Dernière session : S280 — l'exclusion absorbante levée : la bande survit au budget qui la tuait (L336)
