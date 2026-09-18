@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S269 — en cours
+Session : S269 — terminée
 Agent : Codex, GPT-6 ; fichiers, git, cargo, Python et GPU local.
 Entrée : « continue », copie unique master propre 24a4c03, jeton libre.
 Objectif : mesurer la réflexion du pas couplé mobile avec l'éponge ADR-164.
@@ -70,7 +70,7 @@ Objectif : mesurer la réflexion du pas couplé mobile avec l'éponge ADR-164.
 - [x] **P3** — banc consommant le pas réel, contrôle du paquet et des fenêtres.
 - [x] **P4a** — garde brute refusée, diagnostic spatial et bord gauche.
 - [x] **P4b** — mesure différentielle déclarée avec seconde garde longue, témoins et convergence.
-- [>] **P5** — rituel §6, journal, file, index et jeton.
+- [x] **P5** — rituel §6, journal, file, index et jeton.
 
 ### Notes de reprise
 

@@ -63,6 +63,7 @@
 - [Optimisation des reflets validés : cache rejeté, sommes exactes retenues](validation/CIEL-CACHE-S266.md).
 - [Cuisson du sillage : mêmes grilles et images, coût réduit](validation/CUISSON-SILLAGE-S267.md).
 - [Relaxation de hauteur dans le pas mobile couplé](validation/RELAXATION-SURFACE-S268.md).
+- [Absorption du paquet : mesure différentielle et limites](validation/REFLEXION-PAQUET-S269.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

@@ -3692,3 +3692,13 @@ Un fond traversant et les frontières du total restent hors réception. Déclenc
 immédiat S269 : paquet sortant avec mesure intégrée à jauge et garde contre la
 contamination des fenêtres selon ADR-046 ; ne pas hériter du 1 % du véhicule 1D.
 [Preuve](../validation/RELAXATION-SURFACE-S268.md).
+
+
+**Suivi A92/A50 — S269, 2026-09-18 (sévérités conservées).** Réception bornée du
+bord absorbant : R_diff 0,00144442 / 0,00161565 à dx 0,25 / 0,125 ; doubles gardes
+et identité incidente reçues. Signal brut contaminé par queue numérique et retour
+gauche : il reste non recevable comme réflexion. Les témoins doivent partager le
+bord gauche, sinon l'éponge symétrique fausse l'attribution au bord droit.
+[Preuve](../validation/REFLEXION-PAQUET-S269.md). Déclencheur S270 : fond traversant
+et flux de bande aux frontières ; pas de fermeture A92/B2 ou B4 global. Autres
+spectres et horizons : nouvelle garde avant toute extrapolation de ce résultat.

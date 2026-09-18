@@ -13649,3 +13649,36 @@ preuve commande l'usage ouvert du domaine ; la seule décroissance locale ne suf
 I-08 (coefficients ADR-141) et I-14 (paramètres d'essai non calibrés) relus. δ général,
 V, B2, bathymétrie et multiplateforme restent dans la file. Jeton libre, aucune copie
 isolée à fermer ; aucun arbitrage utilisateur nouveau requis.
+
+
+## S269 — Absorption du paquet sous double garde différentielle
+
+**2026-09-18, Codex GPT-6.** Entrées « continue », master propre 24a4c03, copie unique.
+Plan ff8711e, protocole 218e0f3, banc 2e85720, diagnostic 9ea320a, réception 611f90d.
+Le banc consomme `step_perturbation_mobile` réel, fond nul, sans changer la bibliothèque.
+
+**Preuve reçue :** [REFLEXION-PAQUET-S269](../docs/validation/REFLEXION-PAQUET-S269.md).
+Douze traces de 7 200 pas ; R_diff éponge 0,00144442 / 0,00161565, écart 0,000171226,
+seuils 0,01 / 0,002 tenus ; doubles gardes <0,001, incidents <0,001, murs >0,5.
+La première garde brute refuse : queue numérique et retour gauche. L'instrument
+corrigé, déclaré avant verdict, soustrait un domaine long au même bord gauche,
+puis contrôle un second domaine long. La réception brute reste refusée.
+Tests de l'exemple : 6 réussis, 1 ignoré ; analyse Python : 3 réussis. Suite complète
+S268 non rejouée, cœur inchangé ; aucun rendu modifié, aucun nouvel ADR.
+
+**Limites et maillons : 1.** Cette session reçoit l'absorption d'un cas du chemin
+existant, mais n'ajoute aucune capacité d'exécution : le banc seul ne remet pas
+le compteur à zéro. Ni propagation exacte, ni horizon infini, ni autre spectre,
+ni fond traversant, ni performance reçus. Les durées de calcul concurrentes ne
+valent pas un coût produit. Aucun arbitrage utilisateur nouveau requis.
+
+**Suite S270 : fond traversant et flux de bande aux frontières.** Avant cette
+troisième session sur les bords, comparaison à la file : le passage réel de B
+reste nécessaire à l'usage perturbatif J2 ; prolonger les seuls tests spectraux
+serait différable. Construire/recevoir ce passage prime donc les reflets acceptés
+et leur coût CPU. δ général, V, B2, bathymétrie et seconde cible gardent leurs
+déclencheurs ; aucune ambition supprimée.
+
+**Rituel :** file active entière relue ; J2, A92/A50, index actualisés. Invariants
+I-04, I-05, I-06, I-08 et I-14 relus : banc hors temps réel, constantes de fixture,
+aucune modification du contrat produit. Jeton libéré ; aucune copie isolée à fermer.

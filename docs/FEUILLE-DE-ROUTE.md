@@ -244,9 +244,11 @@ au-dessous et reçu contre l'oracle S253 : à 128 colonnes, 0,168 % / 0,58 % à 
 **S268 : hauteur perturbative amortie dans l'éponge du pas mobile** (ADR-164), après transport,
 fond analytique intact et intérieur au bit. Exponentielle locale reçue, 20 pas couplés et
 607 expirations/reprises sans allocation ; [preuve](validation/RELAXATION-SURFACE-S268.md).
-Restent les couches W au-dessus du plan moyen, la réception des bords ouverts par réflexion
-d'un paquet, le fond traversant et les frontières du total. Une relaxation locale exacte ne
-reçoit pas la transparence d'une frontière ; la fermeture extérieure reste réfléchissante.
+**S269 : effet du bord absorbant reçu sur un paquet sortant**, 0,14–0,16 % par
+différence à deux domaines longs ; mesure brute refusée, fenêtres 14–36 s et fond nul
+([preuve](validation/REFLEXION-PAQUET-S269.md)). Restent les couches W au-dessus du plan
+moyen, le fond traversant et les frontières du total. La fermeture extérieure reste
+réfléchissante ; ce reçu borné ne vaut pas frontière transparente universelle.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand
