@@ -34,3 +34,7 @@ L'éponge ADR-164 reste responsable de réduire la perturbation près des bords.
 Aucun nouveau paramètre, stockage persistant ou allocation dans le pas.
 
 [Réception](../validation/FOND-TRAVERSANT-S270.md).
+
+**Note S273, 2026-09-18.** Le débit par couche `U_face * (longueur mouillée…)` est remplacé par
+la quadrature linéaire d'[ADR-166](ADR-166-quadrature-lineaire-de-la-bande.md), commune aux faces
+intérieures et extérieures ; troncature par le fond solide et le reste de la décision inchangés.

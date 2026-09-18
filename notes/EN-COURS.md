@@ -67,10 +67,10 @@ Objectif : intégrer au transport réel la reconstruction linéaire de la bande
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — ADR-166 (quadrature linéaire de la bande, remplace la formule
+- [x] **P2** — ADR-166 (quadrature linéaire de la bande, remplace la formule
   d'ADR-152/165), notes datées, critères de réception et de campagne écrits
   avant le code dans BANDE-LINEAIRE-S273.
-- [ ] **P3** — construction : même règle aux faces intérieures et extérieures ;
+- [>] **P3** — construction : même règle aux faces intérieures et extérieures ;
   tests de quadrature contre l'intégrale analytique, bandes signées/coupées,
   fond uniforme et fond nul inchangés.
 - [ ] **P4** — suite complète, valeurs déplacées expliquées, transaction intacte.
