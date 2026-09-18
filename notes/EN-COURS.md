@@ -74,9 +74,9 @@ Objectif : intégrer au transport réel la reconstruction linéaire de la bande
   tests de quadrature contre l'intégrale analytique, bandes signées/coupées,
   fond uniforme et fond nul inchangés.
 - [x] **P4** — suite complète, valeurs déplacées expliquées, transaction intacte.
-- [>] **P5** — rejouer les cinq passages S272, verdict aux critères S272 inchangés,
+- [x] **P5** — rejouer les cinq passages S272, verdict aux critères S272 inchangés,
   qualification dt/amplitude déclarée en P2.
-- [ ] **P6** — rituel §6, feuille de route/file/liste, journal, index et jeton.
+- [>] **P6** — rituel §6, feuille de route/file/liste, journal, index et jeton.
 
 ### Notes de reprise
 
@@ -96,3 +96,7 @@ P4 : suite 480 ok/21 ignorés. S253 release 2,14 %. Campagne S272 rejouée :
 Richardson a (ajout après la fine : a/2 aux mailles grossière/moyenne, 2 passages)
 7,74/2,92/1,77 % ; a² 2,74/2,85/2,89 % indépendant de dx → ordre trois physique.
 Rejeu S253 128 colonnes 5/10 cm en cours (fluidisim-s273-s253-*.log, ~26 min).
+
+P5 : refus maintenu aux critères S272 ; cause resserrée : troncature de
+l'oracle ∝ a, part d'ordre deux convergente. Suite concrète : protocole N*
+déclaré avant mesure, dt 1 ms / 0,5 ms (l'exemple n'accepte pas encore 500 µs).

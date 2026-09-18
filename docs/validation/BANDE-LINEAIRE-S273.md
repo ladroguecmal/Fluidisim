@@ -58,3 +58,67 @@ Valeurs déplacées, toutes par un fond non uniforme :
   témoin sans résidus 99,56 % inchangé (bande éteinte).
 - S254, intégration du B de production : 590 faces mouillées au-dessus du plan moyen, comme
   avant ; `u'` maximal 5,36·10⁻³ m/s aux murs.
+
+## Campagne — refus maintenu aux critères S272, cause resserrée
+
+Les sept passages terminent tous leurs pas, sans refus du solveur. Erreur L2 de `η'` seul, 40
+instants de 0,05 à 2 s, toutes colonnes, contre l'oracle modal S272 inchangé (garde 128/256 modes
+< 0,053 %).
+
+| dx (m) | a (m) | dt (ms) | erreur S272 | **erreur S273** | itérations max |
+|---|---:|---:|---:|---:|---:|
+| 0,125 | 0,01 | 2 | 22,52 % | **9,11 %** | 64 |
+| 0,0625 | 0,01 | 2 | 13,04 % | **6,18 %** | 127 |
+| 0,03125 | 0,01 | 2 | 8,68 % | **5,88 %** | 243 |
+| 0,03125 | 0,005 | 2 | 6,58 % | **3,23 %** | 242 |
+| 0,03125 | 0,01 | 1 | 8,62 % | **5,78 %** | 243 |
+
+**Critères S272 manqués** : 5,88 % > 2 % ; demi-pas 0,668 % > 0,5 % ; champs divisés par a²
+2,89 % > 1 %. Aucun seuil relevé, aucune fenêtre raccourcie.
+
+**Qualification déclarée en P2.** Les passages à a/2 aux mailles grossière et moyenne ont été
+ajoutés **après** la mesure fine, pour voir la convergence du diagnostic ; deux passages de plus,
+même fixture, pas de nouvelle maille.
+
+| dx | brute, a = 1 cm | brute, a = 5 mm | écart des champs / a² | **N\* extrapolé** |
+|---|---:|---:|---:|---:|
+| 0,125 | 9,11 % | 7,99 % | 2,74 % | **7,74 %** |
+| 0,0625 | 6,18 % | 3,90 % | 2,85 % | **2,92 %** |
+| 0,03125 | 5,88 % | 3,23 % | 2,89 % | **1,77 %** |
+
+Lecture :
+
+- L'écart des champs normalisés par a² **ne dépend pas de la maille** (2,74 → 2,89 %) : ce
+  n'est pas une erreur de discrétisation. C'est le contenu d'ordre trois de la solution, absent
+  de l'oracle d'ordre deux — environ 5,8 % de `η'` à 1 cm (le double de l'écart normalisé).
+- La part d'ordre deux extrapolée **converge** : 7,74 → 2,92 → 1,77 %. À la maille fine, elle
+  contient encore l'erreur temporelle (demi-pas : 0,668 %, soit ≈ 1,3 % si l'ordre est un).
+- Les nombres se recoupent : avec 1,77 % numérique, la troncature vaudrait √(5,88² − 1,77²) =
+  5,61 % à 1 cm et √(3,23² − 1,77²) = 2,70 % à 5 mm, soit proportionnelle à a. Recoupement
+  d'ordre de grandeur, pas une décomposition démontrée.
+
+**Conséquence.** Le seuil S272 compare le solveur à une référence qui s'écarte elle-même
+d'environ 5,6 % de la solution à cette amplitude : il ne peut pas recevoir le solveur à 2 %,
+quel que soit le raffinement. La correction de quadrature était nécessaire (elle divise
+l'erreur brute par 2,5 à la maille grossière) mais le reste n'est plus, pour l'essentiel, un
+défaut du pas.
+
+**Prochain correctif concret** : un protocole de réception sur `N*`, écrit avant mesure et
+justifié par l'indépendance à la maille mesurée ici — `N*` ≤ 2 % et décroissant aux trois
+mailles, demi-pas sur `N*` ≤ 0,5 %, à dt = 1 ms avec contrôle 0,5 ms. Sinon, un oracle d'ordre
+trois. Hors de ce banc : houle incidente transparente, autres spectres, 3D, coût.
+
+## Reproduction
+
+```powershell
+cargo test --offline --locked --manifest-path code/Cargo.toml -p water-core --lib s273 -- --nocapture
+cargo build --release --offline --locked --manifest-path code/Cargo.toml -p water-core --example delta_progressive
+& code/target/release/examples/delta_progressive.exe 0.03125 0.01 2000 > "$env:TEMP/fluidisim-s273-fine.log"
+& code/target/release/examples/delta_progressive.exe 0.03125 0.005 2000 > "$env:TEMP/fluidisim-s273-halfamplitude.log"
+python -B -X utf8 outils/residu_progressif.py "$env:TEMP/fluidisim-s273-fine.log"
+python -B -X utf8 outils/residu_progressif.py --richardson "$env:TEMP/fluidisim-s273-fine.log" "$env:TEMP/fluidisim-s273-halfamplitude.log"
+```
+
+Les autres passages suivent RESIDU-TEMPOREL-S272 (mêmes arguments, préfixe `s273`) ; mailles
+grossière et moyenne à a/2 : `0.125 0.005 2000`, `0.0625 0.005 2000`. `test_residu_progressif.py`
+porte désormais quatre tests, dont l'extrapolation exacte d'un champ `a²f + a³g`.
