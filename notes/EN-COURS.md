@@ -58,39 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S276 — terminée
+Session : S277 — en cours
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
-Entrée : « Continue » (2026-09-18), sans verdict R10 : la revue reste en attente. master 79bcb50.
-Objectif : faire tourner δ en direct dans l'afficheur — coût du pas et de l'échantillonnage de B
-mesurés, réduits par les techniques désignées par la mesure, cadence publiée (A276, liste 4.19).
+Entrée : l'utilisateur signale que `cargo run … -- --delta --delta-direct` depuis la racine
+« n'ouvre rien ». Constat (terminal) : cache des rejeux cherché relativement au dossier courant,
+donc manqué depuis la racine ; ~3 min de précalcul muet, interrompu. master cafcea6.
+Objectif : lancement immédiat depuis n'importe quel dossier, direct sans précalcul, progression
+annoncée quand un calcul est nécessaire.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — carte du coût d'un pas en direct (scène S275, un fil) : échantillonnage des faces u
-  et w, pas couplé ; critères écrits avant (COUT-DIRECT-S276).
-- [x] **P3** — échantillonnage du fond par grille (colonnes × couches) : phase par colonne,
-  facteur vertical par couche, **identique au bit** à l'évaluation ponctuelle ; essais, mesure.
-- [x] **P4** — technique suivante désignée par la carte (départ depuis la pression précédente
-  si le pas domine) ; mêmes portes d'acceptation ; mesure.
-- [x] **P5** — δ en direct dans l'afficheur (`--delta-direct`) : un pas par image, temps simulé
-  fixe par image, cadence publiée ; accord au bit avec le rejeu de 16 ms.
-- [x] **P6** — rituel §6.
+- [ ] **P2** — cache sous `viewer/` quel que soit le dossier courant ; `--delta-direct` sans
+  rejeux ; message et progression du précalcul ; essai du lancement depuis la racine.
+- [ ] **P3** — rituel §6.
 
 ### Notes de reprise
 
-R10 sans verdict : ne rien consigner à sa place. S275 : un pas par image (16 ms) indiscernable
-du pas de 4 ms à cette échelle. Précalcul S275 : 258 s pour 9 375 pas, échantillonnage réparti.
-
-P2 : échantillonnage 33,7/33,2 ms, pas 24,8/24,2 ms (médianes, un fil, secteur), 23 itérations.
-
-P3 : grille 5,14/5,11 ms contre 33,0 (×6,4), identique au bit ; le pas (24 ms) domine.
-P4 visé : départ depuis la pression précédente, pas principal seulement (pas l'affinage) ;
-en-tête du cache des rejeux à versionner si les bits changent.
-
-P4 : départ à chaud 134/266 itérations, pas 17,7/17,4 ms ; suite 372+17+95 puis release 375 ;
-`set_free_surface` remet la pression publiée à zéro (renaissance d'un domaine). Cache versionné
-0x5276_0169, rejeux recalculés en 179 s, statistiques S275 inchangées aux décimales publiées.
-P5 : direct identique au bit au rejeu 16 ms sur 200 images ; cadence à mesurer sans charge.
-
-P5 : direct 40,5 Hz, CPU 23,8 ms, δ 21,7 ms, 0 allocation dans update ; témoin rejeu 754 Hz.
+Rejeu partiel `captures/s275/rejeu_16000.bin` écrit à la racine par le lancement interrompu
+(non versionné, dérivé) : à retirer avec le correctif. R10 toujours sans verdict.

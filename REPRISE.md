@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 21:03 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 21:14 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : aucune
+Session en cours : S277 — correctif : `--delta` depuis la racine ne s'ouvrait pas
 Dernière session : S276 — δ en direct dans viewer/ à 40 images/s, identique au bit au rejeu (ADR-169)
 Session suivante : S277 — R10 si reçu ; δ sous budget déclaré : cadence découplée (I-05), puis décision δ GPU
 Maillons        : 0
