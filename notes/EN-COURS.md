@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S283 — en cours
+Session : S283 — terminée
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : continuer la porte A, après correction de mesure S282.
 Objectif : premier redimensionnement spatial consommable de δ, avec transfert contrôlé de son
@@ -71,7 +71,7 @@ Objectif : premier redimensionnement spatial consommable de δ, avec transfert c
   critères, construire et tester le transfert sans allocation ; découper avant quinze minutes.
 - [x] **P3** — consommation réelle par l'hôte ou le pas couplé, coût/continuité et refus ;
   suites de validation proportionnées, limites explicitement conservées.
-- [>] **P4** — rituel §6 : journal, file, feuille de route, invariants et jeton libre.
+- [x] **P4** — rituel §6 : journal, file, feuille de route, invariants et jeton libre.
 
 ### Notes de reprise
 

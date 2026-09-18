@@ -76,6 +76,7 @@
 - [L'ordonnanceur : ce qui décide qu'une zone est simulée](validation/ORDONNANCEUR-S278.md).
 - [La bande δ décidée par l'ordonnanceur](validation/ORDONNANCEUR-S279.md).
 - [Un pic ne condamne plus un domaine](validation/COUT-ROBUSTE-S280.md).
+- [Rétrécissement perturbatif consommé, saut borné et coût](validation/RETRECISSEMENT-S283.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

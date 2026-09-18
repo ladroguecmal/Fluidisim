@@ -14274,3 +14274,41 @@ plateforme conservent leurs déclencheurs ; verdict visuel de l'onde S277 toujou
 **Rituel :** file active relue entière, feuille de route actualisée ; suivi A276 dans le registre
 des angles morts. Invariants I-05/I-06/I-12/I-13 relus, aucun amendé. Pas de nouvel ADR ni de
 document à indexer. Copie principale conservée, aucune copie isolée à fermer.
+---
+
+## S283 — un domaine réellement plus étroit, avec refus avant rupture de hauteur
+
+**2026-09-19, Codex GPT-6, application desktop.** Entrée : continuer la porte A ; master dcaa97f,
+une seule copie, propre. Plan 0800c7d ; cœur 954fc7f ; consommation/réception 62072ce.
+
+**Capacité reçue, maillons 0 :** réduire manuellement un domaine perturbatif vivant vers une
+réserve plus étroite, sans changer sa maille ni son horloge. Le cœur transfère et amortit sans
+allocation ; `Live` poursuit le vrai pas couplé, `Layer` publie la nouvelle emprise à l'image et
+à l'ordonnanceur. Commande de banc N. Le centre est conservé au bit au transfert. Réception
+bornée au fond plat et à une réduction 256→128 m dans l'hôte, pas au système spatial complet.
+
+**La contre-épreuve a changé l'intégration :** rétrécir à 1,024 s change la hauteur de 33,447 mm,
+contre 3 mm déclarés avant mesure. Garde ajouté avant permutation, sur l'interpolant et ses
+fondus, avec borne de dérivée entre points ; le cas est refusé (borne 33,729 mm), l'ancien état
+reste consommable. Le cas précoce à 0,016 s est admis. Pas de prétention à I-12 visuel : pentes
+et suite temporelle restent ouvertes, A290. Le diagnostic forcé dérive de 21,255 mm au centre.
+
+**Coût et preuves :** [RETRECISSEMENT-S283](../docs/validation/RETRECISSEMENT-S283.md) porte
+le contrat et le protocole. 6 656→3 328 cellules, médiane 25,55→12,38 ms, ×2,06 sur le pas ;
+transfert + garde 3,03 ms, secteur avant/après. Pas de restitution de mémoire (réserve gardée).
+Tests release : **506** cœur/harnais, **33** afficheur, aucun échec, 19 ignorés au total.
+Refus atomiques, continuation couplée et zéro allocation mesurés ; coordonnées mondiales,
+horloge et publication réduite vérifiées. Aucun gain de qualité ou verdict visuel inventé.
+
+**Non-fait :** dégradation automatique/non focale, agrandissement, déplacement, domaines épars,
+substitutif et 3D ; I-05 toujours non reçu. Le garde vérifie la hauteur CPU instantanée seulement.
+**Suite :** préparer progressivement le rétrécissement, recevoir perte et évolution avant
+permutation, puis décision non focale sous budget. Ce lot lève un défaut d'usage de la porte A ;
+il prime un autre approfondissement de la médiane S282. Coût avant deuxième domaine/3D ;
+V, B2, bathymétrie, multiplateforme et verdict visuel S277 gardent leurs déclencheurs.
+
+**Rituel :** file active relue entière et états périmés remplacés, feuille de route et index
+actualisés, A290 ouvert et A276 suivi. I-04/I-05/I-06/I-08/I-12/I-13/I-17 relus : aucun amendé,
+aucune sérialisation de δ, aucun changement d'autorité ou de modèle B/W. Aucun ADR réécrit.
+Une seule copie principale, aucune copie à fermer. V1 S281 reste proposée, ambition complète
+maintenue. Journal, plan cochés et jeton libéré dans le commit de clôture.

@@ -319,9 +319,15 @@ l'afficheur** : elle s'éteint et se rallume toute seule aux bons instants (ADR-
 est une médiane qui sait oublier, et la bande survit au budget qui la tuait
 ([COUT-ROBUSTE-S280](validation/COUT-ROBUSTE-S280.md)). **S282, 2026-09-19 : mesures fiabilisées
 dans le chemin image** — naissance, pause, saut et refus ne dupliquent plus le dernier coût ;
-deux régressions reproduites puis corrigées dans `viewer/src/delta.rs`. Reste la famine, qui demande la
-dégradation d'ADR-012 §4. Restent la dégradation, la
-forme des domaines et le régime substitutif ; les seuils attendent le banc **B8**.
+deux régressions reproduites puis corrigées dans `viewer/src/delta.rs`.
+**S283, 2026-09-19 : premier rétrécissement consommé par l'afficheur**, manuel et sur fond plat,
+256→128 m à maille inchangée, transfert vers réserve sans allocation. Garde de hauteur avant
+publication : 3 mm ; cas précoce admis, cas à 1,024 s refusé (33,447 mm observés).
+Pas médian 25,55→12,38 ms sur le diagnostic forcé ; transfert + garde 3,03 ms.
+Les pentes et la suite temporelle ne sont pas reçues (A290), ni I-05 ou I-12 globalement.
+[Réception et limites](validation/RETRECISSEMENT-S283.md). Reste la famine : la réduction
+automatique des domaines non focaux, sa préparation temporelle, l'agrandissement, le déplacement
+et le régime substitutif ne sont pas construits ; les seuils attendent le banc **B8**.
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.

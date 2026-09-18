@@ -3780,3 +3780,19 @@ régressions échouent avant correction et passent après, dans le chemin `Layer
 Aucun gain de vitesse revendiqué : la médiane ne reçoit pas le 99e centile, le coût des échecs
 n'est pas qualifié, et l'oubli par appel refusé reste sensible à la cadence d'appel. Déclencheur :
 avant cadence découplée ou multiplication des domaines ; I-05 reste non reçu pour cet hôte.
+**A290 — S283, 2026-09-19 (sévérité 2, ouverte).** **Rétrécir un domaine perturbatif n'est
+pas gratuit à un instant arbitraire.** Sur l'onde S277 à 1,024 s, transfert amorti 256→128 m :
+saut de hauteur publiée 33,447 mm et écart central au témoin large de 21,255 mm dans les
+2,048 s suivantes. Le garde intégré borne la hauteur instantanée à 3 mm et refuse ce cas
+(borne 33,729 mm), sans publier ni perdre l'ancien domaine. Il n'assure ni les pentes/reflets
+ni l'évolution après un transfert admis ; I-12 perceptif reste ouvert. Déclencheur : avant
+réduction automatique/non focale, préparer l'amortissement dans le temps et recevoir perte,
+reprise et rendu. Agrandissement et domaine mobile également non reçus.
+[Contrat, contre-exemple et coût](../validation/RETRECISSEMENT-S283.md).
+
+**Suivi A276 — S283, 2026-09-19 (sévérité conservée).** Réduction effective du calcul,
+6 656→3 328 cellules : médiane 25,5464→12,3784 ms, p99 observé 32,9817→15,8659 ms ;
+128 pas sous le même fond, sur secteur, diagnostic forcé de transition normalement refusée.
+Transfert et garde 3,0283 ms (transfert seul 0,0276 ms au premier passage). Toujours hors
+2 ms, aucun gain de mémoire : le volume large reste réservé. La baisse de coût ne reçoit
+pas la qualité perdue (A290) ni la commande globale sous I-05.
