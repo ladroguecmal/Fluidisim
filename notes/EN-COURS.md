@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S270 — en cours
+Session : S270 — terminée
 Agent : Codex, GPT-6 ; fichiers, git, cargo et Python.
 Entrée : « continue », copie unique master propre 8e624a1, jeton libre.
 Objectif : recevoir le passage du fond à travers les frontières du pas perturbatif.
@@ -69,7 +69,7 @@ Objectif : recevoir le passage du fond à travers les frontières du pas perturb
 - [x] **P2** — lire les contrats, isoler le défaut et déclarer la réception bornée.
 - [x] **P3** — construire la correction et ses contre-épreuves dans le pas réel.
 - [x] **P4** — exécuter la réception et les régressions pertinentes.
-- [>] **P5** — rituel §6, file entière, journal, index et jeton.
+- [x] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
 

@@ -3702,3 +3702,14 @@ bord gauche, sinon l'éponge symétrique fausse l'attribution au bord droit.
 [Preuve](../validation/REFLEXION-PAQUET-S269.md). Déclencheur S270 : fond traversant
 et flux de bande aux frontières ; pas de fermeture A92/B2 ou B4 global. Autres
 spectres et horizons : nouvelle garde avant toute extrapolation de ce résultat.
+
+
+**Suivi A92/A50 — S270, 2026-09-18 (sévérités conservées).** Le flux de bande était
+fermé avec la perturbation : un courant/niveau constants créaient ±dt Ua/dx aux
+extrémités. Défaut reproduit puis corrigé (ADR-165), deux mailles, deux signes,
+bilan signé et 638 expirations/reprises sans allocation reçus. La fermeture de v
+reste distincte : aucune réception de houle progressive entière ou de W(b)≠0.
+Déclencheur S271 : onde progressive de profondeur finie, référence indépendante,
+contrôle des perturbations induites et des fenêtres avant verdict. Spectres et
+horizons hors S269 restent à recevoir avant extrapolation, sans campagne générique.
+[Preuve](../validation/FOND-TRAVERSANT-S270.md).

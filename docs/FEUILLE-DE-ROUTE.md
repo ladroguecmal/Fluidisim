@@ -247,8 +247,12 @@ fond analytique intact et intérieur au bit. Exponentielle locale reçue, 20 pas
 **S269 : effet du bord absorbant reçu sur un paquet sortant**, 0,14–0,16 % par
 différence à deux domaines longs ; mesure brute refusée, fenêtres 14–36 s et fond nul
 ([preuve](validation/REFLEXION-PAQUET-S269.md)). Restent les couches W au-dessus du plan
-moyen, le fond traversant et les frontières du total. La fermeture extérieure reste
-réfléchissante ; ce reçu borné ne vaut pas frontière transparente universelle.
+moyen et les frontières du total. **S270 : bande du fond ouverte aux frontières**
+(ADR-165), courant et élévation uniformes reçus aux deux mailles ; le défaut de
+hauteur artificielle est corrigé, 638 expirations/reprises sans allocation
+([preuve](validation/FOND-TRAVERSANT-S270.md)). La houle progressive traversante
+reste à recevoir. La fermeture extérieure de la perturbation reste réfléchissante ;
+ces reçus bornés ne valent pas frontière transparente universelle.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand

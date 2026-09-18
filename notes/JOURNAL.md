@@ -13682,3 +13682,38 @@ déclencheurs ; aucune ambition supprimée.
 **Rituel :** file active entière relue ; J2, A92/A50, index actualisés. Invariants
 I-04, I-05, I-06, I-08 et I-14 relus : banc hors temps réel, constantes de fixture,
 aucune modification du contrat produit. Jeton libéré ; aucune copie isolée à fermer.
+
+
+## S270 — Flux de bande prescrit aux frontières latérales
+
+**2026-09-18, Codex GPT-6.** Entrée « continue », master propre 8e624a1, copie unique.
+Plan 385f23e, contrat 54e76be, construction 453b117, réception 17f0d3f.
+Le passage du fond J2 reste prioritaire devant les reflets acceptés et leur coût :
+la troisième session du fil corrige une condition nécessaire, pas un affinage spectral.
+
+**Capacité reçue, maillons 0 :** le courant analytique uniforme sous niveau uniforme
+traverse le domaine sans créer de hauteur parasite. Consommateur : transport réel de
+`step_perturbation_mobile`, flux de bande prescrit aux deux faces externes (ADR-165),
+condition fermée de v conservée. Déficit ancien reproduit : erreur 0,0002501011 m au
+premier pas contre dt Ua/dx=0,00025 m. Après correction : erreur de hauteur nulle,
+huit cas, vingt pas, deux mailles. Intégrales signées et bilan global indépendants.
+[Preuve](../docs/validation/FOND-TRAVERSANT-S270.md).
+
+**Validation :** 478 tests réussis, 18 ignorés, aucun échec (366 cœur, 17 intégrations,
+95 harnais). 638 expirations avec flux non nul : zéro allocation, restauration et
+reprise au bit. Élévation des faces extérieures incohérente ou hors domaine refusée ;
+gardes avant/après transport. Identité S253 au fond nul et harmonicité stationnaire
+conservées par leurs tests. Aucun champ GPU, dépendance ou état persistant ajouté.
+
+**Limites :** reçu stationnaire et bilan, pas une houle progressive complète. v_n
+reste nul au bord ; frontières du total, W(b)≠0, coques, B4 global et budget mural
+restent ouverts. Suite S271 : onde progressive traversante de profondeur finie,
+référence indépendante et contrôle de contamination avant mesure. Le test ne doit
+pas traiter une reconstruction analytique imposée comme une propagation reçue.
+Aucun arbitrage utilisateur nouveau requis.
+
+**Rituel :** file active entière relue ; J2, A92/A50 et index actualisés. I-04/I-13
+inchangés, I-05 transaction reçue sans promesse murale, I-06 mesuré, I-08 arithmétique
+f32 et durées entières, I-14 identités exactes et fixtures explicites. δ général, V,
+B2, bathymétrie et seconde cible gardent leurs déclencheurs. Jeton libre, aucune
+copie isolée à fermer.
