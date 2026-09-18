@@ -1,0 +1,86 @@
+//! S269 : paquet progressif, jauge et garde de réflexion. Voir REFLEXION-PAQUET-S269.
+#[path = "../../water-harness/src/host_impl.rs"]
+#[allow(dead_code)]
+mod host_impl;
+use std::{f64::consts::PI, time::Instant};
+use water_core::{background::BackgroundSample,delta_projection::{BackgroundFaces,Domain,Sponge,Volume},
+    host::{HostServices,MonotonicClock},SimTime};
+struct Frozen;
+impl MonotonicClock for Frozen {fn now_ns(&self)->u64{0}}
+const H:f64=1.;
+const G:f64=9.81;
+const A:f64=0.002;
+fn modes()->Vec<(f64,f64)> {
+    let mut modes:Vec<_>=(0..=90).map(|i|{let k=1.+i as f64*0.05;
+        (k,(-0.5*((k-PI)/0.6).powi(2)).exp())}).collect();
+    let sum:f64=modes.iter().map(|m|m.1).sum();
+    for m in &mut modes {m.1*=A/sum;}
+    modes
+}
+fn sample(modes:&[(f64,f64)],x:f64,z:f64,t:f64)->[f64;3] {
+    let mut out=[0.;3];
+    for &(k,a) in modes {
+        let omega=(G*k*(k*H).tanh()).sqrt();
+        let phase=k*(x-8.)-omega*t;
+        let (s,c)=phase.sin_cos();
+        let norm=(k*H).cosh();
+        out[0]+=a*c;
+        out[1]+=a*G*k/omega*(k*(z+H)).cosh()/norm*c;
+        out[2]+=a*G*k/omega*(k*(z+H)).sinh()/norm*s;
+    }
+    out
+}
+fn gauge(v:&Volume,x:f64)->f64 {
+    let q=x/v.domain().dx as f64-0.5;
+    let i=q.floor() as usize;let f=q-i as f64;
+    (1.-f)*(v.surface()[i] as f64-H)+f*(v.surface()[i+1] as f64-H)
+}
+fn run()->Result<(),String> {
+    let args:Vec<_>=std::env::args().collect();
+    let case=args.get(1).map(String::as_str).unwrap_or("garde");
+    if !["garde","garde-gauche","mur","eponge"].contains(&case) {return Err("cas : garde, garde-gauche, mur, eponge".into());}
+    let dx:f32=args.get(2).map(|s|s.parse()).transpose().map_err(|_|"dx invalide")?.unwrap_or(0.25);
+    if ![0.25,0.125].contains(&dx) {return Err("dx : 0.25 ou 0.125".into());}
+    let shift=if case=="garde-gauche" {24.} else {0.};
+    let length=if case.starts_with("garde") {48.+shift} else {24.};
+    let domain=Domain{nx:(length/dx) as usize,nz:(1.5/dx) as usize,dx};
+    let jobs=host_impl::SequentialJobs;let sink=host_impl::StderrSink;
+    let mut arena=host_impl::ArenaAllocator::with_capacity(1<<27);
+    let mut v=Volume::configure(&mut HostServices{alloc:&mut arena,jobs:&jobs,sink:&sink},
+        domain,1025.,G as f32,&vec![0.;domain.nx]).map_err(|e|format!("configure {e:?}"))?;
+    let modes=modes();
+    let eta:Vec<_>=(0..domain.nx).map(|i|(H+sample(&modes,(i as f64+0.5)*dx as f64-shift as f64,0.,0.)[0]) as f32).collect();
+    v.set_free_surface(&eta,H as f32).map_err(|e|format!("surface {e:?}"))?;
+    let mut u=vec![0.;v.velocity_u().len()];let mut w=vec![0.;v.velocity_w().len()];
+    for k in 0..domain.nz {for i in 1..domain.nx {
+        u[k*(domain.nx+1)+i]=sample(&modes,i as f64*dx as f64-shift as f64,(k as f64+0.5)*dx as f64-H,0.)[1] as f32;
+    }}
+    for k in 1..=domain.nz {for i in 0..domain.nx {
+        w[k*domain.nx+i]=sample(&modes,(i as f64+0.5)*dx as f64-shift as f64,k as f64*dx as f64-H,0.)[2] as f32;
+    }}
+    v.set_velocity(&u,&w).map_err(|e|format!("vitesse {e:?}"))?;
+    let bu=vec![BackgroundSample::default();u.len()];let bw=vec![BackgroundSample::default();w.len()];
+    let omega=(G*PI*(PI*H).tanh()).sqrt();
+    let cg=0.5*omega/PI*(1.+2.*PI*H/(2.*PI*H).sinh());
+    let sponge=if case=="eponge" {Sponge{width_m:4.,rate_per_s:(10.*cg/4.) as f32}} else {Sponge::default()};
+    println!("PAQUET cas={case} dx={dx} nx={} nz={} dt_us=5000 cg={cg} sigma={} fond=nul",domain.nx,domain.nz,sponge.rate_per_s);
+    let (mut incident,mut returned,mut analytic_incident)=(0.,0.,0.);
+    let start=Instant::now();let mut iters=0;
+    for n in 0..7200u64 {
+        let bg=BackgroundFaces{domain,time:SimTime(n*5000),density:1025.,gravity:G as f32,u:&bu,w:&bw};
+        let r=v.step_perturbation_mobile(bg.time,5000,6000,1_000_000,&bg,sponge,&jobs,&Frozen)
+            .map_err(|e|format!("REFUS cas={case} dx={dx} pas={n} t={} erreur={e:?}",n as f64*0.005))?;
+        if r.advanced_us!=5000 {return Err("pas non avance".into());}
+        iters=iters.max(r.report.unwrap().iterations);
+        let t=(n+1) as f64*0.005;let y=gauge(&v,12.+shift as f64);
+        if !y.is_finite(){return Err("jauge non finie".into());}
+        if t<=12. {incident+=y*y*0.005;let a=sample(&modes,12.,0.,t)[0];analytic_incident+=a*a*0.005;}
+        if t>=14. {returned+=y*y*0.005;}
+        if (n+1)%50==0 {println!("TRACE t={t:.3} eta={y:.10}");}
+    }
+    if incident<=0. {return Err("incident nul".into());}
+    println!("MESURE cas={case} dx={dx} E_inc={incident:e} E_retour={returned:e} rapport_brut={} energie_inc_sur_lineaire={} iterations_max={iters} temps_s={}",
+        (returned/incident).sqrt(),incident/analytic_incident,start.elapsed().as_secs_f64());
+    Ok(())
+}
+fn main(){if let Err(e)=run(){eprintln!("{e}");std::process::exit(1);}}

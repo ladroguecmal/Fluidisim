@@ -29,3 +29,17 @@ Critères avant campagne :
 
 Arrêt : réception bornée ou cause de refus démontrée avec prochaine action concrète.
 Aucune modification des seuils après mesure. Pas de promesse de coût temps réel.
+
+
+## Première garde et diagnostic déclaré avant suite
+
+Garde dx=0,25 : tous les 7 200 pas reçus, mais rapport tardif **0,019668** >0,001.
+Énergie incidente 7,1510674e-6 m²s ; retour 2,7662244e-9 m²s. Le paquet linéaire
+analytique aux mêmes fenêtres donne **8,8193e-5**, inférieur au seuil. Le signal
+numérique tardif n'est donc pas la simple queue du paquet analytique.
+Aucune réflexion de l'éponge n'est encore mesurée ni déclarée.
+
+Deux diagnostics distincts : (1) garde dx=0,125, pour mesurer l'effet spatial ;
+(2) même garde dx=0,25 en reculant seulement le mur gauche de 24 m, paquet/jauge/bord
+droit inchangés en coordonnées physiques. Celui-ci distingue le retour d'une onde
+parasite partie à gauche des autres erreurs du paquet. Aucun seuil de réception changé.

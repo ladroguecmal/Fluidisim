@@ -67,11 +67,14 @@ Objectif : mesurer la réflexion du pas couplé mobile avec l'éponge ADR-164.
 
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — montage du paquet, témoins, fenêtres et critères déclarés avant mesure.
-- [>] **P3** — banc consommant le pas réel, contrôle du paquet et des fenêtres.
-- [ ] **P4** — mesures bornées, réception ou diagnostic honnête, régressions adaptées.
+- [x] **P3** — banc consommant le pas réel, contrôle du paquet et des fenêtres.
+- [>] **P4** — mesures bornées, réception ou diagnostic honnête, régressions adaptées.
 - [ ] **P5** — rituel §6, journal, file, index et jeton.
 
 ### Notes de reprise
 
 S268 : dissipation locale reçue, frontière transparente non reçue. Ne pas confondre
 crête et énergie ni prendre une fenêtre contaminée pour de la réflexion (ADR-046).
+
+P3 : garde 0,25 refuse la mesure : signal tardif 1,9668 %, analytique 0,00882 %.
+Diagnostic déclaré : raffiner la garde et reculer seulement le mur gauche. Pas de verdict éponge.
