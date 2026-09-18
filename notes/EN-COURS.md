@@ -73,9 +73,9 @@ mesurés, réduits par les techniques désignées par la mesure, cadence publié
   facteur vertical par couche, **identique au bit** à l'évaluation ponctuelle ; essais, mesure.
 - [x] **P4** — technique suivante désignée par la carte (départ depuis la pression précédente
   si le pas domine) ; mêmes portes d'acceptation ; mesure.
-- [>] **P5** — δ en direct dans l'afficheur (`--delta-direct`) : un pas par image, temps simulé
+- [x] **P5** — δ en direct dans l'afficheur (`--delta-direct`) : un pas par image, temps simulé
   fixe par image, cadence publiée ; accord au bit avec le rejeu de 16 ms.
-- [ ] **P6** — rituel §6.
+- [>] **P6** — rituel §6.
 
 ### Notes de reprise
 
@@ -92,3 +92,5 @@ P4 : départ à chaud 134/266 itérations, pas 17,7/17,4 ms ; suite 372+17+95 pu
 `set_free_surface` remet la pression publiée à zéro (renaissance d'un domaine). Cache versionné
 0x5276_0169, rejeux recalculés en 179 s, statistiques S275 inchangées aux décimales publiées.
 P5 : direct identique au bit au rejeu 16 ms sur 200 images ; cadence à mesurer sans charge.
+
+P5 : direct 40,5 Hz, CPU 23,8 ms, δ 21,7 ms, 0 allocation dans update ; témoin rejeu 754 Hz.

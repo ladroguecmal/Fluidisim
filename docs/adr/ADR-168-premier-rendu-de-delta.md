@@ -32,3 +32,7 @@ Temps réel ; 3D (la bande répète la tranche le long des crêtes) ; frontière
 de phase longue (A289) — visible ou non, elle n'est pas corrigée.
 
 [Protocole et résultats](../validation/DELTA-VISIBLE-S275.md).
+
+**Note S276, 2026-09-18.** Le point 3 (« rejeux précalculés ») a désormais une variante en direct,
+`--delta-direct` : un pas de 16 ms par image, identique au bit au rejeu, 40 images/s, toujours hors
+budget ([mesure](../validation/COUT-DIRECT-S276.md)). Le rejeu reste le mode par défaut.

@@ -65,3 +65,31 @@ inchangé (18 itérations, pression nulle au repos).
 | **pas couplé** | **17,7 ; 17,4** | 25,7 ; 23,9 | 30,4 ; 29,3 |
 
 Itérations au pire 23 → 17. **Un pas par image ≈ 23 ms**, contre 58 ms à l'ouverture de S276.
+
+## δ en direct dans l'afficheur (P5)
+
+`water-viewer --delta --delta-direct` : `delta::Live` avance d'un pas de 16 ms par image, au fond
+échantillonné par grille, dans `FrameData::update` ; le temps de la scène avance du même pas
+simulé par image (ralenti si l'image dure plus). Né au repos (I-12), renaît au repos si le temps
+recule ou saute (`set_free_surface` remet désormais la pression publiée à zéro, ADR-169).
+
+- **Identité** (`--delta --delta-direct-verify`) : 200 images en direct **identiques au bit** au
+  rejeu de 16 ms, rejeux recalculés avec ADR-169 en 179 s — statistiques S275 inchangées aux
+  décimales publiées (`η'` 15,88 mm rms, écart 16/4 ms 0,367 mm rms).
+- **Cadence** (`--cadence`, 960 × 540, secteur, GPU RTX 5070 Laptop, un fil CPU pour δ) :
+
+| mode | intervalle médian (ms) | p95 | cadence médiane | CPU par image (ms) | allocations `update` |
+|---|---:|---:|---:|---:|---:|
+| rejeu (témoin) | 1,33 | 1,88 | 754 Hz | 0,63 | 0 |
+| **direct** | **24,7** | 30,5 | **40,5 Hz** | 23,8 | **0** |
+
+  Coût de δ par image : médiane **21,7 ms**, p95 27,8, max 32,1 (échantillonnage par grille et
+  pas couplé). La boucle d'image n'alloue toujours rien dans `update` (ADR-145).
+
+**Techniques présentes** : multigrille mobile (ADR-167), échantillonnage par grille (identique au
+bit), départ depuis la pression publiée (ADR-169), un pas par image (précision S275), f32, un fil.
+**Absentes** : GPU, parallélisme du pas, cadence de δ inférieure à celle de l'image (LOD
+temporel), domaine plus petit ou plus grossier, 3D. **Domaine** : bande x-z de 6 656 mailles,
+houle à crêtes longues Hs 2 m. **Budget** : 21,7 ms contre 2 ms pour toute l'eau (ADR-125),
+≈ 11 fois ; l'écart qualifie l'implémentation mesurée (ADR-131). Depuis l'ouverture de S276 :
+58 → 23 ms par image, soit 17 → 40 images/s.
