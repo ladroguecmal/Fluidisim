@@ -1,4 +1,4 @@
-//! S272 : résidu progressif réel, voir RESIDU-TEMPOREL-S272.
+//! S272 : résidu progressif réel, voir RESIDU-TEMPOREL-S272 ; S274 : a = 2 cm et dt = 0,5 ms (HOULE-USAGE-S274).
 #[path="../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)] mod host_impl;
 #[path="support/progressive_background.rs"] mod wave;
@@ -11,7 +11,7 @@ fn run()->Result<(),String> {
     let dx:f32=args.get(1).ok_or("dx requis")?.parse().map_err(|_|"dx")?;
     let a:f64=args.get(2).ok_or("amplitude requise")?.parse().map_err(|_|"a")?;
     let dt:u64=args.get(3).ok_or("dt_us requis")?.parse().map_err(|_|"dt")?;
-    if ![0.125,0.0625,0.03125].contains(&dx) || ![0.01,0.005].contains(&a) || ![2000,1000].contains(&dt) {return Err("fixture non declaree".into());}
+    if ![0.125,0.0625,0.03125].contains(&dx) || ![0.02,0.01,0.005].contains(&a) || ![2000,1000,500].contains(&dt) {return Err("fixture non declaree".into());}
     let domain=Domain{nx:(4./dx) as usize,nz:(1.5/dx) as usize,dx};
     let jobs=host_impl::SequentialJobs;let sink=host_impl::StderrSink;
     let mut arena=host_impl::ArenaAllocator::with_capacity(1<<27);

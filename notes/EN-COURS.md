@@ -74,10 +74,10 @@ puis ouvrir le blocage suivant.
   critère ; écart en hauteur absolue, pente, déphasage (mode k en quadrature, harmonique 2k) ;
   signature séculaire de l'ordre trois contre la dispersion de Stokes ; critères de la
   campagne P3 écrits avant mesure (HOULE-USAGE-S274).
-- [>] **P3** — campagne unique : a = 2 cm et dt = 0,5 ms admis par l'exemple ; trois amplitudes
+- [x] **P3** — campagne unique : a = 2 cm et dt = 0,5 ms admis par l'exemple ; trois amplitudes
   × trois mailles à 1 ms, contrôle 0,5 ms à la fine ; coefficient d'ordre deux jugé au budget
   d'ADR-120, sans le présenter comme la houle complète.
-- [ ] **P4** — verdict d'usage : garanties de fonctionnement, seuils justifiés par l'usage ou
+- [>] **P4** — verdict d'usage : garanties de fonctionnement, seuils justifiés par l'usage ou
   proposés à l'utilisateur, raccord δ→rendu manquant, besoins découverts dans liste et file.
 - [ ] **P5** — blocage suivant de la feuille de route : choix argumenté, critère, premier lot
   (plan amendé ici avant de le construire).
@@ -94,3 +94,7 @@ P2 : écart fin = 5,8 µm rms (0,058 % de a), pente 1,9e-5, déphasage 1,35e-3 r
 D = N(a)−N(a/2) croît sur sin θ à 0,85–0,87 × Stokes (ω₂ = 0,611(ak)²ω), indépendant de dx.
 ADR-122 : une troncature d'ordre deux ne juge pas la phase. Besoin découvert : cohérence
 de phase δ/B (B linéaire). Outil outils/usage_houle.py.
+
+P3 : coefficient d'ordre deux 1,16 % (1 ms) / 0,88 % (0,5 ms) ; troisième amplitude non
+qualifiante à la fine (1,94 %) : crête 2 cm > centre de maille 1,56 cm ; budget ADR-120
+2,26–2,43 % → non reçu, aucun seuil relevé. Traces fluidisim-s274-<dx>-<a>-<dt>.log.

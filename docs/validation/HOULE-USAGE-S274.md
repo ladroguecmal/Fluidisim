@@ -64,7 +64,7 @@ phase sur plusieurs périodes. Le critère brut de S272 mesure surtout ce manque
   la formule seule : `ak` = 0,06, T = 7 s, 60 s → ≈ 0,1 rad, soit ≈ 7 cm de hauteur pour
   a = 0,75 m. Trois effets : `|δ|` n'est plus petit devant B (ADR-001) ; couture de phase à la
   bordure ; surface rendue différente de la surface de jeu B+W (I-04). À trancher avant un
-  domaine δ de longue durée sous une houle cambrée (options au §6 après P4).
+  domaine δ de longue durée sous une houle cambrée (options au §7).
 
 ## 5. Critères de la campagne P3, écrits avant mesure
 
@@ -82,3 +82,36 @@ Mesurer **le coefficient d'ordre deux du pas réel**, `N₂`, pas la houle compl
   dernier instant est publié à titre d'information.
 - Sinon : chiffrer la part en défaut, sans relever de seuil. Un reçu dit « coefficient d'ordre
   deux », jamais « houle progressive reçue ».
+
+## 6. Campagne P3 — coefficient d'ordre deux non reçu, cause chiffrée
+
+Onze passages, tous complets, dt = 1 ms (et 0,5 ms au contrôle). Écarts L2 espace-temps
+relatifs à la norme de l'oracle `η₂/a²`.
+
+| dx | N*(2 cm, 1 cm) | N*(1 cm, 5 mm) | c₂ (trois amplitudes) | écart des deux paires |
+|---|---:|---:|---:|---:|
+| 0,125 | 7,51 % | 7,33 % | 7,28 % | 0,40 % |
+| 0,0625 | 2,63 % | 2,42 % | 2,36 % | 0,42 % |
+| 0,03125 | 2,34 % | **1,16 %** | 1,28 % | **1,94 %** |
+
+- **Extrapolation qualifiée aux deux mailles grossières, pas à la fine** (1,94 % > 0,5 %).
+  Cause structurelle probable : à la maille fine, la crête de 2 cm (2,04 cm) dépasse le centre
+  des mailles de la couche au-dessus du repos (1,56 cm) ; des mailles entrent dans le fluide et
+  le développement en amplitude cesse d'être régulier. À 1 cm, et aux autres mailles à 2 cm, rien
+  ne franchit. Le rapport séculaire le confirme : 0,856 / 0,870 / **0,719** pour la paire
+  2 cm / 1 cm, contre 0,85 à 0,87 partout ailleurs. Cohérent, non démontré.
+- **Pas de temps** : `N*(1 cm, 5 mm)` passe de 1,16 % à 0,88 % entre 1 et 0,5 ms (e_temporel
+  0,455 %) ; il valait 1,77 % à 2 ms (S273). L'erreur temporelle pèse donc autant que l'erreur
+  spatiale restante à la maille fine.
+- **Budget d'ADR-120** avec les termes déclarés : 1,28 + 0,46 + 0,65 + 0,05 = **2,43 %** ; avec la
+  paire basse comme valeur, 1,16 + 0,46 + 0,65 = 2,26 %. **Non reçu à 2 %**, et `e_référence`
+  n'est pas qualifié à la maille fine. Aucun seuil relevé.
+- Forme d'ADR-120 (maximum au dernier instant) pour `c₂` : 3,82 %, publiée à titre d'information.
+- Écart brut au modèle d'ordre deux, inchangé en substance : 8,79 / 6,01 / 5,78 % à 1 ms, 5,75 %
+  à 0,5 ms. **Ce banc ne valide pas la houle complète** : seul le coefficient d'ordre deux y est
+  jugé, et il ne l'est pas encore au budget déclaré.
+
+Ce qui manquerait pour le recevoir, si l'usage l'exige : dt ≤ 0,5 ms avec contrôle à 0,25 ms,
+troisième amplitude **sous** le centre des mailles (2,5 mm), donc une trace de `η'` compensée
+(la trace f32 actuelle perd ≈ 0,5 % par point à cette amplitude). Estimation, non mesurée :
+≈ 0,9 + 0,2 + 0,2 %. Voir §7 pour savoir si l'usage l'exige.
