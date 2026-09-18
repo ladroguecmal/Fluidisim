@@ -5580,3 +5580,22 @@ diverger.
    divergence n'est pas un écart mesuré : c'est le signe que l'instrument lui-même est faux.
 
 Famille de L322 (un critère qui mord pour la bonne raison) et de L328.
+
+## L330 — Un oracle tronqué borne ce qu'il peut recevoir
+
+*(S273)* Le résidu progressif S272 était refusé à 8,68 % contre un oracle d'ordre deux. Corriger
+la quadrature fautive l'a ramené à 5,88 %, et le raffinement ne le faisait presque plus baisser.
+L'écart restant venait de la référence : la solution contient un ordre trois que l'oracle n'a pas,
+environ 5,6 % de `η'` à cette amplitude. Aucun solveur ne pouvait passer 2 % contre lui.
+
+1. **Avant d'attribuer un écart au solveur, mesurer celui de la référence.** Un oracle tronqué en
+   un paramètre physique se qualifie en faisant varier ce paramètre. Si l'écart normalisé ne
+   dépend pas de la maille, il n'est pas numérique.
+2. **L'extrapolation dans le paramètre sépare les deux parts.** Ici `2N(a/2) − N(a)` retire le
+   terme d'ordre trois. La part qui reste converge avec la maille, et c'est elle que le solveur
+   doit à la référence.
+3. **Ce contrôle s'écrit avec le seuil, pas après le refus.** S272 l'avait déclaré comme contrôle
+   (« a² ≤ 1 % ») sans en tirer la conséquence : un contrôle qui échoue invalide la métrique
+   avant de juger le candidat.
+
+Famille de L329 (un témoin s'éprouve à l'ordre qu'il prétend garder) et de L322.

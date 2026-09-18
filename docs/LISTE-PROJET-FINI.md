@@ -114,9 +114,10 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
   sur courant/niveau uniformes (S270, [preuve](validation/FOND-TRAVERSANT-S270.md), ADR-165).
   Démarrage d’une houle progressive contrôlé à 0,58 % à la maille fine
   ([S271](validation/HOULE-PROGRESSIVE-S271.md)), pas réel éprouvé à petit pas.
-  **S272 : évolution sur 2 s refusée**, erreur de résidu 8,68 % contre oracle
-  indépendant ; quadrature des bandes partielles à corriger
-  ([diagnostic](validation/RESIDU-TEMPOREL-S272.md)).
+  **S272 : évolution sur 2 s refusée** contre oracle indépendant d'ordre deux ;
+  **S273 : quadrature des bandes corrigée** (ADR-166), résidu 5,88 %, part d'ordre deux
+  extrapolée 1,77 %, reste attribué à la troncature de l'oracle
+  ([preuve](validation/BANDE-LINEAIRE-S273.md)).
   Manquent la houle progressive traversante reçue sur une durée utile, les frontières
   générales du total et W au-dessus du plan moyen ; B4 reste partiel.
 - [ ] **4.7 Frontière sans réflexion ni rupture visible** (C05) — *partiel* : éponge quadratique

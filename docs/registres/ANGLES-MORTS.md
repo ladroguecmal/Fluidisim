@@ -3734,3 +3734,14 @@ isolée : bande partielle évaluée au centre de cellule, 1,60 % contre intégra
 exacte ; reconstruction linéaire 0,0162 % sur ce flux. Déclencheur S273 : intégrer
 la reconstruction au transport réel (intérieur/bords), puis refaire le verdict,
 sans extrapoler ce gain isolé à l'erreur temporelle. [Preuve](../validation/RESIDU-TEMPOREL-S272.md).
+
+
+**Suivi A92/A50 — S273, 2026-09-18 (sévérités conservées).** La quadrature de
+bande est d'ordre deux dans le produit (ADR-166) : flux 0,0162 % au lieu de 1,60 %
+à la maille fine, fond affine exact. Résidu progressif sur 2 s : 9,11 / 6,18 /
+5,88 %, encore au-dessus de 2 %. L'écart des champs divisés par a² vaut 2,74 /
+2,85 / 2,89 % quelle que soit la maille : c'est l'ordre trois absent de l'oracle,
+pas le pas. La part extrapolée `2N(a/2) − N(a)` converge vers 1,77 %, erreur
+temporelle comprise. Déclencheur S274 : protocole de réception sur cette part,
+écrit avant mesure, à dt 1 ms avec contrôle 0,5 ms ; sinon oracle d'ordre trois.
+[Preuve](../validation/BANDE-LINEAIRE-S273.md).

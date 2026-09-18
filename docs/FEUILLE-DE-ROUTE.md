@@ -254,9 +254,12 @@ hauteur artificielle est corrigé, 638 expirations/reprises sans allocation
 initiale 0,58 % à dx=0,03125, décroissante, pas réel cohérent à petit dt
 ([preuve](validation/HOULE-PROGRESSIVE-S271.md)). La houle progressive sur durée
 utile **refusée S272** : écart de résidu 8,68 % sur 2 s à dx=0,03125,
-contre oracle modal indépendant ; contrôles de dt/amplitude encore insuffisants.
-Erreur de quadrature de bande isolée, reconstruction linéaire à intégrer S273
-([preuve](validation/RESIDU-TEMPOREL-S272.md)). La fermeture extérieure de la perturbation reste réfléchissante ;
+contre oracle modal indépendant ([preuve](validation/RESIDU-TEMPOREL-S272.md)).
+**S273 : bande du fond en quadrature linéaire** (ADR-166), flux à 0,016 % au lieu de
+1,60 % ; résidu brut 5,88 %, toujours refusé, mais la part d'ordre deux extrapolée en
+amplitude converge (7,74 / 2,92 / 1,77 %) et l'écart restant est la troncature de
+l'oracle, indépendante de la maille ([preuve](validation/BANDE-LINEAIRE-S273.md)).
+Réception sur la part extrapolée à déclarer avant mesure. La fermeture extérieure de la perturbation reste réfléchissante ;
 ces reçus bornés ne valent pas frontière transparente universelle.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;

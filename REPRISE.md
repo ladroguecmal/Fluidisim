@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-18 19:15 +02:00
+JETON            : libre
+Battement        : 2026-09-18 19:19 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : S273 — reconstruction linéaire des flux de bande dans le pas réel
-Dernière session : S272 — résidu temporel refusé à 8,68 %, erreur de quadrature de bande isolée
-Session suivante : S273 — reconstruire linéairement les flux de bande dans le pas réel et recevoir le correctif
-Maillons        : 2
+Session en cours : aucune
+Dernière session : S273 — bande du fond d'ordre deux (ADR-166) ; résidu 5,88 %, part d'ordre deux extrapolée 1,77 %
+Session suivante : S274 — recevoir la part extrapolée en amplitude, protocole écrit avant mesure (dt 1 ms / 0,5 ms)
+Maillons        : 0
 
 ```
 

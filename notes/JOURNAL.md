@@ -13786,3 +13786,39 @@ résidu et qualifier dt/amplitude ; pas de campagne infinie de raffinements.
 actualisés (décompte inchangé 119=3+48+68). I-04/I-05/I-06/I-08 produit inchangés,
 I-14 oracle dérivé et critères conservés. δ général, V, B2, bathymétrie et seconde
 cible gardent leurs déclencheurs. Jeton libre, aucune copie isolée à fermer.
+
+
+## S273 — Bande du fond d'ordre deux, troncature de l'oracle isolée
+
+**2026-09-18, Claude Opus 5 (Claude Code desktop).** Entrée « reprends le projet », master propre
+2506015, copie unique, jeton libre. Plan de892c7, ADR et critères e751947, construction b090418,
+suite 38d6c0b, campagne cec9fcb. Suite prescrite par S272 : un correctif produit, pas un instrument.
+
+**Capacité reçue, maillons 0.** Le transport réel de `step_perturbation_mobile` intègre la bande
+du fond en quadrature linéaire par couche (ADR-166, fonction unique aux faces intérieures et
+extérieures, `∂zU` déjà fourni). Défaut reproduit par un témoin dans le test (1,60 % à la maille
+fine), corrigé : flux produit 0,4190 / 0,0892 / 0,0162 %, ordre deux ; fond affine exact à
+3,9·10⁻⁸. Consommateurs : tout pas couplé mobile, dont le B de production S254.
+[Preuve](../docs/validation/BANDE-LINEAIRE-S273.md).
+
+**Validation :** 480 tests réussis, 0 échec, 21 ignorés (368 cœur, 17 intégrations, 95 harnais) ;
+S253 release vert, `b₂` couplé 2,17 → 2,14 % ; campagne S253 à 128 colonnes rejouée, profil
+0,162 → 0,148 % (5 cm) et 0,213 → 0,178 % (10 cm), `b₂` inchangé à 0,01 point près. Fond nul au bit, fond uniforme, témoin sans résidus,
+refus et expirations inchangés. S271 initial 0,585 → 0,137 %. Oracle Python : 4 tests.
+
+**Résidu temporel, refus maintenu** aux critères S272 inchangés : 9,11 / 6,18 / 5,88 % (S272 :
+22,52 / 13,04 / 8,68 %) ; demi-pas 0,668 % ; a² 2,89 %. Cause resserrée : l'écart normalisé en a²
+ne dépend pas de la maille (2,74 / 2,85 / 2,89 %), donc c'est la troncature de l'oracle ; la part
+extrapolée en amplitude, déclarée en P2 comme diagnostic, converge 7,74 / 2,92 / 1,77 %. Deux
+passages a/2 aux mailles grossière et moyenne ajoutés après la mesure fine, dits comme tels.
+
+**Troisième session du fil (A211).** La suite débloque encore l'usage J2 (entrée des vagues de B
+dans le domaine, liste 4.6) et tient en une session de mesure. Comparée à A276 (coût δ,
+multigrille du mode mobile) et aux frontières du total : ceux-ci gardent leur déclencheur.
+**Suite S274 :** réception sur la part extrapolée, protocole écrit avant mesure (trois mailles,
+dt 1 ms, contrôle 0,5 ms, l'exemple doit accepter 500 µs) ; en cas d'échec, oracle d'ordre trois.
+Une quatrième session d'instrument sans reçu ne se justifierait pas : passer alors à A276.
+
+**Rituel :** file active entière relue ; J2, A50, liste 4.6, A92/A50, index (ADR-166, preuve)
+actualisés ; L330. ADR-152/165 : notes datées. I-12 et I-14 relus, inchangés. δ général, V, B2,
+bathymétrie et seconde cible gardent leurs déclencheurs. Aucun arbitrage utilisateur requis.

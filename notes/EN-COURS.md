@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S273 — en cours
+Session : S273 — terminée
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo et Python.
 Entrée : « reprends le projet », master propre 2506015, copie unique, jeton libre.
 Objectif : intégrer au transport réel la reconstruction linéaire de la bande
@@ -76,7 +76,7 @@ Objectif : intégrer au transport réel la reconstruction linéaire de la bande
 - [x] **P4** — suite complète, valeurs déplacées expliquées, transaction intacte.
 - [x] **P5** — rejouer les cinq passages S272, verdict aux critères S272 inchangés,
   qualification dt/amplitude déclarée en P2.
-- [>] **P6** — rituel §6, feuille de route/file/liste, journal, index et jeton.
+- [x] **P6** — rituel §6, feuille de route/file/liste, journal, index et jeton.
 
 ### Notes de reprise
 
@@ -100,3 +100,6 @@ Rejeu S253 128 colonnes 5/10 cm en cours (fluidisim-s273-s253-*.log, ~26 min).
 P5 : refus maintenu aux critères S272 ; cause resserrée : troncature de
 l'oracle ∝ a, part d'ordre deux convergente. Suite concrète : protocole N*
 déclaré avant mesure, dt 1 ms / 0,5 ms (l'exemple n'accepte pas encore 500 µs).
+
+P6 : rejeu S253 128 colonnes reçu (profil 0,148 / 0,178 %, b₂ 0,35 / 0,53 %).
+Jeton rendu, maillons 0, suite S274 = réception sur N* (protocole avant mesure).

@@ -58,6 +58,11 @@ Valeurs déplacées, toutes par un fond non uniforme :
   témoin sans résidus 99,56 % inchangé (bande éteinte).
 - S254, intégration du B de production : 590 faces mouillées au-dessus du plan moyen, comme
   avant ; `u'` maximal 5,36·10⁻³ m/s aux murs.
+- S253, campagne à 128 colonnes rejouée (`delta_mobile couple_cas couple`, une période) : profil
+  couplé **0,162 → 0,148 %** à 5 cm et **0,213 → 0,178 %** à 10 cm ; `b₂` 0,34 → 0,35 % et
+  0,53 → 0,53 % ; pas au plancher 116 → 119 et 27 → 23, tous reçus. Critères 3 et 4 (2 % et
+  20 %) tenus. Durées non comparables : sept processus concurrents, ce n'est pas une mesure de
+  coût.
 
 ## Campagne — refus maintenu aux critères S272, cause resserrée
 
