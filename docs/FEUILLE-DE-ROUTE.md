@@ -237,7 +237,9 @@ domaine né à zéro sous un fond linéaire reconstruit la part non linéaire de
 colonnes : 5 cm 0,162 % / 0,34 %, 10 cm 0,213 % / 0,53 %, mieux que le solveur total ; coût
 comparable (265–277 ms). [Preuve](validation/SURFACE-COUPLEE-S253.md). Restent le prolongement
 de B réel au-dessus du plan moyen (A286), les bords ouverts, les frontières du total, le
-raccordement au rendu et B4 global.
+raccordement au rendu et B4 global. **S275 : premier raccordement au rendu** (ADR-168) — bande
+δ couplée rejouée dans `viewer/` sous houle à crêtes longues, pas d'image à 0,25 mm rms du pas
+de 4 ms hors éponge ; revue R10 demandée ([protocole](validation/DELTA-VISIBLE-S275.md)).
 **S254 : le fond B de production se prolonge au-dessus du plan moyen** (ADR-154 : vitesse
 horizontale constante, `W` par continuité, `P` de Taylor d'ordre un). Il est identique au bit
 au-dessous et reçu contre l'oracle S253 : à 128 colonnes, 0,168 % / 0,58 % à 5 cm et 0,244 % /

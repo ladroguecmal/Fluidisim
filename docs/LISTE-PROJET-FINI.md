@@ -23,8 +23,8 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S274, 2026-09-18** — actualisation demandée par l’utilisateur, sur les preuves
-S262–S274 ; les résultats récents sont précisés aux points concernés. Le décompte porte
+**État au S275, 2026-09-18** — actualisation demandée par l’utilisateur, sur les preuves
+S262–S275 ; les résultats récents sont précisés aux points concernés. Le décompte porte
 sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 
 ---
@@ -33,7 +33,8 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 
 - [ ] **1.1 Eau = somme de quatre couches B, W, δ, V, dans le code** — *partiel* : B, W, un δ
   candidat 2D et le noyau V existent ; B+W sont composés par le cœur (S214, S236) ; B/W sont
-  raccordés à δ en 2D (S250–S254). Manquent l'articulation V↔δ et la somme rendue avec δ.
+  raccordés à δ en 2D (S250–S254) ; somme rendue B+δ sur une bande rejouée (S275). Manquent
+  l'articulation V↔δ et δ rendu en direct.
 - [x] **1.2 Le cœur est une bibliothèque sans dépendance moteur** — *validé* : `water-core` n'a
   aucune dépendance (ADR-020, ADR-028).
 - [ ] **1.3 Interfaces de SPEC-004** (solveur δ, solveur W, fond, solides, services d'hôte) —
@@ -213,9 +214,11 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 - [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent*.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *absent*.
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *absent*.
-- [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *absent*. `viewer/` ne consomme
-  aucun domaine δ : aucune précision de δ ne peut encore être jugée à l'œil (S274). Manque aussi
-  une tolérance de pente d'image, les reflets dépendant de la pente.
+- [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *partiel* : **S275, ADR-168** —
+  bande δ couplée sous houle à crêtes longues, précalculée hors budget et rejouée dans `viewer/`
+  (touche D : B seul, B+δ 4 ms, B+δ au pas d'image), couche GPU à 7·10⁻⁸ m de sa lecture CPU,
+  scène S201 inchangée au bit ; revue R10 en attente. Manquent δ en direct, la 3D, une frontière
+  δ↔B sans rupture autre qu'un fondu de rendu, et une tolérance de pente d'image.
 - [ ] **8.8 Lointain et horizon sans artefact** — *partiel* : coupure spectrale B/sillage (S249) ;
   bande d'horizon mesurée (S247, S248) ; fin de grille à l'horizon géométrique sous le ciel clair
   (S262). Pas de certificat d'absence d'alias.
@@ -325,13 +328,13 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
 | 6. Solides | 8 | 0 | 3 | 5 |
 | 7. Secondaires | 8 | 0 | 0 | 8 |
-| 8. Rendu | 10 | 0 | 6 | 4 |
+| 8. Rendu | 10 | 0 | 7 | 3 |
 | 9. Activation et budget | 13 | 0 | 5 | 8 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **48** | **69** |
+| **total** | **120** | **3** | **49** | **68** |
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.

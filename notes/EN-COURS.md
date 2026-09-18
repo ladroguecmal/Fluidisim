@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S275 — en cours
+Session : S275 — terminée
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
 Entrée : suite de S274 dans la même conversation (consigne utilisateur : continuer sans attendre,
 solliciter pour un jugement visuel). master d0ab484, copie unique.
@@ -78,7 +78,7 @@ soumettre des captures à l'utilisateur (liste 8.7).
 - [x] **P4** — couche δ côté GPU : tampon et paramètres, lecture Hermite le long de x, fondus,
   bascule clavier ; vérification GPU contre CPU de la couche.
 - [x] **P5** — captures de revue (poses de jeu, trois variantes) et demande de revue à l'utilisateur.
-- [>] **P6** — rituel §6.
+- [x] **P6** — rituel §6.
 
 ### Notes de reprise
 

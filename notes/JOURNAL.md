@@ -13863,3 +13863,39 @@ de l'utilisateur ; l'écart au pas d'image y est mesuré. Puis le lot de coût s
 ADR-147 (note) actualisés ; L331. I-03 (réductions ordonnées), I-06 (mémoire comptée, zéro
 allocation), I-14 relus. δ général, V, B2, bathymétrie et seconde cible gardent leurs
 déclencheurs. Aucun arbitrage utilisateur requis ; les 2 % d'ADR-120 restent inchangés.
+
+
+## S275 — δ visible dans l'afficheur, revue R10 demandée
+
+**2026-09-18, Claude Opus 5 (Claude Code desktop).** Suite de S274 dans la même conversation,
+sur consigne de continuer sans attendre. master d0ab484. Plan 4e2a68c ; étapes f29cf11 à efe3932.
+
+**Capacité reçue, maillons 0.** Pour la première fois, δ se voit : scène `--delta` de `viewer/`
+(ADR-168), houle JONSWAP à crêtes longues (Hs 2 m, Tp 8 s), domaine couplé 256 × 104 m, dx 2 m,
+rejeu précalculé hors budget et mis en cache, bande extrudée le long des crêtes avec fondus de
+rendu ; touche D : B seul, B+δ 4 ms, B+δ au pas d'image. Consommateur : le chemin d'image.
+Preuves : 7 500 et 1 875 pas couplés tous reçus ; couche GPU à 7,4·10⁻⁸ m de sa lecture CPU sur
+19 630 sondes ; sept images S254 identiques au bit, `--verify` reçu, essais 21/21.
+[Protocole et résultats](../docs/validation/DELTA-VISIBLE-S275.md).
+
+**Mesures.** `η'` 15,9 mm rms, max ≈ 10 cm (5 % de Hs), groupé sous les grosses crêtes. Pas
+d'image contre 4 ms, hors éponge : 0,25 mm rms, 1,33 mm max ; 11 mm dans l'éponge amont, masqué
+par le fondu : le bord amont est une limite (4.7). Dans l'image : δ change 10 à 24 % des pixels de
+plus de 4 niveaux à hauteur d'œil et en rasant, rien vu d'en haut ; le pas d'image ne se distingue
+en aucun pixel. **Un pas par image suffit donc à cette échelle** (mesure, avant verdict).
+
+**Limites :** précalcul (258 s), 2D extrudé, frontière du total au fond, fondus de rendu au lieu
+d'une frontière physique, dérive A289 non corrigée. Contrainte GPU : huit tampons de stockage
+par étage ; la bande suit les impacts dans le même tampon.
+
+**Incidents :** `--multi --revue` sans suffixe a réécrit les PPM R1 de `captures/s254` (PNG envoyés
+intacts, `captures/` non versionné) ; un `sed` global avait touché d'autres lignes de `main.rs`,
+restauré depuis Git puis réédité. Rien de faux n'a été committé.
+
+**Suite S276 :** consigner le verdict R10 ; puis lot de coût vers δ en direct (A276) — coût par
+image mesuré (pas couplé et échantillonnage de B, aujourd'hui dominant), départ depuis la
+pression précédente, échantillonnage décimé du fond (SPEC-004 §6.2). Arbitrage : aucun.
+
+**Rituel :** file active relue ; liste (1.1, 8.7 : 120 = 3 + 49 + 68), feuille de route J2, file
+(rendu de δ), registre des revues (R10), index (ADR-168) actualisés. I-04 (δ cosmétique) et
+I-06 (aucune allocation ajoutée au pas du cœur) relus ; l'afficheur précalcule hors image.
