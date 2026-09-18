@@ -68,8 +68,8 @@ Objectif : éprouver la houle progressive traversante et actualiser LISTE-PROJET
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — choisir l'oracle indépendant et déclarer les critères ; actualiser la liste sur preuves.
 - [x] **P3** — construire le cas progressif et ses contre-épreuves.
-- [>] **P4** — réception, limites, mise à jour finale de la liste et décompte.
-- [ ] **P5** — rituel §6, file entière, journal, index et jeton.
+- [x] **P4** — réception, limites, mise à jour finale de la liste et décompte.
+- [>] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
 

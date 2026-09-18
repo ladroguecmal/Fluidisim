@@ -112,6 +112,8 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 - [ ] **4.6 Entrée des vagues de B/W dans le domaine** — *partiel* : source volumique, surface
   mobile couplée, fond B prolongé (ADR-149 à 154). Flux de bande aux frontières reçus
   sur courant/niveau uniformes (S270, [preuve](validation/FOND-TRAVERSANT-S270.md), ADR-165).
+  Démarrage d’une houle progressive contrôlé à 0,58 % à la maille fine
+  ([S271](validation/HOULE-PROGRESSIVE-S271.md)), pas réel éprouvé à petit pas.
   Manquent la houle progressive traversante reçue sur une durée utile, les frontières
   générales du total et W au-dessus du plan moyen ; B4 reste partiel.
 - [ ] **4.7 Frontière sans réflexion ni rupture visible** (C05) — *partiel* : éponge quadratique
