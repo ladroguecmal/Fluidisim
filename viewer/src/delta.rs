@@ -640,6 +640,27 @@ impl<'a> Layer<'a> {
         self.granted
     }
 
+    /// S280 — budget de l'afficheur, pour éprouver le cas serré (`--delta-budget=<ms>`). Sans lui,
+    /// on ne peut pas montrer que la bande survit là où S279 la voyait mourir.
+    pub fn set_budget_ms(&mut self, ms: f32) -> Result<(), String> {
+        self.scheduler
+            .set_profile(Profile { cpu_sim_ms: ms, ..PROFILE })
+            .map_err(|e| format!("budget de l'afficheur : {e:?}"))
+    }
+
+    /// S280 — **décidé vivant** par l'ordonnanceur, ce qui n'est pas la même chose que financé.
+    /// Un domaine vivant mais jamais servi est affamé (limite connue du glouton) ; un domaine que
+    /// son propre coût a fait sortir et qui ne peut plus revenir est absorbé (L336). Les deux se
+    /// ressemblent à l'écran et se distinguent ici.
+    pub fn is_alive(&self) -> bool {
+        self.scheduler.is_active(DomainId(0))
+    }
+
+    /// Estimation réinjectée au dernier pas, pour les relevés.
+    pub fn estimated_cost_ms(&self) -> f32 {
+        self.cost_ms()
+    }
+
     /// Profil de l'instant et en-tête rebasé à la caméra ; pentes par différences centrées.
     pub fn update(&mut self, seconds: f64, eye: [f32; 3], view: Option<&crate::lod::Projection>) {
         if !self.arbitrate(seconds, view) {

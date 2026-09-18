@@ -2144,13 +2144,19 @@ fn onde_interaction(amplitude: f32) -> Result<(), String> {
 /// jusqu'à la pose haute où S275 a mesuré que δ ne change aucun pixel, puis revient.
 ///
 /// Relève chaque transition avec l'instant, la part de cadre qui l'a causée et le coût réinjecté.
-fn delta_arbitrage(background: &water_core::background::Background, amplitude: f32) -> Result<(), String> {
+fn delta_arbitrage(background: &water_core::background::Background, amplitude: f32, budget_ms: Option<f32>)
+    -> Result<(), String> {
     let mut layer = delta::Layer::direct(background, delta::initial_wave(amplitude))?;
+    if let Some(ms) = budget_ms {
+        layer.set_budget_ms(ms)?;
+    }
     let pas = delta::FRAME_US as f64 * 1e-6;
     let images = (15.0 / pas) as usize;
     let mut transitions = 0;
     let mut precedent = false;
-    println!("DELTA_ARBITRAGE_S279 images={images} pas_s={pas} seuils=0.45/0.35");
+    println!("DELTA_ARBITRAGE_S279 images={images} pas_s={pas} seuils=0.45/0.35 budget_ms={}",
+        budget_ms.map_or("defaut".to_string(), |ms| format!("{ms}")));
+    let (mut payes, mut vivants, mut estimation_max) = (0usize, 0usize, 0f32);
     for n in 0..=images {
         let t = n as f64 * pas;
         // Trois phases : près, loin (pose haute de R10), puis retour.
@@ -2168,6 +2174,9 @@ fn delta_arbitrage(background: &water_core::background::Background, amplitude: f
             [delta::X0 + delta::NX as f32 * delta::DX, delta::HALF_WIDTH],
         );
         layer.update(t, eye, Some(&vue));
+        payes += layer.is_granted() as usize;
+        vivants += layer.is_alive() as usize;
+        estimation_max = estimation_max.max(layer.estimated_cost_ms());
         if layer.is_granted() != precedent {
             transitions += 1;
             println!("DELTA_ARBITRAGE_S279 t_s={t:.3} part={part:.4} bande={}",
@@ -2175,10 +2184,15 @@ fn delta_arbitrage(background: &water_core::background::Background, amplitude: f
             precedent = layer.is_granted();
         }
     }
-    println!("DELTA_ARBITRAGE_S279 transitions={transitions} attendu=3 fin={}",
+    println!("DELTA_ARBITRAGE_S279 transitions={transitions} attendu=3 fin={} pas_vivants={vivants}/{images} pas_payes={payes} estimation_max_ms={estimation_max:.1}",
         if precedent { "allumee" } else { "eteinte" });
-    if transitions != 3 {
+    // Le relevé de référence est celui du profil de l'afficheur. Un budget imposé sert à éprouver
+    // un régime — dont celui, légitime, où il ne suffit pas : on n'y attend pas trois transitions.
+    if budget_ms.is_none() && transitions != 3 {
         return Err(format!("l'ordonnanceur n'a pas décidé comme prévu : {transitions} transitions"));
+    }
+    if vivants == 0 {
+        return Err("la bande n'a jamais vécu : la décision, elle, ne dépend pas du budget".into());
     }
     Ok(())
 }
@@ -2191,7 +2205,12 @@ fn run() -> Result<(), String> {
     // S279 — l'ordonnanceur décide la bande δ : relevé dynamique, sans GPU.
     if args.iter().any(|a| a == "--delta-arbitrage") {
         let amplitude = onde_amplitude(&args)?.unwrap_or(0.);
-        return delta_arbitrage(&delta::swell_background()?, amplitude);
+        let budget = args
+            .iter()
+            .find_map(|a| a.strip_prefix("--delta-budget="))
+            .map(|v| v.parse::<f32>().map_err(|_| "--delta-budget : nombre attendu".to_string()))
+            .transpose()?;
+        return delta_arbitrage(&delta::swell_background()?, amplitude, budget);
     }
     // S277 — balayage des régimes de houle, sans GPU.
     if args.iter().any(|a| a == "--onde-regime") {

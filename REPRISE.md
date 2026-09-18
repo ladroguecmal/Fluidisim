@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 00:02 +02:00
+Battement        : 2026-09-19 00:04 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
 Session en cours : S280 — sortir de l'exclusion absorbante (L336)
 Dernière session : S279 — l'ordonnanceur branché sur la bande δ : elle s'éteint et se rallume seule (ADR-171)

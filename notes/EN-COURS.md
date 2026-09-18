@@ -89,12 +89,18 @@ l'hôte, pas au cœur.
 - [x] **P2** — estimation robuste dans l'hôte : médiane glissante des derniers pas payés, et retour
   vers l'estimation nominale quand plus rien n'est payé — un domaine qui ne tourne plus ne sait
   plus ce qu'il coûte, et le dire est plus honnête que de garder son pire chiffre. Essais.
-- [ ] **P3** — réception : `--delta-budget=<ms>` pour éprouver le cas serré ; la bande survit à
+- [x] **P3** — réception : `--delta-budget=<ms>` pour éprouver le cas serré ; la bande survit à
   33 ms là où S279 la voyait mourir à 0,352 s ; relevé dynamique de S279 inchangé ; douze
   empreintes de R10 inchangées.
 - [ ] **P4** — rituel §6.
 
 ### Notes de reprise
+
+**P3 reçu** ([mesure](../docs/validation/COUT-ROBUSTE-S280.md)) : à **33 ms** — le budget qui
+tuait en S279 — 689 pas payés sur 689 vivants, estimation maximale 29,7 ms ; à 20 ms, vivant mais
+jamais servi, estimation au nominal (22,0) — **affamé, pas absorbé** ; à 50 ms, identique. **689 pas
+vivants dans les trois cas** : la décision ne dépend pas du budget. Douze empreintes R10 inchangées,
+relevé dynamique de S279 identique.
 
 Chiffres de S279 à retrouver : bande morte à **0,352 s** sans retour avec un budget de 33 ms ;
 relevé à 50 ms — allumée 0 s, éteinte **6,016 s**, rallumée **10,0 s**, trois transitions. Douze

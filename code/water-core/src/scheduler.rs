@@ -183,6 +183,20 @@ impl Scheduler {
         self.profile
     }
 
+    /// Change de profil sans rien réallouer — manette de qualité (ADR-012 §5), ou banc qui veut
+    /// éprouver un budget serré. Les mêmes refus qu'à la construction s'appliquent : un profil
+    /// qu'on n'aurait pas accepté au départ ne s'accepte pas davantage en route.
+    pub fn set_profile(&mut self, profile: Profile) -> Result<(), Error> {
+        if !(profile.cpu_sim_ms.is_finite() && profile.cpu_sim_ms > 0.) {
+            return Err(Error::NotFinite);
+        }
+        if !(profile.off.is_finite() && profile.on.is_finite() && profile.off < profile.on) {
+            return Err(Error::NotFinite);
+        }
+        self.profile = profile;
+        Ok(())
+    }
+
     pub fn capacity(&self) -> usize {
         self.bids.capacity()
     }
