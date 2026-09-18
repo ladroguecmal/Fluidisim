@@ -66,9 +66,20 @@ Objectif : faire avancer une capacité de la porte A après lecture des preuves 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [>] **P2** — lecture à froid ciblée ; choisir et construire le prochain incrément consommé de la porte A, avec vérification de son comportement et de ses limites. Découper avant quinze minutes si nécessaire.
-- [ ] **P3** — rituel §6 : preuves, journal, file et feuille de route actualisées, jeton libéré.
+- [x] **P2** — lecture à froid ciblée ; choisir et construire le prochain incrément consommé de la porte A, avec vérification de son comportement et de ses limites. Découper avant quinze minutes si nécessaire.
+- [>] **P3** — rituel §6 : preuves, journal, file et feuille de route actualisées, jeton libéré.
 
 ### Notes de reprise
 
 Une seule copie, master 22605fd propre ; branche historique archivée 5d9bf2f. Cargo disponible.
+
+P2 précisé après lecture : intégrité de la mesure consommée par Layer::update. Actuellement
+chaque image financée ajoute le dernier coût, même à la naissance, en pause, après saut temporel
+ou erreur. Réception : un échantillon par pas réellement réussi ; aucun pour naissance/pause/
+renaissance/échec ; le profil de surface reste disponible sans pas. Tests de régression d'abord
+sur le code initial, puis correction et suites viewer/cœur. La forme des domaines reste le lot
+suivant : corriger ce défaut local avant d'étendre le nombre de consommateurs.
+
+Preuves P2 : les deux régressions échouent avant correction (1 mesure au lieu de 0 à la
+naissance ; 2 au lieu de 1 après refus), passent après. Viewer release : 30 réussis, 1 ignoré.
+Workspace release : 505 réussis (393 + 14 + 2 + 1 + 95), 18 ignorés, aucun échec.

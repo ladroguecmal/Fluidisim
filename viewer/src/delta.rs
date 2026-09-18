@@ -455,7 +455,13 @@ impl<'a> Live<'a> {
     }
     /// Amène δ à l'instant de la scène `seconds` (après la naissance de la scène) : un pas si
     /// l'image a avancé d'un pas, renaissance sinon. `η'` rendu dans `out`.
-    pub fn advance(&mut self, seconds: f64, out: &mut [f32]) -> Result<(), String> {
+    /// Renvoie `true` seulement si un nouveau pas a réussi : naissance, pause et renaissance
+    /// publient une surface mais ne produisent aucune mesure de coût de pas.
+    pub fn advance(&mut self, seconds: f64, out: &mut [f32]) -> Result<bool, String> {
+        self.sampling_ms = 0.;
+        self.step_ms = 0.;
+        self.iterations = 0;
+        let mut stepped = false;
         let target = START_US + (seconds.max(0.) * 1e6).round() as u64;
         if target < self.now_us() || target > self.now_us() + FRAME_US {
             self.rebirth(target)?;
@@ -474,11 +480,12 @@ impl<'a> Live<'a> {
             self.step_ms = b.elapsed().as_secs_f64() * 1e3;
             self.iterations = r.report.map_or(0, |r| r.iterations);
             self.steps += 1;
+            stepped = true;
         }
         for (o, h) in out.iter_mut().zip(self.volume.surface()) {
             *o = h - REST;
         }
-        Ok(())
+        Ok(stepped)
     }
 }
 
@@ -507,8 +514,8 @@ fn fade(s: f64, width: f64) -> (f64, f64) {
 /// bout de 0,35 s et n'est jamais revenue, alors que rien à l'écran n'avait changé. Le pire pas
 /// mesuré en S276 vaut 45,8 ms : un seul dépassement suffit à exclure le domaine, et **un domaine
 /// exclu n'exécute plus de pas, donc ne produit plus de mesure, donc reste exclu** — l'exclusion
-/// par le coût est absorbante. Le budget couvre désormais le pire pas connu. Le défaut de fond,
-/// lui, n'est pas corrigé : voir ORDONNANCEUR-S279 et L336.
+/// par le coût était absorbante. S280 l'a corrigée par une médiane avec oubli (L336) ;
+/// le budget historique de l'afficheur reste à 50 ms.
 ///
 /// Les seuils, eux, sont calibrés : 0,45 / 0,35, sur la mesure de S275 (ADR-171).
 const PROFILE: Profile = Profile { cpu_sim_ms: 50., blocks: 1, on: 0.45, off: 0.35 };
@@ -532,9 +539,9 @@ pub struct Layer<'a> {
     /// S279 : ce qui décide que la bande vit. Avant lui, elle vivait parce que le code le disait.
     scheduler: Scheduler,
     /// S280 — **les derniers coûts payés**, du plus récent au plus ancien. L'estimation réinjectée
-    /// est leur **médiane** : ADR-012 §3 veut un centile et jamais une valeur isolée, et S279 a
-    /// montré ce que coûte l'oubli de cette phrase — un seul pas à 45,8 ms, pour une médiane de 22,
-    /// excluait la bande définitivement (L336).
+    /// est leur **médiane**, choisie en S280 après l'exclusion sur un pic à 45,8 ms (L336).
+    /// Elle ne reçoit pas le 99e centile exigé pour le coût par image par ADR-012 §3,
+    /// ni une garantie de respect du budget. S282 : seuls les nouveaux pas réussis entrent ici.
     costs: [f32; COST_SAMPLES],
     /// Combien d'entrées de `costs` sont valides. **Décroît d'une unité par pas non payé** : un
     /// domaine qui ne tourne plus ne sait plus ce qu'il coûte, et le dire est plus honnête que de
@@ -669,17 +676,28 @@ impl<'a> Layer<'a> {
             self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, 0.];
             return;
         }
+        let mut measured_cost = None;
         self.active = match self.live.as_mut() {
             // En direct, δ avance même masqué : l'afficher ne change pas son histoire.
-            Some(live) => live.advance(seconds, &mut self.heights).map_err(|e| eprintln!("{e}")).is_ok() && self.mode > 0,
+            Some(live) => match live.advance(seconds, &mut self.heights) {
+                Ok(stepped) => {
+                    if stepped {
+                        measured_cost = Some((live.sampling_ms + live.step_ms) as f32);
+                    }
+                    self.mode > 0
+                }
+                Err(e) => {
+                    eprintln!("{e}");
+                    false
+                }
+            },
             None => match self.replays {
                 Some(r) if self.mode > 0 => r[self.mode - 1].at(seconds, &mut self.heights),
                 _ => false,
             },
         };
         // ADR-012 §3 : le coût annoncé au pas suivant sort de ce qu'on vient de payer.
-        if let Some(live) = self.live.as_ref() {
-            let paye = (live.sampling_ms + live.step_ms) as f32;
+        if let Some(paye) = measured_cost {
             self.record_cost(paye);
         }
         self.gpu[0] = [X0 - eye[0], -eye[1], DX, NX as f32];
@@ -727,6 +745,46 @@ impl<'a> Layer<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn cost_samples_follow_real_steps_s282() {
+        let b = flat_background().unwrap();
+        let mut layer = Layer::direct(&b, [REST; NX]).unwrap();
+        layer.set_budget_ms(1_000_000.).unwrap();
+        layer.update(0., [0.; 3], None);
+        assert_eq!(layer.samples, 0, "la naissance ne mesure aucun pas");
+        assert_eq!(layer.estimated_cost_ms(), FIRST_COST_MS);
+        layer.update(0.016, [0.; 3], None);
+        assert_eq!(layer.samples, 1);
+        let measured = layer.cost_ms();
+        for _ in 0..12 {
+            layer.update(0.016, [0.; 3], None);
+        }
+        assert_eq!(layer.samples, 1, "une pause ne duplique pas une mesure");
+        assert_eq!(layer.cost_ms(), measured);
+        assert!(layer.is_active(), "le profil reste visible pendant la pause");
+        layer.update(1., [0.; 3], None);
+        layer.update(0., [0.; 3], None);
+        assert_eq!(layer.samples, 1, "saut et retour ne mesurent aucun pas");
+        layer.update(0.016, [0.; 3], None);
+        assert_eq!(layer.samples, 2, "la reprise compte son nouveau pas");
+    }
+
+    #[test]
+    fn failed_step_does_not_reuse_cost_s282() {
+        let b = flat_background().unwrap();
+        let mut layer = Layer::direct(&b, [REST; NX]).unwrap();
+        layer.set_budget_ms(1_000_000.).unwrap();
+        layer.update(0.016, [0.; 3], None);
+        let count = layer.samples;
+        let measured = layer.cost_ms();
+        // Force un refus du fournisseur de fond par des dimensions de sortie invalides.
+        layer.live.as_mut().unwrap().u.clear();
+        layer.update(0.032, [0.; 3], None);
+        assert!(!layer.is_active());
+        assert_eq!(layer.samples, count, "un refus ne recycle pas le dernier coût");
+        assert_eq!(layer.cost_ms(), measured);
+    }
 
     #[test]
     fn swell_samples_are_planar_s275() {
