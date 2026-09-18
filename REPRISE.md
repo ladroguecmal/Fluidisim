@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 00:28 +02:00
-Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : —
+JETON            : occupé
+Battement        : 2026-09-19 00:23 +02:00
+Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
+Session en cours : S282
 Dernière session : S281 — trajectoire en six portes et v1 proposée (FEUILLE-DE-ROUTE §3 bis) ; rien décidé
 Session suivante : **une décision attend l'utilisateur — tranche-t-il la v1 proposée ?** À défaut, la file porte la **porte A** : dégradation (ADR-012 §4 rang 1), plusieurs candidats réels, forme des domaines (liste 1.5/1.6). **En attente depuis S277** : le verdict visuel sur l'onde injectée
 Maillons        : 1 — S281 est documentaire, aucune capacité nouvelle

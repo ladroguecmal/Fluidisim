@@ -58,33 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S281 — terminée
-Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
-Entrée : l'utilisateur demande la trajectoire sous une forme qu'elle n'a pas — « création / test /
-validation d'un système puis d'un autre », et **la déclaration d'une v1**. master 0f2650d.
-Objectif : la lui donner sans créer un second document de trajectoire.
-
-**Contrainte, et c'est la principale** : FEUILLE-DE-ROUTE est *le seul document qui porte la
-trajectoire* ; deux lectures parallèles de la même trajectoire divergeront, et c'est le mécanisme
-exact des trois forks (L137). La forme demandée s'écrit donc **dans** ce document, en portes qui
-regroupent les jalons existants — jamais à côté d'eux.
-
-**Ce que je ne décide pas** : le contenu d'une v1. Réduire ou fixer un périmètre appartient à
-l'utilisateur (ADR-127 §6). Je propose où poser la porte et ce qu'elle contient ; il tranche.
+Session : S282 — en cours
+Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
+Entrée : reprendre et construire vers une V1 proche des intentions initiales, réaliste et performante.
+Objectif : faire avancer une capacité de la porte A après lecture des preuves ; conserver l'ambition entière et le statut proposé du périmètre V1 tant qu'il n'est pas explicitement fixé.
 
 ### Plan
 
-- [ ] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — section « Portes de version » dans FEUILLE-DE-ROUTE : par porte, ce qu'on crée,
-  comment on l'éprouve, ce qui vaut réception ; et la v1 **proposée**, marquée comme non tranchée.
-- [x] **P3** — rituel §6.
+- [x] **P1** — amorce, jeton et plan seuls.
+- [>] **P2** — lecture à froid ciblée ; choisir et construire le prochain incrément consommé de la porte A, avec vérification de son comportement et de ses limites. Découper avant quinze minutes si nécessaire.
+- [ ] **P3** — rituel §6 : preuves, journal, file et feuille de route actualisées, jeton libéré.
 
 ### Notes de reprise
 
-État réel à citer sans l'embellir ([liste](../docs/LISTE-PROJET-FINI.md)) : **3 points validés sur
-120**, 49 partiels, 68 absents. Le décompte de la liste date d'avant S278–S280 — la section 9
-(activation et budget) a bougé depuis et n'est pas recomptée.
-
-Les manques qui commandent l'ordre : δ est une **tranche 2D** sous houle idéalisée (verdict R10),
-son coût vaut **≈ 11 fois** le budget d'ADR-012 §3, l'ordonnanceur décide *qu'un* domaine vit mais
-pas *où ni de quelle forme*, et V a un noyau reçu sans aucune articulation avec δ.
+Une seule copie, master 22605fd propre ; branche historique archivée 5d9bf2f. Cargo disponible.
