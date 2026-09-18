@@ -3757,3 +3757,12 @@ de jeu B+W (famille d'A288). Déclencheur : premier domaine appelé à vivre plu
 sous `ak` ≥ 0,05, ou premier rendu de δ sous houle. Options : rappel lent de la grande longueur
 d'onde de `η'` vers B, durée de vie bornée et recréation (I-12), ou dispersion d'amplitude dans B
 (ADR nécessaire). [Mesure](../validation/HOULE-USAGE-S274.md) §3–§7.
+
+
+**Suivi A276 et A92/A50 — S274, 2026-09-18 (sévérités conservées).** A276 : le pas couplé
+mobile passe de 280 à 49 ms à 16 384 mailles par la multigrille du mode mobile (ADR-167), sans
+changer ses réceptions ; il reste ≈ 24 fois le budget par pas, et la précision à un pas par image
+n'est pas mesurée. A92/A50 : le banc de houle progressive est arrêté au niveau d'usage (écart brut
+5,8 µm sur 1 cm, coefficient d'ordre deux 0,88–1,16 %) ; la réception au budget d'ADR-120 pour
+les mers cambrées est différée avec déclencheur. [Usage](../validation/HOULE-USAGE-S274.md),
+[coût](../validation/COUT-MOBILE-S274.md).

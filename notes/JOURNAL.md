@@ -13822,3 +13822,44 @@ Une quatrième session d'instrument sans reçu ne se justifierait pas : passer a
 **Rituel :** file active entière relue ; J2, A50, liste 4.6, A92/A50, index (ADR-166, preuve)
 actualisés ; L330. ADR-152/165 : notes datées. I-12 et I-14 relus, inchangés. δ général, V, B2,
 bathymétrie et seconde cible gardent leurs déclencheurs. Aucun arbitrage utilisateur requis.
+
+
+## S274 — Précision rapportée à l'usage, multigrille du mode mobile
+
+**2026-09-18, Claude Opus 5 (Claude Code desktop).** Entrée : consigne de l'utilisateur —
+vérifier que la précision recherchée sert le résultat final avant tout raffinement, puis passer
+au blocage suivant. master 43385bd. Plan 7522372, amendé 30a179f ; étapes b485f75 à 4e5e5fe.
+
+**Houle progressive, banc arrêté.** L'écart de 5,88 % vaut 5,8 µm rms sur une vague de 1 cm
+(0,058 % de a), pente 1,9·10⁻⁵, déphasage 1,35·10⁻³ rad à 2 s ; il suit à 0,85–0,87 la
+dispersion d'amplitude de Stokes, que l'oracle d'ordre deux n'a pas (ADR-122 le prévoyait).
+Campagne unique, troisième amplitude et pas de temps : coefficient d'ordre deux 1,16 % (1 ms),
+0,88 % (0,5 ms) ; extrapolation qualifiée aux mailles grossières, **pas à la fine** (1,94 %) :
+la crête de 2 cm y franchit le centre des mailles. Budget d'ADR-120 non démontré (2,26–2,43 %),
+aucun seuil relevé. Usage : 2 % de la correction ≈ 3 mm d'image pour Hs 4 m et ak 0,1 ; la mer
+J1 n'en demande que ≈ 13 %. Réception pour mers cambrées différée avec déclencheur. Aucune
+conclusion visuelle : `viewer/` ne rend pas δ (liste 8.7). [Usage](../docs/validation/HOULE-USAGE-S274.md).
+
+**Besoin découvert, A289 (liste 4.21, 120 points = 3 + 48 + 69).** B linéaire, δ fidèle : `η'`
+dérive comme `a·ω₂·t`, ≈ 7 cm/min sous ak 0,06 (formule). Options inscrites, rien choisi.
+
+**Capacité reçue, maillons 0.** Le pas couplé mobile a sa multigrille (ADR-167, remplace
+ADR-147 point 5) : niveaux grossiers recalculés par pas depuis les mailles mouillées, Dirichlet
+vers l'air. **280 → 49 ms** de médiane à 16 384 mailles, 1 145 → 18 itérations, maximum
+660 → 77 ms ; premier pas reçu sans affinage. Consommateur : tout pas couplé mobile (J2).
+Preuves : symétrie 1,2·10⁻⁹, 20 pas contre le témoin de Jacobi (6·10⁻⁸ m/s), réceptions S253
+à 128 colonnes et houle fine identiques. [Coût](../docs/validation/COUT-MOBILE-S274.md).
+
+**Validation :** debug 370 cœur + 17 intégrations + 95 harnais, 0 échec ; release 373. Deux
+essais adaptés et expliqués : comptabilité mémoire (+832 flottants à 32 × 16), et l'essai
+d'affinage S253 qui s'éprouve désormais sous le témoin de Jacobi. Limites : ≈ 24 fois le budget
+par pas ; précision à un pas par image non mesurée ; 2D seulement.
+
+**Suite S275 : δ visible.** Un domaine couplé sous houle à crêtes longues, rejoué dans
+`viewer/` (B seul, B+δ à 1 ms, B+δ au pas d'image), hors budget déclaré, pour la revue visuelle
+de l'utilisateur ; l'écart au pas d'image y est mesuré. Puis le lot de coût suivant (A276).
+
+**Rituel :** file active relue ; J2, A50, A276, A289, liste (4.6, 4.19, 4.21, 8.7), index,
+ADR-147 (note) actualisés ; L331. I-03 (réductions ordonnées), I-06 (mémoire comptée, zéro
+allocation), I-14 relus. δ général, V, B2, bathymétrie et seconde cible gardent leurs
+déclencheurs. Aucun arbitrage utilisateur requis ; les 2 % d'ADR-120 restent inchangés.

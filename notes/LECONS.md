@@ -5599,3 +5599,20 @@ environ 5,6 % de `η'` à cette amplitude. Aucun solveur ne pouvait passer 2 % c
    avant de juger le candidat.
 
 Famille de L329 (un témoin s'éprouve à l'ordre qu'il prétend garder) et de L322.
+
+## L331 — Une précision se juge dans l'unité de l'usage, et une extrapolation dans son régime
+
+*(S274)* Trois sessions poursuivaient 2 % sur la correction non linéaire d'une houle. Traduits,
+les 5,88 % restants valaient 5,8 µm sur une vague de 1 cm. Et les 2 % valaient à peu près 3 mm
+d'image pour la mer la plus cambrée : ni absurdes, ni requis pour la mer de référence.
+
+1. **Avant de raffiner, traduire le seuil en grandeur d'usage au régime le plus exigeant servi**
+   (hauteur, pente, phase contre les tolérances d'image et d'horloge). Un seuil relatif sur une
+   petite correction ne dit rien de ce qui se voit, dans un sens comme dans l'autre.
+2. **Une extrapolation dans un paramètre se vérifie par un point de plus, et ce point doit rester
+   dans le même régime discret.** Ici, la troisième amplitude franchissait le centre des mailles de
+   surface : l'accord manqué venait du changement de topologie, pas de la physique.
+3. **Le point d'arrêt se déclare avec l'usage** : une réception différée garde son déclencheur
+   dans la file, elle n'est pas abandonnée.
+
+Famille de L330 (un oracle tronqué borne ce qu'il peut recevoir).

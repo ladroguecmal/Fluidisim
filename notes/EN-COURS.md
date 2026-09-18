@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S274 — en cours
+Session : S274 — terminée
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo et Python.
 Entrée : consigne utilisateur du 2026-09-18 — vérifier que la précision recherchée sert le
 résultat final avant tout raffinement ; critères rattachés à ce qu'ils protègent ; écart
@@ -89,7 +89,7 @@ puis ouvrir le blocage suivant.
   essais d'accord avec le témoin, refus/expiration/allocation ; suite complète.
 - [x] **P8** — mesure : itérations et ms par pas, S253 128 colonnes et houle fine ; réceptions
   S253 rejouées ; techniques présentes/absentes/domaine (ADR-131).
-- [>] **P9** — rituel §6.
+- [x] **P9** — rituel §6.
 
 ### Notes de reprise
 
