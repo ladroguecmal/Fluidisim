@@ -14,6 +14,19 @@ trouvé des erreurs restent ; l'obligation implicite d'en trouver ou d'ouvrir un
 4. Déclarer le plan dans EN-COURS selon REPRISE. Le plan doit être assez court pour montrer ce
    qui sera fini ; pas un traité préalable à une correction.
 
+**Précision rapportée à l'usage** *(consigne de l'utilisateur, 2026-09-18)*. Avant de poursuivre
+un raffinement numérique, traduire la précision visée en grandeurs d'usage — hauteur, pente, phase
+— contre les tolérances d'image (3 mm, S201) et d'horloge (ADR-003), au régime le plus exigeant
+servi, et dire ce que chaque critère protège : fonctionnement, fidélité physique ou qualité
+visuelle. Les garanties de fonctionnement ne se négocient pas. Un seuil de précision se justifie
+par l'usage ; s'il paraît inutilement strict, le documenter et proposer ce qu'un autre critère
+garantirait, sans le relever pour faire passer un test. Au niveau nécessaire, passer au blocage
+suivant et garder le perfectionnement dans la file avec son déclencheur. Ne pas conclure à
+l'invisibilité sur des chiffres seuls : un rendu se juge par l'utilisateur (REVUE-VISUELLE).
+Regrouper diagnostic, correction, essais et intégration en lots utiles ; continuer les étapes
+autorisées sans attendre de relance, et solliciter l'utilisateur pour un jugement visuel ou une
+vraie décision. Exemple : [HOULE-USAGE-S274](../docs/validation/HOULE-USAGE-S274.md).
+
 Avant de poursuivre un même sujet une troisième session, comparer sa suite à au moins une
 capacité de la file encore absente. Le compteur de REPRISE n'est pas un concours de lignes.
 Une grande amélioration locale peut ne plus être prioritaire une fois son usage débloqué.
