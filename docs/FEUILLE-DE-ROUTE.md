@@ -218,7 +218,9 @@ donné comme dérivé est l'optimum à une dimension, `4/5` est celui à deux �
 à 828 ms ; [mesure](validation/PROLONGATION-S246.md). Le plafond du taux reste ouvert (A281). **S252 : ces comptes et coûts multigrille étaient faux** —
 le gradient conjugué préconditionné avait un β fautif (A285). Corrigée, la multigrille converge en 6 à 8
 itérations et bat le gradient nu dès 512 mailles (2,9 fois à 32 768 mailles, 137 contre 392 ms) ; le
-pas à 32 768 mailles est reçu par l'affinage de divergence d'ADR-151. L'ordre d'ADR-147 est à reprendre ;
+pas à 32 768 mailles est reçu par l'affinage de divergence d'ADR-151. **S274 : le mode mobile a sa
+multigrille** (ADR-167) — pas couplé 280 → 49 ms à 16 384 mailles, 1 145 → 18 itérations, mêmes
+réceptions ; ≈ 24 fois le budget par pas ([mesure](validation/COUT-MOBILE-S274.md)). L'ordre d'ADR-147 est à reprendre ;
 [re-mesure](validation/MULTIGRILLE-BETA-S252.md). Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 **S250 : premier raccordement volumique B/W→δ** consommé par le pas MAC à surface

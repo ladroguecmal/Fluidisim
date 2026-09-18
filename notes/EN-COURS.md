@@ -87,9 +87,9 @@ puis ouvrir le blocage suivant.
   chemin ordinaire inchangé au bit ; essais de symétrie et de positivité.
 - [x] **P7** — branchement dans `project` en mode mobile, témoin Jacobi conservé en essai ;
   essais d'accord avec le témoin, refus/expiration/allocation ; suite complète.
-- [>] **P8** — mesure : itérations et ms par pas, S253 128 colonnes et houle fine ; réceptions
+- [x] **P8** — mesure : itérations et ms par pas, S253 128 colonnes et houle fine ; réceptions
   S253 rejouées ; techniques présentes/absentes/domaine (ADR-131).
-- [ ] **P9** — rituel §6.
+- [>] **P9** — rituel §6.
 
 ### Notes de reprise
 
@@ -119,3 +119,6 @@ P6 (branchement fait en même temps, P7 = suite) : symétrie 1,2e-9 ; 20 pas cou
 P7 : suite debug 370+17+95 ok (17/4 ignorés), release lib 373 ok. Comptabilité mémoire
 recomptée (+832 flottants à 32×16). S253 128 : témoin Jacobi garde l'affinage ADR-153 ;
 multigrille reçoit le 1er pas en 18 itérations sans affinage (D franche 6,6e-6, D toutes 4,1e-4).
+
+P8 : 48,9/48,8 ms (×5,7), max 76,6/78,7 (×8,5), 18 itérations ; S253 128 identique ;
+houle fine 5,7752 % ; mémoire +8 %. Précision à dt = image non mesurée (prochain lot coût).

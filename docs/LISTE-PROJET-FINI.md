@@ -142,8 +142,10 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
   C06 partiel sur un véhicule d'essai 1D.
 - [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel* : dérive de volume
   ≤ 10⁻⁸ m sur les bancs de surface. C09 non exécuté.
-- [ ] **4.19 Coût de δ compatible avec le budget** — *partiel* : carte du coût (S244) et multigrille
-  (S252). Un pas à 16 384 mailles coûte environ 130 fois le budget d'eau.
+- [ ] **4.19 Coût de δ compatible avec le budget** — *partiel* : carte du coût (S244), multigrille
+  (S252), **multigrille du mode mobile (S274, ADR-167)** : le pas couplé à 16 384 mailles passe de
+  280 à 49 ms, environ 24 fois le budget d'eau. Manquent la précision à un pas par image, le départ
+  depuis la pression précédente, le GPU et la 3D.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *absent*.
   Besoin découvert S274 : B est linéaire, un δ fidèle dérive de la dispersion d'amplitude
