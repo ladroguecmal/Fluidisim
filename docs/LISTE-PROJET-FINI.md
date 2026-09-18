@@ -23,8 +23,8 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S275, 2026-09-18** — actualisation demandée par l’utilisateur, sur les preuves
-S262–S275 ; les résultats récents sont précisés aux points concernés. Le décompte porte
+**État au S276, 2026-09-18** — actualisation demandée par l’utilisateur, sur les preuves
+S262–S276 ; les résultats récents sont précisés aux points concernés. Le décompte porte
 sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 
 ---
@@ -145,8 +145,10 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
   ≤ 10⁻⁸ m sur les bancs de surface. C09 non exécuté.
 - [ ] **4.19 Coût de δ compatible avec le budget** — *partiel* : carte du coût (S244), multigrille
   (S252), **multigrille du mode mobile (S274, ADR-167)** : le pas couplé à 16 384 mailles passe de
-  280 à 49 ms, environ 24 fois le budget d'eau. Manquent la précision à un pas par image, le départ
-  depuis la pression précédente, le GPU et la 3D.
+  280 à 49 ms, environ 24 fois le budget d'eau. **S276 : δ en direct à 40 images/s** — bande de
+  6 656 mailles, 21,7 ms par image (échantillonnage du fond par grille identique au bit, départ
+  depuis la pression publiée, ADR-169), un pas par image (précision S275), zéro allocation ;
+  ≈ 11 fois le budget. Manquent la cadence de δ découplée de l'image, le GPU et la 3D.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *absent*.
   Besoin découvert S274 : B est linéaire, un δ fidèle dérive de la dispersion d'amplitude
@@ -217,7 +219,8 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *partiel* : **S275, ADR-168** —
   bande δ couplée sous houle à crêtes longues, précalculée hors budget et rejouée dans `viewer/`
   (touche D : B seul, B+δ 4 ms, B+δ au pas d'image), couche GPU à 7·10⁻⁸ m de sa lecture CPU,
-  scène S201 inchangée au bit ; revue R10 en attente. Manquent δ en direct, la 3D, une frontière
+  scène S201 inchangée au bit ; revue R10 en attente. **S276 : en direct** (`--delta-direct`, un pas
+  par image, identique au bit au rejeu, 40 images/s). Manquent le budget, la 3D, une frontière
   δ↔B sans rupture autre qu'un fondu de rendu, et une tolérance de pente d'image.
 - [ ] **8.8 Lointain et horizon sans artefact** — *partiel* : coupure spectrale B/sillage (S249) ;
   bande d'horizon mesurée (S247, S248) ; fin de grille à l'horizon géométrique sous le ciel clair

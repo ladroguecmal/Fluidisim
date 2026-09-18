@@ -5616,3 +5616,20 @@ d'image pour la mer la plus cambrée : ni absurdes, ni requis pour la mer de ré
    dans la file, elle n'est pas abandonnée.
 
 Famille de L330 (un oracle tronqué borne ce qu'il peut recevoir).
+
+## L332 — Une optimisation qui garde les bits se prouve par l'égalité
+
+*(S276)* L'échantillonnage du fond coûtait 33 ms par pas, et chaque face recalculait des phases et
+des exponentielles qui ne dépendaient que de sa colonne ou de sa couche. Passer la boucle des
+composantes à l'extérieur, sans changer la suite d'opérations reçue par chaque face, a donné
+×6,4 **au bit**.
+
+1. **Réordonner les boucles sans changer la suite d'opérations de chaque sortie garde les bits.**
+   On peut alors hisser tout ce qui ne dépend pas de l'indice intérieur, et l'essai est une égalité
+   exacte, pas une tolérance.
+2. **Une égalité au bit dispense de toute re-réception** : le rejeu S275 et le direct S276 sont
+   restés identiques, et aucune mesure physique n'a été refaite. Une optimisation à tolérance, elle,
+   oblige à rejouer chaque réception qui en dépend (ADR-167, ADR-169).
+3. **Chercher d'abord ce qui garde les bits**, puis seulement ce qui les change.
+
+Famille de L195 (coût complet) et de L328.

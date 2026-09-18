@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-18 21:00 +02:00
+JETON            : libre
+Battement        : 2026-09-18 21:03 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : S276 — δ en direct : coût du pas et de l'échantillonnage de B
-Dernière session : S275 — δ visible dans viewer/ (ADR-168), revue R10 demandée ; pas d'image indiscernable
-Session suivante : S276 — consigner le verdict R10, puis coût vers δ en direct (pas + échantillonnage de B, A276)
+Session en cours : aucune
+Dernière session : S276 — δ en direct dans viewer/ à 40 images/s, identique au bit au rejeu (ADR-169)
+Session suivante : S277 — R10 si reçu ; δ sous budget déclaré : cadence découplée (I-05), puis décision δ GPU
 Maillons        : 0
 
 ```

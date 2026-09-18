@@ -13899,3 +13899,37 @@ pression précédente, échantillonnage décimé du fond (SPEC-004 §6.2). Arbit
 **Rituel :** file active relue ; liste (1.1, 8.7 : 120 = 3 + 49 + 68), feuille de route J2, file
 (rendu de δ), registre des revues (R10), index (ADR-168) actualisés. I-04 (δ cosmétique) et
 I-06 (aucune allocation ajoutée au pas du cœur) relus ; l'afficheur précalcule hors image.
+
+
+## S276 — δ en direct dans l'afficheur
+
+**2026-09-18, Claude Opus 5 (Claude Code desktop).** Entrée « Continue », sans verdict R10 (la
+revue reste en attente, rien consigné à sa place). master 79bcb50. Plan 9eab501 ; étapes 1f0ca8c,
+ea3f1e9, 9e36897, 54de4f3.
+
+**Capacité reçue, maillons 0.** δ tourne en direct : `water-viewer --delta --delta-direct`, un pas
+de 16 ms par image dans la boucle de l'afficheur, **40,5 images/s** à 6 656 mailles, CPU 23,8 ms
+par image dont δ 21,7 ms, **zéro allocation** dans la phase de mise à jour ; identique au bit au
+rejeu de 16 ms sur 200 images. Consommateur : le chemin d'image.
+[Mesure](../docs/validation/COUT-DIRECT-S276.md).
+
+**Techniques, par la carte du coût :** échantillonnage du fond 33 ms, pas 24 ms à l'ouverture.
+(1) `Background::differential_grid_extended` : phase par colonne, facteur vertical par couche,
+**identique au bit** au ponctuel — 33 → 5,1 ms ; (2) ADR-169, départ depuis la pression publiée
+dans les deux pas mobiles — itérations 266 → 134 sur vingt pas, pas 24 → 17,5 ms, vitesses à
+8·10⁻⁸ m/s du départ nul. `set_free_surface` remet la pression à zéro (renaissance d'un domaine).
+
+**Validation :** suite 372 cœur + 17 intégrations + 95 harnais, 0 échec ; release 375 après la
+remise à zéro de la pression ; identité fond nul / S237 conservée ; rejeux recalculés (cache
+versionné), statistiques S275 inchangées aux décimales publiées.
+
+**Limites :** ≈ 11 fois le budget d'eau ; 2D extrudé ; temps simulé fixe par image (ralenti si
+l'image dure plus) ; un fil. Absents : cadence découplée, GPU, 3D.
+
+**Suite S277 :** consigner R10 s'il arrive ; sinon δ sous budget déclaré — cadence de δ découplée
+de l'image (pas de 32 à 48 ms, précision contre 16 ms), ordonnancement et dégradation (I-05) ;
+puis la décision d'un δ sur GPU (ADR). Arbitrage utilisateur : aucun.
+
+**Rituel :** file active relue ; liste (4.19, 8.7), feuille de route J2, file (A276, rendu de δ),
+A276, index (ADR-169, COUT-DIRECT-S276), ADR-168 (note) ; L332. I-03 (ordre des réductions
+inchangé), I-06 (aucune allocation dans la boucle), I-12 (naissance au repos) relus.

@@ -3766,3 +3766,10 @@ n'est pas mesurée. A92/A50 : le banc de houle progressive est arrêté au nivea
 5,8 µm sur 1 cm, coefficient d'ordre deux 0,88–1,16 %) ; la réception au budget d'ADR-120 pour
 les mers cambrées est différée avec déclencheur. [Usage](../validation/HOULE-USAGE-S274.md),
 [coût](../validation/COUT-MOBILE-S274.md).
+
+
+**Suivi A276 — S276, 2026-09-18 (sévérité conservée).** δ tourne en direct dans l'afficheur :
+40 images/s à 6 656 mailles, 21,7 ms par image, zéro allocation. L'échantillonnage du fond, poste
+dominant (33 ms), passe à 5,1 ms par grille, identique au bit ; le pas couplé passe de 24 à
+17,5 ms en partant de la pression publiée (ADR-169). Reste ≈ 11 fois le budget ; absents : cadence
+découplée, GPU, 3D. [Mesure](../validation/COUT-DIRECT-S276.md).

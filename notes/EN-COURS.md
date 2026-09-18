@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S276 — en cours
+Session : S276 — terminée
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
 Entrée : « Continue » (2026-09-18), sans verdict R10 : la revue reste en attente. master 79bcb50.
 Objectif : faire tourner δ en direct dans l'afficheur — coût du pas et de l'échantillonnage de B
@@ -75,7 +75,7 @@ mesurés, réduits par les techniques désignées par la mesure, cadence publié
   si le pas domine) ; mêmes portes d'acceptation ; mesure.
 - [x] **P5** — δ en direct dans l'afficheur (`--delta-direct`) : un pas par image, temps simulé
   fixe par image, cadence publiée ; accord au bit avec le rejeu de 16 ms.
-- [>] **P6** — rituel §6.
+- [x] **P6** — rituel §6.
 
 ### Notes de reprise
 

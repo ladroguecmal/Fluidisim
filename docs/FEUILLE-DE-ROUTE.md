@@ -240,6 +240,10 @@ de B réel au-dessus du plan moyen (A286), les bords ouverts, les frontières du
 raccordement au rendu et B4 global. **S275 : premier raccordement au rendu** (ADR-168) — bande
 δ couplée rejouée dans `viewer/` sous houle à crêtes longues, pas d'image à 0,25 mm rms du pas
 de 4 ms hors éponge ; revue R10 demandée ([protocole](validation/DELTA-VISIBLE-S275.md)).
+**S276 : δ en direct** — un pas par image dans la boucle de l'afficheur, 40 images/s à 6 656
+mailles (21,7 ms), identique au bit au rejeu, zéro allocation ; échantillonnage du fond par
+grille ×6,4 au bit, départ depuis la pression publiée (ADR-169) ; ≈ 11 fois le budget
+([mesure](validation/COUT-DIRECT-S276.md)).
 **S254 : le fond B de production se prolonge au-dessus du plan moyen** (ADR-154 : vitesse
 horizontale constante, `W` par continuité, `P` de Taylor d'ordre un). Il est identique au bit
 au-dessous et reçu contre l'oracle S253 : à 128 colonnes, 0,168 % / 0,58 % à 5 cm et 0,244 % /
