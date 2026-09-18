@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 22:45 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 22:49 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : —
+Session en cours : S279 — brancher l'ordonnanceur sur la bande δ de l'afficheur
 Dernière session : S278 — l'ordonnanceur écrit et éprouvé (ADR-170, scheduler.rs) ; branché sur rien
 Session suivante : S279 — **brancher l'ordonnanceur** : la bande δ de l'afficheur décidée par lui et non par le code (`W_perception` depuis la caméra, coût réinjecté depuis `delta_budget`). C'est le chemin qui consomme la capacité de S278, et le seul moyen de remettre les maillons à zéro
 Maillons        : 1 — S278 a livré de quoi décider, mais aucun consommateur ne s'en sert encore
