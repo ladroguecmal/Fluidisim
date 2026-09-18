@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 00:27 +02:00
+JETON            : libre
+Battement        : 2026-09-19 00:28 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : S282
-Dernière session : S281 — trajectoire en six portes et v1 proposée (FEUILLE-DE-ROUTE §3 bis) ; rien décidé
-Session suivante : **une décision attend l'utilisateur — tranche-t-il la v1 proposée ?** À défaut, la file porte la **porte A** : dégradation (ADR-012 §4 rang 1), plusieurs candidats réels, forme des domaines (liste 1.5/1.6). **En attente depuis S277** : le verdict visuel sur l'onde injectée
-Maillons        : 1 — S281 est documentaire, aucune capacité nouvelle
+Session en cours : —
+Dernière session : S282 — coût des nouveaux pas réels seulement ; correction intégrée et régressions reçues
+Session suivante : **porte A : forme/redimensionnement des domaines et dégradation de rang 1**, coût A276 avant plusieurs domaines simultanés. V1 proposée : FEUILLE-DE-ROUTE §3 bis, périmètre encore non tranché. Verdict visuel de l'onde S277 toujours attendu.
+Maillons        : 0 — correction d'intégrité reproduite puis testée dans le chemin image
 
 ```
 

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S282 — en cours
+Session : S282 — terminée
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : reprendre et construire vers une V1 proche des intentions initiales, réaliste et performante.
 Objectif : faire avancer une capacité de la porte A après lecture des preuves ; conserver l'ambition entière et le statut proposé du périmètre V1 tant qu'il n'est pas explicitement fixé.
@@ -67,7 +67,7 @@ Objectif : faire avancer une capacité de la porte A après lecture des preuves 
 
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — lecture à froid ciblée ; choisir et construire le prochain incrément consommé de la porte A, avec vérification de son comportement et de ses limites. Découper avant quinze minutes si nécessaire.
-- [>] **P3** — rituel §6 : preuves, journal, file et feuille de route actualisées, jeton libéré.
+- [x] **P3** — rituel §6 : preuves, journal, file et feuille de route actualisées, jeton libéré.
 
 ### Notes de reprise
 

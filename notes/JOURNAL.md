@@ -14235,3 +14235,42 @@ domaines). **En attente depuis S277** : le verdict visuel sur l'onde injectée.
 
 **Rituel :** journal, feuille de route §3 bis, file active relue. Aucun ADR : rien n'a été décidé,
 une proposition a été écrite.
+
+---
+
+## S282 — le coût vient des pas réellement exécutés
+
+**2026-09-19, Codex GPT-6, application desktop.** Entrée : reprendre vers une V1 proche des
+intentions initiales, réaliste et performante. Amorce : master 22605fd propre, une seule copie,
+branche historique archivée. Plan 88ddee7 ; correction 7e17803.
+
+**Capacité reçue, maillons 0 :** le pilotage du coût de la bande en direct ne fabrique plus de
+mesures pendant une pause, une naissance, une renaissance ou un refus. Consommateur réel :
+`Layer::update` ; `Live::advance` distingue un pas réussi d'une simple publication de surface.
+Les diagnostics de durée/itérations sont remis à zéro à chaque appel. Aucun calcul physique,
+seuil ni budget modifié ; aucun nouvel espace mémoire dans la boucle.
+
+**Preuve :** deux tests dans `viewer/src/delta.rs`, exécutés d'abord sur le code antérieur :
+échecs attendus, une mesure au lieu de zéro à la naissance et deux au lieu d'une après refus.
+Après correction : naissance, douze images en pause, saut, retour, reprise et refus vérifiés.
+`cargo test --release` dans viewer : **30 réussis, 1 ignoré** ;
+`cargo test --workspace --release` dans code : **505 réussis, 18 ignorés** (393 cœur,
+14 + 2 + 1 intégrations, 95 harnais), aucun échec. Avertissements existants conservés.
+
+**Choix du lot :** défaut d'intégrité constaté dans le consommateur pendant la lecture de la
+porte A ; le corriger avant d'étendre les domaines évite de multiplier les mesures fictives.
+Cela ne remplace pas le chantier spatial, prioritaire ensuite. Pas de nouvelle campagne de
+coût ni revue visuelle : aucune accélération ou amélioration perceptive revendiquée.
+
+**Limites et non-fait :** famine, budget I-05, domaine 3D et forme mobile inchangés. La médiane
+S280 n'est pas le 99e centile ; coût des tentatives échouées et vieillissement par cadence non
+reçus. L'oubli reste déclenché par appel d'arbitrage refusé, à qualifier avant cadence découplée.
+Le périmètre V1 proposé en S281 n'est pas transformé en décision par cette reprise.
+
+**Suite :** porte A, forme/redimensionnement consommés par δ et dégradation de rang 1 ; coût
+A276 à traiter avant un deuxième domaine simultané. δ général, V, B2, bathymétrie et seconde
+plateforme conservent leurs déclencheurs ; verdict visuel de l'onde S277 toujours attendu.
+
+**Rituel :** file active relue entière, feuille de route actualisée ; suivi A276 dans le registre
+des angles morts. Invariants I-05/I-06/I-12/I-13 relus, aucun amendé. Pas de nouvel ADR ni de
+document à indexer. Copie principale conservée, aucune copie isolée à fermer.

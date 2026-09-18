@@ -3773,3 +3773,10 @@ les mers cambrées est différée avec déclencheur. [Usage](../validation/HOULE
 dominant (33 ms), passe à 5,1 ms par grille, identique au bit ; le pas couplé passe de 24 à
 17,5 ms en partant de la pression publiée (ADR-169). Reste ≈ 11 fois le budget ; absents : cadence
 découplée, GPU, 3D. [Mesure](../validation/COUT-DIRECT-S276.md).
+
+**Suivi A276 — S282, 2026-09-19 (sévérité conservée).** La médiane de coût de l'hôte ne reçoit
+plus de mesures fictives aux appels sans pas réussi (naissance, pause, saut, refus). Deux
+régressions échouent avant correction et passent après, dans le chemin `Layer::update`.
+Aucun gain de vitesse revendiqué : la médiane ne reçoit pas le 99e centile, le coût des échecs
+n'est pas qualifié, et l'oubli par appel refusé reste sensible à la cadence d'appel. Déclencheur :
+avant cadence découplée ou multiplication des domaines ; I-05 reste non reçu pour cet hôte.
