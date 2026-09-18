@@ -76,7 +76,7 @@ faux.
 - [ ] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — `W_perception` pour de vrai : fraction d'écran de l'emprise de la bande, projetée
   depuis la caméra, coupée au plan proche puis au cadre. Essais : de face, de dos, hors champ.
-- [ ] **P3** — les seuils passent au profil, et la première calibration (ADR à écrire). *Découpage
+- [x] **P3** — les seuils passent au profil, et la première calibration (ADR à écrire). *Découpage
   déclaré à 23:05, imposé par une mesure : voir les notes.*
 - [ ] **P3b** — le branchement : soumission, décision et allocation à chaque image ; δ n'avance et
   ne s'affiche que retenu ; coût réinjecté depuis la mesure du pas précédent.

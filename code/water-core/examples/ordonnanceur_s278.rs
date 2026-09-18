@@ -74,7 +74,7 @@ fn run() -> (u64, [u32; ISLETS.len()], f32, u64, usize) {
     let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 16);
     let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
     let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
-    let profile = Profile { cpu_sim_ms: BUDGET_MS, blocks: 64 };
+    let profile = Profile::default_thresholds(BUDGET_MS, 64);
     let mut scheduler = Scheduler::with_capacity(&mut host, profile, ISLETS.len()).expect("ordonnanceur");
 
     let mut hash = Hasher64::new();

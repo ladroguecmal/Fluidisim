@@ -55,6 +55,17 @@ pub struct Profile {
     /// Blocs disponibles dans le pool. Le pool est préalloué : le battement coûte des pointeurs,
     /// jamais de la mémoire (ADR-006 §4).
     pub blocks: u32,
+    /// Seuils d'allumage et d'extinction (ADR-171). `Profile::default_thresholds` rend ceux
+    /// d'ADR-013 §5 ; un hôte qui les change doit dire sur quelle mesure.
+    pub on: f32,
+    pub off: f32,
+}
+
+impl Profile {
+    /// Les seuils de départ d'ADR-013 §5, pour un profil qui n'a rien calibré.
+    pub fn default_thresholds(cpu_sim_ms: f32, blocks: u32) -> Self {
+        Self { cpu_sim_ms, blocks, on: ON, off: OFF }
+    }
 }
 
 /// Ce qu'un candidat soumissionne à chaque pas — domaine déjà vivant ou simple prétendant.
@@ -82,9 +93,14 @@ impl Bid {
     }
 }
 
-/// Hystérésis d'ADR-013 §5 : on allume au-dessus de `ON`, on éteint en dessous de `OFF`, et
-/// entre les deux **on ne change rien**. C'est l'intervalle qui empêche le battement, pas les
-/// bornes ; les valeurs restent celles du départ, toutes à calibrer (banc B8).
+/// Hystérésis d'ADR-013 §5 : on allume au-dessus de `on`, on éteint en dessous de `off`, et entre
+/// les deux **on ne change rien**. C'est l'intervalle qui empêche le battement, pas les bornes.
+///
+/// Ces deux constantes sont les **valeurs de départ** d'ADR-013 §5, gardées comme défaut. S279 les
+/// a éprouvées pour la première fois et elles n'ont pas tenu : la priorité étant un produit de
+/// trois fractions, elle est toujours inférieure à la plus petite, et un domaine occupant 55 % du
+/// cadre n'atteint jamais 0,60. **Les seuils appartiennent donc au profil** (ADR-171) : chaque hôte
+/// calibre les siens et écrit sur quoi.
 pub const ON: f32 = 0.60;
 pub const OFF: f32 = 0.40;
 
@@ -144,6 +160,11 @@ impl Scheduler {
         capacity: usize,
     ) -> Result<Self, Error> {
         if !(profile.cpu_sim_ms.is_finite() && profile.cpu_sim_ms > 0.) {
+            return Err(Error::NotFinite);
+        }
+        // Un intervalle inversé ou nul supprimerait l'hystérésis sans le dire, et le battement
+        // reviendrait par une porte que personne ne surveille.
+        if !(profile.off.is_finite() && profile.on.is_finite() && profile.off < profile.on) {
             return Err(Error::NotFinite);
         }
         let bytes = capacity
@@ -218,7 +239,7 @@ impl Scheduler {
         self.last_us = Some(now.0);
         for l in self.live.iter_mut() {
             let s = self.bids.iter().find(|b| b.id == l.id).map_or(0., |b| b.priority());
-            if s < OFF {
+            if s < self.profile.off {
                 l.below_since_us.get_or_insert(now.0);
             } else {
                 l.below_since_us = None;
@@ -231,7 +252,7 @@ impl Scheduler {
         }
         for b in &self.bids {
             // Inconnu : il n'entre dans la mémoire que s'il franchit le seuil d'allumage.
-            if b.priority() > ON && !self.live.iter().any(|l| l.id == b.id) {
+            if b.priority() > self.profile.on && !self.live.iter().any(|l| l.id == b.id) {
                 self.live.push(Live { id: b.id, active: true, born_us: now.0, below_since_us: None });
             }
         }
@@ -349,7 +370,7 @@ mod tests {
         let mut alloc = Hote { used: core::cell::Cell::new(0), limit: 1 << 16 };
         let services = Hote { used: core::cell::Cell::new(0), limit: 0 };
         let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
-        Scheduler::with_capacity(&mut host, Profile { cpu_sim_ms: 2., blocks: 64 }, capacity).unwrap()
+        Scheduler::with_capacity(&mut host, Profile::default_thresholds(2., 64), capacity).unwrap()
     }
 
     #[test]
@@ -599,6 +620,41 @@ mod tests {
         s.allocate();
         assert_eq!(s.grants().len(), 1);
         assert!(s.is_active(DomainId(1)) && s.is_active(DomainId(2)));
+    }
+
+    /// ADR-171 : les seuils viennent du profil. Un score de 0,55 — celui d'une bande qui occupe
+    /// la moitié du cadre — reste éteint aux valeurs de départ et vit aux seuils calibrés.
+    #[test]
+    fn les_seuils_viennent_du_profil_s279() {
+        let essai = |on: f32, off: f32| {
+            let mut alloc = Hote { used: core::cell::Cell::new(0), limit: 1 << 16 };
+            let services = Hote { used: core::cell::Cell::new(0), limit: 0 };
+            let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+            let profile = Profile { cpu_sim_ms: 2., blocks: 64, on, off };
+            let mut s = Scheduler::with_capacity(&mut host, profile, 4).unwrap();
+            s.begin();
+            s.submit(bid(1, 0.55, 1., 1., 0.5)).unwrap();
+            s.decide(SimTime(0)).unwrap();
+            s.is_active(DomainId(1))
+        };
+        assert!(!essai(ON, OFF), "aux valeurs de départ, 0,55 n'allume rien");
+        assert!(essai(0.45, 0.35), "aux seuils calibrés de l'afficheur, il vit");
+    }
+
+    /// Un intervalle inversé ou nul supprimerait l'hystérésis sans le dire.
+    #[test]
+    fn un_intervalle_d_hysteresis_vide_est_refuse_s279() {
+        let mut alloc = Hote { used: core::cell::Cell::new(0), limit: 1 << 16 };
+        let services = Hote { used: core::cell::Cell::new(0), limit: 0 };
+        let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+        for (on, off) in [(0.4f32, 0.4f32), (0.3, 0.5), (0.5, f32::NAN)] {
+            let profile = Profile { cpu_sim_ms: 2., blocks: 64, on, off };
+            assert_eq!(
+                Scheduler::with_capacity(&mut host, profile, 4).err(),
+                Some(Error::NotFinite),
+                "seuils {on} / {off} acceptés"
+            );
+        }
     }
 
     #[test]
