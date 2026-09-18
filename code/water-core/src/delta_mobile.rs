@@ -271,6 +271,8 @@ impl Volume {
         self.eta.copy_from_slice(eta);
         self.rest = rest;
         self.eta_roundoff.fill(0.);
+        // S276, ADR-169 : une surface posée invalide la pression publiée comme départ du pas suivant.
+        self.p.fill(0.);
         self.last_cost_ms = None;
         Ok(())
     }
@@ -401,7 +403,10 @@ impl Volume {
             swapped = true;
             self.advect(advection, &mut ctl)?;
             self.mobile = true;
+            // S276, ADR-169 : même départ que le pas couplé, pour garder l'identité au fond nul.
+            self.warm_pressure = true;
             let projected = self.project(scale, correction, max_iters, false, jobs, &mut ctl);
+            self.warm_pressure = false;
             self.mobile = false;
             let report = projected?;
             if report.degraded { return Err(Error::Convergence); }

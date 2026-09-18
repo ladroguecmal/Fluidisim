@@ -189,7 +189,8 @@ fn fill_with(background: &Background, time: SimTime, u: &mut [BackgroundSample],
 /// Un en-tête différent — autre domaine, autre houle, autre durée — refait le calcul.
 fn cache_header(dt_us: u64) -> [u64; 8] {
     let r = swell_recipe();
-    [0x5275_de17a, dt_us, DURATION_US, START_US, NX as u64, NZ as u64,
+    // Premier mot : version du pas couplé — S276 (ADR-169, départ depuis la pression publiée).
+    [0x5276_0169, dt_us, DURATION_US, START_US, NX as u64, NZ as u64,
         (DX.to_bits() as u64) << 32 | REST.to_bits() as u64,
         (r.sea.hs.to_bits() as u64) << 32 | r.sea.tp.to_bits() as u64 ^ r.sea.graine]
 }
@@ -334,6 +335,86 @@ pub fn measure(background: &Background) -> Result<(Replay, Replay), String> {
     Ok((reference, frame))
 }
 
+/// S276 — δ **en direct** : le domaine avance d'un pas de `FRAME_US` par image, au fond
+/// échantillonné par grille à l'instant du pas. Né au repos à l'instant où l'image le demande
+/// (I-12) ; renaît au repos si le temps de la scène recule ou saute. Aucune allocation par image.
+pub struct Live<'a> {
+    background: &'a Background,
+    volume: Volume,
+    u: Vec<BackgroundSample>,
+    w: Vec<BackgroundSample>,
+    zero_u: Vec<f32>,
+    zero_w: Vec<f32>,
+    born_us: u64,
+    steps: u64,
+    /// Dernière image : durées de l'échantillonnage et du pas (ms), itérations.
+    pub sampling_ms: f64,
+    pub step_ms: f64,
+    pub iterations: u32,
+}
+
+impl<'a> Live<'a> {
+    pub fn new(background: &'a Background) -> Result<Self, String> {
+        let domain = Domain { nx: NX, nz: NZ, dx: DX };
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
+        let mut volume = Volume::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+            domain, DENSITY, background.gravity(), &[0.; NX]).map_err(|e| format!("domaine δ : {e:?}"))?;
+        volume.set_free_surface(&[REST; NX], REST).map_err(|e| format!("surface δ : {e:?}"))?;
+        let (nu, nw) = (volume.velocity_u().len(), volume.velocity_w().len());
+        Ok(Self {
+            background,
+            volume,
+            u: vec![BackgroundSample::default(); nu],
+            w: vec![BackgroundSample::default(); nw],
+            zero_u: vec![0.; nu],
+            zero_w: vec![0.; nw],
+            born_us: START_US,
+            steps: 0,
+            sampling_ms: 0.,
+            step_ms: 0.,
+            iterations: 0,
+        })
+    }
+    fn now_us(&self) -> u64 {
+        self.born_us + self.steps * FRAME_US
+    }
+    fn rebirth(&mut self, at_us: u64) -> Result<(), String> {
+        self.volume.set_free_surface(&[REST; NX], REST).map_err(|e| format!("{e:?}"))?;
+        self.volume.set_velocity(&self.zero_u, &self.zero_w).map_err(|e| format!("{e:?}"))?;
+        self.born_us = at_us;
+        self.steps = 0;
+        Ok(())
+    }
+    /// Amène δ à l'instant de la scène `seconds` (après la naissance de la scène) : un pas si
+    /// l'image a avancé d'un pas, renaissance sinon. `η'` rendu dans `out`.
+    pub fn advance(&mut self, seconds: f64, out: &mut [f32]) -> Result<(), String> {
+        let target = START_US + (seconds.max(0.) * 1e6).round() as u64;
+        if target < self.now_us() || target > self.now_us() + FRAME_US {
+            self.rebirth(target)?;
+        } else if target == self.now_us() + FRAME_US {
+            let time = SimTime(self.now_us());
+            let a = std::time::Instant::now();
+            fill_grid(self.background, time, &mut self.u, &mut self.w, 1)?;
+            let b = std::time::Instant::now();
+            let bg = BackgroundFaces { domain: self.volume.domain(), time, density: DENSITY,
+                gravity: self.background.gravity(), u: &self.u, w: &self.w };
+            let r = self.volume
+                .step_perturbation_mobile(time, FRAME_US, 6000, 1_000_000_000, &bg, SPONGE,
+                    &host_impl::SequentialJobs, &Frozen)
+                .map_err(|e| format!("pas δ en direct : {e:?}"))?;
+            self.sampling_ms = (b - a).as_secs_f64() * 1e3;
+            self.step_ms = b.elapsed().as_secs_f64() * 1e3;
+            self.iterations = r.report.map_or(0, |r| r.iterations);
+            self.steps += 1;
+        }
+        for (o, h) in out.iter_mut().zip(self.volume.surface()) {
+            *o = h - REST;
+        }
+        Ok(())
+    }
+}
+
 /// Fondu en cosinus sur `width` mètres depuis un bord : poids et dérivée par rapport à `s`.
 fn fade(s: f64, width: f64) -> (f64, f64) {
     if s >= width {
@@ -351,6 +432,8 @@ fn fade(s: f64, width: f64) -> (f64, f64) {
 pub struct Layer<'a> {
     pub replays: [&'a Replay; 2],
     pub mode: usize,
+    /// S276 : δ en direct ; présent, les modes sont « B seul » et « δ en direct ».
+    pub live: Option<Live<'a>>,
     pub gpu: [[f32; 4]; GPU_ROWS],
     heights: [f32; NX],
     active: bool,
@@ -358,14 +441,25 @@ pub struct Layer<'a> {
 
 impl<'a> Layer<'a> {
     pub fn new(reference: &'a Replay, frame: &'a Replay) -> Self {
-        Self { replays: [reference, frame], mode: 1, gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false }
+        Self { replays: [reference, frame], mode: 1, live: None, gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false }
     }
     pub fn label(&self) -> &'static str {
+        if self.live.is_some() {
+            return ["B seul (δ continue en arrière-plan)", "B+δ en direct, un pas de 16 ms par image"][self.mode.min(1)];
+        }
         ["B seul", "B+δ au pas de 4 ms", "B+δ au pas d'image (16 ms)"][self.mode]
+    }
+    /// Nombre de modes que la touche D fait défiler.
+    pub fn modes(&self) -> usize {
+        if self.live.is_some() { 2 } else { 3 }
     }
     /// Profil de l'instant et en-tête rebasé à la caméra ; pentes par différences centrées.
     pub fn update(&mut self, seconds: f64, eye: [f32; 3]) {
-        self.active = self.mode > 0 && self.replays[self.mode - 1].at(seconds, &mut self.heights);
+        self.active = match self.live.as_mut() {
+            // En direct, δ avance même masqué : l'afficher ne change pas son histoire.
+            Some(live) => live.advance(seconds, &mut self.heights).map_err(|e| eprintln!("{e}")).is_ok() && self.mode > 0,
+            None => self.mode > 0 && self.replays[self.mode - 1].at(seconds, &mut self.heights),
+        };
         self.gpu[0] = [X0 - eye[0], -eye[1], DX, NX as f32];
         self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, if self.active { 1. } else { 0. }];
         for i in 0..NX {

@@ -71,9 +71,9 @@ mesurés, réduits par les techniques désignées par la mesure, cadence publié
   et w, pas couplé ; critères écrits avant (COUT-DIRECT-S276).
 - [x] **P3** — échantillonnage du fond par grille (colonnes × couches) : phase par colonne,
   facteur vertical par couche, **identique au bit** à l'évaluation ponctuelle ; essais, mesure.
-- [>] **P4** — technique suivante désignée par la carte (départ depuis la pression précédente
+- [x] **P4** — technique suivante désignée par la carte (départ depuis la pression précédente
   si le pas domine) ; mêmes portes d'acceptation ; mesure.
-- [ ] **P5** — δ en direct dans l'afficheur (`--delta-direct`) : un pas par image, temps simulé
+- [>] **P5** — δ en direct dans l'afficheur (`--delta-direct`) : un pas par image, temps simulé
   fixe par image, cadence publiée ; accord au bit avec le rejeu de 16 ms.
 - [ ] **P6** — rituel §6.
 
@@ -87,3 +87,8 @@ P2 : échantillonnage 33,7/33,2 ms, pas 24,8/24,2 ms (médianes, un fil, secteur
 P3 : grille 5,14/5,11 ms contre 33,0 (×6,4), identique au bit ; le pas (24 ms) domine.
 P4 visé : départ depuis la pression précédente, pas principal seulement (pas l'affinage) ;
 en-tête du cache des rejeux à versionner si les bits changent.
+
+P4 : départ à chaud 134/266 itérations, pas 17,7/17,4 ms ; suite 372+17+95 puis release 375 ;
+`set_free_surface` remet la pression publiée à zéro (renaissance d'un domaine). Cache versionné
+0x5276_0169, rejeux recalculés en 179 s, statistiques S275 inchangées aux décimales publiées.
+P5 : direct identique au bit au rejeu 16 ms sur 200 images ; cadence à mesurer sans charge.

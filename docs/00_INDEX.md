@@ -256,6 +256,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-166](adr/ADR-166-quadrature-lineaire-de-la-bande.md) | Quadrature linéaire de la bande du fond |
 | [ADR-167](adr/ADR-167-multigrille-du-mode-mobile.md) | La multigrille préconditionne le mode à surface mobile |
 | [ADR-168](adr/ADR-168-premier-rendu-de-delta.md) | Premier rendu de δ : bande couplée rejouée dans l'afficheur |
+| [ADR-169](adr/ADR-169-depart-depuis-la-pression-publiee.md) | Les pas mobiles partent de la pression publiée |
 
 ## Travail et historique
 

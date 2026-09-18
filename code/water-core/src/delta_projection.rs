@@ -80,6 +80,8 @@ thread_local! {
     pub(crate) static MULTIGRID_ON: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
     /// ADR-167 : témoin de Jacobi du mode mobile, pour comparer au cycle multigrille.
     pub(crate) static MOBILE_MULTIGRID_OFF: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
+    /// ADR-169 : témoin à départ nul des pas mobiles.
+    pub(crate) static WARM_PRESSURE_OFF: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
     pub(crate) static TOLERANCE_TRACE_PLAIN: core::cell::RefCell<Vec<f64>> =
         const { core::cell::RefCell::new(Vec::new()) };
 }
@@ -269,6 +271,9 @@ pub struct Volume {
     prec: Vec<f32>,
     /// ADR-167 : `z = M⁻¹r` du cycle multigrille mobile ; vide quand la grille ne se divise pas.
     mobile_z: Vec<f32>,
+    /// S276, ADR-169 : la projection principale d'un pas mobile part de la pression publiée.
+    /// Allumé par le pas pour ce seul appel ; l'affinage part toujours de zéro.
+    warm_pressure: bool,
 }
 
 impl Volume {
@@ -374,6 +379,7 @@ impl Volume {
             levels: Vec::new(),
             // Compté par `hierarchy_floats` dès qu'un niveau existe.
             mobile_z: vec![0.0f32; if multigrid::level_count(nx, nz) > 0 { c } else { 0 }],
+            warm_pressure: false,
         };
         v.cut();
         v.seal_isolated();
@@ -1157,9 +1163,31 @@ impl Volume {
         }
         }
         // Gradient conjugué, départ `p = 0` : le résidu initial **est** le second membre.
+        // S276, ADR-169 : en mode mobile, sur demande du pas, départ depuis la pression publiée,
+        // nulle hors des mailles mouillées ; résidu vrai `b − A·p`. Second membre nul : départ nul.
         ctl.check(Phase::Pressure)?;
-        for p in &mut self.p { ctl.poll(Phase::Pressure)?; *p = 0.; }
-        budget::copy(&self.rhs, &mut self.res, ctl, Phase::Pressure)?;
+        #[cfg(test)]
+        let cold = WARM_PRESSURE_OFF.with(|c| c.get());
+        #[cfg(not(test))]
+        let cold = false;
+        let warm = self.warm_pressure && self.mobile && !cold && self.norm2(&self.rhs, jobs, ctl)? > 0.;
+        if warm {
+            for c in 0..self.domain.cells() {
+                ctl.poll(Phase::Pressure)?;
+                if !self.wet_cell(c) { self.p[c] = 0.; }
+            }
+            let mut tmp = core::mem::take(&mut self.tmp);
+            let result = self.apply(&self.p, &mut tmp, ctl);
+            self.tmp = tmp;
+            result?;
+            for c in 0..self.domain.cells() {
+                ctl.poll(Phase::Pressure)?;
+                self.res[c] = self.rhs[c] - self.tmp[c];
+            }
+        } else {
+            for p in &mut self.p { ctl.poll(Phase::Pressure)?; *p = 0.; }
+            budget::copy(&self.rhs, &mut self.res, ctl, Phase::Pressure)?;
+        }
         let mut seeded = None;
         if jacobi {
             self.precondition_into_dir(0., ctl)?;
@@ -1171,7 +1199,7 @@ impl Volume {
             budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
         }
         let b2 = self.norm2(&self.rhs, jobs, ctl)?;
-        let mut rr = b2;
+        let mut rr = if warm { self.norm2(&self.res, jobs, ctl)? } else { b2 };
         // Produit `r·M⁻¹r` du préconditionneur ; sans lui, c'est exactement `rr`.
         let mut rz = if jacobi {
             self.dot_prec(&self.res, jobs, ctl)?

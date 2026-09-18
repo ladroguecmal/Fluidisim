@@ -48,6 +48,10 @@ struct App<'a> {
     config: Option<wgpu::SurfaceConfiguration>,
     last: Instant,
     seconds: f64,
+    /// S276 : δ en direct — le temps de la scène avance d'un pas fixe par image (simulé, pas mural).
+    fixed_step: Option<f64>,
+    /// S276 : coût de δ en direct par image (échantillonnage + pas), relevé pendant la cadence.
+    delta_ms: Vec<f64>,
     birth: f64,
     paused: bool,
     enabled: bool,
@@ -114,7 +118,7 @@ impl App<'_> {
         let dt = now.duration_since(self.last).as_secs_f64().min(0.1);
         self.last = now;
         if !self.paused {
-            self.seconds += dt;
+            self.seconds += self.fixed_step.unwrap_or(dt);
         }
         // Phase 2 de la mesure de cadence : la relecture d'horodatage commence après 600 images.
         let measuring = self.cadence && self.frames >= 600;
@@ -142,6 +146,13 @@ impl App<'_> {
         self.frame
             .update(self.seconds, self.seconds - self.birth, self.enabled);
         let a_update = counting::mark().since(m_update_start);
+        if measuring {
+            if let Some(live) = self.frame.delta.as_ref().and_then(|l| l.live.as_ref()) {
+                if self.delta_ms.len() < self.delta_ms.capacity() {
+                    self.delta_ms.push(live.sampling_ms + live.step_ms);
+                }
+            }
+        }
         let Some(g) = self.gpu.as_mut() else {
             return;
         };
@@ -249,6 +260,11 @@ impl App<'_> {
             let (k50, _, kmax) = quantiles(&mut self.wake);
             println!("CADENCE_CPU_ms median={c50:.4} p95={c95:.4} max={cmax:.4} | acquisition median={a50:.4} max={amax:.4} | presentation median={p50:.4} max={pmax:.4}");
             println!("CADENCE_CPU_detail_ms sillage median={k50:.4} max={kmax:.4} | transfert median={u50:.4} max={umax:.4} | reste_du_cpu={:.4}", c50 - k50 - u50 - a50);
+            if !self.delta_ms.is_empty() {
+                let (d50, d95, dmax) = quantiles(&mut self.delta_ms);
+                println!("CADENCE_DELTA_DIRECT images={} pas_simule_ms=16 cout_cpu_ms median={d50:.4} p95={d95:.4} max={dmax:.4} mailles={} (echantillonnage par grille + pas couple, un fil)",
+                    self.delta_ms.len(), delta::NX * delta::NZ);
+            }
             let (w50, _, wmax) = quantiles(&mut self.water);
             let (f50, _, fmax) = quantiles(&mut self.whole);
             println!("DECOMPOSITION_serialisee images={} GPU_eau_ms median={w50:.4} max={wmax:.4} | GPU_trame_ms median={f50:.4} max={fmax:.4} | part_eau={:.4}", self.water.len(), w50 / f50);
@@ -361,7 +377,7 @@ impl ApplicationHandler for App<'_> {
                                 // S275 : B seul, B+δ (4 ms), B+δ (pas d'image).
                                 KeyCode::KeyD => {
                                     if let Some(layer) = self.frame.delta.as_mut() {
-                                        layer.mode = (layer.mode + 1) % 3;
+                                        layer.mode = (layer.mode + 1) % layer.modes();
                                         println!("DELTA {}", layer.label());
                                     }
                                 }
@@ -1931,6 +1947,27 @@ fn revue_delta(frame: &mut FrameData<'_>) -> Result<(), String> {
     Ok(())
 }
 
+/// S276 — critère « δ en direct » de COUT-DIRECT-S276 : 200 images en direct depuis la naissance,
+/// `η'` comparé au bit au rejeu de 16 ms aux mêmes instants.
+fn delta_direct_verify(swell: &water_core::background::Background, replay: &delta::Replay) -> Result<(), String> {
+    let mut live = delta::Live::new(swell)?;
+    let mut heights = [0f32; delta::NX];
+    let (mut worst, mut iterations, mut cost) = (0f32, 0u32, Vec::new());
+    for n in 0..=200usize {
+        live.advance(n as f64 * delta::FRAME_US as f64 * 1e-6, &mut heights)?;
+        if n > 0 { cost.push(live.sampling_ms + live.step_ms); iterations = iterations.max(live.iterations); }
+        for (a, b) in heights.iter().zip(replay.frame(n)) {
+            worst = worst.max((a - b).abs());
+            if a.to_bits() != b.to_bits() {
+                return Err(format!("δ en direct diffère du rejeu à l'image {n} : {a} contre {b}"));
+            }
+        }
+    }
+    let (c50, c95, cmax) = quantiles(&mut cost);
+    println!("DELTA_DIRECT_VERIFY images=200 identique_au_rejeu_16ms=oui iterations_max={iterations} cout_ms median={c50:.3} p95={c95:.3} max={cmax:.3}");
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     if args.iter().any(|a| a == "--delta-mesure") {
@@ -1990,8 +2027,18 @@ fn run() -> Result<(), String> {
     let swell = if delta_scene { Some(delta::swell_background()?) } else { None };
     let replays = match &swell { Some(b) => Some(delta_replays(b)?), None => None };
     let mut frame = FrameData::new(swell.as_ref().unwrap_or(&scene.background), table, input, timeline, recipe, impacts);
+    // S276 : `--delta-direct` — δ avance d'un pas par image au lieu d'être rejoué.
+    let delta_direct = delta_scene && args.iter().any(|a| a == "--delta-direct");
     if let Some((reference, image)) = &replays {
         frame.delta = Some(delta::Layer::new(reference, image));
+        if args.iter().any(|a| a == "--delta-direct-verify") {
+            return delta_direct_verify(swell.as_ref().unwrap(), image);
+        }
+        if delta_direct {
+            let layer = frame.delta.as_mut().unwrap();
+            layer.live = Some(delta::Live::new(swell.as_ref().unwrap())?);
+            layer.mode = 1;
+        }
         if args.iter().any(|a| a == "--delta-verify") {
             return delta_verify(&mut frame);
         }
@@ -2583,6 +2630,8 @@ fn run() -> Result<(), String> {
         paused: false,
         // S275 : la scène `--delta` s'ouvre sans impact ni sillage (touche B pour les montrer).
         enabled: !delta_scene,
+        fixed_step: delta_direct.then_some(delta::FRAME_US as f64 * 1e-6),
+        delta_ms: Vec::with_capacity(if delta_direct { BENCH_FRAMES } else { 0 }),
         drag: false,
         cursor: None,
         frames: 0,

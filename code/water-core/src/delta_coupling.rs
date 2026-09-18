@@ -358,7 +358,10 @@ impl Volume {
             swapped = true;
             self.coupled_predict(bg,dt,sponge,&mut ctl)?;
             self.mobile = true;
+            // S276, ADR-169 : départ depuis la pression publiée, projection principale seulement.
+            self.warm_pressure = true;
             let mut projected = self.project(scale,correction,max_iters,false,jobs,&mut ctl);
+            self.warm_pressure = false;
             // S253, ADR-153 : refusé au plancher, le pas reçoit une fois l'affinage d'ADR-150,
             // valeurs fantômes homogènes ; `iterations` compte les deux projections.
             if let Ok(first) = projected {
@@ -395,6 +398,7 @@ impl Volume {
             Ok(report)
         })();
         self.mobile = false;
+        self.warm_pressure = false;
         self.surface_coupled = false;
         self.homogeneous_ghost = false;
         if result.is_err() && swapped {

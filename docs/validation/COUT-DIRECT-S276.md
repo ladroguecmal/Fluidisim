@@ -51,3 +51,17 @@ plane, `y` non nul ; refus de capacité, domaine et densité. Dans l'afficheur, 
 | pas couplé | 24,2 ; 24,2 | 29,8 ; 30,3 | 36,8 ; 40,4 |
 
 Facteur **6,4**, sans aucune réception physique à refaire. Le pas couplé domine désormais (83 %).
+
+## Départ depuis la pression publiée (P4, ADR-169)
+
+Essai du cœur, vingt pas couplés à 64 colonnes sous l'onde stationnaire S253 : **134 itérations
+contre 266**, vitesse à 8,0·10⁻⁸ m/s du départ nul (1,4·10⁻⁵ du maximum), hauteur identique.
+Identité fond nul / S237 conservée ; harmonique S253 2,14 % inchangée ; premier pas à 128 colonnes
+inchangé (18 itérations, pression nulle au repos).
+
+| poste, scène `--delta` | médiane (ms) | p95 (ms) | maximum (ms) |
+|---|---:|---:|---:|
+| échantillonnage par grille | 5,30 ; 5,24 | 6,83 ; 7,13 | 8,6 ; 12,3 |
+| **pas couplé** | **17,7 ; 17,4** | 25,7 ; 23,9 | 30,4 ; 29,3 |
+
+Itérations au pire 23 → 17. **Un pas par image ≈ 23 ms**, contre 58 ms à l'ouverture de S276.

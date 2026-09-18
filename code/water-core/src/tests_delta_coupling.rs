@@ -1201,3 +1201,32 @@ fn mobile_multigrid_agrees_with_jacobi_witness_s274(){
     assert!(du<=1e-4*vmax,"écart de vitesse {du} pour {vmax}");
     assert!(it_mg<it_jac);
 }
+
+/// S276 (ADR-169) : départ depuis la pression publiée contre départ nul, vingt pas couplés
+/// mobiles sous l'onde stationnaire S253 de 5 cm ; mêmes portes, vitesses, hauteur, itérations.
+#[test]
+fn warm_pressure_agrees_with_cold_start_s276(){
+    let wave=standing::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let nx=64;
+    let (mut warm,mut cold)=(standing_case(nx,&wave,&vec![2.;nx]),standing_case(nx,&wave,&vec![2.;nx]));
+    let (mut it_warm,mut it_cold)=(0u32,0u32);
+    for n in 0..20u64 {
+        let t=SimTime(n*1000);
+        let (u,w)=standing_faces(&warm,&wave,n as f64*1e-3);
+        let bg=BackgroundFaces{domain:warm.domain,time:t,density:1025.,gravity:9.81,u:&u,w:&w};
+        let a=warm.step_perturbation_mobile(t,1000,4000,1_000_000_000,&bg,Sponge::default(),&Jobs,&Clock)
+            .unwrap_or_else(|e|panic!("départ chaud, pas {n} : {e:?}"));
+        super::super::WARM_PRESSURE_OFF.with(|c|c.set(true));
+        let b=cold.step_perturbation_mobile(t,1000,4000,1_000_000_000,&bg,Sponge::default(),&Jobs,&Clock);
+        super::super::WARM_PRESSURE_OFF.with(|c|c.set(false));
+        let b=b.unwrap_or_else(|e|panic!("départ nul, pas {n} : {e:?}"));
+        it_warm+=a.report.unwrap().iterations;it_cold+=b.report.unwrap().iterations;
+    }
+    let vmax=cold.u.iter().chain(&cold.w).fold(0f32,|m,x|m.max(x.abs()));
+    let du=warm.u.iter().zip(&cold.u).chain(warm.w.iter().zip(&cold.w)).fold(0f32,|m,(a,b)|m.max((a-b).abs()));
+    let de=warm.eta.iter().zip(&cold.eta).fold(0f32,|m,(a,b)|m.max((a-b).abs()));
+    println!("S276 depart iterations_chaud={it_warm} iterations_nul={it_cold} ecart_vitesse={du:e} vmax={vmax:e} ecart_hauteur={de:e}");
+    assert!(du<=1e-4*vmax,"écart de vitesse {du} pour {vmax}");
+    assert!(it_warm<it_cold);
+    assert!(!warm.warm_pressure&&!cold.warm_pressure);
+}
