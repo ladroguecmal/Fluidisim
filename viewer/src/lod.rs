@@ -742,3 +742,30 @@ mod perception_s279 {
         }
     }
 }
+
+#[cfg(test)]
+mod perception_poses_s279 {
+    use super::Projection;
+    use crate::scene::Camera;
+
+    /// S279 — relevé : ce que vaut `W_perception` dans les poses réelles de la revue R10. Sans ce
+    /// chiffre, on ne peut pas savoir si la bande franchit le seuil d'allumage de l'ordonnanceur —
+    /// et brancher en espérant qu'elle le franchisse serait régler les poids sur le résultat voulu.
+    #[test]
+    fn part_de_cadre_des_poses_de_r10_s279() {
+        let min = [crate::delta::X0, -crate::delta::HALF_WIDTH];
+        let max = [crate::delta::X0 + crate::delta::NX as f32 * crate::delta::DX, crate::delta::HALF_WIDTH];
+        for (nom, eye, yaw, pitch) in [
+            ("defaut", [0f32, -18., 7.], 0f32, -(7.0f32 / 53.).atan()),
+            ("le_long_des_cretes", [0., -60., 6.], 0., -0.08),
+            ("face_a_la_houle", [60., 0., 8.], -core::f32::consts::FRAC_PI_2, -0.1),
+            ("haute", [0., -200., 60.], 0., -0.35),
+            ("rasante", [-30., -20., 3.], 0.9, -0.03),
+        ] {
+            let [forward, right, up] = Camera { eye, yaw, pitch }.vectors();
+            let p = Projection { eye, forward, right, up,
+                tan_half: (50.0f32.to_radians() / 2.).tan(), aspect: 1280. / 720., far: 1500. };
+            println!("PERCEPTION_S279 pose={nom} part={:.4}", p.screen_fraction(min, max));
+        }
+    }
+}

@@ -76,13 +76,32 @@ faux.
 - [ ] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — `W_perception` pour de vrai : fraction d'écran de l'emprise de la bande, projetée
   depuis la caméra, coupée au plan proche puis au cadre. Essais : de face, de dos, hors champ.
-- [ ] **P3** — le branchement : soumission, décision et allocation à chaque image ; δ n'avance et
+- [ ] **P3** — les seuils passent au profil, et la première calibration (ADR à écrire). *Découpage
+  déclaré à 23:05, imposé par une mesure : voir les notes.*
+- [ ] **P3b** — le branchement : soumission, décision et allocation à chaque image ; δ n'avance et
   ne s'affiche que retenu ; coût réinjecté depuis la mesure du pas précédent.
 - [ ] **P4** — réception : scène R10 identique au bit quand la bande reste visible ; relevé de
   l'extinction et de la renaissance quand la caméra se détourne ; coût réinjecté vérifié.
 - [ ] **P5** — rituel §6.
 
 ### Notes de reprise
+
+**Mesure qui impose un découpage** (relevé `part_de_cadre_des_poses_de_r10_s279`) : la part de
+cadre de la bande vaut **0,5774 / 0,5456 / 0,5571 / 0,3185 / 0,5089** pour les poses défaut, le
+long des crêtes, face à la houle, haute et rasante. **Aucune n'atteint le seuil d'allumage de
+0,60.** Or `P = g · p · u` est un produit de trois fractions : il est **toujours ≤ la plus petite**,
+donc un domaine maximal au gameplay et à l'urgence mais occupant 55 % du cadre ne s'allume jamais.
+Brancher tel quel éteindrait la bande dans toutes les poses de R10.
+
+**Ce qu'il ne faut pas faire** : remonter `W_gameplay` ou `W_urgence` pour que ça passe — ce serait
+régler les poids sur le résultat voulu (L334). Les seuils 0,60 / 0,40 sont des **valeurs de départ
+d'ADR-013 §5, explicitement « toutes à calibrer »**, et c'est leur première mise à l'épreuve.
+
+**Critère de calibration, indépendant du résultat cherché** : S275 a mesuré que δ change 10 à 24 %
+des pixels à hauteur d'œil et en incidence rasante, et **0 % vue d'en haut**. Un domaine mérite donc
+de vivre quand sa présence change l'image — pas quand il occupe le cadre. Cette frontière tombe
+entre la pose haute (0,3185, δ invisible) et la rasante (0,5089, δ visible). Les seuils doivent
+appartenir au **profil**, pas au cœur : chaque hôte calibre les siens et les écrit.
 
 **P2 : deux attentes fausses, corrigées par la mesure.** (1) Dans la pose de R10 la caméra est
 **à l'intérieur** de l'emprise (256 × 200 m, œil au milieu) : la bande remplit le cadre quel que

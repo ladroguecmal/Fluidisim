@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-18 23:01 +02:00
+Battement        : 2026-09-18 23:05 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
 Session en cours : S279 — brancher l'ordonnanceur sur la bande δ de l'afficheur
 Dernière session : S278 — l'ordonnanceur écrit et éprouvé (ADR-170, scheduler.rs) ; branché sur rien
