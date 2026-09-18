@@ -3671,3 +3671,14 @@ suffixes et boucles 3×3 fixes (ADR-163) reçues : 10–17 % de coût GPU en moi
 1,06–1,08 ms, budget non tenu. Cache ciel ADR-162 rejeté (précision et gain), retiré du code.
 La quadrature, la BRDF et la réception temporelle gardent leurs limites S265 ; coût du sillage
 prioritaire avant approfondissement des reflets acceptés. [Preuve](../validation/CIEL-CACHE-S266.md).
+
+
+*S267, 2026-09-18 — A282 partielle et A265 ouverte (sévérités conservées).* Cuisson
+spectrale par huit accumulateurs explicites : mêmes grilles et sept images au bit,
+36 cas S249 conservés, −46 % cuisson et −22 à −23 % eau totale. Aucun changement
+d'I-09. Le rendu R7 accepté est conservé, sans fermer les limites physiques d'A287.
+GPU médian ~1,74 ms, pointe 2,962 ms au premier passage ; second maximum 1,836 ms.
+CPU médian ~4,1 ms, maxima ~26 ms. Pas d'attribution aux allocations, au pilote ou au
+système sans mesure ; budget global et borne par image non reçus. Déclencheur :
+prochain lot de coût après les bords ouverts J2, avec séparation des postes CPU/GPU.
+[Preuve](../validation/CUISSON-SILLAGE-S267.md).

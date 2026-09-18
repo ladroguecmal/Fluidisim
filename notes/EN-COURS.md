@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S267 — en cours
+Session : S267 — terminée
 Agent : Codex, GPT-6 ; fichiers, git, cargo, Python et GPU local.
 Entrée : « continue ». Copie unique master propre c476631, jeton libre.
 Objectif : réduire le coût de cuisson GPU du sillage en préservant le rendu accepté et I-09.
@@ -69,7 +69,7 @@ Objectif : réduire le coût de cuisson GPU du sillage en préservant le rendu a
 - [x] **P2** — lectures, diagnostic du calcul du sillage et contrat de réception avant code ; comparer avec J2.
 - [x] **P3** — construire une optimisation bornée avec témoin conservé et vérifications ciblées.
 - [x] **P4** — recevoir précision, images et coût ; retenir ou rejeter sur les critères déclarés.
-- [>] **P5** — rituel §6, file entière, journal, index et jeton.
+- [x] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
 
@@ -84,3 +84,6 @@ Pointe référence 2,962 ms à conserver ; images et réception spectrale encore
 P4 : sept images au bit S266, 36 cas spectraux <=0,340 mm. Deux passages de coût
 reçus (46 % cuisson, 22–23 % total). Premier maximum 2,962 ms conservé ; second
 maximum 1,836 ms. CPU toujours ~4,1 ms. Preuve CUISSON-SILLAGE-S267 complète.
+
+P5 : rituel terminé ; suite S268 bords ouverts J2. Coût CPU et pointes gardés dans
+la file, critères et limites dans CUISSON-SILLAGE-S267. Copie unique.

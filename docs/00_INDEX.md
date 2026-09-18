@@ -61,6 +61,7 @@
 - [Le vent comme paramètre de scène : Pierson–Moskowitz, Cox–Munk, calibration R6](validation/VENT-S263.md).
 - [Reflets de la queue non résolue, comparaison R7 et coût](validation/REFLETS-S265.md).
 - [Optimisation des reflets validés : cache rejeté, sommes exactes retenues](validation/CIEL-CACHE-S266.md).
+- [Cuisson du sillage : mêmes grilles et images, coût réduit](validation/CUISSON-SILLAGE-S267.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

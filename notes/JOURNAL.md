@@ -13586,3 +13586,35 @@ le rendu a motivé S266. La prochaine session doit garder cette comparaison expl
 A287, registre de revue et index actualisés. Ordre de somme modifié documenté, cœur inchangé,
 aucune valeur physique recalibrée. δ,V,B2,bathymétrie et seconde cible restent dans la file.
 Jeton libéré, aucune copie isolée à fermer.
+
+
+## S267 — Sillage identique, cuisson GPU réduite de 46 %
+
+**2026-09-18, Codex GPT-6.** Entrée « continue », réitérée pendant la réception.
+Master propre c476631, copie unique, plan ac7b0c5, contrat f3c1372 avant code,
+construction 8ec6de0, réception bb09783. Comparaison à J2 déclarée avant construction.
+
+**Capacité reçue, maillons 0 :** la fenêtre, les captures et sondes consomment par défaut
+une cuisson des huit bandes à accumulateurs explicites, **sans modifier le champ**.
+3 514 240 flottants GPU identiques, retours temporels exacts, sept PPM identiques à S266 ;
+36 contrôles spectraux conservés (hauteur ≤0,340 mm). Tests hôte 19 réussis, 1 ignoré.
+[Preuve et limites](../docs/validation/CUISSON-SILLAGE-S267.md). Aucun nouvel ADR :
+implémentation équivalente d'ADR-148, témoin conservé par option.
+
+**Coût reçu :** cuisson 0,574–0,585 ms contre 1,064–1,086, −46 % ; eau totale ~1,74 ms,
+−22 à −23 %, référence/rasante 1280×720, RTX 5070 Laptop DX12, secteur. Deux passages,
+critères tenus aux deux. Première pointe 2,962 ms conservée ; second max 1,836 ms.
+CPU ~4,1 ms médian, maxima ~26 ms : ni budget global 2 ms ni borne par image reçus.
+Update zéro allocation, buffers inchangés, pipeline témoin supplémentaire au démarrage.
+Pas de réception multiplateforme, d'animation perceptive, ni de modification du cœur.
+
+**Suite choisie : S268, bords ouverts du pas couplé J2**, relaxation de hauteur et éponge,
+puis frontières du total. Le rendu accepté est préservé et son poste GPU dominant traité :
+un nouvel affinage cosmétique serait différable devant cette capacité physique absente.
+Coût CPU et pointes restent ouverts A265/A278 avec déclencheur après ce lot J2 ; pas
+promesse de les attribuer par raisonnement. Aucun arbitrage utilisateur nouveau requis.
+
+**Rituel :** file active entière relue ; J1-bis, A282/A265, index et README actualisés.
+I-03 cœur inchangé, I-06 update mesuré, I-09 aucune interpolation temporelle, I-13 rendu
+cosmétique, I-14 seuils de rentabilité déclarés. δ, V, B2, bathymétrie et seconde cible
+gardent leurs travaux. Jeton libéré, aucune copie isolée à fermer.

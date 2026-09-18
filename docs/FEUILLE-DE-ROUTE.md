@@ -151,6 +151,13 @@ quadrature 3×3 non convergée partout. **S266 : sommes suffixes et boucles fixe
 image à un niveau RGB près, gain GPU **10–17 %**, **2,24–2,26 ms** (1280×720, 5 m/s),
 budget toujours non tenu ; [preuve](validation/CIEL-CACHE-S266.md). Cache de ciel ADR-162 rejeté.
 Variante `--reflets-filtres` optimisée ; scène historique par défaut conservée.
+**S267 : cuisson des bandes du sillage optimisée par défaut**, huit accumulateurs explicites,
+identité de 3,51 millions de flottants et sept images au bit. Cuisson **0,574–0,585 ms** contre
+1,064–1,086 ; GPU eau médian **1,74 ms** (−22 à −23 %), 1280×720 sur la même scène.
+[Réception](validation/CUISSON-SILLAGE-S267.md). Pointe 2,962 ms au premier passage,
+CPU médian ~4,1 ms : le budget global et la borne par image restent non reçus.
+Cadence inchangée, aucune interpolation temporelle ; prochaine capacité : bords ouverts J2.
+
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 
