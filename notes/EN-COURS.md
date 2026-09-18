@@ -58,38 +58,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S275 — terminée
+Session : S276 — en cours
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
-Entrée : suite de S274 dans la même conversation (consigne utilisateur : continuer sans attendre,
-solliciter pour un jugement visuel). master d0ab484, copie unique.
-Objectif : rendre δ visible pour la première fois — un domaine couplé sous une houle à crêtes
-longues, rejoué dans `viewer/`, B seul contre B+δ, au pas de référence et au pas d'image — et
-soumettre des captures à l'utilisateur (liste 8.7).
+Entrée : « Continue » (2026-09-18), sans verdict R10 : la revue reste en attente. master 79bcb50.
+Objectif : faire tourner δ en direct dans l'afficheur — coût du pas et de l'échantillonnage de B
+mesurés, réduits par les techniques désignées par la mesure, cadence publiée (A276, liste 4.19).
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — ADR-168 et protocole écrits avant le code : scène `--delta` (houle unidirectionnelle),
-  domaine, pas de temps, bande extrudée le long des crêtes et fondus, ce qui n'est pas revendiqué,
-  critères de fonctionnement et questions de revue.
-- [x] **P3** — précalcul de δ dans l'afficheur (module `delta.rs`) : échantillons de B de la scène,
-  pas couplé mobile au pas de référence et au pas d'image ; essais (échantillons plans, pas reçus,
-  écart entre les deux pas en hauteur).
-- [x] **P4** — couche δ côté GPU : tampon et paramètres, lecture Hermite le long de x, fondus,
-  bascule clavier ; vérification GPU contre CPU de la couche.
-- [x] **P5** — captures de revue (poses de jeu, trois variantes) et demande de revue à l'utilisateur.
-- [x] **P6** — rituel §6.
+- [ ] **P2** — carte du coût d'un pas en direct (scène S275, un fil) : échantillonnage des faces u
+  et w, pas couplé ; critères écrits avant (COUT-DIRECT-S276).
+- [ ] **P3** — échantillonnage du fond par grille (colonnes × couches) : phase par colonne,
+  facteur vertical par couche, **identique au bit** à l'évaluation ponctuelle ; essais, mesure.
+- [ ] **P4** — technique suivante désignée par la carte (départ depuis la pression précédente
+  si le pas domine) ; mêmes portes d'acceptation ; mesure.
+- [ ] **P5** — δ en direct dans l'afficheur (`--delta-direct`) : un pas par image, temps simulé
+  fixe par image, cadence publiée ; accord au bit avec le rejeu de 16 ms.
+- [ ] **P6** — rituel §6.
 
 ### Notes de reprise
 
-Pas couplé mobile ≈ 49 ms à 16 384 mailles (S274) : le précalcul est hors budget et déclaré tel.
-δ x-z exige des échantillons plans : houle à `spread_turns = 0`. Similitude de Froude : le pas
-d'image à λ = 100 m équivaut en `ωdt` à ≈ 3,5 ms sur le banc de 4 m.
-
-P3+P4 (un commit : code imbriqué dans les mêmes fichiers) : rejeux reçus, écart pas d'image
-hors éponge 0,25/1,33 mm ; GPU/CPU 7e-8 ; empreintes S254 identiques. Incident : `--multi --revue`
-sans suffixe a réécrit les PPM R1 de captures/s254 (PNG envoyés intacts, non versionnés).
-Un `sed` global avait touché d'autres lignes de main.rs : fichier restauré puis réédité.
-
-P5 : 12 captures + 3 diagnostics (captures/s275), pixels B/B+δ 10–24 % > 4 niveaux (0 % vue
-haute), 4 ms/16 ms 0 %. η' groupé (−47 mm à 20 s vers x = 0–32 m). Revue R10 envoyée, en attente.
+R10 sans verdict : ne rien consigner à sa place. S275 : un pas par image (16 ms) indiscernable
+du pas de 4 ms à cette échelle. Précalcul S275 : 258 s pour 9 375 pas, échantillonnage réparti.
