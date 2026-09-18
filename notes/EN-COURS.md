@@ -78,7 +78,12 @@ annoncée quand un calcul est nécessaire.
   l'amplitude et de la position du maximum sur 30 s.
 - [x] **P5** — l'interaction, mesurée : la même onde sur la houle et sur une mer plate ; la
   différence est l'effet de B sur l'onde, et c'est exactement ce que l'utilisateur veut voir.
-- [ ] **P6** — ce qu'il regarde : pose qui montre l'onde traverser la houle, capture, commande.
+- [ ] **P6** — balayage des régimes : où `u_orbital/c` devient assez grand pour que la déformation
+  se voie. **Un seul levier praticable** — la houle cambrée : l'onde plus courte est fermée par la
+  résolution du domaine (`DX` = 2 m, il faut `λ ≥ 8·DX` = 16 m, et `σ` = 8 m y est déjà). Cas
+  `Hs`/`Tp` : 2/8 (référence, 15 %), 4/8 (31 %), 4/6 (41 %), 6/6 (62 %) ; durée réduite à 10 s,
+  onde sur mer plate calculée une seule fois.
+- [ ] **P6b** — ce qu'il regarde : pose qui montre l'onde traverser la houle, capture, commande.
 - [ ] **P7** — rituel §6.
 
 **P4 relevé** (`--delta --onde-mesure`, bosse 0,6 m, σ 8 m) : la bosse se sépare en deux fronts
