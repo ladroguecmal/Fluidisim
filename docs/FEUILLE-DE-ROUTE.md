@@ -259,7 +259,11 @@ contre oracle modal indépendant ([preuve](validation/RESIDU-TEMPOREL-S272.md)).
 1,60 % ; résidu brut 5,88 %, toujours refusé, mais la part d'ordre deux extrapolée en
 amplitude converge (7,74 / 2,92 / 1,77 %) et l'écart restant est la troncature de
 l'oracle, indépendante de la maille ([preuve](validation/BANDE-LINEAIRE-S273.md)).
-Réception sur la part extrapolée à déclarer avant mesure. La fermeture extérieure de la perturbation reste réfléchissante ;
+**S274 : précision rapportée à l'usage** — écart brut 5,8 µm rms sur une vague de 1 cm,
+dérive de Stokes que l'oracle n'a pas ; coefficient d'ordre deux 0,88–1,16 %, budget
+d'ADR-120 non démontré. Suffisant pour la mer J1 (marge ≈ 5, chiffrée, pas vue) ; la
+réception pour les mers cambrées est différée avec déclencheur. Besoins découverts :
+cohérence de phase δ/B (A289), rendu de δ (liste 8.7) ([usage](validation/HOULE-USAGE-S274.md)). La fermeture extérieure de la perturbation reste réfléchissante ;
 ces reçus bornés ne valent pas frontière transparente universelle.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;

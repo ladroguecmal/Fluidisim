@@ -3745,3 +3745,15 @@ pas le pas. La part extrapolée `2N(a/2) − N(a)` converge vers 1,77 %, erreur
 temporelle comprise. Déclencheur S274 : protocole de réception sur cette part,
 écrit avant mesure, à dt 1 ms avec contrôle 0,5 ms ; sinon oracle d'ordre trois.
 [Preuve](../validation/BANDE-LINEAIRE-S273.md).
+
+
+**A289 — S274, 2026-09-18 (sévérité 2, ouverte).** **Un domaine δ fidèle dérive en phase de B.**
+B est linéaire (ADR-113) ; la vraie vague non linéaire va plus vite de `ω₂ ≈ 0,5–0,6 (ak)² ω`
+(Stokes, ordre trois). Le pas couplé porte cette dérive : 0,85 à 0,87 fois Stokes sur le banc
+progressif, indépendant de la maille. `η'` croît donc comme `a·ω₂·t` : sous `ak` = 0,06 et
+T = 7 s, environ 7 cm en une minute, par la formule seule. Trois conséquences : `|δ|` cesse d'être
+petit devant B (ADR-001), couture de phase à la bordure, surface rendue différente de la surface
+de jeu B+W (famille d'A288). Déclencheur : premier domaine appelé à vivre plus de dix périodes
+sous `ak` ≥ 0,05, ou premier rendu de δ sous houle. Options : rappel lent de la grande longueur
+d'onde de `η'` vers B, durée de vie bornée et recréation (I-12), ou dispersion d'amplitude dans B
+(ADR nécessaire). [Mesure](../validation/HOULE-USAGE-S274.md) §3–§7.

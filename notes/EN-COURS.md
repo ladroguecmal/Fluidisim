@@ -77,7 +77,7 @@ puis ouvrir le blocage suivant.
 - [x] **P3** — campagne unique : a = 2 cm et dt = 0,5 ms admis par l'exemple ; trois amplitudes
   × trois mailles à 1 ms, contrôle 0,5 ms à la fine ; coefficient d'ordre deux jugé au budget
   d'ADR-120, sans le présenter comme la houle complète.
-- [>] **P4** — verdict d'usage : garanties de fonctionnement, seuils justifiés par l'usage ou
+- [x] **P4** — verdict d'usage : garanties de fonctionnement, seuils justifiés par l'usage ou
   proposés à l'utilisateur, raccord δ→rendu manquant, besoins découverts dans liste et file.
 - [ ] **P5** — blocage suivant de la feuille de route : choix argumenté, critère, premier lot
   (plan amendé ici avant de le construire).
@@ -98,3 +98,6 @@ de phase δ/B (B linéaire). Outil outils/usage_houle.py.
 P3 : coefficient d'ordre deux 1,16 % (1 ms) / 0,88 % (0,5 ms) ; troisième amplitude non
 qualifiante à la fine (1,94 %) : crête 2 cm > centre de maille 1,56 cm ; budget ADR-120
 2,26–2,43 % → non reçu, aucun seuil relevé. Traces fluidisim-s274-<dx>-<a>-<dt>.log.
+
+P4 : 2 % d'ADR-120 ≈ 3 mm d'image à Hs 4 m / ak 0,1 ; J1 demande ≈ 13 %. Aucun seuil changé.
+Banc arrêté ; réception cambrée différée (déclencheur). A289 et liste 4.21 (120 points), 8.7.

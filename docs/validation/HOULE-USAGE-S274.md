@@ -115,3 +115,48 @@ Ce qui manquerait pour le recevoir, si l'usage l'exige : dt ≤ 0,5 ms avec cont
 troisième amplitude **sous** le centre des mailles (2,5 mm), donc une trace de `η'` compensée
 (la trace f32 actuelle perd ≈ 0,5 % par point à cette amplitude). Estimation, non mesurée :
 ≈ 0,9 + 0,2 + 0,2 %. Voir §7 pour savoir si l'usage l'exige.
+
+## 7. Niveau nécessaire, et ce qui est proposé
+
+**Garanties de fonctionnement — conservées, toutes tenues.** Aucun refus sur les seize passages
+S273–S274 (trois amplitudes, trois mailles, trois pas de temps) ; fond uniforme traversant
+exact ; bilan des bandes ; transaction, expiration et zéro allocation ; `η'` reste petit
+devant la vague (1 à 2 % à `ak` ≤ 0,03). Elles ne se négocient pas et ne bougent pas.
+
+**Fidélité — ce que valent les 2 % d'ADR-120 pour l'usage.** La correction d'ordre deux vaut
+`η₂ ≈ 0,5 a·ak` en eau profonde (0,7 à kh = π/2). La tolérance de hauteur d'image de 3 mm
+(S201) demande donc une précision relative `3 mm / η₂` :
+
+| mer | a | ak | η₂ | précision nécessaire |
+|---|---:|---:|---:|---:|
+| référence J1 (Hs 1,5 m) | 0,75 m | 0,06 | 2,3 cm | ≈ 13 % |
+| houle cambrée (Hs 4 m) | 2 m | 0,1 | 10 à 14 cm | **≈ 2 à 3 %** |
+
+**Les 2 % ne sont pas inutilement stricts** : ils coïncident avec la tolérance d'image pour les
+mers les plus cambrées. Pour la mer J1, ils le sont environ six fois plus que nécessaire. Aucun
+changement de seuil n'est proposé : un critère d'usage (« 3 mm à la cambrure maximale servie »)
+reviendrait au même là où il compte. Le projet n'a en revanche **aucune tolérance de pente
+d'image**, alors que les reflets dépendent de la pente : manque noté, sans chiffre inventé.
+
+**Où en est la fidélité.** Valeur mesurée du coefficient 0,88 à 1,16 %, sous 2 % ; démonstration
+au budget complet non faite (2,26 à 2,43 %, référence non qualifiée à la maille fine). Pour la mer
+J1, la marge chiffrée est d'environ 5 ; pour une mer cambrée, la réception reste à terminer (§6,
+dernier paragraphe). **Perfectionnement différé**, avec déclencheur : avant tout domaine δ sous
+une mer de cambrure ≥ 0,08, ou avant de déclarer reçu le volet surface de B4.
+
+**Qualité visuelle — non jugeable.** Raccord manquant (liste 8.7) : la surface d'un domaine δ,
+composée avec B+W sous sa bordure d'éponge, dans `viewer/`, avec un mode de comparaison
+(B seul, B+δ, B+oracle) en mouvement aux distances de jeu. δ étant en x-z, une houle à crêtes
+longues extrudée le long des crêtes suffirait pour ce banc. Rien n'est conclu sur la visibilité
+avant ce raccord et le jugement de l'utilisateur.
+
+**Besoin découvert — cohérence de phase δ/B (A289, liste 4.21).** Options, par ordre de
+dépendance : (b) ramener lentement vers B la dérive de grande longueur d'onde de `η'` dans le
+domaine, ce qui garde δ cohérent avec la surface de jeu B+W (I-04) ; (c) borner la durée de vie
+d'un domaine et le recréer à zéro (I-12) ; (a) donner à B la dispersion d'amplitude, déterministe
+donc compatible avec I-15, mais qui modifie la mer autoritaire et demande un ADR. Rien n'est
+choisi : déclencheur au premier domaine appelé à vivre plus de dix périodes sous `ak` ≥ 0,05.
+
+**Suite.** Le banc de houle progressive s'arrête ici. Le blocage suivant de J2 est le **coût** :
+le pas couplé mobile, chemin de J2, coûte encore 265 à 300 ms à 16 384 mailles, sans multigrille
+(ADR-147 point 5) ; aucun domaine ne peut être pris dans l'image tant qu'il en est là.

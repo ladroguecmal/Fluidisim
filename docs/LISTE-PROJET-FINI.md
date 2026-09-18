@@ -23,8 +23,8 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S272, 2026-09-18** — actualisation demandée par l’utilisateur, sur les preuves
-S262–S272 ; les résultats récents sont précisés aux points concernés. Le décompte porte
+**État au S274, 2026-09-18** — actualisation demandée par l’utilisateur, sur les preuves
+S262–S274 ; les résultats récents sont précisés aux points concernés. Le décompte porte
 sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 
 ---
@@ -115,9 +115,11 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
   Démarrage d’une houle progressive contrôlé à 0,58 % à la maille fine
   ([S271](validation/HOULE-PROGRESSIVE-S271.md)), pas réel éprouvé à petit pas.
   **S272 : évolution sur 2 s refusée** contre oracle indépendant d'ordre deux ;
-  **S273 : quadrature des bandes corrigée** (ADR-166), résidu 5,88 %, part d'ordre deux
-  extrapolée 1,77 %, reste attribué à la troncature de l'oracle
-  ([preuve](validation/BANDE-LINEAIRE-S273.md)).
+  **S273 : quadrature des bandes corrigée** (ADR-166). **S274 : l'écart brut vaut 5,8 µm
+  rms sur une vague de 1 cm** et suit la dispersion de Stokes que l'oracle n'a pas ; le
+  coefficient d'ordre deux est à 0,88–1,16 %, mais sa réception au budget d'ADR-120 reste à
+  terminer (2,26–2,43 %), requise avant une mer de cambrure ≥ 0,08
+  ([usage](validation/HOULE-USAGE-S274.md)).
   Manquent la houle progressive traversante reçue sur une durée utile, les frontières
   générales du total et W au-dessus du plan moyen ; B4 reste partiel.
 - [ ] **4.7 Frontière sans réflexion ni rupture visible** (C05) — *partiel* : éponge quadratique
@@ -143,6 +145,10 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 - [ ] **4.19 Coût de δ compatible avec le budget** — *partiel* : carte du coût (S244) et multigrille
   (S252). Un pas à 16 384 mailles coûte environ 130 fois le budget d'eau.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
+- [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *absent*.
+  Besoin découvert S274 : B est linéaire, un δ fidèle dérive de la dispersion d'amplitude
+  (0,85–0,87 fois Stokes mesuré). Sous `ak` = 0,06, environ 7 cm en une minute : surface rendue
+  différente de la surface de jeu. Options et déclencheur : A289.
 
 ## 5. Volumes finis et inondations (V)
 
@@ -205,7 +211,9 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 - [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent*.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *absent*.
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *absent*.
-- [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *absent*.
+- [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *absent*. `viewer/` ne consomme
+  aucun domaine δ : aucune précision de δ ne peut encore être jugée à l'œil (S274). Manque aussi
+  une tolérance de pente d'image, les reflets dépendant de la pente.
 - [ ] **8.8 Lointain et horizon sans artefact** — *partiel* : coupure spectrale B/sillage (S249) ;
   bande d'horizon mesurée (S247, S248) ; fin de grille à l'horizon géométrique sous le ciel clair
   (S262). Pas de certificat d'absence d'alias.
@@ -311,7 +319,7 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 | 1. Socle | 8 | 1 | 4 | 3 |
 | 2. Grandes masses (B) | 9 | 0 | 3 | 6 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
-| 4. Volumique (δ) | 20 | 0 | 7 | 13 |
+| 4. Volumique (δ) | 21 | 0 | 7 | 14 |
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
 | 6. Solides | 8 | 0 | 3 | 5 |
 | 7. Secondaires | 8 | 0 | 0 | 8 |
@@ -321,7 +329,7 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **119** | **3** | **48** | **68** |
+| **total** | **120** | **3** | **48** | **69** |
 
-Trois points validés sur 119. Cela ne mesure pas l'avancement du travail. Beaucoup de points
+Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.
