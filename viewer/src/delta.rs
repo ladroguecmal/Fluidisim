@@ -103,9 +103,13 @@ fn sample(background: &Background, x: f32, z_from_bottom: f32, time: SimTime) ->
 /// indépendant par face, le résultat ne dépend pas du découpage. Précalcul hors image seulement.
 const SAMPLING_THREADS: usize = 6;
 fn fill(background: &Background, time: SimTime, u: &mut [BackgroundSample], w: &mut [BackgroundSample]) -> Result<(), String> {
+    fill_with(background, time, u, w, SAMPLING_THREADS)
+}
+fn fill_with(background: &Background, time: SimTime, u: &mut [BackgroundSample], w: &mut [BackgroundSample],
+    threads: usize) -> Result<(), String> {
     std::thread::scope(|s| {
         let mut jobs = Vec::new();
-        let rows_u = NZ.div_ceil(SAMPLING_THREADS);
+        let rows_u = NZ.div_ceil(threads);
         for (c, chunk) in u.chunks_mut(rows_u * (NX + 1)).enumerate() {
             jobs.push(s.spawn(move || -> Result<(), String> {
                 for (j, out) in chunk.iter_mut().enumerate() {
@@ -115,7 +119,7 @@ fn fill(background: &Background, time: SimTime, u: &mut [BackgroundSample], w: &
                 Ok(())
             }));
         }
-        let rows_w = (NZ + 1).div_ceil(SAMPLING_THREADS);
+        let rows_w = (NZ + 1).div_ceil(threads);
         for (c, chunk) in w.chunks_mut(rows_w * NX).enumerate() {
             jobs.push(s.spawn(move || -> Result<(), String> {
                 for (j, out) in chunk.iter_mut().enumerate() {
@@ -207,6 +211,34 @@ pub fn precompute(background: &Background, dt_us: u64, duration_us: u64) -> Resu
         return Err("η' non fini".into());
     }
     Ok(Replay { dt_us, heights, iterations_max: worst, steps })
+}
+
+/// S276 — carte du coût (COUT-DIRECT-S276) : `steps` pas de 16 ms depuis le repos, un fil ;
+/// durées par pas de l'échantillonnage et du pas couplé (ms), itérations au pire.
+pub fn cost_map(background: &Background, steps: u64) -> Result<(Vec<f64>, Vec<f64>, u32), String> {
+    let domain = Domain { nx: NX, nz: NZ, dx: DX };
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
+    let mut v = Volume::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+        domain, DENSITY, background.gravity(), &[0.; NX]).map_err(|e| format!("{e:?}"))?;
+    v.set_free_surface(&[REST; NX], REST).map_err(|e| format!("{e:?}"))?;
+    let mut u = vec![BackgroundSample::default(); v.velocity_u().len()];
+    let mut w = vec![BackgroundSample::default(); v.velocity_w().len()];
+    let (mut sampling, mut stepping, mut worst) = (Vec::new(), Vec::new(), 0);
+    for n in 0..steps {
+        let time = SimTime(START_US + n * FRAME_US);
+        let a = std::time::Instant::now();
+        fill_with(background, time, &mut u, &mut w, 1)?;
+        let b = std::time::Instant::now();
+        let bg = BackgroundFaces { domain, time, density: DENSITY, gravity: background.gravity(), u: &u, w: &w };
+        let r = v.step_perturbation_mobile(time, FRAME_US, 6000, 1_000_000_000, &bg, SPONGE, &jobs, &Frozen)
+            .map_err(|e| format!("pas {n} : {e:?}"))?;
+        let c = std::time::Instant::now();
+        worst = worst.max(r.report.map_or(0, |r| r.iterations));
+        sampling.push((b - a).as_secs_f64() * 1e3);
+        stepping.push((c - b).as_secs_f64() * 1e3);
+    }
+    Ok((sampling, stepping, worst))
 }
 
 /// `(rms, max)` de `η'` sur toutes les images, en m.

@@ -1936,6 +1936,15 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta-mesure") {
         return delta_replays(&delta::swell_background()?).map(|_| ());
     }
+    // S276 — carte du coût d'un pas en direct (COUT-DIRECT-S276), un fil.
+    if args.iter().any(|a| a == "--delta-cout") {
+        let background = delta::swell_background()?;
+        let (mut s, mut p, worst) = delta::cost_map(&background, 200)?;
+        let (sq, pq) = (quantiles(&mut s), quantiles(&mut p));
+        println!("DELTA_COUT pas=200 echantillonnage_ms mediane={:.3} p95={:.3} max={:.3} pas_couple_ms mediane={:.3} p95={:.3} max={:.3} iterations_max={worst} faces={}",
+            sq.0, sq.1, sq.2, pq.0, pq.1, pq.2, (delta::NX + 1) * delta::NZ + delta::NX * (delta::NZ + 1));
+        return Ok(());
+    }
     // S259, ADR-156 : `--houle` — mer de vent et houle longue, étalement cos^2s (scène déclarée).
     // S260, ADR-157 : `--vagues` — recette `--houle`, queue d'équilibre f⁻⁴ et CWM.
     let vagues = args.iter().any(|a| a == "--vagues");

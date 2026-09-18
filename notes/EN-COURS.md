@@ -67,9 +67,9 @@ mesurés, réduits par les techniques désignées par la mesure, cadence publié
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — carte du coût d'un pas en direct (scène S275, un fil) : échantillonnage des faces u
+- [x] **P2** — carte du coût d'un pas en direct (scène S275, un fil) : échantillonnage des faces u
   et w, pas couplé ; critères écrits avant (COUT-DIRECT-S276).
-- [ ] **P3** — échantillonnage du fond par grille (colonnes × couches) : phase par colonne,
+- [>] **P3** — échantillonnage du fond par grille (colonnes × couches) : phase par colonne,
   facteur vertical par couche, **identique au bit** à l'évaluation ponctuelle ; essais, mesure.
 - [ ] **P4** — technique suivante désignée par la carte (départ depuis la pression précédente
   si le pas domine) ; mêmes portes d'acceptation ; mesure.
@@ -81,3 +81,5 @@ mesurés, réduits par les techniques désignées par la mesure, cadence publié
 
 R10 sans verdict : ne rien consigner à sa place. S275 : un pas par image (16 ms) indiscernable
 du pas de 4 ms à cette échelle. Précalcul S275 : 258 s pour 9 375 pas, échantillonnage réparti.
+
+P2 : échantillonnage 33,7/33,2 ms, pas 24,8/24,2 ms (médianes, un fil, secteur), 23 itérations.

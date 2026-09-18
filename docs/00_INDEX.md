@@ -71,6 +71,7 @@
 - [Houle progressive : quelle précision sert l'usage](validation/HOULE-USAGE-S274.md).
 - [Coût du pas couplé mobile : multigrille](validation/COUT-MOBILE-S274.md).
 - [δ visible dans l'afficheur : protocole et revue](validation/DELTA-VISIBLE-S275.md).
+- [δ en direct : coût d'un pas dans l'image](validation/COUT-DIRECT-S276.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
