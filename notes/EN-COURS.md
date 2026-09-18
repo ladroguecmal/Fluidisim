@@ -58,33 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S269 — terminée
-Agent : Codex, GPT-6 ; fichiers, git, cargo, Python et GPU local.
-Entrée : « continue », copie unique master propre 24a4c03, jeton libre.
-Objectif : mesurer la réflexion du pas couplé mobile avec l'éponge ADR-164.
+Session : S270 — en cours
+Agent : Codex, GPT-6 ; fichiers, git, cargo et Python.
+Entrée : « continue », copie unique master propre 8e624a1, jeton libre.
+Objectif : recevoir le passage du fond à travers les frontières du pas perturbatif.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — montage du paquet, témoins, fenêtres et critères déclarés avant mesure.
-- [x] **P3** — banc consommant le pas réel, contrôle du paquet et des fenêtres.
-- [x] **P4a** — garde brute refusée, diagnostic spatial et bord gauche.
-- [x] **P4b** — mesure différentielle déclarée avec seconde garde longue, témoins et convergence.
-- [x] **P5** — rituel §6, journal, file, index et jeton.
+- [x] **P1** — amorce, jeton et plan seuls.
+- [>] **P2** — lire les contrats, isoler le défaut et déclarer la réception bornée.
+- [ ] **P3** — construire la correction et ses contre-épreuves dans le pas réel.
+- [ ] **P4** — exécuter la réception et les régressions pertinentes.
+- [ ] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
 
-S268 : dissipation locale reçue, frontière transparente non reçue. Ne pas confondre
-crête et énergie ni prendre une fenêtre contaminée pour de la réflexion (ADR-046).
-
-P3 : garde 0,25 refuse la mesure : signal tardif 1,9668 %, analytique 0,00882 %.
-Diagnostic déclaré : raffiner la garde et reculer seulement le mur gauche. Pas de verdict éponge.
-
-P4a : signal brut contient queue numérique puis retour parasite du mur gauche.
-Protocole différentiel avant campagne : soustraire le témoin long, contrôler deux
-longueurs 48/72 m et identité incidente. Seuils inchangés, portée différente explicite.
-
-P4b : douze traces complètes reçues par analyse différentielle ; R éponge
-0,001444421 / 0,001615647 ; écart 0,000171226. Doubles gardes <0,001,
-incidents <0,001, murs >0,5. Tests Python 3 ; exemple Rust 6 + 1 ignoré.
-Mesure brute toujours refusée. Résultats et reproduction dans la preuve S269.
+S269 reçoit seulement l'effet différentiel du bord sur un paquet à fond nul.
+Troisième session du fil : le fond traversant débloque l'usage perturbatif J2 ;
+un approfondissement spectral serait différable. Vérifier les flux de bande
+avant de supposer un défaut. Aucun rendu modifié, aucune frontière universelle promise.
