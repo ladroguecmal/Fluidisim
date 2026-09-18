@@ -358,12 +358,31 @@ pub fn measure(background: &Background) -> Result<(Replay, Replay), String> {
     Ok((reference, frame))
 }
 
+/// S277 — **onde injectée** dans le profil initial de δ : bosse gaussienne d'amplitude `a` (m) et
+/// d'écart-type `SIGMA`, posée au centre du domaine, vitesse nulle. Elle se sépare en deux fronts
+/// qui s'éloignent — c'est le problème de Cauchy, pas un artefact — et chacun traverse la houle.
+///
+/// Le verdict R10 demandait de voir une onde rencontrer les vagues et changer de forme. La tranche
+/// 2D sait porter cela : ce que δ ne sait pas encore faire, c'est interagir avec les **vaguelettes**,
+/// qui ne sont qu'un habillage de pentes hors du domaine simulé.
+pub const SIGMA: f32 = 8.;
+pub fn initial_wave(amplitude: f32) -> [f32; NX] {
+    let mut eta = [REST; NX];
+    for (i, e) in eta.iter_mut().enumerate() {
+        let x = X0 + (i as f32 + 0.5) * DX;
+        *e += amplitude * (-(x / SIGMA) * (x / SIGMA)).exp();
+    }
+    eta
+}
+
 /// S276 — δ **en direct** : le domaine avance d'un pas de `FRAME_US` par image, au fond
 /// échantillonné par grille à l'instant du pas. Né au repos à l'instant où l'image le demande
 /// (I-12) ; renaît au repos si le temps de la scène recule ou saute. Aucune allocation par image.
 pub struct Live<'a> {
     background: &'a Background,
     volume: Volume,
+    /// S277 : surface de naissance, reposée à chaque renaissance. Plate, ou l'onde injectée.
+    initial: [f32; NX],
     u: Vec<BackgroundSample>,
     w: Vec<BackgroundSample>,
     zero_u: Vec<f32>,
@@ -377,17 +396,18 @@ pub struct Live<'a> {
 }
 
 impl<'a> Live<'a> {
-    pub fn new(background: &'a Background) -> Result<Self, String> {
+    pub fn new(background: &'a Background, initial: [f32; NX]) -> Result<Self, String> {
         let domain = Domain { nx: NX, nz: NZ, dx: DX };
         let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
         let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
         let mut volume = Volume::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
             domain, DENSITY, background.gravity(), &[0.; NX]).map_err(|e| format!("domaine δ : {e:?}"))?;
-        volume.set_free_surface(&[REST; NX], REST).map_err(|e| format!("surface δ : {e:?}"))?;
+        volume.set_free_surface(&initial, REST).map_err(|e| format!("surface δ : {e:?}"))?;
         let (nu, nw) = (volume.velocity_u().len(), volume.velocity_w().len());
         Ok(Self {
             background,
             volume,
+            initial,
             u: vec![BackgroundSample::default(); nu],
             w: vec![BackgroundSample::default(); nw],
             zero_u: vec![0.; nu],
@@ -403,7 +423,7 @@ impl<'a> Live<'a> {
         self.born_us + self.steps * FRAME_US
     }
     fn rebirth(&mut self, at_us: u64) -> Result<(), String> {
-        self.volume.set_free_surface(&[REST; NX], REST).map_err(|e| format!("{e:?}"))?;
+        self.volume.set_free_surface(&self.initial, REST).map_err(|e| format!("{e:?}"))?;
         self.volume.set_velocity(&self.zero_u, &self.zero_w).map_err(|e| format!("{e:?}"))?;
         self.born_us = at_us;
         self.steps = 0;
@@ -469,8 +489,8 @@ impl<'a> Layer<'a> {
     }
     /// S277 — δ **en direct sans rejeu** : la scène s'ouvre immédiatement, δ naît au repos et
     /// avance d'un pas par image. Les trois minutes de précalcul ne servaient qu'aux rejeux.
-    pub fn direct(background: &'a Background) -> Result<Self, String> {
-        Ok(Self { replays: None, mode: 1, live: Some(Live::new(background)?), gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false })
+    pub fn direct(background: &'a Background, initial: [f32; NX]) -> Result<Self, String> {
+        Ok(Self { replays: None, mode: 1, live: Some(Live::new(background, initial)?), gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false })
     }
     pub fn label(&self) -> &'static str {
         if self.live.is_some() {

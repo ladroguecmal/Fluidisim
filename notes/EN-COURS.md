@@ -73,13 +73,23 @@ annoncée quand un calcul est nécessaire.
   rejeux ; message et progression du précalcul ; essai du lancement depuis la racine.
 - [x] **P3** — verdict R10 : les deux retours de l'utilisateur, leurs causes mesurées, la suite
   en file. *(Découpage déclaré en cours de session : le verdict est arrivé pendant S277.)*
-- [ ] **P4** — onde injectée : `Live` accepte une surface initiale, `--onde` la pose (bosse
+- [x] **P4** — onde injectée : `Live` accepte une surface initiale, `--onde` la pose (bosse
   gaussienne au centre du domaine) ; elle naît, se propage, renaît sur **Début**. Relevé de
   l'amplitude et de la position du maximum sur 30 s.
 - [ ] **P5** — l'interaction, mesurée : la même onde sur la houle et sur une mer plate ; la
   différence est l'effet de B sur l'onde, et c'est exactement ce que l'utilisateur veut voir.
 - [ ] **P6** — ce qu'il regarde : pose qui montre l'onde traverser la houle, capture, commande.
 - [ ] **P7** — rituel §6.
+
+**P4 relevé** (`--delta --onde-mesure`, bosse 0,6 m, σ 8 m) : la bosse se sépare en deux fronts
+qui avancent de 13 m à 2 s jusqu'à ≈ 105 m à 24 s, soit **4,2 m/s** de vitesse apparente ;
+l'amplitude tombe de 0,59 m à ≈ 0,20 m en 2 s (séparation) puis décroît lentement par dispersion,
+0,12–0,16 m après 20 s. **Les deux fronts ne sont pas symétriques** alors que l'onde initiale
+l'est : à 8 s le maximum gauche est à −41 m et le droit à +23 m. La houle se propage vers +x et
+c'est la seule chose qui brise la symétrie — mais le relevé suit le maximum de |η'|, qui saute
+d'une oscillation à l'autre : **P5 doit le prouver par différence, pas par ce relevé**. Au-delà de
+24 s le maximum tombe dans l'éponge (|x| > 96 m) et ne désigne plus le front : restreindre P5 au
+domaine utile.
 
 *Découpage déclaré le 2026-09-18 à 21:41 : l'utilisateur a demandé l'onde injectée maintenant.
 Le rituel, déclaré P3 puis P4, devient P7 — il reste la dernière étape.*

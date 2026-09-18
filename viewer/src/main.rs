@@ -1957,7 +1957,7 @@ fn revue_delta(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// S276 — critère « δ en direct » de COUT-DIRECT-S276 : 200 images en direct depuis la naissance,
 /// `η'` comparé au bit au rejeu de 16 ms aux mêmes instants.
 fn delta_direct_verify(swell: &water_core::background::Background, replay: &delta::Replay) -> Result<(), String> {
-    let mut live = delta::Live::new(swell)?;
+    let mut live = delta::Live::new(swell, delta::initial_wave(0.))?;
     let mut heights = [0f32; delta::NX];
     let (mut worst, mut iterations, mut cost) = (0f32, 0u32, Vec::new());
     for n in 0..=200usize {
@@ -1975,10 +1975,63 @@ fn delta_direct_verify(swell: &water_core::background::Background, replay: &delt
     Ok(())
 }
 
+/// S277 — `--onde` / `--onde=<m>` : onde injectée dans le profil initial de δ. Elle n'a de sens
+/// qu'en direct — un rejeu est précalculé sans elle — donc elle implique `--delta-direct`.
+fn onde_amplitude(args: &[String]) -> Result<Option<f32>, String> {
+    let demandee = args.iter().any(|a| a == "--onde" || a == "--onde-mesure");
+    let valeur = args.iter().find_map(|a| a.strip_prefix("--onde="));
+    if !demandee && valeur.is_none() {
+        return Ok(None);
+    }
+    let a: f32 = match valeur {
+        Some(v) => v.parse().map_err(|_| "amplitude d'onde : nombre attendu".to_string())?,
+        None => 0.6,
+    };
+    // Garde de géométrie : la surface reste loin du sommet du domaine et du fond (SURFACE-MOBILE-S237).
+    if !(a.is_finite() && a > 0. && a <= 3.) {
+        return Err("amplitude d'onde : 0 < a ≤ 3 m".into());
+    }
+    Ok(Some(a))
+}
+
+/// S277 — relevé de l'onde injectée, sans GPU : amplitude et position des deux fronts au cours des
+/// 30 s du domaine. La bosse naît au centre à vitesse nulle et se sépare en deux ; la position du
+/// maximum de chaque côté donne la vitesse apparente du front, à comparer à `√(gλ/2π)`.
+fn onde_mesure(background: &water_core::background::Background, amplitude: f32) -> Result<(), String> {
+    let mut live = delta::Live::new(background, delta::initial_wave(amplitude))?;
+    let mut eta = [0f32; delta::NX];
+    let steps = (delta::DURATION_US / delta::FRAME_US) as usize;
+    println!("ONDE_S277 amplitude_m={amplitude} sigma_m={} domaine_m={} eponge_m={}",
+        delta::SIGMA, delta::NX as f32 * delta::DX, delta::SPONGE.width_m);
+    for n in 0..=steps {
+        live.advance(n as f64 * delta::FRAME_US as f64 * 1e-6, &mut eta)?;
+        if n % 125 != 0 {
+            continue;
+        }
+        let x = |i: usize| delta::X0 + (i as f32 + 0.5) * delta::DX;
+        let front = |gauche: bool| {
+            (0..delta::NX)
+                .filter(|i| if gauche { x(*i) < 0. } else { x(*i) > 0. })
+                .max_by(|a, b| eta[*a].abs().total_cmp(&eta[*b].abs()))
+                .map_or((0., 0.), |i| (x(i), eta[i]))
+        };
+        let (xg, hg) = front(true);
+        let (xd, hd) = front(false);
+        println!("ONDE_S277 t_s={:.1} gauche x_m={xg:.0} eta_m={hg:.4} droite x_m={xd:.0} eta_m={hd:.4}",
+            n as f64 * delta::FRAME_US as f64 * 1e-6);
+    }
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     if args.iter().any(|a| a == "--delta-mesure") {
         return delta_replays(&delta::swell_background()?).map(|_| ());
+    }
+    // S277 — relevé de l'onde injectée, sans GPU.
+    if args.iter().any(|a| a == "--onde-mesure") {
+        let amplitude = onde_amplitude(&args)?.expect("--onde-mesure porte son amplitude");
+        return onde_mesure(&delta::swell_background()?, amplitude);
     }
     // S276 — carte du coût d'un pas en direct (COUT-DIRECT-S276), un fil.
     if args.iter().any(|a| a == "--delta-cout") {
@@ -2033,7 +2086,10 @@ fn run() -> Result<(), String> {
     let delta_scene = args.iter().any(|a| a == "--delta");
     let swell = if delta_scene { Some(delta::swell_background()?) } else { None };
     // S276 : `--delta-direct` — δ avance d'un pas par image au lieu d'être rejoué.
-    let delta_direct = delta_scene && args.iter().any(|a| a == "--delta-direct");
+    let onde = onde_amplitude(&args)?;
+    // Amplitude nulle : profil plat à `REST`, c'est-à-dire la naissance au repos de S276.
+    let surface_initiale = delta::initial_wave(onde.unwrap_or(0.));
+    let delta_direct = delta_scene && (onde.is_some() || args.iter().any(|a| a == "--delta-direct"));
     // S277 : en direct, aucun rejeu n'est lu — seule la vérification les compare. Les précalculer
     // coûtait trois minutes muettes avant la première image, pour rien.
     let direct_verify = args.iter().any(|a| a == "--delta-direct-verify");
@@ -2044,7 +2100,7 @@ fn run() -> Result<(), String> {
     };
     let mut frame = FrameData::new(swell.as_ref().unwrap_or(&scene.background), table, input, timeline, recipe, impacts);
     if delta_direct && replays.is_none() {
-        frame.delta = Some(delta::Layer::direct(swell.as_ref().unwrap())?);
+        frame.delta = Some(delta::Layer::direct(swell.as_ref().unwrap(), surface_initiale)?);
     }
     if let Some((reference, image)) = &replays {
         frame.delta = Some(delta::Layer::new(reference, image));
@@ -2053,7 +2109,7 @@ fn run() -> Result<(), String> {
         }
         if delta_direct {
             let layer = frame.delta.as_mut().unwrap();
-            layer.live = Some(delta::Live::new(swell.as_ref().unwrap())?);
+            layer.live = Some(delta::Live::new(swell.as_ref().unwrap(), surface_initiale)?);
             layer.mode = 1;
         }
         if args.iter().any(|a| a == "--delta-verify") {
