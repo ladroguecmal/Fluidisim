@@ -396,6 +396,14 @@ impl ApplicationHandler for App<'_> {
                                         }
                                     }
                                 }
+                                KeyCode::KeyM => {
+                                    if let Some(layer) = self.frame.delta.as_mut() {
+                                        match layer.request_shrink() {
+                                            Ok(()) => println!("DELTA préparation progressive demandée (S284)"),
+                                            Err(err) => eprintln!("{err}"),
+                                        }
+                                    }
+                                }
                                 KeyCode::Home => {
                                     self.frame.camera = Camera::default();
                                     self.seconds = 3.;
@@ -2209,6 +2217,9 @@ fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     if args.iter().any(|a| a == "--delta-retrecissement") {
         return delta::measure_shrink();
+    }
+    if args.iter().any(|a| a == "--delta-progressif") {
+        return delta::measure_progressive_shrink();
     }
     if args.iter().any(|a| a == "--delta-mesure") {
         return delta_replays(&delta::swell_background()?).map(|_| ());

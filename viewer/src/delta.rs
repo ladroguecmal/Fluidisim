@@ -408,6 +408,8 @@ pub struct Live<'a> {
     /// S283 : destination préallouée, puis ancien domaine gardé sans désallocation par image.
     smaller: Volume,
     first_column: usize,
+    preparing: bool,
+    pub preparation_change_m: f32,
     /// S277 : surface de naissance, reposée à chaque renaissance. Plate, ou l'onde injectée.
     initial: [f32; NX],
     u: Vec<BackgroundSample>,
@@ -439,6 +441,8 @@ impl<'a> Live<'a> {
             volume,
             smaller,
             first_column: 0,
+            preparing: false,
+            preparation_change_m: 0.,
             initial,
             u: vec![BackgroundSample::default(); nu],
             w: vec![BackgroundSample::default(); nw],
@@ -464,6 +468,7 @@ impl<'a> Live<'a> {
     fn commit_shrink(&mut self) {
         core::mem::swap(&mut self.volume, &mut self.smaller);
         self.first_column = NX / 4;
+        self.preparing = false;
     }
     fn rebirth(&mut self, at_us: u64) -> Result<(), String> {
         let nx = self.volume.domain().nx;
@@ -484,6 +489,7 @@ impl<'a> Live<'a> {
         self.sampling_ms = 0.;
         self.step_ms = 0.;
         self.iterations = 0;
+        self.preparation_change_m = 0.;
         let mut stepped = false;
         let target = START_US + (seconds.max(0.) * 1e6).round() as u64;
         if target < self.now_us() || target > self.now_us() + FRAME_US {
@@ -513,6 +519,20 @@ impl<'a> Live<'a> {
                 .step_perturbation_mobile(time, FRAME_US, 6000, 1_000_000_000, &bg, SPONGE,
                     &host_impl::SequentialJobs, &Frozen)
                 .map_err(|e| format!("pas δ en direct : {e:?}"))?;
+            if self.preparing {
+                // Moitié de la tolérance S201 réservée à la préparation, moitié à sa marge
+                // d'interpolation. Paramétrage de banc, pas réception visuelle générale.
+                let mut removable = 0f32;
+                for (i, h) in self.volume.surface().iter().enumerate() {
+                    let x = X0 + (i as f32 + 0.5)*DX;
+                    let s = ((64.-x.abs())/SPONGE.width_m).clamp(0.,1.);
+                    let keep = s*s*(3.-2.*s);
+                    removable = removable.max((h-REST).abs()*(1.-keep));
+                }
+                let decay = if removable > 0. { 1.-(0.0015/removable).min(1.) } else { 1. };
+                self.preparation_change_m = self.volume.prepare_shrink(NX/4,NX/2,SPONGE.width_m,decay)
+                    .map_err(|e| format!("préparation δ : {e:?}"))?;
+            }
             self.sampling_ms = (b - a).as_secs_f64() * 1e3;
             self.step_ms = b.elapsed().as_secs_f64() * 1e3;
             self.iterations = r.report.map_or(0, |r| r.iterations);
@@ -607,7 +627,18 @@ fn scheduler() -> Result<Scheduler, String> {
 }
 
 impl<'a> Layer<'a> {
+    pub fn request_shrink(&mut self) -> Result<(), String> {
+        let live = self.live.as_mut().ok_or("rétrécissement : mode direct requis")?;
+        if live.first_column != 0 { return Err("domaine déjà étroit".into()); }
+        live.preparing = true;
+        Ok(())
+    }
     pub fn shrink(&mut self) -> Result<(), String> {
+        if self.shrink_if_safe()? { Ok(()) }
+        else { Err("rétrécissement refusé : borne de hauteur > 3 mm".into()) }
+    }
+
+    fn shrink_if_safe(&mut self) -> Result<bool, String> {
         if self.gpu[0][3] < 2. || self.gpu[0][2] <= 0. {
             return Err("rétrécissement : publier un premier profil avant la demande".into());
         }
@@ -617,10 +648,10 @@ impl<'a> Layer<'a> {
         let bound = height_change_bound(&old, &candidate);
         // Tolérance de hauteur S201 : elle ne reçoit ni les pentes ni un verdict perceptif.
         if bound > 0.003 {
-            return Err(format!("rétrécissement refusé : saut de hauteur borné à {:.2} mm (> 3 mm)", bound * 1000.));
+            return Ok(false);
         }
         self.commit_shrink(candidate);
-        Ok(())
+        Ok(true)
     }
 
     fn stage_shrink(&mut self) -> Result<[[f32; 4]; GPU_ROWS], String> {
@@ -763,6 +794,7 @@ impl<'a> Layer<'a> {
             self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, 0.];
             return;
         }
+        let started = std::time::Instant::now();
         let mut measured_cost = None;
         self.active = match self.live.as_mut() {
             // En direct, δ avance même masqué : l'afficher ne change pas son histoire.
@@ -783,10 +815,6 @@ impl<'a> Layer<'a> {
                 _ => false,
             },
         };
-        // ADR-012 §3 : le coût annoncé au pas suivant sort de ce qu'on vient de payer.
-        if let Some(paye) = measured_cost {
-            self.record_cost(paye);
-        }
         self.gpu[0] = [x0 - eye[0], -eye[1], DX, nx as f32];
         self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, if self.active { 1. } else { 0. }];
         for j in 0..nx {
@@ -794,6 +822,16 @@ impl<'a> Layer<'a> {
             let (l, r) = (first + j.saturating_sub(1), first + (j + 1).min(nx - 1));
             let slope = (self.heights[r] - self.heights[l]) / ((r - l) as f32 * DX);
             self.gpu[2 + j] = [self.heights[i], slope, 0., 0.];
+        }
+        // Une tentative tous les 16 vrais pas (256 ms) : le garde coûte quelques ms (S283).
+        // La pause n'exécute ni amortissement ni tentative supplémentaire.
+        if measured_cost.is_some() && self.live.as_ref().is_some_and(|v| v.preparing && v.steps % 16 == 0) {
+            let _ = self.shrink_if_safe();
+        }
+        // S284 : préparation, publication et tentatives refusées comprises ; un changement
+        // d'emprise invalide la mesure du domaine large, sans l'attribuer au domaine étroit.
+        if measured_cost.is_some() && self.window() == (first,nx) {
+            self.record_cost((started.elapsed().as_secs_f64()*1e3) as f32);
         }
     }
     pub fn is_active(&self) -> bool {
@@ -871,6 +909,34 @@ fn height_change_bound(a: &[[f32; 4]; GPU_ROWS], b: &[[f32; 4]; GPU_ROWS]) -> f6
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn progressive_request_runs_only_on_real_steps_and_reaches_guard_s284() {
+        let b = swell_background().unwrap();
+        let mut layer = Layer::direct(&b, initial_wave(0.6)).unwrap();
+        layer.set_budget_ms(1000.).unwrap();
+        for n in 0..=64 { layer.update(n as f64*0.016,[0.;3],None); }
+        assert!(layer.shrink().is_err(), "la demande tardive ne passe pas directement");
+        layer.request_shrink().unwrap();
+        let initial = layer.gpu;
+        let count = layer.samples;
+        for _ in 0..32 { layer.update(64.*0.016,[0.;3],None); }
+        assert_eq!(layer.gpu, initial);
+        assert_eq!(layer.samples, count);
+        assert!(layer.live.as_ref().unwrap().preparing);
+        let mut switched = false;
+        for n in 65..=192 {
+            layer.update(n as f64*0.016,[0.;3],None);
+            assert!(layer.is_active());
+            let v = layer.live.as_ref().unwrap();
+            // À hauteur 96 m, un ulp f32 vaut 2^-17 m : la correction est arrondie au stockage.
+            assert!(v.preparation_change_m <= 0.0015 + 2f32.powi(-17));
+            switched |= v.first_column != 0;
+        }
+        assert!(switched, "le garde doit finir par autoriser cette fixture");
+        assert!(!layer.live.as_ref().unwrap().preparing);
+        assert_eq!(layer.window(),(NX/4,NX/2));
+    }
 
     #[test]
     fn damaging_shrink_is_refused_without_publishing_s283() {
@@ -1098,5 +1164,44 @@ pub fn measure_shrink() -> Result<(), String> {
     let (w, n) = (quantiles(&mut wide_ms), quantiles(&mut narrow_ms));
     println!("RETRECISSEMENT_S283 pas=128 large_mediane_ms={:.4} large_p99_ms={:.4} etroit_mediane_ms={:.4} etroit_p99_ms={:.4} gain={:.3} derive_centre_max_m={center_drift:.6} saut_sous_3mm={}",
         w.0, w.1, n.0, n.1, w.0/n.0, transition_max <= 0.003);
+    Ok(())
+}
+
+pub fn measure_progressive_shrink() -> Result<(), String> {
+    let background = swell_background()?;
+    let mut layer = Layer::direct(&background, initial_wave(0.6))?;
+    let mut witness = Layer::direct(&background, initial_wave(0.6))?;
+    layer.set_budget_ms(1000.)?;
+    witness.set_budget_ms(1000.)?;
+    let mut changed_at = None;
+    let mut nodal = 0f32;
+    let mut central = 0f64;
+    let mut costs = Vec::new();
+    let mut allocations = 0;
+    for n in 0..=320 {
+        let t = n as f64 * 0.016;
+        witness.update(t, [0.;3], None);
+        let start = std::time::Instant::now();
+        let before_alloc = crate::counting::mark();
+        layer.update(t, [0.;3], None);
+        allocations += crate::counting::mark().since(before_alloc).allocs;
+        let cost = start.elapsed().as_secs_f64()*1e3;
+        if !(layer.is_active() && witness.is_active()) { return Err(format!("refus au pas {n}")); }
+        if n == 64 { layer.request_shrink()?; }
+        if n > 64 {
+            costs.push(cost);
+            let live = layer.live.as_ref().unwrap();
+            nodal = nodal.max(live.preparation_change_m);
+            if changed_at.is_none() && live.first_column != 0 { changed_at = Some(t); }
+            for i in 56..72 {
+                let q = [X0+(i as f32+0.5)*DX,0.];
+                central = central.max((layer.eval(q)[0]-witness.eval(q)[0]).abs());
+            }
+        }
+    }
+    costs.sort_by(f64::total_cmp);
+    if allocations != 0 { return Err(format!("préparation : {allocations} allocations")); }
+    println!("PROGRESSIF_S284 demande_s=1.024 reduction_s={changed_at:?} changement_nodal_max_m={nodal:.6} derive_centre_max_m={central:.6} allocations={allocations} update_mediane_ms={:.4} update_p99_ms={:.4} update_max_ms={:.4}",
+        costs[costs.len()/2],costs[costs.len()*99/100],costs[costs.len()-1]);
     Ok(())
 }
