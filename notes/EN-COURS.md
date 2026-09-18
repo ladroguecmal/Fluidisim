@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S271 — en cours
+Session : S271 — terminée
 Agent : Codex, GPT-6 ; fichiers, git, cargo et Python.
 Entrée : « continue et mes a jour la to do list », master propre 9155256, copie unique.
 Objectif : éprouver la houle progressive traversante et actualiser LISTE-PROJET-FINI.
@@ -69,7 +69,7 @@ Objectif : éprouver la houle progressive traversante et actualiser LISTE-PROJET
 - [x] **P2** — choisir l'oracle indépendant et déclarer les critères ; actualiser la liste sur preuves.
 - [x] **P3** — construire le cas progressif et ses contre-épreuves.
 - [x] **P4** — réception, limites, mise à jour finale de la liste et décompte.
-- [>] **P5** — rituel §6, file entière, journal, index et jeton.
+- [x] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
 

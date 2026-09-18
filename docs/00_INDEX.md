@@ -65,6 +65,7 @@
 - [Relaxation de hauteur dans le pas mobile couplé](validation/RELAXATION-SURFACE-S268.md).
 - [Absorption du paquet : mesure différentielle et limites](validation/REFLEXION-PAQUET-S269.md).
 - [Fond uniforme traversant : flux de bande et réception](validation/FOND-TRAVERSANT-S270.md).
+- [Houle progressive : oracle initial et limites](validation/HOULE-PROGRESSIVE-S271.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

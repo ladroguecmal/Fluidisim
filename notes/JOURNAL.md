@@ -13717,3 +13717,37 @@ inchangés, I-05 transaction reçue sans promesse murale, I-06 mesuré, I-08 ari
 f32 et durées entières, I-14 identités exactes et fixtures explicites. δ général, V,
 B2, bathymétrie et seconde cible gardent leurs déclencheurs. Jeton libre, aucune
 copie isolée à fermer.
+
+
+## S271 — Démarrage de houle progressive et liste utilisateur actualisée
+
+**2026-09-18, Codex GPT-6.** Entrée « continue et mes a jour la to do list », master
+propre 9155256, copie unique. Plan 6c83b1e, contrat/liste 6c0eb0d, tests cdf1487.
+La vérification de fond variable J2 reste nécessaire devant l'affinage différable
+des reflets acceptés ; le courant constant S270 ne suffit pas à la recevoir.
+
+**Preuve bornée :** [HOULE-PROGRESSIVE-S271](../docs/validation/HOULE-PROGRESSIVE-S271.md).
+Fond progressif analytique de profondeur finie, source cinématique initiale
+W(ζ)−W(0)−U(ζ)ζ_x contrôlée indépendamment de la quadrature. Erreur 3,048 / 1,237 /
+0,585 %, décroissante ; témoin fermé 169–338 %. Le pas couplé réel avance et
+l'écart au taux initial est divisé par deux en divisant dt par deux. Trois tests
+ciblés reçus, aucun échec ; bibliothèque de production inchangée, suite S270 non
+rejouée. Aucune évolution temporelle entière ni coût reçus. Aucun nouvel ADR.
+**Maillons 1** : instruments et preuve locale, aucune capacité d'exécution ajoutée.
+
+**Liste demandée :** états actualisés S262–S271 : requête CWM/A288 déjà close,
+flux de bande, relaxation de hauteur, paquet absorbé, démarrage progressif,
+filtre spectral B/sillage, R7 accepté, coût GPU/CPU récent et transaction. Tous
+ces points restent partiels sur leur périmètre final. Décompte recalculé depuis
+les entrées : 119 points = 3 validés + 48 partiels + 68 absents ; ne mesure pas
+le pourcentage d'avancement. Les changements conservent l'ambition complète.
+
+**Suite S272 :** référence temporelle indépendante du résidu progressif d'ordre
+deux, puis comparaison sur durée utile avec contrôle des bords. Le fond linéaire
+imposé ne constitue pas une réception de propagation du total ; η'=0 n'est pas
+l'oracle. Cette étape garde le critère d'arrêt avant toute campagne.
+
+**Rituel :** file active entière relue ; J2, A92/A50, index, liste mis à jour.
+I-04/I-05/I-06/I-08 inchangés dans le produit, I-14 oracle dérivé et fixtures
+explicites. δ général, V, B2, bathymétrie et seconde cible restent dans la file.
+Jeton libre ; aucune copie isolée à fermer, aucun arbitrage utilisateur requis.

@@ -250,8 +250,10 @@ différence à deux domaines longs ; mesure brute refusée, fenêtres 14–36 s 
 moyen et les frontières du total. **S270 : bande du fond ouverte aux frontières**
 (ADR-165), courant et élévation uniformes reçus aux deux mailles ; le défaut de
 hauteur artificielle est corrigé, 638 expirations/reprises sans allocation
-([preuve](validation/FOND-TRAVERSANT-S270.md)). La houle progressive traversante
-reste à recevoir. La fermeture extérieure de la perturbation reste réfléchissante ;
+([preuve](validation/FOND-TRAVERSANT-S270.md)). **S271 : démarrage progressif contrôlé**, erreur cinématique
+initiale 0,58 % à dx=0,03125, décroissante, pas réel cohérent à petit dt
+([preuve](validation/HOULE-PROGRESSIVE-S271.md)). La houle progressive sur durée
+utile reste à recevoir contre une référence temporelle indépendante. La fermeture extérieure de la perturbation reste réfléchissante ;
 ces reçus bornés ne valent pas frontière transparente universelle.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;

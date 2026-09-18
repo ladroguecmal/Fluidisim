@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-18 18:38 +02:00
+JETON            : libre
+Battement        : 2026-09-18 18:39 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S271
-Dernière session : S270 — bande du fond aux frontières reçue sur courant uniforme (ADR-165), 478 tests
-Session suivante : S271 — houle progressive traversante, référence indépendante et perturbations induites
-Maillons        : 0
+Session en cours : aucune
+Dernière session : S271 — démarrage progressif contrôlé, liste du projet actualisée ; durée utile non reçue
+Session suivante : S272 — référence temporelle indépendante et résidu progressif sur durée utile
+Maillons        : 1
 
 ```
 

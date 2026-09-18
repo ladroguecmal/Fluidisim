@@ -3713,3 +3713,13 @@ Déclencheur S271 : onde progressive de profondeur finie, référence indépenda
 contrôle des perturbations induites et des fenêtres avant verdict. Spectres et
 horizons hors S269 restent à recevoir avant extrapolation, sans campagne générique.
 [Preuve](../validation/FOND-TRAVERSANT-S270.md).
+
+
+**Suivi A92/A50 — S271, 2026-09-18 (sévérités conservées).** La houle linéaire
+progressive induit un résidu cinématique non nul : le comparer à zéro serait
+un faux oracle. Identité locale W(ζ)−W(0)−U(ζ)ζ_x reçue au démarrage, erreur
+3,05 / 1,24 / 0,58 % aux trois mailles, contre témoin à flux de bord fermé.
+Le pas réel tend vers ce transport à petit dt. Pas d'ordre deux spatial ni de
+réception après propagation revendiqués. Déclencheur S272 : oracle temporel
+indépendant du résidu d'ordre deux, puis fenêtre sans retour contaminant.
+[Preuve](../validation/HOULE-PROGRESSIVE-S271.md).
