@@ -937,3 +937,93 @@ fn boundary_surface_outside_domain_refuses_s270() {
     assert_eq!(v.step_perturbation_mobile(bg.time,1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock),Err(Error::Domain));
     assert_eq!(v.eta,before);assert!(!v.surface_coupled);
 }
+
+
+/// Fond progressif de profondeur finie ; fixture, pas fournisseur de production.
+fn progressive_sample_s271(x:f64,z:f64,t:f64)->BackgroundSample {
+    let (a,k,h,g,rho)=(0.125,std::f64::consts::PI/2.,1.,9.81,1025.);
+    let omega=(g*k*(k*h).tanh()).sqrt();let q=a*g*k/omega;
+    let (sn,cs)=(k*x-omega*t+0.37).sin_cos();
+    let c=(k*(z+h)).cosh()/(k*h).cosh();let sh=(k*(z+h)).sinh()/(k*h).cosh();
+    BackgroundSample{eta:(a*cs) as f32,grad_eta:[(-a*k*sn) as f32,0.,0.],
+        u:[(q*c*cs) as f32,0.,(q*sh*sn) as f32],
+        du_dt:[(omega*q*c*sn) as f32,0.,(-omega*q*sh*cs) as f32],
+        grad_u:[[(-k*q*c*sn) as f32,0.,(k*q*sh*cs) as f32],[0.;3],
+            [(k*q*sh*cs) as f32,0.,(k*q*c*sn) as f32]],
+        p_dyn:(rho*g*a*c*cs) as f32,
+        grad_p_dyn:[(-rho*g*a*k*c*sn) as f32,0.,(rho*g*a*k*sh*cs) as f32],
+        ..Default::default()}
+}
+fn progressive_case_s271(dx:f32)->(Volume,Vec<BackgroundSample>,Vec<BackgroundSample>) {
+    let nx=(4./dx) as usize;let nz=(1.5/dx) as usize;
+    let mut v=Volume::configure(&mut HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs},
+        Domain{nx,nz,dx},1025.,9.81,&vec![0.;nx]).unwrap();
+    v.set_free_surface(&vec![1.;nx],1.).unwrap();let (mut u,mut w)=fields(&v);
+    for k in 0..nz {for i in 0..=nx {u[v.fu(i,k)]=progressive_sample_s271(i as f64*dx as f64,(k as f64+0.5)*dx as f64-1.,0.);}}
+    for k in 0..=nz {for i in 0..nx {w[v.fw(i,k)]=progressive_sample_s271((i as f64+0.5)*dx as f64,k as f64*dx as f64-1.,0.);}}
+    (v,u,w)
+}
+fn progressive_rate_s271(x:f64)->f64 {
+    // Oracle local W(zeta)-W(0)-U(zeta)*zeta_x, sans quadrature de bande.
+    let (a,k,h,g)=(0.125,std::f64::consts::PI/2.,1.,9.81);
+    let omega=(g*k*(k*h).tanh()).sqrt();let q=a*g*k/omega;
+    let (sn,cs)=(k*x+0.37).sin_cos();let zeta=a*cs;
+    q*sn*((k*(zeta+h)).sinh()-(k*h).sinh())/(k*h).cosh()
+        +q*(k*(zeta+h)).cosh()/(k*h).cosh()*cs*a*k*sn
+}
+#[test]
+fn progressive_background_identities_s271() {
+    let k=std::f64::consts::PI/2.;let omega=(9.81*k*k.tanh()).sqrt();
+    for x in [0.,0.31,1.7,4.] {for t in [0.,0.43] {
+        for z in [-1.,-0.4,0.,0.125] {
+            let s=progressive_sample_s271(x,z,t);
+            assert_eq!(s.grad_u[0][0]+s.grad_u[2][2],0.);
+            for axis in [0,2] {assert!((s.du_dt[axis]+s.grad_p_dyn[axis]/1025.).abs()<3e-7);}
+        }
+        assert_eq!(progressive_sample_s271(x,-1.,t).u[2],0.);
+        let exact=0.125*omega*(k*x-omega*t+0.37).sin();
+        assert!((progressive_sample_s271(x,0.,t).u[2] as f64-exact).abs()<3e-8);
+    }}
+}
+#[test]
+fn progressive_initial_kinematics_converges_s271() {
+    let mut previous=f64::INFINITY;
+    for dx in [0.125f32,0.0625,0.03125] {
+        let (mut v,u,w)=progressive_case_s271(dx);let bg=input(&v,&u,&w);
+        v.prepare_surface_background(&bg,&mut Control::unlimited()).unwrap();
+        let ql=v.boundary_background_band(0,&bg,&mut Control::unlimited()).unwrap();
+        let qr=v.boundary_background_band(v.domain.nx,&bg,&mut Control::unlimited()).unwrap();
+        let dt=0.001f32;
+        v.transport_coupled(dt/dx,&bg,&mut Control::unlimited()).unwrap();
+        let rates:Vec<f64>=v.eta.iter().zip(&v.eta_roundoff).map(|(h,r)|(*h as f64-1.-*r as f64)/dt as f64).collect();
+        let exact:Vec<f64>=(0..v.domain.nx).map(|i|progressive_rate_s271((i as f64+0.5)*dx as f64)).collect();
+        let norm:f64=exact.iter().map(|x|x*x).sum();
+        let error=(rates.iter().zip(&exact).map(|(a,b)|(a-b).powi(2)).sum::<f64>()/norm).sqrt();
+        let mut closed=rates.clone();closed[0]-=ql as f64/dx as f64;
+        let end=closed.len()-1;closed[end]+=qr as f64/dx as f64;
+        let witness=(closed.iter().zip(&exact).map(|(a,b)|(a-b).powi(2)).sum::<f64>()/norm).sqrt();
+        let balance=rates.iter().sum::<f64>()*dx as f64;
+        assert!((balance+(qr-ql) as f64).abs()<2e-7);
+        println!("S271 dx={dx} erreur={error:e} temoin_ferme={witness:e} bilan={balance:e}");
+        assert!(error<previous);previous=error;assert!(witness>0.02);
+    }
+    assert!(previous<0.02,"oracle cinématique fin : {previous}");
+}
+#[test]
+fn progressive_real_step_tends_to_initial_transport_s271() {
+    let dx=0.125;let (mut transport,u,w)=progressive_case_s271(dx);
+    let bg=input(&transport,&u,&w);
+    transport.prepare_surface_background(&bg,&mut Control::unlimited()).unwrap();
+    transport.transport_coupled(0.001/dx,&bg,&mut Control::unlimited()).unwrap();
+    let rate:Vec<f64>=transport.eta.iter().zip(&transport.eta_roundoff).map(|(h,r)|(*h as f64-1.-*r as f64)/0.001).collect();
+    let mut previous=f64::INFINITY;
+    for duration in [1000u64,500] {
+        let (mut v,u,w)=progressive_case_s271(dx);let bg=input(&v,&u,&w);
+        let result=v.step_perturbation_mobile(bg.time,duration,6000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock).unwrap();
+        assert_eq!(result.advanced_us,duration);
+        let dt=duration as f64*1e-6;
+        let error=v.eta.iter().zip(&v.eta_roundoff).zip(&rate).map(|((h,r),a)|((*h as f64-1.-*r as f64)/dt-a).powi(2)).sum::<f64>().sqrt();
+        println!("S271 pas_reel dt_us={duration} ecart_taux={error:e}");
+        assert!(error<previous);previous=error;
+    }
+}

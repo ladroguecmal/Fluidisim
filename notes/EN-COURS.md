@@ -67,8 +67,8 @@ Objectif : éprouver la houle progressive traversante et actualiser LISTE-PROJET
 
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — choisir l'oracle indépendant et déclarer les critères ; actualiser la liste sur preuves.
-- [>] **P3** — construire le cas progressif et ses contre-épreuves.
-- [ ] **P4** — réception, limites, mise à jour finale de la liste et décompte.
+- [x] **P3** — construire le cas progressif et ses contre-épreuves.
+- [>] **P4** — réception, limites, mise à jour finale de la liste et décompte.
 - [ ] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
@@ -83,3 +83,7 @@ ainsi que l'ancienne absence A288 déjà close S262. Ne pas cocher le périmètr
 P2 : liste actualisée sur S262–S270, périmètres finaux toujours partiels.
 Oracle initial W(ζ)-W(0)-U(ζ)ζ_x déclaré avant campagne ; ne pas viser η'=0
 pour une houle linéaire. Réception temporelle entière explicitement non acquise.
+
+P3 : trois tests S271 passent. Erreurs spatiales 3,0481 / 1,2370 / 0,5847 %,
+témoin fermé 168,9 / 238,9 / 337,7 %. Pas réel : erreur de taux 0,00120251
+puis 0,000601253, divisée par deux. Décompte liste vérifié : 119=3+48+68.
