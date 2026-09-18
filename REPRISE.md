@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 00:28 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 00:50 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : —
+Session en cours : S283
 Dernière session : S282 — coût des nouveaux pas réels seulement ; correction intégrée et régressions reçues
 Session suivante : **porte A : forme/redimensionnement des domaines et dégradation de rang 1**, coût A276 avant plusieurs domaines simultanés. V1 proposée : FEUILLE-DE-ROUTE §3 bis, périmètre encore non tranché. Verdict visuel de l'onde S277 toujours attendu.
 Maillons        : 0 — correction d'intégrité reproduite puis testée dans le chemin image

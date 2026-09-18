@@ -58,28 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S282 — terminée
+Session : S283 — en cours
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
-Entrée : reprendre et construire vers une V1 proche des intentions initiales, réaliste et performante.
-Objectif : faire avancer une capacité de la porte A après lecture des preuves ; conserver l'ambition entière et le statut proposé du périmètre V1 tant qu'il n'est pas explicitement fixé.
+Entrée : continuer la porte A, après correction de mesure S282.
+Objectif : premier redimensionnement spatial consommable de δ, avec transfert contrôlé de son
+état et réception de ses limites ; ne pas confondre un changement de masque avec un gain de calcul.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — lecture à froid ciblée ; choisir et construire le prochain incrément consommé de la porte A, avec vérification de son comportement et de ses limites. Découper avant quinze minutes si nécessaire.
-- [x] **P3** — rituel §6 : preuves, journal, file et feuille de route actualisées, jeton libéré.
+- [>] **P2** — contrats et code du domaine : choisir un redimensionnement borné, déclarer ses
+  critères, construire et tester le transfert sans allocation ; découper avant quinze minutes.
+- [ ] **P3** — consommation réelle par l'hôte ou le pas couplé, coût/continuité et refus ;
+  suites de validation proportionnées, limites explicitement conservées.
+- [ ] **P4** — rituel §6 : journal, file, feuille de route, invariants et jeton libre.
 
 ### Notes de reprise
 
-Une seule copie, master 22605fd propre ; branche historique archivée 5d9bf2f. Cargo disponible.
-
-P2 précisé après lecture : intégrité de la mesure consommée par Layer::update. Actuellement
-chaque image financée ajoute le dernier coût, même à la naissance, en pause, après saut temporel
-ou erreur. Réception : un échantillon par pas réellement réussi ; aucun pour naissance/pause/
-renaissance/échec ; le profil de surface reste disponible sans pas. Tests de régression d'abord
-sur le code initial, puis correction et suites viewer/cœur. La forme des domaines reste le lot
-suivant : corriger ce défaut local avant d'étendre le nombre de consommateurs.
-
-Preuves P2 : les deux régressions échouent avant correction (1 mesure au lieu de 0 à la
-naissance ; 2 au lieu de 1 après refus), passent après. Viewer release : 30 réussis, 1 ignoré.
-Workspace release : 505 réussis (393 + 14 + 2 + 1 + 95), 18 ignorés, aucun échec.
+master dcaa97f propre ; une seule copie. Branche historique archivée vérifiée S282.
+Le périmètre complet reste obligatoire ; V1 proposée S281 non redéfinie ici.
