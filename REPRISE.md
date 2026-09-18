@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-18 22:08 +02:00
+JETON            : libre
+Battement        : 2026-09-18 22:15 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : S277 — correctif : `--delta` depuis la racine ne s'ouvrait pas
-Dernière session : S276 — δ en direct dans viewer/ à 40 images/s, identique au bit au rejeu (ADR-169)
-Session suivante : S277 — R10 si reçu ; δ sous budget déclaré : cadence découplée (I-05), puis décision δ GPU
+Session en cours : —
+Dernière session : S277 — lancement depuis la racine corrigé, verdict R10 consigné, onde injectée dans δ et mesurée
+Session suivante : S278 — **établir l'orchestrateur des régimes** (demande de l'utilisateur) : ce qui décide qu'une zone est simulée, analytique ou en transition. Conçu et jamais écrit (ADR-006, ADR-012 §2, ADR-013 §5, ADR-001 §3.3) ; liste 1.4/1.5/1.6, banc B8
 Maillons        : 0
 
 ```

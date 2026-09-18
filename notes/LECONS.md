@@ -5633,3 +5633,22 @@ composantes à l'extérieur, sans changer la suite d'opérations reçue par chaq
 3. **Chercher d'abord ce qui garde les bits**, puis seulement ce qui les change.
 
 Famille de L195 (coût complet) et de L328.
+
+## L333 — Une demande de verdict doit dire ce que la scène ne contient pas
+
+*(S277)* R10 a montré à l'utilisateur la houle la plus pauvre du dépôt — étalement nul, aucune
+vague sous 40 m, surface rigoureusement invariante le long des crêtes — en lui demandant si δ était
+convaincant. Il a répondu, exactement et légitimement, que le motif était trop répétitif et que les
+vagues devaient interagir avec l'onde. **Il a jugé la scène, pas la couche**, et il a eu raison :
+rien dans la demande ne disait que la scène était appauvrie exprès, ni pourquoi.
+
+1. **Une scène de mesure n'est pas une scène de démonstration.** L'étalement nul était la condition
+   pour que le fond soit exactement plan dans une tranche 2D. C'est un choix juste pour mesurer, et
+   trompeur pour montrer. Les deux usages demandent deux scènes, ou une mise en garde explicite.
+2. **Ce qu'on retire d'une scène se déclare dans la demande de verdict**, avec sa raison, et pas
+   dans la réponse à l'objection. Sinon le verdict porte sur l'absence, et il est perdu pour la
+   question posée — ici, « le pas de 16 ms suffit-il ? » n'a pas reçu de réponse.
+3. **Un retour qui semble à côté de la question désigne souvent une limite structurelle.** Les deux
+   remarques de l'utilisateur pointaient la même chose : δ est une tranche 2D sous une houle
+   idéalisée, et les vaguelettes ne sont qu'un habillage hors du domaine simulé. Mesurer avant de
+   répondre (`bandes_s277.rs`) a transformé une impression en quatre nombres.

@@ -13933,3 +13933,76 @@ puis la décision d'un δ sur GPU (ADR). Arbitrage utilisateur : aucun.
 **Rituel :** file active relue ; liste (4.19, 8.7), feuille de route J2, file (A276, rendu de δ),
 A276, index (ADR-169, COUT-DIRECT-S276), ADR-168 (note) ; L332. I-03 (ordre des réductions
 inchangé), I-06 (aucune allocation dans la boucle), I-12 (naissance au repos) relus.
+
+---
+
+## S277 — la fenêtre qui ne s'ouvrait pas, le verdict R10, et l'onde injectée
+
+**2026-09-18, Claude Opus 5 (Claude Code desktop).** Entrée : « je dois réaliser la revue 10 mais
+la fenêtre ne s'ouvre pas ». master 6c22b90 (plan de S277 déjà committé, session coupée après P1).
+Étapes a563b76, 7e5bf8b, 5b4fb4a, 95f003b, 23f2bb1, 45ba82b ; découpages 2b2b370, 861e82c, e5ee593.
+
+**Capacité reçue, maillons 0.** Deux, et la seconde était imprévue.
+
+1. **δ se lance depuis n'importe quel dossier** : le cache des rejeux était cherché relativement au
+   dossier courant, donc manqué depuis la racine, et le viewer repartait pour trois minutes de
+   précalcul muet — vu du dehors, une fenêtre qui ne s'ouvre pas. `captures!` ancre au crate tous
+   les chemins de sortie du viewer ; `--delta-direct` ne précalcule plus aucun rejeu puisqu'il n'en
+   lit aucun ; un précalcul nécessaire s'annonce et rend un dixième par ligne. **Fenêtre en 1,1 s**
+   (`--delta`) et 1,4 s (`--delta --delta-direct`) depuis la racine. Consommateur : la revue de
+   l'utilisateur, qui a pu être faite.
+2. **Une onde s'injecte dans δ et l'effet de la houle sur elle se mesure** : `--onde[=<m>]` pose une
+   bosse gaussienne dans le profil initial, `--onde-mesure`, `--onde-interaction` et `--onde-regime`
+   la chiffrent, `--delta-hs=` / `--delta-tp=` règlent la houle.
+   [Mesure](../docs/validation/ONDE-INJECTEE-S277.md).
+
+**Verdict R10, reçu et consigné** ([REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md#verdict-r10--reçu-s277-2026-09-18)).
+Deux retours, **tous deux sur la scène, aucun sur la couche** : le motif de surface est trop
+répétitif, et les vagues doivent interagir avec l'onde. L'utilisateur a aussi dit ne pas savoir quel
+retour on attendait de lui — défaut de la demande, pas de la réponse.
+
+Mesuré avant d'écrire le verdict (`code/water-core/examples/bandes_s277.rs`), houle de `--delta`
+contre mer S201 : λ **40,1–198,7 m** contre 3,7–210,7 m ; étalement **0,00°** contre 87,19° ;
+écart-type de η le long des crêtes **0,0000 m** contre 0,2872 m. Le constat est exact : aucune vague
+sous 40 m, et le même profil de 128 colonnes répété sur 200 m. Cause structurelle et non
+cosmétique — le domaine δ est une tranche 2D sans dimension `y`, l'étalement nul en est la
+condition, et les vaguelettes visibles sont la queue spectrale S256, habillage de pentes hors du
+domaine simulé. **Aucune conclusion d'invisibilité de δ n'est tirée** : la scène ne permettait pas
+de la poser, et la question « le pas de 16 ms suffit-il ? » reste sans réponse visuelle.
+
+**L'onde injectée, et ce que la houle lui fait.** Bosse de 0,6 m, σ = 8 m, vitesse nulle : elle se
+sépare en deux fronts (Cauchy) qui vont de 13 m à 2 s à ≈ 105 m à 24 s, soit 4,2 m/s. Trois domaines
+identiques au pas près — l'onde sous la houle, la houle seule, l'onde sur mer plate (`flat_background`,
+`Hs` = 0) — isolent l'effet par différence : **4 à 8 % de l'onde** dans la houle de S275, cohérent
+avec `u_orbital/c ≈ 15 %`. Contrôle interne : sur mer plate l'énergie des deux côtés reste égale à
+**1,000 exactement**. C'est donc invisible : 5 % d'une onde de 10 cm font 5 mm.
+
+**Le balayage des régimes** (`--onde-regime`) : écart/onde **8,8 % → 28,2 % → 73,3 %** quand `ak`
+va de 0,063 à 0,224 (`Hs`/`Tp` de 2/8 à 4/8 puis 4/6). À 4/6 l'onde est méconnaissable et la
+symétrie gauche/droite se brise (0,812), mais la correction couplée de la houle seule (223 mm)
+écrase l'onde (87 mm) : **le régime lisible est 4 m / 8 s**. L'autre levier — une onde plus courte —
+est **fermé par la résolution** : `DX` = 2 m impose `λ ≥ 16 m`, et `σ` = 8 m y est déjà.
+
+**Limites et non-fait.** L'utilisateur n'a pas rendu de verdict sur l'onde (il regardait quand la
+session a tourné vers l'orchestrateur). À `Hs` = 6 m / `Tp` = 6 s (`ak` = 0,335) le pas **refuse**
+(`Domain`, garde de géométrie de SURFACE-MOBILE-S237) : **cause non diagnostiquée**, peut-être la
+hauteur libre du domaine (`REST` = 96 m sous un sommet à 102 m) — ne pas en conclure une limite
+physique. Aucune image de l'onde produite : seule la commande interactive existe. Rien de S275/S276
+n'est touché ; essais 21/21.
+
+**Suite S278 : établir l'orchestrateur des régimes**, demandé explicitement par l'utilisateur après
+qu'il eut demandé si le système qui décide entre simulation volumétrique, haute mer analytique et
+zone de transition existait. Réponse trouvée dans le dépôt : **entièrement conçu, pas écrit** —
+`WaterManager` seul décideur et sac à dos sous budget (ADR-006, ADR-012 §2 : `P = gameplay ×
+perception × urgence`), score `s` à hystérésis 0,60 / 0,40, durées de vie et pool (ADR-013 §5),
+bascule perturbatif → substitutif à `max|δ| > 0,35·Hs_local` **proposée, jamais calibrée**
+(ADR-001 §3.3, banc B4). Liste du projet fini 1.4, 1.5 et 1.6 : *absent, conçu*. Aucune trace de
+`WaterSystem` ni de `WaterManager` dans `code/`. La bande δ que l'utilisateur regarde est une
+transition **câblée en dur** : rien ne la décide, ne la déplace ni ne l'éteint.
+
+**Arbitrage utilisateur :** aucun en attente ; la demande d'établir l'orchestrateur prime sur la
+suite automatique de S276 (cadence découplée, δ GPU), qui garde son déclencheur dans la file.
+
+**Rituel :** journal, L333, file active relue (rendu de δ actualisé, orchestrateur ajouté),
+feuille de route J3, index (ONDE-INJECTEE-S277), REVUE-VISUELLE (verdict R10). Invariants relus :
+I-12 (naissance au repos — l'onde injectée est une naissance, pas une exception), I-03, I-06.

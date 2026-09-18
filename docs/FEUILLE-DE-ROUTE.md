@@ -309,8 +309,11 @@ géométries et tailles supplémentaires. Cuisson réelle et budget encore à re
 substitutif et sa restauration depuis graine (ADR-001 §3.3, ADR-013, I-17), référentiel accéléré,
 aération et bulles, écume, vue sous-marine.
 
-*État au 2026-09-13* : véhicules d'essai Saint-Venant 1D à paroi mobile et corps flottant simple
-(S21–S58), qui ne sont pas le système ; rien dans le candidat δ.
+*État au 2026-09-18* : véhicules d'essai Saint-Venant 1D à paroi mobile et corps flottant simple
+(S21–S58), qui ne sont pas le système ; rien dans le candidat δ. **L'orchestrateur des régimes —
+ce qui décide qu'une zone est simulée, analytique ou en transition — est ouvert en S278** sur
+demande de l'utilisateur : entièrement conçu (ADR-006, ADR-012, ADR-013), jamais écrit, et la bande
+δ de l'afficheur est aujourd'hui câblée en dur. Il porte le banc B8.
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.

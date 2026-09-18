@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S277 — en cours
+Session : S277 — terminée
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
 Entrée : l'utilisateur signale que `cargo run … -- --delta --delta-direct` depuis la racine
 « n'ouvre rien ». Constat (terminal) : cache des rejeux cherché relativement au dossier courant,
@@ -84,7 +84,7 @@ annoncée quand un calcul est nécessaire.
   `Hs`/`Tp` : 2/8 (référence, 15 %), 4/8 (31 %), 4/6 (41 %), 6/6 (62 %) ; durée réduite à 10 s,
   onde sur mer plate calculée une seule fois.
 - [x] **P6b** — ce qu'il regarde : pose qui montre l'onde traverser la houle, capture, commande.
-- [ ] **P7** — rituel §6.
+- [x] **P7** — rituel §6.
 
 **P4 relevé** (`--delta --onde-mesure`, bosse 0,6 m, σ 8 m) : la bosse se sépare en deux fronts
 qui avancent de 13 m à 2 s jusqu'à ≈ 105 m à 24 s, soit **4,2 m/s** de vitesse apparente ;
