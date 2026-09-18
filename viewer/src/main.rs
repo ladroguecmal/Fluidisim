@@ -2023,6 +2023,65 @@ fn onde_mesure(background: &water_core::background::Background, amplitude: f32) 
     Ok(())
 }
 
+/// S277 — colonnes du domaine utile, hors éponge.
+fn onde_utile() -> Vec<usize> {
+    (0..delta::NX)
+        .filter(|i| (delta::X0 + (*i as f32 + 0.5) * delta::DX).abs() <= 96.)
+        .collect()
+}
+
+/// Avance un domaine δ jusqu'à `duree_us` et rend son profil final.
+fn onde_avance(live: &mut delta::Live<'_>, duree_us: u64, out: &mut [f32]) -> Result<(), String> {
+    for n in 0..=(duree_us / delta::FRAME_US) {
+        live.advance(n as f64 * delta::FRAME_US as f64 * 1e-6, out)?;
+    }
+    Ok(())
+}
+
+/// S277 — **balayage des régimes** : à quelle cambrure de houle la déformation de l'onde cesse
+/// d'être négligeable. Un seul levier est praticable — l'onde plus courte est fermée par la
+/// résolution du domaine (`DX` = 2 m impose `λ ≥ 16 m`, et `σ` = 8 m y est déjà).
+///
+/// La grandeur qui commande est `u_orbital / c` : la vitesse de l'eau sous la houle rapportée à
+/// celle de l'onde. L'onde sur mer plate ne dépend pas de la houle : elle est calculée une fois.
+fn onde_regime(amplitude: f32) -> Result<(), String> {
+    const DUREE_US: u64 = 10_000_000;
+    /// Vitesse de phase du paquet, mesurée en S277 pour `σ` = 8 m (λ ≈ 16,6 m).
+    const CELERITE: f64 = 5.1;
+    let utile = onde_utile();
+    let x = |i: usize| (delta::X0 + (i as f32 + 0.5) * delta::DX) as f64;
+    let onde = delta::initial_wave(amplitude);
+    let (mut libre, mut avec, mut sans) = ([0f32; delta::NX], [0f32; delta::NX], [0f32; delta::NX]);
+    onde_avance(&mut delta::Live::new(&delta::flat_background()?, onde)?, DUREE_US, &mut libre)?;
+    let rms = |f: &dyn Fn(usize) -> f64| {
+        (utile.iter().map(|i| f(*i) * f(*i)).sum::<f64>() / utile.len() as f64).sqrt()
+    };
+    let energie = |f: &dyn Fn(usize) -> f64, droite: bool| -> f64 {
+        utile.iter().filter(|i| (x(**i) > 0.) == droite).map(|i| f(*i) * f(*i)).sum()
+    };
+    let rl = rms(&|i| libre[i] as f64);
+    println!("ONDE_REGIME_S277 duree_s={} amplitude_m={amplitude} celerite_m_s={CELERITE} onde_libre_rms_m={rl:.5}",
+        DUREE_US as f64 * 1e-6);
+    for (hs, tp) in [(2., 8.), (4., 8.), (4., 6.), (6., 6.)] {
+        let swell = delta::swell_background_for(hs, tp)?;
+        onde_avance(&mut delta::Live::new(&swell, onde)?, DUREE_US, &mut avec)?;
+        onde_avance(&mut delta::Live::new(&swell, delta::initial_wave(0.))?, DUREE_US, &mut sans)?;
+        let rendue = |i: usize| (avec[i] - sans[i]) as f64;
+        let ecart = |i: usize| rendue(i) - libre[i] as f64;
+        let u_orb = (hs as f64 / 2.) * core::f64::consts::TAU / tp as f64;
+        // Cambrure de la houle : a·k, avec λ = g·Tp²/2π en eau profonde.
+        let lambda = 9.81 * (tp as f64) * (tp as f64) / core::f64::consts::TAU;
+        let ak = (hs as f64 / 2.) * core::f64::consts::TAU / lambda;
+        let (ed, eg) = (energie(&rendue, true), energie(&rendue, false));
+        println!(
+            "ONDE_REGIME_S277 hs_m={hs} tp_s={tp} ak={ak:.3} u_orbital_m_s={u_orb:.3}              u_sur_c={:.2} houle_seule_rms_m={:.5} ecart_rms_m={:.5} ecart_sur_libre={:.3}              energie_droite_sur_gauche={:.3}",
+            u_orb / CELERITE, rms(&|i| sans[i] as f64), rms(&ecart), rms(&ecart) / rl,
+            if eg > 0. { ed / eg } else { 0. }
+        );
+    }
+    Ok(())
+}
+
 /// S277 — **ce que la houle fait à l'onde**, par différence. Trois domaines δ identiques au pas
 /// près : l'onde sous la houle, la houle seule, et l'onde sur mer plate. Retrancher la houle seule
 /// isole l'onde telle que la houle la transforme ; la comparer à l'onde sur mer plate donne
@@ -2083,6 +2142,10 @@ fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     if args.iter().any(|a| a == "--delta-mesure") {
         return delta_replays(&delta::swell_background()?).map(|_| ());
+    }
+    // S277 — balayage des régimes de houle, sans GPU.
+    if args.iter().any(|a| a == "--onde-regime") {
+        return onde_regime(onde_amplitude(&args)?.unwrap_or(0.6));
     }
     // S277 — ce que la houle fait à l'onde, par différence (trois domaines), sans GPU.
     if args.iter().any(|a| a == "--onde-interaction") {

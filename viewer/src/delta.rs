@@ -44,7 +44,16 @@ pub fn swell_recipe() -> Recipe {
 }
 
 pub fn swell_background() -> Result<Background, String> {
-    let cooked = background_spectrum::bake(swell_recipe()).map_err(|e| format!("houle δ : {e:?}"))?;
+    swell_background_for(swell_recipe().sea.hs, swell_recipe().sea.tp)
+}
+
+/// S277 — la même houle à `Hs` et `Tp` choisis, pour le balayage des régimes. `Hs = 2`, `Tp = 8`
+/// rend exactement la houle de S275 : la recette est la même, seuls ces deux nombres changent.
+pub fn swell_background_for(hs: f32, tp: f32) -> Result<Background, String> {
+    let mut recipe = swell_recipe();
+    recipe.sea.hs = hs;
+    recipe.sea.tp = tp;
+    let cooked = background_spectrum::bake(recipe).map_err(|e| format!("houle δ : {e:?}"))?;
     let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 22);
     Background::from_spectrum(
         &mut HostServices { alloc: &mut alloc, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink },

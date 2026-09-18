@@ -57,5 +57,34 @@ d'ordre de grandeur.
 régime où `u_orbital / c` est grand : houle plus cambrée (`Hs` plus grand, `Tp` plus court) ou onde
 plus courte. **Ce régime n'est pas mesuré ici** ; il est la suite naturelle de ce lot.
 
+## 4. Le balayage des régimes — `--onde-regime`
+
+Un seul levier est praticable. L'onde plus courte est **fermée par la résolution** : `DX` = 2 m
+impose `λ ≥ 8·DX` = 16 m pour être résolue, et `σ` = 8 m y est déjà (`λ ≈ 16,6 m`). Reste la houle
+cambrée. Même onde, même domaine, 10 s ; l'onde sur mer plate ne dépend pas de la houle et n'est
+calculée qu'une fois (rms 0,0867 m à 10 s).
+
+| `Hs` / `Tp` | `ak` | `u_orb/c` | houle seule, rms | écart rms | **écart / onde** | énergie D/G |
+|---|---|---|---|---|---|---|
+| 2 m / 8 s | 0,063 | 0,15 | 14,2 mm | 7,6 mm | **8,8 %** | 1,043 |
+| 4 m / 8 s | 0,126 | 0,31 | 75,1 mm | 24,4 mm | **28,2 %** | 1,071 |
+| 4 m / 6 s | 0,224 | 0,41 | 222,6 mm | 63,5 mm | **73,3 %** | 0,812 |
+| 6 m / 6 s | 0,335 | 0,62 | — | — | **refus `Domain`** | — |
+
+**L'effet croît vite avec la cambrure** : de 9 % à 73 % quand `ak` passe de 0,063 à 0,224. À
+`Hs` = 4 m, `Tp` = 6 s l'onde est méconnaissable et la symétrie gauche/droite est franchement
+brisée (0,812) — c'est le régime où la déformation demandée par R10 se voit.
+
+Deux réserves, et elles comptent :
+
+- à 4 m / 6 s, la **correction couplée de la houle seule** vaut 222,6 mm rms, plus du double de
+  l'onde (86,7 mm). À l'écran, c'est elle qu'on verrait d'abord, pas l'onde. Le compromis lisible
+  est **4 m / 8 s** : 28 % de déformation pour une correction couplée (75 mm) du même ordre que
+  l'onde ;
+- à 6 m / 6 s (`ak` = 0,335), le pas refuse : `pas δ en direct : Domain`. La garde de géométrie de
+  SURFACE-MOBILE-S237 n'est plus tenue. **La cause n'est pas diagnostiquée** — ce n'est pas
+  nécessairement une limite physique, ce peut être la hauteur libre du domaine (`REST` = 96 m sous
+  un sommet à 102 m). À reprendre avant d'en conclure quoi que ce soit.
+
 Rien de ceci ne touche aux réceptions de S275 et S276 : le pas, le coût et l'identité au bit sont
 inchangés.

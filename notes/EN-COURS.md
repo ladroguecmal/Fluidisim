@@ -78,7 +78,7 @@ annoncée quand un calcul est nécessaire.
   l'amplitude et de la position du maximum sur 30 s.
 - [x] **P5** — l'interaction, mesurée : la même onde sur la houle et sur une mer plate ; la
   différence est l'effet de B sur l'onde, et c'est exactement ce que l'utilisateur veut voir.
-- [ ] **P6** — balayage des régimes : où `u_orbital/c` devient assez grand pour que la déformation
+- [x] **P6** — balayage des régimes : où `u_orbital/c` devient assez grand pour que la déformation
   se voie. **Un seul levier praticable** — la houle cambrée : l'onde plus courte est fermée par la
   résolution du domaine (`DX` = 2 m, il faut `λ ≥ 8·DX` = 16 m, et `σ` = 8 m y est déjà). Cas
   `Hs`/`Tp` : 2/8 (référence, 15 %), 4/8 (31 %), 4/6 (41 %), 6/6 (62 %) ; durée réduite à 10 s,
@@ -103,6 +103,13 @@ deux côtés reste égale à 1,000 exactement. Cohérent avec `u_orbital/c ≈ 1
 10 cm font 5 mm. Ce que l'utilisateur veut voir demande un régime à `u_orbital/c` grand — houle plus
 cambrée ou onde plus courte — **non mesuré**, c'est la suite. Une exécution coûte 2 min 16 (trois
 domaines × 30 s) : raccourcir la durée pour un balayage de régimes.
+
+**P6 : la cambrure commande.** Écart/onde 8,8 % → 28,2 % → 73,3 % quand `ak` va de 0,063 à 0,224
+(`Hs`/`Tp` 2/8, 4/8, 4/6). **4 m / 8 s est le compromis lisible** : 28 % de déformation, correction
+couplée (75 mm) du même ordre que l'onde (87 mm). À 4/6 la correction couplée écrase l'onde
+(223 mm). **6/6 refuse : `pas δ en direct : Domain`** — garde de géométrie non tenue, cause non
+diagnostiquée, peut-être la hauteur libre (REST 96 m, sommet 102 m). Ne pas en conclure une limite
+physique sans l'avoir cherchée.
 
 *Découpage déclaré le 2026-09-18 à 21:41 : l'utilisateur a demandé l'onde injectée maintenant.
 Le rituel, déclaré P3 puis P4, devient P7 — il reste la dernière étape.*

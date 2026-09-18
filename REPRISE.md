@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-18 21:58 +02:00
+Battement        : 2026-09-18 22:07 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
 Session en cours : S277 — correctif : `--delta` depuis la racine ne s'ouvrait pas
 Dernière session : S276 — δ en direct dans viewer/ à 40 images/s, identique au bit au rejeu (ADR-169)
