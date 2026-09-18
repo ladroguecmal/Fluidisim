@@ -43,3 +43,27 @@ Deux diagnostics distincts : (1) garde dx=0,125, pour mesurer l'effet spatial ;
 (2) même garde dx=0,25 en reculant seulement le mur gauche de 24 m, paquet/jauge/bord
 droit inchangés en coordonnées physiques. Celui-ci distingue le retour d'une onde
 parasite partie à gauche des autres erreurs du paquet. Aucun seuil de réception changé.
+
+
+## Diagnostic et changement d'instrument, avant mesure de l'éponge
+
+Garde fine dx=0,125 : rapport brut 0,0077458, encore refusé. Garde avec mur gauche
+reculé : 0,0137305 au pas 0,25. Les traces montrent deux contributions : queue
+numérique à 14–18 s (fortement réduite par le raffinement), puis onde revenue du
+mur gauche (supprimée en reculant ce mur). Leurs origines détaillées dans
+l'initialisation/discrétisation ne sont pas complètement attribuées.
+
+La mesure brute d'ADR-046 est donc **non recevable pour ce montage**, et le reste.
+Nouveau protocole déclaré avant de lancer mur/éponge : mesurer la réponse au bord
+par **différence temporelle au témoin long**, même pas et même bord gauche :
+`R_diff=sqrt(integrale (eta_cas-eta_garde)^2 retour / E_incident_garde)`.
+Ce nombre mesure l'effet du bord droit relativement au domaine long, pas l'énergie
+absolue de tout le signal tardif. Il ne reçoit pas la propagation du paquet initial.
+
+Garde supplémentaire obligatoire : comparer deux domaines longs, 48 et 72 m, avec
+même bord gauche et mêmes fenêtres. Leur différence normalisée doit rester <=0,001
+(seuil initial conservé). Avant 12 s, cas et garde doivent aussi différer de <=0,001
+en norme énergétique incidente. Sinon l'instrument refuse. Enregistrer chaque pas
+(5 ms), pas les seules traces à 250 ms. Garder R_mur>=0,5, R_eponge<=0,01 et
+convergence entre dx=0,25 et 0,125 à 0,002 absolu. Ne pas appeler reçu un résultat
+qui manque l'un de ces critères. Cette différence ne change aucun champ du solveur.

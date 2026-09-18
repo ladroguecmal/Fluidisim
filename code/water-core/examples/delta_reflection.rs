@@ -38,11 +38,11 @@ fn gauge(v:&Volume,x:f64)->f64 {
 fn run()->Result<(),String> {
     let args:Vec<_>=std::env::args().collect();
     let case=args.get(1).map(String::as_str).unwrap_or("garde");
-    if !["garde","garde-gauche","mur","eponge"].contains(&case) {return Err("cas : garde, garde-gauche, mur, eponge".into());}
+    if !["garde","garde-gauche","garde-longue","mur","eponge"].contains(&case) {return Err("cas : garde, garde-gauche, garde-longue, mur, eponge".into());}
     let dx:f32=args.get(2).map(|s|s.parse()).transpose().map_err(|_|"dx invalide")?.unwrap_or(0.25);
     if ![0.25,0.125].contains(&dx) {return Err("dx : 0.25 ou 0.125".into());}
     let shift=if case=="garde-gauche" {24.} else {0.};
-    let length=if case.starts_with("garde") {48.+shift} else {24.};
+    let length=if case=="garde-longue" {72.} else if case.starts_with("garde") {48.+shift} else {24.};
     let domain=Domain{nx:(length/dx) as usize,nz:(1.5/dx) as usize,dx};
     let jobs=host_impl::SequentialJobs;let sink=host_impl::StderrSink;
     let mut arena=host_impl::ArenaAllocator::with_capacity(1<<27);
@@ -76,11 +76,37 @@ fn run()->Result<(),String> {
         if !y.is_finite(){return Err("jauge non finie".into());}
         if t<=12. {incident+=y*y*0.005;let a=sample(&modes,12.,0.,t)[0];analytic_incident+=a*a*0.005;}
         if t>=14. {returned+=y*y*0.005;}
-        if (n+1)%50==0 {println!("TRACE t={t:.3} eta={y:.10}");}
+        if args.iter().any(|a| a=="--trace-complete") || (n+1)%50==0 {println!("TRACE t={t:.3} eta={y:.10}");}
     }
     if incident<=0. {return Err("incident nul".into());}
     println!("MESURE cas={case} dx={dx} E_inc={incident:e} E_retour={returned:e} rapport_brut={} energie_inc_sur_lineaire={} iterations_max={iters} temps_s={}",
         (returned/incident).sqrt(),incident/analytic_incident,start.elapsed().as_secs_f64());
+    if case.starts_with("garde") && (returned/incident).sqrt()>0.001 {
+        return Err("GARDE_CONTAMINEE : aucun coefficient de reflexion recevable".into());
+    }
     Ok(())
 }
 fn main(){if let Err(e)=run(){eprintln!("{e}");std::process::exit(1);}}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn packet_is_right_going_incompressible_and_kinematic_s269() {
+        let m=modes();let e=1e-5;
+        assert!((sample(&m,8.,0.,0.)[0]-A).abs()<1e-15);
+        for x in [4.,8.,12.] {for t in [0.,1.,5.] {
+            let eta_t=(sample(&m,x,0.,t+e)[0]-sample(&m,x,0.,t-e)[0])/(2.*e);
+            assert!((eta_t-sample(&m,x,0.,t)[2]).abs()<1e-10);
+            assert_eq!(sample(&m,x,-H,t)[2],0.);
+            for z in [-0.8,-0.2,0.] {
+                let ux=(sample(&m,x+e,z,t)[1]-sample(&m,x-e,z,t)[1])/(2.*e);
+                let wz=(sample(&m,x,z+e,t)[2]-sample(&m,x,z-e,t)[2])/(2.*e);
+                assert!((ux+wz).abs()<1e-10);
+            }
+        }}
+        // Déplacement vers +x : le maximum du paquet est à droite après une courte durée.
+        assert!(sample(&m,8.1,0.,0.05)[0]>sample(&m,7.9,0.,0.05)[0]);
+    }
+}

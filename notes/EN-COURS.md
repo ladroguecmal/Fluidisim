@@ -68,7 +68,8 @@ Objectif : mesurer la réflexion du pas couplé mobile avec l'éponge ADR-164.
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — montage du paquet, témoins, fenêtres et critères déclarés avant mesure.
 - [x] **P3** — banc consommant le pas réel, contrôle du paquet et des fenêtres.
-- [>] **P4** — mesures bornées, réception ou diagnostic honnête, régressions adaptées.
+- [x] **P4a** — garde brute refusée, diagnostic spatial et bord gauche.
+- [>] **P4b** — mesure différentielle déclarée avec seconde garde longue, témoins et convergence.
 - [ ] **P5** — rituel §6, journal, file, index et jeton.
 
 ### Notes de reprise
@@ -78,3 +79,7 @@ crête et énergie ni prendre une fenêtre contaminée pour de la réflexion (AD
 
 P3 : garde 0,25 refuse la mesure : signal tardif 1,9668 %, analytique 0,00882 %.
 Diagnostic déclaré : raffiner la garde et reculer seulement le mur gauche. Pas de verdict éponge.
+
+P4a : signal brut contient queue numérique puis retour parasite du mur gauche.
+Protocole différentiel avant campagne : soustraire le témoin long, contrôler deux
+longueurs 48/72 m et identité incidente. Seuils inchangés, portée différente explicite.
