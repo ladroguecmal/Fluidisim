@@ -38,11 +38,11 @@ fn gauge(v:&Volume,x:f64)->f64 {
 fn run()->Result<(),String> {
     let args:Vec<_>=std::env::args().collect();
     let case=args.get(1).map(String::as_str).unwrap_or("garde");
-    if !["garde","garde-gauche","garde-longue","mur","eponge"].contains(&case) {return Err("cas : garde, garde-gauche, garde-longue, mur, eponge".into());}
+    if !["garde","garde-gauche","garde-longue","garde-eponge","garde-longue-eponge","mur","eponge"].contains(&case) {return Err("cas : garde, garde-gauche, garde-longue, garde-eponge, garde-longue-eponge, mur, eponge".into());}
     let dx:f32=args.get(2).map(|s|s.parse()).transpose().map_err(|_|"dx invalide")?.unwrap_or(0.25);
     if ![0.25,0.125].contains(&dx) {return Err("dx : 0.25 ou 0.125".into());}
     let shift=if case=="garde-gauche" {24.} else {0.};
-    let length=if case=="garde-longue" {72.} else if case.starts_with("garde") {48.+shift} else {24.};
+    let length=if case.contains("longue") {72.} else if case.starts_with("garde") {48.+shift} else {24.};
     let domain=Domain{nx:(length/dx) as usize,nz:(1.5/dx) as usize,dx};
     let jobs=host_impl::SequentialJobs;let sink=host_impl::StderrSink;
     let mut arena=host_impl::ArenaAllocator::with_capacity(1<<27);
@@ -62,7 +62,7 @@ fn run()->Result<(),String> {
     let bu=vec![BackgroundSample::default();u.len()];let bw=vec![BackgroundSample::default();w.len()];
     let omega=(G*PI*(PI*H).tanh()).sqrt();
     let cg=0.5*omega/PI*(1.+2.*PI*H/(2.*PI*H).sinh());
-    let sponge=if case=="eponge" {Sponge{width_m:4.,rate_per_s:(10.*cg/4.) as f32}} else {Sponge::default()};
+    let sponge=if case.contains("eponge") {Sponge{width_m:4.,rate_per_s:(10.*cg/4.) as f32}} else {Sponge::default()};
     println!("PAQUET cas={case} dx={dx} nx={} nz={} dt_us=5000 cg={cg} sigma={} fond=nul",domain.nx,domain.nz,sponge.rate_per_s);
     let (mut incident,mut returned,mut analytic_incident)=(0.,0.,0.);
     let start=Instant::now();let mut iters=0;
@@ -82,7 +82,7 @@ fn run()->Result<(),String> {
     println!("MESURE cas={case} dx={dx} E_inc={incident:e} E_retour={returned:e} rapport_brut={} energie_inc_sur_lineaire={} iterations_max={iters} temps_s={}",
         (returned/incident).sqrt(),incident/analytic_incident,start.elapsed().as_secs_f64());
     if case.starts_with("garde") && (returned/incident).sqrt()>0.001 {
-        return Err("GARDE_CONTAMINEE : aucun coefficient de reflexion recevable".into());
+        return Err("GARDE_CONTAMINEE : mesure brute non recevable, controle differentiel separe requis".into());
     }
     Ok(())
 }

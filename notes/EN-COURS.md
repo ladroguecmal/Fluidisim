@@ -69,8 +69,8 @@ Objectif : mesurer la réflexion du pas couplé mobile avec l'éponge ADR-164.
 - [x] **P2** — montage du paquet, témoins, fenêtres et critères déclarés avant mesure.
 - [x] **P3** — banc consommant le pas réel, contrôle du paquet et des fenêtres.
 - [x] **P4a** — garde brute refusée, diagnostic spatial et bord gauche.
-- [>] **P4b** — mesure différentielle déclarée avec seconde garde longue, témoins et convergence.
-- [ ] **P5** — rituel §6, journal, file, index et jeton.
+- [x] **P4b** — mesure différentielle déclarée avec seconde garde longue, témoins et convergence.
+- [>] **P5** — rituel §6, journal, file, index et jeton.
 
 ### Notes de reprise
 
@@ -83,3 +83,8 @@ Diagnostic déclaré : raffiner la garde et reculer seulement le mur gauche. Pas
 P4a : signal brut contient queue numérique puis retour parasite du mur gauche.
 Protocole différentiel avant campagne : soustraire le témoin long, contrôler deux
 longueurs 48/72 m et identité incidente. Seuils inchangés, portée différente explicite.
+
+P4b : douze traces complètes reçues par analyse différentielle ; R éponge
+0,001444421 / 0,001615647 ; écart 0,000171226. Doubles gardes <0,001,
+incidents <0,001, murs >0,5. Tests Python 3 ; exemple Rust 6 + 1 ignoré.
+Mesure brute toujours refusée. Résultats et reproduction dans la preuve S269.

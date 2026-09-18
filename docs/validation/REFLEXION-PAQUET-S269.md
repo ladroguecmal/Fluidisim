@@ -67,3 +67,69 @@ en norme énergétique incidente. Sinon l'instrument refuse. Enregistrer chaque 
 (5 ms), pas les seules traces à 250 ms. Garder R_mur>=0,5, R_eponge<=0,01 et
 convergence entre dx=0,25 et 0,125 à 0,002 absolu. Ne pas appeler reçu un résultat
 qui manque l'un de ces critères. Cette différence ne change aucun champ du solveur.
+
+
+### Correction de l'instrument différentiel avant verdict
+
+Le premier calcul différentiel grossier donne 0,01455 pour l'éponge, mais il compare
+**deux** bords différents : Sponge amortit aussi à gauche, contrairement au témoin nu.
+Attribuer toute cette différence au bord droit serait faux. Résultat conservé comme
+diagnostic, pas comme réflexion du bord droit.
+
+Pour isoler le bord droit, ajouter `garde-eponge` (48 m) et `garde-longue-eponge`
+(72 m), avec exactement la même zone absorbante gauche que le domaine candidat.
+Leur zone droite est lointaine, son absence d'effet doit être reçue par la même
+double garde <=0,001. Comparer l'éponge à cette garde, le mur à la garde nue.
+Toutes les tolérances, fenêtres, pas et paquet restent inchangés. Les deux familles
+de doubles gardes doivent passer avant verdict. Ce correctif retire un biais du
+montage, sans changer le solveur ou sa physique.
+
+
+## Réception finale — 18 septembre 2026
+
+Douze traces complètes de 7 200 pas : six cas à chacune des deux résolutions.
+Tous les pas sont reçus. L'analyse différentielle reçoit tous les critères :
+
+| dx (m) | double garde nue | double garde avec éponge | mur R_diff | éponge R_diff |
+|---|---:|---:|---:|---:|
+| 0,25 | 0,000526731 | 0,000051673 | 0,524801157 | 0,001444421 |
+| 0,125 | 0,000807300 | 0,000086839 | 0,884724977 | 0,001615647 |
+
+Écart incident maximal 0,000455702 <0,001. Écart entre les deux résultats éponge
+0,000171226 <0,002. Les deux doubles gardes restent sous 0,001 ; le mur dépasse
+0,5 et l'éponge reste sous 0,01 aux deux mailles. **Effet du bord droit reçu sur
+ce paquet : environ 0,14–0,16 %**, relativement au domaine long correspondant.
+
+La mesure brute reste refusée. La propagation initiale n'est pas exacte : énergie
+incidente numérique/analytique environ 1,0991 puis 1,02998. Le mur change fortement
+avec la maille ; une fenêtre finie ne reçoit pas tout retour à horizon infini.
+Le plancher des gardes borne la précision de l'instrument : ces chiffres étayent
+le seuil de 1 %, pas un coefficient universel à six décimales. Ni fond traversant,
+ni B4 complet, ni autre spectre, ni coût temps réel ne sont reçus. Des calculs ont
+été concurrents : leur durée murale n'est pas une preuve de performance.
+
+### Reproduction et vérifications
+
+Depuis la racine, PowerShell :
+
+```powershell
+cargo build --release --offline --locked --manifest-path code/Cargo.toml -p water-core --example delta_reflection
+foreach ($res in @('025','0125')) {
+    $dx = if ($res -eq '025') { '0.25' } else { '0.125' }
+    foreach ($cas in @('garde','garde-longue','garde-eponge','garde-longue-eponge','mur','eponge')) {
+        & code/target/release/examples/delta_reflection.exe $cas $dx --trace-complete 2>&1 |
+            Set-Content -Encoding utf8 "$env:TEMP/fluidisim-s269-$cas-$res.log"
+    }
+}
+python -B -X utf8 outils/reflexion_paquet.py $env:TEMP
+python -B -X utf8 outils/test_reflexion_paquet.py
+cargo test --release --offline --locked --manifest-path code/Cargo.toml -p water-core --example delta_reflection
+```
+
+Une garde peut terminer avec code 1 après MESURE : c'est le refus brut conservé,
+pas un pas rejeté. L'analyse exige chaque trace à 5 ms, MESURE finale, finitude et
+absence de REFUS du solveur. Les fichiers temporaires sont régénérables par ce banc.
+Analyse finale : RECU. Tests Python : 3 réussis (queue commune soustraite, mauvaise
+garde refusée, trace incomplète refusée). Exemple Rust : 6 réussis, 1 ignoré,
+dont potentiel incompressible, fond imperméable et cinématique du paquet.
+Aucun code de bibliothèque changé ; suite complète S268 non rejouée.
