@@ -58,36 +58,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S272 — terminée
-Agent : Codex, GPT-6 ; fichiers, git, cargo et Python.
-Entrée : « continue », master propre b92ba0b, copie unique, jeton libre.
-Objectif : comparer le résidu progressif sur une durée finie à un oracle temporel indépendant.
+Session : S273 — en cours
+Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo et Python.
+Entrée : « reprends le projet », master propre 2506015, copie unique, jeton libre.
+Objectif : intégrer au transport réel la reconstruction linéaire de la bande
+(défaut de quadrature isolé en S272), la recevoir, puis rejouer le résidu S272.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — référence d'ordre deux et critères déclarés avant campagne.
-- [x] **P3** — oracle et consommateur réel, contrôles indépendants de l'instrument.
-- [x] **P4** — mesures spatiales/temporelles, verdict ou diagnostic, pas de seuil relevé.
-- [x] **P5** — rituel §6, liste/file, journal, index et jeton.
+- [ ] **P2** — ADR-166 (quadrature linéaire de la bande, remplace la formule
+  d'ADR-152/165), notes datées, critères de réception et de campagne écrits
+  avant le code dans BANDE-LINEAIRE-S273.
+- [ ] **P3** — construction : même règle aux faces intérieures et extérieures ;
+  tests de quadrature contre l'intégrale analytique, bandes signées/coupées,
+  fond uniforme et fond nul inchangés.
+- [ ] **P4** — suite complète, valeurs déplacées expliquées, transaction intacte.
+- [ ] **P5** — rejouer les cinq passages S272, verdict aux critères S272 inchangés,
+  qualification dt/amplitude déclarée en P2.
+- [ ] **P6** — rituel §6, feuille de route/file/liste, journal, index et jeton.
 
 ### Notes de reprise
 
-S271 contrôle seulement le démarrage. Ne pas comparer à un oracle périodique si
-la perturbation du solveur est fermée aux bords. Représentation modale à Neumann
-pour le potentiel perturbatif, forcée par le fond progressif : référence indépendante
-de la discrétisation MAC. Lot comparé à V et au coût : le reçu temporel manque encore
-à l'usage J2, mais une nouvelle chaîne de simples instruments ne suffit pas.
-
-P2 : oracle modal Neumann forcé à l’ordre deux déclaré, 2 s, résidu seul <=2 %.
-Paramètres et contrôles dans RESIDU-TEMPOREL-S272 ; aucun oracle périodique.
-
-P3 : oracle analytique contrôlé par RK4 et quadrature (2 tests).
-P4 en cours : erreurs temporelles 22,52 % (dx0,125), 13,04 % (dx0,0625),
-gardes modales <0,1 %. Fine dx0,03125 en cours, logs TEMP fluidisim-s272-*.log.
-Ancien test RK4 divisait par zéro sur mode64 non forcé : corrigé, champ nul exact.
-
-P4 : refus temporel, 8,6778 % fin, 8,6181 % au demi-dt ; amplitude divisée
-par deux : 6,5779 %, champs/a² écart 2,3922 % (troncature non qualifiée).
-Quadrature bande actuelle erreur 1,60 %, reconstruction linéaire 0,0162 %
-sur flux fin isolé. S273 doit intégrer cette correction, pas prolonger les instruments.
+Maillons 2 à l'ouverture : ce lot doit livrer une correction produit reçue,
+pas un instrument de plus. Passages S272 : environ 1 min chacun en release.
+Anciennes traces S272 conservées dans TEMP (fluidisim-s272-*.log) ; nouvelles
+traces fluidisim-s273-*.log. Repos aligné sur une face dans tous les appelants
+(tests, exemples) ; le pli ADR-154 à z=0 ne gêne donc pas la règle par couche.

@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 18:51 +02:00
-Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-18 18:56 +02:00
+Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
+Session en cours : S273 — reconstruction linéaire des flux de bande dans le pas réel
 Dernière session : S272 — résidu temporel refusé à 8,68 %, erreur de quadrature de bande isolée
 Session suivante : S273 — reconstruire linéairement les flux de bande dans le pas réel et recevoir le correctif
 Maillons        : 2
