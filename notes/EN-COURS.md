@@ -77,8 +77,8 @@ soumettre des captures à l'utilisateur (liste 8.7).
   écart entre les deux pas en hauteur).
 - [x] **P4** — couche δ côté GPU : tampon et paramètres, lecture Hermite le long de x, fondus,
   bascule clavier ; vérification GPU contre CPU de la couche.
-- [>] **P5** — captures de revue (poses de jeu, trois variantes) et demande de revue à l'utilisateur.
-- [ ] **P6** — rituel §6.
+- [x] **P5** — captures de revue (poses de jeu, trois variantes) et demande de revue à l'utilisateur.
+- [>] **P6** — rituel §6.
 
 ### Notes de reprise
 
@@ -90,3 +90,6 @@ P3+P4 (un commit : code imbriqué dans les mêmes fichiers) : rejeux reçus, éc
 hors éponge 0,25/1,33 mm ; GPU/CPU 7e-8 ; empreintes S254 identiques. Incident : `--multi --revue`
 sans suffixe a réécrit les PPM R1 de captures/s254 (PNG envoyés intacts, non versionnés).
 Un `sed` global avait touché d'autres lignes de main.rs : fichier restauré puis réédité.
+
+P5 : 12 captures + 3 diagnostics (captures/s275), pixels B/B+δ 10–24 % > 4 niveaux (0 % vue
+haute), 4 ms/16 ms 0 %. η' groupé (−47 mm à 20 s vers x = 0–32 m). Revue R10 envoyée, en attente.

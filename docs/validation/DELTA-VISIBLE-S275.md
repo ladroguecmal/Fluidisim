@@ -44,3 +44,40 @@ Le bord amont réagit au pas de temps dix fois plus que l'intérieur : limite de
 **Contrainte rencontrée** : un tampon de stockage de plus dépassait la limite de huit par étage ;
 la bande δ suit donc les impacts dans le même tampon, sa position passée par `reflection.z`
 (nulle hors `--delta`).
+
+## Captures envoyées pour revue (R10)
+
+`cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --delta --revue-delta`
+(depuis `viewer/`) : 1280 × 720, champ vertical 50°, âge 20 s, rejeux relus du cache.
+
+| pose | œil (m) | lacet, tangage | empreintes B seul / B+δ 4 ms / B+δ 16 ms |
+|---|---|---|---|
+| le long des crêtes | (0, −60, 6) | 0, −0,08 | `2c2c7112d88de170` / `6655e844fb685e94` / `ab9ab268355170ef` |
+| face à la houle | (60, 0, 8) | −π/2, −0,1 | `a78b0282f39d0f4a` / `1d04366680e37613` / `0291b2d7d0986a73` |
+| haute | (0, −200, 60) | 0, −0,35 | `184d2c9d2cfab515` / `3c28db078621434b` / `ed8f64818ea6fb07` |
+| rasante | (−30, −20, 3) | 0,9, −0,03 | `ab416e1f0c7240e3` / `fc448ff856113dee` / `f82b079ef7ed1ce9` |
+
+Couches : B (houle à crêtes longues de la scène `--delta`), queue spectrale S256 (habillage de
+rugosité, directionnel, non couplé à δ), δ selon la variante. Ni impact, ni sillage, ni W.
+Habillage de banc : ciel et brume S211, couleur de l'eau, pas d'écume ni de réfraction.
+
+**Écarts de pixels mesurés avant la revue** (canal maximal, 0–255) :
+
+| pose | B contre B+δ : pixels > 4 niveaux, maximum | 4 ms contre 16 ms : pixels > 4 niveaux, maximum |
+|---|---|---|
+| le long des crêtes | 16,2 %, 100 | 0 %, 2 |
+| face à la houle | 10,0 %, 53 | 0 %, 2 |
+| haute | 0 %, 1 | 0 %, 1 |
+| rasante | 24,1 %, 92 | 0 %, 22 (pixels isolés) |
+
+δ change l'image à hauteur d'œil et en incidence rasante, par ses pentes sur les reflets ; il
+ne change presque rien vue d'en haut à travers la brume. Le pas d'image ne se distingue du pas de
+4 ms en aucun pixel au-delà de 4 niveaux. Images `…_diagnostic_ecart_x10` : |B+δ − B| × 10, pour
+situer l'effet ; **ce ne sont pas des rendus**. `η'` n'est pas uniforme : à 20 s, un groupe de
+grosses vagues vers x = 0–32 m porte `η'` = −47 mm (ordre de la correction liée d'une crête de
+1,5 m) ; d'où l'asymétrie gauche/droite des images de différence. Le bord amont grossit en fin de
+rejeu (43,8 mm rms dans l'éponge), masqué par le fondu : limite de frontière (liste 4.7).
+
+**En mouvement** : `cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --delta`,
+touche **D** pour B seul → B+δ 4 ms → B+δ 16 ms, **Début** pour revenir à 3 s ; le rejeu couvre
+0–30 s, au-delà B seul. La revue attend le verdict de l'utilisateur.

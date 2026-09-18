@@ -1884,6 +1884,53 @@ fn delta_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
     Ok(())
 }
 
+/// S275 — revue de δ (DELTA-VISIBLE-S275) : quatre poses de jeu, trois variantes au même instant
+/// (B seul, B+δ au pas de 4 ms, B+δ au pas d'image), 1280 × 720, PPM et empreinte FNV.
+fn revue_delta(frame: &mut FrameData<'_>) -> Result<(), String> {
+    let dir = "captures/s275";
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    let (width, height) = (1280u32, 720u32);
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, width, height,
+        frame.profile.len(), scene::WAKE_CAPACITY))?;
+    frame.lod = true;
+    frame.cull = true;
+    frame.viewport = Some((width as f32 / height as f32, g.nx, g.ny));
+    let half_pi = std::f32::consts::FRAC_PI_2;
+    let poses: [(&str, Camera); 4] = [
+        ("le_long_des_cretes", Camera { eye: [0., -60., 6.], yaw: 0., pitch: -0.08 }),
+        ("face_a_la_houle", Camera { eye: [60., 0., 8.], yaw: -half_pi, pitch: -0.1 }),
+        ("haute", Camera { eye: [0., -200., 60.], yaw: 0., pitch: -0.35 }),
+        ("rasante", Camera { eye: [-30., -20., 3.], yaw: 0.9, pitch: -0.03 }),
+    ];
+    let age = 20.;
+    for (name, camera) in poses {
+        for (mode, variant) in ["b_seul", "delta_4ms", "delta_16ms"].iter().enumerate() {
+            frame.camera = Camera { eye: camera.eye, yaw: camera.yaw, pitch: camera.pitch };
+            frame.delta.as_mut().ok_or("--revue-delta demande --delta")?.mode = mode;
+            frame.update(age, age, false);
+            g.upload(frame);
+            let target = g.target();
+            g.draw(&target.create_view(&Default::default()), false);
+            let path = format!("{dir}/s275_{name}_{variant}.ppm");
+            g.capture(&target, &path)?;
+            let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+            let header = format!("P6
+{width} {height}
+255
+").len();
+            let hash = bytes[header..]
+                .iter()
+                .fold(0xcbf2_9ce4_8422_2325u64, |h, b| (h ^ *b as u64).wrapping_mul(0x100_0000_01b3));
+            let c = &frame.camera;
+            println!("REVUE_DELTA image=s275_{name}_{variant}.ppm {width}x{height} oeil=[{},{},{}] lacet={:.4} tangage={} champ_vertical=50deg age_s={age} couche_delta={} queue={} filtre_spectral={} empreinte=0x{hash:016x}",
+                c.eye[0], c.eye[1], c.eye[2], c.yaw, c.pitch, frame.delta.as_ref().unwrap().label(),
+                frame.tail_background.is_some(), frame.spectral);
+        }
+    }
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     if args.iter().any(|a| a == "--delta-mesure") {
@@ -1938,6 +1985,12 @@ fn run() -> Result<(), String> {
         frame.delta = Some(delta::Layer::new(reference, image));
         if args.iter().any(|a| a == "--delta-verify") {
             return delta_verify(&mut frame);
+        }
+        if args.iter().any(|a| a == "--revue-delta") {
+            if !args.iter().any(|a| a == "--no-tail") {
+                frame.tail_background = Some(&scene.tail);
+            }
+            return revue_delta(&mut frame);
         }
     }
     // S256, ADR-155 : queue spectrale en pentes par pixel, active par défaut ; `--no-tail` pour R1.

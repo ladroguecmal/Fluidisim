@@ -74,6 +74,7 @@ tel quel, et c'est la réception qu'on réexamine d'abord.
 | **R4** | 2026-09-17 | sept rendus aux poses de R1, scène `--vagues` : queue d'équilibre f⁻⁴ et CWM (ADR-157, [empreintes](VAGUES-POINTUES-S260.md) §3) | références A et B de R3 | **« Change le ciel et la couleur comme sur ma photo ; la mer a l'air trop rugueuse, la surface entre les pics est plutôt lisse, mais il y a beaucoup de petites vaguelettes »** (07:25) | habillage demandé (ciel, couleur) ; rugosité : trop forte et trop uniforme, à mesurer (§11) |
 | **R5** | 2026-09-17 | sept rendus aux poses de R1, `--vagues --modulation --ciel-clair` : habillage de la référence A, rugosité ajustée à Cox–Munk (ADR-158, [empreintes](RUGOSITE-S261.md) §3) | références A et B | **« Trop rugueuse, trop de petits pics ; je ne connais pas le niveau de vent »** (08:09, après les réparations S262) | rugosité conforme à Cox–Munk **à 8,4 m/s** : le vent de la scène est en cause, vent de la référence inconnu ; calibration perceptive par le vent (§12) |
 | **R6** | 2026-09-17 | calibration : même scène à 3, 5 et 8,37 m/s, trois poses, ciel clair (ADR-160, [empreintes](VENT-S263.md) §3) | références A et B | **en attente** | question : quel vent ressemble le plus à la mer attendue ? |
+| **R10** | 2026-09-18 | **premier rendu de δ** : houle à crêtes longues, bande δ couplée rejouée, quatre poses × B seul / B+δ 4 ms / B+δ 16 ms, trois diagnostics d'écart (ADR-168, [empreintes](DELTA-VISIBLE-S275.md)) | demandées : houle longue sans mer de vent marquée, vue de 5–20 m, crêtes de travers | **en attente** | questions : δ se voit-il, la limite de la bande se voit-elle, les deux pas se distinguent-ils ? |
 
 ## 6. R1 — la scène J1 telle qu'elle est, S254
 
@@ -477,3 +478,11 @@ les covariances entièrement filtrées et fixe les bornes des boucles 3×3 : **s
 niveau RGB près** de R7, sept témoins identiques au bit. Ce contrôle ne demande pas de nouveau
 choix esthétique. Aperçu `viewer/captures/s266/r8_final_reference_12s.png`, mêmes pose, âge,
 vent et couches que R7. Coût et limites : [CIEL-CACHE-S266](CIEL-CACHE-S266.md).
+
+## 15. R10 — δ visible pour la première fois, S275
+
+Revue demandée le 2026-09-18 : [DELTA-VISIBLE-S275](DELTA-VISIBLE-S275.md), captures dans
+`viewer/captures/s275`, et commande interactive `--delta` (touche D) pour la comparaison en
+mouvement. Mesure préalable : δ change 10 à 24 % des pixels de plus de 4 niveaux à hauteur d'œil
+et en incidence rasante, rien vue d'en haut ; le pas d'image ne se distingue pas du pas de 4 ms.
+Aucune conclusion d'invisibilité n'est tirée avant le verdict.
