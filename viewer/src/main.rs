@@ -2240,7 +2240,7 @@ fn run() -> Result<(), String> {
         frame.delta = Some(delta::Layer::direct(swell.as_ref().unwrap(), surface_initiale)?);
     }
     if let Some((reference, image)) = &replays {
-        frame.delta = Some(delta::Layer::new(reference, image));
+        frame.delta = Some(delta::Layer::new(reference, image)?);
         if direct_verify {
             return delta_direct_verify(swell.as_ref().unwrap(), image);
         }

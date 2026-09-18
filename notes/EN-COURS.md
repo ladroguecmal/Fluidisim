@@ -78,13 +78,22 @@ faux.
   depuis la caméra, coupée au plan proche puis au cadre. Essais : de face, de dos, hors champ.
 - [x] **P3** — les seuils passent au profil, et la première calibration (ADR à écrire). *Découpage
   déclaré à 23:05, imposé par une mesure : voir les notes.*
-- [ ] **P3b** — le branchement : soumission, décision et allocation à chaque image ; δ n'avance et
+- [x] **P3b** — le branchement : soumission, décision et allocation à chaque image ; δ n'avance et
   ne s'affiche que retenu ; coût réinjecté depuis la mesure du pas précédent.
 - [ ] **P4** — réception : scène R10 identique au bit quand la bande reste visible ; relevé de
   l'extinction et de la renaissance quand la caméra se détourne ; coût réinjecté vérifié.
 - [ ] **P5** — rituel §6.
 
 ### Notes de reprise
+
+**P3b : les douze empreintes de R10 sont identiques**, pose haute comprise — alors qu'ADR-171
+prévoyait de l'éteindre. Explication, et elle est juste : `--revue-delta` appelle `update` à
+**temps figé** (`age` = 20 s pour les douze images). Le domaine s'allume à la première pose
+(0,5456), et aux suivantes son score tombe sous `off` sans que rien ne s'éteigne — la durée de vie
+minimale et le délai d'extinction ne s'écoulent pas quand le temps ne bouge pas. **Une décision
+demande du temps ; une image isolée n'en donne aucun.** L'identité au bit prouve donc que le
+branchement ne casse rien, pas qu'il décide : la preuve de l'extinction doit être **dynamique**
+(P4).
 
 **Mesure qui impose un découpage** (relevé `part_de_cadre_des_poses_de_r10_s279`) : la part de
 cadre de la bande vaut **0,5774 / 0,5456 / 0,5571 / 0,3185 / 0,5089** pour les poses défaut, le

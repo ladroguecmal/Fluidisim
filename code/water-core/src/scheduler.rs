@@ -303,6 +303,15 @@ impl Scheduler {
         self.grants.iter().map(|g| g.budget_ms).sum()
     }
 
+    /// Oublie tout état : plus aucun domaine vivant, plus d'horloge. C'est ce qu'un hôte appelle
+    /// quand son temps recule — retour au début d'une scène, chargement — plutôt que de subir le
+    /// refus de `decide`. Ne rend aucune mémoire.
+    pub fn rewind(&mut self) {
+        self.live.clear();
+        self.grants.clear();
+        self.last_us = None;
+    }
+
     /// Les domaines que la décision laisse vivants, dans l'ordre où ils se sont allumés.
     pub fn active(&self) -> impl Iterator<Item = DomainId> + '_ {
         self.live.iter().filter(|l| l.active).map(|l| l.id)

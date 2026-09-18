@@ -779,8 +779,16 @@ impl<'a> FrameData<'a> {
         self.time = SimTime(BIRTH + (seconds.max(0.) * 1e6) as u64);
         self.age = age;
         let eye = self.camera.eye;
+        // S279 : la bande δ passe par l'ordonnanceur, qui a besoin du cadre pour peser ce qu'elle
+        // occupe. Hors fenêtre — vérifications, bancs sans viewport — il n'y a pas de cadre, et
+        // `Layer::update` le sait.
+        let vue = self.viewport.map(|(aspect, _, _)| {
+            let [forward, right, up] = self.camera.vectors();
+            crate::lod::Projection { eye, forward, right, up,
+                tan_half: (50.0f32.to_radians() / 2.).tan(), aspect, far: self.far_distance() }
+        });
         if let Some(layer) = self.delta.as_mut() {
-            layer.update(seconds.max(0.), eye);
+            layer.update(seconds.max(0.), eye, vue.as_ref());
         }
         self.background
             .render_components(

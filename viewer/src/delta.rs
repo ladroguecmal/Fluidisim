@@ -9,6 +9,7 @@ use water_core::{
     HostServices, SeaState, SimTime, WorldPos,
 };
 use crate::scene::host_impl;
+use water_core::scheduler::{Bid, DomainId, Profile, Regime, Scheduler};
 
 /// Bord gauche du domaine (m), pas, colonnes, couches ; repos à `REST` au-dessus du fond plat.
 pub const X0: f32 = -128.;
@@ -495,6 +496,23 @@ fn fade(s: f64, width: f64) -> (f64, f64) {
 
 /// La couche δ de l'image : deux rejeux, un mode (0 : B seul, 1 : pas de référence, 2 : pas
 /// d'image), l'instant, et le tampon GPU correspondant.
+/// S279, [ADR-171](../../docs/adr/ADR-171-les-seuils-d-activation-appartiennent-au-profil.md) —
+/// le profil de l'afficheur. **Ce n'est pas le profil du jeu** : ADR-012 §3 vise 2 ms de
+/// simulation par pas, et δ en direct en coûte ≈ 22 (S276), onze fois trop. Déclarer 2 ms ici
+/// n'améliorerait rien — la bande serait simplement toujours éteinte, et le dépassement resterait
+/// entier. L'afficheur déclare donc ce qu'il a, une image à 30 Hz, et le dépassement reste ce
+/// qu'il était : un fait mesuré, consigné dans COUT-DIRECT-S276.
+///
+/// Les seuils, eux, sont calibrés : 0,45 / 0,35, sur la mesure de S275 (ADR-171).
+const PROFILE: Profile = Profile { cpu_sim_ms: 33., blocks: 1, on: 0.45, off: 0.35 };
+
+/// `W_gameplay` et `W_urgence` n'ont aucune source dans un afficheur : il n'y a ni acteur, ni
+/// objectif, ni rien dont l'absence deviendrait visible à une échéance connue. Ils sont donc
+/// **déclarés au maximum**, et c'est `W_perception` qui décide seul — ce qui est honnête tant
+/// qu'on ne prétend pas les avoir mesurés. Un jeu les calculerait.
+const GAMEPLAY: f32 = 1.;
+const URGENCY: f32 = 1.;
+
 pub struct Layer<'a> {
     /// S277 : absents en direct — rien à précalculer pour ouvrir la fenêtre.
     pub replays: Option<[&'a Replay; 2]>,
@@ -504,16 +522,40 @@ pub struct Layer<'a> {
     pub gpu: [[f32; 4]; GPU_ROWS],
     heights: [f32; NX],
     active: bool,
+    /// S279 : ce qui décide que la bande vit. Avant lui, elle vivait parce que le code le disait.
+    scheduler: Scheduler,
+    /// Coût du dernier pas réellement exécuté, réinjecté comme estimation du suivant (ADR-012 §3 :
+    /// « un ordonnanceur qui planifie sur des coûts théoriques dérive dès la première
+    /// optimisation »). Au premier pas, la mesure de S276.
+    cost_ms: f32,
+    granted: bool,
+}
+
+/// Coût d'un pas en direct mesuré en S276 : sert de première estimation, remplacée dès le
+/// premier pas réel.
+const FIRST_COST_MS: f32 = 22.;
+
+fn scheduler() -> Result<Scheduler, String> {
+    let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 12);
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    Scheduler::with_capacity(
+        &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+        PROFILE,
+        1,
+    )
+    .map_err(|e| format!("ordonnanceur δ : {e:?}"))
 }
 
 impl<'a> Layer<'a> {
-    pub fn new(reference: &'a Replay, frame: &'a Replay) -> Self {
-        Self { replays: Some([reference, frame]), mode: 1, live: None, gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false }
+    pub fn new(reference: &'a Replay, frame: &'a Replay) -> Result<Self, String> {
+        Ok(Self { replays: Some([reference, frame]), mode: 1, live: None, gpu: [[0.; 4]; GPU_ROWS],
+            heights: [0.; NX], active: false, scheduler: scheduler()?, cost_ms: FIRST_COST_MS, granted: false })
     }
     /// S277 — δ **en direct sans rejeu** : la scène s'ouvre immédiatement, δ naît au repos et
     /// avance d'un pas par image. Les trois minutes de précalcul ne servaient qu'aux rejeux.
     pub fn direct(background: &'a Background, initial: [f32; NX]) -> Result<Self, String> {
-        Ok(Self { replays: None, mode: 1, live: Some(Live::new(background, initial)?), gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false })
+        Ok(Self { replays: None, mode: 1, live: Some(Live::new(background, initial)?), gpu: [[0.; 4]; GPU_ROWS],
+            heights: [0.; NX], active: false, scheduler: scheduler()?, cost_ms: FIRST_COST_MS, granted: false })
     }
     pub fn label(&self) -> &'static str {
         if self.live.is_some() {
@@ -525,8 +567,47 @@ impl<'a> Layer<'a> {
     pub fn modes(&self) -> usize {
         if self.live.is_some() { 2 } else { 3 }
     }
+    /// S279 — **ce qui décide que la bande vit**. Elle publie ses trois poids, l'ordonnanceur
+    /// tranche, et δ n'avance que s'il est retenu. Sans cadre — vérifications hors fenêtre —
+    /// `W_perception` vaut 1 : rien à l'écran ne peut la départager, et éteindre la bande y
+    /// changerait des rendus reçus au bit pour une raison qui n'existe pas.
+    ///
+    /// Non retenue, la bande n'avance pas et ne s'affiche pas. Elle **renaît au repos** au retour
+    /// (I-12) : une extinction n'est pas gratuite pour l'onde injectée, qui repart de zéro.
+    pub fn arbitrate(&mut self, seconds: f64, view: Option<&crate::lod::Projection>) -> bool {
+        let emprise = ([X0, -HALF_WIDTH], [X0 + NX as f32 * DX, HALF_WIDTH]);
+        let perception = view.map_or(1., |p| p.screen_fraction(emprise.0, emprise.1));
+        self.scheduler.begin();
+        let bid = Bid { id: DomainId(0), gameplay: GAMEPLAY, perception, urgency: URGENCY,
+            cost_ms: self.cost_ms, blocks: 1, regime: Regime::Perturbative };
+        if self.scheduler.submit(bid).is_err() {
+            return self.granted;
+        }
+        let now = SimTime(START_US + (seconds.max(0.) * 1e6) as u64);
+        // Le temps de la scène recule quand on revient au début : l'ordonnanceur l'oublie plutôt
+        // que de refuser, comme δ lui-même renaît.
+        if self.scheduler.decide(now).is_err() {
+            self.scheduler.rewind();
+            let _ = self.scheduler.decide(now);
+        }
+        self.scheduler.allocate();
+        self.granted = !self.scheduler.grants().is_empty();
+        self.granted
+    }
+
+    /// Ce que l'ordonnanceur a décidé au dernier appel, et la part de cadre qui l'a décidé.
+    pub fn is_granted(&self) -> bool {
+        self.granted
+    }
+
     /// Profil de l'instant et en-tête rebasé à la caméra ; pentes par différences centrées.
-    pub fn update(&mut self, seconds: f64, eye: [f32; 3]) {
+    pub fn update(&mut self, seconds: f64, eye: [f32; 3], view: Option<&crate::lod::Projection>) {
+        if !self.arbitrate(seconds, view) {
+            self.active = false;
+            self.gpu[0] = [X0 - eye[0], -eye[1], DX, NX as f32];
+            self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, 0.];
+            return;
+        }
         self.active = match self.live.as_mut() {
             // En direct, δ avance même masqué : l'afficher ne change pas son histoire.
             Some(live) => live.advance(seconds, &mut self.heights).map_err(|e| eprintln!("{e}")).is_ok() && self.mode > 0,
@@ -535,6 +616,10 @@ impl<'a> Layer<'a> {
                 _ => false,
             },
         };
+        // ADR-012 §3 : le coût annoncé au pas suivant est celui qu'on vient de payer.
+        if let Some(live) = self.live.as_ref() {
+            self.cost_ms = (live.sampling_ms + live.step_ms) as f32;
+        }
         self.gpu[0] = [X0 - eye[0], -eye[1], DX, NX as f32];
         self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, if self.active { 1. } else { 0. }];
         for i in 0..NX {
@@ -603,8 +688,8 @@ mod tests {
         assert!(r.at(0.016, &mut out));
         assert_eq!(&out[..], r.frame(1));
         assert!(!r.at(0.7, &mut out) && !r.at(-0.1, &mut out));
-        let mut layer = Layer::new(&r, &r);
-        layer.update(0.32, [0., -40., 6.]);
+        let mut layer = Layer::new(&r, &r).unwrap();
+        layer.update(0.32, [0., -40., 6.], None);
         assert!(layer.is_active());
         // Hors bande et au bord : zéro ; au centre de colonne loin des fondus : la valeur rejouée.
         assert_eq!(layer.eval([0., 40. + HALF_WIDTH + 1.]), [0.; 3]);
