@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-18 19:42 +02:00
+Battement        : 2026-09-18 19:46 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
 Session en cours : S274 — utilité de la précision de la houle progressive, puis blocage suivant
 Dernière session : S273 — bande du fond d'ordre deux (ADR-166) ; résidu 5,88 %, part d'ordre deux extrapolée 1,77 %

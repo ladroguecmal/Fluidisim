@@ -82,10 +82,10 @@ puis ouvrir le blocage suivant.
 - [x] **P5** — blocage suivant, choisi : coût du pas couplé mobile (A276, ADR-147 point 5).
   *Amendement 19:39* : lot découpé en P5–P8, rituel en P9. P5 = ADR-167 et critères écrits
   avant le code (COUT-MOBILE-S274).
-- [>] **P6** — multigrille mobile : niveaux grossiers recalculés par pas depuis les mailles
+- [x] **P6** — multigrille mobile : niveaux grossiers recalculés par pas depuis les mailles
   mouillées (Dirichlet vers l'air, Neumann vers le solide), mémoire comptée à la configuration,
   chemin ordinaire inchangé au bit ; essais de symétrie et de positivité.
-- [ ] **P7** — branchement dans `project` en mode mobile, témoin Jacobi conservé en essai ;
+- [>] **P7** — branchement dans `project` en mode mobile, témoin Jacobi conservé en essai ;
   essais d'accord avec le témoin, refus/expiration/allocation ; suite complète.
 - [ ] **P8** — mesure : itérations et ms par pas, S253 128 colonnes et houle fine ; réceptions
   S253 rejouées ; techniques présentes/absentes/domaine (ADR-131).
@@ -112,3 +112,6 @@ Banc arrêté ; réception cambrée différée (déclencheur). A289 et liste 4.2
 
 P5 : référence Jacobi 279,9/279,7 ms médiane, 1 145 itérations max (secteur, 200 pas).
 ADR-167 et COUT-MOBILE-S274 écrits avant le code.
+
+P6 (branchement fait en même temps, P7 = suite) : symétrie 1,2e-9 ; 20 pas couplés 64 col.,
+266 itérations contre 4 920 (Jacobi), écart de vitesse 6e-8 pour 5,9e-3, hauteur au bit.

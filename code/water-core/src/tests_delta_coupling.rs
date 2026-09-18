@@ -1124,3 +1124,71 @@ fn linear_band_signed_and_cut_layers_exact_on_affine_s273() {
         println!("S273 affine U0={u0} S={slope} ecart_max={worst:e}");
     }
 }
+
+
+/// S274 (ADR-167, critère 3) : le cycle multigrille mobile est symétrique défini positif, sur une
+/// surface ondulée au-dessus d'un fond en pente (mailles coupées, fantômes latéraux).
+#[test]
+fn mobile_multigrid_is_symmetric_positive_s274(){
+    let nx=64;let dx=2./nx as f64;let k=std::f64::consts::PI/2.;
+    let bottom:Vec<f32>=(0..nx).map(|i|(0.05+0.25*(i as f64+0.5)/nx as f64) as f32).collect();
+    let mut v=Volume::configure(&mut HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs},
+        Domain{nx,nz:72,dx:dx as f32},1025.,9.81,&bottom).unwrap();
+    let eta:Vec<f32>=(0..nx).map(|i|{let x=(i as f64+0.5)*dx;
+        (2.+0.1*(k*x).cos()+0.03*(5.*k*x).sin()) as f32}).collect();
+    v.set_free_surface(&eta,2.).unwrap();
+    assert!(v.levels.len()>=3);
+    v.mobile=true;
+    let mut ctl=Control::unlimited();
+    v.rhs.fill(0.);
+    v.rhs_mobile(-1_025_000.,&mut ctl).unwrap();
+    v.prepare_mobile_levels(&mut ctl).unwrap();
+    let cells=v.domain.cells();
+    let mut seed=0x9e37_79b9_7f4a_7c15u64;
+    let mut draw=||{seed^=seed<<13;seed^=seed>>7;seed^=seed<<17;((seed>>11) as f64/(1u64<<53) as f64*2.-1.) as f32};
+    let x:Vec<f32>=(0..cells).map(|_|draw()).collect();
+    let y:Vec<f32>=(0..cells).map(|_|draw()).collect();
+    let cycle=|v:&mut Volume,r:&[f32]|->Vec<f32>{
+        v.res.copy_from_slice(r);v.v_cycle_mobile(&mut Control::unlimited()).unwrap();v.mobile_z.clone()};
+    let (mx,my)=(cycle(&mut v,&x),cycle(&mut v,&y));
+    let dot=|a:&[f32],b:&[f32]|a.iter().zip(b).map(|(p,q)|*p as f64*(*q as f64)).sum::<f64>();
+    let norm=|a:&[f32]|dot(a,a).sqrt();
+    let asym=(dot(&mx,&y)-dot(&x,&my)).abs()/(norm(&x)*norm(&my));
+    let wet=(0..cells).filter(|&c|v.wet_cell(c)).count();
+    println!("S274 symetrie niveaux={} mouillees={wet} asymetrie={asym:e} xMx={:e} yMy={:e}",
+        v.levels.len(),dot(&mx,&x),dot(&my,&y));
+    assert!(asym<=1e-5,"asymétrie {asym}");
+    assert!(dot(&mx,&x)>0.&&dot(&my,&y)>0.);
+    assert!((0..cells).all(|c|v.wet_cell(c)||mx[c]==0.),"le cycle écrit hors du fluide");
+    assert!(v.levels[0].mobile_frac.iter().any(|f|*f<0.),"aucun air grossier : Dirichlet non exercé");
+    assert!(v.frac.iter().any(|f|*f>0.&&*f<1.),"aucune maille coupée");
+    v.mobile=false;
+}
+
+/// S274 (ADR-167, critère 4) : vingt pas couplés mobiles, multigrille contre témoin de Jacobi,
+/// sous l'onde stationnaire S253 de 5 cm ; acceptation, vitesses et hauteur.
+#[test]
+fn mobile_multigrid_agrees_with_jacobi_witness_s274(){
+    let wave=standing::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let nx=64;
+    let (mut mg,mut jac)=(standing_case(nx,&wave,&vec![2.;nx]),standing_case(nx,&wave,&vec![2.;nx]));
+    let (mut it_mg,mut it_jac)=(0u32,0u32);
+    for n in 0..20u64 {
+        let t=SimTime(n*1000);
+        let (u,w)=standing_faces(&mg,&wave,n as f64*1e-3);
+        let bg=BackgroundFaces{domain:mg.domain,time:t,density:1025.,gravity:9.81,u:&u,w:&w};
+        let a=mg.step_perturbation_mobile(t,1000,4000,1_000_000_000,&bg,Sponge::default(),&Jobs,&Clock)
+            .unwrap_or_else(|e|panic!("multigrille, pas {n} : {e:?}"));
+        super::super::MOBILE_MULTIGRID_OFF.with(|c|c.set(true));
+        let b=jac.step_perturbation_mobile(t,1000,4000,1_000_000_000,&bg,Sponge::default(),&Jobs,&Clock);
+        super::super::MOBILE_MULTIGRID_OFF.with(|c|c.set(false));
+        let b=b.unwrap_or_else(|e|panic!("témoin, pas {n} : {e:?}"));
+        it_mg+=a.report.unwrap().iterations;it_jac+=b.report.unwrap().iterations;
+    }
+    let vmax=jac.u.iter().chain(&jac.w).fold(0f32,|m,x|m.max(x.abs()));
+    let du=mg.u.iter().zip(&jac.u).chain(mg.w.iter().zip(&jac.w)).fold(0f32,|m,(a,b)|m.max((a-b).abs()));
+    let de=mg.eta.iter().zip(&jac.eta).fold(0f32,|m,(a,b)|m.max((a-b).abs()));
+    println!("S274 accord iterations_multigrille={it_mg} iterations_jacobi={it_jac} ecart_vitesse={du:e} vmax={vmax:e} ecart_hauteur={de:e}");
+    assert!(du<=1e-4*vmax,"écart de vitesse {du} pour {vmax}");
+    assert!(it_mg<it_jac);
+}

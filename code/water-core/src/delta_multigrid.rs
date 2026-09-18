@@ -42,6 +42,10 @@ pub(super) struct Level {
     pub x: Vec<f32>,
     pub r: Vec<f32>,
     pub t: Vec<f32>,
+    /// ADR-167 : fractions du mode mobile, recalculées à chaque projection — positive, maille
+    /// active ; `-1`, air (Dirichlet) ; zéro, solide (Neumann). Et la diagonale qui leur répond.
+    pub mobile_frac: Vec<f32>,
+    pub mobile_diag: Vec<f32>,
 }
 
 impl Level {
@@ -70,20 +74,25 @@ pub(super) fn level_count(mut nx: usize, mut nz: usize) -> usize {
 
 /// Flottants que toute la hiérarchie demande — comptés avant d'allouer quoi que ce soit (I-06).
 pub(super) fn hierarchy_floats(mut nx: usize, mut nz: usize) -> usize {
+    // ADR-167 : correction fine du cycle mobile, présente dès qu'un niveau existe.
+    let fine = nx * nz;
     let mut total = 0usize;
     while coarsens(nx, nz) {
         let (cx, cz) = (nx / 2, nz / 2);
-        // frac, diag, x, r, t sur les mailles ; plus les deux jeux d'ouvertures.
-        total += 5 * cx * cz + (cx + 1) * cz + cx * (cz + 1);
+        // frac, diag, x, r, t, fractions et diagonale mobiles sur les mailles ; plus les deux jeux
+        // d'ouvertures.
+        total += 7 * cx * cz + (cx + 1) * cz + cx * (cz + 1);
         nx = cx;
         nz = cz;
     }
-    total
+    if total > 0 { total + fine } else { 0 }
 }
 
 /// `L p` au niveau donné : **même stencil que `Volume::apply`** en mode à couvercle fixe, mais sans
 /// budget coopératif — un niveau grossier n'est jamais interrompu à mi-parcours. Un essai compare
 /// les deux au bit sur la grille fine, pour que cette écriture ne puisse pas diverger de l'autre.
+/// ADR-167 : une fraction négative marque l'air du mode mobile — Dirichlet à demi-maille vers elle.
+/// Le chemin à couvercle n'a jamais de fraction négative, et reste identique au bit.
 pub(super) fn apply_level(
     nx: usize,
     nz: usize,
@@ -97,7 +106,7 @@ pub(super) fn apply_level(
     for i in 0..nx {
         for k in 0..nz {
             let c = k * nx + i;
-            if frac[c] == 0. {
+            if frac[c] <= 0. {
                 out[c] = 0.;
                 continue;
             }
@@ -110,6 +119,7 @@ pub(super) fn apply_level(
                     let a = af;
                     match n {
                         Some(j) if frac[j] > 0. => acc += a * (p[c] - p[j]),
+                        Some(j) if frac[j] < 0. => acc += 2. * a * p[c],
                         Some(_) => {}
                         None if dirichlet => acc += 2. * a * p[c],
                         None => {}
@@ -142,7 +152,7 @@ pub(super) fn diagonal(
     for i in 0..nx {
         for k in 0..nz {
             let c = k * nx + i;
-            if frac[c] == 0. {
+            if frac[c] <= 0. {
                 out[c] = 0.;
                 continue;
             }
@@ -154,6 +164,7 @@ pub(super) fn diagonal(
                     }
                     match n {
                         Some(j) if frac[j] > 0. => acc += af,
+                        Some(j) if frac[j] < 0. => acc += 2. * af,
                         Some(_) => {}
                         None if dirichlet => acc += 2. * af,
                         None => {}
@@ -208,6 +219,24 @@ pub(super) fn coarsen_into(
             let (fi, fk) = (2 * i, 2 * k);
             let a = open_w[fk * nx + fi] + open_w[fk * nx + fi + 1];
             level.open_w[k * cx + i] = 0.5 * a;
+        }
+    }
+}
+
+/// ADR-167 — fractions mobiles d'un niveau depuis celles du niveau fin (`fine(c)`, même codage) :
+/// active si une fille l'est, avec la moyenne des fractions actives ; sinon air si une fille est
+/// d'air, solide autrement. Recalculées à chaque projection, sans allocation.
+pub(super) fn coarsen_mobile(nx: usize, cx: usize, cz: usize, fine: &dyn Fn(usize) -> f32, out: &mut [f32]) {
+    for i in 0..cx {
+        for k in 0..cz {
+            let (fi, fk) = (2 * i, 2 * k);
+            let children = [fk * nx + fi, fk * nx + fi + 1, (fk + 1) * nx + fi, (fk + 1) * nx + fi + 1];
+            let (mut active, mut air) = (0f32, false);
+            for c in children {
+                let v = fine(c);
+                if v > 0. { active += v; } else if v < 0. { air = true; }
+            }
+            out[k * cx + i] = if active > 0. { 0.25 * active } else if air { -1. } else { 0. };
         }
     }
 }

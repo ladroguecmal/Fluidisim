@@ -78,6 +78,8 @@ thread_local! {
     // il ne paie pas encore (MULTIGRILLE-S245 §3). Les essais l'allument pour le mesurer ; le chemin
     // de production reste exactement celui de S244, au bit.
     pub(crate) static MULTIGRID_ON: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
+    /// ADR-167 : témoin de Jacobi du mode mobile, pour comparer au cycle multigrille.
+    pub(crate) static MOBILE_MULTIGRID_OFF: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
     pub(crate) static TOLERANCE_TRACE_PLAIN: core::cell::RefCell<Vec<f64>> =
         const { core::cell::RefCell::new(Vec::new()) };
 }
@@ -265,6 +267,8 @@ pub struct Volume {
     levels: Vec<multigrid::Level>,
     /// S237 : inverse de la diagonale de l'opérateur mobile (préconditionneur de Jacobi).
     prec: Vec<f32>,
+    /// ADR-167 : `z = M⁻¹r` du cycle multigrille mobile ; vide quand la grille ne se divise pas.
+    mobile_z: Vec<f32>,
 }
 
 impl Volume {
@@ -368,6 +372,8 @@ impl Volume {
             mobile: false,
             prec: vec![0.0f32; nx * nz],
             levels: Vec::new(),
+            // Compté par `hierarchy_floats` dès qu'un niveau existe.
+            mobile_z: vec![0.0f32; if multigrid::level_count(nx, nz) > 0 { c } else { 0 }],
         };
         v.cut();
         v.seal_isolated();
@@ -443,7 +449,7 @@ impl Volume {
             }
             let (cx, cz) = (first.nx, first.nz);
             multigrid::restrict(nx, &tmp, cx, cz, &mut first.r);
-            self.coarse_cycle(ctl)?;
+            self.coarse_cycle(false, ctl)?;
             let first = &self.levels[0];
             multigrid::prolong_add(nx, &mut z, first.nx, first.nz, &first.x);
         }
@@ -463,7 +469,8 @@ impl Volume {
 
     /// Descente puis remontée sur les niveaux grossiers. Écrite en deux boucles plutôt qu'en
     /// récursion : les emprunts de deux niveaux voisins y restent lisibles.
-    fn coarse_cycle(&mut self, ctl: &mut Control) -> Result<(), Error> {
+    /// ADR-167 : `mobile` choisit les fractions et diagonales mobiles des niveaux.
+    fn coarse_cycle(&mut self, mobile: bool, ctl: &mut Control) -> Result<(), Error> {
         let last = self.levels.len() - 1;
         for l in 0..=last {
             ctl.poll(Phase::Pressure)?;
@@ -475,9 +482,10 @@ impl Volume {
                 }
                 for _ in 0..sweeps {
                     let mut t = core::mem::take(&mut level.t);
+                    let (frac, diag) = if mobile { (&level.mobile_frac, &level.mobile_diag) } else { (&level.frac, &level.diag) };
                     multigrid::smooth(
                         level.nx, level.nz, level.inv, &level.open_u, &level.open_w,
-                        &level.frac, &level.diag, &level.r, &mut level.x, &mut t,
+                        frac, diag, &level.r, &mut level.x, &mut t,
                     );
                     level.t = t;
                 }
@@ -487,9 +495,10 @@ impl Volume {
                 let level = &mut head[l];
                 let next = &mut tail[0];
                 let mut t = core::mem::take(&mut level.t);
+                let frac = if mobile { &level.mobile_frac } else { &level.frac };
                 multigrid::apply_level(
                     level.nx, level.nz, level.inv, &level.open_u, &level.open_w,
-                    &level.frac, &level.x, &mut t,
+                    frac, &level.x, &mut t,
                 );
                 for c in 0..level.cells() {
                     t[c] = level.r[c] - t[c];
@@ -509,14 +518,116 @@ impl Volume {
             let level = &mut self.levels[l];
             for _ in 0..multigrid::POST_SWEEPS {
                 let mut t = core::mem::take(&mut level.t);
+                let (frac, diag) = if mobile { (&level.mobile_frac, &level.mobile_diag) } else { (&level.frac, &level.diag) };
                 multigrid::smooth(
                     level.nx, level.nz, level.inv, &level.open_u, &level.open_w,
-                    &level.frac, &level.diag, &level.r, &mut level.x, &mut t,
+                    frac, diag, &level.r, &mut level.x, &mut t,
                 );
                 level.t = t;
             }
         }
         Ok(())
+    }
+
+    /// ADR-167 — fractions et diagonales mobiles de tous les niveaux, depuis les mailles mouillées
+    /// de la géométrie courante. Appelée après `rhs_mobile`, la surface étant figée pour la
+    /// projection. Aucune allocation : les tableaux sont ceux de la configuration.
+    fn prepare_mobile_levels(&mut self, ctl: &mut Control) -> Result<(), Error> {
+        ctl.check(Phase::Pressure)?;
+        let mut levels = core::mem::take(&mut self.levels);
+        let nx = self.domain.nx;
+        for l in 0..levels.len() {
+            let (head, tail) = levels.split_at_mut(l);
+            let level = &mut tail[0];
+            match head.last() {
+                None => {
+                    let fine = |c: usize| {
+                        if self.wet_cell(c) { self.frac[c] } else if self.frac[c] > 0. { -1. } else { 0. }
+                    };
+                    multigrid::coarsen_mobile(nx, level.nx, level.nz, &fine, &mut level.mobile_frac);
+                }
+                Some(prev) => {
+                    let fine = |c: usize| prev.mobile_frac[c];
+                    multigrid::coarsen_mobile(prev.nx, level.nx, level.nz, &fine, &mut level.mobile_frac);
+                }
+            }
+            multigrid::diagonal(
+                level.nx, level.nz, level.inv, &level.open_u, &level.open_w,
+                &level.mobile_frac, &mut level.mobile_diag,
+            );
+        }
+        self.levels = levels;
+        ctl.poll(Phase::Pressure)
+    }
+
+    /// ADR-167 — cycle en V du mode mobile : `mobile_z = M⁻¹·res`. Niveau fin : opérateur mobile
+    /// exact et Jacobi amorti sur sa diagonale (`prec`, écrit par `rhs_mobile`) ; niveaux grossiers
+    /// mobiles ; résultat nul hors des mailles de diagonale positive. Même symétrie qu'ADR-147.
+    fn v_cycle_mobile(&mut self, ctl: &mut Control) -> Result<(), Error> {
+        let cells = self.domain.cells();
+        let r = core::mem::take(&mut self.res);
+        let mut z = core::mem::take(&mut self.mobile_z);
+        let mut tmp = core::mem::take(&mut self.tmp);
+        let result = self.v_cycle_mobile_in(&r, &mut z, &mut tmp, cells, ctl);
+        self.res = r;
+        self.mobile_z = z;
+        self.tmp = tmp;
+        result
+    }
+
+    fn v_cycle_mobile_in(&mut self, r: &[f32], z: &mut [f32], tmp: &mut [f32], cells: usize,
+        ctl: &mut Control) -> Result<(), Error> {
+        z.fill(0.);
+        for _ in 0..multigrid::PRE_SWEEPS {
+            self.apply_mobile(z, tmp, ctl)?;
+            for c in 0..cells {
+                if self.prec[c] > 0. {
+                    z[c] += multigrid::SMOOTH_DAMPING * self.prec[c] * (r[c] - tmp[c]);
+                }
+            }
+        }
+        self.apply_mobile(z, tmp, ctl)?;
+        for c in 0..cells {
+            tmp[c] = if self.prec[c] > 0. { r[c] - tmp[c] } else { 0. };
+        }
+        let (nx, cx, cz) = (self.domain.nx, self.levels[0].nx, self.levels[0].nz);
+        multigrid::restrict(nx, tmp, cx, cz, &mut self.levels[0].r);
+        self.coarse_cycle(true, ctl)?;
+        let first = &self.levels[0];
+        multigrid::prolong_add(nx, z, first.nx, first.nz, &first.x);
+        for _ in 0..multigrid::POST_SWEEPS {
+            self.apply_mobile(z, tmp, ctl)?;
+            for c in 0..cells {
+                if self.prec[c] > 0. {
+                    z[c] += multigrid::SMOOTH_DAMPING * self.prec[c] * (r[c] - tmp[c]);
+                }
+            }
+        }
+        for c in 0..cells {
+            if !(self.prec[c] > 0.) {
+                z[c] = 0.;
+            }
+        }
+        ctl.poll(Phase::Pressure)
+    }
+
+    /// ADR-167 — `dir ← z + β·dir` avec `z` du cycle mobile ; rend `⟨r, z⟩`. Même forme que
+    /// `multigrid_into_dir` (A285 : `β` formé après le cycle, sur `⟨r_n, z_n⟩`).
+    fn mobile_multigrid_into_dir(&mut self, previous_rz: f32, jobs: &dyn JobSystem,
+        ctl: &mut Control) -> Result<f32, Error> {
+        self.v_cycle_mobile(ctl)?;
+        let rz = self.dot(&self.res, &self.mobile_z, jobs, ctl)?;
+        if !rz.is_finite() {
+            return Err(Error::NotFinite);
+        }
+        let beta = if previous_rz == 0. { 0. } else { rz / previous_rz };
+        for c in 0..self.domain.cells() {
+            ctl.poll(Phase::Pressure)?;
+            if self.frac[c] > 0. {
+                self.dir[c] = self.mobile_z[c] + beta * self.dir[c];
+            }
+        }
+        Ok(rz)
     }
 
     /// Diagonale de l'opérateur fin en une maille, dans l'ordre de sommation d'`apply`.
@@ -570,6 +681,8 @@ impl Volume {
                 x: vec![0.; cx * cz],
                 r: vec![0.; cx * cz],
                 t: vec![0.; cx * cz],
+                mobile_frac: vec![0.; cx * cz],
+                mobile_diag: vec![0.; cx * cz],
             };
             match self.levels.last() {
                 Some(prev) => multigrid::coarsen_into(
@@ -1001,7 +1114,14 @@ impl Volume {
         self.rhs = rhs;
         result?;
         // S237 : le mode mobile assemble son second membre et son préconditionneur à part.
-        let jacobi = self.mobile;
+        // ADR-167 : il est préconditionné par la multigrille mobile quand la grille se divise ;
+        // Jacobi reste son chemin sans niveaux, et le témoin des essais.
+        #[cfg(test)]
+        let mobile_mg_off = MOBILE_MULTIGRID_OFF.with(|c| c.get());
+        #[cfg(not(test))]
+        let mobile_mg_off = false;
+        let mobile_mg = self.mobile && !self.levels.is_empty() && !mobile_mg_off;
+        let jacobi = self.mobile && !mobile_mg;
         // S245 : multigrille sur le chemin à couvercle fixe, quand la grille se divise. Un
         // préconditionneur ne change que les directions de recherche ; l'acceptation reste celle
         // d'ADR-144, appliquée au même vrai résidu recalculé.
@@ -1010,8 +1130,11 @@ impl Volume {
         #[cfg(not(test))]
         let forced = false;
         let multigrid_on = (multigrid || forced) && !self.mobile && !self.levels.is_empty();
-        if jacobi {
+        if self.mobile {
             self.rhs_mobile(scale, ctl)?;
+            if mobile_mg {
+                self.prepare_mobile_levels(ctl)?;
+            }
         } else {
         for i in 0..nx {
             for k in 0..nz {
@@ -1040,6 +1163,8 @@ impl Volume {
         let mut seeded = None;
         if jacobi {
             self.precondition_into_dir(0., ctl)?;
+        } else if mobile_mg {
+            seeded = Some(self.mobile_multigrid_into_dir(0., jobs, ctl)?);
         } else if multigrid_on {
             seeded = Some(self.multigrid_into_dir(0., jobs, ctl)?);
         } else {
@@ -1099,6 +1224,8 @@ impl Volume {
                     let beta = zn / rz;
                     self.precondition_into_dir(beta, ctl)?;
                     rz = zn;
+                } else if mobile_mg {
+                    rz = self.mobile_multigrid_into_dir(rz, jobs, ctl)?;
                 } else if multigrid_on {
                     // `β = ⟨r_{n+1}, z_{n+1}⟩ / ⟨r_n, z_n⟩` : le cycle est appliqué d'abord, et
                     // c'est lui qui fournit le produit. S252 (A285) : on lui passe `⟨r_n, z_n⟩`,
@@ -1190,6 +1317,8 @@ impl Volume {
             if jacobi {
                 self.precondition_into_dir(0., ctl)?;
                 rz = self.dot_prec(&self.res, jobs, ctl)?;
+            } else if mobile_mg {
+                rz = self.mobile_multigrid_into_dir(0., jobs, ctl)?;
             } else if multigrid_on {
                 rz = self.multigrid_into_dir(0., jobs, ctl)?;
             } else {
