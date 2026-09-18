@@ -79,9 +79,17 @@ puis ouvrir le blocage suivant.
   d'ADR-120, sans le présenter comme la houle complète.
 - [x] **P4** — verdict d'usage : garanties de fonctionnement, seuils justifiés par l'usage ou
   proposés à l'utilisateur, raccord δ→rendu manquant, besoins découverts dans liste et file.
-- [ ] **P5** — blocage suivant de la feuille de route : choix argumenté, critère, premier lot
-  (plan amendé ici avant de le construire).
-- [ ] **P6** — rituel §6.
+- [>] **P5** — blocage suivant, choisi : coût du pas couplé mobile (A276, ADR-147 point 5).
+  *Amendement 19:39* : lot découpé en P5–P8, rituel en P9. P5 = ADR-167 et critères écrits
+  avant le code (COUT-MOBILE-S274).
+- [ ] **P6** — multigrille mobile : niveaux grossiers recalculés par pas depuis les mailles
+  mouillées (Dirichlet vers l'air, Neumann vers le solide), mémoire comptée à la configuration,
+  chemin ordinaire inchangé au bit ; essais de symétrie et de positivité.
+- [ ] **P7** — branchement dans `project` en mode mobile, témoin Jacobi conservé en essai ;
+  essais d'accord avec le témoin, refus/expiration/allocation ; suite complète.
+- [ ] **P8** — mesure : itérations et ms par pas, S253 128 colonnes et houle fine ; réceptions
+  S253 rejouées ; techniques présentes/absentes/domaine (ADR-131).
+- [ ] **P9** — rituel §6.
 
 ### Notes de reprise
 
