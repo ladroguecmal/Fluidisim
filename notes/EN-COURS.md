@@ -58,92 +58,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S277 — terminée
+Session : S278 — en cours
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
-Entrée : l'utilisateur signale que `cargo run … -- --delta --delta-direct` depuis la racine
-« n'ouvre rien ». Constat (terminal) : cache des rejeux cherché relativement au dossier courant,
-donc manqué depuis la racine ; ~3 min de précalcul muet, interrompu. master cafcea6.
-Objectif : lancement immédiat depuis n'importe quel dossier, direct sans précalcul, progression
-annoncée quand un calcul est nécessaire.
+Entrée : l'utilisateur demande si le système qui décide entre simulation volumétrique, haute mer
+analytique et zone de transition existe — réponse S277 : **conçu depuis S01, jamais écrit** — puis
+demande de l'établir. master 4265d22.
+Objectif : **ce qui décide, écrit et éprouvé**. Un ordonnanceur qui, à chaque pas, reçoit des
+candidats `(priorité P, coût C)`, trie par `P/C`, alloue sous budget et distribue à chacun son
+`budget_ms` (ADR-012 §1) ; hystérésis 0,60 / 0,40 et durées de vie (ADR-013 §5) pour qu'aucune
+décision ne batte. Déterministe (I-03), sans allocation à l'exécution (I-06).
+
+**Ce que S278 ne fait pas, et qu'il ne faut pas croire fait** : la grille de référence et les blocs
+épars (liste 1.5, 1.6), la fusion et la séparation géométriques, les sept rangs de dégradation
+(ADR-012 §4), le régime substitutif et sa restauration depuis graine. L'ordonnanceur décide
+**qu'un** domaine vit et avec quel budget ; il ne décide pas encore de sa forme.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — cache sous `viewer/` quel que soit le dossier courant ; `--delta-direct` sans
-  rejeux ; message et progression du précalcul ; essai du lancement depuis la racine.
-- [x] **P3** — verdict R10 : les deux retours de l'utilisateur, leurs causes mesurées, la suite
-  en file. *(Découpage déclaré en cours de session : le verdict est arrivé pendant S277.)*
-- [x] **P4** — onde injectée : `Live` accepte une surface initiale, `--onde` la pose (bosse
-  gaussienne au centre du domaine) ; elle naît, se propage, renaît sur **Début**. Relevé de
-  l'amplitude et de la position du maximum sur 30 s.
-- [x] **P5** — l'interaction, mesurée : la même onde sur la houle et sur une mer plate ; la
-  différence est l'effet de B sur l'onde, et c'est exactement ce que l'utilisateur veut voir.
-- [x] **P6** — balayage des régimes : où `u_orbital/c` devient assez grand pour que la déformation
-  se voie. **Un seul levier praticable** — la houle cambrée : l'onde plus courte est fermée par la
-  résolution du domaine (`DX` = 2 m, il faut `λ ≥ 8·DX` = 16 m, et `σ` = 8 m y est déjà). Cas
-  `Hs`/`Tp` : 2/8 (référence, 15 %), 4/8 (31 %), 4/6 (41 %), 6/6 (62 %) ; durée réduite à 10 s,
-  onde sur mer plate calculée une seule fois.
-- [x] **P6b** — ce qu'il regarde : pose qui montre l'onde traverser la houle, capture, commande.
-- [x] **P7** — rituel §6.
-
-**P4 relevé** (`--delta --onde-mesure`, bosse 0,6 m, σ 8 m) : la bosse se sépare en deux fronts
-qui avancent de 13 m à 2 s jusqu'à ≈ 105 m à 24 s, soit **4,2 m/s** de vitesse apparente ;
-l'amplitude tombe de 0,59 m à ≈ 0,20 m en 2 s (séparation) puis décroît lentement par dispersion,
-0,12–0,16 m après 20 s. **Les deux fronts ne sont pas symétriques** alors que l'onde initiale
-l'est : à 8 s le maximum gauche est à −41 m et le droit à +23 m. La houle se propage vers +x et
-c'est la seule chose qui brise la symétrie — mais le relevé suit le maximum de |η'|, qui saute
-d'une oscillation à l'autre : **P5 doit le prouver par différence, pas par ce relevé**. Au-delà de
-24 s le maximum tombe dans l'éponge (|x| > 96 m) et ne désigne plus le front : restreindre P5 au
-domaine utile.
-
-**P5 : l'interaction est faible — 4 à 8 % de l'onde en régime** ([mesure](../docs/validation/ONDE-INJECTEE-S277.md)).
-Symétrie gauche/droite brisée de 1 à 4 % seulement ; contrôle interne : sur mer plate l'énergie des
-deux côtés reste égale à 1,000 exactement. Cohérent avec `u_orbital/c ≈ 15 %` (0,785 m/s contre
-≈ 5,1 m/s de vitesse de phase, λ ≈ 16,6 m). **Donc invisible à l'œil dans cette houle** : 5 % de
-10 cm font 5 mm. Ce que l'utilisateur veut voir demande un régime à `u_orbital/c` grand — houle plus
-cambrée ou onde plus courte — **non mesuré**, c'est la suite. Une exécution coûte 2 min 16 (trois
-domaines × 30 s) : raccourcir la durée pour un balayage de régimes.
-
-**P6 : la cambrure commande.** Écart/onde 8,8 % → 28,2 % → 73,3 % quand `ak` va de 0,063 à 0,224
-(`Hs`/`Tp` 2/8, 4/8, 4/6). **4 m / 8 s est le compromis lisible** : 28 % de déformation, correction
-couplée (75 mm) du même ordre que l'onde (87 mm). À 4/6 la correction couplée écrase l'onde
-(223 mm). **6/6 refuse : `pas δ en direct : Domain`** — garde de géométrie non tenue, cause non
-diagnostiquée, peut-être la hauteur libre (REST 96 m, sommet 102 m). Ne pas en conclure une limite
-physique sans l'avoir cherchée.
-
-*Découpage déclaré le 2026-09-18 à 21:41 : l'utilisateur a demandé l'onde injectée maintenant.
-Le rituel, déclaré P3 puis P4, devient P7 — il reste la dernière étape.*
+- [ ] **P1** — amorce, jeton et plan seuls.
+- [ ] **P2** — `scheduler.rs` : les types et leur sens — candidat, décision, budget, profil,
+  état d'un domaine. Aucune logique de tri ; essais de forme et de contrat.
+- [ ] **P3** — priorité `P = gameplay × perception × urgence` (ADR-012 §2) et score à hystérésis
+  0,60 / 0,40 (ADR-013 §5). Essai : un candidat qui oscille autour d'un seuil ne bat pas.
+- [ ] **P4** — le sac à dos : tri par `P/C` décroissant, allocation jusqu'au budget, distribution
+  d'un `budget_ms` par domaine retenu. Essais : budget jamais dépassé, décision déterministe.
+- [ ] **P5** — le temps : durée de vie minimale 0,75 s, délai d'extinction 1,0 s sous le seuil,
+  fenêtre d'engagement 1 s. Essai : rien ne meurt avant son terme.
+- [ ] **P6** — le banc qui prouve : un domaine s'allume à l'approche, suit l'objet, s'éteint après
+  son départ ; sans battement, sous budget, mêmes décisions à deux exécutions.
+- [ ] **P7** — rituel §6.
 
 ### Notes de reprise
 
-Rejeu partiel écrit à la racine par le lancement interrompu : **retiré** en P2.
+Conception à suivre, à ne pas réinventer : ADR-012 §1 (sac à dos, cinq lignes), §2 (priorité,
+perception en **surface écran** et non en distance), §3 (profil : ressources seulement — une
+capacité dérivée inscrite dans un profil finit par contredire ses ressources) ; ADR-013 §5
+(seuils de départ, **tous à calibrer**) ; ADR-006 §4 (hystérésis, durée de vie, pool — le vrai
+risque est le battement d'**allocation**, pas le battement logique).
 
-P2 mesuré depuis la racine, binaire déjà bâti : fenêtre en **1,1 s** avec `--delta`, **1,4 s** avec
-`--delta --delta-direct` (contre ~3 min muettes avant). `--delta-mesure` relit les deux caches en
-1,2 s et rend les chiffres de S275 au chiffre près. Cache du 16 ms effacé puis recalculé :
-**identique au bit** à l'ancien, 38,6 s annoncées 34 s après vingt pas. Essais 21/21,
-`--delta-direct-verify` identique au bit au rejeu (coût médian 23,1 ms).
-
-Tous les chemins `captures/` du viewer sont ancrés au crate par `captures!`, pas seulement le
-cache : une revue lancée depuis la racine écrivait ses images à la racine.
-
-**Verdict R10 reçu le 2026-09-18, en deux points** : (1) le motif de surface est trop répétitif,
-pas réaliste ; (2) les vagues et vaguelettes doivent interagir avec l'onde.
-
-Causes **mesurées** en P3 par `code/water-core/examples/bandes_s277.rs` — houle δ contre mer
-S201 : λ 40,1–198,7 m (rapport 5,0) contre 3,7–210,7 m (56,2) ; étalement 0,00° contre 87,19° ;
-écart-type de η le long des crêtes **0,0000 m** contre 0,2872 m. Le constat de l'utilisateur est
-exact. Lecture du code qui l'explique :
-- la houle de `--delta` est la plus pauvre du dépôt **par choix de mesure** : `spread_turns: 0.`
-  (étalement nul), bande `0,7–1,6 fp`, 32 composantes colinéaires. La scène S201 a `spread_turns:
-  0.25` et une bande `0,5–4 fp` ; `--houle` y assemble en plus une houle longue et 64 composantes
-  de queue ;
-- le domaine δ est une **tranche 2D** `Domain { nx, nz, dx }` — aucune dimension y. Le profil de
-  128 colonnes est répété tel quel sur 200 m de large, fondu compris. L'étalement nul n'est pas un
-  choix esthétique : une houle étalée ne serait pas constante le long de y, et la tranche ne
-  saurait pas la porter ;
-- la queue spectrale S256 (les vaguelettes) est un **habillage de pentes non couplé à δ**, écrit
-  tel quel dans DELTA-VISIBLE-S275. Elle ne peut donc pas interagir avec l'onde aujourd'hui.
-
-Les deux retours désignent donc la même limite structurelle, pas un défaut de rendu : **δ général**
-au sens d'ADR-127.
+`delta_budget.rs` porte déjà le contrôle coopératif **à l'intérieur** d'un pas (arrêt atomique,
+`BudgetReport`) : c'est le contrat que l'ordonnanceur suppose (ADR-012 §1 point 5), pas un
+concurrent. L'ordonnanceur ne calcule ni `W_gameplay` ni `W_perception` — ils viennent de l'hôte.
