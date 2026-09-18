@@ -66,8 +66,8 @@ Objectif : faire progresser les bords ouverts du pas volumique couplé J2.
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [>] **P2** — lire les contrats et le code, définir le lot borné et ses critères avant construction.
-- [ ] **P3** — construire le raccordement retenu et ses contrôles analytiques ciblés.
+- [x] **P2** — lire les contrats et le code, définir le lot borné et ses critères avant construction.
+- [>] **P3** — construire le raccordement retenu et ses contrôles analytiques ciblés.
 - [ ] **P4** — vérifier le chemin consommateur et les régressions ; publier preuves et limites.
 - [ ] **P5** — rituel §6 : journal, file entière, feuille de route, index et jeton.
 
@@ -75,3 +75,6 @@ Objectif : faire progresser les bords ouverts du pas volumique couplé J2.
 
 Le rendu accepté reste celui de S267. Lot physique distinct : relaxation de la hauteur
 perturbative et éponge aux bords, sans prétendre recevoir les frontières du total ni B4 global.
+
+P2 : absence confirmée de relaxation de hauteur ; lot ADR-164, critères avant code.
+Frontière transparente et réflexion de paquet restent la suite, pas reçues par ce lot.
