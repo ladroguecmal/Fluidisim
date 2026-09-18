@@ -71,7 +71,9 @@ annoncée quand un calcul est nécessaire.
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — cache sous `viewer/` quel que soit le dossier courant ; `--delta-direct` sans
   rejeux ; message et progression du précalcul ; essai du lancement depuis la racine.
-- [ ] **P3** — rituel §6.
+- [ ] **P3** — verdict R10 : les deux retours de l'utilisateur, leurs causes mesurées, la suite
+  en file. *(Découpage déclaré en cours de session : le verdict est arrivé pendant S277.)*
+- [ ] **P4** — rituel §6.
 
 ### Notes de reprise
 
@@ -86,4 +88,20 @@ P2 mesuré depuis la racine, binaire déjà bâti : fenêtre en **1,1 s** avec `
 Tous les chemins `captures/` du viewer sont ancrés au crate par `captures!`, pas seulement le
 cache : une revue lancée depuis la racine écrivait ses images à la racine.
 
-R10 toujours sans verdict — c'est ce que l'utilisateur veut faire.
+**Verdict R10 reçu le 2026-09-18, en deux points** : (1) le motif de surface est trop répétitif,
+pas réaliste ; (2) les vagues et vaguelettes doivent interagir avec l'onde.
+
+Causes lues dans le code avant d'écrire le verdict, à vérifier en P3 :
+- la houle de `--delta` est la plus pauvre du dépôt **par choix de mesure** : `spread_turns: 0.`
+  (étalement nul), bande `0,7–1,6 fp`, 32 composantes colinéaires. La scène S201 a `spread_turns:
+  0.25` et une bande `0,5–4 fp` ; `--houle` y assemble en plus une houle longue et 64 composantes
+  de queue ;
+- le domaine δ est une **tranche 2D** `Domain { nx, nz, dx }` — aucune dimension y. Le profil de
+  128 colonnes est répété tel quel sur 200 m de large, fondu compris. L'étalement nul n'est pas un
+  choix esthétique : une houle étalée ne serait pas constante le long de y, et la tranche ne
+  saurait pas la porter ;
+- la queue spectrale S256 (les vaguelettes) est un **habillage de pentes non couplé à δ**, écrit
+  tel quel dans DELTA-VISIBLE-S275. Elle ne peut donc pas interagir avec l'onde aujourd'hui.
+
+Les deux retours désignent donc la même limite structurelle, pas un défaut de rendu : **δ général**
+au sens d'ADR-127.
