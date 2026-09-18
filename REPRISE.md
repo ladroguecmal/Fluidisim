@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-18 22:18 +02:00
+Battement        : 2026-09-18 22:26 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
 Session en cours : S278 — l'ordonnanceur : ce qui décide qu'une zone est simulée, analytique ou en transition
 Dernière session : S277 — lancement depuis la racine corrigé, verdict R10 consigné, onde injectée dans δ et mesurée

@@ -75,8 +75,8 @@ décision ne batte. Déterministe (I-03), sans allocation à l'exécution (I-06)
 
 ### Plan
 
-- [ ] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — `scheduler.rs` : les types et leur sens — candidat, décision, budget, profil,
+- [x] **P1** — amorce, jeton et plan seuls.
+- [x] **P2** — `scheduler.rs` : les types et leur sens — candidat, décision, budget, profil,
   état d'un domaine. Aucune logique de tri ; essais de forme et de contrat.
 - [ ] **P3** — priorité `P = gameplay × perception × urgence` (ADR-012 §2) et score à hystérésis
   0,60 / 0,40 (ADR-013 §5). Essai : un candidat qui oscille autour d'un seuil ne bat pas.
