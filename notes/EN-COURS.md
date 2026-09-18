@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S268 — en cours
+Session : S268 — terminée
 Agent : Codex, GPT-6 ; fichiers, git, cargo, Python, GPU local et accès web.
 Entrée : « continue ». Copie unique master propre c9fd0d3, jeton libre.
 Objectif : faire progresser les bords ouverts du pas volumique couplé J2.
@@ -69,7 +69,7 @@ Objectif : faire progresser les bords ouverts du pas volumique couplé J2.
 - [x] **P2** — lire les contrats et le code, définir le lot borné et ses critères avant construction.
 - [x] **P3** — construire le raccordement retenu et ses contrôles analytiques ciblés.
 - [x] **P4** — vérifier le chemin consommateur et les régressions ; publier preuves et limites.
-- [>] **P5** — rituel §6 : journal, file entière, feuille de route, index et jeton.
+- [x] **P5** — rituel §6 : journal, file entière, feuille de route, index et jeton.
 
 ### Notes de reprise
 
@@ -85,3 +85,5 @@ Test runtime : 607 expirations, rollback/reprise au bit, zéro allocation. Suite
 
 P4 : suite complète 473 réussis, 18 ignorés, zéro échec. Critères du lot reçus ;
 réflexion de paquet non mesurée, prochaine capacité S269. Aucun changement du rendu.
+
+P5 : rituel terminé, suite S269 réception de réflexion. Aucun rendu modifié.

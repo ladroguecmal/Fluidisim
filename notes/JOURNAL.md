@@ -13618,3 +13618,34 @@ promesse de les attribuer par raisonnement. Aucun arbitrage utilisateur nouveau 
 I-03 cœur inchangé, I-06 update mesuré, I-09 aucune interpolation temporelle, I-13 rendu
 cosmétique, I-14 seuils de rentabilité déclarés. δ, V, B2, bathymétrie et seconde cible
 gardent leurs travaux. Jeton libéré, aucune copie isolée à fermer.
+
+
+## S268 — Relaxation de la hauteur perturbative dans le pas mobile
+
+**2026-09-18, Codex GPT-6.** Entrée « continue », master propre c9fd0d3, copie unique.
+Plan 9f17665, contrat de78c26, construction 1f04add, réception 324863f.
+Absence constatée : l'éponge S250/S253 amortissait les vitesses mais pas η'.
+Lot borné avant code à cette brique, sans déclarer les frontières ouvertes reçues.
+
+**Capacité reçue, maillons 0 :** `step_perturbation_mobile` applique après transport
+la relaxation exponentielle de η' vers zéro (ADR-164), fond intact, reste compensé
+amorti lui aussi, intérieur et taux nul au bit. Consommateur : pas mobile transactionnel
+existant. Preuve : [RELAXATION-SURFACE-S268](../docs/validation/RELAXATION-SURFACE-S268.md),
+référence exponentielle indépendante, 20 pas avec fond non nul, témoin vitesse seule,
+607 expirations/reprises exactes et zéro allocation. Suite complète cœur/harnais
+**473 réussis, 18 ignorés, 0 échec** ; reçus sans éponge conservés. Rendu inchangé.
+
+**Limites :** dissipation locale, pas absorption globale reçue ; fermeture extérieure
+réfléchissante, volume perturbatif non conservé, pas de transduction W. Ni réflexion
+<1 %, ni fond traversant, ni frontières du total, ni B4 global acquis. Aucune mesure de
+coût ; durée entière, calcul de coefficient ADR-141, I-05 mural reste non reçu.
+
+**Suite S269 :** mesurer la réflexion d'un paquet sortant avec témoin et contrôle de
+contamination des fenêtres incident/réfléchi (ADR-046), puis fond traversant. Cette
+preuve commande l'usage ouvert du domaine ; la seule décroissance locale ne suffit pas.
+
+**Rituel :** file active entière relue ; J2, A92/A50, index actualisés. Invariants I-04
+(non autoritaire), I-05 (transaction testée, pas budget mural), I-06 (zéro allocation),
+I-08 (coefficients ADR-141) et I-14 (paramètres d'essai non calibrés) relus. δ général,
+V, B2, bathymétrie et multiplateforme restent dans la file. Jeton libre, aucune copie
+isolée à fermer ; aucun arbitrage utilisateur nouveau requis.

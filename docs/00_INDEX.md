@@ -62,6 +62,7 @@
 - [Reflets de la queue non résolue, comparaison R7 et coût](validation/REFLETS-S265.md).
 - [Optimisation des reflets validés : cache rejeté, sommes exactes retenues](validation/CIEL-CACHE-S266.md).
 - [Cuisson du sillage : mêmes grilles et images, coût réduit](validation/CUISSON-SILLAGE-S267.md).
+- [Relaxation de hauteur dans le pas mobile couplé](validation/RELAXATION-SURFACE-S268.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -241,6 +242,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-161](adr/ADR-161-reflets-de-la-queue-non-resolue.md) | Filtrer les reflets de la queue non résolue |
 | [ADR-162](adr/ADR-162-ciel-precalcule-des-reflets.md) | Ciel précalculé des reflets (candidat rejeté, remplacé par ADR-163) |
 | [ADR-163](adr/ADR-163-sommes-des-ondes-filtrees.md) | Regrouper les ondes filtrées sans changer le reflet |
+| [ADR-164](adr/ADR-164-relaxation-hauteur-perturbative.md) | Relaxation de la hauteur perturbative dans l’éponge mobile |
 
 ## Travail et historique
 

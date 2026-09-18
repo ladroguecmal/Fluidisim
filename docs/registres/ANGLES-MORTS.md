@@ -3682,3 +3682,13 @@ CPU médian ~4,1 ms, maxima ~26 ms. Pas d'attribution aux allocations, au pilote
 système sans mesure ; budget global et borne par image non reçus. Déclencheur :
 prochain lot de coût après les bords ouverts J2, avec séparation des postes CPU/GPU.
 [Preuve](../validation/CUISSON-SILLAGE-S267.md).
+
+
+**Suivi A92/A50 — S268, 2026-09-18 (sévérités conservées).** Le pas mobile couplé
+amortit désormais η' en plus du prédicteur de vitesse (ADR-164) ; étape locale et
+transaction reçues, fond préservé. Cela ne reçoit ni réflexion ni largeur d'éponge :
+la fermeture extérieure reste réfléchissante, aucune transduction vers W n'existe.
+Un fond traversant et les frontières du total restent hors réception. Déclencheur
+immédiat S269 : paquet sortant avec mesure intégrée à jauge et garde contre la
+contamination des fenêtres selon ADR-046 ; ne pas hériter du 1 % du véhicule 1D.
+[Preuve](../validation/RELAXATION-SURFACE-S268.md).

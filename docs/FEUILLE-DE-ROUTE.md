@@ -240,8 +240,13 @@ raccordement au rendu et B4 global.
 horizontale constante, `W` par continuité, `P` de Taylor d'ordre un). Il est identique au bit
 au-dessous et reçu contre l'oracle S253 : à 128 colonnes, 0,168 % / 0,58 % à 5 cm et 0,244 % /
 0,66 % à 10 cm, décroissants. Le pas couplé le consomme (50 pas, faces des crêtes comprises).
-[Preuve](validation/PROLONGEMENT-FOND-S254.md). Restent les couches W au-dessus du plan moyen,
-les bords ouverts et les frontières du total.
+[Preuve](validation/PROLONGEMENT-FOND-S254.md).
+**S268 : hauteur perturbative amortie dans l'éponge du pas mobile** (ADR-164), après transport,
+fond analytique intact et intérieur au bit. Exponentielle locale reçue, 20 pas couplés et
+607 expirations/reprises sans allocation ; [preuve](validation/RELAXATION-SURFACE-S268.md).
+Restent les couches W au-dessus du plan moyen, la réception des bords ouverts par réflexion
+d'un paquet, le fond traversant et les frontières du total. Une relaxation locale exacte ne
+reçoit pas la transparence d'une frontière ; la fermeture extérieure reste réfléchissante.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand
