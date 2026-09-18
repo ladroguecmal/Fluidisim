@@ -29,6 +29,7 @@ machine S211. Les autres systèmes utilisent la sélection wgpu par défaut, enc
 | Espace | Pause / reprise |
 | R | Relancer impact et sillage à leur position de référence |
 | B | Afficher / masquer impact et sillage pour comparer au fond |
+| N, avec δ en direct | Essai S283 : réduire la largeur de 256 à 128 m si le saut de hauteur est borné à 3 mm ; refus sinon, pas de restauration |
 | Début (Home) | Caméra S201 et instant +3 s |
 | Échap | Fermer |
 
@@ -37,6 +38,14 @@ pas une limite du projet. L'impact s'arrête après l'horizon reçu de 56 s, le 
 contexte de 40 s, sans boucle cachée.
 
 ## Vérifier et mesurer
+
+**Rétrécissement expérimental S283.** Lancer avec `--delta --delta-direct --onde=0.6`,
+puis N pour demander une réduction. Le garde porte seulement sur la hauteur instantanée du
+profil CPU ; les pentes, la suite temporelle et la réception visuelle restent ouvertes.
+L'ordonnanceur utilise la nouvelle emprise mais ne décide pas encore de cette réduction.
+Le banc `--delta-retrecissement` force, hors fenêtre, une transition refusée à 1,024 s pour
+mesurer son coût et sa perte : ne pas confondre ce diagnostic avec une admission.
+[Contrat et mesures S283](../docs/validation/RETRECISSEMENT-S283.md).
 
 ```powershell
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --verify

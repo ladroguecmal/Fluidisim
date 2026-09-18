@@ -405,6 +405,9 @@ pub fn initial_wave(amplitude: f32) -> [f32; NX] {
 pub struct Live<'a> {
     background: &'a Background,
     volume: Volume,
+    /// S283 : destination préallouée, puis ancien domaine gardé sans désallocation par image.
+    smaller: Volume,
+    first_column: usize,
     /// S277 : surface de naissance, reposée à chaque renaissance. Plate, ou l'onde injectée.
     initial: [f32; NX],
     u: Vec<BackgroundSample>,
@@ -427,10 +430,15 @@ impl<'a> Live<'a> {
         let mut volume = Volume::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
             domain, DENSITY, background.gravity(), &[0.; NX]).map_err(|e| format!("domaine δ : {e:?}"))?;
         volume.set_free_surface(&initial, REST).map_err(|e| format!("surface δ : {e:?}"))?;
+        let smaller = Volume::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+            Domain { nx: NX / 2, ..domain }, DENSITY, background.gravity(), &[0.; NX / 2])
+            .map_err(|e| format!("réserve δ étroite : {e:?}"))?;
         let (nu, nw) = (volume.velocity_u().len(), volume.velocity_w().len());
         Ok(Self {
             background,
             volume,
+            smaller,
+            first_column: 0,
             initial,
             u: vec![BackgroundSample::default(); nu],
             w: vec![BackgroundSample::default(); nw],
@@ -446,9 +454,23 @@ impl<'a> Live<'a> {
     fn now_us(&self) -> u64 {
         self.born_us + self.steps * FRAME_US
     }
+    /// S283 : première réduction manuelle 256→128 m, même maille, même temps.
+    /// Ne reçoit pas encore le choix non focal d'ADR-012 ni la restauration.
+    fn stage_shrink(&mut self) -> Result<(), String> {
+        self.smaller.shrink_perturbation_from(&self.volume, NX / 4, SPONGE.width_m)
+            .map_err(|e| format!("rétrécissement δ : {e:?}"))?;
+        Ok(())
+    }
+    fn commit_shrink(&mut self) {
+        core::mem::swap(&mut self.volume, &mut self.smaller);
+        self.first_column = NX / 4;
+    }
     fn rebirth(&mut self, at_us: u64) -> Result<(), String> {
-        self.volume.set_free_surface(&self.initial, REST).map_err(|e| format!("{e:?}"))?;
-        self.volume.set_velocity(&self.zero_u, &self.zero_w).map_err(|e| format!("{e:?}"))?;
+        let nx = self.volume.domain().nx;
+        self.volume.set_free_surface(&self.initial[self.first_column..self.first_column + nx], REST)
+            .map_err(|e| format!("{e:?}"))?;
+        self.volume.set_velocity(&self.zero_u[..(nx + 1) * NZ], &self.zero_w[..nx * (NZ + 1)])
+            .map_err(|e| format!("{e:?}"))?;
         self.born_us = at_us;
         self.steps = 0;
         Ok(())
@@ -458,6 +480,7 @@ impl<'a> Live<'a> {
     /// Renvoie `true` seulement si un nouveau pas a réussi : naissance, pause et renaissance
     /// publient une surface mais ne produisent aucune mesure de coût de pas.
     pub fn advance(&mut self, seconds: f64, out: &mut [f32]) -> Result<bool, String> {
+        if out.len() != NX { return Err("profil δ : longueur incorrecte".into()); }
         self.sampling_ms = 0.;
         self.step_ms = 0.;
         self.iterations = 0;
@@ -468,10 +491,24 @@ impl<'a> Live<'a> {
         } else if target == self.now_us() + FRAME_US {
             let time = SimTime(self.now_us());
             let a = std::time::Instant::now();
-            fill_grid(self.background, time, &mut self.u, &mut self.w, 1)?;
+            let nx = self.volume.domain().nx;
+            let (nu, nw) = ((nx + 1) * NZ, nx * (NZ + 1));
+            if self.first_column == 0 {
+                fill_grid(self.background, time, &mut self.u, &mut self.w, 1)?;
+            } else {
+                let g = Grids::new();
+                let mut columns = [[0f32; 2]; NX + 1];
+                let lo = self.first_column;
+                self.background.differential_grid_extended(&g.xu[lo..=lo + nx], 0., &g.zu,
+                    time, DENSITY, &mut columns[..nx + 1], &mut self.u[..nu])
+                    .map_err(|e| format!("fond δ étroit : {e:?}"))?;
+                self.background.differential_grid_extended(&g.xw[lo..lo + nx], 0., &g.zw,
+                    time, DENSITY, &mut columns[..nx], &mut self.w[..nw])
+                    .map_err(|e| format!("fond δ étroit : {e:?}"))?;
+            }
             let b = std::time::Instant::now();
             let bg = BackgroundFaces { domain: self.volume.domain(), time, density: DENSITY,
-                gravity: self.background.gravity(), u: &self.u, w: &self.w };
+                gravity: self.background.gravity(), u: &self.u[..nu], w: &self.w[..nw] };
             let r = self.volume
                 .step_perturbation_mobile(time, FRAME_US, 6000, 1_000_000_000, &bg, SPONGE,
                     &host_impl::SequentialJobs, &Frozen)
@@ -482,7 +519,8 @@ impl<'a> Live<'a> {
             self.steps += 1;
             stepped = true;
         }
-        for (o, h) in out.iter_mut().zip(self.volume.surface()) {
+        out.fill(0.);
+        for (o, h) in out[self.first_column..].iter_mut().zip(self.volume.surface()) {
             *o = h - REST;
         }
         Ok(stepped)
@@ -569,6 +607,51 @@ fn scheduler() -> Result<Scheduler, String> {
 }
 
 impl<'a> Layer<'a> {
+    pub fn shrink(&mut self) -> Result<(), String> {
+        if self.gpu[0][3] < 2. || self.gpu[0][2] <= 0. {
+            return Err("rétrécissement : publier un premier profil avant la demande".into());
+        }
+        let candidate = self.stage_shrink()?;
+        let mut old = self.gpu;
+        old[1][3] = 1.;
+        let bound = height_change_bound(&old, &candidate);
+        // Tolérance de hauteur S201 : elle ne reçoit ni les pentes ni un verdict perceptif.
+        if bound > 0.003 {
+            return Err(format!("rétrécissement refusé : saut de hauteur borné à {:.2} mm (> 3 mm)", bound * 1000.));
+        }
+        self.commit_shrink(candidate);
+        Ok(())
+    }
+
+    fn stage_shrink(&mut self) -> Result<[[f32; 4]; GPU_ROWS], String> {
+        let live = self.live.as_mut().ok_or("rétrécissement : mode direct requis")?;
+        if live.first_column != 0 { return Err("domaine déjà étroit".into()); }
+        live.stage_shrink()?;
+        let mut candidate = self.gpu;
+        candidate[0][0] += (NX / 4) as f32 * DX;
+        candidate[0][3] = (NX / 2) as f32;
+        candidate[1][3] = 1.;
+        let eta = live.smaller.surface();
+        for i in 0..NX / 2 {
+            let (l, r) = (i.saturating_sub(1), (i + 1).min(NX / 2 - 1));
+            // Même ordre que la publication du profil dans update.
+            let slope = ((eta[r] - REST) - (eta[l] - REST)) / ((r-l) as f32 * DX);
+            candidate[2+i] = [eta[i] - REST, slope, 0., 0.];
+        }
+        Ok(candidate)
+    }
+
+    fn commit_shrink(&mut self, mut candidate: [[f32; 4]; GPU_ROWS]) {
+        self.live.as_mut().unwrap().commit_shrink();
+        candidate[1][3] = self.gpu[1][3];
+        self.gpu = candidate;
+        // Un autre domaine n'hérite pas des mesures du précédent.
+        self.samples = 0;
+    }
+
+    fn window(&self) -> (usize, usize) {
+        self.live.as_ref().map_or((0, NX), |v| (v.first_column, v.volume.domain().nx))
+    }
     pub fn new(reference: &'a Replay, frame: &'a Replay) -> Result<Self, String> {
         Ok(Self { replays: Some([reference, frame]), mode: 1, live: None, gpu: [[0.; 4]; GPU_ROWS],
             heights: [0.; NX], active: false, scheduler: scheduler()?, costs: [FIRST_COST_MS; COST_SAMPLES], samples: 0, granted: false })
@@ -617,7 +700,9 @@ impl<'a> Layer<'a> {
     }
 
     pub fn arbitrate(&mut self, seconds: f64, view: Option<&crate::lod::Projection>) -> bool {
-        let emprise = ([X0, -HALF_WIDTH], [X0 + NX as f32 * DX, HALF_WIDTH]);
+        let (first, nx) = self.window();
+        let x0 = X0 + first as f32 * DX;
+        let emprise = ([x0, -HALF_WIDTH], [x0 + nx as f32 * DX, HALF_WIDTH]);
         let perception = view.map_or(1., |p| p.screen_fraction(emprise.0, emprise.1));
         self.scheduler.begin();
         let bid = Bid { id: DomainId(0), gameplay: GAMEPLAY, perception, urgency: URGENCY,
@@ -670,9 +755,11 @@ impl<'a> Layer<'a> {
 
     /// Profil de l'instant et en-tête rebasé à la caméra ; pentes par différences centrées.
     pub fn update(&mut self, seconds: f64, eye: [f32; 3], view: Option<&crate::lod::Projection>) {
+        let (first, nx) = self.window();
+        let x0 = X0 + first as f32 * DX;
         if !self.arbitrate(seconds, view) {
             self.active = false;
-            self.gpu[0] = [X0 - eye[0], -eye[1], DX, NX as f32];
+            self.gpu[0] = [x0 - eye[0], -eye[1], DX, nx as f32];
             self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, 0.];
             return;
         }
@@ -700,12 +787,13 @@ impl<'a> Layer<'a> {
         if let Some(paye) = measured_cost {
             self.record_cost(paye);
         }
-        self.gpu[0] = [X0 - eye[0], -eye[1], DX, NX as f32];
+        self.gpu[0] = [x0 - eye[0], -eye[1], DX, nx as f32];
         self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, if self.active { 1. } else { 0. }];
-        for i in 0..NX {
-            let (l, r) = (i.saturating_sub(1), (i + 1).min(NX - 1));
+        for j in 0..nx {
+            let i = first + j;
+            let (l, r) = (first + j.saturating_sub(1), first + (j + 1).min(nx - 1));
             let slope = (self.heights[r] - self.heights[l]) / ((r - l) as f32 * DX);
-            self.gpu[2 + i] = [self.heights[i], slope, 0., 0.];
+            self.gpu[2 + j] = [self.heights[i], slope, 0., 0.];
         }
     }
     pub fn is_active(&self) -> bool {
@@ -714,7 +802,12 @@ impl<'a> Layer<'a> {
     /// Même lecture que `delta_layer` du shader, en f64 : hauteur et deux pentes au point
     /// rebasé à la caméra `q`.
     pub fn eval(&self, q: [f32; 2]) -> [f64; 3] {
-        let [h0, h1] = [self.gpu[0], self.gpu[1]];
+        eval_profile(&self.gpu, q)
+    }
+}
+
+fn eval_profile(gpu: &[[f32; 4]; GPU_ROWS], q: [f32; 2]) -> [f64; 3] {
+        let [h0, h1] = [gpu[0], gpu[1]];
         if h1[3] < 0.5 {
             return [0.; 3];
         }
@@ -732,19 +825,120 @@ impl<'a> Layer<'a> {
         let xc = xl / dx - 0.5;
         let i = (xc.floor().max(0.) as usize).min(n - 2);
         let t = (xc - i as f64).clamp(0., 1.);
-        let (a, b) = (self.gpu[2 + i], self.gpu[3 + i]);
+        let (a, b) = (gpu[2 + i], gpu[3 + i]);
         let (f0, m0, f1, m1) = (a[0] as f64, a[1] as f64 * dx, b[0] as f64, b[1] as f64 * dx);
         let (t2, t3) = (t * t, t * t * t);
         let e = (2. * t3 - 3. * t2 + 1.) * f0 + (t3 - 2. * t2 + t) * m0 + (-2. * t3 + 3. * t2) * f1 + (t3 - t2) * m1;
         let de = ((6. * t2 - 6. * t) * f0 + (3. * t2 - 4. * t + 1.) * m0 + (-6. * t2 + 6. * t) * f1
             + (3. * t2 - 2. * t) * m1) / dx;
         [wx * wy * e, wy * (dwx * e + wx * de), wx * dwy * e]
+}
+
+/// Borne de Lipschitz du profil Hermite multiplié par son fondu en cosinus.
+/// Les quatre contrôles de Bézier bornent la hauteur ; leurs différences bornent la dérivée.
+fn profile_lipschitz(gpu: &[[f32; 4]; GPU_ROWS]) -> f64 {
+    let dx = gpu[0][2] as f64;
+    let mut bound = 0f64;
+    for i in 0..gpu[0][3] as usize - 1 {
+        let (a, b) = (gpu[2+i], gpu[3+i]);
+        let controls = [a[0] as f64, a[0] as f64 + dx * a[1] as f64 / 3.,
+            b[0] as f64 - dx * b[1] as f64 / 3., b[0] as f64];
+        let height = controls.iter().fold(0f64, |m, h| m.max(h.abs()));
+        let slope = controls.windows(2).fold(0f64, |m, c| m.max(3. * (c[1]-c[0]).abs()/dx));
+        bound = bound.max(slope + height * core::f64::consts::PI / (2. * gpu[1][2] as f64));
     }
+    bound
+}
+
+fn height_change_bound(a: &[[f32; 4]; GPU_ROWS], b: &[[f32; 4]; GPU_ROWS]) -> f64 {
+    let left = (a[0][0] as f64).min(b[0][0] as f64);
+    let right = (a[0][0] as f64 + a[0][2] as f64 * a[0][3] as f64)
+        .max(b[0][0] as f64 + b[0][2] as f64 * b[0][3] as f64);
+    // 256 sous-intervalles par maille : raffine la borne, jamais la tolérance de 3 mm.
+    let intervals = ((right-left) / (DX as f64 / 256.)).ceil() as usize;
+    let step = (right-left) / intervals as f64;
+    let mut observed = 0f64;
+    for i in 0..=intervals {
+        let q = [(left + i as f64 * step) as f32, a[0][1]];
+        observed = observed.max((eval_profile(a, q)[0] - eval_profile(b, q)[0]).abs());
+    }
+    // Le fondu y est commun et <=1 : son centre majore toutes les lignes.
+    // Marge pour l'arrondi f32 des positions échantillonnées.
+    let radius = step * 0.5 + 2. * f32::EPSILON as f64 * left.abs().max(right.abs());
+    observed + radius * (profile_lipschitz(a) + profile_lipschitz(b))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn damaging_shrink_is_refused_without_publishing_s283() {
+        let b = swell_background().unwrap();
+        let mut layer = Layer::direct(&b, initial_wave(0.6)).unwrap();
+        assert!(layer.shrink().is_err());
+        layer.set_budget_ms(1000.).unwrap();
+        for n in 0..=64 { layer.update(n as f64 * 0.016, [0.; 3], None); }
+        let gpu = layer.gpu;
+        let heights = layer.heights;
+        let samples = layer.samples;
+        let time = layer.live.as_ref().unwrap().now_us();
+        assert!(layer.shrink().unwrap_err().contains("3 mm"));
+        assert_eq!(layer.gpu, gpu);
+        assert_eq!(layer.heights, heights);
+        assert_eq!(layer.samples, samples);
+        assert_eq!(layer.live.as_ref().unwrap().now_us(), time);
+        assert_eq!(layer.live.as_ref().unwrap().volume.domain().nx, NX);
+        layer.update(65. * 0.016, [0.; 3], None);
+        assert!(layer.is_active());
+    }
+
+    #[test]
+    fn height_guard_bounds_interpolated_profiles_s283() {
+        let mut a = [[0.; 4]; GPU_ROWS];
+        a[0] = [-128., 0., DX, NX as f32];
+        a[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, 1.];
+        // Les valeurs aux nœuds sont nulles, mais les tangentes créent un relief entre eux.
+        a[20] = [0., 0.1, 0., 0.];
+        a[21] = [0., -0.1, 0., 0.];
+        let mut b = a;
+        b[20][1] = 0.; b[21][1] = 0.;
+        let bound = height_change_bound(&a, &b);
+        assert!(bound > 0.049);
+        for n in 0..=10000 {
+            let q = [-94. + n as f32 * 0.001, 0.];
+            assert!((eval_profile(&a, q)[0]-eval_profile(&b, q)[0]).abs() <= bound);
+        }
+    }
+
+    #[test]
+    fn narrower_domain_keeps_time_center_and_world_background_s283() {
+        let b = swell_background().unwrap();
+        let mut layer = Layer::direct(&b, initial_wave(0.6)).unwrap();
+        layer.set_budget_ms(1000.).unwrap();
+        layer.update(0.016, [0.; 3], None);
+        let before = layer.heights;
+        let time = layer.live.as_ref().unwrap().now_us();
+        layer.shrink().unwrap();
+        layer.update(0.016, [0.; 3], None);
+        let live = layer.live.as_ref().unwrap();
+        assert_eq!(live.now_us(), time);
+        assert_eq!(live.volume.domain().nx, NX / 2);
+        assert_eq!(layer.gpu[0], [-64., 0., DX, 64.]);
+        for i in 48..80 { assert_eq!(layer.heights[i].to_bits(), before[i].to_bits()); }
+        assert_eq!(layer.eval([-100., 0.]), [0.; 3]);
+        assert!((layer.eval([1., 0.])[0] - before[64] as f64).abs() < 1e-9);
+        layer.update(0.032, [0.; 3], None);
+        assert!(layer.is_active());
+        let live = layer.live.as_ref().unwrap();
+        assert_eq!(live.now_us(), time + FRAME_US);
+        // Le fond est évalué à l'abscisse mondiale conservée, pas depuis l'ancien bord gauche.
+        let expected = sample(&b, -64., 1., SimTime(time)).unwrap();
+        assert_eq!(live.u[0], expected);
+        layer.update(1., [0.; 3], None);
+        assert_eq!(layer.live.as_ref().unwrap().volume.domain().nx, NX / 2);
+        assert!(layer.is_active());
+    }
 
     #[test]
     fn cost_samples_follow_real_steps_s282() {
@@ -850,4 +1044,59 @@ mod tests {
         let got = layer.eval([x, 40.]);
         assert!((got[0] - layer.gpu[2 + 64][0] as f64).abs() < 1e-9);
     }
+}
+
+/// S283 : même onde et mêmes instants, témoin large conservé ; consommation réelle par Layer.
+/// Essai manuel de rétrécissement, pas une politique automatique de qualité.
+pub fn measure_shrink() -> Result<(), String> {
+    let background = swell_background()?;
+    let mut wide = Layer::direct(&background, initial_wave(0.6))?;
+    let mut narrow = Layer::direct(&background, initial_wave(0.6))?;
+    wide.set_budget_ms(1000.)?;
+    narrow.set_budget_ms(1000.)?;
+    let (mut wide_ms, mut narrow_ms) = (Vec::new(), Vec::new());
+    let mut center_drift = 0f64;
+    let mut transition_max = 0f64;
+    for n in 0..=192 {
+        let time = n as f64 * FRAME_US as f64 * 1e-6;
+        wide.update(time, [0.; 3], None);
+        narrow.update(time, [0.; 3], None);
+        if !(wide.is_active() && narrow.is_active()) {
+            return Err(format!("pas refusé au rang {n}"));
+        }
+        if n == 64 {
+            let start = std::time::Instant::now();
+            // Diagnostic de la transition refusée : transfert forcé uniquement dans ce banc.
+            let candidate = narrow.stage_shrink()?;
+            let bound = height_change_bound(&narrow.gpu, &candidate);
+            narrow.commit_shrink(candidate);
+            let transfer_ms = start.elapsed().as_secs_f64() * 1e3;
+            narrow.update(time, [0.; 3], None);
+            for i in 0..NX {
+                let q = [X0 + (i as f32 + 0.5) * DX, 0.];
+                transition_max = transition_max.max((wide.eval(q)[0] - narrow.eval(q)[0]).abs());
+            }
+            println!("RETRECISSEMENT_S283 t_s={time:.3} transfert_et_garde_ms={transfer_ms:.4} cellules=6656->3328 saut_hauteur_max_m={transition_max:.6} borne_m={bound:.6} diagnostic_force=true");
+        }
+        if n > 64 {
+            let cost = |l: &Layer<'_>| {
+                let live = l.live.as_ref().unwrap();
+                live.sampling_ms + live.step_ms
+            };
+            wide_ms.push(cost(&wide));
+            narrow_ms.push(cost(&narrow));
+            for i in 56..72 {
+                let q = [X0 + (i as f32 + 0.5) * DX, 0.];
+                center_drift = center_drift.max((wide.eval(q)[0] - narrow.eval(q)[0]).abs());
+            }
+        }
+    }
+    let quantiles = |values: &mut Vec<f64>| {
+        values.sort_by(f64::total_cmp);
+        (values[values.len()/2], values[(values.len()*99/100).min(values.len()-1)])
+    };
+    let (w, n) = (quantiles(&mut wide_ms), quantiles(&mut narrow_ms));
+    println!("RETRECISSEMENT_S283 pas=128 large_mediane_ms={:.4} large_p99_ms={:.4} etroit_mediane_ms={:.4} etroit_p99_ms={:.4} gain={:.3} derive_centre_max_m={center_drift:.6} saut_sous_3mm={}",
+        w.0, w.1, n.0, n.1, w.0/n.0, transition_max <= 0.003);
+    Ok(())
 }

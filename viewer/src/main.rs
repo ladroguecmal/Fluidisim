@@ -388,6 +388,14 @@ impl ApplicationHandler for App<'_> {
                                         println!("DELTA {}", layer.label());
                                     }
                                 }
+                                KeyCode::KeyN => {
+                                    if let Some(layer) = self.frame.delta.as_mut() {
+                                        match layer.shrink() {
+                                            Ok(()) => println!("DELTA domaine étroit : 128 m, essai S283 ; restauration non construite"),
+                                            Err(err) => eprintln!("{err}"),
+                                        }
+                                    }
+                                }
                                 KeyCode::Home => {
                                     self.frame.camera = Camera::default();
                                     self.seconds = 3.;
@@ -2199,6 +2207,9 @@ fn delta_arbitrage(background: &water_core::background::Background, amplitude: f
 
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
+    if args.iter().any(|a| a == "--delta-retrecissement") {
+        return delta::measure_shrink();
+    }
     if args.iter().any(|a| a == "--delta-mesure") {
         return delta_replays(&delta::swell_background()?).map(|_| ());
     }

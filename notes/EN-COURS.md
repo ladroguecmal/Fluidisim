@@ -69,9 +69,9 @@ Objectif : premier redimensionnement spatial consommable de δ, avec transfert c
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — contrats et code du domaine : choisir un redimensionnement borné, déclarer ses
   critères, construire et tester le transfert sans allocation ; découper avant quinze minutes.
-- [>] **P3** — consommation réelle par l'hôte ou le pas couplé, coût/continuité et refus ;
+- [x] **P3** — consommation réelle par l'hôte ou le pas couplé, coût/continuité et refus ;
   suites de validation proportionnées, limites explicitement conservées.
-- [ ] **P4** — rituel §6 : journal, file, feuille de route, invariants et jeton libre.
+- [>] **P4** — rituel §6 : journal, file, feuille de route, invariants et jeton libre.
 
 ### Notes de reprise
 
@@ -85,3 +85,15 @@ Mesurer coût du transfert et des pas large/étroit ; continuité au centre, per
 Ce lot ne reçoit ni choix automatique non focal, ni agrandissement, ni I-12 perceptif.
 P2 reçu : transfert + vrai pas couplé, zéro allocation au compteur global, centre au bit,
 faces normales aux nouveaux bords nulles, refus atomiques (bornes et largeur).
+
+P3 critère avant mesure : comparer les hauteurs publiées sur la bande au moment du transfert
+contre 3 mm (tolérance d'image S201) ; publier tout dépassement, sans réception visuelle déduite.
+Comparer aussi le centre |x|<16 m pendant les 128 pas suivants au témoin large. Pas de seuil de
+vitesse pour faire passer la mesure : publier médiane et p99, transfert inclus séparément.
+P3 reçu : Live/Layer et commande N, un rétrécissement manuel borné en hauteur, pas automatique.
+Essai brut : 33,447 mm de saut, 21,255 mm de dérive centrale sur 2,048 s ; refus de la réception
+sans couture. Garde Hermite + fondus + marge de Lipschitz ajouté : borne 33,729 mm, refus atomique
+à 1,024 s ; admission vérifiée à 0,016 s. dx/64 trop conservateur au cas précoce, dx/256 retenu,
+tolérance 3 mm inchangée. Sur secteur : 25,5464→12,3784 ms médian, 32,9817→15,8659 ms p99 ;
+transfert + garde 3,0283 ms. Diagnostic forcé isolé, aucune réception I-05/visuelle.
+Suites : 506 cœur/harnais + 33 viewer réussis, 19 ignorés au total, aucun échec.
