@@ -58,32 +58,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S268 — terminée
-Agent : Codex, GPT-6 ; fichiers, git, cargo, Python, GPU local et accès web.
-Entrée : « continue ». Copie unique master propre c9fd0d3, jeton libre.
-Objectif : faire progresser les bords ouverts du pas volumique couplé J2.
+Session : S269 — en cours
+Agent : Codex, GPT-6 ; fichiers, git, cargo, Python et GPU local.
+Entrée : « continue », copie unique master propre 24a4c03, jeton libre.
+Objectif : mesurer la réflexion du pas couplé mobile avec l'éponge ADR-164.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — lire les contrats et le code, définir le lot borné et ses critères avant construction.
-- [x] **P3** — construire le raccordement retenu et ses contrôles analytiques ciblés.
-- [x] **P4** — vérifier le chemin consommateur et les régressions ; publier preuves et limites.
-- [x] **P5** — rituel §6 : journal, file entière, feuille de route, index et jeton.
+- [x] **P1** — amorce, jeton, plan seuls.
+- [>] **P2** — montage du paquet, témoins, fenêtres et critères déclarés avant mesure.
+- [ ] **P3** — banc consommant le pas réel, contrôle du paquet et des fenêtres.
+- [ ] **P4** — mesures bornées, réception ou diagnostic honnête, régressions adaptées.
+- [ ] **P5** — rituel §6, journal, file, index et jeton.
 
 ### Notes de reprise
 
-Le rendu accepté reste celui de S267. Lot physique distinct : relaxation de la hauteur
-perturbative et éponge aux bords, sans prétendre recevoir les frontières du total ni B4 global.
-
-P2 : absence confirmée de relaxation de hauteur ; lot ADR-164, critères avant code.
-Frontière transparente et réflexion de paquet restent la suite, pas reçues par ce lot.
-
-P3 : ADR-164 intégré après transport, somme compensée et reste amortis.
-Deux tests unitaires passent ; consommateur 20 pas, 160 hauteurs/restes changés.
-Test runtime : 607 expirations, rollback/reprise au bit, zéro allocation. Suite complète à lancer.
-
-P4 : suite complète 473 réussis, 18 ignorés, zéro échec. Critères du lot reçus ;
-réflexion de paquet non mesurée, prochaine capacité S269. Aucun changement du rendu.
-
-P5 : rituel terminé, suite S269 réception de réflexion. Aucun rendu modifié.
+S268 : dissipation locale reçue, frontière transparente non reçue. Ne pas confondre
+crête et énergie ni prendre une fenêtre contaminée pour de la réflexion (ADR-046).

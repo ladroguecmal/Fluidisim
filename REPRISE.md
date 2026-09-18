@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 07:49 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 07:51 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S269
 Dernière session : S268 — relaxation de hauteur mobile reçue (ADR-164), 473 tests ; réflexion non mesurée
 Session suivante : S269 — réflexion d’un paquet aux bords absorbants du pas couplé J2
 Maillons        : 0
