@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-19 01:07 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : —
+Session en cours : S284
 Dernière session : S283 — rétrécissement manuel consommé, garde de hauteur et coût ; A290 ouvert
 Session suivante : préparer progressivement le rétrécissement (A290), puis choix non focal sous budget ; coût A276 avant plusieurs domaines/3D. V1 proposée et verdict visuel S277 toujours ouverts.
 Maillons        : 0 — domaine étroit consommé par Live/Layer, transfert et refus reçus

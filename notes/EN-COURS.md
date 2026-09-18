@@ -58,42 +58,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S283 — terminée
+Session : S284 — en cours
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
-Entrée : continuer la porte A, après correction de mesure S282.
-Objectif : premier redimensionnement spatial consommable de δ, avec transfert contrôlé de son
-état et réception de ses limites ; ne pas confondre un changement de masque avec un gain de calcul.
+Entrée : continuer, préparation progressive demandée après S283.
+Objectif : amortir la couronne avant réduction et éprouver le passage gardé, sans prétendre
+recevoir la réduction automatique ni I-12 perceptif.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — contrats et code du domaine : choisir un redimensionnement borné, déclarer ses
-  critères, construire et tester le transfert sans allocation ; découper avant quinze minutes.
-- [x] **P3** — consommation réelle par l'hôte ou le pas couplé, coût/continuité et refus ;
-  suites de validation proportionnées, limites explicitement conservées.
-- [x] **P4** — rituel §6 : journal, file, feuille de route, invariants et jeton libre.
+- [x] **P1** — état Git, jeton et plan seuls.
+- [>] **P2** — construire un amortissement de préparation sans allocation, consommé après
+  les vrais pas de Live ; réception exponentielle, centre conservé, refus atomiques.
+- [ ] **P3** — demande progressive dans Layer, mesure contre réduction brutale et témoin,
+  coût complet, garde S283 inchangé, tests et limites ; découper avant quinze minutes.
+- [ ] **P4** — rituel §6 : preuves, journal, file/feuille de route/index, jeton libre.
 
 ### Notes de reprise
 
-master dcaa97f propre ; une seule copie. Branche historique archivée vérifiée S282.
-Le périmètre complet reste obligatoire ; V1 proposée S281 non redéfinie ici.
-P2 précisé : transfert vers volume préalloué plus étroit, même dx/nz/milieu et fond plat.
-Conserver hauteur/vitesses/reste d'arrondi dans l'intérieur ; smoothstep dans une bande fournie,
-pression invalidée pour le nouveau domaine ; refus atomiques et aucune allocation. P3 : Live
-128→64 colonnes, même horloge/fond aux coordonnées mondiales, publication de la vraie emprise.
-Mesurer coût du transfert et des pas large/étroit ; continuité au centre, perte aux bords publiée.
-Ce lot ne reçoit ni choix automatique non focal, ni agrandissement, ni I-12 perceptif.
-P2 reçu : transfert + vrai pas couplé, zéro allocation au compteur global, centre au bit,
-faces normales aux nouveaux bords nulles, refus atomiques (bornes et largeur).
-
-P3 critère avant mesure : comparer les hauteurs publiées sur la bande au moment du transfert
-contre 3 mm (tolérance d'image S201) ; publier tout dépassement, sans réception visuelle déduite.
-Comparer aussi le centre |x|<16 m pendant les 128 pas suivants au témoin large. Pas de seuil de
-vitesse pour faire passer la mesure : publier médiane et p99, transfert inclus séparément.
-P3 reçu : Live/Layer et commande N, un rétrécissement manuel borné en hauteur, pas automatique.
-Essai brut : 33,447 mm de saut, 21,255 mm de dérive centrale sur 2,048 s ; refus de la réception
-sans couture. Garde Hermite + fondus + marge de Lipschitz ajouté : borne 33,729 mm, refus atomique
-à 1,024 s ; admission vérifiée à 0,016 s. dx/64 trop conservateur au cas précoce, dx/256 retenu,
-tolérance 3 mm inchangée. Sur secteur : 25,5464→12,3784 ms médian, 32,9817→15,8659 ms p99 ;
-transfert + garde 3,0283 ms. Diagnostic forcé isolé, aucune réception I-05/visuelle.
-Suites : 506 cœur/harnais + 33 viewer réussis, 19 ignorés au total, aucun échec.
+S283 clôturée 48d2ab7 ; copie principale unique, propre. Transfert brut à 1,024 s refusé :
+33,447 mm contre 3 mm. Garde CPU de hauteur seulement, pas la pente ni la suite temporelle.
+Critère : une demande tardive ne permute jamais au-dessus du garde 3 mm ; suivre la variation
+supplémentaire de hauteur par pas de préparation, le centre et le coût complet. Si le fond
+réalimente trop les bords, conserver le refus et mesurer la limite, ne pas relâcher le garde.
