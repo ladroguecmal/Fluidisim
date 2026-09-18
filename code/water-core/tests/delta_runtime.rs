@@ -682,3 +682,32 @@ fn shrink_transfers_state_and_runs_without_allocation_s283() {
     assert_eq!(allocations, 0); assert_eq!(r.unwrap().advanced_us, 1000);
     assert_ne!(surface_bits(&small), before.1);
 }
+#[test]
+fn progressive_shrink_damping_is_bounded_and_allocation_free_s284() {
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut v = Volume::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain { nx: 32, nz: 12, dx: 0.25 }, 1025., 9.81, &[0.; 32]).unwrap();
+    v.set_free_surface(&[2.125; 32], 2.).unwrap();
+    let u = vec![0.25; v.velocity_u().len()];
+    let w = vec![0.5; v.velocity_w().len()];
+    v.set_velocity(&u, &w).unwrap();
+    arena.seal();
+    let before = (bits(&v), surface_bits(&v));
+    for (start, count, band, decay) in [(usize::MAX,16,1.,0.5), (8,16,1.,f32::NAN),
+        (8,16,0.,0.5), (8,16,1.,1.1)] {
+        let (r, n) = measured(||v.prepare_shrink(start,count,band,decay));
+        assert!(r.is_err()); assert_eq!(n,0);
+        assert_eq!((bits(&v),surface_bits(&v)),before);
+    }
+    assert_eq!(v.prepare_shrink(8,16,1.,1.).unwrap(),0.);
+    assert_eq!((bits(&v),surface_bits(&v)),before);
+    for step in 1..=4 {
+        let (r,n) = measured(||v.prepare_shrink(8,16,1.,0.5));
+        assert_eq!(n,0);
+        assert!(r.unwrap() <= 0.0625);
+        assert_eq!(v.surface()[0],2. + 0.125 * 0.5f32.powi(step));
+        assert_eq!(v.velocity_w()[0],0.5 * 0.5f32.powi(step));
+        for i in 12..20 { assert_eq!(v.surface()[i],2.125); }
+        for k in 0..12 { assert_eq!(v.velocity_u()[k*33+16],0.25); }
+    }
+}

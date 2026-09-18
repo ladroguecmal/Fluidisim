@@ -67,9 +67,9 @@ recevoir la réduction automatique ni I-12 perceptif.
 ### Plan
 
 - [x] **P1** — état Git, jeton et plan seuls.
-- [>] **P2** — construire un amortissement de préparation sans allocation, consommé après
+- [x] **P2** — construire un amortissement de préparation sans allocation, consommé après
   les vrais pas de Live ; réception exponentielle, centre conservé, refus atomiques.
-- [ ] **P3** — demande progressive dans Layer, mesure contre réduction brutale et témoin,
+- [>] **P3** — demande progressive dans Layer, mesure contre réduction brutale et témoin,
   coût complet, garde S283 inchangé, tests et limites ; découper avant quinze minutes.
 - [ ] **P4** — rituel §6 : preuves, journal, file/feuille de route/index, jeton libre.
 
@@ -80,3 +80,8 @@ S283 clôturée 48d2ab7 ; copie principale unique, propre. Transfert brut à 1,0
 Critère : une demande tardive ne permute jamais au-dessus du garde 3 mm ; suivre la variation
 supplémentaire de hauteur par pas de préparation, le centre et le coût complet. Si le fond
 réalimente trop les bords, conserver le refus et mesurer la limite, ne pas relâcher le garde.
+P2 : noyau prepare_shrink construit et reçu, décroissance répétée indépendante, intérieur au
+bit, refus atomiques et zéro allocation. Branchement Live en P3 en cours, non encore reçu.
+P3 : plutôt qu'un taux inventé, limiter le changement nodal à 1,5 mm par vrai pas (moitié de
+3 mm S201, marge d'interpolation restante à mesurer). Tentative gardée tous les 16 pas : choix
+de coût de banc, à qualifier ; aucune diminution de la tolérance de publication S283.

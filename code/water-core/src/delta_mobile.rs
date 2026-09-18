@@ -14,6 +14,50 @@ use crate::host::{JobSystem, MonotonicClock};
 pub const SURFACE_THETA_MIN: f32 = 1e-3;
 
 impl Volume {
+    /// S284 : amortissement préparatoire d'un état perturbatif autour d'une fenêtre future.
+    /// `decay` est exp(-taux * durée), fourni par l'hôte ; [0,1], 1 ne change rien.
+    /// L'intérieur de la fenêtre (hors bande) reste au bit. Pas de transduction ni conservation
+    /// de la masse perturbative ; uniquement pour δ, jamais pour V ou un champ total.
+    /// Renvoie le plus grand changement de hauteur au centre des colonnes.
+    pub fn prepare_shrink(&mut self, first: usize, columns: usize, band: f32, decay: f32)
+        -> Result<f32, Error> {
+        let end = first.checked_add(columns).ok_or(Error::Domain)?;
+        let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
+        if columns == 0 || columns >= nx || end > nx || !band.is_finite()
+            || band < dx || band >= columns as f32 * dx * 0.5
+            || !decay.is_finite() || !(0. ..=1.).contains(&decay)
+            || self.bottom.iter().any(|b| *b != self.bottom[0])
+            || !(self.rest >= self.bottom[0] + 2. * dx && self.rest <= (nz-1) as f32 * dx)
+            || self.eta.iter().any(|h| !(*h >= self.bottom[0] + 2. * dx && *h <= (nz-1) as f32 * dx))
+        { return Err(Error::Domain); }
+        if decay == 1. { return Ok(0.); }
+        let weight = |x: f32| {
+            let distance = (x - first as f32 * dx).min(end as f32 * dx - x);
+            let s = (distance / band).clamp(0., 1.);
+            let keep = s*s*(3.-2.*s);
+            // Fraction de décroissance : mêmes limites que l'exponentielle, centre exact.
+            keep + (1.-keep)*decay
+        };
+        let mut max_change = 0f32;
+        for i in 0..nx {
+            let a = weight((i as f32 + 0.5)*dx);
+            if a == 1. { continue; }
+            let old = self.eta[i];
+            self.eta[i] = self.rest + a*(old-self.rest);
+            self.eta_roundoff[i] *= a;
+            max_change = max_change.max((old-self.eta[i]).abs());
+            for k in 0..=nz { let j = self.fw(i,k); self.w[j] *= a; }
+        }
+        for i in 0..=nx {
+            let a = weight(i as f32 * dx);
+            if a == 1. { continue; }
+            for k in 0..nz { let j = self.fu(i,k); self.u[j] *= a; }
+        }
+        self.p.fill(0.);
+        self.last_cost_ms = None;
+        Ok(max_change)
+    }
+
     /// S283 : rétrécissement perturbatif sur fond plat, vers un volume déjà préalloué.
     /// Même référentiel, origine verticale, dx, nz et milieu ; l'hôte décale son origine x
     /// de `first_column * dx`. Ne convient pas à un état total/substitutif.
