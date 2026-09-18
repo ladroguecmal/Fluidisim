@@ -69,11 +69,21 @@ annoncée quand un calcul est nécessaire.
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — cache sous `viewer/` quel que soit le dossier courant ; `--delta-direct` sans
+- [x] **P2** — cache sous `viewer/` quel que soit le dossier courant ; `--delta-direct` sans
   rejeux ; message et progression du précalcul ; essai du lancement depuis la racine.
 - [ ] **P3** — rituel §6.
 
 ### Notes de reprise
 
-Rejeu partiel `captures/s275/rejeu_16000.bin` écrit à la racine par le lancement interrompu
-(non versionné, dérivé) : à retirer avec le correctif. R10 toujours sans verdict.
+Rejeu partiel écrit à la racine par le lancement interrompu : **retiré** en P2.
+
+P2 mesuré depuis la racine, binaire déjà bâti : fenêtre en **1,1 s** avec `--delta`, **1,4 s** avec
+`--delta --delta-direct` (contre ~3 min muettes avant). `--delta-mesure` relit les deux caches en
+1,2 s et rend les chiffres de S275 au chiffre près. Cache du 16 ms effacé puis recalculé :
+**identique au bit** à l'ancien, 38,6 s annoncées 34 s après vingt pas. Essais 21/21,
+`--delta-direct-verify` identique au bit au rejeu (coût médian 23,1 ms).
+
+Tous les chemins `captures/` du viewer sont ancrés au crate par `captures!`, pas seulement le
+cache : une revue lancée depuis la racine écrivait ses images à la racine.
+
+R10 toujours sans verdict — c'est ce que l'utilisateur veut faire.

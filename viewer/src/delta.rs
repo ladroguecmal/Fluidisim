@@ -195,7 +195,9 @@ fn cache_header(dt_us: u64) -> [u64; 8] {
         (r.sea.hs.to_bits() as u64) << 32 | r.sea.tp.to_bits() as u64 ^ r.sea.graine]
 }
 pub fn cached(background: &Background, dt_us: u64) -> Result<Replay, String> {
-    let path = format!("captures/s275/rejeu_{dt_us}.bin");
+    // S277 : ancré au crate. Relatif au dossier courant, le cache était manqué depuis la racine.
+    let dir = captures!("s275");
+    let path = format!("{dir}/rejeu_{dt_us}.bin");
     let header = cache_header(dt_us);
     if let Ok(bytes) = std::fs::read(&path) {
         let frames = (DURATION_US / FRAME_US) as usize + 1;
@@ -209,8 +211,9 @@ pub fn cached(background: &Background, dt_us: u64) -> Result<Replay, String> {
             }
         }
     }
-    let r = precompute(background, dt_us, DURATION_US)?;
-    std::fs::create_dir_all("captures/s275").map_err(|e| e.to_string())?;
+    println!("DELTA_PRECALCUL dt={dt_us}us rejeu absent de {path} — calcul en cours");
+    let r = precompute(background, dt_us, DURATION_US, true)?;
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let mut bytes = Vec::with_capacity(64 + 4 * (r.heights.len() + 2));
     for h in header { bytes.extend_from_slice(&h.to_le_bytes()); }
     bytes.extend_from_slice(&r.iterations_max.to_le_bytes());
@@ -220,8 +223,23 @@ pub fn cached(background: &Background, dt_us: u64) -> Result<Replay, String> {
     Ok(r)
 }
 
+/// S277 — avancement du précalcul : durée estimée après vingt pas, puis un dixième par ligne.
+/// Deux rejeux calculent en parallèle : chaque ligne porte son pas, aucune n'efface l'autre.
+fn progress(dt_us: u64, done: u64, steps: u64, start: std::time::Instant) {
+    use std::io::Write;
+    let elapsed = start.elapsed().as_secs_f64();
+    if done == 20 && steps > 40 {
+        println!("DELTA_PRECALCUL dt={dt_us}us pas={steps} duree_estimee_s={:.0}", elapsed / 20. * steps as f64);
+    } else if done == steps || done * 10 / steps != (done - 1) * 10 / steps {
+        println!("DELTA_PRECALCUL dt={dt_us}us {}% ecoule_s={elapsed:.0}", done * 100 / steps);
+    } else {
+        return;
+    }
+    let _ = std::io::stdout().flush();
+}
+
 /// Pas couplé mobile (ADR-152/164/165/166/167) de `0` à `duration_us`, au pas `dt_us`.
-pub fn precompute(background: &Background, dt_us: u64, duration_us: u64) -> Result<Replay, String> {
+pub fn precompute(background: &Background, dt_us: u64, duration_us: u64, report: bool) -> Result<Replay, String> {
     if dt_us == 0 || FRAME_US % dt_us != 0 || duration_us % FRAME_US != 0 {
         return Err("pas de temps non déclaré".into());
     }
@@ -245,6 +263,8 @@ pub fn precompute(background: &Background, dt_us: u64, duration_us: u64) -> Resu
     heights.extend(v.surface().iter().map(|h| h - REST));
     let steps = duration_us / dt_us;
     let mut worst = 0;
+    // S277 : un précalcul muet de trois minutes se confond avec une fenêtre qui ne s'ouvre pas.
+    let start = std::time::Instant::now();
     for n in 0..steps {
         let time = SimTime(START_US + n * dt_us);
         fill(background, time, &mut u, &mut w)?;
@@ -258,6 +278,9 @@ pub fn precompute(background: &Background, dt_us: u64, duration_us: u64) -> Resu
         worst = worst.max(r.report.map_or(0, |r| r.iterations));
         if ((n + 1) * dt_us) % FRAME_US == 0 {
             heights.extend(v.surface().iter().map(|h| h - REST));
+        }
+        if report {
+            progress(dt_us, n + 1, steps, start);
         }
     }
     if heights.iter().any(|h| !h.is_finite()) {
@@ -430,7 +453,8 @@ fn fade(s: f64, width: f64) -> (f64, f64) {
 /// La couche δ de l'image : deux rejeux, un mode (0 : B seul, 1 : pas de référence, 2 : pas
 /// d'image), l'instant, et le tampon GPU correspondant.
 pub struct Layer<'a> {
-    pub replays: [&'a Replay; 2],
+    /// S277 : absents en direct — rien à précalculer pour ouvrir la fenêtre.
+    pub replays: Option<[&'a Replay; 2]>,
     pub mode: usize,
     /// S276 : δ en direct ; présent, les modes sont « B seul » et « δ en direct ».
     pub live: Option<Live<'a>>,
@@ -441,7 +465,12 @@ pub struct Layer<'a> {
 
 impl<'a> Layer<'a> {
     pub fn new(reference: &'a Replay, frame: &'a Replay) -> Self {
-        Self { replays: [reference, frame], mode: 1, live: None, gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false }
+        Self { replays: Some([reference, frame]), mode: 1, live: None, gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false }
+    }
+    /// S277 — δ **en direct sans rejeu** : la scène s'ouvre immédiatement, δ naît au repos et
+    /// avance d'un pas par image. Les trois minutes de précalcul ne servaient qu'aux rejeux.
+    pub fn direct(background: &'a Background) -> Result<Self, String> {
+        Ok(Self { replays: None, mode: 1, live: Some(Live::new(background)?), gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false })
     }
     pub fn label(&self) -> &'static str {
         if self.live.is_some() {
@@ -458,7 +487,10 @@ impl<'a> Layer<'a> {
         self.active = match self.live.as_mut() {
             // En direct, δ avance même masqué : l'afficher ne change pas son histoire.
             Some(live) => live.advance(seconds, &mut self.heights).map_err(|e| eprintln!("{e}")).is_ok() && self.mode > 0,
-            None => self.mode > 0 && self.replays[self.mode - 1].at(seconds, &mut self.heights),
+            None => match self.replays {
+                Some(r) if self.mode > 0 => r[self.mode - 1].at(seconds, &mut self.heights),
+                _ => false,
+            },
         };
         self.gpu[0] = [X0 - eye[0], -eye[1], DX, NX as f32];
         self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, if self.active { 1. } else { 0. }];
@@ -519,7 +551,7 @@ mod tests {
     #[test]
     fn short_replay_is_received_s275() {
         let b = swell_background().unwrap();
-        let r = precompute(&b, FRAME_US, 640_000).unwrap();
+        let r = precompute(&b, FRAME_US, 640_000, false).unwrap();
         let (rms, max) = stats(&r);
         println!("S275 rejeu_court images={} iterations_max={} rms={rms:e} max={max:e}", r.frames(), r.iterations_max);
         assert_eq!(r.frames(), 41);

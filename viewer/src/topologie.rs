@@ -12,7 +12,7 @@ use std::fs;
 use std::io::{self, BufWriter, Write};
 
 /// Répertoire des images de cette session. Local, jamais publié.
-pub const DIR: &str = "captures/s248";
+pub const DIR: &str = captures!("s248");
 
 /// Écrit une image PPM binaire et rend son **empreinte FNV-1a**, convention des images de banc
 /// depuis S201. Deux exécutions doivent rendre la même (I-03).

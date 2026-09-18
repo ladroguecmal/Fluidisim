@@ -1,3 +1,10 @@
+/// S277 — un chemin sous `viewer/captures/`, ancré au **crate** et non au dossier courant.
+/// Lancé depuis la racine du dépôt, le viewer cherchait son cache de rejeux à côté de lui,
+/// ne le trouvait pas, et repartait pour trois minutes de précalcul muet — fenêtre jamais ouverte.
+macro_rules! captures {
+    ($rel:literal) => { concat!(env!("CARGO_MANIFEST_DIR"), "/captures/", $rel) };
+}
+
 mod reflection;
 mod counting;
 mod delta;
@@ -1554,7 +1561,7 @@ fn verify_return(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// dernier impact (84 s). Le rendu est cosmétique : les refus du budget se publient à part
 /// (`--scene-admission`), ils n'arrêtent pas la vérification.
 fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
-    std::fs::create_dir_all("captures/s235").map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(captures!("s235")).map_err(|e| e.to_string())?;
     let instance = instance();
     let mut g = pollster::block_on(gpu::Gpu::new(
         &instance,
@@ -1589,7 +1596,7 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
     g.upload(frame);
     let target = g.target();
     g.draw(&target.create_view(&Default::default()), false);
-    g.capture(&target, "captures/s235/scene.ppm")?;
+    g.capture(&target, captures!("s235/scene.ppm"))?;
     for lod in [true, false] {
         frame.lod = lod;
         for (w, h) in [(640, 360), (960, 540)] {
@@ -1610,11 +1617,11 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// spectrale, `captures/s256`) — mêmes poses et âges.
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
     // S262 : un dossier par revue ; un nouveau rendu n'écrase plus une revue envoyée.
-    let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", "r4" => "captures/s260",
-        t if t.starts_with("r9") => "captures/s267",
-        t if t.starts_with("r8") => "captures/s266",
-        t if t.starts_with("r7") => "captures/s265",
-        t if t.starts_with("r5") => "captures/s261", t if t.starts_with("r6_v") => "captures/s263", _ => "captures/s262" };
+    let dir = match tag { "r1" => captures!("s254"), "r2" => captures!("s256"), "r3" => captures!("s259"), "r4" => captures!("s260"),
+        t if t.starts_with("r9") => captures!("s267"),
+        t if t.starts_with("r8") => captures!("s266"),
+        t if t.starts_with("r7") => captures!("s265"),
+        t if t.starts_with("r5") => captures!("s261"), t if t.starts_with("r6_v") => captures!("s263"), _ => captures!("s262") };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -1903,7 +1910,7 @@ fn delta_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// S275 — revue de δ (DELTA-VISIBLE-S275) : quatre poses de jeu, trois variantes au même instant
 /// (B seul, B+δ au pas de 4 ms, B+δ au pas d'image), 1280 × 720, PPM et empreinte FNV.
 fn revue_delta(frame: &mut FrameData<'_>) -> Result<(), String> {
-    let dir = "captures/s275";
+    let dir = captures!("s275");
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -2025,13 +2032,23 @@ fn run() -> Result<(), String> {
     // S275, ADR-168 : `--delta` — houle à crêtes longues à la place de B, bande δ rejouée.
     let delta_scene = args.iter().any(|a| a == "--delta");
     let swell = if delta_scene { Some(delta::swell_background()?) } else { None };
-    let replays = match &swell { Some(b) => Some(delta_replays(b)?), None => None };
-    let mut frame = FrameData::new(swell.as_ref().unwrap_or(&scene.background), table, input, timeline, recipe, impacts);
     // S276 : `--delta-direct` — δ avance d'un pas par image au lieu d'être rejoué.
     let delta_direct = delta_scene && args.iter().any(|a| a == "--delta-direct");
+    // S277 : en direct, aucun rejeu n'est lu — seule la vérification les compare. Les précalculer
+    // coûtait trois minutes muettes avant la première image, pour rien.
+    let direct_verify = args.iter().any(|a| a == "--delta-direct-verify");
+    let replayed = ["--delta-direct-verify", "--delta-verify", "--revue-delta"];
+    let replays = match &swell {
+        Some(b) if !delta_direct || args.iter().any(|a| replayed.contains(&a.as_str())) => Some(delta_replays(b)?),
+        _ => None,
+    };
+    let mut frame = FrameData::new(swell.as_ref().unwrap_or(&scene.background), table, input, timeline, recipe, impacts);
+    if delta_direct && replays.is_none() {
+        frame.delta = Some(delta::Layer::direct(swell.as_ref().unwrap())?);
+    }
     if let Some((reference, image)) = &replays {
         frame.delta = Some(delta::Layer::new(reference, image));
-        if args.iter().any(|a| a == "--delta-direct-verify") {
+        if direct_verify {
             return delta_direct_verify(swell.as_ref().unwrap(), image);
         }
         if delta_direct {
@@ -2393,7 +2410,7 @@ fn run() -> Result<(), String> {
         return verify_multi(&mut frame);
     }
     if args.iter().any(|a| a == "--verify") {
-        std::fs::create_dir_all("captures/s212").map_err(|e| e.to_string())?;
+        std::fs::create_dir_all(captures!("s212")).map_err(|e| e.to_string())?;
         let instance = instance();
         let mut g = pollster::block_on(gpu::Gpu::new(
             &instance,
@@ -2433,9 +2450,9 @@ fn run() -> Result<(), String> {
             g.capture(
                 &target,
                 if enabled {
-                    "captures/s212/scene.ppm"
+                    captures!("s212/scene.ppm")
                 } else {
-                    "captures/s212/background.ppm"
+                    captures!("s212/background.ppm")
                 },
             )?;
         }
