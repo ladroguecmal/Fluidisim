@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 18:39 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 18:40 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S272
 Dernière session : S271 — démarrage progressif contrôlé, liste du projet actualisée ; durée utile non reçue
 Session suivante : S272 — référence temporelle indépendante et résidu progressif sur durée utile
 Maillons        : 1

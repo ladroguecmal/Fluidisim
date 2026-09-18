@@ -58,32 +58,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S271 — terminée
+Session : S272 — en cours
 Agent : Codex, GPT-6 ; fichiers, git, cargo et Python.
-Entrée : « continue et mes a jour la to do list », master propre 9155256, copie unique.
-Objectif : éprouver la houle progressive traversante et actualiser LISTE-PROJET-FINI.
+Entrée : « continue », master propre b92ba0b, copie unique, jeton libre.
+Objectif : comparer le résidu progressif sur une durée finie à un oracle temporel indépendant.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — choisir l'oracle indépendant et déclarer les critères ; actualiser la liste sur preuves.
-- [x] **P3** — construire le cas progressif et ses contre-épreuves.
-- [x] **P4** — réception, limites, mise à jour finale de la liste et décompte.
-- [x] **P5** — rituel §6, file entière, journal, index et jeton.
+- [>] **P2** — référence d'ordre deux et critères déclarés avant campagne.
+- [ ] **P3** — oracle et consommateur réel, contrôles indépendants de l'instrument.
+- [ ] **P4** — mesures spatiales/temporelles, verdict ou diagnostic, pas de seuil relevé.
+- [ ] **P5** — rituel §6, liste/file, journal, index et jeton.
 
 ### Notes de reprise
 
-S270 : courant constant reçu, pas houle progressive. La source non linéaire du fond
-ne doit pas être confondue avec une erreur parasite. Priorité J2 maintenue devant
-l'affinage du rendu accepté : vérifier le passage d'un fond variable est nécessaire.
-Liste utilisateur encore datée S263 ; corriger notamment 4.6/4.7, 8.10 et 9.11,
-ainsi que l'ancienne absence A288 déjà close S262. Ne pas cocher le périmètre final
-à partir d'un reçu local.
-
-P2 : liste actualisée sur S262–S270, périmètres finaux toujours partiels.
-Oracle initial W(ζ)-W(0)-U(ζ)ζ_x déclaré avant campagne ; ne pas viser η'=0
-pour une houle linéaire. Réception temporelle entière explicitement non acquise.
-
-P3 : trois tests S271 passent. Erreurs spatiales 3,0481 / 1,2370 / 0,5847 %,
-témoin fermé 168,9 / 238,9 / 337,7 %. Pas réel : erreur de taux 0,00120251
-puis 0,000601253, divisée par deux. Décompte liste vérifié : 119=3+48+68.
+S271 contrôle seulement le démarrage. Ne pas comparer à un oracle périodique si
+la perturbation du solveur est fermée aux bords. Représentation modale à Neumann
+pour le potentiel perturbatif, forcée par le fond progressif : référence indépendante
+de la discrétisation MAC. Lot comparé à V et au coût : le reçu temporel manque encore
+à l'usage J2, mais une nouvelle chaîne de simples instruments ne suffit pas.
