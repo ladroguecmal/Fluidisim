@@ -58,87 +58,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S279 — terminée
+Session : S280 — en cours
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
-Entrée : « branche l'ordonnanceur sur la bande δ ». master 57fb182, maillons 1 — S278 a livré de
-quoi décider et personne ne s'en sert.
-Objectif : **la bande δ cesse d'être câblée**. À chaque image, l'afficheur publie ses trois poids,
-l'ordonnanceur décide, et δ ne vit que s'il est retenu. Le coût annoncé est celui **mesuré** au pas
-précédent (ADR-012 §3), pas une constante.
+Entrée : « Continue », jeton libre, master 5a3500e. La file porte en tête le défaut ouvert de
+S279 : **l'exclusion par le coût est absorbante** (L336) — un domaine qu'un pic fait sortir du
+budget n'exécute plus de pas, donc ne produit plus de mesure, donc conserve le coût qui l'a fait
+sortir. S279 l'a refermé en élargissant le budget de l'afficheur ; le défaut est entier.
+Objectif : **qu'un pic ne condamne plus un domaine**, et que le budget reste inviolé.
 
-**Ce qui doit rester vrai** : dans la pose de la revue R10, la bande est visible en permanence,
-donc elle doit vivre en permanence et **la scène doit être identique au bit** à celle d'avant le
-branchement. Un branchement qui change l'image quand rien ne devait changer est un branchement
-faux.
+### Ce que l'analyse a écarté avant d'écrire
+
+- **Distribuer le reliquat au lieu d'exclure** (ADR-012 §1 point 5, le solveur s'arrête dans son
+  budget) : juste en général, **inapplicable à δ**. Le pas couplé est tout ou rien — un pas partiel
+  avancerait l'histoire de moins que `FRAME_US` en croyant l'avoir faite (`Live::advance` compte
+  ses pas), et la surface mobile n'admet pas de demi-pas (ADR-152).
+- **Admettre d'office un domaine affamé** : viole la seule propriété qu'ADR-012 §1 demande de
+  défendre avant toutes les autres. Écarté sans discussion.
+- **Faire décroître l'estimation dans l'ordonnanceur** : ce n'est pas son travail. ADR-012 §3 confie
+  la mesure du coût au solveur, qui la réinjecte ; l'ordonnanceur ne doit pas inventer un chiffre
+  que personne n'a mesuré.
+
+**Ce qui reste, et qui est le vrai défaut** : l'estimation se faisait sur **le dernier pas**, alors
+qu'ADR-012 §3 dit en toutes lettres que la cible de mesure est un **centile**, jamais une valeur
+isolée. Un pic à 45,8 ms pour une médiane à 22 condamnait le domaine. La correction appartient à
+l'hôte, pas au cœur.
 
 ### Plan
 
 - [ ] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — `W_perception` pour de vrai : fraction d'écran de l'emprise de la bande, projetée
-  depuis la caméra, coupée au plan proche puis au cadre. Essais : de face, de dos, hors champ.
-- [x] **P3** — les seuils passent au profil, et la première calibration (ADR à écrire). *Découpage
-  déclaré à 23:05, imposé par une mesure : voir les notes.*
-- [x] **P3b** — le branchement : soumission, décision et allocation à chaque image ; δ n'avance et
-  ne s'affiche que retenu ; coût réinjecté depuis la mesure du pas précédent.
-- [x] **P4** — réception : scène R10 identique au bit quand la bande reste visible ; relevé de
-  l'extinction et de la renaissance quand la caméra se détourne ; coût réinjecté vérifié.
-- [x] **P5** — rituel §6.
+- [ ] **P2** — estimation robuste dans l'hôte : médiane glissante des derniers pas payés, et retour
+  vers l'estimation nominale quand plus rien n'est payé — un domaine qui ne tourne plus ne sait
+  plus ce qu'il coûte, et le dire est plus honnête que de garder son pire chiffre. Essais.
+- [ ] **P3** — réception : `--delta-budget=<ms>` pour éprouver le cas serré ; la bande survit à
+  33 ms là où S279 la voyait mourir à 0,352 s ; relevé dynamique de S279 inchangé ; douze
+  empreintes de R10 inchangées.
+- [ ] **P4** — rituel §6.
 
 ### Notes de reprise
 
-**P4 : l'exclusion par le coût est absorbante — défaut trouvé par le relevé.** Avec un budget de
-33 ms (une image à 30 Hz), la bande s'éteignait à 0,352 s et ne revenait jamais, part de cadre
-inchangée. Cycle : le pire pas vaut 45,8 ms (S276) → exclusion → **un domaine exclu n'exécute plus
-de pas, donc ne produit plus de mesure, donc reste exclu**. Budget porté à 50 ms : le cas observé
-est refermé, **le défaut de fond non**. Avec les 2 ms d'un jeu il revient aussitôt. Traitement
-possible non tranché : coût annoncé décroissant tant qu'on ne tourne pas, ou dégradation
-(ADR-012 §4) qui rétrécit au lieu d'exclure.
-
-**P4 reçu** : 12 empreintes R10 identiques ; relevé dynamique 3 transitions — allumée à 0, éteinte
-à 6,016 s (soit 1,016 s après l'éloignement : le délai d'ADR-013 plus un pas), rallumée à 10,0 s
-sans délai.
-
-**P3b : les douze empreintes de R10 sont identiques**, pose haute comprise — alors qu'ADR-171
-prévoyait de l'éteindre. Explication, et elle est juste : `--revue-delta` appelle `update` à
-**temps figé** (`age` = 20 s pour les douze images). Le domaine s'allume à la première pose
-(0,5456), et aux suivantes son score tombe sous `off` sans que rien ne s'éteigne — la durée de vie
-minimale et le délai d'extinction ne s'écoulent pas quand le temps ne bouge pas. **Une décision
-demande du temps ; une image isolée n'en donne aucun.** L'identité au bit prouve donc que le
-branchement ne casse rien, pas qu'il décide : la preuve de l'extinction doit être **dynamique**
-(P4).
-
-**Mesure qui impose un découpage** (relevé `part_de_cadre_des_poses_de_r10_s279`) : la part de
-cadre de la bande vaut **0,5774 / 0,5456 / 0,5571 / 0,3185 / 0,5089** pour les poses défaut, le
-long des crêtes, face à la houle, haute et rasante. **Aucune n'atteint le seuil d'allumage de
-0,60.** Or `P = g · p · u` est un produit de trois fractions : il est **toujours ≤ la plus petite**,
-donc un domaine maximal au gameplay et à l'urgence mais occupant 55 % du cadre ne s'allume jamais.
-Brancher tel quel éteindrait la bande dans toutes les poses de R10.
-
-**Ce qu'il ne faut pas faire** : remonter `W_gameplay` ou `W_urgence` pour que ça passe — ce serait
-régler les poids sur le résultat voulu (L334). Les seuils 0,60 / 0,40 sont des **valeurs de départ
-d'ADR-013 §5, explicitement « toutes à calibrer »**, et c'est leur première mise à l'épreuve.
-
-**Critère de calibration, indépendant du résultat cherché** : S275 a mesuré que δ change 10 à 24 %
-des pixels à hauteur d'œil et en incidence rasante, et **0 % vue d'en haut**. Un domaine mérite donc
-de vivre quand sa présence change l'image — pas quand il occupe le cadre. Cette frontière tombe
-entre la pose haute (0,3185, δ invisible) et la rasante (0,5089, δ visible). Les seuils doivent
-appartenir au **profil**, pas au cœur : chaque hôte calibre les siens et les écrit.
-
-**P2 : deux attentes fausses, corrigées par la mesure.** (1) Dans la pose de R10 la caméra est
-**à l'intérieur** de l'emprise (256 × 200 m, œil au milieu) : la bande remplit le cadre quel que
-soit le regard, et c'est pour cela qu'elle y vivra en permanence. (2) **La part d'écran n'est pas
-monotone en lacet** — mesurée à 0,0308 de face et 0,0323 à 0,3 rad depuis l'extérieur : l'aire
-projetée d'un rectangle ne décroît pas avec l'angle. Ce dont l'hystérésis a besoin n'est pas la
-monotonie mais l'absence de saut ; mesuré : **moins de 0,01 par pas de 0,05 rad** sur un demi-tour.
-
-`W_gameplay` et `W_urgence` n'ont **pas** de source dans un afficheur : il n'y a ni acteur ni
-objectif. Ils seront déclarés, avec leur raison écrite — c'est exactement ce que l'ordonnanceur
-attend d'un hôte (ADR-012 §2), et c'est honnête tant qu'on ne prétend pas les avoir mesurés.
-
-La caméra du viewer donne `eye`, `yaw`, `pitch` et un champ vertical de 50° ; `lod::Projection`
-porte déjà `forward/right/up/tan_half/aspect`. L'emprise de la bande est le rectangle
-`x ∈ [X0, X0 + NX·DX]`, `y ∈ [±HALF_WIDTH]` au niveau de l'eau.
-
-Attention : en direct, δ **renaît au repos** quand on le rallume (I-12). Une extinction n'est donc
-pas gratuite pour l'onde injectée — elle repart de zéro. C'est le comportement voulu, pas un défaut,
-mais il faut le dire dans la réception.
+Chiffres de S279 à retrouver : bande morte à **0,352 s** sans retour avec un budget de 33 ms ;
+relevé à 50 ms — allumée 0 s, éteinte **6,016 s**, rallumée **10,0 s**, trois transitions. Douze
+empreintes R10 dans ORDONNANCEUR-S279. Coût de δ : médiane 23,1 ms, p95 29,2, **maximum 45,8**
+(COUT-DIRECT-S276).

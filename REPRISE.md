@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 23:12 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 23:55 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : —
+Session en cours : S280 — sortir de l'exclusion absorbante (L336)
 Dernière session : S279 — l'ordonnanceur branché sur la bande δ : elle s'éteint et se rallume seule (ADR-171)
 Session suivante : au choix de l'utilisateur. La file porte : sortir de **l'exclusion absorbante** (L336 — un domaine exclu ne produit plus la mesure qui le ferait revenir), plusieurs candidats réels dans l'afficheur, la forme des domaines (liste 1.5/1.6). **En attente depuis S277** : le verdict visuel de l'utilisateur sur l'onde injectée
 Maillons        : 0
