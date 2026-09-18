@@ -68,6 +68,7 @@
 - [Houle progressive : oracle initial et limites](validation/HOULE-PROGRESSIVE-S271.md).
 - [Résidu progressif temporel : refus et diagnostic de quadrature](validation/RESIDU-TEMPOREL-S272.md).
 - [Bande du fond en quadrature linéaire : critères et réception](validation/BANDE-LINEAIRE-S273.md).
+- [Houle progressive : quelle précision sert l'usage](validation/HOULE-USAGE-S274.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

@@ -70,11 +70,11 @@ puis ouvrir le blocage suivant.
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — lecture d'usage sur les traces S273, sans calcul nouveau : ce que protège chaque
+- [x] **P2** — lecture d'usage sur les traces S273, sans calcul nouveau : ce que protège chaque
   critère ; écart en hauteur absolue, pente, déphasage (mode k en quadrature, harmonique 2k) ;
   signature séculaire de l'ordre trois contre la dispersion de Stokes ; critères de la
   campagne P3 écrits avant mesure (HOULE-USAGE-S274).
-- [ ] **P3** — campagne unique : a = 2 cm et dt = 0,5 ms admis par l'exemple ; trois amplitudes
+- [>] **P3** — campagne unique : a = 2 cm et dt = 0,5 ms admis par l'exemple ; trois amplitudes
   × trois mailles à 1 ms, contrôle 0,5 ms à la fine ; coefficient d'ordre deux jugé au budget
   d'ADR-120, sans le présenter comme la houle complète.
 - [ ] **P4** — verdict d'usage : garanties de fonctionnement, seuils justifiés par l'usage ou
@@ -89,3 +89,8 @@ ADR-120 : 2 % décidés par l'utilisateur, budget conjoint spatial + temporel + 
 seul un arbitrage explicite les change. Le rendu (`viewer/`) ne consomme aucun domaine δ.
 Repères d'usage existants : hauteur d'image 3 mm (S201), horloge 20 ms (ADR-003, Δz ≈ Aω·Δt).
 Traces S273 dans TEMP (fluidisim-s273-*.log), à réutiliser en P2.
+
+P2 : écart fin = 5,8 µm rms (0,058 % de a), pente 1,9e-5, déphasage 1,35e-3 rad à 2 s ;
+D = N(a)−N(a/2) croît sur sin θ à 0,85–0,87 × Stokes (ω₂ = 0,611(ak)²ω), indépendant de dx.
+ADR-122 : une troncature d'ordre deux ne juge pas la phase. Besoin découvert : cohérence
+de phase δ/B (B linéaire). Outil outils/usage_houle.py.
