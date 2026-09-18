@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 18:10 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 18:34 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S271
 Dernière session : S270 — bande du fond aux frontières reçue sur courant uniforme (ADR-165), 478 tests
 Session suivante : S271 — houle progressive traversante, référence indépendante et perturbations induites
 Maillons        : 0

@@ -58,32 +58,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S270 — terminée
+Session : S271 — en cours
 Agent : Codex, GPT-6 ; fichiers, git, cargo et Python.
-Entrée : « continue », copie unique master propre 8e624a1, jeton libre.
-Objectif : recevoir le passage du fond à travers les frontières du pas perturbatif.
+Entrée : « continue et mes a jour la to do list », master propre 9155256, copie unique.
+Objectif : éprouver la houle progressive traversante et actualiser LISTE-PROJET-FINI.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — lire les contrats, isoler le défaut et déclarer la réception bornée.
-- [x] **P3** — construire la correction et ses contre-épreuves dans le pas réel.
-- [x] **P4** — exécuter la réception et les régressions pertinentes.
-- [x] **P5** — rituel §6, file entière, journal, index et jeton.
+- [>] **P2** — choisir l'oracle indépendant et déclarer les critères ; actualiser la liste sur preuves.
+- [ ] **P3** — construire le cas progressif et ses contre-épreuves.
+- [ ] **P4** — réception, limites, mise à jour finale de la liste et décompte.
+- [ ] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
 
-S269 reçoit seulement l'effet différentiel du bord sur un paquet à fond nul.
-Troisième session du fil : le fond traversant débloque l'usage perturbatif J2 ;
-un approfondissement spectral serait différable. Vérifier les flux de bande
-avant de supposer un défaut. Aucun rendu modifié, aucune frontière universelle promise.
-
-P2 : défaut constaté, flux Ua constant fermé aux deux bouts. ADR-165 et critères
-déclarés ; lot borné à la bande prescrite, pas à la houle progressive entière.
-
-P3 : ancien premier pas erreur 0,0002501011 m ; correctif : zéro aux huit cas.
-Flux signé, bilan et refus reçus ; première réception 638 expirations sans allocation.
-Gardes étendues au bord avant/après transport ; suite complète à exécuter.
-
-P4 : workspace 478 réussis, 18 ignorés, zéro échec ; 638 expirations finales
-avec flux non nul, zéro allocation et reprise identique. Preuve S270 complète.
+S270 : courant constant reçu, pas houle progressive. La source non linéaire du fond
+ne doit pas être confondue avec une erreur parasite. Priorité J2 maintenue devant
+l'affinage du rendu accepté : vérifier le passage d'un fond variable est nécessaire.
+Liste utilisateur encore datée S263 ; corriger notamment 4.6/4.7, 8.10 et 9.11,
+ainsi que l'ancienne absence A288 déjà close S262. Ne pas cocher le périmètre final
+à partir d'un reçu local.
