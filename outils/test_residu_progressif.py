@@ -59,4 +59,12 @@ class Oracle(unittest.TestCase):
                 self.assertLess(abs(exact_k-k2)/(a*a),.002)
                 self.assertLess(abs(exact_d-d2)/(a*a),.002)
 
+    def test_amplitude_extrapolation_removes_third_order(self):
+        # S273 : eta'=a²f+a³g ; N* doit rendre f exactement, sans connaître g.
+        a=.01;f=[.3,-1.2,2.5];g=[40.,-7.,13.]
+        full=[a*a*x+a**3*y for x,y in zip(f,g)]
+        half=[(a/2)**2*x+(a/2)**3*y for x,y in zip(f,g)]
+        for got,want in zip(r.extrapolate(full,half,a),f):
+            self.assertAlmostEqual(got,want,places=9)
+
 if __name__=='__main__': unittest.main()

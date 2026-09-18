@@ -100,11 +100,36 @@ def sensitivity(reference_path,other_path):
     return result
 
 
+def extrapolate(full,half,a):
+    """S273 : N*=2N(a/2)-N(a), N=eta'/a² ; élimine le terme a³ si eta'=a²f+a³g+…"""
+    return [2*h/(a/2)**2-f/a**2 for f,h in zip(full,half)]
+
+
+def richardson(full_path,half_path):
+    """Diagnostic S273, pas un reçu : écart de N* à l'oracle eta2/a²."""
+    dx,a,base=read(full_path)
+    other_dx,other_a,other=read(half_path)
+    if dx!=other_dx or other_a!=a/2: raise ValueError('il faut la même maille et a/2')
+    xs=[(i+.5)*dx for i in range(round(L/dx))]
+    err=raw=den=0.
+    for (t,y),(t2,z) in zip(base,other):
+        if t!=t2: raise ValueError('instants différents')
+        ref=[v/a**2 for v in field(xs,t,a)]
+        star=extrapolate(y,z,a)
+        err+=math.fsum((b-c)**2 for b,c in zip(star,ref))
+        raw+=math.fsum((b/a**2-c)**2 for b,c in zip(y,ref))
+        den+=math.fsum(c*c for c in ref)
+    result,plain=math.sqrt(err/den),math.sqrt(raw/den)
+    print(f'RICHARDSON dx={dx} a={a} erreur_extrapolee={result:.9g} erreur_brute={plain:.9g}')
+    return result
+
+
 if __name__=='__main__':
     try:
         if len(sys.argv)==2: measure(sys.argv[1])
         elif len(sys.argv)==4 and sys.argv[1]=='--sensibilite': sensitivity(sys.argv[2],sys.argv[3])
-        else: raise ValueError('une trace, ou --sensibilite reference autre')
+        elif len(sys.argv)==4 and sys.argv[1]=='--richardson': richardson(sys.argv[2],sys.argv[3])
+        else: raise ValueError('une trace, --sensibilite reference autre, ou --richardson a a/2')
     except (ValueError,OSError) as e:
         print(f'NON_RECU : {e}',file=sys.stderr)
         sys.exit(1)

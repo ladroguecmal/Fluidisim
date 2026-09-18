@@ -37,3 +37,24 @@ Qualification des deux biais, **diagnostic seulement**, déclarée ici avant mes
 
 Arrêt : verdict, ou diagnostic chiffré avec le prochain correctif concret. Pas de nouvelle
 campagne de raffinement dans cette session.
+
+## Réception de la construction
+
+`band_layer` (`delta_coupling.rs`) porte la règle ; les faces intérieures l'appellent avec un
+plancher nul et l'ouverture d'avant, les faces extérieures avec le fond de leur colonne.
+
+| critère | résultat |
+|---|---|
+| 1. quadrature, flux produit de toutes les faces | **0,4190 / 0,0892 / 0,0162 %** (rapports 4,7 et 5,5), identiques au diagnostic S272 ; témoin rectangle 8,41 / 3,86 / 1,60 % |
+| 2. fond affine, 9 bandes au bord × 3 couples (U0, S), 17 faces intérieures | écart maximal **3,9·10⁻⁸** m²/s |
+| 3. identités | fond nul S253 au bit, fond uniforme S270, témoin sans résidus, refus et expirations : inchangés, verts |
+| 4. suite complète | **480 réussis, 0 échec**, 21 ignorés (368 cœur, 17 intégrations, 95 harnais) ; release : S253 128 colonnes et harmonique reçus |
+
+Valeurs déplacées, toutes par un fond non uniforme :
+
+- S271, cinématique initiale : **3,048 / 1,237 / 0,585 % → 1,509 / 0,445 / 0,137 %** ; il reste
+  la différence finie de la divergence, d'ordre deux.
+- S253, harmonique `2k` couplée à 32 colonnes, une période : 2,17 → **2,14 %** (seuil 20 %) ;
+  témoin sans résidus 99,56 % inchangé (bande éteinte).
+- S254, intégration du B de production : 590 faces mouillées au-dessus du plan moyen, comme
+  avant ; `u'` maximal 5,36·10⁻³ m/s aux murs.

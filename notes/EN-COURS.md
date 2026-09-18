@@ -73,8 +73,8 @@ Objectif : intégrer au transport réel la reconstruction linéaire de la bande
 - [x] **P3** — construction : même règle aux faces intérieures et extérieures ;
   tests de quadrature contre l'intégrale analytique, bandes signées/coupées,
   fond uniforme et fond nul inchangés.
-- [>] **P4** — suite complète, valeurs déplacées expliquées, transaction intacte.
-- [ ] **P5** — rejouer les cinq passages S272, verdict aux critères S272 inchangés,
+- [x] **P4** — suite complète, valeurs déplacées expliquées, transaction intacte.
+- [>] **P5** — rejouer les cinq passages S272, verdict aux critères S272 inchangés,
   qualification dt/amplitude déclarée en P2.
 - [ ] **P6** — rituel §6, feuille de route/file/liste, journal, index et jeton.
 
@@ -90,3 +90,9 @@ P3 : `band_layer` commun (bord : plancher = fond de colonne ; intérieur : 0,
 ouverture conservée). Flux produit 0,4190/0,0892/0,0162 % (= diagnostic S272),
 témoin rectangle 8,41/3,86/1,60 %. Affine exact à 3,9e-8. S271 cinématique
 initiale 3,048/1,237/0,585 % → 1,509/0,445/0,137 %. Module couplé 29 ok, 4 ignorés.
+
+P4 : suite 480 ok/21 ignorés. S253 release 2,14 %. Campagne S272 rejouée :
+9,11/6,18/5,88 % ; a/2 3,23 % ; demi-dt 5,78 %, sens. 0,668 % ; a² 2,89 %.
+Richardson a (ajout après la fine : a/2 aux mailles grossière/moyenne, 2 passages)
+7,74/2,92/1,77 % ; a² 2,74/2,85/2,89 % indépendant de dx → ordre trois physique.
+Rejeu S253 128 colonnes 5/10 cm en cours (fluidisim-s273-s253-*.log, ~26 min).
