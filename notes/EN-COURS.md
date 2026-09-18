@@ -68,8 +68,8 @@ Objectif : réduire le coût de cuisson GPU du sillage en préservant le rendu a
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — lectures, diagnostic du calcul du sillage et contrat de réception avant code ; comparer avec J2.
 - [x] **P3** — construire une optimisation bornée avec témoin conservé et vérifications ciblées.
-- [>] **P4** — recevoir précision, images et coût ; retenir ou rejeter sur les critères déclarés.
-- [ ] **P5** — rituel §6, file entière, journal, index et jeton.
+- [x] **P4** — recevoir précision, images et coût ; retenir ou rejeter sur les critères déclarés.
+- [>] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
 
@@ -80,3 +80,7 @@ P3 : huit accumulateurs nommés, témoin --sillage-cuisson-directe, bancs intég
 Tests hôte 19/1/0. Vingt comparaisons de grilles au bit et retours temporels reçus.
 Premier coût : cuisson 0,585/0,574 ms contre 1,083/1,064 ; eau 1,744/1,737 ms.
 Pointe référence 2,962 ms à conserver ; images et réception spectrale encore à faire.
+
+P4 : sept images au bit S266, 36 cas spectraux <=0,340 mm. Deux passages de coût
+reçus (46 % cuisson, 22–23 % total). Premier maximum 2,962 ms conservé ; second
+maximum 1,836 ms. CPU toujours ~4,1 ms. Preuve CUISSON-SILLAGE-S267 complète.

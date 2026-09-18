@@ -167,3 +167,13 @@ le témoin S265 ; `--reflets-suffixe-bench` compare les deux chemins en 1280×72
 Les captures `--multi --revue=r8_<nom>` vont dans `captures/s266`.
 Le cache de ciel essayé puis rejeté n'est pas conservé ; aucune option de cache disponible.
 Voir [réception](../docs/validation/CIEL-CACHE-S266.md).
+
+
+### Cuisson du sillage optimisée (S267)
+
+Huit accumulateurs explicites conservent les mêmes grilles et images au bit sur la
+machine de réception, pour environ 46 % de cuisson GPU en moins. Actif par défaut ;
+`--sillage-cuisson-directe` conserve le témoin. `--sillage-cuisson-verify` compare les
+grilles et le retour temporel ; `--sillage-cuisson-bench` mesure les deux chemins.
+`--multi --revue=r9_<nom>` écrit dans `captures/s267`.
+Voir [réception et limites](../docs/validation/CUISSON-SILLAGE-S267.md).

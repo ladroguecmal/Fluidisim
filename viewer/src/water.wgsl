@@ -176,7 +176,7 @@ fn bake(@builtin(global_invocation_id) id: vec3<u32>) {
     }
     lattice_out[index] = total;
 }
-// S267 : same ordered sums, explicit accumulators.
+// S267 : mêmes sommes ordonnées, accumulateurs explicites.
 @compute @workgroup_size(8, 8)
 fn bake_named(@builtin(global_invocation_id) id: vec3<u32>) {
     let nx = u32(p.lattice.y); let ny = u32(p.lattice.z);
