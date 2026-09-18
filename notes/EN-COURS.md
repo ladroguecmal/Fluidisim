@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S281 — en cours
+Session : S281 — terminée
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
 Entrée : l'utilisateur demande la trajectoire sous une forme qu'elle n'a pas — « création / test /
 validation d'un système puis d'un autre », et **la déclaration d'une v1**. master 0f2650d.
@@ -77,7 +77,7 @@ l'utilisateur (ADR-127 §6). Je propose où poser la porte et ce qu'elle contien
 - [ ] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — section « Portes de version » dans FEUILLE-DE-ROUTE : par porte, ce qu'on crée,
   comment on l'éprouve, ce qui vaut réception ; et la v1 **proposée**, marquée comme non tranchée.
-- [ ] **P3** — rituel §6.
+- [x] **P3** — rituel §6.
 
 ### Notes de reprise
 

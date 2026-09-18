@@ -14194,3 +14194,44 @@ rétrécir au lieu d'exclure), plusieurs candidats réels dans l'afficheur, et l
 **Rituel :** journal, L336 complétée d'une levée datée, file active relue, index
 (COUT-ROBUSTE-S280). Invariants relus : I-06 (l'anneau des coûts est un tableau fixe, rien par
 image), I-03.
+
+---
+
+## S281 — la trajectoire en portes, et une v1 proposée
+
+**2026-09-19, Claude Opus 5 (Claude Code desktop).** Entrée : l'utilisateur demande la trajectoire
+sous une forme qu'elle n'avait pas — « création / test / validation d'un système puis d'un autre »
+— et **la déclaration d'une v1**. master 0f2650d. Plan 27414b9 ; étape 27dd86b.
+
+**Maillons : 1.** Session documentaire, aucune capacité nouvelle. Elle n'invente rien : elle
+regroupe §2 en portes et nomme, pour chacune, ce qui vaut réception.
+
+**Écrit dans FEUILLE-DE-ROUTE §3 bis, et nulle part ailleurs.** La tentation était un second
+document ; deux lectures parallèles de la même trajectoire divergeront, et c'est le mécanisme
+exact des trois forks (L137). La section le dit d'elle-même : si elle contredit §2 un jour, c'est
+elle qui est fausse.
+
+**Six portes** : A ce qui décide (en cours), B δ sur les deux dimensions horizontales, C δ sous
+budget, D solides et flottabilité, E V articulé avec δ, F grande échelle. Chacune porte ce qu'on
+crée, le banc ou le cas qui l'éprouve, et la condition de réception — **une porte se franchit
+quand sa colonne « reçu si » est vraie, pas quand le code existe**.
+
+**V1 proposée après la porte D** : mer parcourue en temps réel, perturbations locales décidées par
+le système et non câblées, δ qui tient sur une vraie mer et dans le budget, objets qui flottent.
+Sans les inondations complexes, la grande échelle, les phénomènes secondaires — **reportés, jamais
+retirés** (ADR-127 §1). **Ce n'est pas une décision** : fixer ce qu'une version contient appartient
+à l'utilisateur (ADR-127 §6), et la section l'écrit pour qu'aucune session ne parle d'une « v1 »
+comme d'un périmètre acquis.
+
+**Ce que l'état réel dit, sans l'embellir** : 3 points validés sur 120, 49 partiels, 68 absents. Le
+chiffre ne mesure pas l'avancement — beaucoup de partiels portent l'essentiel de leur difficulté —
+il mesure que **presque rien n'est allé jusqu'à la réception**. Les quatre manques qui commandent
+l'ordre sont tous mesurés : δ est une tranche 2D (verdict R10), son coût vaut ≈ 11 fois le budget,
+l'ordonnanceur ne décide ni où ni de quelle forme, V n'a aucune articulation avec δ.
+
+**Suite S282 :** au choix de l'utilisateur, et cette fois une décision l'attend — **tranche-t-il la
+v1 proposée ?** Sinon la file porte la porte A (dégradation, plusieurs candidats, forme des
+domaines). **En attente depuis S277** : le verdict visuel sur l'onde injectée.
+
+**Rituel :** journal, feuille de route §3 bis, file active relue. Aucun ADR : rien n'a été décidé,
+une proposition a été écrite.

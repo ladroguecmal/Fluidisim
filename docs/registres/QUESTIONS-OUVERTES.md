@@ -2,6 +2,12 @@
 
 ## File active
 
+> **Décision qui attend l'utilisateur, posée S281** : la **v1** proposée en
+> [FEUILLE-DE-ROUTE §3 bis](../FEUILLE-DE-ROUTE.md) — mer parcourue, domaines décidés par le
+> système, δ sur une vraie mer et sous budget, solides qui flottent ; inondations, grande échelle
+> et phénomènes secondaires reportés. Tant qu'elle n'est pas tranchée, aucune session ne parle
+> d'une « v1 » comme d'un périmètre acquis (ADR-127 §6).
+
 **État relu en S276, 2026-09-18.** Porteur des travaux internes : la session du dépôt.
 Trajectoire : [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md). Priorité et protocole d'arrêt :
 [BILAN-GLOBAL-S227](BILAN-GLOBAL-S227.md). Remplacer les états touchés ; ne plus empiler ici des
