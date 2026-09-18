@@ -67,8 +67,8 @@ Objectif : comparer le résidu progressif sur une durée finie à un oracle temp
 
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — référence d'ordre deux et critères déclarés avant campagne.
-- [>] **P3** — oracle et consommateur réel, contrôles indépendants de l'instrument.
-- [ ] **P4** — mesures spatiales/temporelles, verdict ou diagnostic, pas de seuil relevé.
+- [x] **P3** — oracle et consommateur réel, contrôles indépendants de l'instrument.
+- [>] **P4** — mesures spatiales/temporelles, verdict ou diagnostic, pas de seuil relevé.
 - [ ] **P5** — rituel §6, liste/file, journal, index et jeton.
 
 ### Notes de reprise
@@ -81,3 +81,8 @@ de la discrétisation MAC. Lot comparé à V et au coût : le reçu temporel man
 
 P2 : oracle modal Neumann forcé à l’ordre deux déclaré, 2 s, résidu seul <=2 %.
 Paramètres et contrôles dans RESIDU-TEMPOREL-S272 ; aucun oracle périodique.
+
+P3 : oracle analytique contrôlé par RK4 et quadrature (2 tests).
+P4 en cours : erreurs temporelles 22,52 % (dx0,125), 13,04 % (dx0,0625),
+gardes modales <0,1 %. Fine dx0,03125 en cours, logs TEMP fluidisim-s272-*.log.
+Ancien test RK4 divisait par zéro sur mode64 non forcé : corrigé, champ nul exact.
