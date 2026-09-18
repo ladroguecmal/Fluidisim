@@ -70,10 +70,10 @@ Objectif : intégrer au transport réel la reconstruction linéaire de la bande
 - [x] **P2** — ADR-166 (quadrature linéaire de la bande, remplace la formule
   d'ADR-152/165), notes datées, critères de réception et de campagne écrits
   avant le code dans BANDE-LINEAIRE-S273.
-- [>] **P3** — construction : même règle aux faces intérieures et extérieures ;
+- [x] **P3** — construction : même règle aux faces intérieures et extérieures ;
   tests de quadrature contre l'intégrale analytique, bandes signées/coupées,
   fond uniforme et fond nul inchangés.
-- [ ] **P4** — suite complète, valeurs déplacées expliquées, transaction intacte.
+- [>] **P4** — suite complète, valeurs déplacées expliquées, transaction intacte.
 - [ ] **P5** — rejouer les cinq passages S272, verdict aux critères S272 inchangés,
   qualification dt/amplitude déclarée en P2.
 - [ ] **P6** — rituel §6, feuille de route/file/liste, journal, index et jeton.
@@ -85,3 +85,8 @@ pas un instrument de plus. Passages S272 : environ 1 min chacun en release.
 Anciennes traces S272 conservées dans TEMP (fluidisim-s272-*.log) ; nouvelles
 traces fluidisim-s273-*.log. Repos aligné sur une face dans tous les appelants
 (tests, exemples) ; le pli ADR-154 à z=0 ne gêne donc pas la règle par couche.
+
+P3 : `band_layer` commun (bord : plancher = fond de colonne ; intérieur : 0,
+ouverture conservée). Flux produit 0,4190/0,0892/0,0162 % (= diagnostic S272),
+témoin rectangle 8,41/3,86/1,60 %. Affine exact à 3,9e-8. S271 cinématique
+initiale 3,048/1,237/0,585 % → 1,509/0,445/0,137 %. Module couplé 29 ok, 4 ignorés.

@@ -84,6 +84,17 @@ fn validate_sample(s: &BackgroundSample, rho: f32) -> Result<(), Error> {
     Ok(())
 }
 
+/// ADR-166 : intégrale sur la couche `k` de la reconstruction linéaire de `U` autour de
+/// l'échantillon (`z_c` = centre de couche), du repos à la surface ; segment signé, tronqué à
+/// `[max(k·dx, plancher), (k+1)·dx]`. Exacte pour `U` affine ; fond nul ou uniforme inchangés.
+fn band_layer(s: &BackgroundSample, k: usize, dx: f32, floor: f32, rest: f32, surface: f32) -> f32 {
+    let lower = (k as f32 * dx).max(floor);
+    let upper = (k + 1) as f32 * dx;
+    if !(lower < upper) { return 0.; }
+    let (start, end) = (rest.clamp(lower, upper), surface.clamp(lower, upper));
+    (end - start) * (s.u[0] + s.grad_u[0][2] * (0.5 * (end + start) - (k as f32 + 0.5) * dx))
+}
+
 /// Termes absents de l'advection v·Dv existante ; contraction après somme B/W.
 fn extra(s: &BackgroundSample, axis: usize, v: [f32; 2], dv: [f32; 2], rho: f32) -> Result<f32, Error> {
     let residual = s.momentum_residual(rho, 0.).map_err(|_| Error::NotFinite)?;
@@ -248,11 +259,7 @@ impl Volume {
             let s=&bg.u[self.fu(edge,k)];
             if s.eta.to_bits()!=elevation.to_bits() { return Err(Error::BackgroundContext); }
             if !surface_residuals_on() { continue; }
-            let lower=(k as f32*dx).max(self.bottom[column]);
-            let upper=(k+1) as f32*dx;
-            let wet=(surface.min(upper)-lower).max(0.);
-            let calm=(self.rest.min(upper)-lower).max(0.);
-            flux+=s.u[0]*(wet-calm);
+            flux+=band_layer(s,k,dx,self.bottom[column],self.rest,surface);
         }
         if !flux.is_finite() { return Err(Error::NotFinite); }
         Ok(flux)
@@ -260,7 +267,8 @@ impl Volume {
 
     /// ADR-152 : `η' ← η' − (dt/dx)·Δ(Q_v + bande)`. `Q_v` est le débit S237, à l'identique, sur la
     /// géométrie totale ; la bande — flux du fond entre le plan moyen et `ζ` — s'ajoute à part, pour
-    /// qu'un fond nul rende exactement le pas S237. Tous les débits lisent `ζ^n`.
+    /// qu'un fond nul rende exactement le pas S237. Tous les débits lisent `ζ^n`. Bande en
+    /// quadrature linéaire par couche (ADR-166), la même aux faces intérieures et extérieures.
     fn transport_coupled(&mut self, transport: f32, bg: &BackgroundFaces<'_>, ctl: &mut Control) -> Result<(), Error> {
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         // Les deux flux lisent eta^n avant le transport en place.
@@ -282,13 +290,11 @@ impl Volume {
                 }
                 for k in 0..if surface_residuals_on() { nz } else { 0 } {
                     ctl.poll(Phase::Correct)?;
-                    let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
-                    let calm = ((self.rest - k as f32 * dx) / dx).clamp(0., 1.);
-                    if wet == 0. && calm == 0. {
+                    if k as f32 * dx >= surface.max(self.rest) {
                         break;
                     }
                     let face = self.fu(i + 1, k);
-                    band_right += self.open_u[face] * bg.u[face].u[0] * dx * (wet - calm);
+                    band_right += self.open_u[face] * band_layer(&bg.u[face], k, dx, 0., self.rest, surface);
                 }
             }
             let increment = -transport * ((right - left) + (band_right - band_left)) - self.eta_roundoff[i];

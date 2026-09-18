@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-18 19:02 +02:00
+Battement        : 2026-09-18 19:01 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
 Session en cours : S273 — reconstruction linéaire des flux de bande dans le pas réel
 Dernière session : S272 — résidu temporel refusé à 8,68 %, erreur de quadrature de bande isolée

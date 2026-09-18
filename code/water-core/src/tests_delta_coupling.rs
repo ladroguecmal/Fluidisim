@@ -940,8 +940,9 @@ fn boundary_surface_outside_domain_refuses_s270() {
 
 
 /// Fond progressif de profondeur finie ; fixture, pas fournisseur de production.
-fn progressive_sample_s271(x:f64,z:f64,t:f64)->BackgroundSample {
-    let (a,k,h,g,rho)=(0.125,std::f64::consts::PI/2.,1.,9.81,1025.);
+fn progressive_sample_s271(x:f64,z:f64,t:f64)->BackgroundSample {progressive_sample_amplitude(0.125,x,z,t)}
+fn progressive_sample_amplitude(a:f64,x:f64,z:f64,t:f64)->BackgroundSample {
+    let (k,h,g,rho)=(std::f64::consts::PI/2.,1.,9.81,1025.);
     let omega=(g*k*(k*h).tanh()).sqrt();let q=a*g*k/omega;
     let (sn,cs)=(k*x-omega*t+0.37).sin_cos();
     let c=(k*(z+h)).cosh()/(k*h).cosh();let sh=(k*(z+h)).sinh()/(k*h).cosh();
@@ -954,13 +955,14 @@ fn progressive_sample_s271(x:f64,z:f64,t:f64)->BackgroundSample {
         grad_p_dyn:[(-rho*g*a*k*c*sn) as f32,0.,(rho*g*a*k*sh*cs) as f32],
         ..Default::default()}
 }
-fn progressive_case_s271(dx:f32)->(Volume,Vec<BackgroundSample>,Vec<BackgroundSample>) {
+fn progressive_case_s271(dx:f32)->(Volume,Vec<BackgroundSample>,Vec<BackgroundSample>) {progressive_case_amplitude(0.125,dx)}
+fn progressive_case_amplitude(a:f64,dx:f32)->(Volume,Vec<BackgroundSample>,Vec<BackgroundSample>) {
     let nx=(4./dx) as usize;let nz=(1.5/dx) as usize;
     let mut v=Volume::configure(&mut HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs},
         Domain{nx,nz,dx},1025.,9.81,&vec![0.;nx]).unwrap();
     v.set_free_surface(&vec![1.;nx],1.).unwrap();let (mut u,mut w)=fields(&v);
-    for k in 0..nz {for i in 0..=nx {u[v.fu(i,k)]=progressive_sample_s271(i as f64*dx as f64,(k as f64+0.5)*dx as f64-1.,0.);}}
-    for k in 0..=nz {for i in 0..nx {w[v.fw(i,k)]=progressive_sample_s271((i as f64+0.5)*dx as f64,k as f64*dx as f64-1.,0.);}}
+    for k in 0..nz {for i in 0..=nx {u[v.fu(i,k)]=progressive_sample_amplitude(a,i as f64*dx as f64,(k as f64+0.5)*dx as f64-1.,0.);}}
+    for k in 0..=nz {for i in 0..nx {w[v.fw(i,k)]=progressive_sample_amplitude(a,(i as f64+0.5)*dx as f64,k as f64*dx as f64-1.,0.);}}
     (v,u,w)
 }
 fn progressive_rate_s271(x:f64)->f64 {
@@ -1025,5 +1027,100 @@ fn progressive_real_step_tends_to_initial_transport_s271() {
         let error=v.eta.iter().zip(&v.eta_roundoff).zip(&rate).map(|((h,r),a)|((*h as f64-1.-*r as f64)/dt-a).powi(2)).sum::<f64>().sqrt();
         println!("S271 pas_reel dt_us={duration} ecart_taux={error:e}");
         assert!(error<previous);previous=error;
+    }
+}
+
+
+/// Flux de bande de toutes les faces, lus dans le transport réel : bords par la fonction du bord,
+/// intérieur recomposé depuis les incréments compensés de `η'` (vitesse perturbative nulle, T = 1).
+fn band_fluxes_s273(v:&mut Volume,bg:&BackgroundFaces<'_>)->Vec<f64> {
+    let nx=v.domain.nx;
+    let before:Vec<f64>=v.eta.iter().map(|h|*h as f64).collect();
+    assert!(v.u.iter().all(|x|*x==0.)&&v.eta_roundoff.iter().all(|r|*r==0.));
+    let mut flux=vec![v.boundary_background_band(0,bg,&mut Control::unlimited()).unwrap() as f64];
+    let right=v.boundary_background_band(nx,bg,&mut Control::unlimited()).unwrap() as f64;
+    v.transport_coupled(1.,bg,&mut Control::unlimited()).unwrap();
+    for i in 0..nx {
+        let increment=v.eta[i] as f64-before[i]-v.eta_roundoff[i] as f64;
+        flux.push(flux[i]-increment);
+    }
+    assert!((flux[nx]-right).abs()<=1e-6*right.abs().max(1e-3),"télescopage {} / {right}",flux[nx]);
+    flux[nx]=right;
+    flux
+}
+
+/// S273 (ADR-166, critère 1) : fond progressif S272 (a = 1 cm), flux de bande du code produit
+/// contre l'intégrale analytique sur la surface discrète de chaque face ; témoin rectangle.
+#[test]
+fn linear_band_quadrature_is_second_order_s273() {
+    let (a,k,h,g)=(0.01f64,std::f64::consts::PI/2.,1.,9.81);
+    let omega=(g*k*(k*h).tanh()).sqrt();let q=a*g*k/omega;
+    let mut previous=f64::INFINITY;
+    for (dx,limit) in [(0.125f32,0.005),(0.0625,0.001),(0.03125,0.00025)] {
+        let (mut v,u,w)=progressive_case_amplitude(a,dx);let bg=input(&v,&u,&w);
+        v.prepare_surface_background(&bg,&mut Control::unlimited()).unwrap();
+        let got=band_fluxes_s273(&mut v,&bg);
+        let (nx,nz,d)=(v.domain.nx,v.domain.nz,dx as f64);
+        let column=|i:usize|a*(k*(i as f64+0.5)*d+0.37).cos();
+        let (mut err,mut rect,mut norm)=(0f64,0f64,0f64);
+        for i in 0..=nx {
+            let x=i as f64*d;let cs=(k*x+0.37).cos();
+            let zeta=if i==0||i==nx {a*cs} else {0.5*(column(i-1)+column(i))};
+            let exact=q*cs/k*((k*(h+zeta)).sinh()-(k*h).sinh())/(k*h).cosh();
+            // Témoin : ancienne règle, U au centre de couche fois la longueur signée.
+            let mut r=0f64;
+            for layer in 0..nz {
+                let (lo,hi)=(layer as f64*d-h,(layer+1) as f64*d-h);
+                let zc=(layer as f64+0.5)*d-h;
+                r+=q*(k*(zc+h)).cosh()/(k*h).cosh()*cs*(zeta.clamp(lo,hi)-0f64.clamp(lo,hi));
+            }
+            err+=(got[i]-exact).powi(2);rect+=(r-exact).powi(2);norm+=exact*exact;
+        }
+        let (err,rect)=((err/norm).sqrt(),(rect/norm).sqrt());
+        println!("S273 bande dx={dx} erreur_lineaire={err:e} temoin_rectangle={rect:e}");
+        assert!(err<=limit,"quadrature linéaire {err} > {limit}");
+        if previous.is_finite() {assert!(previous/err>=3.5,"ordre : rapport {}",previous/err);}
+        previous=err;
+        if dx==0.03125 {assert!(rect>=0.015,"le témoin doit distinguer le défaut : {rect}");}
+    }
+}
+
+/// S273 (ADR-166, critère 2) : fond affine `U = U0 + S·(z − 2)`, règle exacte. Bandes signées,
+/// sur trois couches, sur une face de couche, repos hors face, fond solide au-dessus du repos.
+#[test]
+fn linear_band_signed_and_cut_layers_exact_on_affine_s273() {
+    let mut v=volume();v.set_free_surface(&vec![2.;16],2.).unwrap();
+    let (mut u,w)=fields(&v);
+    let (dx,nz)=(v.domain.dx,v.domain.nz);
+    for (u0,slope) in [(0.7f32,0.3f32),(-0.75,0.5),(0.4375,-0.25)] {
+        for k in 0..nz {for i in 0..=16 {
+            let s=&mut u[v.fu(i,k)];s.u[0]=u0+slope*((k as f32+0.5)*dx-2.);s.grad_u[0][2]=slope;
+        }}
+        let prim=|z:f64|u0 as f64*(z-2.)+0.5*slope as f64*(z-2.).powi(2);
+        let mut worst=0f64;
+        for (bottom,rest,surface) in [(0.,2.,2.375),(0.,2.,1.625),(0.,2.,3.25),(0.,2.,0.75),
+            (0.,2.,2.5),(1.9,2.,1.8),(2.1,2.,2.375),(0.,2.25,1.875),(0.,2.25,3.125)] {
+            v.bottom[0]=bottom;v.rest=rest;v.eta[0]=surface;
+            let bg=input(&v,&u,&w);
+            let got=v.boundary_background_band(0,&bg,&mut Control::unlimited()).unwrap() as f64;
+            let b=bottom as f64;
+            let exact=prim((surface as f64).max(b))-prim((rest as f64).max(b));
+            worst=worst.max((got-exact).abs());
+            assert!((got-exact).abs()<=2e-7,"bord {bottom}/{rest}/{surface} : {got} / {exact}");
+        }
+        // Intérieur : surfaces de colonnes signées, demi-sommes sur et entre les faces de couche.
+        v.bottom[0]=0.;v.rest=2.;
+        let d=[0.375f32,0.125,-0.375,-1.125,1.25,0.5,0.,-0.5,0.25,1.,-0.25,0.0625,-0.0625,0.75,-0.75,0.3125];
+        for i in 0..16 {v.eta[i]=2.+d[i];v.surface_total[i]=v.eta[i];}
+        v.eta_roundoff.fill(0.);
+        let bg=input(&v,&u,&w);
+        let got=band_fluxes_s273(&mut v,&bg);
+        for i in 0..=16 {
+            let zeta=if i==0 {d[0]} else if i==16 {d[15]} else {0.5*(d[i-1]+d[i])} as f64;
+            let exact=prim(2.+zeta)-prim(2.);
+            worst=worst.max((got[i]-exact).abs());
+            assert!((got[i]-exact).abs()<=2e-7,"face {i} : {} / {exact}",got[i]);
+        }
+        println!("S273 affine U0={u0} S={slope} ecart_max={worst:e}");
     }
 }
