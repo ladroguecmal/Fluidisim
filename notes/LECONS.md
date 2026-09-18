@@ -5686,3 +5686,23 @@ et deux revues croisées.
    trouver les endroits où deux textes justes ne se raccordent pas.
 3. La réparation appartient à un **nouvel** ADR (ADR-170), jamais à une retouche des deux anciens :
    ce qui a été décidé reste lisible, et ce qui manquait devient une décision datée.
+
+## L336 — Exclure sur une mesure que l'exclusion empêche de produire est absorbant
+
+*(S279)* L'ordonnanceur estime le coût d'un domaine par celui de son dernier pas — ADR-012 §3 le
+demande, et pour une bonne raison : « un ordonnanceur qui planifie sur des coûts théoriques dérive
+dès la première optimisation ». Mais un domaine que le budget écarte **n'exécute plus de pas**. Il
+ne produit donc plus de mesure, conserve le coût qui l'a fait écarter, et reste écarté. La bande δ
+s'est éteinte au bout de 0,352 s et n'est jamais revenue, alors que rien à l'écran n'avait changé.
+
+1. **Une boucle de rétroaction dont l'entrée est produite par l'action qu'elle commande a un état
+   absorbant.** Le motif ne tient ni au budget ni au coût : il apparaît partout où l'on décide de
+   *ne pas faire* sur la foi d'une mesure que seul *faire* produit — repli d'un cache, dégradation
+   d'un service, seuil de réessai.
+2. **Un pic suffit.** Il n'est pas besoin que le coût moyen dépasse le budget : le pire pas mesuré
+   valait 45,8 ms pour une médiane de 22. La décision se prend sur la dernière valeur, et la
+   dernière valeur d'un domaine écarté est celle de son pire pas.
+3. **Élargir le budget referme le cas, pas le défaut.** C'est ce qui a été fait ici, et il faut le
+   dire ainsi : le mécanisme reste absorbant, et il reviendra au premier budget serré. Sortir
+   demande soit une estimation qui décroît tant qu'on ne tourne pas — un droit de retenter — soit
+   une dégradation qui **rétrécit** au lieu d'exclure (ADR-012 §4 rang 1).

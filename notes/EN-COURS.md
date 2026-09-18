@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S279 — en cours
+Session : S279 — terminée
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
 Entrée : « branche l'ordonnanceur sur la bande δ ». master 57fb182, maillons 1 — S278 a livré de
 quoi décider et personne ne s'en sert.
@@ -82,7 +82,7 @@ faux.
   ne s'affiche que retenu ; coût réinjecté depuis la mesure du pas précédent.
 - [x] **P4** — réception : scène R10 identique au bit quand la bande reste visible ; relevé de
   l'extinction et de la renaissance quand la caméra se détourne ; coût réinjecté vérifié.
-- [ ] **P5** — rituel §6.
+- [x] **P5** — rituel §6.
 
 ### Notes de reprise
 

@@ -313,8 +313,10 @@ aération et bulles, écume, vue sous-marine.
 (S21–S58), qui ne sont pas le système ; rien dans le candidat δ. **L'orchestrateur des régimes est
 ouvert et sa première pièce est reçue (S278)** : `scheduler.rs` décide quels domaines vivent et
 avec quel budget, éprouvé sur cinq domaines qui demandent le double du profil
-([ORDONNANCEUR-S278](validation/ORDONNANCEUR-S278.md), ADR-170). **Il n'est branché sur rien** : la
-bande δ de l'afficheur reste câblée en dur, et c'est le lot de S279. Restent la dégradation, la
+([ORDONNANCEUR-S278](validation/ORDONNANCEUR-S278.md), ADR-170). **S279 l'a branché sur la bande δ de
+l'afficheur** : elle s'éteint et se rallume toute seule aux bons instants (ADR-171,
+[ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md)). Défaut ouvert : l'exclusion par le coût
+est absorbante (L336). Restent la dégradation, la
 forme des domaines et le régime substitutif ; les seuils attendent le banc **B8**.
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),

@@ -14070,3 +14070,68 @@ injectée, que l'utilisateur regardait quand la session a tourné vers l'ordonna
 J3, index (ADR-170, ORDONNANCEUR-S278), liste 1.4 passée à *partiel*. Invariants relus : I-03
 (décision reproductible, empreinte à deux exécutions), I-06 (capacité fixée à la construction,
 mémoire demandée à l'hôte).
+
+---
+
+## S279 — la bande δ décidée par l'ordonnanceur
+
+**2026-09-18, Claude Opus 5 (Claude Code desktop).** Entrée : « branche l'ordonnanceur sur la bande
+δ ». master 57fb182, maillons 1. Plan 65e72e2 ; étapes 6030bfb, 13a4dbe, 16aab70, be9eefd ;
+découpage 803a407.
+
+**Capacité reçue, maillons remis à 0.** *Ce qui devient possible* : une zone de simulation vit ou
+meurt parce que quelque chose l'a décidé, et non parce que le code le disait. *Le chemin qui le
+consomme* : la bande δ de l'afficheur, à chaque image. *La preuve* : elle s'éteint et se rallume
+toute seule, aux bons instants ([mesure](../docs/validation/ORDONNANCEUR-S279.md)).
+
+**Le relevé dynamique** (`--delta --delta-arbitrage`, 937 images au pas de δ, trois phases) :
+allumée à 0 s (part de cadre 0,5456), **éteinte à 6,016 s** après le passage à la pose haute
+(0,3185) — soit **1,016 s** plus tard, le délai d'ADR-013 §5 plus un pas — **rallumée sans délai à
+10,0 s**. Trois transitions, aucune de plus. C'est la première fois que le système éteint quelque
+chose de lui-même, et il l'éteint là où S275 avait mesuré que δ ne change **aucun** pixel.
+
+**Rien ne change là où rien ne devait changer** : les douze empreintes de la revue R10 sont
+identiques à celles de S275, pose haute comprise. Explication, et elle vaut d'être retenue :
+`--revue-delta` travaille à **temps figé**, et ni la durée de vie minimale ni le délai d'extinction
+ne s'écoulent quand le temps ne bouge pas. **Une décision demande du temps ; une image isolée n'en
+donne aucun.** L'identité prouve que le branchement ne casse rien, pas qu'il décide — d'où le
+relevé.
+
+**`W_perception` se calcule** (`Projection::screen_fraction`) : emprise projetée, coupée au plan
+proche **avant** la division par la profondeur — sans quoi une emprise dont on tourne le dos
+paraîtrait immense — puis aux quatre bords du cadre. Deux attentes fausses corrigées par la mesure :
+dans la pose de R10 la caméra est **à l'intérieur** de l'emprise (256 m sur 200), et la part
+**n'est pas monotone** en lacet (0,0308 de face, 0,0323 à 0,3 rad). Ce dont l'hystérésis a besoin
+n'est pas la monotonie mais l'absence de saut : moins de 0,01 par pas de 0,05 rad sur un demi-tour.
+`W_gameplay` et `W_urgence` restent **déclarés** au maximum : un afficheur n'a ni acteur ni objectif.
+
+**[ADR-171](../docs/adr/ADR-171-les-seuils-d-activation-appartiennent-au-profil.md) — les seuils
+appartiennent au profil.** Mesuré avant d'écrire le branchement : la part de cadre vaut 0,5774 /
+0,5456 / 0,5571 / 0,3185 / 0,5089 dans les cinq poses. **Aucune n'atteint 0,60**, et comme `P` est
+un produit de trois fractions il est toujours inférieur à la plus petite : brancher tel quel aurait
+éteint la bande partout. Remonter les autres poids aurait été régler les poids sur le résultat
+voulu (L334). Calibration sur un critère indépendant — S275 : δ change 10 à 24 % des pixels à
+hauteur d'œil, **0 % vue d'en haut** — donc `on = 0,45`, `off = 0,35`, frontière entre la pose
+haute et la rasante. Un intervalle inversé ou nul est refusé.
+
+**Défaut trouvé par le relevé, et non corrigé : l'exclusion par le coût est absorbante** (L336).
+Avec un budget d'image à 30 Hz, la bande mourait à 0,352 s sans jamais revenir, part de cadre
+inchangée. Le pire pas vaut 45,8 ms (S276) ; un seul dépassement exclut, et **un domaine exclu
+n'exécute plus de pas, donc ne produit plus de mesure, donc reste exclu**. Budget de l'afficheur
+porté à 50 ms : le cas observé est refermé, **le défaut de fond reste entier** — avec les 2 ms d'un
+jeu il revient aussitôt.
+
+**Limites.** Un seul candidat : ni tri par `P/C`, ni contention, ni famine ne sont exercés par ce
+branchement (ils l'étaient au banc S278). Les poids déclarés restent déclarés. **Rien ne déplace la
+bande** : emprise, résolution et position restent écrites en dur ; grille et blocs épars (liste 1.5
+et 1.6) ne sont pas commencés. Une extinction n'est pas gratuite pour l'onde injectée de S277 : δ
+renaît au repos (I-12), donc elle repart de zéro. Essais 27 viewer + 18 ordonnanceur ; fenêtre
+ouverte en 1,1 s.
+
+**Suite S280 :** au choix de l'utilisateur. Ce que la file porte : sortir de l'exclusion absorbante
+(coût décroissant ou dégradation d'ADR-012 §4 rang 1), plusieurs candidats réels dans l'afficheur,
+ou la forme des domaines. Reste en attente depuis S277 : le verdict visuel sur l'onde injectée.
+
+**Rituel :** journal, L336, file active relue, feuille de route J3, index (ADR-171,
+ORDONNANCEUR-S279), liste 1.4. Invariants relus : I-06 (l'ordonnanceur alloue à la construction,
+rien par image), I-12 (renaissance au repos d'un domaine rallumé), I-03 (décision reproductible).
