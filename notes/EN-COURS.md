@@ -58,51 +58,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S280 — terminée
+Session : S281 — en cours
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo, Python, GPU local.
-Entrée : « Continue », jeton libre, master 5a3500e. La file porte en tête le défaut ouvert de
-S279 : **l'exclusion par le coût est absorbante** (L336) — un domaine qu'un pic fait sortir du
-budget n'exécute plus de pas, donc ne produit plus de mesure, donc conserve le coût qui l'a fait
-sortir. S279 l'a refermé en élargissant le budget de l'afficheur ; le défaut est entier.
-Objectif : **qu'un pic ne condamne plus un domaine**, et que le budget reste inviolé.
+Entrée : l'utilisateur demande la trajectoire sous une forme qu'elle n'a pas — « création / test /
+validation d'un système puis d'un autre », et **la déclaration d'une v1**. master 0f2650d.
+Objectif : la lui donner sans créer un second document de trajectoire.
 
-### Ce que l'analyse a écarté avant d'écrire
+**Contrainte, et c'est la principale** : FEUILLE-DE-ROUTE est *le seul document qui porte la
+trajectoire* ; deux lectures parallèles de la même trajectoire divergeront, et c'est le mécanisme
+exact des trois forks (L137). La forme demandée s'écrit donc **dans** ce document, en portes qui
+regroupent les jalons existants — jamais à côté d'eux.
 
-- **Distribuer le reliquat au lieu d'exclure** (ADR-012 §1 point 5, le solveur s'arrête dans son
-  budget) : juste en général, **inapplicable à δ**. Le pas couplé est tout ou rien — un pas partiel
-  avancerait l'histoire de moins que `FRAME_US` en croyant l'avoir faite (`Live::advance` compte
-  ses pas), et la surface mobile n'admet pas de demi-pas (ADR-152).
-- **Admettre d'office un domaine affamé** : viole la seule propriété qu'ADR-012 §1 demande de
-  défendre avant toutes les autres. Écarté sans discussion.
-- **Faire décroître l'estimation dans l'ordonnanceur** : ce n'est pas son travail. ADR-012 §3 confie
-  la mesure du coût au solveur, qui la réinjecte ; l'ordonnanceur ne doit pas inventer un chiffre
-  que personne n'a mesuré.
-
-**Ce qui reste, et qui est le vrai défaut** : l'estimation se faisait sur **le dernier pas**, alors
-qu'ADR-012 §3 dit en toutes lettres que la cible de mesure est un **centile**, jamais une valeur
-isolée. Un pic à 45,8 ms pour une médiane à 22 condamnait le domaine. La correction appartient à
-l'hôte, pas au cœur.
+**Ce que je ne décide pas** : le contenu d'une v1. Réduire ou fixer un périmètre appartient à
+l'utilisateur (ADR-127 §6). Je propose où poser la porte et ce qu'elle contient ; il tranche.
 
 ### Plan
 
 - [ ] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — estimation robuste dans l'hôte : médiane glissante des derniers pas payés, et retour
-  vers l'estimation nominale quand plus rien n'est payé — un domaine qui ne tourne plus ne sait
-  plus ce qu'il coûte, et le dire est plus honnête que de garder son pire chiffre. Essais.
-- [x] **P3** — réception : `--delta-budget=<ms>` pour éprouver le cas serré ; la bande survit à
-  33 ms là où S279 la voyait mourir à 0,352 s ; relevé dynamique de S279 inchangé ; douze
-  empreintes de R10 inchangées.
-- [x] **P4** — rituel §6.
+- [ ] **P2** — section « Portes de version » dans FEUILLE-DE-ROUTE : par porte, ce qu'on crée,
+  comment on l'éprouve, ce qui vaut réception ; et la v1 **proposée**, marquée comme non tranchée.
+- [ ] **P3** — rituel §6.
 
 ### Notes de reprise
 
-**P3 reçu** ([mesure](../docs/validation/COUT-ROBUSTE-S280.md)) : à **33 ms** — le budget qui
-tuait en S279 — 689 pas payés sur 689 vivants, estimation maximale 29,7 ms ; à 20 ms, vivant mais
-jamais servi, estimation au nominal (22,0) — **affamé, pas absorbé** ; à 50 ms, identique. **689 pas
-vivants dans les trois cas** : la décision ne dépend pas du budget. Douze empreintes R10 inchangées,
-relevé dynamique de S279 identique.
+État réel à citer sans l'embellir ([liste](../docs/LISTE-PROJET-FINI.md)) : **3 points validés sur
+120**, 49 partiels, 68 absents. Le décompte de la liste date d'avant S278–S280 — la section 9
+(activation et budget) a bougé depuis et n'est pas recomptée.
 
-Chiffres de S279 à retrouver : bande morte à **0,352 s** sans retour avec un budget de 33 ms ;
-relevé à 50 ms — allumée 0 s, éteinte **6,016 s**, rallumée **10,0 s**, trois transitions. Douze
-empreintes R10 dans ORDONNANCEUR-S279. Coût de δ : médiane 23,1 ms, p95 29,2, **maximum 45,8**
-(COUT-DIRECT-S276).
+Les manques qui commandent l'ordre : δ est une **tranche 2D** sous houle idéalisée (verdict R10),
+son coût vaut **≈ 11 fois** le budget d'ADR-012 §3, l'ordonnanceur décide *qu'un* domaine vit mais
+pas *où ni de quelle forme*, et V a un noyau reçu sans aucune articulation avec δ.

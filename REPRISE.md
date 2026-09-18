@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 00:14 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 00:22 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : —
+Session en cours : S281 — trajectoire par portes et proposition de v1, demandées par l'utilisateur
 Dernière session : S280 — l'exclusion absorbante levée : la bande survit au budget qui la tuait (L336)
 Session suivante : au choix de l'utilisateur. La file porte : la **dégradation** (ADR-012 §4 rang 1 — rétrécir au lieu d'exclure, seule réponse à la famine, demande la forme des domaines), plusieurs candidats réels dans l'afficheur, la forme des domaines (liste 1.5/1.6). **En attente depuis S277** : le verdict visuel de l'utilisateur sur l'onde injectée
 Maillons        : 0
