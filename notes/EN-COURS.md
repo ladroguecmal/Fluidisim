@@ -66,8 +66,8 @@ Objectif : recevoir le passage du fond à travers les frontières du pas perturb
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [>] **P2** — lire les contrats, isoler le défaut et déclarer la réception bornée.
-- [ ] **P3** — construire la correction et ses contre-épreuves dans le pas réel.
+- [x] **P2** — lire les contrats, isoler le défaut et déclarer la réception bornée.
+- [>] **P3** — construire la correction et ses contre-épreuves dans le pas réel.
 - [ ] **P4** — exécuter la réception et les régressions pertinentes.
 - [ ] **P5** — rituel §6, file entière, journal, index et jeton.
 
@@ -77,3 +77,6 @@ S269 reçoit seulement l'effet différentiel du bord sur un paquet à fond nul.
 Troisième session du fil : le fond traversant débloque l'usage perturbatif J2 ;
 un approfondissement spectral serait différable. Vérifier les flux de bande
 avant de supposer un défaut. Aucun rendu modifié, aucune frontière universelle promise.
+
+P2 : défaut constaté, flux Ua constant fermé aux deux bouts. ADR-165 et critères
+déclarés ; lot borné à la bande prescrite, pas à la houle progressive entière.
