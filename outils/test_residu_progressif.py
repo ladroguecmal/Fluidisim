@@ -16,7 +16,7 @@ class Oracle(unittest.TestCase):
 
     def test_closed_solution_against_two_rk4_steps(self):
         a=.01
-        for n in [1,4,17,64]:
+        for n in [1,4,17,63,64]:
             kn=n*math.pi/r.L;lam=kn*math.tanh(kn*r.H)
             d0,dc,ds,ks,kc=r.coefficients(n,a)
             def rhs(t,y,p):
@@ -38,5 +38,25 @@ class Oracle(unittest.TestCase):
             print(f'S272 oracle n={n} erreurs_RK4={errors}')
             self.assertLess(errors[0],1e-6);self.assertLessEqual(errors[1],errors[0])
             self.assertEqual(r.mode(n,0.,a),0.)
+
+    def test_forcing_is_second_order_expansion_of_surface_conditions(self):
+        # Conditions exactes évaluées à la vraie surface ; comparer leurs limites a².
+        for x,t in [(.31,0.),(1.7,.43),(3.2,1.1)]:
+            theta=r.K*x-r.OMEGA*t+r.PHASE
+            sn,cs=math.sin(theta),math.cos(theta)
+            for a in [1e-4,5e-5]:
+                q=a*r.G*r.K/r.OMEGA;tau=math.tanh(r.K*r.H)
+                zeta=a*cs;eta_x=-a*r.K*sn
+                c=math.cosh(r.K*(zeta+r.H))/math.cosh(r.K*r.H)
+                sh=math.sinh(r.K*(zeta+r.H))/math.cosh(r.K*r.H)
+                u,w=q*c*cs,q*sh*sn
+                exact_k=w-q*tau*sn-u*eta_x
+                exact_d=r.G*a*(c-1)*cs-.5*(u*u+w*w)
+                k2=a*q*r.K*math.sin(2*theta)
+                d0=a*a*r.G*r.K*tau/2-q*q*(1+tau*tau)/4
+                dc=a*a*r.G*r.K*tau/2-q*q*(1-tau*tau)/4
+                d2=d0+dc*math.cos(2*theta)
+                self.assertLess(abs(exact_k-k2)/(a*a),.002)
+                self.assertLess(abs(exact_d-d2)/(a*a),.002)
 
 if __name__=='__main__': unittest.main()

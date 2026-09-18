@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-18 18:44 +02:00
+Battement        : 2026-09-18 18:49 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
 Session en cours : S272
 Dernière session : S271 — démarrage progressif contrôlé, liste du projet actualisée ; durée utile non reçue

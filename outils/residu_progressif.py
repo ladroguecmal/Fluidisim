@@ -84,10 +84,27 @@ def measure(path):
     return result
 
 
+def sensitivity(reference_path,other_path):
+    dx,a,base=read(reference_path)
+    other_dx,other_a,other=read(other_path)
+    if dx!=other_dx: raise ValueError('mailles différentes pour la sensibilité')
+    xs=[(i+.5)*dx for i in range(round(L/dx))]
+    err=den=0.
+    for (t,y),(t2,z) in zip(base,other):
+        if t!=t2: raise ValueError('instants différents')
+        ref=field(xs,t,a)
+        err+=math.fsum((b-c*(a/other_a)**2)**2 for b,c in zip(y,z))
+        den+=math.fsum(v*v for v in ref)
+    result=math.sqrt(err/den)
+    print(f'SENSIBILITE erreur_normalisee={result:.9g}')
+    return result
+
+
 if __name__=='__main__':
     try:
-        if len(sys.argv)!=2: raise ValueError('indiquer une trace S272')
-        measure(sys.argv[1])
+        if len(sys.argv)==2: measure(sys.argv[1])
+        elif len(sys.argv)==4 and sys.argv[1]=='--sensibilite': sensitivity(sys.argv[2],sys.argv[3])
+        else: raise ValueError('une trace, ou --sensibilite reference autre')
     except (ValueError,OSError) as e:
         print(f'NON_RECU : {e}',file=sys.stderr)
         sys.exit(1)
