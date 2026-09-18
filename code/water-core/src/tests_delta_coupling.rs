@@ -858,3 +858,82 @@ fn mobile_step_consumes_surface_sponge_without_damping_background_s268() {
     assert!(changed>0,"le témoin doit distinguer la relaxation");
     println!("S268 integration : 20 pas, {changed} hauteurs/restes modifies, fond intact");
 }
+
+
+/// État exact stationnaire : courant et élévation constants, pression hydrostatique.
+#[test]
+fn uniform_through_background_preserves_flat_surface_s270() {
+    for dx in [0.25f32,0.125] { for speed in [-0.5f32,0.5] { for elevation in [-0.125f32,0.125] {
+        let nx=(4./dx) as usize;
+        let mut v=Volume::configure(&mut HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs},
+            Domain{nx,nz:(3./dx) as usize,dx},1025.,9.81,&vec![0.;nx]).unwrap();
+        v.set_free_surface(&vec![2.;nx],2.).unwrap();
+        let (mut u,mut w)=fields(&v);
+        for s in u.iter_mut().chain(&mut w) {
+            s.u[0]=speed;s.eta=elevation;s.p_dyn=(1025f32*9.81)*elevation;
+        }
+        for n in 0..20 {
+            let bg=BackgroundFaces{domain:v.domain,time:SimTime(n*1000),density:1025.,gravity:9.81,u:&u,w:&w};
+            let r=v.step_perturbation_mobile(bg.time,1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock).unwrap();
+            assert_eq!(r.advanced_us,1000);
+            let error=v.eta.iter().map(|h|(h-2.).abs()).fold(0f32,f32::max);
+            if n==19 { println!("S270 uniforme dx={dx} U={speed} a={elevation} erreur={error:e}"); }
+            assert!(error<=8.*f32::EPSILON,"surface artificielle {error}");
+            assert!(v.u.iter().chain(&v.w).all(|x|x.abs()<=8.*f32::EPSILON));
+        }
+    }}}
+}
+
+
+#[test]
+fn boundary_band_integral_and_global_balance_s270() {
+    let mut v=volume();v.set_free_surface(&vec![2.;16],2.).unwrap();
+    let (mut u,w)=fields(&v);
+    for (bottom,rest,surface,speed) in [(0.,2.,2.375,0.7),(0.,2.,1.625,-0.7),
+        (1.9,2.,1.8,0.7),(2.1,2.,2.375,-0.7)] {
+        v.bottom[0]=bottom;v.rest=rest;v.eta[0]=surface;
+        for sample in &mut u {sample.u[0]=speed;}
+        let bg=input(&v,&u,&w);
+        let got=v.boundary_background_band(0,&bg,&mut Control::unlimited()).unwrap();
+        let exact=speed as f64*((surface as f64-bottom as f64).max(0.)
+            -(rest as f64-bottom as f64).max(0.));
+        assert!((got as f64-exact).abs()<2e-7,"integrale {got} / {exact}");
+    }
+    v.bottom[0]=0.;v.rest=2.;v.eta.fill(2.);v.surface_total.fill(2.);
+    // Flux différents aux deux extrémités ; profil intérieur arbitraire, télescopage exact.
+    for k in 0..v.domain.nz {for i in 0..=16 {
+        let f=v.fu(i,k);u[f].eta=if i==0 {0.125} else if i==16 {-0.25} else {0.};
+        u[f].u[0]=0.5;
+    }}
+    let bg=input(&v,&u,&w);
+    v.transport_coupled(0.002,&bg,&mut Control::unlimited()).unwrap();
+    let mass:f64=v.eta.iter().zip(&v.eta_roundoff).map(|(h,r)|(*h as f64-2.-*r as f64)*0.5).sum();
+    let exact=-0.001*((-0.25*0.5)-(0.125*0.5));
+    assert!((mass-exact).abs()<1e-10,"bilan {mass} / {exact}");
+    assert!((v.eta[0]-2.000125).abs()<3e-7);
+    assert!((v.eta[15]-2.00025).abs()<3e-7);
+}
+
+#[test]
+fn incoherent_boundary_elevation_refuses_atomically_s270() {
+    let mut v=volume();v.set_free_surface(&vec![2.;16],2.).unwrap();
+    let (mut u,w)=fields(&v);let f=v.fu(0,1);u[f].eta=0.125;
+    let bg=input(&v,&u,&w);
+    let before=(v.u.clone(),v.w.clone(),v.p.clone(),v.eta.clone(),v.eta_roundoff.clone());
+    let r=v.step_perturbation_mobile(bg.time,1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock);
+    assert_eq!(r,Err(Error::BackgroundContext));
+    assert_eq!((v.u.clone(),v.w.clone(),v.p.clone(),v.eta.clone(),v.eta_roundoff.clone()),before);
+    assert!(!v.surface_coupled&&!v.mobile);
+}
+
+
+#[test]
+fn boundary_surface_outside_domain_refuses_s270() {
+    let mut v=volume();v.set_free_surface(&vec![2.;16],2.).unwrap();
+    let (mut u,w)=fields(&v);
+    for k in 0..v.domain.nz {let f=v.fu(16,k);u[f].eta=2.;}
+    let bg=input(&v,&u,&w);
+    let before=v.eta.clone();
+    assert_eq!(v.step_perturbation_mobile(bg.time,1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock),Err(Error::Domain));
+    assert_eq!(v.eta,before);assert!(!v.surface_coupled);
+}

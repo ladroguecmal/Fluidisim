@@ -7,6 +7,8 @@ use crate::{background::BackgroundSample, host::{JobSystem, MonotonicClock}, Sim
 /// w : ((i+1/2)dx, 0, k dx-z0), ordre k*nx+i.
 /// Coordonnées relatives à l'ancre choisie par l'hôte ; sommer B/W avant cet appel.
 /// Les tableaux sont préparés hors du budget du pas et restent propriété de l'appelant.
+/// Mode mobile : eta est identique au bit verticalement sur chaque colonne w et,
+/// depuis ADR-165, sur chacune des deux colonnes u extérieures (x=0 et x=L).
 pub struct BackgroundFaces<'a> {
     pub domain: Domain,
     pub time: SimTime,
@@ -123,6 +125,7 @@ impl Volume {
             }
             self.surface_total[i] = self.eta[i] + zeta;
         }
+        self.check_background_edges(bg,ctl,Phase::Prepare)?;
         self.surface_coupled = true;
         let rg = self.rho * self.g_eff;
         // Fantôme vertical : maille mouillée la plus haute, face w au-dessus d'elle.
@@ -217,14 +220,55 @@ impl Volume {
         Ok(())
     }
 
+    fn check_background_edges(&self, bg: &BackgroundFaces<'_>, ctl: &mut Control,
+        phase: Phase) -> Result<(),Error> {
+        let (nx,nz,dx)=(self.domain.nx,self.domain.nz,self.domain.dx);
+        for (edge,column) in [(0,0),(nx,nx-1)] {
+            ctl.poll(phase)?;
+            let height=self.eta[column]+bg.u[self.fu(edge,0)].eta;
+            if !(height>=self.bottom[column]+2.*dx && height<=(nz-1) as f32*dx) {
+                return Err(Error::Domain);
+            }
+        }
+        Ok(())
+    }
+
+    /// ADR-165 : bande prescrite au bord ; l'ouverture de projection y ferme v, pas U.
+    /// La hauteur de η' est prolongée constamment depuis la colonne voisine.
+    fn boundary_background_band(&self, edge: usize, bg: &BackgroundFaces<'_>,
+        ctl: &mut Control) -> Result<f32, Error> {
+        let (nx,nz,dx)=(self.domain.nx,self.domain.nz,self.domain.dx);
+        let column=if edge==0 {0} else {nx-1};
+        let elevation=bg.u[self.fu(edge,0)].eta;
+        let surface=self.eta[column]+elevation;
+        if !surface.is_finite() { return Err(Error::NotFinite); }
+        let mut flux=0.;
+        for k in 0..nz {
+            ctl.poll(Phase::Correct)?;
+            let s=&bg.u[self.fu(edge,k)];
+            if s.eta.to_bits()!=elevation.to_bits() { return Err(Error::BackgroundContext); }
+            if !surface_residuals_on() { continue; }
+            let lower=(k as f32*dx).max(self.bottom[column]);
+            let upper=(k+1) as f32*dx;
+            let wet=(surface.min(upper)-lower).max(0.);
+            let calm=(self.rest.min(upper)-lower).max(0.);
+            flux+=s.u[0]*(wet-calm);
+        }
+        if !flux.is_finite() { return Err(Error::NotFinite); }
+        Ok(flux)
+    }
+
     /// ADR-152 : `η' ← η' − (dt/dx)·Δ(Q_v + bande)`. `Q_v` est le débit S237, à l'identique, sur la
     /// géométrie totale ; la bande — flux du fond entre le plan moyen et `ζ` — s'ajoute à part, pour
     /// qu'un fond nul rende exactement le pas S237. Tous les débits lisent `ζ^n`.
     fn transport_coupled(&mut self, transport: f32, bg: &BackgroundFaces<'_>, ctl: &mut Control) -> Result<(), Error> {
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
-        let (mut left, mut band_left) = (0f32, 0f32);
+        // Les deux flux lisent eta^n avant le transport en place.
+        let mut band_left=self.boundary_background_band(0,bg,ctl)?;
+        let boundary_right=self.boundary_background_band(nx,bg,ctl)?;
+        let mut left=0f32;
         for i in 0..nx {
-            let (mut right, mut band_right) = (0f32, 0f32);
+            let (mut right, mut band_right) = (0f32, if i+1==nx {boundary_right} else {0.});
             if i + 1 < nx {
                 let surface = 0.5 * (self.surface_total[i] + self.surface_total[i + 1]);
                 for k in 0..nz {
@@ -264,6 +308,7 @@ impl Volume {
     /// façon incompressible, sans flux au fond du domaine. Refus atomiques ; expiration = zéro
     /// avancée ; u/w/p, `η'` et restes restaurés. Affinage ADR-153 et relaxation de hauteur
     /// ADR-164 : Sponge amortit aussi η' après transport, sans toucher au fond.
+    /// ADR-165 : bande prescrite aux frontières latérales, v normal toujours nul.
     pub fn step_perturbation_mobile(&mut self, time: SimTime, duration_us: u64, max_iters: u32,
         budget_us: u64, bg: &BackgroundFaces<'_>, sponge: Sponge,
         jobs: &dyn JobSystem, clock: &dyn MonotonicClock) -> Result<SurfaceReport, Error> {
@@ -339,6 +384,7 @@ impl Volume {
                 self.surface_total[i] = self.eta[i] + bg.w[self.fw(i,0)].eta;
             }
             if !self.surface_in_bounds(&mut ctl,Phase::Validate)? {return Err(Error::Domain);}
+            self.check_background_edges(bg,&mut ctl,Phase::Validate)?;
             ctl.check(Phase::Publish)?;
             Ok(report)
         })();

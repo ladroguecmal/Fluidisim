@@ -595,3 +595,34 @@ fn coupled_surface_sponge_is_atomic_and_allocation_free_s268() {
     }
     println!("S268 : {} expirations, reprise identique et zero allocation",clock.calls.get()-1);
 }
+
+#[test]
+fn through_background_is_atomic_and_allocation_free_s270() {
+    use water_core::{background::BackgroundSample,delta_projection::{BackgroundFaces,Sponge},SimTime};
+    let mut reference=prepared_mobile();
+    let sample=BackgroundSample{u:[0.5,0.,0.],eta:0.125,p_dyn:(1025f32*9.81)*0.125,..Default::default()};
+    let u=vec![sample;reference.velocity_u().len()];
+    let w=vec![sample;reference.velocity_w().len()];
+    let bg=BackgroundFaces{domain:reference.domain(),time:SimTime(0),density:1025.,gravity:9.81,u:&u,w:&w};
+    let sponge=Sponge{width_m:0.5,rate_per_s:4.};
+    let before=bits(&reference);let eta_before=surface_bits(&reference);
+    let clock=DeadlineClock::new(usize::MAX);
+    let (result,allocs)=measured(||reference.step_perturbation_mobile(SimTime(0),1000,2000,1000,
+        &bg,sponge,&Jobs,&clock));
+    assert_eq!(allocs,0);let report=result.unwrap();assert_eq!(report.advanced_us,1000);
+    let after=bits(&reference);let eta_after=surface_bits(&reference);
+    assert_ne!(eta_before,eta_after);
+    for cutoff in 1..clock.calls.get() {
+        let mut v=prepared_mobile();
+        let (r,allocs)=measured(||v.step_perturbation_mobile(SimTime(0),1000,2000,1000,
+            &bg,sponge,&Jobs,&DeadlineClock::new(cutoff)));
+        assert_eq!(allocs,0);let r=r.unwrap();
+        assert_eq!((r.advanced_us,r.remaining_us),(0,1000));
+        assert_eq!(bits(&v),before);assert_eq!(surface_bits(&v),eta_before);
+        let (r,allocs)=measured(||v.step_perturbation_mobile(SimTime(0),1000,2000,1000,
+            &bg,sponge,&Jobs,&DeadlineClock::new(usize::MAX)));
+        assert_eq!(allocs,0);assert_eq!(r.unwrap(),report);
+        assert_eq!(bits(&v),after);assert_eq!(surface_bits(&v),eta_after);
+    }
+    println!("S270 : {} expirations, reprise identique et zero allocation",clock.calls.get()-1);
+}

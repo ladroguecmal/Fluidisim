@@ -67,8 +67,8 @@ Objectif : recevoir le passage du fond à travers les frontières du pas perturb
 
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — lire les contrats, isoler le défaut et déclarer la réception bornée.
-- [>] **P3** — construire la correction et ses contre-épreuves dans le pas réel.
-- [ ] **P4** — exécuter la réception et les régressions pertinentes.
+- [x] **P3** — construire la correction et ses contre-épreuves dans le pas réel.
+- [>] **P4** — exécuter la réception et les régressions pertinentes.
 - [ ] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
@@ -80,3 +80,7 @@ avant de supposer un défaut. Aucun rendu modifié, aucune frontière universell
 
 P2 : défaut constaté, flux Ua constant fermé aux deux bouts. ADR-165 et critères
 déclarés ; lot borné à la bande prescrite, pas à la houle progressive entière.
+
+P3 : ancien premier pas erreur 0,0002501011 m ; correctif : zéro aux huit cas.
+Flux signé, bilan et refus reçus ; première réception 638 expirations sans allocation.
+Gardes étendues au bord avant/après transport ; suite complète à exécuter.
