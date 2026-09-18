@@ -262,6 +262,38 @@ fn wake_lattice(q: vec2<f32>, band: u32) -> vec3<f32> {
     return vec3<f32>(out.x, out.y/s, out.z/s);
 }
 
+// S275 : fondu en cosinus sur `w` mètres depuis un bord — poids et dérivée.
+fn delta_fade(s: f32, w: f32) -> vec2<f32> {
+    if (s >= w) { return vec2<f32>(1.0, 0.0); }
+    if (s <= 0.0) { return vec2<f32>(0.0); }
+    let a = 3.14159265358979/w;
+    return vec2<f32>(0.5 - 0.5*cos(a*s), 0.5*a*sin(a*s));
+}
+// S275, ADR-168 : `η'` de la bande, Hermite le long de x, fondus en x (éponge) et en y. Même
+// lecture que `delta::Layer::eval` côté hôte.
+// Lignes dans `impacts` à partir de `p.reflection.z` : en-tête `[x0, y0, dx, n]` rebasé à la
+// caméra, `[demi-largeur, fondu y, fondu x, active]`, puis `[η', ∂x η', 0, 0]` par colonne.
+fn delta_layer(q: vec2<f32>) -> vec3<f32> {
+    let base = u32(p.reflection.z);
+    let h0 = impacts[base]; let h1 = impacts[base + 1u];
+    let n = u32(h0.w); let dx = h0.z;
+    let len = f32(n)*dx;
+    let xl = q.x - h0.x; let yl = q.y - h0.y;
+    if (xl <= 0.0 || xl >= len || abs(yl) >= h1.x) { return vec3<f32>(0.0); }
+    var fx = delta_fade(min(xl, len - xl), h1.z);
+    if (xl > len - xl) { fx.y = -fx.y; }
+    var fy = delta_fade(h1.x - abs(yl), h1.y);
+    fy.y = -sign(yl)*fy.y;
+    let xc = xl/dx - 0.5;
+    let i = min(u32(max(floor(xc), 0.0)), n - 2u);
+    let t = clamp(xc - f32(i), 0.0, 1.0);
+    let a = impacts[base + 2u + i]; let b = impacts[base + 3u + i];
+    let m0 = a.y*dx; let m1 = b.y*dx;
+    let t2 = t*t; let t3 = t2*t;
+    let e = (2.0*t3-3.0*t2+1.0)*a.x + (t3-2.0*t2+t)*m0 + (-2.0*t3+3.0*t2)*b.x + (t3-t2)*m1;
+    let de = ((6.0*t2-6.0*t)*a.x + (3.0*t2-4.0*t+1.0)*m0 + (-6.0*t2+6.0*t)*b.x + (3.0*t2-2.0*t)*m1)/dx;
+    return vec3<f32>(fx.x*fy.x*e, fy.x*(fx.y*e + fx.x*de), fx.x*fy.y*e);
+}
 // Hauteur et deux pentes. Une seule fonction pour sommets et réception compute.
 fn water(q: vec2<f32>, spacing: f32) -> vec3<f32> {
     let h = select(0.0, spacing, p.spectral.x > 0.5);
@@ -321,6 +353,8 @@ fn perturbations(q: vec2<f32>, h: f32, v0: vec3<f32>) -> vec3<f32> {
             }
         }
     }
+    // S275 : la bande δ seulement quand elle est active — ailleurs, rien ne change au bit.
+    if (p.reflection.z > 0.5 && impacts[u32(p.reflection.z) + 1u].w > 0.5) { v += delta_layer(q); }
     return v;
 }
 @compute @workgroup_size(64)

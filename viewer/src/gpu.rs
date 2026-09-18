@@ -171,10 +171,12 @@ impl Gpu {
             wake_len as u64 * 32,
             wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         );
+        // S275, ADR-168 : la bande δ suit les impacts dans ce tampon (`delta::GPU_ROWS` lignes à partir
+        // de `IMPACT_CAPACITY`) — un tampon de plus dépasserait les huit de stockage par étage.
         let impacts = buffer(
             &device,
-            "W impact centres",
-            crate::scene::IMPACT_CAPACITY as u64 * 16,
+            "W impact centres and delta band",
+            (crate::scene::IMPACT_CAPACITY + crate::delta::GPU_ROWS) as u64 * 16,
             wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         );
         let binding = |i, ty| wgpu::BindGroupLayoutEntry {
@@ -480,7 +482,9 @@ impl Gpu {
         for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, tail, if frame.cwm { 1. } else { 0. }] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
-        for v in [frame.reflection_order as f32, if frame.reflection_suffix { 1. } else { 0. }, 0., 0.] {
+        // S275 : `reflection.z` = première ligne de la bande δ dans `impacts`, zéro sans δ.
+        let delta_base = if frame.delta.is_some() { crate::scene::IMPACT_CAPACITY as f32 } else { 0. };
+        for v in [frame.reflection_order as f32, if frame.reflection_suffix { 1. } else { 0. }, delta_base, 0.] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
@@ -494,6 +498,16 @@ impl Gpu {
             }
         }
         self.queue.write_buffer(&self.impacts, 0, &self.bytes);
+        // S275 : bande δ après les impacts ; sans couche, rien n'est écrit ni lu.
+        if let Some(layer) = &frame.delta {
+            self.bytes.clear();
+            for row in &layer.gpu {
+                for v in row {
+                    self.bytes.extend_from_slice(&v.to_le_bytes());
+                }
+            }
+            self.queue.write_buffer(&self.impacts, crate::scene::IMPACT_CAPACITY as u64 * 16, &self.bytes);
+        }
         self.bytes.clear();
         for row in frame.components {
             for v in row {

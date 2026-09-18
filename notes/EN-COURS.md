@@ -72,12 +72,12 @@ soumettre des captures à l'utilisateur (liste 8.7).
 - [x] **P2** — ADR-168 et protocole écrits avant le code : scène `--delta` (houle unidirectionnelle),
   domaine, pas de temps, bande extrudée le long des crêtes et fondus, ce qui n'est pas revendiqué,
   critères de fonctionnement et questions de revue.
-- [>] **P3** — précalcul de δ dans l'afficheur (module `delta.rs`) : échantillons de B de la scène,
+- [x] **P3** — précalcul de δ dans l'afficheur (module `delta.rs`) : échantillons de B de la scène,
   pas couplé mobile au pas de référence et au pas d'image ; essais (échantillons plans, pas reçus,
   écart entre les deux pas en hauteur).
-- [ ] **P4** — couche δ côté GPU : tampon et paramètres, lecture Hermite le long de x, fondus,
+- [x] **P4** — couche δ côté GPU : tampon et paramètres, lecture Hermite le long de x, fondus,
   bascule clavier ; vérification GPU contre CPU de la couche.
-- [ ] **P5** — captures de revue (poses de jeu, trois variantes) et demande de revue à l'utilisateur.
+- [>] **P5** — captures de revue (poses de jeu, trois variantes) et demande de revue à l'utilisateur.
 - [ ] **P6** — rituel §6.
 
 ### Notes de reprise
@@ -85,3 +85,8 @@ soumettre des captures à l'utilisateur (liste 8.7).
 Pas couplé mobile ≈ 49 ms à 16 384 mailles (S274) : le précalcul est hors budget et déclaré tel.
 δ x-z exige des échantillons plans : houle à `spread_turns = 0`. Similitude de Froude : le pas
 d'image à λ = 100 m équivaut en `ωdt` à ≈ 3,5 ms sur le banc de 4 m.
+
+P3+P4 (un commit : code imbriqué dans les mêmes fichiers) : rejeux reçus, écart pas d'image
+hors éponge 0,25/1,33 mm ; GPU/CPU 7e-8 ; empreintes S254 identiques. Incident : `--multi --revue`
+sans suffixe a réécrit les PPM R1 de captures/s254 (PNG envoyés intacts, non versionnés).
+Un `sed` global avait touché d'autres lignes de main.rs : fichier restauré puis réédité.

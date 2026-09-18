@@ -1,0 +1,354 @@
+//! S275, ADR-168 — premier rendu de δ : bande couplée sous une houle à crêtes longues, précalculée
+//! **hors budget** avant l'affichage, puis lue par l'image. Protocole :
+//! `docs/validation/DELTA-VISIBLE-S275.md`.
+use water_core::{
+    background::{Background, BackgroundSample},
+    background_spectrum::{self, Recipe},
+    delta_projection::{BackgroundFaces, Domain, Sponge, Volume},
+    host::MonotonicClock,
+    HostServices, SeaState, SimTime, WorldPos,
+};
+use crate::scene::host_impl;
+
+/// Bord gauche du domaine (m), pas, colonnes, couches ; repos à `REST` au-dessus du fond plat.
+pub const X0: f32 = -128.;
+pub const DX: f32 = 2.;
+pub const NX: usize = 128;
+pub const NZ: usize = 52;
+pub const REST: f32 = 96.;
+/// Éponge d'ADR-164 : **valeurs de scénario, pas calibrées** (ADR-168).
+pub const SPONGE: Sponge = Sponge { width_m: 32., rate_per_s: 0.5 };
+/// Bande rendue : demi-largeur en y et fondu transversal (m). Le fondu en x couvre l'éponge.
+pub const HALF_WIDTH: f32 = 100.;
+pub const FADE_Y: f32 = 30.;
+pub const DURATION_US: u64 = 30_000_000;
+/// Pas d'image (62,5 Hz) et pas de référence.
+pub const FRAME_US: u64 = 16_000;
+pub const REFERENCE_US: u64 = 4_000;
+pub const DENSITY: f32 = 1025.;
+/// Le rejeu commence à la naissance de la scène : l'image évalue B à `BIRTH + secondes`.
+pub const START_US: u64 = crate::scene::BIRTH;
+/// Tampon GPU : deux lignes d'en-tête, puis `[η', ∂x η', 0, 0]` par colonne.
+pub const GPU_ROWS: usize = 2 + NX;
+
+/// Houle JONSWAP à crêtes longues vers +x : étalement nul, donc échantillons exactement plans.
+pub fn swell_recipe() -> Recipe {
+    Recipe {
+        sea: SeaState { hs: 2., tp: 8., theta_turns: 0., components: 32, graine: 275 },
+        gravity: 9.81,
+        gamma: 3.3,
+        min_ratio: 0.7,
+        max_ratio: 1.6,
+        spread_turns: 0.,
+    }
+}
+
+pub fn swell_background() -> Result<Background, String> {
+    let cooked = background_spectrum::bake(swell_recipe()).map_err(|e| format!("houle δ : {e:?}"))?;
+    let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 22);
+    Background::from_spectrum(
+        &mut HostServices { alloc: &mut alloc, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink },
+        &cooked,
+        WorldPos::from_units(0, 0, 0),
+    )
+    .map_err(|e| format!("houle δ : {e:?}"))
+}
+
+struct Frozen;
+impl MonotonicClock for Frozen {
+    fn now_ns(&self) -> u64 {
+        0
+    }
+}
+
+/// Un rejeu : `η'` aux centres de colonnes, une ligne de `NX` valeurs par image de `FRAME_US`.
+pub struct Replay {
+    pub dt_us: u64,
+    pub heights: Vec<f32>,
+    pub iterations_max: u32,
+    pub steps: u64,
+}
+
+impl Replay {
+    pub fn frames(&self) -> usize {
+        self.heights.len() / NX
+    }
+    pub fn frame(&self, n: usize) -> &[f32] {
+        &self.heights[n * NX..(n + 1) * NX]
+    }
+    /// `η'` à `t` secondes après la naissance, interpolé entre deux images ; `false` hors du rejeu.
+    pub fn at(&self, t: f64, out: &mut [f32]) -> bool {
+        let x = t / (FRAME_US as f64 * 1e-6);
+        if !(x >= 0.) || x > (self.frames() - 1) as f64 {
+            return false;
+        }
+        let n = (x.floor() as usize).min(self.frames() - 2);
+        let f = (x - n as f64) as f32;
+        let (a, b) = (self.frame(n), self.frame(n + 1));
+        for i in 0..NX {
+            out[i] = a[i] + f * (b[i] - a[i]);
+        }
+        true
+    }
+}
+
+/// Échantillon du fond à une position locale du domaine (x depuis l'ancre, z depuis le fond).
+fn sample(background: &Background, x: f32, z_from_bottom: f32, time: SimTime) -> Result<BackgroundSample, String> {
+    background
+        .differential_local_extended([x, 0., z_from_bottom - REST], time, DENSITY)
+        .map_err(|e| format!("fond δ x={x} z={z_from_bottom} : {e:?}"))
+}
+
+/// Échantillons des faces u puis w, par rangées réparties sur `SAMPLING_THREADS` fils : le calcul est
+/// indépendant par face, le résultat ne dépend pas du découpage. Précalcul hors image seulement.
+const SAMPLING_THREADS: usize = 6;
+fn fill(background: &Background, time: SimTime, u: &mut [BackgroundSample], w: &mut [BackgroundSample]) -> Result<(), String> {
+    std::thread::scope(|s| {
+        let mut jobs = Vec::new();
+        let rows_u = NZ.div_ceil(SAMPLING_THREADS);
+        for (c, chunk) in u.chunks_mut(rows_u * (NX + 1)).enumerate() {
+            jobs.push(s.spawn(move || -> Result<(), String> {
+                for (j, out) in chunk.iter_mut().enumerate() {
+                    let (k, i) = (c * rows_u + j / (NX + 1), j % (NX + 1));
+                    *out = sample(background, X0 + i as f32 * DX, (k as f32 + 0.5) * DX, time)?;
+                }
+                Ok(())
+            }));
+        }
+        let rows_w = (NZ + 1).div_ceil(SAMPLING_THREADS);
+        for (c, chunk) in w.chunks_mut(rows_w * NX).enumerate() {
+            jobs.push(s.spawn(move || -> Result<(), String> {
+                for (j, out) in chunk.iter_mut().enumerate() {
+                    let (k, i) = (c * rows_w + j / NX, j % NX);
+                    *out = sample(background, X0 + (i as f32 + 0.5) * DX, k as f32 * DX, time)?;
+                }
+                Ok(())
+            }));
+        }
+        jobs.into_iter().try_for_each(|j| j.join().map_err(|_| "échantillonnage interrompu".to_string())?)
+    })
+}
+
+/// Rejeux déjà calculés : `captures/s275/rejeu_<dt>.bin`, en-tête des constantes puis `η'` en f32.
+/// Un en-tête différent — autre domaine, autre houle, autre durée — refait le calcul.
+fn cache_header(dt_us: u64) -> [u64; 8] {
+    let r = swell_recipe();
+    [0x5275_de17a, dt_us, DURATION_US, START_US, NX as u64, NZ as u64,
+        (DX.to_bits() as u64) << 32 | REST.to_bits() as u64,
+        (r.sea.hs.to_bits() as u64) << 32 | r.sea.tp.to_bits() as u64 ^ r.sea.graine]
+}
+pub fn cached(background: &Background, dt_us: u64) -> Result<Replay, String> {
+    let path = format!("captures/s275/rejeu_{dt_us}.bin");
+    let header = cache_header(dt_us);
+    if let Ok(bytes) = std::fs::read(&path) {
+        let frames = (DURATION_US / FRAME_US) as usize + 1;
+        if bytes.len() == 64 + 4 * (frames * NX + 2) {
+            let read = |i: usize| u64::from_le_bytes(bytes[8 * i..8 * i + 8].try_into().unwrap());
+            if (0..8).all(|i| read(i) == header[i]) {
+                let word = |i: usize| u32::from_le_bytes(bytes[64 + 4 * i..68 + 4 * i].try_into().unwrap());
+                let heights = (0..frames * NX).map(|i| f32::from_bits(word(2 + i))).collect();
+                println!("DELTA_S275 rejeu relu {path}");
+                return Ok(Replay { dt_us, heights, iterations_max: word(0), steps: word(1) as u64 });
+            }
+        }
+    }
+    let r = precompute(background, dt_us, DURATION_US)?;
+    std::fs::create_dir_all("captures/s275").map_err(|e| e.to_string())?;
+    let mut bytes = Vec::with_capacity(64 + 4 * (r.heights.len() + 2));
+    for h in header { bytes.extend_from_slice(&h.to_le_bytes()); }
+    bytes.extend_from_slice(&r.iterations_max.to_le_bytes());
+    bytes.extend_from_slice(&(r.steps as u32).to_le_bytes());
+    for h in &r.heights { bytes.extend_from_slice(&h.to_le_bytes()); }
+    std::fs::write(&path, bytes).map_err(|e| e.to_string())?;
+    Ok(r)
+}
+
+/// Pas couplé mobile (ADR-152/164/165/166/167) de `0` à `duration_us`, au pas `dt_us`.
+pub fn precompute(background: &Background, dt_us: u64, duration_us: u64) -> Result<Replay, String> {
+    if dt_us == 0 || FRAME_US % dt_us != 0 || duration_us % FRAME_US != 0 {
+        return Err("pas de temps non déclaré".into());
+    }
+    let domain = Domain { nx: NX, nz: NZ, dx: DX };
+    let jobs = host_impl::SequentialJobs;
+    let sink = host_impl::StderrSink;
+    let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
+    let mut v = Volume::configure(
+        &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+        domain,
+        DENSITY,
+        background.gravity(),
+        &[0.; NX],
+    )
+    .map_err(|e| format!("domaine δ : {e:?}"))?;
+    v.set_free_surface(&[REST; NX], REST).map_err(|e| format!("surface δ : {e:?}"))?;
+    let mut u = vec![BackgroundSample::default(); v.velocity_u().len()];
+    let mut w = vec![BackgroundSample::default(); v.velocity_w().len()];
+    let frames = (duration_us / FRAME_US) as usize + 1;
+    let mut heights = Vec::with_capacity(frames * NX);
+    heights.extend(v.surface().iter().map(|h| h - REST));
+    let steps = duration_us / dt_us;
+    let mut worst = 0;
+    for n in 0..steps {
+        let time = SimTime(START_US + n * dt_us);
+        fill(background, time, &mut u, &mut w)?;
+        let bg = BackgroundFaces { domain, time, density: DENSITY, gravity: background.gravity(), u: &u, w: &w };
+        let r = v
+            .step_perturbation_mobile(time, dt_us, 6000, 1_000_000_000, &bg, SPONGE, &jobs, &Frozen)
+            .map_err(|e| format!("pas δ {n} (t = {} s) : {e:?}", (n * dt_us) as f64 * 1e-6))?;
+        if r.advanced_us != dt_us {
+            return Err(format!("pas δ {n} incomplet"));
+        }
+        worst = worst.max(r.report.map_or(0, |r| r.iterations));
+        if ((n + 1) * dt_us) % FRAME_US == 0 {
+            heights.extend(v.surface().iter().map(|h| h - REST));
+        }
+    }
+    if heights.iter().any(|h| !h.is_finite()) {
+        return Err("η' non fini".into());
+    }
+    Ok(Replay { dt_us, heights, iterations_max: worst, steps })
+}
+
+/// `(rms, max)` de `η'` sur toutes les images, en m.
+pub fn stats(r: &Replay) -> (f64, f64) {
+    let (mut s, mut m) = (0f64, 0f64);
+    for h in &r.heights {
+        s += (*h as f64).powi(2);
+        m = m.max(h.abs() as f64);
+    }
+    ((s / r.heights.len() as f64).sqrt(), m)
+}
+
+/// Écart entre deux rejeux aux mêmes images : `(rms, max)` en m.
+pub fn difference(a: &Replay, b: &Replay) -> (f64, f64) {
+    let (mut s, mut m) = (0f64, 0f64);
+    for (x, y) in a.heights.iter().zip(&b.heights) {
+        let d = (*x - *y) as f64;
+        s += d * d;
+        m = m.max(d.abs());
+    }
+    ((s / a.heights.len() as f64).sqrt(), m)
+}
+
+/// Critères 1 et 2 du protocole : les deux rejeux, en parallèle (précalcul hors image).
+pub fn measure(background: &Background) -> Result<(Replay, Replay), String> {
+    let (reference, frame) = std::thread::scope(|s| {
+        let a = s.spawn(|| cached(background, REFERENCE_US));
+        let b = s.spawn(|| cached(background, FRAME_US));
+        (a.join(), b.join())
+    });
+    let reference = reference.map_err(|_| "rejeu de référence interrompu".to_string())??;
+    let frame = frame.map_err(|_| "rejeu au pas d'image interrompu".to_string())??;
+    Ok((reference, frame))
+}
+
+/// Fondu en cosinus sur `width` mètres depuis un bord : poids et dérivée par rapport à `s`.
+fn fade(s: f64, width: f64) -> (f64, f64) {
+    if s >= width {
+        (1., 0.)
+    } else if s <= 0. {
+        (0., 0.)
+    } else {
+        let a = core::f64::consts::PI / width;
+        (0.5 - 0.5 * (a * s).cos(), 0.5 * a * (a * s).sin())
+    }
+}
+
+/// La couche δ de l'image : deux rejeux, un mode (0 : B seul, 1 : pas de référence, 2 : pas
+/// d'image), l'instant, et le tampon GPU correspondant.
+pub struct Layer<'a> {
+    pub replays: [&'a Replay; 2],
+    pub mode: usize,
+    pub gpu: [[f32; 4]; GPU_ROWS],
+    heights: [f32; NX],
+    active: bool,
+}
+
+impl<'a> Layer<'a> {
+    pub fn new(reference: &'a Replay, frame: &'a Replay) -> Self {
+        Self { replays: [reference, frame], mode: 1, gpu: [[0.; 4]; GPU_ROWS], heights: [0.; NX], active: false }
+    }
+    pub fn label(&self) -> &'static str {
+        ["B seul", "B+δ au pas de 4 ms", "B+δ au pas d'image (16 ms)"][self.mode]
+    }
+    /// Profil de l'instant et en-tête rebasé à la caméra ; pentes par différences centrées.
+    pub fn update(&mut self, seconds: f64, eye: [f32; 3]) {
+        self.active = self.mode > 0 && self.replays[self.mode - 1].at(seconds, &mut self.heights);
+        self.gpu[0] = [X0 - eye[0], -eye[1], DX, NX as f32];
+        self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, if self.active { 1. } else { 0. }];
+        for i in 0..NX {
+            let (l, r) = (i.saturating_sub(1), (i + 1).min(NX - 1));
+            let slope = (self.heights[r] - self.heights[l]) / ((r - l) as f32 * DX);
+            self.gpu[2 + i] = [self.heights[i], slope, 0., 0.];
+        }
+    }
+    pub fn is_active(&self) -> bool {
+        self.active
+    }
+    /// Même lecture que `delta_layer` du shader, en f64 : hauteur et deux pentes au point
+    /// rebasé à la caméra `q`.
+    pub fn eval(&self, q: [f32; 2]) -> [f64; 3] {
+        let [h0, h1] = [self.gpu[0], self.gpu[1]];
+        if h1[3] < 0.5 {
+            return [0.; 3];
+        }
+        let (dx, n) = (h0[2] as f64, h0[3] as usize);
+        let length = n as f64 * dx;
+        let (xl, yl) = (q[0] as f64 - h0[0] as f64, q[1] as f64 - h0[1] as f64);
+        if xl <= 0. || xl >= length || yl.abs() >= h1[0] as f64 {
+            return [0.; 3];
+        }
+        let near = xl.min(length - xl);
+        let (wx, dwx) = fade(near, h1[2] as f64);
+        let dwx = if xl <= length - xl { dwx } else { -dwx };
+        let (wy, dwy) = fade(h1[0] as f64 - yl.abs(), h1[1] as f64);
+        let dwy = -yl.signum() * dwy;
+        let xc = xl / dx - 0.5;
+        let i = (xc.floor().max(0.) as usize).min(n - 2);
+        let t = (xc - i as f64).clamp(0., 1.);
+        let (a, b) = (self.gpu[2 + i], self.gpu[3 + i]);
+        let (f0, m0, f1, m1) = (a[0] as f64, a[1] as f64 * dx, b[0] as f64, b[1] as f64 * dx);
+        let (t2, t3) = (t * t, t * t * t);
+        let e = (2. * t3 - 3. * t2 + 1.) * f0 + (t3 - 2. * t2 + t) * m0 + (-2. * t3 + 3. * t2) * f1 + (t3 - t2) * m1;
+        let de = ((6. * t2 - 6. * t) * f0 + (3. * t2 - 4. * t + 1.) * m0 + (-6. * t2 + 6. * t) * f1
+            + (3. * t2 - 2. * t) * m1) / dx;
+        [wx * wy * e, wy * (dwx * e + wx * de), wx * dwy * e]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn swell_samples_are_planar_s275() {
+        let b = swell_background().unwrap();
+        for (x, z) in [(-128., 0.), (0.3, 50.), (127., 97.5)] {
+            let s = sample(&b, x, z, SimTime(1_234_000)).unwrap();
+            assert_eq!(s.u[1], 0.);
+            assert!(s.grad_u[1].iter().all(|v| *v == 0.) && (0..3).all(|i| s.grad_u[i][1] == 0.));
+        }
+    }
+
+    #[test]
+    fn short_replay_is_received_s275() {
+        let b = swell_background().unwrap();
+        let r = precompute(&b, FRAME_US, 640_000).unwrap();
+        let (rms, max) = stats(&r);
+        println!("S275 rejeu_court images={} iterations_max={} rms={rms:e} max={max:e}", r.frames(), r.iterations_max);
+        assert_eq!(r.frames(), 41);
+        assert!(max < 0.1 * 2., "η' n'est plus petit devant Hs : {max}");
+        let mut out = [0f32; NX];
+        assert!(r.at(0.016, &mut out));
+        assert_eq!(&out[..], r.frame(1));
+        assert!(!r.at(0.7, &mut out) && !r.at(-0.1, &mut out));
+        let mut layer = Layer::new(&r, &r);
+        layer.update(0.32, [0., -40., 6.]);
+        assert!(layer.is_active());
+        // Hors bande et au bord : zéro ; au centre de colonne loin des fondus : la valeur rejouée.
+        assert_eq!(layer.eval([0., 40. + HALF_WIDTH + 1.]), [0.; 3]);
+        let x = X0 + (64. + 0.5) * DX;
+        let got = layer.eval([x, 40.]);
+        assert!((got[0] - layer.gpu[2 + 64][0] as f64).abs() < 1e-9);
+    }
+}

@@ -1,5 +1,6 @@
 mod reflection;
 mod counting;
+mod delta;
 mod gpu;
 mod topologie;
 mod lod;
@@ -357,6 +358,13 @@ impl ApplicationHandler for App<'_> {
                                     self.enabled = true;
                                 }
                                 KeyCode::KeyB => self.enabled = !self.enabled,
+                                // S275 : B seul, B+δ (4 ms), B+δ (pas d'image).
+                                KeyCode::KeyD => {
+                                    if let Some(layer) = self.frame.delta.as_mut() {
+                                        layer.mode = (layer.mode + 1) % 3;
+                                        println!("DELTA {}", layer.label());
+                                    }
+                                }
                                 KeyCode::Home => {
                                     self.frame.camera = Camera::default();
                                     self.seconds = 3.;
@@ -1811,8 +1819,76 @@ fn spectral_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
     Ok(())
 }
 
+/// S275, ADR-168 — critères 1 et 2 de DELTA-VISIBLE-S275 : les deux rejeux δ (relus s'ils sont
+/// déjà calculés pour les mêmes constantes), leurs statistiques et leur écart.
+fn delta_replays(background: &water_core::background::Background) -> Result<(delta::Replay, delta::Replay), String> {
+    let start = Instant::now();
+    let (reference, frame) = delta::measure(background)?;
+    let hs = delta::swell_recipe().sea.hs as f64;
+    for r in [&reference, &frame] {
+        let (rms, max) = delta::stats(r);
+        println!("DELTA_S275 dt_us={} pas={} images={} iterations_max={} eta_prime_rms_m={rms:.5} max_m={max:.5} max_sur_hs={:.4}",
+            r.dt_us, r.steps, r.frames(), r.iterations_max, max / hs);
+    }
+    let (rms_ref, _) = delta::stats(&reference);
+    let (d_rms, d_max) = delta::difference(&frame, &reference);
+    println!("DELTA_S275 ecart_16ms_4ms rms_mm={:.3} max_mm={:.3} rms_relatif={:.4} duree_precalcul_s={:.1}",
+        d_rms * 1e3, d_max * 1e3, d_rms / rms_ref, start.elapsed().as_secs_f64());
+    Ok((reference, frame))
+}
+
+/// S275 — critère 3 : la couche δ du GPU contre sa lecture CPU f64. GPU(B+δ) − GPU(B) aux mêmes
+/// sondes isole la couche ; sondes sur la bande, ses fondus et au-delà, deux poses, deux âges.
+fn delta_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, 640, 360,
+        frame.profile.len(), scene::WAKE_CAPACITY))?;
+    let (mut worst_h, mut worst_s, mut peak, mut inside) = (0f64, 0f64, 0f64, 0usize);
+    for (age, camera) in [(10.0, Camera { eye: [-60., -30., 8.], yaw: 1.2, pitch: -0.2 }),
+        (25.0, Camera { eye: [20., 130., 15.], yaw: -2.4, pitch: -0.3 })] {
+        let eye = camera.eye;
+        frame.camera = camera;
+        let mut points = Vec::new();
+        let mut x = -141.3f32;
+        while x < 141. {
+            let mut y = -123.7f32;
+            while y < 124. {
+                points.push([x - eye[0], y - eye[1]]);
+                y += 3.1;
+            }
+            x += 1.7;
+        }
+        let layer_mode = frame.delta.as_ref().ok_or("--delta-verify demande --delta")?.mode;
+        frame.delta.as_mut().unwrap().mode = 0;
+        frame.update(age, age, false);
+        g.upload(frame);
+        let off = g.evaluate(&points)?;
+        frame.delta.as_mut().unwrap().mode = layer_mode.max(1);
+        frame.update(age, age, false);
+        g.upload(frame);
+        let on = g.evaluate(&points)?;
+        let layer = frame.delta.as_ref().unwrap();
+        if !layer.is_active() { return Err("couche δ inactive à la vérification".into()); }
+        for ((q, a), b) in points.iter().zip(&on).zip(&off) {
+            let want = layer.eval(*q);
+            if want[0] != 0. { inside += 1; }
+            peak = peak.max(want[0].abs());
+            worst_h = worst_h.max(((a[0] - b[0]) as f64 - want[0]).abs());
+            for k in 1..3 { worst_s = worst_s.max(((a[k] - b[k]) as f64 - want[k]).abs()); }
+        }
+    }
+    println!("DELTA_VERIFY sondes_dans_la_bande={inside} eta_prime_max_m={peak:.4} pire_ecart_hauteur_m={worst_h:.3e} pire_ecart_pente={worst_s:.3e}");
+    if worst_h > 1e-4 || worst_s > 1e-5 || inside == 0 {
+        return Err(format!("couche δ GPU hors tolérance : {worst_h} m, {worst_s}"));
+    }
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
+    if args.iter().any(|a| a == "--delta-mesure") {
+        return delta_replays(&delta::swell_background()?).map(|_| ());
+    }
     // S259, ADR-156 : `--houle` — mer de vent et houle longue, étalement cos^2s (scène déclarée).
     // S260, ADR-157 : `--vagues` — recette `--houle`, queue d'équilibre f⁻⁴ et CWM.
     let vagues = args.iter().any(|a| a == "--vagues");
@@ -1853,7 +1929,17 @@ fn run() -> Result<(), String> {
     let timeline = Timeline::build(input.context, &spectrum, &journal, &mut nodes, &mut modes)
         .map_err(|e| format!("levier temporel : {e:?}"))?;
     let impacts = scene::scene_impacts(&scene, if multi { scene::IMPACTS.len() } else { 1 });
-    let mut frame = FrameData::new(&scene.background, table, input, timeline, recipe, impacts);
+    // S275, ADR-168 : `--delta` — houle à crêtes longues à la place de B, bande δ rejouée.
+    let delta_scene = args.iter().any(|a| a == "--delta");
+    let swell = if delta_scene { Some(delta::swell_background()?) } else { None };
+    let replays = match &swell { Some(b) => Some(delta_replays(b)?), None => None };
+    let mut frame = FrameData::new(swell.as_ref().unwrap_or(&scene.background), table, input, timeline, recipe, impacts);
+    if let Some((reference, image)) = &replays {
+        frame.delta = Some(delta::Layer::new(reference, image));
+        if args.iter().any(|a| a == "--delta-verify") {
+            return delta_verify(&mut frame);
+        }
+    }
     // S256, ADR-155 : queue spectrale en pentes par pixel, active par défaut ; `--no-tail` pour R1.
     if !args.iter().any(|a| a == "--no-tail") {
         frame.tail_background = Some(&scene.tail);
@@ -2433,7 +2519,8 @@ fn run() -> Result<(), String> {
             .unwrap_or(3.),
         birth: 0.,
         paused: false,
-        enabled: true,
+        // S275 : la scène `--delta` s'ouvre sans impact ni sillage (touche B pour les montrer).
+        enabled: !delta_scene,
         drag: false,
         cursor: None,
         frames: 0,

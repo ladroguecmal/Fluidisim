@@ -20,7 +20,7 @@ use water_core::{
 };
 #[allow(dead_code)]
 #[path = "../../code/water-harness/src/host_impl.rs"]
-mod host_impl;
+pub(crate) mod host_impl;
 
 pub const BIRTH: u64 = 12_000_000;
 pub const RADIUS: f32 = 52.;
@@ -719,6 +719,8 @@ pub struct FrameData<'a> {
     /// fils par appel coûte 67 µs pièce et **alloue**, ce qu'ADR-145 interdit à 60 Hz. Le
     /// parallélisme attend un vivier persistant, qui demande `unsafe` dans l'hôte — une décision.
     pub jobs: host_impl::ScopedJobs,
+    /// S275, ADR-168 : bande δ rejouée sous la houle à crêtes longues ; `None` hors `--delta`.
+    pub delta: Option<crate::delta::Layer<'a>>,
 }
 impl<'a> FrameData<'a> {
     pub fn new(
@@ -770,12 +772,16 @@ impl<'a> FrameData<'a> {
             culled_impacts: 0,
             footprint: Vec::new(),
             jobs: host_impl::ScopedJobs::with_workers(1),
+            delta: None,
         }
     }
     pub fn update(&mut self, seconds: f64, age: f64, enabled: bool) {
         self.time = SimTime(BIRTH + (seconds.max(0.) * 1e6) as u64);
         self.age = age;
         let eye = self.camera.eye;
+        if let Some(layer) = self.delta.as_mut() {
+            layer.update(seconds.max(0.), eye);
+        }
         self.background
             .render_components(
                 WorldPos::from_metres(eye[0] as f64, eye[1] as f64, 0.),
