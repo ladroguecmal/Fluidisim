@@ -84,7 +84,7 @@ décision ne batte. Déterministe (I-03), sans allocation à l'exécution (I-06)
   d'un `budget_ms` par domaine retenu. Essais : budget jamais dépassé, décision déterministe.
 - [x] **P5** — le temps : durée de vie minimale 0,75 s, délai d'extinction 1,0 s sous le seuil,
   fenêtre d'engagement 1 s. Essai : rien ne meurt avant son terme.
-- [ ] **P6** — le banc qui prouve : un domaine s'allume à l'approche, suit l'objet, s'éteint après
+- [x] **P6** — le banc qui prouve : un domaine s'allume à l'approche, suit l'objet, s'éteint après
   son départ ; sans battement, sous budget, mêmes décisions à deux exécutions.
 - [ ] **P7** — rituel §6.
 
@@ -95,6 +95,12 @@ perception en **surface écran** et non en distance), §3 (profil : ressources s
 capacité dérivée inscrite dans un profil finit par contredire ses ressources) ; ADR-013 §5
 (seuils de départ, **tous à calibrer**) ; ADR-006 §4 (hystérésis, durée de vie, pool — le vrai
 risque est le battement d'**allocation**, pas le battement logique).
+
+**P6 : un banc qui ne peut pas échouer ne prouve rien.** Première version, îlots espacés de 150 m :
+tout passait, budget maximal 0,800 ms — un seul domaine vivait à la fois, le sac à dos n'avait
+jamais été sollicité. Le garde ajouté (`vivants × coût > budget`) l'a révélé. Version serrée :
+**5 vivants simultanés, 4,0 ms demandés, 1,600 ms distribués**, transitions 2 par îlot, plus courte
+vie 10 267 ms, empreinte `6aebff024c734fc9` reproductible.
 
 **P5 : le délai d'extinction court depuis la chute sous `OFF`, pas depuis la naissance ni depuis
 la dernière soumission.** Trois essais écrits l'ignoraient et ont échoué — le code appliquait
