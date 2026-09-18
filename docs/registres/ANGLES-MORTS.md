@@ -3796,3 +3796,12 @@ reprise et rendu. Agrandissement et domaine mobile également non reçus.
 Transfert et garde 3,0283 ms (transfert seul 0,0276 ms au premier passage). Toujours hors
 2 ms, aucun gain de mémoire : le volume large reste réservé. La baisse de coût ne reçoit
 pas la qualité perdue (A290) ni la commande globale sous I-05.
+**Suivi A290/A276 — S284, 2026-09-19 (sévérités conservées).** Préparation progressive
+consommée : correction nodale 1,503 mm maximum (1,5 mm + arrondi f32), garde S283 inchangé,
+demande à 1,024 s, réduction autorisée à 1,792 s. Zéro allocation mesuré sur 321 updates.
+**Écart central maximal 66,994 mm** au large intact jusqu'à 5,120 s : ni fidélité temporelle ni
+I-12 reçus. Ne pas comparer ce maximum à celui S283 sans égaliser les fenêtres. Coût complet
+médian 12,3857 ms, p99 42,0321 ms et maximum 43,1006 ms ; I-05 non reçu. Déclencheur : avant
+automatisation, séparer l'effet de la préparation de celui du domaine étroit avec un témoin
+large préparé. La correction nodale ne borne pas tout l'interpolant entre colonnes.
+[Mesure et limites](../validation/PREPARATION-RETRECISSEMENT-S284.md).

@@ -326,8 +326,13 @@ publication : 3 mm ; cas précoce admis, cas à 1,024 s refusé (33,447 mm obser
 Pas médian 25,55→12,38 ms sur le diagnostic forcé ; transfert + garde 3,03 ms.
 Les pentes et la suite temporelle ne sont pas reçues (A290), ni I-05 ou I-12 globalement.
 [Réception et limites](validation/RETRECISSEMENT-S283.md). Reste la famine : la réduction
-automatique des domaines non focaux, sa préparation temporelle, l'agrandissement, le déplacement
+automatique des domaines non focaux, l'agrandissement, le déplacement
 et le régime substitutif ne sont pas construits ; les seuils attendent le banc **B8**.
+**S284, 2026-09-19 : préparation progressive consommée** (commande M), correction nodale visée
+1,5 mm par pas, garde 3 mm inchangé. La demande à 1,024 s permute à 1,792 s ; zéro allocation
+sur 321 images. **Fidélité temporelle non reçue** : écart central maximal 66,994 mm au témoin
+large jusqu'à 5,120 s. Coût complet médian 12,39 ms, p99 observé 42,03 ms pendant la transition.
+La porte A reste partielle ; A290 et I-05 ouverts. [Mesure](validation/PREPARATION-RETRECISSEMENT-S284.md).
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.

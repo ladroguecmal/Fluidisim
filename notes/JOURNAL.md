@@ -14312,3 +14312,38 @@ actualisés, A290 ouvert et A276 suivi. I-04/I-05/I-06/I-08/I-12/I-13/I-17 relus
 aucune sérialisation de δ, aucun changement d'autorité ou de modèle B/W. Aucun ADR réécrit.
 Une seule copie principale, aucune copie à fermer. V1 S281 reste proposée, ambition complète
 maintenue. Journal, plan cochés et jeton libéré dans le commit de clôture.
+---
+
+## S284 — préparer la réduction, et mesurer ce qui reste perdu
+
+**2026-09-19, Codex GPT-6, application desktop.** L'utilisateur demande de continuer pendant
+la clôture S283. Base propre 48d2ab7, copie principale unique. Plan e8ade0b, noyau 22963d4,
+consommation a3fac09.
+
+**Capacité bornée reçue, maillons 0 :** une demande tardive qui échouait au garde S283 prépare
+désormais le champ après chaque vrai pas et finit par permuter sans relâcher le garde. Chemin
+`Volume::prepare_shrink` → `Live::advance` → `Layer::update`, commande M. Fenêtre/fond/maillage
+identiques à S283. Pas de politique non focale automatique, pas de réception du résultat visuel.
+
+**Preuves :** demande à 1,024 s, permutation à 1,792 s. Correction nodale visée 1,5 mm,
+maximum 1,503 mm avec arrondi à hauteur 96 m ; garde 3 mm inchangé. Amortissement au centre
+identité, refus atomiques et coefficient neutre reçus. Pause sans travail ni échantillon de
+coût. **Zéro allocation dans 321 updates**, tentatives incluses. 507 tests cœur/harnais et
+34 viewer réussis, aucun échec, 19 ignorés. Coût réinjecté élargi à la préparation et au garde ;
+coût du grand domaine invalidé à la permutation.
+
+**Échec de fidélité conservé :** l'écart central au témoin large atteint **66,994 mm** jusqu'à
+5,120 s. La fenêtre diffère de S283, aucune conclusion de détérioration relative. Le garde
+instantané et la correction nodale ne reçoivent pas les pentes, l'interpolant complet ni la
+suite temporelle. A290 reste ouvert. Coût complet sur secteur : médiane 12,39 ms, p99 42,03 ms,
+maximum 43,10 ms ; I-05 non reçu. [Preuve](../docs/validation/PREPARATION-RETRECISSEMENT-S284.md).
+
+**Suite recommandée :** témoin large préparé, comparé au large intact et au réduit préparé sur
+une même fenêtre, pour attribuer A290 avant une correction. Ce serait une troisième session
+spatiale : comparer explicitement ce lot au blocage A276/3D avant de le choisir. L'automatisation
+reste suspendue à la réception de perte/évolution/coût, pas à une autorisation manquante.
+V, B2, bathymétrie, seconde plateforme et verdict S277 restent dans la file ; V1 non redéfinie.
+
+**Rituel :** file active relue (lignes S283 encore courantes hors remplacement spatial), feuille
+de route/index actualisés, A290/A276 suivis, invariants I-04/I-05/I-06/I-12/I-13/I-17 conservés.
+Aucun ADR modifié, aucune donnée persistée. Plan coché, jeton libre ; une seule copie, rien à fermer.

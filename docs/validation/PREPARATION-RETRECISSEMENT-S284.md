@@ -59,6 +59,10 @@ consommé ; centre au bit lors de l'amortissement seul, refus atomiques du noyau
 répétée, aucune allocation, pause sans progrès et poursuite réelle après permutation. Les tests
 incluent les refus de coefficients et de fenêtres, et le témoin identique pour `decay=1`.
 
+Suites release : **507 réussis** dans `code/` (393 cœur, 16 + 2 + 1 intégrations, 95 harnais),
+**34 réussis** dans `viewer/`, aucun échec ; 19 tests ignorés au total, avertissements antérieurs
+conservés. Ces tests ne reçoivent pas la qualité temporelle refusée ci-dessous.
+
 **La fidélité dans la durée n'est pas reçue.** 66,994 mm au centre interdisent de présenter le
 seul garde instantané comme une transition sans perte. Cette mesure mélange les effets de
 l'amortissement préparatoire et du domaine raccourci ; leur attribution demande un témoin

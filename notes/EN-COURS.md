@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S284 — en cours
+Session : S284 — terminée
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : continuer, préparation progressive demandée après S283.
 Objectif : amortir la couronne avant réduction et éprouver le passage gardé, sans prétendre
@@ -71,7 +71,7 @@ recevoir la réduction automatique ni I-12 perceptif.
   les vrais pas de Live ; réception exponentielle, centre conservé, refus atomiques.
 - [x] **P3** — demande progressive dans Layer, mesure contre réduction brutale et témoin,
   coût complet, garde S283 inchangé, tests et limites ; découper avant quinze minutes.
-- [>] **P4** — rituel §6 : preuves, journal, file/feuille de route/index, jeton libre.
+- [x] **P4** — rituel §6 : preuves, journal, file/feuille de route/index, jeton libre.
 
 ### Notes de reprise
 

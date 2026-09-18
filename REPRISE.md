@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 01:14 +02:00
+JETON            : libre
+Battement        : 2026-09-19 01:16 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : S284
-Dernière session : S283 — rétrécissement manuel consommé, garde de hauteur et coût ; A290 ouvert
-Session suivante : préparer progressivement le rétrécissement (A290), puis choix non focal sous budget ; coût A276 avant plusieurs domaines/3D. V1 proposée et verdict visuel S277 toujours ouverts.
-Maillons        : 0 — domaine étroit consommé par Live/Layer, transfert et refus reçus
+Session en cours : —
+Dernière session : S284 — préparation progressive consommée ; passage gardé reçu, dérive temporelle A290 ouverte
+Session suivante : attribuer A290 par trois témoins (large intact/préparé, étroit préparé), avant automatisation ; comparer ce troisième lot spatial au coût A276/3D. V, B2, bathymétrie et multiplateforme gardent leurs déclencheurs. V1 et verdict S277 toujours ouverts.
+Maillons        : 0 — préparation consommée, demande tardive passant le garde inchangé ; fidélité temporelle non reçue
 
 ```
 
