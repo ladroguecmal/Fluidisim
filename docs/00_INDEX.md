@@ -70,6 +70,7 @@
 - [Bande du fond en quadrature linéaire : critères et réception](validation/BANDE-LINEAIRE-S273.md).
 - [Houle progressive : quelle précision sert l'usage](validation/HOULE-USAGE-S274.md).
 - [Coût du pas couplé mobile : multigrille](validation/COUT-MOBILE-S274.md).
+- [δ visible dans l'afficheur : protocole et revue](validation/DELTA-VISIBLE-S275.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -253,6 +254,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-165](adr/ADR-165-bande-du-fond-aux-frontieres.md) | Flux de bande du fond aux frontières latérales |
 | [ADR-166](adr/ADR-166-quadrature-lineaire-de-la-bande.md) | Quadrature linéaire de la bande du fond |
 | [ADR-167](adr/ADR-167-multigrille-du-mode-mobile.md) | La multigrille préconditionne le mode à surface mobile |
+| [ADR-168](adr/ADR-168-premier-rendu-de-delta.md) | Premier rendu de δ : bande couplée rejouée dans l'afficheur |
 
 ## Travail et historique
 

@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-18 20:04 +02:00
+Battement        : 2026-09-18 20:05 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
 Session en cours : S275 — δ visible dans viewer/, revue de l'utilisateur
 Dernière session : S274 — précision de la houle rapportée à l'usage ; pas couplé mobile 280 → 49 ms (ADR-167)

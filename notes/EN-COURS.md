@@ -69,10 +69,10 @@ soumettre des captures à l'utilisateur (liste 8.7).
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — ADR-168 et protocole écrits avant le code : scène `--delta` (houle unidirectionnelle),
+- [x] **P2** — ADR-168 et protocole écrits avant le code : scène `--delta` (houle unidirectionnelle),
   domaine, pas de temps, bande extrudée le long des crêtes et fondus, ce qui n'est pas revendiqué,
   critères de fonctionnement et questions de revue.
-- [ ] **P3** — précalcul de δ dans l'afficheur (module `delta.rs`) : échantillons de B de la scène,
+- [>] **P3** — précalcul de δ dans l'afficheur (module `delta.rs`) : échantillons de B de la scène,
   pas couplé mobile au pas de référence et au pas d'image ; essais (échantillons plans, pas reçus,
   écart entre les deux pas en hauteur).
 - [ ] **P4** — couche δ côté GPU : tampon et paramètres, lecture Hermite le long de x, fondus,
