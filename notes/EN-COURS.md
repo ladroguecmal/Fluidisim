@@ -78,7 +78,7 @@ décision ne batte. Déterministe (I-03), sans allocation à l'exécution (I-06)
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — `scheduler.rs` : les types et leur sens — candidat, décision, budget, profil,
   état d'un domaine. Aucune logique de tri ; essais de forme et de contrat.
-- [ ] **P3** — priorité `P = gameplay × perception × urgence` (ADR-012 §2) et score à hystérésis
+- [x] **P3** — priorité `P = gameplay × perception × urgence` (ADR-012 §2) et score à hystérésis
   0,60 / 0,40 (ADR-013 §5). Essai : un candidat qui oscille autour d'un seuil ne bat pas.
 - [ ] **P4** — le sac à dos : tri par `P/C` décroissant, allocation jusqu'au budget, distribution
   d'un `budget_ms` par domaine retenu. Essais : budget jamais dépassé, décision déterministe.
@@ -95,6 +95,12 @@ perception en **surface écran** et non en distance), §3 (profil : ressources s
 capacité dérivée inscrite dans un profil finit par contredire ses ressources) ; ADR-013 §5
 (seuils de départ, **tous à calibrer**) ; ADR-006 §4 (hystérésis, durée de vie, pool — le vrai
 risque est le battement d'**allocation**, pas le battement logique).
+
+**P3 a trouvé une ambiguïté de conception, close par ADR-170** : ADR-012 §2 ne borne pas les
+poids et `W_urgence = 1/temps` diverge, alors qu'ADR-013 §5 veut un score dans `[0,1]`. Les deux
+ne se raccordaient pas, et ça ne se voyait pas tant que personne ne calculait. Décision : les trois
+poids sont des fractions par contrat, `s = P`, et l'hôte normalise `W_urgence` par un horizon
+déclaré.
 
 `delta_budget.rs` porte déjà le contrôle coopératif **à l'intérieur** d'un pas (arrêt atomique,
 `BudgetReport`) : c'est le contrat que l'ordonnanceur suppose (ADR-012 §1 point 5), pas un

@@ -73,10 +73,26 @@ pub struct Bid {
 }
 
 impl Bid {
-    /// `P = W_gameplay · W_perception · W_urgence` (ADR-012 §2).
+    /// `P = W_gameplay · W_perception · W_urgence` (ADR-012 §2). Les trois poids étant dans
+    /// `[0,1]` (ADR-170), le produit l'est aussi : c'est **le score d'activation** d'ADR-013 §5,
+    /// sans facteur d'échelle.
     pub fn priority(&self) -> f32 {
         self.gameplay * self.perception * self.urgency
     }
+}
+
+/// Hystérésis d'ADR-013 §5 : on allume au-dessus de `ON`, on éteint en dessous de `OFF`, et
+/// entre les deux **on ne change rien**. C'est l'intervalle qui empêche le battement, pas les
+/// bornes ; les valeurs restent celles du départ, toutes à calibrer (banc B8).
+pub const ON: f32 = 0.60;
+pub const OFF: f32 = 0.40;
+
+/// L'état d'un domaine d'un pas à l'autre. C'est la seule mémoire de l'ordonnanceur : sans elle,
+/// l'hystérésis n'existe pas, puisqu'elle porte sur la décision précédente.
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct Live {
+    id: DomainId,
+    active: bool,
 }
 
 /// Ce qu'un domaine retenu reçoit : le droit de vivre ce pas, et son budget.
@@ -102,6 +118,7 @@ pub struct Scheduler {
     profile: Profile,
     bids: Vec<Bid>,
     grants: Vec<Grant>,
+    live: Vec<Live>,
 }
 
 impl Scheduler {
@@ -113,12 +130,14 @@ impl Scheduler {
         if !(profile.cpu_sim_ms.is_finite() && profile.cpu_sim_ms > 0.) {
             return Err(Error::NotFinite);
         }
-        let bytes = capacity * (core::mem::size_of::<Bid>() + core::mem::size_of::<Grant>());
+        let bytes = capacity
+            * (core::mem::size_of::<Bid>() + core::mem::size_of::<Grant>() + core::mem::size_of::<Live>());
         host.alloc.alloc_persistent(bytes).map_err(|_| Error::Capacity)?;
         Ok(Self {
             profile,
             bids: Vec::with_capacity(capacity),
             grants: Vec::with_capacity(capacity),
+            live: Vec::with_capacity(capacity),
         })
     }
 
@@ -139,8 +158,13 @@ impl Scheduler {
     /// Soumissionne. Refuse tout poids non fini ou négatif : un `NaN` qui remonterait jusqu'au tri
     /// y vaudrait n'importe quel rang, et le plus dangereux est **le meilleur** (L161).
     pub fn submit(&mut self, bid: Bid) -> Result<(), Error> {
-        let fini = |v: f32| v.is_finite() && v >= 0.;
-        if !(fini(bid.gameplay) && fini(bid.perception) && fini(bid.urgency) && fini(bid.cost_ms)) {
+        // ADR-170 : les trois poids sont des fractions. Le coût, lui, est une durée : il est
+        // seulement fini et positif.
+        let poids = |v: f32| v.is_finite() && (0. ..=1.).contains(&v);
+        if !(poids(bid.gameplay) && poids(bid.perception) && poids(bid.urgency)) {
+            return Err(Error::NotFinite);
+        }
+        if !(bid.cost_ms.is_finite() && bid.cost_ms >= 0.) {
             return Err(Error::NotFinite);
         }
         if self.bids.iter().any(|b| b.id == bid.id) {
@@ -159,6 +183,47 @@ impl Scheduler {
 
     pub fn grants(&self) -> &[Grant] {
         &self.grants
+    }
+
+    /// Décision d'un pas, hystérésis seule : chaque soumission allume au-dessus de `ON`, éteint
+    /// en dessous de `OFF`, et **garde son état entre les deux**. Un candidat qu'on ne revoit pas
+    /// s'éteint — ne pas soumissionner, c'est renoncer.
+    ///
+    /// Le budget n'intervient pas encore (P4) : ce que rend cette étape est l'ensemble des
+    /// domaines qui *veulent* vivre, pas celui qui vivra.
+    pub fn decide(&mut self) {
+        for l in self.live.iter_mut() {
+            if !self.bids.iter().any(|b| b.id == l.id) {
+                l.active = false;
+            }
+        }
+        for b in &self.bids {
+            let s = b.priority();
+            match self.live.iter_mut().find(|l| l.id == b.id) {
+                Some(l) => {
+                    if l.active {
+                        if s < OFF {
+                            l.active = false;
+                        }
+                    } else if s > ON {
+                        l.active = true;
+                    }
+                }
+                // Inconnu : il n'entre dans la mémoire que s'il franchit le seuil d'allumage.
+                None if s > ON => self.live.push(Live { id: b.id, active: true }),
+                None => {}
+            }
+        }
+        self.live.retain(|l| l.active);
+    }
+
+    /// Les domaines que la décision laisse vivants, dans l'ordre où ils se sont allumés.
+    pub fn active(&self) -> impl Iterator<Item = DomainId> + '_ {
+        self.live.iter().filter(|l| l.active).map(|l| l.id)
+    }
+
+    pub fn is_active(&self, id: DomainId) -> bool {
+        self.live.iter().any(|l| l.id == id && l.active)
     }
 }
 
@@ -252,11 +317,65 @@ mod tests {
         assert!(s.submit(bid(3, 1., 1., 1., 1.)).is_ok());
     }
 
+    /// Un poids hors de `[0,1]` est refusé (ADR-170) : sans cette borne, les seuils d'ADR-013
+    /// n'ont pas de sens, et le défaut ne se voit qu'au moment où quelqu'un calcule.
+    #[test]
+    fn un_poids_hors_de_zero_un_est_refuse_s278() {
+        let mut s = scheduler(4);
+        s.begin();
+        assert_eq!(s.submit(bid(1, 1.5, 1., 1., 1.)), Err(Error::NotFinite));
+        // Le coût est une durée, pas une fraction : au-delà de 1 ms, il reste légitime.
+        assert!(s.submit(bid(2, 1., 1., 1., 40.)).is_ok());
+    }
+
+    /// L'hystérésis d'ADR-013 §5 : ce qui empêche le battement est l'**intervalle**, pas les
+    /// bornes. Un candidat qui oscille dedans garde l'état qu'il avait en y entrant.
+    #[test]
+    fn un_candidat_qui_oscille_dans_l_intervalle_ne_bat_pas_s278() {
+        let mut s = scheduler(4);
+        let pas = |s: &mut Scheduler, score: f32| {
+            s.begin();
+            s.submit(bid(1, score, 1., 1., 1.)).unwrap();
+            s.decide();
+            s.is_active(DomainId(1))
+        };
+        // Sous le seuil d'allumage, rien ne s'allume — même à un cheveu.
+        assert!(!pas(&mut s, 0.59));
+        assert!(pas(&mut s, 0.61), "franchi ON, le domaine vit");
+        // Entre OFF et ON, dix oscillations ne changent rien : c'est exactement le battement
+        // qu'un seuil unique produirait.
+        for score in [0.45, 0.55, 0.41, 0.59, 0.42, 0.58, 0.44, 0.56, 0.43, 0.57] {
+            assert!(pas(&mut s, score), "le domaine ne doit pas s'éteindre dans l'intervalle");
+        }
+        assert!(!pas(&mut s, 0.39), "sous OFF, il s'éteint");
+        // Et il ne se rallume pas en remontant dans l'intervalle : l'hystérésis est symétrique.
+        for score in [0.41, 0.5, 0.59] {
+            assert!(!pas(&mut s, score));
+        }
+        assert!(pas(&mut s, 0.61));
+    }
+
+    /// Ne pas soumissionner, c'est renoncer : un domaine qu'on ne revoit pas s'éteint, sans quoi
+    /// une source disparue laisserait son domaine vivre indéfiniment.
+    #[test]
+    fn un_candidat_qui_ne_soumissionne_plus_s_eteint_s278() {
+        let mut s = scheduler(4);
+        s.begin();
+        s.submit(bid(1, 0.9, 1., 1., 1.)).unwrap();
+        s.submit(bid(2, 0.9, 1., 1., 1.)).unwrap();
+        s.decide();
+        assert_eq!(s.active().count(), 2);
+        s.begin();
+        s.submit(bid(1, 0.9, 1., 1., 1.)).unwrap();
+        s.decide();
+        assert!(s.is_active(DomainId(1)) && !s.is_active(DomainId(2)));
+    }
+
     #[test]
     fn deux_soumissions_de_meme_identite_sont_refusees_s278() {
         let mut s = scheduler(4);
         s.begin();
         assert!(s.submit(bid(7, 1., 1., 1., 1.)).is_ok());
-        assert_eq!(s.submit(bid(7, 2., 1., 1., 1.)), Err(Error::Duplicate));
+        assert_eq!(s.submit(bid(7, 0.9, 1., 1., 1.)), Err(Error::Duplicate));
     }
 }
