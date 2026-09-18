@@ -193,6 +193,110 @@ impl Background {
         output.copy_from_slice(&scratch[..points.len()]);
         Ok(())
     }
+    /// S276 — lot sur la grille produit `xs × zs` à `y` fixe, **identique au bit** à
+    /// `differential_local_extended` en chaque point : mêmes composantes dans le même ordre,
+    /// mêmes opérations. La boucle des composantes passe à l'extérieur ; la phase, son sinus et
+    /// son cosinus se calculent une fois par colonne, l'atténuation une fois par couche.
+    /// `out[k·xs.len() + i]` reçoit le point `(xs[i], y, zs[k])`. `columns` : au moins `xs.len()`
+    /// lignes de travail. Refus : capacité, densité, fond, domaine (tous les points contrôlés
+    /// avant tout calcul), non-fini ; après un refus, `out` est indéterminé. Aucune allocation.
+    pub fn differential_grid_extended(
+        &self,
+        xs: &[f32],
+        y: f32,
+        zs: &[f32],
+        t: SimTime,
+        rho: f32,
+        columns: &mut [[f32; 2]],
+        out: &mut [BackgroundSample],
+    ) -> Result<(), DifferentialError> {
+        let nx = xs.len();
+        if out.len() != nx.checked_mul(zs.len()).ok_or(DifferentialError::Capacity)?
+            || columns.len() < nx
+        {
+            return Err(DifferentialError::Capacity);
+        }
+        self.differential_parameters(rho)?;
+        for &z in zs {
+            for &x in xs {
+                if !admits_local([x, y, z]) {
+                    return Err(DifferentialError::Domain);
+                }
+            }
+        }
+        out.fill(BackgroundSample::default());
+        for c in &self.components {
+            let time_phase = PhaseQ32(c.phase0.0.wrapping_sub(PhaseQ32::from_time(c.freq_q32, t).0));
+            for (column, &x) in columns.iter_mut().zip(xs) {
+                let phase = phase_spatiale(c, [x, y]).wrapping_add(time_phase);
+                *column = [phase.sin(), phase.cos()];
+            }
+            let omega = (c.freq_q32 as f64 / 4_294_967_296.0 * core::f64::consts::TAU) as f32;
+            let k = c.k_turns_per_m * core::f32::consts::TAU;
+            for (row, &z) in out.chunks_exact_mut(nx).zip(zs) {
+                if z > 0.0 {
+                    // Même corps que `differential_local_above`.
+                    let m = 1.0 + k * z;
+                    let a = c.amplitude * omega;
+                    let pressure_gradient = rho * self.gravity * c.amplitude * k;
+                    let lap = -(k * k) * (c.dir[0] * c.dir[0] + c.dir[1] * c.dir[1]);
+                    for (s, &[sn, cs]) in row.iter_mut().zip(columns.iter()) {
+                        s.eta += c.amplitude * sn;
+                        let slope = c.amplitude * k * cs;
+                        for i in 0..2 {
+                            s.grad_eta[i] += slope * c.dir[i];
+                            s.u[i] += a * sn * c.dir[i];
+                            s.du_dt[i] -= a * omega * cs * c.dir[i];
+                            s.grad_p_dyn[i] += pressure_gradient * m * cs * c.dir[i];
+                            s.laplacian_u[i] += lap * (a * sn * c.dir[i]);
+                            for j in 0..2 {
+                                s.grad_u[i][j] += a * k * cs * c.dir[i] * c.dir[j];
+                            }
+                            s.grad_u[2][i] += a * k * m * sn * c.dir[i];
+                        }
+                        s.u[2] -= a * m * cs;
+                        s.du_dt[2] -= a * omega * m * sn;
+                        s.grad_u[2][2] -= a * k * cs;
+                        s.p_dyn += rho * self.gravity * c.amplitude * m * sn;
+                        s.grad_p_dyn[2] += pressure_gradient * sn;
+                        s.laplacian_u[2] += lap * (-a * m * cs);
+                    }
+                } else {
+                    // Même corps que `differential_local_checked`.
+                    let e = attenuation(-k * z);
+                    let a = c.amplitude * omega * e;
+                    let pressure_gradient = rho * self.gravity * c.amplitude * e * k;
+                    let lap = (k * k) * ((1.0 - c.dir[0] * c.dir[0]) - c.dir[1] * c.dir[1]);
+                    for (s, &[sn, cs]) in row.iter_mut().zip(columns.iter()) {
+                        s.eta += c.amplitude * sn;
+                        let slope = c.amplitude * k * cs;
+                        for i in 0..2 {
+                            s.grad_eta[i] += slope * c.dir[i];
+                            s.u[i] += a * sn * c.dir[i];
+                            s.du_dt[i] -= a * omega * cs * c.dir[i];
+                            s.grad_p_dyn[i] += pressure_gradient * cs * c.dir[i];
+                            s.laplacian_u[i] += lap * (a * sn * c.dir[i]);
+                            for j in 0..2 {
+                                s.grad_u[i][j] += a * k * cs * c.dir[i] * c.dir[j];
+                            }
+                            s.grad_u[i][2] += a * k * sn * c.dir[i];
+                            s.grad_u[2][i] += a * k * sn * c.dir[i];
+                        }
+                        s.u[2] -= a * cs;
+                        s.du_dt[2] -= a * omega * sn;
+                        s.grad_u[2][2] -= a * k * cs;
+                        s.p_dyn += rho * self.gravity * c.amplitude * e * sn;
+                        s.grad_p_dyn[2] += pressure_gradient * sn;
+                        s.laplacian_u[2] += lap * (-a * cs);
+                    }
+                }
+            }
+        }
+        if out.iter().any(|s| !s.finite()) {
+            return Err(DifferentialError::NonFinite);
+        }
+        Ok(())
+    }
     fn differential_local_selected(
         &self,
         local: [f32; 3],
@@ -715,6 +819,59 @@ mod tests {
                 - b.differential_local(l, t, 1000.0).unwrap().p_dyn)
                 / (2.0 * h * 1000.0);
             close(s.du_dt[j], -dp as f64, 4e-4);
+        }
+    }
+    /// S276 — la grille est identique au bit au point par point : fond directionnel S201 et
+    /// houle plane, `y` non nul, `z` sous, sur et au-dessus du plan moyen ; refus.
+    #[test]
+    fn grid_extended_matches_pointwise_to_the_bit_s276() {
+        let bits = |s: &BackgroundSample| {
+            let mut v = vec![s.eta.to_bits(), s.p_dyn.to_bits()];
+            for i in 0..3 {
+                v.extend([s.grad_eta[i], s.u[i], s.du_dt[i], s.grad_p_dyn[i], s.laplacian_u[i]].map(f32::to_bits));
+                v.extend(s.grad_u[i].map(f32::to_bits));
+            }
+            v
+        };
+        // Douze composantes directionnelles, puis une houle plane : longueurs d'onde de 5 à 100 m.
+        let make = |planar: bool| Background {
+            components: (0..12u32).map(|n| {
+                let angle = if planar { 0f32 } else { n as f32 * 0.37 };
+                let (sn, cs) = angle.sin_cos();
+                let k = 0.01 + 0.017 * n as f32;
+                Component {
+                    amplitude: 0.05 + 0.02 * n as f32,
+                    k_turns_per_m: k,
+                    dir: [cs, sn],
+                    freq_q32: ((9.81 * k * core::f32::consts::TAU).sqrt() as f64 / core::f64::consts::TAU
+                        * 4_294_967_296.0) as u64,
+                    phase0: PhaseQ32(0x1234_5678u32.wrapping_mul(n + 1)),
+                }
+            }).collect(),
+            anchor: WorldPos::from_units(0, 0, 0),
+            gravity: 9.81,
+        };
+        for planar in [false, true] {
+            let b = make(planar);
+            let xs: Vec<f32> = (0..37).map(|i| -300. + i as f32 * 16.37).collect();
+            let zs = [-96., -40.25, -3., -0.5, -1e-6, 0., 1e-6, 0.25, 1.5, 3.];
+            let (y, t, rho) = (-12.5f32, SimTime(12_345_678), 1025.);
+            let mut columns = vec![[0f32; 2]; xs.len()];
+            let mut out = vec![BackgroundSample::default(); xs.len() * zs.len()];
+            b.differential_grid_extended(&xs, y, &zs, t, rho, &mut columns, &mut out).unwrap();
+            for (k, &z) in zs.iter().enumerate() {
+                for (i, &x) in xs.iter().enumerate() {
+                    let want = b.differential_local_extended([x, y, z], t, rho).unwrap();
+                    assert_eq!(bits(&out[k * xs.len() + i]), bits(&want), "x={x} z={z} plane={planar}");
+                }
+            }
+            let mut short = vec![BackgroundSample::default(); 3];
+            assert_eq!(b.differential_grid_extended(&xs, y, &zs, t, rho, &mut columns, &mut short),
+                Err(DifferentialError::Capacity));
+            assert_eq!(b.differential_grid_extended(&xs, y, &[5000.], t, rho, &mut columns,
+                &mut out[..xs.len()]), Err(DifferentialError::Domain));
+            assert_eq!(b.differential_grid_extended(&xs, y, &zs, t, -1., &mut columns, &mut out),
+                Err(DifferentialError::Density));
         }
     }
     #[test]

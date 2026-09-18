@@ -69,9 +69,9 @@ mesurés, réduits par les techniques désignées par la mesure, cadence publié
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — carte du coût d'un pas en direct (scène S275, un fil) : échantillonnage des faces u
   et w, pas couplé ; critères écrits avant (COUT-DIRECT-S276).
-- [>] **P3** — échantillonnage du fond par grille (colonnes × couches) : phase par colonne,
+- [x] **P3** — échantillonnage du fond par grille (colonnes × couches) : phase par colonne,
   facteur vertical par couche, **identique au bit** à l'évaluation ponctuelle ; essais, mesure.
-- [ ] **P4** — technique suivante désignée par la carte (départ depuis la pression précédente
+- [>] **P4** — technique suivante désignée par la carte (départ depuis la pression précédente
   si le pas domine) ; mêmes portes d'acceptation ; mesure.
 - [ ] **P5** — δ en direct dans l'afficheur (`--delta-direct`) : un pas par image, temps simulé
   fixe par image, cadence publiée ; accord au bit avec le rejeu de 16 ms.
@@ -83,3 +83,7 @@ R10 sans verdict : ne rien consigner à sa place. S275 : un pas par image (16 ms
 du pas de 4 ms à cette échelle. Précalcul S275 : 258 s pour 9 375 pas, échantillonnage réparti.
 
 P2 : échantillonnage 33,7/33,2 ms, pas 24,8/24,2 ms (médianes, un fil, secteur), 23 itérations.
+
+P3 : grille 5,14/5,11 ms contre 33,0 (×6,4), identique au bit ; le pas (24 ms) domine.
+P4 visé : départ depuis la pression précédente, pas principal seulement (pas l'affinage) ;
+en-tête du cache des rejeux à versionner si les bits changent.

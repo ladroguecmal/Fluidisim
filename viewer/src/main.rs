@@ -1939,10 +1939,10 @@ fn run() -> Result<(), String> {
     // S276 — carte du coût d'un pas en direct (COUT-DIRECT-S276), un fil.
     if args.iter().any(|a| a == "--delta-cout") {
         let background = delta::swell_background()?;
-        let (mut s, mut p, worst) = delta::cost_map(&background, 200)?;
-        let (sq, pq) = (quantiles(&mut s), quantiles(&mut p));
-        println!("DELTA_COUT pas=200 echantillonnage_ms mediane={:.3} p95={:.3} max={:.3} pas_couple_ms mediane={:.3} p95={:.3} max={:.3} iterations_max={worst} faces={}",
-            sq.0, sq.1, sq.2, pq.0, pq.1, pq.2, (delta::NX + 1) * delta::NZ + delta::NX * (delta::NZ + 1));
+        let (mut s, mut g, mut p, worst) = delta::cost_map(&background, 200)?;
+        let (sq, gq, pq) = (quantiles(&mut s), quantiles(&mut g), quantiles(&mut p));
+        println!("DELTA_COUT pas=200 echantillonnage_ponctuel_ms mediane={:.3} p95={:.3} max={:.3} echantillonnage_grille_ms mediane={:.3} p95={:.3} max={:.3} pas_couple_ms mediane={:.3} p95={:.3} max={:.3} iterations_max={worst} faces={} grille_identique_au_bit=oui",
+            sq.0, sq.1, sq.2, gq.0, gq.1, gq.2, pq.0, pq.1, pq.2, (delta::NX + 1) * delta::NZ + delta::NX * (delta::NZ + 1));
         return Ok(());
     }
     // S259, ADR-156 : `--houle` — mer de vent et houle longue, étalement cos^2s (scène déclarée).

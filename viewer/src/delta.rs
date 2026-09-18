@@ -103,7 +103,59 @@ fn sample(background: &Background, x: f32, z_from_bottom: f32, time: SimTime) ->
 /// indépendant par face, le résultat ne dépend pas du découpage. Précalcul hors image seulement.
 const SAMPLING_THREADS: usize = 6;
 fn fill(background: &Background, time: SimTime, u: &mut [BackgroundSample], w: &mut [BackgroundSample]) -> Result<(), String> {
-    fill_with(background, time, u, w, SAMPLING_THREADS)
+    fill_grid(background, time, u, w, SAMPLING_THREADS)
+}
+
+/// S276 — abscisses et cotes des faces, calculées avec les mêmes opérations que `sample`, pour
+/// l'échantillonnage par grille (`differential_grid_extended`, identique au bit au ponctuel).
+pub struct Grids {
+    xu: [f32; NX + 1],
+    zu: [f32; NZ],
+    xw: [f32; NX],
+    zw: [f32; NZ + 1],
+}
+impl Grids {
+    pub fn new() -> Self {
+        Self {
+            xu: core::array::from_fn(|i| X0 + i as f32 * DX),
+            zu: core::array::from_fn(|k| (k as f32 + 0.5) * DX - REST),
+            xw: core::array::from_fn(|i| X0 + (i as f32 + 0.5) * DX),
+            zw: core::array::from_fn(|k| k as f32 * DX - REST),
+        }
+    }
+}
+/// Faces u puis w par grille ; `threads` rangées de couches en parallèle (précalcul), un fil en
+/// direct. Chaque fil a sa ligne de travail ; le résultat ne dépend pas du découpage.
+pub fn fill_grid(background: &Background, time: SimTime, u: &mut [BackgroundSample], w: &mut [BackgroundSample],
+    threads: usize) -> Result<(), String> {
+    let g = Grids::new();
+    let err = |e| format!("fond δ par grille : {e:?}");
+    if threads <= 1 {
+        let mut columns = [[0f32; 2]; NX + 1];
+        background.differential_grid_extended(&g.xu, 0., &g.zu, time, DENSITY, &mut columns, u).map_err(err)?;
+        return background.differential_grid_extended(&g.xw, 0., &g.zw, time, DENSITY, &mut columns[..NX], w)
+            .map_err(err);
+    }
+    std::thread::scope(|s| {
+        let mut jobs = Vec::new();
+        let rows_u = NZ.div_ceil(threads);
+        for (zs, out) in g.zu.chunks(rows_u).zip(u.chunks_mut(rows_u * (NX + 1))) {
+            let xs = &g.xu;
+            jobs.push(s.spawn(move || {
+                let mut columns = [[0f32; 2]; NX + 1];
+                background.differential_grid_extended(xs, 0., zs, time, DENSITY, &mut columns, out).map_err(err)
+            }));
+        }
+        let rows_w = (NZ + 1).div_ceil(threads);
+        for (zs, out) in g.zw.chunks(rows_w).zip(w.chunks_mut(rows_w * NX)) {
+            let xs = &g.xw;
+            jobs.push(s.spawn(move || {
+                let mut columns = [[0f32; 2]; NX];
+                background.differential_grid_extended(xs, 0., zs, time, DENSITY, &mut columns, out).map_err(err)
+            }));
+        }
+        jobs.into_iter().try_for_each(|j| j.join().map_err(|_| "échantillonnage interrompu".to_string())?)
+    })
 }
 fn fill_with(background: &Background, time: SimTime, u: &mut [BackgroundSample], w: &mut [BackgroundSample],
     threads: usize) -> Result<(), String> {
@@ -214,8 +266,9 @@ pub fn precompute(background: &Background, dt_us: u64, duration_us: u64) -> Resu
 }
 
 /// S276 — carte du coût (COUT-DIRECT-S276) : `steps` pas de 16 ms depuis le repos, un fil ;
-/// durées par pas de l'échantillonnage et du pas couplé (ms), itérations au pire.
-pub fn cost_map(background: &Background, steps: u64) -> Result<(Vec<f64>, Vec<f64>, u32), String> {
+/// durées par pas de l'échantillonnage ponctuel, de l'échantillonnage par grille et du pas couplé
+/// (ms), itérations au pire. Les deux échantillonnages doivent rendre les mêmes bits.
+pub fn cost_map(background: &Background, steps: u64) -> Result<(Vec<f64>, Vec<f64>, Vec<f64>, u32), String> {
     let domain = Domain { nx: NX, nz: NZ, dx: DX };
     let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
     let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
@@ -224,21 +277,28 @@ pub fn cost_map(background: &Background, steps: u64) -> Result<(Vec<f64>, Vec<f6
     v.set_free_surface(&[REST; NX], REST).map_err(|e| format!("{e:?}"))?;
     let mut u = vec![BackgroundSample::default(); v.velocity_u().len()];
     let mut w = vec![BackgroundSample::default(); v.velocity_w().len()];
-    let (mut sampling, mut stepping, mut worst) = (Vec::new(), Vec::new(), 0);
+    let (mut gu, mut gw) = (u.clone(), w.clone());
+    let (mut sampling, mut grid, mut stepping, mut worst) = (Vec::new(), Vec::new(), Vec::new(), 0);
     for n in 0..steps {
         let time = SimTime(START_US + n * FRAME_US);
         let a = std::time::Instant::now();
         fill_with(background, time, &mut u, &mut w, 1)?;
+        let a2 = std::time::Instant::now();
+        fill_grid(background, time, &mut gu, &mut gw, 1)?;
         let b = std::time::Instant::now();
+        if u.iter().zip(&gu).chain(w.iter().zip(&gw)).any(|(p, q)| p != q || p.p_dyn.to_bits() != q.p_dyn.to_bits()) {
+            return Err(format!("grille et ponctuel diffèrent au pas {n}"));
+        }
         let bg = BackgroundFaces { domain, time, density: DENSITY, gravity: background.gravity(), u: &u, w: &w };
         let r = v.step_perturbation_mobile(time, FRAME_US, 6000, 1_000_000_000, &bg, SPONGE, &jobs, &Frozen)
             .map_err(|e| format!("pas {n} : {e:?}"))?;
         let c = std::time::Instant::now();
         worst = worst.max(r.report.map_or(0, |r| r.iterations));
-        sampling.push((b - a).as_secs_f64() * 1e3);
+        sampling.push((a2 - a).as_secs_f64() * 1e3);
+        grid.push((b - a2).as_secs_f64() * 1e3);
         stepping.push((c - b).as_secs_f64() * 1e3);
     }
-    Ok((sampling, stepping, worst))
+    Ok((sampling, grid, stepping, worst))
 }
 
 /// `(rms, max)` de `η'` sur toutes les images, en m.

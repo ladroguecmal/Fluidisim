@@ -34,3 +34,20 @@ cible n'est revendiquée avant mesure.
 
 Itérations au pire : 23. L'échantillonnage domine (58 % du total, ≈ 58 ms par image, ≈ 17 images/s).
 Il passe en premier. Le fil unique est lancé par `thread::scope`, coût négligeable ici (S243).
+
+## Échantillonnage par grille (P3)
+
+`Background::differential_grid_extended` : la boucle des composantes passe à l'extérieur, la
+phase et son sinus/cosinus sont calculés une fois par colonne, l'atténuation une fois par couche ;
+chaque face reçoit les mêmes termes dans le même ordre. Essai du cœur : identité au bit, champ
+par champ, sur 37 × 10 points (z de −96 à +3 m, plan moyen compris), fond directionnel et houle
+plane, `y` non nul ; refus de capacité, domaine et densité. Dans l'afficheur, les 13 492 faces des
+200 pas sont comparées aux deux chemins : **identiques**.
+
+| poste | médiane (ms) | p95 (ms) | maximum (ms) |
+|---|---:|---:|---:|
+| échantillonnage ponctuel | 33,0 ; 33,0 | 38,1 ; 38,6 | 50,3 ; 44,8 |
+| **échantillonnage par grille** | **5,14 ; 5,11** | 6,84 ; 6,93 | 10,8 ; 9,7 |
+| pas couplé | 24,2 ; 24,2 | 29,8 ; 30,3 | 36,8 ; 40,4 |
+
+Facteur **6,4**, sans aucune réception physique à refaire. Le pas couplé domine désormais (83 %).

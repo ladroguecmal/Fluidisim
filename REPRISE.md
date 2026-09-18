@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-18 20:44 +02:00
+Battement        : 2026-09-18 20:46 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
 Session en cours : S276 — δ en direct : coût du pas et de l'échantillonnage de B
 Dernière session : S275 — δ visible dans viewer/ (ADR-168), revue R10 demandée ; pas d'image indiscernable
