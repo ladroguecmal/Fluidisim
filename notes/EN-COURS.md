@@ -67,9 +67,9 @@ Objectif : premier redimensionnement spatial consommable de δ, avec transfert c
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [>] **P2** — contrats et code du domaine : choisir un redimensionnement borné, déclarer ses
+- [x] **P2** — contrats et code du domaine : choisir un redimensionnement borné, déclarer ses
   critères, construire et tester le transfert sans allocation ; découper avant quinze minutes.
-- [ ] **P3** — consommation réelle par l'hôte ou le pas couplé, coût/continuité et refus ;
+- [>] **P3** — consommation réelle par l'hôte ou le pas couplé, coût/continuité et refus ;
   suites de validation proportionnées, limites explicitement conservées.
 - [ ] **P4** — rituel §6 : journal, file, feuille de route, invariants et jeton libre.
 
@@ -77,3 +77,11 @@ Objectif : premier redimensionnement spatial consommable de δ, avec transfert c
 
 master dcaa97f propre ; une seule copie. Branche historique archivée vérifiée S282.
 Le périmètre complet reste obligatoire ; V1 proposée S281 non redéfinie ici.
+P2 précisé : transfert vers volume préalloué plus étroit, même dx/nz/milieu et fond plat.
+Conserver hauteur/vitesses/reste d'arrondi dans l'intérieur ; smoothstep dans une bande fournie,
+pression invalidée pour le nouveau domaine ; refus atomiques et aucune allocation. P3 : Live
+128→64 colonnes, même horloge/fond aux coordonnées mondiales, publication de la vraie emprise.
+Mesurer coût du transfert et des pas large/étroit ; continuité au centre, perte aux bords publiée.
+Ce lot ne reçoit ni choix automatique non focal, ni agrandissement, ni I-12 perceptif.
+P2 reçu : transfert + vrai pas couplé, zéro allocation au compteur global, centre au bit,
+faces normales aux nouveaux bords nulles, refus atomiques (bornes et largeur).

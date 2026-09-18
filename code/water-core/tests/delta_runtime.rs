@@ -628,3 +628,57 @@ fn through_background_is_atomic_and_allocation_free_s270() {
     }
     println!("S270 : {} expirations, reprise identique et zero allocation",clock.calls.get()-1);
 }
+
+#[test]
+fn shrink_transfers_state_and_runs_without_allocation_s283() {
+    use water_core::{background::BackgroundSample, delta_projection::{BackgroundFaces, Sponge}, SimTime};
+    let make = |nx| {
+        let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+        let mut v = Volume::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+            Domain { nx, nz: 12, dx: 0.25 }, 1025., 9.81, &vec![0.; nx]).unwrap();
+        let eta: Vec<_> = (0..nx).map(|i| {
+            let x = (i as f32 + 0.5 - nx as f32 * 0.5) * 0.25;
+            2. + 0.02 * (-x * x / 0.25).exp()
+        }).collect();
+        v.set_free_surface(&eta, 2.).unwrap();
+        v
+    };
+    let mut source = make(32);
+    source.step_surface_mobile(1000, 2000, 1000, &Jobs, &DeadlineClock::new(usize::MAX)).unwrap();
+    let mut small = make(16);
+    let source_bits = bits(&source);
+    let source_eta = surface_bits(&source);
+    let (result, allocs) = measured(|| small.shrink_perturbation_from(&source, 8, 1.));
+    result.unwrap(); assert_eq!(allocs, 0);
+    assert_eq!(bits(&source), source_bits); assert_eq!(surface_bits(&source), source_eta);
+    for i in 4..12 {
+        assert_eq!(small.surface()[i].to_bits(), source.surface()[8+i].to_bits());
+        for k in 0..=12 {
+            assert_eq!(small.velocity_w()[k*16+i].to_bits(), source.velocity_w()[k*32+8+i].to_bits());
+        }
+    }
+    for k in 0..12 {
+        assert_eq!(small.velocity_u()[k*17], 0.);
+        assert_eq!(small.velocity_u()[k*17+16], 0.);
+        for i in 4..=12 {
+            assert_eq!(small.velocity_u()[k*17+i].to_bits(), source.velocity_u()[k*33+8+i].to_bits());
+        }
+    }
+    assert!(small.pressure().iter().all(|p| *p == 0.));
+    let before = (bits(&small), surface_bits(&small));
+    for (start, band) in [(usize::MAX, 1.), (17, 1.), (8, f32::NAN), (8, 0.), (8, 2.)] {
+        let (r, allocations) = measured(|| small.shrink_perturbation_from(&source, start, band));
+        assert!(r.is_err()); assert_eq!(allocations, 0);
+        assert_eq!((bits(&small), surface_bits(&small)), before);
+    }
+    // Même fournisseur zéro, mais faces aux dimensions du NOUVEAU domaine ; vrai pas couplé.
+    let u = vec![BackgroundSample::default(); small.velocity_u().len()];
+    let w = vec![BackgroundSample::default(); small.velocity_w().len()];
+    let bg = BackgroundFaces { domain: small.domain(), time: SimTime(1000), density: 1025.,
+        gravity: 9.81, u: &u, w: &w };
+    let (r, allocations) = measured(|| small.step_perturbation_mobile(SimTime(1000), 1000,
+        2000, 1000, &bg, Sponge { width_m: 1., rate_per_s: 0.5 }, &Jobs,
+        &DeadlineClock::new(usize::MAX)));
+    assert_eq!(allocations, 0); assert_eq!(r.unwrap().advanced_us, 1000);
+    assert_ne!(surface_bits(&small), before.1);
+}

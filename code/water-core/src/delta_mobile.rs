@@ -14,6 +14,66 @@ use crate::host::{JobSystem, MonotonicClock};
 pub const SURFACE_THETA_MIN: f32 = 1e-3;
 
 impl Volume {
+    /// S283 : rétrécissement perturbatif sur fond plat, vers un volume déjà préalloué.
+    /// Même référentiel, origine verticale, dx, nz et milieu ; l'hôte décale son origine x
+    /// de `first_column * dx`. Ne convient pas à un état total/substitutif.
+    /// L'intérieur est copié au bit, la bande `edge_width_m` est amortie par smoothstep
+    /// vers zéro perturbatif. L'énergie abandonnée n'est pas transduite (ADR-012 §4).
+    /// Aucun lissage temporel ni certificat de continuité visuelle. Refus atomique, sans allocation.
+    pub fn shrink_perturbation_from(
+        &mut self, source: &Volume, first_column: usize, edge_width_m: f32,
+    ) -> Result<(), Error> {
+        let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
+        let end = first_column.checked_add(nx).ok_or(Error::Domain)?;
+        let length = nx as f32 * dx;
+        if nx >= source.domain.nx || end > source.domain.nx || nz != source.domain.nz
+            || dx != source.domain.dx || self.rho != source.rho || self.g_eff != source.g_eff
+            || !edge_width_m.is_finite() || edge_width_m < dx || edge_width_m >= length * 0.5
+        {
+            return Err(Error::Domain);
+        }
+        let bottom = source.bottom[0];
+        if source.bottom.iter().chain(&self.bottom).any(|b| *b != bottom) {
+            return Err(Error::Domain);
+        }
+        let (floor, top) = (bottom + 2. * dx, (nz - 1) as f32 * dx);
+        if !(source.rest >= floor && source.rest <= top)
+            || source.eta[first_column..end].iter().any(|h| !(*h >= floor && *h <= top))
+            || source.eta_roundoff[first_column..end].iter().chain(&source.u).chain(&source.w)
+                .any(|v| !v.is_finite())
+        {
+            return Err(Error::Domain);
+        }
+        let weight = |x: f32| {
+            let t = (x.min(length - x) / edge_width_m).clamp(0., 1.);
+            t * t * (3. - 2. * t)
+        };
+        self.rest = source.rest;
+        for i in 0..nx {
+            let a = weight((i as f32 + 0.5) * dx);
+            let j = first_column + i;
+            self.eta[i] = if a == 1. { source.eta[j] }
+                else { self.rest + a * (source.eta[j] - self.rest) };
+            self.eta_roundoff[i] = a * source.eta_roundoff[j];
+            for k in 0..=nz {
+                let dest = self.fw(i, k);
+                self.w[dest] = a * source.w[source.fw(j, k)];
+            }
+        }
+        for i in 0..=nx {
+            let a = weight(i as f32 * dx);
+            for k in 0..nz {
+                let dest = self.fu(i, k);
+                self.u[dest] = a * source.u[source.fu(first_column + i, k)];
+            }
+        }
+        // La pression est une amorce de résolution, pas un champ transférable après changement
+        // des frontières de Neumann. Le prochain pas la résout sur sa nouvelle géométrie.
+        self.p.fill(0.);
+        self.last_cost_ms = None;
+        Ok(())
+    }
+
     #[inline]
     fn zc(&self, k: usize) -> f32 {
         (k as f32 + 0.5) * self.domain.dx
