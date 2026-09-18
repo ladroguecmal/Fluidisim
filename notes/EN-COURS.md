@@ -66,8 +66,8 @@ Objectif : comparer le résidu progressif sur une durée finie à un oracle temp
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [>] **P2** — référence d'ordre deux et critères déclarés avant campagne.
-- [ ] **P3** — oracle et consommateur réel, contrôles indépendants de l'instrument.
+- [x] **P2** — référence d'ordre deux et critères déclarés avant campagne.
+- [>] **P3** — oracle et consommateur réel, contrôles indépendants de l'instrument.
 - [ ] **P4** — mesures spatiales/temporelles, verdict ou diagnostic, pas de seuil relevé.
 - [ ] **P5** — rituel §6, liste/file, journal, index et jeton.
 
@@ -78,3 +78,6 @@ la perturbation du solveur est fermée aux bords. Représentation modale à Neum
 pour le potentiel perturbatif, forcée par le fond progressif : référence indépendante
 de la discrétisation MAC. Lot comparé à V et au coût : le reçu temporel manque encore
 à l'usage J2, mais une nouvelle chaîne de simples instruments ne suffit pas.
+
+P2 : oracle modal Neumann forcé à l’ordre deux déclaré, 2 s, résidu seul <=2 %.
+Paramètres et contrôles dans RESIDU-TEMPOREL-S272 ; aucun oracle périodique.
