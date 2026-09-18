@@ -531,16 +531,24 @@ pub struct Layer<'a> {
     active: bool,
     /// S279 : ce qui décide que la bande vit. Avant lui, elle vivait parce que le code le disait.
     scheduler: Scheduler,
-    /// Coût du dernier pas réellement exécuté, réinjecté comme estimation du suivant (ADR-012 §3 :
-    /// « un ordonnanceur qui planifie sur des coûts théoriques dérive dès la première
-    /// optimisation »). Au premier pas, la mesure de S276.
-    cost_ms: f32,
+    /// S280 — **les derniers coûts payés**, du plus récent au plus ancien. L'estimation réinjectée
+    /// est leur **médiane** : ADR-012 §3 veut un centile et jamais une valeur isolée, et S279 a
+    /// montré ce que coûte l'oubli de cette phrase — un seul pas à 45,8 ms, pour une médiane de 22,
+    /// excluait la bande définitivement (L336).
+    costs: [f32; COST_SAMPLES],
+    /// Combien d'entrées de `costs` sont valides. **Décroît d'une unité par pas non payé** : un
+    /// domaine qui ne tourne plus ne sait plus ce qu'il coûte, et le dire est plus honnête que de
+    /// garder son pire chiffre. Vidé, il retombe sur l'estimation nominale et retente.
+    samples: usize,
     granted: bool,
 }
 
-/// Coût d'un pas en direct mesuré en S276 : sert de première estimation, remplacée dès le
-/// premier pas réel.
+/// Coût d'un pas en direct mesuré en S276 : estimation nominale, tant qu'aucun pas n'a été payé —
+/// et celle sur laquelle on retombe quand on a fini d'oublier.
 const FIRST_COST_MS: f32 = 22.;
+/// Huit pas, soit 128 ms à la cadence de δ. Assez pour qu'un pic isolé ne commande pas, assez peu
+/// pour qu'un renchérissement réel se voie en un cinquième de seconde.
+const COST_SAMPLES: usize = 8;
 
 fn scheduler() -> Result<Scheduler, String> {
     let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 12);
@@ -556,13 +564,13 @@ fn scheduler() -> Result<Scheduler, String> {
 impl<'a> Layer<'a> {
     pub fn new(reference: &'a Replay, frame: &'a Replay) -> Result<Self, String> {
         Ok(Self { replays: Some([reference, frame]), mode: 1, live: None, gpu: [[0.; 4]; GPU_ROWS],
-            heights: [0.; NX], active: false, scheduler: scheduler()?, cost_ms: FIRST_COST_MS, granted: false })
+            heights: [0.; NX], active: false, scheduler: scheduler()?, costs: [FIRST_COST_MS; COST_SAMPLES], samples: 0, granted: false })
     }
     /// S277 — δ **en direct sans rejeu** : la scène s'ouvre immédiatement, δ naît au repos et
     /// avance d'un pas par image. Les trois minutes de précalcul ne servaient qu'aux rejeux.
     pub fn direct(background: &'a Background, initial: [f32; NX]) -> Result<Self, String> {
         Ok(Self { replays: None, mode: 1, live: Some(Live::new(background, initial)?), gpu: [[0.; 4]; GPU_ROWS],
-            heights: [0.; NX], active: false, scheduler: scheduler()?, cost_ms: FIRST_COST_MS, granted: false })
+            heights: [0.; NX], active: false, scheduler: scheduler()?, costs: [FIRST_COST_MS; COST_SAMPLES], samples: 0, granted: false })
     }
     pub fn label(&self) -> &'static str {
         if self.live.is_some() {
@@ -581,12 +589,32 @@ impl<'a> Layer<'a> {
     ///
     /// Non retenue, la bande n'avance pas et ne s'affiche pas. Elle **renaît au repos** au retour
     /// (I-12) : une extinction n'est pas gratuite pour l'onde injectée, qui repart de zéro.
+    /// L'estimation réinjectée : médiane des derniers pas payés, ou le nominal si l'on a fini
+    /// d'oublier. La médiane d'un nombre pair d'échantillons est prise comme l'élément supérieur —
+    /// ce qui penche du côté prudent, celui qui protège le budget.
+    fn cost_ms(&self) -> f32 {
+        if self.samples == 0 {
+            return FIRST_COST_MS;
+        }
+        let mut tri = [0f32; COST_SAMPLES];
+        tri[..self.samples].copy_from_slice(&self.costs[..self.samples]);
+        tri[..self.samples].sort_unstable_by(f32::total_cmp);
+        tri[self.samples / 2]
+    }
+
+    /// Enregistre le coût d'un pas payé, en tête.
+    fn record_cost(&mut self, ms: f32) {
+        self.costs.copy_within(..COST_SAMPLES - 1, 1);
+        self.costs[0] = ms;
+        self.samples = (self.samples + 1).min(COST_SAMPLES);
+    }
+
     pub fn arbitrate(&mut self, seconds: f64, view: Option<&crate::lod::Projection>) -> bool {
         let emprise = ([X0, -HALF_WIDTH], [X0 + NX as f32 * DX, HALF_WIDTH]);
         let perception = view.map_or(1., |p| p.screen_fraction(emprise.0, emprise.1));
         self.scheduler.begin();
         let bid = Bid { id: DomainId(0), gameplay: GAMEPLAY, perception, urgency: URGENCY,
-            cost_ms: self.cost_ms, blocks: 1, regime: Regime::Perturbative };
+            cost_ms: self.cost_ms(), blocks: 1, regime: Regime::Perturbative };
         if self.scheduler.submit(bid).is_err() {
             return self.granted;
         }
@@ -599,6 +627,11 @@ impl<'a> Layer<'a> {
         }
         self.scheduler.allocate();
         self.granted = !self.scheduler.grants().is_empty();
+        // Non payé : on oublie une mesure. Huit pas sans tourner, et l'estimation redevient le
+        // nominal — le domaine retente alors, et c'est ce qui l'empêche d'être condamné par un pic.
+        if !self.granted {
+            self.samples = self.samples.saturating_sub(1);
+        }
         self.granted
     }
 
@@ -623,9 +656,10 @@ impl<'a> Layer<'a> {
                 _ => false,
             },
         };
-        // ADR-012 §3 : le coût annoncé au pas suivant est celui qu'on vient de payer.
+        // ADR-012 §3 : le coût annoncé au pas suivant sort de ce qu'on vient de payer.
         if let Some(live) = self.live.as_ref() {
-            self.cost_ms = (live.sampling_ms + live.step_ms) as f32;
+            let paye = (live.sampling_ms + live.step_ms) as f32;
+            self.record_cost(paye);
         }
         self.gpu[0] = [X0 - eye[0], -eye[1], DX, NX as f32];
         self.gpu[1] = [HALF_WIDTH, FADE_Y, SPONGE.width_m, if self.active { 1. } else { 0. }];
@@ -681,6 +715,39 @@ mod tests {
             assert_eq!(s.u[1], 0.);
             assert!(s.grad_u[1].iter().all(|v| *v == 0.) && (0..3).all(|i| s.grad_u[i][1] == 0.));
         }
+    }
+
+    /// S280 — **un pic ne condamne plus un domaine**. S279 estimait le coût par le dernier pas :
+    /// un seul à 45,8 ms, pour une médiane de 22, suffisait à faire sortir la bande du budget, et
+    /// un domaine sorti ne produit plus de mesure (L336). La médiane l'ignore ; l'oubli permet le
+    /// retour.
+    #[test]
+    fn un_pic_isole_ne_commande_pas_l_estimation_s280() {
+        let r = Replay { dt_us: FRAME_US, heights: vec![0.; NX * 2], iterations_max: 0, steps: 1 };
+        let mut layer = Layer::new(&r, &r).unwrap();
+
+        // Sans mesure, l'estimation est le nominal de S276.
+        assert_eq!(layer.cost_ms(), FIRST_COST_MS);
+
+        // Huit pas ordinaires, puis le pire pas mesuré en S276.
+        for _ in 0..COST_SAMPLES {
+            layer.record_cost(22.);
+        }
+        assert_eq!(layer.cost_ms(), 22.);
+        layer.record_cost(45.8);
+        assert_eq!(layer.cost_ms(), 22., "un pic isolé ne doit pas commander");
+
+        // Un renchérissement réel, lui, se voit : cinq pas chers sur huit font basculer la médiane.
+        for _ in 0..5 {
+            layer.record_cost(45.8);
+        }
+        assert_eq!(layer.cost_ms(), 45.8, "un coût durable doit se voir");
+
+        // Et l'oubli ramène au nominal : c'est ce qui rend le retour possible.
+        for _ in 0..COST_SAMPLES {
+            layer.samples = layer.samples.saturating_sub(1);
+        }
+        assert_eq!(layer.cost_ms(), FIRST_COST_MS, "sans mesure fraîche, on revient à l'a priori");
     }
 
     #[test]

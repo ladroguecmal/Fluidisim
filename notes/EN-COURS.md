@@ -86,7 +86,7 @@ l'hôte, pas au cœur.
 ### Plan
 
 - [ ] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — estimation robuste dans l'hôte : médiane glissante des derniers pas payés, et retour
+- [x] **P2** — estimation robuste dans l'hôte : médiane glissante des derniers pas payés, et retour
   vers l'estimation nominale quand plus rien n'est payé — un domaine qui ne tourne plus ne sait
   plus ce qu'il coûte, et le dire est plus honnête que de garder son pire chiffre. Essais.
 - [ ] **P3** — réception : `--delta-budget=<ms>` pour éprouver le cas serré ; la bande survit à
