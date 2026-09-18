@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 19:19 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 19:31 +02:00
 Agent            : Claude Opus 5, Claude Code desktop (fichiers, git, cargo, Python, navigateur intégré)
-Session en cours : aucune
+Session en cours : S274 — utilité de la précision de la houle progressive, puis blocage suivant
 Dernière session : S273 — bande du fond d'ordre deux (ADR-166) ; résidu 5,88 %, part d'ordre deux extrapolée 1,77 %
 Session suivante : S274 — recevoir la part extrapolée en amplitude, protocole écrit avant mesure (dt 1 ms / 0,5 ms)
 Maillons        : 0

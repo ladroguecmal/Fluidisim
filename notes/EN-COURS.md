@@ -58,48 +58,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S273 — terminée
+Session : S274 — en cours
 Agent : Claude Opus 5, Claude Code desktop ; fichiers, git, cargo et Python.
-Entrée : « reprends le projet », master propre 2506015, copie unique, jeton libre.
-Objectif : intégrer au transport réel la reconstruction linéaire de la bande
-(défaut de quadrature isolé en S272), la recevoir, puis rejouer le résidu S272.
+Entrée : consigne utilisateur du 2026-09-18 — vérifier que la précision recherchée sert le
+résultat final avant tout raffinement ; critères rattachés à ce qu'ils protègent ; écart
+traduit en hauteur, pente, déphasage ; extrapolation vérifiée (troisième amplitude, pas de
+temps) ; usage réel et rendu ; puis blocage suivant de la feuille de route. master 43385bd.
+Objectif : établir le niveau nécessaire de la houle progressive, l'atteindre ou le proposer,
+puis ouvrir le blocage suivant.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — ADR-166 (quadrature linéaire de la bande, remplace la formule
-  d'ADR-152/165), notes datées, critères de réception et de campagne écrits
-  avant le code dans BANDE-LINEAIRE-S273.
-- [x] **P3** — construction : même règle aux faces intérieures et extérieures ;
-  tests de quadrature contre l'intégrale analytique, bandes signées/coupées,
-  fond uniforme et fond nul inchangés.
-- [x] **P4** — suite complète, valeurs déplacées expliquées, transaction intacte.
-- [x] **P5** — rejouer les cinq passages S272, verdict aux critères S272 inchangés,
-  qualification dt/amplitude déclarée en P2.
-- [x] **P6** — rituel §6, feuille de route/file/liste, journal, index et jeton.
+- [ ] **P2** — lecture d'usage sur les traces S273, sans calcul nouveau : ce que protège chaque
+  critère ; écart en hauteur absolue, pente, déphasage (mode k en quadrature, harmonique 2k) ;
+  signature séculaire de l'ordre trois contre la dispersion de Stokes ; critères de la
+  campagne P3 écrits avant mesure (HOULE-USAGE-S274).
+- [ ] **P3** — campagne unique : a = 2 cm et dt = 0,5 ms admis par l'exemple ; trois amplitudes
+  × trois mailles à 1 ms, contrôle 0,5 ms à la fine ; coefficient d'ordre deux jugé au budget
+  d'ADR-120, sans le présenter comme la houle complète.
+- [ ] **P4** — verdict d'usage : garanties de fonctionnement, seuils justifiés par l'usage ou
+  proposés à l'utilisateur, raccord δ→rendu manquant, besoins découverts dans liste et file.
+- [ ] **P5** — blocage suivant de la feuille de route : choix argumenté, critère, premier lot
+  (plan amendé ici avant de le construire).
+- [ ] **P6** — rituel §6.
 
 ### Notes de reprise
 
-Maillons 2 à l'ouverture : ce lot doit livrer une correction produit reçue,
-pas un instrument de plus. Passages S272 : environ 1 min chacun en release.
-Anciennes traces S272 conservées dans TEMP (fluidisim-s272-*.log) ; nouvelles
-traces fluidisim-s273-*.log. Repos aligné sur une face dans tous les appelants
-(tests, exemples) ; le pli ADR-154 à z=0 ne gêne donc pas la règle par couche.
-
-P3 : `band_layer` commun (bord : plancher = fond de colonne ; intérieur : 0,
-ouverture conservée). Flux produit 0,4190/0,0892/0,0162 % (= diagnostic S272),
-témoin rectangle 8,41/3,86/1,60 %. Affine exact à 3,9e-8. S271 cinématique
-initiale 3,048/1,237/0,585 % → 1,509/0,445/0,137 %. Module couplé 29 ok, 4 ignorés.
-
-P4 : suite 480 ok/21 ignorés. S253 release 2,14 %. Campagne S272 rejouée :
-9,11/6,18/5,88 % ; a/2 3,23 % ; demi-dt 5,78 %, sens. 0,668 % ; a² 2,89 %.
-Richardson a (ajout après la fine : a/2 aux mailles grossière/moyenne, 2 passages)
-7,74/2,92/1,77 % ; a² 2,74/2,85/2,89 % indépendant de dx → ordre trois physique.
-Rejeu S253 128 colonnes 5/10 cm en cours (fluidisim-s273-s253-*.log, ~26 min).
-
-P5 : refus maintenu aux critères S272 ; cause resserrée : troncature de
-l'oracle ∝ a, part d'ordre deux convergente. Suite concrète : protocole N*
-déclaré avant mesure, dt 1 ms / 0,5 ms (l'exemple n'accepte pas encore 500 µs).
-
-P6 : rejeu S253 128 colonnes reçu (profil 0,148 / 0,178 %, b₂ 0,35 / 0,53 %).
-Jeton rendu, maillons 0, suite S274 = réception sur N* (protocole avant mesure).
+ADR-120 : 2 % décidés par l'utilisateur, budget conjoint spatial + temporel + référence ;
+seul un arbitrage explicite les change. Le rendu (`viewer/`) ne consomme aucun domaine δ.
+Repères d'usage existants : hauteur d'image 3 mm (S201), horloge 20 ms (ADR-003, Δz ≈ Aω·Δt).
+Traces S273 dans TEMP (fluidisim-s273-*.log), à réutiliser en P2.
