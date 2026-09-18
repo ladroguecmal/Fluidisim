@@ -299,14 +299,16 @@ fn allocation_accounting_matches_requested_typed_storage() {
     // essai de comptabilité qui appellerait la même fonction que le code ne vérifierait rien.
     // Division par deux tant que les deux dimensions sont paires et au moins huit ; par niveau,
     // cinq tableaux de mailles (fraction, diagonale, correction, second membre, temporaire) et les
-    // deux familles d'ouvertures.
+    // deux familles d'ouvertures. S274 (ADR-167) : deux tableaux mobiles de plus par niveau
+    // (fractions, diagonale), et une correction fine du cycle mobile dès qu'un niveau existe.
     let (mut hx, mut hz, mut hierarchy) = (n, k, 0usize);
     while hx % 2 == 0 && hz % 2 == 0 && hx >= 8 && hz >= 8 {
         let (cx, cz) = (hx / 2, hz / 2);
-        hierarchy += 5 * cx * cz + (cx + 1) * cz + cx * (cz + 1);
+        hierarchy += 7 * cx * cz + (cx + 1) * cz + cx * (cz + 1);
         (hx, hz) = (cx, cz);
     }
-    assert_eq!(hierarchy, 1156, "32×16 donne 16×8 puis 8×4");
+    assert_eq!(hierarchy, 1156 + 2 * (16 * 8 + 8 * 4), "32×16 donne 16×8 puis 8×4");
+    let hierarchy = hierarchy + n * k;
     let bytes = bytes + hierarchy * 4;
     assert_eq!(arena.stats().persistent_bytes, bytes);
     assert_eq!(arena.stats().persistent_calls, 1);

@@ -610,6 +610,9 @@ fn coupled_mobile_first_step_refusal_diagnosis_s253(){
 #[test]
 #[cfg_attr(debug_assertions, ignore = "128 colonnes : release")]
 fn coupled_mobile_first_step_is_received_by_refinement_s253(){
+    // S274 (ADR-167) : l'affinage d'ADR-153 s'éprouve sous le témoin de Jacobi, qui touche encore le
+    // plancher au premier pas ; la multigrille mobile le reçoit sans affinage (fin de l'essai).
+    super::super::MOBILE_MULTIGRID_OFF.with(|c|c.set(true));
     let wave=standing::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
     let nx=128;
     let build=||standing_case(nx,&wave,&vec![2.;nx]);
@@ -644,6 +647,12 @@ fn coupled_mobile_first_step_is_received_by_refinement_s253(){
     assert_eq!(r.advanced_us,0);
     assert_eq!((late.u.clone(),late.w.clone(),late.p.clone(),late.eta.clone()),before);
     assert!(!late.homogeneous_ghost&&!late.surface_coupled&&!late.mobile);
+    super::super::MOBILE_MULTIGRID_OFF.with(|c|c.set(false));
+    let mut mg=build();
+    let r=mg.step_perturbation_mobile(SimTime(0),1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock).unwrap();
+    let report=r.report.unwrap();
+    println!("S274_128 multigrille={report:?}");
+    assert_eq!((r.advanced_us,report.refinements,report.degraded),(1000,0,false));
 }
 
 /// S254 (ADR-154) — le prolongement borné de l'oracle avant usage, au-dessus du plan moyen :
