@@ -84,10 +84,10 @@ Critères avant code, posés ici :
 - [>] **P1** — amorce, lecture ciblée du lot, plan seul.
 - [ ] **P2** — publication des composantes de B sur la carte et WGSL de base : phase spatiale,
   `sin_cos` Q32, tampons réservés à la configuration.
-- [>] **P3** — `differential_local_extended` en WGSL **sous** le plan moyen, reçu contre le
+- [x] **P3** — `differential_local_extended` en WGSL **sous** le plan moyen, reçu contre le
   cœur champ par champ ; refus et réserve testés.
-- [ ] **P4** — **au-dessus** du plan moyen, règle d'ADR-154, reçu contre le cœur.
-- [ ] **P5** — second membre **couplé** assemblé sur la carte depuis ce fond, reçu.
+- [x] **P4** — **au-dessus** du plan moyen, règle d'ADR-154, reçu contre le cœur.
+- [>] **P5** — second membre **couplé** assemblé sur la carte depuis ce fond, reçu.
 - [ ] **P6** — coût du fond sur la carte, comparé au chemin CPU de S276/S298.
 - [ ] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
@@ -119,3 +119,19 @@ cos 2,09·10⁻⁷, exp 3,02·10⁻⁸ contre `exp(−x)` en f64.
 Le reliquat vient du **cœur** : son `turns − floor(turns)` arrondit quand la somme n'est pas
 représentable (ex. turns = −0,344, frac 0,656 perd un bit). La carte est donc plus exacte que
 la référence sur ce point précis. À dire tel quel, sans le présenter comme une identité.
+
+**Fusion déclarée P3+P4** : un seul banc (`--delta3d-champ`) couvre les deux branches, et les
+séparer aurait voulu dire couper un banc en deux pour la forme. Un commit, deux cases.
+
+P3/P4 reçus : 891 sondes (9×9 en x-y, onze hauteurs dont **cinq au-dessus** du plan moyen),
+trois instants dont 9 876 s. Champ par champ, écart relatif **1,0 à 2,6·10⁻⁶**, sans champ
+aberrant ; `grad_eta.z` exactement nul des deux côtés. Par point et par branche, métrique plus
+sévère : au-dessus 1,2 à 4,2·10⁻⁵, au-dessous 1,5 à 1,9·10⁻⁵ — les grands rapports tombent là où
+l'atténuation a tout éteint et où l'échelle du point est minuscule.
+En grandeurs physiques : eta à 0,57 µm près pour une échelle de 0,64 m ; p_dyn à 1,2·10⁻² Pa
+pour 12 209 Pa. Le repère de 3 mm de S201 est cinq mille fois plus large.
+Hors domaine : le cœur refuse, la carte marque en NaN — un noyau ne peut pas refuser.
+
+**FXC refuse l'indexation dynamique d'un vecteur en écriture** (`grad_u0[j] = …` dans une
+boucle) : « array reference cannot be used as an l-value ». Boucles déroulées à la main. À
+retenir pour tout noyau à écrire : dérouler dès qu'une composante de vecteur est une cible.

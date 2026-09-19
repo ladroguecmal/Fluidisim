@@ -18,6 +18,7 @@ pub struct Background3 {
     device: wgpu::Device,
     queue: wgpu::Queue,
     primitives: wgpu::ComputePipeline,
+    field: wgpu::ComputePipeline,
     bind: wgpu::BindGroup,
     components: wgpu::Buffer,
     time_phase: wgpu::Buffer,
@@ -32,9 +33,11 @@ pub struct Background3 {
     pub backend: String,
 }
 
-/// Six flottants par sonde : phase (bits), sinus, cosinus, atténuation, puis deux
-/// diagnostics — le produit `k·d` brut et sa partie fractionnaire.
-const OUT_PER_PROBE: usize = 6;
+/// Six flottants par sonde pour le banc des primitives : phase (bits), sinus, cosinus,
+/// atténuation, puis deux diagnostics — le produit `k·d` brut et sa partie fractionnaire.
+const PRIMITIVE_SLOTS: usize = 6;
+/// Vingt-six pour le champ complet, dans l'ordre de `BackgroundSample`.
+pub const FIELD_SLOTS: usize = 26;
 
 impl Background3 {
     /// `capacity` borne le nombre de points qu'un appel peut interroger : les tampons sont
@@ -62,20 +65,25 @@ impl Background3 {
         let info = adapter.get_info();
 
         let storage = wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC;
-        let components = buffer(&device, (count * 16) as u64, storage);
+        let components = buffer(&device, (count * 32) as u64, storage);
         let time_phase = buffer(&device, (count * 4) as u64, storage);
         let points = buffer(&device, (capacity * 16) as u64, storage);
-        let out = buffer(&device, (capacity * OUT_PER_PROBE * 4) as u64, storage);
+        let out = buffer(&device, (capacity * FIELD_SLOTS * 4) as u64, storage);
         let read = buffer(
             &device,
-            (capacity * OUT_PER_PROBE * 4) as u64,
+            (capacity * FIELD_SLOTS * 4) as u64,
             wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
         );
 
         // Les paramètres qui ne changent jamais partent une fois.
-        let mut packed = Vec::with_capacity(count * 4);
+        let mut packed = Vec::with_capacity(count * 8);
         for c in background.components() {
+            // `omega` se calcule en f64 dans le cœur ; WGSL n'en a pas. C'est un paramètre de
+            // composante, donc l'hôte le publie — sans que cela devienne un échantillon.
+            let omega = (c.freq_q32 as f64 / 4_294_967_296.0 * core::f64::consts::TAU) as f32;
+            let k = c.k_turns_per_m * core::f32::consts::TAU;
             packed.extend_from_slice(&[c.amplitude, c.k_turns_per_m, c.dir[0], c.dir[1]]);
+            packed.extend_from_slice(&[omega, k, 0., 0.]);
         }
         queue.write_buffer(&components, 0, bytemuck_cast(&packed));
 
@@ -122,19 +130,24 @@ impl Background3 {
             immediate_size: 0,
         });
         let shader = device.create_shader_module(wgpu::include_wgsl!("delta3d_background.wgsl"));
-        let primitives = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-            label: Some("primitives du fond"),
-            layout: Some(&pipeline_layout),
-            module: &shader,
-            entry_point: Some("primitives"),
-            compilation_options: Default::default(),
-            cache: None,
-        });
+        let make = |label: &str, entry: &str| {
+            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some(label),
+                layout: Some(&pipeline_layout),
+                module: &shader,
+                entry_point: Some(entry),
+                compilation_options: Default::default(),
+                cache: None,
+            })
+        };
+        let primitives = make("primitives du fond", "primitives");
+        let field = make("champ du fond", "sample_field");
 
         Ok(Self {
             device,
             queue,
             primitives,
+            field,
             bind,
             components,
             time_phase,
@@ -167,6 +180,53 @@ impl Background3 {
         Ok(())
     }
 
+
+    /// Champ complet en chaque point local, dans l'ordre de `BackgroundSample`. Un point hors
+    /// du domaine d'I-08 rend des `NaN` : un noyau ne peut pas refuser, donc il le signale.
+    /// **Banc seulement** pour la relecture, comme `primitives`.
+    pub fn sample(&self, probes: &[[f32; 3]]) -> Result<Vec<[f32; FIELD_SLOTS]>, String> {
+        if probes.is_empty() || probes.len() > self.capacity {
+            return Err(format!("sondes : 1 à {} attendues, {} reçues", self.capacity, probes.len()));
+        }
+        if probes.iter().flatten().any(|v| !v.is_finite()) {
+            return Err("sonde non finie".into());
+        }
+        let mut packed = Vec::with_capacity(probes.len() * 4);
+        for p in probes {
+            packed.extend_from_slice(&[p[0], p[1], p[2], 0.]);
+        }
+        self.queue.write_buffer(&self.points, 0, bytemuck_cast(&packed));
+        let span = (probes.len() * FIELD_SLOTS * 4) as u64;
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            pass.set_pipeline(&self.field);
+            pass.set_bind_group(0, &self.bind, &[]);
+            pass.dispatch_workgroups((probes.len() as u32).div_ceil(GROUP), 1, 1);
+        }
+        encoder.copy_buffer_to_buffer(&self.out, 0, &self.read, 0, span);
+        self.queue.submit([encoder.finish()]);
+        let slice = self.read.slice(..span);
+        let (tx, rx) = std::sync::mpsc::channel();
+        slice.map_async(wgpu::MapMode::Read, move |r| {
+            let _ = tx.send(r);
+        });
+        self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+        rx.recv().map_err(|e| e.to_string())?.map_err(|e| e.to_string())?;
+        let mut result = Vec::with_capacity(probes.len());
+        {
+            let view = slice.get_mapped_range().map_err(|e| e.to_string())?;
+            for row in view.chunks_exact(FIELD_SLOTS * 4) {
+                let mut values = [0f32; FIELD_SLOTS];
+                for (v, bytes) in values.iter_mut().zip(row.chunks_exact(4)) {
+                    *v = f32::from_le_bytes(bytes.try_into().unwrap());
+                }
+                result.push(values);
+            }
+        }
+        self.read.unmap();
+        Ok(result)
+    }
     /// Banc des primitives : `probes[i] = (k, d, x)` rend `(phase, sin, cos, exp(−x))`.
     /// **Banc seulement** — la lecture est synchrone.
     pub fn primitives(&self, probes: &[[f32; 3]]) -> Result<Vec<[f32; 6]>, String> {
@@ -181,7 +241,7 @@ impl Background3 {
             packed.extend_from_slice(&[p[0], p[1], p[2], 0.]);
         }
         self.queue.write_buffer(&self.points, 0, bytemuck_cast(&packed));
-        let span = (probes.len() * OUT_PER_PROBE * 4) as u64;
+        let span = (probes.len() * PRIMITIVE_SLOTS * 4) as u64;
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
@@ -201,7 +261,7 @@ impl Background3 {
         let mut result = Vec::with_capacity(probes.len());
         {
             let view = slice.get_mapped_range().map_err(|e| e.to_string())?;
-            for row in view.chunks_exact(OUT_PER_PROBE * 4) {
+            for row in view.chunks_exact(PRIMITIVE_SLOTS * 4) {
                 let mut values = [0f32; 6];
                 for (v, bytes) in values.iter_mut().zip(row.chunks_exact(4)) {
                     *v = f32::from_le_bytes(bytes.try_into().unwrap());
@@ -296,6 +356,130 @@ pub fn recevoir_primitives() -> Result<(), String> {
                  refus[0], refus[1], refus[2]);
         if !refus.iter().all(|r| *r) {
             return Err("un refus attendu n'a pas eu lieu".into());
+        }
+        Ok(())
+    })
+}
+
+/// Les 26 champs de `BackgroundSample`, dans l'ordre où la carte les écrit.
+const NOMS: [&str; FIELD_SLOTS] = [
+    "eta", "grad_eta.x", "grad_eta.y", "grad_eta.z", "u.x", "u.y", "u.z",
+    "du_dt.x", "du_dt.y", "du_dt.z",
+    "grad_u.0x", "grad_u.0y", "grad_u.0z", "grad_u.1x", "grad_u.1y", "grad_u.1z",
+    "grad_u.2x", "grad_u.2y", "grad_u.2z",
+    "p_dyn", "grad_p_dyn.x", "grad_p_dyn.y", "grad_p_dyn.z",
+    "laplacian_u.x", "laplacian_u.y", "laplacian_u.z",
+];
+
+fn aplatir(s: &water_core::background::BackgroundSample) -> [f32; FIELD_SLOTS] {
+    let mut v = [0f32; FIELD_SLOTS];
+    v[0] = s.eta;
+    v[1..4].copy_from_slice(&s.grad_eta);
+    v[4..7].copy_from_slice(&s.u);
+    v[7..10].copy_from_slice(&s.du_dt);
+    for i in 0..3 {
+        v[10 + i * 3..13 + i * 3].copy_from_slice(&s.grad_u[i]);
+    }
+    v[19] = s.p_dyn;
+    v[20..23].copy_from_slice(&s.grad_p_dyn);
+    v[23..26].copy_from_slice(&s.laplacian_u);
+    v
+}
+
+/// Banc P3/P4 : **réception du champ complet**, champ par champ, sous **et** au-dessus du plan
+/// moyen. Le cœur juge : c'est `differential_local_extended` qui donne la valeur attendue, à
+/// trois instants dont un très éloigné, sur des profondeurs qui vont du ras de la surface au
+/// fond profond où l'atténuation a tout éteint.
+pub fn recevoir_champ() -> Result<(), String> {
+    use water_core::background::SeaState;
+    use water_core::host::HostServices;
+    use water_core::{WorldPos, SimTime};
+    use crate::scene::host_impl;
+
+    pollster::block_on(async {
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 22);
+        let background = Background::configure(
+            &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+            SeaState { hs: 1.4, tp: 7.0, theta_turns: 0.13, components: 64, graine: 300 },
+            WorldPos::from_units(0, 0, 0),
+        ).map_err(|e| format!("fond {e:?}"))?;
+
+        let mut points = Vec::new();
+        for ix in 0..9 {
+            for iy in 0..9 {
+                // Cinq hauteurs au-dessus du plan moyen — c'est la branche d'ADR-154 §2 —,
+                // le plan lui-même, puis jusqu'au fond profond où l'atténuation a tout éteint.
+                for z in [12., 8., 4., 2., 0.5, 0., -0.5, -2., -6., -18., -60.] {
+                    let x = -160. + ix as f32 * 40.;
+                    let y = -160. + iy as f32 * 40.;
+                    points.push([x, y, z]);
+                }
+            }
+        }
+        let n = points.len();
+        let mut carte = Background3::new(&background, n).await?;
+        println!("DELTA3D_CHAMP_S300 carte={:?} backend={} composantes={} sondes={n}",
+                 carte.adapter, carte.backend, carte.components());
+
+        let rho = 1025_f32;
+        for micros in [0u64, 987_654, 9_876_543_210] {
+            let time = SimTime(micros);
+            carte.publish_time(&background, time)?;
+            let obtenu = carte.sample(&points)?;
+            // Écart relatif par champ, rapporté à l'échelle du champ sur l'échantillon entier :
+            // un gradient et une pression n'ont pas la même unité, les mélanger n'a pas de sens.
+            let (mut echelles, mut ecarts) = ([0f32; FIELD_SLOTS], [0f32; FIELD_SLOTS]);
+            let (mut au_bit, mut total) = (0usize, 0usize);
+            let (mut pire_dessus, mut pire_dessous) = (0f32, 0f32);
+            for (p, v) in points.iter().zip(&obtenu) {
+                let attendu = aplatir(&background.differential_local_extended(*p, time, rho)
+                    .map_err(|e| format!("coeur {e:?} en {p:?}"))?);
+                // Échelle du point, pour séparer les deux branches sans mélanger les unités.
+                let echelle_point = attendu.iter().fold(0f32, |m, x| m.max(x.abs()));
+                for f in 0..FIELD_SLOTS {
+                    echelles[f] = echelles[f].max(attendu[f].abs());
+                    let ecart = (attendu[f] - v[f]).abs();
+                    ecarts[f] = ecarts[f].max(ecart);
+                    if attendu[f].to_bits() == v[f].to_bits() { au_bit += 1; }
+                    total += 1;
+                    if echelle_point > 0. {
+                        let r = ecart / echelle_point;
+                        if p[2] > 0. { pire_dessus = pire_dessus.max(r); }
+                        else { pire_dessous = pire_dessous.max(r); }
+                    }
+                }
+            }
+            let mut pire = (0f32, 0usize);
+            for f in 0..FIELD_SLOTS {
+                let relatif = if echelles[f] > 0. { ecarts[f] / echelles[f] } else { 0. };
+                if relatif > pire.0 { pire = (relatif, f); }
+            }
+            println!(
+                "DELTA3D_CHAMP_S300 t_us={micros} au_bit={au_bit}/{total} pire_champ={} pire_ecart_relatif={:e} (echelle {:e}, ecart absolu {:e}) ; par branche : au_dessus={pire_dessus:e} au_dessous={pire_dessous:e}",
+                NOMS[pire.1], pire.0, echelles[pire.1], ecarts[pire.1]
+            );
+            // Champ par champ, une fois, à l'instant intermédiaire : c'est ce que le plan
+            // demandait, et un maximum global cache quel champ le porte.
+            if micros == 987_654 {
+                for f in 0..FIELD_SLOTS {
+                    let relatif = if echelles[f] > 0. { ecarts[f] / echelles[f] } else { 0. };
+                    println!(
+                        "DELTA3D_CHAMP_S300   champ={:<14} echelle={:e} ecart_absolu={:e} ecart_relatif={relatif:e}",
+                        NOMS[f], echelles[f], ecarts[f]
+                    );
+                }
+            }
+        }
+
+        // Hors domaine : le cœur refuse, la carte marque. Les deux doivent être d'accord.
+        let dehors = [[5000., 0., -1.], [0., -5000., -1.]];
+        let marque = carte.sample(&dehors)?;
+        let coeur_refuse = dehors.iter().all(|p| background.differential_local_extended(*p, SimTime(0), rho).is_err());
+        let carte_marque = marque.iter().all(|v| v.iter().all(|x| x.is_nan()));
+        println!("DELTA3D_CHAMP_S300 hors_domaine coeur_refuse={coeur_refuse} carte_marque={carte_marque}");
+        if !(coeur_refuse && carte_marque) {
+            return Err("le hors-domaine n'est pas traité des deux côtés".into());
         }
         Ok(())
     })

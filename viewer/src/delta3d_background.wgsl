@@ -22,7 +22,9 @@ struct Params {
     _pad3: f32,
 };
 
-// (amplitude, k en tours/m, dir.x, dir.y)
+// Deux vec4 par composante : (amplitude, k en tours/m, dir.x, dir.y) puis (omega, k en rad/m,
+// 0, 0). `omega` se calcule en f64 dans le cœur — absent de WGSL — donc l'hôte le publie ;
+// c'est un paramètre de composante, pas un échantillon.
 @group(0) @binding(0) var<storage, read> components: array<vec4<f32>>;
 // Phase temporelle repliée, une par composante, réécrite à chaque instant.
 @group(0) @binding(1) var<storage, read> time_phase: array<u32>;
@@ -140,4 +142,143 @@ fn primitives(@builtin(global_invocation_id) id: vec3<u32>) {
     let turns = q.x * q.y;
     out[i * 6u + 4u] = turns;
     out[i * 6u + 5u] = turns - floor(turns);
+}
+
+// ── Le champ complet ─────────────────────────────────────────────────────────────────────────
+//
+// 26 flottants par point, dans l'ordre de `BackgroundSample` : eta, grad_eta (3), u (3),
+// du_dt (3), grad_u (9, ligne par ligne), p_dyn, grad_p_dyn (3), laplacian_u (3).
+//
+// Deux corps, comme le cœur : sous le plan moyen l'atténuation `e = exp(kz)` (ADR-113), au-dessus
+// le prolongement linéaire `m = 1 + kz` d'ADR-154 §2. La bascule est `local.z > 0`, et hors du
+// domaine d'I-08 le point est refusé — ici en rendant un marqueur, l'hôte ne pouvant pas
+// recevoir d'erreur d'un noyau.
+
+const FIELDS: u32 = 26u;
+
+fn admits_local(p: vec3<f32>) -> bool {
+    return abs(p.x) < 4096.0 && abs(p.y) < 4096.0 && abs(p.z) < 4096.0;
+}
+
+@compute @workgroup_size(64)
+fn sample_field(@builtin(global_invocation_id) id: vec3<u32>) {
+    let i = id.x;
+    if (i >= params.probes) { return; }
+    let base = i * FIELDS;
+    let local = points[i].xyz;
+
+    var eta = 0.0;
+    var p_dyn = 0.0;
+    var grad_eta = vec3<f32>(0.0);
+    var u = vec3<f32>(0.0);
+    var du_dt = vec3<f32>(0.0);
+    var grad_p_dyn = vec3<f32>(0.0);
+    var laplacian_u = vec3<f32>(0.0);
+    var grad_u0 = vec3<f32>(0.0);
+    var grad_u1 = vec3<f32>(0.0);
+    var grad_u2 = vec3<f32>(0.0);
+
+    let admis = admits_local(local);
+    let above = admis && local.z > 0.0;
+    // Le cœur refuse un point hors domaine ou au-dessus du plan sans prolongement ; le marqueur
+    // laisse l'hôte le constater sans inventer de valeur.
+    if (!admis) {
+        for (var f = 0u; f < FIELDS; f = f + 1u) { out[base + f] = bitcast<f32>(0x7fc00000u); }
+        return;
+    }
+
+    for (var n = 0u; n < params.count; n = n + 1u) {
+        let c0 = components[n * 2u];
+        let c1 = components[n * 2u + 1u];
+        let amplitude = c0.x;
+        let dir = vec2<f32>(c0.z, c0.w);
+        let omega = c1.x;
+        let k = c1.y;
+
+        let d = local.x * dir.x + local.y * dir.y;
+        let phase = phase_from_distance(c0.y, d) + time_phase[n];
+        let sc = phase_sin_cos(phase);
+        let sn = sc.x;
+        let cs = sc.y;
+
+        var e = 1.0;
+        var m = 1.0;
+        if (above) { m = 1.0 + k * local.z; } else { e = attenuation(-k * local.z); }
+        let a = select(amplitude * omega * e, amplitude * omega, above);
+        let pressure_gradient = select(params.rho * params.gravity * amplitude * e * k,
+                                       params.rho * params.gravity * amplitude * k, above);
+        // Sous le plan : Δ = k²(1 − |d|²). Au-dessus, aucune courbure en z : Δ = −k²|d|².
+        let lap = select((k * k) * ((1.0 - dir.x * dir.x) - dir.y * dir.y),
+                         -(k * k) * (dir.x * dir.x + dir.y * dir.y), above);
+
+        eta = eta + amplitude * sn;
+        let slope = amplitude * k * cs;
+        // Boucles déroulées : FXC refuse l'indexation dynamique d'un vecteur en écriture.
+        // L'ordre entre cibles distinctes est sans effet — chacune n'accumule qu'une fois.
+        grad_eta.x = grad_eta.x + slope * dir.x;
+        grad_eta.y = grad_eta.y + slope * dir.y;
+        u.x = u.x + a * sn * dir.x;
+        u.y = u.y + a * sn * dir.y;
+        du_dt.x = du_dt.x - a * omega * cs * dir.x;
+        du_dt.y = du_dt.y - a * omega * cs * dir.y;
+        laplacian_u.x = laplacian_u.x + lap * (a * sn * dir.x);
+        laplacian_u.y = laplacian_u.y + lap * (a * sn * dir.y);
+        grad_u0.x = grad_u0.x + a * k * cs * dir.x * dir.x;
+        grad_u0.y = grad_u0.y + a * k * cs * dir.x * dir.y;
+        grad_u1.x = grad_u1.x + a * k * cs * dir.y * dir.x;
+        grad_u1.y = grad_u1.y + a * k * cs * dir.y * dir.y;
+        if (above) {
+            grad_p_dyn.x = grad_p_dyn.x + pressure_gradient * m * cs * dir.x;
+            grad_p_dyn.y = grad_p_dyn.y + pressure_gradient * m * cs * dir.y;
+            grad_u2.x = grad_u2.x + a * k * m * sn * dir.x;
+            grad_u2.y = grad_u2.y + a * k * m * sn * dir.y;
+            u.z = u.z - a * m * cs;
+            du_dt.z = du_dt.z - a * omega * m * sn;
+            grad_u2.z = grad_u2.z - a * k * cs;
+            p_dyn = p_dyn + params.rho * params.gravity * amplitude * m * sn;
+            grad_p_dyn.z = grad_p_dyn.z + pressure_gradient * sn;
+            laplacian_u.z = laplacian_u.z + lap * (-a * m * cs);
+        } else {
+            grad_p_dyn.x = grad_p_dyn.x + pressure_gradient * cs * dir.x;
+            grad_p_dyn.y = grad_p_dyn.y + pressure_gradient * cs * dir.y;
+            // Sous le plan, la ligne i reçoit aussi sa composante z, et la ligne z la sienne.
+            grad_u0.z = grad_u0.z + a * k * sn * dir.x;
+            grad_u2.x = grad_u2.x + a * k * sn * dir.x;
+            grad_u1.z = grad_u1.z + a * k * sn * dir.y;
+            grad_u2.y = grad_u2.y + a * k * sn * dir.y;
+            u.z = u.z - a * cs;
+            du_dt.z = du_dt.z - a * omega * sn;
+            grad_u2.z = grad_u2.z - a * k * cs;
+            p_dyn = p_dyn + params.rho * params.gravity * amplitude * e * sn;
+            grad_p_dyn.z = grad_p_dyn.z + pressure_gradient * sn;
+            laplacian_u.z = laplacian_u.z + lap * (-a * cs);
+        }
+    }
+
+    out[base + 0u] = eta;
+    out[base + 1u] = grad_eta.x;
+    out[base + 2u] = grad_eta.y;
+    out[base + 3u] = grad_eta.z;
+    out[base + 4u] = u.x;
+    out[base + 5u] = u.y;
+    out[base + 6u] = u.z;
+    out[base + 7u] = du_dt.x;
+    out[base + 8u] = du_dt.y;
+    out[base + 9u] = du_dt.z;
+    out[base + 10u] = grad_u0.x;
+    out[base + 11u] = grad_u0.y;
+    out[base + 12u] = grad_u0.z;
+    out[base + 13u] = grad_u1.x;
+    out[base + 14u] = grad_u1.y;
+    out[base + 15u] = grad_u1.z;
+    out[base + 16u] = grad_u2.x;
+    out[base + 17u] = grad_u2.y;
+    out[base + 18u] = grad_u2.z;
+    out[base + 19u] = p_dyn;
+    out[base + 20u] = grad_p_dyn.x;
+    out[base + 21u] = grad_p_dyn.y;
+    out[base + 22u] = grad_p_dyn.z;
+    out[base + 23u] = laplacian_u.x;
+    out[base + 24u] = laplacian_u.y;
+    out[base + 25u] = laplacian_u.z;
 }

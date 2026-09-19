@@ -2238,6 +2238,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-primitives") {
         return delta3d_background::recevoir_primitives();
     }
+    if args.iter().any(|a| a == "--delta3d-champ") {
+        return delta3d_background::recevoir_champ();
+    }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();
     }
