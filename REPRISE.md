@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 16:10 +02:00
+Battement        : 2026-09-19 16:14 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
 Session en cours : S297 — couplage B/W de la référence 3D et aperçu animé local
 Dernière session : S296 — porte B, lot 2 : référence δ 3D à surface mobile reçue, HOS et onde oblique validés

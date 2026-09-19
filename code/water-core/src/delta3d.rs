@@ -69,6 +69,15 @@ pub struct Volume3 {
     g_eff: f32,
     rest: f32,
     prec: Vec<f32>,
+    surface_coupled: bool,
+    homogeneous_ghost: bool,
+    surface_total: Vec<f32>,
+    ghost_bg_up: Vec<f32>,
+    ghost_bg_x: Vec<f32>,
+    ghost_bg_y: Vec<f32>,
+    pressure_base: Vec<f32>,
+    band_x: Vec<f32>,
+    band_y: Vec<f32>,
     /// Élévation de surface par colonne, m. `η ≡ z₀` est le repos.
     eta: Vec<f32>,
     /// Reste de la somme compensée de `η` (S233) : un déplacement plus petit que l'ulp de `z₀`
@@ -139,9 +148,11 @@ impl Volume3 {
         // second membre, résidu, direction, produit, sauvegarde, Jacobi), quatre de colonnes (hauteur,
         // reste, et leurs sauvegardes), deux jeux de flux de colonne.
         let floats = nu.checked_add(nv).and_then(|n| n.checked_add(nw)).and_then(|n| n.checked_mul(3))
-            .and_then(|n| cells.checked_mul(7).and_then(|c| n.checked_add(c)))
-            .and_then(|n| cols.checked_mul(4).and_then(|c| n.checked_add(c)))
-            .and_then(|n| n.checked_add(fx)).and_then(|n| n.checked_add(fy))
+            .and_then(|n| cells.checked_mul(8).and_then(|c| n.checked_add(c)))
+            .and_then(|n| cols.checked_mul(6).and_then(|c| n.checked_add(c)))
+            .and_then(|n| n.checked_add(nu)).and_then(|n| n.checked_add(nv))
+            .and_then(|n| fx.checked_mul(2).and_then(|c| n.checked_add(c)))
+            .and_then(|n| fy.checked_mul(2).and_then(|c| n.checked_add(c)))
             .ok_or(Error::Domain)?;
         let bytes = floats.checked_mul(core::mem::size_of::<f32>()).ok_or(Error::Domain)?;
         if !(domain.z0().is_finite() && (nx as f32 * dx).is_finite() && (ny as f32 * dx).is_finite()) {
@@ -157,6 +168,15 @@ impl Volume3 {
             g_eff,
             rest: z0,
             prec: vec![0.; cells],
+            surface_coupled: false,
+            homogeneous_ghost: false,
+            surface_total: vec![z0; cols],
+            ghost_bg_up: vec![0.; cols],
+            ghost_bg_x: vec![0.; nu],
+            ghost_bg_y: vec![0.; nv],
+            pressure_base: vec![0.; cells],
+            band_x: vec![0.; fx],
+            band_y: vec![0.; fy],
             eta: vec![z0; cols],
             eta_roundoff: vec![0.; cols],
             u: vec![0.; nu],
@@ -633,3 +653,7 @@ mod tests;
 
 #[path = "delta3d_mobile.rs"]
 mod mobile;
+
+#[path = "delta3d_coupling.rs"]
+mod coupling;
+pub use coupling::{BackgroundFaces3, Sponge3};

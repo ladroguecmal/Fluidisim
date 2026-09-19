@@ -97,7 +97,8 @@ fn configuration_counts_every_buffer_it_holds_s295() {
     let floats = 3 * (v.u.len() + v.v.len() + v.w.len())
         + v.prec.len() + v.p.len() + v.rhs.len() + v.res.len() + v.dir.len() + v.tmp.len() + v.saved_p.len()
         + v.eta.len() + v.eta_roundoff.len() + v.saved_eta.len() + v.saved_eta_roundoff.len()
-        + v.flux_x.len() + v.flux_y.len();
+        + v.flux_x.len() + v.flux_y.len() + v.band_x.len() + v.band_y.len()
+        + v.surface_total.len() + v.ghost_bg_up.len() + v.ghost_bg_x.len() + v.ghost_bg_y.len() + v.pressure_base.len();
     assert_eq!(arena.stats.persistent_bytes, floats * 4);
     assert_eq!(arena.stats.persistent_calls, 1);
     assert!(v.surface().iter().all(|e| *e == 2.));
@@ -513,4 +514,22 @@ fn mobile_ghost_coefficients_and_jacobi_match_matrix_s296() {
         let inverse=if matrix[c][c]>0. {1./matrix[c][c]} else {0.};
         assert_eq!(v.prec[c].to_bits(),inverse.to_bits());
     }
+}
+
+#[test]
+fn coupled_geometry_zero_and_oblique_ghosts_s297() {
+    use crate::background::BackgroundSample;
+    let (mut v,_) = volume(5,4,8,0.25,9.81);
+    let u=vec![BackgroundSample::default();v.u.len()];let vv=vec![BackgroundSample::default();v.v.len()];
+    let mut w=vec![BackgroundSample::default();v.w.len()];
+    let eta:Vec<_>=(0..20).map(|c|1.2+0.2*(c as f32).sin()).collect();v.set_free_surface(&eta,1.2).unwrap();
+    let p=noise(v.p.len(),9);let mut before=vec![0.;p.len()];let mut after=before.clone();
+    v.apply_mobile3(&p,&mut before);
+    v.prepare_background3(&BackgroundFaces3{domain:v.domain,time:crate::SimTime(0),density:1025.,gravity:9.81,u:&u,v:&vv,w:&w}).unwrap();
+    v.apply_mobile3(&p,&mut after);assert_eq!(before,after);
+    for k in 0..=8 {for j in 0..4 {for i in 0..5 {w[v.fw(i,j,k)].eta=0.1*((i+j) as f32).sin();}}}
+    v.prepare_background3(&BackgroundFaces3{domain:v.domain,time:crate::SimTime(0),density:1025.,gravity:9.81,u:&u,v:&vv,w:&w}).unwrap();
+    for j in 0..4 {for i in 0..5 {assert_eq!(v.height3(i,j),eta[j*5+i]+w[v.fw(i,j,0)].eta);}}
+    assert!(v.ghost_bg_up.iter().any(|x|*x!=0.));
+    v.surface_coupled=false;
 }

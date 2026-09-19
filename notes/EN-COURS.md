@@ -73,7 +73,7 @@ reproductible et paramètres publiés. Aucune réception perceptive ou temps ré
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls ; copie unique, branche B archivée, diff vide.
-- [ ] **P2** — contrats de fond 3D, réserves, géométrie et fantômes du total ; affinage homogène.
+- [x] **P2** — contrats de fond 3D, réserves, géométrie et fantômes du total ; affinage homogène.
 - [ ] **P3** — advection croisée/source, bandes aux quatre bords, éponge et pas atomique ; tests
   fond nul, courant traversant, refus et allocations.
 - [ ] **P4** — réception : cas limite HOS, invariance transverse et cas oblique ; preuve S297.

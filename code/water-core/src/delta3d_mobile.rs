@@ -18,25 +18,36 @@ impl Volume3 {
         Ok(())
     }
 
+    pub(super) fn height3(&self, i: usize, j: usize) -> f32 {
+        let c = self.col(i,j);
+        if self.surface_coupled { self.surface_total[c] } else { self.eta[c] }
+    }
+
     pub(super) fn wet3(&self, i: usize, j: usize, k: usize) -> bool {
-        (k as f32 + 0.5) * self.domain.dx < self.eta[self.col(i, j)]
+        (k as f32 + 0.5) * self.domain.dx < self.height3(i,j)
     }
 
     fn ghost_up3(&self, i: usize, j: usize, k: usize) -> (f32, f32) {
         let c = self.col(i, j);
-        let theta = ((self.eta[c] - (k as f32 + 0.5) * self.domain.dx) / self.domain.dx)
+        let theta = ((self.height3(i,j) - (k as f32 + 0.5) * self.domain.dx) / self.domain.dx)
             .max(SURFACE_THETA_MIN);
-        (
-            1. / theta,
-            self.rho * self.g_eff * ((self.eta[c] - self.rest) - self.eta_roundoff[c]),
-        )
+        if self.homogeneous_ghost { return (1./theta,0.); }
+        let mut value=self.rho*self.g_eff*((self.eta[c]-self.rest)-self.eta_roundoff[c]);
+        if self.surface_coupled {value+=self.ghost_bg_up[c];}
+        (1./theta,value)
     }
 
     fn ghost_side3(&self, i: usize, j: usize, k: usize, x: usize, y: usize) -> (f32, f32) {
         let zc = (k as f32 + 0.5) * self.domain.dx;
-        let h = self.eta[self.col(i, j)];
-        let theta = ((h - zc) / (h - self.eta[self.col(x, y)])).max(SURFACE_THETA_MIN);
-        (1. / theta, self.rho * self.g_eff * (zc - self.rest))
+        let h = self.height3(i,j);
+        let theta = ((h - zc) / (h - self.height3(x,y))).max(SURFACE_THETA_MIN);
+        if self.homogeneous_ghost {return (1./theta,0.);}
+        let mut value=self.rho*self.g_eff*(zc-self.rest);
+        if self.surface_coupled {
+            value+=if i!=x {self.ghost_bg_x[self.fu(i.max(x),j,k)]}
+                else {self.ghost_bg_y[self.fv(i,j.max(y),k)]};
+        }
+        (1./theta,value)
     }
 
     /// (voisin fluide, coefficient fantôme, valeur imposée), dans l'ordre x−, x+, y−,
@@ -461,7 +472,7 @@ impl Volume3 {
 impl Volume3 {
     /// Advection centrée sur MAC. Le terme transverse est ajouté après x/z pour garder
     /// l'ordre des arrondis de la 2D lorsque ny=1. Le sommet w n'est pas advecté.
-    fn advect_mobile3(&mut self, dt: f32) {
+    pub(super) fn advect_mobile3(&mut self, dt: f32) {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let h = 0.5 / dx;
         self.us.copy_from_slice(&self.u);
@@ -615,10 +626,10 @@ impl Volume3 {
         }
     }
 
-    fn mobile_in_bounds(&self) -> bool {
+    pub(super) fn mobile_in_bounds(&self) -> bool {
         let dx = self.domain.dx;
         let top = (self.domain.nz - 1) as f32 * dx;
-        self.eta.iter().all(|e| *e >= 2. * dx && *e <= top)
+        (0..self.domain.ny).all(|j| (0..self.domain.nx).all(|i| {let e=self.height3(i,j); e>=2.*dx && e<=top}))
     }
 
     /// Référence CPU à surface mobile (S296, ADR-175), hors boucle d'image. Garde dt²g/dx≤1,
