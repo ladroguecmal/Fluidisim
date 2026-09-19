@@ -89,7 +89,7 @@ qu'ADR-175 §4.1 demande. Hors lot : couplage B/W, production GPU, scène, coût
   correction fantôme, extrapolation, divergence des lignes franches ; essai : identité avec la 2D.
 - [x] **P4** — advection 3D, transport mouillé en x et y, `step_surface_mobile`, gardes et refus
   atomiques ; essais : repos exact, trajectoire `ny = 1` contre la 2D, symétrie x↔y, allocations.
-- [ ] **P5** — réception : banc `delta3d_mobile` (S237 à `ny = 1` contre HOS, petite amplitude
+- [x] **P5** — réception : banc `delta3d_mobile` (S237 à `ny = 1` contre HOS, petite amplitude
   oblique contre le linéaire), preuve `DELTA3D-MOBILE-S296.md`.
 - [ ] **P6** — rituel §6.
 
@@ -122,3 +122,8 @@ Ce que la lecture du 2D a établi, pour ne pas le refaire :
   L = h = 2 m, `nz = 2,25/dx`, repos à 2 m, une période, 1 ms, plafond 4 000) et
   `examples/support/nl_surface.rs` ; à recopier dans un banc `delta3d_mobile.rs`.
 
+
+Résultats Codex P2–P5 : tous les critères tenus ; voir docs/validation/DELTA3D-MOBILE-S296.md.
+Identité 2D au bit sur 1 604 pas, 5 et 10 cm ; HOS fin 0,252893 % / 0,703828 % et
+0,223506 % / 0,427441 %. Onde oblique fine 0,253045 %, phase 0,065204°. Suite :
+530 réussis, 18 ignorés ; test matriciel ajouté ensuite reçu séparément (531 au total).

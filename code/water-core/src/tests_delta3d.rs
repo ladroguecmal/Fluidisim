@@ -500,3 +500,17 @@ fn mobile_refusals_restore_state_s296() {
     }
     assert!(refused,"la garde après transport doit être exercée");
 }
+
+#[test]
+fn mobile_ghost_coefficients_and_jacobi_match_matrix_s296() {
+    let (mut v,_) = volume(4,3,7,0.25,9.81);
+    let eta:Vec<_>=(0..12).map(|c|1.1+0.2*(c as f32*1.9).sin()).collect();
+    v.set_free_surface(&eta,1.1).unwrap();v.rhs_mobile3(0.);
+    let n=v.p.len();let mut matrix=vec![vec![0.;n];n];let mut basis=vec![0.;n];
+    for c in 0..n {basis[c]=1.;v.apply_mobile3(&basis,&mut matrix[c]);basis[c]=0.;}
+    for c in 0..n {
+        for d in 0..n {assert_eq!(matrix[c][d].to_bits(),matrix[d][c].to_bits(),"{c},{d}");}
+        let inverse=if matrix[c][c]>0. {1./matrix[c][c]} else {0.};
+        assert_eq!(v.prec[c].to_bits(),inverse.to_bits());
+    }
+}
