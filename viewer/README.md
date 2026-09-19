@@ -79,6 +79,12 @@ refusées, décomposition du coût d'appel et dérive de surface. Les portes d'a
 au cœur ; ni le budget de 2 ms ni I-06 du chemin d'image ne sont reçus.
 [Réception et limites S289](../docs/validation/PRESSION-RESIDENTE-S289.md).
 
+`--pression-variantes` compare les trois encodages du **même** cycle — 7, 5 ou 3 dispatchs par
+itération, un seul tampon de commandes ou plusieurs tranches — en exigeant l'égalité **au bit**
+de la pression et des diagnostics, et publie la décomposition du coût d'appel ainsi que le temps
+de carte par mode. Défauts du solveur depuis S290 : 3 dispatchs, tranches de 32.
+[Réception et limites S290](../docs/validation/ENCODAGE-CYCLE-S290.md).
+
 ```powershell
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --verify
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --smoke

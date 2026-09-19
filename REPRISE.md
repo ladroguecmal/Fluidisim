@@ -8,14 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 12:28 +02:00
+JETON            : libre
+Battement        : 2026-09-19 12:57 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : S290 — coût d'appel du cycle GPU résident (A292)
-Dernière session : S289 — pas réel consommant une pression GPU résidente, ADR-173 ; coût d'appel du cycle encore dominant
-Session suivante : —
-Maillons        : 0 — capacité reçue en S289 : la projection de δ est calculée sur GPU et consommée par le pas réel, portes inchangées ; prochaine capacité visée : cycle activable dans la boucle d'image
-
+Session en cours : —
+Dernière session : S290 — coût d'appel du cycle GPU divisé au bit, A292 close ; pas réel à 4,6315 ms
+Session suivante : A293, cartographier ce que le pas dépense **hors** pression — ≈ 2,5 ms des 4,6315, jamais mesurés, alors que S244 n'avait cartographié que la boucle de pression. **Puis rejouer sur ces nombres la comparaison de priorité avec la 3D et les solides**, dont A292 était le déclencheur. Ne pas ouvrir une troisième session de micro-optimisation GPU : mode choisi par la taille, somme à deux niveaux, longueur de cycle calibrée et arbitrage médiane/pic attendent cette carte. Cadence lente, A290, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Maillons        : 0 — capacité reçue en S290 : le pas de δ coûte 4,6315 ms au lieu de 9,9248 et son pire pas 11,0477 au lieu de 26,3234, consommé par le pas mobile réel, au bit ; prochaine capacité visée : un pas dont tous les postes sont connus
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -91,8 +90,11 @@ avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)).
 **S289 : la projection passe sur GPU et le pas réel la consomme** (ADR-173) — cycle de gradient
 conjugué résident, le candidat ne fournit qu'un départ, portes ADR-143/144 inchangées et refus
 atomique ; 9,2236 → 6,6220 ms par pas à 6 656 mailles, itérations du cœur 427 → 19
-([preuve](docs/validation/PRESSION-RESIDENTE-S289.md)). Toujours ×3,3 du budget de 2 ms ; le
-poste restant est le **temps d'enregistrement** des commandes, 1,86 µs par dispatch (A292, S290). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
+([preuve](docs/validation/PRESSION-RESIDENTE-S289.md)). **S290 : le coût d'appel divisé, au bit** —
+l'enregistrement des commandes était 52 % de l'appel (1,86 µs par `dispatch_workgroups`), et trois
+dispatchs par itération au lieu de sept ramènent le pas à **4,6315 ms**, le pire pas à 11,0477
+([preuve](docs/validation/ENCODAGE-CYCLE-S290.md)). Reste ×2,3 du budget de 2 ms ; **la pression
+n'est plus la majorité du pas** — ≈ 2,5 ms hors pression jamais cartographiés (A293). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet), **couplée depuis S253 à un fond B/W linéaire** (ADR-152/153), **B de production prolongé au-dessus du plan moyen depuis S254** (ADR-154 ; W : A286) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
 ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768** par le repli multigrille (ADR-147) suivi, depuis S252, d'un affinage de divergence (ADR-151 ; β du gradient multigrille corrigé, A285) ; plancher

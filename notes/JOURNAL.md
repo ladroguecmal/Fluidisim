@@ -14527,3 +14527,86 @@ solides se rejoue sur un coût de projection à jour.
 actualisés, ADR-173 indexé, ADR-172 laissé intact (sa suite est ADR-173, pas une correction).
 I-04/I-05/I-06/I-13/I-17 : aucun état δ persisté, aucune porte déplacée, I-06 explicitement
 non revendiquée. Plan terminé, jeton libre, copie principale unique, aucune fermeture requise.
+
+## S290 — 2026-09-19 — l'enregistrement des commandes, poste dominant d'un appel GPU
+
+**Entrée :** continuer ; A292, déclarée par S289 — le coût d'appel du cycle résident.
+
+**Ce qui devient possible.** Le pas de δ coûte **4,6315 ms au lieu de 9,9248** à 6 656 mailles,
+et son **pire** pas tombe de 26,3234 à 11,0477 ms quand le cycle est long. **Le chemin qui le
+consomme** est le pas mobile réel, par les défauts du solveur — tout consommateur en bénéficie.
+**La preuve** : [ENCODAGE-CYCLE-S290](../docs/validation/ENCODAGE-CYCLE-S290.md).
+
+**La mesure qui a décidé du lot.** S289 publiait « 3,9333 ms d'encodage-soumission-attente pour
+1,150 de carte » sans les séparer. Décomposés : empaquetage 0,2768, **enregistrement 2,2163
+(52 %)**, soumission 0,1925, attente 1,3663, recopie 0,0058. L'attente *est* le calcul ;
+l'enregistrement est du temps CPU pendant lequel la carte ne fait rien. Une sonde qui enregistre
+des dispatchs puis **jette** le tampon a nommé le coupable : `dispatch_workgroups` à **1,86 µs et
+une allocation par appel**, `set_pipeline` n'ajoutant que 0,38 à 0,44 µs — et les deux sont
+indépendants de la taille de grille.
+
+**Construit.** Trois encodages du **même** calcul : 7 dispatchs par itération (S289), 5 (chaque
+réduction repliée dans le noyau qui produit ses valeurs), **3** (les deux dispatchs à un seul
+groupe disparaissent — chaque groupe refait la somme lui-même, sur des valeurs écrites par le
+dispatch précédent, donc visibles par simple frontière de dispatch). Plus la soumission par
+tranches, qui laisse l'encodage d'une tranche recouvrir l'exécution de la précédente. Défauts :
+3 dispatchs, tranches de 32.
+
+**Reçu.** 72 combinaisons comparées au chemin de S289 : **zéro bit d'écart** sur la pression
+**et** sur les deux diagnostics. Appel : 3,9748 → 1,8228 ms à 6 656/128 (×2,18), 10,6282 → 5,8590
+à 32 768/256 (×1,81). Pas réel, deux encodages contre le **même** témoin dans la **même**
+exécution : 9,9248 → 7,0597 (S289) → **4,6315** (S290) à 6 656/128 ; 45,0679 → 30,2715 →
+**26,1125** à 32 768/256. 24 combinaisons, 60/60 propositions retenues, 0 refus, 0 pas dégradé,
+dérive ≤ 7,63·10⁻⁶ m. Vérification : 394 essais de la bibliothèque du cœur et 36 essais viewer
+réussis, 0 échec, plus les trois bancs GPU exécutés explicitement. Les essais d'intégration du
+harnais n'ont **pas** été rejoués : S290 ne touche que `viewer/`, et leur dernier passage est celui
+de S289 (508 au total, 0 échec). Dit ainsi pour ne pas reporter un décompte non remesuré.
+
+**Deux voies abandonnées sans être construites** : réduction finale par le dernier groupe via
+compteur atomique (parie sur une visibilité inter-groupes que WGSL n'énonce pas nettement) et
+récurrence `q = A·z + β·q` (Chronopoulos/Gear, moins stable en f32). La troisième voie, apparue
+en construisant, était à la fois plus rapide et sans risque. **Refaire un petit calcul
+redondamment coûte souvent moins que de le synchroniser** — L340.
+
+**Une erreur de fait de S289, corrigée par note datée.** S289 donnait deux raisons à ce lot, dont
+« les allocations qu'ADR-145 interdit à la boucle d'image ». ADR-145 §1 lit I-06 sur **le code du
+projet** et §2 décide que les allocations des dépendances verrouillées sont **comptées et
+publiées, non interdites**. L'obstacle était le temps, pas une règle violée. Notes correctives
+datées dans ADR-173 et dans la preuve de S289. Le plafond « ≈ ×3 » de S289 était également faux —
+il traitait tout le non-calcul comme récupérable ; il valait ≈ ×2,1, avant que les tranches ne
+déplacent la borne.
+
+**Deux mesures fautives, corrigées avant publication et non après.** (1) L'horodatage GPU n'était
+payé que par les variantes à un seul tampon : le gain des tranches était surestimé d'environ
+0,5 ms, et deux configurations identiques par construction affichaient 2,2454 contre 1,6761 ms.
+(2) La fenêtre d'I-06 sur notre empaquetage englobait les `write_buffer` de wgpu et comptait
+19 allocations attribuées à notre code ; resserrée, elle rend zéro, et le banc refuse sinon.
+Enfin, dix passages laissaient des aberrations peser sur les médianes : trente désormais.
+
+**Non-fait, limites.** Budget 2 ms non reçu (×2,3, contre ×3,3 en S289). Boucle d'image non
+activée — il faudra y remesurer la référence « 133 allocations par image » d'ADR-145 et décider
+du recouvrement. Mode et longueur de cycle non calibrés, non automatiques. **Croisement mesuré** :
+le recalcul redondant coûte `groups²` lectures, si bien qu'à 512 groupes le mode à 3 dispatchs
+perd sur la carte contre le mode à 5 (1,6009 contre 1,3354 ms) — il reste retenu parce que
+l'encodage baisse plus, mais à grille plus grande il faudra choisir le mode par la taille, ou une
+somme à deux niveaux. Une seule carte, un seul backend, une version de wgpu : 1,86 µs par dispatch
+est une référence **datée**, comme les 133 d'ADR-145. Toujours Jacobi, donc S244 tient.
+
+**Pas de nouvel ADR, et pourquoi.** Rien n'est décidé ici qu'ADR-172 et ADR-173 ne portaient déjà :
+le calcul est au bit identique, les portes sont intactes, aucune dépendance n'est ajoutée. Les
+faits nouveaux — croisement, réglages non calibrés — sont des points de file, pas des décisions.
+
+**Prochaine capacité visée, et l'avertissement du troisième maillon.** S289 et S290 portent le
+même sujet ; **une troisième session de micro-optimisation GPU serait un approfondissement
+différable**, parce que la pression n'est plus la majorité du pas : 4,6315 ms de pas pour 2,1271
+d'appel, donc **≈ 2,5 ms que personne n'a cartographiés** — S244 n'avait mesuré que la boucle de
+pression. La suite utile est donc de cartographier ce que le pas dépense **hors** pression, puis
+de rejouer là-dessus la comparaison de priorité avec la 3D et les solides, dont A292 était
+justement le déclencheur.
+
+**Maillons : 0.** Capacité reçue, chemin qui la consomme, preuve.
+
+**Rituel :** file active entièrement relue, états périmés remplacés, feuille/index actualisés,
+nouveau point A293 ouvert avec déclencheur, notes correctives datées posées, leçons L339 et L340
+écrites. I-04/I-05/I-06/I-13/I-17 : aucun état δ persisté, aucune porte déplacée, I-06 vérifiée
+sur notre code et refusée au banc si elle cède. Plan terminé, jeton libre, copie unique.

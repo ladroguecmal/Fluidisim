@@ -358,9 +358,18 @@ dérive de surface ≤ 7,63·10⁻⁶ m. **Non reçu** : budget 2 ms (×3,3), ac
 d'image, garantie sur le pic, réglage automatique de la longueur du cycle, multiplateforme.
 Les ≈ 7 allocations par itération sont celles de wgpu : **publiées et permises** par ADR-145 §2
 (correction S290 d'une lecture fausse), constantes à longueur de cycle fixée ; ce qui bloque la
-boucle d'image est le **temps** d'enregistrement. Le poste dominant restant est **l'enregistrement des
+boucle d'image est le **temps** d'enregistrement — divisé en S290, voir ci-dessous. Le poste dominant restant est **l'enregistrement des
 commandes** : 27 % du temps d'appel est du calcul utile.
 [Réception et limites](validation/PRESSION-RESIDENTE-S289.md).
+**S290, 2026-09-19 : le coût d'appel du cycle divisé, au bit.** Le poste dominant était
+l'**enregistrement des commandes** — 1,86 µs et une allocation par `dispatch_workgroups`, mesurés,
+indépendants de la taille. Trois dispatchs par itération au lieu de sept (chaque groupe refait
+son scalaire lui-même) et soumission par tranches : appel 3,9748 → 1,8228 ms à 6 656 mailles,
+**pas réel 9,9248 → 4,6315 ms (×2,14)**, et pire pas 26,3234 → 11,0477 avec un cycle long.
+72 combinaisons reçues **au bit**. **Non reçu** : budget 2 ms (×2,3), boucle d'image, choix
+automatique du mode et de la longueur de cycle, arbitrage médiane/pic, multiplateforme. Le
+recalcul redondant a un **croisement en `groups²`**, déjà visible à 512 groupes (A293).
+[Réception et limites](validation/ENCODAGE-CYCLE-S290.md).
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.

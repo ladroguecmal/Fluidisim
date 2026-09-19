@@ -5758,3 +5758,54 @@ Optimiser le noyau aurait été le geste évident et n'aurait presque rien rendu
 **Réflexe** : décomposer le temps d'un appel déporté en *préparer / décrire / exécuter / attendre*
 **avant** de toucher au noyau, et publier les quatre. Un banc qui ne rend qu'un total ne peut pas
 désigner le lot suivant — et il laisse optimiser la part qu'on voit au lieu de celle qui coûte.
+
+## L339 — Un instrument doit être dans les deux bras, et sa fenêtre ne doit contenir que ce qu'on mesure
+
+*(S290)* Deux mesures fautives le même jour, de la même famille, et toutes deux invisibles à la
+relecture du code qui les produisait.
+
+1. **L'instrument n'était que dans un bras.** La comparaison de six variantes d'encodage laissait
+   celles à un seul tampon de commandes payer un aller-retour de lecture d'horodatage, que les
+   variantes par tranches ne payaient pas — l'horodatage étant tu dès qu'il y a plusieurs
+   soumissions. Le gain des tranches était surestimé d'environ 0,5 ms. Le signe qui a trahi le
+   défaut : **deux configurations identiques par construction affichaient 2,2454 et 1,6761 ms.**
+   Une paire qui devait être égale ne l'était pas ; c'est le seul test qui pouvait le voir.
+2. **La fenêtre contenait le code d'autrui.** La mesure d'I-06 sur notre empaquetage englobait les
+   `write_buffer` de la bibliothèque graphique et comptait 19 allocations — attribuées à notre
+   code, alors qu'ADR-145 §1 ne lit cet invariant que là, et §2 permet explicitement les autres.
+   Resserrée sur le seul remplissage de nos réserves, elle rend zéro.
+
+Les deux erreurs vont dans le sens qui flatte le travail en cours, et c'est la raison de la
+leçon : une mesure fautive se remarque quand elle déçoit, jamais quand elle confirme.
+
+**Réflexes.** *(a)* Mettre dans le protocole une paire qui **doit** rendre le même nombre, et la
+publier ; un écart y est un défaut d'instrument, pas un résultat. *(b)* Avant de publier un compte
+attaché à un invariant, écrire à qui appartient chaque ligne dans la fenêtre — un invariant qui
+porte sur « notre code » ne se mesure pas sur une fenêtre qui appelle une dépendance. *(c)* Dix
+passages ne suffisent pas à une médiane sur une machine à quelques dixièmes de ms de variance ;
+trente, et aucune différence de moins de 5 % lue comme un effet. Même famille que L338 : un total
+ne désigne rien, et un total mal borné désigne faux.
+
+## L340 — Refaire un petit calcul coûte souvent moins que de le synchroniser
+
+*(S290)* Le cycle de pression avait, par itération, deux dispatchs entiers dont le seul travail
+était de sommer quelques centaines de valeurs pour produire un scalaire. Mesuré, un dispatch coûte
+**1,86 µs d'enregistrement CPU quel que soit son contenu** : ces deux-là payaient le prix plein
+pour un travail négligeable. Les deux échappatoires envisagées étaient des synchronisations —
+compteur atomique désignant le dernier groupe, ou reformulation supprimant la dépendance — et
+toutes deux coûtaient de la portabilité ou de la précision.
+
+La sortie était de **ne pas synchroniser du tout** : chaque groupe refait la somme pour lui-même,
+au début du noyau suivant, sur des valeurs écrites par le dispatch précédent — donc visibles par
+la seule frontière de dispatch, sans rien demander de plus. Redondance pure : la somme est faite
+autant de fois qu'il y a de groupes. Résultat identique **au bit**, un tiers de dispatchs en
+moins, et la carte plus rapide aussi tant que la redondance reste petite.
+
+Et elle ne reste pas petite indéfiniment : le coût redondant est en `groups²`, mesuré, avec un
+croisement déjà visible entre 104 et 512 groupes. C'est la seconde moitié de la leçon.
+
+**Réflexe** : quand une valeur partagée coûte une synchronisation, calculer ce que coûterait de la
+**refaire** partout où elle sert. Le rapport à comparer n'est pas « une fois contre N fois », c'est
+« N fois le petit calcul » contre « le prix de la coordination », et ce prix inclut ce qu'on cesse
+de pouvoir garantir. Publier aussi l'exposant de la redondance, parce qu'il fixe le domaine où la
+réponse reste vraie.

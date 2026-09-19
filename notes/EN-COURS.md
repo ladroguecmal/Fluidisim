@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S290 — en cours
+Session : S290 — terminée
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
 Entrée : continuer ; A292, déclarée par S289.
 Objectif : rendre le cycle résident **appelable sans gaspiller 73 % de son temps**, et lever les
@@ -80,7 +80,7 @@ allocations qu'ADR-145 interdit à la boucle d'image. Même cause, un seul lot.
 - [x] **P5** — allocations de l'appel : viser zéro en régime, publier ce qui reste et pourquoi.
 - [x] **P6** — reconsommation par le **pas réel** : gain de bout en bout contre le témoin S289,
   mêmes tailles, mêmes fonds, portes inchangées.
-- [ ] **P7** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
+- [x] **P7** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
 ### Notes de reprise
 
