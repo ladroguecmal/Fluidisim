@@ -135,6 +135,11 @@ hauteur, et jusqu'à 5 fois au pire point. Conséquence pour la revue : le bruit
 montrer et à nommer, pas à cacher ; 32 cycles suffisent visuellement (le maximum seul gagne à
 128), donc le choix de cycles est une question de coût.
 
+*Tenue du plan* : le battement du commit P2+P3 a été écrit **sans lire l'horloge** (23:18 au lieu
+de 23:06, L237) ; corrigé au commit suivant. Une fenêtre interactive s'est ouverte une fois parce
+que l'ancien binaire ignorait un drapeau neuf après un échec de compilation — vérifier que la
+compilation a réussi avant de lancer.
+
 ---
 
 ## Archive — notes de S301 (pour le lot)
