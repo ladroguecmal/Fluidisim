@@ -2224,6 +2224,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta-attribution") {
         return delta::measure_shrink_attribution();
     }
+    if args.iter().any(|a| a == "--delta-cadence") {
+        return delta::measure_temporal_cadence();
+    }
     if args.iter().any(|a| a == "--delta-mesure") {
         return delta_replays(&delta::swell_background()?).map(|_| ());
     }

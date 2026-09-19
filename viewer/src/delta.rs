@@ -417,6 +417,8 @@ pub struct Live<'a> {
     zero_u: Vec<f32>,
     zero_w: Vec<f32>,
     born_us: u64,
+    step_us: u64,
+    last_target_us: u64,
     steps: u64,
     /// Dernière image : durées de l'échantillonnage et du pas (ms), itérations.
     pub sampling_ms: f64,
@@ -426,6 +428,13 @@ pub struct Live<'a> {
 
 impl<'a> Live<'a> {
     pub fn new(background: &'a Background, initial: [f32; NX]) -> Result<Self, String> {
+        Self::with_step(background, initial, FRAME_US)
+    }
+    /// Cadences de banc S286 ; le profil rendu est maintenu entre les vrais pas.
+    fn with_step(background: &'a Background, initial: [f32; NX], step_us: u64) -> Result<Self, String> {
+        if ![FRAME_US, 2*FRAME_US, 3*FRAME_US].contains(&step_us) {
+            return Err("cadence δ : 16, 32 ou 48 ms requis".into());
+        }
         let domain = Domain { nx: NX, nz: NZ, dx: DX };
         let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
         let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
@@ -449,6 +458,8 @@ impl<'a> Live<'a> {
             zero_u: vec![0.; nu],
             zero_w: vec![0.; nw],
             born_us: START_US,
+            step_us,
+            last_target_us: START_US,
             steps: 0,
             sampling_ms: 0.,
             step_ms: 0.,
@@ -456,7 +467,7 @@ impl<'a> Live<'a> {
         })
     }
     fn now_us(&self) -> u64 {
-        self.born_us + self.steps * FRAME_US
+        self.born_us + self.steps * self.step_us
     }
     /// S283 : première réduction manuelle 256→128 m, même maille, même temps.
     /// Ne reçoit pas encore le choix non focal d'ADR-012 ni la restauration.
@@ -492,9 +503,9 @@ impl<'a> Live<'a> {
         self.preparation_change_m = 0.;
         let mut stepped = false;
         let target = START_US + (seconds.max(0.) * 1e6).round() as u64;
-        if target < self.now_us() || target > self.now_us() + FRAME_US {
+        if target < self.last_target_us || target > self.now_us() + self.step_us {
             self.rebirth(target)?;
-        } else if target == self.now_us() + FRAME_US {
+        } else if target == self.now_us() + self.step_us {
             let time = SimTime(self.now_us());
             let a = std::time::Instant::now();
             let nx = self.volume.domain().nx;
@@ -516,7 +527,7 @@ impl<'a> Live<'a> {
             let bg = BackgroundFaces { domain: self.volume.domain(), time, density: DENSITY,
                 gravity: self.background.gravity(), u: &self.u[..nu], w: &self.w[..nw] };
             let r = self.volume
-                .step_perturbation_mobile(time, FRAME_US, 6000, 1_000_000_000, &bg, SPONGE,
+                .step_perturbation_mobile(time, self.step_us, 6000, 1_000_000_000, &bg, SPONGE,
                     &host_impl::SequentialJobs, &Frozen)
                 .map_err(|e| format!("pas δ en direct : {e:?}"))?;
             if self.preparing {
@@ -539,6 +550,7 @@ impl<'a> Live<'a> {
             self.steps += 1;
             stepped = true;
         }
+        self.last_target_us = target;
         out.fill(0.);
         for (o, h) in out[self.first_column..].iter_mut().zip(self.volume.surface()) {
             *o = h - REST;
@@ -1303,5 +1315,68 @@ pub fn measure_shrink_attribution() -> Result<(), String> {
     }
     if switched.is_none() || allocations != 0 { return Err(format!("permutation={switched:?}, allocations={allocations}")); }
     println!("ATTRIBUTION_S285 permutation_pas={switched:?} pas_prepares_identiques={paired_steps} avant_permutation_max_m={before_switch:?} allocations={allocations} temoins_larges_nx={},{}", intact.volume.domain().nx, prepared.volume.domain().nx);
+    Ok(())
+}
+
+/// Compare des cadences à la même heure de scène, y compris les images sans pas.
+pub fn measure_temporal_cadence() -> Result<(), String> {
+    let background = swell_background()?;
+    for amplitude in [0., 0.6] {
+        let build = |multiple| -> Result<Layer<'_>, String> {
+            let mut layer = Layer::direct(&background, initial_wave(amplitude))?;
+            layer.live = Some(Live::with_step(&background, initial_wave(amplitude), multiple*FRAME_US)?);
+            layer.set_budget_ms(1000.)?;
+            Ok(layer)
+        };
+        let mut layers = [build(1)?, build(2)?, build(3)?];
+        let mut costs: [Vec<f64>; 3] = core::array::from_fn(|_| Vec::new());
+        let mut total_ms = [0f64; 3];
+        let mut idle_max_ms = [0f64; 3];
+        let mut height = [0f64; 3];
+        let mut slope = [0f64; 3];
+        let mut synchronized_height = [0f64; 3];
+        let mut allocations = 0;
+        for n in 0..=192 {
+            let t = n as f64 * FRAME_US as f64 * 1e-6;
+            for (k, layer) in layers.iter_mut().enumerate() {
+                let before = layer.live.as_ref().unwrap().steps;
+                let mark = crate::counting::mark();
+                let start = std::time::Instant::now();
+                layer.update(t, [0.; 3], None);
+                let ms = start.elapsed().as_secs_f64()*1e3;
+                allocations += crate::counting::mark().since(mark).allocs;
+                if !layer.is_active() {
+                    return Err(format!("cadence {} ms refusée à {t}, coût complet du refus {ms:.4} ms", (k+1)*16));
+                }
+                if n > 0 {
+                    total_ms[k] += ms;
+                    if layer.live.as_ref().unwrap().steps != before { costs[k].push(ms); }
+                    else { idle_max_ms[k] = idle_max_ms[k].max(ms); }
+                }
+                if layer.live.as_ref().unwrap().steps != n as u64/(k as u64+1) {
+                    return Err("compte de pas incohérent".into());
+                }
+            }
+            for i in 1..NX*4 {
+                let q = [X0 + i as f32*DX/4., 0.];
+                let reference = layers[0].eval(q);
+                for k in 1..3 {
+                    let value = layers[k].eval(q);
+                    let dh = (value[0]-reference[0]).abs();
+                    height[k] = height[k].max(dh);
+                    slope[k] = slope[k].max((value[1]-reference[1]).abs());
+                    if n % (k+1) == 0 { synchronized_height[k] = synchronized_height[k].max(dh); }
+                }
+            }
+        }
+        for k in 0..3 {
+            costs[k].sort_by(f64::total_cmp);
+            let c = &costs[k];
+            println!("CADENCE_S286 amplitude_m={amplitude} pas_ms={} images=192 pas_payes={} moyenne_image_ms={:.4} pas_mediane_ms={:.4} pas_p99_ms={:.4} pas_max_ms={:.4} attente_max_ms={:.4} hauteur_toutes_images_m={:.6} hauteur_synchronisee_m={:.6} pente_max={:.6}",
+                (k+1)*16,c.len(),total_ms[k]/192.,c[c.len()/2],c[c.len()*99/100],c[c.len()-1],idle_max_ms[k],height[k],synchronized_height[k],slope[k]);
+        }
+        if allocations != 0 { return Err(format!("cadence : {allocations} allocations")); }
+        println!("CADENCE_S286 amplitude_m={amplitude} allocations={allocations} maintien_profil=true budget_banc_ms=1000");
+    }
     Ok(())
 }

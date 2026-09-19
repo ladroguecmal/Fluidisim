@@ -69,7 +69,7 @@ au nombre d'appels dans le vieillissement des coûts avant cette intégration.
 - [x] **P1** — état réel, jeton et plan seuls.
 - [x] **P2** — reproduire puis corriger le vieillissement par appels refusés ; pauses et retours
   de temps éprouvés, historique des vrais pas conservé.
-- [ ] **P3** — pas Live configurable 16/32/48 ms, comparaison à instants communs et par image,
+- [x] **P3** — pas Live configurable 16/32/48 ms, comparaison à instants communs et par image,
   coût complet et refus publiés ; ne pas activer par défaut une cadence non reçue.
 - [ ] **P4** — tests et réception, intégration expérimentale seulement si critères tenus,
   diagnostic explicite sinon ; découper avant quinze minutes.
@@ -87,3 +87,7 @@ A290 différée, pas de nouvelle réduction spatiale ; priorité au coût avant 
 
 P2 : régression rouge (8 mesures devenaient 7 au même temps), puis verte : oubli par
 16 ms non financées, reste conservé, pause et retour sans vieillissement.
+
+P3 : 32/48 ms réduisent la moyenne mais échouent sur onde 0,6 m : 4,445/8,916 mm
+aux instants calculés. Moyennes 13,150/9,108 ms, pires pas 32,319/32,708 ms. Secteur
+aux deux bornes, zéro allocation. Pas de refus représentatif observé, coût des échecs ouvert.
