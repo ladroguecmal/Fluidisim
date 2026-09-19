@@ -72,8 +72,8 @@ place de l'utilisateur.
 
 ### Plan
 
-- [ ] **P1** — état réel, jeton, plan seuls.
-- [ ] **P2** — clore S292 : entrée de journal courte (interrompue, ce qu'elle a établi, ce qui
+- [x] **P1** — état réel, jeton, plan seuls.
+- [x] **P2** — clore S292 : entrée de journal courte (interrompue, ce qu'elle a établi, ce qui
   reste), A294 actualisée dans la file avec le geste écrit et jamais exécuté comme suite.
 - [ ] **P3** — état réel du code : compilation et suites (cœur/harnais, viewer) hors réseau,
   avertissements ; ce que `code/` et `viewer/` contiennent par couche, confronté aux documents.

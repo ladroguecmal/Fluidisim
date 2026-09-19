@@ -14694,3 +14694,31 @@ Avant cela, un seul point est plus urgent que tout réglage : **le gel de la car
 corrective datée posée sur la preuve de S289, feuille/index/REPRISE actualisés, leçons L341 et
 L342 écrites. I-04/I-05/I-06/I-13/I-17 : aucun état δ persisté, aucune porte déplacée, et les
 huit points d'expiration de S230 restent atteignables — vérifié par son essai.
+
+
+## S292 — 2026-09-19 — le gel de la carte refroidie ne se reproduit pas sur l'appel isolé (interrompue)
+
+**Claude Opus 5 (Claude Code desktop).** Entrée : régler le gel de la carte refroidie (A294),
+demande de l'utilisateur. Plan 935919b ; étape c629ebb. **Interrompue par l'utilisateur après
+P2/P3**, puis close par S293, qui ouvre l'audit global demandé : P4–P7 non faits, rituel compris.
+
+**Établi.** Banc `--pas-froid` — huit appels dos à dos, pause, puis l'appel froid décomposé en
+ses cinq postes, trois répétitions par durée ; 6 656 mailles, cycle 128, horodatage éteint. Le
+refroidissement existe mais vaut **×1,4 à ×2, pas ×200** : appel froid 2,29 → 4,84 ms en pause
+endormie, 3,06 → 4,35 ms à processeur saturé, de 0 à 8 s de pause ; il apparaît vers 2 s et
+sature ensuite. Il tombe dans l'**attente** (0,32 → 1,77 ms processeur occupé, 0,32 → 0,78
+endormi), donc côté carte ou pilote, pas dans notre encodage ni notre empaquetage. Cohérent avec
+un état d'alimentation ; non tranché, P4 existait pour cela.
+
+**Conséquence.** Le pic de 467 puis 132 ms de S291 n'est pas un appel refroidi du solveur : il a
+été vu dans le **pas complet** de `--pas-couple`, qui diffère du banc isolé par un `Volume` neuf
+par régime (réserve de 64 Mo, défauts de page au premier pas), une pause remplie de 400 pas
+couplés, et un pas qui contient bien plus que l'appel. L'hypothèse de S291 est fausse ou
+incomplète : **aucun entretien de la carte ne doit être bâti dessus.**
+
+**Écrit, compilé, jamais exécuté.** `--pas-couple` garde la carte du pire pas (`PIC_S292` :
+étapes du cœur et cinq postes de l'appel), ordre des régimes remis à celui de S291. Commande :
+`cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --pas-couple`.
+
+**Maillons : 1** — mesure sans capacité reçue. Rituel porté par S293 : A294 actualisée dans la
+file avec ce geste pour suite.
