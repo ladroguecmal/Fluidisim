@@ -121,8 +121,19 @@ et c'est la même cause que les allocations : 82 à 0 itération, puis ≈ 7 par
 
 Deux conséquences, non interchangeables :
 
-1. **ADR-145 n'admet pas ces allocations dans la boucle d'image.** L'activation du solveur dans
-   le chemin d'image reste donc à construire, même si le pas, lui, le consomme déjà.
+1. ~~**ADR-145 n'admet pas ces allocations dans la boucle d'image.** L'activation du solveur dans
+   le chemin d'image reste donc à construire, même si le pas, lui, le consomme déjà.~~
+   **Correction datée, S290, 2026-09-19 — cette phrase est fausse.** ADR-145 §2 décide
+   exactement l'inverse : « les allocations des dépendances verrouillées en S210/S211 sont
+   **comptées et publiées**, non interdites ». I-06 se lit, pour `viewer/`, sur **le code du
+   projet** (§1), et notre empaquetage n'alloue rien après le premier appel. Les 82 à 990
+   allocations mesurées sont celles de wgpu, donc permises dès lors qu'elles sont publiées —
+   ce que fait ce document. Ce qu'elles obligent est autre : ADR-145 §Conséquences demande que
+   la référence « 133 par image » soit **remesurée** quand la charge de la pile change, et
+   ADR-131 D3 veut ce nombre dans l'en-tête de mesure. Elles restent **constantes** à longueur
+   de cycle fixée, ce qui est la propriété qu'ADR-145 exige. L'obstacle réel à la boucle
+   d'image n'est donc pas l'allocation : c'est le **temps** d'enregistrement, inséparable du
+   dispatch (S290 : 1,86 µs et une allocation par `dispatch_workgroups`, mesurés).
 2. **Le levier suivant est désigné par la mesure** : réduire le nombre de dispatchs par
    itération (fusionner opérateur et réduction, mise à jour et réduction), ou enregistrer le
    cycle une fois au lieu de le réémettre. Les deux attaquent la même cause. À 27 % de temps

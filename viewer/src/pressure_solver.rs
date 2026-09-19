@@ -46,10 +46,17 @@ pub struct Resident {
     /// Diagnostics du dernier appel — jamais des portes d'acceptation.
     pub last_device_ms: Option<f64>,
     pub last_wall_ms: f64,
-    /// Décomposition du temps hors carte : empaquetage des trois entrées, puis encodage +
-    /// soumission + attente de la cartographie. Diagnostic, jamais une porte.
+    /// Décomposition du temps hors carte, en cinq postes disjoints : empaquetage des entrées,
+    /// enregistrement des commandes, soumission, attente de la cartographie, recopie du
+    /// résultat. Diagnostic, jamais une porte. S290 : c'est cette décomposition qui décide
+    /// quelle voie de réduction vaut la peine — L338.
     pub last_pack_ms: f64,
+    pub last_encode_ms: f64,
+    pub last_submit_ms: f64,
     pub last_wait_ms: f64,
+    pub last_read_ms: f64,
+    /// Nombre de dispatchs réellement émis par le dernier appel.
+    pub last_dispatches: u32,
     pub last_residual2: f32,
     pub last_rz: f32,
     pub last_allocations: u64,
@@ -133,10 +140,35 @@ impl Resident {
             packed_rows: Vec::with_capacity(cells * 32),
             packed_rhs: Vec::with_capacity(cells * 4),
             packed_p: Vec::with_capacity(cells * 4),
-            iterations, timing: false, last_device_ms: None, last_wall_ms: 0., last_pack_ms: 0., last_wait_ms: 0.,
+            iterations, timing: false, last_device_ms: None, last_wall_ms: 0., last_pack_ms: 0., last_encode_ms: 0., last_submit_ms: 0.,
+            last_wait_ms: 0., last_read_ms: 0., last_dispatches: 0,
             last_residual2: 0., last_rz: 0.,
             last_allocations: 0, calls: 0,
         })
+    }
+
+    /// S290 — sonde d'enregistrement. Elle n'exécute rien : elle enregistre `count` dispatchs
+    /// et jette le tampon de commandes. Comparer `alterne = false` (un seul `set_pipeline`) à
+    /// `alterne = true` (un par dispatch) dit **lequel des deux appels** coûte, et donc si
+    /// fusionner des noyaux paie doublement. Rend (ms, allocations).
+    fn probe_encoding(&self, count: u32, alternating: bool) -> (f64, u64) {
+        let mark = crate::counting::mark();
+        let start = std::time::Instant::now();
+        let mut encoder = self.device.create_command_encoder(&Default::default());
+        {
+            let mut pass = encoder.begin_compute_pass(&Default::default());
+            pass.set_bind_group(0, &self.bind, &[]);
+            if !alternating { pass.set_pipeline(&self.stages[UPDATE_DIR]); }
+            for n in 0..count {
+                if alternating { pass.set_pipeline(&self.stages[if n % 2 == 0 { UPDATE_DIR } else { UPDATE_PR }]); }
+                pass.dispatch_workgroups(1, 1, 1);
+            }
+        }
+        let commands = encoder.finish();
+        let ms = start.elapsed().as_secs_f64() * 1e3;
+        let allocs = crate::counting::mark().since(mark).allocs;
+        drop(commands);
+        (ms, allocs)
     }
 
     fn map(&self, b: &wgpu::Buffer) -> Result<(), String> {
@@ -174,7 +206,8 @@ impl Resident {
         // reste celle de l'amorçage.
         self.queue.write_buffer(&self.scalar, 0, &[0u8; 16]);
         self.last_pack_ms = start.elapsed().as_secs_f64() * 1e3;
-        let submit = std::time::Instant::now();
+        let encode = std::time::Instant::now();
+        let mut dispatches = 0u32;
         let groups = (self.cells as u32).div_ceil(GROUP);
         let mut encoder = self.device.create_command_encoder(&Default::default());
         {
@@ -184,9 +217,11 @@ impl Resident {
                     query_set: q, beginning_of_pass_write_index: Some(0), end_of_pass_write_index: Some(1) }),
             });
             pass.set_bind_group(0, &self.bind, &[]);
-            let run = |pass: &mut wgpu::ComputePass, stage: usize, count: u32| {
-                pass.set_pipeline(&self.stages[stage]);
+            let stages = &self.stages;
+            let mut run = |pass: &mut wgpu::ComputePass, stage: usize, count: u32| {
+                pass.set_pipeline(&stages[stage]);
                 pass.dispatch_workgroups(count, 1, 1);
+                dispatches += 1;
             };
             run(&mut pass, INIT, groups);
             run(&mut pass, REDUCE_RZ, groups);
@@ -211,9 +246,16 @@ impl Resident {
             encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
             encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
         }
-        self.queue.submit([encoder.finish()]);
+        let commands = encoder.finish();
+        self.last_encode_ms = encode.elapsed().as_secs_f64() * 1e3;
+        self.last_dispatches = dispatches;
+        let sent = std::time::Instant::now();
+        self.queue.submit([commands]);
+        self.last_submit_ms = sent.elapsed().as_secs_f64() * 1e3;
+        let waited = std::time::Instant::now();
         self.map(&self.read)?;
-        self.last_wait_ms = submit.elapsed().as_secs_f64() * 1e3;
+        self.last_wait_ms = waited.elapsed().as_secs_f64() * 1e3;
+        let readback = std::time::Instant::now();
         {
             let data = self.read.slice(..).get_mapped_range().map_err(|e| e.to_string())?;
             for (v, bytes) in p.iter_mut().zip(data[..self.cells * 4].chunks_exact(4)) {
@@ -224,6 +266,7 @@ impl Resident {
             self.last_residual2 = f32::from_le_bytes(tail[4..8].try_into().unwrap());
         }
         self.read.unmap();
+        self.last_read_ms = readback.elapsed().as_secs_f64() * 1e3;
         self.last_device_ms = None;
         if self.query.is_some() && timed {
             self.map(&self.query_read)?;
@@ -343,6 +386,19 @@ async fn measure_async() -> Result<(), String> {
         let domain = Domain { nx, nz, dx };
         let mut gpu = Resident::new(domain, 0).await?;
         gpu.timing = true;
+        if nx == 128 {
+            for count in [64u32, 256, 1024] {
+                for alternating in [false, true] {
+                    // Trois passages : le premier chauffe les réserves internes de wgpu.
+                    let mut best = (f64::INFINITY, 0);
+                    for _ in 0..3 {
+                        let r = gpu.probe_encoding(count, alternating);
+                        if r.0 < best.0 { best = r; }
+                    }
+                    println!("SONDE_ENCODAGE_S290 dispatchs={count} alterne={alternating}                         ms={:.6} par_dispatch_us={:.4} allocations={}", best.0, best.0 * 1e3 / count as f64, best.1);
+                }
+            }
+        }
         for cut in [false, true] {
             let ground: Vec<f32> = (0..nx).map(|i| if cut { dx * (0.3 + 0.4 * (i % 3) as f32) } else { 0. }).collect();
             let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
@@ -373,6 +429,7 @@ async fn measure_async() -> Result<(), String> {
                 let mut p_gpu = start.clone();
                 let mut wall = Vec::with_capacity(9);
                 let mut device = Vec::with_capacity(9);
+                let mut parts = [const { Vec::<f64>::new() }; 5];
                 let mut first = 0.;
                 let mut allocations = 0;
                 for rep in 0..10 {
@@ -381,11 +438,15 @@ async fn measure_async() -> Result<(), String> {
                     if rep == 0 { first = gpu.last_wall_ms; } else {
                         wall.push(gpu.last_wall_ms);
                         if let Some(ms) = gpu.last_device_ms { device.push(ms); }
+                        for (v, ms) in parts.iter_mut().zip([gpu.last_pack_ms, gpu.last_encode_ms,
+                            gpu.last_submit_ms, gpu.last_wait_ms, gpu.last_read_ms]) { v.push(ms); }
                         allocations = allocations.max(gpu.last_allocations);
                     }
                 }
                 wall.sort_by(f64::total_cmp);
                 device.sort_by(f64::total_cmp);
+                for v in parts.iter_mut() { v.sort_by(f64::total_cmp); }
+                let dispatches = gpu.last_dispatches;
                 if p_gpu.iter().any(|v| !v.is_finite()) { return Err("pression GPU non finie".into()); }
                 let (rz_gpu, rr_gpu) = (gpu.last_rz as f64, gpu.last_residual2 as f64);
                 let mut p_cpu = start.clone();
@@ -400,9 +461,10 @@ async fn measure_async() -> Result<(), String> {
                     residu_relatif_gpu={:e} residu_relatif_cpu={:e} rapport={:.4} \
                     derive_recurrence_gpu={drift_gpu:e} derive_recurrence_cpu={drift_cpu:e} \
                     rz_gpu={rz_gpu:e} rz_cpu={:e} complet_mediane_ms={:.6} complet_max_ms={:.6} \
-                    premier_ms={first:.6} gpu_mediane_ms={:?} cpu_ms={cpu_ms:.6} allocations_max={allocations}",
+                    premier_ms={first:.6} gpu_mediane_ms={:?} cpu_ms={cpu_ms:.6} allocations_max={allocations}                     dispatchs={dispatches} empaquetage_ms={:.6} encodage_ms={:.6} soumission_ms={:.6}                     attente_ms={:.6} lecture_ms={:.6}",
                     (true_gpu / b2).sqrt(), (true_cpu / b2).sqrt(), true_gpu / true_cpu.max(f64::MIN_POSITIVE),
-                    rz_cpu as f64, wall[4], wall[8], device.get(4));
+                    rz_cpu as f64, wall[4], wall[8], device.get(4),
+                    parts[0][4], parts[1][4], parts[2][4], parts[3][4], parts[4][4]);
                 if iterations == 0 {
                     for (a, b) in p_gpu.iter().zip(&start) {
                         if a.to_bits() != b.to_bits() { return Err("l'amorçage a bougé la pression".into()); }

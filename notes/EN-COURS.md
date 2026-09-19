@@ -67,7 +67,7 @@ allocations qu'ADR-145 interdit à la boucle d'image. Même cause, un seul lot.
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls ; battement de S289 corrigé (fabriqué, non lu).
-- [ ] **P2** — **mesurer avant de choisir** : décomposer les 3,93 ms en encodage / soumission /
+- [x] **P2** — **mesurer avant de choisir** : décomposer les 3,93 ms en encodage / soumission /
   attente, et mesurer le coût **par dispatch** en faisant varier leur nombre à travail égal.
   C'est cette mesure qui décide de la voie, pas le raisonnement.
 - [ ] **P3** — réduction des dispatchs à **mathématique identique** : replier chaque réduction
@@ -106,5 +106,28 @@ Trois voies de réduction, par risque croissant :
    à un seul groupe. 5 → 3 ou 4 → 2. Dépend d'une visibilité inter-groupes que WGSL n'énonce
    pas aussi nettement qu'un `storageBarrier` intra-groupe : portabilité à peser, et c'est un
    argument pour la refuser même si elle marche sur cette carte.
+
+P2 : mesure faite, et elle **change le lot**. Décomposition à 6 656 mailles / 128 itérations :
+4,2752 ms = 0,2768 empaquetage + **2,2163 encodage** + 0,1925 soumission + 1,3663 attente +
+0,0058 lecture, pour 1,1475 ms de carte. L'encodage est 52 % de l'appel ; l'attente vaut à peu
+près le temps de carte plus la latence. Sonde d'enregistrement (901 dispatchs jetés sans
+exécution) : **1,86 µs et une allocation par `dispatch_workgroups`**, contre seulement 0,38 à
+0,44 µs de plus pour un `set_pipeline` par dispatch — et ces chiffres ne dépendent pas de la
+taille de grille. Donc : fusionner des noyaux paie en proportion des dispatchs supprimés, et
+presque rien de plus.
+
+**Le plafond annoncé par S289 était faux** : ×3 supposait tout le non-calcul récupérable. Seul
+l'encodage l'est, donc **≈ ×2,1**. Corrigé dans la file, la feuille et REPRISE.
+
+**Une des deux raisons du lot n'existait pas.** S289 écrivait qu'ADR-145 n'admet pas ces
+allocations : ADR-145 §2 décide l'inverse — les allocations des dépendances verrouillées sont
+comptées et publiées, **non interdites** —, et §1 lit I-06 sur le code du projet, qui n'alloue
+rien ici. Note corrective datée posée dans ADR-173 et dans la preuve S289. Le lot garde un seul
+objectif : le temps.
+
+**Voie retenue pour P3** : (1) replier les réductions dans leurs producteurs, 7 → 5 dispatchs,
+mathématique inchangée donc réception **au bit** exigible ; (2) soumettre par tranches, pour
+que l'encodage de la tranche suivante recouvre l'exécution de la précédente. Les deux sont sans
+risque numérique. Les voies 3 et 4 restent pour P4, sous condition de mesure.
 
 Hors de ce lot : multigrille GPU, budget 2 ms, 3D, solides, multiplateforme, garantie de pic.

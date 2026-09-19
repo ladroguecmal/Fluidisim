@@ -51,8 +51,17 @@ sans que δ cesse d'être cosmétique et non répliqué.
 
 Le budget eau de 2 ms d'ADR-125 : S289 mesure 6,62 ms par pas à 6 656 mailles, soit ×3,3.
 I-06 sur le chemin d'image : le cycle alloue ≈ 7 fois par itération dans l'encodage de la pile
-graphique, et ADR-145 ne l'admet pas ; l'activation dans la boucle d'image reste donc à
-construire. La longueur du cycle est un réglage de l'hôte, non calibré et non automatique :
+graphique ; l'activation dans la boucle d'image reste donc à construire.
+
+> **Note corrective, S290, 2026-09-19.** La rédaction d'origine ajoutait « et ADR-145 ne
+> l'admet pas ». C'est une erreur de fait : ADR-145 §1 lit I-06 sur **le code du projet** pour
+> `viewer/`, et §2 décide que les allocations des dépendances verrouillées sont **comptées et
+> publiées, non interdites**. Les allocations de l'encodage wgpu sont donc permises, et elles
+> sont publiées. Ce qui empêche la boucle d'image est le **temps** d'enregistrement — 1,86 µs
+> et une allocation par `dispatch_workgroups`, mesurés en S290 — et non une règle violée.
+> La décision d'ADR-173 n'est pas affectée ; seule cette justification l'était.
+
+La longueur du cycle est un réglage de l'hôte, non calibré et non automatique :
 S289 mesure qu'elle perd autant qu'elle gagne si elle est mal choisie. Enfin, aucune identité
 inter-GPU n'est introduite, et la trajectoire mesurée reste celle du cœur à l'arrondi de `f32`
 — si une version future la déplaçait visiblement, la revue visuelle de S254 s'appliquerait.

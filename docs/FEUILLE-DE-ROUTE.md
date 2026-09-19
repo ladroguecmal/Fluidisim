@@ -354,9 +354,11 @@ gradient conjugué **résident** — opérateur, réductions, `α` et `β` sur l
 CPU entre itérations ; le candidat ne fournit **qu'un départ** et les portes ADR-143/144 ne
 bougent pas. Médiane du pas 9,2236 → 6,6220 ms à 6 656 mailles (itérations du cœur 427 → 19)
 et 44,8697 → 30,2744 à 32 768 (353 → 61) ; 60/60 propositions retenues, 0 refus, 0 pas dégradé,
-dérive de surface ≤ 7,63·10⁻⁶ m. **Non reçu** : budget 2 ms (×3,3), I-06 du chemin d'image — le
-cycle alloue ≈ 7 fois par itération dans l'encodage —, garantie sur le pic, réglage automatique
-de la longueur du cycle, multiplateforme. Le poste dominant restant est **l'enregistrement des
+dérive de surface ≤ 7,63·10⁻⁶ m. **Non reçu** : budget 2 ms (×3,3), activation dans la boucle
+d'image, garantie sur le pic, réglage automatique de la longueur du cycle, multiplateforme.
+Les ≈ 7 allocations par itération sont celles de wgpu : **publiées et permises** par ADR-145 §2
+(correction S290 d'une lecture fausse), constantes à longueur de cycle fixée ; ce qui bloque la
+boucle d'image est le **temps** d'enregistrement. Le poste dominant restant est **l'enregistrement des
 commandes** : 27 % du temps d'appel est du calcul utile.
 [Réception et limites](validation/PRESSION-RESIDENTE-S289.md).
 

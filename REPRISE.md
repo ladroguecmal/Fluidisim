@@ -91,8 +91,8 @@ avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)).
 **S289 : la projection passe sur GPU et le pas réel la consomme** (ADR-173) — cycle de gradient
 conjugué résident, le candidat ne fournit qu'un départ, portes ADR-143/144 inchangées et refus
 atomique ; 9,2236 → 6,6220 ms par pas à 6 656 mailles, itérations du cœur 427 → 19
-([preuve](docs/validation/PRESSION-RESIDENTE-S289.md)). Toujours ×3,3 du budget de 2 ms ; I-06 du
-chemin d'image non reçue, le poste restant est le coût d'appel du cycle (A292). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
+([preuve](docs/validation/PRESSION-RESIDENTE-S289.md)). Toujours ×3,3 du budget de 2 ms ; le
+poste restant est le **temps d'enregistrement** des commandes, 1,86 µs par dispatch (A292, S290). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet), **couplée depuis S253 à un fond B/W linéaire** (ADR-152/153), **B de production prolongé au-dessus du plan moyen depuis S254** (ADR-154 ; W : A286) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
 ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768** par le repli multigrille (ADR-147) suivi, depuis S252, d'un affinage de divergence (ADR-151 ; β du gradient multigrille corrigé, A285) ; plancher
