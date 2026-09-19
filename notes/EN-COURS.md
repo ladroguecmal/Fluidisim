@@ -71,9 +71,9 @@ sans déplacer d'un bit ce que le pas publie.
 - [x] **P1** — état réel, jeton et plan seuls.
 - [x] **P2** — cœur : accumuler le temps **par phase** (les huit de `delta_budget`), exposé sans
   changer les structures publiques ; **mesurer ce que l'instrument lui-même coûte**, et le dire.
-- [ ] **P3** — banc de décomposition : part de chaque phase sur un vrai pas, deux tailles, deux
+- [x] **P3** — banc de décomposition : part de chaque phase sur un vrai pas, deux tailles, deux
   fonds, avec et sans candidat GPU. C'est cette carte qui décide de la suite, pas la lecture.
-- [ ] **P4** — supprimer les recalculs **identiques** repérés à la lecture, chacun avec sa preuve
+- [x] **P4** — supprimer les recalculs **identiques** repérés à la lecture, chacun avec sa preuve
   d'identité, réception **au bit** sur la trajectoire :
   a. `‖b‖²` réduit **deux fois** sur le même `rhs` (garde `warm`, puis `b2`) ;
   b. `correct_into_uw` **et** `divergence_metric` refaits sur le **même** `p` quand la porte
@@ -121,6 +121,55 @@ de mesure reste interne. `Volume::last_phase_ns()` et `last_stage_ns()` exposent
 toucher aux structures publiques. Coût marginal de l'instrument : deux additions par `check`
 déjà existant, plus onze `mark` par pas — onze lectures d'horloge, contre des centaines déjà
 faites par le sondage. Vérification : 75 essais delta et 16 du harnais budgétaire réussis.
+
+P3 : carte faite, banc `--pas-decomposition`, dix-huit étapes, horloge **réelle**. La paire
+`somme(phases) == somme(étapes) == elapsed` est vérifiée à chaque exécution et refuse sinon.
+À 6 656 mailles avec candidat GPU, avant toute suppression, 5,7937 ms internes :
+
+| étape | ms | part |
+|---|---|---|
+| candidat (appel GPU, hôte) | 2,4226 | 41,8 % |
+| **préconditionneur** (un cycle multigrille) | **0,8291** | **14,3 %** |
+| validation (finitude de onze tableaux) | 0,4376 | 7,6 % |
+| erreur_inverse (diagnostic pur) | 0,3405 | 5,9 % |
+| itérations du gradient conjugué | 0,2948 | 5,1 % |
+| second membre | 0,2409 | 4,2 % |
+| divergence | 0,2184 | 3,8 % |
+| portes | 0,1591 | 2,7 % |
+| export de l'opérateur | 0,1477 | 2,5 % |
+| résidu initial | 0,1414 | 2,4 % |
+| correction | 0,1312 | 2,3 % |
+| advection | 0,1311 | 2,3 % |
+| départ, extrapolation, vérification, transport, sauvegarde, garde | 0,3283 | 5,7 % |
+
+**Le poste le plus gros côté cœur était du travail jeté** : le préconditionneur était appliqué
+*avant* la boucle, et la boucle ne tourne presque jamais quand le candidat a déjà convergé.
+
+P4 : quatre suppressions, **trajectoire identique au bit**.
+a. `‖b‖²` n'est plus réduit qu'une fois (la garde du départ chaud réutilise `b2`).
+b. **Amorçage différé** : la direction préconditionnée est calculée à la première itération qui
+   l'emploie, et à chaque relance — jamais avant. Même direction, même `⟨r, M⁻¹r⟩` quand une
+   itération tourne, parce que `res` ne bouge pas entre les deux points.
+c. Correction et divergence ne sont plus refaites quand la porte d'ADR-144 vient de les produire
+   pour le même `p`. Les deux **phases** restent traversées (`Phase` est le vocabulaire public des
+   points d'expiration, reçu en S230) : deux lectures d'horloge, aucun parcours de champ.
+d. Double sondage par maille retiré de la boucle `w` de l'advection.
+
+**Preuve d'identité** : le banc d'empreintes laissé par S287 rend les **six** valeurs publiées
+dans PASSES-PRESSION-S287 §Identité — `92d65e868ec29942`, `aee9db45c45129a9`, `c9c79e0075ee0ffc`,
+`1e5c6d5f5fed86bd`, `b0414fc315f5f3c6`, `6c037edac4f55f05` — et les six sommes d'itérations
+(2648, 1562, 1116, 2895, 1551, 1105). Rien de ce que la simulation produit n'a changé.
+75 essais delta et 16 du harnais budgétaire réussis.
+
+**Gain**, médiane murale par pas, horloge réelle :
+6 656 mailles avec candidat **5,2162 → 4,3022 ms (×1,21)** ; sans candidat 10,3556 → 10,1835.
+32 768 mailles avec candidat 27,8395 → 25,5579 (×1,09) ; sans candidat 48,9270 → 46,4978.
+Le préconditionneur passe de 0,8291 à **0,0121 ms** sur le chemin avec candidat.
+
+**Un fait à ne pas surinterpréter** : la suppression (c) ne rend rien sur le chemin **avec**
+candidat, et 0,33 ms sans. C'est cohérent : la redondance n'existait que lorsque le gradient
+conjugué itérait jusqu'à la convergence. Avec un candidat déjà convergé la boucle sort avant la
+porte, et la correction finale est alors la seule. Dit ainsi plutôt que compté deux fois.
 
 Ce qui reste hors de ce lot : multigrille GPU, 3D, solides, boucle d'image, multiplateforme,
 calibration automatique de la longueur de cycle. Et **aucune porte d'acceptation ne bouge** :

@@ -10,7 +10,7 @@
 //! Le GPU propose, le cœur dispose — c'est ce qui rend la consommation par le pas réel possible
 //! sans réception physique du GPU lui-même.
 use water_core::delta_projection::{Domain, ExternalPressure, PressureCandidate, PressureProblem,
-    PressureRow, Volume};
+    PressureRow, Volume, STAGES, STAGE_NAMES};
 use water_core::host::{HostServices, MonotonicClock};
 use crate::scene::host_impl;
 use wgpu::util::DeviceExt;
@@ -823,6 +823,78 @@ async fn measure_variants_async() -> Result<(), String> {
                         (nx * nz).div_ceil(64), device[device.len() / 2], device[device.len() - 1]);
                 }
                 gpu.timing = false;
+            }
+        }
+    }
+    Ok(())
+}
+
+// ─── S291 : carte du coût d'un pas, par étape ──────────────────────────────────────────────
+
+/// Horloge murale réelle. Les mesures de S289 et S290 employaient une horloge **figée**
+/// (`now_ns → 0`) : le sondage y était donc quasi gratuit, et le pas y coûtait moins qu'en
+/// production. Ce banc mesure les deux, pour dire l'écart au lieu de le supposer.
+struct Wall(std::time::Instant);
+impl MonotonicClock for Wall {
+    fn now_ns(&self) -> u64 { self.0.elapsed().as_nanos() as u64 }
+}
+
+pub fn measure_decomposition() -> Result<(), String> { pollster::block_on(measure_decomposition_async()) }
+
+async fn measure_decomposition_async() -> Result<(), String> {
+    const STEPS: usize = 60;
+    for (nx, nz, dx) in [(128usize, 52usize, 2.0f32), (256, 128, 0.5)] {
+        let cells = nx * nz;
+        let mut gpu = Resident::new(Domain { nx, nz, dx }, 128).await?;
+        for cut in [false, true] {
+            let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+            // Quatre régimes : horloge réelle ou figée, candidat GPU ou non. Le pas est le même.
+            for (with_gpu, real_clock) in [(false, true), (true, true), (false, false), (true, false)] {
+                gpu.iterations = if nx == 128 { 128 } else { 256 };
+                let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 28);
+                let mut volume = scene(nx, nz, dx, cut, &mut arena, &jobs, &sink)?;
+                let mut rows = vec![PressureRow::default(); cells];
+                let mut stages = [0u64; STAGES];
+                let mut phases = [0u64; 8];
+                let mut elapsed = 0u64;
+                let mut wall = Vec::with_capacity(STEPS);
+                let clock = Wall(std::time::Instant::now());
+                let frozen = Frozen;
+                let injected: &dyn MonotonicClock = if real_clock { &clock } else { &frozen };
+                let mut iterations = 0u64;
+                for step in 0..STEPS {
+                    let start = std::time::Instant::now();
+                    let report = if with_gpu {
+                        let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut gpu,
+                            used: false, refused: false };
+                        volume.step_surface_mobile_with(2000, 4000, 600_000_000, &jobs, injected, Some(&mut ext))
+                    } else {
+                        volume.step_surface_mobile(2000, 4000, 600_000_000, &jobs, injected)
+                    }.map_err(|e| format!("pas {step} : {e:?}"))?;
+                    wall.push(start.elapsed().as_secs_f64() * 1e3);
+                    let inner = report.report.ok_or("pas expiré")?;
+                    iterations += inner.iterations as u64;
+                    elapsed += report.elapsed_ns;
+                    for (a, b) in stages.iter_mut().zip(volume.last_stage_ns()) { *a += b; }
+                    for (a, b) in phases.iter_mut().zip(volume.last_phase_ns()) { *a += b; }
+                }
+                wall.sort_by(f64::total_cmp);
+                let (sum_stage, sum_phase): (u64, u64) = (stages.iter().sum(), phases.iter().sum());
+                // La paire qui doit rendre le même nombre. Un écart ici est un défaut
+                // d'instrument, pas un résultat — L339.
+                if real_clock && (sum_stage != elapsed || sum_phase != elapsed) {
+                    return Err(format!("instrument incohérent : étapes {sum_stage}, phases {sum_phase}, \
+                        pas {elapsed}"));
+                }
+                let total = (elapsed as f64 / STEPS as f64) / 1e6;
+                let detail: Vec<String> = STAGE_NAMES.iter().zip(stages).map(|(name, ns)| {
+                    let ms = (ns as f64 / STEPS as f64) / 1e6;
+                    format!("{name}={ms:.4}")
+                }).collect();
+                println!("DECOMPOSITION_S291 nx={nx} nz={nz} coupe={cut} gpu={with_gpu} \
+                    horloge={} pas={STEPS} mural_mediane_ms={:.4} interne_moyen_ms={total:.4} \
+                    iterations_coeur={iterations} {}",
+                    if real_clock { "reelle" } else { "figee" }, wall[STEPS / 2], detail.join(" "));
             }
         }
     }

@@ -1099,7 +1099,6 @@ impl Volume {
             }
         }
         for i in 0..nx {
-            ctl.poll(Phase::Advect)?;
             for k in 1..nz {
                 ctl.poll(Phase::Advect)?;
                 let f = self.fw(i, k);
@@ -1192,7 +1191,10 @@ impl Volume {
         let cold = WARM_PRESSURE_OFF.with(|c| c.get());
         #[cfg(not(test))]
         let cold = false;
-        let warm = self.warm_pressure && self.mobile && !cold && self.norm2(&self.rhs, jobs, ctl)? > 0.;
+        // S291 : `‖b‖²` était réduit **deux fois** sur le même tableau — une fois pour décider du
+        // départ chaud, une fois comme `b2`. Une seule réduction, et la garde la réutilise.
+        let b2 = self.norm2(&self.rhs, jobs, ctl)?;
+        let warm = self.warm_pressure && self.mobile && !cold && b2 > 0.;
         if warm {
             for c in 0..self.domain.cells() {
                 ctl.poll(Phase::Pressure)?;
@@ -1204,14 +1206,17 @@ impl Volume {
             if let Some(ext) = external {
                 ext.used = false;
                 ext.refused = false;
+                ctl.mark(Stage::Export);
                 self.write_rows(ext.rows, ctl)?;
                 // `tmp` est libre jusqu'au `apply` ci-dessous : il garde le départ du cœur, pour
                 // qu'un refus le restaure exactement. Aucune allocation.
                 budget::copy(&self.p, &mut self.tmp, ctl, Phase::Pressure)?;
                 let mut p = core::mem::take(&mut self.p);
                 let problem = mobile::PressureProblem { domain: self.domain, rows: ext.rows, rhs: &self.rhs };
+                ctl.mark(Stage::Candidate);
                 let proposed = ext.candidate.propose(problem, &mut p);
                 self.p = p;
+                ctl.mark(Stage::Verify);
                 let finite = !proposed || {
                     let mut ok = true;
                     for v in &self.p { ctl.poll(Phase::Pressure)?; ok &= v.is_finite(); }
@@ -1232,7 +1237,9 @@ impl Volume {
                     result?;
                     ext.refused = proposed;
                 }
+                ctl.mark(Stage::Warm);
             }
+            ctl.mark(Stage::Residual);
             let mut tmp = core::mem::take(&mut self.tmp);
             let result = self.apply(&self.p, &mut tmp, ctl);
             self.tmp = tmp;
@@ -1241,28 +1248,21 @@ impl Volume {
                 ctl.poll(Phase::Pressure)?;
                 self.res[c] = self.rhs[c] - self.tmp[c];
             }
+            ctl.mark(Stage::Warm);
         } else {
             for p in &mut self.p { ctl.poll(Phase::Pressure)?; *p = 0.; }
             budget::copy(&self.rhs, &mut self.res, ctl, Phase::Pressure)?;
         }
-        let mut seeded = None;
-        if jacobi {
-            self.precondition_into_dir(0., ctl)?;
-        } else if mobile_mg {
-            seeded = Some(self.mobile_multigrid_into_dir(0., jobs, ctl)?);
-        } else if multigrid_on {
-            seeded = Some(self.multigrid_into_dir(0., jobs, ctl)?);
-        } else {
-            budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
-        }
-        let b2 = self.norm2(&self.rhs, jobs, ctl)?;
         let mut rr = if warm { self.norm2(&self.res, jobs, ctl)? } else { b2 };
-        // Produit `r·M⁻¹r` du préconditionneur ; sans lui, c'est exactement `rr`.
-        let mut rz = if jacobi {
-            self.dot_prec(&self.res, jobs, ctl)?
-        } else {
-            seeded.unwrap_or(b2)
-        };
+        // S291 : **l'amorçage de la direction est différé jusqu'à la première itération qui
+        // l'emploie.** C'était un cycle multigrille complet appliqué avant la boucle ; sur un pas
+        // dont le départ converge déjà — ce que le candidat de S289 produit à presque tous les
+        // pas — la boucle ne tournait pas et ce cycle était jeté. Mesuré : 0,83 ms sur 5,79 à
+        // 6 656 mailles. Le décalage ne change rien numériquement : quand une itération tourne,
+        // elle reçoit exactement la même direction et le même `⟨r, M⁻¹r⟩`, calculés à partir du
+        // même `res`, que rien ne touche entre les deux points.
+        let mut rz = 0f32;
+        let mut primed = false;
         let mut it = 0;
         let tol = 1e-12_f32;
         #[cfg(test)]
@@ -1283,11 +1283,22 @@ impl Volume {
         // que la tolerance physique de S199 le soit. `INFINITY` = aucune contrainte de plus.
         let mut physical_target = f32::INFINITY;
         let (mut checkpoint, mut power, mut since): (Option<u64>, u32, u32) = (None, 1, 0);
+        // S291 : porte l'état corrigé et sa divergence quand la porte d'ADR-144 vient de les
+        // produire pour le `p` courant. Remis à zéro à chaque tour, parce que la boucle interne
+        // peut alors déplacer `p`.
+        let mut settled: Option<Projected> = None;
         let actual_rr = loop {
             ctl.mark(Stage::Iterate);
+            settled = None;
             let before_iterations = it;
             // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
             while b2 > 0. && (rr > tol * b2 || rr > physical_target) && it < max_iters {
+                if !primed {
+                    ctl.mark(Stage::Precondition);
+                    rz = self.prime_direction(jacobi, mobile_mg, multigrid_on, b2, jobs, ctl)?;
+                    primed = true;
+                    ctl.mark(Stage::Iterate);
+                }
                 let mut tmp = core::mem::take(&mut self.tmp);
                 let result = self.apply(&self.dir, &mut tmp, ctl);
                 self.tmp = tmp;
@@ -1366,7 +1377,11 @@ impl Volume {
                 // n'est pas tenue, la boucle poursuit. Les cas qui la tiennent deja s'arretent
                 // exactement ou ils s'arretaient, et gardent leurs bits.
                 self.correct_into_uw(k1, ctl, Phase::Pressure)?;
-                let reached = self.divergence_metric(ctl, Phase::Pressure)?.plain;
+                // S291 : le résultat est conservé. `p`, `us` et `ws` ne bougent plus si l'on sort
+                // ici, et la queue refaisait à l'identique cette correction **et** cette mesure.
+                let measured = self.divergence_metric(ctl, Phase::Pressure)?;
+                settled = Some(measured);
+                let reached = measured.plain;
                 if reached <= PROJECTION_DIVERGENCE_TOLERANCE {
                     break actual;
                 }
@@ -1401,24 +1416,29 @@ impl Volume {
                 since = 0;
             }
             rr = actual;
-            if jacobi {
-                self.precondition_into_dir(0., ctl)?;
-                rz = self.dot_prec(&self.res, jobs, ctl)?;
-            } else if mobile_mg {
-                rz = self.mobile_multigrid_into_dir(0., jobs, ctl)?;
-            } else if multigrid_on {
-                rz = self.multigrid_into_dir(0., jobs, ctl)?;
-            } else {
-                budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
-                rz = actual;
-            }
+            ctl.mark(Stage::Precondition);
+            rz = self.prime_direction(jacobi, mobile_mg, multigrid_on, actual, jobs, ctl)?;
+            primed = true;
         };
         // Correction : `u = u* − (dt/ρ)·∂p/∂x`, demi-maille au couvercle.
-        ctl.mark(Stage::Correct);
-        self.correct_into_uw(k1, ctl, Phase::Correct)?;
         let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
-        ctl.mark(Stage::Diagnose);
-        let projected = self.divergence_metric(ctl, Phase::Diagnostics)?;
+        let projected = match settled {
+            // Déjà faites par la porte d'ADR-144, sur ce même `p` et ces mêmes `us`/`ws`.
+            // Les deux phases restent **traversées** : `Phase` est le vocabulaire public des
+            // points d'expiration (réception S230), et sauter le calcul ne doit pas retirer un
+            // point d'arrêt du pas. Deux lectures d'horloge, aucun parcours de champ.
+            Some(measured) => {
+                ctl.check(Phase::Correct)?;
+                ctl.check(Phase::Diagnostics)?;
+                measured
+            }
+            None => {
+                ctl.mark(Stage::Correct);
+                self.correct_into_uw(k1, ctl, Phase::Correct)?;
+                ctl.mark(Stage::Diagnose);
+                self.divergence_metric(ctl, Phase::Diagnostics)?
+            }
+        };
         let divergence = projected.all;
         // S239, ADR-144 : la tolérance physique de S199 est nécessaire dans **tout** chemin
         // d'acceptation. ADR-143 l'exigeait déjà au plancher ; le critère premier ne l'exigeait pas,
@@ -1427,6 +1447,7 @@ impl Volume {
         let accepted = (actual_rr <= tol * b2 || floor_stop) && tolerance_held;
         // `res` porte encore le vrai résidu du `p` publié : correction et diagnostic de divergence ne
         // touchent ni `p`, ni `rhs`, ni `res`.
+        ctl.mark(Stage::Backward);
         let backward_error = self.backward_error(ctl)? as f64;
         Ok(Report {
             refinements: 0,
@@ -1438,6 +1459,24 @@ impl Volume {
             backward_error,
             divergence_plain: projected.plain,
         })
+    }
+
+    /// S291 : `dir ← M⁻¹·res` et le produit `⟨r, M⁻¹r⟩` qui va avec, quel que soit le
+    /// préconditionneur. Une seule écriture de ce choix, employée à l'amorçage **et** à chaque
+    /// relance ; `fallback` est la valeur que rend le chemin sans préconditionneur.
+    fn prime_direction(&mut self, jacobi: bool, mobile_mg: bool, multigrid_on: bool, fallback: f32,
+        jobs: &dyn JobSystem, ctl: &mut Control) -> Result<f32, Error> {
+        if jacobi {
+            self.precondition_into_dir(0., ctl)?;
+            self.dot_prec(&self.res, jobs, ctl)
+        } else if mobile_mg {
+            self.mobile_multigrid_into_dir(0., jobs, ctl)
+        } else if multigrid_on {
+            self.multigrid_into_dir(0., jobs, ctl)
+        } else {
+            budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
+            Ok(fallback)
+        }
     }
 
     /// Correction du champ prédit **dans les tampons de travail** `u`/`w` (mode fixe ou mobile).

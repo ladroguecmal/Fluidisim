@@ -29,8 +29,18 @@ pub enum Stage {
     Advect,
     /// Divergence du champ prédit, second membre, préconditionneur, niveaux.
     Rhs,
-    /// Départ chaud : nettoyage, candidat externe, vrai résidu initial, `‖b‖²`.
+    /// Départ chaud : nettoyage des mailles sèches, vrai résidu initial, `‖b‖²`.
     Warm,
+    /// Export de l'opérateur figé vers la réserve de l'hôte, et mise à l'abri du départ.
+    Export,
+    /// Le candidat externe lui-même — temps de l'hôte, pas du cœur.
+    Candidate,
+    /// Vérification de la proposition : finitude, remise à zéro des mailles sèches.
+    Verify,
+    /// Vrai résidu initial `b − A·p` du départ retenu.
+    Residual,
+    /// Première application du préconditionneur : cycle multigrille mobile, ou Jacobi.
+    Precondition,
     /// Les itérations du gradient conjugué.
     Iterate,
     /// Les portes d'acceptation : vrai résidu recalculé, tolérance physique, erreur inverse,
@@ -38,17 +48,20 @@ pub enum Stage {
     Gate,
     /// Correction finale des faces.
     Correct,
-    /// Diagnostics publiés du rapport.
+    /// Divergence projetée publiée par le rapport.
     Diagnose,
+    /// Erreur inverse composante par composante du rapport — diagnostic pur (S238).
+    Backward,
     Extrapolate,
     Transport,
     /// Contrôle de finitude et garde de géométrie de sortie.
     Validate,
 }
-pub const STAGES: usize = 12;
+pub const STAGES: usize = 18;
 pub const STAGE_NAMES: [&str; STAGES] = ["garde", "sauvegarde", "advection", "second_membre",
-    "depart", "iterations", "portes", "correction", "diagnostics", "extrapolation", "transport",
-    "validation"];
+    "depart", "export", "candidat", "verification", "residu_initial", "preconditionneur",
+    "iterations", "portes", "correction",
+    "divergence", "erreur_inverse", "extrapolation", "transport", "validation"];
 
 pub(super) struct Control<'a> {
     clock: Option<&'a dyn MonotonicClock>,

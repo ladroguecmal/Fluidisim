@@ -2229,6 +2229,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--pression-variantes") {
         return pressure_solver::measure_variants();
     }
+    if args.iter().any(|a| a == "--pas-decomposition") {
+        return pressure_solver::measure_decomposition();
+    }
     if args.iter().any(|a| a == "--delta-retrecissement") {
         return delta::measure_shrink();
     }
