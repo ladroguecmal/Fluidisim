@@ -58,139 +58,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S293 — **audit global demandé par l'utilisateur** — terminée
+Session : S294 — **les arbitrages du 2026-09-19 consignés, l'architecture de δ en 3D décidée**
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
-Entrée : « Reprends le projet, ton objectif est d'analyser le projet et voir où cela bloque dans
-l'avancement, regarde l'intégralité de ce projet. » — 2026-09-19 14:19, S292 venant d'être
-interrompue par l'utilisateur après P2/P3 (jeton `interrompu`, arbre propre, copie unique).
-Objectif : un diagnostic **vérifié** de ce qui empêche l'avancement — technique, décisionnel,
-méthodologique, outillage — classé par effet sur les capacités, avec pour chaque blocage sa
-preuve, ce qui le lèverait et ce qui relève de l'utilisateur. Livrable :
-`docs/registres/BILAN-GLOBAL-S293.md`. **Aucun code modifié, aucune porte ni seuil déplacé,
-aucune réduction d'ambition** (ADR-127) : l'audit constate et propose, il ne tranche pas à la
-place de l'utilisateur.
+Entrée : réponses de l'utilisateur aux questions de BILAN-GLOBAL-S293 §6, 2026-09-19 14:47 —
+« 1. l'objectif est d'avoir de l'eau d'un jeu en temps réel dynamique à son environnement et les
+joueurs, donc les 2 ms peuvent être modifiées tant que l'objectif est réalisé, puis pour la
+machine cet ordi est la référence. 2. Oui. 3. Comme tu veux, cela ne me dérange pas de tout
+garder sur ce PC. 4. Oui si cela débloquera la situation. 5. Je ne sais pas. »
+Objectif : que ces réponses deviennent des décisions écrites, que la porte B soit ouverte sans
+contredire la trajectoire, et que la 3D s'écrive une fois, au bon endroit. **Aucun code de
+solveur dans cette session** : elle prépare la construction de S295, qui visera une capacité.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seuls.
-- [x] **P2** — clore S292 : entrée de journal courte (interrompue, ce qu'elle a établi, ce qui
-  reste), A294 actualisée dans la file avec le geste écrit et jamais exécuté comme suite.
-- [x] **P3** — état réel du code : compilation et suites (cœur/harnais, viewer) hors réseau,
-  avertissements ; ce que `code/` et `viewer/` contiennent par couche, confronté aux documents.
-- [x] **P4** — intentions → projet fini → jalons : sources, LISTE-PROJET-FINI, portes §3 bis ;
-  recompter reçu/partiel/absent si le décompte affiché est périmé.
-- [x] **P5** — trajectoire mesurée : sessions et commits par sujet et par période (Git et
-  journal), capacités reçues, maillons, part conception/code ; fils longs et ce qu'ils ont
-  débloqué.
-- [x] **P6** — blocages classés (technique mesuré, décision en attente de l'utilisateur,
-  méthode/procédure, outillage/infrastructure), avec preuve, effet et levier.
-- [x] **P7** — rédiger `docs/registres/BILAN-GLOBAL-S293.md` et l'indexer.
-- [x] **P8** — rituel §6.
+- [ ] **P2** — **ADR-174**, arbitrages de l'utilisateur : machine de référence ; budget de l'eau
+  au service de l'objectif, profil de travail avec une part pour δ ; v1 = portes A à D ; pas de
+  dépôt distant ; porte B avant la suite du coût en 2D ; onde de S277 sans verdict attendu.
+  Notes datées sur ADR-125 ; feuille §3 bis, bandeau de la file, REVUE-VISUELLE ; A296 close.
+- [ ] **P3** — lire les contrats que la 3D touche (ADR-006, 007, 012, 143, 144, SPEC-004 δ,
+  structure de `delta_projection`) ; notes de conception ici.
+- [ ] **P4** — **ADR-175**, architecture d'exécution de δ en 3D : pas de production résident sur
+  GPU à travail borné, erreur publiée et état dégradé déclaré, cœur CPU référence de réception ;
+  classe de fidélité par couche ; représentation 3D du régime perturbatif et voie non graphe (B3
+  préliminaire). Note datée sur ADR-173 ; A295 décidée.
+- [ ] **P5** — pilotage : déclencheur d'A276 remplacé (L343) ; REPRISE §6 et METHODE — lot pris
+  dans les portes, maillons liés aux colonnes « reçu si » et aux points de la liste ; plafonds des
+  documents d'état, contrôlés par `outils/etat_projet.py`.
+- [ ] **P6** — file active ramenée aux plafonds (état, déclencheur, lien).
+- [ ] **P7** — états des jalons de la feuille de route ramenés aux plafonds.
+- [ ] **P8** — rituel §6.
 
 ### Notes de reprise
 
-Notes complètes de S292 (tableau froid/chaud, trois mécanismes, commande non exécutée) :
-`git show c629ebb:notes/EN-COURS.md`. P2 les reporte dans le journal et dans A294.
-
-**P3 — état réel du code (mesuré 14:25–14:31).** `cargo test --workspace --release --offline`
-dans `code/` : **511 réussis, 0 échec, 18 ignorés** (397 bibliothèque + 16 + 2 + 1 intégration
-+ 95 harnais) ; construction 40 s, suite 46 s. `viewer/` : **36 réussis, 1 ignoré**. Les 19
-ignorés sont tous des mesures ou diagnostics à lancer explicitement, aucun défaut connu masqué.
-≈ 43 lignes d'avertissements, surtout des doublons dans les exemples. Écart de décompte avec
-S291 (394 réussis / 21 ignorés annoncés) : même total de 411 essais de bibliothèque, 3 passés
-d'ignorés à réussis — sans conséquence, mais les décomptes du journal ne se reproduisent pas
-exactement.
-Inventaire : cœur 36 464 lignes (75 fichiers), harnais 8 577, exemples 29 104 (114 fichiers,
-bancs de session pour la plupart), afficheur 10 231 dont `main.rs` 3 000 et **67 options de
-ligne de commande**, presque toutes des bancs. Aucun dépôt distant (`git remote` vide).
-Faits structurels vérifiés dans le code : δ = `Domain { nx, nz, dx }`, tranche x-z sans `y` ;
-le pas de production de la bande est `step_perturbation_mobile_with` ; le GPU ne fournit qu'un
-départ de pression, le cœur CPU refait `b − A·p`, ses itérations et ses portes (ADR-173) ;
-ordonnanceur `scheduler.rs` 690 lignes ; V = `hydro_network` + géométrie + instantané, ≈ 880
-lignes hors tests, intouché depuis S229.
-Effort mesuré par Git (lignes ajoutées, `--first-parent`) : Markdown 116 357 ; W 21 571 +
-bancs B/W 19 700 ; δ 10 230 + bancs δ 10 906 ; hôte de rendu 7 784 ; harnais 9 223 ;
-véhicules 3 481 ; B 3 638 ; **V 2 095** ; **ordonnanceur 738**. Sessions par sujet dominant :
-W 113, δ 57, véhicules/harnais 40, documentaires 40, rendu 16, B 12, **V 4**, ordonnanceur ≈ 3.
-Sessions de 10 à 40 min entre plan et rituel (médiane 15,8 min depuis S250) ; depuis S250,
-34 % des commits sont des plans ou des rituels.
-
-**P4 — intentions → projet fini → portes (14:31–14:32, lectures faites pendant P3).**
-Source §1 : « le critère de validation principal est le rendu perçu en temps réel [...] la
-précision scientifique [...] n'est pas une fin en soi » ; §17 : en surcharge, réduire d'abord la
-taille des domaines, **puis la résolution physique** ; §20 : le système est « un orchestrateur de
-régimes », écrit seulement à partir de S278.
-LISTE-PROJET-FINI (état S276, remplie à la demande de l'utilisateur — **non modifiée ici**) :
-3 validés / 49 partiels / 68 absents sur 120. Décompte **périmé d'environ trois points** : 1.4
-est partiel depuis S278 mais la section 1 compte encore 4 partiels et 3 absents ; 9.1 (poids de
-perception calculé S279) et 9.9 (rétrécissement manuel S283–S284) ont une première pièce ; 4.19
-cite encore « ≈ 11 fois » au lieu de ×4,1. Aucun validé de plus.
-Portes de la v1 proposée (§3 bis) contre la liste : A (1.4, 1.5, 1.6, 4.2, 4.5, 9.1, 9.9) en
-cours ; **B (4.1, 4.6, 4.7, 8.7) non commencée** ; C (4.19, 9.8, 9.11) travaillée **sur la
-tranche 2D** alors que sa réception est définie « sur la scène de la porte B » ; **D (6.1–6.8)
-non commencée**, rien dans le système. Aucun des ≈ 20 points de la v1 n'est validé.
-J1 ouvert depuis S201 (≈ 90 sessions) : il manque l'« interaction manuelle représentative » —
-l'afficheur n'a **aucun objet pilotable** (caméra, pause, D/N/M/B seulement ; sillages sur
-trajectoires prescrites, impacts programmés toutes les 4 s) — et la seconde cible.
-Revue visuelle : R10 (S277) a désigné la porte B — « une onde qui traverse une vraie mer et s'y
-déforme » — il y a quinze sessions ; le registre §5 affiche encore R6 et R10 « en attente »
-alors que R7 et R10 sont reçus. Verdict sur l'onde injectée de S277 toujours non rendu.
-
-**P5 — trajectoire mesurée (14:32–14:33).** Phases : S01–S19 conception pure ; S20–S69
-harnais et véhicules d'essai ; S70–S198 **W** (129 sessions, 44 % du total) ; S199–S292 δ,
-hôte GPU, V, revue visuelle. δ depuis S199 ≈ 44 sessions, **toutes sur la tranche 2D** :
-noyau et précision 9, coût 14, raccordement B/W 4, bords et précision temporelle 7, rendu 3,
-ordonnancement et rétrécissement 7 ; **3D : 0**. V : 5 sessions (S224–S229), rien depuis le
-2026-09-14. Solides dans le système : 0.
-**Chaînage de la suite** : S283 → S292, **dix sessions sur dix** ont pris pour sujet la suite
-déclarée par la précédente (S291 et S292 sur demande de l'utilisateur, mais sur le point
-ouvert par la session d'avant). Même mécanisme que S198 (33 sur 38), et il a traversé deux
-agents différents (Codex S282–S288, Claude S289–S292) : il est dans le dispositif, pas dans
-l'agent. La règle des maillons ne l'arrête pas : chaque micro-optimisation consommée par le
-chemin de l'afficheur remet le compteur à zéro (S289, S290, S291).
-**Cinquième audit du même mécanisme** : BILAN-S69 (« vingt-deux sessions sur l'instrument »),
-S145 (« le goulot n'a pas bougé »), S198 (« le problème est le choix du sujet »), S227 (« la
-livraison est déséquilibrée »). Chaque fois, correctif de procédure ; chaque fois, retour.
-**Regonflement des documents d'état depuis la refonte S227** (65 sessions) : file active
-962 → 5 806 mots (×6), FEUILLE-DE-ROUTE 12,8 → 41,9 ko (×3,3), index 19,2 → 30,0 ko, REPRISE
-9,2 → 13,1 ko. Lecture obligatoire à froid ≈ 170 ko (≈ 45 à 50 k jetons) avant le lot. Les
-cellules de la file (A276 notamment) sont redevenues des journaux S252 → S291.
-**Coût de l'eau aujourd'hui, sur la machine locale** (portable, RTX 5070 Laptop) : J1 = GPU
-médian 1,74 ms + CPU hôte 4,1 ms (S267) ; bande δ 8,27 ms (S291). Soit ≈ 14 ms contre 2 ms pour
-toute l'eau (ADR-125), et ≈ 5,8 ms sans δ. ADR-125 ne fixe **aucune répartition** entre couches
-ni entre CPU et GPU.
-**A278 surévalué** : l'hôte contient déjà du `unsafe` (`viewer/src/counting.rs`, allocateur
-compteur) ; et un vivier persistant sûr existe sans emprunt partagé (tampons possédés par les
-fils et rendus par canal borné, ou sortie en `AtomicU32` à écriture disjointe). Hypothèse à
-éprouver, pas un fait reçu.
-
-**P6 — blocages classés (14:33–14:35).**
-*Techniques structurels.* T1 : **porte B verrouillée par une règle interne** — « A276 avant la
-3D », posée par S249 et écrite en déclencheur par S276 (cafcea6), sans décision de l'utilisateur ;
-or la porte C se reçoit « sur la scène de la porte B » et le livrable de J2 (« cavité et gerbe
-d'impact, proche-coque ») est tridimensionnel : la dépendance va dans l'autre sens. T2 : **famille
-de δ non choisie (B3)** ; le seul candidat, surface-fonction-hauteur en tranche x-z, ne peut
-exécuter aucun des quatre scénarios de B3 (coque, cavité, déferlement, compartiment). T3 :
-**architecture d'exécution de δ** — ADR-173 garde sur CPU le résidu, les itérations restantes
-et les portes à chaque pas ; extrapolé des coûts par maille mesurés en S291 (0,23 µs/maille pour
-les postes CPU du pas mobile, ≈ 0,9 pour le pas couplé), un domaine 3D de 64×64×32 coûterait
-30 à 120 ms de CPU par pas, et la bande actuelle étendue en 3D (128×128×52) 200 à 800 ms. La
-porte C nomme « δ sur GPU (décision d'architecture, ADR) », jamais prise. Estimation, pas mesure.
-T4 : **budget unique sans répartition ni cible** — J1 seul ≈ 5,8 ms, δ 8,27 ms, 2 ms pour tout ;
-ADR-131 (liste ouverte) ne laisse aucun point d'arrêt : le coût ne peut jamais être « reçu ».
-T5 : **aucun objet pilotable ni intégrateur de corps rigide** (body.rs : « ni intégrateur, ni
-rotation ») ; porte D non commencée, J1 ouvert sur l'interaction représentative.
-*Pilotage.* M1 : chaînage des suites (10/10) et maillons remis à zéro par toute optimisation
-consommée ; M2 : classe de fidélité uniforme — identité au bit, portes physiques à chaque pas —
-appliquée à une couche cosmétique, contre source §1 et §17 ; M3 : documents d'état regonflés,
-≈ 300 lignes de Markdown par session de 15 à 40 min.
-*Hors de portée d'une session.* U1 cible matérielle et répartition des 2 ms (ADR-125) ; U2
-périmètre de la v1 (en attente depuis S281) ; U3 dépôt distant (aucun) ; U4 verdict de l'onde
-S277 ; U5 faits d'intégration du jeu (inconnus depuis S19).
-*Faux blocages ou surévalués.* A278 (voir P5) ; A294 ne concerne que l'activation de δ GPU
-dans la boucle d'image, et le geste de mesure est déjà écrit.
-
-**P7 — bilan écrit (14:35–14:38)** : `docs/registres/BILAN-GLOBAL-S293.md`, indexé en tête du
-socle. Cinq questions à l'utilisateur (cible et budget, v1, dépôt distant, ordre et architecture
-de δ, onde S277) ; ordre recommandé 0 → 5. Chiffres corrigés avant commit : code ≈ 95 000 lignes
-ajoutées (et non 96 000), 200 à 360 lignes de Markdown par session, près de 1 500 commits.
+Réponses verbatim ci-dessus ; elles font foi. Q3 : aucun dépôt distant, tout reste sur ce PC.

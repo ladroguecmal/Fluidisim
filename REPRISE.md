@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 14:41 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 14:48 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : aucune
+Session en cours : S294 — consigner les arbitrages de l'utilisateur du 2026-09-19, décider l'architecture de δ en 3D, lever les verrous de pilotage
 Dernière session : S293 — audit global : le projet bloque sur l'ordre de ses travaux ; BILAN-GLOBAL-S293
-Session suivante : porter les réponses de l'utilisateur aux questions Q1–Q5 de BILAN-GLOBAL-S293 §6. Sur « continue » sans réponse : lot 1 du bilan §5 (lever « A276 avant la 3D » en montrant la dépendance, choix du lot par les portes, maillons liés aux colonnes « reçu si », plafonds des documents d'état), puis rédiger l'ADR d'architecture de δ en 3D (A295) — acté seulement après Q4. A294 : une exécution de `--pas-couple`, sans construire d'entretien.
+Session suivante : à fixer au rituel de S294. À défaut : porte B, premier lot — domaine δ tridimensionnel de référence dans le cœur.
 Maillons        : 2 — S292 mesure sans capacité, S293 audit ; la suivante vise une capacité (porte B ou scène-témoin de la v1)
 ```
 
