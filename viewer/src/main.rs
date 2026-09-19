@@ -2231,6 +2231,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-projection") {
         return delta3d_projection::recevoir_projection();
     }
+    if args.iter().any(|a| a == "--delta3d-cout") {
+        return delta3d_projection::mesurer_cout();
+    }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();
     }

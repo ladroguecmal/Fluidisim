@@ -94,8 +94,8 @@ Critères avant code, posés ici :
   sur la carte depuis la seule géométrie, reçus contre ceux du cœur.
 - [x] **P5** — PCG **résident à cycles fixés** sur un second membre donné : scalaires sur la
   carte, aucun retour CPU entre itérations ; pression comparée à la référence.
-- [>] **P6** — coût du pas borné sur le poste de référence, cycles comptés et publiés.
-- [ ] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
+- [x] **P6** — coût du pas borné sur le poste de référence, cycles comptés et publiés.
+- [>] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
 
@@ -143,3 +143,15 @@ Dispatchs = **3 + 5·cycles + 2**, indépendants de la donnée : c'est la borne 
 Trois refus attendus obtenus. Pression maximale stable à 5,003·10³ dès 32 cycles.
 À 128 cycles les deux résidus divergent (2,72 contre 2,02·10⁻⁷) : à ce niveau la somme f32 et
 l'écart d'un ulp entre les deux opérateurs dominent. Ce n'est pas un désaccord de schéma.
+
+P6 mesuré (`--delta3d-cout`, RTX 5070 Laptop, 30 passages, premier écarté) — médiane ms :
+32³ (32 768 mailles) : 0,090144 / 0,164864 / 0,313504 à 8 / 16 / 32 cycles ;
+48×48×24 (55 296) : 0,122528 / 0,223328 / 0,423200 ;
+64×64×32 (131 072) : 0,234176 / 0,428384 / 0,816096, maximum 0,848640.
+Résidus relatifs correspondants : 2,44·10⁻³ à 6,98·10⁻⁴ selon les cycles.
+
+**Correction apportée en P6** : le résidu relatif du banc de coût était rapporté à la divergence
+d'entrée au lieu de ‖b‖ ; les fantômes dominent b de plusieurs ordres, et le rapport valait 10⁵.
+‖b‖ est désormais calculée **sur la carte** juste après l'assemblage. La formule des dispatchs
+passe donc de 3+5c+2 à **5+5c+2** : la ligne du commit P5 est périmée sur ce seul point.
+Le banc de réception P5, lui, normalisait déjà par ‖b‖ du cœur : ses résidus sont inchangés.

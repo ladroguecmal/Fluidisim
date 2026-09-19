@@ -41,6 +41,7 @@ const RZ: u32 = 0u;
 const DQ: u32 = 1u;
 const ALPHA: u32 = 2u;
 const BETA: u32 = 3u;
+const BNORM: u32 = 4u;
 
 var<workgroup> scratch: array<f32, 64>;
 
@@ -184,6 +185,27 @@ fn assemble(@builtin(global_invocation_id) id: vec3<u32>) {
     }
     state[at(B, c)] = b;
     if (diag > 0.0) { state[at(M, c)] = 1.0 / (diag * params.inv_dx2); } else { state[at(M, c)] = 0.0; }
+}
+
+/// `‖b‖²` replié dans la tranche 2, juste après l'assemblage : c'est l'échelle contre laquelle
+/// le résidu se lit. Sans elle, un résidu « relatif » serait rapporté à la mauvaise grandeur.
+@compute @workgroup_size(64)
+fn bnorm_fold(@builtin(global_invocation_id) id: vec3<u32>,
+              @builtin(local_invocation_index) lid: u32,
+              @builtin(workgroup_id) wid: vec3<u32>) {
+    let c = id.x;
+    var contribution = 0.0;
+    if (c < params.cells) {
+        let b = state[at(B, c)];
+        contribution = b * b;
+    }
+    fold_at(2u, contribution, lid, wid.x);
+}
+
+@compute @workgroup_size(64)
+fn finish_bnorm(@builtin(local_invocation_index) lid: u32) {
+    let v = gather_at(2u, lid);
+    if (lid == 0u) { scalar[BNORM] = v; }
 }
 
 /// Départ froid : `x = 0`, donc `r = b`. Direction préconditionnée, et `⟨r, M r⟩` replié.
