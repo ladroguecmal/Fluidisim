@@ -58,64 +58,56 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S298 — terminée : frontières 3D reçues, fond spectral réel branché, maille mesurée.
-Agent : Codex GPT-6 jusqu’à P3 ; P4 repris à chaud par Claude Opus 5, application desktop ;
-fichiers, git, cargo, outils locaux. Diff P4 jugé cohérent avec la thèse déclarée : complété, non annulé.
-Entrée : « Continue », 2026-09-19.
-Capacité : la référence 3D consomme le fournisseur spectral B du cœur ; ses frontières
-sont éprouvées contre le chemin 2D reçu. Consommateur : banc et aperçu 3D, puis référence
-pour la production GPU d’ADR-175. La scène interactive reste la prochaine intégration.
-Critères avant code : échantillons MAC identiques au ponctuel B prolongé, aucune allocation
-après configuration, aucun échantillon partiel publié sur refus ; cas plan progressif et
-éponge comparés au témoin 2D (hauteur < 3 mm S201, écarts et limites publiés).
-Ne pas transformer cette équivalence en réception universelle de l’absorption oblique.
-Le coût 2D est différé selon S293 ; ce lot prépare les entrées réelles de la porte B.
+Session : S299 — en cours : premier étage du pas GPU 3D résident (ADR-175 §4.2).
+Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, outils locaux, carte réelle.
+Entrée : « Continue », 2026-09-19, après S298 close et jeton libre.
+Carte constatée : NVIDIA GeForce RTX 5070 Laptop GPU, backend Dx12 — machine de référence
+d'ADR-174 D1. Afficheur construit hors ligne, dépendances verrouillées S210/S211.
+
+Capacité visée : le domaine 3D de δ vit **sur la carte** — tampons réservés à la création
+(I-06), opérateur de pression appliqué sans matrice sur le GPU, projection à travail **borné**
+(ADR-175 D2) — et son écart à la référence CPU de S297/S298 est mesuré, pas supposé.
+Consommateur : la scène de mer étalée de la porte B, dont S298 a mesuré qu'elle ne peut pas
+tenir sur le banc CPU, puis la revue utilisateur (ADR-175 §4.3).
+
+Critères avant code, posés ici :
+- Aucune allocation ni travail en `O(N)` sur CPU pendant le pas ; **aucune lecture synchrone**
+  (SPEC-004 §8.4). Les diagnostics se relisent en différé, avec leur âge.
+- L'action de l'opérateur assemblé sur la carte se compare à `apply_mobile3` du cœur sur le
+  même état et le même champ : écart publié, **aucune identité au bit exigée** (ADR-175 D4).
+- La projection fait un nombre de cycles **fixé par le profil**, jamais une boucle jusqu'à
+  convergence dans la boucle d'image.
+- Au-dessus de la tolérance d'ADR-144 (`10⁻⁵`, aucun nombre nouveau), le pas est **déclaré
+  dégradé** ; il n'est ni refusé ni refait.
+- L'écart à la référence se publie en hauteur et en pente, contre le repère de 3 mm de S201.
+- Aucun état δ sérialisé (I-17), aucune grandeur de jeu issue de δ (I-04, I-15).
+- La référence CPU ne bouge pas : elle est l'instrument, pas le sujet.
 
 ### Plan
 
-- [x] **P1** — amorce, lecture ciblée et plan seuls ; copie unique, master propre.
-- [x] **P2** — échantillonneur B réel sur MAC 3D, stockage réservé et publication atomique ;
-  tests au ponctuel, erreurs et allocations.
-- [x] **P3** — comparer houle progressive et éponge 3D au témoin 2D, transposition x/y ;
-  fixtures et critères existants conservés, limites publiées.
-- [x] **P4** — consommer B réel dans un aperçu 3D calculé, vérifier les images et la suite.
-- [x] **P4b** — découpage déclaré : la vérification P4 a trouvé la fixture sous-résolue
-  (3,92 mailles par λ la plus courte). Rejouer sur une fixture résolue et comparer, pour
-  séparer le bruit de maille de la dispersion physique avant de livrer l’image.
-- [x] **P5** — preuve §5/§6, index, file active, feuille de route.
-- [x] **P6** — rituel REPRISE §6 : journal, angles morts, jeton libre.
+- [>] **P1** — amorce, lecture ciblée du lot, carte constatée ; plan seul.
+- [ ] **P2** — `viewer/src/delta3d.rs` et son WGSL : domaine 3D résident, tampons réservés à la
+  création, géométrie téléversée une fois ; noyau de l'opérateur sans matrice.
+- [ ] **P3** — recevoir l'action de l'opérateur contre `apply_mobile3` : même état, même champ
+  d'entrée, écarts publiés ; refus et réserve testés.
+- [ ] **P4** — projection bornée résidente : cycles fixés, aucun retour CPU entre itérations,
+  aucune lecture synchrone ; pression comparée à la référence.
+- [ ] **P5** — diagnostics par réduction sur la carte : divergence projetée des lignes franches
+  et dérive de masse, relus en différé avec leur âge ; dégradation déclarée.
+- [ ] **P6** — coût du pas borné sur le poste de référence, et écart à la référence en hauteur
+  et pente contre les 3 mm de S201.
+- [ ] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
 
-B possède differential_local_extended (ADR-154) et differential_grid_extended (S276).
-Le support Samples3 de S297 ne traite que des fonctions de banc infaillibles.
-B est profond : le fond du domaine doit être suffisamment bas et l’atténuation publiée.
-W prolongé au-dessus du plan moyen reste A286 ; ne pas prétendre le recevoir avec B seul.
-P4 commence pendant les calculs P3, sans modifier le solveur ni les bancs en cours.
+Le cœur n'exporte **aucune** ligne d'opérateur en 3D : `apply_mobile3` est sans matrice, six
+voisins par maille via `mobile_row(i,j,k)` qui rend `(voisin, a, valeur)` — `a` le coefficient
+fantôme, `valeur` le fantôme lui-même. La production doit donc porter cette règle, pas lire des
+lignes. ADR-172 (export de lignes) ne vaut plus que pour les essais 2D (ADR-175 §3).
 
-P4 : premier essai 64 modes trop lent en ponctuel ; arrêt après quelques images.
-Réutiliser la grille S276 à chaque rangée y, mêmes bits, scratch réservé.
+`viewer/src/pressure_solver.rs` porte un CG résident **2D** (S289) qui prend des lignes du cœur :
+il sert de modèle d'ordonnancement GPU, pas de code à réutiliser tel quel.
+Aucune 3D n'existe côté afficheur : `grep Domain3 viewer/src` est vide.
 
-P4 mesuré (run complet, `viewer/captures/s298-spectral.log`) : recipe_hash 4413aa00b9029fcf,
-64 composantes, atténuation au fond 2,2591731·10⁻⁵, λ_min 0,9809 m soit **3,92 mailles**,
-vitesse verticale résiduelle au fond 1,193644·10⁻⁶ m/s, it_max 147, affinages 0,
-divergence franche max 9,39682·10⁻⁶, 121 images en ≈ 5 min 45 s (≈ 2,8 s/image, CPU séquentiel).
-Le diagnostic de résolution ajouté ne change ni le hash ni l’empreinte FRAME 0 : run publié valide.
-
-**Constat P4** : le champ de différence dégénère en damier à l’échelle de la maille et son
-amplitude **remonte** après le minimum de 3,3 s (0,047 → 0,091 m à 6 s), au lieu de se disperser
-comme en S297 analytique. Deux causes candidates, non tranchées : composantes courtes portées
-par 4 mailles ; éponge de 1 m face à une mer large bande. P4b discrimine par la résolution.
-
-P4b tranché (`viewer/captures/s298-resolu.log`, même scène, seules les périodes changent :
-Tp 1,6 et 1,75 s) : recipe_hash 2a9785f2c177e596, λ_min 2,0752 m soit **8,30 mailles**,
-atténuation au fond 1,0629863·10⁻³, vitesse verticale résiduelle 3,4031687·10⁻⁵ m/s,
-it_max 140, affinages 0, divergence franche max 4,887259·10⁻⁶ (contre 9,39682·10⁻⁶).
-Pic de différence à 6 s : **0,026775 m** contre 0,090666 m, et **décroissant** au lieu de croissant.
-Le damier était donc du bruit de maille, pas de la dispersion. Confusion assumée : à Hs constant,
-allonger les périodes baisse aussi la cambrure ; la résolution seule n’est pas isolée.
-
-**Limite trouvée, utile à la porte B** : à dx 0,25 m dans 8 × 6 m, la bande résolue tient dans
-λ ∈ [2,1 ; 7,3] m — moins de deux longueurs d’onde en travers de la boîte. La mer résolue ne
-*ressemble* donc plus à une mer étalée. Le critère « une onde traverse une mer étalée »
-(ADR-175 §4 critère 3) ne peut pas être jugé sur ce banc CPU : il demande le domaine de production.
+Banc 2D disponible pour comparer les ordres de grandeur : `--pression-gpu` sur 31×19 donne
+gpu_mediane 2,2 µs à 0 lissage, 67 µs à 32 lissages, premier passage 4,94 ms.

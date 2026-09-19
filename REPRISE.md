@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 17:36 +02:00
-Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux) ; S298 ouverte par Codex GPT-6, reprise à chaud à P4
-Session en cours : aucune — S298 terminée
+JETON            : occupé
+Battement        : 2026-09-19 19:04 +02:00
+Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
+Session en cours : S299 — premier étage du pas GPU 3D résident (ADR-175 §4.2)
 Dernière session : S298 — frontières 3D reçues contre la 2D, fond spectral réel branché, maille d'une mer étalée mesurée
 Session suivante : S299 — porte B : construire le pas GPU résident d'ADR-175 §4.2 et le juger contre la référence CPU de S297/S298, puis surface publiée dans la mer étalée et revue utilisateur (§4.3). S298 a mesuré que le banc CPU ne peut pas porter le critère 3.
 Maillons        : 0 — capacité S298 : frontières S269–S274 reproduites en 3D et fournisseur B du cœur consommé sans allocation, consommés par delta3d_boundaries et l'aperçu, preuve DELTA3D-FOND-REEL-S298
