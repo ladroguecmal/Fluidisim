@@ -13,7 +13,49 @@ use crate::host::{JobSystem, MonotonicClock};
 /// lorsque la surface passe à moins d'un millième de maille d'un centre.
 pub const SURFACE_THETA_MIN: f32 = 1e-3;
 
+/// Opérateur mobile figé (ADR-172), gauche/droite/bas/haut. `weight=0` : face ignorée ;
+/// `ghost=0` : différence avec le voisin ; sinon `weight*p*ghost`. Le facteur 1/dx²
+/// s'applique après la somme. Invalide après changement de géométrie, jamais sérialisé.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct PressureRow {
+    pub weights: [f32; 4],
+    pub ghosts: [f32; 4],
+}
+
 impl Volume {
+    /// Écrit un produit de calcul dans la réserve de l'hôte, sans allocation. Ne contient
+    /// pas les valeurs inhomogènes des fantômes (elles appartiennent au second membre).
+    pub fn write_mobile_pressure_rows(&self, rows: &mut [PressureRow]) -> Result<(), Error> {
+        if rows.len() != self.domain.cells() { return Err(Error::Shape); }
+        if !self.surface_in_bounds(&mut Control::unlimited(), Phase::Prepare)? { return Err(Error::Domain); }
+        let (nx, nz) = (self.domain.nx, self.domain.nz);
+        for k in 0..nz {
+            for i in 0..nx {
+                let c = self.c(i,k);
+                let mut row = PressureRow::default();
+                if self.wet(i,k) {
+                    for (face,j) in [i.checked_sub(1), (i+1<nx).then_some(i+1)].into_iter().enumerate() {
+                        if let Some(j) = j {
+                            let a = self.open_u[self.fu(i+face,k)];
+                            if a != 0. && self.frac[self.c(j,k)] != 0. {
+                                row.weights[face] = a;
+                                if !self.wet(j,k) { row.ghosts[face] = self.ghost_side(i,k,j).0; }
+                            }
+                        }
+                    }
+                    let down = self.open_w[self.fw(i,k)];
+                    if down > 0. && k > 0 && self.frac[self.c(i,k-1)] > 0. { row.weights[2] = down; }
+                    let up = self.open_w[self.fw(i,k+1)];
+                    if up > 0. {
+                        row.weights[3] = up;
+                        if k+1 == nz || !self.wet(i,k+1) { row.ghosts[3] = self.ghost_up(i,k).0; }
+                    }
+                }
+                rows[c] = row;
+            }
+        }
+        Ok(())
+    }
     /// S284 : amortissement préparatoire d'un état perturbatif autour d'une fenêtre future.
     /// `decay` est exp(-taux * durée), fourni par l'hôte ; [0,1], 1 ne change rien.
     /// L'intérieur de la fenêtre (hors bande) reste au bit. Pas de transduction ni conservation

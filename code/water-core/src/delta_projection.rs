@@ -54,6 +54,7 @@ mod multigrid;
 mod coupling;
 pub use coupling::{BackgroundFaces, Sponge};
 pub use mobile::SURFACE_THETA_MIN;
+pub use mobile::PressureRow;
 
 // S238 P3 : trace de mesure du plancher (tests seulement) — à chaque vrai résidu recalculé :
 // itérations, résidu relatif, erreur inverse composante par composante.

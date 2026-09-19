@@ -1,4 +1,41 @@
 use super::*;
+
+#[test]
+fn exported_mobile_rows_match_native_operator_s288() {
+    for (nx,nz) in [(16,12),(31,19)] {
+        for cut in [false,true] {
+            let ground: Vec<f32> = (0..nx).map(|i| if cut { 0.3+0.4*(i%3) as f32 } else { 0. }).collect();
+            let mut v = mobile_volume(nx,nz,1.,&ground);
+            let eta: Vec<f32> = (0..nx).map(|i| nz as f32-3.2 + 0.9*((i as f32)*0.7).sin()).collect();
+            v.set_free_surface(&eta,nz as f32-3.).unwrap();
+            let p: Vec<f32> = (0..nx*nz).map(|c| (c*37%101) as f32*0.07-2.).collect();
+            let mut native = vec![0.;nx*nz];
+            v.apply_mobile(&p,&mut native,&mut Control::unlimited()).unwrap();
+            let mut rows = vec![PressureRow::default();nx*nz];
+            v.write_mobile_pressure_rows(&mut rows).unwrap();
+            assert!(rows.iter().any(|r|r.ghosts.iter().any(|g|*g>0.)));
+            for c in 0..nx*nz {
+                let mut sum=0f32;
+                for f in 0..4 {
+                    let (a,g)=(rows[c].weights[f],rows[c].ghosts[f]);
+                    if a==0. { continue; }
+                    if g>0. { sum+=a*p[c]*g; }
+                    else {
+                        let j=match f {0=>c-1,1=>c+1,2=>c-nx,_=>c+nx};
+                        sum+=a*(p[c]-p[j]);
+                    }
+                }
+                assert_eq!(sum.to_bits(),native[c].to_bits(),"{nx} {cut} {c}");
+            }
+            let before=rows.clone();
+            assert_eq!(v.write_mobile_pressure_rows(&mut rows[..nx]),Err(Error::Shape));
+            assert_eq!(rows,before);
+            v.set_free_surface(&vec![0.;nx],0.).unwrap();
+            assert_eq!(v.write_mobile_pressure_rows(&mut rows),Err(Error::Domain));
+            assert_eq!(rows,before);
+        }
+    }
+}
 use crate::host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink};
 
 struct Arena {

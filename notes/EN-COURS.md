@@ -66,7 +66,7 @@ Objectif : construire et éprouver opérateur mobile et lissage résidents GPU c
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — ADR du candidat expérimental ; export préalloué des coefficients du véritable
+- [x] **P2** — ADR du candidat expérimental ; export préalloué des coefficients du véritable
   opérateur mobile, réception contre son application native.
 - [ ] **P3** — noyaux GPU opérateur et Jacobi, ressources réservées et alternance de tampons,
   banc sur géométries planes/coupées/ondulées et tailles différentes ; découper si nécessaire.
@@ -86,3 +86,6 @@ Repos nul exact, bords/air/solides compris, pas de lecture CPU entre lissages. C
 en bout avec transferts et attente, GPU seul si horodatage disponible ; allocations publiées.
 Seuil 1e-5 vise à distinguer une erreur de stencil d'arrondis f32 ; ne reçoit ni hauteur 3 mm
 ni acceptation ADR-144 du solveur complet. Intégration future conditionnée à ces deux portes.
+
+P2 : export natif reçu au bit sur fonds plans/coupés et surfaces ondulées, grilles
+16x12 et31x19 ; refus atomiques forme/géométrie. ADR-172 acte seulement le candidat.
