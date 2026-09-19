@@ -1819,6 +1819,17 @@ impl Volume {
     }
 }
 
+/// S295 : l'opérateur à couvercle fixe, exposé aux essais du crate seulement — le témoin 2D de
+/// la référence tridimensionnelle (`delta3d`). Aucun chemin d'exécution ne change.
+#[cfg(test)]
+impl Volume {
+    pub(crate) fn apply_for_tests(&self, p: &[f32]) -> Vec<f32> {
+        let mut out = vec![0.; p.len()];
+        self.apply(p, &mut out, &mut Control::unlimited()).unwrap();
+        out
+    }
+}
+
 #[cfg(test)]
 #[path = "tests_delta_projection.rs"]
 mod tests;

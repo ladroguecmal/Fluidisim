@@ -52,6 +52,9 @@ pub mod types;
 /// (réseaux) dans le vocabulaire d'ADR-001, et `outils/velocite.sh` classait le module
 /// dans la mauvaise couche. Un nom qui trompe un outil trompera un lecteur (S199).
 pub mod delta_projection;
+/// S295, ADR-175 : **référence tridimensionnelle de δ** — la porte B. Définie et reçue ici, sur
+/// CPU et sans dépendance ; hors de la boucle d'image, où la production sera résidente sur GPU.
+pub mod delta3d;
 
 pub use background::{Background, Component, SeaState};
 pub use body::{FloatingBox, Milieu};

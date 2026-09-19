@@ -78,7 +78,7 @@ Hors lot : surface mobile (lot 2), couplage à B/W (lot 3), production GPU (lot 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seuls.
-- [ ] **P2** — module `delta3d` : domaine, champs, configuration comptée auprès de l'hôte (I-06),
+- [x] **P2** — module `delta3d` : domaine, champs, configuration comptée auprès de l'hôte (I-06),
   opérateur de pression 3D ; essais : refus de configuration, symétrie et positivité.
 - [ ] **P3** — projection : gradient conjugué sans préconditionneur (le chemin 2D à couvercle
   fixe), critère premier `10⁻⁶`, tolérance d'ADR-144, certificat d'arrondi `γ₁₀` dérivé pour six
@@ -91,3 +91,4 @@ Hors lot : surface mobile (lot 2), couplage à B/W (lot 3), production GPU (lot 
 
 ### Notes de reprise
 
+P2 (15:05-15:12) : `delta3d` créé, opérateur 3D symétrique et défini positif ; **à `ny = 1` il est identique au bit à l'opérateur 2D** (même ordre des faces, murs `y` sans contribution). Seul ajout côté 2D : `apply_for_tests`, sous `#[cfg(test)]`. 4 essais verts.
