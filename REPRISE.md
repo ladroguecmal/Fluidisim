@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 15:18 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 15:25 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : aucune
+Session en cours : S296 — porte B, lot 2 : surface mobile de la référence δ 3D
 Dernière session : S295 — porte B, lot 1 : référence δ 3D à surface linéarisée reçue (identique au bit à la 2D quand ny = 1, onde oblique 0,176 %)
-Session suivante : porte B, lot 2 — surface **mobile** dans la référence 3D (fonction hauteur `η(x, y)`, fluide fantôme, advection), reçue à `ny = 1` contre S237/S238 (HOS d'ordre 3 : 10 cm à 0,23 % / 0,43 %, 5 cm à 0,25 % / 0,71 % à 128 colonnes) et en 3D contre une onde oblique d'amplitude finie. La scène-témoin de la porte D peut avancer en parallèle.
+Session suivante : à fixer au rituel de S296. À défaut : reprendre S296 au premier pas non coché.
 Maillons        : 0 — capacité reçue en S295 : δ a une référence tridimensionnelle, consommée par les réceptions de la porte B (ADR-175 §4.1), preuve DELTA3D-LINEAIRE-S295
 ```
 

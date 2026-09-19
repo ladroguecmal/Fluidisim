@@ -58,40 +58,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S295 — **porte B, lot 1 : la référence δ tridimensionnelle, surface linéarisée** — terminée
+Session : S296 — **porte B, lot 2 : la surface mobile dans la référence δ 3D**
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
-Entrée : suite désignée par S294 — porte en cours B (FEUILLE-DE-ROUTE §3 bis), ADR-175.
-Objectif : recevoir la première partie du critère 1 de la porte B (ADR-175 §4.1) sur le mode le
-plus simple : un domaine MAC x-y-z à surface **linéarisée** (le mode 2D de S233, ADR-141),
-référence CPU dans le cœur, **nouveau module, la 2D intacte**. Critères posés avant le code :
-1. `ny = 1` reproduit la trajectoire du solveur 2D de S233 sur le même bassin (écart publié ;
-   l'identité au bit n'est pas exigée, elle sera dite si elle a lieu) ;
-2. une hauteur initiale indépendante de `y` le reste, à l'arrondi près ;
-3. l'onde stationnaire **oblique** d'une cuve rectangulaire — mode (1, 1), `Lx` 8 m, `Ly` 4 m,
-   `h` 4 m, `A` 1 cm, vitesse nulle, 1 s — suit `η = A·cos(πx/Lx)·cos(πy/Ly)·cos(ωt)`,
-   `ω² = g·k·tanh(k·h)`, `k = π·√(1/Lx² + 1/Ly²)` : erreur maximale normalisée par `A`
-   publiée à plusieurs résolutions et pas, **décroissante en raffinant**, sous **1 %** au cas fin
-   — la tolérance de banc de S233, reprise telle quelle ;
-4. repos exact au bit, aucune allocation dans le pas, refus atomique sur non-convergence.
-Hors lot : surface mobile (lot 2), couplage à B/W (lot 3), production GPU (lot 4), coût.
+Entrée : « continue » de l'utilisateur, 2026-09-19 ; suite désignée par S295, porte en cours B.
+Objectif : la référence `delta3d` gagne le mode **à surface géométriquement mobile** de S237 —
+fonction hauteur `η(x, y)`, fluide fantôme aux faces verticales et latérales, advection centrée,
+extrapolation, transport par débits mouillés — étendu aux deux dimensions horizontales, la 2D
+intacte. Critères posés avant le code :
+1. à `ny = 1`, trajectoire **identique à la 2D** mobile au chemin de Jacobi (celui de S237) sur
+   le cas S237 à `nx` = 32 — l'identité au bit est visée, puisque le lot 1 l'a obtenue ; à défaut
+   l'écart est publié ;
+2. à `ny = 1`, le protocole S237 contre le véhicule HOS d'ordre 3 (L = h = 2 m, une période,
+   1 ms) : profil sous **2 %** de `a` à 128 colonnes et décroissant, harmonique `2k` sous **20 %**,
+   aux tolérances publiées de S237 ;
+3. en 3D : une onde le long de `y` dans une cuve transposée rend la même trajectoire que l'onde le
+   long de `x` (symétrie x↔y du schéma), à l'arrondi près ; petite amplitude oblique contre le
+   mode linéaire du lot 1 sous **1 %** de `a` (critère 4 de S237) ;
+4. repos exact au bit à un niveau non aligné, aucune allocation, refus atomiques (gardes de
+   géométrie, convergence).
+Préconditionneur de Jacobi : l'invariance en `y` n'est alors tenue qu'à l'arrondi — c'est ce
+qu'ADR-175 §4.1 demande. Hors lot : couplage B/W, production GPU, scène, coût.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seuls.
-- [x] **P2** — module `delta3d` : domaine, champs, configuration comptée auprès de l'hôte (I-06),
-  opérateur de pression 3D ; essais : refus de configuration, symétrie et positivité.
-- [x] **P3** — projection : gradient conjugué sans préconditionneur (le chemin 2D à couvercle
-  fixe), critère premier `10⁻⁶`, tolérance d'ADR-144, certificat d'arrondi `γ₁₀` dérivé pour six
-  faces (ADR-143) ; correction et divergence ; essais : divergence projetée, repos exact.
-- [x] **P4** — pas à surface linéarisée (flux de colonne, somme compensée, refus atomique) ;
-  essais : `ny = 1` contre la 2D, invariance en `y`, aucune allocation.
-- [x] **P5** — réception de l'onde oblique : banc `delta3d_lineaire`, preuve
-  `docs/validation/DELTA3D-LINEAIRE-S295.md`.
-- [x] **P6** — rituel §6.
+- [ ] **P2** — géométrie mobile et opérateur : mailles mouillées, fantômes vertical et latéraux
+  (x et y), opérateur, second membre et diagonale ; erreur inverse du mode mobile, `γ` selon le
+  nombre de faces ; essais : symétrie avec fantômes, identité au bit avec la 2D à `ny = 1`.
+- [ ] **P3** — projection mobile (Jacobi, départ depuis la pression publiée d'ADR-169),
+  correction fantôme, extrapolation, divergence des lignes franches ; essai : identité avec la 2D.
+- [ ] **P4** — advection 3D, transport mouillé en x et y, `step_surface_mobile`, gardes et refus
+  atomiques ; essais : repos exact, trajectoire `ny = 1` contre la 2D, symétrie x↔y, allocations.
+- [ ] **P5** — réception : banc `delta3d_mobile` (S237 à `ny = 1` contre HOS, petite amplitude
+  oblique contre le linéaire), preuve `DELTA3D-MOBILE-S296.md`.
+- [ ] **P6** — rituel §6.
 
 ### Notes de reprise
 
-P2 (15:05-15:06) : `delta3d` créé, opérateur 3D symétrique et défini positif ; **à `ny = 1` il est identique au bit à l'opérateur 2D** (même ordre des faces, murs `y` sans contribution). Seul ajout côté 2D : `apply_for_tests`, sous `#[cfg(test)]`. 4 essais verts.
-P3 (15:06-15:09) : projection 3D — gradient conjugué du chemin 2D à couvercle fixe, vrai résidu, porte d'ADR-144 avec cible resserrée, arrêts au plancher par `γ₁₀` et par empreinte (Brent). Champ aléatoire projeté sous `10⁻⁵` sur trois formes, repos exact au bit, murs nuls au bit. Une assertion de l'essai comparait deux ordres d'opérations flottantes au bit : remplacée par un écart relatif `10⁻⁶`, la valeur publiée étant bien celle du champ publié.
-P4 (15:09-15:13) : `step_surface_linear` 3D — flux de colonne `x` puis `y`, somme compensée, refus atomique. **`ny = 1` identique au bit à la 2D** sur 500 pas (n = 16, 2 ms) et 1 000 pas (n = 32, 1 ms), itérations comprises ; hauteur indépendante de `y` **exactement** conservée sur 200 pas, aucune vitesse transverse ; repos exact au bit ; refus `Convergence` rendant les six champs au bit ; zéro allocation sur 20 pas et au refus (essai d'intégration). Onde oblique (1,1) : 2,32 % → 0,54 % contre la dispersion continue (n = 16/2 ms → 32/1 ms, ×4,3), **0,005 % contre la fréquence du schéma** calculée hors du solveur — à condition d'y mettre le demi-pas d'Euler symplectique (`β = −ω_s²dt²/2sin(Ωdt)`) : sans lui, 0,29 %, qui n'était pas une faute du solveur mais de l'oracle.
-P5 (15:13-15:15) : banc `delta3d_lineaire` exécuté, deux gravités, quatre résolutions et pas ; cas fin 48/1 ms à **0,176 %** (Terre) et 0,131 % (Lune) contre la dispersion continue, 0,005 % contre le schéma partout ; ordre deux en espace (rapports 3,9 et 2,24) ; 16,5 ms par pas à 27 648 mailles sur un fil. Preuve `DELTA3D-LINEAIRE-S295.md`, indexée.
