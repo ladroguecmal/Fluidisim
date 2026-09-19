@@ -137,3 +137,47 @@ fn operator_reduces_to_the_2d_one_at_ny_1_s295() {
         assert_eq!(a3[c].to_bits(), a2[c].to_bits(), "maille {c}");
     }
 }
+
+fn project_current(v: &mut Volume3, dt: f32, max_iters: u32) -> Report {
+    v.us.copy_from_slice(&v.u);
+    v.vs.copy_from_slice(&v.v);
+    v.ws.copy_from_slice(&v.w);
+    v.project(-v.rho / dt, dt / v.rho, max_iters, &Jobs).unwrap()
+}
+
+#[test]
+fn projection_leaves_a_divergence_free_field_s295() {
+    for (nx, ny, nz) in [(8usize, 6usize, 5usize), (12, 1, 7), (5, 9, 4)] {
+        let (mut v, _) = volume(nx, ny, nz, 0.25, 9.81);
+        let (u, vv, w) = (noise(v.u.len(), 1), noise(v.v.len(), 2), noise(v.w.len(), 3));
+        v.set_velocity(&u, &vv, &w).unwrap();
+        let r = project_current(&mut v, 0.002, 4000);
+        assert!(!r.degraded, "{nx}x{ny}x{nz} : {r:?}");
+        assert!(r.iterations > 0 && r.divergence <= PROJECTION_DIVERGENCE_TOLERANCE, "{r:?}");
+        // La divergence publiée est celle du champ publié, recalculée ici indépendamment.
+        let mut div = vec![0.; v.domain.cells()];
+        v.divergence(&v.u, &v.v, &v.w, &mut div);
+        let umax = v.u.iter().chain(&v.v).chain(&v.w).fold(0f32, |m, x| m.max(x.abs()));
+        let d = div.iter().fold(0f32, |m, x| m.max(x.abs())) as f64 * v.domain.dx as f64 / umax as f64;
+        assert!((d - r.divergence).abs() <= 1e-6 * d, "{d} contre {}", r.divergence);
+        // Murs et fond : vitesse normale nulle au bit.
+        for k in 0..nz {
+            for j in 0..ny {
+                assert_eq!(v.u[v.fu(0, j, k)].to_bits(), 0);
+                assert_eq!(v.u[v.fu(nx, j, k)].to_bits(), 0);
+            }
+            for i in 0..nx {
+                assert_eq!(v.v[v.fv(i, 0, k)].to_bits(), 0);
+                assert_eq!(v.v[v.fv(i, ny, k)].to_bits(), 0);
+            }
+        }
+    }
+}
+
+#[test]
+fn rest_projects_to_exact_zero_s295() {
+    let (mut v, _) = volume(6, 4, 5, 0.5, 9.81);
+    let r = project_current(&mut v, 0.002, 100);
+    assert_eq!((r.iterations, r.degraded, r.residual, r.divergence), (0, false, 0., 0.));
+    assert!(v.p.iter().chain(&v.u).chain(&v.v).chain(&v.w).all(|x| x.to_bits() == 0));
+}

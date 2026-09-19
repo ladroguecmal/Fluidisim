@@ -80,7 +80,7 @@ Hors lot : surface mobile (lot 2), couplage à B/W (lot 3), production GPU (lot 
 - [x] **P1** — état réel, jeton, plan seuls.
 - [x] **P2** — module `delta3d` : domaine, champs, configuration comptée auprès de l'hôte (I-06),
   opérateur de pression 3D ; essais : refus de configuration, symétrie et positivité.
-- [ ] **P3** — projection : gradient conjugué sans préconditionneur (le chemin 2D à couvercle
+- [x] **P3** — projection : gradient conjugué sans préconditionneur (le chemin 2D à couvercle
   fixe), critère premier `10⁻⁶`, tolérance d'ADR-144, certificat d'arrondi `γ₁₀` dérivé pour six
   faces (ADR-143) ; correction et divergence ; essais : divergence projetée, repos exact.
 - [ ] **P4** — pas à surface linéarisée (flux de colonne, somme compensée, refus atomique) ;
@@ -91,4 +91,5 @@ Hors lot : surface mobile (lot 2), couplage à B/W (lot 3), production GPU (lot 
 
 ### Notes de reprise
 
-P2 (15:05-15:12) : `delta3d` créé, opérateur 3D symétrique et défini positif ; **à `ny = 1` il est identique au bit à l'opérateur 2D** (même ordre des faces, murs `y` sans contribution). Seul ajout côté 2D : `apply_for_tests`, sous `#[cfg(test)]`. 4 essais verts.
+P2 (15:05-15:06) : `delta3d` créé, opérateur 3D symétrique et défini positif ; **à `ny = 1` il est identique au bit à l'opérateur 2D** (même ordre des faces, murs `y` sans contribution). Seul ajout côté 2D : `apply_for_tests`, sous `#[cfg(test)]`. 4 essais verts.
+P3 (15:06-15:09) : projection 3D — gradient conjugué du chemin 2D à couvercle fixe, vrai résidu, porte d'ADR-144 avec cible resserrée, arrêts au plancher par `γ₁₀` et par empreinte (Brent). Champ aléatoire projeté sous `10⁻⁵` sur trois formes, repos exact au bit, murs nuls au bit. Une assertion de l'essai comparait deux ordres d'opérations flottantes au bit : remplacée par un écart relatif `10⁻⁶`, la valeur publiée étant bien celle du champ publié.

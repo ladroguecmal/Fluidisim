@@ -279,6 +279,254 @@ impl Volume3 {
             }
         }
     }
+
+    /// Divergence des faces, dans `out`. Parties `x` puis `z` dans l'ordre de la 2D, la partie `y`
+    /// ajoutée ensuite : à `ny = 1` elle vaut zéro et la valeur est celle de la 2D.
+    fn divergence(&self, u: &[f32], v: &[f32], w: &[f32], out: &mut [f32]) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let c = self.c(i, j, k);
+                    let (fl, fr) = (u[self.fu(i, j, k)], u[self.fu(i + 1, j, k)]);
+                    let (ff, fk) = (v[self.fv(i, j, k)], v[self.fv(i, j + 1, k)]);
+                    let (fb, ft) = (w[self.fw(i, j, k)], w[self.fw(i, j, k + 1)]);
+                    out[c] = ((fr - fl + ft - fb) + (fk - ff)) / dx;
+                }
+            }
+        }
+    }
+
+    /// Produit scalaire, réduit dans l'ordre des indices par tranches de 64 (SPEC-004 §8.2) ;
+    /// produits, sommes de tranches et fusion arrondis en f32 — la sémantique de la 2D, et aucune
+    /// accumulation double cachée (I-08, précision S233).
+    fn dot(&self, a: &[f32], b: &[f32], jobs: &dyn JobSystem) -> f32 {
+        let reduce = |start: usize, end: usize| {
+            let mut acc = 0f32;
+            for c in start..end { acc += a[c] * b[c]; }
+            acc as f64
+        };
+        let merge = |x: f64, y: f64| (x as f32 + y as f32) as f64;
+        jobs.parallel_reduce_ordered_f64(a.len(), 64, &reduce, &merge, 0.) as f32
+    }
+
+    /// Une norme non représentable ne fait jamais passer un second membre non nul pour le repos.
+    fn norm2(&self, a: &[f32], jobs: &dyn JobSystem) -> Result<f32, Error> {
+        let n = self.dot(a, a, jobs);
+        if !n.is_finite() { return Err(Error::NotFinite); }
+        if n == 0. && a.iter().any(|x| *x != 0.) { return Err(Error::NotFinite); }
+        Ok(n)
+    }
+
+    /// Erreur inverse composante par composante (Oettli–Prager) du vrai résidu `res`,
+    /// `max_i |r_i| / (|b| + |A||p|)_i`. Certificat d'arrêt au plancher (ADR-143), jamais critère
+    /// d'acceptation. Doit être appelée quand `res = rhs − A·p`.
+    fn backward_error(&self) -> f32 {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let inv = 1. / (dx * dx);
+        let mut worst = 0f32;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let c = self.c(i, j, k);
+                    let pc = self.p[c].abs();
+                    let mut acc = 0f32;
+                    if i > 0 { acc += pc + self.p[c - 1].abs(); }
+                    if i + 1 < nx { acc += pc + self.p[c + 1].abs(); }
+                    if j > 0 { acc += pc + self.p[c - nx].abs(); }
+                    if j + 1 < ny { acc += pc + self.p[c + nx].abs(); }
+                    if k > 0 { acc += pc + self.p[c - nx * ny].abs(); }
+                    if k + 1 < nz { acc += pc + self.p[c + nx * ny].abs(); } else { acc += pc * 2.; }
+                    let scale = self.rhs[c].abs() + acc * inv;
+                    if scale > 0. { worst = worst.max(self.res[c].abs() / scale); }
+                }
+            }
+        }
+        worst
+    }
+
+    /// Correction du champ prédit dans les tampons publiés : `u = u* − (dt/ρ)·∇p`, demi-maille au
+    /// couvercle, faces de mur intouchées.
+    fn correct(&mut self, k1: f32) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        self.u.copy_from_slice(&self.us);
+        self.v.copy_from_slice(&self.vs);
+        self.w.copy_from_slice(&self.ws);
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 1..nx {
+                    let (f, l, r) = (self.fu(i, j, k), self.c(i - 1, j, k), self.c(i, j, k));
+                    self.u[f] -= k1 * (self.p[r] - self.p[l]) / dx;
+                }
+            }
+        }
+        for k in 0..nz {
+            for j in 1..ny {
+                for i in 0..nx {
+                    let (f, a, b) = (self.fv(i, j, k), self.c(i, j - 1, k), self.c(i, j, k));
+                    self.v[f] -= k1 * (self.p[b] - self.p[a]) / dx;
+                }
+            }
+        }
+        for k in 1..=nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let (f, below) = (self.fw(i, j, k), self.c(i, j, k - 1));
+                    if k < nz {
+                        let above = self.c(i, j, k);
+                        self.w[f] -= k1 * (self.p[above] - self.p[below]) / dx;
+                    } else {
+                        self.w[f] -= k1 * (self.lid(i, j) - self.p[below]) / (0.5 * dx);
+                    }
+                }
+            }
+        }
+    }
+
+    /// `D = max|div u|·dx / max|u|` sur le champ corrigé : la tolérance physique de S199, que la
+    /// référence tient comme ADR-144 le demande. Sans fantôme de surface, toutes les lignes sont
+    /// franches. Consomme `tmp`.
+    fn divergence_metric(&mut self) -> f64 {
+        let mut tmp = core::mem::take(&mut self.tmp);
+        self.divergence(&self.u, &self.v, &self.w, &mut tmp);
+        let dmax = tmp.iter().fold(0f32, |m, x| m.max(x.abs()));
+        self.tmp = tmp;
+        let umax = self.u.iter().chain(&self.v).chain(&self.w).fold(0f32, |m, x| m.max(x.abs()));
+        let ratio = if umax > 0. { self.domain.dx / umax } else { 0. };
+        (dmax * ratio) as f64
+    }
+
+    /// Projection : résout `L p = scale·div(u*)` plus le couvercle, puis corrige.
+    ///
+    /// Le gradient conjugué est celui du chemin 2D à couvercle fixe, départ `p = 0`, et ses arrêts
+    /// sont ceux de la référence 2D : critère premier `‖b − Ap‖/‖b‖ ≤ 10⁻⁶` sur le vrai résidu
+    /// recalculé ; tolérance physique d'ADR-144 exigée pour accepter, avec cible resserrée tant
+    /// qu'elle manque ; arrêt au plancher par l'erreur inverse `≤ γ₁₀` ou par retour au bit de `p`
+    /// (Brent, ADR-143). `max_iters` borne toutes les itérations, relances comprises.
+    fn project(&mut self, scale: f32, k1: f32, max_iters: u32, jobs: &dyn JobSystem) -> Result<Report, Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let inv = 1. / (dx * dx);
+        let mut rhs = core::mem::take(&mut self.rhs);
+        self.divergence(&self.us, &self.vs, &self.ws, &mut rhs);
+        self.rhs = rhs;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let c = self.c(i, j, k);
+                    let mut b = scale * self.rhs[c];
+                    // La valeur imposée au couvercle entre ici, et nulle part ailleurs.
+                    if k + 1 == nz { b += 2. * self.lid(i, j) * inv; }
+                    self.rhs[c] = b;
+                }
+            }
+        }
+        let b2 = self.norm2(&self.rhs, jobs)?;
+        self.p.fill(0.);
+        self.res.copy_from_slice(&self.rhs);
+        let mut rr = b2;
+        let mut primed = false;
+        let mut it = 0u32;
+        let tol = 1e-12_f32;
+        let mut floor_stop = false;
+        let mut physical_target = f32::INFINITY;
+        let (mut checkpoint, mut power, mut since): (Option<u64>, u32, u32) = (None, 1, 0);
+        // `settled` porte la divergence quand la porte d'ADR-144 vient de la mesurer sur le `p`
+        // publié : la queue ne refait alors ni la correction ni la mesure.
+        let (actual_rr, settled) = loop {
+            let before = it;
+            while b2 > 0. && (rr > tol * b2 || rr > physical_target) && it < max_iters {
+                if !primed {
+                    self.dir.copy_from_slice(&self.res);
+                    primed = true;
+                }
+                let mut tmp = core::mem::take(&mut self.tmp);
+                self.apply(&self.dir, &mut tmp);
+                self.tmp = tmp;
+                let dq = self.dot(&self.dir, &self.tmp, jobs);
+                if !(dq > 0.) { break; }
+                let alpha = rr / dq;
+                for c in 0..self.p.len() {
+                    self.p[c] += alpha * self.dir[c];
+                    self.res[c] -= alpha * self.tmp[c];
+                }
+                let rn = self.norm2(&self.res, jobs)?;
+                let beta = rn / rr;
+                for c in 0..self.dir.len() {
+                    self.dir[c] = self.res[c] + beta * self.dir[c];
+                }
+                rr = rn;
+                it += 1;
+            }
+            // Vrai résidu recalculé : c'est lui qui décide, jamais la récurrence.
+            let mut tmp = core::mem::take(&mut self.tmp);
+            self.apply(&self.p, &mut tmp);
+            self.tmp = tmp;
+            for c in 0..self.res.len() { self.res[c] = self.rhs[c] - self.tmp[c]; }
+            let actual = self.norm2(&self.res, jobs)?;
+            let exhausted = it >= max_iters || it == before;
+            let mut measured = None;
+            if actual <= tol * b2 {
+                if exhausted { break (actual, None); }
+                self.correct(k1);
+                let reached = self.divergence_metric();
+                if reached <= PROJECTION_DIVERGENCE_TOLERANCE { break (actual, Some(reached)); }
+                measured = Some(reached);
+                let ratio = (PROJECTION_DIVERGENCE_TOLERANCE / reached) as f32;
+                physical_target = actual * ratio * ratio;
+            } else if exhausted {
+                break (actual, None);
+            }
+            if self.backward_error() <= ROUNDOFF_BACKWARD_ERROR_3D {
+                floor_stop = true;
+                break (actual, measured);
+            }
+            let state = fingerprint(&self.p);
+            if checkpoint == Some(state) {
+                floor_stop = true;
+                break (actual, measured);
+            }
+            since += 1;
+            if since == power {
+                checkpoint = Some(state);
+                power = power.saturating_mul(2);
+                since = 0;
+            }
+            rr = actual;
+            self.dir.copy_from_slice(&self.res);
+        };
+        let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
+        let divergence = match settled {
+            Some(d) => d,
+            None => {
+                self.correct(k1);
+                self.divergence_metric()
+            }
+        };
+        let accepted = (actual_rr <= tol * b2 || floor_stop) && divergence <= PROJECTION_DIVERGENCE_TOLERANCE;
+        Ok(Report {
+            refinements: 0,
+            iterations: it,
+            degraded: b2 > 0. && !accepted,
+            residual: residual as f64,
+            divergence,
+            floor: floor_stop,
+            backward_error: self.backward_error() as f64,
+            divergence_plain: divergence,
+        })
+    }
+}
+
+/// Empreinte 64 bits (FNV-1a) d'un champ f32, sur ses bits exacts : la détection de cycle
+/// d'ADR-143.
+fn fingerprint(values: &[f32]) -> u64 {
+    let mut h = 0xcbf2_9ce4_8422_2325u64;
+    for v in values {
+        for byte in v.to_bits().to_le_bytes() {
+            h ^= byte as u64;
+            h = h.wrapping_mul(0x0100_0000_01b3);
+        }
+    }
+    h
 }
 
 #[cfg(test)]
