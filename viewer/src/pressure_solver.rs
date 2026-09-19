@@ -651,8 +651,14 @@ async fn measure_step_async() -> Result<(), String> {
             let w_median = median(&mut w_ms.clone());
             let w_max = w_ms.iter().fold(0f64, |m, x| m.max(*x));
 
-            for iterations in [32u32, 128, 256] {
+            // S290 : les deux encodages sont mesurés dans la **même** exécution que le témoin —
+            // (7, 0) est le solveur de S289, (3, 32) celui de S290. Comparer à des nombres publiés
+            // un autre jour laisserait la variance de la machine passer pour un gain.
+            for (iterations, per_iteration, chunk) in [(32u32, 7u32, 0u32), (32, 3, 32),
+                (128, 7, 0), (128, 3, 32), (256, 7, 0), (256, 3, 32)] {
                 gpu.iterations = iterations;
+                gpu.per_iteration = per_iteration;
+                gpu.chunk = chunk;
                 gpu.calls = 0;
                 let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 28);
                 let mut driven = scene(nx, nz, dx, cut, &mut arena, &jobs, &sink)?;
@@ -680,7 +686,7 @@ async fn measure_step_async() -> Result<(), String> {
                 let d_median = median(&mut d_ms.clone());
                 let d_max = d_ms.iter().fold(0f64, |m, x| m.max(*x));
                 let calls = counted.solver.calls.max(1) as f64;
-                println!("PRESSION_PAS_S289 nx={nx} nz={nz} coupe={cut} cycle={iterations} pas={STEPS} \
+                println!("PRESSION_PAS_S290 nx={nx} nz={nz} coupe={cut} cycle={iterations} dispatchs={per_iteration} tranche={chunk} pas={STEPS} \
                     temoin_mediane_ms={w_median:.4} temoin_max_ms={w_max:.4} temoin_iterations={w_iters} \
                     conduit_mediane_ms={d_median:.4} conduit_max_ms={d_max:.4} conduit_iterations={d_iters} \
                     gain={:.3} candidat_retenu={used} candidat_refuse={refused} \

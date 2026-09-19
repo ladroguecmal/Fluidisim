@@ -78,7 +78,7 @@ allocations qu'ADR-145 interdit à la boucle d'image. Même cause, un seul lot.
   risque** — chaque groupe recalcule le scalaire lui-même au début du noyau suivant, depuis des
   valeurs écrites par le dispatch précédent. 3 dispatchs par itération, reçu au bit.*
 - [x] **P5** — allocations de l'appel : viser zéro en régime, publier ce qui reste et pourquoi.
-- [ ] **P6** — reconsommation par le **pas réel** : gain de bout en bout contre le témoin S289,
+- [x] **P6** — reconsommation par le **pas réel** : gain de bout en bout contre le témoin S289,
   mêmes tailles, mêmes fonds, portes inchangées.
 - [ ] **P7** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
@@ -217,5 +217,37 @@ le mode 5 et revient au niveau du mode 7 : le recalcul redondant coûte `groups�
 scalaire. Le mode 3 reste retenu parce que l'appel complet gagne quand même — l'encodage baisse
 plus que la carte ne monte (1,45 contre 2,55 ms à 32 768/128) — mais **le mode devrait être
 choisi par la taille**, et une somme à deux niveaux est le remède. Rien de cela n'est construit.
+
+P6 : **le pas réel reconsomme le cycle**, et les deux encodages sont mesurés contre le **même**
+témoin dans la **même** exécution — sinon la variance de la machine passerait pour un gain.
+60 pas de 2 ms, `SequentialJobs`, release. Médiane du pas, ms :
+
+| mailles | fond | cycle | témoin | S289 (7,0) | S290 (3,32) |
+|---|---|---|---|---|---|
+| 6 656 | plat | 32 | 9,9248 | 11,5741 | 10,1327 |
+| 6 656 | plat | 128 | 9,9248 | 7,0597 (×1,41) | **4,6315 (×2,14)** |
+| 6 656 | plat | 256 | 9,9248 | 10,6264 (×0,93) | 6,2199 (×1,60) |
+| 6 656 | coupé | 128 | 9,5383 | 7,5997 (×1,26) | **5,2290 (×1,82)** |
+| 6 656 | coupé | 256 | 9,5383 | 11,4465 (×0,83) | 6,2936 (×1,52) |
+| 32 768 | plat | 128 | 45,0679 | 35,7514 (×1,26) | 32,8756 (×1,37) |
+| 32 768 | plat | 256 | 45,0679 | 30,2715 (×1,49) | **26,1125 (×1,73)** |
+| 32 768 | coupé | 256 | 44,3810 | 30,6914 (×1,45) | **25,9103 (×1,71)** |
+
+Appel du candidat : 4,4665 → 2,1271 ms à 6 656/128 ; 11,3378 → 6,7252 à 32 768/256.
+24 combinaisons : 60/60 propositions retenues, 0 refus, 0 pas dégradé de part et d'autre,
+dérive de surface 0 à 7,63e-6 m — les portes n'ont pas bougé d'un cran.
+
+**Deux faits qui n'étaient pas prévus.**
+1. **Un encodage moins cher élargit la plage utile de la longueur de cycle.** Avec l'encodage de
+   S289, 256 itérations *perdaient* à 6 656 mailles (×0,93 et ×0,83) ; avec celui de S290 elles
+   gagnent (×1,60 et ×1,52). Le réglage n'est plus un piège aussi étroit.
+2. **Un cycle long achète la stabilité du pic.** À 6 656 mailles : cycle 128 → médiane 4,6315
+   mais maximum 22,6187 ; cycle 256 → médiane 6,2199 et maximum **11,0477**, contre 26,3234 pour
+   le témoin. Le cœur ne fait plus que 3 itérations par pas au lieu de 19, et la queue s'effondre.
+   C'est exactement la propriété que S286 reprochait à la cadence lente de ne pas avoir — mais
+   ici elle est obtenue, pas décidée, et elle n'est pas encore un arbitrage rendu.
+
+**Ce qui reste hors budget** : 4,6315 ms par pas contre 2 ms (ADR-125), soit ×2,3 — contre ×3,3
+en S289. Progrès réel, budget toujours non reçu.
 
 Hors de ce lot : multigrille GPU, budget 2 ms, 3D, solides, multiplateforme, garantie de pic.
