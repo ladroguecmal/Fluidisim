@@ -77,7 +77,7 @@ solveur dans cette session** : elle prépare la construction de S295, qui visera
   Notes datées sur ADR-125 ; feuille §3 bis, bandeau de la file, REVUE-VISUELLE ; A296 close.
 - [x] **P3** — lire les contrats que la 3D touche (ADR-006, 007, 012, 143, 144, SPEC-004 δ,
   structure de `delta_projection`) ; notes de conception ici.
-- [ ] **P4** — **ADR-175**, architecture d'exécution de δ en 3D : pas de production résident sur
+- [x] **P4** — **ADR-175**, architecture d'exécution de δ en 3D : pas de production résident sur
   GPU à travail borné, erreur publiée et état dégradé déclaré, cœur CPU référence de réception ;
   classe de fidélité par couche ; représentation 3D du régime perturbatif et voie non graphe (B3
   préliminaire). Note datée sur ADR-173 ; A295 décidée.

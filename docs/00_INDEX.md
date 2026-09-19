@@ -276,6 +276,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-172](adr/ADR-172-candidat-pression-residente-gpu.md) | Candidat de pression résidente GPU dans l'hôte |
 | [ADR-173](adr/ADR-173-le-candidat-de-pression-ne-fournit-qu-un-depart.md) | Un candidat de pression externe ne fournit qu'un départ (voir A295) |
 | [ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) | Arbitrages de l'utilisateur du 2026-09-19 : machine de référence, temps de l'eau au service de l'objectif, v1, ordre |
+| [ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) | Architecture d'exécution de δ en 3D : production résidente sur GPU à travail borné, référence CPU pour la réception |
 
 ## Travail et historique
 

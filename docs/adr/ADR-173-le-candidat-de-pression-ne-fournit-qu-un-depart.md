@@ -65,3 +65,14 @@ La longueur du cycle est un réglage de l'hôte, non calibré et non automatique
 S289 mesure qu'elle perd autant qu'elle gagne si elle est mal choisie. Enfin, aucune identité
 inter-GPU n'est introduite, et la trajectoire mesurée reste celle du cœur à l'arrondi de `f32`
 — si une version future la déplaçait visiblement, la revue visuelle de S254 s'appliquerait.
+
+## Note datée du 2026-09-19 (S294) — ADR-175
+
+Cette décision reste vraie **dans le cœur** : un candidat externe n'y fournit qu'un départ, et ne
+peut coûter que des itérations. Elle **cesse d'être le chemin de production** de δ :
+[ADR-175](ADR-175-architecture-d-execution-de-delta-en-3d.md) place le pas entier sur GPU, à
+travail borné, lecture différée et dégradation déclarée, la référence CPU jugeant la production à
+la réception. Deux justifications d'ici sont à lire avec cette date : l'attente synchrone du
+chemin S289–S291 contredit SPEC-004 §8.4 (« la lecture synchrone n'existe pas »), et I-13 protège
+les structures de calcul de δ contre le rendu, pas la réception physique contre un solveur GPU —
+celle-ci reste portée par la référence. Ce document n'est pas réécrit.

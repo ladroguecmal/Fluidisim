@@ -3871,3 +3871,9 @@ la liste des techniques ouverte, la porte C n'a **aucun critère atteignable** :
 *S294, 2026-09-19 — **A296 close**.* Arbitrage de l'utilisateur, [ADR-174](../adr/ADR-174-arbitrages-du-2026-09-19.md) :
 la machine de référence est nommée, le temps de l'eau sert l'objectif, et le profil de travail D3
 donne à δ ≤ 2 ms GPU. La porte C a désormais un critère atteignable ; il reste à l'atteindre.
+
+*S294, 2026-09-19 — **A295 décidée**, construction à venir.* [ADR-175](../adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) :
+la production de δ devient un pas résident sur GPU à travail borné, la référence CPU sort de la
+boucle d'image et juge la production à la réception. En relisant les contrats, un second défaut du
+même fil : le chemin S289–S291 attendait la carte à chaque pas, contre SPEC-004 §8.4. A295 reste
+ouverte jusqu'à la porte B reçue.
