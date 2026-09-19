@@ -58,32 +58,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S285 — terminée
+Session : S286 — en cours
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
-Entrée : continuer.
-Objectif : attribuer A290 au moyen de trois trajectoires au même temps, pour décider quel
-mécanisme corriger avant toute réduction automatique.
+Entrée : continuer ; priorité A276 après diagnostic spatial borné.
+Objectif : découpler expérimentalement le pas δ et la cadence image, et supprimer la dépendance
+au nombre d'appels dans le vieillissement des coûts avant cette intégration.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [x] **P2** — banc consommant Live/Layer : large intact, large préparé, étroit préparé ;
-  même préparation jusqu'à permutation, puis arrêt commun. Mesures séparées et contrôles.
-- [x] **P3** — exécuter et publier le diagnostic, tests du viewer ; arrêter au mécanisme
-  attribué, ne pas inventer une correction physique sur un seul scénario.
-- [x] **P4** — rituel §6 : journal, angles morts, file/feuille/index, jeton libre.
+- [ ] **P2** — reproduire puis corriger le vieillissement par appels refusés ; pauses et retours
+  de temps éprouvés, historique des vrais pas conservé.
+- [ ] **P3** — pas Live configurable 16/32/48 ms, comparaison à instants communs et par image,
+  coût complet et refus publiés ; ne pas activer par défaut une cadence non reçue.
+- [ ] **P4** — tests et réception, intégration expérimentale seulement si critères tenus,
+  diagnostic explicite sinon ; découper avant quinze minutes.
+- [ ] **P5** — rituel §6 : preuves, journal, file/feuille/index, jeton libre.
 
 ### Notes de reprise
 
-Troisième lot spatial comparé à A276 et à la 3D : la cadence découplée débloque le budget,
-la 3D débloque les vaguelettes demandées S277 ; une nouvelle optimisation du rétrécissement
-est moins prioritaire. Ce lot est donc borné à l'attribution manquante, préalable à choisir
-une correction sans fausse promesse de qualité. Ensuite revenir au coût A276.
-Critère d'arrêt : isoler hauteur centrale préparé-intact et réduit-préparé, vérifier identité
-au bit avant permutation, publier les fenêtres communes et les limites. Le seuil 3 mm reste
-un repère de hauteur, jamais une réception perceptive ni une tolérance modifiée pour réussir.
-S284 : 507 tests cœur/harnais, 34 viewer, 19 ignorés ; code cœur inchangé prévu ici.
-P3 : banc complet reçu, 48 pas préparés identiques, permutation pas 112 ; zéro allocation
-sur 963 appels. Maxima P-I 45,517 mm, R-P 25,391 mm, R-I 66,994 mm. À la permutation :
-8,118 mm dus à la préparation, zéro écart central de transfert. 34 tests viewer réussis,
-un ignoré. Pas de correction physique spéculative ; revenir au coût A276 après ce diagnostic.
+Critères : le nombre d'appels au même temps ne change pas l'oubli ; les nouveaux pas réussis
+seuls alimentent les mesures. Cadence : compter les vrais pas, zéro allocation, pauses et sauts,
+écarts hauteur/pente au témoin 16 ms sur houle et onde 0,6 m, coût moyen par image ET pire pas.
+Repère hauteur 3 mm S201 ; ni baisse de fréquence ni coût moyen ne reçoivent I-05 si un pas
+bloque encore plus de 2 ms. Évaluer le maintien du dernier profil entre pas avant d'introduire
+une interpolation qui pourrait cacher un retard. Fond B toujours au temps de scène (ADR-003).
+A290 différée, pas de nouvelle réduction spatiale ; priorité au coût avant 3D/deuxième domaine.

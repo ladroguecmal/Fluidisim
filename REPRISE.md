@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 10:45 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 10:49 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : —
+Session en cours : S286 — cadence et coût de delta
 Dernière session : S285 — dérive attribuée par trois témoins ; préparation et évolution réduite toutes deux en cause
 Session suivante : A276, cadence δ découplée de l'image sous budget déclaré, précision contre 16 ms et coût des refus/vieillissement ; avant 3D/deuxième domaine. A290 différée à la réduction automatique. V, B2, bathymétrie et multiplateforme gardent leurs déclencheurs. V1 et verdict S277 ouverts.
 Maillons        : 1 — diagnostic reçu, aucune nouvelle capacité de jeu ; priorité suivante au coût A276
