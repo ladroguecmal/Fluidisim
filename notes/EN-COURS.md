@@ -58,46 +58,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S288 — terminée
-Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
-Entrée : continuer ; premier candidat GPU du calcul de pression.
-Objectif : construire et éprouver opérateur mobile et lissage résidents GPU contre le cœur.
+Session : S289 — en cours
+Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
+Entrée : reprendre le projet ; suite A276 déclarée par S288.
+Objectif : un solveur de pression **résident** GPU — réductions et cycle sans retour CPU par
+itération — que le **pas réel** consomme sous les portes d'acceptation inchangées du cœur.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [x] **P2** — ADR du candidat expérimental ; export préalloué des coefficients du véritable
-  opérateur mobile, réception contre son application native.
-- [x] **P3** — noyaux GPU opérateur et Jacobi, ressources réservées et alternance de tampons,
-  banc sur géométries planes/coupées/ondulées et tailles différentes ; découper si nécessaire.
-- [x] **P4** — mesures précision/coût complet/allocations, suites pertinentes et limites ;
-  ni cycle complet ni simulation intégrée revendiqués avant leur construction.
-- [x] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
+- [ ] **P2** — cœur : export du second membre et de l'inverse de la diagonale du mode mobile,
+  sans allocation ; réception contre les valeurs internes de la projection.
+- [ ] **P3** — cœur : crochet d'un candidat de pression externe dans la projection mobile.
+  Le candidat ne franchit aucune porte : le cœur recalcule le vrai résidu et garde ADR-143/144.
+  Refus atomique d'un candidat non fini ou de mauvaise forme. Tests.
+- [ ] **P4** — GPU : réductions résidentes (produit scalaire, norme) et scalaires gardés en
+  tampon ; réception contre les réductions du cœur.
+- [ ] **P5** — GPU : cycle PCG résident, aucun retour CPU entre itérations ; réception contre
+  le CG du cœur sur les géométries de S288. Découper si nécessaire.
+- [ ] **P6** — consommation par le **pas réel** : candidat GPU proposé au pas mobile, itérations
+  restantes, acceptations/refus et coût mesurés contre le chemin CPU seul.
+- [ ] **P7** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
 ### Notes de reprise
 
-Troisième lot coût comparé à la 3D et aux solides : ces capacités manquent, mais ajouter une
-seconde direction au solveur déjà >10 fois le budget accroît ce blocage. On construit ici le
-premier étage GPU consommable par le futur solveur, sans prolonger les micro-optimisations CPU.
-Cœur sans dépendance, pile wgpu déjà autorisée, δ cosmétique, aucune nouvelle source réseau.
-Critères : export au bit contre opérateur CPU natif ; GPU contre CPU, erreur relative max
-normalisée <=1e-5 sur opérateur et 32 lissages (précision de port, pas seuil physique).
-Repos nul exact, bords/air/solides compris, pas de lecture CPU entre lissages. Coût de bout
-en bout avec transferts et attente, GPU seul si horodatage disponible ; allocations publiées.
-Seuil 1e-5 vise à distinguer une erreur de stencil d'arrondis f32 ; ne reçoit ni hauteur 3 mm
-ni acceptation ADR-144 du solveur complet. Intégration future conditionnée à ces deux portes.
+Suite déclarée par S288 : ne pas ouvrir une micro-optimisation isolée. La brique S288
+(opérateur + Jacobi amorti, export des lignes au bit) est acquise ; ce qui manque est le
+**cycle**, les **réductions** et le **consommateur**.
 
-P2 : export natif reçu au bit sur fonds plans/coupés et surfaces ondulées, grilles
-16x12 et31x19 ; refus atomiques forme/géométrie. ADR-172 acte seulement le candidat.
+Thèse d'intégration : **le GPU propose, le cœur dispose.** Le candidat entre par le chemin
+warm d'ADR-169 déjà existant — `project` recalcule `r = b − A·p` sur CPU, puis CG poursuit
+sous les portes d'ADR-143 (plancher d'arrondi) et ADR-144 (tolérance physique de S199).
+Aucune porte n'est déplacée vers le GPU, aucune publication partielle : un mauvais candidat
+coûte des itérations, il ne peut pas faire accepter un pas faux. C'est ce qui rend la
+consommation par le pas réel possible sans réception physique du GPU lui-même.
 
-P3 : export consommé par kernels GPU opérateur/Jacobi ; 30 cas GPU passent, repos exact,
-pas de readback entre 32 lissages. RTX5070/DX12. Première erreur max 1,69e-7 ; à128x52
-32 lissages ~0,8 ms aller-retour contre2,5–2,9 ms CPU empaqueté. Non encore coût avec
-export/empaquetage à chaque appel : P4 élargit cette mesure. 65–105 allocations pile+banc,
-aucune prétention I-06 image. Noms WGSL réservés operator/smooth corrigés avant réception.
-
-P4 : mesure finale inclut export+empaquetage réitérés sans allocation ;32 lissages128x52
-complets1,1020/1,2410 ms contre2,8444/2,5213 ms CPU scalaire des lignes, GPU seul0,09–0,096.
-256x128 :2,4008/2,4446 ms, pas de budget2ms reçu. Maximum erreur1,686e-7, repos nul exact.
-65–105 allocations pile+banc, pas de réception I-06 image. Secteur avant/après. 508 tests
-cœur/harnais +36 viewer réussis,19 ignorés,0 échec. Test cœur étendu dx0,5/2 et surface couplée.
+Ce qui reste hors de ce lot, et doit le rester tant qu'il n'est pas prouvé : identité
+inter-GPU, budget eau de 2 ms reçu, I-06 du chemin d'image, multigrille GPU, 3D.

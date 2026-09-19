@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 11:45 +02:00
-Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : —
+JETON            : occupé
+Battement        : 2026-09-19 11:49 +02:00
+Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
+Session en cours : S289 — solveur de pression résident GPU et consommation par le pas réel (A276)
 Dernière session : S288 — opérateur mobile et lissages GPU reçus au banc, ADR-172 ; solveur intégré encore absent
-Session suivante : A276, construire le solveur de pression résident GPU (réductions/cycle, acceptation/refus CPU) puis le consommer dans le pas réel ; pas de nouveau raffinement isolé. Priorité comparée à 3D/solides en S288. Cadence lente, A290, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Session suivante : —
 Maillons        : 2 — noyaux consommés au banc, pas encore de gain de jeu ; prochaine capacité visée : projection GPU intégrable
 
 ```
