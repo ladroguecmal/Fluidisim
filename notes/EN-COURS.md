@@ -73,9 +73,10 @@ allocations qu'ADR-145 interdit à la boucle d'image. Même cause, un seul lot.
 - [x] **P3** — réduction des dispatchs à **mathématique identique** : replier chaque réduction
   dans le noyau qui produit ses valeurs, 7 par itération → 5. Réception **au bit** contre le
   cycle de S289, puis coût.
-- [ ] **P4** — deuxième palier, seulement si P2 le justifie : réduction finale par le dernier
-  groupe (atomique) et/ou récurrence `q = A·z + β·q` qui rend la direction locale. Les deux
-  changent la précision ou la portabilité : **refus explicite** si le gain n'est pas robuste.
+- [x] **P4** — deuxième palier. *Ni l'atomique ni la récurrence `q = A·z + β·q` n'ont été
+  nécessaires : une troisième voie, apparue en construisant, est **à la fois plus rapide et sans
+  risque** — chaque groupe recalcule le scalaire lui-même au début du noyau suivant, depuis des
+  valeurs écrites par le dispatch précédent. 3 dispatchs par itération, reçu au bit.*
 - [ ] **P5** — allocations de l'appel : viser zéro en régime, publier ce qui reste et pourquoi.
 - [ ] **P6** — reconsommation par le **pas réel** : gain de bout en bout contre le témoin S289,
   mêmes tailles, mêmes fonds, portes inchangées.
@@ -157,5 +158,39 @@ l'appel. À mesurer, pas à annoncer.
 **Allocations** : elles **montent** avec les tranches — 990 → 988 (fusion+16) mais 1 245 sans
 fusion, car chaque tampon de commandes alloue. Permises et publiées (ADR-145 §2), constantes à
 longueur de cycle et tranche fixées.
+
+P4 : **3 dispatchs par itération**, reçus au bit. Les deux dispatchs à un seul groupe — ceux
+qui sommaient les valeurs par groupe pour faire `α` puis `β` — coûtaient un enregistrement plein
+(1,86 µs) pour un travail négligeable. Ils disparaissent : **chaque groupe refait la somme**, au
+début du noyau qui a besoin du scalaire. Les valeurs sommées viennent du **dispatch précédent**,
+donc leur visibilité est celle d'une frontière de dispatch, que WebGPU garantit. Ni atomique, ni
+synchronisation inter-groupes, ni pari sur la spécification — et le scalaire n'est plus stocké,
+donc plus écrit en concurrence. `partial` porte trois tranches, l'ancienne ⟨r,z⟩ survivant à la
+neuve ; la parité choisit laquelle, par deux points d'entrée au lieu d'un test.
+
+Les voies 3 et 4 du plan sont **abandonnées sans être construites** : elles coûtaient de la
+précision ou de la portabilité pour moins de gain. À ne pas reprendre sans raison nouvelle.
+
+Réception : 72 combinaisons, **zéro bit d'écart** sur la pression **et sur les deux diagnostics**
+(⟨r,z⟩ et ‖r‖²) — cette seconde comparaison vérifie que `close_*` lit la bonne tranche.
+Dispatchs à 128 itérations : 901 → 387. Allocations : 979 → 575.
+
+Coût de l'appel, médiane sur 30, contre le chemin de S289 (7 dispatchs, un tampon) :
+6 656 mailles — 32 itérations 1,3408 → 0,8442 ms (×1,59) ; 128 : 3,9748 → **1,8228** (×2,18) ;
+256 : 7,5894 → 3,1271 (×2,43). 32 768 mailles — 32 : 3,2225 → 1,9335 (×1,67) ;
+128 : 5,8523 → 3,4009 (×1,72) ; 256 : 10,6282 → 5,8590 (×1,81). Les maxima baissent aussi
+(6,0281 → 3,0944 à 6 656/128 ; 12,6691 → 8,4717 à 32 768/256).
+
+**Biais d'instrumentation trouvé et retiré avant publication** : la première mesure laissait les
+variantes à un seul tampon payer un aller-retour d'horodatage que les variantes par tranches ne
+payaient pas, surestimant le gain des tranches d'environ 0,5 ms. L'horodatage est désormais
+éteint dans ce banc ; le temps de carte se lit dans `--pression-cg`, à configuration égale.
+Deuxième correction : dix passages laissaient des aberrations peser sur la médiane — 30 passages.
+
+**Limite à publier** : le recalcul redondant coûte `groups` lectures par groupe, donc `groups²`
+par dispatch. À 6 656 mailles (104 groupes) la carte y gagne encore ; à 32 768 (512 groupes) elle
+y perd déjà — mesuré en P5. Le gain net reste positif parce que l'encodage baisse plus que la
+carte ne monte, mais **cette voie a un croisement**, et une somme à deux niveaux serait le
+remède si une grille plus grande arrive.
 
 Hors de ce lot : multigrille GPU, budget 2 ms, 3D, solides, multiplateforme, garantie de pic.

@@ -22,7 +22,7 @@ const GROUP: u32 = 64;
 pub struct Resident {
     device: wgpu::Device,
     queue: wgpu::Queue,
-    stages: [wgpu::ComputePipeline; 13],
+    stages: [wgpu::ComputePipeline; 22],
     bind: wgpu::BindGroup,
     rows: wgpu::Buffer,
     rhs: wgpu::Buffer,
@@ -40,9 +40,11 @@ pub struct Resident {
     /// Nombre d'itérations du cycle, fixé par l'hôte. Le GPU n'arrête jamais de lui-même :
     /// un critère d'arrêt demanderait la lecture que ce solveur existe pour supprimer.
     pub iterations: u32,
-    /// S290 : noyaux fusionnés — 5 dispatchs par itération au lieu de 7, mathématique
-    /// inchangée. Le chemin séparé de S289 reste disponible pour prouver l'égalité au bit.
-    pub fused: bool,
+    /// S290 : dispatchs par itération — **7** (chemin de S289), **5** (réductions repliées dans
+    /// leurs producteurs) ou **3** (scalaires recalculés par chaque groupe). Les trois sont
+    /// reçus **au bit** l'un contre l'autre ; les deux réductions restent le même arbre sur les
+    /// mêmes valeurs. Toute autre valeur est refusée.
+    pub per_iteration: u32,
     /// S290 : itérations par tampon de commandes. `0` = un seul tampon, comme S289. Soumettre
     /// par tranches laisse l'encodage de la suivante recouvrir l'exécution de la précédente ;
     /// rien n'est rapatrié entre les tranches, la résidence est intacte.
@@ -83,6 +85,12 @@ const FINISH_RR: usize = 9;
 const INIT_FOLD: usize = 10;
 const APPLY_FOLD: usize = 11;
 const UPDATE_FOLD: usize = 12;
+const INIT_FOLD0: usize = 13;
+const APPLY_FOLD0: usize = 14;
+const ADVANCE: [usize; 2] = [15, 16];
+const DIRECT: [usize; 2] = [17, 18];
+const CLOSE: [usize; 2] = [19, 20];
+const CLOSE_SUM: usize = 21;
 
 fn buffer(device: &wgpu::Device, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
     device.create_buffer(&wgpu::BufferDescriptor { label: None, size, usage, mapped_at_creation: false })
@@ -106,7 +114,8 @@ impl Resident {
         let rows = buffer(&device, (cells * 32) as u64, storage);
         let rhs = buffer(&device, (cells * 4) as u64, storage);
         let state = buffer(&device, cells as u64 * 4 * SECTIONS, storage);
-        let partial = buffer(&device, (groups * 4).max(4) as u64, storage);
+        // Trois tranches : ⟨d,q⟩, puis ⟨r,z⟩ en alternance — l'ancienne survit à la neuve (S290).
+        let partial = buffer(&device, (groups * 4 * 3).max(12) as u64, storage);
         let scalar = buffer(&device, 16, storage);
         let read = buffer(&device, (cells * 4) as u64 + 16,
             wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
@@ -141,7 +150,9 @@ impl Resident {
             compilation_options: Default::default(), cache: None });
         let stages = ["apply_dir", "reduce_dq", "finish_dq", "update_pr", "reduce_rz", "finish_rz",
             "update_dir", "init", "reduce_rr", "finish_rr",
-            "init_fold", "apply_fold", "update_fold"].map(pipeline);
+            "init_fold", "apply_fold", "update_fold",
+            "init_fold0", "apply_fold0", "advance_even", "advance_odd", "direct_even",
+            "direct_odd", "close_even", "close_odd", "close_sum"].map(pipeline);
         let query = (!features.is_empty()).then(|| device.create_query_set(&wgpu::QuerySetDescriptor {
             label: None, ty: wgpu::QueryType::Timestamp, count: 2 }));
         let query_resolve = buffer(&device, 16, wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC);
@@ -154,7 +165,7 @@ impl Resident {
             // S290 : défauts reçus au bit contre le chemin de S289. `16` tient le mieux sur les
             // six couples taille/longueur mesurés ; `32` est à 3-7 % et `8` clairement moins bon.
             // L'optimum se déplace de quelques pour cent et n'est calibré pour aucune taille.
-            iterations, fused: true, chunk: 16, timing: false, last_device_ms: None, last_wall_ms: 0., last_pack_ms: 0., last_encode_ms: 0., last_submit_ms: 0.,
+            iterations, per_iteration: 3, chunk: 32, timing: false, last_device_ms: None, last_wall_ms: 0., last_pack_ms: 0., last_encode_ms: 0., last_submit_ms: 0.,
             last_wait_ms: 0., last_read_ms: 0., last_dispatches: 0,
             last_residual2: 0., last_rz: 0.,
             last_allocations: 0, calls: 0,
@@ -249,35 +260,54 @@ impl Resident {
                     pass.dispatch_workgroups(count, 1, 1);
                     dispatches += 1;
                 };
+                let compact = self.per_iteration == 3;
                 if opening {
-                    if self.fused {
-                        run(&mut pass, INIT_FOLD, groups);
-                    } else {
-                        run(&mut pass, INIT, groups);
-                        run(&mut pass, REDUCE_RZ, groups);
+                    match self.per_iteration {
+                        3 => run(&mut pass, INIT_FOLD0, groups),
+                        5 => { run(&mut pass, INIT_FOLD, groups); run(&mut pass, FINISH_RZ, 1); }
+                        _ => {
+                            run(&mut pass, INIT, groups);
+                            run(&mut pass, REDUCE_RZ, groups);
+                            run(&mut pass, FINISH_RZ, 1);
+                        }
                     }
-                    run(&mut pass, FINISH_RZ, 1);
                 }
-                for _ in 0..take {
-                    if self.fused {
-                        run(&mut pass, APPLY_FOLD, groups);
-                        run(&mut pass, FINISH_DQ, 1);
-                        run(&mut pass, UPDATE_FOLD, groups);
-                        run(&mut pass, FINISH_RZ, 1);
-                    } else {
-                        run(&mut pass, APPLY, groups);
-                        run(&mut pass, REDUCE_DQ, groups);
-                        run(&mut pass, FINISH_DQ, 1);
-                        run(&mut pass, UPDATE_PR, groups);
-                        run(&mut pass, REDUCE_RZ, groups);
-                        run(&mut pass, FINISH_RZ, 1);
+                for n in done..done + take {
+                    match self.per_iteration {
+                        // La parité choisit laquelle des deux tranches de ⟨r,z⟩ est l'ancienne.
+                        3 => {
+                            let k = (n % 2) as usize;
+                            run(&mut pass, APPLY_FOLD0, groups);
+                            run(&mut pass, ADVANCE[k], groups);
+                            run(&mut pass, DIRECT[k], groups);
+                        }
+                        5 => {
+                            run(&mut pass, APPLY_FOLD, groups);
+                            run(&mut pass, FINISH_DQ, 1);
+                            run(&mut pass, UPDATE_FOLD, groups);
+                            run(&mut pass, FINISH_RZ, 1);
+                            run(&mut pass, UPDATE_DIR, groups);
+                        }
+                        _ => {
+                            run(&mut pass, APPLY, groups);
+                            run(&mut pass, REDUCE_DQ, groups);
+                            run(&mut pass, FINISH_DQ, 1);
+                            run(&mut pass, UPDATE_PR, groups);
+                            run(&mut pass, REDUCE_RZ, groups);
+                            run(&mut pass, FINISH_RZ, 1);
+                            run(&mut pass, UPDATE_DIR, groups);
+                        }
                     }
-                    run(&mut pass, UPDATE_DIR, groups);
                 }
                 if closing {
                     // Diagnostic seul : `‖r‖²` du cycle, écrit dans la case `DQ` désormais libre.
-                    run(&mut pass, REDUCE_RR, groups);
-                    run(&mut pass, FINISH_RR, 1);
+                    if compact {
+                        run(&mut pass, CLOSE[(self.iterations % 2) as usize], groups);
+                        run(&mut pass, CLOSE_SUM, 1);
+                    } else {
+                        run(&mut pass, REDUCE_RR, groups);
+                        run(&mut pass, FINISH_RR, 1);
+                    }
                 }
             }
             if closing {
@@ -437,7 +467,7 @@ async fn measure_async() -> Result<(), String> {
         // Ce banc est la **reproduction** de la réception de S289 : il reste sur le chemin
         // d'alors — noyaux séparés, un seul tampon de commandes — pour que ses nombres soient
         // encore comparables. Les variantes de S290 ont leur propre banc.
-        gpu.fused = false;
+        gpu.per_iteration = 7;
         gpu.chunk = 0;
         if nx == 128 {
             for count in [64u32, 256, 1024] {
@@ -701,20 +731,26 @@ pub fn measure_variants() -> Result<(), String> { pollster::block_on(measure_var
 async fn measure_variants_async() -> Result<(), String> {
     for (nx, nz, dx) in [(128usize, 52usize, 2.0f32), (256, 128, 0.5)] {
         let mut gpu = Resident::new(Domain { nx, nz, dx }, 0).await?;
-        gpu.timing = true;
+        // **Aucun horodatage ici.** Le lire demande un second aller-retour de cartographie, que
+        // seules les variantes à un tampon pouvaient payer : la première mesure comparait donc
+        // des appels inégalement chargés, et surestimait le gain des tranches de 0,5 ms environ.
+        // Le temps de carte se lit dans `--pression-cg`, à configuration égale.
+        gpu.timing = false;
         for cut in [false, true] {
             let (rows, rhs, start) = capture_problem(nx, nz, dx, cut)?;
             for iterations in [32u32, 128, 256] {
                 gpu.iterations = iterations;
-                let mut reference: Option<Vec<f32>> = None;
-                for (fused, chunk) in [(false, 0u32), (true, 0), (false, 16), (true, 16), (true, 32), (true, 8)] {
-                    gpu.fused = fused;
+                let mut reference: Option<(Vec<f32>, f32, f32)> = None;
+                for (fused, chunk) in [(7u32, 0u32), (5, 0), (3, 0), (5, 16), (3, 16), (3, 32)] {
+                    gpu.per_iteration = fused;
                     gpu.chunk = chunk;
                     let mut p = start.clone();
-                    let mut wall = Vec::with_capacity(9);
+                    let mut wall = Vec::with_capacity(30);
                     let mut parts = [const { Vec::<f64>::new() }; 4];
                     let mut allocations = 0;
-                    for rep in 0..10 {
+                    // 30 passages : la variance de cette machine est de quelques dixièmes de ms,
+                    // et dix passages laissaient des aberrations peser sur la médiane.
+                    for rep in 0..31 {
                         p.copy_from_slice(&start);
                         gpu.solve(&rows, &rhs, &mut p)?;
                         if rep > 0 {
@@ -727,10 +763,16 @@ async fn measure_variants_async() -> Result<(), String> {
                     wall.sort_by(f64::total_cmp);
                     for v in parts.iter_mut() { v.sort_by(f64::total_cmp); }
                     let (dispatches, device) = (gpu.last_dispatches, gpu.last_device_ms);
-                    let ecart = match &reference {
-                        None => { reference = Some(p.clone()); 0usize }
-                        Some(r) => r.iter().zip(&p).filter(|(a, b)| a.to_bits() != b.to_bits()).count(),
+                    let (rz, rr) = (gpu.last_rz, gpu.last_residual2);
+                    let mut ecart = match &reference {
+                        None => { reference = Some((p.clone(), rz, rr)); 0usize }
+                        Some((r, _, _)) => r.iter().zip(&p).filter(|(a, b)| a.to_bits() != b.to_bits()).count(),
                     };
+                    // Les deux diagnostics sont le même arbre sur les mêmes valeurs : eux aussi
+                    // doivent sortir au bit, sinon `close_*` ne lit pas la bonne tranche.
+                    if let Some((_, r0, r1)) = &reference {
+                        if rz.to_bits() != r0.to_bits() || rr.to_bits() != r1.to_bits() { ecart += 1; }
+                    }
                     let base = wall.len() / 2;
                     println!("VARIANTE_CG_S290 nx={nx} nz={nz} coupe={cut} iterations={iterations} \
                         fusion={fused} tranche={chunk} dispatchs={dispatches} \

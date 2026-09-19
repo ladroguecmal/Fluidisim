@@ -60,14 +60,17 @@ fn stencil(section: u32, c: u32) -> vec2<f32> {
 
 /// Somme d'arbre dans le groupe, puis une valeur par groupe. Ordre fixé par la structure :
 /// reproductible sur une même carte, sans prétention d'identité inter-GPU (ADR-172).
-fn fold(value: f32, lid: u32, group: u32) {
+fn fold(value: f32, lid: u32, group: u32) { fold_at(0u, value, lid, group); }
+
+fn fold_at(base: u32, value: f32, lid: u32, group: u32) {
     scratch[lid] = value;
     workgroupBarrier();
     for (var s = 32u; s > 0u; s >>= 1u) {
         if lid < s { scratch[lid] += scratch[lid + s]; }
         workgroupBarrier();
     }
-    if lid == 0u { partial[group] = scratch[0]; }
+    if lid == 0u { partial[base * params.groups + group] = scratch[0]; }
+    workgroupBarrier();
 }
 
 fn product(a: u32, b: u32, c: u32) -> f32 {
@@ -76,12 +79,16 @@ fn product(a: u32, b: u32, c: u32) -> f32 {
 }
 
 /// Somme des valeurs par groupe, dans un seul groupe. `groups` ≤ 65 536 par construction.
-fn gather(lid: u32) -> f32 {
+fn gather(lid: u32) -> f32 { return gather_at(0u, lid); }
+
+/// Même somme, sur la tranche de `partial` qui commence à `base * groups` (S290).
+fn gather_at(base: u32, lid: u32) -> f32 {
     var v = 0.0;
     var i = lid;
+    let origin = base * params.groups;
     loop {
         if i >= params.groups { break; }
-        v += partial[i];
+        v += partial[origin + i];
         i += 64u;
     }
     scratch[lid] = v;
@@ -90,7 +97,11 @@ fn gather(lid: u32) -> f32 {
         if lid < s { scratch[lid] += scratch[lid + s]; }
         workgroupBarrier();
     }
-    return scratch[0];
+    // S290 : `scratch` sert à plusieurs phases dans un même noyau. Sans cette barrière, un fil
+    // pourrait l'écraser avant qu'un autre n'ait lu le résultat.
+    let out = scratch[0];
+    workgroupBarrier();
+    return out;
 }
 
 /// Amorçage : diagonale, vrai résidu `b − A·p` du départ fourni, direction préconditionnée.
@@ -244,4 +255,139 @@ fn update_fold(@builtin(global_invocation_id) id: vec3<u32>,
         v = r * z;
     }
     fold(v, lid, wid.x);
+}
+
+// ─── S290, chemin « scalaire recalculé » : 3 dispatchs par itération ───────────────────────
+//
+// Les deux dispatchs à un seul groupe de travail — ceux qui sommaient les valeurs par groupe
+// pour produire `α` puis `β` — coûtaient exactement le même enregistrement que n'importe quel
+// autre dispatch, 1,86 µs, pour un travail négligeable. Ici **chaque groupe refait la somme
+// lui-même**, au début du noyau qui a besoin du scalaire. Les valeurs sommées ont été écrites
+// par le **dispatch précédent** : leur visibilité est celle d'une frontière de dispatch, que
+// WebGPU garantit. Aucune atomique, aucune synchronisation inter-groupes, aucun pari sur la
+// spécification — et le scalaire n'est plus stocké, donc plus écrit en concurrence.
+//
+// La somme est l'**même** arbre sur les **mêmes** valeurs : l'égalité au bit avec le chemin
+// précédent est exigible, et le banc la vérifie.
+//
+// `partial` porte trois tranches de `groups` valeurs : 0 pour ⟨d,q⟩, 1 et 2 pour ⟨r,z⟩ en
+// alternance — la tranche ancienne doit survivre pendant que la nouvelle s'écrit.
+const PART_DQ: u32 = 0u;
+const PART_RZ0: u32 = 1u;
+const PART_RZ1: u32 = 2u;
+
+fn guard(num: f32, den: f32) -> f32 {
+    if den > 0.0 && den < HUGE && num > 0.0 && num < HUGE { return num / den; }
+    return 0.0;
+}
+
+/// `p += α d ; r -= α q ; z = M⁻¹r`, puis ⟨r,z⟩ dans la tranche neuve. `α` est refait ici.
+fn advance(old: u32, fresh: u32, id: vec3<u32>, lid: u32, group: u32) {
+    let dq = gather_at(PART_DQ, lid);
+    let rz = gather_at(old, lid);
+    let a = guard(rz, dq);
+    var v = 0.0;
+    let c = id.x;
+    if c < params.cells {
+        let p = state[at(P, c)] + a * state[at(D, c)];
+        let r = state[at(R, c)] - a * state[at(Q, c)];
+        state[at(P, c)] = p;
+        state[at(R, c)] = r;
+        let z = state[at(M, c)] * r;
+        state[at(Z, c)] = z;
+        v = r * z;
+    }
+    fold_at(fresh, v, lid, group);
+}
+
+/// `d = z + β d`, `β` refait depuis les deux tranches de ⟨r,z⟩.
+fn direct(old: u32, fresh: u32, id: vec3<u32>, lid: u32) {
+    let rzn = gather_at(fresh, lid);
+    let rz = gather_at(old, lid);
+    let b = guard(rzn, rz);
+    let c = id.x;
+    if c < params.cells { state[at(D, c)] = state[at(Z, c)] + b * state[at(D, c)]; }
+}
+
+@compute @workgroup_size(64)
+fn advance_even(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32, @builtin(workgroup_id) wid: vec3<u32>) {
+    advance(PART_RZ0, PART_RZ1, id, lid, wid.x);
+}
+@compute @workgroup_size(64)
+fn advance_odd(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32, @builtin(workgroup_id) wid: vec3<u32>) {
+    advance(PART_RZ1, PART_RZ0, id, lid, wid.x);
+}
+@compute @workgroup_size(64)
+fn direct_even(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32) {
+    direct(PART_RZ0, PART_RZ1, id, lid);
+}
+@compute @workgroup_size(64)
+fn direct_odd(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32) {
+    direct(PART_RZ1, PART_RZ0, id, lid);
+}
+
+/// Amorçage de ce chemin : ⟨r,z⟩₀ va dans la tranche 1, que la première itération lit.
+@compute @workgroup_size(64)
+fn init_fold0(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32, @builtin(workgroup_id) wid: vec3<u32>) {
+    var v = 0.0;
+    let c = id.x;
+    if c < params.cells {
+        let op = stencil(P, c);
+        var m = 0.0;
+        if op.y > 0.0 { m = 1.0 / op.y; }
+        state[at(M, c)] = m;
+        let r = rhs[c] - op.x;
+        state[at(R, c)] = r;
+        let z = m * r;
+        state[at(Z, c)] = z;
+        state[at(D, c)] = z;
+        v = r * z;
+    }
+    fold_at(PART_RZ0, v, lid, wid.x);
+}
+
+/// `q = A·d` avec ⟨d,q⟩ dans la tranche 0. Identique à `apply_fold`, autre tranche.
+@compute @workgroup_size(64)
+fn apply_fold0(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32, @builtin(workgroup_id) wid: vec3<u32>) {
+    var v = 0.0;
+    let c = id.x;
+    if c < params.cells {
+        let q = stencil(D, c).x;
+        state[at(Q, c)] = q;
+        v = state[at(D, c)] * q;
+    }
+    fold_at(PART_DQ, v, lid, wid.x);
+}
+
+/// Diagnostics finaux en un seul dispatch : `‖r‖²` replié puis sommé par le premier groupe,
+/// et ⟨r,z⟩ relu de la tranche vive. Un seul groupe écrit, donc pas de concurrence.
+fn close(fresh: u32, id: vec3<u32>, lid: u32, group: u32) {
+    var v = 0.0;
+    let c = id.x;
+    if c < params.cells { v = state[at(R, c)] * state[at(R, c)]; }
+    fold_at(PART_DQ, v, lid, group);
+    let rz = gather_at(fresh, lid);
+    if group == 0u && lid == 0u { scalar[RZ] = rz; }
+}
+@compute @workgroup_size(64)
+fn close_even(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32, @builtin(workgroup_id) wid: vec3<u32>) {
+    close(PART_RZ0, id, lid, wid.x);
+}
+@compute @workgroup_size(64)
+fn close_odd(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32, @builtin(workgroup_id) wid: vec3<u32>) {
+    close(PART_RZ1, id, lid, wid.x);
+}
+/// Somme des `‖r‖²` par groupe : un seul groupe, une seule fois par appel.
+@compute @workgroup_size(64)
+fn close_sum(@builtin(local_invocation_index) lid: u32) {
+    let rr = gather_at(PART_DQ, lid);
+    if lid == 0u { scalar[DQ] = rr; }
 }
