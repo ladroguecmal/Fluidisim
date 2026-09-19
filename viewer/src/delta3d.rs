@@ -233,3 +233,104 @@ pub fn verifier() -> Result<(), String> {
         Ok(())
     })
 }
+
+/// Banc P3 : **réception de l'opérateur** contre le cœur. Même domaine, même géométrie, mêmes
+/// champs d'entrée ; l'écart est publié, jamais supposé nul. ADR-175 D4 n'exige aucune identité
+/// au bit entre une carte et le CPU : ce banc mesure de combien ils diffèrent, et sur quoi.
+///
+/// Trois géométries, choisies pour exercer les trois branches de la règle du cœur : surface
+/// plate (fantôme du haut seul), surface ondulée assez raide pour assécher des colonnes
+/// voisines (fantômes latéraux), et surface posée au ras d'un centre de maille (plancher de θ).
+pub fn recevoir() -> Result<(), String> {
+    use water_core::delta3d::Volume3;
+    use water_core::host::HostServices;
+    use crate::scene::host_impl;
+
+    pollster::block_on(async {
+        let domain = Domain3 { nx: 13, ny: 9, nz: 11, dx: 0.25 };
+        let (cells, columns) = (domain.cells(), domain.columns());
+        let resident = Resident3::new(domain).await?;
+        println!("DELTA3D_RECU_S299 carte={:?} backend={}", resident.adapter, resident.backend);
+        let rest = (domain.nz as f32 - 4.) * domain.dx;
+
+        let geometries: [(&str, Box<dyn Fn(usize, usize) -> f32>); 3] = [
+            ("plate", Box::new(move |_, _| rest)),
+            // Assez raide pour qu'une colonne voisine soit sèche là où celle-ci est mouillée.
+            ("ondulee", Box::new(move |i: usize, j: usize| {
+                rest + 1.6 * domain.dx * ((i as f32 * 0.9).sin() + (j as f32 * 1.3).cos())
+            })),
+            // Surface au ras du centre de la maille k : θ tombe sur son plancher.
+            ("au-ras", Box::new(move |i: usize, j: usize| {
+                let k = 6 + (i + j) % 2;
+                (k as f32 + 0.5) * domain.dx + 1e-7 * ((i + j) as f32 + 1.)
+            })),
+        ];
+
+        let (mut worst_absolute, mut worst_relative, mut worst_case) = (0f32, 0f32, String::new());
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        for (name, height) in geometries {
+            let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
+            let mut volume = Volume3::configure(
+                &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+                domain, 1025., 9.81,
+            ).map_err(|e| format!("volume {e:?}"))?;
+            let eta: Vec<f32> = (0..columns).map(|c| height(c % domain.nx, c / domain.nx)).collect();
+            volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+            resident.set_heights(&eta)?;
+
+            for (shape, field) in fields(cells) {
+                let mut cpu = vec![0f32; cells];
+                volume.apply_pressure_operator_for_trials(&field, &mut cpu)
+                    .map_err(|e| format!("coeur {e:?}"))?;
+                let mut gpu = vec![f32::NAN; cells];
+                resident.apply(&field, &mut gpu)?;
+                let scale = cpu.iter().fold(0f32, |m, v| m.max(v.abs()));
+                let absolute = cpu.iter().zip(&gpu).fold(0f32, |m, (a, b)| m.max((a - b).abs()));
+                let relative = if scale > 0. { absolute / scale } else { 0. };
+                let identical = cpu.iter().zip(&gpu).filter(|(a, b)| a.to_bits() == b.to_bits()).count();
+                println!(
+                    "DELTA3D_RECU_S299 geometrie={name} champ={shape} mouillees={} \
+                     max_coeur={scale:e} ecart_absolu={absolute:e} ecart_relatif={relative:e} \
+                     identiques_au_bit={identical}/{cells}",
+                    volume.wet_cells()
+                );
+                if relative > worst_relative {
+                    worst_relative = relative;
+                    worst_case = format!("{name}/{shape}");
+                }
+                worst_absolute = worst_absolute.max(absolute);
+            }
+        }
+
+        // Refus : mêmes exigences des deux côtés, et l'état en place n'est pas touché.
+        let refusals = [
+            resident.set_heights(&vec![0.; columns + 1]).is_err(),
+            resident.set_heights(&{ let mut h = vec![1.; columns]; h[0] = f32::NAN; h }).is_err(),
+            resident.apply(&vec![0.; cells - 1], &mut vec![0.; cells]).is_err(),
+            resident.apply(&{ let mut p = vec![0.; cells]; p[3] = f32::INFINITY; p }, &mut vec![0.; cells]).is_err(),
+        ];
+        println!(
+            "DELTA3D_RECU_S299 refus_longueur_hauteurs={} refus_hauteur_non_finie={} \
+             refus_longueur_champ={} refus_champ_non_fini={}",
+            refusals[0], refusals[1], refusals[2], refusals[3]
+        );
+        println!(
+            "DELTA3D_RECU_S299 pire_ecart_relatif={worst_relative:e} sur {worst_case} ; \
+             pire_ecart_absolu={worst_absolute:e}"
+        );
+        if !refusals.iter().all(|r| *r) {
+            return Err("un refus attendu n'a pas eu lieu".into());
+        }
+        Ok(())
+    })
+}
+
+/// Champs d'entrée déterministes : constante, rampe, et un champ dentelé qui ne laisse aucune
+/// face au repos. Aucun tirage aléatoire — un banc doit se rejouer à l'identique.
+fn fields(cells: usize) -> Vec<(&'static str, Vec<f32>)> {
+    vec![
+        ("constant", vec![1.; cells]),
+        ("rampe", (0..cells).map(|c| c as f32 * 0.01 - 5.).collect()),
+        ("dentele", (0..cells).map(|c| ((c * 37 % 101) as f32) * 0.07 - 3.5).collect()),
+    ]
+}

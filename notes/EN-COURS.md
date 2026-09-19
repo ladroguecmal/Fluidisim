@@ -88,9 +88,9 @@ Critères avant code, posés ici :
 - [x] **P1** — amorce, lecture ciblée du lot, carte constatée ; plan seul.
 - [x] **P2** — `viewer/src/delta3d.rs` et son WGSL : domaine 3D résident, tampons réservés à la
   création, géométrie téléversée une fois ; noyau de l'opérateur sans matrice.
-- [>] **P3** — recevoir l'action de l'opérateur contre `apply_mobile3` : même état, même champ
+- [x] **P3** — recevoir l'action de l'opérateur contre `apply_mobile3` : même état, même champ
   d'entrée, écarts publiés ; refus et réserve testés.
-- [ ] **P4** — projection bornée résidente : cycles fixés, aucun retour CPU entre itérations,
+- [>] **P4** — projection bornée résidente : cycles fixés, aucun retour CPU entre itérations,
   aucune lecture synchrone ; pression comparée à la référence.
 - [ ] **P5** — diagnostics par réduction sur la carte : divergence projetée des lignes franches
   et dérive de masse, relus en différé avec leur âge ; dégradation déclarée.
@@ -119,3 +119,11 @@ Ordre d'accumulation x−, x+, y−, y+, z−, z+ respecté : l'addition f32 n'e
 z− n'est jamais testé mouillé (une maille sous une mouillée l'est), le fond est un mur.
 wgpu 30 : `PollType::wait_indefinitely()` et `get_mapped_range()` rend un `Result`.
 Banc P2 : 1920 mailles, sèches exactement nulles, max|A·p| 1,817143e2, tout fini.
+
+P3 reçu (`--delta3d-operateur-recu`, RTX 5070 Laptop / Dx12, 13×9×11) :
+surface **plate** — identité **au bit**, 1287/1287, les trois champs ;
+surface **ondulée** (fantômes latéraux) — pire écart relatif **9,5541296·10⁻⁸**, 1231/1287 au bit ;
+surface **au ras** d'un centre (plancher de θ) — 9,300078·10⁻⁸, 1255/1287 au bit.
+L'écart ne naît donc que sur les mailles à fantôme, et vaut moins d'un ulp f32 relatif (1,19·10⁻⁷).
+Écart absolu maximal 3,125·10⁻² — à lire avec l'échelle 3,36·10⁵ du cas « au-ras », où 1/θ vaut 1000.
+Quatre refus attendus obtenus des deux côtés. Suite complète du cœur : 444 réussis, 0 échec.

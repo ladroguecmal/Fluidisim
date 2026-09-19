@@ -2221,6 +2221,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-operateur") {
         return delta3d::verifier();
     }
+    if args.iter().any(|a| a == "--delta3d-operateur-recu") {
+        return delta3d::recevoir();
+    }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();
     }
