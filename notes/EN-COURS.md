@@ -92,9 +92,9 @@ Critères avant code, posés ici :
   d'entrée, écarts publiés ; refus et réserve testés.
 - [x] **P4** — **découpage déclaré** : second membre et préconditionneur de Jacobi assemblés
   sur la carte depuis la seule géométrie, reçus contre ceux du cœur.
-- [>] **P5** — PCG **résident à cycles fixés** sur un second membre donné : scalaires sur la
+- [x] **P5** — PCG **résident à cycles fixés** sur un second membre donné : scalaires sur la
   carte, aucun retour CPU entre itérations ; pression comparée à la référence.
-- [ ] **P6** — coût du pas borné sur le poste de référence, cycles comptés et publiés.
+- [>] **P6** — coût du pas borné sur le poste de référence, cycles comptés et publiés.
 - [ ] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
@@ -134,3 +134,12 @@ Préconditionneur = Jacobi : `prec = 1/(diag·dx⁻²)`, `diag` = 1 par voisin f
 Il ne dépend donc que de la géométrie, comme l'opérateur.
 **Portée assumée** : cas non couplé. Les fantômes de fond de S297 (`ghost_bg_x/y/up`) ne sont
 pas portés sur la carte ; le second membre couplé reste à faire, et rien n'est prétendu dessus.
+
+P5 reçu (`--delta3d-projection`, 24×16×20 = 7 680 mailles, départ froid) :
+cycles 0 / 4 / 8 / 16 / 32 / 64 / 128 → résidu relatif jugé **par le cœur**
+1 / 9,669227·10⁻³ / 4,719628·10⁻³ / 2,061514·10⁻³ / 8,939724·10⁻⁴ / 1,900073·10⁻⁵ / 2,720936·10⁻⁷.
+La carte annonce les mêmes à 4–6 chiffres : elle ne se ment pas sur sa propre convergence.
+Dispatchs = **3 + 5·cycles + 2**, indépendants de la donnée : c'est la borne d'ADR-175 D2.
+Trois refus attendus obtenus. Pression maximale stable à 5,003·10³ dès 32 cycles.
+À 128 cycles les deux résidus divergent (2,72 contre 2,02·10⁻⁷) : à ce niveau la somme f32 et
+l'écart d'un ulp entre les deux opérateurs dominent. Ce n'est pas un désaccord de schéma.

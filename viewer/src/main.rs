@@ -9,6 +9,7 @@ mod reflection;
 mod counting;
 mod delta;
 mod delta3d;
+mod delta3d_projection;
 mod pressure_gpu;
 mod pressure_solver;
 mod gpu;
@@ -2226,6 +2227,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--delta3d-probleme") {
         return delta3d::recevoir_probleme();
+    }
+    if args.iter().any(|a| a == "--delta3d-projection") {
+        return delta3d_projection::recevoir_projection();
     }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();

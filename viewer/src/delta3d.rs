@@ -16,7 +16,7 @@
 use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
-const GROUP: u32 = 64;
+pub(crate) const GROUP: u32 = 64;
 
 pub struct Resident3 {
     device: wgpu::Device,
@@ -39,7 +39,7 @@ pub struct Resident3 {
     pub backend: String,
 }
 
-fn buffer(device: &wgpu::Device, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
+pub(crate) fn buffer(device: &wgpu::Device, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
     device.create_buffer(&wgpu::BufferDescriptor { label: None, size, usage, mapped_at_creation: false })
 }
 
@@ -269,7 +269,7 @@ impl Resident3 {
 
 /// Vue octets d'un champ `f32`, sans dépendance ajoutée (ADR-020 vaut pour le cœur ; l'hôte
 /// n'ajoute rien non plus hors du verrou S210/S211).
-fn bytemuck_cast(values: &[f32]) -> &[u8] {
+pub(crate) fn bytemuck_cast(values: &[f32]) -> &[u8] {
     // SAFETY : `f32` n'a pas d'invariant de représentation et `u8` accepte tout motif de bits ;
     // la tranche produite a exactement la même étendue et une durée de vie empruntée identique.
     unsafe { core::slice::from_raw_parts(values.as_ptr() as *const u8, core::mem::size_of_val(values)) }
