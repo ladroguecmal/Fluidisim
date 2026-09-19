@@ -82,7 +82,7 @@ place de l'utilisateur.
 - [x] **P5** — trajectoire mesurée : sessions et commits par sujet et par période (Git et
   journal), capacités reçues, maillons, part conception/code ; fils longs et ce qu'ils ont
   débloqué.
-- [ ] **P6** — blocages classés (technique mesuré, décision en attente de l'utilisateur,
+- [x] **P6** — blocages classés (technique mesuré, décision en attente de l'utilisateur,
   méthode/procédure, outillage/infrastructure), avec preuve, effet et levier.
 - [ ] **P7** — rédiger `docs/registres/BILAN-GLOBAL-S293.md` et l'indexer.
 - [ ] **P8** — rituel §6.
@@ -163,3 +163,29 @@ ni entre CPU et GPU.
 compteur) ; et un vivier persistant sûr existe sans emprunt partagé (tampons possédés par les
 fils et rendus par canal borné, ou sortie en `AtomicU32` à écriture disjointe). Hypothèse à
 éprouver, pas un fait reçu.
+
+**P6 — blocages classés (14:33–14:35).**
+*Techniques structurels.* T1 : **porte B verrouillée par une règle interne** — « A276 avant la
+3D », posée par S249 et écrite en déclencheur par S276 (cafcea6), sans décision de l'utilisateur ;
+or la porte C se reçoit « sur la scène de la porte B » et le livrable de J2 (« cavité et gerbe
+d'impact, proche-coque ») est tridimensionnel : la dépendance va dans l'autre sens. T2 : **famille
+de δ non choisie (B3)** ; le seul candidat, surface-fonction-hauteur en tranche x-z, ne peut
+exécuter aucun des quatre scénarios de B3 (coque, cavité, déferlement, compartiment). T3 :
+**architecture d'exécution de δ** — ADR-173 garde sur CPU le résidu, les itérations restantes
+et les portes à chaque pas ; extrapolé des coûts par maille mesurés en S291 (0,23 µs/maille pour
+les postes CPU du pas mobile, ≈ 0,9 pour le pas couplé), un domaine 3D de 64×64×32 coûterait
+30 à 120 ms de CPU par pas, et la bande actuelle étendue en 3D (128×128×52) 200 à 800 ms. La
+porte C nomme « δ sur GPU (décision d'architecture, ADR) », jamais prise. Estimation, pas mesure.
+T4 : **budget unique sans répartition ni cible** — J1 seul ≈ 5,8 ms, δ 8,27 ms, 2 ms pour tout ;
+ADR-131 (liste ouverte) ne laisse aucun point d'arrêt : le coût ne peut jamais être « reçu ».
+T5 : **aucun objet pilotable ni intégrateur de corps rigide** (body.rs : « ni intégrateur, ni
+rotation ») ; porte D non commencée, J1 ouvert sur l'interaction représentative.
+*Pilotage.* M1 : chaînage des suites (10/10) et maillons remis à zéro par toute optimisation
+consommée ; M2 : classe de fidélité uniforme — identité au bit, portes physiques à chaque pas —
+appliquée à une couche cosmétique, contre source §1 et §17 ; M3 : documents d'état regonflés,
+≈ 300 lignes de Markdown par session de 15 à 40 min.
+*Hors de portée d'une session.* U1 cible matérielle et répartition des 2 ms (ADR-125) ; U2
+périmètre de la v1 (en attente depuis S281) ; U3 dépôt distant (aucun) ; U4 verdict de l'onde
+S277 ; U5 faits d'intégration du jeu (inconnus depuis S19).
+*Faux blocages ou surévalués.* A278 (voir P5) ; A294 ne concerne que l'activation de δ GPU
+dans la boucle d'image, et le geste de mesure est déjà écrit.
