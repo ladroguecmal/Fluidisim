@@ -740,6 +740,36 @@ impl Volume3 {
         Ok(())
     }
 
+    /// S299, ADR-175 §3 — **essais seulement**. Assemble le problème de pression tel que la
+    /// projection l'emploie : second membre et préconditionneur de Jacobi, à partir de l'état
+    /// courant et du champ de divergence fourni. Sert à juger une production qui assemble les
+    /// siens sur sa carte.
+    ///
+    /// Mutation assumée : les tampons de travail internes sont écrasés, exactement comme le
+    /// ferait un pas réel, qui les recalcule de toute façon. Rien de **publié** n'est touché
+    /// (I-17). Refus `Domain` sur une longueur, `NotFinite` sur une entrée non finie ; sur
+    /// refus, les sorties ne sont pas écrites. Aucune allocation.
+    pub fn assemble_pressure_problem_for_trials(
+        &mut self,
+        divergence: &[f32],
+        scale: f32,
+        rhs: &mut [f32],
+        prec: &mut [f32],
+    ) -> Result<(), Error> {
+        let cells = self.p.len();
+        if divergence.len() != cells || rhs.len() != cells || prec.len() != cells {
+            return Err(Error::Domain);
+        }
+        if !scale.is_finite() || divergence.iter().any(|x| !x.is_finite()) {
+            return Err(Error::NotFinite);
+        }
+        self.rhs.copy_from_slice(divergence);
+        self.rhs_mobile3(scale);
+        rhs.copy_from_slice(&self.rhs);
+        prec.copy_from_slice(&self.prec);
+        Ok(())
+    }
+
     pub fn wet_cells(&self) -> usize {
         let Domain3 { nx, ny, nz, .. } = self.domain;
         let mut n = 0;

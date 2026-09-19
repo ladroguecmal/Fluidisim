@@ -90,12 +90,11 @@ Critères avant code, posés ici :
   création, géométrie téléversée une fois ; noyau de l'opérateur sans matrice.
 - [x] **P3** — recevoir l'action de l'opérateur contre `apply_mobile3` : même état, même champ
   d'entrée, écarts publiés ; refus et réserve testés.
-- [>] **P4** — projection bornée résidente : cycles fixés, aucun retour CPU entre itérations,
-  aucune lecture synchrone ; pression comparée à la référence.
-- [ ] **P5** — diagnostics par réduction sur la carte : divergence projetée des lignes franches
-  et dérive de masse, relus en différé avec leur âge ; dégradation déclarée.
-- [ ] **P6** — coût du pas borné sur le poste de référence, et écart à la référence en hauteur
-  et pente contre les 3 mm de S201.
+- [x] **P4** — **découpage déclaré** : second membre et préconditionneur de Jacobi assemblés
+  sur la carte depuis la seule géométrie, reçus contre ceux du cœur.
+- [>] **P5** — PCG **résident à cycles fixés** sur un second membre donné : scalaires sur la
+  carte, aucun retour CPU entre itérations ; pression comparée à la référence.
+- [ ] **P6** — coût du pas borné sur le poste de référence, cycles comptés et publiés.
 - [ ] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
@@ -127,3 +126,11 @@ surface **au ras** d'un centre (plancher de θ) — 9,300078·10⁻⁸, 1255/128
 L'écart ne naît donc que sur les mailles à fantôme, et vaut moins d'un ulp f32 relatif (1,19·10⁻⁷).
 Écart absolu maximal 3,125·10⁻² — à lire avec l'échelle 3,36·10⁵ du cas « au-ras », où 1/θ vaut 1000.
 Quatre refus attendus obtenus des deux côtés. Suite complète du cœur : 444 réussis, 0 échec.
+
+P4 reçu (`--delta3d-probleme`) : surface plate — second membre **et** préconditionneur
+identiques **au bit** (1287/1287) ; ondulée — rhs 7,7484614·10⁻⁸, prec 4,4703484·10⁻⁸ ;
+au-ras — rhs **au bit**, prec 4,3655746·10⁻¹¹. Tout sous l'ulp f32 relatif.
+Préconditionneur = Jacobi : `prec = 1/(diag·dx⁻²)`, `diag` = 1 par voisin fluide, `a` par fantôme.
+Il ne dépend donc que de la géométrie, comme l'opérateur.
+**Portée assumée** : cas non couplé. Les fantômes de fond de S297 (`ghost_bg_x/y/up`) ne sont
+pas portés sur la carte ; le second membre couplé reste à faire, et rien n'est prétendu dessus.

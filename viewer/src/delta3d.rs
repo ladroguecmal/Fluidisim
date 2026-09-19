@@ -23,10 +23,13 @@ pub struct Resident3 {
     queue: wgpu::Queue,
     domain: Domain3,
     apply: wgpu::ComputePipeline,
+    assemble: wgpu::ComputePipeline,
     bind: wgpu::BindGroup,
     heights: wgpu::Buffer,
     field: wgpu::Buffer,
     out: wgpu::Buffer,
+    prec: wgpu::Buffer,
+    uniform: wgpu::Buffer,
     read: wgpu::Buffer,
     cells: usize,
     columns: usize,
@@ -71,29 +74,32 @@ impl Resident3 {
         let heights = buffer(&device, (columns * 4) as u64, storage);
         let field = buffer(&device, (cells * 4) as u64, storage);
         let out = buffer(&device, (cells * 4) as u64, storage);
-        let read = buffer(&device, (cells * 4) as u64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
+        let prec = buffer(&device, (cells * 4) as u64, storage);
+        // Deux champs peuvent être relus d'un coup : second membre et préconditionneur.
+        let read = buffer(&device, (cells * 8) as u64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
 
         let mut params = Vec::with_capacity(32);
         for v in [domain.nx as u32, domain.ny as u32, domain.nz as u32, cells as u32] {
             params.extend_from_slice(&v.to_le_bytes());
         }
-        for v in [domain.dx, 1. / (domain.dx * domain.dx), water_core::delta_projection::SURFACE_THETA_MIN, 0.] {
+        // dx, 1/dx², plancher de θ, repos, rho·g, échelle du second membre, deux remplissages.
+        for v in [domain.dx, 1. / (domain.dx * domain.dx), water_core::delta_projection::SURFACE_THETA_MIN, 0., 0., 0., 0., 0.] {
             params.extend_from_slice(&v.to_le_bytes());
         }
         let uniform = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: None,
             contents: &params,
-            usage: wgpu::BufferUsages::UNIFORM,
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
-        let entries: Vec<_> = (0..4)
+        let entries: Vec<_> = (0..5)
             .map(|binding| wgpu::BindGroupLayoutEntry {
                 binding,
                 visibility: wgpu::ShaderStages::COMPUTE,
                 ty: wgpu::BindingType::Buffer {
                     ty: match binding {
-                        3 => wgpu::BufferBindingType::Uniform,
-                        2 => wgpu::BufferBindingType::Storage { read_only: false },
+                        4 => wgpu::BufferBindingType::Uniform,
+                        2 | 3 => wgpu::BufferBindingType::Storage { read_only: false },
                         _ => wgpu::BufferBindingType::Storage { read_only: true },
                     },
                     has_dynamic_offset: false,
@@ -103,7 +109,7 @@ impl Resident3 {
             })
             .collect();
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor { label: None, entries: &entries });
-        let buffers = [&heights, &field, &out, &uniform];
+        let buffers = [&heights, &field, &out, &prec, &uniform];
         let entries: Vec<_> = buffers
             .iter()
             .enumerate()
@@ -116,24 +122,31 @@ impl Resident3 {
             immediate_size: 0,
         });
         let shader = device.create_shader_module(wgpu::include_wgsl!("delta3d.wgsl"));
-        let apply = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-            label: Some("operateur 3d"),
-            layout: Some(&pipeline_layout),
-            module: &shader,
-            entry_point: Some("apply_operator"),
-            compilation_options: Default::default(),
-            cache: None,
-        });
+        let pipeline = |label: &str, entry: &str| {
+            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some(label),
+                layout: Some(&pipeline_layout),
+                module: &shader,
+                entry_point: Some(entry),
+                compilation_options: Default::default(),
+                cache: None,
+            })
+        };
+        let apply = pipeline("operateur 3d", "apply_operator");
+        let assemble = pipeline("probleme 3d", "assemble_problem");
 
         Ok(Self {
             device,
             queue,
             domain,
             apply,
+            assemble,
             bind,
             heights,
             field,
             out,
+            prec,
+            uniform,
             read,
             cells,
             columns,
@@ -158,6 +171,62 @@ impl Resident3 {
             return Err("hauteur non finie".into());
         }
         self.queue.write_buffer(&self.heights, 0, bytemuck_cast(heights));
+        Ok(())
+    }
+
+    /// Paramètres du second membre : repos de la surface, `rho · g_eff`, et l'échelle appliquée
+    /// à la divergence. Écrits dans l'uniforme déjà réservé ; aucun tampon n'est recréé.
+    pub fn set_problem_parameters(&self, rest: f32, rho_g: f32, scale: f32) -> Result<(), String> {
+        if ![rest, rho_g, scale].iter().all(|v| v.is_finite()) {
+            return Err("paramètre non fini".into());
+        }
+        let mut bytes = Vec::with_capacity(12);
+        for v in [rest, rho_g, scale] {
+            bytes.extend_from_slice(&v.to_le_bytes());
+        }
+        self.queue.write_buffer(&self.uniform, 28, &bytes);
+        Ok(())
+    }
+
+    /// Second membre et préconditionneur assemblés sur la carte depuis la géométrie et le champ
+    /// de divergence fourni. **Banc seulement** pour la relecture, comme `apply`.
+    pub fn assemble(&self, divergence: &[f32], rhs: &mut [f32], prec: &mut [f32]) -> Result<(), String> {
+        if divergence.len() != self.cells || rhs.len() != self.cells || prec.len() != self.cells {
+            return Err(format!("champ : {} mailles attendues", self.cells));
+        }
+        if divergence.iter().any(|x| !x.is_finite()) {
+            return Err("divergence non finie".into());
+        }
+        self.queue.write_buffer(&self.field, 0, bytemuck_cast(divergence));
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            pass.set_pipeline(&self.assemble);
+            pass.set_bind_group(0, &self.bind, &[]);
+            pass.dispatch_workgroups(self.groups, 1, 1);
+        }
+        let span = (self.cells * 4) as u64;
+        encoder.copy_buffer_to_buffer(&self.out, 0, &self.read, 0, span);
+        encoder.copy_buffer_to_buffer(&self.prec, 0, &self.read, span, span);
+        self.queue.submit([encoder.finish()]);
+        let slice = self.read.slice(..);
+        let (tx, rx) = std::sync::mpsc::channel();
+        slice.map_async(wgpu::MapMode::Read, move |r| {
+            let _ = tx.send(r);
+        });
+        self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+        rx.recv().map_err(|e| e.to_string())?.map_err(|e| e.to_string())?;
+        {
+            let view = slice.get_mapped_range().map_err(|e| e.to_string())?;
+            let (head, tail) = view.split_at(self.cells * 4);
+            for (o, bytes) in rhs.iter_mut().zip(head.chunks_exact(4)) {
+                *o = f32::from_le_bytes(bytes.try_into().unwrap());
+            }
+            for (o, bytes) in prec.iter_mut().zip(tail.chunks_exact(4)) {
+                *o = f32::from_le_bytes(bytes.try_into().unwrap());
+            }
+        }
+        self.read.unmap();
         Ok(())
     }
 
@@ -333,4 +402,77 @@ fn fields(cells: usize) -> Vec<(&'static str, Vec<f32>)> {
         ("rampe", (0..cells).map(|c| c as f32 * 0.01 - 5.).collect()),
         ("dentele", (0..cells).map(|c| ((c * 37 % 101) as f32) * 0.07 - 3.5).collect()),
     ]
+}
+
+/// Banc P4 : **réception du problème assemblé** — second membre et préconditionneur de Jacobi —
+/// contre ceux que le cœur assemble pour sa propre projection. Mêmes géométries qu'en P3, même
+/// principe : l'écart est publié.
+///
+/// Portée : cas **non couplé**. Les fantômes de fond de S297 (`ghost_bg_*`) ne sont pas portés
+/// sur la carte, et ce banc ne prétend donc rien sur le second membre couplé.
+pub fn recevoir_probleme() -> Result<(), String> {
+    use water_core::delta3d::Volume3;
+    use water_core::host::HostServices;
+    use crate::scene::host_impl;
+
+    pollster::block_on(async {
+        let domain = Domain3 { nx: 13, ny: 9, nz: 11, dx: 0.25 };
+        let (cells, columns) = (domain.cells(), domain.columns());
+        let resident = Resident3::new(domain).await?;
+        println!("DELTA3D_PROBLEME_S299 carte={:?} backend={}", resident.adapter, resident.backend);
+        let rest = (domain.nz as f32 - 4.) * domain.dx;
+        let (rho, g) = (1025_f32, 9.81_f32);
+        resident.set_problem_parameters(rest, rho * g, 1.)?;
+
+        let geometries: [(&str, Box<dyn Fn(usize, usize) -> f32>); 3] = [
+            ("plate", Box::new(move |_, _| rest)),
+            ("ondulee", Box::new(move |i: usize, j: usize| {
+                rest + 1.6 * domain.dx * ((i as f32 * 0.9).sin() + (j as f32 * 1.3).cos())
+            })),
+            ("au-ras", Box::new(move |i: usize, j: usize| {
+                let k = 6 + (i + j) % 2;
+                (k as f32 + 0.5) * domain.dx + 1e-7 * ((i + j) as f32 + 1.)
+            })),
+        ];
+
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let (mut pire_rhs, mut pire_prec) = (0f32, 0f32);
+        for (name, height) in geometries {
+            let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
+            let mut volume = Volume3::configure(
+                &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+                domain, rho, g,
+            ).map_err(|e| format!("volume {e:?}"))?;
+            let eta: Vec<f32> = (0..columns).map(|c| height(c % domain.nx, c / domain.nx)).collect();
+            volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+            resident.set_heights(&eta)?;
+
+            for (shape, divergence) in fields(cells) {
+                let (mut rhs_cpu, mut prec_cpu) = (vec![0f32; cells], vec![0f32; cells]);
+                volume.assemble_pressure_problem_for_trials(&divergence, 1., &mut rhs_cpu, &mut prec_cpu)
+                    .map_err(|e| format!("coeur {e:?}"))?;
+                let (mut rhs_gpu, mut prec_gpu) = (vec![f32::NAN; cells], vec![f32::NAN; cells]);
+                resident.assemble(&divergence, &mut rhs_gpu, &mut prec_gpu)?;
+
+                let relative = |a: &[f32], b: &[f32]| {
+                    let scale = a.iter().fold(0f32, |m, v| m.max(v.abs()));
+                    let gap = a.iter().zip(b).fold(0f32, |m, (x, y)| m.max((x - y).abs()));
+                    (scale, if scale > 0. { gap / scale } else { 0. })
+                };
+                let (echelle_rhs, ecart_rhs) = relative(&rhs_cpu, &rhs_gpu);
+                let (echelle_prec, ecart_prec) = relative(&prec_cpu, &prec_gpu);
+                let bits_rhs = rhs_cpu.iter().zip(&rhs_gpu).filter(|(a, b)| a.to_bits() == b.to_bits()).count();
+                let bits_prec = prec_cpu.iter().zip(&prec_gpu).filter(|(a, b)| a.to_bits() == b.to_bits()).count();
+                println!(
+                    "DELTA3D_PROBLEME_S299 geometrie={name} divergence={shape} \
+                     echelle_rhs={echelle_rhs:e} ecart_rhs={ecart_rhs:e} rhs_au_bit={bits_rhs}/{cells} \
+                     echelle_prec={echelle_prec:e} ecart_prec={ecart_prec:e} prec_au_bit={bits_prec}/{cells}"
+                );
+                pire_rhs = pire_rhs.max(ecart_rhs);
+                pire_prec = pire_prec.max(ecart_prec);
+            }
+        }
+        println!("DELTA3D_PROBLEME_S299 pire_ecart_relatif_rhs={pire_rhs:e} pire_ecart_relatif_prec={pire_prec:e}");
+        Ok(())
+    })
 }

@@ -14,13 +14,20 @@ struct Params {
     dx: f32,
     inv_dx2: f32,
     theta_min: f32,
-    _pad: f32,
+    rest: f32,
+    // Valeur imposée aux fantômes : `rho * g_eff`. Cas **non couplé** seulement — les fantômes
+    // de fond de S297 (`ghost_bg_*`) ne sont pas portés ici, et ce lot ne le prétend pas.
+    rho_g: f32,
+    scale: f32,
+    _pad0: f32,
+    _pad1: f32,
 };
 
 @group(0) @binding(0) var<storage, read> heights: array<f32>;
 @group(0) @binding(1) var<storage, read> p: array<f32>;
 @group(0) @binding(2) var<storage, read_write> out: array<f32>;
-@group(0) @binding(3) var<uniform> params: Params;
+@group(0) @binding(3) var<storage, read_write> prec: array<f32>;
+@group(0) @binding(4) var<uniform> params: Params;
 
 fn height(i: u32, j: u32) -> f32 {
     return heights[j * params.nx + i];
@@ -94,4 +101,66 @@ fn apply_operator(@builtin(global_invocation_id) gid: vec3<u32>) {
     }
 
     out[c] = acc * params.inv_dx2;
+}
+
+// Second membre et préconditionneur de Jacobi, assemblés sur la carte depuis la seule géométrie.
+// `p` porte ici le champ de divergence ; `out` reçoit le second membre. Même ordre de parcours
+// et mêmes opérations que `rhs_mobile3` du cœur. Cas non couplé : le fantôme du haut impose
+// `rho·g·(h − repos)`, le fantôme latéral `rho·g·(z_c − repos)`.
+@compute @workgroup_size(64)
+fn assemble_problem(@builtin(global_invocation_id) gid: vec3<u32>) {
+    let c = gid.x;
+    if (c >= params.cells) {
+        return;
+    }
+    let plane = params.nx * params.ny;
+    let i = c % params.nx;
+    let j = (c / params.nx) % params.ny;
+    let k = c / plane;
+
+    let h = height(i, j);
+    let zc = (f32(k) + 0.5) * params.dx;
+    if (zc >= h) {
+        out[c] = 0.0;
+        prec[c] = 0.0;
+        return;
+    }
+
+    var b = params.scale * p[c];
+    var diag = 0.0;
+    let side_value = params.rho_g * (zc - params.rest);
+
+    if (i > 0u) {
+        let o = height(i - 1u, j);
+        if (zc < o) { diag = diag + 1.0; }
+        else { let a = side_coefficient(h, zc, o); diag = diag + a; b = b + side_value * a * params.inv_dx2; }
+    }
+    if (i + 1u < params.nx) {
+        let o = height(i + 1u, j);
+        if (zc < o) { diag = diag + 1.0; }
+        else { let a = side_coefficient(h, zc, o); diag = diag + a; b = b + side_value * a * params.inv_dx2; }
+    }
+    if (j > 0u) {
+        let o = height(i, j - 1u);
+        if (zc < o) { diag = diag + 1.0; }
+        else { let a = side_coefficient(h, zc, o); diag = diag + a; b = b + side_value * a * params.inv_dx2; }
+    }
+    if (j + 1u < params.ny) {
+        let o = height(i, j + 1u);
+        if (zc < o) { diag = diag + 1.0; }
+        else { let a = side_coefficient(h, zc, o); diag = diag + a; b = b + side_value * a * params.inv_dx2; }
+    }
+    if (k > 0u) {
+        diag = diag + 1.0;
+    }
+    if (k + 1u < params.nz && (f32(k + 1u) + 0.5) * params.dx < h) {
+        diag = diag + 1.0;
+    } else {
+        let a = 1.0 / max((h - zc) / params.dx, params.theta_min);
+        diag = diag + a;
+        b = b + params.rho_g * (h - params.rest) * a * params.inv_dx2;
+    }
+
+    out[c] = b;
+    if (diag > 0.0) { prec[c] = 1.0 / (diag * params.inv_dx2); } else { prec[c] = 0.0; }
 }
