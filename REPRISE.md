@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 21:37 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 22:48 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : aucune — S301 terminée
+Session en cours : S302 — scène du critère 3 : δ 3D rendu en direct sur mer étalée, pour la revue
 Dernière session : S301 — pas couplé complet résident sur la carte, un seul device, reçu contre le cœur ; A297 ouverte
 Session suivante : S302 — porte B, critère 3 : brancher `Step3` dans l'afficheur sur une mer étalée (`--houle`), rendre la surface publiée sommée à B, et soumettre la scène à la revue de l'utilisateur. Avant la revue, mesurer les à-coups d'une trajectoire seule (A297). Ensuite : mode sans fond de `Step3` pour les cas de cuve de §4.1.
 Maillons        : 0 — capacité S301 : pas de production complet sur la carte avec surface publiée, reçu étage par étage contre le cœur et suivi en trajectoire jusqu'à l'horizon de la référence ; consommateur : la scène du critère 3 ; preuve DELTA3D-PAS-GPU-S301

@@ -58,52 +58,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S301 — terminée : pas couplé complet sur la carte, reçu contre le cœur ; A297 ouverte.
+Session : S302 — en cours.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, outils locaux, carte réelle.
-Entrée : « Reprends le projet », 2026-09-19. Copie unique, master propre, jeton libre à l'amorce.
+Entrée : « Continue avec la scène pour que je la juge », 2026-09-19. Copie unique, master propre.
 
-Capacité visée : le **pas couplé complet** résident sur la carte, sur **un seul device** —
-prédiction (advection MAC, couplage à B, éponge), divergence, second membre couplé (S300),
-projection bornée (S299) à départ chaud, correction, extrapolation, transport par débits
-mouillés et bandes, relaxation de l'éponge, surface publiée (ADR-175 D7). Aujourd'hui les trois
-étages de S299–S300 vivent chacun sur leur propre device et ne peuvent pas s'enchaîner.
-Consommateur : critère 2 de la porte B (production contre référence), puis la scène (critère 3).
+Capacité visée : **la scène du critère 3** d'ADR-175 §4 — une onde qui traverse une mer étalée
+dans un domaine δ 3D, **rendue en direct** dans l'afficheur, soumise à la revue de l'utilisateur.
+Consommateur : l'utilisateur (verdict R11), puis la porte C mesurée sur cette même scène.
 
-Critères avant code, posés ici :
-- Un device, tampons réservés à la configuration (I-06). Par pas, le CPU écrit les phases
-  (`O(composantes)`) et des uniformes `O(1)`, et enregistre un nombre de dispatchs **fixé par le
-  profil** et publié ; aucune boucle CPU sur les mailles, aucune lecture dans le pas.
-- Chaque étage reçu contre le cœur, écart publié champ par champ, aucune identité au bit
-  exigée (D4). La référence ne bouge pas, sauf une fonction d'**essai** de prédiction sur le
-  modèle de S299/S300, que la production n'appelle jamais.
-- Réception du pas : cas S298 — impulsion de 18 cm sous B spectral résolu, 32×24×36, `dx`
-  0,25 m, `dt` 5 ms, éponge 1 m à 2 s⁻¹. Écart de hauteur carte–cœur publié à chaque image ;
-  **reçu si < 3 mm** (S201, ADR-175 §4.2) sur la durée déclarée, visée 6 s. Pente et phase
-  publiées. Un dépassement se publie tel quel, cause cherchée ; aucun seuil relevé.
-- **Affinage** : ADR-175 D3 tranche déjà — la production ne refait jamais un pas. Si la mesure
-  montre qu'un affinage manque, il entre comme **quantité fixe du profil** (D2), pas comme reprise
-  conditionnelle. Pas d'ADR tant que la mesure ne le demande pas.
-- Hors lot : scène et revue (critère 3), coût au 99ᵉ centile (porte C), A286, multiplateforme.
+Choix posés avant code :
+- Mer : `--houle` (S259, 64 composantes, Hs ≈ 2,5 m, λ la plus courte ≈ 3,5 m : résolue à 25 cm).
+  Ce que R10 demandait : « les vagues de la mer doivent interagir avec l'onde ». La queue S256
+  (vaguelettes par pixel) reste un habillage **non couplé** — à dire dans la question de revue.
+- Onde : **paquet linéaire** injecté (hauteur et vitesses de la théorie linéaire en eau profonde,
+  enveloppe gaussienne), qui traverse le domaine vers la caméra. État initial construit sur CPU à
+  la configuration (`O(N)` hors pas, I-06 tenu).
+- Domaine : `dx` 0,25 m, boîte de 7 m (repos 3,5 m) pour tenir les creux et crêtes de Hs 2,5 m,
+  éponge de 3 m ; un pas par image à 1/60 s (S275) ; 32 cycles (S301 P5). Taille réglée par la
+  mesure sans fenêtre (P2) : stable, dans les bornes, coût noté.
+- Rendu : la surface **publiée** (D7) seule est liée au rendu, sommée à B dans le nuanceur
+  (I-01), interpolation bicubique, fondu aux bords. Sans δ 3D, le rendu reste **identique au bit**
+  (témoin mesuré avant et après).
+- Revue : question explicite (R10 : l'utilisateur ne savait pas quel retour on attendait),
+  commande interactive avec bascule δ, captures locales (ADR-124).
 
 ### Plan
 
-- [x] **P1** — amorce, lecture ciblée du lot, plan seul. *(Committé avec `[>]` par erreur ;
-  coché au commit de P2.)*
-- [x] **P2** — `Step3` : un device, tampons réservés, pipelines des trois sources WGSL (fond,
-  gradient conjugué, pas) ; dépôt d'état et relecture de banc. Noyau `predict` (advection MAC,
-  couplage `extra3`, éponge) et `predict_for_trials` dans le cœur ; reçu contre lui.
-- [x] **P3a** — divergence, couplage S300 avec `eta_roundoff`, passage à la projection, départ
-  chaud ; pression reçue contre le cœur sur un pas.
-- [x] **P3b** — correction aux faces et extrapolation verticale ; vitesses reçues.
-- [x] **P4** — transport par débits mouillés et bandes, relaxation d'éponge, compensation,
-  surface publiée (D7) ; pas complet reçu champ par champ contre `step_perturbation_mobile`.
-- [x] **P5** — trajectoire du cas S298 : écart de hauteur par image, selon les cycles.
-- [x] **P6** — coût du pas complet, passe chronométrée, trois tailles ; dispatchs publiés.
-- [x] **P7** — diagnostics D3 sur la carte (divergence des lignes franches, dérive de masse,
-  colonnes hors bornes), relus en différé avec leur âge.
-- [x] **P8** — preuve et rituel REPRISE §6.
+- [>] **P1** — amorce, lecture ciblée, plan seul.
+- [ ] **P2** — `Step3` sur un device fourni ; paquet d'ondes initial ; banc sans fenêtre de la scène
+  (`--delta3d-scene-mesure`) : bornes, dégradation, amplitude, coût ; paramètres arrêtés.
+- [ ] **P3** — à-coups d'A297 sur la même scène sans paquet (témoin) et avec : dérivée seconde
+  temporelle par colonne, localisation ; chiffre avant revue.
+- [ ] **P4** — rendu : couche δ 3D dans `water.wgsl` (groupe 3, bicubique, fondu), liaison factice
+  sans δ, témoin au bit ; boucle interactive `--houle --delta3d` (D bascule, R relance).
+- [ ] **P5** — captures de revue (avec et sans δ, deux poses, plusieurs instants), pixels changés ;
+  section R11 de REVUE-VISUELLE avec la question.
+- [ ] **P6** — rituel REPRISE §6.
 
 ### Notes de reprise
+
+*(S302 — vide à l'ouverture.)*
+
+---
+
+## Archive — notes de S301 (pour le lot)
 
 **Architecture retenue (P2).** `Step3` crée **un** device et y compile les trois sources telles
 quelles — `delta3d_background.wgsl` (S300), `delta3d_cg.wgsl` (S299), `delta3d_step.wgsl`
@@ -252,97 +250,3 @@ Anneau de 3 emplacements ; si aucun n'est libre, le diagnostic du pas est perdu,
 retardé.
 
 ---
-
-### Notes de reprise de S300 (conservées pour le lot)
-
-`PhaseQ32::from_time` multiplie `freq_q32` (u64) par les microsecondes en **u128** avant de
-diviser par 10⁶ : intransposable en WGSL, qui n'a ni u64 ni u128. Mais cette phase ne dépend
-**que** de la composante et de l'instant, pas du point : elle se calcule une fois par composante
-et par pas, côté CPU, et se publie. C'est littéralement « le CPU publie les paramètres
-analytiques de B/W, phases repliées » d'ADR-175 D1.
-
-`from_distance` est du `f32` pur : `frac(k·d)` puis `× 2³²` en `u32` — portable tel quel.
-`sin_cos` est un quadrant (`>> 30`), un repliement sur `π/4` et deux polynômes de Horner
-(sin ordre 9, cos ordre 10) — portable tel quel, erreur ≈ 2·10⁻⁹ annoncée par le cœur.
-
-`viewer/src/water.wgsl` évalue déjà B pour le **rendu**, mais par le chemin CWM/bandes
-(`band_cwm`, `tail_cwm`) : ce n'est pas `differential_local_extended` et ça ne se réutilise pas.
-`viewer/src/delta.rs` échantillonne le fond de la bande 2D **sur CPU** puis téléverse : c'est
-exactement ce que ce lot remplace.
-
-**P2 : trouvaille à ne pas reperdre.** Le produit `k·d` est identique au bit sur la carte
-(576/576), mais le `x − floor(x)` **compilé** en diverge d'un ulp (72/576 seulement au bit).
-Près de la borne d'I-08, `k·d` vaut des milliers de tours : il ne reste qu'une poignée de bits à
-la fraction, et un ulp y pèse **10⁻³ de tour** — sin/cos à 3,2·10⁻³ et 5,6·10⁻³ d'écart.
-**La fraction se prend en entier** : `x = mantisse·2^(e−23)` donc `x·2³² = mantisse·2^(e+9)`
-modulo 2³², signe par complément. Exact, et indépendant du compilateur.
-Après : phases **564/576 au bit**, pire écart **128 unités** (3·10⁻⁸ tour), sin 1,94·10⁻⁷,
-cos 2,09·10⁻⁷, exp 3,02·10⁻⁸ contre `exp(−x)` en f64.
-Le reliquat vient du **cœur** : son `turns − floor(turns)` arrondit quand la somme n'est pas
-représentable (ex. turns = −0,344, frac 0,656 perd un bit). La carte est donc plus exacte que
-la référence sur ce point précis. À dire tel quel, sans le présenter comme une identité.
-
-**Fusion déclarée P3+P4** : un seul banc (`--delta3d-champ`) couvre les deux branches, et les
-séparer aurait voulu dire couper un banc en deux pour la forme. Un commit, deux cases.
-
-P3/P4 reçus : 891 sondes (9×9 en x-y, onze hauteurs dont **cinq au-dessus** du plan moyen),
-trois instants dont 9 876 s. Champ par champ, écart relatif **1,0 à 2,6·10⁻⁶**, sans champ
-aberrant ; `grad_eta.z` exactement nul des deux côtés. Par point et par branche, métrique plus
-sévère : au-dessus 1,2 à 4,2·10⁻⁵, au-dessous 1,5 à 1,9·10⁻⁵ — les grands rapports tombent là où
-l'atténuation a tout éteint et où l'échelle du point est minuscule.
-En grandeurs physiques : eta à 0,57 µm près pour une échelle de 0,64 m ; p_dyn à 1,2·10⁻² Pa
-pour 12 209 Pa. Le repère de 3 mm de S201 est cinq mille fois plus large.
-Hors domaine : le cœur refuse, la carte marque en NaN — un noyau ne peut pas refuser.
-
-**FXC refuse l'indexation dynamique d'un vecteur en écriture** (`grad_u0[j] = …` dans une
-boucle) : « array reference cannot be used as an l-value ». Boucles déroulées à la main. À
-retenir pour tout noyau à écrire : dérouler dès qu'une composante de vecteur est une cible.
-
-**A286 levée pour ce lot** : les fantômes couplés de `delta3d_coupling.rs` ne consomment que
-`eta`, `p_dyn` et `grad_p_dyn[axis]` des échantillons de face — rien qui soit propre à W.
-La carte les calcule déjà tous. Quand W entrera dans le fond publié, il passera par le même
-chemin sans le modifier. A286 reste ouverte sur le **prolongement de W**, pas sur ce lot.
-
-P5a reçu (`--delta3d-faces`, 17×11×13, origine non alignée, 7 844 faces, trois instants) :
-pire écart absolu sur `p_dyn`, 1,46 à 2,44·10⁻³ Pa pour des valeurs de 129 à 5 223 Pa — soit
-4,7·10⁻⁷ à 3,3·10⁻⁶ en relatif, du même ordre que le champ ponctuel de P3/P4.
-Les trois familles se comportent pareil ; refus de capacité et de domaine vide obtenus.
-`sample_faces` retrouve l'axe par soustractions successives : un seul dispatch couvre les
-trois familles, et leur ordre u, v, w est celui du cœur.
-
-**P5b, ce qui reste à porter** (`delta3d_coupling.rs` l. 60-125) : `surface_total = eta + eta_fond`,
-`ghost_bg_up[c] = rho·g·s.eta − (s.p_dyn + dz·s.grad_p_dyn.z)` à la face au-dessus de la
-dernière maille mouillée, et `ghost_bg_{x,y}[f] = −(s.p_dyn + signe·(θ−0,5)·dx·s.grad_p_dyn[axe])`
-sur les faces où la mouillure change. La constance verticale de `eta` que le cœur vérifie est
-automatique ici : la carte évalue `eta` sans dépendance en z.
-
-P5b reçu (`--delta3d-couplage`, 15×11×14, 1 510 mailles mouillées sur 2 310, aucune colonne
-pleine — donc les fantômes latéraux sont réellement exercés) : second membre à 6,0·10⁻⁸,
-1,1·10⁻⁶ et 3,9·10⁻⁷ en relatif sur trois instants ; préconditionneur du même ordre.
-Fantôme du haut de 211 à 389 Pa : le fond entre vraiment dans le second membre.
-
-**Première fixture rejetée, et pourquoi.** À `rest = (nz−4)·dx` avec une perturbation de
-±1,4·dx, la hauteur totale franchissait la borne de `check_edges3` (`2·dx ≤ h ≤ (nz−1)·dx`) :
-le cœur refusait `Domain` au temps lointain, et à t=0 l'écart montait à 1,3·10⁻⁵. Fixture
-rentrée dans le domaine (`rest = (nz−5)·dx`, ±0,9·dx) : tout redevient régulier.
-
-**Instrument à garder** : `mailles_franchement_divergentes` compte les mailles dont le second
-membre s'écarte de plus de 10⁻³ de l'échelle. Un arrondi ne peut pas produire ça ; une
-**mouillure classée autrement** des deux côtés, si. Ici **zéro** aux trois instants, mais le
-risque existe dès qu'une surface totale passe à un ulp d'un centre de maille : garder ce
-compteur dans tout banc qui compare des géométries, il est le seul à voir la bascule.
-
-P6 mesuré (`--delta3d-cout-fond`, 64 composantes, 20 passages, premier écarté) :
-24×24×16 — carte 0,099520 ms contre CPU 27,6712 ms, **×278** ;
-32³ — 0,179552 contre 92,8762 ms, **×517** ;
-48×48×24 — 0,273856 contre 148,044 ms, **×541**.
-Et la passe de la carte porte **faces + couplage**, là où le CPU ne porte que les faces :
-le rapport est donc une borne basse.
-
-Ce que ça tranche : échantillonner le fond sur CPU à l'échelle 3D coûte **93 à 148 ms par pas**.
-Ce n'est pas lent, c'est impossible — le budget entier de δ est de 2 ms (ADR-174 D3). Le choix
-d'ADR-175 D1 de publier les paramètres plutôt que les échantillons n'était pas une préférence
-d'architecture : c'était la seule voie, et on a maintenant le chiffre qui le dit.
-Avec la projection de S299 (0,31 ms à 32³, 32 cycles), les deux postes font ≈ 0,5 ms — mais
-le pas reste incomplet, donc aucun budget n'est reçu.
-Temps muraux, tâches concurrentes, alimentation non relevée : A270 due sur ce banc.
