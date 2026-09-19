@@ -14963,3 +14963,59 @@ un livrable visuel doit publier sa résolution comme un banc, et l'aperçu l'imp
 pas de leçon nouvelle forcée, pas d'angle mort nouveau. File active entière relue, deux lignes
 remplacées ; feuille de route et index actualisés. I-02/I-04/I-12/I-14/I-17 inchangés.
 Navigation et plafonds vérifiés à 0. Copie unique, jeton libre.
+
+## S299 — 2026-09-19 — porte B : le premier étage de δ passe sur la carte
+
+**Entrée.** « Continue », après S298 close et jeton libre. Copie unique, master propre, plan
+committé avant tout code. Agent Claude Opus 5, application desktop. Carte constatée avant de
+planifier : NVIDIA GeForce RTX 5070 Laptop GPU, backend Dx12 — la machine de référence d'ADR-174 D1.
+
+**Capacité reçue.** Le domaine 3D de δ vit sur la carte. L'opérateur de pression et son
+préconditionneur y sont **assemblés** à partir de la seule géométrie, pas lus du cœur : en 3D le
+cœur n'exporte rien, `apply_mobile3` est sans matrice, et la production porte donc la règle de
+`mobile_row`. La projection y tourne à **travail borné** — `5 + 5·cycles + 2` dispatchs, fonction
+des seuls cycles demandés, jamais de la donnée. **Ce qui devient possible** : un pas de production
+dont le coût se connaît avant de le lancer, et qu'une référence CPU peut juger.
+**Consommateurs** : les quatre bancs de ce lot, puis le pas complet d'ADR-175 D1.
+**Preuve** : [DELTA3D-GPU-S299](../docs/validation/DELTA3D-GPU-S299.md).
+
+**Mesures.** Opérateur contre le cœur, trois géométries : surface plate **identique au bit**
+(1287/1287), ondulée 9,554·10⁻⁸, au ras d'un centre 9,300·10⁻⁸ — sous l'ulp `f32` relatif, et
+seulement sur les mailles à fantôme. Problème assemblé : rhs et prec **au bit** sur surface
+plate, 7,748·10⁻⁸ et 4,470·10⁻⁸ au pire. Projection jugée **par le cœur** avec son propre
+opérateur, 7 680 mailles, départ froid : 9,67·10⁻³ à 4 cycles, 8,94·10⁻⁴ à 32, 2,72·10⁻⁷ à 128 ;
+la carte annonce les mêmes à quatre à six chiffres. Coût sur la machine de référence :
+32³ en 0,314 ms à 32 cycles, 64×64×32 en 0,816 ms médiane, 0,849 ms au maximum.
+Suite complète du cœur : **539 réussis**, 18 ignorés, aucun échec.
+
+**Ce que ça dit du 32³.** ADR-144 le désignait comme le point dur du passage à la 3D, « qui y
+arrivera d'emblée ». Il tient en un tiers de milliseconde. L'estimation d'ADR-175 §1 — 30 à 120 ms
+de CPU par pas pour un 64×64×32 sur le chemin d'ADR-173 — se compare à 0,8 ms de carte pour la
+projection seule. L'ordre de grandeur que la décision visait est atteint sur ce poste.
+
+**Erreur commise et corrigée dans la session.** Le banc de coût publiait un « résidu relatif » de
+10⁵ : le numérateur portait `‖b − A·x‖` avec un `b` assemblé sur la carte, le dénominateur la
+divergence d'entrée. Deux grandeurs justes, calculées à deux endroits, dont le rapport ne veut
+rien dire. `‖b‖` est désormais réduite sur la carte, ce qui ajoute deux dispatchs : la borne
+passe de `3+5c+2` à `5+5c+2`, et la ligne correspondante du commit P5 est périmée sur ce point.
+Les résidus de la réception P5 étaient déjà normalisés par le `‖b‖` du cœur : ils n'ont pas bougé.
+
+**Partiel et suite.** Seule la projection est sur la carte. Restent le second membre **couplé**
+(les fantômes de fond de S297 ne sont pas portés), l'advection, les bandes, la surface publiée
+(D7), les diagnostics D3 — dérive de masse, âge publié, `PressureItersCut` au-dessus de 10⁻⁵ —
+puis la scène de mer étalée et la revue. Aucun coût de porte C n'est reçu : ce banc ne couvre pas
+le pas entier. A98 entière : ces chiffres valent pour cette carte et ce pilote. A270 due sur ce
+banc — l'état d'alimentation n'a pas été relevé. Aucun retrait d'ambition, aucun arbitrage nouveau.
+
+**Rituel.** Maillons **0** : un critère « reçu si » de la porte B avance — la production que le
+critère 3 exige a son premier étage, reçu contre la référence — avec consommateur et preuve.
+Cinquième session consécutive sur la porte B, autorisée par A211 puisqu'un critère avance à
+chaque fois ; ADR-174 D6 la désigne comme porte en cours. L156 reçoit une **récurrence datée**
+sur la variante « dénominateur venu d'ailleurs » ; pas de leçon nouvelle forcée, pas d'angle mort
+nouveau. File active et feuille de route remplacées ; la section J2 dépassait son plafond, son
+histoire est rendue aux preuves. Index complété. I-04/I-05/I-06/I-13/I-15/I-17 inchangés.
+Navigation et plafonds vérifiés à 0. Copie unique, jeton libre.
+
+*Tenue du plan* : le commit P1 porte sa case encore `[>]` — la bascule a été faite au début de P2
+au lieu de la dernière action avant le commit. Sans conséquence ici, le commit P1 ne contenant que
+le plan ; signalé pour que l'historique ne soit pas lu comme un `[x]` manquant.

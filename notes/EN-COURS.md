@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S299 — en cours : premier étage du pas GPU 3D résident (ADR-175 §4.2).
+Session : S299 — terminée : opérateur, problème et projection bornée reçus sur la carte.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, outils locaux, carte réelle.
 Entrée : « Continue », 2026-09-19, après S298 close et jeton libre.
 Carte constatée : NVIDIA GeForce RTX 5070 Laptop GPU, backend Dx12 — machine de référence
@@ -95,7 +95,7 @@ Critères avant code, posés ici :
 - [x] **P5** — PCG **résident à cycles fixés** sur un second membre donné : scalaires sur la
   carte, aucun retour CPU entre itérations ; pression comparée à la référence.
 - [x] **P6** — coût du pas borné sur le poste de référence, cycles comptés et publiés.
-- [>] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
+- [x] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
 

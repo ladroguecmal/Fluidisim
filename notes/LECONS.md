@@ -2534,6 +2534,18 @@ ailleurs**. Deux tests le montrent : *dépasse-t-elle une borne physique connue 
 *varie-t-elle sans tendance quand on bouge le réglage ?* Une réponse positive à l'une des deux suffit
 à retirer la grandeur des rapports.
 
+**Récurrence S299, 2026-09-19 — variante « dénominateur venu d'ailleurs ».** Le banc de coût du
+pas GPU publiait un « résidu relatif » de **10⁵**. Le dénominateur n'était pourtant pas un réglage :
+c'était la divergence d'entrée, alors que le numérateur portait `‖b − A·x‖` avec un `b` assemblé
+**sur la carte**, que les termes fantômes dominent de plusieurs ordres. Deux grandeurs justes,
+calculées à deux endroits, dont le rapport ne veut rien dire.
+
+Le premier test de L156 a suffi à le voir : un résidu rapporté à sa propre échelle vaut **1** au
+départ froid et décroît ; 10⁵ dépasse une borne connue du montage. **Réflexe complémentaire** :
+quand le numérateur est calculé ailleurs — une carte, un service, un autre assemblage — son
+échelle doit être calculée **au même endroit et sur le même objet**, pas reconstituée à côté à
+partir de ce qu'on croit lui avoir donné en entrée.
+
 ## L157 — Une raison fausse à l'appui d'une bonne décision la fait reporter indéfiniment
 
 *(S40)* Une session avait refusé de trancher une question, à juste titre, et avait écrit pourquoi :
