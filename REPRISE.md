@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 14:32 +02:00
+Battement        : 2026-09-19 14:33 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
 Session en cours : S293 — audit global demandé par l'utilisateur : où l'avancement bloque ; S292 close comme interrompue
 Dernière session : S292 — interrompue par l'utilisateur après P2/P3 ; le gel de 467 ms ne se reproduit pas sur le solveur isolé

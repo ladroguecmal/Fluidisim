@@ -79,7 +79,7 @@ place de l'utilisateur.
   avertissements ; ce que `code/` et `viewer/` contiennent par couche, confronté aux documents.
 - [x] **P4** — intentions → projet fini → jalons : sources, LISTE-PROJET-FINI, portes §3 bis ;
   recompter reçu/partiel/absent si le décompte affiché est périmé.
-- [ ] **P5** — trajectoire mesurée : sessions et commits par sujet et par période (Git et
+- [x] **P5** — trajectoire mesurée : sessions et commits par sujet et par période (Git et
   journal), capacités reçues, maillons, part conception/code ; fils longs et ce qu'ils ont
   débloqué.
 - [ ] **P6** — blocages classés (technique mesuré, décision en attente de l'utilisateur,
@@ -135,3 +135,31 @@ trajectoires prescrites, impacts programmés toutes les 4 s) — et la seconde c
 Revue visuelle : R10 (S277) a désigné la porte B — « une onde qui traverse une vraie mer et s'y
 déforme » — il y a quinze sessions ; le registre §5 affiche encore R6 et R10 « en attente »
 alors que R7 et R10 sont reçus. Verdict sur l'onde injectée de S277 toujours non rendu.
+
+**P5 — trajectoire mesurée (14:32–14:33).** Phases : S01–S19 conception pure ; S20–S69
+harnais et véhicules d'essai ; S70–S198 **W** (129 sessions, 44 % du total) ; S199–S292 δ,
+hôte GPU, V, revue visuelle. δ depuis S199 ≈ 44 sessions, **toutes sur la tranche 2D** :
+noyau et précision 9, coût 14, raccordement B/W 4, bords et précision temporelle 7, rendu 3,
+ordonnancement et rétrécissement 7 ; **3D : 0**. V : 5 sessions (S224–S229), rien depuis le
+2026-09-14. Solides dans le système : 0.
+**Chaînage de la suite** : S283 → S292, **dix sessions sur dix** ont pris pour sujet la suite
+déclarée par la précédente (S291 et S292 sur demande de l'utilisateur, mais sur le point
+ouvert par la session d'avant). Même mécanisme que S198 (33 sur 38), et il a traversé deux
+agents différents (Codex S282–S288, Claude S289–S292) : il est dans le dispositif, pas dans
+l'agent. La règle des maillons ne l'arrête pas : chaque micro-optimisation consommée par le
+chemin de l'afficheur remet le compteur à zéro (S289, S290, S291).
+**Cinquième audit du même mécanisme** : BILAN-S69 (« vingt-deux sessions sur l'instrument »),
+S145 (« le goulot n'a pas bougé »), S198 (« le problème est le choix du sujet »), S227 (« la
+livraison est déséquilibrée »). Chaque fois, correctif de procédure ; chaque fois, retour.
+**Regonflement des documents d'état depuis la refonte S227** (65 sessions) : file active
+962 → 5 806 mots (×6), FEUILLE-DE-ROUTE 12,8 → 41,9 ko (×3,3), index 19,2 → 30,0 ko, REPRISE
+9,2 → 13,1 ko. Lecture obligatoire à froid ≈ 170 ko (≈ 45 à 50 k jetons) avant le lot. Les
+cellules de la file (A276 notamment) sont redevenues des journaux S252 → S291.
+**Coût de l'eau aujourd'hui, sur la machine locale** (portable, RTX 5070 Laptop) : J1 = GPU
+médian 1,74 ms + CPU hôte 4,1 ms (S267) ; bande δ 8,27 ms (S291). Soit ≈ 14 ms contre 2 ms pour
+toute l'eau (ADR-125), et ≈ 5,8 ms sans δ. ADR-125 ne fixe **aucune répartition** entre couches
+ni entre CPU et GPU.
+**A278 surévalué** : l'hôte contient déjà du `unsafe` (`viewer/src/counting.rs`, allocateur
+compteur) ; et un vivier persistant sûr existe sans emprunt partagé (tampons possédés par les
+fils et rendus par canal borné, ou sortie en `AtomicU32` à écriture disjointe). Hypothèse à
+éprouver, pas un fait reçu.
