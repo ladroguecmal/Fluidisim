@@ -59,7 +59,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 Session : S298 — en cours : fournisseur B réel et frontières de la référence 3D.
-Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
+Agent : Codex GPT-6 jusqu’à P3 ; P4 repris à chaud par Claude Opus 5, application desktop ;
+fichiers, git, cargo, outils locaux. Diff P4 jugé cohérent avec la thèse déclarée : complété, non annulé.
 Entrée : « Continue », 2026-09-19.
 Capacité : la référence 3D consomme le fournisseur spectral B du cœur ; ses frontières
 sont éprouvées contre le chemin 2D reçu. Consommateur : banc et aperçu 3D, puis référence
@@ -77,7 +78,10 @@ Le coût 2D est différé selon S293 ; ce lot prépare les entrées réelles de 
   tests au ponctuel, erreurs et allocations.
 - [x] **P3** — comparer houle progressive et éponge 3D au témoin 2D, transposition x/y ;
   fixtures et critères existants conservés, limites publiées.
-- [>] **P4** — consommer B réel dans un aperçu 3D calculé, vérifier les images et la suite.
+- [x] **P4** — consommer B réel dans un aperçu 3D calculé, vérifier les images et la suite.
+- [ ] **P4b** — découpage déclaré : la vérification P4 a trouvé la fixture sous-résolue
+  (3,92 mailles par λ la plus courte). Rejouer sur une fixture résolue et comparer, pour
+  séparer le bruit de maille de la dispersion physique avant de livrer l’image.
 - [ ] **P5** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
@@ -90,3 +94,14 @@ P4 commence pendant les calculs P3, sans modifier le solveur ni les bancs en cou
 
 P4 : premier essai 64 modes trop lent en ponctuel ; arrêt après quelques images.
 Réutiliser la grille S276 à chaque rangée y, mêmes bits, scratch réservé.
+
+P4 mesuré (run complet, `viewer/captures/s298-spectral.log`) : recipe_hash 4413aa00b9029fcf,
+64 composantes, atténuation au fond 2,2591731·10⁻⁵, λ_min 0,9809 m soit **3,92 mailles**,
+vitesse verticale résiduelle au fond 1,193644·10⁻⁶ m/s, it_max 147, affinages 0,
+divergence franche max 9,39682·10⁻⁶, 121 images en ≈ 5 min 45 s (≈ 2,8 s/image, CPU séquentiel).
+Le diagnostic de résolution ajouté ne change ni le hash ni l’empreinte FRAME 0 : run publié valide.
+
+**Constat P4** : le champ de différence dégénère en damier à l’échelle de la maille et son
+amplitude **remonte** après le minimum de 3,3 s (0,047 → 0,091 m à 6 s), au lieu de se disperser
+comme en S297 analytique. Deux causes candidates, non tranchées : composantes courtes portées
+par 4 mailles ; éponge de 1 m face à une mer large bande. P4b discrimine par la résolution.

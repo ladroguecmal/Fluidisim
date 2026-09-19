@@ -636,6 +636,9 @@ fn coupled_transverse_invariance_and_rotation_s297() {
 #[test]
 fn real_background_grid_matches_mac_points_and_preserves_publication_s298() {
     use crate::{background::{Background,SeaState,DifferentialError},SimTime,WorldPos};
+    let sample_bits=|s:BackgroundSample| core::iter::once(s.eta).chain(core::iter::once(s.p_dyn))
+        .chain(s.grad_eta).chain(s.u).chain(s.du_dt).chain(s.grad_p_dyn).chain(s.laplacian_u)
+        .chain(s.grad_u.into_iter().flatten()).map(f32::to_bits).collect::<Vec<_>>();
     let d=Domain3{nx:5,ny:3,nz:9,dx:0.25};
     let origin=[-1.,0.75,-1.5];
     let mut arena=Arena{stats:AllocStats::default(),sealed:false};
@@ -646,7 +649,7 @@ fn real_background_grid_matches_mac_points_and_preserves_publication_s298() {
     let before=host.alloc.stats().persistent_bytes;
     let mut grid=BackgroundGrid3::configure(&mut host,d,origin,1025.).unwrap();
     let faces=(d.nx+1)*d.ny*d.nz+d.nx*(d.ny+1)*d.nz+d.nx*d.ny*(d.nz+1);
-    assert_eq!(host.alloc.stats().persistent_bytes-before,2*faces*core::mem::size_of::<BackgroundSample>());
+    assert_eq!(host.alloc.stats().persistent_bytes-before,(2*faces+(d.nx+1)*(d.nz+1))*core::mem::size_of::<BackgroundSample>()+(d.nx+1)*core::mem::size_of::<[f32;2]>()+(2*(d.nx+d.ny+d.nz)+3)*core::mem::size_of::<f32>());
     assert!(grid.view().is_none());
     host.alloc.seal();
     for t in [0,987_654,9_876_543_210] {
@@ -656,7 +659,7 @@ fn real_background_grid_matches_mac_points_and_preserves_publication_s298() {
             let dims=[d.nx+usize::from(axis==0),d.ny+usize::from(axis==1),d.nz+usize::from(axis==2)];
             for k in 0..dims[2] {for j in 0..dims[1] {for i in 0..dims[0] {
                 let ijk=[i,j,k];let p=core::array::from_fn(|a|origin[a]+(ijk[a] as f32+if a==axis {0.} else {0.5})*d.dx);
-                assert_eq!(field[(k*dims[1]+j)*dims[0]+i],b.differential_local_extended(p,SimTime(t),1025.).unwrap());
+                assert_eq!(sample_bits(field[(k*dims[1]+j)*dims[0]+i]),sample_bits(b.differential_local_extended(p,SimTime(t),1025.).unwrap()));
             }}}
         }
         let old=[bg.u.to_vec(),bg.v.to_vec(),bg.w.to_vec()];

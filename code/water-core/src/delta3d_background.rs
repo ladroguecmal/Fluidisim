@@ -11,7 +11,9 @@ use crate::{
 /// Ce tampon de travail est recalculé à chaque instant, jamais persisté (I-02/I-17).
 pub struct BackgroundGrid3 {
     domain: Domain3,
-    origin_bottom: [f32; 3],
+    coordinates: [[Vec<f32>; 2]; 3],
+    columns: Vec<[f32; 2]>,
+    row: Vec<BackgroundSample>,
     density: f32,
     current: [Vec<BackgroundSample>; 3],
     pending: [Vec<BackgroundSample>; 3],
@@ -56,10 +58,35 @@ impl BackgroundGrid3 {
             }
             sizes[axis] = size;
         }
+        let row_size = (d.nx + 1)
+            .checked_mul(d.nz + 1)
+            .ok_or(DifferentialError::Capacity)?;
+        let coordinates_size = dims
+            .iter()
+            .try_fold(0usize, |n, &s| {
+                s.checked_mul(2)
+                    .and_then(|s| s.checked_add(1))
+                    .and_then(|s| n.checked_add(s))
+            })
+            .ok_or(DifferentialError::Capacity)?;
+        let scratch_bytes = row_size
+            .checked_mul(core::mem::size_of::<BackgroundSample>())
+            .and_then(|n| {
+                (d.nx + 1)
+                    .checked_mul(core::mem::size_of::<[f32; 2]>())
+                    .and_then(|s| n.checked_add(s))
+            })
+            .and_then(|n| {
+                coordinates_size
+                    .checked_mul(core::mem::size_of::<f32>())
+                    .and_then(|s| n.checked_add(s))
+            })
+            .ok_or(DifferentialError::Capacity)?;
         let bytes = sizes
             .iter()
             .try_fold(0usize, |n, &s| n.checked_add(s))
             .and_then(|n| n.checked_mul(2 * core::mem::size_of::<BackgroundSample>()))
+            .and_then(|n| n.checked_add(scratch_bytes))
             .ok_or(DifferentialError::Capacity)?;
         host.alloc
             .alloc_persistent(bytes)
@@ -67,7 +94,17 @@ impl BackgroundGrid3 {
         let make = || core::array::from_fn(|axis| vec![BackgroundSample::default(); sizes[axis]]);
         Ok(Self {
             domain,
-            origin_bottom,
+            coordinates: core::array::from_fn(|a| {
+                core::array::from_fn(|face| {
+                    (0..dims[a] + face)
+                        .map(|i| {
+                            origin_bottom[a] + (i as f32 + if face == 1 { 0. } else { 0.5 }) * d.dx
+                        })
+                        .collect()
+                })
+            }),
+            columns: vec![[0.; 2]; d.nx + 1],
+            row: vec![BackgroundSample::default(); row_size],
             density,
             current: make(),
             pending: make(),
@@ -83,25 +120,27 @@ impl BackgroundGrid3 {
         background: &Background,
         time: SimTime,
     ) -> Result<(), DifferentialError> {
-        let d = self.domain;
         for axis in 0..3 {
-            let dims = [
-                d.nx + usize::from(axis == 0),
-                d.ny + usize::from(axis == 1),
-                d.nz + usize::from(axis == 2),
-            ];
-            for k in 0..dims[2] {
-                for j in 0..dims[1] {
-                    for i in 0..dims[0] {
-                        let ijk = [i, j, k];
-                        let point = core::array::from_fn(|a| {
-                            self.origin_bottom[a]
-                                + (ijk[a] as f32 + if a == axis { 0. } else { 0.5 }) * d.dx
-                        });
-                        let sample =
-                            background.differential_local_extended(point, time, self.density)?;
-                        self.pending[axis][(k * dims[1] + j) * dims[0] + i] = sample;
-                    }
+            let xs = &self.coordinates[0][usize::from(axis == 0)];
+            let ys = &self.coordinates[1][usize::from(axis == 1)];
+            let zs = &self.coordinates[2][usize::from(axis == 2)];
+            let nx = xs.len();
+            let ny = ys.len();
+            // S276 calcule phase/atténuation une fois par colonne/couche, sans changer les bits.
+            for (j, &y) in ys.iter().enumerate() {
+                let row = &mut self.row[..nx * zs.len()];
+                background.differential_grid_extended(
+                    xs,
+                    y,
+                    zs,
+                    time,
+                    self.density,
+                    &mut self.columns,
+                    row,
+                )?;
+                for (k, source) in row.chunks_exact(nx).enumerate() {
+                    self.pending[axis][(k * ny + j) * nx..(k * ny + j + 1) * nx]
+                        .copy_from_slice(source);
                 }
             }
         }

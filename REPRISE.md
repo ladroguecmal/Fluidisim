@@ -9,8 +9,8 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 16:55 +02:00
-Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
+Battement        : 2026-09-19 17:12 +02:00
+Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux) — reprise à chaud de S298 ouverte par Codex GPT-6, sur demande de l’utilisateur
 Session en cours : S298 — frontières 3D et raccord au fond réel
 Dernière session : S297 — référence 3D couplée reçue contre HOS, aperçu animé local livré
 Session suivante : S298 — porte B : réception absorption/progression 3D S269–S274, fournisseur réel B/W ; préparer production GPU et surface publiée pour la scène visible demandée.
