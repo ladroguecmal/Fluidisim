@@ -14843,3 +14843,11 @@ l'utilisateur.
 relus : I-04, I-06, I-07 (`g_eff` fourni), I-08 (f32, durée entière, coefficients seuls arrondis),
 I-17 ; aucun amendé. Copie unique.
 
+## S296 — 2026-09-19 — surface mobile 3D : plan posé, passation à Codex (interrompue)
+
+**Claude Opus 5 (Claude Code desktop).** Entrée : « continue », puis « commit tout, je vais le
+faire avec Codex ». Plan 7c5180b : porte B, lot 2, surface mobile dans la référence `delta3d`,
+quatre critères posés avant le code. **Seul P1 est fait** ; P2–P6 restent, avec les notes de
+conception tirées de la lecture du mode mobile 2D dans `notes/EN-COURS.md`. Aucun code modifié.
+Jeton `interrompu` : reprise à chaud à P2. Maillons inchangés (0, capacité de S295).
+

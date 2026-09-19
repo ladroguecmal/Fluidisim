@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S296 — **porte B, lot 2 : la surface mobile dans la référence δ 3D**
+Session : S296 — **porte B, lot 2 : la surface mobile dans la référence δ 3D** — interrompue après P1 (passation à Codex, demande de l'utilisateur)
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
 Entrée : « continue » de l'utilisateur, 2026-09-19 ; suite désignée par S295, porte en cours B.
 Objectif : la référence `delta3d` gagne le mode **à surface géométriquement mobile** de S237 —
@@ -94,4 +94,31 @@ qu'ADR-175 §4.1 demande. Hors lot : couplage B/W, production GPU, scène, coût
 - [ ] **P6** — rituel §6.
 
 ### Notes de reprise
+Passation (2026-09-19, demande de l'utilisateur : « commit tout, je vais le faire avec Codex »).
+Rien n'est écrit pour P2 : reprendre à P2, code intact depuis S295.
+
+Ce que la lecture du 2D a établi, pour ne pas le refaire :
+- Le mode mobile 2D vit dans `delta_mobile.rs` : `wet` (centre sous `η` de la colonne),
+  `ghost_up` (`θ = (η − z_c)/dx` borné par `SURFACE_THETA_MIN`, valeur `ρg((η − rest) − reste)`),
+  `ghost_side` (`θ = (h_i − z_c)/(h_i − h_j)`, valeur `ρg(z_c − rest)`), `apply_mobile`,
+  `rhs_mobile` (second membre et diagonale de Jacobi), `correct_mobile`, `extrapolate_mobile`
+  (constante verticale au-dessus de la dernière face corrigée), `transport_mobile` (débit intégré
+  jusqu'à `½(η_i + η_{i+1})` avec fraction mouillée `clamp((η_f − k·dx)/dx, 0, 1)`, tous lisent
+  `ηⁿ`), `surface_in_bounds` (≥ 2 mailles au-dessus du fond, ≤ sommet − 1 maille).
+- Ordre du pas 2D : garde, sauvegarde, `advect(dt)` (centrée, `delta_projection.rs` l.1090 :
+  voisins manquants remplacés par la valeur centrale ; face `w` du sommet non advectée), projection
+  mobile **à départ chaud** (ADR-169 : `p` publiée, nulle hors mailles mouillées, résidu vrai),
+  extrapolation, transport, validation de onze champs, garde, publication.
+- Préconditionneur : la 2D prend la **multigrille mobile** (ADR-167) dès que la grille se divise ;
+  pour l'identité à `ny = 1`, forcer son chemin de Jacobi dans les essais par le
+  `thread_local` `crate::delta_projection::MOBILE_MULTIGRID_OFF` (cfg(test)). Chemin Jacobi :
+  `dir = prec·res` (`β = 0`), `rz = Σ r·prec·r`, puis `β = zn/rz`, `dir = prec·res + β·dir`.
+- Certificat d'arrondi : utiliser `γ₈` quand `ny = 1` (quatre faces par ligne) et `γ₁₀` sinon ;
+  le lot 1 emploie `γ₁₀` partout — à aligner, sans quoi l'identité à `ny = 1` peut casser au
+  plancher.
+- Advection 3D : écrire `uc·ux + wc·uz + vc·uy` (terme `y` en dernier) pour garder les bits 2D à
+  `ny = 1`, même règle que la divergence et le transport du lot 1.
+- Oracle HOS et protocole : `examples/delta_mobile.rs` (fonctions `hos`, `hos_eta`, `hos_b2`,
+  L = h = 2 m, `nz = 2,25/dx`, repos à 2 m, une période, 1 ms, plafond 4 000) et
+  `examples/support/nl_surface.rs` ; à recopier dans un banc `delta3d_mobile.rs`.
 
