@@ -58,39 +58,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S297 — terminée : couplage B/W dans la référence 3D et aperçu animé livré.
+Session : S298 — en cours : fournisseur B réel et frontières de la référence 3D.
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
-Entrée : « Continue, et j'aimerais pouvoir voir après », 2026-09-19.
-Objectif : étendre les équations reçues ADR-149/152/153/164/165/166 aux deux dimensions
-horizontales, puis montrer un calcul véritable de la référence par des images locales de banc.
-Critères avant code : fond nul identique au bit au pas mobile S296 ; à ny=1 cas S253 contre
-HOS (profil <2 %, harmonique <20 % à 128 colonnes, décroissants) ; fond uniforme traversant
-sans perturbation créée ; invariance transverse à l'arrondi ; source réellement 3D et refus
-atomiques sans allocation. Toute réception manquée reste publiée, sans déplacer ses seuils.
-Aperçu : surfaces rendues directement en images, sans sérialisation d'état δ (I-17), commande
-reproductible et paramètres publiés. Aucune réception perceptive ou temps réel anticipée.
+Entrée : « Continue », 2026-09-19.
+Capacité : la référence 3D consomme le fournisseur spectral B du cœur ; ses frontières
+sont éprouvées contre le chemin 2D reçu. Consommateur : banc et aperçu 3D, puis référence
+pour la production GPU d’ADR-175. La scène interactive reste la prochaine intégration.
+Critères avant code : échantillons MAC identiques au ponctuel B prolongé, aucune allocation
+après configuration, aucun échantillon partiel publié sur refus ; cas plan progressif et
+éponge comparés au témoin 2D (hauteur < 3 mm S201, écarts et limites publiés).
+Ne pas transformer cette équivalence en réception universelle de l’absorption oblique.
+Le coût 2D est différé selon S293 ; ce lot prépare les entrées réelles de la porte B.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seuls ; copie unique, branche B archivée, diff vide.
-- [x] **P2** — contrats de fond 3D, réserves, géométrie et fantômes du total ; affinage homogène.
-- [x] **P3** — advection croisée/source, bandes aux quatre bords, éponge et pas atomique ; tests
-  fond nul, courant traversant, refus et allocations.
-- [x] **P4** — réception : cas limite HOS, invariance transverse et cas oblique ; preuve S297.
-- [x] **P5** — aperçu animé local calculé depuis le pas 3D, rendu en images de banc, vérification
-  visuelle et livraison ; aucune page HTML ni état δ écrit sur disque.
-- [x] **P6** — rituel REPRISE §6, file et feuille de route, jeton libre, commits vérifiés.
+- [x] **P1** — amorce, lecture ciblée et plan seuls ; copie unique, master propre.
+- [>] **P2** — échantillonneur B réel sur MAC 3D, stockage réservé et publication atomique ;
+  tests au ponctuel, erreurs et allocations.
+- [ ] **P3** — comparer houle progressive et éponge 3D au témoin 2D, transposition x/y ;
+  fixtures et critères existants conservés, limites publiées.
+- [ ] **P4** — consommer B réel dans un aperçu 3D calculé, vérifier les images et la suite.
+- [ ] **P5** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
 
-La 2D reste le témoin. `delta_coupling.rs` porte les équations et les bandes ADR-166.
-Le mode mobile 3D S296 est dans `delta3d_mobile.rs` ; lui garder ses bits au fond nul.
-La production GPU et le raccord à l'afficheur de mer restent distincts de l'aperçu CPU.
-Découper avant 15 minutes toute étape qui se prolonge.
-
-P4 : HOS reçu 0,148100 % / 0,345649 % à 5 cm ; 0,177888 % / 0,531870 % à 10 cm.
-Invariance et rotation : un ulp. Bandes/éponge construites, réception S269–S274 restante.
-Aperçu calculé avec succès en parallèle du banc : 121 PPM, 6 s, viewer/captures/s297.
-
-P5 : GIF livré (121 images), PPM/PNG locaux sous viewer/captures/s297 ; calcul sans refus.
-Suite complète : 537 réussis, 18 ignorés. Aucun état δ sérialisé.
+B possède differential_local_extended (ADR-154) et differential_grid_extended (S276).
+Le support Samples3 de S297 ne traite que des fonctions de banc infaillibles.
+B est profond : le fond du domaine doit être suffisamment bas et l’atténuation publiée.
+W prolongé au-dessus du plan moyen reste A286 ; ne pas prétendre le recevoir avec B seul.

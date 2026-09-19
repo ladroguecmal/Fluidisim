@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 16:42 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 16:44 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : aucune — S297 terminée
+Session en cours : S298 — frontières 3D et raccord au fond réel
 Dernière session : S297 — référence 3D couplée reçue contre HOS, aperçu animé local livré
 Session suivante : S298 — porte B : réception absorption/progression 3D S269–S274, fournisseur réel B/W ; préparer production GPU et surface publiée pour la scène visible demandée.
 Maillons        : 0 — capacité S297 : couplage 3D reçu, consommé par HOS et aperçu animé, référence de la porte B (ADR-175 §4.1), preuve DELTA3D-COUPLEE-S297
