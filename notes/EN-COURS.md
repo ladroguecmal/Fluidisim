@@ -85,7 +85,7 @@ qu'ADR-175 §4.1 demande. Hors lot : couplage B/W, production GPU, scène, coût
 - [x] **P2** — géométrie mobile et opérateur : mailles mouillées, fantômes vertical et latéraux
   (x et y), opérateur, second membre et diagonale ; erreur inverse du mode mobile, `γ` selon le
   nombre de faces ; essais : symétrie avec fantômes, identité au bit avec la 2D à `ny = 1`.
-- [ ] **P3** — projection mobile (Jacobi, départ depuis la pression publiée d'ADR-169),
+- [x] **P3** — projection mobile (Jacobi, départ depuis la pression publiée d'ADR-169),
   correction fantôme, extrapolation, divergence des lignes franches ; essai : identité avec la 2D.
 - [ ] **P4** — advection 3D, transport mouillé en x et y, `step_surface_mobile`, gardes et refus
   atomiques ; essais : repos exact, trajectoire `ny = 1` contre la 2D, symétrie x↔y, allocations.

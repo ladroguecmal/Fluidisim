@@ -382,3 +382,38 @@ fn mobile_operator_has_symmetric_ghost_rows_s296() {
         }
     }
 }
+
+#[test]
+fn mobile_projection_is_conservative_s296() {
+    for ny in [1,4] {
+        let (mut v,_) = volume(9,ny,9,0.25,9.81);
+        let eta: Vec<_>=(0..9*ny).map(|c|1.25+0.2*(c as f32*1.7).sin()).collect();
+        v.set_free_surface(&eta,1.25).unwrap();
+        v.set_velocity(&noise(v.u.len(),1),&noise(v.v.len(),2),&noise(v.w.len(),3)).unwrap();
+        v.us.copy_from_slice(&v.u); v.vs.copy_from_slice(&v.v); v.ws.copy_from_slice(&v.w);
+        let r=v.project_mobile3(-1025./0.002,0.002/1025.,4000,&Jobs).unwrap();
+        assert!(!r.degraded,"{r:?}");
+        assert!(r.divergence_plain<=PROJECTION_DIVERGENCE_TOLERANCE);
+    }
+}
+
+#[test]
+fn mobile_projection_matches_2d_s296() {
+    use crate::delta_projection::{Domain,Volume,MOBILE_MULTIGRID_OFF};
+    struct Still;
+    impl crate::host::MonotonicClock for Still { fn now_ns(&self)->u64 {0} }
+    let (mut v3,_) = volume(32,1,36,0.0625,9.81);
+    let mut arena=Arena{stats:AllocStats::default(),sealed:false};
+    let mut v2=Volume::configure(&mut HostServices{alloc:&mut arena,jobs:&Jobs,sink:&Jobs},
+        Domain{nx:32,nz:36,dx:0.0625},1025.,9.81,&[0.;32]).unwrap();
+    let eta:Vec<_>=(0..32).map(|i|2.+0.1*(std::f64::consts::PI*(i as f64+0.5)/32.).cos() as f32).collect();
+    v3.set_free_surface(&eta,2.).unwrap();v2.set_free_surface(&eta,2.).unwrap();
+    MOBILE_MULTIGRID_OFF.with(|c|c.set(true));
+    let r2=v2.step_surface_mobile(1000,4000,1_000_000,&Jobs,&Still).unwrap().report.unwrap();
+    MOBILE_MULTIGRID_OFF.with(|c|c.set(false));
+    let r3=v3.project_mobile3(-1_025_000.,(0.001f64/1025.) as f32,4000,&Jobs).unwrap();
+    assert_eq!(r3.iterations,r2.iterations);
+    assert_eq!(v3.pressure(),v2.pressure());
+    v3.extrapolate_mobile3();
+    assert_eq!(v3.velocity_u(),v2.velocity_u());assert_eq!(v3.velocity_w(),v2.velocity_w());
+}
