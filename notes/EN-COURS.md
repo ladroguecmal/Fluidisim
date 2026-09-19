@@ -58,97 +58,53 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S289 — terminée
+Session : S290 — en cours
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
-Entrée : reprendre le projet ; suite A276 déclarée par S288.
-Objectif : un solveur de pression **résident** GPU — réductions et cycle sans retour CPU par
-itération — que le **pas réel** consomme sous les portes d'acceptation inchangées du cœur.
+Entrée : continuer ; A292, déclarée par S289.
+Objectif : rendre le cycle résident **appelable sans gaspiller 73 % de son temps**, et lever les
+allocations qu'ADR-145 interdit à la boucle d'image. Même cause, un seul lot.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seuls.
-- [x] **P2** — cœur : crochet d'un candidat de pression externe dans la projection mobile.
-  Le candidat ne franchit aucune porte : le cœur recalcule le vrai résidu et garde ADR-143/144.
-  Refus atomique d'un candidat non fini ou de mauvaise forme. Tests.
-  *Découpage corrigé : l'export séparé du second membre et de la diagonale, déclaré comme étape
-  distincte, n'existe pas — le crochet passe `rhs` au candidat, et l'inverse de la diagonale se
-  déduit exactement des lignes déjà exportées. Une étape de moins, pas une de moins faite.*
-- [x] **P3** — GPU : cycle PCG résident — réductions d'arbre, `α`/`β` produits et consommés sur
-  la carte, aucun retour CPU entre itérations ; réception contre le CG du cœur.
-- [x] **P4** — consommation par le **pas réel** : candidat GPU proposé au pas mobile, itérations
-  restantes, acceptations/refus et coût mesurés contre le chemin CPU seul.
-- [x] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
+- [x] **P1** — état réel, jeton et plan seuls ; battement de S289 corrigé (fabriqué, non lu).
+- [ ] **P2** — **mesurer avant de choisir** : décomposer les 3,93 ms en encodage / soumission /
+  attente, et mesurer le coût **par dispatch** en faisant varier leur nombre à travail égal.
+  C'est cette mesure qui décide de la voie, pas le raisonnement.
+- [ ] **P3** — réduction des dispatchs à **mathématique identique** : replier chaque réduction
+  dans le noyau qui produit ses valeurs, 7 par itération → 5. Réception **au bit** contre le
+  cycle de S289, puis coût.
+- [ ] **P4** — deuxième palier, seulement si P2 le justifie : réduction finale par le dernier
+  groupe (atomique) et/ou récurrence `q = A·z + β·q` qui rend la direction locale. Les deux
+  changent la précision ou la portabilité : **refus explicite** si le gain n'est pas robuste.
+- [ ] **P5** — allocations de l'appel : viser zéro en régime, publier ce qui reste et pourquoi.
+- [ ] **P6** — reconsommation par le **pas réel** : gain de bout en bout contre le témoin S289,
+  mêmes tailles, mêmes fonds, portes inchangées.
+- [ ] **P7** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
 ### Notes de reprise
 
-Suite déclarée par S288 : ne pas ouvrir une micro-optimisation isolée. La brique S288
-(opérateur + Jacobi amorti, export des lignes au bit) est acquise ; ce qui manque est le
-**cycle**, les **réductions** et le **consommateur**.
+Mesure de départ (S289, [preuve](../docs/validation/PRESSION-RESIDENTE-S289.md) §5) : à
+6 656 mailles et 128 itérations, l'appel coûte 4,1989 ms = 0,2606 d'empaquetage + 3,9333
+d'encodage-soumission-attente, pour **1,150 ms de calcul réel**. 7 dispatchs par itération,
+896 en tout ; ≈ 7 allocations par itération, 990 en tout, dans l'encodage de la pile graphique.
+Plafond du lot ≈ ×3 sur l'appel.
 
-Thèse d'intégration : **le GPU propose, le cœur dispose.** Le candidat entre par le chemin
-warm d'ADR-169 déjà existant — `project` recalcule `r = b − A·p` sur CPU, puis CG poursuit
-sous les portes d'ADR-143 (plancher d'arrondi) et ADR-144 (tolérance physique de S199).
-Aucune porte n'est déplacée vers le GPU, aucune publication partielle : un mauvais candidat
-coûte des itérations, il ne peut pas faire accepter un pas faux. C'est ce qui rend la
-consommation par le pas réel possible sans réception physique du GPU lui-même.
+**Le piège à éviter est nommé d'avance** : supposer que les 3,93 ms sont de l'encodage. Si
+l'essentiel est la latence de soumission ou l'attente de cartographie, réduire les dispatchs ne
+rendra presque rien, et la réponse est ailleurs (recouvrement, ou un seul appel par pas au lieu
+d'un par projection). P2 existe pour trancher cela par la mesure — L338.
 
-P2 : crochet reçu. `step_surface_mobile_with` + `project_with`, `None` reproduit le pas
-historique **au bit** (témoin comparé sur u/w/p/η). Candidat exact → itérations strictement
-inférieures au témoin ; candidat absurde (1e4·bruit) → toujours accepté par les portes, non
-dégradé ; NaN et +∞ → refus atomique, départ restauré au bit ; `propose` négatif → pas
-historique ; réserve de lignes mal dimensionnée → `Err(Shape)`, candidat jamais consulté,
-rien publié. 40 pas d'affilée avec oracle parfait : dérive de surface <= 1e-6 m, départ chaud
-d'ADR-169 effectivement vu par le candidat. Suite cœur/harnais : 508 réussis, 21 ignorés,
-0 échec (les décomptes de S288 — 508/19 — ne se recoupent pas exactement ; le mien est mesuré
-sur `cargo test` dans `code/`).
+Trois voies de réduction, par risque croissant :
+1. **Repli des réductions dans leurs producteurs** — `apply` calcule `q` puis replie `d·q` ;
+   `update_pr` calcule `p,r,z` puis replie `r·z`. Les valeurs repliées sont celles que le même
+   fil vient de calculer : **mathématique inchangée**, réception au bit exigible. 7 → 5.
+2. **Direction locale par `q = A·z + β·q_prev`** — supprime la dépendance aux voisins de `d`,
+   donc permet de fusionner la mise à jour de direction. 5 → 4. Mais c'est la reformulation
+   de Chronopoulos/Gear, **moins stable en f32** : la récurrence de `q` dérive. À éprouver
+   contre le vrai résidu, pas contre elle-même.
+3. **Réduction finale par le dernier groupe** (compteur atomique) — supprime les deux dispatchs
+   à un seul groupe. 5 → 3 ou 4 → 2. Dépend d'une visibilité inter-groupes que WGSL n'énonce
+   pas aussi nettement qu'un `storageBarrier` intra-groupe : portabilité à peser, et c'est un
+   argument pour la refuser même si elle marche sur cette carte.
 
-P3 : cycle reçu, `--pression-cg`. Réductions à zéro itération : `⟨r,z⟩₀` et `‖r₀‖²` du GPU
-contre le CPU, écart relatif ≤ 2e-7 (critère 1e-5) ; pression ressortie au bit. Convergence
-identique au miroir CPU du **même** cycle : rapport des vrais résidus (arbitrés en f64)
-0,964 à 1,094, et 1,0000 à 8 et 32 itérations sur les trois tailles. Repos : second membre
-nul → pression nulle exacte. RTX 5070 / DX12.
-
-Coût, médiane sur 9 après un premier appel écarté, transferts et attente compris :
-32 768 mailles, 128 itérations → 5,26–5,50 ms complet, 1,679–1,685 ms GPU seul, contre
-69,2–74,4 ms du miroir CPU (×13 complet, ×41 sur la carte) ; 32 itérations → 2,06–2,19 ms
-contre 17,6–18,4. 6 656 mailles, 128 itérations → 4,23–4,24 ms complet, 1,15 ms GPU seul,
-contre 13,5–14,7 ms CPU (×3,2). **589 mailles : le GPU perd** — 3,81–3,85 ms contre 1,09 ms
-CPU à 128 itérations ; l'appel porte 0,27–0,63 ms de frais fixes quoi qu'il calcule.
-Résidu relatif vrai atteint : 1,65e-4 à 6 656 mailles, 2,64e-4 à 32 768, pour 128 itérations.
-
-**Limite mesurée, à ne pas masquer : le cycle alloue.** 82 allocations à 0 itération, puis
-≈ 7 par itération — 990 à 128 — dans l'encodage wgpu lui-même, pas dans notre empaquetage.
-Le chemin d'image d'ADR-145 n'admet pas cela ; l'enregistrement du cycle une fois pour toutes
-(paquet de commandes réutilisé, ou dispatch indirect) est le lot qui lèverait ce point.
-Première mesure fautive corrigée avant publication : le compteur ne suivait que `propose`.
-
-P4 : **le pas réel consomme le solveur**, `--pression-pas`. 60 pas de 2 ms, témoin et
-conduit partis du même état, `SequentialJobs`, release.
-6 656 mailles (128×52, dx 2 m), cycle 128 : médiane du pas 9,2236 → 6,6220 ms (fond plat)
-et 10,4352 → 6,9694 (fond coupé), soit ×1,39 et ×1,50 ; itérations du cœur 427 → 19 et
-430 → 19. 32 768 mailles (256×128, dx 0,5), cycle 256 : 44,8697 → 30,2744 et 44,3670 → 30,3977,
-×1,48 et ×1,46 ; itérations 353 → 61 et 352 → 61. Dans tous les cas : 60/60 propositions
-retenues, 0 refus, 0 pas dégradé de part et d'autre, dérive de surface 0 à 7,63e-6 m.
-
-**La longueur du cycle n'est pas libre.** À 6 656 mailles, 32 itérations (×0,95) et 256 (×0,89)
-perdent tous les deux ; seul 128 gagne. À 32 768 le gain croît encore à 256. Il n'y a pas de
-réglage unique, et rien n'ajuste cette longueur automatiquement.
-
-**Où part le temps, mesuré et non supposé.** À 6 656 mailles / cycle 128, l'appel coûte
-4,1989 ms : 0,2606 d'empaquetage et 3,9333 d'encodage+soumission+attente — alors que la carte
-elle-même ne calcule que 1,15 ms (P3). À 32 768 / cycle 256 : 11,6996 = 1,7302 + 9,9554 pour
-3,32 ms de carte. Le poste dominant est **l'enregistrement des commandes** : 7 dispatchs par
-itération, 1 792 à 256 itérations — la même cause que les ≈ 7 allocations par itération.
-Réduire le nombre de dispatchs par itération, ou enregistrer le cycle une fois, est le lot
-suivant, et il est désigné par la mesure.
-
-Retirer le second aller-retour de cartographie (horodatage GPU) **ne donne pas de gain
-mesurable** : 4,31 → 4,18 ms à 6 656 mailles, mais 7,42 → 8,09 à 32 768 — dans la variance de
-la machine. Éteint par défaut parce qu'il ne sert à rien sur ce chemin, pas parce qu'il a été
-mesuré comme un gain.
-
-**Ce qui n'est pas reçu** : le budget eau de 2 ms (6,62 ms par pas, soit ×3,3), I-06 du chemin
-d'image, la 3D, l'identité inter-GPU, et tout réglage automatique de la longueur du cycle.
-
-Ce qui reste hors de ce lot, et doit le rester tant qu'il n'est pas prouvé : identité
-inter-GPU, budget eau de 2 ms reçu, I-06 du chemin d'image, multigrille GPU, 3D.
+Hors de ce lot : multigrille GPU, budget 2 ms, 3D, solides, multiplateforme, garantie de pic.

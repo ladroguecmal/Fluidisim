@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 14:32 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 12:28 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : —
+Session en cours : S290 — coût d'appel du cycle GPU résident (A292)
 Dernière session : S289 — pas réel consommant une pression GPU résidente, ADR-173 ; coût d'appel du cycle encore dominant
-Session suivante : A292, réduire le coût d'appel du cycle résident — moins de dispatchs par itération, ou cycle enregistré une fois. Un seul lot lève les 73 % de temps perdu **et** les allocations qu'ADR-145 interdit à la boucle d'image. Ensuite seulement, rejouer la comparaison 3D/solides sur un coût de projection à jour. Longueur du cycle à calibrer dans le même lot. Cadence lente, A290, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Session suivante : —
 Maillons        : 0 — capacité reçue en S289 : la projection de δ est calculée sur GPU et consommée par le pas réel, portes inchangées ; prochaine capacité visée : cycle activable dans la boucle d'image
 
 ```
