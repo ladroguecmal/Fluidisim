@@ -95,7 +95,7 @@ Critères avant code, posés ici :
 - [x] **P3a** — divergence, couplage S300 avec `eta_roundoff`, passage à la projection, départ
   chaud ; pression reçue contre le cœur sur un pas.
 - [x] **P3b** — correction aux faces et extrapolation verticale ; vitesses reçues.
-- [ ] **P4** — transport par débits mouillés et bandes, relaxation d'éponge, compensation,
+- [x] **P4** — transport par débits mouillés et bandes, relaxation d'éponge, compensation,
   surface publiée (D7) ; pas complet reçu champ par champ contre `step_perturbation_mobile`.
 - [ ] **P5** — trajectoire du cas S298 : écart de hauteur par image, selon les cycles.
 - [ ] **P6** — coût du pas complet, passe chronométrée, trois tailles ; dispatchs publiés.
@@ -156,6 +156,26 @@ champ de départ est fortement divergent, la projection le redresse). Écart **�
 **≤ 2,6·10⁻⁵ de l'incrément** à 128 cycles, ≤ 1,7·10⁻⁵ à 64 ; **zéro face fautive** sur les trois
 familles et trois instants. Fantômes latéraux avec le fond de la face (`p_dyn`, `grad_p_dyn`),
 fantôme du haut avec `eta_roundoff` et `ghost_up` de S300 : aucune règle de bord divergente.
+
+**P4 reçu** (`--delta3d-pas`, pas complet à 128 cycles, **655 dispatchs**, trois instants) :
+- hauteur : incrément du pas 4,2 à 5,1 mm ; écart **2,4·10⁻⁷ m** (un ulp de η à 2,25 m),
+  159 à 162 colonnes sur 165 au bit ; surface publiée au même écart ;
+- **hauteur vraie** `η − reste` : écart **3 à 4·10⁻⁸ m**, six fois sous l'ulp — la compensation
+  est portée ;
+- vitesses ≤ 1,4·10⁻⁵ m/s (2·10⁻⁵ de l'incrément), pression ≤ 0,38 Pa (2,3·10⁻⁵).
+Surface publiée = `(η − repos) − reste` par colonne, **tampon à part** (liaison 7) : le rendu ne
+liera jamais `cells_in` ni `vel` (D7, I-13). Accès d'essai `surface_roundoff_for_trials` ajouté au
+cœur.
+
+**Défaut trouvé, corrigé avant commit — la somme compensée détruite par le compilateur.** Premier
+passage : reste nul sur les 165 colonnes. Expérience : sur la carte `(η + inc) − η` rendait `inc`
+**au bit** pour 165/165 colonnes, quand la même addition est inexacte sur CPU pour 164 à 165/165.
+Le compilateur de la carte (DX12) simplifie `(a + b) − a → b` ; la compensation de S233 disparaît
+sans bruit — hauteur au bit près dans 130/165 colonnes seulement, et une perte systématique de
+l'ordre de l'ulp de η par pas. Remède : `exact_difference(s, a)`, soustraction **en entiers sur
+les bits IEEE**, exacte par Sterbenz pour deux hauteurs à moins d'un facteur deux. Même famille
+que L345 (fraction de phase) : **une identité flottante du source n'est pas une identité du
+binaire compilé** — généralisation à écrire en leçon.
 
 ---
 

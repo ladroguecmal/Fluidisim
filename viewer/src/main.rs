@@ -2260,6 +2260,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-correction") {
         return delta3d_step::recevoir_correction();
     }
+    if args.iter().any(|a| a == "--delta3d-pas") {
+        return delta3d_step::recevoir_pas();
+    }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();
     }

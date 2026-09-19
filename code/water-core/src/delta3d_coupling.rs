@@ -425,6 +425,13 @@ impl Volume3 {
         self.prepare_background3(bg)
     }
 
+    /// S301, ADR-175 §3 — **essais seulement**. Reste de la somme compensée de `η` (S233), par
+    /// colonne : ce que la surface stockée excède la somme exacte des incréments. Sert à juger
+    /// une production qui porte la même compensation ; rien de publié (I-17).
+    pub fn surface_roundoff_for_trials(&self) -> &[f32] {
+        &self.eta_roundoff
+    }
+
     /// S301, ADR-175 §3 — **essais seulement**. Prédiction du pas couplé telle que le pas la
     /// fait : advection MAC, couplage au fond et facteur d'éponge, rendue dans `us`, `vs`, `ws`.
     /// Sert à juger une production qui la calcule sur sa carte ; la production ne l'appelle pas.

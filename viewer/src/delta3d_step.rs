@@ -28,11 +28,13 @@ const CG_CYCLE: [usize; 5] = [2, 3, 4, 5, 6];
 const CG_RESIDUAL: [usize; 2] = [7, 8];
 const CG_BNORM: [usize; 2] = [9, 10];
 /// Noyaux de `delta3d_step.wgsl`.
-const STEP: [&str; 4] = ["predict", "divergence", "correct", "extrapolate"];
+const STEP: [&str; 6] = ["predict", "divergence", "correct", "extrapolate", "fluxes", "advance"];
 const PREDICT: usize = 0;
 const DIVERGENCE: usize = 1;
 const CORRECT: usize = 2;
 const EXTRAPOLATE: usize = 3;
+const FLUXES: usize = 4;
+const ADVANCE: usize = 5;
 /// Noyaux de `delta3d_background.wgsl`.
 const BG: [&str; 3] = ["sample_faces", "couple_columns", "couple_rhs"];
 
@@ -42,6 +44,8 @@ pub enum Upto {
     Prediction,
     Projection,
     Correction,
+    /// Le pas entier : transport, éponge et surface publiée compris.
+    Full,
 }
 
 pub struct Step3 {
@@ -67,7 +71,9 @@ pub struct Step3 {
     step_bind: wgpu::BindGroup,
     step_uniform: wgpu::Buffer,
     vel: wgpu::Buffer,
+    published: wgpu::Buffer,
     step: Vec<wgpu::ComputePipeline>,
+    column_faces: usize,
     read: wgpu::Buffer,
     phases: Vec<u32>,
     count: usize,
@@ -270,18 +276,19 @@ impl Step3 {
 
         // ── Étages du pas. ──
         let vel = buffer(&device, (2 * faces * 4) as u64, storage);
-        let work = buffer(&device, ((2 * fx + 2 * fy + columns) * 4) as u64, storage);
+        let work = buffer(&device, ((2 * fx + 2 * fy) * 4) as u64, storage);
+        let published = buffer(&device, (columns * 4) as u64, storage);
         let step_uniform = buffer(&device, 64, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
-        let step_layout = layout(&device, &['w', 'r', 'w', 'r', 'r', 'w', 'u']);
+        let step_layout = layout(&device, &['w', 'r', 'w', 'r', 'r', 'w', 'u', 'w']);
         let step_bind = bind(
             &device,
             &step_layout,
-            &[&vel, &faces_buf, &cells_in, &cells_out, &state, &work, &step_uniform],
+            &[&vel, &faces_buf, &cells_in, &cells_out, &state, &work, &step_uniform, &published],
         );
         let step_module = device.create_shader_module(wgpu::include_wgsl!("delta3d_step.wgsl"));
         let step = pipelines(&device, &step_layout, &step_module, &STEP);
 
-        let largest = [2 * faces, 7 * cells, 2 * columns + 2 * cells, 2 * fx + 2 * fy + columns]
+        let largest = [2 * faces, 7 * cells, 2 * columns + 2 * cells, 2 * fx + 2 * fy]
             .into_iter()
             .max()
             .unwrap_or(1);
@@ -307,7 +314,9 @@ impl Step3 {
             step_bind,
             step_uniform,
             vel,
+            published,
             step,
+            column_faces: fx + fy,
             read,
             phases: vec![0; count],
             count,
@@ -435,7 +444,12 @@ impl Step3 {
             return projection;
         }
         // correction aux faces, extrapolation par colonne.
-        projection + 2
+        let correction = projection + 2;
+        if upto == Upto::Correction {
+            return correction;
+        }
+        // débits et bandes, puis hauteur, éponge et publication.
+        correction + 2
     }
 
     /// Enregistre le pas jusqu'à `upto`. Aucune lecture, aucune décision CPU entre deux
@@ -500,6 +514,13 @@ impl Step3 {
             pass.dispatch_workgroups(faces, 1, 1);
             pass.set_pipeline(&self.step[EXTRAPOLATE]);
             pass.dispatch_workgroups(columns, 1, 1);
+            if upto == Upto::Correction {
+                return;
+            }
+            pass.set_pipeline(&self.step[FLUXES]);
+            pass.dispatch_workgroups((self.column_faces as u32).div_ceil(GROUP), 1, 1);
+            pass.set_pipeline(&self.step[ADVANCE]);
+            pass.dispatch_workgroups(columns, 1, 1);
         }
     }
 
@@ -520,6 +541,17 @@ impl Step3 {
     /// **Banc** : vitesses courantes `[u | v | w]`.
     pub fn velocities(&self) -> Result<Vec<f32>, String> {
         self.relire(&self.vel, 0, self.face_total)
+    }
+
+    /// **Banc** : surface absolue et reste de la somme compensée, par colonne.
+    pub fn surface(&self) -> Result<(Vec<f32>, Vec<f32>), String> {
+        let all = self.relire(&self.cells_in, 0, 2 * self.columns + self.cells)?;
+        Ok((all[..self.columns].to_vec(), all[self.columns + self.cells..].to_vec()))
+    }
+
+    /// **Banc** : surface publiée (ADR-175 D7), perturbation de hauteur par colonne.
+    pub fn published(&self) -> Result<Vec<f32>, String> {
+        self.relire(&self.published, 0, self.columns)
     }
 
     /// **Banc** : pression (tranche X de la projection).
@@ -859,6 +891,101 @@ pub fn recevoir_correction() -> Result<(), String> {
             }
         }
         println!("DELTA3D_CORRECTION_S301 pire_ecart_sur_increment_128_cycles={pire_global:e}");
+        Ok(())
+    })
+}
+
+/// Banc P4 : **réception du pas complet**. Un pas couplé du cœur contre un pas de la carte, depuis
+/// le même état, au même instant, avec la même éponge. Tout ce que le pas publie ou garde est
+/// comparé : hauteur de surface (en mètres, et rapportée à son incrément), surface publiée,
+/// vitesses et pression. La hauteur est la grandeur d'usage (S201 : 3 mm) ; le reste dit d'où
+/// viendrait un écart.
+pub fn recevoir_pas() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::{BackgroundGrid3, BackgroundFaces3, Volume3};
+    use water_core::host::HostServices;
+
+    pollster::block_on(async {
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 27);
+        let Fixture { background, domain, origin, rest, eta } = fixture(&mut alloc)?;
+        let (rho, g) = (1025_f32, 9.81_f32);
+        let sponge = Sponge3 { width_x: 1.0, width_y: 0.75, rate_per_s: 2.0 };
+        let duration = 5_000u64;
+        let total = face_total(domain);
+        let (nu, nv) = ((domain.nx + 1) * domain.ny * domain.nz, domain.nx * (domain.ny + 1) * domain.nz);
+        let champ = |n: usize, graine: f32| -> Vec<f32> {
+            (0..n).map(|f| 0.2 * ((f as f32 * 0.37 + graine).sin() + 0.5 * (f as f32 * 0.113).cos())).collect()
+        };
+        let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+        carte.set_step(duration, rest, sponge)?;
+        println!(
+            "DELTA3D_PAS_S301 carte={:?} backend={} nx={} ny={} nz={} faces={total} colonnes={} dispatchs_128={}",
+            carte.adapter, carte.backend, domain.nx, domain.ny, domain.nz, domain.columns(),
+            Step3::dispatches(128, Upto::Full)
+        );
+        let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
+            .map_err(|e| format!("grille {e:?}"))?;
+        for micros in [0u64, 1_234_567, 76_543_210] {
+            let time = water_core::SimTime(micros);
+            let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
+                .map_err(|e| format!("volume {e:?}"))?;
+            volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+            volume.set_velocity(&champ(nu, 0.1), &champ(nv, 1.7), &champ(total - nu - nv, 2.9))
+                .map_err(|e| format!("vitesses {e:?}"))?;
+            let debut: Vec<f32> = [volume.velocity_u(), volume.velocity_v(), volume.velocity_w()].concat();
+            grille.sample(&background, time).map_err(|e| format!("grille {e:?}"))?;
+            let vue = grille.view().ok_or("la grille du coeur ne publie rien")?;
+            let faces = BackgroundFaces3 { domain, time, density: rho, gravity: g, u: vue.u, v: vue.v, w: vue.w };
+            let rapport = volume.step_perturbation_mobile(time, duration, 4000, &faces, sponge, &jobs)
+                .map_err(|e| format!("coeur {e:?}"))?;
+            let eta_coeur = volume.surface().to_vec();
+            let vitesses_coeur: Vec<f32> = [volume.velocity_u(), volume.velocity_v(), volume.velocity_w()].concat();
+            let p_coeur = volume.pressure().to_vec();
+
+            carte.publish_time(&background, time)?;
+            carte.set_state(&debut[..nu], &debut[nu..nu + nv], &debut[nu + nv..], &eta)?;
+            carte.run_for_bench(128, Upto::Full)?;
+            let (eta_carte, reste) = carte.surface()?;
+            let publiee = carte.published()?;
+            let vitesses = carte.velocities()?;
+            let p = carte.pressure()?;
+
+            let increment = eta_coeur.iter().zip(&eta).fold(0f32, |m, (a, b)| m.max((a - b).abs()));
+            let (ecart_eta, _, bits_eta) = ecart(&eta_coeur, &eta_carte);
+            let perturbation: Vec<f32> = eta_coeur.iter().map(|e| e - rest).collect();
+            let (ecart_publiee, echelle_publiee, _) = ecart(&perturbation, &publiee);
+            let (ecart_v, _, _) = ecart(&vitesses_coeur, &vitesses);
+            let increment_v = vitesses_coeur.iter().zip(&debut).fold(0f32, |m, (a, b)| m.max((a - b).abs()));
+            let mouillee = |c: usize| {
+                let (i, j, k) = (c % domain.nx, (c / domain.nx) % domain.ny, c / domain.columns());
+                let col = j * domain.nx + i;
+                (k as f32 + 0.5) * domain.dx < eta[col] + vue.w[col].eta
+            };
+            let (mut ecart_p, mut echelle_p) = (0f32, 0f32);
+            for c in 0..domain.cells() {
+                if mouillee(c) {
+                    ecart_p = ecart_p.max((p[c] - p_coeur[c]).abs());
+                    echelle_p = echelle_p.max(p_coeur[c].abs());
+                }
+            }
+            let reste_max = reste.iter().fold(0f32, |m, r| m.max(r.abs()));
+            let (ecart_reste, _, bits_reste) = ecart(volume.surface_roundoff_for_trials(), &reste);
+            // Hauteur **vraie** `η − reste`, en f64 des deux côtés : c'est elle que la compensation
+            // protège. Sans compensation sur la carte, l'écart serait de l'ordre de l'ulp de `η`.
+            let vraie = |e: &[f32], r: &[f32]| -> Vec<f64> { e.iter().zip(r).map(|(e, r)| *e as f64 - *r as f64).collect() };
+            let (vraie_coeur, vraie_carte) = (vraie(&eta_coeur, volume.surface_roundoff_for_trials()), vraie(&eta_carte, &reste));
+            let ecart_vraie = vraie_coeur.iter().zip(&vraie_carte).fold(0f64, |m, (a, b)| m.max((a - b).abs()));
+            println!(
+                "DELTA3D_PAS_S301 t_us={micros} coeur_iterations={} coeur_affinages={} eta: increment_max={increment:e} m ecart={ecart_eta:e} m ecart_sur_increment={:e} au_bit={bits_eta}/{} ; publiee: echelle={echelle_publiee:e} ecart={ecart_publiee:e} m ; reste_compense: max={reste_max:e} ecart_au_coeur={ecart_reste:e} au_bit={bits_reste}/{} ; hauteur_vraie: ecart={ecart_vraie:e} m",
+                rapport.iterations, rapport.refinements,
+                ecart_eta / increment.max(f32::MIN_POSITIVE), domain.columns(), domain.columns()
+            );
+            println!(
+                "DELTA3D_PAS_S301 t_us={micros} vitesses: ecart={ecart_v:e} sur_increment={:e} ; pression: echelle={echelle_p:e} ecart={ecart_p:e} relatif={:e}",
+                ecart_v / increment_v.max(f32::MIN_POSITIVE), ecart_p / echelle_p.max(f32::MIN_POSITIVE)
+            );
+        }
         Ok(())
     })
 }

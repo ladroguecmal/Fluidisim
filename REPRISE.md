@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 20:56 +02:00
+Battement        : 2026-09-19 21:03 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
 Session en cours : S301 — pas couplé complet résident sur la carte, un seul device, reçu contre le cœur
 Dernière session : S300 — fond B évalué sur la carte et second membre couplé reçus contre le cœur

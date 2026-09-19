@@ -39,9 +39,12 @@ struct Step {
 @group(0) @binding(3) var<storage, read> cells_out: array<f32>;
 // État du gradient conjugué ; la tranche 0 est la pression.
 @group(0) @binding(4) var<storage, read> state: array<f32>;
-// [flux_x | bande_x | flux_y | bande_y | surface publiée].
+// [flux_x | bande_x | flux_y | bande_y].
 @group(0) @binding(5) var<storage, read_write> work: array<f32>;
 @group(0) @binding(6) var<uniform> s: Step;
+// Surface **publiée** (ADR-175 D7) : la perturbation de hauteur par colonne, compensée. C'est un
+// tampon à part pour que le rendu ne lie jamais un tampon interne de δ (I-13).
+@group(0) @binding(7) var<storage, read_write> published: array<f32>;
 
 const FIELDS: u32 = 26u;
 
@@ -177,7 +180,11 @@ fn sponge(x: f32, y: f32) -> f32 {
     if (s.sponge_rate == 0.0) { return 1.0; }
     let rx = ramp(x, s.nx, s.sponge_x);
     let ry = ramp(y, s.ny, s.sponge_y);
-    return exp(-s.sponge_rate * s.dt * (rx * rx + ry * ry));
+    let r2 = rx * rx + ry * ry;
+    // Hors des bandes le cœur rend 1 exactement et saute la relaxation ; on ne confie pas
+    // cette exactitude à l'`exp` de la carte.
+    if (r2 == 0.0) { return 1.0; }
+    return exp(-s.sponge_rate * s.dt * r2);
 }
 
 @compute @workgroup_size(64)
@@ -332,4 +339,123 @@ fn extrapolate(@builtin(global_invocation_id) id: vec3<u32>) {
         if (wet(i, j, k - 1u)) { last = vel[f]; has = true; }
         else if (has) { vel[f] = last; }
     }
+}
+
+// ── Transport de la surface, bandes de couplage, éponge, surface publiée ─────────────────────
+//
+// `transport_coupled3` puis `relax_coupled3`. Deux dispatchs : tous les débits lisent `eta^n`
+// avant qu'aucune hauteur ne soit écrite, comme le cœur. La compensation de la somme (S233) est
+// portée telle quelle ; si le compilateur de la carte la simplifiait, le banc le verrait sur
+// `eta` au pas suivant — c'est le reste qui entre dans le fantôme du haut.
+
+/// `s − a`, **exacte et calculée en entiers** (S301). Pour deux flottants normaux positifs à moins
+/// d'un facteur deux l'un de l'autre — une hauteur de colonne avant et après un pas —, la
+/// différence est représentable (Sterbenz) ; le cœur l'obtient donc exactement en flottant.
+/// Mesuré S301 sur cette carte : le compilateur réécrit `(a + b) − a` en `b`, les 165 colonnes
+/// d'un pas rendant un reste nul là où le CPU en trouvait 165 non nuls. En entiers sur les bits
+/// IEEE, il n'y a rien à simplifier. Même remède que la fraction de phase de S300 (L345).
+fn exact_difference(s: f32, a: f32) -> f32 {
+    let bs = bitcast<u32>(s);
+    let ba = bitcast<u32>(a);
+    let es = i32((bs >> 23u) & 0xffu);
+    let ea = i32((ba >> 23u) & 0xffu);
+    let ms = i32((bs & 0x7fffffu) | 0x800000u);
+    let ma = i32((ba & 0x7fffffu) | 0x800000u);
+    let e = min(es, ea);
+    let d = (ms << u32(es - e)) - (ma << u32(ea - e));
+    // d · 2^(e − 150), la puissance de deux construite sur ses bits : aucune `exp2` approchée.
+    return f32(d) * bitcast<f32>(u32(e - 150 + 127) << 23u);
+}
+
+fn x_faces() -> u32 { return (s.nx + 1u) * s.ny; }
+fn y_faces() -> u32 { return s.nx * (s.ny + 1u); }
+
+/// `band3` : débit de fond entre le repos et la surface, dans la couche `k`.
+fn band(f: u32, axis: u32, k: u32, surface: f32) -> f32 {
+    let lower = f32(k) * s.dx;
+    let upper = f32(k + 1u) * s.dx;
+    let start = clamp(s.rest, lower, upper);
+    let end = clamp(surface, lower, upper);
+    return (end - start) * (bg(f, 4u + axis) + bg(f, 10u + 3u * axis + 2u) * (0.5 * (end + start) - (f32(k) + 0.5) * s.dx));
+}
+
+@compute @workgroup_size(64)
+fn fluxes(@builtin(global_invocation_id) id: vec3<u32>) {
+    let slot = id.x;
+    if (slot >= x_faces() + y_faces()) { return; }
+    var axis = 0u;
+    var index = slot;
+    var a = 0u;
+    var b = 0u;
+    var n = s.nx;
+    if (slot < x_faces()) {
+        a = slot % (s.nx + 1u);
+        b = slot / (s.nx + 1u);
+    } else {
+        axis = 1u;
+        index = slot - x_faces();
+        a = index / s.nx;
+        b = index % s.nx;
+        n = s.ny;
+    }
+    // Colonne d'indice `a` le long de l'axe, `b` en travers ; face `a` de la couche `k`.
+    var lo = 0u;
+    var hi = 0u;
+    if (a > 0u) { lo = select(b * s.nx + (a - 1u), (a - 1u) * s.nx + b, axis == 1u); }
+    if (a < n) { hi = select(b * s.nx + a, a * s.nx + b, axis == 1u); }
+    let edge_face = select(fu(a, b, 0u), fv(b, a, 0u), axis == 1u);
+    var surface = 0.0;
+    if (a == 0u) {
+        surface = cells_in[hi] + bg(edge_face, 0u);
+    } else if (a == n) {
+        surface = cells_in[lo] + bg(edge_face, 0u);
+    } else {
+        surface = 0.5 * (cells_out[lo] + cells_out[hi]);
+    }
+    var flux = 0.0;
+    var total_band = 0.0;
+    for (var k = 0u; k < s.nz; k = k + 1u) {
+        let f = select(fu(a, b, k), fv(b, a, k), axis == 1u);
+        if (a > 0u && a < n) {
+            let wet_part = clamp((surface - f32(k) * s.dx) / s.dx, 0.0, 1.0);
+            if (wet_part > 0.0) { flux = flux + vel[f] * s.dx * wet_part; }
+        }
+        total_band = total_band + band(f, axis, k, surface);
+    }
+    let base = select(0u, 2u * x_faces(), axis == 1u);
+    let span = select(x_faces(), y_faces(), axis == 1u);
+    work[base + index] = flux;
+    work[base + span + index] = total_band;
+}
+
+/// Hauteur d'une colonne, puis relaxation d'éponge, puis publication. Une invocation par colonne.
+@compute @workgroup_size(64)
+fn advance(@builtin(global_invocation_id) id: vec3<u32>) {
+    let c = id.x;
+    if (c >= columns()) { return; }
+    let i = c % s.nx;
+    let j = c / s.nx;
+    let fx = x_faces();
+    let fy = y_faces();
+    let l = j * (s.nx + 1u) + i;
+    let f = j * s.nx + i;
+    let xs = (work[l + 1u] - work[l]) + (work[fx + l + 1u] - work[fx + l]);
+    let ys = (work[2u * fx + f + s.nx] - work[2u * fx + f]) + (work[2u * fx + fy + f + s.nx] - work[2u * fx + fy + f]);
+    let r = columns() + cells() + c;
+    var eta = cells_in[c];
+    var roundoff = cells_in[r];
+    var increment = -s.transport * (xs + ys) - roundoff;
+    var height = eta + increment;
+    roundoff = exact_difference(height, eta) - increment;
+    eta = height;
+    let factor = sponge((f32(i) + 0.5) * s.dx, (f32(j) + 0.5) * s.dx);
+    if (factor != 1.0) {
+        increment = (factor - 1.0) * (eta - s.rest) - factor * roundoff;
+        height = eta + increment;
+        roundoff = exact_difference(height, eta) - increment;
+        eta = height;
+    }
+    cells_in[c] = eta;
+    cells_in[r] = roundoff;
+    published[c] = (eta - s.rest) - roundoff;
 }
