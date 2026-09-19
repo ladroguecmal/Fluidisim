@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 14:38 +02:00
+JETON            : libre
+Battement        : 2026-09-19 14:41 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : S293 — audit global demandé par l'utilisateur : où l'avancement bloque ; S292 close comme interrompue
-Dernière session : S292 — interrompue par l'utilisateur après P2/P3 ; le gel de 467 ms ne se reproduit pas sur le solveur isolé
-Session suivante : à fixer au rituel de S293. À défaut : A294, geste écrit et jamais exécuté de S292 (`--pas-couple`, carte du pire pas `PIC_S292`) ; notes complètes dans `git show c629ebb:notes/EN-COURS.md`.
-Maillons        : 0 — capacité reçue en S291 : le pas de la bande δ coûte 8,2729 ms au lieu de 17,9281 et son pire pas 16,1106 au lieu de 28,2240, consommé par le pas couplé réel, trajectoire identique au bit ; prochaine capacité visée : un pire pas qui tient
+Session en cours : aucune
+Dernière session : S293 — audit global : le projet bloque sur l'ordre de ses travaux ; BILAN-GLOBAL-S293
+Session suivante : porter les réponses de l'utilisateur aux questions Q1–Q5 de BILAN-GLOBAL-S293 §6. Sur « continue » sans réponse : lot 1 du bilan §5 (lever « A276 avant la 3D » en montrant la dépendance, choix du lot par les portes, maillons liés aux colonnes « reçu si », plafonds des documents d'état), puis rédiger l'ADR d'architecture de δ en 3D (A295) — acté seulement après Q4. A294 : une exécution de `--pas-couple`, sans construire d'entretien.
+Maillons        : 2 — S292 mesure sans capacité, S293 audit ; la suivante vise une capacité (porte B ou scène-témoin de la v1)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -35,7 +35,7 @@ séparé, puis reporter sa valeur à chaque commit d'étape (L237). Une seule se
 
 [Questions ouvertes — file active](docs/registres/QUESTIONS-OUVERTES.md#file-active) porte les
 travaux, états et déclencheurs. [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) porte seule les jalons.
-Ne pas recopier leurs suivis ici. [Liste du projet fini](docs/LISTE-PROJET-FINI.md) : ce que l'ambition complète contient, cochée à la demande de l'utilisateur. Dernier audit global : [BILAN-GLOBAL-S227](docs/registres/BILAN-GLOBAL-S227.md).
+Ne pas recopier leurs suivis ici. [Liste du projet fini](docs/LISTE-PROJET-FINI.md) : ce que l'ambition complète contient, cochée à la demande de l'utilisateur. Dernier audit global : [BILAN-GLOBAL-S293](docs/registres/BILAN-GLOBAL-S293.md) — où l'avancement bloque.
 
 ## 1. Ce qu'est ce projet
 
@@ -97,8 +97,10 @@ dispatchs par itération au lieu de sept ([preuve](docs/validation/ENCODAGE-CYCL
 un cycle multigrille **jeté** ; le crochet est porté sur le pas **couplé**, celui que la bande δ
 emprunte réellement, et sa médiane passe de 17,9281 à **8,2729 ms** sur la grille de production
 ([preuve](docs/validation/PAS-DECOMPOSE-S291.md)). Reste ×4,1 du budget de 2 ms sur ce chemin.
-**Défaut ouvert et prioritaire** : un pas à 467 ms sur carte **refroidie**, reproduit, qu'un
-préchauffage ne corrige pas (A294). Les mesures de S289/S290 employaient une horloge figée et
+Un pas à 467 ms vu en S291 **ne se reproduit pas sur l'appel isolé** (S292) ; le localiser
+demande une exécution de `--pas-couple` (A294). **Audit S293** : l'avancement bloque sur l'ordre
+des travaux — porte B retenue par un déclencheur interne, architecture d'exécution de δ à décider
+avant la 3D (A295), budget sans part pour δ (A296) ; [bilan](docs/registres/BILAN-GLOBAL-S293.md). Les mesures de S289/S290 employaient une horloge figée et
 sous-estiment d'environ 8 %. δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet), **couplée depuis S253 à un fond B/W linéaire** (ADR-152/153), **B de production prolongé au-dessus du plan moyen depuis S254** (ADR-154 ; W : A286) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199

@@ -3839,3 +3839,31 @@ Ni solveur complet, ni certificat de convergence, ni pas intégré, ni I-05/I-06
 Déclencheur : construction du solveur résident puis intégration, avec réduction/cycle, refus
 atomiques et coût réel ; ne pas extrapoler un gain de noyau au pas ou à toute l'eau.
 [Réception et limites](../validation/PRESSION-GPU-S288.md).
+
+**Suivi A211 / A243 — S293, 2026-09-19 (sévérité 1, ouverte).** La refonte S227 n'a pas tenu sur
+ce point. S283 → S292 : **dix sessions sur dix** ont pris pour sujet la suite déclarée par la
+précédente, à travers deux agents (Codex puis Claude) ; la règle des maillons ne l'a pas arrêté,
+parce qu'une optimisation consommée par l'afficheur remet le compteur à zéro (S289, S290,
+S291). Le chaînage a aussi produit un **verrou d'ordre sans dépendance** : « A276 avant la 3D »
+(S249, déclencheur écrit en S276), alors que la porte C se reçoit sur la scène de la porte B et
+que le livrable de J2 est tridimensionnel. Cinquième constat du mécanisme (S69, S145, S198,
+S227, S293). Ce qui est nouveau : les portes de §3 bis donnent depuis S281 un critère « reçu si »
+par système, auquel ancrer le choix du lot et la remise à zéro des maillons.
+[BILAN-GLOBAL-S293](BILAN-GLOBAL-S293.md) §3.1 et §3.4.
+
+**A295 — S293, 2026-09-19 (sévérité 1, ouverte).** **L'architecture d'exécution de δ ne peut pas
+porter un domaine 3D dans le budget.** ADR-173 garde sur CPU, à chaque pas, le résidu
+`b − A·p`, les itérations restantes et les portes d'ADR-143/144 ; advection et couplage y sont
+aussi. Extrapolé des coûts par maille de S291 (0,23 µs pour les postes CPU du pas mobile,
+≈ 0,9 µs pour le pas couplé) : 30 à 120 ms de CPU par pas pour 64×64×32 mailles, 200 à 800 ms
+pour la bande actuelle étendue en 3D — **estimation, non mesure**. La porte C nomme « δ sur GPU
+(décision d'architecture, ADR) », jamais prise. Découvert tard, cela coûterait la réécriture d'un
+solveur 3D écrit dans le cœur CPU. Déclencheur : **avant d'écrire le premier domaine 3D** — ADR
+d'architecture et classe de fidélité par couche, soumis à l'utilisateur (Q4 du bilan).
+
+**A296 — S293, 2026-09-19 (sévérité 2, ouverte).** **Le profil de 2 ms ne donne aucune part à δ
+ni de cible matérielle.** ADR-125 compte toute l'eau en somme CPU + GPU, sans répartition (note
+S207) ; J1 seul en consomme l'essentiel (GPU 1,74 ms + CPU 4,1 ms, S267). Avec ADR-131, qui laisse
+la liste des techniques ouverte, la porte C n'a **aucun critère atteignable** : le coût ne peut
+être ni reçu ni déclaré incompatible, ce qui entretient le fil de coût. Mesures sur un portable
+(A270, S292). Déclencheur : réponse de l'utilisateur à Q1 du bilan ; aucune part inventée d'ici là.

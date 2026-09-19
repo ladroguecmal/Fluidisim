@@ -14722,3 +14722,45 @@ incomplète : **aucun entretien de la carte ne doit être bâti dessus.**
 
 **Maillons : 1** — mesure sans capacité reçue. Rituel porté par S293 : A294 actualisée dans la
 file avec ce geste pour suite.
+
+## S293 — 2026-09-19 — où l'avancement bloque : audit global
+
+**Claude Opus 5 (Claude Code desktop).** Entrée : « analyser le projet et voir où cela bloque
+dans l'avancement, regarder l'intégralité de ce projet », à 14:19, S292 venant d'être
+interrompue par l'utilisateur. master c629ebb, copie unique, aucun distant. Plan 441eecc ; étapes
+c9bd2c2 (S292 close), 7401568, 9cf5e5a, 49a4dfa, 49c2f94, 48f0d2c.
+
+**Livrable** : [BILAN-GLOBAL-S293](../docs/registres/BILAN-GLOBAL-S293.md). **Réponse : le projet
+ne bloque ni sur son code ni sur une impossibilité technique, mais sur l'ordre de ses travaux.**
+Suites vertes (511 cœur/harnais + 36 afficheur, 0 échec) ; 3 points sur 120 validés ; portes B
+et D non commencées. Cinq blocages techniques : la porte B retenue par un déclencheur interne
+sans dépendance (« A276 avant la 3D », S249/S276) alors que la porte C se reçoit sur sa scène ; la
+famille de δ non choisie (B3), le seul candidat n'exécutant aucun de ses scénarios ; une
+architecture d'exécution de δ qui garde du travail `O(N)` sur CPU à chaque pas (A295 — 30 à
+120 ms extrapolés pour 64×64×32, estimation) ; un budget de 2 ms sans part pour δ ni cible
+(A296) ; aucun objet pilotable ni corps rigide. Trois de pilotage : dix suites chaînées sur dix
+depuis S283, à travers deux agents (cinquième constat du mécanisme) ; une classe de fidélité
+uniforme appliquée à une couche cosmétique ; des documents d'état regonflés depuis S227 (file ×6
+en mots, feuille de route ×3,3).
+
+**Faux blocages** : A278 (l'hôte contient déjà du `unsafe`, et un vivier sûr existe — hypothèse à
+éprouver) ; A294 ne concerne que δ GPU dans la boucle d'image.
+
+**Non-fait, volontairement** : aucun code, aucune porte ni seuil déplacé, aucun ADR — A295 et le
+lot 1 attendent la lecture de l'utilisateur ; la liste du projet fini n'est pas recomptée (elle se
+remplit à sa demande ; décompte périmé d'environ trois points signalé). Estimations 3D non
+mesurées. 141 fichiers de la copie de travail ont des fins de ligne CRLF ou mixtes, normalisées
+par Git au commit : sans effet sur le dépôt, non traité.
+
+**Arbitrages demandés à l'utilisateur** (bilan §6) : Q1 cible matérielle et part de δ dans les
+2 ms ; Q2 v1 (en attente depuis S281) ; Q3 dépôt distant ; Q4 porte B avant la suite du coût en 2D,
+et pas de δ résident sur GPU à travail borné ; Q5 onde de S277.
+
+**Maillons : 2** — S292 mesure, S293 audit. La suivante doit viser une capacité : porte B ou
+scène-témoin de la v1, après le lot 1 du bilan.
+
+**Rituel** : A211/A243 suivi, A295 et A296 ouverts ; L343 écrite, note datée sur L342 ; file
+active (décisions en attente regroupées, A276 contesté, A278, A211, A295, A296), feuille de route
+§3 bis, REPRISE §4, index (ADR-170 à 173 manquants depuis S278, ajoutés : navigation à 0 erreur), deux
+cellules périmées de REVUE-VISUELLE §5. Invariants relus : I-04,
+I-05, I-13 ; aucun amendé. Copie principale seule, rien à fermer.

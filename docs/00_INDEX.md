@@ -271,6 +271,10 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-167](adr/ADR-167-multigrille-du-mode-mobile.md) | La multigrille préconditionne le mode à surface mobile |
 | [ADR-168](adr/ADR-168-premier-rendu-de-delta.md) | Premier rendu de δ : bande couplée rejouée dans l'afficheur |
 | [ADR-169](adr/ADR-169-depart-depuis-la-pression-publiee.md) | Les pas mobiles partent de la pression publiée |
+| [ADR-170](adr/ADR-170-les-trois-poids-sont-bornes.md) | Les trois poids de l'ordonnanceur sont bornés |
+| [ADR-171](adr/ADR-171-les-seuils-d-activation-appartiennent-au-profil.md) | Les seuils d'activation appartiennent au profil |
+| [ADR-172](adr/ADR-172-candidat-pression-residente-gpu.md) | Candidat de pression résidente GPU dans l'hôte |
+| [ADR-173](adr/ADR-173-le-candidat-de-pression-ne-fournit-qu-un-depart.md) | Un candidat de pression externe ne fournit qu'un départ (voir A295) |
 
 ## Travail et historique
 

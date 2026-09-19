@@ -465,6 +465,13 @@ Les quatre manques qui commandent l'ordre ci-dessus, tous mesurés :
    ([ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md)) ;
 4. **V a un noyau reçu et aucune articulation** avec δ.
 
+*Audit S293, 2026-09-19* ([BILAN-GLOBAL-S293](registres/BILAN-GLOBAL-S293.md)) : la porte B n'a pas
+commencé parce qu'un déclencheur interne — « A276 avant la 3D » — la place derrière la porte C,
+dont la réception est pourtant définie sur la scène de la porte B (L343). Deux préalables à la 3D
+sont nommés : l'architecture d'exécution de δ (A295) et la part de δ dans le budget (A296,
+décision de l'utilisateur). La porte D n'a ni objet pilotable ni corps rigide. Ordre recommandé
+et questions : bilan §5 et §6 ; rien n'est retiré de l'ambition.
+
 ## 4. Arbitrages explicites
 
 **Aucun accord de dépendances du lot S210/S211 n'est encore attendu.** GPU séparé choisi en

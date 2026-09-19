@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S293 — **audit global demandé par l'utilisateur**
+Session : S293 — **audit global demandé par l'utilisateur** — terminée
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
 Entrée : « Reprends le projet, ton objectif est d'analyser le projet et voir où cela bloque dans
 l'avancement, regarde l'intégralité de ce projet. » — 2026-09-19 14:19, S292 venant d'être
@@ -85,7 +85,7 @@ place de l'utilisateur.
 - [x] **P6** — blocages classés (technique mesuré, décision en attente de l'utilisateur,
   méthode/procédure, outillage/infrastructure), avec preuve, effet et levier.
 - [x] **P7** — rédiger `docs/registres/BILAN-GLOBAL-S293.md` et l'indexer.
-- [ ] **P8** — rituel §6.
+- [x] **P8** — rituel §6.
 
 ### Notes de reprise
 

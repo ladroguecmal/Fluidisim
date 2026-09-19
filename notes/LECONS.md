@@ -5853,3 +5853,22 @@ ne désignent pas le même réglage. *(b)* Mesurer un chemin accéléré **aprè
 seulement en rafale : une rafale est le régime le plus favorable et le moins représentatif.
 *(c) *Ce qui garde une ressource tiède est un arbitrage — qui paie, quand, contre quel budget —
 et pas un réglage qu'on pose en passant.
+
+*Note datée S293, 2026-09-19.* Le mécanisme « refroidi » n'est **pas établi** : S292 a mesuré
+l'appel isolé après des pauses de 0 à 8 s, endormies ou à processeur saturé — ×1,4 à ×2, pas
+×200. Le pic de S291 reste à localiser dans le pas complet (A294). La leçon sur le **pire pas**
+tient ; celle sur la cause, non.
+
+## L343 — Un ordre sans dépendance nommée devient un verrou
+
+*(S293)* « A276/A281 restent préalables mesurés de la 3D », écrit en S249, est devenu en S276 le
+déclencheur « avant la 3D ». Aucune dépendance ne le fondait : la porte C se reçoit **sur la scène
+de la porte B**, et le livrable de J2 — cavité, gerbe, proche-coque — est tridimensionnel. La
+dépendance allait dans l'autre sens. Pendant seize sessions, le travail a glissé vers ce qui
+restait déverrouillé : le coût d'une tranche 2D dont les frais fixes ne représentent pas le
+régime à tenir.
+
+Un déclencheur d'ordre (« X avant Y ») doit **nommer la dépendance qu'il protège** et le critère
+qui le lève. Sans elle, il ne protège rien ; il décide seulement où ira le travail suivant — et
+ADR-127 §6 exige justement une dépendance, pas une préférence, pour ordonner les jalons.
+
