@@ -748,3 +748,20 @@ fn reference_3d_mobile_step_has_no_runtime_allocation_s296() {
     assert_eq!(r.err(),Some(Error::Convergence));assert_eq!(n,0);
     assert_eq!(arena.stats.refused_after_seal,0);
 }
+
+#[test]
+fn coupled_3d_has_no_runtime_allocation_s297() {
+    use water_core::{delta3d::{Domain3,Volume3,BackgroundFaces3,Sponge3},background::BackgroundSample,SimTime};
+    let mut arena=Arena{stats:AllocStats::default(),sealed:false};
+    let mut v=Volume3::configure(&mut HostServices{alloc:&mut arena,jobs:&Jobs,sink:&Jobs},Domain3{nx:8,ny:6,nz:12,dx:0.25},1025.,9.81).unwrap();
+    let eta:Vec<_>=(0..48).map(|c|2.+0.05*(c as f32).sin()).collect();v.set_free_surface(&eta,2.).unwrap();
+    let u=vec![BackgroundSample::default();v.velocity_u().len()];let vv=vec![BackgroundSample::default();v.velocity_v().len()];let w=vec![BackgroundSample::default();v.velocity_w().len()];
+    arena.seal();
+    let bg=BackgroundFaces3{domain:v.domain(),time:SimTime(0),density:1025.,gravity:9.81,u:&u,v:&vv,w:&w};
+    for _ in 0..20 {
+        let (r,n)=measured(||v.step_perturbation_mobile(SimTime(0),1000,4000,&bg,Sponge3::default(),&Jobs));
+        r.unwrap();assert_eq!(n,0);
+    }
+    let (r,n)=measured(||v.step_perturbation_mobile(SimTime(0),1000,0,&bg,Sponge3::default(),&Jobs));
+    assert_eq!(r.err(),Some(Error::Convergence));assert_eq!(n,0);
+}

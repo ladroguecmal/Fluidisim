@@ -533,3 +533,56 @@ fn coupled_geometry_zero_and_oblique_ghosts_s297() {
     assert!(v.ghost_bg_up.iter().any(|x|*x!=0.));
     v.surface_coupled=false;
 }
+
+#[test]
+fn coupled_zero_background_reproduces_mobile_bits_s297() {
+    use crate::{background::BackgroundSample,SimTime};
+    for ny in [1,4] {
+        let (mut a,_) = volume(12,ny,12,0.25,9.81);let (mut b,_) = volume(12,ny,12,0.25,9.81);
+        let eta:Vec<_>=(0..12*ny).map(|c|2.+0.06*(c as f32*0.4).sin()).collect();
+        a.set_free_surface(&eta,2.).unwrap();b.set_free_surface(&eta,2.).unwrap();
+        let u=vec![BackgroundSample::default();a.u.len()];let v=vec![BackgroundSample::default();a.v.len()];let w=vec![BackgroundSample::default();a.w.len()];
+        for n in 0..200 {
+            let time=SimTime(n*1000);let bg=BackgroundFaces3{domain:a.domain,time,density:1025.,gravity:9.81,u:&u,v:&v,w:&w};
+            a.step_surface_mobile(1000,4000,&Jobs).unwrap();b.step_perturbation_mobile(time,1000,4000,&bg,Sponge3::default(),&Jobs).unwrap();
+            for (x,y) in [&a.u,&a.v,&a.w,&a.p,&a.eta,&a.eta_roundoff].into_iter().zip([&b.u,&b.v,&b.w,&b.p,&b.eta,&b.eta_roundoff]) {
+                assert!(x.iter().zip(y).all(|(x,y)|x.to_bits()==y.to_bits()),"ny={ny} step={n}");
+            }
+        }
+    }
+}
+
+#[test]
+fn coupled_uniform_background_crosses_all_four_edges_s297() {
+    use crate::{background::BackgroundSample,SimTime};
+    let (mut v,_) = volume(8,6,12,0.25,9.81);
+    v.set_free_surface(&[2.;48],2.).unwrap();
+    let s=BackgroundSample{eta:0.07,u:[0.6,-0.4,0.],p_dyn:1025.*9.81*0.07,..BackgroundSample::default()};
+    let u=vec![s;v.u.len()];let vv=vec![s;v.v.len()];let w=vec![s;v.w.len()];
+    for n in 0..100 {
+        let time=SimTime(n*1000);let bg=BackgroundFaces3{domain:v.domain,time,density:1025.,gravity:9.81,u:&u,v:&vv,w:&w};
+        let r=v.step_perturbation_mobile(time,1000,4000,&bg,Sponge3{width_x:0.5,width_y:0.5,rate_per_s:1.},&Jobs).unwrap();
+        assert_eq!(r.iterations,0);assert!(v.eta.iter().all(|x|x.to_bits()==2f32.to_bits()));
+        assert!(v.u.iter().chain(&v.v).chain(&v.w).all(|x|*x==0.));
+    }
+}
+
+#[test]
+fn coupled_refusal_is_atomic_and_disarms_geometry_s297() {
+    use crate::{background::BackgroundSample,SimTime};
+    let (mut v,_) = volume(8,6,12,0.25,9.81);
+    let eta:Vec<_>=(0..48).map(|c|2.+0.05*(c as f32).sin()).collect();v.set_free_surface(&eta,2.).unwrap();
+    let u=vec![BackgroundSample::default();v.u.len()];let vv=vec![BackgroundSample::default();v.v.len()];let mut w=vec![BackgroundSample::default();v.w.len()];
+    let before:Vec<_>=[&v.u,&v.v,&v.w,&v.p,&v.eta,&v.eta_roundoff].iter().map(|f|f.iter().map(|x|x.to_bits()).collect::<Vec<_>>()).collect();
+    for mode in 0..4 {
+        w.fill(BackgroundSample::default());
+        if mode==1 {w[0].eta=0.1;} if mode==2 {w[0].u[1]=f32::NAN;}
+        if mode==3 {for s in &mut w {s.eta=20.;}}
+        let bg=BackgroundFaces3{domain:v.domain,time:SimTime(0),density:1025.,gravity:9.81,u:&u,v:&vv,w:&w};
+        let e=v.step_perturbation_mobile(SimTime(0),1000,0,&bg,Sponge3::default(),&Jobs).unwrap_err();
+        assert_eq!(e,[Error::Convergence,Error::BackgroundContext,Error::NotFinite,Error::Domain][mode]);
+        let after:Vec<_>=[&v.u,&v.v,&v.w,&v.p,&v.eta,&v.eta_roundoff].iter().map(|f|f.iter().map(|x|x.to_bits()).collect::<Vec<_>>()).collect();
+        assert_eq!(before,after);assert!(!v.surface_coupled && !v.homogeneous_ghost);
+    }
+    v.step_surface_mobile(1000,4000,&Jobs).unwrap();
+}
