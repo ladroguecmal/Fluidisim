@@ -1427,3 +1427,76 @@ pub fn measure_temporal_cadence() -> Result<(), String> {
     }
     Ok(())
 }
+
+/// S291 — le pas **couplé**, celui que la bande δ de l'afficheur emprunte réellement, avec et
+/// sans candidat de pression GPU. Même grille que la bande vivante : 128 × 52, dx = 2 m.
+/// Horloge réelle : le sondage coûte ~8 % du pas, et une horloge figée le cacherait.
+use water_core::delta_projection::{ExternalPressure, PressureRow};
+
+pub fn measure_coupled_candidate(background: &Background, steps: u64) -> Result<(), String> {
+    let domain = Domain { nx: NX, nz: NZ, dx: DX };
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut solver = crate::pressure_solver::for_domain(domain, 0)?;
+    // S291 — **un envoi jeté, et ce qu'il ne répare pas.** Un pas à 467 ms puis 132 ms est apparu
+    // deux fois, toujours au premier régime GPU venant **après** les régimes sans candidat. Ce
+    // préchauffage exerce chaque pipeline avant la mesure ; **il ne supprime pas le blocage** —
+    // la troisième exécution l'a montré. Ce qui l'a supprimé est de placer les régimes GPU en
+    // **premier**, donc de ne pas laisser la carte inactive entre deux envois. Le blocage est
+    // celui d'un chemin GPU **refroidi**, pas d'un chemin neuf. Conservé parce qu'il élimine la
+    // composante « tout premier envoi » et parce que sa mesure fait partie du résultat.
+    {
+        solver.iterations = 384;
+        let mut zero_rows = vec![PressureRow::default(); NX * NZ];
+        let mut zero_p = vec![0f32; NX * NZ];
+        let zero_rhs = vec![0f32; NX * NZ];
+        solver.solve(&zero_rows, &zero_rhs, &mut zero_p)?;
+        zero_rows.clear();
+    }
+    for (cycle, diagnostic) in [(128u32, false), (192, false), (256, false), (384, false), (0, true), (0, false)] {
+        solver.iterations = cycle;
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
+        let mut v = Volume::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+            domain, DENSITY, background.gravity(), &[0.; NX]).map_err(|e| format!("{e:?}"))?;
+        v.set_free_surface(&[REST; NX], REST).map_err(|e| format!("{e:?}"))?;
+        v.set_report_backward_error(diagnostic);
+        let mut u = vec![BackgroundSample::default(); v.velocity_u().len()];
+        let mut w = vec![BackgroundSample::default(); v.velocity_w().len()];
+        let mut rows = vec![PressureRow::default(); NX * NZ];
+        let clock = RealClock(std::time::Instant::now());
+        let (mut stepping, mut worst, mut used) = (Vec::new(), 0u32, 0u32);
+        let mut stages = [0u64; water_core::delta_projection::STAGES];
+        for n in 0..steps {
+            let time = SimTime(START_US + n * FRAME_US);
+            fill_with(background, time, &mut u, &mut w, 1)?;
+            let bg = BackgroundFaces { domain, time, density: DENSITY, gravity: background.gravity(), u: &u, w: &w };
+            let start = std::time::Instant::now();
+            let r = if cycle == 0 {
+                v.step_perturbation_mobile(time, FRAME_US, 6000, 1_000_000_000, &bg, SPONGE, &jobs, &clock)
+            } else {
+                let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut solver,
+                    used: false, refused: false };
+                let out = v.step_perturbation_mobile_with(time, FRAME_US, 6000, 1_000_000_000, &bg,
+                    SPONGE, &jobs, &clock, Some(&mut ext));
+                if ext.used { used += 1; }
+                if ext.refused { return Err(format!("pas {n} : candidat refusé")); }
+                out
+            }.map_err(|e| format!("pas {n} : {e:?}"))?;
+            stepping.push(start.elapsed().as_secs_f64() * 1e3);
+            worst = worst.max(r.report.map_or(0, |x| x.iterations));
+            for (a, b) in stages.iter_mut().zip(v.last_stage_ns()) { *a += b; }
+        }
+        stepping.sort_by(f64::total_cmp);
+        let part = |i: usize| (stages[i] as f64 / steps as f64) / 1e6;
+        println!("COUPLE_S291 cycle={cycle} diagnostic={diagnostic} pas={steps} \
+            mediane_ms={:.4} max_ms={:.4} pire_iterations={worst} candidat_retenu={used} \
+            candidat_ms={:.4} iterations_ms={:.4} validation_ms={:.4} erreur_inverse_ms={:.4}",
+            stepping[stepping.len() / 2], stepping[stepping.len() - 1],
+            part(6), part(10), part(17), part(14));
+    }
+    Ok(())
+}
+
+struct RealClock(std::time::Instant);
+impl MonotonicClock for RealClock {
+    fn now_ns(&self) -> u64 { self.0.elapsed().as_nanos() as u64 }
+}

@@ -633,8 +633,7 @@ impl Volume {
             core::mem::swap(&mut self.eta, &mut self.saved_eta);
             core::mem::swap(&mut self.eta_roundoff, &mut self.saved_eta_roundoff);
         }
-        self.last_phase_ns = ctl.spent;
-        self.last_stage_ns = ctl.spent_stage;
+        self.set_cost_map(ctl.spent, ctl.spent_stage);
         match result {
             Ok(report) => {
                 let elapsed_ns = ctl.elapsed();

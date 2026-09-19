@@ -816,6 +816,11 @@ impl Volume {
     /// tant que l'hôte ne le demande pas. Ne touche ni ADR-143, ni ADR-144, ni l'acceptation.
     pub fn set_report_backward_error(&mut self, on: bool) { self.report_backward_error = on; }
 
+    pub(super) fn set_cost_map(&mut self, phases: [u64; 8], stages: [u64; STAGES]) {
+        self.last_phase_ns = phases;
+        self.last_stage_ns = stages;
+    }
+
     /// S291 : carte du coût du dernier pas. `[u64; 8]` dans l'ordre de `Phase`.
     pub fn last_phase_ns(&self) -> [u64; 8] { self.last_phase_ns }
     /// S291 : la même durée, découpée plus finement ; noms dans `STAGE_NAMES`.

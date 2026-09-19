@@ -907,6 +907,11 @@ async fn measure_decomposition_async() -> Result<(), String> {
 /// S291 — balayage de la longueur de cycle, **après** l'allègement du cœur. Le réglage optimal
 /// avait été mesuré en S290 sur un pas où le cœur coûtait 40 % de plus : il n'a aucune raison
 /// d'être resté le même, et rien ne l'ajuste automatiquement.
+/// Construit un solveur résident depuis un chemin synchrone.
+pub fn for_domain(domain: Domain, iterations: u32) -> Result<Resident, String> {
+    pollster::block_on(Resident::new(domain, iterations))
+}
+
 pub fn measure_cycle_sweep() -> Result<(), String> { pollster::block_on(sweep_async()) }
 
 async fn sweep_async() -> Result<(), String> {

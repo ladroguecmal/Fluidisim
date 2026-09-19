@@ -85,13 +85,13 @@ sans déplacer d'un bit ce que le pas publie.
 - [x] **P6** — coût de l'horloge : le sondage lit l'horloge toutes les 64 mailles. Mesurer le pas
   avec horloge réelle contre horloge figée, et l'effet du grain. Les mesures de S289/S290 ont été
   prises avec une horloge figée : dire de combien elles sous-estiment la production.
-- [ ] **P7b** — *étape ajoutée en cours de session, sur une erreur trouvée.* La bande δ vivante
+- [x] **P7b** — *étape ajoutée en cours de session, sur une erreur trouvée.* La bande δ vivante
   de l'afficheur passe par `step_perturbation_mobile` (chemin couplé S253), **pas** par
   `step_surface_mobile`. Le crochet de S289 n'était donc pas atteignable par le rendu, et
   l'affirmation de S289 « le même que pilote la bande δ de l'afficheur » était imprécise :
   la même *fonction du cœur*, pas le même *chemin de l'afficheur*. Corriger l'affirmation par
   note datée, **et** porter le crochet sur le pas couplé pour que ce soit vrai.
-- [ ] **P7** — re-mesure complète et **propositions chiffrées**, y compris celles qui ne seront pas
+- [x] **P7** — re-mesure complète et **propositions chiffrées**, y compris celles qui ne seront pas
   construites ici. Vérifier que le rendu reste valide : trajectoire au bit, ou écart expliqué.
 - [ ] **P8** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
@@ -218,6 +218,59 @@ Sur la base « horloge figée » que S290 publiait (4,6315 ms) : **3,6392 ms**, 
 itérations 0,3060, second membre 0,2363, divergence 0,1982, portes 0,1519, export 0,1395,
 advection 0,1352, résidu initial 0,1342, correction 0,1238, validation 0,0987, et sept postes
 sous 0,09. **Plus aucun poste dominant côté cœur** : ce qui reste est l'appel GPU.
+
+P7 : **balayage de la longueur de cycle**, 6 656 mailles, horloge réelle, diagnostic coupé.
+Le réglage optimal de S290 avait été mesuré sur un pas 40 % plus cher ; il fallait le refaire.
+
+| cycle | médiane | maximum | itérations du cœur |
+|---|---|---|---|
+| 0 (témoin) | 9,6745 | 25,7736 | 427 |
+| 32 | 9,6439 | 29,4189 | 289 |
+| 64 | 4,7121 | 26,7258 | 149 |
+| 96 | 5,2103 | 24,5126 | 58 |
+| **128** | **3,7983** | 25,7902 | 19 |
+| 192 | 4,2002 | 20,2319 | 16 |
+| 256 | 4,8067 | **8,0980** | 3 |
+| 384 | 6,0820 | 9,7361 | **0** |
+
+**Le pic et la médiane ne désignent pas le même réglage**, et pour un rendu c'est le pic qui
+décide : 128 donne la meilleure médiane, 256 donne un maximum **trois fois** plus bas
+(8,0980 contre 25,7902). La variance vient entièrement du nombre d'itérations que le cœur doit
+encore faire ; à 384 il n'en fait plus aucune. Deux colonnes de détail étaient mal indexées à la
+première exécution — corrigées avant publication.
+
+P7b : **le crochet est porté sur le chemin que l'afficheur emprunte vraiment.** La bande δ passe
+par `step_perturbation_mobile` (couplé, S253), pas par `step_surface_mobile` : le crochet de S289
+n'était pas atteignable par le rendu, et la phrase de S289 « le même que pilote la bande δ de
+l'afficheur » était imprécise — la même fonction du cœur, pas le même chemin de l'hôte.
+`step_perturbation_mobile_with` existe désormais ; le candidat n'entre que dans la projection
+principale, le repli multigrille et l'affinage partant de zéro (ADR-153). La validation aplatie
+et la carte d'étapes sont posées sur ce chemin aussi. **Les six empreintes de S287 sont rendues
+à l'identique** — et ce banc-là emprunte précisément le chemin couplé.
+
+**Mesure sur la grille vivante** (128 × 52, dx 2 m, 200 pas, horloge réelle, diagnostic coupé) :
+
+| cycle | médiane | maximum |
+|---|---|---|
+| 0 (témoin, diagnostic actif) | 17,9281 | 28,2240 |
+| 0 (diagnostic coupé) | 17,5027 | 26,9360 |
+| 128 | 14,7182 | 26,1217 |
+| **192** | **8,2729** | 16,8865 |
+| 256 | 8,5538 | **16,1106** |
+| 384 | 10,1015 | 22,2520 |
+
+**×2,17 sur la médiane et ×1,75 sur le pic**, 200/200 propositions retenues, aucun refus.
+
+**Un défaut trouvé en mesurant, et qui compte plus que le gain.** Un pas à **467 ms**, puis
+132 ms à la reproduction, toujours au premier régime GPU venant après des régimes sans candidat.
+Un envoi de préchauffage **ne le supprime pas**. Ce qui le supprime est de ne pas laisser la
+carte inactive : régimes GPU exécutés en premier, le maximum retombe à 26,12 ms. **C'est un
+chemin GPU refroidi, pas un chemin neuf** — et pour un rendu, 130 à 470 ms est un gel visible.
+Aucune correction n'est construite ici : elle demande de décider ce qui garde la carte tiède
+quand la bande δ est éteinte, ce qui est un arbitrage d'ordonnancement, pas un réglage.
+
+Vérification finale : 508 essais cœur/harnais réussis (394 + 16 + 2 + 1 + 95), 21 ignorés,
+0 échec ; 36 essais viewer réussis, 1 ignoré, 0 échec ; six empreintes de S287 identiques.
 
 Ce qui reste hors de ce lot : multigrille GPU, 3D, solides, boucle d'image, multiplateforme,
 calibration automatique de la longueur de cycle. Et **aucune porte d'acceptation ne bouge** :

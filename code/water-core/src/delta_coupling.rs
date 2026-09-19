@@ -1,5 +1,5 @@
 //! S250, ADR-149 : raccordement volumique continu, géométrie et couvercle imposés.
-use super::{budget, Control, Domain, Error, Phase, SurfaceReport, Volume};
+use super::{budget, Control, Domain, Error, Phase, Stage, SurfaceReport, Volume};
 use crate::{background::BackgroundSample, host::{JobSystem, MonotonicClock}, SimTime};
 
 /// Échantillons au même instant ; densité/gravité identiques aux fournisseurs B/W.
@@ -318,6 +318,20 @@ impl Volume {
     pub fn step_perturbation_mobile(&mut self, time: SimTime, duration_us: u64, max_iters: u32,
         budget_us: u64, bg: &BackgroundFaces<'_>, sponge: Sponge,
         jobs: &dyn JobSystem, clock: &dyn MonotonicClock) -> Result<SurfaceReport, Error> {
+        self.step_perturbation_mobile_with(time, duration_us, max_iters, budget_us, bg, sponge,
+            jobs, clock, None)
+    }
+
+    /// S291 : le **chemin couplé** — celui que la bande δ de l'afficheur emprunte réellement —
+    /// avec un candidat de pression externe facultatif (ADR-173). `None` reproduit
+    /// `step_perturbation_mobile` au bit. Le candidat n'entre que dans la projection principale :
+    /// le repli multigrille et l'affinage de divergence partent de zéro (ADR-153) et ne le
+    /// consultent pas. Les portes d'ADR-143/144 restent entièrement au cœur.
+    #[allow(clippy::too_many_arguments)]
+    pub fn step_perturbation_mobile_with(&mut self, time: SimTime, duration_us: u64, max_iters: u32,
+        budget_us: u64, bg: &BackgroundFaces<'_>, sponge: Sponge,
+        jobs: &dyn JobSystem, clock: &dyn MonotonicClock,
+        mut external: Option<&mut super::ExternalPressure<'_>>) -> Result<SurfaceReport, Error> {
         self.last_cost_ms = None;
         let limit = budget_us.checked_mul(1000).ok_or(Error::NotFinite)?;
         if duration_us == 0 || duration_us > 1u64<<53 || time.0.checked_add(duration_us).is_none() {
@@ -345,8 +359,10 @@ impl Volume {
                 ctl.poll(Phase::Prepare)?;
                 validate_sample(s,self.rho)?;
             }
+            ctl.mark(Stage::Guard);
             self.prepare_surface_background(bg,&mut ctl)?;
             if !self.surface_in_bounds(&mut ctl,Phase::Prepare)? {return Err(Error::Domain);}
+            ctl.mark(Stage::Save);
             budget::copy(&self.u,&mut self.saved_u,&mut ctl,Phase::Prepare)?;
             budget::copy(&self.w,&mut self.saved_w,&mut ctl,Phase::Prepare)?;
             budget::copy(&self.p,&mut self.saved_p,&mut ctl,Phase::Prepare)?;
@@ -356,11 +372,13 @@ impl Volume {
             core::mem::swap(&mut self.eta,&mut self.saved_eta);
             core::mem::swap(&mut self.eta_roundoff,&mut self.saved_eta_roundoff);
             swapped = true;
+            ctl.mark(Stage::Advect);
             self.coupled_predict(bg,dt,sponge,&mut ctl)?;
             self.mobile = true;
             // S276, ADR-169 : départ depuis la pression publiée, projection principale seulement.
             self.warm_pressure = true;
-            let mut projected = self.project(scale,correction,max_iters,false,jobs,&mut ctl);
+            let mut projected = self.project_with(scale,correction,max_iters,false,jobs,&mut ctl,
+                external.as_deref_mut());
             self.warm_pressure = false;
             // S253, ADR-153 : refusé au plancher, le pas reçoit une fois l'affinage d'ADR-150,
             // valeurs fantômes homogènes ; `iterations` compte les deux projections.
@@ -373,18 +391,20 @@ impl Volume {
             self.mobile = false;
             let report = projected?;
             if report.degraded {return Err(Error::Convergence);}
+            ctl.mark(Stage::Extrapolate);
             self.extrapolate_mobile(&mut ctl)?;
+            ctl.mark(Stage::Transport);
             self.transport_coupled(transport,bg,&mut ctl)?;
             #[cfg(test)] let relax = !HEIGHT_RELAXATION_OFF.with(|v| v.get());
             #[cfg(not(test))] let relax = true;
             if relax { self.relax_surface(sponge,dt,&mut ctl)?; }
 
             ctl.check(Phase::Validate)?;
-            for value in self.u.iter().chain(&self.w).chain(&self.p).chain(&self.eta)
-                .chain(&self.eta_roundoff).chain(&self.us).chain(&self.ws)
-                .chain(&self.rhs).chain(&self.res).chain(&self.dir).chain(&self.tmp) {
-                ctl.poll(Phase::Validate)?;
-                if !value.is_finite() {return Err(Error::NotFinite);}
+            ctl.mark(Stage::Validate);
+            // S291 : mêmes onze champs, même ordre, même grain, forme vectorisable.
+            for field in [&self.u,&self.w,&self.p,&self.eta,&self.eta_roundoff,&self.us,
+                &self.ws,&self.rhs,&self.res,&self.dir,&self.tmp] {
+                budget::all_finite(field,&mut ctl,Phase::Validate)?;
             }
             if !report.residual.is_finite() || !report.divergence.is_finite() {return Err(Error::NotFinite);}
             // Garde sur η'^{n+1} + ζ_fond(t_n) : le pas suivant la refait sur son propre fond.
@@ -406,6 +426,8 @@ impl Volume {
             core::mem::swap(&mut self.eta,&mut self.saved_eta);
             core::mem::swap(&mut self.eta_roundoff,&mut self.saved_eta_roundoff);
         }
+        // S291 : la carte du coût existe aussi sur ce chemin — c'est celui de la bande δ.
+        self.set_cost_map(ctl.spent, ctl.spent_stage);
         match result {
             Ok(report) => {
                 let elapsed_ns=ctl.elapsed();
