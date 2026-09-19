@@ -58,42 +58,57 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S300 — terminée : fond B et second membre couplé reçus sur la carte.
+Session : S301 — en cours.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, outils locaux, carte réelle.
-Entrée : « Continue, et dis-moi quand pour le solveur 3d », 2026-09-19.
+Entrée : « Reprends le projet », 2026-09-19. Copie unique, master propre, jeton libre à l'amorce.
 
-Capacité visée : la carte **évalue elle-même** le fond différentiel de B. Le CPU ne publie que
-les paramètres analytiques par composante — phase temporelle repliée comprise (I-08) — soit un
-travail en `O(composantes)`, jamais en `O(mailles)` (ADR-175 D1). C'est le blocage nommé par
-S299 : le second membre couplé en dépend, et sans lui le pas de production reste non couplé.
-Consommateur : le second membre couplé, puis le pas complet d'ADR-175 D1.
+Capacité visée : le **pas couplé complet** résident sur la carte, sur **un seul device** —
+prédiction (advection MAC, couplage à B, éponge), divergence, second membre couplé (S300),
+projection bornée (S299) à départ chaud, correction, extrapolation, transport par débits
+mouillés et bandes, relaxation de l'éponge, surface publiée (ADR-175 D7). Aujourd'hui les trois
+étages de S299–S300 vivent chacun sur leur propre device et ne peuvent pas s'enchaîner.
+Consommateur : critère 2 de la porte B (production contre référence), puis la scène (critère 3).
 
 Critères avant code, posés ici :
-- Aucune boucle CPU sur les mailles par pas ; seul le tableau des composantes est téléversé.
-- La phase **temporelle** se calcule sur CPU — `from_time` passe par 128 bits, absent de WGSL —
-  et se publie repliée. La phase **spatiale** et le `sin_cos` Q32 vivent sur la carte.
-- Écart à `differential_local_extended` publié **champ par champ**, sous et au-dessus du plan
-  moyen. Aucune identité au bit exigée (ADR-175 D4) ; l'écart attendu est de l'ordre de l'ulp,
-  et tout écart plus grand se publie tel quel au lieu d'être arrondi dans un résumé.
-- Bornes d'I-08 respectées (`|d| < 4096 m`) ; refus contrôlés des deux côtés.
-- Portée : **B seul**. W local au-dessus du plan moyen reste A286, et ce lot ne le prétend pas.
-- La référence CPU ne bouge pas : elle est l'instrument.
+- Un device, tampons réservés à la configuration (I-06). Par pas, le CPU écrit les phases
+  (`O(composantes)`) et des uniformes `O(1)`, et enregistre un nombre de dispatchs **fixé par le
+  profil** et publié ; aucune boucle CPU sur les mailles, aucune lecture dans le pas.
+- Chaque étage reçu contre le cœur, écart publié champ par champ, aucune identité au bit
+  exigée (D4). La référence ne bouge pas, sauf une fonction d'**essai** de prédiction sur le
+  modèle de S299/S300, que la production n'appelle jamais.
+- Réception du pas : cas S298 — impulsion de 18 cm sous B spectral résolu, 32×24×36, `dx`
+  0,25 m, `dt` 5 ms, éponge 1 m à 2 s⁻¹. Écart de hauteur carte–cœur publié à chaque image ;
+  **reçu si < 3 mm** (S201, ADR-175 §4.2) sur la durée déclarée, visée 6 s. Pente et phase
+  publiées. Un dépassement se publie tel quel, cause cherchée ; aucun seuil relevé.
+- **Affinage** : ADR-175 D3 tranche déjà — la production ne refait jamais un pas. Si la mesure
+  montre qu'un affinage manque, il entre comme **quantité fixe du profil** (D2), pas comme reprise
+  conditionnelle. Pas d'ADR tant que la mesure ne le demande pas.
+- Hors lot : scène et revue (critère 3), coût au 99ᵉ centile (porte C), A286, multiplateforme.
 
 ### Plan
 
 - [>] **P1** — amorce, lecture ciblée du lot, plan seul.
-- [ ] **P2** — publication des composantes de B sur la carte et WGSL de base : phase spatiale,
-  `sin_cos` Q32, tampons réservés à la configuration.
-- [x] **P3** — `differential_local_extended` en WGSL **sous** le plan moyen, reçu contre le
-  cœur champ par champ ; refus et réserve testés.
-- [x] **P4** — **au-dessus** du plan moyen, règle d'ADR-154, reçu contre le cœur.
-- [x] **P5a** — **découpage déclaré** : les trois familles de faces MAC échantillonnées sur
-  la carte, reçues contre `BackgroundGrid3` du cœur.
-- [x] **P5b** — fantômes couplés et second membre assemblés sur la carte depuis ces faces.
-- [x] **P6** — coût du fond sur la carte, comparé au chemin CPU de S276/S298.
-- [x] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
+- [ ] **P2** — `Step3` : un device, tampons réservés, pipelines des trois sources WGSL (fond,
+  gradient conjugué, pas) ; dépôt d'état et relecture de banc. Noyau `predict` (advection MAC,
+  couplage `extra3`, éponge) et `predict_for_trials` dans le cœur ; reçu contre lui.
+- [ ] **P3a** — divergence, couplage S300 avec `eta_roundoff`, passage à la projection, départ
+  chaud ; pression reçue contre le cœur sur un pas.
+- [ ] **P3b** — correction aux faces et extrapolation verticale ; vitesses reçues.
+- [ ] **P4** — transport par débits mouillés et bandes, relaxation d'éponge, compensation,
+  surface publiée (D7) ; pas complet reçu champ par champ contre `step_perturbation_mobile`.
+- [ ] **P5** — trajectoire du cas S298 : écart de hauteur par image, selon les cycles.
+- [ ] **P6** — coût du pas complet, passe chronométrée, trois tailles ; dispatchs publiés.
+- [ ] **P7** — diagnostics D3 sur la carte (divergence des lignes franches, dérive de masse,
+  colonnes hors bornes), relus en différé avec leur âge.
+- [ ] **P8** — preuve et rituel REPRISE §6.
 
 ### Notes de reprise
+
+*(S301 — vide à l'ouverture.)*
+
+---
+
+### Notes de reprise de S300 (conservées pour le lot)
 
 `PhaseQ32::from_time` multiplie `freq_q32` (u64) par les microsecondes en **u128** avant de
 diviser par 10⁶ : intransposable en WGSL, qui n'a ni u64 ni u128. Mais cette phase ne dépend

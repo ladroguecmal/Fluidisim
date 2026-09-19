@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 20:10 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 20:42 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : aucune — S300 terminée
+Session en cours : S301 — pas couplé complet résident sur la carte, un seul device, reçu contre le cœur
 Dernière session : S300 — fond B évalué sur la carte et second membre couplé reçus contre le cœur
 Session suivante : S301 — porte B : advection, bandes de couplage et éponge sur la carte, puis la surface mobile et sa surface publiée (ADR-175 D7). La surface mobile demandera un arbitrage : le cœur **refait** le pas avec un affinage quand la porte d'ADR-144 échoue, ce que la production n'a pas le droit de faire (D3 : dégradation déclarée) — nouvel ADR probable.
 Maillons        : 0 — capacité S300 : fond B évalué sur la carte depuis les seuls paramètres publiés et second membre couplé qui en découle, reçus à 2,6·10⁻⁶ du cœur, consommés par cinq bancs, preuve DELTA3D-FOND-GPU-S300
