@@ -69,7 +69,7 @@ mécanisme corriger avant toute réduction automatique.
 - [x] **P1** — état réel, jeton et plan seuls.
 - [x] **P2** — banc consommant Live/Layer : large intact, large préparé, étroit préparé ;
   même préparation jusqu'à permutation, puis arrêt commun. Mesures séparées et contrôles.
-- [ ] **P3** — exécuter et publier le diagnostic, tests du viewer ; arrêter au mécanisme
+- [x] **P3** — exécuter et publier le diagnostic, tests du viewer ; arrêter au mécanisme
   attribué, ne pas inventer une correction physique sur un seul scénario.
 - [ ] **P4** — rituel §6 : journal, angles morts, file/feuille/index, jeton libre.
 
@@ -83,3 +83,7 @@ Critère d'arrêt : isoler hauteur centrale préparé-intact et réduit-prépar�
 au bit avant permutation, publier les fenêtres communes et les limites. Le seuil 3 mm reste
 un repère de hauteur, jamais une réception perceptive ni une tolérance modifiée pour réussir.
 S284 : 507 tests cœur/harnais, 34 viewer, 19 ignorés ; code cœur inchangé prévu ici.
+P3 : banc complet reçu, 48 pas préparés identiques, permutation pas 112 ; zéro allocation
+sur 963 appels. Maxima P-I 45,517 mm, R-P 25,391 mm, R-I 66,994 mm. À la permutation :
+8,118 mm dus à la préparation, zéro écart central de transfert. 34 tests viewer réussis,
+un ignoré. Pas de correction physique spéculative ; revenir au coût A276 après ce diagnostic.
