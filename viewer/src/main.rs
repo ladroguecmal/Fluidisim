@@ -8,6 +8,7 @@ macro_rules! captures {
 mod reflection;
 mod counting;
 mod delta;
+mod pressure_gpu;
 mod gpu;
 mod topologie;
 mod lod;
@@ -2215,6 +2216,9 @@ fn delta_arbitrage(background: &water_core::background::Background, amplitude: f
 
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
+    if args.iter().any(|a| a == "--pression-gpu") {
+        return pressure_gpu::measure();
+    }
     if args.iter().any(|a| a == "--delta-retrecissement") {
         return delta::measure_shrink();
     }

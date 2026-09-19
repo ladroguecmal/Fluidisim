@@ -68,7 +68,7 @@ Objectif : construire et éprouver opérateur mobile et lissage résidents GPU c
 - [x] **P1** — état réel, jeton et plan seuls.
 - [x] **P2** — ADR du candidat expérimental ; export préalloué des coefficients du véritable
   opérateur mobile, réception contre son application native.
-- [ ] **P3** — noyaux GPU opérateur et Jacobi, ressources réservées et alternance de tampons,
+- [x] **P3** — noyaux GPU opérateur et Jacobi, ressources réservées et alternance de tampons,
   banc sur géométries planes/coupées/ondulées et tailles différentes ; découper si nécessaire.
 - [ ] **P4** — mesures précision/coût complet/allocations, suites pertinentes et limites ;
   ni cycle complet ni simulation intégrée revendiqués avant leur construction.
@@ -89,3 +89,9 @@ ni acceptation ADR-144 du solveur complet. Intégration future conditionnée à 
 
 P2 : export natif reçu au bit sur fonds plans/coupés et surfaces ondulées, grilles
 16x12 et31x19 ; refus atomiques forme/géométrie. ADR-172 acte seulement le candidat.
+
+P3 : export consommé par kernels GPU opérateur/Jacobi ; 30 cas GPU passent, repos exact,
+pas de readback entre 32 lissages. RTX5070/DX12. Première erreur max 1,69e-7 ; à128x52
+32 lissages ~0,8 ms aller-retour contre2,5–2,9 ms CPU empaqueté. Non encore coût avec
+export/empaquetage à chaque appel : P4 élargit cette mesure. 65–105 allocations pile+banc,
+aucune prétention I-06 image. Noms WGSL réservés operator/smooth corrigés avant réception.
