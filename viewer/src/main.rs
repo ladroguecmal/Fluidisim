@@ -8,6 +8,7 @@ macro_rules! captures {
 mod reflection;
 mod counting;
 mod delta;
+mod delta3d;
 mod pressure_gpu;
 mod pressure_solver;
 mod gpu;
@@ -2217,6 +2218,9 @@ fn delta_arbitrage(background: &water_core::background::Background, amplitude: f
 
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
+    if args.iter().any(|a| a == "--delta3d-operateur") {
+        return delta3d::verifier();
+    }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();
     }

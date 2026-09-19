@@ -85,10 +85,10 @@ Critères avant code, posés ici :
 
 ### Plan
 
-- [>] **P1** — amorce, lecture ciblée du lot, carte constatée ; plan seul.
-- [ ] **P2** — `viewer/src/delta3d.rs` et son WGSL : domaine 3D résident, tampons réservés à la
+- [x] **P1** — amorce, lecture ciblée du lot, carte constatée ; plan seul.
+- [x] **P2** — `viewer/src/delta3d.rs` et son WGSL : domaine 3D résident, tampons réservés à la
   création, géométrie téléversée une fois ; noyau de l'opérateur sans matrice.
-- [ ] **P3** — recevoir l'action de l'opérateur contre `apply_mobile3` : même état, même champ
+- [>] **P3** — recevoir l'action de l'opérateur contre `apply_mobile3` : même état, même champ
   d'entrée, écarts publiés ; refus et réserve testés.
 - [ ] **P4** — projection bornée résidente : cycles fixés, aucun retour CPU entre itérations,
   aucune lecture synchrone ; pression comparée à la référence.
@@ -111,3 +111,11 @@ Aucune 3D n'existe côté afficheur : `grep Domain3 viewer/src` est vide.
 
 Banc 2D disponible pour comparer les ordres de grandeur : `--pression-gpu` sur 31×19 donne
 gpu_mediane 2,2 µs à 0 lissage, 67 µs à 32 lissages, premier passage 4,94 ms.
+
+P2 : l'opérateur ne dépend que de la **géométrie** — `a = 1/θ` dans les deux branches de
+`ghost_up3`/`ghost_side3`, `homogeneous_ghost` ne change que la *valeur*, pas le coefficient.
+Le noyau n'a donc besoin que des hauteurs de colonne, de `dx` et de `SURFACE_THETA_MIN` (1e-3).
+Ordre d'accumulation x−, x+, y−, y+, z−, z+ respecté : l'addition f32 n'est pas associative.
+z− n'est jamais testé mouillé (une maille sous une mouillée l'est), le fond est un mur.
+wgpu 30 : `PollType::wait_indefinitely()` et `get_mapped_range()` rend un `Result`.
+Banc P2 : 1920 mailles, sèches exactement nulles, max|A·p| 1,817143e2, tout fini.

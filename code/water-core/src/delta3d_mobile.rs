@@ -718,6 +718,28 @@ impl Volume3 {
         result
     }
 
+    /// S299, ADR-175 §3 — **essais seulement**. Action de l'opérateur de pression mobile sur un
+    /// champ donné, telle que la projection l'emploie. Elle existe pour qu'une production qui
+    /// assemble son opérateur sur sa carte puisse être **jugée** contre le cœur : la production
+    /// ne l'appelle jamais à l'exécution, et ADR-172 (export de lignes) reste cantonné à la 2D.
+    /// Rien ici n'est un état publié ni une sauvegarde de δ (I-17) : `out` est un tampon emprunté.
+    /// Refus `Domain` si les longueurs ne sont pas celles du domaine, `NotFinite` si `p` ne l'est
+    /// pas. Sur refus, `out` n'est pas touché. Aucune allocation.
+    pub fn apply_pressure_operator_for_trials(
+        &self,
+        p: &[f32],
+        out: &mut [f32],
+    ) -> Result<(), Error> {
+        if p.len() != self.p.len() || out.len() != self.p.len() {
+            return Err(Error::Domain);
+        }
+        if p.iter().any(|x| !x.is_finite()) {
+            return Err(Error::NotFinite);
+        }
+        self.apply_mobile3(p, out);
+        Ok(())
+    }
+
     pub fn wet_cells(&self) -> usize {
         let Domain3 { nx, ny, nz, .. } = self.domain;
         let mut n = 0;
