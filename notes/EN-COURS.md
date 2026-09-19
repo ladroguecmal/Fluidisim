@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S298 — en cours : fournisseur B réel et frontières de la référence 3D.
+Session : S298 — terminée : frontières 3D reçues, fond spectral réel branché, maille mesurée.
 Agent : Codex GPT-6 jusqu’à P3 ; P4 repris à chaud par Claude Opus 5, application desktop ;
 fichiers, git, cargo, outils locaux. Diff P4 jugé cohérent avec la thèse déclarée : complété, non annulé.
 Entrée : « Continue », 2026-09-19.
@@ -83,7 +83,7 @@ Le coût 2D est différé selon S293 ; ce lot prépare les entrées réelles de 
   (3,92 mailles par λ la plus courte). Rejouer sur une fixture résolue et comparer, pour
   séparer le bruit de maille de la dispersion physique avant de livrer l’image.
 - [x] **P5** — preuve §5/§6, index, file active, feuille de route.
-- [ ] **P6** — rituel REPRISE §6 : journal, angles morts, jeton libre.
+- [x] **P6** — rituel REPRISE §6 : journal, angles morts, jeton libre.
 
 ### Notes de reprise
 

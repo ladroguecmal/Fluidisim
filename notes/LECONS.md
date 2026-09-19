@@ -1194,6 +1194,18 @@ critère explicite de leur écriture.
 résolution, amplitude, rapport d'échelles — et le comparer au régime visé. L'écart est soit
 justifié, soit un angle mort.
 
+**Récurrence S298, 2026-09-19** — et le coût de l'oubli, cette fois, est une **image**. La
+fixture spectrale de l'aperçu 3D portait sa composante la plus courte sur **3,92 mailles** ; son
+énoncé disait les hauteurs, les périodes et les directions, jamais la résolution. Le champ de
+différence dégénérait en damier et **remontait** après 3,3 s : plausible comme dispersion dans
+une mer large bande, en réalité du bruit de maille. À 8,30 mailles, tout le reste égal, le pic
+décroît et vaut 3,4 fois moins à six secondes.
+
+Ce qui a changé depuis S25 : une image ne déclenche aucun seuil et ne fait échouer aucun test.
+Elle est juste regardée — et un damier régulier ressemble à de la petite houle. **Un livrable
+visuel doit donc publier sa résolution au même titre qu'un banc**, et l'aperçu l'imprime désormais
+(`lambda_min_m`, `cells_per_lambda_min`) avant la première image.
+
 ## L85 — Quand des grandeurs disparaissent d'une formule, ce qui reste est ce qu'il faut mesurer
 
 *(S25)* L'amortissement d'une onde par le schéma s'écrivait avec la célérité, la longueur d'onde, la

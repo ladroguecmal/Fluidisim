@@ -14911,3 +14911,55 @@ feuille de route et index remplacés/complétés. I-04/I-06/I-07/I-08/I-12/I-13/
 Navigation/plafonds vérifiés, copie unique, jeton libre. Deux battements intermédiaires ont été
 reportés une à deux minutes trop tard par erreur de saisie (P1/P3) ; battement final relu
 séparément et exact, sans conséquence de concurrence constatée.
+
+## S298 — 2026-09-19 — porte B : frontières reçues en 3D, fond réel branché, et la maille qui manque
+
+**Entrée.** « Continue » à Codex GPT-6, puis « Reprends le projet » à Claude Opus 5 après coupure.
+**Reprise à chaud** : jeton `occupé`, battement de six minutes, mais interruption signalée par
+l'utilisateur. Diff de P4 jugé cohérent avec la thèse déclarée — **complété, non annulé**. Copie
+unique, master propre. P1–P3 étaient de Codex ; P4 à P6 de Claude.
+
+**Capacité reçue.** La référence 3D reproduit les réceptions de frontières de S269–S274 — houle
+progressive, paquet, mur et éponge, sur chaque axe — et consomme désormais le **fournisseur
+spectral B du cœur** au lieu d'ondes analytiques choisies : `BackgroundGrid3` échantillonne B sur
+les trois familles MAC par `differential_grid_extended`, scratch réservé avant scellement, zéro
+allocation, publication atomique. **Ce qui devient possible** : la référence CPU peut juger le pas
+GPU d'ADR-175 §4.2 sur les entrées réelles de la production, pas sur une fixture de banc.
+**Consommateurs** : `delta3d_boundaries`, l'aperçu 3D, puis la production GPU.
+**Preuve** : [DELTA3D-FOND-REEL-S298](../docs/validation/DELTA3D-FOND-REEL-S298.md).
+
+**Mesures.** Frontières : 139 200 pas acceptés, aucun refus, écart de hauteur maximal
+**1,192093·10⁻⁷ m** tous cas et axes confondus ; erreur énergétique de jauge ≤ 1,59·10⁻⁵.
+Fond réel : 64 composantes de deux systèmes JONSWAP directionnels, atténuation au fond
+2,259·10⁻⁵, vitesse verticale résiduelle **1,194·10⁻⁶ m/s**, échantillons identiques au bit au
+ponctuel prolongé aux trois familles et à trois instants. Suite complète : **539 réussis**,
+18 ignorés, aucun échec ; afficheur inchangé.
+
+**Visible, et ce que le regarder a trouvé.** Deux GIF locaux de 121 images. Le premier montre δ
+sous une mer réellement étalée — 79° entre les deux systèmes — pour la première fois. En le
+vérifiant : le champ de différence dégénérait en damier à l'échelle de la maille et **remontait**
+après 3,3 s (0,047 → 0,091 m). Cause mesurée : la fixture portait sa composante la plus courte sur
+**3,92 mailles**. Rejouée à **8,30 mailles**, tout le reste identique, elle redonne un anneau qui
+se disperse, pic 0,027 m décroissant et divergence franche divisée par 1,9. Confusion assumée : à
+`Hs` constant, allonger les périodes baisse aussi la cambrure — la résolution seule n'est pas
+isolée, et aucun seuil de mailles par longueur d'onde n'est reçu.
+
+**Blocage mesuré, pas supposé.** À `dx` 0,25 m dans 8 × 6 m, la bande à la fois résolue et contenue
+tient dans λ ∈ [2,1 ; 7,3] m : **moins de deux longueurs d'onde en travers de la boîte**. Une mer
+étalée *et* résolue n'entre pas dans ce banc CPU. Le critère 3 d'ADR-175 §4 — « une onde traverse
+une mer étalée et s'y déforme », jugé par l'utilisateur — ne peut donc pas être franchi ici : il
+demande le domaine de production GPU. C'est l'apport principal de la session pour l'ordre des lots.
+
+**Partiel et suite.** La seconde moitié du « reçu si » de la porte B est tenue ; la première ne
+l'est pas et ne peut pas l'être sur ce banc. Restent : pas GPU résident (§4.2), surface publiée,
+scène de mer étalée, revue utilisateur (§4.3). A286 (W au-dessus du plan moyen), A274 et A281
+inchangées. Absorption oblique, aux coins et mer large bande à la frontière restent non reçues :
+l'équivalence 3D↔2D ne les reçoit pas. Aucun retrait d'ambition, aucun arbitrage nouveau.
+
+**Rituel.** Maillons **0** : un critère « reçu si » de la porte B a avancé, avec consommateur et
+preuve. Quatrième session consécutive sur la porte B, autorisée par A211 puisqu'un critère avance
+à chaque fois ; ADR-174 D6 la désigne comme porte en cours. L84 reçoit une **récurrence datée** —
+un livrable visuel doit publier sa résolution comme un banc, et l'aperçu l'imprime maintenant ;
+pas de leçon nouvelle forcée, pas d'angle mort nouveau. File active entière relue, deux lignes
+remplacées ; feuille de route et index actualisés. I-02/I-04/I-12/I-14/I-17 inchangés.
+Navigation et plafonds vérifiés à 0. Copie unique, jeton libre.

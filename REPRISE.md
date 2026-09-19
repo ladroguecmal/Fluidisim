@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 17:34 +02:00
-Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux) — reprise à chaud de S298 ouverte par Codex GPT-6, sur demande de l’utilisateur
-Session en cours : S298 — frontières 3D et raccord au fond réel
-Dernière session : S297 — référence 3D couplée reçue contre HOS, aperçu animé local livré
-Session suivante : S298 — porte B : réception absorption/progression 3D S269–S274, fournisseur réel B/W ; préparer production GPU et surface publiée pour la scène visible demandée.
-Maillons        : 0 — capacité S297 : couplage 3D reçu, consommé par HOS et aperçu animé, référence de la porte B (ADR-175 §4.1), preuve DELTA3D-COUPLEE-S297
+JETON            : libre
+Battement        : 2026-09-19 17:36 +02:00
+Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux) ; S298 ouverte par Codex GPT-6, reprise à chaud à P4
+Session en cours : aucune — S298 terminée
+Dernière session : S298 — frontières 3D reçues contre la 2D, fond spectral réel branché, maille d'une mer étalée mesurée
+Session suivante : S299 — porte B : construire le pas GPU résident d'ADR-175 §4.2 et le juger contre la référence CPU de S297/S298, puis surface publiée dans la mer étalée et revue utilisateur (§4.3). S298 a mesuré que le banc CPU ne peut pas porter le critère 3.
+Maillons        : 0 — capacité S298 : frontières S269–S274 reproduites en 3D et fournisseur B du cœur consommé sans allocation, consommés par delta3d_boundaries et l'aperçu, preuve DELTA3D-FOND-REEL-S298
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -75,7 +75,7 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État au 2026-09-19 (S297). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
+État au 2026-09-19 (S298). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
 travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En bref :
 
 - **J1** partiel : B+W sur GPU dans l'hôte séparé, scène multi-sources admise par le cœur, GPU eau
@@ -84,7 +84,10 @@ travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En br
 - **δ reçu en 2D** — surface mobile couplée à B/W contre HOS, frontières, rendu en direct.
   **S295–S296** : référence 3D à surfaces linéaire et mobile reçue, identique au bit à la 2D quand `ny = 1`.
   **Porte B ouverte** : δ en 3D selon [ADR-175](docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md),
-  référence CPU couplée reçue S297, aperçu animé local livré ; frontières partiellement reçues, fournisseurs réels, production GPU et scène encore à construire.
+  référence CPU couplée reçue S297. **S298** : frontières S269–S274 reproduites en 3D et fournisseur
+  spectral B du cœur consommé sans allocation ; mesuré au passage qu'une mer à la fois résolue et
+  étalée n'entre pas dans le banc CPU — le critère 3 d'ADR-175 §4 demande la production GPU, qui
+  reste à construire avec la surface publiée, la scène et la revue.
 - **Ordonnanceur** (porte A) : décide qu'un domaine vit et avec quel budget ; ni plusieurs
   candidats, ni déplacement, ni dégradation automatique.
 - **V** : noyau reçu (C12, géométrie orientée, restauration), sans articulation avec δ.
