@@ -85,7 +85,7 @@ solveur dans cette session** : elle prépare la construction de S295, qui visera
   dans les portes, maillons liés aux colonnes « reçu si » et aux points de la liste ; plafonds des
   documents d'état, contrôlés par `outils/etat_projet.py`.
 - [x] **P6** — file active ramenée aux plafonds (état, déclencheur, lien).
-- [ ] **P7** — états des jalons de la feuille de route ramenés aux plafonds.
+- [x] **P7** — états des jalons de la feuille de route ramenés aux plafonds.
 - [ ] **P8** — rituel §6.
 
 ### Notes de reprise
@@ -131,3 +131,8 @@ restent dans le journal et les preuves. **Correction de règle** : « porte ouve
 rang » aurait renvoyé à la porte A ; REPRISE §6.7 et METHODE disent désormais « la porte en
 cours que désigne §3 bis », et §3 bis désigne B (D en parallèle) avec les dépendances qui fondent
 cet ordre.
+
+**P7 — feuille de route (14:59–15:02).** J1, J1-bis (désormais section propre, table d'ADR-131
+conservée et resserrée), J2 et J3 réécrits en état présent : 41,9 → 20,5 ko ; sections de
+30 à 299 mots, aucune au-dessus de 450 ; `etat_projet.py` : navigation 0 erreur, plafonds 0
+dépassement. L'histoire S-par-S reste au journal et dans les preuves liées. §5 : ADR-174 et 175.

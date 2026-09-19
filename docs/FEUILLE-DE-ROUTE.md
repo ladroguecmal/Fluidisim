@@ -42,242 +42,77 @@ déclenche un domaine δ local, C21 compare la masse avec et sans δ.
 ### J1 — Version visible et interactive avec B et W
 
 *Livre* : une scène représentative — mer de référence, impacts, sillages — **parcourue en temps
-réel**, composée B+W sans refus, coût mesuré face au profil 60 images/s / eau 2 ms.
+réel**, composée B+W sans refus, coût mesuré face au profil (ADR-125, [ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) D3).
 
-*État relu S227, 2026-09-13* : **hôte GPU B + impact + sillage présent** (S211–S213),
-mer JONSWAP, composition par le cœur reçue S214. Budget de pente resserré S215/S216/S223 ;
-**A254/A262 closes**, l'admission ne bloque plus par principe une scène à plusieurs sources.
-Le domaine honnête du sillage est publié (ADR-132) ; l'hôte avertit lorsqu'il en sort.
+*État au 2026-09-19* — **partiel**. Reçu : hôte GPU séparé B + impacts + sillages (S211–S213,
+ADR-130) ; scène multi-sources composée et admise par le cœur (S214, S236, ADR-142) ; passe d'eau
+réduite par grille locale du sillage (S234), visibilité à retour au bit (S235), filtrage spectral
+de B et du sillage (S249, ADR-148) et cuisson optimisée (S267) : **GPU eau médian 1,74 ms** à
+1280×720 ; boucle d'image sans allocation pour notre code (S240, ADR-145). La mer a été jugée par
+l'utilisateur de R1 à R7 (S254–S266), **R7 accepté** : queue spectrale (ADR-155), mer multimodale
+(ADR-156), vagues pointues et rugosité de Cox–Munk (ADR-157, 158), vent de scène (ADR-160),
+reflets filtrés (ADR-161, 163). Preuves : [COUPURE-S249](validation/COUPURE-S249.md),
+[CUISSON-SILLAGE-S267](validation/CUISSON-SILLAGE-S267.md), [REVUE-VISUELLE](validation/REVUE-VISUELLE.md).
 
-*S234, 2026-09-14* : **la passe d'eau de la scène J1 passe sous 2 ms** — grille locale du sillage
-à pas borné (3 mm) et reconstruction Hermite bicubique : **0,426 ms** cuisson comprise à 960×540
-(témoin S233 4,24), 0,43/0,46 ms en fenêtre fixe/balayée, cadence 384/398 Hz ; recette 128×256 à
-1,51 ms. Mesures sur secteur (A270). Voir [LOD-SILLAGE-S234](validation/LOD-SILLAGE-S234.md).
+*Manque* : le **CPU** — préparation du sillage 4,1 ms médian sur un fil, contre ≤ 2 ms (ADR-174
+D3), levier A278 ; l'**interaction représentative** — aucun objet pilotable, objet de la
+scène-témoin de la porte D ; les pointes au premier passage (A265) ; l'échantillonnage du lointain
+aux angles rasants (S247, S248) ; la seconde cible (A98). Requête de jeu : ≈ 0,2 ms par point,
+plancher jusqu'à 12 ms (A261) ; CWM cohérente avec l'image à 0,30 mm (ADR-159).
 
-*S235, 2026-09-14* : **scène multi-sources dans l'hôte** — trois sillages d'un journal commun et
-huit impacts nés toutes les 4 s — vérifiée contre le cœur (≤0,368 mm) ; passe GPU ≤0,47 ms, et
-visibilité par emprise de la grille : hors champ 0,06 ms GPU, **retour dans le champ identique au
-bit**. Voir [SCENE-MULTI-S235](validation/SCENE-MULTI-S235.md).
+*Bancs* : B1, B2 partiel, B7 sur la machine de référence. *Cas* : C02, C07, C18, branche W de C19.
+Composition de la scène par le cœur faite (S236) ; le choix du mode par un hôte autoritaire reste
+à trancher avec lui (A271).
 
-*S236, 2026-09-15* : **le cœur compose et admet la scène représentative** — mode union de la
-requête mixte (ADR-142 : chaque perturbation contribue là où son emprise couvre le point), plancher
-de pente certifié par séparation avec pression locale ADR-137 sur les cellules critiques. S235
-admise aux **161 instants** (0 refus contre 49), requête à < 1e-9 m de la somme de référence de
-l'image. Voir [ADMISSION-UNION-S236](validation/ADMISSION-UNION-S236.md).
+### J1-bis — Espace d'optimisation du rendu (ADR-131, S213)
 
-**J1 reste partiel.** (1) **CPU** : l'implémentation mono-fil prépare le sillage en 3,1 ms pendant le
-forçage de trois sillages ; somme CPU+GPU 4,5 ms alors, 2,1–2,6 ms hors forçage (ADR-125 ne fixe pas
-la répartition). (2) **Requête** : ≈0,2 ms par point (pression 4 096 modes sur CPU) et plancher
-jusqu'à 12 ms quand la pression locale intervient — hors du chemin d'image, borne de ce qu'un
-consommateur gameplay peut demander. Restent l'interaction représentative et la seconde cible ;
-angles rasants mesurés S247, allocations reçues S240 et filtrage B/sillage reçu S249 ci-dessous.
+Un dépassement qualifie l'implémentation, pas la fonctionnalité ; le budget s'éprouve sur la
+**combinaison** des techniques, sur des scènes représentatives ; la liste est ouverte. Chaque
+mesure publie techniques présentes, absentes et domaine de validité (ADR-131 D3).
 
-A261 reste vraie hors des cellules critiques ; A258 porte désormais sur une borne employée à
-l'admission ; A263 suit la constante Bessel. Les déclencheurs de reprise vivent uniquement dans la
-file active. L'ordre de livraison n'interdit pas de construire les briques indépendantes de J2 ou V
-pendant que J1-bis progresse.
-
-#### J1-bis — Espace d'optimisation du rendu et travaux nécessaires (ADR-131, S213)
-
-Un dépassement mesuré qualifie l'implémentation, pas la fonctionnalité. **2 ms (ADR-125) est un
-objectif éprouvé sur la combinaison** des techniques ci-dessous, sur des scènes représentatives,
-sans présumer qu'elle réussira ou échouera. Aucune demande de réduction d'ambition ne se fonde sur
-l'échec d'optimisations prises isolément. La liste est ouverte.
-
-| technique | état (mises à jour datées) | publie avec elle |
+| technique | état au 2026-09-19 | publie avec elle |
 |---|---|---|
-| phases repliées de B au GPU | **présente** (S211) | écart GPU/cœur |
-| table de Bessel d'un impact (ADR-129) | **présente** (S208, S211) | écart au champ direct, pas λ/16 |
-| **temps** — sillage : tronçons achevés repliés, modes préconstruits | **présente** (S213) : 1,26 ms forçage / 0,36 ms après à 4 096 nœuds, un fil ; 6e-8 du chemin préparé | écart au chemin préparé, pic aux bornes (2,12 ms), retour arrière (3,10 ms) |
-| **espace** — grille locale et transformée | **grille locale présente** (S234, évaluation directe des modes aux nœuds) ; **transformée absente** | quadrature d'image, coutures et période |
-| **LOD spatial** — densité, emprise selon distance et écran | **présent pour le sillage** (S234) : densité d'évaluation selon sa borne bicubique, indépendante du maillage ; 0,426 ms contre 4,24. **LOD du maillage absent** (≤35 % mesurés, rien en vue haute : B dicte la densité) | borne et erreur aux intérieurs, coutures entre mailles (≤6 µm), rapport au témoin ; coupure des amplitudes selon Nyquist ajoutée S249, ligne distincte ci-dessous |
-| **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, **ADR-132** : les deux lois se recalculent depuis la recette réduite) |
-| **Filtrage spectral de l'image** — amplitudes selon le pas projeté | **B et sillage présents S249** (ADR-148), huit bandes du même champ, aucune décimation de quadrature. Impacts absents. GPU 1,22–1,33 ms en régime, contre 0,46–0,49 ; premier passage à 2,26 ms | erreur numérique ≤0,340 mm, écart volontaire au champ complet séparé ; rayon/durée ADR-132 inchangés ; normales sans dérivée du filtre, perception non reçue ; [preuve](validation/COUPURE-S249.md) |
-| **LOD temporel** — cadence de mise à jour selon distance, vitesse, régime | absente | erreur de phase, I-09 |
-| **visibilité** — frustum, occlusion, hors écran | **présente pour sillage et impacts** (S235) : emprise de la grille sur l'eau, marge par arête ; hors champ 0,448 → 0,062 ms GPU, 1,59 → 0,67 ms CPU ; +0,05 ms CPU dans le champ. Occlusion et composantes de B absentes | **retour au bit** vérifié (31 images, fin de tronçon incluse) |
-| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | **présente pour les sillages d'un même journal** (cœur, S222 ; hôte S235 : trois sillages, 4 096 modes, +0,01–0,03 ms GPU) ; table de Bessel partagée par les impacts de même entrée (S235) ; passe commune B/W absente | superposition dans son domaine (ADR-123) ; budget de pente : **admis sur l'union sous plancher certifié** (S236, ADR-142) — refusé par majorants en S235 |
-| **parallélisme CPU / LOD temporel de la préparation** | **S243 : le parallélisme déterministe existe** (ADR-146) — `parallel_fill_f32`, écriture disjointe, garantie inconditionnelle ; **×2,63 à huit fils** sur `ModalPressure::sample`, 3,27 → 1,24 ms, empreintes identiques à 1/2/4/8/16 fils. **Le chemin d'image reste à un fil** : créer les fils par appel coûte ≈ 67 µs et alloue (A278). LOD temporel toujours absent | écart au chemin séquentiel **au bit**, vérifié ; pour le chemin d'image, un vivier persistant — donc `unsafe` dans l'hôte, une décision (A278). Le coût de δ (A276) se mesure sur bancs et n'attend pas |
+| phases repliées de B au GPU | présente (S211) | écart GPU/cœur |
+| table de Bessel d'un impact (ADR-129) | présente (S208, S211) | écart au champ direct |
+| **temps** — tronçons repliés, modes préconstruits | présente (S213) | écart au chemin préparé, pics aux bornes |
+| **espace** — grille locale, transformée | grille présente (S234) ; transformée absente | quadrature, coutures, période |
+| **LOD spatial** | sillage présent (S234) ; maillage absent | erreur aux intérieurs, coutures |
+| **filtrage spectral de l'image** | B et sillage (S249, ADR-148) ; impacts absents | erreur ≤ 0,340 mm, écart volontaire séparé |
+| **LOD spectral** par source | absent | écart à la recette pleine ; durée et rayon (ADR-132) |
+| **LOD temporel** | absent | erreur de phase, I-09 |
+| **visibilité** | sillage et impacts (S235) ; occlusion absente | retour au bit |
+| **mutualisation** | sillages d'un journal, table de Bessel partagée (S222, S235) ; passe B/W commune absente | superposition (ADR-123) |
+| **parallélisme CPU** | construit (S243, ADR-146), hors chemin d'image (A278) | écart au bit |
 
-**Chaque mesure de coût publie** techniques présentes, techniques absentes et domaine de validité
-(scène, recette, sources, formats, instants, machine, grandeur mesurée) — ADR-131 D3.
-
-**Travaux nécessaires de J1, indépendants du coût** (ADR-131 D6) : A251 et composition faites
-S214, A254 close S223, cadence complète faite S225. **Allocations de la pile graphique faites S240**
-(ADR-145) : boucle d'image à **zéro allocation** pour le code du projet, pile verrouillée à **133
-allocations et 18 509 octets par image, constantes** ; [preuve](validation/ALLOCATIONS-HOTE-S240.md).
-**Angles rasants soutenus faits S247** : le coût tient à toutes les poses mesurées — GPU eau
-identique à la quatrième décimale —, mais l'échantillonnage du champ lointain non : même part sous
-Nyquist, **pire écart 8,243 m contre 2,589** ; [mesure](validation/RASANT-S247.md). **Mis en
-images S248** : la dégradation n'est pas répartie mais concentrée dans une **bande étroite à
-l'horizon**, et sur toute l'eau visible le pire écart monte à **1 228,8 m** à la pose rasante ;
-[images](validation/IMAGES-S248.md). Restent l'interaction manuelle représentative et la seconde
-cible (B7).
-**Revue perceptive ouverte S254** : l'utilisateur supervise les rendus. Il fournit les références
-réelles, et ses verdicts sont consignés selon [REVUE-VISUELLE](validation/REVUE-VISUELLE.md).
-**S256 : premier verdict, « la mer est trop lisse »**, confirmé par mesure (`mss` de B 0,0075
-contre 0,044 observés). La queue du même spectre est rendue en pentes par pixel (ADR-155) : `mss`
-0,0195, GPU eau 1,82 ms à 1280×720 (+0,38 ms), réceptions B/W inchangées au bit.
-[Réception](validation/QUEUE-SPECTRALE-S256.md). Rugosité encore à 52 % de l'observé (A287).
-**S257 : verdict R2, « un grand lac soumis au vent »**, classé par construction : mer de vent seule,
-sans houle longue. **S259 : mer multimodale construite** (ADR-156) : houle longue de 225 m et mer de
-vent, étalement `cos^2s` de Mitsuyasu, directions indépendantes du rang. Le spectre est identique au
-bit à chaque système, le GPU s'accorde au cœur à 0,379 mm, pour +0,03 à 0,07 ms. Variante déclarée
-`--houle`, scène par défaut inchangée au bit ; [réception](validation/MER-MULTIMODALE-S259.md).
-**S260 : verdict R3 avec deux références** (« trop de petites bosses, pas assez de mini pics »). La
-mesure confirme des pentes gaussiennes. Remède choisi par le calcul : **queue d'équilibre en `f⁻⁴` +
-vagues pointues de Lagrange** (ADR-157), sans ajustement : `mss` 0,0495, pointe des pentes dans les
-incertitudes de Cox–Munk. Accord GPU/CPU ; GPU eau 2,15 ms à 1280×720, dépassement qualifiant
-l'implémentation ; écart au jeu 0,365 m (A288). [Réception](validation/VAGUES-POINTUES-S260.md).
-**S261 : verdict R4.** L'utilisateur demande le ciel et la couleur de sa photo : fait en habillage
-sélectionnable `--ciel-clair`, brume au bit. Il juge la mer « trop rugueuse, lisse entre les pics ».
-Mesuré, puis corrigé par un ajustement déclaré à Cox–Munk (ADR-158) : coupure 28 fp, modulation par
-la bande, `mss` 0,0435. Cox–Munk borne la modulation. GPU eau 2,24–2,26 ms ;
-[réception](validation/RUGOSITE-S261.md). R5 est en attente de verdict.
-**S262 : défauts réparés avant le visuel**, à la demande de l'utilisateur
-([preuve](validation/DEFAUTS-S262.md)) :
-- **horizon** : grille jusqu'à l'horizon géométrique sous le ciel clair ;
-- **coût** : précalculs et travail dupliqué supprimés, GPU eau 1,54–1,60 ms en 960×540 et 1,98–2,01 ms
-  en 1280×720 (avant 2,28 ms), image changée d'un arrondi seulement ;
-- **A288 close** : requête de jeu CWM à 0,30 mm de l'image, contre 0,365 m (ADR-159).
-
-**S263 : verdict R5**, « trop rugueuse, vent inconnu ». La rugosité était celle de Cox–Munk à 8,4 m/s :
-**le vent devient un paramètre de scène** (ADR-160), avec la mer de vent de Pierson–Moskowitz et une
-queue coupée à Cox–Munk au même vent, conforme à 3, 5 et 8,37 m/s. Scènes sans vent au bit ;
-[réception](validation/VENT-S263.md). R6 a reçu en S265 un verdict sur les zones entre les pics, sans choix de vent.
-**S265 : reflets filtrés en variante** `--reflets-filtres` (ADR-161), covariance manquante de la
-queue intégrée à l'éclairage. Contrôle CPU/GPU reçu, géométrie inchangée, témoin R6 au bit ;
-[preuve](validation/REFLETS-S265.md). **R7 accepté S266** dans la vue présentée. Approximation gaussienne,
-quadrature 3×3 non convergée partout. **S266 : sommes suffixes et boucles fixes** (ADR-163),
-image à un niveau RGB près, gain GPU **10–17 %**, **2,24–2,26 ms** (1280×720, 5 m/s),
-budget toujours non tenu ; [preuve](validation/CIEL-CACHE-S266.md). Cache de ciel ADR-162 rejeté.
-Variante `--reflets-filtres` optimisée ; scène historique par défaut conservée.
-**S267 : cuisson des bandes du sillage optimisée par défaut**, huit accumulateurs explicites,
-identité de 3,51 millions de flottants et sept images au bit. Cuisson **0,574–0,585 ms** contre
-1,064–1,086 ; GPU eau médian **1,74 ms** (−22 à −23 %), 1280×720 sur la même scène.
-[Réception](validation/CUISSON-SILLAGE-S267.md). Pointe 2,962 ms au premier passage,
-CPU médian ~4,1 ms : le budget global et la borne par image restent non reçus.
-Cadence inchangée, aucune interpolation temporelle ; prochaine capacité : bords ouverts J2.
-
-Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
-mode par un hôte autoritaire reste à trancher avec lui (A271).
-
-*Bancs qui tranchent à ce jalon* : **B1** (nombre de composantes et coût de B, dès qu'un LOD
-existe dans l'hôte) ; **B2** partiel (représentation de W, dès que le coût B+W par image est
-mesuré sur la scène) ; **B7** partiel (budget sur la machine locale, pas encore la cible).
-*Cas* : C02, C07, C18, branche W de C19.
+Travaux nécessaires faits : A251 et composition (S214), A254 (S223), cadence complète (S225),
+allocations (S240), angles rasants mesurés et mis en images (S247, S248).
 
 ### J2 — Domaines volumiques bornés, comme cas de construction du δ général
 
 *Livre* : un ou plusieurs domaines δ **pris dans le système** — interfaces `Volume`/`Caps`
-(ADR-007), ordonnanceur et dégradation (ADR-012, I-05), création et destruction gratuites
-(I-12), éponge vers B+W (ADR-005) — sur des cas bornés : cavité et gerbe d'impact, proche-coque.
-Un domaine borné est une **étape** du δ général, jamais un produit à part (ADR-127 D3).
+(ADR-007), ordonnanceur et dégradation (ADR-012, I-05), création et destruction gratuites (I-12),
+éponge vers B+W (ADR-005) — sur des cas bornés : cavité et gerbe d'impact, proche-coque. Un
+domaine borné est une **étape** du δ général (ADR-127 D3).
 
-*État au 2026-09-16* : candidat MAC x-z en bibliothèque (S199), sans allocation dans le pas et
-à refus atomiques (S200), coût du pas mesuré (S202). **S230 : arrêt coopératif atomique et
-temps restant explicite**, reprise reçue ; [budget δ](validation/BUDGET-DELTA-S230.md).
-I-05 complet non reçu : retards réels observés, admission/marges encore absentes.
-Non admissible B3. **Sur le chemin** : A244 /
-S200-1 (anciennes API temps f32, respect temporel I-05). **Pression f32 reçue S231** sur les
-domaines éprouvés, résidu réel contrôlé, stockage réduit sans gain de vitesse reçu ;
-[preuve](validation/PRESSION-F32-S231.md). **S232 : débit ouvert reçu** sur trois fonds lisses,
-ordres1,947/1,957/1,966 ; triangles fluides perdus corrigés. L'ancien≈0,90 mesurait une somme
-sans ouvertures ; [preuve et limites](validation/FLUX-COUPES-S232.md).
-**S233 : hauteur évolutive linéarisée**, consommée par pression/flux du pas suivant ; durée
-entière et compensation f32, onde stationnaire reçue, abandon atomique hauteur comprise.
-[Preuve](validation/SURFACE-LINEARISEE-S233.md), ADR-141.
-**S237 (2026-09-15) : surface géométriquement mobile** — fonction hauteur, Dirichlet par fluide
-fantôme (opérateur symétrique au bit), mailles qui entrent et sortent du fluide, advection
-quadratique, pas atomique. Reçue contre l'**onde stationnaire d'amplitude finie** du véhicule HOS
-d'ordre 3 : à 10 cm (`ka = 0,16`), profil **0,23 %** et harmonique `2k` à **0,43 %** à 128 colonnes,
-décroissants en raffinant ; le mode linéaire n'en produit que 10⁻⁵.
-[Preuve](validation/SURFACE-MOBILE-S237.md). **S238 : la pression f32 s'arrête à sa précision
-représentable** (ADR-143) — erreur inverse sous la borne d'arrondi de la ligne ou état revenu au bit, pas
-reçu seulement à la divergence de S199 ; 5 cm **reçu à 128 colonnes** (0,25 % / 0,71 %), vitesse à
-5,5·10⁻⁸ de la solution f64 ; [preuve](validation/PRESSION-PLANCHER-S238.md).
-**S239 : la tolérance physique de S199 devient une condition d'acceptation** (ADR-144), sur les lignes
-**franches** — sans fantôme de surface. Tenue jusqu'à 8 192 mailles pour **une itération de plus**
-(348 contre 347, divergence 1,02·10⁻⁵ → 5,84·10⁻⁶) ; **refusée explicitement à 32 768 mailles**, où le
-plancher d'ADR-143 arrête le solveur à 1,34·10⁻⁵ et le pas est déclaré dégradé. Réception S237/S238
-conservée pour +0,9 % de coût médian ; [preuve](validation/TOLERANCE-PRESSION-S239.md). Restent :
-surface non graphe (déferlement), mouillage du fond, bords ouverts, plancher des lignes à fantôme
-(A274), grandes tailles en f32 (**A275 fermée S245** : la multigrille en repli fait passer 32 768 mailles de refusé à reçu, ADR-147), cavité et couplage de
-l'écart à B+W. **S241 : l'ordre des obstacles du passage à la 3D est renversé** — à 2 048 mailles
-δ seul coûte 5,5125 ms par image contre les 2 ms qu'ADR-125 donne à toute l'eau, et ≈ 296 ms par
-image à 8 192 mailles ; le **coût** passe donc devant la précision (A276 avant A275), et aucune
-technique de coût n'a encore été tentée sur δ (ADR-131).
-[Confrontation](COMPARABLES-EXTERNES.md) §3. **S244 : la carte du coût est faite** — écritures
-disjointes 67 à 73 % du pas, réductions 12-13 %, itérations doublant par raffinement ; **286,2 ms
-par pas à 32 768 mailles**. Le parallélisme est fermé pour cette boucle (125 µs par fil contre
-21,7 de pass) : **la multigrille est le seul levier dont le gain croît avec la taille** ;
-[carte](validation/COUT-DELTA-S244.md). **S245 : elle est construite** — elle ne gagne pas de
-vitesse, un cycle coûtant cinq produits fins par itération, mais elle **ferme A275** en précision et
-est branchée en repli ; [mesure](validation/MULTIGRILLE-S245.md). Le coût reste entier. **S246 : la
-prolongation bilinéaire n'apporte rien et est annulée ; l'amortissement du lisseur était faux** — `2/3`
-donné comme dérivé est l'optimum à une dimension, `4/5` est celui à deux — et le repli passe de 1 006
-à 828 ms ; [mesure](validation/PROLONGATION-S246.md). Le plafond du taux reste ouvert (A281). **S252 : ces comptes et coûts multigrille étaient faux** —
-le gradient conjugué préconditionné avait un β fautif (A285). Corrigée, la multigrille converge en 6 à 8
-itérations et bat le gradient nu dès 512 mailles (2,9 fois à 32 768 mailles, 137 contre 392 ms) ; le
-pas à 32 768 mailles est reçu par l'affinage de divergence d'ADR-151. **S274 : le mode mobile a sa
-multigrille** (ADR-167) — pas couplé 280 → 49 ms à 16 384 mailles, 1 145 → 18 itérations, mêmes
-réceptions ; ≈ 24 fois le budget par pas ([mesure](validation/COUT-MOBILE-S274.md)). L'ordre d'ADR-147 est à reprendre ;
-[re-mesure](validation/MULTIGRILLE-BETA-S252.md). Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
+*État au 2026-09-19* — **reçu en 2D ; la 3D est la porte B** ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)).
+Tranche MAC x-z : pas sans allocation et refus atomiques (S200), arrêt coopératif (S230), pression
+f32 à sa précision représentable et tolérance physique en condition d'acceptation (S231, S238,
+S239 ; ADR-143, 144), faces coupées (S232), multigrille (S245, S252, S274 ; ADR-147, 151, 167).
+**Surface mobile** reçue contre l'onde stationnaire HOS d'ordre 3 (S237) et **couplée** au fond
+B/W (S250–S254, ADR-149 à 154) : à 128 colonnes, 5 cm à 0,162 % / 0,34 %, 10 cm à 0,213 % /
+0,53 %. Frontières : relaxation de hauteur, absorption, bandes ouvertes (S268–S270, ADR-164, 165) ;
+houle progressive (S271–S274, ADR-166), précision chiffrée à l'usage, marge ≈ 5 pour la mer J1.
+Rendu : bande rejouée puis en direct dans l'afficheur (S275, S276, ADR-168, 169). Coût du pas
+couplé : 8,27 ms à 6 656 mailles (S291), sur un chemin qu'ADR-175 retire de la production.
+Preuves : [SURFACE-COUPLEE-S253](validation/SURFACE-COUPLEE-S253.md),
+[HOULE-USAGE-S274](validation/HOULE-USAGE-S274.md), [PAS-DECOMPOSE-S291](validation/PAS-DECOMPOSE-S291.md).
 
-**S250 : premier raccordement volumique B/W→δ** consommé par le pas MAC à surface
-imposée : -S continu après somme, advection croisée, éponge quadratique, budget atomique
-et zéro allocation. Vingt pas reçus à 16×8 ; [preuve](validation/RACCORDEMENT-DELTA-S250.md), ADR-149.
-**S251 : démarrage plat reçu** — δ=0, v=0, B/W réels, 16×8 et 32×16, contre une projection
-f64 indépendante (vitesse ≤2,2·10⁻⁶ relatif), par un affinage unique de divergence au
-plancher (ADR-150) ; vingt pas, reprise au bit, zéro allocation. Coût ×40 à 32×16 attribué
-en S252 au gradient conjugué multigrille fautif (A285) : 2,53 ms de médiane une fois corrigé ;
-[preuve](validation/DEMARRAGE-PLAT-S251.md).
-**S253 : surface mobile couplée reçue** — `step_perturbation_mobile` (ADR-152) : géométrie totale,
-fantômes corrigés de la pression du fond, bande cinématique ; affinage au plancher (ADR-153). Un
-domaine né à zéro sous un fond linéaire reconstruit la part non linéaire de HOS M=3. À 128
-colonnes : 5 cm 0,162 % / 0,34 %, 10 cm 0,213 % / 0,53 %, mieux que le solveur total ; coût
-comparable (265–277 ms). [Preuve](validation/SURFACE-COUPLEE-S253.md). Restent le prolongement
-de B réel au-dessus du plan moyen (A286), les bords ouverts, les frontières du total, le
-raccordement au rendu et B4 global. **S275 : premier raccordement au rendu** (ADR-168) — bande
-δ couplée rejouée dans `viewer/` sous houle à crêtes longues, pas d'image à 0,25 mm rms du pas
-de 4 ms hors éponge ; revue R10 demandée ([protocole](validation/DELTA-VISIBLE-S275.md)).
-**S276 : δ en direct** — un pas par image dans la boucle de l'afficheur, 40 images/s à 6 656
-mailles (21,7 ms), identique au bit au rejeu, zéro allocation ; échantillonnage du fond par
-grille ×6,4 au bit, départ depuis la pression publiée (ADR-169) ; ≈ 11 fois le budget
-([mesure](validation/COUT-DIRECT-S276.md)).
-**S254 : le fond B de production se prolonge au-dessus du plan moyen** (ADR-154 : vitesse
-horizontale constante, `W` par continuité, `P` de Taylor d'ordre un). Il est identique au bit
-au-dessous et reçu contre l'oracle S253 : à 128 colonnes, 0,168 % / 0,58 % à 5 cm et 0,244 % /
-0,66 % à 10 cm, décroissants. Le pas couplé le consomme (50 pas, faces des crêtes comprises).
-[Preuve](validation/PROLONGEMENT-FOND-S254.md).
-**S268 : hauteur perturbative amortie dans l'éponge du pas mobile** (ADR-164), après transport,
-fond analytique intact et intérieur au bit. Exponentielle locale reçue, 20 pas couplés et
-607 expirations/reprises sans allocation ; [preuve](validation/RELAXATION-SURFACE-S268.md).
-**S269 : effet du bord absorbant reçu sur un paquet sortant**, 0,14–0,16 % par
-différence à deux domaines longs ; mesure brute refusée, fenêtres 14–36 s et fond nul
-([preuve](validation/REFLEXION-PAQUET-S269.md)). Restent les couches W au-dessus du plan
-moyen et les frontières du total. **S270 : bande du fond ouverte aux frontières**
-(ADR-165), courant et élévation uniformes reçus aux deux mailles ; le défaut de
-hauteur artificielle est corrigé, 638 expirations/reprises sans allocation
-([preuve](validation/FOND-TRAVERSANT-S270.md)). **S271 : démarrage progressif contrôlé**, erreur cinématique
-initiale 0,58 % à dx=0,03125, décroissante, pas réel cohérent à petit dt
-([preuve](validation/HOULE-PROGRESSIVE-S271.md)). La houle progressive sur durée
-utile **refusée S272** : écart de résidu 8,68 % sur 2 s à dx=0,03125,
-contre oracle modal indépendant ([preuve](validation/RESIDU-TEMPOREL-S272.md)).
-**S273 : bande du fond en quadrature linéaire** (ADR-166), flux à 0,016 % au lieu de
-1,60 % ; résidu brut 5,88 %, toujours refusé, mais la part d'ordre deux extrapolée en
-amplitude converge (7,74 / 2,92 / 1,77 %) et l'écart restant est la troncature de
-l'oracle, indépendante de la maille ([preuve](validation/BANDE-LINEAIRE-S273.md)).
-**S274 : précision rapportée à l'usage** — écart brut 5,8 µm rms sur une vague de 1 cm,
-dérive de Stokes que l'oracle n'a pas ; coefficient d'ordre deux 0,88–1,16 %, budget
-d'ADR-120 non démontré. Suffisant pour la mer J1 (marge ≈ 5, chiffrée, pas vue) ; la
-réception pour les mers cambrées est différée avec déclencheur. Besoins découverts :
-cohérence de phase δ/B (A289), rendu de δ (liste 8.7) ([usage](validation/HOULE-USAGE-S274.md)). La fermeture extérieure de la perturbation reste réfléchissante ;
-ces reçus bornés ne valent pas frontière transparente universelle.
+*Manque* : la 3D (ADR-175 §4) ; I-05 complet et admission (A244) ; cavité et gerbe (B10, seconde
+représentation, ADR-175 D5) ; cohérence de phase δ/B (A289) ; plancher des lignes à fantôme
+(A274) ; W au-dessus du plan moyen (A286) ; frontières générales du total.
 
-*Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
-**B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand
-plusieurs blocs existent ; **B10** (cavité d'entrée) avec le premier domaine d'impact.
-*Cas* : C01, C03, C04, C05, C06, C08, C09, C20, C22, C23.
+*Bancs* : **B3** (famille de δ), **B4** (volets restants), **B5** (blocs épars), **B10** (cavité
+d'entrée). *Cas* : C01, C03, C04, C05, C06, C08, C09, C20, C22, C23.
 
 ### V-noyau — ouvert au plus tard avec J2
 
@@ -309,82 +144,21 @@ géométries et tailles supplémentaires. Cuisson réelle et budget encore à re
 substitutif et sa restauration depuis graine (ADR-001 §3.3, ADR-013, I-17), référentiel accéléré,
 aération et bulles, écume, vue sous-marine.
 
-*État au 2026-09-18* : véhicules d'essai Saint-Venant 1D à paroi mobile et corps flottant simple
-(S21–S58), qui ne sont pas le système ; rien dans le candidat δ. **L'orchestrateur des régimes est
-ouvert et sa première pièce est reçue (S278)** : `scheduler.rs` décide quels domaines vivent et
-avec quel budget, éprouvé sur cinq domaines qui demandent le double du profil
-([ORDONNANCEUR-S278](validation/ORDONNANCEUR-S278.md), ADR-170). **S279 l'a branché sur la bande δ de
-l'afficheur** : elle s'éteint et se rallume toute seule aux bons instants (ADR-171,
-[ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md)). **S280 lève l'exclusion absorbante** : l'estimation
-est une médiane qui sait oublier, et la bande survit au budget qui la tuait
-([COUT-ROBUSTE-S280](validation/COUT-ROBUSTE-S280.md)). **S282, 2026-09-19 : mesures fiabilisées
-dans le chemin image** — naissance, pause, saut et refus ne dupliquent plus le dernier coût ;
-deux régressions reproduites puis corrigées dans `viewer/src/delta.rs`.
-**S283, 2026-09-19 : premier rétrécissement consommé par l'afficheur**, manuel et sur fond plat,
-256→128 m à maille inchangée, transfert vers réserve sans allocation. Garde de hauteur avant
-publication : 3 mm ; cas précoce admis, cas à 1,024 s refusé (33,447 mm observés).
-Pas médian 25,55→12,38 ms sur le diagnostic forcé ; transfert + garde 3,03 ms.
-Les pentes et la suite temporelle ne sont pas reçues (A290), ni I-05 ou I-12 globalement.
-[Réception et limites](validation/RETRECISSEMENT-S283.md). Reste la famine : la réduction
-automatique des domaines non focaux, l'agrandissement, le déplacement
-et le régime substitutif ne sont pas construits ; les seuils attendent le banc **B8**.
-**S284, 2026-09-19 : préparation progressive consommée** (commande M), correction nodale visée
-1,5 mm par pas, garde 3 mm inchangé. La demande à 1,024 s permute à 1,792 s ; zéro allocation
-sur 321 images. **Fidélité temporelle non reçue** : écart central maximal 66,994 mm au témoin
-large jusqu'à 5,120 s. Coût complet médian 12,39 ms, p99 observé 42,03 ms pendant la transition.
-**S285 : attribution sur trois trajectoires appariées** — préparation seule : maximum central
-45,517 mm ; réduction après préparation : écart supplémentaire maximal 25,391 mm. À la
-permutation, 8,118 mm sont déjà dus à la préparation. La porte A reste partielle ; A290 et
-I-05 ouverts. [Mesure S284](validation/PREPARATION-RETRECISSEMENT-S284.md),
-[attribution et limites](validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
+*État au 2026-09-19* : véhicules d'essai 1D à paroi mobile et corps flottant statique (S21–S58),
+hors système. **L'ordonnanceur est ouvert** (porte A) : `scheduler.rs` décide quels domaines
+vivent et avec quel budget (S278, ADR-170), branché sur la bande δ (S279, ADR-171) ; coût estimé
+par la médiane des pas payés et oublié selon le temps (S280, S282, S286) ; rétrécissement manuel
+puis préparé (S283–S285), fidélité temporelle non reçue (A290). Cadences lentes mesurées, non
+activées (S286). Preuves : [ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md),
+[ATTRIBUTION-RETRECISSEMENT-S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
 
-**S286, 2026-09-19 : oubli des coûts corrigé dans le chemin image**, selon le temps simulé
-non financé ; les appels répétés pendant une pause ne changent plus l'estimation. Cadences
-32/48 ms éprouvées mais **non activées** : onde 0,6 m à 4,445/8,916 mm du témoin 16 ms ;
-moyennes 13,15/9,11 ms par image et pics de pas >32 ms. La cadence seule ne reçoit ni la
-fidélité ni I-05 ; priorité au coût par pas avant 3D. [Preuve](validation/CADENCE-DELTA-S286.md).
-**S287 : parcours mémoire CPU éprouvé puis retiré**, gain complet non robuste ; empreintes
-des six trajectoires identiques ([mesures](validation/PASSES-PRESSION-S287.md)).
-**S288 : opérateur mobile et lissage GPU construits**, contrat ADR-172, export natif reçu au
-bit et 30 cas GPU contre CPU (erreur relative max 1,686·10⁻⁷, repos exact). À 128×52,
-32 lissages : 1,10–1,24 ms complets contre 2,52–2,84 ms CPU scalaire.
-[Réception et limites](validation/PRESSION-GPU-S288.md).
-**S289, 2026-09-19 : le pas réel consomme une pression calculée sur GPU** (ADR-173). Cycle de
-gradient conjugué **résident** — opérateur, réductions, `α` et `β` sur la carte, aucun retour
-CPU entre itérations ; le candidat ne fournit **qu'un départ** et les portes ADR-143/144 ne
-bougent pas. Médiane du pas 9,2236 → 6,6220 ms à 6 656 mailles (itérations du cœur 427 → 19)
-et 44,8697 → 30,2744 à 32 768 (353 → 61) ; 60/60 propositions retenues, 0 refus, 0 pas dégradé,
-dérive de surface ≤ 7,63·10⁻⁶ m. **Non reçu** : budget 2 ms (×3,3), activation dans la boucle
-d'image, garantie sur le pic, réglage automatique de la longueur du cycle, multiplateforme.
-Les ≈ 7 allocations par itération sont celles de wgpu : **publiées et permises** par ADR-145 §2
-(correction S290 d'une lecture fausse), constantes à longueur de cycle fixée ; ce qui bloque la
-boucle d'image est le **temps** d'enregistrement — divisé en S290, voir ci-dessous. Le poste dominant restant est **l'enregistrement des
-commandes** : 27 % du temps d'appel est du calcul utile.
-[Réception et limites](validation/PRESSION-RESIDENTE-S289.md).
-**S290, 2026-09-19 : le coût d'appel du cycle divisé, au bit.** Le poste dominant était
-l'**enregistrement des commandes** — 1,86 µs et une allocation par `dispatch_workgroups`, mesurés,
-indépendants de la taille. Trois dispatchs par itération au lieu de sept (chaque groupe refait
-son scalaire lui-même) et soumission par tranches : appel 3,9748 → 1,8228 ms à 6 656 mailles,
-**pas réel 9,9248 → 4,6315 ms (×2,14)**, et pire pas 26,3234 → 11,0477 avec un cycle long.
-72 combinaisons reçues **au bit**. **Non reçu** : budget 2 ms (×2,3), boucle d'image, choix
-automatique du mode et de la longueur de cycle, arbitrage médiane/pic, multiplateforme. Le
-recalcul redondant a un **croisement en `groups²`**, déjà visible à 512 groupes (A293).
-[Réception et limites](validation/ENCODAGE-CYCLE-S290.md).
-**S291, 2026-09-19 : le pas décomposé étape par étape, puis allégé — au bit.** Dix-huit étapes
-mesurées à l'horloge réelle. Le plus gros poste hors GPU était **du travail jeté** : un cycle
-multigrille appliqué avant une boucle qui ne tournait plus (0,8291 → 0,0121 ms). Avec la
-validation aplatie (0,4189 → 0,1031) et le diagnostic d'erreur inverse rendu optionnel (0,3379),
-le pas mobile passe de 5,3443 à 3,5371 ms à 6 656 mailles. **Le crochet est porté sur le pas
-couplé**, celui que la bande δ emprunte réellement — l'affirmation de S289 était imprécise :
-**médiane 17,9281 → 8,2729 ms (×2,17)**, pire pas 28,2240 → 16,1106, 200/200 propositions
-retenues. Les **six empreintes de S287 sont rendues à l'identique**. **Non reçu** : budget 2 ms
-(×4,1), tenue du pire pas, longueur de cycle non calibrée, multiplateforme. **Défaut ouvert
-(A294)** : un pas à 467 ms sur carte **refroidie**, reproduit, qu'un préchauffage ne corrige pas.
-Le sondage coûte +8 % : les chiffres de S289/S290, pris à horloge figée, sous-estiment d'autant.
-[Réception et limites](validation/PAS-DECOMPOSE-S291.md).
+*Manque* : plusieurs candidats réels, domaine qui se déplace et se redimensionne, dégradation
+automatique (ADR-012 §4), régime substitutif et son critère `0,35·Hs_local` jamais calibré —
+sur les domaines 3D de la porte B ; seuils sans banc B8 ; aucun corps rigide dans le système
+(porte D).
 
-*Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
-**B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.
+*Bancs* : **B6** (flottabilité), **B8** (seuils d'activation), **B9** (écume), **B11** (rendu
+sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.
 
 ### J4 — V et inondations complexes, articulées avec la représentation volumétrique
 
@@ -499,3 +273,6 @@ sur GPU par un hôte séparé, choix de l'utilisateur. ADR-131 (S213) : un dépa
 implémentation ; espace d'optimisation nommé ; 2 ms éprouvé sur la combinaison — clarification de
 l'utilisateur. *Les verdicts « incompatible » de S206 à S212 se lisent désormais comme portant sur
 les implémentations mesurées à leur date.*
+ADR-174 (S294) : machine de référence, temps de l'eau au service de l'objectif, v1 = porte D
+franchie, porte B avant la suite du coût en 2D — arbitrages de l'utilisateur. ADR-175 (S294) : δ
+en 3D, production résidente sur GPU à travail borné, référence CPU pour la réception.

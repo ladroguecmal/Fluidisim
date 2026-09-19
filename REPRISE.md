@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 14:59 +02:00
+Battement        : 2026-09-19 15:02 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
 Session en cours : S294 — consigner les arbitrages de l'utilisateur du 2026-09-19, décider l'architecture de δ en 3D, lever les verrous de pilotage
 Dernière session : S293 — audit global : le projet bloque sur l'ordre de ses travaux ; BILAN-GLOBAL-S293
