@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 10:56 +02:00
+JETON            : libre
+Battement        : 2026-09-19 10:57 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : S286 — cadence et coût de delta
-Dernière session : S285 — dérive attribuée par trois témoins ; préparation et évolution réduite toutes deux en cause
-Session suivante : A276, cadence δ découplée de l'image sous budget déclaré, précision contre 16 ms et coût des refus/vieillissement ; avant 3D/deuxième domaine. A290 différée à la réduction automatique. V, B2, bathymétrie et multiplateforme gardent leurs déclencheurs. V1 et verdict S277 ouverts.
-Maillons        : 1 — diagnostic reçu, aucune nouvelle capacité de jeu ; priorité suivante au coût A276
+Session en cours : —
+Dernière session : S286 — oubli temporel des coûts corrigé ; cadence 32/48 ms mesurée et refusée sur onde
+Session suivante : A276, réduire le coût par pas : confronter port GPU et passes CPU, décider l'architecture avant 3D/deuxième domaine. Cadence lente différée (fidélité et pics refusés), coût des échecs représentatifs ouvert. A290 revient avant réduction automatique. V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Maillons        : 0 — intégrité de l'estimation corrigée dans le chemin image, défaut reproduit puis reçu ; budget toujours ouvert
 
 ```
 

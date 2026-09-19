@@ -338,6 +338,12 @@ permutation, 8,118 mm sont déjà dus à la préparation. La porte A reste parti
 I-05 ouverts. [Mesure S284](validation/PREPARATION-RETRECISSEMENT-S284.md),
 [attribution et limites](validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
 
+**S286, 2026-09-19 : oubli des coûts corrigé dans le chemin image**, selon le temps simulé
+non financé ; les appels répétés pendant une pause ne changent plus l'estimation. Cadences
+32/48 ms éprouvées mais **non activées** : onde 0,6 m à 4,445/8,916 mm du témoin 16 ms ;
+moyennes 13,15/9,11 ms par image et pics de pas >32 ms. La cadence seule ne reçoit ni la
+fidélité ni I-05 ; priorité au coût par pas avant 3D. [Preuve](validation/CADENCE-DELTA-S286.md).
+
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.
 

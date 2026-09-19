@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S286 — en cours
+Session : S286 — terminée
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : continuer ; priorité A276 après diagnostic spatial borné.
 Objectif : découpler expérimentalement le pas δ et la cadence image, et supprimer la dépendance
@@ -73,7 +73,7 @@ au nombre d'appels dans le vieillissement des coûts avant cette intégration.
   coût complet et refus publiés ; ne pas activer par défaut une cadence non reçue.
 - [x] **P4** — tests et réception, intégration expérimentale seulement si critères tenus,
   diagnostic explicite sinon ; découper avant quinze minutes.
-- [ ] **P5** — rituel §6 : preuves, journal, file/feuille/index, jeton libre.
+- [x] **P5** — rituel §6 : preuves, journal, file/feuille/index, jeton libre.
 
 ### Notes de reprise
 

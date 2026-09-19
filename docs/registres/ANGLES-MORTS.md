@@ -3813,3 +3813,12 @@ Ces maxima ne sont pas additifs. Préparation arrêtée au même pas, champs ide
 avant transfert. Le garde instantané ne reçoit pas la trajectoire préparatoire. Diagnostic
 local terminé ; correction différée à la réduction automatique, après priorité coût A276.
 [Attribution et limites](../validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
+
+**Suivi A276 — S286, 2026-09-19 (sévérité conservée).** L'oubli dépend désormais du temps
+simulé non financé, pas du nombre d'appels ; défaut reproduit puis corrigé dans Layer.
+La cadence 32/48 ms réduit la moyenne sur l'onde à 13,15/9,11 ms mais laisse des pas >32 ms,
+et 4,445/8,916 mm de différence même aux instants calculés. Pas d'activation interactive.
+Coût d'échecs représentatifs toujours non mesuré (aucun refus pendant ce banc) ; seuils
+de pente et réception visuelle ouverts. Prochain levier : coût par pas, candidat GPU face
+aux passes CPU ; cadence à reprendre avec intégration temporelle reçue ou solveur moins cher.
+[Protocole et limites](../validation/CADENCE-DELTA-S286.md).

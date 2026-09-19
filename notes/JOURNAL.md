@@ -14372,3 +14372,32 @@ après diagnostic borné et viser une capacité consommée.
 **Rituel :** file active entièrement relue, état spatial remplacé, index et feuille de route
 actualisés, suivi A290, invariants I-04/I-05/I-06/I-12 conservés. Dépôt principal seul, aucune
 copie à fermer. Jeton libre et plan terminé.
+
+## S286 — 2026-09-19 — cadence δ et intégrité du coût
+
+**Entrée :** continuer, priorité A276 après attribution spatiale. **Capacité reçue :** la
+pause et les appels répétés ne détruisent plus les mesures de coût ; `Layer::arbitrate` vieillit
+selon le temps simulé non financé. Régression rouge (8→7 entrées sans temps écoulé), puis verte,
+avec retour d'horloge et reprise. Correction consommée dans le chemin image : maillons = 0.
+
+**Cadence construite au banc** : Live 16/32/48 ms, maintien du profil entre pas, vrais temps et
+comptes contrôlés. Sur onde 0,6 m, 32/48 ms coûtent 13,15/9,11 ms moyens par image, mais les
+pics calculés dépassent 32 ms et les erreurs synchronisées atteignent 4,445/8,916 mm.
+**Refus de généralisation**, afficheur à 16 ms. Deux scénarios, zéro allocation, secteur aux
+bornes. 36 tests viewer réussis, un ignoré ; cœur inchangé, reçu S284 conservé.
+[Mesures et protocole](../docs/validation/CADENCE-DELTA-S286.md).
+
+**Limites :** référence 16 ms, hauteur/pente échantillonnées, aucun rendu jugé, pas de borne
+matérielle de coût ; refus de solveur représentatif absent donc coût des échecs non qualifié.
+Le banc expose sa durée si un refus survient, sans la confondre avec un pas réussi. Ni I-05
+ni fidélité des cadences lentes reçus. Aucun ADR modifié, aucun périmètre réduit.
+
+**Suite recommandée :** coût par pas, candidat GPU confronté aux passes CPU, décision
+architecturale puis construction reçue avant 3D/deuxième domaine. Le budget ne se résout pas
+par des images vides entre des pics. Cadence lente à reprendre quand son intégration temporelle
+ou son coût par pas est reçu. A290 revient avant réduction automatique ; V, B2, bathymétrie,
+multiplateforme, proposition V1 et verdict S277 conservent leurs déclencheurs.
+
+**Rituel :** file active entièrement relue et états périmés remplacés, feuille de route/index,
+A276 et invariants I-04/I-05/I-06/I-12 vérifiés. Une seule copie principale, rien à fermer.
+Plan terminé et jeton libre. Aucun gain de fidélité ou de cadence interactive revendiqué.
