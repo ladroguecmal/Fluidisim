@@ -73,9 +73,9 @@ Le coût 2D est différé selon S293 ; ce lot prépare les entrées réelles de 
 ### Plan
 
 - [x] **P1** — amorce, lecture ciblée et plan seuls ; copie unique, master propre.
-- [>] **P2** — échantillonneur B réel sur MAC 3D, stockage réservé et publication atomique ;
+- [x] **P2** — échantillonneur B réel sur MAC 3D, stockage réservé et publication atomique ;
   tests au ponctuel, erreurs et allocations.
-- [ ] **P3** — comparer houle progressive et éponge 3D au témoin 2D, transposition x/y ;
+- [>] **P3** — comparer houle progressive et éponge 3D au témoin 2D, transposition x/y ;
   fixtures et critères existants conservés, limites publiées.
 - [ ] **P4** — consommer B réel dans un aperçu 3D calculé, vérifier les images et la suite.
 - [ ] **P5** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.

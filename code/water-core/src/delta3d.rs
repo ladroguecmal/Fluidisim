@@ -657,3 +657,6 @@ mod mobile;
 #[path = "delta3d_coupling.rs"]
 mod coupling;
 pub use coupling::{BackgroundFaces3, Sponge3};
+#[path = "delta3d_background.rs"]
+mod background_grid;
+pub use background_grid::BackgroundGrid3;

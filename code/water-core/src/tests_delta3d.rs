@@ -632,3 +632,42 @@ fn coupled_transverse_invariance_and_rotation_s297() {
     assert!(transverse<2e-6 && rotated<2e-6);
     assert!(a.eta.iter().any(|h|(*h-2.).abs()>1e-4));
 }
+
+#[test]
+fn real_background_grid_matches_mac_points_and_preserves_publication_s298() {
+    use crate::{background::{Background,SeaState,DifferentialError},SimTime,WorldPos};
+    let d=Domain3{nx:5,ny:3,nz:9,dx:0.25};
+    let origin=[-1.,0.75,-1.5];
+    let mut arena=Arena{stats:AllocStats::default(),sealed:false};
+    let mut host=HostServices{alloc:&mut arena,jobs:&Jobs,sink:&Jobs};
+    let sea=SeaState{hs:0.2,tp:2.,theta_turns:0.13,components:8,graine:298};
+    let b=Background::configure(&mut host,sea,WorldPos::from_units(0,0,0)).unwrap();
+    let bad=Background::configure(&mut host,SeaState{hs:f32::NAN,..sea},WorldPos::from_units(0,0,0)).unwrap();
+    let before=host.alloc.stats().persistent_bytes;
+    let mut grid=BackgroundGrid3::configure(&mut host,d,origin,1025.).unwrap();
+    let faces=(d.nx+1)*d.ny*d.nz+d.nx*(d.ny+1)*d.nz+d.nx*d.ny*(d.nz+1);
+    assert_eq!(host.alloc.stats().persistent_bytes-before,2*faces*core::mem::size_of::<BackgroundSample>());
+    assert!(grid.view().is_none());
+    host.alloc.seal();
+    for t in [0,987_654,9_876_543_210] {
+        grid.sample(&b,SimTime(t)).unwrap();
+        let bg=grid.view().unwrap();assert_eq!(bg.time,SimTime(t));assert_eq!(bg.gravity,b.gravity());
+        for (axis,field) in [bg.u,bg.v,bg.w].into_iter().enumerate() {
+            let dims=[d.nx+usize::from(axis==0),d.ny+usize::from(axis==1),d.nz+usize::from(axis==2)];
+            for k in 0..dims[2] {for j in 0..dims[1] {for i in 0..dims[0] {
+                let ijk=[i,j,k];let p=core::array::from_fn(|a|origin[a]+(ijk[a] as f32+if a==axis {0.} else {0.5})*d.dx);
+                assert_eq!(field[(k*dims[1]+j)*dims[0]+i],b.differential_local_extended(p,SimTime(t),1025.).unwrap());
+            }}}
+        }
+        let old=[bg.u.to_vec(),bg.v.to_vec(),bg.w.to_vec()];
+        assert_eq!(grid.sample(&bad,SimTime(t+1)),Err(DifferentialError::Background));
+        let bg=grid.view().unwrap();assert_eq!(bg.time,SimTime(t));
+        assert_eq!([bg.u,bg.v,bg.w],[old[0].as_slice(),old[1].as_slice(),old[2].as_slice()]);
+    }
+    let calls=host.alloc.stats().persistent_calls;
+    for (domain,point,rho) in [(Domain3{nx:0,..d},origin,1025.),(d,[4095.5,0.,0.],1025.),
+        (d,[0.,0.,f32::NAN],1025.),(d,origin,0.),(Domain3{nx:usize::MAX,..d},origin,1025.)] {
+        assert!(BackgroundGrid3::configure(&mut host,domain,point,rho).is_err());
+    }
+    assert_eq!(host.alloc.stats().persistent_calls,calls);
+}

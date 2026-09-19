@@ -765,3 +765,25 @@ fn coupled_3d_has_no_runtime_allocation_s297() {
     let (r,n)=measured(||v.step_perturbation_mobile(SimTime(0),1000,0,&bg,Sponge3::default(),&Jobs));
     assert_eq!(r.err(),Some(Error::Convergence));assert_eq!(n,0);
 }
+
+#[test]
+fn real_background_3d_sampling_and_step_allocate_nothing_s298() {
+    use water_core::{delta3d::{Domain3,Volume3,BackgroundGrid3,Sponge3},background::{Background,SeaState},SimTime,WorldPos};
+    let mut arena=Arena{stats:AllocStats::default(),sealed:false};
+    let mut host=HostServices{alloc:&mut arena,jobs:&Jobs,sink:&Jobs};
+    let d=Domain3{nx:8,ny:6,nz:18,dx:0.5};
+    let b=Background::configure(&mut host,SeaState{hs:0.04,tp:1.,theta_turns:0.13,components:8,graine:298},WorldPos::from_units(0,0,0)).unwrap();
+    let bad=Background::configure(&mut host,SeaState{hs:f32::NAN,tp:1.,theta_turns:0.,components:1,graine:0},WorldPos::from_units(0,0,0)).unwrap();
+    let mut v=Volume3::configure(&mut host,d,1025.,b.gravity()).unwrap();
+    let mut bg=BackgroundGrid3::configure(&mut host,d,[0.,0.,-8.],1025.).unwrap();
+    v.set_free_surface(&vec![8.;d.columns()],8.).unwrap();host.alloc.seal();
+    for n in 0..20 {
+        let time=SimTime(n*1000);
+        let (r,allocs)=measured(||bg.sample(&b,time));r.unwrap();assert_eq!(allocs,0);
+        let (r,allocs)=measured(||v.step_perturbation_mobile(time,1000,4000,&bg.view().unwrap(),Sponge3::default(),&Jobs));
+        r.unwrap();assert_eq!(allocs,0);
+    }
+    let (r,allocs)=measured(||bg.sample(&bad,SimTime(20_000)));assert!(r.is_err());assert_eq!(allocs,0);
+    let (r,allocs)=measured(||v.step_perturbation_mobile(SimTime(20_000),1000,4000,&bg.view().unwrap(),Sponge3::default(),&Jobs));
+    assert_eq!(r.err(),Some(Error::BackgroundContext));assert_eq!(allocs,0);
+}
