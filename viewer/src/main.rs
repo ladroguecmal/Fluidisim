@@ -66,6 +66,12 @@ struct App<'a> {
     fixed_step: Option<f64>,
     /// S276 : coût de δ en direct par image (échantillonnage + pas), relevé pendant la cadence.
     delta_ms: Vec<f64>,
+    /// S302 : le domaine δ 3D de la scène du critère 3, un pas par image sur la carte du rendu.
+    /// `None` hors `--delta3d`.
+    delta3d: Option<delta3d_scene::Live>,
+    /// Configuration de ce domaine, gardée pour l'attacher quand la carte existe.
+    delta3d_config: Option<delta3d_scene::Config>,
+    delta3d_active: bool,
     birth: f64,
     paused: bool,
     enabled: bool,
@@ -164,6 +170,26 @@ impl App<'_> {
             if let Some(live) = self.frame.delta.as_ref().and_then(|l| l.live.as_ref()) {
                 if self.delta_ms.len() < self.delta_ms.capacity() {
                     self.delta_ms.push(live.sampling_ms + live.step_ms);
+                }
+            }
+        }
+        // S302 : un pas du domaine δ 3D par image, sur la carte du rendu, avant que l'image ne lise
+        // la surface publiée. Rien ne revient au CPU ; les diagnostics arrivent en différé.
+        if let Some(live) = self.delta3d.as_mut() {
+            let background = self.frame.background;
+            if !self.paused {
+                if let Err(error) = live.advance(background) {
+                    self.fail(e, error);
+                    return;
+                }
+            }
+            self.frame.delta3d = Some(live.config.view(self.delta3d_active));
+            if self.frames % 120 == 0 {
+                if let Some(d) = live.last {
+                    println!(
+                        "DELTA3D pas={} age_diag={} degrade={} divergence_franche={:.3e} hors_bornes={} volume={:.4} m3",
+                        d.step, d.age, d.degraded(), d.divergence_plain, d.columns_outside, d.volume
+                    );
                 }
             }
         }
@@ -311,7 +337,7 @@ impl ApplicationHandler for App<'_> {
             }
         };
         let size = w.inner_size();
-        let g = match pollster::block_on(gpu::Gpu::new(
+        let mut g = match pollster::block_on(gpu::Gpu::new(
             &instance,
             Some(&surface),
             size.width,
@@ -337,6 +363,43 @@ impl ApplicationHandler for App<'_> {
             wgpu::PresentMode::AutoVsync
         };
         surface.configure(&g.device, &config);
+        // S302 : le domaine δ 3D naît sur **le device du rendu** : sa surface publiée devient un
+        // tampon que l'image lie directement (ADR-175 D7).
+        if let Some(config) = self.delta3d_config {
+            let info = g.adapter.get_info();
+            let step = match delta3d_step::Step3::on_device(
+                g.device.clone(),
+                g.queue.clone(),
+                &info,
+                self.frame.background,
+                config.domain,
+                config.origin,
+                delta3d_scene::RHO,
+                delta3d_scene::G,
+            ) {
+                Ok(s) => s,
+                Err(error) => {
+                    self.fail(e, error);
+                    return;
+                }
+            };
+            g.attach_delta3d(step.published_buffer());
+            let start = (self.seconds * 1e6) as u64;
+            match delta3d_scene::Live::new(step, config, start) {
+                Ok(live) => {
+                    println!(
+                        "DELTA3D scene domaine={}x{}x{} dx={} mailles={} cycles={} pas_us={} paquet_amplitude={} m",
+                        config.domain.nx, config.domain.ny, config.domain.nz, config.domain.dx,
+                        config.domain.cells(), config.cycles, config.step_us, config.packet.amplitude
+                    );
+                    self.delta3d = Some(live);
+                }
+                Err(error) => {
+                    self.fail(e, error);
+                    return;
+                }
+            }
+        }
         self.window = Some(w);
         self.surface = Some(surface);
         self.gpu = Some(g);
@@ -386,6 +449,14 @@ impl ApplicationHandler for App<'_> {
                                 KeyCode::KeyR => {
                                     self.birth = self.seconds;
                                     self.enabled = true;
+                                    // S302 : relance l'onde du domaine δ 3D depuis l'instant courant.
+                                    if let Some(live) = self.delta3d.as_mut() {
+                                        let start = (self.seconds * 1e6) as u64;
+                                        match live.inject(start) {
+                                            Ok(()) => println!("DELTA3D onde relancée à t={:.2} s", self.seconds),
+                                            Err(err) => eprintln!("{err}"),
+                                        }
+                                    }
                                 }
                                 KeyCode::KeyB => self.enabled = !self.enabled,
                                 // S275 : B seul, B+δ (4 ms), B+δ (pas d'image).
@@ -393,6 +464,14 @@ impl ApplicationHandler for App<'_> {
                                     if let Some(layer) = self.frame.delta.as_mut() {
                                         layer.mode = (layer.mode + 1) % layer.modes();
                                         println!("DELTA {}", layer.label());
+                                    }
+                                    // S302 : bascule de la couche δ 3D — B seul contre B + δ.
+                                    if self.delta3d.is_some() {
+                                        self.delta3d_active = !self.delta3d_active;
+                                        println!(
+                                            "DELTA3D couche {}",
+                                            if self.delta3d_active { "active (B + δ)" } else { "inactive (B seul)" }
+                                        );
                                     }
                                 }
                                 KeyCode::KeyN => {
@@ -1638,6 +1717,98 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// (ADR-124), jamais publiés. Ciel, soleil, couleur et brouillard restent de l'habillage de banc.
 /// S256 : `tag` = `r1` (S254, `captures/s254`, à reproduire avec `--no-tail`) ou `r2` (queue
 /// spectrale, `captures/s256`) — mêmes poses et âges.
+/// S302, ADR-175 §4.3 — **captures de la scène du critère 3** (ADR-124 : images locales de banc).
+///
+/// Le domaine δ 3D avance d'un pas par image sur la carte du rendu, et l'image est prise aux
+/// instants demandés, deux fois : **avec** la couche δ et **sans** (B seul, même instant, même
+/// pose). Ce sont ces paires que la revue compare. Aucune publication.
+fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config) -> Result<(), String> {
+    let dir = captures!("s302");
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    let (width, height) = (1280u32, 720u32);
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, width, height,
+        frame.profile.len(), scene::WAKE_CAPACITY))?;
+    frame.lod = true;
+    frame.cull = true;
+    frame.viewport = Some((width as f32 / height as f32, g.nx, g.ny));
+    let info = g.adapter.get_info();
+    let step = delta3d_step::Step3::on_device(
+        g.device.clone(), g.queue.clone(), &info, frame.background,
+        config.domain, config.origin, delta3d_scene::RHO, delta3d_scene::G,
+    )?;
+    g.attach_delta3d(step.published_buffer());
+    let mut live = delta3d_scene::Live::new(step, config, 0)?;
+    let poses: [(&str, Camera); 4] = [
+        ("reference", Camera::default()),
+        ("proche", Camera { eye: [0., -7., 4.], yaw: 0., pitch: -0.18 }),
+        ("rasante", grazing_camera()),
+        ("haute", Camera { eye: [0., -34., 22.], yaw: 0., pitch: -0.42 }),
+    ];
+    // Une vue plongeante a été essayée (œil à 34 m, tangage −1,05) : à cet angle le relief ne se
+    // lit pas, comme S275 l'avait déjà mesuré — rien vue d'en haut. Elle n'est pas conservée.
+    let instants: Vec<u64> = std::env::var("INSTANTS")
+        .ok()
+        .map(|v| v.split(',').filter_map(|x| x.parse().ok()).collect())
+        .unwrap_or_else(|| vec![0, 180, 360, 540]);
+    let dernier = *instants.last().unwrap_or(&0);
+    let background = frame.background;
+    for n in 0..=dernier {
+        if instants.contains(&n) {
+            let age = n as f64 * config.step_us as f64 * 1e-6;
+            for (nom, camera) in &poses {
+                for actif in [true, false] {
+                    frame.camera = Camera { eye: camera.eye, yaw: camera.yaw, pitch: camera.pitch };
+                    frame.delta3d = Some(config.view(actif));
+                    frame.update(age, age, false);
+                    g.upload(frame);
+                    let target = g.target();
+                    g.draw(&target.create_view(&Default::default()), false);
+                    let couche = if actif { "avec" } else { "sans" };
+                    let path = format!("{dir}/s302_{nom}_{couche}_{:.1}s.ppm", age);
+                    g.capture(&target, &path)?;
+                    let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+                    let entete = format!("P6\n{width} {height}\n255\n").len();
+                    let hash = bytes[entete..]
+                        .iter()
+                        .fold(0xcbf2_9ce4_8422_2325u64, |h, b| (h ^ *b as u64).wrapping_mul(0x100_0000_01b3));
+                    let c = &frame.camera;
+                    println!(
+                        "DELTA3D_CAPTURE image={path} {width}x{height} t={age:.2}s couche={couche} oeil=[{},{},{}] tangage={} empreinte=0x{hash:016x}",
+                        c.eye[0], c.eye[1], c.eye[2], c.pitch
+                    );
+                }
+            }
+            // Ce que la couche change, en pixels : la mesure que R10 avait déjà pour la bande 2D.
+            let (mut changes, mut fort) = (0u64, 0u64);
+            let lire = |nom: &str, couche: &str, age: f64| -> Result<Vec<u8>, String> {
+                std::fs::read(format!("{dir}/s302_{nom}_{couche}_{age:.1}s.ppm")).map_err(|e| e.to_string())
+            };
+            let (a, b) = (lire("reference", "avec", age)?, lire("reference", "sans", age)?);
+            for (x, y) in a.iter().zip(&b) {
+                if x != y {
+                    changes += 1;
+                    if x.abs_diff(*y) > 4 { fort += 1; }
+                }
+            }
+            let total = (width * height * 3) as u64;
+            println!(
+                "DELTA3D_CAPTURE t={age:.2}s pose=reference octets_changes={changes}/{total} ({:.2} %) dont_plus_de_4_niveaux={fort} ({:.2} %)",
+                100. * changes as f64 / total as f64, 100. * fort as f64 / total as f64
+            );
+        }
+        if n == dernier { break; }
+        live.advance(background)?;
+    }
+    if let Some(d) = live.last {
+        println!(
+            "DELTA3D_CAPTURE diagnostic_final pas={} age={} degrade={} divergence_franche={:.3e} hors_bornes={} volume={:.4}",
+            d.step, d.age, d.degraded(), d.divergence_plain, d.columns_outside, d.volume
+        );
+    }
+    Ok(())
+}
+
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
     // S262 : un dossier par revue ; un nouveau rendu n'écrase plus une revue envoyée.
     let dir = match tag { "r1" => captures!("s254"), "r2" => captures!("s256"), "r3" => captures!("s259"), "r4" => captures!("s260"),
@@ -2399,6 +2570,15 @@ fn run() -> Result<(), String> {
     let impacts = scene::scene_impacts(&scene, if multi { scene::IMPACTS.len() } else { 1 });
     // S275, ADR-168 : `--delta` — houle à crêtes longues à la place de B, bande δ rejouée.
     let delta_scene = args.iter().any(|a| a == "--delta");
+    // S302, ADR-175 §4.3 : `--delta3d` — scène du critère 3, un domaine δ 3D devant la caméra sur
+    // la mer étalée, un pas par image. Le temps de la scène avance alors d'un pas **fixe** par
+    // image, comme `--delta-direct` : le fond que δ consomme et celui que l'image montre sont au
+    // même instant.
+    let delta3d_scene_on = args.iter().any(|a| a == "--delta3d");
+    if delta3d_scene_on && delta_scene {
+        return Err("--delta3d et --delta s'excluent : deux couches δ à la fois".into());
+    }
+    let delta3d_config = delta3d_scene_on.then(delta3d_scene::Config::review);
     // S277 — `--delta-hs=<m>` / `--delta-tp=<s>` : la houle de la scène δ, pour voir l'onde se
     // déformer. Sans eux, la houle de S275 au bit. La cambrure commande (ONDE-INJECTEE-S277) :
     // 4 m / 8 s déforme l'onde de 28 %, 2 m / 8 s de 9 % seulement.
@@ -2502,6 +2682,11 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--verify") { frame.spectral = false; }
     if args.iter().any(|a| a == "--topologie") {
         return topologie_images(&mut frame);
+    }
+    if let Some(config) = delta3d_config {
+        if args.iter().any(|a| a == "--captures") {
+            return delta3d_captures(&mut frame, config);
+        }
     }
     if multi && args.iter().any(|a| a == "--revue") {
         return revue_images(&mut frame, "r1");
@@ -3030,9 +3215,16 @@ fn run() -> Result<(), String> {
         birth: 0.,
         paused: false,
         // S275 : la scène `--delta` s'ouvre sans impact ni sillage (touche B pour les montrer).
-        enabled: !delta_scene,
-        fixed_step: delta_direct.then_some(delta::FRAME_US as f64 * 1e-6),
+        enabled: !delta_scene && !delta3d_scene_on,
+        fixed_step: match (delta_direct, delta3d_config) {
+            (_, Some(c)) => Some(c.step_us as f64 * 1e-6),
+            (true, None) => Some(delta::FRAME_US as f64 * 1e-6),
+            _ => None,
+        },
         delta_ms: Vec::with_capacity(if delta_direct { BENCH_FRAMES } else { 0 }),
+        delta3d: None,
+        delta3d_config,
+        delta3d_active: true,
         drag: false,
         cursor: None,
         frames: 0,

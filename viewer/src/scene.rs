@@ -721,6 +721,9 @@ pub struct FrameData<'a> {
     pub jobs: host_impl::ScopedJobs,
     /// S275, ADR-168 : bande δ rejouée sous la houle à crêtes longues ; `None` hors `--delta`.
     pub delta: Option<crate::delta::Layer<'a>>,
+    /// S302, ADR-175 D7 : géométrie de la couche δ 3D rendue en direct ; la hauteur, elle, reste
+    /// sur la carte. `None` hors `--delta3d`.
+    pub delta3d: Option<crate::delta3d_scene::View>,
 }
 impl<'a> FrameData<'a> {
     pub fn new(
@@ -773,6 +776,7 @@ impl<'a> FrameData<'a> {
             footprint: Vec::new(),
             jobs: host_impl::ScopedJobs::with_workers(1),
             delta: None,
+            delta3d: None,
         }
     }
     pub fn update(&mut self, seconds: f64, age: f64, enabled: bool) {

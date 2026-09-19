@@ -39,30 +39,66 @@ pub struct Packet {
     pub sigma_crest: f32,
 }
 
+/// Ce que le rendu doit savoir de la couche delta 3D : ou elle est, son pas, son fondu, et si elle
+/// est active. La **hauteur** reste sur la carte (D7) : le rendu lie le tampon publie.
+#[derive(Clone, Copy, Debug)]
+pub struct View {
+    /// Coin bas du domaine en coordonnees monde.
+    pub origin: [f32; 2],
+    pub dx: f32,
+    /// Largeur du fondu en cosinus depuis chaque bord, m.
+    pub fade: f32,
+    pub nx: u32,
+    pub ny: u32,
+    pub active: bool,
+}
+
+impl Config {
+    pub fn view(&self, active: bool) -> View {
+        View {
+            origin: [self.origin[0], self.origin[1]],
+            dx: self.domain.dx,
+            fade: self.sponge.width_x.max(self.sponge.width_y),
+            nx: self.domain.nx as u32,
+            ny: self.domain.ny as u32,
+            active,
+        }
+    }
+}
+
 pub const RHO: f32 = 1025.;
 pub const G: f32 = 9.81;
 
 impl Config {
-    /// La scène de revue R11. 24 m × 32 m à 25 cm, boîte de 7 m, repos à 3,5 m sous le plan
+    /// La scène de revue R11. 30 m × 28 m à 25 cm, boîte de 7 m, repos à 3,5 m sous le plan
     /// moyen : les creux et crêtes de Hs 2,5 m y tiennent. Devant la caméra par défaut
-    /// (`[0, −18, 7]`), de 20 à 52 m. Le paquet part du fond et vient vers la caméra.
+    /// (`[0, −18, 7]`), de 18 à 46 m. Le paquet part du fond et vient vers la caméra.
+    ///
+    /// **Ce qui plafonne la taille** : le tampon des faces du fond porte 26 flottants par face
+    /// (S300) ; au-delà de ~1,15 million de faces il dépasse la limite standard de 128 Mio d'une
+    /// liaison de stockage. Réduire cette charge utile — le pas n'a besoin que de la vitesse, d'une
+    /// ligne de `grad_u`, du résidu et de la pression — est une optimisation identifiée, pas faite.
     pub fn review() -> Self {
-        let domain = Domain3 { nx: 96, ny: 128, nz: 28, dx: 0.25 };
+        let domain = Domain3 { nx: 120, ny: 112, nz: 28, dx: 0.25 };
         let rest = 3.5;
         Config {
             domain,
-            origin: [-12., 2., -rest],
+            origin: [-15., 0., -rest],
             rest,
             sponge: Sponge3 { width_x: 3., width_y: 3., rate_per_s: 2. },
             cycles: 32,
             step_us: 16_667,
+            // 65 cm d'amplitude pour 16 m : cambrure `ak` = 0,26, sous la limite de déferlement
+            // (0,44) et sous le refus non diagnostiqué de 0,335 vu en 2D. Vitesse de groupe
+            // 2,5 m/s : le front traverse les 28 m du domaine en une douzaine de secondes. Crête
+            // longue de 12 m d'écart-type : un **front** qui barre le domaine, pas un point.
             packet: Packet {
-                amplitude: 0.25,
-                wavelength: 8.,
-                center: [0., 26.],
+                amplitude: 0.65,
+                wavelength: 16.,
+                center: [0., 24.],
                 direction: [0., -1.],
-                sigma_long: 6.,
-                sigma_crest: 5.,
+                sigma_long: 9.,
+                sigma_crest: 12.,
             },
         }
     }

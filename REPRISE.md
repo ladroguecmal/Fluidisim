@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 23:06 +02:00
+Battement        : 2026-09-20 01:58 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
 Session en cours : S302 — scène du critère 3 : δ 3D rendu en direct sur mer étalée, pour la revue
 Dernière session : S301 — pas couplé complet résident sur la carte, un seul device, reçu contre le cœur ; A297 ouverte

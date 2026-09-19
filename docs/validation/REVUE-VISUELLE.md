@@ -543,3 +543,38 @@ reste tranchée par la mesure, pas par l'image. **Aucune conclusion d'invisibili
 Réponse de l'utilisateur : « Jsp ». Conformément à [ADR-174](../adr/ADR-174-arbitrages-du-2026-09-19.md) D7,
 aucun verdict n'est plus attendu sur cette scène de mesure ; la question qu'elle portait — une onde
 prise dans une vraie mer — reviendra en revue sur la scène 3D de la porte B.
+
+## 16. R11 — δ sur les deux dimensions, sur une vraie mer, S302
+
+**2026-09-20, verdict attendu.** C'est la revue que le [verdict R10](#verdict-r10--reçu-s277-2026-09-18)
+appelait : δ n'est plus une tranche, la mer n'est plus appauvrie, et une onde traverse le domaine.
+Protocole, mesures et limites : [SCENE-DELTA3D-S302](SCENE-DELTA3D-S302.md). Images dans
+`viewer/captures/s302` ; commande interactive `--houle --delta3d`, touche **D** pour basculer.
+
+**Ce qui est simulé, et ce qui ne l'est pas.** R10 avait montré une scène sans dire ce qu'elle
+contenait ; ici c'est dit avant la question. La mer (64 composantes, `Hs` ≈ 2,5 m, la plus courte à
+3,5 m de longueur d'onde) et l'onde injectée (65 cm, 16 m, cambrure 0,26) sont **simulées et
+couplées** dans un domaine de 30 × 28 m à 25 cm de maille, un pas par image. Les **vaguelettes**
+fines que l'on voit partout sont la queue spectrale de S256 : un **habillage par pixel, non
+couplé** — elles ne réagissent pas à l'onde, et ce lot ne le prétend pas. Hors du domaine, la mer
+est B seul, comme avant.
+
+**Ce que les chiffres disent déjà** : l'onde traverse à 2,2 m/s (théorie 2,5), garde 0,46 m à
+mi-course, et la couche change 13,5 à 15,7 % des octets de l'image. Le grain à l'échelle de la
+maille vaut 2 mm d'écart-type — un cinquième de la signature de l'onde — et vient du schéma, pas
+du budget de calcul (mesuré de 32 à 512 cycles).
+
+**Les questions, dans l'ordre où elles comptent :**
+
+1. **L'onde est-elle crédible dans cette mer ?** En basculant D, la voit-on comme une vague qui
+   appartient à la scène, ou comme une pièce rapportée ?
+2. **L'interaction est-elle celle que vous attendiez en R10** — l'onde qui se déforme sur les
+   vagues, et la mer qui la porte — ou manque-t-il encore quelque chose de précis ?
+3. **Voyez-vous un grain, des piqûres ou des scintillements** à petite échelle dans le rectangle du
+   domaine, que l'on ne voit pas ailleurs ? (Nous en avons mesuré : 2 mm, localisés.)
+4. **Le bord du domaine se remarque-t-il ?** Il doit se fondre en 3 m ; un raccord visible est un
+   défaut à corriger.
+
+Une réponse d'un mot suffit pour chacune ; « je ne sais pas » est une réponse utile, et dit que la
+question est mal posée. Aucun verdict n'est déduit des images par nous : la mesure dit ce qui est
+mesurable, le jugement vous appartient.

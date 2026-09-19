@@ -41,6 +41,12 @@ pub struct Gpu {
     query: Option<wgpu::QuerySet>,
     query_resolve: wgpu::Buffer,
     query_read: wgpu::Buffer,
+    /// S302, ADR-175 D7 : liaison de la surface **publiee** du domaine delta 3D. Factice tant
+    /// qu'aucun domaine n'est attache — le rendu reste alors identique au bit.
+    delta3d_layout: wgpu::BindGroupLayout,
+    delta3d_bind: wgpu::BindGroup,
+    delta3d_dummy: wgpu::Buffer,
+    delta3d_uniform: wgpu::Buffer,
 }
 fn buffer(
     device: &wgpu::Device,
@@ -283,9 +289,38 @@ impl Gpu {
         };
         let lattice_read = lattice_group(&lattice_read_layout);
         let lattice_write = lattice_group(&lattice_write_layout);
+        // S302 : groupe 3 du rendu — hauteur publiee de delta 3D et sa geometrie.
+        let delta3d_entry = |binding: u32, uniform: bool| wgpu::BindGroupLayoutEntry {
+            binding,
+            visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
+            ty: wgpu::BindingType::Buffer {
+                ty: if uniform {
+                    wgpu::BufferBindingType::Uniform
+                } else {
+                    wgpu::BufferBindingType::Storage { read_only: true }
+                },
+                has_dynamic_offset: false,
+                min_binding_size: None,
+            },
+            count: None,
+        };
+        let delta3d_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("delta 3d published surface"),
+            entries: &[delta3d_entry(1, false), delta3d_entry(2, true)],
+        });
+        let delta3d_dummy = buffer(&device, "delta 3d dummy height", 4, wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST);
+        let delta3d_uniform = buffer(&device, "delta 3d geometry", 32, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
+        let delta3d_bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("delta 3d published surface"),
+            layout: &delta3d_layout,
+            entries: &[
+                wgpu::BindGroupEntry { binding: 1, resource: delta3d_dummy.as_entire_binding() },
+                wgpu::BindGroupEntry { binding: 2, resource: delta3d_uniform.as_entire_binding() },
+            ],
+        });
         let render_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
-            bind_group_layouts: &[Some(&layout), None, Some(&lattice_read_layout)],
+            bind_group_layouts: &[Some(&layout), None, Some(&lattice_read_layout), Some(&delta3d_layout)],
             immediate_size: 0,
         });
         let compute_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -419,6 +454,10 @@ impl Gpu {
             query,
             query_resolve,
             query_read,
+            delta3d_layout,
+            delta3d_bind,
+            delta3d_dummy,
+            delta3d_uniform,
         })
     }
     fn grid(device: &wgpu::Device, w: u32, h: u32) -> (u32, u32, wgpu::Buffer) {
@@ -452,6 +491,18 @@ impl Gpu {
         self.nx = nx;
         self.ny = ny;
         self.indices = ids;
+    }
+    /// S302 : attache la surface publiee d'un domaine delta 3D (D7). Le tampon appartient au pas
+    /// de production ; le rendu ne fait que le lire, jamais un tampon interne de delta (I-13).
+    pub fn attach_delta3d(&mut self, published: &wgpu::Buffer) {
+        self.delta3d_bind = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("delta 3d published surface"),
+            layout: &self.delta3d_layout,
+            entries: &[
+                wgpu::BindGroupEntry { binding: 1, resource: published.as_entire_binding() },
+                wgpu::BindGroupEntry { binding: 2, resource: self.delta3d_uniform.as_entire_binding() },
+            ],
+        });
     }
     pub fn upload(&mut self, frame: &FrameData<'_>) {
         self.bytes.clear();
@@ -490,6 +541,17 @@ impl Gpu {
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
         self.bytes.clear();
         let eye = frame.camera.eye;
+        // S302 : geometrie de la couche delta 3D, rebasee a la camera comme la bande 2D de S275.
+        {
+            let v = frame.delta3d;
+            let g = v.map_or([0f32; 4], |v| [v.origin[0] - eye[0], v.origin[1] - eye[1], v.dx, v.fade]);
+            let s = v.map_or([0f32; 4], |v| [v.nx as f32, v.ny as f32, if v.active { 1. } else { 0. }, 0.]);
+            let mut bytes = Vec::with_capacity(32);
+            for value in g.into_iter().chain(s) {
+                bytes.extend_from_slice(&value.to_le_bytes());
+            }
+            self.queue.write_buffer(&self.delta3d_uniform, 0, &bytes);
+        }
         for slot in &frame.impacts {
             let c = slot.center();
             let row = [c[0] - eye[0], c[1] - eye[1], if slot.active { 1. } else { 0. }, 0.];
@@ -624,8 +686,9 @@ impl Gpu {
             });
             pass.set_pipeline(&self.sky);
             pass.set_bind_group(0, &self.bind, &[]);
-            // Mise en page partagée avec l'eau : le groupe de la grille doit être posé.
+            // Mise en page partagée avec l'eau : les groupes de la grille et de delta 3D sont posés.
             pass.set_bind_group(2, &self.lattice_read, &[]);
+            pass.set_bind_group(3, &self.delta3d_bind, &[]);
             pass.draw(0..3, 0..1);
         }
         {
@@ -664,6 +727,7 @@ impl Gpu {
             pass.set_pipeline(&self.ocean);
             pass.set_bind_group(0, &self.bind, &[]);
             pass.set_bind_group(2, &self.lattice_read, &[]);
+            pass.set_bind_group(3, &self.delta3d_bind, &[]);
             pass.set_index_buffer(self.indices.slice(..), wgpu::IndexFormat::Uint32);
             pass.draw_indexed(0..(self.nx - 1) * (self.ny - 1) * 6, 0, 0..1);
         }

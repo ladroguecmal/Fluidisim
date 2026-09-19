@@ -89,11 +89,11 @@ Choix posés avant code :
   (`--delta3d-scene-mesure`) : bornes, dégradation, amplitude, coût ; paramètres arrêtés.
 - [x] **P3** — à-coups d'A297 sur la même scène sans paquet (témoin) et avec : dérivée seconde
   temporelle par colonne, localisation ; chiffre avant revue.
-- [>] **P4** — rendu : couche δ 3D dans `water.wgsl` (groupe 3, bicubique, fondu), liaison factice
+- [x] **P4** — rendu : couche δ 3D dans `water.wgsl` (groupe 3, bicubique, fondu), liaison factice
   sans δ, témoin au bit ; boucle interactive `--houle --delta3d` (D bascule, R relance).
-- [ ] **P5** — captures de revue (avec et sans δ, deux poses, plusieurs instants), pixels changés ;
+- [x] **P5** — captures de revue (avec et sans δ, deux poses, plusieurs instants), pixels changés ;
   section R11 de REVUE-VISUELLE avec la question.
-- [ ] **P6** — rituel REPRISE §6.
+- [>] **P6** — rituel REPRISE §6.
 
 ### Notes de reprise
 
@@ -134,6 +134,27 @@ maille, `a·k²·dx²` = 9,6·10⁻³ m : le bruit vaut environ **un cinquième*
 hauteur, et jusqu'à 5 fois au pire point. Conséquence pour la revue : le bruit de maille est à
 montrer et à nommer, pas à cacher ; 32 cycles suffisent visuellement (le maximum seul gagne à
 128), donc le choix de cycles est une question de coût.
+
+**P4 et P5 — la scène est rendue et soumise.** `Step3::on_device` fait naître le domaine sur le
+device du rendu ; le nuanceur lie **la seule surface publiée** (groupe 3), l'interpole en
+Catmull-Rom bicubique et l'ajoute à la somme des couches avec un fondu de 3 m. Témoin : les sept
+images de la revue R9 gardent leurs empreintes **au bit** (0x8ae42dfb1fe7d1b3…) — le rendu existant
+n'a pas bougé. Fenêtre : `--houle --delta3d`, **D** bascule, **R** relance l'onde ; un pas fixe de
+16,667 ms par image, donc le fond que δ consomme et celui que l'image montre sont au même instant.
+Cadence **197 Hz** (5,06 ms), essai de 120 images passé.
+
+**Dimensionnement, deux allers-retours mesurés** : d'abord 24×32 m avec une onde de 25 cm à 8 m —
+l'onde se noyait dans une mer de 2,5 m (les deux images se ressemblaient). Puis 32×32 m : **refusé
+par le device**, le tampon des faces (26 flottants par face, S300) franchissant les 128 Mio d'une
+liaison de stockage. Retenu : **30 × 28 m** (120×112×28) et un **front** de 65 cm sur 16 m, crête
+longue de 12 m — visible sans être hors du régime perturbatif (`ak` 0,26 ; le refus non diagnostiqué
+de 2D est à 0,335). Une vue plongeante a été essayée et écartée : rien ne s'y lit (déjà mesuré S275).
+
+Captures : quatre poses × avec/sans × quatre instants, plus deux images de différence ×6.
+La couche change **13,5 à 15,7 %** des octets à la pose de référence (8,5 à 11,2 % de plus de
+quatre niveaux). Preuve : [SCENE-DELTA3D-S302](../docs/validation/SCENE-DELTA3D-S302.md) ; demande
+de revue : REVUE-VISUELLE §16 (R11), avec **quatre questions explicites** — R10 avait échoué faute
+de dire ce qu'on attendait.
 
 *Tenue du plan* : le battement du commit P2+P3 a été écrit **sans lire l'horloge** (23:18 au lieu
 de 23:06, L237) ; corrigé au commit suivant. Une fenêtre interactive s'est ouverte une fois parce

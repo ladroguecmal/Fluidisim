@@ -22,6 +22,13 @@ struct Params {
 @group(0) @binding(5) var<storage, read> tail: array<vec4<f32>>;
 @group(2) @binding(0) var<storage, read> lattice: array<vec4<f32>>;
 @group(3) @binding(0) var<storage, read_write> lattice_out: array<vec4<f32>>;
+// S302, ADR-175 D7 : la surface **publiée** du domaine δ 3D — `η'` compensé par colonne, rangé
+// `j·nx + i`. C'est le seul tampon de δ que le rendu lie ; aucun tampon interne (I-13).
+@group(3) @binding(1) var<storage, read> delta3d_height: array<f32>;
+// (x0, y0) coin du domaine relatif à la caméra, pas de maille, largeur du fondu ; puis (nx, ny,
+// actif, réserve).
+struct Delta3 { geometry: vec4<f32>, size: vec4<f32> }
+@group(3) @binding(2) var<uniform> d3: Delta3;
 
 fn spectral_weight(k: f32, h: f32) -> f32 {
     let t = clamp(2.0*k*h/3.141592653589793 - 1.0, 0.0, 1.0);
@@ -294,6 +301,55 @@ fn delta_layer(q: vec2<f32>) -> vec3<f32> {
     let de = ((6.0*t2-6.0*t)*a.x + (3.0*t2-4.0*t+1.0)*m0 + (-6.0*t2+6.0*t)*b.x + (3.0*t2-2.0*t)*m1)/dx;
     return vec3<f32>(fx.x*fy.x*e, fy.x*(fx.y*e + fx.x*de), fx.x*fy.y*e);
 }
+// S302 — la couche δ 3D à un point, depuis la surface publiée : hauteur et deux pentes.
+// Catmull-Rom bicubique (les colonnes sont des échantillons, pas des nœuds d'Hermite : aucune
+// dérivée n'est publiée), puis fondu en cosinus depuis chaque bord — l'éponge a déjà relaxé `η'`
+// près des bords, le fondu assure la continuité exacte du raccord à B.
+fn cr_w(t: f32) -> vec4<f32> {
+    let t2 = t*t; let t3 = t2*t;
+    return vec4<f32>(-0.5*t3 + t2 - 0.5*t, 1.5*t3 - 2.5*t2 + 1.0, -1.5*t3 + 2.0*t2 + 0.5*t, 0.5*t3 - 0.5*t2);
+}
+fn cr_d(t: f32) -> vec4<f32> {
+    let t2 = t*t;
+    return vec4<f32>(-1.5*t2 + 2.0*t - 0.5, 4.5*t2 - 5.0*t, -4.5*t2 + 4.0*t + 0.5, 1.5*t2 - t);
+}
+fn delta3d_at(i: i32, j: i32) -> f32 {
+    let nx = i32(d3.size.x); let ny = i32(d3.size.y);
+    return delta3d_height[clamp(j, 0, ny - 1) * nx + clamp(i, 0, nx - 1)];
+}
+fn delta3d_row(i0: i32, j: i32, wx: vec4<f32>) -> f32 {
+    return wx.x*delta3d_at(i0 - 1, j) + wx.y*delta3d_at(i0, j)
+         + wx.z*delta3d_at(i0 + 1, j) + wx.w*delta3d_at(i0 + 2, j);
+}
+fn delta3d_layer(q: vec2<f32>) -> vec3<f32> {
+    if (d3.size.z < 0.5) { return vec3<f32>(0.0); }
+    let dx = d3.geometry.z;
+    let extent = vec2<f32>(d3.size.x, d3.size.y) * dx;
+    let r = q - d3.geometry.xy;
+    if (any(r <= vec2<f32>(0.0)) || any(r >= extent)) { return vec3<f32>(0.0); }
+    let local = r/dx - vec2<f32>(0.5);
+    let base = floor(local);
+    let tx = local.x - base.x; let ty = local.y - base.y;
+    let wx = cr_w(tx); let wy = cr_w(ty);
+    let dwx = cr_d(tx); let dwy = cr_d(ty);
+    let i0 = i32(base.x); let j0 = i32(base.y);
+    let r0 = delta3d_row(i0, j0 - 1, wx); let r1 = delta3d_row(i0, j0, wx);
+    let r2 = delta3d_row(i0, j0 + 1, wx); let r3 = delta3d_row(i0, j0 + 2, wx);
+    let d0 = delta3d_row(i0, j0 - 1, dwx); let d1 = delta3d_row(i0, j0, dwx);
+    let d2 = delta3d_row(i0, j0 + 1, dwx); let d3_ = delta3d_row(i0, j0 + 2, dwx);
+    let h = wy.x*r0 + wy.y*r1 + wy.z*r2 + wy.w*r3;
+    let hx = (wy.x*d0 + wy.y*d1 + wy.z*d2 + wy.w*d3_)/dx;
+    let hy = (dwy.x*r0 + dwy.y*r1 + dwy.z*r2 + dwy.w*r3)/dx;
+    // Fondu : distance au bord le plus proche sur chaque axe, et le signe de sa dérivée.
+    let width = d3.geometry.w;
+    let low = r; let high = extent - r;
+    let sx = select(-1.0, 1.0, low.x < high.x);
+    let sy = select(-1.0, 1.0, low.y < high.y);
+    var fx = delta_fade(min(low.x, high.x), width);
+    var fy = delta_fade(min(low.y, high.y), width);
+    fx.y = sx*fx.y; fy.y = sy*fy.y;
+    return vec3<f32>(fx.x*fy.x*h, fy.x*(fx.y*h + fx.x*hx), fx.x*(fy.y*h + fy.x*hy));
+}
 // Hauteur et deux pentes. Une seule fonction pour sommets et réception compute.
 fn water(q: vec2<f32>, spacing: f32) -> vec3<f32> {
     let h = select(0.0, spacing, p.spectral.x > 0.5);
@@ -438,6 +494,10 @@ fn grid_spacing(index: vec2<f32>, q: vec2<f32>) -> f32 {
         w = water(q, h);
         local = vec3<f32>(q,w.x-p.eye.z);
     }
+    // S302 : la couche δ 3D s'ajoute à la somme des couches (I-01). Inactive, rien ne change.
+    let d = delta3d_layer(q);
+    w += d;
+    local.z += d.x;
     let depth = max(dot(local,p.forward.xyz),0.01);
     o.clip = vec4<f32>(dot(local,p.right.xyz)/(p.forward.w*p.right.w),dot(local,p.up.xyz)/p.forward.w,depth-0.1,depth);
     o.local = local; o.slope = w.yz;
