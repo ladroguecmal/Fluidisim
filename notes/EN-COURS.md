@@ -58,39 +58,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S286 — terminée
+Session : S287 — en cours
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
-Entrée : continuer ; priorité A276 après diagnostic spatial borné.
-Objectif : découpler expérimentalement le pas δ et la cadence image, et supprimer la dépendance
-au nombre d'appels dans le vieillissement des coûts avant cette intégration.
+Entrée : continuer, coût par pas après cadence lente refusée.
+Objectif : accélérer les passes de pression sans changer le calcul, avant un port GPU.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [x] **P2** — reproduire puis corriger le vieillissement par appels refusés ; pauses et retours
-  de temps éprouvés, historique des vrais pas conservé.
-- [x] **P3** — pas Live configurable 16/32/48 ms, comparaison à instants communs et par image,
-  coût complet et refus publiés ; ne pas activer par défaut une cadence non reçue.
-- [x] **P4** — tests et réception, intégration expérimentale seulement si critères tenus,
-  diagnostic explicite sinon ; découper avant quinze minutes.
-- [x] **P5** — rituel §6 : preuves, journal, file/feuille/index, jeton libre.
+- [ ] **P2** — comparer les chemins CPU/GPU présents ; instrumenter les empreintes des
+  trajectoires complètes du banc S286, mesurer la référence sur secteur.
+- [ ] **P3** — parcourir les écritures disjointes multigrilles dans leur ordre mémoire,
+  mesurer le même travail et exiger les empreintes identiques ; conserver seulement un gain
+  reçu, sinon retirer l'optimisation. Suite complète et tests budget/mémoire existants.
+- [ ] **P4** — rituel §6 : mesures et décision de suite, journal, registres, jeton libre.
 
 ### Notes de reprise
 
-Critères : le nombre d'appels au même temps ne change pas l'oubli ; les nouveaux pas réussis
-seuls alimentent les mesures. Cadence : compter les vrais pas, zéro allocation, pauses et sauts,
-écarts hauteur/pente au témoin 16 ms sur houle et onde 0,6 m, coût moyen par image ET pire pas.
-Repère hauteur 3 mm S201 ; ni baisse de fréquence ni coût moyen ne reçoivent I-05 si un pas
-bloque encore plus de 2 ms. Évaluer le maintien du dernier profil entre pas avant d'introduire
-une interpolation qui pourrait cacher un retard. Fond B toujours au temps de scène (ADR-003).
-A290 différée, pas de nouvelle réduction spatiale ; priorité au coût avant 3D/deuxième domaine.
-
-P2 : régression rouge (8 mesures devenaient 7 au même temps), puis verte : oubli par
-16 ms non financées, reste conservé, pause et retour sans vieillissement.
-
-P3 : 32/48 ms réduisent la moyenne mais échouent sur onde 0,6 m : 4,445/8,916 mm
-aux instants calculés. Moyennes 13,150/9,108 ms, pires pas 32,319/32,708 ms. Secteur
-aux deux bornes, zéro allocation. Pas de refus représentatif observé, coût des échecs ouvert.
-
-P4 : 36 tests viewer réussis, 1 ignoré, aucun échec. Cadences lentes privées au banc ;
-maintien, pause, retour et saut éprouvés. Correction de vieillissement intégrée au chemin image.
+Lecture initiale : les tableaux multigrilles sont k*nx+i, mais les passes indépendantes
+parcourent i puis k. Permuter ces boucles ne change aucune somme locale ni réduction.
+GPU : hôte compute wgpu présent, aucun solveur δ GPU ; porter une seule pass imposerait
+transferts/synchronisations par itération. Une pression résidente est un lot architectural,
+à comparer au gain CPU local d'abord. Aucun choix d'architecture GPU acté par cette session.
+Critères : mêmes bits à toutes les images et pour les champs volumétriques aux pas, mêmes
+itérations/acceptations, zéro allocation, coût complet publié, aucun seuil physique changé.
+Banc S286 : houle et onde 0,6 m, 16/32/48 ms, dont seul 16 ms interactif. Arrêt au résultat
+local mesuré, gain insuffisant aux 2 ms explicitement gardé ; pas de campagne cosmétique.
