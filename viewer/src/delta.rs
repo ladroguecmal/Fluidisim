@@ -1452,7 +1452,7 @@ pub fn measure_coupled_candidate(background: &Background, steps: u64) -> Result<
         solver.solve(&zero_rows, &zero_rhs, &mut zero_p)?;
         zero_rows.clear();
     }
-    for (cycle, diagnostic) in [(128u32, false), (192, false), (256, false), (384, false), (0, true), (0, false)] {
+    for (cycle, diagnostic) in [(0u32, true), (0, false), (128, false), (192, false), (256, false), (384, false)] {
         solver.iterations = cycle;
         let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
         let mut v = Volume::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
@@ -1464,6 +1464,7 @@ pub fn measure_coupled_candidate(background: &Background, steps: u64) -> Result<
         let mut rows = vec![PressureRow::default(); NX * NZ];
         let clock = RealClock(std::time::Instant::now());
         let (mut stepping, mut worst, mut used) = (Vec::new(), 0u32, 0u32);
+        let mut peak = (0f64, [0u64; water_core::delta_projection::STAGES], 0u64, [0f64; 5]);
         let mut stages = [0u64; water_core::delta_projection::STAGES];
         for n in 0..steps {
             let time = SimTime(START_US + n * FRAME_US);
@@ -1481,9 +1482,17 @@ pub fn measure_coupled_candidate(background: &Background, steps: u64) -> Result<
                 if ext.refused { return Err(format!("pas {n} : candidat refusé")); }
                 out
             }.map_err(|e| format!("pas {n} : {e:?}"))?;
-            stepping.push(start.elapsed().as_secs_f64() * 1e3);
+            let spent = start.elapsed().as_secs_f64() * 1e3;
+            stepping.push(spent);
             worst = worst.max(r.report.map_or(0, |x| x.iterations));
             for (a, b) in stages.iter_mut().zip(v.last_stage_ns()) { *a += b; }
+            // S292 : le pire pas garde sa carte. Un pic qui ne dit pas où il est tombé ne se
+            // corrige pas — et c'est exactement ce qui manquait à S291.
+            if spent > peak.0 {
+                peak = (spent, v.last_stage_ns(), n,
+                    [solver.last_pack_ms, solver.last_encode_ms, solver.last_submit_ms,
+                     solver.last_wait_ms, solver.last_read_ms]);
+            }
         }
         stepping.sort_by(f64::total_cmp);
         let part = |i: usize| (stages[i] as f64 / steps as f64) / 1e6;
@@ -1492,6 +1501,11 @@ pub fn measure_coupled_candidate(background: &Background, steps: u64) -> Result<
             candidat_ms={:.4} iterations_ms={:.4} validation_ms={:.4} erreur_inverse_ms={:.4}",
             stepping[stepping.len() / 2], stepping[stepping.len() - 1],
             part(6), part(10), part(17), part(14));
+        let detail: Vec<String> = water_core::delta_projection::STAGE_NAMES.iter().zip(peak.1)
+            .filter(|(_, ns)| *ns > 100_000)
+            .map(|(name, ns)| format!("{name}={:.4}", ns as f64 / 1e6)).collect();
+        println!("PIC_S292 cycle={cycle} pas={} pire_ms={:.4} etapes[{}]             appel[empaquetage={:.4} encodage={:.4} soumission={:.4} attente={:.4} lecture={:.4}]",
+            peak.2, peak.0, detail.join(" "), peak.3[0], peak.3[1], peak.3[2], peak.3[3], peak.3[4]);
     }
     Ok(())
 }

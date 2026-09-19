@@ -2235,6 +2235,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--pas-cycle") {
         return pressure_solver::measure_cycle_sweep();
     }
+    if args.iter().any(|a| a == "--pas-froid") {
+        return pressure_solver::measure_cold();
+    }
     if args.iter().any(|a| a == "--pas-couple") {
         return delta::measure_coupled_candidate(&delta::swell_background()?, 200);
     }

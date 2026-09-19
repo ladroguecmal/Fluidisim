@@ -956,3 +956,80 @@ async fn sweep_async() -> Result<(), String> {
     }
     Ok(())
 }
+
+// ─── S292 : le premier appel après une inactivité de la carte ──────────────────────────────
+
+pub fn measure_cold() -> Result<(), String> { pollster::block_on(measure_cold_async()) }
+
+/// Le premier appel après `idle` millisecondes sans rien envoyer à la carte, décomposé en ses
+/// cinq postes. Ce qui distingue les mécanismes possibles :
+/// — dans l'**attente**, c'est la carte ou le pilote (alimentation, résidence) ;
+/// — dans la **soumission**, c'est le pilote ;
+/// — dans l'**encodage** ou l'**empaquetage**, c'est notre côté ou wgpu.
+/// Trois appels sont mesurés après le froid, pour voir combien il en faut pour revenir au régime.
+async fn measure_cold_async() -> Result<(), String> {
+    let (nx, nz, dx) = (128usize, 52usize, 2.0f32);
+    let (rows, rhs, start) = capture_problem(nx, nz, dx, false)?;
+    let mut gpu = Resident::new(Domain { nx, nz, dx }, 128).await?;
+    // Pas d'horodatage : il ajouterait un second aller-retour de cartographie à tous les appels,
+    // et la comparaison froid/chaud doit porter le même instrument (L339).
+    gpu.timing = false;
+    let mut p = start.clone();
+    const REPS: usize = 3;
+    // S292 : **la pause n'est pas vide en production.** Quand la bande delta est eteinte, le reste
+    // de l'image continue de tourner : le processeur est occupe, pas endormi. Le banc mesure les
+    // deux, parce que le premier essai — pause endormie — n'a pas reproduit le gel de S291, dont
+    // la pause etait justement remplie de 400 pas de calcul.
+    let mut ballast = vec![1.0f64; 1 << 16];
+    for busy in [false, true] {
+    for idle_ms in [0u64, 50, 100, 250, 500, 1000, 2000, 4000, 8000] {
+        let mut cold = Vec::with_capacity(REPS);
+        let mut parts = [const { Vec::<f64>::new() }; 5];
+        let mut after = [const { Vec::<f64>::new() }; 3];
+        for _ in 0..REPS {
+            // Régime chaud : huit appels dos à dos, dont on ne garde rien.
+            for _ in 0..8 {
+                p.copy_from_slice(&start);
+                gpu.solve(&rows, &rhs, &mut p)?;
+            }
+            if idle_ms > 0 {
+                if busy {
+                    let deadline = std::time::Instant::now() + std::time::Duration::from_millis(idle_ms);
+                    let mut n = 0usize;
+                    while std::time::Instant::now() < deadline {
+                        for _ in 0..64 {
+                            let i = n % ballast.len();
+                            ballast[i] = ballast[i].mul_add(1.0000001, 1e-12).sqrt() + 1.;
+                            n += 1;
+                        }
+                    }
+                } else {
+                    std::thread::sleep(std::time::Duration::from_millis(idle_ms));
+                }
+            }
+            // L'appel froid.
+            p.copy_from_slice(&start);
+            gpu.solve(&rows, &rhs, &mut p)?;
+            cold.push(gpu.last_wall_ms);
+            for (v, ms) in parts.iter_mut().zip([gpu.last_pack_ms, gpu.last_encode_ms,
+                gpu.last_submit_ms, gpu.last_wait_ms, gpu.last_read_ms]) { v.push(ms); }
+            // Les trois suivants, sans pause.
+            for slot in after.iter_mut() {
+                p.copy_from_slice(&start);
+                gpu.solve(&rows, &rhs, &mut p)?;
+                slot.push(gpu.last_wall_ms);
+            }
+            if p.iter().any(|v| !v.is_finite()) { return Err("pression non finie".into()); }
+        }
+        let worst = cold.iter().fold(0f64, |m, x| m.max(*x));
+        println!("FROID_S292 occupe={busy} inactivite_ms={idle_ms} repetitions={REPS} froid_mediane_ms={:.4} \
+            froid_max_ms={worst:.4} empaquetage_ms={:.4} encodage_ms={:.4} soumission_ms={:.4} \
+            attente_ms={:.4} lecture_ms={:.4} suivant1_ms={:.4} suivant2_ms={:.4} suivant3_ms={:.4}",
+            median(&mut cold.clone()), median(&mut parts[0]), median(&mut parts[1]),
+            median(&mut parts[2]), median(&mut parts[3]), median(&mut parts[4]),
+            median(&mut after[0]), median(&mut after[1]), median(&mut after[2]));
+    }
+    }
+    if ballast.iter().any(|v| !v.is_finite()) { return Err("ballast non fini".into()); }
+    Ok(())
+}
