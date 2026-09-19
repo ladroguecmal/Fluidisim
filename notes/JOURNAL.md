@@ -14808,3 +14808,38 @@ porte B n'avait ni architecture ni droit de commencer, elle a les deux, et son l
 **Rituel** : A295 décidée, A296 close ; file, feuille de route §2 et §3 bis, REPRISE §4 à §8,
 METHODE, index (ADR-174, 175), REVUE-VISUELLE (onde), note sur BILAN-GLOBAL-S293. Invariants
 relus : I-03, I-04, I-05, I-06, I-08, I-12, I-13, I-14, I-17 ; aucun amendé. Copie unique.
+
+## S295 — 2026-09-19 — porte B, lot 1 : la référence δ tridimensionnelle existe
+
+**Claude Opus 5 (Claude Code desktop).** Entrée : suite désignée par S294, porte en cours B.
+master f030f40. Plan 217840f ; étapes 3138ddf, 7f82956, e970e64, c3473ab.
+
+**Ce qui devient possible.** δ a une **référence en trois dimensions** : `code/water-core/src/delta3d.rs`,
+grille MAC x-y-z, surface linéarisée (ADR-141 en 3D), la 2D intacte. **Le chemin qui la consomme** :
+les réceptions de la porte B (ADR-175 §4.1), et demain la production GPU qui sera jugée contre
+elle. **La preuve** : [DELTA3D-LINEAIRE-S295](../docs/validation/DELTA3D-LINEAIRE-S295.md).
+
+**Reçu, contre des critères posés avant le code.** (1) À `ny = 1`, la trajectoire est **identique
+au bit** à celle de la 2D de S233 — hauteurs et itérations, 500 et 1 000 pas — et l'opérateur l'est
+sur un champ quelconque ; (2) une hauteur indépendante de `y` le reste **exactement** ; (3) l'onde
+stationnaire oblique (1, 1) d'une cuve 8 × 4 × 4 m tient sa dispersion : 2,32 → 0,54 → **0,176 %**
+de `A` en raffinant, ordre deux en espace, et **0,005 %** contre la fréquence du schéma calculée hors
+du solveur ; (4) repos exact, zéro allocation arène scellée, refus atomique rendant six champs au
+bit. `γ₁₀` dérivé pour six faces (ADR-143). Suite complète : 523 essais cœur/harnais (408 + 17 + 2 +
+1 + 95), 36 afficheur, 0 échec, 19 ignorés.
+
+**Une erreur d'oracle, pas du solveur** : sans le demi-pas d'Euler symplectique, l'oracle « schéma »
+laissait 0,29 % ; corrigé dans l'oracle, dérivé de la récurrence (L344).
+
+**Non-fait, limites.** Surface mobile, couplage B/W, production GPU, scène et revue, coût. Pas de
+préconditionneur — un Jacobi briserait l'invariance en `y` à l'arrondi ; la multigrille viendra
+avec la production. 16,5 ms par pas à 27 648 mailles sur un fil : c'est une référence, hors de la
+boucle d'image. La liste du projet fini (4.1) n'est pas recochée : elle se remplit à la demande de
+l'utilisateur.
+
+**Maillons : 0.** Capacité reçue, chemin qui la consomme, preuve — et un critère de la porte B avance.
+
+**Rituel** : L344 ; file (porte B), feuille de route (J2, porte B), REPRISE §4, index. Invariants
+relus : I-04, I-06, I-07 (`g_eff` fourni), I-08 (f32, durée entière, coefficients seuls arrondis),
+I-17 ; aucun amendé. Copie unique.
+

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S295 — **porte B, lot 1 : la référence δ tridimensionnelle, surface linéarisée**
+Session : S295 — **porte B, lot 1 : la référence δ tridimensionnelle, surface linéarisée** — terminée
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
 Entrée : suite désignée par S294 — porte en cours B (FEUILLE-DE-ROUTE §3 bis), ADR-175.
 Objectif : recevoir la première partie du critère 1 de la porte B (ADR-175 §4.1) sur le mode le
@@ -87,7 +87,7 @@ Hors lot : surface mobile (lot 2), couplage à B/W (lot 3), production GPU (lot 
   essais : `ny = 1` contre la 2D, invariance en `y`, aucune allocation.
 - [x] **P5** — réception de l'onde oblique : banc `delta3d_lineaire`, preuve
   `docs/validation/DELTA3D-LINEAIRE-S295.md`.
-- [ ] **P6** — rituel §6.
+- [x] **P6** — rituel §6.
 
 ### Notes de reprise
 

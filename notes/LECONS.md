@@ -5872,3 +5872,16 @@ Un déclencheur d'ordre (« X avant Y ») doit **nommer la dépendance qu'il pro
 qui le lève. Sans elle, il ne protège rien ; il décide seulement où ira le travail suivant — et
 ADR-127 §6 exige justement une dépendance, pas une préférence, pour ordonner les jalons.
 
+## L344 — L'oracle d'un schéma porte aussi sa structure en temps
+
+*(S295)* Pour séparer une faute du solveur de l'erreur de discrétisation, la fréquence exacte du
+schéma a été calculée hors du code : Laplacien discret, structure verticale discrète, Euler
+symplectique. L'écart restait à **0,29 %** — trop pour de l'arrondi, trop peu pour une faute
+franche. La cause était dans l'oracle : Euler symplectique décale la hauteur et le flux d'un
+demi-pas, et un départ au repos cinématique donne `ηⁿ = A·(cos(nΩdt) + β·sin(nΩdt))`,
+`β = −ω_s²·dt²/(2·sin(Ω·dt))`, pas `A·cos(nΩdt)`. Avec ce terme : 0,005 %.
+
+Un oracle « du schéma » n'est exact que s'il reproduit **toute** la récurrence, conditions
+initiales discrètes comprises. Faute de quoi il mesure un écart qui n'appartient ni au code ni
+au modèle — et l'on corrigerait le solveur pour la faute de l'instrument.
+

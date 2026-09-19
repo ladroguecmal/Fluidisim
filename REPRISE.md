@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 15:15 +02:00
+JETON            : libre
+Battement        : 2026-09-19 15:18 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : S295 — porte B, lot 1 : référence δ tridimensionnelle à surface linéarisée
-Dernière session : S294 — arbitrages du 2026-09-19 consignés (ADR-174), δ 3D décidé (ADR-175), pilotage par les portes, documents d'état ramenés sous plafond
-Session suivante : à fixer au rituel de S295. À défaut : porte B, lot 2 — surface mobile de la référence 3D.
-Maillons        : 0 — S294 lève le blocage de la porte B et nomme le lot désormais exécutable ; S295 doit recevoir un critère de porte
+Session en cours : aucune
+Dernière session : S295 — porte B, lot 1 : référence δ 3D à surface linéarisée reçue (identique au bit à la 2D quand ny = 1, onde oblique 0,176 %)
+Session suivante : porte B, lot 2 — surface **mobile** dans la référence 3D (fonction hauteur `η(x, y)`, fluide fantôme, advection), reçue à `ny = 1` contre S237/S238 (HOS d'ordre 3 : 10 cm à 0,23 % / 0,43 %, 5 cm à 0,25 % / 0,71 % à 128 colonnes) et en 3D contre une onde oblique d'amplitude finie. La scène-témoin de la porte D peut avancer en parallèle.
+Maillons        : 0 — capacité reçue en S295 : δ a une référence tridimensionnelle, consommée par les réceptions de la porte B (ADR-175 §4.1), preuve DELTA3D-LINEAIRE-S295
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -82,6 +82,7 @@ travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En br
   1,74 ms, mer jugée par l'utilisateur (R7 accepté) ; manquent le CPU sous 2 ms (A278), un objet
   pilotable et la seconde cible.
 - **δ reçu en 2D** — surface mobile couplée à B/W contre HOS, frontières, rendu en direct.
+  **S295** : référence 3D à surface linéarisée reçue, identique au bit à la 2D quand `ny = 1`.
   **Porte B ouverte** : δ en 3D selon [ADR-175](docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md),
   référence CPU dans le cœur, production résidente sur GPU à travail borné. Rien de 3D construit.
 - **Ordonnanceur** (porte A) : décide qu'un domaine vit et avec quel budget ; ni plusieurs
