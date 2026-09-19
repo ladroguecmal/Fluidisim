@@ -92,6 +92,7 @@
 - [Fond spectral réel et frontières de la référence 3D — S298](validation/DELTA3D-FOND-REEL-S298.md) : B du cœur échantillonné sur la grille MAC, cas limites 2D reproduits en 3D, et la maille qu’exige une mer étalée.
 - [Premier étage du pas δ 3D résident sur la carte — S299](validation/DELTA3D-GPU-S299.md) : opérateur et problème assemblés sur le GPU et reçus à moins d'un ulp, projection à travail borné jugée par le cœur, coût sur la machine de référence.
 - [Le fond B évalué sur la carte et le second membre couplé — S300](validation/DELTA3D-FOND-GPU-S300.md) : paramètres publiés au lieu d'échantillons, champ reçu champ par champ, couplage reçu, et le CPU 500 fois plus lent.
+- [Le pas couplé complet résident sur la carte — S301](validation/DELTA3D-PAS-GPU-S301.md) : un seul device, chaque étage reçu contre le cœur, somme compensée sauvée du compilateur, trajectoire jugée contre la sensibilité propre de la référence (A297), coût et diagnostics D3.
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

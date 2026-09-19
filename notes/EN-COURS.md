@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S301 — en cours.
+Session : S301 — terminée : pas couplé complet sur la carte, reçu contre le cœur ; A297 ouverte.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, outils locaux, carte réelle.
 Entrée : « Reprends le projet », 2026-09-19. Copie unique, master propre, jeton libre à l'amorce.
 
@@ -101,7 +101,7 @@ Critères avant code, posés ici :
 - [x] **P6** — coût du pas complet, passe chronométrée, trois tailles ; dispatchs publiés.
 - [x] **P7** — diagnostics D3 sur la carte (divergence des lignes franches, dérive de masse,
   colonnes hors bornes), relus en différé avec leur âge.
-- [>] **P8** — preuve et rituel REPRISE §6.
+- [x] **P8** — preuve et rituel REPRISE §6.
 
 ### Notes de reprise
 

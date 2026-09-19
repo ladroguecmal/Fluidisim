@@ -3889,3 +3889,23 @@ reçu contre HOS et un fond uniforme traversant ; un aperçu animé CPU est livr
 construites restent partiellement reçues (absorption/progression S269–S274 à rejouer), les
 fournisseurs réels et la production GPU manquent. A274 non fermée.
 [Preuves et limites](../validation/DELTA3D-COUPLEE-S297.md).
+
+**A297 — S301, 2026-09-19 (sévérité 2, ouverte).** **La hauteur de la référence δ 3D est
+discontinue en la position de la surface par rapport aux centres de maille.** Le transport lit la
+vitesse de la couche partiellement mouillée, pondérée par `(surface − k·dx)/dx` ; quand la surface
+passe le centre de cette couche, sa face bascule de projetée (correction pondérée par 1/θ, θ petit)
+à extrapolée depuis la couche du dessous. Mesuré : 0,25 m/s d'écart sur une face, ~0,5 mm de
+hauteur par pas ; **deux cœurs partis à ±10⁻⁶ m l'un de l'autre divergent de 4,5 cm en 6 s** sur
+le cas S298, premier millimètre à 1,3 s. Conséquences : (1) aucune implémentation non identique au
+bit ne suit la référence au-delà de cet horizon — le critère 2 d'ADR-175 §4.2 se lit sur la durée
+de prévisibilité mesurée ; (2) chaque trajectoire porte probablement des à-coups locaux d'origine
+numérique, non mesurés en tant que tels. Déclencheur : avant la revue du critère 3, mesurer les
+à-coups d'une trajectoire seule ; s'ils sont visibles, une vitesse de couche continue en θ est une
+décision de schéma (nouvel ADR, réceptions 2D et 3D rejouées). [Preuve](../validation/DELTA3D-PAS-GPU-S301.md) §5.
+
+*S301, 2026-09-19 — suivi A295, ouverte.* Le pas de production est complet sur la carte et reçu
+étage par étage contre la référence ; la trajectoire la suit jusqu'à son propre horizon de
+prévisibilité (A297). Diagnostics D3 relus en différé, dégradation déclarée. Manquent la scène et
+la revue (critère 3), et la porte C sur cette scène. Pic d'amorçage observé à 8,4 ms au premier
+pas d'un domaine de 131 072 mailles (famille A294), non attribué.
+[Preuve](../validation/DELTA3D-PAS-GPU-S301.md).

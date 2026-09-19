@@ -231,3 +231,12 @@ cargo run --manifest-path viewer/Cargo.toml --release --offline -- --delta3d-cou
 
 La trajectoire accepte `PAS`, `PERIODE`, `CYCLES` et `SONDE_PAS=a,b` (état comparé face par face
 sur ces pas) ; la sensibilité, `PAS` et `EPS`.
+
+## 9. Vérification globale
+
+`cargo test --manifest-path code/Cargo.toml --workspace --release --offline` : **539 réussis**
+(421 cœur, 20 exécution δ, 2 géométrie, 1 table radiale, 95 harnais), 18 ignorés, aucun échec.
+Le cœur ne gagne que deux accès d'essai (`predict_for_trials`, `surface_roundoff_for_trials`),
+additifs ; aucun chemin existant n'est modifié. L'afficheur gagne un module et un WGSL, un noyau
+dans `delta3d_cg.wgsl` et une lecture dans `couple_rhs` ; le banc de couplage S300 rejoué rend
+ses chiffres à l'identique. La bande 2D, la scène et le rendu sont inchangés.

@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 21:03 +02:00
+JETON            : libre
+Battement        : 2026-09-19 21:37 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : S301 — pas couplé complet résident sur la carte, un seul device, reçu contre le cœur
-Dernière session : S300 — fond B évalué sur la carte et second membre couplé reçus contre le cœur
-Session suivante : S301 — porte B : advection, bandes de couplage et éponge sur la carte, puis la surface mobile et sa surface publiée (ADR-175 D7). La surface mobile demandera un arbitrage : le cœur **refait** le pas avec un affinage quand la porte d'ADR-144 échoue, ce que la production n'a pas le droit de faire (D3 : dégradation déclarée) — nouvel ADR probable.
-Maillons        : 0 — capacité S300 : fond B évalué sur la carte depuis les seuls paramètres publiés et second membre couplé qui en découle, reçus à 2,6·10⁻⁶ du cœur, consommés par cinq bancs, preuve DELTA3D-FOND-GPU-S300
+Session en cours : aucune — S301 terminée
+Dernière session : S301 — pas couplé complet résident sur la carte, un seul device, reçu contre le cœur ; A297 ouverte
+Session suivante : S302 — porte B, critère 3 : brancher `Step3` dans l'afficheur sur une mer étalée (`--houle`), rendre la surface publiée sommée à B, et soumettre la scène à la revue de l'utilisateur. Avant la revue, mesurer les à-coups d'une trajectoire seule (A297). Ensuite : mode sans fond de `Step3` pour les cas de cuve de §4.1.
+Maillons        : 0 — capacité S301 : pas de production complet sur la carte avec surface publiée, reçu étage par étage contre le cœur et suivi en trajectoire jusqu'à l'horizon de la référence ; consommateur : la scène du critère 3 ; preuve DELTA3D-PAS-GPU-S301
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -75,7 +75,7 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État au 2026-09-19 (S300). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
+État au 2026-09-19 (S301). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
 travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En bref :
 
 - **J1** partiel : B+W sur GPU dans l'hôte séparé, scène multi-sources admise par le cœur, GPU eau
@@ -86,11 +86,10 @@ travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En br
   **Porte B ouverte** : δ en 3D selon [ADR-175](docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md),
   référence CPU couplée reçue S297, frontières et fond spectral réel reçus S298. Une mer à la fois
   résolue et étalée n'entre pas dans un banc CPU : le critère 3 d'ADR-175 §4 demande la production
-  GPU. **S299** en a construit le premier étage — opérateur, préconditionneur et projection à
-  travail borné — et **S300** le second : la carte évalue B elle-même et en tire le second membre
-  couplé, là où le même échantillonnage sur CPU coûterait 93 à 148 ms par pas. Restent
-  l'advection, les bandes, l'éponge, la surface mobile et sa surface publiée, les diagnostics,
-  la scène et la revue.
+  GPU. **S299–S301** l'ont construite : le pas couplé entier tourne sur la carte (0,84 ms à
+  64 cycles sur 27 648 mailles), publie sa surface, se diagnostique en différé, et suit la
+  référence jusqu'à l'horizon de prévisibilité **de la référence elle-même** (≈ 1,2 s, A297).
+  Restent la scène et la revue.
 - **Ordonnanceur** (porte A) : décide qu'un domaine vit et avec quel budget ; ni plusieurs
   candidats, ni déplacement, ni dégradation automatique.
 - **V** : noyau reçu (C12, géométrie orientée, restauration), sans articulation avec δ.

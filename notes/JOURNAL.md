@@ -15080,3 +15080,51 @@ plafonds vérifiés à 0. Copie unique, jeton libre.
 *Tenue du plan* : P3 et P4 ont été fusionnés en un commit, et P5 découpé en P5a et P5b — les deux
 fois déclaré dans EN-COURS avant de committer. Un battement a été écrit 20:08 pour une horloge lue
 20:07 ; corrigé au rituel, sans conséquence de concurrence, une seule copie ayant travaillé.
+
+## S301 — 2026-09-19 — porte B : le pas de production est complet sur la carte
+
+**Entrée.** « Reprends le projet ». Copie unique, master propre, jeton libre ; plan committé avant
+tout code. Agent Claude Opus 5, application desktop, carte réelle.
+
+**Capacité reçue.** Le **pas couplé entier** tourne sur la carte, sur un seul device : fond évalué
+sur la carte, prédiction, second membre couplé, projection bornée à départ chaud, correction,
+extrapolation, transport et bandes, éponge, **surface publiée** dans un tampon à part (D7) et
+diagnostics D3 relus en différé. S299 et S300 vivaient chacun sur leur device et ne pouvaient pas
+s'enchaîner ; `Step3` compile leurs WGSL tels quels à côté du nouveau. **Ce qui devient possible** :
+rendre δ 3D dans une scène. **Consommateur** : la scène du critère 3. **Preuve** :
+[DELTA3D-PAS-GPU-S301](../docs/validation/DELTA3D-PAS-GPU-S301.md).
+
+**Mesures.** Chaque étage reçu contre le cœur : prédiction à 9·10⁻⁶ de l'incrément, pression à
+0,27 Pa sur 16 400 (64 cycles), vitesses à 2,6·10⁻⁵ de l'incrément, hauteur à un ulp et hauteur
+vraie à 3–4·10⁻⁸ m. Pas entier : **0,84 ms à 64 cycles** sur le cas S298 (27 648 mailles),
+64×64×32 sous 2 ms jusqu'à 32 cycles — médianes de banc, secteur relevé, pas la porte C.
+
+**Deux défauts trouvés par les bancs, corrigés avant commit.** Faces `i = nx`, `j = ny` couplées à
+tort (60 % de l'incrément, 1 % de la vitesse : rapporter à l'incrément était nécessaire). Et la
+**somme compensée annulée par le compilateur** : `(η + inc) − η` rendait `inc` au bit sur 165
+colonnes, inexact sur CPU pour 165. Remède en entiers sur les bits IEEE ; leçon **L346**.
+
+**Ce que la trajectoire a dit.** Sur le cas S298 la carte suit le cœur à quelques micromètres
+pendant une seconde, puis l'écart saute au centimètre **pour tous les nombres de cycles**. Sonde :
+une maille sèche d'un côté, mouillée de l'autre, la surface à 10⁻⁶ m de son centre. Contre-épreuve
+décisive : **deux cœurs partis à ±10⁻⁶ m divergent de la même façon** (4,5 cm en 6 s, premier
+millimètre à 1,3 s). C'est la référence qui est discontinue — la face de la couche partiellement
+mouillée bascule de projetée à extrapolée — et non la production. **A297** ouverte, sévérité 2.
+Le critère 2 se lit sur l'horizon de prévisibilité mesuré ; au-delà, la carte est dans
+l'enveloppe de la référence contre elle-même. Une fausse piste, notée : une sonde décalée d'un pas
+avait accusé B, que `--delta3d-fond-s298` a disculpé (9·10⁻⁸ m).
+
+**Partiel et suite.** Ni scène ni revue ; les cas de cuve de §4.1 ne sont pas rejoués sur la
+production (`Step3` exige un fond). À 16 cycles, 84 % des pas sont « dégradés » au sens d'ADR-144
+alors que la hauteur suit : constat remonté à la porte C, seuil non relevé. A286 et A98 inchangées.
+Aucun arbitrage de l'utilisateur requis : l'affinage du cœur ne se porte pas, ADR-175 D3 l'avait
+déjà tranché — ce n'était pas un ADR à écrire.
+
+**Rituel.** Maillons **0** : le pas de production, entrée du critère 3, est reçu. Huitième session
+sur la porte B, un critère avançant à chaque fois (A211). File active relue, quatre lignes
+remplacées dont A297 ajoutée ; feuille de route J2 et §3 bis, index. I-01/I-06/I-08/I-13/I-17
+relus, inchangés. Plafonds et navigation à 0. Recommandation du bilan S293 portée : porte B d'abord.
+
+*Tenue du plan* : P1 committé avec `[>]` (coché au commit suivant) ; P5, P6 et P7 fusionnés,
+déclaré ; `REPRISE.md` ré-encodé par `Set-Content` de PowerShell 5.1 dans le commit de P2, restauré
+par un commit séparé.
