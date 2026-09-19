@@ -58,81 +58,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S294 — **les arbitrages du 2026-09-19 consignés, l'architecture de δ en 3D décidée** — terminée
+Session : S295 — **porte B, lot 1 : la référence δ tridimensionnelle, surface linéarisée**
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
-Entrée : réponses de l'utilisateur aux questions de BILAN-GLOBAL-S293 §6, 2026-09-19 14:47,
-citées telles qu'écrites dans ADR-174 §1 (résumé : cible = ce poste ; les 2 ms peuvent changer
-tant que l'objectif est atteint ; v1 acceptée ; pas de distant ; ordre et architecture acceptés
-« si cela débloque » ; onde de S277 : ne sait pas).
-Objectif : que ces réponses deviennent des décisions écrites, que la porte B soit ouverte sans
-contredire la trajectoire, et que la 3D s'écrive une fois, au bon endroit. **Aucun code de
-solveur dans cette session** : elle prépare la construction de S295, qui visera une capacité.
+Entrée : suite désignée par S294 — porte en cours B (FEUILLE-DE-ROUTE §3 bis), ADR-175.
+Objectif : recevoir la première partie du critère 1 de la porte B (ADR-175 §4.1) sur le mode le
+plus simple : un domaine MAC x-y-z à surface **linéarisée** (le mode 2D de S233, ADR-141),
+référence CPU dans le cœur, **nouveau module, la 2D intacte**. Critères posés avant le code :
+1. `ny = 1` reproduit la trajectoire du solveur 2D de S233 sur le même bassin (écart publié ;
+   l'identité au bit n'est pas exigée, elle sera dite si elle a lieu) ;
+2. une hauteur initiale indépendante de `y` le reste, à l'arrondi près ;
+3. l'onde stationnaire **oblique** d'une cuve rectangulaire — mode (1, 1), `Lx` 8 m, `Ly` 4 m,
+   `h` 4 m, `A` 1 cm, vitesse nulle, 1 s — suit `η = A·cos(πx/Lx)·cos(πy/Ly)·cos(ωt)`,
+   `ω² = g·k·tanh(k·h)`, `k = π·√(1/Lx² + 1/Ly²)` : erreur maximale normalisée par `A`
+   publiée à plusieurs résolutions et pas, **décroissante en raffinant**, sous **1 %** au cas fin
+   — la tolérance de banc de S233, reprise telle quelle ;
+4. repos exact au bit, aucune allocation dans le pas, refus atomique sur non-convergence.
+Hors lot : surface mobile (lot 2), couplage à B/W (lot 3), production GPU (lot 4), coût.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seuls.
-- [x] **P2** — **ADR-174**, arbitrages de l'utilisateur : machine de référence ; budget de l'eau
-  au service de l'objectif, profil de travail avec une part pour δ ; v1 = portes A à D ; pas de
-  dépôt distant ; porte B avant la suite du coût en 2D ; onde de S277 sans verdict attendu.
-  Notes datées sur ADR-125 ; feuille §3 bis, bandeau de la file, REVUE-VISUELLE ; A296 close.
-- [x] **P3** — lire les contrats que la 3D touche (ADR-006, 007, 012, 143, 144, SPEC-004 δ,
-  structure de `delta_projection`) ; notes de conception ici.
-- [x] **P4** — **ADR-175**, architecture d'exécution de δ en 3D : pas de production résident sur
-  GPU à travail borné, erreur publiée et état dégradé déclaré, cœur CPU référence de réception ;
-  classe de fidélité par couche ; représentation 3D du régime perturbatif et voie non graphe (B3
-  préliminaire). Note datée sur ADR-173 ; A295 décidée.
-- [x] **P5** — pilotage : déclencheur d'A276 remplacé (L343) ; REPRISE §6 et METHODE — lot pris
-  dans les portes, maillons liés aux colonnes « reçu si » et aux points de la liste ; plafonds des
-  documents d'état, contrôlés par `outils/etat_projet.py`.
-- [x] **P6** — file active ramenée aux plafonds (état, déclencheur, lien).
-- [x] **P7** — états des jalons de la feuille de route ramenés aux plafonds.
-- [x] **P8** — rituel §6.
+- [ ] **P2** — module `delta3d` : domaine, champs, configuration comptée auprès de l'hôte (I-06),
+  opérateur de pression 3D ; essais : refus de configuration, symétrie et positivité.
+- [ ] **P3** — projection : gradient conjugué sans préconditionneur (le chemin 2D à couvercle
+  fixe), critère premier `10⁻⁶`, tolérance d'ADR-144, certificat d'arrondi `γ₁₀` dérivé pour six
+  faces (ADR-143) ; correction et divergence ; essais : divergence projetée, repos exact.
+- [ ] **P4** — pas à surface linéarisée (flux de colonne, somme compensée, refus atomique) ;
+  essais : `ny = 1` contre la 2D, invariance en `y`, aucune allocation.
+- [ ] **P5** — réception de l'onde oblique : banc `delta3d_lineaire`, preuve
+  `docs/validation/DELTA3D-LINEAIRE-S295.md`.
+- [ ] **P6** — rituel §6.
 
 ### Notes de reprise
 
-Réponses citées telles qu'écrites dans ADR-174 §1 ; elles font foi. Q3 : aucun dépôt distant, tout reste sur ce PC.
-
-**P3 — ce que les contrats disent de la 3D (14:50–14:51).**
-- **ADR-007** : `IFluidSolver` est défini **3D** dès S01 ; `step()` respecte son budget « quitte à
-  sous-résoudre — moins d'itérations de pression » ; §4.1 prévoit δ sur GPU avec
-  `latency_frames ≥ 1`, et la flottabilité ne lit jamais δ GPU de façon synchrone.
-- **SPEC-004 §4** : `StepResult.degraded` avec `PressureItersCut` — la coupe d'itérations
-  déclarée est **déjà** le contrat. **§8.4** : « la lecture synchrone n'existe pas » dans
-  `IGpuBackend`. Or le chemin S289–S291 **attend** la carte et relit la pression à chaque pas
-  (postes « attente » et « lecture ») : contradiction avec SPEC-004 §8.4, jamais relevée.
-- **ADR-012 §7** : tick de simulation fixe (30 Hz proposé), δ sur un fil avec au plus une image
-  de retard, rendu interpolé. §3 : cible de mesure = 99ᵉ centile, pas la moyenne.
-- **ADR-006 §3** : domaine = ensemble épars de blocs 8³, `dx` ∈ {0,02 … 1,00 m}. La bande de
-  l'afficheur est à `dx` = 2 m, **hors de ces niveaux** — à dire dans l'ADR, pas à corriger ici.
-- **ADR-143/144** : écrits pour l'opérateur 2D à quatre faces ; en 3D, `γ₁₀` est à dériver, et
-  ADR-144 note que franchir 32 768 mailles « est le point dur du passage à la 3D, qui y arrivera
-  d'emblée » — un domaine 32³ y est déjà. Les portes à chaque pas buteront immédiatement.
-- **Cœur 2D** (`delta_projection` et sous-modules, ≈ 3 300 lignes hors tests) : MAC, pression
-  scindée `p_hydro + p_dyn`, `g_eff` par la surface, fonction hauteur et fluide fantôme, bandes
-  de couplage B/W et éponge, multigrille, f32 avec coefficients construits en f64. Le GPU
-  (`pressure_cg.wgsl`) est écrit pour quatre faces.
-**Conséquence pour P4** : la décision n'invente pas une architecture, elle **revient à celle de
-S01/S04** (δ 3D, GPU, lecture différée, dégradation déclarée) qu'ADR-173 avait contournée.
-
-**P5 — pilotage (14:53–14:55).** REPRISE §6.7 : `Session suivante` se prend dans la porte ouverte
-de plus petit rang ; pas de troisième session consécutive sur un même point sans critère de
-porte avancé. Maillons : une capacité compte si elle avance un critère « reçu si » ou un point de
-la liste ; la clause « décision qui lève un blocage et nomme le lot » est conservée. §8 : plafonds
-90 mots par ligne de file, 450 mots par section de jalon, contrôlés par `etat_projet.py --check`
-(fonction `oversized`, un essai ajouté ; 5 essais de l'outil verts). METHODE étape 1 alignée.
-A276 : déclencheur « avant la 3D » remplacé. **22 dépassements** relevés par l'outil : 19 lignes
-de file, et les sections J1 (1 909 mots), J2 (1 489), J3 (1 031) — objets de P6 et P7.
-
-**P6 — file active (14:56–14:59).** Réécrite et rangée par porte (B, A, C, D, J1-bis, rendu de
-B, V, F et pilotage) : 5 806 → 3 030 mots, 38 → 19 ko, **aucune ligne au-dessus de 90 mots**.
-A292, A293 et A296 passent dans « Clos » ; A295 fusionnée dans la ligne de la porte B ; « CPU de
-préparation du sillage » fusionnée dans J1-bis ; rien d'autre retiré, les états détaillés
-restent dans le journal et les preuves. **Correction de règle** : « porte ouverte de plus petit
-rang » aurait renvoyé à la porte A ; REPRISE §6.7 et METHODE disent désormais « la porte en
-cours que désigne §3 bis », et §3 bis désigne B (D en parallèle) avec les dépendances qui fondent
-cet ordre.
-
-**P7 — feuille de route (14:59–15:02).** J1, J1-bis (désormais section propre, table d'ADR-131
-conservée et resserrée), J2 et J3 réécrits en état présent : 41,9 → 20,5 ko ; sections de
-30 à 299 mots, aucune au-dessus de 450 ; `etat_projet.py` : navigation 0 erreur, plafonds 0
-dépassement. L'histoire S-par-S reste au journal et dans les preuves liées. §5 : ADR-174 et 175.

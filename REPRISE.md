@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 15:01 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 15:04 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : aucune
+Session en cours : S295 — porte B, lot 1 : référence δ tridimensionnelle à surface linéarisée
 Dernière session : S294 — arbitrages du 2026-09-19 consignés (ADR-174), δ 3D décidé (ADR-175), pilotage par les portes, documents d'état ramenés sous plafond
-Session suivante : porte B, lot 1 — référence δ tridimensionnelle dans le cœur (module nouveau, la 2D intacte), reçue selon ADR-175 §4.1 : `ny = 1` contre les réceptions 2D de S237/S238, invariance en `y` sous une onde à crêtes longues, onde stationnaire oblique contre `ω² = g·k·tanh(k·h)`. Découper en lots d'une session ; la scène-témoin de la porte D peut avancer en parallèle.
-Maillons        : 0 — S294 lève le blocage de la porte B et nomme le lot désormais exécutable (clause « décision qui lève un blocage », REPRISE §6) ; la suivante doit recevoir un critère de porte
+Session suivante : à fixer au rituel de S295. À défaut : porte B, lot 2 — surface mobile de la référence 3D.
+Maillons        : 0 — S294 lève le blocage de la porte B et nomme le lot désormais exécutable ; S295 doit recevoir un critère de porte
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
