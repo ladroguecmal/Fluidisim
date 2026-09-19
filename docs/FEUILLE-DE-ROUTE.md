@@ -344,9 +344,13 @@ non financé ; les appels répétés pendant une pause ne changent plus l'estima
 moyennes 13,15/9,11 ms par image et pics de pas >32 ms. La cadence seule ne reçoit ni la
 fidélité ni I-05 ; priorité au coût par pas avant 3D. [Preuve](validation/CADENCE-DELTA-S286.md).
 **S287 : parcours mémoire CPU éprouvé puis retiré**, gain complet non robuste ; empreintes
-des six trajectoires identiques. Prochain lot : candidat de pression résidente GPU, contrat
-puis opérateur/lissage contre référence CPU ; aucun solveur δ GPU encore construit.
-[Mesures](validation/PASSES-PRESSION-S287.md).
+des six trajectoires identiques ([mesures](validation/PASSES-PRESSION-S287.md)).
+**S288 : opérateur mobile et lissage GPU construits**, contrat ADR-172, export natif reçu au
+bit et 30 cas GPU contre CPU (erreur relative max 1,686·10⁻⁷, repos exact). À 128×52,
+32 lissages : 1,10–1,24 ms complets contre 2,52–2,84 ms CPU scalaire. **Pas encore un solveur
+de pression ni une accélération de l'afficheur** ; allocations pile/banc et pics persistent.
+Prochain lot : réductions/cycle et acceptation, puis intégration au pas réel.
+[Réception et limites](validation/PRESSION-GPU-S288.md).
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.

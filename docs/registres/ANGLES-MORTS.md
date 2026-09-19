@@ -3830,3 +3830,12 @@ qui se recouvrent après A/B/B/A. Pas de gain livré. Suite : contrat d'un candi
 résidente GPU, opérateur/lissage contre CPU et coût incluant transferts/synchronisations,
 avant cycle complet et intégration. Pas de preuve GPU acquise par la seule présence de wgpu.
 [Mesures et limites](../validation/PASSES-PRESSION-S287.md).
+
+**Suivi A276 — S288, 2026-09-19 (sévérité conservée).** Opérateur mobile et lissages GPU
+reçus contre CPU, 30 cas, erreur normalisée ≤1,686·10⁻⁷ ; export natif au bit. 32 lissages
+à 128×52 : coût complet 1,10–1,24 ms ; à 256×128 : 2,40–2,44 ms, maximum 4,22 ms sur ce lot.
+Préparation comprise et sans allocation, mais pile/banc jusqu'à 105 allocations/appel.
+Ni solveur complet, ni certificat de convergence, ni pas intégré, ni I-05/I-06 globaux reçus.
+Déclencheur : construction du solveur résident puis intégration, avec réduction/cycle, refus
+atomiques et coût réel ; ne pas extrapoler un gain de noyau au pas ou à toute l'eau.
+[Réception et limites](../validation/PRESSION-GPU-S288.md).

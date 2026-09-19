@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S288 — en cours
+Session : S288 — terminée
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : continuer ; premier candidat GPU du calcul de pression.
 Objectif : construire et éprouver opérateur mobile et lissage résidents GPU contre le cœur.
@@ -72,7 +72,7 @@ Objectif : construire et éprouver opérateur mobile et lissage résidents GPU c
   banc sur géométries planes/coupées/ondulées et tailles différentes ; découper si nécessaire.
 - [x] **P4** — mesures précision/coût complet/allocations, suites pertinentes et limites ;
   ni cycle complet ni simulation intégrée revendiqués avant leur construction.
-- [ ] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
+- [x] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
 ### Notes de reprise
 

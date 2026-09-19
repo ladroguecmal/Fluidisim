@@ -14426,3 +14426,37 @@ viser une construction consommable plutôt qu'une nouvelle micro-optimisation lo
 **Rituel :** file active entièrement relue, prochain lot remplacé, feuille de route/index
 actualisés, A276 suivi ; I-04/I-05/I-06/I-12/I-17 conservés. Maillons = 1, instrument seul ne
 valant pas capacité de jeu. Une copie principale, rien à fermer ; plan terminé et jeton libre.
+
+## S288 — 2026-09-19 — première pression sur GPU
+
+**Entrée :** continuer. Troisième lot coût comparé à 3D/solides : construire le chemin moins
+cher avant de multiplier les mailles. ADR-172 acte un candidat dans l'hôte wgpu existant,
+sans nouvelle dépendance ; cœur toujours sans dépendance, δ toujours cosmétique.
+
+**Construit et reçu :** export préalloué de l'opérateur mobile réel (au bit contre natif),
+consommé par opérateur et Jacobi GPU ; jusqu'à32 lissages sans retour CPU intermédiaire.
+30 cas, trois tailles, plans/coupés/ondulés, repos exact, erreur normalisée max1,686e-7.
+Le test cœur inclut surface couplée distincte de η et refus atomiques. [Preuve](../docs/validation/PRESSION-GPU-S288.md).
+
+**Coût de la brique :**32 lissages128×52 coûtent1,1020–1,2410 ms, export/empaquetage,
+transferts/attentes compris, contre2,5213–2,8444 ms CPU scalaire des mêmes lignes. GPU seul
+0,09–0,096 ms. À256×128, complet2,40–2,44 ms ; petite grille défavorable. Secteur aux bornes,
+RTX5070/DX12. Préparation sans allocation, pile+banc jusqu'à105 allocations/appel, pics
+jusqu'à4,731 ms en régime et5,518 au premier appel. Pas de réception I-05/I-06 image.
+
+**Vérification :**508 tests cœur/harnais +36 viewer réussis,19 ignorés,0 échec ; banc GPU
+exécuté explicitement. Deux noms réservés WGSL corrigés pendant construction. Le premier
+chronométrage omettait la préparation : élargi avant les chiffres finaux, pas masqué.
+
+**Non-fait et suite :** ni convergence, ni cycle/réductions complets, ni correction des vitesses,
+ni trajectoire ou gain interactif. Maillons=2 : le banc consommateur ne vaut pas jeu. Prochaine
+capacité : projection GPU intégrable, solveur résident et portes d'acceptation/refus contre CPU,
+puis consommation par le pas réel ; ne pas ouvrir une nouvelle micro-optimisation isolée.
+Comparaison de priorité :3D/solides restent obligatoires, A276 les précède pour éviter une
+augmentation de coût déjà incompatible. A290/cadence/V/B2/bathymétrie/multiplateforme,
+proposition V1 et verdict S277 gardent leurs déclencheurs. Un troisième maillon nécessiterait
+justification explicite : ne pas déclarer cette projection intégrée avant preuve.
+
+**Rituel :** file active entièrement relue, état courant remplacé, feuille/index et A276
+actualisés, ADR nouveau indexé ; I-04/I-05/I-06/I-13/I-17 préservés (aucun état δ persisté).
+Plan terminé, jeton libre, copie principale unique et aucune fermeture nécessaire.

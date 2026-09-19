@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 11:43 +02:00
+JETON            : libre
+Battement        : 2026-09-19 11:45 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : S288 — opérateur de pression GPU
-Dernière session : S287 — parcours mémoire CPU éprouvé puis retiré ; empreintes de trajectoires disponibles
-Session suivante : A276, candidat de pression résidente GPU : contrat/ADR puis opérateur et lissage contre CPU, coût avec transferts/synchronisations ; avant cycle complet, 3D/deuxième domaine. Comparer ce troisième lot de coût aux capacités absentes. Cadence lente, A290, échecs représentatifs, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
-Maillons        : 1 — diagnostic et instrument reçus, aucun gain de simulation livré
+Session en cours : —
+Dernière session : S288 — opérateur mobile et lissages GPU reçus au banc, ADR-172 ; solveur intégré encore absent
+Session suivante : A276, construire le solveur de pression résident GPU (réductions/cycle, acceptation/refus CPU) puis le consommer dans le pas réel ; pas de nouveau raffinement isolé. Priorité comparée à 3D/solides en S288. Cadence lente, A290, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Maillons        : 2 — noyaux consommés au banc, pas encore de gain de jeu ; prochaine capacité visée : projection GPU intégrable
 
 ```
 
