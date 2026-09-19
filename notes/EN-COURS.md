@@ -127,6 +127,12 @@ dans le banc : c'est lui qui voit une règle de bord portée autrement, l'arrond
 Rapporter l'écart à l'incrément et non à la vitesse était nécessaire : rapporté à la vitesse, le
 même défaut ne pesait que 1 %.
 
+**Incident d'outillage, corrigé par un commit séparé** : le battement de P2 a été écrit par
+`Get-Content -Raw | Set-Content -Encoding utf8` de Windows PowerShell 5.1, qui **lit en ANSI** :
+`REPRISE.md` est parti ré-encodé (mojibake) dans `fff03d5`. Restauré depuis `7ebeeb5`, battement
+réécrit à l'outil d'édition. **Ne jamais réécrire un fichier du dépôt par `Get-Content` /
+`Set-Content`** ; `[IO.File]::ReadAllText/WriteAllText` (UTF-8 par défaut) ou l'outil d'édition.
+
 ---
 
 ### Notes de reprise de S300 (conservées pour le lot)
