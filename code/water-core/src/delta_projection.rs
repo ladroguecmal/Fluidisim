@@ -43,7 +43,8 @@ use crate::host::{AllocError, HostServices, JobSystem, MonotonicClock};
 #[path = "delta_budget.rs"]
 mod budget;
 pub use budget::{BudgetReport, Phase};
-use budget::Control;
+pub use budget::{STAGES, STAGE_NAMES};
+use budget::{Control, Stage};
 // S237 : surface géométriquement mobile (fonction hauteur, fluide fantôme). Voir SURFACE-MOBILE-S237.
 #[path = "delta_mobile.rs"]
 mod mobile;
@@ -260,6 +261,10 @@ pub struct Volume {
     eta_roundoff: Vec<f32>,
     saved_eta_roundoff: Vec<f32>,
     last_cost_ms: Option<f32>,
+    /// S291 : temps du dernier pas, par phase publique et par étape fine, en ns. Les deux sommes
+    /// valent `elapsed_ns` du rapport. Nuls si le pas a reçu une horloge figée.
+    last_phase_ns: [u64; 8],
+    last_stage_ns: [u64; STAGES],
     /// S237 : niveau de référence de la pression hydrostatique du mode mobile. `z₀` par défaut.
     rest: f32,
     /// S237 : vrai pendant un pas mobile — opérateur, second membre et correction lisent alors
@@ -374,6 +379,8 @@ impl Volume {
             eta_roundoff: vec![0.; nx],
             saved_eta_roundoff: vec![0.; nx],
             last_cost_ms: None,
+            last_phase_ns: [0; 8],
+            last_stage_ns: [0; STAGES],
             rest: domain.z0(),
             mobile: false,
             prec: vec![0.0f32; nx * nz],
@@ -798,6 +805,11 @@ impl Volume {
         (full + (wet - full) * (0.5 * (h0 + h1))).clamp(0., 1.)
     }
 
+    /// S291 : carte du coût du dernier pas. `[u64; 8]` dans l'ordre de `Phase`.
+    pub fn last_phase_ns(&self) -> [u64; 8] { self.last_phase_ns }
+    /// S291 : la même durée, découpée plus finement ; noms dans `STAGE_NAMES`.
+    pub fn last_stage_ns(&self) -> [u64; STAGES] { self.last_stage_ns }
+
     pub fn caps(&self) -> Caps {
         Caps {
             cost_per_block_ms: self.last_cost_ms,
@@ -1121,6 +1133,7 @@ impl Volume {
     fn project_with(&mut self, scale: f32, k1: f32, max_iters: u32, multigrid: bool, jobs: &dyn JobSystem,
         ctl: &mut Control, external: Option<&mut mobile::ExternalPressure<'_>>) -> Result<Report, Error> {
         ctl.check(Phase::Rhs)?;
+        ctl.mark(Stage::Rhs);
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx * dx);
         let mut rhs = core::mem::take(&mut self.rhs);
@@ -1174,6 +1187,7 @@ impl Volume {
         // S276, ADR-169 : en mode mobile, sur demande du pas, départ depuis la pression publiée,
         // nulle hors des mailles mouillées ; résidu vrai `b − A·p`. Second membre nul : départ nul.
         ctl.check(Phase::Pressure)?;
+        ctl.mark(Stage::Warm);
         #[cfg(test)]
         let cold = WARM_PRESSURE_OFF.with(|c| c.get());
         #[cfg(not(test))]
@@ -1270,6 +1284,7 @@ impl Volume {
         let mut physical_target = f32::INFINITY;
         let (mut checkpoint, mut power, mut since): (Option<u64>, u32, u32) = (None, 1, 0);
         let actual_rr = loop {
+            ctl.mark(Stage::Iterate);
             let before_iterations = it;
             // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
             while b2 > 0. && (rr > tol * b2 || rr > physical_target) && it < max_iters {
@@ -1315,6 +1330,7 @@ impl Volume {
                 rr = rn;
                 it += 1;
             }
+            ctl.mark(Stage::Gate);
             let mut tmp = core::mem::take(&mut self.tmp);
             let result = self.apply(&self.p, &mut tmp, ctl);
             self.tmp = tmp;
@@ -1398,8 +1414,10 @@ impl Volume {
             }
         };
         // Correction : `u = u* − (dt/ρ)·∂p/∂x`, demi-maille au couvercle.
+        ctl.mark(Stage::Correct);
         self.correct_into_uw(k1, ctl, Phase::Correct)?;
         let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
+        ctl.mark(Stage::Diagnose);
         let projected = self.divergence_metric(ctl, Phase::Diagnostics)?;
         let divergence = projected.all;
         // S239, ADR-144 : la tolérance physique de S199 est nécessaire dans **tout** chemin

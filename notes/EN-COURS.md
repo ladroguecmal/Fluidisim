@@ -69,7 +69,7 @@ sans déplacer d'un bit ce que le pas publie.
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — cœur : accumuler le temps **par phase** (les huit de `delta_budget`), exposé sans
+- [x] **P2** — cœur : accumuler le temps **par phase** (les huit de `delta_budget`), exposé sans
   changer les structures publiques ; **mesurer ce que l'instrument lui-même coûte**, et le dire.
 - [ ] **P3** — banc de décomposition : part de chaque phase sur un vrai pas, deux tailles, deux
   fonds, avec et sans candidat GPU. C'est cette carte qui décide de la suite, pas la lecture.
@@ -111,6 +111,16 @@ mesurés : S244 n'avait cartographié que la boucle de pression, qui n'est plus 
 7. **Le sondage lit l'horloge une fois par 64 mailles.** Toutes les mesures de S289 et S290 ont
    été prises avec une horloge **figée** (`now_ns → 0`), donc quasi gratuite : elles ne disent
    rien du coût réel du sondage en production. À quantifier avant de proposer quoi que ce soit.
+
+P2 : instrument posé. `Control` referme chaque segment de temps et l'attribue **aux deux**
+décompositions — les huit `Phase` publiques et douze `Stage` internes. Les deux sommes valent
+`elapsed()` par construction : c'est la paire qui doit rendre le même nombre (L339), et le banc
+la publiera. `Phase` n'a pas gagné de variante : son test d'exhaustivité de S230 (huit points
+d'expiration atteignables dans `step_budgeted`) aurait cassé, et il vaut mieux que le découpage
+de mesure reste interne. `Volume::last_phase_ns()` et `last_stage_ns()` exposent la carte sans
+toucher aux structures publiques. Coût marginal de l'instrument : deux additions par `check`
+déjà existant, plus onze `mark` par pas — onze lectures d'horloge, contre des centaines déjà
+faites par le sondage. Vérification : 75 essais delta et 16 du harnais budgétaire réussis.
 
 Ce qui reste hors de ce lot : multigrille GPU, 3D, solides, boucle d'image, multiplateforme,
 calibration automatique de la longueur de cycle. Et **aucune porte d'acceptation ne bouge** :

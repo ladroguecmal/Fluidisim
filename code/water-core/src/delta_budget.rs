@@ -16,6 +16,40 @@ pub struct BudgetReport {
     pub report: Option<super::Report>,
 }
 
+/// S291 — découpage **fin** du pas, pour la carte du coût. Il est interne : `Phase` reste le
+/// vocabulaire public des expirations (ADR-007, réception S230), et son test d'exhaustivité tient.
+/// Les deux décompositions partagent la même frontière de temps, donc leurs sommes sont égales —
+/// c'est la paire qui doit rendre le même nombre, et le banc la publie (L339).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Stage {
+    /// Garde de géométrie d'entrée.
+    Guard,
+    /// Mise à l'abri de l'état publié et permutations.
+    Save,
+    Advect,
+    /// Divergence du champ prédit, second membre, préconditionneur, niveaux.
+    Rhs,
+    /// Départ chaud : nettoyage, candidat externe, vrai résidu initial, `‖b‖²`.
+    Warm,
+    /// Les itérations du gradient conjugué.
+    Iterate,
+    /// Les portes d'acceptation : vrai résidu recalculé, tolérance physique, erreur inverse,
+    /// empreinte de détection de cycle.
+    Gate,
+    /// Correction finale des faces.
+    Correct,
+    /// Diagnostics publiés du rapport.
+    Diagnose,
+    Extrapolate,
+    Transport,
+    /// Contrôle de finitude et garde de géométrie de sortie.
+    Validate,
+}
+pub const STAGES: usize = 12;
+pub const STAGE_NAMES: [&str; STAGES] = ["garde", "sauvegarde", "advection", "second_membre",
+    "depart", "iterations", "portes", "correction", "diagnostics", "extrapolation", "transport",
+    "validation"];
+
 pub(super) struct Control<'a> {
     clock: Option<&'a dyn MonotonicClock>,
     start: u64,
@@ -23,10 +57,15 @@ pub(super) struct Control<'a> {
     limit: u64,
     left: usize,
     pub phase: Phase,
+    stage: Stage,
+    /// Temps par phase publique et par étape fine, en ns. Nuls sans horloge.
+    pub spent: [u64; 8],
+    pub spent_stage: [u64; STAGES],
 }
 impl<'a> Control<'a> {
     pub fn unlimited() -> Self {
-        Self { clock: None, start: 0, last: 0, limit: 0, left: 0, phase: Phase::Prepare }
+        Self { clock: None, start: 0, last: 0, limit: 0, left: 0, phase: Phase::Prepare,
+            stage: Stage::Guard, spent: [0; 8], spent_stage: [0; STAGES] }
     }
     pub fn new(clock: &'a dyn MonotonicClock, budget_ms: f32) -> Result<Self, Error> {
         let ns = budget_ms as f64 * 1_000_000.;
@@ -35,17 +74,38 @@ impl<'a> Control<'a> {
     }
     pub fn from_ns(clock: &'a dyn MonotonicClock, limit: u64) -> Self {
         let start = clock.now_ns();
-        Self { clock: Some(clock), start, last: start, limit, left: 0, phase: Phase::Prepare }
+        Self { clock: Some(clock), start, last: start, limit, left: 0, phase: Phase::Prepare,
+            stage: Stage::Guard, spent: [0; 8], spent_stage: [0; STAGES] }
     }
     pub fn limited(&self) -> bool { self.clock.is_some() }
     pub fn elapsed(&self) -> u64 { self.last - self.start }
-    pub fn check(&mut self, phase: Phase) -> Result<(), Error> {
-        self.phase = phase;
+    /// Referme le segment courant et l'attribue **aux deux** décompositions. `sum(spent)` et
+    /// `sum(spent_stage)` valent donc toujours `elapsed()`.
+    #[inline]
+    fn close(&mut self, now: u64) {
+        let d = now - self.last;
+        self.spent[self.phase as usize] += d;
+        self.spent_stage[self.stage as usize] += d;
+        self.last = now;
+    }
+    /// Change d'étape fine. Lit l'horloge une fois — une dizaine de fois par pas, pas par maille.
+    pub fn mark(&mut self, stage: Stage) {
         if let Some(clock) = self.clock {
             let now = clock.now_ns();
-            if now < self.last { return Err(Error::Clock); }
-            self.last = now;
+            // Une horloge qui recule est signalée par `check`, pas ici : `mark` ne décide rien.
+            if now >= self.last { self.close(now); }
+        }
+        self.stage = stage;
+    }
+    pub fn check(&mut self, phase: Phase) -> Result<(), Error> {
+        if let Some(clock) = self.clock {
+            let now = clock.now_ns();
+            if now < self.last { self.phase = phase; return Err(Error::Clock); }
+            self.close(now);
+            self.phase = phase;
             if self.elapsed() >= self.limit { return Err(Error::Budget); }
+        } else {
+            self.phase = phase;
         }
         self.left = 63;
         Ok(())

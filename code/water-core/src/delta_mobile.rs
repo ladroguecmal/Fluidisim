@@ -5,7 +5,7 @@
 //! La condition `p = 0` à la surface est imposée par **fluide fantôme** : entre une maille fluide et
 //! une maille d'air, l'interface est à `θ·dx` du centre fluide, et l'opérateur reçoit `a/θ` sur sa
 //! diagonale — ses termes hors diagonale ne changent pas, il reste symétrique.
-use super::{budget, Control, Error, Phase, SurfaceReport, Volume};
+use super::{budget, Control, Error, Phase, Stage, SurfaceReport, Volume};
 use crate::host::{JobSystem, MonotonicClock};
 
 /// Borne inférieure de `θ` (fraction de maille entre un centre fluide et la surface).
@@ -588,7 +588,9 @@ impl Volume {
         let mut swapped = false;
         let result = (|| {
             ctl.check(Phase::Prepare)?;
+            ctl.mark(Stage::Guard);
             if !self.surface_in_bounds(&mut ctl, Phase::Prepare)? { return Err(Error::Domain); }
+            ctl.mark(Stage::Save);
             budget::copy(&self.u, &mut self.saved_u, &mut ctl, Phase::Prepare)?;
             budget::copy(&self.w, &mut self.saved_w, &mut ctl, Phase::Prepare)?;
             budget::copy(&self.p, &mut self.saved_p, &mut ctl, Phase::Prepare)?;
@@ -598,6 +600,7 @@ impl Volume {
             core::mem::swap(&mut self.eta, &mut self.saved_eta);
             core::mem::swap(&mut self.eta_roundoff, &mut self.saved_eta_roundoff);
             swapped = true;
+            ctl.mark(Stage::Advect);
             self.advect(advection, &mut ctl)?;
             self.mobile = true;
             // S276, ADR-169 : même départ que le pas couplé, pour garder l'identité au fond nul.
@@ -608,9 +611,12 @@ impl Volume {
             self.mobile = false;
             let report = projected?;
             if report.degraded { return Err(Error::Convergence); }
+            ctl.mark(Stage::Extrapolate);
             self.extrapolate_mobile(&mut ctl)?;
+            ctl.mark(Stage::Transport);
             self.transport_mobile(transport, &mut ctl)?;
             ctl.check(Phase::Validate)?;
+            ctl.mark(Stage::Validate);
             for value in self.u.iter().chain(&self.w).chain(&self.p).chain(&self.eta)
                 .chain(&self.eta_roundoff).chain(&self.us).chain(&self.ws)
                 .chain(&self.rhs).chain(&self.res).chain(&self.dir).chain(&self.tmp) {
@@ -628,6 +634,8 @@ impl Volume {
             core::mem::swap(&mut self.eta, &mut self.saved_eta);
             core::mem::swap(&mut self.eta_roundoff, &mut self.saved_eta_roundoff);
         }
+        self.last_phase_ns = ctl.spent;
+        self.last_stage_ns = ctl.spent_stage;
         match result {
             Ok(report) => {
                 let elapsed_ns = ctl.elapsed();
