@@ -84,7 +84,7 @@ solveur dans cette session** : elle prépare la construction de S295, qui visera
 - [x] **P5** — pilotage : déclencheur d'A276 remplacé (L343) ; REPRISE §6 et METHODE — lot pris
   dans les portes, maillons liés aux colonnes « reçu si » et aux points de la liste ; plafonds des
   documents d'état, contrôlés par `outils/etat_projet.py`.
-- [ ] **P6** — file active ramenée aux plafonds (état, déclencheur, lien).
+- [x] **P6** — file active ramenée aux plafonds (état, déclencheur, lien).
 - [ ] **P7** — états des jalons de la feuille de route ramenés aux plafonds.
 - [ ] **P8** — rituel §6.
 
@@ -122,3 +122,12 @@ la liste ; la clause « décision qui lève un blocage et nomme le lot » est co
 (fonction `oversized`, un essai ajouté ; 5 essais de l'outil verts). METHODE étape 1 alignée.
 A276 : déclencheur « avant la 3D » remplacé. **22 dépassements** relevés par l'outil : 19 lignes
 de file, et les sections J1 (1 909 mots), J2 (1 489), J3 (1 031) — objets de P6 et P7.
+
+**P6 — file active (14:56–14:59).** Réécrite et rangée par porte (B, A, C, D, J1-bis, rendu de
+B, V, F et pilotage) : 5 806 → 3 030 mots, 38 → 19 ko, **aucune ligne au-dessus de 90 mots**.
+A292, A293 et A296 passent dans « Clos » ; A295 fusionnée dans la ligne de la porte B ; « CPU de
+préparation du sillage » fusionnée dans J1-bis ; rien d'autre retiré, les états détaillés
+restent dans le journal et les preuves. **Correction de règle** : « porte ouverte de plus petit
+rang » aurait renvoyé à la porte A ; REPRISE §6.7 et METHODE disent désormais « la porte en
+cours que désigne §3 bis », et §3 bis désigne B (D en parallèle) avec les dépendances qui fondent
+cet ordre.

@@ -422,6 +422,12 @@ Si les deux divergent un jour, **§2 fait foi** et cette section est fausse (L13
 **Une porte se franchit quand sa colonne « reçu si » est vraie, pas quand le code existe.** Un
 système qu'on n'a pas éprouvé n'est pas construit : il est écrit.
 
+**Porte en cours, S294 (2026-09-19) : B**, avec **D en parallèle** par la scène-témoin de la v1.
+Dépendances qui fondent cet ordre (ADR-127 §6, L343) : la porte C se reçoit sur la scène de B ;
+les critères restants de A — plusieurs candidats, domaine qui se déplace et se redimensionne —
+portent sur les domaines 3D que B définit ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)
+D6) ; D ne dépend que de B+W. Ordre accepté par l'utilisateur ([ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) D6).
+
 | porte | ce qu'on crée | ce qui l'éprouve | reçu si |
 |---|---|---|---|
 | **A — ce qui décide** *(en cours)* | l'ordonnanceur : quels domaines vivent, où, de quelle forme, et ce qu'on dégrade quand le budget manque | banc **B8** (seuils, inexistant) ; la bande δ de l'afficheur comme premier consommateur | plusieurs candidats réels se disputent un budget ; un domaine **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint ; la dégradation d'ADR-012 §4 rang 1 existe, donc la famine a une issue |

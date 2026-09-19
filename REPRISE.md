@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 14:55 +02:00
+Battement        : 2026-09-19 14:59 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
 Session en cours : S294 — consigner les arbitrages de l'utilisateur du 2026-09-19, décider l'architecture de δ en 3D, lever les verrous de pilotage
 Dernière session : S293 — audit global : le projet bloque sur l'ordre de ses travaux ; BILAN-GLOBAL-S293
@@ -135,8 +135,8 @@ Ses nombres mesurent des fichiers et des modifications, **pas du temps ni des ca
    note factuelle datée ; une décision remplacée exige un nouvel ADR. Mettre les nouveaux
    documents utiles dans l'index ; vérifier les décomptes seulement s'ils sont encore affichés.
 6. Mettre à jour jeton, session, battement et état ; cocher le rituel avant son commit.
-7. Relire **toute la file active**. **`Session suivante` se prend dans la porte ouverte de plus
-   petit rang** de [FEUILLE-DE-ROUTE §3 bis](docs/FEUILLE-DE-ROUTE.md), ou dans la demande de
+7. Relire **toute la file active**. **`Session suivante` se prend dans la porte en cours** que
+   désigne [FEUILLE-DE-ROUTE §3 bis](docs/FEUILLE-DE-ROUTE.md), ou dans la demande de
    l'utilisateur : la suite qu'une session déclare n'est qu'une proposition. Un même point de
    file ne porte pas une troisième session consécutive si aucun critère « reçu si » d'une porte
    n'a avancé (S294, A211). La recommandation du dernier bilan est portée ou écartée au journal.
