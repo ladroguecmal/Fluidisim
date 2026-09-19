@@ -58,6 +58,12 @@ deux trajectoires au même pas, les champs avant transfert sont vérifiés au bi
 centraux séparent préparation et réduction sur la même fenêtre de 5,120 s (S285).
 [Résultats et limites](../docs/validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
 
+`--delta-cadence` compare les pas 16/32/48 ms, le coût par image et les erreurs entre calculs.
+Les cadences lentes restent au banc : elles dépassent 3 mm sur l'onde injectée et ne tiennent
+pas le budget de 2 ms. L'afficheur conserve 16 ms. L'oubli des anciennes mesures de coût dépend
+désormais du temps simulé, sans effet des appels répétés pendant une pause.
+[Mesures S286](../docs/validation/CADENCE-DELTA-S286.md).
+
 ```powershell
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --verify
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --smoke

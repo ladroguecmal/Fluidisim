@@ -1025,6 +1025,41 @@ mod tests {
     }
 
     #[test]
+    fn slower_clock_holds_pauses_and_rewinds_s286() {
+        let b = flat_background().unwrap();
+        assert!(Live::with_step(&b, initial_wave(0.6), 0).is_err());
+        assert!(Live::with_step(&b, initial_wave(0.6), 20_000).is_err());
+        for multiple in [2, 3] {
+            let mut live = Live::with_step(&b, initial_wave(0.6), multiple*FRAME_US).unwrap();
+            let mut sparse = Live::with_step(&b, initial_wave(0.6), multiple*FRAME_US).unwrap();
+            let (mut out, mut expected) = ([0.; NX], [0.; NX]);
+            live.advance(0., &mut out).unwrap();
+            for n in 1..=6 {
+                let previous = out;
+                let t = n as f64*0.016;
+                assert_eq!(live.advance(t, &mut out).unwrap(), n % multiple == 0);
+                if n % multiple == 0 {
+                    assert!(sparse.advance(t, &mut expected).unwrap());
+                    assert_eq!(out, expected, "les appels intermédiaires ne changent pas la physique");
+                } else { assert_eq!(out, previous); }
+                assert!(!live.advance(t, &mut out).unwrap());
+                assert_eq!(live.steps, n/multiple);
+                assert_eq!(live.step_ms, 0.);
+            }
+            // Retour dans l'intervalle entre deux calculs : détecté même si now_us ne recule pas.
+            assert!(!live.advance(0.104, &mut out).unwrap());
+            assert!(!live.advance(0.100, &mut out).unwrap());
+            assert_eq!(live.now_us(), START_US+100_000);
+            assert_eq!(live.steps, 0);
+            let time = 0.100 + (multiple*FRAME_US) as f64*1e-6;
+            assert!(live.advance(time, &mut out).unwrap());
+            assert!(!live.advance(1., &mut out).unwrap());
+            assert_eq!(live.now_us(), START_US+1_000_000);
+            assert_eq!(live.steps, 0);
+        }
+    }
+
+    #[test]
     fn cost_forgetting_follows_time_not_calls_s286() {
         let b = flat_background().unwrap();
         let mut layer = Layer::direct(&b, [REST; NX]).unwrap();

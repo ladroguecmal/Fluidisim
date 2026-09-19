@@ -80,3 +80,8 @@ l'organisation des passes CPU ; décider l'architecture avant 3D/deuxième domai
 de la cadence attend ce chemin, ou un schéma temporel reçu sur l'onde. Coût des échecs de
 solveur/budget **non qualifié** : le dispositif de mesure est prêt, mais aucun échec représentatif
 n'a été observé. Ne pas extrapoler à partir d'un refus artificiel d'arguments.
+
+Réception logicielle : **36 tests viewer réussis, un ignoré, aucun échec**. Tests de l'oubli
+temporel, de la pause, du retour à l'intérieur d'un intervalle sans pas, du saut d'horloge et
+de l'identité des trajectoires avec/sans appels intermédiaires. Suite cœur inchangée : reçu
+S284 (507 réussis, 18 ignorés) conservé, non rejoué. Aucun rendu visuel reçu dans cette session.

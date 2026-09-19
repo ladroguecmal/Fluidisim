@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 10:54 +02:00
+Battement        : 2026-09-19 10:56 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
 Session en cours : S286 — cadence et coût de delta
 Dernière session : S285 — dérive attribuée par trois témoins ; préparation et évolution réduite toutes deux en cause

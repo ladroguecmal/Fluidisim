@@ -71,7 +71,7 @@ au nombre d'appels dans le vieillissement des coûts avant cette intégration.
   de temps éprouvés, historique des vrais pas conservé.
 - [x] **P3** — pas Live configurable 16/32/48 ms, comparaison à instants communs et par image,
   coût complet et refus publiés ; ne pas activer par défaut une cadence non reçue.
-- [ ] **P4** — tests et réception, intégration expérimentale seulement si critères tenus,
+- [x] **P4** — tests et réception, intégration expérimentale seulement si critères tenus,
   diagnostic explicite sinon ; découper avant quinze minutes.
 - [ ] **P5** — rituel §6 : preuves, journal, file/feuille/index, jeton libre.
 
@@ -91,3 +91,6 @@ P2 : régression rouge (8 mesures devenaient 7 au même temps), puis verte : oub
 P3 : 32/48 ms réduisent la moyenne mais échouent sur onde 0,6 m : 4,445/8,916 mm
 aux instants calculés. Moyennes 13,150/9,108 ms, pires pas 32,319/32,708 ms. Secteur
 aux deux bornes, zéro allocation. Pas de refus représentatif observé, coût des échecs ouvert.
+
+P4 : 36 tests viewer réussis, 1 ignoré, aucun échec. Cadences lentes privées au banc ;
+maintien, pause, retour et saut éprouvés. Correction de vieillissement intégrée au chemin image.
