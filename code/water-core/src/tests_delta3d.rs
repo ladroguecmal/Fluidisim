@@ -586,3 +586,49 @@ fn coupled_refusal_is_atomic_and_disarms_geometry_s297() {
     }
     v.step_surface_mobile(1000,4000,&Jobs).unwrap();
 }
+
+use crate::background::BackgroundSample;
+#[path = "../examples/support/standing_background.rs"]
+#[allow(dead_code)]
+mod standing297;
+fn standing_samples297(v:&Volume3,time:f64,axis:usize)->(Vec<BackgroundSample>,Vec<BackgroundSample>,Vec<BackgroundSample>) {
+    let d=v.domain;let wave=standing297::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let mut fields=[vec![BackgroundSample::default();v.u.len()],vec![BackgroundSample::default();v.v.len()],vec![BackgroundSample::default();v.w.len()]];
+    for component in 0..3 {
+        let end=[d.nx+usize::from(component==0),d.ny+usize::from(component==1),d.nz+usize::from(component==2)];
+        for k in 0..end[2] {for j in 0..end[1] {for i in 0..end[0] {
+            let p=[i,j,k];let x=(p[axis] as f64+if component==axis {0.} else {0.5})*d.dx as f64;
+            let z=(k as f64+if component==2 {0.} else {0.5})*d.dx as f64-2.;
+            let mut s=wave.sample(x,z,time);
+            if axis==1 {
+                s.u.swap(0,1);s.du_dt.swap(0,1);s.grad_eta.swap(0,1);s.grad_p_dyn.swap(0,1);s.laplacian_u.swap(0,1);
+                s.grad_u.swap(0,1);for row in &mut s.grad_u {row.swap(0,1);}
+            }
+            fields[component][(k*end[1]+j)*end[0]+i]=s;
+        }}}
+    }
+    let [u,v,w]=fields;(u,v,w)
+}
+#[test]
+fn coupled_transverse_invariance_and_rotation_s297() {
+    use crate::SimTime;
+    let (mut a,_) = volume(16,4,20,0.125,9.81);let (mut b,_) = volume(4,16,20,0.125,9.81);
+    a.set_free_surface(&[2.;64],2.).unwrap();b.set_free_surface(&[2.;64],2.).unwrap();
+    let (mut transverse,mut rotated)=(0f32,0f32);
+    for n in 0..400 {
+        let time=SimTime(n*1000);
+        let (u,v,w)=standing_samples297(&a,n as f64*0.001,0);
+        let bg=BackgroundFaces3{domain:a.domain,time,density:1025.,gravity:9.81,u:&u,v:&v,w:&w};
+        a.step_perturbation_mobile(time,1000,4000,&bg,Sponge3::default(),&Jobs).unwrap();
+        let (u,v,w)=standing_samples297(&b,n as f64*0.001,1);
+        let bg=BackgroundFaces3{domain:b.domain,time,density:1025.,gravity:9.81,u:&u,v:&v,w:&w};
+        b.step_perturbation_mobile(time,1000,4000,&bg,Sponge3::default(),&Jobs).unwrap();
+        for j in 0..4 {for i in 0..16 {
+            transverse=transverse.max((a.eta[j*16+i]-a.eta[i]).abs());
+            rotated=rotated.max((a.eta[j*16+i]-b.eta[i*4+j]).abs());
+        }}
+    }
+    println!("S297 transverse={transverse:e} m rotation={rotated:e} m");
+    assert!(transverse<2e-6 && rotated<2e-6);
+    assert!(a.eta.iter().any(|h|(*h-2.).abs()>1e-4));
+}

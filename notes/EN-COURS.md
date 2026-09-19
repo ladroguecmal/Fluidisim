@@ -76,7 +76,7 @@ reproductible et paramètres publiés. Aucune réception perceptive ou temps ré
 - [x] **P2** — contrats de fond 3D, réserves, géométrie et fantômes du total ; affinage homogène.
 - [x] **P3** — advection croisée/source, bandes aux quatre bords, éponge et pas atomique ; tests
   fond nul, courant traversant, refus et allocations.
-- [ ] **P4** — réception : cas limite HOS, invariance transverse et cas oblique ; preuve S297.
+- [x] **P4** — réception : cas limite HOS, invariance transverse et cas oblique ; preuve S297.
 - [ ] **P5** — aperçu animé local calculé depuis le pas 3D, rendu en images de banc, vérification
   visuelle et livraison ; aucune page HTML ni état δ écrit sur disque.
 - [ ] **P6** — rituel REPRISE §6, file et feuille de route, jeton libre, commits vérifiés.
@@ -87,3 +87,7 @@ La 2D reste le témoin. `delta_coupling.rs` porte les équations et les bandes A
 Le mode mobile 3D S296 est dans `delta3d_mobile.rs` ; lui garder ses bits au fond nul.
 La production GPU et le raccord à l'afficheur de mer restent distincts de l'aperçu CPU.
 Découper avant 15 minutes toute étape qui se prolonge.
+
+P4 : HOS reçu 0,148100 % / 0,345649 % à 5 cm ; 0,177888 % / 0,531870 % à 10 cm.
+Invariance et rotation : un ulp. Bandes/éponge construites, réception S269–S274 restante.
+Aperçu calculé avec succès en parallèle du banc : 121 PPM, 6 s, viewer/captures/s297.

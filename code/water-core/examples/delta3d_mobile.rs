@@ -8,6 +8,13 @@ mod host_impl;
 #[allow(dead_code)]
 mod nl;
 use nl::NlSurface;
+use water_core::{background::BackgroundSample,delta3d::Sponge3,SimTime};
+#[path="support/standing_background.rs"]
+#[allow(dead_code)]
+mod standing;
+#[path="support/delta3d_background.rs"]
+#[allow(dead_code)]
+mod background3;
 use std::{f64::consts::PI, time::Instant};
 use water_core::{
     delta3d::{Domain3, Volume3},
@@ -50,7 +57,7 @@ fn volume(nx: usize, ny: usize, nz: usize, dx: f64) -> Volume3 {
     )
     .unwrap()
 }
-fn reception_hos() {
+fn reception_hos(coupled: bool) {
     let k = PI / L;
     let omega = (G * k * (k * H).tanh()).sqrt();
     let steps = (2. * PI / omega / 0.001).round() as usize;
@@ -64,6 +71,10 @@ fn reception_hos() {
                 .map(|i| (H + a * (k * (i as f64 + 0.5) * dx).cos()) as f32)
                 .collect();
             v.set_free_surface(&eta, H as f32).unwrap();
+            if coupled {v.set_free_surface(&vec![H as f32;nx],H as f32).unwrap();}
+            let mut samples=background3::Samples3::new(v.domain());
+            let wave=standing::StandingWave{a,k,h:H,g:G,rho:1025.};
+            let mut refinements=0;
             let mut oracle = hos(a);
             let mean0 = eta.iter().map(|x| *x as f64).sum::<f64>() / nx as f64;
             let (mut profile, mut b2err, mut b2ref, mut drift) = (0f64, 0f64, 0f64, 0f64);
@@ -71,16 +82,20 @@ fn reception_hos() {
             let (mut wetmin, mut wetmax) = (v.wet_cells(), v.wet_cells());
             for n in 1..=steps {
                 oracle.step(0.001).unwrap();
-                let r = v
-                    .step_surface_mobile(1000, 4000, &host_impl::SequentialJobs)
-                    .unwrap_or_else(|e| panic!("a={a} nx={nx} step={n}: {e:?}"));
+                let r = if coupled {
+                    let time=SimTime((n as u64-1)*1000);
+                    samples.fill(H,|x,_,z|wave.sample(x,z,time.0 as f64*1e-6));
+                    v.step_perturbation_mobile(time,1000,4000,&samples.view(time),Sponge3::default(),&host_impl::SequentialJobs)
+                } else {v.step_surface_mobile(1000,4000,&host_impl::SequentialJobs)}
+                    .unwrap_or_else(|e|panic!("a={a} nx={nx} step={n}: {e:?}"));
+                refinements+=r.refinements;
                 imax = imax.max(r.iterations);
                 floor += r.floor as usize;
                 let mut b2 = 0.;
                 let mut mean = 0.;
                 for i in 0..nx {
                     let x = (i as f64 + 0.5) * dx;
-                    let h = v.surface()[i] as f64 - H;
+                    let h = v.surface()[i] as f64 - H + if coupled {wave.sample(x,0.,n as f64*0.001).eta as f64} else {0.};
                     profile = profile.max((h - hos_eta(&oracle, x)).abs() / a);
                     b2 += 2. / nx as f64 * h * (2. * k * x).cos();
                     mean += v.surface()[i] as f64 / nx as f64;
@@ -93,7 +108,7 @@ fn reception_hos() {
                 wetmax = wetmax.max(v.wet_cells());
             }
             let harmonic = b2err / b2ref;
-            println!("HOS a={a} nx={nx} steps={steps} profile_pct={:.6} b2_pct={:.6} mean_drift_m={drift:.3e} wet={wetmin}..{wetmax} it_max={imax} floor={floor} seconds={:.2}",100.*profile,100.*harmonic,start.elapsed().as_secs_f64());
+            println!("HOS coupled={coupled} refinements={refinements} a={a} nx={nx} steps={steps} profile_pct={:.6} b2_pct={:.6} mean_drift_m={drift:.3e} wet={wetmin}..{wetmax} it_max={imax} floor={floor} seconds={:.2}",100.*profile,100.*harmonic,start.elapsed().as_secs_f64());
             assert!(
                 profile < previous.0 && harmonic < previous.1,
                 "raffinement non décroissant"
@@ -170,7 +185,8 @@ fn oblique() {
 }
 fn main() {
     match std::env::args().nth(1).as_deref() {
-        Some("hos") => reception_hos(),
+        Some("hos") => reception_hos(false),
+        Some("coupled") => reception_hos(true),
         Some("oblique") => oblique(),
         _ => panic!("choisir hos ou oblique"),
     }
