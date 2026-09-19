@@ -58,73 +58,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S296 — **porte B, lot 2 : la surface mobile dans la référence δ 3D** — terminée par Codex (reprise à chaud après P1)
+Session : S297 — porte B, lot 3 : couplage B/W dans la référence 3D et aperçu animé.
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
-Entrée : « continue » de l'utilisateur, 2026-09-19 ; suite désignée par S295, porte en cours B.
-Objectif : la référence `delta3d` gagne le mode **à surface géométriquement mobile** de S237 —
-fonction hauteur `η(x, y)`, fluide fantôme aux faces verticales et latérales, advection centrée,
-extrapolation, transport par débits mouillés — étendu aux deux dimensions horizontales, la 2D
-intacte. Critères posés avant le code :
-1. à `ny = 1`, trajectoire **identique à la 2D** mobile au chemin de Jacobi (celui de S237) sur
-   le cas S237 à `nx` = 32 — l'identité au bit est visée, puisque le lot 1 l'a obtenue ; à défaut
-   l'écart est publié ;
-2. à `ny = 1`, le protocole S237 contre le véhicule HOS d'ordre 3 (L = h = 2 m, une période,
-   1 ms) : profil sous **2 %** de `a` à 128 colonnes et décroissant, harmonique `2k` sous **20 %**,
-   aux tolérances publiées de S237 ;
-3. en 3D : une onde le long de `y` dans une cuve transposée rend la même trajectoire que l'onde le
-   long de `x` (symétrie x↔y du schéma), à l'arrondi près ; petite amplitude oblique contre le
-   mode linéaire du lot 1 sous **1 %** de `a` (critère 4 de S237) ;
-4. repos exact au bit à un niveau non aligné, aucune allocation, refus atomiques (gardes de
-   géométrie, convergence).
-Préconditionneur de Jacobi : l'invariance en `y` n'est alors tenue qu'à l'arrondi — c'est ce
-qu'ADR-175 §4.1 demande. Hors lot : couplage B/W, production GPU, scène, coût.
+Entrée : « Continue, et j'aimerais pouvoir voir après », 2026-09-19.
+Objectif : étendre les équations reçues ADR-149/152/153/164/165/166 aux deux dimensions
+horizontales, puis montrer un calcul véritable de la référence par des images locales de banc.
+Critères avant code : fond nul identique au bit au pas mobile S296 ; à ny=1 cas S253 contre
+HOS (profil <2 %, harmonique <20 % à 128 colonnes, décroissants) ; fond uniforme traversant
+sans perturbation créée ; invariance transverse à l'arrondi ; source réellement 3D et refus
+atomiques sans allocation. Toute réception manquée reste publiée, sans déplacer ses seuils.
+Aperçu : surfaces rendues directement en images, sans sérialisation d'état δ (I-17), commande
+reproductible et paramètres publiés. Aucune réception perceptive ou temps réel anticipée.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton, plan seuls.
-- [x] **P2** — géométrie mobile et opérateur : mailles mouillées, fantômes vertical et latéraux
-  (x et y), opérateur, second membre et diagonale ; erreur inverse du mode mobile, `γ` selon le
-  nombre de faces ; essais : symétrie avec fantômes, identité au bit avec la 2D à `ny = 1`.
-- [x] **P3** — projection mobile (Jacobi, départ depuis la pression publiée d'ADR-169),
-  correction fantôme, extrapolation, divergence des lignes franches ; essai : identité avec la 2D.
-- [x] **P4** — advection 3D, transport mouillé en x et y, `step_surface_mobile`, gardes et refus
-  atomiques ; essais : repos exact, trajectoire `ny = 1` contre la 2D, symétrie x↔y, allocations.
-- [x] **P5** — réception : banc `delta3d_mobile` (S237 à `ny = 1` contre HOS, petite amplitude
-  oblique contre le linéaire), preuve `DELTA3D-MOBILE-S296.md`.
-- [x] **P6** — rituel §6.
+- [x] **P1** — état réel, jeton et plan seuls ; copie unique, branche B archivée, diff vide.
+- [ ] **P2** — contrats de fond 3D, réserves, géométrie et fantômes du total ; affinage homogène.
+- [ ] **P3** — advection croisée/source, bandes aux quatre bords, éponge et pas atomique ; tests
+  fond nul, courant traversant, refus et allocations.
+- [ ] **P4** — réception : cas limite HOS, invariance transverse et cas oblique ; preuve S297.
+- [ ] **P5** — aperçu animé local calculé depuis le pas 3D, rendu en images de banc, vérification
+  visuelle et livraison ; aucune page HTML ni état δ écrit sur disque.
+- [ ] **P6** — rituel REPRISE §6, file et feuille de route, jeton libre, commits vérifiés.
 
 ### Notes de reprise
-Passation (2026-09-19, demande de l'utilisateur : « commit tout, je vais le faire avec Codex »).
-État à la passation initiale : rien n’était écrit pour P2, code intact depuis S295.
-P2–P5 sont désormais committés ; résultats ci-dessous et dans la preuve S296.
 
-Ce que la lecture du 2D a établi, pour ne pas le refaire :
-- Le mode mobile 2D vit dans `delta_mobile.rs` : `wet` (centre sous `η` de la colonne),
-  `ghost_up` (`θ = (η − z_c)/dx` borné par `SURFACE_THETA_MIN`, valeur `ρg((η − rest) − reste)`),
-  `ghost_side` (`θ = (h_i − z_c)/(h_i − h_j)`, valeur `ρg(z_c − rest)`), `apply_mobile`,
-  `rhs_mobile` (second membre et diagonale de Jacobi), `correct_mobile`, `extrapolate_mobile`
-  (constante verticale au-dessus de la dernière face corrigée), `transport_mobile` (débit intégré
-  jusqu'à `½(η_i + η_{i+1})` avec fraction mouillée `clamp((η_f − k·dx)/dx, 0, 1)`, tous lisent
-  `ηⁿ`), `surface_in_bounds` (≥ 2 mailles au-dessus du fond, ≤ sommet − 1 maille).
-- Ordre du pas 2D : garde, sauvegarde, `advect(dt)` (centrée, `delta_projection.rs` l.1090 :
-  voisins manquants remplacés par la valeur centrale ; face `w` du sommet non advectée), projection
-  mobile **à départ chaud** (ADR-169 : `p` publiée, nulle hors mailles mouillées, résidu vrai),
-  extrapolation, transport, validation de onze champs, garde, publication.
-- Préconditionneur : la 2D prend la **multigrille mobile** (ADR-167) dès que la grille se divise ;
-  pour l'identité à `ny = 1`, forcer son chemin de Jacobi dans les essais par le
-  `thread_local` `crate::delta_projection::MOBILE_MULTIGRID_OFF` (cfg(test)). Chemin Jacobi :
-  `dir = prec·res` (`β = 0`), `rz = Σ r·prec·r`, puis `β = zn/rz`, `dir = prec·res + β·dir`.
-- Certificat d'arrondi : utiliser `γ₈` quand `ny = 1` (quatre faces par ligne) et `γ₁₀` sinon ;
-  le lot 1 emploie `γ₁₀` partout — à aligner, sans quoi l'identité à `ny = 1` peut casser au
-  plancher.
-- Advection 3D : écrire `uc·ux + wc·uz + vc·uy` (terme `y` en dernier) pour garder les bits 2D à
-  `ny = 1`, même règle que la divergence et le transport du lot 1.
-- Oracle HOS et protocole : `examples/delta_mobile.rs` (fonctions `hos`, `hos_eta`, `hos_b2`,
-  L = h = 2 m, `nz = 2,25/dx`, repos à 2 m, une période, 1 ms, plafond 4 000) et
-  `examples/support/nl_surface.rs` ; à recopier dans un banc `delta3d_mobile.rs`.
-
-
-Résultats Codex P2–P5 : tous les critères tenus ; voir docs/validation/DELTA3D-MOBILE-S296.md.
-Identité 2D au bit sur 1 604 pas, 5 et 10 cm ; HOS fin 0,252893 % / 0,703828 % et
-0,223506 % / 0,427441 %. Onde oblique fine 0,253045 %, phase 0,065204°. Suite :
-530 réussis, 18 ignorés ; test matriciel ajouté ensuite reçu séparément (531 au total).
+La 2D reste le témoin. `delta_coupling.rs` porte les équations et les bandes ADR-166.
+Le mode mobile 3D S296 est dans `delta3d_mobile.rs` ; lui garder ses bits au fond nul.
+La production GPU et le raccord à l'afficheur de mer restent distincts de l'aperçu CPU.
+Découper avant 15 minutes toute étape qui se prolonge.

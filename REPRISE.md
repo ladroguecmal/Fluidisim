@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 16:02 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 16:10 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : aucune — S296 terminée
+Session en cours : S297 — couplage B/W de la référence 3D et aperçu animé local
 Dernière session : S296 — porte B, lot 2 : référence δ 3D à surface mobile reçue, HOS et onde oblique validés
 Session suivante : S297 — porte B, lot 3 : couplage B/W et frontières de la référence 3D ; réceptions S253/S268–S274 à ny=1 et invariance transverse.
 Maillons        : 0 — capacité reçue en S296 : surface mobile 3D, consommée par la référence de réception de la porte B (ADR-175 §4.1), preuve DELTA3D-MOBILE-S296
