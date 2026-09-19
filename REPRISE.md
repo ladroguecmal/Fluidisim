@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 11:20 +02:00
+Battement        : 2026-09-19 11:22 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
 Session en cours : S287 — coût des passes de pression
 Dernière session : S286 — oubli temporel des coûts corrigé ; cadence 32/48 ms mesurée et refusée sur onde

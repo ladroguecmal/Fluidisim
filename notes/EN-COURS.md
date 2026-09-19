@@ -66,7 +66,7 @@ Objectif : accélérer les passes de pression sans changer le calcul, avant un p
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — comparer les chemins CPU/GPU présents ; instrumenter les empreintes des
+- [x] **P2** — comparer les chemins CPU/GPU présents ; instrumenter les empreintes des
   trajectoires complètes du banc S286, mesurer la référence sur secteur.
 - [ ] **P3** — parcourir les écritures disjointes multigrilles dans leur ordre mémoire,
   mesurer le même travail et exiger les empreintes identiques ; conserver seulement un gain
@@ -84,3 +84,10 @@ Critères : mêmes bits à toutes les images et pour les champs volumétriques a
 itérations/acceptations, zéro allocation, coût complet publié, aucun seuil physique changé.
 Banc S286 : houle et onde 0,6 m, 16/32/48 ms, dont seul 16 ms interactif. Arrêt au résultat
 local mesuré, gain insuffisant aux 2 ms explicitement gardé ; pas de campagne cosmétique.
+
+P2 référence secteur : médianes pas 16/32/48 ms houle = 23,3345/25,6885/26,7559 ms ;
+onde = 24,8565/25,7251/26,6230 ms. Empreintes (hauteurs publiées + u/w, toutes images) :
+houle 92d65e868ec29942/aee9db45c45129a9/c9c79e0075ee0ffc ; onde
+1e5c6d5f5fed86bd/b0414fc315f5f3c6/6c037edac4f55f05. Itérations totales
+2648/1562/1116 et 2895/1551/1105. Zéro allocation. Carte RTX 5070 Laptop et AMD présentes.
+Optimisation P3 inclut apply_mobile, opérateur fin des cycles, mêmes écritures indépendantes.

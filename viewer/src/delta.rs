@@ -1370,6 +1370,10 @@ pub fn measure_temporal_cadence() -> Result<(), String> {
         let mut height = [0f64; 3];
         let mut slope = [0f64; 3];
         let mut synchronized_height = [0f64; 3];
+        // S287 : empreintes de toutes les trajectoires, hors chronométrage. Même ordre
+        // logique avant/après optimisation des passes ; pas seulement la dernière image.
+        let mut hashes = [0xcbf29ce484222325u64; 3];
+        let mut iterations = [0u64; 3];
         let mut allocations = 0;
         for n in 0..=192 {
             let t = n as f64 * FRAME_US as f64 * 1e-6;
@@ -1390,6 +1394,13 @@ pub fn measure_temporal_cadence() -> Result<(), String> {
                 }
                 if layer.live.as_ref().unwrap().steps != n as u64/(k as u64+1) {
                     return Err("compte de pas incohérent".into());
+                }
+                let live = layer.live.as_ref().unwrap();
+                iterations[k] += live.iterations as u64;
+                for v in layer.heights.iter().chain(live.volume.velocity_u()).chain(live.volume.velocity_w()) {
+                    for byte in v.to_bits().to_le_bytes() {
+                        hashes[k] = (hashes[k] ^ byte as u64).wrapping_mul(0x100000001b3);
+                    }
                 }
             }
             for i in 1..NX*4 {
@@ -1412,6 +1423,7 @@ pub fn measure_temporal_cadence() -> Result<(), String> {
         }
         if allocations != 0 { return Err(format!("cadence : {allocations} allocations")); }
         println!("CADENCE_S286 amplitude_m={amplitude} allocations={allocations} maintien_profil=true budget_banc_ms=1000");
+        println!("PASSES_S287 amplitude_m={amplitude} empreintes={hashes:x?} iterations={iterations:?}");
     }
     Ok(())
 }
