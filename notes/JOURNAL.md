@@ -15019,3 +15019,64 @@ Navigation et plafonds vérifiés à 0. Copie unique, jeton libre.
 *Tenue du plan* : le commit P1 porte sa case encore `[>]` — la bascule a été faite au début de P2
 au lieu de la dernière action avant le commit. Sans conséquence ici, le commit P1 ne contenant que
 le plan ; signalé pour que l'historique ne soit pas lu comme un `[x]` manquant.
+
+## S300 — 2026-09-19 — porte B : le fond passe sur la carte, et le couplage avec
+
+**Entrée.** « Continue, et dis-moi quand pour le solveur 3d ». Copie unique, master propre, plan
+committé avant tout code. Agent Claude Opus 5, application desktop, carte réelle.
+
+**Capacité reçue.** La carte évalue **B elle-même**. L'hôte ne publie que les paramètres
+analytiques — amplitude, nombre d'onde, direction, pulsation, et une phase temporelle repliée par
+instant — soit `O(composantes)` par pas et jamais `O(mailles)`. La carte en tire les vingt-six
+champs du fond, les trois familles de faces MAC, la surface totale, les fantômes de fond et le
+**second membre couplé**. **Ce qui devient possible** : le pas de production de S299 cesse d'être
+non couplé, et le fond cesse d'être un poste CPU. **Consommateurs** : cinq bancs de ce lot, puis
+le pas complet d'ADR-175 D1. **Preuve** : [DELTA3D-FOND-GPU-S300](../docs/validation/DELTA3D-FOND-GPU-S300.md).
+
+**Mesures.** Champ complet, 891 sondes, onze hauteurs dont cinq au-dessus du plan moyen, trois
+instants : écart relatif **1,0 à 2,6·10⁻⁶** sur les vingt-six champs, sans champ aberrant —
+`eta` juste à **0,57 µm** pour une échelle de 64 cm, quand le repère de S201 vaut 3 mm. Faces MAC :
+même ordre, pire écart sur `p_dyn` à 2,44·10⁻³ Pa pour 5 223 Pa. Second membre couplé, sur un
+domaine à 1 510 mailles mouillées sur 2 310 et aucune colonne pleine : **6,0·10⁻⁸ à 1,1·10⁻⁶**.
+Suite complète du cœur : **539 réussis**, 18 ignorés, aucun échec.
+
+**Le coût, et ce qu'il tranche.** Faces et couplage sur la carte contre le seul échantillonnage
+sur CPU : ×278 à 24×24×16, ×517 à 32³, **×541** à 48×48×24 — et le rapport est une borne basse,
+la passe de la carte portant le couplage en plus. Autrement dit : échantillonner le fond sur CPU
+à l'échelle 3D coûte **93 à 148 ms par pas** pour un budget total de 2 ms. Publier les paramètres
+plutôt que les échantillons n'était pas une préférence d'architecture ; on a maintenant le
+chiffre qui le dit, et il manquait depuis ADR-175.
+
+**Ce que le banc a trouvé et que je n'aurais pas deviné.** Porter la même formule ne porte pas les
+mêmes bits : `k·d` est identique au bit 576 fois sur 576, mais le `x − floor(x)` **compilé** en
+diverge d'un ulp, 72 fois sur 576. Près de la borne d'I-08 il ne reste qu'une poignée de bits à
+la fraction et cet ulp pèse 10⁻³ de tour — 3·10⁻³ sur le sinus. La fraction prise en **entier**
+ramène les phases de 73 à 564 concordances au bit et l'écart de 4 145 152 unités à 128. Leçon
+**L345** écrite là-dessus ; elle complète L332. Le reliquat vient du **cœur**, qui arrondit là où
+l'entier est exact : la carte est plus juste que la référence sur ce point, et c'est dit tel quel.
+
+**Une fixture rejetée, et pourquoi.** Le second membre couplé montrait 1,3·10⁻⁵ à `t = 0` et le
+cœur refusait `Domain` au temps lointain : la hauteur totale franchissait la borne de
+`check_edges3`. Fixture rentrée dans son domaine, tout redevient régulier. Le banc était sorti du
+domaine de validité de ce qu'il mesurait ; le port n'était pas en cause. Le compteur
+`mailles_franchement_divergentes` — qui seul verrait une **mouillure classée autrement** des deux
+côtés — vaut zéro aux trois instants, et reste dans le banc.
+
+**Partiel et suite.** Seuls B et le couplage sont sur la carte. Restent l'advection, les bandes,
+l'éponge, la surface mobile et sa surface publiée (D7), les diagnostics D3 — puis la scène et la
+revue. `eta_roundoff` vaut zéro tant que la surface n'avance pas : sa compensation se portera avec
+l'avance. **A286 est sans effet sur ce chemin**, vérifié et non supposé : les fantômes couplés ne
+consomment que `eta`, `p_dyn` et `grad_p_dyn`, que la carte calcule ; A286 reste ouverte sur le
+prolongement de W lui-même. A98 entière, A270 due sur ces bancs. Aucun budget reçu, aucun retrait
+d'ambition, aucun arbitrage nouveau.
+
+**Rituel.** Maillons **0** : le critère 3 de la porte B exige une production, et son entrée réelle
+existe désormais, reçue contre la référence. Sixième session consécutive sur la porte B, autorisée
+par A211 puisqu'un critère avance à chaque fois. **L345** nouvelle ; pas d'angle mort nouveau.
+File active relue, deux lignes remplacées dont A286 ; feuille de route et index actualisés, la
+section J2 ramenée sous son plafond. I-04/I-06/I-08/I-13/I-15/I-17 inchangés. Navigation et
+plafonds vérifiés à 0. Copie unique, jeton libre.
+
+*Tenue du plan* : P3 et P4 ont été fusionnés en un commit, et P5 découpé en P5a et P5b — les deux
+fois déclaré dans EN-COURS avant de committer. Un battement a été écrit 20:08 pour une horloge lue
+20:07 ; corrigé au rituel, sans conséquence de concurrence, une seule copie ayant travaillé.

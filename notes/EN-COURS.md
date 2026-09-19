@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S300 — en cours : le fond B sur la carte, entrée réelle du pas de production.
+Session : S300 — terminée : fond B et second membre couplé reçus sur la carte.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, outils locaux, carte réelle.
 Entrée : « Continue, et dis-moi quand pour le solveur 3d », 2026-09-19.
 
@@ -91,7 +91,7 @@ Critères avant code, posés ici :
   la carte, reçues contre `BackgroundGrid3` du cœur.
 - [x] **P5b** — fantômes couplés et second membre assemblés sur la carte depuis ces faces.
 - [x] **P6** — coût du fond sur la carte, comparé au chemin CPU de S276/S298.
-- [>] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
+- [x] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
 

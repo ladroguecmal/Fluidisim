@@ -5909,3 +5909,36 @@ Un oracle « du schéma » n'est exact que s'il reproduit **toute** la récurren
 initiales discrètes comprises. Faute de quoi il mesure un écart qui n'appartient ni au code ni
 au modèle — et l'on corrigerait le solveur pour la faute de l'instrument.
 
+## L345 — Porter la même formule ne porte pas les mêmes bits : le compilateur est dans la boucle
+
+*(S300)* Trois primitives du fond — phase spatiale, `sin_cos` Q32, atténuation — ont été portées
+en WGSL avec **les mêmes opérations dans le même ordre** que le cœur : mêmes polynômes, même
+réduction d'angle, même mise à l'échelle sur les bits IEEE. Le banc a mesuré, sur 576 sondes :
+
+- le produit `k·d` : **identique au bit, 576 fois sur 576** ;
+- la fraction `x − floor(x)` calculée dessus : **72 sur 576**.
+
+Même entrée au bit, deux opérations élémentaires, un résultat qui diffère d'un ulp. Ce que le
+code source dit n'est pas ce que la carte exécute : entre les deux il y a un compilateur qui a le
+droit de contracter, de reconnaître un motif, de choisir une autre instruction.
+
+**L'ulp n'était pas négligeable, et c'est le régime qui décide.** Près de la borne d'I-08, `k·d`
+vaut plusieurs milliers de tours ; il ne reste alors qu'une poignée de bits à la partie
+fractionnaire, et un ulp y pèse **10⁻³ de tour** — 3·10⁻³ sur le sinus, des millièmes
+d'amplitude. La même erreur près de l'origine aurait été invisible. **Un banc qui ne sonde que le
+régime habituel ne voit rien** : ici les sondes allaient jusqu'à la borne *déclarée* du domaine,
+et c'est la seule raison pour laquelle l'écart est apparu.
+
+**Le remède n'est pas de mieux écrire la formule, c'est de sortir du flottant.** La fraction se
+prend en entier — `x = mantisse · 2^(e−23)`, donc `x · 2³² = mantisse · 2^(e+9)` modulo 2³², le
+signe par complément. Exact par construction, et hors de portée de toute optimisation. Les phases
+sont passées de 73 à **564** concordances au bit, et l'écart maximal de 4 145 152 unités à **128**.
+
+**Réflexe** : quand une primitive numérique passe à une autre chaîne d'outils — autre langage,
+autre carte, autre compilateur —, l'identité de formule est une **hypothèse**, pas une propriété.
+La vérifier sur la primitive seule, avant de construire dessus, et sonder jusqu'aux bornes
+déclarées du domaine. Ce qui survit à un compilateur est ce qui ne dépend pas de lui :
+l'arithmétique entière et la manipulation de bits. Le reste se mesure.
+
+Complément de [L332](#l332--une-optimisation-qui-garde-les-bits-se-prouve-par-légalité) : L332 dit
+comment garder les bits **dans** un langage ; celle-ci dit qu'on ne les garde pas **entre** deux.
