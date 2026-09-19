@@ -60,11 +60,10 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 Session : S294 — **les arbitrages du 2026-09-19 consignés, l'architecture de δ en 3D décidée**
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
-Entrée : réponses de l'utilisateur aux questions de BILAN-GLOBAL-S293 §6, 2026-09-19 14:47 —
-« 1. l'objectif est d'avoir de l'eau d'un jeu en temps réel dynamique à son environnement et les
-joueurs, donc les 2 ms peuvent être modifiées tant que l'objectif est réalisé, puis pour la
-machine cet ordi est la référence. 2. Oui. 3. Comme tu veux, cela ne me dérange pas de tout
-garder sur ce PC. 4. Oui si cela débloquera la situation. 5. Je ne sais pas. »
+Entrée : réponses de l'utilisateur aux questions de BILAN-GLOBAL-S293 §6, 2026-09-19 14:47,
+citées telles qu'écrites dans ADR-174 §1 (résumé : cible = ce poste ; les 2 ms peuvent changer
+tant que l'objectif est atteint ; v1 acceptée ; pas de distant ; ordre et architecture acceptés
+« si cela débloque » ; onde de S277 : ne sait pas).
 Objectif : que ces réponses deviennent des décisions écrites, que la porte B soit ouverte sans
 contredire la trajectoire, et que la 3D s'écrive une fois, au bon endroit. **Aucun code de
 solveur dans cette session** : elle prépare la construction de S295, qui visera une capacité.
@@ -72,7 +71,7 @@ solveur dans cette session** : elle prépare la construction de S295, qui visera
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seuls.
-- [ ] **P2** — **ADR-174**, arbitrages de l'utilisateur : machine de référence ; budget de l'eau
+- [x] **P2** — **ADR-174**, arbitrages de l'utilisateur : machine de référence ; budget de l'eau
   au service de l'objectif, profil de travail avec une part pour δ ; v1 = portes A à D ; pas de
   dépôt distant ; porte B avant la suite du coût en 2D ; onde de S277 sans verdict attendu.
   Notes datées sur ADR-125 ; feuille §3 bis, bandeau de la file, REVUE-VISUELLE ; A296 close.
@@ -91,4 +90,4 @@ solveur dans cette session** : elle prépare la construction de S295, qui visera
 
 ### Notes de reprise
 
-Réponses verbatim ci-dessus ; elles font foi. Q3 : aucun dépôt distant, tout reste sur ce PC.
+Réponses citées telles qu'écrites dans ADR-174 §1 ; elles font foi. Q3 : aucun dépôt distant, tout reste sur ce PC.

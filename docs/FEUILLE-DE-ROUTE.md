@@ -431,7 +431,7 @@ système qu'on n'a pas éprouvé n'est pas construit : il est écrit.
 | **E — V articulé avec δ** | inondations : V expose sa surface, déclenche un δ local, la masse reste celle de V | cas **C17**, **C21**, **C19** complet | la comptabilité de masse est identique **avec et sans** δ (C21) |
 | **F — grande échelle** | référentiels multiples, bathymétrie, hauts-fonds, conformité multiplateforme | **B7** complet, **A98** | une scène lointaine et une scène proche coexistent sans rupture ni perte de précision |
 
-### Où poser la v1 — proposition, non tranchée
+### La v1 — tranchée par l'utilisateur le 2026-09-19 (ADR-174 D4)
 
 **Une v1 après la porte D**, c'est-à-dire : mer crédible parcourue en temps réel (J1, tenu),
 perturbations locales **décidées par le système** et non câblées (porte A), δ qui tient sur une
@@ -444,9 +444,10 @@ grande échelle (porte F), les phénomènes secondaires — écume, spray, bulle
 multijoueur au-delà de ce qui est déjà déterministe. **Ce sont des reports, pas des retraits** :
 l'ambition complète reste celle d'ADR-127 §1, et aucune session ne la réduit.
 
-**Cette proposition n'est pas une décision.** Fixer ce qu'une version contient appartient à
-l'utilisateur (ADR-127 §6). Tant qu'il ne l'a pas tranché, aucune session ne doit parler d'une
-« v1 » comme d'un périmètre acquis.
+**Décision de l'utilisateur, 2026-09-19** ([ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md)
+D4) : la v1 est la porte D franchie. Proposée en S281, elle n'était pas une décision avant cette
+date. Profil de travail de la porte C : [ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) D3 —
+δ ≤ 2 ms GPU sur la machine de référence.
 
 ### Ce que l'état réel dit de la distance
 

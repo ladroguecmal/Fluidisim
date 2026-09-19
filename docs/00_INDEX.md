@@ -275,6 +275,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-171](adr/ADR-171-les-seuils-d-activation-appartiennent-au-profil.md) | Les seuils d'activation appartiennent au profil |
 | [ADR-172](adr/ADR-172-candidat-pression-residente-gpu.md) | Candidat de pression résidente GPU dans l'hôte |
 | [ADR-173](adr/ADR-173-le-candidat-de-pression-ne-fournit-qu-un-depart.md) | Un candidat de pression externe ne fournit qu'un départ (voir A295) |
+| [ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) | Arbitrages de l'utilisateur du 2026-09-19 : machine de référence, temps de l'eau au service de l'objectif, v1, ordre |
 
 ## Travail et historique
 

@@ -57,3 +57,13 @@ sur **GPU** dans un hôte séparé ([ADR-130](ADR-130-rendu-j1-sur-gpu-par-un-ho
 options « compter les 2 ms en temps mur sur tous les cœurs » et « changer le profil » n'ont pas
 été retenues. La répartition CPU/GPU des 2 ms n'est pas fixée ici ; la première mesure de l'hôte
 GPU la confrontera au profil.
+
+## Note datée du 2026-09-19 (S294) — ADR-174
+
+Par arbitrage de l'utilisateur ([ADR-174](ADR-174-arbitrages-du-2026-09-19.md)) : **la machine
+est nommée** — le poste de développement, RTX 5070 Laptop, est la référence — et **le temps de
+l'eau sert l'objectif** (« de l'eau d'un jeu en temps réel, dynamique à son environnement et aux
+joueurs ») : 2 ms devient un profil de travail révisable. Profil en vigueur : ADR-174 D3 — eau
+≤ 4 ms GPU et ≤ 2 ms CPU par image, dont δ ≤ 2 ms GPU, à calibrer par B7. 60 images/s et la
+règle « aucun seuil changé pour faire passer une mesure » sont conservés. Ce document n'est pas
+réécrit.

@@ -537,3 +537,9 @@ Il ne rejette rien de mesuré en S275 et S276 : la couche δ reste identique au 
 direct, son coût reste celui de COUT-DIRECT-S276, et la question « le pas de 16 ms suffit-il ? »
 reste tranchée par la mesure, pas par l'image. **Aucune conclusion d'invisibilité de δ n'est tirée**
 — la scène ne permettait pas de la poser.
+
+#### Onde injectée de S277 — sans verdict attendu (S294, 2026-09-19)
+
+Réponse de l'utilisateur : « Jsp ». Conformément à [ADR-174](../adr/ADR-174-arbitrages-du-2026-09-19.md) D7,
+aucun verdict n'est plus attendu sur cette scène de mesure ; la question qu'elle portait — une onde
+prise dans une vraie mer — reviendra en revue sur la scène 3D de la porte B.

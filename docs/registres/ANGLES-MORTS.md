@@ -3867,3 +3867,7 @@ S207) ; J1 seul en consomme l'essentiel (GPU 1,74 ms + CPU 4,1 ms, S267). Avec A
 la liste des techniques ouverte, la porte C n'a **aucun critère atteignable** : le coût ne peut
 être ni reçu ni déclaré incompatible, ce qui entretient le fil de coût. Mesures sur un portable
 (A270, S292). Déclencheur : réponse de l'utilisateur à Q1 du bilan ; aucune part inventée d'ici là.
+
+*S294, 2026-09-19 — **A296 close**.* Arbitrage de l'utilisateur, [ADR-174](../adr/ADR-174-arbitrages-du-2026-09-19.md) :
+la machine de référence est nommée, le temps de l'eau sert l'objectif, et le profil de travail D3
+donne à δ ≤ 2 ms GPU. La porte C a désormais un critère atteignable ; il reste à l'atteindre.
