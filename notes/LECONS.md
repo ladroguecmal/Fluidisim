@@ -5942,3 +5942,30 @@ l'arithmétique entière et la manipulation de bits. Le reste se mesure.
 
 Complément de [L332](#l332--une-optimisation-qui-garde-les-bits-se-prouve-par-légalité) : L332 dit
 comment garder les bits **dans** un langage ; celle-ci dit qu'on ne les garde pas **entre** deux.
+
+## L346 — Un terme qui n'existe que par l'arrondi est algébriquement nul : le compilateur l'efface
+
+*(S301)* Le pas de production porte la somme compensée de la hauteur (S233) : après
+`h = η + inc`, le reste `(h − η) − inc` garde ce que l'arrondi a perdu. Premier banc : hauteur à
+un ulp du cœur, 130 colonnes sur 165 au bit — un résultat qui avait l'air reçu. Mais le reste
+valait **zéro partout**. Expérience : sur la carte, `(η + inc) − η` rendait `inc` **au bit** pour
+165 colonnes sur 165, quand la même addition, sur CPU, est inexacte pour 164 à 165 sur 165. Le
+compilateur de la carte a réécrit `(a + b) − a` en `b` ; le reste, qui n'a de valeur que par
+l'arrondi, est algébriquement nul, et il a disparu sans erreur ni avertissement.
+
+**Ce qui rend ce défaut dangereux, c'est qu'il ne se voit pas sur la grandeur principale.** La
+hauteur restait juste à un ulp : seule la mémoire de ce que l'ulp perd était détruite — une perte
+systématique qui ne se montre qu'en trajectoire, en dérive de masse, bien après le banc d'un pas.
+Il a fallu comparer **le terme compensateur lui-même**, puis la hauteur vraie `η − reste` (3 à
+4·10⁻⁸ m du cœur une fois corrigée, six fois sous l'ulp).
+
+**Remède** : la différence `h − η` se calcule en entiers sur les bits IEEE — exacte par Sterbenz
+pour deux hauteurs à moins d'un facteur deux, et hors de portée de toute simplification.
+
+**Réflexe** : toute transformation sans erreur — Kahan, TwoSum, Fast2Sum, Veltkamp, double-float —
+est une suite d'opérations dont la valeur est nulle en arithmétique exacte. Sur une chaîne
+d'outils qui a le droit de réassocier (les compilateurs de nuanceurs l'ont par défaut, et WGSL
+n'offre pas `precise`), **elle est à réécrire hors du flottant ou à vérifier terme à terme** ; la
+vérifier sur le résultat principal ne prouve rien. Récurrence de
+[L345](#l345--porter-la-même-formule-ne-porte-pas-les-mêmes-bits--le-compilateur-est-dans-la-boucle)
+par un autre mécanisme : là un ulp de différence, ici un terme entier supprimé.

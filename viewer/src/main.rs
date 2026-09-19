@@ -2263,6 +2263,21 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-pas") {
         return delta3d_step::recevoir_pas();
     }
+    if args.iter().any(|a| a == "--delta3d-trajectoire") {
+        return delta3d_step::trajectoire();
+    }
+    if args.iter().any(|a| a == "--delta3d-cout-pas") {
+        return delta3d_step::mesurer_cout_pas();
+    }
+    if args.iter().any(|a| a == "--delta3d-diagnostics") {
+        return delta3d_step::recevoir_diagnostics();
+    }
+    if args.iter().any(|a| a == "--delta3d-fond-s298") {
+        return delta3d_step::comparer_fond_s298();
+    }
+    if args.iter().any(|a| a == "--delta3d-sensibilite") {
+        return delta3d_step::sensibilite_reference();
+    }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();
     }

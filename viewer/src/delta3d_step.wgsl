@@ -344,9 +344,9 @@ fn extrapolate(@builtin(global_invocation_id) id: vec3<u32>) {
 // ── Transport de la surface, bandes de couplage, éponge, surface publiée ─────────────────────
 //
 // `transport_coupled3` puis `relax_coupled3`. Deux dispatchs : tous les débits lisent `eta^n`
-// avant qu'aucune hauteur ne soit écrite, comme le cœur. La compensation de la somme (S233) est
-// portée telle quelle ; si le compilateur de la carte la simplifiait, le banc le verrait sur
-// `eta` au pas suivant — c'est le reste qui entre dans le fantôme du haut.
+// avant qu'aucune hauteur ne soit écrite, comme le cœur. La compensation de la somme (S233) ne se
+// porte **pas** telle quelle : écrite en flottant, le compilateur l'annule (voir
+// `exact_difference`). Le reste entre dans le fantôme du haut et dans la surface publiée.
 
 /// `s − a`, **exacte et calculée en entiers** (S301). Pour deux flottants normaux positifs à moins
 /// d'un facteur deux l'un de l'autre — une hauteur de colonne avant et après un pas —, la
@@ -458,4 +458,120 @@ fn advance(@builtin(global_invocation_id) id: vec3<u32>) {
     cells_in[c] = eta;
     cells_in[r] = roundoff;
     published[c] = (eta - s.rest) - roundoff;
+}
+
+// ── Diagnostics D3 : qualité mesurée sur la carte, relue en différé ──────────────────────────
+//
+// ADR-175 D3 : chaque pas mesure la divergence projetée des lignes franches — la grandeur
+// d'ADR-144, `max|div u|·dx/max|u|` sur les mailles mouillées sans fantôme — et la masse de la
+// perturbation. Rien ici ne commande le pas : le résultat part dans un anneau de relecture et
+// l'hôte le lit quand la carte l'a rendu, avec son âge. Au-dessus de 10⁻⁵, le pas est déclaré
+// dégradé ; il n'est ni refusé ni refait.
+//
+// Partiels par groupe puis résultat final dans `work`, après les débits : les deux usages ne se
+// chevauchent pas dans le temps, mais leurs tranches restent distinctes pour la lisibilité.
+
+var<workgroup> reduce_max: array<vec3<f32>, 64>;
+var<workgroup> reduce_sum: array<vec2<f32>, 64>;
+
+fn diag_base() -> u32 { return 2u * x_faces() + 2u * y_faces(); }
+fn diag_groups() -> u32 { return (max(cells(), s.faces) + 63u) / 64u; }
+fn diag_result() -> u32 { return diag_base() + 5u * diag_groups(); }
+
+/// Ligne franche au sens du cœur : mouillée, et aucune de ses faces n'est un fantôme — voisins
+/// latéraux existants tous mouillés, voisin du dessus existant et mouillé. Un mur n'est pas un
+/// fantôme.
+fn plain(i: u32, j: u32, k: u32) -> bool {
+    if (i > 0u && !wet(i - 1u, j, k)) { return false; }
+    if (i + 1u < s.nx && !wet(i + 1u, j, k)) { return false; }
+    if (j > 0u && !wet(i, j - 1u, k)) { return false; }
+    if (j + 1u < s.ny && !wet(i, j + 1u, k)) { return false; }
+    return k + 1u < s.nz && wet(i, j, k + 1u);
+}
+
+/// Pas de retour anticipé : les barrières doivent être atteintes par tout le groupe.
+@compute @workgroup_size(64)
+fn diagnose(@builtin(global_invocation_id) gid: vec3<u32>,
+            @builtin(local_invocation_index) lid: u32,
+            @builtin(workgroup_id) wid: vec3<u32>) {
+    let n = gid.x;
+    var whole = 0.0;
+    var franche = 0.0;
+    var speed = 0.0;
+    var mass = 0.0;
+    var outside = 0.0;
+    if (n < cells()) {
+        let i = n % s.nx;
+        let j = (n / s.nx) % s.ny;
+        let k = n / columns();
+        if (wet(i, j, k)) {
+            let d = abs(((vel[fu(i + 1u, j, k)] - vel[fu(i, j, k)] + vel[fw(i, j, k + 1u)] - vel[fw(i, j, k)])
+                + (vel[fv(i, j + 1u, k)] - vel[fv(i, j, k)])) / s.dx);
+            whole = d;
+            if (plain(i, j, k)) { franche = d; }
+        }
+    }
+    if (n < s.faces) { speed = abs(vel[n]); }
+    if (n < columns()) {
+        mass = published[n];
+        // Bornes du cœur (`mobile_in_bounds`) sur la surface totale de fin de pas.
+        let total = cells_in[n] + bg(fw(n % s.nx, n / s.nx, 0u), 0u);
+        if (!(total >= 2.0 * s.dx && total <= f32(s.nz - 1u) * s.dx)) { outside = 1.0; }
+    }
+    reduce_max[lid] = vec3<f32>(whole, franche, speed);
+    reduce_sum[lid] = vec2<f32>(mass, outside);
+    workgroupBarrier();
+    for (var half_width = 32u; half_width > 0u; half_width >>= 1u) {
+        if (lid < half_width) {
+            reduce_max[lid] = max(reduce_max[lid], reduce_max[lid + half_width]);
+            reduce_sum[lid] = reduce_sum[lid] + reduce_sum[lid + half_width];
+        }
+        workgroupBarrier();
+    }
+    if (lid == 0u) {
+        let base = diag_base() + 5u * wid.x;
+        work[base] = reduce_max[0].x;
+        work[base + 1u] = reduce_max[0].y;
+        work[base + 2u] = reduce_max[0].z;
+        work[base + 3u] = reduce_sum[0].x;
+        work[base + 4u] = reduce_sum[0].y;
+    }
+}
+
+/// Un seul groupe : rassemble les partiels. Résultat : divergence de toutes les lignes et des
+/// lignes franches, déjà rapportées à `max|u|/dx` comme ADR-144 ; `max|u|` ; volume de la
+/// perturbation (m³) ; colonnes hors bornes.
+@compute @workgroup_size(64)
+fn diagnose_finish(@builtin(local_invocation_index) lid: u32) {
+    var m = vec3<f32>(0.0);
+    var t = vec2<f32>(0.0);
+    var g = lid;
+    loop {
+        if (g >= diag_groups()) { break; }
+        let base = diag_base() + 5u * g;
+        m = max(m, vec3<f32>(work[base], work[base + 1u], work[base + 2u]));
+        t = t + vec2<f32>(work[base + 3u], work[base + 4u]);
+        g = g + 64u;
+    }
+    reduce_max[lid] = m;
+    reduce_sum[lid] = t;
+    workgroupBarrier();
+    for (var half_width = 32u; half_width > 0u; half_width >>= 1u) {
+        if (lid < half_width) {
+            reduce_max[lid] = max(reduce_max[lid], reduce_max[lid + half_width]);
+            reduce_sum[lid] = reduce_sum[lid] + reduce_sum[lid + half_width];
+        }
+        workgroupBarrier();
+    }
+    if (lid == 0u) {
+        let r = diag_result();
+        let speed = reduce_max[0].z;
+        var ratio = 0.0;
+        if (speed > 0.0) { ratio = s.dx / speed; }
+        work[r] = reduce_max[0].x * ratio;
+        work[r + 1u] = reduce_max[0].y * ratio;
+        work[r + 2u] = speed;
+        work[r + 3u] = reduce_sum[0].x * s.dx * s.dx;
+        work[r + 4u] = reduce_sum[0].y;
+    }
 }

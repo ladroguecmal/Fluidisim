@@ -456,8 +456,8 @@ fn sample_faces(@builtin(global_invocation_id) id: vec3<u32>) {
 // la carte évaluant `eta` sans dépendance en z — la vérification n'a donc pas d'objet, et son
 // absence n'est pas un relâchement.
 //
-// `eta_roundoff` vaut zéro tant que la surface n'a pas avancé. Ce lot ne porte pas l'avance de
-// surface, donc il ne porte pas non plus sa compensation : à reprendre avec la surface mobile.
+// `eta_roundoff` vaut zéro tant que la surface n'a pas avancé. Depuis S301 le pas de production
+// (`delta3d_step.wgsl`) fait avancer la surface et tient la compensation ; `couple_rhs` la lit.
 
 fn columns() -> u32 { return params.nx * params.ny; }
 fn cells() -> u32 { return params.nx * params.ny * params.nz; }

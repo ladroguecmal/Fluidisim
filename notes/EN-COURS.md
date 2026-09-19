@@ -97,11 +97,11 @@ Critères avant code, posés ici :
 - [x] **P3b** — correction aux faces et extrapolation verticale ; vitesses reçues.
 - [x] **P4** — transport par débits mouillés et bandes, relaxation d'éponge, compensation,
   surface publiée (D7) ; pas complet reçu champ par champ contre `step_perturbation_mobile`.
-- [ ] **P5** — trajectoire du cas S298 : écart de hauteur par image, selon les cycles.
-- [ ] **P6** — coût du pas complet, passe chronométrée, trois tailles ; dispatchs publiés.
-- [ ] **P7** — diagnostics D3 sur la carte (divergence des lignes franches, dérive de masse,
+- [x] **P5** — trajectoire du cas S298 : écart de hauteur par image, selon les cycles.
+- [x] **P6** — coût du pas complet, passe chronométrée, trois tailles ; dispatchs publiés.
+- [x] **P7** — diagnostics D3 sur la carte (divergence des lignes franches, dérive de masse,
   colonnes hors bornes), relus en différé avec leur âge.
-- [ ] **P8** — preuve et rituel REPRISE §6.
+- [>] **P8** — preuve et rituel REPRISE §6.
 
 ### Notes de reprise
 
@@ -175,7 +175,81 @@ sans bruit — hauteur au bit près dans 130/165 colonnes seulement, et une pert
 l'ordre de l'ulp de η par pas. Remède : `exact_difference(s, a)`, soustraction **en entiers sur
 les bits IEEE**, exacte par Sterbenz pour deux hauteurs à moins d'un facteur deux. Même famille
 que L345 (fraction de phase) : **une identité flottante du source n'est pas une identité du
-binaire compilé** — généralisation à écrire en leçon.
+binaire compilé** — généralisation à écrire en leçon. *(Écrite : L346.)*
+
+**P5 — trajectoire S298, premier passage** (`--delta3d-trajectoire`, 32×24×36, 64 composantes,
+1 200 pas, cycles 8/16/32/64 en parallèle, 4 min 39) : écart de hauteur **≤ 5·10⁻⁶ m jusqu'à
+t = 1 s** pour 32 et 64 cycles (1·10⁻⁴ à 8 cycles, 5·10⁻⁵ à 16), puis saut au millimètre vers
+t ≈ 1,1 s et 1 à 3,5 cm ensuite, **quel que soit le nombre de cycles**. Donc pas la projection.
+Localisation (`PAS`, `CYCLES`, `SONDE_PAS` en variables d'environnement) : le saut naît à
+**n = 215** dans la maille **(19,10,32)** — **sèche pour le cœur (p = 0), mouillée pour la
+carte (p = 37 Pa)** : une surface passée à moins de 10⁻⁶ m d'un centre de maille, classée des deux
+côtés opposés. Une seule bascule donne 0,25 m/s d'écart sur une face `v`, 0,08 sur `u`, puis des
+centimètres de hauteur. Avant la bascule, les faces adjacentes aux mailles de surface à petit θ
+diffèrent déjà de 2·10⁻³ m/s (coefficient 1/θ jusqu'à 1 000) sans effet visible sur η.
+**Fausses pistes écartées** : B n'est pas en cause (élévation carte/cœur à 9·10⁻⁸ m sur ce fond,
+`--delta3d-fond-s298`) ; l'éponge non plus (colonne intérieure). Une première sonde décalée d'un
+pas (lue après le pas du cœur) avait fait croire à un écart de B — artefact de l'instrument.
+**Question ouverte à trancher par la mesure** : sensibilité **propre** du schéma de référence
+(deux cœurs à ±10⁻⁶ m au départ, `--delta3d-sensibilite`) — si deux cœurs se séparent pareil,
+l'écart est une propriété de la référence et le critère ponctuel de §4.2 n'est tenable que sur
+une durée déclarée avant la première bascule.
+Artefact de banc corrigé : la surface publiée n'était écrite qu'au premier pas (écart 0,16 m à
+t = 0) ; `set_state` la publie désormais.
+
+**P5 — tranché par la sensibilité de la référence** (`--delta3d-sensibilite`, deux cœurs, le
+second à ±10⁻⁶ m au départ, motif haché, 1 200 pas) : **ils se séparent exactement comme la carte
+et le cœur** — 4,6 à 7·10⁻⁵ m jusqu'à t = 1 s, premier dépassement du millimètre au **pas 260**
+(1,3 s), 1 à 4,5 cm ensuite, écart quadratique 2,3 à 3,1 mm de t = 3 à 6 s. Carte contre cœur à
+64 cycles : quadratique 1,9 à 2,4 mm sur la même période, premier millimètre vers le pas 216.
+**L'écart de P5 est une propriété du schéma de référence, pas de la production.** Avant son
+horizon, la carte suit le cœur **mieux** (≤ 5,5·10⁻⁶ m à 32–64 cycles) qu'un cœur perturbé d'un
+ulp ne suit le cœur (≤ 7·10⁻⁵ m).
+**Mécanisme** (sonde) : le transport de la hauteur lit la vitesse de la couche **partiellement
+mouillée** (fraction `(surface − k·dx)/dx`). Quand la surface passe le centre de cette couche, sa
+face bascule de « projetée » (correction à 1/θ, θ petit) à « extrapolée » depuis la couche
+inférieure : 0,25 m/s d'écart sur une face, soit ~6·10⁻⁴ m de hauteur par pas
+(`dt/dx · Δu · dx · ½`), observé 5,8·10⁻⁴ puis 2,8·10⁻⁴ m par pas. La hauteur est donc
+**discontinue** en la position de la surface par rapport aux centres de maille : deux états
+distants de 10⁻⁶ m divergent de centimètres en une demi-seconde. Nouvel angle mort (A297).
+**Lecture du critère 2** (ADR-175 §4.2, « sur la durée déclarée ») : la durée ponctuelle ne
+peut excéder l'horizon de prévisibilité **de la référence elle-même**, mesuré ; au-delà, la
+production se compare à l'enveloppe que la référence a contre elle-même. Aucun seuil relevé.
+
+**P6 mesuré** (`--delta3d-cout-pas`, pas entier horodaté de la première passe à la dernière,
+copies comprises, fond S298 à 64 composantes, 30 passages, premier écarté ; secteur aux deux
+bornes, BatteryStatus = 2, 98 %) — médianes de banc :
+
+| domaine | mailles | 8 cycles | 16 | 32 | 64 |
+|---|---:|---:|---:|---:|---:|
+| 32×24×36 (cas S298) | 27 648 | 0,305 ms | 0,382 | 0,532 | 0,838 |
+| 32³ | 32 768 | 0,329 | 0,410 | 0,561 | 0,876 |
+| 64×64×32 | 131 072 | 1,106 | 1,299 | 1,697 | 2,504 |
+
+Dispatchs : 57, 97, 177, 337. Un maximum isolé à 7,34 ms (64×64×32, 8 cycles, premier passage
+8,39 ms) : pic d'amorçage de la famille A294, non attribué. **Ce n'est pas la porte C** (pas de
+scène, pas de 99ᵉ centile) : 64×64×32 tient sous 2 ms jusqu'à 32 cycles en médiane de banc.
+
+**P5, horizon mesuré** (trajectoire relancée avec la métrique) : premier millimètre au pas
+260 (8 et 16 cycles) et 220 (32 et 64), contre 260 cœur contre cœur ; pire écart avant l'horizon
+9,1·10⁻⁴ (8), 5,8·10⁻⁵ (16), 1,0·10⁻⁴ (32), 2,4·10⁻⁵ m (64) ; pire sur 6 s 3,4 à 4,3 cm, contre
+4,5 cm pour la référence contre elle-même.
+
+*Tenue du plan* — **fusion déclarée P5+P6+P7 en un commit** : leur code a été écrit pendant les
+calculs de P5 (4 à 8 min chacun) dans le même fichier, et leurs mesures sont consignées ici.
+Le banc de localisation `--delta3d-fond-s298` est gardé : il a écarté B.
+
+**P7 reçu** (`--delta3d-diagnostics`) — justesse, depuis l'état de P4 : divergence des lignes
+franches carte **1,1 à 1,8·10⁻⁶** à 128 cycles contre **2,7 à 7,3·10⁻⁶** pour le cœur (sa
+projection s'arrête à ses critères, la carte fait 128 cycles) ; toutes lignes 2,5·10⁻⁶ à
+8,4·10⁻⁵. À 16 cycles depuis p = 0 : 1,6 à 2,7·10⁻² → **déclaré dégradé**. Différé, 100 pas du
+cas S298 à 16 cycles par le seul `step` : 97 diagnostics rendus, **âge 1 pas** pour 96 d'entre
+eux, 3 appels sans retour (premiers pas), aucune attente, 68 ms au mur pour les 100 pas.
+**84 pas sur 100 déclarés dégradés à 16 cycles** (franche jusqu'à 1,2·10⁻³) alors que la
+trajectoire à 16 cycles suit le cœur à 5·10⁻⁵ m jusqu'à t = 1 s : la tolérance d'ADR-144 est
+bien plus stricte que l'usage en hauteur — à documenter, sans la relever.
+Anneau de 3 emplacements ; si aucun n'est libre, le diagnostic du pas est perdu, jamais le pas
+retardé.
 
 ---
 
