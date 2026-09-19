@@ -34,7 +34,7 @@ d'image : aucun budget temporel ni production GPU revendiqués. Aucun changement
 - Transposition x↔y, cuves 12×7×12 et 7×12×12, 300 pas : écart de hauteur maximal
   **2,3841858·10⁻⁷ m** (un ulp autour de 2 m). Les réductions changent d'ordre ; aucune identité
   au bit n'est promise après transposition.
-- Repos non aligné à 2,013 m, 50 pas : zéro itération, hauteurs et champs nuls au bit.
+- Repos non aligné à 2,013 m, 50 pas : zéro itération, hauteurs inchangées, vitesses et pression nulles au bit.
 - Gardes au fond et au sommet, garde après transport réellement atteinte, plafond de pression :
   refus atomiques, six champs publiés restaurés au bit, y compris le reste de hauteur.
 - Allocateur compteur : **zéro allocation** sur 20 pas mobiles 3D et au refus, arène scellée.

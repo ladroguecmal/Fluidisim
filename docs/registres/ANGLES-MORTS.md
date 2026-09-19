@@ -3877,3 +3877,9 @@ la production de δ devient un pas résident sur GPU à travail borné, la réf�
 boucle d'image et juge la production à la réception. En relisant les contrats, un second défaut du
 même fil : le chemin S289–S291 attendait la carte à chaque pas, contre SPEC-004 §8.4. A295 reste
 ouverte jusqu'à la porte B reçue.
+
+*S296, 2026-09-19 — suivi A295, toujours ouverte.* Référence CPU 3D à surface mobile
+reçue, après le mode linéaire S295 : [preuve](../validation/DELTA3D-MOBILE-S296.md).
+Le couplage B/W, la production résidente et la scène restent à construire ; la réception CPU
+ne ferme ni A295 ni la porte B. A274 conserve sa portée : la loi du plancher des lignes
+fantômes en fonction de θ et de la taille n'est pas établie par ce lot.

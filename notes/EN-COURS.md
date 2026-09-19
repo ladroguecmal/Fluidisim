@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S296 — **porte B, lot 2 : la surface mobile dans la référence δ 3D** — reprise à chaud par Codex à P2
+Session : S296 — **porte B, lot 2 : la surface mobile dans la référence δ 3D** — terminée par Codex (reprise à chaud après P1)
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : « continue » de l'utilisateur, 2026-09-19 ; suite désignée par S295, porte en cours B.
 Objectif : la référence `delta3d` gagne le mode **à surface géométriquement mobile** de S237 —
@@ -91,11 +91,12 @@ qu'ADR-175 §4.1 demande. Hors lot : couplage B/W, production GPU, scène, coût
   atomiques ; essais : repos exact, trajectoire `ny = 1` contre la 2D, symétrie x↔y, allocations.
 - [x] **P5** — réception : banc `delta3d_mobile` (S237 à `ny = 1` contre HOS, petite amplitude
   oblique contre le linéaire), preuve `DELTA3D-MOBILE-S296.md`.
-- [ ] **P6** — rituel §6.
+- [x] **P6** — rituel §6.
 
 ### Notes de reprise
 Passation (2026-09-19, demande de l'utilisateur : « commit tout, je vais le faire avec Codex »).
-Rien n'est écrit pour P2 : reprendre à P2, code intact depuis S295.
+État à la passation initiale : rien n’était écrit pour P2, code intact depuis S295.
+P2–P5 sont désormais committés ; résultats ci-dessous et dans la preuve S296.
 
 Ce que la lecture du 2D a établi, pour ne pas le refaire :
 - Le mode mobile 2D vit dans `delta_mobile.rs` : `wet` (centre sous `η` de la colonne),

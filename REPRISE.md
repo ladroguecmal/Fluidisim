@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 16:01 +02:00
+JETON            : libre
+Battement        : 2026-09-19 16:02 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : S296 — reprise à chaud par Codex à P2 ; plan dans notes/EN-COURS.md
-Dernière session : S295 — porte B, lot 1 : référence δ 3D à surface linéarisée reçue (identique au bit à la 2D quand ny = 1, onde oblique 0,176 %)
-Session suivante : reprendre S296 à P2 (surface mobile de la référence δ 3D) ; plan, critères et notes de conception dans notes/EN-COURS.md.
-Maillons        : 0 — capacité reçue en S295 : δ a une référence tridimensionnelle, consommée par les réceptions de la porte B (ADR-175 §4.1), preuve DELTA3D-LINEAIRE-S295
+Session en cours : aucune — S296 terminée
+Dernière session : S296 — porte B, lot 2 : référence δ 3D à surface mobile reçue, HOS et onde oblique validés
+Session suivante : S297 — porte B, lot 3 : couplage B/W et frontières de la référence 3D ; réceptions S253/S268–S274 à ny=1 et invariance transverse.
+Maillons        : 0 — capacité reçue en S296 : surface mobile 3D, consommée par la référence de réception de la porte B (ADR-175 §4.1), preuve DELTA3D-MOBILE-S296
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -75,16 +75,16 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État au 2026-09-19 (S294). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
+État au 2026-09-19 (S296). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
 travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En bref :
 
 - **J1** partiel : B+W sur GPU dans l'hôte séparé, scène multi-sources admise par le cœur, GPU eau
   1,74 ms, mer jugée par l'utilisateur (R7 accepté) ; manquent le CPU sous 2 ms (A278), un objet
   pilotable et la seconde cible.
 - **δ reçu en 2D** — surface mobile couplée à B/W contre HOS, frontières, rendu en direct.
-  **S295** : référence 3D à surface linéarisée reçue, identique au bit à la 2D quand `ny = 1`.
+  **S295–S296** : référence 3D à surfaces linéaire et mobile reçue, identique au bit à la 2D quand `ny = 1`.
   **Porte B ouverte** : δ en 3D selon [ADR-175](docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md),
-  référence CPU dans le cœur, production résidente sur GPU à travail borné. Rien de 3D construit.
+  référence CPU dans le cœur ; couplage B/W, production GPU et scène 3D encore à construire.
 - **Ordonnanceur** (porte A) : décide qu'un domaine vit et avec quel budget ; ni plusieurs
   candidats, ni déplacement, ni dégradation automatique.
 - **V** : noyau reçu (C12, géométrie orientée, restauration), sans articulation avec δ.

@@ -14843,11 +14843,35 @@ l'utilisateur.
 relus : I-04, I-06, I-07 (`g_eff` fourni), I-08 (f32, durée entière, coefficients seuls arrondis),
 I-17 ; aucun amendé. Copie unique.
 
-## S296 — 2026-09-19 — surface mobile 3D : plan posé, passation à Codex (interrompue)
+## S296 — 2026-09-19 — porte B, lot 2 : surface mobile de la référence 3D reçue
 
-**Claude Opus 5 (Claude Code desktop).** Entrée : « continue », puis « commit tout, je vais le
-faire avec Codex ». Plan 7c5180b : porte B, lot 2, surface mobile dans la référence `delta3d`,
-quatre critères posés avant le code. **Seul P1 est fait** ; P2–P6 restent, avec les notes de
-conception tirées de la lecture du mode mobile 2D dans `notes/EN-COURS.md`. Aucun code modifié.
-Jeton `interrompu` : reprise à chaud à P2. Maillons inchangés (0, capacité de S295).
+**Entrée et reprise.** Claude Opus 5 a posé le plan et les critères (`7c5180b`), puis passé le
+jeton à Codex à la demande de l'utilisateur. Codex reprend sur « reprend le projet » : copie
+unique, branche parallèle archivée, diff vide ; aucune étape à annuler. P2–P6 terminés.
 
+**Capacité reçue.** Une surface graphe se déplace non linéairement dans la référence MAC x-y-z :
+fantômes verticaux et latéraux, projection Jacobi à départ chaud, advection, extrapolation et
+débits mouillés conservatifs. **Consommateur** : référence de réception de la porte B,
+ADR-175 §4.1, qui prépare le couplage B/W puis juge la production GPU.
+**Preuve** : [DELTA3D-MOBILE-S296](../docs/validation/DELTA3D-MOBILE-S296.md).
+
+**Résultats.** À `ny=1`, hauteurs, pressions, u/w et itérations **identiques au bit** à la 2D
+sur une période, 32 colonnes, amplitudes 5 et 10 cm. Contre HOS à 128 colonnes : profil
+**0,253 % / 0,224 %**, harmonique **0,704 % / 0,427 %**, décroissants en raffinant.
+Onde oblique fine : **0,253 %** contre la solution linéaire analytique, phase **0,065°**,
+écart au mode linéaire discret <0,10 %. Transposition x↔y : un ulp. Repos non aligné exact,
+zéro allocation, refus atomiques avant/après transport et sur non-convergence. Suite
+cœur/harnais : **530 réussis, 18 ignorés**, puis test matriciel supplémentaire reçu (531 au
+total), aucun échec. Afficheur inchangé, non retesté. Aucune tolérance déplacée.
+
+**Limites, suite.** Fond plat, surface graphe, une période ; pas de couplage B/W, production
+GPU, rendu ni coût reçu. A274 (plancher des lignes fantômes) demeure ouverte ; aucune loi
+universelle déduite des cas reçus. **S297 : lot 3 de la porte B, couplage B/W et frontières**,
+réceptions S253/S268–S274 à `ny=1` et invariance transverse. Recommandation S293 maintenue :
+avancer la 3D avant le coût, pas de retour au fil d'optimisation 2D. V, B2, bathymétrie et
+multiplateforme restent dans la file, sans réduction d'ambition ni nouvel arbitrage.
+
+**Maillons : 0.** La référence de la porte B gagne une capacité reçue. Invariants relus :
+I-03 à I-08, I-12, I-13, I-17 ; aucun amendé. Pas de nouvel ADR ni de leçon forcée.
+Rituel : file active entière relue, état J2/porte B remplacé, index et passation actualisés,
+copie unique conservée ; navigation et plafonds vérifiés.

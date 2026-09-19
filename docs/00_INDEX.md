@@ -87,6 +87,7 @@
 - [Coût d'appel du cycle résident : enregistrement des commandes, trois encodages au bit](validation/ENCODAGE-CYCLE-S290.md).
 - [Le pas de δ décomposé étape par étape, puis allégé au bit](validation/PAS-DECOMPOSE-S291.md).
 - [Référence δ tridimensionnelle, surface linéarisée — porte B, lot 1](validation/DELTA3D-LINEAIRE-S295.md) : identique au bit à la 2D quand `ny = 1`, onde oblique reçue.
+- [Référence δ tridimensionnelle, surface mobile — porte B, lot 2](validation/DELTA3D-MOBILE-S296.md) : trajectoires 2D au bit, HOS et onde oblique reçus.
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
