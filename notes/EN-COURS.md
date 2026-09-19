@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S287 — en cours
+Session : S287 — terminée
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : continuer, coût par pas après cadence lente refusée.
 Objectif : accélérer les passes de pression sans changer le calcul, avant un port GPU.
@@ -71,7 +71,7 @@ Objectif : accélérer les passes de pression sans changer le calcul, avant un p
 - [x] **P3** — parcourir les écritures disjointes multigrilles dans leur ordre mémoire,
   mesurer le même travail et exiger les empreintes identiques ; conserver seulement un gain
   reçu, sinon retirer l'optimisation. Suite complète et tests budget/mémoire existants.
-- [ ] **P4** — rituel §6 : mesures et décision de suite, journal, registres, jeton libre.
+- [x] **P4** — rituel §6 : mesures et décision de suite, journal, registres, jeton libre.
 
 ### Notes de reprise
 

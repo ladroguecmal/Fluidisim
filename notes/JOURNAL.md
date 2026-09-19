@@ -14401,3 +14401,28 @@ multiplateforme, proposition V1 et verdict S277 conservent leurs déclencheurs.
 **Rituel :** file active entièrement relue et états périmés remplacés, feuille de route/index,
 A276 et invariants I-04/I-05/I-06/I-12 vérifiés. Une seule copie principale, rien à fermer.
 Plan terminé et jeton libre. Aucun gain de fidélité ou de cadence interactive revendiqué.
+
+## S287 — 2026-09-19 — parcours mémoire de la pression
+
+**Entrée :** continuer, A276 coût par pas. Essai CPU borné avant port GPU : boucles
+indépendantes parcourues dans l'ordre mémoire, opérateur fin mobile et multigrille.
+Instrument ajouté au banc S286 : empreintes hauteur/u/w à toutes les images et itérations.
+
+**Résultat : variante retirée.** A1/B1/B2/A2 sur secteur, six trajectoires strictement
+identiques par empreinte, mêmes itérations et zéro allocation. Sur onde16, plages de moyennes
+A 24,8542–25,1081 ms et B 24,8082–25,0584 ms se recouvrent ; petit gain de médiane insuffisant
+pour recevoir un gain complet robuste. Le cœur est restauré exactement, aucun gain livré.
+[Mesures et limites](../docs/validation/PASSES-PRESSION-S287.md). 36 tests viewer réussis,
+un ignoré ; reçu cœur S284 conservé puisque toute modification du cœur a été retirée.
+
+**Choix de suite :** passer à la construction du candidat de pression résidente GPU, contrat
+puis opérateur/lissage confrontés au CPU, coûts de transferts/synchronisations inclus ;
+réductions/cycle complet et refus avant intégration. Matériel GPU constaté, compute existant,
+aucune performance δ GPU acquise. Pas d'ADR acté prématurément. Cadence lente et A290 gardées
+avec déclencheurs, V/B2/bathymétrie/multiplateforme et verdict S277 non effacés ; V1 ouverte.
+Ce serait le troisième lot de coût : comparer explicitement à la 3D et aux solides absents,
+viser une construction consommable plutôt qu'une nouvelle micro-optimisation locale.
+
+**Rituel :** file active entièrement relue, prochain lot remplacé, feuille de route/index
+actualisés, A276 suivi ; I-04/I-05/I-06/I-12/I-17 conservés. Maillons = 1, instrument seul ne
+valant pas capacité de jeu. Une copie principale, rien à fermer ; plan terminé et jeton libre.

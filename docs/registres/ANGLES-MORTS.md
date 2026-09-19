@@ -3822,3 +3822,11 @@ Coût d'échecs représentatifs toujours non mesuré (aucun refus pendant ce ban
 de pente et réception visuelle ouverts. Prochain levier : coût par pas, candidat GPU face
 aux passes CPU ; cadence à reprendre avec intégration temporelle reçue ou solveur moins cher.
 [Protocole et limites](../validation/CADENCE-DELTA-S286.md).
+
+**Suivi A276 — S287, 2026-09-19 (sévérité conservée).** Inversion des boucles des passes
+multigrilles et de l'opérateur fin essayée puis retirée. Identité des hauteurs/vitesses sur
+six trajectoires, itérations et allocations inchangées, mais plages de coût moyen complet
+qui se recouvrent après A/B/B/A. Pas de gain livré. Suite : contrat d'un candidat de pression
+résidente GPU, opérateur/lissage contre CPU et coût incluant transferts/synchronisations,
+avant cycle complet et intégration. Pas de preuve GPU acquise par la seule présence de wgpu.
+[Mesures et limites](../validation/PASSES-PRESSION-S287.md).

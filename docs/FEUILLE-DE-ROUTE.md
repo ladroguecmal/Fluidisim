@@ -343,6 +343,10 @@ non financé ; les appels répétés pendant une pause ne changent plus l'estima
 32/48 ms éprouvées mais **non activées** : onde 0,6 m à 4,445/8,916 mm du témoin 16 ms ;
 moyennes 13,15/9,11 ms par image et pics de pas >32 ms. La cadence seule ne reçoit ni la
 fidélité ni I-05 ; priorité au coût par pas avant 3D. [Preuve](validation/CADENCE-DELTA-S286.md).
+**S287 : parcours mémoire CPU éprouvé puis retiré**, gain complet non robuste ; empreintes
+des six trajectoires identiques. Prochain lot : candidat de pression résidente GPU, contrat
+puis opérateur/lissage contre référence CPU ; aucun solveur δ GPU encore construit.
+[Mesures](validation/PASSES-PRESSION-S287.md).
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.

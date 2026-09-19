@@ -80,6 +80,7 @@
 - [Préparation progressive du rétrécissement et dérive temporelle](validation/PREPARATION-RETRECISSEMENT-S284.md).
 - [Attribution de la dérive : préparation et domaine réduit](validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
 - [Cadence δ : coût moyen, fidélité et vieillissement des mesures](validation/CADENCE-DELTA-S286.md).
+- [Passes de pression : parcours mémoire éprouvé et suite GPU](validation/PASSES-PRESSION-S287.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

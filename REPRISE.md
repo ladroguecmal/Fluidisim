@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 11:27 +02:00
+JETON            : libre
+Battement        : 2026-09-19 11:28 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : S287 — coût des passes de pression
-Dernière session : S286 — oubli temporel des coûts corrigé ; cadence 32/48 ms mesurée et refusée sur onde
-Session suivante : A276, réduire le coût par pas : confronter port GPU et passes CPU, décider l'architecture avant 3D/deuxième domaine. Cadence lente différée (fidélité et pics refusés), coût des échecs représentatifs ouvert. A290 revient avant réduction automatique. V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
-Maillons        : 0 — intégrité de l'estimation corrigée dans le chemin image, défaut reproduit puis reçu ; budget toujours ouvert
+Session en cours : —
+Dernière session : S287 — parcours mémoire CPU éprouvé puis retiré ; empreintes de trajectoires disponibles
+Session suivante : A276, candidat de pression résidente GPU : contrat/ADR puis opérateur et lissage contre CPU, coût avec transferts/synchronisations ; avant cycle complet, 3D/deuxième domaine. Comparer ce troisième lot de coût aux capacités absentes. Cadence lente, A290, échecs représentatifs, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Maillons        : 1 — diagnostic et instrument reçus, aucun gain de simulation livré
 
 ```
 

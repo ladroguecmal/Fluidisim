@@ -63,6 +63,8 @@ Les cadences lentes restent au banc : elles dépassent 3 mm sur l'onde injectée
 pas le budget de 2 ms. L'afficheur conserve 16 ms. L'oubli des anciennes mesures de coût dépend
 désormais du temps simulé, sans effet des appels répétés pendant une pause.
 [Mesures S286](../docs/validation/CADENCE-DELTA-S286.md).
+Le même banc imprime depuis S287 les empreintes de hauteur/vitesse de toutes les images et
+les totaux d'itérations, pour comparer les optimisations sans changer les trajectoires.
 
 ```powershell
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --verify
