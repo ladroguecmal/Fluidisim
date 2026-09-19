@@ -2244,6 +2244,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-faces") {
         return delta3d_background::recevoir_faces();
     }
+    if args.iter().any(|a| a == "--delta3d-couplage") {
+        return delta3d_background::recevoir_couplage();
+    }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();
     }

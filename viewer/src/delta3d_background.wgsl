@@ -19,11 +19,11 @@ struct Params {
     rho: f32,
     gravity: f32,
     dx: f32,
-    _pad0: f32,
+    rest: f32,
     nz: u32,
-    _pad1: u32,
-    _pad2: u32,
-    _pad3: u32,
+    g_eff: f32,
+    scale: f32,
+    theta_min: f32,
     // Coin bas du domaine δ, local à l'ancre de B.
     origin: vec4<f32>,
 };
@@ -38,6 +38,11 @@ struct Params {
 @group(0) @binding(2) var<storage, read> points: array<vec4<f32>>;
 @group(0) @binding(3) var<storage, read_write> out: array<f32>;
 @group(0) @binding(4) var<uniform> params: Params;
+// Entrée par colonne puis par maille : perturbation de surface, puis divergence.
+@group(0) @binding(5) var<storage, read> cells_in: array<f32>;
+// Sortie : surface totale (colonnes), fantôme du haut (colonnes), second membre et
+// préconditionneur (mailles), à la suite.
+@group(0) @binding(6) var<storage, read_write> cells_out: array<f32>;
 
 const TWO_POW_32: f32 = 4294967296.0;
 const FRAC_PI_2: f32 = 1.5707963267948966;
@@ -442,4 +447,148 @@ fn sample_faces(@builtin(global_invocation_id) id: vec3<u32>) {
     );
     let local = params.origin.xyz + (vec3<f32>(f32(i), f32(j), f32(k)) + half) * params.dx;
     write_sample(slot * FIELDS, local);
+}
+
+// ── Le couplage : surface totale, fantômes de fond, second membre ────────────────────────────
+//
+// Porté de `delta3d_coupling.rs` l. 60-125 et de `ghost_up3` / `ghost_side3`. Le cœur vérifie
+// que l'élévation du fond est constante sur la verticale d'une colonne ; ici c'est automatique,
+// la carte évaluant `eta` sans dépendance en z — la vérification n'a donc pas d'objet, et son
+// absence n'est pas un relâchement.
+//
+// `eta_roundoff` vaut zéro tant que la surface n'a pas avancé. Ce lot ne porte pas l'avance de
+// surface, donc il ne porte pas non plus sa compensation : à reprendre avec la surface mobile.
+
+fn columns() -> u32 { return params.nx * params.ny; }
+fn cells() -> u32 { return params.nx * params.ny * params.nz; }
+
+fn u_faces() -> u32 { return (params.nx + 1u) * params.ny * params.nz; }
+fn v_faces() -> u32 { return params.nx * (params.ny + 1u) * params.nz; }
+
+/// Champ `f` de la face `w` d'indice (i, j, k), dans le tampon des faces.
+fn face_w(i: u32, j: u32, k: u32, f: u32) -> f32 {
+    let index = u_faces() + v_faces() + (k * params.ny + j) * params.nx + i;
+    return out[index * FIELDS + f];
+}
+fn face_u(i: u32, j: u32, k: u32, f: u32) -> f32 {
+    let index = (k * params.ny + j) * (params.nx + 1u) + i;
+    return out[index * FIELDS + f];
+}
+fn face_v(i: u32, j: u32, k: u32, f: u32) -> f32 {
+    let index = u_faces() + (k * (params.ny + 1u) + j) * params.nx + i;
+    return out[index * FIELDS + f];
+}
+
+const F_ETA: u32 = 0u;
+const F_P_DYN: u32 = 19u;
+const F_GRAD_P_X: u32 = 20u;
+const F_GRAD_P_Y: u32 = 21u;
+const F_GRAD_P_Z: u32 = 22u;
+
+fn total_height(c: u32) -> f32 { return cells_out[c]; }
+
+/// Surface totale et fantôme du haut, une invocation par colonne.
+@compute @workgroup_size(64)
+fn couple_columns(@builtin(global_invocation_id) id: vec3<u32>) {
+    let c = id.x;
+    if (c >= columns()) { return; }
+    let i = c % params.nx;
+    let j = c / params.nx;
+    let elevation = face_w(i, j, 0u, F_ETA);
+    let height = cells_in[c] + elevation;
+    cells_out[c] = height;
+
+    var ghost = 0.0;
+    // Dernière maille mouillée, balayée du haut comme le cœur ; nz est petit.
+    var k = params.nz;
+    loop {
+        if (k == 0u) { break; }
+        k = k - 1u;
+        if ((f32(k) + 0.5) * params.dx < height) {
+            let dz = height - f32(k + 1u) * params.dx;
+            let eta_bg = face_w(i, j, k + 1u, F_ETA);
+            let p = face_w(i, j, k + 1u, F_P_DYN);
+            let gz = face_w(i, j, k + 1u, F_GRAD_P_Z);
+            ghost = params.rho * params.g_eff * eta_bg - (p + dz * gz);
+            break;
+        }
+    }
+    cells_out[columns() + c] = ghost;
+}
+
+/// Second membre couplé et préconditionneur, une invocation par maille. Même parcours de faces
+/// et même ordre qu'en 3D dans le cœur ; les valeurs de fantôme portent en plus le fond.
+@compute @workgroup_size(64)
+fn couple_rhs(@builtin(global_invocation_id) id: vec3<u32>) {
+    let c = id.x;
+    if (c >= cells()) { return; }
+    let plane = columns();
+    let i = c % params.nx;
+    let j = (c / params.nx) % params.ny;
+    let k = c / plane;
+    let col = j * params.nx + i;
+
+    let base_rhs = 2u * plane;
+    let base_prec = 2u * plane + cells();
+    let h = total_height(col);
+    let zc = (f32(k) + 0.5) * params.dx;
+    if (zc >= h) {
+        cells_out[base_rhs + c] = 0.0;
+        cells_out[base_prec + c] = 0.0;
+        return;
+    }
+
+    var b = params.scale * cells_in[plane + c];
+    var diag = 0.0;
+    let inv = 1.0 / (params.dx * params.dx);
+    // Fantôme latéral : pression hydrostatique locale plus le fond, pris sur la face.
+    let side_base = params.rho * params.g_eff * (zc - params.rest);
+
+    // x−, x+, y−, y+ dans l'ordre du cœur.
+    for (var face = 0u; face < 4u; face = face + 1u) {
+        var ok = false;
+        var other_col = col;
+        var bg_p = 0.0;
+        var bg_g = 0.0;
+        var sign = 1.0;
+        if (face == 0u && i > 0u) {
+            ok = true; other_col = col - 1u;
+            // Face d'indice max(i, i−1) = i ; notre maille est la plus haute, donc sign = −1.
+            bg_p = face_u(i, j, k, F_P_DYN); bg_g = face_u(i, j, k, F_GRAD_P_X); sign = -1.0;
+        } else if (face == 1u && i + 1u < params.nx) {
+            ok = true; other_col = col + 1u;
+            bg_p = face_u(i + 1u, j, k, F_P_DYN); bg_g = face_u(i + 1u, j, k, F_GRAD_P_X); sign = 1.0;
+        } else if (face == 2u && j > 0u) {
+            ok = true; other_col = col - params.nx;
+            bg_p = face_v(i, j, k, F_P_DYN); bg_g = face_v(i, j, k, F_GRAD_P_Y); sign = -1.0;
+        } else if (face == 3u && j + 1u < params.ny) {
+            ok = true; other_col = col + params.nx;
+            bg_p = face_v(i, j + 1u, k, F_P_DYN); bg_g = face_v(i, j + 1u, k, F_GRAD_P_Y); sign = 1.0;
+        }
+        if (!ok) { continue; }
+        let other = total_height(other_col);
+        if (zc < other) {
+            diag = diag + 1.0;
+        } else {
+            let theta = max((h - zc) / (h - other), params.theta_min);
+            let a = 1.0 / theta;
+            diag = diag + a;
+            let bg = -(bg_p + sign * (theta - 0.5) * params.dx * bg_g);
+            b = b + (side_base + bg) * a * inv;
+        }
+    }
+    if (k > 0u) { diag = diag + 1.0; }
+    if (k + 1u < params.nz && (f32(k + 1u) + 0.5) * params.dx < h) {
+        diag = diag + 1.0;
+    } else {
+        let a = 1.0 / max((h - zc) / params.dx, params.theta_min);
+        diag = diag + a;
+        // `eta[c] − repos` porte la perturbation seule ; le fond arrive par `ghost_up`.
+        let value = params.rho * params.g_eff * (cells_in[col] - params.rest)
+            + cells_out[plane + col];
+        b = b + value * a * inv;
+    }
+
+    cells_out[base_rhs + c] = b;
+    if (diag > 0.0) { cells_out[base_prec + c] = 1.0 / (diag * inv); } else { cells_out[base_prec + c] = 0.0; }
 }

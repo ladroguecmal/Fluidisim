@@ -89,8 +89,8 @@ Critères avant code, posés ici :
 - [x] **P4** — **au-dessus** du plan moyen, règle d'ADR-154, reçu contre le cœur.
 - [x] **P5a** — **découpage déclaré** : les trois familles de faces MAC échantillonnées sur
   la carte, reçues contre `BackgroundGrid3` du cœur.
-- [ ] **P5b** — fantômes couplés et second membre assemblés sur la carte depuis ces faces.
-- [ ] **P6** — coût du fond sur la carte, comparé au chemin CPU de S276/S298.
+- [x] **P5b** — fantômes couplés et second membre assemblés sur la carte depuis ces faces.
+- [>] **P6** — coût du fond sur la carte, comparé au chemin CPU de S276/S298.
 - [ ] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
@@ -155,3 +155,19 @@ trois familles, et leur ordre u, v, w est celui du cœur.
 dernière maille mouillée, et `ghost_bg_{x,y}[f] = −(s.p_dyn + signe·(θ−0,5)·dx·s.grad_p_dyn[axe])`
 sur les faces où la mouillure change. La constance verticale de `eta` que le cœur vérifie est
 automatique ici : la carte évalue `eta` sans dépendance en z.
+
+P5b reçu (`--delta3d-couplage`, 15×11×14, 1 510 mailles mouillées sur 2 310, aucune colonne
+pleine — donc les fantômes latéraux sont réellement exercés) : second membre à 6,0·10⁻⁸,
+1,1·10⁻⁶ et 3,9·10⁻⁷ en relatif sur trois instants ; préconditionneur du même ordre.
+Fantôme du haut de 211 à 389 Pa : le fond entre vraiment dans le second membre.
+
+**Première fixture rejetée, et pourquoi.** À `rest = (nz−4)·dx` avec une perturbation de
+±1,4·dx, la hauteur totale franchissait la borne de `check_edges3` (`2·dx ≤ h ≤ (nz−1)·dx`) :
+le cœur refusait `Domain` au temps lointain, et à t=0 l'écart montait à 1,3·10⁻⁵. Fixture
+rentrée dans le domaine (`rest = (nz−5)·dx`, ±0,9·dx) : tout redevient régulier.
+
+**Instrument à garder** : `mailles_franchement_divergentes` compte les mailles dont le second
+membre s'écarte de plus de 10⁻³ de l'échelle. Un arrondi ne peut pas produire ça ; une
+**mouillure classée autrement** des deux côtés, si. Ici **zéro** aux trois instants, mais le
+risque existe dès qu'une surface totale passe à un ulp d'un centre de maille : garder ce
+compteur dans tout banc qui compare des géométries, il est le seul à voir la bascule.

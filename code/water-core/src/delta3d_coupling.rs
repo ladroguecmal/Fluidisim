@@ -414,6 +414,17 @@ impl Volume3 {
     /// Référence perturbative 3D, surface totale eta+B/W ; vitesses, pression et eta−rest
     /// publiées sont des écarts. Fond prescrit aux quatre bords, éponge de l'écart seul.
     /// Aucun budget temps réel revendiqué (ADR-175). Refus atomique et zéro allocation.
+    /// S300, ADR-175 §3 — **essais seulement**. Arme le couplage au fond comme le ferait un pas :
+    /// surface totale, fantôme de fond au-dessus de la dernière maille mouillée, et fantômes
+    /// latéraux aux faces où la mouillure change. Sert à juger une production qui les assemble
+    /// sur sa carte ; la production ne l'appelle pas à l'exécution.
+    ///
+    /// Mutation assumée, comme sa voisine : les tampons de travail du couplage sont écrits,
+    /// exactement comme un pas les écrirait. Rien de publié n'est touché (I-17).
+    pub fn arm_coupling_for_trials(&mut self, bg: &BackgroundFaces3<'_>) -> Result<(), Error> {
+        self.prepare_background3(bg)
+    }
+
     pub fn step_perturbation_mobile(
         &mut self,
         time: SimTime,
