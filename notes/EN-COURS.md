@@ -58,196 +58,60 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S290 — terminée
+Session : S291 — en cours
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
-Entrée : continuer ; A292, déclarée par S289.
-Objectif : rendre le cycle résident **appelable sans gaspiller 73 % de son temps**, et lever les
-allocations qu'ADR-145 interdit à la boucle d'image. Même cause, un seul lot.
+Entrée : demande de l'utilisateur, qui recouvre A293 — décomposer le temps par étape de calcul,
+trouver où il part, chercher les erreurs et les calculs redondants, expérimenter, proposer.
+Contrainte donnée : **garder un rendu visuellement valide et un temps de réponse court**.
+Objectif : un pas dont **tous** les postes sont connus, puis supprimer ce qui est prouvé inutile
+sans déplacer d'un bit ce que le pas publie.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seuls ; battement de S289 corrigé (fabriqué, non lu).
-- [x] **P2** — **mesurer avant de choisir** : décomposer les 3,93 ms en encodage / soumission /
-  attente, et mesurer le coût **par dispatch** en faisant varier leur nombre à travail égal.
-  C'est cette mesure qui décide de la voie, pas le raisonnement.
-- [x] **P3** — réduction des dispatchs à **mathématique identique** : replier chaque réduction
-  dans le noyau qui produit ses valeurs, 7 par itération → 5. Réception **au bit** contre le
-  cycle de S289, puis coût.
-- [x] **P4** — deuxième palier. *Ni l'atomique ni la récurrence `q = A·z + β·q` n'ont été
-  nécessaires : une troisième voie, apparue en construisant, est **à la fois plus rapide et sans
-  risque** — chaque groupe recalcule le scalaire lui-même au début du noyau suivant, depuis des
-  valeurs écrites par le dispatch précédent. 3 dispatchs par itération, reçu au bit.*
-- [x] **P5** — allocations de l'appel : viser zéro en régime, publier ce qui reste et pourquoi.
-- [x] **P6** — reconsommation par le **pas réel** : gain de bout en bout contre le témoin S289,
-  mêmes tailles, mêmes fonds, portes inchangées.
-- [x] **P7** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
+- [x] **P1** — état réel, jeton et plan seuls.
+- [ ] **P2** — cœur : accumuler le temps **par phase** (les huit de `delta_budget`), exposé sans
+  changer les structures publiques ; **mesurer ce que l'instrument lui-même coûte**, et le dire.
+- [ ] **P3** — banc de décomposition : part de chaque phase sur un vrai pas, deux tailles, deux
+  fonds, avec et sans candidat GPU. C'est cette carte qui décide de la suite, pas la lecture.
+- [ ] **P4** — supprimer les recalculs **identiques** repérés à la lecture, chacun avec sa preuve
+  d'identité, réception **au bit** sur la trajectoire :
+  a. `‖b‖²` réduit **deux fois** sur le même `rhs` (garde `warm`, puis `b2`) ;
+  b. `correct_into_uw` **et** `divergence_metric` refaits sur le **même** `p` quand la porte
+     physique d'ADR-144 est franchie — c'est-à-dire à chaque pas accepté ;
+  c. double `ctl.poll` par maille dans la boucle `w` de l'advection.
+- [ ] **P5** — phase `Validate` : elle parcourt **onze** tableaux, dont six ne sont **pas
+  publiés** (`us`, `ws`, `rhs`, `res`, `dir`, `tmp`). Distinguer ce qui protège la publication de
+  ce qui ne protège rien, mesurer, et **refuser le changement si l'argument ne tient pas**.
+- [ ] **P6** — coût de l'horloge : le sondage lit l'horloge toutes les 64 mailles. Mesurer le pas
+  avec horloge réelle contre horloge figée, et l'effet du grain. Les mesures de S289/S290 ont été
+  prises avec une horloge figée : dire de combien elles sous-estiment la production.
+- [ ] **P7** — re-mesure complète et **propositions chiffrées**, y compris celles qui ne seront pas
+  construites ici. Vérifier que le rendu reste valide : trajectoire au bit, ou écart expliqué.
+- [ ] **P8** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
 ### Notes de reprise
 
-Mesure de départ (S289, [preuve](../docs/validation/PRESSION-RESIDENTE-S289.md) §5) : à
-6 656 mailles et 128 itérations, l'appel coûte 4,1989 ms = 0,2606 d'empaquetage + 3,9333
-d'encodage-soumission-attente, pour **1,150 ms de calcul réel**. 7 dispatchs par itération,
-896 en tout ; ≈ 7 allocations par itération, 990 en tout, dans l'encodage de la pile graphique.
-Plafond du lot ≈ ×3 sur l'appel.
+Point de départ (S290, [preuve](../docs/validation/ENCODAGE-CYCLE-S290.md)) : à 6 656 mailles le
+pas coûte 4,6315 ms dont **2,1271 d'appel de pression**. Les ≈ 2,5 ms restants n'ont jamais été
+mesurés : S244 n'avait cartographié que la boucle de pression, qui n'est plus le poste dominant.
 
-**Le piège à éviter est nommé d'avance** : supposer que les 3,93 ms sont de l'encodage. Si
-l'essentiel est la latence de soumission ou l'attente de cartographie, réduire les dispatchs ne
-rendra presque rien, et la réponse est ailleurs (recouvrement, ou un seul appel par pas au lieu
-d'un par projection). P2 existe pour trancher cela par la mesure — L338.
+**Suspects relevés à la lecture, avant toute mesure** — à confirmer ou écarter, pas à croire :
+1. `project_with` réduit `norm2(&self.rhs)` pour décider `warm`, **puis** à nouveau pour `b2`.
+   Deux réductions complètes sur le même tableau inchangé.
+2. Sur un pas accepté, la porte d'ADR-144 appelle `correct_into_uw` puis `divergence_metric` ;
+   la queue de `project_with` **les rappelle tous les deux**, sur le même `p`, les mêmes `us`/`ws`.
+   Deux corrections de faces complètes et deux passes de divergence par pas.
+3. `Validate` vérifie la finitude de onze tableaux — ≈ 60 000 valeurs à 6 656 mailles — dont six
+   sont des tampons de travail jamais publiés.
+4. La boucle `w` de `advect` sonde le contrôle **deux fois** par maille (une fois par colonne, une
+   fois par maille).
+5. `wet_cell(c)` refait une division et un modulo par maille, plus `height(i)`, et le chemin du
+   candidat externe rezéroie deux fois les mailles sèches.
+6. `surface_in_bounds` est parcouru deux fois par pas (Prepare et Validate).
+7. **Le sondage lit l'horloge une fois par 64 mailles.** Toutes les mesures de S289 et S290 ont
+   été prises avec une horloge **figée** (`now_ns → 0`), donc quasi gratuite : elles ne disent
+   rien du coût réel du sondage en production. À quantifier avant de proposer quoi que ce soit.
 
-Trois voies de réduction, par risque croissant :
-1. **Repli des réductions dans leurs producteurs** — `apply` calcule `q` puis replie `d·q` ;
-   `update_pr` calcule `p,r,z` puis replie `r·z`. Les valeurs repliées sont celles que le même
-   fil vient de calculer : **mathématique inchangée**, réception au bit exigible. 7 → 5.
-2. **Direction locale par `q = A·z + β·q_prev`** — supprime la dépendance aux voisins de `d`,
-   donc permet de fusionner la mise à jour de direction. 5 → 4. Mais c'est la reformulation
-   de Chronopoulos/Gear, **moins stable en f32** : la récurrence de `q` dérive. À éprouver
-   contre le vrai résidu, pas contre elle-même.
-3. **Réduction finale par le dernier groupe** (compteur atomique) — supprime les deux dispatchs
-   à un seul groupe. 5 → 3 ou 4 → 2. Dépend d'une visibilité inter-groupes que WGSL n'énonce
-   pas aussi nettement qu'un `storageBarrier` intra-groupe : portabilité à peser, et c'est un
-   argument pour la refuser même si elle marche sur cette carte.
-
-P2 : mesure faite, et elle **change le lot**. Décomposition à 6 656 mailles / 128 itérations :
-4,2752 ms = 0,2768 empaquetage + **2,2163 encodage** + 0,1925 soumission + 1,3663 attente +
-0,0058 lecture, pour 1,1475 ms de carte. L'encodage est 52 % de l'appel ; l'attente vaut à peu
-près le temps de carte plus la latence. Sonde d'enregistrement (901 dispatchs jetés sans
-exécution) : **1,86 µs et une allocation par `dispatch_workgroups`**, contre seulement 0,38 à
-0,44 µs de plus pour un `set_pipeline` par dispatch — et ces chiffres ne dépendent pas de la
-taille de grille. Donc : fusionner des noyaux paie en proportion des dispatchs supprimés, et
-presque rien de plus.
-
-**Le plafond annoncé par S289 était faux** : ×3 supposait tout le non-calcul récupérable. Seul
-l'encodage l'est, donc **≈ ×2,1**. Corrigé dans la file, la feuille et REPRISE.
-
-**Une des deux raisons du lot n'existait pas.** S289 écrivait qu'ADR-145 n'admet pas ces
-allocations : ADR-145 §2 décide l'inverse — les allocations des dépendances verrouillées sont
-comptées et publiées, **non interdites** —, et §1 lit I-06 sur le code du projet, qui n'alloue
-rien ici. Note corrective datée posée dans ADR-173 et dans la preuve S289. Le lot garde un seul
-objectif : le temps.
-
-**Voie retenue pour P3** : (1) replier les réductions dans leurs producteurs, 7 → 5 dispatchs,
-mathématique inchangée donc réception **au bit** exigible ; (2) soumettre par tranches, pour
-que l'encodage de la tranche suivante recouvre l'exécution de la précédente. Les deux sont sans
-risque numérique. Les voies 3 et 4 restent pour P4, sous condition de mesure.
-
-P3 : les deux voies sûres sont construites et **reçues au bit**, banc `--pression-variantes`.
-72 combinaisons (2 tailles × 2 fonds × 3 longueurs × 6 variantes) : **zéro valeur différente**
-du chemin de S289. Défauts fixés à fusion active, tranche 16.
-
-Dispatchs par itération 7 → 5 ; total à 128 itérations 901 → 644.
-Gains sur l'appel complet (médiane sur 9), contre le chemin de S289 :
-6 656 mailles — 32 itérations 1,7837 → 1,1005 ms (×1,62) ; 128 : 4,1725 → 2,5750 (×1,62) ;
-256 : 7,2247 → 4,7664 (×1,52). 32 768 mailles — 32 : 2,2436 → 1,6628 (×1,35) ;
-128 : 5,0288 → 3,3431 (×1,50) ; 256 : 9,5180 → 5,5391 (×1,72).
-
-**Bonus non prévu** : la fusion accélère aussi la **carte** — 1,1549 → 0,9431 ms à 6 656/128,
-1,6770 → 1,3461 à 32 768/128, 3,3362 → 2,6558 à 32 768/256, soit −18 à −20 %. Moins de
-frontières de dispatch, donc moins de barrières implicites.
-
-**Ce que les tranches déplacent** : l'attente s'effondre (1,3630 → 0,2289 ms à 6 656/128), parce
-que la carte a fini avant que le CPU n'ait fini d'enregistrer. L'appel est désormais **borné par
-l'encodage**, qui reste 1,65 à 1,81 ms à 128 itérations. Tranche 8 est clairement moins bonne
-(trop de soumissions) ; 16 et 32 se tiennent à 3-7 %.
-
-**Le plafond de ×2,1 annoncé en P2 n'est plus le bon** : il supposait l'attente incompressible.
-Les tranches l'ayant absorbée, ce qui borne est `empaquetage + encodage + soumission`, et
-supprimer encore 2 dispatchs par itération (voie 3 ou 4) viserait ≈ 1,4 ms, soit ×2,9 sur
-l'appel. À mesurer, pas à annoncer.
-
-**Allocations** : elles **montent** avec les tranches — 990 → 988 (fusion+16) mais 1 245 sans
-fusion, car chaque tampon de commandes alloue. Permises et publiées (ADR-145 §2), constantes à
-longueur de cycle et tranche fixées.
-
-P4 : **3 dispatchs par itération**, reçus au bit. Les deux dispatchs à un seul groupe — ceux
-qui sommaient les valeurs par groupe pour faire `α` puis `β` — coûtaient un enregistrement plein
-(1,86 µs) pour un travail négligeable. Ils disparaissent : **chaque groupe refait la somme**, au
-début du noyau qui a besoin du scalaire. Les valeurs sommées viennent du **dispatch précédent**,
-donc leur visibilité est celle d'une frontière de dispatch, que WebGPU garantit. Ni atomique, ni
-synchronisation inter-groupes, ni pari sur la spécification — et le scalaire n'est plus stocké,
-donc plus écrit en concurrence. `partial` porte trois tranches, l'ancienne ⟨r,z⟩ survivant à la
-neuve ; la parité choisit laquelle, par deux points d'entrée au lieu d'un test.
-
-Les voies 3 et 4 du plan sont **abandonnées sans être construites** : elles coûtaient de la
-précision ou de la portabilité pour moins de gain. À ne pas reprendre sans raison nouvelle.
-
-Réception : 72 combinaisons, **zéro bit d'écart** sur la pression **et sur les deux diagnostics**
-(⟨r,z⟩ et ‖r‖²) — cette seconde comparaison vérifie que `close_*` lit la bonne tranche.
-Dispatchs à 128 itérations : 901 → 387. Allocations : 979 → 575.
-
-Coût de l'appel, médiane sur 30, contre le chemin de S289 (7 dispatchs, un tampon) :
-6 656 mailles — 32 itérations 1,3408 → 0,8442 ms (×1,59) ; 128 : 3,9748 → **1,8228** (×2,18) ;
-256 : 7,5894 → 3,1271 (×2,43). 32 768 mailles — 32 : 3,2225 → 1,9335 (×1,67) ;
-128 : 5,8523 → 3,4009 (×1,72) ; 256 : 10,6282 → 5,8590 (×1,81). Les maxima baissent aussi
-(6,0281 → 3,0944 à 6 656/128 ; 12,6691 → 8,4717 à 32 768/256).
-
-**Biais d'instrumentation trouvé et retiré avant publication** : la première mesure laissait les
-variantes à un seul tampon payer un aller-retour d'horodatage que les variantes par tranches ne
-payaient pas, surestimant le gain des tranches d'environ 0,5 ms. L'horodatage est désormais
-éteint dans ce banc ; le temps de carte se lit dans `--pression-cg`, à configuration égale.
-Deuxième correction : dix passages laissaient des aberrations peser sur la médiane — 30 passages.
-
-**Limite à publier** : le recalcul redondant coûte `groups` lectures par groupe, donc `groups²`
-par dispatch. À 6 656 mailles (104 groupes) la carte y gagne encore ; à 32 768 (512 groupes) elle
-y perd déjà — mesuré en P5. Le gain net reste positif parce que l'encodage baisse plus que la
-carte ne monte, mais **cette voie a un croisement**, et une somme à deux niveaux serait le
-remède si une grille plus grande arrive.
-
-P5 : **notre code n'alloue rien** — la fenêtre d'ADR-145 §1, resserrée sur le remplissage des
-trois réserves, rend **zéro** à chaque appel, et le banc refuse désormais si elle ne le fait pas.
-Première fenêtre fautive : elle englobait les `write_buffer` de wgpu et comptait 19 allocations,
-attribuées à tort à notre code ; corrigée avant publication, pas après. Le reste appartient à la
-pile verrouillée (ADR-145 §2, comptées et publiées) : 979 → **575** par appel à 6 656 mailles et
-128 itérations, 171 à 32 itérations, 1 115 à 256 ; constantes à longueur et tranche fixées.
-
-**Le croisement annoncé est mesuré.** Temps de carte médian sur 30, horodatage allumé, un seul
-tampon, par mode de dispatch :
-
-| groupes | itérations | 7 | 5 | 3 |
-|---|---|---|---|---|
-| 104 (6 656 mailles) | 32 | 0,2893 | 0,2358 | **0,2156** |
-| 104 | 128 | 1,4851 | 1,1973 | **1,0182** |
-| 104 | 256 | 2,2750 | 1,8593 | **1,6898** |
-| 512 (32 768 mailles) | 32 | 0,4411 | **0,3585** | 0,4246 |
-| 512 | 128 | 1,6780 | **1,3354** | 1,6009 |
-| 512 | 256 | 4,2657 | **2,6462** | 3,1804 |
-
-À 104 groupes le mode 3 est le plus rapide **aussi sur la carte**. À 512 groupes il perd contre
-le mode 5 et revient au niveau du mode 7 : le recalcul redondant coûte `groups²` lectures par
-scalaire. Le mode 3 reste retenu parce que l'appel complet gagne quand même — l'encodage baisse
-plus que la carte ne monte (1,45 contre 2,55 ms à 32 768/128) — mais **le mode devrait être
-choisi par la taille**, et une somme à deux niveaux est le remède. Rien de cela n'est construit.
-
-P6 : **le pas réel reconsomme le cycle**, et les deux encodages sont mesurés contre le **même**
-témoin dans la **même** exécution — sinon la variance de la machine passerait pour un gain.
-60 pas de 2 ms, `SequentialJobs`, release. Médiane du pas, ms :
-
-| mailles | fond | cycle | témoin | S289 (7,0) | S290 (3,32) |
-|---|---|---|---|---|---|
-| 6 656 | plat | 32 | 9,9248 | 11,5741 | 10,1327 |
-| 6 656 | plat | 128 | 9,9248 | 7,0597 (×1,41) | **4,6315 (×2,14)** |
-| 6 656 | plat | 256 | 9,9248 | 10,6264 (×0,93) | 6,2199 (×1,60) |
-| 6 656 | coupé | 128 | 9,5383 | 7,5997 (×1,26) | **5,2290 (×1,82)** |
-| 6 656 | coupé | 256 | 9,5383 | 11,4465 (×0,83) | 6,2936 (×1,52) |
-| 32 768 | plat | 128 | 45,0679 | 35,7514 (×1,26) | 32,8756 (×1,37) |
-| 32 768 | plat | 256 | 45,0679 | 30,2715 (×1,49) | **26,1125 (×1,73)** |
-| 32 768 | coupé | 256 | 44,3810 | 30,6914 (×1,45) | **25,9103 (×1,71)** |
-
-Appel du candidat : 4,4665 → 2,1271 ms à 6 656/128 ; 11,3378 → 6,7252 à 32 768/256.
-24 combinaisons : 60/60 propositions retenues, 0 refus, 0 pas dégradé de part et d'autre,
-dérive de surface 0 à 7,63e-6 m — les portes n'ont pas bougé d'un cran.
-
-**Deux faits qui n'étaient pas prévus.**
-1. **Un encodage moins cher élargit la plage utile de la longueur de cycle.** Avec l'encodage de
-   S289, 256 itérations *perdaient* à 6 656 mailles (×0,93 et ×0,83) ; avec celui de S290 elles
-   gagnent (×1,60 et ×1,52). Le réglage n'est plus un piège aussi étroit.
-2. **Un cycle long achète la stabilité du pic.** À 6 656 mailles : cycle 128 → médiane 4,6315
-   mais maximum 22,6187 ; cycle 256 → médiane 6,2199 et maximum **11,0477**, contre 26,3234 pour
-   le témoin. Le cœur ne fait plus que 3 itérations par pas au lieu de 19, et la queue s'effondre.
-   C'est exactement la propriété que S286 reprochait à la cadence lente de ne pas avoir — mais
-   ici elle est obtenue, pas décidée, et elle n'est pas encore un arbitrage rendu.
-
-**Ce qui reste hors budget** : 4,6315 ms par pas contre 2 ms (ADR-125), soit ×2,3 — contre ×3,3
-en S289. Progrès réel, budget toujours non reçu.
-
-Hors de ce lot : multigrille GPU, budget 2 ms, 3D, solides, multiplateforme, garantie de pic.
+Ce qui reste hors de ce lot : multigrille GPU, 3D, solides, boucle d'image, multiplateforme,
+calibration automatique de la longueur de cycle. Et **aucune porte d'acceptation ne bouge** :
+ADR-143/144 sont le garde-fou qui rend ces suppressions vérifiables au bit.

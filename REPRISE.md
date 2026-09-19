@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 12:57 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 13:08 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : —
+Session en cours : S291 — décomposition du pas par phase, recalculs redondants, coût de l'horloge (A293)
 Dernière session : S290 — coût d'appel du cycle GPU divisé au bit, A292 close ; pas réel à 4,6315 ms
-Session suivante : A293, cartographier ce que le pas dépense **hors** pression — ≈ 2,5 ms des 4,6315, jamais mesurés, alors que S244 n'avait cartographié que la boucle de pression. **Puis rejouer sur ces nombres la comparaison de priorité avec la 3D et les solides**, dont A292 était le déclencheur. Ne pas ouvrir une troisième session de micro-optimisation GPU : mode choisi par la taille, somme à deux niveaux, longueur de cycle calibrée et arbitrage médiane/pic attendent cette carte. Cadence lente, A290, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Session suivante : —
 Maillons        : 0 — capacité reçue en S290 : le pas de δ coûte 4,6315 ms au lieu de 9,9248 et son pire pas 11,0477 au lieu de 26,3234, consommé par le pas mobile réel, au bit ; prochaine capacité visée : un pas dont tous les postes sont connus
 ```
 
