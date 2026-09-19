@@ -75,7 +75,7 @@ solveur dans cette session** : elle prépare la construction de S295, qui visera
   au service de l'objectif, profil de travail avec une part pour δ ; v1 = portes A à D ; pas de
   dépôt distant ; porte B avant la suite du coût en 2D ; onde de S277 sans verdict attendu.
   Notes datées sur ADR-125 ; feuille §3 bis, bandeau de la file, REVUE-VISUELLE ; A296 close.
-- [ ] **P3** — lire les contrats que la 3D touche (ADR-006, 007, 012, 143, 144, SPEC-004 δ,
+- [x] **P3** — lire les contrats que la 3D touche (ADR-006, 007, 012, 143, 144, SPEC-004 δ,
   structure de `delta_projection`) ; notes de conception ici.
 - [ ] **P4** — **ADR-175**, architecture d'exécution de δ en 3D : pas de production résident sur
   GPU à travail borné, erreur publiée et état dégradé déclaré, cœur CPU référence de réception ;
@@ -91,3 +91,25 @@ solveur dans cette session** : elle prépare la construction de S295, qui visera
 ### Notes de reprise
 
 Réponses citées telles qu'écrites dans ADR-174 §1 ; elles font foi. Q3 : aucun dépôt distant, tout reste sur ce PC.
+
+**P3 — ce que les contrats disent de la 3D (14:50–14:51).**
+- **ADR-007** : `IFluidSolver` est défini **3D** dès S01 ; `step()` respecte son budget « quitte à
+  sous-résoudre — moins d'itérations de pression » ; §4.1 prévoit δ sur GPU avec
+  `latency_frames ≥ 1`, et la flottabilité ne lit jamais δ GPU de façon synchrone.
+- **SPEC-004 §4** : `StepResult.degraded` avec `PressureItersCut` — la coupe d'itérations
+  déclarée est **déjà** le contrat. **§8.4** : « la lecture synchrone n'existe pas » dans
+  `IGpuBackend`. Or le chemin S289–S291 **attend** la carte et relit la pression à chaque pas
+  (postes « attente » et « lecture ») : contradiction avec SPEC-004 §8.4, jamais relevée.
+- **ADR-012 §7** : tick de simulation fixe (30 Hz proposé), δ sur un fil avec au plus une image
+  de retard, rendu interpolé. §3 : cible de mesure = 99ᵉ centile, pas la moyenne.
+- **ADR-006 §3** : domaine = ensemble épars de blocs 8³, `dx` ∈ {0,02 … 1,00 m}. La bande de
+  l'afficheur est à `dx` = 2 m, **hors de ces niveaux** — à dire dans l'ADR, pas à corriger ici.
+- **ADR-143/144** : écrits pour l'opérateur 2D à quatre faces ; en 3D, `γ₁₀` est à dériver, et
+  ADR-144 note que franchir 32 768 mailles « est le point dur du passage à la 3D, qui y arrivera
+  d'emblée » — un domaine 32³ y est déjà. Les portes à chaque pas buteront immédiatement.
+- **Cœur 2D** (`delta_projection` et sous-modules, ≈ 3 300 lignes hors tests) : MAC, pression
+  scindée `p_hydro + p_dyn`, `g_eff` par la surface, fonction hauteur et fluide fantôme, bandes
+  de couplage B/W et éponge, multigrille, f32 avec coefficients construits en f64. Le GPU
+  (`pressure_cg.wgsl`) est écrit pour quatre faces.
+**Conséquence pour P4** : la décision n'invente pas une architecture, elle **revient à celle de
+S01/S04** (δ 3D, GPU, lecture différée, dégradation déclarée) qu'ADR-173 avait contournée.
