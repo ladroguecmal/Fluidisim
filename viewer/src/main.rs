@@ -2220,6 +2220,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();
     }
+    if args.iter().any(|a| a == "--pression-cg") {
+        return pressure_solver::measure();
+    }
     if args.iter().any(|a| a == "--delta-retrecissement") {
         return delta::measure_shrink();
     }

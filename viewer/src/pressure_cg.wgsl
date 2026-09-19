@@ -32,7 +32,7 @@ fn at(section: u32, c: u32) -> u32 { return section * params.cells + c; }
 
 /// `(A·x)_c` et la diagonale de la ligne, pour la tranche `section`. Même parcours de faces
 /// que `apply_mobile` du cœur : fantôme de surface quand `ghost > 0`, différence sinon.
-fn operator(section: u32, c: u32) -> vec2<f32> {
+fn stencil(section: u32, c: u32) -> vec2<f32> {
     var acc = 0.0;
     var diag = 0.0;
     let base = section * params.cells;
@@ -99,7 +99,7 @@ fn gather(lid: u32) -> f32 {
 fn init(@builtin(global_invocation_id) id: vec3<u32>) {
     let c = id.x;
     if c >= params.cells { return; }
-    let op = operator(P, c);
+    let op = stencil(P, c);
     var m = 0.0;
     if op.y > 0.0 { m = 1.0 / op.y; }
     state[at(M, c)] = m;
@@ -114,7 +114,7 @@ fn init(@builtin(global_invocation_id) id: vec3<u32>) {
 fn apply_dir(@builtin(global_invocation_id) id: vec3<u32>) {
     let c = id.x;
     if c >= params.cells { return; }
-    state[at(Q, c)] = operator(D, c).x;
+    state[at(Q, c)] = stencil(D, c).x;
 }
 
 @compute @workgroup_size(64)
