@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 01:16 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 10:40 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : —
+Session en cours : S285 — attribution temporelle du rétrécissement
 Dernière session : S284 — préparation progressive consommée ; passage gardé reçu, dérive temporelle A290 ouverte
 Session suivante : attribuer A290 par trois témoins (large intact/préparé, étroit préparé), avant automatisation ; comparer ce troisième lot spatial au coût A276/3D. V, B2, bathymétrie et multiplateforme gardent leurs déclencheurs. V1 et verdict S277 toujours ouverts.
 Maillons        : 0 — préparation consommée, demande tardive passant le garde inchangé ; fidélité temporelle non reçue

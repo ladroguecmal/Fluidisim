@@ -58,36 +58,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S284 — terminée
+Session : S285 — en cours
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
-Entrée : continuer, préparation progressive demandée après S283.
-Objectif : amortir la couronne avant réduction et éprouver le passage gardé, sans prétendre
-recevoir la réduction automatique ni I-12 perceptif.
+Entrée : continuer.
+Objectif : attribuer A290 au moyen de trois trajectoires au même temps, pour décider quel
+mécanisme corriger avant toute réduction automatique.
 
 ### Plan
 
-- [x] **P1** — état Git, jeton et plan seuls.
-- [x] **P2** — construire un amortissement de préparation sans allocation, consommé après
-  les vrais pas de Live ; réception exponentielle, centre conservé, refus atomiques.
-- [x] **P3** — demande progressive dans Layer, mesure contre réduction brutale et témoin,
-  coût complet, garde S283 inchangé, tests et limites ; découper avant quinze minutes.
-- [x] **P4** — rituel §6 : preuves, journal, file/feuille de route/index, jeton libre.
+- [x] **P1** — état réel, jeton et plan seuls.
+- [ ] **P2** — banc consommant Live/Layer : large intact, large préparé, étroit préparé ;
+  même préparation jusqu'à permutation, puis arrêt commun. Mesures séparées et contrôles.
+- [ ] **P3** — exécuter et publier le diagnostic, tests du viewer ; arrêter au mécanisme
+  attribué, ne pas inventer une correction physique sur un seul scénario.
+- [ ] **P4** — rituel §6 : journal, angles morts, file/feuille/index, jeton libre.
 
 ### Notes de reprise
 
-S283 clôturée 48d2ab7 ; copie principale unique, propre. Transfert brut à 1,024 s refusé :
-33,447 mm contre 3 mm. Garde CPU de hauteur seulement, pas la pente ni la suite temporelle.
-Critère : une demande tardive ne permute jamais au-dessus du garde 3 mm ; suivre la variation
-supplémentaire de hauteur par pas de préparation, le centre et le coût complet. Si le fond
-réalimente trop les bords, conserver le refus et mesurer la limite, ne pas relâcher le garde.
-P2 : noyau prepare_shrink construit et reçu, décroissance répétée indépendante, intérieur au
-bit, refus atomiques et zéro allocation. Branchement Live en P3 en cours, non encore reçu.
-P3 : plutôt qu'un taux inventé, limiter le changement nodal à 1,5 mm par vrai pas (moitié de
-3 mm S201, marge d'interpolation restante à mesurer). Tentative gardée tous les 16 pas : choix
-de coût de banc, à qualifier ; aucune diminution de la tolérance de publication S283.
-P3 mesure finale : demande 1,024 s, permutation 1,792 s ; correction nodale maximale 1,503 mm
-(arrondi à 96 m, ulp 2^-17 m) ; écart centre 66,994 mm jusqu'à 5,120 s, fidélité non reçue.
-321 updates mesurés : zéro allocation. 256 après demande : médiane 12,3857 ms, p99 42,0321,
-max 43,1006, préparation et garde compris. Coût réinjecté élargi à ce travail, sans reprendre
-le coût du domaine large après permutation. Essai release sur secteur, garde inchangé.
-Suites release : 507 cœur/harnais, 34 viewer réussis ; 19 ignorés, aucun échec.
+Troisième lot spatial comparé à A276 et à la 3D : la cadence découplée débloque le budget,
+la 3D débloque les vaguelettes demandées S277 ; une nouvelle optimisation du rétrécissement
+est moins prioritaire. Ce lot est donc borné à l'attribution manquante, préalable à choisir
+une correction sans fausse promesse de qualité. Ensuite revenir au coût A276.
+Critère d'arrêt : isoler hauteur centrale préparé-intact et réduit-préparé, vérifier identité
+au bit avant permutation, publier les fenêtres communes et les limites. Le seuil 3 mm reste
+un repère de hauteur, jamais une réception perceptive ni une tolérance modifiée pour réussir.
+S284 : 507 tests cœur/harnais, 34 viewer, 19 ignorés ; code cœur inchangé prévu ici.
