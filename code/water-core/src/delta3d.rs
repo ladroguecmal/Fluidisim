@@ -14,8 +14,9 @@
 //!
 //! # Ce qu'il n'est pas encore
 //!
-//! Ni surface mobile (lot 2), ni couplage à B/W, ni faces coupées, ni budget coopératif : la
-//! référence sort de la boucle d'image, I-05 y est porté par la production. Aucun préconditionneur :
+//! Surface mobile (S296) : fonction hauteur et fantômes dans `delta3d_mobile.rs`, Jacobi.
+//! Ni couplage à B/W, ni faces coupées, ni budget coopératif : la
+//! référence sort de la boucle d'image, I-05 y est porté par la production. Le mode linéaire reste sans préconditionneur :
 //! le gradient conjugué est celui du chemin 2D à couvercle fixe, ce qui garde une hauteur
 //! indépendante de `y` **exactement** indépendante de `y` — un Jacobi, dont la diagonale change
 //! au mur, la briserait à l'arrondi.
@@ -134,8 +135,8 @@ impl Volume3 {
         let nw = (nz + 1).checked_mul(cols).ok_or(Error::Domain)?;
         let fx = (nx + 1).checked_mul(ny).ok_or(Error::Domain)?;
         let fy = (ny + 1).checked_mul(nx).ok_or(Error::Domain)?;
-        // Trois jeux de faces (publié, prédit, sauvegardé), six champs de mailles (pression,
-        // second membre, résidu, direction, produit, sauvegarde), quatre de colonnes (hauteur,
+        // Trois jeux de faces (publié, prédit, sauvegardé), sept champs de mailles (pression,
+        // second membre, résidu, direction, produit, sauvegarde, Jacobi), quatre de colonnes (hauteur,
         // reste, et leurs sauvegardes), deux jeux de flux de colonne.
         let floats = nu.checked_add(nv).and_then(|n| n.checked_add(nw)).and_then(|n| n.checked_mul(3))
             .and_then(|n| cells.checked_mul(7).and_then(|c| n.checked_add(c)))

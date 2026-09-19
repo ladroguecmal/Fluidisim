@@ -417,3 +417,86 @@ fn mobile_projection_matches_2d_s296() {
     v3.extrapolate_mobile3();
     assert_eq!(v3.velocity_u(),v2.velocity_u());assert_eq!(v3.velocity_w(),v2.velocity_w());
 }
+
+#[test]
+fn mobile_trajectory_matches_2d_bits_s296() {
+    use crate::delta_projection::{Domain,Volume,MOBILE_MULTIGRID_OFF};
+    struct Still;
+    impl crate::host::MonotonicClock for Still {fn now_ns(&self)->u64{0}}
+    struct Reset;
+    impl Drop for Reset {fn drop(&mut self){MOBILE_MULTIGRID_OFF.with(|c|c.set(false));}}
+    let (mut v3,_) = volume(32,1,36,0.0625,9.81);
+    let mut arena=Arena{stats:AllocStats::default(),sealed:false};
+    let mut v2=Volume::configure(&mut HostServices{alloc:&mut arena,jobs:&Jobs,sink:&Jobs},
+        Domain{nx:32,nz:36,dx:0.0625},1025.,9.81,&[0.;32]).unwrap();
+    MOBILE_MULTIGRID_OFF.with(|c|c.set(true)); let _reset=Reset;
+    for a in [0.05,0.1] {
+        let eta:Vec<_>=(0..32).map(|i|(2.+a*(std::f64::consts::PI*(i as f64+0.5)/32.).cos()) as f32).collect();
+        v3.set_free_surface(&eta,2.).unwrap();v2.set_free_surface(&eta,2.).unwrap();
+        v3.set_velocity(&vec![0.;v3.u.len()],&vec![0.;v3.v.len()],&vec![0.;v3.w.len()]).unwrap();
+        v2.set_velocity(&vec![0.;v2.velocity_u().len()],&vec![0.;v2.velocity_w().len()]).unwrap();
+        for step in 0..1604 {
+            let r3=v3.step_surface_mobile(1000,4000,&Jobs).unwrap();
+            let r2=v2.step_surface_mobile(1000,4000,1_000_000,&Jobs,&Still).unwrap().report.unwrap();
+            assert_eq!(r3.iterations,r2.iterations,"a={a} step {step}");
+            for (a,b) in v3.surface().iter().zip(v2.surface()).chain(v3.pressure().iter().zip(v2.pressure()))
+                .chain(v3.velocity_u().iter().zip(v2.velocity_u())).chain(v3.velocity_w().iter().zip(v2.velocity_w())) {
+                assert_eq!(a.to_bits(),b.to_bits(),"step {step}");
+            }
+        }
+    }
+}
+
+#[test]
+fn mobile_transposition_and_rest_s296() {
+    let (mut x,_) = volume(12,7,12,0.25,9.81);
+    let (mut y,_) = volume(7,12,12,0.25,9.81);
+    let eta:Vec<_>=(0..84).map(|c|2.+0.05*(std::f32::consts::PI*(c%12) as f32/12.).cos()).collect();
+    let mut trans=vec![0.;84];
+    for j in 0..7 {for i in 0..12 {trans[i*7+j]=eta[j*12+i];}}
+    x.set_free_surface(&eta,2.).unwrap();y.set_free_surface(&trans,2.).unwrap();
+    let mut worst=0f32;
+    for _ in 0..300 {
+        x.step_surface_mobile(1000,4000,&Jobs).unwrap();y.step_surface_mobile(1000,4000,&Jobs).unwrap();
+        for j in 0..7 {for i in 0..12 {worst=worst.max((x.eta[j*12+i]-y.eta[i*7+j]).abs());}}
+    }
+    println!("S296 transposition x-y: {worst:e} m");
+    assert!(worst<2e-6,"{worst}");
+    x.set_free_surface(&[2.013;84],2.013).unwrap();
+    x.set_velocity(&vec![0.;x.u.len()],&vec![0.;x.v.len()],&vec![0.;x.w.len()]).unwrap();
+    for _ in 0..50 {
+        let r=x.step_surface_mobile(1000,4000,&Jobs).unwrap();assert_eq!(r.iterations,0);
+        assert!(x.eta.iter().all(|h|h.to_bits()==2.013f32.to_bits()));
+        assert!(x.u.iter().chain(&x.v).chain(&x.w).chain(&x.p).all(|u|u.to_bits()==0));
+    }
+}
+
+#[test]
+fn mobile_refusals_restore_state_s296() {
+    let (mut v,_) = volume(16,5,12,0.25,9.81);
+    let bits=|v:&Volume3| [&v.u,&v.v,&v.w,&v.p,&v.eta,&v.eta_roundoff].iter()
+        .map(|f|f.iter().map(|x|x.to_bits()).collect::<Vec<_>>()).collect::<Vec<_>>();
+    let eta:Vec<_>=(0..80).map(|c|2.+0.1*(c as f32*0.7).sin()).collect();
+    v.set_free_surface(&eta,2.).unwrap();
+    for _ in 0..5 {v.step_surface_mobile(1000,4000,&Jobs).unwrap();}
+    let before=bits(&v);
+    assert_eq!(v.step_surface_mobile(1000,0,&Jobs).err(),Some(Error::Convergence));assert_eq!(bits(&v),before);
+    for height in [0.49,2.76] {
+        v.set_free_surface(&[height;80],2.).unwrap();let before=bits(&v);
+        assert_eq!(v.step_surface_mobile(1000,4000,&Jobs).err(),Some(Error::Domain));assert_eq!(bits(&v),before);
+    }
+    assert_eq!(v.step_surface_mobile(0,4000,&Jobs).err(),Some(Error::NotFinite));
+    // Garde après transport : la crête atteint le sommet admis au demi-cycle.
+    let (mut v,_) = volume(16,1,18,0.125,9.81);
+    let eta:Vec<_>=(0..16).map(|i|2.+0.125*(std::f64::consts::PI*(i as f64+0.5)/16.).cos() as f32).collect();
+    v.set_free_surface(&eta,2.).unwrap();
+    let mut refused=false;
+    for _ in 0..1604 {
+        let before=bits(&v);
+        match v.step_surface_mobile(1000,4000,&Jobs) {
+            Ok(_)=>{}, Err(Error::Domain)=>{assert_eq!(bits(&v),before);refused=true;break;},
+            Err(e)=>panic!("unexpected {e:?}"),
+        }
+    }
+    assert!(refused,"la garde après transport doit être exercée");
+}

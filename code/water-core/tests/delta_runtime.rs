@@ -731,3 +731,20 @@ fn reference_3d_linear_step_has_no_runtime_allocation_s295() {
     assert_eq!(allocs, 0);
     assert_eq!(arena.stats.refused_after_seal, 0);
 }
+
+#[test]
+fn reference_3d_mobile_step_has_no_runtime_allocation_s296() {
+    use water_core::delta3d::{Domain3,Volume3};
+    let mut arena=Arena{stats:AllocStats::default(),sealed:false};
+    let mut v=Volume3::configure(&mut HostServices{alloc:&mut arena,jobs:&Jobs,sink:&Jobs},
+        Domain3{nx:12,ny:8,nz:8,dx:0.5},1025.,9.81).unwrap();
+    let eta:Vec<_>=(0..96).map(|c|3.+0.02*(c as f32*0.7).sin()).collect();
+    v.set_free_surface(&eta,3.).unwrap();arena.seal();
+    for _ in 0..20 {
+        let (r,n)=measured(||v.step_surface_mobile(1000,4000,&Jobs));
+        assert!(!r.unwrap().degraded);assert_eq!(n,0);
+    }
+    let (r,n)=measured(||v.step_surface_mobile(1000,0,&Jobs));
+    assert_eq!(r.err(),Some(Error::Convergence));assert_eq!(n,0);
+    assert_eq!(arena.stats.refused_after_seal,0);
+}

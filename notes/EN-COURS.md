@@ -87,7 +87,7 @@ qu'ADR-175 §4.1 demande. Hors lot : couplage B/W, production GPU, scène, coût
   nombre de faces ; essais : symétrie avec fantômes, identité au bit avec la 2D à `ny = 1`.
 - [x] **P3** — projection mobile (Jacobi, départ depuis la pression publiée d'ADR-169),
   correction fantôme, extrapolation, divergence des lignes franches ; essai : identité avec la 2D.
-- [ ] **P4** — advection 3D, transport mouillé en x et y, `step_surface_mobile`, gardes et refus
+- [x] **P4** — advection 3D, transport mouillé en x et y, `step_surface_mobile`, gardes et refus
   atomiques ; essais : repos exact, trajectoire `ny = 1` contre la 2D, symétrie x↔y, allocations.
 - [ ] **P5** — réception : banc `delta3d_mobile` (S237 à `ny = 1` contre HOS, petite amplitude
   oblique contre le linéaire), preuve `DELTA3D-MOBILE-S296.md`.
