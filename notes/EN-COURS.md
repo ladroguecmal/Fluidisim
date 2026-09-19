@@ -77,7 +77,7 @@ place de l'utilisateur.
   reste), A294 actualisée dans la file avec le geste écrit et jamais exécuté comme suite.
 - [x] **P3** — état réel du code : compilation et suites (cœur/harnais, viewer) hors réseau,
   avertissements ; ce que `code/` et `viewer/` contiennent par couche, confronté aux documents.
-- [>] **P4** — intentions → projet fini → jalons : sources, LISTE-PROJET-FINI, portes §3 bis ;
+- [x] **P4** — intentions → projet fini → jalons : sources, LISTE-PROJET-FINI, portes §3 bis ;
   recompter reçu/partiel/absent si le décompte affiché est périmé.
 - [ ] **P5** — trajectoire mesurée : sessions et commits par sujet et par période (Git et
   journal), capacités reçues, maillons, part conception/code ; fils longs et ce qu'ils ont
@@ -114,3 +114,24 @@ véhicules 3 481 ; B 3 638 ; **V 2 095** ; **ordonnanceur 738**. Sessions par su
 W 113, δ 57, véhicules/harnais 40, documentaires 40, rendu 16, B 12, **V 4**, ordonnanceur ≈ 3.
 Sessions de 10 à 40 min entre plan et rituel (médiane 15,8 min depuis S250) ; depuis S250,
 34 % des commits sont des plans ou des rituels.
+
+**P4 — intentions → projet fini → portes (14:31–14:32, lectures faites pendant P3).**
+Source §1 : « le critère de validation principal est le rendu perçu en temps réel [...] la
+précision scientifique [...] n'est pas une fin en soi » ; §17 : en surcharge, réduire d'abord la
+taille des domaines, **puis la résolution physique** ; §20 : le système est « un orchestrateur de
+régimes », écrit seulement à partir de S278.
+LISTE-PROJET-FINI (état S276, remplie à la demande de l'utilisateur — **non modifiée ici**) :
+3 validés / 49 partiels / 68 absents sur 120. Décompte **périmé d'environ trois points** : 1.4
+est partiel depuis S278 mais la section 1 compte encore 4 partiels et 3 absents ; 9.1 (poids de
+perception calculé S279) et 9.9 (rétrécissement manuel S283–S284) ont une première pièce ; 4.19
+cite encore « ≈ 11 fois » au lieu de ×4,1. Aucun validé de plus.
+Portes de la v1 proposée (§3 bis) contre la liste : A (1.4, 1.5, 1.6, 4.2, 4.5, 9.1, 9.9) en
+cours ; **B (4.1, 4.6, 4.7, 8.7) non commencée** ; C (4.19, 9.8, 9.11) travaillée **sur la
+tranche 2D** alors que sa réception est définie « sur la scène de la porte B » ; **D (6.1–6.8)
+non commencée**, rien dans le système. Aucun des ≈ 20 points de la v1 n'est validé.
+J1 ouvert depuis S201 (≈ 90 sessions) : il manque l'« interaction manuelle représentative » —
+l'afficheur n'a **aucun objet pilotable** (caméra, pause, D/N/M/B seulement ; sillages sur
+trajectoires prescrites, impacts programmés toutes les 4 s) — et la seconde cible.
+Revue visuelle : R10 (S277) a désigné la porte B — « une onde qui traverse une vraie mer et s'y
+déforme » — il y a quinze sessions ; le registre §5 affiche encore R6 et R10 « en attente »
+alors que R7 et R10 sont reçus. Verdict sur l'onde injectée de S277 toujours non rendu.
