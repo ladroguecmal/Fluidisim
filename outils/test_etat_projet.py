@@ -1,6 +1,6 @@
 """Contre-exemples des erreurs de classement et d'historique de l'ancien indicateur."""
 import unittest
-from etat_projet import activity, category, history, layer
+from etat_projet import MILESTONE_WORDS, QUEUE_ROW_WORDS, activity, category, history, layer, oversized
 
 
 class InventoryTests(unittest.TestCase):
@@ -23,6 +23,17 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(layer("code/water-core/src/hydro_network.rs"), "V")
         self.assertIsNone(layer("code/water-core/src/tests_hydro_network.rs"))
         self.assertIsNone(layer("code/water-core/src/host.rs"))
+
+    def test_state_documents_have_word_ceilings_s294(self):
+        short = "| **A1 / court** | état | déclencheur |"
+        long = "| **A2 / long** | " + "mot " * QUEUE_ROW_WORDS + "| x |"
+        roadmap = ("## 2. Les jalons\n\n### J1 — court\n\ntexte\n\n### J2 — long\n\n"
+                   + "mot " * (MILESTONE_WORDS + 1) + "\n\n## 3. Suite\n\n" + "hors " * 999)
+        found = oversized(short + "\n" + long, roadmap)
+        self.assertEqual(len(found), 2)
+        self.assertIn("A2 / long", found[0])
+        self.assertIn("J2 — long", found[1])
+        self.assertEqual(oversized(short, "## 2. Les jalons\n\n### J1\n\ncourt\n"), [])
 
 
 if __name__ == "__main__":

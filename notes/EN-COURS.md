@@ -81,7 +81,7 @@ solveur dans cette session** : elle prépare la construction de S295, qui visera
   GPU à travail borné, erreur publiée et état dégradé déclaré, cœur CPU référence de réception ;
   classe de fidélité par couche ; représentation 3D du régime perturbatif et voie non graphe (B3
   préliminaire). Note datée sur ADR-173 ; A295 décidée.
-- [ ] **P5** — pilotage : déclencheur d'A276 remplacé (L343) ; REPRISE §6 et METHODE — lot pris
+- [x] **P5** — pilotage : déclencheur d'A276 remplacé (L343) ; REPRISE §6 et METHODE — lot pris
   dans les portes, maillons liés aux colonnes « reçu si » et aux points de la liste ; plafonds des
   documents d'état, contrôlés par `outils/etat_projet.py`.
 - [ ] **P6** — file active ramenée aux plafonds (état, déclencheur, lien).
@@ -113,3 +113,12 @@ Réponses citées telles qu'écrites dans ADR-174 §1 ; elles font foi. Q3 : auc
   (`pressure_cg.wgsl`) est écrit pour quatre faces.
 **Conséquence pour P4** : la décision n'invente pas une architecture, elle **revient à celle de
 S01/S04** (δ 3D, GPU, lecture différée, dégradation déclarée) qu'ADR-173 avait contournée.
+
+**P5 — pilotage (14:53–14:55).** REPRISE §6.7 : `Session suivante` se prend dans la porte ouverte
+de plus petit rang ; pas de troisième session consécutive sur un même point sans critère de
+porte avancé. Maillons : une capacité compte si elle avance un critère « reçu si » ou un point de
+la liste ; la clause « décision qui lève un blocage et nomme le lot » est conservée. §8 : plafonds
+90 mots par ligne de file, 450 mots par section de jalon, contrôlés par `etat_projet.py --check`
+(fonction `oversized`, un essai ajouté ; 5 essais de l'outil verts). METHODE étape 1 alignée.
+A276 : déclencheur « avant la 3D » remplacé. **22 dépassements** relevés par l'outil : 19 lignes
+de file, et les sections J1 (1 909 mots), J2 (1 489), J3 (1 031) — objets de P6 et P7.

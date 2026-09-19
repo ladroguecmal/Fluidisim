@@ -6,8 +6,11 @@ trouvé des erreurs restent ; l'obligation implicite d'en trouver ou d'ouvrir un
 
 ## Choisir un lot utile
 
-1. Partir de la demande actuelle, des intentions et de la file active, puis vérifier le blocage
-   dans le **code présent** et son contrat. Ne pas hériter d'une absence sans la constater.
+1. Partir de la demande actuelle, puis de la **porte ouverte de plus petit rang**
+   ([FEUILLE-DE-ROUTE §3 bis](../docs/FEUILLE-DE-ROUTE.md)), puis de la file active ; vérifier
+   le blocage dans le **code présent** et son contrat. Ne pas hériter d'une absence sans la
+   constater. La suite déclarée par la session précédente est une proposition, pas un ordre ;
+   un déclencheur d'ordre nomme la dépendance qu'il protège (L343).
 2. Nommer la capacité visée et le consommateur : joueur, hôte, serveur V ou prochaine brique.
 3. Écrire le critère de réception et d'arrêt avant le code ou la campagne. Si la réponse ne
    change aucune décision ou intégration, différer cette recherche avec son déclencheur.

@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 14:53 +02:00
+Battement        : 2026-09-19 14:55 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
 Session en cours : S294 — consigner les arbitrages de l'utilisateur du 2026-09-19, décider l'architecture de δ en 3D, lever les verrous de pilotage
 Dernière session : S293 — audit global : le projet bloque sur l'ordre de ses travaux ; BILAN-GLOBAL-S293
@@ -135,19 +135,26 @@ Ses nombres mesurent des fichiers et des modifications, **pas du temps ni des ca
    note factuelle datée ; une décision remplacée exige un nouvel ADR. Mettre les nouveaux
    documents utiles dans l'index ; vérifier les décomptes seulement s'ils sont encore affichés.
 6. Mettre à jour jeton, session, battement et état ; cocher le rituel avant son commit.
-7. Relire **toute la file active**. La recommandation du dernier bilan doit être portée par
-   `Session suivante`, ou explicitement écartée au journal. Les autres sujets gardent leur
-   déclencheur. Une suite locale n'efface jamais δ, V, B2, bathymétrie ou multiplateforme (A211).
+7. Relire **toute la file active**. **`Session suivante` se prend dans la porte ouverte de plus
+   petit rang** de [FEUILLE-DE-ROUTE §3 bis](docs/FEUILLE-DE-ROUTE.md), ou dans la demande de
+   l'utilisateur : la suite qu'une session déclare n'est qu'une proposition. Un même point de
+   file ne porte pas une troisième session consécutive si aucun critère « reçu si » d'une porte
+   n'a avancé (S294, A211). La recommandation du dernier bilan est portée ou écartée au journal.
+   Une suite locale n'efface jamais δ, V, B2, bathymétrie ou multiplateforme.
 8. Appliquer la règle des deux maillons précisée ci-dessous, puis fermer/synchroniser les copies
    selon **AGENTS.md**, sans recopier sa procédure ici.
 
-### Deux maillons — critère révisé S227 sur demande d'audit
+### Deux maillons — critère révisé S227, resserré S294
 
 `Maillons` compte les sessions successives sans **capacité reçue**. Remise à zéro seulement si
 le journal nomme : **ce qui devient possible**, **le chemin qui le consomme**, **la preuve**.
 Une correction d'intégrité effectivement reproduite puis testée compte. Une décision qui lève
 un blocage compte si elle nomme le lot de construction désormais exécutable. Un commentaire,
 un banc isolé, un simple ajout dans `src` ou un ADR sans effet aval ne suffisent pas.
+**Depuis S294** : une capacité compte si elle fait avancer un critère « reçu si » d'une porte de
+§3 bis, ou l'état d'un point de la [liste du projet fini](docs/LISTE-PROJET-FINI.md). Une
+optimisation consommée qui ne franchit aucun critère de porte ne remet pas le compteur à zéro :
+S289, S290 et S291 l'avaient fait trois fois de suite sur le même fil (BILAN-GLOBAL-S293 M1).
 
 Sinon, incrémenter. À deux maillons, choisir dans la file un lot faisant avancer une capacité,
 et comparer sa priorité aux reliquats. Un troisième maillon demande une justification explicite
@@ -168,6 +175,9 @@ construit, reçu et intégré, ainsi que résolu, dissous, partiel et ouvert par
 Chaque information a un porteur : journal pour l'histoire, feuille de route pour les capacités,
 file active pour les travaux, documents de validation pour les preuves, index pour les liens.
 REPRISE ne grandit pas d'un compte rendu à chaque session.
+**Plafonds (S294)** : une ligne de la file active ≤ 90 mots — état présent, déclencheur, lien ;
+une section de jalon de la feuille de route ≤ 450 mots ; l'histoire va au journal et aux
+preuves. `python outils/etat_projet.py --check` vérifie plafonds et navigation au rituel.
 
 ## 9. Limites du dispositif
 

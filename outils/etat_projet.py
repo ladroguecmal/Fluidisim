@@ -95,6 +95,31 @@ def missing_links(path: Path, contents: str) -> list[str]:
     return errors
 
 
+# S294 (BILAN-GLOBAL-S293 M3) : les documents d'état redevenaient des journaux. Plafonds en mots,
+# indépendants de la largeur des lignes : l'histoire va au journal et aux preuves.
+QUEUE_ROW_WORDS = 90
+MILESTONE_WORDS = 450
+
+
+def oversized(active_questions: str, roadmap: str) -> list[str]:
+    """Lignes de la file et sections de jalon au-delà de leur plafond de mots."""
+    found = []
+    for line in active_questions.splitlines():
+        if line.startswith("| **"):
+            words = len(line.replace("|", " ").split())
+            if words > QUEUE_ROW_WORDS:
+                title = line.split("**")[1]
+                found.append(f"file active, « {title} » : {words} mots > {QUEUE_ROW_WORDS}")
+    milestones = roadmap.split("## 2. Les jalons", 1)[-1].split("\n## ", 1)[0]
+    for section in re.split(r"\n(?=### )", milestones):
+        if section.startswith("### "):
+            words = len(section.split())
+            if words > MILESTONE_WORDS:
+                title = section.splitlines()[0].removeprefix("### ")
+                found.append(f"feuille de route, « {title} » : {words} mots > {MILESTONE_WORDS}")
+    return found
+
+
 def inspect(since: int | None) -> dict:
     paths = sorted(filter(None, git("ls-files", "-z").split("\0")))
     commits = history(git("log", "--first-parent", "--no-renames", "--numstat",
@@ -127,6 +152,7 @@ def inspect(since: int | None) -> dict:
     index = texts["docs/00_INDEX.md"]
     adrs = [p for p in paths if re.fullmatch(r"docs/adr/ADR-\d+[^/]*\.md", p)]
     errors += [f"ADR absent de l'index : {p}" for p in adrs if p.removeprefix("docs/") not in index]
+    sizes = oversized(active_questions, texts["docs/FEUILLE-DE-ROUTE.md"])
     return dict(head=git("rev-parse", "--short", "HEAD").strip(),
                 note="Fichiers suivis présents ; lignes brutes, tests/commentaires inclus. "
                      "Ajouts Git sans renommages ; ni temps, ni productivité, ni capacités. "
@@ -136,13 +162,15 @@ def inspect(since: int | None) -> dict:
                 pages_actives={p: len(texts[p].splitlines()) for p in ACTIVE},
                 file_active_lignes=len(active_questions.splitlines()),
                 couches=layers, depuis_session=since,
-                ajouts_par_ere=activity(commits, since), erreurs_navigation=errors)
+                ajouts_par_ere=activity(commits, since), erreurs_navigation=errors,
+                plafonds_depasses=sizes)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--check", action="store_true", help="échouer si navigation active incomplète")
+    parser.add_argument("--check", action="store_true",
+                        help="échouer si navigation active incomplète ou plafond d'un document d'état dépassé")
     parser.add_argument("--since-session", type=int)
     args = parser.parse_args()
     if args.since_session is not None and args.since_session < 0:
@@ -165,7 +193,10 @@ def main() -> int:
         print(f"Navigation active: {len(result['erreurs_navigation'])} erreur(s)")
         for error in result["erreurs_navigation"]:
             print(error)
-    return int(args.check and bool(result["erreurs_navigation"]))
+        print(f"Plafonds des documents d'état : {len(result['plafonds_depasses'])} dépassement(s)")
+        for excess in result["plafonds_depasses"]:
+            print(excess)
+    return int(args.check and bool(result["erreurs_navigation"] or result["plafonds_depasses"]))
 
 
 if __name__ == "__main__":
