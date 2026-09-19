@@ -77,7 +77,7 @@ reproductible et paramètres publiés. Aucune réception perceptive ou temps ré
 - [x] **P3** — advection croisée/source, bandes aux quatre bords, éponge et pas atomique ; tests
   fond nul, courant traversant, refus et allocations.
 - [x] **P4** — réception : cas limite HOS, invariance transverse et cas oblique ; preuve S297.
-- [ ] **P5** — aperçu animé local calculé depuis le pas 3D, rendu en images de banc, vérification
+- [x] **P5** — aperçu animé local calculé depuis le pas 3D, rendu en images de banc, vérification
   visuelle et livraison ; aucune page HTML ni état δ écrit sur disque.
 - [ ] **P6** — rituel REPRISE §6, file et feuille de route, jeton libre, commits vérifiés.
 
@@ -91,3 +91,6 @@ Découper avant 15 minutes toute étape qui se prolonge.
 P4 : HOS reçu 0,148100 % / 0,345649 % à 5 cm ; 0,177888 % / 0,531870 % à 10 cm.
 Invariance et rotation : un ulp. Bandes/éponge construites, réception S269–S274 restante.
 Aperçu calculé avec succès en parallèle du banc : 121 PPM, 6 s, viewer/captures/s297.
+
+P5 : GIF livré (121 images), PPM/PNG locaux sous viewer/captures/s297 ; calcul sans refus.
+Suite complète : 537 réussis, 18 ignorés. Aucun état δ sérialisé.

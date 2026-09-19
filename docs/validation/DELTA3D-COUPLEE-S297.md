@@ -67,5 +67,46 @@ Les durées de banc, avec tâches concurrentes, ne sont pas une réception de co
 
 ## 5. Aperçu demandé
 
-En préparation : deux ondes analytiques croisées, impulsion localisée, témoin sans impulsion,
-images raster locales calculées depuis le véritable pas 3D. Aucun état δ sérialisé (I-17).
+**Livré localement** : `viewer/captures/s297/couplage_3d.gif` et quatre PNG aux instants
+0 / 1,5 / 3 / 6 s. 121 images, 20 images/s ; les six secondes physiques sont lues à vitesse
+réelle (dernière image tenue 50 ms). Images inspectées à plusieurs instants, aucun état δ
+sérialisé (I-17). Commandes depuis la racine :
+
+```powershell
+cargo run --manifest-path code/Cargo.toml -p water-core --release --offline --example delta3d_preview -- viewer/captures/s297
+python outils/apercu_delta3d.py
+```
+
+Domaine 32×24×12, maille 0,25 m, emprise 8×6 m, repos 2 m ; 1 200 pas de 5 ms,
+plafond 4 000, éponge de 1 m sur les quatre côtés à 2 s⁻¹. Fond : deux ondes stationnaires
+linéaires de profondeur finie, amplitudes 10 et 7 cm, k=π/4 et π/3, directions (1,0) et
+(0,6 ; 0,8), g=9,81 fourni. Impulsion initiale `0,18(1−r)exp(−r)` m,
+`r=((x−3)²+(y−2,5)²)/(2·0,55²)`, vitesses perturbatives nulles. Témoin identique sans
+impulsion, calculé séparément : la différence isole son effet, interactions comprises.
+Pas une mer spectrale de production ni une réception de S269.
+
+Vue orthographique : direction vers l'œil (0,48 ; 0,64 ; 0,6), projection de 43 pixels/mètre,
+champ centré sur le domaine ; pas de champ perspectif. À gauche : surface totale à son échelle
+réelle. À droite : différence au témoin, **relief amplifié ×4**, couleurs signées pour la lire.
+Habillage de banc : éclairage fixe, grille métrique, couleurs ; pas d'écume, réfraction, ciel
+physique ni matériau de production. Aucun verdict de réalisme demandé sur cet habillage.
+
+Empreintes FNV-1a des PPM complets (en-tête et pixels) :
+
+| image | âge | FNV |
+|---|---:|---|
+| frame_0000.ppm | 0.00 s | `323783da806686fd` |
+| frame_0030.ppm | 1.50 s | `81abecd9e350e151` |
+| frame_0060.ppm | 3.00 s | `57b3e9756f84b8ec` |
+| frame_0120.ppm | 6.00 s | `cc39f67fe6af1134` |
+
+Calcul des deux trajectoires terminé sans refus, 83 itérations au maximum, aucun affinage,
+divergence franche maximale **9,126218·10⁻⁶** (<10⁻⁵). Le relief initial évolue en anneaux,
+puis se déforme et se disperse. Cela montre le calcul ; cela ne reçoit pas encore les critères
+perceptifs de la porte B. **Suite visible** : raccorder la production GPU à la scène de mer.
+
+## 6. Vérification globale
+
+`cargo test --manifest-path code/Cargo.toml --workspace --release --offline` : **537 réussis**
+(420 cœur, 19 exécution δ, 2 géométrie, 1 table radiale, 95 harnais), 18 ignorés, aucun échec.
+Afficheur inchangé. Les bancs HOS et aperçu ont été exécutés explicitement en plus des tests.
