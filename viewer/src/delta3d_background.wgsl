@@ -14,12 +14,18 @@
 struct Params {
     count: u32,
     probes: u32,
-    _pad0: u32,
-    _pad1: u32,
+    nx: u32,
+    ny: u32,
     rho: f32,
     gravity: f32,
-    _pad2: f32,
-    _pad3: f32,
+    dx: f32,
+    _pad0: f32,
+    nz: u32,
+    _pad1: u32,
+    _pad2: u32,
+    _pad3: u32,
+    // Coin bas du domaine δ, local à l'ancre de B.
+    origin: vec4<f32>,
 };
 
 // Deux vec4 par composante : (amplitude, k en tours/m, dir.x, dir.y) puis (omega, k en rad/m,
@@ -281,4 +287,159 @@ fn sample_field(@builtin(global_invocation_id) id: vec3<u32>) {
     out[base + 23u] = laplacian_u.x;
     out[base + 24u] = laplacian_u.y;
     out[base + 25u] = laplacian_u.z;
+}
+
+// ── Les trois familles de faces MAC ──────────────────────────────────────────────────────────
+//
+// Même géométrie que `BackgroundGrid3` du cœur (S298) : la face d'axe `a` est décalée d'un
+// demi-pas sur les deux autres axes, et pleine sur le sien. Les trois familles sont écrites à
+// la suite dans `out`, dans l'ordre u, v, w — comme le cœur les range.
+//
+// C'est ici que le fond cesse d'être un banc : ces échantillons sont ceux que le second membre
+// couplé consomme, et le CPU n'en calcule aucun.
+
+fn faces_of(axis: u32) -> vec3<u32> {
+    return vec3<u32>(
+        params.nx + u32(axis == 0u),
+        params.ny + u32(axis == 1u),
+        params.nz + u32(axis == 2u),
+    );
+}
+
+fn write_sample(base: u32, local: vec3<f32>) {
+    var eta = 0.0;
+    var p_dyn = 0.0;
+    var grad_eta = vec3<f32>(0.0);
+    var u = vec3<f32>(0.0);
+    var du_dt = vec3<f32>(0.0);
+    var grad_p_dyn = vec3<f32>(0.0);
+    var laplacian_u = vec3<f32>(0.0);
+    var grad_u0 = vec3<f32>(0.0);
+    var grad_u1 = vec3<f32>(0.0);
+    var grad_u2 = vec3<f32>(0.0);
+
+    if (!admits_local(local)) {
+        for (var f = 0u; f < FIELDS; f = f + 1u) { out[base + f] = bitcast<f32>(0x7fc00000u); }
+        return;
+    }
+    let above = local.z > 0.0;
+
+    for (var n = 0u; n < params.count; n = n + 1u) {
+        let c0 = components[n * 2u];
+        let c1 = components[n * 2u + 1u];
+        let amplitude = c0.x;
+        let dir = vec2<f32>(c0.z, c0.w);
+        let omega = c1.x;
+        let k = c1.y;
+
+        let d = local.x * dir.x + local.y * dir.y;
+        let phase = phase_from_distance(c0.y, d) + time_phase[n];
+        let sc = phase_sin_cos(phase);
+        let sn = sc.x;
+        let cs = sc.y;
+
+        var e = 1.0;
+        var m = 1.0;
+        if (above) { m = 1.0 + k * local.z; } else { e = attenuation(-k * local.z); }
+        let a = select(amplitude * omega * e, amplitude * omega, above);
+        let pressure_gradient = select(params.rho * params.gravity * amplitude * e * k,
+                                       params.rho * params.gravity * amplitude * k, above);
+        let lap = select((k * k) * ((1.0 - dir.x * dir.x) - dir.y * dir.y),
+                         -(k * k) * (dir.x * dir.x + dir.y * dir.y), above);
+
+        eta = eta + amplitude * sn;
+        let slope = amplitude * k * cs;
+        grad_eta.x = grad_eta.x + slope * dir.x;
+        grad_eta.y = grad_eta.y + slope * dir.y;
+        u.x = u.x + a * sn * dir.x;
+        u.y = u.y + a * sn * dir.y;
+        du_dt.x = du_dt.x - a * omega * cs * dir.x;
+        du_dt.y = du_dt.y - a * omega * cs * dir.y;
+        laplacian_u.x = laplacian_u.x + lap * (a * sn * dir.x);
+        laplacian_u.y = laplacian_u.y + lap * (a * sn * dir.y);
+        grad_u0.x = grad_u0.x + a * k * cs * dir.x * dir.x;
+        grad_u0.y = grad_u0.y + a * k * cs * dir.x * dir.y;
+        grad_u1.x = grad_u1.x + a * k * cs * dir.y * dir.x;
+        grad_u1.y = grad_u1.y + a * k * cs * dir.y * dir.y;
+        if (above) {
+            grad_p_dyn.x = grad_p_dyn.x + pressure_gradient * m * cs * dir.x;
+            grad_p_dyn.y = grad_p_dyn.y + pressure_gradient * m * cs * dir.y;
+            grad_u2.x = grad_u2.x + a * k * m * sn * dir.x;
+            grad_u2.y = grad_u2.y + a * k * m * sn * dir.y;
+            u.z = u.z - a * m * cs;
+            du_dt.z = du_dt.z - a * omega * m * sn;
+            grad_u2.z = grad_u2.z - a * k * cs;
+            p_dyn = p_dyn + params.rho * params.gravity * amplitude * m * sn;
+            grad_p_dyn.z = grad_p_dyn.z + pressure_gradient * sn;
+            laplacian_u.z = laplacian_u.z + lap * (-a * m * cs);
+        } else {
+            grad_p_dyn.x = grad_p_dyn.x + pressure_gradient * cs * dir.x;
+            grad_p_dyn.y = grad_p_dyn.y + pressure_gradient * cs * dir.y;
+            grad_u0.z = grad_u0.z + a * k * sn * dir.x;
+            grad_u2.x = grad_u2.x + a * k * sn * dir.x;
+            grad_u1.z = grad_u1.z + a * k * sn * dir.y;
+            grad_u2.y = grad_u2.y + a * k * sn * dir.y;
+            u.z = u.z - a * cs;
+            du_dt.z = du_dt.z - a * omega * sn;
+            grad_u2.z = grad_u2.z - a * k * cs;
+            p_dyn = p_dyn + params.rho * params.gravity * amplitude * e * sn;
+            grad_p_dyn.z = grad_p_dyn.z + pressure_gradient * sn;
+            laplacian_u.z = laplacian_u.z + lap * (-a * cs);
+        }
+    }
+
+    out[base + 0u] = eta;
+    out[base + 1u] = grad_eta.x;
+    out[base + 2u] = grad_eta.y;
+    out[base + 3u] = grad_eta.z;
+    out[base + 4u] = u.x;
+    out[base + 5u] = u.y;
+    out[base + 6u] = u.z;
+    out[base + 7u] = du_dt.x;
+    out[base + 8u] = du_dt.y;
+    out[base + 9u] = du_dt.z;
+    out[base + 10u] = grad_u0.x;
+    out[base + 11u] = grad_u0.y;
+    out[base + 12u] = grad_u0.z;
+    out[base + 13u] = grad_u1.x;
+    out[base + 14u] = grad_u1.y;
+    out[base + 15u] = grad_u1.z;
+    out[base + 16u] = grad_u2.x;
+    out[base + 17u] = grad_u2.y;
+    out[base + 18u] = grad_u2.z;
+    out[base + 19u] = p_dyn;
+    out[base + 20u] = grad_p_dyn.x;
+    out[base + 21u] = grad_p_dyn.y;
+    out[base + 22u] = grad_p_dyn.z;
+    out[base + 23u] = laplacian_u.x;
+    out[base + 24u] = laplacian_u.y;
+    out[base + 25u] = laplacian_u.z;
+}
+
+@compute @workgroup_size(64)
+fn sample_faces(@builtin(global_invocation_id) id: vec3<u32>) {
+    let slot = id.x;
+    if (slot >= params.probes) { return; }
+    // `probes` porte ici le total des trois familles ; on retrouve l'axe par soustraction.
+    var axis = 0u;
+    var rest = slot;
+    loop {
+        let dims = faces_of(axis);
+        let size = dims.x * dims.y * dims.z;
+        if (rest < size || axis == 2u) { break; }
+        rest = rest - size;
+        axis = axis + 1u;
+    }
+    let dims = faces_of(axis);
+    let i = rest % dims.x;
+    let j = (rest / dims.x) % dims.y;
+    let k = rest / (dims.x * dims.y);
+    // Décalage d'un demi-pas sur les axes autres que celui de la face, comme le cœur.
+    let half = vec3<f32>(
+        select(0.5, 0.0, axis == 0u),
+        select(0.5, 0.0, axis == 1u),
+        select(0.5, 0.0, axis == 2u),
+    );
+    let local = params.origin.xyz + (vec3<f32>(f32(i), f32(j), f32(k)) + half) * params.dx;
+    write_sample(slot * FIELDS, local);
 }

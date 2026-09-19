@@ -19,7 +19,9 @@ pub struct Background3 {
     queue: wgpu::Queue,
     primitives: wgpu::ComputePipeline,
     field: wgpu::ComputePipeline,
+    faces: wgpu::ComputePipeline,
     bind: wgpu::BindGroup,
+    uniform: wgpu::Buffer,
     components: wgpu::Buffer,
     time_phase: wgpu::Buffer,
     points: wgpu::Buffer,
@@ -29,6 +31,8 @@ pub struct Background3 {
     capacity: usize,
     /// Phases temporelles, calculées sur CPU puis publiées. Réservé une fois.
     phases: Vec<u32>,
+    /// Nombre de faces MAC du domaine déclaré, zéro tant qu'aucun ne l'est.
+    pending_faces: usize,
     pub adapter: String,
     pub backend: String,
 }
@@ -87,13 +91,16 @@ impl Background3 {
         }
         queue.write_buffer(&components, 0, bytemuck_cast(&packed));
 
-        let mut params = Vec::with_capacity(32);
+        // 64 octets : (count, probes, nx, ny), (rho, gravity, dx, _), (nz, _, _, _), origine.
+        let mut params = Vec::with_capacity(64);
         for v in [count as u32, capacity as u32, 0, 0] {
             params.extend_from_slice(&v.to_le_bytes());
         }
         for v in [1025_f32, background.gravity(), 0., 0.] {
             params.extend_from_slice(&v.to_le_bytes());
         }
+        params.extend_from_slice(&[0u8; 16]);
+        params.extend_from_slice(&[0u8; 16]);
         let uniform = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: None,
             contents: &params,
@@ -142,13 +149,16 @@ impl Background3 {
         };
         let primitives = make("primitives du fond", "primitives");
         let field = make("champ du fond", "sample_field");
+        let faces = make("faces MAC du fond", "sample_faces");
 
         Ok(Self {
             device,
             queue,
             primitives,
             field,
+            faces,
             bind,
+            uniform,
             components,
             time_phase,
             points,
@@ -157,6 +167,7 @@ impl Background3 {
             count,
             capacity,
             phases: vec![0; count],
+            pending_faces: 0,
             adapter: info.name,
             backend: format!("{:?}", info.backend),
         })
@@ -164,6 +175,91 @@ impl Background3 {
 
     pub fn components(&self) -> usize {
         self.count
+    }
+
+    /// Borne de dispatch écrite dans l'uniforme : sans elle les fils excédentaires liraient des
+    /// points jamais écrits. Un octet de plus vaut mieux qu'un résultat dont on ignore l'origine.
+    fn set_probes(&self, probes: u32) {
+        self.queue.write_buffer(&self.uniform, 4, &probes.to_le_bytes());
+    }
+
+    /// Géométrie du domaine δ pour l'échantillonnage aux faces MAC : dimensions, maille, et le
+    /// coin bas du domaine exprimé dans le repère local de B.
+    pub fn set_domain(&mut self, domain: water_core::delta3d::Domain3, origin: [f32; 3]) -> Result<(), String> {
+        if domain.nx == 0 || domain.ny == 0 || domain.nz == 0 {
+            return Err("domaine vide".into());
+        }
+        if !domain.dx.is_finite() || domain.dx <= 0. || origin.iter().any(|v| !v.is_finite()) {
+            return Err("géométrie non finie".into());
+        }
+        let mut xy = Vec::with_capacity(8);
+        for v in [domain.nx as u32, domain.ny as u32] {
+            xy.extend_from_slice(&v.to_le_bytes());
+        }
+        self.queue.write_buffer(&self.uniform, 8, &xy);
+        self.queue.write_buffer(&self.uniform, 24, &domain.dx.to_le_bytes());
+        self.queue.write_buffer(&self.uniform, 32, &(domain.nz as u32).to_le_bytes());
+        let mut o = Vec::with_capacity(16);
+        for v in [origin[0], origin[1], origin[2], 0.] {
+            o.extend_from_slice(&v.to_le_bytes());
+        }
+        self.queue.write_buffer(&self.uniform, 48, &o);
+        self.pending_faces = Self::face_count(domain);
+        if self.pending_faces > self.capacity {
+            self.pending_faces = 0;
+            return Err(format!("domaine de {} faces au-delà de la capacité {}", Self::face_count(domain), self.capacity));
+        }
+        Ok(())
+    }
+
+    /// Nombre total de faces MAC d'un domaine : c'est la taille que `faces` produit.
+    pub fn face_count(domain: water_core::delta3d::Domain3) -> usize {
+        let (nx, ny, nz) = (domain.nx, domain.ny, domain.nz);
+        (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1)
+    }
+
+    /// Les trois familles de faces MAC, à la suite, dans l'ordre u, v, w — comme le cœur les
+    /// range. `set_domain` doit avoir été appelée. **Banc seulement** pour la relecture.
+    pub fn faces(&self) -> Result<Vec<[f32; FIELD_SLOTS]>, String> {
+        let total = self.pending_faces;
+        if total == 0 || total > self.capacity {
+            return Err(format!("faces : domaine non déclaré ou au-delà de {} sondes", self.capacity));
+        }
+        self.set_probes(total as u32);
+        let span = (total * FIELD_SLOTS * 4) as u64;
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            pass.set_pipeline(&self.faces);
+            pass.set_bind_group(0, &self.bind, &[]);
+            pass.dispatch_workgroups((total as u32).div_ceil(GROUP), 1, 1);
+        }
+        encoder.copy_buffer_to_buffer(&self.out, 0, &self.read, 0, span);
+        self.queue.submit([encoder.finish()]);
+        self.relire(span, total)
+    }
+
+    fn relire(&self, span: u64, rows: usize) -> Result<Vec<[f32; FIELD_SLOTS]>, String> {
+        let slice = self.read.slice(..span);
+        let (tx, rx) = std::sync::mpsc::channel();
+        slice.map_async(wgpu::MapMode::Read, move |r| {
+            let _ = tx.send(r);
+        });
+        self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+        rx.recv().map_err(|e| e.to_string())?.map_err(|e| e.to_string())?;
+        let mut result = Vec::with_capacity(rows);
+        {
+            let view = slice.get_mapped_range().map_err(|e| e.to_string())?;
+            for row in view.chunks_exact(FIELD_SLOTS * 4) {
+                let mut values = [0f32; FIELD_SLOTS];
+                for (v, bytes) in values.iter_mut().zip(row.chunks_exact(4)) {
+                    *v = f32::from_le_bytes(bytes.try_into().unwrap());
+                }
+                result.push(values);
+            }
+        }
+        self.read.unmap();
+        Ok(result)
     }
 
     /// Publie l'instant : une phase temporelle repliée par composante. C'est **tout** ce que le
@@ -196,6 +292,7 @@ impl Background3 {
             packed.extend_from_slice(&[p[0], p[1], p[2], 0.]);
         }
         self.queue.write_buffer(&self.points, 0, bytemuck_cast(&packed));
+        self.set_probes(probes.len() as u32);
         let span = (probes.len() * FIELD_SLOTS * 4) as u64;
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         {
@@ -241,6 +338,7 @@ impl Background3 {
             packed.extend_from_slice(&[p[0], p[1], p[2], 0.]);
         }
         self.queue.write_buffer(&self.points, 0, bytemuck_cast(&packed));
+        self.set_probes(probes.len() as u32);
         let span = (probes.len() * PRIMITIVE_SLOTS * 4) as u64;
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         {
@@ -481,6 +579,83 @@ pub fn recevoir_champ() -> Result<(), String> {
         if !(coeur_refuse && carte_marque) {
             return Err("le hors-domaine n'est pas traité des deux côtés".into());
         }
+        Ok(())
+    })
+}
+
+/// Banc P5a : **réception des faces MAC**. Le cœur les assemble avec `BackgroundGrid3` (S298),
+/// la carte les calcule depuis les seuls paramètres publiés. Même domaine, même origine, même
+/// instant ; l'écart est publié par famille et par champ le plus mauvais.
+///
+/// Ce banc est la charnière du lot : ce sont **ces** échantillons que le second membre couplé
+/// consomme, et à partir d'ici le CPU n'en calcule plus aucun.
+pub fn recevoir_faces() -> Result<(), String> {
+    use water_core::background::SeaState;
+    use water_core::delta3d::{BackgroundGrid3, Domain3};
+    use water_core::host::HostServices;
+    use water_core::{WorldPos, SimTime};
+    use crate::scene::host_impl;
+
+    pollster::block_on(async {
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
+        let background = Background::configure(
+            &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+            SeaState { hs: 1.4, tp: 7.0, theta_turns: 0.13, components: 64, graine: 300 },
+            WorldPos::from_units(0, 0, 0),
+        ).map_err(|e| format!("fond {e:?}"))?;
+
+        let domain = Domain3 { nx: 17, ny: 11, nz: 13, dx: 0.25 };
+        let origin = [-2.125, -1.375, -3.25];
+        let total = Background3::face_count(domain);
+        let mut carte = Background3::new(&background, total).await?;
+        carte.set_domain(domain, origin)?;
+        println!(
+            "DELTA3D_FACES_S300 carte={:?} backend={} nx={} ny={} nz={} faces={total}",
+            carte.adapter, carte.backend, domain.nx, domain.ny, domain.nz
+        );
+
+        let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
+        let mut grille = BackgroundGrid3::configure(&mut host, domain, origin, 1025.)
+            .map_err(|e| format!("grille {e:?}"))?;
+
+        for micros in [0u64, 987_654, 9_876_543_210] {
+            let time = SimTime(micros);
+            grille.sample(&background, time).map_err(|e| format!("grille {e:?}"))?;
+            carte.publish_time(&background, time)?;
+            let obtenu = carte.faces()?;
+            let vue = grille.view().ok_or("la grille du coeur ne publie rien")?;
+
+            let familles: [(&str, &[water_core::background::BackgroundSample]); 3] =
+                [("u", vue.u), ("v", vue.v), ("w", vue.w)];
+            let mut debut = 0usize;
+            for (nom, attendus) in familles {
+                let (mut pire, mut champ, mut echelle) = (0f32, 0usize, 0f32);
+                let mut au_bit = 0usize;
+                for (n, attendu) in attendus.iter().enumerate() {
+                    let a = aplatir(attendu);
+                    let g = &obtenu[debut + n];
+                    for f in 0..FIELD_SLOTS {
+                        if a[f].to_bits() == g[f].to_bits() { au_bit += 1; }
+                        let ecart = (a[f] - g[f]).abs();
+                        if ecart > pire { pire = ecart; champ = f; echelle = a[f].abs(); }
+                    }
+                }
+                let cases = attendus.len() * FIELD_SLOTS;
+                println!(
+                    "DELTA3D_FACES_S300 t_us={micros} famille={nom} faces={} au_bit={au_bit}/{cases} pire_champ={} ecart_absolu={pire:e} valeur_coeur={echelle:e}",
+                    attendus.len(), NOMS[champ]
+                );
+                debut += attendus.len();
+            }
+        }
+
+        let trop_grand = Domain3 { nx: 64, ny: 64, nz: 64, dx: 0.25 };
+        println!(
+            "DELTA3D_FACES_S300 refus_capacite={} refus_domaine_vide={}",
+            carte.set_domain(trop_grand, origin).is_err(),
+            carte.set_domain(Domain3 { nx: 0, ny: 4, nz: 4, dx: 0.25 }, origin).is_err()
+        );
         Ok(())
     })
 }

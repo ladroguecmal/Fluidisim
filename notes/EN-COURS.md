@@ -87,7 +87,9 @@ Critères avant code, posés ici :
 - [x] **P3** — `differential_local_extended` en WGSL **sous** le plan moyen, reçu contre le
   cœur champ par champ ; refus et réserve testés.
 - [x] **P4** — **au-dessus** du plan moyen, règle d'ADR-154, reçu contre le cœur.
-- [>] **P5** — second membre **couplé** assemblé sur la carte depuis ce fond, reçu.
+- [x] **P5a** — **découpage déclaré** : les trois familles de faces MAC échantillonnées sur
+  la carte, reçues contre `BackgroundGrid3` du cœur.
+- [ ] **P5b** — fantômes couplés et second membre assemblés sur la carte depuis ces faces.
 - [ ] **P6** — coût du fond sur la carte, comparé au chemin CPU de S276/S298.
 - [ ] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
@@ -135,3 +137,21 @@ Hors domaine : le cœur refuse, la carte marque en NaN — un noyau ne peut pas 
 **FXC refuse l'indexation dynamique d'un vecteur en écriture** (`grad_u0[j] = …` dans une
 boucle) : « array reference cannot be used as an l-value ». Boucles déroulées à la main. À
 retenir pour tout noyau à écrire : dérouler dès qu'une composante de vecteur est une cible.
+
+**A286 levée pour ce lot** : les fantômes couplés de `delta3d_coupling.rs` ne consomment que
+`eta`, `p_dyn` et `grad_p_dyn[axis]` des échantillons de face — rien qui soit propre à W.
+La carte les calcule déjà tous. Quand W entrera dans le fond publié, il passera par le même
+chemin sans le modifier. A286 reste ouverte sur le **prolongement de W**, pas sur ce lot.
+
+P5a reçu (`--delta3d-faces`, 17×11×13, origine non alignée, 7 844 faces, trois instants) :
+pire écart absolu sur `p_dyn`, 1,46 à 2,44·10⁻³ Pa pour des valeurs de 129 à 5 223 Pa — soit
+4,7·10⁻⁷ à 3,3·10⁻⁶ en relatif, du même ordre que le champ ponctuel de P3/P4.
+Les trois familles se comportent pareil ; refus de capacité et de domaine vide obtenus.
+`sample_faces` retrouve l'axe par soustractions successives : un seul dispatch couvre les
+trois familles, et leur ordre u, v, w est celui du cœur.
+
+**P5b, ce qui reste à porter** (`delta3d_coupling.rs` l. 60-125) : `surface_total = eta + eta_fond`,
+`ghost_bg_up[c] = rho·g·s.eta − (s.p_dyn + dz·s.grad_p_dyn.z)` à la face au-dessus de la
+dernière maille mouillée, et `ghost_bg_{x,y}[f] = −(s.p_dyn + signe·(θ−0,5)·dx·s.grad_p_dyn[axe])`
+sur les faces où la mouillure change. La constance verticale de `eta` que le cœur vérifie est
+automatique ici : la carte évalue `eta` sans dépendance en z.
