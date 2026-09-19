@@ -58,100 +58,52 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S299 — terminée : opérateur, problème et projection bornée reçus sur la carte.
+Session : S300 — en cours : le fond B sur la carte, entrée réelle du pas de production.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, outils locaux, carte réelle.
-Entrée : « Continue », 2026-09-19, après S298 close et jeton libre.
-Carte constatée : NVIDIA GeForce RTX 5070 Laptop GPU, backend Dx12 — machine de référence
-d'ADR-174 D1. Afficheur construit hors ligne, dépendances verrouillées S210/S211.
+Entrée : « Continue, et dis-moi quand pour le solveur 3d », 2026-09-19.
 
-Capacité visée : le domaine 3D de δ vit **sur la carte** — tampons réservés à la création
-(I-06), opérateur de pression appliqué sans matrice sur le GPU, projection à travail **borné**
-(ADR-175 D2) — et son écart à la référence CPU de S297/S298 est mesuré, pas supposé.
-Consommateur : la scène de mer étalée de la porte B, dont S298 a mesuré qu'elle ne peut pas
-tenir sur le banc CPU, puis la revue utilisateur (ADR-175 §4.3).
+Capacité visée : la carte **évalue elle-même** le fond différentiel de B. Le CPU ne publie que
+les paramètres analytiques par composante — phase temporelle repliée comprise (I-08) — soit un
+travail en `O(composantes)`, jamais en `O(mailles)` (ADR-175 D1). C'est le blocage nommé par
+S299 : le second membre couplé en dépend, et sans lui le pas de production reste non couplé.
+Consommateur : le second membre couplé, puis le pas complet d'ADR-175 D1.
 
 Critères avant code, posés ici :
-- Aucune allocation ni travail en `O(N)` sur CPU pendant le pas ; **aucune lecture synchrone**
-  (SPEC-004 §8.4). Les diagnostics se relisent en différé, avec leur âge.
-- L'action de l'opérateur assemblé sur la carte se compare à `apply_mobile3` du cœur sur le
-  même état et le même champ : écart publié, **aucune identité au bit exigée** (ADR-175 D4).
-- La projection fait un nombre de cycles **fixé par le profil**, jamais une boucle jusqu'à
-  convergence dans la boucle d'image.
-- Au-dessus de la tolérance d'ADR-144 (`10⁻⁵`, aucun nombre nouveau), le pas est **déclaré
-  dégradé** ; il n'est ni refusé ni refait.
-- L'écart à la référence se publie en hauteur et en pente, contre le repère de 3 mm de S201.
-- Aucun état δ sérialisé (I-17), aucune grandeur de jeu issue de δ (I-04, I-15).
-- La référence CPU ne bouge pas : elle est l'instrument, pas le sujet.
+- Aucune boucle CPU sur les mailles par pas ; seul le tableau des composantes est téléversé.
+- La phase **temporelle** se calcule sur CPU — `from_time` passe par 128 bits, absent de WGSL —
+  et se publie repliée. La phase **spatiale** et le `sin_cos` Q32 vivent sur la carte.
+- Écart à `differential_local_extended` publié **champ par champ**, sous et au-dessus du plan
+  moyen. Aucune identité au bit exigée (ADR-175 D4) ; l'écart attendu est de l'ordre de l'ulp,
+  et tout écart plus grand se publie tel quel au lieu d'être arrondi dans un résumé.
+- Bornes d'I-08 respectées (`|d| < 4096 m`) ; refus contrôlés des deux côtés.
+- Portée : **B seul**. W local au-dessus du plan moyen reste A286, et ce lot ne le prétend pas.
+- La référence CPU ne bouge pas : elle est l'instrument.
 
 ### Plan
 
-- [x] **P1** — amorce, lecture ciblée du lot, carte constatée ; plan seul.
-- [x] **P2** — `viewer/src/delta3d.rs` et son WGSL : domaine 3D résident, tampons réservés à la
-  création, géométrie téléversée une fois ; noyau de l'opérateur sans matrice.
-- [x] **P3** — recevoir l'action de l'opérateur contre `apply_mobile3` : même état, même champ
-  d'entrée, écarts publiés ; refus et réserve testés.
-- [x] **P4** — **découpage déclaré** : second membre et préconditionneur de Jacobi assemblés
-  sur la carte depuis la seule géométrie, reçus contre ceux du cœur.
-- [x] **P5** — PCG **résident à cycles fixés** sur un second membre donné : scalaires sur la
-  carte, aucun retour CPU entre itérations ; pression comparée à la référence.
-- [x] **P6** — coût du pas borné sur le poste de référence, cycles comptés et publiés.
-- [x] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
+- [>] **P1** — amorce, lecture ciblée du lot, plan seul.
+- [ ] **P2** — publication des composantes de B sur la carte et WGSL de base : phase spatiale,
+  `sin_cos` Q32, tampons réservés à la configuration.
+- [ ] **P3** — `differential_local_extended` en WGSL **sous** le plan moyen, reçu contre le
+  cœur champ par champ ; refus et réserve testés.
+- [ ] **P4** — **au-dessus** du plan moyen, règle d'ADR-154, reçu contre le cœur.
+- [ ] **P5** — second membre **couplé** assemblé sur la carte depuis ce fond, reçu.
+- [ ] **P6** — coût du fond sur la carte, comparé au chemin CPU de S276/S298.
+- [ ] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
 
-Le cœur n'exporte **aucune** ligne d'opérateur en 3D : `apply_mobile3` est sans matrice, six
-voisins par maille via `mobile_row(i,j,k)` qui rend `(voisin, a, valeur)` — `a` le coefficient
-fantôme, `valeur` le fantôme lui-même. La production doit donc porter cette règle, pas lire des
-lignes. ADR-172 (export de lignes) ne vaut plus que pour les essais 2D (ADR-175 §3).
+`PhaseQ32::from_time` multiplie `freq_q32` (u64) par les microsecondes en **u128** avant de
+diviser par 10⁶ : intransposable en WGSL, qui n'a ni u64 ni u128. Mais cette phase ne dépend
+**que** de la composante et de l'instant, pas du point : elle se calcule une fois par composante
+et par pas, côté CPU, et se publie. C'est littéralement « le CPU publie les paramètres
+analytiques de B/W, phases repliées » d'ADR-175 D1.
 
-`viewer/src/pressure_solver.rs` porte un CG résident **2D** (S289) qui prend des lignes du cœur :
-il sert de modèle d'ordonnancement GPU, pas de code à réutiliser tel quel.
-Aucune 3D n'existe côté afficheur : `grep Domain3 viewer/src` est vide.
+`from_distance` est du `f32` pur : `frac(k·d)` puis `× 2³²` en `u32` — portable tel quel.
+`sin_cos` est un quadrant (`>> 30`), un repliement sur `π/4` et deux polynômes de Horner
+(sin ordre 9, cos ordre 10) — portable tel quel, erreur ≈ 2·10⁻⁹ annoncée par le cœur.
 
-Banc 2D disponible pour comparer les ordres de grandeur : `--pression-gpu` sur 31×19 donne
-gpu_mediane 2,2 µs à 0 lissage, 67 µs à 32 lissages, premier passage 4,94 ms.
-
-P2 : l'opérateur ne dépend que de la **géométrie** — `a = 1/θ` dans les deux branches de
-`ghost_up3`/`ghost_side3`, `homogeneous_ghost` ne change que la *valeur*, pas le coefficient.
-Le noyau n'a donc besoin que des hauteurs de colonne, de `dx` et de `SURFACE_THETA_MIN` (1e-3).
-Ordre d'accumulation x−, x+, y−, y+, z−, z+ respecté : l'addition f32 n'est pas associative.
-z− n'est jamais testé mouillé (une maille sous une mouillée l'est), le fond est un mur.
-wgpu 30 : `PollType::wait_indefinitely()` et `get_mapped_range()` rend un `Result`.
-Banc P2 : 1920 mailles, sèches exactement nulles, max|A·p| 1,817143e2, tout fini.
-
-P3 reçu (`--delta3d-operateur-recu`, RTX 5070 Laptop / Dx12, 13×9×11) :
-surface **plate** — identité **au bit**, 1287/1287, les trois champs ;
-surface **ondulée** (fantômes latéraux) — pire écart relatif **9,5541296·10⁻⁸**, 1231/1287 au bit ;
-surface **au ras** d'un centre (plancher de θ) — 9,300078·10⁻⁸, 1255/1287 au bit.
-L'écart ne naît donc que sur les mailles à fantôme, et vaut moins d'un ulp f32 relatif (1,19·10⁻⁷).
-Écart absolu maximal 3,125·10⁻² — à lire avec l'échelle 3,36·10⁵ du cas « au-ras », où 1/θ vaut 1000.
-Quatre refus attendus obtenus des deux côtés. Suite complète du cœur : 444 réussis, 0 échec.
-
-P4 reçu (`--delta3d-probleme`) : surface plate — second membre **et** préconditionneur
-identiques **au bit** (1287/1287) ; ondulée — rhs 7,7484614·10⁻⁸, prec 4,4703484·10⁻⁸ ;
-au-ras — rhs **au bit**, prec 4,3655746·10⁻¹¹. Tout sous l'ulp f32 relatif.
-Préconditionneur = Jacobi : `prec = 1/(diag·dx⁻²)`, `diag` = 1 par voisin fluide, `a` par fantôme.
-Il ne dépend donc que de la géométrie, comme l'opérateur.
-**Portée assumée** : cas non couplé. Les fantômes de fond de S297 (`ghost_bg_x/y/up`) ne sont
-pas portés sur la carte ; le second membre couplé reste à faire, et rien n'est prétendu dessus.
-
-P5 reçu (`--delta3d-projection`, 24×16×20 = 7 680 mailles, départ froid) :
-cycles 0 / 4 / 8 / 16 / 32 / 64 / 128 → résidu relatif jugé **par le cœur**
-1 / 9,669227·10⁻³ / 4,719628·10⁻³ / 2,061514·10⁻³ / 8,939724·10⁻⁴ / 1,900073·10⁻⁵ / 2,720936·10⁻⁷.
-La carte annonce les mêmes à 4–6 chiffres : elle ne se ment pas sur sa propre convergence.
-Dispatchs = **3 + 5·cycles + 2**, indépendants de la donnée : c'est la borne d'ADR-175 D2.
-Trois refus attendus obtenus. Pression maximale stable à 5,003·10³ dès 32 cycles.
-À 128 cycles les deux résidus divergent (2,72 contre 2,02·10⁻⁷) : à ce niveau la somme f32 et
-l'écart d'un ulp entre les deux opérateurs dominent. Ce n'est pas un désaccord de schéma.
-
-P6 mesuré (`--delta3d-cout`, RTX 5070 Laptop, 30 passages, premier écarté) — médiane ms :
-32³ (32 768 mailles) : 0,090144 / 0,164864 / 0,313504 à 8 / 16 / 32 cycles ;
-48×48×24 (55 296) : 0,122528 / 0,223328 / 0,423200 ;
-64×64×32 (131 072) : 0,234176 / 0,428384 / 0,816096, maximum 0,848640.
-Résidus relatifs correspondants : 2,44·10⁻³ à 6,98·10⁻⁴ selon les cycles.
-
-**Correction apportée en P6** : le résidu relatif du banc de coût était rapporté à la divergence
-d'entrée au lieu de ‖b‖ ; les fantômes dominent b de plusieurs ordres, et le rapport valait 10⁵.
-‖b‖ est désormais calculée **sur la carte** juste après l'assemblage. La formule des dispatchs
-passe donc de 3+5c+2 à **5+5c+2** : la ligne du commit P5 est périmée sur ce seul point.
-Le banc de réception P5, lui, normalisait déjà par ‖b‖ du cœur : ses résidus sont inchangés.
+`viewer/src/water.wgsl` évalue déjà B pour le **rendu**, mais par le chemin CWM/bandes
+(`band_cwm`, `tail_cwm`) : ce n'est pas `differential_local_extended` et ça ne se réutilise pas.
+`viewer/src/delta.rs` échantillonne le fond de la bande 2D **sur CPU** puis téléverse : c'est
+exactement ce que ce lot remplace.

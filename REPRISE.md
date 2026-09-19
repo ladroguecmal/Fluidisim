@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 19:29 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 19:32 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : aucune — S299 terminée
+Session en cours : S300 — le fond B sur la carte, entrée réelle du pas de production
 Dernière session : S299 — opérateur, problème et projection bornée de δ 3D reçus sur la carte contre le cœur
 Session suivante : S300 — porte B : compléter le pas de production sur la carte — second membre **couplé** (fantômes de fond de S297), advection, bandes et éponge, surface publiée (ADR-175 D7) — puis les diagnostics D3, avant la scène de mer étalée et la revue (§4.3).
 Maillons        : 0 — capacité S299 : opérateur, problème et projection à travail borné assemblés et exécutés sur la carte, reçus contre le cœur à moins d'un ulp, consommés par quatre bancs, preuve DELTA3D-GPU-S299
