@@ -84,6 +84,7 @@
 - [Opérateur et lissage GPU : précision, coût complet et limites](validation/PRESSION-GPU-S288.md), [contrat ADR-172](adr/ADR-172-candidat-pression-residente-gpu.md).
 - [Solveur de pression résident GPU, consommé par le pas réel](validation/PRESSION-RESIDENTE-S289.md), [ADR-173](adr/ADR-173-le-candidat-de-pression-ne-fournit-qu-un-depart.md).
 - [Coût d'appel du cycle résident : enregistrement des commandes, trois encodages au bit](validation/ENCODAGE-CYCLE-S290.md).
+- [Le pas de δ décomposé étape par étape, puis allégé au bit](validation/PAS-DECOMPOSE-S291.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

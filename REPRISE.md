@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 13:08 +02:00
+JETON            : libre
+Battement        : 2026-09-19 14:05 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : S291 — décomposition du pas par phase, recalculs redondants, coût de l'horloge (A293)
-Dernière session : S290 — coût d'appel du cycle GPU divisé au bit, A292 close ; pas réel à 4,6315 ms
-Session suivante : —
-Maillons        : 0 — capacité reçue en S290 : le pas de δ coûte 4,6315 ms au lieu de 9,9248 et son pire pas 11,0477 au lieu de 26,3234, consommé par le pas mobile réel, au bit ; prochaine capacité visée : un pas dont tous les postes sont connus
+Session en cours : —
+Dernière session : S291 — pas décomposé et allégé au bit, A293 close ; bande δ à 8,2729 ms contre 17,9281
+Session suivante : A294, le **gel d'une carte refroidie** — un pas à 467 ms, reproduit, qu'un préchauffage ne corrige pas ; c'est un arbitrage d'ordonnancement (qui paie l'entretien, à quelle cadence, contre quel budget), à instruire avec l'ordonnanceur de S278/S279 et non dans le solveur. Il passe devant tout réglage : un pic de 467 ms annule le gain de médiane de milliers de pas. **Ensuite, rejouer la comparaison de priorité avec la 3D et les solides** : c'est ce qu'A293 devait débloquer, et le pas a désormais tous ses postes connus. Longueur de cycle non calibrée, grain du sondage, cadence lente, A290, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Maillons        : 0 — capacité reçue en S291 : le pas de la bande δ coûte 8,2729 ms au lieu de 17,9281 et son pire pas 16,1106 au lieu de 28,2240, consommé par le pas couplé réel, trajectoire identique au bit ; prochaine capacité visée : un pire pas qui tient
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -92,9 +92,14 @@ conjugué résident, le candidat ne fournit qu'un départ, portes ADR-143/144 in
 atomique ; 9,2236 → 6,6220 ms par pas à 6 656 mailles, itérations du cœur 427 → 19
 ([preuve](docs/validation/PRESSION-RESIDENTE-S289.md)). **S290 : le coût d'appel divisé, au bit** —
 l'enregistrement des commandes était 52 % de l'appel (1,86 µs par `dispatch_workgroups`), et trois
-dispatchs par itération au lieu de sept ramènent le pas à **4,6315 ms**, le pire pas à 11,0477
-([preuve](docs/validation/ENCODAGE-CYCLE-S290.md)). Reste ×2,3 du budget de 2 ms ; **la pression
-n'est plus la majorité du pas** — ≈ 2,5 ms hors pression jamais cartographiés (A293). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
+dispatchs par itération au lieu de sept ([preuve](docs/validation/ENCODAGE-CYCLE-S290.md)).
+**S291 : le pas décomposé étape par étape et allégé, au bit** — le plus gros poste hors GPU était
+un cycle multigrille **jeté** ; le crochet est porté sur le pas **couplé**, celui que la bande δ
+emprunte réellement, et sa médiane passe de 17,9281 à **8,2729 ms** sur la grille de production
+([preuve](docs/validation/PAS-DECOMPOSE-S291.md)). Reste ×4,1 du budget de 2 ms sur ce chemin.
+**Défaut ouvert et prioritaire** : un pas à 467 ms sur carte **refroidie**, reproduit, qu'un
+préchauffage ne corrige pas (A294). Les mesures de S289/S290 employaient une horloge figée et
+sous-estiment d'environ 8 %. δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet), **couplée depuis S253 à un fond B/W linéaire** (ADR-152/153), **B de production prolongé au-dessus du plan moyen depuis S254** (ADR-154 ; W : A286) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
 ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768** par le repli multigrille (ADR-147) suivi, depuis S252, d'un affinage de divergence (ADR-151 ; β du gradient multigrille corrigé, A285) ; plancher

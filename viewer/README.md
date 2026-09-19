@@ -85,6 +85,13 @@ de la pression et des diagnostics, et publie la décomposition du coût d'appel 
 de carte par mode. Défauts du solveur depuis S290 : 3 dispatchs, tranches de 32.
 [Réception et limites S290](../docs/validation/ENCODAGE-CYCLE-S290.md).
 
+`--pas-decomposition` publie la carte du coût d'un pas de δ, en dix-huit étapes, à l'horloge
+**réelle** — et refuse si les deux décompositions (phases publiques et étapes fines) ne rendent
+pas le même total. `--pas-cycle` balaie la longueur de cycle et publie médiane **et** maximum,
+qui ne désignent pas le même réglage. `--pas-couple` mesure le pas **couplé**, celui que la bande
+δ de l'afficheur emprunte réellement, avec et sans candidat GPU.
+[Réception et limites S291](../docs/validation/PAS-DECOMPOSE-S291.md).
+
 ```powershell
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --verify
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --smoke

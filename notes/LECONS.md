@@ -5809,3 +5809,47 @@ croisement déjà visible entre 104 et 512 groupes. C'est la seconde moitié de 
 « N fois le petit calcul » contre « le prix de la coordination », et ce prix inclut ce qu'on cesse
 de pouvoir garantir. Publier aussi l'exposant de la redondance, parce qu'il fixe le domaine où la
 réponse reste vraie.
+
+## L341 — Un travail préparé « au cas où » se paie à chaque tour, et la relecture ne le voit pas
+
+*(S291)* Le solveur de pression appliquait son préconditionneur — un cycle multigrille complet —
+**avant** d'entrer dans la boucle qui l'emploie. Le code était juste, et il l'avait toujours été :
+tant que la boucle tournait, la préparation servait. Puis S289 a mis un candidat GPU devant, la
+boucle a cessé de tourner à presque tous les pas, et la préparation est devenue du travail jeté :
+**0,83 ms sur 5,79, le plus gros poste hors GPU.** Trois sessions avaient lu ce code de près sans
+le voir, parce qu'il n'y a rien à voir — la faute n'est pas dans la ligne, elle est dans l'ordre.
+
+Deux choses en sortent, et la seconde est la vraie.
+
+1. **Ce qu'une boucle conditionnelle emploie se calcule dans la boucle.** Différer l'amorçage ne
+   change rien numériquement quand une itération tourne, et supprime tout quand aucune ne tourne.
+2. **Une optimisation en amont périme les préparations en aval, silencieusement.** Rendre une
+   étape inutile ne la supprime pas : elle continue de coûter, et son coût devient d'autant plus
+   visible que le reste a maigri. Aucun test ne se plaint — le résultat est identique.
+
+**Réflexe** : après avoir rendu une étape beaucoup plus rapide ou beaucoup plus rare, **remesurer
+par poste** ce qui l'entourait, et chercher ce qui se prépare encore pour elle. Ne pas relire :
+mesurer. Une relecture voit ce qui est faux, pas ce qui est devenu inutile. Même famille que
+L338 — un total ne désigne rien.
+
+## L342 — Un chemin rapide qui refroidit n'est pas un chemin rapide
+
+*(S291)* Le pas de δ passait de 17,93 à 8,27 ms de médiane en déportant sa pression sur le GPU.
+Puis un pas a coûté **467 ms**, et 132 à la reproduction — toujours au premier appel venant après
+quelques secondes sans GPU. Un envoi de préchauffage au démarrage **ne le supprime pas** : ce qui
+le supprime est de ne pas laisser la carte inactive entre deux appels. Ce n'est pas un chemin
+neuf qui se prépare, c'est un chemin **refroidi** qui se rallume.
+
+Pour ce qui est rendu à l'écran, **le nombre qui décide est le pire pas, pas la médiane**. Un gel
+de 130 ms annule le bénéfice de milliers de pas à 8 ms, et il suffit que la bande ait été éteinte
+un instant — ce qu'un ordonnanceur fait exprès, régulièrement, pour économiser du budget.
+
+Le même écart entre médiane et pic s'est retrouvé dans un réglage : la longueur de cycle qui
+minimise la médiane (3,80 ms, pic 25,79) n'est pas celle qui minimise le pic (4,81 ms, pic 8,10).
+Optimiser la moyenne et optimiser la latence sont deux objectifs, et ils divergent.
+
+**Réflexes.** *(a)* Publier le maximum à côté de la médiane, toujours, et le dire quand les deux
+ne désignent pas le même réglage. *(b)* Mesurer un chemin accéléré **après une pause**, pas
+seulement en rafale : une rafale est le régime le plus favorable et le moins représentatif.
+*(c) *Ce qui garde une ressource tiède est un arbitrage — qui paie, quand, contre quel budget —
+et pas un réglage qu'on pose en passant.

@@ -370,6 +370,18 @@ son scalaire lui-même) et soumission par tranches : appel 3,9748 → 1,8228 ms 
 automatique du mode et de la longueur de cycle, arbitrage médiane/pic, multiplateforme. Le
 recalcul redondant a un **croisement en `groups²`**, déjà visible à 512 groupes (A293).
 [Réception et limites](validation/ENCODAGE-CYCLE-S290.md).
+**S291, 2026-09-19 : le pas décomposé étape par étape, puis allégé — au bit.** Dix-huit étapes
+mesurées à l'horloge réelle. Le plus gros poste hors GPU était **du travail jeté** : un cycle
+multigrille appliqué avant une boucle qui ne tournait plus (0,8291 → 0,0121 ms). Avec la
+validation aplatie (0,4189 → 0,1031) et le diagnostic d'erreur inverse rendu optionnel (0,3379),
+le pas mobile passe de 5,3443 à 3,5371 ms à 6 656 mailles. **Le crochet est porté sur le pas
+couplé**, celui que la bande δ emprunte réellement — l'affirmation de S289 était imprécise :
+**médiane 17,9281 → 8,2729 ms (×2,17)**, pire pas 28,2240 → 16,1106, 200/200 propositions
+retenues. Les **six empreintes de S287 sont rendues à l'identique**. **Non reçu** : budget 2 ms
+(×4,1), tenue du pire pas, longueur de cycle non calibrée, multiplateforme. **Défaut ouvert
+(A294)** : un pas à 467 ms sur carte **refroidie**, reproduit, qu'un préchauffage ne corrige pas.
+Le sondage coûte +8 % : les chiffres de S289/S290, pris à horloge figée, sous-estiment d'autant.
+[Réception et limites](validation/PAS-DECOMPOSE-S291.md).
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.

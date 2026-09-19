@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S291 — en cours
+Session : S291 — terminée
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
 Entrée : demande de l'utilisateur, qui recouvre A293 — décomposer le temps par étape de calcul,
 trouver où il part, chercher les erreurs et les calculs redondants, expérimenter, proposer.
@@ -93,7 +93,7 @@ sans déplacer d'un bit ce que le pas publie.
   note datée, **et** porter le crochet sur le pas couplé pour que ce soit vrai.
 - [x] **P7** — re-mesure complète et **propositions chiffrées**, y compris celles qui ne seront pas
   construites ici. Vérifier que le rendu reste valide : trajectoire au bit, ou écart expliqué.
-- [ ] **P8** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
+- [x] **P8** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
 ### Notes de reprise
 

@@ -7,6 +7,16 @@ Bancs : `viewer --pression-cg` (le cycle seul) et `viewer --pression-pas` (le pa
 
 ## 1. Ce qui est reçu, et ce qui ne l'est pas
 
+> **Note corrective, S291, 2026-09-19.** Ce document, et l'entrée de journal de S289, présentent
+> `step_surface_mobile_with` comme « le pas mobile réel, le même que pilote la bande δ de
+> l'afficheur ». La seconde moitié est fausse : la bande δ emprunte `step_perturbation_mobile`,
+> le pas **couplé** de S253. C'était bien un vrai pas du cœur, mais pas le chemin du rendu, et le
+> crochet n'était donc pas atteignable par l'afficheur. Corrigé en S291 en portant le crochet sur
+> le pas couplé, avec mesure sur la grille de production
+> ([PAS-DECOMPOSE-S291](PAS-DECOMPOSE-S291.md) §7). Les mesures de ce document restent valides
+> pour le pas qu'elles nomment ; **elles employaient en revanche une horloge figée**, et
+> sous-estiment donc la production d'environ 8 % (S291 §6).
+
 **Reçu.** Un gradient conjugué préconditionné dont *tout* le cycle vit sur la carte —
 opérateur, produits scalaires, `α`, `β`, mises à jour — sans aucun retour CPU entre itérations.
 Il est **consommé par le pas réel du cœur**, `step_surface_mobile_with`, qui garde ses portes

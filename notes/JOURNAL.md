@@ -14610,3 +14610,87 @@ justement le déclencheur.
 nouveau point A293 ouvert avec déclencheur, notes correctives datées posées, leçons L339 et L340
 écrites. I-04/I-05/I-06/I-13/I-17 : aucun état δ persisté, aucune porte déplacée, I-06 vérifiée
 sur notre code et refusée au banc si elle cède. Plan terminé, jeton libre, copie unique.
+
+## S291 — 2026-09-19 — le pas décomposé, et un cycle multigrille qui partait à la poubelle
+
+**Entrée :** demande de l'utilisateur — décomposer le temps par étape de calcul, trouver où il
+part, chercher les erreurs et les calculs redondants, expérimenter, proposer ; garder un rendu
+visuellement valide et un temps de réponse court. Cela recouvre A293.
+
+**Ce qui devient possible.** Sur le chemin que la bande δ de l'afficheur emprunte réellement, à
+sa grille de production (128 × 52, dx 2 m), le pas coûte **8,27 ms au lieu de 17,93** et son pire
+pas 16,11 au lieu de 28,22. **Le chemin qui le consomme** est `step_perturbation_mobile_with`,
+construit ici. **La preuve** : [PAS-DECOMPOSE-S291](../docs/validation/PAS-DECOMPOSE-S291.md).
+
+**Le rendu n'a pas changé d'un bit.** Les six empreintes de trajectoire publiées par S287 sont
+rendues à l'identique, sommes d'itérations comprises — et ce banc emprunte le chemin couplé.
+
+**Ce que la mesure a trouvé et qu'aucune relecture n'avait vu.** Le préconditionneur était
+appliqué **avant** la boucle du gradient conjugué. Or depuis S289 le candidat GPU converge à
+presque tous les pas, la boucle ne tourne pas, et ce **cycle multigrille complet partait à la
+poubelle** : 0,8291 ms sur 5,7937, le plus gros poste hors GPU. Différé à la première itération
+qui l'emploie, il coûte 0,0121 ms. Trois sessions avaient lu ce code sans le voir ; une mesure
+par étape l'a vu au premier passage.
+
+**Construit.** Instrument : `Control` attribue chaque segment à huit `Phase` publiques **et** à
+dix-huit `Stage` internes, les deux sommes valant `elapsed()` — paire vérifiée à chaque exécution,
+refus si elle diverge. `Phase` n'a pas gagné de variante, pour ne pas casser son exhaustivité de
+S230. Quatre suppressions au bit : amorçage différé, `‖b‖²` réduit une fois au lieu de deux,
+correction et divergence non refaites quand la porte d'ADR-144 vient de les produire, double
+sondage retiré de l'advection. Validation aplatie : mêmes onze champs, même ordre, même grain,
+forme vectorisable — 0,4189 → 0,1031 ms. Erreur inverse du rapport rendue optionnelle (`NaN`
+quand coupée), 0,3379 ms, sans toucher au certificat d'arrêt d'ADR-143.
+
+**Refusé explicitement.** Retirer du contrôle de finitude les six tampons non publiés : `dir`
+n'est pas réécrit sur les mailles solides, l'argument demandait un raisonnement par tampon, et
+une erreur y rendrait un `NaN` silencieux. Le gain était déjà pris sans ce risque.
+
+**Une imprécision de S289, corrigée.** S289 écrivait « le même que pilote la bande δ de
+l'afficheur ». La bande passe par `step_perturbation_mobile` (couplé, S253), pas par
+`step_surface_mobile` : même fonction du cœur, pas même chemin de l'hôte, et le crochet n'était
+donc pas atteignable par le rendu. Corrigé en le portant sur le chemin couplé, et par note datée.
+
+**Ce que S289 et S290 cachaient.** Leurs mesures employaient une horloge **figée**. Avec une
+horloge réelle, le sondage coûte **+8,0 à +11,0 %** selon le cas : leurs chiffres sous-estiment
+la production d'environ 8 %. Le grain n'a pas été élargi — chaque sondage est un point
+d'expiration, et en retirer relève d'un arbitrage sur ADR-007.
+
+**Le pic et la médiane ne désignent pas le même réglage.** À 6 656 mailles, cycle 128 donne la
+meilleure médiane (3,7983 ms) pour un maximum de 25,7902 ; cycle 256 donne 4,8067 et **8,0980** —
+trois fois moins. À 384 le cœur ne fait plus aucune itération. Pour un rendu, c'est le pire pas
+qui décide, et rien n'arbitre encore entre les deux.
+
+**Le défaut qui compte plus que le gain.** Un pas à **467 ms**, puis 132 à la reproduction,
+toujours au premier régime GPU venant après sept secondes sans GPU. Un envoi de préchauffage
+**ne le supprime pas** ; ne pas laisser la carte refroidir le supprime (maximum retombé à
+26,12 ms). C'est un chemin GPU **refroidi**, pas neuf. Pour un rendu c'est un gel visible, et il
+suffit que la bande ait été éteinte un instant. Non corrigé : garder la carte tiède est un
+arbitrage d'ordonnancement, pas un réglage. C'est le point le plus important laissé ouvert (A294).
+
+**Non-fait, limites.** Budget 2 ms non reçu (×4,1 sur le chemin de l'afficheur). Longueur de
+cycle non calibrée et non automatique. Tenue du pire pas non garantie. Une seule carte, un seul
+backend. Ni famine, ni A290, ni topologie violente. Ni 3D ni solides.
+
+**Deux corrections d'instrument, avant publication et non après.** Deux colonnes de détail du
+balayage étaient indexées sur les mauvaises étapes. Et la fenêtre d'I-06 sur notre empaquetage
+englobait les `write_buffer` de wgpu : resserrée, elle rend zéro, et le banc refuse sinon.
+
+**Vérification.** 508 essais cœur/harnais réussis (394 + 16 + 2 + 1 + 95), 21 ignorés, 0 échec ;
+36 essais viewer réussis, 1 ignoré, 0 échec ; six empreintes de S287 identiques.
+
+**Pas de nouvel ADR, et pourquoi.** Rien de décidé ici qu'ADR-173 ne portait déjà : le calcul est
+au bit identique, les portes sont intactes, et le crochet posé sur le pas couplé est le même
+mécanisme appliqué au chemin que ce mécanisme visait. Le diagnostic optionnel est un réglage
+d'hôte, pas une décision de conception. Les faits nouveaux sont des points de file.
+
+**Prochaine capacité visée.** La comparaison de priorité avec la **3D et les solides** se rejoue
+maintenant : c'était ce qu'A293 devait débloquer, et le pas a désormais tous ses postes connus.
+Avant cela, un seul point est plus urgent que tout réglage : **le gel de la carte refroidie**
+(A294), parce qu'un pic de 467 ms annule tout gain de médiane pour un rendu.
+
+**Maillons : 0.** Capacité reçue, chemin qui la consomme, preuve.
+
+**Rituel :** file active entièrement relue, A293 close, A294 ouverte avec déclencheur, note
+corrective datée posée sur la preuve de S289, feuille/index/REPRISE actualisés, leçons L341 et
+L342 écrites. I-04/I-05/I-06/I-13/I-17 : aucun état δ persisté, aucune porte déplacée, et les
+huit points d'expiration de S230 restent atteignables — vérifié par son essai.
