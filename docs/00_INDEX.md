@@ -86,6 +86,7 @@
 - [Solveur de pression résident GPU, consommé par le pas réel](validation/PRESSION-RESIDENTE-S289.md), [ADR-173](adr/ADR-173-le-candidat-de-pression-ne-fournit-qu-un-depart.md).
 - [Coût d'appel du cycle résident : enregistrement des commandes, trois encodages au bit](validation/ENCODAGE-CYCLE-S290.md).
 - [Le pas de δ décomposé étape par étape, puis allégé au bit](validation/PAS-DECOMPOSE-S291.md).
+- [Référence δ tridimensionnelle, surface linéarisée — porte B, lot 1](validation/DELTA3D-LINEAIRE-S295.md) : identique au bit à la 2D quand `ny = 1`, onde oblique reçue.
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

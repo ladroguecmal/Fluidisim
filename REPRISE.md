@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 15:13 +02:00
+Battement        : 2026-09-19 15:15 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
 Session en cours : S295 — porte B, lot 1 : référence δ tridimensionnelle à surface linéarisée
 Dernière session : S294 — arbitrages du 2026-09-19 consignés (ADR-174), δ 3D décidé (ADR-175), pilotage par les portes, documents d'état ramenés sous plafond
