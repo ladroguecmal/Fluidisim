@@ -67,7 +67,7 @@ au nombre d'appels dans le vieillissement des coûts avant cette intégration.
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — reproduire puis corriger le vieillissement par appels refusés ; pauses et retours
+- [x] **P2** — reproduire puis corriger le vieillissement par appels refusés ; pauses et retours
   de temps éprouvés, historique des vrais pas conservé.
 - [ ] **P3** — pas Live configurable 16/32/48 ms, comparaison à instants communs et par image,
   coût complet et refus publiés ; ne pas activer par défaut une cadence non reçue.
@@ -84,3 +84,6 @@ Repère hauteur 3 mm S201 ; ni baisse de fréquence ni coût moyen ne reçoivent
 bloque encore plus de 2 ms. Évaluer le maintien du dernier profil entre pas avant d'introduire
 une interpolation qui pourrait cacher un retard. Fond B toujours au temps de scène (ADR-003).
 A290 différée, pas de nouvelle réduction spatiale ; priorité au coût avant 3D/deuxième domaine.
+
+P2 : régression rouge (8 mesures devenaient 7 au même temps), puis verte : oubli par
+16 ms non financées, reste conservé, pause et retour sans vieillissement.

@@ -601,10 +601,11 @@ pub struct Layer<'a> {
     /// Elle ne reçoit pas le 99e centile exigé pour le coût par image par ADR-012 §3,
     /// ni une garantie de respect du budget. S282 : seuls les nouveaux pas réussis entrent ici.
     costs: [f32; COST_SAMPLES],
-    /// Combien d'entrées de `costs` sont valides. **Décroît d'une unité par pas non payé** : un
+    /// Combien d'entrées de `costs` sont valides. Décroît par 16 ms non financées : un
     /// domaine qui ne tourne plus ne sait plus ce qu'il coûte, et le dire est plus honnête que de
     /// garder son pire chiffre. Vidé, il retombe sur l'estimation nominale et retente.
     samples: usize,
+    forget_at_us: Option<u64>,
     granted: bool,
 }
 
@@ -685,13 +686,13 @@ impl<'a> Layer<'a> {
     }
     pub fn new(reference: &'a Replay, frame: &'a Replay) -> Result<Self, String> {
         Ok(Self { replays: Some([reference, frame]), mode: 1, live: None, gpu: [[0.; 4]; GPU_ROWS],
-            heights: [0.; NX], active: false, scheduler: scheduler()?, costs: [FIRST_COST_MS; COST_SAMPLES], samples: 0, granted: false })
+            heights: [0.; NX], active: false, scheduler: scheduler()?, costs: [FIRST_COST_MS; COST_SAMPLES], samples: 0, forget_at_us: None, granted: false })
     }
     /// S277 — δ **en direct sans rejeu** : la scène s'ouvre immédiatement, δ naît au repos et
     /// avance d'un pas par image. Les trois minutes de précalcul ne servaient qu'aux rejeux.
     pub fn direct(background: &'a Background, initial: [f32; NX]) -> Result<Self, String> {
         Ok(Self { replays: None, mode: 1, live: Some(Live::new(background, initial)?), gpu: [[0.; 4]; GPU_ROWS],
-            heights: [0.; NX], active: false, scheduler: scheduler()?, costs: [FIRST_COST_MS; COST_SAMPLES], samples: 0, granted: false })
+            heights: [0.; NX], active: false, scheduler: scheduler()?, costs: [FIRST_COST_MS; COST_SAMPLES], samples: 0, forget_at_us: None, granted: false })
     }
     pub fn label(&self) -> &'static str {
         if self.live.is_some() {
@@ -741,7 +742,7 @@ impl<'a> Layer<'a> {
         if self.scheduler.submit(bid).is_err() {
             return self.granted;
         }
-        let now = SimTime(START_US + (seconds.max(0.) * 1e6) as u64);
+        let now = SimTime(START_US + (seconds.max(0.) * 1e6).round() as u64);
         // Le temps de la scène recule quand on revient au début : l'ordonnanceur l'oublie plutôt
         // que de refuser, comme δ lui-même renaît.
         if self.scheduler.decide(now).is_err() {
@@ -750,10 +751,15 @@ impl<'a> Layer<'a> {
         }
         self.scheduler.allocate();
         self.granted = !self.scheduler.grants().is_empty();
-        // Non payé : on oublie une mesure. Huit pas sans tourner, et l'estimation redevient le
-        // nominal — le domaine retente alors, et c'est ce qui l'empêche d'être condamné par un pic.
-        if !self.granted {
-            self.samples = self.samples.saturating_sub(1);
+        // S286 : l'oubli dépend du temps de scène, jamais du nombre d'appels. Conserver
+        // le reste inférieur à 16 ms ; pause et retour de temps ne vieillissent rien.
+        match self.forget_at_us {
+            Some(last) if !self.granted && now.0 >= last => {
+                let ticks = (now.0 - last) / FRAME_US;
+                self.samples = self.samples.saturating_sub(ticks.min(COST_SAMPLES as u64) as usize);
+                self.forget_at_us = Some(last + ticks * FRAME_US);
+            }
+            _ => self.forget_at_us = Some(now.0),
         }
         self.granted
     }
@@ -1004,6 +1010,31 @@ mod tests {
         layer.update(1., [0.; 3], None);
         assert_eq!(layer.live.as_ref().unwrap().volume.domain().nx, NX / 2);
         assert!(layer.is_active());
+    }
+
+    #[test]
+    fn cost_forgetting_follows_time_not_calls_s286() {
+        let b = flat_background().unwrap();
+        let mut layer = Layer::direct(&b, [REST; NX]).unwrap();
+        layer.set_budget_ms(50.).unwrap();
+        for _ in 0..COST_SAMPLES { layer.record_cost(100.); }
+        assert!(!layer.arbitrate(0., None));
+        assert_eq!(layer.samples, COST_SAMPLES, "aucun temps écoulé");
+        for _ in 0..30 { assert!(!layer.arbitrate(0., None)); }
+        assert_eq!(layer.samples, COST_SAMPLES, "pause : aucun oubli");
+        assert!(!layer.arbitrate(0.008, None));
+        assert_eq!(layer.samples, COST_SAMPLES);
+        assert!(!layer.arbitrate(0.016, None));
+        assert_eq!(layer.samples, COST_SAMPLES-1);
+        assert!(!layer.arbitrate(0.016, None));
+        assert_eq!(layer.samples, COST_SAMPLES-1);
+        assert!(!layer.arbitrate(0., None));
+        assert_eq!(layer.samples, COST_SAMPLES-1, "retour : pas de temps négatif");
+        assert!(!layer.arbitrate(0.016, None));
+        assert_eq!(layer.samples, COST_SAMPLES-2);
+        layer.arbitrate(0.128, None);
+        assert_eq!(layer.samples, 0);
+        assert!(layer.arbitrate(0.144, None), "retour possible après oubli temporel");
     }
 
     #[test]
