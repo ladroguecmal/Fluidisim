@@ -79,10 +79,10 @@ sans déplacer d'un bit ce que le pas publie.
   b. `correct_into_uw` **et** `divergence_metric` refaits sur le **même** `p` quand la porte
      physique d'ADR-144 est franchie — c'est-à-dire à chaque pas accepté ;
   c. double `ctl.poll` par maille dans la boucle `w` de l'advection.
-- [ ] **P5** — phase `Validate` : elle parcourt **onze** tableaux, dont six ne sont **pas
+- [x] **P5** — phase `Validate` : elle parcourt **onze** tableaux, dont six ne sont **pas
   publiés** (`us`, `ws`, `rhs`, `res`, `dir`, `tmp`). Distinguer ce qui protège la publication de
   ce qui ne protège rien, mesurer, et **refuser le changement si l'argument ne tient pas**.
-- [ ] **P6** — coût de l'horloge : le sondage lit l'horloge toutes les 64 mailles. Mesurer le pas
+- [x] **P6** — coût de l'horloge : le sondage lit l'horloge toutes les 64 mailles. Mesurer le pas
   avec horloge réelle contre horloge figée, et l'effet du grain. Les mesures de S289/S290 ont été
   prises avec une horloge figée : dire de combien elles sous-estiment la production.
 - [ ] **P7** — re-mesure complète et **propositions chiffrées**, y compris celles qui ne seront pas
@@ -170,6 +170,48 @@ Le préconditionneur passe de 0,8291 à **0,0121 ms** sur le chemin avec candida
 candidat, et 0,33 ms sans. C'est cohérent : la redondance n'existait que lorsque le gradient
 conjugué itérait jusqu'à la convergence. Avec un candidat déjà convergé la boucle sort avant la
 porte, et la correction finale est alors la seule. Dit ainsi plutôt que compté deux fois.
+
+P5 : deux gestes, de natures différentes, et il faut les distinguer.
+
+**a. La validation garde exactement sa garantie, et coûte quatre fois moins.** Les onze champs
+sont toujours parcourus, dans le même ordre, avec le même grain de sondage et la même erreur ;
+seule la forme change — onze tranches plates au lieu d'une chaîne de onze itérateurs, ce qui
+laisse le test se vectoriser. **0,4189 → 0,1031 ms.** Aucun champ retiré du contrôle : l'idée de
+ne plus vérifier les six tampons non publiés a été **écartée**, parce qu'établir qu'aucun ne
+peut être relu avant réécriture demandait un raisonnement par tampon dont une erreur rendrait un
+NaN silencieux — et le gain était déjà pris sans ce risque.
+
+**b. L'erreur inverse du rapport devient un choix de l'hôte.** C'est un diagnostic déclaré
+« jamais seuil » par S238, et il coûte une passe de stencil complète : **0,3379 ms**.
+`set_report_backward_error(false)` la coupe, et `Report.backward_error` vaut alors `NaN` — « non
+mesurée » plutôt qu'un chiffre faux. Défaut inchangé à `true` : rien ne bouge tant que l'hôte ne
+demande rien. **Le certificat d'arrêt d'ADR-143 n'est pas concerné** : il est calculé dans la
+boucle parce qu'il décide, et il reste calculé.
+
+P6 : **le sondage coûte environ 8 % du pas**, et les mesures de S289/S290 le cachaient.
+Horloge réelle contre horloge figée, candidat GPU actif : 3,9306 contre 3,6392 ms à 6 656 mailles
+(+8,0 %) ; 24,4207 contre 22,4219 à 32 768 (+8,9 %). Sans candidat : 10,2011 contre 9,1869
+(+11,0 %) et 45,5672 contre 41,9096 (+8,7 %). Toutes les mesures de S289 et S290 ont été prises
+avec l'horloge figée : **elles sous-estiment la production d'environ 8 %**. Le grain n'a pas été
+changé — l'élargir retirerait des points d'expiration, donc de la garantie d'arrêt coopératif
+d'ADR-007, et cela demande un arbitrage, pas une optimisation.
+
+**Où en est le pas**, 6 656 mailles, candidat GPU, horloge réelle, médiane murale :
+
+| état | ms | contre le départ |
+|---|---|---|
+| départ de S291 (= S290 remesuré à l'horloge réelle) | 5,3443 | — |
+| après P4 (amorçage différé, doublons retirés) | 4,3022 | ×1,24 |
+| après P5a (validation aplatie) | 3,9306 | ×1,36 |
+| après P5b (diagnostic coupé par l'hôte) | **3,5371** | **×1,51** |
+
+À 32 768 mailles : 27,4144 → 24,4207 (×1,12), ou 22,6806 avec le diagnostic coupé (×1,21).
+Sur la base « horloge figée » que S290 publiait (4,6315 ms) : **3,6392 ms**, ×1,27.
+
+**Ce qu'il reste à 6 656 mailles**, 3,8259 ms internes, diagnostic coupé : candidat 2,0188 (53 %),
+itérations 0,3060, second membre 0,2363, divergence 0,1982, portes 0,1519, export 0,1395,
+advection 0,1352, résidu initial 0,1342, correction 0,1238, validation 0,0987, et sept postes
+sous 0,09. **Plus aucun poste dominant côté cœur** : ce qui reste est l'appel GPU.
 
 Ce qui reste hors de ce lot : multigrille GPU, 3D, solides, boucle d'image, multiplateforme,
 calibration automatique de la longueur de cycle. Et **aucune porte d'acceptation ne bouge** :

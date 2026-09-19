@@ -130,6 +130,19 @@ impl<'a> Control<'a> {
     }
 }
 
+/// S291 — contrôle de finitude d'un champ, **même sémantique** que la boucle qu'il remplace :
+/// même erreur, même grain de sondage d'un contrôle par 64 valeurs, même ordre. La différence est
+/// qu'il travaille sur une tranche plate au lieu d'une chaîne de onze itérateurs, ce qui laisse le
+/// test se vectoriser. Aucune valeur n'est retirée du contrôle : ce n'est pas un allègement de
+/// garantie, c'est la même garantie moins cher.
+pub(super) fn all_finite(values: &[f32], c: &mut Control<'_>, phase: Phase) -> Result<(), Error> {
+    for chunk in values.chunks(64) {
+        c.check(phase)?;
+        if chunk.iter().any(|v| !v.is_finite()) { return Err(Error::NotFinite); }
+    }
+    Ok(())
+}
+
 pub(super) fn copy<T: Copy>(src: &[T], dest: &mut [T], c: &mut Control<'_>, phase: Phase) -> Result<(), Error> {
     if !c.limited() { dest.copy_from_slice(src); return Ok(()); }
     for (a, b) in src.chunks(64).zip(dest.chunks_mut(64)) { c.check(phase)?; b.copy_from_slice(a); }

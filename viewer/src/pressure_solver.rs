@@ -849,10 +849,13 @@ async fn measure_decomposition_async() -> Result<(), String> {
         for cut in [false, true] {
             let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
             // Quatre régimes : horloge réelle ou figée, candidat GPU ou non. Le pas est le même.
-            for (with_gpu, real_clock) in [(false, true), (true, true), (false, false), (true, false)] {
+            for (with_gpu, real_clock, diagnostic) in [(false, true, true), (true, true, true),
+                (false, false, true), (true, false, true), (true, true, false)] {
                 gpu.iterations = if nx == 128 { 128 } else { 256 };
                 let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 28);
                 let mut volume = scene(nx, nz, dx, cut, &mut arena, &jobs, &sink)?;
+                // S291 : l'erreur inverse du rapport est un diagnostic ; l'hôte peut la couper.
+                volume.set_report_backward_error(diagnostic);
                 let mut rows = vec![PressureRow::default(); cells];
                 let mut stages = [0u64; STAGES];
                 let mut phases = [0u64; 8];
@@ -892,7 +895,7 @@ async fn measure_decomposition_async() -> Result<(), String> {
                     format!("{name}={ms:.4}")
                 }).collect();
                 println!("DECOMPOSITION_S291 nx={nx} nz={nz} coupe={cut} gpu={with_gpu} \
-                    horloge={} pas={STEPS} mural_mediane_ms={:.4} interne_moyen_ms={total:.4} \
+                    horloge={} diagnostic={diagnostic} pas={STEPS} mural_mediane_ms={:.4} interne_moyen_ms={total:.4} \
                     iterations_coeur={iterations} {}",
                     if real_clock { "reelle" } else { "figee" }, wall[STEPS / 2], detail.join(" "));
             }

@@ -617,11 +617,10 @@ impl Volume {
             self.transport_mobile(transport, &mut ctl)?;
             ctl.check(Phase::Validate)?;
             ctl.mark(Stage::Validate);
-            for value in self.u.iter().chain(&self.w).chain(&self.p).chain(&self.eta)
-                .chain(&self.eta_roundoff).chain(&self.us).chain(&self.ws)
-                .chain(&self.rhs).chain(&self.res).chain(&self.dir).chain(&self.tmp) {
-                ctl.poll(Phase::Validate)?;
-                if !value.is_finite() { return Err(Error::NotFinite); }
+            // Les onze mêmes champs, dans le même ordre, avec le même grain de sondage.
+            for field in [&self.u, &self.w, &self.p, &self.eta, &self.eta_roundoff, &self.us,
+                &self.ws, &self.rhs, &self.res, &self.dir, &self.tmp] {
+                budget::all_finite(field, &mut ctl, Phase::Validate)?;
             }
             if !report.residual.is_finite() || !report.divergence.is_finite() { return Err(Error::NotFinite); }
             if !self.surface_in_bounds(&mut ctl, Phase::Validate)? { return Err(Error::Domain); }

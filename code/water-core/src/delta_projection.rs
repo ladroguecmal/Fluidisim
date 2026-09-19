@@ -280,6 +280,12 @@ pub struct Volume {
     /// S276, ADR-169 : la projection principale d'un pas mobile part de la pression publiée.
     /// Allumé par le pas pour ce seul appel ; l'affinage part toujours de zéro.
     warm_pressure: bool,
+    /// S291 : l'erreur inverse du rapport est un **diagnostic** (S238, « jamais seuil »), et elle
+    /// coûte une passe de stencil complète — 0,34 ms sur 4,86 à 6 656 mailles. L'hôte peut la
+    /// couper ; `Report.backward_error` vaut alors `NaN`, qui dit « non mesurée » au lieu de
+    /// mentir. Le certificat d'arrêt d'ADR-143, lui, n'est **pas** concerné : il reste calculé
+    /// dans la boucle, parce qu'il décide.
+    report_backward_error: bool,
 }
 
 impl Volume {
@@ -379,6 +385,7 @@ impl Volume {
             eta_roundoff: vec![0.; nx],
             saved_eta_roundoff: vec![0.; nx],
             last_cost_ms: None,
+            report_backward_error: true,
             last_phase_ns: [0; 8],
             last_stage_ns: [0; STAGES],
             rest: domain.z0(),
@@ -804,6 +811,10 @@ impl Volume {
         let h1 = ((top - high) / dx).clamp(0., 1.);
         (full + (wet - full) * (0.5 * (h0 + h1))).clamp(0., 1.)
     }
+
+    /// S291 : couper le diagnostic d'erreur inverse du rapport. `true` par défaut : rien ne change
+    /// tant que l'hôte ne le demande pas. Ne touche ni ADR-143, ni ADR-144, ni l'acceptation.
+    pub fn set_report_backward_error(&mut self, on: bool) { self.report_backward_error = on; }
 
     /// S291 : carte du coût du dernier pas. `[u64; 8]` dans l'ordre de `Phase`.
     pub fn last_phase_ns(&self) -> [u64; 8] { self.last_phase_ns }
@@ -1448,7 +1459,11 @@ impl Volume {
         // `res` porte encore le vrai résidu du `p` publié : correction et diagnostic de divergence ne
         // touchent ni `p`, ni `rhs`, ni `res`.
         ctl.mark(Stage::Backward);
-        let backward_error = self.backward_error(ctl)? as f64;
+        let backward_error = if self.report_backward_error {
+            self.backward_error(ctl)? as f64
+        } else {
+            f64::NAN
+        };
         Ok(Report {
             refinements: 0,
             iterations: it,
