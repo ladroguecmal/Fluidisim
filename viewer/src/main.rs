@@ -11,6 +11,7 @@ mod delta;
 mod delta3d;
 mod delta3d_projection;
 mod delta3d_background;
+mod delta3d_step;
 mod pressure_gpu;
 mod pressure_solver;
 mod gpu;
@@ -2249,6 +2250,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--delta3d-cout-fond") {
         return delta3d_background::mesurer_cout_fond();
+    }
+    if args.iter().any(|a| a == "--delta3d-prediction") {
+        return delta3d_step::recevoir_prediction();
     }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();

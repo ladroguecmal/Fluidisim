@@ -425,6 +425,50 @@ impl Volume3 {
         self.prepare_background3(bg)
     }
 
+    /// S301, ADR-175 §3 — **essais seulement**. Prédiction du pas couplé telle que le pas la
+    /// fait : advection MAC, couplage au fond et facteur d'éponge, rendue dans `us`, `vs`, `ws`.
+    /// Sert à juger une production qui la calcule sur sa carte ; la production ne l'appelle pas.
+    ///
+    /// Mutation assumée : seuls les tampons de travail de la prédiction sont écrits, comme un
+    /// pas les écrirait. Rien de publié n'est touché (I-17). Refus `Shape` sur une longueur,
+    /// `BackgroundContext` sur un fond d'un autre domaine, `Domain` sur une éponge invalide ou
+    /// `dt²g/dx > 1`, `NotFinite` sur un échantillon ; sur refus, les sorties ne sont pas écrites.
+    pub fn predict_for_trials(
+        &mut self,
+        bg: &BackgroundFaces3<'_>,
+        duration_us: u64,
+        sponge: Sponge3,
+        us: &mut [f32],
+        vs: &mut [f32],
+        ws: &mut [f32],
+    ) -> Result<(), Error> {
+        if duration_us == 0 || duration_us > 1u64 << 53 {
+            return Err(Error::NotFinite);
+        }
+        if bg.domain != self.domain || bg.density != self.rho {
+            return Err(Error::BackgroundContext);
+        }
+        if bg.u.len() != self.u.len()
+            || bg.v.len() != self.v.len()
+            || bg.w.len() != self.w.len()
+            || us.len() != self.u.len()
+            || vs.len() != self.v.len()
+            || ws.len() != self.w.len()
+        {
+            return Err(Error::Shape);
+        }
+        sponge.validate(self.domain)?;
+        let dt = duration_us as f64 * 1e-6;
+        if self.g_eff <= 0. || dt * dt * self.g_eff as f64 / self.domain.dx as f64 > 1. {
+            return Err(Error::Domain);
+        }
+        self.predict_coupled3(bg, dt, sponge)?;
+        us.copy_from_slice(&self.us);
+        vs.copy_from_slice(&self.vs);
+        ws.copy_from_slice(&self.ws);
+        Ok(())
+    }
+
     pub fn step_perturbation_mobile(
         &mut self,
         time: SimTime,

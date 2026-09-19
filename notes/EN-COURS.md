@@ -87,8 +87,9 @@ Critères avant code, posés ici :
 
 ### Plan
 
-- [>] **P1** — amorce, lecture ciblée du lot, plan seul.
-- [ ] **P2** — `Step3` : un device, tampons réservés, pipelines des trois sources WGSL (fond,
+- [x] **P1** — amorce, lecture ciblée du lot, plan seul. *(Committé avec `[>]` par erreur ;
+  coché au commit de P2.)*
+- [x] **P2** — `Step3` : un device, tampons réservés, pipelines des trois sources WGSL (fond,
   gradient conjugué, pas) ; dépôt d'état et relecture de banc. Noyau `predict` (advection MAC,
   couplage `extra3`, éponge) et `predict_for_trials` dans le cœur ; reçu contre lui.
 - [ ] **P3a** — divergence, couplage S300 avec `eta_roundoff`, passage à la projection, départ
@@ -104,7 +105,27 @@ Critères avant code, posés ici :
 
 ### Notes de reprise
 
-*(S301 — vide à l'ouverture.)*
+**Architecture retenue (P2).** `Step3` crée **un** device et y compile les trois sources telles
+quelles — `delta3d_background.wgsl` (S300), `delta3d_cg.wgsl` (S299), `delta3d_step.wgsl`
+(nouveau) — chacune avec sa propre disposition de liaisons, sur des tampons communs. Rien de
+S299/S300 n'est réécrit (L137). Rangements : `vel = [u|v|w courants | u|v|w prédits]`, l'indice
+d'une face étant aussi celui de son échantillon de fond ; `cells_in = [eta | divergence |
+eta_roundoff]` — **eta vit là**, c'est l'entrée de `couple_columns` ; `cells_out` = celui de S300 ;
+`work = [flux_x | bande_x | flux_y | bande_y | surface publiée]`. Les passages vers la projection
+(surface totale → `heights`, second membre → tranche B, préconditionneur → tranche M) seront des
+copies de tampon **dans l'encodeur**, sans retour CPU.
+
+**P2 reçu** (`--delta3d-prediction`, 15×11×14, 7 459 faces, fond S300 à 64 composantes, vitesses
+d'ordre 0,2 m/s, éponge (1 ; 0,75 ; 2 s⁻¹), dt 5 ms, trois instants) : pire écart **6,0·10⁻⁸ m/s**,
+soit **≤ 9,0·10⁻⁶ de l'incrément** du pas, sur les trois familles ; 70 à 85 % des faces au bit ;
+zéro face fautive. Refus : durée nulle, éponge trop large, `dt²g/dx > 1`, longueur.
+
+**Défaut trouvé par le banc, corrigé avant commit** : le noyau couplait les faces `i = nx` (u) et
+`j = ny` (v), que le cœur saute — borne comparée à `n + 1` au lieu de `n`. Écart de **60 % de
+l'incrément**, sur ces seules faces. Le compteur `faces_fautives` (> 5 % de l'incrément) reste
+dans le banc : c'est lui qui voit une règle de bord portée autrement, l'arrondi ne le peut pas.
+Rapporter l'écart à l'incrément et non à la vitesse était nécessaire : rapporté à la vitesse, le
+même défaut ne pesait que 1 %.
 
 ---
 
