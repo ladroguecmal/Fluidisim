@@ -75,9 +75,9 @@ Le coût 2D est différé selon S293 ; ce lot prépare les entrées réelles de 
 - [x] **P1** — amorce, lecture ciblée et plan seuls ; copie unique, master propre.
 - [x] **P2** — échantillonneur B réel sur MAC 3D, stockage réservé et publication atomique ;
   tests au ponctuel, erreurs et allocations.
-- [>] **P3** — comparer houle progressive et éponge 3D au témoin 2D, transposition x/y ;
+- [x] **P3** — comparer houle progressive et éponge 3D au témoin 2D, transposition x/y ;
   fixtures et critères existants conservés, limites publiées.
-- [ ] **P4** — consommer B réel dans un aperçu 3D calculé, vérifier les images et la suite.
+- [>] **P4** — consommer B réel dans un aperçu 3D calculé, vérifier les images et la suite.
 - [ ] **P5** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
@@ -86,3 +86,7 @@ B possède differential_local_extended (ADR-154) et differential_grid_extended (
 Le support Samples3 de S297 ne traite que des fonctions de banc infaillibles.
 B est profond : le fond du domaine doit être suffisamment bas et l’atténuation publiée.
 W prolongé au-dessus du plan moyen reste A286 ; ne pas prétendre le recevoir avec B seul.
+P4 commence pendant les calculs P3, sans modifier le solveur ni les bancs en cours.
+
+P4 : premier essai 64 modes trop lent en ponctuel ; arrêt après quelques images.
+Réutiliser la grille S276 à chaque rangée y, mêmes bits, scratch réservé.
