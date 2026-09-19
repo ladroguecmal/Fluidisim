@@ -75,9 +75,9 @@ place de l'utilisateur.
 - [x] **P1** — état réel, jeton, plan seuls.
 - [x] **P2** — clore S292 : entrée de journal courte (interrompue, ce qu'elle a établi, ce qui
   reste), A294 actualisée dans la file avec le geste écrit et jamais exécuté comme suite.
-- [ ] **P3** — état réel du code : compilation et suites (cœur/harnais, viewer) hors réseau,
+- [x] **P3** — état réel du code : compilation et suites (cœur/harnais, viewer) hors réseau,
   avertissements ; ce que `code/` et `viewer/` contiennent par couche, confronté aux documents.
-- [ ] **P4** — intentions → projet fini → jalons : sources, LISTE-PROJET-FINI, portes §3 bis ;
+- [>] **P4** — intentions → projet fini → jalons : sources, LISTE-PROJET-FINI, portes §3 bis ;
   recompter reçu/partiel/absent si le décompte affiché est périmé.
 - [ ] **P5** — trajectoire mesurée : sessions et commits par sujet et par période (Git et
   journal), capacités reçues, maillons, part conception/code ; fils longs et ce qu'ils ont
@@ -91,3 +91,26 @@ place de l'utilisateur.
 
 Notes complètes de S292 (tableau froid/chaud, trois mécanismes, commande non exécutée) :
 `git show c629ebb:notes/EN-COURS.md`. P2 les reporte dans le journal et dans A294.
+
+**P3 — état réel du code (mesuré 14:25–14:31).** `cargo test --workspace --release --offline`
+dans `code/` : **511 réussis, 0 échec, 18 ignorés** (397 bibliothèque + 16 + 2 + 1 intégration
++ 95 harnais) ; construction 40 s, suite 46 s. `viewer/` : **36 réussis, 1 ignoré**. Les 19
+ignorés sont tous des mesures ou diagnostics à lancer explicitement, aucun défaut connu masqué.
+≈ 43 lignes d'avertissements, surtout des doublons dans les exemples. Écart de décompte avec
+S291 (394 réussis / 21 ignorés annoncés) : même total de 411 essais de bibliothèque, 3 passés
+d'ignorés à réussis — sans conséquence, mais les décomptes du journal ne se reproduisent pas
+exactement.
+Inventaire : cœur 36 464 lignes (75 fichiers), harnais 8 577, exemples 29 104 (114 fichiers,
+bancs de session pour la plupart), afficheur 10 231 dont `main.rs` 3 000 et **67 options de
+ligne de commande**, presque toutes des bancs. Aucun dépôt distant (`git remote` vide).
+Faits structurels vérifiés dans le code : δ = `Domain { nx, nz, dx }`, tranche x-z sans `y` ;
+le pas de production de la bande est `step_perturbation_mobile_with` ; le GPU ne fournit qu'un
+départ de pression, le cœur CPU refait `b − A·p`, ses itérations et ses portes (ADR-173) ;
+ordonnanceur `scheduler.rs` 690 lignes ; V = `hydro_network` + géométrie + instantané, ≈ 880
+lignes hors tests, intouché depuis S229.
+Effort mesuré par Git (lignes ajoutées, `--first-parent`) : Markdown 116 357 ; W 21 571 +
+bancs B/W 19 700 ; δ 10 230 + bancs δ 10 906 ; hôte de rendu 7 784 ; harnais 9 223 ;
+véhicules 3 481 ; B 3 638 ; **V 2 095** ; **ordonnanceur 738**. Sessions par sujet dominant :
+W 113, δ 57, véhicules/harnais 40, documentaires 40, rendu 16, B 12, **V 4**, ordonnanceur ≈ 3.
+Sessions de 10 à 40 min entre plan et rituel (médiane 15,8 min depuis S250) ; depuis S250,
+34 % des commits sont des plans ou des rituels.
