@@ -94,7 +94,7 @@ Critères avant code, posés ici :
   couplage `extra3`, éponge) et `predict_for_trials` dans le cœur ; reçu contre lui.
 - [x] **P3a** — divergence, couplage S300 avec `eta_roundoff`, passage à la projection, départ
   chaud ; pression reçue contre le cœur sur un pas.
-- [ ] **P3b** — correction aux faces et extrapolation verticale ; vitesses reçues.
+- [x] **P3b** — correction aux faces et extrapolation verticale ; vitesses reçues.
 - [ ] **P4** — transport par débits mouillés et bandes, relaxation d'éponge, compensation,
   surface publiée (D7) ; pas complet reçu champ par champ contre `step_perturbation_mobile`.
 - [ ] **P5** — trajectoire du cas S298 : écart de hauteur par image, selon les cycles.
@@ -149,6 +149,13 @@ Aucune maille sèche non nulle. Résidu vrai de la carte 3,6·10⁻⁷ à 64 cyc
 part de la pression du pas précédent, et c'est P5 qui dira combien de cycles il faut alors.
 `couple_rhs` lit désormais `eta_roundoff` (`cells_in` après la divergence) ; banc S300 rejoué,
 chiffres identiques (1,06·10⁻⁶ ; 6,0·10⁻⁸ ; 3,9·10⁻⁷). `init_warm` ajouté à `delta3d_cg.wgsl`.
+
+**P3b reçu** (`--delta3d-correction`, même fixture, vitesses de fin de pas contre celles du cœur
+après `step_perturbation_mobile`, extrapolées comprises) : incrément du pas ≈ 0,5 à 0,76 m/s (le
+champ de départ est fortement divergent, la projection le redresse). Écart **≤ 1,4·10⁻⁵ m/s**,
+**≤ 2,6·10⁻⁵ de l'incrément** à 128 cycles, ≤ 1,7·10⁻⁵ à 64 ; **zéro face fautive** sur les trois
+familles et trois instants. Fantômes latéraux avec le fond de la face (`p_dyn`, `grad_p_dyn`),
+fantôme du haut avec `eta_roundoff` et `ghost_up` de S300 : aucune règle de bord divergente.
 
 ---
 

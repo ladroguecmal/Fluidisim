@@ -28,9 +28,11 @@ const CG_CYCLE: [usize; 5] = [2, 3, 4, 5, 6];
 const CG_RESIDUAL: [usize; 2] = [7, 8];
 const CG_BNORM: [usize; 2] = [9, 10];
 /// Noyaux de `delta3d_step.wgsl`.
-const STEP: [&str; 2] = ["predict", "divergence"];
+const STEP: [&str; 4] = ["predict", "divergence", "correct", "extrapolate"];
 const PREDICT: usize = 0;
 const DIVERGENCE: usize = 1;
+const CORRECT: usize = 2;
+const EXTRAPOLATE: usize = 3;
 /// Noyaux de `delta3d_background.wgsl`.
 const BG: [&str; 3] = ["sample_faces", "couple_columns", "couple_rhs"];
 
@@ -39,6 +41,7 @@ const BG: [&str; 3] = ["sample_faces", "couple_columns", "couple_rhs"];
 pub enum Upto {
     Prediction,
     Projection,
+    Correction,
 }
 
 pub struct Step3 {
@@ -427,7 +430,12 @@ impl Step3 {
             return prediction;
         }
         // divergence, colonnes, second membre ; ‖b‖ ; départ ; cycles ; vrai résidu.
-        prediction + 3 + 2 + 2 + 5 * cycles + 2
+        let projection = prediction + 3 + 2 + 2 + 5 * cycles + 2;
+        if upto == Upto::Projection {
+            return projection;
+        }
+        // correction aux faces, extrapolation par colonne.
+        projection + 2
     }
 
     /// Enregistre le pas jusqu'à `upto`. Aucune lecture, aucune décision CPU entre deux
@@ -482,6 +490,17 @@ impl Step3 {
             run(CG_RESIDUAL[0], cells);
             run(CG_RESIDUAL[1], 1);
         }
+        if upto == Upto::Projection {
+            return;
+        }
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            pass.set_bind_group(0, &self.step_bind, &[]);
+            pass.set_pipeline(&self.step[CORRECT]);
+            pass.dispatch_workgroups(faces, 1, 1);
+            pass.set_pipeline(&self.step[EXTRAPOLATE]);
+            pass.dispatch_workgroups(columns, 1, 1);
+        }
     }
 
     /// **Banc** : exécute le pas jusqu'à `upto` et attend la carte.
@@ -496,6 +515,11 @@ impl Step3 {
     /// **Banc** : vitesses prédites `[us | vs | ws]`.
     pub fn predicted(&self) -> Result<Vec<f32>, String> {
         self.relire(&self.vel, self.face_total, self.face_total)
+    }
+
+    /// **Banc** : vitesses courantes `[u | v | w]`.
+    pub fn velocities(&self) -> Result<Vec<f32>, String> {
+        self.relire(&self.vel, 0, self.face_total)
     }
 
     /// **Banc** : pression (tranche X de la projection).
@@ -767,6 +791,74 @@ pub fn recevoir_pression() -> Result<(), String> {
                 );
             }
         }
+        Ok(())
+    })
+}
+
+/// Banc P3b : **réception de la correction et de l'extrapolation**. Même pas qu'en P3a ; on
+/// compare cette fois les vitesses de fin de pas, que le transport de surface ne touche plus.
+/// L'écart est rapporté à l'incrément du pas, `|u_fin − u_début|`, pour la raison de P2.
+pub fn recevoir_correction() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::{BackgroundGrid3, BackgroundFaces3, Volume3};
+    use water_core::host::HostServices;
+
+    pollster::block_on(async {
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 27);
+        let Fixture { background, domain, origin, rest, eta } = fixture(&mut alloc)?;
+        let (rho, g) = (1025_f32, 9.81_f32);
+        let sponge = Sponge3 { width_x: 1.0, width_y: 0.75, rate_per_s: 2.0 };
+        let duration = 5_000u64;
+        let total = face_total(domain);
+        let (nu, nv) = ((domain.nx + 1) * domain.ny * domain.nz, domain.nx * (domain.ny + 1) * domain.nz);
+        let champ = |n: usize, graine: f32| -> Vec<f32> {
+            (0..n).map(|f| 0.2 * ((f as f32 * 0.37 + graine).sin() + 0.5 * (f as f32 * 0.113).cos())).collect()
+        };
+        let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+        carte.set_step(duration, rest, sponge)?;
+        println!(
+            "DELTA3D_CORRECTION_S301 carte={:?} backend={} nx={} ny={} nz={} faces={total}",
+            carte.adapter, carte.backend, domain.nx, domain.ny, domain.nz
+        );
+        let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
+            .map_err(|e| format!("grille {e:?}"))?;
+        let mut pire_global = 0f32;
+        for micros in [0u64, 1_234_567, 76_543_210] {
+            let time = water_core::SimTime(micros);
+            let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
+                .map_err(|e| format!("volume {e:?}"))?;
+            volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+            volume.set_velocity(&champ(nu, 0.1), &champ(nv, 1.7), &champ(total - nu - nv, 2.9))
+                .map_err(|e| format!("vitesses {e:?}"))?;
+            let debut: Vec<f32> = [volume.velocity_u(), volume.velocity_v(), volume.velocity_w()].concat();
+            grille.sample(&background, time).map_err(|e| format!("grille {e:?}"))?;
+            let vue = grille.view().ok_or("la grille du coeur ne publie rien")?;
+            let faces = BackgroundFaces3 { domain, time, density: rho, gravity: g, u: vue.u, v: vue.v, w: vue.w };
+            let rapport = volume.step_perturbation_mobile(time, duration, 4000, &faces, sponge, &jobs)
+                .map_err(|e| format!("coeur {e:?}"))?;
+            let fin: Vec<f32> = [volume.velocity_u(), volume.velocity_v(), volume.velocity_w()].concat();
+
+            carte.publish_time(&background, time)?;
+            for cycles in [64u32, 128] {
+                carte.set_state(&debut[..nu], &debut[nu..nu + nv], &debut[nu + nv..], &eta)?;
+                carte.run_for_bench(cycles, Upto::Correction)?;
+                let obtenu = carte.velocities()?;
+                for (nom, a, b) in [("u", 0, nu), ("v", nu, nu + nv), ("w", nu + nv, total)] {
+                    let (coeur, gpu, avant) = (&fin[a..b], &obtenu[a..b], &debut[a..b]);
+                    let (pire, echelle, bits) = ecart(coeur, gpu);
+                    let increment = coeur.iter().zip(avant).fold(0f32, |m, (x, y)| m.max((x - y).abs()));
+                    let fautives = coeur.iter().zip(gpu).filter(|(x, y)| (*x - *y).abs() > 0.05 * increment).count();
+                    let relatif = if increment > 0. { pire / increment } else { 0. };
+                    if cycles == 128 { pire_global = pire_global.max(relatif); }
+                    println!(
+                        "DELTA3D_CORRECTION_S301 t_us={micros} cycles={cycles} famille={nom} echelle={echelle:e} increment_max={increment:e} ecart={pire:e} ecart_sur_increment={relatif:e} au_bit={bits}/{} faces_fautives={fautives} coeur_iterations={} coeur_affinages={}",
+                        coeur.len(), rapport.iterations, rapport.refinements
+                    );
+                }
+            }
+        }
+        println!("DELTA3D_CORRECTION_S301 pire_ecart_sur_increment_128_cycles={pire_global:e}");
         Ok(())
     })
 }

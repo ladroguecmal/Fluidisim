@@ -228,3 +228,108 @@ fn divergence(@builtin(global_invocation_id) id: vec3<u32>) {
     let ft = vel[o + fw(i, j, k + 1u)];
     cells_in[plane + c] = ((fr - fl + ft - fb) + (fk - ff)) / s.dx;
 }
+
+// ── Correction aux faces et extrapolation verticale ──────────────────────────────────────────
+//
+// `correct_mobile3` et `extrapolate_mobile3` du cœur, avec la surface **totale** de début de pas
+// (`cells_out`, écrite par `couple_columns`) : c'est elle qui classe les mailles, comme
+// `height3` quand le couplage est armé. Les fantômes portent le fond : latéraux par l'échantillon
+// de la face, celui du haut par `ghost_up` de S300.
+
+fn height(i: u32, j: u32) -> f32 { return cells_out[j * s.nx + i]; }
+fn wet(i: u32, j: u32, k: u32) -> bool { return (f32(k) + 0.5) * s.dx < height(i, j); }
+fn pressure(i: u32, j: u32, k: u32) -> f32 { return state[(k * s.ny + j) * s.nx + i]; }
+
+/// `ghost_side3` vu depuis la maille mouillée `(wi, wj)` vers la sèche `(di, dj)`, avec le fond de
+/// la face `f` (`prepare_background3`) ; `sign` vaut +1 quand la mouillée est du côté bas.
+fn ghost_side(wi: u32, wj: u32, di: u32, dj: u32, k: u32, f: u32, axis: u32, sign: f32) -> vec2<f32> {
+    let zc = (f32(k) + 0.5) * s.dx;
+    let h = height(wi, wj);
+    let theta = max((h - zc) / (h - height(di, dj)), s.theta_min);
+    let background = -(bg(f, 19u) + sign * (theta - 0.5) * s.dx * bg(f, 20u + axis));
+    return vec2<f32>(1.0 / theta, s.rho * s.g_eff * (zc - s.rest) + background);
+}
+
+/// `ghost_up3` : couvercle de la colonne, perturbation compensée plus le fond.
+fn ghost_up(i: u32, j: u32, k: u32) -> vec2<f32> {
+    let col = j * s.nx + i;
+    let theta = max((height(i, j) - (f32(k) + 0.5) * s.dx) / s.dx, s.theta_min);
+    let roundoff = cells_in[columns() + cells() + col];
+    let value = s.rho * s.g_eff * ((cells_in[col] - s.rest) - roundoff) + cells_out[columns() + col];
+    return vec2<f32>(1.0 / theta, value);
+}
+
+@compute @workgroup_size(64)
+fn correct(@builtin(global_invocation_id) id: vec3<u32>) {
+    let slot = id.x;
+    if (slot >= s.faces) { return; }
+    let q = decode(slot);
+    let axis = q.w;
+    let i = q.x;
+    let j = q.y;
+    let k = q.z;
+    var value = vel[s.faces + slot];
+    if (axis < 2u) {
+        let n = select(s.ny, s.nx, axis == 0u);
+        let pa = select(j, i, axis == 0u);
+        if (pa > 0u && pa < n) {
+            var xi = i;
+            var yj = j;
+            if (axis == 0u) { xi = i - 1u; } else { yj = j - 1u; }
+            let lw = wet(xi, yj, k);
+            let rw = wet(i, j, k);
+            if (lw && rw) {
+                value = value - s.k1 * (pressure(i, j, k) - pressure(xi, yj, k)) / s.dx;
+            } else if (lw) {
+                let g = ghost_side(xi, yj, i, j, k, slot, axis, 1.0);
+                value = value - s.k1 * (g.y - pressure(xi, yj, k)) * g.x / s.dx;
+            } else if (rw) {
+                let g = ghost_side(i, j, xi, yj, k, slot, axis, -1.0);
+                value = value - s.k1 * (pressure(i, j, k) - g.y) * g.x / s.dx;
+            }
+        }
+    } else if (k >= 1u && wet(i, j, k - 1u)) {
+        let below = pressure(i, j, k - 1u);
+        if (k < s.nz && wet(i, j, k)) {
+            value = value - s.k1 * (pressure(i, j, k) - below) / s.dx;
+        } else {
+            let g = ghost_up(i, j, k - 1u);
+            value = value - s.k1 * (g.y - below) * g.x / s.dx;
+        }
+    }
+    vel[slot] = value;
+}
+
+/// Une invocation par colonne : elle seule écrit ses faces u(i), v(j) et w, donc aucune course.
+@compute @workgroup_size(64)
+fn extrapolate(@builtin(global_invocation_id) id: vec3<u32>) {
+    let c = id.x;
+    if (c >= columns()) { return; }
+    let i = c % s.nx;
+    let j = c / s.nx;
+    if (i > 0u) {
+        var has = false;
+        var last = 0.0;
+        for (var k = 0u; k < s.nz; k = k + 1u) {
+            let f = fu(i, j, k);
+            if (wet(i - 1u, j, k) || wet(i, j, k)) { last = vel[f]; has = true; }
+            else if (has) { vel[f] = last; }
+        }
+    }
+    if (j > 0u) {
+        var has = false;
+        var last = 0.0;
+        for (var k = 0u; k < s.nz; k = k + 1u) {
+            let f = fv(i, j, k);
+            if (wet(i, j - 1u, k) || wet(i, j, k)) { last = vel[f]; has = true; }
+            else if (has) { vel[f] = last; }
+        }
+    }
+    var has = false;
+    var last = 0.0;
+    for (var k = 1u; k <= s.nz; k = k + 1u) {
+        let f = fw(i, j, k);
+        if (wet(i, j, k - 1u)) { last = vel[f]; has = true; }
+        else if (has) { vel[f] = last; }
+    }
+}
