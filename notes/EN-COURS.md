@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S285 — en cours
+Session : S285 — terminée
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : continuer.
 Objectif : attribuer A290 au moyen de trois trajectoires au même temps, pour décider quel
@@ -71,7 +71,7 @@ mécanisme corriger avant toute réduction automatique.
   même préparation jusqu'à permutation, puis arrêt commun. Mesures séparées et contrôles.
 - [x] **P3** — exécuter et publier le diagnostic, tests du viewer ; arrêter au mécanisme
   attribué, ne pas inventer une correction physique sur un seul scénario.
-- [ ] **P4** — rituel §6 : journal, angles morts, file/feuille/index, jeton libre.
+- [x] **P4** — rituel §6 : journal, angles morts, file/feuille/index, jeton libre.
 
 ### Notes de reprise
 

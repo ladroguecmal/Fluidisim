@@ -332,7 +332,11 @@ et le régime substitutif ne sont pas construits ; les seuils attendent le banc 
 1,5 mm par pas, garde 3 mm inchangé. La demande à 1,024 s permute à 1,792 s ; zéro allocation
 sur 321 images. **Fidélité temporelle non reçue** : écart central maximal 66,994 mm au témoin
 large jusqu'à 5,120 s. Coût complet médian 12,39 ms, p99 observé 42,03 ms pendant la transition.
-La porte A reste partielle ; A290 et I-05 ouverts. [Mesure](validation/PREPARATION-RETRECISSEMENT-S284.md).
+**S285 : attribution sur trois trajectoires appariées** — préparation seule : maximum central
+45,517 mm ; réduction après préparation : écart supplémentaire maximal 25,391 mm. À la
+permutation, 8,118 mm sont déjà dus à la préparation. La porte A reste partielle ; A290 et
+I-05 ouverts. [Mesure S284](validation/PREPARATION-RETRECISSEMENT-S284.md),
+[attribution et limites](validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.

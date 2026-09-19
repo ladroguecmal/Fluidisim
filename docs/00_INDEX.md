@@ -78,6 +78,7 @@
 - [Un pic ne condamne plus un domaine](validation/COUT-ROBUSTE-S280.md).
 - [Rétrécissement perturbatif consommé, saut borné et coût](validation/RETRECISSEMENT-S283.md).
 - [Préparation progressive du rétrécissement et dérive temporelle](validation/PREPARATION-RETRECISSEMENT-S284.md).
+- [Attribution de la dérive : préparation et domaine réduit](validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

@@ -56,6 +56,7 @@ une commande d'essai, sans déclenchement automatique par le budget.
 `--delta-attribution` ajoute un témoin préparé conservé large : la préparation cesse pour les
 deux trajectoires au même pas, les champs avant transfert sont vérifiés au bit. Les écarts
 centraux séparent préparation et réduction sur la même fenêtre de 5,120 s (S285).
+[Résultats et limites](../docs/validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
 
 ```powershell
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --verify

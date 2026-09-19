@@ -3805,3 +3805,11 @@ médian 12,3857 ms, p99 42,0321 ms et maximum 43,1006 ms ; I-05 non reçu. Décl
 automatisation, séparer l'effet de la préparation de celui du domaine étroit avec un témoin
 large préparé. La correction nodale ne borne pas tout l'interpolant entre colonnes.
 [Mesure et limites](../validation/PREPARATION-RETRECISSEMENT-S284.md).
+
+**Suivi A290 — S285, 2026-09-19 (sévérité 2, ouverte).** Trois trajectoires appariées :
+la préparation seule produit déjà 8,118 mm au centre lors de la permutation, et jusqu'à
+45,517 mm sur la fenêtre ; l'effet supplémentaire du domaine réduit atteint 25,391 mm.
+Ces maxima ne sont pas additifs. Préparation arrêtée au même pas, champs identiques au bit
+avant transfert. Le garde instantané ne reçoit pas la trajectoire préparatoire. Diagnostic
+local terminé ; correction différée à la réduction automatique, après priorité coût A276.
+[Attribution et limites](../validation/ATTRIBUTION-RETRECISSEMENT-S285.md).

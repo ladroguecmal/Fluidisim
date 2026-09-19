@@ -14347,3 +14347,28 @@ V, B2, bathymétrie, seconde plateforme et verdict S277 restent dans la file ; V
 **Rituel :** file active relue (lignes S283 encore courantes hors remplacement spatial), feuille
 de route/index actualisés, A290/A276 suivis, invariants I-04/I-05/I-06/I-12/I-13/I-17 conservés.
 Aucun ADR modifié, aucune donnée persistée. Plan coché, jeton libre ; une seule copie, rien à fermer.
+## S285 — 2026-09-19 — attribution du rétrécissement
+
+**Entrée :** continuer. Troisième lot spatial explicitement comparé à A276/3D : attribution
+bornée utile avant correction, mais prochain gain de capacité attendu du coût, pas d'un
+quatrième approfondissement. Banc `--delta-attribution` consommant deux Live et un Layer.
+
+**Résultat :** à la permutation (1,792 s), préparation seule : 8,118 mm au centre, transfert :
+zéro. Sur 5,120 s, maxima préparation/intact 45,517 mm, réduit/préparé 25,391 mm ; total
+66,994 mm. Maxima non additifs. 48 pas préparés identiques au bit ; arrêt commun de préparation,
+963 appels sans allocation. 34 tests viewer réussis, un ignoré ; cœur inchangé, reçu S284
+conservé. [Protocole et limites](../docs/validation/ATTRIBUTION-RETRECISSEMENT-S285.md).
+
+**Non-fait :** ni correction physique spéculative, ni rendu, ni gain de coût revendiqué.
+A290 reste ouverte : le garde de permutation ne reçoit pas l'évolution préparatoire. Ce banc
+n'est pas une capacité de jeu, maillons = 1. Pas d'ADR modifié ni d'arbitrage nouveau.
+
+**Suite :** A276, cadence découplée avec précision et budget mesurés, coût des refus et
+vieillissement de l'estimation ; avant 3D et deuxième domaine. A290 revient avant réduction
+automatique ; V, B2, bathymétrie, multiplateforme, verdict S277 et proposition V1 restent dans
+la file avec leurs déclencheurs. Recommandation du bilan S227 appliquée : quitter le fil local
+après diagnostic borné et viser une capacité consommée.
+
+**Rituel :** file active entièrement relue, état spatial remplacé, index et feuille de route
+actualisés, suivi A290, invariants I-04/I-05/I-06/I-12 conservés. Dépôt principal seul, aucune
+copie à fermer. Jeton libre et plan terminé.
