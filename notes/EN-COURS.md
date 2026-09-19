@@ -67,7 +67,7 @@ mécanisme corriger avant toute réduction automatique.
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — banc consommant Live/Layer : large intact, large préparé, étroit préparé ;
+- [x] **P2** — banc consommant Live/Layer : large intact, large préparé, étroit préparé ;
   même préparation jusqu'à permutation, puis arrêt commun. Mesures séparées et contrôles.
 - [ ] **P3** — exécuter et publier le diagnostic, tests du viewer ; arrêter au mécanisme
   attribué, ne pas inventer une correction physique sur un seul scénario.

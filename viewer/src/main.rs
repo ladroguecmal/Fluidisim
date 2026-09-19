@@ -2221,6 +2221,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta-progressif") {
         return delta::measure_progressive_shrink();
     }
+    if args.iter().any(|a| a == "--delta-attribution") {
+        return delta::measure_shrink_attribution();
+    }
     if args.iter().any(|a| a == "--delta-mesure") {
         return delta_replays(&delta::swell_background()?).map(|_| ());
     }

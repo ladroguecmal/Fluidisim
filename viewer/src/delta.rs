@@ -1205,3 +1205,72 @@ pub fn measure_progressive_shrink() -> Result<(), String> {
         costs[costs.len()/2],costs[costs.len()*99/100],costs[costs.len()-1]);
     Ok(())
 }
+
+/// S285 : attribution appariée. Le témoin préparé reste large, mais arrête sa préparation
+/// exactement au pas où le chemin Layer permute. Aucune politique alternative dans Live.
+pub fn measure_shrink_attribution() -> Result<(), String> {
+    let background = swell_background()?;
+    let mut reduced = Layer::direct(&background, initial_wave(0.6))?;
+    reduced.set_budget_ms(1000.)?;
+    let mut intact = Live::new(&background, initial_wave(0.6))?;
+    let mut prepared = Live::new(&background, initial_wave(0.6))?;
+    let (mut hi, mut hp) = ([0.; NX], [0.; NX]);
+    let mut switched = None;
+    let mut paired_steps = 0;
+    let mut allocations = 0;
+    // Ordre : préparation-intact, réduit-préparation, réduit-intact. Maxima indépendants,
+    // donc non additifs ; l'identité signée, elle, est vérifiée en chaque point.
+    let mut maxima = [0f64; 3];
+    let mut before_switch = [0f64; 3];
+    for n in 0..=320 {
+        let t = n as f64 * FRAME_US as f64 * 1e-6;
+        prepared.preparing = reduced.live.as_ref().unwrap().preparing;
+        let mark = crate::counting::mark();
+        let si = intact.advance(t, &mut hi)?;
+        let sp = prepared.advance(t, &mut hp)?;
+        reduced.update(t, [0.; 3], None);
+        allocations += crate::counting::mark().since(mark).allocs;
+        if !reduced.is_active() || si != (n > 0) || sp != (n > 0) {
+            return Err(format!("trajectoire interrompue au pas {n}"));
+        }
+        let live = reduced.live.as_ref().unwrap();
+        if intact.now_us() != live.now_us() || prepared.now_us() != live.now_us() {
+            return Err(format!("horloges différentes au pas {n}"));
+        }
+        if switched.is_none() {
+            // Après permutation, smaller conserve le grand domaine juste avant transfert.
+            let source = if live.first_column == 0 { &live.volume } else { &live.smaller };
+            for (a, b) in [
+                (prepared.volume.surface(), source.surface()),
+                (prepared.volume.velocity_u(), source.velocity_u()),
+                (prepared.volume.velocity_w(), source.velocity_w()),
+            ] {
+                if a.len() != b.len() || a.iter().zip(b).any(|(x,y)| x.to_bits() != y.to_bits()) {
+                    return Err(format!("histoires préparées différentes au pas {n}"));
+                }
+            }
+            paired_steps += usize::from(n > 64);
+            if live.first_column != 0 { switched = Some(n); }
+        }
+        let mut at_time = [0f64; 3];
+        for i in 56..72 {
+            let q = [X0 + (i as f32 + 0.5)*DX, 0.];
+            let (a, b, c) = (hi[i] as f64, hp[i] as f64, reduced.eval(q)[0]);
+            let d = [b-a, c-b, c-a];
+            if (d[0]+d[1]-d[2]).abs() > 1e-12 { return Err("décomposition incohérente".into()); }
+            for k in 0..3 { at_time[k] = at_time[k].max(d[k].abs()); }
+        }
+        if n <= 64 && at_time != [0.; 3] { return Err("témoins initiaux différents".into()); }
+        for k in 0..3 {
+            maxima[k] = maxima[k].max(at_time[k]);
+            if switched.is_none() { before_switch[k] = before_switch[k].max(at_time[k]); }
+        }
+        if n == 64 { reduced.request_shrink()?; }
+        if n == 64 || switched == Some(n) || n == 192 || n == 320 {
+            println!("ATTRIBUTION_S285 t_s={t:.3} ordre=prepare-intact,reduit-prepare,reduit-intact instant_m={at_time:?} maxima_depuis_demande_m={maxima:?}");
+        }
+    }
+    if switched.is_none() || allocations != 0 { return Err(format!("permutation={switched:?}, allocations={allocations}")); }
+    println!("ATTRIBUTION_S285 permutation_pas={switched:?} pas_prepares_identiques={paired_steps} avant_permutation_max_m={before_switch:?} allocations={allocations} temoins_larges_nx={},{}", intact.volume.domain().nx, prepared.volume.domain().nx);
+    Ok(())
+}
