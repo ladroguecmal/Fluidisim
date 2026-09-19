@@ -15,11 +15,14 @@ fn background(x:f64,y:f64,z:f64,t:f64)->BackgroundSample {
     background3::sum(a.sample(x,z,t),background3::rotate(b.sample(0.6*x+0.8*y,z,t),[0.6,0.8]))
 }
 // Fixture compacte, deux systèmes JONSWAP directionnels du fournisseur réel (pas la scène --houle).
-fn spectral_background()->Background {
-    let recipe=Recipe{sea:SeaState{hs:0.18,tp:1.4,theta_turns:0.02,components:32,graine:298},
+// `resolu` allonge les deux périodes pour que la maille de 25 cm porte la composante la plus
+// courte (S298 P4b) ; les hauteurs et tout le reste de la scène sont inchangés.
+fn spectral_background(resolu:bool)->Background {
+    let (tp_a,tp_b)=if resolu {(1.6,1.75)} else {(1.4,1.1)};
+    let recipe=Recipe{sea:SeaState{hs:0.18,tp:tp_a,theta_turns:0.02,components:32,graine:298},
         gravity:9.81,gamma:3.3,min_ratio:0.8,max_ratio:1.4,spread_turns:0.25};
     let a=background_spectrum::bake_directional(recipe,10.).unwrap();
-    let b=background_spectrum::bake_directional(Recipe{sea:SeaState{hs:0.10,tp:1.1,theta_turns:0.22,graine:299,..recipe.sea},..recipe},25.).unwrap();
+    let b=background_spectrum::bake_directional(Recipe{sea:SeaState{hs:0.10,tp:tp_b,theta_turns:0.22,graine:299,..recipe.sea},..recipe},25.).unwrap();
     let cooked=background_spectrum::assemble(&[&a,&b]).unwrap();
     let attenuation=cooked.components().iter().map(|c|(-(c.k_turns_per_m as f64)*std::f64::consts::TAU*8.).exp()).fold(0f64,f64::max);
     // Résolution de la fixture : la maille doit porter la composante la plus courte.
@@ -33,7 +36,8 @@ fn main()->Result<(),String> {
     let output=std::env::args().nth(1).unwrap_or_else(||"viewer/captures/s297".into());
     std::fs::create_dir_all(&output).map_err(|e|e.to_string())?;
     let spectral=std::env::args().any(|a|a=="--spectral");
-    let real=spectral.then(spectral_background);let rest=if spectral {8.} else {2.};
+    let resolu=std::env::args().any(|a|a=="--resolu");
+    let real=spectral.then(||spectral_background(resolu));let rest=if spectral {8.} else {2.};
     let d=Domain3{nx:32,ny:24,nz:if spectral {36} else {12},dx:0.25};
     let mut arena=host_impl::ArenaAllocator::with_capacity(1<<27);
     let mut grid=if spectral {Some(BackgroundGrid3::configure(&mut HostServices{alloc:&mut arena,jobs:&host_impl::SequentialJobs,sink:&host_impl::StderrSink},d,[0.,0.,-rest],1025.).unwrap())} else {None};
@@ -73,6 +77,6 @@ fn main()->Result<(),String> {
             imax=imax.max(r.iterations);refinements+=r.refinements;dmax=dmax.max(r.divergence_plain);
         }
     }
-    println!("PREVIEW spectral={spectral} nx=32 ny=24 nz={} rest={rest} bottom_speed_max={bottom_speed:e} dt_us=5000 duration=6s frames=121 it_max={imax} refinements={refinements} divergence_plain_max={dmax:e}",d.nz);
+    println!("PREVIEW spectral={spectral} resolu={resolu} nx=32 ny=24 nz={} rest={rest} bottom_speed_max={bottom_speed:e} dt_us=5000 duration=6s frames=121 it_max={imax} refinements={refinements} divergence_plain_max={dmax:e}",d.nz);
     Ok(())
 }

@@ -79,7 +79,7 @@ Le coût 2D est différé selon S293 ; ce lot prépare les entrées réelles de 
 - [x] **P3** — comparer houle progressive et éponge 3D au témoin 2D, transposition x/y ;
   fixtures et critères existants conservés, limites publiées.
 - [x] **P4** — consommer B réel dans un aperçu 3D calculé, vérifier les images et la suite.
-- [ ] **P4b** — découpage déclaré : la vérification P4 a trouvé la fixture sous-résolue
+- [x] **P4b** — découpage déclaré : la vérification P4 a trouvé la fixture sous-résolue
   (3,92 mailles par λ la plus courte). Rejouer sur une fixture résolue et comparer, pour
   séparer le bruit de maille de la dispersion physique avant de livrer l’image.
 - [ ] **P5** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
@@ -105,3 +105,16 @@ Le diagnostic de résolution ajouté ne change ni le hash ni l’empreinte FRAME
 amplitude **remonte** après le minimum de 3,3 s (0,047 → 0,091 m à 6 s), au lieu de se disperser
 comme en S297 analytique. Deux causes candidates, non tranchées : composantes courtes portées
 par 4 mailles ; éponge de 1 m face à une mer large bande. P4b discrimine par la résolution.
+
+P4b tranché (`viewer/captures/s298-resolu.log`, même scène, seules les périodes changent :
+Tp 1,6 et 1,75 s) : recipe_hash 2a9785f2c177e596, λ_min 2,0752 m soit **8,30 mailles**,
+atténuation au fond 1,0629863·10⁻³, vitesse verticale résiduelle 3,4031687·10⁻⁵ m/s,
+it_max 140, affinages 0, divergence franche max 4,887259·10⁻⁶ (contre 9,39682·10⁻⁶).
+Pic de différence à 6 s : **0,026775 m** contre 0,090666 m, et **décroissant** au lieu de croissant.
+Le damier était donc du bruit de maille, pas de la dispersion. Confusion assumée : à Hs constant,
+allonger les périodes baisse aussi la cambrure ; la résolution seule n’est pas isolée.
+
+**Limite trouvée, utile à la porte B** : à dx 0,25 m dans 8 × 6 m, la bande résolue tient dans
+λ ∈ [2,1 ; 7,3] m — moins de deux longueurs d’onde en travers de la boîte. La mer résolue ne
+*ressemble* donc plus à une mer étalée. Le critère « une onde traverse une mer étalée »
+(ADR-175 §4 critère 3) ne peut pas être jugé sur ce banc CPU : il demande le domaine de production.
