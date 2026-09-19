@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 11:28 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 11:33 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
-Session en cours : —
+Session en cours : S288 — opérateur de pression GPU
 Dernière session : S287 — parcours mémoire CPU éprouvé puis retiré ; empreintes de trajectoires disponibles
 Session suivante : A276, candidat de pression résidente GPU : contrat/ADR puis opérateur et lissage contre CPU, coût avec transferts/synchronisations ; avant cycle complet, 3D/deuxième domaine. Comparer ce troisième lot de coût aux capacités absentes. Cadence lente, A290, échecs représentatifs, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
 Maillons        : 1 — diagnostic et instrument reçus, aucun gain de simulation livré

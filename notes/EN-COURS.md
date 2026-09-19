@@ -58,41 +58,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S287 — terminée
+Session : S288 — en cours
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
-Entrée : continuer, coût par pas après cadence lente refusée.
-Objectif : accélérer les passes de pression sans changer le calcul, avant un port GPU.
+Entrée : continuer ; premier candidat GPU du calcul de pression.
+Objectif : construire et éprouver opérateur mobile et lissage résidents GPU contre le cœur.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [x] **P2** — comparer les chemins CPU/GPU présents ; instrumenter les empreintes des
-  trajectoires complètes du banc S286, mesurer la référence sur secteur.
-- [x] **P3** — parcourir les écritures disjointes multigrilles dans leur ordre mémoire,
-  mesurer le même travail et exiger les empreintes identiques ; conserver seulement un gain
-  reçu, sinon retirer l'optimisation. Suite complète et tests budget/mémoire existants.
-- [x] **P4** — rituel §6 : mesures et décision de suite, journal, registres, jeton libre.
+- [ ] **P2** — ADR du candidat expérimental ; export préalloué des coefficients du véritable
+  opérateur mobile, réception contre son application native.
+- [ ] **P3** — noyaux GPU opérateur et Jacobi, ressources réservées et alternance de tampons,
+  banc sur géométries planes/coupées/ondulées et tailles différentes ; découper si nécessaire.
+- [ ] **P4** — mesures précision/coût complet/allocations, suites pertinentes et limites ;
+  ni cycle complet ni simulation intégrée revendiqués avant leur construction.
+- [ ] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
 ### Notes de reprise
 
-Lecture initiale : les tableaux multigrilles sont k*nx+i, mais les passes indépendantes
-parcourent i puis k. Permuter ces boucles ne change aucune somme locale ni réduction.
-GPU : hôte compute wgpu présent, aucun solveur δ GPU ; porter une seule pass imposerait
-transferts/synchronisations par itération. Une pression résidente est un lot architectural,
-à comparer au gain CPU local d'abord. Aucun choix d'architecture GPU acté par cette session.
-Critères : mêmes bits à toutes les images et pour les champs volumétriques aux pas, mêmes
-itérations/acceptations, zéro allocation, coût complet publié, aucun seuil physique changé.
-Banc S286 : houle et onde 0,6 m, 16/32/48 ms, dont seul 16 ms interactif. Arrêt au résultat
-local mesuré, gain insuffisant aux 2 ms explicitement gardé ; pas de campagne cosmétique.
-
-P2 référence secteur : médianes pas 16/32/48 ms houle = 23,3345/25,6885/26,7559 ms ;
-onde = 24,8565/25,7251/26,6230 ms. Empreintes (hauteurs publiées + u/w, toutes images) :
-houle 92d65e868ec29942/aee9db45c45129a9/c9c79e0075ee0ffc ; onde
-1e5c6d5f5fed86bd/b0414fc315f5f3c6/6c037edac4f55f05. Itérations totales
-2648/1562/1116 et 2895/1551/1105. Zéro allocation. Carte RTX 5070 Laptop et AMD présentes.
-Optimisation P3 inclut apply_mobile, opérateur fin des cycles, mêmes écritures indépendantes.
-
-P3 : variante retirée après A1/B1/B2/A2. Empreintes et itérations identiques, zéro allocation.
-Onde16 : moyennes A=24,8542/25,1081 ms, B=24,8082/25,0584 ms ; gain non robuste reçu.
-36 tests viewer réussis, 1 ignoré ; cœur restauré à sa révision initiale donc suite cœur
-antérieure conservée au lieu de rejouer une optimisation retirée. Aucun gain livré.
+Troisième lot coût comparé à la 3D et aux solides : ces capacités manquent, mais ajouter une
+seconde direction au solveur déjà >10 fois le budget accroît ce blocage. On construit ici le
+premier étage GPU consommable par le futur solveur, sans prolonger les micro-optimisations CPU.
+Cœur sans dépendance, pile wgpu déjà autorisée, δ cosmétique, aucune nouvelle source réseau.
+Critères : export au bit contre opérateur CPU natif ; GPU contre CPU, erreur relative max
+normalisée <=1e-5 sur opérateur et 32 lissages (précision de port, pas seuil physique).
+Repos nul exact, bords/air/solides compris, pas de lecture CPU entre lissages. Coût de bout
+en bout avec transferts et attente, GPU seul si horodatage disponible ; allocations publiées.
+Seuil 1e-5 vise à distinguer une erreur de stencil d'arrondis f32 ; ne reçoit ni hauteur 3 mm
+ni acceptation ADR-144 du solveur complet. Intégration future conditionnée à ces deux portes.
