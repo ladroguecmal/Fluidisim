@@ -89,6 +89,7 @@
 - [Référence δ tridimensionnelle, surface linéarisée — porte B, lot 1](validation/DELTA3D-LINEAIRE-S295.md) : identique au bit à la 2D quand `ny = 1`, onde oblique reçue.
 - [Référence δ tridimensionnelle, surface mobile — porte B, lot 2](validation/DELTA3D-MOBILE-S296.md) : trajectoires 2D au bit, HOS et onde oblique reçus.
 - [Référence δ 3D couplée et aperçu animé local — S297](validation/DELTA3D-COUPLEE-S297.md) : HOS reçu, courant traversant, limites des frontières et animation reproductible.
+- [Fond spectral réel et frontières de la référence 3D — S298](validation/DELTA3D-FOND-REEL-S298.md) : B du cœur échantillonné sur la grille MAC, cas limites 2D reproduits en 3D, et la maille qu’exige une mer étalée.
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

@@ -82,7 +82,8 @@ Le coût 2D est différé selon S293 ; ce lot prépare les entrées réelles de 
 - [x] **P4b** — découpage déclaré : la vérification P4 a trouvé la fixture sous-résolue
   (3,92 mailles par λ la plus courte). Rejouer sur une fixture résolue et comparer, pour
   séparer le bruit de maille de la dispersion physique avant de livrer l’image.
-- [ ] **P5** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
+- [x] **P5** — preuve §5/§6, index, file active, feuille de route.
+- [ ] **P6** — rituel REPRISE §6 : journal, angles morts, jeton libre.
 
 ### Notes de reprise
 
