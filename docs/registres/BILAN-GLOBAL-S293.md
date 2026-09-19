@@ -205,3 +205,10 @@ mesures ; le coût GPU d'un domaine 3D n'est pas mesuré. Le sujet dominant d'un
 approché par ses lignes de code ajoutées, par groupe de fichiers. La
 [liste du projet fini](../LISTE-PROJET-FINI.md) n'est pas modifiée : elle se remplit à la demande
 de l'utilisateur. Une seule machine ; aucune réception nouvelle de physique, de GPU ou de budget.
+
+## Suite — S294, 2026-09-19
+
+Q1 à Q5 tranchées par l'utilisateur ([ADR-174](../adr/ADR-174-arbitrages-du-2026-09-19.md)) ; T3
+décidé ([ADR-175](../adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)) ; lot 1 appliqué —
+déclencheur « A276 avant la 3D » levé, lot pris dans la porte en cours, maillons liés aux critères
+de porte, plafonds des documents d'état contrôlés par l'outil. Porte en cours : B, D en parallèle.

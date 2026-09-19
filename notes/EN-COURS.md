@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S294 — **les arbitrages du 2026-09-19 consignés, l'architecture de δ en 3D décidée**
+Session : S294 — **les arbitrages du 2026-09-19 consignés, l'architecture de δ en 3D décidée** — terminée
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
 Entrée : réponses de l'utilisateur aux questions de BILAN-GLOBAL-S293 §6, 2026-09-19 14:47,
 citées telles qu'écrites dans ADR-174 §1 (résumé : cible = ce poste ; les 2 ms peuvent changer
@@ -86,7 +86,7 @@ solveur dans cette session** : elle prépare la construction de S295, qui visera
   documents d'état, contrôlés par `outils/etat_projet.py`.
 - [x] **P6** — file active ramenée aux plafonds (état, déclencheur, lien).
 - [x] **P7** — états des jalons de la feuille de route ramenés aux plafonds.
-- [ ] **P8** — rituel §6.
+- [x] **P8** — rituel §6.
 
 ### Notes de reprise
 

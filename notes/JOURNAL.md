@@ -14764,3 +14764,47 @@ active (décisions en attente regroupées, A276 contesté, A278, A211, A295, A29
 §3 bis, REPRISE §4, index (ADR-170 à 173 manquants depuis S278, ajoutés : navigation à 0 erreur), deux
 cellules périmées de REVUE-VISUELLE §5. Invariants relus : I-04,
 I-05, I-13 ; aucun amendé. Copie principale seule, rien à fermer.
+
+## S294 — 2026-09-19 — les arbitrages consignés, δ 3D décidé, le pilotage attaché aux portes
+
+**Claude Opus 5 (Claude Code desktop).** Entrée : réponses de l'utilisateur aux questions de
+BILAN-GLOBAL-S293 §6 (citées dans ADR-174 §1). master aa48867. Plan 48499f1 ; étapes 0a8d9a0,
+7572c95, a4e13e6, b73def0, c71720d, b276d69.
+
+**Décisions de l'utilisateur, consignées** ([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md)) :
+machine de référence = ce poste (AERO X16, Ryzen AI 7 350, RTX 5070 Laptop) ; le temps de l'eau sert
+l'objectif — « de l'eau d'un jeu en temps réel, dynamique à son environnement et aux joueurs » — et
+devient un profil de travail : eau ≤ 4 ms GPU et ≤ 2 ms CPU par image, dont **δ ≤ 2 ms GPU**, à
+calibrer par B7 ; v1 = porte D franchie ; aucun dépôt distant ; porte B avant la suite du coût en
+2D ; onde de S277 sans verdict attendu. A296 close : la porte C a un critère atteignable.
+
+**Décision technique** ([ADR-175](../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md), A295) :
+δ en 3D avec deux implémentations — la référence CPU dans le cœur, hors de la boucle d'image, et une
+production résidente sur GPU à travail borné, diagnostics relus en différé, dégradation déclarée ;
+fidélité par couche ; MAC x-y-z à surface fonction-hauteur, le non graphe réservé à une seconde
+représentation. Relire les contrats a montré que c'était le dessin de S01/S04 (ADR-007 §4.1,
+SPEC-004 §4 et §8.4, ADR-012 §7), et que le chemin S289–S291 attendait la carte à chaque pas, contre
+SPEC-004 §8.4 — note datée sur ADR-173. Critères de la porte B posés avant construction (§4).
+
+**Pilotage** : `Session suivante` se prend dans la porte en cours que désigne §3 bis — B, avec D en
+parallèle, dépendances écrites ; pas de troisième session consécutive sur un point sans critère de
+porte avancé ; une capacité compte si elle avance un critère « reçu si » ou un point de la liste.
+Déclencheur « A276 avant la 3D » remplacé (L343). Une première rédaction disait « porte ouverte de
+plus petit rang », ce qui renvoyait à A : corrigée dans la même session.
+
+**Documents d'état** : plafonds de 90 mots par ligne de file et 450 par section de jalon, contrôlés
+par `outils/etat_projet.py --check` (fonction `oversized`, un essai ajouté, 5 essais verts). File
+active réécrite par porte : 5 806 → 3 030 mots ; feuille de route 41,9 → 20,5 ko ; REPRISE §4
+ramené à l'état présent. Navigation 0 erreur, plafonds 0 dépassement.
+
+**Non-fait** : aucun code de solveur ; A294 non exécuté ; la liste du projet fini n'est pas
+recomptée (à la demande de l'utilisateur). Deux battements de jeton écrits avant la lecture de
+l'horloge, corrigés au commit suivant (L237).
+
+**Maillons : 0** — par la clause « décision qui lève un blocage et nomme le lot exécutable » : la
+porte B n'avait ni architecture ni droit de commencer, elle a les deux, et son lot 1 est nommé.
+**S295 doit recevoir un critère de porte**, sinon la clause aura servi à rien.
+
+**Rituel** : A295 décidée, A296 close ; file, feuille de route §2 et §3 bis, REPRISE §4 à §8,
+METHODE, index (ADR-174, 175), REVUE-VISUELLE (onde), note sur BILAN-GLOBAL-S293. Invariants
+relus : I-03, I-04, I-05, I-06, I-08, I-12, I-13, I-14, I-17 ; aucun amendé. Copie unique.

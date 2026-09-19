@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 15:02 +02:00
+JETON            : libre
+Battement        : 2026-09-19 15:01 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : S294 — consigner les arbitrages de l'utilisateur du 2026-09-19, décider l'architecture de δ en 3D, lever les verrous de pilotage
-Dernière session : S293 — audit global : le projet bloque sur l'ordre de ses travaux ; BILAN-GLOBAL-S293
-Session suivante : à fixer au rituel de S294. À défaut : porte B, premier lot — domaine δ tridimensionnel de référence dans le cœur.
-Maillons        : 2 — S292 mesure sans capacité, S293 audit ; la suivante vise une capacité (porte B ou scène-témoin de la v1)
+Session en cours : aucune
+Dernière session : S294 — arbitrages du 2026-09-19 consignés (ADR-174), δ 3D décidé (ADR-175), pilotage par les portes, documents d'état ramenés sous plafond
+Session suivante : porte B, lot 1 — référence δ tridimensionnelle dans le cœur (module nouveau, la 2D intacte), reçue selon ADR-175 §4.1 : `ny = 1` contre les réceptions 2D de S237/S238, invariance en `y` sous une onde à crêtes longues, onde stationnaire oblique contre `ω² = g·k·tanh(k·h)`. Découper en lots d'une session ; la scène-témoin de la porte D peut avancer en parallèle.
+Maillons        : 0 — S294 lève le blocage de la porte B et nomme le lot désormais exécutable (clause « décision qui lève un blocage », REPRISE §6) ; la suivante doit recevoir un critère de porte
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -75,49 +75,35 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S249 : B/W et un afficheur existent ; **filtre lointain B/sillage intégré** (ADR-148,
-[réception et limites](docs/validation/COUPURE-S249.md), impacts non filtrés) ; scène multi-sources dessinée, visibilité au bit, composée
-et admise par le cœur (ADR-142) ; **la boucle d'image de l'hôte n'alloue rien** pour le code du projet,
-la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget de l'hôte est
-`ModalPressure::sample` dans la préparation du sillage — **87 %** de ses 3,1 ms, contre 0,44 ms de
-GPU eau (S242). Le système a désormais un **parallélisme déterministe** (ADR-146), qui vaut **×2,6**
-sur ce poste **hors ligne** ; le chemin d'image reste à un fil tant qu'un vivier persistant n'existe
-pas, ce qui demanderait `unsafe` dans l'hôte (A278). Côté δ, **la carte du coût est faite** (S244) : écritures
-disjointes 67 à 73 % du pas, réductions 12-13 %, itérations doublant par raffinement, et
-**286,2 ms par pas à 32 768 mailles** — 143 fois le budget. Le parallélisme est **fermé** pour cette
-boucle (125 µs par fil contre 21,7 de pass) ; **la multigrille est le seul levier dont le gain croît
-avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)).
-**S289 : la projection passe sur GPU et le pas réel la consomme** (ADR-173) — cycle de gradient
-conjugué résident, le candidat ne fournit qu'un départ, portes ADR-143/144 inchangées et refus
-atomique ; 9,2236 → 6,6220 ms par pas à 6 656 mailles, itérations du cœur 427 → 19
-([preuve](docs/validation/PRESSION-RESIDENTE-S289.md)). **S290 : le coût d'appel divisé, au bit** —
-l'enregistrement des commandes était 52 % de l'appel (1,86 µs par `dispatch_workgroups`), et trois
-dispatchs par itération au lieu de sept ([preuve](docs/validation/ENCODAGE-CYCLE-S290.md)).
-**S291 : le pas décomposé étape par étape et allégé, au bit** — le plus gros poste hors GPU était
-un cycle multigrille **jeté** ; le crochet est porté sur le pas **couplé**, celui que la bande δ
-emprunte réellement, et sa médiane passe de 17,9281 à **8,2729 ms** sur la grille de production
-([preuve](docs/validation/PAS-DECOMPOSE-S291.md)). Reste ×4,1 du budget de 2 ms sur ce chemin.
-Un pas à 467 ms vu en S291 **ne se reproduit pas sur l'appel isolé** (S292) ; le localiser
-demande une exécution de `--pas-couple` (A294). **Audit S293** : l'avancement bloque sur l'ordre
-des travaux — porte B retenue par un déclencheur interne, architecture d'exécution de δ à décider
-avant la 3D (A295), budget sans part pour δ (A296) ; [bilan](docs/registres/BILAN-GLOBAL-S293.md). Les mesures de S289/S290 employaient une horloge figée et
-sous-estiment d'environ 8 %. δ MAC x-z possède une **surface géométriquement mobile** reçue contre
-l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet), **couplée depuis S253 à un fond B/W linéaire** (ADR-152/153), **B de production prolongé au-dessus du plan moyen depuis S254** (ADR-154 ; W : A286) ; sa
-pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
-ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768** par le repli multigrille (ADR-147) suivi, depuis S252, d'un affinage de divergence (ADR-151 ; β du gradient multigrille corrigé, A285) ; plancher
-des lignes à fantôme de surface non borné (A274). V : plans orientés et restauration locale reçus.
-Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
-pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
+État au 2026-09-19 (S294). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
+travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En bref :
+
+- **J1** partiel : B+W sur GPU dans l'hôte séparé, scène multi-sources admise par le cœur, GPU eau
+  1,74 ms, mer jugée par l'utilisateur (R7 accepté) ; manquent le CPU sous 2 ms (A278), un objet
+  pilotable et la seconde cible.
+- **δ reçu en 2D** — surface mobile couplée à B/W contre HOS, frontières, rendu en direct.
+  **Porte B ouverte** : δ en 3D selon [ADR-175](docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md),
+  référence CPU dans le cœur, production résidente sur GPU à travail borné. Rien de 3D construit.
+- **Ordonnanceur** (porte A) : décide qu'un domaine vit et avec quel budget ; ni plusieurs
+  candidats, ni déplacement, ni dégradation automatique.
+- **V** : noyau reçu (C12, géométrie orientée, restauration), sans articulation avec δ.
+- **Solides** : rien dans le système (porte D, scène-témoin de la v1).
+- Dernier audit : [BILAN-GLOBAL-S293](docs/registres/BILAN-GLOBAL-S293.md) — le projet bloquait sur
+  l'ordre de ses propres travaux.
 
 L'inventaire Git se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau).
-Ses nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**.
+Ses nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`
+vérifie la navigation et les plafonds des documents d'état.
 
 ## 5. Ce qui ne se décide pas ici
 
 - Les cinq arbitrages d'[ADR-027](docs/adr/ADR-027-les-cinq-arbitrages-tranches.md) sont tranchés.
-- 2 % pour B4 (ADR-120), 60 Hz / eau 2 ms (ADR-125), hôte GPU séparé (ADR-130) et sources de son
-  verrou déjà autorisées : ne pas redemander ces accords. Un dépassement qualifie l'implémentation
-  et s'éprouve sur la combinaison des techniques (ADR-131).
+- 2 % pour B4 (ADR-120), 60 Hz (ADR-125), hôte GPU séparé (ADR-130) et sources de son verrou
+  déjà autorisées : ne pas redemander ces accords. **Arbitrages du 2026-09-19**
+  ([ADR-174](docs/adr/ADR-174-arbitrages-du-2026-09-19.md)) : machine de référence = ce poste ;
+  temps de l'eau au service de l'objectif, profil de travail eau ≤ 4 ms GPU et ≤ 2 ms CPU, dont δ
+  ≤ 2 ms GPU ; v1 = porte D franchie ; aucun dépôt distant. Un dépassement qualifie
+  l'implémentation et s'éprouve sur la combinaison des techniques (ADR-131).
 - Une réduction d'ambition demande une décision explicite de l'utilisateur (ADR-127).
 - Les faits d'intégration non constatés et les actions d'infrastructure restent distincts des
   décisions techniques : ne pas inventer terrain, format réseau, personnes ou dépôt distant.
