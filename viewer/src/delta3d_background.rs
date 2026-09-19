@@ -27,6 +27,9 @@ pub struct Background3 {
     cells_in: wgpu::Buffer,
     cells_out: wgpu::Buffer,
     cells_read: wgpu::Buffer,
+    query: Option<wgpu::QuerySet>,
+    query_resolve: wgpu::Buffer,
+    query_read: wgpu::Buffer,
     /// Dimensions du domaine déclaré, pour ne pas les redemander à chaque appel.
     declared: Option<water_core::delta3d::Domain3>,
     components: wgpu::Buffer,
@@ -69,8 +72,13 @@ impl Background3 {
             })
             .await
             .map_err(|e| e.to_string())?;
+        let features = adapter.features() & wgpu::Features::TIMESTAMP_QUERY;
         let (device, queue) = adapter
-            .request_device(&wgpu::DeviceDescriptor { label: Some("fond 3d sur carte"), ..Default::default() })
+            .request_device(&wgpu::DeviceDescriptor {
+                label: Some("fond 3d sur carte"),
+                required_features: features,
+                ..Default::default()
+            })
             .await
             .map_err(|e| e.to_string())?;
         let info = adapter.get_info();
@@ -126,6 +134,16 @@ impl Background3 {
             contents: &params,
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
+
+        let query = (!features.is_empty()).then(|| {
+            device.create_query_set(&wgpu::QuerySetDescriptor {
+                label: None,
+                ty: wgpu::QueryType::Timestamp,
+                count: 2,
+            })
+        });
+        let query_resolve = buffer(&device, 16, wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC);
+        let query_read = buffer(&device, 16, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
 
         let entries: Vec<_> = (0..7)
             .map(|binding| wgpu::BindGroupLayoutEntry {
@@ -186,6 +204,9 @@ impl Background3 {
             cells_in,
             cells_out,
             cells_read,
+            query,
+            query_resolve,
+            query_read,
             declared: None,
             components,
             time_phase,
@@ -309,6 +330,62 @@ impl Background3 {
         let rhs = all[2 * columns..2 * columns + cells].to_vec();
         let prec = all[2 * columns + cells..2 * columns + 2 * cells].to_vec();
         Ok((surface, ghost, rhs, prec))
+    }
+
+    /// Faces **et** couplage en une seule passe chronométrée, sans aucune relecture : c'est la
+    /// forme que le pas de production aura, et donc le coût qui compte. Rien ne revient au CPU.
+    pub fn timed_step(&self, perturbation: &[f32], divergence: &[f32]) -> Result<Option<f64>, String> {
+        let domain = self.declared.ok_or("aucun domaine déclaré")?;
+        let (columns, cells) = (domain.columns(), domain.cells());
+        if perturbation.len() != columns || divergence.len() != cells {
+            return Err(format!("attendu {columns} colonnes et {cells} mailles"));
+        }
+        self.queue.write_buffer(&self.cells_in, 0, bytemuck_cast(perturbation));
+        self.queue.write_buffer(&self.cells_in, (columns * 4) as u64, bytemuck_cast(divergence));
+        self.set_probes(self.pending_faces as u32);
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+                label: None,
+                timestamp_writes: self.query.as_ref().map(|q| wgpu::ComputePassTimestampWrites {
+                    query_set: q,
+                    beginning_of_pass_write_index: Some(0),
+                    end_of_pass_write_index: Some(1),
+                }),
+            });
+            pass.set_bind_group(0, &self.bind, &[]);
+            pass.set_pipeline(&self.faces);
+            pass.dispatch_workgroups((self.pending_faces as u32).div_ceil(GROUP), 1, 1);
+            pass.set_pipeline(&self.couple_columns);
+            pass.dispatch_workgroups((columns as u32).div_ceil(GROUP), 1, 1);
+            pass.set_pipeline(&self.couple_rhs);
+            pass.dispatch_workgroups((cells as u32).div_ceil(GROUP), 1, 1);
+        }
+        if let Some(q) = self.query.as_ref() {
+            encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
+            encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
+        }
+        self.queue.submit([encoder.finish()]);
+        if self.query.is_none() {
+            self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+            return Ok(None);
+        }
+        let slice = self.query_read.slice(..);
+        let (tx, rx) = std::sync::mpsc::channel();
+        slice.map_async(wgpu::MapMode::Read, move |r| {
+            let _ = tx.send(r);
+        });
+        self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+        rx.recv().map_err(|e| e.to_string())?.map_err(|e| e.to_string())?;
+        let ms;
+        {
+            let data = slice.get_mapped_range().map_err(|e| e.to_string())?;
+            let a = u64::from_le_bytes(data[..8].try_into().unwrap());
+            let b = u64::from_le_bytes(data[8..16].try_into().unwrap());
+            ms = b.checked_sub(a).map(|d| d as f64 * self.queue.get_timestamp_period() as f64 / 1e6);
+        }
+        self.query_read.unmap();
+        Ok(ms)
     }
 
     /// Nombre total de faces MAC d'un domaine : c'est la taille que `faces` produit.
@@ -893,6 +970,74 @@ pub fn recevoir_couplage() -> Result<(), String> {
         if !refus.iter().all(|r| *r) {
             return Err("un refus attendu n'a pas eu lieu".into());
         }
+        Ok(())
+    })
+}
+
+/// Banc P6 : **coût du fond sur la carte**, contre le chemin CPU qu'il remplace. Le temps de la
+/// carte est celui de la passe — faces et couplage enchaînés, sans aucune relecture, la forme
+/// que le pas de production aura. Le temps CPU est celui de `BackgroundGrid3::sample`, le
+/// chemin par grille de S276 déjà optimisé, mesuré au mur sur ce poste.
+///
+/// Un temps mural ne reçoit aucune performance de production (A270 : l'alimentation n'est pas
+/// relevée ici). Ce qui se lit, c'est un rapport, pas un budget.
+pub fn mesurer_cout_fond() -> Result<(), String> {
+    use water_core::background::SeaState;
+    use water_core::delta3d::{BackgroundGrid3, Domain3};
+    use water_core::host::HostServices;
+    use water_core::{WorldPos, SimTime};
+    use crate::scene::host_impl;
+
+    pollster::block_on(async {
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let passages = 20;
+        for (nx, ny, nz) in [(24, 24, 16), (32, 32, 32), (48, 48, 24)] {
+            let domain = Domain3 { nx, ny, nz, dx: 0.25 };
+            let (columns, cells) = (domain.columns(), domain.cells());
+            let rest = (nz as f32 - 5.) * domain.dx;
+            let origin = [-(nx as f32) * domain.dx / 2., -(ny as f32) * domain.dx / 2., -rest];
+            let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 28);
+            let background = Background::configure(
+                &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+                SeaState { hs: 0.35, tp: 3.2, theta_turns: 0.11, components: 64, graine: 301 },
+                WorldPos::from_units(0, 0, 0),
+            ).map_err(|e| format!("fond {e:?}"))?;
+
+            let total = Background3::face_count(domain);
+            let mut carte = Background3::new(&background, total).await?;
+            carte.set_domain(domain, origin)?;
+            carte.set_coupling(rest, 9.81, 1.)?;
+            let perturbation = vec![rest; columns];
+            let divergence = vec![0.5f32; cells];
+
+            let mut grille = BackgroundGrid3::configure(
+                &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+                domain, origin, 1025.,
+            ).map_err(|e| format!("grille {e:?}"))?;
+
+            let (mut gpu, mut cpu) = (Vec::new(), Vec::new());
+            for tour in 0..passages {
+                let time = SimTime(tour as u64 * 5_000);
+                carte.publish_time(&background, time)?;
+                if let Some(ms) = carte.timed_step(&perturbation, &divergence)? {
+                    if tour > 0 { gpu.push(ms); }
+                }
+                let debut = std::time::Instant::now();
+                grille.sample(&background, time).map_err(|e| format!("grille {e:?}"))?;
+                let ms = debut.elapsed().as_secs_f64() * 1e3;
+                if tour > 0 { cpu.push(ms); }
+            }
+            let mediane = |v: &mut Vec<f64>| {
+                v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+                v.get(v.len() / 2).copied().unwrap_or(f64::NAN)
+            };
+            let (g, c) = (mediane(&mut gpu), mediane(&mut cpu));
+            println!(
+                "DELTA3D_COUT_FOND_S300 carte={:?} nx={nx} ny={ny} nz={nz} faces={total} mailles={cells} composantes=64 passages={} gpu_mediane_ms={g:.6} cpu_mediane_ms={c:.6} rapport={:.1}",
+                carte.adapter, gpu.len(), c / g
+            );
+        }
+        println!("DELTA3D_COUT_FOND_S300 la passe de la carte porte faces ET couplage ; le CPU ne porte que l'echantillonnage des faces");
         Ok(())
     })
 }

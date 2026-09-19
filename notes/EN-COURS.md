@@ -90,8 +90,8 @@ Critères avant code, posés ici :
 - [x] **P5a** — **découpage déclaré** : les trois familles de faces MAC échantillonnées sur
   la carte, reçues contre `BackgroundGrid3` du cœur.
 - [x] **P5b** — fantômes couplés et second membre assemblés sur la carte depuis ces faces.
-- [>] **P6** — coût du fond sur la carte, comparé au chemin CPU de S276/S298.
-- [ ] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
+- [x] **P6** — coût du fond sur la carte, comparé au chemin CPU de S276/S298.
+- [>] **P7** — preuve et rituel REPRISE §6 : file, feuille de route, index, journal, jeton libre.
 
 ### Notes de reprise
 
@@ -171,3 +171,18 @@ membre s'écarte de plus de 10⁻³ de l'échelle. Un arrondi ne peut pas produi
 **mouillure classée autrement** des deux côtés, si. Ici **zéro** aux trois instants, mais le
 risque existe dès qu'une surface totale passe à un ulp d'un centre de maille : garder ce
 compteur dans tout banc qui compare des géométries, il est le seul à voir la bascule.
+
+P6 mesuré (`--delta3d-cout-fond`, 64 composantes, 20 passages, premier écarté) :
+24×24×16 — carte 0,099520 ms contre CPU 27,6712 ms, **×278** ;
+32³ — 0,179552 contre 92,8762 ms, **×517** ;
+48×48×24 — 0,273856 contre 148,044 ms, **×541**.
+Et la passe de la carte porte **faces + couplage**, là où le CPU ne porte que les faces :
+le rapport est donc une borne basse.
+
+Ce que ça tranche : échantillonner le fond sur CPU à l'échelle 3D coûte **93 à 148 ms par pas**.
+Ce n'est pas lent, c'est impossible — le budget entier de δ est de 2 ms (ADR-174 D3). Le choix
+d'ADR-175 D1 de publier les paramètres plutôt que les échantillons n'était pas une préférence
+d'architecture : c'était la seule voie, et on a maintenant le chiffre qui le dit.
+Avec la projection de S299 (0,31 ms à 32³, 32 cycles), les deux postes font ≈ 0,5 ms — mais
+le pas reste incomplet, donc aucun budget n'est reçu.
+Temps muraux, tâches concurrentes, alimentation non relevée : A270 due sur ce banc.
