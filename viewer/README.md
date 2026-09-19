@@ -71,6 +71,14 @@ pression sur la carte, comparés au CPU sur six géométries. Précision, transf
 et allocations sont publiés. **Ce banc ne remplace pas encore le solveur de l'afficheur.**
 [Réception et limites S288](../docs/validation/PRESSION-GPU-S288.md).
 
+`--pression-cg` exécute le **cycle résident** de S289 — gradient conjugué dont opérateur,
+réductions, `α` et `β` vivent sur la carte — et le compare à un miroir CPU du même cycle,
+avec le vrai résidu arbitré en `f64`. `--pression-pas` fait consommer ce cycle par le **pas
+réel** du cœur (ADR-173) et publie témoin, gain, itérations du cœur, propositions retenues et
+refusées, décomposition du coût d'appel et dérive de surface. Les portes d'acceptation restent
+au cœur ; ni le budget de 2 ms ni I-06 du chemin d'image ne sont reçus.
+[Réception et limites S289](../docs/validation/PRESSION-RESIDENTE-S289.md).
+
 ```powershell
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --verify
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --smoke

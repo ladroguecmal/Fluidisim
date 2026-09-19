@@ -14460,3 +14460,70 @@ justification explicite : ne pas déclarer cette projection intégrée avant pre
 **Rituel :** file active entièrement relue, état courant remplacé, feuille/index et A276
 actualisés, ADR nouveau indexé ; I-04/I-05/I-06/I-13/I-17 préservés (aucun état δ persisté).
 Plan terminé, jeton libre, copie principale unique et aucune fermeture nécessaire.
+
+## S289 — 2026-09-19 — le pas réel consomme une pression calculée sur GPU
+
+**Entrée :** reprendre le projet ; suite A276 déclarée par S288 — solveur résident, réductions
+et cycle, acceptation/refus CPU, puis consommation par le pas réel.
+
+**Ce qui devient possible.** Le coût de la projection de δ ne croît plus avec le nombre
+d'itérations que le CPU doit payer. **Le chemin qui le consomme** est le pas mobile réel,
+`step_surface_mobile_with` — le même que pilote la bande δ de l'afficheur. **La preuve** :
+[PRESSION-RESIDENTE-S289](../docs/validation/PRESSION-RESIDENTE-S289.md). À 6 656 mailles,
+médiane du pas 9,2236 → 6,6220 ms et itérations du cœur 427 → 19 sur 60 pas ; à 32 768,
+44,8697 → 30,2744 et 353 → 61. Gain ×1,39 à ×1,50.
+
+**Décision structurante — [ADR-173](../docs/adr/ADR-173-le-candidat-de-pression-ne-fournit-qu-un-depart.md).**
+Un candidat externe ne fournit **qu'un départ**. Le cœur recalcule `b − A·p` avec son opérateur
+et garde ADR-143/144 inchangés ; un candidat non fini, mal formé ou déclinant est refusé
+atomiquement, départ restauré au bit. Pourquoi ce découpage et pas une délégation : les trois
+portes du cœur demandent chacune un rapatriement par test, soit exactement ce qu'un solveur
+résident existe pour supprimer — et un candidat faux devient alors inutile, jamais dangereux.
+C'est ce qui permet d'activer un solveur GPU sans réception physique du GPU.
+
+**Construit.** Cœur : `PressureCandidate`/`PressureProblem`/`ExternalPressure`,
+`project_with`, `step_surface_mobile_with` ; `None` reproduit le pas historique au bit. Hôte :
+`pressure_cg.wgsl` et `pressure_solver.rs` — gradient conjugué préconditionné dont opérateur,
+réductions d'arbre, `α` et `β` vivent sur la carte, aucun retour CPU entre itérations.
+
+**Reçu.** Réductions contre le CPU ≤ 2e-7 en relatif (critère 1e-5) ; convergence identique au
+miroir CPU du même cycle, rapport des vrais résidus (arbitrés en f64) 1,0000 à 8 et 32
+itérations, 0,964 à 1,094 partout ; repos exact ; 60/60 propositions retenues, 0 refus, 0 pas
+dégradé, dérive de surface 0 à 7,63e-6 m — huit cas sur douze au bit. 508 essais cœur/harnais
+et 36 viewer réussis, 21 et 1 ignorés, 0 échec ; deux bancs GPU exécutés explicitement.
+
+**Chiffres qui ont orienté la suite.** L'appel du candidat coûte 4,1989 ms à 6 656 mailles dont
+**0,2606 d'empaquetage et 3,9333 d'encodage-soumission-attente**, pour 1,150 ms de calcul réel :
+27 % de temps utile. Le poste dominant est **l'enregistrement des commandes** — 7 dispatchs par
+itération, 896 à 128 — et c'est la même cause que les allocations (82 à 0 itération, ≈ 7 par
+itération, 990 à 128), toutes dans l'encodage de la pile graphique.
+
+**Non-fait, limites.** Budget eau de 2 ms non reçu (6,62 ms, ×3,3). I-06 du chemin d'image non
+reçu : le cycle alloue, ADR-145 ne l'admet pas — le pas le consomme, la boucle d'image non.
+Le pire pas ne suit pas la médiane : il baisse à 32 768 mailles, il monte légèrement à 6 656,
+dans la variance. La longueur du cycle est un réglage non calibré et non automatique : 32 et
+256 itérations perdent tous deux à 6 656 mailles, seul 128 gagne. Préconditionneur Jacobi
+seulement : S244 tient toujours que la multigrille est le seul levier dont le gain croît avec
+la taille. Une seule carte, un seul backend. Ni 3D, ni solides, ni A290, ni famine.
+
+**Impasse mesurée, à ne pas refaire.** Retirer le second aller-retour de cartographie
+(horodatage GPU) ne donne aucun gain mesurable : 4,31 → 4,18 ms à 6 656 mailles mais
+7,42 → 8,09 à 32 768, dans la variance.
+
+**Découpage corrigé en cours de route.** L'étape « exporter le second membre et l'inverse de la
+diagonale » annoncée au plan n'existe pas : le crochet passe `rhs` au candidat, et l'inverse de
+la diagonale se déduit exactement des lignes déjà exportées par S288. Une étape de moins au
+plan, aucune de moins faite. Une mesure d'allocations fautive — le compteur ne suivait que
+`propose`, pas `solve` — a été corrigée **avant** publication, pas après.
+
+**Prochaine capacité visée.** Faire tenir le cycle dans peu de dispatchs, ou l'enregistrer une
+fois : c'est le même geste qui lève les allocations d'ADR-145 et les 73 % de temps perdu. Le
+plafond de ce levier est ≈ ×3 sur l'appel. Ensuite seulement, la comparaison avec la 3D et les
+solides se rejoue sur un coût de projection à jour.
+
+**Maillons : remis à zéro.** Une capacité est reçue, son chemin la consomme, sa preuve existe.
+
+**Rituel :** file active entièrement relue, états périmés remplacés, feuille de route et index
+actualisés, ADR-173 indexé, ADR-172 laissé intact (sa suite est ADR-173, pas une correction).
+I-04/I-05/I-06/I-13/I-17 : aucun état δ persisté, aucune porte déplacée, I-06 explicitement
+non revendiquée. Plan terminé, jeton libre, copie principale unique, aucune fermeture requise.

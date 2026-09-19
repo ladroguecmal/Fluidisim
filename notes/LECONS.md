@@ -5715,3 +5715,46 @@ absorbée** — vivante, estimation honnête, servable dès que le budget le per
 leçon est celle-là : **l'antidote d'une boucle absorbante est l'oubli**. Une mesure qu'on ne peut
 plus rafraîchir doit se périmer, faute de quoi elle devient un jugement définitif rendu sur une
 seule observation.
+
+## L337 — Déplacer un calcul sur un accélérateur, jamais le critère qui le reçoit
+
+*(S289)* Pour faire calculer la pression de δ sur GPU, la pente naturelle était d'y mettre le
+solveur **entier**, critère d'arrêt compris. C'était impossible sans perdre l'essentiel : les
+trois portes du cœur — tolérance physique sur le champ corrigé, plancher d'arrondi composante
+par composante, empreinte au bit pour détecter un cycle — demandent chacune un rapatriement
+**par test**, soit exactement ce qu'un solveur résident existe pour supprimer. Les porter sur la
+carte aurait coûté ce que le déplacement faisait gagner, **et** aurait mis la réception physique
+du système sous la dépendance d'un pilote graphique.
+
+Le bon découpage se lit dans les ordres de grandeur, et il est presque toujours le même :
+l'approximation coûte `O(n)` **par itération**, la vérification coûte `O(n)` **une fois**. Le
+calcul part ; le critère reste. L'accélérateur propose, l'autorité dispose.
+
+La propriété qui compte n'est cependant pas la vitesse. C'est que **le résultat faux devient
+inutile au lieu d'être dangereux** : une mauvaise proposition ne peut coûter que des itérations.
+C'est ce qui a permis d'activer un chemin GPU dans le pas réel sans avoir reçu physiquement le
+GPU, sans exiger d'identité entre cartes, et en gardant le refus atomique — départ restauré au
+bit sur une valeur non finie.
+
+**Réflexe** : devant un calcul à déporter — accélérateur, cache, approximation, modèle appris,
+service externe —, séparer d'abord *ce qui cherche* de *ce qui constate*, et compter le coût de
+constater. S'il est d'un ordre inférieur, il ne part pas. Même famille que L328 : un composant
+numérique s'éprouve dans le solveur qui l'emploie, contre le vrai résidu — ici c'est le solveur
+qui **reste** l'épreuve, à demeure et en production.
+
+## L338 — Le poste dominant d'un appel accéléré peut n'être aucun des deux qu'on soupçonne
+
+*(S289)* Les deux suspects d'un appel GPU sont le calcul et les transferts. Mesuré, l'appel du
+cycle résident coûte 4,1989 ms à 6 656 mailles : 0,2606 d'empaquetage, 1,150 de calcul réel sur
+la carte — et **3,9333 d'encodage, soumission et attente**. Ni l'un ni l'autre des suspects :
+27 % de temps utile, et le reste dans la *description* du travail, parce que le cycle émettait
+sept commandes par itération, 896 en tout. La même cause produisait les allocations qui
+interdisent le chemin d'image — sept par itération, dans l'encodage de la pile graphique, pas
+dans notre code.
+
+Optimiser le noyau aurait été le geste évident et n'aurait presque rien rendu : le plafond est
+27 %. Le lot utile est de dire le travail en moins de commandes.
+
+**Réflexe** : décomposer le temps d'un appel déporté en *préparer / décrire / exécuter / attendre*
+**avant** de toucher au noyau, et publier les quatre. Un banc qui ne rend qu'un total ne peut pas
+désigner le lot suivant — et il laisse optimiser la part qu'on voit au lieu de celle qui coûte.

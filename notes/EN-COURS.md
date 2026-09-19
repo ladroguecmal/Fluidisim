@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S289 — en cours
+Session : S289 — terminée
 Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
 Entrée : reprendre le projet ; suite A276 déclarée par S288.
 Objectif : un solveur de pression **résident** GPU — réductions et cycle sans retour CPU par
@@ -77,7 +77,7 @@ itération — que le **pas réel** consomme sous les portes d'acceptation incha
   la carte, aucun retour CPU entre itérations ; réception contre le CG du cœur.
 - [x] **P4** — consommation par le **pas réel** : candidat GPU proposé au pas mobile, itérations
   restantes, acceptations/refus et coût mesurés contre le chemin CPU seul.
-- [ ] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
+- [x] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
 ### Notes de reprise
 

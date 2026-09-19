@@ -347,10 +347,18 @@ fidélité ni I-05 ; priorité au coût par pas avant 3D. [Preuve](validation/CA
 des six trajectoires identiques ([mesures](validation/PASSES-PRESSION-S287.md)).
 **S288 : opérateur mobile et lissage GPU construits**, contrat ADR-172, export natif reçu au
 bit et 30 cas GPU contre CPU (erreur relative max 1,686·10⁻⁷, repos exact). À 128×52,
-32 lissages : 1,10–1,24 ms complets contre 2,52–2,84 ms CPU scalaire. **Pas encore un solveur
-de pression ni une accélération de l'afficheur** ; allocations pile/banc et pics persistent.
-Prochain lot : réductions/cycle et acceptation, puis intégration au pas réel.
+32 lissages : 1,10–1,24 ms complets contre 2,52–2,84 ms CPU scalaire.
 [Réception et limites](validation/PRESSION-GPU-S288.md).
+**S289, 2026-09-19 : le pas réel consomme une pression calculée sur GPU** (ADR-173). Cycle de
+gradient conjugué **résident** — opérateur, réductions, `α` et `β` sur la carte, aucun retour
+CPU entre itérations ; le candidat ne fournit **qu'un départ** et les portes ADR-143/144 ne
+bougent pas. Médiane du pas 9,2236 → 6,6220 ms à 6 656 mailles (itérations du cœur 427 → 19)
+et 44,8697 → 30,2744 à 32 768 (353 → 61) ; 60/60 propositions retenues, 0 refus, 0 pas dégradé,
+dérive de surface ≤ 7,63·10⁻⁶ m. **Non reçu** : budget 2 ms (×3,3), I-06 du chemin d'image — le
+cycle alloue ≈ 7 fois par itération dans l'encodage —, garantie sur le pic, réglage automatique
+de la longueur du cycle, multiplateforme. Le poste dominant restant est **l'enregistrement des
+commandes** : 27 % du temps d'appel est du calcul utile.
+[Réception et limites](validation/PRESSION-RESIDENTE-S289.md).
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation et de prédiction), **B9** (écume),
 **B11** (rendu sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.

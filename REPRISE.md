@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-19 11:49 +02:00
+JETON            : libre
+Battement        : 2026-09-19 14:32 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : S289 — solveur de pression résident GPU et consommation par le pas réel (A276)
-Dernière session : S288 — opérateur mobile et lissages GPU reçus au banc, ADR-172 ; solveur intégré encore absent
-Session suivante : —
-Maillons        : 2 — noyaux consommés au banc, pas encore de gain de jeu ; prochaine capacité visée : projection GPU intégrable
+Session en cours : —
+Dernière session : S289 — pas réel consommant une pression GPU résidente, ADR-173 ; coût d'appel du cycle encore dominant
+Session suivante : A292, réduire le coût d'appel du cycle résident — moins de dispatchs par itération, ou cycle enregistré une fois. Un seul lot lève les 73 % de temps perdu **et** les allocations qu'ADR-145 interdit à la boucle d'image. Ensuite seulement, rejouer la comparaison 3D/solides sur un coût de projection à jour. Longueur du cycle à calibrer dans le même lot. Cadence lente, A290, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Maillons        : 0 — capacité reçue en S289 : la projection de δ est calculée sur GPU et consommée par le pas réel, portes inchangées ; prochaine capacité visée : cycle activable dans la boucle d'image
 
 ```
 
@@ -87,7 +87,12 @@ pas, ce qui demanderait `unsafe` dans l'hôte (A278). Côté δ, **la carte du c
 disjointes 67 à 73 % du pas, réductions 12-13 %, itérations doublant par raffinement, et
 **286,2 ms par pas à 32 768 mailles** — 143 fois le budget. Le parallélisme est **fermé** pour cette
 boucle (125 µs par fil contre 21,7 de pass) ; **la multigrille est le seul levier dont le gain croît
-avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
+avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)).
+**S289 : la projection passe sur GPU et le pas réel la consomme** (ADR-173) — cycle de gradient
+conjugué résident, le candidat ne fournit qu'un départ, portes ADR-143/144 inchangées et refus
+atomique ; 9,2236 → 6,6220 ms par pas à 6 656 mailles, itérations du cœur 427 → 19
+([preuve](docs/validation/PRESSION-RESIDENTE-S289.md)). Toujours ×3,3 du budget de 2 ms ; I-06 du
+chemin d'image non reçue, le poste restant est le coût d'appel du cycle (A292). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet), **couplée depuis S253 à un fond B/W linéaire** (ADR-152/153), **B de production prolongé au-dessus du plan moyen depuis S254** (ADR-154 ; W : A286) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
 ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768** par le repli multigrille (ADR-147) suivi, depuis S252, d'un affinage de divergence (ADR-151 ; β du gradient multigrille corrigé, A285) ; plancher
