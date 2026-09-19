@@ -205,3 +205,26 @@ fn predict(@builtin(global_invocation_id) id: vec3<u32>) {
     }
     vel[s.faces + slot] = value;
 }
+
+// ── Divergence des vitesses prédites, entrée du second membre couplé (S300) ─────────────────
+
+fn cells() -> u32 { return s.nx * s.ny * s.nz; }
+fn columns() -> u32 { return s.nx * s.ny; }
+
+@compute @workgroup_size(64)
+fn divergence(@builtin(global_invocation_id) id: vec3<u32>) {
+    let c = id.x;
+    if (c >= cells()) { return; }
+    let plane = columns();
+    let i = c % s.nx;
+    let j = (c / s.nx) % s.ny;
+    let k = c / plane;
+    let o = s.faces;
+    let fl = vel[o + fu(i, j, k)];
+    let fr = vel[o + fu(i + 1u, j, k)];
+    let ff = vel[o + fv(i, j, k)];
+    let fk = vel[o + fv(i, j + 1u, k)];
+    let fb = vel[o + fw(i, j, k)];
+    let ft = vel[o + fw(i, j, k + 1u)];
+    cells_in[plane + c] = ((fr - fl + ft - fb) + (fk - ff)) / s.dx;
+}

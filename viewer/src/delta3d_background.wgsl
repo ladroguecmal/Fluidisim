@@ -583,8 +583,11 @@ fn couple_rhs(@builtin(global_invocation_id) id: vec3<u32>) {
     } else {
         let a = 1.0 / max((h - zc) / params.dx, params.theta_min);
         diag = diag + a;
-        // `eta[c] − repos` porte la perturbation seule ; le fond arrive par `ghost_up`.
-        let value = params.rho * params.g_eff * (cells_in[col] - params.rest)
+        // `eta[c] − repos` porte la perturbation seule ; le fond arrive par `ghost_up`. Le reste
+        // de la somme compensée (S233) suit les mailles dans `cells_in` : nul tant que la surface
+        // n'a pas avancé — les bancs de S300 ne l'écrivent pas —, porté par le pas depuis S301.
+        let roundoff = cells_in[plane + cells() + col];
+        let value = params.rho * params.g_eff * ((cells_in[col] - params.rest) - roundoff)
             + cells_out[plane + col];
         b = b + value * a * inv;
     }

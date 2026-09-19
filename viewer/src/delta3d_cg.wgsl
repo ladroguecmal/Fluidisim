@@ -229,6 +229,39 @@ fn init(@builtin(global_invocation_id) id: vec3<u32>,
     fold_at(0u, contribution, lid, wid.x);
 }
 
+/// S301 — **départ chaud** : `x` garde la pression du pas précédent, comme la référence
+/// (`project_mobile3` ne remet à zéro que les mailles sèches). `r = b − A·x`, puis direction
+/// préconditionnée et `⟨r, M r⟩` replié. Une maille sèche n'est lue par aucun voisin mouillé,
+/// donc la remettre à zéro dans la même passe ne crée aucune course.
+@compute @workgroup_size(64)
+fn init_warm(@builtin(global_invocation_id) id: vec3<u32>,
+             @builtin(local_invocation_index) lid: u32,
+             @builtin(workgroup_id) wid: vec3<u32>) {
+    let c = id.x;
+    var contribution = 0.0;
+    if (c < params.cells) {
+        let plane = params.nx * params.ny;
+        let i = c % params.nx;
+        let j = (c / params.nx) % params.ny;
+        let k = c / plane;
+        if ((f32(k) + 0.5) * params.dx >= height(i, j)) {
+            state[at(X, c)] = 0.0;
+            state[at(R, c)] = 0.0;
+            state[at(Z, c)] = 0.0;
+            state[at(D, c)] = 0.0;
+        } else {
+            let r = state[at(B, c)] - stencil3(X, c).x;
+            let z = state[at(M, c)] * r;
+            state[at(R, c)] = r;
+            state[at(Z, c)] = z;
+            state[at(D, c)] = z;
+            contribution = r * z;
+        }
+        state[at(Q, c)] = 0.0;
+    }
+    fold_at(0u, contribution, lid, wid.x);
+}
+
 @compute @workgroup_size(64)
 fn finish_rz(@builtin(local_invocation_index) lid: u32) {
     let v = gather_at(0u, lid);

@@ -19,11 +19,27 @@ use wgpu::util::DeviceExt;
 
 /// Noyaux de `delta3d_cg.wgsl` employés par le pas, dans l'ordre de ce tableau.
 const CG: [&str; 11] = [
-    "init", "finish_rz", "apply_fold", "finish_dq", "update", "finish_beta", "direction",
+    "init_warm", "finish_rz", "apply_fold", "finish_dq", "update", "finish_beta", "direction",
     "residual_fold", "finish_residual", "bnorm_fold", "finish_bnorm",
 ];
+const CG_INIT_WARM: usize = 0;
+const CG_FINISH_RZ: usize = 1;
+const CG_CYCLE: [usize; 5] = [2, 3, 4, 5, 6];
+const CG_RESIDUAL: [usize; 2] = [7, 8];
+const CG_BNORM: [usize; 2] = [9, 10];
 /// Noyaux de `delta3d_step.wgsl`.
-const STEP: [&str; 1] = ["predict"];
+const STEP: [&str; 2] = ["predict", "divergence"];
+const PREDICT: usize = 0;
+const DIVERGENCE: usize = 1;
+/// Noyaux de `delta3d_background.wgsl`.
+const BG: [&str; 3] = ["sample_faces", "couple_columns", "couple_rhs"];
+
+/// Jusqu'où encoder le pas — les bancs s'arrêtent à un étage pour le juger seul.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub enum Upto {
+    Prediction,
+    Projection,
+}
 
 pub struct Step3 {
     device: wgpu::Device,
@@ -36,12 +52,13 @@ pub struct Step3 {
     bg_uniform: wgpu::Buffer,
     time_phase: wgpu::Buffer,
     cells_in: wgpu::Buffer,
-    sample_faces: wgpu::ComputePipeline,
+    cells_out: wgpu::Buffer,
+    bg: Vec<wgpu::ComputePipeline>,
     // Projection (S299).
-    #[allow(dead_code)]
     cg_bind: wgpu::BindGroup,
+    heights: wgpu::Buffer,
     state: wgpu::Buffer,
-    #[allow(dead_code)]
+    scalar: wgpu::Buffer,
     cg: Vec<wgpu::ComputePipeline>,
     // Étages du pas (S301).
     step_bind: wgpu::BindGroup,
@@ -214,8 +231,7 @@ impl Step3 {
             &[&components, &time_phase, &points, &faces_buf, &bg_uniform, &cells_in, &cells_out],
         );
         let bg_module = device.create_shader_module(wgpu::include_wgsl!("delta3d_background.wgsl"));
-        let mut bg_pipes = pipelines(&device, &bg_layout, &bg_module, &["sample_faces", "couple_columns", "couple_rhs"]);
-        let sample_faces = bg_pipes.remove(0);
+        let bg = pipelines(&device, &bg_layout, &bg_module, &BG);
 
         // ── Projection : mêmes tranches que `Projection3` (S299). ──
         let groups = (cells as u32).div_ceil(GROUP);
@@ -278,9 +294,12 @@ impl Step3 {
             bg_uniform,
             time_phase,
             cells_in,
-            sample_faces,
+            cells_out,
+            bg,
             cg_bind,
+            heights,
             state,
+            scalar,
             cg,
             step_bind,
             step_uniform,
@@ -400,6 +419,97 @@ impl Step3 {
         (self.face_total as u32).div_ceil(GROUP)
     }
 
+    /// Nombre de dispatchs du pas jusqu'à `upto`, pour `cycles` cycles de projection. Il ne
+    /// dépend que du profil, jamais de la donnée (ADR-175 D2).
+    pub fn dispatches(cycles: u32, upto: Upto) -> u32 {
+        let prediction = 2;
+        if upto == Upto::Prediction {
+            return prediction;
+        }
+        // divergence, colonnes, second membre ; ‖b‖ ; départ ; cycles ; vrai résidu.
+        prediction + 3 + 2 + 2 + 5 * cycles + 2
+    }
+
+    /// Enregistre le pas jusqu'à `upto`. Aucune lecture, aucune décision CPU entre deux
+    /// dispatchs : les passages d'un étage à l'autre sont des copies **sur la carte**.
+    pub fn encode(&self, encoder: &mut wgpu::CommandEncoder, cycles: u32, upto: Upto) {
+        let (faces, cells, columns) = (
+            self.face_groups(),
+            (self.cells as u32).div_ceil(GROUP),
+            (self.columns as u32).div_ceil(GROUP),
+        );
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            pass.set_bind_group(0, &self.bg_bind, &[]);
+            pass.set_pipeline(&self.bg[0]);
+            pass.dispatch_workgroups(faces, 1, 1);
+            pass.set_bind_group(0, &self.step_bind, &[]);
+            pass.set_pipeline(&self.step[PREDICT]);
+            pass.dispatch_workgroups(faces, 1, 1);
+            if upto == Upto::Prediction {
+                return;
+            }
+            pass.set_pipeline(&self.step[DIVERGENCE]);
+            pass.dispatch_workgroups(cells, 1, 1);
+            pass.set_bind_group(0, &self.bg_bind, &[]);
+            pass.set_pipeline(&self.bg[1]);
+            pass.dispatch_workgroups(columns, 1, 1);
+            pass.set_pipeline(&self.bg[2]);
+            pass.dispatch_workgroups(cells, 1, 1);
+        }
+        // Surface totale → géométrie de l'opérateur ; second membre et préconditionneur couplés
+        // → tranches B et M de la projection.
+        let (col_bytes, cell_bytes) = ((self.columns * 4) as u64, (self.cells * 4) as u64);
+        encoder.copy_buffer_to_buffer(&self.cells_out, 0, &self.heights, 0, col_bytes);
+        encoder.copy_buffer_to_buffer(&self.cells_out, 2 * col_bytes, &self.state, 6 * cell_bytes, cell_bytes);
+        encoder.copy_buffer_to_buffer(&self.cells_out, 2 * col_bytes + cell_bytes, &self.state, 5 * cell_bytes, cell_bytes);
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            pass.set_bind_group(0, &self.cg_bind, &[]);
+            let mut run = |index: usize, groups: u32| {
+                pass.set_pipeline(&self.cg[index]);
+                pass.dispatch_workgroups(groups, 1, 1);
+            };
+            run(CG_BNORM[0], cells);
+            run(CG_BNORM[1], 1);
+            run(CG_INIT_WARM, cells);
+            run(CG_FINISH_RZ, 1);
+            for _ in 0..cycles {
+                for (n, index) in CG_CYCLE.iter().enumerate() {
+                    run(*index, if n % 2 == 1 { 1 } else { cells });
+                }
+            }
+            run(CG_RESIDUAL[0], cells);
+            run(CG_RESIDUAL[1], 1);
+        }
+    }
+
+    /// **Banc** : exécute le pas jusqu'à `upto` et attend la carte.
+    fn run_for_bench(&self, cycles: u32, upto: Upto) -> Result<(), String> {
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        self.encode(&mut encoder, cycles, upto);
+        self.queue.submit([encoder.finish()]);
+        self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+    /// **Banc** : vitesses prédites `[us | vs | ws]`.
+    pub fn predicted(&self) -> Result<Vec<f32>, String> {
+        self.relire(&self.vel, self.face_total, self.face_total)
+    }
+
+    /// **Banc** : pression (tranche X de la projection).
+    pub fn pressure(&self) -> Result<Vec<f32>, String> {
+        self.relire(&self.state, 0, self.cells)
+    }
+
+    /// **Banc** : `(‖b − A·x‖, ‖b‖)` tels que la carte les a rangés en fin de projection. En
+    /// production ces deux nombres se liront en différé (ADR-175 D3) ; ici, tout de suite.
+    pub fn residual(&self) -> Result<(f32, f32), String> {
+        let s = self.relire(&self.scalar, 0, 8)?;
+        Ok((s[1].max(0.).sqrt(), s[4].max(0.).sqrt()))
+    }
+
     /// Relecture de banc : `count` flottants de `src` à partir de `offset` flottants.
     fn relire(&self, src: &wgpu::Buffer, offset: usize, count: usize) -> Result<Vec<f32>, String> {
         let span = (count * 4) as u64;
@@ -426,18 +536,8 @@ impl Step3 {
 
     /// **Banc P2** : échantillonne le fond aux faces puis prédit ; rend `[us | vs | ws]`.
     pub fn predict_for_bench(&self) -> Result<Vec<f32>, String> {
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-        {
-            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
-            pass.set_bind_group(0, &self.bg_bind, &[]);
-            pass.set_pipeline(&self.sample_faces);
-            pass.dispatch_workgroups(self.face_groups(), 1, 1);
-            pass.set_bind_group(0, &self.step_bind, &[]);
-            pass.set_pipeline(&self.step[0]);
-            pass.dispatch_workgroups(self.face_groups(), 1, 1);
-        }
-        self.queue.submit([encoder.finish()]);
-        self.relire(&self.vel, self.face_total, self.face_total)
+        self.run_for_bench(0, Upto::Prediction)?;
+        self.predicted()
     }
 }
 
@@ -577,6 +677,95 @@ pub fn recevoir_prediction() -> Result<(), String> {
         );
         if !refus.iter().all(|r| *r) {
             return Err("un refus attendu n'a pas eu lieu".into());
+        }
+        Ok(())
+    })
+}
+
+/// Banc P3a : **réception de la pression** d'un pas couplé. Le cœur fait un pas complet
+/// (`step_perturbation_mobile`, projection jusqu'à ses propres critères, affinage compris) ; la
+/// carte enchaîne prédiction, divergence, second membre couplé et `cycles` cycles de projection
+/// à départ chaud — ici depuis `p = 0`, comme le cœur au premier pas. On compare les pressions
+/// sur les mailles mouillées, pour plusieurs nombres de cycles : c'est la courbe qui dit combien
+/// de travail borné (ADR-175 D2) il faut pour rejoindre la référence.
+pub fn recevoir_pression() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::{BackgroundGrid3, BackgroundFaces3, Volume3};
+    use water_core::host::HostServices;
+
+    pollster::block_on(async {
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 27);
+        let Fixture { background, domain, origin, rest, eta } = fixture(&mut alloc)?;
+        let (rho, g) = (1025_f32, 9.81_f32);
+        let sponge = Sponge3 { width_x: 1.0, width_y: 0.75, rate_per_s: 2.0 };
+        let duration = 5_000u64;
+        let total = face_total(domain);
+        let (nu, nv) = ((domain.nx + 1) * domain.ny * domain.nz, domain.nx * (domain.ny + 1) * domain.nz);
+        let champ = |n: usize, graine: f32| -> Vec<f32> {
+            (0..n).map(|f| 0.2 * ((f as f32 * 0.37 + graine).sin() + 0.5 * (f as f32 * 0.113).cos())).collect()
+        };
+
+        let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+        carte.set_step(duration, rest, sponge)?;
+        println!(
+            "DELTA3D_PRESSION_S301 carte={:?} backend={} nx={} ny={} nz={} mailles={}",
+            carte.adapter, carte.backend, domain.nx, domain.ny, domain.nz, domain.cells()
+        );
+        let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
+            .map_err(|e| format!("grille {e:?}"))?;
+
+        for micros in [0u64, 1_234_567] {
+            let time = water_core::SimTime(micros);
+            let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
+                .map_err(|e| format!("volume {e:?}"))?;
+            volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+            volume.set_velocity(&champ(nu, 0.1), &champ(nv, 1.7), &champ(total - nu - nv, 2.9))
+                .map_err(|e| format!("vitesses {e:?}"))?;
+            let (u, v, w) = (volume.velocity_u().to_vec(), volume.velocity_v().to_vec(), volume.velocity_w().to_vec());
+            grille.sample(&background, time).map_err(|e| format!("grille {e:?}"))?;
+            let vue = grille.view().ok_or("la grille du coeur ne publie rien")?;
+            let faces = BackgroundFaces3 { domain, time, density: rho, gravity: g, u: vue.u, v: vue.v, w: vue.w };
+            let rapport = volume.step_perturbation_mobile(time, duration, 4000, &faces, sponge, &jobs)
+                .map_err(|e| format!("coeur {e:?}"))?;
+            let p_coeur = volume.pressure().to_vec();
+            // Mailles mouillées au sens du cœur, sur la surface totale de début de pas.
+            let mouillee: Vec<bool> = (0..domain.cells())
+                .map(|c| {
+                    let (i, j, k) = (c % domain.nx, (c / domain.nx) % domain.ny, c / domain.columns());
+                    let col = j * domain.nx + i;
+                    (k as f32 + 0.5) * domain.dx < eta[col] + vue.w[col].eta
+                })
+                .collect();
+            let echelle = p_coeur.iter().zip(&mouillee).filter(|(_, m)| **m).fold(0f32, |a, (p, _)| a.max(p.abs()));
+            println!(
+                "DELTA3D_PRESSION_S301 t_us={micros} coeur iterations={} affinages={} residu={:e} divergence_franche={:e} mouillees={} echelle_p={echelle:e}",
+                rapport.iterations, rapport.refinements, rapport.residual, rapport.divergence_plain,
+                mouillee.iter().filter(|m| **m).count()
+            );
+
+            carte.publish_time(&background, time)?;
+            for cycles in [8u32, 16, 32, 64, 128, 256] {
+                carte.set_state(&u, &v, &w, &eta)?;
+                carte.run_for_bench(cycles, Upto::Projection)?;
+                let p = carte.pressure()?;
+                let (residu, b) = carte.residual()?;
+                let mut pire = 0f32;
+                let mut seches_non_nulles = 0usize;
+                for c in 0..domain.cells() {
+                    if mouillee[c] {
+                        pire = pire.max((p[c] - p_coeur[c]).abs());
+                    } else if p[c] != 0. {
+                        seches_non_nulles += 1;
+                    }
+                }
+                println!(
+                    "DELTA3D_PRESSION_S301 t_us={micros} cycles={cycles} dispatchs={} ecart_p={pire:e} ecart_relatif={:e} residu_carte={:e} seches_non_nulles={seches_non_nulles}",
+                    Step3::dispatches(cycles, Upto::Projection),
+                    pire / echelle.max(f32::MIN_POSITIVE),
+                    residu / b.max(f32::MIN_POSITIVE)
+                );
+            }
         }
         Ok(())
     })

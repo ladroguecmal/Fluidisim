@@ -92,7 +92,7 @@ Critères avant code, posés ici :
 - [x] **P2** — `Step3` : un device, tampons réservés, pipelines des trois sources WGSL (fond,
   gradient conjugué, pas) ; dépôt d'état et relecture de banc. Noyau `predict` (advection MAC,
   couplage `extra3`, éponge) et `predict_for_trials` dans le cœur ; reçu contre lui.
-- [ ] **P3a** — divergence, couplage S300 avec `eta_roundoff`, passage à la projection, départ
+- [x] **P3a** — divergence, couplage S300 avec `eta_roundoff`, passage à la projection, départ
   chaud ; pression reçue contre le cœur sur un pas.
 - [ ] **P3b** — correction aux faces et extrapolation verticale ; vitesses reçues.
 - [ ] **P4** — transport par débits mouillés et bandes, relaxation d'éponge, compensation,
@@ -132,6 +132,23 @@ même défaut ne pesait que 1 %.
 `REPRISE.md` est parti ré-encodé (mojibake) dans `fff03d5`. Restauré depuis `7ebeeb5`, battement
 réécrit à l'outil d'édition. **Ne jamais réécrire un fichier du dépôt par `Get-Content` /
 `Set-Content`** ; `[IO.File]::ReadAllText/WriteAllText` (UTF-8 par défaut) ou l'outil d'édition.
+
+**P3a reçu** (`--delta3d-pression`, même fixture, 1 510 mailles mouillées sur 2 310, départ
+`p = 0` des deux côtés). Le cœur converge en 65 et 68 itérations, sans affinage. La carte :
+
+| cycles | dispatchs | écart p (t=0) | relatif | écart p (t=1,23 s) | relatif |
+|---|---|---|---|---|---|
+| 8 | 51 | 2 757 Pa | 0,17 | 2 992 Pa | 0,18 |
+| 32 | 171 | 218 Pa | 1,3·10⁻² | 196 Pa | 1,2·10⁻² |
+| 64 | 331 | **0,27 Pa** | 1,6·10⁻⁵ | **0,20 Pa** | 1,2·10⁻⁵ |
+| 128 | 651 | 0,38 Pa | 2,3·10⁻⁵ | 0,077 Pa | 4,7·10⁻⁶ |
+
+Échelle 16 400 Pa. Plateau dès 128 cycles : plancher f32. En usage : 0,27 Pa ≈ **0,03 mm d'eau**.
+Aucune maille sèche non nulle. Résidu vrai de la carte 3,6·10⁻⁷ à 64 cycles, celui du cœur
+2,3·10⁻⁷. À 8 cycles l'écart vaut 27 cm d'eau **depuis p = 0** : en trajectoire le départ chaud
+part de la pression du pas précédent, et c'est P5 qui dira combien de cycles il faut alors.
+`couple_rhs` lit désormais `eta_roundoff` (`cells_in` après la divergence) ; banc S300 rejoué,
+chiffres identiques (1,06·10⁻⁶ ; 6,0·10⁻⁸ ; 3,9·10⁻⁷). `init_warm` ajouté à `delta3d_cg.wgsl`.
 
 ---
 
