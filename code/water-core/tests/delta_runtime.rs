@@ -711,3 +711,23 @@ fn progressive_shrink_damping_is_bounded_and_allocation_free_s284() {
         for k in 0..12 { assert_eq!(v.velocity_u()[k*33+16],0.25); }
     }
 }
+#[test]
+fn reference_3d_linear_step_has_no_runtime_allocation_s295() {
+    use water_core::delta3d::{Domain3, Volume3};
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut v = Volume3::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain3 { nx: 12, ny: 8, nz: 6, dx: 0.5 }, 1025., 9.81).unwrap();
+    arena.seal();
+    let eta: Vec<f32> = (0..12 * 8).map(|c| 3. + 0.02 * ((c % 12) as f32 * 0.7).sin() * ((c / 12) as f32 * 0.4).cos()).collect();
+    v.set_surface(&eta).unwrap();
+    for _ in 0..20 {
+        let (r, allocs) = measured(|| v.step_surface_linear(2000, 2000, &Jobs));
+        assert!(r.unwrap().iterations > 0);
+        assert_eq!(allocs, 0);
+    }
+    // Le refus atomique n'alloue pas davantage.
+    let (r, allocs) = measured(|| v.step_surface_linear(2000, 1, &Jobs));
+    assert_eq!(r.err(), Some(Error::Convergence));
+    assert_eq!(allocs, 0);
+    assert_eq!(arena.stats.refused_after_seal, 0);
+}

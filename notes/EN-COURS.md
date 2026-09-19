@@ -83,7 +83,7 @@ Hors lot : surface mobile (lot 2), couplage à B/W (lot 3), production GPU (lot 
 - [x] **P3** — projection : gradient conjugué sans préconditionneur (le chemin 2D à couvercle
   fixe), critère premier `10⁻⁶`, tolérance d'ADR-144, certificat d'arrondi `γ₁₀` dérivé pour six
   faces (ADR-143) ; correction et divergence ; essais : divergence projetée, repos exact.
-- [ ] **P4** — pas à surface linéarisée (flux de colonne, somme compensée, refus atomique) ;
+- [x] **P4** — pas à surface linéarisée (flux de colonne, somme compensée, refus atomique) ;
   essais : `ny = 1` contre la 2D, invariance en `y`, aucune allocation.
 - [ ] **P5** — réception de l'onde oblique : banc `delta3d_lineaire`, preuve
   `docs/validation/DELTA3D-LINEAIRE-S295.md`.
@@ -93,3 +93,4 @@ Hors lot : surface mobile (lot 2), couplage à B/W (lot 3), production GPU (lot 
 
 P2 (15:05-15:06) : `delta3d` créé, opérateur 3D symétrique et défini positif ; **à `ny = 1` il est identique au bit à l'opérateur 2D** (même ordre des faces, murs `y` sans contribution). Seul ajout côté 2D : `apply_for_tests`, sous `#[cfg(test)]`. 4 essais verts.
 P3 (15:06-15:09) : projection 3D — gradient conjugué du chemin 2D à couvercle fixe, vrai résidu, porte d'ADR-144 avec cible resserrée, arrêts au plancher par `γ₁₀` et par empreinte (Brent). Champ aléatoire projeté sous `10⁻⁵` sur trois formes, repos exact au bit, murs nuls au bit. Une assertion de l'essai comparait deux ordres d'opérations flottantes au bit : remplacée par un écart relatif `10⁻⁶`, la valeur publiée étant bien celle du champ publié.
+P4 (15:09-15:13) : `step_surface_linear` 3D — flux de colonne `x` puis `y`, somme compensée, refus atomique. **`ny = 1` identique au bit à la 2D** sur 500 pas (n = 16, 2 ms) et 1 000 pas (n = 32, 1 ms), itérations comprises ; hauteur indépendante de `y` **exactement** conservée sur 200 pas, aucune vitesse transverse ; repos exact au bit ; refus `Convergence` rendant les six champs au bit ; zéro allocation sur 20 pas et au refus (essai d'intégration). Onde oblique (1,1) : 2,32 % → 0,54 % contre la dispersion continue (n = 16/2 ms → 32/1 ms, ×4,3), **0,005 % contre la fréquence du schéma** calculée hors du solveur — à condition d'y mettre le demi-pas d'Euler symplectique (`β = −ω_s²dt²/2sin(Ωdt)`) : sans lui, 0,29 %, qui n'était pas une faute du solveur mais de l'oracle.

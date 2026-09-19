@@ -516,6 +516,99 @@ impl Volume3 {
     }
 }
 
+// ---------------------------------------------------------------- le pas à surface linéarisée
+
+impl Volume3 {
+    /// Surface linéarisée sur géométrie fixe — ADR-141 en trois dimensions. La durée entre en
+    /// microsecondes entières et ne devient jamais f32 : seuls `ρ/dt`, `dt/ρ` et `dt/dx` le
+    /// deviennent. Pression d'abord (modèle entièrement linéaire, aucune advection), puis hauteur
+    /// transportée par les flux de colonne. Garde `dt²·g/dx ≤ 1` de S233.
+    ///
+    /// **Refus atomique** : une pression non convergée rend `Convergence`, un champ non fini
+    /// `NotFinite`, et `u`, `v`, `w`, `p`, `η` et son reste sont rendus au bit. Aucune allocation.
+    pub fn step_surface_linear(&mut self, duration_us: u64, max_iters: u32, jobs: &dyn JobSystem) -> Result<Report, Error> {
+        if duration_us == 0 || duration_us > (1u64 << 53) {
+            return Err(Error::NotFinite);
+        }
+        let dt = duration_us as f64 * 1e-6;
+        let dx = self.domain.dx;
+        if self.g_eff <= 0. || dt * dt * self.g_eff as f64 / dx as f64 > 1. {
+            return Err(Error::Domain);
+        }
+        let scale = (-self.rho as f64 / dt) as f32;
+        let correction = (dt / self.rho as f64) as f32;
+        let transport = (dt / dx as f64) as f32;
+        if !scale.is_finite() || !correction.is_finite() || correction == 0.
+            || !transport.is_finite() || transport == 0. {
+            return Err(Error::NotFinite);
+        }
+        self.saved_u.copy_from_slice(&self.u);
+        self.saved_v.copy_from_slice(&self.v);
+        self.saved_w.copy_from_slice(&self.w);
+        self.saved_p.copy_from_slice(&self.p);
+        self.saved_eta.copy_from_slice(&self.eta);
+        self.saved_eta_roundoff.copy_from_slice(&self.eta_roundoff);
+        let result = self.linear(scale, correction, transport, max_iters, jobs);
+        if result.is_err() {
+            self.u.copy_from_slice(&self.saved_u);
+            self.v.copy_from_slice(&self.saved_v);
+            self.w.copy_from_slice(&self.saved_w);
+            self.p.copy_from_slice(&self.saved_p);
+            self.eta.copy_from_slice(&self.saved_eta);
+            self.eta_roundoff.copy_from_slice(&self.saved_eta_roundoff);
+        }
+        result
+    }
+
+    fn linear(&mut self, scale: f32, correction: f32, transport: f32, max_iters: u32,
+        jobs: &dyn JobSystem) -> Result<Report, Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        // Le modèle est linéaire : le champ prédit est le champ publié, sans terme quadratique.
+        self.us.copy_from_slice(&self.u);
+        self.vs.copy_from_slice(&self.v);
+        self.ws.copy_from_slice(&self.w);
+        let report = self.project(scale, correction, max_iters, jobs)?;
+        if report.degraded {
+            return Err(Error::Convergence);
+        }
+        // Flux de colonne à chaque face latérale, sommés du fond vers le couvercle comme en 2D.
+        for j in 0..ny {
+            for i in 0..=nx {
+                let mut q = 0f32;
+                for k in 0..nz { q += self.u[self.fu(i, j, k)] * dx; }
+                self.flux_x[j * (nx + 1) + i] = q;
+            }
+        }
+        for j in 0..=ny {
+            for i in 0..nx {
+                let mut q = 0f32;
+                for k in 0..nz { q += self.v[self.fv(i, j, k)] * dx; }
+                self.flux_y[j * nx + i] = q;
+            }
+        }
+        for j in 0..ny {
+            for i in 0..nx {
+                let (left, right) = (self.flux_x[j * (nx + 1) + i], self.flux_x[j * (nx + 1) + i + 1]);
+                let (front, back) = (self.flux_y[j * nx + i], self.flux_y[(j + 1) * nx + i]);
+                let c = self.col(i, j);
+                // Somme compensée f32 : un déplacement plus petit que l'ulp de z₀ survit au pas
+                // suivant et participe à la pression (S233). Partie `y` ajoutée après la partie `x`.
+                let increment = -transport * ((right - left) + (back - front)) - self.eta_roundoff[c];
+                let height = self.eta[c] + increment;
+                self.eta_roundoff[c] = (height - self.eta[c]) - increment;
+                self.eta[c] = height;
+            }
+        }
+        let finite = self.u.iter().chain(&self.v).chain(&self.w).chain(&self.p).chain(&self.eta)
+            .chain(&self.eta_roundoff).chain(&self.rhs).chain(&self.res).chain(&self.dir).chain(&self.tmp)
+            .all(|x| x.is_finite());
+        if !finite || !report.residual.is_finite() || !report.divergence.is_finite() {
+            return Err(Error::NotFinite);
+        }
+        Ok(report)
+    }
+}
+
 /// Empreinte 64 bits (FNV-1a) d'un champ f32, sur ses bits exacts : la détection de cycle
 /// d'ADR-143.
 fn fingerprint(values: &[f32]) -> u64 {

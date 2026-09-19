@@ -181,3 +181,167 @@ fn rest_projects_to_exact_zero_s295() {
     assert_eq!((r.iterations, r.degraded, r.residual, r.divergence), (0, false, 0., 0.));
     assert!(v.p.iter().chain(&v.u).chain(&v.v).chain(&v.w).all(|x| x.to_bits() == 0));
 }
+
+// ---- P4 : le pas à surface linéarisée -----------------------------------------------------------
+
+/// Onde stationnaire de S233 : `η = z₀ + A·cos(π(i + ½)/n)` sur un bassin de 8 m, `h` = 4 m.
+fn s233_surface(n: usize) -> Vec<f32> {
+    (0..n).map(|i| 4. + 0.01 * (std::f64::consts::PI * (i as f64 + 0.5) / n as f64).cos() as f32).collect()
+}
+
+#[test]
+fn ny_1_reproduces_the_2d_linear_trajectory_s295() {
+    use crate::delta_projection::{Domain, Volume};
+    struct Still;
+    impl crate::host::MonotonicClock for Still { fn now_ns(&self) -> u64 { 0 } }
+    for (n, us) in [(16usize, 2000u64), (32, 1000)] {
+        let dx = 8. / n as f32;
+        let (mut v3, _) = volume(n, 1, n / 2, dx, 9.81);
+        let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+        let mut v2 = Volume::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+            Domain { nx: n, nz: n / 2, dx }, 1025., 9.81, &vec![0.; n]).unwrap();
+        let eta = s233_surface(n);
+        v3.set_surface(&eta).unwrap();
+        v2.set_surface(&eta).unwrap();
+        let (mut worst, mut identical) = (0f64, true);
+        for step in 0..1_000_000 / us {
+            let r3 = v3.step_surface_linear(us, 2000, &Jobs).unwrap();
+            let r2 = v2.step_surface_linear(us, 2000, 1_000_000, &Jobs, &Still).unwrap().report.unwrap();
+            assert_eq!(r3.iterations, r2.iterations, "n={n} pas {step}");
+            for (a, b) in v3.surface().iter().zip(v2.surface()) {
+                worst = worst.max((*a as f64 - *b as f64).abs());
+                identical &= a.to_bits() == b.to_bits();
+            }
+        }
+        println!("S295 ny=1 contre 2D : n={n} dt={us} µs, écart maximal {worst:e} m, identique au bit : {identical}");
+        assert!(identical, "n={n} : écart {worst:e} m");
+    }
+}
+
+#[test]
+fn a_surface_independent_of_y_stays_independent_of_y_s295() {
+    let (nx, ny, nz) = (16usize, 5usize, 8usize);
+    let (mut v, _) = volume(nx, ny, nz, 0.5, 9.81);
+    let line = s233_surface(nx);
+    let eta: Vec<f32> = (0..ny).flat_map(|_| line.iter().copied()).collect();
+    v.set_surface(&eta).unwrap();
+    for _ in 0..200 {
+        v.step_surface_linear(2000, 2000, &Jobs).unwrap();
+    }
+    for j in 1..ny {
+        for i in 0..nx {
+            assert_eq!(v.eta[v.col(i, j)].to_bits(), v.eta[v.col(i, 0)].to_bits(), "colonne ({i},{j})");
+            for k in 0..nz {
+                assert_eq!(v.u[v.fu(i, j, k)].to_bits(), v.u[v.fu(i, 0, k)].to_bits());
+                assert_eq!(v.w[v.fw(i, j, k)].to_bits(), v.w[v.fw(i, 0, k)].to_bits());
+            }
+        }
+    }
+    assert!(v.v.iter().all(|x| *x == 0.), "aucune vitesse transverse ne doit naître");
+    assert!(v.surface()[0] < 4.01, "l'onde a bien évolué");
+}
+
+#[test]
+fn rest_is_exact_and_guards_refuse_s295() {
+    let (mut v, _) = volume(8, 6, 4, 1., 9.81);
+    for _ in 0..100 {
+        let r = v.step_surface_linear(2000, 100, &Jobs).unwrap();
+        assert_eq!(r.iterations, 0);
+        assert!(v.surface().iter().all(|e| *e == 4.));
+        assert!(v.u.iter().chain(&v.v).chain(&v.w).chain(&v.p).all(|x| x.to_bits() == 0));
+    }
+    assert_eq!(v.step_surface_linear(0, 100, &Jobs).err(), Some(Error::NotFinite));
+    // dt²·g/dx = 0,5²·9,81 > 1 : hors de la garde de S233.
+    assert_eq!(v.step_surface_linear(500_000, 100, &Jobs).err(), Some(Error::Domain));
+    v.g_eff = -1.;
+    assert_eq!(v.step_surface_linear(2000, 100, &Jobs).err(), Some(Error::Domain));
+}
+
+#[test]
+fn refusal_restores_every_published_field_s295() {
+    let (mut v, _) = volume(12, 8, 6, 0.5, 9.81);
+    let eta: Vec<f32> = (0..12 * 8).map(|c| 3. + 0.02 * ((c % 12) as f32 * 0.7).sin() * ((c / 12) as f32 * 0.4).cos()).collect();
+    v.set_surface(&eta).unwrap();
+    for _ in 0..5 { v.step_surface_linear(2000, 2000, &Jobs).unwrap(); }
+    let before: Vec<Vec<u32>> = [&v.u, &v.v, &v.w, &v.p, &v.eta, &v.eta_roundoff]
+        .iter().map(|f| f.iter().map(|x| x.to_bits()).collect()).collect();
+    assert_eq!(v.step_surface_linear(2000, 1, &Jobs).err(), Some(Error::Convergence));
+    let after: Vec<Vec<u32>> = [&v.u, &v.v, &v.w, &v.p, &v.eta, &v.eta_roundoff]
+        .iter().map(|f| f.iter().map(|x| x.to_bits()).collect()).collect();
+    assert_eq!(before, after);
+    // Et la reprise est celle d'un pas qui n'aurait jamais été tenté.
+    v.step_surface_linear(2000, 2000, &Jobs).unwrap();
+}
+
+/// Fréquence **du schéma** pour le mode `(kx, ky)`, calculée hors du solveur : valeur propre
+/// horizontale discrète `κ² = (4/dx²)(sin²(kx·dx/2) + sin²(ky·dx/2))`, structure verticale `φ` du
+/// problème discret à fond de Neumann et couvercle de Dirichlet à une demi-maille, `S = Σ φ·dx`,
+/// puis `ω_s² = g·κ²·S` et Euler symplectique : `cos(Ω·dt) = 1 − ω_s²·dt²/2`. Départ au repos
+/// cinématique : `ηⁿ = A·(cos(nΩdt) + β·sin(nΩdt))`, `β = −ω_s²·dt²/(2·sin(Ω·dt))` — le
+/// demi-pas qui sépare hauteur et flux dans Euler symplectique. Rend `(Ω, β)`. Sépare une faute
+/// d'implémentation de l'erreur de discrétisation.
+fn scheme_frequency(kx: f64, ky: f64, dx: f64, nz: usize, g: f64, dt: f64) -> (f64, f64) {
+    let kappa2 = 4. / (dx * dx) * ((kx * dx / 2.).sin().powi(2) + (ky * dx / 2.).sin().powi(2));
+    // Système tridiagonal (Thomas) : diag·φ_k − φ_{k±1} = second membre, le tout multiplié par dx².
+    let mut a = vec![0f64; nz]; // sous-diagonale
+    let mut b = vec![0f64; nz]; // diagonale
+    let mut c = vec![0f64; nz]; // sur-diagonale
+    let mut d = vec![0f64; nz];
+    for k in 0..nz {
+        let mut diag = kappa2 * dx * dx;
+        if k > 0 { diag += 1.; a[k] = -1.; }
+        if k + 1 < nz { diag += 1.; c[k] = -1.; } else { diag += 2.; d[k] = 2.; }
+        b[k] = diag;
+    }
+    for k in 1..nz {
+        let m = a[k] / b[k - 1];
+        b[k] -= m * c[k - 1];
+        d[k] -= m * d[k - 1];
+    }
+    let mut phi = vec![0f64; nz];
+    phi[nz - 1] = d[nz - 1] / b[nz - 1];
+    for k in (0..nz - 1).rev() { phi[k] = (d[k] - c[k] * phi[k + 1]) / b[k]; }
+    let s: f64 = phi.iter().map(|x| x * dx).sum();
+    let ws2 = g * kappa2 * s;
+    let big_omega = (1. - ws2 * dt * dt / 2.).acos() / dt;
+    (big_omega, -ws2 * dt * dt / (2. * (big_omega * dt).sin()))
+}
+
+#[test]
+fn oblique_standing_wave_follows_its_dispersion_s295() {
+    // Mode (1, 1) d'une cuve de 8 × 4 m, h = 4 m, A = 1 cm, vitesse nulle, 1 s : critère 3 du plan.
+    let (lx, ly, h, a, g) = (8f64, 4f64, 4f64, 0.01f64, 9.81f64);
+    let pi = std::f64::consts::PI;
+    let (kx, ky) = (pi / lx, pi / ly);
+    let k = (kx * kx + ky * ky).sqrt();
+    let omega = (g * k * (k * h).tanh()).sqrt();
+    let mut continuous = Vec::new();
+    for (n, us) in [(16usize, 2000u64), (32, 1000)] {
+        let dx = lx / n as f64;
+        let (nx, ny, nz) = (n, (ly / dx) as usize, (h / dx) as usize);
+        let (mut v, _) = volume(nx, ny, nz, dx as f32, g as f32);
+        let mode = |i: usize, j: usize| (kx * (i as f64 + 0.5) * dx).cos() * (ky * (j as f64 + 0.5) * dx).cos();
+        let eta: Vec<f32> = (0..ny).flat_map(|j| (0..nx).map(move |i| (h + a * mode(i, j)) as f32)).collect();
+        v.set_surface(&eta).unwrap();
+        let (big_omega, beta) = scheme_frequency(kx, ky, dx, nz, g, us as f64 * 1e-6);
+        let (mut e_cont, mut e_scheme) = (0f64, 0f64);
+        for step in 1..=1_000_000 / us {
+            v.step_surface_linear(us, 4000, &Jobs).unwrap();
+            let t = (step * us) as f64 * 1e-6;
+            for j in 0..ny {
+                for i in 0..nx {
+                    let h_num = v.eta[v.col(i, j)] as f64 - h;
+                    e_cont = e_cont.max((h_num - a * mode(i, j) * (omega * t).cos()).abs() / a);
+                    let phase = big_omega * t;
+                    e_scheme = e_scheme.max((h_num - a * mode(i, j) * (phase.cos() + beta * phase.sin())).abs() / a);
+                }
+            }
+        }
+        println!("S295 onde oblique (1,1) n={n} dt={us} µs : erreur {:.4} % contre ω continue, {:.4} % contre Ω du schéma             (Ω/ω − 1 = {:.3e})", 100. * e_cont, 100. * e_scheme, big_omega / omega - 1.);
+        // Le solveur est le schéma : l'écart restant est l'arrondi f32 et la tolérance de pression.
+        assert!(e_scheme < 1e-3, "n={n} : {e_scheme}");
+        continuous.push(e_cont);
+    }
+    assert!(continuous[1] < continuous[0], "le raffinement doit réduire l'erreur : {continuous:?}");
+    assert!(continuous[1] < 0.01, "{continuous:?}");
+}
