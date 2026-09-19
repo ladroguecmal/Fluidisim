@@ -197,6 +197,17 @@ impl Background {
     }
 
     /// Gravité qui a servi à la dispersion ; comparée par les compositions B+W.
+    /// S300, [ADR-175](../../../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) D1 —
+    /// les **paramètres analytiques** que l'hôte publie à sa carte. Ce ne sont pas des
+    /// échantillons : une production qui les reçoit évalue le fond elle-même, et le CPU n'a donc
+    /// aucun travail en `O(mailles)` par pas. Vue empruntée, valide le temps d'un appel ; rien
+    /// ici n'est un état publié ni une sauvegarde (I-17).
+    pub fn components(&self) -> &[Component] { &self.components }
+
+    /// Ancre du repère local de B. Les positions publiées à la carte lui sont relatives, et la
+    /// borne d'I-08 (`|d| < 4096 m`) porte sur cette distance-là.
+    pub fn anchor(&self) -> WorldPos { self.anchor }
+
     pub fn gravity(&self) -> f32 { self.gravity }
 
     // S205, ADR-128 : `differential_slope_envelope` (ADR-117) est retirée. Elle ne servait qu'à

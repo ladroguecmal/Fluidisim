@@ -84,7 +84,7 @@ Critères avant code, posés ici :
 - [>] **P1** — amorce, lecture ciblée du lot, plan seul.
 - [ ] **P2** — publication des composantes de B sur la carte et WGSL de base : phase spatiale,
   `sin_cos` Q32, tampons réservés à la configuration.
-- [ ] **P3** — `differential_local_extended` en WGSL **sous** le plan moyen, reçu contre le
+- [>] **P3** — `differential_local_extended` en WGSL **sous** le plan moyen, reçu contre le
   cœur champ par champ ; refus et réserve testés.
 - [ ] **P4** — **au-dessus** du plan moyen, règle d'ADR-154, reçu contre le cœur.
 - [ ] **P5** — second membre **couplé** assemblé sur la carte depuis ce fond, reçu.
@@ -107,3 +107,15 @@ analytiques de B/W, phases repliées » d'ADR-175 D1.
 (`band_cwm`, `tail_cwm`) : ce n'est pas `differential_local_extended` et ça ne se réutilise pas.
 `viewer/src/delta.rs` échantillonne le fond de la bande 2D **sur CPU** puis téléverse : c'est
 exactement ce que ce lot remplace.
+
+**P2 : trouvaille à ne pas reperdre.** Le produit `k·d` est identique au bit sur la carte
+(576/576), mais le `x − floor(x)` **compilé** en diverge d'un ulp (72/576 seulement au bit).
+Près de la borne d'I-08, `k·d` vaut des milliers de tours : il ne reste qu'une poignée de bits à
+la fraction, et un ulp y pèse **10⁻³ de tour** — sin/cos à 3,2·10⁻³ et 5,6·10⁻³ d'écart.
+**La fraction se prend en entier** : `x = mantisse·2^(e−23)` donc `x·2³² = mantisse·2^(e+9)`
+modulo 2³², signe par complément. Exact, et indépendant du compilateur.
+Après : phases **564/576 au bit**, pire écart **128 unités** (3·10⁻⁸ tour), sin 1,94·10⁻⁷,
+cos 2,09·10⁻⁷, exp 3,02·10⁻⁸ contre `exp(−x)` en f64.
+Le reliquat vient du **cœur** : son `turns − floor(turns)` arrondit quand la somme n'est pas
+représentable (ex. turns = −0,344, frac 0,656 perd un bit). La carte est donc plus exacte que
+la référence sur ce point précis. À dire tel quel, sans le présenter comme une identité.

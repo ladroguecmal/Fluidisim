@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 19:32 +02:00
+Battement        : 2026-09-19 19:41 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
 Session en cours : S300 — le fond B sur la carte, entrée réelle du pas de production
 Dernière session : S299 — opérateur, problème et projection bornée de δ 3D reçus sur la carte contre le cœur
