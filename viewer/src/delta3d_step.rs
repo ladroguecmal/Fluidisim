@@ -207,23 +207,6 @@ impl Step3 {
         rho: f32,
         g_eff: f32,
     ) -> Result<Self, String> {
-        let Domain3 { nx, ny, nz, dx } = domain;
-        if nx == 0 || ny == 0 || nz == 0 {
-            return Err("domaine vide".into());
-        }
-        if !dx.is_finite() || dx <= 0. || origin.iter().any(|v| !v.is_finite()) {
-            return Err("géométrie non finie".into());
-        }
-        if !rho.is_finite() || rho <= 0. || !g_eff.is_finite() || g_eff <= 0. {
-            return Err("densité ou gravité invalide".into());
-        }
-        let count = background.components().len();
-        if count == 0 {
-            return Err("fond sans composante".into());
-        }
-        let (cells, columns, faces) = (domain.cells(), domain.columns(), face_total(domain));
-        let (fx, fy) = ((nx + 1) * ny, nx * (ny + 1));
-
         let instance = crate::instance();
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -242,6 +225,40 @@ impl Step3 {
             .await
             .map_err(|e| e.to_string())?;
         let info = adapter.get_info();
+        Self::on_device(device, queue, &info, background, domain, origin, rho, g_eff)
+    }
+
+    /// S302 — le même pas, sur un device **fourni** : celui du rendu. La surface publiée devient
+    /// alors un tampon que le rendu lie directement (D7), sans aucun passage par le CPU. Les files
+    /// étant les mêmes, un pas soumis avant l'image est ordonné avant elle.
+    #[allow(clippy::too_many_arguments)]
+    pub fn on_device(
+        device: wgpu::Device,
+        queue: wgpu::Queue,
+        info: &wgpu::AdapterInfo,
+        background: &Background,
+        domain: Domain3,
+        origin: [f32; 3],
+        rho: f32,
+        g_eff: f32,
+    ) -> Result<Self, String> {
+        let features = device.features() & wgpu::Features::TIMESTAMP_QUERY;
+        let Domain3 { nx, ny, nz, dx } = domain;
+        if nx == 0 || ny == 0 || nz == 0 {
+            return Err("domaine vide".into());
+        }
+        if !dx.is_finite() || dx <= 0. || origin.iter().any(|v| !v.is_finite()) {
+            return Err("géométrie non finie".into());
+        }
+        if !rho.is_finite() || rho <= 0. || !g_eff.is_finite() || g_eff <= 0. {
+            return Err("densité ou gravité invalide".into());
+        }
+        let count = background.components().len();
+        if count == 0 {
+            return Err("fond sans composante".into());
+        }
+        let (cells, columns, faces) = (domain.cells(), domain.columns(), face_total(domain));
+        let (fx, fy) = ((nx + 1) * ny, nx * (ny + 1));
         let storage = wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC;
 
         // ── Fond : mêmes tampons et même uniforme que `Background3` (S300). ──
@@ -392,7 +409,7 @@ impl Step3 {
             face_total: faces,
             cells,
             columns,
-            adapter: info.name,
+            adapter: info.name.clone(),
             backend: format!("{:?}", info.backend),
         };
         this.write_step_uniform(domain.z0(), 0., Sponge3::default());
@@ -732,6 +749,16 @@ impl Step3 {
     /// **Banc** : vitesses courantes `[u | v | w]`.
     pub fn velocities(&self) -> Result<Vec<f32>, String> {
         self.relire(&self.vel, 0, self.face_total)
+    }
+
+    /// Surface publiée (ADR-175 D7) : la perturbation de hauteur compensée par colonne,
+    /// `j·nx + i`, au centre des colonnes. **Le seul tampon de δ que le rendu a le droit de lier.**
+    pub fn published_buffer(&self) -> &wgpu::Buffer {
+        &self.published
+    }
+
+    pub fn domain(&self) -> Domain3 {
+        self.domain
     }
 
     /// **Banc** : surface absolue et reste de la somme compensée, par colonne.

@@ -12,6 +12,7 @@ mod delta3d;
 mod delta3d_projection;
 mod delta3d_background;
 mod delta3d_step;
+mod delta3d_scene;
 mod pressure_gpu;
 mod pressure_solver;
 mod gpu;
@@ -2277,6 +2278,12 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--delta3d-sensibilite") {
         return delta3d_step::sensibilite_reference();
+    }
+    if args.iter().any(|a| a == "--delta3d-scene-mesure") {
+        return delta3d_scene::mesurer();
+    }
+    if args.iter().any(|a| a == "--delta3d-scene-acoups") {
+        return delta3d_scene::acoups();
     }
     if args.iter().any(|a| a == "--pression-gpu") {
         return pressure_gpu::measure();

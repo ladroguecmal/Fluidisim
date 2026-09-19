@@ -84,12 +84,12 @@ Choix posés avant code :
 
 ### Plan
 
-- [>] **P1** — amorce, lecture ciblée, plan seul.
-- [ ] **P2** — `Step3` sur un device fourni ; paquet d'ondes initial ; banc sans fenêtre de la scène
+- [x] **P1** — amorce, lecture ciblée, plan seul.
+- [x] **P2** — `Step3` sur un device fourni ; paquet d'ondes initial ; banc sans fenêtre de la scène
   (`--delta3d-scene-mesure`) : bornes, dégradation, amplitude, coût ; paramètres arrêtés.
-- [ ] **P3** — à-coups d'A297 sur la même scène sans paquet (témoin) et avec : dérivée seconde
+- [x] **P3** — à-coups d'A297 sur la même scène sans paquet (témoin) et avec : dérivée seconde
   temporelle par colonne, localisation ; chiffre avant revue.
-- [ ] **P4** — rendu : couche δ 3D dans `water.wgsl` (groupe 3, bicubique, fondu), liaison factice
+- [>] **P4** — rendu : couche δ 3D dans `water.wgsl` (groupe 3, bicubique, fondu), liaison factice
   sans δ, témoin au bit ; boucle interactive `--houle --delta3d` (D bascule, R relance).
 - [ ] **P5** — captures de revue (avec et sans δ, deux poses, plusieurs instants), pixels changés ;
   section R11 de REVUE-VISUELLE avec la question.
@@ -97,7 +97,43 @@ Choix posés avant code :
 
 ### Notes de reprise
 
-*(S302 — vide à l'ouverture.)*
+**P2 — la scène tient** (`--delta3d-scene-mesure`, mer `--houle` à 64 composantes, domaine
+96×128×28 à 25 cm = 344 064 mailles, repos 3,5 m, éponge 3 m, 32 cycles, 60 Hz, 12 s) :
+- **aucune colonne hors bornes**, jamais, avec et sans paquet ;
+- le paquet garde ses 25 cm et traverse de `y = 26` à `y ≈ 7` en 11 s, soit **1,7 m/s** — la
+  vitesse de groupe théorique d'une onde de 8 m vaut 1,77 m/s. L'onde isolée (paquet − témoin)
+  reste à 0,18–0,26 m ;
+- δ **sans paquet** porte déjà 9 à 19 cm : la correction couplée de B à Hs 2,5 m (R10 : 10,6 cm
+  mesurés en 2D à Hs 2 m). À dire dans la revue : une partie de ce que l'utilisateur verra n'est
+  pas l'onde mais cette correction ;
+- coût **4,23 ms** par pas (médiane, 177 dispatchs) : au-delà des 2 ms d'ADR-174 D3, ce qui est un
+  point de la porte C, pas de la revue ; tenable à 60 Hz avec le rendu (≈ 2 ms) ;
+- **tous les pas reçus sont déclarés dégradés** au sens d'ADR-144 (divergence franche 2·10⁻²).
+  Les diagnostics ne reviennent que 60 fois sur 720 : l'anneau est plein tant que la carte
+  travaille — perdus, jamais retardants, comme D3 le prévoit.
+
+`Step3::on_device` : le pas se construit sur un device **fourni**, celui du rendu ; la surface
+publiée devient un tampon que le rendu lie (D7), sans passage par le CPU. `published_buffer()` est
+le seul tampon exposé.
+
+**P3 — les à-coups d'A297 se voient dans les chiffres** (`--delta3d-scene-acoups`, dérivée seconde
+temporelle par colonne, 2,2 à 4,4 millions d'échantillons) :
+
+| | d2 RMS | q99,99 | max | localité | rugosité de maille RMS | max |
+|---|---:|---:|---:|---:|---:|---:|
+| témoin, 32 cycles | 9,2·10⁻⁵ m | 1,8·10⁻³ | 7,2·10⁻³ | **7,4** | 2,17·10⁻³ m | 5,9·10⁻² |
+| témoin, 128 | 9,2·10⁻⁵ | 1,8·10⁻³ | 4,8·10⁻³ | 7,3 | 1,99·10⁻³ | 2,1·10⁻² |
+| témoin, 512 | 9,2·10⁻⁵ | 1,7·10⁻³ | 4,8·10⁻³ | 7,3 | 2,03·10⁻³ | 2,2·10⁻² |
+| paquet, 32 | 1,6·10⁻⁴ | 2,0·10⁻³ | 6,7·10⁻³ | 7,3 | 2,68·10⁻³ | 4,7·10⁻² |
+
+« Localité 7,4 » : au pire à-coup, la colonne fautive vaut 7,4 fois la moyenne de ses huit
+voisines — la signature d'une bascule, pas d'une onde. **Le balayage de cycles tranche** : de 32 à
+512 cycles la rugosité ne bouge pas (2,17 → 1,99 → 2,03 mm) ; ce n'est **pas** une pression
+sous-convergée, c'est le schéma. À comparer à la signature du paquet lui-même à l'échelle de la
+maille, `a·k²·dx²` = 9,6·10⁻³ m : le bruit vaut environ **un cinquième** du signal utile en
+hauteur, et jusqu'à 5 fois au pire point. Conséquence pour la revue : le bruit de maille est à
+montrer et à nommer, pas à cacher ; 32 cycles suffisent visuellement (le maximum seul gagne à
+128), donc le choix de cycles est une question de coût.
 
 ---
 
