@@ -1476,3 +1476,189 @@ S252_32768 pas={r:?} ms={:.1}", start.elapsed().as_secs_f64() * 1e3);
     assert!(!r.degraded && r.divergence_plain <= PROJECTION_DIVERGENCE_TOLERANCE as f64, "{r:?}");
     assert!(!v.homogeneous_lid);
 }
+
+// ─── S289 : candidat de pression externe (le GPU propose, le cœur dispose) ────────────────
+
+/// Candidat scriptable : rend ce qu'on lui a donné, et retient ce qu'il a vu.
+struct Scripted {
+    answer: Option<Vec<f32>>,
+    seen_rows: Vec<PressureRow>,
+    seen_rhs: Vec<f32>,
+    seen_start: Vec<f32>,
+    calls: u32,
+}
+impl PressureCandidate for Scripted {
+    fn propose(&mut self, problem: PressureProblem<'_>, p: &mut [f32]) -> bool {
+        self.calls += 1;
+        self.seen_rows.clear();
+        self.seen_rows.extend_from_slice(problem.rows);
+        self.seen_rhs.clear();
+        self.seen_rhs.extend_from_slice(problem.rhs);
+        self.seen_start.clear();
+        self.seen_start.extend_from_slice(p);
+        match &self.answer {
+            Some(values) => { p.copy_from_slice(values); true }
+            None => false,
+        }
+    }
+}
+impl Scripted {
+    fn new(answer: Option<Vec<f32>>) -> Self {
+        Self { answer, seen_rows: Vec::new(), seen_rhs: Vec::new(), seen_start: Vec::new(), calls: 0 }
+    }
+}
+
+fn wavy_mobile(nx: usize, nz: usize, dx: f32) -> Volume {
+    let floor = bottom(nx, dx);
+    let mut v = mobile_volume(nx, nz, dx, &floor);
+    let rest = dx * (nz as f32 - 3.);
+    let eta: Vec<f32> = (0..nx)
+        .map(|i| rest + 0.12 * dx * (std::f32::consts::PI * (i as f32 + 0.5) / nx as f32 * 3.).sin())
+        .collect();
+    v.set_free_surface(&eta, rest).unwrap();
+    v
+}
+
+/// État publié, pour comparer deux pas **au bit**.
+fn published(v: &Volume) -> Vec<u32> {
+    v.velocity_u().iter().chain(v.velocity_w()).chain(v.pressure()).chain(v.surface())
+        .map(|x| x.to_bits()).collect()
+}
+
+fn step_with(v: &mut Volume, ext: Option<&mut ExternalPressure<'_>>) -> Report {
+    v.step_surface_mobile_with(2000, 4000, 1_000_000, &Jobs, &StillClock, ext)
+        .unwrap().report.unwrap()
+}
+
+#[test]
+fn external_candidate_never_moves_the_acceptance_gates_s289() {
+    let (nx, nz, dx) = (24usize, 16usize, 0.25f32);
+    let cells = nx * nz;
+
+    // Témoin : un pas sans candidat. C'est la référence au bit de tous les cas suivants.
+    let mut witness = wavy_mobile(nx, nz, dx);
+    let r0 = step_with(&mut witness, None);
+    let solution = witness.pressure().to_vec();
+    let reference = published(&witness);
+    assert!(!r0.degraded && r0.iterations > 0, "{r0:?}");
+
+    // 1. `None` par le chemin nommé : identique au pas historique, au bit.
+    let mut plain = wavy_mobile(nx, nz, dx);
+    plain.step_surface_mobile(2000, 4000, 1_000_000, &Jobs, &StillClock).unwrap();
+    assert_eq!(published(&plain), reference, "le chemin sans candidat a bougé");
+
+    // 2. Candidat exact : la solution du cœur lui est rendue telle quelle. Le vrai résidu est
+    //    déjà sous la tolérance, donc le cœur ne dépense plus d'itérations — et accepte.
+    let mut exact = wavy_mobile(nx, nz, dx);
+    let mut rows = vec![PressureRow::default(); cells];
+    let mut candidate = Scripted::new(Some(solution.clone()));
+    let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut candidate, used: false, refused: false };
+    let r = step_with(&mut exact, Some(&mut ext));
+    assert!(ext.used && !ext.refused, "candidat exact non retenu");
+    assert!(!r.degraded, "{r:?}");
+    assert!(r.iterations < r0.iterations, "exact {} >= témoin {}", r.iterations, r0.iterations);
+    assert_eq!(candidate.calls, 1, "le candidat doit être consulté une fois par pas");
+    // Ce qu'il a vu est bien le problème du cœur : `A·p_exact ≈ b` sur les mailles mouillées.
+    assert_eq!(candidate.seen_rows.len(), cells);
+    assert_eq!(candidate.seen_rhs.len(), cells);
+    assert!(candidate.seen_start.iter().all(|x| *x == 0.), "premier pas : départ nul (ADR-169)");
+    let inv = 1. / (dx * dx);
+    let (mut worst, mut scale) = (0f64, 0f64);
+    for c in 0..cells {
+        let row = candidate.seen_rows[c];
+        let mut acc = 0f32;
+        for f in 0..4 {
+            let (a, g) = (row.weights[f], row.ghosts[f]);
+            if a == 0. { continue; }
+            if g > 0. { acc += a * solution[c] * g; }
+            else {
+                let j = match f { 0 => c - 1, 1 => c + 1, 2 => c - nx, _ => c + nx };
+                acc += a * (solution[c] - solution[j]);
+            }
+        }
+        worst = worst.max(((acc * inv - candidate.seen_rhs[c]) as f64).abs());
+        scale = scale.max((candidate.seen_rhs[c] as f64).abs());
+    }
+    assert!(scale > 0. && worst <= 1e-4 * scale, "résidu du candidat exact {worst:e} pour b {scale:e}");
+
+    // 3. Candidat absurde : le cœur paie des itérations, mais il ne dégrade pas et il converge.
+    let mut wild = wavy_mobile(nx, nz, dx);
+    let noise: Vec<f32> = (0..cells).map(|c| 1e4 * ((c * 29 % 71) as f32 - 35.)).collect();
+    let mut rows = vec![PressureRow::default(); cells];
+    let mut candidate = Scripted::new(Some(noise));
+    let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut candidate, used: false, refused: false };
+    let r = step_with(&mut wild, Some(&mut ext));
+    assert!(ext.used && !r.degraded, "un mauvais départ ne doit pas faire échouer la porte : {r:?}");
+    assert!(r.divergence_plain <= PROJECTION_DIVERGENCE_TOLERANCE, "{r:?}");
+}
+
+#[test]
+fn external_candidate_refusal_is_atomic_s289() {
+    let (nx, nz, dx) = (24usize, 16usize, 0.25f32);
+    let cells = nx * nz;
+    let mut witness = wavy_mobile(nx, nz, dx);
+    step_with(&mut witness, None);
+    let reference = published(&witness);
+
+    // 1. Valeur non finie : refus, et le pas se termine **exactement** comme sans candidat.
+    for poison in [f32::NAN, f32::INFINITY] {
+        let mut v = wavy_mobile(nx, nz, dx);
+        let mut answer = vec![0.5f32; cells];
+        answer[cells / 3] = poison;
+        let mut rows = vec![PressureRow::default(); cells];
+        let mut candidate = Scripted::new(Some(answer));
+        let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut candidate, used: false, refused: false };
+        step_with(&mut v, Some(&mut ext));
+        assert!(!ext.used && ext.refused, "candidat empoisonné retenu");
+        assert_eq!(published(&v), reference, "le refus n'a pas restauré le départ au bit");
+    }
+
+    // 2. Candidat qui décline : ni retenu, ni refusé, et le pas est le pas historique.
+    let mut v = wavy_mobile(nx, nz, dx);
+    let mut rows = vec![PressureRow::default(); cells];
+    let mut candidate = Scripted::new(None);
+    let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut candidate, used: false, refused: false };
+    step_with(&mut v, Some(&mut ext));
+    let (used, refused) = (ext.used, ext.refused);
+    assert_eq!(candidate.calls, 1);
+    assert!(!used && !refused);
+    assert_eq!(published(&v), reference, "un candidat qui décline a changé le pas");
+
+    // 3. Réserve de lignes mal dimensionnée : le pas refuse, sans rien publier.
+    let mut v = wavy_mobile(nx, nz, dx);
+    let before = published(&v);
+    let mut rows = vec![PressureRow::default(); cells - 1];
+    let mut candidate = Scripted::new(Some(vec![0.; cells]));
+    let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut candidate, used: false, refused: false };
+    assert_eq!(v.step_surface_mobile_with(2000, 4000, 1_000_000, &Jobs, &StillClock, Some(&mut ext)),
+        Err(Error::Shape));
+    assert_eq!(candidate.calls, 0, "le candidat ne doit pas voir une réserve invalide");
+    assert_eq!(published(&v), before, "un refus de forme a publié quelque chose");
+}
+
+#[test]
+fn external_candidate_carries_a_trajectory_over_many_steps_s289() {
+    // Le candidat est consulté à chaque pas, voit le départ chaud d'ADR-169, et la trajectoire
+    // reste celle du cœur : mêmes surfaces à l'arrondi, aucune acceptation supplémentaire.
+    let (nx, nz, dx) = (32usize, 18usize, 0.25f32);
+    let cells = nx * nz;
+    let mut witness = wavy_mobile(nx, nz, dx);
+    let mut driven = wavy_mobile(nx, nz, dx);
+    let mut rows = vec![PressureRow::default(); cells];
+    let mut candidate = Scripted::new(Some(vec![0.; cells]));
+    let mut warm_seen = false;
+    for step in 0..40 {
+        let w = step_with(&mut witness, None);
+        // Le candidat rend la solution que le témoin vient de trouver : un oracle parfait.
+        candidate.answer = Some(witness.pressure().to_vec());
+        let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut candidate, used: false, refused: false };
+        let d = step_with(&mut driven, Some(&mut ext));
+        assert!(ext.used, "pas {step} : candidat non retenu");
+        assert!(!w.degraded && !d.degraded, "pas {step} : {w:?} / {d:?}");
+        if candidate.seen_start.iter().any(|x| *x != 0.) { warm_seen = true; }
+        let drift = witness.surface().iter().zip(driven.surface())
+            .fold(0f64, |m, (a, b)| m.max((*a as f64 - *b as f64).abs()));
+        assert!(drift <= 1e-6, "pas {step} : la trajectoire diverge de {drift:e} m");
+    }
+    assert!(warm_seen, "le départ chaud d'ADR-169 n'a jamais atteint le candidat");
+}

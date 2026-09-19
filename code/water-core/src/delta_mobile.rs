@@ -22,15 +22,57 @@ pub struct PressureRow {
     pub ghosts: [f32; 4],
 }
 
+/// S289 : le problème de pression du mode mobile, tel que le cœur vient de l'assembler.
+/// Vue empruntée, valide le temps d'un seul appel ; rien ici n'est un état publié ni une
+/// sauvegarde de δ (ADR-172). L'inverse de la diagonale n'est pas transmis : il se déduit
+/// exactement des lignes, `1/(Σ aᵢ·gᵢ · dx⁻²)` avec `gᵢ = 1` sur une face intérieure.
+pub struct PressureProblem<'a> {
+    pub domain: super::Domain,
+    /// Opérateur figé, une ligne par maille, ordre gauche/droite/bas/haut (ADR-172).
+    pub rows: &'a [PressureRow],
+    /// Second membre, valeurs fantômes inhomogènes comprises.
+    pub rhs: &'a [f32],
+}
+
+/// S289 : **le candidat propose, le cœur dispose.** Un solveur externe — GPU notamment — écrit
+/// une pression dans `p`, qui contient à l'entrée le départ du cœur (ADR-169), nul hors des
+/// mailles mouillées. Rendre `false` laisse ce départ intact.
+///
+/// Rien de ce qui est écrit ici ne franchit une porte d'acceptation : le cœur recalcule
+/// `r = b − A·p` avec **son** opérateur, poursuit son gradient conjugué et applique ADR-143
+/// et ADR-144 inchangés. Un candidat faux coûte des itérations ; il ne peut pas faire
+/// recevoir un pas qui ne tient pas la tolérance physique de S199.
+pub trait PressureCandidate {
+    fn propose(&mut self, problem: PressureProblem<'_>, p: &mut [f32]) -> bool;
+}
+
+/// S289 : ce que l'hôte prête au pas pour qu'un candidat externe soit consulté. `rows` est la
+/// réserve où le cœur écrit son opérateur — elle appartient à l'hôte, le cœur n'alloue pas.
+pub struct ExternalPressure<'a> {
+    pub rows: &'a mut [PressureRow],
+    pub candidate: &'a mut dyn PressureCandidate,
+    /// Écrit par le cœur : le candidat a-t-il été consulté, et sa proposition retenue comme
+    /// départ. `false` après un refus — forme, valeur non finie, ou `propose` négatif.
+    pub used: bool,
+    /// Écrit par le cœur : proposition refusée parce qu'elle portait une valeur non finie.
+    pub refused: bool,
+}
+
 impl Volume {
     /// Écrit un produit de calcul dans la réserve de l'hôte, sans allocation. Ne contient
     /// pas les valeurs inhomogènes des fantômes (elles appartiennent au second membre).
     pub fn write_mobile_pressure_rows(&self, rows: &mut [PressureRow]) -> Result<(), Error> {
+        self.write_rows(rows, &mut Control::unlimited())
+    }
+
+    /// Même écriture, sous le contrôle de budget du pas appelant (S289).
+    pub(super) fn write_rows(&self, rows: &mut [PressureRow], ctl: &mut Control) -> Result<(), Error> {
         if rows.len() != self.domain.cells() { return Err(Error::Shape); }
-        if !self.surface_in_bounds(&mut Control::unlimited(), Phase::Prepare)? { return Err(Error::Domain); }
+        if !self.surface_in_bounds(ctl, Phase::Prepare)? { return Err(Error::Domain); }
         let (nx, nz) = (self.domain.nx, self.domain.nz);
         for k in 0..nz {
             for i in 0..nx {
+                ctl.poll(Phase::Prepare)?;
                 let c = self.c(i,k);
                 let mut row = PressureRow::default();
                 if self.wet(i,k) {
@@ -519,6 +561,15 @@ impl Volume {
     /// `Convergence`, `NotFinite` ; expiration = zéro avancée. u/w/p/η et reste d'arrondi restaurés.
     pub fn step_surface_mobile(&mut self, duration_us: u64, max_iters: u32, budget_us: u64,
         jobs: &dyn JobSystem, clock: &dyn MonotonicClock) -> Result<SurfaceReport, Error> {
+        self.step_surface_mobile_with(duration_us, max_iters, budget_us, jobs, clock, None)
+    }
+
+    /// S289 : le même pas, avec un candidat de pression externe facultatif. `None` reproduit
+    /// `step_surface_mobile` au bit. Le candidat ne fournit qu'un **départ** : convergence,
+    /// portes d'ADR-143/144, refus et publication restent entièrement au cœur.
+    pub fn step_surface_mobile_with(&mut self, duration_us: u64, max_iters: u32, budget_us: u64,
+        jobs: &dyn JobSystem, clock: &dyn MonotonicClock,
+        mut external: Option<&mut ExternalPressure<'_>>) -> Result<SurfaceReport, Error> {
         self.last_cost_ms = None;
         let limit = budget_us.checked_mul(1000).ok_or(Error::NotFinite)?;
         if duration_us == 0 || duration_us > (1u64 << 53) { return Err(Error::NotFinite); }
@@ -551,7 +602,8 @@ impl Volume {
             self.mobile = true;
             // S276, ADR-169 : même départ que le pas couplé, pour garder l'identité au fond nul.
             self.warm_pressure = true;
-            let projected = self.project(scale, correction, max_iters, false, jobs, &mut ctl);
+            let projected = self.project_with(scale, correction, max_iters, false, jobs, &mut ctl,
+                external.as_deref_mut());
             self.warm_pressure = false;
             self.mobile = false;
             let report = projected?;

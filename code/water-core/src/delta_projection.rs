@@ -54,7 +54,7 @@ mod multigrid;
 mod coupling;
 pub use coupling::{BackgroundFaces, Sponge};
 pub use mobile::SURFACE_THETA_MIN;
-pub use mobile::PressureRow;
+pub use mobile::{ExternalPressure, PressureCandidate, PressureProblem, PressureRow};
 
 // S238 P3 : trace de mesure du plancher (tests seulement) — à chaque vrai résidu recalculé :
 // itérations, résidu relatif, erreur inverse composante par composante.
@@ -1113,6 +1113,13 @@ impl Volume {
     /// Projection : résout `L p = −(ρ/dt)·div(u*)` plus le couvercle, puis corrige.
     /// `max_iters` **est** la variable de dégradation exigée par ADR-007 §2.
     fn project(&mut self, scale: f32, k1: f32, max_iters: u32, multigrid: bool, jobs: &dyn JobSystem, ctl: &mut Control) -> Result<Report, Error> {
+        self.project_with(scale, k1, max_iters, multigrid, jobs, ctl, None)
+    }
+
+    /// S289 : même projection, avec un candidat externe facultatif. `None` reproduit `project`
+    /// au bit — le candidat n'entre que par le départ du chemin warm, et aucune porte ne bouge.
+    fn project_with(&mut self, scale: f32, k1: f32, max_iters: u32, multigrid: bool, jobs: &dyn JobSystem,
+        ctl: &mut Control, external: Option<&mut mobile::ExternalPressure<'_>>) -> Result<Report, Error> {
         ctl.check(Phase::Rhs)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx * dx);
@@ -1176,6 +1183,41 @@ impl Volume {
             for c in 0..self.domain.cells() {
                 ctl.poll(Phase::Pressure)?;
                 if !self.wet_cell(c) { self.p[c] = 0.; }
+            }
+            // S289 : le candidat externe propose ici, et **seulement** ici — sur un départ déjà
+            // nettoyé, avant que le vrai résidu ne soit recalculé. Il ne voit ni les portes, ni la
+            // correction, ni la publication ; la suite de la fonction est identique.
+            if let Some(ext) = external {
+                ext.used = false;
+                ext.refused = false;
+                self.write_rows(ext.rows, ctl)?;
+                // `tmp` est libre jusqu'au `apply` ci-dessous : il garde le départ du cœur, pour
+                // qu'un refus le restaure exactement. Aucune allocation.
+                budget::copy(&self.p, &mut self.tmp, ctl, Phase::Pressure)?;
+                let mut p = core::mem::take(&mut self.p);
+                let problem = mobile::PressureProblem { domain: self.domain, rows: ext.rows, rhs: &self.rhs };
+                let proposed = ext.candidate.propose(problem, &mut p);
+                self.p = p;
+                let finite = !proposed || {
+                    let mut ok = true;
+                    for v in &self.p { ctl.poll(Phase::Pressure)?; ok &= v.is_finite(); }
+                    ok
+                };
+                if proposed && finite {
+                    for c in 0..self.domain.cells() {
+                        ctl.poll(Phase::Pressure)?;
+                        if !self.wet_cell(c) { self.p[c] = 0.; }
+                    }
+                    ext.used = true;
+                } else {
+                    // Refus **atomique** : le départ du cœur est restauré au bit, le pas continue
+                    // exactement comme si aucun candidat n'avait été consulté.
+                    let tmp = core::mem::take(&mut self.tmp);
+                    let result = budget::copy(&tmp, &mut self.p, ctl, Phase::Pressure);
+                    self.tmp = tmp;
+                    result?;
+                    ext.refused = proposed;
+                }
             }
             let mut tmp = core::mem::take(&mut self.tmp);
             let result = self.apply(&self.p, &mut tmp, ctl);

@@ -67,18 +67,17 @@ itération — que le **pas réel** consomme sous les portes d'acceptation incha
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — cœur : export du second membre et de l'inverse de la diagonale du mode mobile,
-  sans allocation ; réception contre les valeurs internes de la projection.
-- [ ] **P3** — cœur : crochet d'un candidat de pression externe dans la projection mobile.
+- [x] **P2** — cœur : crochet d'un candidat de pression externe dans la projection mobile.
   Le candidat ne franchit aucune porte : le cœur recalcule le vrai résidu et garde ADR-143/144.
   Refus atomique d'un candidat non fini ou de mauvaise forme. Tests.
-- [ ] **P4** — GPU : réductions résidentes (produit scalaire, norme) et scalaires gardés en
-  tampon ; réception contre les réductions du cœur.
-- [ ] **P5** — GPU : cycle PCG résident, aucun retour CPU entre itérations ; réception contre
-  le CG du cœur sur les géométries de S288. Découper si nécessaire.
-- [ ] **P6** — consommation par le **pas réel** : candidat GPU proposé au pas mobile, itérations
+  *Découpage corrigé : l'export séparé du second membre et de la diagonale, déclaré comme étape
+  distincte, n'existe pas — le crochet passe `rhs` au candidat, et l'inverse de la diagonale se
+  déduit exactement des lignes déjà exportées. Une étape de moins, pas une de moins faite.*
+- [ ] **P3** — GPU : cycle PCG résident — réductions d'arbre, `α`/`β` produits et consommés sur
+  la carte, aucun retour CPU entre itérations ; réception contre le CG du cœur.
+- [ ] **P4** — consommation par le **pas réel** : candidat GPU proposé au pas mobile, itérations
   restantes, acceptations/refus et coût mesurés contre le chemin CPU seul.
-- [ ] **P7** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
+- [ ] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
 ### Notes de reprise
 
@@ -92,6 +91,16 @@ sous les portes d'ADR-143 (plancher d'arrondi) et ADR-144 (tolérance physique d
 Aucune porte n'est déplacée vers le GPU, aucune publication partielle : un mauvais candidat
 coûte des itérations, il ne peut pas faire accepter un pas faux. C'est ce qui rend la
 consommation par le pas réel possible sans réception physique du GPU lui-même.
+
+P2 : crochet reçu. `step_surface_mobile_with` + `project_with`, `None` reproduit le pas
+historique **au bit** (témoin comparé sur u/w/p/η). Candidat exact → itérations strictement
+inférieures au témoin ; candidat absurde (1e4·bruit) → toujours accepté par les portes, non
+dégradé ; NaN et +∞ → refus atomique, départ restauré au bit ; `propose` négatif → pas
+historique ; réserve de lignes mal dimensionnée → `Err(Shape)`, candidat jamais consulté,
+rien publié. 40 pas d'affilée avec oracle parfait : dérive de surface <= 1e-6 m, départ chaud
+d'ADR-169 effectivement vu par le candidat. Suite cœur/harnais : 508 réussis, 21 ignorés,
+0 échec (les décomptes de S288 — 508/19 — ne se recoupent pas exactement ; le mien est mesuré
+sur `cargo test` dans `code/`).
 
 Ce qui reste hors de ce lot, et doit le rester tant qu'il n'est pas prouvé : identité
 inter-GPU, budget eau de 2 ms reçu, I-06 du chemin d'image, multigrille GPU, 3D.
