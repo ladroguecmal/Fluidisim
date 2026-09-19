@@ -77,7 +77,7 @@ allocations qu'ADR-145 interdit à la boucle d'image. Même cause, un seul lot.
   nécessaires : une troisième voie, apparue en construisant, est **à la fois plus rapide et sans
   risque** — chaque groupe recalcule le scalaire lui-même au début du noyau suivant, depuis des
   valeurs écrites par le dispatch précédent. 3 dispatchs par itération, reçu au bit.*
-- [ ] **P5** — allocations de l'appel : viser zéro en régime, publier ce qui reste et pourquoi.
+- [x] **P5** — allocations de l'appel : viser zéro en régime, publier ce qui reste et pourquoi.
 - [ ] **P6** — reconsommation par le **pas réel** : gain de bout en bout contre le témoin S289,
   mêmes tailles, mêmes fonds, portes inchangées.
 - [ ] **P7** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
@@ -192,5 +192,30 @@ par dispatch. À 6 656 mailles (104 groupes) la carte y gagne encore ; à 32 768
 y perd déjà — mesuré en P5. Le gain net reste positif parce que l'encodage baisse plus que la
 carte ne monte, mais **cette voie a un croisement**, et une somme à deux niveaux serait le
 remède si une grille plus grande arrive.
+
+P5 : **notre code n'alloue rien** — la fenêtre d'ADR-145 §1, resserrée sur le remplissage des
+trois réserves, rend **zéro** à chaque appel, et le banc refuse désormais si elle ne le fait pas.
+Première fenêtre fautive : elle englobait les `write_buffer` de wgpu et comptait 19 allocations,
+attribuées à tort à notre code ; corrigée avant publication, pas après. Le reste appartient à la
+pile verrouillée (ADR-145 §2, comptées et publiées) : 979 → **575** par appel à 6 656 mailles et
+128 itérations, 171 à 32 itérations, 1 115 à 256 ; constantes à longueur et tranche fixées.
+
+**Le croisement annoncé est mesuré.** Temps de carte médian sur 30, horodatage allumé, un seul
+tampon, par mode de dispatch :
+
+| groupes | itérations | 7 | 5 | 3 |
+|---|---|---|---|---|
+| 104 (6 656 mailles) | 32 | 0,2893 | 0,2358 | **0,2156** |
+| 104 | 128 | 1,4851 | 1,1973 | **1,0182** |
+| 104 | 256 | 2,2750 | 1,8593 | **1,6898** |
+| 512 (32 768 mailles) | 32 | 0,4411 | **0,3585** | 0,4246 |
+| 512 | 128 | 1,6780 | **1,3354** | 1,6009 |
+| 512 | 256 | 4,2657 | **2,6462** | 3,1804 |
+
+À 104 groupes le mode 3 est le plus rapide **aussi sur la carte**. À 512 groupes il perd contre
+le mode 5 et revient au niveau du mode 7 : le recalcul redondant coûte `groups²` lectures par
+scalaire. Le mode 3 reste retenu parce que l'appel complet gagne quand même — l'encodage baisse
+plus que la carte ne monte (1,45 contre 2,55 ms à 32 768/128) — mais **le mode devrait être
+choisi par la taille**, et une somme à deux niveaux est le remède. Rien de cela n'est construit.
 
 Hors de ce lot : multigrille GPU, budget 2 ms, 3D, solides, multiplateforme, garantie de pic.

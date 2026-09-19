@@ -69,6 +69,9 @@ pub struct Resident {
     pub last_residual2: f32,
     pub last_rz: f32,
     pub last_allocations: u64,
+    /// Allocations imputables à **notre** code — l'empaquetage des trois entrées. ADR-145 §1 lit
+    /// I-06 là ; le reste appartient à la pile verrouillée et n'est que compté (§2).
+    pub last_pack_allocations: u64,
     pub calls: u64,
 }
 
@@ -168,7 +171,7 @@ impl Resident {
             iterations, per_iteration: 3, chunk: 32, timing: false, last_device_ms: None, last_wall_ms: 0., last_pack_ms: 0., last_encode_ms: 0., last_submit_ms: 0.,
             last_wait_ms: 0., last_read_ms: 0., last_dispatches: 0,
             last_residual2: 0., last_rz: 0.,
-            last_allocations: 0, calls: 0,
+            last_allocations: 0, last_pack_allocations: 0, calls: 0,
         })
     }
 
@@ -224,6 +227,10 @@ impl Resident {
         for v in rhs { self.packed_rhs.extend_from_slice(&v.to_le_bytes()); }
         self.packed_p.clear();
         for v in p.iter() { self.packed_p.extend_from_slice(&v.to_le_bytes()); }
+        // La fenêtre d'I-06 s'arrête ici : au-delà, ce sont les tampons intermédiaires de wgpu,
+        // qui relèvent d'ADR-145 §2 — comptés, pas interdits. Les mélanger rendrait la mesure
+        // d'ADR-145 §1 impossible à interpréter, et c'est ce que la première version faisait.
+        self.last_pack_allocations = crate::counting::mark().since(mark).allocs;
         self.queue.write_buffer(&self.rows, 0, &self.packed_rows);
         self.queue.write_buffer(&self.rhs, 0, &self.packed_rhs);
         self.queue.write_buffer(&self.state, 0, &self.packed_p);
@@ -785,7 +792,31 @@ async fn measure_variants_async() -> Result<(), String> {
                         return Err(format!("variante fusion={fused} tranche={chunk} : {ecart} valeurs \
                             différentes du chemin de S289 — la mathématique devait être inchangée"));
                     }
+                    // ADR-145 §1 : I-06 se lit sur notre code. L'empaquetage réutilise ses
+                    // réserves, donc il ne doit **rien** allouer après le premier appel.
+                    if gpu.last_pack_allocations != 0 {
+                        return Err(format!("l'empaquetage alloue {} fois", gpu.last_pack_allocations));
+                    }
                 }
+                // Ce que le recalcul redondant coûte à la **carte** : `groups` lectures par
+                // groupe, donc `groups²` par dispatch. Mesuré à configuration égale — horodatage
+                // allumé et un seul tampon pour les trois modes.
+                gpu.timing = true;
+                gpu.chunk = 0;
+                for mode in [7u32, 5, 3] {
+                    gpu.per_iteration = mode;
+                    let mut device = Vec::with_capacity(30);
+                    let mut probe = start.clone();
+                    for rep in 0..31 {
+                        probe.copy_from_slice(&start);
+                        gpu.solve(&rows, &rhs, &mut probe)?;
+                        if rep > 0 { if let Some(ms) = gpu.last_device_ms { device.push(ms); } }
+                    }
+                    device.sort_by(f64::total_cmp);
+                    println!("CARTE_CG_S290 nx={nx} nz={nz} coupe={cut} iterations={iterations}                         groupes={} mode={mode} gpu_mediane_ms={:.6} gpu_max_ms={:.6}",
+                        (nx * nz).div_ceil(64), device[device.len() / 2], device[device.len() - 1]);
+                }
+                gpu.timing = false;
             }
         }
     }
