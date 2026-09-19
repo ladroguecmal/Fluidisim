@@ -6,6 +6,7 @@
 
 - [Intentions initiales](sources/systeme_eau_architecture_globale.md) et [questions sources](sources/systeme_eau_zones_ouvertes_et_decisions_a_valider.md).
 - [Invariants](01_INVARIANTS.md), [décomposition ADR-001](adr/ADR-001-decomposition-en-couches.md).
+- [Bilan global S293](registres/BILAN-GLOBAL-S293.md) : où l'avancement bloque — porte B verrouillée, architecture de δ, budget sans répartition, pilotage.
 - [Bilan global S227](registres/BILAN-GLOBAL-S227.md) : dérives, procédure et correctifs.
 - [Comparables externes](COMPARABLES-EXTERNES.md) : systèmes du commerce regardés, avec le statut de chaque affirmation.
 - [Journal](../notes/JOURNAL.md) : comptes rendus historiques ; les états présents sont dans la feuille de route.

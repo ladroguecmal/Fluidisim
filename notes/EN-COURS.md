@@ -84,7 +84,7 @@ place de l'utilisateur.
   débloqué.
 - [x] **P6** — blocages classés (technique mesuré, décision en attente de l'utilisateur,
   méthode/procédure, outillage/infrastructure), avec preuve, effet et levier.
-- [ ] **P7** — rédiger `docs/registres/BILAN-GLOBAL-S293.md` et l'indexer.
+- [x] **P7** — rédiger `docs/registres/BILAN-GLOBAL-S293.md` et l'indexer.
 - [ ] **P8** — rituel §6.
 
 ### Notes de reprise
@@ -189,3 +189,8 @@ périmètre de la v1 (en attente depuis S281) ; U3 dépôt distant (aucun) ; U4 
 S277 ; U5 faits d'intégration du jeu (inconnus depuis S19).
 *Faux blocages ou surévalués.* A278 (voir P5) ; A294 ne concerne que l'activation de δ GPU
 dans la boucle d'image, et le geste de mesure est déjà écrit.
+
+**P7 — bilan écrit (14:35–14:38)** : `docs/registres/BILAN-GLOBAL-S293.md`, indexé en tête du
+socle. Cinq questions à l'utilisateur (cible et budget, v1, dépôt distant, ordre et architecture
+de δ, onde S277) ; ordre recommandé 0 → 5. Chiffres corrigés avant commit : code ≈ 95 000 lignes
+ajoutées (et non 96 000), 200 à 360 lignes de Markdown par session, près de 1 500 commits.
