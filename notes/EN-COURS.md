@@ -85,6 +85,12 @@ sans déplacer d'un bit ce que le pas publie.
 - [x] **P6** — coût de l'horloge : le sondage lit l'horloge toutes les 64 mailles. Mesurer le pas
   avec horloge réelle contre horloge figée, et l'effet du grain. Les mesures de S289/S290 ont été
   prises avec une horloge figée : dire de combien elles sous-estiment la production.
+- [ ] **P7b** — *étape ajoutée en cours de session, sur une erreur trouvée.* La bande δ vivante
+  de l'afficheur passe par `step_perturbation_mobile` (chemin couplé S253), **pas** par
+  `step_surface_mobile`. Le crochet de S289 n'était donc pas atteignable par le rendu, et
+  l'affirmation de S289 « le même que pilote la bande δ de l'afficheur » était imprécise :
+  la même *fonction du cœur*, pas le même *chemin de l'afficheur*. Corriger l'affirmation par
+  note datée, **et** porter le crochet sur le pas couplé pour que ce soit vrai.
 - [ ] **P7** — re-mesure complète et **propositions chiffrées**, y compris celles qui ne seront pas
   construites ici. Vérifier que le rendu reste valide : trajectoire au bit, ou écart expliqué.
 - [ ] **P8** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.

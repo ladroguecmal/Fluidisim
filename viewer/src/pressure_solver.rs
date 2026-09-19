@@ -903,3 +903,51 @@ async fn measure_decomposition_async() -> Result<(), String> {
     }
     Ok(())
 }
+
+/// S291 — balayage de la longueur de cycle, **après** l'allègement du cœur. Le réglage optimal
+/// avait été mesuré en S290 sur un pas où le cœur coûtait 40 % de plus : il n'a aucune raison
+/// d'être resté le même, et rien ne l'ajuste automatiquement.
+pub fn measure_cycle_sweep() -> Result<(), String> { pollster::block_on(sweep_async()) }
+
+async fn sweep_async() -> Result<(), String> {
+    const STEPS: usize = 60;
+    for (nx, nz, dx) in [(128usize, 52usize, 2.0f32), (256, 128, 0.5)] {
+        let cells = nx * nz;
+        let mut gpu = Resident::new(Domain { nx, nz, dx }, 0).await?;
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        for cycle in [0u32, 32, 64, 96, 128, 192, 256, 384] {
+            gpu.iterations = cycle;
+            let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 28);
+            let mut volume = scene(nx, nz, dx, false, &mut arena, &jobs, &sink)?;
+            // Diagnostic coupé : c'est le régime qu'un hôte pressé choisirait (S291 P5b).
+            volume.set_report_backward_error(false);
+            let mut rows = vec![PressureRow::default(); cells];
+            let clock = Wall(std::time::Instant::now());
+            let mut wall = Vec::with_capacity(STEPS);
+            let (mut iterations, mut degraded) = (0u64, 0u32);
+            let mut stages = [0u64; STAGES];
+            for step in 0..STEPS {
+                let start = std::time::Instant::now();
+                // `cycle = 0` : aucun candidat du tout, le témoin du cœur seul.
+                let report = if cycle == 0 {
+                    volume.step_surface_mobile(2000, 4000, 600_000_000, &jobs, &clock)
+                } else {
+                    let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut gpu,
+                        used: false, refused: false };
+                    volume.step_surface_mobile_with(2000, 4000, 600_000_000, &jobs, &clock, Some(&mut ext))
+                }.map_err(|e| format!("pas {step} : {e:?}"))?;
+                wall.push(start.elapsed().as_secs_f64() * 1e3);
+                let inner = report.report.ok_or("pas expiré")?;
+                iterations += inner.iterations as u64;
+                if inner.degraded { degraded += 1; }
+                for (a, b) in stages.iter_mut().zip(volume.last_stage_ns()) { *a += b; }
+            }
+            wall.sort_by(f64::total_cmp);
+            let part = |i: usize| (stages[i] as f64 / STEPS as f64) / 1e6;
+            println!("CYCLE_S291 nx={nx} nz={nz} cycle={cycle} pas={STEPS}                 mediane_ms={:.4} max_ms={:.4} iterations_coeur={iterations} degrades={degraded}                 candidat_ms={:.4} iterations_ms={:.4} preconditionneur_ms={:.4}",
+                wall[STEPS / 2], wall[STEPS - 1], part(6), part(10), part(9));
+            if degraded != 0 { return Err(format!("cycle {cycle} : {degraded} pas dégradés")); }
+        }
+    }
+    Ok(())
+}

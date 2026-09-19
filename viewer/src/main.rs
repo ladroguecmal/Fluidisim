@@ -2232,6 +2232,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--pas-decomposition") {
         return pressure_solver::measure_decomposition();
     }
+    if args.iter().any(|a| a == "--pas-cycle") {
+        return pressure_solver::measure_cycle_sweep();
+    }
     if args.iter().any(|a| a == "--delta-retrecissement") {
         return delta::measure_shrink();
     }
