@@ -70,7 +70,7 @@ Objectif : construire et éprouver opérateur mobile et lissage résidents GPU c
   opérateur mobile, réception contre son application native.
 - [x] **P3** — noyaux GPU opérateur et Jacobi, ressources réservées et alternance de tampons,
   banc sur géométries planes/coupées/ondulées et tailles différentes ; découper si nécessaire.
-- [ ] **P4** — mesures précision/coût complet/allocations, suites pertinentes et limites ;
+- [x] **P4** — mesures précision/coût complet/allocations, suites pertinentes et limites ;
   ni cycle complet ni simulation intégrée revendiqués avant leur construction.
 - [ ] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
@@ -95,3 +95,9 @@ pas de readback entre 32 lissages. RTX5070/DX12. Première erreur max 1,69e-7 ; 
 32 lissages ~0,8 ms aller-retour contre2,5–2,9 ms CPU empaqueté. Non encore coût avec
 export/empaquetage à chaque appel : P4 élargit cette mesure. 65–105 allocations pile+banc,
 aucune prétention I-06 image. Noms WGSL réservés operator/smooth corrigés avant réception.
+
+P4 : mesure finale inclut export+empaquetage réitérés sans allocation ;32 lissages128x52
+complets1,1020/1,2410 ms contre2,8444/2,5213 ms CPU scalaire des lignes, GPU seul0,09–0,096.
+256x128 :2,4008/2,4446 ms, pas de budget2ms reçu. Maximum erreur1,686e-7, repos nul exact.
+65–105 allocations pile+banc, pas de réception I-06 image. Secteur avant/après. 508 tests
+cœur/harnais +36 viewer réussis,19 ignorés,0 échec. Test cœur étendu dx0,5/2 et surface couplée.

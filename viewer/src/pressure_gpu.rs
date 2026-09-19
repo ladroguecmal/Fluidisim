@@ -171,11 +171,11 @@ async fn measure_async()->Result<(),String> {
             volume.write_mobile_pressure_rows(&mut rows).map_err(|e|format!("export {e:?}"))?;
             let allocations=crate::counting::mark().since(mark).allocs;
             if allocations!=0 {return Err(format!("export alloue {allocations}"));}
-            let packed=crate::gpu::floats(rows.iter().flat_map(|r|r.weights.into_iter().chain(r.ghosts)));
+            let mut packed=crate::gpu::floats(rows.iter().flat_map(|r|r.weights.into_iter().chain(r.ghosts)));
             let initial:Vec<_>=(0..nx*nz).map(|c|if rows[c].weights==[0.;4] {0.} else {(c*37%101) as f32*0.07-2.}).collect();
             let rhs:Vec<_>=(0..nx*nz).map(|c|if rows[c].weights==[0.;4] {0.} else {(c*13%71) as f32*0.01-0.3}).collect();
-            let initial_bytes=crate::gpu::floats(initial.iter().copied());
-            let rhs_bytes=crate::gpu::floats(rhs.iter().copied());
+            let mut initial_bytes=crate::gpu::floats(initial.iter().copied());
+            let mut rhs_bytes=crate::gpu::floats(rhs.iter().copied());
             let mut result=vec![0.;nx*nz];
             let mut source=initial.clone();
             let mut dest=vec![0.;nx*nz];
@@ -183,6 +183,7 @@ async fn measure_async()->Result<(),String> {
                 let mut wall=Vec::with_capacity(9);
                 let mut device_ms=Vec::with_capacity(9);
                 let mut cpu_ms=Vec::with_capacity(9);
+                let mut prep_ms=Vec::with_capacity(9);
                 let mut error=0f64;
                 let mut alloc_max=0;
                 let mut first_ms=0.;
@@ -196,6 +197,16 @@ async fn measure_async()->Result<(),String> {
                     let c_ms=start.elapsed().as_secs_f64()*1e3;
                     let mark=crate::counting::mark();
                     let start=std::time::Instant::now();
+                    volume.write_mobile_pressure_rows(&mut rows).map_err(|e|format!("export {e:?}"))?;
+                    packed.clear();
+                    for row in &rows {
+                        for v in row.weights.into_iter().chain(row.ghosts) {packed.extend_from_slice(&v.to_le_bytes());}
+                    }
+                    initial_bytes.clear();rhs_bytes.clear();
+                    for v in &initial {initial_bytes.extend_from_slice(&v.to_le_bytes());}
+                    for v in &rhs {rhs_bytes.extend_from_slice(&v.to_le_bytes());}
+                    if crate::counting::mark().since(mark).allocs!=0 {return Err("préparation alloue".into());}
+                    let p_ms=start.elapsed().as_secs_f64()*1e3;
                     let g_ms=gpu.run(&packed,&rhs_bytes,&initial_bytes,sweeps,&mut result)?;
                     let w_ms=start.elapsed().as_secs_f64()*1e3;
                     let allocations=crate::counting::mark().since(mark).allocs;
@@ -205,13 +216,13 @@ async fn measure_async()->Result<(),String> {
                         error=error.max((*a as f64-*b as f64).abs()/scale);
                     }
                     if rep==0 {first_ms=w_ms;} else {
-                        wall.push(w_ms);cpu_ms.push(c_ms);
+                        wall.push(w_ms);cpu_ms.push(c_ms);prep_ms.push(p_ms);
                         if let Some(ms)=g_ms {device_ms.push(ms);}
                         alloc_max=alloc_max.max(allocations);
                     }
                 }
-                wall.sort_by(f64::total_cmp);cpu_ms.sort_by(f64::total_cmp);device_ms.sort_by(f64::total_cmp);
-                println!("PRESSION_GPU_S288 nx={nx} nz={nz} coupe={cut} lissages={sweeps} erreur_relative={error:e} cpu_mediane_ms={:.6} complet_mediane_ms={:.6} complet_max_ms={:.6} premier_ms={first_ms:.6} gpu_mediane_ms={:?} allocations_max={alloc_max}",cpu_ms[4],wall[4],wall[8],device_ms.get(4));
+                wall.sort_by(f64::total_cmp);cpu_ms.sort_by(f64::total_cmp);device_ms.sort_by(f64::total_cmp);prep_ms.sort_by(f64::total_cmp);
+                println!("PRESSION_GPU_S288 nx={nx} nz={nz} coupe={cut} lissages={sweeps} erreur_relative={error:e} cpu_mediane_ms={:.6} complet_mediane_ms={:.6} complet_max_ms={:.6} premier_ms={first_ms:.6} preparation_mediane_ms={:.6} gpu_mediane_ms={:?} allocations_max={alloc_max}",cpu_ms[4],wall[4],wall[8],prep_ms[4],device_ms.get(4));
                 if error>1e-5 {return Err("precision du port refusee".into());}
             }
             // Repos exact, après des données non nulles : couvre aussi la réinitialisation.

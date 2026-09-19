@@ -2,12 +2,15 @@ use super::*;
 
 #[test]
 fn exported_mobile_rows_match_native_operator_s288() {
-    for (nx,nz) in [(16,12),(31,19)] {
+    for (nx,nz,dx) in [(16,12,0.5),(31,19,2.)] {
         for cut in [false,true] {
-            let ground: Vec<f32> = (0..nx).map(|i| if cut { 0.3+0.4*(i%3) as f32 } else { 0. }).collect();
-            let mut v = mobile_volume(nx,nz,1.,&ground);
-            let eta: Vec<f32> = (0..nx).map(|i| nz as f32-3.2 + 0.9*((i as f32)*0.7).sin()).collect();
-            v.set_free_surface(&eta,nz as f32-3.).unwrap();
+            let ground: Vec<f32> = (0..nx).map(|i| if cut { dx*(0.3+0.4*(i%3) as f32) } else { 0. }).collect();
+            let mut v = mobile_volume(nx,nz,dx,&ground);
+            let eta: Vec<f32> = (0..nx).map(|i| dx*(nz as f32-3.2 + 0.9*((i as f32)*0.7).sin())).collect();
+            v.set_free_surface(&eta,dx*(nz as f32-3.)).unwrap();
+            // Le mode couplé porte sa géométrie dans surface_total, distincte de eta.
+            v.surface_coupled=cut;
+            for (a,b) in v.surface_total.iter_mut().zip(&eta) {*a=*b+0.15*dx;}
             let p: Vec<f32> = (0..nx*nz).map(|c| (c*37%101) as f32*0.07-2.).collect();
             let mut native = vec![0.;nx*nz];
             v.apply_mobile(&p,&mut native,&mut Control::unlimited()).unwrap();
@@ -25,12 +28,13 @@ fn exported_mobile_rows_match_native_operator_s288() {
                         sum+=a*(p[c]-p[j]);
                     }
                 }
-                assert_eq!(sum.to_bits(),native[c].to_bits(),"{nx} {cut} {c}");
+                assert_eq!((sum/(dx*dx)).to_bits(),native[c].to_bits(),"{nx} {cut} {c}");
             }
             let before=rows.clone();
             assert_eq!(v.write_mobile_pressure_rows(&mut rows[..nx]),Err(Error::Shape));
             assert_eq!(rows,before);
             v.set_free_surface(&vec![0.;nx],0.).unwrap();
+            v.surface_coupled=false;
             assert_eq!(v.write_mobile_pressure_rows(&mut rows),Err(Error::Domain));
             assert_eq!(rows,before);
         }

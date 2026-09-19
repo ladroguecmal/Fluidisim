@@ -66,6 +66,11 @@ désormais du temps simulé, sans effet des appels répétés pendant une pause.
 Le même banc imprime depuis S287 les empreintes de hauteur/vitesse de toutes les images et
 les totaux d'itérations, pour comparer les optimisations sans changer les trajectoires.
 
+`--pression-gpu` exécute le candidat ADR-172 : opérateur mobile et jusqu'à 32 lissages de
+pression sur la carte, comparés au CPU sur six géométries. Précision, transferts, coût complet
+et allocations sont publiés. **Ce banc ne remplace pas encore le solveur de l'afficheur.**
+[Réception et limites S288](../docs/validation/PRESSION-GPU-S288.md).
+
 ```powershell
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --verify
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --smoke
