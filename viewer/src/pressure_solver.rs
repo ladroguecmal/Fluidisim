@@ -22,7 +22,7 @@ const GROUP: u32 = 64;
 pub struct Resident {
     device: wgpu::Device,
     queue: wgpu::Queue,
-    stages: [wgpu::ComputePipeline; 10],
+    stages: [wgpu::ComputePipeline; 13],
     bind: wgpu::BindGroup,
     rows: wgpu::Buffer,
     rhs: wgpu::Buffer,
@@ -40,6 +40,13 @@ pub struct Resident {
     /// Nombre d'itérations du cycle, fixé par l'hôte. Le GPU n'arrête jamais de lui-même :
     /// un critère d'arrêt demanderait la lecture que ce solveur existe pour supprimer.
     pub iterations: u32,
+    /// S290 : noyaux fusionnés — 5 dispatchs par itération au lieu de 7, mathématique
+    /// inchangée. Le chemin séparé de S289 reste disponible pour prouver l'égalité au bit.
+    pub fused: bool,
+    /// S290 : itérations par tampon de commandes. `0` = un seul tampon, comme S289. Soumettre
+    /// par tranches laisse l'encodage de la suivante recouvrir l'exécution de la précédente ;
+    /// rien n'est rapatrié entre les tranches, la résidence est intacte.
+    pub chunk: u32,
     /// Lire l'horodatage GPU demande un **second** aller-retour de cartographie. Le banc du
     /// cycle le veut ; le pas réel paie ce qu'il n'utilise pas. Éteint par défaut.
     pub timing: bool,
@@ -73,6 +80,9 @@ const UPDATE_DIR: usize = 6;
 const INIT: usize = 7;
 const REDUCE_RR: usize = 8;
 const FINISH_RR: usize = 9;
+const INIT_FOLD: usize = 10;
+const APPLY_FOLD: usize = 11;
+const UPDATE_FOLD: usize = 12;
 
 fn buffer(device: &wgpu::Device, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
     device.create_buffer(&wgpu::BufferDescriptor { label: None, size, usage, mapped_at_creation: false })
@@ -130,7 +140,8 @@ impl Resident {
             label: Some(entry), layout: Some(&pipeline_layout), module: &shader, entry_point: Some(entry),
             compilation_options: Default::default(), cache: None });
         let stages = ["apply_dir", "reduce_dq", "finish_dq", "update_pr", "reduce_rz", "finish_rz",
-            "update_dir", "init", "reduce_rr", "finish_rr"].map(pipeline);
+            "update_dir", "init", "reduce_rr", "finish_rr",
+            "init_fold", "apply_fold", "update_fold"].map(pipeline);
         let query = (!features.is_empty()).then(|| device.create_query_set(&wgpu::QuerySetDescriptor {
             label: None, ty: wgpu::QueryType::Timestamp, count: 2 }));
         let query_resolve = buffer(&device, 16, wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC);
@@ -140,7 +151,10 @@ impl Resident {
             packed_rows: Vec::with_capacity(cells * 32),
             packed_rhs: Vec::with_capacity(cells * 4),
             packed_p: Vec::with_capacity(cells * 4),
-            iterations, timing: false, last_device_ms: None, last_wall_ms: 0., last_pack_ms: 0., last_encode_ms: 0., last_submit_ms: 0.,
+            // S290 : défauts reçus au bit contre le chemin de S289. `16` tient le mieux sur les
+            // six couples taille/longueur mesurés ; `32` est à 3-7 % et `8` clairement moins bon.
+            // L'optimum se déplace de quelques pour cent et n'est calibré pour aucune taille.
+            iterations, fused: true, chunk: 16, timing: false, last_device_ms: None, last_wall_ms: 0., last_pack_ms: 0., last_encode_ms: 0., last_submit_ms: 0.,
             last_wait_ms: 0., last_read_ms: 0., last_dispatches: 0,
             last_residual2: 0., last_rz: 0.,
             last_allocations: 0, calls: 0,
@@ -209,49 +223,83 @@ impl Resident {
         let encode = std::time::Instant::now();
         let mut dispatches = 0u32;
         let groups = (self.cells as u32).div_ceil(GROUP);
-        let mut encoder = self.device.create_command_encoder(&Default::default());
-        {
-            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
-                label: Some("cycle de pression"),
-                timestamp_writes: self.query.as_ref().map(|q| wgpu::ComputePassTimestampWrites {
-                    query_set: q, beginning_of_pass_write_index: Some(0), end_of_pass_write_index: Some(1) }),
-            });
-            pass.set_bind_group(0, &self.bind, &[]);
-            let stages = &self.stages;
-            let mut run = |pass: &mut wgpu::ComputePass, stage: usize, count: u32| {
-                pass.set_pipeline(&stages[stage]);
-                pass.dispatch_workgroups(count, 1, 1);
-                dispatches += 1;
-            };
-            run(&mut pass, INIT, groups);
-            run(&mut pass, REDUCE_RZ, groups);
-            run(&mut pass, FINISH_RZ, 1);
-            for _ in 0..self.iterations {
-                run(&mut pass, APPLY, groups);
-                run(&mut pass, REDUCE_DQ, groups);
-                run(&mut pass, FINISH_DQ, 1);
-                run(&mut pass, UPDATE_PR, groups);
-                run(&mut pass, REDUCE_RZ, groups);
-                run(&mut pass, FINISH_RZ, 1);
-                run(&mut pass, UPDATE_DIR, groups);
+        // Tranches : chacune est un tampon de commandes soumis dès qu'il est enregistré. Les
+        // soumissions d'une même file s'exécutent dans l'ordre, et **rien n'est rapatrié entre
+        // elles** — le cycle reste résident, seul l'enregistrement se recouvre avec l'exécution.
+        let mut submit_ms = 0.;
+        let mut done = 0u32;
+        let mut opening = true;
+        loop {
+            let take = if self.chunk == 0 { self.iterations } else { self.chunk.min(self.iterations - done) };
+            let closing = done + take >= self.iterations;
+            // L'horodatage ne vaut que sur une soumission unique : sur plusieurs, il compterait
+            // aussi les creux entre tranches. Il est alors tu, plutôt que publié faussement.
+            let single = opening && closing && self.timing;
+            let mut encoder = self.device.create_command_encoder(&Default::default());
+            {
+                let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+                    label: Some("cycle de pression"),
+                    timestamp_writes: self.query.as_ref().filter(|_| single).map(|q| wgpu::ComputePassTimestampWrites {
+                        query_set: q, beginning_of_pass_write_index: Some(0), end_of_pass_write_index: Some(1) }),
+                });
+                pass.set_bind_group(0, &self.bind, &[]);
+                let stages = &self.stages;
+                let mut run = |pass: &mut wgpu::ComputePass, stage: usize, count: u32| {
+                    pass.set_pipeline(&stages[stage]);
+                    pass.dispatch_workgroups(count, 1, 1);
+                    dispatches += 1;
+                };
+                if opening {
+                    if self.fused {
+                        run(&mut pass, INIT_FOLD, groups);
+                    } else {
+                        run(&mut pass, INIT, groups);
+                        run(&mut pass, REDUCE_RZ, groups);
+                    }
+                    run(&mut pass, FINISH_RZ, 1);
+                }
+                for _ in 0..take {
+                    if self.fused {
+                        run(&mut pass, APPLY_FOLD, groups);
+                        run(&mut pass, FINISH_DQ, 1);
+                        run(&mut pass, UPDATE_FOLD, groups);
+                        run(&mut pass, FINISH_RZ, 1);
+                    } else {
+                        run(&mut pass, APPLY, groups);
+                        run(&mut pass, REDUCE_DQ, groups);
+                        run(&mut pass, FINISH_DQ, 1);
+                        run(&mut pass, UPDATE_PR, groups);
+                        run(&mut pass, REDUCE_RZ, groups);
+                        run(&mut pass, FINISH_RZ, 1);
+                    }
+                    run(&mut pass, UPDATE_DIR, groups);
+                }
+                if closing {
+                    // Diagnostic seul : `‖r‖²` du cycle, écrit dans la case `DQ` désormais libre.
+                    run(&mut pass, REDUCE_RR, groups);
+                    run(&mut pass, FINISH_RR, 1);
+                }
             }
-            // Diagnostic seul : `‖r‖²` du cycle, écrit dans la case `DQ` désormais libre.
-            run(&mut pass, REDUCE_RR, groups);
-            run(&mut pass, FINISH_RR, 1);
+            if closing {
+                encoder.copy_buffer_to_buffer(&self.state, 0, &self.read, 0, (self.cells * 4) as u64);
+                encoder.copy_buffer_to_buffer(&self.scalar, 0, &self.read, (self.cells * 4) as u64, 16);
+                if let Some(q) = self.query.as_ref().filter(|_| single) {
+                    encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
+                    encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
+                }
+            }
+            let commands = encoder.finish();
+            let sent = std::time::Instant::now();
+            self.queue.submit([commands]);
+            submit_ms += sent.elapsed().as_secs_f64() * 1e3;
+            done += take;
+            opening = false;
+            if closing { break; }
         }
-        encoder.copy_buffer_to_buffer(&self.state, 0, &self.read, 0, (self.cells * 4) as u64);
-        encoder.copy_buffer_to_buffer(&self.scalar, 0, &self.read, (self.cells * 4) as u64, 16);
-        let timed = self.timing;
-        if let Some(q) = self.query.as_ref().filter(|_| timed) {
-            encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
-            encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
-        }
-        let commands = encoder.finish();
-        self.last_encode_ms = encode.elapsed().as_secs_f64() * 1e3;
+        let timed = self.timing && self.chunk == 0;
+        self.last_encode_ms = encode.elapsed().as_secs_f64() * 1e3 - submit_ms;
         self.last_dispatches = dispatches;
-        let sent = std::time::Instant::now();
-        self.queue.submit([commands]);
-        self.last_submit_ms = sent.elapsed().as_secs_f64() * 1e3;
+        self.last_submit_ms = submit_ms;
         let waited = std::time::Instant::now();
         self.map(&self.read)?;
         self.last_wait_ms = waited.elapsed().as_secs_f64() * 1e3;
@@ -386,6 +434,11 @@ async fn measure_async() -> Result<(), String> {
         let domain = Domain { nx, nz, dx };
         let mut gpu = Resident::new(domain, 0).await?;
         gpu.timing = true;
+        // Ce banc est la **reproduction** de la réception de S289 : il reste sur le chemin
+        // d'alors — noyaux séparés, un seul tampon de commandes — pour que ses nombres soient
+        // encore comparables. Les variantes de S290 ont leur propre banc.
+        gpu.fused = false;
+        gpu.chunk = 0;
         if nx == 128 {
             for count in [64u32, 256, 1024] {
                 for alternating in [false, true] {
@@ -608,6 +661,88 @@ async fn measure_step_async() -> Result<(), String> {
                 // que ne le fait la tolérance à laquelle le cœur accepte (S199, 1e-5 relatif).
                 if drift > 1e-4 * dx as f64 {
                     return Err(format!("trajectoire déplacée de {drift:e} m"));
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+// ─── S290 : variantes d'encodage, contre le chemin de S289 ─────────────────────────────────
+
+/// Capture le problème de pression d'un vrai pas, sans le perturber (candidat qui décline).
+fn capture_problem(nx: usize, nz: usize, dx: f32, cut: bool)
+    -> Result<(Vec<PressureRow>, Vec<f32>, Vec<f32>), String> {
+    let cells = nx * nz;
+    let ground: Vec<f32> = (0..nx).map(|i| if cut { dx * (0.3 + 0.4 * (i % 3) as f32) } else { 0. }).collect();
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 28);
+    let mut volume = Volume::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+        Domain { nx, nz, dx }, 1025., 9.81, &ground).map_err(|e| format!("volume {e:?}"))?;
+    let rest = (nz as f32 - 3.) * dx;
+    let eta: Vec<f32> = (0..nx).map(|i| rest + 0.12 * dx * (i as f32 * 0.7).sin()).collect();
+    volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+    let mut capture = Capture { rows: Vec::new(), rhs: Vec::new(), start: Vec::new() };
+    let mut rows = vec![PressureRow::default(); cells];
+    let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut capture, used: false, refused: false };
+    let step = volume.step_surface_mobile_with(2000, 4000, 600_000_000, &jobs, &Frozen, Some(&mut ext))
+        .map_err(|e| format!("pas {e:?}"))?;
+    if ext.used || step.report.is_none() { return Err("capture inattendue".into()); }
+    Ok((capture.rows, capture.rhs, capture.start))
+}
+
+pub fn measure_variants() -> Result<(), String> { pollster::block_on(measure_variants_async()) }
+
+/// Critères déclarés avant mesure. Les deux changements de S290 sont censés être **gratuits en
+/// précision** : les noyaux fusionnés replient une valeur que le même fil vient d'écrire, et les
+/// tranches n'émettent pas d'autres commandes, seulement dans plusieurs tampons. On exige donc
+/// l'**égalité au bit** avec le chemin de S289 — pas une tolérance. Un seul bit d'écart refuse la
+/// variante, parce qu'il voudrait dire que le raisonnement était faux quelque part.
+async fn measure_variants_async() -> Result<(), String> {
+    for (nx, nz, dx) in [(128usize, 52usize, 2.0f32), (256, 128, 0.5)] {
+        let mut gpu = Resident::new(Domain { nx, nz, dx }, 0).await?;
+        gpu.timing = true;
+        for cut in [false, true] {
+            let (rows, rhs, start) = capture_problem(nx, nz, dx, cut)?;
+            for iterations in [32u32, 128, 256] {
+                gpu.iterations = iterations;
+                let mut reference: Option<Vec<f32>> = None;
+                for (fused, chunk) in [(false, 0u32), (true, 0), (false, 16), (true, 16), (true, 32), (true, 8)] {
+                    gpu.fused = fused;
+                    gpu.chunk = chunk;
+                    let mut p = start.clone();
+                    let mut wall = Vec::with_capacity(9);
+                    let mut parts = [const { Vec::<f64>::new() }; 4];
+                    let mut allocations = 0;
+                    for rep in 0..10 {
+                        p.copy_from_slice(&start);
+                        gpu.solve(&rows, &rhs, &mut p)?;
+                        if rep > 0 {
+                            wall.push(gpu.last_wall_ms);
+                            for (v, ms) in parts.iter_mut().zip([gpu.last_pack_ms, gpu.last_encode_ms,
+                                gpu.last_submit_ms, gpu.last_wait_ms]) { v.push(ms); }
+                            allocations = allocations.max(gpu.last_allocations);
+                        }
+                    }
+                    wall.sort_by(f64::total_cmp);
+                    for v in parts.iter_mut() { v.sort_by(f64::total_cmp); }
+                    let (dispatches, device) = (gpu.last_dispatches, gpu.last_device_ms);
+                    let ecart = match &reference {
+                        None => { reference = Some(p.clone()); 0usize }
+                        Some(r) => r.iter().zip(&p).filter(|(a, b)| a.to_bits() != b.to_bits()).count(),
+                    };
+                    let base = wall.len() / 2;
+                    println!("VARIANTE_CG_S290 nx={nx} nz={nz} coupe={cut} iterations={iterations} \
+                        fusion={fused} tranche={chunk} dispatchs={dispatches} \
+                        complet_mediane_ms={:.6} complet_max_ms={:.6} empaquetage_ms={:.6} \
+                        encodage_ms={:.6} soumission_ms={:.6} attente_ms={:.6} gpu_ms={device:?} \
+                        allocations_max={allocations} bits_differents={ecart}",
+                        wall[base], wall[wall.len() - 1], parts[0][base], parts[1][base],
+                        parts[2][base], parts[3][base]);
+                    if ecart != 0 {
+                        return Err(format!("variante fusion={fused} tranche={chunk} : {ecart} valeurs \
+                            différentes du chemin de S289 — la mathématique devait être inchangée"));
+                    }
                 }
             }
         }

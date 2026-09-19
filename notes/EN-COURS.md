@@ -70,7 +70,7 @@ allocations qu'ADR-145 interdit à la boucle d'image. Même cause, un seul lot.
 - [x] **P2** — **mesurer avant de choisir** : décomposer les 3,93 ms en encodage / soumission /
   attente, et mesurer le coût **par dispatch** en faisant varier leur nombre à travail égal.
   C'est cette mesure qui décide de la voie, pas le raisonnement.
-- [ ] **P3** — réduction des dispatchs à **mathématique identique** : replier chaque réduction
+- [x] **P3** — réduction des dispatchs à **mathématique identique** : replier chaque réduction
   dans le noyau qui produit ses valeurs, 7 par itération → 5. Réception **au bit** contre le
   cycle de S289, puis coût.
 - [ ] **P4** — deuxième palier, seulement si P2 le justifie : réduction finale par le dernier
@@ -129,5 +129,33 @@ objectif : le temps.
 mathématique inchangée donc réception **au bit** exigible ; (2) soumettre par tranches, pour
 que l'encodage de la tranche suivante recouvre l'exécution de la précédente. Les deux sont sans
 risque numérique. Les voies 3 et 4 restent pour P4, sous condition de mesure.
+
+P3 : les deux voies sûres sont construites et **reçues au bit**, banc `--pression-variantes`.
+72 combinaisons (2 tailles × 2 fonds × 3 longueurs × 6 variantes) : **zéro valeur différente**
+du chemin de S289. Défauts fixés à fusion active, tranche 16.
+
+Dispatchs par itération 7 → 5 ; total à 128 itérations 901 → 644.
+Gains sur l'appel complet (médiane sur 9), contre le chemin de S289 :
+6 656 mailles — 32 itérations 1,7837 → 1,1005 ms (×1,62) ; 128 : 4,1725 → 2,5750 (×1,62) ;
+256 : 7,2247 → 4,7664 (×1,52). 32 768 mailles — 32 : 2,2436 → 1,6628 (×1,35) ;
+128 : 5,0288 → 3,3431 (×1,50) ; 256 : 9,5180 → 5,5391 (×1,72).
+
+**Bonus non prévu** : la fusion accélère aussi la **carte** — 1,1549 → 0,9431 ms à 6 656/128,
+1,6770 → 1,3461 à 32 768/128, 3,3362 → 2,6558 à 32 768/256, soit −18 à −20 %. Moins de
+frontières de dispatch, donc moins de barrières implicites.
+
+**Ce que les tranches déplacent** : l'attente s'effondre (1,3630 → 0,2289 ms à 6 656/128), parce
+que la carte a fini avant que le CPU n'ait fini d'enregistrer. L'appel est désormais **borné par
+l'encodage**, qui reste 1,65 à 1,81 ms à 128 itérations. Tranche 8 est clairement moins bonne
+(trop de soumissions) ; 16 et 32 se tiennent à 3-7 %.
+
+**Le plafond de ×2,1 annoncé en P2 n'est plus le bon** : il supposait l'attente incompressible.
+Les tranches l'ayant absorbée, ce qui borne est `empaquetage + encodage + soumission`, et
+supprimer encore 2 dispatchs par itération (voie 3 ou 4) viserait ≈ 1,4 ms, soit ×2,9 sur
+l'appel. À mesurer, pas à annoncer.
+
+**Allocations** : elles **montent** avec les tranches — 990 → 988 (fusion+16) mais 1 245 sans
+fusion, car chaque tampon de commandes alloue. Permises et publiées (ADR-145 §2), constantes à
+longueur de cycle et tranche fixées.
 
 Hors de ce lot : multigrille GPU, budget 2 ms, 3D, solides, multiplateforme, garantie de pic.

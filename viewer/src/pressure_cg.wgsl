@@ -188,3 +188,60 @@ fn update_dir(@builtin(global_invocation_id) id: vec3<u32>) {
     if c >= params.cells { return; }
     state[at(D, c)] = state[at(Z, c)] + scalar[BETA] * state[at(D, c)];
 }
+
+// ─── S290 : noyaux fusionnés — chaque réduction est repliée dans le noyau qui produit ses
+// valeurs. La valeur repliée est celle que le même fil vient de calculer et d'écrire, donc
+// **la mathématique est inchangée** et le découpage des groupes aussi : l'égalité au bit avec
+// les noyaux séparés est exigible, et le banc la vérifie. Le repli se fait hors de toute
+// sortie anticipée, parce que `fold` porte des barrières de groupe.
+
+@compute @workgroup_size(64)
+fn init_fold(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32, @builtin(workgroup_id) wid: vec3<u32>) {
+    var v = 0.0;
+    let c = id.x;
+    if c < params.cells {
+        let op = stencil(P, c);
+        var m = 0.0;
+        if op.y > 0.0 { m = 1.0 / op.y; }
+        state[at(M, c)] = m;
+        let r = rhs[c] - op.x;
+        state[at(R, c)] = r;
+        let z = m * r;
+        state[at(Z, c)] = z;
+        state[at(D, c)] = z;
+        v = r * z;
+    }
+    fold(v, lid, wid.x);
+}
+
+@compute @workgroup_size(64)
+fn apply_fold(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32, @builtin(workgroup_id) wid: vec3<u32>) {
+    var v = 0.0;
+    let c = id.x;
+    if c < params.cells {
+        let q = stencil(D, c).x;
+        state[at(Q, c)] = q;
+        v = state[at(D, c)] * q;
+    }
+    fold(v, lid, wid.x);
+}
+
+@compute @workgroup_size(64)
+fn update_fold(@builtin(global_invocation_id) id: vec3<u32>,
+    @builtin(local_invocation_index) lid: u32, @builtin(workgroup_id) wid: vec3<u32>) {
+    var v = 0.0;
+    let c = id.x;
+    if c < params.cells {
+        let a = scalar[ALPHA];
+        let p = state[at(P, c)] + a * state[at(D, c)];
+        let r = state[at(R, c)] - a * state[at(Q, c)];
+        state[at(P, c)] = p;
+        state[at(R, c)] = r;
+        let z = state[at(M, c)] * r;
+        state[at(Z, c)] = z;
+        v = r * z;
+    }
+    fold(v, lid, wid.x);
+}
