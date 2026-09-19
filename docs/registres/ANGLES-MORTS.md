@@ -3883,3 +3883,9 @@ reçue, après le mode linéaire S295 : [preuve](../validation/DELTA3D-MOBILE-S2
 Le couplage B/W, la production résidente et la scène restent à construire ; la réception CPU
 ne ferme ni A295 ni la porte B. A274 conserve sa portée : la loi du plancher des lignes
 fantômes en fonction de θ et de la taille n'est pas établie par ce lot.
+
+*S297, 2026-09-19 — suivi A295, ouverte.* La référence 3D dispose du couplage B/W,
+reçu contre HOS et un fond uniforme traversant ; un aperçu animé CPU est livré. Les frontières
+construites restent partiellement reçues (absorption/progression S269–S274 à rejouer), les
+fournisseurs réels et la production GPU manquent. A274 non fermée.
+[Preuves et limites](../validation/DELTA3D-COUPLEE-S297.md).

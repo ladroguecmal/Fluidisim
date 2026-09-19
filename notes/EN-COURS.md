@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S297 — porte B, lot 3 : couplage B/W dans la référence 3D et aperçu animé.
+Session : S297 — terminée : couplage B/W dans la référence 3D et aperçu animé livré.
 Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : « Continue, et j'aimerais pouvoir voir après », 2026-09-19.
 Objectif : étendre les équations reçues ADR-149/152/153/164/165/166 aux deux dimensions
@@ -79,7 +79,7 @@ reproductible et paramètres publiés. Aucune réception perceptive ou temps ré
 - [x] **P4** — réception : cas limite HOS, invariance transverse et cas oblique ; preuve S297.
 - [x] **P5** — aperçu animé local calculé depuis le pas 3D, rendu en images de banc, vérification
   visuelle et livraison ; aucune page HTML ni état δ écrit sur disque.
-- [ ] **P6** — rituel REPRISE §6, file et feuille de route, jeton libre, commits vérifiés.
+- [x] **P6** — rituel REPRISE §6, file et feuille de route, jeton libre, commits vérifiés.
 
 ### Notes de reprise
 

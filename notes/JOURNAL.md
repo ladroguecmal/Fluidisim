@@ -14875,3 +14875,39 @@ multiplateforme restent dans la file, sans réduction d'ambition ni nouvel arbit
 I-03 à I-08, I-12, I-13, I-17 ; aucun amendé. Pas de nouvel ADR ni de leçon forcée.
 Rituel : file active entière relue, état J2/porte B remplacé, index et passation actualisés,
 copie unique conservée ; navigation et plafonds vérifiés.
+
+## S297 — 2026-09-19 — référence 3D couplée et premier aperçu animé
+
+**Entrée.** « Continue, et j'aimerais pouvoir voir après », puis deux « continue » pendant le
+travail. Copie unique, master propre ; plan committé avant code. Agent Codex GPT-6 desktop.
+
+**Capacité reçue.** La référence MAC 3D résout maintenant la perturbation du fond B/W :
+source et advection croisée, surface totale et fantômes, affinage au plancher, bandes aux quatre
+bords, relaxation de hauteur. **Consommateurs** : banc HOS et aperçu du véritable pas 3D,
+puis référence qui jugera le pas GPU de la porte B (ADR-175 §4.1).
+**Preuve** : [DELTA3D-COUPLEE-S297](../docs/validation/DELTA3D-COUPLEE-S297.md).
+
+**Mesures.** HOS à 128 colonnes : profil 0,148 % / 0,178 % pour 5 / 10 cm, harmonique
+0,346 % / 0,532 %, décroissants avec le raffinement. L'affinage est réellement exercé.
+Fond nul identique au bit au mode mobile ; invariance transverse et rotation à un ulp ;
+courant uniforme traversant sans perturbation créée ; refus atomiques et zéro allocation.
+Suite complète : **537 réussis, 18 ignorés**, aucun échec ; afficheur inchangé.
+
+**Visible.** GIF local de 121 images, 6 s physiques : impulsion dans deux ondes analytiques
+croisées ; surface totale à échelle réelle et différence au témoin amplifiée ×4. Inspection
+de plusieurs PNG et ouverture dans Codex ; habillage de banc explicite. Aucun état δ sérialisé.
+Ce n'est ni la mer spectrale de production ni un verdict perceptif sur la porte B.
+
+**Partiel et suite.** Bandes/éponge construites, réception absorption et houle progressive
+S269–S274 encore due. Fournisseurs réels B/W, production GPU résidente, rendu dans la mer
+étalée et revue à faire. La suite reste dans la porte B : compléter ces réceptions en préparant
+la production GPU et sa surface publiée, pour passer de l'aperçu demandé à la scène interactive.
+Pas de retour au coût 2D : recommandation S293 maintenue. V, B2, bathymétrie, multiplateforme
+restent dans la file ; aucun retrait d'ambition ni arbitrage nouveau.
+
+**Rituel.** Maillons **0** : un critère de référence de la porte B avance, avec consommateur
+et preuve. A295 actualisée, A274 ouverte ; pas de leçon forcée. File active entière relue,
+feuille de route et index remplacés/complétés. I-04/I-06/I-07/I-08/I-12/I-13/I-17 inchangés.
+Navigation/plafonds vérifiés, copie unique, jeton libre. Deux battements intermédiaires ont été
+reportés une à deux minutes trop tard par erreur de saisie (P1/P3) ; battement final relu
+séparément et exact, sans conséquence de concurrence constatée.

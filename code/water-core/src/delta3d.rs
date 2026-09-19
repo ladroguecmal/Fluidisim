@@ -15,7 +15,7 @@
 //! # Ce qu'il n'est pas encore
 //!
 //! Surface mobile (S296) : fonction hauteur et fantômes dans `delta3d_mobile.rs`, Jacobi.
-//! Ni couplage à B/W, ni faces coupées, ni budget coopératif : la
+//! Couplage B/W (S297) dans `delta3d_coupling.rs`. Ni faces coupées ni budget coopératif : la
 //! référence sort de la boucle d'image, I-05 y est porté par la production. Le mode linéaire reste sans préconditionneur :
 //! le gradient conjugué est celui du chemin 2D à couvercle fixe, ce qui garde une hauteur
 //! indépendante de `y` **exactement** indépendante de `y` — un Jacobi, dont la diagonale change
@@ -144,9 +144,9 @@ impl Volume3 {
         let nw = (nz + 1).checked_mul(cols).ok_or(Error::Domain)?;
         let fx = (nx + 1).checked_mul(ny).ok_or(Error::Domain)?;
         let fy = (ny + 1).checked_mul(nx).ok_or(Error::Domain)?;
-        // Trois jeux de faces (publié, prédit, sauvegardé), sept champs de mailles (pression,
-        // second membre, résidu, direction, produit, sauvegarde, Jacobi), quatre de colonnes (hauteur,
-        // reste, et leurs sauvegardes), deux jeux de flux de colonne.
+        // Trois jeux de faces ; huit champs de mailles (dont Jacobi et pression avant affinage),
+        // six de colonnes (hauteur/reste/sauvegardes, total, fantôme vertical), fantômes
+        // latéraux u/v, et deux jeux de flux (perturbation et bande) par axe horizontal.
         let floats = nu.checked_add(nv).and_then(|n| n.checked_add(nw)).and_then(|n| n.checked_mul(3))
             .and_then(|n| cells.checked_mul(8).and_then(|c| n.checked_add(c)))
             .and_then(|n| cols.checked_mul(6).and_then(|c| n.checked_add(c)))
