@@ -75,7 +75,7 @@ itération — que le **pas réel** consomme sous les portes d'acceptation incha
   déduit exactement des lignes déjà exportées. Une étape de moins, pas une de moins faite.*
 - [x] **P3** — GPU : cycle PCG résident — réductions d'arbre, `α`/`β` produits et consommés sur
   la carte, aucun retour CPU entre itérations ; réception contre le CG du cœur.
-- [ ] **P4** — consommation par le **pas réel** : candidat GPU proposé au pas mobile, itérations
+- [x] **P4** — consommation par le **pas réel** : candidat GPU proposé au pas mobile, itérations
   restantes, acceptations/refus et coût mesurés contre le chemin CPU seul.
 - [ ] **P5** — rituel §6 : preuve, journal, registres/index/feuille, jeton libre.
 
@@ -121,6 +121,34 @@ Résidu relatif vrai atteint : 1,65e-4 à 6 656 mailles, 2,64e-4 à 32 768, pour
 Le chemin d'image d'ADR-145 n'admet pas cela ; l'enregistrement du cycle une fois pour toutes
 (paquet de commandes réutilisé, ou dispatch indirect) est le lot qui lèverait ce point.
 Première mesure fautive corrigée avant publication : le compteur ne suivait que `propose`.
+
+P4 : **le pas réel consomme le solveur**, `--pression-pas`. 60 pas de 2 ms, témoin et
+conduit partis du même état, `SequentialJobs`, release.
+6 656 mailles (128×52, dx 2 m), cycle 128 : médiane du pas 9,2236 → 6,6220 ms (fond plat)
+et 10,4352 → 6,9694 (fond coupé), soit ×1,39 et ×1,50 ; itérations du cœur 427 → 19 et
+430 → 19. 32 768 mailles (256×128, dx 0,5), cycle 256 : 44,8697 → 30,2744 et 44,3670 → 30,3977,
+×1,48 et ×1,46 ; itérations 353 → 61 et 352 → 61. Dans tous les cas : 60/60 propositions
+retenues, 0 refus, 0 pas dégradé de part et d'autre, dérive de surface 0 à 7,63e-6 m.
+
+**La longueur du cycle n'est pas libre.** À 6 656 mailles, 32 itérations (×0,95) et 256 (×0,89)
+perdent tous les deux ; seul 128 gagne. À 32 768 le gain croît encore à 256. Il n'y a pas de
+réglage unique, et rien n'ajuste cette longueur automatiquement.
+
+**Où part le temps, mesuré et non supposé.** À 6 656 mailles / cycle 128, l'appel coûte
+4,1989 ms : 0,2606 d'empaquetage et 3,9333 d'encodage+soumission+attente — alors que la carte
+elle-même ne calcule que 1,15 ms (P3). À 32 768 / cycle 256 : 11,6996 = 1,7302 + 9,9554 pour
+3,32 ms de carte. Le poste dominant est **l'enregistrement des commandes** : 7 dispatchs par
+itération, 1 792 à 256 itérations — la même cause que les ≈ 7 allocations par itération.
+Réduire le nombre de dispatchs par itération, ou enregistrer le cycle une fois, est le lot
+suivant, et il est désigné par la mesure.
+
+Retirer le second aller-retour de cartographie (horodatage GPU) **ne donne pas de gain
+mesurable** : 4,31 → 4,18 ms à 6 656 mailles, mais 7,42 → 8,09 à 32 768 — dans la variance de
+la machine. Éteint par défaut parce qu'il ne sert à rien sur ce chemin, pas parce qu'il a été
+mesuré comme un gain.
+
+**Ce qui n'est pas reçu** : le budget eau de 2 ms (6,62 ms par pas, soit ×3,3), I-06 du chemin
+d'image, la 3D, l'identité inter-GPU, et tout réglage automatique de la longueur du cycle.
 
 Ce qui reste hors de ce lot, et doit le rester tant qu'il n'est pas prouvé : identité
 inter-GPU, budget eau de 2 ms reçu, I-06 du chemin d'image, multigrille GPU, 3D.

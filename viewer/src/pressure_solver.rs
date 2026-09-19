@@ -40,9 +40,16 @@ pub struct Resident {
     /// Nombre d'itérations du cycle, fixé par l'hôte. Le GPU n'arrête jamais de lui-même :
     /// un critère d'arrêt demanderait la lecture que ce solveur existe pour supprimer.
     pub iterations: u32,
+    /// Lire l'horodatage GPU demande un **second** aller-retour de cartographie. Le banc du
+    /// cycle le veut ; le pas réel paie ce qu'il n'utilise pas. Éteint par défaut.
+    pub timing: bool,
     /// Diagnostics du dernier appel — jamais des portes d'acceptation.
     pub last_device_ms: Option<f64>,
     pub last_wall_ms: f64,
+    /// Décomposition du temps hors carte : empaquetage des trois entrées, puis encodage +
+    /// soumission + attente de la cartographie. Diagnostic, jamais une porte.
+    pub last_pack_ms: f64,
+    pub last_wait_ms: f64,
     pub last_residual2: f32,
     pub last_rz: f32,
     pub last_allocations: u64,
@@ -126,7 +133,8 @@ impl Resident {
             packed_rows: Vec::with_capacity(cells * 32),
             packed_rhs: Vec::with_capacity(cells * 4),
             packed_p: Vec::with_capacity(cells * 4),
-            iterations, last_device_ms: None, last_wall_ms: 0., last_residual2: 0., last_rz: 0.,
+            iterations, timing: false, last_device_ms: None, last_wall_ms: 0., last_pack_ms: 0., last_wait_ms: 0.,
+            last_residual2: 0., last_rz: 0.,
             last_allocations: 0, calls: 0,
         })
     }
@@ -165,6 +173,8 @@ impl Resident {
         // `⟨r,z⟩` part de zéro : le premier `finish_rz` donne donc `β = 0`, et la direction
         // reste celle de l'amorçage.
         self.queue.write_buffer(&self.scalar, 0, &[0u8; 16]);
+        self.last_pack_ms = start.elapsed().as_secs_f64() * 1e3;
+        let submit = std::time::Instant::now();
         let groups = (self.cells as u32).div_ceil(GROUP);
         let mut encoder = self.device.create_command_encoder(&Default::default());
         {
@@ -196,12 +206,14 @@ impl Resident {
         }
         encoder.copy_buffer_to_buffer(&self.state, 0, &self.read, 0, (self.cells * 4) as u64);
         encoder.copy_buffer_to_buffer(&self.scalar, 0, &self.read, (self.cells * 4) as u64, 16);
-        if let Some(q) = &self.query {
+        let timed = self.timing;
+        if let Some(q) = self.query.as_ref().filter(|_| timed) {
             encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
             encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
         }
         self.queue.submit([encoder.finish()]);
         self.map(&self.read)?;
+        self.last_wait_ms = submit.elapsed().as_secs_f64() * 1e3;
         {
             let data = self.read.slice(..).get_mapped_range().map_err(|e| e.to_string())?;
             for (v, bytes) in p.iter_mut().zip(data[..self.cells * 4].chunks_exact(4)) {
@@ -213,7 +225,7 @@ impl Resident {
         }
         self.read.unmap();
         self.last_device_ms = None;
-        if self.query.is_some() {
+        if self.query.is_some() && timed {
             self.map(&self.query_read)?;
             let ms = {
                 let data = self.query_read.slice(..).get_mapped_range().map_err(|e| e.to_string())?;
@@ -330,6 +342,7 @@ async fn measure_async() -> Result<(), String> {
         let inv = 1. / (dx * dx);
         let domain = Domain { nx, nz, dx };
         let mut gpu = Resident::new(domain, 0).await?;
+        gpu.timing = true;
         for cut in [false, true] {
             let ground: Vec<f32> = (0..nx).map(|i| if cut { dx * (0.3 + 0.4 * (i % 3) as f32) } else { 0. }).collect();
             let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
@@ -415,6 +428,126 @@ async fn measure_async() -> Result<(), String> {
             gpu.iterations = 32;
             gpu.solve(&crows, &zeros, &mut p)?;
             if p.iter().any(|v| *v != 0.) { return Err("repos GPU non nul".into()); }
+        }
+    }
+    Ok(())
+}
+
+// ─── Consommation par le pas réel ─────────────────────────────────────────────────────────
+
+/// Candidat de production : le cycle résident, et rien d'autre. Le compte des propositions
+/// retenues et refusées est tenu par le cœur, pas par lui.
+struct Counted<'a> { solver: &'a mut Resident, device_ms: f64, wall_ms: f64, pack_ms: f64,
+    wait_ms: f64, allocations: u64 }
+impl PressureCandidate for Counted<'_> {
+    fn propose(&mut self, problem: PressureProblem<'_>, p: &mut [f32]) -> bool {
+        let ok = self.solver.propose(problem, p);
+        self.device_ms += self.solver.last_device_ms.unwrap_or(0.);
+        self.wall_ms += self.solver.last_wall_ms;
+        self.pack_ms += self.solver.last_pack_ms;
+        self.wait_ms += self.solver.last_wait_ms;
+        self.allocations = self.allocations.max(self.solver.last_allocations);
+        ok
+    }
+}
+
+fn scene(nx: usize, nz: usize, dx: f32, cut: bool, alloc: &mut host_impl::ArenaAllocator,
+    jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink) -> Result<Volume, String> {
+    let ground: Vec<f32> = (0..nx).map(|i| if cut { dx * (0.3 + 0.4 * (i % 3) as f32) } else { 0. }).collect();
+    let mut volume = Volume::configure(&mut HostServices { alloc, jobs, sink },
+        Domain { nx, nz, dx }, 1025., 9.81, &ground).map_err(|e| format!("volume {e:?}"))?;
+    let rest = (nz as f32 - 3.) * dx;
+    let eta: Vec<f32> = (0..nx).map(|i| rest + 0.12 * dx * (i as f32 * 0.7).sin()).collect();
+    volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+    Ok(volume)
+}
+
+fn median(values: &mut [f64]) -> f64 {
+    values.sort_by(f64::total_cmp);
+    values[values.len() / 2]
+}
+
+pub fn measure_step() -> Result<(), String> { pollster::block_on(measure_step_async()) }
+
+/// Ce que cette mesure reçoit, et ce qu'elle ne reçoit pas. Elle reçoit : le pas réel du cœur
+/// consulte le solveur résident, retient sa proposition, et **ses portes ne bougent pas** —
+/// aucun pas dégradé de plus, trajectoire de surface confondue avec celle du témoin. Elle ne
+/// reçoit ni le budget eau de 2 ms (ADR-125), ni I-06 sur le chemin d'image (le cycle alloue),
+/// ni la 3D, ni une identité inter-GPU.
+async fn measure_step_async() -> Result<(), String> {
+    const STEPS: usize = 60;
+    for (nx, nz, dx) in [(128usize, 52usize, 2.0f32), (256, 128, 0.5)] {
+        let cells = nx * nz;
+        let mut gpu = Resident::new(Domain { nx, nz, dx }, 0).await?;
+        for cut in [false, true] {
+            let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+            // Témoin : le pas historique, sans candidat. Mesuré une fois, comparé à tous.
+            let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 28);
+            let mut witness = scene(nx, nz, dx, cut, &mut arena, &jobs, &sink)?;
+            let (mut w_ms, mut w_iters, mut w_degraded) = (Vec::with_capacity(STEPS), 0u64, 0u32);
+            let mut surface = Vec::with_capacity(STEPS * nx);
+            for step in 0..STEPS {
+                let start = std::time::Instant::now();
+                let r = witness.step_surface_mobile(2000, 4000, 600_000_000, &jobs, &Frozen)
+                    .map_err(|e| format!("témoin {step} : {e:?}"))?;
+                w_ms.push(start.elapsed().as_secs_f64() * 1e3);
+                let report = r.report.ok_or("témoin expiré")?;
+                w_iters += report.iterations as u64;
+                if report.degraded { w_degraded += 1; }
+                surface.extend_from_slice(witness.surface());
+            }
+            let w_median = median(&mut w_ms.clone());
+            let w_max = w_ms.iter().fold(0f64, |m, x| m.max(*x));
+
+            for iterations in [32u32, 128, 256] {
+                gpu.iterations = iterations;
+                gpu.calls = 0;
+                let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 28);
+                let mut driven = scene(nx, nz, dx, cut, &mut arena, &jobs, &sink)?;
+                let mut rows = vec![PressureRow::default(); cells];
+                let (mut d_ms, mut d_iters, mut d_degraded) = (Vec::with_capacity(STEPS), 0u64, 0u32);
+                let (mut used, mut refused) = (0u32, 0u32);
+                let mut counted = Counted { solver: &mut gpu, device_ms: 0., wall_ms: 0., pack_ms: 0.,
+                    wait_ms: 0., allocations: 0 };
+                let mut drift = 0f64;
+                for step in 0..STEPS {
+                    let mut ext = ExternalPressure { rows: &mut rows, candidate: &mut counted, used: false, refused: false };
+                    let start = std::time::Instant::now();
+                    let r = driven.step_surface_mobile_with(2000, 4000, 600_000_000, &jobs, &Frozen, Some(&mut ext))
+                        .map_err(|e| format!("conduit {step} : {e:?}"))?;
+                    d_ms.push(start.elapsed().as_secs_f64() * 1e3);
+                    if ext.used { used += 1; }
+                    if ext.refused { refused += 1; }
+                    let report = r.report.ok_or("pas conduit expiré")?;
+                    d_iters += report.iterations as u64;
+                    if report.degraded { d_degraded += 1; }
+                    for (a, b) in surface[step * nx..(step + 1) * nx].iter().zip(driven.surface()) {
+                        drift = drift.max((*a as f64 - *b as f64).abs());
+                    }
+                }
+                let d_median = median(&mut d_ms.clone());
+                let d_max = d_ms.iter().fold(0f64, |m, x| m.max(*x));
+                let calls = counted.solver.calls.max(1) as f64;
+                println!("PRESSION_PAS_S289 nx={nx} nz={nz} coupe={cut} cycle={iterations} pas={STEPS} \
+                    temoin_mediane_ms={w_median:.4} temoin_max_ms={w_max:.4} temoin_iterations={w_iters} \
+                    conduit_mediane_ms={d_median:.4} conduit_max_ms={d_max:.4} conduit_iterations={d_iters} \
+                    gain={:.3} candidat_retenu={used} candidat_refuse={refused} \
+                    degrades_temoin={w_degraded} degrades_conduit={d_degraded} \
+                    appel_moyen_ms={:.4} empaquetage_moyen_ms={:.4} attente_moyen_ms={:.4}                     allocations_max={} derive_surface_m={drift:e}",
+                    w_median / d_median, counted.wall_ms / calls, counted.pack_ms / calls,
+                    counted.wait_ms / calls, counted.allocations);
+                if used != STEPS as u32 || refused != 0 {
+                    return Err(format!("candidat non consulté à chaque pas : {used} retenus, {refused} refusés"));
+                }
+                if d_degraded > w_degraded {
+                    return Err(format!("le candidat a dégradé des pas : {d_degraded} contre {w_degraded}"));
+                }
+                // La trajectoire appartient au cœur : le candidat ne doit pas la déplacer plus
+                // que ne le fait la tolérance à laquelle le cœur accepte (S199, 1e-5 relatif).
+                if drift > 1e-4 * dx as f64 {
+                    return Err(format!("trajectoire déplacée de {drift:e} m"));
+                }
+            }
         }
     }
     Ok(())
