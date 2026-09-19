@@ -95,7 +95,7 @@ fn configuration_refuses_what_it_cannot_hold_s295() {
 fn configuration_counts_every_buffer_it_holds_s295() {
     let (v, arena) = volume(5, 3, 4, 0.5, 9.81);
     let floats = 3 * (v.u.len() + v.v.len() + v.w.len())
-        + v.p.len() + v.rhs.len() + v.res.len() + v.dir.len() + v.tmp.len() + v.saved_p.len()
+        + v.prec.len() + v.p.len() + v.rhs.len() + v.res.len() + v.dir.len() + v.tmp.len() + v.saved_p.len()
         + v.eta.len() + v.eta_roundoff.len() + v.saved_eta.len() + v.saved_eta_roundoff.len()
         + v.flux_x.len() + v.flux_y.len();
     assert_eq!(arena.stats.persistent_bytes, floats * 4);
@@ -344,4 +344,41 @@ fn oblique_standing_wave_follows_its_dispersion_s295() {
     }
     assert!(continuous[1] < continuous[0], "le raffinement doit réduire l'erreur : {continuous:?}");
     assert!(continuous[1] < 0.01, "{continuous:?}");
+}
+
+#[test]
+fn mobile_operator_has_symmetric_ghost_rows_s296() {
+    for ny in [1, 4] {
+        let (mut v, _) = volume(7, ny, 8, 0.25, 9.81);
+        let eta: Vec<_> = (0..7*ny).map(|c| 1. + 0.21 * (c as f32 * 1.7).sin()).collect();
+        v.set_free_surface(&eta, 1.).unwrap();
+        let (mut x, mut y) = (noise(v.p.len(), 4), noise(v.p.len(), 8));
+        for k in 0..8 { for j in 0..ny { for i in 0..7 {
+            if !v.wet3(i,j,k) { x[v.c(i,j,k)]=0.; y[v.c(i,j,k)]=0.; }
+        }}}
+        let (mut ax,mut ay) = (vec![0.;x.len()],vec![0.;y.len()]);
+        v.apply_mobile3(&x,&mut ax); v.apply_mobile3(&y,&mut ay);
+        let dot = |a:&[f32],b:&[f32]| a.iter().zip(b).map(|(x,y)|*x as f64 * *y as f64).sum::<f64>();
+        assert!((dot(&x,&ay)-dot(&y,&ax)).abs() < 1e-5 * (dot(&x,&x)*dot(&ay,&ay)).sqrt());
+        assert!(dot(&x,&ax)>0.);
+        if ny == 1 {
+            use crate::delta_projection::{Domain,Volume,PressureRow};
+            let mut arena = Arena { stats: AllocStats::default(), sealed:false };
+            let mut v2 = Volume::configure(&mut HostServices{alloc:&mut arena,jobs:&Jobs,sink:&Jobs},
+                Domain{nx:7,nz:8,dx:0.25},1025.,9.81,&[0.;7]).unwrap();
+            v2.set_free_surface(&eta,1.).unwrap();
+            let mut rows = vec![PressureRow::default();56];
+            v2.write_mobile_pressure_rows(&mut rows).unwrap();
+            for c in 0..56 {
+                let mut a = 0f32;
+                for (f,offset) in [-1isize,1,-7,7].into_iter().enumerate() {
+                    let row = rows[c];
+                    if row.weights[f] == 0. {continue;}
+                    if row.ghosts[f] != 0. {a += row.weights[f]*x[c]*row.ghosts[f];}
+                    else {a += row.weights[f]*(x[c]-x[(c as isize+offset) as usize]);}
+                }
+                assert_eq!(ax[c].to_bits(),(a*16.).to_bits(),"cell {c}");
+            }
+        }
+    }
 }

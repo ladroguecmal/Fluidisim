@@ -66,6 +66,8 @@ pub struct Volume3 {
     rho: f32,
     /// **Fournie**, jamais codée en dur (ADR-007 §2, I-07).
     g_eff: f32,
+    rest: f32,
+    prec: Vec<f32>,
     /// Élévation de surface par colonne, m. `η ≡ z₀` est le repos.
     eta: Vec<f32>,
     /// Reste de la somme compensée de `η` (S233) : un déplacement plus petit que l'ulp de `z₀`
@@ -136,7 +138,7 @@ impl Volume3 {
         // second membre, résidu, direction, produit, sauvegarde), quatre de colonnes (hauteur,
         // reste, et leurs sauvegardes), deux jeux de flux de colonne.
         let floats = nu.checked_add(nv).and_then(|n| n.checked_add(nw)).and_then(|n| n.checked_mul(3))
-            .and_then(|n| cells.checked_mul(6).and_then(|c| n.checked_add(c)))
+            .and_then(|n| cells.checked_mul(7).and_then(|c| n.checked_add(c)))
             .and_then(|n| cols.checked_mul(4).and_then(|c| n.checked_add(c)))
             .and_then(|n| n.checked_add(fx)).and_then(|n| n.checked_add(fy))
             .ok_or(Error::Domain)?;
@@ -152,6 +154,8 @@ impl Volume3 {
             domain,
             rho,
             g_eff,
+            rest: z0,
+            prec: vec![0.; cells],
             eta: vec![z0; cols],
             eta_roundoff: vec![0.; cols],
             u: vec![0.; nu],
@@ -625,3 +629,6 @@ fn fingerprint(values: &[f32]) -> u64 {
 #[cfg(test)]
 #[path = "tests_delta3d.rs"]
 mod tests;
+
+#[path = "delta3d_mobile.rs"]
+mod mobile;

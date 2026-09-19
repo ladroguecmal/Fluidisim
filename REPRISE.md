@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-19 15:42 +02:00
+Battement        : 2026-09-19 15:45 +02:00
 Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
 Session en cours : S296 — reprise à chaud par Codex à P2 ; plan dans notes/EN-COURS.md
 Dernière session : S295 — porte B, lot 1 : référence δ 3D à surface linéarisée reçue (identique au bit à la 2D quand ny = 1, onde oblique 0,176 %)

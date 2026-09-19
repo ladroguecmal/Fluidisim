@@ -82,7 +82,7 @@ qu'ADR-175 §4.1 demande. Hors lot : couplage B/W, production GPU, scène, coût
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seuls.
-- [ ] **P2** — géométrie mobile et opérateur : mailles mouillées, fantômes vertical et latéraux
+- [x] **P2** — géométrie mobile et opérateur : mailles mouillées, fantômes vertical et latéraux
   (x et y), opérateur, second membre et diagonale ; erreur inverse du mode mobile, `γ` selon le
   nombre de faces ; essais : symétrie avec fantômes, identité au bit avec la 2D à `ny = 1`.
 - [ ] **P3** — projection mobile (Jacobi, départ depuis la pression publiée d'ADR-169),
