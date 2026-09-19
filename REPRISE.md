@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : interrompu
-Battement        : 2026-09-19 14:15 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 14:21 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : S292 — interrompue par l'utilisateur après P2/P3 ; reprise à chaud par notes/EN-COURS.md
-Dernière session : S291 — pas décomposé et allégé au bit, A293 close ; bande δ à 8,2729 ms contre 17,9281
-Session suivante : reprendre S292 à P4. **Acquis : le gel de 467 ms ne se reproduit pas** sur le solveur mesuré isolément, ni après une pause endormie ni après une pause à processeur saturé — le refroidissement réel vaut ×1,4 à ×2 au-delà de ≈ 2 s, et il tombe dans l'**attente**, donc côté carte ou pilote. L'hypothèse de S291 est donc fausse ou incomplète, et l'entretien ne doit pas être bâti dessus. Le geste suivant est écrit, compilé et **jamais exécuté** : `--pas-couple` garde désormais la carte du pire pas (`PIC_S292`), ce qui dira en un passage où le pic tombe.
+Session en cours : S293 — audit global demandé par l'utilisateur : où l'avancement bloque ; S292 close comme interrompue
+Dernière session : S292 — interrompue par l'utilisateur après P2/P3 ; le gel de 467 ms ne se reproduit pas sur le solveur isolé
+Session suivante : à fixer au rituel de S293. À défaut : A294, geste écrit et jamais exécuté de S292 (`--pas-couple`, carte du pire pas `PIC_S292`) ; notes complètes dans `git show c629ebb:notes/EN-COURS.md`.
 Maillons        : 0 — capacité reçue en S291 : le pas de la bande δ coûte 8,2729 ms au lieu de 17,9281 et son pire pas 16,1106 au lieu de 28,2240, consommé par le pas couplé réel, trajectoire identique au bit ; prochaine capacité visée : un pire pas qui tient
 ```
 
