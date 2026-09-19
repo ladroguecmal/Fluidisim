@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : interrompu
-Battement        : 2026-09-19 15:26 +02:00
-Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : S296 — interrompue après P1 à la demande de l'utilisateur (passation à Codex) ; reprise à chaud par notes/EN-COURS.md
+JETON            : occupé
+Battement        : 2026-09-19 15:42 +02:00
+Agent            : Codex GPT-6, application desktop (fichiers, git, cargo, outils locaux)
+Session en cours : S296 — reprise à chaud par Codex à P2 ; plan dans notes/EN-COURS.md
 Dernière session : S295 — porte B, lot 1 : référence δ 3D à surface linéarisée reçue (identique au bit à la 2D quand ny = 1, onde oblique 0,176 %)
 Session suivante : reprendre S296 à P2 (surface mobile de la référence δ 3D) ; plan, critères et notes de conception dans notes/EN-COURS.md.
 Maillons        : 0 — capacité reçue en S295 : δ a une référence tridimensionnelle, consommée par les réceptions de la porte B (ADR-175 §4.1), preuve DELTA3D-LINEAIRE-S295

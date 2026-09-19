@@ -58,8 +58,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S296 — **porte B, lot 2 : la surface mobile dans la référence δ 3D** — interrompue après P1 (passation à Codex, demande de l'utilisateur)
-Agent : Claude Opus 5, application desktop Claude Code ; fichiers, git, cargo, outils locaux.
+Session : S296 — **porte B, lot 2 : la surface mobile dans la référence δ 3D** — reprise à chaud par Codex à P2
+Agent : Codex GPT-6, application desktop ; fichiers, git, cargo, outils locaux.
 Entrée : « continue » de l'utilisateur, 2026-09-19 ; suite désignée par S295, porte en cours B.
 Objectif : la référence `delta3d` gagne le mode **à surface géométriquement mobile** de S237 —
 fonction hauteur `η(x, y)`, fluide fantôme aux faces verticales et latérales, advection centrée,
