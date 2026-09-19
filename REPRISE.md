@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-19 14:05 +02:00
+JETON            : occupé
+Battement        : 2026-09-19 14:07 +02:00
 Agent            : Claude Opus 5, application desktop Claude Code (fichiers, git, cargo, outils locaux)
-Session en cours : —
+Session en cours : S292 — le gel d'une carte refroidie (A294)
 Dernière session : S291 — pas décomposé et allégé au bit, A293 close ; bande δ à 8,2729 ms contre 17,9281
-Session suivante : A294, le **gel d'une carte refroidie** — un pas à 467 ms, reproduit, qu'un préchauffage ne corrige pas ; c'est un arbitrage d'ordonnancement (qui paie l'entretien, à quelle cadence, contre quel budget), à instruire avec l'ordonnanceur de S278/S279 et non dans le solveur. Il passe devant tout réglage : un pic de 467 ms annule le gain de médiane de milliers de pas. **Ensuite, rejouer la comparaison de priorité avec la 3D et les solides** : c'est ce qu'A293 devait débloquer, et le pas a désormais tous ses postes connus. Longueur de cycle non calibrée, grain du sondage, cadence lente, A290, V, B2, bathymétrie, multiplateforme, V1 et verdict S277 gardent leurs déclencheurs.
+Session suivante : —
 Maillons        : 0 — capacité reçue en S291 : le pas de la bande δ coûte 8,2729 ms au lieu de 17,9281 et son pire pas 16,1106 au lieu de 28,2240, consommé par le pas couplé réel, trajectoire identique au bit ; prochaine capacité visée : un pire pas qui tient
 ```
 
