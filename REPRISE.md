@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 16:19 +02:00
+JETON            : libre
+Battement        : 2026-09-20 16:20 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S311 — **lot 2 : le retour δ → W**, lancé par l'utilisateur. Cette session fait l'**identification** : d'où sort la perturbation, quel cas contrôlé la porte, ce que W peut recevoir, et la réflexion mesurée en 3D
-Dernière session : S310 — le premier compteur : bilan de masse exact, cuve qui ne perd rien, A302 chiffrée (l'éponge efface 10,2 %/s) ([preuve](docs/validation/BILAN-MASSE-S310.md))
-Session suivante : fixée au rituel
-Maillons        : 0 — capacité S310 : le compteur, consommé par ce lot même
+Session en cours : —
+Dernière session : S311 — **la frontière de δ est une paroi**, la sortie se lit sur une ligne de contrôle intérieure, et le cas contrôlé du lot 2 est reçu contre T3 sur deux mailles ([preuve](docs/validation/SORTIE-DELTA-S311.md))
+Session suivante : **le transfert lui-même** (points 2 et 3 d'ADR-179 D8) — *mais une décision de l'utilisateur l'attend* : le **volume net** sortant n'a aucun receveur dans W. Le perdre en le chiffrant (recommandé), étendre W, ou changer de surface de contrôle
+Maillons        : 0 — capacité S311 : la perturbation sortante est identifiée, mesurée et reçue contre les deux seuils de T3 ; consommateur : le transfert, qui n'avait ni référence, ni normalisation, ni moyen de séparer le transmis du perdu
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

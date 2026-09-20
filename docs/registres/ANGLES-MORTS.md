@@ -4017,3 +4017,13 @@ la même sévérité 2 : le compteur n'existe pas sur la **carte** ; les bilans 
 nommés (travail de la pression au bord, flux advectif) ; et la réflexion artificielle n'est
 toujours chiffrée qu'en 2D (S269). Déclencheurs : lot 2 d'ADR-178 pour le retour vers W, et le
 premier portage du compteur sur la production.
+
+**A302 — note datée du 2026-09-20 (S311).** Ce que S310 appelait « un chemin manquant » est en
+réalité **une paroi** : la vitesse normale aux faces extérieures d'un domaine δ vaut **0
+exactement** (0,605 m/s à l'intérieur au même instant). Un domaine est une **boîte fermée**, et
+l'éponge une région d'amortissement *intérieure*. Aucun document d'état ne le disait, et trois
+sessions ont raisonné autour sans le nommer. La perturbation sortante se lit donc sur une
+**surface de contrôle intérieure**, reçue contre les deux seuils de T3
+([preuve](../validation/SORTIE-DELTA-S311.md)). **Reste ouvert** : le transfert lui-même, et le
+fait que la composante de **volume net** n'a **aucun receveur** dans W — mesuré, l'impact de W
+portant de l'énergie et pas de volume (−3,6·10⁻⁷ m³ pour 0,01 J).

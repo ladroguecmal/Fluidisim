@@ -6121,3 +6121,27 @@ l'outil.
 **dominant**. Écrire la liste des termes avant les essais, et cocher ; une case vide est un terme
 que personne n'a mesuré. Même famille que **L347** — un cas éprouvé sous la tolérance de son propre
 critère ne prouve rien — et que **L349** : ce qu'il faut penser à vérifier ne se vérifie pas.
+
+## L354 — Un balayage sert autant à disculper qu'à régler
+
+S311. Le cas contrôlé du lot 2 rendait deux chiffres faux : un retour de 36 % à travers la ligne de
+contrôle, et une erreur de restitution de 25 %. Deux suspects évidents — l'éponge, la dispersion —
+et aucun moyen de choisir en regardant le code.
+
+Deux balayages ont tranché, et **chacun par l'absence d'effet** :
+
+- le **taux de l'éponge**, de 2 à 20 : le retour n'a pas bougé (36 %, 37 %, 36 %, 36 %). Une cause
+  dont on multiplie l'intensité par dix sans rien changer **n'est pas la cause**. L'éponge était
+  disculpée ;
+- `λ/h₀`, de 4 à 24 : le retour s'est effondré (36 % → 0,2 %) — donc la dispersion était bien le
+  coupable du **retour** —, mais l'erreur de restitution est restée **constante à 14,7 %**. Une
+  erreur insensible au seul paramètre physique du cas ne vient pas de la physique : elle venait du
+  **montage**, la bosse démarrant à l'intérieur de l'éponge de gauche, symétrique et oubliée.
+
+**La règle.** Devant un chiffre faux, balayer les paramètres **un par un**, et lire d'abord les
+**non-réponses** : un paramètre qui ne change rien innocente son mécanisme, et une erreur qui ne
+dépend d'**aucun** paramètre physique est dans le montage, pas dans le modèle. C'est plus rapide
+que de relire le code, et cela ne se trompe pas de la même façon.
+
+Famille de **L350** — un coupable désigné par élimination s'éteint avant de se remplacer — dont
+ceci est la version continue : au lieu d'un interrupteur, un cadran.

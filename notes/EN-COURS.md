@@ -58,7 +58,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S311 — lot 2, phase d'identification. **P1 à P8 faits ; reste le rituel.**
+Session : S311 — **terminée**. La frontière est une paroi, la sortie se lit sur une ligne
+de contrôle intérieure, et le cas contrôlé est reçu contre les deux seuils de T3.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : la **décision de l'utilisateur du 2026-09-20** sur les tolérances, et le lancement du
 lot 2. T1 acceptée provisoirement, T2 comme objectif à éprouver sur la durée complète, T3 comme
@@ -126,7 +127,7 @@ Critères, écrits avant la mesure :
 - [x] **P8** — [SORTIE-DELTA-S311](../docs/validation/SORTIE-DELTA-S311.md). **Une question à
   trancher y est posée** : le volume net sortant n'a pas de receveur dans W — le perdre, étendre W,
   ou choisir une surface où il est nul.
-- [ ] **P9** — rituel REPRISE §6.
+- [x] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
 

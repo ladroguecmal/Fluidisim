@@ -15683,3 +15683,68 @@ BILAN-MASSE-S310. Point **4.18** de la liste du projet fini avancé. 544 essais,
 *Tenue du plan* : neuf étapes, aucun découpage supplémentaire. L237 tenu — l'horloge lue par un
 appel du shell qui écrit lui-même le battement, après que S309 eut construit le contrôle qui le
 vérifie.
+
+## S311 — 2026-09-20 — la frontière est une paroi, et ce qui en sort, W ne peut pas le porter
+
+**Entrées.** La décision de l'utilisateur sur les tolérances T1/T2/T3, et le **lancement du lot 2**
+— le retour δ → W. Avec une précision qui a commandé la session : définir la grandeur à restituer,
+ne pas confondre le volume net signé et la quantité absolue, ne pas fabriquer une vague pour
+compenser l'activité de l'éponge, et **identifier** ce que W ne peut pas représenter.
+
+**Acté.** [ADR-179](../docs/adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md), huit
+décisions. La centrale, **D3**, sépare trois grandeurs que S310 mesurait ensemble : le **flux
+sortant** — celui qu'on restitue —, l'**activité absolue** de l'éponge, et son **net signé**.
+Fabriquer une vague pour compenser l'activité absolue créerait de l'énergie, puisqu'une partie de
+cette activité amortit une onde qui **entrait**. Et une honnêteté inscrite : **T2 n'est pas tenue**
+— S310 l'a mesurée sur 5 s pour 10 s demandées.
+
+**Le fait de la session.** Le plan posait la question avant d'y répondre : le flux sortant
+existe-t-il déjà, jeté par la garde du transport ? **Non.** La vitesse normale aux faces
+extérieures vaut **0 exactement**, quand le champ atteint 0,605 m/s à l'intérieur. **Un domaine δ
+est une boîte fermée** ; l'éponge n'est pas une frontière absorbante mais une région
+d'amortissement *à l'intérieur*. « δ ne ressort pas vers W » est plus fort que ce que S310 disait :
+ce n'est pas un chemin manquant, **c'est une paroi**.
+
+**Construit.** `Volume3::control_flux_x` — la perturbation sortante se lit sur une **surface de
+contrôle intérieure**, la ligne intérieure de la bande d'éponge, que le transport calcule déjà. Et
+`examples/sortie_canal.rs`, le **cas contrôlé** d'ADR-179 D6 : onde longue purement progressive,
+fond nul, grandeur de référence non nulle (le volume de l'onde), erreur normalisée par elle,
+réflexion en énergie sur une jauge dont les deux fenêtres se déduisent de la géométrie.
+
+**Reçu.** Cas de réception, `λ/h₀` = 12, éponge de `8σ`, **deux mailles** : erreur de restitution
+**0,151 %** (25 cm) et **0,149 %** (10 cm) pour 5 % admis ; **réflexion en énergie 1,485·10⁻⁶ et
+1,489·10⁻⁶** pour 1 %, mesurée **directement en 3D**. Les deux mailles s'accordent à 0,3 % pour un
+rapport de 2,5 : ce n'est pas un artefact de grille. Le banc sort avec le code 0.
+[Preuve](../docs/validation/SORTIE-DELTA-S311.md).
+
+**Deux erreurs de montage, et c'est la méthode qui les a trouvées.** `λ/h₀ = 4` n'est pas une onde
+longue — la traîne dispersive traversait la ligne dans les deux sens, retour de 36 % **insensible
+au taux de l'éponge entre 2 et 20**, ce qui a **disculpé** l'éponge. Et l'éponge est **symétrique** :
+la bosse démarrait dans celle de gauche, qui en effaçait 14,7 % avant le premier pas, avec pour
+signature une erreur **constante quel que soit `λ/h₀`**. Deux balayages, deux coupables (**L354**).
+
+**Le point dur, et il faut une décision.** W n'a que deux primitives de production — l'impact
+radial et le sillage — et **l'impact porte de l'énergie, pas du volume** : le dépôt imprimait déjà
+le chiffre sans jamais l'affirmer, **−3,6·10⁻⁷ m³** de volume net pour 0,01 J, zéro à la
+quadrature près. Or la grandeur que le cas contrôlé identifie **est** un volume net sortant. Le cas
+prouve donc d'un coup que la perturbation sortante est identifiée **et** qu'elle ne peut pas être
+remise à W en l'état. Trois issues, aucune tranchée : la perdre en la chiffrant, étendre W, ou
+choisir une surface de contrôle où elle est nulle. Recommandation portée à l'utilisateur : la
+première pour le premier transfert.
+
+**Limites.** Référence CPU, une machine (A98). Cas **unidirectionnel et invariant en `y`** : il ne
+dit rien d'un front oblique ni d'une frontière courbe. La séparation entrant/sortant est triviale
+**parce que rien n'entre** ; sur une scène quelconque elle demande une décomposition en
+caractéristiques, non écrite. La maille de 12,5 cm sur `λ/h₀ = 20` a été arrêtée pour dépassement
+de temps.
+
+**Non-fait.** Le transfert lui-même — points 2 et 3 d'ADR-179 D8. Aucune revendication d'énergie
+ni de quantité de mouvement (D7).
+
+**Rituel.** Maillons **0**. Capacité : la perturbation sortante d'un domaine δ est **identifiée,
+mesurée et reçue** contre les deux seuils de T3, sur un banc qui se rejoue. Consommateur nommé : le
+transfert, qui n'avait jusqu'ici ni grandeur de référence, ni normalisation, ni moyen de séparer le
+transmis du perdu. Preuve : SORTIE-DELTA-S311. Point 1 d'ADR-179 D8 tenu.
+
+*Tenue du plan* : neuf étapes, une ajoutée en cours (P8b, le banc de réception et la comparaison de
+mailles). L237 tenu. Deux longues exécutions arrêtées faute de temps, dites comme telles.
