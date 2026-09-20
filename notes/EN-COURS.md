@@ -98,7 +98,7 @@ Critères, écrits avant la mesure :
 - [x] **P3** — les deux sorties de diagnostic manquantes (hauteur en fausses couleurs, normales
   géométriques seules) ; `--no-tail` et le rendu complet existent déjà.
 - [x] **P4** — le test A/B aux quatre sorties, et la cause dominante attribuée.
-- [ ] **P5** — *(découpage déclaré)* balayage de la coupure `λ/Δ` : le seul essai qui dit si les
+- [x] **P5** — *(découpage déclaré)* balayage de la coupure `λ/Δ` : le seul essai qui dit si les
   stries sont évitables sans toucher à l'énergie du modèle.
 - [ ] **P5** — conséquences : file active, angles morts, note datée à ADR-176 si la mesure la
   contredit, et ce qui doit remonter à l'utilisateur comme arbitrage.
@@ -187,6 +187,35 @@ rend** : `spectral_weight` garde tout son poids jusqu'à `λ = 4·empreinte` et 
 `λ = 2·empreinte`, le Nyquist du pixel. Les composantes entre 2 et 4 empreintes sont exactement
 celles qui produisent un motif de deux pixels. C'est le point §4.2 de la lecture, et c'est ce que
 P5 mesure.
+
+**P5 — la coupure est un bouton, et il ne coûte rien.** Treizième `vec4` d'uniforme
+(`--coupure=<f>`), qui déplace les deux bornes du filtre : poids plein à `4f` empreintes, zéro à
+`2f`. `f = 1` est ADR-148 **au bit** (les quatre empreintes de R12 inchangées — multiplier par
+1,0 est exact). Pose `proche`, rendu complet :
+
+| `f` | poids plein / zéro | `hf_rms` | `hf_part` | `p99_hf` | `luma_et` | GPU eau |
+|---|---|---:|---:|---:|---:|---:|
+| **1** (actuel) | 4 / 2 empreintes | **9,82** | 0,191 | 41,19 | 51,29 | 1,0212 ms |
+| 1,5 | 6 / 3 | 6,42 | 0,125 | 26,71 | 51,23 | — |
+| **2** (haut de la fourchette du guide) | 8 / 4 | **4,51** | 0,088 | 18,78 | 51,25 | **0,9574 ms** |
+| 3 | 12 / 6 | 2,74 | 0,053 | 11,57 | 51,35 | — |
+| *sans queue* | — | *1,93* | *0,038* | *9,14* | *51,41* | — |
+
+Pose `rasante` : 11,28 → 7,50 → 5,37 → 3,19 (sans queue 1,69). Monotone aux deux poses.
+
+- **L'énergie haute fréquence se divise par 2,2 à `f` = 2 et par 3,6 à `f` = 3**, et le contraste
+  global ne bouge pas : `luma_et` reste entre 51,23 et 51,41, la luma moyenne à 0,3 % près.
+- **C'est moins cher** : GPU eau **1,0212 → 0,9574 ms**, −6,2 %, parce que `tail_cwm` s'arrête à
+  la première composante de poids nul et qu'elle arrive plus tôt.
+- **Donc les stries sont un choix de bande de rendu, pas un problème d'énergie.** Le modèle ne
+  change pas (`mss` est une propriété du spectre, pas de la coupure) ; ce qui change est la
+  fraction qu'on rend en pentes par pixel plutôt qu'en reflet filtré (ADR-161).
+
+**Ce que je ne tranche pas, et pourquoi c'est un arbitrage.** Élargir la coupure retire aussi du
+micro-détail réel : l'image devient plus lisse que Cox–Munk, même si le modèle ne bouge pas. Le
+bon compensateur est celui d'ADR-161 et du guide §5.3 — transférer ces pentes vers le reflet —
+et il n'est pas mesuré ici. Choisir `f` est donc une **décision visuelle**, pas un réglage : elle
+revient à l'utilisateur, avec les images, ou à un ADR s'il délègue.
 
 **Non retenu, et pourquoi** : rien du guide ne rouvre ADR-027 ni ne réduit ADR-127 ; aucun de ses
 chiffres non repris ici n'est validé par le dépôt (I-14).

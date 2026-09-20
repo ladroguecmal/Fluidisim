@@ -149,7 +149,8 @@ impl Gpu {
             &device,
             "camera",
             // S303, ADR-176 : un douzième vec4 porte les asymétries.
-            192,
+            // S306 : un treizième porte le facteur de coupure spectrale.
+            208,
             wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         );
         let waves = buffer(
@@ -546,6 +547,10 @@ impl Gpu {
             [a.split as f32, a.k_mean[0], a.k_mean[1], a.lag_turns]
         });
         for v in asym {
+            self.bytes.extend_from_slice(&v.to_le_bytes());
+        }
+        // S306 : facteur de coupure spectrale. 1 = ADR-148 au bit.
+        for v in [frame.cut_factor, 0., 0., 0.] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);

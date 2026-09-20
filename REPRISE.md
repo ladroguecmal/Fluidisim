@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 10:31 +02:00
+Battement        : 2026-09-20 10:37 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
 Session en cours : S306 — **guide de topologie d'océan reçu de l'utilisateur** (`docs/sources/guide_topologie_ocean_haute_mer_plage.md`, v1.0, 2026-09-20) : le confronter au dépôt, et éprouver l'hypothèse qu'il met au premier rang — l'écart au réel viendrait d'abord des **normales fines et de l'environnement lumineux**, pas de la topologie
 Dernière session : S305 — critère 2 de la porte B mesuré sur les cas de cuve ; images de R12 renvoyées à l'utilisateur

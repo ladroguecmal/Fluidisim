@@ -2825,6 +2825,13 @@ fn run() -> Result<(), String> {
             return delta3d_captures(&mut frame, config);
         }
     }
+    // S306, guide §5.3 : `--coupure=<f>` déplace les bornes du filtre spectral. 1 = ADR-148.
+    if let Some(value) = args.iter().find_map(|a| a.strip_prefix("--coupure=")) {
+        let f: f32 = value.parse().map_err(|_| "coupure : nombre attendu")?;
+        if !(0.5..=8.).contains(&f) { return Err("coupure : entre 0,5 et 8".into()); }
+        frame.cut_factor = f;
+        println!("COUPURE facteur={f} plein_poids_a={} empreintes zero_a={} empreintes", 4. * f, 2. * f);
+    }
     if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--test-ab=")) {
         if !tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
             return Err("--test-ab : suffixe alphanumérique".into());

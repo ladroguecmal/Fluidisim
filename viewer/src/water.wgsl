@@ -11,6 +11,10 @@ struct Params {
     // S303, ADR-176 : asymétries. (composantes du premier système, k̄ du premier, k̄ du second,
     // retard de la modulation en tours). Inactif quand `asym.y` vaut 0.
     asym: vec4<f32>,
+    // S306, guide §5.3 : facteur de coupure spectrale. 1 = comportement d'ADR-148 au bit
+    // (poids plein jusqu'à `λ = 4·empreinte`, nul au Nyquist du pixel `λ = 2·empreinte`) ;
+    // `f` déplace les deux bornes à `4f` et `2f`. Multiplier par 1,0 est exact.
+    cut: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> p: Params;
 @group(0) @binding(1) var<storage, read> waves: array<vec4<f32>>;
@@ -34,7 +38,7 @@ struct Delta3 { geometry: vec4<f32>, size: vec4<f32> }
 @group(3) @binding(2) var<uniform> d3: Delta3;
 
 fn spectral_weight(k: f32, h: f32) -> f32 {
-    let t = clamp(2.0*k*h/3.141592653589793 - 1.0, 0.0, 1.0);
+    let t = clamp(2.0*k*h*p.cut.x/3.141592653589793 - 1.0, 0.0, 1.0);
     return 1.0 - t*t*(3.0 - 2.0*t);
 }
 fn band_upper(b: u32) -> f32 { return p.spectral.y / f32(1u << b); }
