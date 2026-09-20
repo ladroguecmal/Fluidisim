@@ -699,3 +699,24 @@ n'est pas construit. C'est donc un arbitrage visuel, et il vous revient.
    crêtes séparément ?
 
 Un mot par question suffit ; « je ne sais pas » reste une réponse utile.
+
+## Verdict R12 / R13 — reçu S307, 2026-09-20
+
+**« Le rendu actuel est toujours mauvais. »** Et, dans la même demande : aller **au-delà** du
+guide, lire ses références, puis les références de ses références, et **multiplier les étapes**.
+
+**Ce que ce verdict tranche.** Les deux revues reçoivent la même réponse, et c'est la réponse la
+plus informative possible : ni ADR-176 (les asymétries de la forme, S304) ni la coupure spectrale
+(la bande de rendu, S306) ne suffisent. Deux lots successifs ont chacun mesuré et corrigé un
+défaut réel, et l'image reste mauvaise. **La cause dominante n'a donc pas encore été touchée.**
+
+**Ce qu'il ne tranche pas**, et qu'il faut se garder d'inventer : quel défaut précis l'utilisateur
+voit. Aucune des questions de §17 ni de §18 n'a reçu de réponse séparée. Une session qui choisirait
+un coupable sans mesure referait exactement ce que S304 et S306 ont fait.
+
+**Ce que la demande impose, et c'est une consigne de méthode** : cesser de raffiner ce qui est
+déjà construit, et aller chercher dans la littérature **ce que notre rendu ne contient pas du
+tout**. Un défaut qui résiste à deux corrections mesurées est plus probablement un terme absent
+qu'un terme mal réglé.
+
+Suite : S307, recherche à trois niveaux, puis mesure de l'écart, puis décision.

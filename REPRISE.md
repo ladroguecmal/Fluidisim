@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 10:41 +02:00
-Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : aucune — S306 terminée
-Dernière session : S306 — guide reçu confronté au dépôt ; les stries attribuées à la queue spectrale, coupure réglable, revue R13 demandée
-Session suivante : S307 — **deux verdicts attendus, R12 et R13**, et ils ne portent pas sur la même chose : R12 sur la forme des crêtes (dernier élément du critère 3 de la porte B), R13 sur la fréquence spatiale de l'image et le choix de la coupure `f`. Un verdict R13 → ADR de la coupure, puis compensateur d'ADR-161 (pentes non résolues vers le reflet) à mesurer. **Sans verdict**, dans cet ordre : A299 — comparer l'environnement lumineux de façon contrôlée (ciel, Fresnel, exposition à caméra fixe), le seul grand poste du guide encore non mesuré ; puis cas 1 et 2 d'ADR-175 §4.1 pour la **production** (HOS à `ny` = 1, invariance en `y`) ; puis la **porte D**, déclarée en parallèle et vide. Porte C : charge utile par face du fond (26 flottants → 12).
-Maillons        : 0 — capacité S306 : d'où viennent les stries, mesuré (queue spectrale = 80–85 % de l'énergie haute fréquence, invisible au contraste) et réglable sans coût ; consommateur : la revue R13 ; preuve STRIES-S306
+JETON            : occupé
+Battement        : 2026-09-20 10:45 +02:00
+Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
+Session en cours : S307 — **verdict R12/R13 reçu : « le rendu est toujours mauvais »**. Recherche à trois niveaux (références du guide, références des références, état de l'art non cité), puis mesure de l'écart, puis décision. Consigne explicite de l'utilisateur : aller au-delà du guide, multiplier les étapes
+Dernière session : S306 — guide confronté au dépôt ; stries attribuées à la queue spectrale, coupure réglable, revue R13 demandée
+Session suivante : fixée au rituel
+Maillons        : 0 — capacité S306 : d'où viennent les stries, mesuré et réglable sans coût ; consommateur : la revue R13 ; preuve STRIES-S306
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

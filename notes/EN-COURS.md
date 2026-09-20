@@ -58,174 +58,65 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S306 — terminée : guide confronté, stries attribuées, coupure réglable, R13 demandée.
-Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle.
-Entrée : un fichier, sans consigne — `guide_topologie_ocean_haute_mer_plage.md`, v1.0 du
-2026-09-20, recopié tel quel dans [`docs/sources/`](../docs/sources/guide_topologie_ocean_haute_mer_plage.md).
-Il dit analyser « les deux images reçues » (une photo de haute mer, un rendu) : c'est donc, selon
-toute vraisemblance, une **réponse indirecte à R12** obtenue ailleurs. Le verdict lui-même n'est
-toujours pas donné ; la question sera posée au rituel, pas avant — le travail n'en dépend pas.
+Session : S307 — en cours : recherche profonde après un verdict négatif.
+Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, **accès web**.
+Entrée : le verdict, enfin — « **le rendu actuel est toujours mauvais** » — et une consigne de
+méthode : « va au-delà du guide, regarde les références liées, et les références des références,
+multiplie les étapes ». Verdict consigné dans [REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md).
 
-Capacité visée : **savoir ce que ce document change, et ce qu'il ne change pas.** Deux moitiés :
-1. La **confrontation** au dépôt, section par section — déjà acté, déjà construit, diverge, neuf
-   et actionnable, hors périmètre présent. Sans cela, un document de 773 lignes se dissout en
-   impressions et reforke la conception par la bande.
-2. L'**hypothèse qu'il met au premier rang** (§1, §10.3, §12.3) et que le dépôt n'a jamais
-   testée : l'écart entre notre mer et une photo viendrait d'abord des **normales fines** (notre
-   queue spectrale, ADR-155) et de l'**environnement lumineux** (ADR-162), et non de la topologie
-   ni des asymétries. ADR-176 a répondu par la statistique de la surface ; le guide dit de
-   regarder ailleurs **en premier**. C'est une thèse concurrente, et elle se mesure.
+**Ce que ce verdict veut dire, et pourquoi il change la méthode.** S304 a mesuré l'absence
+d'asymétries et l'a corrigée ; S306 a mesuré l'origine des stries et l'a rendue réglable. Deux
+corrections réelles, chacune reçue sur ses chiffres, et **l'image reste mauvaise**. Un défaut qui
+résiste à deux corrections mesurées est plus probablement un **terme absent** qu'un terme mal
+réglé. Donc : arrêter de raffiner ce qui existe, et aller chercher ce que le rendu ne contient
+pas du tout.
 
-Ce que je ne fais pas : réécrire ADR-176 ni rouvrir les cinq arbitrages d'ADR-027 ; construire
-quoi que ce soit de la côte, de la plage ou du déferlement (porte F et au-delà — l'ambition
-d'ADR-127 les contient, l'ordre des portes les place plus tard) ; prendre pour acquis un chiffre
-du guide sans sa source.
+Capacité visée : **savoir, sourcé, ce qui manque à notre rendu pour qu'une mer soit crédible** —
+une liste ordonnée par ce qui se voit, chaque poste rattaché à une source primaire, chaque écart
+chiffré ou chiffrable sur nos propres images. Consommateur : la décision de construction (un ou
+plusieurs ADR) et les lots qui suivront.
 
-Critères, écrits avant la mesure :
-1. Chaque section du guide est classée, et **chaque divergence nommée avec le document du dépôt
-   qui la tranche** — un désaccord sans référence est une impression.
-2. Le test A/B de §12.3 tourne sur **notre** rendu, quatre sorties au même instant, même caméra,
-   même mer : hauteur brute, normales géométriques seules, matériau sans queue, rendu complet.
-3. La cause dominante des stries est **attribuée par la mesure** — queue spectrale, ciel, ou
-   géométrie — et non par préférence. Si la mesure contredit ADR-176, elle est dite telle quelle.
-4. Les scènes antérieures restent **au bit** : les sorties de diagnostic sont des modes en plus,
-   jamais une modification du chemin de rendu.
+Ce que je ne fais pas : choisir un coupable sans mesure — c'est exactement ce que S304 et S306
+ont fait, et deux fois ça n'a pas suffi ; reprendre les cinq arbitrages d'ADR-027 ; réduire
+ADR-127 ; prendre un chiffre de seconde main sans remonter à sa source (I-14).
+
+Critères, écrits avant la recherche :
+1. **Trois niveaux de lecture atteints** : les références du guide lues à la source ; leurs
+   propres références ; et l'état de l'art que le guide **ne cite pas**. Un niveau qui n'apporte
+   rien se dit tel quel.
+2. **Chaque poste identifié porte** : sa source primaire, ce que notre rendu en fait aujourd'hui
+   (ligne de code ou ADR), et l'ordre de grandeur de l'écart.
+3. **La liste est ordonnée par ce qui se voit**, pas par ce qui est facile — et l'ordre est
+   argumenté.
+4. **Rien n'est construit avant la décision**, et la décision cite la mesure.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, guide recopié dans `docs/sources/`, plan seul.
-- [x] **P2** — confrontation section par section, écrite dans un document de lecture.
-- [x] **P3** — les deux sorties de diagnostic manquantes (hauteur en fausses couleurs, normales
-  géométriques seules) ; `--no-tail` et le rendu complet existent déjà.
-- [x] **P4** — le test A/B aux quatre sorties, et la cause dominante attribuée.
-- [x] **P5** — *(découpage déclaré)* balayage de la coupure `λ/Δ` : le seul essai qui dit si les
-  stries sont évitables sans toucher à l'énergie du modèle.
-- [x] **P6** — conséquences : note datée à SPEC-001, leçon L348, demande de revue R13, preuve
-  `STRIES-S306`, index.
-- [x] **P7** — rituel REPRISE §6.
+- [x] **P1** — amorce, verdict consigné, plan seul.
+- [ ] **P2** — niveau 1 : les douze références du guide, à la source. Ce qu'elles disent que le
+  guide n'a pas repris.
+- [ ] **P3** — niveau 2 : les références **des** références, et l'état de l'art du rendu d'océan
+  que le guide ne cite pas.
+- [ ] **P4** — niveau 3 : l'optique de l'eau et du ciel — couleur, absorption, diffusion, écume —
+  les postes que notre rendu traite aujourd'hui par des **constantes écrites à la main**.
+- [ ] **P5** — synthèse ordonnée : ce qui manque, sourcé, chiffré, rattaché à notre code.
+- [ ] **P6** — mesure sur nos propres images de ce que la synthèse prédit.
+- [ ] **P7** — décision : ADR de ce qu'on construit et dans quel ordre.
+- [ ] **P8+** — construction, déclarée après la décision.
+- [ ] **Pn** — preuve, rituel REPRISE §6.
 
 ### Notes de reprise
 
-**P2 — la confrontation est faite** : [LECTURE-GUIDE-OCEAN-S306](../docs/registres/LECTURE-GUIDE-OCEAN-S306.md).
-Résultat en une ligne : **aucune divergence réelle**, beaucoup de convergence, et un seul apport
-qui change quelque chose maintenant — l'**ordre de diagnostic**.
+*(à remplir en cours de session)*
 
-- **Le guide décrit ce que nous faisons déjà**, parfois mot pour mot. Deux cas frappants : sa
-  « couche résiduelle définie » (§8.4) est exactement ADR-175 D7 (δ publie une perturbation, le
-  rendu reconstruit `η_B + δ`) ; et son projected grid (§5.2, Johanson) **est** notre maillage
-  depuis S211 — `grid_point` lance un rayon par sommet vers `z = 0`, borné à l'horizon. Un
-  document écrit sans connaître le dépôt converge sur ses deux choix structurants de rendu.
-- **§5.4 (coutures, T-junctions, morphing) est sans objet chez nous** : une seule grille projetée,
-  aucun raccord entre niveaux. Un tiers des risques de maillage du guide ne nous concerne pas.
-- **§6 et §7 (côte, plage, déferlement, wet/dry) sont quasi absents du dépôt** — et c'est daté :
-  A234 (fond uniforme seulement) et porte F. Le guide y apporte de la matière sourcée (TMA [S6],
-  bilan d'action SWAN [S5] et son défaut de phase, Celeris [S7], Jeschke–Wojtan [S8], wet/dry
-  [S10]) : consignée, rien à construire.
-
-**Trois points actionnables, et une correction.**
-1. **Le test A/B de §12.3 n'a jamais été fait.** Nous avons déjà deux de ses quatre sorties
-   (`--no-tail` = matériau sans queue ; le défaut = rendu complet). Manquent les deux sorties
-   **géométriques** : hauteur brute, normales sans détail. C'est P3.
-2. **Le ratio `λ/Δ` : nous sommes à la borne basse de ce que le guide recommande.**
-   `spectral_weight` vaut 1 tant que `λ ≥ 4h` et tombe à 0 en `λ = 2h` (Nyquist exact) ; le guide
-   propose `λ/Δ ≥ 4–8` comme point de départ. Les composantes entre 2 et 4 sont précisément
-   celles qui font le plus de bruit de pente. Jamais éprouvé contre un critère visuel.
-3. **`min(J)` n'est jamais publié.** Le déterminant du jacobien est calculé (il sert de garde à
-   `det < 0,1` dans `covariance_transport`) mais aucune distribution n'est mesurée.
-4. **Correction sourcée d'un chiffre du dépôt** : SPEC-001 §3 donne `H/h ≈ 0,78` (McCowan) comme
-   critère de déferlement, et ADR-023 §4 en dérive des sites turbulents. Le guide (§7.1, Coastal
-   Engineering Manual [S9]) rappelle que c'est un repère **du cas de la vague solitaire sur fond
-   horizontal**, pas une loi universelle. L'attribution est juste, l'emploi comme critère unique
-   ne l'est pas → note datée à SPEC-001, rien à reprendre (le mécanisme n'est pas construit).
-
-**Et une prédiction vérifiable, tirée du rapprochement** : S303 a mesuré notre `mss` **14 % trop
-haute** contre Cox–Munk, ce qui est le symptôme d'une bande fine trop forte (§4.4 du guide, « ne
-pas compter deux fois »). Si les stries viennent de la queue, la `mss` mesurée **sans** queue doit
-tomber **sous** Cox–Munk. Si elle reste au-dessus, la queue n'est pas la cause. À vérifier en P4.
-
-**P3 — les sorties manquantes, sans toucher au chemin de rendu.** Trois modes dans
-`ocean_fragment`, portés par `p.reflection.w` qui valait un **zéro littéral** : aucune taille
-d'uniforme ne change. 1 = hauteur (rampe fixe ±3 m), 2 = normales géométriques seules (bande
-corrigée par le jacobien, **sans** la queue), 3 = jacobien. Le ciel devient un gris constant en
-diagnostic. Outil d'analyse : `outils/spectre_image.py` (Python standard), qui mesure sur une
-capture PPM l'énergie **haute fréquence** — un écart-type de luma ne distingue pas une grande
-masse d'un tapis de stries, un passe-haut si.
-
-*Fausse alerte, et ce qu'elle a appris* : le premier contrôle d'identité au bit a **échoué**.
-Cause : j'avais rejoué `--revue-mer` avec `--multi --ciel-clair`, que S304 n'employait pas. Avec
-la commande exacte de la preuve S304, les quatre empreintes sont **identiques au bit**
-(2463a897…, 6592d82c…, bd3d6046…, a2ccc245…). Le témoin ne valait rien tant que la commande
-n'était pas celle du document. Deuxième contrôle, plus fort : la sortie `iv_rendu_complet` du
-test A/B porte l'empreinte `0x4e2da43a6e5dec18`, **celle de l'image de R12 elle-même**.
-
-**P4 — la cause des stries est attribuée, et ce n'est pas celle qu'ADR-176 visait.**
-
-| sortie (pose `proche`) | `luma_et` | `hf_rms` | `hf_part` | `p99_hf` |
-|---|---:|---:|---:|---:|
-| (iii) matériau **sans** queue | 51,41 | **1,93** | 0,0375 | 9,14 |
-| (iv) rendu complet | 51,29 | **9,82** | 0,191 | 41,19 |
-
-Pose `rasante` : 1,69 → **11,28** (`hf_part` 0,041 → 0,266 ; `p99` 8,14 → 48,13).
-
-- **La queue spectrale porte 80 à 85 % de l'énergie haute fréquence de l'image** (×5,1 en
-  `proche`, ×6,7 en `rasante`). C'est elle, les stries.
-- **Le contraste global ne le voit pas** : `luma_et` passe de 51,41 à 51,29 — il *baisse*. Le
-  défaut n'est pas dans le contraste, il est dans la **fréquence spatiale**. C'est exactement le
-  piège que le guide décrit, et c'est pourquoi aucune mesure antérieure ne l'avait attrapé.
-- **La prédiction de P2 est vérifiée, et chiffrée.** Instrument S260, 10⁶ points : `mss` de Cox–Munk
-  **0,0437** ; notre modèle **0,0497** (+13,7 %) ; **sans queue 0,0200** (−54 %). La queue porte donc
-  **0,0297 des 0,0497 — 60 % de la variance de pente**, et tout l'excès. Pour tomber exactement sur
-  Cox–Munk il faudrait qu'elle en porte 0,0237, soit **−20 % en variance, −10,7 % en amplitude**.
-- **`replis = 0` sur tous les modèles** : le jacobien ne se retourne **jamais** dans notre mer.
-  L'indicateur que le guide met au premier rang (§4.3) est publié, et il écarte une hypothèse.
-
-**La conclusion honnête, qui n'est pas « la queue est fautive ».** La queue n'est que 20 % trop
-forte en variance ; la réduire de 20 % ne diviserait l'énergie haute fréquence que par ≈ 1,1,
-quand elle vaut ×5 à ×6 le reste. **L'essentiel de ces stries est donc légitime** — une vraie mer
-porte cette variance de pente. Ce qui est en cause, c'est **la bande de longueurs d'onde où on la
-rend** : `spectral_weight` garde tout son poids jusqu'à `λ = 4·empreinte` et ne tombe à zéro qu'à
-`λ = 2·empreinte`, le Nyquist du pixel. Les composantes entre 2 et 4 empreintes sont exactement
-celles qui produisent un motif de deux pixels. C'est le point §4.2 de la lecture, et c'est ce que
-P5 mesure.
-
-**P5 — la coupure est un bouton, et il ne coûte rien.** Treizième `vec4` d'uniforme
-(`--coupure=<f>`), qui déplace les deux bornes du filtre : poids plein à `4f` empreintes, zéro à
-`2f`. `f = 1` est ADR-148 **au bit** (les quatre empreintes de R12 inchangées — multiplier par
-1,0 est exact). Pose `proche`, rendu complet :
-
-| `f` | poids plein / zéro | `hf_rms` | `hf_part` | `p99_hf` | `luma_et` | GPU eau |
-|---|---|---:|---:|---:|---:|---:|
-| **1** (actuel) | 4 / 2 empreintes | **9,82** | 0,191 | 41,19 | 51,29 | 1,0212 ms |
-| 1,5 | 6 / 3 | 6,42 | 0,125 | 26,71 | 51,23 | — |
-| **2** (haut de la fourchette du guide) | 8 / 4 | **4,51** | 0,088 | 18,78 | 51,25 | **0,9574 ms** |
-| 3 | 12 / 6 | 2,74 | 0,053 | 11,57 | 51,35 | — |
-| *sans queue* | — | *1,93* | *0,038* | *9,14* | *51,41* | — |
-
-Pose `rasante` : 11,28 → 7,50 → 5,37 → 3,19 (sans queue 1,69). Monotone aux deux poses.
-
-- **L'énergie haute fréquence se divise par 2,2 à `f` = 2 et par 3,6 à `f` = 3**, et le contraste
-  global ne bouge pas : `luma_et` reste entre 51,23 et 51,41, la luma moyenne à 0,3 % près.
-- **C'est moins cher** : GPU eau **1,0212 → 0,9574 ms**, −6,2 %, parce que `tail_cwm` s'arrête à
-  la première composante de poids nul et qu'elle arrive plus tôt.
-- **Donc les stries sont un choix de bande de rendu, pas un problème d'énergie.** Le modèle ne
-  change pas (`mss` est une propriété du spectre, pas de la coupure) ; ce qui change est la
-  fraction qu'on rend en pentes par pixel plutôt qu'en reflet filtré (ADR-161).
-
-**Ce que je ne tranche pas, et pourquoi c'est un arbitrage.** Élargir la coupure retire aussi du
-micro-détail réel : l'image devient plus lisse que Cox–Munk, même si le modèle ne bouge pas. Le
-bon compensateur est celui d'ADR-161 et du guide §5.3 — transférer ces pentes vers le reflet —
-et il n'est pas mesuré ici. Choisir `f` est donc une **décision visuelle**, pas un réglage : elle
-revient à l'utilisateur, avec les images, ou à un ADR s'il délègue.
-
-**Non retenu, et pourquoi** : rien du guide ne rouvre ADR-027 ni ne réduit ADR-127 ; aucun de ses
-chiffres non repris ici n'est validé par le dépôt (I-14).
-
-**Ce qui est déjà su au départ.** Le rendu porte déjà : mer multimodale à étalement (ADR-156),
-queue d'équilibre et vagues pointues (ADR-157), rugosité calée sur Cox–Munk (ADR-158), queue
-spectrale en pentes par pixel (ADR-155), reflets de la queue non résolue (ADR-161), ciel
-précalculé (ADR-162), sommes d'ondes filtrées par la distance (ADR-163), et depuis S304 les deux
-asymétries d'ADR-176. `--no-tail` éteint déjà la queue ; `--sans-asym` éteint ADR-176. Ce qui
-manque pour le test A/B, ce sont les deux sorties **géométriques** : hauteur et normales seules.
+**Ce que le rendu contient aujourd'hui, à avoir en tête pendant la recherche** : mer multimodale
+JONSWAP à étalement `cos^2s` (ADR-156), queue d'équilibre `f⁻⁴` continuée à la main (ADR-157),
+rugosité calée sur Cox–Munk (ADR-158), queue en pentes par pixel (ADR-155), reflets de la queue
+non résolue (ADR-161), ciel **procédural** (ADR-162), CWM pour les crêtes pointues, asymétries
+d'ADR-176. **Ce qu'il ne contient pas du tout** : écume, spray, micro-déferlement, couleur d'eau
+dérivée d'un modèle d'absorption, diffusion sous la surface, ciel physique, exposition contrôlée.
+La couleur de base est **une constante RGB écrite dans le nuanceur** (`vec3(0.012,0.105,0.13)`,
+ou `vec3(0.004,0.060,0.170)` en habillage « ciel clair »).
 
 ---
 
