@@ -23,9 +23,15 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S276, 2026-09-18** — actualisation demandée par l’utilisateur, sur les preuves
-S262–S276 ; les résultats récents sont précisés aux points concernés. Le décompte porte
-sur le périmètre final, pas sur le nombre de correctifs ou de tests.
+**État au S309, 2026-09-20** — actualisation demandée par l'utilisateur avec la stratégie en
+trois systèmes ([ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md)). **Seuls les
+points que S277–S308 ont réellement bougés sont retouchés** ; les autres gardent leur état de
+S276 et sa date. Chaque état modifié cite la preuve qui le modifie. Le décompte porte sur le
+périmètre final, pas sur le nombre de correctifs ou de tests.
+
+**Où cette liste rejoint les trois systèmes** : la répartition de ses 120 points entre A, B, C et
+« hors des trois » est dans [TROIS-SYSTEMES-S308](registres/TROIS-SYSTEMES-S308.md) §8. Elle n'est
+pas recopiée ici (L137).
 
 ---
 
@@ -33,8 +39,9 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 
 - [ ] **1.1 Eau = somme de quatre couches B, W, δ, V, dans le code** — *partiel* : B, W, un δ
   candidat 2D et le noyau V existent ; B+W sont composés par le cœur (S214, S236) ; B/W sont
-  raccordés à δ en 2D (S250–S254) ; somme rendue B+δ sur une bande rejouée (S275). Manquent
-  l'articulation V↔δ et δ rendu en direct.
+  raccordés à δ en 2D (S250–S254) puis **en 3D** (S297, S302) ; somme rendue B+δ en direct
+  depuis la surface publiée ([S302](validation/SCENE-DELTA3D-S302.md)). Manquent l'articulation
+  V↔δ et le **retour de δ vers W**, qui n'existe dans aucune dimension (A302, lot 2 d'ADR-178).
 - [x] **1.2 Le cœur est une bibliothèque sans dépendance moteur** — *validé* : `water-core` n'a
   aucune dépendance (ADR-020, ADR-028).
 - [ ] **1.3 Interfaces de SPEC-004** (solveur δ, solveur W, fond, solides, services d'hôte) —
@@ -108,8 +115,14 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 
 ## 4. Simulation volumique locale (δ)
 
-- [ ] **4.1 Solveur volumique 3D à surface libre** — *partiel* : MAC x-z en 2D, surface mobile
-  graphe reçue contre HOS (S237, S253, S254), pression f32 reçue jusqu'à 32 768 mailles. Manque la 3D.
+- [ ] **4.1 Solveur volumique 3D à surface libre** — *partiel*, **et la 3D existe depuis S297**.
+  MAC **x-y-z**, surface **fonction hauteur** à fluide fantôme, pression scindée. Référence CPU
+  contre HOS à 0,148 % / 0,178 % et invariance transverse à un ulp
+  ([S297](validation/DELTA3D-COUPLEE-S297.md)) ; cas limites 2D reproduits à 1,19·10⁻⁷ m
+  ([S298](validation/DELTA3D-FOND-REEL-S298.md)) ; production GPU reçue étage par étage
+  ([S301](validation/DELTA3D-PAS-GPU-S301.md)) ; cuve fermée à 3·10⁻⁷ m pour 3 mm exigés
+  ([S305](validation/CUVE-GPU-S305.md)). **Manque le périmètre final** : la surface est un graphe,
+  donc ni cavité, ni jet, ni déferlement (4.16) — seconde représentation, lot 5 d'ADR-178.
 - [ ] **4.2 Plusieurs domaines actifs simultanés** — *absent*.
 - [ ] **4.3 Subdivision adaptative anisotrope, blocs épars** épousant la forme utile (B5) — *absent*.
 - [ ] **4.4 Profondeur adaptative**, domaine qui suit un objet qui coule — *absent*.
@@ -127,34 +140,60 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
   coefficient d'ordre deux est à 0,88–1,16 %, mais sa réception au budget d'ADR-120 reste à
   terminer (2,26–2,43 %), requise avant une mer de cambrure ≥ 0,08
   ([usage](validation/HOULE-USAGE-S274.md)).
+  **S297–S302 : l'entrée existe en 3D** — fond B+W sommé aux faces MAC x/y/z, `eta` identique au
+  bit verticalement, et une onde de 65 cm traverse un domaine de 30 × 28 m sur la mer étalée
+  ([S302](validation/SCENE-DELTA3D-S302.md)).
   Manquent la houle progressive traversante reçue sur une durée utile, les frontières
-  générales du total et W au-dessus du plan moyen ; B4 reste partiel.
+  générales du total et W au-dessus du plan moyen ; B4 reste partiel. **Et l'entrée n'est
+  comptée par aucun bilan** : masse, quantité de mouvement et énergie ne sont pas mesurées à
+  l'interface (A302, lot 1 d'ADR-178).
 - [ ] **4.7 Frontière sans réflexion ni rupture visible** (C05) — *partiel* : éponge quadratique
   sur la vitesse (S250) et relaxation de hauteur reçue (S268, ADR-164). Effet du bord
   absorbant 0,14–0,16 % sur un paquet à fond nul, par différence contrôlée aux domaines
   longs ([S269](validation/REFLEXION-PAQUET-S269.md)). Manquent les autres régimes,
   la transparence générale et C05 sur le système ; la mesure brute S269 reste refusée.
-- [ ] **4.8 Sortie des perturbations vers W** (transduction δ→W, W local cosmétique ; coupure W–δ et `λ_cut` de B2) — *absent*.
+  **En 3D, l'éponge et les bandes existent sur les quatre côtés et R11 a jugé le raccord
+  « invisible » — mais la réflexion n'a jamais été chiffrée** (A302). Un jugement visuel ne vaut
+  pas une mesure (ADR-178 D3).
+- [ ] **4.8 Sortie des perturbations vers W** (transduction δ→W, W local cosmétique ; coupure W–δ
+  et `λ_cut` de B2) — *absent*, **et c'est une absence de chemin, pas de réglage** : l'éponge
+  **absorbe** vers B+W, rien n'écrit en retour dans W. Constaté en S308 ; aucun document d'état ne
+  le disait avant. Lot 2 d'[ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7.
 - [ ] **4.9 Fusion et séparation de domaines** sans rupture — *absent*.
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
-- [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *absent*.
+- [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *absent*, et **hors de la représentation
+  actuelle par construction** : la surface de δ est une fonction hauteur (ADR-175 D5, qui renvoyait
+  déjà à une seconde représentation). Lot 5 d'ADR-178 ; le choix particules / surface implicite
+  reste une décision de l'utilisateur.
 - [ ] **4.13 Proche-coque et gerbe d'étrave** — *absent*.
 - [ ] **4.14 Plage** : rouleau 3D, mouillage et séchage (C04) — *absent* : C04 exécuté sur un
   véhicule d'essai 1D seulement.
 - [ ] **4.15 Rochers et obstacles immergés**, turbulence — *partiel* : faces coupées sur fonds
-  lisses 2D (S232). Manquent les obstacles, la 3D et la turbulence.
-- [ ] **4.16 Surface non graphe** : déferlement, éclaboussures détachées — *absent*.
+  lisses **2D seulement** (S232, ordres 1,947–1,966) ; `delta3d.rs` déclare en tête « ni faces
+  coupées ni budget coopératif ». Manquent les obstacles, la 3D et la turbulence — **aucun modèle
+  de turbulence n'existe nulle part dans le dépôt**. Lot 3 d'ADR-178 pour la 3D.
+- [ ] **4.16 Surface non graphe** : déferlement, éclaboussures détachées — *absent*. **C'est le
+  point le plus lourd de la liste** : il demande un **second solveur**, pas une extension du
+  premier (ADR-175 D5). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *absent* sur le système ;
   C06 partiel sur un véhicule d'essai 1D.
-- [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel* : dérive de volume
-  ≤ 10⁻⁸ m sur les bancs de surface. C09 non exécuté.
+- [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et moins avancé
+  qu'il n'y paraissait**. Dérive de volume ≤ 10⁻⁸ m sur les bancs de surface ; mais **aucun bilan
+  n'a jamais été mesuré à l'interface δ ↔ B/W**, dans aucune dimension, et la carte porte une
+  dérive séculaire d'environ 1,2·10⁻⁷ m/s sur la cuve, suspect nommé et non démontré (A298,
+  [S305](validation/CUVE-GPU-S305.md) §6). C09 non exécuté. Lot 1 d'ADR-178.
 - [ ] **4.19 Coût de δ compatible avec le budget** — *partiel* : carte du coût (S244), multigrille
   (S252), **multigrille du mode mobile (S274, ADR-167)** : le pas couplé à 16 384 mailles passe de
   280 à 49 ms, environ 24 fois le budget d'eau. **S276 : δ en direct à 40 images/s** — bande de
   6 656 mailles, 21,7 ms par image (échantillonnage du fond par grille identique au bit, départ
   depuis la pression publiée, ADR-169), un pas par image (précision S275), zéro allocation ;
-  ≈ 11 fois le budget. Manquent la cadence de δ découplée de l'image, le GPU et la 3D.
+  ≈ 11 fois le budget. **S299–S302 : le GPU et la 3D existent** — le pas couplé entier est
+  résident sur la carte, **0,84 ms à 64 cycles sur 27 648 mailles**
+  ([S301](validation/DELTA3D-PAS-GPU-S301.md)) ; sur la scène de 376 320 mailles à 32 cycles,
+  **4,62 ms par pas contre 2 ms** visés, et le tampon des faces plafonne le domaine à 1,15 M faces
+  ([S302](validation/SCENE-DELTA3D-S302.md) §2). Manque la cadence de δ découplée de l'image.
+  **Le budget n'est plus opposable pendant la construction** (ADR-178 D4) : il reste mesuré.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *absent*.
   Besoin découvert S274 : B est linéaire, un δ fidèle dérive de la dispersion d'amplitude
@@ -193,7 +232,9 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
   vers la source de pression (ADR-103). Manque le corps réel couplé.
 - [ ] **6.4 Parois et corps mobiles dans δ** (C23) — *absent* sur le système ; C23 exécuté sur un
   véhicule d'essai.
-- [ ] **6.5 Décor fixe comme frontière imposée** — *partiel* : fonds lisses coupés en 2D (S232).
+- [ ] **6.5 Décor fixe comme frontière imposée** — *partiel* : fonds lisses coupés **en 2D
+  seulement** (S232) ; le solveur 3D n'a pas de faces coupées. Lot 3 d'ADR-178, qui conditionne
+  6.1, 6.4 et les essais 2 et 3 du banc de la piscine.
 - [ ] **6.6 Grands navires** — *absent*.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *absent*.
 - [ ] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *absent*.
@@ -226,8 +267,11 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
   bande δ couplée sous houle à crêtes longues, précalculée hors budget et rejouée dans `viewer/`
   (touche D : B seul, B+δ 4 ms, B+δ au pas d'image), couche GPU à 7·10⁻⁸ m de sa lecture CPU,
   scène S201 inchangée au bit ; revue R10 en attente. **S276 : en direct** (`--delta-direct`, un pas
-  par image, identique au bit au rejeu, 40 images/s). Manquent le budget, la 3D, une frontière
-  δ↔B sans rupture autre qu'un fondu de rendu, et une tolérance de pente d'image.
+  par image, identique au bit au rejeu, 40 images/s). **S302 : δ en 3D rendu en direct** depuis la
+  seule surface publiée (I-13, ADR-175 D7), Catmull-Rom bicubique, fondu de 3 m, **197 Hz** ; le
+  rendu existant reste identique au bit sans la couche
+  ([preuve](validation/SCENE-DELTA3D-S302.md)). Manquent le budget, une frontière δ↔B sans rupture
+  autre qu'un fondu de rendu, et une tolérance de pente d'image.
 - [ ] **8.8 Lointain et horizon sans artefact** — *partiel* : coupure spectrale B/sillage (S249) ;
   bande d'horizon mesurée (S247, S248) ; fin de grille à l'horizon géométrique sous le ciel clair
   (S262). Pas de certificat d'absence d'alias.
@@ -237,13 +281,23 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 - [ ] **8.10 Crédibilité perçue validée par un regard humain** — *partiel* : protocole de revue
   ([REVUE-VISUELLE](validation/REVUE-VISUELLE.md)). Premier verdict (R1, « trop lisse ») mesuré et
   traité ; **R7 accepté S266**, après lissage des reflets entre les crêtes (ADR-161).
-  Optimisations S266/S267 reçues ; autres poses, animation et scénarios restent à
-  valider perceptivement. Ce verdict local ne clôt pas la crédibilité du système.
+  Optimisations S266/S267 reçues. **R11 reçu S303** (δ sans artefact, raccord invisible) ;
+  **R12/R13 annulées** — leurs images tournaient options acceptées éteintes (L349) ; **R14 reçu
+  S308**, et sa troisième image devient la **référence interne provisoire** de l'océan (ADR-178
+  D2). L'écart à une photographie réelle est désormais **chiffré** (`outils/cible_image.py`) et ce
+  qu'il en reste est **spatial**, hors de portée de l'optique (L351,
+  [confrontation](registres/TROIS-SYSTEMES-S308.md) §1). Autres poses, animation et scénarios
+  restent à valider perceptivement. Ce verdict local ne clôt pas la crédibilité du système, et
+  **une validation visuelle ne remplace pas une validation numérique** (ADR-178 D3).
 
 ## 9. Activation, prédiction, budget et dégradation
 
 - [ ] **9.1 Activation multicritère** : proximité, visibilité, taille à l'écran, regard, vitesse du
-  joueur, énergie, enjeu de jeu, budget (ADR-013, B8) — *absent*.
+  joueur, énergie, enjeu de jeu, budget (ADR-013, B8) — *partiel* **depuis S278** : le **mécanisme**
+  qui consomme les critères existe — sac à dos sous budget, `P/C` décroissant, hystérésis
+  ([ORDONNANCEUR-S278](validation/ORDONNANCEUR-S278.md), ADR-170). Manquent **les critères
+  eux-mêmes** : `W_gameplay` vient du jeu et `W_perception` du rendu, et aucun n'est calculé ;
+  aucun banc B8 ne fixe leurs seuils.
 - [ ] **9.2 Domaine prédictif orienté devant le joueur** — *absent*.
 - [ ] **9.3 Prédiction d'objets balistiques** : point, vitesse, orientation, région utile — *absent*.
 - [ ] **9.4 Objets contrôlables : paliers de confiance** ; confiance réduite par le jeu — *absent*.
@@ -256,14 +310,21 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
   condensation.
 - [ ] **9.8 Aucun solveur ne dépasse son budget** (I-05, ordonnanceur ADR-012) — *partiel* : arrêt
   coopératif atomique de δ (S230), y compris hauteur relaxée (S268) et flux de bord
-  (S270 : 638 interruptions/reprises exactes). L'ordonnanceur et la borne murale manquent.
+  (S270 : 638 interruptions/reprises exactes). **L'ordonnanceur existe depuis S278** et est branché
+  sur la bande δ (S279, ADR-171). Manquent la borne murale, la dégradation d'ADR-012 §4 et
+  plusieurs candidats réels se disputant un budget.
 - [ ] **9.9 Dégradation contrôlée dans l'ordre prescrit** : taille, résolution, interactions
-  lointaines, fréquence, effets — *absent*.
+  lointaines, fréquence, effets — *absent* au sens de cette liste : le **rétrécissement** d'un
+  domaine est construit (S283–S285) mais **non reçu** — dérive de 66,994 mm, A290
+  ([ATTRIBUTION-RETRECISSEMENT-S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md)). Construit et
+  non reçu ne vaut pas partiel (§ « Comment lire un point »).
 - [ ] **9.10 Profils de qualité, adaptation au matériel et à la charge** (I-16) — *absent*.
 - [ ] **9.11 60 images/s avec 2 ms pour l'eau sur une scène représentative** (ADR-125) — *partiel* :
   scène filtrée S267 : GPU eau médian ~1,74 ms en 1280×720, cuisson 0,574–0,585 ms,
   pointe 2,962 ms au premier passage ; CPU ~4,1 ms, pointes ~26 ms
-  ([preuve](validation/CUISSON-SILLAGE-S267.md)). Le budget global n'est pas reçu ; δ hors budget.
+  ([preuve](validation/CUISSON-SILLAGE-S267.md)). Le budget global n'est pas reçu ; **δ 3D mesuré
+  à 4,62 ms par pas sur la scène de S302**, contre 2 ms. Profil de travail : ADR-174 D3, **non
+  opposable pendant la construction physique** mais toujours mesuré et publié (ADR-178 D4).
 - [ ] **9.12 Aucune allocation à l'exécution** (I-06) — *partiel* : pas de δ et boucle d'image de
   l'hôte reçus (S200, S240), pas couplé avec flux de bord reçu S270. Système entier non éprouvé.
 - [ ] **9.13 Dépassement critique temporaire** sans retard global perceptible — *absent*.
@@ -330,7 +391,7 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
-| 1. Socle | 8 | 1 | 4 | 3 |
+| 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 3 | 6 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 7 | 14 |
@@ -338,12 +399,25 @@ sur le périmètre final, pas sur le nombre de correctifs ou de tests.
 | 6. Solides | 8 | 0 | 3 | 5 |
 | 7. Secondaires | 8 | 0 | 0 | 8 |
 | 8. Rendu | 10 | 0 | 7 | 3 |
-| 9. Activation et budget | 13 | 0 | 5 | 8 |
+| 9. Activation et budget | 13 | 0 | 6 | 7 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **49** | **68** |
+| **total** | **120** | **3** | **51** | **66** |
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.
+
+**Ce que l'actualisation de S309 a changé, et ce qu'elle n'a pas changé.** Le décompte a été
+**recalculé point par point**, pas corrigé à vue — et le total de S276 était faux de deux unités :
+la ligne « Socle » comptait encore **1.4** en absent alors que S278 l'avait rendu partiel, ce que
+l'audit [S293](registres/BILAN-GLOBAL-S293.md) §2 avait signalé sans que la table soit refaite.
+Un seul point change de catégorie aujourd'hui — **9.1**, absent → partiel, l'ordonnanceur ayant
+été écrit en S278. Quatorze autres voient leur **texte** corrigé sans changer de case : pour la
+plupart parce que la 3D de δ, absente au S276, existe depuis S297 et tourne sur la carte depuis
+S301. **Aucun point ne devient validé**,
+et c'est le fait le plus important de ce décompte : entre S276 et S308, le dépôt a construit un
+solveur 3D, l'a porté sur GPU et l'a rendu en direct — sans amener **un seul** point de cette
+liste jusqu'à son périmètre final. Trois points sont même mieux compris **en moins bien** qu'avant
+(4.8, 4.18, 4.7) : ce que S308 a découvert, c'est qu'ils étaient surestimés.

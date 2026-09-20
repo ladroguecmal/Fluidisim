@@ -83,8 +83,8 @@ Critères, écrits avant :
 ### Plan
 
 - [x] **P1** — amorce, jeton pris, **horodatage fabriqué de S308 corrigé**, plan seul.
-- [ ] **P2** — la liste actualisée là où S295–S308 l'ont bougée : δ 3D, rendu, solides. Preuve
-  citée à chaque état changé ; décompte recalculé.
+- [x] **P2** — quinze points retouchés, chacun avec sa preuve ; décompte **recalculé** point par
+  point : 3 / 51 / 66, et le total de S276 était faux de deux unités (1.4).
 - [ ] **P3** — la vue par système : chaque point rangé en A, B, C ou hors des trois, et ce que
   chaque système doit encore recevoir. Ajout à `TROIS-SYSTEMES-S308`, pas un document de plus.
 - [ ] **P4** — rituel REPRISE §6.

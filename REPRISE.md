@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 13:45 +02:00
+Battement        : 2026-09-20 13:46 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S309 — la **liste du projet fini** confrontée aux trois systèmes : l'utilisateur l'a demandée explicitement et S308 ne l'a pas faite. Ses états datent de S276 et ignorent la 3D de δ
 Dernière session : S308 — photographie de R14 chiffrée, lot du rendu **clos par la mesure**, stratégie en trois systèmes actée ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md), [confrontation](docs/registres/TROIS-SYSTEMES-S308.md))
