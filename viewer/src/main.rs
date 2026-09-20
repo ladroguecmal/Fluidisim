@@ -1809,6 +1809,47 @@ fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config) ->
     Ok(())
 }
 
+/// S304, ADR-176 §3.6 — **images de la revue R12** : la mer seule, aux poses de R11, dans l'état
+/// que les options décrivent. Le nom du fichier porte l'état, pour qu'aucune image ne circule sans
+/// dire ce qu'elle montre (D5). Images locales de banc (ADR-124), aucune publication.
+fn revue_mer(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
+    let dir = captures!("s304");
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    let (width, height) = (1280u32, 720u32);
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, width, height,
+        frame.profile.len(), scene::WAKE_CAPACITY))?;
+    frame.lod = true;
+    frame.cull = true;
+    frame.viewport = Some((width as f32 / height as f32, g.nx, g.ny));
+    // Les poses de R11, celles que l'utilisateur a déjà regardées.
+    let poses: [(&str, Camera); 4] = [
+        ("reference", Camera::default()),
+        ("proche", Camera { eye: [0., -7., 4.], yaw: 0., pitch: -0.18 }),
+        ("rasante", grazing_camera()),
+        ("haute", Camera { eye: [0., -34., 22.], yaw: 0., pitch: -0.42 }),
+    ];
+    for (nom, camera) in &poses {
+        frame.camera = Camera { eye: camera.eye, yaw: camera.yaw, pitch: camera.pitch };
+        frame.update(12., 12., false);
+        g.upload(frame);
+        let target = g.target();
+        g.draw(&target.create_view(&Default::default()), false);
+        let path = format!("{dir}/s304_{tag}_{nom}_12s.ppm");
+        g.capture(&target, &path)?;
+        let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+        let entete = format!("P6\n{width} {height}\n255\n").len();
+        let hash = bytes[entete..]
+            .iter()
+            .fold(0xcbf2_9ce4_8422_2325u64, |h, b| (h ^ *b as u64).wrapping_mul(0x100_0000_01b3));
+        println!(
+            "REVUE_MER image={path} {width}x{height} etat={tag} pose={nom} age_s=12 cwm={} modulation={} asymetries={} empreinte=0x{hash:016x}",
+            frame.cwm, frame.modulation, frame.asymmetry.is_some()
+        );
+    }
+    Ok(())
+}
+
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
     // S262 : un dossier par revue ; un nouveau rendu n'écrase plus une revue envoyée.
     let dir = match tag { "r1" => captures!("s254"), "r2" => captures!("s256"), "r3" => captures!("s259"), "r4" => captures!("s260"),
@@ -2653,6 +2694,20 @@ fn run() -> Result<(), String> {
         frame.tail_count = scene.tail_count_28;
         frame.modulation = 2.;
         println!("MODULATION queue_lignes={} M={}", frame.tail_count, frame.modulation);
+        // S303, ADR-176 D4 : les asymétries s'activent avec `--vagues --modulation`. `--sans-asym`
+        // rend le comportement d'ADR-158, au bit, pour servir de témoin.
+        if !args.iter().any(|a| a == "--sans-asym") {
+            let lag = args
+                .iter()
+                .find_map(|a| a.strip_prefix("--retard=").and_then(|v| v.parse::<f32>().ok()))
+                .unwrap_or(-0.20);
+            let asym = scene::Asymmetry::from_background(&scene.background, scene.split, lag);
+            println!(
+                "ASYMETRIES systeme1={} k1={:.4} k2={:.4} retard_tours={lag}",
+                asym.split, asym.k_mean[0], asym.k_mean[1]
+            );
+            frame.asymmetry = Some(asym);
+        }
     }
     // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
     frame.lod = !args.iter().any(|a| a == "--no-lod");
@@ -2687,6 +2742,12 @@ fn run() -> Result<(), String> {
         if args.iter().any(|a| a == "--captures") {
             return delta3d_captures(&mut frame, config);
         }
+    }
+    if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue-mer=")) {
+        if tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+            return revue_mer(&mut frame, tag);
+        }
+        return Err("--revue-mer : suffixe alphanumérique".into());
     }
     if multi && args.iter().any(|a| a == "--revue") {
         return revue_images(&mut frame, "r1");

@@ -612,3 +612,42 @@ Quatre réponses, dans l'ordre des questions posées :
 reçoit pas** : la porte B, dont le critère 3 demande une mer jugée convaincante — elle ne l'est pas
 encore. La revue reviendra (R12) avec les asymétries construites, et la scène dira ce qu'elle
 montre.
+
+## 17. R12 — la mer avec ses asymétries, S304
+
+**2026-09-20, verdict attendu.** Réponse au verdict R11 : « la topologie est à revoir […] les micro
+vaguelettes ou pics doivent être convexes plutôt que concaves ». Construction :
+[ADR-176](../adr/ADR-176-asymetries-de-la-surface-rendue.md) ; réception et chiffres :
+[ASYMETRIES-S304](ASYMETRIES-S304.md). Images dans `viewer/captures/s304`, 1280×720, âge 12 s,
+**les quatre poses de R11**.
+
+**Les options sont déclarées — c'est la leçon de R11.** Trois états de la même mer, le nom du
+fichier portant le sien :
+
+| état | ce qui est actif | pourquoi il est là |
+|---|---|---|
+| `a_houle_seule` | mer multimodale seule | **c'est ce que R11 a montré** : sans la queue d'équilibre ni les vagues pointues construites en S260–S261. Ma faute de protocole |
+| `b_vagues_modulation` | + queue d'équilibre, vagues pointues, modulation | le meilleur d'avant ce lot |
+| `c_asymetries` | + second ordre par système, modulation retardée | **ce lot** |
+
+**Ce qui est simulé** : la mer entière — houle (`Hs` 2 m, `Tp` 12 s) et mer de vent (`Hs` 1,5 m,
+`Tp` 6 s), 64 composantes, plus une queue spectrale de 60 lignes rendue en pentes par pixel. Cette
+queue reste un **habillage non couplé** : elle donne le grain, pas la dynamique. Aucune couche δ
+n'est rendue ici : la question posée est celle de la mer.
+
+**Ce que la mesure dit déjà**, sur la même réalisation : l'asymétrie verticale passe de 0,003 à
+**0,066** (observé ≈ 0,156), l'asymétrie des pentes de 0,001 à **−0,155** (observé −0,222), et
+`c₂₁` tombe sur la valeur de Cox–Munk sans avoir été visée. Coût : +0,25 %.
+
+**Les questions :**
+
+1. **Entre `b` et `c`** : les crêtes vous paraissent-elles plus justes — pointues en haut, creux
+   plus larges — ou ne voyez-vous pas de différence ?
+2. **Entre `a` et `c`** : est-ce l'écart que vous attendiez après votre retour, ou la mer reste-t-elle
+   « pas réaliste » pour une raison que vous pouvez nommer ?
+3. **Le grain** : les vaguelettes, prises seules, vous semblent-elles encore trop régulières ou
+   trop uniformément réparties ?
+4. **Ce qui manque encore**, si vous le voyez : nous savons qu'il manque les capillaires parasites
+   (le fin grain sur la face avant des vagues courtes), l'écume et le micro-déferlement.
+
+Un mot par question suffit ; « je ne sais pas » reste une réponse utile.

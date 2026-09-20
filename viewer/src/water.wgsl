@@ -8,6 +8,9 @@ struct Params {
     lattice: vec4<f32>, // pas (m), nx, ny, 1 = grille / 0 = somme directe par sommet
     spectral: vec4<f32>, // activé, k_max de la recette ; huit bandes ADR-148
     reflection: vec4<f32>, // ordre 0/3/5 ; y : sommes suffixes et boucles fixes (S266)
+    // S303, ADR-176 : asymétries. (composantes du premier système, k̄ du premier, k̄ du second,
+    // retard de la modulation en tours). Inactif quand `asym.y` vaut 0.
+    asym: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> p: Params;
 @group(0) @binding(1) var<storage, read> waves: array<vec4<f32>>;
@@ -44,9 +47,14 @@ fn spectral_band(k: f32) -> u32 {
 
 // S260, ADR-157 — CWM : déplacement de Lagrange et ∂D (xx, xy, yy) de la bande (poids d'ADR-148),
 // pentes et ∂D de la queue (poids d'ADR-155, arrêt au premier poids nul).
-struct Cwm { d: vec2<f32>, s: vec2<f32>, g: vec3<f32>, e: f32, h: f32 }
+// S303, ADR-176 : `e2`/`qd` élévation et quadrature **par système**, `sa`/`sq` leurs pentes
+// (xy premier système, zw second), `eq` la quadrature de la déformation. Tout est accumulé dans
+// la même boucle : la somme des composantes n'est pas parcourue deux fois.
+struct Cwm { d: vec2<f32>, s: vec2<f32>, g: vec3<f32>, e: f32, h: f32,
+             e2: vec2<f32>, qd: vec2<f32>, sa: vec4<f32>, sq: vec4<f32>, eq: f32 }
 fn band_cwm(q: vec2<f32>, h: f32) -> Cwm {
     var o: Cwm;
+    let split = u32(p.asym.x);
     for (var i = 0u; i < u32(p.info.x); i++) {
         let c = waves[i];
         let k = length(c.yz);
@@ -58,10 +66,38 @@ fn band_cwm(q: vec2<f32>, h: f32) -> Cwm {
         o.d += a*cs*u;
         o.h += a*sn;
         o.e += a*k*sn;
+        o.eq += a*k*cs;
         o.s += a*cs*c.yz;
         o.g -= a*k*sn*vec3<f32>(u.x*u.x, u.x*u.y, u.y*u.y);
+        // Branches explicites : FXC refuse d'indexer un vecteur dynamiquement en écriture (L345).
+        if (i < split) {
+            o.e2.x += a*sn; o.qd.x += a*cs;
+            o.sa = vec4<f32>(o.sa.xy + a*cs*c.yz, o.sa.zw);
+            o.sq = vec4<f32>(o.sq.xy - a*sn*c.yz, o.sq.zw);
+        } else {
+            o.e2.y += a*sn; o.qd.y += a*cs;
+            o.sa = vec4<f32>(o.sa.xy, o.sa.zw + a*cs*c.yz);
+            o.sq = vec4<f32>(o.sq.xy, o.sq.zw - a*sn*c.yz);
+        }
     }
     return o;
+}
+// S303, ADR-176 D1 — second ordre en bande étroite (Tayfun 1980) appliqué **par système** :
+// `η₂ = ½·k̄·(η² − η̂²)`, pente par dérivation du produit. Rend (hauteur, pente x, pente y).
+fn tayfun(c: Cwm) -> vec3<f32> {
+    if (p.asym.y <= 0.0) { return vec3<f32>(0.0); }
+    let h2 = 0.5*p.asym.y*(c.e2.x*c.e2.x - c.qd.x*c.qd.x)
+           + 0.5*p.asym.z*(c.e2.y*c.e2.y - c.qd.y*c.qd.y);
+    let s2 = p.asym.y*(c.e2.x*c.sa.xy - c.qd.x*c.sq.xy)
+           + p.asym.z*(c.e2.y*c.sa.zw - c.qd.y*c.sq.zw);
+    return vec3<f32>(h2, s2);
+}
+// S303, ADR-176 D2 — déformation **retardée** : les rides sont maximales en avant de la crête.
+// À retard nul, c'est la déformation d'ADR-158, au bit.
+fn lagged_eps(c: Cwm) -> f32 {
+    if (p.asym.w == 0.0) { return c.e; }
+    let angle = p.asym.w*6.28318530718;
+    return cos(angle)*c.e + sin(angle)*c.eq;
 }
 // S262 : `k` et la direction unitaire de chaque composante de queue sont précalculés par l'hôte
 // dans la seconde moitié du tampon, identiques à `length(c.yz)` et `c.yz/k`.
@@ -429,10 +465,11 @@ fn verify(@builtin(global_invocation_id) id: vec3<u32>) {
         }
         if (probe.w > 4.5) {
             let b = band_cwm(probe.xy,probe.z);
+            let t2 = tayfun(b);
             let t = filtered_tail(probe.xy,probe.z);
-            let energy = max(0.0,1.0+p.up.w*b.e);
+            let energy = max(0.0,1.0+p.up.w*lagged_eps(b));
             let g = b.g+sqrt(energy)*t.cwm.g;
-            let e = euler_slope(b.s+sqrt(energy)*t.cwm.s,g);
+            let e = euler_slope(b.s+t2.yz+sqrt(energy)*t.cwm.s,g);
             if (probe.w > 5.5) { results[id.x] = vec4<f32>(covariance_transport(energy*t.covariance,g),0.0); }
             else { results[id.x] = vec4<f32>(e.xy,e.z,0.0); }
             return;
@@ -441,8 +478,9 @@ fn verify(@builtin(global_invocation_id) id: vec3<u32>) {
         // S260 : w = 3 — déplacement de la bande ; w = 4 — pente eulérienne CWM (bande + queue), det.
         if (probe.w > 3.5) {
             let b = band_cwm(probe.xy, probe.z); var t = tail_cwm(probe.xy, probe.z);
-            if (p.up.w > 0.0) { let m = sqrt(max(0.0, 1.0 + p.up.w*b.e)); t.s *= m; t.g *= m; }
-            let e = euler_slope(b.s + t.s, b.g + t.g);
+            let t2 = tayfun(b);
+            if (p.up.w > 0.0) { let m = sqrt(max(0.0, 1.0 + p.up.w*lagged_eps(b))); t.s *= m; t.g *= m; }
+            let e = euler_slope(b.s + t2.yz + t.s, b.g + t.g);
             results[id.x] = vec4<f32>(e.z, e.xy, probe.z); return;
         }
         if (probe.w > 2.5) { results[id.x] = vec4<f32>(band_cwm(probe.xy, probe.z).d, 0.0, probe.z); return; }
@@ -486,10 +524,13 @@ fn grid_spacing(index: vec2<f32>, q: vec2<f32>) -> f32 {
     // S262 : la bande n'est plus parcourue deux fois — `band_cwm` rend aussi la hauteur et la pente.
     if (p.spectral.w > 0.5) {
         let b = band_cwm(q, h);
-        w = perturbations(q, h, vec3<f32>(b.h, b.s));
+        // S303, ADR-176 : l'élévation et la pente du second ordre s'ajoutent à celles de la bande,
+        // et la déformation transmise au fragment est la déformation **retardée**.
+        let t2 = tayfun(b);
+        w = perturbations(q, h, vec3<f32>(b.h + t2.x, b.s + t2.yz));
         local = vec3<f32>(q + b.d, w.x-p.eye.z);
         o.g = b.g;
-        o.eps = b.e;
+        o.eps = lagged_eps(b);
     } else {
         w = water(q, h);
         local = vec3<f32>(q,w.x-p.eye.z);

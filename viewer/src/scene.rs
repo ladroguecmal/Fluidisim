@@ -37,6 +37,9 @@ pub const TAIL_COMPONENTS: usize = 64;
 pub const B_CAPACITY: usize = 64;
 pub struct Scene {
     pub background: Background,
+    /// S303, ADR-176 : nombre de composantes du **premier système** du spectre (mer de vent sous
+    /// `--houle`) ; le reste appartient au second. Sans houle, un seul système.
+    pub split: usize,
     /// S256 : même recette que `background`, prolongée ; jamais évaluée en hauteur.
     pub tail: Background,
     /// S261, ADR-158 : nombre de composantes de la queue jusqu'à 28 fp (k croissant) ; S263, ADR-160 :
@@ -118,6 +121,13 @@ impl Scene {
             WorldPos::from_units(0, 0, 0),
         )
         .unwrap();
+        // Le premier système est celui que `--houle` assemble en tête (mer de vent) ; sans houle,
+        // le spectre n'en a qu'un et tout lui appartient.
+        let split = if houle {
+            background_spectrum::bake_directional(recipe, 10.).expect("vent S259").components().len()
+        } else {
+            cooked.components().len()
+        };
         let (tail_count_28, wind_report) = match wind {
             Some(u) => {
                 let target = background_spectrum::cox_munk_mss(u);
@@ -182,6 +192,7 @@ impl Scene {
         .unwrap();
         Self {
             background,
+            split,
             tail,
             tail_count_28,
             wind_report,
@@ -724,6 +735,35 @@ pub struct FrameData<'a> {
     /// S302, ADR-175 D7 : géométrie de la couche δ 3D rendue en direct ; la hauteur, elle, reste
     /// sur la carte. `None` hors `--delta3d`.
     pub delta3d: Option<crate::delta3d_scene::View>,
+    /// S303, ADR-176 : asymétries du rendu — `None` les désactive et le rendu est celui d'avant,
+    /// au bit.
+    pub asymmetry: Option<Asymmetry>,
+}
+
+/// S303, ADR-176 : ce dont le rendu a besoin pour les deux asymétries. `k_mean` est le nombre
+/// d'onde moyen pondéré par l'énergie de chaque système ; `lag_turns` le retard de la modulation
+/// de la queue, seul paramètre libre de la décision (calé sur `c₀₃` de Cox–Munk).
+#[derive(Clone, Copy, Debug)]
+pub struct Asymmetry {
+    pub split: u32,
+    pub k_mean: [f32; 2],
+    pub lag_turns: f32,
+}
+
+impl Asymmetry {
+    /// Les deux nombres d'onde moyens du spectre, calculés une fois sur les composantes du fond.
+    pub fn from_background(background: &Background, split: usize, lag_turns: f32) -> Self {
+        let mut energy = [0f64; 2];
+        let mut weighted = [0f64; 2];
+        for (i, c) in background.components().iter().enumerate() {
+            let s = usize::from(i >= split);
+            let e = 0.5 * (c.amplitude as f64) * (c.amplitude as f64);
+            energy[s] += e;
+            weighted[s] += e * c.k_turns_per_m as f64 * std::f64::consts::TAU;
+        }
+        let k = |s: usize| if energy[s] > 0. { (weighted[s] / energy[s]) as f32 } else { 0. };
+        Asymmetry { split: split as u32, k_mean: [k(0), k(1)], lag_turns }
+    }
 }
 impl<'a> FrameData<'a> {
     pub fn new(
@@ -777,6 +817,7 @@ impl<'a> FrameData<'a> {
             jobs: host_impl::ScopedJobs::with_workers(1),
             delta: None,
             delta3d: None,
+            asymmetry: None,
         }
     }
     pub fn update(&mut self, seconds: f64, age: f64, enabled: bool) {
@@ -938,8 +979,13 @@ impl<'a> FrameData<'a> {
             1.0 - t * t * (3.0 - 2.0 * t)
         };
         let (mut d, mut s, mut g, mut eta, mut eps) = ([0f64; 2], [0f64; 2], [0f64; 3], 0f64, 0f64);
+        // S303, ADR-176 : élévation, quadrature et leurs pentes **par système**, plus la
+        // quadrature de la déformation — mêmes accumulations que le nuanceur.
+        let split = self.asymmetry.map_or(usize::MAX, |a| a.split as usize);
+        let (mut e2, mut qd, mut eps_q) = ([0f64; 2], [0f64; 2], 0f64);
+        let (mut sa, mut sq) = ([[0f64; 2]; 2], [[0f64; 2]; 2]);
         let count = self.background.component_count();
-        for c in &self.components[..count] {
+        for (index, c) in self.components[..count].iter().enumerate() {
             let (kx, ky) = (c[1] as f64, c[2] as f64);
             let k = (kx * kx + ky * ky).sqrt();
             if k == 0.0 {
@@ -951,6 +997,16 @@ impl<'a> FrameData<'a> {
             let (ux, uy) = (kx / k, ky / k);
             eta += a * sn;
             eps += a * k * sn;
+            eps_q += a * k * cs;
+            let sys = usize::from(index >= split);
+            if self.asymmetry.is_some() {
+                e2[sys] += a * sn;
+                qd[sys] += a * cs;
+                sa[sys][0] += a * cs * kx;
+                sa[sys][1] += a * cs * ky;
+                sq[sys][0] -= a * sn * kx;
+                sq[sys][1] -= a * sn * ky;
+            }
             d[0] += a * cs * ux;
             d[1] += a * cs * uy;
             s[0] += a * cs * kx;
@@ -959,6 +1015,24 @@ impl<'a> FrameData<'a> {
             g[1] -= a * k * sn * ux * uy;
             g[2] -= a * k * sn * uy * uy;
         }
+        // Second ordre en bande étroite, par système (ADR-176 D1).
+        if let Some(asym) = self.asymmetry {
+            for sys in 0..2 {
+                let km = asym.k_mean[sys] as f64;
+                eta += 0.5 * km * (e2[sys] * e2[sys] - qd[sys] * qd[sys]);
+                for i in 0..2 {
+                    s[i] += km * (e2[sys] * sa[sys][i] - qd[sys] * sq[sys][i]);
+                }
+            }
+        }
+        // Déformation retardée (ADR-176 D2) : à retard nul, `eps` d'ADR-158 au bit.
+        let eps = match self.asymmetry {
+            Some(a) if a.lag_turns != 0. => {
+                let angle = a.lag_turns as f64 * std::f64::consts::TAU;
+                angle.cos() * eps + angle.sin() * eps_q
+            }
+            _ => eps,
+        };
         if self.tail_background.is_some() {
             let v = if self.modulation > 0. { (1.0 + self.modulation as f64 * eps).max(0.0).sqrt() } else { 1.0 };
             for c in &self.tail[..self.tail_count] {

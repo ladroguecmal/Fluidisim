@@ -81,17 +81,39 @@ second ordre (borne prudente retenue) ; ajouter capillaires, écume ou asymétri
 
 ### Plan
 
-- [>] **P1** — amorce, plan seul.
-- [ ] **P2** — uniforme, nuanceur et référence CPU : second ordre par système et modulation
+- [x] **P1** — amorce, plan seul.
+- [x] **P2** — uniforme, nuanceur et référence CPU : second ordre par système et modulation
   retardée ; activation avec `--vagues --modulation`.
-- [ ] **P3** — critères 2 et 3 : GPU contre CPU aux sondes, scènes antérieures au bit.
-- [ ] **P4** — critères 1, 4 et 5 : statistiques, écart au jeu, coût.
-- [ ] **P5** — captures R12 et demande de revue.
-- [ ] **P6** — preuve, rituel REPRISE §6.
+- [x] **P3** — critères 2 et 3 : GPU contre CPU aux sondes, scènes antérieures au bit.
+- [x] **P4** — critères 1, 4 et 5 : statistiques, écart au jeu, coût.
+- [x] **P5** — captures R12 et demande de revue.
+- [>] **P6** — preuve, rituel REPRISE §6.
 
 ### Notes de reprise
 
-*(S304 — vide à l'ouverture.)*
+**Construit** : `tayfun()` et `lagged_eps()` dans `water.wgsl`, accumulations par système dans la
+boucle existante de `band_cwm` (branches explicites — FXC refuse l'indexation dynamique en
+écriture, L345) ; douzième `vec4` de l'uniforme `(split, k̄₁, k̄₂, retard)` ; mêmes deux termes dans
+la référence CPU `cwm_reference` ; activation par `--vagues --modulation`, témoin `--sans-asym`,
+balayage `--retard=`. Le fragment n'a pas changé : le sommet lui transmet la déformation **retardée**.
+
+**Réception d'ADR-176 §3, cinq critères tenus** :
+
+| critère | exigé | obtenu |
+|---|---|---|
+| 1. statistiques | `Sk` ≥ 0,06 ; `c₀₃` ∈ [−0,18 ; −0,13] ; `c₂₁` −0,058 ± 0,02 ; `c₄₀` ∈ [0,26 ; 0,45] ; `mss` ± 2 % | **0,0656** ; **−0,155** ; **−0,057** ; **0,340** ; +0,2 % |
+| 2. GPU contre CPU | 3 mm ; 5·10⁻⁴ | 1,59·10⁻⁶ m ; 2,69·10⁻⁴, aucun repli |
+| 3. scènes au bit | défaut, `--houle`, `--vagues`, `--sans-asym` | **identiques** au binaire de S301 |
+| 4. écart au jeu | publié | 0,3651 → **0,3999 m** (+3,5 cm ; CWM en porte 36,5) |
+| 5. coût | publié, secteur relevé | 1,0138 → **1,0163 ms** (+0,25 %) |
+
+`k̄` par système : **0,1742** (mer de vent) et **0,0317** (houle) — l'instrument et l'hôte donnent
+les mêmes, donc les deux implémentations portent bien le même modèle.
+
+**Images R12** : `--revue-mer=<état>`, quatre poses de R11, trois états nommés dans le fichier
+(`a_houle_seule`, `b_vagues_modulation`, `c_asymetries`). Regardées ici : l'écart `a` → `c` est
+franc (la mer de R11 était lisse et striée) ; l'écart `b` → `c` est plus fin — crêtes plus marquées,
+contraste crête/creux plus net. C'est à l'utilisateur de juger, R12 pose quatre questions.
 
 ---
 

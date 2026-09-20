@@ -206,6 +206,8 @@ fn main() {
         }
     }
     let names: Vec<String> = cases.iter().map(|c| c.0.clone()).collect();
+    println!("SURFACE_S303 systeme1={} k1={:.4} k2={:.4} variance1={:.4} variance2={:.4}",
+        systeme.iter().filter(|s| **s == 0).count(), km_s[0], km_s[1], var_s[0], var_s[1]);
     println!("SURFACE_S260 echantillons={samples} composantes_bande={} queue={} sigma_m={sigma:.4} k_m={km:.5} trois_k_sigma={:.4}",
         band.len(), tail.components().len(), 3.0 * km * sigma);
     let w_cm = 7.95f64;

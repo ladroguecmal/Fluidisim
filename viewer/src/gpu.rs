@@ -148,7 +148,8 @@ impl Gpu {
         let uniform = buffer(
             &device,
             "camera",
-            176,
+            // S303, ADR-176 : un douzième vec4 porte les asymétries.
+            192,
             wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         );
         let waves = buffer(
@@ -536,6 +537,14 @@ impl Gpu {
         // S275 : `reflection.z` = première ligne de la bande δ dans `impacts`, zéro sans δ.
         let delta_base = if frame.delta.is_some() { crate::scene::IMPACT_CAPACITY as f32 } else { 0. };
         for v in [frame.reflection_order as f32, if frame.reflection_suffix { 1. } else { 0. }, delta_base, 0.] {
+            self.bytes.extend_from_slice(&v.to_le_bytes());
+        }
+        // S303, ADR-176 : (composantes du premier système, k̄₁, k̄₂, retard en tours). Sans
+        // asymétries, quatre zéros — le nuanceur les reconnaît et ne change rien.
+        let asym = frame.asymmetry.map_or([0f32; 4], |a| {
+            [a.split as f32, a.k_mean[0], a.k_mean[1], a.lag_turns]
+        });
+        for v in asym {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
