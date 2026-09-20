@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 10:08 +02:00
+JETON            : occupé
+Battement        : 2026-09-20 10:16 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : aucune — S305 terminée
+Session en cours : S306 — **guide de topologie d'océan reçu de l'utilisateur** (`docs/sources/guide_topologie_ocean_haute_mer_plage.md`, v1.0, 2026-09-20) : le confronter au dépôt, et éprouver l'hypothèse qu'il met au premier rang — l'écart au réel viendrait d'abord des **normales fines et de l'environnement lumineux**, pas de la topologie
 Dernière session : S305 — critère 2 de la porte B mesuré sur les cas de cuve ; images de R12 renvoyées à l'utilisateur
-Session suivante : S306 — **d'abord le verdict R12** (REVUE-VISUELLE §17) : c'est le **dernier** élément manquant de la porte B, son critère 2 étant désormais mesuré. Sans verdict, dans cet ordre : cas 1 et 2 d'ADR-175 §4.1 pour la **production** (HOS à `ny` = 1, invariance en `y`) — dernier trou du critère 2 ; puis, si une troisième session consécutive devait rester sans verdict, la **porte D** (déclarée en parallèle en §3 bis, et vide) : objet lâché dans un bassin, qui consomme exactement la géométrie sans B reçue ici. Reliquats du lot de la mer, suspendus au verdict : noyau exact du second ordre pour deux systèmes (`Sk` vrai entre 0,066 et 0,150), capillaires parasites, asymétrie horizontale. Porte C : charge utile par face du fond (26 flottants → 12).
+Session suivante : fixée au rituel
 Maillons        : 0 — capacité S305 : le pas de production suit la référence dans une cuve (3·10⁻⁷ m pour 3 mm, phase 1,22° → 0,065°), chaînon CPU identique au bit ; consommateur : la porte B, dont il ne reste que le verdict ; preuve CUVE-GPU-S305
 ```
 

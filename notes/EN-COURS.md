@@ -58,144 +58,60 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S305 — terminée : critère 2 de la porte B mesuré sur les cas de cuve.
+Session : S306 — en cours : le guide reçu, confronté au dépôt puis éprouvé.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle.
-Entrée : « Reprends le projet », 2026-09-20, jeton libre, copie unique, master propre.
+Entrée : un fichier, sans consigne — `guide_topologie_ocean_haute_mer_plage.md`, v1.0 du
+2026-09-20, recopié tel quel dans [`docs/sources/`](../docs/sources/guide_topologie_ocean_haute_mer_plage.md).
+Il dit analyser « les deux images reçues » (une photo de haute mer, un rendu) : c'est donc, selon
+toute vraisemblance, une **réponse indirecte à R12** obtenue ailleurs. Le verdict lui-même n'est
+toujours pas donné ; la question sera posée au rituel, pas avant — le travail n'en dépend pas.
 
-Capacité visée : **le pas de production GPU reçu contre la référence 3D sur les cas de cuve**
-d'[ADR-175](../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) §4.1 — critère **2**
-de la porte B, le seul de ses quatre critères dont rien n'est encore mesuré. Ce que cela demande :
-un **mode sans fond** de `Step3`, c'est-à-dire un fond d'amplitude nulle, murs au lieu d'éponge, et
-l'état initial du mode oblique (1,1). Consommateur : la porte B, dont le critère 3 attend par
-ailleurs le verdict R12.
+Capacité visée : **savoir ce que ce document change, et ce qu'il ne change pas.** Deux moitiés :
+1. La **confrontation** au dépôt, section par section — déjà acté, déjà construit, diverge, neuf
+   et actionnable, hors périmètre présent. Sans cela, un document de 773 lignes se dissout en
+   impressions et reforke la conception par la bande.
+2. L'**hypothèse qu'il met au premier rang** (§1, §10.3, §12.3) et que le dépôt n'a jamais
+   testée : l'écart entre notre mer et une photo viendrait d'abord des **normales fines** (notre
+   queue spectrale, ADR-155) et de l'**environnement lumineux** (ADR-162), et non de la topologie
+   ni des asymétries. ADR-176 a répondu par la statistique de la surface ; le guide dit de
+   regarder ailleurs **en premier**. C'est une thèse concurrente, et elle se mesure.
 
-Ce que je ne fais pas : réécrire quoi que ce soit de S299/S300/S301 (L137) — le mode sans fond
-passe par la donnée, pas par une seconde source ; toucher au rendu ou à ADR-176 ; relever un
-seuil d'ADR-144.
+Ce que je ne fais pas : réécrire ADR-176 ni rouvrir les cinq arbitrages d'ADR-027 ; construire
+quoi que ce soit de la côte, de la plage ou du déferlement (porte F et au-delà — l'ambition
+d'ADR-127 les contient, l'ordre des portes les place plus tard) ; prendre pour acquis un chiffre
+du guide sans sa source.
 
-Critères, écrits avant la mesure (ADR-175 §4.1 cas 3 et §4.2) :
-1. **Le mode sans fond est nul** : champ de fond publié par la carte identiquement nul (vitesses,
-   `eta`, `p_dyn`, `grad_p_dyn`), et pas de production identique **au bit** aux bancs de S301
-   quand le fond réel est remis.
-2. **Dispersion** : la carte tient `ω² = g·k·tanh(k·h)` sur le mode (1,1) d'une cuve 8×4 m,
-   `h` = 4 m — erreur de phase **publiée et décroissante** en raffinant `nx` = 16/32/48, comme la
-   référence (S295 : 0,176 % à n = 48).
-3. **Production contre référence** : écart de hauteur **sous 3 mm** et rapporté à l'amplitude,
-   pente publiée, **sur une durée déclarée**. L'amplitude du cas est choisie pour que les 3 mm
-   aient un sens (la référence de S296 travaillait à 1 mm) ; le régime reste linéaire.
-4. **Le chaînon est nommé** : la référence reçue est `step_surface_mobile` (surface totale), le
-   pas GPU reproduit `step_perturbation_mobile` (perturbation sur fond). Les deux sont comparés
-   **l'un à l'autre** à fond nul, pour que l'écart carte/référence soit attribuable.
+Critères, écrits avant la mesure :
+1. Chaque section du guide est classée, et **chaque divergence nommée avec le document du dépôt
+   qui la tranche** — un désaccord sans référence est une impression.
+2. Le test A/B de §12.3 tourne sur **notre** rendu, quatre sorties au même instant, même caméra,
+   même mer : hauteur brute, normales géométriques seules, matériau sans queue, rendu complet.
+3. La cause dominante des stries est **attribuée par la mesure** — queue spectrale, ciel, ou
+   géométrie — et non par préférence. Si la mesure contredit ADR-176, elle est dite telle quelle.
+4. Les scènes antérieures restent **au bit** : les sorties de diagnostic sont des modes en plus,
+   jamais une modification du chemin de rendu.
 
 ### Plan
 
-- [x] **P1** — amorce, prise du jeton, plan seul ; demande du verdict R12 à l'utilisateur.
-- [x] **P2** — banc `--delta3d-cuve` : mode sans fond de `Step3`, murs, état initial du mode
-  oblique ; critère 1 (fond nul, bancs de S301 au bit).
-- [x] **P3** — critère 4 : `step_perturbation_mobile` à fond nul contre `step_surface_mobile`
-  sur le même cas, CPU contre CPU — le chaînon entre la référence reçue et ce que la carte porte.
-- [x] **P4** — critères 2 et 3 : carte contre référence, raffinement 16/32/48, écart de hauteur,
-  pente, erreur de phase, durée déclarée.
-- [x] **P5** — *(découpage déclaré)* durée longue : 5 s au raffinement moyen, pour dire si
-  l'écart est borné ou séculaire — la seule objection que 1 s laisse ouverte.
-- [x] **P6** — preuve `CUVE-GPU-S305`, réception écrite des quatre critères.
-- [x] **P7** — rituel REPRISE §6.
+- [x] **P1** — amorce, jeton, guide recopié dans `docs/sources/`, plan seul.
+- [ ] **P2** — confrontation section par section, écrite dans un document de lecture.
+- [ ] **P3** — les deux sorties de diagnostic manquantes (hauteur en fausses couleurs, normales
+  géométriques seules) ; `--no-tail` et le rendu complet existent déjà.
+- [ ] **P4** — le test A/B aux quatre sorties, et la cause dominante attribuée.
+- [ ] **P5** — conséquences : file active, angles morts, note datée à ADR-176 si la mesure la
+  contredit, et ce qui doit remonter à l'utilisateur comme arbitrage.
+- [ ] **P6** — preuve, rituel REPRISE §6.
 
 ### Notes de reprise
 
-**P2 reçu — le critère 1 est tenu, et le mode sans fond ne coûte aucune ligne de noyau.**
-`--delta3d-cuve`, cuve 8 × 4 m, `h` = 4 m, mode (1, 1), `nx` = 32 (dx 25 cm, 32×16×18, 29 024
-faces, 512 colonnes), `a` = 5 cm, `a·k` = 0,0439, `k·h` = 3,512, `ω` = 2,9324 s⁻¹ (période 2,1427 s).
+*(à remplir en cours de session)*
 
-- **Fond nul, exactement** : les 26 emplacements de `BackgroundSample` sur les 29 024 faces —
-  **754 624 valeurs, zéro non nulle**, au noyau de S300 lui-même. Le mode sans fond est une
-  **donnée** (une composante d'amplitude nulle), pas une branche : `Step3::on_device` refuse zéro
-  composante, jamais une composante nulle.
-- **Le pas tourne dans une cuve** (murs, `Sponge3::default()`, 64 cycles, 337 dispatchs) :
-  incrément d'un pas de 1 ms **4,77·10⁻⁷ m** pour `a·(ω·dt)²/2` = 2,15·10⁻⁷ attendu (même ordre,
-  à l'ulp de `η` près à 4 m) ; amplitude modale **4,99996·10⁻²** m pour 5·10⁻² posés.
-- **Les murs tiennent la forme** : résidu de forme `η − A·cos(kx·x)·cos(ky·y)` = **4,3·10⁻⁷ m**,
-  soit **8,7·10⁻⁶** de l'amplitude. C'est le premier contrôle qui tombe quand un bord est mal posé.
-- **Bancs de S301 au bit** : `--delta3d-pas` rejoué rend **exactement** les nombres publiés en
-  S301 (η 2,3841858·10⁻⁷ m ; 159/162/159 colonnes sur 165 au bit ; hauteur vraie 4,10 / 2,96 /
-  3,19·10⁻⁸ m ; vitesses 1,424551·10⁻⁵ ; pression 0,38378906 Pa). Aucun nuanceur n'a été touché.
-
-**P3 reçu — le chaînon est une identité, pas une approximation.** `--delta3d-cuve-chainon`,
-1 000 pas de 1 ms sur la même cuve, `nx` = 16 puis 32 :
-
-| | écart totale/couplée | `continu` | `forme` | phase | dérive moyenne | itérations |
-|---|---:|---:|---:|---:|---:|---:|
-| `nx` = 16 (8×10, 4,2 s) | **0 — au bit** | 2,509 % | 3,114 % | **1,223°** | 5,2·10⁻⁸ m | 48 |
-| `nx` = 32 (16×18, 52,3 s) | **0 — au bit** | 0,562 % | 3,300 % | **0,248°** | 2,3·10⁻⁸ m | 89 |
-
-- **Écart nul au bit**, sur les 1 000 pas et les deux résolutions : à fond nul,
-  `step_perturbation_mobile` **est** `step_surface_mobile`. Conséquence directe, et c'est tout
-  l'objet du critère 4 : un écart carte/référence sur ce cas est attribuable à la **carte seule**,
-  jamais au schéma couplé. Aucun pas dégradé.
-- **Dispersion** : erreur au mode continu 2,51 % → 0,56 %, erreur de phase 1,22° → 0,25°,
-  **décroissantes** — la référence tient `ω² = g·k·tanh(k·h)` comme en S295 (0,176 % à n = 48).
-- **`forme` ne décroît pas** (3,11 % → 3,30 %) : ce résidu au cosinus pur **n'est pas** une erreur
-  de discrétisation, sinon il tomberait ; il croît légèrement en raffinant. C'est la
-  non-linéarité du transport à `a·k` = 0,044 (second ordre attendu ≈ `a·k`/2 ≈ 2 %). À ne pas
-  confondre avec un défaut de mur : le mur, lui, est jugé au pas un (8,7·10⁻⁶, P2).
-
-**P4 reçu — les critères 2 et 3, avec quatre ordres de grandeur de marge.**
-`--delta3d-cuve-trajectoire`, 1 000 pas de 1 ms (**1 s déclarée, 0,467 période**), trois
-raffinements, deux profils de cycles, référence `step_surface_mobile`.
-
-| `nx` (mailles) | écart de hauteur | / amplitude | quadratique | écart de pente | phase référence | phase carte |
-|---|---:|---:|---:|---:|---:|---:|
-| 16 (1 280) | **3,00·10⁻⁷ m** | 6,0·10⁻⁶ | 1,36·10⁻⁷ | 9,07·10⁻⁷ | 1,223193° | 1,223174° |
-| 32 (9 216) | **3,05·10⁻⁷ m** | 6,1·10⁻⁶ | 1,22·10⁻⁷ | 1,82·10⁻⁶ | 0,248306° | 0,248257° |
-| 48 (29 952) | **3,26·10⁻⁷ m** | 6,5·10⁻⁶ | 1,18·10⁻⁷ | 2,57·10⁻⁶ | 0,065156° | 0,065106° |
-
-(64 cycles ; à 128 cycles les mêmes chiffres à 2 % près — la projection est **déjà convergée à
-64 cycles** sur ce cas, contrairement au cas S298 qui demandait 128.)
-
-- **Critère 3 tenu** : 3·10⁻⁷ m contre les **3 mm** exigés — quatre ordres de grandeur, sur toute
-  la durée déclarée et non jusqu'à un horizon. L'écart de pente vaut 2,6·10⁻⁶ au plus, pour la
-  tolérance de 5·10⁻⁴ héritée de S260.
-- **Critère 2 tenu** : l'erreur de phase de la carte **décroît** 1,223° → 0,248° → 0,0652° et
-  colle à celle de la référence à la cinquième décimale. La carte porte `ω² = g·k·tanh(k·h)`.
-  L'erreur au mode continu suit : 2,5083 → 0,5614 → 0,2016 %.
-- **Pourquoi la durée est entière ici, et pas au cas S298** : la surface reste dans 4 ± 5 cm et
-  **aucun centre de maille** ne s'y trouve aux trois raffinements (3,875/4,125 à `nx` = 32 ;
-  3,9167/4,0833 à 48). La bascule de mouillure d'A297 n'est donc jamais déclenchée — c'est une
-  propriété du **cas**, pas une correction du schéma, et A297 reste entière.
-
-**P5 reçu — l'écart est séculaire, et sa pente est chiffrée.** `--delta3d-cuve-longue`,
-`nx` = 32, 5 000 pas de 1 ms — **5 s, 2,334 périodes**, 64 cycles, 116 s de banc. Pire écart par
-fenêtre de 500 pas :
-
-| t (s) | 0,5 | 1,0 | 1,5 | 2,0 | 2,5 | 3,0 | 3,5 | 4,0 | 4,5 | 5,0 |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| hauteur (10⁻⁷ m) | 2,48 | 3,05 | 2,98 | 4,25 | 4,32 | 5,48 | 4,92 | 6,30 | 6,02 | **7,79** |
-
-**L'écart n'est pas borné : il croît, et à peu près linéairement** — ≈ 1,2·10⁻⁷ m par seconde
-entre t = 1 s et t = 5 s. C'est la réponse à la seule objection que P4 laissait ouverte, et elle
-est à donner telle quelle : le critère des 3 mm serait franchi vers **7 heures** de temps simulé.
-Aucun domaine δ ne vit sept heures (I-12), mais la phrase juste est « l'écart croît lentement »,
-pas « l'écart est borné ». L'écart d'amplitude modale suit la même pente (6,5·10⁻⁹ → 4,5·10⁻⁷ m)
-et les deux solveurs s'amortissent donc ensemble, sans divergence de phase visible sur 2,3 périodes.
-
-*Réserve, dite parce qu'elle est mesurée* : la dérive de la moyenne de la carte vaut 4 à 6·10⁻⁸ m
-sur 1 000 pas, contre 1·10⁻¹⁰ m pour la référence — un facteur **400**. À 40 nm sur une seconde,
-elle ne pèse sur aucun usage ; elle dit seulement que la somme compensée de la carte (S301,
-`exact_difference`) n'égale pas celle du cœur. Elle n'a pas été poursuivie ici.
-
-*Réserve honnête* : `ecart_publiee` = 2,3·10⁻⁷ m n'est pas un défaut de la carte mais de ma
-recomputation — je refais `(η − repos) − reste` en f32 côté CPU, quand la carte l'obtient par
-`exact_difference` (S301, L346). Le chiffre à lire est la hauteur vraie, pas celui-là.
-
-**Ce qui est déjà su au départ, et n'est pas à re-mesurer.** La référence 3D tient le mode oblique
-(S295 : 0,176 % à n = 48, décroissante ; S296 : la même à surface mobile, `A` = 1 mm). Le pas GPU
-est reçu étage par étage contre le cœur **sur le cas S298** (fond spectral réel, éponge) — P4 de
-S301 : hauteur 2,4·10⁻⁷ m, vitesses 1,4·10⁻⁵ m/s, pression 0,38 Pa. Ce qui manque est exactement
-le cas **sans fond et à murs**, où la carte n'a jamais tourné.
-
-**Attention connue** : `Step3::on_device` refuse `count == 0` (« fond sans composante ») — le mode
-sans fond passe donc par **une** composante d'amplitude nulle, pas par zéro composante. La
-compensation `exact_difference` de S301 (L346) et la bascule de mouillure A297 restent en vigueur.
+**Ce qui est déjà su au départ.** Le rendu porte déjà : mer multimodale à étalement (ADR-156),
+queue d'équilibre et vagues pointues (ADR-157), rugosité calée sur Cox–Munk (ADR-158), queue
+spectrale en pentes par pixel (ADR-155), reflets de la queue non résolue (ADR-161), ciel
+précalculé (ADR-162), sommes d'ondes filtrées par la distance (ADR-163), et depuis S304 les deux
+asymétries d'ADR-176. `--no-tail` éteint déjà la queue ; `--sans-asym` éteint ADR-176. Ce qui
+manque pour le test A/B, ce sont les deux sorties **géométriques** : hauteur et normales seules.
 
 ---
 
