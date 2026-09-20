@@ -58,107 +58,87 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S314 — **terminée**. **L'ordre B** : une primitive de W qui garde la direction, le
-spectre et la phase de ce qui sort d'un domaine δ.
+Session : S315 — **en cours**. Les deux vérifications que S314 devait à l'ordre B : **la phase à
+dix longueurs d'onde**, contre un oracle indépendant, et **l'oblique à la frontière**.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : la **décision de l'utilisateur du 2026-09-20 (S313)**, « Critères de conservation et
-poursuite du lot 2 ». Elle acte les trois critères sous conditions et **autorise l'ordre B** :
+Entrée : la **décision de l'utilisateur du 2026-09-20 (S314)**, « Primitive orientée et poursuite
+du couplage ». Essai oblique autorisé, puis ordre C ; le transfert reste **partiel**.
 
-> « **C1 — Accepté provisoirement** […] Conservez toutefois une distinction explicite entre une
-> **loi observée expérimentalement** et une **borne numérique démontrée**. Le seuil doit être
-> réévalué si le schéma, la précision, la méthode de sommation ou le régime physique change. »
-> « **C2 — Accepté provisoirement** […] le cas ouvert […] **doit rester signalé comme non
-> conforme**. Je ne souhaite ni augmenter arbitrairement le seuil pour faire passer ce cas, ni
-> attribuer prématurément l'anomalie à une fuite physique. » « **C3 — Accepté**, T2 inchangée. »
-> « **La détection d'une fuite de 10⁻¹³ m³ par pas** […] Ne la généralisez pas automatiquement à
-> toutes les tailles de domaine, amplitudes et configurations numériques. »
-> « **A305** […] diagnostic ciblé, en distinguant la bande B/W de l'éponge. […] elle ne doit pas
-> bloquer tout le développement de la primitive orientée. Les travaux indépendants peuvent
-> avancer en parallèle. »
-> « **Ordre B** […] corriger les limitations observées en S312 : 50 % de l'énergie transmise dans
-> la mauvaise direction, une représentation spectrale insuffisante, une phase non conservée.
-> **Commencez par une onde progressive unique en eau profonde, puis un paquet spectral et une
-> propagation oblique.** […] les cinq essais prévus […] avec des mesures **indépendantes** de
-> l'amplitude, de la direction, du spectre, de la phase et de la réflexion. **Le transfert ne
-> devra pas être déclaré validé au seul motif que son amplitude et sa réflexion respectent déjà
-> leurs seuils.** […] **Ne modifiez pas artificiellement W pour lui attribuer la responsabilité
-> du niveau moyen.** »
+> 1. « **Terminer l'essai oblique à la frontière** […] Que l'énergie sortante est transmise dans
+>    la **direction attendue** ; que les **composantes tangentielles** sont correctement
+>    conservées ; que le transfert ne crée pas de composante **réfléchie ou transverse
+>    artificielle** ; que le résultat reste cohérent lorsque **l'angle d'incidence varie**. La
+>    primitive accepte déjà une direction oblique, mais il reste à démontrer que **le raccord
+>    l'exploite correctement**. »
+> 2. « **Vérifier la conservation de la phase pendant la propagation.** La régression mesurée sur
+>    la ligne d'émission […] ne suffit pas. Construisez un **oracle indépendant** pour vérifier la
+>    phase à distance, notamment à **dix longueurs d'onde**. La comparaison devra tenir compte de
+>    la **dispersion**, du **temps de propagation** et de l'**élargissement naturel** du paquet.
+>    **Ne remplacez pas un défaut de phase par une simple correction d'amplitude ou un décalage
+>    temporel arbitraire.** »
+> 3. « Passer ensuite à l'**ordre C** […] Distinguez les résultats propres à la **primitive W**,
+>    ceux du **raccord** et ceux de la **simulation δ**. Le volume net reste intégralement dans
+>    `pending`. »
+> 4. « **A305 et A306** […] maintenues ouvertes […] Pour A306, examinez les **deux emplois** dans
+>    le harnais et déterminez si des **réceptions antérieures** ont pu être affectées. »
 
-Capacité visée : **W sait porter un train d'ondes orienté, à bande étroite et à phase prescrite**,
-et le transfert δ → W le lui donne depuis le signal mesuré à la ligne de contrôle. Consommateur :
-l'ordre C — la vérification conjointe des six propriétés —, qui n'a aujourd'hui aucune primitive
-capable de les porter toutes.
+Capacité visée : **le trajet complet d'une perturbation est vérifié de bout en bout** — produite
+par δ, identifiée, transférée, et **retrouvée à dix longueurs d'onde** avec sa phase ; et il l'est
+aussi quand elle arrive **de biais**. Consommateur : l'ordre C, qui doit attribuer chaque écart à
+la primitive, au raccord ou à δ — ce qui suppose qu'on sache mesurer les trois séparément.
 
-**Ce que je ne fais pas, et je le déclare d'avance** : toucher au régime — l'eau profonde reste le
-domaine de W, et le canal peu profond de S311 ne se force pas (ADR-181 D9) ; donner à W la
-responsabilité du niveau moyen ; déclarer le transfert validé sur l'amplitude et la réflexion
-seules ; diagnostiquer A305, qui est un travail indépendant et parallèle ; ouvrir un chantier de
-rendu ou d'optimisation.
+**Ce que je ne fais pas, et je le déclare d'avance** : l'ordre C lui-même, qui vient après ;
+corriger un écart de phase par une amplitude ou un décalage temporel — c'est explicitement
+interdit, et le banc doit rendre la manœuvre **impossible** plutôt que déconseillée ; toucher au
+régime (l'eau profonde reste le domaine de W) ; donner à W la responsabilité du niveau moyen ;
+ouvrir un chantier de rendu ou d'optimisation.
 
-**La question de fond, posée avant de construire.** L'impact de W est isotrope **parce que c'est
-un champ d'Hankel** : `J₀(kr)` ne dépend que du rayon, et aucun réglage ne lui donnera une
-direction. Une primitive orientée n'est donc pas un impact avec un paramètre de plus — c'est une
-**autre famille**. La famille naturelle existe déjà dans le dépôt, mais dans **B** :
-`background::Component` est une onde plane avec amplitude, nombre d'onde, direction et **phase**.
-Une somme de telles composantes, bornée en bande et en secteur angulaire, porte exactement les
-trois grandeurs qui manquent.
+**La question de fond, posée avant de mesurer.** Un « oracle indépendant » de la phase à distance
+ne peut pas être le train lui-même : le train **est** une somme de modes exacts, donc il propage
+exactement par construction, et le comparer à sa propre formule ne mesurerait rien. L'oracle doit
+être une **autre** physique. Le seul candidat du dépôt qui soit vraiment indépendant est **δ** :
+si le domaine est assez long, la perturbation continue d'y vivre au-delà de la ligne d'émission,
+et une **seconde ligne de contrôle** dix longueurs d'onde plus loin dit ce que le solveur, lui, a
+produit là-bas. Le train prédit ; δ constate.
 
-**Mais je ne sais pas si elle est admissible**, et c'est ce que P3 décide avant de construire
-quoi que ce soit : une somme de plane waves est **non bornée dans l'espace**, quand tout ce que W
-produit aujourd'hui décroît et meurt (`domain.radius`, `ttl_us`, ADR-066). Un train d'ondes qui ne
-s'éteint jamais n'est pas une perturbation de W : c'est de la mer. **La primitive doit donc porter
-une enveloppe finie, et la question est de savoir si l'enveloppe survit à la dispersion** — ou si
-elle s'étale jusqu'à devenir la mer qu'elle n'a pas le droit d'être.
+**Mais je ne sais pas si les deux sont comparables**, et c'est ce que P3 tranche avant de
+construire : δ est **dispersif et discret**, le train est **exact et continu**. À 12,5 cm, S314 a
+mesuré 0,83 % d'écart de célérité entre les deux — sur dix longueurs d'onde, cela déplace la phase
+de **0,83 % × 10 = 8 % de tour**, soit 30°. **Un désaccord de phase à distance sera donc attendu,
+et sa valeur attendue se calcule.** Ce qu'il faut mesurer n'est pas « la phase est-elle juste »
+mais « l'écart est-il celui que la dispersion numérique de δ impose, ou y a-t-il autre chose ».
 
 Critères, écrits avant la mesure :
-1. La primitive **refuse** ce qu'elle ne sait pas porter, avec un nom par refus (ADR-081, ADR-082).
-2. Les cinq grandeurs sont mesurées **indépendamment** : amplitude, direction, spectre, phase,
-   réflexion. Aucune n'est déduite d'une autre.
-3. Un écart de direction ou de spectre **ne se corrige pas** par un réglage d'amplitude — et le
-   banc doit rendre ce réglage impossible plutôt que déconseillé.
-4. Les scènes et réceptions antérieures restent **au bit** : W a des consommateurs.
-5. Le volume net reste dans `pending`, et rien dans la primitive ne porte de moyenne.
+1. L'oracle est **une autre physique**, pas une autre écriture de la même formule.
+2. L'écart de phase attendu **du fait de la dispersion numérique de δ** est calculé **avant** de
+   lire l'écart mesuré, et les deux sont publiés côte à côte.
+3. Aucun ajustement d'amplitude ni de décalage temporel n'est appliqué pour rapprocher les deux.
+   Le banc n'en offre pas le moyen.
+4. Sur l'oblique, la direction transmise, la composante tangentielle et la composante transverse
+   parasite sont mesurées **séparément**, et l'angle **se balaye**.
+5. Les scènes et réceptions antérieures restent **au bit**.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — ADR-182 : la décision du 2026-09-20 (S313), actée — critères sous conditions,
-  ordre B autorisé, A305 maintenu ouvert et parallèle.
-- [x] **P3** — *l'enveloppe survit-elle ?* La question de fond, mesurée avant de construire :
-  étalement dispersif d'un train à bande étroite, et ce qu'il impose à la primitive.
-- [x] **P4** — la primitive : `wave_train.rs`, construction, refusas nommés, essais unitaires.
-- [x] **P5** — **essai 1** : une onde progressive unique en eau profonde ; amplitude, direction,
-  spectre, phase mesurés séparément.
-- [x] **P6** — l'extracteur : amplitude, phase et spectre lus sur le signal sortant à la ligne.
-- [x] **P7** — **essai 2** : le paquet spectral, transféré et vérifié.
-- [~] **P8** — **essai 3** : oblique **porté par la primitive**, mesuré en deux composantes ; **l'essai à la frontière reste dû** — il demande un domaine large en `y`, dix à vingt fois le coût des cas de cette session.
-- [x] **P9** — **essais 4 et 5** : cohérence de phase δ → W, puis transmission et réflexion sur
-  plusieurs résolutions.
-- [x] **P10** — preuve publiée : les six propriétés, chacune avec sa mesure et son verdict.
-- [x] **P11** — rituel REPRISE §6.
+- [>] **P1** — amorce, jeton, plan seul.
+- [ ] **P2** — ADR-183 : la décision du 2026-09-20 (S314), actée.
+- [ ] **P3** — *l'oracle est-il comparable ?* L'écart de phase qu'impose la dispersion de δ sur
+  dix longueurs d'onde, **calculé avant** de mesurer quoi que ce soit.
+- [ ] **P4** — le montage à **deux lignes de contrôle**, et la phase mesurée à 10 λ.
+- [ ] **P5** — le cas **oblique** : domaine large en `y`, éponges sur les quatre bords, paquet
+  incliné.
+- [ ] **P6** — l'extraction de la **direction** à la surface de contrôle : `k_y` par le gradient
+  de phase transverse, et non par une hypothèse.
+- [ ] **P7** — essai 3 a et b : direction transmise, composante tangentielle, et recherche d'une
+  composante **transverse artificielle**.
+- [ ] **P8** — essai 3 c : **balayage de l'angle d'incidence**.
+- [ ] **P9** — preuve publiée : les six propriétés, chacune attribuée à la primitive, au raccord
+  ou à δ.
+- [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
 
-**P3 — l'enveloppe survit, et c'est ce qui rend la famille admissible.**
-
-La question était : une somme d'ondes planes ne meurt pas, donc peut-elle être une primitive de
-W ? Réponse mesurée sur la seule arithmétique de la dispersion, **avant** d'écrire la primitive.
-
-| `λ₀` = 2 m, `σ₀` = 3 m | élargissement | écart au modèle |
-|---:|---:|---:|
-| 5 s | ×1,0031 | 0,01 % |
-| **10 s** | **×1,0125** | **0,03 %** |
-| 20 s | ×1,0490 | 0,13 % |
-| 40 s | ×1,1839 | 0,40 % |
-
-`τ = σ₀²/|ω''|` vaut **64 s** ici, et croît comme `σ₀²` et comme `k₀^{3/2}` — 90 s à `λ₀` = 4 m,
-128 s à 8 m, 256 s si l'enveloppe double. **Un transfert dure dix secondes ; l'enveloppe tient une
-minute.** Deux contrôles indépendants tombent juste au passage : le centre avance exactement à
-`cg` (0,2 % à 10 s, et l'écart est l'effet de bande, pas une erreur), et le produit
-`crête × σ` reste à 1 — l'énergie ne se perd pas dans l'étalement, elle s'étale.
-
-**Conséquence de conception** : l'horizon et le rayon d'un train **se calculent** au lieu d'être
-choisis. Ce sont les deux refus que la dispersion impose, et aucune autre production de W ne les a.
+*(à remplir en cours de session)*
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
