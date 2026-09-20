@@ -123,7 +123,7 @@ Critères, écrits avant la mesure :
   décision, y compris le refus du niveau global arbitraire et l'ordre A → E.
 - [x] **P3** — *la borne*, dérivée puis mesurée : loi du plancher d'arrondi en `N`, amplitude et
   `dt`. C'est la question de fond, et elle passe avant l'outil.
-- [ ] **P4** — le module du critère : les quatre grandeurs de l'utilisateur, publiées séparément.
+- [x] **P4** — le module du critère : les quatre grandeurs de l'utilisateur, publiées séparément.
 - [x] **P5** — balayage **amplitude**, à géométrie et pas fixés.
 - [x] **P6** — balayages **pas de temps** et **résolution**.
 - [ ] **P7** — **l'erreur volontaire** : fuite connue injectée, sensibilité de l'instrument
@@ -804,3 +804,20 @@ précision à ADR-179 D1, dont le statut provisoire le prévoit. Aucun banc de l
 revendique T1.
 
 **Suite de tests** : 455 essais, 0 échec.
+
+**P4 — le module publie, il ne décide pas.**
+
+`delta3d_closure.rs`, `Closure3`. Les quatre grandeurs de l'utilisateur, chacune avec son unité,
+et **aucun seuil** : ADR-181 D5 interdit un chiffre avant la démonstration complète, qui comprend
+la sensibilité de P7. La grandeur à lire est `over_floor` — le rapport du résidu au plancher
+**dérivé**, pas à une échelle inventée.
+
+Deux choix que P3 a rendus obligatoires :
+
+- **l'échelle pertinente est le volume absolu de perturbation**, parce que c'est le seul
+  dénominateur dont le rapport reste constant sur quatre décades ;
+- **un pas sans activité ne fabrique pas de rapport** : son plancher vaut zéro, et `résidu / 0`
+  ne mesurerait que la division — c'est exactement la faute d'A304, et elle ne se répète pas.
+
+`random_walk_ratio` est le seul des quatre qui sépare un **bruit** d'une **fuite lente** : ≈ 1
+pour des signes alternés, `√pas` pour un seul signe. Six essais, dont les deux qui l'encadrent.

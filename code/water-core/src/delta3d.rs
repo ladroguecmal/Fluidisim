@@ -669,3 +669,6 @@ pub use balance::{Balance3, Energy3};
 #[path = "delta3d_transfer.rs"]
 mod transfer;
 pub use transfer::{Ledger3, LedgerError};
+#[path = "delta3d_closure.rs"]
+mod closure;
+pub use closure::{Closure3, ClosureError};
