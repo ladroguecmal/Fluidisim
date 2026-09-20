@@ -110,33 +110,36 @@ structure fine restent dus, **avec leur cible chiffrée**.
 éponge vers B+W (ADR-005) — sur des cas bornés : cavité et gerbe d'impact, proche-coque. Un
 domaine borné est une **étape** du δ général (ADR-127 D3).
 
-*État au 2026-09-20* — **reçu en 2D ; la 3D est la porte B** ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)). **Référence CPU 3D reçue** : HOS à 0,148 % / 0,178 %, invariance transverse à un ulp, couplage B/W ([S297](validation/DELTA3D-COUPLEE-S297.md)) ; cas limites S269–S274 reproduits à 1,19·10⁻⁷ m ([S298](validation/DELTA3D-FOND-REEL-S298.md)).
+*État au 2026-09-20* — **reçu en 2D ; la 3D est la porte B** ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)). **Référence CPU 3D reçue** : HOS à 0,148 % / 0,178 %, couplage B/W ([S297](validation/DELTA3D-COUPLEE-S297.md)) ; cas limites S269–S274 à 1,19·10⁻⁷ m ([S298](validation/DELTA3D-FOND-REEL-S298.md)).
 
-La mer étalée jugée par l'utilisateur **ne peut pas l'être sur un banc CPU** (S298 §5) : elle
-demande la production GPU. **S301 l'a complète** : un seul device, le pas couplé entier —
-fond évalué sur la carte (S300), prédiction, projection bornée à départ chaud (S299), correction,
-transport et bandes, éponge, surface publiée (D7) et diagnostics D3 relus en différé —, chaque
-étage reçu contre le cœur. Sur le cas S298 la production suit la référence à 2·10⁻⁵ m jusqu'à
-l'**horizon de la référence elle-même** (1,1–1,3 s, A297) ; 0,84 ms à 64 cycles
-([S299](validation/DELTA3D-GPU-S299.md), [S300](validation/DELTA3D-FOND-GPU-S300.md),
-[S301](validation/DELTA3D-PAS-GPU-S301.md)). **S302 : la scène existe et tourne** — 30 × 28 m à 25 cm sur la mer
-`--houle`, front de 65 cm à 2,2 m/s, rendu en direct depuis la surface publiée à 197 Hz
-([S302](validation/SCENE-DELTA3D-S302.md)). **Verdict R11 reçu** : aucun artefact visible dans δ, raccord du domaine
-invisible — mais S310 montre que cette invisibilité n'était **pas** de la conservation.
+La mer étalée **ne se juge pas sur un banc CPU** (S298 §5) : elle demande la production GPU.
+**S301 l'a complète**, chaque étage reçu contre le cœur ; elle suit la référence à 2·10⁻⁵ m
+jusqu'à l'**horizon de la référence elle-même** (1,1–1,3 s, A297), 0,84 ms à 64 cycles
+([S299](validation/DELTA3D-GPU-S299.md),
+[S300](validation/DELTA3D-FOND-GPU-S300.md), [S301](validation/DELTA3D-PAS-GPU-S301.md)).
+**S302 : la scène tourne** — 30 × 28 m à 25 cm, rendu en direct à 197 Hz
+([S302](validation/SCENE-DELTA3D-S302.md)). **R11 reçu** : raccord invisible — mais S310 montre
+que cette invisibilité n'était **pas** de la conservation.
 Tranche MAC x-z (2D), reçue : surface mobile couplée contre HOS à 0,162 % / 0,34 %, faces
 coupées, multigrille, frontières, rendu en direct (ADR-143 à 169). Preuves :
 [S253](validation/SURFACE-COUPLEE-S253.md), [S274](validation/HOULE-USAGE-S274.md).
 
-**S310, le premier compteur** ([preuve](validation/BILAN-MASSE-S310.md)) : bilan de **masse**
-exact par télescopage. Cuve fermée, murs à **zéro exact**, dérive 7,4·10⁻¹² m sur 5 s —
-**A298 n'est pas une fuite de volume**. Dissipation numérique **0,0935 %/s**. Scène couplée :
-l'éponge **efface 10,2 % du contenu perturbatif par seconde** — **A302 chiffrée**.
+**S310 à S312, la conservation et le retour vers W** (lot 2 d'ADR-178 D7, sous
+[ADR-179](adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md) et
+[ADR-180](adr/ADR-180-retour-delta-w-et-conservation-du-volume.md)). Bilan de **masse** exact par
+télescopage, **A302 chiffrée** : l'éponge efface **10,2 %** du contenu perturbatif par seconde
+([S310](validation/BILAN-MASSE-S310.md)). La frontière est une **paroi** ; la sortie se lit sur une
+**ligne de contrôle intérieure** ([S311](validation/SORTIE-DELTA-S311.md)). **S312 : le premier
+transfert existe** — T3 tenue en **amplitude à 1,24·10⁻⁵**, réflexion **2,84·10⁻⁷** en 3D, aucun
+double comptage ([preuve](validation/TRANSFERT-DELTA-W-S312.md)) — et il dit ce qui manque : **W
+n'a de mode `k = 0` dans aucune de ses productions** (le volume net relève de V ou de B), **W est
+en eau profonde**, et son impact est **isotrope** — **50 % de l'énergie repart à contresens**.
+Deux décisions attendues : receveur du volume net, **normalisation de T1** (A304).
 
-*Manque* : production sur les cas de cuve (§4.1) ; bascule de mouillure (A297) ; I-05 complet
-et admission (A244) ; cavité et gerbe (B10, seconde représentation, ADR-175 D5) ; cohérence de
-phase δ/B (A289) ; plancher des lignes à fantôme (A274) ; W au-dessus du plan moyen (A286) ;
-frontières générales du total ; **le compteur sur la carte et les bilans d'énergie et de quantité
-de mouvement** (S310).
+*Manque* : production sur les cas de cuve (§4.1) ; bascule de mouillure (A297) ; I-05 et
+admission (A244) ; cavité et gerbe (B10, ADR-175 D5) ; phase δ/B (A289) ; lignes à fantôme
+(A274) ; W au-dessus du plan moyen (A286) ; frontières du total ; **le compteur sur la carte,
+l'énergie, la quantité de mouvement et le sens W → δ** (A302).
 
 *Bancs* : **B3** (famille de δ), **B4** (volets restants), **B5** (blocs épars), **B10** (cavité
 d'entrée). *Cas* : C01, C03, C04, C05, C06, C08, C09, C20, C22, C23.

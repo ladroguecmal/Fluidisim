@@ -6145,3 +6145,70 @@ que de relire le code, et cela ne se trompe pas de la même façon.
 
 Famille de **L350** — un coupable désigné par élimination s'éteint avant de se remplacer — dont
 ceci est la version continue : au lieu d'un interrupteur, un cadran.
+
+## L355 — Un champ du contrat n'est pas un champ de l'objet construit
+
+S312. `WaveEvent` porte `displaced_l` (un volume) et `anisotropy` (une direction). Les deux ont
+traversé cinquante sessions comme des capacités de W, parce qu'ils sont dans l'encodage, dans les
+tests de sérialisation, et dans les documents qui décrivent la couche.
+
+Soumis aux **champs construits** : `displaced_l` est **inerte** — deux impacts à 0 et 1000 L
+rendent des `η` identiques **au bit** sur 768 points ; et toute `anisotropy` non nulle est
+**refusée**, `Error::Anisotropy`, par les deux champs. `WaveEvent::impact` remet même
+`direction_turns` à zéro quand l'anisotropie l'est.
+
+Aucune relecture ne l'aurait donné avec cette force : le champ *existe*, il est *validé*, il est
+*transmis*. Ce qu'il ne fait pas, c'est **arriver quelque part**.
+
+**La règle.** Un champ présent dans un format, un contrat ou une structure ne prouve rien de ce
+que le code en fait. Pour savoir si une capacité existe, **la demander à l'objet construit** :
+deux instances qui ne diffèrent que par ce champ, et comparer les sorties. Le refus et
+l'identité au bit sont deux réponses, et toutes deux valent mieux qu'une lecture.
+
+Famille de **L346** — une identité flottante du source n'est pas une identité du binaire compilé —
+dont ceci est la version « en largeur » : ce n'est plus le compilateur qui efface, c'est le
+constructeur qui n'a jamais lu.
+
+## L356 — Un seuil relatif n'est un seuil que si son dénominateur ne peut pas s'annuler
+
+S312. T1 demande un résidu « ≤ 10⁻⁶ de l'**échelle du pas** », `max(|delta|, |band_in|,
+|sponge_out|)`. Sur un cas de **moyenne nulle** avec un fond nul, cette échelle vaut au mieux
+1,15·10⁻⁷ m³ pour tout le banc, et tombe au picolitre dès que le domaine se calme — tandis que le
+résidu, lui, reste au plancher `f32` de ses sommes, 2·10⁻¹¹ m³. Le rapport vaut alors 1,95 sans
+plancher d'activité, et **encore 1,8·10⁻⁴ sur les 318 pas les plus actifs**. Normaliser par le
+volume du domaine ne sauve rien : `Balance3::volume` est une somme **signée**, donc nulle par
+construction pour un paquet.
+
+Rapporté à une grandeur **absolue** — volume absolu, transit absolu — le même résidu vaut
+8,3·10⁻¹⁰. Le schéma n'a jamais été en cause.
+
+**La règle.** Avant d'écrire un seuil relatif, demander ce que devient son **dénominateur** dans
+les cas limites du domaine visé : un pas plus court, un champ de moyenne nulle, un domaine au
+repos. Un dénominateur qui rétrécit avec `dt`, ou qui s'annule par symétrie, fabrique des échecs
+qui ne disent rien et des succès qui n'en disent pas plus. Normaliser par une grandeur **absolue
+et indépendante du pas**.
+
+Et le corollaire de méthode : quand un critère échoue, **balayer son dénominateur avant d'accuser
+son numérateur**. C'est ce qui a séparé ici « le schéma est mauvais » de « le critère est mal
+normalisé », et les deux verdicts n'appellent pas le même travail.
+
+## L357 — Un instrument se règle sur un cas dont la réponse est connue d'avance
+
+S312. Trois mesures de cette session ont d'abord mesuré leur propre montage :
+
+- l'échantillonnage d'un champ de W à des coordonnées **relatives** quand il les attend
+  **absolues** — tout le disque refusé, `Error::Domain` ;
+- une longueur d'onde lue par passages par zéro sur **tout** le disque, queue de bruit `f32`
+  comprise — 1,04 m qui ne mesurait que le bruit ;
+- un partage avant/arrière sur une grille à **compte impair** : la colonne `x = 0`, la plus haute,
+  tombait entière d'un côté, et la fraction sortait à **0,579** au lieu de 0,5.
+
+Les trois ont été trouvées parce que la réponse attendue était connue : un champ isotrope donne
+**exactement** la moitié, une longueur d'onde vaut ce qu'on a demandé à ±30 %, et un champ centré
+n'est pas vide. Le troisième cas est le plus instructif : 0,579 ressemble assez à 0,5 pour se
+publier sans bruit.
+
+**La règle.** Tout instrument nouveau passe d'abord par un cas dont la valeur est **connue
+analytiquement** — une symétrie, une constante, un zéro. Un chiffre plausible n'est pas un chiffre
+vérifié, et c'est précisément le plausible qui traverse les revues. Famille de **L349** — ce qu'il
+faut penser à vérifier ne se vérifie pas — appliquée à l'instrument plutôt qu'à l'option.

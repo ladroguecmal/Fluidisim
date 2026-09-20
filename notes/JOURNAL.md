@@ -15748,3 +15748,90 @@ transmis du perdu. Preuve : SORTIE-DELTA-S311. Point 1 d'ADR-179 D8 tenu.
 
 *Tenue du plan* : neuf étapes, une ajoutée en cours (P8b, le banc de réception et la comparaison de
 mailles). L237 tenu. Deux longues exécutions arrêtées faute de temps, dites comme telles.
+
+## S312 — 2026-09-20 — le transfert existe, et il dit enfin ce qui manque à W
+
+**Entrée.** La décision de l'utilisateur du 2026-09-20, « Retour δ → W et conservation du
+volume », en réponse à la question laissée ouverte par S311. Option 1 **limitée aux tests**, tout
+volume non restitué **comptabilisé et publié séparément**, jamais présenté comme une restitution.
+Et une instruction qui commande l'ordre de la session : *« Il ne faut pas créer une nouvelle
+primitive dans W avant d'avoir vérifié si cette responsabilité relève déjà d'une autre couche. »*
+
+**Acté.** [ADR-180](../docs/adr/ADR-180-retour-delta-w-et-conservation-du-volume.md), huit
+décisions. D2 fixe les trois catégories publiées séparément ; D3 avertit que la catégorie non
+représentable **ne se réduit pas au volume net** — forme, direction, spectre, phase, régime — et
+interdit de la lire dans un encodage ; D4 impose l'ordre de l'étude du receveur.
+
+**Le fait de la session.** La question de S311 était mal posée, et la mesure l'a redressée. Ce
+n'est pas *l'impact* qui ne porte pas de volume, c'est **W**. Le volume net d'un champ **est**
+l'amplitude de son mode `k = 0` ; aucune des trois productions de W ne l'a — impact 0,785 rad/m
+au plus bas, champ périodique 0,393, sillage 0,187 — et `ModalPressure::new([0,0])` le **refuse**.
+Une « primitive de W portant un volume » serait un déplacement du plan de repos, c'est-à-dire **B
+sous un autre nom**. Le champ périodique, seul à s'intégrer **sans troncature**, donne net/absolu
+**1,3·10⁻⁹**. L'impact radial et le sillage donnaient des nets non nuls : balayés en taille, ils
+**changent de signe** et tombent — c'était la troncature, et S311 ne pouvait pas le voir avec un
+seul rayon.
+
+**Et une découverte qui a changé le plan.** Les champs de W **refusent** le cas contrôlé de S311 —
+`Regime` et `Medium`. Seuils balayés : `h ≥ λ` pour l'impact radial, `h ≥ 2λ` pour le périodique ;
+et `ModalPressure` n'a pas de paramètre de profondeur du tout. **Toute la couche W est en eau
+profonde**, et forcer le transfert donnerait **+44,3 %** de célérité à l'onde de S311. Repère utile :
+la scène δ 3D réelle de S302 n'est qu'à **0,41 %** — c'est le canal qui était peu profond.
+
+**Construit.** `delta3d_transfer.rs`, `Ledger3` — un registre qui se défend par sa forme :
+`pending()` est une **différence**, rien ne l'écrit donc rien ne l'efface ; il est signé et
+négatif il dit qu'on a **créé de l'eau** ; aucune méthode ne porte le mot « restituer », et la
+conformité qu'ADR-180 D1 interdit d'affirmer est **calculée**. Et `examples/transfert_paquet.rs`,
+le second cas contrôlé : un **paquet d'ondes en eau profonde**, dont le volume net vaut
+`exp(−k²σ²/2)` fois l'échelle du volume absolu — ce qui répond au point 2 de l'utilisateur mieux
+qu'un découpage, puisque les deux grandeurs s'y font varier indépendamment.
+
+**Reçu.** λ = 2 m, `h₀` = 2,5 m, maille 12,5 cm, 5 432 pas. Net/absolu au passage de la ligne
+**9,49·10⁻⁴**. Période à **0,46 %** de la théorie — les deux côtés du raccord portent la même
+dispersion. **T3 tenue sur le transfert effectivement réalisé** : amplitude **1,24·10⁻⁵** pour
+5 %, et **réflexion 2,84·10⁻⁷** pour 1 %, mesurée à part. `band_in` et `perturbation_in` valent
+**0 exactement** sur tous les pas — pas de double comptage.
+[Preuve](../docs/validation/TRANSFERT-DELTA-W-S312.md).
+
+**Les trois pertes, chiffrées — c'est la réponse à « ce qui manque véritablement à W ».**
+**La moitié** de l'énergie transférée repart à contresens (0,5000 mesuré, l'anisotropie est
+refusée à toute valeur non nulle) ; le **spectre** de l'impact est une bande de **deux octaves**
+quand le paquet en demandait 11 %, d'où 27 % d'écart de longueur d'onde et 12 % de vitesse ; et
+la **phase** est impossible — le champ naît au repos, `∂η/∂t` = 0 partout. Le volume net,
+lui, reste **entièrement** en attente : 4,93·10⁻⁵ m³ registrés, 0 transféré, 0 créé.
+
+**Une trouvaille non cherchée : T1 n'est pas mesurable sur un cas de moyenne nulle.** Son
+dénominateur — `max(|delta|, |band_in|, |sponge_out|)` — rétrécit avec `dt` et avec l'activité
+(1,15·10⁻⁷ m³ au maximum du banc) quand le résidu reste au plancher `f32` (2,0·10⁻¹¹ m³) : le
+rapport vaut 1,95 sans plancher et **encore 1,8·10⁻⁴ sur les 318 pas les plus actifs**. Normaliser
+par `Balance3::volume` ne sauve rien — somme **signée**, nulle par construction pour un paquet.
+Rapporté à une grandeur **absolue** : **8,3·10⁻¹⁰**. Le schéma n'est pas en cause ; la
+normalisation l'est. **Précision proposée à l'utilisateur**, et aucun banc de la session ne
+revendique T1.
+
+**Trois biais d'instrument, trouvés parce que la réponse était connue d'avance** (L357) :
+coordonnées relatives données à un `sample` qui les veut absolues ; longueur d'onde lue sur la
+queue de bruit `f32` ; grille de partage à compte **impair**, qui donnait 0,579 au lieu de 0,5 —
+le plus dangereux des trois, parce qu'il est plausible.
+
+**Limites.** Référence CPU, une machine, **une seule maille** — la convergence n'est pas faite
+pour ce second cas, contrairement à S311. Cas unidirectionnel et invariant en `y` ; séparation
+entrant/sortant triviale parce que rien n'entre. Transfert **ponctuel et unique** : ni cadence, ni
+recouvrement. Le champ de W n'est **pas** rebouclé dans δ — A302 reste ouverte pour l'autre sens.
+**Le prototype n'est pas conforme à la conservation globale**, et ADR-180 D1 interdit de l'écrire
+autrement.
+
+**Non-fait.** Le receveur du volume net lui-même : l'étude le désigne (V, ou un niveau moyen dans
+B), la décision appartient à l'utilisateur. Aucune revendication d'énergie ni de quantité de
+mouvement comme bilan (ADR-179 D7).
+
+**Rituel.** Maillons **0**. Capacité : **un transfert δ → W existe, tourne, passe T3 sur la
+grandeur qu'il transporte, et publie séparément le transféré, l'attente et le résidu**.
+Consommateur nommé : la décision de l'utilisateur sur le receveur du volume net et sur la
+primitive orientée, qui n'avaient jusqu'ici ni chiffres ni alternative mesurée. Preuve :
+TRANSFERT-DELTA-W-S312. Points 1 à 6 d'ADR-180 §1 tenus sur ce cas. Trois leçons : L355, L356, L357.
+
+*Tenue du plan* : dix étapes, **fusion déclarée P6+P7+P8+P9** — le cas, le transfert, sa
+vérification et sa preuve sont un seul objet. Battement du commit P4 écrit à 16:55 pour 16:48 à
+l'horloge (L237), corrigé au commit suivant et dit au plan. Cinq exécutions du banc, dont trois
+jetées pour corriger un instrument.

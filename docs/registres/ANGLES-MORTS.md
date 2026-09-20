@@ -4027,3 +4027,44 @@ sessions ont raisonné autour sans le nommer. La perturbation sortante se lit do
 ([preuve](../validation/SORTIE-DELTA-S311.md)). **Reste ouvert** : le transfert lui-même, et le
 fait que la composante de **volume net** n'a **aucun receveur** dans W — mesuré, l'impact de W
 portant de l'énergie et pas de volume (−3,6·10⁻⁷ m³ pour 0,01 J).
+
+**A302 — note datée du 2026-09-20 (S312). Sens δ → W : premier transfert construit.** Le chemin
+existe : un événement de W émis au point de sortie, calibré sur la jauge, **T3 tenue en amplitude**
+(1,24·10⁻⁵ pour 5 %) et **réflexion 2,84·10⁻⁷ en 3D** ([preuve](../validation/TRANSFERT-DELTA-W-S312.md)).
+La composante de volume net est **registrée**, pas transférée, et ADR-180 D1 interdit d'appeler
+cela une conservation. **Reste ouvert** à la même sévérité : le sens **W → δ**, le compteur sur la
+**carte**, l'énergie et la quantité de mouvement, la cadence d'un transfert continu, et le
+rebouclage du champ de W dans le domaine.
+
+**A303 — S312, 2026-09-20 (sévérité 2, ouverte). Personne n'avait demandé à W ce qu'il sait
+faire.** Cinquante sessions ont traité W comme la couche des perturbations propagatives, en
+s'appuyant sur le contrat `WaveEvent` — qui porte une énergie, une longueur d'onde, une
+**direction**, une **anisotropie** et un **volume déplacé**. Soumis aux champs **construits**, le
+compte est tout autre :
+
+| ce que le contrat annonce | ce que les champs construits en font |
+|---|---|
+| `displaced_l`, un volume | **inerte** — 0 et 1000 L donnent des `η` identiques **au bit** |
+| `anisotropy`, une direction | **refusée** à toute valeur non nulle, `Error::Anisotropy` |
+| `wavelength_m`, une longueur d'onde | le **centre d'une bande de deux octaves**, `k ∈ [k₀/2, 2k₀]` |
+| une couche d'ondes de gravité | **eau profonde uniquement** : `h ≥ λ`, `h ≥ 2λ`, ou pas de profondeur du tout |
+
+**Conséquences mesurées au premier couplage** : 100 % du volume net reste en attente, 50 % de
+l'énergie transférée repart à contresens, 27 % d'écart de longueur d'onde et 12 % de vitesse. Rien
+de tout cela n'était écrit nulle part, et rien ne l'aurait montré sans construire les champs et
+les interroger (L355). **Déclencheur** : toute session qui prévoit d'envoyer quelque chose à W, ou
+la décision de l'utilisateur sur la primitive orientée (ADR-180 D8, après le premier couplage —
+donc maintenant possible).
+
+**A304 — S312, 2026-09-20 (sévérité 1, ouverte). Un seuil dont le dénominateur peut s'annuler.**
+T1 (ADR-179 D1) demande « résidu ≤ 10⁻⁶ de l'**échelle du pas** ». Sur un cas de **moyenne nulle**,
+cette échelle vaut 1,15·10⁻⁷ m³ au maximum du banc et tombe au picolitre dès que le domaine se
+calme, tandis que le résidu reste au plancher `f32` de ses sommes : le rapport vaut **1,95** sans
+plancher d'activité et **encore 1,8·10⁻⁴ sur les 318 pas les plus actifs**. Normaliser par
+`Balance3::volume` ne sauve rien — somme **signée**, nulle par construction pour un paquet
+(2,78·10⁻⁴). Rapporté à une grandeur **absolue** : 8,3·10⁻¹⁰, trois ordres sous le seuil. Le
+schéma n'est pas en cause. **Sévérité 1** parce que le défaut est dans l'énoncé du critère et non
+dans le code, mais il produit des échecs qui ne disent rien et, ailleurs, des succès qui n'en
+disent pas plus. **Déclencheur** : décision de l'utilisateur sur la normalisation de T1, que le
+statut « provisoire, révisable » d'ADR-179 D1 prévoit. En attendant, aucun banc ne revendique T1
+(L356).

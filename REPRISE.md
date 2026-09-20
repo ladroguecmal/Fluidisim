@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 17:44 +02:00
+JETON            : libre
+Battement        : 2026-09-20 17:50 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S312 — le **premier transfert δ → W** sous la décision de l'utilisateur du 2026-09-20 : transférer ce que W porte, **registrer** ce qu'il ne porte pas, et chercher le receveur du volume net **dans B, δ et V d'abord**
-Dernière session : S311 — **la frontière de δ est une paroi**, la sortie se lit sur une ligne de contrôle intérieure, et le cas contrôlé du lot 2 est reçu contre T3 sur deux mailles ([preuve](docs/validation/SORTIE-DELTA-S311.md))
-Session suivante : selon la file active, à la fin de S312
-Maillons        : 0 — capacité S311 : la perturbation sortante est identifiée, mesurée et reçue contre les deux seuils de T3 ; consommateur : le transfert, qui n'avait ni référence, ni normalisation, ni moyen de séparer le transmis du perdu
+Session en cours : —
+Dernière session : S312 — **le premier transfert δ → W existe** (T3 en amplitude 1,24·10⁻⁵, réflexion 2,84·10⁻⁷ en 3D) et il dit ce qui manque à W : aucun mode `k = 0`, eau profonde seule, impact isotrope — **50 % de l'énergie repart à contresens** ([preuve](docs/validation/TRANSFERT-DELTA-W-S312.md), [ADR-180](docs/adr/ADR-180-retour-delta-w-et-conservation-du-volume.md))
+Session suivante : **deux décisions de l'utilisateur sont en attente** — le receveur du volume net (V, ou un niveau moyen dans B) et la **normalisation de T1** (A304). Sans elles, le lot 2 continue par ce qui n'en dépend pas : **convergence en maille du second cas, front oblique, émission continue** ; ou le sens **W → δ**, l'autre moitié d'A302
+Maillons        : 0 — capacité S312 : un transfert δ → W existe, tourne, passe T3 sur la grandeur qu'il transporte, et publie séparément le transféré, l'attente et le résidu ; consommateur : la décision de l'utilisateur sur le receveur du volume net et sur la primitive orientée, qui n'avaient ni chiffres ni alternative mesurée
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

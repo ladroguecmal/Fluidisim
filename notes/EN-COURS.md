@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S312 — **en cours**. Le premier transfert δ → W, sous la décision de l'utilisateur
+Session : S312 — **terminée**. Le premier transfert δ → W, sous la décision de l'utilisateur
 du 2026-09-20 : ce que W peut porter part vers W, ce qu'il ne peut pas est **chiffré et
 registré**, et le receveur du volume net se cherche **d'abord dans B, δ et V**.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -136,7 +136,7 @@ Critères, écrits avant la mesure :
   transfert effectivement réalisé ; réflexion à part.
 - [x] **P9** — preuve publiée : transféré, en attente, perdu, et le bilan global sans double
   comptage.
-- [ ] **P10** — rituel REPRISE §6.
+- [x] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
 
