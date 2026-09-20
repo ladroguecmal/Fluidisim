@@ -2491,6 +2491,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-sensibilite") {
         return delta3d_step::sensibilite_reference();
     }
+    if args.iter().any(|a| a == "--delta3d-cuve") {
+        return delta3d_step::recevoir_cuve();
+    }
     if args.iter().any(|a| a == "--delta3d-scene-mesure") {
         return delta3d_scene::mesurer();
     }

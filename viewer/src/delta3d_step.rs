@@ -1697,3 +1697,174 @@ pub fn sensibilite_reference() -> Result<(), String> {
     );
     Ok(())
 }
+
+// ───────────────────────────────────────────────────────────────────────────────────────────────
+// S305 — le **cas de cuve** d'ADR-175 §4.1 cas 3, en mode **sans fond**.
+//
+// Les quatre critères de la porte B sont posés en §4 d'ADR-175 ; trois ont été mesurés (la
+// référence en S295–S298, la scène en S302, le coût en S301–S302). Le **critère 2** — production
+// contre référence *sur les mêmes cas* — n'a jamais été mesuré sur les cas de cuve : le pas de
+// production n'a tourné que sur le cas S298, fond spectral réel et éponge. Une cuve est l'inverse :
+// **pas de fond du tout, et des murs**.
+//
+// Le mode sans fond ne demande aucune seconde source (L137) : il passe par la **donnée**, un fond
+// à une composante d'amplitude nulle. `Step3::on_device` refuse zéro composante, jamais une
+// composante nulle ; et le noyau du fond étant linéaire en amplitude, il rend exactement zéro.
+// ───────────────────────────────────────────────────────────────────────────────────────────────
+
+/// Cuve d'ADR-175 §4.1 cas 3 : mode oblique (1, 1) d'un bassin `LX × LY`, profondeur `H`.
+const CUVE_LX: f64 = 8.;
+const CUVE_LY: f64 = 4.;
+const CUVE_H: f64 = 4.;
+/// Amplitude du mode. S296 travaillait à 1 mm ; le critère de §4.2 est un écart **en mètres**
+/// (3 mm), qui n'aurait alors aucun sens. 5 cm garde `a·k` = 0,044 — linéaire — et rend le seuil
+/// lisible. L'écart est publié en mètres **et** rapporté à l'amplitude.
+const CUVE_A: f64 = 0.05;
+
+/// Fond **nul** : une composante d'amplitude nulle. Ce n'est pas un fond « désactivé » quelque
+/// part dans le code ; c'est le même noyau, avec la seule donnée qui l'annule.
+fn fond_nul(alloc: &mut crate::scene::host_impl::ArenaAllocator) -> Result<Background, String> {
+    use crate::scene::host_impl;
+    use water_core::background::SeaState;
+    use water_core::host::HostServices;
+    use water_core::WorldPos;
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    Background::configure(
+        &mut HostServices { alloc, jobs: &jobs, sink: &sink },
+        SeaState { hs: 0., tp: 4., theta_turns: 0., components: 1, graine: 305 },
+        WorldPos::from_units(0, 0, 0),
+    )
+    .map_err(|e| format!("fond nul {e:?}"))
+}
+
+/// Géométrie de la cuve pour `nx` mailles sur `LX`, et l'état initial du mode (1, 1).
+/// Deux couches au-dessus du repos, comme la référence mobile de S296.
+struct Cuve {
+    domain: Domain3,
+    rest: f32,
+    eta: Vec<f32>,
+    /// `kx`, `ky`, `k`, `omega` du mode continu.
+    mode: (f64, f64, f64, f64),
+}
+
+fn cuve(nx: usize, g: f64) -> Cuve {
+    use std::f64::consts::PI;
+    let dx = CUVE_LX / nx as f64;
+    let ny = (CUVE_LY / dx).round() as usize;
+    let nz = (CUVE_H / dx).round() as usize + 2;
+    let (kx, ky) = (PI / CUVE_LX, PI / CUVE_LY);
+    let k = (kx * kx + ky * ky).sqrt();
+    let omega = (g * k * (k * CUVE_H).tanh()).sqrt();
+    let domain = Domain3 { nx, ny, nz, dx: dx as f32 };
+    let eta = (0..domain.columns())
+        .map(|c| {
+            let (i, j) = (c % nx, c / nx);
+            (CUVE_H + CUVE_A * mode_oblique(i, j, kx, ky, dx)) as f32
+        })
+        .collect();
+    Cuve { domain, rest: CUVE_H as f32, eta, mode: (kx, ky, k, omega) }
+}
+
+fn mode_oblique(i: usize, j: usize, kx: f64, ky: f64, dx: f64) -> f64 {
+    (kx * (i as f64 + 0.5) * dx).cos() * (ky * (j as f64 + 0.5) * dx).cos()
+}
+
+/// Amplitude modale et résidu de forme d'une surface : la solution du mode (1, 1) garde
+/// `cos(kx·x)·cos(ky·y)` à l'arrondi près, et un mur mal posé casse cette forme avant tout autre
+/// défaut. Rend `(amplitude, pire écart à la forme)`.
+fn projection_modale(surface: &[f32], rest: f32, d: Domain3, kx: f64, ky: f64) -> (f64, f64) {
+    let dx = d.dx as f64;
+    let mut amplitude = 0f64;
+    for j in 0..d.ny {
+        for i in 0..d.nx {
+            let m = mode_oblique(i, j, kx, ky, dx);
+            amplitude += 4. * (surface[j * d.nx + i] - rest) as f64 * m / d.columns() as f64;
+        }
+    }
+    let mut residu = 0f64;
+    for j in 0..d.ny {
+        for i in 0..d.nx {
+            let m = mode_oblique(i, j, kx, ky, dx);
+            let h = (surface[j * d.nx + i] - rest) as f64;
+            residu = residu.max((h - amplitude * m).abs());
+        }
+    }
+    (amplitude, residu)
+}
+
+/// **Banc S305, critère 1** : le mode sans fond est nul, et le pas tourne dans une cuve.
+/// `--delta3d-cuve`.
+pub fn recevoir_cuve() -> Result<(), String> {
+    use crate::scene::host_impl;
+
+    pollster::block_on(async {
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 27);
+        let background = fond_nul(&mut alloc)?;
+        let (rho, g) = (1025_f32, 9.81_f32);
+        let Cuve { domain, rest, eta, mode } = cuve(32, g as f64);
+        let (kx, ky, k, omega) = mode;
+        let total = face_total(domain);
+        let origin = [0., 0., -rest];
+        println!(
+            "CUVE_S305 geometrie nx={} ny={} nz={} dx={:.6} faces={total} colonnes={} rest={rest} a={CUVE_A} ak={:.4} kh={:.4} omega={omega:.6} periode={:.6}",
+            domain.nx, domain.ny, domain.nz, domain.dx, domain.columns(),
+            CUVE_A * k, k * CUVE_H, std::f64::consts::TAU / omega
+        );
+
+        // ── Critère 1a : le champ de fond publié par la carte est identiquement nul. ──
+        // Les 26 emplacements de `BackgroundSample` sur **chaque** face MAC, au même noyau que
+        // S300 ; c'est lui que `Step3` compile.
+        let mut fond = crate::delta3d_background::Background3::new(&background, total).await?;
+        fond.set_domain(domain, origin)?;
+        fond.publish_time(&background, SimTime(0))?;
+        let faces = fond.faces()?;
+        let (mut pire, mut emplacement, mut non_nuls) = (0f32, 0usize, 0usize);
+        for f in &faces {
+            for (s, v) in f.iter().enumerate() {
+                if !v.is_finite() {
+                    return Err(format!("fond nul : emplacement {s} non fini"));
+                }
+                if *v != 0. {
+                    non_nuls += 1;
+                    if v.abs() > pire {
+                        pire = v.abs();
+                        emplacement = s;
+                    }
+                }
+            }
+        }
+        println!(
+            "CUVE_S305 fond_nul faces={} emplacements={} non_nuls={non_nuls} pire={pire:e} pire_emplacement={emplacement}",
+            faces.len(),
+            faces.len() * crate::delta3d_background::FIELD_SLOTS
+        );
+
+        // ── Critère 1b : le pas tourne dans la cuve, murs et fond nul. ──
+        let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+        carte.set_step(1_000, rest, Sponge3::default())?;
+        println!(
+            "CUVE_S305 carte={:?} backend={} dispatchs_64={}",
+            carte.adapter, carte.backend, Step3::dispatches(64, Upto::Full)
+        );
+        let (nu, nv) = ((domain.nx + 1) * domain.ny * domain.nz, domain.nx * (domain.ny + 1) * domain.nz);
+        let zeros = vec![0f32; total];
+        carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[..total - nu - nv], &eta)?;
+        carte.run_for_bench(64, Upto::Full)?;
+        let (eta_carte, reste) = carte.surface()?;
+        let publiee = carte.published()?;
+        let (residu, norme) = carte.residual()?;
+        let increment = eta_carte.iter().zip(&eta).fold(0f32, |m, (a, b)| m.max((a - b).abs()));
+        let perturbation = eta_carte.iter().fold(0f32, |m, e| m.max((e - rest).abs()));
+        let ecart_publiee = eta_carte
+            .iter()
+            .zip(&publiee)
+            .zip(&reste)
+            .fold(0f32, |m, ((e, p), r)| m.max(((e - rest) - r - p).abs()));
+        let (amplitude, residu_forme) = projection_modale(&eta_carte, rest, domain, kx, ky);
+        println!(
+            "CUVE_S305 pas_un increment={increment:e} m perturbation={perturbation:e} m ecart_publiee={ecart_publiee:e} m residu_cg={residu:e} norme_b={norme:e} amplitude_modale={amplitude:e} m residu_de_forme={residu_forme:e} m relatif={:e}",
+            residu_forme / amplitude.abs().max(f64::MIN_POSITIVE)
+        );
+        Ok(())
+    })
+}

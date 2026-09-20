@@ -90,7 +90,7 @@ Critères, écrits avant la mesure (ADR-175 §4.1 cas 3 et §4.2) :
 ### Plan
 
 - [x] **P1** — amorce, prise du jeton, plan seul ; demande du verdict R12 à l'utilisateur.
-- [ ] **P2** — banc `--delta3d-cuve` : mode sans fond de `Step3`, murs, état initial du mode
+- [x] **P2** — banc `--delta3d-cuve` : mode sans fond de `Step3`, murs, état initial du mode
   oblique ; critère 1 (fond nul, bancs de S301 au bit).
 - [ ] **P3** — critère 4 : `step_perturbation_mobile` à fond nul contre `step_surface_mobile`
   sur le même cas, CPU contre CPU — le chaînon entre la référence reçue et ce que la carte porte.
@@ -101,7 +101,26 @@ Critères, écrits avant la mesure (ADR-175 §4.1 cas 3 et §4.2) :
 
 ### Notes de reprise
 
-*(à remplir en cours de session)*
+**P2 reçu — le critère 1 est tenu, et le mode sans fond ne coûte aucune ligne de noyau.**
+`--delta3d-cuve`, cuve 8 × 4 m, `h` = 4 m, mode (1, 1), `nx` = 32 (dx 25 cm, 32×16×18, 29 024
+faces, 512 colonnes), `a` = 5 cm, `a·k` = 0,0439, `k·h` = 3,512, `ω` = 2,9324 s⁻¹ (période 2,1427 s).
+
+- **Fond nul, exactement** : les 26 emplacements de `BackgroundSample` sur les 29 024 faces —
+  **754 624 valeurs, zéro non nulle**, au noyau de S300 lui-même. Le mode sans fond est une
+  **donnée** (une composante d'amplitude nulle), pas une branche : `Step3::on_device` refuse zéro
+  composante, jamais une composante nulle.
+- **Le pas tourne dans une cuve** (murs, `Sponge3::default()`, 64 cycles, 337 dispatchs) :
+  incrément d'un pas de 1 ms **4,77·10⁻⁷ m** pour `a·(ω·dt)²/2` = 2,15·10⁻⁷ attendu (même ordre,
+  à l'ulp de `η` près à 4 m) ; amplitude modale **4,99996·10⁻²** m pour 5·10⁻² posés.
+- **Les murs tiennent la forme** : résidu de forme `η − A·cos(kx·x)·cos(ky·y)` = **4,3·10⁻⁷ m**,
+  soit **8,7·10⁻⁶** de l'amplitude. C'est le premier contrôle qui tombe quand un bord est mal posé.
+- **Bancs de S301 au bit** : `--delta3d-pas` rejoué rend **exactement** les nombres publiés en
+  S301 (η 2,3841858·10⁻⁷ m ; 159/162/159 colonnes sur 165 au bit ; hauteur vraie 4,10 / 2,96 /
+  3,19·10⁻⁸ m ; vitesses 1,424551·10⁻⁵ ; pression 0,38378906 Pa). Aucun nuanceur n'a été touché.
+
+*Réserve honnête* : `ecart_publiee` = 2,3·10⁻⁷ m n'est pas un défaut de la carte mais de ma
+recomputation — je refais `(η − repos) − reste` en f32 côté CPU, quand la carte l'obtient par
+`exact_difference` (S301, L346). Le chiffre à lire est la hauteur vraie, pas celui-là.
 
 **Ce qui est déjà su au départ, et n'est pas à re-mesurer.** La référence 3D tient le mode oblique
 (S295 : 0,176 % à n = 48, décroissante ; S296 : la même à surface mobile, `A` = 1 mm). Le pas GPU
