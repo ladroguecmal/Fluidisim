@@ -124,7 +124,7 @@ Critères, écrits avant la mesure :
 - [x] **P2** — ADR-183 : la décision du 2026-09-20 (S314), actée.
 - [x] **P3** — *l'oracle est-il comparable ?* L'écart de phase qu'impose la dispersion de δ sur
   dix longueurs d'onde, **calculé avant** de mesurer quoi que ce soit.
-- [ ] **P4** — le montage à **deux lignes de contrôle**, et la phase mesurée à 10 λ.
+- [x] **P4** — le montage à **deux lignes de contrôle**, et la phase mesurée à 10 λ.
 - [ ] **P5** — le cas **oblique** : domaine large en `y`, éponges sur les quatre bords, paquet
   incliné.
 - [ ] **P6** — l'extraction de la **direction** à la surface de contrôle : `k_y` par le gradient
@@ -999,3 +999,80 @@ contrat » —, et elle l'a fait sur la mienne. Le site est déclaré avec sa ju
 vérifié par `slope_bound_is_tight`). La déclaration et l'essai se tiennent l'un l'autre.
 
 **449 essais, 0 échec.**
+
+**P4 — le montage à deux lignes, et deux fautes de méthode avant le premier chiffre utile.**
+
+**Le contrat de la primitive a refusé la distance demandée, et il avait raison.** Garder le train
+jusqu'à la seconde ligne demande une cinquantaine de secondes, où l'enveloppe s'élargit de 11 % —
+au-delà des 10 % par défaut. Deux issues : relever la constante, ou **déclarer** ce qu'on accepte.
+La première l'aurait fait en silence **pour tous les appelants** ; la seconde le dit pour celui-ci.
+`TrainSpec::spread_limit` est donc devenu un champ, `SPREAD_LIMIT` reste le défaut, et le banc
+**publie l'élargissement obtenu** à côté de celui qu'il a déclaré. Le module l'avait prévu en
+toutes lettres ; il a suffi de le rendre exécutable.
+
+*Au passage, un essai nouveau* : un rayon **trop large** est un refus `Resolution`, pas une
+précaution — la réplique du spectre discret entre dans le disque. C'est contre-intuitif et
+maintenant vérifié.
+
+**Faute 1 — comparer deux phases référencées à deux instants différents.** `identifie` rend une
+phase relative à **l'arrivée de son propre signal**. Or la prédiction arrive **1,66 s avant** δ :
+les deux origines sont distantes de 1,45 tour. La soustraction directe rendait 0,38 tour d'écart
+« inexpliqué » qui ne mesurait que ce décalage d'origine. Corrigé : les deux phases se lisent à un
+**instant absolu commun**, `ω·(t−t_c)/2π − φ`.
+
+**Faute 2 — un binaire périmé qui rend des chiffres plausibles.** Deux exécutions précédentes
+tournaient encore et **verrouillaient l'exécutable** ; `cargo build` échouait, son erreur était
+avalée par le filtre de la ligne de commande, et l'ancien binaire s'exécutait. J'ai failli publier
+une mesure de phase calculée par la version d'avant. **Un échec de compilation filtré est pire
+qu'une erreur : il rend la sortie d'un autre programme.**
+
+**P4 — la mesure, et un résidu que la prédiction n'explique pas.**
+
+| | 25 cm | 12,5 cm |
+|---|---:|---:|
+| `k_δ` **mesuré** *(posé 3,1416)* | 3,1081 | **3,1395** |
+| `k_train = ω²/g` | 2,8735 | 3,0875 |
+| `ω` ligne 1 → ligne 2 | 5,3094 → 5,0232 | 5,5035 → **5,4985** |
+| `Δφ` espace | −0,7466 | **−0,1655** |
+| `Δφ` temps | +1,2601 | +0,0559 |
+| **`Δφ` attendu** | −0,4864 | **−0,1096** |
+| **`Δφ` mesuré** | −0,0609 | **+0,2463** |
+| **résidu** | **0,4256** | **0,3559** |
+| rapport d'amplitude | 1,4197 | 1,0629 |
+| écart d'arrivée | −5,50 s | −1,66 s |
+
+**Ce qui marche.** Le périodogramme spatial retrouve `k_δ` à **0,07 %** du posé à 12,5 cm, sans
+rien supposer de la condition initiale — l'oracle sait mesurer ce qu'il doit mesurer. Et le terme
+d'espace tombe **exactement** sur la prédiction de P3 : −0,1655 contre −0,165 annoncés.
+
+**Ce qui ne marche pas.** Il reste **0,36 tour** de désaccord à 12,5 cm et 0,43 à 25 cm, que le
+modèle à deux termes n'explique pas. Les deux valeurs sont **proches** alors que la physique
+diffère d'un facteur 4 sur le terme d'espace : cela ressemble à un **décalage de comparaison**
+plutôt qu'à un effet accumulé.
+
+**Le discriminant est la distance elle-même**, et il est bon marché : un résidu indépendant de la
+séparation est un décalage d'instrument ; un résidu qui croît avec elle est un écart de nombre
+d'onde. Balayage 1 λ / 3 λ / 10 λ lancé, tout le reste fixé.
+
+**P4 conclu — le balayage tranche, et la réponse est « indéterminé », pas « faux ».**
+
+| séparation | `Δφ` espace | `Δφ` attendu | `Δφ` mesuré | résidu | rapport d'amplitude |
+|---:|---:|---:|---:|---:|---:|
+| 1 λ | +0,0729 | +0,0807 | +0,0227 | −0,058 | 0,985 |
+| 3 λ | −0,0057 | +0,0109 | +0,0746 | +0,064 | 1,021 |
+| 10 λ | −0,1655 | −0,1096 | +0,2463 | **+0,356** | 1,063 |
+
+Le résidu **croît avec la distance**, donc ce n'est pas un décalage fixe — le balayage servait
+exactement à ça. Mais le modèle à deux termes ne le prédit pas, et la raison est structurelle :
+**une phase n'est connue que modulo un tour**. Le train et δ n'arrivent plus ensemble (1,66 s, soit
+**1,46 tour** de porteuse), et comparer deux phases enroulées aux deux extrémités devient ambigu.
+
+**La phase à dix longueurs d'onde est donc indéterminée par ce montage** — ni validée, ni
+invalidée. Le remède est nommé : **dérouler la phase le long du trajet** au lieu de la comparer
+aux extrémités. Ce que je n'ai **pas** fait, et qui aurait « marché » : décaler le train de 1,66 s
+pour superposer les deux signaux. ADR-183 D3 l'interdit, et cela n'aurait mesuré rien.
+
+**Ce que l'oracle établit quand même** : `k_δ` mesuré à **0,07 %** du posé, sans rien supposer de
+la condition initiale ; le terme d'espace **exactement** sur la prédiction de P3 (−0,1655 contre
+−0,165) ; et deux propriétés de δ que personne n'avait chiffrées sur ce trajet — **6,3 % de
+dissipation** sur dix longueurs d'onde, et une vitesse de groupe **7,5 % sous** celle du train.

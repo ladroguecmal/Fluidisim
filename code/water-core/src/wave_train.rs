@@ -53,13 +53,24 @@
 use crate::impact_field::{Medium, Sample};
 use crate::{FrameId, PhaseQ32, SimTime};
 
-/// Élargissement d'enveloppe admis sur l'horizon d'un train — **10 %**.
+/// Élargissement d'enveloppe **par défaut** sur l'horizon d'un train — **10 %**.
 ///
 /// Choisi, et le dire : au-delà, le paquet reste un paquet mais son spectre et sa forme ne sont
 /// plus ceux qu'on lui a donnés, et un banc qui mesurerait sa fidélité mesurerait la dispersion.
 /// Ce n'est pas une limite physique ; c'est la frontière du domaine où le champ **est ce qu'on a
-/// demandé**. Un appelant qui veut plus long le demande explicitement et publie l'écart.
+/// demandé**.
+///
+/// **S315 l'a rendu explicite** : vérifier la phase à dix longueurs d'onde demande de garder le
+/// train cinquante secondes, où l'enveloppe s'élargit de 19 %. Le contrat a refusé, et il avait
+/// raison de refuser — un appelant qui veut plus long le **demande** par
+/// [`TrainSpec::spread_limit`] et **publie** l'élargissement obtenu par
+/// [`WaveTrain::envelope_at`]. Contourner le refus en relevant la constante aurait fait la même
+/// chose en silence, pour tous les appelants.
 pub const SPREAD_LIMIT: f32 = 0.10;
+
+/// Élargissement maximal qu'un appelant peut demander — **100 %**, soit une enveloppe doublée.
+/// Au-delà, « le paquet qu'on a demandé » n'existe plus, et aucune mesure de fidélité n'a de sens.
+pub const SPREAD_LIMIT_MAX: f32 = 1.0;
 
 /// Ouverture angulaire maximale d'un secteur, en tours — un huitième de tour, soit **45°**.
 ///
@@ -137,6 +148,10 @@ pub struct TrainSpec {
     pub age_us: u64,
     /// Rayon déclaré autour du centre **initial**.
     pub radius_m: f32,
+    /// Élargissement d'enveloppe accepté sur l'horizon. [`SPREAD_LIMIT`] est la valeur par
+    /// défaut ; un appelant qui demande plus **déclare** ce qu'il accepte, et le champ n'est
+    /// alors plus « celui qu'on a demandé » qu'à cette tolérance près.
+    pub spread_limit: f32,
 }
 
 #[derive(Clone, Copy, Default)]
@@ -218,8 +233,14 @@ impl<const N: usize> WaveTrain<N> {
             return Err(Error::NotRepresentable);
         }
 
-        // **L'horizon se calcule.** `σ(t)/σ₀ = √(1 + (ω''t/σ₀²)²) ≤ 1 + SPREAD_LIMIT`.
-        let facteur = (1.0 + SPREAD_LIMIT) * (1.0 + SPREAD_LIMIT) - 1.0;
+        // **L'horizon se calcule.** `σ(t)/σ₀ = √(1 + (ω''t/σ₀²)²) ≤ 1 + spread_limit`.
+        if !spec.spread_limit.is_finite()
+            || spec.spread_limit <= 0.0
+            || spec.spread_limit > SPREAD_LIMIT_MAX
+        {
+            return Err(Error::Horizon);
+        }
+        let facteur = (1.0 + spec.spread_limit) * (1.0 + spec.spread_limit) - 1.0;
         let horizon_s = spec.envelope_m * spec.envelope_m / dispersion.abs() * facteur.sqrt();
         if spec.age_us == 0
             || spec.birth.0.checked_add(spec.age_us).is_none()
@@ -337,6 +358,25 @@ impl<const N: usize> WaveTrain<N> {
 
     pub fn spec(&self) -> &TrainSpec {
         &self.spec
+    }
+    /// Direction **effectivement portée** par les modes construits, et non celle demandée :
+    /// moyenne des `k̂_m` pondérée par l'amplitude, renormalisée. À secteur nul elle vaut la
+    /// direction de la demande ; à secteur ouvert elle dit où le champ va vraiment.
+    pub fn direction_check(&self) -> [f32; 2] {
+        let (mut x, mut y) = (0f32, 0f32);
+        for m in &self.modes[..self.used] {
+            let n = (m.k_turns[0] * m.k_turns[0] + m.k_turns[1] * m.k_turns[1]).sqrt();
+            if n > 0.0 {
+                x += m.amplitude * m.k_turns[0] / n;
+                y += m.amplitude * m.k_turns[1] / n;
+            }
+        }
+        let n = (x * x + y * y).sqrt();
+        if n > 0.0 {
+            [x / n, y / n]
+        } else {
+            [0.0, 0.0]
+        }
     }
     pub fn mode_count(&self) -> usize {
         self.used

@@ -33,6 +33,7 @@ fn spec() -> TrainSpec {
         phase: PhaseQ32(0),
         age_us: 8_000_000,
         radius_m: 40.,
+        spread_limit: SPREAD_LIMIT,
     }
 }
 
@@ -178,6 +179,20 @@ fn dispersion_bounds_are_refusals() {
     let m = milieu(8.);
     let mut s = spec();
     s.age_us = 60_000_000; // très au-delà de l'horizon d'élargissement
+    assert_eq!(WaveTrain::<64>::new(s, m).err(), Some(Error::Horizon));
+    // **Et un appelant peut demander plus long en le déclarant** : le même âge passe si
+    // l'élargissement accepté suit. C'est la porte de sortie du contrat, et elle est explicite.
+    s.spread_limit = 0.6;
+    // Rayon **juste** suffisant : `cg·âge + 4σ(âge)` vaut 69,6 m. Le prendre bien plus grand
+    // ferait échouer `Resolution` — la réplique du spectre discret entrerait dans le disque —,
+    // et c'est une leçon en soi : **un rayon trop large est un refus, pas une précaution**.
+    s.radius_m = 72.;
+    assert!(WaveTrain::<64>::new(s, m).is_ok());
+    s.radius_m = 120.;
+    assert_eq!(WaveTrain::<64>::new(s, m).err(), Some(Error::Resolution));
+    s.radius_m = 72.;
+    // Mais pas au-delà de l'enveloppe doublée : le paquet demandé n'existerait plus.
+    s.spread_limit = 1.5;
     assert_eq!(WaveTrain::<64>::new(s, m).err(), Some(Error::Horizon));
     s = spec();
     s.radius_m = 2.; // ne contient même pas le paquet initial
