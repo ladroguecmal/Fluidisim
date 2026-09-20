@@ -58,44 +58,58 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S302 — terminée : scène du critère 3 rendue et soumise à la revue R11.
-Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, outils locaux, carte réelle.
-Entrée : « Continue avec la scène pour que je la juge », 2026-09-19. Copie unique, master propre.
+Session : S303 — en cours.
+Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, recherche web, carte réelle.
+Entrée : **verdict R11 de l'utilisateur**, 2026-09-20 — « je ne sais pas s'il s'agit d'une onde
+circulaire ou linéaire, car dans la scène il se forme une vague qui va uniquement dans un sens » ;
+« je ne vois pas d'artefact visuel » ; « pas de problème sur la transition » ; « la mer ne fait pas
+réaliste […] la topologie est à revoir, réalise des recherches sur le profil des vaguelettes, de
+l'anatomie de la mer en haute mer […] selon moi déjà les micro vaguelettes ou pics doivent être
+convexes plutôt que concaves », avec un lien de figure en exemple et la consigne de chercher
+par moi-même.
 
-Capacité visée : **la scène du critère 3** d'ADR-175 §4 — une onde qui traverse une mer étalée
-dans un domaine δ 3D, **rendue en direct** dans l'afficheur, soumise à la revue de l'utilisateur.
-Consommateur : l'utilisateur (verdict R11), puis la porte C mesurée sur cette même scène.
+Capacité visée : **savoir de quoi la forme de la mer s'écarte, et le mesurer**. Recherche sourcée
+sur l'anatomie d'une surface de mer en eau profonde (asymétrie verticale et horizontale, profil des
+vaguelettes, modulation par les grandes vagues), puis écart chiffré entre ces références et la mer
+que le dépôt rend aujourd'hui ; enfin la décision de ce qui se construit.
+Consommateur : le rendu de J1 et la revue suivante (R12) ; l'asymétrie de l'élévation est déjà
+nommée dans la file active avec ce déclencheur — « si l'asymétrie est jugée visible ».
 
-Choix posés avant code :
-- Mer : `--houle` (S259, 64 composantes, Hs ≈ 2,5 m, λ la plus courte ≈ 3,5 m : résolue à 25 cm).
-  Ce que R10 demandait : « les vagues de la mer doivent interagir avec l'onde ». La queue S256
-  (vaguelettes par pixel) reste un habillage **non couplé** — à dire dans la question de revue.
-- Onde : **paquet linéaire** injecté (hauteur et vitesses de la théorie linéaire en eau profonde,
-  enveloppe gaussienne), qui traverse le domaine vers la caméra. État initial construit sur CPU à
-  la configuration (`O(N)` hors pas, I-06 tenu).
-- Domaine : `dx` 0,25 m, boîte de 7 m (repos 3,5 m) pour tenir les creux et crêtes de Hs 2,5 m,
-  éponge de 3 m ; un pas par image à 1/60 s (S275) ; 32 cycles (S301 P5). Taille réglée par la
-  mesure sans fenêtre (P2) : stable, dans les bornes, coût noté.
-- Rendu : la surface **publiée** (D7) seule est liée au rendu, sommée à B dans le nuanceur
-  (I-01), interpolation bicubique, fondu aux bords. Sans δ 3D, le rendu reste **identique au bit**
-  (témoin mesuré avant et après).
-- Revue : question explicite (R10 : l'utilisateur ne savait pas quel retour on attendait),
-  commande interactive avec bascule δ, captures locales (ADR-124).
+Ce que le verdict reçoit et ne reçoit pas, posé ici avant tout travail :
+- **Reçus** : aucun artefact visuel dans le domaine δ (le grain de 2 mm mesuré en S302 ne se voit
+  pas) ; raccord du domaine invisible. Ces deux réponses closent les questions 3 et 4 de R11.
+- **Non reçu** : la lisibilité de l'onde (question 1) — l'utilisateur ne peut pas dire si elle est
+  circulaire ou linéaire. C'est un défaut de la **scène**, pas du solveur : elle injecte un front
+  linéaire sans le dire ni montrer son origine.
+- **Ouvert, et c'est le lot** : le réalisme de la mer (question 2 implicite) — la topologie.
+
+Critères avant travail :
+- Toute valeur physique citée porte sa source (I-14) ; les valeurs de la littérature sont
+  distinguées des valeurs mesurées dans le dépôt.
+- L'écart se mesure sur la **même réalisation** que le rendu, avec les statistiques que la
+  littérature emploie (asymétrie d'élévation, cumulants de pente, courbure des crêtes).
+- Aucune calibration esthétique : si une correction s'ajoute, elle vient d'un modèle nommé, pas
+  d'un coefficient choisi pour faire joli.
+- Le rendu par défaut et `--houle` restent identiques au bit tant qu'aucune décision n'est prise.
 
 ### Plan
 
-- [x] **P1** — amorce, lecture ciblée, plan seul.
-- [x] **P2** — `Step3` sur un device fourni ; paquet d'ondes initial ; banc sans fenêtre de la scène
-  (`--delta3d-scene-mesure`) : bornes, dégradation, amplitude, coût ; paramètres arrêtés.
-- [x] **P3** — à-coups d'A297 sur la même scène sans paquet (témoin) et avec : dérivée seconde
-  temporelle par colonne, localisation ; chiffre avant revue.
-- [x] **P4** — rendu : couche δ 3D dans `water.wgsl` (groupe 3, bicubique, fondu), liaison factice
-  sans δ, témoin au bit ; boucle interactive `--houle --delta3d` (D bascule, R relance).
-- [x] **P5** — captures de revue (avec et sans δ, deux poses, plusieurs instants), pixels changés ;
-  section R11 de REVUE-VISUELLE avec la question.
-- [x] **P6** — rituel REPRISE §6.
+- [>] **P1** — amorce, verdict R11 consigné, plan seul.
+- [ ] **P2** — recherche sourcée : anatomie d'une mer en eau profonde, profil des vaguelettes,
+  asymétries, modulation ; document de connaissance avec citations.
+- [ ] **P3** — ce que le dépôt rend aujourd'hui : statistiques de la mer `--houle` et `--vagues`
+  (asymétrie d'élévation, cumulants de pente, courbure), sur la réalisation de la scène.
+- [ ] **P4** — tableau d'écart littérature ↔ dépôt, et ce que chaque écart coûterait à corriger.
+- [ ] **P5** — décision (ADR) et première correction visible, si elle tient dans la session.
+- [ ] **P6** — rituel REPRISE §6.
 
 ### Notes de reprise
+
+*(S303 — vide à l'ouverture.)*
+
+---
+
+## Archive — notes de S302 (pour le lot)
 
 **P2 — la scène tient** (`--delta3d-scene-mesure`, mer `--houle` à 64 composantes, domaine
 96×128×28 à 25 cm = 344 064 mailles, repos 3,5 m, éponge 3 m, 32 cycles, 60 Hz, 12 s) :

@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 02:01 +02:00
+JETON            : occupé
+Battement        : 2026-09-20 02:06 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : aucune — S302 terminée
+Session en cours : S303 — verdict R11 : la topologie de la mer, recherche et écart mesuré
 Dernière session : S302 — scène du critère 3 rendue en direct et soumise à la revue R11 ; à-coups d'A297 chiffrés
 Session suivante : S303 — **d'abord le verdict R11 de l'utilisateur** (REVUE-VISUELLE §16) : il décide si la porte B est reçue ou ce qu'il faut corriger. Sans verdict, travail utile sans lui : critère 2 sur les cas de cuve de §4.1 (mode sans fond de `Step3`), puis charge utile par face (26 flottants → 12, plafond de domaine et coût, porte C).
 Maillons        : 0 — capacité S302 : le domaine δ 3D rendu en direct dans l'afficheur depuis sa seule surface publiée, mer étalée et onde qui la traverse, mesuré stable et soumis au jugement ; consommateur : la revue R11 ; preuve SCENE-DELTA3D-S302
