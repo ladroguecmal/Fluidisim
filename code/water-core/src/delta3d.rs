@@ -103,6 +103,8 @@ pub struct Volume3 {
     /// Flux de colonne à travers les faces `u` et `v`, `Σ_k u·dx`, pour le transport de `η`.
     flux_x: Vec<f32>,
     flux_y: Vec<f32>,
+    /// S310 : bilan de masse du dernier pas couplé. Des `f64` : aucune allocation, aucun tampon.
+    balance: Balance3,
 }
 
 impl Volume3 {
@@ -198,6 +200,7 @@ impl Volume3 {
             saved_eta_roundoff: vec![0.; cols],
             flux_x: vec![0.; fx],
             flux_y: vec![0.; fy],
+            balance: Balance3::default(),
         })
     }
 
@@ -660,3 +663,6 @@ pub use coupling::{BackgroundFaces3, Sponge3};
 #[path = "delta3d_background.rs"]
 mod background_grid;
 pub use background_grid::BackgroundGrid3;
+#[path = "delta3d_balance.rs"]
+mod balance;
+pub use balance::Balance3;

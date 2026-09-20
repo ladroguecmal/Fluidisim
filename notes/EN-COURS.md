@@ -96,9 +96,9 @@ Critères, écrits avant la mesure :
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — le contrat du bilan, écrit avant le code : l'identité de télescopage, les quatre
-  sites qui bougent `eta`, ce que `eta_roundoff` dit du plancher, et ce qui n'est **pas** mesurable
-  par cette voie.
+- [x] **P2** — `delta3d_balance.rs` : le contrat écrit avant la mesure, `Balance3`, et le volume
+  de perturbation lu sur la hauteur **compensée**. Deux sites bougent `eta` dans le pas couplé,
+  pas quatre — les deux autres sont les chemins non couplés.
 - [ ] **P3** — `Balance3` dans le cœur : volume, entrée de bande aux quatre bords, prélèvement de
   l'éponge, compensation, résidu. Zéro allocation, rien de publié touché.
 - [ ] **P4** — essais : télescopage exact sur un cas construit ; cuve fermée à volume constant au
@@ -112,7 +112,19 @@ Critères, écrits avant la mesure :
 
 ### Notes de reprise
 
-*(vides au départ)*
+**Trois faits établis en P2, en lisant le pas plutôt qu'en le supposant.**
+1. Dans le **pas couplé**, `eta` ne bouge qu'à **deux** endroits — `transport_coupled3` et
+   `relax_coupled3`. Le plan en annonçait quatre : les deux autres (`delta3d.rs` 622,
+   `delta3d_mobile.rs` 622) sont les transports des chemins **non couplés**. Corrigé.
+2. La hauteur qui compte est **`η − eta_roundoff`**, pas `η` : c'est déjà ce que la pression lit
+   (`delta3d.rs` §`lid`). Un volume sommé sur `η` seul manquerait exactement ce que la somme
+   compensée existe pour retenir.
+3. `transport = dt/dx`, donc un incrément de hauteur vaut `−(dt/dx)·Δflux` et un volume
+   `−dt·dx·Δflux` — les flux étant des `Σ_k v·dx·mouillure`, en m²/s.
+
+**Ce qui reste à décider en P3** : l'éponge ne stocke pas ses incréments, donc `relax_coupled3`
+doit **rendre** la somme retirée. C'est la seule intrusion du lot dans le pas ; elle ne touche
+aucune opération flottante sur `eta`.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
