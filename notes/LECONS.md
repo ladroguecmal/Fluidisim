@@ -6259,3 +6259,50 @@ verrait une, et un instrument dont la portée n'est pas écrite sera lu comme s'
 
 Corollaire de méthode : **deux contrôles qui mesurent « la même chose » ne sont redondants que si
 on a vérifié qu'ils le sont**. Ici, les supprimer l'un pour l'autre aurait ouvert un trou complet.
+
+## L360 — Un instrument peut se dégrader quand ce qu'il mesure s'améliore
+
+S314. Un banc mesurait la pulsation dominante d'un signal par **comptage des passages par zéro**.
+Trois maillages, de 25 à 6,25 cm. L'écart à la pulsation posée : −4,1 %, puis −0,45 %, puis
+**+4,7 %**. Changement de signe au maillage le plus fin, erreur de forme passant de 9 % à 60 %,
+régression du modèle tombant de 0,99 à 0,66.
+
+Le réflexe est d'accuser le schéma : un solveur qui empire quand on le raffine est un défaut grave.
+C'était faux. **Un comptage de zéros compte toutes les traversées** — la traîne dispersive, une
+ride résiduelle, tout ce qui coupe l'axe sans porter d'énergie — et rend une période trop brève.
+Un maillage grossier **amortit** ces courtes ; un maillage fin les **conserve**. L'estimateur se
+dégradait donc exactement dans la mesure où le domaine devenait juste.
+
+Mesuré, les deux estimateurs côte à côte sur le **même** signal : ils s'accordent à 0,3 % aux deux
+mailles grossières, et divergent de **4,7 %** à la plus fine. Le maximum du périodogramme, lui,
+donne −0,036 % — il ne compte rien, il cherche la fréquence qui explique le plus d'énergie.
+
+**La règle.** Un instrument a un **domaine de validité qui dépend de ce qu'il mesure**, et ce
+domaine peut se rétrécir quand l'objet s'améliore. Avant de conclure qu'un raffinement dégrade un
+résultat, faire tourner **deux estimateurs indépendants** sur la même donnée : s'ils s'accordent,
+le défaut est dans l'objet ; s'ils divergent, il est dans l'instrument, et c'est le plus fin des
+deux montages qui le révèle.
+
+Corollaire, moins intuitif : **le désaccord entre deux estimateurs est lui-même une mesure**. Ici
+il localise exactement où le comptage de zéros cesse d'être utilisable, sans qu'il ait fallu
+modéliser la traîne.
+
+## L361 — Une convergence ne se lit pas sur deux points
+
+Même session. De 25 à 12,5 cm, l'écart de célérité tombait de 4,30 % à 0,46 % : un facteur 9,4 pour
+un facteur 2 de maille, mieux que l'ordre deux. **Deux points, une belle droite, une conclusion
+prête à publier.** Le troisième l'a détruite — et, après correction de l'instrument (L360), l'a
+**rétablie autrement** : 4,56 %, 0,83 %, 0,035 %.
+
+Les deux versions de l'histoire ont la même morale. Deux points s'ajustent **toujours** à une loi ;
+ils ne peuvent pas la **réfuter**. Le troisième est le premier qui apporte de l'information, et le
+quatrième est celui qui permet d'y croire.
+
+**La règle.** Ne jamais publier un ordre de convergence, un exposant ou une loi d'échelle sur deux
+mesures. Trois au minimum, et si les trois tiennent, dire **sur quel intervalle** — jamais au-delà.
+Ce qui vaut pour la convergence en maille vaut pour toute loi de puissance : l'étalement d'un
+paquet, le plancher d'un résidu (**L358**), le coût d'un pas.
+
+Et l'inverse mérite d'être dit : **une convergence qui se brise au troisième point accuse
+l'instrument avant le schéma**. Un solveur qui empire en se raffinant est rare ; un estimateur qui
+se dégrade quand le signal s'enrichit est courant (L360).

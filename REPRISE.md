@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 22:14 +02:00
+JETON            : libre
+Battement        : 2026-09-20 22:18 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S314 — **ordre B** : une primitive de W qui garde la **direction**, le **spectre** et la **phase** de ce qui sort d'un domaine δ, et les cinq essais qui la jugent
-Dernière session : S313 — **ordre A rendu** : la loi du résidu est `u₃₂·activité/√N`, l'instrument voit une fuite de bilan à 10⁻¹³ m³/pas et **ne voit pas** une fuite d'état (T1 et T2 non redondantes), **T2 est tenue sur 10 s**, trois seuils proposés ([preuve](docs/validation/PLANCHER-BILAN-S313.md), [ADR-181](docs/adr/ADR-181-conservation-transfert-oriente-et-ordre-du-lot-2.md))
-Session suivante : selon la file active, à la fin de S314
-Maillons        : 0 — capacité S313 : le dépôt sait dire si un écart de conservation est numérique ou physique, connaît la **portée** de son instrument, et l'a éprouvé sur un défaut qu'il s'est donné ; consommateur : les ordres B à E, qui auraient tous reçu leurs bancs sur un critère dont A304 disait qu'il ne mesurait rien
+Session en cours : —
+Dernière session : S314 — **ordre B** : `WaveTrain`, la primitive orientée de W. La direction passe de **0,500 à 1,00000**, le spectre de deux octaves à **3,5 %**, la phase devient possible (régression 0,9938), la célérité tombe à **0,035 %** ([preuve](docs/validation/TRANSFERT-ORIENTE-S314.md), [ADR-182](docs/adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md))
+Session suivante : **l'oblique à la frontière** — l'essai 3 d'ADR-182 D7, seul des cinq à n'être fait qu'à moitié ; il demande un domaine large en `y`. Puis l'**ordre C**, la vérification conjointe des six propriétés. A305 et A306 avancent en parallèle
+Maillons        : 0 — capacité S314 : **W porte un train orienté, à bande étroite et à phase prescrite**, et le transfert δ → W le lui donne depuis le signal mesuré ; consommateur : l'ordre C, la vérification conjointe des six propriétés, qui n'avait aucune primitive capable de les porter toutes
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

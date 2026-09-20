@@ -130,16 +130,24 @@ fn every_field_places_its_limit_at_stokes_steepness_s143() {
     );
 }
 
-/// Les cinq endroits du crate où quelque chose est comparé à `max_slope`, avec la forme exacte
-/// de la comparaison. **Deux constructions**, qui convertissent leur borne L1 par le rapport
-/// mesuré de leur champ ; **trois budgets**, qui somment des grandeurs déjà converties.
+/// Les endroits du crate où quelque chose est comparé à `max_slope`, avec la forme exacte de la
+/// comparaison. **Trois constructions** et **trois budgets**, qui somment des grandeurs déjà
+/// converties.
+///
+/// Les deux champs d'impact convertissent leur borne L1 par le rapport **mesuré** de leur champ.
+/// Le **train d'ondes** (S314) ne convertit pas, et c'est son contrat propre : à bande étroite,
+/// tous les sinus s'alignent un quart de longueur d'onde après la crête, donc `Σ a_m k_m` **est**
+/// la pente réelle et non un majorant. Le rapport vaut 0,9 à 1,0 — vérifié par
+/// `slope_bound_is_tight`, qui est le pendant de cette ligne : l'un déclare, l'autre mesure, et
+/// supprimer l'essai ferait mentir la déclaration.
 ///
 /// S205, ADR-128 : les trois budgets s'appellent `budget` et ne somment plus que les
 /// **perturbations**. Le terme `steepness_B·π` — une borne L1 de B, non convertie, qu'I-18
 /// interdisait (A245) — n'est plus comparé nulle part ; il reste publié dans `steepness`.
-const SITES_CONNUS: [(&str, &str); 11] = [
+const SITES_CONNUS: [(&str, &str); 12] = [
     ("impact_field.rs", "slope/SLOPE_L1_RATIO>medium.max_slope"),
     ("radial_impact.rs", "slope/SLOPE_L1_RATIO>medium.max_slope"),
+    ("wave_train.rs", "slope>medium.max_slope"),
     ("composition.rs", "budget>max_slope"),
     ("mixed_water.rs", "budget>max_slope"),
     ("bound_pressure.rs", "budget>max_slope"),

@@ -15918,3 +15918,81 @@ Preuve : PLANCHER-BILAN-S313. Deux leçons : L358, L359. Un angle mort : A305 ; 
 *Tenue du plan* : dix étapes, **fusion déclarée P3+P5+P6** — la loi ne se lit pas sur un balayage.
 Battement écrit en avance de deux et trois minutes à P1 et P2 (L237), corrigé dès constat ;
 c'est la seconde session de suite, un garde-fou vaut mieux qu'une note (porté en file).
+
+## S314 — 2026-09-20 — W sait enfin viser, et un instrument se dégradait quand le solveur s'améliorait
+
+**Entrée.** La décision de l'utilisateur du 2026-09-20 (S313) : C1, C2 et C3 actés **sous
+conditions**, ordre B **autorisé**, A305 maintenu ouvert et parallèle.
+
+**Acté.** [ADR-182](../docs/adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md), douze
+décisions. D1 acte C1 à 10 **mais impose de distinguer partout une loi observée d'une borne
+démontrée** — appliqué le jour même au module et à la preuve de S313, par une **note datée** et non
+une réécriture. D2 acte C2 et ferme les deux échappatoires du cas ouvert. D8 redit que deux
+critères tenus ne font pas une réception.
+
+**La question posée avant d'écrire une ligne.** L'impact de W est isotrope **parce que c'est un
+champ d'Hankel** : `J₀(kr)` ne dépend que du rayon, et aucun réglage ne lui donne une direction.
+La famille qui porte direction, spectre et phase existait déjà — **dans B**, `background::Component`,
+une onde plane. Mais une onde plane **ne meurt pas**, et W n'a que des champs qui s'éteignent. Un
+paquet meurt, lui : il s'étale. **S'il s'étale vite, il devient de la mer et n'a pas sa place.**
+
+**Mesuré avant de construire** (`examples/etalement_paquet.rs`, aucune dépendance au dépôt) :
+l'enveloppe du paquet de S312 ne s'élargit que de **1,25 % en 10 s**, et la loi
+`σ(t) = σ₀√(1+(ω''t/σ₀²)²)` tombe à **0,03 %**. `τ = σ₀²/|ω''|` vaut **64 s**. **Un transfert dure
+dix secondes ; l'enveloppe en tient soixante.** Deux contrôles indépendants tombent juste au
+passage : le centre avance exactement à `cg`, et le produit `crête × σ` reste à 1.
+
+**Conséquence de conception.** L'horizon et le rayon d'un train **se calculent** au lieu d'être
+choisis — deux refus, `Horizon` et `Radius`, qu'aucune autre production de W ne porte.
+
+**Construit.** `src/wave_train.rs`, `WaveTrain<N>` : une somme d'ondes planes bornée en **bande**
+et en **secteur**. Chaque mode étant une solution exacte de la houle linéaire en eau profonde,
+**direction, spectre et phase ne sont pas approchés, ils sont portés**. Douze essais unitaires, un
+par propriété : amplitude à 10⁻⁷, volume net nul à 10⁻⁵, invariance transverse **au bit**, quart de
+tour de phase **exact**, vitesse de groupe à 1 %, **borne de pente atteinte** (0,9 à 1,0 — donc
+aucune constante de conversion à calibrer, contrairement aux 1,795 et 1,702 des champs d'impact),
+et une direction oblique portée **composante par composante** à 2 %. Cinq refus, dont
+`Resolution`, qui rend un service immédiat : **ouvrir le secteur coûte des modes de bande**, et un
+secteur de cinq directions est refusé à `N` = 64.
+
+**Le transfert**, en trois gestes : lire `η(t)` sur la ligne de contrôle de S311 ; l'identifier par
+**cinq nombres** issus du même signal — arrivée, largeur, amplitude, pulsation, **phase** ;
+émettre un train qui les porte. Rien n'est ajusté après coup, et surtout pas l'amplitude.
+
+**Reçu — les trois limitations de S312 sont corrigées** ([preuve](../docs/validation/TRANSFERT-ORIENTE-S314.md)) :
+
+| | S312, impact | **S314, train** |
+|---|---:|---:|
+| direction, part vers l'avant | 0,500 | **1,00000** |
+| spectre, écart de bande | deux octaves pour 11 % | **3,5 %** *(à 6,25 cm)* |
+| phase | impossible | régression **0,9938**, forme **5,7 %** |
+| vitesse de groupe | 12,4 % | **0,035 %** |
+| réflexion *(à part)* | 2,84·10⁻⁷ | **2,84·10⁻⁷** |
+| volume net | 100 % en attente | **100 % en attente** |
+
+**Et une trouvaille qui a demandé deux passages.** Au premier, **le maillage le plus fin était le
+pire** : `ω` lue passait de −4,1 % à −0,45 % puis **+4,7 %**, changement de signe, erreur de forme
+à 60 %. Deux points suggéraient une convergence nette ; le troisième la détruisait. **La cause
+n'était pas le schéma mais l'estimateur** : les passages par zéro comptent *toutes* les traversées,
+et **une maille fine amortit moins les courtes** — l'instrument se dégradait *exactement quand le
+domaine s'améliorait*. Avec le maximum du périodogramme, les six grandeurs convergent de façon
+monotone. Les deux estimateurs s'accordent à 0,3 % aux mailles grossières et divergent de **4,7 %**
+à la plus fine.
+
+**Limites et non-fait, et ils sont importants.** **L'essai 3 n'est réalisé qu'à moitié** : la
+primitive porte l'oblique, mesuré en deux composantes, mais **la propagation oblique à la
+frontière** — un front qui sort d'un domaine large en `y` — reste due. L'essai 4 est mesuré **sur
+la ligne d'émission**, pas à distance. Le champ de W n'est **pas rebouclé** dans δ (A302). Et
+**le transfert n'est pas déclaré validé** : quatre essais sur cinq, deux réserves de montage sur
+l'essai 1, et ADR-182 D8 l'interdit.
+
+**Rituel.** Maillons **0**. Capacité : **W porte un train orienté, à bande étroite et à phase
+prescrite, et le transfert δ → W le lui donne depuis le signal mesuré**. Consommateur nommé :
+l'ordre C, la vérification conjointe des six propriétés, qui n'avait aucune primitive capable de
+les porter toutes. Preuve : TRANSFERT-ORIENTE-S314. Deux leçons : L360, L361. Un angle mort : A306.
+
+*Tenue du plan* : onze étapes, **deux fusions déclarées** — P5+P6+P7 (l'extracteur n'existe que
+pour alimenter le train) et P9+P10. P8 rendu **à moitié**, et marqué `[~]` plutôt que coché. Quatre
+biais d'instrument trouvés et corrigés dans la session, tous parce que la réponse attendue était
+connue d'avance (L357) : coordonnées relatives données à `sample`, normalisation de projection à
+`1/√2`, fenêtres de direction recouvrant le paquet, et l'estimateur de fréquence.

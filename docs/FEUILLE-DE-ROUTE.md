@@ -120,26 +120,30 @@ jusqu'à l'**horizon de la référence elle-même** (1,1–1,3 s, A297), 0,84 ms
 **S302 : la scène tourne** — 30 × 28 m à 25 cm, rendu en direct à 197 Hz
 ([S302](validation/SCENE-DELTA3D-S302.md)). **R11 reçu** : raccord invisible — mais S310 montre
 que cette invisibilité n'était **pas** de la conservation.
-Tranche MAC x-z (2D), reçue : surface mobile couplée contre HOS à 0,162 % / 0,34 %, faces
-coupées, multigrille, frontières, rendu en direct (ADR-143 à 169). Preuves :
-[S253](validation/SURFACE-COUPLEE-S253.md), [S274](validation/HOULE-USAGE-S274.md).
+Tranche MAC x-z (2D), reçue : surface mobile couplée contre HOS à 0,162 % / 0,34 %, faces coupées,
+multigrille, frontières (ADR-143 à 169) — [S253](validation/SURFACE-COUPLEE-S253.md),
+[S274](validation/HOULE-USAGE-S274.md).
 
-**S310 à S312, la conservation et le retour vers W** (lot 2 d'ADR-178 D7, sous
-[ADR-179](adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md) et
-[ADR-180](adr/ADR-180-retour-delta-w-et-conservation-du-volume.md)). Bilan de **masse** exact par
-télescopage, **A302 chiffrée** : l'éponge efface **10,2 %/s** ([S310](validation/BILAN-MASSE-S310.md)).
-La frontière est une **paroi** ; la sortie se lit sur une **ligne de contrôle intérieure**
-([S311](validation/SORTIE-DELTA-S311.md)). **S312 : le premier transfert existe** — T3 tenue en
-**amplitude à 1,24·10⁻⁵**, réflexion **2,84·10⁻⁷** en 3D — et il dit ce qui manque : **W n'a de
-mode `k = 0` dans aucune de ses productions**, **W est en eau profonde**, et son impact est
-**isotrope** : **50 % de l'énergie repart à contresens** ([preuve](validation/TRANSFERT-DELTA-W-S312.md)).
-**S313, ordre A** : loi du résidu `u₃₂·activité/√N` ; fuite de bilan vue à **10⁻¹³ m³/pas**, fuite
-d'état **invisible** — T1 et T2 non redondantes ; **T2 tenue sur 10 s**
-([preuve](validation/PLANCHER-BILAN-S313.md)). Trois seuils proposés, non actés.
+**S310 à S314, la conservation et le retour vers W** (lot 2 d'ADR-178 D7, sous les ADR
+[179](adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md),
+[180](adr/ADR-180-retour-delta-w-et-conservation-du-volume.md),
+[181](adr/ADR-181-conservation-transfert-oriente-et-ordre-du-lot-2.md) et
+[182](adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md)). Bilan de masse exact par
+télescopage, **A302 chiffrée** ([S310](validation/BILAN-MASSE-S310.md)) ; la frontière est une
+**paroi**, la sortie se lit sur une **ligne de contrôle intérieure**
+([S311](validation/SORTIE-DELTA-S311.md)) ; le premier transfert existe et dit ce qui manque — **W
+n'a de mode `k = 0` nulle part**, il est en **eau profonde**, son impact est **isotrope**
+([S312](validation/TRANSFERT-DELTA-W-S312.md)). **Ordre A** : loi du résidu `u₃₂·activité/√N`,
+fuite de bilan vue à **10⁻¹³ m³/pas**, fuite d'état **invisible** — T1 et T2 non redondantes —,
+**T2 tenue sur 10 s** ([S313](validation/PLANCHER-BILAN-S313.md)). **Ordre B** : `WaveTrain`,
+somme d'ondes planes bornée en bande et en secteur, horizon et rayon **calculés** — direction
+**1,00000** pour 0,500, bande **3,5 %** pour deux octaves, phase possible, célérité **0,035 %**
+([S314](validation/TRANSFERT-ORIENTE-S314.md)). Restent dus : l'**oblique à la frontière**, la
+phase **à distance**, et les ordres C à E.
 
-*Manque* : cas de cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité
-(B10) ; phase δ/B (A289) ; lignes à fantôme (A274) ; W au plan moyen (A286) ; **compteur sur la
-carte, énergie, quantité de mouvement, sens W → δ** (A302) ; **résidu biaisé en cas ouvert** (A305).
+*Manque* : cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité (B10) ; phase
+δ/B (A289) ; A274 ; A286 ; **compteur carte, énergie, quantité de mouvement, sens W → δ** (A302) ;
+**résidu biaisé en cas ouvert** (A305).
 
 *Bancs* : **B3** (famille de δ), **B4** (volets restants), **B5** (blocs épars), **B10** (cavité
 d'entrée). *Cas* : C01, C03, C04, C05, C06, C08, C09, C20, C22, C23.

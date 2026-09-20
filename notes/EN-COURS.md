@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S314 — **en cours**. **L'ordre B** : une primitive de W qui garde la direction, le
+Session : S314 — **terminée**. **L'ordre B** : une primitive de W qui garde la direction, le
 spectre et la phase de ce qui sort d'un domaine δ.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : la **décision de l'utilisateur du 2026-09-20 (S313)**, « Critères de conservation et
@@ -135,7 +135,7 @@ Critères, écrits avant la mesure :
 - [x] **P9** — **essais 4 et 5** : cohérence de phase δ → W, puis transmission et réflexion sur
   plusieurs résolutions.
 - [x] **P10** — preuve publiée : les six propriétés, chacune avec sa mesure et son verdict.
-- [ ] **P11** — rituel REPRISE §6.
+- [x] **P11** — rituel REPRISE §6.
 
 ### Notes de reprise
 
@@ -985,3 +985,14 @@ a réellement produit**, et l'écart à l'onde *posée* est la dispersion numér
 **Essai 4** — la cohérence de phase est mesurée **sur la ligne d'émission**, régression 0,9938
 (paquet) et 0,9734 (onde) : le train **part** avec la phase du signal sortant. Qu'il la conserve à
 dix longueurs d'onde demande un oracle que cette session n'a pas construit.
+
+**P11 — et le garde-fou du dépôt a attrapé ma propre construction.**
+
+`contrat_pente::no_undeclared_comparison_to_max_slope_s143` a **échoué** au premier passage de la
+suite : `wave_train.rs` comparait quelque chose à `max_slope` sans l'avoir déclaré. C'est
+exactement ce que cette garde existe pour faire — « une implémentation de plus qui ignore le
+contrat » —, et elle l'a fait sur la mienne. Le site est déclaré avec sa justification : le train
+**ne convertit pas** sa borne L1, parce qu'à bande étroite elle **est** la pente réelle (0,9 à 1,0,
+vérifié par `slope_bound_is_tight`). La déclaration et l'essai se tiennent l'un l'autre.
+
+**449 essais, 0 échec.**

@@ -4098,3 +4098,22 @@ autre raison — éprouver une fuite volontaire — pour que le biais apparaisse
 n'existent pas dans la cuve fermée. **Déclencheur** : l'ordre C du lot 2 (vérification conjointe),
 ou tout banc de conservation sur une scène à fond réel — et il se teste en éteignant les deux
 termes l'un après l'autre, comme L354 le prescrit.
+
+**A306 — S314, 2026-09-20 (sévérité 2, ouverte). Aucun estimateur de fréquence du dépôt n'a été
+vérifié.** Le comptage de passages par zéro sert de mesure de période dans quatre endroits :
+`examples/transfert_paquet.rs` (S312), `examples/frame_cost.rs`, `water-harness/src/physics.rs` et
+`physics_shallow.rs`. **Aucun n'a jamais été comparé à un second estimateur.**
+
+S314 a montré qu'il **biaise dès que le signal porte des composantes courtes**, et que le biais
+**croît avec la qualité du solveur** : 0,25 % à 25 cm, 0,38 % à 12,5 cm, **4,7 % à 6,25 cm**
+([preuve](../validation/TRANSFERT-ORIENTE-S314.md) §7.1). Le maximum du périodogramme donne
+−0,036 % au même point.
+
+**Ce qui est déjà tranché** : à 12,5 cm l'écart vaut 0,38 %, donc les conclusions de S312 tiennent,
+et son `λ_mesure` = 2,0183 m se lit **2,034 m** au périodogramme — sans effet sur ses verdicts.
+
+**Ce qui reste ouvert** : les trois autres emplois n'ont pas été examinés. `physics.rs` et
+`physics_shallow.rs` appartiennent au **harnais de validation** — un estimateur biaisé y fausserait
+des réceptions, pas seulement un banc. **Déclencheur** : toute réception qui dépend d'une période
+mesurée, et tout raffinement de maille sur un cas qui en emploie une. Le remède est connu et coûte
+quelques lignes — deux estimateurs, publiés côte à côte, et leur écart lu comme une mesure (L360).
