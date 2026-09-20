@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S306 — en cours : le guide reçu, confronté au dépôt puis éprouvé.
+Session : S306 — terminée : guide confronté, stries attribuées, coupure réglable, R13 demandée.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle.
 Entrée : un fichier, sans consigne — `guide_topologie_ocean_haute_mer_plage.md`, v1.0 du
 2026-09-20, recopié tel quel dans [`docs/sources/`](../docs/sources/guide_topologie_ocean_haute_mer_plage.md).
@@ -102,7 +102,7 @@ Critères, écrits avant la mesure :
   stries sont évitables sans toucher à l'énergie du modèle.
 - [x] **P6** — conséquences : note datée à SPEC-001, leçon L348, demande de revue R13, preuve
   `STRIES-S306`, index.
-- [ ] **P7** — rituel REPRISE §6.
+- [x] **P7** — rituel REPRISE §6.
 
 ### Notes de reprise
 

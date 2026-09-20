@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 10:39 +02:00
+JETON            : libre
+Battement        : 2026-09-20 10:41 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : S306 — **guide de topologie d'océan reçu de l'utilisateur** (`docs/sources/guide_topologie_ocean_haute_mer_plage.md`, v1.0, 2026-09-20) : le confronter au dépôt, et éprouver l'hypothèse qu'il met au premier rang — l'écart au réel viendrait d'abord des **normales fines et de l'environnement lumineux**, pas de la topologie
-Dernière session : S305 — critère 2 de la porte B mesuré sur les cas de cuve ; images de R12 renvoyées à l'utilisateur
-Session suivante : fixée au rituel
-Maillons        : 0 — capacité S305 : le pas de production suit la référence dans une cuve (3·10⁻⁷ m pour 3 mm, phase 1,22° → 0,065°), chaînon CPU identique au bit ; consommateur : la porte B, dont il ne reste que le verdict ; preuve CUVE-GPU-S305
+Session en cours : aucune — S306 terminée
+Dernière session : S306 — guide reçu confronté au dépôt ; les stries attribuées à la queue spectrale, coupure réglable, revue R13 demandée
+Session suivante : S307 — **deux verdicts attendus, R12 et R13**, et ils ne portent pas sur la même chose : R12 sur la forme des crêtes (dernier élément du critère 3 de la porte B), R13 sur la fréquence spatiale de l'image et le choix de la coupure `f`. Un verdict R13 → ADR de la coupure, puis compensateur d'ADR-161 (pentes non résolues vers le reflet) à mesurer. **Sans verdict**, dans cet ordre : A299 — comparer l'environnement lumineux de façon contrôlée (ciel, Fresnel, exposition à caméra fixe), le seul grand poste du guide encore non mesuré ; puis cas 1 et 2 d'ADR-175 §4.1 pour la **production** (HOS à `ny` = 1, invariance en `y`) ; puis la **porte D**, déclarée en parallèle et vide. Porte C : charge utile par face du fond (26 flottants → 12).
+Maillons        : 0 — capacité S306 : d'où viennent les stries, mesuré (queue spectrale = 80–85 % de l'énergie haute fréquence, invisible au contraste) et réglable sans coût ; consommateur : la revue R13 ; preuve STRIES-S306
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

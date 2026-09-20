@@ -15340,3 +15340,83 @@ mesure. L237 tenu cette fois : l'horloge lue dans un appel séparé **avant** ch
 battement, cinq fois sur cinq. Une affirmation fausse écrite puis corrigée avant commit :
 « secteur aux deux bornes » dans la preuve, alors que rien n'avait été relevé ; l'alimentation
 l'est maintenant, et le document dit pourquoi A270 ne s'applique pas à ce lot.
+
+## S306 — 2026-09-20 — un guide reçu, et la cause des stries enfin attribuée
+
+**Entrée.** Un fichier, sans consigne : `guide_topologie_ocean_haute_mer_plage.md`, v1.0, 773
+lignes, recopié tel quel dans [`docs/sources/`](../docs/sources/guide_topologie_ocean_haute_mer_plage.md).
+Il analyse « les deux images reçues » — une photo de haute mer et un rendu : c'est donc,
+vraisemblablement, une réponse indirecte à R12 obtenue ailleurs. **Le verdict R12 lui-même n'a
+toujours pas été donné** ; la question est reposée en R13, le travail n'en a pas dépendu.
+
+**Capacité reçue.** Le dépôt sait désormais **d'où viennent les stries de sa mer**, par la mesure :
+la queue spectrale porte **80 à 85 %** de l'énergie haute fréquence de l'image, et le contraste
+global ne le voyait pas. **Ce qui devient possible** : régler la bande de rendu plutôt que la
+statistique de la surface, et soumettre à l'utilisateur un arbitrage chiffré au lieu d'une
+impression. **Consommateur** : la revue **R13**, demandée, et l'ADR qui suivra son verdict.
+**Preuve** : [STRIES-S306](../docs/validation/STRIES-S306.md).
+
+**Construit — aucune modification du chemin de rendu.** Trois sorties de diagnostic dans
+`ocean_fragment` (hauteur, normales géométriques sans queue, jacobien), portées par
+`p.reflection.w` **qui valait un zéro littéral**. `--coupure=<f>`, treizième `vec4` d'uniforme,
+qui déplace les deux bornes du filtre spectral ; `f` = 1 est ADR-148 **au bit**.
+`outils/spectre_image.py`, qui mesure l'énergie haute fréquence d'une capture — parce qu'un
+écart-type de luma ne distingue pas une masse d'eau d'un tapis de stries.
+
+**Les quatre résultats, dans l'ordre d'importance.**
+1. **La queue porte les stries** : `hf_rms` ×5,1 en pose `proche`, ×6,7 en `rasante` quand on
+   l'allume. Pendant ce temps `luma_et` **baisse** (51,41 → 51,29). Aucune mesure antérieure du
+   dépôt ne pouvait l'attraper : toutes portaient sur la surface ou sur des empreintes.
+2. **Mais l'essentiel de cette énergie est légitime.** La queue porte 60 % de la variance de pente
+   et tout l'excès sur Cox–Munk (`mss` 0,0497 contre 0,0437) ; il lui faudrait −10,7 % en
+   amplitude pour tomber juste — ce qui ne diviserait `hf_rms` que par 1,1. Le problème n'est pas
+   *combien*, c'est **dans quelle bande on la rend**.
+3. **La bande est un bouton, et il rapporte.** `spectral_weight` garde tout son poids jusqu'à
+   `λ = 4·empreinte` et ne tombe qu'au Nyquist du pixel : la borne **basse** de la fourchette que
+   le guide recommande. Élargir divise l'énergie haute fréquence par 2,2 (`f` = 2) ou 3,6 (`f` = 3)
+   **sans changer le contraste**, et coûte **6,2 % de GPU en moins** (1,0212 → 0,9574 ms).
+4. **`replis = 0`** sur les treize modèles de l'instrument : le jacobien ne se retourne jamais.
+   L'indicateur que le guide met au premier rang est publié, et il écarte une hypothèse.
+
+**Ce que le guide a changé, et ce qu'il n'a pas changé.** Ses treize sections sont classées dans
+[LECTURE-GUIDE-OCEAN-S306](../docs/registres/LECTURE-GUIDE-OCEAN-S306.md) : **aucune divergence
+réelle** avec une décision actée. Il décrit au contraire ce que le dépôt fait déjà, parfois mot
+pour mot — sa « couche résiduelle définie » est ADR-175 D7, son projected grid est notre maillage
+depuis S211, et son §5.4 (coutures, T-junctions) est sans objet chez nous. Ses §6 et §7 (côte,
+plage, déferlement) sont quasi absents du dépôt, et c'est daté (A234, porte F) ; sa matière
+sourcée y est consignée. **Ce qu'il apporte vraiment est un ordre de diagnostic** : normales fines
+et environnement lumineux avant la topologie. S303–S304 avaient fait l'inverse, et le test qui
+départage n'avait jamais été fait.
+
+**Arbitrage rendu à l'utilisateur, pas pris ici.** Élargir la coupure retire aussi du micro-détail
+**réel** ; le compensateur correct est de transférer ces pentes vers le reflet (ADR-161, guide
+§5.3) et il n'est pas mesuré. Choisir `f` est une décision visuelle → **R13**, cinq questions,
+options déclarées. R12 reste demandée : elle porte sur la forme des crêtes, R13 sur la fréquence
+spatiale. **ADR-176 n'est ni confirmée ni contredite** par ce lot.
+
+**Partiel et non-fait.** L'**environnement lumineux** n'est toujours pas testé — nouvel angle mort
+**A299** : le dépôt a un ciel relevé sur la photo (S261) et ADR-162, mais aucune comparaison
+contrôlée, ni vérification du Fresnel. L'anisotropie mesurée (4 à 9) n'est pas interprétée : une
+caméra rasante étire les structures, la mesure est confondue avec la perspective. Aucun ADR n'est
+pris. Rien de la côte n'est construit.
+
+**Correction sourcée portée au dépôt.** SPEC-001 §3 donnait `H/h ≈ 0,78` (McCowan) comme critère
+de déferlement ; note factuelle datée : c'est un repère du **cas de la vague solitaire sur fond
+horizontal**, pas une loi universelle ni un déclencheur suffisant (*Coastal Engineering Manual*).
+L'attribution reste juste, l'emploi comme critère unique ne l'est pas. Aucun ADR réécrit.
+
+**Rituel.** Maillons **0** : capacité mesurée, consommateur nommé (R13), preuve écrite, et elle
+fait avancer le critère 3 de la porte B — la seule chose qui lui manque est un jugement, et ce
+lot lui donne de quoi juger. Suites de tests rejouées : cœur 0 échec, afficheur 36 passés
+0 échec. File active relue en entier ; quatre lignes remplacées, deux ajoutées (stries, A299).
+Feuille de route J1-bis, index (deux entrées), angles morts, leçons, SPEC-001, REVUE-VISUELLE
+§18. I-01/I-04/I-13/I-14/I-15 relus, inchangés. Plafonds et navigation à **0**. Copie unique,
+jeton libre.
+
+*Tenue du plan* : découpage déclaré en cours de route (P5 devenu le balayage de la coupure, les
+conséquences en P6, le rituel en P7). **Deux erreurs commises et corrigées dans la session**, qui
+font la leçon **L348** : une constante de couleur supposée en linéaire dans une cible sRGB — le
+filtre n'excluait rien, et un compteur trop rond le disait sans que je le lise ; et un témoin
+d'identité au bit rejoué avec des drapeaux que la preuve S304 n'employait pas — il a crié à la
+régression alors qu'il comparait deux choses différentes. Les deux fois, c'est le côté **supposé**
+de la comparaison qui a cassé, en silence.

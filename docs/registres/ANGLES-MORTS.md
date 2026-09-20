@@ -3930,3 +3930,23 @@ plus de quelques minutes, ou premier lot de précision sur la production.
 chaînon `step_perturbation_mobile` / `step_surface_mobile` est identique **au bit** à fond nul.
 Restent non mesurés pour la production les cas 1 et 2 de §4.1 (HOS à `ny` = 1, invariance en `y`),
 et le régime de forte cambrure. [Preuve](../validation/CUVE-GPU-S305.md).
+
+**A299 — S306, 2026-09-20 (sévérité 1, ouverte).** **L'environnement lumineux de notre rendu n'a
+jamais été comparé de façon contrôlée.** Le guide reçu place le ciel et l'exposition au **même
+rang** que les normales fines dans les causes d'un rendu qui ne ressemble pas à une photo (§10.2
+points 1–3, §10.3 rang A), et demande de fixer ciel, tone mapping et caméra **avant** toute
+comparaison. Le dépôt possède un habillage « ciel clair » dont les couleurs ont été relevées sur
+la photo de référence (S261, `p.eye.w`) et un ciel précalculé pour les reflets
+([ADR-162](../adr/ADR-162-ciel-precalcule-des-reflets.md)), mais **aucune mesure** : ni
+comparaison ciel par ciel à caméra et exposition fixées, ni vérification que le Fresnel employé
+(0,02 à incidence normale, exposant 5) correspond à un diélectrique eau/air, ni contrôle de
+l'exposition. Conséquence : une part inconnue de l'écart jugé en R11 peut venir de là, et aucun
+travail sur la surface ne la corrigera. S306 a mesuré la part des **normales fines** (80–85 % de
+l'énergie haute fréquence) ; la part de l'**environnement** reste non mesurée. Déclencheur : au
+verdict R13, ou avant toute nouvelle revue de mer.
+[Preuve partielle](../validation/STRIES-S306.md) §6.5.
+
+*S306, 2026-09-20 — fermeture partielle du soupçon de repli du paramétrage.* L'instrument de S260
+publie désormais `replis` : **zéro sur les treize modèles**, dont celui du rendu. Le jacobien du
+déplacement horizontal ne s'annule ni ne s'inverse dans notre mer. L'indicateur que le guide met
+au premier rang (§4.3) est mesuré, et il écarte cette hypothèse.

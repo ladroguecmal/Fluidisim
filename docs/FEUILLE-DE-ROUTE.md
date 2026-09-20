@@ -77,7 +77,7 @@ mesure publie techniques présentes, absentes et domaine de validité (ADR-131 D
 | **temps** — tronçons repliés, modes préconstruits | présente (S213) | écart au chemin préparé, pics aux bornes |
 | **espace** — grille locale, transformée | grille présente (S234) ; transformée absente | quadrature, coutures, période |
 | **LOD spatial** | sillage présent (S234) ; maillage absent | erreur aux intérieurs, coutures |
-| **filtrage spectral de l'image** | B et sillage (S249, ADR-148) ; impacts absents | erreur ≤ 0,340 mm, écart volontaire séparé |
+| **filtrage spectral de l'image** | B et sillage (S249, ADR-148) ; impacts absents. **S306 : la coupure est réglable** (`--coupure=<f>`), `f` = 1 étant ADR-148 au bit | erreur ≤ 0,340 mm, écart volontaire séparé ; **et depuis S306 l'énergie haute fréquence de l'image** ([STRIES-S306](validation/STRIES-S306.md)) |
 | **LOD spectral** par source | absent | écart à la recette pleine ; durée et rayon (ADR-132) |
 | **LOD temporel** | absent | erreur de phase, I-09 |
 | **visibilité** | sillage et impacts (S235) ; occlusion absente | retour au bit |
@@ -86,6 +86,13 @@ mesure publie techniques présentes, absentes et domaine de validité (ADR-131 D
 
 Travaux nécessaires faits : A251 et composition (S214), A254 (S223), cadence complète (S225),
 allocations (S240), angles rasants mesurés et mis en images (S247, S248).
+
+**S306, d'où viennent les stries** ([STRIES-S306](validation/STRIES-S306.md), en réponse au
+[guide reçu](sources/guide_topologie_ocean_haute_mer_plage.md) §12.3) : la queue spectrale porte
+**80 à 85 %** de l'énergie haute fréquence de l'image, que le contraste global ne voit pas.
+Élargir la coupure la divise par 2,2 (`f` = 2) ou 3,6 (`f` = 3) **sans changer le contraste**, et
+coûte **6,2 % de GPU en moins** — la première optimisation de cette section qui améliore l'image
+au lieu de la dégrader. Le choix de `f` est un arbitrage visuel : **verdict R13 attendu**.
 
 **S304, asymétries de la surface** ([ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md)) :
 second ordre en bande étroite par système et modulation de la queue retardée, dans le rendu
