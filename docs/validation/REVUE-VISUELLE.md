@@ -578,3 +578,37 @@ du budget de calcul (mesuré de 32 à 512 cycles).
 Une réponse d'un mot suffit pour chacune ; « je ne sais pas » est une réponse utile, et dit que la
 question est mal posée. Aucun verdict n'est déduit des images par nous : la mesure dit ce qui est
 mesurable, le jugement vous appartient.
+
+### Verdict R11 — reçu S303, 2026-09-20
+
+Quatre réponses, dans l'ordre des questions posées :
+
+1. **« Je ne sais pas s'il s'agit d'une onde circulaire ou bien linéaire, car dans la scène il se
+   forme une vague qui va uniquement dans un sens. »** L'onde est **linéaire** — un front injecté,
+   qui se propage dans une seule direction ; la scène ne le disait pas et ne montrait pas son
+   origine. Défaut de la **scène**, pas du solveur : une onde circulaire née d'un impact serait
+   plus lisible, et c'est d'ailleurs le cas d'usage de J2 (gerbe d'impact).
+2. **« Je ne vois pas d'artefact visuel. »** Le grain de maille de 2 mm mesuré en S302 (§3 de la
+   preuve) **ne se voit pas**. A297 reste ouverte comme défaut de schéma, mais elle n'est pas
+   visible à cette échelle et sur cette scène.
+3. **« Pas de problème sur la transition. »** Le fondu de 3 m au bord du domaine tient.
+4. **« La mer ne fait pas réaliste […] la topologie est à revoir […] selon moi déjà les micro
+   vaguelettes ou pics doivent être convexes plutôt que concaves »**, avec consigne de rechercher
+   par moi-même. C'est le retour de fond, et il est exact.
+
+**Ce que la mesure a confirmé** ([ANATOMIE-SURFACE-S303](ANATOMIE-SURFACE-S303.md)) :
+
+- **Faute de protocole de ma part** : la scène montrée tournait sous `--houle` **seule**, sans la
+  queue d'équilibre ni les vagues pointues de S260–S261. L'utilisateur a jugé la plus pauvre des
+  trois mers que le dépôt sait produire. Toute revue de mer doit désormais déclarer, dans la
+  demande, **quelles options de topologie sont actives**.
+- **Le fond du retour tient même pour la meilleure variante** : asymétrie verticale `Sk` = 0,003
+  contre 0,156 attendus, asymétrie des pentes `c₀₃` = 0,001 contre −0,222 (Cox–Munk). Crêtes et
+  creux également arrondis : « concave » est le mot juste.
+- Deux modèles mesurés y répondent — second ordre en bande étroite (Tayfun) et modulation
+  **retardée** de la queue —, décidés par [ADR-176](../adr/ADR-176-asymetries-de-la-surface-rendue.md).
+
+**Ce que ce verdict reçoit** : l'absence d'artefact et la transition du domaine δ. **Ce qu'il ne
+reçoit pas** : la porte B, dont le critère 3 demande une mer jugée convaincante — elle ne l'est pas
+encore. La revue reviendra (R12) avec les asymétries construites, et la scène dira ce qu'elle
+montre.

@@ -15175,3 +15175,58 @@ relus, inchangés. Plafonds et navigation à 0. Copie unique, jeton libre.
 *Tenue du plan* : un battement a été écrit sans lire l'horloge (corrigé au commit suivant, L237) ;
 une fenêtre interactive s'est ouverte par mégarde après un échec de compilation — l'ancien binaire
 ignorait le drapeau neuf.
+
+## S303 — 2026-09-20 — verdict R11 : la mer n'a aucune asymétrie, et c'est mesuré
+
+**Entrée.** Verdict R11 de l'utilisateur : δ sans artefact visible, raccord du domaine invisible,
+mais « la mer ne fait pas réaliste […] la topologie est à revoir […] les micro vaguelettes ou pics
+doivent être convexes plutôt que concaves », avec consigne de rechercher par moi-même. Copie
+unique, master propre, jeton libre ; plan committé avant tout travail.
+
+**Capacité reçue.** On sait maintenant **de quoi la forme de notre mer s'écarte, et de combien**.
+Recherche sourcée sur l'anatomie d'une mer profonde, puis mesure sur la réalisation même du rendu,
+puis décision. **Ce qui devient possible** : construire les asymétries au lieu de retoucher à vue.
+**Consommateur** : ADR-176, puis la revue R12. **Preuve** :
+[ANATOMIE-SURFACE-S303](../docs/validation/ANATOMIE-SURFACE-S303.md).
+
+**Ce que la recherche donne.** L'asymétrie verticale d'une mer profonde vient des harmoniques
+liées du second ordre — crêtes pointues, creux plats ; en bande étroite `Sk = 3k̄σ`
+(Longuet-Higgins 1963, Tayfun 1980), soit **0,156** pour notre mer. Les pentes se mesurent au
+miroitement depuis Cox & Munk (1954), révisées par 150 millions d'observations IASI. Et surtout :
+les **rides ne sont pas uniformes** — elles se raccourcissent et se redressent sur les crêtes des
+vagues longues, s'aplatissent dans les creux (JFM 2024 : pente modulée de 20 % à `ε_L` = 0,1,
+doublée à 0,4), avec un retard qui place leur maximum **en avant** de la crête.
+
+**Ce que la mesure dit.** Trois choses, dont une qui m'incombe.
+
+1. **Faute de protocole** : la scène soumise à R11 tournait sous `--houle` **seule**, sans la queue
+   d'équilibre ni les vagues pointues construites en S260–S261. L'utilisateur a jugé la plus pauvre
+   des trois mers du dépôt — celle que S260 avait déjà mesurée « pentes quasi gaussiennes ». Toute
+   demande de revue déclarera désormais les options actives (ADR-176 D5).
+2. **Le fond du retour tient quand même** : même la meilleure variante a `Sk` = 0,003 contre 0,156
+   et `c₀₃` = 0,001 contre −0,222. Crêtes et creux également arrondis : « concave » est le mot juste.
+3. **Le second ordre par composante ne peut pas y répondre** (0,0022 mesuré) : il est quartique en
+   amplitude. Ce sont les **termes croisés** entre composantes qui portent l'asymétrie.
+
+**Décision : [ADR-176](../docs/adr/ADR-176-asymetries-de-la-surface-rendue.md).** Second ordre en
+bande étroite (Tayfun) **par système**, qui contient tous les termes croisés pour une somme de
+plus ; et modulation de la queue **retardée** de −0,20 tour, rides maximales en avant de la crête.
+Mesuré ensemble : `c₀₃` −0,155 (70 % de l'observé), `c₂₁` −0,057 contre −0,058 **sans avoir été
+visé**, `c₄₀` 0,34 dans les barres, `Sk` 0,066 — vingt fois mieux, deux fois moins que la bande
+étroite. Le retard est le seul paramètre libre, calé sur `c₀₃` et dit comme tel ; son signe, lui,
+est imposé par le mécanisme. Tout cela vit dans le **rendu**, pas dans B : les requêtes de jeu ne
+bougent pas, l'écart s'ajoute à celui d'A288 (6 cm contre 0,365 m pour CWM).
+
+**Partiel et suite.** Rien n'est construit : ADR-176 porte sa réception écrite avant le code.
+Restent nommés : le noyau exact du second ordre pour deux systèmes (la vérité est entre 0,063 et
+0,150), les capillaires parasites, l'asymétrie horizontale, la `mss` 14 % haute. Et la lisibilité
+de la scène : l'utilisateur ne pouvait pas dire si l'onde était circulaire ou linéaire — elle est
+linéaire, et une onde d'impact serait plus parlante.
+
+**Rituel.** Maillons **0** : la capacité est un écart mesuré et une décision qui s'ensuit, et elle
+débloque un lot de construction nommé. File active relue, quatre lignes remplacées ; feuille de
+route J2 et §3 bis, index, REVUE-VISUELLE (verdict R11). I-01/I-04/I-13/I-14/I-15 relus, inchangés.
+Plafonds et navigation à 0. Copie unique, jeton libre.
+
+*Tenue du plan* : un battement écrit sans lire l'horloge, corrigé dans la minute (L237, deuxième
+fois en deux sessions — le geste doit précéder l'écriture, pas la suivre).

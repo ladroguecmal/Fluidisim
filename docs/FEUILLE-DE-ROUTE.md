@@ -107,13 +107,14 @@ A297) ; 0,84 ms à 64 cycles
 [S301](validation/DELTA3D-PAS-GPU-S301.md)). **S302 : la scène existe et tourne** — domaine de
 30 × 28 m à 25 cm sur la mer `--houle`, front de 65 cm qui la traverse à 2,2 m/s, rendu en direct
 depuis la seule surface publiée à 197 Hz, sans colonne hors bornes
-([S302](validation/SCENE-DELTA3D-S302.md)). **Le verdict de l'utilisateur (R11) est attendu** ;
-restent les cas de cuve de §4.1 sur la production.
-Tranche MAC x-z : pas sans allocation, refus atomiques, pression f32 à sa précision
-représentable, faces coupées, multigrille (ADR-143, 144, 147, 151, 167).
-**Surface mobile** reçue contre HOS d'ordre 3 et **couplée** à B/W (ADR-149 à 154) : à 128
-colonnes, 0,162 % / 0,34 % à 5 cm. Frontières : relaxation, absorption, bandes ouvertes
-(ADR-164 à 166). Rendu : bande en direct (ADR-168, 169). Preuves :
+([S302](validation/SCENE-DELTA3D-S302.md)). **Verdict R11 reçu** : aucun artefact visible dans δ, raccord du domaine invisible — mais la
+mer « ne fait pas réaliste », et la mesure le confirme (aucune asymétrie :
+[S303](validation/ANATOMIE-SURFACE-S303.md)). Le critère 3 attend donc
+[ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md) construit puis R12 ; restent aussi les
+cas de cuve de §4.1 sur la production.
+Tranche MAC x-z (2D) : pas sans allocation, pression f32 à sa précision représentable, faces
+coupées, multigrille, surface mobile couplée reçue contre HOS — 0,162 % / 0,34 % à 5 cm —,
+frontières et rendu en direct (ADR-143 à 169). Preuves :
 [S253](validation/SURFACE-COUPLEE-S253.md), [S274](validation/HOULE-USAGE-S274.md).
 
 *Manque* : verdict de la revue (R11) ; production sur les cas de cuve (§4.1) ; bascule de mouillure (A297) ; I-05 complet et admission (A244) ; cavité et gerbe (B10, seconde
@@ -214,7 +215,7 @@ D6) ; D ne dépend que de B+W. Ordre accepté par l'utilisateur ([ADR-174](adr/A
 | porte | ce qu'on crée | ce qui l'éprouve | reçu si |
 |---|---|---|---|
 | **A — ce qui décide** *(en cours)* | l'ordonnanceur : quels domaines vivent, où, de quelle forme, et ce qu'on dégrade quand le budget manque | banc **B8** (seuils, inexistant) ; la bande δ de l'afficheur comme premier consommateur | plusieurs candidats réels se disputent un budget ; un domaine **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint ; la dégradation d'ADR-012 §4 rang 1 existe, donc la famine a une issue |
-| **B — δ sur les deux dimensions horizontales** *(ouverte S294 ; référence S297–S298 ; pas de production S299–S301 ; scène rendue S302 ; **verdict R11 attendu**)* | le solveur volumique qui n'est plus une tranche : domaine 3D, mer étalée, interaction avec des vagues réelles ; représentation et critères posés par [ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) D5 et §4 | banc **B3** (technique δ), cas **C10**, **C11** ; revue visuelle de l'utilisateur | une onde traverse une mer **étalée** et s'y déforme, jugée convaincante par l'utilisateur ; les réceptions 2D (S253, S268–S274) tiennent encore à trois dimensions |
+| **B — δ sur les deux dimensions horizontales** *(ouverte S294 ; référence S297–S298 ; pas de production S299–S301 ; scène rendue S302 ; **R11 : δ reçu sans artefact, mer à corriger — ADR-176**)* | le solveur volumique qui n'est plus une tranche : domaine 3D, mer étalée, interaction avec des vagues réelles ; représentation et critères posés par [ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) D5 et §4 | banc **B3** (technique δ), cas **C10**, **C11** ; revue visuelle de l'utilisateur | une onde traverse une mer **étalée** et s'y déforme, jugée convaincante par l'utilisateur ; les réceptions 2D (S253, S268–S274) tiennent encore à trois dimensions |
 | **C — δ sous budget** | cadence découplée de l'image (I-05), δ sur GPU — **décidé S294** : pas résident à travail borné ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)) —, multigrille hors repli | **B7** sur la machine de référence ([ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) D1), cartes de coût selon ADR-131 | le pas tient **δ ≤ 2 ms GPU** (ADR-174 D3) sur la scène de la porte B, au 99ᵉ centile, **techniques présentes et absentes publiées** |
 | **D — solides et flottabilité** | corps flottants pris dans B+W+δ, forces rendues au jeu | **B6** (flottabilité), **B4** (forces et perception), cas **C13**, **C14** | un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le gameplay (I-04) |
 | **E — V articulé avec δ** | inondations : V expose sa surface, déclenche un δ local, la masse reste celle de V | cas **C17**, **C21**, **C19** complet | la comptabilité de masse est identique **avec et sans** δ (C21) |

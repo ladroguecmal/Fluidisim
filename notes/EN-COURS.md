@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S303 — en cours.
+Session : S303 — terminée : écart mesuré, ADR-176 actée, construction en S304.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, recherche web, carte réelle.
 Entrée : **verdict R11 de l'utilisateur**, 2026-09-20 — « je ne sais pas s'il s'agit d'une onde
 circulaire ou linéaire, car dans la scène il se forme une vague qui va uniquement dans un sens » ;
@@ -100,8 +100,8 @@ Critères avant travail :
 - [x] **P3** — ce que le dépôt rend aujourd'hui : statistiques de la mer `--houle` et `--vagues`
   (asymétrie d'élévation, cumulants de pente, courbure), sur la réalisation de la scène.
 - [x] **P4** — tableau d'écart littérature ↔ dépôt, et ce que chaque écart coûterait à corriger.
-- [>] **P5** — décision (ADR) et première correction visible, si elle tient dans la session.
-- [ ] **P6** — rituel REPRISE §6.
+- [x] **P5** — décision (ADR) et première correction visible, si elle tient dans la session.
+- [x] **P6** — rituel REPRISE §6.
 
 ### Notes de reprise
 

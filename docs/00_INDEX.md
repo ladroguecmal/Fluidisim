@@ -94,6 +94,7 @@
 - [Le fond B évalué sur la carte et le second membre couplé — S300](validation/DELTA3D-FOND-GPU-S300.md) : paramètres publiés au lieu d'échantillons, champ reçu champ par champ, couplage reçu, et le CPU 500 fois plus lent.
 - [Le pas couplé complet résident sur la carte — S301](validation/DELTA3D-PAS-GPU-S301.md) : un seul device, chaque étage reçu contre le cœur, somme compensée sauvée du compilateur, trajectoire jugée contre la sensibilité propre de la référence (A297), coût et diagnostics D3.
 - [La scène du critère 3 : une onde qui traverse une mer étalée — S302](validation/SCENE-DELTA3D-S302.md) : δ 3D rendu en direct depuis sa surface publiée, front injecté à 65 cm, à-coups et grain mesurés, revue R11 demandée.
+- [Anatomie d'une surface de mer, et ce qui manque à la nôtre — S303](validation/ANATOMIE-SURFACE-S303.md) : recherche sourcée sur les asymétries d'une mer réelle, mesure de la nôtre, et les deux modèles qui y répondent.
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
