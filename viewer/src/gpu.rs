@@ -550,7 +550,7 @@ impl Gpu {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         // S306 : facteur de coupure spectrale. 1 = ADR-148 au bit.
-        for v in [frame.cut_factor, 0., 0., 0.] {
+        for v in [frame.cut_factor, if frame.physical_color { 1. } else { 0. }, frame.color_gain, 0.] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);

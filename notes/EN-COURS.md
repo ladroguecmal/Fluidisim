@@ -101,7 +101,7 @@ Critères, écrits avant la recherche :
 - [x] **P5** — *(fait avant la synthèse, parce qu'il devenait urgent)* le remède de protocole :
   `--meilleur`, la ligne d'options complète, la règle dans REVUE-VISUELLE, la leçon L349.
 - [x] **P6** — synthèse ordonnée : ce qui manque, sourcé, chiffré, rattaché à notre code.
-- [ ] **P7** — la couleur de l'eau depuis ses sources, et ce qu'elle change à l'image.
+- [x] **P7** — la couleur de l'eau depuis ses sources, et ce qu'elle change à l'image.
 - [ ] **P8** — décision : ADR de ce qui se construit et dans quel ordre.
 - [ ] **P9+** — construction, déclarée après la décision.
 - [ ] **Pn** — preuve, rituel REPRISE §6.
@@ -239,6 +239,35 @@ floutée avec rétroaction pour simuler sa dispersion.
    **0,22** (Koepke), soit **0,42 %** de couverture à `U₁₀ ≈ 7,8 m/s`. Absente.
 4. **Diffusion sous la surface aux crêtes** — absente ; le masque existe déjà (jacobien).
 5. **Spectre** — ECKV/Elfouhaily remplacerait la queue `f⁻⁴` **et** le calage Cox–Munk.
+
+## P5 — le remède de protocole
+
+`--meilleur` active `--vagues --modulation --ciel-clair --reflets-filtres` ; la liste vit dans
+`main.rs` à côté du code qui la consomme. Chaque ligne de capture publie **toutes** les options.
+Leçon **L349**. Scènes de référence toujours au bit.
+
+**Mesure qui corrige S306** : `--reflets-filtres` divise `hf_rms` par **2,5** (15,05 → 5,97) sans
+retirer d'énergie de pente, là où `--coupure=2` n'atteignait 2,2 qu'en en supprimant. Le bon
+levier existait et était éteint.
+
+## P7 — la couleur, et une erreur de ma part corrigée par l'image
+
+`--eau-physique[=gain]` : la teinte vient de `R(0⁻) = (0,00068 ; 0,00826 ; 0,08960)` dérivée de
+Pope & Fry 1997 et Morel 1974, **et le gain est un paramètre libre déclaré**, qui tient lieu
+d'irradiance de ciel (`E/π` chez Bruneton).
+
+**Première tentative, fausse, et il faut le dire.** J'avais remis `R(0⁻)` à la **luminance** de
+la constante historique (facteur 4,476), pour ne changer que la teinte. Résultat : un bleu
+outremer artificiel — et pour cause, le bleu valait alors **0,40 de réflectance**, ce qu'aucune
+eau ne fait (le maximum physique est 0,09). La renormalisation compensait en réalité une
+irradiance de ciel absente. **Regarder l'image l'a montré en une seconde ; aucun chiffre ne
+l'avait dit.**
+
+`gain = 1`, c'est-à-dire `R(0⁻)` **nue**, donne la meilleure image que le projet ait produite :
+creux bleu marine profonds, crêtes qui renvoient le ciel, contraste franc. `gain = 2` est plus
+clair. **Le gain est un arbitrage visuel** : R14.
+
+Scènes de référence toujours identiques au bit (`--eau-physique` éteint par défaut).
 
 **Ce que le rendu contient aujourd'hui, à avoir en tête pendant la recherche** : mer multimodale
 JONSWAP à étalement `cos^2s` (ADR-156), queue d'équilibre `f⁻⁴` continuée à la main (ADR-157),

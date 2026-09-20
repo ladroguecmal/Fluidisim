@@ -41,6 +41,27 @@ fn spectral_weight(k: f32, h: f32) -> f32 {
     let t = clamp(2.0*k*h*p.cut.x/3.141592653589793 - 1.0, 0.0, 1.0);
     return 1.0 - t*t*(3.0 - 2.0*t);
 }
+// ─────────────────────────────────────────────────────────────────────────────────────────────
+// S307 — COULEUR DU CORPS D'EAU, DÉRIVÉE DE SES SOURCES (RENDU-ECART-S307 §4).
+//
+// Les deux constantes historiques — `vec3(0.012,0.105,0.13)` et `vec3(0.004,0.060,0.170)` —
+// n'ont **aucune provenance**, ce qu'I-14 interdit, et elles sont 9 et 3,8 fois trop vertes.
+//
+// Dérivation, faite hors ligne et reproduite dans la preuve :
+//   absorption de l'eau pure `a(λ)`      Pope & Fry 1997 (jeu de données téléchargé)
+//   diffusion `b(λ) = 0,0029·(550/λ)^4,30`, rétrodiffusion `b_b = b/2`   Morel 1974
+//   réflectance d'irradiance `R(0⁻) ≈ 0,33·b_b/(a + b_b)`
+//   → R(0⁻) = (0,00068 ; 0,00826 ; 0,08960) pour (650 ; 550 ; 450 nm), soit B/G = 10,85.
+//
+// La constante ci-dessous est ce R(0⁻) **remis à la luminance de la constante historique**
+// (facteur 4,476). Ce choix est délibéré : il ne change que la **teinte**, celle qui est
+// mesurée fausse, et n'introduit aucun changement d'exposition qui brouillerait le jugement.
+// Ce qui reste approché, et qui n'est pas prétendu : pas d'irradiance de ciel réelle (la
+// référence de Bruneton multiplie par `E_ciel/π`), pas de particules, pas de multiple diffusion.
+// `R(0⁻)` **brut**. Le gain qui le met à l'échelle de l'image vit dans `p.cut.z` : c'est lui qui
+// tient lieu d'irradiance de ciel (`E/π` chez Bruneton), et il se balaye au lieu de se supposer.
+const SEA_R0 = vec3<f32>(0.00068, 0.00826, 0.08960);
+
 fn band_upper(b: u32) -> f32 { return p.spectral.y / f32(1u << b); }
 fn spectral_band(k: f32) -> u32 {
     var b = 0u;
@@ -597,10 +618,13 @@ fn sample_light(slope: vec2<f32>, ray: vec3<f32>) -> vec3<f32> {
     let reflection = reflect(ray,n);
     let glint = pow(max(dot(reflection,sun),0.0),180.0);
     if (p.eye.w > 0.5) {
-        let body = vec3<f32>(0.004,0.060,0.170)*(0.6+0.4*max(dot(n,sun),0.0));
+        // S307 : `p.cut.y` = 1 → couleur dérivée de ses sources au lieu de la constante historique.
+        let sea = select(vec3<f32>(0.004,0.060,0.170), SEA_R0 * p.cut.z, p.cut.y > 0.5);
+        let body = sea*(0.6+0.4*max(dot(n,sun),0.0));
         return mix(body,sky_detail(reflection,2u),fresnel)+vec3<f32>(1.0,0.95,0.85)*glint*1.2;
     }
-    let base = vec3<f32>(0.012,0.105,0.13)*(0.65+0.35*max(dot(n,sun),0.0));
+    let sea_defaut = select(vec3<f32>(0.012,0.105,0.13), SEA_R0 * p.cut.z, p.cut.y > 0.5);
+    let base = sea_defaut*(0.65+0.35*max(dot(n,sun),0.0));
     return mix(base,sky(reflection),fresnel)+vec3<f32>(1.0,0.9,0.7)*glint*0.65;
 }
 fn filtered_fragment(v: Vertex) -> vec4<f32> {
@@ -663,6 +687,7 @@ fn ramp(t: f32) -> vec3<f32> {
     let zero = exp(-u*u*900.0);
     return vec3<f32>(max(u,0.0), zero, max(-u,0.0))*0.9 + vec3<f32>(0.05);
 }
+
 fn diagnostic_fragment(v: Vertex) -> vec4<f32> {
     let mode = u32(p.reflection.w + 0.5);
     if (mode == 1u) {
@@ -701,7 +726,8 @@ fn diagnostic_fragment(v: Vertex) -> vec4<f32> {
     let glint = pow(max(dot(reflection,sun),0.0),180.0);
     if (p.eye.w > 0.5) {
         // Habillage « ciel clair » : eau bleu profond (photo B), air clair, reflet du soleil plus franc.
-        let body = vec3<f32>(0.004,0.060,0.170)*(0.6+0.4*max(dot(n,sun),0.0));
+        let sea_c = select(vec3<f32>(0.004,0.060,0.170), SEA_R0 * p.cut.z, p.cut.y > 0.5);
+        let body = sea_c*(0.6+0.4*max(dot(n,sun),0.0));
         let clear = mix(body,sky_detail(reflection, 2u),fresnel)+vec3<f32>(1.0,0.95,0.85)*glint*1.2;
         // S262 : air clair sur 6 km, et raccord à la couleur d'horizon dans le dernier tiers de la
         // grille (horizon géométrique `p.impact.y`), où la courbure cacherait l'eau.
@@ -709,7 +735,8 @@ fn diagnostic_fragment(v: Vertex) -> vec4<f32> {
         let haze = max(1.0 - exp(-d/6000.0), smoothstep(0.66*p.impact.y, p.impact.y, d));
         return vec4<f32>(mix(clear,CLEAR_HORIZON,haze),1.0);
     }
-    let base = vec3<f32>(0.012,0.105,0.13)*(0.65+0.35*max(dot(n,sun),0.0));
+    let sea_d = select(vec3<f32>(0.012,0.105,0.13), SEA_R0 * p.cut.z, p.cut.y > 0.5);
+    let base = sea_d*(0.65+0.35*max(dot(n,sun),0.0));
     let color = mix(base,sky(reflection),fresnel)+vec3<f32>(1.0,0.9,0.7)*glint*0.65;
     return vec4<f32>(mix(color,vec3<f32>(0.66,0.78,0.84),1-exp(-length(v.local)/500.0)),1.0);
 }

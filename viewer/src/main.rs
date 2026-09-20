@@ -2848,6 +2848,20 @@ fn run() -> Result<(), String> {
             return delta3d_captures(&mut frame, config);
         }
     }
+    // S307 : `--eau-physique` — couleur du corps d'eau dérivée de Pope & Fry 1997 et Morel 1974,
+    // remise à la luminance de la constante historique (teinte seule, exposition inchangée).
+    if let Some(g) = args.iter().find_map(|a| a.strip_prefix("--eau-physique")) {
+        frame.physical_color = true;
+        if let Some(value) = g.strip_prefix('=') {
+            let gain: f32 = value.parse().map_err(|_| "gain de couleur : nombre attendu")?;
+            if !(0.1..=20.).contains(&gain) { return Err("gain de couleur : entre 0,1 et 20".into()); }
+            frame.color_gain = gain;
+        }
+        println!(
+            "EAU_PHYSIQUE R0=vec3(0.00068,0.00826,0.08960) gain={} B/G=10.85 B/R=130.9 source=Pope&Fry1997+Morel1974",
+            frame.color_gain
+        );
+    }
     // S306, guide §5.3 : `--coupure=<f>` déplace les bornes du filtre spectral. 1 = ADR-148.
     if let Some(value) = args.iter().find_map(|a| a.strip_prefix("--coupure=")) {
         let f: f32 = value.parse().map_err(|_| "coupure : nombre attendu")?;

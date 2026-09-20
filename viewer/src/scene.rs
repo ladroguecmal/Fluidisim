@@ -716,6 +716,12 @@ pub struct FrameData<'a> {
     /// S306, guide §5.3 : facteur de coupure spectrale (1 = ADR-148 au bit ; 2 = deux fois plus
     /// tôt, soit le haut de la fourchette `λ/Δ ≥ 4–8` que le guide propose).
     pub cut_factor: f32,
+    /// S307 : couleur du corps d'eau dérivée de ses sources (Pope & Fry 1997, Morel 1974) au lieu
+    /// de la constante historique sans provenance. Publiée dans `cut.y`.
+    pub physical_color: bool,
+    /// S307 : gain appliqué à `R(0⁻)`. Il tient lieu d'irradiance de ciel (`E/π`) et se balaye ;
+    /// 1 = la réflectance nue, telle que la physique la donne.
+    pub color_gain: f32,
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -814,6 +820,8 @@ impl<'a> FrameData<'a> {
             reflection_suffix: true,
             diagnostic: 0,
             cut_factor: 1.,
+            physical_color: false,
+            color_gain: 1.,
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,
