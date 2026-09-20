@@ -2132,3 +2132,86 @@ pub fn trajectoire_cuve() -> Result<(), String> {
         Ok(())
     })
 }
+
+/// **Banc S305, P5 — la durée longue.** Une seconde ne dit pas si l'écart est **borné** ou
+/// **séculaire** : c'est la seule objection que P4 laisse ouverte. Même cuve, `nx` = 32,
+/// 5 000 pas de 1 ms — **5 s, soit 2,33 périodes** — et l'écart publié par fenêtres de 500 pas,
+/// avec les deux amplitudes modales pour voir si les deux solveurs s'amortissent pareil.
+/// `--delta3d-cuve-longue`.
+pub fn longue_cuve() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::Volume3;
+    use water_core::host::HostServices;
+
+    pollster::block_on(async {
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 29);
+        let background = fond_nul(&mut alloc)?;
+        let (rho, g) = (1025_f32, 9.81_f32);
+        let (pas_us, pas, fenetre, cycles) = (1_000u64, 5_000usize, 500usize, 64u32);
+
+        let Cuve { domain, rest, eta, mode } = cuve(32, g as f64);
+        let (kx, ky, _k, omega) = mode;
+        let colonnes = domain.columns();
+        let depart = std::time::Instant::now();
+
+        let mut volume = Volume3::configure(
+            &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g,
+        )
+        .map_err(|e| format!("volume {e:?}"))?;
+        volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+
+        let total = face_total(domain);
+        let (nu, nv) = ((domain.nx + 1) * domain.ny * domain.nz, domain.nx * (domain.ny + 1) * domain.nz);
+        let zeros = vec![0f32; total];
+        let mut carte = Step3::new(&background, domain, [0., 0., -rest], rho, g).await?;
+        carte.set_step(pas_us, rest, Sponge3::default())?;
+        carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[..total - nu - nv], &eta)?;
+
+        println!(
+            "CUVE_S305 longue carte={:?} nx={} ny={} nz={} mailles={} pas={pas} cycles={cycles} duree_s={:.3} periodes={:.3}",
+            carte.adapter, domain.nx, domain.ny, domain.nz, domain.cells(),
+            pas as f64 * pas_us as f64 * 1e-6,
+            pas as f64 * pas_us as f64 * 1e-6 * omega / core::f64::consts::TAU
+        );
+
+        let (mut pire_global, mut pire, mut quadratique) = (0f32, 0f32, 0f64);
+        for n in 1..=pas {
+            let temps = SimTime((n as u64 - 1) * pas_us);
+            volume.step_surface_mobile(pas_us, 4000, &jobs).map_err(|e| format!("reference {e:?}"))?;
+            carte.step(&background, temps, cycles)?;
+            let coeur: Vec<f32> = volume
+                .surface()
+                .iter()
+                .zip(volume.surface_roundoff_for_trials())
+                .map(|(e, r)| (e - rest) - r)
+                .collect();
+            let publiee = carte.published()?;
+            let mut somme = 0f64;
+            for (a, b) in coeur.iter().zip(&publiee) {
+                pire = pire.max((a - b).abs());
+                somme += ((a - b) as f64).powi(2);
+            }
+            quadratique = quadratique.max((somme / colonnes as f64).sqrt());
+            if n % fenetre == 0 {
+                let (amplitude_coeur, _) = projection_modale(&coeur, 0., domain, kx, ky);
+                let (amplitude_carte, forme_carte) = projection_modale(&publiee, 0., domain, kx, ky);
+                pire_global = pire_global.max(pire);
+                println!(
+                    "CUVE_S305 longue t={:.3} hauteur_m={pire:e} quadratique_m={quadratique:e} sur_amplitude={:e} amplitude_reference={amplitude_coeur:e} amplitude_carte={amplitude_carte:e} ecart_amplitude={:e} forme_carte={forme_carte:e}",
+                    n as f64 * pas_us as f64 * 1e-6,
+                    pire as f64 / CUVE_A,
+                    (amplitude_carte - amplitude_coeur).abs()
+                );
+                pire = 0.;
+                quadratique = 0.;
+            }
+        }
+        println!(
+            "CUVE_S305 longue bilan pire_fenetre_m={pire_global:e} sur_amplitude={:e} secondes={:.1}",
+            pire_global as f64 / CUVE_A,
+            depart.elapsed().as_secs_f64()
+        );
+        Ok(())
+    })
+}

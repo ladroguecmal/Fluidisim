@@ -96,7 +96,7 @@ Critères, écrits avant la mesure (ADR-175 §4.1 cas 3 et §4.2) :
   sur le même cas, CPU contre CPU — le chaînon entre la référence reçue et ce que la carte porte.
 - [x] **P4** — critères 2 et 3 : carte contre référence, raffinement 16/32/48, écart de hauteur,
   pente, erreur de phase, durée déclarée.
-- [ ] **P5** — *(découpage déclaré)* durée longue : 5 s au raffinement moyen, pour dire si
+- [x] **P5** — *(découpage déclaré)* durée longue : 5 s au raffinement moyen, pour dire si
   l'écart est borné ou séculaire — la seule objection que 1 s laisse ouverte.
 - [ ] **P6** — preuve `CUVE-GPU-S305`, réception écrite des quatre critères.
 - [ ] **P7** — rituel REPRISE §6.
@@ -162,6 +162,21 @@ raffinements, deux profils de cycles, référence `step_surface_mobile`.
   **aucun centre de maille** ne s'y trouve aux trois raffinements (3,875/4,125 à `nx` = 32 ;
   3,9167/4,0833 à 48). La bascule de mouillure d'A297 n'est donc jamais déclenchée — c'est une
   propriété du **cas**, pas une correction du schéma, et A297 reste entière.
+
+**P5 reçu — l'écart est séculaire, et sa pente est chiffrée.** `--delta3d-cuve-longue`,
+`nx` = 32, 5 000 pas de 1 ms — **5 s, 2,334 périodes**, 64 cycles, 116 s de banc. Pire écart par
+fenêtre de 500 pas :
+
+| t (s) | 0,5 | 1,0 | 1,5 | 2,0 | 2,5 | 3,0 | 3,5 | 4,0 | 4,5 | 5,0 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| hauteur (10⁻⁷ m) | 2,48 | 3,05 | 2,98 | 4,25 | 4,32 | 5,48 | 4,92 | 6,30 | 6,02 | **7,79** |
+
+**L'écart n'est pas borné : il croît, et à peu près linéairement** — ≈ 1,2·10⁻⁷ m par seconde
+entre t = 1 s et t = 5 s. C'est la réponse à la seule objection que P4 laissait ouverte, et elle
+est à donner telle quelle : le critère des 3 mm serait franchi vers **7 heures** de temps simulé.
+Aucun domaine δ ne vit sept heures (I-12), mais la phrase juste est « l'écart croît lentement »,
+pas « l'écart est borné ». L'écart d'amplitude modale suit la même pente (6,5·10⁻⁹ → 4,5·10⁻⁷ m)
+et les deux solveurs s'amortissent donc ensemble, sans divergence de phase visible sur 2,3 périodes.
 
 *Réserve, dite parce qu'elle est mesurée* : la dérive de la moyenne de la carte vaut 4 à 6·10⁻⁸ m
 sur 1 000 pas, contre 1·10⁻¹⁰ m pour la référence — un facteur **400**. À 40 nm sur une seconde,
