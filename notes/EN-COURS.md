@@ -102,9 +102,9 @@ Critères, écrits avant la recherche :
   `--meilleur`, la ligne d'options complète, la règle dans REVUE-VISUELLE, la leçon L349.
 - [x] **P6** — synthèse ordonnée : ce qui manque, sourcé, chiffré, rattaché à notre code.
 - [x] **P7** — la couleur de l'eau depuis ses sources, et ce qu'elle change à l'image.
-- [ ] **P8** — décision : ADR de ce qui se construit et dans quel ordre.
-- [ ] **P9+** — construction, déclarée après la décision.
-- [ ] **Pn** — preuve, rituel REPRISE §6.
+- [x] **P8** — décision : ADR-177 (la couleur se dérive), et la revue R14 qui remplace R12/R13.
+- [ ] **P9** — rituel REPRISE §6. *(Écume, diffusion aux crêtes et spectre ECKV : déclarés en file, pas construits ici.)*
+
 
 ### Notes de reprise
 

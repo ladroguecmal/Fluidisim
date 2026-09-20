@@ -292,6 +292,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) | Arbitrages de l'utilisateur du 2026-09-19 : machine de référence, temps de l'eau au service de l'objectif, v1, ordre |
 | [ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) | Architecture d'exécution de δ en 3D : production résidente sur GPU à travail borné, référence CPU pour la réception |
 | [ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md) | Les asymétries de la surface rendue : second ordre en bande étroite par système et modulation de la queue retardée, dans le rendu seul |
+| [ADR-177](adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md) | La couleur du corps d'eau se dérive de ses sources (Pope & Fry 1997, Morel 1974) ; le gain d'échelle est nommé pour ce qu'il est, un substitut d'irradiance de ciel |
 
 ## Travail et historique
 

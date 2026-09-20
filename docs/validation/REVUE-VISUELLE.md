@@ -746,3 +746,47 @@ sous-ensemble choisi par la session.
 
 *Ce qui reste à la charge de la session* : dire ce que la revue **compare**, et pourquoi. Les
 options ne sont plus une question ; la thèse en reste une.
+
+## 19. R14 — le rendu avec tout ce que vous aviez accepté, et la couleur dérivée, S307
+
+**2026-09-20, verdict attendu.** Cette revue **annule et remplace** R12 et R13 : leurs images
+étaient rendues avec des options que vous aviez déjà acceptées, **éteintes** (voir la règle de
+protocole ci-dessus). Les juger n'avait pas de sens, et votre « toujours mauvais » portait en
+partie sur cela.
+
+Images dans `viewer/captures/s306`, 1280×720, âge 12 s, poses `proche` et `rasante`.
+Mesures : [RENDU-ECART-S307](RENDU-ECART-S307.md) ; décision :
+[ADR-177](../adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md).
+
+**Options déclarées — et désormais produites par le code, pas par ma mémoire.** Toutes les
+images partagent `--meilleur`, c'est-à-dire `--vagues --modulation --ciel-clair
+--reflets-filtres` : mer multimodale, queue d'équilibre, vagues pointues, modulation, asymétries
+d'ADR-176, ciel construit d'après votre photo, reflets filtrés d'ADR-161.
+
+| image | ce qui s'ajoute | pourquoi |
+|---|---|---|
+| `tout` | rien — `--meilleur` seul | **la référence honnête** : ce que le dépôt savait déjà faire |
+| `eau_g1` | `--eau-physique=1` | couleur dérivée de Pope & Fry 1997 et Morel 1974, réflectance **nue** |
+| `eau_g2` | `--eau-physique=2` | la même, gain 2 |
+
+**Ce que la mesure dit déjà.** Notre ancienne couleur d'eau était **9 fois trop verte** (B/G 1,24
+contre 10,9 attendu) et n'avait aucune provenance. Les reflets filtrés, éteints depuis R7,
+divisent l'énergie haute fréquence de l'image par **2,5**. Le ciel oublié remplaçait une brume à
+6 km par une brume à **500 m** sur une scène qui porte à 1 500 m.
+
+**Ce qui manque encore, et que je n'ai pas construit** : l'**écume** (0,42 % de couverture
+attendue à ce vent, totalement absente), la **diffusion sous la surface aux crêtes** (le masque
+existe pourtant déjà — le jacobien), un **ciel physique** et une **exposition** (A299).
+
+**Les questions :**
+
+1. **Entre `tout`, `eau_g1` et `eau_g2`** : laquelle est la plus proche d'une mer réelle ? Si
+   c'est `eau_g1` ou `eau_g2`, je fais de la couleur dérivée le défaut.
+2. **Le gain** : si aucune des deux ne va, plus sombre ou plus clair ?
+3. **Ce qui reste faux**, en un mot si possible : la forme des vagues ? la lumière ? le
+   scintillement ? le manque d'écume ? autre chose que vous pouvez nommer ?
+4. **Avez-vous une photographie** de la mer que vous visez — même approximative ? Sans vent,
+   exposition ni focale connus, toute comparaison reste qualitative, et c'est aujourd'hui la
+   limite la plus dure du dispositif.
+
+Un mot par question suffit ; « je ne sais pas » reste une réponse utile.
