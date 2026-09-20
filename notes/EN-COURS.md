@@ -114,8 +114,9 @@ Critères, écrits avant la mesure :
 - [x] **P3** — **réponse : non.** La vitesse normale aux faces extérieures vaut **0 exactement**,
   quand le champ atteint 0,60 m/s à l'intérieur. Le domaine est une **boîte fermée** ; le transport
   ne jette rien, il n'y a rien à jeter. **Le flux sortant est à construire, pas à récupérer.**
-- [ ] **P4** — le **cas contrôlé** : canal, onde longue sortante, grandeur de référence non nulle,
-  erreur normalisée définie avant la mesure.
+- [x] **P4** — `examples/sortie_canal.rs` : une onde longue traverse une **ligne de contrôle
+  intérieure**. À `λ/h₀ = 24` : erreur de restitution **0,148 %**, retour **0,215 %**. Deux erreurs
+  de montage trouvées par la mesure, pas par la relecture.
 - [ ] **P5** — **ce que W peut recevoir** : inventaire de ses primitives, et ce qu'aucune ne couvre.
 - [ ] **P6** — la décomposition de ce que l'éponge absorbe : la part qui est l'onde sortante, et
   celle qui ne l'est pas.
@@ -151,6 +152,39 @@ La voie 2 ne touche pas au schéma, se mesure avec le compteur existant, et resp
 ce qui traverse la ligne **sort**, alors que l'activité de l'éponge mélange trois choses. Elle
 demande en revanche de séparer sortant et entrant sur cette ligne — ce qu'un **cas contrôlé**, où
 rien n'entre, rend trivial. C'est exactement pourquoi l'utilisateur en demande un.
+
+**P4 : le cas contrôlé marche, après deux erreurs de montage que seule la mesure a dites.**
+
+1. **`λ/h₀ = 4` n'est pas une onde longue.** La condition initiale est la solution d'onde simple
+   des équations en **eau peu profonde** ; le solveur est complet et **dispersif**. À `λ/h₀ = 4`,
+   la bosse se sépare en une onde progressive et une **traîne dispersive** qui traverse la ligne
+   dans les deux sens : retour de 36 %, **insensible au taux de l'éponge** — c'est ce qui a
+   disculpé l'éponge et accusé la dispersion.
+2. **L'éponge est symétrique.** `width_x` s'applique aux **deux** bords `x` ; la bosse, placée à
+   `3σ`, démarrait *dedans*, et l'éponge de gauche en effaçait **14,7 %** avant le premier pas.
+   Signature : une erreur de restitution constante à 14,7 % **quel que soit** `λ/h₀`.
+
+| `λ/h₀` | retour relatif | erreur de restitution |
+|---:|---:|---:|
+| 8 | 7,30 % | 1,28 % |
+| 16 | 0,646 % | 0,328 % |
+| **24** | **0,215 %** | **0,148 %** |
+
+Le retour s'effondre comme la dispersion diminue : **c'était bien elle**, démontré et non supposé.
+Résidu du bilan ≤ 3·10⁻¹² m³ partout, `outgoing` nul partout — la paroi tient.
+
+**P5 : ce que W peut recevoir, et le point dur.** W n'a que deux primitives de production —
+l'**impact** radial (`wave_event.rs` : énergie, longueur d'onde, direction, anisotropie, TTL) et le
+**sillage** le long d'une trajectoire. Aucune ne représente un front quelconque sortant d'un bord.
+Et surtout : **l'impact de W porte de l'énergie, pas du volume**. Mesuré — l'essai
+`initial_energy_in_disk_and_volume_residual` du dépôt imprimait déjà le chiffre sans jamais
+l'affirmer : `disk_volume = −3,6·10⁻⁷ m³` pour 0,01 J, c'est-à-dire **zéro à la quadrature près**.
+
+**Conséquence, et elle est plus intéressante que prévu.** La grandeur de référence que le cas
+contrôlé mesure — un **volume net** sortant — est précisément la composante qu'**aucune primitive
+de W ne peut porter**. Le cas prouve donc deux choses d'un coup : que la perturbation sortante est
+correctement identifiée (point 1 d'ADR-179 D8), et que ce qu'il identifie **ne peut pas être remis
+à W en l'état**. C'est exactement l'identification qu'ADR-179 D5 exige.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 

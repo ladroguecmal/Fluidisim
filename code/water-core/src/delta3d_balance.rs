@@ -201,3 +201,38 @@ impl Volume3 {
         [m[0] * factor, m[1] * factor, m[2] * factor]
     }
 }
+
+impl Volume3 {
+    /// **Le volume qui traverse une ligne de contrôle intérieure** pendant le dernier pas, en m³,
+    /// positif vers les `x` croissants — S311, lot 2.
+    ///
+    /// La frontière extérieure d'un domaine δ est une **paroi** : la vitesse normale y vaut zéro
+    /// (mesuré en S311 P3), donc `Balance3::outgoing` vaut zéro et la perturbation n'en sort
+    /// jamais — elle est éteinte par l'éponge avant d'y arriver. La perturbation **sortante** au
+    /// sens d'[ADR-179] D3 se lit donc sur une surface de contrôle **intérieure**, typiquement la
+    /// ligne intérieure de la bande d'éponge, où l'onde est encore intacte.
+    ///
+    /// [ADR-179]: ../../../docs/adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md
+    ///
+    /// Cette ligne est une face intérieure : `transport_coupled3` calcule déjà son flux de colonne,
+    /// avec les mêmes mouillures et les mêmes vitesses que le transport applique. Cette fonction
+    /// n'ajoute aucune physique — elle **lit** ce que le pas a calculé, et rien d'autre.
+    ///
+    /// **Elle ne sépare pas l'entrant du sortant.** Ce que traverse la ligne est une somme
+    /// algébrique. Sur un cas **contrôlé** où rien n'entre, la séparation est triviale ; sur une
+    /// scène quelconque, elle demande une décomposition en caractéristiques, qui n'est pas écrite.
+    /// Confondre les deux serait exactement le double comptage qu'ADR-179 D4 interdit.
+    ///
+    /// Refuse `Domain` si `i` n'est pas une face intérieure, `0 < i < nx`.
+    pub fn control_flux_x(&self, i: usize, dt: f64) -> Result<f64, crate::delta_projection::Error> {
+        let Domain3 { nx, ny, dx, .. } = self.domain;
+        if i == 0 || i >= nx {
+            return Err(crate::delta_projection::Error::Domain);
+        }
+        let mut total = 0f64;
+        for j in 0..ny {
+            total += self.flux_x[j * (nx + 1) + i] as f64;
+        }
+        Ok(total * dt * dx as f64)
+    }
+}
