@@ -15230,3 +15230,46 @@ Plafonds et navigation à 0. Copie unique, jeton libre.
 
 *Tenue du plan* : un battement écrit sans lire l'horloge, corrigé dans la minute (L237, deuxième
 fois en deux sessions — le geste doit précéder l'écriture, pas la suivre).
+
+## S304 — 2026-09-20 — les asymétries construites, et la mer soumise de nouveau
+
+**Entrée.** « Continue », après le verdict R11 et ADR-176. Copie unique, master propre, jeton
+libre ; plan committé avant tout code.
+
+**Capacité reçue.** La surface rendue a **ses deux asymétries** : verticale (crêtes pointues,
+creux plats) et de pente (face avant plus rugueuse). **Ce qui devient possible** : soumettre à
+l'utilisateur une mer qui a la forme statistique d'une mer observée, et non plus une somme de
+sinusoïdes. **Consommateur** : la revue R12, demandée. **Preuve** :
+[ASYMETRIES-S304](../docs/validation/ASYMETRIES-S304.md).
+
+**Construit.** Dans le nuanceur : `tayfun()` — second ordre en bande étroite par système,
+`η₂ = ½k̄(η² − η̂²)` — et `lagged_eps()` — déformation déphasée de −0,20 tour. Les accumulations par
+système entrent dans la boucle qui somme déjà la bande ; branches explicites, FXC refusant
+l'indexation dynamique d'un vecteur en écriture (L345). Un douzième `vec4` d'uniforme porte
+`(split, k̄₁, k̄₂, retard)`. La référence CPU porte les mêmes termes. Le fragment n'a pas changé :
+le sommet lui transmet la déformation retardée.
+
+**Réception, cinq critères écrits avant le code, cinq tenus.** `Sk` 0,003 → **0,0656** (exigé
+≥ 0,06), `c₀₃` 0,001 → **−0,155** (exigé entre −0,18 et −0,13), `c₂₁` **−0,057** contre −0,058
+observé — **sans avoir été visé**, le seul paramètre calé étant le retard, sur `c₀₃`. GPU contre
+CPU : 1,59·10⁻⁶ m et 2,69·10⁻⁴, aucun repli. Scènes antérieures **identiques au bit** au binaire de
+S301, `--sans-asym` compris. Écart au jeu 0,3651 → 0,3999 m (+3,5 cm sur 36,5 dont CWM porte
+l'essentiel ; A288 aggravée de moins de 10 %). Coût **+0,25 %** : 1,0138 → 1,0163 ms.
+
+**Contrôle qui vaut d'être dit** : les `k̄` par système calculés par l'instrument (0,1742 et
+0,0317) sont ceux que l'hôte publie au nuanceur. Les deux implémentations portent le même modèle,
+et c'est ce qui autorise à lire les statistiques de l'instrument comme celles du rendu.
+
+**Partiel.** `Sk` atteint 0,066 pour 0,156 observés : c'est la borne prudente d'ADR-176 D1, le
+noyau exact du second ordre pour deux systèmes restant à écrire. `c₀₃` atteint 70 % de l'observé.
+Capillaires parasites, écume, micro-déferlement, asymétrie horizontale et `mss` 14 % haute :
+inchangés. Aucune couche δ dans les images de R12 — la question posée est celle de la mer.
+
+**Rituel.** Maillons **0** : une capacité construite, reçue sur cinq critères, et son consommateur
+est la revue demandée. File active relue, deux lignes remplacées ; feuille de route J1-bis, index
+(liste et tableau des ADR), REVUE-VISUELLE §17. I-01/I-04/I-13/I-15 relus, inchangés. Plafonds et
+navigation à 0. Copie unique, jeton libre.
+
+*Tenue du plan* : P2 à P5 fusionnés en un commit — la construction et sa réception forment une
+seule thèse, et les quatre étapes ont tenu dans l'heure. Le battement a encore été écrit avant la
+lecture de l'horloge (L237) : geste corrigé dans la minute, règle à appliquer dans l'ordre.

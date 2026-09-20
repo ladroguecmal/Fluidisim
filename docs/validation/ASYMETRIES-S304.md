@@ -105,6 +105,12 @@ fichier porte l'état, pour qu'aucune image ne circule sans dire ce qu'elle mont
   la `mss` 14 % au-dessus de Cox–Munk (inchangée par ce lot).
 - **La couche δ** n'est pas rendue dans ces images : la question posée est celle de la mer.
 
+## 4 bis. Vérification globale
+
+`cargo test --manifest-path code/Cargo.toml --workspace --release --offline` : **539 réussis**,
+18 ignorés, aucun échec. Le cœur n'est pas touché par ce lot ; seul l'instrument de statistiques
+gagne deux candidats et une ligne de sortie.
+
 ## 5. Reproduction
 
 ```powershell

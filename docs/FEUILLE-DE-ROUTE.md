@@ -87,6 +87,11 @@ mesure publie techniques présentes, absentes et domaine de validité (ADR-131 D
 Travaux nécessaires faits : A251 et composition (S214), A254 (S223), cadence complète (S225),
 allocations (S240), angles rasants mesurés et mis en images (S247, S248).
 
+**S304, asymétries de la surface** ([ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md)) :
+second ordre en bande étroite par système et modulation de la queue retardée, dans le rendu
+seul, pour +0,25 % de coût. `Sk` 0,003 → 0,066 et `c₀₃` 0,001 → −0,155 (observés 0,156 et
+−0,222) ; scènes antérieures au bit ([S304](validation/ASYMETRIES-S304.md)). **Verdict R12
+attendu.**
 ### J2 — Domaines volumiques bornés, comme cas de construction du δ général
 
 *Livre* : un ou plusieurs domaines δ **pris dans le système** — interfaces `Volume`/`Caps`

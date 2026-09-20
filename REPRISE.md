@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 02:39 +02:00
+JETON            : libre
+Battement        : 2026-09-20 02:41 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : S304 — construction d'ADR-176 : les asymétries dans le rendu
-Dernière session : S303 — verdict R11 reçu : δ sans artefact, mer sans asymétrie ; écart mesuré et ADR-176 actée
-Session suivante : S304 — **construire [ADR-176](docs/adr/ADR-176-asymetries-de-la-surface-rendue.md)** : second ordre en bande étroite par système et modulation retardée dans le nuanceur, réception §3 écrite avant le code (statistiques, GPU contre CPU, scènes antérieures au bit, écart au jeu, coût), puis **revue R12** aux poses de R11, **options de topologie déclarées dans la demande**. Ensuite : critère 2 sur les cas de cuve de §4.1.
-Maillons        : 0 — capacité S303 : l'écart de notre mer aux mers observées, mesuré sur la réalisation du rendu (Sk 0,003 contre 0,156 ; c₀₃ 0,001 contre −0,222) et deux modèles éprouvés qui y répondent ; consommateur : ADR-176 puis R12 ; preuve ANATOMIE-SURFACE-S303
+Session en cours : aucune — S304 terminée
+Dernière session : S304 — ADR-176 construite et reçue sur ses cinq critères ; revue R12 demandée
+Session suivante : S305 — **d'abord le verdict R12** (REVUE-VISUELLE §17) : trois états de la mer, options déclarées. Sans verdict, travail utile sans lui : noyau exact du second ordre pour deux systèmes (`Sk` vrai entre 0,066 et 0,150), puis critère 2 de la porte B sur les cas de cuve de §4.1 (mode sans fond de `Step3`), puis charge utile par face du fond (26 flottants → 12 : plafond de domaine et coût).
+Maillons        : 0 — capacité S304 : les deux asymétries d'une mer observée dans le rendu (Sk 0,066, c₀₃ −0,155, c₂₁ sur Cox–Munk sans être visé), pour +0,25 % de coût et sans toucher au cœur ; consommateur : la revue R12 ; preuve ASYMETRIES-S304
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -75,12 +75,14 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État au 2026-09-20 (S303). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
+État au 2026-09-20 (S304). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
 travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En bref :
 
 - **J1** partiel : B+W sur GPU dans l'hôte séparé, scène multi-sources admise par le cœur, GPU eau
-  1,74 ms, mer jugée par l'utilisateur (R7 accepté) ; manquent le CPU sous 2 ms (A278), un objet
-  pilotable et la seconde cible.
+  1,74 ms, mer jugée par l'utilisateur (R7 accepté). **S304 : la mer a ses asymétries** — crêtes
+  pointues et face avant rugueuse, statistiques rapprochées des mers observées pour +0,25 % de
+  coût (ADR-176) ; **verdict R12 attendu**. Manquent le CPU sous 2 ms (A278), un objet pilotable
+  et la seconde cible.
 - **δ reçu en 2D** — surface mobile couplée à B/W contre HOS, frontières, rendu en direct.
   **S295–S296** : référence 3D à surfaces linéaire et mobile reçue, identique au bit à la 2D quand `ny = 1`.
   **Porte B ouverte** : δ en 3D selon [ADR-175](docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md),

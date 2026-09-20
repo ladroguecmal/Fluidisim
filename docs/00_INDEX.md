@@ -95,6 +95,7 @@
 - [Le pas couplé complet résident sur la carte — S301](validation/DELTA3D-PAS-GPU-S301.md) : un seul device, chaque étage reçu contre le cœur, somme compensée sauvée du compilateur, trajectoire jugée contre la sensibilité propre de la référence (A297), coût et diagnostics D3.
 - [La scène du critère 3 : une onde qui traverse une mer étalée — S302](validation/SCENE-DELTA3D-S302.md) : δ 3D rendu en direct depuis sa surface publiée, front injecté à 65 cm, à-coups et grain mesurés, revue R11 demandée.
 - [Anatomie d'une surface de mer, et ce qui manque à la nôtre — S303](validation/ANATOMIE-SURFACE-S303.md) : recherche sourcée sur les asymétries d'une mer réelle, mesure de la nôtre, et les deux modèles qui y répondent.
+- [Les asymétries de la surface rendue, construites — S304](validation/ASYMETRIES-S304.md) : second ordre en bande étroite et modulation retardée, cinq critères d'ADR-176 tenus, +0,25 % de coût, images de R12.
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -286,6 +287,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-173](adr/ADR-173-le-candidat-de-pression-ne-fournit-qu-un-depart.md) | Un candidat de pression externe ne fournit qu'un départ (voir A295) |
 | [ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) | Arbitrages de l'utilisateur du 2026-09-19 : machine de référence, temps de l'eau au service de l'objectif, v1, ordre |
 | [ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) | Architecture d'exécution de δ en 3D : production résidente sur GPU à travail borné, référence CPU pour la réception |
+| [ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md) | Les asymétries de la surface rendue : second ordre en bande étroite par système et modulation de la queue retardée, dans le rendu seul |
 
 ## Travail et historique
 

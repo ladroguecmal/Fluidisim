@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S304 — en cours.
+Session : S304 — terminée : asymétries construites et reçues, revue R12 demandée.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle.
 Entrée : « Continue », 2026-09-20, après le verdict R11 et [ADR-176](../docs/adr/ADR-176-asymetries-de-la-surface-rendue.md).
 
@@ -87,7 +87,7 @@ second ordre (borne prudente retenue) ; ajouter capillaires, écume ou asymétri
 - [x] **P3** — critères 2 et 3 : GPU contre CPU aux sondes, scènes antérieures au bit.
 - [x] **P4** — critères 1, 4 et 5 : statistiques, écart au jeu, coût.
 - [x] **P5** — captures R12 et demande de revue.
-- [>] **P6** — preuve, rituel REPRISE §6.
+- [x] **P6** — preuve, rituel REPRISE §6.
 
 ### Notes de reprise
 
