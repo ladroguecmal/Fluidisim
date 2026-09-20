@@ -127,10 +127,10 @@ Critères, écrits avant la mesure :
 - [x] **P3** — *l'enveloppe survit-elle ?* La question de fond, mesurée avant de construire :
   étalement dispersif d'un train à bande étroite, et ce qu'il impose à la primitive.
 - [x] **P4** — la primitive : `wave_train.rs`, construction, refusas nommés, essais unitaires.
-- [ ] **P5** — **essai 1** : une onde progressive unique en eau profonde ; amplitude, direction,
+- [x] **P5** — **essai 1** : une onde progressive unique en eau profonde ; amplitude, direction,
   spectre, phase mesurés séparément.
-- [ ] **P6** — l'extracteur : amplitude, phase et spectre lus sur le signal sortant à la ligne.
-- [ ] **P7** — **essai 2** : le paquet spectral, transféré et vérifié.
+- [x] **P6** — l'extracteur : amplitude, phase et spectre lus sur le signal sortant à la ligne.
+- [x] **P7** — **essai 2** : le paquet spectral, transféré et vérifié.
 - [ ] **P8** — **essai 3** : propagation oblique à la frontière.
 - [ ] **P9** — **essais 4 et 5** : cohérence de phase δ → W, puis transmission et réflexion sur
   plusieurs résolutions.
@@ -919,3 +919,30 @@ Deux erreurs de ma part, corrigées : une condition de réplique posée comme un
 (4 × rayon) au lieu de la vraie — « la réplique reste hors du disque à l'âge où elle s'en approche
 le plus » ; et un essai de direction qui comparait `η` en deux points, donc mesurait la **phase de
 la porteuse** et non la position du paquet. Corrigé en comparant l'**énergie** de deux fenêtres.
+
+**P5+P6+P7 — fusion déclarée.** L'extracteur, l'essai 1 et l'essai 2 sont un seul banc :
+l'identification n'existe que pour alimenter le train, et les deux essais ne diffèrent que par la
+largeur de l'enveloppe.
+
+**Le transfert, en trois gestes** : lire `η(t)` sur la ligne ; l'identifier par **cinq nombres**
+— arrivée, largeur, amplitude, pulsation, **phase** — tous issus du même signal ; émettre un
+`WaveTrain` qui les porte. Rien n'est ajusté après coup, et surtout pas l'amplitude (ADR-182 D8).
+
+**Essai 2, le paquet — les trois limitations de S312 sont corrigées.**
+
+| propriété | S312, impact | **S314, train** |
+|---|---:|---:|
+| **direction** — part vers l'avant | 0,500 | **1,00000** *(recul 3,96 σ)* |
+| **spectre** — bande relative | deux octaves pour 11 % demandés | **0,0973 contre 0,1061**, écart **8,3 %** |
+| **phase** — erreur de forme RMS | impossible, le champ naît au repos | **9,4 %**, corrélation **0,9907** |
+| amplitude | calibrée en énergie | écart **2,1 %** |
+| vitesse de groupe | 12,4 % | **0,46 %** |
+| réflexion *(mesurée à part)* | 2,84·10⁻⁷ | 2,84·10⁻⁷ |
+| volume net | 100 % en attente | 100 % en attente *(ADR-182 D9)* |
+
+**Deux biais d'instrument, encore, et encore trouvés par une réponse connue d'avance** (L357).
+(1) L'amplitude lue valait **0,7071** fois l'amplitude émise — exactement `1/√2`, la signature
+d'une projection normalisée par `∫w dt` au lieu de `∫env·w dt`. Le facteur ne se règle pas, il se
+**calcule**. (2) La direction était mesurée sur deux fenêtres de deux longueurs d'onde qui
+**recouvraient le paquet** : 0,898 au lieu de 1,000. Remplacée par un partage en **demi-plans** à
+un âge où le paquet a reculé de plus de trois écarts-types — condition publiée, pas supposée.
