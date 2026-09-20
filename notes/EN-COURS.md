@@ -131,7 +131,7 @@ Critères, écrits avant la mesure :
   spectre, phase mesurés séparément.
 - [x] **P6** — l'extracteur : amplitude, phase et spectre lus sur le signal sortant à la ligne.
 - [x] **P7** — **essai 2** : le paquet spectral, transféré et vérifié.
-- [ ] **P8** — **essai 3** : propagation oblique à la frontière.
+- [~] **P8** — **essai 3** : oblique **porté par la primitive**, mesuré en deux composantes ; **l'essai à la frontière reste dû** — il demande un domaine large en `y`, dix à vingt fois le coût des cas de cette session.
 - [ ] **P9** — **essais 4 et 5** : cohérence de phase δ → W, puis transmission et réflexion sur
   plusieurs résolutions.
 - [ ] **P10** — preuve publiée : les six propriétés, chacune avec sa mesure et son verdict.
@@ -946,3 +946,13 @@ d'une projection normalisée par `∫w dt` au lieu de `∫env·w dt`. Le facteur
 **calcule**. (2) La direction était mesurée sur deux fenêtres de deux longueurs d'onde qui
 **recouvraient le paquet** : 0,898 au lieu de 1,000. Remplacée par un partage en **demi-plans** à
 un âge où le paquet a reculé de plus de trois écarts-types — condition publiée, pas supposée.
+
+**P8 — l'oblique, la moitié que la primitive peut porter seule.**
+
+Un train à 30° : le centre d'énergie se déplace de `cg·Δt` **en norme** (2 %) et dans la bonne
+direction **composante par composante** (2 %) — un axe inversé ou permuté se verrait sur la
+seconde et pas sur la première, et c'est pour cela que les deux sont vérifiées.
+
+**Ce que cela ne fait pas** : l'essai 3 demande une propagation oblique **à la frontière**, donc un
+front qui sort d'un domaine δ large en `y` et se lit sur sa ligne de contrôle. La primitive le
+**supporte** ; supporter n'est pas éprouver, et l'essai reste dû.

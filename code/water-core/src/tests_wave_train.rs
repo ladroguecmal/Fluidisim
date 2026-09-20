@@ -271,3 +271,67 @@ fn outside_the_declared_radius_it_refuses() {
         Some(Error::Domain)
     );
 }
+
+/// **La direction oblique est portée en deux dimensions** — le centre d'énergie se déplace le long
+/// de la direction demandée, composante par composante, et pas seulement « vers l'avant ».
+///
+/// C'est la part de l'essai 3 d'[ADR-182] D7 que la **primitive** peut porter seule. L'essai
+/// complet — un front oblique qui sort d'un domaine δ et se lit sur sa frontière — demande un
+/// domaine large en `y` et reste dû.
+///
+/// [ADR-182]: ../../docs/adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md
+#[test]
+fn an_oblique_direction_is_carried_in_both_components() {
+    let m = milieu(8.);
+    // 30° : `cos` et `sin` exacts à l'arrondi près, et aucune composante nulle qui masquerait une
+    // erreur d'axe.
+    let (c30, s30) = (0.8660254f32, 0.5f32);
+    let mut s = spec();
+    s.direction = [c30, s30];
+    s.radius_m = 60.;
+    s.age_us = 12_000_000;
+    let t = WaveTrain::<64>::new(s, m).unwrap();
+
+    // Centre d'énergie sur une grille carrée centrée sur l'origine.
+    let centre = |age: u64| -> [f64; 2] {
+        let (n, demi) = (420usize, 40f64);
+        let pas = 2. * demi / n as f64;
+        let (mut aire, mut mx, mut my) = (0f64, 0f64, 0f64);
+        for j in 0..n {
+            for i in 0..n {
+                let x = -demi + (i as f64 + 0.5) * pas;
+                let y = -demi + (j as f64 + 0.5) * pas;
+                if x * x + y * y > (demi - 1.) * (demi - 1.) {
+                    continue;
+                }
+                let e = t
+                    .sample(FrameId(0), 0, [x as f32, y as f32], SimTime(age))
+                    .unwrap()
+                    .eta as f64;
+                let p = e * e * pas * pas;
+                aire += p;
+                mx += x * p;
+                my += y * p;
+            }
+        }
+        [mx / aire, my / aire]
+    };
+    let (a, b) = (centre(2_000_000), centre(10_000_000));
+    let deplacement = [b[0] - a[0], b[1] - a[1]];
+    let attendu = t.group_speed() as f64 * 8.;
+    let norme = (deplacement[0] * deplacement[0] + deplacement[1] * deplacement[1]).sqrt();
+    // La **norme** : c'est bien `cg` qui transporte, pas une projection.
+    assert!(
+        (norme - attendu).abs() / attendu < 0.02,
+        "norme {norme} contre {attendu}"
+    );
+    // Et la **direction**, composante par composante : un axe inversé ou permuté se verrait ici et
+    // pas dans la norme.
+    for (axe, attendu_axe) in [(0usize, c30 as f64), (1, s30 as f64)] {
+        let obtenu = deplacement[axe] / norme;
+        assert!(
+            (obtenu - attendu_axe).abs() < 0.02,
+            "axe {axe} : {obtenu} contre {attendu_axe}"
+        );
+    }
+}
