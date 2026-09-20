@@ -13,7 +13,7 @@
 //! |---|---|---|
 //! | **résidu absolu** | ce que le pas ne referme pas, en m³ | [`absolute_worst`], [`absolute_mean`] |
 //! | **résidu relatif** | rapporté à une **échelle pertinente**, à justifier | [`relative_worst`] |
-//! | **plancher attendu** | ce que la représentation impose, **dérivé** | [`expected_floor`], [`over_floor`] |
+//! | **plancher attendu** | ce que la représentation impose, **loi observée** | [`expected_floor`], [`over_floor`] |
 //! | **cumulé** | dérive ou bruit, sur une durée | [`cumulative_signed`], [`random_walk_ratio`] |
 //!
 //! [`absolute_worst`]: Closure3::absolute_worst
@@ -33,7 +33,12 @@
 //! le **volume signé** est nul par construction sur un paquet, et diviser par lui donne un
 //! nombre sans rapport avec quoi que ce soit.
 //!
-//! # Le plancher attendu, dérivé
+//! # Le plancher attendu — une **loi observée**, pas une borne démontrée
+//!
+//! [ADR-182](../../../docs/adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md) D1 exige que
+//! la distinction soit portée partout où le plancher est invoqué : ce qui suit est **raisonné puis
+//! vérifié par la mesure**, ce n'est pas une majoration prouvée. Aucun document ne doit écrire
+//! « borne » à la place.
 //!
 //! Le transport télescope : sommée sur le domaine, la divergence des flux de colonne ne laisse
 //! que les faces de bord. Mais chaque différence `F[i+1] − F[i]` est **arrondie en `f32`** avant
@@ -45,8 +50,11 @@
 //! plancher = u₃₂ · activité / √N        u₃₂ = 2⁻²⁴,  activité = Σ|Δ(η−repos)|·dx²
 //! ```
 //!
-//! **Mesuré à `C ≈ 1,5` près sur tout le balayage de S313** — amplitude sur quatre décades, `dt`
-//! sur un facteur 16, résolution sur un facteur 16 en `N`. Les bornes naïves en `ulp(h₀)` sont
+//! **Le rapport `résidu / plancher` reste entre 3,0 et 5,7 sur tout le balayage de S313** —
+//! amplitude sur quatre décades, `dt` sur un facteur 16, résolution sur un facteur 16 en `N`, et
+//! trois montages. C'est ce **domaine de validité** qui accompagne la loi ; hors de lui, elle est
+//! à revérifier (ADR-182 D1 : schéma, précision, méthode de sommation, régime). Les estimations
+//! naïves en `ulp(h₀)` sont
 //! fausses de **cinq ordres** : la somme compensée de S233 retire la hauteur du problème, et il
 //! ne reste que ce que le pas déplace.
 //!
@@ -68,7 +76,7 @@ pub enum ClosureError {
     Empty,
 }
 
-/// `u₃₂ = 2⁻²⁴` — la demi-résolution relative d'un `f32`, et la constante de la borne.
+/// `u₃₂ = 2⁻²⁴` — la demi-résolution relative d'un `f32`, et la constante de la loi observée.
 pub const U32: f64 = 5.960_464_477_539_063e-8;
 
 /// Le critère de fermeture d'un bilan de masse, cumulé sur les pas.
@@ -88,7 +96,7 @@ pub struct Closure3 {
 }
 
 impl Closure3 {
-    /// `columns` est le nombre de colonnes du domaine — le `N` de la borne.
+    /// `columns` est le nombre de colonnes du domaine — le `N` de la loi.
     pub fn new(columns: usize) -> Result<Self, ClosureError> {
         if columns == 0 {
             return Err(ClosureError::Empty);
@@ -110,7 +118,7 @@ impl Closure3 {
     ///
     /// - `residual` : `delta − band_in − perturbation_in + sponge_out`, **signé**.
     /// - `activity` : `Σ|Δ(η − repos)|·dx²` du pas — ce que les colonnes ont bougé **en valeur
-    ///   absolue**, et non leur somme, qui est `delta`. C'est l'entrée de la borne.
+    ///   absolue**, et non leur somme, qui est `delta`. C'est l'entrée de la loi.
     /// - `absolute_volume` : `Σ|η − repos|·dx²` à la fin du pas — l'échelle pertinente.
     ///
     /// Un pas dont l'activité est nulle ne contribue pas au rapport au plancher : son plancher
@@ -237,10 +245,10 @@ mod tests {
         );
     }
 
-    /// La borne est celle qui a été dérivée, et elle se calcule sans rien d'autre que l'activité
+    /// La loi est celle que S313 a observée, et elle se calcule sans rien d'autre que l'activité
     /// et le nombre de colonnes.
     #[test]
-    fn the_floor_is_the_derived_bound() {
+    fn the_floor_is_the_observed_law() {
         let mut c = Closure3::new(64).unwrap();
         c.account(0., 1.6e-4, 1e-2).unwrap();
         // u₃₂ · 1,6e-4 / 8

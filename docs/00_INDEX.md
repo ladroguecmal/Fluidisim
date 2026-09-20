@@ -302,6 +302,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-179](adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md) | Tolérances de conservation T1/T2/T3 tranchées ; la grandeur restituée est le **flux sortant**, jamais l'activité de l'éponge ni son net ; ce que W ne peut pas porter se déclare perdu |
 | [ADR-180](adr/ADR-180-retour-delta-w-et-conservation-du-volume.md) | Premier transfert δ → W limité aux tests ; trois catégories publiées séparément et le non-transféré **registré**, jamais dit restitué ; le receveur du volume net se cherche dans **V ou le niveau moyen de B** avant toute primitive nouvelle de W |
 | [ADR-181](adr/ADR-181-conservation-transfert-oriente-et-ordre-du-lot-2.md) | Le volume net va à **V ou à un niveau moyen régional de B** — jamais à un niveau global arbitraire ; T1 devient un critère à **quatre grandeurs** sans chiffre avant démonstration, éprouvé sur une erreur volontaire ; le transfert δ → W **n'est pas validé** ; ordre A → E du lot 2 |
+| [ADR-182](adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md) | C1, C2 et C3 actés sous conditions : le plancher reste une **loi observée** et non une borne démontrée, le cas ouvert reste **non conforme à C2**, et les trois s'appliquent **ensemble** ; ordre B autorisé, A305 maintenu ouvert et parallèle |
 
 ## Travail et historique
 

@@ -121,8 +121,8 @@ Critères, écrits avant la mesure :
 
 ### Plan
 
-- [>] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — ADR-182 : la décision du 2026-09-20 (S313), actée — critères sous conditions,
+- [x] **P1** — amorce, jeton, plan seul.
+- [>] **P2** — ADR-182 : la décision du 2026-09-20 (S313), actée — critères sous conditions,
   ordre B autorisé, A305 maintenu ouvert et parallèle.
 - [ ] **P3** — *l'enveloppe survit-elle ?* La question de fond, mesurée avant de construire :
   étalement dispersif d'un train à bande étroite, et ce qu'il impose à la primitive.

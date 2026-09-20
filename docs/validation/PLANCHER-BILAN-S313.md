@@ -82,6 +82,13 @@ plancher_du_pas  =  u₃₂ · activité / √N       u₃₂ = 2⁻²⁴,  acti
 **Mesurée à un facteur 3 près, et jamais dépassée**, sur tout le balayage : le rapport
 `résidu / plancher` vaut **3,00** en cuve fermée, **3,67** avec réécriture, **5,70** en cas ouvert.
 
+> **Note datée du 2026-09-20 (S314), [ADR-182](../adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md) D1.**
+> Ce qui précède est une **loi observée**, raisonnée puis vérifiée sur quatre décades d'amplitude,
+> un facteur 16 en `dt`, un facteur 16 en `N` et trois montages. **Ce n'est pas une borne
+> numérique démontrée**, et le mot « borne » employé ailleurs dans ce document désigne la même
+> chose, avec la même réserve. Son domaine de validité est celui du balayage ; elle se revérifie
+> si le schéma, la précision, la méthode de sommation ou le régime physique change.
+
 **Les bornes naïves sont fausses de cinq ordres**, et il faut le dire : `N·ulp(h₀)/2·dx²` donne
 3,576·10⁻⁷ m³ et sa variante en `√N` 5,162·10⁻⁸, quand la mesure donne 2·10⁻¹². **La somme
 compensée de S233 retire `ulp(h₀)` du problème** — sans elle le plancher serait cinq ordres plus
