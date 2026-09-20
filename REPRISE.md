@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 11:09 +02:00
+JETON            : libre
+Battement        : 2026-09-20 11:12 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S307 — **verdict R12/R13 reçu : « le rendu est toujours mauvais »**. Recherche à trois niveaux (références du guide, références des références, état de l'art non cité), puis mesure de l'écart, puis décision. Consigne explicite de l'utilisateur : aller au-delà du guide, multiplier les étapes
-Dernière session : S306 — guide confronté au dépôt ; stries attribuées à la queue spectrale, coupure réglable, revue R13 demandée
-Session suivante : fixée au rituel
-Maillons        : 0 — capacité S306 : d'où viennent les stries, mesuré et réglable sans coût ; consommateur : la revue R13 ; preuve STRIES-S306
+Session en cours : aucune — S307 terminée
+Dernière session : S307 — trois revues envoyées avec des options acceptées éteintes ; couleur de l'eau dérivée de ses sources (ADR-177) ; R14 demandée
+Session suivante : S308 — **d'abord le verdict R14** ([§19](docs/validation/REVUE-VISUELLE.md)) : il fixe le gain de couleur et fait du dérivé le défaut. **Toute demande de revue passe désormais par `--meilleur`** (L349). Sans verdict, dans cet ordre, tous décidés et aucun construit ([synthèse](docs/validation/RENDU-ECART-S307.md) §6) : **diffusion sous la surface aux crêtes** — le masque existe déjà, c'est le jacobien de CWM ; **écume** (Monahan, 0,42 % à ce vent, réflectance 0,22) ; **ciel et exposition** (A299, à mesurer avant de décider) ; **spectre ECKV/Elfouhaily**, qui retirerait ADR-157 et ADR-158. Puis A300 : auditer les autres constantes du nuanceur sans provenance. Porte B : cas 1 et 2 d'ADR-175 §4.1 pour la production.
+Maillons        : 0 — capacité S307 : le dépôt sait pourquoi son rendu était jugé mauvais (trois options acceptées éteintes, couleur 9 fois trop verte) ; consommateur : la revue R14 ; preuve RENDU-ECART-S307
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

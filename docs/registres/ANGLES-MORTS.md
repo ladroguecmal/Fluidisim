@@ -3950,3 +3950,28 @@ verdict R13, ou avant toute nouvelle revue de mer.
 publie désormais `replis` : **zéro sur les treize modèles**, dont celui du rendu. Le jacobien du
 déplacement horizontal ne s'annule ni ne s'inverse dans notre mer. L'indicateur que le guide met
 au premier rang (§4.3) est mesuré, et il écarte cette hypothèse.
+
+**A300 — S307, 2026-09-20 (sévérité 2, ouverte).** **Les constantes du nuanceur n'ont pas de
+provenance, et personne ne les avait auditées.** La couleur du corps d'eau était 9 fois trop
+verte et l'est restée à travers six revues visuelles, deux lots de correction de la mer et
+plusieurs audits ([ADR-177](../adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md) la
+corrige). Ce n'était pas un cas isolé : `water.wgsl` porte encore, **sans source**, les couleurs
+d'horizon et de zénith du ciel (`CLEAR_HORIZON`, `CLEAR_ZENITH`), deux longueurs de brume
+(**500 m** par défaut, 6 km en ciel clair, contre des dizaines de kilomètres en air marin
+propre), le terme de Fresnel (`0,02 + 0,98·(1−cos)⁵`), la direction du soleil, et trois exposants
+de miroitement (180, 512, 1024). **I-14 ne s'appliquait de fait qu'au cœur** : la règle « aucune
+valeur physique sans provenance » n'avait jamais été portée sur le rendu, parce qu'on le tenait
+pour cosmétique — or c'est lui que l'utilisateur juge. Déclencheur : au prochain lot de rendu,
+auditer ces constantes comme on audite celles du cœur, et donner à chacune une source ou le
+statut explicite de **choix déclaré**.
+[Preuve](../validation/RENDU-ECART-S307.md) §4 et §5.
+
+**A301 — S307, 2026-09-20 (sévérité 2, ouverte).** **Aucune mesure du dépôt ne regardait
+l'image.** Jusqu'à S306, toutes les mesures du rendu portaient sur la **surface** (statistiques
+de pente, `mss`, `Sk`, `c₀₃`) ou sur des **empreintes d'octets** — c'est-à-dire sur l'entrée et
+sur l'identité, jamais sur ce qui est montré. Conséquence mesurée : trois revues envoyées avec
+des options acceptées éteintes, une brume à 500 m et une couleur 9 fois fausse ont traversé six
+revues sans être vues. Les deux instruments qui existent aujourd'hui sont récents et partiels —
+`outils/spectre_image.py` (S306, énergie haute fréquence) et la mesure de couleur de S307 — et
+**aucun n'est exécuté au rituel**. Déclencheur : faire entrer au moins une mesure d'image dans
+les contrôles systématiques, au même titre que `etat_projet.py --check`.

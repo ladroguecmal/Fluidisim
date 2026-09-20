@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S307 — en cours : recherche profonde après un verdict négatif.
+Session : S307 — terminée : trois options acceptées étaient éteintes ; couleur dérivée (ADR-177) ; R14.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, **accès web**.
 Entrée : le verdict, enfin — « **le rendu actuel est toujours mauvais** » — et une consigne de
 méthode : « va au-delà du guide, regarde les références liées, et les références des références,
@@ -103,7 +103,7 @@ Critères, écrits avant la recherche :
 - [x] **P6** — synthèse ordonnée : ce qui manque, sourcé, chiffré, rattaché à notre code.
 - [x] **P7** — la couleur de l'eau depuis ses sources, et ce qu'elle change à l'image.
 - [x] **P8** — décision : ADR-177 (la couleur se dérive), et la revue R14 qui remplace R12/R13.
-- [ ] **P9** — rituel REPRISE §6. *(Écume, diffusion aux crêtes et spectre ECKV : déclarés en file, pas construits ici.)*
+- [x] **P9** — rituel REPRISE §6. *(Écume, diffusion aux crêtes et spectre ECKV : déclarés en file, pas construits ici.)*
 
 
 ### Notes de reprise

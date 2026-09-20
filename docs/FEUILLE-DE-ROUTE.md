@@ -84,21 +84,25 @@ mesure publie techniques présentes, absentes et domaine de validité (ADR-131 D
 | **mutualisation** | sillages d'un journal, table de Bessel partagée (S222, S235) ; passe B/W commune absente | superposition (ADR-123) |
 | **parallélisme CPU** | construit (S243, ADR-146), hors chemin d'image (A278) | écart au bit |
 
-Travaux nécessaires faits : A251 et composition (S214), A254 (S223), cadence complète (S225),
-allocations (S240), angles rasants mesurés et mis en images (S247, S248).
+Travaux nécessaires faits : A251 et composition (S214), A254 (S223), cadence (S225), allocations
+(S240), angles rasants (S247, S248).
 
-**S306, d'où viennent les stries** ([STRIES-S306](validation/STRIES-S306.md), en réponse au
-[guide reçu](sources/guide_topologie_ocean_haute_mer_plage.md) §12.3) : la queue spectrale porte
-**80 à 85 %** de l'énergie haute fréquence de l'image, que le contraste global ne voit pas.
-Élargir la coupure la divise par 2,2 (`f` = 2) ou 3,6 (`f` = 3) **sans changer le contraste**, et
-coûte **6,2 % de GPU en moins** — la première optimisation de cette section qui améliore l'image
-au lieu de la dégrader. Le choix de `f` est un arbitrage visuel : **verdict R13 attendu**.
+**S307, l'optique du rendu** ([preuve](validation/RENDU-ECART-S307.md),
+[ADR-177](adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md)) : la couleur du corps
+d'eau était **9 fois trop verte** et sans provenance ; elle se dérive désormais de Pope & Fry 1997
+et Morel 1974. Les reflets filtrés d'ADR-161, **éteints depuis R7**, divisent l'énergie haute
+fréquence par 2,5 sans retirer d'énergie. Trois revues avaient été envoyées avec des options
+acceptées **éteintes** : remède exécutable `--meilleur` (L349). Restent, dans l'ordre : diffusion
+aux crêtes, écume, spectre ECKV. **Verdict R14 attendu.**
 
-**S304, asymétries de la surface** ([ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md)) :
-second ordre en bande étroite par système et modulation de la queue retardée, dans le rendu
-seul, pour +0,25 % de coût. `Sk` 0,003 → 0,066 et `c₀₃` 0,001 → −0,155 (observés 0,156 et
-−0,222) ; scènes antérieures au bit ([S304](validation/ASYMETRIES-S304.md)). **Verdict R12
-attendu.**
+**S306, d'où viennent les stries** ([preuve](validation/STRIES-S306.md)) : la queue spectrale
+porte **80 à 85 %** de l'énergie haute fréquence de l'image, que le contraste global ne voit pas.
+`--coupure` la divise par 2,2 à 3,6 pour 6,2 % de GPU en moins — mais **S307 montre que ce n'était
+pas le bon levier**.
+
+**S304, asymétries de la surface** ([ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md),
+[preuve](validation/ASYMETRIES-S304.md)) : second ordre en bande étroite par système et modulation
+retardée, +0,25 % de coût ; `Sk` 0,003 → 0,066, `c₀₃` 0,001 → −0,155.
 ### J2 — Domaines volumiques bornés, comme cas de construction du δ général
 
 *Livre* : un ou plusieurs domaines δ **pris dans le système** — interfaces `Volume`/`Caps`

@@ -15420,3 +15420,77 @@ filtre n'excluait rien, et un compteur trop rond le disait sans que je le lise ;
 d'identité au bit rejoué avec des drapeaux que la preuve S304 n'employait pas — il a crié à la
 régression alors qu'il comparait deux choses différentes. Les deux fois, c'est le côté **supposé**
 de la comparaison qui a cassé, en silence.
+
+## S307 — 2026-09-20 — le verdict, et trois revues qui ne montraient pas notre rendu
+
+**Entrée.** Le verdict, enfin : « **le rendu actuel est toujours mauvais** », avec une consigne de
+méthode — aller au-delà du guide reçu, lire ses références et les références de ses références,
+multiplier les étapes. Consigné dans [REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md).
+
+**Capacité reçue.** Le dépôt sait pourquoi son rendu était jugé mauvais, et ce n'est pas ce que
+deux lots de correction avaient supposé. **Ce qui devient possible** : soumettre une mer que le
+dépôt sait réellement produire, et corriger des valeurs fausses au lieu de raffiner des valeurs
+justes. **Consommateur** : la revue **R14**, qui annule R12 et R13. **Preuve** :
+[RENDU-ECART-S307](../docs/validation/RENDU-ECART-S307.md).
+
+**Le fait principal, et il est désagréable.** **Trois revues consécutives ont été soumises avec
+des fonctionnalités que l'utilisateur avait lui-même acceptées, éteintes.** R11 tournait sans les
+vagues pointues (trouvé par S303). R12 et R13 tournaient sans `--ciel-clair` — le ciel construit
+en S261 **d'après sa propre photo de référence** — et sans `--reflets-filtres`, qu'il avait
+accepté en **R7**. Mesuré : le ciel oublié remplaçait une brume à 6 km par une brume à **500 m**
+sur une scène qui porte à 1 500 m ; les reflets oubliés divisent l'énergie haute fréquence de
+l'image par **2,5**.
+
+**Comment cela s'est vu** : j'ai **regardé l'image**, ce qu'aucune session n'avait fait, puis lu
+le nuanceur. Toutes les mesures du dépôt portaient sur la surface ou sur des empreintes d'octets
+— sur l'entrée et sur l'identité, jamais sur ce qui est montré (angle mort **A301**).
+
+**Le second fait, sourcé.** La couleur du corps d'eau, `vec3(0.012, 0.105, 0.13)`, **n'a aucune
+provenance** — ce qu'I-14 interdit — et elle est **9 fois trop verte**. Dérivation depuis
+[Pope & Fry 1997](https://omlc.org/spectra/water/data/pope97.txt) (absorption, jeu téléchargé) et
+Morel 1974 (diffusion moléculaire, `b_b = b/2`) : `R(0⁻) ≈ 0,33·b_b/(a+b_b)` donne B/G = **10,9**
+contre 1,24 mesuré. [ADR-177](../docs/adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md)
+la dérive désormais du calcul. Angle mort **A300** : ce n'était pas un cas isolé — ciel, brume,
+Fresnel et miroitement n'ont pas davantage de source, parce qu'I-14 n'avait jamais été portée sur
+le rendu, tenu pour cosmétique alors que c'est lui que l'utilisateur juge.
+
+**Recherche, trois niveaux.** *Niveau 1* : les douze références du guide portent sur la forme et
+la physique côtière ; **aucune** ne traite couleur, absorption, diffusion, écume, ciel ni
+exposition — exactement ce que nous traitons par des constantes. *Niveau 2* : Bruneton et al.
+2010, lu par son implémentation de référence — le remède au scintillement est de convertir les
+pentes non résolues en **rugosité de BRDF**, pas de les couper ; nous l'avions déjà (ADR-161),
+éteint. Sea of Thieves (SIGGRAPH 2018) : masque de crête tiré de la compression horizontale pour
+la diffusion sous-surface et l'écume — **ce masque, nous l'avons déjà**, c'est le jacobien de CWM,
+calculé à chaque pixel et jamais employé qu'à un repli. *Niveau 3* : ECKV/Elfouhaily 1997, qui
+remplacerait notre queue `f⁻⁴` **et** le calage Cox–Munk ; écume de Monahan (0,42 % à notre vent,
+réflectance 0,22).
+
+**Construit.** `--meilleur`, qui active tout ce qui est accepté, la liste vivant dans le code à
+côté de ce qui la consomme, et une ligne de capture qui publie **toutes** les options (leçon
+**L349**). `--eau-physique[=gain]`, couleur dérivée, gain déclaré libre. Les scènes de référence
+restent **identiques au bit** à chaque étape.
+
+**Une erreur de ma part, corrigée par l'image.** J'avais d'abord remis `R(0⁻)` à la luminance de
+l'ancienne constante : le bleu valait alors 0,40 de réflectance, quatre fois le maximum physique,
+et le rendu virait à l'outremer. La renormalisation compensait sans le dire l'irradiance de ciel
+absente. Aucun chiffre ne l'avait signalé ; l'image, en une seconde. C'est ce qui a produit D2
+d'ADR-177 — nommer le facteur d'échelle pour ce qu'il est.
+
+**Partiel et non-fait.** Écume, diffusion aux crêtes et spectre ECKV : **décidés en ordre, aucun
+construit**. Ciel physique et exposition non mesurés (A299). Le PDF de Bruneton et le talk Sea of
+Thieves n'ont été lus qu'en résumé ou par leur implémentation. Et la limite la plus dure du
+dispositif est nommée dans R14 : **le dépôt n'a aucune photographie de référence** dont on
+connaisse vent, exposition et focale.
+
+**Rituel.** Maillons **0** : capacité mesurée, consommateur nommé (R14), preuve écrite, et elle
+fait avancer le critère 3 de la porte B — dont les trois verdicts précédents portaient sur des
+images qui ne montraient pas notre rendu. File active relue en entier ; deux lignes ajoutées,
+quatre remplacées. Feuille de route J1-bis, index (preuve + ADR-177), angles morts (**A300**,
+**A301**), leçons (**L349**), REVUE-VISUELLE (verdict, règle de protocole, R14). I-01/I-04/I-13/
+**I-14**/I-15 relus : I-14 était violée par le rendu, elle ne l'est plus pour la couleur.
+Plafonds et navigation à **0**. Copie unique, jeton libre.
+
+*Tenue du plan* : plan à neuf étapes déclaré d'avance, découpage annoncé une fois (le remède de
+protocole passé avant la synthèse parce qu'il devenait urgent). L237 tenu : horloge lue avant
+chaque battement. Une affirmation fausse écrite puis corrigée dans la session — un « artefact
+brun-olive » que la mesure a réfuté (zéro pixel sur 921 600 n'a `R > B`).
