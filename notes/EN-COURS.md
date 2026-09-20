@@ -126,7 +126,7 @@ Critères, écrits avant la mesure :
   ordre B autorisé, A305 maintenu ouvert et parallèle.
 - [x] **P3** — *l'enveloppe survit-elle ?* La question de fond, mesurée avant de construire :
   étalement dispersif d'un train à bande étroite, et ce qu'il impose à la primitive.
-- [ ] **P4** — la primitive : `wave_train.rs`, construction, refusas nommés, essais unitaires.
+- [x] **P4** — la primitive : `wave_train.rs`, construction, refusas nommés, essais unitaires.
 - [ ] **P5** — **essai 1** : une onde progressive unique en eau profonde ; amplitude, direction,
   spectre, phase mesurés séparément.
 - [ ] **P6** — l'extracteur : amplitude, phase et spectre lus sur le signal sortant à la ligne.
@@ -889,3 +889,33 @@ montre qu'une fuite passe C1 et échoue C3.
 **Le cas ouvert échoue C2** (13,67 pour √200 = 14,14) : son résidu est d'un seul signe. Minuscule
 — 5·10⁻⁸ de la dérive physique — mais **systématique**. Suspect nommé, non démontré : la bande ou
 l'éponge, qui n'existent que là. Enregistré en A305.
+
+**P4 — `wave_train.rs`, et ce sont les refus qui portent la conception.**
+
+`WaveTrain<N>` : une somme d'ondes planes bornée en **bande** (`Δk = 1/σ`) et en **secteur**.
+Chaque mode est une solution exacte de la houle linéaire en eau profonde, donc **direction,
+spectre et phase ne sont pas approchés, ils sont portés** ; ce qui est approché est
+l'échantillonnage, et il a son refus.
+
+Onze essais, un par propriété, aucune déduite d'une autre :
+
+- l'amplitude demandée **est** la crête à la naissance (10⁻⁷) ;
+- le **volume net est nul** à 10⁻⁵ de l'absolu — W ne porte pas de moyenne (ADR-182 D9) ;
+- le champ est invariant **au bit** en travers quand le secteur est nul, et son énergie part
+  **dix fois** plus vers l'avant que vers l'arrière ;
+- un quart de tour de phase échange **exactement** crête et zéro — la propriété qu'aucun champ
+  d'impact ne peut offrir ;
+- la vitesse de groupe mesurée sur le centre d'énergie tombe à **1 %** de `½√(g/k)` ;
+- la **borne de pente est atteinte** (rapport 0,9 à 1,0), contrairement aux champs d'impact qui
+  majorent d'un facteur constant : pas de constante de conversion à calibrer.
+
+**Trois refus que la dispersion impose**, et qui n'existent dans aucune autre production de W :
+`Horizon` (au-delà de l'élargissement admis), `Radius` (le disque ne contient plus le paquet),
+`Resolution` (la réplique du spectre discret entre dans le disque). Le dernier a rendu un service
+immédiat : **ouvrir le secteur coûte des modes de bande**, et à `N` = 64 un secteur de 5 directions
+est refusé — il faut `N` = 256. Le compromis n'est pas commenté, il est **appliqué**.
+
+Deux erreurs de ma part, corrigées : une condition de réplique posée comme un facteur arbitraire
+(4 × rayon) au lieu de la vraie — « la réplique reste hors du disque à l'âge où elle s'en approche
+le plus » ; et un essai de direction qui comparait `η` en deux points, donc mesurait la **phase de
+la porteuse** et non la position du paquet. Corrigé en comparant l'**énergie** de deux fenêtres.
