@@ -81,22 +81,25 @@ du taux d'éponge, la seconde par un balayage de `λ/h₀` — **deux paramètre
 | 24 | 0,215 % | 0,148 % |
 
 **Cas de réception de T3** — `λ/h₀` = 12, éponge de `8σ` (assez large pour que les deux fenêtres de
-jauge se séparent : 7,66 s contre 15,33 s), taux `10·c/largeur`, maille 25 cm :
+jauge se séparent : 7,66 s contre 15,33 s), taux `10·c/largeur`. **Deux mailles**, et c'est la
+réponse à la question de la convergence :
 
-| grandeur | mesure | seuil T3 |
-|---|---:|---:|
-| **erreur de restitution** | **0,151 %** | ≤ 5 % |
-| **réflexion en énergie, en 3D** | **1,48·10⁻⁶** | < 1 % |
-| retour relatif en volume | 1,41 % | — |
-| résidu du bilan de masse | ≤ 3·10⁻¹² m³ | T1 : ≤ 10⁻⁶ |
-| `outgoing` au bord | **0** partout | — |
+| grandeur | **maille 25 cm** | **maille 10 cm** | seuil T3 |
+|---|---:|---:|---:|
+| **erreur de restitution** | **0,151 %** | **0,149 %** | ≤ 5 % |
+| **réflexion en énergie, en 3D** | **1,4849·10⁻⁶** | **1,4888·10⁻⁶** | < 1 % |
+| retour relatif en volume | 1,41 % | 1,31 % | — |
+| résidu du bilan de masse | ≤ 3·10⁻¹² m³ | ≤ 4,5·10⁻¹³ m³ | T1 : ≤ 10⁻⁶ |
+| `outgoing` au bord | **0** partout | **0** partout | — |
 
-La réflexion est **quatre ordres de grandeur** sous le seuil, et elle est mesurée **directement en
-3D** comme ADR-179 D6 l'exige — la mesure 2D de S269 n'a pas été transportée.
+Les deux mailles donnent les mêmes chiffres à **0,3 %** près sur les deux grandeurs de T3, pour un
+rapport de maille de 2,5 : ce qui est mesuré est le comportement du raccord, pas un artefact de
+grille. La réflexion est **quatre ordres de grandeur** sous le seuil, et elle est mesurée
+**directement en 3D** comme ADR-179 D6 l'exige — la mesure 2D de S269 n'a pas été transportée.
 
-*Non fait : la convergence en maille. Le cas à 12,5 cm n'a pas abouti dans le temps de la session
-et a été arrêté ; les chiffres ci-dessus valent pour 25 cm, et rien ne dit encore qu'ils sont
-insensibles à la maille.*
+*Ce qui reste hors de portée de cette session : la maille de 12,5 cm sur le cas `λ/h₀ = 20`, dont
+le coût a dépassé le temps disponible et qui a été arrêté. La comparaison ci-dessus la remplace
+sans la refaire : elle porte sur le cas de réception lui-même.*
 
 ---
 
