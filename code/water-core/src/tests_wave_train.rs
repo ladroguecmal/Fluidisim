@@ -350,3 +350,37 @@ fn an_oblique_direction_is_carried_in_both_components() {
         );
     }
 }
+
+/// **La direction lue à la frontière est portée par le train** — dernier maillon de l'essai 3.
+///
+/// Les triplets viennent du banc oblique de S315 (`examples/transfert_oriente.rs -- oblique`,
+/// maille 25 cm) : ce sont les `(k_x, k_y)` **mesurés** à la surface de contrôle, jamais les
+/// posés. Le banc lui-même n'avait pas pu construire son train au premier passage — son enveloppe
+/// valait une longueur d'onde *posée* pour une longueur d'onde *lue* plus grande, et le contrat a
+/// refusé (`Envelope`). L'essai ferme donc la chaîne ici, sur les mêmes nombres.
+#[test]
+fn the_direction_read_at_the_boundary_is_carried_s315() {
+    let m = milieu(8.);
+    // `(angle posé en degrés, k_x lu, k_y lu)`.
+    for (pose, kx, ky) in [(0.0f64, 2.9407f64, 0.0f64), (20., 2.7224, 1.1318), (40., 2.0917, 2.0994)]
+    {
+        let k = (kx * kx + ky * ky).sqrt();
+        let lambda = core::f64::consts::TAU / k;
+        let mut s = spec();
+        s.direction = [(kx / k) as f32, (ky / k) as f32];
+        s.wavelength_m = lambda as f32;
+        s.envelope_m = 1.5 * lambda as f32;
+        s.radius_m = 40.;
+        let t = WaveTrain::<64>::new(s, m)
+            .unwrap_or_else(|e| panic!("angle {pose} : {e:?}"));
+        let d = t.direction_check();
+        let lu = (ky.atan2(kx)) * 360. / core::f64::consts::TAU;
+        let porte = (d[1] as f64).atan2(d[0] as f64) * 360. / core::f64::consts::TAU;
+        // Le train porte la direction **lue**, à l'arrondi `f32` près — et non la posée, dont il
+        // s'écarte de 2,6° à 20° et de 5,1° à 40° par la dispersion de δ.
+        assert!(
+            (porte - lu).abs() < 0.05,
+            "angle posé {pose} : lu {lu:.3}°, porté {porte:.3}°"
+        );
+    }
+}

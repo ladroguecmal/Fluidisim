@@ -125,14 +125,14 @@ Critères, écrits avant la mesure :
 - [x] **P3** — *l'oracle est-il comparable ?* L'écart de phase qu'impose la dispersion de δ sur
   dix longueurs d'onde, **calculé avant** de mesurer quoi que ce soit.
 - [x] **P4** — le montage à **deux lignes de contrôle**, et la phase mesurée à 10 λ.
-- [ ] **P5** — le cas **oblique** : domaine large en `y`, éponges sur les quatre bords, paquet
+- [x] **P5** — le cas **oblique** : domaine large en `y`, éponges sur les quatre bords, paquet
   incliné.
-- [ ] **P6** — l'extraction de la **direction** à la surface de contrôle : `k_y` par le gradient
+- [x] **P6** — l'extraction de la **direction** à la surface de contrôle : `k_y` par le gradient
   de phase transverse, et non par une hypothèse.
-- [ ] **P7** — essai 3 a et b : direction transmise, composante tangentielle, et recherche d'une
+- [x] **P7** — essai 3 a et b : direction transmise, composante tangentielle, et recherche d'une
   composante **transverse artificielle**.
-- [ ] **P8** — essai 3 c : **balayage de l'angle d'incidence**.
-- [ ] **P9** — preuve publiée : les six propriétés, chacune attribuée à la primitive, au raccord
+- [x] **P8** — essai 3 c : **balayage de l'angle d'incidence**.
+- [x] **P9** — preuve publiée : les six propriétés, chacune attribuée à la primitive, au raccord
   ou à δ.
 - [ ] **P10** — rituel REPRISE §6.
 
@@ -1076,3 +1076,32 @@ pour superposer les deux signaux. ADR-183 D3 l'interdit, et cela n'aurait mesur�
 la condition initiale ; le terme d'espace **exactement** sur la prédiction de P3 (−0,1655 contre
 −0,165) ; et deux propriétés de δ que personne n'avait chiffrées sur ce trajet — **6,3 % de
 dissipation** sur dix longueurs d'onde, et une vitesse de groupe **7,5 % sous** celle du train.
+
+**P5+P6+P7+P8+P9 — fusion déclarée.** Le montage oblique, l'extraction de direction et les trois
+mesures sont un seul banc ; les séparer aurait donné quatre commits dont trois sans résultat.
+
+**L'essai 3 — et le résultat le plus net n'est pas celui que j'attendais.**
+
+| `θ` posé | `θ` lu | écart | `k_y` lu / posé | **miroir transverse** |
+|---:|---:|---:|---:|---:|
+| 0° | **0,00°** | **0,000°** | — | *(sans objet)* |
+| 20° | 22,57° | 2,57° | +5,3 % | **1,28·10⁻⁶** |
+| 40° | 45,10° | 5,11° | +4,0 % | **2,09·10⁻⁷** |
+
+**Le raccord ne crée aucune composante transverse artificielle** — le miroir `−k_y` vaut 10⁻⁶ à
+10⁻⁷ de la composante utile. C'est le troisième point de la décision, et il est tenu net.
+
+**La direction est lue, pas supposée** : à 0° la lecture rend exactement zéro. Et l'écart aux deux
+autres angles **s'attribue** : `k` vient de `ω²/g` avec `ω` lue à −3,3 % (dispersion de δ à huit
+mailles par longueur d'onde, la même qui converge en S314 §7), et `k_y` mesuré rend +4 à 5 % (la
+largeur spectrale d'un paquet de deux longueurs d'onde). Les deux s'additionnent dans le même sens
+puisque `θ = asin(k_y/k)`. **Prévu, pas mesuré** : que l'écart suive la même convergence — le cas
+oblique à 12,5 cm coûte huit fois celui-ci.
+
+**Le contrat a encore attrapé quelque chose.** Le banc n'a **pas pu construire** son train :
+`Error::Envelope`, parce que son enveloppe valait une longueur d'onde **posée** (2,00 m) pour une
+longueur d'onde **lue** de 2,14 m. La dispersion de δ allonge l'onde, et le paquet cesse d'être
+plus large qu'une longueur d'onde. La chaîne est fermée par un essai unitaire bâti sur les
+`(k_x, k_y)` **mesurés** : la direction portée est la direction lue à **0,05°** près aux trois
+angles. Le banc est corrigé pour dimensionner son enveloppe sur la longueur d'onde **lue** ; la
+correction n'a pas été rejouée sur δ.

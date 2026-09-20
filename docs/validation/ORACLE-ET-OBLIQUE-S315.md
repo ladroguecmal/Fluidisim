@@ -126,3 +126,101 @@ extrémités — un déroulement de phase le long du trajet, que ce banc ne fait
 rattraper la phase par un décalage temporel. Ajuster le train de 1,66 s aurait rendu les deux
 signaux superposables et aurait mesuré **exactement rien**. Le banc n'offre pas ce réglage, et le
 résultat reste ce qu'il est : indéterminé, et dit comme tel.
+
+---
+
+## 6. L'oblique à la frontière — essai 3
+
+`examples/transfert_oriente.rs -- oblique`. Un paquet part à l'angle `θ` du domaine et traverse une
+ligne normale à `x`. **Rien dans l'extraction ne connaît `θ`** : la direction se mesure, par
+périodogramme à **deux dimensions** sur `η(y, t)` le long de la ligne. Le signe de `k_y` vient du
+couplage espace-temps — une onde qui monte et une onde qui descend ont le même spectre spatial, et
+seule leur marche dans le temps les sépare. Éponges sur les **quatre** bords : un paquet oblique
+sort par deux côtés.
+
+Maille 25 cm, `λ` = 2 m, trois angles :
+
+| `θ` posé | `θ` **lu** | écart | `k_y` posé | `k_y` **lu** | écart | **miroir transverse** |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0° | **0,00°** | **0,000°** | 0,0000 | 0,0000 | — | *(sans objet)* |
+| 20° | 22,57° | 2,57° | 1,0745 | 1,1318 | 5,3 % | **1,28·10⁻⁶** |
+| 40° | 45,10° | 5,11° | 2,0194 | 2,0994 | 4,0 % | **2,09·10⁻⁷** |
+
+### 6.1 Aucune composante transverse artificielle — c'est le résultat le plus net
+
+Le **miroir** est l'énergie de la direction `−k_y`, celle qu'un raccord fabriquerait s'il créait une
+composante parasite. Elle vaut **10⁻⁶ à 10⁻⁷** de la composante utile. À 0°, le miroir se confond
+avec la composante elle-même et la mesure est sans objet — dit plutôt que masqué par un chiffre.
+
+**Le raccord ne crée pas de direction qui n'existait pas.** C'est le troisième point de la
+décision, et il est tenu.
+
+### 6.2 La direction est lue, et l'écart est attribuable
+
+À 0°, la lecture rend **exactement** zéro : le montage ne fabrique pas d'angle. Aux deux autres, la
+direction lue dépasse la posée de 2,6° et 5,1°, et **l'écart s'attribue** :
+
+- `k_y` est mesuré **directement** et rend +4 à 5 % — la largeur spectrale d'un paquet de deux
+  longueurs d'onde suffit à l'expliquer ;
+- `k` vient de `ω²/g`, et `ω` **lue** vaut 5,37 pour 5,55 posée : c'est la **dispersion numérique
+  de δ à huit mailles par longueur d'onde**, la même que S314 a mesurée et vue disparaître au
+  raffinement (§7 de la preuve de S314 : 4,36 % → 0,83 % → 0,036 %).
+
+Comme `θ = asin(k_y/k)`, un `k` trop petit et un `k_y` trop grand s'additionnent dans le même sens.
+**L'écart d'angle n'est donc pas un défaut du raccord** ; il hérite de la maille, et il devrait
+suivre la même convergence. *Cela n'a pas été vérifié* : le cas oblique à 12,5 cm coûte huit fois
+celui-ci, et n'a pas été exécuté.
+
+### 6.3 Le contrat a refusé le train, et il avait raison
+
+Au premier passage, le banc n'a **pas pu construire** son train : `Error::Envelope`. Son enveloppe
+valait une longueur d'onde **posée**, 2,00 m, pour une longueur d'onde **lue** de 2,14 m — la
+dispersion de δ allonge l'onde, et le paquet cesse d'être plus large qu'une longueur d'onde. **Le
+contrat s'en est aperçu avant nous.**
+
+La chaîne est fermée par l'essai `the_direction_read_at_the_boundary_is_carried_s315`, qui
+construit le train sur les `(k_x, k_y)` **mesurés** ci-dessus et vérifie que la direction portée
+est la direction **lue**, à 0,05° près, aux trois angles. Le banc a été corrigé pour dimensionner
+son enveloppe sur la longueur d'onde lue ; la correction n'a pas été rejouée sur δ.
+
+### 6.4 Ce que l'essai 3 ne couvre pas
+
+- La **composante tangentielle** est vérifiée comme *lue conforme* (`k_y` à 4–5 %), pas comme
+  *conservée à travers une interface* : le montage n'a qu'un milieu, donc rien ne peut réfracter.
+  La conservation de `k_y` à une **discontinuité** reste à éprouver.
+- Trois angles, une seule maille. La convergence de l'écart d'angle avec la maille est **prévue par
+  l'attribution de §6.2 et non mesurée**.
+- Aucune réflexion n'est mesurée dans ce montage oblique : la jauge de S311 suppose un aller-retour
+  normal à la ligne.
+
+---
+
+## 7. Où en est le transfert, propriété par propriété
+
+ADR-183 D5 demande d'**attribuer** chaque écart. Voici l'état à la fin de S315 — c'est l'entrée de
+l'ordre C, pas sa conclusion.
+
+| propriété | mesure | **à qui l'écart revient** |
+|---|---:|---|
+| **amplitude** | 1,7 % *(S314)* ; 6,3 % à 10 λ | raccord ; puis **dissipation de δ** |
+| **direction** | part avant **1,00000** ; angle lu à 2,6° et 5,1° | primitive : exacte ; angle : **maille de δ** (§6.2) |
+| **composante transverse parasite** | **10⁻⁶ à 10⁻⁷** | **aucun** — le raccord n'en crée pas |
+| **spectre** | 3,5 % à 6,25 cm *(S314)* | **maille de δ**, convergent |
+| **vitesse de groupe** | 0,035 % à 6,25 cm *(S314)* ; 7,5 % à 25 cm | **maille de δ**, convergent |
+| **phase, à l'émission** | régression 0,9938 *(S314)* | raccord : tenue |
+| **phase, à dix longueurs d'onde** | **indéterminée** | **instrument** — A307 |
+| **volume net** | **100 % en attente** | architecture — receveur B/V non construit |
+| **réflexion** | 2,84·10⁻⁷ *(S314)* | éponge de δ |
+
+**Le transfert reste partiel** (ADR-183 D6), et deux lignes disent pourquoi : la phase à distance
+n'est pas mesurable par ce montage, et le volume net n'a toujours pas de receveur.
+
+## 8. Limites
+
+Référence CPU, une machine (A98). L'oblique n'a qu'une **maille** (25 cm, huit points par longueur
+d'onde) et **trois angles** ; la convergence de l'écart d'angle est attribuée, non mesurée. Le
+montage oblique n'a **qu'un milieu** : rien n'y réfracte, donc la conservation de la composante
+tangentielle à une **discontinuité** n'est pas éprouvée. Aucune **réflexion** n'est mesurée en
+oblique. L'oracle de phase suppose une **enveloppe gaussienne** et une **porteuse unique** des deux
+côtés. Le train est émis **une fois** : ni cadence, ni recouvrement. Et rien ici ne reboucle W dans
+δ — le couplage reste à un sens (A302).

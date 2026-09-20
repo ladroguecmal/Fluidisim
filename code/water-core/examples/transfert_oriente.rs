@@ -900,7 +900,12 @@ fn oblique(dx: f32, lambda: f32, angle_tours: f32) -> Result<(), String> {
         ],
         wavelength_m: (core::f64::consts::TAU / k_lu) as f32,
         amplitude_m: a,
-        envelope_m: sigma,
+        // **Une enveloppe et demie de la longueur d'onde *lue*, pas de la posée.** Au premier
+        // passage l'enveloppe valait `σ` = 1 λ posée, soit 2,00 m, pour une longueur d'onde lue de
+        // 2,14 m : le constructeur a refusé (`Envelope`), et il avait raison — un paquet plus
+        // court qu'une longueur d'onde n'a pas de porteuse. La dispersion de δ allonge l'onde, et
+        // le contrat s'en aperçoit avant nous.
+        envelope_m: 1.5 * (core::f64::consts::TAU / k_lu) as f32,
         spread_turns: 0.,
         directions: 1,
         phase: PhaseQ32(0),
