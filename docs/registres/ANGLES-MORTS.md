@@ -3909,3 +3909,24 @@ prévisibilité (A297). Diagnostics D3 relus en différé, dégradation déclar�
 la revue (critère 3), et la porte C sur cette scène. Pic d'amorçage observé à 8,4 ms au premier
 pas d'un domaine de 131 072 mailles (famille A294), non attribué.
 [Preuve](../validation/DELTA3D-PAS-GPU-S301.md).
+
+**A298 — S305, 2026-09-20 (sévérité 1, ouverte).** **L'écart entre le pas de production et la
+référence croît avec le temps, à pente mesurée.** Sur le cas de cuve — fond nul, murs, régime
+linéaire, aucun déclenchement d'A297 — l'écart de hauteur passe de 2,5·10⁻⁷ à 7,8·10⁻⁷ m entre
+t = 0,5 s et t = 5 s, soit **≈ 1,2·10⁻⁷ m par seconde**, à peu près linéairement. Dans le même
+temps la moyenne de la surface dérive de 4 à 6·10⁻⁸ m sur la carte contre 1·10⁻¹⁰ m sur le cœur,
+un facteur **400**. Ce n'est pas la divergence chaotique d'A297 : ce cas y échappe par
+construction, les deux solveurs s'amortissent ensemble et aucune divergence de phase n'apparaît
+sur 2,33 périodes. C'est un biais lent, probablement dans la somme compensée de la carte
+(`exact_difference`, S301, L346) qui n'égale pas celle du cœur — **non démontré**. Conséquence :
+un critère d'écart ponctuel se lit avec sa durée, y compris hors d'A297 ; les 3 mm d'ADR-175 §4.2
+seraient franchis vers sept heures de temps simulé. Déclencheur : premier domaine δ appelé à vivre
+plus de quelques minutes, ou premier lot de précision sur la production.
+[Preuve](../validation/CUVE-GPU-S305.md) §6 et §7.
+
+*S305, 2026-09-20 — suivi A295, ouverte.* Le critère 2 de la porte B est désormais mesuré sur
+**deux** familles de cas et non une : le cas S298 (fond spectral, éponge) et les cas de cuve
+(fond nul, murs). Le mode sans fond du pas de production est une donnée, pas une branche, et le
+chaînon `step_perturbation_mobile` / `step_surface_mobile` est identique **au bit** à fond nul.
+Restent non mesurés pour la production les cas 1 et 2 de §4.1 (HOS à `ny` = 1, invariance en `y`),
+et le régime de forte cambrure. [Preuve](../validation/CUVE-GPU-S305.md).

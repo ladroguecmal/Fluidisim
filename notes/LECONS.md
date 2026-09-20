@@ -5969,3 +5969,22 @@ n'offre pas `precise`), **elle est à réécrire hors du flottant ou à vérifie
 vérifier sur le résultat principal ne prouve rien. Récurrence de
 [L345](#l345--porter-la-même-formule-ne-porte-pas-les-mêmes-bits--le-compilateur-est-dans-la-boucle)
 par un autre mécanisme : là un ulp de différence, ici un terme entier supprimé.
+
+## L347 — Un cas éprouvé sous la tolérance de son propre critère ne prouve rien
+
+*(S305)* Le critère 2 d'ADR-175 §4.2 demande un écart de hauteur **sous 3 mm**. La référence du
+cas de cuve, reçue en S296, travaillait à une amplitude de **1 mm**. Toute production, y compris
+une production entièrement fausse qui rendrait une surface plate, aurait passé ce critère : un
+écart borné par l'amplitude ne peut pas dépasser une tolérance trois fois plus grande qu'elle.
+
+Le remède est d'un mot et coûte une ligne : **choisir l'amplitude du cas pour que le seuil du
+critère ait un sens**. Ici 5 cm — soit quinze fois la tolérance — en vérifiant que le régime
+visé tient encore (`a·k` = 0,044, linéaire). L'écart mesuré vaut alors 3·10⁻⁷ m, et les quatre
+ordres de grandeur de marge **sont une information** ; à 1 mm ils n'en auraient été aucune.
+
+**Réflexe, avant de lancer un banc de réception** : comparer l'échelle du cas à la tolérance du
+critère. Si le signal est du même ordre que le seuil, ou plus petit, le banc ne peut pas échouer,
+et un banc qui ne peut pas échouer n'est pas une réception. Cela vaut pour toute tolérance
+**absolue** — millimètres, Pa, m/s — posée indépendamment du cas qui l'éprouvera : la tolérance
+vient de l'usage, l'amplitude vient du cas, et personne ne les confronte tant qu'on ne le fait
+pas exprès.

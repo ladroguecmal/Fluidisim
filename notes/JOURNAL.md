@@ -15273,3 +15273,70 @@ navigation à 0. Copie unique, jeton libre.
 *Tenue du plan* : P2 à P5 fusionnés en un commit — la construction et sa réception forment une
 seule thèse, et les quatre étapes ont tenu dans l'heure. Le battement a encore été écrit avant la
 lecture de l'horloge (L237) : geste corrigé dans la minute, règle à appliquer dans l'ordre.
+
+## S305 — 2026-09-20 — la production dans une cuve, et le seul critère de porte qui n'avait rien
+
+**Entrée.** « Reprends le projet ». Jeton libre, copie unique, `master` propre ; plan committé
+avant tout code. Le verdict R12 n'étant pas là, le lot a été pris dans la **porte en cours**
+(REPRISE §6.7) : le critère **2** d'[ADR-175](../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)
+§4, seul des quatre dont **rien** n'était mesuré sur les cas de cuve de §4.1. Les images de R12
+ont été renvoyées à l'utilisateur en parallèle ; le lot ne les attendait pas.
+
+**Capacité reçue.** Le pas de production GPU **suit la référence 3D dans une cuve** — fond nul,
+murs, mode oblique (1, 1) — à **3·10⁻⁷ m** pour les **3 mm** exigés, aux trois raffinements et
+sur la seconde entière déclarée, avec une erreur de phase qui **décroît** 1,223° → 0,248° →
+0,0652°. **Ce qui devient possible** : le critère 2 de la porte B repose désormais sur **deux**
+familles de cas au lieu d'une, et il ne manque plus à cette porte que le **critère 3** — le
+verdict de l'utilisateur sur la mer. **Consommateur** : la porte B elle-même, et la géométrie
+« bassin sans B » dont la porte D aura besoin. **Preuve** :
+[CUVE-GPU-S305](../docs/validation/CUVE-GPU-S305.md).
+
+**Construit — rien dans le solveur.** Quatre bancs dans `viewer/src/delta3d_step.rs`
+(`--delta3d-cuve`, `-chainon`, `-trajectoire`, `-longue`). Aucun nuanceur touché : le **mode sans
+fond** passe par la **donnée** — un fond à une composante d'amplitude nulle — et non par une
+branche ni une seconde source (L137). `Step3::on_device` refuse zéro composante, jamais une
+composante nulle ; le noyau du fond étant linéaire en amplitude, il rend exactement zéro.
+**Vérifié** : 754 624 valeurs sur 29 024 faces, **aucune non nulle**.
+
+**Le résultat qui porte les autres.** À fond nul, `step_perturbation_mobile` — le schéma que la
+carte reproduit — est **identique au bit** à `step_surface_mobile`, la référence reçue en
+S295/S296 : écart 0 sur 1 000 pas, aux deux résolutions. Sans cette identité, un écart
+carte/référence se serait partagé entre la carte et le schéma couplé ; avec elle, il est
+attribuable à la **carte seule**. C'était l'objet du quatrième critère écrit avant la mesure.
+
+**Deux choses dites parce qu'elles sont mesurées, non parce qu'elles arrangent.**
+1. **L'écart n'est pas borné.** Sur 5 s (2,33 périodes) il croît de 2,5 à 7,8·10⁻⁷ m, ≈ 1,2·10⁻⁷ m
+   par seconde, à peu près linéairement — les 3 mm seraient franchis vers **sept heures** de temps
+   simulé. La phrase juste est « il croît lentement », pas « il est borné ». Nouvel angle mort
+   **A298**, sévérité 1 ; suspect nommé (la somme compensée de la carte, L346), **non démontré**.
+2. **L'amplitude du cas avait été mal choisie en amont.** La référence de S296 travaillait à
+   `A` = 1 mm, sous une tolérance de 3 mm : un banc qu'une production entièrement fausse aurait
+   passé. Le cas a été repris à 5 cm — quinze fois la tolérance, `a·k` = 0,044, régime linéaire
+   préservé. Leçon **L347**.
+
+**Pourquoi la durée est entière ici.** La surface reste dans 4 ± 5 cm et **aucun centre de maille**
+ne s'y trouve aux trois raffinements : la bascule de mouillure d'A297 n'est jamais déclenchée.
+C'est une propriété du **cas**, pas une correction du schéma — **A297 reste entière**, et le
+constat est porté dans sa ligne de file. Autre observation : la projection est **déjà convergée à
+64 cycles** sur ce cas, là où le cas S298 en demandait 128 — une cuve à fond plat est mieux
+conditionnée qu'une mer résolue.
+
+**Partiel et non-fait.** Seul le cas **3** de §4.1 est éprouvé côté production ; les cas 1 et 2
+(HOS à `ny` = 1, invariance en `y`) restent reçus pour la seule référence. Régime linéaire
+uniquement. Dérive de la moyenne de la carte 400 fois celle du cœur, non poursuivie. Aucun coût
+mesuré — il relève de la porte C et de la scène, pas d'une cuve. Rien de visuel : le critère 3
+reste suspendu au verdict R12. Les bancs allouent par pas (I-06 se lit sur la boucle d'image,
+qu'ils ne touchent pas).
+
+**Rituel.** Maillons **0** : capacité reçue, consommateur nommé, preuve écrite, et un critère
+« reçu si » de la porte en cours qui avance. Suite de tests du cœur rejouée, 0 échec. File active
+relue en entier ; cinq lignes remplacées et une ajoutée (A298), feuille de route §3 bis et §2 (B),
+index, angles morts, leçons. I-04, I-06, I-13, I-15 et I-17 relus : inchangés, aucun nuanceur ni
+chemin d'image touché. Plafonds et navigation à **0**. Copie unique, jeton libre.
+
+*Tenue du plan* : découpage déclaré en cours de route (P5 devenu la durée longue, preuve en P6,
+rituel en P7) — l'objection « borné ou séculaire ? » n'était pas prévue au plan et méritait sa
+mesure. L237 tenu cette fois : l'horloge lue dans un appel séparé **avant** chaque écriture de
+battement, cinq fois sur cinq. Une affirmation fausse écrite puis corrigée avant commit :
+« secteur aux deux bornes » dans la preuve, alors que rien n'avait été relevé ; l'alimentation
+l'est maintenant, et le document dit pourquoi A270 ne s'applique pas à ce lot.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S305 — en cours : critère 2 de la porte B sur les cas de cuve.
+Session : S305 — terminée : critère 2 de la porte B mesuré sur les cas de cuve.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle.
 Entrée : « Reprends le projet », 2026-09-20, jeton libre, copie unique, master propre.
 
@@ -99,7 +99,7 @@ Critères, écrits avant la mesure (ADR-175 §4.1 cas 3 et §4.2) :
 - [x] **P5** — *(découpage déclaré)* durée longue : 5 s au raffinement moyen, pour dire si
   l'écart est borné ou séculaire — la seule objection que 1 s laisse ouverte.
 - [x] **P6** — preuve `CUVE-GPU-S305`, réception écrite des quatre critères.
-- [ ] **P7** — rituel REPRISE §6.
+- [x] **P7** — rituel REPRISE §6.
 
 ### Notes de reprise
 

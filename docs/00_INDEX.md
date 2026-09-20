@@ -96,6 +96,7 @@
 - [La scène du critère 3 : une onde qui traverse une mer étalée — S302](validation/SCENE-DELTA3D-S302.md) : δ 3D rendu en direct depuis sa surface publiée, front injecté à 65 cm, à-coups et grain mesurés, revue R11 demandée.
 - [Anatomie d'une surface de mer, et ce qui manque à la nôtre — S303](validation/ANATOMIE-SURFACE-S303.md) : recherche sourcée sur les asymétries d'une mer réelle, mesure de la nôtre, et les deux modèles qui y répondent.
 - [Les asymétries de la surface rendue, construites — S304](validation/ASYMETRIES-S304.md) : second ordre en bande étroite et modulation retardée, cinq critères d'ADR-176 tenus, +0,25 % de coût, images de R12.
+- [La production contre la référence dans une cuve — S305](validation/CUVE-GPU-S305.md) : le critère 2 de la porte B sur les cas de §4.1, mode sans fond du pas de production, chaînon CPU identique au bit, 3·10⁻⁷ m pour 3 mm exigés, phase décroissante, et l'écart séculaire chiffré.
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
