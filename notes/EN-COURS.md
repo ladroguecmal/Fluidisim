@@ -110,8 +110,8 @@ Critères, écrits avant la mesure :
   confrontée à l'état réel** : ce qui existe pour A, B et C, les six interfaces manquantes, le banc
   de la piscine essai par essai, et l'ordre de réalisation.
   [TROIS-SYSTEMES-S308](../docs/registres/TROIS-SYSTEMES-S308.md).
-- [ ] **P9** — l'ADR : la stratégie en trois systèmes est une **décision de l'utilisateur** qui
-  change l'ordre des travaux. Elle ne se range pas dans un registre, elle s'acte.
+- [x] **P9** — [ADR-178](../docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md) : la
+  stratégie est actée, ses sept décisions écrites, ce qu'elle ne tranche pas nommé.
 - [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
