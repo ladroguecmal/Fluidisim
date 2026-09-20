@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 18:33 +02:00
+Battement        : 2026-09-20 18:40 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S314 — **ordre B** : une primitive de W qui garde la **direction**, le **spectre** et la **phase** de ce qui sort d'un domaine δ, et les cinq essais qui la jugent
 Dernière session : S313 — **ordre A rendu** : la loi du résidu est `u₃₂·activité/√N`, l'instrument voit une fuite de bilan à 10⁻¹³ m³/pas et **ne voit pas** une fuite d'état (T1 et T2 non redondantes), **T2 est tenue sur 10 s**, trois seuils proposés ([preuve](docs/validation/PLANCHER-BILAN-S313.md), [ADR-181](docs/adr/ADR-181-conservation-transfert-oriente-et-ordre-du-lot-2.md))

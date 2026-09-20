@@ -122,9 +122,9 @@ Critères, écrits avant la mesure :
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [>] **P2** — ADR-182 : la décision du 2026-09-20 (S313), actée — critères sous conditions,
+- [x] **P2** — ADR-182 : la décision du 2026-09-20 (S313), actée — critères sous conditions,
   ordre B autorisé, A305 maintenu ouvert et parallèle.
-- [ ] **P3** — *l'enveloppe survit-elle ?* La question de fond, mesurée avant de construire :
+- [x] **P3** — *l'enveloppe survit-elle ?* La question de fond, mesurée avant de construire :
   étalement dispersif d'un train à bande étroite, et ce qu'il impose à la primitive.
 - [ ] **P4** — la primitive : `wave_train.rs`, construction, refusas nommés, essais unitaires.
 - [ ] **P5** — **essai 1** : une onde progressive unique en eau profonde ; amplitude, direction,
@@ -139,7 +139,26 @@ Critères, écrits avant la mesure :
 
 ### Notes de reprise
 
-*(à remplir en cours de session)*
+**P3 — l'enveloppe survit, et c'est ce qui rend la famille admissible.**
+
+La question était : une somme d'ondes planes ne meurt pas, donc peut-elle être une primitive de
+W ? Réponse mesurée sur la seule arithmétique de la dispersion, **avant** d'écrire la primitive.
+
+| `λ₀` = 2 m, `σ₀` = 3 m | élargissement | écart au modèle |
+|---:|---:|---:|
+| 5 s | ×1,0031 | 0,01 % |
+| **10 s** | **×1,0125** | **0,03 %** |
+| 20 s | ×1,0490 | 0,13 % |
+| 40 s | ×1,1839 | 0,40 % |
+
+`τ = σ₀²/|ω''|` vaut **64 s** ici, et croît comme `σ₀²` et comme `k₀^{3/2}` — 90 s à `λ₀` = 4 m,
+128 s à 8 m, 256 s si l'enveloppe double. **Un transfert dure dix secondes ; l'enveloppe tient une
+minute.** Deux contrôles indépendants tombent juste au passage : le centre avance exactement à
+`cg` (0,2 % à 10 s, et l'écart est l'effet de bande, pas une erreur), et le produit
+`crête × σ` reste à 1 — l'énergie ne se perd pas dans l'étalement, elle s'étale.
+
+**Conséquence de conception** : l'horizon et le rayon d'un train **se calculent** au lieu d'être
+choisis. Ce sont les deux refus que la dispersion impose, et aucune autre production de W ne les a.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
