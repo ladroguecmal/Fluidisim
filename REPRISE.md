@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 14:47 +02:00
+Battement        : 2026-09-20 15:02 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S311 — **lot 2 : le retour δ → W**, lancé par l'utilisateur. Cette session fait l'**identification** : d'où sort la perturbation, quel cas contrôlé la porte, ce que W peut recevoir, et la réflexion mesurée en 3D
 Dernière session : S310 — le premier compteur : bilan de masse exact, cuve qui ne perd rien, A302 chiffrée (l'éponge efface 10,2 %/s) ([preuve](docs/validation/BILAN-MASSE-S310.md))

@@ -312,8 +312,13 @@ impl Volume3 {
         Ok(())
     }
 
-    fn transport_coupled3(&mut self, bg: &BackgroundFaces3<'_>, transport: f32) {
+    /// Rend le **flux sortant** que les faces extérieures porteraient, en m³ — S311, lot 2.
+    /// Positif = sortant. Il est calculé **ici**, dans la boucle même qui le jette, pour qu'il ne
+    /// puisse pas diverger de la formule du transport : mêmes mouillures, mêmes vitesses, même
+    /// surface de face.
+    fn transport_coupled3(&mut self, bg: &BackgroundFaces3<'_>, transport: f32) -> f64 {
         let Domain3 { nx, ny, nz, dx } = self.domain;
+        let mut sortant = 0f64;
         self.flux_x.fill(0.);
         self.flux_y.fill(0.);
         self.band_x.fill(0.);
@@ -348,20 +353,30 @@ impl Volume3 {
                     } else {
                         0.5 * (self.surface_total[col(a - 1)] + self.surface_total[col(a)])
                     };
-                    let (mut flux, mut band) = (0f32, 0f32);
+                    let (mut flux, mut band, mut bord) = (0f32, 0f32, 0f32);
                     for k in 0..nz {
-                        if a > 0 && a < n {
-                            let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
-                            let v = if axis == 0 {
-                                self.u[self.fu(a, b, k)]
-                            } else {
-                                self.v[self.fv(b, a, k)]
-                            };
-                            if wet > 0. {
+                        let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
+                        let v = if axis == 0 {
+                            self.u[self.fu(a, b, k)]
+                        } else {
+                            self.v[self.fv(b, a, k)]
+                        };
+                        if wet > 0. {
+                            // La garde d'origine : au bord, le transport ne prend rien. S311 met
+                            // la même quantité de côté au lieu de ne pas la calculer.
+                            if a > 0 && a < n {
                                 flux += v * dx * wet;
+                            } else {
+                                bord += v * dx * wet;
                             }
                         }
                         band += band3(sample(k), axis, k, dx, self.rest, surface);
+                    }
+                    // Face basse : une vitesse positive **entre**. Face haute : elle **sort**.
+                    if a == 0 {
+                        sortant -= bord as f64;
+                    } else if a == n {
+                        sortant += bord as f64;
                     }
                     if axis == 0 {
                         self.flux_x[index] = flux;
@@ -388,6 +403,7 @@ impl Volume3 {
                 self.eta[c] = height;
             }
         }
+        sortant * dx as f64 * dx as f64 * transport as f64
     }
     /// Rend le volume **retiré** (positif) — S310. L'éponge ne range ses incréments nulle part,
     /// et c'est la seule intrusion du bilan dans le pas : aucune opération flottante sur `eta`
@@ -587,7 +603,7 @@ impl Volume3 {
                 return Err(Error::Convergence);
             }
             self.extrapolate_mobile3();
-            self.transport_coupled3(bg, transport);
+            let outgoing = self.transport_coupled3(bg, transport);
             let (band_in, perturbation_in) = self.boundary_transport3(dt);
             let sponge_out = self.relax_coupled3(sponge, dt);
             let volume = self.perturbation_volume();
@@ -602,6 +618,7 @@ impl Volume3 {
                 perturbation_in,
                 sponge_out,
                 residual: delta - band_in - perturbation_in + sponge_out,
+                outgoing,
             };
             for f in [
                 &self.u,

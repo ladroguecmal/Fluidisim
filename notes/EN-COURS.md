@@ -111,8 +111,9 @@ Critères, écrits avant la mesure :
 - [x] **P2** — [ADR-179](../docs/adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md) :
   huit décisions. **D3 sépare trois grandeurs que S310 mesurait ensemble** ; D2 dit que T2 n'est
   **pas** encore tenue — 5 s mesurées pour 10 s demandées.
-- [ ] **P3** — *(la question de fond)* **le flux sortant existe-t-il ?** Mesurer ce que portent les
-  faces extérieures, que le transport jette.
+- [x] **P3** — **réponse : non.** La vitesse normale aux faces extérieures vaut **0 exactement**,
+  quand le champ atteint 0,60 m/s à l'intérieur. Le domaine est une **boîte fermée** ; le transport
+  ne jette rien, il n'y a rien à jeter. **Le flux sortant est à construire, pas à récupérer.**
 - [ ] **P4** — le **cas contrôlé** : canal, onde longue sortante, grandeur de référence non nulle,
   erreur normalisée définie avant la mesure.
 - [ ] **P5** — **ce que W peut recevoir** : inventaire de ses primitives, et ce qu'aucune ne couvre.
@@ -125,7 +126,31 @@ Critères, écrits avant la mesure :
 
 ### Notes de reprise
 
-*(vides au départ)*
+**P3 a renversé la moitié du plan, et il valait mieux le mesurer que le supposer.**
+
+Mesuré sur la scène couplée à fond spectral réel : `vitesse_normale_de_bord_max = 0` **exactement**,
+`vitesse_max_du_champ = 0,605 m/s`. Le flux sortant vaut donc `0` non parce que la garde du
+transport le jette, mais parce qu'**il n'existe pas** : `close_walls` met les faces normales
+extérieures à zéro, et rien dans le pas ne les rouvre — la projection à Neumann préserve ce zéro.
+
+**Conséquence, et elle est structurelle.** Un domaine δ est une **boîte fermée**. L'éponge n'est
+pas une frontière absorbante au sens des ondes : c'est une **région d'amortissement à l'intérieur
+d'une boîte**. Rien ne traverse la frontière ; la perturbation est éteinte avant de l'atteindre.
+« δ ne ressort pas vers W » est donc plus fort que ce que S310 disait : ce n'est pas un chemin
+manquant, c'est une **paroi**.
+
+**Ce que cela change pour le lot 2.** Deux voies, et la seconde est la bonne pour un premier cas :
+1. **ouvrir la frontière** — condition de radiation sur les caractéristiques. Gros lot, et il
+   change le schéma ;
+2. **mesurer la perturbation sortante sur une surface de contrôle intérieure** — la **ligne
+   intérieure de la bande d'éponge**, où l'onde est encore intacte. Cette ligne est une face
+   **intérieure** : `transport_coupled3` calcule déjà son flux, et il n'est pas nul. On lit ce qui
+   la traverse vers l'extérieur, et c'est cela qui part vers W.
+
+La voie 2 ne touche pas au schéma, se mesure avec le compteur existant, et respecte ADR-179 D3 :
+ce qui traverse la ligne **sort**, alors que l'activité de l'éponge mélange trois choses. Elle
+demande en revanche de séparer sortant et entrant sur cette ligne — ce qu'un **cas contrôlé**, où
+rien n'entre, rend trivial. C'est exactement pourquoi l'utilisateur en demande un.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 

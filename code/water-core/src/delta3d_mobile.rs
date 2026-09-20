@@ -711,6 +711,8 @@ impl Volume3 {
                 perturbation_in,
                 sponge_out: 0.,
                 residual: delta - perturbation_in,
+                // Chemin non couplé : les faces extérieures sont des murs, rien n'en sort.
+                outgoing: 0.,
             };
             for field in [
                 &self.u,

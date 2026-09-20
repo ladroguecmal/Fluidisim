@@ -63,6 +63,9 @@ fn main()->Result<(),String> {
         .map(|(e,r)|(((*e-rest)-*r) as f64).abs()).sum::<f64>()*(d.dx as f64)*(d.dx as f64);
     let echelle_initiale=echelle(&pulse);
     let (mut eponge,mut eponge_abs,mut bande,mut residu,mut echelle_min)=(0f64,0f64,0f64,0f64,f64::MAX);
+    // S311, lot 2 : ce que la vitesse de bord emporterait, et que le transport jette (ADR-179 D3).
+    let (mut sortant,mut sortant_abs)=(0f64,0f64);
+    let (mut vitesse_bord,mut vitesse_interieure)=(0f32,0f32);
     for n in 0..=1200 {
         let time=SimTime(n*5000);let t=time.0 as f64*1e-6;
         if n%10==0 {
@@ -90,9 +93,20 @@ fn main()->Result<(),String> {
                 let b=v.balance();
                 eponge+=b.sponge_out;eponge_abs+=b.sponge_out.abs();bande+=b.band_in;
                 residu=residu.max(b.residual.abs());
+                sortant+=b.outgoing;sortant_abs+=b.outgoing.abs();
             }
         }
         echelle_min=echelle_min.min(echelle(&pulse));
+        // S311 P3 : le flux sortant est nul — reste à savoir **pourquoi**. Si la vitesse normale
+        // de bord est elle-même nulle, la sortie n'est pas jetée : elle n'existe pas.
+        {let u=pulse.velocity_u();let v=pulse.velocity_v();
+         for k in 0..d.nz {for j in 0..d.ny {
+             vitesse_bord=vitesse_bord.max(u[k*(d.nx+1)*d.ny+j*(d.nx+1)].abs())
+                 .max(u[k*(d.nx+1)*d.ny+j*(d.nx+1)+d.nx].abs());}
+         for i in 0..d.nx {
+             vitesse_bord=vitesse_bord.max(v[k*d.nx*(d.ny+1)+i].abs())
+                 .max(v[k*d.nx*(d.ny+1)+d.ny*d.nx+i].abs());}}
+         vitesse_interieure=vitesse_interieure.max(u.iter().chain(v).fold(0f32,|m,x|m.max(x.abs())));}
     }
     let echelle_finale=echelle(&pulse);let secondes=6.0;
     println!("BILAN_S310 scene eponge_m3={eponge:e} eponge_absolu_m3={eponge_abs:e} \
@@ -100,6 +114,9 @@ bande_m3={bande:e} residu_max_m3={residu:e} echelle_initiale_m3={echelle_initial
 echelle_finale_m3={echelle_finale:e} echelle_min_m3={echelle_min:e} \
 eponge_absolu_par_seconde_m3={:e} en_parts_de_l_echelle_initiale_par_seconde={:e}",
         eponge_abs/secondes,eponge_abs/secondes/echelle_initiale);
+    println!("SORTANT_S311 vitesse_normale_de_bord_max_m_s={vitesse_bord:e} vitesse_max_du_champ_m_s={vitesse_interieure:e}");
+    println!("SORTANT_S311 net_m3={sortant:e} absolu_m3={sortant_abs:e} absolu_par_seconde_m3={:e} rapport_a_l_eponge={:e} en_parts_de_l_echelle_initiale_par_seconde={:e}",
+        sortant_abs/secondes,sortant_abs/eponge_abs,sortant_abs/secondes/echelle_initiale);
     println!("PREVIEW spectral={spectral} resolu={resolu} nx=32 ny=24 nz={} rest={rest} bottom_speed_max={bottom_speed:e} dt_us=5000 duration=6s frames=121 it_max={imax} refinements={refinements} divergence_plain_max={dmax:e}",d.nz);
     Ok(())
 }

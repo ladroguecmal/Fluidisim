@@ -82,6 +82,18 @@ pub struct Balance3 {
     /// `delta − band_in − perturbation_in + sponge_out`. Nul en arithmétique exacte : **c'est le
     /// plancher numérique du pas**, et il se publie, il ne s'absorbe pas dans une tolérance.
     pub residual: f64,
+    /// **Le flux que la vitesse normale porte aux faces extérieures, et que le transport jette**
+    /// — S311, lot 2. Positif = **sortant**.
+    ///
+    /// Ce n'est pas un terme du bilan : il n'entre pas dans `residual`, précisément parce qu'il
+    /// **n'a pas lieu**. La garde `a > 0 && a < n` de `transport_coupled3` laisse le flux de
+    /// colonne à zéro au bord, donc la hauteur ne bouge pas de son fait. Mais la vitesse, elle,
+    /// est calculée par la prédiction et la projection : ce champ dit ce qu'elle emporterait.
+    ///
+    /// [ADR-179](../../../docs/adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md)
+    /// D3 en fait **la grandeur à restituer** — par opposition à l'activité de l'éponge, qui
+    /// mélange l'onde sortante, l'onde entrante qu'elle amortit aussi, et le rappel vers le repos.
+    pub outgoing: f64,
 }
 
 impl Volume3 {
