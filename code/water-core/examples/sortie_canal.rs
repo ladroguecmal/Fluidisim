@@ -40,7 +40,8 @@
 //! revendication d'énergie ni de quantité de mouvement (D7).
 //!
 //!     cargo run -p water-core --release --example sortie_canal
-//!     cargo run -p water-core --release --example sortie_canal -- 0.05   # maille en m
+//!     cargo run -p water-core --release --example sortie_canal -- 0.25 10 24 8
+//!     # arguments : maille (m), coefficient de taux d'éponge, λ/h₀, largeur d'éponge en σ
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
@@ -77,16 +78,20 @@ struct Canal {
 /// `λ ≫ h₀`. En deçà, la bosse se sépare en une onde progressive et une **traîne dispersive**, qui
 /// traverse la ligne de contrôle **dans les deux sens** — et le cas cesse d'être contrôlé. S311 l'a
 /// découvert en fixant `λ/h₀ = 4` et en voyant un retour de 36 % que l'éponge ne changeait pas.
-fn canal(dx: f32, rapport: f32) -> Canal {
+fn canal(dx: f32, rapport: f32, eponge_sigma: f32) -> Canal {
     let h0 = 1.0f32;
     let sigma = rapport * h0 / 4.;
     // **L'éponge est symétrique** : `width_x` s'applique aux deux bords `x`. Placer la bosse à
     // `3σ` la mettait *dans* l'éponge de gauche, qui en effaçait 14,7 % avant le premier pas —
     // constaté en S311, et c'est pourquoi l'erreur de restitution ne dépendait pas de `λ/h₀`.
     // Elle démarre donc à `4σ` au-delà de la bande, soit `exp(−8) = 3·10⁻⁴` d'amplitude dedans.
-    let eponge = 4. * sigma;
+    // La largeur de l'éponge décide aussi de la **séparation temporelle** entre le signal qui
+    // passe et celui qui revient : le retour arrive `2·largeur/c` après le passage. Une éponge
+    // aussi courte que l'onde fait se chevaucher les deux fenêtres, et la réflexion en énergie
+    // devient immesurable. À `8σ`, elles se séparent — c'est le cas de réception de T3.
+    let eponge = eponge_sigma * sigma;
     let x0 = eponge + 4. * sigma;
-    let longueur = 17. * sigma;
+    let longueur = x0 + 4. * sigma + eponge;
     let domain = Domain3 {
         nx: (longueur / dx) as usize,
         ny: 2,
@@ -102,13 +107,21 @@ fn main() -> Result<(), String> {
         .map(|s| s.parse().map_err(|_| "maille : un nombre en m".to_string()))
         .transpose()?
         .unwrap_or(0.1);
-    // Troisième argument : `λ/h₀`. 20 est le cas de réception ; en deçà l'onde est dispersive.
+    // Troisième argument : `λ/h₀`. **12 est le cas de réception** — le plus petit rapport qui
+    // reste franchement en régime d'onde longue *et* qui se rejoue en deux minutes. Un banc de
+    // réception qu'on ne relance pas n'est pas un banc de réception.
     let rapport: f32 = std::env::args()
         .nth(3)
         .map(|s| s.parse().map_err(|_| "lambda/h0 : un nombre".to_string()))
         .transpose()?
-        .unwrap_or(20.);
-    let Canal { domain, h0, a, sigma, x0, eponge, c } = canal(dx, rapport);
+        .unwrap_or(12.);
+    // Quatrième argument : la largeur de l'éponge en σ. 8 sépare les fenêtres, 4 ne les sépare pas.
+    let eponge_sigma: f32 = std::env::args()
+        .nth(4)
+        .map(|s| s.parse().map_err(|_| "eponge : un nombre de sigma".to_string()))
+        .transpose()?
+        .unwrap_or(8.);
+    let Canal { domain, h0, a, sigma, x0, eponge, c } = canal(dx, rapport, eponge_sigma);
     let (nx, ny, nz) = (domain.nx, domain.ny, domain.nz);
     let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
     let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 28);
@@ -189,6 +202,21 @@ fn main() -> Result<(), String> {
 
     let (mut traverse, mut vers_la_droite, mut vers_la_gauche) = (0f64, 0f64, 0f64);
     let (mut eponge_abs, mut residu, mut sortant_bord) = (0f64, 0f64, 0f64);
+    // **La réflexion, en énergie, mesurée en 3D** (ADR-179 D6). Une jauge sur la ligne de
+    // contrôle enregistre `η − repos`. Le paquet la franchit une fois en allant ; ce qui repasse
+    // ensuite n'a pu venir que de l'éponge ou du mur derrière elle. Les deux fenêtres se
+    // déduisent de la géométrie, pas d'un réglage : passage jusqu'à `t_arrivée + 4σ/c`, retour à
+    // partir de `t_arrivée + 2·largeur/c − 4σ/c`.
+    //
+    // C'est une **jauge**, pas un bilan d'énergie : un rapport de deux intégrales de `η²` sur le
+    // même point. ADR-179 D7 interdit de revendiquer une conservation d'énergie ; ceci n'en
+    // revendique aucune, comme la mesure 2D de S269 n'en revendiquait pas.
+    let jauge_i = ligne;
+    let jauge_j = ny / 2;
+    let t_arrivee = ((ligne as f32 * dx - x0) / c) as f64;
+    let passage = (4. * sigma / c) as f64;
+    let (t1, t2) = (t_arrivee + passage, t_arrivee + 2. * (eponge / c) as f64 - passage);
+    let (mut incident, mut retour) = (0f64, 0f64);
     for n in 0..pas {
         let time = SimTime(n * dt_us);
         let bg = water_core::delta3d::BackgroundFaces3 {
@@ -213,9 +241,22 @@ fn main() -> Result<(), String> {
         eponge_abs += b.sponge_out.abs();
         residu = residu.max(b.residual.abs());
         sortant_bord += b.outgoing.abs();
+        let t = (n + 1) as f64 * dt;
+        let eta = (v.surface()[jauge_j * nx + jauge_i] - h0) as f64;
+        if t <= t1 {
+            incident += eta * eta * dt;
+        } else if t >= t2 {
+            retour += eta * eta * dt;
+        }
     }
 
     let erreur = (traverse - volume_onde).abs() / volume_onde;
+    let reflexion = if incident > 0. { retour / incident } else { f64::NAN };
+    println!(
+        "CANAL_S311 reflexion jauge_x_m={:.2} t_arrivee_s={t_arrivee:.3} fenetre_passage_s={t1:.3}          fenetre_retour_s={t2:.3} fenetres_separees={} incident_m2s={incident:e} retour_m2s={retour:e}          reflexion_en_energie={reflexion:e}",
+        jauge_i as f32 * dx,
+        t2 > t1
+    );
     println!(
         "CANAL_S311 coefficient={coefficient} taux={:e} pas={pas} duree_s={secondes} traverse_m3={traverse:e} \
          vers_la_droite_m3={vers_la_droite:e} vers_la_gauche_m3={vers_la_gauche:e} \
@@ -227,8 +268,16 @@ fn main() -> Result<(), String> {
     );
     // Le seuil de T3 ne s'applique qu'au **cas de réception**, celui du taux retenu ; un balayage
     // explore, il ne se juge pas (ADR-179 D6 : « la réception de ce premier cas »).
-    if coefficient == 10. && rapport == 20. && erreur > 0.05 {
-        return Err(format!("T3 : erreur de restitution {erreur:e} au-dessus de 5 %"));
+    if coefficient == 10. && rapport == 12. && eponge_sigma == 8. {
+        if erreur > 0.05 {
+            return Err(format!("T3 : erreur de restitution {erreur:e} au-dessus de 5 %"));
+        }
+        if !(t2 > t1) {
+            return Err("T3 : fenêtres de jauge non séparées, la réflexion n'est pas mesurable".into());
+        }
+        if !(reflexion < 0.01) {
+            return Err(format!("T3 : réflexion en énergie {reflexion:e} au-dessus de 1 %"));
+        }
     }
     Ok(())
 }

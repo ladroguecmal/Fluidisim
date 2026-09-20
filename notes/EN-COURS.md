@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S311 — lot 2 d'ADR-178 D7 : le retour δ → W, **phase d'identification**.
+Session : S311 — lot 2, phase d'identification. **P1 à P8 faits ; reste le rituel.**
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : la **décision de l'utilisateur du 2026-09-20** sur les tolérances, et le lancement du
 lot 2. T1 acceptée provisoirement, T2 comme objectif à éprouver sur la durée complète, T3 comme
@@ -117,12 +117,15 @@ Critères, écrits avant la mesure :
 - [x] **P4** — `examples/sortie_canal.rs` : une onde longue traverse une **ligne de contrôle
   intérieure**. À `λ/h₀ = 24` : erreur de restitution **0,148 %**, retour **0,215 %**. Deux erreurs
   de montage trouvées par la mesure, pas par la relecture.
-- [ ] **P5** — **ce que W peut recevoir** : inventaire de ses primitives, et ce qu'aucune ne couvre.
-- [ ] **P6** — la décomposition de ce que l'éponge absorbe : la part qui est l'onde sortante, et
-  celle qui ne l'est pas.
-- [ ] **P7** — la **réflexion mesurée en 3D** sur ce cas, contre le seuil de 1 %.
-- [ ] **P8** — preuve publiée : le cas, les grandeurs, ce qui est identifié, ce qui ne l'est pas,
-  et ce qu'il reste à construire pour le transfert.
+- [x] **P5** — W n'a que **deux** primitives, impact radial et sillage ; **l'impact porte de
+  l'énergie, pas du volume** (−3,6·10⁻⁷ m³ mesurés pour 0,01 J). Le volume net n'a pas de receveur.
+- [x] **P6** — la décomposition se lit sur la **ligne de contrôle** : ce qui la traverse vers la
+  droite est l'onde (99,85 % du volume au cas de réception), le reste est la traîne dispersive.
+- [x] **P7** — jauge sur la ligne, fenêtres séparées par la géométrie (7,66 s contre 15,33 s) :
+  **réflexion en énergie 1,48·10⁻⁶**, quatre ordres sous le seuil de 1 %, mesurée **en 3D**.
+- [x] **P8** — [SORTIE-DELTA-S311](../docs/validation/SORTIE-DELTA-S311.md). **Une question à
+  trancher y est posée** : le volume net sortant n'a pas de receveur dans W — le perdre, étendre W,
+  ou choisir une surface où il est nul.
 - [ ] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
