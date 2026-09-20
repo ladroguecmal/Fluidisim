@@ -103,7 +103,8 @@ Critères, écrits avant la mesure :
   qu'elle retire, résidu publié. **539 essais inchangés**, dont les réceptions au bit.
 - [x] **P4** — quatre essais, **543 au total, 0 échec**. Et l'essai de l'éponge a attrapé un
   défaut réel du compteur : 0,86 % du volume retiré, quatre ordres au-dessus du plancher.
-- [ ] **P5** — mesure sur la **cuve de S305** : plancher et dérive nommés, comparés à A298.
+- [x] **P5** — cuve de S305, 5 000 pas : **murs à zéro exact**, dérive de volume
+  **2,37·10⁻¹⁰ m³**, soit 7,4·10⁻¹² m de hauteur moyenne et 1,5·10⁻¹⁰ de l'amplitude du mode.
 - [ ] **P6** — mesure sur la **scène de S302** : ce que l'éponge retire par seconde. A302 chiffrée.
 - [ ] **P7** — quantité de mouvement et énergie : ce qu'il faudrait pour les **fermer**, et le
   diagnostic non fermé publié comme tel.
@@ -133,6 +134,21 @@ aucune opération flottante sur `eta`.
 | bilan fermé, fond traversant | résidu **1,24·10⁻¹¹ m³** pour une échelle de 1,26·10⁻⁴ → **9,85·10⁻⁸** relatif, ≈ 1,6 ulp de f32 par pas |
 | cuve fermée, sans fond ni éponge | dérive **3,39·10⁻¹¹ m³** sur 200 pas, soit **1,13·10⁻¹¹ m** de hauteur moyenne |
 | éponge | retiré 2,5267·10⁻⁵ m³, volume perdu 2,5267·10⁻⁵ m³, écart **9,8·10⁻⁷** relatif |
+
+**La cuve de S305, mesurée (P5)** — `--delta3d-cuve-longue`, 32 × 16 × 18, 5 000 pas de 1 ms,
+5 s simulées, 2,33 période :
+
+| | mesure |
+|---|---|
+| volume passé par les **murs** | **0 exactement**, à chaque pas — la construction est vérifiée, plus supposée |
+| dérive du volume de perturbation | **2,37·10⁻¹⁰ m³** sur 32 m², soit **7,40·10⁻¹² m** de hauteur moyenne |
+| rapportée à l'amplitude du mode | **1,48·10⁻¹⁰** |
+
+**Ce que cela dit d'A298, et c'est nouveau.** A298 mesure une dérive de **hauteur** carte/référence
+d'environ 1,2·10⁻⁷ m par seconde sur cette même cuve. La **référence**, elle, conserve son volume à
+7,4·10⁻¹² m sur cinq secondes — quatre à cinq ordres de grandeur en dessous. La dérive d'A298
+n'est donc **pas** une fuite de volume du schéma : elle est propre au chemin de la carte, ce
+qu'A298 soupçonnait sans pouvoir l'isoler.
 
 **Le défaut que l'essai de l'éponge a attrapé, et il vaut leçon.** Compter l'`increment` de
 l'éponge sur-compte de `eta_roundoff` à chaque colonne et à chaque pas : **0,86 %** du volume

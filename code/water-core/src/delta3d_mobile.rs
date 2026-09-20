@@ -626,6 +626,23 @@ impl Volume3 {
         }
     }
 
+    /// **Le transport à travers les quatre faces extérieures** du chemin non couplé, en mètres
+    /// cubes, positif entrant — S310. Il vaut **zéro par construction** : `transport_mobile3`
+    /// saute `i == 0` et `j == 0`, et n'écrit jamais les indices `nx` et `ny`, que `fill(0.)` a
+    /// mis à zéro. Ce sont les murs. On le somme quand même — une valeur non nulle voudrait dire
+    /// qu'une cuve fuit par un bord, et c'est exactement ce qu'un bilan doit savoir dire.
+    pub(super) fn boundary_flux_mobile3(&self, dt: f64) -> f64 {
+        let Domain3 { nx, ny, dx, .. } = self.domain;
+        let mut total = 0f64;
+        for j in 0..ny {
+            total += self.flux_x[j * (nx + 1)] as f64 - self.flux_x[j * (nx + 1) + nx] as f64;
+        }
+        for i in 0..nx {
+            total += self.flux_y[i] as f64 - self.flux_y[ny * nx + i] as f64;
+        }
+        total * dt * dx as f64
+    }
+
     pub(super) fn mobile_in_bounds(&self) -> bool {
         let dx = self.domain.dx;
         let top = (self.domain.nz - 1) as f32 * dx;
@@ -671,6 +688,8 @@ impl Volume3 {
         self.saved_p.copy_from_slice(&self.p);
         self.saved_eta.copy_from_slice(&self.eta);
         self.saved_eta_roundoff.copy_from_slice(&self.eta_roundoff);
+        // S310 : le volume d'avant, lu après les sauvegardes — l'état qu'un refus restaurerait.
+        let volume_before = self.perturbation_volume();
         let result = (|| {
             self.advect_mobile3(advection);
             let report = self.project_mobile3(scale, correction, max_iters, jobs)?;
@@ -679,6 +698,20 @@ impl Volume3 {
             }
             self.extrapolate_mobile3();
             self.transport_mobile3(transport);
+            // S310 : la cuve n'a ni bande ni éponge, donc son bilan se réduit à deux nombres —
+            // ce qui a traversé les murs, et ce que le volume a fait. Publié après le dernier
+            // contrôle, comme dans le pas couplé.
+            let volume = self.perturbation_volume();
+            let delta = volume - volume_before;
+            let perturbation_in = self.boundary_flux_mobile3(dt);
+            let bilan = crate::delta3d::Balance3 {
+                volume,
+                delta,
+                band_in: 0.,
+                perturbation_in,
+                sponge_out: 0.,
+                residual: delta - perturbation_in,
+            };
             for field in [
                 &self.u,
                 &self.v,
@@ -705,6 +738,7 @@ impl Volume3 {
             if !self.mobile_in_bounds() {
                 return Err(Error::Domain);
             }
+            self.balance = bilan;
             Ok(report)
         })();
         if result.is_err() {

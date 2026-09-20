@@ -2176,9 +2176,17 @@ pub fn longue_cuve() -> Result<(), String> {
         );
 
         let (mut pire_global, mut pire, mut quadratique) = (0f32, 0f32, 0f64);
+        // S310, lot 1 d'ADR-178 : la cuve est fermée — ni bande, ni éponge, des murs. Son volume
+        // de perturbation ne doit donc **pas bouger**, et ce qu'il fait quand même est le plancher
+        // du schéma. C'est le compagnon exact d'A298 : la dérive séculaire s'y lit en volume.
+        let volume_initial = volume.perturbation_volume();
+        let (mut mur_max, mut derive_max) = (0f64, 0f64);
         for n in 1..=pas {
             let temps = SimTime((n as u64 - 1) * pas_us);
             volume.step_surface_mobile(pas_us, 4000, &jobs).map_err(|e| format!("reference {e:?}"))?;
+            let bilan = volume.balance();
+            mur_max = mur_max.max(bilan.perturbation_in.abs());
+            derive_max = derive_max.max((bilan.volume - volume_initial).abs());
             carte.step(&background, temps, cycles)?;
             let coeur: Vec<f32> = volume
                 .surface()
@@ -2207,10 +2215,16 @@ pub fn longue_cuve() -> Result<(), String> {
                 quadratique = 0.;
             }
         }
+        let aire = domain.dx as f64 * domain.dx as f64 * colonnes as f64;
         println!(
             "CUVE_S305 longue bilan pire_fenetre_m={pire_global:e} sur_amplitude={:e} secondes={:.1}",
             pire_global as f64 / CUVE_A,
             depart.elapsed().as_secs_f64()
+        );
+        println!(
+            "BILAN_S310 cuve murs_max_m3={mur_max:e} derive_volume_max_m3={derive_max:e}              hauteur_moyenne_m={:e} sur_amplitude={:e} volume_initial_m3={volume_initial:e} aire_m2={aire:e}",
+            derive_max / aire,
+            derive_max / aire / CUVE_A
         );
         Ok(())
     })
