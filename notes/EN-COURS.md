@@ -132,9 +132,9 @@ Critères, écrits avant la mesure :
 - [x] **P6** — l'extracteur : amplitude, phase et spectre lus sur le signal sortant à la ligne.
 - [x] **P7** — **essai 2** : le paquet spectral, transféré et vérifié.
 - [~] **P8** — **essai 3** : oblique **porté par la primitive**, mesuré en deux composantes ; **l'essai à la frontière reste dû** — il demande un domaine large en `y`, dix à vingt fois le coût des cas de cette session.
-- [ ] **P9** — **essais 4 et 5** : cohérence de phase δ → W, puis transmission et réflexion sur
+- [x] **P9** — **essais 4 et 5** : cohérence de phase δ → W, puis transmission et réflexion sur
   plusieurs résolutions.
-- [ ] **P10** — preuve publiée : les six propriétés, chacune avec sa mesure et son verdict.
+- [x] **P10** — preuve publiée : les six propriétés, chacune avec sa mesure et son verdict.
 - [ ] **P11** — rituel REPRISE §6.
 
 ### Notes de reprise
@@ -956,3 +956,32 @@ seconde et pas sur la première, et c'est pour cela que les deux sont vérifiée
 **Ce que cela ne fait pas** : l'essai 3 demande une propagation oblique **à la frontière**, donc un
 front qui sort d'un domaine δ large en `y` et se lit sur sa ligne de contrôle. La primitive le
 **supporte** ; supporter n'est pas éprouver, et l'essai reste dû.
+
+**P9 — essai 5, et il a fallu deux passages : le premier accusait le mauvais coupable.**
+
+Au premier passage, **le maillage le plus fin était le pire** : `ω` lue passait de −4,1 % à
+−0,45 % puis **+4,7 %**, changement de signe, erreur de forme à 60 %, régression à 0,66. Deux
+points suggéraient une convergence nette ; le troisième la détruisait.
+
+La cause n'était pas le schéma mais l'**estimateur de fréquence**. Les passages par zéro comptent
+*toutes* les traversées — traîne courte, ride résiduelle — et rendent une période trop brève. Or
+**une maille fine amortit moins les courtes** : l'estimateur se dégrade *exactement quand le
+domaine s'améliore*. Les deux estimateurs, mesurés côte à côte sur le même signal :
+
+| maille | passages par zéro | **périodogramme** | écart |
+|---:|---:|---:|---:|
+| 25 cm | 5,3227 | 5,3094 | 0,25 % |
+| 12,5 cm | 5,5263 | 5,5056 | 0,38 % |
+| **6,25 cm** | **5,8110** *(+4,7 %)* | **5,5495** *(−0,036 %)* | **4,7 %** |
+
+Avec le périodogramme, **les six grandeurs convergent de façon monotone** : écart de célérité
+4,56 % → 0,83 % → **0,035 %** ; bande 19,4 % → 7,6 % → **3,5 %** ; amplitude 3,2 % → 1,7 % →
+**1,1 %** ; forme 13,3 % → 7,5 % → **5,7 %**. Ce que le transfert reproduit est **ce que le domaine
+a réellement produit**, et l'écart à l'onde *posée* est la dispersion numérique de δ.
+
+**Portée** : `transfert_paquet.rs` (S312) emploie l'estimateur par zéros. À sa maille l'écart vaut
+0,38 %, donc ses conclusions tiennent — mais son `λ_mesure` se lit 2,034 m au périodogramme.
+
+**Essai 4** — la cohérence de phase est mesurée **sur la ligne d'émission**, régression 0,9938
+(paquet) et 0,9734 (onde) : le train **part** avec la phase du signal sortant. Qu'il la conserve à
+dix longueurs d'onde demande un oracle que cette session n'a pas construit.

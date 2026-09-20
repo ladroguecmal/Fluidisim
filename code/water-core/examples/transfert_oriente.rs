@@ -52,8 +52,11 @@ struct Signal {
     sigma_t: f64,
     /// Amplitude de la porteuse, m — projection sur les deux quadratures.
     amplitude_m: f64,
-    /// Pulsation dominante, rad/s.
+    /// Pulsation dominante retenue, rad/s — celle du **spectre**.
     omega: f64,
+    /// Pulsation par passages par zéro, gardée pour comparaison : c'est l'estimateur de S312 et
+    /// de S314 au premier passage, et il **biaise** dès que le signal porte des courtes.
+    omega_zero: f64,
     /// Phase de la porteuse à `arrivee_s`, en tours.
     phase_tours: f64,
     /// Énergie de la fenêtre de passage, `∫η²dt`, m²·s.
@@ -100,7 +103,35 @@ fn identifie(jauge: &[(f64, f64)], t1: f64, t2: f64) -> Signal {
     } else {
         f64::NAN
     };
-    let omega = core::f64::consts::TAU / periode;
+    let omega_zero = core::f64::consts::TAU / periode;
+
+    // **La pulsation dominante se prend sur le spectre, pas sur les passages par zéro.**
+    //
+    // Le comptage de passages par zéro compte **toutes** les traversées : une traîne courte, une
+    // ride résiduelle, et il rend une période trop brève. Le maillage le plus fin en garde
+    // davantage — il les amortit moins —, si bien que l'estimateur se dégrade quand le domaine
+    // s'améliore. Constaté à 6,25 cm au premier passage : `ω` lue **+4,7 %** alors qu'elle valait
+    // −0,45 % à 12,5 cm, avec changement de signe. Le maximum du périodogramme, lui, ne compte
+    // rien : il cherche la fréquence qui **explique le plus d'énergie**.
+    let mut omega = omega_zero;
+    if omega_zero.is_finite() && omega_zero > 0. {
+        let (mut meilleur, mut arg) = (-1f64, omega_zero);
+        for i in 0..=800 {
+            let w = omega_zero * (0.5 + 1.0 * i as f64 / 800.);
+            let (mut cc, mut ss) = (0f64, 0f64);
+            for &(t, e) in &passage {
+                let d = t - arrivee_s;
+                cc += e * (w * d).cos() * dt;
+                ss += e * (w * d).sin() * dt;
+            }
+            let p = cc * cc + ss * ss;
+            if p > meilleur {
+                meilleur = p;
+                arg = w;
+            }
+        }
+        omega = arg;
+    }
 
     // **Amplitude et phase, du même calcul** : projection sur `cos` et `sin` de la porteuse,
     // pondérée par l'enveloppe gaussienne recentrée. `A·e^{iφ} = 2·Σ η·e^{iωΔt}·w / Σ w`.
@@ -128,6 +159,7 @@ fn identifie(jauge: &[(f64, f64)], t1: f64, t2: f64) -> Signal {
         sigma_t,
         amplitude_m,
         omega,
+        omega_zero,
         phase_tours,
         incident,
         retour,
@@ -255,13 +287,14 @@ fn essai(etiquette: &str, dx: f32, lambda: f32, sigma_en_lambda: f32) -> Result<
         "ORIENTE_S314 signal cas={etiquette} dx={dx} lambda_pose={lambda} sigma={sigma} \
          x_ligne_m={x_ligne:.3} t_arrivee_theorique_s={t_arrivee:.3} \
          arrivee_lue_s={:.4} sigma_t_lue_s={:.4} sigma_x_lue_m={:.4} sigma_pose_m={sigma} \
-         amplitude_lue_m={:.6} omega_lue={:.4} omega_posee={omega:.4} lambda_lue_m={lambda_lue:.4} \
+         amplitude_lue_m={:.6} omega_spectre={:.4} omega_zeros={:.4} omega_posee={omega:.4}          lambda_lue_m={lambda_lue:.4} \
          phase_lue_tours={:.5} incident_m2s={:e} reflexion_en_energie={reflexion:e}",
         sig.arrivee_s,
         sig.sigma_t,
         sig.sigma_t * cg as f64,
         sig.amplitude_m,
         sig.omega,
+        sig.omega_zero,
         sig.phase_tours,
         sig.incident
     );
