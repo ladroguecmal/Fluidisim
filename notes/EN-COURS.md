@@ -94,11 +94,12 @@ Critères, écrits avant la mesure :
 ### Plan
 
 - [x] **P1** — amorce, verdict et arbitrage consignés, plan seul.
-- [ ] **P2** — `outils/cible_image.py` : horizon, gradient du ciel, histogramme de la mer, couleur
+- [x] **P2** — `outils/cible_image.py` : horizon, gradient du ciel, histogramme de la mer, couleur
   creux/crêtes, contraste local, fraction claire. Mesure de la photographie.
-- [ ] **P3** — la même mesure sur nos images, et l'écart poste par poste.
-- [ ] **P4** — exposition et gain de couleur réglés **contre la mesure**, pas à l'œil.
-- [ ] **P5** — le ciel : gradient et bande d'horizon, contre la mesure.
+- [x] **P3** — la même mesure sur nos images, et l'écart poste par poste. **L'ordre change.**
+- [ ] **P4** — *(promu par la mesure)* **le ciel** : c'est lui qui porte les crêtes, la dynamique
+  et le contraste local.
+- [ ] **P5** — l'exposition et le gain de couleur, ce qu'il en reste après le ciel.
 - [ ] **P6** — diffusion sous la surface aux crêtes, par le masque du jacobien.
 - [ ] **P7** — écume (Monahan), couverture calée sur la fraction claire mesurée.
 - [ ] **P8** — images soumises (R15), preuve.
@@ -109,6 +110,66 @@ Critères, écrits avant la mesure :
 **La photographie** : recadrée de son cadre de galerie — détecté par la **chromaticité**, le cadre
 étant achromatique là où l'image ne l'est jamais — 1070 × 712. Elle vit dans le répertoire de
 travail de la session, **pas dans le dépôt**. Ce qui entre dans le dépôt, ce sont ses mesures.
+
+## P2 + P3 — la photographie est chiffrée, et elle renverse l'ordre des travaux
+
+`outils/cible_image.py` détecte l'horizon par la chute de luma la plus franche, sépare ciel et mer,
+et publie séparément ce qui est **comparable** (tout ce qui est normalisé par la scène elle-même)
+et ce qui ne l'est pas (les luma absolues — exposition et tone mapping inconnus).
+
+Horizon de la photo : `y` = 356 sur 712, **exactement à mi-cadre**.
+
+| grandeur comparable | **photo** | `eau_g2` (choisie par R14) | `tout` |
+|---|---:|---:|---:|
+| `mer_p05/p50` (densité des creux) | **0,193** | 0,277 | 0,415 |
+| `mer_p95/p50` | 4,56 | 4,06 | 3,46 |
+| **dynamique `p95/p05`** | **23,7** | **14,6** | 8,3 |
+| **contraste local / p50** | **0,455** | **0,266** | 0,217 |
+| fraction claire (> 4 × médiane) | 0,074 | 0,055 | 0,015 |
+| creux `B/G` | **5,54** | **5,63** | 2,59 |
+| creux `B/R` | 30,0 | 14,1 | 11,6 |
+| crêtes `B/G` | **2,89** | **1,37** | 1,32 |
+| crêtes `B/R` | 8,95 | 1,73 | 1,72 |
+| ciel `B/G` | **2,03** | **1,41** | 1,41 |
+| ciel `B/R` | 5,14 | 1,82 | 1,82 |
+| **ciel haut / horizon** | **0,356** | **0,809** | 0,809 |
+
+**Trois lectures, et la troisième commande la suite.**
+
+1. **La couleur des creux est juste.** `eau_g2` donne 5,63 contre 5,54 mesurés. La couleur dérivée
+   d'ADR-177 au gain 2 **tombe sur la cible**, et le verdict de l'utilisateur la désignait déjà.
+   Noter au passage que la photo (5,54) se situe **entre** notre ancienne constante (2,83) et
+   l'eau pure théorique (10,85) : une mer réelle porte des particules, et le capteur a sa balance.
+2. **Notre dynamique et notre contraste local valent 60 % de ceux de la photo** (14,6 contre 23,7 ;
+   0,266 contre 0,455). C'est exactement ce que l'utilisateur décrit — « creux plus denses,
+   contraste local plus marqué ».
+3. **Et la cause est le ciel.** Notre ciel est **plat** — sommet à 0,809 de l'horizon, quand la
+   photo est à **0,356** — et **pâle** : `B/R` 1,82 contre 5,14. Mesuré bande par bande :
+
+   | | horizon | | | | | haut |
+   |---|---:|---:|---:|---:|---:|---:|
+   | **photo** R | 0,311 | 0,211 | 0,122 | 0,079 | 0,058 | **0,043** |
+   | **photo** G | 0,554 | 0,486 | 0,365 | 0,275 | 0,221 | **0,181** |
+   | **photo** B | 0,795 | 0,787 | 0,740 | 0,687 | 0,631 | **0,574** |
+   | **nous** R | 0,533 | 0,450 | 0,446 | 0,421 | 0,374 | 0,407 |
+   | **nous** G | 0,675 | 0,588 | 0,572 | 0,545 | 0,502 | 0,523 |
+   | **nous** B | 0,851 | 0,810 | 0,801 | 0,787 | 0,767 | 0,775 |
+
+   Dans la photo, **le bleu ne bouge presque pas** (×0,72 de l'horizon au haut) pendant que le
+   rouge s'effondre (**×0,14**) et le vert chute (×0,33). C'est la signature de Rayleigh : à
+   l'horizon la masse d'air diffuse toutes les longueurs d'onde et le ciel blanchit ; au zénith
+   seul le bleu survit. **Notre ciel ne fait rien de tout cela** : les trois canaux bougent de
+   moins de 25 %, et le profil n'est même pas monotone.
+
+**Conséquence, et c'est elle qui renverse le plan.** La mer est un miroir : un ciel plat et pâle
+donne des crêtes grises (`B/G` 1,37 contre 2,89), une dynamique écrasée et un contraste local
+faible. **Le ciel passe donc avant l'exposition et avant le gain de couleur**, que je comptais
+traiter d'abord. L'utilisateur l'avait formulé sans le mesurer : « les reflets clairs restent
+portés par le **ciel** et la géométrie, pas par une couleur de base trop élevée ».
+
+**Ce que la mesure ne peut pas donner** : l'élévation réelle que couvre le haut du cadre de la
+photo — focale inconnue. Le profil est donc mesuré en **fraction de cadre**, pas en élévation, et
+tout modèle calé dessus porte une hypothèse déclarée sur ce champ.
 
 **Ce que l'œil voit déjà sur elle, à confirmer par la mesure** : mer très sombre, creux presque
 noirs ; crêtes gris-bleu clair ; ciel à gradient **fort** (blanc-cyan à l'horizon, bleu profond en
