@@ -94,18 +94,47 @@ Critères avant travail :
 
 ### Plan
 
-- [>] **P1** — amorce, verdict R11 consigné, plan seul.
-- [ ] **P2** — recherche sourcée : anatomie d'une mer en eau profonde, profil des vaguelettes,
+- [x] **P1** — amorce, verdict R11 consigné, plan seul.
+- [x] **P2** — recherche sourcée : anatomie d'une mer en eau profonde, profil des vaguelettes,
   asymétries, modulation ; document de connaissance avec citations.
-- [ ] **P3** — ce que le dépôt rend aujourd'hui : statistiques de la mer `--houle` et `--vagues`
+- [x] **P3** — ce que le dépôt rend aujourd'hui : statistiques de la mer `--houle` et `--vagues`
   (asymétrie d'élévation, cumulants de pente, courbure), sur la réalisation de la scène.
-- [ ] **P4** — tableau d'écart littérature ↔ dépôt, et ce que chaque écart coûterait à corriger.
-- [ ] **P5** — décision (ADR) et première correction visible, si elle tient dans la session.
+- [x] **P4** — tableau d'écart littérature ↔ dépôt, et ce que chaque écart coûterait à corriger.
+- [>] **P5** — décision (ADR) et première correction visible, si elle tient dans la session.
 - [ ] **P6** — rituel REPRISE §6.
 
 ### Notes de reprise
 
-*(S303 — vide à l'ouverture.)*
+**Ce que la recherche donne** (sources dans la preuve) : l'asymétrie verticale d'une mer profonde
+vient des **harmoniques liées du second ordre** (`Sk = 3k̄σ` en bande étroite, Longuet-Higgins 1963,
+Tayfun 1980) ; les pentes se mesurent au miroitement depuis Cox & Munk 1954, révisées par IASI ; et
+— le plus visible — les **rides ne sont pas uniformes** : elles se raccourcissent et se redressent
+sur les crêtes des vagues longues, s'aplatissent dans les creux (JFM 2024 : pente modulée de 20 %
+à `ε_L` = 0,1, doublée à 0,4), avec un **retard** qui place leur maximum en avant de la crête.
+
+**Ce que la mesure donne** (instrument de S260 étendu, 10⁶ points, même réalisation que le rendu) :
+
+| | `mss` | `c₂₁` | `c₀₃` | `c₄₀` | `Sk` |
+|---|---:|---:|---:|---:|---:|
+| observations (Cox–Munk 7,95 m/s ; 3k̄σ) | 0,0437 | −0,058 | −0,222 | 0,40 | 0,156 |
+| `--houle` — **la scène montrée en R11** | 0,0198 | −0,001 | 0,002 | −0,026 | −0,0001 |
+| `--vagues --modulation` (le meilleur construit) | 0,0496 | 0,001 | 0,001 | 0,390 | 0,0030 |
+| **S303 retenu** (+ Tayfun + retard −0,20) | 0,0497 | **−0,057** | **−0,155** | 0,340 | **0,066** |
+
+**Trois choses apprises, dans l'ordre d'importance.**
+1. **Faute de protocole de ma part** : la scène soumise à R11 était `--houle` **seule**, c'est-à-dire
+   sans la queue d'équilibre ni les vagues pointues construites en S260–S261. C'est la
+   configuration que S260 avait déjà mesurée « pentes quasi gaussiennes ». L'utilisateur a jugé la
+   plus pauvre des trois mers du dépôt.
+2. **Même la meilleure n'a aucune asymétrie** : `Sk` 0,003 contre 0,156 ; crêtes et creux aussi
+   arrondis les uns que les autres — le « concave plutôt que convexe » du verdict, chiffré.
+3. **Le second ordre par composante ne peut pas la produire** (mesuré : 0,0022) : ce sont les
+   termes **croisés** qui la portent. D'où Tayfun, qui les contient tous pour une somme de plus.
+
+**Le retard est le seul paramètre libre**, calé sur `c₀₃` ; son **signe** ne l'est pas — seul un
+retard négatif (rides en avant de la crête) donne l'asymétrie du signe observé, et `c₂₁` tombe sur
+Cox–Munk sans avoir été visé. Reste ouvert : le noyau exact du second ordre pour deux systèmes
+(la vérité est entre 0,063 et 0,150), les capillaires parasites, l'asymétrie horizontale.
 
 ---
 

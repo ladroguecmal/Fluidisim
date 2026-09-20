@@ -1,4 +1,12 @@
 //! S260 — statistiques de la surface rendue contre la mer observée (revue R3, REVUE-VISUELLE §10).
+//! S303 — verdict R11 : la topologie. Deux candidats de plus, tous deux à **termes croisés** entre
+//! composantes, car ce sont eux qui portent les asymétries observées :
+//!   * `tayfun` : second ordre en bande étroite, `η = η₁ + ½·k̄·(η₁² − η̂₁²)` (Tayfun 1980), appliqué
+//!     **par système** (mer de vent, houle) avec le `k̄` du système ; asymétrie **verticale**.
+//!   * `retard` : la modulation de la queue déphasée d'un angle `δ` par rapport à la crête de la
+//!     bande — les rides sont maximales **en avant** de la crête, pas dessus ; asymétrie de
+//!     **pente** (up/downwind). Le déphasage est le seul paramètre libre, et il est calé sur `c03`.
+//! Références : Tayfun (1980), Longuet-Higgins (1963), Cox & Munk (1954), Bréon & Henriot (2006).
 //! Scène `--houle` d'ADR-156 : mer de vent et houle (bande), queue directionnelle d'ADR-155.
 //! Pentes et élévation analytiques en f64, 10⁶ points tirés dans l'espace et le temps.
 //! Trois modèles de la même réalisation : linéaire (le rendu actuel), CWM (déplacement horizontal
@@ -55,6 +63,10 @@ fn main() {
     let sea = assemble(&[&bake_directional(wind, 10.0).unwrap(), &bake_directional(swell, 75.0).unwrap()]).unwrap();
     let tail = bake_tail_directional(wind, 10.0, 32.0, 64).unwrap();
     let band = modes(sea.components());
+    // Les deux systèmes dans l'ordre d'assemblage : mer de vent (32), puis houle (32). Tayfun
+    // s'applique par système, chacun avec son nombre d'onde moyen — la bande entière n'est pas
+    // étroite, chaque système l'est.
+    let systeme: Vec<usize> = (0..band.len()).map(|i| usize::from(i >= 32)).collect();
         let tau = std::f64::consts::TAU;
     let wind_dir = [(0.12 * tau).cos(), (0.12 * tau).sin()];
     let cross = [-wind_dir[1], wind_dir[0]];
@@ -62,6 +74,14 @@ fn main() {
     let var_b: f64 = band.iter().map(|m| 0.5 * m.a * m.a).sum();
     let km = band.iter().map(|m| 0.5 * m.a * m.a * m.k).sum::<f64>() / var_b;
     let sigma = var_b.sqrt();
+    // `k̄` et variance de chaque système, pour le second ordre en bande étroite.
+    let mut var_s = [0.0f64; 2];
+    let mut km_s = [0.0f64; 2];
+    for (m, s) in band.iter().zip(&systeme) {
+        var_s[*s] += 0.5 * m.a * m.a;
+        km_s[*s] += 0.5 * m.a * m.a * m.k;
+    }
+    for s in 0..2 { km_s[s] /= var_s[s]; }
 
     let mut state = 0x5260_2026_0917u64;
     let mut next = || {
@@ -74,16 +94,24 @@ fn main() {
     // Candidats : (nom, queue en f⁻⁴, M de modulation, CWM). f⁻⁴ : Toba/Phillips, continué depuis 4 fp,
     // `a·√(x/4)` pour `q ≈ x⁻⁵` au-delà de 4 fp. Modulation : énergie de la queue × max(0, 1 + M·ε),
     // `ε = Σ_bande a·k·sin ψ` (compression orbitale, maximale aux crêtes des ondes longues).
-    let mut cases: Vec<(String, bool, f64, bool, bool)> = vec![
-        ("lineaire".into(), false, 0.0, false, false),
-        ("cwm".into(), false, 0.0, true, false),
-        ("second_ordre".into(), false, 0.0, false, true),
-        ("queue_f-4".into(), true, 0.0, false, false),
-        ("queue_f-4+cwm".into(), true, 0.0, true, false),
+    // (nom, queue f⁻⁴, M, CWM, second ordre par composante, Tayfun 0/1/2, retard en tours)
+    // Tayfun : 1 = par système (chacun son `k̄`), 2 = bande entière (un seul `k̄`, borne haute).
+    let mut cases: Vec<(String, bool, f64, bool, bool, u8, f64)> = vec![
+        ("lineaire".into(), false, 0.0, false, false, 0, 0.0),
+        ("cwm".into(), false, 0.0, true, false, 0, 0.0),
+        ("second_ordre".into(), false, 0.0, false, true, 0, 0.0),
+        ("tayfun_par_systeme".into(), false, 0.0, false, false, 1, 0.0),
+        ("tayfun_bande_entiere".into(), false, 0.0, false, false, 2, 0.0),
+        ("queue_f-4".into(), true, 0.0, false, false, 0, 0.0),
+        ("queue_f-4+cwm".into(), true, 0.0, true, false, 0, 0.0),
+        ("queue_f-4+modulation_M2+cwm".into(), true, 2.0, true, false, 0, 0.0),
+        ("S303_tayfun1+queue_f-4+modulation_M2+cwm".into(), true, 2.0, true, false, 1, 0.0),
+        ("S303_tayfun2+queue_f-4+modulation_M2+cwm".into(), true, 2.0, true, false, 2, 0.0),
     ];
-    for m in [2.0, 4.0, 6.0, 8.0, 10.0, 12.0] {
-        cases.push((format!("queue_f-4+modulation_M{m}"), true, m, false, false));
-        cases.push((format!("queue_f-4+modulation_M{m}+cwm"), true, m, true, false));
+    // Retard de la modulation : rides maximales **en avant** de la crête. Les deux signes sont
+    // balayés — c'est la mesure qui dit lequel donne l'asymétrie de pente observée.
+    for d in [-0.25, -0.20, -0.15, -0.10, -0.05, 0.05, 0.10, 0.15, 0.20, 0.25] {
+        cases.push((format!("S303_tayfun1+retard{d}+queue_f-4+modulation_M2+cwm"), true, 2.0, true, false, 1, d));
     }
     let tail_modes = modes(tail.components());
     let tail_boost: Vec<f64> = tail_modes.iter().map(|m| (m.omega / tau * 6.0 / 4.0).sqrt()).collect();
@@ -93,11 +121,23 @@ fn main() {
         let (x, y, t) = (next() * 4000.0, next() * 4000.0, next() * 3600.0);
         // Bande : élévation, pentes, gradient du déplacement, second ordre, déformation ε.
         let (mut eta, mut sb, mut gb, mut eta2, mut s2, mut eps) = (0.0, [0.0f64; 2], [[0.0f64; 2]; 2], 0.0, [0.0f64; 2], 0.0);
-        for m in &band {
+        // Par système : élévation, quadrature (transformée de Hilbert en bande étroite) et pentes,
+        // pour le second ordre de Tayfun. Et la déformation en quadrature, pour le retard.
+        let (mut e_s, mut q_s) = ([0.0f64; 2], [0.0f64; 2]);
+        let (mut es_s, mut qs_s) = ([[0.0f64; 2]; 2], [[0.0f64; 2]; 2]);
+        let mut eps_q = 0.0;
+        for (m, s) in band.iter().zip(&systeme) {
             let psi = m.k * (m.d[0] * x + m.d[1] * y) - m.omega * t + m.phase0;
             let (sn, cs) = psi.sin_cos();
             eta += m.a * sn;
             eps += m.a * m.k * sn;
+            eps_q += m.a * m.k * cs;
+            e_s[*s] += m.a * sn;
+            q_s[*s] += m.a * cs;
+            for i in 0..2 {
+                es_s[*s][i] += m.a * m.k * m.d[i] * cs;
+                qs_s[*s][i] += -m.a * m.k * m.d[i] * sn;
+            }
             for i in 0..2 {
                 sb[i] += m.a * m.k * m.d[i] * cs;
                 for j in 0..2 { gb[i][j] += -m.a * m.k * m.d[i] * m.d[j] * sn; }
@@ -105,6 +145,21 @@ fn main() {
             eta2 += -0.5 * m.k * m.a * m.a * (2.0 * psi).cos();
             for i in 0..2 { s2[i] += m.k * m.k * m.a * m.a * (2.0 * psi).sin() * m.d[i]; }
         }
+        // Tayfun 1980 : `η₂ = ½·k̄·(η² − η̂²)`, et sa pente par dérivation du produit. Deux
+        // applications : par système (chacun son `k̄`), ou sur la bande entière (un seul `k̄`).
+        let (mut eta_t1, mut s_t1) = (0.0, [0.0f64; 2]);
+        for s in 0..2 {
+            eta_t1 += 0.5 * km_s[s] * (e_s[s] * e_s[s] - q_s[s] * q_s[s]);
+            for i in 0..2 {
+                s_t1[i] += km_s[s] * (e_s[s] * es_s[s][i] - q_s[s] * qs_s[s][i]);
+            }
+        }
+        let (e_all, q_all) = (e_s[0] + e_s[1], q_s[0] + q_s[1]);
+        let eta_t2 = 0.5 * km * (e_all * e_all - q_all * q_all);
+        let s_t2 = [
+            km * (e_all * (es_s[0][0] + es_s[1][0]) - q_all * (qs_s[0][0] + qs_s[1][0])),
+            km * (e_all * (es_s[0][1] + es_s[1][1]) - q_all * (qs_s[0][1] + qs_s[1][1])),
+        ];
         // Queue : pentes et gradient du déplacement, avec et sans f⁻⁴.
         let (mut st, mut gt, mut st4, mut gt4) = ([0.0f64; 2], [[0.0f64; 2]; 2], [0.0f64; 2], [[0.0f64; 2]; 2]);
         for (m, b) in tail_modes.iter().zip(&tail_boost) {
@@ -120,12 +175,18 @@ fn main() {
             }
         }
         for (case, m) in cases.iter().zip(acc.iter_mut()) {
-            let (_, f4, mm, cwm, second) = case;
-            let v = (1.0 + mm * eps).max(0.0).sqrt();
+            let (_, f4, mm, cwm, second, tayfun, retard) = case;
+            // Retard : la déformation vue avec un déphasage `δ` — `cos δ·ε + sin δ·ε̂`, où `ε̂` est
+            // la quadrature. À `δ = 0` c'est la modulation d'ADR-158, au bit.
+            let (sin_d, cos_d) = (retard * std::f64::consts::TAU).sin_cos();
+            let eps_d = cos_d * eps + sin_d * eps_q;
+            let v = (1.0 + mm * eps_d).max(0.0).sqrt();
             let (qs, qg) = if *f4 { (st4, gt4) } else { (st, gt) };
             let mut sl = [sb[0] + v * qs[0], sb[1] + v * qs[1]];
             let mut e = eta;
             if *second { e += eta2; sl = [sl[0] + s2[0], sl[1] + s2[1]]; }
+            if *tayfun == 1 { e += eta_t1; sl = [sl[0] + s_t1[0], sl[1] + s_t1[1]]; }
+            if *tayfun == 2 { e += eta_t2; sl = [sl[0] + s_t2[0], sl[1] + s_t2[1]]; }
             let mut w = 1.0;
             if *cwm {
                 let j = [[1.0 + gb[0][0] + v * qg[0][0], gb[0][1] + v * qg[0][1]],
