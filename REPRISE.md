@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 17:50 +02:00
+JETON            : occupé
+Battement        : 2026-09-20 17:55 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : —
+Session en cours : S313 — **l'instrument avant le chiffre** : corriger et valider T1 (ordre A de la décision du 2026-09-20), en quatre grandeurs distinctes, avec une borne d'erreur et une fuite introduite volontairement
 Dernière session : S312 — **le premier transfert δ → W existe** (T3 en amplitude 1,24·10⁻⁵, réflexion 2,84·10⁻⁷ en 3D) et il dit ce qui manque à W : aucun mode `k = 0`, eau profonde seule, impact isotrope — **50 % de l'énergie repart à contresens** ([preuve](docs/validation/TRANSFERT-DELTA-W-S312.md), [ADR-180](docs/adr/ADR-180-retour-delta-w-et-conservation-du-volume.md))
-Session suivante : **deux décisions de l'utilisateur sont en attente** — le receveur du volume net (V, ou un niveau moyen dans B) et la **normalisation de T1** (A304). Sans elles, le lot 2 continue par ce qui n'en dépend pas : **convergence en maille du second cas, front oblique, émission continue** ; ou le sens **W → δ**, l'autre moitié d'A302
+Session suivante : **ordre B** de la décision du 2026-09-20 — la **primitive orientée** de W, sur un paquet en eau profonde, avec les cinq essais ciblés que l'utilisateur énumère
 Maillons        : 0 — capacité S312 : un transfert δ → W existe, tourne, passe T3 sur la grandeur qu'il transporte, et publie séparément le transféré, l'attente et le résidu ; consommateur : la décision de l'utilisateur sur le receveur du volume net et sur la primitive orientée, qui n'avaient ni chiffres ni alternative mesurée
 ```
 

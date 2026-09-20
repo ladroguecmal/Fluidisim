@@ -58,111 +58,83 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S312 — **terminée**. Le premier transfert δ → W, sous la décision de l'utilisateur
-du 2026-09-20 : ce que W peut porter part vers W, ce qu'il ne peut pas est **chiffré et
-registré**, et le receveur du volume net se cherche **d'abord dans B, δ et V**.
+Session : S313 — **en cours**. **L'instrument avant le chiffre** : corriger et valider T1 selon
+la décision de l'utilisateur du 2026-09-20, en quatre grandeurs distinctes, avant toute nouvelle
+tolérance.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : la **décision de l'utilisateur du 2026-09-20**, « Retour δ → W et conservation du
-volume », en réponse à la question laissée ouverte par S311 (ADR-179 §3). Elle tranche cinq
-choses, et la troisième commande l'ordre de cette session :
+Entrée : la **décision de l'utilisateur du 2026-09-20 (S312)**, « Conservation, transfert δ → W et
+suite du développement ». Elle tranche trois choses et en ordonne cinq :
 
-> 1. « **Option 1, limitée aux tests.** […] tout volume non restitué doit être comptabilisé et
->    publié séparément […] Le prototype ne pourra pas être déclaré conforme à la conservation
->    globale tant qu'un receveur approprié n'aura pas été construit. »
-> 2. « **Ne pas imposer artificiellement le volume net à W.** […] La troisième catégorie ne se
->    limite pas nécessairement au volume net : une perturbation de moyenne nulle peut également
->    présenter une forme, une direction ou un spectre incompatibles avec les primitives
->    existantes. Ne présumez donc pas qu'en supprimant la moyenne, le reste devient
->    automatiquement transférable. »
-> 3. « **Destination du volume net.** […] étudier **en priorité** la possibilité de conserver le
->    volume net à travers **V** ou une modification du **niveau moyen de B** […] Il ne faut pas
->    créer une nouvelle primitive dans W avant d'avoir vérifié si cette responsabilité relève
->    déjà d'une autre couche. »
-> 4. Six points de progression, « la référence doit rester le **signal physique sortant**, pas
->    simplement l'intégrale de son volume » ; T3 « évalué sur le transfert effectivement
->    réalisé, avec des critères adaptés à la grandeur testée » ; réflexion mesurée à part.
-> 5. « Ne lancez pas de refonte générale de W ou de nouvelle campagne de rendu. Construisez
->    d'abord le **transfert minimal physiquement cohérent**, en réutilisant autant que possible
->    les interfaces existantes. »
+> 1. **Destination du volume net** — V pour les contenants, B pour les masses ouvertes, avec un
+>    **niveau moyen régional** : « je ne souhaite pas qu'une quantité locale d'eau soit simplement
+>    répartie sur un océan infini par une modification arbitraire du niveau global. […] La
+>    modification de B devra s'appuyer sur une **région ou un volume de contrôle identifiable**. »
+>    W reste la propagation ; le registre `pending` est conservé tant que le receveur n'existe pas.
+> 2. **T1 est à revoir**, et pas en la remplaçant par un absolu arbitraire « qui pourrait masquer
+>    des erreurs sur les petites perturbations ». Quatre grandeurs **distinguées explicitement** :
+>    le **résidu absolu** avec ses unités, le **résidu relatif** à une échelle pertinente, le
+>    **plancher d'arrondi attendu** pour la représentation utilisée, et le **résidu cumulé** sur
+>    une durée. « La tolérance doit être justifiée par des mesures et, lorsque possible, par une
+>    **borne d'erreur numérique**. » Vérification sur **plusieurs amplitudes, pas de temps et
+>    résolutions**, « y compris sur des cas où une **erreur volontaire** est introduite afin de
+>    s'assurer que l'instrument reste capable de la détecter ». **Aucun chiffre n'est fixé avant
+>    cette démonstration.** T2 reste à confirmer sur 10 s.
+> 3. **Le transfert δ → W n'est pas validé.** Amplitude et réflexion conservées comme critères,
+>    mais « la transmission doit reproduire une perturbation sortante **cohérente**, et pas
+>    seulement générer une onde possédant une amplitude équivalente ».
+> 4. **Prochaine priorité : la primitive orientée de W**, sur un paquet en eau profonde. Ne pas
+>    forcer le canal peu profond de S311 ; la profondeur finie est un développement distinct.
+> 5. **Ordre A → E** : A l'instrument T1, B la transmission orientée, C la vérification conjointe,
+>    D la comptabilité du volume net, E le couplage complet. Préparation en parallèle permise.
 
-Capacité visée : **un transfert δ → W existe, tourne, et publie séparément ce qu'il transmet, ce
-qu'il met en attente de restitution et ce qu'il perd numériquement.** Consommateur : le bilan
-global du couplage (point 6), puis la réponse à « ce qui manque véritablement à W » que
-l'utilisateur veut tirer du premier couplage.
+Capacité visée : **le dépôt sait dire si un écart de conservation est physique ou numérique, et
+le prouve sur un défaut qu'il a lui-même introduit.** Consommateur : toute réception future du
+couplage — B, C, D et E s'appuient toutes sur ce verdict, et S312 a montré qu'un critère mal
+normalisé produit des échecs qui ne disent rien (A304).
 
-**Ce que je ne fais pas, et je le déclare d'avance** : aucune refonte de W, aucune nouvelle
-primitive de W, aucune campagne de rendu (point 5) ; aucune revendication de conformité à la
-conservation globale (point 1) ; aucune revendication d'énergie ni de quantité de mouvement
-comme **bilan** (ADR-179 D7) — l'énergie ne sert ici que de **paramètre** d'une primitive
-existante et de grandeur de jauge, exactement comme la réflexion de S311.
+**Ce que je ne fais pas dans cette session, et je le déclare d'avance** : construire la primitive
+orientée (ordre B) ; construire le receveur du volume net (ordre D) ; déclarer le transfert validé
+(l'utilisateur dit qu'il ne l'est pas) ; fixer une tolérance avant que les mesures et la borne
+existent — c'est l'interdit explicite de la décision.
 
-**La question de fond, posée avant de mesurer.** S311 a montré que l'impact de W porte de
-l'énergie et **pas de volume**. Deux questions restent, et elles décident du reste :
-1. Est-ce une propriété de la **primitive impact**, ou de la **couche W** ? Si les trois
-   productions de W (impact radial, champ périodique, source de pression mobile) portent toutes
-   un volume net nul, alors « W n'a pas de moyenne » est une propriété de couche, et le point 3
-   de l'utilisateur a sa réponse : le volume net relève de **B ou de V**, pas d'une primitive à
-   créer. **Je ne le sais pas, et P3 le mesure.**
-2. Le cas contrôlé de S311 est-il seulement **admissible** par W ? Ses champs exigent l'eau
-   profonde ; le canal de S311 a `λ/h₀` = 12. **P5 le mesure**, et s'il refuse, le transfert
-   demande un second cas contrôlé en eau profonde — ce qui est une découverte, pas un contournement.
+**La question de fond, posée avant de mesurer.** S312 a mesuré un résidu de 2,0·10⁻¹¹ m³ et l'a
+attribué au « plancher `f32` » **sans le démontrer**. Si c'est vrai, ce plancher doit avoir une
+**loi** : il doit croître avec le nombre de colonnes, avec l'amplitude du champ, et **ne pas
+dépendre du pas de temps** — puisqu'il vient de la représentation, pas de la dynamique. Si le
+résidu suit cette loi, le schéma est hors de cause et la tolérance se pose dessus. **S'il ne la
+suit pas, il reste une erreur à trouver, et S312 l'aurait excusée à tort.** Je ne sais pas
+laquelle des deux, et P3 le mesure avant tout le reste.
 
 Critères, écrits avant la mesure :
-1. Le receveur du volume net est cherché **dans les couches existantes d'abord**, et la réponse
-   est **mesurée** sur les primitives, pas déduite d'une lecture.
-2. Les trois catégories de l'utilisateur sont publiées **séparément** à chaque pas, et la
-   deuxième n'est jamais comptée comme restituée.
-3. Ce qui n'est pas représentable par W est nommé **au-delà du volume net** — forme, direction,
-   spectre, phase, régime.
-4. Le transfert construit est **vérifié** sur la grandeur qu'il transporte : amplitude,
-   longueur d'onde dominante, direction, propagation.
-5. La réflexion artificielle reste mesurée **indépendamment**, et les scènes antérieures
-   restent au bit.
+1. Le plancher attendu est **dérivé** avant d'être mesuré, et sa loi est écrite en fonction de
+   `N`, de l'amplitude et de `dt`.
+2. Les quatre grandeurs de l'utilisateur sont publiées **séparément**, chacune avec son unité.
+3. L'instrument **détecte une fuite introduite volontairement**, et la plus petite fuite détectée
+   est publiée — c'est elle, la sensibilité réelle, et non le seuil qu'on aimerait écrire.
+4. Les balayages couvrent **amplitude, pas de temps et résolution**, chacun séparément, pour que
+   la loi soit lue sur une variable à la fois.
+5. Aucune tolérance n'est écrite qui ne s'appuie sur une mesure ou une borne. T2 est éprouvée sur
+   **10 s**, la durée demandée, ou déclarée non tenue.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — ADR-180 : la décision de l'utilisateur du 2026-09-20, actée décision par décision.
-- [x] **P3** — *le receveur du volume net, mesuré* : volume net des trois productions de W ;
-  ce que V porte (entiers, mL) ; ce que le niveau moyen de B porte. Réponse au point 3.
-- [x] **P4** — le **registre** : les trois volumes de l'utilisateur publiés séparément à chaque
-  pas, réutilisant `Balance3`, sans jamais compter l'attente comme une restitution.
-- [x] **P5** — *W est-il admissible sur le cas de S311 ?* Régime, pente, portée : mesurés sur la
-  primitive, pas lus.
-- [x] **P6** — le cas contrôlé du **transfert** : perturbation sortante que W peut recevoir,
-  volume net et composante de moyenne nulle séparés sur la ligne de contrôle.
-- [x] **P7** — le **transfert lui-même**, minimal, par les interfaces existantes.
-- [x] **P8** — vérification : amplitude, longueur d'onde, direction, propagation ; T3 sur le
-  transfert effectivement réalisé ; réflexion à part.
-- [x] **P9** — preuve publiée : transféré, en attente, perdu, et le bilan global sans double
-  comptage.
-- [x] **P10** — rituel REPRISE §6.
+- [>] **P1** — amorce, jeton, plan seul.
+- [ ] **P2** — ADR-181 : la décision de l'utilisateur du 2026-09-20 (S312), actée décision par
+  décision, y compris le refus du niveau global arbitraire et l'ordre A → E.
+- [ ] **P3** — *la borne*, dérivée puis mesurée : loi du plancher d'arrondi en `N`, amplitude et
+  `dt`. C'est la question de fond, et elle passe avant l'outil.
+- [ ] **P4** — le module du critère : les quatre grandeurs de l'utilisateur, publiées séparément.
+- [ ] **P5** — balayage **amplitude**, à géométrie et pas fixés.
+- [ ] **P6** — balayages **pas de temps** et **résolution**.
+- [ ] **P7** — **l'erreur volontaire** : fuite connue injectée, sensibilité de l'instrument
+  mesurée, plus petite fuite détectée publiée.
+- [ ] **P8** — T2 sur **10 s**, la durée demandée.
+- [ ] **P9** — la tolérance proposée, justifiée par la borne et les mesures ; preuve publiée.
+- [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
 
-**P3 — la réponse au point 3 est « ni l'un ni l'autre, et pour une raison structurelle ».**
-
-Trois mesures, et la deuxième est celle qui tranche.
-
-1. **`displaced_l` est inerte.** Deux impacts à 0 et 1000 L : `RadialImpact` et `ImpactField`
-   rendent des `η` **identiques au bit** sur 768 points. Le volume du contrat traverse
-   l'encodage et n'entre dans aucun champ.
-2. **Le champ périodique a un volume net nul sans troncature possible** — l'intégrale porte sur
-   exactement une cellule : net/absolu **1,3 à 3,7·10⁻⁹**.
-3. **L'impact radial et le sillage n'ont *pas* un volume net nul mesurable** — un disque et une
-   boîte tronquent. Balayés, leurs nets **changent de signe** et **tombent** avec la taille
-   (sillage : 6,3·10⁻² → 2,7·10⁻² → 1,0·10⁻³ à maille constante). **C'est la troncature**, et
-   S311 ne pouvait pas le savoir avec un seul rayon.
-
-**La raison, structurelle** : `∫η dA` **est** l'amplitude du mode `k = 0`. Plus petit `k`
-mesuré — impact 0,785, périodique 0,393, sillage 0,187 rad/m ; `ModalPressure::new([0,0])`
-**refuse** (`Domain`). **Aucune production de W n'a ce mode.** Donc : propriété de la **couche**,
-pas de la primitive, et une « primitive de W portant un volume » serait un déplacement du plan de
-repos, c'est-à-dire **B sous un autre nom**.
-
-**Ce que portent les autres couches** (lu dans les types, et dit comme tel) : `HydroNode.volume_ml`
-est un `i64` de millilitres — en V le volume **est** l'état ; `SeaState` n'a **aucun** champ de
-niveau moyen — « modifier le niveau moyen de B » n'existe pas encore, c'est un scalaire à ajouter.
+*(à remplir en cours de session)*
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
