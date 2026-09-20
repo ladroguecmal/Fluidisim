@@ -58,137 +58,89 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S311 — **terminée**. La frontière est une paroi, la sortie se lit sur une ligne
-de contrôle intérieure, et le cas contrôlé est reçu contre les deux seuils de T3.
+Session : S312 — **en cours**. Le premier transfert δ → W, sous la décision de l'utilisateur
+du 2026-09-20 : ce que W peut porter part vers W, ce qu'il ne peut pas est **chiffré et
+registré**, et le receveur du volume net se cherche **d'abord dans B, δ et V**.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : la **décision de l'utilisateur du 2026-09-20** sur les tolérances, et le lancement du
-lot 2. T1 acceptée provisoirement, T2 comme objectif à éprouver sur la durée complète, T3 comme
-objectif initial **avec une précision qui commande cette session** :
+Entrée : la **décision de l'utilisateur du 2026-09-20**, « Retour δ → W et conservation du
+volume », en réponse à la question laissée ouverte par S311 (ADR-179 §3). Elle tranche cinq
+choses, et la troisième commande l'ordre de cette session :
 
-> « Il faut définir précisément la grandeur à restituer. L'éponge absorbe des perturbations dont le
-> volume net signé et la quantité absolue sont différents. Ces deux mesures ne doivent pas être
-> confondues. Je ne souhaite pas que le moteur crée artificiellement une nouvelle vague pour
-> compenser toute l'activité de l'éponge. Le transfert doit représenter la perturbation physique
-> **sortante**, compatible avec W, sans double comptage avec le fond B/W entrant. Les composantes
-> qui ne peuvent pas être représentées par W doivent être **identifiées**. »
+> 1. « **Option 1, limitée aux tests.** […] tout volume non restitué doit être comptabilisé et
+>    publié séparément […] Le prototype ne pourra pas être déclaré conforme à la conservation
+>    globale tant qu'un receveur approprié n'aura pas été construit. »
+> 2. « **Ne pas imposer artificiellement le volume net à W.** […] La troisième catégorie ne se
+>    limite pas nécessairement au volume net : une perturbation de moyenne nulle peut également
+>    présenter une forme, une direction ou un spectre incompatibles avec les primitives
+>    existantes. Ne présumez donc pas qu'en supprimant la moyenne, le reste devient
+>    automatiquement transférable. »
+> 3. « **Destination du volume net.** […] étudier **en priorité** la possibilité de conserver le
+>    volume net à travers **V** ou une modification du **niveau moyen de B** […] Il ne faut pas
+>    créer une nouvelle primitive dans W avant d'avoir vérifié si cette responsabilité relève
+>    déjà d'une autre couche. »
+> 4. Six points de progression, « la référence doit rester le **signal physique sortant**, pas
+>    simplement l'intégrale de son volume » ; T3 « évalué sur le transfert effectivement
+>    réalisé, avec des critères adaptés à la grandeur testée » ; réflexion mesurée à part.
+> 5. « Ne lancez pas de refonte générale de W ou de nouvelle campagne de rendu. Construisez
+>    d'abord le **transfert minimal physiquement cohérent**, en réutilisant autant que possible
+>    les interfaces existantes. »
 
-Capacité visée : **le dépôt sait ce qui sort d'un domaine δ, le mesure sur un cas contrôlé, et
-sait ce que W peut en recevoir.** Consommateur : la construction du transfert lui-même, qui est la
-suite immédiate. Sans cette phase, le transfert n'aurait ni grandeur de référence, ni normalisation
-d'erreur, ni moyen de distinguer ce qui est transmis de ce qui est perdu — c'est-à-dire exactement
-les trois choses que l'utilisateur demande.
+Capacité visée : **un transfert δ → W existe, tourne, et publie séparément ce qu'il transmet, ce
+qu'il met en attente de restitution et ce qu'il perd numériquement.** Consommateur : le bilan
+global du couplage (point 6), puis la réponse à « ce qui manque véritablement à W » que
+l'utilisateur veut tirer du premier couplage.
 
-**Ce que je ne fais pas dans cette session, et je le déclare d'avance** : écrire le transfert.
-L'utilisateur demande une progression « à partir du cas physique le plus simple permettant de
-démontrer un transfert réel, mesuré et reproductible », et sa liste commence par *« qu'une
-perturbation sortante est correctement identifiée à la frontière de δ »*. C'est ce point 1, plus
-les instruments des points 4 et 5. Les points 2 et 3 — le transfert et sa propagation dans W —
-viennent ensuite, et cette session doit leur laisser un terrain mesuré.
+**Ce que je ne fais pas, et je le déclare d'avance** : aucune refonte de W, aucune nouvelle
+primitive de W, aucune campagne de rendu (point 5) ; aucune revendication de conformité à la
+conservation globale (point 1) ; aucune revendication d'énergie ni de quantité de mouvement
+comme **bilan** (ADR-179 D7) — l'énergie ne sert ici que de **paramètre** d'une primitive
+existante et de grandeur de jauge, exactement comme la réflexion de S311.
 
-Ce que je ne fais pas non plus : revendiquer une conservation d'énergie ou de quantité de
-mouvement (leurs bilans ne sont pas fermés, S310 §4) ; ouvrir un chantier de rendu ; imposer le
-budget temps réel au solveur de référence.
-
-**La question de fond, posée avant de mesurer.** Le pas calcule une vitesse normale aux faces
-extérieures, et la garde `a > 0 && a < n` de `transport_coupled3` **jette** le flux de colonne
-qu'elle porterait. Si cette vitesse est non nulle, alors le flux sortant *existe déjà*, il est
-calculé, et il est perdu à chaque pas — et c'est lui, et non l'activité de l'éponge, qui est « la
-perturbation physique sortante » que l'utilisateur décrit. Si elle est nulle, la sortie devra être
-construite autrement. **Je ne sais pas laquelle des deux, et P3 le mesure avant tout le reste.**
+**La question de fond, posée avant de mesurer.** S311 a montré que l'impact de W porte de
+l'énergie et **pas de volume**. Deux questions restent, et elles décident du reste :
+1. Est-ce une propriété de la **primitive impact**, ou de la **couche W** ? Si les trois
+   productions de W (impact radial, champ périodique, source de pression mobile) portent toutes
+   un volume net nul, alors « W n'a pas de moyenne » est une propriété de couche, et le point 3
+   de l'utilisateur a sa réponse : le volume net relève de **B ou de V**, pas d'une primitive à
+   créer. **Je ne le sais pas, et P3 le mesure.**
+2. Le cas contrôlé de S311 est-il seulement **admissible** par W ? Ses champs exigent l'eau
+   profonde ; le canal de S311 a `λ/h₀` = 12. **P5 le mesure**, et s'il refuse, le transfert
+   demande un second cas contrôlé en eau profonde — ce qui est une découverte, pas un contournement.
 
 Critères, écrits avant la mesure :
-1. La grandeur à restituer est **définie et défendue** avant d'être mesurée, et le **net signé**
-   n'est jamais confondu avec la **quantité absolue**.
-2. Le cas de T3 est **contrôlé** : perturbation sortante identifiable, grandeur de référence non
-   nulle, erreur normalisée par elle et déclarée d'avance.
-3. Ce que W **ne peut pas** représenter est nommé, et son devenir n'est pas compté comme une
-   restitution réussie.
-4. La réflexion est mesurée **en 3D**, directement, pas transportée de S269.
-5. Les scènes antérieures restent **au bit** ; aucune revendication d'énergie.
+1. Le receveur du volume net est cherché **dans les couches existantes d'abord**, et la réponse
+   est **mesurée** sur les primitives, pas déduite d'une lecture.
+2. Les trois catégories de l'utilisateur sont publiées **séparément** à chaque pas, et la
+   deuxième n'est jamais comptée comme restituée.
+3. Ce qui n'est pas représentable par W est nommé **au-delà du volume net** — forme, direction,
+   spectre, phase, régime.
+4. Le transfert construit est **vérifié** sur la grandeur qu'il transporte : amplitude,
+   longueur d'onde dominante, direction, propagation.
+5. La réflexion artificielle reste mesurée **indépendamment**, et les scènes antérieures
+   restent au bit.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — [ADR-179](../docs/adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md) :
-  huit décisions. **D3 sépare trois grandeurs que S310 mesurait ensemble** ; D2 dit que T2 n'est
-  **pas** encore tenue — 5 s mesurées pour 10 s demandées.
-- [x] **P3** — **réponse : non.** La vitesse normale aux faces extérieures vaut **0 exactement**,
-  quand le champ atteint 0,60 m/s à l'intérieur. Le domaine est une **boîte fermée** ; le transport
-  ne jette rien, il n'y a rien à jeter. **Le flux sortant est à construire, pas à récupérer.**
-- [x] **P4** — `examples/sortie_canal.rs` : une onde longue traverse une **ligne de contrôle
-  intérieure**. À `λ/h₀ = 24` : erreur de restitution **0,148 %**, retour **0,215 %**. Deux erreurs
-  de montage trouvées par la mesure, pas par la relecture.
-- [x] **P5** — W n'a que **deux** primitives, impact radial et sillage ; **l'impact porte de
-  l'énergie, pas du volume** (−3,6·10⁻⁷ m³ mesurés pour 0,01 J). Le volume net n'a pas de receveur.
-- [x] **P6** — la décomposition se lit sur la **ligne de contrôle** : ce qui la traverse vers la
-  droite est l'onde (99,85 % du volume au cas de réception), le reste est la traîne dispersive.
-- [x] **P7** — jauge sur la ligne, fenêtres séparées par la géométrie (7,66 s contre 15,33 s) :
-  **réflexion en énergie 1,48·10⁻⁶**, quatre ordres sous le seuil de 1 %, mesurée **en 3D**.
-- [x] **P8** — [SORTIE-DELTA-S311](../docs/validation/SORTIE-DELTA-S311.md). **Une question à
-  trancher y est posée** : le volume net sortant n'a pas de receveur dans W — le perdre, étendre W,
-  ou choisir une surface où il est nul.
-- [x] **P9** — rituel REPRISE §6.
+- [>] **P1** — amorce, jeton, plan seul.
+- [ ] **P2** — ADR-180 : la décision de l'utilisateur du 2026-09-20, actée décision par décision.
+- [ ] **P3** — *le receveur du volume net, mesuré* : volume net des trois productions de W ;
+  ce que V porte (entiers, mL) ; ce que le niveau moyen de B porte. Réponse au point 3.
+- [ ] **P4** — le **registre** : les trois volumes de l'utilisateur publiés séparément à chaque
+  pas, réutilisant `Balance3`, sans jamais compter l'attente comme une restitution.
+- [ ] **P5** — *W est-il admissible sur le cas de S311 ?* Régime, pente, portée : mesurés sur la
+  primitive, pas lus.
+- [ ] **P6** — le cas contrôlé du **transfert** : perturbation sortante que W peut recevoir,
+  volume net et composante de moyenne nulle séparés sur la ligne de contrôle.
+- [ ] **P7** — le **transfert lui-même**, minimal, par les interfaces existantes.
+- [ ] **P8** — vérification : amplitude, longueur d'onde, direction, propagation ; T3 sur le
+  transfert effectivement réalisé ; réflexion à part.
+- [ ] **P9** — preuve publiée : transféré, en attente, perdu, et le bilan global sans double
+  comptage.
+- [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
 
-**P3 a renversé la moitié du plan, et il valait mieux le mesurer que le supposer.**
-
-Mesuré sur la scène couplée à fond spectral réel : `vitesse_normale_de_bord_max = 0` **exactement**,
-`vitesse_max_du_champ = 0,605 m/s`. Le flux sortant vaut donc `0` non parce que la garde du
-transport le jette, mais parce qu'**il n'existe pas** : `close_walls` met les faces normales
-extérieures à zéro, et rien dans le pas ne les rouvre — la projection à Neumann préserve ce zéro.
-
-**Conséquence, et elle est structurelle.** Un domaine δ est une **boîte fermée**. L'éponge n'est
-pas une frontière absorbante au sens des ondes : c'est une **région d'amortissement à l'intérieur
-d'une boîte**. Rien ne traverse la frontière ; la perturbation est éteinte avant de l'atteindre.
-« δ ne ressort pas vers W » est donc plus fort que ce que S310 disait : ce n'est pas un chemin
-manquant, c'est une **paroi**.
-
-**Ce que cela change pour le lot 2.** Deux voies, et la seconde est la bonne pour un premier cas :
-1. **ouvrir la frontière** — condition de radiation sur les caractéristiques. Gros lot, et il
-   change le schéma ;
-2. **mesurer la perturbation sortante sur une surface de contrôle intérieure** — la **ligne
-   intérieure de la bande d'éponge**, où l'onde est encore intacte. Cette ligne est une face
-   **intérieure** : `transport_coupled3` calcule déjà son flux, et il n'est pas nul. On lit ce qui
-   la traverse vers l'extérieur, et c'est cela qui part vers W.
-
-La voie 2 ne touche pas au schéma, se mesure avec le compteur existant, et respecte ADR-179 D3 :
-ce qui traverse la ligne **sort**, alors que l'activité de l'éponge mélange trois choses. Elle
-demande en revanche de séparer sortant et entrant sur cette ligne — ce qu'un **cas contrôlé**, où
-rien n'entre, rend trivial. C'est exactement pourquoi l'utilisateur en demande un.
-
-**P4 : le cas contrôlé marche, après deux erreurs de montage que seule la mesure a dites.**
-
-1. **`λ/h₀ = 4` n'est pas une onde longue.** La condition initiale est la solution d'onde simple
-   des équations en **eau peu profonde** ; le solveur est complet et **dispersif**. À `λ/h₀ = 4`,
-   la bosse se sépare en une onde progressive et une **traîne dispersive** qui traverse la ligne
-   dans les deux sens : retour de 36 %, **insensible au taux de l'éponge** — c'est ce qui a
-   disculpé l'éponge et accusé la dispersion.
-2. **L'éponge est symétrique.** `width_x` s'applique aux **deux** bords `x` ; la bosse, placée à
-   `3σ`, démarrait *dedans*, et l'éponge de gauche en effaçait **14,7 %** avant le premier pas.
-   Signature : une erreur de restitution constante à 14,7 % **quel que soit** `λ/h₀`.
-
-| `λ/h₀` | retour relatif | erreur de restitution |
-|---:|---:|---:|
-| 8 | 7,30 % | 1,28 % |
-| 16 | 0,646 % | 0,328 % |
-| **24** | **0,215 %** | **0,148 %** |
-
-Le retour s'effondre comme la dispersion diminue : **c'était bien elle**, démontré et non supposé.
-Résidu du bilan ≤ 3·10⁻¹² m³ partout, `outgoing` nul partout — la paroi tient.
-
-**P5 : ce que W peut recevoir, et le point dur.** W n'a que deux primitives de production —
-l'**impact** radial (`wave_event.rs` : énergie, longueur d'onde, direction, anisotropie, TTL) et le
-**sillage** le long d'une trajectoire. Aucune ne représente un front quelconque sortant d'un bord.
-Et surtout : **l'impact de W porte de l'énergie, pas du volume**. Mesuré — l'essai
-`initial_energy_in_disk_and_volume_residual` du dépôt imprimait déjà le chiffre sans jamais
-l'affirmer : `disk_volume = −3,6·10⁻⁷ m³` pour 0,01 J, c'est-à-dire **zéro à la quadrature près**.
-
-**Conséquence, et elle est plus intéressante que prévu.** La grandeur de référence que le cas
-contrôlé mesure — un **volume net** sortant — est précisément la composante qu'**aucune primitive
-de W ne peut porter**. Le cas prouve donc deux choses d'un coup : que la perturbation sortante est
-correctement identifiée (point 1 d'ADR-179 D8), et que ce qu'il identifie **ne peut pas être remis
-à W en l'état**. C'est exactement l'identification qu'ADR-179 D5 exige.
+*(à remplir en cours de session)*
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
