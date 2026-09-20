@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 23:57 +02:00
+JETON            : libre
+Battement        : 2026-09-20 23:58 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S315 — les deux vérifications dues à l'ordre B : la **phase à dix longueurs d'onde** contre un oracle indépendant, et l'**oblique à la frontière**
-Dernière session : S314 — **ordre B** : `WaveTrain`, la primitive orientée de W. La direction passe de **0,500 à 1,00000**, le spectre de deux octaves à **3,5 %**, la phase devient possible (régression 0,9938), la célérité tombe à **0,035 %** ([preuve](docs/validation/TRANSFERT-ORIENTE-S314.md), [ADR-182](docs/adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md))
-Session suivante : l'**ordre C** — vérification conjointe des six propriétés, en distinguant ce qui revient à la primitive, au raccord et à δ
-Maillons        : 0 — capacité S314 : **W porte un train orienté, à bande étroite et à phase prescrite**, et le transfert δ → W le lui donne depuis le signal mesuré ; consommateur : l'ordre C, la vérification conjointe des six propriétés, qui n'avait aucune primitive capable de les porter toutes
+Session en cours : —
+Dernière session : S315 — **l'oblique à la frontière** : la direction se **lit** (0,00° à 0°) et le raccord ne crée **aucune composante transverse** (miroir 10⁻⁶–10⁻⁷) ; mais la **phase à dix longueurs d'onde est indéterminée** — une phase ne vaut que modulo un tour (A307) ([preuve](docs/validation/ORACLE-ET-OBLIQUE-S315.md), [ADR-183](docs/adr/ADR-183-essai-oblique-phase-a-distance-et-ordre-c.md))
+Session suivante : l'**ordre C** — les six propriétés ensemble, chacune **attribuée** à la primitive, au raccord ou à δ ; §7 de la preuve de S315 en est l'entrée. Le déroulement de phase (A307) en est le préalable
+Maillons        : 0 — capacité S315 : **le raccord lit une direction qu'on ne lui a pas soufflée et n'en fabrique aucune**, et le dépôt sait pourquoi une phase ne se compare pas à distance par ses extrémités ; consommateur : l'ordre C, dont l'entrée est le tableau d'attribution de §7
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

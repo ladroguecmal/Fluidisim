@@ -113,8 +113,8 @@ domaine borné est une **étape** du δ général (ADR-127 D3).
 *État au 2026-09-20* — **reçu en 2D ; la 3D est la porte B** ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)). **Référence CPU 3D reçue** : HOS à 0,148 % / 0,178 %, couplage B/W ([S297](validation/DELTA3D-COUPLEE-S297.md)) ; cas limites S269–S274 à 1,19·10⁻⁷ m ([S298](validation/DELTA3D-FOND-REEL-S298.md)).
 
 La mer étalée **ne se juge pas sur un banc CPU** (S298 §5) : elle demande la production GPU.
-**S301 l'a complète**, chaque étage reçu contre le cœur ; elle suit la référence à 2·10⁻⁵ m
-jusqu'à l'**horizon de la référence elle-même** (1,1–1,3 s, A297), 0,84 ms à 64 cycles
+**S301 l'a complète**, chaque étage reçu contre le cœur ; elle suit la référence à 2·10⁻⁵ m jusqu'à
+l'**horizon de la référence** (1,1–1,3 s, A297), 0,84 ms à 64 cycles
 ([S299](validation/DELTA3D-GPU-S299.md),
 [S300](validation/DELTA3D-FOND-GPU-S300.md), [S301](validation/DELTA3D-PAS-GPU-S301.md)).
 **S302 : la scène tourne** — 30 × 28 m à 25 cm, rendu en direct à 197 Hz
@@ -131,22 +131,22 @@ multigrille, frontières (ADR-143 à 169) — [S253](validation/SURFACE-COUPLEE-
 [182](adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md)). Bilan de masse exact par
 télescopage, **A302 chiffrée** ([S310](validation/BILAN-MASSE-S310.md)) ; la frontière est une
 **paroi**, la sortie se lit sur une **ligne de contrôle intérieure**
-([S311](validation/SORTIE-DELTA-S311.md)) ; le premier transfert existe et dit ce qui manque — **W
-n'a de mode `k = 0` nulle part**, il est en **eau profonde**, son impact est **isotrope**
+([S311](validation/SORTIE-DELTA-S311.md)) ; le premier transfert existe et dit ce qui manque — **W n'a de mode
+`k = 0` nulle part**, il est en **eau profonde** et **isotrope**
 ([S312](validation/TRANSFERT-DELTA-W-S312.md)). **Ordre A** : loi du résidu `u₃₂·activité/√N`,
-fuite de bilan vue à **10⁻¹³ m³/pas**, fuite d'état **invisible** — T1 et T2 non redondantes —,
-**T2 tenue sur 10 s** ([S313](validation/PLANCHER-BILAN-S313.md)). **Ordre B** : `WaveTrain`,
-somme d'ondes planes bornée en bande et en secteur, horizon et rayon **calculés** — direction
-**1,00000** pour 0,500, bande **3,5 %** pour deux octaves, phase possible, célérité **0,035 %**
-([S314](validation/TRANSFERT-ORIENTE-S314.md)). Restent dus : l'**oblique à la frontière**, la
-phase **à distance**, et les ordres C à E.
+fuite de bilan vue à **10⁻¹³ m³/pas**, fuite d'état **invisible**, **T2 tenue sur 10 s**
+([S313](validation/PLANCHER-BILAN-S313.md)). **Ordre B** : `WaveTrain`,
+ondes planes bornées en bande et en secteur, horizon et rayon **calculés** — direction **1,00000**
+pour 0,500, bande **3,5 %**, célérité **0,035 %** ([S314](validation/TRANSFERT-ORIENTE-S314.md)).
+**S315, l'oblique à la frontière** : la direction se **lit**, et le raccord ne crée **aucune
+composante transverse** (miroir 10⁻⁶–10⁻⁷) ; la **phase à dix longueurs d'onde reste indéterminée**
+(A307) ([S315](validation/ORACLE-ET-OBLIQUE-S315.md)). Restent : les ordres C à E.
 
 *Manque* : cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité (B10) ; phase
 δ/B (A289) ; A274 ; A286 ; **compteur carte, énergie, quantité de mouvement, sens W → δ** (A302) ;
 **résidu biaisé en cas ouvert** (A305).
 
-*Bancs* : **B3** (famille de δ), **B4** (volets restants), **B5** (blocs épars), **B10** (cavité
-d'entrée). *Cas* : C01, C03, C04, C05, C06, C08, C09, C20, C22, C23.
+*Bancs* : **B3**, **B4**, **B5**, **B10**. *Cas* : C01, C03 à C06, C08, C09, C20, C22, C23.
 
 ### V-noyau — ouvert au plus tard avec J2
 

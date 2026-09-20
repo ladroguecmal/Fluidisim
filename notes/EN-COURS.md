@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S315 — **en cours**. Les deux vérifications que S314 devait à l'ordre B : **la phase à
+Session : S315 — **terminée**. Les deux vérifications que S314 devait à l'ordre B : **la phase à
 dix longueurs d'onde**, contre un oracle indépendant, et **l'oblique à la frontière**.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : la **décision de l'utilisateur du 2026-09-20 (S314)**, « Primitive orientée et poursuite
@@ -134,7 +134,7 @@ Critères, écrits avant la mesure :
 - [x] **P8** — essai 3 c : **balayage de l'angle d'incidence**.
 - [x] **P9** — preuve publiée : les six propriétés, chacune attribuée à la primitive, au raccord
   ou à δ.
-- [ ] **P10** — rituel REPRISE §6.
+- [x] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
 

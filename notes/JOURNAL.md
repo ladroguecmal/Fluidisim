@@ -15996,3 +15996,83 @@ pour alimenter le train) et P9+P10. P8 rendu **à moitié**, et marqué `[~]` pl
 biais d'instrument trouvés et corrigés dans la session, tous parce que la réponse attendue était
 connue d'avance (L357) : coordonnées relatives données à `sample`, normalisation de projection à
 `1/√2`, fenêtres de direction recouvrant le paquet, et l'estimateur de fréquence.
+
+## S315 — 2026-09-20 — l'oblique ne fabrique aucune direction, et la phase à distance n'est pas mesurable ainsi
+
+**Entrée.** La décision de l'utilisateur du 2026-09-20 (S314) : essai oblique autorisé, puis ordre
+C ; le transfert **reste partiel**. Deux vérifications dues — l'oblique **à la frontière**, et la
+phase **à dix longueurs d'onde** contre un oracle indépendant.
+
+**Acté.** [ADR-183](../docs/adr/ADR-183-essai-oblique-phase-a-distance-et-ordre-c.md), neuf
+décisions. D1 déplace l'essai oblique de la primitive vers le **raccord**. D2 exige que l'oracle
+soit **une autre physique** — et exclut explicitement le train, qui propage exactement par
+construction. D3 interdit de rattraper une phase par une amplitude **ou par un décalage**. D5 fait
+de l'**attribution** le cœur de l'ordre C.
+
+**L'oracle.** δ sert d'oracle à lui-même : **deux lignes de contrôle** séparées de dix longueurs
+d'onde, le train émis depuis la première, δ vivant jusqu'à la seconde. Le train prédit, δ constate.
+
+**La prédiction, écrite avant que le banc existe** : à fréquence égale et nombre d'onde différent,
+la phase se sépare linéairement avec la distance. Depuis les seules mesures de S314 : **−0,853 tour
+à 25 cm, −0,165 à 12,5 cm, −0,0072 à 6,25 cm** — deux ordres de grandeur entre les extrêmes, donc
+un vrai test.
+
+**Ce que l'oracle établit.** Le périodogramme **spatial** retrouve `k_δ` = 3,1395 pour 3,1416 posé
+— **0,07 %** — sans rien supposer de la condition initiale. Le terme d'espace tombe **exactement**
+sur la prédiction : −0,1655 mesuré contre −0,165 annoncé. Et deux propriétés de δ que personne
+n'avait chiffrées sur ce trajet : **6,3 % de dissipation** sur dix longueurs d'onde, et une vitesse
+de groupe **7,5 % sous** celle du train.
+
+**Ce qu'il n'établit pas, et pourquoi.** Il reste un résidu de phase que le modèle n'explique pas.
+Le **balayage de séparation** le qualifie — 0,058 à 1 λ, 0,064 à 3 λ, **0,356 à 10 λ** : il
+**croît**, donc ce n'est pas un décalage d'instrument. La raison est structurelle : **une phase
+n'est connue que modulo un tour**, et dès que les vitesses de groupe diffèrent le train et δ
+n'arrivent plus ensemble — 1,66 s, soit **1,46 tour** de porteuse. Plusieurs enroulements sont
+compatibles, et rien dans ce banc ne tranche. **La phase à dix longueurs d'onde est indéterminée :
+ni validée, ni invalidée.** Le remède est nommé — dérouler la phase le long du trajet — et n'est
+pas construit (**A307**). Ce que je n'ai **pas** fait et qui aurait « marché » : décaler le train
+de 1,66 s. D3 l'interdit, et cela n'aurait rien mesuré.
+
+**L'essai oblique, et son résultat le plus net.** Rien dans l'extraction ne connaît l'angle : la
+direction se mesure par périodogramme **à deux dimensions** sur `η(y, t)`, le signe de `k_y` venant
+du couplage espace-temps. Trois angles :
+
+| `θ` posé | `θ` lu | écart | **miroir transverse** |
+|---:|---:|---:|---:|
+| 0° | **0,00°** | **0,000°** | *(sans objet)* |
+| 20° | 22,57° | 2,57° | **1,28·10⁻⁶** |
+| 40° | 45,10° | 5,11° | **2,09·10⁻⁷** |
+
+**Le raccord ne crée aucune composante transverse artificielle** — le miroir `−k_y` vaut 10⁻⁶ à
+10⁻⁷ de la composante utile. Troisième point de la décision, tenu net. L'écart d'angle
+**s'attribue** : `ω` lue à −3,3 % (dispersion de δ à huit mailles par longueur d'onde, celle que
+S314 a vue converger) et `k_y` à +4–5 % (largeur spectrale d'un paquet court), qui s'additionnent
+puisque `θ = asin(k_y/k)`. Prévu, **non mesuré** : que l'écart converge avec la maille.
+
+**Deux fois le contrat a attrapé quelque chose.** Il a **refusé la distance** demandée — l'enveloppe
+s'élargit de 11 % sur les cinquante secondes nécessaires, pour 10 % admis. J'ai **déclaré**
+l'élargissement (`TrainSpec::spread_limit`) au lieu de relever la constante, ce qui l'aurait fait
+en silence pour tous les appelants. Puis il a **refusé le train oblique** (`Envelope`) : l'enveloppe
+valait une longueur d'onde *posée* pour une longueur d'onde *lue* plus grande. La chaîne est fermée
+par un essai unitaire sur les `(k_x, k_y)` **mesurés** — direction portée à **0,05°** près.
+
+**Deux fautes de méthode.** Comparer deux phases référencées à **deux instants différents** (1,45
+tour d'origine, lu comme 0,38 tour « inexpliqué »). Et surtout : deux exécutions périmées
+**verrouillaient l'exécutable**, `cargo build` échouait, son erreur était **avalée par un filtre**,
+et l'ancien binaire tournait. Une mesure de phase calculée par la version d'avant a failli être
+publiée (**L362**).
+
+**Limites.** Oblique à **une maille** et trois angles ; la convergence de l'écart d'angle est
+attribuée, non mesurée. Le montage oblique n'a **qu'un milieu** : la conservation de la composante
+tangentielle à une **discontinuité** n'est pas éprouvée, et aucune réflexion n'y est mesurée.
+L'oracle suppose une enveloppe gaussienne et une porteuse unique. Le volume net reste **intégralement
+en attente**. Le couplage reste à **un sens** (A302).
+
+**Rituel.** Maillons **0**. Capacité : **le raccord sait lire une direction qu'on ne lui a pas
+soufflée, et il n'en fabrique aucune** ; et le dépôt sait désormais **pourquoi** une phase ne se
+compare pas à distance par les extrémités. Consommateur nommé : l'ordre C, dont §7 de la preuve est
+l'entrée — chaque propriété avec son écart et son attributaire. Preuve : ORACLE-ET-OBLIQUE-S315.
+Deux leçons : L362, L363. Un angle mort : A307.
+
+*Tenue du plan* : dix étapes, **deux fusions déclarées** (P5..P9 ; le balayage de séparation ajouté
+en cours de P4 comme discriminant). Battement reporté de l'horloge à chaque commit.
