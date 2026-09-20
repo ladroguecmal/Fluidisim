@@ -104,12 +104,12 @@ Critères, écrits avant la mesure :
 - [x] **P6** — le **miroitement du soleil** : hypothèse **réfutée** par la mesure. Le coupable est
   la courbe elle-même. *(Étape de vérification seule ; la construction devient P7 — découpage
   déclaré, aucune étape de plus d'un quart d'heure.)*
-- [ ] **P7** — la courbe contre les **quatre** cibles à la fois : recherche à deux étages, critère
-  déclaré, instrument versionné.
-- [ ] **P8** — diffusion aux crêtes et écume, **jugées contre la cible** : construites si la mesure
-  les demande, déclarées en file si elle dit le contraire. Rien n'est retiré du périmètre : les six
-  postes du verdict R14 restent dus (ADR-127).
-- [ ] **P9** — images soumises (R15), preuve.
+- [x] **P7** — la courbe contre les **quatre** cibles à la fois : `outils/courbe_tonalite.py`.
+  **Le reste de l'écart n'est pas tonal, il est spatial.** Et le lot du rendu s'arrête là.
+- [ ] **P8** — *(nouvelle consigne, reçue en cours de session)* **la stratégie en trois systèmes
+  confrontée à l'état réel du dépôt** : ce qui existe pour A, B et C, les interfaces manquantes,
+  les dépendances qui bloquent l'assemblage.
+- [ ] **P9** — l'ordre de réalisation vers la 3D et le couplage, en réutilisant l'existant.
 - [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
@@ -339,6 +339,53 @@ fraction claire de 0,174 à 0,103 sans toucher à la teinte.
 luma redonne les chiffres du GPU à 2 % près — `0,1956 / 27,84 / 0,3830 / 0,17402` contre
 `0,1923 / 28,40 / 0,3821 / 0,17470`. **La recherche peut donc se faire hors GPU**, à condition de
 revérifier le gagnant sur la carte. C'est ce que fait P7.
+
+## P7 — la courbe ne peut pas fermer l'écart, et ce qui reste n'est pas de la tonalité
+
+`outils/courbe_tonalite.py` cherche `(e, g, w)` contre les **quatre** cibles à la fois, sur un
+rendu fait *sans courbe* : la courbe ne touchant qu'à la luminance, les statistiques de luma se
+recalculent sans refaire l'image. La courbe est croissante, donc les centiles se lisent dans un
+tableau trié **une seule fois** — 6 300 candidats en quelques secondes. Le contraste local, lui,
+demande la fenêtre 9 × 9 : il n'est calculé que sur la liste courte. Critère déclaré avant la
+mesure : minimiser le **pire** écart relatif logarithmique sur les quatre grandeurs.
+
+Le premier étage atteint **0,058** de pire écart sur trois grandeurs (creux, dynamique, fraction
+claire) — la photographie est donc rattrapable sur son histogramme. Puis le second étage tombe,
+et il tombe **de la même façon pour les huit meilleurs candidats** :
+
+| | `p05/p50` | dynamique | **contraste local** | fraction claire | pire écart |
+|---|---:|---:|---:|---:|---:|
+| **photo** | 0,193 | 23,7 | **0,455** | 0,074 | — |
+| `3,096 ; 1,55 ; 11,31` | 0,178 | 23,8 | **0,318** | 0,082 | 0,357 |
+| `4,458 ; 1,60 ; 2,83` | 0,176 | 23,8 | **0,318** | 0,071 | 0,358 |
+| `2,580 ; 1,45 ; 11,31` | 0,197 | 21,2 | **0,311** | 0,072 | 0,380 |
+| … les huit | … | … | **0,311 – 0,318** | … | … |
+
+**Les huit meilleurs réglages donnent le même contraste local, à 2 % près, et il manque 30 %.**
+Aucun n'est limité par autre chose : sur les huit, `cible_la_plus_dure` vaut `contraste`.
+
+**Ce que cela démontre.** Le contraste local est une propriété **spatiale** — l'écart-type de luma
+dans une fenêtre de neuf pixels. Une courbe de tonalité est une fonction **point à point** : elle
+ne peut que redistribuer l'histogramme, pas créer de la structure à l'échelle de la fenêtre. Le
+réglage précédent (`1 ; 1,4 ; 6`) obtenait 0,382 — mais en payant une fraction claire de 0,175
+pour 0,074 visés, c'est-à-dire en fabriquant du mouchetage clair que la mesure compte comme du
+contraste. **Il n'y a donc pas de réglage à trouver : ce qui manque est dans l'image, pas dans la
+courbe.** C'est la mer elle-même — détail de surface à l'échelle de quelques pixels — et
+l'utilisateur avait suspendu les lots de forme.
+
+**Vérifié sur la carte**, et c'est la règle : `3,096 ; 1,55 ; 11,31` rendu par le GPU donne
+`0,1800 / 23,65 / 0,3186 / 0,0824` contre `0,1781 / 23,80 / 0,3182 / 0,0815` prévus — 1 %.
+
+**Une leçon d'instrument, et c'est la deuxième fois.** La détection automatique d'horizon s'est
+encore trompée sur un de ces rendus, et a donné `0,3652 / 15,11 / 0,4890 / 0,1046` là où la mer
+seule donne `0,1766 / 22,81 / 0,3082 / 0,0528`. P4 l'avait déjà constaté et avait publié la
+hauteur de chute pour le signaler. **Cela ne suffit pas** : comparer des rendus entre eux demande
+`--horizon=<y>` **forcé**, toujours. À inscrire en leçon au rituel.
+
+**Ce qui n'a pas été fait, et qui reste dû** *(ADR-127 : rien n'est retiré du périmètre)* :
+diffusion sous la surface aux crêtes, écume de Monahan, et la structure fine de la mer que le
+contraste local réclame. L'utilisateur a redirigé la session vers la physique ; ces trois postes
+partent en file, non construits, avec leur cible chiffrée — c'est-à-dire prêts.
 
 ## Archive — notes de S304 (lot de la mer, en attente du verdict R12)
 
