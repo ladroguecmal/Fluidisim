@@ -53,7 +53,7 @@ mod host_impl;
 
 use water_core::{
     background::BackgroundSample,
-    delta3d::{BackgroundFaces3, Domain3, Sponge3, Volume3},
+    delta3d::{BackgroundFaces3, Closure3, Domain3, Sponge3, Volume3},
     host::HostServices,
     SimTime,
 };
@@ -75,6 +75,7 @@ fn demi_ulp(x: f32) -> f64 {
 }
 
 struct Mesure {
+    critere: Closure3,
     colonnes: usize,
     pas: u64,
     pire_residu: f64,
@@ -89,7 +90,21 @@ struct Mesure {
 /// Un pas de cuve **fermée** — aucun fond, aucune éponge : `band_in`, `perturbation_in` et
 /// `sponge_out` valent zéro, et le résidu **est** la dérive de volume du pas. C'est le cas le plus
 /// nu qui existe : ce qu'il mesure ne peut venir que de la représentation et de l'arithmétique.
-fn mesure(dx: f32, a: f32, dt_us: u64, duree_s: f64, ouvert: bool) -> Result<Mesure, String> {
+/// `fuite_bilan` s'ajoute au **résidu** avant le critère : elle émule un pas qui retire de l'eau
+/// sans la déclarer, ce qu'un défaut de solveur ferait, et elle est **exacte**. `fuite_etat`
+/// retire réellement du volume au champ, ce qui éprouve toute la chaîne — mais elle passe par
+/// `set_free_surface`, qui **remet à zéro la somme compensée** : son propre artefact vaut cinq
+/// ordres de plus que le plancher, et c'est pourquoi les deux niveaux existent au lieu d'un.
+fn mesure(
+    dx: f32,
+    a: f32,
+    dt_us: u64,
+    duree_s: f64,
+    ouvert: bool,
+    fuite_bilan: f64,
+    fuite_etat: f64,
+    reecriture: bool,
+) -> Result<Mesure, String> {
     let domain = Domain3 {
         nx: (LX / dx) as usize,
         ny: (LY / dx) as usize,
@@ -147,7 +162,17 @@ fn mesure(dx: f32, a: f32, dt_us: u64, duree_s: f64, ouvert: bool) -> Result<Mes
 
     let pas = (duree_s / (dt_us as f64 * 1e-6)) as u64;
     let depart = v.perturbation_volume();
+    let aire_maille = (dx * dx) as f64;
+    // La hauteur **compensée** `η − reste`, gardée d'un pas au suivant : c'est elle qui donne
+    // l'activité absolue, et elle seule — `η` seul manquerait ce que la compensation retient.
+    let mut precedente: Vec<f64> = v
+        .surface()
+        .iter()
+        .zip(v.surface_roundoff_for_trials())
+        .map(|(h, r)| (*h as f64) - (*r as f64))
+        .collect();
     let mut m = Mesure {
+        critere: Closure3::new(domain.columns()).map_err(|e| format!("critere {e:?}"))?,
         colonnes: domain.columns(),
         pas,
         pire_residu: 0.,
@@ -171,7 +196,28 @@ fn mesure(dx: f32, a: f32, dt_us: u64, duree_s: f64, ouvert: bool) -> Result<Mes
         };
         v.step_perturbation_mobile(time, dt_us, 60_000, &bg, sponge, &jobs)
             .map_err(|e| format!("pas {n}: {e:?}"))?;
+        if reecriture {
+            let offset = (fuite_etat / (domain.columns() as f64 * aire_maille)) as f32;
+            let nouvelle: Vec<f32> = v.surface().iter().map(|h| h - offset).collect();
+            v.set_free_surface(&nouvelle, H0).map_err(|e| format!("reecriture {e:?}"))?;
+        }
         let b = v.balance();
+        // Activité et volume absolu, sur la hauteur compensée.
+        let (mut activite, mut absolu) = (0f64, 0f64);
+        for (c, (h, r)) in v
+            .surface()
+            .iter()
+            .zip(v.surface_roundoff_for_trials())
+            .enumerate()
+        {
+            let compensee = (*h as f64) - (*r as f64);
+            activite += (compensee - precedente[c]).abs();
+            absolu += (compensee - H0 as f64).abs();
+            precedente[c] = compensee;
+        }
+        m.critere
+            .account(b.residual + fuite_bilan, activite * aire_maille, absolu * aire_maille)
+            .map_err(|e| format!("critere {e:?}"))?;
         m.pire_residu = m.pire_residu.max(b.residual.abs());
         m.residu_moyen += b.residual.abs();
         m.cumule_signe += b.residual;
@@ -185,6 +231,26 @@ fn mesure(dx: f32, a: f32, dt_us: u64, duree_s: f64, ouvert: bool) -> Result<Mes
     }
     m.residu_moyen /= pas as f64;
     Ok(m)
+}
+
+fn publie_critere(etiquette: &str, fuite: f64, m: &Mesure) {
+    let c = &m.critere;
+    println!(
+        "PLANCHER_S313 critere {etiquette} fuite_m3={fuite:e} pas={}          residu_absolu_pire_m3={:e} residu_absolu_moyen_m3={:e} relatif_pire={:e}          plancher_attendu_m3={:e} rapport_au_plancher={:e} cumule_signe_m3={:e}          cumule_absolu_m3={:e} forme_du_cumule={:e} racine_de_pas={:e}          derive_volume_m3={:e} volume_absolu_m3={:e} derive_sur_absolu={:e}",
+        c.steps(),
+        c.absolute_worst(),
+        c.absolute_mean(),
+        c.relative_worst(),
+        c.expected_floor(),
+        c.over_floor(),
+        c.cumulative_signed(),
+        c.cumulative_absolute(),
+        c.random_walk_ratio(),
+        (c.steps() as f64).sqrt(),
+        m.derive_volume,
+        m.volume_absolu,
+        m.derive_volume / m.volume_absolu
+    );
 }
 
 fn publie(etiquette: &str, dx: f32, a: f32, dt_us: u64, m: &Mesure) {
@@ -226,22 +292,24 @@ fn main() -> Result<(), String> {
         // Le point de départ : la cuve de S310, telle quelle, et la vérification que le résidu
         // **est** la dérive quand rien n'entre ni ne sort.
         "reference" => {
-            let m = mesure(0.25, 0.02, 1_000, 0.2, false)?;
+            let m = mesure(0.25, 0.02, 1_000, 0.2, false, 0., 0., false)?;
             publie("reference_fermee", 0.25, 0.02, 1_000, &m);
-            let m = mesure(0.25, 0.02, 1_000, 0.2, true)?;
+            publie_critere("reference_fermee", 0., &m);
+            let m = mesure(0.25, 0.02, 1_000, 0.2, true, 0., 0., false)?;
             publie("reference_ouverte", 0.25, 0.02, 1_000, &m);
+            publie_critere("reference_ouverte", 0., &m);
         }
         // H1 prédit **aucun** effet, H2 et H3 prédisent une proportionnalité.
         "amplitude" => {
             for a in [2e-4f32, 2e-3, 2e-2, 2e-1] {
-                let m = mesure(0.25, a, 1_000, 0.2, false)?;
+                let m = mesure(0.25, a, 1_000, 0.2, false, 0., 0., false)?;
                 publie("amplitude", 0.25, a, 1_000, &m);
             }
         }
         // H2 seule prédit un effet, et il doit être **linéaire**.
         "pas" => {
             for dt in [250u64, 500, 1_000, 2_000, 4_000] {
-                let m = mesure(0.25, 0.02, dt, 0.2, false)?;
+                let m = mesure(0.25, 0.02, dt, 0.2, false, 0., 0., false)?;
                 publie("pas", 0.25, 0.02, dt, &m);
             }
         }
@@ -249,8 +317,30 @@ fn main() -> Result<(), String> {
         // décroissance en `1/√N`, H3 une croissance en `N`.
         "resolution" => {
             for dx in [0.5f32, 0.25, 0.125] {
-                let m = mesure(dx, 0.02, 1_000, 0.2, false)?;
+                let m = mesure(dx, 0.02, 1_000, 0.2, false, 0., 0., false)?;
                 publie("resolution", dx, 0.02, 1_000, &m);
+            }
+        }
+        // **L'erreur volontaire, niveau exact** : une fuite d'un seul signe ajoutée au résidu,
+        // sans toucher au champ. Ce qu'on cherche n'est pas « est-elle vue » mais **à partir de
+        // quelle taille**, et par **lequel** des quatre indicateurs.
+        "fuite_bilan" => {
+            let temoin = mesure(0.25, 0.02, 1_000, 0.2, false, 0., 0., false)?;
+            publie_critere("temoin", 0., &temoin);
+            for fuite in [1e-16f64, 1e-15, 1e-14, 1e-13, 1e-12, 1e-11, 1e-10] {
+                let m = mesure(0.25, 0.02, 1_000, 0.2, false, fuite, 0., false)?;
+                publie_critere("fuite_bilan", fuite, &m);
+            }
+        }
+        // **L'erreur volontaire, niveau état** : du volume réellement retiré au champ. Le témoin
+        // porte la **réécriture à fuite nulle**, pour que le prix de la réécriture elle-même soit
+        // lisible à côté — c'est lui qui interdit d'éprouver une fuite fine par ce chemin.
+        "fuite_etat" => {
+            let temoin = mesure(0.25, 0.02, 1_000, 0.2, false, 0., 0., true)?;
+            publie_critere("temoin_reecriture", 0., &temoin);
+            for fuite in [1e-9f64, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4] {
+                let m = mesure(0.25, 0.02, 1_000, 0.2, false, 0., fuite, true)?;
+                publie_critere("fuite_etat", fuite, &m);
             }
         }
         autre => return Err(format!("balayage inconnu : {autre}")),

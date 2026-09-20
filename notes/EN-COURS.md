@@ -126,7 +126,7 @@ Critères, écrits avant la mesure :
 - [x] **P4** — le module du critère : les quatre grandeurs de l'utilisateur, publiées séparément.
 - [x] **P5** — balayage **amplitude**, à géométrie et pas fixés.
 - [x] **P6** — balayages **pas de temps** et **résolution**.
-- [ ] **P7** — **l'erreur volontaire** : fuite connue injectée, sensibilité de l'instrument
+- [x] **P7** — **l'erreur volontaire** : fuite connue injectée, sensibilité de l'instrument
   mesurée, plus petite fuite détectée publiée.
 - [ ] **P8** — T2 sur **10 s**, la durée demandée.
 - [ ] **P9** — la tolérance proposée, justifiée par la borne et les mesures ; preuve publiée.
@@ -821,3 +821,51 @@ Deux choix que P3 a rendus obligatoires :
 
 `random_walk_ratio` est le seul des quatre qui sépare un **bruit** d'une **fuite lente** : ≈ 1
 pour des signes alternés, `√pas` pour un seul signe. Six essais, dont les deux qui l'encadrent.
+
+**P7 — l'erreur volontaire, et elle apprend deux choses dont une n'était pas cherchée.**
+
+Deux niveaux d'injection, parce qu'ils ne posent pas la même question.
+
+**Fuite de bilan** — un écart d'un seul signe ajouté au résidu, sans toucher au champ : c'est ce
+qu'un défaut de solveur ferait s'il retirait de l'eau sans la déclarer.
+
+| fuite / pas | rapport au plancher | forme du cumulé |
+|---:|---:|---:|
+| 0 *(témoin)* | 3,00 | 0,741 |
+| 10⁻¹⁵ | 3,00 | 0,775 |
+| 10⁻¹⁴ | 3,01 | **1,08** |
+| **10⁻¹³** | **20,6** | **4,03** |
+| 10⁻¹² | 202 | 13,7 |
+| 10⁻¹¹ | 2 021 | **14,14 = √200** |
+
+**Sensibilité : 10⁻¹³ m³ par pas**, sans ambiguïté sur les deux indicateurs — soit **0,11 fois le
+plancher** et **3·10⁻¹²** du volume absolu. Le cumulé bouge dès 10⁻¹⁴ mais une seule réalisation ne
+suffit pas à l'affirmer. Et la forme du cumulé **sature à `√pas`** quand la fuite domine, comme la
+dérivation le prédisait.
+
+*Le rapport au plancher est plus sensible que le plancher du pire pas ne le laisse croire* : il
+prend le pire **rapport**, donc il attrape une fuite dès qu'elle dépasse le plancher du pas le
+plus **calme**, pas du plus actif.
+
+**Fuite d'état** — du volume réellement retiré au champ, et **c'est un résultat négatif** :
+
+| fuite / pas | résidu | rapport au plancher | **dérive / volume absolu** |
+|---:|---:|---:|---:|
+| 0 | 1,82·10⁻¹² | 3,67 | 1,86·10⁻⁵ |
+| 10⁻⁹ à 10⁻⁷ | **identique au bit** | 3,67 | 1,86·10⁻⁵ |
+| 10⁻⁶ | 2,73·10⁻¹² | 3,78 | **4,6·10⁻³** |
+| 10⁻⁴ | 2,44·10⁻¹² | 2,47 | **0,518** |
+
+**T1 est aveugle à cette fuite à toutes les tailles** — le résidu ne quitte jamais son plancher
+alors que le domaine perd **52 %** de son volume de perturbation. T2, la dérive, la voit
+immédiatement et proportionnellement.
+
+Ce n'est pas un défaut de l'instrument, c'est **sa portée** : le résidu ferme **un pas**, et une
+fuite qui a lieu **entre** deux pas est hors de son champ. **T1 et T2 ne sont donc pas
+redondantes** — chacune attrape exactement ce que l'autre laisse passer, et aucune seule ne suffit
+à parler de conservation.
+
+*Second fait, mesuré en passant* : de 10⁻⁹ à 10⁻⁷, les sorties sont **identiques au bit**. L'offset
+demandé (fuite/3 m) est sous `ulp(2,0)` = 2,4·10⁻⁷ m : **la fuite n'a pas lieu**, elle n'est pas
+représentable. C'est l'autre face de la somme compensée — elle sauve les incréments du pas, elle ne
+peut rien pour une écriture extérieure.
