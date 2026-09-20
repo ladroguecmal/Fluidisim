@@ -129,7 +129,7 @@ Critères, écrits avant la mesure :
 - [x] **P7** — **l'erreur volontaire** : fuite connue injectée, sensibilité de l'instrument
   mesurée, plus petite fuite détectée publiée.
 - [x] **P8** — T2 sur **10 s**, la durée demandée.
-- [ ] **P9** — la tolérance proposée, justifiée par la borne et les mesures ; preuve publiée.
+- [x] **P9** — la tolérance proposée, justifiée par la borne et les mesures ; preuve publiée.
 - [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
@@ -886,3 +886,20 @@ ce qui est un troisième contrôle de la borne sur un banc qui ne l'avait pas se
 
 ADR-179 D2 est donc rendue, et la note d'honnêteté de S311 (« T2 n'est pas tenue, 5 s pour 10 »)
 est levée **par la mesure**, pas par un changement de seuil.
+
+**P9 — trois seuils proposés, et le premier service du critère est de déclarer quelque chose
+non conforme.**
+
+| | proposition | ce qui la justifie |
+|---|---|---|
+| **C1** | rapport au plancher ≤ **10** | témoin 3,0 à 5,7 ; plus petite fuite détectée 20,6 |
+| **C2** | forme du cumulé ≤ **5**, sur ≥ 200 pas | témoin 0,06 à 2,93 sur 22 passages ; fuite à 10⁻¹² → 13,7 |
+| **C3** | T2 **inchangée** | mesurée 2,99·10⁻⁹ et 5,77·10⁻¹⁰ pour 10⁻⁶ |
+
+Sensibilité combinée **10⁻¹³ m³ par pas**, portée par C1 — rien de plus fin n'aurait de sens.
+Et une exigence qui n'est pas un chiffre : **les trois sont requises ensemble**, parce que §4.2
+montre qu'une fuite passe C1 et échoue C3.
+
+**Le cas ouvert échoue C2** (13,67 pour √200 = 14,14) : son résidu est d'un seul signe. Minuscule
+— 5·10⁻⁸ de la dérive physique — mais **systématique**. Suspect nommé, non démontré : la bande ou
+l'éponge, qui n'existent que là. Enregistré en A305.
