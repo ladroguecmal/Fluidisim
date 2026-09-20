@@ -95,9 +95,11 @@ Critères, écrits avant la mesure :
 
 - [x] **P1** — amorce, jeton, guide recopié dans `docs/sources/`, plan seul.
 - [x] **P2** — confrontation section par section, écrite dans un document de lecture.
-- [ ] **P3** — les deux sorties de diagnostic manquantes (hauteur en fausses couleurs, normales
+- [x] **P3** — les deux sorties de diagnostic manquantes (hauteur en fausses couleurs, normales
   géométriques seules) ; `--no-tail` et le rendu complet existent déjà.
-- [ ] **P4** — le test A/B aux quatre sorties, et la cause dominante attribuée.
+- [x] **P4** — le test A/B aux quatre sorties, et la cause dominante attribuée.
+- [ ] **P5** — *(découpage déclaré)* balayage de la coupure `λ/Δ` : le seul essai qui dit si les
+  stries sont évitables sans toucher à l'énergie du modèle.
 - [ ] **P5** — conséquences : file active, angles morts, note datée à ADR-176 si la mesure la
   contredit, et ce qui doit remonter à l'utilisateur comme arbitrage.
 - [ ] **P6** — preuve, rituel REPRISE §6.
@@ -140,6 +142,51 @@ qui change quelque chose maintenant — l'**ordre de diagnostic**.
 haute** contre Cox–Munk, ce qui est le symptôme d'une bande fine trop forte (§4.4 du guide, « ne
 pas compter deux fois »). Si les stries viennent de la queue, la `mss` mesurée **sans** queue doit
 tomber **sous** Cox–Munk. Si elle reste au-dessus, la queue n'est pas la cause. À vérifier en P4.
+
+**P3 — les sorties manquantes, sans toucher au chemin de rendu.** Trois modes dans
+`ocean_fragment`, portés par `p.reflection.w` qui valait un **zéro littéral** : aucune taille
+d'uniforme ne change. 1 = hauteur (rampe fixe ±3 m), 2 = normales géométriques seules (bande
+corrigée par le jacobien, **sans** la queue), 3 = jacobien. Le ciel devient un gris constant en
+diagnostic. Outil d'analyse : `outils/spectre_image.py` (Python standard), qui mesure sur une
+capture PPM l'énergie **haute fréquence** — un écart-type de luma ne distingue pas une grande
+masse d'un tapis de stries, un passe-haut si.
+
+*Fausse alerte, et ce qu'elle a appris* : le premier contrôle d'identité au bit a **échoué**.
+Cause : j'avais rejoué `--revue-mer` avec `--multi --ciel-clair`, que S304 n'employait pas. Avec
+la commande exacte de la preuve S304, les quatre empreintes sont **identiques au bit**
+(2463a897…, 6592d82c…, bd3d6046…, a2ccc245…). Le témoin ne valait rien tant que la commande
+n'était pas celle du document. Deuxième contrôle, plus fort : la sortie `iv_rendu_complet` du
+test A/B porte l'empreinte `0x4e2da43a6e5dec18`, **celle de l'image de R12 elle-même**.
+
+**P4 — la cause des stries est attribuée, et ce n'est pas celle qu'ADR-176 visait.**
+
+| sortie (pose `proche`) | `luma_et` | `hf_rms` | `hf_part` | `p99_hf` |
+|---|---:|---:|---:|---:|
+| (iii) matériau **sans** queue | 51,41 | **1,93** | 0,0375 | 9,14 |
+| (iv) rendu complet | 51,29 | **9,82** | 0,191 | 41,19 |
+
+Pose `rasante` : 1,69 → **11,28** (`hf_part` 0,041 → 0,266 ; `p99` 8,14 → 48,13).
+
+- **La queue spectrale porte 80 à 85 % de l'énergie haute fréquence de l'image** (×5,1 en
+  `proche`, ×6,7 en `rasante`). C'est elle, les stries.
+- **Le contraste global ne le voit pas** : `luma_et` passe de 51,41 à 51,29 — il *baisse*. Le
+  défaut n'est pas dans le contraste, il est dans la **fréquence spatiale**. C'est exactement le
+  piège que le guide décrit, et c'est pourquoi aucune mesure antérieure ne l'avait attrapé.
+- **La prédiction de P2 est vérifiée, et chiffrée.** Instrument S260, 10⁶ points : `mss` de Cox–Munk
+  **0,0437** ; notre modèle **0,0497** (+13,7 %) ; **sans queue 0,0200** (−54 %). La queue porte donc
+  **0,0297 des 0,0497 — 60 % de la variance de pente**, et tout l'excès. Pour tomber exactement sur
+  Cox–Munk il faudrait qu'elle en porte 0,0237, soit **−20 % en variance, −10,7 % en amplitude**.
+- **`replis = 0` sur tous les modèles** : le jacobien ne se retourne **jamais** dans notre mer.
+  L'indicateur que le guide met au premier rang (§4.3) est publié, et il écarte une hypothèse.
+
+**La conclusion honnête, qui n'est pas « la queue est fautive ».** La queue n'est que 20 % trop
+forte en variance ; la réduire de 20 % ne diviserait l'énergie haute fréquence que par ≈ 1,1,
+quand elle vaut ×5 à ×6 le reste. **L'essentiel de ces stries est donc légitime** — une vraie mer
+porte cette variance de pente. Ce qui est en cause, c'est **la bande de longueurs d'onde où on la
+rend** : `spectral_weight` garde tout son poids jusqu'à `λ = 4·empreinte` et ne tombe à zéro qu'à
+`λ = 2·empreinte`, le Nyquist du pixel. Les composantes entre 2 et 4 empreintes sont exactement
+celles qui produisent un motif de deux pixels. C'est le point §4.2 de la lecture, et c'est ce que
+P5 mesure.
 
 **Non retenu, et pourquoi** : rien du guide ne rouvre ADR-027 ni ne réduit ADR-127 ; aucun de ses
 chiffres non repris ici n'est validé par le dépôt (I-14).

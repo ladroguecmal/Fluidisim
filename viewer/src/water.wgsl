@@ -646,7 +646,35 @@ fn filtered_fragment(v: Vertex) -> vec4<f32> {
     }
     return vec4<f32>(mix(color,vec3<f32>(0.66,0.78,0.84),1.0-exp(-length(v.local)/500.0)),1.0);
 }
+// S306 — SORTIES DE DIAGNOSTIC (guide reçu §12.3, LECTURE-GUIDE-OCEAN-S306 §4.1).
+// Le guide demande quatre sorties au même instant pour séparer les causes d'un rendu ; nous
+// avions déjà « matériau sans queue » (`--no-tail`) et le rendu complet. Voici les deux sorties
+// **géométriques** qui manquaient, plus le jacobien que §4.3 demande de publier.
+// Porté par `p.reflection.w`, qui valait un zéro littéral : aucune taille d'uniforme ne change.
+// 0 = rendu (rien ne change), 1 = hauteur, 2 = normales géométriques seules, 3 = jacobien.
+const DIAG_HAUTEUR_M = 3.0;
+// Bleu → noir → rouge, symétrique, avec un trait clair au zéro : une rampe qui se lit sans légende.
+fn ramp(t: f32) -> vec3<f32> {
+    let u = clamp(t, -1.0, 1.0);
+    let zero = exp(-u*u*900.0);
+    return vec3<f32>(max(u,0.0), zero, max(-u,0.0))*0.9 + vec3<f32>(0.05);
+}
+fn diagnostic_fragment(v: Vertex) -> vec4<f32> {
+    let mode = u32(p.reflection.w + 0.5);
+    if (mode == 1u) {
+        // Hauteur de la surface au-dessus du plan moyen, échelle fixe ±3 m, sans matériau.
+        return vec4<f32>(ramp((v.local.z + p.eye.z)/DIAG_HAUTEUR_M), 1.0);
+    }
+    // Pente **géométrique** seule : la bande résolue, corrigée par le jacobien comme au rendu,
+    // mais **sans la queue spectrale**. C'est la sortie (ii) du guide.
+    let e = euler_slope(v.slope, v.g);
+    if (mode == 3u) { return vec4<f32>(ramp((e.z - 1.0)*2.0), 1.0); }
+    let s = select(v.slope, e.xy, e.z >= 0.1);
+    let n = normalize(vec3<f32>(-s, 1.0));
+    return vec4<f32>(n*0.5 + 0.5, 1.0);
+}
 @fragment fn ocean_fragment(v: Vertex) -> @location(0) vec4<f32> {
+    if (p.reflection.w > 0.5) { return diagnostic_fragment(v); }
     if (p.reflection.x > 0.5) { return filtered_fragment(v); }
     // S256 : empreinte du pixel sur l'eau, puis pentes de la queue spectrale (normales seulement).
     let footprint = max(length(dpdx(v.local.xy)), length(dpdy(v.local.xy)));
@@ -687,6 +715,8 @@ struct SkyVertex { @builtin(position) clip: vec4<f32>, @location(0) uv: vec2<f32
     var o: SkyVertex; o.clip = vec4<f32>(uv,0.99999,1.0); o.uv=uv; return o;
 }
 @fragment fn sky_fragment(v: SkyVertex) -> @location(0) vec4<f32> {
+    // S306 : en diagnostic, le ciel est un gris neutre — l'image ne doit montrer que l'eau.
+    if (p.reflection.w > 0.5) { return vec4<f32>(0.18, 0.18, 0.18, 1.0); }
     let ray = normalize(p.forward.xyz+p.right.xyz*v.uv.x*p.forward.w*p.right.w+p.up.xyz*v.uv.y*p.forward.w);
     return vec4<f32>(sky(ray),1.0);
 }

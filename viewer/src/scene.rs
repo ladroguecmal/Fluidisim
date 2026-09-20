@@ -710,6 +710,9 @@ pub struct FrameData<'a> {
     /// S265 : 0 = miroir historique, 3/5 = quadrature des pentes non résolues.
     pub reflection_order: u32,
     pub reflection_suffix: bool,
+    /// S306, guide §12.3 : sortie de diagnostic. 0 = rendu, 1 = hauteur, 2 = normales
+    /// géométriques seules, 3 = jacobien. Publiée dans `reflection.w`, qui était un zéro littéral.
+    pub diagnostic: u32,
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -806,6 +809,7 @@ impl<'a> FrameData<'a> {
             modulation: 0.,
             reflection_order: 0,
             reflection_suffix: true,
+            diagnostic: 0,
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,

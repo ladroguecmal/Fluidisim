@@ -1850,6 +1850,76 @@ fn revue_mer(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// S306 — **le test A/B du guide reçu** (§12.3), que le dépôt n'avait jamais fait. Cinq sorties
+/// au **même instant, même caméra, même mer** : la règle de lecture est celle du guide — si le
+/// matériau sans queue montre déjà le défaut, la cause est l'environnement et le matériau ; si la
+/// hauteur seule manque de grandes masses, c'est le champ et le maillage ; si seul le rendu
+/// complet dérive, c'est le filtrage des détails. La cinquième sortie est le jacobien, que §4.3
+/// demande de publier et que le dépôt calculait sans jamais le regarder.
+fn test_ab<'a>(frame: &mut FrameData<'a>, tag: &str, tail: Option<&'a water_core::background::Background>) -> Result<(), String> {
+    let dir = captures!("s306");
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    let (width, height) = (1280u32, 720u32);
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, width, height,
+        frame.profile.len(), scene::WAKE_CAPACITY))?;
+    frame.lod = true;
+    frame.cull = true;
+    frame.viewport = Some((width as f32 / height as f32, g.nx, g.ny));
+    // Les deux poses que l'utilisateur a effectivement regardées en R12.
+    let poses: [(&str, Camera); 2] = [
+        ("proche", Camera { eye: [0., -7., 4.], yaw: 0., pitch: -0.18 }),
+        ("rasante", grazing_camera()),
+    ];
+    // (nom, mode de diagnostic, queue active) — l'ordre est celui du guide.
+    let sorties: [(&str, u32, bool); 5] = [
+        ("i_hauteur", 1, true),
+        ("ii_normales_geometriques", 2, true),
+        ("iii_materiau_sans_queue", 0, false),
+        ("iv_rendu_complet", 0, true),
+        ("v_jacobien", 3, true),
+    ];
+    for (nom_pose, camera) in &poses {
+        for (nom, mode, queue) in &sorties {
+            frame.camera = Camera { eye: camera.eye, yaw: camera.yaw, pitch: camera.pitch };
+            frame.diagnostic = *mode;
+            frame.tail_background = if *queue { tail } else { None };
+            frame.update(12., 12., false);
+            g.upload(frame);
+            let target = g.target();
+            g.draw(&target.create_view(&Default::default()), false);
+            let path = format!("{dir}/s306_{tag}_{nom_pose}_{nom}_12s.ppm");
+            g.capture(&target, &path)?;
+            let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+            let entete = format!("P6\n{width} {height}\n255\n").len();
+            let pixels = &bytes[entete..];
+            let hash = pixels
+                .iter()
+                .fold(0xcbf2_9ce4_8422_2325u64, |h, b| (h ^ *b as u64).wrapping_mul(0x100_0000_01b3));
+            // Contraste de l'image : écart-type de luma sur les pixels d'**eau**. En diagnostic le
+            // ciel est une couleur constante ; on la lit au coin haut-gauche plutôt que de la
+            // supposer — la cible est en sRGB, et 0,18 linéaire n'y vaut pas 46 (L348).
+            let ciel: [u8; 3] = [pixels[0], pixels[1], pixels[2]];
+            let (mut n, mut somme, mut carres) = (0u64, 0f64, 0f64);
+            for chunk in pixels.chunks_exact(3) {
+                if *mode > 0 && chunk == ciel { continue; }
+                let luma = 0.2126 * chunk[0] as f64 + 0.7152 * chunk[1] as f64 + 0.0722 * chunk[2] as f64;
+                n += 1;
+                somme += luma;
+                carres += luma * luma;
+            }
+            let moyenne = somme / n.max(1) as f64;
+            let ecart = (carres / n.max(1) as f64 - moyenne * moyenne).max(0.).sqrt();
+            println!(
+                "TEST_AB_S306 image={path} etat={tag} pose={nom_pose} sortie={nom} mode={mode} queue={queue} pixels_eau={n} luma_moyenne={moyenne:.3} luma_ecart_type={ecart:.3} empreinte=0x{hash:016x}"
+            );
+        }
+    }
+    frame.diagnostic = 0;
+    frame.tail_background = tail;
+    Ok(())
+}
+
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
     // S262 : un dossier par revue ; un nouveau rendu n'écrase plus une revue envoyée.
     let dir = match tag { "r1" => captures!("s254"), "r2" => captures!("s256"), "r3" => captures!("s259"), "r4" => captures!("s260"),
@@ -2754,6 +2824,13 @@ fn run() -> Result<(), String> {
         if args.iter().any(|a| a == "--captures") {
             return delta3d_captures(&mut frame, config);
         }
+    }
+    if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--test-ab=")) {
+        if !tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+            return Err("--test-ab : suffixe alphanumérique".into());
+        }
+        let tail = frame.tail_background;
+        return test_ab(&mut frame, tag, tail);
     }
     if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue-mer=")) {
         if tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {

@@ -536,7 +536,8 @@ impl Gpu {
         }
         // S275 : `reflection.z` = première ligne de la bande δ dans `impacts`, zéro sans δ.
         let delta_base = if frame.delta.is_some() { crate::scene::IMPACT_CAPACITY as f32 } else { 0. };
-        for v in [frame.reflection_order as f32, if frame.reflection_suffix { 1. } else { 0. }, delta_base, 0.] {
+        // S306 : `reflection.w` porte la sortie de diagnostic (0 = rendu), à la place d'un zéro littéral.
+        for v in [frame.reflection_order as f32, if frame.reflection_suffix { 1. } else { 0. }, delta_base, frame.diagnostic as f32] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         // S303, ADR-176 : (composantes du premier système, k̄₁, k̄₂, retard en tours). Sans
