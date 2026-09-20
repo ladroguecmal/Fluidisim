@@ -94,7 +94,7 @@ Critères, écrits avant la mesure :
 ### Plan
 
 - [x] **P1** — amorce, jeton, guide recopié dans `docs/sources/`, plan seul.
-- [ ] **P2** — confrontation section par section, écrite dans un document de lecture.
+- [x] **P2** — confrontation section par section, écrite dans un document de lecture.
 - [ ] **P3** — les deux sorties de diagnostic manquantes (hauteur en fausses couleurs, normales
   géométriques seules) ; `--no-tail` et le rendu complet existent déjà.
 - [ ] **P4** — le test A/B aux quatre sorties, et la cause dominante attribuée.
@@ -104,7 +104,45 @@ Critères, écrits avant la mesure :
 
 ### Notes de reprise
 
-*(à remplir en cours de session)*
+**P2 — la confrontation est faite** : [LECTURE-GUIDE-OCEAN-S306](../docs/registres/LECTURE-GUIDE-OCEAN-S306.md).
+Résultat en une ligne : **aucune divergence réelle**, beaucoup de convergence, et un seul apport
+qui change quelque chose maintenant — l'**ordre de diagnostic**.
+
+- **Le guide décrit ce que nous faisons déjà**, parfois mot pour mot. Deux cas frappants : sa
+  « couche résiduelle définie » (§8.4) est exactement ADR-175 D7 (δ publie une perturbation, le
+  rendu reconstruit `η_B + δ`) ; et son projected grid (§5.2, Johanson) **est** notre maillage
+  depuis S211 — `grid_point` lance un rayon par sommet vers `z = 0`, borné à l'horizon. Un
+  document écrit sans connaître le dépôt converge sur ses deux choix structurants de rendu.
+- **§5.4 (coutures, T-junctions, morphing) est sans objet chez nous** : une seule grille projetée,
+  aucun raccord entre niveaux. Un tiers des risques de maillage du guide ne nous concerne pas.
+- **§6 et §7 (côte, plage, déferlement, wet/dry) sont quasi absents du dépôt** — et c'est daté :
+  A234 (fond uniforme seulement) et porte F. Le guide y apporte de la matière sourcée (TMA [S6],
+  bilan d'action SWAN [S5] et son défaut de phase, Celeris [S7], Jeschke–Wojtan [S8], wet/dry
+  [S10]) : consignée, rien à construire.
+
+**Trois points actionnables, et une correction.**
+1. **Le test A/B de §12.3 n'a jamais été fait.** Nous avons déjà deux de ses quatre sorties
+   (`--no-tail` = matériau sans queue ; le défaut = rendu complet). Manquent les deux sorties
+   **géométriques** : hauteur brute, normales sans détail. C'est P3.
+2. **Le ratio `λ/Δ` : nous sommes à la borne basse de ce que le guide recommande.**
+   `spectral_weight` vaut 1 tant que `λ ≥ 4h` et tombe à 0 en `λ = 2h` (Nyquist exact) ; le guide
+   propose `λ/Δ ≥ 4–8` comme point de départ. Les composantes entre 2 et 4 sont précisément
+   celles qui font le plus de bruit de pente. Jamais éprouvé contre un critère visuel.
+3. **`min(J)` n'est jamais publié.** Le déterminant du jacobien est calculé (il sert de garde à
+   `det < 0,1` dans `covariance_transport`) mais aucune distribution n'est mesurée.
+4. **Correction sourcée d'un chiffre du dépôt** : SPEC-001 §3 donne `H/h ≈ 0,78` (McCowan) comme
+   critère de déferlement, et ADR-023 §4 en dérive des sites turbulents. Le guide (§7.1, Coastal
+   Engineering Manual [S9]) rappelle que c'est un repère **du cas de la vague solitaire sur fond
+   horizontal**, pas une loi universelle. L'attribution est juste, l'emploi comme critère unique
+   ne l'est pas → note datée à SPEC-001, rien à reprendre (le mécanisme n'est pas construit).
+
+**Et une prédiction vérifiable, tirée du rapprochement** : S303 a mesuré notre `mss` **14 % trop
+haute** contre Cox–Munk, ce qui est le symptôme d'une bande fine trop forte (§4.4 du guide, « ne
+pas compter deux fois »). Si les stries viennent de la queue, la `mss` mesurée **sans** queue doit
+tomber **sous** Cox–Munk. Si elle reste au-dessus, la queue n'est pas la cause. À vérifier en P4.
+
+**Non retenu, et pourquoi** : rien du guide ne rouvre ADR-027 ni ne réduit ADR-127 ; aucun de ses
+chiffres non repris ici n'est validé par le dépôt (I-14).
 
 **Ce qui est déjà su au départ.** Le rendu porte déjà : mer multimodale à étalement (ADR-156),
 queue d'équilibre et vagues pointues (ADR-157), rugosité calée sur Cox–Munk (ADR-158), queue
