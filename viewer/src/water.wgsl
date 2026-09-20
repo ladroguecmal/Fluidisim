@@ -598,8 +598,55 @@ fn clouds(ray: vec3<f32>, octaves: u32) -> f32 {
     else { n += 0.25*0.5; }
     return smoothstep(0.52, 0.80, n)*fade;
 }
+// ─────────────────────────────────────────────────────────────────────────────────────────────
+// S308 — CIEL CALÉ SUR LA PHOTOGRAPHIE DE RÉFÉRENCE (CIEL-MESURE-S308).
+//
+// Le ciel historique interpole deux couleurs en `pow(ray.z, 0.35)` : mesuré, son sommet vaut
+// **0,809** de son horizon, quand la photographie de référence est à **0,356**. Il est plat, et
+// comme la mer est un miroir, il donne des crêtes grises, une dynamique écrasée et un contraste
+// local faible — les trois défauts que le verdict R14 nomme.
+//
+// Ce que la photographie montre, mesuré bande par bande de l'horizon vers le haut du cadre :
+//
+//   R : 0,311 → 0,043   (× 0,139)
+//   G : 0,554 → 0,181   (× 0,327)
+//   B : 0,795 → 0,574   (× 0,722)
+//
+// **Le bleu ne bouge presque pas ; le rouge s'effondre.** C'est la signature de la diffusion de
+// Rayleigh : à l'horizon la masse d'air est longue et diffuse toutes les longueurs d'onde, donc
+// le ciel blanchit ; vers le zénith la masse d'air diminue et seul le bleu survit.
+//
+// Modèle retenu, le plus simple qui porte ce comportement : une extinction exponentielle **par
+// canal** en `sin(élévation)`.
+//
+//     ciel(s) = CIEL_HORIZON · exp(−K · s),   K = −ln(CIEL_F) / sin(élévation du haut du cadre)
+//
+// **L'hypothèse déclarée, et elle est nécessaire** : la focale de la photographie est inconnue,
+// donc l'élévation que couvre le haut de son cadre l'est aussi. Elle est exposée par
+// `--ciel-mesure=<degrés>` (défaut 25°, soit un cadrage paysage ordinaire) et **se balaye au lieu
+// de se supposer** — même discipline que le gain d'ADR-177.
+//
+// **Ce que ces constantes ne sont pas** : des radiances physiques. Ce sont les valeurs linéaires
+// de la photographie, qui portent la balance des blancs et la courbe de tonalité de son capteur.
+// Elles calent notre ciel sur *cette* image, pas sur le ciel terrestre.
+const CIEL_HORIZON = vec3<f32>(0.311, 0.554, 0.795);
+const CIEL_F = vec3<f32>(0.139, 0.327, 0.722);
+
+fn ciel_mesure(ray: vec3<f32>, octaves: u32) -> vec3<f32> {
+    let sun = normalize(vec3<f32>(-0.4, 0.3, 0.8));
+    let s = clamp(ray.z, 0.0, 1.0);
+    let s_haut = max(sin(p.cut.w * 0.017453292), 1e-3);
+    let k = -log(CIEL_F) / s_haut;
+    var c = CIEL_HORIZON * exp(-k * s);
+    c = mix(c, vec3<f32>(0.92, 0.93, 0.95), clouds(ray, octaves));
+    let d = max(dot(ray, sun), 0.0);
+    return c + vec3<f32>(1.0, 0.95, 0.85) * (pow(d, 1024.0) * 4.0 + pow(d, 32.0) * 0.15);
+}
+
 fn sky(ray: vec3<f32>) -> vec3<f32> { return sky_detail(ray, 4u); }
 fn sky_detail(ray: vec3<f32>, octaves: u32) -> vec3<f32> {
+    // S308 : `p.cut.w` > 0 → ciel calé sur la photographie. Zéro = les deux chemins historiques.
+    if (p.cut.w > 0.0) { return ciel_mesure(ray, octaves); }
     let sun = normalize(vec3<f32>(-0.4,0.3,0.8));
     if (p.eye.w > 0.5) {
         let t = pow(clamp(ray.z, 0.0, 1.0), 0.35);
@@ -733,7 +780,9 @@ fn diagnostic_fragment(v: Vertex) -> vec4<f32> {
         // grille (horizon géométrique `p.impact.y`), où la courbure cacherait l'eau.
         let d = length(v.local.xy);
         let haze = max(1.0 - exp(-d/6000.0), smoothstep(0.66*p.impact.y, p.impact.y, d));
-        return vec4<f32>(mix(clear,CLEAR_HORIZON,haze),1.0);
+        // S308 : la brume d'horizon est le ciel à l'horizon — même air, même couleur.
+        let voile = select(CLEAR_HORIZON, CIEL_HORIZON, p.cut.w > 0.0);
+        return vec4<f32>(mix(clear,voile,haze),1.0);
     }
     let sea_d = select(vec3<f32>(0.012,0.105,0.13), SEA_R0 * p.cut.z, p.cut.y > 0.5);
     let base = sea_d*(0.65+0.35*max(dot(n,sun),0.0));

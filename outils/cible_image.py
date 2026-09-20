@@ -17,12 +17,16 @@ image se mesure. Cet outil extrait les grandeurs qui se comparent entre une phot
 | `B/G`, `B/R` par tranche de luma | **oui** *(sous réserve)* | la balance des blancs du capteur est inconnue ; un écart de **teinte** reste lisible, un écart de quelques pour cent ne l'est pas |
 | `fraction_claire` | **oui** | définie par un seuil **relatif à la médiane de la mer** |
 | `hf_part` | **oui** | énergie haute fréquence rapportée à l'écart-type |
-| `ciel_pente` | **oui** | gradient normalisé par la luma du ciel à l'horizon |
+| `ciel_haut_sur_horizon`, `ciel_bandes` | **non** *(corrigé S308)* | le profil est mesuré en **fraction de cadre** ; deux images de champs de vision différents ne couvrent pas la même plage d'élévation, et le même ciel y donne deux profils. Comparable seulement entre images de **même cadrage** |
+| `ciel_BsurG`, `ciel_BsurR` | oui *(sous la même réserve de balance des blancs)* | teintes moyennes du ciel visible |
 | luma absolue, `hf_rms` absolu | **non** | dépendent de l'exposition et du tone mapping, inconnus |
 
 L'horizon est détecté comme la ligne où la **luma moyenne par ligne** chute le plus brutalement :
-sur une mer sous un ciel clair, c'est la transition la plus franche de l'image. La position est
-publiée pour être vérifiée à l'œil ; un `--horizon=<y>` la force si la détection se trompe.
+sur une mer sous un ciel clair, c'est la transition la plus franche de l'image. **Elle se trompe
+quand le ciel porte lui-même un fort gradient** — constaté en S308 sur un rendu à ciel calé, où
+la chute du ciel l'emporte sur celle de l'horizon (chute 0,017 contre 0,083 sur la photographie).
+La position détectée et la hauteur de la chute sont donc **publiées toutes les deux** : une chute
+faible est le signe qu'il faut forcer la ligne avec `--horizon=<y>`.
 
 Python standard, sans réseau, sans dépendance. Lit le P6 binaire à 255 niveaux, comme le reste
 du dépôt (une photographie se convertit hors du dépôt : rien de binaire n'y entre, SPEC-005
@@ -163,7 +167,11 @@ def mesurer(chemin, force=None):
     print(
         f"CIBLE image={nom} COMPARABLE creux_BsurG={creux[0]:.3f} creux_BsurR={creux[1]:.3f} "
         f"cretes_BsurG={cretes[0]:.3f} cretes_BsurR={cretes[1]:.3f} ciel_BsurG={teinte_ciel:.3f} "
-        f"ciel_BsurR={teinte_bande:.3f} ciel_haut_sur_horizon={pente:.4f} "
+        f"ciel_BsurR={teinte_bande:.3f}"
+    )
+    # Profil du ciel : **non comparable** entre cadrages différents (voir l'en-tête).
+    print(
+        f"CIBLE image={nom} CADRAGE ciel_haut_sur_horizon={pente:.4f} "
         f"ciel_bandes={'/'.join(f'{b / base_ciel:.3f}' for b in bandes)}"
     )
     print(

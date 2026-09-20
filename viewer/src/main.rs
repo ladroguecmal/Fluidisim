@@ -2848,6 +2848,17 @@ fn run() -> Result<(), String> {
             return delta3d_captures(&mut frame, config);
         }
     }
+    // S308 : `--ciel-mesure[=degrés]` — ciel calé sur la photographie de référence. L'argument est
+    // l'élévation supposée du haut de son cadre, sa focale étant inconnue.
+    if let Some(e) = args.iter().find_map(|a| a.strip_prefix("--ciel-mesure")) {
+        let mut deg = 25.0f32;
+        if let Some(value) = e.strip_prefix('=') {
+            deg = value.parse().map_err(|_| "ciel-mesure : degrés attendus")?;
+            if !(5.0..=80.0).contains(&deg) { return Err("ciel-mesure : entre 5 et 80 degrés".into()); }
+        }
+        frame.sky_elevation_deg = deg;
+        println!("CIEL_MESURE elevation_haut_cadre_deg={deg} horizon=(0.311,0.554,0.795) ratios_haut=(0.139,0.327,0.722) source=photographie_de_reference");
+    }
     // S307 : `--eau-physique` — couleur du corps d'eau dérivée de Pope & Fry 1997 et Morel 1974,
     // remise à la luminance de la constante historique (teinte seule, exposition inchangée).
     if let Some(g) = args.iter().find_map(|a| a.strip_prefix("--eau-physique")) {

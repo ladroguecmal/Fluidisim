@@ -722,6 +722,9 @@ pub struct FrameData<'a> {
     /// S307 : gain appliqué à `R(0⁻)`. Il tient lieu d'irradiance de ciel (`E/π`) et se balaye ;
     /// 1 = la réflectance nue, telle que la physique la donne.
     pub color_gain: f32,
+    /// S308 : ciel calé sur la photographie de référence. Valeur = élévation supposée du haut du
+    /// cadre de la photographie, en degrés ; 0 = ciel historique. Publiée dans `cut.w`.
+    pub sky_elevation_deg: f32,
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -822,6 +825,7 @@ impl<'a> FrameData<'a> {
             cut_factor: 1.,
             physical_color: false,
             color_gain: 1.,
+            sky_elevation_deg: 0.,
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,

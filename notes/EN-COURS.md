@@ -97,7 +97,7 @@ Critères, écrits avant la mesure :
 - [x] **P2** — `outils/cible_image.py` : horizon, gradient du ciel, histogramme de la mer, couleur
   creux/crêtes, contraste local, fraction claire. Mesure de la photographie.
 - [x] **P3** — la même mesure sur nos images, et l'écart poste par poste. **L'ordre change.**
-- [ ] **P4** — *(promu par la mesure)* **le ciel** : c'est lui qui porte les crêtes, la dynamique
+- [x] **P4** — *(promu par la mesure)* **le ciel** : c'est lui qui porte les crêtes, la dynamique
   et le contraste local.
 - [ ] **P5** — l'exposition et le gain de couleur, ce qu'il en reste après le ciel.
 - [ ] **P6** — diffusion sous la surface aux crêtes, par le masque du jacobien.
@@ -170,6 +170,63 @@ portés par le **ciel** et la géométrie, pas par une couleur de base trop éle
 **Ce que la mesure ne peut pas donner** : l'élévation réelle que couvre le haut du cadre de la
 photo — focale inconnue. Le profil est donc mesuré en **fraction de cadre**, pas en élévation, et
 tout modèle calé dessus porte une hypothèse déclarée sur ce champ.
+
+## P4 — le ciel calé sur la photographie, et ce que la mesure dit ensuite
+
+`--ciel-mesure[=degrés]` remplace l'interpolation de deux couleurs par une **extinction
+exponentielle par canal** en `sin(élévation)` :
+
+```
+ciel(s) = CIEL_HORIZON · exp(−K · s),   K = −ln(CIEL_F) / sin(élévation du haut du cadre)
+CIEL_HORIZON = (0,311 ; 0,554 ; 0,795)      CIEL_F = (0,139 ; 0,327 ; 0,722)
+```
+
+Les deux constantes **sont** la photographie, mesurée. `CIEL_F` porte la signature de Rayleigh :
+le bleu à peine atténué, le rouge effondré. L'élévation du haut du cadre de la photographie est
+inconnue (focale inconnue) : elle est **exposée en paramètre**, défaut 25°, et se balaye — même
+discipline que le gain d'ADR-177. La brume d'horizon suit désormais la couleur du ciel à
+l'horizon : c'est le même air.
+
+| grandeur comparable | **photo** | avant (`eau_g2`) | **après (`ciel25`)** |
+|---|---:|---:|---:|
+| crêtes `B/R` | **8,95** | 1,73 | **3,03** |
+| crêtes `B/G` | **2,89** | 1,37 | **1,69** |
+| ciel `B/R` | **5,14** | 1,82 | **2,96** |
+| ciel `B/G` | **2,03** | 1,41 | **1,63** |
+| creux `B/R` | 30,0 | 14,1 | **29,5** |
+| creux `B/G` | 5,54 | 5,63 | 7,04 |
+| dynamique `p95/p05` | **23,7** | 14,6 | **12,3** |
+| contraste local / p50 | **0,455** | 0,266 | 0,268 |
+| `mer_p05/p50` | **0,193** | 0,277 | 0,310 |
+
+**La teinte se rapproche partout, la dynamique non.** Les crêtes passent de 1,73 à 3,03 de `B/R`
+(cible 8,95), les creux tombent à 29,5 contre 30,0 mesurés — **juste**. Mais la dynamique
+**recule** (14,6 → 12,3) et le contraste local ne bouge pas.
+
+**Deux erreurs de ma part, l'une dans l'instrument, l'autre dans ce que j'attendais.**
+
+1. **L'instrument déclarait comparable ce qui ne l'est pas.** `ciel_haut_sur_horizon` est mesuré
+   en **fraction de cadre** : deux images de champs de vision différents ne couvrent pas la même
+   plage d'élévation, et le même ciel y donne deux profils. Notre cadre montre le ciel jusqu'à
+   ≈ 15° d'élévation, la photographie jusqu'à ≈ 25° supposés — d'où 0,85 contre 0,36 **sans que
+   le modèle soit en cause**. Corrigé : la grandeur est publiée sous `CADRAGE`, pas sous
+   `COMPARABLE`.
+2. **La détection d'horizon se trompe quand le ciel a un fort gradient** : sur le rendu à ciel
+   calé elle a trouvé 125 au lieu de 223, la chute du ciel l'emportant sur celle de l'horizon
+   (chute 0,017 contre 0,083 sur la photographie). La hauteur de la chute est désormais publiée
+   à côté de la position : une chute faible dit qu'il faut forcer la ligne.
+
+**Ce que la dynamique manquante désigne, et ce n'est pas le ciel.** Il reste un facteur **2** sur
+`p95/p05` et sur le contraste local. Deux causes candidates, toutes deux hors du ciel :
+
+- **l'absence de courbe de tonalité.** Nous écrivons du linéaire vers sRGB sans exposition ni
+  contraste ; l'appareil photo, lui, applique une courbe en S qui écrase les ombres. C'est
+  exactement le poste « exposition » que le verdict R14 nomme, et c'est désormais le plus gros
+  levier restant **mesuré** ;
+- **l'état de mer.** La photographie montre une mer de vent courte et raide ; notre scène porte
+  une houle de 12 s plus douce. Des faces plus raides réfléchissent le ciel **haut**, donc sombre,
+  et creusent la dynamique. **Je ne touche pas à cela** : l'utilisateur a suspendu les lots de
+  forme, et c'est une hypothèse mesurée, pas une conclusion.
 
 **Ce que l'œil voit déjà sur elle, à confirmer par la mesure** : mer très sombre, creux presque
 noirs ; crêtes gris-bleu clair ; ciel à gradient **fort** (blanc-cyan à l'horizon, bleu profond en
