@@ -674,3 +674,134 @@ fn real_background_grid_matches_mac_points_and_preserves_publication_s298() {
     }
     assert_eq!(host.alloc.stats().persistent_calls,calls);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────
+// S310 — LE BILAN DE MASSE (lot 1 d'ADR-178 D7, angle mort A302).
+//
+// Le contrat est dans `delta3d_balance.rs` : les termes intérieurs du transport télescopent, donc
+// la variation de volume vaut **exactement** la somme des faces de bord. Ces essais éprouvent les
+// trois affirmations sur lesquelles repose cette exactitude, et une quatrième sur l'atomicité.
+
+/// Montage commun : une bosse de surface, un fond uniforme qui traverse les quatre bords.
+/// La surface **non uniforme** est ce qui rend `band_in` non nul — les deux faces opposées
+/// n'intègrent pas la même hauteur.
+fn bilan_montage_s310(bump: bool) -> (Volume3, Arena, Vec<BackgroundSample>) {
+    let (mut v, arena) = volume(8, 6, 12, 0.25, 9.81);
+    let eta: Vec<f32> = (0..48)
+        .map(|c| if bump { 2. + 0.02 * ((c % 8) as f32 - 3.5) } else { 2. })
+        .collect();
+    v.set_free_surface(&eta, 2.).unwrap();
+    let sample = BackgroundSample {
+        eta: 0.07,
+        u: [0.6, -0.4, 0.],
+        p_dyn: 1025. * 9.81 * 0.07,
+        ..BackgroundSample::default()
+    };
+    (v, arena, vec![sample; 1])
+}
+
+#[test]
+fn bilan_de_masse_se_ferme_au_plancher_s310() {
+    use crate::SimTime;
+    let (mut v, _a, proto) = bilan_montage_s310(true);
+    let (u, vv, w) = (vec![proto[0]; v.u.len()], vec![proto[0]; v.v.len()], vec![proto[0]; v.w.len()]);
+    let (mut worst, mut scale) = (0f64, 0f64);
+    for n in 0..200 {
+        let time = SimTime(n * 1000);
+        let bg = BackgroundFaces3 { domain: v.domain, time, density: 1025., gravity: 9.81,
+            u: &u, v: &vv, w: &w };
+        v.step_perturbation_mobile(time, 1000, 4000, &bg, Sponge3::default(), &Jobs).unwrap();
+        let b = v.balance();
+        // La perturbation ne traverse **pas** le bord : la garde `a > 0 && a < n` du transport.
+        // Exactement zéro, pas « petit » — c'est une construction, pas une approximation.
+        assert_eq!(b.perturbation_in, 0.);
+        assert_eq!(b.sponge_out, 0.);
+        worst = worst.max(b.residual.abs());
+        scale = scale.max(b.band_in.abs()).max(b.delta.abs());
+    }
+    eprintln!("S310 bilan ferme : residu_max={worst:e} echelle={scale:e} rapport={:e}", worst / scale);
+    assert!(scale > 1e-6, "le montage doit faire circuler de la masse, sinon il ne prouve rien");
+    // Mesuré S310 : 9,85e-8, soit ≈ 1,6 ulp de f32 par pas. Seuil à dix fois la mesure.
+    assert!(worst / scale < 1e-6, "residu {worst:e} hors plancher pour une echelle {scale:e}");
+}
+
+#[test]
+fn cuve_fermee_garde_son_volume_s310() {
+    use crate::SimTime;
+    let (mut v, _a, _p) = bilan_montage_s310(true);
+    let zero = BackgroundSample::default();
+    let (u, vv, w) = (vec![zero; v.u.len()], vec![zero; v.v.len()], vec![zero; v.w.len()]);
+    let depart = v.perturbation_volume();
+    let mut worst = 0f64;
+    for n in 0..200 {
+        let time = SimTime(n * 1000);
+        let bg = BackgroundFaces3 { domain: v.domain, time, density: 1025., gravity: 9.81,
+            u: &u, v: &vv, w: &w };
+        v.step_perturbation_mobile(time, 1000, 4000, &bg, Sponge3::default(), &Jobs).unwrap();
+        let b = v.balance();
+        // Aucun fond, aucune éponge : le domaine est fermé. Rien ne doit entrer ni sortir.
+        assert_eq!(b.band_in, 0.);
+        assert_eq!(b.perturbation_in, 0.);
+        assert_eq!(b.sponge_out, 0.);
+        worst = worst.max((b.volume - depart).abs());
+    }
+    let colonne = v.domain.dx as f64 * v.domain.dx as f64 * 48.;
+    eprintln!("S310 cuve fermee : derive_volume_max={worst:e} m3, soit {:e} m de hauteur moyenne",
+              worst / colonne);
+    // Mesuré S310 : 1,13e-11 m de hauteur moyenne sur 200 pas. Seuil à cent fois la mesure.
+    assert!(worst / colonne < 1e-9, "derive {worst:e} m3 au-dela du plancher");
+}
+
+#[test]
+fn l_eponge_est_un_puits_et_il_se_compte_s310() {
+    use crate::SimTime;
+    let (mut v, _a, _p) = bilan_montage_s310(true);
+    let zero = BackgroundSample::default();
+    let (u, vv, w) = (vec![zero; v.u.len()], vec![zero; v.v.len()], vec![zero; v.w.len()]);
+    let depart = v.perturbation_volume();
+    let sponge = Sponge3 { width_x: 0.5, width_y: 0.5, rate_per_s: 1. };
+    let (mut retire, mut worst) = (0f64, 0f64);
+    for n in 0..200 {
+        let time = SimTime(n * 1000);
+        let bg = BackgroundFaces3 { domain: v.domain, time, density: 1025., gravity: 9.81,
+            u: &u, v: &vv, w: &w };
+        v.step_perturbation_mobile(time, 1000, 4000, &bg, sponge, &Jobs).unwrap();
+        let b = v.balance();
+        assert_eq!(b.band_in, 0.);
+        retire += b.sponge_out;
+        worst = worst.max(b.residual.abs());
+    }
+    let perdu = depart - v.perturbation_volume();
+    eprintln!("S310 eponge : retire_cumule={retire:e} m3, volume_perdu={perdu:e} m3, \
+               ecart={:e}, residu_max={worst:e}", (perdu - retire).abs());
+    // Le domaine est fermé : **tout** ce qui manque est passé par l'éponge, et rien d'autre.
+    assert!(retire.abs() > 1e-9, "l'eponge doit avoir retire quelque chose");
+    // Mesuré S310 : 9,8e-7 relatif. Seuil à dix fois la mesure — le défaut que cet essai a
+    // effectivement attrapé (compter `increment` au lieu de la hauteur compensée) valait
+    // 8,6e-3, soit quatre ordres de grandeur au-dessus.
+    assert!((perdu - retire).abs() / retire.abs() < 1e-5,
+            "le volume perdu {perdu:e} ne s'explique pas par l'eponge {retire:e}");
+}
+
+#[test]
+fn un_refus_ne_publie_pas_de_bilan_s310() {
+    use crate::SimTime;
+    let (mut v, _a, proto) = bilan_montage_s310(true);
+    let (u, vv, mut w) = (vec![proto[0]; v.u.len()], vec![proto[0]; v.v.len()],
+                          vec![proto[0]; v.w.len()]);
+    let time = SimTime(0);
+    {
+        let bg = BackgroundFaces3 { domain: v.domain, time, density: 1025., gravity: 9.81,
+            u: &u, v: &vv, w: &w };
+        v.step_perturbation_mobile(time, 1000, 4000, &bg, Sponge3::default(), &Jobs).unwrap();
+    }
+    let bon = v.balance();
+    assert_ne!(bon, Balance3::default());
+    // Un fond hors du domaine fait échouer le pas **après** le transport : c'est exactement le
+    // cas où un bilan publié trop tôt décrirait un pas qui n'a pas eu lieu.
+    for s in &mut w { s.eta = 20.; }
+    let bg = BackgroundFaces3 { domain: v.domain, time, density: 1025., gravity: 9.81,
+        u: &u, v: &vv, w: &w };
+    assert!(v.step_perturbation_mobile(time, 1000, 4000, &bg, Sponge3::default(), &Jobs).is_err());
+    assert_eq!(v.balance(), bon, "le bilan doit survivre au refus, comme l'etat qu'il decrit");
+}

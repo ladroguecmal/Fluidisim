@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 14:05 +02:00
+Battement        : 2026-09-20 14:10 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S310 — **lot 1 d'ADR-178 D7 : les compteurs de conservation**. Masse d'abord, sur la cuve de S305 et la scène de S302 ; A302 doit cesser d'être une phrase et devenir un nombre
 Dernière session : S309 — liste du projet fini confrontée aux trois systèmes (3 / 51 / 66 ; A 20, B 29, C 7, 64 hors des trois), battement du jeton rendu vérifiable

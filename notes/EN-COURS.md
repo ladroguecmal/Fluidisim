@@ -101,8 +101,8 @@ Critères, écrits avant la mesure :
   pas quatre — les deux autres sont les chemins non couplés.
 - [x] **P3** — le pas couplé tient son bilan : `boundary_transport3`, l'éponge qui **rend** ce
   qu'elle retire, résidu publié. **539 essais inchangés**, dont les réceptions au bit.
-- [ ] **P4** — essais : télescopage exact sur un cas construit ; cuve fermée à volume constant au
-  plancher ; scènes antérieures au bit.
+- [x] **P4** — quatre essais, **543 au total, 0 échec**. Et l'essai de l'éponge a attrapé un
+  défaut réel du compteur : 0,86 % du volume retiré, quatre ordres au-dessus du plancher.
 - [ ] **P5** — mesure sur la **cuve de S305** : plancher et dérive nommés, comparés à A298.
 - [ ] **P6** — mesure sur la **scène de S302** : ce que l'éponge retire par seconde. A302 chiffrée.
 - [ ] **P7** — quantité de mouvement et énergie : ce qu'il faudrait pour les **fermer**, et le
@@ -125,6 +125,20 @@ Critères, écrits avant la mesure :
 **Ce qui reste à décider en P3** : l'éponge ne stocke pas ses incréments, donc `relax_coupled3`
 doit **rendre** la somme retirée. C'est la seule intrusion du lot dans le pas ; elle ne touche
 aucune opération flottante sur `eta`.
+
+**Le plancher, mesuré en P4** — 8 × 6 × 12 à 25 cm, 200 pas de 1 ms :
+
+| essai | mesure |
+|---|---|
+| bilan fermé, fond traversant | résidu **1,24·10⁻¹¹ m³** pour une échelle de 1,26·10⁻⁴ → **9,85·10⁻⁸** relatif, ≈ 1,6 ulp de f32 par pas |
+| cuve fermée, sans fond ni éponge | dérive **3,39·10⁻¹¹ m³** sur 200 pas, soit **1,13·10⁻¹¹ m** de hauteur moyenne |
+| éponge | retiré 2,5267·10⁻⁵ m³, volume perdu 2,5267·10⁻⁵ m³, écart **9,8·10⁻⁷** relatif |
+
+**Le défaut que l'essai de l'éponge a attrapé, et il vaut leçon.** Compter l'`increment` de
+l'éponge sur-compte de `eta_roundoff` à chaque colonne et à chaque pas : **0,86 %** du volume
+retiré, soit quatre ordres de grandeur au-dessus du plancher. La somme compensée est construite
+pour que ce soit **`η − eta_roundoff`** qui décroisse, pas `η`. Le transport, lui, était juste
+d'emblée — son incrément retranche déjà `eta_roundoff`, que la hauteur compensée rajoute.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 

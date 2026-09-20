@@ -407,12 +407,18 @@ impl Volume3 {
                     continue;
                 }
                 let c = self.col(i, j);
+                // S310 : la hauteur **compensée** avant et après. Compter `increment` seul
+                // sur-compterait de `eta_roundoff` à chaque colonne et à chaque pas — mesuré :
+                // 0,86 % du volume retiré, c'est-à-dire quatre ordres de grandeur au-dessus du
+                // plancher. La somme compensée est faite pour que ce soit `η − eta_roundoff` qui
+                // décroisse, pas `η` ; le bilan lit donc la même chose que la pression.
+                let before = self.eta[c] as f64 - self.eta_roundoff[c] as f64;
                 let increment =
                     (factor - 1.) * (self.eta[c] - self.rest) - factor * self.eta_roundoff[c];
                 let height = self.eta[c] + increment;
                 self.eta_roundoff[c] = (height - self.eta[c]) - increment;
                 self.eta[c] = height;
-                removed -= increment as f64;
+                removed += before - (self.eta[c] as f64 - self.eta_roundoff[c] as f64);
             }
         }
         removed * dx as f64 * dx as f64
@@ -586,7 +592,10 @@ impl Volume3 {
             let sponge_out = self.relax_coupled3(sponge, dt);
             let volume = self.perturbation_volume();
             let delta = volume - volume_before;
-            self.balance = Balance3 {
+            // **Publié en dernier, pas ici.** Les contrôles qui suivent peuvent encore refuser le
+            // pas, et un refus restaure l'état : un bilan déjà écrit décrirait alors un pas qui
+            // n'a pas eu lieu. Il attend `Ok`.
+            let balance = Balance3 {
                 volume,
                 delta,
                 band_in,
@@ -629,6 +638,7 @@ impl Volume3 {
                 return Err(Error::Domain);
             }
             self.check_edges3(bg)?;
+            self.balance = balance;
             Ok(report)
         })();
         self.surface_coupled = false;
