@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 18:06 +02:00
+Battement        : 2026-09-20 18:14 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S313 — **l'instrument avant le chiffre** : corriger et valider T1 (ordre A de la décision du 2026-09-20), en quatre grandeurs distinctes, avec une borne d'erreur et une fuite introduite volontairement
 Dernière session : S312 — **le premier transfert δ → W existe** (T3 en amplitude 1,24·10⁻⁵, réflexion 2,84·10⁻⁷ en 3D) et il dit ce qui manque à W : aucun mode `k = 0`, eau profonde seule, impact isotrope — **50 % de l'énergie repart à contresens** ([preuve](docs/validation/TRANSFERT-DELTA-W-S312.md), [ADR-180](docs/adr/ADR-180-retour-delta-w-et-conservation-du-volume.md))

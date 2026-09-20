@@ -128,7 +128,7 @@ Critères, écrits avant la mesure :
 - [x] **P6** — balayages **pas de temps** et **résolution**.
 - [x] **P7** — **l'erreur volontaire** : fuite connue injectée, sensibilité de l'instrument
   mesurée, plus petite fuite détectée publiée.
-- [ ] **P8** — T2 sur **10 s**, la durée demandée.
+- [x] **P8** — T2 sur **10 s**, la durée demandée.
 - [ ] **P9** — la tolérance proposée, justifiée par la borne et les mesures ; preuve publiée.
 - [ ] **P10** — rituel REPRISE §6.
 
@@ -869,3 +869,20 @@ redondantes** — chacune attrape exactement ce que l'autre laisse passer, et au
 demandé (fuite/3 m) est sous `ulp(2,0)` = 2,4·10⁻⁷ m : **la fuite n'a pas lieu**, elle n'est pas
 représentable. C'est l'autre face de la somme compensée — elle sauve les incréments du pas, elle ne
 peut rien pour une écriture extérieure.
+
+**P8 — T2 est tenue sur les 10 s demandées, et sa croissance est une marche aléatoire.**
+
+| durée | dérive / amplitude, `dx` = 0,25 | `dx` = 0,125 |
+|---:|---:|---:|
+| 1 s | 6,91·10⁻¹⁰ | 3,38·10⁻¹⁰ |
+| 5 s | 1,54·10⁻⁹ | 5,77·10⁻¹⁰ |
+| **10 s** | **2,99·10⁻⁹** | **5,77·10⁻¹⁰** |
+| 20 s | 3,52·10⁻⁹ | 7,92·10⁻¹⁰ |
+
+**Seuil 10⁻⁶ : tenu avec 340 fois de marge** à la maille grossière, 1 700 à la fine. De 1 s à
+20 s la dérive croît de **5,1 fois** pour `√20` = 4,5 attendus : c'est une **marche aléatoire**,
+pas une fuite. Et elle **diminue quand la maille se raffine** — conforme à la loi en `A/√N` de P3,
+ce qui est un troisième contrôle de la borne sur un banc qui ne l'avait pas servie à l'écrire.
+
+ADR-179 D2 est donc rendue, et la note d'honnêteté de S311 (« T2 n'est pas tenue, 5 s pour 10 »)
+est levée **par la mesure**, pas par un changement de seuil.

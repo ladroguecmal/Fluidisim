@@ -343,6 +343,25 @@ fn main() -> Result<(), String> {
                 publie_critere("fuite_etat", fuite, &m);
             }
         }
+        // **T2 sur la durée demandée.** ADR-179 D2 la veut sur 10 s ; S310 ne l'avait mesurée que
+        // sur 5. Les durées s'échelonnent pour que la **loi de croissance** de la dérive se lise :
+        // une marche aléatoire croît en `√t`, une fuite en `t`.
+        "duree" => {
+            for dx in [0.25f32, 0.125] {
+                for duree in [1.0f64, 2.0, 5.0, 10.0, 20.0] {
+                    let m = mesure(dx, 0.02, 1_000, duree, false, 0., 0., false)?;
+                    let hauteur = m.derive_volume / (m.colonnes as f64 * (dx * dx) as f64);
+                    println!(
+                        "PLANCHER_S313 T2 dx={dx} duree_s={duree} pas={} derive_m3={:e}                          derive_hauteur_m={hauteur:e} derive_sur_amplitude={:e}                          derive_sur_volume_absolu={:e} forme_du_cumule={:e}",
+                        m.pas,
+                        m.derive_volume,
+                        hauteur / 0.02,
+                        m.derive_volume / m.volume_absolu,
+                        m.critere.random_walk_ratio()
+                    );
+                }
+            }
+        }
         autre => return Err(format!("balayage inconnu : {autre}")),
     }
     Ok(())
