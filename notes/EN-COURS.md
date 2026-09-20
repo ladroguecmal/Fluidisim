@@ -93,8 +93,8 @@ Critères, écrits avant la recherche :
 ### Plan
 
 - [x] **P1** — amorce, verdict consigné, plan seul.
-- [ ] **P2** — niveau 1 : les douze références du guide, à la source. Ce qu'elles disent que le
-  guide n'a pas repris.
+- [x] **P2** — niveau 1, **et un fait qui déclasse la recherche** : le rendu soumis n'était pas
+  le meilleur rendu du dépôt.
 - [ ] **P3** — niveau 2 : les références **des** références, et l'état de l'art du rendu d'océan
   que le guide ne cite pas.
 - [ ] **P4** — niveau 3 : l'optique de l'eau et du ciel — couleur, absorption, diffusion, écume —
@@ -107,7 +107,86 @@ Critères, écrits avant la recherche :
 
 ### Notes de reprise
 
-*(à remplir en cours de session)*
+## P2 — la découverte qui passe avant toute la recherche
+
+**Pour la troisième revue consécutive, les images envoyées n'étaient pas celles du meilleur
+rendu du dépôt.** R11 tournait sous `--houle` seule (trouvé en S303). R12 et R13 tournaient
+**sans `--ciel-clair`**, c'est-à-dire avec la brume et le ciel de S211 — et non avec l'habillage
+construit en **S261 d'après la photo de référence de l'utilisateur lui-même**.
+
+J'ai d'abord **regardé** notre image, ce qu'aucune session n'avait fait ; puis lu le nuanceur.
+Le chemin par défaut (`p.eye.w = 0`), celui de R12 :
+
+```wgsl
+mix(color, vec3(0.66,0.78,0.84), 1 - exp(-length(v.local)/500.0))
+```
+
+**Une brume dont la longueur caractéristique est 500 m**, sur une scène qui porte à 1 500 m. À
+500 m il reste 37 % de l'image, à 1 000 m 14 %. Le chemin `--ciel-clair` fogge à **6 km** et
+porte un ciel à dégradé et nuages. Mesuré sur la même mer, même instant, même caméra :
+
+| | moyenne linéaire (bande d'eau) | B/G | B/R | plus sombre B/G |
+|---|---|---:|---:|---:|
+| **R12 tel qu'envoyé** | R 0,102 G 0,198 B 0,234 | **1,18** | 2,29 | 1,24 |
+| **`--ciel-clair`** | R 0,059 G 0,122 B 0,247 | **2,02** | 4,23 | 2,84 |
+
+L'écart se voit à l'œil immédiatement : l'une est une nappe gris-vert, l'autre une mer bleue avec
+un horizon. **ADR-176 D5 demandait de déclarer les options d'une revue** ; S304 a déclaré les
+options de **vagues** (a/b/c) et pas celles d'**environnement**, parce que personne ne pensait au
+ciel comme à une option. Or la mer est un miroir : le ciel est la moitié de l'image.
+
+**Ce que cela ne dit pas** : que le rendu est bon. Avec `--ciel-clair` il est bien meilleur et
+reste insuffisant — tapis de scintillement uniforme, aucune écume, et un **artefact brun-olive**
+en moyenne distance que la brume cachait jusqu'ici.
+
+## P2 — recherche de niveau 1 : les références du guide portent sur la géométrie, pas sur l'aspect
+
+Lues à la source, les douze références du guide sont des références de **forme** (FFT, Gerstner,
+clipmap, projected grid) et de **physique côtière** (SWAN, TMA, Celeris, SWE, CEM). Exemple
+mesurable : [GPU Gems ch. 1](https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models)
+(2004) donne la limite de boucle de Gerstner `Σ Q_i w_i A_i ≤ 1`, les normales analytiques, et
+**quatre** vagues géométriques plus ~15 vagues de texture. Notre rendu est très au-delà.
+
+**Aucune des douze ne traite** : la couleur de l'eau, l'absorption, la diffusion, l'écume, le
+ciel physique, l'exposition. Or c'est exactement ce que notre rendu traite **par des constantes
+écrites à la main**. Le guide le dit d'ailleurs lui-même en §10.2, sans sources.
+
+## P2 — la couleur de l'eau n'a aucune provenance, et elle est fausse d'un facteur 4 à 9
+
+La constante du nuanceur est `vec3(0.012, 0.105, 0.13)` (défaut) ou `vec3(0.004, 0.060, 0.170)`
+(ciel clair). Aucune provenance — I-14 l'interdit, et personne ne l'avait relevé.
+
+Calcul depuis les sources primaires : absorption de l'eau pure
+([Pope & Fry 1997](https://omlc.org/spectra/water/data/pope97.txt), données téléchargées),
+diffusion moléculaire `b = 0,0029·(550/λ)^4,30` avec `b_b = b/2` (Morel 1974), réflectance
+d'irradiance `R(0⁻) ≈ 0,33·b_b/(a + b_b)` :
+
+| λ | `a` (1/m) | `b_b` (1/m) | `R(0⁻)` |
+|---|---:|---:|---:|
+| 450 nm | 0,00922 | 0,00344 | **0,0896** |
+| 550 nm | 0,0565 | 0,00145 | **0,00826** |
+| 650 nm | 0,340 | 0,00071 | **0,00068** |
+
+**B/G attendu = 10,9 ; B/R = 131.** Nos constantes donnent B/G = **1,24** (défaut) et **2,83**
+(ciel clair) : **9 fois et 3,8 fois trop vert**. Et la mesure le confirme dans l'image : les
+pixels les plus sombres — ceux où l'on voit dans l'eau et non le ciel — rendent exactement le
+rapport de la constante (1,24 et 2,84).
+
+## P2 — ce que la recherche a déjà rapporté pour la suite
+
+- **Spectre ECKV / Elfouhaily et al. 1997** ([formules complètes](https://www.oceanopticsbook.info/view/surfaces/level-2/wave-variance-spectra-examples)) :
+  un spectre unifié gravité → capillarité, avec `k_m = 370 rad/m`, `c_m = 0,23 m/s`, un âge de
+  vague `Ω_c` et un étalement `Δ(k) = tanh[a₀ + a_p(c/c_p)^2,5 + a_m(c_m/c)^2,5]`. Il **remplace
+  à lui seul** notre queue `f⁻⁴` continuée à la main (ADR-157) **et** le calage empirique sur
+  Cox–Munk (ADR-158) : la variance de pente en sort, elle ne s'ajuste plus.
+- **Écume** : couverture `W = 3,84·10⁻⁶·U₁₀^3,41` (Monahan & O'Muircheartaigh 1980), réflectance
+  effective de Koepke **0,22** — pas 1. À `U₁₀ ≈ 7,8 m/s` (notre mer de vent, `Hs` 1,5 m), cela
+  fait **0,42 % de couverture**. Faible, mais c'est le seul objet de l'image qui donne l'échelle,
+  et il est **totalement absent**.
+- **Bruneton, Neyret & Holzschuch 2010**, *Real-time Realistic Ocean Lighting using Seamless
+  Transitions from Geometry to BRDF* (Computer Graphics Forum 29(2)) : la référence exacte de
+  notre problème de transition géométrie → BRDF. Le guide ne la cite pas. PDF non récupéré
+  (portail protégé) ; à reprendre.
 
 **Ce que le rendu contient aujourd'hui, à avoir en tête pendant la recherche** : mer multimodale
 JONSWAP à étalement `cos^2s` (ADR-156), queue d'équilibre `f⁻⁴` continuée à la main (ADR-157),

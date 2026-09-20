@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 10:45 +02:00
+Battement        : 2026-09-20 10:52 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S307 — **verdict R12/R13 reçu : « le rendu est toujours mauvais »**. Recherche à trois niveaux (références du guide, références des références, état de l'art non cité), puis mesure de l'écart, puis décision. Consigne explicite de l'utilisateur : aller au-delà du guide, multiplier les étapes
 Dernière session : S306 — guide confronté au dépôt ; stries attribuées à la queue spectrale, coupure réglable, revue R13 demandée
