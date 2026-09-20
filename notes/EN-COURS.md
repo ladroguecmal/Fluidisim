@@ -119,13 +119,13 @@ Critères, écrits avant la mesure :
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [>] **P2** — ADR-181 : la décision de l'utilisateur du 2026-09-20 (S312), actée décision par
+- [x] **P2** — ADR-181 : la décision de l'utilisateur du 2026-09-20 (S312), actée décision par
   décision, y compris le refus du niveau global arbitraire et l'ordre A → E.
-- [ ] **P3** — *la borne*, dérivée puis mesurée : loi du plancher d'arrondi en `N`, amplitude et
+- [x] **P3** — *la borne*, dérivée puis mesurée : loi du plancher d'arrondi en `N`, amplitude et
   `dt`. C'est la question de fond, et elle passe avant l'outil.
 - [ ] **P4** — le module du critère : les quatre grandeurs de l'utilisateur, publiées séparément.
-- [ ] **P5** — balayage **amplitude**, à géométrie et pas fixés.
-- [ ] **P6** — balayages **pas de temps** et **résolution**.
+- [x] **P5** — balayage **amplitude**, à géométrie et pas fixés.
+- [x] **P6** — balayages **pas de temps** et **résolution**.
 - [ ] **P7** — **l'erreur volontaire** : fuite connue injectée, sensibilité de l'instrument
   mesurée, plus petite fuite détectée publiée.
 - [ ] **P8** — T2 sur **10 s**, la durée demandée.
@@ -134,7 +134,45 @@ Critères, écrits avant la mesure :
 
 ### Notes de reprise
 
-*(à remplir en cours de session)*
+**Fusion déclarée P3+P5+P6.** La loi du plancher ne se lit pas sur un balayage : elle se lit sur
+trois, un paramètre à la fois (L354). Le banc et ses trois sorties sont un seul objet.
+
+**P3 — les trois hypothèses étaient écrites avant la mesure, et deux sont réfutées.**
+
+| | prédiction | verdict |
+|---|---|---|
+| **H1 — représentation** (`ulp(h₀)`) | insensible à `a` **et** à `dt` | **réfutée** : le résidu est **strictement linéaire en `a`** sur quatre décades |
+| **H3 — accumulation `f64`** | `∝ a`, insensible à `dt` | **réfutée** : le résidu moyen est **linéaire en `dt`** (×2,00 ; ×2,12 ; ×2,07 ; ×2,11) |
+| **H2 — incrément** | `∝ a` **et** `∝ dt` | **confirmée** |
+
+Et le mécanisme est plus précis que H2 ne le disait : le télescopage du transport se fait sur des
+différences de flux **arrondies en `f32`**, une par colonne, de signe indépendant — donc
+l'accumulation se fait en **`√N`**, pas en `N`. D'où la borne, écrite puis vérifiée :
+
+```text
+résidu_du_pas  ≲  u₃₂ · |Δη_pas| · A / √N       avec  u₃₂ = 2⁻²⁴,  A = N·dx²
+```
+
+**Vérifiée à `C ≈ 1` sur tout le balayage** : prédit 2,02·10⁻¹² contre 1,99·10⁻¹² mesuré au point
+de référence ; 2,02·10⁻¹¹ contre 2,07·10⁻¹¹ à `a` ×10 ; 4,04·10⁻¹² contre 4,09·10⁻¹² à `dx` = 0,5 ;
+1,01·10⁻¹² contre 1,51·10⁻¹² à `dx` = 0,125. Jamais plus d'un facteur 1,5.
+
+**L'invariant utile, et c'est lui qui fera l'échelle pertinente** : `pire_résidu / volume_absolu`
+vaut **6,2 ; 5,8 ; 5,2 ; 5,4·10⁻¹¹** sur quatre décades d'amplitude — **constant**. L'échelle
+pertinente du problème n'est donc ni l'incrément du pas (S312, A304) ni le volume **signé**, c'est
+le **volume absolu de perturbation**.
+
+**Les bornes naïves sont fausses par cinq ordres**, et il fallait le dire : `N·ulp(h₀)/2·dx²` donne
+3,58·10⁻⁷ et la variante en `√N` 5,16·10⁻⁸, quand la mesure donne 2·10⁻¹². La somme compensée de
+S233 **fait son travail** — c'est elle qui retire `ulp(h₀)` du problème, et sans elle le plancher
+serait cinq ordres plus haut.
+
+**Le cumulé ne se comporte pas pareil des deux côtés, et c'est une trouvaille.** Rapport
+`|cumulé signé| / (moyen·√pas)` : **0,006 à 2,3 dans la cuve fermée** — une marche aléatoire, sans
+dérive. Mais **13,7 dans le cas ouvert**, pour `√200` = 14,1 : le résidu y est **d'un seul signe**,
+donc le cumulé croît **linéairement** avec le nombre de pas. 2,88·10⁻¹⁰ m³ sur 200 pas, soit
+5·10⁻⁸ de la dérive physique — minuscule, mais **systématique**. Suspect nommé, non démontré : la
+bande ou l'éponge, qui n'existent que dans ce cas.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
