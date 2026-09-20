@@ -554,8 +554,9 @@ impl Gpu {
         for v in [frame.cut_factor, if frame.physical_color { 1. } else { 0. }, frame.color_gain, frame.sky_elevation_deg] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
-        // S308 : (exposition, contraste, point blanc, 0) ; exposition nulle = courbe éteinte.
-        for v in [frame.tone[0], frame.tone[1], frame.tone[2], 0.] {
+        // S308 : (exposition, contraste, point blanc, miroitement) ; exposition nulle = courbe
+        // éteinte, miroitement 1 = comportement historique au bit.
+        for v in [frame.tone[0], frame.tone[1], frame.tone[2], frame.glint] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);

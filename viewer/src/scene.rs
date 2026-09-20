@@ -727,6 +727,8 @@ pub struct FrameData<'a> {
     pub sky_elevation_deg: f32,
     /// S308 : courbe de tonalité (exposition, contraste, point blanc). Exposition nulle = éteinte.
     pub tone: [f32; 3],
+    /// S308 P6 : facteur du miroitement du soleil. 1 = comportement historique, au bit.
+    pub glint: f32,
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -829,6 +831,7 @@ impl<'a> FrameData<'a> {
             color_gain: 1.,
             sky_elevation_deg: 0.,
             tone: [0.; 3],
+            glint: 1.,
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,

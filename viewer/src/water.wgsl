@@ -15,7 +15,8 @@ struct Params {
     // (poids plein jusqu'à `λ = 4·empreinte`, nul au Nyquist du pixel `λ = 2·empreinte`) ;
     // `f` déplace les deux bornes à `4f` et `2f`. Multiplier par 1,0 est exact.
     cut: vec4<f32>,
-    // S308 : courbe de tonalité. (exposition, contraste, point blanc, 0). `x <= 0` = éteinte.
+    // S308 : courbe de tonalité. (exposition, contraste, point blanc, facteur de miroitement).
+    // `x <= 0` = courbe éteinte ; `w` vaut 1 par défaut, et multiplier par 1,0 est exact.
     tone: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> p: Params;
@@ -693,7 +694,9 @@ fn sample_light(slope: vec2<f32>, ray: vec3<f32>) -> vec3<f32> {
     let fresnel = 0.02+0.98*pow(1.0-max(dot(-ray,n),0.0),5.0);
     let sun = normalize(vec3<f32>(-0.4,0.3,0.8));
     let reflection = reflect(ray,n);
-    let glint = pow(max(dot(reflection,sun),0.0),180.0);
+    // S308 P6 : `p.tone.w` échelonne le miroitement, 1 par défaut. Il sert à **mesurer** sa part
+    // dans les pixels très clairs, que la photographie dit 2,4 fois trop nombreux.
+    let glint = pow(max(dot(reflection,sun),0.0),180.0)*p.tone.w;
     if (p.eye.w > 0.5) {
         // S307 : `p.cut.y` = 1 → couleur dérivée de ses sources au lieu de la constante historique.
         let sea = select(vec3<f32>(0.004,0.060,0.170), SEA_R0 * p.cut.z, p.cut.y > 0.5);
@@ -801,7 +804,9 @@ fn diagnostic_fragment(v: Vertex) -> vec4<f32> {
     let fresnel = 0.02+0.98*pow(1.0-max(dot(-ray,n),0.0),5.0);
     let sun = normalize(vec3<f32>(-0.4,0.3,0.8));
     let reflection = reflect(ray,n);
-    let glint = pow(max(dot(reflection,sun),0.0),180.0);
+    // S308 P6 : `p.tone.w` échelonne le miroitement, 1 par défaut. Il sert à **mesurer** sa part
+    // dans les pixels très clairs, que la photographie dit 2,4 fois trop nombreux.
+    let glint = pow(max(dot(reflection,sun),0.0),180.0)*p.tone.w;
     if (p.eye.w > 0.5) {
         // Habillage « ciel clair » : eau bleu profond (photo B), air clair, reflet du soleil plus franc.
         let sea_c = select(vec3<f32>(0.004,0.060,0.170), SEA_R0 * p.cut.z, p.cut.y > 0.5);

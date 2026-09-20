@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 13:12 +02:00
+Battement        : 2026-09-20 13:33 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S308 — **verdict R14 reçu avec la photographie de référence**. L'utilisateur tranche : la géométrie suffit, le travail prioritaire est **optique**, et aucune correction de forme ne s'ouvre avant. Faire de la photographie une **cible de statistiques d'image**, puis construire contre elle
 Dernière session : S307 — trois revues envoyées avec des options acceptées éteintes ; couleur dérivée (ADR-177) ; R14 demandée

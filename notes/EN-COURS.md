@@ -101,13 +101,16 @@ Critères, écrits avant la mesure :
   et le contraste local.
 - [x] **P5** — la courbe de tonalité, calée sur les centiles. **Et un résultat négatif net sur la
   coupure spectrale.**
-- [ ] **P6** — *(promu par la mesure)* le **miroitement du soleil** : vérifier qu'il est la cause
-  des 2,4 × trop de pixels très clairs, puis l'intégrer sur la distribution de pentes.
-- [ ] **P7** — diffusion aux crêtes et écume, **jugées contre la cible** : construites si la mesure
+- [x] **P6** — le **miroitement du soleil** : hypothèse **réfutée** par la mesure. Le coupable est
+  la courbe elle-même. *(Étape de vérification seule ; la construction devient P7 — découpage
+  déclaré, aucune étape de plus d'un quart d'heure.)*
+- [ ] **P7** — la courbe contre les **quatre** cibles à la fois : recherche à deux étages, critère
+  déclaré, instrument versionné.
+- [ ] **P8** — diffusion aux crêtes et écume, **jugées contre la cible** : construites si la mesure
   les demande, déclarées en file si elle dit le contraire. Rien n'est retiré du périmètre : les six
   postes du verdict R14 restent dus (ADR-127).
-- [ ] **P8** — images soumises (R15), preuve.
-- [ ] **P9** — rituel REPRISE §6.
+- [ ] **P9** — images soumises (R15), preuve.
+- [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
 
@@ -294,6 +297,49 @@ noirs ; crêtes gris-bleu clair ; ciel à gradient **fort** (blanc-cyan à l'hor
 haut) avec une bande claire mince juste au-dessus de l'horizon ; **très peu d'écume**, quelques
 mouchetures ; **pas de chemin de miroitement**, le soleil n'est pas dans le champ ; mer de vent
 courte et raide, pas de houle longue dominante.
+## P6 — le miroitement du soleil n'est pas le coupable : hypothèse réfutée
+
+P5 laissait une hypothèse nommée : les 2,4 × trop de pixels très clairs viendraient du reflet
+spéculaire du soleil, `pow(dot(reflet, soleil), 180)`, trop dur pour être résolu. Elle est
+**fausse**, et il a suffi d'un interrupteur pour le savoir.
+
+`--miroitement=<facteur>` échelonne ce terme ; 1 est le rendu historique, et il l'est **au bit** —
+empreintes `0x4a200520b14ac563` (proche) et `0xe2abde41dd05f6ba` (rasante), identiques avant et
+après l'ajout du facteur.
+
+| | fraction claire *(cible 0,074)* | contraste local | dynamique |
+|---|---:|---:|---:|
+| `--miroitement=1` *(historique)* | 0,1747 | 0,382 | 28,4 |
+| `--miroitement=0` *(éteint)* | **0,1837** | 0,385 | 28,8 |
+
+**Éteindre complètement le miroitement ne retire pas un pixel clair — il en ajoute.** La hausse
+n'est pas un paradoxe : le seuil est *relatif* à la médiane de la mer, qui baisse quand on retire
+de la lumière. Le miroitement ne pèse donc rien dans ce poste.
+
+**Où est le coupable, alors : dans la courbe.** Le chiffre était déjà sous les yeux en P5 et
+personne ne l'avait lu comme une cause — sans courbe, la fraction claire vaut **0,037** ; avec la
+courbe retenue, **0,175**. C'est la courbe qui fabrique les pixels clairs, en écartant la
+distribution. Et ce n'est pas un défaut de réglage mais une **contrainte de forme** : dans la
+plage de luma de la mer, `x = (l·e)^g` est presque une pure loi de puissance, si bien que
+
+    p95/p50 ≈ (l95/l50)^g   et   p05/p50 ≈ (l05/l50)^g
+
+sont commandés par le **même** exposant. Caler la densité des creux sur la photographie
+(`g = 1,4`) fixe donc la queue claire du même coup — 2,4 fois trop haute. **Un seul paramètre ne
+peut pas tenir les deux bouts.**
+
+Ce qui reste à essayer, et c'est P7 : le genou de Reinhard ne mord qu'au voisinage de 1, très
+au-dessus de la mer (`p95` après courbe ≈ 0,19). **L'exposition le descend dans la plage utile** —
+elle n'est pas un réglage de clarté ici, c'est le levier de compression des hautes lumières. Un
+premier balayage hors GPU le confirme : à `g` constant, passer `e` de 1 à 2 fait tomber la
+fraction claire de 0,174 à 0,103 sans toucher à la teinte.
+
+**Deux vérifications d'instrument, faites en passant.** L'image rendue sans courbe ne sature
+**aucun** pixel de mer (0 sur 632 320 à 255), et un modèle hors GPU qui applique la courbe à sa
+luma redonne les chiffres du GPU à 2 % près — `0,1956 / 27,84 / 0,3830 / 0,17402` contre
+`0,1923 / 28,40 / 0,3821 / 0,17470`. **La recherche peut donc se faire hors GPU**, à condition de
+revérifier le gagnant sur la carte. C'est ce que fait P7.
+
 ## Archive — notes de S304 (lot de la mer, en attente du verdict R12)
 
 **Construit** : `tayfun()` et `lagged_eps()` dans `water.wgsl`, accumulations par système dans la

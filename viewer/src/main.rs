@@ -2848,6 +2848,16 @@ fn run() -> Result<(), String> {
             return delta3d_captures(&mut frame, config);
         }
     }
+    // S308 P6 : `--miroitement=<facteur>` — échelonne le reflet spéculaire du soleil sur l'eau.
+    // Il n'est pas un réglage d'auteur : il sert à **mesurer** la part du miroitement dans les
+    // pixels très clairs, que la photographie de référence dit 2,4 fois trop nombreux. 1 = rendu
+    // historique, au bit.
+    if let Some(value) = args.iter().find_map(|a| a.strip_prefix("--miroitement=")) {
+        let f: f32 = value.parse().map_err(|_| "miroitement : un nombre".to_string())?;
+        if !(0. ..=4.).contains(&f) { return Err("miroitement : facteur dans [0;4]".into()); }
+        frame.glint = f;
+        println!("MIROITEMENT facteur={f}");
+    }
     // S308 : `--tonalite=e,g,w` — exposition, contraste, point blanc, calés sur les centiles
     // mesurés de la photographie de référence et jamais choisis à l'œil.
     if let Some(value) = args.iter().find_map(|a| a.strip_prefix("--tonalite=")) {
