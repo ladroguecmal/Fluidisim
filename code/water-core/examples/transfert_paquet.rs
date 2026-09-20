@@ -55,7 +55,10 @@ use water_core::{
     background::BackgroundSample,
     delta3d::{Domain3, Ledger3, Sponge3, Volume3},
     host::HostServices,
-    SimTime,
+    impact_field::{Medium, BREAKING_SLOPE},
+    radial_impact::{Domain as RadialDomain, RadialImpact},
+    wave_event::{Impact, Origin, WaveEvent},
+    FrameId, SimTime,
 };
 
 const G: f32 = 9.81;
@@ -218,6 +221,23 @@ fn main() -> Result<(), String> {
 
     let mut volume = Ledger3::default();
     let (mut traverse_net, mut traverse_absolu) = (0f64, 0f64);
+    // **Le contrôle du double comptage** (point 6 de l'utilisateur, ADR-180 D7). Ce que la bande
+    // B/W pousse dans δ n'a pas à ressortir au titre du transfert. Ici le fond est nul, donc
+    // `band_in` doit valoir zéro **à chaque pas** — et `perturbation_in` aussi, parce que la
+    // frontière est une paroi (S311). Les deux sont cumulés en valeur absolue : une compensation
+    // entre pas masquerait précisément ce qu'on veut exclure.
+    let (mut bande_entrante, mut perturbation_au_bord) = (0f64, 0f64);
+    let mut eponge_absolu = 0f64;
+    // **T1 rapporté à l'échelle du pas** (ADR-179 D1) — `max(|delta|, |band_in|, |sponge_out|)`,
+    // la définition de S310. Un résidu absolu ne dit rien sans elle : c'est le rapport qui se
+    // compare aux 10⁻⁶.
+    //
+    // Mais un rapport n'a pas de sens sur un pas qui ne fait **rien** : quand l'échelle tombe au
+    // picolitre, le résidu du même ordre donne un rapport de 2, qui ne mesure que la division.
+    // Les couples sont donc gardés et le pire se prend parmi les pas dont l'échelle atteint
+    // `10⁻⁶` de la plus grande du banc — un plancher **relatif**, pas un seuil choisi.
+    let mut couples: Vec<(f64, f64)> = Vec::with_capacity(6000);
+    let mut pire_sur_le_champ = 0f64;
     let (mut incident, mut retour) = (0f64, 0f64);
     let (jauge_i, jauge_j) = (ligne, ny / 2);
     // Signal de jauge de la fenêtre de passage, pour la longueur d'onde dominante et l'énergie.
@@ -239,6 +259,19 @@ fn main() -> Result<(), String> {
         traverse_net += q;
         traverse_absolu += q.abs();
         let b = v.balance();
+        bande_entrante += b.band_in.abs();
+        perturbation_au_bord += b.perturbation_in.abs();
+        eponge_absolu += b.sponge_out.abs();
+        couples.push((
+            b.residual.abs(),
+            b.delta.abs().max(b.band_in.abs()).max(b.sponge_out.abs()),
+        ));
+        // **L'autre normalisation possible** : l'échelle du **champ**, pas celle de l'incrément.
+        // Le résidu d'une somme sur 21 000 colonnes en `f32` a un plancher fixé par le champ ;
+        // le diviser par un incrément qui rétrécit avec `dt` fait dépendre le critère du pas.
+        if b.volume.abs() > 0.0 {
+            pire_sur_le_champ = pire_sur_le_champ.max(b.residual.abs() / b.volume.abs());
+        }
         // Le transfert est enregistré à zéro tant que rien n'a été remis à W : c'est l'état du
         // registre **avant** la phase de transfert, et il doit valoir exactement le sortant.
         volume.account(q, 0.0, b.residual).map_err(|e| format!("registre {e:?}"))?;
@@ -301,5 +334,271 @@ fn main() -> Result<(), String> {
         volume.global_conservation_claimable(),
         v.perturbation_volume()
     );
+    let echelle_max = couples.iter().fold(0f64, |m, c| m.max(c.1));
+    println!(
+        "PAQUET_S312 double_comptage bande_entrante_cumulee_m3={bande_entrante:e} \
+         perturbation_au_bord_cumulee_m3={perturbation_au_bord:e} \
+         eponge_absolue_m3={eponge_absolu:e} echelle_max_m3={echelle_max:e} pas={}",
+        couples.len()
+    );
+    // **T1 se lit avec le plancher d'activité du pas, et pas sans lui.** `max(|delta|, |band_in|,
+    // |sponge_out|)` tend vers zéro quand le domaine se calme, et un résidu au plancher `f64`
+    // divisé par une échelle au plancher `f64` donne un rapport d'ordre 1 qui ne mesure que la
+    // division. Le balayage publie le pire rapport **par tranche d'activité** : c'est lui qui dit
+    // à partir de quand le critère a un sens, au lieu de rendre un verdict sur un pas mort.
+    for fraction in [0.0f64, 1e-3, 1e-2, 1e-1, 0.5] {
+        let plancher = fraction * echelle_max;
+        let (mut pire, mut retenus, mut pire_echelle) = (0f64, 0u64, 0f64);
+        for &(residu, echelle) in &couples {
+            if echelle > 0.0 && echelle >= plancher {
+                retenus += 1;
+                if residu / echelle > pire {
+                    pire = residu / echelle;
+                    pire_echelle = echelle;
+                }
+            }
+        }
+        println!(
+            "PAQUET_S312 T1 plancher_en_fraction_de_max={fraction:e} \
+             plancher_m3={plancher:e} pas_retenus={retenus}/{} pire_rapport={pire:e} \
+             echelle_au_pire_m3={pire_echelle:e} sous_1e-6={}",
+            couples.len(),
+            pire <= 1e-6
+        );
+    }
+    println!(
+        "PAQUET_S312 T1 normalisee_par_le_champ pire_rapport={pire_sur_le_champ:e} sous_1e-6={}",
+        pire_sur_le_champ <= 1e-6
+    );
+
+    // ─────────────────────────────────────────────────────────────────────────────────────────
+    // LE TRANSFERT — point 4 d'ADR-180 §1, par les interfaces existantes et rien d'autre.
+    // ─────────────────────────────────────────────────────────────────────────────────────────
+    //
+    // Deux champs de l'événement sont **forcés**, et chacun est une perte que le registre porte :
+    //
+    // - `anisotropy = 0`, parce que les deux champs construits **refusent** toute autre valeur
+    //   (`Error::Anisotropy`). La direction du signal sortant ne franchit pas le raccord.
+    // - `displaced_l = 0`, parce qu'il est **mesuré inerte** (`receveur_volume_net`, §1.1) : le
+    //   remplir donnerait l'apparence d'un transfert de volume sans en faire un — exactement ce
+    //   qu'ADR-180 D1 interdit.
+    let emission_us = (t_arrivee * 1e6) as u64;
+    // **Le point d'émission**, et `sample` attend des coordonnées **absolues** : ses distances
+    // sont comptées depuis la position de l'événement, pas depuis l'origine. Les oublier fait
+    // refuser tout le disque, `Error::Domain` — constaté au premier passage.
+    let source = [ligne as f32 * dx, ny as f32 * dx * 0.5];
+    let evenement = WaveEvent::impact(Impact {
+        id: 1,
+        frame: FrameId(0),
+        cell: 0,
+        birth: SimTime(emission_us),
+        ttl_us: 16_000_000,
+        position: [source[0], source[1], 0.],
+        energy_j: energie_sortante as f32,
+        wavelength_m: lambda_mesure as f32,
+        direction_turns: 0.,
+        anisotropy: 0.,
+        displaced_l: 0.,
+        material: 0,
+        origin: Origin::Local,
+        above_surface: false,
+    })
+    .map_err(|e| format!("evenement {e:?}"))?;
+    let medium = Medium {
+        gravity: G,
+        density: RHO,
+        depth: h0,
+        max_slope: BREAKING_SLOPE,
+    };
+    let rayon = 20.0f32;
+    let champ = RadialImpact::<128>::new(
+        evenement,
+        medium,
+        RadialDomain {
+            radius: rayon,
+            age_us: 12_000_000,
+        },
+    )
+    .map_err(|e| format!("transfert refusé : {e:?}"))?;
+
+    // ── Vérification 1 : l'amplitude. C'est elle que T3 juge. ────────────────────────────────
+    //
+    // À la naissance le champ est au repos (`∂η/∂t = 0` partout), donc toute son énergie est
+    // potentielle : `E = ½ρg∫η²dA`, en quadrature radiale exacte en angle. Si le champ construit
+    // ne rend pas l'énergie qu'on lui a demandé de porter, le transfert n'a pas eu lieu.
+    let (nr, rmax) = (4096usize, (rayon - 0.1) as f64);
+    let dr = rmax / nr as f64;
+    let (mut energie_champ, mut repos_max) = (0f64, 0f64);
+    let mut profil: Vec<(f64, f64)> = Vec::with_capacity(nr);
+    for i in 0..nr {
+        let r = (i as f64 + 0.5) * dr;
+        let s = champ
+            .sample(FrameId(0), 0, [source[0] + r as f32, source[1]], SimTime(emission_us))
+            .map_err(|e| format!("champ {e:?}"))?;
+        let eta = s.eta as f64;
+        energie_champ +=
+            core::f64::consts::PI * RHO as f64 * G as f64 * eta * eta * r * dr;
+        repos_max = repos_max.max(s.deta_dt.abs() as f64);
+        profil.push((r, eta));
+    }
+    let erreur_amplitude = (energie_champ - energie_sortante).abs() / energie_sortante;
+
+    // ── Vérification 2 : la longueur d'onde, lue sur le profil radial. ───────────────────────
+    //
+    // **Seulement là où le champ existe.** Au premier passage la mesure balayait tout le disque,
+    // queue comprise : au-delà de la perturbation, `η` vaut quelques 10⁻⁹ et change de signe à
+    // chaque maille, ce qui a donné une « longueur d'onde » de 1,04 m qui ne mesurait que le
+    // bruit `f32`. La fenêtre retenue est celle où `|η| ≥ 20 %` de son maximum.
+    let longueur_dominante = |profil: &[(f64, f64)]| -> f64 {
+        let pic = profil.iter().fold(0f64, |m, p| m.max(p.1.abs()));
+        if pic <= 0.0 {
+            return f64::NAN;
+        }
+        let dedans: Vec<usize> = (0..profil.len())
+            .filter(|&i| profil[i].1.abs() >= 0.2 * pic)
+            .collect();
+        let (Some(&debut), Some(&fin)) = (dedans.first(), dedans.last()) else {
+            return f64::NAN;
+        };
+        let mut zeros: Vec<f64> = Vec::new();
+        for i in debut..fin {
+            if profil[i].1 * profil[i + 1].1 < 0.0 {
+                zeros.push(profil[i + 1].0);
+            }
+        }
+        // Deux zéros consécutifs sont séparés d'une **demi**-longueur d'onde.
+        if zeros.len() >= 3 {
+            2.0 * (zeros[zeros.len() - 1] - zeros[0]) / (zeros.len() - 1) as f64
+        } else {
+            f64::NAN
+        }
+    };
+    let lambda_champ = longueur_dominante(&profil);
+
+    // ── Vérification 3 : la propagation. ─────────────────────────────────────────────────────
+    //
+    // La crête principale de l'anneau se déplace à la vitesse de groupe. On la suit à deux âges
+    // et on compare la vitesse obtenue à `cg = ½√(g/k)` — celle du paquet côté δ.
+    let crete = |age_us: u64| -> Result<(f64, f64), String> {
+        let (mut meilleur_r, mut meilleur) = (0f64, 0f64);
+        let mut trace: Vec<(f64, f64)> = Vec::with_capacity(nr);
+        for i in 0..nr {
+            let r = (i as f64 + 0.5) * dr;
+            let eta = champ
+                .sample(
+                    FrameId(0),
+                    0,
+                    [source[0] + r as f32, source[1]],
+                    SimTime(emission_us + age_us),
+                )
+                .map_err(|e| format!("champ {e:?}"))?
+                .eta as f64;
+            trace.push((r, eta));
+            if eta.abs() > meilleur {
+                meilleur = eta.abs();
+                meilleur_r = r;
+            }
+        }
+        Ok((meilleur_r, longueur_dominante(&trace)))
+    };
+    let ((r4, lambda4), (r10, lambda10)) = (crete(4_000_000)?, crete(10_000_000)?);
+    let vitesse_champ = (r10 - r4) / 6.0;
+
+    // ── Vérification 4 : la direction, et c'est la perte la plus grosse. ─────────────────────
+    //
+    // Le paquet sortait **vers les `x` croissants**. L'impact de W est isotrope — l'anisotropie
+    // est refusée par le constructeur. On mesure donc où va l'énergie qu'on vient de lui confier,
+    // par intégration sur le disque : demi-plan avant contre demi-plan arrière.
+    let pas_grille = (lambda_mesure / 16.0) as f32;
+    // La grille est **centrée sur la source**, `x = (i + ½ − n/2)·pas` : sans cela le demi-plan
+    // avant perd une bande à la troncature et la fraction sort à 0,462 au lieu de 0,5, ce qui
+    // mesurerait le cadrage et non le champ. Constaté au premier passage.
+    // Le compte est rendu **pair** : impair, la colonne `x = 0` — celle où `η` est le plus grand —
+    // tombe entière du côté « avant » et la fraction sort à 0,579 au lieu de 0,5.
+    let n_grille = ((2.0 * (rayon - 0.1) / pas_grille) as usize) & !1usize;
+    let (mut avant, mut arriere) = (0f64, 0f64);
+    for jy in 0..n_grille {
+        for ix in 0..n_grille {
+            let x = (ix as f64 + 0.5 - n_grille as f64 / 2.0) * pas_grille as f64;
+            let y = (jy as f64 + 0.5 - n_grille as f64 / 2.0) * pas_grille as f64;
+            if x * x + y * y > (rayon as f64 - 0.1) * (rayon as f64 - 0.1) {
+                continue;
+            }
+            let eta = champ
+                .sample(
+                    FrameId(0),
+                    0,
+                    [source[0] + x as f32, source[1] + y as f32],
+                    SimTime(emission_us),
+                )
+                .map_err(|e| format!("champ {e:?}"))?
+                .eta as f64;
+            let part = 0.5 * RHO as f64 * G as f64 * eta * eta * (pas_grille * pas_grille) as f64;
+            if x >= 0.0 {
+                avant += part;
+            } else {
+                arriere += part;
+            }
+        }
+    }
+    let fraction_avant = avant / (avant + arriere);
+
+    // ── Le second registre : la grandeur propagative. ────────────────────────────────────────
+    //
+    // « Transféré » est ici l'énergie que le champ construit porte **vers l'avant** — celle qui
+    // part dans la direction du signal sortant. Ce qui part vers l'arrière n'est pas transféré :
+    // c'est une composante que W ne sait pas orienter, et elle rejoint l'attente (ADR-180 D3).
+    let mut propagatif = Ledger3::default();
+    propagatif
+        .account(energie_sortante, energie_champ * fraction_avant, 0.0)
+        .map_err(|e| format!("registre {e:?}"))?;
+
+    println!(
+        "PAQUET_S312 transfert emission_s={:.3} energie_demandee_j={energie_sortante:e} \
+         lambda_demandee_m={lambda_mesure:.4} energie_du_champ_j={energie_champ:e} \
+         erreur_amplitude={erreur_amplitude:e} lambda_du_champ_m={lambda_champ:.4} \
+         ecart_lambda={:e} bande_du_champ_m={:.3}_a_{:.3} deta_dt_max_a_la_naissance={repos_max:e} \
+         crete_a_4s_m={r4:.3} lambda_a_4s_m={lambda4:.4} crete_a_10s_m={r10:.3} \
+         lambda_a_10s_m={lambda10:.4} vitesse_du_champ_m_par_s={vitesse_champ:.4} \
+         cg_du_paquet_m_par_s={cg:.4} ecart_vitesse={:e} fraction_avant={fraction_avant:.4}",
+        t_arrivee,
+        (lambda10 - lambda_mesure).abs() / lambda_mesure,
+        // La bande d'Hankel de l'impact : `k ∈ [k₀/2, 2k₀]`, soit `λ ∈ [λ/2, 2λ]`. Ce n'est pas
+        // une longueur d'onde, c'est **deux octaves** — à comparer à la largeur spectrale du
+        // paquet sortant, `Δk/k ≈ 1/(kσ)`.
+        lambda_mesure / 2.0,
+        lambda_mesure * 2.0,
+        (vitesse_champ - cg as f64).abs() / cg as f64
+    );
+    println!(
+        "PAQUET_S312 registre_propagatif sorti_j={:e} transfere_j={:e} en_attente_j={:e} \
+         cree_j={:e} part_en_attente={:e} conservation_globale_revendicable={}",
+        propagatif.outgoing(),
+        propagatif.transferred(),
+        propagatif.pending(),
+        propagatif.created(),
+        propagatif.pending_ratio(),
+        propagatif.global_conservation_claimable()
+    );
+
+    // ── T3, sur le transfert **effectivement réalisé** (ADR-180 D5). ─────────────────────────
+    //
+    // La grandeur testée n'est pas le volume — le transfert n'en porte pas, et le registre le
+    // dit. C'est l'**amplitude** : le champ de W porte-t-il ce qu'on lui a demandé de porter ?
+    // Le seuil de réflexion reste mesuré **à part** (ADR-180 D6), comme en S311.
+    if dx == 0.125 && lambda == 2.0 && sigma_en_lambda == 1.5 {
+        if erreur_amplitude > 0.05 {
+            return Err(format!("T3 : erreur d'amplitude {erreur_amplitude:e} au-dessus de 5 %"));
+        }
+        if !(t2 > t1) {
+            return Err("T3 : fenêtres de jauge non séparées, la réflexion n'est pas mesurable".into());
+        }
+        if !(reflexion < 0.01) {
+            return Err(format!("T3 : réflexion en énergie {reflexion:e} au-dessus de 1 %"));
+        }
+        if propagatif.created() != 0.0 || volume.created() != 0.0 {
+            return Err("ADR-180 D8 : de l'eau ou de l'énergie a été créée".into());
+        }
+    }
     Ok(())
 }

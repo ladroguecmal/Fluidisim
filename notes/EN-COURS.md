@@ -129,12 +129,12 @@ Critères, écrits avant la mesure :
   pas, réutilisant `Balance3`, sans jamais compter l'attente comme une restitution.
 - [x] **P5** — *W est-il admissible sur le cas de S311 ?* Régime, pente, portée : mesurés sur la
   primitive, pas lus.
-- [ ] **P6** — le cas contrôlé du **transfert** : perturbation sortante que W peut recevoir,
+- [x] **P6** — le cas contrôlé du **transfert** : perturbation sortante que W peut recevoir,
   volume net et composante de moyenne nulle séparés sur la ligne de contrôle.
-- [ ] **P7** — le **transfert lui-même**, minimal, par les interfaces existantes.
-- [ ] **P8** — vérification : amplitude, longueur d'onde, direction, propagation ; T3 sur le
+- [x] **P7** — le **transfert lui-même**, minimal, par les interfaces existantes.
+- [x] **P8** — vérification : amplitude, longueur d'onde, direction, propagation ; T3 sur le
   transfert effectivement réalisé ; réflexion à part.
-- [ ] **P9** — preuve publiée : transféré, en attente, perdu, et le bilan global sans double
+- [x] **P9** — preuve publiée : transféré, en attente, perdu, et le bilan global sans double
   comptage.
 - [ ] **P10** — rituel REPRISE §6.
 
@@ -750,3 +750,47 @@ reste celui du **volume net**, que le registre porte.
 
 *Tenue du plan* : battement du commit P4 écrit à 16:55 alors que l'horloge disait 16:48 (L237) ;
 corrigé au commit suivant, et dit ici plutôt qu'effacé.
+
+**P6+P7+P8+P9 — fusion déclarée.** Le second cas contrôlé, le transfert et sa vérification vivent
+dans **un seul exemple** (`transfert_paquet.rs`) : le transfert consomme ce que le cas mesure, et
+la vérification consomme le transfert. Les séparer aurait donné trois commits dont deux ne
+compilent pas utilement. La preuve est écrite en même temps parce que trois chiffres sur quatre ont
+changé en cours de route.
+
+**Le paquet, et pourquoi il répond au point 2 mieux qu'un découpage.** `∫η dx = a·σ√(2π)·exp(−k²σ²/2)` :
+le volume net d'un paquet vaut `exp(−k²σ²/2)` fois l'échelle de son volume absolu. À `kσ` = 0 c'est
+la bosse de S311 ; à **9,42** c'est ce paquet, net/absolu **2,47·10⁻⁶** à l'état initial et
+**9,49·10⁻⁴** au passage de la ligne. Les deux transportent autant d'eau d'avant en arrière. **Le
+flux sortant ne se découpe pas** en « part nette » et « reste » : son intégrale et sa forme sont
+deux fonctionnelles, et l'utilisateur avait raison de l'interdire.
+
+**Le transfert passe T3, et les trois pertes sont chiffrées.**
+
+| | mesure | seuil |
+|---|---:|---|
+| **amplitude** — énergie que le champ porte | **1,24·10⁻⁵** | 5 % ✓ |
+| **réflexion artificielle, en 3D** | **2,84·10⁻⁷** | 1 % ✓ |
+| direction — part avant | **0,5000** | *la moitié repart à contresens* |
+| spectre — `λ` à 10 s contre demandée | **27,3 %** | *bande de deux octaves contre 11 %* |
+| propagation — crête contre `cg` | **12,4 %** | *conséquence du spectre* |
+| phase | `∂η/∂t` = **0** à la naissance | *impossible par construction* |
+
+**Double comptage** : `band_in` et `perturbation_in` valent **0 exactement** sur 5 432 pas.
+
+**Trois biais d'instrument, trouvés par la mesure et non par relecture.** (1) `sample` attend des
+coordonnées **absolues** : tout le disque était refusé, `Error::Domain`. (2) La longueur d'onde était
+mesurée sur tout le disque, queue de bruit `f32` comprise — 1,04 m qui ne mesurait rien ; fenêtre
+ramenée à `|η| ≥ 20 %` du pic. (3) La grille du partage avant/arrière avait un **compte impair** :
+la colonne `x = 0`, la plus haute, tombait entière du côté avant et donnait 0,579 au lieu de 0,5.
+
+**Et une trouvaille qui n'était pas cherchée : T1 n'est pas mesurable sur un cas de moyenne nulle.**
+Le rapport dépend entièrement du plancher d'activité — 1,95 sans plancher, **1,79·10⁻⁴ sur les 318
+pas les plus actifs**, toujours 180 fois au-dessus du seuil. Ce n'est pas une division par un pas
+mort. La cause est la **normalisation** : l'échelle du pas rétrécit avec `dt` (1,15·10⁻⁷ m³ au
+maximum du banc) quand le résidu reste au plancher `f32` (2,0·10⁻¹¹ m³) ; et normaliser par
+`Balance3::volume` ne sauve rien, c'est une somme **signée**, nulle par construction pour un paquet
+(2,78·10⁻⁴). Rapporté à une grandeur **absolue** : 8,3·10⁻¹⁰. **À proposer à l'utilisateur** comme
+précision à ADR-179 D1, dont le statut provisoire le prévoit. Aucun banc de la session ne
+revendique T1.
+
+**Suite de tests** : 455 essais, 0 échec.

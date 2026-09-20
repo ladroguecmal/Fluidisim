@@ -27,6 +27,26 @@ use water_core::{
     FrameId, SimTime,
 };
 
+fn evenement_oriente(lambda_m: f32, energie_j: f32, anisotropie: f32, direction: f32) -> WaveEvent {
+    WaveEvent::impact(Impact {
+        id: 1,
+        frame: FrameId(0),
+        cell: 0,
+        birth: SimTime(0),
+        ttl_us: 10_000_000,
+        position: [0.0; 3],
+        energy_j: energie_j,
+        wavelength_m: lambda_m,
+        direction_turns: direction,
+        anisotropy: anisotropie,
+        displaced_l: 0.0,
+        material: 0,
+        origin: Origin::Server,
+        above_surface: true,
+    })
+    .expect("impact valide")
+}
+
 fn evenement(lambda_m: f32, energie_j: f32) -> WaveEvent {
     WaveEvent::impact(Impact {
         id: 1,
@@ -86,6 +106,29 @@ fn main() {
             "ADMISSION_S312 cas={nom} lambda_m={lambda} profondeur_m={profondeur} \
              lambda_sur_profondeur={:.2} impact_radial={radial:?} champ_periodique={periodique:?}",
             lambda / profondeur
+        );
+    }
+
+    // ── 1 bis. La **direction** franchit-elle le raccord ? ───────────────────────────────────
+    //
+    // `WaveEvent` porte `direction_turns` et `anisotropy`. ADR-180 D3 interdit d'en conclure quoi
+    // que ce soit sans mesure : un champ présent dans l'encodage ne prouve pas qu'un champ
+    // construit l'honore. On soumet donc une anisotropie franche aux deux champs.
+    for anisotropie in [0.0f32, 0.25, 0.5, 1.0] {
+        let e = evenement_oriente(2.0, 0.01, anisotropie, 0.25);
+        let radial = RadialImpact::<64>::new(
+            e,
+            milieu(8.0),
+            Domain {
+                radius: 16.0,
+                age_us: 4_000_000,
+            },
+        )
+        .err();
+        let periodique = ImpactField::new(e, milieu(8.0)).err();
+        println!(
+            "ADMISSION_S312 anisotropie valeur={anisotropie} direction_tours=0.25 \
+             impact_radial={radial:?} champ_periodique={periodique:?}"
         );
     }
 
