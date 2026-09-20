@@ -2003,3 +2003,132 @@ pub fn chainon_cuve() -> Result<(), String> {
     }
     Ok(())
 }
+
+/// **Banc S305, critères 2 et 3.** Le pas de **production** contre la référence 3D, sur le cas de
+/// cuve d'ADR-175 §4.1 : mode oblique (1, 1), murs, fond nul. Trois raffinements, deux profils de
+/// cycles. Publie l'écart de hauteur en mètres et rapporté à l'amplitude, l'écart de pente, et
+/// l'erreur de phase de chaque solveur contre `ω² = g·k·tanh(k·h)`.
+///
+/// **La durée est déclarée, et elle est entière** : 1 s, soit 0,467 période. Ce cas échappe par
+/// construction à la bascule de mouillure d'A297 — la surface reste dans `4 ± 5 cm` et aucun
+/// centre de maille ne s'y trouve, aux trois raffinements. C'est pourquoi l'écart peut être lu
+/// sur toute la trajectoire, sans l'horizon de prévisibilité qu'imposait le cas S298.
+/// `--delta3d-cuve-trajectoire`.
+pub fn trajectoire_cuve() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::Volume3;
+    use water_core::host::HostServices;
+
+    pollster::block_on(async {
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 29);
+        let background = fond_nul(&mut alloc)?;
+        let (rho, g) = (1025_f32, 9.81_f32);
+        let (pas_us, pas) = (1_000u64, 1_000usize);
+        let profils = [64u32, 128];
+
+        for nx in [16usize, 32, 48] {
+            let Cuve { domain, rest, eta, mode } = cuve(nx, g as f64);
+            let (kx, ky, _k, omega) = mode;
+            let origin = [0., 0., -rest];
+            let colonnes = domain.columns();
+            let depart = std::time::Instant::now();
+
+            let mut volume = Volume3::configure(
+                &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g,
+            )
+            .map_err(|e| format!("volume {e:?}"))?;
+            volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+
+            let total = face_total(domain);
+            let (nu, nv) = ((domain.nx + 1) * domain.ny * domain.nz, domain.nx * (domain.ny + 1) * domain.nz);
+            let zeros = vec![0f32; total];
+            let mut cartes = Vec::with_capacity(profils.len());
+            for _ in profils {
+                let carte = Step3::new(&background, domain, origin, rho, g).await?;
+                carte.set_step(pas_us, rest, Sponge3::default())?;
+                carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[..total - nu - nv], &eta)?;
+                cartes.push(carte);
+            }
+
+            let perturbation0: Vec<f32> = eta.iter().map(|e| e - rest).collect();
+            let mut suivi_ref = SuiviModal::new(domain, 0., kx, ky, omega, &perturbation0);
+            let mut suivis: Vec<SuiviModal> =
+                profils.iter().map(|_| SuiviModal::new(domain, 0., kx, ky, omega, &perturbation0)).collect();
+
+            let pente = |h: &[f32]| -> Vec<(f32, f32)> {
+                (0..colonnes)
+                    .map(|c| {
+                        let (i, j) = (c % domain.nx, c / domain.nx);
+                        let gx = if i + 1 < domain.nx { (h[c + 1] - h[c]) / domain.dx } else { 0. };
+                        let gy = if j + 1 < domain.ny { (h[c + domain.nx] - h[c]) / domain.dx } else { 0. };
+                        (gx, gy)
+                    })
+                    .collect()
+            };
+            // Par profil : pire écart de hauteur, pire quadratique, pire écart de pente, crête.
+            let mut pires = vec![(0f32, 0f64, 0f32); profils.len()];
+            let mut crete_max = 0f32;
+            let mut iterations = 0u32;
+            let mut degrades = 0usize;
+
+            for n in 1..=pas {
+                let t = n as f64 * pas_us as f64 * 1e-6;
+                let temps = SimTime((n as u64 - 1) * pas_us);
+                let rapport = volume
+                    .step_surface_mobile(pas_us, 4000, &jobs)
+                    .map_err(|e| format!("reference {e:?}"))?;
+                iterations = iterations.max(rapport.iterations);
+                if rapport.degraded {
+                    degrades += 1;
+                }
+                let coeur: Vec<f32> = volume
+                    .surface()
+                    .iter()
+                    .zip(volume.surface_roundoff_for_trials())
+                    .map(|(e, r)| (e - rest) - r)
+                    .collect();
+                let pente_coeur = pente(&coeur);
+                crete_max = crete_max.max(coeur.iter().fold(0f32, |m, x| m.max(x.abs())));
+                suivi_ref.observer(&coeur, t);
+
+                for (v, carte) in cartes.iter_mut().enumerate() {
+                    carte.step(&background, temps, profils[v])?;
+                    let publiee = carte.published()?;
+                    let pente_carte = pente(&publiee);
+                    let (mut pire, mut somme) = (0f32, 0f64);
+                    for (a, b) in coeur.iter().zip(&publiee) {
+                        pire = pire.max((a - b).abs());
+                        somme += ((a - b) as f64).powi(2);
+                    }
+                    let mut pente_ecart = 0f32;
+                    for ((ax, ay), (bx, by)) in pente_coeur.iter().zip(&pente_carte) {
+                        pente_ecart = pente_ecart.max((ax - bx).abs()).max((ay - by).abs());
+                    }
+                    pires[v].0 = pires[v].0.max(pire);
+                    pires[v].1 = pires[v].1.max((somme / colonnes as f64).sqrt());
+                    pires[v].2 = pires[v].2.max(pente_ecart);
+                    suivis[v].observer(&publiee, t);
+                }
+            }
+
+            println!(
+                "CUVE_S305 trajectoire nx={nx} ny={} nz={} dx={:.6} mailles={} colonnes={colonnes} pas={pas} duree_s={:.3} crete_m={crete_max:e} it_reference={iterations} degrades_reference={degrades} secondes={:.1}",
+                domain.ny, domain.nz, domain.dx, domain.cells(),
+                pas as f64 * pas_us as f64 * 1e-6, depart.elapsed().as_secs_f64()
+            );
+            println!(
+                "CUVE_S305 trajectoire nx={nx} schema=reference continu_pct={:.6} forme_pct={:.6} phase_deg={:.6} derive_m={:e}",
+                100. * suivi_ref.continu, 100. * suivi_ref.forme, suivi_ref.phase_deg(), suivi_ref.derive
+            );
+            for (v, cycles) in profils.iter().enumerate() {
+                println!(
+                    "CUVE_S305 trajectoire nx={nx} cycles={cycles} hauteur_m={:e} sur_amplitude={:e} quadratique_m={:e} pente={:e} continu_pct={:.6} phase_deg={:.6} derive_m={:e}",
+                    pires[v].0, pires[v].0 as f64 / CUVE_A, pires[v].1, pires[v].2,
+                    100. * suivis[v].continu, suivis[v].phase_deg(), suivis[v].derive
+                );
+            }
+        }
+        Ok(())
+    })
+}

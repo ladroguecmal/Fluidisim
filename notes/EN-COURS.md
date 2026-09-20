@@ -94,10 +94,12 @@ Critères, écrits avant la mesure (ADR-175 §4.1 cas 3 et §4.2) :
   oblique ; critère 1 (fond nul, bancs de S301 au bit).
 - [x] **P3** — critère 4 : `step_perturbation_mobile` à fond nul contre `step_surface_mobile`
   sur le même cas, CPU contre CPU — le chaînon entre la référence reçue et ce que la carte porte.
-- [ ] **P4** — critères 2 et 3 : carte contre référence, raffinement 16/32/48, écart de hauteur,
+- [x] **P4** — critères 2 et 3 : carte contre référence, raffinement 16/32/48, écart de hauteur,
   pente, erreur de phase, durée déclarée.
-- [ ] **P5** — preuve `CUVE-GPU-S305`, réception écrite des quatre critères.
-- [ ] **P6** — rituel REPRISE §6.
+- [ ] **P5** — *(découpage déclaré)* durée longue : 5 s au raffinement moyen, pour dire si
+  l'écart est borné ou séculaire — la seule objection que 1 s laisse ouverte.
+- [ ] **P6** — preuve `CUVE-GPU-S305`, réception écrite des quatre critères.
+- [ ] **P7** — rituel REPRISE §6.
 
 ### Notes de reprise
 
@@ -136,6 +138,35 @@ faces, 512 colonnes), `a` = 5 cm, `a·k` = 0,0439, `k·h` = 3,512, `ω` = 2,9324
   de discrétisation, sinon il tomberait ; il croît légèrement en raffinant. C'est la
   non-linéarité du transport à `a·k` = 0,044 (second ordre attendu ≈ `a·k`/2 ≈ 2 %). À ne pas
   confondre avec un défaut de mur : le mur, lui, est jugé au pas un (8,7·10⁻⁶, P2).
+
+**P4 reçu — les critères 2 et 3, avec quatre ordres de grandeur de marge.**
+`--delta3d-cuve-trajectoire`, 1 000 pas de 1 ms (**1 s déclarée, 0,467 période**), trois
+raffinements, deux profils de cycles, référence `step_surface_mobile`.
+
+| `nx` (mailles) | écart de hauteur | / amplitude | quadratique | écart de pente | phase référence | phase carte |
+|---|---:|---:|---:|---:|---:|---:|
+| 16 (1 280) | **3,00·10⁻⁷ m** | 6,0·10⁻⁶ | 1,36·10⁻⁷ | 9,07·10⁻⁷ | 1,223193° | 1,223174° |
+| 32 (9 216) | **3,05·10⁻⁷ m** | 6,1·10⁻⁶ | 1,22·10⁻⁷ | 1,82·10⁻⁶ | 0,248306° | 0,248257° |
+| 48 (29 952) | **3,26·10⁻⁷ m** | 6,5·10⁻⁶ | 1,18·10⁻⁷ | 2,57·10⁻⁶ | 0,065156° | 0,065106° |
+
+(64 cycles ; à 128 cycles les mêmes chiffres à 2 % près — la projection est **déjà convergée à
+64 cycles** sur ce cas, contrairement au cas S298 qui demandait 128.)
+
+- **Critère 3 tenu** : 3·10⁻⁷ m contre les **3 mm** exigés — quatre ordres de grandeur, sur toute
+  la durée déclarée et non jusqu'à un horizon. L'écart de pente vaut 2,6·10⁻⁶ au plus, pour la
+  tolérance de 5·10⁻⁴ héritée de S260.
+- **Critère 2 tenu** : l'erreur de phase de la carte **décroît** 1,223° → 0,248° → 0,0652° et
+  colle à celle de la référence à la cinquième décimale. La carte porte `ω² = g·k·tanh(k·h)`.
+  L'erreur au mode continu suit : 2,5083 → 0,5614 → 0,2016 %.
+- **Pourquoi la durée est entière ici, et pas au cas S298** : la surface reste dans 4 ± 5 cm et
+  **aucun centre de maille** ne s'y trouve aux trois raffinements (3,875/4,125 à `nx` = 32 ;
+  3,9167/4,0833 à 48). La bascule de mouillure d'A297 n'est donc jamais déclenchée — c'est une
+  propriété du **cas**, pas une correction du schéma, et A297 reste entière.
+
+*Réserve, dite parce qu'elle est mesurée* : la dérive de la moyenne de la carte vaut 4 à 6·10⁻⁸ m
+sur 1 000 pas, contre 1·10⁻¹⁰ m pour la référence — un facteur **400**. À 40 nm sur une seconde,
+elle ne pèse sur aucun usage ; elle dit seulement que la somme compensée de la carte (S301,
+`exact_difference`) n'égale pas celle du cœur. Elle n'a pas été poursuivie ici.
 
 *Réserve honnête* : `ecart_publiee` = 2,3·10⁻⁷ m n'est pas un défaut de la carte mais de ma
 recomputation — je refais `(η − repos) − reste` en f32 côté CPU, quand la carte l'obtient par
