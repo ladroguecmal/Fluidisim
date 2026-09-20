@@ -58,121 +58,88 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S313 — **terminée**. **L'instrument avant le chiffre** : corriger et valider T1 selon
-la décision de l'utilisateur du 2026-09-20, en quatre grandeurs distinctes, avant toute nouvelle
-tolérance.
+Session : S314 — **en cours**. **L'ordre B** : une primitive de W qui garde la direction, le
+spectre et la phase de ce qui sort d'un domaine δ.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : la **décision de l'utilisateur du 2026-09-20 (S312)**, « Conservation, transfert δ → W et
-suite du développement ». Elle tranche trois choses et en ordonne cinq :
+Entrée : la **décision de l'utilisateur du 2026-09-20 (S313)**, « Critères de conservation et
+poursuite du lot 2 ». Elle acte les trois critères sous conditions et **autorise l'ordre B** :
 
-> 1. **Destination du volume net** — V pour les contenants, B pour les masses ouvertes, avec un
->    **niveau moyen régional** : « je ne souhaite pas qu'une quantité locale d'eau soit simplement
->    répartie sur un océan infini par une modification arbitraire du niveau global. […] La
->    modification de B devra s'appuyer sur une **région ou un volume de contrôle identifiable**. »
->    W reste la propagation ; le registre `pending` est conservé tant que le receveur n'existe pas.
-> 2. **T1 est à revoir**, et pas en la remplaçant par un absolu arbitraire « qui pourrait masquer
->    des erreurs sur les petites perturbations ». Quatre grandeurs **distinguées explicitement** :
->    le **résidu absolu** avec ses unités, le **résidu relatif** à une échelle pertinente, le
->    **plancher d'arrondi attendu** pour la représentation utilisée, et le **résidu cumulé** sur
->    une durée. « La tolérance doit être justifiée par des mesures et, lorsque possible, par une
->    **borne d'erreur numérique**. » Vérification sur **plusieurs amplitudes, pas de temps et
->    résolutions**, « y compris sur des cas où une **erreur volontaire** est introduite afin de
->    s'assurer que l'instrument reste capable de la détecter ». **Aucun chiffre n'est fixé avant
->    cette démonstration.** T2 reste à confirmer sur 10 s.
-> 3. **Le transfert δ → W n'est pas validé.** Amplitude et réflexion conservées comme critères,
->    mais « la transmission doit reproduire une perturbation sortante **cohérente**, et pas
->    seulement générer une onde possédant une amplitude équivalente ».
-> 4. **Prochaine priorité : la primitive orientée de W**, sur un paquet en eau profonde. Ne pas
->    forcer le canal peu profond de S311 ; la profondeur finie est un développement distinct.
-> 5. **Ordre A → E** : A l'instrument T1, B la transmission orientée, C la vérification conjointe,
->    D la comptabilité du volume net, E le couplage complet. Préparation en parallèle permise.
+> « **C1 — Accepté provisoirement** […] Conservez toutefois une distinction explicite entre une
+> **loi observée expérimentalement** et une **borne numérique démontrée**. Le seuil doit être
+> réévalué si le schéma, la précision, la méthode de sommation ou le régime physique change. »
+> « **C2 — Accepté provisoirement** […] le cas ouvert […] **doit rester signalé comme non
+> conforme**. Je ne souhaite ni augmenter arbitrairement le seuil pour faire passer ce cas, ni
+> attribuer prématurément l'anomalie à une fuite physique. » « **C3 — Accepté**, T2 inchangée. »
+> « **La détection d'une fuite de 10⁻¹³ m³ par pas** […] Ne la généralisez pas automatiquement à
+> toutes les tailles de domaine, amplitudes et configurations numériques. »
+> « **A305** […] diagnostic ciblé, en distinguant la bande B/W de l'éponge. […] elle ne doit pas
+> bloquer tout le développement de la primitive orientée. Les travaux indépendants peuvent
+> avancer en parallèle. »
+> « **Ordre B** […] corriger les limitations observées en S312 : 50 % de l'énergie transmise dans
+> la mauvaise direction, une représentation spectrale insuffisante, une phase non conservée.
+> **Commencez par une onde progressive unique en eau profonde, puis un paquet spectral et une
+> propagation oblique.** […] les cinq essais prévus […] avec des mesures **indépendantes** de
+> l'amplitude, de la direction, du spectre, de la phase et de la réflexion. **Le transfert ne
+> devra pas être déclaré validé au seul motif que son amplitude et sa réflexion respectent déjà
+> leurs seuils.** […] **Ne modifiez pas artificiellement W pour lui attribuer la responsabilité
+> du niveau moyen.** »
 
-Capacité visée : **le dépôt sait dire si un écart de conservation est physique ou numérique, et
-le prouve sur un défaut qu'il a lui-même introduit.** Consommateur : toute réception future du
-couplage — B, C, D et E s'appuient toutes sur ce verdict, et S312 a montré qu'un critère mal
-normalisé produit des échecs qui ne disent rien (A304).
+Capacité visée : **W sait porter un train d'ondes orienté, à bande étroite et à phase prescrite**,
+et le transfert δ → W le lui donne depuis le signal mesuré à la ligne de contrôle. Consommateur :
+l'ordre C — la vérification conjointe des six propriétés —, qui n'a aujourd'hui aucune primitive
+capable de les porter toutes.
 
-**Ce que je ne fais pas dans cette session, et je le déclare d'avance** : construire la primitive
-orientée (ordre B) ; construire le receveur du volume net (ordre D) ; déclarer le transfert validé
-(l'utilisateur dit qu'il ne l'est pas) ; fixer une tolérance avant que les mesures et la borne
-existent — c'est l'interdit explicite de la décision.
+**Ce que je ne fais pas, et je le déclare d'avance** : toucher au régime — l'eau profonde reste le
+domaine de W, et le canal peu profond de S311 ne se force pas (ADR-181 D9) ; donner à W la
+responsabilité du niveau moyen ; déclarer le transfert validé sur l'amplitude et la réflexion
+seules ; diagnostiquer A305, qui est un travail indépendant et parallèle ; ouvrir un chantier de
+rendu ou d'optimisation.
 
-**La question de fond, posée avant de mesurer.** S312 a mesuré un résidu de 2,0·10⁻¹¹ m³ et l'a
-attribué au « plancher `f32` » **sans le démontrer**. Si c'est vrai, ce plancher doit avoir une
-**loi** : il doit croître avec le nombre de colonnes, avec l'amplitude du champ, et **ne pas
-dépendre du pas de temps** — puisqu'il vient de la représentation, pas de la dynamique. Si le
-résidu suit cette loi, le schéma est hors de cause et la tolérance se pose dessus. **S'il ne la
-suit pas, il reste une erreur à trouver, et S312 l'aurait excusée à tort.** Je ne sais pas
-laquelle des deux, et P3 le mesure avant tout le reste.
+**La question de fond, posée avant de construire.** L'impact de W est isotrope **parce que c'est
+un champ d'Hankel** : `J₀(kr)` ne dépend que du rayon, et aucun réglage ne lui donnera une
+direction. Une primitive orientée n'est donc pas un impact avec un paramètre de plus — c'est une
+**autre famille**. La famille naturelle existe déjà dans le dépôt, mais dans **B** :
+`background::Component` est une onde plane avec amplitude, nombre d'onde, direction et **phase**.
+Une somme de telles composantes, bornée en bande et en secteur angulaire, porte exactement les
+trois grandeurs qui manquent.
+
+**Mais je ne sais pas si elle est admissible**, et c'est ce que P3 décide avant de construire
+quoi que ce soit : une somme de plane waves est **non bornée dans l'espace**, quand tout ce que W
+produit aujourd'hui décroît et meurt (`domain.radius`, `ttl_us`, ADR-066). Un train d'ondes qui ne
+s'éteint jamais n'est pas une perturbation de W : c'est de la mer. **La primitive doit donc porter
+une enveloppe finie, et la question est de savoir si l'enveloppe survit à la dispersion** — ou si
+elle s'étale jusqu'à devenir la mer qu'elle n'a pas le droit d'être.
 
 Critères, écrits avant la mesure :
-1. Le plancher attendu est **dérivé** avant d'être mesuré, et sa loi est écrite en fonction de
-   `N`, de l'amplitude et de `dt`.
-2. Les quatre grandeurs de l'utilisateur sont publiées **séparément**, chacune avec son unité.
-3. L'instrument **détecte une fuite introduite volontairement**, et la plus petite fuite détectée
-   est publiée — c'est elle, la sensibilité réelle, et non le seuil qu'on aimerait écrire.
-4. Les balayages couvrent **amplitude, pas de temps et résolution**, chacun séparément, pour que
-   la loi soit lue sur une variable à la fois.
-5. Aucune tolérance n'est écrite qui ne s'appuie sur une mesure ou une borne. T2 est éprouvée sur
-   **10 s**, la durée demandée, ou déclarée non tenue.
+1. La primitive **refuse** ce qu'elle ne sait pas porter, avec un nom par refus (ADR-081, ADR-082).
+2. Les cinq grandeurs sont mesurées **indépendamment** : amplitude, direction, spectre, phase,
+   réflexion. Aucune n'est déduite d'une autre.
+3. Un écart de direction ou de spectre **ne se corrige pas** par un réglage d'amplitude — et le
+   banc doit rendre ce réglage impossible plutôt que déconseillé.
+4. Les scènes et réceptions antérieures restent **au bit** : W a des consommateurs.
+5. Le volume net reste dans `pending`, et rien dans la primitive ne porte de moyenne.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — ADR-181 : la décision de l'utilisateur du 2026-09-20 (S312), actée décision par
-  décision, y compris le refus du niveau global arbitraire et l'ordre A → E.
-- [x] **P3** — *la borne*, dérivée puis mesurée : loi du plancher d'arrondi en `N`, amplitude et
-  `dt`. C'est la question de fond, et elle passe avant l'outil.
-- [x] **P4** — le module du critère : les quatre grandeurs de l'utilisateur, publiées séparément.
-- [x] **P5** — balayage **amplitude**, à géométrie et pas fixés.
-- [x] **P6** — balayages **pas de temps** et **résolution**.
-- [x] **P7** — **l'erreur volontaire** : fuite connue injectée, sensibilité de l'instrument
-  mesurée, plus petite fuite détectée publiée.
-- [x] **P8** — T2 sur **10 s**, la durée demandée.
-- [x] **P9** — la tolérance proposée, justifiée par la borne et les mesures ; preuve publiée.
-- [x] **P10** — rituel REPRISE §6.
+- [>] **P1** — amorce, jeton, plan seul.
+- [ ] **P2** — ADR-182 : la décision du 2026-09-20 (S313), actée — critères sous conditions,
+  ordre B autorisé, A305 maintenu ouvert et parallèle.
+- [ ] **P3** — *l'enveloppe survit-elle ?* La question de fond, mesurée avant de construire :
+  étalement dispersif d'un train à bande étroite, et ce qu'il impose à la primitive.
+- [ ] **P4** — la primitive : `wave_train.rs`, construction, refusas nommés, essais unitaires.
+- [ ] **P5** — **essai 1** : une onde progressive unique en eau profonde ; amplitude, direction,
+  spectre, phase mesurés séparément.
+- [ ] **P6** — l'extracteur : amplitude, phase et spectre lus sur le signal sortant à la ligne.
+- [ ] **P7** — **essai 2** : le paquet spectral, transféré et vérifié.
+- [ ] **P8** — **essai 3** : propagation oblique à la frontière.
+- [ ] **P9** — **essais 4 et 5** : cohérence de phase δ → W, puis transmission et réflexion sur
+  plusieurs résolutions.
+- [ ] **P10** — preuve publiée : les six propriétés, chacune avec sa mesure et son verdict.
+- [ ] **P11** — rituel REPRISE §6.
 
 ### Notes de reprise
 
-**Fusion déclarée P3+P5+P6.** La loi du plancher ne se lit pas sur un balayage : elle se lit sur
-trois, un paramètre à la fois (L354). Le banc et ses trois sorties sont un seul objet.
-
-**P3 — les trois hypothèses étaient écrites avant la mesure, et deux sont réfutées.**
-
-| | prédiction | verdict |
-|---|---|---|
-| **H1 — représentation** (`ulp(h₀)`) | insensible à `a` **et** à `dt` | **réfutée** : le résidu est **strictement linéaire en `a`** sur quatre décades |
-| **H3 — accumulation `f64`** | `∝ a`, insensible à `dt` | **réfutée** : le résidu moyen est **linéaire en `dt`** (×2,00 ; ×2,12 ; ×2,07 ; ×2,11) |
-| **H2 — incrément** | `∝ a` **et** `∝ dt` | **confirmée** |
-
-Et le mécanisme est plus précis que H2 ne le disait : le télescopage du transport se fait sur des
-différences de flux **arrondies en `f32`**, une par colonne, de signe indépendant — donc
-l'accumulation se fait en **`√N`**, pas en `N`. D'où la borne, écrite puis vérifiée :
-
-```text
-résidu_du_pas  ≲  u₃₂ · |Δη_pas| · A / √N       avec  u₃₂ = 2⁻²⁴,  A = N·dx²
-```
-
-**Vérifiée à `C ≈ 1` sur tout le balayage** : prédit 2,02·10⁻¹² contre 1,99·10⁻¹² mesuré au point
-de référence ; 2,02·10⁻¹¹ contre 2,07·10⁻¹¹ à `a` ×10 ; 4,04·10⁻¹² contre 4,09·10⁻¹² à `dx` = 0,5 ;
-1,01·10⁻¹² contre 1,51·10⁻¹² à `dx` = 0,125. Jamais plus d'un facteur 1,5.
-
-**L'invariant utile, et c'est lui qui fera l'échelle pertinente** : `pire_résidu / volume_absolu`
-vaut **6,2 ; 5,8 ; 5,2 ; 5,4·10⁻¹¹** sur quatre décades d'amplitude — **constant**. L'échelle
-pertinente du problème n'est donc ni l'incrément du pas (S312, A304) ni le volume **signé**, c'est
-le **volume absolu de perturbation**.
-
-**Les bornes naïves sont fausses par cinq ordres**, et il fallait le dire : `N·ulp(h₀)/2·dx²` donne
-3,58·10⁻⁷ et la variante en `√N` 5,16·10⁻⁸, quand la mesure donne 2·10⁻¹². La somme compensée de
-S233 **fait son travail** — c'est elle qui retire `ulp(h₀)` du problème, et sans elle le plancher
-serait cinq ordres plus haut.
-
-**Le cumulé ne se comporte pas pareil des deux côtés, et c'est une trouvaille.** Rapport
-`|cumulé signé| / (moyen·√pas)` : **0,006 à 2,3 dans la cuve fermée** — une marche aléatoire, sans
-dérive. Mais **13,7 dans le cas ouvert**, pour `√200` = 14,1 : le résidu y est **d'un seul signe**,
-donc le cumulé croît **linéairement** avec le nombre de pas. 2,88·10⁻¹⁰ m³ sur 200 pas, soit
-5·10⁻⁸ de la dérive physique — minuscule, mais **systématique**. Suspect nommé, non démontré : la
-bande ou l'éponge, qui n'existent que dans ce cas.
+*(à remplir en cours de session)*
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
