@@ -58,7 +58,9 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S308 — en cours : la photographie devient une cible mesurable, puis on construit.
+Session : S308 — **terminée**. La photographie est devenue une cible chiffrée, le lot du rendu
+est clos par la mesure, et la stratégie en trois systèmes est actée (ADR-178). Reprise à chaud
+après coupure : l'étape P5 a été **complétée**, pas annulée — code rebâti, chiffres revérifiés.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : le **verdict R14**, complet, et la **photographie de référence**. Verdict et arbitrage
 consignés dans [REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md).
@@ -112,7 +114,7 @@ Critères, écrits avant la mesure :
   [TROIS-SYSTEMES-S308](../docs/registres/TROIS-SYSTEMES-S308.md).
 - [x] **P9** — [ADR-178](../docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md) : la
   stratégie est actée, ses sept décisions écrites, ce qu'elle ne tranche pas nommé.
-- [ ] **P10** — rituel REPRISE §6.
+- [x] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
 

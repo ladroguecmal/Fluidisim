@@ -6045,3 +6045,39 @@ demander si X est un ensemble **ouvert et croissant**. Si oui, la procédure est
 la seule forme qui tient est un défaut exécutable — une valeur par défaut, un drapeau agrégé, une
 liste unique dans le code — et pas une phrase dans un document. Même famille que **L137** : deux endroits qui doivent dire la même chose finissent par diverger,
 y compris quand l'un des deux est une mémoire — humaine ou d'agent.
+
+## L350 — Un coupable désigné par élimination s'éteint avant de se remplacer
+
+S308. Deux fois de suite, une cause a été **nommée par raisonnement** puis démentie par un
+interrupteur qui coûtait dix minutes. La coupure spectrale devait retirer les taches claires : elle
+en ajoute (0,175 → 0,200) et détruit le contraste local (0,382 → 0,230). Le miroitement du soleil
+devait les produire : éteint **complètement**, il n'en retire pas une (0,1747 → 0,1837 — le seuil
+étant relatif à une médiane qui baisse). Dans les deux cas le raisonnement était plausible, la
+littérature le soutenait, et il était faux.
+
+**La règle.** Quand une cause est désignée **par élimination**, construire d'abord le drapeau qui
+l'annule, et mesurer. Un facteur à 1 est exact en IEEE 754 : l'interrupteur ne coûte donc même pas
+une empreinte. Ce n'est pas de la prudence, c'est de l'économie — S308 a payé une étape entière de
+construction sur une hypothèse qu'un `*0` réfutait.
+
+Famille de **L347** (un cas éprouvé sous sa propre tolérance ne prouve rien) et de
+[L348](#l348--un-contrôle-qui-suppose-la-valeur-quil-doit-reconnaître-ne-contrôle-rien) : le
+dépôt se trompe surtout quand il vérifie ce qu'il a déjà décidé.
+
+## L351 — Une fonction point à point ne fabrique pas de structure spatiale
+
+S308, P7. Le rendu manquait 40 % du **contraste local** de la photographie de référence — une
+grandeur définie comme l'écart-type de luma dans une fenêtre de neuf pixels. Deux sessions l'ont
+cherché dans la **courbe de tonalité** : exposition, exposant, point blanc. Une recherche sur
+6 300 réglages a montré que les huit meilleurs donnent **tous le même contraste**, à 2 % près, et
+qu'il manque toujours 30 %.
+
+C'était prévisible sans mesurer, et personne ne l'a vu : une courbe de tonalité est une fonction
+**point à point**. Elle redistribue l'histogramme ; elle ne peut pas créer de variation entre
+pixels voisins là où il n'y en a pas. Le réglage précédent y « arrivait » en fabriquant du
+mouchetage clair — 2,4 fois trop —, c'est-à-dire en trichant sur la définition de la mesure.
+
+**La règle.** Avant de régler les paramètres d'un outil, vérifier sa **classe** : point à point,
+local, ou global. Une grandeur cible qui vit à une échelle spatiale ne se corrige qu'avec un outil
+qui agit à cette échelle. Sinon on optimise longtemps, on trouve un optimum, et l'optimum n'est
+pas la réponse.

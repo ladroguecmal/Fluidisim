@@ -84,25 +84,25 @@ mesure publie techniques présentes, absentes et domaine de validité (ADR-131 D
 | **mutualisation** | sillages d'un journal, table de Bessel partagée (S222, S235) ; passe B/W commune absente | superposition (ADR-123) |
 | **parallélisme CPU** | construit (S243, ADR-146), hors chemin d'image (A278) | écart au bit |
 
-Travaux nécessaires faits : A251 et composition (S214), A254 (S223), cadence (S225), allocations
-(S240), angles rasants (S247, S248).
+**L'optique du rendu, S304 à S308 — lot clos**
+([ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D2,
+[confrontation](registres/TROIS-SYSTEMES-S308.md)). Asymétries de la surface, `Sk` 0,003 → 0,066
+pour +0,25 % ([ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md)) ; queue spectrale = 80–85 %
+de l'énergie haute fréquence de l'image, `--coupure` réglable ([S306](validation/STRIES-S306.md)) ;
+couleur du corps d'eau **9 fois trop verte**, désormais dérivée de ses sources
+([ADR-177](adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md),
+[S307](validation/RENDU-ECART-S307.md)) ; trois revues envoyées options acceptées **éteintes**,
+remède `--meilleur` (**L349**).
 
-**S307, l'optique du rendu** ([preuve](validation/RENDU-ECART-S307.md),
-[ADR-177](adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md)) : la couleur du corps
-d'eau était **9 fois trop verte** et sans provenance ; elle se dérive désormais de Pope & Fry 1997
-et Morel 1974. Les reflets filtrés d'ADR-161, **éteints depuis R7**, divisent l'énergie haute
-fréquence par 2,5 sans retirer d'énergie. Trois revues avaient été envoyées avec des options
-acceptées **éteintes** : remède exécutable `--meilleur` (L349). Restent, dans l'ordre : diffusion
-aux crêtes, écume, spectre ECKV. **Verdict R14 attendu.**
+**S308 : la photographie de R14 devient une cible chiffrée** (`outils/cible_image.py`), le ciel
+est calé sur elle (`--ciel-mesure`), la courbe de tonalité exposée (`--tonalite`), le miroitement
+échelonnable (`--miroitement`). Deux hypothèses **réfutées** — la coupure spectrale
+*ajoute* des pixels clairs, éteindre le miroitement n'en retire aucun. Puis
+`outils/courbe_tonalite.py`, 6 300 réglages : **les huit meilleurs donnent le même contraste
+local, 0,311–0,318 pour 0,455 mesurés**. Une courbe est point à point, le contraste local est
+spatial (**L351**) : ce qui manque est **dans la mer**. Écume, diffusion aux crêtes, ECKV et
+structure fine restent dus, **avec leur cible chiffrée**.
 
-**S306, d'où viennent les stries** ([preuve](validation/STRIES-S306.md)) : la queue spectrale
-porte **80 à 85 %** de l'énergie haute fréquence de l'image, que le contraste global ne voit pas.
-`--coupure` la divise par 2,2 à 3,6 pour 6,2 % de GPU en moins — mais **S307 montre que ce n'était
-pas le bon levier**.
-
-**S304, asymétries de la surface** ([ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md),
-[preuve](validation/ASYMETRIES-S304.md)) : second ordre en bande étroite par système et modulation
-retardée, +0,25 % de coût ; `Sk` 0,003 → 0,066, `c₀₃` 0,001 → −0,155.
 ### J2 — Domaines volumiques bornés, comme cas de construction du δ général
 
 *Livre* : un ou plusieurs domaines δ **pris dans le système** — interfaces `Volume`/`Caps`
@@ -236,6 +236,18 @@ D6) ; D ne dépend que de B+W. Ordre accepté par l'utilisateur ([ADR-174](adr/A
 | **D — solides et flottabilité** | corps flottants pris dans B+W+δ, forces rendues au jeu | **B6** (flottabilité), **B4** (forces et perception), cas **C13**, **C14** | un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le gameplay (I-04) |
 | **E — V articulé avec δ** | inondations : V expose sa surface, déclenche un δ local, la masse reste celle de V | cas **C17**, **C21**, **C19** complet | la comptabilité de masse est identique **avec et sans** δ (C21) |
 | **F — grande échelle** | référentiels multiples, bathymétrie, hauts-fonds, conformité multiplateforme | **B7** complet, **A98** | une scène lointaine et une scène proche coexistent sans rupture ni perte de précision |
+
+**Réorganisation du 2026-09-20 (S308), décision de l'utilisateur**
+([ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md)). Les travaux se regroupent
+désormais en **trois systèmes** — A haute mer superficielle (B + W), B volumique 3D (δ), C
+transition et couplage —, validés indépendamment puis assemblés puis optimisés. **Les portes
+ci-dessus restent vraies** ; ce sont leurs priorités relatives qui changent, et l'ordre des lots
+est celui de [TROIS-SYSTEMES-S308](registres/TROIS-SYSTEMES-S308.md) §5 : compteurs de
+conservation, retour δ → W, faces coupées 3D, corps rigides *(ces deux-là franchissent la porte
+D, donc la v1)*, seconde représentation de surface libre, requête de jeu à travers δ, puis
+adaptation et budget. **A est déclaré suffisant pour servir B et C** : aucun lot de
+perfectionnement visuel ne s'ouvre avant que la physique le demande. Le profil d'ADR-174 D3 reste
+**mesuré et publié**, sans être opposable pendant la construction (ADR-178 D4).
 
 ### La v1 — tranchée par l'utilisateur le 2026-09-19 (ADR-174 D4)
 

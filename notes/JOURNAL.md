@@ -15494,3 +15494,70 @@ Plafonds et navigation à **0**. Copie unique, jeton libre.
 protocole passé avant la synthèse parce qu'il devenait urgent). L237 tenu : horloge lue avant
 chaque battement. Une affirmation fausse écrite puis corrigée dans la session — un « artefact
 brun-olive » que la mesure a réfuté (zéro pixel sur 921 600 n'a `R > B`).
+
+## S308 — 2026-09-20 — la photographie devenue cible, le lot du rendu clos par la mesure, et la stratégie en trois systèmes
+
+**Entrées.** Le verdict **R14** avec une **photographie de référence** : la géométrie suffit, le
+travail prioritaire est optique. Puis, **en cours de session**, une nouvelle stratégie de
+développement de l'utilisateur, qui redirige le projet vers la physique.
+
+**Session interrompue puis reprise.** Une coupure a arrêté S308 après P4, avec P5 mesuré mais non
+écrit et son code non committé. Reprise à chaud selon EN-COURS : le diff était cohérent et sa
+thèse déclarée, j'ai **complété** l'étape plutôt que de l'annuler — code rebâti, images refaites,
+tous les chiffres revérifiés au centième avant commit. La photographie remesurée redonne ses
+valeurs exactes : l'instrument est reproductible.
+
+**Construit.** `outils/cible_image.py` (P2) : la photographie devient une cible **chiffrée** —
+horizon, profil du ciel, histogramme de la mer, couleur creux/crêtes, contraste local, fraction
+claire —, chaque grandeur déclarée **comparable ou non**, avec la raison. `--ciel-mesure[=degrés]`
+(P4) : extinction exponentielle par canal en `sin(élévation)`, les deux constantes étant la
+photographie mesurée ; signature de Rayleigh, bleu à peine atténué, rouge effondré.
+`--tonalite=e,g,w` (P5) : pied en puissance, épaule de Reinhard, **sur la luminance seule** — la
+version par canal crevait la teinte, et la mesure l'a dit en un passage. `--miroitement=<f>` (P6),
+1 au bit. `outils/courbe_tonalite.py` (P7) : recherche à deux étages, 6 300 candidats, critère
+déclaré avant la mesure.
+
+**Ce que la mesure a tranché, et c'est l'apport principal.** La photographie a **renversé l'ordre
+des travaux** : notre ciel était plat (sommet à 0,809 de l'horizon contre 0,356) et pâle (`B/R`
+1,82 contre 5,14), et comme la mer est un miroir, c'est lui qui écrasait crêtes, dynamique et
+contraste. Le ciel calé rapproche la teinte partout — crêtes `B/R` 1,73 → 3,03, creux 14,1 → 29,5
+pour 30,0 mesurés — mais pas la dynamique. Puis deux hypothèses successives ont été **réfutées par
+l'expérience, pas par le raisonnement** : la coupure spectrale (elle *ajoute* des pixels clairs et
+détruit le contraste local) et le miroitement du soleil (l'éteindre complètement ne retire pas un
+pixel clair). Enfin P7 : **les huit meilleurs réglages de courbe donnent tous le même contraste
+local, 0,311–0,318 pour 0,455 mesurés**, et c'est pour tous la cible la plus dure. Une courbe est
+point à point, le contraste local est spatial : **il n'y a pas de réglage à trouver, ce qui manque
+est dans la mer**. Le lot optique est arrivé à son point d'arrêt, et il y est arrivé **mesuré**.
+
+**La stratégie en trois systèmes** ([ADR-178](../docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md),
+[confrontation](../docs/registres/TROIS-SYSTEMES-S308.md)). Trois écarts entre la stratégie et le
+dépôt, tous mesurés. **Le dépôt a déjà** la séparation référence CPU / production GPU qu'elle
+réclame (ADR-175). **δ 3D tourne** — cuve fermée reçue à 3·10⁻⁷ m pour 3 mm, scène de 30 × 28 m
+rendue en direct — **mais sa surface est une fonction hauteur** : l'essai phare de la stratégie,
+la boule qui tombe avec cavité et projections, est hors de cette représentation **par
+construction** (ADR-175 D5), et la seconde représentation n'a jamais été choisie. **Le couplage
+est à sens unique et sans aucun compteur** : δ ne ressort pas vers W, et masse, quantité de
+mouvement et énergie n'ont jamais été mesurées à l'interface — alors que R11 a jugé ce raccord
+« invisible ». Six interfaces nommées, l'ordre en sept lots, les compteurs d'abord.
+
+**Preuves et limites.** Les chiffres de P5 à P7 portent sur **une pose** (« proche ») d'**une**
+scène ; la photographie n'est pas une cible physique — vent, focale, exposition et réponse capteur
+restent inconnus, seules les grandeurs normalisées par la scène sont comparables. L'inventaire de
+P8 lit le code et les preuves citées ; il ne re-mesure aucun coût et n'exécute aucun banc neuf.
+
+**Non-fait.** Diffusion aux crêtes, écume et ECKV : toujours aucun construit, mais désormais **avec
+leur cible chiffrée**. La structure fine de la mer que réclame le contraste local : non ouverte —
+c'est un lot de forme, et ils étaient suspendus. R15 non envoyée : la stratégie a rendu la campagne
+sans objet.
+
+**Rituel.** Maillons **0**. La justification n'est pas une capacité de code : c'est une **décision
+qui lève un blocage en nommant le lot désormais exécutable** (critère S227/S294). Cinq sessions de
+suite avaient porté sur le rendu ; ADR-178 nomme le lot 1 — les compteurs de conservation — sur
+des scènes qui existent déjà. La recommandation du dernier bilan (BILAN-GLOBAL-S293 §5) est
+**portée** : son lot 4, la scène-témoin de la v1, devient les lots 3 et 4 d'ADR-178 D7.
+
+*Tenue du plan* : dix étapes, dont deux découpages déclarés (P6 séparé de sa construction ; P8/P9
+redéfinis à la réception de la nouvelle consigne). L237 tenu. Deux erreurs écrites puis corrigées
+dans la session : le miroitement présenté comme coupable en P5 — P6 l'a réfuté — et un `min`
+d'écrêtage ajouté dans `courbe_tonalite.py` en croyant expliquer un écart qui venait d'ailleurs ;
+le `min` est juste, l'explication était fausse, et le fichier le dit.

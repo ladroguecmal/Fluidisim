@@ -7,6 +7,7 @@
 - [Intentions initiales](sources/systeme_eau_architecture_globale.md) et [questions sources](sources/systeme_eau_zones_ouvertes_et_decisions_a_valider.md).
 - [Invariants](01_INVARIANTS.md), [décomposition ADR-001](adr/ADR-001-decomposition-en-couches.md).
 - [Bilan global S293](registres/BILAN-GLOBAL-S293.md) : où l'avancement bloque — porte B verrouillée, architecture de δ, budget sans répartition, pilotage.
+- [Trois systèmes — S308](registres/TROIS-SYSTEMES-S308.md) : la stratégie A / B / C confrontée au code — ce qui existe, les six interfaces manquantes, le banc de la piscine essai par essai, l'ordre en sept lots.
 - [Bilan global S227](registres/BILAN-GLOBAL-S227.md) : dérives, procédure et correctifs.
 - [Comparables externes](COMPARABLES-EXTERNES.md) : systèmes du commerce regardés, avec le statut de chaque affirmation.
 - [Journal](../notes/JOURNAL.md) : comptes rendus historiques ; les états présents sont dans la feuille de route.
@@ -293,6 +294,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) | Architecture d'exécution de δ en 3D : production résidente sur GPU à travail borné, référence CPU pour la réception |
 | [ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md) | Les asymétries de la surface rendue : second ordre en bande étroite par système et modulation de la queue retardée, dans le rendu seul |
 | [ADR-177](adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md) | La couleur du corps d'eau se dérive de ses sources (Pope & Fry 1997, Morel 1974) ; le gain d'échelle est nommé pour ce qu'il est, un substitut d'irradiance de ciel |
+| [ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) | Stratégie en trois systèmes physiques : A stabilisé, B volumique 3D, C couplage ; validité physique avant temps réel ; budget mesuré mais non opposable pendant la construction ; ordre en sept lots |
 
 ## Travail et historique
 
@@ -301,4 +303,9 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 Les anciens récits de cet index restent dans Git à `dfd1507`. Refonte S227 : ne plus y ajouter
 les comptes rendus déjà présents au journal. L’inventaire se recalcule avec
 `python outils/etat_projet.py`. Les images locales de banc (ADR-124) se regardent avec
-`python outils/apercu_ppm.py <image.ppm>`, qui écrit un PNG à côté du PPM.
+`python outils/apercu_ppm.py <image.ppm>`, qui écrit un PNG à côté du PPM. Une image de mer se
+**mesure** avec `python outils/cible_image.py [--horizon=<y>] <image.ppm>…` (S308 : horizon,
+histogramme, couleur, contraste local, fraction claire, chaque grandeur déclarée comparable ou
+non) ; `python outils/courbe_tonalite.py <rendu_sans_courbe.ppm>` cherche une courbe de tonalité
+contre ces cibles. **Comparer deux rendus demande `--horizon` forcé** : la détection automatique
+se trompe en silence quand le ciel porte un fort gradient (A301).

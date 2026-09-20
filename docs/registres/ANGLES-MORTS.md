@@ -3975,3 +3975,24 @@ revues sans être vues. Les deux instruments qui existent aujourd'hui sont réce
 `outils/spectre_image.py` (S306, énergie haute fréquence) et la mesure de couleur de S307 — et
 **aucun n'est exécuté au rituel**. Déclencheur : faire entrer au moins une mesure d'image dans
 les contrôles systématiques, au même titre que `etat_projet.py --check`.
+
+**A302 — S308, 2026-09-20 (sévérité 2, ouverte).** **Aucun bilan de conservation n'a jamais été
+mesuré à l'interface δ ↔ B/W.** Le couplage existe depuis S250 et tourne depuis S302 ; masse,
+quantité de mouvement et énergie entrantes et sortantes n'ont **jamais** été comptées, et la
+réflexion artificielle aux frontières n'a jamais été chiffrée. Ce qui existe à la place est un
+**jugement visuel** : R11 a déclaré le raccord du domaine « invisible ». Même famille qu'A301 —
+une propriété qu'on regarde au lieu de la mesurer — mais du côté physique cette fois, et c'est le
+côté où le projet revendique sa rigueur. Aggravant : le couplage est **à sens unique** (l'éponge
+absorbe vers B+W, rien n'écrit en retour dans W), ce qu'aucun document d'état ne disait avant
+S308. Déclencheur : lot 1 d'[ADR-178](../adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7,
+sur la cuve de S305 et la scène de S302, qui existent toutes les deux.
+[Confrontation](TROIS-SYSTEMES-S308.md) §2 et §3.
+
+**A301 — note datée du 2026-09-20 (S308).** L'angle reste ouvert et son déclencheur inchangé.
+Deux instruments d'image ont été construits depuis — `outils/cible_image.py` et
+`outils/courbe_tonalite.py` — et **aucun des deux n'est encore exécuté au rituel**. S'y ajoute un
+défaut d'instrument constaté **deux fois** : la détection automatique d'horizon se trompe quand le
+ciel porte un fort gradient, en silence et avec un résultat plausible (`0,3652 / 15,11 / 0,4890`
+au lieu de `0,1766 / 22,81 / 0,3082` sur le même rendu). Toute comparaison entre rendus passe
+désormais par `--horizon=<y>` **forcé** ; publier la hauteur de chute, comme S308 P4 l'avait fait,
+n'a pas suffi à l'empêcher.

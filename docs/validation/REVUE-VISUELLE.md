@@ -822,3 +822,25 @@ informative qu'après.
   sont **suspendus**, pas retirés ;
 - la photographie ne peut pas servir de cible physique, mais elle peut servir de **cible de
   statistiques d'image** — c'est ce que S308 construit.
+
+## Clôture du lot de rendu — S308, 2026-09-20
+
+**Il n'y aura pas de R15.** En cours de session, l'utilisateur a redirigé le projet vers la
+physique ([ADR-178](../adr/ADR-178-strategie-en-trois-systemes-physiques.md)) : « La troisième
+image de R14 constitue notre **référence interne provisoire** pour l'océan. Nous n'avons pas
+besoin de poursuivre immédiatement son perfectionnement photoréaliste. »
+
+**La mesure dit la même chose, et c'est ce qui rend la clôture propre.** S308 a transformé la
+photographie de référence en cible chiffrée, puis a cherché la meilleure courbe de tonalité contre
+elle sur 6 300 réglages : **les huit meilleurs donnent tous le même contraste local, 0,311–0,318
+pour 0,455 mesurés sur la photographie**, et c'est pour tous la cible la plus dure. Une courbe de
+tonalité est une fonction point à point ; le contraste local est une grandeur spatiale. **Ce qui
+manque n'est pas dans l'optique, c'est dans la mer** — la structure de surface à quelques pixels
+d'échelle, c'est-à-dire un lot de forme, que l'utilisateur avait suspendu à R14.
+
+Le lot se rouvrira quand les systèmes physiques l'alimenteront (ADR-178 D2). Il rouvrira **avec sa
+cible** : `outils/cible_image.py`, `outils/courbe_tonalite.py` et les mesures de la photographie
+restent dans le dépôt, inchangées.
+
+**Règle de protocole ajoutée** : comparer deux rendus demande `--horizon=<y>` **forcé**. La
+détection automatique s'est trompée deux fois, en silence et avec un résultat plausible (A301).

@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 14:52 +02:00
+JETON            : libre
+Battement        : 2026-09-20 15:14 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S308 — **verdict R14 reçu avec la photographie de référence**. L'utilisateur tranche : la géométrie suffit, le travail prioritaire est **optique**, et aucune correction de forme ne s'ouvre avant. Faire de la photographie une **cible de statistiques d'image**, puis construire contre elle
-Dernière session : S307 — trois revues envoyées avec des options acceptées éteintes ; couleur dérivée (ADR-177) ; R14 demandée
-Session suivante : fixée au rituel
-Maillons        : 0 — capacité S307 : le dépôt sait pourquoi son rendu était jugé mauvais ; consommateur : la revue R14, reçue ; preuve RENDU-ECART-S307
+Session en cours : —
+Dernière session : S308 — la photographie de R14 chiffrée, le lot du rendu **clos par la mesure** (le contraste local manquant est spatial, pas tonal), et la **stratégie en trois systèmes** actée ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md), [confrontation](docs/registres/TROIS-SYSTEMES-S308.md))
+Session suivante : **lot 1 d'ADR-178 D7 — les compteurs de conservation** (masse, quantité de mouvement, énergie à l'interface δ ↔ B/W ; volume d'un domaine fermé), sur la cuve de S305 et la scène de S302, qui existent toutes les deux. Angle mort **A302**
+Maillons        : 0 — capacité S308 : une décision qui lève un blocage en **nommant le lot exécutable** (critère S227/S294). Cinq sessions de suite portaient sur le rendu ; consommateur : le lot 1, sur des scènes existantes ; preuve : TROIS-SYSTEMES-S308
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -75,14 +75,15 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État au 2026-09-20 (S304). Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
+État au 2026-09-20 (S308). **Depuis S308, les chantiers se regroupent en trois systèmes** — A haute mer superficielle, B volumique 3D, C couplage — par décision de l'utilisateur ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md)) ; les portes restent vraies, leurs priorités changent. Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
 travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En bref :
 
 - **J1** partiel : B+W sur GPU dans l'hôte séparé, scène multi-sources admise par le cœur, GPU eau
-  1,74 ms, mer jugée par l'utilisateur (R7 accepté). **S304 : la mer a ses asymétries** — crêtes
-  pointues et face avant rugueuse, statistiques rapprochées des mers observées pour +0,25 % de
-  coût (ADR-176) ; **verdict R12 attendu**. Manquent le CPU sous 2 ms (A278), un objet pilotable
-  et la seconde cible.
+  1,74 ms, mer jugée par l'utilisateur (R7 accepté). **S304–S308 : la mer a ses asymétries** (ADR-176) et
+  sa couleur dérivée de ses sources (ADR-177). **R14 reçu : sa troisième image est la référence
+  interne provisoire de l'océan**, et le lot optique est clos — S308 a montré que le contraste
+  local manquant est **spatial**, hors de portée de toute courbe. Manquent le CPU sous 2 ms
+  (A278), un objet pilotable et la seconde cible.
 - **δ reçu en 2D** — surface mobile couplée à B/W contre HOS, frontières, rendu en direct.
   **S295–S296** : référence 3D à surfaces linéaire et mobile reçue, identique au bit à la 2D quand `ny = 1`.
   **Porte B ouverte** : δ en 3D selon [ADR-175](docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md),
@@ -92,14 +93,18 @@ travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En br
   64 cycles sur 27 648 mailles), publie sa surface, se diagnostique en différé, et suit la
   référence jusqu'à l'horizon de prévisibilité **de la référence elle-même** (≈ 1,2 s, A297).
   **S302 : la scène tourne** — 30 × 28 m sur la mer étalée, une onde la traverse, rendu en direct à
-  197 Hz depuis la seule surface publiée. **R11 : δ reçu sans artefact et sans raccord visible ;
-  la mer, elle, n'a aucune asymétrie (mesuré S303) — ADR-176 la décide, R12 la jugera.**
+  197 Hz depuis la seule surface publiée. **R11 : δ reçu sans artefact et sans raccord visible —
+  mais S308 l'a nommé : ce raccord n'a jamais été mesuré. Aucun bilan de masse, de quantité de
+  mouvement ni d'énergie à l'interface, et le couplage est à sens unique (A302, lots 1 et 2).**
 - **Ordonnanceur** (porte A) : décide qu'un domaine vit et avec quel budget ; ni plusieurs
   candidats, ni déplacement, ni dégradation automatique.
 - **V** : noyau reçu (C12, géométrie orientée, restauration), sans articulation avec δ.
-- **Solides** : rien dans le système (porte D, scène-témoin de la v1).
+- **Solides** : rien dans le système ; faces coupées en 2D seulement, `body.rs` statique. Porte D,
+  devenue les lots 3 et 4 d'ADR-178 D7.
 - Dernier audit : [BILAN-GLOBAL-S293](docs/registres/BILAN-GLOBAL-S293.md) — le projet bloquait sur
-  l'ordre de ses propres travaux.
+  l'ordre de ses propres travaux. **Confrontation S308** :
+  [TROIS-SYSTEMES-S308](docs/registres/TROIS-SYSTEMES-S308.md) — ce qui existe pour A, B et C,
+  les six interfaces manquantes, le banc de la piscine essai par essai, l'ordre en sept lots.
 
 L'inventaire Git se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau).
 Ses nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`
