@@ -98,7 +98,7 @@ Critères, écrits avant la mesure (ADR-175 §4.1 cas 3 et §4.2) :
   pente, erreur de phase, durée déclarée.
 - [x] **P5** — *(découpage déclaré)* durée longue : 5 s au raffinement moyen, pour dire si
   l'écart est borné ou séculaire — la seule objection que 1 s laisse ouverte.
-- [ ] **P6** — preuve `CUVE-GPU-S305`, réception écrite des quatre critères.
+- [x] **P6** — preuve `CUVE-GPU-S305`, réception écrite des quatre critères.
 - [ ] **P7** — rituel REPRISE §6.
 
 ### Notes de reprise
