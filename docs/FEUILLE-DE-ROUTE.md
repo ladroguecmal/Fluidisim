@@ -117,25 +117,26 @@ demande la production GPU. **S301 l'a complète** : un seul device, le pas coupl
 fond évalué sur la carte (S300), prédiction, projection bornée à départ chaud (S299), correction,
 transport et bandes, éponge, surface publiée (D7) et diagnostics D3 relus en différé —, chaque
 étage reçu contre le cœur. Sur le cas S298 la production suit la référence à 2·10⁻⁵ m jusqu'à
-l'**horizon de la référence elle-même** (1,1–1,3 s : deux cœurs à ±10⁻⁶ m s'y séparent pareil,
-A297) ; 0,84 ms à 64 cycles
+l'**horizon de la référence elle-même** (1,1–1,3 s, A297) ; 0,84 ms à 64 cycles
 ([S299](validation/DELTA3D-GPU-S299.md), [S300](validation/DELTA3D-FOND-GPU-S300.md),
-[S301](validation/DELTA3D-PAS-GPU-S301.md)). **S302 : la scène existe et tourne** — domaine de
-30 × 28 m à 25 cm sur la mer `--houle`, front de 65 cm qui la traverse à 2,2 m/s, rendu en direct
-depuis la seule surface publiée à 197 Hz, sans colonne hors bornes
-([S302](validation/SCENE-DELTA3D-S302.md)). **Verdict R11 reçu** : aucun artefact visible dans δ, raccord du domaine invisible — mais la
-mer « ne fait pas réaliste », et la mesure le confirme (aucune asymétrie :
-[S303](validation/ANATOMIE-SURFACE-S303.md)). Le critère 3 attend donc
-[ADR-176](adr/ADR-176-asymetries-de-la-surface-rendue.md) construit puis R12 ; restent aussi les
-cas de cuve de §4.1 sur la production.
-Tranche MAC x-z (2D) : pas sans allocation, pression f32 à sa précision représentable, faces
-coupées, multigrille, surface mobile couplée reçue contre HOS — 0,162 % / 0,34 % à 5 cm —,
-frontières et rendu en direct (ADR-143 à 169). Preuves :
+[S301](validation/DELTA3D-PAS-GPU-S301.md)). **S302 : la scène existe et tourne** — 30 × 28 m à 25 cm sur la mer
+`--houle`, front de 65 cm à 2,2 m/s, rendu en direct depuis la surface publiée à 197 Hz
+([S302](validation/SCENE-DELTA3D-S302.md)). **Verdict R11 reçu** : aucun artefact visible dans δ, raccord du domaine
+invisible — mais S310 montre que cette invisibilité n'était **pas** de la conservation.
+Tranche MAC x-z (2D), reçue : surface mobile couplée contre HOS à 0,162 % / 0,34 %, faces
+coupées, multigrille, frontières, rendu en direct (ADR-143 à 169). Preuves :
 [S253](validation/SURFACE-COUPLEE-S253.md), [S274](validation/HOULE-USAGE-S274.md).
 
-*Manque* : verdict de la revue (R11) ; production sur les cas de cuve (§4.1) ; bascule de mouillure (A297) ; I-05 complet et admission (A244) ; cavité et gerbe (B10, seconde
-représentation, ADR-175 D5) ; cohérence de phase δ/B (A289) ; plancher des lignes à fantôme
-(A274) ; W au-dessus du plan moyen (A286) ; frontières générales du total.
+**S310, le premier compteur** ([preuve](validation/BILAN-MASSE-S310.md)) : bilan de **masse**
+exact par télescopage. Cuve fermée, murs à **zéro exact**, dérive 7,4·10⁻¹² m sur 5 s —
+**A298 n'est pas une fuite de volume**. Dissipation numérique **0,0935 %/s**. Scène couplée :
+l'éponge **efface 10,2 % du contenu perturbatif par seconde** — **A302 chiffrée**.
+
+*Manque* : production sur les cas de cuve (§4.1) ; bascule de mouillure (A297) ; I-05 complet
+et admission (A244) ; cavité et gerbe (B10, seconde représentation, ADR-175 D5) ; cohérence de
+phase δ/B (A289) ; plancher des lignes à fantôme (A274) ; W au-dessus du plan moyen (A286) ;
+frontières générales du total ; **le compteur sur la carte et les bilans d'énergie et de quantité
+de mouvement** (S310).
 
 *Bancs* : **B3** (famille de δ), **B4** (volets restants), **B5** (blocs épars), **B10** (cavité
 d'entrée). *Cas* : C01, C03, C04, C05, C06, C08, C09, C20, C22, C23.

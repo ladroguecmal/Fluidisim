@@ -4006,3 +4006,14 @@ d'un jeton `occupé` de moins de deux heures un **refus de reprise**, donc un ho
 `outils/etat_projet.py --check` refuse désormais un battement dans le futur de plus de deux
 minutes, et ses essais prennent pour contre-exemple l'erreur réelle de S308. Reste ouvert le
 défaut de fond — rien n'oblige une session à lancer `--check` avant de committer son jeton.
+
+**A302 — note datée du 2026-09-20 (S310). Partiellement fermée.** Le bilan de **masse** existe :
+`Balance3`, tenu par le pas couplé et le pas non couplé, exact par télescopage et publié avec son
+plancher ([BILAN-MASSE-S310](../validation/BILAN-MASSE-S310.md)). L'angle est **fermé pour la masse
+sur la référence CPU**, et ce qu'il soupçonnait est confirmé et chiffré : l'éponge **efface** 10,2 %
+du contenu perturbatif d'un domaine par seconde, et rien n'en revient dans W. **Reste ouvert**, à
+la même sévérité 2 : le compteur n'existe pas sur la **carte** ; les bilans d'**énergie** et de
+**quantité de mouvement** ne sont pas fermés — publiés comme états, avec les termes manquants
+nommés (travail de la pression au bord, flux advectif) ; et la réflexion artificielle n'est
+toujours chiffrée qu'en 2D (S269). Déclencheurs : lot 2 d'ADR-178 pour le retour vers W, et le
+premier portage du compteur sur la production.

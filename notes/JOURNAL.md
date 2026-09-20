@@ -15621,3 +15621,65 @@ lot 1 et en sort une capacité mesurée**, ou le troisième maillon devra être 
 *Tenue du plan* : cinq étapes, un découpage déclaré (P4, le contrôle exécutable, séparé du rituel).
 L237 tenu cette fois — horloge lue avant chaque battement, y compris une correction en cours
 d'étape quand j'ai recommencé à extrapoler de onze minutes.
+
+## S310 — 2026-09-20 — le premier compteur : ce qui entre, ce qui sort, et ce que l'éponge efface
+
+**Entrée.** Le lot 1 d'[ADR-178](../docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7,
+ouvert par l'angle mort **A302** : le couplage δ ↔ B/W tournait depuis S250 et **rien n'avait
+jamais compté** ce qui y entrait ni ce qui en sortait.
+
+**Construit.** `delta3d_balance.rs` — `Balance3` (volume, bande, perturbation, éponge, résidu),
+`perturbation_volume`, `perturbation_energy`, `perturbation_momentum` —, le bilan tenu par le pas
+**couplé** et par le pas **non couplé**, et la publication des mesures dans deux bancs existants.
+
+**Pourquoi c'est exact, et pas seulement précis.** Le transport ne produit que des flux de colonne,
+dont les termes intérieurs **télescopent** : la variation de volume vaut la somme des faces de
+bord, en arithmétique exacte. **L'écart mesuré est donc le plancher du schéma**, pas une erreur
+d'instrument — et c'est ce qui permet de le publier au lieu de l'absorber dans une tolérance.
+
+**Ce que la mesure a trouvé, et que la relecture n'avait pas vu.** Compter l'`increment` de
+l'éponge sur-compte de `eta_roundoff` à chaque colonne et à chaque pas : **0,86 %** du volume
+retiré, **quatre ordres de grandeur au-dessus du plancher**. La somme compensée de S233 est faite
+pour que ce soit `η − eta_roundoff` qui décroisse, pas `η`. Le transport, lui, était juste d'emblée
+— son incrément retranche déjà le reste que la hauteur compensée rajoute. **Aucune relecture ne
+l'aurait donné** : c'est l'essai de l'éponge, et lui seul, qui l'a dit (**L353**).
+
+**Trois résultats.** *(1)* **La cuve de S305 ne perd rien** : murs à **zéro exact** à chaque pas,
+dérive de volume **7,4·10⁻¹² m** de hauteur moyenne sur 5 s. Conséquence pour **A298**, dont la
+dérive carte/référence vaut ≈ 1,2·10⁻⁷ m/s sur la même cuve : **ce n'est pas une fuite de volume du
+schéma**, c'est propre au chemin de la carte. *(2)* **La dissipation numérique du schéma est
+mesurée** — 100,55 J → 100,08 J en 5 s, soit **0,0935 % par seconde**, un cinquième de pour cent
+par période : elle borne la durée de vie utile d'un domaine, et le dépôt n'avait pas ce nombre.
+*(3)* **A302 devient un nombre** : sur une scène couplée à fond spectral réel, l'éponge échange
+**10,2 % du contenu perturbatif du domaine par seconde**, et rien n'en revient dans W. *L'éponge ne
+laisse pas sortir la perturbation : elle l'efface.* Le raccord que R11 avait jugé « invisible »
+l'est parce qu'elle est **douce**, pas parce qu'elle **conserve** — et distinguer les deux
+demandait exactement ce compteur.
+
+**Ce qui ne se ferme pas, dit comme tel.** Énergie et quantité de mouvement sont publiées comme
+**états**, pas comme bilans : leur fermeture demande le travail de la pression aux faces de bord et
+le flux advectif, que le pas ne calcule nulle part sous une forme récupérable. Les fabriquer après
+coup donnerait un nombre qui ressemble à un bilan sans en être un — l'erreur exacte qu'A302
+reproche au raccord « invisible ». Ce qu'il faudrait est nommé dans la preuve, non improvisé.
+
+**Preuve et limites.** [BILAN-MASSE-S310](../docs/validation/BILAN-MASSE-S310.md). Tout est mesuré
+sur la **référence CPU** : le compteur n'existe pas sur la carte, et la scène du §3 est une scène
+*voisine* de celle de S302, pas la même. Une seule machine (A98). Aucun banc déclaré reçu.
+
+**Trois tolérances proposées**, chacune adossée à une mesure, à trancher par l'utilisateur : T1
+l'instrument (résidu ≤ 10⁻⁶, tenu ×10 à ×2 000), T2 domaine fermé (≤ 10⁻⁶ sur 10 s, tenu ×10⁴), et
+**T3, le seul critère de fond** — ce que δ absorbe reparaît dans W à 5 % près, réflexion au bord
+sous 1 % en énergie. **T3 n'est pas tenu : 100 % de ce qui est absorbé est effacé.** C'est le
+critère du lot 2, et il existe maintenant.
+
+**Non-fait.** Le compteur sur la carte. Les bilans d'énergie et de quantité de mouvement. Le retour
+δ → W lui-même, qui est le lot 2.
+
+**Rituel.** Maillons **0**. Capacité : le dépôt sait ce qui entre et sort d'un domaine δ, et à quel
+plancher. Consommateur nommé et immédiat : le **lot 2**, qui ne peut pas se juger sans compteur —
+on ne saura pas si un retour conserve tant qu'on ne sait pas ce que l'absorption retire. Preuve :
+BILAN-MASSE-S310. Point **4.18** de la liste du projet fini avancé. 544 essais, 0 échec.
+
+*Tenue du plan* : neuf étapes, aucun découpage supplémentaire. L237 tenu — l'horloge lue par un
+appel du shell qui écrit lui-même le battement, après que S309 eut construit le contrôle qui le
+vérifie.

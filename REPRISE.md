@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 14:34 +02:00
+JETON            : libre
+Battement        : 2026-09-20 14:37 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S310 — **lot 1 d'ADR-178 D7 : les compteurs de conservation**. Masse d'abord, sur la cuve de S305 et la scène de S302 ; A302 doit cesser d'être une phrase et devenir un nombre
-Dernière session : S309 — liste du projet fini confrontée aux trois systèmes (3 / 51 / 66 ; A 20, B 29, C 7, 64 hors des trois), battement du jeton rendu vérifiable
-Session suivante : fixée au rituel
-Maillons        : 1 — S309 a produit une carte et un contrôle, pas une capacité. **Cette session doit en sortir une**, ou le troisième maillon devra être justifié
+Session en cours : —
+Dernière session : S310 — **le premier compteur** : bilan de masse exact d'un domaine δ, cuve fermée qui ne perd rien (A298 n'est pas une fuite de volume), dissipation du schéma 0,0935 %/s, et **A302 chiffrée** — l'éponge efface 10,2 % du domaine par seconde ([preuve](docs/validation/BILAN-MASSE-S310.md))
+Session suivante : **lot 2 d'ADR-178 D7 — le retour δ → W**, dont le critère existe désormais : **T3** de BILAN-MASSE-S310 §6. Le compteur du lot 1 en est l'instrument. *(Trois tolérances attendent une décision de l'utilisateur ; elles ne bloquent pas le lot.)*
+Maillons        : 0 — capacité S310 : le dépôt sait ce qui entre et sort d'un domaine δ, et à quel plancher. Consommateur : le lot 2, qui ne peut pas se juger sans compteur. Preuve : BILAN-MASSE-S310. Point 4.18 de la liste du projet fini avancé
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -6100,3 +6100,24 @@ retenu.
 
 Famille de **L349** : ce qu'il faut penser à faire ne se fait pas. La forme qui tient est une
 étape déclarée d'avance, comme la liste du drapeau `--meilleur` vit dans le code.
+
+## L353 — Un terme qui vaut zéro dans l'essai n'est pas éprouvé : un cas par terme
+
+S310. Le compteur de masse a été écrit avec quatre termes — bande, perturbation, éponge, résidu —
+et éprouvé d'abord sur deux cas : une cuve fermée et un domaine traversé par un fond. Il fermait
+au plancher dans les deux, à 10⁻¹¹ près. **Les deux avaient l'éponge éteinte.**
+
+Le troisième essai, celui qui l'allume, a trouvé une erreur de **0,86 %** — quatre ordres de
+grandeur au-dessus du plancher que les deux premiers annonçaient. La cause : compter l'`increment`
+de l'éponge au lieu de la variation de la hauteur **compensée**, ce qui sur-compte de
+`eta_roundoff` à chaque colonne et à chaque pas.
+
+Le point n'est pas l'arithmétique compensée. C'est que **deux essais qui passent brillamment ne
+disent rien d'un terme qu'ils laissent à zéro**, et qu'un instrument inspire d'autant plus
+confiance qu'il vient de fermer à 10⁻¹¹ — la précision d'un cas se lit à tort comme la justesse de
+l'outil.
+
+**La règle.** Un instrument à `n` termes demande au moins `n` cas, chacun rendant un terme
+**dominant**. Écrire la liste des termes avant les essais, et cocher ; une case vide est un terme
+que personne n'a mesuré. Même famille que **L347** — un cas éprouvé sous la tolérance de son propre
+critère ne prouve rien — et que **L349** : ce qu'il faut penser à vérifier ne se vérifie pas.

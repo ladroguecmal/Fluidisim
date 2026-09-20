@@ -178,11 +178,14 @@ pas recopiée ici (L137).
   premier (ADR-175 D5). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *absent* sur le système ;
   C06 partiel sur un véhicule d'essai 1D.
-- [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et moins avancé
-  qu'il n'y paraissait**. Dérive de volume ≤ 10⁻⁸ m sur les bancs de surface ; mais **aucun bilan
-  n'a jamais été mesuré à l'interface δ ↔ B/W**, dans aucune dimension, et la carte porte une
-  dérive séculaire d'environ 1,2·10⁻⁷ m/s sur la cuve, suspect nommé et non démontré (A298,
-  [S305](validation/CUVE-GPU-S305.md) §6). C09 non exécuté. Lot 1 d'ADR-178.
+- [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et la masse est
+  désormais comptée**. S310 : bilan **exact par télescopage** tenu par les deux pas, plancher
+  publié ; cuve fermée à 7,4·10⁻¹² m de dérive sur 5 s, murs à zéro exact ; scène couplée à
+  1,28·10⁻¹⁰ m³ de résidu ([preuve](validation/BILAN-MASSE-S310.md)). **A298 n'est donc pas une
+  fuite de volume du schéma.** Dissipation numérique mesurée : 0,0935 % par seconde. **Manquent**
+  le compteur sur la carte, et les bilans d'**énergie** et de **quantité de mouvement** — publiés
+  comme états, termes manquants nommés (travail de la pression au bord, flux advectif). C09 non
+  exécuté.
 - [ ] **4.19 Coût de δ compatible avec le budget** — *partiel* : carte du coût (S244), multigrille
   (S252), **multigrille du mode mobile (S274, ADR-167)** : le pas couplé à 16 384 mailles passe de
   280 à 49 ms, environ 24 fois le budget d'eau. **S276 : δ en direct à 40 images/s** — bande de

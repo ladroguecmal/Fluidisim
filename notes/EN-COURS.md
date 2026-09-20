@@ -58,7 +58,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S310 — les compteurs de conservation, lot 1 d'ADR-178 D7.
+Session : S310 — **terminée**. Le bilan de masse d'un domaine δ existe, il est exact par
+télescopage, et A302 est devenue un nombre : l'éponge efface 10,2 % du domaine par seconde.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : [ADR-178](../docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7 et l'angle
 mort **A302** — aucun bilan de masse, de quantité de mouvement ni d'énergie n'a jamais été mesuré
@@ -111,7 +112,7 @@ Critères, écrits avant la mesure :
   dit. Dissipation numérique du schéma sur la cuve fermée : **0,0935 % par seconde**.
 - [x] **P8** — [BILAN-MASSE-S310](../docs/validation/BILAN-MASSE-S310.md) : la preuve, et **trois
   tolérances proposées** — T1 instrument, T2 domaine fermé, T3 couplage (critère du lot 2).
-- [ ] **P9** — rituel REPRISE §6.
+- [x] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
 
