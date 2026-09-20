@@ -95,10 +95,9 @@ Critères, écrits avant la recherche :
 - [x] **P1** — amorce, verdict consigné, plan seul.
 - [x] **P2** — niveau 1, **et un fait qui déclasse la recherche** : le rendu soumis n'était pas
   le meilleur rendu du dépôt.
-- [ ] **P3** — niveau 2 : les références **des** références, et l'état de l'art du rendu d'océan
+- [x] **P3** — niveau 2 : les références **des** références, et l'état de l'art du rendu d'océan
   que le guide ne cite pas.
-- [ ] **P4** — niveau 3 : l'optique de l'eau et du ciel — couleur, absorption, diffusion, écume —
-  les postes que notre rendu traite aujourd'hui par des **constantes écrites à la main**.
+- [x] **P4** — niveau 3 : l'optique de l'eau et du ciel — couleur, absorption, diffusion, écume.
 - [ ] **P5** — synthèse ordonnée : ce qui manque, sourcé, chiffré, rattaché à notre code.
 - [ ] **P6** — mesure sur nos propres images de ce que la synthèse prédit.
 - [ ] **P7** — décision : ADR de ce qu'on construit et dans quel ordre.
@@ -185,8 +184,59 @@ rapport de la constante (1,24 et 2,84).
   et il est **totalement absent**.
 - **Bruneton, Neyret & Holzschuch 2010**, *Real-time Realistic Ocean Lighting using Seamless
   Transitions from Geometry to BRDF* (Computer Graphics Forum 29(2)) : la référence exacte de
-  notre problème de transition géométrie → BRDF. Le guide ne la cite pas. PDF non récupéré
-  (portail protégé) ; à reprendre.
+  notre problème de transition géométrie → BRDF. Le guide ne la cite pas.
+
+## P2 — correction d'une affirmation que j'avais écrite trop vite
+
+J'avais noté un « artefact brun-olive en moyenne distance ». **Mesuré : il n'existe pas.** Zéro
+pixel sur 921 600 n'a `R > B`. Les taches que je prenais pour un défaut ont `B/G` = 1,36, celui
+du **ciel** (1,47) : ce sont des reflets de la couche de nuages, pas un bug. Ce qui est vrai en
+revanche, c'est que l'eau y paraît terne — parce que partout où l'on voit *dans* l'eau plutôt que
+le ciel, on voit notre constante trop verte. L'œil avait raison sur le symptôme et tort sur la
+cause.
+
+## P3 — l'état de l'art que le guide ne cite pas, et qui répond à notre question
+
+**Bruneton et al. 2010**, lu par son implémentation de référence
+([portage Unity](https://github.com/Scrawk/Brunetons-Ocean/blob/master/Assets/BrunetonsOcean/Shaders/Ocean.shader)) :
+
+```
+float2 sigmaSq = tex3D(_Variance, ...);          // variance de pente, par pixel
+float fresnel  = 0.02 + 0.98 * MeanFresnel(V, N, sigmaSq);
+col += ReflectedSunRadiance(SUN_DIR, V, N, Tx, Ty, sigmaSq) * Lsun;
+col += MeanSkyRadiance(V, N, Tx, Ty, sigmaSq) * fresnel;
+float3 Lsea = _SeaColor * Esky / M_PI;  col += Lsea * (1.0 - fresnel);
+```
+
+**Ce que cela nous apprend, et c'est important** : le remède au tapis de scintillement n'est pas
+de **couper** les pentes non résolues (ce que fait notre `--coupure` de S306, et ce que je
+proposais) mais de les **convertir en rugosité de BRDF** — Fresnel **moyen** sur la distribution,
+soleil et ciel intégrés sur elle. On garde toute l'énergie **et** on perd l'aliasing. **Nous
+avons déjà cela** : c'est `--reflets-filtres` ([ADR-161](../docs/adr/ADR-161-reflets-de-la-queue-non-resolue.md),
+accepté en **R7**) — et il n'était pas actif non plus dans les images de R11, R12 et R13.
+
+Sa couleur d'eau : `(0.0039, 0.046, 0.09)`, soit **B/G = 1,96, B/R = 23** — appliquée à
+l'irradiance du **ciel**, donc bien plus bleue en sortie que notre constante appliquée à une
+constante. Et **aucune écume** : confirmation qu'elle est une couche à part, absente partout.
+
+**Sea of Thieves, SIGGRAPH 2018** (Ang et al.) : la couleur mélange une *deep water colour* et
+une *sub-surface colour* selon l'angle de vue, la direction du soleil **et un masque de crête
+tiré du déplacement horizontal de la FFT** — plus la crête est comprimée, plus la lumière
+traverse une faible épaisseur, plus la diffusion se voit. L'écume naît aux crêtes, puis est
+floutée avec rétroaction pour simuler sa dispersion.
+**Ce masque de crête, nous l'avons déjà** : c'est le **déterminant du jacobien** de CWM, calculé
+à chaque pixel depuis S260 et **jamais employé pour autre chose qu'un repli**.
+
+## P4 — les deux postes que notre rendu traite par des constantes, chiffrés
+
+1. **Couleur du corps d'eau** — §P2 ci-dessus : B/G attendu 10,9, obtenu 1,24 (défaut) / 2,83
+   (ciel clair).
+2. **Perspective aérienne** — brume à 500 m par défaut, 6 km en ciel clair, contre des dizaines
+   de kilomètres de portée visuelle en air marin propre.
+3. **Écume** — `W = 3,84·10⁻⁶·U₁₀^3,41` (Monahan & O'Muircheartaigh 1980), réflectance effective
+   **0,22** (Koepke), soit **0,42 %** de couverture à `U₁₀ ≈ 7,8 m/s`. Absente.
+4. **Diffusion sous la surface aux crêtes** — absente ; le masque existe déjà (jacobien).
+5. **Spectre** — ECKV/Elfouhaily remplacerait la queue `f⁻⁴` **et** le calage Cox–Munk.
 
 **Ce que le rendu contient aujourd'hui, à avoir en tête pendant la recherche** : mer multimodale
 JONSWAP à étalement `cos^2s` (ADR-156), queue d'équilibre `f⁻⁴` continuée à la main (ADR-157),
