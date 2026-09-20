@@ -4117,3 +4117,24 @@ et son `λ_mesure` = 2,0183 m se lit **2,034 m** au périodogramme — sans effe
 des réceptions, pas seulement un banc. **Déclencheur** : toute réception qui dépend d'une période
 mesurée, et tout raffinement de maille sur un cas qui en emploie une. Le remède est connu et coûte
 quelques lignes — deux estimateurs, publiés côte à côte, et leur écart lu comme une mesure (L360).
+
+**A307 — S315, 2026-09-20 (sévérité 2, ouverte). Aucun banc du dépôt ne déroule une phase.**
+Partout où une phase est comparée — S312, S314, S315 —, elle l'est **enroulée**, lue en un point
+et modulo un tour. Tant que les deux signaux comparés arrivent ensemble, c'est licite. **Dès que
+leurs vitesses de groupe diffèrent, ce ne l'est plus** : l'écart d'arrivée croît avec la distance,
+dépasse une période, et plusieurs enroulements deviennent compatibles avec la mesure.
+
+Mesuré en S315 ([preuve](../validation/ORACLE-ET-OBLIQUE-S315.md) §5) : à dix longueurs d'onde, le
+train et δ arrivent à **1,66 s** l'un de l'autre, soit **1,46 tour** de porteuse ; le désaccord de
+phase mesuré, 0,356 tour, est compatible avec au moins deux enroulements et **le banc ne tranche
+pas**.
+
+**Conséquence sur le passé** : la régression de phase de 0,9938 publiée en S314 est mesurée **sur
+la ligne d'émission**, où les deux signaux sont au même endroit au même instant — elle est donc
+valide, et elle ne dit rien de la propagation. Aucune réception du dépôt ne dépend d'une phase
+comparée à distance, parce qu'aucune n'a été tentée avant S315.
+
+**Déclencheur** : l'ordre C, qui doit évaluer la phase parmi les six propriétés. Le remède est
+nommé et n'est pas construit : **suivre la porteuse en continu** le long du trajet — déroulement
+de phase entre les deux lignes — plutôt que la lire aux extrémités. Interdit associé (ADR-183 D3,
+L363) : décaler un signal pour superposer les deux **ne mesure rien**.

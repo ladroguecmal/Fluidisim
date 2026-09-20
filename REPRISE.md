@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 23:22 +02:00
+Battement        : 2026-09-20 23:26 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S315 — les deux vérifications dues à l'ordre B : la **phase à dix longueurs d'onde** contre un oracle indépendant, et l'**oblique à la frontière**
 Dernière session : S314 — **ordre B** : `WaveTrain`, la primitive orientée de W. La direction passe de **0,500 à 1,00000**, le spectre de deux octaves à **3,5 %**, la phase devient possible (régression 0,9938), la célérité tombe à **0,035 %** ([preuve](docs/validation/TRANSFERT-ORIENTE-S314.md), [ADR-182](docs/adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md))

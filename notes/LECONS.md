@@ -6306,3 +6306,50 @@ paquet, le plancher d'un résidu (**L358**), le coût d'un pas.
 Et l'inverse mérite d'être dit : **une convergence qui se brise au troisième point accuse
 l'instrument avant le schéma**. Un solveur qui empire en se raffinant est rare ; un estimateur qui
 se dégrade quand le signal s'enrichit est courant (L360).
+
+## L362 — Un échec de compilation filtré ne donne pas une erreur : il donne la sortie d'un autre programme
+
+S315. Deux exécutions précédentes du même banc tournaient encore et **verrouillaient
+l'exécutable**. `cargo build` a donc échoué — `LNK1104: cannot open file` —, mais la commande
+filtrait sa sortie (`| grep -E "^error" -A 8 | head`), la ligne utile est passée à côté du filtre,
+et **l'ancien binaire s'est exécuté**. Il a produit des chiffres cohérents, plausibles, au bon
+format, avec les bons noms de champs. Rien ne les distinguait d'une mesure valide, et une mesure de
+phase calculée par la version d'avant a failli être publiée.
+
+Le piège a trois pièces, et il en faut trois : un **processus survivant** qu'on croyait tué, un
+**filtre** qui avale l'erreur, et un **artefact périmé** qui reste exécutable. Chacune est
+anodine ; ensemble elles fabriquent une mesure fausse qui a l'air juste.
+
+**La règle.** Ne jamais filtrer la sortie d'une compilation sans vérifier son **code de retour**,
+et ne jamais enchaîner une exécution derrière une compilation dont on n'a pas constaté le succès.
+Sur un artefact de banc, la forme la plus sûre est de **dater** : si le binaire est plus vieux que
+la source, il ne mesure pas ce qu'on croit. Corollaire pratique : tuer une tâche d'arrière-plan
+**ne tue pas** le processus qu'elle a lancé — le vérifier avant de reconstruire.
+
+Famille de **L360** : là un instrument se dégradait sans le dire, ici c'est le mauvais instrument
+qui répond. Dans les deux cas la sortie est plausible, et c'est la plausibilité qui est le danger.
+
+## L363 — Une phase ne se compare qu'à origine commune, et elle ne vaut que modulo un tour
+
+S315, deux fautes successives sur le même objet.
+
+**La première.** L'identification rendait une phase référencée à **l'instant d'arrivée de son
+propre signal**. Comparer la phase du modèle à celle de la mesure revenait donc à comparer deux
+angles définis depuis deux origines distantes de 1,66 s — **1,45 tour** de porteuse. L'écart de
+0,38 tour qui en sortait ne mesurait que ce décalage d'origine. Remède : lire les deux phases à un
+**instant absolu commun**, `ω·(t − t_c)/2π − φ`, qui fait disparaître `t_c`.
+
+**La seconde est plus profonde, et elle n'a pas de remède dans le même montage.** Une phase n'est
+connue que **modulo un tour**. Tant que deux signaux arrivent ensemble, l'enroulement est le même
+et la comparaison est licite. Dès que leurs **vitesses de groupe** diffèrent, l'écart d'arrivée
+croît avec la distance, dépasse une période, et **plusieurs enroulements deviennent compatibles
+avec la mesure**. À dix longueurs d'onde, le désaccord mesuré était compatible avec au moins deux
+d'entre eux, et rien dans le banc ne tranchait.
+
+**La règle.** Une comparaison de phase à distance demande de **dérouler** la phase le long du
+trajet — de la suivre en continu — et non de la lire aux deux extrémités. Un banc qui ne le fait
+pas ne peut pas conclure, et il doit le dire **au lieu de choisir l'enroulement qui arrange**.
+
+Et l'interdit qui va avec : décaler l'un des deux signaux pour les superposer **mesure exactement
+rien**. C'est le même geste que corriger un spectre par une amplitude (ADR-182 D8) — remplacer une
+grandeur qu'on n'a pas su reproduire par une autre qu'on ajuste.
