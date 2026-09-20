@@ -122,8 +122,8 @@ Critères, écrits avant la mesure :
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [>] **P2** — ADR-180 : la décision de l'utilisateur du 2026-09-20, actée décision par décision.
-- [ ] **P3** — *le receveur du volume net, mesuré* : volume net des trois productions de W ;
+- [x] **P2** — ADR-180 : la décision de l'utilisateur du 2026-09-20, actée décision par décision.
+- [x] **P3** — *le receveur du volume net, mesuré* : volume net des trois productions de W ;
   ce que V porte (entiers, mL) ; ce que le niveau moyen de B porte. Réponse au point 3.
 - [ ] **P4** — le **registre** : les trois volumes de l'utilisateur publiés séparément à chaque
   pas, réutilisant `Balance3`, sans jamais compter l'attente comme une restitution.
@@ -140,7 +140,29 @@ Critères, écrits avant la mesure :
 
 ### Notes de reprise
 
-*(à remplir en cours de session)*
+**P3 — la réponse au point 3 est « ni l'un ni l'autre, et pour une raison structurelle ».**
+
+Trois mesures, et la deuxième est celle qui tranche.
+
+1. **`displaced_l` est inerte.** Deux impacts à 0 et 1000 L : `RadialImpact` et `ImpactField`
+   rendent des `η` **identiques au bit** sur 768 points. Le volume du contrat traverse
+   l'encodage et n'entre dans aucun champ.
+2. **Le champ périodique a un volume net nul sans troncature possible** — l'intégrale porte sur
+   exactement une cellule : net/absolu **1,3 à 3,7·10⁻⁹**.
+3. **L'impact radial et le sillage n'ont *pas* un volume net nul mesurable** — un disque et une
+   boîte tronquent. Balayés, leurs nets **changent de signe** et **tombent** avec la taille
+   (sillage : 6,3·10⁻² → 2,7·10⁻² → 1,0·10⁻³ à maille constante). **C'est la troncature**, et
+   S311 ne pouvait pas le savoir avec un seul rayon.
+
+**La raison, structurelle** : `∫η dA` **est** l'amplitude du mode `k = 0`. Plus petit `k`
+mesuré — impact 0,785, périodique 0,393, sillage 0,187 rad/m ; `ModalPressure::new([0,0])`
+**refuse** (`Domain`). **Aucune production de W n'a ce mode.** Donc : propriété de la **couche**,
+pas de la primitive, et une « primitive de W portant un volume » serait un déplacement du plan de
+repos, c'est-à-dire **B sous un autre nom**.
+
+**Ce que portent les autres couches** (lu dans les types, et dit comme tel) : `HydroNode.volume_ml`
+est un `i64` de millilitres — en V le volume **est** l'état ; `SeaState` n'a **aucun** champ de
+niveau moyen — « modifier le niveau moyen de B » n'existe pas encore, c'est un scalaire à ajouter.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
