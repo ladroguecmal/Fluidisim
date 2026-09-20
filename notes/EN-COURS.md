@@ -109,7 +109,8 @@ Critères, écrits avant la mesure :
   perturbatif du domaine par seconde**, et rien n'en revient dans W. Résidu 1,28·10⁻¹⁰ m³.
 - [x] **P7** — énergie et quantité de mouvement : **des états, pas des bilans**, et le module le
   dit. Dissipation numérique du schéma sur la cuve fermée : **0,0935 % par seconde**.
-- [ ] **P8** — preuve publiée, tolérance **proposée** à l'utilisateur.
+- [x] **P8** — [BILAN-MASSE-S310](../docs/validation/BILAN-MASSE-S310.md) : la preuve, et **trois
+  tolérances proposées** — T1 instrument, T2 domaine fermé, T3 couplage (critère du lot 2).
 - [ ] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
