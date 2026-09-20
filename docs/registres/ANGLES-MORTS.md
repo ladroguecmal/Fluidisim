@@ -3996,3 +3996,13 @@ ciel porte un fort gradient, en silence et avec un résultat plausible (`0,3652 
 au lieu de `0,1766 / 22,81 / 0,3082` sur le même rendu). Toute comparaison entre rendus passe
 désormais par `--horizon=<y>` **forcé** ; publier la hauteur de chute, comme S308 P4 l'avait fait,
 n'a pas suffi à l'empêcher.
+
+**A303 — S309, 2026-09-20 (sévérité 1, fermée le jour même).** **Le battement du jeton n'était
+relu par personne.** S308 a lu l'horloge une fois, à 13:12, puis a **extrapolé** cinq battements
+successifs jusqu'à 15:14 — soit 1 h 30 d'avance sur l'heure réelle. L237 interdit exactement cela
+depuis longtemps, et rien ne le vérifiait. La conséquence n'est pas cosmétique : AGENTS.md fait
+d'un jeton `occupé` de moins de deux heures un **refus de reprise**, donc un horodatage avancé
+**bloque la session suivante**, silencieusement. Remède **exécutable**, pas documentaire (L349) :
+`outils/etat_projet.py --check` refuse désormais un battement dans le futur de plus de deux
+minutes, et ses essais prennent pour contre-exemple l'erreur réelle de S308. Reste ouvert le
+défaut de fond — rien n'oblige une session à lancer `--check` avant de committer son jeton.

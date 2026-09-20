@@ -87,7 +87,10 @@ Critères, écrits avant :
   point : 3 / 51 / 66, et le total de S276 était faux de deux unités (1.4).
 - [x] **P3** — les 120 points rangés : A 20, B 29, C 7, hors des trois 64. **Et une phrase de S308
   bornée** — « A est avancé » vaut pour la haute mer, pas pour les rivières ni les plages.
-- [ ] **P4** — rituel REPRISE §6.
+- [x] **P4** — *(découpage déclaré)* le contrôle **exécutable** du battement dans
+  `outils/etat_projet.py --check`, avec ses quatre essais. Une consigne d'exactitude sans contrôle
+  n'est pas tenue — L349 appliquée à l'heure.
+- [ ] **P5** — rituel REPRISE §6.
 
 ### Notes de reprise
 

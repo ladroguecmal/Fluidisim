@@ -7,6 +7,7 @@ sans compter une seconde fois les branches et leurs copies. Renommages comptés 
 from __future__ import annotations
 import argparse
 from collections import Counter
+from datetime import datetime, timezone
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -120,6 +121,35 @@ def oversized(active_questions: str, roadmap: str) -> list[str]:
     return found
 
 
+def heartbeat(reprise: str, now: datetime | None = None) -> list[str]:
+    """Le battement du jeton ne peut pas être **dans le futur** — contrôle ajouté en S309.
+
+    **Pourquoi ce contrôle existe.** L237 demande de lire l'horloge dans un appel séparé et d'en
+    reporter la valeur à chaque commit d'étape. S308 ne l'a lue qu'une fois et a **extrapolé** les
+    battements suivants : le dernier valait 1 h 30 de plus que l'heure réelle. Un battement dans le
+    futur est le pire des cas — AGENTS.md dit qu'un jeton `occupé` de moins de deux heures
+    interdit la reprise, donc un horodatage avancé **bloque** la session suivante, et il le fait
+    silencieusement parce que rien ne le relit.
+
+    Une consigne d'exactitude sans contrôle n'est pas tenue : c'est **L349** appliquée à l'heure.
+    Deux minutes de tolérance pour l'écart de lecture entre le `date` et l'écriture du fichier.
+    """
+    marge = 120.0
+    m = re.search(r"^Battement\s*:\s*(\d{4}-\d{2}-\d{2} \d{2}:\d{2} [+-]\d{2}:?\d{2})\s*$",
+                  reprise, re.M)
+    if not m:
+        # Un battement mal formé ne correspond pas au motif : il tombe ici, et c'est voulu — une
+        # date illisible est aussi grave qu'une date absente, et un seul message suffit.
+        return ["REPRISE.md : aucune ligne « Battement » lisible"]
+    stamp = datetime.strptime(m.group(1), "%Y-%m-%d %H:%M %z")
+    now = now or datetime.now(timezone.utc)
+    avance = (stamp - now).total_seconds()
+    if avance > marge:
+        return [f"REPRISE.md : battement {m.group(1)} dans le futur de {avance / 60:.0f} min — "
+                "L237, l'horloge se lit, elle ne s'extrapole pas"]
+    return []
+
+
 def inspect(since: int | None) -> dict:
     paths = sorted(filter(None, git("ls-files", "-z").split("\0")))
     commits = history(git("log", "--first-parent", "--no-renames", "--numstat",
@@ -153,6 +183,7 @@ def inspect(since: int | None) -> dict:
     adrs = [p for p in paths if re.fullmatch(r"docs/adr/ADR-\d+[^/]*\.md", p)]
     errors += [f"ADR absent de l'index : {p}" for p in adrs if p.removeprefix("docs/") not in index]
     sizes = oversized(active_questions, texts["docs/FEUILLE-DE-ROUTE.md"])
+    clock = heartbeat(texts["REPRISE.md"])
     return dict(head=git("rev-parse", "--short", "HEAD").strip(),
                 note="Fichiers suivis présents ; lignes brutes, tests/commentaires inclus. "
                      "Ajouts Git sans renommages ; ni temps, ni productivité, ni capacités. "
@@ -163,14 +194,15 @@ def inspect(since: int | None) -> dict:
                 file_active_lignes=len(active_questions.splitlines()),
                 couches=layers, depuis_session=since,
                 ajouts_par_ere=activity(commits, since), erreurs_navigation=errors,
-                plafonds_depasses=sizes)
+                plafonds_depasses=sizes, battement=clock)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--check", action="store_true",
-                        help="échouer si navigation active incomplète ou plafond d'un document d'état dépassé")
+                        help="échouer si navigation active incomplète, plafond dépassé, "
+                             "ou battement du jeton dans le futur")
     parser.add_argument("--since-session", type=int)
     args = parser.parse_args()
     if args.since_session is not None and args.since_session < 0:
@@ -196,7 +228,11 @@ def main() -> int:
         print(f"Plafonds des documents d'état : {len(result['plafonds_depasses'])} dépassement(s)")
         for excess in result["plafonds_depasses"]:
             print(excess)
-    return int(args.check and bool(result["erreurs_navigation"] or result["plafonds_depasses"]))
+        print(f"Battement du jeton : {len(result['battement'])} anomalie(s)")
+        for anomaly in result["battement"]:
+            print(anomaly)
+    return int(args.check and bool(result["erreurs_navigation"] or result["plafonds_depasses"]
+                                   or result["battement"]))
 
 
 if __name__ == "__main__":
