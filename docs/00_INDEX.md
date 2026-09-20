@@ -98,6 +98,7 @@
 - [Les asymétries de la surface rendue, construites — S304](validation/ASYMETRIES-S304.md) : second ordre en bande étroite et modulation retardée, cinq critères d'ADR-176 tenus, +0,25 % de coût, images de R12.
 - [La production contre la référence dans une cuve — S305](validation/CUVE-GPU-S305.md) : le critère 2 de la porte B sur les cas de §4.1, mode sans fond du pas de production, chaînon CPU identique au bit, 3·10⁻⁷ m pour 3 mm exigés, phase décroissante, et l'écart séculaire chiffré.
 - [D'où viennent les stries de notre mer — S306](validation/STRIES-S306.md) : le test A/B du guide reçu, la queue spectrale portant 80–85 % de l'énergie haute fréquence sans que le contraste le voie, `replis = 0`, et une coupure qui divise les stries par 3,6 pour 6 % de GPU en moins.
+- [L'écart entre notre rendu et l'état de l'art — S307](validation/RENDU-ECART-S307.md) : trois revues envoyées avec des options acceptées éteintes, la couleur de l'eau fausse d'un facteur 9 contre Pope & Fry et Morel, et la liste ordonnée de ce que le rendu ne contient pas du tout.
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Lecture du guide de topologie d'océan reçu — S306](registres/LECTURE-GUIDE-OCEAN-S306.md) : ce qu'un guide externe redit du dépôt, ce qu'il couvre et que nous n'avons pas, et les trois points actionnables — dont le test A/B à quatre sorties, jamais fait. Source : [le guide lui-même](sources/guide_topologie_ocean_haute_mer_plage.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
