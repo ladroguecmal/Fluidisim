@@ -725,6 +725,8 @@ pub struct FrameData<'a> {
     /// S308 : ciel calé sur la photographie de référence. Valeur = élévation supposée du haut du
     /// cadre de la photographie, en degrés ; 0 = ciel historique. Publiée dans `cut.w`.
     pub sky_elevation_deg: f32,
+    /// S308 : courbe de tonalité (exposition, contraste, point blanc). Exposition nulle = éteinte.
+    pub tone: [f32; 3],
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -826,6 +828,7 @@ impl<'a> FrameData<'a> {
             physical_color: false,
             color_gain: 1.,
             sky_elevation_deg: 0.,
+            tone: [0.; 3],
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,

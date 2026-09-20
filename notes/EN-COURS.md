@@ -99,9 +99,13 @@ Critères, écrits avant la mesure :
 - [x] **P3** — la même mesure sur nos images, et l'écart poste par poste. **L'ordre change.**
 - [x] **P4** — *(promu par la mesure)* **le ciel** : c'est lui qui porte les crêtes, la dynamique
   et le contraste local.
-- [ ] **P5** — l'exposition et le gain de couleur, ce qu'il en reste après le ciel.
-- [ ] **P6** — diffusion sous la surface aux crêtes, par le masque du jacobien.
-- [ ] **P7** — écume (Monahan), couverture calée sur la fraction claire mesurée.
+- [x] **P5** — la courbe de tonalité, calée sur les centiles. **Et un résultat négatif net sur la
+  coupure spectrale.**
+- [ ] **P6** — *(promu par la mesure)* le **miroitement du soleil** : vérifier qu'il est la cause
+  des 2,4 × trop de pixels très clairs, puis l'intégrer sur la distribution de pentes.
+- [ ] **P7** — diffusion aux crêtes et écume, **jugées contre la cible** : construites si la mesure
+  les demande, déclarées en file si elle dit le contraire. Rien n'est retiré du périmètre : les six
+  postes du verdict R14 restent dus (ADR-127).
 - [ ] **P8** — images soumises (R15), preuve.
 - [ ] **P9** — rituel REPRISE §6.
 
@@ -227,6 +231,63 @@ l'horizon : c'est le même air.
   une houle de 12 s plus douce. Des faces plus raides réfléchissent le ciel **haut**, donc sombre,
   et creusent la dynamique. **Je ne touche pas à cela** : l'utilisateur a suspendu les lots de
   forme, et c'est une hypothèse mesurée, pas une conclusion.
+
+## P5 — la courbe de tonalité, et une erreur que la mesure a attrapée en un passage
+
+*Étape interrompue par une coupure de session, reprise et **revérifiée** avant commit : le code de
+la copie de travail a été rebâti, les images refaites et remesurées ; tous les chiffres ci-dessous
+se reproduisent au centième. La photographie remesurée redonne elle aussi ses valeurs exactes —
+l'instrument est reproductible.*
+
+`--tonalite=e,g,w` : `x = (l·e)^g` écrase les ombres, `l' = x(1 + x/w²)/(1 + x)` comprime les
+hautes lumières. Appliquée à **toute l'image**, mer et ciel, sinon le raccord se voit.
+
+**Premier essai, faux : la courbe par canal.** Elle a crevé la teinte — `B/R` des creux passait de
+29,5 à **191** pour 30,0 mesurés sur la photographie, parce qu'une puissance > 1 écrase d'autant
+plus un canal qu'il est petit, et le rouge est le plus petit. Corrigé : la courbe ne touche que la
+**luminance**, la teinte est conservée par un rapport. La couleur vient d'ADR-177 et du ciel ; la
+courbe ne doit toucher qu'à la dynamique.
+
+| grandeur comparable | **photo** | sans courbe | `1 ; 1,4 ; 6` | `1,2 ; 1,5 ; 5` | `1,4 ; 1,6 ; 5` |
+|---|---:|---:|---:|---:|---:|
+| `mer_p05/p50` | **0,193** | 0,310 | **0,192** | 0,172 | 0,154 |
+| dynamique `p95/p05` | **23,7** | 12,3 | 28,4 | 35,1 | 43,7 |
+| contraste local / p50 | **0,455** | 0,268 | 0,382 | 0,418 | 0,459 |
+| creux `B/R` | **30,0** | 29,5 | **31,3** | 31,2 | 30,7 |
+| creux `B/G` | 5,54 | 7,04 | 7,06 | 7,06 | 7,04 |
+| fraction claire | **0,074** | 0,037 | 0,175 | 0,206 | 0,238 |
+
+**Retenu : `1 ; 1,4 ; 6`.** Il tombe **exactement** sur la densité des creux (0,1923 contre 0,1926
+mesurés) et porte le contraste local à 84 % de la cible, sans pousser la dynamique au-delà du
+raisonnable. La teinte ne bouge plus d'un chiffre entre les trois réglages : la séparation
+couleur / dynamique tient.
+
+## P5 — résultat négatif : la coupure spectrale est définitivement le mauvais levier
+
+Il reste **un** poste franchement hors cible : la **fraction claire**, 0,175 contre **0,074**
+mesurés — 2,4 fois trop de pixels très clairs. C'est le tapis de scintillement, et c'est le
+dernier item de la liste du verdict R14 (« gestion des hautes fréquences dans le reflet »).
+
+S306 proposait la coupure spectrale. Elle a maintenant un critère, et elle échoue :
+
+| `--coupure` | 1 | 1,5 | 2 | 3 |
+|---|---:|---:|---:|---:|
+| fraction claire *(cible 0,074)* | 0,175 | 0,179 | 0,183 | **0,200** |
+| contraste local *(cible 0,455)* | **0,382** | 0,351 | 0,306 | **0,230** |
+
+**Élargir la coupure n'enlève pas les taches claires — elle en ajoute — et elle détruit le
+contraste local.** Le verdict est net : la coupure retire la structure qui porte le contraste sans
+retirer ce qui brille. S306 la proposait comme piste, S307 disait déjà qu'elle n'était pas le bon
+levier ; **c'est maintenant mesuré contre une cible**, et le sujet est clos. *(Le point extrême,
+`--coupure=3`, a été refait à la reprise : 0,19976 et 0,2304, aux mêmes chiffres.)*
+
+**Ce que les taches claires sont, alors.** Hypothèse désignée par élimination et par le code, pas
+encore vérifiée : le **miroitement du soleil** est une puissance dure d'un soleil ponctuel
+(`pow(dot(reflet, soleil), 180)` et un terme large `pow(·, 32)` dans le ciel), et non une
+intégrale sur le disque solaire **et** sur la distribution de pentes. Sur une mer devenue sombre,
+chaque facette qui attrape la direction du soleil s'allume seule. C'est exactement ce que
+`ReflectedSunRadiance(..., σ²)` de Bruneton intègre, et ce que notre `--reflets-filtres` fait
+pour le **ciel** — le terme de miroitement, lui, est ajouté **après** l'intégration. C'est P6.
 
 **Ce que l'œil voit déjà sur elle, à confirmer par la mesure** : mer très sombre, creux presque
 noirs ; crêtes gris-bleu clair ; ciel à gradient **fort** (blanc-cyan à l'horizon, bleu profond en

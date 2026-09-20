@@ -2848,6 +2848,20 @@ fn run() -> Result<(), String> {
             return delta3d_captures(&mut frame, config);
         }
     }
+    // S308 : `--tonalite=e,g,w` — exposition, contraste, point blanc, calés sur les centiles
+    // mesurés de la photographie de référence et jamais choisis à l'œil.
+    if let Some(value) = args.iter().find_map(|a| a.strip_prefix("--tonalite=")) {
+        let champs: Vec<f32> = value
+            .split(',')
+            .map(|x| x.parse::<f32>().map_err(|_| "tonalite : trois nombres e,g,w".to_string()))
+            .collect::<Result<_, _>>()?;
+        if champs.len() != 3 { return Err("tonalite : trois nombres e,g,w".into()); }
+        if !(0.05..=20.).contains(&champs[0]) || !(0.2..=4.).contains(&champs[1]) || !(0.2..=50.).contains(&champs[2]) {
+            return Err("tonalite : e dans [0,05;20], g dans [0,2;4], w dans [0,2;50]".into());
+        }
+        frame.tone = [champs[0], champs[1], champs[2]];
+        println!("TONALITE exposition={} contraste={} point_blanc={}", champs[0], champs[1], champs[2]);
+    }
     // S308 : `--ciel-mesure[=degrés]` — ciel calé sur la photographie de référence. L'argument est
     // l'élévation supposée du haut de son cadre, sa focale étant inconnue.
     if let Some(e) = args.iter().find_map(|a| a.strip_prefix("--ciel-mesure")) {

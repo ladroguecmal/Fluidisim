@@ -15,6 +15,8 @@ struct Params {
     // (poids plein jusqu'à `λ = 4·empreinte`, nul au Nyquist du pixel `λ = 2·empreinte`) ;
     // `f` déplace les deux bornes à `4f` et `2f`. Multiplier par 1,0 est exact.
     cut: vec4<f32>,
+    // S308 : courbe de tonalité. (exposition, contraste, point blanc, 0). `x <= 0` = éteinte.
+    tone: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> p: Params;
 @group(0) @binding(1) var<storage, read> waves: array<vec4<f32>>;
@@ -36,6 +38,34 @@ struct Params {
 // actif, réserve).
 struct Delta3 { geometry: vec4<f32>, size: vec4<f32> }
 @group(3) @binding(2) var<uniform> d3: Delta3;
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────
+// S308 — COURBE DE TONALITÉ (CIEL-MESURE-S308).
+//
+// Le rendu écrit du linéaire vers sRGB **sans exposition ni contraste**. Un appareil photo, lui,
+// applique une courbe en S qui écrase les ombres et comprime les hautes lumières. Mesuré : la
+// photographie de référence a une dynamique `p95/p05` de **23,7** sur la mer et un contraste
+// local de **0,455** ; notre rendu, ciel calé compris, plafonne à 12,3 et 0,268.
+//
+//     x  = (c · exposition) ^ contraste            écrase les ombres
+//     c' = x · (1 + x/w²) / (1 + x)                comprime les hautes lumières (Reinhard étendu)
+//
+// Les trois paramètres se **calent sur les centiles mesurés** de la photographie et sont exposés
+// (`--tonalite=e,g,w`) pour être balayés. La courbe s'applique à **toute l'image** — mer et ciel
+// — sinon les deux divergent et le raccord se voit.
+fn tonalite(c: vec3<f32>) -> vec3<f32> {
+    if (p.tone.x <= 0.0) { return c; }
+    // **Sur la luminance seule, la teinte conservée.** Premier essai fait par canal : il crevait
+    // la teinte — `B/R` des creux passait de 29,5 à 191 pour 30,0 mesurés sur la photographie,
+    // parce qu'une puissance > 1 écrase d'autant plus un canal qu'il est petit. La mesure l'a dit
+    // en un passage. La courbe ne doit toucher qu'à la dynamique ; la couleur vient d'ADR-177 et
+    // du ciel.
+    let l = max(dot(c, vec3<f32>(0.2126, 0.7152, 0.0722)), 1e-6);
+    let x = pow(l * p.tone.x, p.tone.y);
+    let w = max(p.tone.z, 1e-3);
+    let l2 = x * (1.0 + x / (w * w)) / (1.0 + x);
+    return c * (l2 / l);
+}
 
 fn spectral_weight(k: f32, h: f32) -> f32 {
     let t = clamp(2.0*k*h*p.cut.x/3.141592653589793 - 1.0, 0.0, 1.0);
@@ -717,9 +747,10 @@ fn filtered_fragment(v: Vertex) -> vec4<f32> {
     if (p.eye.w > 0.5) {
         let d = length(v.local.xy);
         let haze = max(1.0-exp(-d/6000.0),smoothstep(0.66*p.impact.y,p.impact.y,d));
-        return vec4<f32>(mix(color,CLEAR_HORIZON,haze),1.0);
+        let voile_f = select(CLEAR_HORIZON, CIEL_HORIZON, p.cut.w > 0.0);
+        return vec4<f32>(tonalite(mix(color,voile_f,haze)),1.0);
     }
-    return vec4<f32>(mix(color,vec3<f32>(0.66,0.78,0.84),1.0-exp(-length(v.local)/500.0)),1.0);
+    return vec4<f32>(tonalite(mix(color,vec3<f32>(0.66,0.78,0.84),1.0-exp(-length(v.local)/500.0))),1.0);
 }
 // S306 — SORTIES DE DIAGNOSTIC (guide reçu §12.3, LECTURE-GUIDE-OCEAN-S306 §4.1).
 // Le guide demande quatre sorties au même instant pour séparer les causes d'un rendu ; nous
@@ -782,12 +813,12 @@ fn diagnostic_fragment(v: Vertex) -> vec4<f32> {
         let haze = max(1.0 - exp(-d/6000.0), smoothstep(0.66*p.impact.y, p.impact.y, d));
         // S308 : la brume d'horizon est le ciel à l'horizon — même air, même couleur.
         let voile = select(CLEAR_HORIZON, CIEL_HORIZON, p.cut.w > 0.0);
-        return vec4<f32>(mix(clear,voile,haze),1.0);
+        return vec4<f32>(tonalite(mix(clear,voile,haze)),1.0);
     }
     let sea_d = select(vec3<f32>(0.012,0.105,0.13), SEA_R0 * p.cut.z, p.cut.y > 0.5);
     let base = sea_d*(0.65+0.35*max(dot(n,sun),0.0));
     let color = mix(base,sky(reflection),fresnel)+vec3<f32>(1.0,0.9,0.7)*glint*0.65;
-    return vec4<f32>(mix(color,vec3<f32>(0.66,0.78,0.84),1-exp(-length(v.local)/500.0)),1.0);
+    return vec4<f32>(tonalite(mix(color,vec3<f32>(0.66,0.78,0.84),1-exp(-length(v.local)/500.0))),1.0);
 }
 struct SkyVertex { @builtin(position) clip: vec4<f32>, @location(0) uv: vec2<f32> }
 @vertex fn sky_vertex(@builtin(vertex_index) id: u32) -> SkyVertex {
@@ -798,5 +829,5 @@ struct SkyVertex { @builtin(position) clip: vec4<f32>, @location(0) uv: vec2<f32
     // S306 : en diagnostic, le ciel est un gris neutre — l'image ne doit montrer que l'eau.
     if (p.reflection.w > 0.5) { return vec4<f32>(0.18, 0.18, 0.18, 1.0); }
     let ray = normalize(p.forward.xyz+p.right.xyz*v.uv.x*p.forward.w*p.right.w+p.up.xyz*v.uv.y*p.forward.w);
-    return vec4<f32>(sky(ray),1.0);
+    return vec4<f32>(tonalite(sky(ray)),1.0);
 }

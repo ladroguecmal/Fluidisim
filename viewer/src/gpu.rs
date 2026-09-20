@@ -150,7 +150,8 @@ impl Gpu {
             "camera",
             // S303, ADR-176 : un douzième vec4 porte les asymétries.
             // S306 : un treizième porte le facteur de coupure spectrale.
-            208,
+            // S308 : un quatorzième porte la courbe de tonalité.
+            224,
             wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         );
         let waves = buffer(
@@ -551,6 +552,10 @@ impl Gpu {
         }
         // S306 : facteur de coupure spectrale. 1 = ADR-148 au bit.
         for v in [frame.cut_factor, if frame.physical_color { 1. } else { 0. }, frame.color_gain, frame.sky_elevation_deg] {
+            self.bytes.extend_from_slice(&v.to_le_bytes());
+        }
+        // S308 : (exposition, contraste, point blanc, 0) ; exposition nulle = courbe éteinte.
+        for v in [frame.tone[0], frame.tone[1], frame.tone[2], 0.] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
