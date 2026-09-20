@@ -99,8 +99,8 @@ Critères, écrits avant la mesure :
 - [x] **P2** — `delta3d_balance.rs` : le contrat écrit avant la mesure, `Balance3`, et le volume
   de perturbation lu sur la hauteur **compensée**. Deux sites bougent `eta` dans le pas couplé,
   pas quatre — les deux autres sont les chemins non couplés.
-- [ ] **P3** — `Balance3` dans le cœur : volume, entrée de bande aux quatre bords, prélèvement de
-  l'éponge, compensation, résidu. Zéro allocation, rien de publié touché.
+- [x] **P3** — le pas couplé tient son bilan : `boundary_transport3`, l'éponge qui **rend** ce
+  qu'elle retire, résidu publié. **539 essais inchangés**, dont les réceptions au bit.
 - [ ] **P4** — essais : télescopage exact sur un cas construit ; cuve fermée à volume constant au
   plancher ; scènes antérieures au bit.
 - [ ] **P5** — mesure sur la **cuve de S305** : plancher et dérive nommés, comparés à A298.

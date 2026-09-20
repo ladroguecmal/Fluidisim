@@ -1,6 +1,7 @@
 //! S297 : couplage perturbatif MAC 3D, extension d'ADR-149/152/153/164/165/166.
 use super::*;
 use crate::{background::BackgroundSample, SimTime};
+use super::Balance3;
 
 /// Fond B+W déjà sommé, aux faces MAC x/y/z, à un même instant. Positions z depuis le repos.
 /// `eta` est identique au bit verticalement sur w et sur les quatre faces extérieures.
@@ -388,8 +389,12 @@ impl Volume3 {
             }
         }
     }
-    fn relax_coupled3(&mut self, sponge: Sponge3, dt: f64) {
+    /// Rend le volume **retiré** (positif) — S310. L'éponge ne range ses incréments nulle part,
+    /// et c'est la seule intrusion du bilan dans le pas : aucune opération flottante sur `eta`
+    /// n'est touchée, la somme rendue vit à côté, en `f64`.
+    fn relax_coupled3(&mut self, sponge: Sponge3, dt: f64) -> f64 {
         let Domain3 { nx, ny, dx, .. } = self.domain;
+        let mut removed = 0f64;
         for j in 0..ny {
             for i in 0..nx {
                 let factor = sponge.factor(
@@ -407,8 +412,37 @@ impl Volume3 {
                 let height = self.eta[c] + increment;
                 self.eta_roundoff[c] = (height - self.eta[c]) - increment;
                 self.eta[c] = height;
+                removed -= increment as f64;
             }
         }
+        removed * dx as f64 * dx as f64
+    }
+
+    /// **Le transport à travers les quatre faces extérieures**, en mètres cubes, compté positif
+    /// entrant — S310. Rend `(bande, perturbation)`.
+    ///
+    /// À lire avec l'en-tête de `delta3d_balance.rs` : les termes intérieurs télescopent, donc
+    /// ces deux sommes **sont** la variation de volume due au transport, et non son estimation.
+    /// Un incrément de hauteur vaut `−(dt/dx)·Δflux`, donc un volume `−dt·dx·Δflux`.
+    ///
+    /// La perturbation est nulle ici **par construction** — la garde `a > 0 && a < n` de
+    /// `transport_coupled3` laisse `flux` à zéro aux deux extrémités. On la somme quand même :
+    /// c'est une addition, et elle vérifie à chaque pas une lecture du code au lieu de la croire.
+    fn boundary_transport3(&self, dt: f64) -> (f64, f64) {
+        let Domain3 { nx, ny, dx, .. } = self.domain;
+        let (mut band, mut perturbation) = (0f64, 0f64);
+        for j in 0..ny {
+            let (low, high) = (j * (nx + 1), j * (nx + 1) + nx);
+            band += self.band_x[low] as f64 - self.band_x[high] as f64;
+            perturbation += self.flux_x[low] as f64 - self.flux_x[high] as f64;
+        }
+        for i in 0..nx {
+            let (low, high) = (i, ny * nx + i);
+            band += self.band_y[low] as f64 - self.band_y[high] as f64;
+            perturbation += self.flux_y[low] as f64 - self.flux_y[high] as f64;
+        }
+        let factor = dt * dx as f64;
+        (band * factor, perturbation * factor)
     }
 
     /// Référence perturbative 3D, surface totale eta+B/W ; vitesses, pression et eta−rest
@@ -533,6 +567,9 @@ impl Volume3 {
             self.saved_eta.copy_from_slice(&self.eta);
             self.saved_eta_roundoff.copy_from_slice(&self.eta_roundoff);
             saved = true;
+            // S310 : le volume d'avant se lit après les sauvegardes, donc sur l'état exact que le
+            // refus atomique restaurerait.
+            let volume_before = self.perturbation_volume();
             self.predict_coupled3(bg, dt, sponge)?;
             let mut report = self.project_mobile3(scale, correction, max_iters, jobs)?;
             if report.degraded && report.floor {
@@ -545,7 +582,18 @@ impl Volume3 {
             }
             self.extrapolate_mobile3();
             self.transport_coupled3(bg, transport);
-            self.relax_coupled3(sponge, dt);
+            let (band_in, perturbation_in) = self.boundary_transport3(dt);
+            let sponge_out = self.relax_coupled3(sponge, dt);
+            let volume = self.perturbation_volume();
+            let delta = volume - volume_before;
+            self.balance = Balance3 {
+                volume,
+                delta,
+                band_in,
+                perturbation_in,
+                sponge_out,
+                residual: delta - band_in - perturbation_in + sponge_out,
+            };
             for f in [
                 &self.u,
                 &self.v,
