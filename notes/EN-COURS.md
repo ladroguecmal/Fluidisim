@@ -127,7 +127,7 @@ Critères, écrits avant la mesure :
   ce que V porte (entiers, mL) ; ce que le niveau moyen de B porte. Réponse au point 3.
 - [x] **P4** — le **registre** : les trois volumes de l'utilisateur publiés séparément à chaque
   pas, réutilisant `Balance3`, sans jamais compter l'attente comme une restitution.
-- [ ] **P5** — *W est-il admissible sur le cas de S311 ?* Régime, pente, portée : mesurés sur la
+- [x] **P5** — *W est-il admissible sur le cas de S311 ?* Régime, pente, portée : mesurés sur la
   primitive, pas lus.
 - [ ] **P6** — le cas contrôlé du **transfert** : perturbation sortante que W peut recevoir,
   volume net et composante de moyenne nulle séparés sur la ligne de contrôle.
@@ -731,3 +731,22 @@ qui se laisse satisfaire. Trois traits, et ce sont eux la décision :
 Le registre ne sait pas que W porte zéro volume, et c'est voulu : écrire ce zéro en dur le rendrait
 faux le jour où un receveur existe. L'unité n'est pas dans le type — un registre par grandeur,
 volume en m³ et grandeur propagative en joules de jauge. Six essais.
+
+**P5 — la réponse est non, et elle disqualifie le cas de S311 pour le transfert.**
+
+Les deux champs d'impact **refusent** l'onde du canal — `Regime` et `Medium`. Seuils balayés au
+centimètre : `RadialImpact` exige `h ≥ λ`, `ImpactField` `h ≥ 2λ`, aux trois longueurs d'onde
+essayées. Et `ModalPressure` n'a **pas de paramètre de profondeur** : `ω = √(g|k|)` est écrit dans
+le constructeur. **Toute la couche W est en eau profonde.**
+
+Ce que coûterait de passer outre, chiffré : W donnerait à l'onde de S311 **44,3 % de célérité en
+trop**. Deux repères qui remettent la chose à sa place : la scène δ 3D **réelle** de S302
+(λ = 8 m, h = 3,5 m) n'est qu'à **0,41 %** — l'eau y est déjà profonde ; c'est le **canal** de
+S311 qui était peu profond. Et le candidat d'eau profonde est exact à 10⁻⁴ près.
+
+**Conséquence pour le plan** : le transfert demande un **second cas contrôlé**, en eau profonde.
+Ce n'est pas un contournement, c'est ce que la mesure impose. Le premier cas garde sa valeur : il
+reste celui du **volume net**, que le registre porte.
+
+*Tenue du plan* : battement du commit P4 écrit à 16:55 alors que l'horloge disait 16:48 (L237) ;
+corrigé au commit suivant, et dit ici plutôt qu'effacé.

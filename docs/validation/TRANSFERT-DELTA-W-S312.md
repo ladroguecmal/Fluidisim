@@ -132,3 +132,53 @@ Ce que cette section ne tranche pas : ni l'articulation δ ↔ V, qui est le lot
 n'est pas ouverte, ni la forme qu'aurait un niveau moyen dans B — une constante par région, un
 champ lent, ou une entrée de l'ordonnanceur. **Les deux sont des décisions de l'utilisateur**, et
 ce document lui apporte de quoi les prendre, pas leur résultat.
+
+---
+
+## 2. W est une couche d'**eau profonde**, et le cas de S311 n'y entre pas
+
+`examples/admission_w.rs`.
+
+Avant de construire un transfert, une question qu'aucune session n'avait posée : les champs de W
+**admettent-ils** ce qu'un domaine δ leur enverrait ? Le cas contrôlé de S311 est une onde longue
+dans **un mètre** d'eau, `λ` ≈ 12 m. Soumis tel quel :
+
+| champ | verdict |
+|---|---|
+| `RadialImpact` (ADR-060) | **refusé — `Error::Regime`** |
+| `ImpactField` (ADR-058) | **refusé — `Error::Medium`** |
+
+Ce n'est pas une borne à desserrer. Le seuil, balayé au centimètre à trois longueurs d'onde :
+
+| `λ` | profondeur minimale, `RadialImpact` | en `λ` | profondeur minimale, `ImpactField` | en `λ` |
+|---:|---:|---:|---:|---:|
+| 2 m | 2,01 m | **1,00** | 4,01 m | **2,00** |
+| 4 m | 4,01 m | **1,00** | 8,00 m | **2,00** |
+| 12 m | 12,00 m | **1,00** | 24,00 m | **2,00** |
+
+Et la troisième production, le **sillage**, n'a pas de paramètre de profondeur **du tout** :
+`ModalPressure::new` prend `k`, `g`, `ρ` et un segment, et pose `ω = √(g|k|)`. Toute la couche W
+porte la dispersion de l'eau profonde.
+
+### Ce que coûterait de passer outre
+
+Un refus qu'on contourne ne disparaît pas : il devient une **erreur de vitesse**. Célérité que W
+donnerait à l'onde, contre celle qu'elle a réellement, `c = √(g/k·tanh(kh))` :
+
+| cas | `λ` | profondeur | `kh` | `c` vraie | `c` de W | **écart** |
+|---|---:|---:|---:|---:|---:|---:|
+| **canal de S311** | 12 m | 1 m | 0,52 | 3,000 m/s | 4,329 m/s | **+44,3 %** |
+| scène δ 3D de S302 | 8 m | 3,5 m | 2,75 | 3,520 m/s | 3,534 m/s | +0,41 % |
+| candidat eau profonde | 2 m | 8 m | 25,1 | 1,7671 m/s | 1,7671 m/s | **0,0000** |
+
+**Trois lectures.**
+
+1. **Le cas contrôlé de S311 ne peut pas servir au transfert.** Il a fait son travail — identifier
+   et mesurer ce qui sort — et il ne peut pas faire celui-ci. Un second cas contrôlé est
+   nécessaire, en eau profonde ; c'est §3.
+2. **Ce n'est pas une restriction artificielle.** La scène δ 3D réelle de S302 est à 0,41 % de la
+   dispersion de W : l'eau y est déjà assez profonde. C'est le **canal** de S311 qui était
+   peu profond, choisi pour d'autres raisons.
+3. **Le régime est une composante non représentable**, au sens d'ADR-180 D3, et elle n'a rien à
+   voir avec le volume net. Un domaine δ en eau peu profonde — un rivage, un haut-fond, une
+   piscine — ne peut **rien** transmettre à W en l'état : ni son volume, ni son onde.
