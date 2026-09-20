@@ -58,145 +58,73 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S310 — **terminée**. Le bilan de masse d'un domaine δ existe, il est exact par
-télescopage, et A302 est devenue un nombre : l'éponge efface 10,2 % du domaine par seconde.
+Session : S311 — lot 2 d'ADR-178 D7 : le retour δ → W, **phase d'identification**.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : [ADR-178](../docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7 et l'angle
-mort **A302** — aucun bilan de masse, de quantité de mouvement ni d'énergie n'a jamais été mesuré
-à l'interface δ ↔ B/W, et R11 a pourtant jugé le raccord « invisible ».
+Entrée : la **décision de l'utilisateur du 2026-09-20** sur les tolérances, et le lancement du
+lot 2. T1 acceptée provisoirement, T2 comme objectif à éprouver sur la durée complète, T3 comme
+objectif initial **avec une précision qui commande cette session** :
 
-Capacité visée : **le dépôt sait ce qui entre et ce qui sort d'un domaine δ, et à quel plancher.**
-Consommateur immédiat : le lot 2 (retour δ → W), qui ne peut pas se juger sans compteur — on ne
-saura pas si le retour conserve tant qu'on ne sait pas ce que l'absorption retire aujourd'hui.
-Consommateur second : les essais 1 et 6 du banc de la piscine, qui demandent tous deux un volume.
+> « Il faut définir précisément la grandeur à restituer. L'éponge absorbe des perturbations dont le
+> volume net signé et la quantité absolue sont différents. Ces deux mesures ne doivent pas être
+> confondues. Je ne souhaite pas que le moteur crée artificiellement une nouvelle vague pour
+> compenser toute l'activité de l'éponge. Le transfert doit représenter la perturbation physique
+> **sortante**, compatible avec W, sans double comptage avec le fond B/W entrant. Les composantes
+> qui ne peuvent pas être représentées par W doivent être **identifiées**. »
 
-Ce que je ne fais pas : construire le retour δ → W (c'est le lot 2) ; toucher au schéma ; relever
-un seuil ; revendiquer une tolérance — elle se propose à l'utilisateur, elle ne se décrète pas.
+Capacité visée : **le dépôt sait ce qui sort d'un domaine δ, le mesure sur un cas contrôlé, et
+sait ce que W peut en recevoir.** Consommateur : la construction du transfert lui-même, qui est la
+suite immédiate. Sans cette phase, le transfert n'aurait ni grandeur de référence, ni normalisation
+d'erreur, ni moyen de distinguer ce qui est transmis de ce qui est perdu — c'est-à-dire exactement
+les trois choses que l'utilisateur demande.
 
-Ce que le code donne déjà, et qui rend ce lot court :
-- `transport_coupled3` calcule **déjà** `flux_x`, `flux_y` (perturbation) et `band_x`, `band_y`
-  (fond B/W) sur chaque face de colonne. Le bilan est une **somme de bord**, pas un calcul neuf.
-- Les termes intérieurs **télescopent** : `Σᵢ (F[i+1] − F[i]) = F[n] − F[0]`. En arithmétique
-  exacte, la variation de volume vaut donc exactement le flux de bord. L'écart mesuré **est** le
-  plancher numérique, il ne l'approche pas.
-- `eta` ne bouge qu'à **quatre endroits**, tous avec la même somme compensée, et `eta_roundoff`
-  porte la part perdue. Le plancher se **lit**, il ne s'estime pas.
-- Aux faces extérieures `a == 0` et `a == n`, `flux` est **nul par construction** (garde
-  `a > 0 && a < n`) : seule la bande y transporte. C'est une seconde formulation, dans le code, de
-  « δ ne ressort pas » — la perturbation ne peut sortir que par l'éponge.
+**Ce que je ne fais pas dans cette session, et je le déclare d'avance** : écrire le transfert.
+L'utilisateur demande une progression « à partir du cas physique le plus simple permettant de
+démontrer un transfert réel, mesuré et reproductible », et sa liste commence par *« qu'une
+perturbation sortante est correctement identifiée à la frontière de δ »*. C'est ce point 1, plus
+les instruments des points 4 et 5. Les points 2 et 3 — le transfert et sa propagation dans W —
+viennent ensuite, et cette session doit leur laisser un terrain mesuré.
+
+Ce que je ne fais pas non plus : revendiquer une conservation d'énergie ou de quantité de
+mouvement (leurs bilans ne sont pas fermés, S310 §4) ; ouvrir un chantier de rendu ; imposer le
+budget temps réel au solveur de référence.
+
+**La question de fond, posée avant de mesurer.** Le pas calcule une vitesse normale aux faces
+extérieures, et la garde `a > 0 && a < n` de `transport_coupled3` **jette** le flux de colonne
+qu'elle porterait. Si cette vitesse est non nulle, alors le flux sortant *existe déjà*, il est
+calculé, et il est perdu à chaque pas — et c'est lui, et non l'activité de l'éponge, qui est « la
+perturbation physique sortante » que l'utilisateur décrit. Si elle est nulle, la sortie devra être
+construite autrement. **Je ne sais pas laquelle des deux, et P3 le mesure avant tout le reste.**
 
 Critères, écrits avant la mesure :
-1. Le compteur est **exact par construction** là où il l'est (télescopage), et son résidu est
-   publié comme plancher, jamais absorbé dans une tolérance.
-2. Cuve fermée : ni bande ni éponge, donc **variation de volume nulle** — l'écart est le plancher,
-   et il se compare à la dérive séculaire déjà mesurée (A298).
-3. Ce que l'éponge retire est **chiffré par seconde**, sur la scène de S302. A302 cesse d'être une
-   phrase.
-4. Les scènes antérieures restent **au bit** ; refus atomique et zéro allocation conservés.
+1. La grandeur à restituer est **définie et défendue** avant d'être mesurée, et le **net signé**
+   n'est jamais confondu avec la **quantité absolue**.
+2. Le cas de T3 est **contrôlé** : perturbation sortante identifiable, grandeur de référence non
+   nulle, erreur normalisée par elle et déclarée d'avance.
+3. Ce que W **ne peut pas** représenter est nommé, et son devenir n'est pas compté comme une
+   restitution réussie.
+4. La réflexion est mesurée **en 3D**, directement, pas transportée de S269.
+5. Les scènes antérieures restent **au bit** ; aucune revendication d'énergie.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — `delta3d_balance.rs` : le contrat écrit avant la mesure, `Balance3`, et le volume
-  de perturbation lu sur la hauteur **compensée**. Deux sites bougent `eta` dans le pas couplé,
-  pas quatre — les deux autres sont les chemins non couplés.
-- [x] **P3** — le pas couplé tient son bilan : `boundary_transport3`, l'éponge qui **rend** ce
-  qu'elle retire, résidu publié. **539 essais inchangés**, dont les réceptions au bit.
-- [x] **P4** — quatre essais, **543 au total, 0 échec**. Et l'essai de l'éponge a attrapé un
-  défaut réel du compteur : 0,86 % du volume retiré, quatre ordres au-dessus du plancher.
-- [x] **P5** — cuve de S305, 5 000 pas : **murs à zéro exact**, dérive de volume
-  **2,37·10⁻¹⁰ m³**, soit 7,4·10⁻¹² m de hauteur moyenne et 1,5·10⁻¹⁰ de l'amplitude du mode.
-- [x] **P6** — scène couplée à fond spectral réel : l'éponge échange **10,2 % du contenu
-  perturbatif du domaine par seconde**, et rien n'en revient dans W. Résidu 1,28·10⁻¹⁰ m³.
-- [x] **P7** — énergie et quantité de mouvement : **des états, pas des bilans**, et le module le
-  dit. Dissipation numérique du schéma sur la cuve fermée : **0,0935 % par seconde**.
-- [x] **P8** — [BILAN-MASSE-S310](../docs/validation/BILAN-MASSE-S310.md) : la preuve, et **trois
-  tolérances proposées** — T1 instrument, T2 domaine fermé, T3 couplage (critère du lot 2).
-- [x] **P9** — rituel REPRISE §6.
+- [ ] **P2** — **ADR-179** : les tolérances tranchées, la précision sur T3, et ce que « restituer »
+  veut dire exactement.
+- [ ] **P3** — *(la question de fond)* **le flux sortant existe-t-il ?** Mesurer ce que portent les
+  faces extérieures, que le transport jette.
+- [ ] **P4** — le **cas contrôlé** : canal, onde longue sortante, grandeur de référence non nulle,
+  erreur normalisée définie avant la mesure.
+- [ ] **P5** — **ce que W peut recevoir** : inventaire de ses primitives, et ce qu'aucune ne couvre.
+- [ ] **P6** — la décomposition de ce que l'éponge absorbe : la part qui est l'onde sortante, et
+  celle qui ne l'est pas.
+- [ ] **P7** — la **réflexion mesurée en 3D** sur ce cas, contre le seuil de 1 %.
+- [ ] **P8** — preuve publiée : le cas, les grandeurs, ce qui est identifié, ce qui ne l'est pas,
+  et ce qu'il reste à construire pour le transfert.
+- [ ] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
 
-**Trois faits établis en P2, en lisant le pas plutôt qu'en le supposant.**
-1. Dans le **pas couplé**, `eta` ne bouge qu'à **deux** endroits — `transport_coupled3` et
-   `relax_coupled3`. Le plan en annonçait quatre : les deux autres (`delta3d.rs` 622,
-   `delta3d_mobile.rs` 622) sont les transports des chemins **non couplés**. Corrigé.
-2. La hauteur qui compte est **`η − eta_roundoff`**, pas `η` : c'est déjà ce que la pression lit
-   (`delta3d.rs` §`lid`). Un volume sommé sur `η` seul manquerait exactement ce que la somme
-   compensée existe pour retenir.
-3. `transport = dt/dx`, donc un incrément de hauteur vaut `−(dt/dx)·Δflux` et un volume
-   `−dt·dx·Δflux` — les flux étant des `Σ_k v·dx·mouillure`, en m²/s.
-
-**Ce qui reste à décider en P3** : l'éponge ne stocke pas ses incréments, donc `relax_coupled3`
-doit **rendre** la somme retirée. C'est la seule intrusion du lot dans le pas ; elle ne touche
-aucune opération flottante sur `eta`.
-
-**Le plancher, mesuré en P4** — 8 × 6 × 12 à 25 cm, 200 pas de 1 ms :
-
-| essai | mesure |
-|---|---|
-| bilan fermé, fond traversant | résidu **1,24·10⁻¹¹ m³** pour une échelle de 1,26·10⁻⁴ → **9,85·10⁻⁸** relatif, ≈ 1,6 ulp de f32 par pas |
-| cuve fermée, sans fond ni éponge | dérive **3,39·10⁻¹¹ m³** sur 200 pas, soit **1,13·10⁻¹¹ m** de hauteur moyenne |
-| éponge | retiré 2,5267·10⁻⁵ m³, volume perdu 2,5267·10⁻⁵ m³, écart **9,8·10⁻⁷** relatif |
-
-**La cuve de S305, mesurée (P5)** — `--delta3d-cuve-longue`, 32 × 16 × 18, 5 000 pas de 1 ms,
-5 s simulées, 2,33 période :
-
-| | mesure |
-|---|---|
-| volume passé par les **murs** | **0 exactement**, à chaque pas — la construction est vérifiée, plus supposée |
-| dérive du volume de perturbation | **2,37·10⁻¹⁰ m³** sur 32 m², soit **7,40·10⁻¹² m** de hauteur moyenne |
-| rapportée à l'amplitude du mode | **1,48·10⁻¹⁰** |
-
-**Ce que cela dit d'A298, et c'est nouveau.** A298 mesure une dérive de **hauteur** carte/référence
-d'environ 1,2·10⁻⁷ m par seconde sur cette même cuve. La **référence**, elle, conserve son volume à
-7,4·10⁻¹² m sur cinq secondes — quatre à cinq ordres de grandeur en dessous. La dérive d'A298
-n'est donc **pas** une fuite de volume du schéma : elle est propre au chemin de la carte, ce
-qu'A298 soupçonnait sans pouvoir l'isoler.
-
-**A302 chiffrée (P6)** — `delta3d_preview --spectral --resolu`, 32 × 24 × 36 à 25 cm, fond
-spectral réel à 64 composantes, éponge de 1 m à 2 s⁻¹, 6 s. C'est la scène la plus proche de celle
-de S302 qui tourne dans la **référence CPU** ; la scène de S302 elle-même vit sur la carte.
-
-| | mesure sur 6 s |
-|---|---|
-| **résidu du bilan** | **1,28·10⁻¹⁰ m³** pour une échelle de 0,25 m³ — 5·10⁻¹⁰ relatif |
-| échange de l'éponge, en valeur absolue | **0,1546 m³**, soit **0,0258 m³/s** |
-| rapporté au contenu perturbatif du domaine | **10,2 % par seconde** |
-| éponge, en **net** signé | **−7,80·10⁻³ m³** — elle rappelle vers le repos dans les deux sens |
-| bande B/W, en net | **−0,1096 m³** |
-
-**Ce que ces nombres disent, et c'est A302 transformée.** L'éponge ne « laisse pas sortir » la
-perturbation : elle l'**efface**, à raison d'un dixième du contenu du domaine par seconde, et rien
-de cela n'entre dans W. Le raccord que R11 a jugé « invisible » l'est parce que l'éponge est douce,
-pas parce qu'elle conserve. Distinguer les deux demandait un compteur ; il existe.
-
-**Énergie et quantité de mouvement (P7) — ce qui se mesure, et ce qui ne se ferme pas.** Le bilan
-de masse est exact parce que le transport ne produit que des flux de colonne, qui télescopent.
-L'énergie et la quantité de mouvement n'ont pas cette chance : leur bilan demande le **travail de
-la pression aux faces de bord** et le **flux advectif**, que le pas ne calcule nulle part sous une
-forme récupérable. Les fabriquer après coup donnerait un nombre qui ressemble à un bilan sans en
-être un — l'erreur exacte qu'A302 reproche au raccord « invisible ». Le module publie donc des
-**états**, à lire par différence, et le dit dans sa documentation.
-
-Sur la cuve **fermée**, où il n'y a ni bande ni éponge, cette différence a pourtant un sens
-physique unique : toute décroissance est la **dissipation numérique du schéma**.
-
-| | 5 s, 2,33 période |
-|---|---|
-| énergie initiale | 100,55 J (cinétique + potentielle) |
-| énergie finale | 100,08 J |
-| perte | **4,67·10⁻³**, soit **0,0935 % par seconde** |
-
-C'est une grandeur que le dépôt n'avait pas, et elle borne une durée de vie : un domaine δ perd
-environ **un cinquième de pour cent d'énergie par période** sur ce cas. La quantité de mouvement,
-elle, oscille — les murs exercent des forces — et n'est pas un contrôle de conservation ici ; elle
-est publiée comme état.
-
-**Le défaut que l'essai de l'éponge a attrapé, et il vaut leçon.** Compter l'`increment` de
-l'éponge sur-compte de `eta_roundoff` à chaque colonne et à chaque pas : **0,86 %** du volume
-retiré, soit quatre ordres de grandeur au-dessus du plancher. La somme compensée est construite
-pour que ce soit **`η − eta_roundoff`** qui décroisse, pas `η`. Le transport, lui, était juste
-d'emblée — son incrément retranche déjà `eta_roundoff`, que la hauteur compensée rajoute.
+*(vides au départ)*
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 

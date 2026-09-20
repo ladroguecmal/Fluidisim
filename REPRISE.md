@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 14:37 +02:00
+JETON            : occupé
+Battement        : 2026-09-20 14:46 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : —
-Dernière session : S310 — **le premier compteur** : bilan de masse exact d'un domaine δ, cuve fermée qui ne perd rien (A298 n'est pas une fuite de volume), dissipation du schéma 0,0935 %/s, et **A302 chiffrée** — l'éponge efface 10,2 % du domaine par seconde ([preuve](docs/validation/BILAN-MASSE-S310.md))
-Session suivante : **lot 2 d'ADR-178 D7 — le retour δ → W**, dont le critère existe désormais : **T3** de BILAN-MASSE-S310 §6. Le compteur du lot 1 en est l'instrument. *(Trois tolérances attendent une décision de l'utilisateur ; elles ne bloquent pas le lot.)*
-Maillons        : 0 — capacité S310 : le dépôt sait ce qui entre et sort d'un domaine δ, et à quel plancher. Consommateur : le lot 2, qui ne peut pas se juger sans compteur. Preuve : BILAN-MASSE-S310. Point 4.18 de la liste du projet fini avancé
+Session en cours : S311 — **lot 2 : le retour δ → W**, lancé par l'utilisateur. Cette session fait l'**identification** : d'où sort la perturbation, quel cas contrôlé la porte, ce que W peut recevoir, et la réflexion mesurée en 3D
+Dernière session : S310 — le premier compteur : bilan de masse exact, cuve qui ne perd rien, A302 chiffrée (l'éponge efface 10,2 %/s) ([preuve](docs/validation/BILAN-MASSE-S310.md))
+Session suivante : fixée au rituel
+Maillons        : 0 — capacité S310 : le compteur, consommé par ce lot même
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
