@@ -304,6 +304,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-180](adr/ADR-180-retour-delta-w-et-conservation-du-volume.md) | Premier transfert δ → W limité aux tests ; trois catégories publiées séparément et le non-transféré **registré**, jamais dit restitué ; le receveur du volume net se cherche dans **V ou le niveau moyen de B** avant toute primitive nouvelle de W |
 | [ADR-181](adr/ADR-181-conservation-transfert-oriente-et-ordre-du-lot-2.md) | Le volume net va à **V ou à un niveau moyen régional de B** — jamais à un niveau global arbitraire ; T1 devient un critère à **quatre grandeurs** sans chiffre avant démonstration, éprouvé sur une erreur volontaire ; le transfert δ → W **n'est pas validé** ; ordre A → E du lot 2 |
 | [ADR-182](adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md) | C1, C2 et C3 actés sous conditions : le plancher reste une **loi observée** et non une borne démontrée, le cas ouvert reste **non conforme à C2**, et les trois s'appliquent **ensemble** ; ordre B autorisé, A305 maintenu ouvert et parallèle |
+| [ADR-183](adr/ADR-183-essai-oblique-phase-a-distance-et-ordre-c.md) | L'essai oblique se fait **à la frontière** et non dans la seule primitive ; l'oracle de phase à dix longueurs d'onde est **une autre physique**, et un défaut de phase ne se rattrape ni par l'amplitude ni par un décalage ; l'ordre C **attribue** chaque écart à la primitive, au raccord ou à δ ; le transfert est **partiel** jusque-là |
 
 ## Travail et historique
 

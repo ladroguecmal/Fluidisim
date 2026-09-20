@@ -120,8 +120,8 @@ Critères, écrits avant la mesure :
 
 ### Plan
 
-- [>] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — ADR-183 : la décision du 2026-09-20 (S314), actée.
+- [x] **P1** — amorce, jeton, plan seul.
+- [>] **P2** — ADR-183 : la décision du 2026-09-20 (S314), actée.
 - [ ] **P3** — *l'oracle est-il comparable ?* L'écart de phase qu'impose la dispersion de δ sur
   dix longueurs d'onde, **calculé avant** de mesurer quoi que ce soit.
 - [ ] **P4** — le montage à **deux lignes de contrôle**, et la phase mesurée à 10 λ.
