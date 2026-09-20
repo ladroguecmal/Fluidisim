@@ -106,10 +106,12 @@ Critères, écrits avant la mesure :
   déclaré, aucune étape de plus d'un quart d'heure.)*
 - [x] **P7** — la courbe contre les **quatre** cibles à la fois : `outils/courbe_tonalite.py`.
   **Le reste de l'écart n'est pas tonal, il est spatial.** Et le lot du rendu s'arrête là.
-- [ ] **P8** — *(nouvelle consigne, reçue en cours de session)* **la stratégie en trois systèmes
-  confrontée à l'état réel du dépôt** : ce qui existe pour A, B et C, les interfaces manquantes,
-  les dépendances qui bloquent l'assemblage.
-- [ ] **P9** — l'ordre de réalisation vers la 3D et le couplage, en réutilisant l'existant.
+- [x] **P8** — *(nouvelle consigne, reçue en cours de session)* **la stratégie en trois systèmes
+  confrontée à l'état réel** : ce qui existe pour A, B et C, les six interfaces manquantes, le banc
+  de la piscine essai par essai, et l'ordre de réalisation.
+  [TROIS-SYSTEMES-S308](../docs/registres/TROIS-SYSTEMES-S308.md).
+- [ ] **P9** — l'ADR : la stratégie en trois systèmes est une **décision de l'utilisateur** qui
+  change l'ordre des travaux. Elle ne se range pas dans un registre, elle s'acte.
 - [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
