@@ -121,8 +121,8 @@ Critères, écrits avant la mesure :
 
 ### Plan
 
-- [>] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — ADR-180 : la décision de l'utilisateur du 2026-09-20, actée décision par décision.
+- [x] **P1** — amorce, jeton, plan seul.
+- [>] **P2** — ADR-180 : la décision de l'utilisateur du 2026-09-20, actée décision par décision.
 - [ ] **P3** — *le receveur du volume net, mesuré* : volume net des trois productions de W ;
   ce que V porte (entiers, mL) ; ce que le niveau moyen de B porte. Réponse au point 3.
 - [ ] **P4** — le **registre** : les trois volumes de l'utilisateur publiés séparément à chaque

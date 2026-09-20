@@ -298,6 +298,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-177](adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md) | La couleur du corps d'eau se dérive de ses sources (Pope & Fry 1997, Morel 1974) ; le gain d'échelle est nommé pour ce qu'il est, un substitut d'irradiance de ciel |
 | [ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) | Stratégie en trois systèmes physiques : A stabilisé, B volumique 3D, C couplage ; validité physique avant temps réel ; budget mesuré mais non opposable pendant la construction ; ordre en sept lots |
 | [ADR-179](adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md) | Tolérances de conservation T1/T2/T3 tranchées ; la grandeur restituée est le **flux sortant**, jamais l'activité de l'éponge ni son net ; ce que W ne peut pas porter se déclare perdu |
+| [ADR-180](adr/ADR-180-retour-delta-w-et-conservation-du-volume.md) | Premier transfert δ → W limité aux tests ; trois catégories publiées séparément et le non-transféré **registré**, jamais dit restitué ; le receveur du volume net se cherche dans **V ou le niveau moyen de B** avant toute primitive nouvelle de W |
 
 ## Travail et historique
 
