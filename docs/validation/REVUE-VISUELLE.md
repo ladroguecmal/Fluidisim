@@ -720,3 +720,29 @@ tout**. Un défaut qui résiste à deux corrections mesurées est plus probablem
 qu'un terme mal réglé.
 
 Suite : S307, recherche à trois niveaux, puis mesure de l'écart, puis décision.
+
+## Règle de protocole — S307, 2026-09-20
+
+**Une demande de revue se rend avec `--meilleur`, et publie la ligne d'options complète.**
+
+*Pourquoi cette règle existe.* Trois revues consécutives ont été envoyées avec des options que
+l'utilisateur avait **déjà acceptées**, éteintes :
+
+| revue | manquait | accepté depuis |
+|---|---|---|
+| R11 | `--vagues` (queue d'équilibre, vagues pointues) | S260–S261, trouvé en S303 |
+| R12, R13 | `--ciel-clair` | **S261, construit d'après la photo de référence de l'utilisateur** |
+| R12, R13 | `--reflets-filtres` (ADR-161) | **accepté par l'utilisateur en R7**, S266 |
+
+Trois fois, la session avait déclaré les options qu'elle **avait en tête** — celles de son propre
+lot — et oublié les autres. ADR-176 D5 demandait de déclarer les options : c'était insuffisant,
+parce qu'une liste qu'il faut penser à écrire est une liste qu'on oublie.
+
+*Le remède est du code, pas une consigne.* `--meilleur` active tout ce qui est accepté ; la
+liste vit dans `viewer/src/main.rs`, à côté du code qui la consomme, et **une option acceptée s'y
+ajoute le jour où elle est acceptée**. Chaque ligne de capture publie désormais `cwm`,
+`modulation`, `asymetries`, `ciel_clair`, `reflets_ordre`, `queue` et `coupure` — pas un
+sous-ensemble choisi par la session.
+
+*Ce qui reste à la charge de la session* : dire ce que la revue **compare**, et pourquoi. Les
+options ne sont plus une question ; la thèse en reste une.

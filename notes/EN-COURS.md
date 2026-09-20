@@ -98,10 +98,12 @@ Critères, écrits avant la recherche :
 - [x] **P3** — niveau 2 : les références **des** références, et l'état de l'art du rendu d'océan
   que le guide ne cite pas.
 - [x] **P4** — niveau 3 : l'optique de l'eau et du ciel — couleur, absorption, diffusion, écume.
-- [ ] **P5** — synthèse ordonnée : ce qui manque, sourcé, chiffré, rattaché à notre code.
-- [ ] **P6** — mesure sur nos propres images de ce que la synthèse prédit.
-- [ ] **P7** — décision : ADR de ce qu'on construit et dans quel ordre.
-- [ ] **P8+** — construction, déclarée après la décision.
+- [x] **P5** — *(fait avant la synthèse, parce qu'il devenait urgent)* le remède de protocole :
+  `--meilleur`, la ligne d'options complète, la règle dans REVUE-VISUELLE, la leçon L349.
+- [ ] **P6** — synthèse ordonnée : ce qui manque, sourcé, chiffré, rattaché à notre code.
+- [ ] **P7** — la couleur de l'eau depuis ses sources, et ce qu'elle change à l'image.
+- [ ] **P8** — décision : ADR de ce qui se construit et dans quel ordre.
+- [ ] **P9+** — construction, déclarée après la décision.
 - [ ] **Pn** — preuve, rituel REPRISE §6.
 
 ### Notes de reprise

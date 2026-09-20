@@ -1842,9 +1842,11 @@ fn revue_mer(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
         let hash = bytes[entete..]
             .iter()
             .fold(0xcbf2_9ce4_8422_2325u64, |h, b| (h ^ *b as u64).wrapping_mul(0x100_0000_01b3));
+        // S307 : **toutes** les options, pas celles que la session a en tête (L349).
         println!(
-            "REVUE_MER image={path} {width}x{height} etat={tag} pose={nom} age_s=12 cwm={} modulation={} asymetries={} empreinte=0x{hash:016x}",
-            frame.cwm, frame.modulation, frame.asymmetry.is_some()
+            "REVUE_MER image={path} {width}x{height} etat={tag} pose={nom} age_s=12 cwm={} modulation={} asymetries={} ciel_clair={} reflets_ordre={} queue={} coupure={} empreinte=0x{hash:016x}",
+            frame.cwm, frame.modulation, frame.asymmetry.is_some(), frame.clear_sky,
+            frame.reflection_order, frame.tail_background.is_some(), frame.cut_factor
         );
     }
     Ok(())
@@ -2503,7 +2505,28 @@ fn delta_arbitrage(background: &water_core::background::Background, amplitude: f
 }
 
 fn run() -> Result<(), String> {
-    let args: Vec<_> = std::env::args().collect();
+    let mut args: Vec<_> = std::env::args().collect();
+    // ─────────────────────────────────────────────────────────────────────────────────────────
+    // S307 — `--meilleur` : **tout ce que l'utilisateur a déjà accepté**, d'un seul mot.
+    //
+    // Trois revues de suite (R11, R12, R13) ont été envoyées avec des options acceptées
+    // **éteintes** : `--vagues` en R11 (trouvé S303), puis `--ciel-clair` (S261, construit
+    // d'après la photo de référence de l'utilisateur) et `--reflets-filtres` (ADR-161, accepté
+    // en R7) en R12 et R13. Chaque fois, la session avait déclaré les options qu'elle avait en
+    // tête et oublié les autres. Une liste qu'il faut penser à écrire est une liste qu'on oublie.
+    //
+    // Ce drapeau est donc la liste, **au même endroit que le code qui la consomme**. Une option
+    // acceptée par l'utilisateur s'ajoute ici le jour où elle est acceptée, et nulle part ailleurs.
+    const MEILLEUR: [&str; 4] = ["--vagues", "--modulation", "--ciel-clair", "--reflets-filtres"];
+    if args.iter().any(|a| a == "--meilleur") {
+        for drapeau in MEILLEUR {
+            if !args.iter().any(|a| a == drapeau) {
+                args.push(drapeau.to_string());
+            }
+        }
+        println!("MEILLEUR options={}", MEILLEUR.join(" "));
+    }
+    let args = args;
     if args.iter().any(|a| a == "--delta3d-operateur") {
         return delta3d::verifier();
     }

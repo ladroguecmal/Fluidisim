@@ -6017,3 +6017,31 @@ casse**, et il casse en silence : un témoin faux ne lève aucune alerte, il don
 reproduction du document de preuve, la valeur que le code écrit réellement, l'en-tête du fichier —
 et jamais de mémoire. Et quand un contrôle rend un nombre trop rond ou un verdict trop net,
 c'est lui qu'on vérifie en premier, pas ce qu'il juge.
+
+## L349 — Une liste qu'il faut penser à écrire est une liste qu'on oublie
+
+*(S307)* Trois revues visuelles de suite ont été soumises à l'utilisateur avec des fonctionnalités
+**qu'il avait lui-même acceptées**, éteintes. R11 tournait sans les vagues pointues — trouvé, et
+corrigé en procédure, par S303 : « toute demande de revue déclarera désormais les options
+actives » (ADR-176 D5). R12 et R13, écrites **après** cette règle, tournaient sans le ciel
+construit d'après sa propre photo de référence et sans les reflets filtrés qu'il avait acceptés
+en R7. La règle avait été suivie à la lettre : S304 a bel et bien déclaré ses options — celles
+**de son lot**, les trois états de vagues. Elle n'a pas déclaré le reste, parce que le reste ne
+lui était pas présent à l'esprit.
+
+**Le défaut n'est pas l'étourderie, c'est la forme du remède.** Une règle qui demande à un agent
+de se souvenir d'un ensemble ouvert échoue dès que l'ensemble grandit : chaque session déclare le
+sous-ensemble qu'elle vient de toucher, et l'ensemble complet n'est jamais nommé par personne. La
+règle s'exécute correctement et le défaut persiste — c'est le pire des cas, parce que le contrôle
+rend « conforme ».
+
+**Remède** : faire porter la liste par le **code**, au même endroit que ce qui la consomme, et la
+rendre atteignable d'un seul mot — ici `--meilleur`, plus une ligne de capture qui publie
+**toutes** les options et non celles que la session a choisies. Une option acceptée s'ajoute à la
+liste le jour de son acceptation ; aucune session ultérieure n'a plus à s'en souvenir.
+
+**Réflexe généralisable** : quand une procédure demande « n'oublie pas de déclarer X », se
+demander si X est un ensemble **ouvert et croissant**. Si oui, la procédure est déjà cassée ;
+la seule forme qui tient est un défaut exécutable — une valeur par défaut, un drapeau agrégé, une
+liste unique dans le code — et pas une phrase dans un document. Même famille que **L137** : deux endroits qui doivent dire la même chose finissent par diverger,
+y compris quand l'un des deux est une mémoire — humaine ou d'agent.
