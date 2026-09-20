@@ -52,6 +52,17 @@ fn main()->Result<(),String> {
     let mut samples=background3::Samples3::new(d);let sponge=Sponge3{width_x:1.,width_y:1.,rate_per_s:2.};
     let mut total=vec![0.;d.columns()];let mut difference=total.clone();
     let (mut imax,mut refinements,mut dmax)=(0,0,0f64);let mut bottom_speed=0f32;
+    // S310, lot 1 d'ADR-178 — **ce que l'éponge retire, et ce que la bande apporte**. L'angle mort
+    // A302 dit que personne n'a jamais compté : voici le compte, sur la scène la plus proche de
+    // celle de S302 qui tourne dans la référence CPU.
+    //
+    // L'échelle n'est pas le volume signé : l'impulsion est un chapeau mexicain, d'intégrale nulle
+    // en continu. C'est `Σ|h − repos|·dx²` — la quantité de perturbation **présente** — qui dit si
+    // un prélèvement est grand ou petit.
+    let echelle=|v:&Volume3| v.surface().iter().zip(v.surface_roundoff_for_trials())
+        .map(|(e,r)|(((*e-rest)-*r) as f64).abs()).sum::<f64>()*(d.dx as f64)*(d.dx as f64);
+    let echelle_initiale=echelle(&pulse);
+    let (mut eponge,mut eponge_abs,mut bande,mut residu,mut echelle_min)=(0f64,0f64,0f64,0f64,f64::MAX);
     for n in 0..=1200 {
         let time=SimTime(n*5000);let t=time.0 as f64*1e-6;
         if n%10==0 {
@@ -75,8 +86,20 @@ fn main()->Result<(),String> {
             let r=v.step_perturbation_mobile(time,5000,4000,&bg,sponge,&host_impl::SequentialJobs)
                 .map_err(|e|format!("{name} step {n}: {e:?}"))?;
             imax=imax.max(r.iterations);refinements+=r.refinements;dmax=dmax.max(r.divergence_plain);
+            if name=="pulse" {
+                let b=v.balance();
+                eponge+=b.sponge_out;eponge_abs+=b.sponge_out.abs();bande+=b.band_in;
+                residu=residu.max(b.residual.abs());
+            }
         }
+        echelle_min=echelle_min.min(echelle(&pulse));
     }
+    let echelle_finale=echelle(&pulse);let secondes=6.0;
+    println!("BILAN_S310 scene eponge_m3={eponge:e} eponge_absolu_m3={eponge_abs:e} \
+bande_m3={bande:e} residu_max_m3={residu:e} echelle_initiale_m3={echelle_initiale:e} \
+echelle_finale_m3={echelle_finale:e} echelle_min_m3={echelle_min:e} \
+eponge_absolu_par_seconde_m3={:e} en_parts_de_l_echelle_initiale_par_seconde={:e}",
+        eponge_abs/secondes,eponge_abs/secondes/echelle_initiale);
     println!("PREVIEW spectral={spectral} resolu={resolu} nx=32 ny=24 nz={} rest={rest} bottom_speed_max={bottom_speed:e} dt_us=5000 duration=6s frames=121 it_max={imax} refinements={refinements} divergence_plain_max={dmax:e}",d.nz);
     Ok(())
 }

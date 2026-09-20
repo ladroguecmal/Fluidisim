@@ -105,7 +105,8 @@ Critères, écrits avant la mesure :
   défaut réel du compteur : 0,86 % du volume retiré, quatre ordres au-dessus du plancher.
 - [x] **P5** — cuve de S305, 5 000 pas : **murs à zéro exact**, dérive de volume
   **2,37·10⁻¹⁰ m³**, soit 7,4·10⁻¹² m de hauteur moyenne et 1,5·10⁻¹⁰ de l'amplitude du mode.
-- [ ] **P6** — mesure sur la **scène de S302** : ce que l'éponge retire par seconde. A302 chiffrée.
+- [x] **P6** — scène couplée à fond spectral réel : l'éponge échange **10,2 % du contenu
+  perturbatif du domaine par seconde**, et rien n'en revient dans W. Résidu 1,28·10⁻¹⁰ m³.
 - [ ] **P7** — quantité de mouvement et énergie : ce qu'il faudrait pour les **fermer**, et le
   diagnostic non fermé publié comme tel.
 - [ ] **P8** — preuve publiée, tolérance **proposée** à l'utilisateur.
@@ -149,6 +150,23 @@ d'environ 1,2·10⁻⁷ m par seconde sur cette même cuve. La **référence**, 
 7,4·10⁻¹² m sur cinq secondes — quatre à cinq ordres de grandeur en dessous. La dérive d'A298
 n'est donc **pas** une fuite de volume du schéma : elle est propre au chemin de la carte, ce
 qu'A298 soupçonnait sans pouvoir l'isoler.
+
+**A302 chiffrée (P6)** — `delta3d_preview --spectral --resolu`, 32 × 24 × 36 à 25 cm, fond
+spectral réel à 64 composantes, éponge de 1 m à 2 s⁻¹, 6 s. C'est la scène la plus proche de celle
+de S302 qui tourne dans la **référence CPU** ; la scène de S302 elle-même vit sur la carte.
+
+| | mesure sur 6 s |
+|---|---|
+| **résidu du bilan** | **1,28·10⁻¹⁰ m³** pour une échelle de 0,25 m³ — 5·10⁻¹⁰ relatif |
+| échange de l'éponge, en valeur absolue | **0,1546 m³**, soit **0,0258 m³/s** |
+| rapporté au contenu perturbatif du domaine | **10,2 % par seconde** |
+| éponge, en **net** signé | **−7,80·10⁻³ m³** — elle rappelle vers le repos dans les deux sens |
+| bande B/W, en net | **−0,1096 m³** |
+
+**Ce que ces nombres disent, et c'est A302 transformée.** L'éponge ne « laisse pas sortir » la
+perturbation : elle l'**efface**, à raison d'un dixième du contenu du domaine par seconde, et rien
+de cela n'entre dans W. Le raccord que R11 a jugé « invisible » l'est parce que l'éponge est douce,
+pas parce qu'elle conserve. Distinguer les deux demandait un compteur ; il existe.
 
 **Le défaut que l'essai de l'éponge a attrapé, et il vaut leçon.** Compter l'`increment` de
 l'éponge sur-compte de `eta_roundoff` à chaque colonne et à chaque pas : **0,86 %** du volume
