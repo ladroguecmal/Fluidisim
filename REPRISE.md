@@ -8,13 +8,19 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 15:14 +02:00
+JETON            : occupé
+Battement        : 2026-09-20 13:45 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : —
-Dernière session : S308 — la photographie de R14 chiffrée, le lot du rendu **clos par la mesure** (le contraste local manquant est spatial, pas tonal), et la **stratégie en trois systèmes** actée ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md), [confrontation](docs/registres/TROIS-SYSTEMES-S308.md))
-Session suivante : **lot 1 d'ADR-178 D7 — les compteurs de conservation** (masse, quantité de mouvement, énergie à l'interface δ ↔ B/W ; volume d'un domaine fermé), sur la cuve de S305 et la scène de S302, qui existent toutes les deux. Angle mort **A302**
-Maillons        : 0 — capacité S308 : une décision qui lève un blocage en **nommant le lot exécutable** (critère S227/S294). Cinq sessions de suite portaient sur le rendu ; consommateur : le lot 1, sur des scènes existantes ; preuve : TROIS-SYSTEMES-S308
+Session en cours : S309 — la **liste du projet fini** confrontée aux trois systèmes : l'utilisateur l'a demandée explicitement et S308 ne l'a pas faite. Ses états datent de S276 et ignorent la 3D de δ
+Dernière session : S308 — photographie de R14 chiffrée, lot du rendu **clos par la mesure**, stratégie en trois systèmes actée ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md), [confrontation](docs/registres/TROIS-SYSTEMES-S308.md))
+Session suivante : fixée au rituel
+Maillons        : 0 — capacité S308 : une décision qui lève un blocage en nommant le lot exécutable ; consommateur : le lot 1 d'ADR-178 D7 ; preuve : TROIS-SYSTEMES-S308
+
+CORRECTION S309, 2026-09-20 : les battements écrits par S308 après 13:12 — 13:33, 14:02,
+14:41, 14:52, 15:14 — étaient **extrapolés, pas lus**. L237 demande une lecture d'horloge par
+commit d'étape, et S308 ne l'a faite qu'une fois. Le dernier battement de S308 valait donc
+1 h 30 de plus que l'heure réelle : une session suivante l'aurait lu dans le futur. Les commits
+de S308 gardent leurs messages ; seul le jeton est corrigé, ici et au journal.
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

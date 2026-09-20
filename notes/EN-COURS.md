@@ -58,69 +58,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S308 — **terminée**. La photographie est devenue une cible chiffrée, le lot du rendu
-est clos par la mesure, et la stratégie en trois systèmes est actée (ADR-178). Reprise à chaud
-après coupure : l'étape P5 a été **complétée**, pas annulée — code rebâti, chiffres revérifiés.
+Session : S309 — la liste du projet fini confrontée aux trois systèmes.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : le **verdict R14**, complet, et la **photographie de référence**. Verdict et arbitrage
-consignés dans [REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md).
+Entrée : la stratégie en trois systèmes, **renvoyée telle quelle** par l'utilisateur après S308.
+Elle demandait deux confrontations : à l'**état réel du dépôt** — faite, `TROIS-SYSTEMES-S308` —
+et à la **liste de contrôle du projet terminé** — **non faite**. S308 s'est contentée de noter que
+son décompte datait de S276. C'est la moitié manquante de la demande, et c'est cette session.
 
-**Ce que l'utilisateur tranche, et qui commande cette session.** La géométrie suffit ; le travail
-prioritaire est **optique** — ciel, exposition, couleur, diffusion aux crêtes, écume, hautes
-fréquences du reflet ; **aucune correction de forme ne s'ouvre avant**. Et sur la couleur : plus
-sombre, plus neutre, creux plus denses, contraste local plus marqué, **les reflets clairs portés
-par le ciel et la géométrie et non par une couleur de base trop élevée**.
+Capacité visée : **la liste du projet fini dit la vérité sur δ**, et chacun de ses 120 points sait
+à quel système il appartient. Consommateur : le choix du lot, à chaque session suivante — la liste
+est le seul document qui énumère le périmètre final point par point, et un point faux y coûte
+plus cher qu'ailleurs, parce qu'on s'en sert pour décider quoi construire.
 
-Capacité visée : **transformer la photographie en cible chiffrée.** Elle n'est pas une cible
-physique — vent, focale, exposition, heure et réponse capteur sont inconnus, l'utilisateur le dit
-et il a raison. Mais c'est une **image**, et une image se mesure : position d'horizon, gradient du
-ciel, histogramme de luma de la mer, couleur des creux contre celle des crêtes, contraste local,
-énergie haute fréquence, fraction de pixels très clairs (écume). Ces grandeurs se comparent **sans
-connaître la physique de la prise de vue**, à condition de les normaliser par la scène elle-même.
-Consommateur : les briques optiques que l'utilisateur vient de prioriser, qui cesseront d'être
-réglées à l'œil.
+Ce que je ne fais pas : réécrire la liste (l'utilisateur a écrit « pas de longue refonte
+documentaire ») ; ajouter des points ; toucher aux sections que rien n'a bougées depuis S276 ;
+rouvrir une décision actée.
 
-Ce que je ne fais pas : prétendre que la photographie calibre quoi que ce soit de physique ;
-ouvrir un lot de forme (l'utilisateur l'a explicitement suspendu) ; ajouter une dépendance au
-dépôt — la photographie est binaire et n'y entre pas (SPEC-005 §11.3), seules ses **mesures**.
-
-Critères, écrits avant la mesure :
-1. L'instrument sépare **ciel** et **mer** tout seul, par l'horizon qu'il détecte, et le dit.
-2. Chaque grandeur publiée est déclarée **comparable** ou **non comparable** entre une photo et un
-   rendu, avec la raison. Une grandeur qui dépend de l'exposition inconnue est normalisée ou
-   écartée — pas publiée comme si elle voulait dire quelque chose.
-3. L'écart entre notre meilleure image et la photographie est **chiffré poste par poste**, et
-   l'ordre des travaux en découle au lieu d'être supposé.
-4. Les scènes antérieures restent **au bit** à chaque étape.
+Critères, écrits avant :
+1. Un état modifié cite la preuve qui le modifie, ou n'est pas modifié.
+2. Le décompte est **recalculé**, pas corrigé à vue.
+3. L'appartenance d'un point à A, B ou C est **dérivée** de son énoncé, et les points qui
+   n'appartiennent à aucun des trois sont dits tels quels — la stratégie ne couvre pas tout.
 
 ### Plan
 
-- [x] **P1** — amorce, verdict et arbitrage consignés, plan seul.
-- [x] **P2** — `outils/cible_image.py` : horizon, gradient du ciel, histogramme de la mer, couleur
-  creux/crêtes, contraste local, fraction claire. Mesure de la photographie.
-- [x] **P3** — la même mesure sur nos images, et l'écart poste par poste. **L'ordre change.**
-- [x] **P4** — *(promu par la mesure)* **le ciel** : c'est lui qui porte les crêtes, la dynamique
-  et le contraste local.
-- [x] **P5** — la courbe de tonalité, calée sur les centiles. **Et un résultat négatif net sur la
-  coupure spectrale.**
-- [x] **P6** — le **miroitement du soleil** : hypothèse **réfutée** par la mesure. Le coupable est
-  la courbe elle-même. *(Étape de vérification seule ; la construction devient P7 — découpage
-  déclaré, aucune étape de plus d'un quart d'heure.)*
-- [x] **P7** — la courbe contre les **quatre** cibles à la fois : `outils/courbe_tonalite.py`.
-  **Le reste de l'écart n'est pas tonal, il est spatial.** Et le lot du rendu s'arrête là.
-- [x] **P8** — *(nouvelle consigne, reçue en cours de session)* **la stratégie en trois systèmes
-  confrontée à l'état réel** : ce qui existe pour A, B et C, les six interfaces manquantes, le banc
-  de la piscine essai par essai, et l'ordre de réalisation.
-  [TROIS-SYSTEMES-S308](../docs/registres/TROIS-SYSTEMES-S308.md).
-- [x] **P9** — [ADR-178](../docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md) : la
-  stratégie est actée, ses sept décisions écrites, ce qu'elle ne tranche pas nommé.
-- [x] **P10** — rituel REPRISE §6.
+- [x] **P1** — amorce, jeton pris, **horodatage fabriqué de S308 corrigé**, plan seul.
+- [ ] **P2** — la liste actualisée là où S295–S308 l'ont bougée : δ 3D, rendu, solides. Preuve
+  citée à chaque état changé ; décompte recalculé.
+- [ ] **P3** — la vue par système : chaque point rangé en A, B, C ou hors des trois, et ce que
+  chaque système doit encore recevoir. Ajout à `TROIS-SYSTEMES-S308`, pas un document de plus.
+- [ ] **P4** — rituel REPRISE §6.
 
 ### Notes de reprise
 
-**La photographie** : recadrée de son cadre de galerie — détecté par la **chromaticité**, le cadre
-étant achromatique là où l'image ne l'est jamais — 1070 × 712. Elle vit dans le répertoire de
-travail de la session, **pas dans le dépôt**. Ce qui entre dans le dépôt, ce sont ses mesures.
+**L'erreur d'horodatage de S308**, corrigée en P1 : les battements après 13:12 étaient extrapolés
+au lieu d'être lus (L237). Aucun autre chiffre de S308 n'est concerné — les mesures d'image ont
+toutes été relues sur la carte.
+
+## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
 ## P2 + P3 — la photographie est chiffrée, et elle renverse l'ordre des travaux
 
