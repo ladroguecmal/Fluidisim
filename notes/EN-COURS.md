@@ -125,7 +125,7 @@ Critères, écrits avant la mesure :
 - [x] **P2** — ADR-180 : la décision de l'utilisateur du 2026-09-20, actée décision par décision.
 - [x] **P3** — *le receveur du volume net, mesuré* : volume net des trois productions de W ;
   ce que V porte (entiers, mL) ; ce que le niveau moyen de B porte. Réponse au point 3.
-- [ ] **P4** — le **registre** : les trois volumes de l'utilisateur publiés séparément à chaque
+- [x] **P4** — le **registre** : les trois volumes de l'utilisateur publiés séparément à chaque
   pas, réutilisant `Balance3`, sans jamais compter l'attente comme une restitution.
 - [ ] **P5** — *W est-il admissible sur le cas de S311 ?* Régime, pente, portée : mesurés sur la
   primitive, pas lus.
@@ -715,3 +715,19 @@ Anneau de 3 emplacements ; si aucun n'est libre, le diagnostic du pas est perdu,
 retardé.
 
 ---
+
+**P4 — le registre se défend par sa forme, pas par sa documentation.**
+
+`delta3d_transfer.rs`, `Ledger3`. Le danger n'était pas de mal calculer mais d'écrire un compteur
+qui se laisse satisfaire. Trois traits, et ce sont eux la décision :
+
+- **`pending` n'est pas un champ, c'est une différence** — rien ne peut l'écrire, donc rien ne
+  peut l'effacer ; la seule façon de le faire baisser est de transférer pour de bon ;
+- **il est signé**, et négatif il dit qu'on a **créé de l'eau** (`created()`), pas que le compte
+  est bon ;
+- **aucune méthode ne s'appelle « restituer »**, et `global_conservation_claimable()` *calcule*
+  ce qu'ADR-180 D1 interdit d'affirmer en prose.
+
+Le registre ne sait pas que W porte zéro volume, et c'est voulu : écrire ce zéro en dur le rendrait
+faux le jour où un receveur existe. L'unité n'est pas dans le type — un registre par grandeur,
+volume en m³ et grandeur propagative en joules de jauge. Six essais.
