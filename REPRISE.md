@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 02:23 +02:00
+JETON            : occupé
+Battement        : 2026-09-20 02:27 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : aucune — S303 terminée
+Session en cours : S304 — construction d'ADR-176 : les asymétries dans le rendu
 Dernière session : S303 — verdict R11 reçu : δ sans artefact, mer sans asymétrie ; écart mesuré et ADR-176 actée
 Session suivante : S304 — **construire [ADR-176](docs/adr/ADR-176-asymetries-de-la-surface-rendue.md)** : second ordre en bande étroite par système et modulation retardée dans le nuanceur, réception §3 écrite avant le code (statistiques, GPU contre CPU, scènes antérieures au bit, écart au jeu, coût), puis **revue R12** aux poses de R11, **options de topologie déclarées dans la demande**. Ensuite : critère 2 sur les cas de cuve de §4.1.
 Maillons        : 0 — capacité S303 : l'écart de notre mer aux mers observées, mesuré sur la réalisation du rendu (Sk 0,003 contre 0,156 ; c₀₃ 0,001 contre −0,222) et deux modèles éprouvés qui y répondent ; consommateur : ADR-176 puis R12 ; preuve ANATOMIE-SURFACE-S303

@@ -58,52 +58,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S303 — terminée : écart mesuré, ADR-176 actée, construction en S304.
-Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, recherche web, carte réelle.
-Entrée : **verdict R11 de l'utilisateur**, 2026-09-20 — « je ne sais pas s'il s'agit d'une onde
-circulaire ou linéaire, car dans la scène il se forme une vague qui va uniquement dans un sens » ;
-« je ne vois pas d'artefact visuel » ; « pas de problème sur la transition » ; « la mer ne fait pas
-réaliste […] la topologie est à revoir, réalise des recherches sur le profil des vaguelettes, de
-l'anatomie de la mer en haute mer […] selon moi déjà les micro vaguelettes ou pics doivent être
-convexes plutôt que concaves », avec un lien de figure en exemple et la consigne de chercher
-par moi-même.
+Session : S304 — en cours.
+Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle.
+Entrée : « Continue », 2026-09-20, après le verdict R11 et [ADR-176](../docs/adr/ADR-176-asymetries-de-la-surface-rendue.md).
 
-Capacité visée : **savoir de quoi la forme de la mer s'écarte, et le mesurer**. Recherche sourcée
-sur l'anatomie d'une surface de mer en eau profonde (asymétrie verticale et horizontale, profil des
-vaguelettes, modulation par les grandes vagues), puis écart chiffré entre ces références et la mer
-que le dépôt rend aujourd'hui ; enfin la décision de ce qui se construit.
-Consommateur : le rendu de J1 et la revue suivante (R12) ; l'asymétrie de l'élévation est déjà
-nommée dans la file active avec ce déclencheur — « si l'asymétrie est jugée visible ».
+Capacité visée : **construire ADR-176** — l'asymétrie verticale (second ordre en bande étroite par
+système) et l'asymétrie des pentes (modulation de la queue retardée) dans le rendu, avec la
+réception écrite en §3 de l'ADR. Consommateur : la revue **R12**, aux poses de R11, options de
+topologie déclarées.
 
-Ce que le verdict reçoit et ne reçoit pas, posé ici avant tout travail :
-- **Reçus** : aucun artefact visuel dans le domaine δ (le grain de 2 mm mesuré en S302 ne se voit
-  pas) ; raccord du domaine invisible. Ces deux réponses closent les questions 3 et 4 de R11.
-- **Non reçu** : la lisibilité de l'onde (question 1) — l'utilisateur ne peut pas dire si elle est
-  circulaire ou linéaire. C'est un défaut de la **scène**, pas du solveur : elle injecte un front
-  linéaire sans le dire ni montrer son origine.
-- **Ouvert, et c'est le lot** : le réalisme de la mer (question 2 implicite) — la topologie.
+Critères, repris d'ADR-176 §3 sans les rouvrir :
+1. Statistiques sur la même réalisation : `Sk` ≥ 0,06 (contre 0,003), `c₀₃` entre −0,13 et −0,18,
+   `c₂₁` à ±0,02 de −0,058, `c₄₀` entre 0,26 et 0,45, `mss` inchangée à 2 %.
+2. GPU contre CPU aux sondes : 3 mm en déplacement, 5·10⁻⁴ en pente (tolérances de S260).
+3. Scènes antérieures **au bit** : défaut, `--houle`, `--vagues` sans modulation, vérifications.
+4. Écart au jeu publié, avant et après.
+5. Coût GPU eau à 1280×720, deux poses, secteur relevé aux deux bornes.
+6. Captures R12 et demande de revue **déclarant les options**.
 
-Critères avant travail :
-- Toute valeur physique citée porte sa source (I-14) ; les valeurs de la littérature sont
-  distinguées des valeurs mesurées dans le dépôt.
-- L'écart se mesure sur la **même réalisation** que le rendu, avec les statistiques que la
-  littérature emploie (asymétrie d'élévation, cumulants de pente, courbure des crêtes).
-- Aucune calibration esthétique : si une correction s'ajoute, elle vient d'un modèle nommé, pas
-  d'un coefficient choisi pour faire joli.
-- Le rendu par défaut et `--houle` restent identiques au bit tant qu'aucune décision n'est prise.
+Ce que je ne fais pas : toucher au cœur ou à B (D3 : le rendu seul) ; combler le noyau exact du
+second ordre (borne prudente retenue) ; ajouter capillaires, écume ou asymétrie horizontale.
 
 ### Plan
 
-- [x] **P1** — amorce, verdict R11 consigné, plan seul.
-- [x] **P2** — recherche sourcée : anatomie d'une mer en eau profonde, profil des vaguelettes,
-  asymétries, modulation ; document de connaissance avec citations.
-- [x] **P3** — ce que le dépôt rend aujourd'hui : statistiques de la mer `--houle` et `--vagues`
-  (asymétrie d'élévation, cumulants de pente, courbure), sur la réalisation de la scène.
-- [x] **P4** — tableau d'écart littérature ↔ dépôt, et ce que chaque écart coûterait à corriger.
-- [x] **P5** — décision (ADR) et première correction visible, si elle tient dans la session.
-- [x] **P6** — rituel REPRISE §6.
+- [>] **P1** — amorce, plan seul.
+- [ ] **P2** — uniforme, nuanceur et référence CPU : second ordre par système et modulation
+  retardée ; activation avec `--vagues --modulation`.
+- [ ] **P3** — critères 2 et 3 : GPU contre CPU aux sondes, scènes antérieures au bit.
+- [ ] **P4** — critères 1, 4 et 5 : statistiques, écart au jeu, coût.
+- [ ] **P5** — captures R12 et demande de revue.
+- [ ] **P6** — preuve, rituel REPRISE §6.
 
 ### Notes de reprise
+
+*(S304 — vide à l'ouverture.)*
+
+---
+
+## Archive — notes de S303 (pour le lot)
 
 **Ce que la recherche donne** (sources dans la preuve) : l'asymétrie verticale d'une mer profonde
 vient des **harmoniques liées du second ordre** (`Sk = 3k̄σ` en bande étroite, Longuet-Higgins 1963,
