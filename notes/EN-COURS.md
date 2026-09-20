@@ -121,8 +121,8 @@ Critères, écrits avant la mesure :
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [>] **P2** — ADR-183 : la décision du 2026-09-20 (S314), actée.
-- [ ] **P3** — *l'oracle est-il comparable ?* L'écart de phase qu'impose la dispersion de δ sur
+- [x] **P2** — ADR-183 : la décision du 2026-09-20 (S314), actée.
+- [x] **P3** — *l'oracle est-il comparable ?* L'écart de phase qu'impose la dispersion de δ sur
   dix longueurs d'onde, **calculé avant** de mesurer quoi que ce soit.
 - [ ] **P4** — le montage à **deux lignes de contrôle**, et la phase mesurée à 10 λ.
 - [ ] **P5** — le cas **oblique** : domaine large en `y`, éponges sur les quatre bords, paquet
@@ -138,7 +138,30 @@ Critères, écrits avant la mesure :
 
 ### Notes de reprise
 
-*(à remplir en cours de session)*
+**P3 — la prédiction, écrite avant que le banc existe.**
+
+Le train et δ portent la **même fréquence** — le transfert lit `ω` sur la jauge et la lui donne.
+Ce qu'ils ne partagent pas est le **nombre d'onde** : le train pose `k = ω²/g`, l'eau profonde
+exacte, tandis que l'onde de δ garde le `k` de sa condition initiale et n'a que la fréquence que le
+schéma discret lui donne. À fréquence égale et nombre d'onde différent, la phase se sépare
+**linéairement avec la distance** : `Δφ = (k_train − k_δ)·D`.
+
+Avec les `ω` mesurées en S314 et `k` posé = 3,1416 rad/m, sur `D` = 10 λ = 20 m :
+
+| maille | `ω` lue | `k_train = ω²/g` | `Δk` | **`Δφ` prédit** |
+|---:|---:|---:|---:|---:|
+| 25 cm | 5,3094 | 2,8736 | −0,2680 | **−0,853 tour** *(−307°)* |
+| 12,5 cm | 5,5056 | 3,0899 | −0,0517 | **−0,165 tour** *(−59°)* |
+| 6,25 cm | 5,5495 | 3,1393 | −0,0023 | **−0,0072 tour** *(−2,6°)* |
+
+**Deux ordres de grandeur entre les extrêmes** : la prédiction est donc un vrai test, pas une
+formule qui tomberait juste quoi qu'il arrive. Et elle dit d'avance que **la phase à dix longueurs
+d'onde sera fausse de soixante degrés à 12,5 cm** — sans que le transfert y soit pour rien.
+
+**Ce que le banc devra mesurer, et pourquoi il ne peut pas se contenter de cette prédiction** :
+`k` posé n'est pas `k_δ`. Sur une scène quelconque on ne connaît pas la condition initiale. Le banc
+mesurera donc `k_δ` **directement**, par la différence de phase du signal de δ entre ses **deux**
+lignes — ce qui rend la prédiction elle-même mesurée, et non calée sur ce qu'on a posé.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
