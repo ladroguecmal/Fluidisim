@@ -100,9 +100,9 @@ Critères, écrits avant la mesure :
 - [x] **P4** — le test A/B aux quatre sorties, et la cause dominante attribuée.
 - [x] **P5** — *(découpage déclaré)* balayage de la coupure `λ/Δ` : le seul essai qui dit si les
   stries sont évitables sans toucher à l'énergie du modèle.
-- [ ] **P5** — conséquences : file active, angles morts, note datée à ADR-176 si la mesure la
-  contredit, et ce qui doit remonter à l'utilisateur comme arbitrage.
-- [ ] **P6** — preuve, rituel REPRISE §6.
+- [x] **P6** — conséquences : note datée à SPEC-001, leçon L348, demande de revue R13, preuve
+  `STRIES-S306`, index.
+- [ ] **P7** — rituel REPRISE §6.
 
 ### Notes de reprise
 

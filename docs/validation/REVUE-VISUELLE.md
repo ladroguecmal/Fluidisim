@@ -651,3 +651,51 @@ n'est rendue ici : la question posée est celle de la mer.
    (le fin grain sur la face avant des vagues courtes), l'écume et le micro-déferlement.
 
 Un mot par question suffit ; « je ne sais pas » reste une réponse utile.
+
+## 18. R13 — d'où viennent les stries, et faut-il en enlever, S306
+
+**2026-09-20, verdict attendu — et il ne remplace pas celui de R12**, qui porte sur la forme des
+crêtes et reste demandé (§17). R13 pose une question différente, née du
+[guide que vous avez transmis](../sources/guide_topologie_ocean_haute_mer_plage.md) : il place les
+**normales fines** et l'**environnement lumineux** avant la topologie dans les causes d'un rendu
+trop strié, et demande (§12.3) un test à quatre sorties que le dépôt n'avait jamais fait.
+
+Il est fait. Mesures et méthode :
+[STRIES-S306](STRIES-S306.md) ; lecture du guide :
+[LECTURE-GUIDE-OCEAN-S306](../registres/LECTURE-GUIDE-OCEAN-S306.md).
+Images dans `viewer/captures/s306`, 1280×720, âge 12 s, poses `proche` et `rasante` de R11/R12.
+
+**Les options sont déclarées** (ADR-176 D5). Toutes les images partagent le même instant, la même
+caméra, la même mer — `--vagues --modulation`, c'est-à-dire **l'état `c` de R12** :
+
+| image | ce qu'elle montre | ce qu'elle sert à voir |
+|---|---|---|
+| `i_hauteur` | la hauteur seule, fausses couleurs, ±3 m, **aucun matériau** | les grandes masses que la géométrie porte vraiment |
+| `ii_normales_geometriques` | les normales de la bande résolue, **sans la queue** | la forme, sans aucun détail fin |
+| `iii_materiau_sans_queue` | le rendu, **queue spectrale éteinte** | l'eau sans ses micro-pentes |
+| `iv_rendu_complet` | le rendu complet — **l'image de R12 au bit** | la référence |
+| `coupure2 / iv_rendu_complet` | complet, coupure spectrale **élargie** (`--coupure=2`) | la même mer avec deux fois moins de stries |
+
+**Ce que la mesure dit déjà.** La queue spectrale porte **80 à 85 %** de l'énergie haute fréquence
+de l'image, et le contraste global ne le voit pas (il *baisse* de 51,41 à 51,29). Élargir la
+coupure divise cette énergie par **2,2** (`--coupure=2`) ou **3,6** (`=3`) **sans changer le
+contraste** et en coûtant **6 % de GPU en moins**. Et notre variance de pente totale est **13,7 %
+au-dessus** de l'observation (Cox–Munk), la queue en portant 60 %.
+
+**Ce que la mesure ne dit pas** : si c'est plus beau. Élargir la coupure enlève aussi du
+micro-détail réel — une vraie mer porte cette variance de pente. Le compensateur correct est de
+transférer ces pentes vers le **reflet** plutôt que de les supprimer (ADR-161, guide §5.3), et il
+n'est pas construit. C'est donc un arbitrage visuel, et il vous revient.
+
+**Les questions :**
+
+1. **Entre `iv_rendu_complet` et `coupure2`** : laquelle ressemble le plus à une mer ? Ou
+   l'écart est-il trop faible pour trancher ?
+2. **`iii_materiau_sans_queue`** : trop lisse, ou au contraire plus juste que le complet ?
+3. **`i_hauteur`** : les grandes masses vous paraissent-elles présentes ? C'est la question que le
+   guide met en premier — si elles manquent ici, aucun réglage de détail ne les fera apparaître.
+4. **Si vous choisissez une coupure**, laquelle : 1 (actuelle), 1,5, 2, 3 ? Un ADR l'actera.
+5. Ce guide est-il votre **réponse à R12**, ou attendez-vous encore que je pose la question des
+   crêtes séparément ?
+
+Un mot par question suffit ; « je ne sais pas » reste une réponse utile.

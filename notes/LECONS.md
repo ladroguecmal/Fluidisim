@@ -5988,3 +5988,32 @@ et un banc qui ne peut pas échouer n'est pas une réception. Cela vaut pour tou
 **absolue** — millimètres, Pa, m/s — posée indépendamment du cas qui l'éprouvera : la tolérance
 vient de l'usage, l'amplitude vient du cas, et personne ne les confronte tant qu'on ne le fait
 pas exprès.
+
+## L348 — Un contrôle qui suppose la valeur qu'il doit reconnaître ne contrôle rien
+
+*(S306)* Deux fois dans la même session, un contrôle a menti parce qu'il **supposait** au lieu de
+**lire**.
+
+**Premier cas.** Les sorties de diagnostic peignent le ciel d'un gris constant, et la mesure de
+contraste devait exclure ces pixels. J'ai écrit la constante « 0,18 linéaire, donc 46 » dans le
+filtre. La cible de rendu est en **sRGB** : 0,18 linéaire y vaut 116, pas 46. Le filtre n'a jamais
+rien exclu — et il l'a dit, sans que ce soit lisible : `pixels_eau` valait exactement
+1280 × 720 sur **toutes** les images, ciel compris. Un compteur juste rend un nombre rond suspect.
+Remède : lire la couleur au coin haut-gauche de l'image, au lieu de la déduire.
+
+**Second cas, le même jour.** Le témoin d'identité au bit a **échoué** : les quatre empreintes de
+la revue R12 avaient changé après une modification de nuanceur. Conclusion apparente : la
+modification n'était pas neutre. En réalité, j'avais rejoué la commande avec deux drapeaux que la
+preuve S304 n'employait pas. Avec la commande **écrite dans le document**, les quatre empreintes
+étaient identiques au bit. Le témoin n'avait pas détecté une régression : il avait comparé deux
+choses différentes.
+
+**Ce que les deux partagent.** Un contrôle est une comparaison, et une comparaison a deux côtés.
+On soigne celui qu'on construit et on suppose celui qu'on croit connaître — la constante, la
+commande, l'unité, l'espace de couleur, le jeu de drapeaux. **C'est toujours le côté supposé qui
+casse**, et il casse en silence : un témoin faux ne lève aucune alerte, il donne une réponse.
+
+**Réflexe** : le côté de référence d'un contrôle se **relit à sa source** — la ligne de
+reproduction du document de preuve, la valeur que le code écrit réellement, l'en-tête du fichier —
+et jamais de mémoire. Et quand un contrôle rend un nombre trop rond ou un verdict trop net,
+c'est lui qu'on vérifie en premier, pas ce qu'il juge.

@@ -354,6 +354,15 @@ d'impact fin. **Cohérence vérifiée** — le budget n'a pas été choisi arbit
   `Hs = 2 m`, `T = 8 s` → `P ≈ 2 452 × 6,25 ≈ 15,3 kW/m`.
 - Déferlement en eau peu profonde : `H/h ≈ 0,78` (McCowan). Voir ADR-005 §4.1 pour la largeur de
   zone de surf en fonction de la pente.
+  > **Note factuelle, S306, 2026-09-20.** Ce rapport est un **repère issu du cas de la vague
+  > solitaire sur fond horizontal**, pas une loi universelle ni un déclencheur suffisant : la
+  > pente du fond, la cambrure incidente et le vent décident du type de déferlement et du seuil
+  > (*Coastal Engineering Manual*, Part II ch. 4, via le
+  > [guide reçu](../sources/guide_topologie_ocean_haute_mer_plage.md) §7.1). L'attribution à
+  > McCowan reste juste ; c'est l'emploi comme **critère unique** qui ne l'est pas. Le mécanisme
+  > qui en dérive ([ADR-023](../adr/ADR-023-mecanismes-restes-a-specifier.md) §4, sites turbulents
+  > permanents) n'étant pas construit, rien n'est à reprendre — mais un score de rupture devra
+  > combiner plusieurs entrées et être calibré.
 - Cambrure limite en eau profonde (Stokes) : `H/λ ≈ 1/7`. Au-delà, la crête déferle.
   Utilisable comme **déclencheur d'écume** directement sur B, sans aucune simulation.
 
