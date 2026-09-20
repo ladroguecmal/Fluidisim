@@ -74,6 +74,12 @@ plan moyen (A286, partielle) ; le CPU sous budget (A278, question d'optimisation
 **Verdict : A est suffisant pour servir B et C.** Sa sortie physique est définie, testée et déjà
 consommée par δ. La stratégie a raison de l'arrêter là.
 
+> **Précision ajoutée en S309, et elle borne le verdict ci-dessus.** « A » ne veut pas dire ici
+> tout le système A de la liste du projet fini, mais **la mer de vent et de houle en eau profonde
+> uniforme**. Douze des vingt points de A y sont absents — lacs, rivières, canaux, bathymétrie,
+> hauts-fonds, courants 3D, tsunamis, explosions, déferlement de W, écume. Le verdict vaut **pour
+> le couplage**, pas pour les autres milieux que l'objectif nomme. Voir §8.
+
 ### B — Simulation volumique 3D (couche δ)
 
 | | état |
@@ -204,3 +210,58 @@ mesurés à leur date, sur la machine de référence, et ne sont pas re-mesurés
 [liste du projet fini](../LISTE-PROJET-FINI.md) n'est pas modifiée : son décompte (3 validés,
 49 partiels, 68 absents sur 120) date de S276 et sous-estime l'état de δ 3D, reçu depuis. Aucun
 banc nouveau n'a été exécuté ; aucune réception n'est revendiquée.
+
+---
+
+## 8. La liste du projet fini, rangée par système — S309
+
+*Ajouté en S309, 2026-09-20 : l'utilisateur demandait deux confrontations, à l'état du dépôt et à
+la [liste de contrôle du projet terminé](../LISTE-PROJET-FINI.md). Voici la seconde.*
+
+**Méthode.** Chaque point est rangé d'après son **énoncé**, pas d'après le code qui l'approche : A
+s'il décrit la haute mer superficielle, B la simulation volumique, C la transition entre les deux.
+Un point qui ne décrit aucun des trois est dit **hors des trois** — ce n'est pas un rebut, c'est le
+reste du moteur. Les états sont ceux de la liste actualisée en S309, recomptés point par point.
+
+| | points | validés | partiels | absents |
+|---|---:|---:|---:|---:|
+| **A** — haute mer superficielle | 20 | 0 | 8 | **12** |
+| **B** — volumique 3D | 29 | 0 | 6 | **23** |
+| **C** — transition et couplage | 7 | 0 | 5 | 2 |
+| hors des trois | 64 | 3 | 32 | 29 |
+| **total** | **120** | **3** | **51** | **66** |
+
+**Quatre lectures, et la première corrige une phrase de ce document.**
+
+1. **« A est une base avancée » est vrai pour la haute mer, et faux pour le reste de A.** Douze de
+   ses vingt points sont absents, et ce sont : **lacs (2.3), rivières (2.4), canaux (2.5)**,
+   courants macroscopiques 3D (2.6), **bathymétrie et hauts-fonds (2.7)**, précalcul côtier (2.8),
+   explosions (3.3), tsunamis (3.4), déferlement de W (3.5), réfraction bathymétrique (3.6),
+   couches W au-dessus du plan moyen (3.9), écume (7.1). Ce qui est avancé, c'est **la mer de vent
+   et de houle en eau profonde uniforme** — et c'est elle, et elle seule, que §2 de ce document
+   déclarait « suffisante pour servir B et C ». La déclaration reste juste **pour le couplage** ;
+   elle ne dit rien des autres milieux. Or l'objectif nomme explicitement « les plages, les
+   rivières, les piscines » : les rivières sont absentes de A, et une plage demande en plus 2.7,
+   3.6 et 4.14, tous absents.
+2. **B est l'endroit où le moteur reste à construire** : 23 absents sur 29. Mais ils ne sont pas 23
+   travaux indépendants — **la surface non graphe (4.16) en commande à elle seule cinq**, cavité et
+   gerbe (4.12), proche-coque (4.13), plage (4.14), spray (7.2) et microbulles (7.3). C'est ce qui
+   justifie que le lot 5 soit à la fois le plus lourd et le plus rentable de la stratégie.
+3. **C est le plus petit des trois — sept points — et celui qui décide de l'assemblage.** Cinq sont
+   déjà partiels : les tuyaux existent. Ses **deux absents sont exactement les lots 1 et 2** —
+   sortie des perturbations vers W (4.8) et cohérence de phase δ/B sur la durée de vie d'un domaine
+   (4.21). Un troisième point, W au-dessus du plan moyen (3.9), est rangé en A par son énoncé mais
+   **bloque C** (A286).
+4. **Soixante-quatre points sont hors des trois systèmes.** La stratégie en couvre donc **56 sur
+   120**. Ce n'est pas un manque : V (12 points), le rendu (10), activation et budget (13), le
+   multijoueur (9), la grande échelle (5), l'outillage (5) et la validation du système (3) viennent
+   **après**, par construction de la stratégie elle-même. Mais il faut le dire : **finir A, B et C
+   ne fait pas le moteur fini** — cela en fait un peu moins de la moitié, et c'est la moitié dont
+   tout le reste dépend.
+
+**Ce que le décompte dit d'autre, et qui n'est pas confortable.** Entre S276 et S308, le dépôt a
+écrit un solveur 3D, l'a porté sur GPU et l'a rendu en direct — **sans amener un seul point de
+cette liste jusqu'à son périmètre final**. Aucun point ne devient validé. Trois sont même revus
+*en moins bien* (4.7, 4.8, 4.18), parce que S308 les a trouvés surestimés. Ce n'est pas un
+argument contre le travail fait : c'est un argument pour les **critères de réception** que la
+stratégie demande, et pour le lot 1, qui en construit l'instrument.
