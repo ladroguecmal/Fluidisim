@@ -108,8 +108,9 @@ Critères, écrits avant la mesure :
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — **ADR-179** : les tolérances tranchées, la précision sur T3, et ce que « restituer »
-  veut dire exactement.
+- [x] **P2** — [ADR-179](../docs/adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md) :
+  huit décisions. **D3 sépare trois grandeurs que S310 mesurait ensemble** ; D2 dit que T2 n'est
+  **pas** encore tenue — 5 s mesurées pour 10 s demandées.
 - [ ] **P3** — *(la question de fond)* **le flux sortant existe-t-il ?** Mesurer ce que portent les
   faces extérieures, que le transport jette.
 - [ ] **P4** — le **cas contrôlé** : canal, onde longue sortante, grandeur de référence non nulle,
