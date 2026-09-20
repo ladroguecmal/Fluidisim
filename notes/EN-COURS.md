@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S302 — en cours.
+Session : S302 — terminée : scène du critère 3 rendue et soumise à la revue R11.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, outils locaux, carte réelle.
 Entrée : « Continue avec la scène pour que je la juge », 2026-09-19. Copie unique, master propre.
 
@@ -93,7 +93,7 @@ Choix posés avant code :
   sans δ, témoin au bit ; boucle interactive `--houle --delta3d` (D bascule, R relance).
 - [x] **P5** — captures de revue (avec et sans δ, deux poses, plusieurs instants), pixels changés ;
   section R11 de REVUE-VISUELLE avec la question.
-- [>] **P6** — rituel REPRISE §6.
+- [x] **P6** — rituel REPRISE §6.
 
 ### Notes de reprise
 

@@ -15128,3 +15128,50 @@ relus, inchangés. Plafonds et navigation à 0. Recommandation du bilan S293 por
 *Tenue du plan* : P1 committé avec `[>]` (coché au commit suivant) ; P5, P6 et P7 fusionnés,
 déclaré ; `REPRISE.md` ré-encodé par `Set-Content` de PowerShell 5.1 dans le commit de P2, restauré
 par un commit séparé.
+
+## S302 — 2026-09-20 — porte B : la scène existe, et elle est soumise au jugement
+
+**Entrée.** « Continue avec la scène pour que je la juge ». Copie unique, master propre, jeton
+libre ; plan committé avant tout code. Agent Claude Opus 5, application desktop, carte réelle.
+
+**Capacité reçue.** Le domaine δ 3D **vit dans l'afficheur** : il naît sur le device du rendu, avance
+d'un pas par image, et le nuanceur lie **sa seule surface publiée** (D7, I-13) qu'il ajoute à la
+somme des couches. **Ce qui devient possible** : le critère 3 de la porte B — une onde qui traverse
+une mer étalée, jugée par l'utilisateur. **Consommateur** : la revue R11, demandée.
+**Preuve** : [SCENE-DELTA3D-S302](../docs/validation/SCENE-DELTA3D-S302.md).
+
+**La scène.** Mer `--houle` (64 composantes, `Hs` ≈ 2,5 m, la plus courte à 3,5 m, donc portée par
+la maille de 25 cm). Domaine de 30 × 28 m sur 7 m, éponge de 3 m, 32 cycles, un pas de 16,667 ms
+par image. Onde : un **front linéaire injecté** — 65 cm, 16 m, crête longue de 12 m, hauteur **et**
+vitesses de la théorie linéaire, donc il se propage au lieu de se scinder. Mesuré avant tout
+rendu : **aucune colonne hors bornes** en 13 s, traversée à **2,2 m/s** (théorie 2,5), amplitude
+0,65 → 0,46 → 0,16 m à l'éponge de sortie, 4,62 ms par pas, **197 Hz** dans la fenêtre.
+
+**Deux allers-retours qui ont coûté et qui servent.** À 24 × 32 m avec une onde de 25 cm, les
+images avec et sans δ se ressemblaient : l'onde se noyait dans une mer de 2,5 m. En passant à
+32 × 32 m, le device a **refusé** : le tampon des faces du fond (26 flottants par face) franchit
+les 128 Mio d'une liaison de stockage — ce qui plafonne le domaine à 1,15 million de faces et
+désigne une optimisation précise. Retenu : 30 × 28 m et un front de 65 cm.
+
+**Les à-coups d'A297, chiffrés avant la revue.** Sur la scène, la dérivée seconde temporelle par
+colonne montre des à-coups **locaux** — au pire, la colonne vaut 7,4 fois la moyenne de ses huit
+voisines — et un grain à l'échelle de la maille de 2,0 à 2,2 mm d'écart-type, un cinquième de la
+signature de l'onde. **Le balayage de 32 à 512 cycles ne le change pas** : ce n'est pas une pression
+sous-convergée, c'est le schéma. Le dire dans la demande de revue plutôt que le corriger en silence.
+
+**Témoin.** Sans domaine δ 3D, les sept images de la revue R9 gardent leurs empreintes **au bit**.
+Le rendu existant n'a pas bougé.
+
+**Partiel et suite.** Aucun verdict n'est déduit des images ; R11 pose quatre questions explicites —
+R10 avait échoué faute de dire ce qu'on attendait. Restent : le critère 2 sur les cas de cuve
+(`Step3` exige un fond), la porte C (4,62 ms contre 2), la charge utile par face, A289 et la dérive
+de volume relevée. A297 mesurée, non corrigée.
+
+**Rituel.** Maillons **0** : la scène est l'entrée du critère 3, et elle tourne. Neuvième session
+sur la porte B, un critère avançant à chaque fois (A211). File active relue, quatre lignes
+remplacées ; feuille de route J2 et §3 bis, index, REVUE-VISUELLE §16. I-01/I-04/I-06/I-13/I-17
+relus, inchangés. Plafonds et navigation à 0. Copie unique, jeton libre.
+
+*Tenue du plan* : un battement a été écrit sans lire l'horloge (corrigé au commit suivant, L237) ;
+une fenêtre interactive s'est ouverte par mégarde après un échec de compilation — l'ancien binaire
+ignorait le drapeau neuf.
