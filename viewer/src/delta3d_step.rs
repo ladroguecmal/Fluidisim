@@ -2180,6 +2180,7 @@ pub fn longue_cuve() -> Result<(), String> {
         // de perturbation ne doit donc **pas bouger**, et ce qu'il fait quand même est le plancher
         // du schéma. C'est le compagnon exact d'A298 : la dérive séculaire s'y lit en volume.
         let volume_initial = volume.perturbation_volume();
+        let energie_initiale = volume.perturbation_energy();
         let (mut mur_max, mut derive_max) = (0f64, 0f64);
         for n in 1..=pas {
             let temps = SimTime((n as u64 - 1) * pas_us);
@@ -2221,8 +2222,18 @@ pub fn longue_cuve() -> Result<(), String> {
             pire_global as f64 / CUVE_A,
             depart.elapsed().as_secs_f64()
         );
+        // S310 P7 : sur un domaine **fermé**, toute décroissance de l'énergie est la dissipation
+        // numérique du schéma — ni bande pour en apporter, ni éponge pour en retirer.
+        let energie = volume.perturbation_energy();
+        let duree = pas as f64 * pas_us as f64 * 1e-6;
+        let perte = (energie_initiale.total - energie.total) / energie_initiale.total;
+        let quantite = volume.perturbation_momentum().iter().fold(0f64, |m, x| m.max(x.abs()));
         println!(
-            "BILAN_S310 cuve murs_max_m3={mur_max:e} derive_volume_max_m3={derive_max:e}              hauteur_moyenne_m={:e} sur_amplitude={:e} volume_initial_m3={volume_initial:e} aire_m2={aire:e}",
+            "BILAN_S310 cuve energie_initiale_J={:e} energie_finale_J={:e} cinetique_J={:e} potentielle_J={:e} perte_relative={perte:e} perte_par_seconde={:e} quantite_de_mouvement_max_kg_m_s={quantite:e}",
+            energie_initiale.total, energie.total, energie.kinetic, energie.potential, perte / duree
+        );
+        println!(
+            "BILAN_S310 cuve murs_max_m3={mur_max:e} derive_volume_max_m3={derive_max:e} hauteur_moyenne_m={:e} sur_amplitude={:e} volume_initial_m3={volume_initial:e} aire_m2={aire:e}",
             derive_max / aire,
             derive_max / aire / CUVE_A
         );

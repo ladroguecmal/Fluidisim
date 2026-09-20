@@ -665,4 +665,4 @@ mod background_grid;
 pub use background_grid::BackgroundGrid3;
 #[path = "delta3d_balance.rs"]
 mod balance;
-pub use balance::Balance3;
+pub use balance::{Balance3, Energy3};

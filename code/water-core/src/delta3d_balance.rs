@@ -45,7 +45,7 @@
 //! 3. **Aux faces extérieures, le flux de perturbation est nul par construction.** La garde
 //!    `a > 0 && a < n` de `transport_coupled3` l'y laisse à zéro : seule la bande transporte au
 //!    bord. C'est « δ ne ressort pas vers W » écrit une seconde fois, dans une boucle — et c'est
-//!    pourquoi ce module **publie quand même** `perturbation_out` : une valeur non nulle voudrait
+//!    pourquoi ce module **publie quand même** `perturbation_in` : une valeur non nulle voudrait
 //!    dire que cette lecture du code est fausse, et le dire tout de suite coûte une addition.
 //!
 //! # Ce que ce module ne mesure pas, et ne prétend pas mesurer
@@ -59,12 +59,12 @@
 //! - **Une tolérance.** Le dépôt n'en a aucune pour la conservation. Elle se **propose** à
 //!   l'utilisateur avec le premier bilan publié ; elle ne se décrète pas dans un module.
 
-use super::Volume3;
+use super::{Domain3, Volume3};
 
 /// Bilan de masse d'un pas, en mètres cubes. Tous les termes sont des **volumes de
 /// perturbation** : le fond B/W n'est pas compté, seule la bande qu'il pousse à travers le bord.
 ///
-/// Convention de signe : `band_in` et `perturbation_out` comptent **positivement ce qui entre** ;
+/// Convention de signe : `band_in` et `perturbation_in` comptent **positivement ce qui entre** ;
 /// `sponge_out` compte **positivement ce qui est retiré**.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Balance3 {
@@ -103,5 +103,89 @@ impl Volume3 {
     /// Le bilan du dernier pas couplé. `Default` tant qu'aucun pas couplé n'a été exécuté.
     pub fn balance(&self) -> Balance3 {
         self.balance
+    }
+}
+
+/// Énergie de la perturbation, en joules — S310. **Diagnostic, pas bilan** : voir ci-dessous.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Energy3 {
+    /// `½ρ ∫ |u|² dV` sur la part mouillée des mailles.
+    pub kinetic: f64,
+    /// `½ρg ∫ (h − repos)² dA` — l'énergie de la surface libre au premier ordre.
+    pub potential: f64,
+    pub total: f64,
+}
+
+impl Volume3 {
+    /// Énergie de la perturbation. **Ce n'est pas un bilan, et il faut le dire.**
+    ///
+    /// La masse se ferme parce que le transport ne produit que des flux de colonne, dont les
+    /// termes intérieurs télescopent. L'énergie et la quantité de mouvement n'ont pas cette
+    /// chance : leur bilan demande **le travail de la pression aux faces de bord** et **le flux
+    /// advectif**, que le pas ne calcule nulle part sous une forme récupérable. Les fabriquer
+    /// après coup donnerait un nombre qui ressemble à un bilan sans en être un — c'est exactement
+    /// l'erreur qu'A302 reproche au raccord « invisible ».
+    ///
+    /// Ce que cette fonction donne est donc un **état**, pas un échange : `E(t)`. Il se lit par
+    /// différence. Sur un domaine **fermé** — cuve, ni bande ni éponge — toute décroissance est la
+    /// dissipation numérique du schéma, et c'est une grandeur que le dépôt n'avait pas.
+    ///
+    /// `O(mailles)`, appelée par les bancs et jamais par le pas : aucun coût dans le budget.
+    pub fn perturbation_energy(&self) -> Energy3 {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let (dx64, rho) = (dx as f64, self.rho as f64);
+        let mut kinetic = 0f64;
+        for j in 0..ny {
+            for i in 0..nx {
+                let h = self.eta[self.col(i, j)] as f64 - self.eta_roundoff[self.col(i, j)] as f64;
+                for k in 0..nz {
+                    let wet = ((h - k as f64 * dx64) / dx64).clamp(0., 1.);
+                    if wet == 0. {
+                        break;
+                    }
+                    // Vitesse au centre de la maille : moyenne des deux faces de chaque axe,
+                    // comme la grille MAC la définit.
+                    let u = 0.5 * (self.u[self.fu(i, j, k)] as f64 + self.u[self.fu(i + 1, j, k)] as f64);
+                    let v = 0.5 * (self.v[self.fv(i, j, k)] as f64 + self.v[self.fv(i, j + 1, k)] as f64);
+                    let w = 0.5 * (self.w[self.fw(i, j, k)] as f64 + self.w[self.fw(i, j, k + 1)] as f64);
+                    kinetic += (u * u + v * v + w * w) * wet;
+                }
+            }
+        }
+        kinetic *= 0.5 * rho * dx64 * dx64 * dx64;
+        let rest = self.rest as f64;
+        let mut potential = 0f64;
+        for (height, lost) in self.eta.iter().zip(&self.eta_roundoff) {
+            let d = (*height as f64 - *lost as f64) - rest;
+            potential += d * d;
+        }
+        potential *= 0.5 * rho * self.g_eff as f64 * dx64 * dx64;
+        Energy3 { kinetic, potential, total: kinetic + potential }
+    }
+
+    /// Quantité de mouvement de la perturbation, en kg·m/s. **Même réserve que l'énergie** : un
+    /// état, pas un échange. Publiée parce qu'elle se lit par différence sur un domaine fermé,
+    /// où elle doit rester nulle à l'arrondi pour un mode stationnaire.
+    pub fn perturbation_momentum(&self) -> [f64; 3] {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let dx64 = dx as f64;
+        let mut m = [0f64; 3];
+        for j in 0..ny {
+            for i in 0..nx {
+                let c = self.col(i, j);
+                let h = self.eta[c] as f64 - self.eta_roundoff[c] as f64;
+                for k in 0..nz {
+                    let wet = ((h - k as f64 * dx64) / dx64).clamp(0., 1.);
+                    if wet == 0. {
+                        break;
+                    }
+                    m[0] += 0.5 * (self.u[self.fu(i, j, k)] as f64 + self.u[self.fu(i + 1, j, k)] as f64) * wet;
+                    m[1] += 0.5 * (self.v[self.fv(i, j, k)] as f64 + self.v[self.fv(i, j + 1, k)] as f64) * wet;
+                    m[2] += 0.5 * (self.w[self.fw(i, j, k)] as f64 + self.w[self.fw(i, j, k + 1)] as f64) * wet;
+                }
+            }
+        }
+        let factor = self.rho as f64 * dx64 * dx64 * dx64;
+        [m[0] * factor, m[1] * factor, m[2] * factor]
     }
 }

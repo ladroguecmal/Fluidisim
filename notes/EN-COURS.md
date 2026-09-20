@@ -107,8 +107,8 @@ Critères, écrits avant la mesure :
   **2,37·10⁻¹⁰ m³**, soit 7,4·10⁻¹² m de hauteur moyenne et 1,5·10⁻¹⁰ de l'amplitude du mode.
 - [x] **P6** — scène couplée à fond spectral réel : l'éponge échange **10,2 % du contenu
   perturbatif du domaine par seconde**, et rien n'en revient dans W. Résidu 1,28·10⁻¹⁰ m³.
-- [ ] **P7** — quantité de mouvement et énergie : ce qu'il faudrait pour les **fermer**, et le
-  diagnostic non fermé publié comme tel.
+- [x] **P7** — énergie et quantité de mouvement : **des états, pas des bilans**, et le module le
+  dit. Dissipation numérique du schéma sur la cuve fermée : **0,0935 % par seconde**.
 - [ ] **P8** — preuve publiée, tolérance **proposée** à l'utilisateur.
 - [ ] **P9** — rituel REPRISE §6.
 
@@ -167,6 +167,28 @@ de S302 qui tourne dans la **référence CPU** ; la scène de S302 elle-même vi
 perturbation : elle l'**efface**, à raison d'un dixième du contenu du domaine par seconde, et rien
 de cela n'entre dans W. Le raccord que R11 a jugé « invisible » l'est parce que l'éponge est douce,
 pas parce qu'elle conserve. Distinguer les deux demandait un compteur ; il existe.
+
+**Énergie et quantité de mouvement (P7) — ce qui se mesure, et ce qui ne se ferme pas.** Le bilan
+de masse est exact parce que le transport ne produit que des flux de colonne, qui télescopent.
+L'énergie et la quantité de mouvement n'ont pas cette chance : leur bilan demande le **travail de
+la pression aux faces de bord** et le **flux advectif**, que le pas ne calcule nulle part sous une
+forme récupérable. Les fabriquer après coup donnerait un nombre qui ressemble à un bilan sans en
+être un — l'erreur exacte qu'A302 reproche au raccord « invisible ». Le module publie donc des
+**états**, à lire par différence, et le dit dans sa documentation.
+
+Sur la cuve **fermée**, où il n'y a ni bande ni éponge, cette différence a pourtant un sens
+physique unique : toute décroissance est la **dissipation numérique du schéma**.
+
+| | 5 s, 2,33 période |
+|---|---|
+| énergie initiale | 100,55 J (cinétique + potentielle) |
+| énergie finale | 100,08 J |
+| perte | **4,67·10⁻³**, soit **0,0935 % par seconde** |
+
+C'est une grandeur que le dépôt n'avait pas, et elle borne une durée de vie : un domaine δ perd
+environ **un cinquième de pour cent d'énergie par période** sur ce cas. La quantité de mouvement,
+elle, oscille — les murs exercent des forces — et n'est pas un contrôle de conservation ici ; elle
+est publiée comme état.
 
 **Le défaut que l'essai de l'éponge a attrapé, et il vaut leçon.** Compter l'`increment` de
 l'éponge sur-compte de `eta_roundoff` à chaque colonne et à chaque pas : **0,86 %** du volume

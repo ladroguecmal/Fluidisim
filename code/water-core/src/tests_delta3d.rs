@@ -805,3 +805,36 @@ fn un_refus_ne_publie_pas_de_bilan_s310() {
     assert!(v.step_perturbation_mobile(time, 1000, 4000, &bg, Sponge3::default(), &Jobs).is_err());
     assert_eq!(v.balance(), bon, "le bilan doit survivre au refus, comme l'etat qu'il decrit");
 }
+
+#[test]
+fn energie_et_quantite_de_mouvement_disent_ce_qu_elles_valent_s310() {
+    let (mut v, _a) = volume(8, 6, 12, 0.25, 9.81);
+    // Au repos, tout est nul : pas d'écart de surface, pas de vitesse.
+    v.set_free_surface(&[2.; 48], 2.).unwrap();
+    let e = v.perturbation_energy();
+    assert_eq!((e.kinetic, e.potential, e.total), (0., 0., 0.));
+    assert_eq!(v.perturbation_momentum(), [0.; 3]);
+
+    // L'énergie potentielle est quadratique en l'écart : doubler l'amplitude la quadruple.
+    let bosse: Vec<f32> = (0..48).map(|c| 2. + 0.01 * ((c % 8) as f32 - 3.5)).collect();
+    v.set_free_surface(&bosse, 2.).unwrap();
+    let simple = v.perturbation_energy().potential;
+    let double: Vec<f32> = bosse.iter().map(|h| 2. + 2. * (h - 2.)).collect();
+    v.set_free_surface(&double, 2.).unwrap();
+    let quadruple = v.perturbation_energy().potential;
+    assert!(simple > 0.);
+    assert!((quadruple / simple - 4.).abs() < 1e-6, "rapport {}", quadruple / simple);
+
+    // Une vitesse uniforme donne une quantité de mouvement `ρ·V·u` sur la part mouillée.
+    v.set_free_surface(&[2.; 48], 2.).unwrap();
+    let u = vec![0.5f32; v.u.len()];
+    v.set_velocity(&u, &vec![0.; v.v.len()], &vec![0.; v.w.len()]).unwrap();
+    let m = v.perturbation_momentum();
+    // 48 colonnes de 2 m d'eau sur des mailles de 25 cm : 8 mailles pleines par colonne. Mais les
+    // **murs** portent une vitesse nulle (`close_walls`), et la vitesse au centre d'une maille est
+    // la moyenne de ses deux faces : les colonnes `i = 0` et `i = nx−1` n'en portent donc que la
+    // moitié. La somme des vitesses centrées vaut `ny·(nx−1)·u`, pas `ny·nx·u` — 21 et non 24.
+    let attendu = 1025. * (6. * 7. * 0.5) * 8. * 0.25f64.powi(3);
+    assert!((m[0] / attendu - 1.).abs() < 1e-6, "{m:?} contre {attendu}");
+    assert_eq!((m[1], m[2]), (0., 0.));
+}
