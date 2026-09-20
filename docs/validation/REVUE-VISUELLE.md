@@ -790,3 +790,35 @@ existe pourtant déjà — le jacobien), un **ciel physique** et une **expositio
    limite la plus dure du dispositif.
 
 Un mot par question suffit ; « je ne sais pas » reste une réponse utile.
+
+## Verdict R14 — reçu S308, 2026-09-20, avec la photographie de référence
+
+**Reçu.** Trois réponses, et un arbitrage qui vaut plus que les trois.
+
+1. **La troisième image est la plus proche d'une mer réelle** (`--meilleur --eau-physique=2`).
+   Les deux autres gardent « une impression de matériau trop bleu / trop propre ».
+2. **Plutôt plus sombre que plus clair** — et la formulation décrit un mécanisme, pas un goût :
+   « pas uniformément plus sombre, mais avec des creux plus denses, un premier plan plus profond,
+   et un contraste local plus marqué entre faces éclairées et zones ombrées. […] une eau plus
+   sombre, plus neutre, dont les **reflets clairs restent portés par le ciel et la géométrie, pas
+   par une couleur de base trop élevée**. » Pas de bleu saturé ni d'outremer.
+3. **La photographie de référence est fournie.** Cible visuelle utile, **pas** cible physique
+   calibrée : vent, focale, exposition, heure, état du ciel et réponse capteur restent inconnus.
+
+**Arbitrage, et il ferme un sujet.** « Le problème principal n'apparaît plus comme topologique.
+La géométrie semble suffisante pour poursuivre. Le travail prioritaire est désormais **optique** :
+ciel / exposition / absorption-couleur / diffusion aux crêtes / écume / gestion des hautes
+fréquences dans le reflet. » Et explicitement : **ne pas ouvrir de nouvelle correction de forme**
+avant d'avoir terminé ces briques ; une critique résiduelle sur les crêtes ne redeviendra
+informative qu'après.
+
+**Ce que cela décide pour le dépôt** :
+
+- la troisième image est la **base courante** ;
+- le point D2 d'[ADR-177](../adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md) est
+  tranché dans son principe — **le gain baisse**, la luminosité vient du ciel et de la géométrie ;
+  la valeur exacte reste à mesurer contre la photographie ;
+- les lots de forme (noyau exact du second ordre, capillaires parasites, asymétrie horizontale)
+  sont **suspendus**, pas retirés ;
+- la photographie ne peut pas servir de cible physique, mais elle peut servir de **cible de
+  statistiques d'image** — c'est ce que S308 construit.

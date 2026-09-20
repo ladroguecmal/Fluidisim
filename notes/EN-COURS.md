@@ -58,228 +58,63 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S307 — terminée : trois options acceptées étaient éteintes ; couleur dérivée (ADR-177) ; R14.
-Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, **accès web**.
-Entrée : le verdict, enfin — « **le rendu actuel est toujours mauvais** » — et une consigne de
-méthode : « va au-delà du guide, regarde les références liées, et les références des références,
-multiplie les étapes ». Verdict consigné dans [REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md).
+Session : S308 — en cours : la photographie devient une cible mesurable, puis on construit.
+Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
+Entrée : le **verdict R14**, complet, et la **photographie de référence**. Verdict et arbitrage
+consignés dans [REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md).
 
-**Ce que ce verdict veut dire, et pourquoi il change la méthode.** S304 a mesuré l'absence
-d'asymétries et l'a corrigée ; S306 a mesuré l'origine des stries et l'a rendue réglable. Deux
-corrections réelles, chacune reçue sur ses chiffres, et **l'image reste mauvaise**. Un défaut qui
-résiste à deux corrections mesurées est plus probablement un **terme absent** qu'un terme mal
-réglé. Donc : arrêter de raffiner ce qui existe, et aller chercher ce que le rendu ne contient
-pas du tout.
+**Ce que l'utilisateur tranche, et qui commande cette session.** La géométrie suffit ; le travail
+prioritaire est **optique** — ciel, exposition, couleur, diffusion aux crêtes, écume, hautes
+fréquences du reflet ; **aucune correction de forme ne s'ouvre avant**. Et sur la couleur : plus
+sombre, plus neutre, creux plus denses, contraste local plus marqué, **les reflets clairs portés
+par le ciel et la géométrie et non par une couleur de base trop élevée**.
 
-Capacité visée : **savoir, sourcé, ce qui manque à notre rendu pour qu'une mer soit crédible** —
-une liste ordonnée par ce qui se voit, chaque poste rattaché à une source primaire, chaque écart
-chiffré ou chiffrable sur nos propres images. Consommateur : la décision de construction (un ou
-plusieurs ADR) et les lots qui suivront.
+Capacité visée : **transformer la photographie en cible chiffrée.** Elle n'est pas une cible
+physique — vent, focale, exposition, heure et réponse capteur sont inconnus, l'utilisateur le dit
+et il a raison. Mais c'est une **image**, et une image se mesure : position d'horizon, gradient du
+ciel, histogramme de luma de la mer, couleur des creux contre celle des crêtes, contraste local,
+énergie haute fréquence, fraction de pixels très clairs (écume). Ces grandeurs se comparent **sans
+connaître la physique de la prise de vue**, à condition de les normaliser par la scène elle-même.
+Consommateur : les briques optiques que l'utilisateur vient de prioriser, qui cesseront d'être
+réglées à l'œil.
 
-Ce que je ne fais pas : choisir un coupable sans mesure — c'est exactement ce que S304 et S306
-ont fait, et deux fois ça n'a pas suffi ; reprendre les cinq arbitrages d'ADR-027 ; réduire
-ADR-127 ; prendre un chiffre de seconde main sans remonter à sa source (I-14).
+Ce que je ne fais pas : prétendre que la photographie calibre quoi que ce soit de physique ;
+ouvrir un lot de forme (l'utilisateur l'a explicitement suspendu) ; ajouter une dépendance au
+dépôt — la photographie est binaire et n'y entre pas (SPEC-005 §11.3), seules ses **mesures**.
 
-Critères, écrits avant la recherche :
-1. **Trois niveaux de lecture atteints** : les références du guide lues à la source ; leurs
-   propres références ; et l'état de l'art que le guide **ne cite pas**. Un niveau qui n'apporte
-   rien se dit tel quel.
-2. **Chaque poste identifié porte** : sa source primaire, ce que notre rendu en fait aujourd'hui
-   (ligne de code ou ADR), et l'ordre de grandeur de l'écart.
-3. **La liste est ordonnée par ce qui se voit**, pas par ce qui est facile — et l'ordre est
-   argumenté.
-4. **Rien n'est construit avant la décision**, et la décision cite la mesure.
+Critères, écrits avant la mesure :
+1. L'instrument sépare **ciel** et **mer** tout seul, par l'horizon qu'il détecte, et le dit.
+2. Chaque grandeur publiée est déclarée **comparable** ou **non comparable** entre une photo et un
+   rendu, avec la raison. Une grandeur qui dépend de l'exposition inconnue est normalisée ou
+   écartée — pas publiée comme si elle voulait dire quelque chose.
+3. L'écart entre notre meilleure image et la photographie est **chiffré poste par poste**, et
+   l'ordre des travaux en découle au lieu d'être supposé.
+4. Les scènes antérieures restent **au bit** à chaque étape.
 
 ### Plan
 
-- [x] **P1** — amorce, verdict consigné, plan seul.
-- [x] **P2** — niveau 1, **et un fait qui déclasse la recherche** : le rendu soumis n'était pas
-  le meilleur rendu du dépôt.
-- [x] **P3** — niveau 2 : les références **des** références, et l'état de l'art du rendu d'océan
-  que le guide ne cite pas.
-- [x] **P4** — niveau 3 : l'optique de l'eau et du ciel — couleur, absorption, diffusion, écume.
-- [x] **P5** — *(fait avant la synthèse, parce qu'il devenait urgent)* le remède de protocole :
-  `--meilleur`, la ligne d'options complète, la règle dans REVUE-VISUELLE, la leçon L349.
-- [x] **P6** — synthèse ordonnée : ce qui manque, sourcé, chiffré, rattaché à notre code.
-- [x] **P7** — la couleur de l'eau depuis ses sources, et ce qu'elle change à l'image.
-- [x] **P8** — décision : ADR-177 (la couleur se dérive), et la revue R14 qui remplace R12/R13.
-- [x] **P9** — rituel REPRISE §6. *(Écume, diffusion aux crêtes et spectre ECKV : déclarés en file, pas construits ici.)*
-
+- [x] **P1** — amorce, verdict et arbitrage consignés, plan seul.
+- [ ] **P2** — `outils/cible_image.py` : horizon, gradient du ciel, histogramme de la mer, couleur
+  creux/crêtes, contraste local, fraction claire. Mesure de la photographie.
+- [ ] **P3** — la même mesure sur nos images, et l'écart poste par poste.
+- [ ] **P4** — exposition et gain de couleur réglés **contre la mesure**, pas à l'œil.
+- [ ] **P5** — le ciel : gradient et bande d'horizon, contre la mesure.
+- [ ] **P6** — diffusion sous la surface aux crêtes, par le masque du jacobien.
+- [ ] **P7** — écume (Monahan), couverture calée sur la fraction claire mesurée.
+- [ ] **P8** — images soumises (R15), preuve.
+- [ ] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
 
-## P2 — la découverte qui passe avant toute la recherche
+**La photographie** : recadrée de son cadre de galerie — détecté par la **chromaticité**, le cadre
+étant achromatique là où l'image ne l'est jamais — 1070 × 712. Elle vit dans le répertoire de
+travail de la session, **pas dans le dépôt**. Ce qui entre dans le dépôt, ce sont ses mesures.
 
-**Pour la troisième revue consécutive, les images envoyées n'étaient pas celles du meilleur
-rendu du dépôt.** R11 tournait sous `--houle` seule (trouvé en S303). R12 et R13 tournaient
-**sans `--ciel-clair`**, c'est-à-dire avec la brume et le ciel de S211 — et non avec l'habillage
-construit en **S261 d'après la photo de référence de l'utilisateur lui-même**.
-
-J'ai d'abord **regardé** notre image, ce qu'aucune session n'avait fait ; puis lu le nuanceur.
-Le chemin par défaut (`p.eye.w = 0`), celui de R12 :
-
-```wgsl
-mix(color, vec3(0.66,0.78,0.84), 1 - exp(-length(v.local)/500.0))
-```
-
-**Une brume dont la longueur caractéristique est 500 m**, sur une scène qui porte à 1 500 m. À
-500 m il reste 37 % de l'image, à 1 000 m 14 %. Le chemin `--ciel-clair` fogge à **6 km** et
-porte un ciel à dégradé et nuages. Mesuré sur la même mer, même instant, même caméra :
-
-| | moyenne linéaire (bande d'eau) | B/G | B/R | plus sombre B/G |
-|---|---|---:|---:|---:|
-| **R12 tel qu'envoyé** | R 0,102 G 0,198 B 0,234 | **1,18** | 2,29 | 1,24 |
-| **`--ciel-clair`** | R 0,059 G 0,122 B 0,247 | **2,02** | 4,23 | 2,84 |
-
-L'écart se voit à l'œil immédiatement : l'une est une nappe gris-vert, l'autre une mer bleue avec
-un horizon. **ADR-176 D5 demandait de déclarer les options d'une revue** ; S304 a déclaré les
-options de **vagues** (a/b/c) et pas celles d'**environnement**, parce que personne ne pensait au
-ciel comme à une option. Or la mer est un miroir : le ciel est la moitié de l'image.
-
-**Ce que cela ne dit pas** : que le rendu est bon. Avec `--ciel-clair` il est bien meilleur et
-reste insuffisant — tapis de scintillement uniforme, aucune écume, et un **artefact brun-olive**
-en moyenne distance que la brume cachait jusqu'ici.
-
-## P2 — recherche de niveau 1 : les références du guide portent sur la géométrie, pas sur l'aspect
-
-Lues à la source, les douze références du guide sont des références de **forme** (FFT, Gerstner,
-clipmap, projected grid) et de **physique côtière** (SWAN, TMA, Celeris, SWE, CEM). Exemple
-mesurable : [GPU Gems ch. 1](https://developer.nvidia.com/gpugems/gpugems/part-i-natural-effects/chapter-1-effective-water-simulation-physical-models)
-(2004) donne la limite de boucle de Gerstner `Σ Q_i w_i A_i ≤ 1`, les normales analytiques, et
-**quatre** vagues géométriques plus ~15 vagues de texture. Notre rendu est très au-delà.
-
-**Aucune des douze ne traite** : la couleur de l'eau, l'absorption, la diffusion, l'écume, le
-ciel physique, l'exposition. Or c'est exactement ce que notre rendu traite **par des constantes
-écrites à la main**. Le guide le dit d'ailleurs lui-même en §10.2, sans sources.
-
-## P2 — la couleur de l'eau n'a aucune provenance, et elle est fausse d'un facteur 4 à 9
-
-La constante du nuanceur est `vec3(0.012, 0.105, 0.13)` (défaut) ou `vec3(0.004, 0.060, 0.170)`
-(ciel clair). Aucune provenance — I-14 l'interdit, et personne ne l'avait relevé.
-
-Calcul depuis les sources primaires : absorption de l'eau pure
-([Pope & Fry 1997](https://omlc.org/spectra/water/data/pope97.txt), données téléchargées),
-diffusion moléculaire `b = 0,0029·(550/λ)^4,30` avec `b_b = b/2` (Morel 1974), réflectance
-d'irradiance `R(0⁻) ≈ 0,33·b_b/(a + b_b)` :
-
-| λ | `a` (1/m) | `b_b` (1/m) | `R(0⁻)` |
-|---|---:|---:|---:|
-| 450 nm | 0,00922 | 0,00344 | **0,0896** |
-| 550 nm | 0,0565 | 0,00145 | **0,00826** |
-| 650 nm | 0,340 | 0,00071 | **0,00068** |
-
-**B/G attendu = 10,9 ; B/R = 131.** Nos constantes donnent B/G = **1,24** (défaut) et **2,83**
-(ciel clair) : **9 fois et 3,8 fois trop vert**. Et la mesure le confirme dans l'image : les
-pixels les plus sombres — ceux où l'on voit dans l'eau et non le ciel — rendent exactement le
-rapport de la constante (1,24 et 2,84).
-
-## P2 — ce que la recherche a déjà rapporté pour la suite
-
-- **Spectre ECKV / Elfouhaily et al. 1997** ([formules complètes](https://www.oceanopticsbook.info/view/surfaces/level-2/wave-variance-spectra-examples)) :
-  un spectre unifié gravité → capillarité, avec `k_m = 370 rad/m`, `c_m = 0,23 m/s`, un âge de
-  vague `Ω_c` et un étalement `Δ(k) = tanh[a₀ + a_p(c/c_p)^2,5 + a_m(c_m/c)^2,5]`. Il **remplace
-  à lui seul** notre queue `f⁻⁴` continuée à la main (ADR-157) **et** le calage empirique sur
-  Cox–Munk (ADR-158) : la variance de pente en sort, elle ne s'ajuste plus.
-- **Écume** : couverture `W = 3,84·10⁻⁶·U₁₀^3,41` (Monahan & O'Muircheartaigh 1980), réflectance
-  effective de Koepke **0,22** — pas 1. À `U₁₀ ≈ 7,8 m/s` (notre mer de vent, `Hs` 1,5 m), cela
-  fait **0,42 % de couverture**. Faible, mais c'est le seul objet de l'image qui donne l'échelle,
-  et il est **totalement absent**.
-- **Bruneton, Neyret & Holzschuch 2010**, *Real-time Realistic Ocean Lighting using Seamless
-  Transitions from Geometry to BRDF* (Computer Graphics Forum 29(2)) : la référence exacte de
-  notre problème de transition géométrie → BRDF. Le guide ne la cite pas.
-
-## P2 — correction d'une affirmation que j'avais écrite trop vite
-
-J'avais noté un « artefact brun-olive en moyenne distance ». **Mesuré : il n'existe pas.** Zéro
-pixel sur 921 600 n'a `R > B`. Les taches que je prenais pour un défaut ont `B/G` = 1,36, celui
-du **ciel** (1,47) : ce sont des reflets de la couche de nuages, pas un bug. Ce qui est vrai en
-revanche, c'est que l'eau y paraît terne — parce que partout où l'on voit *dans* l'eau plutôt que
-le ciel, on voit notre constante trop verte. L'œil avait raison sur le symptôme et tort sur la
-cause.
-
-## P3 — l'état de l'art que le guide ne cite pas, et qui répond à notre question
-
-**Bruneton et al. 2010**, lu par son implémentation de référence
-([portage Unity](https://github.com/Scrawk/Brunetons-Ocean/blob/master/Assets/BrunetonsOcean/Shaders/Ocean.shader)) :
-
-```
-float2 sigmaSq = tex3D(_Variance, ...);          // variance de pente, par pixel
-float fresnel  = 0.02 + 0.98 * MeanFresnel(V, N, sigmaSq);
-col += ReflectedSunRadiance(SUN_DIR, V, N, Tx, Ty, sigmaSq) * Lsun;
-col += MeanSkyRadiance(V, N, Tx, Ty, sigmaSq) * fresnel;
-float3 Lsea = _SeaColor * Esky / M_PI;  col += Lsea * (1.0 - fresnel);
-```
-
-**Ce que cela nous apprend, et c'est important** : le remède au tapis de scintillement n'est pas
-de **couper** les pentes non résolues (ce que fait notre `--coupure` de S306, et ce que je
-proposais) mais de les **convertir en rugosité de BRDF** — Fresnel **moyen** sur la distribution,
-soleil et ciel intégrés sur elle. On garde toute l'énergie **et** on perd l'aliasing. **Nous
-avons déjà cela** : c'est `--reflets-filtres` ([ADR-161](../docs/adr/ADR-161-reflets-de-la-queue-non-resolue.md),
-accepté en **R7**) — et il n'était pas actif non plus dans les images de R11, R12 et R13.
-
-Sa couleur d'eau : `(0.0039, 0.046, 0.09)`, soit **B/G = 1,96, B/R = 23** — appliquée à
-l'irradiance du **ciel**, donc bien plus bleue en sortie que notre constante appliquée à une
-constante. Et **aucune écume** : confirmation qu'elle est une couche à part, absente partout.
-
-**Sea of Thieves, SIGGRAPH 2018** (Ang et al.) : la couleur mélange une *deep water colour* et
-une *sub-surface colour* selon l'angle de vue, la direction du soleil **et un masque de crête
-tiré du déplacement horizontal de la FFT** — plus la crête est comprimée, plus la lumière
-traverse une faible épaisseur, plus la diffusion se voit. L'écume naît aux crêtes, puis est
-floutée avec rétroaction pour simuler sa dispersion.
-**Ce masque de crête, nous l'avons déjà** : c'est le **déterminant du jacobien** de CWM, calculé
-à chaque pixel depuis S260 et **jamais employé pour autre chose qu'un repli**.
-
-## P4 — les deux postes que notre rendu traite par des constantes, chiffrés
-
-1. **Couleur du corps d'eau** — §P2 ci-dessus : B/G attendu 10,9, obtenu 1,24 (défaut) / 2,83
-   (ciel clair).
-2. **Perspective aérienne** — brume à 500 m par défaut, 6 km en ciel clair, contre des dizaines
-   de kilomètres de portée visuelle en air marin propre.
-3. **Écume** — `W = 3,84·10⁻⁶·U₁₀^3,41` (Monahan & O'Muircheartaigh 1980), réflectance effective
-   **0,22** (Koepke), soit **0,42 %** de couverture à `U₁₀ ≈ 7,8 m/s`. Absente.
-4. **Diffusion sous la surface aux crêtes** — absente ; le masque existe déjà (jacobien).
-5. **Spectre** — ECKV/Elfouhaily remplacerait la queue `f⁻⁴` **et** le calage Cox–Munk.
-
-## P5 — le remède de protocole
-
-`--meilleur` active `--vagues --modulation --ciel-clair --reflets-filtres` ; la liste vit dans
-`main.rs` à côté du code qui la consomme. Chaque ligne de capture publie **toutes** les options.
-Leçon **L349**. Scènes de référence toujours au bit.
-
-**Mesure qui corrige S306** : `--reflets-filtres` divise `hf_rms` par **2,5** (15,05 → 5,97) sans
-retirer d'énergie de pente, là où `--coupure=2` n'atteignait 2,2 qu'en en supprimant. Le bon
-levier existait et était éteint.
-
-## P7 — la couleur, et une erreur de ma part corrigée par l'image
-
-`--eau-physique[=gain]` : la teinte vient de `R(0⁻) = (0,00068 ; 0,00826 ; 0,08960)` dérivée de
-Pope & Fry 1997 et Morel 1974, **et le gain est un paramètre libre déclaré**, qui tient lieu
-d'irradiance de ciel (`E/π` chez Bruneton).
-
-**Première tentative, fausse, et il faut le dire.** J'avais remis `R(0⁻)` à la **luminance** de
-la constante historique (facteur 4,476), pour ne changer que la teinte. Résultat : un bleu
-outremer artificiel — et pour cause, le bleu valait alors **0,40 de réflectance**, ce qu'aucune
-eau ne fait (le maximum physique est 0,09). La renormalisation compensait en réalité une
-irradiance de ciel absente. **Regarder l'image l'a montré en une seconde ; aucun chiffre ne
-l'avait dit.**
-
-`gain = 1`, c'est-à-dire `R(0⁻)` **nue**, donne la meilleure image que le projet ait produite :
-creux bleu marine profonds, crêtes qui renvoient le ciel, contraste franc. `gain = 2` est plus
-clair. **Le gain est un arbitrage visuel** : R14.
-
-Scènes de référence toujours identiques au bit (`--eau-physique` éteint par défaut).
-
-**Ce que le rendu contient aujourd'hui, à avoir en tête pendant la recherche** : mer multimodale
-JONSWAP à étalement `cos^2s` (ADR-156), queue d'équilibre `f⁻⁴` continuée à la main (ADR-157),
-rugosité calée sur Cox–Munk (ADR-158), queue en pentes par pixel (ADR-155), reflets de la queue
-non résolue (ADR-161), ciel **procédural** (ADR-162), CWM pour les crêtes pointues, asymétries
-d'ADR-176. **Ce qu'il ne contient pas du tout** : écume, spray, micro-déferlement, couleur d'eau
-dérivée d'un modèle d'absorption, diffusion sous la surface, ciel physique, exposition contrôlée.
-La couleur de base est **une constante RGB écrite dans le nuanceur** (`vec3(0.012,0.105,0.13)`,
-ou `vec3(0.004,0.060,0.170)` en habillage « ciel clair »).
-
----
-
+**Ce que l'œil voit déjà sur elle, à confirmer par la mesure** : mer très sombre, creux presque
+noirs ; crêtes gris-bleu clair ; ciel à gradient **fort** (blanc-cyan à l'horizon, bleu profond en
+haut) avec une bande claire mince juste au-dessus de l'horizon ; **très peu d'écume**, quelques
+mouchetures ; **pas de chemin de miroitement**, le soleil n'est pas dans le champ ; mer de vent
+courte et raide, pas de houle longue dominante.
 ## Archive — notes de S304 (lot de la mer, en attente du verdict R12)
 
 **Construit** : `tayfun()` et `lagged_eps()` dans `water.wgsl`, accumulations par système dans la
