@@ -58,38 +58,64 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S304 — terminée : asymétries construites et reçues, revue R12 demandée.
+Session : S305 — en cours : critère 2 de la porte B sur les cas de cuve.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle.
-Entrée : « Continue », 2026-09-20, après le verdict R11 et [ADR-176](../docs/adr/ADR-176-asymetries-de-la-surface-rendue.md).
+Entrée : « Reprends le projet », 2026-09-20, jeton libre, copie unique, master propre.
 
-Capacité visée : **construire ADR-176** — l'asymétrie verticale (second ordre en bande étroite par
-système) et l'asymétrie des pentes (modulation de la queue retardée) dans le rendu, avec la
-réception écrite en §3 de l'ADR. Consommateur : la revue **R12**, aux poses de R11, options de
-topologie déclarées.
+Capacité visée : **le pas de production GPU reçu contre la référence 3D sur les cas de cuve**
+d'[ADR-175](../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) §4.1 — critère **2**
+de la porte B, le seul de ses quatre critères dont rien n'est encore mesuré. Ce que cela demande :
+un **mode sans fond** de `Step3`, c'est-à-dire un fond d'amplitude nulle, murs au lieu d'éponge, et
+l'état initial du mode oblique (1,1). Consommateur : la porte B, dont le critère 3 attend par
+ailleurs le verdict R12.
 
-Critères, repris d'ADR-176 §3 sans les rouvrir :
-1. Statistiques sur la même réalisation : `Sk` ≥ 0,06 (contre 0,003), `c₀₃` entre −0,13 et −0,18,
-   `c₂₁` à ±0,02 de −0,058, `c₄₀` entre 0,26 et 0,45, `mss` inchangée à 2 %.
-2. GPU contre CPU aux sondes : 3 mm en déplacement, 5·10⁻⁴ en pente (tolérances de S260).
-3. Scènes antérieures **au bit** : défaut, `--houle`, `--vagues` sans modulation, vérifications.
-4. Écart au jeu publié, avant et après.
-5. Coût GPU eau à 1280×720, deux poses, secteur relevé aux deux bornes.
-6. Captures R12 et demande de revue **déclarant les options**.
+Ce que je ne fais pas : réécrire quoi que ce soit de S299/S300/S301 (L137) — le mode sans fond
+passe par la donnée, pas par une seconde source ; toucher au rendu ou à ADR-176 ; relever un
+seuil d'ADR-144.
 
-Ce que je ne fais pas : toucher au cœur ou à B (D3 : le rendu seul) ; combler le noyau exact du
-second ordre (borne prudente retenue) ; ajouter capillaires, écume ou asymétrie horizontale.
+Critères, écrits avant la mesure (ADR-175 §4.1 cas 3 et §4.2) :
+1. **Le mode sans fond est nul** : champ de fond publié par la carte identiquement nul (vitesses,
+   `eta`, `p_dyn`, `grad_p_dyn`), et pas de production identique **au bit** aux bancs de S301
+   quand le fond réel est remis.
+2. **Dispersion** : la carte tient `ω² = g·k·tanh(k·h)` sur le mode (1,1) d'une cuve 8×4 m,
+   `h` = 4 m — erreur de phase **publiée et décroissante** en raffinant `nx` = 16/32/48, comme la
+   référence (S295 : 0,176 % à n = 48).
+3. **Production contre référence** : écart de hauteur **sous 3 mm** et rapporté à l'amplitude,
+   pente publiée, **sur une durée déclarée**. L'amplitude du cas est choisie pour que les 3 mm
+   aient un sens (la référence de S296 travaillait à 1 mm) ; le régime reste linéaire.
+4. **Le chaînon est nommé** : la référence reçue est `step_surface_mobile` (surface totale), le
+   pas GPU reproduit `step_perturbation_mobile` (perturbation sur fond). Les deux sont comparés
+   **l'un à l'autre** à fond nul, pour que l'écart carte/référence soit attribuable.
 
 ### Plan
 
-- [x] **P1** — amorce, plan seul.
-- [x] **P2** — uniforme, nuanceur et référence CPU : second ordre par système et modulation
-  retardée ; activation avec `--vagues --modulation`.
-- [x] **P3** — critères 2 et 3 : GPU contre CPU aux sondes, scènes antérieures au bit.
-- [x] **P4** — critères 1, 4 et 5 : statistiques, écart au jeu, coût.
-- [x] **P5** — captures R12 et demande de revue.
-- [x] **P6** — preuve, rituel REPRISE §6.
+- [x] **P1** — amorce, prise du jeton, plan seul ; demande du verdict R12 à l'utilisateur.
+- [ ] **P2** — banc `--delta3d-cuve` : mode sans fond de `Step3`, murs, état initial du mode
+  oblique ; critère 1 (fond nul, bancs de S301 au bit).
+- [ ] **P3** — critère 4 : `step_perturbation_mobile` à fond nul contre `step_surface_mobile`
+  sur le même cas, CPU contre CPU — le chaînon entre la référence reçue et ce que la carte porte.
+- [ ] **P4** — critères 2 et 3 : carte contre référence, raffinement 16/32/48, écart de hauteur,
+  pente, erreur de phase, durée déclarée.
+- [ ] **P5** — preuve `CUVE-GPU-S305`, réception écrite des quatre critères.
+- [ ] **P6** — rituel REPRISE §6.
 
 ### Notes de reprise
+
+*(à remplir en cours de session)*
+
+**Ce qui est déjà su au départ, et n'est pas à re-mesurer.** La référence 3D tient le mode oblique
+(S295 : 0,176 % à n = 48, décroissante ; S296 : la même à surface mobile, `A` = 1 mm). Le pas GPU
+est reçu étage par étage contre le cœur **sur le cas S298** (fond spectral réel, éponge) — P4 de
+S301 : hauteur 2,4·10⁻⁷ m, vitesses 1,4·10⁻⁵ m/s, pression 0,38 Pa. Ce qui manque est exactement
+le cas **sans fond et à murs**, où la carte n'a jamais tourné.
+
+**Attention connue** : `Step3::on_device` refuse `count == 0` (« fond sans composante ») — le mode
+sans fond passe donc par **une** composante d'amplitude nulle, pas par zéro composante. La
+compensation `exact_difference` de S301 (L346) et la bascule de mouillure A297 restent en vigueur.
+
+---
+
+## Archive — notes de S304 (lot de la mer, en attente du verdict R12)
 
 **Construit** : `tayfun()` et `lagged_eps()` dans `water.wgsl`, accumulations par système dans la
 boucle existante de `band_cwm` (branches explicites — FXC refuse l'indexation dynamique en

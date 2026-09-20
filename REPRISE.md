@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 02:41 +02:00
+JETON            : occupé
+Battement        : 2026-09-20 09:43 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
-Session en cours : aucune — S304 terminée
+Session en cours : S305 — **critère 2 de la porte B sur les cas de cuve** (ADR-175 §4.1 cas 3) : mode sans fond de `Step3` contre la référence 3D. Verdict R12 demandé à l'utilisateur en parallèle, le lot ne l'attend pas
 Dernière session : S304 — ADR-176 construite et reçue sur ses cinq critères ; revue R12 demandée
-Session suivante : S305 — **d'abord le verdict R12** (REVUE-VISUELLE §17) : trois états de la mer, options déclarées. Sans verdict, travail utile sans lui : noyau exact du second ordre pour deux systèmes (`Sk` vrai entre 0,066 et 0,150), puis critère 2 de la porte B sur les cas de cuve de §4.1 (mode sans fond de `Step3`), puis charge utile par face du fond (26 flottants → 12 : plafond de domaine et coût).
+Session suivante : fixée au rituel
 Maillons        : 0 — capacité S304 : les deux asymétries d'une mer observée dans le rendu (Sk 0,066, c₀₃ −0,155, c₂₁ sur Cox–Munk sans être visé), pour +0,25 % de coût et sans toucher au cœur ; consommateur : la revue R12 ; preuve ASYMETRIES-S304
 ```
 
