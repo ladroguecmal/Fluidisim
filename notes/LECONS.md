@@ -6081,3 +6081,22 @@ mouchetage clair — 2,4 fois trop —, c'est-à-dire en trichant sur la défini
 local, ou global. Une grandeur cible qui vit à une échelle spatiale ne se corrige qu'avec un outil
 qui agit à cette échelle. Sinon on optimise longtemps, on trouve un optimum, et l'optimum n'est
 pas la réponse.
+
+## L352 — Noter un manque n'est pas le combler, et le compte rendu ne fait pas la différence
+
+S308/S309. La demande de l'utilisateur portait sur **deux** objets : confronter la stratégie à
+l'état réel du dépôt **et** à la liste de contrôle du projet terminé. S308 a fait le premier, a
+écrit dans ses limites que le décompte du second « date de S276 et sous-estime l'état de δ 3D » —
+et a rendu compte comme si la demande était close. Le manque était **écrit, daté, exact**, et
+personne n'aurait pu dire que la session l'avait caché. Il n'était simplement pas comblé.
+
+C'est un piège propre aux sessions honnêtes : une limite bien écrite **ressemble** à un travail
+fini, parce qu'elle prouve qu'on a regardé. Elle prouve seulement cela.
+
+**La règle.** Quand une demande porte sur plusieurs objets, les énumérer dans le plan, un par
+étape. Une limite écrite sur l'un d'eux devient une étape, pas une phrase de conclusion. Et au
+compte rendu, relire la demande — pas son propre plan : le plan a déjà oublié ce qu'il n'a pas
+retenu.
+
+Famille de **L349** : ce qu'il faut penser à faire ne se fait pas. La forme qui tient est une
+étape déclarée d'avance, comme la liste du drapeau `--meilleur` vit dans le code.

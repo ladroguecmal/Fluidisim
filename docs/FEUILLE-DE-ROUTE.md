@@ -269,10 +269,14 @@ date. Profil de travail de la porte C : [ADR-174](adr/ADR-174-arbitrages-du-2026
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 49 partiels,
-68 absents — décompte antérieur à S278–S280, dont la section 9 a bougé. Ce chiffre ne mesure pas
-l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté. Il mesure autre chose,
-qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la réception**.
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 51 partiels,
+66 absents — **recalculé point par point en S309**, le total de S276 étant faux de deux unités. Ce
+chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
+Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
+réception**, et entre S276 et S308 le dépôt a écrit un solveur 3D, l'a porté sur GPU et l'a rendu
+en direct **sans amener un seul point jusqu'à son périmètre final**. Rangés par système
+([TROIS-SYSTEMES-S308](registres/TROIS-SYSTEMES-S308.md) §8) : A 20, B 29, C 7, et **64 hors des
+trois** — la stratégie d'ADR-178 couvre 56 points sur 120, le reste venant après par construction.
 
 Les quatre manques qui commandent l'ordre ci-dessus, tous mesurés :
 

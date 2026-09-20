@@ -15561,3 +15561,63 @@ redéfinis à la réception de la nouvelle consigne). L237 tenu. Deux erreurs é
 dans la session : le miroitement présenté comme coupable en P5 — P6 l'a réfuté — et un `min`
 d'écrêtage ajouté dans `courbe_tonalite.py` en croyant expliquer un écart qui venait d'ailleurs ;
 le `min` est juste, l'explication était fausse, et le fichier le dit.
+
+## S309 — 2026-09-20 — la moitié de la demande que S308 n'avait pas faite
+
+**Entrée.** La stratégie en trois systèmes, **renvoyée telle quelle** par l'utilisateur après
+S308. Elle demandait deux confrontations : à l'**état réel du dépôt** — faite, `TROIS-SYSTEMES-S308`
+— et à la **liste de contrôle du projet terminé** — pas faite. S308 s'était contentée d'écrire, en
+limites, que son décompte datait de S276 et sous-estimait δ 3D. **Noter un manque n'est pas le
+combler**, et la session avait rendu compte comme si la demande était close.
+
+**Changé.** Quinze points de la liste retouchés, chacun citant la preuve qui le modifie. L'essentiel
+tient en trois lignes : **4.1 n'est plus « manque la 3D »** (MAC x-y-z reçu contre HOS à 0,148 %,
+production GPU, cuve à 3·10⁻⁷ m pour 3 mm) ; **4.19 n'est plus « manquent le GPU et la 3D »**
+(0,84 ms à 64 cycles sur 27 648 mailles, 4,62 ms sur la scène de 376 320) ; **8.7 porte δ 3D rendu
+en direct** à 197 Hz. Trois points sont revus **en moins bien**, parce que S308 les avait trouvés
+surestimés : 4.8 est une absence de **chemin** et non de réglage, 4.18 n'a jamais eu de bilan à
+l'interface, 4.7 repose sur un jugement visuel jamais chiffré.
+
+**Décompte recalculé point par point, pas corrigé à vue : 3 validés, 51 partiels, 66 absents.** Le
+total de S276 était faux de deux unités — la ligne « Socle » comptait encore 1.4 en absent alors
+que S278 l'avait rendu partiel, ce que l'audit S293 avait signalé sans refaire la table. Un seul
+point change de catégorie aujourd'hui (9.1). **Aucun ne devient validé** : entre S276 et S308 le
+dépôt a écrit un solveur 3D, l'a porté sur GPU et l'a rendu en direct **sans amener un seul point
+de cette liste à son périmètre final**.
+
+**Les 120 points rangés par système** (`TROIS-SYSTEMES-S308` §8) : A 20, B 29, C 7, **hors des
+trois 64**. Trois lectures. La stratégie couvre **56 points sur 120** — le reste (V, rendu, budget,
+multijoueur, grande échelle, outillage, validation) vient après, par construction : *finir A, B et
+C ne fait pas le moteur fini, cela en fait la moitié dont tout le reste dépend*. B est l'endroit où
+le moteur reste à écrire — 23 absents sur 29 —, mais la **surface non graphe en commande cinq à
+elle seule**. Et une phrase de S308 est **bornée** : « A est une base avancée » vaut pour la mer de
+vent et de houle en eau profonde uniforme, pas pour les douze points absents de A — lacs,
+rivières, canaux, bathymétrie, hauts-fonds, courants 3D, tsunamis, explosions, déferlement de W,
+écume. **Or l'objectif nomme les plages et les rivières.** Le verdict « A suffit » tenait pour le
+couplage ; il ne tenait pas pour le périmètre.
+
+**Une erreur de S308 corrigée, et rendue impossible à répéter.** Ses battements après 13:12 étaient
+**extrapolés au lieu d'être lus** — le dernier valait 1 h 30 de plus que l'heure réelle. L237
+l'interdit depuis longtemps ; rien ne le vérifiait. Ce n'est pas cosmétique : AGENTS.md fait d'un
+jeton `occupé` de moins de deux heures un **refus de reprise**, donc un horodatage avancé bloque
+silencieusement la session suivante. Remède **exécutable** (L349) : `etat_projet.py --check` refuse
+un battement dans le futur, et ses quatre essais prennent pour contre-exemple l'erreur réelle de
+S308 plutôt qu'un cas inventé. Angle mort **A303**.
+
+**Preuves et limites.** Aucun banc exécuté, aucun coût mesuré : les états cités sont ceux de leurs
+preuves, à leur date. Le rangement A/B/C est **dérivé de l'énoncé** de chaque point ; trois points
+sont à cheval et ont reçu leur système principal, dit dans le texte (4.18 en C, 6.7 en B, 7.1 en
+A). Le décompte par système a été calculé, pas estimé.
+
+**Non-fait.** Le lot 1 d'ADR-178 — les compteurs de conservation — n'est pas ouvert. Rien du code
+de simulation n'a été touché.
+
+**Rituel.** Maillons **1**, et c'est délibéré. Cette session a produit une **carte** et un
+**contrôle**, pas une capacité du système : aucun critère « reçu si » d'une porte n'a avancé, et le
+seul point de la liste qui change de catégorie le doit à S278, pas à S309. Compter zéro ici serait
+exactement la dérive que BILAN-GLOBAL-S293 §3.4 reproche au dépôt. **La session suivante prend le
+lot 1 et en sort une capacité mesurée**, ou le troisième maillon devra être justifié.
+
+*Tenue du plan* : cinq étapes, un découpage déclaré (P4, le contrôle exécutable, séparé du rituel).
+L237 tenu cette fois — horloge lue avant chaque battement, y compris une correction en cours
+d'étape quand j'ai recommencé à extrapoler de onze minutes.

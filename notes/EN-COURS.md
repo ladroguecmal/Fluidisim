@@ -58,7 +58,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S309 — la liste du projet fini confrontée aux trois systèmes.
+Session : S309 — **terminée**. La liste du projet fini dit la vérité sur δ, ses 120 points
+savent à quel système ils appartiennent, et le battement du jeton est désormais vérifié.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : la stratégie en trois systèmes, **renvoyée telle quelle** par l'utilisateur après S308.
 Elle demandait deux confrontations : à l'**état réel du dépôt** — faite, `TROIS-SYSTEMES-S308` —
@@ -90,7 +91,7 @@ Critères, écrits avant :
 - [x] **P4** — *(découpage déclaré)* le contrôle **exécutable** du battement dans
   `outils/etat_projet.py --check`, avec ses quatre essais. Une consigne d'exactitude sans contrôle
   n'est pas tenue — L349 appliquée à l'heure.
-- [ ] **P5** — rituel REPRISE §6.
+- [x] **P5** — rituel REPRISE §6.
 
 ### Notes de reprise
 

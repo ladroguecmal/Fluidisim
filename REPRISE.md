@@ -8,19 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 13:50 +02:00
+JETON            : libre
+Battement        : 2026-09-20 13:52 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S309 — la **liste du projet fini** confrontée aux trois systèmes : l'utilisateur l'a demandée explicitement et S308 ne l'a pas faite. Ses états datent de S276 et ignorent la 3D de δ
-Dernière session : S308 — photographie de R14 chiffrée, lot du rendu **clos par la mesure**, stratégie en trois systèmes actée ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md), [confrontation](docs/registres/TROIS-SYSTEMES-S308.md))
-Session suivante : fixée au rituel
-Maillons        : 0 — capacité S308 : une décision qui lève un blocage en nommant le lot exécutable ; consommateur : le lot 1 d'ADR-178 D7 ; preuve : TROIS-SYSTEMES-S308
-
-CORRECTION S309, 2026-09-20 : les battements écrits par S308 après 13:12 — 13:33, 14:02,
-14:41, 14:52, 15:14 — étaient **extrapolés, pas lus**. L237 demande une lecture d'horloge par
-commit d'étape, et S308 ne l'a faite qu'une fois. Le dernier battement de S308 valait donc
-1 h 30 de plus que l'heure réelle : une session suivante l'aurait lu dans le futur. Les commits
-de S308 gardent leurs messages ; seul le jeton est corrigé, ici et au journal.
+Session en cours : —
+Dernière session : S309 — la **liste du projet fini** confrontée aux trois systèmes : quinze points retouchés, décompte recalculé (3 / 51 / 66), les 120 points rangés en A 20, B 29, C 7 et 64 hors des trois ([§8](docs/registres/TROIS-SYSTEMES-S308.md)) ; et le battement du jeton devenu vérifiable (A303)
+Session suivante : **lot 1 d'ADR-178 D7 — les compteurs de conservation** (masse, quantité de mouvement, énergie à l'interface δ ↔ B/W ; volume d'un domaine fermé), sur la cuve de S305 et la scène de S302. Angle mort **A302**
+Maillons        : 1 — S309 a produit une **carte** et un **contrôle**, pas une capacité : aucun critère « reçu si » n'a avancé, et le seul point de liste qui change de catégorie le doit à S278. Compter zéro ici serait la dérive que BILAN-GLOBAL-S293 §3.4 reproche au dépôt
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

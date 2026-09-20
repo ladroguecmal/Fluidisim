@@ -302,7 +302,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 
 Les anciens récits de cet index restent dans Git à `dfd1507`. Refonte S227 : ne plus y ajouter
 les comptes rendus déjà présents au journal. L’inventaire se recalcule avec
-`python outils/etat_projet.py`. Les images locales de banc (ADR-124) se regardent avec
+`python outils/etat_projet.py` ; `--check` vérifie navigation, plafonds et, **depuis S309**, que le battement du jeton n'est pas dans le futur (L237, A303). Les images locales de banc (ADR-124) se regardent avec
 `python outils/apercu_ppm.py <image.ppm>`, qui écrit un PNG à côté du PPM. Une image de mer se
 **mesure** avec `python outils/cible_image.py [--horizon=<y>] <image.ppm>…` (S308 : horizon,
 histogramme, couleur, contraste local, fraction claire, chaque grandeur déclarée comparable ou
