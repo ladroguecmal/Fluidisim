@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 13:52 +02:00
+JETON            : occupé
+Battement        : 2026-09-20 14:00 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : —
-Dernière session : S309 — la **liste du projet fini** confrontée aux trois systèmes : quinze points retouchés, décompte recalculé (3 / 51 / 66), les 120 points rangés en A 20, B 29, C 7 et 64 hors des trois ([§8](docs/registres/TROIS-SYSTEMES-S308.md)) ; et le battement du jeton devenu vérifiable (A303)
-Session suivante : **lot 1 d'ADR-178 D7 — les compteurs de conservation** (masse, quantité de mouvement, énergie à l'interface δ ↔ B/W ; volume d'un domaine fermé), sur la cuve de S305 et la scène de S302. Angle mort **A302**
-Maillons        : 1 — S309 a produit une **carte** et un **contrôle**, pas une capacité : aucun critère « reçu si » n'a avancé, et le seul point de liste qui change de catégorie le doit à S278. Compter zéro ici serait la dérive que BILAN-GLOBAL-S293 §3.4 reproche au dépôt
+Session en cours : S310 — **lot 1 d'ADR-178 D7 : les compteurs de conservation**. Masse d'abord, sur la cuve de S305 et la scène de S302 ; A302 doit cesser d'être une phrase et devenir un nombre
+Dernière session : S309 — liste du projet fini confrontée aux trois systèmes (3 / 51 / 66 ; A 20, B 29, C 7, 64 hors des trois), battement du jeton rendu vérifiable
+Session suivante : fixée au rituel
+Maillons        : 1 — S309 a produit une carte et un contrôle, pas une capacité. **Cette session doit en sortir une**, ou le troisième maillon devra être justifié
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

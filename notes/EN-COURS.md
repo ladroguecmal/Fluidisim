@@ -58,46 +58,61 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S309 — **terminée**. La liste du projet fini dit la vérité sur δ, ses 120 points
-savent à quel système ils appartiennent, et le battement du jeton est désormais vérifié.
+Session : S310 — les compteurs de conservation, lot 1 d'ADR-178 D7.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : la stratégie en trois systèmes, **renvoyée telle quelle** par l'utilisateur après S308.
-Elle demandait deux confrontations : à l'**état réel du dépôt** — faite, `TROIS-SYSTEMES-S308` —
-et à la **liste de contrôle du projet terminé** — **non faite**. S308 s'est contentée de noter que
-son décompte datait de S276. C'est la moitié manquante de la demande, et c'est cette session.
+Entrée : [ADR-178](../docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7 et l'angle
+mort **A302** — aucun bilan de masse, de quantité de mouvement ni d'énergie n'a jamais été mesuré
+à l'interface δ ↔ B/W, et R11 a pourtant jugé le raccord « invisible ».
 
-Capacité visée : **la liste du projet fini dit la vérité sur δ**, et chacun de ses 120 points sait
-à quel système il appartient. Consommateur : le choix du lot, à chaque session suivante — la liste
-est le seul document qui énumère le périmètre final point par point, et un point faux y coûte
-plus cher qu'ailleurs, parce qu'on s'en sert pour décider quoi construire.
+Capacité visée : **le dépôt sait ce qui entre et ce qui sort d'un domaine δ, et à quel plancher.**
+Consommateur immédiat : le lot 2 (retour δ → W), qui ne peut pas se juger sans compteur — on ne
+saura pas si le retour conserve tant qu'on ne sait pas ce que l'absorption retire aujourd'hui.
+Consommateur second : les essais 1 et 6 du banc de la piscine, qui demandent tous deux un volume.
 
-Ce que je ne fais pas : réécrire la liste (l'utilisateur a écrit « pas de longue refonte
-documentaire ») ; ajouter des points ; toucher aux sections que rien n'a bougées depuis S276 ;
-rouvrir une décision actée.
+Ce que je ne fais pas : construire le retour δ → W (c'est le lot 2) ; toucher au schéma ; relever
+un seuil ; revendiquer une tolérance — elle se propose à l'utilisateur, elle ne se décrète pas.
 
-Critères, écrits avant :
-1. Un état modifié cite la preuve qui le modifie, ou n'est pas modifié.
-2. Le décompte est **recalculé**, pas corrigé à vue.
-3. L'appartenance d'un point à A, B ou C est **dérivée** de son énoncé, et les points qui
-   n'appartiennent à aucun des trois sont dits tels quels — la stratégie ne couvre pas tout.
+Ce que le code donne déjà, et qui rend ce lot court :
+- `transport_coupled3` calcule **déjà** `flux_x`, `flux_y` (perturbation) et `band_x`, `band_y`
+  (fond B/W) sur chaque face de colonne. Le bilan est une **somme de bord**, pas un calcul neuf.
+- Les termes intérieurs **télescopent** : `Σᵢ (F[i+1] − F[i]) = F[n] − F[0]`. En arithmétique
+  exacte, la variation de volume vaut donc exactement le flux de bord. L'écart mesuré **est** le
+  plancher numérique, il ne l'approche pas.
+- `eta` ne bouge qu'à **quatre endroits**, tous avec la même somme compensée, et `eta_roundoff`
+  porte la part perdue. Le plancher se **lit**, il ne s'estime pas.
+- Aux faces extérieures `a == 0` et `a == n`, `flux` est **nul par construction** (garde
+  `a > 0 && a < n`) : seule la bande y transporte. C'est une seconde formulation, dans le code, de
+  « δ ne ressort pas » — la perturbation ne peut sortir que par l'éponge.
+
+Critères, écrits avant la mesure :
+1. Le compteur est **exact par construction** là où il l'est (télescopage), et son résidu est
+   publié comme plancher, jamais absorbé dans une tolérance.
+2. Cuve fermée : ni bande ni éponge, donc **variation de volume nulle** — l'écart est le plancher,
+   et il se compare à la dérive séculaire déjà mesurée (A298).
+3. Ce que l'éponge retire est **chiffré par seconde**, sur la scène de S302. A302 cesse d'être une
+   phrase.
+4. Les scènes antérieures restent **au bit** ; refus atomique et zéro allocation conservés.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton pris, **horodatage fabriqué de S308 corrigé**, plan seul.
-- [x] **P2** — quinze points retouchés, chacun avec sa preuve ; décompte **recalculé** point par
-  point : 3 / 51 / 66, et le total de S276 était faux de deux unités (1.4).
-- [x] **P3** — les 120 points rangés : A 20, B 29, C 7, hors des trois 64. **Et une phrase de S308
-  bornée** — « A est avancé » vaut pour la haute mer, pas pour les rivières ni les plages.
-- [x] **P4** — *(découpage déclaré)* le contrôle **exécutable** du battement dans
-  `outils/etat_projet.py --check`, avec ses quatre essais. Une consigne d'exactitude sans contrôle
-  n'est pas tenue — L349 appliquée à l'heure.
-- [x] **P5** — rituel REPRISE §6.
+- [x] **P1** — amorce, jeton, plan seul.
+- [ ] **P2** — le contrat du bilan, écrit avant le code : l'identité de télescopage, les quatre
+  sites qui bougent `eta`, ce que `eta_roundoff` dit du plancher, et ce qui n'est **pas** mesurable
+  par cette voie.
+- [ ] **P3** — `Balance3` dans le cœur : volume, entrée de bande aux quatre bords, prélèvement de
+  l'éponge, compensation, résidu. Zéro allocation, rien de publié touché.
+- [ ] **P4** — essais : télescopage exact sur un cas construit ; cuve fermée à volume constant au
+  plancher ; scènes antérieures au bit.
+- [ ] **P5** — mesure sur la **cuve de S305** : plancher et dérive nommés, comparés à A298.
+- [ ] **P6** — mesure sur la **scène de S302** : ce que l'éponge retire par seconde. A302 chiffrée.
+- [ ] **P7** — quantité de mouvement et énergie : ce qu'il faudrait pour les **fermer**, et le
+  diagnostic non fermé publié comme tel.
+- [ ] **P8** — preuve publiée, tolérance **proposée** à l'utilisateur.
+- [ ] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
 
-**L'erreur d'horodatage de S308**, corrigée en P1 : les battements après 13:12 étaient extrapolés
-au lieu d'être lus (L237). Aucun autre chiffre de S308 n'est concerné — les mesures d'image ont
-toutes été relues sur la carte.
+*(vides au départ)*
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
