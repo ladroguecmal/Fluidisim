@@ -6212,3 +6212,50 @@ publier sans bruit.
 analytiquement** — une symétrie, une constante, un zéro. Un chiffre plausible n'est pas un chiffre
 vérifié, et c'est précisément le plausible qui traverse les revues. Famille de **L349** — ce qu'il
 faut penser à vérifier ne se vérifie pas — appliquée à l'instrument plutôt qu'à l'option.
+
+## L358 — « C'est l'arrondi » n'est une explication que si l'arrondi a une loi
+
+S312 a mesuré un résidu de 2,0·10⁻¹¹ m³ et l'a attribué au « plancher `f32` ». C'était **plausible,
+non démontré**, et cela a suffi à clore la question pendant une session entière.
+
+S313 a écrit **trois** hypothèses avant de mesurer, chacune avec sa loi : la représentation de la
+hauteur (insensible à l'amplitude et au pas), l'arrondi de l'incrément (`∝ a` et `∝ dt`),
+l'accumulation `f64` (`∝ a`, insensible à `dt`). **Deux sont fausses.** Et celle qui reste n'est
+pas celle que S312 nommait : ce n'est pas la hauteur, c'est l'incrément — et son accumulation se
+fait en `√N`, pas en `N`.
+
+Le prix de la différence est concret. La borne fondée sur la hauteur, `N·ulp(h₀)/2·dx²`, donne
+3,6·10⁻⁷ m³. La borne vraie donne 2·10⁻¹². **Cinq ordres.** Une tolérance posée sur la première
+aurait laissé passer des fuites cent mille fois plus grosses que le plancher réel — en paraissant
+rigoureuse, puisqu'elle citait une borne.
+
+**La règle.** Attribuer un écart à l'arrondi demande de dire **comment il varie** — avec
+l'amplitude, avec le pas, avec la taille du domaine — puis de le vérifier sur chacun. Une
+attribution sans loi n'est pas une explication : c'est un classement sans dossier, et il fixe la
+suite du travail. Corollaire : **une borne trop lâche est plus dangereuse qu'aucune borne**, parce
+qu'elle donne à une tolérance l'apparence d'une démonstration.
+
+Famille de **L354** — un balayage sert autant à disculper qu'à régler — appliquée non plus à un
+défaut mais à une **excuse**.
+
+## L359 — Un instrument a une portée, et on ne la connaît qu'en lui donnant une faute
+
+S313 a injecté deux fautes dans un bilan de masse. La première, un écart ajouté au résidu, est
+détectée à **10⁻¹³ m³ par pas** — dix fois **sous** le plancher d'arrondi. La seconde, du volume
+réellement retiré au champ entre deux pas, n'est **pas vue du tout** : le résidu ne bouge pas d'un
+chiffre pendant que le domaine perd **52 %** de son contenu.
+
+La seconde n'est pas un défaut de l'instrument. Le résidu ferme **un pas** ; ce qui se passe entre
+deux pas est hors de sa définition. Mais **rien dans le dépôt ne le disait**, et six sessions de
+bilans avaient parlé de « conservation » en s'appuyant sur ce seul nombre. La dérive de volume —
+qu'on aurait pu croire redondante avec le résidu, puisque les deux mesurent « de l'eau qui
+manque » — attrape exactement ce que le résidu laisse passer, et réciproquement.
+
+**La règle.** Un instrument de contrôle se caractérise par **deux** nombres, et le second est
+toujours oublié : ce qu'il détecte au plus fin, et **ce qu'il ne peut pas voir par construction**.
+Les deux s'obtiennent de la même façon — en lui soumettant des fautes choisies, dont au moins une
+qu'on s'attend à ce qu'il rate. Un instrument qui n'a jamais vu de faute ne sait pas qu'il en
+verrait une, et un instrument dont la portée n'est pas écrite sera lu comme s'il couvrait tout.
+
+Corollaire de méthode : **deux contrôles qui mesurent « la même chose » ne sont redondants que si
+on a vérifié qu'ils le sont**. Ici, les supprimer l'un pour l'autre aurait ouvert un trou complet.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S313 — **en cours**. **L'instrument avant le chiffre** : corriger et valider T1 selon
+Session : S313 — **terminée**. **L'instrument avant le chiffre** : corriger et valider T1 selon
 la décision de l'utilisateur du 2026-09-20, en quatre grandeurs distinctes, avant toute nouvelle
 tolérance.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -130,7 +130,7 @@ Critères, écrits avant la mesure :
   mesurée, plus petite fuite détectée publiée.
 - [x] **P8** — T2 sur **10 s**, la durée demandée.
 - [x] **P9** — la tolérance proposée, justifiée par la borne et les mesures ; preuve publiée.
-- [ ] **P10** — rituel REPRISE §6.
+- [x] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
 

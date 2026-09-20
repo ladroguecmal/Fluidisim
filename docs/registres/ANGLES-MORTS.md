@@ -4068,3 +4068,33 @@ dans le code, mais il produit des échecs qui ne disent rien et, ailleurs, des s
 disent pas plus. **Déclencheur** : décision de l'utilisateur sur la normalisation de T1, que le
 statut « provisoire, révisable » d'ADR-179 D1 prévoit. En attendant, aucun banc ne revendique T1
 (L356).
+
+**A304 — note datée du 2026-09-20 (S313). Remède mesuré, décision en attente.** Le défaut est
+confirmé et sa cause précisée : ce n'est pas seulement que le dénominateur de T1 peut s'annuler,
+c'est que **la loi du résidu n'était pas connue**. Elle l'est : `u₃₂ · activité / √N`, vérifiée à
+un facteur 3 près sur quatre décades d'amplitude, un facteur 16 en `dt` et un facteur 16 en `N`
+([preuve](../validation/PLANCHER-BILAN-S313.md) §2). L'échelle pertinente est le volume **absolu**
+de perturbation, seul dénominateur dont le rapport soit stable. `Closure3` publie les quatre
+grandeurs sans seuil, et trois tolérances sont **proposées** (C1, C2, C3). **Reste ouvert** jusqu'à
+la décision de l'utilisateur : aucun banc n'applique de seuil, et ADR-179 D1 n'a toujours pas de
+remplaçant acté.
+
+**A305 — S313, 2026-09-20 (sévérité 2, ouverte). Le résidu du cas ouvert est d'un seul signe.**
+La cuve fermée donne un résidu qui se compense d'un pas au suivant : forme du cumulé **0,06 à 2,93**
+sur vingt-deux passages, une marche aléatoire. Le cas **ouvert** — bande B/W et éponge — donne
+**13,67** pour `√200` = 14,14 : **tous les résidus ont le même signe**, donc le cumulé croît
+**linéairement** avec le nombre de pas au lieu de croître en `√pas`.
+
+En valeur c'est minuscule — 2,88·10⁻¹⁰ m³ sur 200 pas, soit 5·10⁻⁸ de la dérive physique du même
+banc. Mais **un biais systématique n'est pas du bruit** : il ne se compense jamais, et sur une
+scène qui vit des minutes il croît sans limite pendant que le bruit, lui, plafonne.
+
+**Ce qui le rend un angle mort** : six sessions ont publié des bilans de masse sans jamais regarder
+le **signe** de leurs résidus. S310 mesurait le pire pas, S312 le pire pas et le cumulé absolu ;
+aucun ne distinguait une marche aléatoire d'une dérive. Il a fallu un indicateur écrit pour une
+autre raison — éprouver une fuite volontaire — pour que le biais apparaisse.
+
+**Suspects nommés, aucun démontré** : la **bande** B/W et l'**éponge**, les deux seuls termes qui
+n'existent pas dans la cuve fermée. **Déclencheur** : l'ordre C du lot 2 (vérification conjointe),
+ou tout banc de conservation sur une scène à fond réel — et il se teste en éteignant les deux
+termes l'un après l'autre, comme L354 le prescrit.

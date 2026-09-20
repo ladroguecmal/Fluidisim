@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-20 18:16 +02:00
+JETON            : libre
+Battement        : 2026-09-20 18:19 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S313 — **l'instrument avant le chiffre** : corriger et valider T1 (ordre A de la décision du 2026-09-20), en quatre grandeurs distinctes, avec une borne d'erreur et une fuite introduite volontairement
-Dernière session : S312 — **le premier transfert δ → W existe** (T3 en amplitude 1,24·10⁻⁵, réflexion 2,84·10⁻⁷ en 3D) et il dit ce qui manque à W : aucun mode `k = 0`, eau profonde seule, impact isotrope — **50 % de l'énergie repart à contresens** ([preuve](docs/validation/TRANSFERT-DELTA-W-S312.md), [ADR-180](docs/adr/ADR-180-retour-delta-w-et-conservation-du-volume.md))
-Session suivante : **ordre B** de la décision du 2026-09-20 — la **primitive orientée** de W, sur un paquet en eau profonde, avec les cinq essais ciblés que l'utilisateur énumère
-Maillons        : 0 — capacité S312 : un transfert δ → W existe, tourne, passe T3 sur la grandeur qu'il transporte, et publie séparément le transféré, l'attente et le résidu ; consommateur : la décision de l'utilisateur sur le receveur du volume net et sur la primitive orientée, qui n'avaient ni chiffres ni alternative mesurée
+Session en cours : —
+Dernière session : S313 — **ordre A rendu** : la loi du résidu est `u₃₂·activité/√N`, l'instrument voit une fuite de bilan à 10⁻¹³ m³/pas et **ne voit pas** une fuite d'état (T1 et T2 non redondantes), **T2 est tenue sur 10 s**, trois seuils proposés ([preuve](docs/validation/PLANCHER-BILAN-S313.md), [ADR-181](docs/adr/ADR-181-conservation-transfert-oriente-et-ordre-du-lot-2.md))
+Session suivante : **ordre B** (ADR-181 D9) — la **primitive orientée** de W, sur un paquet en eau profonde, avec les cinq essais ciblés : onde unidirectionnelle, paquet multi-longueurs, propagation oblique, cohérence de phase δ→W, transmission et réflexion sur plusieurs résolutions. Ne pas forcer le canal peu profond de S311
+Maillons        : 0 — capacité S313 : le dépôt sait dire si un écart de conservation est numérique ou physique, connaît la **portée** de son instrument, et l'a éprouvé sur un défaut qu'il s'est donné ; consommateur : les ordres B à E, qui auraient tous reçu leurs bancs sur un critère dont A304 disait qu'il ne mesurait rien
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

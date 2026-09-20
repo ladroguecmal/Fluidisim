@@ -15835,3 +15835,86 @@ TRANSFERT-DELTA-W-S312. Points 1 à 6 d'ADR-180 §1 tenus sur ce cas. Trois leç
 vérification et sa preuve sont un seul objet. Battement du commit P4 écrit à 16:55 pour 16:48 à
 l'horloge (L237), corrigé au commit suivant et dit au plan. Cinq exécutions du banc, dont trois
 jetées pour corriger un instrument.
+
+## S313 — 2026-09-20 — le plancher a une loi, et l'instrument a une portée
+
+**Entrée.** La décision de l'utilisateur du 2026-09-20 (S312), « Conservation, transfert δ → W et
+suite du développement ». Elle tranche le receveur du volume net — **V** pour un contenant, **B**
+pour une masse ouverte, avec un **niveau moyen régional adossé à une région identifiable**, et
+surtout **pas** une modification arbitraire du niveau global —, révise T1 sans fixer de chiffre,
+déclare le transfert **non validé**, et ordonne le lot 2 en A → E. Cette session prend **A**.
+
+**Acté.** [ADR-181](../docs/adr/ADR-181-conservation-transfert-oriente-et-ordre-du-lot-2.md),
+douze décisions. D2 est celle qui coûte : un niveau moyen de B s'adosse à une **région ou un volume
+de contrôle identifiable**, jamais à un océan — la solution la plus simple à écrire est celle que
+la décision interdit. D6 ajoute ce que personne n'avait demandé : **l'instrument se prouve sur un
+défaut qu'on lui donne à trouver**.
+
+**Le fait de la session.** S312 avait attribué son résidu au « plancher `f32` » **sans le
+démontrer**. Trois hypothèses ont été écrites **avant** de mesurer, et deux sont **réfutées** : le
+résidu est **strictement linéaire en amplitude** sur quatre décades (exit la représentation de la
+hauteur) et **linéaire en `dt`** (exit l'accumulation `f64`). Reste l'arrondi de l'**incrément**,
+et le balayage de résolution en précise le mécanisme : à aire constante, `N` quadruple et le résidu
+est divisé par ≈ 2 — une accumulation en **`√N`**, une colonne à la fois. D'où la borne, écrite
+puis vérifiée :
+
+```text
+plancher = u₃₂ · activité / √N
+```
+
+**Jamais dépassée d'un facteur 3** sur tout le balayage. Et les bornes naïves en `ulp(h₀)` sont
+fausses de **cinq ordres** : la somme compensée de S233 retire la hauteur du problème, et c'est la
+première fois que sa valeur est chiffrée. [Preuve](../docs/validation/PLANCHER-BILAN-S313.md).
+
+**L'échelle pertinente n'a pas été choisie, elle a été trouvée.** Le rapport `résidu / volume
+**absolu** de perturbation` vaut 6,2 ; 5,8 ; 5,2 ; 5,4·10⁻¹¹ sur quatre décades — constant. Le
+volume **signé** est nul par construction sur un paquet, et l'incrément du pas rétrécit avec `dt` :
+ce sont les deux dénominateurs qu'A304 accusait.
+
+**Construit.** `delta3d_closure.rs`, `Closure3` : les quatre grandeurs de l'utilisateur, chacune
+avec son unité, et **aucun seuil dans le module** — il publie, l'appelant compare. Un pas sans
+activité n'y fabrique pas de rapport ; c'est la faute d'A304, et elle ne peut plus se produire.
+
+**L'erreur volontaire, et elle apprend deux choses.** Une **fuite de bilan** — un écart d'un seul
+signe ajouté au résidu — est détectée sans ambiguïté à **10⁻¹³ m³ par pas**, soit 0,11 fois le
+plancher et 3·10⁻¹² du volume absolu ; la forme du cumulé sature à `√pas`, comme prédit. Mais une
+**fuite d'état** — du volume réellement retiré entre deux pas — **n'est pas vue du tout** : le
+résidu ne quitte jamais son plancher pendant que le domaine perd **52 %** de son volume. Ce n'est
+pas un défaut, c'est **la portée** de T1 : elle ferme *un pas*. **T1 et T2 ne sont donc pas
+redondantes**, et aucun document du dépôt ne le disait.
+
+*En passant* : de 10⁻⁹ à 10⁻⁷ de fuite d'état, les sorties sont **identiques au bit** — l'offset
+est sous `ulp(2,0)`, et la fuite **n'a pas lieu**.
+
+**T2 est rendue.** Sur les 10 s demandées, à deux mailles : **2,99·10⁻⁹** et **5,77·10⁻¹⁰** pour
+10⁻⁶ admis — 340 et 1 700 fois de marge. De 1 s à 20 s la dérive croît de 5,1 fois pour `√20` = 4,5
+attendus : **marche aléatoire**, pas fuite. Et elle diminue quand la maille se raffine, conforme à
+la loi en `A/√N` sur un banc qui n'avait pas servi à l'écrire. La dette inscrite par S311 est levée
+**par la mesure**.
+
+**Proposé, non acté** (ADR-181 D5 en fait une décision de l'utilisateur) : **C1** rapport au
+plancher ≤ 10, **C2** forme du cumulé ≤ 5 sur ≥ 200 pas, **C3** T2 inchangée — chacun encadré par
+le témoin et par la plus petite fuite détectée, et **les trois requis ensemble**.
+
+**Et le critère rend aussitôt son premier service** : le **cas ouvert échoue C2**, avec une forme
+du cumulé de **13,67** pour `√200` = 14,14 — son résidu est **d'un seul signe**. Minuscule en
+valeur (5·10⁻⁸ de la dérive physique) mais **systématique**, et six sessions de bilans ne l'avaient
+pas vu. **A305**, suspect nommé et non démontré : la bande ou l'éponge.
+
+**Limites.** Référence CPU, une machine, une cuve fermée et un cas ouvert à fond uniforme — ni
+scène, ni carte. La constante 3 de la borne est **mesurée**, pas prouvée. L'erreur volontaire est
+d'**un seul signe et d'une seule forme** : une fuite alternée n'a pas été essayée, et la forme du
+cumulé ne la verrait pas. Les trois seuils ne sont **pas actés**, et aucun banc ne les applique.
+
+**Non-fait.** Les ordres B à E : la primitive orientée, la vérification conjointe, la comptabilité
+du volume net, le couplage complet. Aucun n'était de cette session.
+
+**Rituel.** Maillons **0**. Capacité : **le dépôt sait dire si un écart de conservation est
+numérique ou physique, connaît la portée de son instrument, et l'a éprouvé sur un défaut qu'il
+s'est donné**. Consommateur nommé : les ordres B, C, D et E, qui s'appuient tous sur ce verdict —
+et qui, sans lui, auraient reçu des bancs sur un critère dont A304 disait qu'il ne mesurait rien.
+Preuve : PLANCHER-BILAN-S313. Deux leçons : L358, L359. Un angle mort : A305 ; A304 reçoit sa note.
+
+*Tenue du plan* : dix étapes, **fusion déclarée P3+P5+P6** — la loi ne se lit pas sur un balayage.
+Battement écrit en avance de deux et trois minutes à P1 et P2 (L237), corrigé dès constat ;
+c'est la seconde session de suite, un garde-fou vaut mieux qu'une note (porté en file).

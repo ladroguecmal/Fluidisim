@@ -127,19 +127,19 @@ coupées, multigrille, frontières, rendu en direct (ADR-143 à 169). Preuves :
 **S310 à S312, la conservation et le retour vers W** (lot 2 d'ADR-178 D7, sous
 [ADR-179](adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md) et
 [ADR-180](adr/ADR-180-retour-delta-w-et-conservation-du-volume.md)). Bilan de **masse** exact par
-télescopage, **A302 chiffrée** : l'éponge efface **10,2 %** du contenu perturbatif par seconde
-([S310](validation/BILAN-MASSE-S310.md)). La frontière est une **paroi** ; la sortie se lit sur une
-**ligne de contrôle intérieure** ([S311](validation/SORTIE-DELTA-S311.md)). **S312 : le premier
-transfert existe** — T3 tenue en **amplitude à 1,24·10⁻⁵**, réflexion **2,84·10⁻⁷** en 3D, aucun
-double comptage ([preuve](validation/TRANSFERT-DELTA-W-S312.md)) — et il dit ce qui manque : **W
-n'a de mode `k = 0` dans aucune de ses productions** (le volume net relève de V ou de B), **W est
-en eau profonde**, et son impact est **isotrope** — **50 % de l'énergie repart à contresens**.
-Deux décisions attendues : receveur du volume net, **normalisation de T1** (A304).
+télescopage, **A302 chiffrée** : l'éponge efface **10,2 %/s** ([S310](validation/BILAN-MASSE-S310.md)).
+La frontière est une **paroi** ; la sortie se lit sur une **ligne de contrôle intérieure**
+([S311](validation/SORTIE-DELTA-S311.md)). **S312 : le premier transfert existe** — T3 tenue en
+**amplitude à 1,24·10⁻⁵**, réflexion **2,84·10⁻⁷** en 3D — et il dit ce qui manque : **W n'a de
+mode `k = 0` dans aucune de ses productions**, **W est en eau profonde**, et son impact est
+**isotrope** : **50 % de l'énergie repart à contresens** ([preuve](validation/TRANSFERT-DELTA-W-S312.md)).
+**S313, ordre A** : loi du résidu `u₃₂·activité/√N` ; fuite de bilan vue à **10⁻¹³ m³/pas**, fuite
+d'état **invisible** — T1 et T2 non redondantes ; **T2 tenue sur 10 s**
+([preuve](validation/PLANCHER-BILAN-S313.md)). Trois seuils proposés, non actés.
 
-*Manque* : production sur les cas de cuve (§4.1) ; bascule de mouillure (A297) ; I-05 et
-admission (A244) ; cavité et gerbe (B10, ADR-175 D5) ; phase δ/B (A289) ; lignes à fantôme
-(A274) ; W au-dessus du plan moyen (A286) ; frontières du total ; **le compteur sur la carte,
-l'énergie, la quantité de mouvement et le sens W → δ** (A302).
+*Manque* : cas de cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité
+(B10) ; phase δ/B (A289) ; lignes à fantôme (A274) ; W au plan moyen (A286) ; **compteur sur la
+carte, énergie, quantité de mouvement, sens W → δ** (A302) ; **résidu biaisé en cas ouvert** (A305).
 
 *Bancs* : **B3** (famille de δ), **B4** (volets restants), **B5** (blocs épars), **B10** (cavité
 d'entrée). *Cas* : C01, C03, C04, C05, C06, C08, C09, C20, C22, C23.

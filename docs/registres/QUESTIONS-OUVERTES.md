@@ -2,11 +2,13 @@
 
 ## File active
 
-> **Décisions de l'utilisateur** — un seul endroit, daté. **Deux en attente au 2026-09-20 (S312)** :
-> le **receveur du volume net** — V pour un contenant, un **niveau moyen dans B** pour une masse
-> d'eau ouverte, aucun des deux n'étant dans W ([preuve](../validation/TRANSFERT-DELTA-W-S312.md) §1) —
-> et la **normalisation de T1**, non mesurable sur un cas de moyenne nulle (A304). Une troisième
-> suivra, la **primitive orientée** de W, qu'ADR-180 D8 renvoyait après le premier couplage.
+> **Décisions de l'utilisateur** — un seul endroit, daté. **Une en attente au 2026-09-20 (S313)** :
+> les **trois seuils proposés** pour T1 et T2 — C1 rapport au plancher ≤ 10, C2 forme du cumulé
+> ≤ 5, C3 T2 inchangée, requis **ensemble** ([preuve](../validation/PLANCHER-BILAN-S313.md) §6).
+> **2026-09-20, S313** : receveur du volume net tranché (V ou niveau moyen **régional** de B,
+> jamais un niveau global), T1 révisée sans chiffre avant démonstration, transfert δ → W déclaré
+> **non validé**, ordre A → E du lot 2
+> ([ADR-181](../adr/ADR-181-conservation-transfert-oriente-et-ordre-du-lot-2.md)).
 > **2026-09-20, S312** : retour δ → W, **option 1 limitée aux tests**, non-transféré registré et
 > jamais dit restitué, receveur cherché dans V ou B avant toute primitive nouvelle
 > ([ADR-180](../adr/ADR-180-retour-delta-w-et-conservation-du-volume.md)).
@@ -32,7 +34,8 @@ suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 |---|---|---|
 | **Porte B / δ 3D / A295 — en cours depuis S294** | Référence CPU (S297–S298), production sur la carte (S299–S301), scène rendue (S302), ADR-176 construite (S304). **S305 : critère 2 mesuré sur les cas de cuve** — mode sans fond, chaînon CPU au bit, 3·10⁻⁷ m pour 3 mm, phase 1,22° → 0,065° ([preuve](../validation/CUVE-GPU-S305.md)). Ne manque que le **critère 3** : une mer jugée convaincante | **Verdict R12.** Puis cas 1 et 2 de §4.1 pour la production (HOS à `ny` = 1, invariance en `y`), non mesurés |
 | **Lot 1 — compteurs de conservation — reçu S310** | **Masse : exacte par télescopage**, tenue par les deux pas, plancher publié ([preuve](../validation/BILAN-MASSE-S310.md)). Cuve fermée : murs à zéro exact, dérive 7,4·10⁻¹² m sur 5 s — **A298 n'est pas une fuite de volume**. Scène couplée : l'éponge **efface 10,2 % du domaine par seconde**. Dissipation du schéma 0,0935 %/s. Énergie et quantité de mouvement : des **états** | **Trois tolérances proposées** : décision de l'utilisateur. Puis le compteur sur la **carte**, et la fermeture des deux autres bilans |
-| **Lot 2 — retour δ → W — premier transfert reçu S312** | W n'a de mode `k = 0` dans **aucune** de ses trois productions : le volume net relève de V ou de B, pas d'une primitive nouvelle. W est en **eau profonde**. Transfert reçu : **T3 en amplitude 1,24·10⁻⁵**, réflexion **2,84·10⁻⁷** en 3D, `band_in` nul ([preuve](../validation/TRANSFERT-DELTA-W-S312.md)) | **Deux décisions attendues** : receveur du volume net, normalisation de T1 (A304). Reliquats : convergence en maille, front oblique, émission **continue** |
+| **Lot 2 — ordre A reçu S313, ordres B à E ouverts** | **A fait** : la loi du résidu est `u₃₂·activité/√N`, vérifiée à un facteur 3 ; l'instrument voit une fuite de bilan à **10⁻¹³ m³/pas** et **ne voit pas** une fuite d'état — T1 et T2 non redondantes ; **T2 tenue sur 10 s** ([preuve](../validation/PLANCHER-BILAN-S313.md)) | **Ordre B** : la primitive orientée de W, sur un paquet en eau profonde, avec les cinq essais d'ADR-181 D9. Puis C, D, E. Décision attendue sur C1/C2/C3 |
+| **A305 / résidu d'un seul signe en cas ouvert** | Cuve fermée : forme du cumulé **0,06 à 2,93** sur 22 passages, marche aléatoire. Cas **ouvert** : **13,67** pour √200 = 14,14 — le cumulé croît **linéairement**. Minuscule (5·10⁻⁸ de la dérive physique) mais **systématique** ; six sessions de bilans ne regardaient pas le signe | Ordre C, ou tout bilan sur fond réel : éteindre la bande puis l'éponge, les deux seuls termes absents de la cuve (L354) |
 | **A303 / ce que W sait faire, mesuré** | Le contrat `WaveEvent` annonce volume, direction et longueur d'onde ; les champs **construits** rendent `displaced_l` **inerte au bit**, **refusent** toute anisotropie, et traitent `wavelength_m` comme le centre d'une bande de **deux octaves**. Coût : 100 % du volume en attente, **50 %** de l'énergie à contresens, 27 % d'écart de λ ([preuve](../validation/TRANSFERT-DELTA-W-S312.md) §7) | Décision sur la **primitive orientée**, qu'ADR-180 D8 renvoyait après le premier couplage — donc possible |
 | **Lots 3–4 — solide ↔ fluide en 3D (I3), porte D** *(ADR-178 D7, à ouvrir)* | Faces coupées **en 2D seulement** (S232, ordres 1,947–1,966) ; `delta3d.rs` déclare « ni faces coupées ni budget coopératif ». Aucun intégrateur de corps rigide : `body.rs` est un modèle **statique** de flottaison (C10) | Après le lot 2. Franchit la **porte D**, donc la v1 (ADR-174 D4). Arrêt : ordre de convergence 3D mesuré comme en 2D ; puis une boule libre à son tirant théorique et sa période de pilonnement (références C10 écrites) |
 | **Lot 5 — seconde représentation de surface libre (I4)** *(ADR-178 D7 ; choix non tranché)* | **Aucune.** La surface de δ est une **fonction hauteur** : cavité, jet et déferlement sont hors de cette représentation **par construction** (ADR-175 D5, qui renvoyait déjà à une seconde) | Après le lot 4. **Décision de l'utilisateur** : particules ou surface implicite, à proposer avec des éléments chiffrés. Arrêt : une cavité se forme, se referme et rend son volume, sous le compteur du lot 1 |
