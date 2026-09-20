@@ -1868,3 +1868,138 @@ pub fn recevoir_cuve() -> Result<(), String> {
         Ok(())
     })
 }
+
+/// Suivi d'un mode au fil d'une trajectoire : amplitude modale par pas, premier passage à zéro
+/// interpolé, et pire écart au mode continu `A·cos(ω·t)`.
+struct SuiviModal {
+    kx: f64,
+    ky: f64,
+    rest: f32,
+    domain: Domain3,
+    amplitude0: f64,
+    omega: f64,
+    precedente: f64,
+    passage: Option<f64>,
+    continu: f64,
+    forme: f64,
+    derive: f64,
+    moyenne0: f64,
+}
+
+impl SuiviModal {
+    fn new(domain: Domain3, rest: f32, kx: f64, ky: f64, omega: f64, eta: &[f32]) -> Self {
+        let moyenne0 = eta.iter().map(|x| *x as f64).sum::<f64>() / eta.len() as f64;
+        Self {
+            kx, ky, rest, domain, omega, moyenne0,
+            amplitude0: CUVE_A,
+            precedente: CUVE_A,
+            passage: None,
+            continu: 0.,
+            forme: 0.,
+            derive: 0.,
+        }
+    }
+
+    /// `t` en secondes, à la fin du pas.
+    fn observer(&mut self, surface: &[f32], t: f64) {
+        let (amplitude, forme) = projection_modale(surface, self.rest, self.domain, self.kx, self.ky);
+        self.forme = self.forme.max(forme / self.amplitude0);
+        self.continu = self
+            .continu
+            .max((amplitude - self.amplitude0 * (self.omega * t).cos()).abs() / self.amplitude0);
+        let moyenne = surface.iter().map(|x| *x as f64).sum::<f64>() / surface.len() as f64;
+        self.derive = self.derive.max((moyenne - self.moyenne0).abs());
+        if self.passage.is_none() && amplitude < 0. && self.precedente >= 0. {
+            let dt = 1e-3;
+            self.passage = Some(t - dt + dt * self.precedente / (self.precedente - amplitude));
+        }
+        self.precedente = amplitude;
+    }
+
+    /// Erreur de phase en degrés : le mode continu passe à zéro à `T/4`.
+    fn phase_deg(&self) -> f64 {
+        match self.passage {
+            Some(t) => (t * self.omega - core::f64::consts::PI / 2.) * 180. / core::f64::consts::PI,
+            None => f64::NAN,
+        }
+    }
+}
+
+/// **Banc S305, critère 4 — le chaînon.** La référence reçue en S295/S296 est
+/// `step_surface_mobile` : une surface **totale**, sans fond. Ce que la carte porte est
+/// `step_perturbation_mobile` : une perturbation **sur** un fond. Les deux ne sont comparables
+/// qu'à fond nul, et c'est cette comparaison-là qui rend l'écart carte/référence attribuable —
+/// sans elle, un écart pourrait venir du schéma couplé aussi bien que de la carte.
+/// `--delta3d-cuve-chainon`.
+pub fn chainon_cuve() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::{BackgroundGrid3, Volume3};
+    use water_core::host::HostServices;
+
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 28);
+    let background = fond_nul(&mut alloc)?;
+    let (rho, g) = (1025_f32, 9.81_f32);
+    let pas_us = 1_000u64;
+    let pas = 1_000usize;
+
+    for nx in [16usize, 32] {
+        let Cuve { domain, rest, eta, mode } = cuve(nx, g as f64);
+        let (kx, ky, _k, omega) = mode;
+        let depart = std::time::Instant::now();
+        let mut grille = BackgroundGrid3::configure(
+            &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+            domain, [0., 0., -rest], rho,
+        )
+        .map_err(|e| format!("grille {e:?}"))?;
+        let mut totale = Volume3::configure(
+            &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g,
+        )
+        .map_err(|e| format!("volume {e:?}"))?;
+        let mut couplee = Volume3::configure(
+            &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g,
+        )
+        .map_err(|e| format!("volume {e:?}"))?;
+        totale.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+        couplee.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+
+        let mut suivi_t = SuiviModal::new(domain, rest, kx, ky, omega, &eta);
+        let mut suivi_c = SuiviModal::new(domain, rest, kx, ky, omega, &eta);
+        let (mut ecart, mut iterations_t, mut iterations_c, mut degrades) = (0f64, 0u32, 0u32, 0usize);
+
+        for n in 1..=pas {
+            let t = n as f64 * pas_us as f64 * 1e-6;
+            let temps = SimTime((n as u64 - 1) * pas_us);
+            grille.sample(&background, temps).map_err(|e| format!("echantillon {e:?}"))?;
+            let vue = grille.view().ok_or("la grille ne publie rien")?;
+            let rc = couplee
+                .step_perturbation_mobile(temps, pas_us, 4000, &vue, Sponge3::default(), &jobs)
+                .map_err(|e| format!("couplee {e:?}"))?;
+            let rt = totale
+                .step_surface_mobile(pas_us, 4000, &jobs)
+                .map_err(|e| format!("totale {e:?}"))?;
+            iterations_c = iterations_c.max(rc.iterations);
+            iterations_t = iterations_t.max(rt.iterations);
+            if rc.degraded || rt.degraded {
+                degrades += 1;
+            }
+            for (a, b) in totale.surface().iter().zip(couplee.surface()) {
+                ecart = ecart.max((*a as f64 - *b as f64).abs());
+            }
+            suivi_t.observer(totale.surface(), t);
+            suivi_c.observer(couplee.surface(), t);
+        }
+        println!(
+            "CUVE_S305 chainon nx={nx} ny={} nz={} pas={pas} duree_s={:.3} ecart_m={ecart:e} sur_amplitude={:e} degrades={degrades} it_totale={iterations_t} it_couplee={iterations_c} secondes={:.1}",
+            domain.ny, domain.nz, pas as f64 * pas_us as f64 * 1e-6,
+            ecart / CUVE_A, depart.elapsed().as_secs_f64()
+        );
+        for (nom, s) in [("totale", &suivi_t), ("couplee", &suivi_c)] {
+            println!(
+                "CUVE_S305 chainon nx={nx} schema={nom} continu_pct={:.6} forme_pct={:.6} phase_deg={:.6} derive_m={:e}",
+                100. * s.continu, 100. * s.forme, s.phase_deg(), s.derive
+            );
+        }
+    }
+    Ok(())
+}

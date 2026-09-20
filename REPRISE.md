@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-20 09:51 +02:00
+Battement        : 2026-09-20 09:54 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop)
 Session en cours : S305 — **critère 2 de la porte B sur les cas de cuve** (ADR-175 §4.1 cas 3) : mode sans fond de `Step3` contre la référence 3D. Verdict R12 demandé à l'utilisateur en parallèle, le lot ne l'attend pas
 Dernière session : S304 — ADR-176 construite et reçue sur ses cinq critères ; revue R12 demandée

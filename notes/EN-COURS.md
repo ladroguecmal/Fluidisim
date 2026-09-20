@@ -92,7 +92,7 @@ Critères, écrits avant la mesure (ADR-175 §4.1 cas 3 et §4.2) :
 - [x] **P1** — amorce, prise du jeton, plan seul ; demande du verdict R12 à l'utilisateur.
 - [x] **P2** — banc `--delta3d-cuve` : mode sans fond de `Step3`, murs, état initial du mode
   oblique ; critère 1 (fond nul, bancs de S301 au bit).
-- [ ] **P3** — critère 4 : `step_perturbation_mobile` à fond nul contre `step_surface_mobile`
+- [x] **P3** — critère 4 : `step_perturbation_mobile` à fond nul contre `step_surface_mobile`
   sur le même cas, CPU contre CPU — le chaînon entre la référence reçue et ce que la carte porte.
 - [ ] **P4** — critères 2 et 3 : carte contre référence, raffinement 16/32/48, écart de hauteur,
   pente, erreur de phase, durée déclarée.
@@ -117,6 +117,25 @@ faces, 512 colonnes), `a` = 5 cm, `a·k` = 0,0439, `k·h` = 3,512, `ω` = 2,9324
 - **Bancs de S301 au bit** : `--delta3d-pas` rejoué rend **exactement** les nombres publiés en
   S301 (η 2,3841858·10⁻⁷ m ; 159/162/159 colonnes sur 165 au bit ; hauteur vraie 4,10 / 2,96 /
   3,19·10⁻⁸ m ; vitesses 1,424551·10⁻⁵ ; pression 0,38378906 Pa). Aucun nuanceur n'a été touché.
+
+**P3 reçu — le chaînon est une identité, pas une approximation.** `--delta3d-cuve-chainon`,
+1 000 pas de 1 ms sur la même cuve, `nx` = 16 puis 32 :
+
+| | écart totale/couplée | `continu` | `forme` | phase | dérive moyenne | itérations |
+|---|---:|---:|---:|---:|---:|---:|
+| `nx` = 16 (8×10, 4,2 s) | **0 — au bit** | 2,509 % | 3,114 % | **1,223°** | 5,2·10⁻⁸ m | 48 |
+| `nx` = 32 (16×18, 52,3 s) | **0 — au bit** | 0,562 % | 3,300 % | **0,248°** | 2,3·10⁻⁸ m | 89 |
+
+- **Écart nul au bit**, sur les 1 000 pas et les deux résolutions : à fond nul,
+  `step_perturbation_mobile` **est** `step_surface_mobile`. Conséquence directe, et c'est tout
+  l'objet du critère 4 : un écart carte/référence sur ce cas est attribuable à la **carte seule**,
+  jamais au schéma couplé. Aucun pas dégradé.
+- **Dispersion** : erreur au mode continu 2,51 % → 0,56 %, erreur de phase 1,22° → 0,25°,
+  **décroissantes** — la référence tient `ω² = g·k·tanh(k·h)` comme en S295 (0,176 % à n = 48).
+- **`forme` ne décroît pas** (3,11 % → 3,30 %) : ce résidu au cosinus pur **n'est pas** une erreur
+  de discrétisation, sinon il tomberait ; il croît légèrement en raffinant. C'est la
+  non-linéarité du transport à `a·k` = 0,044 (second ordre attendu ≈ `a·k`/2 ≈ 2 %). À ne pas
+  confondre avec un défaut de mur : le mur, lui, est jugé au pas un (8,7·10⁻⁶, P2).
 
 *Réserve honnête* : `ecart_publiee` = 2,3·10⁻⁷ m n'est pas un défaut de la carte mais de ma
 recomputation — je refais `(η − repos) − reste` en f32 côté CPU, quand la carte l'obtient par
