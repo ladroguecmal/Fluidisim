@@ -118,8 +118,8 @@ Critères, écrits avant la mesure :
 
 ### Plan
 
-- [>] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — ADR-181 : la décision de l'utilisateur du 2026-09-20 (S312), actée décision par
+- [x] **P1** — amorce, jeton, plan seul.
+- [>] **P2** — ADR-181 : la décision de l'utilisateur du 2026-09-20 (S312), actée décision par
   décision, y compris le refus du niveau global arbitraire et l'ordre A → E.
 - [ ] **P3** — *la borne*, dérivée puis mesurée : loi du plancher d'arrondi en `N`, amplitude et
   `dt`. C'est la question de fond, et elle passe avant l'outil.
