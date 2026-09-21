@@ -117,7 +117,7 @@ décalage.
 - [x] **P1** — amorce, jeton, plan seul.
 - [x] **P2** — la règle d'attribution et les **prédictions chiffrées**, écrites avant toute mesure
   (notes de reprise).
-- [ ] **P3** — l'instrument de phase déroulée, et son **essai sur un défaut connu** : deux trains
+- [x] **P3** — l'instrument de phase déroulée, et son **essai sur un défaut connu** : deux trains
   de nombres d'onde différents, écart attendu > ½ tour à 10 λ.
 - [ ] **P4** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
 - [ ] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
@@ -164,6 +164,29 @@ que la dispersion a déjà déformé. Trois points par limite : la prédiction e
 
 *Dissipation de δ* : 6,3 % d'amplitude perdue sur 10 λ à 12,5 cm (S315). Prédit : elle **converge**.
 Aucune valeur écrite pour les deux autres mailles — pas de loi disponible.
+
+**P3 — l'instrument, sur un défaut connu.** Deux trains exacts, gravités `g` et `g(1+ε)²`,
+ε = −4,36 % (l'écart de 25 cm) : **−0,85299 tour lu pour −0,85299 attendu**, saut maximal entre
+stations 0,0067 tour ; l'extrémité seule lit **+0,14701** — l'ambiguïté d'A307, reproduite et levée.
+Retard de groupe **−2,0189 s pour −2,0189 s**, décalage d'émission 0,0000 s.
+
+*L'impasse du premier passage, qui vaut pour la suite* : `∂D/∂ω` pris **entre les deux lignes**
+rendait −1,797 s (11 % d'erreur). Les relevés commencent à la naissance, donc coupés au milieu de
+l'enveloppe à la première ligne, et une gaussienne coupée a son propre retard `σ_t·√(2/π)` —
+différent pour deux trains de `c_g` différents. Remède : le retard se lit comme une **pente en
+`x`** sur les stations au relevé complet (au-delà de 4,5 σ), l'ordonnée ramenée à la ligne donnant
+le décalage d'émission. La **phase** à `ω₀`, elle, n'est pas biaisée par la coupure (désaccord nul).
+
+*Et la même cause a failli bloquer P3 autrement* : mon banc de référence S315, lancé pour chiffrer
+le coût, **verrouillait l'exécutable** — `link.exe` 1104, exactement L362. Arrêté (son premier
+point reproduisait S315 au chiffre près : −0,0581), et **chaque mesure part désormais d'une copie
+de l'exécutable** dans le répertoire de travail temporaire. Coût mesuré : 1 λ à 12,5 cm ≈ 4 min.
+
+*Deux défauts du raccord de S314/S315, lus dans le code avant de mesurer* : (1) la largeur
+temporelle devient spatiale par la vitesse de groupe de l'onde **posée** — une information qu'une
+scène réelle ne donne pas ; (2) le train naît sur la **face** `x_ligne` alors que la jauge lit le
+**centre** de la colonne, une demi-maille plus loin : `k·dx/2` = 0,031 tour à 12,5 cm, 0,063 à 25 cm.
+L'ordre C mesure le raccord tel qu'il était **et** corrigé, sur le même relevé de δ.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 

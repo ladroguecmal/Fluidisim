@@ -932,6 +932,224 @@ fn oblique(dx: f32, lambda: f32, angle_tours: f32) -> Result<(), String> {
     Ok(())
 }
 
+// ─────────────────────────────────────────────────────────────────────────────────────────────
+// **L'ordre C** — S316, ADR-181 D10 et ADR-183 D5. La phase déroulée (A307), puis les six
+// propriétés du même transfert, chacune attribuée.
+// ─────────────────────────────────────────────────────────────────────────────────────────────
+
+/// Un champ `η` relevé sur une rangée de stations, à pas de temps constant.
+/// `eta[n · stations + s]` est la station `s` à l'instant `t0 + n·dt`.
+struct Releve {
+    t0: f64,
+    dt: f64,
+    stations: usize,
+    eta: Vec<f64>,
+}
+
+impl Releve {
+    fn instants(&self) -> usize {
+        self.eta.len() / self.stations
+    }
+    fn instant(&self, n: usize) -> f64 {
+        self.t0 + n as f64 * self.dt
+    }
+}
+
+/// **La projection à fréquence fixe**, `Z(ω) = Σ η(t)·e^{iωt}·dt` sur la fenêtre `[deb, fin)`, pour
+/// toutes les stations d'un coup.
+///
+/// Pour `η = A cos(ωt − kx + φ)`, `arg Z = kx − φ` : la pente de la phase en `x` est le nombre
+/// d'onde **à cette fréquence**, et la différence de deux phases prises à la **même** fréquence sur
+/// la **même** fenêtre ne contient aucun terme de temps. C'est ce qui manquait à S315 : il lisait
+/// chaque signal à sa propre pulsation dominante, puis ramenait les deux à un instant commun — et
+/// l'erreur sur ces pulsations, multipliée par vingt secondes, devenait de la phase.
+fn projette(r: &Releve, omega: f64, deb: usize, fin: usize) -> Vec<(f64, f64)> {
+    let mut z = vec![(0f64, 0f64); r.stations];
+    for n in deb..fin.min(r.instants()) {
+        let (s, c) = (omega * r.instant(n)).sin_cos();
+        let rangee = &r.eta[n * r.stations..(n + 1) * r.stations];
+        for (zs, &e) in z.iter_mut().zip(rangee) {
+            zs.0 += e * c * r.dt;
+            zs.1 += e * s * r.dt;
+        }
+    }
+    z
+}
+
+fn tours(z: (f64, f64)) -> f64 {
+    z.1.atan2(z.0) / core::f64::consts::TAU
+}
+
+fn module(z: (f64, f64)) -> f64 {
+    (z.0 * z.0 + z.1 * z.1).sqrt()
+}
+
+/// **Le déroulement — A307.** Entre deux stations voisines, la phase ne doit pas sauter de plus
+/// d'un demi-tour : sinon rien ne dit dans quel sens elle a tourné. C'est la **seule** hypothèse de
+/// l'instrument, et elle se mesure — le plus grand saut est rendu, et publié — au lieu de se
+/// supposer.
+fn deroule(p: &[f64]) -> (Vec<f64>, f64) {
+    let mut out: Vec<f64> = Vec::with_capacity(p.len());
+    let mut saut_max = 0f64;
+    for &v in p {
+        match out.last() {
+            None => out.push(v),
+            Some(&prec) => {
+                let d = v - prec;
+                let d = d - d.round();
+                saut_max = saut_max.max(d.abs());
+                out.push(prec + d);
+            }
+        }
+    }
+    (out, saut_max)
+}
+
+/// Pente par moindres carrés de `y` en `x`.
+fn pente(x: &[f64], y: &[f64]) -> f64 {
+    let n = x.len() as f64;
+    let (mx, my) = (x.iter().sum::<f64>() / n, y.iter().sum::<f64>() / n);
+    let (mut sxy, mut sxx) = (0f64, 0f64);
+    for (a, b) in x.iter().zip(y) {
+        sxy += (a - mx) * (b - my);
+        sxx += (a - mx) * (a - mx);
+    }
+    sxy / sxx
+}
+
+/// Relève un train aux stations et aux instants d'un relevé de δ — mêmes stations, mêmes instants,
+/// pour que les deux projections portent sur **exactement** la même fenêtre.
+fn releve_train<const N: usize>(
+    train: &WaveTrain<N>,
+    abscisses: &[f32],
+    y: f32,
+    t0: f64,
+    dt: f64,
+    instants: usize,
+) -> Result<Releve, String> {
+    let mut eta = vec![0f64; instants * abscisses.len()];
+    for n in 0..instants {
+        let t_us = ((t0 + n as f64 * dt) * 1e6).round() as u64;
+        if t_us < train.spec().birth.0 || t_us > train.valid_until().0 {
+            continue;
+        }
+        for (s, &x) in abscisses.iter().enumerate() {
+            eta[n * abscisses.len() + s] = train
+                .sample(FrameId(0), 0, [x, y], SimTime(t_us))
+                .map_err(|e| format!("train {e:?} x={x} t={t_us}"))?
+                .eta as f64;
+        }
+    }
+    Ok(Releve { t0, dt, stations: abscisses.len(), eta })
+}
+
+/// **L'instrument, sur un défaut qu'on lui donne à trouver** — le principe d'ADR-181 D6, appliqué à
+/// la phase.
+///
+/// Deux trains, **exacts** tous les deux, dans deux milieux dont la seule différence est la
+/// gravité : `g` pour la référence, `g' = g·(1 + ε)²` pour la doublure. À pulsation égale, la
+/// doublure a le nombre d'onde `ω²/g'` au lieu de `ω²/g` — c'est **exactement** ce que fait la
+/// dispersion numérique de δ quand elle abaisse `ω` de `ε` à `k` donné. On prend `ε` = −4,36 %,
+/// l'écart lu à 25 cm en S314 : l'écart de phase attendu à dix longueurs d'onde vaut alors
+/// **−0,853 tour**, que l'extrémité seule lirait **+0,147**.
+///
+/// Critère, écrit avant d'exécuter : l'écart déroulé tombe à **0,01 tour** de l'attendu — cinquante
+/// fois moins que l'ambiguïté qu'il lève, et seize fois moins que la plus petite différence entre
+/// deux prédictions de mailles voisines. Et le retard de groupe, lu comme `∂D/∂ω`, tombe à 2 % du
+/// sien.
+fn instrument() -> Result<(), String> {
+    let tau = core::f64::consts::TAU;
+    let eps = -0.0436f64;
+    let g = G as f64;
+    let g_prime = g * (1. + eps) * (1. + eps);
+    // La doublure porte l'onde « posée » de δ, `k₀ = π` ; la référence, celle que le raccord
+    // émettrait à la même pulsation.
+    let k_doublure = core::f64::consts::PI;
+    let omega0 = (g_prime * k_doublure).sqrt();
+    let k_ref = omega0 * omega0 / g;
+    let (separation, sigma, h0) = (20f64, 3f64, 2.5f32);
+    let origine = [42f32, 0.0625];
+    let (dx_stations, dt) = (0.125f64, 0.01f64);
+    let cg_lente = g_prime / (2. * omega0);
+    let t_fin = (separation + 5. * sigma) / cg_lente;
+    let instants = (t_fin / dt) as usize;
+    let fabrique = |gravite: f64, k: f64| {
+        let spec = TrainSpec {
+            origin: origine,
+            birth: SimTime(0),
+            frame: FrameId(0),
+            cell: 0,
+            direction: [1., 0.],
+            wavelength_m: (tau / k) as f32,
+            amplitude_m: 0.02,
+            envelope_m: sigma as f32,
+            spread_turns: 0.,
+            directions: 1,
+            phase: PhaseQ32(0),
+            age_us: (t_fin * 1e6) as u64 + 1_000_000,
+            radius_m: 70.,
+            spread_limit: 0.35,
+        };
+        let medium =
+            Medium { gravity: gravite as f32, density: RHO, depth: h0, max_slope: BREAKING_SLOPE };
+        WaveTrain::<128>::new(spec, medium).map_err(|e| format!("train refusé : {e:?}"))
+    };
+    let (reference, doublure) = (fabrique(g, k_ref)?, fabrique(g_prime, k_doublure)?);
+    let stations = (separation / dx_stations) as usize + 1;
+    let abscisses: Vec<f32> =
+        (0..stations).map(|s| origine[0] + (s as f64 * dx_stations) as f32).collect();
+    let rw = releve_train(&reference, &abscisses, origine[1], 0., dt, instants)?;
+    let rd = releve_train(&doublure, &abscisses, origine[1], 0., dt, instants)?;
+
+    let pulsations: Vec<f64> = (-4..=4).map(|j| omega0 * (1. + 0.0125 * j as f64)).collect();
+    let mut d_par_pulsation: Vec<Vec<f64>> = Vec::new();
+    let (mut saut, mut extremite) = (0f64, 0f64);
+    for (j, &w) in pulsations.iter().enumerate() {
+        let (zw, zd) = (projette(&rw, w, 0, instants), projette(&rd, w, 0, instants));
+        let brut: Vec<f64> = zw.iter().zip(&zd).map(|(a, b)| tours(*a) - tours(*b)).collect();
+        let (d, s) = deroule(&brut);
+        if j == 4 {
+            saut = s;
+            let e = brut[stations - 1] - brut[0];
+            extremite = e - e.round();
+        }
+        d_par_pulsation.push(d);
+    }
+    let ecart_deroule = d_par_pulsation[4][stations - 1] - d_par_pulsation[4][0];
+    // **Le retard de groupe ne se lit pas à la ligne d'émission.** Au premier passage, `∂D/∂ω`
+    // entre les deux extrémités rendait −1,797 s pour −2,019 s attendus : les deux relevés
+    // commencent à la naissance, donc **coupés au milieu de leur enveloppe**, et une gaussienne
+    // coupée a son propre retard, `σ_t·√(2/π)` — différent pour les deux trains puisque leurs
+    // `σ_t` diffèrent. Le retard se lit donc comme une **pente en `x`**, sur les seules stations
+    // dont le relevé est complet (au-delà de 4,5 σ), et son ordonnée à l'origine ramenée à la
+    // ligne dit le décalage d'émission.
+    let s_complet = ((4.5 * sigma) / dx_stations).ceil() as usize;
+    let (xs, retards): (Vec<f64>, Vec<f64>) = (s_complet..stations)
+        .map(|s| {
+            let d: Vec<f64> = d_par_pulsation.iter().map(|v| v[s]).collect();
+            (s as f64 * dx_stations, pente(&pulsations, &d) * tau)
+        })
+        .unzip();
+    let lenteur = pente(&xs, &retards);
+    let retard_s = lenteur * separation;
+    let retard_emission = retards[0] - lenteur * xs[0];
+    let attendu = (k_ref - k_doublure) * separation / tau;
+    let retard_attendu = (2. * omega0 / g - 2. * omega0 / g_prime) * separation;
+    println!(
+        "INSTRUMENT_S316 epsilon={eps} omega0={omega0:.5} k_reference={k_ref:.5} \
+         k_doublure={k_doublure:.5} separation_m={separation} stations={stations} \
+         saut_max_tours={saut:.4} ecart_deroule_tours={ecart_deroule:.5} \
+         ecart_attendu_tours={attendu:.5} erreur_tours={:.5} lecture_aux_extremites_tours={extremite:.5} \
+         retard_lu_s={retard_s:.4} retard_attendu_s={retard_attendu:.4} erreur_retard={:.4} \
+         retard_a_l_emission_s={retard_emission:.4} critere_phase={} critere_retard={}",
+        ecart_deroule - attendu,
+        (retard_s - retard_attendu) / retard_attendu,
+        (ecart_deroule - attendu).abs() < 0.01,
+        ((retard_s - retard_attendu) / retard_attendu).abs() < 0.02
+    );
+    Ok(())
+}
+
 fn main() -> Result<(), String> {
     match std::env::args().nth(1).unwrap_or_else(|| "paquet".into()).as_str() {
         // **Essai 1** — une onde progressive quasi monochromatique : enveloppe large, donc bande
@@ -962,6 +1180,8 @@ fn main() -> Result<(), String> {
             }
             Ok(())
         }
+        // **Ordre C, préalable** — l'instrument de phase déroulée, sur un écart connu (S316).
+        "instrument" => instrument(),
         autre => Err(format!("essai inconnu : {autre}")),
     }
 }
