@@ -129,7 +129,9 @@ décalage.
   avant les résultats à 12,5 et 6,25 cm** (notes).
 - [x] **P4b′** — *découpage déclaré* : 25 et 12,5 cm reçus ; **prédiction révisée pour 6,25 cm
   écrite avant son résultat** (notes).
-- [>] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
+- [x] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
+- [ ] **P4c** — *découpage déclaré* : le témoin du pas de temps moitié (6,25 cm, 5 ms), encore en
+  calcul à 10:08.
 - [ ] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
   phase, vitesse de groupe, réflexion, volume.
 - [x] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
@@ -1280,4 +1282,34 @@ par sessions alternées ; il commence par la comparaison chiffrée (particules s
 surface implicite) sur B10 et une rupture de barrage ; objet cinématique ; le choix reste à
 l'utilisateur. À porter au rituel : bloc des décisions de la file, ligne « Lot 5 », feuille de
 route §3 bis, index, mémoire.
+
+**P4b — la phase à dix longueurs d'onde, déroulée, aux trois mailles (10:08).** Raccord S316.
+
+| maille | `D(10 λ)`, 2 cm | `D(10 λ)`, 1 cm | part linéaire (`a → 0`) | part non linéaire, 2 cm | fraction de Stokes |
+|---:|---:|---:|---:|---:|---:|
+| 25 cm | −0,9142 | −0,9160 | −0,9166 | +0,0024 | 6 % |
+| 12,5 cm | −0,2372 | −0,2422 | −0,2438 | +0,0067 | 17 % |
+| 6,25 cm | **−0,0452** | −0,0524 | −0,0548 | +0,0096 | 24 % |
+
+- **La part linéaire converge à l'ordre deux** — rapports 3,76 puis 4,45, ordres 1,91 et 2,15 :
+  c'est l'erreur de dispersion de δ, et elle s'efface.
+- **La part non linéaire croît avec la maille** : δ résout de mieux en mieux la correction de
+  Stokes, que W ne porte pas. Fraction encore loin de 85 % (A289, 2D) : le paquet s'étale de 25 %
+  sur le trajet et son amplitude effective baisse, donc « Stokes plein » (0,040) majore.
+- **Confrontation des prédictions écrites avant** : S315 (−0,853 ; −0,165 ; −0,0072) **manquées**
+  de 0,06, 0,07 et 0,04 tour — jacobien, voir P4b′ ; P4b′ pour 6,25 cm : −0,056 à −0,032 sous 2 cm,
+  **tenue** (−0,0452) ; −0,063 à −0,057 sous 1 cm, **manquée** de 0,005 (la part linéaire a
+  convergé plus vite que la loi tirée de deux points — L361).
+- **Retard de groupe à 10 λ** : −7,37 ; −1,75 ; −0,38 s, rapports 4,2 et 4,6. `c_g` de δ : −25,3 ;
+  −7,2 ; −1,65 %.
+- **En usage** (METHODE, précision rapportée à l'usage) : à 6,25 cm, −0,045 tour sur 20 m, c'est
+  **9 cm** de décalage de crête (0,45 %) et, pour une vague de 2 cm, **5,7 mm** d'écart de hauteur
+  crête à crête au bout de dix longueurs d'onde — au-dessus des 3 mm d'image. Mais l'écart est
+  **celui de δ contre la physique exacte**, et le raccord le **coupe** : au-delà de la ligne, W porte
+  la dispersion exacte. Ce que la mesure dit au transfert : **le train émis a la bonne phase** ; c'est
+  δ qui la perd sur sa propre longueur, au rythme de sa maille.
+- **Volume net, par mètre de crête** (la largeur du domaine vaut `2·dx` et change avec la maille) :
+  2,57 ; 1,96 ; 1,68·10⁻⁴ m³/m sous 2 cm, **×4,0 exactement** entre 1 et 2 cm aux trois mailles —
+  une grandeur d'**ordre deux**, limite extrapolée ≈ 1,5·10⁻⁴ m³/m. W n'a pas de moyenne : son
+  receveur est B ou V (ADR-181 D1), et c'est l'ordre D.
 
