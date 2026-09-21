@@ -1933,13 +1933,23 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     } else {
         v.set_free_surface(&vec![h0; domain.columns()], h0).map_err(|e| format!("surface {e:?}"))?;
     }
+    // **Le δ témoin (E2)** : même domaine, même mer, **sans** le paquet. Ce qu'il fait passer aux
+    // lignes est ce que la mer seule y fait passer (E1) ; la différence des deux flux est ce que le
+    // paquet y ajoute. Coût : un second domaine.
+    let mut temoin = Volume3::configure(&mut hote, domain, RHO, G).map_err(|e| format!("témoin {e:?}"))?;
+    temoin
+        .set_free_surface(&vec![h0; domain.columns()], h0)
+        .map_err(|e| format!("témoin {e:?}"))?;
+    let (mut region_dg, mut region_dd) = (region(x_g, -1., x_g)?, region(x_d, 1., longueur - x_d)?);
+    let (mut registre_dg, mut registre_dd) = (Ledger3::default(), Ledger3::default());
     let sponge = Sponge3 { width_x: eponge, width_y: 0., rate_per_s: 10. * cg_pose / eponge };
     let dt_us = 10_000u64;
     let dt = dt_us as f64 * 1e-6;
     let duree = if avec_paquet {
         ((longueur - eponge - x0) / (0.7 * cg_pose) + 8. * sigma / cg_pose) as f64
     } else {
-        20.0
+        // `MER_DUREE` : diagnostic de la dérive longue (S319 P5) ; 20 s par défaut.
+        std::env::var("MER_DUREE").ok().and_then(|v| v.parse().ok()).unwrap_or(20.0)
     };
     let pas = (duree / dt) as u64;
 
@@ -1959,6 +1969,24 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         let q_g = v.control_flux_x(ligne_g, dt).map_err(|e| format!("{e:?}"))?;
         let v_int = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
         let b = v.balance();
+        if avec_paquet {
+            temoin
+                .step_perturbation_mobile(time, dt_us, 60_000, &bg, sponge, &jobs)
+                .map_err(|e| format!("témoin {n}: {e:?}"))?;
+            let (t_d, t_g) = (
+                temoin.control_flux_x(ligne_d, dt).map_err(|e| format!("{e:?}"))?,
+                temoin.control_flux_x(ligne_g, dt).map_err(|e| format!("{e:?}"))?,
+            );
+            let (dd, dg) = (q_d - t_d, -(q_g - t_g));
+            registre_dd.account(dd, 0., 0.).map_err(|e| format!("{e:?}"))?;
+            registre_dg.account(dg, 0., 0.).map_err(|e| format!("{e:?}"))?;
+            registre_dd
+                .account_restitution(region_dd.receive(dd).map_err(|e| format!("{e:?}"))?)
+                .map_err(|e| format!("{e:?}"))?;
+            registre_dg
+                .account_restitution(region_dg.receive(dg).map_err(|e| format!("{e:?}"))?)
+                .map_err(|e| format!("{e:?}"))?;
+        }
         bande += b.band_in;
         eponge_out += b.sponge_out;
         flux_abs_d += q_d.abs();
@@ -1976,6 +2004,10 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         bilan_max = bilan_max.max(bilan.abs());
         let pmax = v.surface().iter().fold(0f32, |m, e| m.max((e - h0).abs())) as f64;
         perturbation_max = perturbation_max.max(pmax);
+        if std::env::var("MER_TRACE").is_ok() && n % 100 == 0 {
+            let tmax = temoin.surface().iter().fold(0f32, |m, e| m.max((e - h0).abs()));
+            eprintln!("TRACE t={:.1} delta_max={pmax:.4} temoin_max={tmax:.4}", (n + 1) as f64 * dt);
+        }
         for (i, m) in profil.iter_mut().enumerate() {
             *m = m.max((v.surface()[i] - h0).abs() as f64);
         }
@@ -1991,8 +2023,22 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     let stokes = 0.5 * a_b * a_b * omega_b * largeur as f64 * duree;
     // Le volume net d'un paquet de 2 cm, mesuré en S317 à la même maille.
     let paquet_s317 = if dx == 0.25 { 1.1673e-4 } else if dx == 0.125 { 5.2876e-5 } else { f64::NAN };
+    let paquet_s317_g = if dx == 0.25 { -1.3695e-4 } else if dx == 0.125 { -5.3696e-5 } else { f64::NAN };
+    if avec_paquet {
+        println!(
+            "MER_S319 difference dx={dx} a_houle={a_houle} recu_difference_gauche_m3={:e} \
+             recu_difference_droite_m3={:e} paquet_seul_s317_gauche_m3={paquet_s317_g:e} \
+             paquet_seul_s317_droite_m3={paquet_s317:e} ecart_droite={:.4} ecart_gauche={:.4} \
+             attente_difference={:e}",
+            region_dg.volume(),
+            region_dd.volume(),
+            region_dd.volume() / paquet_s317 - 1.,
+            region_dg.volume() / paquet_s317_g - 1.,
+            registre_dg.pending() + registre_dd.pending()
+        );
+    }
     println!(
-        "MER_S319 dx={dx} paquet={avec_paquet} pas={pas} duree_s={duree:.1} duree_calcul_s={duree_calcul:.0} \
+        "MER_S319 dx={dx} paquet={avec_paquet} a_houle={a_houle} pas={pas} duree_s={duree:.1} duree_calcul_s={duree_calcul:.0} \
          houle_a_m={a_b:.4} houle_k={k_b:.4} houle_omega={omega_b:.4} largeur_m={largeur} \
          perturbation_max_m={perturbation_max:e} recu_gauche_m3={:e} recu_droite_m3={:e} \
          niveau_gauche_m={:e} niveau_droite_m={:e} flux_absolu_droite_m3={flux_abs_d:e} \

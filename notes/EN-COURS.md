@@ -106,8 +106,8 @@ Critères :
 - [x] **P2** — ADR-186 : APIC retenu pour la seconde représentation — décision de l'utilisateur.
 - [x] **P3** — E1 : le banc de la mer seule, écrit et lancé à 25 cm.
 - [x] **P4** — *fusionnée avec P3, déclaré* — E1 : le verdict, et ce qu'il dit de la restitution en mer réelle.
-- [ ] **P5** — E2 : le paquet dans la mer.
-- [ ] **P6** — E3 : le contour fermé à quatre côtés, paquet oblique.
+- [x] **P5** — E2 : le paquet dans la mer.
+- [x] **P6** — *reportée, déclaré (P5)* — E3 : le contour fermé à quatre côtés ; datée dans la file.
 - [ ] **P7** — preuve publiée.
 - [ ] **P8** — rituel REPRISE §6.
 
@@ -1537,4 +1537,44 @@ Houle B d'une composante, λ = 4 m, δ nul au départ, 20 s ; restitution par re
 un raffinement. Remède à éprouver en E2 : un **δ témoin** — même domaine, même mer, sans le paquet —
 et la restitution de la **différence** des flux ; le banc `delta3d_preview` isole déjà la perturbation
 ainsi pour l'affichage. Il coûte un second domaine.
+
+**P5 — prédiction écrite avant E2 (22:18).** Paquet de 2 cm dans la houle de 5 cm, et un δ témoin
+sans le paquet, au même pas. La restitution **de la différence** des flux doit retrouver le paquet
+seul de S317 — 1,17·10⁻⁴ m³ à droite, −1,37·10⁻⁴ à gauche à 25 cm — **à 30 % près** : l'interaction
+paquet–houle, à des fréquences qui ne se calent pas l'une sur l'autre (5,3 et 3,9 rad/s), doit se
+moyenner sur le passage. La restitution **brute** doit valoir celle d'E1 plus celle du paquet.
+
+**P5 — E2, et ce qu'il a trouvé en chemin : sous une vraie mer, δ ne reste pas petit (22:34).**
+
+*Le premier lancement était l'ancien binaire* — mon script d'édition avait échoué sans que je le
+voie avant la compilation : paquet et houle sans témoin, δ monté à **20 cm**. Relancé avec le
+témoin et une trace de δ dans le temps.
+
+*E2, paquet de 2 cm dans la houle de 5 cm, 25 cm* : la restitution **brute** reçoit 0,44 m³ à droite
+(3 700 fois le paquet) ; celle **de la différence** avec le témoin, 2,2·10⁻³ m³ (**18 fois** le paquet,
+prédit à 30 % près : **manqué**) et un signe faux à gauche. Le remède du témoin ne tient pas, et la
+trace dit pourquoi : **le témoin lui-même** — la mer seule, sans paquet — **croît jusqu'à 17 cm**.
+
+*La dérive longue, δ sous la seule houle* (E1 prolongé à 120 s, 25 cm) :
+
+| t | houle 2,5 cm (`ak` = 0,039) | houle 5 cm (`ak` = 0,079) |
+|---:|---:|---:|
+| 20 s | 2,3 mm | 2,8 cm |
+| 40 s | 6,2 mm | **16,5 cm** |
+| 60 s | 1,3 cm | 13,4 cm (saturé) |
+| 95 s | 4,5 cm | 12,0 cm |
+| 115 s | **7,7 cm** | 16,0 cm |
+| taux de croissance | ≈ 0,04 s⁻¹ | ≈ 0,10 s⁻¹ |
+
+**La croissance est exponentielle**, pas linéaire ; son taux croît avec l'amplitude ; δ finit **plus
+grand que la mer** qui le porte. A289 prévoyait une dérive **linéaire** et lente (« ≈ 7 cm/min sous
+`ak` = 0,06 », par formule, en 2D) : ceci est plus rapide et d'une autre nature. **Aucune session n'avait
+fait vivre un domaine δ plus de quelques secondes sous une houle** (S302 : 6 s). Numérique ou physique
+— instabilité paramétrique du pas couplé, ou modulation de l'onde totale — le raffinement le dira :
+12,5 cm lancé, 120 s.
+
+**Conséquence pour l'ordre E** : tant que δ n'est pas stable sous B, aucun bilan du couplage complet
+n'a de sens en mer ; E3 (contour fermé, sans houle) ne dépend pas de ce défaut mais n'apprendrait rien
+qui débloque. **Découpage déclaré : E3 est reporté**, daté dans la file ; la session publie ce qu'elle a
+trouvé.
 
