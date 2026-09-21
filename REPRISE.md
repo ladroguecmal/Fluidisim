@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-21 20:40 +02:00
+Battement        : 2026-09-21 20:46 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S317 — l'ordre D : le volume net qui quitte δ reçoit un receveur, sous I-15
 Dernière session : S316 — **l'ordre C** : six propriétés d'un même transfert, attribuées — primitive exacte à 10⁻⁴ ; au raccord ≈ 1° de phase, 2 à 4 % de spectre, direction lue +1 à 2° (A309) ; le reste converge avec la maille de δ, sauf une part non linéaire que W ne porte pas ; phase à 10 λ **déroulée** (A307 et A306 closes) ([preuve](docs/validation/ORDRE-C-S316.md), [ADR-184](docs/adr/ADR-184-seconde-representation-en-parallele.md))

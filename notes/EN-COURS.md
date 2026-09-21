@@ -113,7 +113,7 @@ GPU ; le sens W → δ ; toute écriture dans l'état répliqué de B ou de V.
 - [x] **P4** — *fusionnée avec P5, déclaré* — `RegionalLevel` dans le cœur : emprise, volume reçu, niveau, frontière comptable,
   refus ; reçu non falsifiable entre le registre et la région.
 - [x] **P5** — essais unitaires : conservation par construction, refus, aucun double comptage.
-- [ ] **P6** — le banc : l'ordre C à 12,5 cm, le volume net restitué à une région ; bilan δ +
+- [x] **P6** — le banc : l'ordre C à 12,5 cm, le volume net restitué à une région ; bilan δ +
   région publié à chaque pas.
 - [ ] **P7** — preuve publiée.
 - [ ] **P8** — rituel REPRISE §6.
@@ -1338,4 +1338,25 @@ Prédiction : résidu ≤ 10⁻¹⁰ m³ — **manquée d'un facteur 3 à 5**, a
    **déplace** de l'eau de l'arrière vers l'avant. Un receveur n'a de sens qu'**à chaque ligne**.
 3. **Les éponges ajoutent de l'eau** (volume retiré négatif) : elles ramènent au repos un niveau
    abaissé. Compter leur action en plus des lignes compterait deux fois — et à contresens.
+
+**P6 — la restitution sur le banc (20:46).** Une région par ligne, adossée du côté sortant, jusqu'au
+bord du domaine ; flux signé de la ligne → registre → région → reçu → registre, à chaque pas.
+
+| | 25 cm | 12,5 cm |
+|---|---:|---:|
+| reçu à gauche (aire, profondeur) | −1,37·10⁻⁴ m³ (9 m², 18 m) | −5,37·10⁻⁵ m³ (4,5 m², 18 m) |
+| reçu à droite | +1,17·10⁻⁴ m³ (24 m², 48 m) | +5,29·10⁻⁵ m³ (12 m², 48 m) |
+| niveau gauche / droite | −15,2 / +4,9 µm | −11,9 / +4,4 µm |
+| attente des deux registres | **0 exactement** | **0 exactement** |
+| eau créée | 0 | 0 |
+| représentation fermée / monde revendicable | oui / **non** | oui / **non** |
+| bilan δ intérieur + régions, final (max) | −1,6·10⁻¹⁰ (5,4·10⁻¹⁰) m³ | −2,5·10⁻¹⁰ (3,0·10⁻¹⁰) m³ |
+| reçus | 19 014 | 19 014 |
+
+Critères de P1 : région identifiable (1), rien sans reçu (2), bilan fermé au résidu et attente au
+résidu — **exactement zéro** ici, puisque la région reçoit la même suite d'additions (3), frontière
+publiée à zéro par choix (4), réceptions antérieures au bit : aucune scène ni banc antérieur
+touché, suite complète en cours (5). **En usage** : quelques micromètres de niveau, invisibles —
+mais **comptés**, et c'est ce que l'utilisateur demandait (« même lorsque son effet local sur le
+niveau moyen est négligeable »).
 
