@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-21 20:48 +02:00
+JETON            : occupé
+Battement        : 2026-09-21 21:18 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : —
+Session en cours : S318 — lot 5 : la comparaison chiffrée des représentations à plusieurs couches (ADR-184 D2)
 Dernière session : S317 — **l'ordre D** : le flux à la ligne ferme l'intérieur de δ au plancher d'arrondi, le paquet **déplace** de l'eau (un receveur par ligne), et une région **locale** — I-15 interdit d'écrire dans B ou V répliqués — reçoit le volume contre un reçu ; attente **exactement nulle**, monde non revendiqué ([preuve](docs/validation/RESTITUTION-S317.md), [ADR-185](docs/adr/ADR-185-ordre-d-receveur-sous-i15.md))
 Session suivante : **lot 5, comparaison chiffrée** des représentations à plusieurs couches (ADR-184 D2 : particules sur grille, SPH, surface implicite ; B10 et rupture de barrage) — l'alternance d'ADR-184 ; l'ordre E du lot 2 à la session d'après, sauf demande de l'utilisateur
 Maillons        : 0 — capacité S317 : **le volume net qui quitte δ a un receveur**, et le bilan de la représentation se ferme par construction ; points 1.1, 4.8 et 4.18 avancés ; consommateur : l'ordre E

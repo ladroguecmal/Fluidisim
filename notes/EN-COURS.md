@@ -58,65 +58,66 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S317 — **terminée**. L'**ordre D** d'ADR-181 D10 : la comptabilité et la restitution
-effective du volume net à travers B ou V, suivant l'environnement.
+Session : S318 — **en cours**. Le **lot 5**, première session du fil ouvert par
+[ADR-184](../docs/adr/ADR-184-seconde-representation-en-parallele.md) : la **comparaison
+chiffrée** des représentations où plusieurs couches d'eau tiennent sur une même verticale.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : **décision de l'utilisateur du 2026-09-21, 20:2x** — *« On passe à l'ordre D »*, en
-réponse à la question que S316 laissait (qualificatif du transfert et ouverture de l'ordre D). Il
-n'a rien dit du qualificatif : **le transfert reste « partiel »** (ADR-183 D6, lecture prudente).
+Entrée : *« Continue »* de l'utilisateur, après S317 ; la suite déclarée était l'alternance
+d'ADR-184 — lot 5 d'abord, l'ordre E du lot 2 ensuite.
 
-**La question de fond, posée avant tout code : qui peut recevoir un volume issu de δ ?** ADR-181
-D1 (décision de l'utilisateur) nomme V pour un contenant, et un niveau moyen **régional** de B pour
-l'eau ouverte. Mais δ est calculé sur le client, sans autorité (I-04) ; B et V sont déterministes
-et répliqués (I-03), V tenu par le serveur (I-10). **Un volume issu de δ versé dans l'état
-répliqué de B ou de V serait un chemin du client vers le monde répliqué — I-11 l'interdit, et I-15
-le tranche sans arbitrage** : une grandeur n'est autoritaire que si tous les participants la
-calculent à l'identique depuis des données répliquées. D'où deux lectures d'ADR-181 D1, que P2
-acte :
+**Ce que la comparaison doit rendre possible** : que l'utilisateur **choisisse** la seconde
+représentation sur pièces (ADR-184 D2). Consommateur : ce choix, puis le premier domaine d'impact
+(B10) et le scénario 2 de B3 (impact d'un objet lourd : cavité, jet, refermeture).
 
-- **eau ouverte** — le receveur est le niveau de B **tel que ce client le représente** : une
-  correction **locale**, non répliquée, comme `W_local` l'est pour W ; elle ferme le bilan de la
-  représentation, elle ne change pas le monde ;
-- **contenant** — c'est **δ qui s'asservit au bilan de V**, pas V qui reçoit de δ : la porte E le
-  dit déjà (« la comptabilité de masse est identique avec et sans δ », C21). Articulation V↔δ :
-  porte E, hors de cette session, règle écrite.
+**Les trois candidats**, en deux dimensions, écrits au plus court et **au même niveau** :
 
-Capacité visée : **le volume net qui quitte δ a un receveur, et le bilan de la représentation se
-ferme** — δ plus sa région, sans création ni destruction, sans double comptage. Consommateur :
-l'ordre E (couplage complet), et la déclaration de conservation qu'ADR-180 D1 interdisait tant
-qu'aucun receveur n'existait.
+1. **particules sur grille** (FLIP/APIC) — des particules portent l'eau, une grille MAC calcule la
+   pression sur le masque des cellules occupées ;
+2. **particules pures** (SPH, forme incompressible ou faiblement compressible) — pas de grille ;
+3. **surface implicite** (ensemble de niveaux sur grille MAC) — la surface est l'iso-zéro d'une
+   distance signée, advectée et réinitialisée.
+
+**Les cas, et pourquoi ceux-là.** Les données expérimentales de Martin et Moyce (1952) sont derrière
+un péage (Royal Society, 403 ; deux sources secondaires sans table accessible) : **aucun chiffre de
+mémoire** (I-14). Les cas se jugent donc sur des références **analytiques** ou **intrinsèques** :
+
+- **repos hydrostatique** — une colonne au repos ne doit ni bouger ni perdre d'eau : courants
+  parasites et dérive de volume ;
+- **ballottement linéaire** — un mode propre de bassin, fréquence exacte `ω² = g·k·tanh(k·h)` :
+  justesse de la dynamique, et amortissement numérique ;
+- **rupture de barrage** — colonne `a × 2a` dans une boîte, géométrie de Martin et Moyce : volume
+  conservé, énergie qui ne croît pas, front **sous** le plafond de Ritter `2√(g·2a)` ; puis
+  l'impact sur la paroi opposée et le **retournement** de la lame — c'est là que plusieurs couches
+  tiennent sur une verticale. L'accord **entre** candidats à deux résolutions est publié, et dit
+  pour ce qu'il est : pas une validation.
 
 Critères, écrits avant le code :
-1. La région est **identifiable** (ADR-181 D2) : une emprise déclarée, jamais l'océan ; un
-   scalaire global qui absorberait tout est refusé **par construction**.
-2. **Rien ne se crée ni ne se perd par construction** (ADR-181 D3) : la seule façon de faire
-   baisser le volume en attente est qu'une région le **reçoive** ; aucune méthode ne restitue sans
-   receveur.
-3. Sur le banc de l'ordre C, **δ + région** se ferme au résidu numérique près, publié, et le
-   volume **en attente** tombe à ce résidu.
-4. La frontière de la région porte une comptabilité : ce qui la quitte est un terme publié, même
-   quand il vaut zéro par choix — et alors **le choix est dit**.
-5. Scènes et réceptions antérieures **au bit** ; le banc ajoute, il ne modifie pas.
-
-**Ce que je ne fais pas** : l'articulation V↔δ (porte E) ; la propagation physique d'une anomalie
-de niveau hors de sa région (onde longue) — nommée et datée si elle n'entre pas ; la production
-GPU ; le sens W → δ ; toute écriture dans l'état répliqué de B ou de V.
+1. Chaque candidat est éprouvé au repos et en ballottement **avant** d'être comparé sur la rupture.
+2. Les quatre grandeurs de chaque cas se publient séparément : **volume** (dérive relative),
+   **justesse** (fréquence, invariants), **coût** (par pas et par degré de liberté, même machine,
+   CPU, un fil), **capacité multicouche** (la lame retournée : représentée ou non, et à quel prix
+   en volume).
+3. Aucun candidat n'est « retenu » par la session : **le choix est à l'utilisateur**.
+4. Ce qui n'est pas comparé est dit : le cas B10 (objet qui entre dans l'eau) vient à la
+   prochaine session du fil ; la carte graphique n'est pas mesurée — son aptitude est **argumentée**.
+5. Rien n'entre dans le cœur : les prototypes sont des **instruments de comparaison**, dans un
+   exemple ; aucune réception antérieure touchée.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — ADR-185 : l'ordre D sous I-15 — receveur local en eau ouverte, δ asservi en
-  contenant, région identifiable, grandeur restituée.
-- [x] **P3** — *quelle grandeur restituer ?* Sur le banc, confronter les candidats — flux à la
-  ligne, flux aux faces (`outgoing`, ADR-179 D3), volume retiré par l'éponge — à ce que δ perd
-  réellement. Écrit avant de coder le receveur.
-- [x] **P4** — *fusionnée avec P5, déclaré* — `RegionalLevel` dans le cœur : emprise, volume reçu, niveau, frontière comptable,
-  refus ; reçu non falsifiable entre le registre et la région.
-- [x] **P5** — essais unitaires : conservation par construction, refus, aucun double comptage.
-- [x] **P6** — le banc : l'ordre C à 12,5 cm, le volume net restitué à une région ; bilan δ +
-  région publié à chaque pas.
-- [x] **P7** — preuve publiée.
-- [x] **P8** — rituel REPRISE §6.
+- [ ] **P2** — le protocole écrit : grandeurs, tolérances d'usage, hypothèses déclarées (ADR-184
+  D5), références et leur provenance.
+- [ ] **P3** — le socle commun 2D : boîte, gravité, parois, mesures (volume, énergie, front, coût).
+- [ ] **P4a** — candidat 1, FLIP/APIC sur grille MAC : particules, transferts, pression sur masque.
+- [ ] **P4b** — candidat 1 au repos et en ballottement.
+- [ ] **P5a** — candidat 2, SPH.
+- [ ] **P5b** — candidat 2 au repos et en ballottement.
+- [ ] **P6a** — candidat 3, ensemble de niveaux sur grille MAC.
+- [ ] **P6b** — candidat 3 au repos et en ballottement.
+- [ ] **P7** — la rupture de barrage, les trois candidats, deux résolutions.
+- [ ] **P8** — preuve publiée : le tableau chiffré, et ce qu'il ne tranche pas.
+- [ ] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
 
