@@ -140,6 +140,8 @@ décalage.
   l'essai daté dans la file)*.
 - [x] **P8** — A306 : les **deux emplois** de l'estimateur par passages par zéro dans le harnais,
   et les réceptions antérieures qui en dépendent (ADR-183 D8).
+- [x] **P8′** — *ajoutée en cours de session, sur décision de l'utilisateur (08:53)* : ADR-184, la
+  seconde représentation avance en parallèle du lot 2, par sessions alternées.
 - [ ] **P9** — preuve publiée : le tableau d'attribution de l'ordre C.
 - [ ] **P10** — rituel REPRISE §6.
 
@@ -1247,4 +1249,35 @@ indépendant de l'amplitude à mieux que 1 % (retard −7,37/−7,40 s, `c_g` �
 sous 2 cm : entre **+0,010 et +0,034** (de la tendance à 85 % de Stokes, A289). D'où **D(10 λ) entre
 −0,056 et −0,032 tour à 6,25 cm, 2 cm** — et donc **la prédiction de S315 (−0,0072) manquée**.
 Sous 1 cm : entre −0,063 et −0,057. Et le pas moitié : écart < 0,005 tour.
+
+**Échange avec l'utilisateur en cours de session (2026-09-21, ~08:50) — à porter au journal et à
+la file.** L'utilisateur : *« dans la zone δ il s'agit comme une simulation de bille ou autres types
+qui permettent de pouvoir plusieurs particules d'eau sur la même ordonnée »* — il craignait un
+malentendu. Réponse : l'exigence est dans les sources (architecture §12, guide de topologie « un
+heightfield ne peut pas avoir deux hauteurs pour une même paire (x,y) », zones ouvertes) et dans
+ADR-001 ; **ADR-175 D5 (S294) a choisi une surface à une hauteur par colonne pour démarrer**, et
+ADR-178 a placé la seconde représentation au **lot 5, après la v1**. Deux questions posées
+(représentation, priorité) ; réponses : *« Est-ce que c'était indiqué dans le projet ? »* et
+**« Attends »** sur la priorité. **Aucun ordre de lot n'est changé.** Le point reste ouvert, et il
+est de l'utilisateur : représentation (particules sur grille, SPH, surface implicite) et moment.
+**Suite (même matinée)** : *« je ne savais pas si cela était indiqué depuis le début, ne fait rien de
+particulier, on laisse le plan initial en route »*. **Ordre d'ADR-178 confirmé par l'utilisateur** :
+la seconde représentation reste au lot 5 ; son choix reste à lui proposer, chiffré, en son temps.
+**Puis** : *« peut-être que le développement de ce système peut se faire en parallèle — réfléchis à
+savoir si tu as besoin d'éléments qui ne peuvent pas être décidés maintenant »*. Réflexion rendue en
+réponse (à reporter dans la ligne « Lot 5 » de la file au rituel) : parallélisable par **sessions
+alternées** (jamais deux sessions simultanées — jeton, L137) ; ne dépend ni du lot 3 ni du lot 4 si
+l'objet qui entre dans l'eau est **cinématique** ; réutilise grille MAC, multigrille et compteur du
+lot 1 ; **le vrai chantier interne** est la condition de surface libre, aujourd'hui construite
+colonne par colonne (`ghost_up3`, `ghost_side3` dans `delta3d_mobile.rs`) et à généraliser à une
+frontière liquide/air dans toutes les directions ; références de B10 déjà écrites (couronne,
+cavité, pincement, jet de Worthington). **Hors de portée d'une session** : le choix de
+représentation (à proposer chiffré), les **faits de jeu** (quels impacts : tailles, vitesses), la
+frontière entre eau physique et effet visuel (embruns), le critère de bascule (mesure, ADR-112), les
+références visuelles (plus tard), et la décision d'ordre elle-même (note à ADR-178).
+**Décision (08:53)** : *« je suis ta recommandation »* — **ADR-184** : lot 5 en parallèle du lot 2,
+par sessions alternées ; il commence par la comparaison chiffrée (particules sur grille, SPH,
+surface implicite) sur B10 et une rupture de barrage ; objet cinématique ; le choix reste à
+l'utilisateur. À porter au rituel : bloc des décisions de la file, ligne « Lot 5 », feuille de
+route §3 bis, index, mémoire.
 
