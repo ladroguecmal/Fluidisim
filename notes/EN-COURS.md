@@ -115,7 +115,7 @@ décalage.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — la règle d'attribution et les **prédictions chiffrées**, écrites avant toute mesure
+- [x] **P2** — la règle d'attribution et les **prédictions chiffrées**, écrites avant toute mesure
   (notes de reprise).
 - [ ] **P3** — l'instrument de phase déroulée, et son **essai sur un défaut connu** : deux trains
   de nombres d'onde différents, écart attendu > ½ tour à 10 λ.
@@ -132,6 +132,38 @@ décalage.
 - [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
+
+**P2 — les prédictions, écrites avant la première mesure de S316.**
+
+*Phase à 10 λ*, écart `D(x₂) − D(x₁)` à la pulsation d'émission, reprises **telles qu'écrites** en
+S315 §2 : **−0,853 ; −0,165 ; −0,0072 tour** à 25 ; 12,5 ; 6,25 cm. Elles reposent sur deux faits :
+le raccord conserve `ω` — la grandeur invariante à une frontière immobile, comme `k_y` l'est à une
+frontière plane —, et dans un milieu homogène δ garde son `k` initial. `D = 20·ε` tours, où `ε` est
+l'écart relatif de `ω` lu en S314 (−4,36 % ; −0,83 % ; −0,036 %).
+
+*Le point à 6,25 cm n'est pas sur la loi des deux autres.* Les rapports d'écart sont 5,3 puis **23** :
+une loi en puissance passant par les deux premiers (p ≈ 2,4) donnerait −0,16 % à 6,25 cm, et on lit
+−0,036 %. Un second terme, de signe opposé et d'ordre +0,1 %, entre en jeu. Suspect nommé : le
+**pas de temps**, fixé à 10 ms aux trois mailles (`ω·dt` = 0,056), donc une part de l'erreur de δ
+**ne converge pas avec la maille**. Discriminant : 6,25 cm à 5 ms, si le coût le permet.
+
+*Vitesse de groupe à 10 λ, 12,5 cm* : **deux prédictions concurrentes**, et l'instrument tranche.
+S315 a lu un retard d'arrivée de **1,66 s** sur les enveloppes. Une erreur de dispersion en
+`(k·dx)²` donnerait `δc_g/c_g = 5ε` = 4,1 %, soit **0,93 s**. L'instrument lit ce retard comme la
+pente `∂D/∂ω`, sans jamais ajuster d'enveloppe.
+
+*Part du raccord, extrapolée des trois mailles de S314* (Richardson, `e(h) = e∞ + C·h^p`) : erreur de
+forme 13,3 → 7,5 → 5,7 %, p ≈ 1,7, **limite ≈ 4,9 %** ; écart de bande 19,4 → 7,6 → 3,5 %, **limite
+≈ 1,3 %** ; amplitude 3,2 → 1,7 → 1,1 %, **limite ≈ 0,7 %**. Une limite non nulle est ce que le
+raccord ne sait pas représenter — une porteuse sous enveloppe gaussienne ne décrit pas un paquet
+que la dispersion a déjà déformé. Trois points par limite : la prédiction est fragile, et elle est
+écrite pour être contredite.
+
+*Part de la primitive* : bande tronquée à ±4 écarts-types, 128 modes, réplique hors du disque —
+**erreur de forme à la naissance < 10⁻³**. Si P6 lit davantage, la primitive porte une part.
+
+*Dissipation de δ* : 6,3 % d'amplitude perdue sur 10 λ à 12,5 cm (S315). Prédit : elle **converge**.
+Aucune valeur écrite pour les deux autres mailles — pas de loi disponible.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 
