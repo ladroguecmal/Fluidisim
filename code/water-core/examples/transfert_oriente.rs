@@ -1212,17 +1212,24 @@ fn pose_paquet(v: &mut Volume3, domain: Domain3, c: &Cas) -> Result<(), String> 
 /// | spectre `|Z_W(x_a, ω)|` contre `|Z_δ(x₁, ω)|` | relevés complets tous deux | raccord |
 /// | réflexion | fenêtre de retour à la seconde ligne, protocole de S311 | éponge de δ |
 /// | volume | registre à la première ligne | architecture — ordre D |
-fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
+fn ordre_c(dx: f32, dt_us: u64, amplitude: f32, prediction_s315: f64) -> Result<(), String> {
     let tau = core::f64::consts::TAU;
-    let (lambda, separation) = (2.0f32, 20.0f32);
-    let c = cas(dx, lambda, 1.5);
+    // Dix mètres de stations **au-delà** de la seconde ligne, avant l'éponge : à 25 cm l'enveloppe
+    // du train vaut 4,2 m, et le relevé complet commence à 4,5 enveloppes de la naissance — soit
+    // presque à la seconde ligne. Au premier passage, le raccord S315 n'y avait plus que six
+    // stations, et le banc a refusé de conclure.
+    let (lambda, separation, prolongement) = (2.0f32, 20.0f32, 10.0f32);
+    let mut c = cas(dx, lambda, 1.5);
+    // L'amplitude se règle pour **une** raison : séparer ce qui dépend de `a²` — la correction de
+    // Stokes, que W linéaire ne porte pas — de ce qui dépend de la maille.
+    c.a = amplitude;
     let Cas { h0, sigma, x0, eponge, k, omega, .. } = c;
     // Vitesse de groupe **posée** : elle dimensionne le banc — durée et fenêtres —, jamais le
     // raccord S316.
     let cg_pose = 0.5 * omega / k;
     let ligne1_m = x0 + 4. * sigma;
     let domain = Domain3 {
-        nx: ((ligne1_m + separation + eponge) / dx) as usize,
+        nx: ((ligne1_m + separation + prolongement + eponge) / dx) as usize,
         ny: 2,
         nz: (h0 / dx) as usize + 2,
         dx,
@@ -1230,7 +1237,9 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
     let (nx, ny) = (domain.nx, domain.ny);
     let ligne1 = (ligne1_m / dx) as usize;
     let ligne2 = ligne1 + (separation / dx).round() as usize;
-    let stations = ligne2 - ligne1 + 1;
+    let ligne_fin = ligne2 + (prolongement / dx).round() as usize;
+    let stations = ligne_fin - ligne1 + 1;
+    let s2 = ligne2 - ligne1;
     let centre = |i: usize| (i as f32 + 0.5) * dx;
 
     let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
@@ -1252,18 +1261,46 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
     );
     let sponge = Sponge3 { width_x: eponge, width_y: 0., rate_per_s: 10. * cg_pose / eponge };
     let dt = dt_us as f64 * 1e-6;
-    // Durée : le passage à la seconde ligne, puis l'aller-retour dans l'éponge — la réflexion se
-    // mesure sur le **même** relevé, au protocole de S311.
-    let t2_arr = ((centre(ligne2) - x0) / cg_pose) as f64;
-    let passage = (4. * sigma / cg_pose) as f64;
-    let t_retour = t2_arr + 2. * (eponge / cg_pose) as f64 - passage;
-    let pas = ((t_retour + passage) / dt) as u64;
+    // **La durée se décide sur ce que δ fait, pas sur ce qu'on lui a posé.** À 25 cm, δ va 25 %
+    // moins vite que l'onde posée : au premier passage, une fenêtre de retour calée sur la vitesse
+    // posée attrapait la traîne du passage direct — 3,5·10⁻⁴ « réfléchis », quand S314 lisait
+    // 5,7·10⁻⁶ au même endroit. On attend donc que le paquet ait franchi la dernière station, on
+    // mesure sa vitesse entre la première et la dernière, et l'aller-retour dans l'éponge — le
+    // protocole de S311 — se compte à **cette** vitesse.
+    let moments = |eta: &[f64], s: usize, n: usize| -> (f64, f64, f64, f64) {
+        let (mut e, mut m1, mut m2, mut pic) = (0f64, 0f64, 0f64, 0f64);
+        for q in 0..n {
+            let (t, v) = ((q + 1) as f64 * dt, eta[q * stations + s]);
+            e += v * v;
+            m1 += t * v * v;
+            m2 += t * t * v * v;
+            pic = pic.max(v * v);
+        }
+        let arrivee = m1 / e.max(f64::MIN_POSITIVE);
+        (arrivee, (m2 / e.max(f64::MIN_POSITIVE) - arrivee * arrivee).max(0.).sqrt(), pic, e)
+    };
+    let mut pas = (900. / dt) as u64;
+    let mut t_retour = f64::INFINITY;
+    let mut cg_transit = f64::NAN;
 
     let jauge_j = ny / 2;
     let mut volume = Ledger3::default();
-    let mut eta_delta: Vec<f64> = Vec::with_capacity(pas as usize * stations);
+    let mut eta_delta: Vec<f64> = Vec::new();
     let depart = std::time::Instant::now();
-    for n in 0..pas {
+    let mut n = 0u64;
+    while n < pas {
+        if t_retour.is_infinite() && n > 0 && n % 50 == 0 {
+            let (a0, _, pic0, _) = moments(&eta_delta, 0, n as usize);
+            let (af, sf, picf, _) = moments(&eta_delta, stations - 1, n as usize);
+            // Passé : le pic de la dernière station vaut au moins le quart de celui de la première
+            // — le paquet y est arrivé — et six largeurs de `η²` (≈ 4,2 σ_t) se sont écoulées.
+            if picf >= 0.25 * pic0 && (n as f64 * dt) > af + 6. * sf {
+                cg_transit = (stations - 1) as f64 * dx as f64 / (af - a0);
+                let sigma_t = sf * core::f64::consts::SQRT_2;
+                t_retour = af + 2. * eponge as f64 / cg_transit - 4. * sigma_t;
+                pas = (((t_retour + 4. * sigma_t) / dt) as u64).max(n + 1);
+            }
+        }
         let time = SimTime(n * dt_us);
         let bg = BackgroundFaces3 { domain, time, density: RHO, gravity: G, u: &bu, v: &bv, w: &bw };
         v.step_perturbation_mobile(time, dt_us, 60_000, &bg, sponge, &jobs)
@@ -1273,7 +1310,11 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
             .account(q, 0., v.balance().residual)
             .map_err(|e| format!("registre {e:?}"))?;
         let surface = v.surface();
-        eta_delta.extend((ligne1..=ligne2).map(|i| (surface[jauge_j * nx + i] - h0) as f64));
+        eta_delta.extend((ligne1..=ligne_fin).map(|i| (surface[jauge_j * nx + i] - h0) as f64));
+        n += 1;
+    }
+    if t_retour.is_infinite() {
+        return Err(format!("le paquet n'a pas franchi la dernière station en {pas} pas"));
     }
     let duree_s = depart.elapsed().as_secs_f64();
     let rel_delta = Releve { t0: dt, dt, stations, eta: eta_delta };
@@ -1294,8 +1335,9 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
         brouillon.arrivee_s + 4. * brouillon.sigma_t,
         f64::INFINITY,
     );
-    let sig2 = identifie(&serie(stations - 1), t_retour, t_retour);
-    let reflexion = sig2.retour / sig2.incident.max(f64::MIN_POSITIVE);
+    let sig2 = identifie(&serie(s2), t_retour, t_retour);
+    let sig_fin = identifie(&serie(stations - 1), t_retour, t_retour);
+    let reflexion = sig_fin.retour / sig_fin.incident.max(f64::MIN_POSITIVE);
     let omega0 = sig1.omega;
     let g = G as f64;
     let k_train = omega0 * omega0 / g;
@@ -1303,7 +1345,8 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
 
     // Fenêtre des projections : de la naissance du train à la fin du passage de δ à la seconde
     // ligne, **avant** le retour de l'éponge.
-    let n_fin = (((sig2.arrivee_s + 4. * sig2.sigma_t).min(t_retour) - rel_delta.t0) / dt) as usize;
+    let n_fin =
+        (((sig_fin.arrivee_s + 4. * sig_fin.sigma_t).min(t_retour) - rel_delta.t0) / dt) as usize;
     let n_naissance = ((sig1.arrivee_s - rel_delta.t0) / dt).ceil().max(0.) as usize;
     let pulsations: Vec<f64> = (-8..=8).map(|j| omega0 * (1. + 0.0125 * j as f64)).collect();
     let centrales: Vec<usize> = (4..=12).collect();
@@ -1325,9 +1368,9 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
         &centrales.iter().map(|&j| pulsations[j]).collect::<Vec<_>>(),
         &centrales.iter().map(|&j| k_delta[j]).collect::<Vec<_>>(),
     );
-    let dissipation = module(z_delta_plein[8][stations - 1]) / module(z_delta_plein[8][0]);
+    let dissipation = module(z_delta_plein[8][s2]) / module(z_delta_plein[8][0]);
     println!(
-        "ORDRE_C_S316 delta dx={dx} dt_us={dt_us} nx={nx} nz={} pas={pas} duree_calcul_s={duree_s:.0} \
+        "ORDRE_C_S316 delta dx={dx} dt_us={dt_us} amplitude={amplitude} nx={nx} nz={} pas={pas}          stations={stations} s2={s2} cg_transit={cg_transit:.5} duree_calcul_s={duree_s:.0} \
          omega0={omega0:.5} k_pose={k:.5} k_delta={:.5} k_train={k_train:.5} \
          cg_delta={:.5} cg_train={cg_train:.5} cg_pose={cg_pose:.5} ecart_cg_delta={:.5} \
          saut_max_tours={saut_delta:.4} dissipation_amplitude_10l={:.5} \
@@ -1350,6 +1393,11 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
         ("S316", cg_train, centre(ligne1)),
     ] {
         let age_utile = ((n_fin as f64 * dt + rel_delta.t0 - sig1.arrivee_s) * 1e6) as u64 + 1_000_000;
+        let enveloppe = (sig1.sigma_t * cg_enveloppe) as f32;
+        // Le rayon se **calcule** : le train, plus rapide que δ, a quitté les stations bien avant
+        // la fin de la fenêtre, et le contrat exige qu'il reste dans son disque tout ce temps.
+        // L'élargissement déclaré est publié à côté de celui obtenu.
+        let rayon = (cg_train * age_utile as f64 * 1e-6) as f32 + 4. * 1.6 * enveloppe + 5.;
         let spec = TrainSpec {
             origin: [origine_x, ny as f32 * dx * 0.5],
             birth: SimTime((sig1.arrivee_s * 1e6) as u64),
@@ -1358,13 +1406,13 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
             direction: [1., 0.],
             wavelength_m: (tau / k_train) as f32,
             amplitude_m: sig1.amplitude_m as f32,
-            envelope_m: (sig1.sigma_t * cg_enveloppe) as f32,
+            envelope_m: enveloppe,
             spread_turns: 0.,
             directions: 1,
             phase: PhaseQ32((sig1.phase_tours.rem_euclid(1.) * 4_294_967_296.0) as u32),
             age_us: age_utile,
-            radius_m: separation + 20. * sigma,
-            spread_limit: 0.35,
+            radius_m: rayon,
+            spread_limit: 0.6,
         };
         let medium = Medium { gravity: G, density: RHO, depth: h0, max_slope: BREAKING_SLOPE };
         let train =
@@ -1392,7 +1440,7 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
             z_train.push(zw);
         }
         let d0 = &d_par_pulsation[8];
-        let ecart_10l = d0[stations - 1] - d0[0];
+        let ecart_10l = d0[s2] - d0[0];
         // Phase : pente en `x` et ordonnée ramenée à la ligne, sur les relevés complets.
         let xs: Vec<f64> = (s_a..stations).map(|s| s as f64 * dx64).collect();
         let pente_d = pente(&xs, &d0[s_a..].to_vec());
@@ -1409,6 +1457,9 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
         let retard_emission = retards[0] - lenteur * xs[0];
         // Primitive : sans perte à fréquence fixe.
         let conservation_train = module(z_train[8][stations - 1]) / module(z_train[8][s_a]);
+        if s_a > s2 {
+            return Err(format!("{nom} : la seconde ligne tombe avant le relevé complet ({s_a} > {s2})"));
+        }
         // Raccord : spectre du train (relevé complet, sans perte) contre celui de δ à la ligne
         // (relevé entier).
         let (mut num, mut den, mut mw, mut md, mut pw, mut pd) = (0f64, 0f64, 0f64, 0f64, 0f64, 0f64);
@@ -1430,7 +1481,7 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
         }
         let amplitude_emission = module(z_train[8][s_a]) / module(z_delta_plein[8][0]);
         println!(
-            "ORDRE_C_S316 raccord={nom} dx={dx} dt_us={dt_us} origine_m={origine_x:.4} \
+            "ORDRE_C_S316 raccord={nom} dx={dx} dt_us={dt_us} amplitude={amplitude}              origine_m={origine_x:.4} rayon_m={rayon:.1} elargissement_declare=0.6              elargissement_obtenu={:.4} \
              enveloppe_m={:.4} station_complete={s_a} saut_max_tours={saut:.4} \
              phase_emission_tours={:.5} phase_emission_ajustee_tours={d_emission_ajuste:.5} \
              ecart_10l_tours={ecart_10l:.5} prediction_s315_tours={prediction_s315} \
@@ -1438,6 +1489,7 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
              retard_10l_s={retard_10l:.4} retard_emission_s={retard_emission:.4} \
              amplitude_emission={amplitude_emission:.5} ecart_spectre={:.5} \
              centroide_relatif={:.5} largeur_relative={:.5} conservation_train={conservation_train:.6}",
+            train.envelope_at(age_utile) / spec.envelope_m - 1.,
             spec.envelope_m,
             d0[0],
             ecart_10l - prediction_s315,
@@ -1572,7 +1624,9 @@ fn main() -> Result<(), String> {
                 d if d == 0.0625 => -0.0072,
                 _ => f64::NAN,
             };
-            ordre_c(dx, dt_us, prediction)
+            let amplitude: f32 =
+                std::env::args().nth(4).unwrap_or_else(|| "0.02".into()).parse().map_err(|_| "a")?;
+            ordre_c(dx, dt_us, amplitude, prediction)
         }
         autre => Err(format!("essai inconnu : {autre}")),
     }

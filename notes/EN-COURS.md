@@ -123,6 +123,10 @@ décalage.
   aux trois mailles, plus 6,25 cm à 5 ms (le discriminant du pas de temps, P2). Quatre calculs
   parallèles, de 3 min à ~1 h 20 ; **P6 et P8 s'exécutent pendant ce temps**, puisqu'ils n'en
   dépendent pas.
+- [x] **P4a′** — *second découpage* : le premier lancement a échoué à 25 cm (six stations au relevé
+  complet) et révélé une fenêtre de retour calée sur la vitesse posée. Banc prolongé de 10 m, durée
+  décidée sur la vitesse **mesurée** de δ, amplitude en paramètre ; **l'hypothèse de Stokes écrite
+  avant les résultats à 12,5 et 6,25 cm** (notes).
 - [ ] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
 - [ ] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
   phase, vitesse de groupe, réflexion, volume.
@@ -130,7 +134,7 @@ décalage.
 - [ ] **P7** — l'oblique à **maille plus fine** : l'écart d'angle se partage-t-il entre δ et
   l'instrument comme S315 l'a prévu ? *(si le coût mesuré le permet ; sinon, le coût est publié et
   l'essai daté dans la file)*.
-- [ ] **P8** — A306 : les **deux emplois** de l'estimateur par passages par zéro dans le harnais,
+- [>] **P8** — A306 : les **deux emplois** de l'estimateur par passages par zéro dans le harnais,
   et les réceptions antérieures qui en dépendent (ADR-183 D8).
 - [ ] **P9** — preuve publiée : le tableau d'attribution de l'ordre C.
 - [ ] **P10** — rituel REPRISE §6.
@@ -1142,3 +1146,30 @@ après 40 s** — dix longueurs d'onde de trajet ; écart maximal **1,8 µm**. C
 la bande à ±4 σ : `√erfc(4)` ≈ 1,2·10⁻⁴. Elle **ne croît pas** en se propageant. Prédiction de P2
 (< 10⁻³) tenue. En usage : 1,8 µm contre 3 mm de tolérance d'image — la primitive ne porte **aucune**
 part mesurable des écarts du transfert.
+
+**P4a′ — le premier lancement, et ce qu'il a appris avant d'échouer.** À 25 cm (134 s de calcul) :
+`c_g` de δ **0,688 m/s contre 0,922** pour l'onde émise, soit **−25,4 %** ; `k_δ(ω₀)` = 3,175 ;
+saut maximal de la phase de δ entre colonnes **0,162 tour** (sous le demi-tour, déroulement sûr).
+Deux défauts du banc, tous deux corrigés avant de relancer : le raccord S315 n'avait que six
+stations au relevé complet (enveloppe 4,2 m) — d'où les 10 m de prolongement ; et la fenêtre de
+retour, calée sur la vitesse **posée**, lisait la traîne du passage direct d'un δ 25 % plus lent —
+**3,5·10⁻⁴** « réfléchis », contre 5,7·10⁻⁶ en S314. *Portée* : **la réflexion de S314 à 25 cm a été
+mesurée avec la même fenêtre** calée sur la vitesse posée ; elle n'est pas sûre non plus.
+
+**L'hypothèse de Stokes — écrite avant les résultats à 12,5 et 6,25 cm.** Le paquet a `a·k` =
+0,063 : sa pulsation porte la correction non linéaire `(ak)²/2` = **+0,197 %**, que W — linéaire —
+ne porte pas. Les `ω` de S314 **la contiennent**. Retirée, l'erreur numérique de δ vaut −4,56 ;
+−1,03 ; −0,233 % aux trois mailles : **rapports 4,44 et 4,40, ordre 2,15 et 2,14** — une convergence
+d'ordre deux nette, là où P2 lisait 5,3 puis 23. **Le « second terme » de P2 n'était pas le pas de
+temps : c'était la non-linéarité.** Conséquences, chiffrées maintenant :
+
+- à 10 λ, `D` se partage en **numérique** (−0,891 ; −0,204 ; **−0,047** tour) et **non linéaire**
+  (**+0,040** tour, indépendant de la maille, en `a²`) ; à 6,25 cm les deux **se compensent
+  presque** — la prédiction de S315 (−0,0072) est une différence de deux termes six fois plus grands ;
+- **le témoin à demi-amplitude** (12,5 cm, `a` = 1 cm) doit déplacer `D` de **+0,030 tour** (les
+  trois quarts de 0,040 retirés) — c'est le discriminant ;
+- **le pas de temps moitié** (6,25 cm, 5 ms) doit laisser `D` presque inchangé : écart **< 0,005
+  tour**, si le pas de temps n'est pas en cause ;
+- et l'attribution change de nature : la part non linéaire ne revient **ni au raccord ni à δ** —
+  δ a raison, W est linéaire. Elle revient au **modèle de la primitive**.
+
