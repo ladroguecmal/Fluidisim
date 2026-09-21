@@ -106,7 +106,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — le protocole écrit : grandeurs, tolérances d'usage, hypothèses déclarées (ADR-184
+- [x] **P2** — le protocole écrit : grandeurs, tolérances d'usage, hypothèses déclarées (ADR-184
   D5), références et leur provenance.
 - [ ] **P3** — le socle commun 2D : boîte, gravité, parois, mesures (volume, énergie, front, coût).
 - [ ] **P4a** — candidat 1, FLIP/APIC sur grille MAC : particules, transferts, pression sur masque.
@@ -1360,4 +1360,42 @@ publiée à zéro par choix (4), réceptions antérieures au bit : aucune scène
 touché, suite complète en cours (5). **En usage** : quelques micromètres de niveau, invisibles —
 mais **comptés**, et c'est ce que l'utilisateur demandait (« même lorsque son effet local sur le
 niveau moyen est négligeable »).
+
+**P2 — le protocole, écrit avant le code (21:19).**
+
+*Échelle.* Celle du scénario 2 de B3 : `dx` = 0,05 m, et 0,025 m pour la seconde résolution. En
+deux dimensions, une rangée d'épaisseur unité ; volumes en m² par mètre de largeur.
+
+*Mêmes degrés de liberté pour tous.* FLIP/APIC : quatre particules par cellule d'eau, grille `dx`.
+SPH : espacement initial `dx/2` — quatre particules par cellule aussi —, rayon de lissage `1,3·dx/2`.
+Ensemble de niveaux : la grille `dx`, sans particule. Coût publié **par pas**, **par seconde
+simulée** et **par degré de liberté** — CPU, un fil, même machine ; la carte n'est pas mesurée.
+
+*Cas 1 — repos.* Bassin 2 m × 1 m, eau sur 0,5 m, 10 s. Publié : vitesse maximale (courants
+parasites), dérive de volume.
+
+*Cas 2 — ballottement.* Même bassin, premier mode, `η = A·cos(k·x)`, `k = π/L`, `A` = 1 cm
+(`a·k` = 0,016, linéaire). Référence exacte : `ω² = g·k·tanh(k·h)` → **ω = 3,1789 rad/s, T =
+1,9765 s**. Publié : période par **deux estimateurs** (passages par zéro et périodogramme, L360),
+écart à la référence, amortissement par période.
+
+*Cas 3 — rupture de barrage.* Colonne `a × 2a`, `a` = 0,8 m, contre la paroi gauche d'une boîte de
+4a × 2,5a ; 2 s. Publié : dérive de volume ; énergie `E_c + E_p` contre `E₀` = 10 045 J/m (elle ne
+doit pas croître) ; front `x_f(t)` contre le **plafond de Ritter** `a + 2√(g·2a)·t`, soit
+7,92 m/s — un front au-dessus serait une faute ; temps où la lame frappe la paroi opposée ; et la
+**capacité multicouche** — le nombre de segments d'eau le long d'une verticale, dont le premier
+passage à deux dit que la lame s'est retournée. Accord **entre** candidats à deux résolutions :
+publié, jamais appelé validation.
+
+*Mesure du volume, par candidat — les trois ne se mesurent pas pareil, et c'est une des choses que
+la comparaison doit montrer* : FLIP, la masse est exacte (particules comptées) et le volume
+**occupé** se lit `Σ min(1, n/4)·dx²` ; SPH, la masse est exacte et le volume vaut `Σ m/ρᵢ` — son
+écart dit la compressibilité ; ensemble de niveaux, le volume est l'aire de `φ < 0`, lissée sur une
+maille, et rien ne le conserve par construction.
+
+*Hypothèses déclarées (ADR-184 D5)* : aucun impact de jeu n'entre dans cette session ; les
+échelles sont celles de B3, pas d'un objet du jeu. *Références et provenance* : la fréquence de
+ballottement est la relation de dispersion linéaire (SPEC-001 §1) ; le plafond du front est la
+solution de Ritter pour un fond sec ; la géométrie `a × 2a` est celle de Martin et Moyce, dont les
+données — derrière un péage — ne sont **pas** utilisées.
 
