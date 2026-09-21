@@ -107,7 +107,7 @@ GPU ; le sens W → δ ; toute écriture dans l'état répliqué de B ou de V.
 - [x] **P1** — amorce, jeton, plan seul.
 - [x] **P2** — ADR-185 : l'ordre D sous I-15 — receveur local en eau ouverte, δ asservi en
   contenant, région identifiable, grandeur restituée.
-- [>] **P3** — *quelle grandeur restituer ?* Sur le banc, confronter les candidats — flux à la
+- [x] **P3** — *quelle grandeur restituer ?* Sur le banc, confronter les candidats — flux à la
   ligne, flux aux faces (`outgoing`, ADR-179 D3), volume retiré par l'éponge — à ce que δ perd
   réellement. Écrit avant de coder le receveur.
 - [x] **P4** — *fusionnée avec P5, déclaré* — `RegionalLevel` dans le cœur : emprise, volume reçu, niveau, frontière comptable,
@@ -1315,4 +1315,27 @@ région qui déborderait de sa cellule est refusée, l'océan ne s'obtient pas e
 **`global_conservation_claimable` devient faux dès qu'une région locale a reçu** — la
 représentation se ferme (`representation_closed`), pas le monde (ADR-185 §3). Sept essais neufs,
 **verts au premier passage** ; les huit du registre inchangés.
+
+**P3 — le flux à la ligne ferme l'intérieur (20:40).** Volume de contrôle entre la première face
+hors de l'éponge gauche et la ligne de l'ordre C ; aucune éponge n'y agit.
+
+| | 25 cm | 12,5 cm |
+|---|---:|---:|
+| résidu final `ΔV + ΣQ_sortant` | −1,6·10⁻¹⁰ m³ | −2,5·10⁻¹⁰ m³ |
+| résidu maximal sur le trajet | 5,4·10⁻¹⁰ | 3,0·10⁻¹⁰ |
+| flux absolu cumulé | 0,130 m³ | 0,053 m³ |
+| sortant à droite | +1,17·10⁻⁴ | +5,29·10⁻⁵ |
+| sortant à gauche | **−1,37·10⁻⁴** | **−5,37·10⁻⁵** |
+| variation de l'intérieur | +2,0·10⁻⁵ | +8,2·10⁻⁷ |
+| éponges : volume retiré | **−5,9·10⁻⁵** | **−8,6·10⁻⁶** |
+
+Prédiction : résidu ≤ 10⁻¹⁰ m³ — **manquée d'un facteur 3 à 5**, au plancher d'arrondi pourtant
+(2 à 6·10⁻⁹ du flux cumulé) ; ma borne était trop serrée, pas le bilan faux. Trois lectures :
+
+1. **Le flux à la ligne ferme l'intérieur** : c'est bien la grandeur à restituer (ADR-179 D3).
+2. **L'eau entre aussi par l'arrière.** Ce qui sort devant, une onde longue du second ordre le
+   ramène par derrière : à 12,5 cm, sortant et entrant s'équilibrent à 2 % près. Le paquet
+   **déplace** de l'eau de l'arrière vers l'avant. Un receveur n'a de sens qu'**à chaque ligne**.
+3. **Les éponges ajoutent de l'eau** (volume retiré négatif) : elles ramènent au repos un niveau
+   abaissé. Compter leur action en plus des lignes compterait deux fois — et à contresens.
 

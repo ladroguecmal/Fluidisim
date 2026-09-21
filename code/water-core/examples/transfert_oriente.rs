@@ -1646,6 +1646,231 @@ fn primitive() -> Result<(), String> {
     Ok(())
 }
 
+/// **Quelle grandeur restituer ? — S317, ordre D, P3.**
+///
+/// [ADR-179] D3 a fixé la grandeur : le flux sortant à la surface de contrôle, pas l'activité de
+/// l'éponge. Ce banc vérifie qu'elle **ferme le bilan de l'intérieur** : le volume de δ entre une
+/// ligne gauche, au bord de l'éponge, et la ligne droite de l'ordre C, contre les flux aux deux
+/// lignes. Et il compare ce qui sort à ce que les éponges **effacent** ensuite — la même eau, comptée
+/// plus tard, qu'un receveur ne doit pas prendre deux fois.
+///
+/// [ADR-179]: ../../../docs/adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md
+fn bilan_interieur(dx: f32, amplitude: f32) -> Result<(), String> {
+    let (lambda, separation, prolongement) = (2.0f32, 20.0f32, 10.0f32);
+    let mut c = cas(dx, lambda, 1.5);
+    c.a = amplitude;
+    let Cas { h0, sigma, x0, eponge, k, omega, .. } = c;
+    let cg_pose = 0.5 * omega / k;
+    let ligne1_m = x0 + 4. * sigma;
+    let domain = Domain3 {
+        nx: ((ligne1_m + separation + prolongement + eponge) / dx) as usize,
+        ny: 2,
+        nz: (h0 / dx) as usize + 2,
+        dx,
+    };
+    let (nx, ny) = (domain.nx, domain.ny);
+    // La ligne gauche est la première face **hors** de l'éponge gauche ; la droite, celle de
+    // l'ordre C. Entre les deux, aucune éponge n'agit : le bilan ne doit rien à son rappel.
+    let (ligne_g, ligne_d) = ((eponge / dx).ceil() as usize, (ligne1_m / dx) as usize);
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 30);
+    let mut v = Volume3::configure(
+        &mut HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink },
+        domain,
+        RHO,
+        G,
+    )
+    .map_err(|e| format!("volume {e:?}"))?;
+    pose_paquet(&mut v, domain, &c)?;
+    let zero = BackgroundSample::default();
+    let (bu, bv, bw) = (
+        vec![zero; (nx + 1) * ny * domain.nz],
+        vec![zero; nx * (ny + 1) * domain.nz],
+        vec![zero; nx * ny * (domain.nz + 1)],
+    );
+    let sponge = Sponge3 { width_x: eponge, width_y: 0., rate_per_s: 10. * cg_pose / eponge };
+    let dt_us = 10_000u64;
+    let dt = dt_us as f64 * 1e-6;
+    // Assez long pour que le paquet ait quitté l'intérieur **et** soit entré dans l'éponge droite,
+    // à la vitesse d'un δ 30 % plus lent que l'onde posée (25 % mesuré à 25 cm, S316).
+    let duree = ((nx as f32 * dx - eponge - x0) / (0.7 * cg_pose) + 8. * sigma / cg_pose) as f64;
+    let pas = (duree / dt) as u64;
+
+    let v_total0 = v.perturbation_volume();
+    let v_int0 = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
+    let (mut sortant_d, mut sortant_g, mut eponge_out, mut exterieur) = (0f64, 0f64, 0f64, 0f64);
+    let (mut residu_max, mut residu_pas_cumule, mut v_int_prec) = (0f64, 0f64, v_int0);
+    let (mut cumul_abs, mut bilan_global_max) = (0f64, 0f64);
+    for n in 0..pas {
+        let time = SimTime(n * dt_us);
+        let bg = BackgroundFaces3 { domain, time, density: RHO, gravity: G, u: &bu, v: &bv, w: &bw };
+        v.step_perturbation_mobile(time, dt_us, 60_000, &bg, sponge, &jobs)
+            .map_err(|e| format!("pas {n}: {e:?}"))?;
+        let q_d = v.control_flux_x(ligne_d, dt).map_err(|e| format!("{e:?}"))?;
+        let q_g = v.control_flux_x(ligne_g, dt).map_err(|e| format!("{e:?}"))?;
+        let v_int = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
+        let b = v.balance();
+        // Sortant compté positivement des deux côtés : vers +x à droite, vers −x à gauche.
+        sortant_d += q_d;
+        sortant_g -= q_g;
+        eponge_out += b.sponge_out;
+        exterieur += b.outgoing;
+        cumul_abs += q_d.abs() + q_g.abs();
+        residu_pas_cumule += ((v_int - v_int_prec) + q_d - q_g).abs();
+        v_int_prec = v_int;
+        let residu = (v_int - v_int0) + sortant_d + sortant_g;
+        residu_max = residu_max.max(residu.abs());
+        let global = (v.perturbation_volume() - v_total0) + eponge_out;
+        bilan_global_max = bilan_global_max.max(global.abs());
+    }
+    let v_int = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
+    let v_total = v.perturbation_volume();
+    println!(
+        "BILAN_INTERIEUR_S317 dx={dx} amplitude={amplitude} pas={pas} duree_s={duree:.1} \
+         largeur_m={} ligne_g={ligne_g} ligne_d={ligne_d} v_interieur_initial={v_int0:e} \
+         v_interieur_final={v_int:e} sortant_droite_m3={sortant_d:e} sortant_gauche_m3={sortant_g:e} \
+         residu_interieur_final={:e} residu_interieur_max={residu_max:e} \
+         somme_residus_par_pas={residu_pas_cumule:e} flux_absolu_cumule={cumul_abs:e} \
+         volume_total_initial={v_total0:e} volume_total_final={v_total:e} eponges_effacent={eponge_out:e} \
+         bilan_global_max={bilan_global_max:e} faces_exterieures={exterieur:e} \
+         hors_interieur_final={:e}",
+        ny as f32 * dx,
+        (v_int - v_int0) + sortant_d + sortant_g,
+        v_total - v_int
+    );
+    Ok(())
+}
+
+/// **La restitution — S317, ordre D, P6.**
+///
+/// Le banc de P3, avec cette fois un **receveur** à chaque ligne : une région locale adossée à la
+/// ligne, du côté sortant ([ADR-185] D3, D4). À chaque pas, le flux signé de la ligne entre dans son
+/// registre, la région le **reçoit**, et le reçu est présenté au registre (D7). Rien d'autre ne
+/// bouge : δ ne voit pas la région, et aucun état répliqué n'est touché (D2).
+///
+/// Ce qui se publie : l'attente de chaque registre — qui doit valoir **exactement** zéro —, le
+/// niveau de chaque région avec sa profondeur déclarée, et le bilan **δ intérieur + régions**.
+///
+/// [ADR-185]: ../../../docs/adr/ADR-185-ordre-d-receveur-sous-i15.md
+fn restitution(dx: f32, amplitude: f32) -> Result<(), String> {
+    use water_core::regional_level::{RegionSpec, RegionalLevel};
+    let (lambda, separation, prolongement) = (2.0f32, 20.0f32, 10.0f32);
+    let mut c = cas(dx, lambda, 1.5);
+    c.a = amplitude;
+    let Cas { h0, sigma, x0, eponge, k, omega, .. } = c;
+    let cg_pose = 0.5 * omega / k;
+    let ligne1_m = x0 + 4. * sigma;
+    let domain = Domain3 {
+        nx: ((ligne1_m + separation + prolongement + eponge) / dx) as usize,
+        ny: 2,
+        nz: (h0 / dx) as usize + 2,
+        dx,
+    };
+    let (nx, ny) = (domain.nx, domain.ny);
+    let (ligne_g, ligne_d) = ((eponge / dx).ceil() as usize, (ligne1_m / dx) as usize);
+    let largeur = ny as f32 * dx;
+    // Les deux régions couvrent ce qui est **au-delà** de chaque ligne, jusqu'au bord du domaine :
+    // c'est là que l'eau sortie s'en va. Profondeurs déclarées et publiées.
+    let (x_g, x_d, longueur) = (ligne_g as f32 * dx, ligne_d as f32 * dx, nx as f32 * dx);
+    let mut region_g = RegionalLevel::new(RegionSpec {
+        frame: FrameId(0),
+        cell: 0,
+        line: [[x_g, 0.], [x_g, largeur]],
+        outward: [-1., 0.],
+        depth_m: x_g,
+    })
+    .map_err(|e| format!("région gauche {e:?}"))?;
+    let mut region_d = RegionalLevel::new(RegionSpec {
+        frame: FrameId(0),
+        cell: 0,
+        line: [[x_d, 0.], [x_d, largeur]],
+        outward: [1., 0.],
+        depth_m: longueur - x_d,
+    })
+    .map_err(|e| format!("région droite {e:?}"))?;
+
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 30);
+    let mut v = Volume3::configure(
+        &mut HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink },
+        domain,
+        RHO,
+        G,
+    )
+    .map_err(|e| format!("volume {e:?}"))?;
+    pose_paquet(&mut v, domain, &c)?;
+    let zero = BackgroundSample::default();
+    let (bu, bv, bw) = (
+        vec![zero; (nx + 1) * ny * domain.nz],
+        vec![zero; nx * (ny + 1) * domain.nz],
+        vec![zero; nx * ny * (domain.nz + 1)],
+    );
+    let sponge = Sponge3 { width_x: eponge, width_y: 0., rate_per_s: 10. * cg_pose / eponge };
+    let dt_us = 10_000u64;
+    let dt = dt_us as f64 * 1e-6;
+    let duree = ((longueur - eponge - x0) / (0.7 * cg_pose) + 8. * sigma / cg_pose) as f64;
+    let pas = (duree / dt) as u64;
+
+    let (mut registre_g, mut registre_d) = (Ledger3::default(), Ledger3::default());
+    let v_int0 = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
+    let (mut v_int_prec, mut ecart_max) = (v_int0, 0f64);
+    for n in 0..pas {
+        let time = SimTime(n * dt_us);
+        let bg = BackgroundFaces3 { domain, time, density: RHO, gravity: G, u: &bu, v: &bv, w: &bw };
+        v.step_perturbation_mobile(time, dt_us, 60_000, &bg, sponge, &jobs)
+            .map_err(|e| format!("pas {n}: {e:?}"))?;
+        let q_d = v.control_flux_x(ligne_d, dt).map_err(|e| format!("{e:?}"))?;
+        let q_g = v.control_flux_x(ligne_g, dt).map_err(|e| format!("{e:?}"))?;
+        let v_int = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
+        // Le résidu du pas, sur le volume de contrôle intérieur, est porté par le registre droit :
+        // un seul registre le compte, pour qu'il ne soit pas compté deux fois.
+        let residu_pas = (v_int - v_int_prec) + q_d - q_g;
+        v_int_prec = v_int;
+        registre_d.account(q_d, 0., residu_pas).map_err(|e| format!("{e:?}"))?;
+        registre_g.account(-q_g, 0., 0.).map_err(|e| format!("{e:?}"))?;
+        registre_d
+            .account_restitution(region_d.receive(q_d).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?;
+        registre_g
+            .account_restitution(region_g.receive(-q_g).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?;
+        let bilan = (v_int - v_int0) + region_g.volume() + region_d.volume()
+            + region_g.boundary_out()
+            + region_d.boundary_out();
+        ecart_max = ecart_max.max(bilan.abs());
+    }
+    let v_int = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
+    println!(
+        "RESTITUTION_S317 dx={dx} amplitude={amplitude} pas={pas} largeur_m={largeur} \
+         profondeur_gauche_m={} profondeur_droite_m={} aire_gauche_m2={} aire_droite_m2={} \
+         recu_gauche_m3={:e} recu_droite_m3={:e} niveau_gauche_m={:e} niveau_droite_m={:e} \
+         attente_gauche={:e} attente_droite={:e} cree_gauche={:e} cree_droite={:e} \
+         representation_fermee={} conservation_du_monde_revendicable={} recus={} \
+         delta_interieur_m3={:e} bilan_final_m3={:e} bilan_max_m3={ecart_max:e} \
+         residu_cumule_abs={:e} frontieres_regions={}",
+        x_g,
+        longueur - x_d,
+        region_g.area(),
+        region_d.area(),
+        region_g.volume(),
+        region_d.volume(),
+        region_g.level_m(),
+        region_d.level_m(),
+        registre_g.pending(),
+        registre_d.pending(),
+        registre_g.created(),
+        registre_d.created(),
+        registre_g.representation_closed() && registre_d.representation_closed(),
+        registre_g.global_conservation_claimable() || registre_d.global_conservation_claimable(),
+        region_g.receipts() + region_d.receipts(),
+        v_int - v_int0,
+        (v_int - v_int0) + region_g.volume() + region_d.volume(),
+        registre_d.numerical(),
+        region_g.boundary_out() + region_d.boundary_out()
+    );
+    Ok(())
+}
+
 fn main() -> Result<(), String> {
     match std::env::args().nth(1).unwrap_or_else(|| "paquet".into()).as_str() {
         // **Essai 1** — une onde progressive quasi monochromatique : enveloppe large, donc bande
@@ -1685,6 +1910,20 @@ fn main() -> Result<(), String> {
         }
         // **Ordre C, préalable** — l'instrument de phase déroulée, sur un écart connu (S316).
         "instrument" => instrument(),
+        // **Ordre D, P6** — le volume net restitué à deux régions locales (S317).
+        "restitution" => {
+            let dx: f32 = std::env::args().nth(2).ok_or("maille ?")?.parse().map_err(|_| "maille")?;
+            let a: f32 =
+                std::env::args().nth(3).unwrap_or_else(|| "0.02".into()).parse().map_err(|_| "a")?;
+            restitution(dx, a)
+        }
+        // **Ordre D, P3** — le flux à la ligne ferme-t-il le bilan de l'intérieur ? (S317)
+        "bilan_interieur" => {
+            let dx: f32 = std::env::args().nth(2).ok_or("maille ?")?.parse().map_err(|_| "maille")?;
+            let a: f32 =
+                std::env::args().nth(3).unwrap_or_else(|| "0.02".into()).parse().map_err(|_| "a")?;
+            bilan_interieur(dx, a)
+        }
         // **Ordre C** — la primitive seule, contre l'évolution exacte de sa propre demande.
         "primitive" => primitive(),
         // **Ordre C** — une maille par appel, pour que les trois tournent en parallèle ; les

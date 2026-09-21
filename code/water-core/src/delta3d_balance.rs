@@ -235,4 +235,34 @@ impl Volume3 {
         }
         Ok(total * dt * dx as f64)
     }
+
+    /// **Le volume de perturbation d'une bande de colonnes**, entre les faces `i0` et `i1` en `x`,
+    /// toutes les rangées `y` — S317, ordre D.
+    ///
+    /// C'est le pendant de [`Self::perturbation_volume`] pour un **volume de contrôle** borné par
+    /// deux lignes : avec [`Self::control_flux_x`] aux deux faces, il ferme le bilan de l'intérieur
+    /// d'un domaine sans compter la bande d'éponge, où l'eau sortie finit effacée. Même hauteur
+    /// **compensée** que la pression et que le bilan global, même somme en `f64` : le télescopage du
+    /// transport s'y lit donc au même plancher.
+    ///
+    /// Refuse `Domain` si la bande est vide ou sort du domaine, `i0 < i1 ≤ nx`.
+    pub fn perturbation_volume_x(
+        &self,
+        i0: usize,
+        i1: usize,
+    ) -> Result<f64, crate::delta_projection::Error> {
+        let Domain3 { nx, ny, dx, .. } = self.domain;
+        if i0 >= i1 || i1 > nx {
+            return Err(crate::delta_projection::Error::Domain);
+        }
+        let rest = self.rest as f64;
+        let mut total = 0f64;
+        for j in 0..ny {
+            for i in i0..i1 {
+                let c = j * nx + i;
+                total += (self.eta[c] as f64 - self.eta_roundoff[c] as f64) - rest;
+            }
+        }
+        Ok(total * dx as f64 * dx as f64)
+    }
 }
