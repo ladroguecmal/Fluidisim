@@ -112,7 +112,7 @@ Critères, écrits avant le code :
 - [x] **P4a** — candidat 1, FLIP/APIC sur grille MAC : particules, transferts, pression sur masque.
 - [x] **P4b** — candidat 1 au repos et en ballottement.
 - [x] **P5a** — *fusionnée avec P6a, même fichier, déclaré* — candidat 2, SPH.
-- [ ] **P5b** — candidat 2 au repos et en ballottement.
+- [x] **P5b** — candidat 2 au repos et en ballottement.
 - [x] **P6a** — candidat 3, ensemble de niveaux sur grille MAC.
 - [x] **P6b** — candidat 3 au repos et en ballottement.
 - [x] **P7** — la rupture de barrage, les trois candidats, deux résolutions.
@@ -1485,4 +1485,35 @@ fraction de maille** — ce que les particules, en marches, ne font pas (2,66 et
   échange 0,1 % avec son énergie élastique.
 - **Le coût sépare les familles** : SPH paie son pas acoustique — **40 fois** APIC par seconde
   simulée à la même maille.
+
+**P5b — SPH au repos et en ballottement (22:01), et un défaut que je n'ai pas su isoler.**
+
+| SPH | repos, 5 cm | ballottement, 5 cm | ballottement, 2,5 cm |
+|---|---:|---:|---:|
+| particules d'eau ; pas | 1 600 ; 39 000 | 1 600 ; 40 000 | 6 400 ; 79 019 |
+| période (zéros ; périodogramme) | | −6,2 % ; −7,1 % | **−6,2 % ; −6,0 %** |
+| amortissement par période | | 29 % | **27 %** |
+| volume `Σ m/ρ`, écart initial ; dérive max | −0,25 % ; 5·10⁻⁴ | 4,6·10⁻⁴ | 3,1·10⁻⁴ |
+| énergie perdue en 10 s | 81 J (tassement) | 83 J | 48 J |
+| vitesse parasite | **0,12 m/s** | 0,19 | 0,17 |
+| coût | 142 s pour 10 s | 178 s | **1 324 s** |
+
+**L'erreur de période et l'amortissement ne convergent pas** — identiques à deux mailles : ce n'est
+pas la résolution. Quatre diagnostics à 5 cm, pour l'isoler :
+
+| variante | période | amortissement | énergie perdue |
+|---|---:|---:|---:|
+| de référence (δ 0,1 ; α 0,02 ; parois adhérentes) | −6,2 % | 29 % | 83 J |
+| sans diffusion δ | −8,7 % | 26 % | **8 J** |
+| α = 0,005 | −6,1 % | 22 % | 83 J |
+| parois glissantes | −6,7 % | 23 % | 83 J |
+
+Ce qu'ils établissent : **le tassement au repos vient de la diffusion δ** (sa forme simple, incohérente
+à la surface libre — Antuono l'a corrigée) ; **ni δ, ni la viscosité, ni l'adhérence aux parois
+n'expliquent l'erreur de période ni l'amortissement**. Suspect restant, non éprouvé : les **parois
+en particules dynamiques** elles-mêmes, ou l'intégrateur. **Le défaut n'est pas attribué à la famille
+SPH** : ce banc ne met pas SPH au même niveau que les deux autres, et la comparaison ne retiendra
+contre lui que ce qui ne dépend pas de ce défaut — la conservation (masse exacte, volume à 0,4 %) et le
+**coût du pas acoustique**, propre au SPH **faiblement compressible** (les variantes incompressibles,
+IISPH ou DFSPH, changent ce compte).
 

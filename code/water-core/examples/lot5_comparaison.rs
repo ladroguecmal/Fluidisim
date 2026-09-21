@@ -1041,7 +1041,10 @@ impl Sph {
         let hauteur = cellules.len() / largeur;
         let p: Vec<f64> = self.rho.iter().map(|r| self.pression(*r)).collect();
         let (mut drho, mut acc) = (vec![0.0; n], vec![[0.0, -G]; n]);
-        let (alpha, delta) = (0.02, 0.1);
+        // `LOT5_DELTA` et `LOT5_ALPHA` : diagnostics seulement — déclarés avec toute mesure qui les
+        // emploie (S318 P5b, recherche de l'erreur de période qui ne converge pas).
+        let lire = |nom: &str, defaut: f64| std::env::var(nom).ok().and_then(|v| v.parse().ok()).unwrap_or(defaut);
+        let (alpha, delta) = (lire("LOT5_ALPHA", 0.02), lire("LOT5_DELTA", 0.1));
         for a in 0..n {
             let xa = self.x[a];
             let ci = (((xa[0] - origine[0]) / taille) as usize).min(largeur - 1);
@@ -1068,7 +1071,11 @@ impl Sph {
                             - delta * self.h * self.c0 * psi * (rx * gx + ry * gy) * self.masse / self.rho[b];
                         if a < self.n_eau {
                             let vr = vx * rx + vy * ry;
-                            let visc = if vr < 0.0 {
+                            // `LOT5_PAROI_GLISSANTE` : pas de viscosité entre l'eau et la paroi —
+                            // la paroi n'agit plus que par la pression, comme les parois glissantes
+                            // des deux candidats sur grille (diagnostic S318 P5b).
+                            let glissante = b >= self.n_eau && std::env::var("LOT5_PAROI_GLISSANTE").is_ok();
+                            let visc = if vr < 0.0 && !glissante {
                                 let rho_m = 0.5 * (self.rho[a] + self.rho[b]);
                                 -alpha * self.c0 * self.h * vr / (rho_m * (r * r + 0.01 * self.h * self.h))
                             } else {

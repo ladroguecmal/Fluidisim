@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-21 21:49 +02:00
+Battement        : 2026-09-21 22:01 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S318 — lot 5 : la comparaison chiffrée des représentations à plusieurs couches (ADR-184 D2)
 Dernière session : S317 — **l'ordre D** : le flux à la ligne ferme l'intérieur de δ au plancher d'arrondi, le paquet **déplace** de l'eau (un receveur par ligne), et une région **locale** — I-15 interdit d'écrire dans B ou V répliqués — reçoit le volume contre un reçu ; attente **exactement nulle**, monde non revendiqué ([preuve](docs/validation/RESTITUTION-S317.md), [ADR-185](docs/adr/ADR-185-ordre-d-receveur-sous-i15.md))
