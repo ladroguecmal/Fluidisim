@@ -1826,6 +1826,54 @@ pub fn c03_dissipation_par_courant(
 }
 
 #[cfg(test)]
+mod tests_a306 {
+    use super::*;
+    use crate::host_impl::{ArenaAllocator, SequentialJobs, StderrSink};
+    use water_core::{Bassin, Delta1D, HostServices};
+
+    /// **A306, troisième emploi — C03 sur `Delta1D`** (S316). `mesurer_seiche` lit la période sur
+    /// les passages à zéro **descendants** au mur gauche, où les harmoniques impaires d'une surface
+    /// inclinée sont toutes en phase. Le signal est rejoué pas à pas, comme dans `mesurer_seiche`,
+    /// puis relu par le périodogramme ; le critère est celui des deux autres emplois.
+    #[test]
+    fn a306_c03_delta1d_deux_estimateurs() {
+        let (l, h) = (20.0f64, 2.0f64);
+        let t_ref = 2.0 * l / (G * h).sqrt();
+        for mode_propre in [false, true] {
+            let mut alloc = ArenaAllocator::with_capacity(1 << 24);
+            let (jobs, sink) = (SequentialJobs, StderrSink);
+            let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
+            let mut d = Delta1D::configure(&mut host, Bassin::c03(mode_propre)).expect("configuration");
+            let duree = 20.0 * t_ref;
+            let (mut t, mut ts, mut ys) = (0f64, vec![0f64], vec![d.eta(0) as f64]);
+            while t < duree {
+                let dt = d.dt_cfl().min((duree - t) as f32);
+                if dt <= 0.0 {
+                    break;
+                }
+                d.pas_equilibre(dt);
+                t += dt as f64;
+                ts.push(t);
+                ys.push(d.eta(0) as f64);
+            }
+            // La réception elle-même : descendants, interpolés, comme `mesurer_seiche_cfl`.
+            let recue = mesurer_seiche(&mut host, Bassin::c03(mode_propre), duree).map(|s| s.periode_s);
+            let neg: Vec<f64> = ys.iter().map(|v| -v).collect();
+            let (zc, pg, ecart, marge) =
+                crate::physics_shallow::a306_marge(&ts, &neg, t_ref, 0.01);
+            println!(
+                "A306 C03 delta1d mode_propre={mode_propre:<5} recue {:.5} s  zeros {zc:.5} s                   periodogramme {pg:.5} s  reference {t_ref:.5} s  ecart entre estimateurs {:.4} %                   marge {:.4} %  echantillons {}",
+                recue.unwrap_or(f64::NAN),
+                ecart * 100.0,
+                marge * 100.0,
+                ts.len()
+            );
+            assert!(ecart < marge, "C03 delta1d mode_propre={mode_propre} : l'estimateur a pu décider");
+        }
+    }
+}
+
+#[cfg(test)]
 mod tests_reference {
     use super::*;
 

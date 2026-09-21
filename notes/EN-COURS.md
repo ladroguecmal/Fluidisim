@@ -136,7 +136,7 @@ décalage.
 - [ ] **P7b** — l'oblique à **maille plus fine** : l'écart d'angle se partage-t-il entre δ et
   l'instrument comme S315 l'a prévu ? *(si le coût mesuré le permet ; sinon, le coût est publié et
   l'essai daté dans la file)*.
-- [>] **P8** — A306 : les **deux emplois** de l'estimateur par passages par zéro dans le harnais,
+- [x] **P8** — A306 : les **deux emplois** de l'estimateur par passages par zéro dans le harnais,
   et les réceptions antérieures qui en dépendent (ADR-183 D8).
 - [ ] **P9** — preuve publiée : le tableau d'attribution de l'ordre C.
 - [ ] **P10** — rituel REPRISE §6.
@@ -1184,4 +1184,24 @@ indépendante de la maille. À 12,5 cm, avec `ω` à −0,83 % : angle lu **20,9
 — l'écart tombe de moitié environ, **pas à zéro**. S'il tombait à zéro, l'instrument n'y serait pour
 rien ; s'il ne bougeait pas, ce serait l'instrument seul. Coût : le pas de δ 3D sur CPU ne se
 parallélise pas (réductions séquentielles), ≈ 1 h 30 par angle ; lancé en parallèle du reste.
+
+**P8 — A306 : les emplois du harnais, relus par un second estimateur sur le même signal.** Critère
+écrit avant : une réception a pu être affectée si l'écart entre estimateurs **dépasse sa marge**
+(ce qui la sépare de sa tolérance). Trois essais permanents, `a306_*` :
+
+| emploi | réception | écart entre estimateurs | marge |
+|---|---|---:|---:|
+| `physics_shallow.rs`, C03 sur `Shallow1D` | C03-T (mode), C03-T-mur | 0,038 %, 0,039 % | 1,00 % |
+| `physics.rs`, `mesurer_seiche` sur `Delta1D` | C03, C03-mode | 0,035 %, 0,037 % | 1,00 % |
+| `physics_dispersif.rs`, milieu vérifié | disp-λ32, λ16, λ8 | 0,232 %, 0,235 %, 0,236 % | 1,00 % |
+
+**Aucune réception affectée.** Et le sens de l'écart est instructif : ici c'est le **périodogramme**
+qui se trompe. Les passages par zéro tombent sur la référence à 5·10⁻⁶ près (milieu dispersif),
+tandis que le périodogramme d'une sinusoïde **pure** de 8 périodes est biaisé de **−0,236 %** par la
+fuite de sa fenêtre (−0,038 % à 20 périodes) — reproduit à part sur un signal synthétique, et selon
+la phase. Le mécanisme d'A306 exige une composante **courte qui traverse zéro** sans porter
+d'énergie : les signaux de **mode** du harnais n'en ont pas (au mur de C03, les harmoniques impaires
+sont en phase et ne déplacent pas les zéros). Le cinquième emploi, C02 sur B, lit une composante
+**unique** analytique : hors d'atteinte par construction. **A306 se clôt pour le harnais** ; le
+remède de L360 reste vrai, avec son corollaire : **le second estimateur a son propre biais**.
 

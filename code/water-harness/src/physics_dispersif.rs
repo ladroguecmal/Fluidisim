@@ -397,6 +397,34 @@ pub fn c05_dispersif() -> Vec<Cas> {
 mod tests {
     use super::*;
 
+    /// **A306, second emploi — le milieu dispersif vérifié avant usage** (S316). Mêmes trois modes,
+    /// même signal ; le périodogramme relit la période que les passages par zéro ont reçue.
+    #[test]
+    fn a306_dispersif_deux_estimateurs() {
+        let h = 20.0f64;
+        for m in [16usize, 32, 64] {
+            let lambda = 512.0 / m as f64;
+            let mut d = milieu_dispersif(lambda, 400.0, 256.0);
+            let i = d.point_en(256.0);
+            let k = core::f64::consts::TAU / lambda;
+            let t_ref = core::f64::consts::TAU / MilieuDispersif::omega_de_k(k, h);
+            let dt_e = t_ref / 200.0;
+            let (mut ts, mut ys) = (Vec::new(), Vec::new());
+            for q in 0..=(200 * 8) {
+                d.avancer_jusqu_a(q as f64 * dt_e, dt_e * 0.5);
+                ts.push(d.temps());
+                ys.push(d.eta(i));
+            }
+            let (zc, pg, ecart, marge) = crate::physics_shallow::a306_marge(&ts, &ys, t_ref, 0.01);
+            println!(
+                "A306 dispersif λ={lambda:>4.0} m  zeros {zc:.6} s  periodogramme {pg:.6} s                   reference {t_ref:.6} s  ecart entre estimateurs {:.5} %  marge {:.5} %",
+                ecart * 100.0,
+                marge * 100.0
+            );
+            assert!(ecart < marge, "λ = {lambda} m : l'estimateur a pu décider de la réception");
+        }
+    }
+
     /// **L'instrument est-il vérifié avant usage ?**
     ///
     /// C'est ce qui distingue `dispersif.rs` d'un montage de circonstance : la période est **mesurée

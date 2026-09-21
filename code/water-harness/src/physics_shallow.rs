@@ -570,6 +570,65 @@ pub fn periode_moyenne(zeros: &[f64]) -> Option<f64> {
     Some((zeros[zeros.len() - 1] - zeros[0]) / (zeros.len() - 1) as f64)
 }
 
+/// **Le second estimateur de période** — A306, remède de L360 : le maximum du périodogramme.
+///
+/// Le comptage de passages par zéro compte **toutes** les traversées, et une composante courte le
+/// biaise sans le dire (S314 §7.1 : +4,7 % au maillage le plus fin). Le périodogramme ne compte
+/// rien : il cherche la fréquence qui **explique le plus d'énergie**. Aucun des deux n'est la
+/// vérité ; leur **écart** est une mesure, et c'est lui qu'on compare à la marge d'une réception.
+///
+/// Échantillonnage quelconque, pondéré par les intervalles. La période des passages par zéro ne
+/// sert qu'à **cadrer** la recherche — un facteur quatre autour —, pas à l'amorcer.
+pub fn periode_periodogramme(t: &[f64], y: &[f64]) -> Option<f64> {
+    let t_zc = periode_moyenne(&passages_a_zero(t, y))?;
+    let w0 = core::f64::consts::TAU / t_zc;
+    let puissance = |w: f64| {
+        let (mut c, mut s) = (0f64, 0f64);
+        for k in 1..y.len() {
+            let dt = t[k] - t[k - 1];
+            let (sn, cs) = (w * t[k]).sin_cos();
+            c += y[k] * cs * dt;
+            s += y[k] * sn * dt;
+        }
+        c * c + s * s
+    };
+    let n = 1500usize;
+    let (mut meilleur, mut arg) = (-1f64, w0);
+    for i in 0..=n {
+        let w = w0 * (0.5 + 1.5 * i as f64 / n as f64);
+        let p = puissance(w);
+        if p > meilleur {
+            meilleur = p;
+            arg = w;
+        }
+    }
+    let mut pas = 1.5 * w0 / n as f64;
+    for _ in 0..3 {
+        let centre = arg;
+        pas /= 20.0;
+        for i in -20i32..=20 {
+            let w = centre + pas * i as f64;
+            let p = puissance(w);
+            if p > meilleur {
+                meilleur = p;
+                arg = w;
+            }
+        }
+    }
+    Some(core::f64::consts::TAU / arg)
+}
+
+/// **A306 — une réception de période a-t-elle pu être affectée par l'estimateur ?** Oui si l'écart
+/// entre les deux estimateurs dépasse sa **marge** — ce qui la sépare de sa tolérance. Rend
+/// `(période par zéros, période par périodogramme, écart relatif, marge relative)`.
+#[cfg(test)]
+pub fn a306_marge(t: &[f64], y: &[f64], t_ref: f64, tolerance: f64) -> (f64, f64, f64, f64) {
+    let t_zc = periode_moyenne(&passages_a_zero(t, y)).unwrap_or(f64::NAN);
+    let t_pg = periode_periodogramme(t, y).unwrap_or(f64::NAN);
+    let marge = tolerance - (t_zc - t_ref).abs() / t_ref;
+    (t_zc, t_pg, (t_zc - t_pg).abs() / t_ref, marge)
+}
+
 /// **La référence *ponctuelle* de l'erreur `L¹`** — celle qu'utilisait la lignée B jusqu'en
 /// **B-S24**, conservée ici pour un usage unique : montrer pourquoi le `p` publié dans `ADR-040`
 /// n'est plus celui que le code rend.
@@ -1256,6 +1315,39 @@ pub fn c06_galilee(n: usize, dx: f64, h0: f64, amp: f64, u0: f64, t_fin: f64) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// **A306, premier emploi — C03 sur `Shallow1D`** (S316, ADR-183 D8). Les deux périodes reçues,
+    /// au mur et sur le mode, relues par le second estimateur **sur le même signal** que la
+    /// réception. Critère écrit avant d'exécuter : la réception n'a pas pu être affectée si l'écart
+    /// entre estimateurs est **inférieur à sa marge**.
+    #[test]
+    fn a306_c03_shallow_deux_estimateurs() {
+        let (n, dx, h0, eta_bord, periodes) = (400usize, 0.05f64, 2.0f64, 0.02f64, 20.0f64);
+        let mut alloc = ArenaAllocator::with_capacity(1 << 22);
+        let (jobs, sink) = (SequentialJobs, StderrSink);
+        let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
+        let mut d = Shallow1D::configure_seiche(&mut host, n, dx, h0, eta_bord).expect("configuration");
+        d.regler_ordre2(SCHEMA_RETENU.ordre2);
+        d.regler_rk2(SCHEMA_RETENU.rk2);
+        let t_ref = 2.0 * d.longueur() / (G * h0).sqrt();
+        let dt_e = t_ref / 64.0;
+        let (mut ts, mut mur, mut mode) = (Vec::new(), Vec::new(), Vec::new());
+        for k in 0..=(periodes * 64.0) as usize {
+            d.avancer_jusqu_a(k as f64 * dt_e, 0.45);
+            ts.push(d.temps());
+            mur.push(d.surface(0) - h0);
+            mode.push(d.mode_fondamental(h0));
+        }
+        for (nom, y) in [("C03-T (mode)", &mode), ("C03-T-mur", &mur)] {
+            let (zc, pg, ecart, marge) = a306_marge(&ts, y, t_ref, 0.01);
+            println!(
+                "A306 {nom:<14} zeros {zc:.5} s  periodogramme {pg:.5} s  reference {t_ref:.5} s                   ecart entre estimateurs {:.4} %  marge {:.4} %",
+                ecart * 100.0,
+                marge * 100.0
+            );
+            assert!(ecart < marge, "{nom} : l'estimateur a pu décider de la réception");
+        }
+    }
 
     #[test]
     fn front_absent_ne_devient_ni_position_ni_profil() {
