@@ -58,110 +58,80 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S315 — **terminée**. Les deux vérifications que S314 devait à l'ordre B : **la phase à
-dix longueurs d'onde**, contre un oracle indépendant, et **l'oblique à la frontière**.
+Session : S316 — **en cours**. L'**ordre C** d'ADR-181 D10 : les six propriétés du transfert
+δ → W mesurées **ensemble**, chacune **attribuée** à la primitive, au raccord ou à δ ; et la phase
+à dix longueurs d'onde, qu'S315 a laissée **indéterminée**, **déroulée** (A307).
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : la **décision de l'utilisateur du 2026-09-20 (S314)**, « Primitive orientée et poursuite
-du couplage ». Essai oblique autorisé, puis ordre C ; le transfert reste **partiel**.
+Entrée : la décision de l'utilisateur du 2026-09-20 ([ADR-183](../docs/adr/ADR-183-essai-oblique-phase-a-distance-et-ordre-c.md)),
+D5 — *« évaluez conjointement l'amplitude, la direction, le spectre, la phase, la vitesse de
+propagation et la réflexion artificielle. Distinguez les résultats propres à la primitive W, ceux
+du raccord et ceux de la simulation δ »* ; et §7 de [S315](../docs/validation/ORACLE-ET-OBLIQUE-S315.md),
+qui en est l'entrée.
 
-> 1. « **Terminer l'essai oblique à la frontière** […] Que l'énergie sortante est transmise dans
->    la **direction attendue** ; que les **composantes tangentielles** sont correctement
->    conservées ; que le transfert ne crée pas de composante **réfléchie ou transverse
->    artificielle** ; que le résultat reste cohérent lorsque **l'angle d'incidence varie**. La
->    primitive accepte déjà une direction oblique, mais il reste à démontrer que **le raccord
->    l'exploite correctement**. »
-> 2. « **Vérifier la conservation de la phase pendant la propagation.** La régression mesurée sur
->    la ligne d'émission […] ne suffit pas. Construisez un **oracle indépendant** pour vérifier la
->    phase à distance, notamment à **dix longueurs d'onde**. La comparaison devra tenir compte de
->    la **dispersion**, du **temps de propagation** et de l'**élargissement naturel** du paquet.
->    **Ne remplacez pas un défaut de phase par une simple correction d'amplitude ou un décalage
->    temporel arbitraire.** »
-> 3. « Passer ensuite à l'**ordre C** […] Distinguez les résultats propres à la **primitive W**,
->    ceux du **raccord** et ceux de la **simulation δ**. Le volume net reste intégralement dans
->    `pending`. »
-> 4. « **A305 et A306** […] maintenues ouvertes […] Pour A306, examinez les **deux emplois** dans
->    le harnais et déterminez si des **réceptions antérieures** ont pu être affectées. »
+**Contrôle de la règle des trois sessions (REPRISE §6.7).** Le lot 2 porte S310 à S315. Ce qui
+autorise celle-ci n'est pas la suite déclarée par S315 : c'est la **décision de l'utilisateur**,
+qui nomme l'ordre C comme étape suivante et la condition de sortie du qualificatif « partiel »
+(ADR-183 D6). La demande de l'utilisateur prime sur la règle automatique.
 
-Capacité visée : **le trajet complet d'une perturbation est vérifié de bout en bout** — produite
-par δ, identifiée, transférée, et **retrouvée à dix longueurs d'onde** avec sa phase ; et il l'est
-aussi quand elle arrive **de biais**. Consommateur : l'ordre C, qui doit attribuer chaque écart à
-la primitive, au raccord ou à δ — ce qui suppose qu'on sache mesurer les trois séparément.
+Capacité visée : **le transfert δ → W est qualifié propriété par propriété** — pour chacune, sa
+valeur à trois mailles, sa limite quand la maille s'affine, et son **attributaire** ; la phase à
+dix longueurs d'onde n'est plus indéterminée. Consommateur : la décision de l'utilisateur sur le
+passage à l'ordre D (restitution du volume net), qu'ADR-183 D6 conditionne à cette qualification.
 
-**Ce que je ne fais pas, et je le déclare d'avance** : l'ordre C lui-même, qui vient après ;
-corriger un écart de phase par une amplitude ou un décalage temporel — c'est explicitement
-interdit, et le banc doit rendre la manœuvre **impossible** plutôt que déconseillée ; toucher au
-régime (l'eau profonde reste le domaine de W) ; donner à W la responsabilité du niveau moyen ;
-ouvrir un chantier de rendu ou d'optimisation.
+**La question de fond, posée avant de mesurer : comment un écart s'attribue-t-il ?** Trois
+sources, et un critère pour chacune, écrit avant le premier chiffre :
 
-**La question de fond, posée avant de mesurer.** Un « oracle indépendant » de la phase à distance
-ne peut pas être le train lui-même : le train **est** une somme de modes exacts, donc il propage
-exactement par construction, et le comparer à sa propre formule ne mesurerait rien. L'oracle doit
-être une **autre** physique. Le seul candidat du dépôt qui soit vraiment indépendant est **δ** :
-si le domaine est assez long, la perturbation continue d'y vivre au-delà de la ligne d'émission,
-et une **seconde ligne de contrôle** dix longueurs d'onde plus loin dit ce que le solveur, lui, a
-produit là-bas. Le train prédit ; δ constate.
+- **δ** — l'écart **converge** quand la maille s'affine (25 → 12,5 → 6,25 cm), vers zéro ;
+- **raccord** — l'écart est présent **dès la ligne d'émission** et **ne converge pas** avec la
+  maille : il vient du modèle d'identification (une porteuse, une enveloppe gaussienne) ;
+- **primitive** — l'écart existe **sans δ ni ligne** : le train comparé, à sa naissance, à la
+  forme qu'on lui a demandée ;
+- et une quatrième, que S315 a dû ajouter : **l'instrument** — un écart qui vient de la façon de
+  mesurer, et qui se démontre en donnant à l'instrument un défaut **connu** à trouver.
 
-**Mais je ne sais pas si les deux sont comparables**, et c'est ce que P3 tranche avant de
-construire : δ est **dispersif et discret**, le train est **exact et continu**. À 12,5 cm, S314 a
-mesuré 0,83 % d'écart de célérité entre les deux — sur dix longueurs d'onde, cela déplace la phase
-de **0,83 % × 10 = 8 % de tour**, soit 30°. **Un désaccord de phase à distance sera donc attendu,
-et sa valeur attendue se calcule.** Ce qu'il faut mesurer n'est pas « la phase est-elle juste »
-mais « l'écart est-il celui que la dispersion numérique de δ impose, ou y a-t-il autre chose ».
+Trois mailles ne font pas une loi : si les trois points ne suivent pas une puissance de la maille,
+**je le dis** et je n'attribue pas.
+
+**L'instrument de phase (A307), déclaré avant d'être écrit.** Transfert à **fréquence fixe** :
+à chaque colonne entre les deux lignes, la projection de `η(t)` sur `e^{iωt}` sur une **fenêtre
+commune** aux deux signaux ; l'écart `D(x) = arg(Z_W · conj Z_δ)` se **déroule le long de `x`**, où
+il varie lentement. Aucune pulsation ajustée, aucun terme de temps, aucun décalage (ADR-183 D3). À
+fréquence fixe, le retard de groupe n'est plus une erreur de phase : il devient la **pente de `D`
+en `ω`**, et c'est lui qui mesure la vitesse.
 
 Critères, écrits avant la mesure :
-1. L'oracle est **une autre physique**, pas une autre écriture de la même formule.
-2. L'écart de phase attendu **du fait de la dispersion numérique de δ** est calculé **avant** de
-   lire l'écart mesuré, et les deux sont publiés côte à côte.
-3. Aucun ajustement d'amplitude ni de décalage temporel n'est appliqué pour rapprocher les deux.
-   Le banc n'en offre pas le moyen.
-4. Sur l'oblique, la direction transmise, la composante tangentielle et la composante transverse
-   parasite sont mesurées **séparément**, et l'angle **se balaye**.
-5. Les scènes et réceptions antérieures restent **au bit**.
+1. L'instrument retrouve un écart de phase **connu et supérieur à un demi-tour** avant d'être
+   appliqué à δ.
+2. Les prédictions de S315 §2 (−0,853 ; −0,165 ; −0,0072 tour à 10 λ) sont confrontées telles
+   qu'écrites, **sans être recalculées** après la mesure.
+3. Chaque propriété est publiée à trois mailles, avec sa limite et son attributaire.
+4. Aucun seuil n'est posé qui n'ait été écrit avant ; ADR-183 §3 laisse le seuil de phase ouvert.
+5. Scènes et réceptions antérieures **au bit** ; le banc ajoute, il ne modifie pas.
+
+**Ce que je ne fais pas** : l'ordre D (le volume net reste **intégralement** dans `pending`) ; A305
+(bande puis éponge) ; la profondeur finie ; le rendu ; toute correction de phase par amplitude ou
+décalage.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — ADR-183 : la décision du 2026-09-20 (S314), actée.
-- [x] **P3** — *l'oracle est-il comparable ?* L'écart de phase qu'impose la dispersion de δ sur
-  dix longueurs d'onde, **calculé avant** de mesurer quoi que ce soit.
-- [x] **P4** — le montage à **deux lignes de contrôle**, et la phase mesurée à 10 λ.
-- [x] **P5** — le cas **oblique** : domaine large en `y`, éponges sur les quatre bords, paquet
-  incliné.
-- [x] **P6** — l'extraction de la **direction** à la surface de contrôle : `k_y` par le gradient
-  de phase transverse, et non par une hypothèse.
-- [x] **P7** — essai 3 a et b : direction transmise, composante tangentielle, et recherche d'une
-  composante **transverse artificielle**.
-- [x] **P8** — essai 3 c : **balayage de l'angle d'incidence**.
-- [x] **P9** — preuve publiée : les six propriétés, chacune attribuée à la primitive, au raccord
-  ou à δ.
-- [x] **P10** — rituel REPRISE §6.
+- [ ] **P2** — la règle d'attribution et les **prédictions chiffrées**, écrites avant toute mesure
+  (notes de reprise).
+- [ ] **P3** — l'instrument de phase déroulée, et son **essai sur un défaut connu** : deux trains
+  de nombres d'onde différents, écart attendu > ½ tour à 10 λ.
+- [ ] **P4** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
+- [ ] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
+  phase, vitesse de groupe, réflexion, volume.
+- [ ] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
+- [ ] **P7** — l'oblique à **maille plus fine** : l'écart d'angle se partage-t-il entre δ et
+  l'instrument comme S315 l'a prévu ? *(si le coût mesuré le permet ; sinon, le coût est publié et
+  l'essai daté dans la file)*.
+- [ ] **P8** — A306 : les **deux emplois** de l'estimateur par passages par zéro dans le harnais,
+  et les réceptions antérieures qui en dépendent (ADR-183 D8).
+- [ ] **P9** — preuve publiée : le tableau d'attribution de l'ordre C.
+- [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
-
-**P3 — la prédiction, écrite avant que le banc existe.**
-
-Le train et δ portent la **même fréquence** — le transfert lit `ω` sur la jauge et la lui donne.
-Ce qu'ils ne partagent pas est le **nombre d'onde** : le train pose `k = ω²/g`, l'eau profonde
-exacte, tandis que l'onde de δ garde le `k` de sa condition initiale et n'a que la fréquence que le
-schéma discret lui donne. À fréquence égale et nombre d'onde différent, la phase se sépare
-**linéairement avec la distance** : `Δφ = (k_train − k_δ)·D`.
-
-Avec les `ω` mesurées en S314 et `k` posé = 3,1416 rad/m, sur `D` = 10 λ = 20 m :
-
-| maille | `ω` lue | `k_train = ω²/g` | `Δk` | **`Δφ` prédit** |
-|---:|---:|---:|---:|---:|
-| 25 cm | 5,3094 | 2,8736 | −0,2680 | **−0,853 tour** *(−307°)* |
-| 12,5 cm | 5,5056 | 3,0899 | −0,0517 | **−0,165 tour** *(−59°)* |
-| 6,25 cm | 5,5495 | 3,1393 | −0,0023 | **−0,0072 tour** *(−2,6°)* |
-
-**Deux ordres de grandeur entre les extrêmes** : la prédiction est donc un vrai test, pas une
-formule qui tomberait juste quoi qu'il arrive. Et elle dit d'avance que **la phase à dix longueurs
-d'onde sera fausse de soixante degrés à 12,5 cm** — sans que le transfert y soit pour rien.
-
-**Ce que le banc devra mesurer, et pourquoi il ne peut pas se contenter de cette prédiction** :
-`k` posé n'est pas `k_δ`. Sur une scène quelconque on ne connaît pas la condition initiale. Le banc
-mesurera donc `k_δ` **directement**, par la différence de phase du signal de δ entre ses **deux**
-lignes — ce qui rend la prédiction elle-même mesurée, et non calée sur ce qu'on a posé.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 

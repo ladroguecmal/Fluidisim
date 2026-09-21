@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-20 23:58 +02:00
+JETON            : occupé
+Battement        : 2026-09-21 07:40 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : —
+Session en cours : S316 — l'ordre C : les six propriétés du transfert ensemble, chacune attribuée ; la phase à dix longueurs d'onde déroulée (A307)
 Dernière session : S315 — **l'oblique à la frontière** : la direction se **lit** (0,00° à 0°) et le raccord ne crée **aucune composante transverse** (miroir 10⁻⁶–10⁻⁷) ; mais la **phase à dix longueurs d'onde est indéterminée** — une phase ne vaut que modulo un tour (A307) ([preuve](docs/validation/ORACLE-ET-OBLIQUE-S315.md), [ADR-183](docs/adr/ADR-183-essai-oblique-phase-a-distance-et-ordre-c.md))
 Session suivante : l'**ordre C** — les six propriétés ensemble, chacune **attribuée** à la primitive, au raccord ou à δ ; §7 de la preuve de S315 en est l'entrée. Le déroulement de phase (A307) en est le préalable
 Maillons        : 0 — capacité S315 : **le raccord lit une direction qu'on ne lui a pas soufflée et n'en fabrique aucune**, et le dépôt sait pourquoi une phase ne se compare pas à distance par ses extrémités ; consommateur : l'ordre C, dont l'entrée est le tableau d'attribution de §7
