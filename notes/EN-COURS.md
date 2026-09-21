@@ -58,150 +58,67 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S316 — **terminée**. L'**ordre C** d'ADR-181 D10 : les six propriétés du transfert
-δ → W mesurées **ensemble**, chacune **attribuée** à la primitive, au raccord ou à δ ; et la phase
-à dix longueurs d'onde, qu'S315 a laissée **indéterminée**, **déroulée** (A307).
+Session : S317 — **en cours**. L'**ordre D** d'ADR-181 D10 : la comptabilité et la restitution
+effective du volume net à travers B ou V, suivant l'environnement.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : la décision de l'utilisateur du 2026-09-20 ([ADR-183](../docs/adr/ADR-183-essai-oblique-phase-a-distance-et-ordre-c.md)),
-D5 — *« évaluez conjointement l'amplitude, la direction, le spectre, la phase, la vitesse de
-propagation et la réflexion artificielle. Distinguez les résultats propres à la primitive W, ceux
-du raccord et ceux de la simulation δ »* ; et §7 de [S315](../docs/validation/ORACLE-ET-OBLIQUE-S315.md),
-qui en est l'entrée.
+Entrée : **décision de l'utilisateur du 2026-09-21, 20:2x** — *« On passe à l'ordre D »*, en
+réponse à la question que S316 laissait (qualificatif du transfert et ouverture de l'ordre D). Il
+n'a rien dit du qualificatif : **le transfert reste « partiel »** (ADR-183 D6, lecture prudente).
 
-**Contrôle de la règle des trois sessions (REPRISE §6.7).** Le lot 2 porte S310 à S315. Ce qui
-autorise celle-ci n'est pas la suite déclarée par S315 : c'est la **décision de l'utilisateur**,
-qui nomme l'ordre C comme étape suivante et la condition de sortie du qualificatif « partiel »
-(ADR-183 D6). La demande de l'utilisateur prime sur la règle automatique.
+**La question de fond, posée avant tout code : qui peut recevoir un volume issu de δ ?** ADR-181
+D1 (décision de l'utilisateur) nomme V pour un contenant, et un niveau moyen **régional** de B pour
+l'eau ouverte. Mais δ est calculé sur le client, sans autorité (I-04) ; B et V sont déterministes
+et répliqués (I-03), V tenu par le serveur (I-10). **Un volume issu de δ versé dans l'état
+répliqué de B ou de V serait un chemin du client vers le monde répliqué — I-11 l'interdit, et I-15
+le tranche sans arbitrage** : une grandeur n'est autoritaire que si tous les participants la
+calculent à l'identique depuis des données répliquées. D'où deux lectures d'ADR-181 D1, que P2
+acte :
 
-Capacité visée : **le transfert δ → W est qualifié propriété par propriété** — pour chacune, sa
-valeur à trois mailles, sa limite quand la maille s'affine, et son **attributaire** ; la phase à
-dix longueurs d'onde n'est plus indéterminée. Consommateur : la décision de l'utilisateur sur le
-passage à l'ordre D (restitution du volume net), qu'ADR-183 D6 conditionne à cette qualification.
+- **eau ouverte** — le receveur est le niveau de B **tel que ce client le représente** : une
+  correction **locale**, non répliquée, comme `W_local` l'est pour W ; elle ferme le bilan de la
+  représentation, elle ne change pas le monde ;
+- **contenant** — c'est **δ qui s'asservit au bilan de V**, pas V qui reçoit de δ : la porte E le
+  dit déjà (« la comptabilité de masse est identique avec et sans δ », C21). Articulation V↔δ :
+  porte E, hors de cette session, règle écrite.
 
-**La question de fond, posée avant de mesurer : comment un écart s'attribue-t-il ?** Trois
-sources, et un critère pour chacune, écrit avant le premier chiffre :
+Capacité visée : **le volume net qui quitte δ a un receveur, et le bilan de la représentation se
+ferme** — δ plus sa région, sans création ni destruction, sans double comptage. Consommateur :
+l'ordre E (couplage complet), et la déclaration de conservation qu'ADR-180 D1 interdisait tant
+qu'aucun receveur n'existait.
 
-- **δ** — l'écart **converge** quand la maille s'affine (25 → 12,5 → 6,25 cm), vers zéro ;
-- **raccord** — l'écart est présent **dès la ligne d'émission** et **ne converge pas** avec la
-  maille : il vient du modèle d'identification (une porteuse, une enveloppe gaussienne) ;
-- **primitive** — l'écart existe **sans δ ni ligne** : le train comparé, à sa naissance, à la
-  forme qu'on lui a demandée ;
-- et une quatrième, que S315 a dû ajouter : **l'instrument** — un écart qui vient de la façon de
-  mesurer, et qui se démontre en donnant à l'instrument un défaut **connu** à trouver.
-
-Trois mailles ne font pas une loi : si les trois points ne suivent pas une puissance de la maille,
-**je le dis** et je n'attribue pas.
-
-**L'instrument de phase (A307), déclaré avant d'être écrit.** Transfert à **fréquence fixe** :
-à chaque colonne entre les deux lignes, la projection de `η(t)` sur `e^{iωt}` sur une **fenêtre
-commune** aux deux signaux ; l'écart `D(x) = arg(Z_W · conj Z_δ)` se **déroule le long de `x`**, où
-il varie lentement. Aucune pulsation ajustée, aucun terme de temps, aucun décalage (ADR-183 D3). À
-fréquence fixe, le retard de groupe n'est plus une erreur de phase : il devient la **pente de `D`
-en `ω`**, et c'est lui qui mesure la vitesse.
-
-Critères, écrits avant la mesure :
-1. L'instrument retrouve un écart de phase **connu et supérieur à un demi-tour** avant d'être
-   appliqué à δ.
-2. Les prédictions de S315 §2 (−0,853 ; −0,165 ; −0,0072 tour à 10 λ) sont confrontées telles
-   qu'écrites, **sans être recalculées** après la mesure.
-3. Chaque propriété est publiée à trois mailles, avec sa limite et son attributaire.
-4. Aucun seuil n'est posé qui n'ait été écrit avant ; ADR-183 §3 laisse le seuil de phase ouvert.
+Critères, écrits avant le code :
+1. La région est **identifiable** (ADR-181 D2) : une emprise déclarée, jamais l'océan ; un
+   scalaire global qui absorberait tout est refusé **par construction**.
+2. **Rien ne se crée ni ne se perd par construction** (ADR-181 D3) : la seule façon de faire
+   baisser le volume en attente est qu'une région le **reçoive** ; aucune méthode ne restitue sans
+   receveur.
+3. Sur le banc de l'ordre C, **δ + région** se ferme au résidu numérique près, publié, et le
+   volume **en attente** tombe à ce résidu.
+4. La frontière de la région porte une comptabilité : ce qui la quitte est un terme publié, même
+   quand il vaut zéro par choix — et alors **le choix est dit**.
 5. Scènes et réceptions antérieures **au bit** ; le banc ajoute, il ne modifie pas.
 
-**Ce que je ne fais pas** : l'ordre D (le volume net reste **intégralement** dans `pending`) ; A305
-(bande puis éponge) ; la profondeur finie ; le rendu ; toute correction de phase par amplitude ou
-décalage.
+**Ce que je ne fais pas** : l'articulation V↔δ (porte E) ; la propagation physique d'une anomalie
+de niveau hors de sa région (onde longue) — nommée et datée si elle n'entre pas ; la production
+GPU ; le sens W → δ ; toute écriture dans l'état répliqué de B ou de V.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — la règle d'attribution et les **prédictions chiffrées**, écrites avant toute mesure
-  (notes de reprise).
-- [x] **P3** — l'instrument de phase déroulée, et son **essai sur un défaut connu** : deux trains
-  de nombres d'onde différents, écart attendu > ½ tour à 10 λ.
-- [x] **P4a** — *découpage déclaré en cours de route* : le banc de l'ordre C écrit et **lancé**
-  aux trois mailles, plus 6,25 cm à 5 ms (le discriminant du pas de temps, P2). Quatre calculs
-  parallèles, de 3 min à ~1 h 20 ; **P6 et P8 s'exécutent pendant ce temps**, puisqu'ils n'en
-  dépendent pas.
-- [x] **P4a′** — *second découpage* : le premier lancement a échoué à 25 cm (six stations au relevé
-  complet) et révélé une fenêtre de retour calée sur la vitesse posée. Banc prolongé de 10 m, durée
-  décidée sur la vitesse **mesurée** de δ, amplitude en paramètre ; **l'hypothèse de Stokes écrite
-  avant les résultats à 12,5 et 6,25 cm** (notes).
-- [x] **P4b′** — *découpage déclaré* : 25 et 12,5 cm reçus ; **prédiction révisée pour 6,25 cm
-  écrite avant son résultat** (notes).
-- [x] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
-- [x] **P4c** — *découpage déclaré* : le témoin du pas de temps moitié (6,25 cm, 5 ms), reçu à 11:21.
-- [x] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
-  phase, vitesse de groupe, réflexion, volume.
-- [x] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
-- [x] **P7a** — *découpage déclaré* : prédiction écrite (notes), oblique à 12,5 cm **lancé** à 20° et
-  40° le 2026-09-21 à 08:01.
-- [x] **P7b** — l'oblique à **maille plus fine** : l'écart d'angle se partage-t-il entre δ et
-  l'instrument comme S315 l'a prévu ? *(si le coût mesuré le permet ; sinon, le coût est publié et
-  l'essai daté dans la file)*.
-- [x] **P8** — A306 : les **deux emplois** de l'estimateur par passages par zéro dans le harnais,
-  et les réceptions antérieures qui en dépendent (ADR-183 D8).
-- [x] **P8′** — *ajoutée en cours de session, sur décision de l'utilisateur (08:53)* : ADR-184, la
-  seconde représentation avance en parallèle du lot 2, par sessions alternées.
-- [x] **P9** — preuve publiée : le tableau d'attribution de l'ordre C.
-- [x] **P10** — rituel REPRISE §6.
+- [ ] **P2** — ADR-185 : l'ordre D sous I-15 — receveur local en eau ouverte, δ asservi en
+  contenant, région identifiable, grandeur restituée.
+- [ ] **P3** — *quelle grandeur restituer ?* Sur le banc, confronter les candidats — flux à la
+  ligne, flux aux faces (`outgoing`, ADR-179 D3), volume retiré par l'éponge — à ce que δ perd
+  réellement. Écrit avant de coder le receveur.
+- [ ] **P4** — `RegionalLevel` dans le cœur : emprise, volume reçu, niveau, frontière comptable,
+  refus ; reçu non falsifiable entre le registre et la région.
+- [ ] **P5** — essais unitaires : conservation par construction, refus, aucun double comptage.
+- [ ] **P6** — le banc : l'ordre C à 12,5 cm, le volume net restitué à une région ; bilan δ +
+  région publié à chaque pas.
+- [ ] **P7** — preuve publiée.
+- [ ] **P8** — rituel REPRISE §6.
 
 ### Notes de reprise
-
-**P2 — les prédictions, écrites avant la première mesure de S316.**
-
-*Phase à 10 λ*, écart `D(x₂) − D(x₁)` à la pulsation d'émission, reprises **telles qu'écrites** en
-S315 §2 : **−0,853 ; −0,165 ; −0,0072 tour** à 25 ; 12,5 ; 6,25 cm. Elles reposent sur deux faits :
-le raccord conserve `ω` — la grandeur invariante à une frontière immobile, comme `k_y` l'est à une
-frontière plane —, et dans un milieu homogène δ garde son `k` initial. `D = 20·ε` tours, où `ε` est
-l'écart relatif de `ω` lu en S314 (−4,36 % ; −0,83 % ; −0,036 %).
-
-*Le point à 6,25 cm n'est pas sur la loi des deux autres.* Les rapports d'écart sont 5,3 puis **23** :
-une loi en puissance passant par les deux premiers (p ≈ 2,4) donnerait −0,16 % à 6,25 cm, et on lit
-−0,036 %. Un second terme, de signe opposé et d'ordre +0,1 %, entre en jeu. Suspect nommé : le
-**pas de temps**, fixé à 10 ms aux trois mailles (`ω·dt` = 0,056), donc une part de l'erreur de δ
-**ne converge pas avec la maille**. Discriminant : 6,25 cm à 5 ms, si le coût le permet.
-
-*Vitesse de groupe à 10 λ, 12,5 cm* : **deux prédictions concurrentes**, et l'instrument tranche.
-S315 a lu un retard d'arrivée de **1,66 s** sur les enveloppes. Une erreur de dispersion en
-`(k·dx)²` donnerait `δc_g/c_g = 5ε` = 4,1 %, soit **0,93 s**. L'instrument lit ce retard comme la
-pente `∂D/∂ω`, sans jamais ajuster d'enveloppe.
-
-*Part du raccord, extrapolée des trois mailles de S314* (Richardson, `e(h) = e∞ + C·h^p`) : erreur de
-forme 13,3 → 7,5 → 5,7 %, p ≈ 1,7, **limite ≈ 4,9 %** ; écart de bande 19,4 → 7,6 → 3,5 %, **limite
-≈ 1,3 %** ; amplitude 3,2 → 1,7 → 1,1 %, **limite ≈ 0,7 %**. Une limite non nulle est ce que le
-raccord ne sait pas représenter — une porteuse sous enveloppe gaussienne ne décrit pas un paquet
-que la dispersion a déjà déformé. Trois points par limite : la prédiction est fragile, et elle est
-écrite pour être contredite.
-
-*Part de la primitive* : bande tronquée à ±4 écarts-types, 128 modes, réplique hors du disque —
-**erreur de forme à la naissance < 10⁻³**. Si P6 lit davantage, la primitive porte une part.
-
-*Dissipation de δ* : 6,3 % d'amplitude perdue sur 10 λ à 12,5 cm (S315). Prédit : elle **converge**.
-Aucune valeur écrite pour les deux autres mailles — pas de loi disponible.
-
-**P3 — l'instrument, sur un défaut connu.** Deux trains exacts, gravités `g` et `g(1+ε)²`,
-ε = −4,36 % (l'écart de 25 cm) : **−0,85299 tour lu pour −0,85299 attendu**, saut maximal entre
-stations 0,0067 tour ; l'extrémité seule lit **+0,14701** — l'ambiguïté d'A307, reproduite et levée.
-Retard de groupe **−2,0189 s pour −2,0189 s**, décalage d'émission 0,0000 s.
-
-*L'impasse du premier passage, qui vaut pour la suite* : `∂D/∂ω` pris **entre les deux lignes**
-rendait −1,797 s (11 % d'erreur). Les relevés commencent à la naissance, donc coupés au milieu de
-l'enveloppe à la première ligne, et une gaussienne coupée a son propre retard `σ_t·√(2/π)` —
-différent pour deux trains de `c_g` différents. Remède : le retard se lit comme une **pente en
-`x`** sur les stations au relevé complet (au-delà de 4,5 σ), l'ordonnée ramenée à la ligne donnant
-le décalage d'émission. La **phase** à `ω₀`, elle, n'est pas biaisée par la coupure (désaccord nul).
-
-*Et la même cause a failli bloquer P3 autrement* : mon banc de référence S315, lancé pour chiffrer
-le coût, **verrouillait l'exécutable** — `link.exe` 1104, exactement L362. Arrêté (son premier
-point reproduisait S315 au chiffre près : −0,0581), et **chaque mesure part désormais d'une copie
-de l'exécutable** dans le répertoire de travail temporaire. Coût mesuré : 1 λ à 12,5 cm ≈ 4 min.
-
-*Deux défauts du raccord de S314/S315, lus dans le code avant de mesurer* : (1) la largeur
-temporelle devient spatiale par la vitesse de groupe de l'onde **posée** — une information qu'une
-scène réelle ne donne pas ; (2) le train naît sur la **face** `x_ligne` alors que la jauge lit le
-**centre** de la colonne, une demi-maille plus loin : `k·dx/2` = 0,031 tour à 12,5 cm, 0,063 à 25 cm.
-L'ordre C mesure le raccord tel qu'il était **et** corrigé, sur le même relevé de δ.
 
 ## Archive — notes de S308 (lot du rendu, clos par ADR-178)
 

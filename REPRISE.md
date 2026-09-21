@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-21 11:23 +02:00
+JETON            : occupé
+Battement        : 2026-09-21 20:23 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : —
+Session en cours : S317 — l'ordre D : le volume net qui quitte δ reçoit un receveur, sous I-15
 Dernière session : S316 — **l'ordre C** : six propriétés d'un même transfert, attribuées — primitive exacte à 10⁻⁴ ; au raccord ≈ 1° de phase, 2 à 4 % de spectre, direction lue +1 à 2° (A309) ; le reste converge avec la maille de δ, sauf une part non linéaire que W ne porte pas ; phase à 10 λ **déroulée** (A307 et A306 closes) ([preuve](docs/validation/ORDRE-C-S316.md), [ADR-184](docs/adr/ADR-184-seconde-representation-en-parallele.md))
 Session suivante : **lot 5, comparaison chiffrée** des représentations à plusieurs couches (ADR-184 D2 : particules sur grille, SPH, surface implicite ; B10 et rupture de barrage) — **sauf** si l'utilisateur tranche d'abord le qualificatif du transfert et l'ordre D, qui passent alors en premier
 Maillons        : 0 — capacité S316 : **le transfert δ → W est qualifié propriété par propriété**, chaque écart attribué, et la phase à distance se mesure ; point 4.8 passé d'absent à partiel ; consommateurs : la décision de l'utilisateur sur l'ordre D, et la comparaison du lot 5
