@@ -58,58 +58,52 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S319 — **terminée**. L'**ordre E** du lot 2 : le couplage complet, sur des configurations
-progressivement plus complexes (ADR-181 D10) ; et, d'abord, **acter le choix d'APIC**.
+Session : S320 — **en cours**. Le **lot 5** sur le candidat retenu : **B10 sur APIC**
+([ADR-186](../docs/adr/ADR-186-apic-seconde-representation.md) §3) — un objet **cinématique**
+entre dans l'eau : couronne, cavité, pincement, jet.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Continue »*, puis, en cours d'amorce, **décision de l'utilisateur : « Ok pour APIC »**
-— la seconde représentation (ADR-184 D2). L'ordre des sessions suit l'alternance d'ADR-184 D1 :
-S319 sur le lot 2, **S320 sur le lot 5, B10 sur APIC** ; l'utilisateur en est prévenu, et peut
-demander l'inverse.
+Entrée : *« Continue »*, après S319 ; suite déclarée : B10 sur APIC, puis l'essai sur A289.
 
-**Ce que l'ordre E doit éprouver.** Les ordres C et D ont été mesurés sur un paquet **seul**, dans une
-tranche à deux rangées, sans fond B. Trois choses n'ont jamais été vues ensemble :
+**Ce que B10 doit rendre possible.** Le premier cas que la fonction hauteur **ne peut pas** porter —
+une cavité d'air sous la surface, derrière un corps — porté par la seconde représentation, avec son
+volume rendu. Consommateur : la porte D (un objet qui entre dans l'eau), C20, et le raccord futur
+particules ↔ colonnes.
 
-1. **une vraie mer B autour du domaine** — ADR-185 D6 renvoyait ici le cas où la bande B/W traverse
-   la ligne de contrôle : ce que la ligne lit n'est plus seulement ce que δ produit ;
-2. **un paquet dans cette mer** — la restitution isole-t-elle le paquet, ou prend-elle aussi la mer ?
-3. **un contour fermé à quatre côtés**, en trois dimensions, avec un paquet oblique — une région par
-   côté, et le bilan de l'intérieur fermé sur les quatre.
+**Le banc.** Celui de S318, en deux dimensions : un **cylindre** de diamètre `D` descend à vitesse
+**imposée** `U` (objet cinématique — aucun corps rigide n'existe, ADR-184 D3), depuis juste au-dessus
+de la surface. Nombre de Froude d'entrée `Fr = U/√(g·D)`.
 
-Échelons, du plus simple au plus complexe :
+**Les références, et pourquoi pas une table.** Les travaux accessibles portent sur des **sphères** et
+des **disques** (axisymétrie) ; ce banc est **plan**. Aucune valeur ne se transpose (I-14). Le cas se
+juge donc sur trois épreuves **sans donnée extérieure** :
 
-- **E1 — la mer seule** : une houle B d'une composante (λ = 4 m, 5 cm), δ nul au départ. Le témoin nul
-  de l'ordre D : **une mer que δ ne perturbe pas ne doit rien faire restituer**. Ce que la ligne lit,
-  en volume net, se compare au volume net d'un paquet de 2 cm (1,5·10⁻⁴ m³/m, S317).
-- **E2 — le paquet dans la mer** : la même houle et le paquet de l'ordre C ; ce que la région reçoit,
-  comparé au paquet seul.
-- **E3 — le contour fermé** : domaine 3D, quatre lignes, quatre régions, paquet oblique à 20°, sans
-  houle ; bilan de l'intérieur sur les quatre côtés, attente de chaque registre.
+1. **la masse** — exacte par construction : le compteur doit la retrouver au bit ;
+2. **la similitude de Froude** — sans viscosité ni tension de surface, deux entrées de même `Fr` et de
+   même `D/dx`, à deux échelles, donnent les **mêmes** grandeurs sans dimension (temps en `√(D/g)`,
+   longueurs en `D`) : tout écart est une faute du banc ;
+3. **la convergence** — même `Fr`, `D/dx` doublé.
 
-**Prédiction, écrite avant la mesure, et je dis ce que je ne sais pas prédire.** Au second ordre, une
-houle transporte `a²ω/2` par mètre de crête et par seconde — 4,9·10⁻³ m²/s pour 5 cm : **trente fois**
-le volume net d'un paquet de 2 cm, **chaque seconde**. Si le flux de δ à la ligne contient ce transport
-— par ses termes croisés avec B —, le registre de l'ordre D restituera la mer, et la construction de
-S317 est fausse en mer réelle. S'il ne le contient pas, E1 lira un flux de moyenne nulle. **Je ne sais
-pas lequel des deux** sans lire le transport couplé ; le témoin tranche. Critère : en E1, le volume
-restitué sur 10 s doit rester sous **10 %** du volume net d'un paquet de 2 cm, sinon la restitution
-doit apprendre à séparer ce qui vient de B.
+Grandeurs publiées : temps et profondeur de **pincement** (air enfermé sous la surface, détecté par
+remplissage depuis l'atmosphère), hauteur de la **couronne** avant, du **jet** après, en `D` et en
+`√(D/g)` ; masse ; coût.
 
-Critères :
-1. E1 d'abord, et son verdict dit si E2 a un sens.
-2. Chaque échelon publie : flux net à chaque ligne, volume restitué, `band_in`, bilan de l'intérieur.
-3. Rien n'entre dans le cœur sans essai ; les réceptions antérieures au bit.
-4. Ce que l'ordre E ne fait pas est dit : le sens W → δ, la production GPU.
+Critères, écrits avant le code :
+1. Le corps **au repos** dans l'eau ne crée pas d'écoulement ; **déplacé lentement**, il élève le niveau
+   de son volume immergé exactement — deux essais du corps avant B10.
+2. Similitude : écart sans dimension **< 5 %** sur le pincement, entre les deux échelles.
+3. Trois `Fr` au moins ; le régime (pincement profond, ou pas de pincement) se dit, il ne se suppose pas.
+4. Rien dans le cœur ; aucune réception antérieure touchée.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — ADR-186 : APIC retenu pour la seconde représentation — décision de l'utilisateur.
-- [x] **P3** — E1 : le banc de la mer seule, écrit et lancé à 25 cm.
-- [x] **P4** — *fusionnée avec P3, déclaré* — E1 : le verdict, et ce qu'il dit de la restitution en mer réelle.
-- [x] **P5** — E2 : le paquet dans la mer.
-- [x] **P6** — *reportée, déclaré (P5)* — E3 : le contour fermé à quatre côtés ; datée dans la file.
-- [x] **P7** — preuve publiée.
-- [x] **P8** — rituel REPRISE §6.
+- [ ] **P2** — le corps cinématique dans la grille : cellules solides, faces à la vitesse du corps,
+  particules repoussées.
+- [ ] **P3** — le corps au repos, puis déplacé lentement : écoulement nul, niveau élevé de son volume.
+- [ ] **P4** — la détection : air enfermé, pincement, couronne, jet.
+- [ ] **P5** — B10 : trois `Fr`, similitude à deux échelles, convergence.
+- [ ] **P6** — preuve publiée.
+- [ ] **P7** — rituel REPRISE §6.
 
 ### Notes de reprise
 

@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-21 22:59 +02:00
+JETON            : occupé
+Battement        : 2026-09-21 23:01 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : —
+Session en cours : S320 — lot 5 : B10 sur APIC, un objet cinématique entre dans l'eau
 Dernière session : S319 — **ordre E, premier échelon** : sous une houle B seule, δ **croît** jusqu'à trois fois l'amplitude de la mer en deux minutes, presque indépendamment de la maille ; la restitution de S317 reçoit des centaines de fois un paquet ; A289 bloque l'ordre E ([preuve](docs/validation/MER-S319.md)) ; **APIC retenue** ([ADR-186](docs/adr/ADR-186-apic-seconde-representation.md))
 Session suivante : **S320, lot 5 — B10 sur APIC** : un objet cinématique entre dans l'eau, couronne, cavité, pincement, jet, volume rendu (ADR-186 §3) ; la voie d'A289, proposée à l'utilisateur, ouvrira la suite de l'ordre E
 Maillons        : 2 — S318 préparait un choix, S319 a trouvé un défaut bloquant ; aucun des deux n'est une capacité reçue. À deux maillons : un lot qui fait avancer une capacité — B10 sur APIC
