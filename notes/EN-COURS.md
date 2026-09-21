@@ -114,7 +114,7 @@ Critères, écrits avant le code :
 - [x] **P5a** — *fusionnée avec P6a, même fichier, déclaré* — candidat 2, SPH.
 - [ ] **P5b** — candidat 2 au repos et en ballottement.
 - [x] **P6a** — candidat 3, ensemble de niveaux sur grille MAC.
-- [ ] **P6b** — candidat 3 au repos et en ballottement.
+- [x] **P6b** — candidat 3 au repos et en ballottement.
 - [ ] **P7** — la rupture de barrage, les trois candidats, deux résolutions.
 - [ ] **P8** — preuve publiée : le tableau chiffré, et ce qu'il ne tranche pas.
 - [ ] **P9** — rituel REPRISE §6.
@@ -1443,4 +1443,19 @@ déclarait **valides** les faces alimentées par des particules, et APIC **créa
 (+11 % en 10 s) — les particules d'air au-dessus de la surface reconstruite gardaient une vitesse
 balistique ; ordre rétabli : on extrapole d'abord depuis l'eau, et seules les faces que
 l'extrapolation n'atteint pas gardent leur valeur. APIC retrouve ses chiffres de P4b **au bit**.
+
+**P6b — l'ensemble de niveaux au repos et en ballottement (21:34).**
+
+| niveaux | repos, 5 cm | ballottement, 5 cm | ballottement, 2,5 cm |
+|---|---:|---:|---:|
+| degrés de liberté (cellules) | 800 | 800 | 3 200 |
+| période (zéros ; périodogramme) | | +1,6 % ; +0,9 % | +1,0 % ; **+0,19 %** |
+| amortissement par période | | ≈ 0 (−5·10⁻⁴) | 0,76 % |
+| dérive de volume (finale ; max) | 10⁻¹² | 5·10⁻⁵ ; 2,8·10⁻⁴ | **−0,17 %** ; 0,17 % |
+| énergie : max − initiale ; finale − initiale | 0 | +0,58 J ; +0,20 J | 0 ; −8,1 J |
+| vitesse parasite au repos | 0 | | |
+| coût | 1,6 ms/pas | 1,8 s pour 10 s | 12,8 s pour 10 s |
+
+Amplitude représentée 1,85–1,89 cm pour 2 cm posés : la distance signée porte l'onde **à une
+fraction de maille** — ce que les particules, en marches, ne font pas (2,66 et 1,76 cm).
 
