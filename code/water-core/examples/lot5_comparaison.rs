@@ -138,14 +138,22 @@ struct Mesure {
     jauge: f64,
 }
 
-/// Compte les segments d'eau d'une colonne d'occupation, de bas en haut.
+/// Compte les segments d'eau d'une colonne d'occupation, de bas en haut. **Deux segments ne sont
+/// distincts que séparés d'au moins deux mailles d'air** : un trou d'une maille dans la masse — une
+/// cellule sans particule, chose courante en FLIP comme en SPH — n'est pas une lame retournée. La
+/// règle est la même pour les trois candidats.
 fn segments(colonne: impl Iterator<Item = bool>) -> usize {
-    let (mut n, mut avant) = (0, false);
+    let (mut n, mut air, mut vu) = (0usize, 0usize, false);
     for c in colonne {
-        if c && !avant {
-            n += 1;
+        if c {
+            if !vu || air >= 2 {
+                n += 1;
+            }
+            vu = true;
+            air = 0;
+        } else {
+            air += 1;
         }
-        avant = c;
     }
     n
 }
@@ -600,6 +608,192 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
     }
 }
 
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// Candidat 1 — particules sur grille (APIC)
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+
+/// **Particules sur grille, en APIC** (Jiang et al., 2015) : chaque particule porte sa vitesse et
+/// une matrice affine `C` ; le transfert vers la grille est bilinéaire, la pression se calcule sur
+/// les cellules qui contiennent au moins une particule, `p = 0` au centre des cellules d'air
+/// (`θ = 1`). APIC plutôt que FLIP pur : même absence de diffusion numérique en volume, sans le
+/// bruit que FLIP laisse monter — c'est la variante qu'une production retiendrait.
+struct Apic {
+    mac: Mac,
+    x: Vec<[f64; 2]>,
+    v: Vec<[f64; 2]>,
+    c: Vec<[[f64; 2]; 2]>,
+    masse: f64,
+}
+
+impl Apic {
+    fn new(scene: Scene) -> Self {
+        let (nx, ny, dx) = (scene.nx(), scene.ny(), scene.dx);
+        let mut x = Vec::new();
+        for j in 0..ny {
+            for i in 0..nx {
+                for (a, b) in [(0.25, 0.25), (0.75, 0.25), (0.25, 0.75), (0.75, 0.75)] {
+                    let p = [(i as f64 + a) * dx, (j as f64 + b) * dx];
+                    if scene.dans_eau(p[0], p[1]) {
+                        x.push(p);
+                    }
+                }
+            }
+        }
+        let n = x.len();
+        Apic {
+            mac: Mac::new(nx, ny, dx),
+            v: vec![[0.0; 2]; n],
+            c: vec![[[0.0; 2]; 2]; n],
+            x,
+            masse: RHO * dx * dx / 4.0,
+        }
+    }
+
+    /// Poids bilinéaires d'un point sur une grille de pas `dx` dont le nœud `(0,0)` est en
+    /// `(ox, oy)` : les quatre nœuds, leurs poids et leurs gradients.
+    fn poids(
+        p: [f64; 2],
+        dx: f64,
+        ox: f64,
+        oy: f64,
+        largeur: usize,
+        hauteur: usize,
+    ) -> [(usize, usize, f64, [f64; 2]); 4] {
+        let fx = ((p[0] - ox) / dx).clamp(0.0, (largeur - 1) as f64 - 1e-9);
+        let fy = ((p[1] - oy) / dx).clamp(0.0, (hauteur - 1) as f64 - 1e-9);
+        let (i0, j0) = (fx.floor() as usize, fy.floor() as usize);
+        let (sx, sy) = (fx - i0 as f64, fy - j0 as f64);
+        let (i1, j1) = ((i0 + 1).min(largeur - 1), (j0 + 1).min(hauteur - 1));
+        [
+            (i0, j0, (1.0 - sx) * (1.0 - sy), [-(1.0 - sy) / dx, -(1.0 - sx) / dx]),
+            (i1, j0, sx * (1.0 - sy), [(1.0 - sy) / dx, -sx / dx]),
+            (i0, j1, (1.0 - sx) * sy, [-sy / dx, (1.0 - sx) / dx]),
+            (i1, j1, sx * sy, [sy / dx, sx / dx]),
+        ]
+    }
+
+    fn occupation(&self) -> Vec<u32> {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let mut n = vec![0u32; nx * ny];
+        for p in &self.x {
+            let (i, j) = (((p[0] / dx) as usize).min(nx - 1), ((p[1] / dx) as usize).min(ny - 1));
+            n[j * nx + i] += 1;
+        }
+        n
+    }
+}
+
+impl Candidat for Apic {
+    fn nom(&self) -> &'static str {
+        "apic"
+    }
+    fn degres(&self) -> usize {
+        self.x.len()
+    }
+    fn definition_du_volume(&self) -> &'static str {
+        "somme des min(1, n/4)*dx^2 sur les cellules ; masse exacte (particules comptees)"
+    }
+    fn pas(&mut self, dt_max: f64) -> f64 {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let vmax = self.v.iter().fold(0f64, |m, v| m.max(v[0].abs()).max(v[1].abs()));
+        let dt = dt_max.min(0.5 * dx / (vmax + (G * dx).sqrt()));
+        // ── Particules → grille, APIC.
+        let (mut mu, mut wu) = (vec![0.0; (nx + 1) * ny], vec![0.0; (nx + 1) * ny]);
+        let (mut mv, mut wv) = (vec![0.0; nx * (ny + 1)], vec![0.0; nx * (ny + 1)]);
+        for k in 0..self.x.len() {
+            let (p, v, c) = (self.x[k], self.v[k], self.c[k]);
+            for (i, j, w, _) in Self::poids(p, dx, 0.0, 0.5 * dx, nx + 1, ny) {
+                let (fx, fy) = (i as f64 * dx, (j as f64 + 0.5) * dx);
+                let affine = c[0][0] * (fx - p[0]) + c[0][1] * (fy - p[1]);
+                mu[j * (nx + 1) + i] += w * (v[0] + affine);
+                wu[j * (nx + 1) + i] += w;
+            }
+            for (i, j, w, _) in Self::poids(p, dx, 0.5 * dx, 0.0, nx, ny + 1) {
+                let (fx, fy) = ((i as f64 + 0.5) * dx, j as f64 * dx);
+                let affine = c[1][0] * (fx - p[0]) + c[1][1] * (fy - p[1]);
+                mv[j * nx + i] += w * (v[1] + affine);
+                wv[j * nx + i] += w;
+            }
+        }
+        for k in 0..mu.len() {
+            self.mac.u[k] = if wu[k] > 0.0 { mu[k] / wu[k] } else { 0.0 };
+        }
+        for k in 0..mv.len() {
+            self.mac.v[k] = if wv[k] > 0.0 { mv[k] / wv[k] } else { 0.0 };
+        }
+        // ── Étiquettes : une cellule qui contient une particule est de l'eau.
+        let n = self.occupation();
+        for (e, c) in self.mac.etiquette.iter_mut().zip(&n) {
+            *e = if *c > 0 { EAU } else { AIR };
+        }
+        // ── Gravité, projection, extrapolation.
+        for v in self.mac.v.iter_mut() {
+            *v -= G * dt;
+        }
+        self.mac.projette(dt, &|_, _, _, _| 1.0);
+        self.mac.extrapole(3);
+        // ── Grille → particules, APIC : vitesse et matrice affine.
+        for k in 0..self.x.len() {
+            let p = self.x[k];
+            let (mut vx, mut vy) = (0.0, 0.0);
+            let mut c = [[0.0; 2]; 2];
+            for (i, j, w, g) in Self::poids(p, dx, 0.0, 0.5 * dx, nx + 1, ny) {
+                let u = self.mac.u[j * (nx + 1) + i];
+                vx += w * u;
+                c[0][0] += g[0] * u;
+                c[0][1] += g[1] * u;
+            }
+            for (i, j, w, g) in Self::poids(p, dx, 0.5 * dx, 0.0, nx, ny + 1) {
+                let v = self.mac.v[j * nx + i];
+                vy += w * v;
+                c[1][0] += g[0] * v;
+                c[1][1] += g[1] * v;
+            }
+            self.v[k] = [vx, vy];
+            self.c[k] = c;
+        }
+        // ── Advection des particules dans la vitesse de grille, RK2, et parois.
+        let (lx, ly) = (nx as f64 * dx, ny as f64 * dx);
+        let marge = 1e-3 * dx;
+        let mac = &self.mac;
+        for p in self.x.iter_mut() {
+            let (u1, v1) = mac.vitesse(p[0], p[1]);
+            let mid = [p[0] + 0.5 * dt * u1, p[1] + 0.5 * dt * v1];
+            let (u2, v2) = mac.vitesse(mid[0], mid[1]);
+            p[0] = (p[0] + dt * u2).clamp(marge, lx - marge);
+            p[1] = (p[1] + dt * v2).clamp(marge, ly - marge);
+        }
+        dt
+    }
+    fn mesure(&self, t: f64) -> Mesure {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let n = self.occupation();
+        let volume: f64 = n.iter().map(|c| (*c as f64 / 4.0).min(1.0) * dx * dx).sum();
+        let couches = (0..nx).map(|i| segments((0..ny).map(|j| n[j * nx + i] > 0))).max().unwrap_or(0);
+        let (mut e_cin, mut e_pot, mut front, mut u_max, mut jauge) = (0.0, 0.0, 0f64, 0f64, 0f64);
+        for (p, v) in self.x.iter().zip(&self.v) {
+            e_cin += 0.5 * self.masse * (v[0] * v[0] + v[1] * v[1]);
+            e_pot += self.masse * G * p[1];
+            front = front.max(p[0] + 0.25 * dx);
+            u_max = u_max.max((v[0] * v[0] + v[1] * v[1]).sqrt());
+            if p[0] < dx {
+                jauge = jauge.max(p[1] + 0.25 * dx);
+            }
+        }
+        Mesure {
+            t,
+            volume,
+            masse: self.masse * self.x.len() as f64,
+            e_cin,
+            e_pot,
+            front,
+            couches,
+            u_max,
+            jauge,
+        }
+    }
+}
+
 fn main() -> Result<(), String> {
     let args: Vec<String> = std::env::args().collect();
     let candidat = args.get(1).ok_or("candidat ?")?.as_str();
@@ -612,6 +806,10 @@ fn main() -> Result<(), String> {
     let dx: f64 = args.get(3).ok_or("dx ?")?.parse().map_err(|_| "dx")?;
     let scene = Scene::new(cas, dx);
     match candidat {
+        "apic" => {
+            execute(scene, &mut Apic::new(scene));
+            Ok(())
+        }
         _ => Err(format!("candidat inconnu : {candidat}")),
     }
 }
