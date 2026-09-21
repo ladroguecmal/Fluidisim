@@ -35,7 +35,9 @@ const RHO: f64 = 1000.0;
 enum Cas {
     /// Bassin 2 m × 1 m, eau sur 0,5 m, au repos.
     Repos,
-    /// Même bassin, premier mode, `η = A cos(kx)`, `A` = 1 cm.
+    /// Même bassin, premier mode, `η = A cos(kx)`, `A` = 2 cm — et non 1 cm, comme écrit au
+    /// protocole : à `dx` = 5 cm, une amplitude de 1 cm est sous l'espacement des particules
+    /// (2,5 cm), aucune n'est placée au-dessus du repos, et le mode **n'existe pas** (P4b).
     Ballottement,
     /// Colonne `a × 2a` contre la paroi gauche, boîte `4a × 2,5a`, `a` = 0,8 m.
     Barrage,
@@ -59,7 +61,7 @@ impl Scene {
         match cas {
             Cas::Repos => Scene { cas, lx: 2.0, ly: 1.0, dx, t_fin: 10.0, h: 0.5, amplitude: 0.0 },
             Cas::Ballottement => {
-                Scene { cas, lx: 2.0, ly: 1.0, dx, t_fin: 10.0, h: 0.5, amplitude: 0.01 }
+                Scene { cas, lx: 2.0, ly: 1.0, dx, t_fin: 10.0, h: 0.5, amplitude: 0.02 }
             }
             Cas::Barrage => Scene { cas, lx: 3.2, ly: 2.0, dx, t_fin: 2.0, h: 0.8, amplitude: 0.0 },
         }
@@ -127,6 +129,9 @@ struct Mesure {
     volume: f64,
     /// Masse portée, kg — exacte pour les particules, déduite du volume pour la grille.
     masse: f64,
+    /// Diagnostic des particules : `Σ min(1, n/4)·dx²` — ce qu'elles couvrent, qui n'est pas ce
+    /// qu'elles portent. Zéro pour la grille.
+    occupation: f64,
     e_cin: f64,
     e_pot: f64,
     /// Abscisse du point d'eau le plus à droite.
@@ -134,7 +139,10 @@ struct Mesure {
     /// Plus grand nombre de segments d'eau le long d'une verticale.
     couches: usize,
     u_max: f64,
-    /// Hauteur de la surface au bord gauche — la jauge du ballottement.
+    /// **La jauge du ballottement** : hauteur d'eau moyenne sur le premier quart du bassin,
+    /// `x < L/4`, déduite du volume que le candidat y représente. Une jauge ponctuelle — la
+    /// particule la plus haute au bord — était quantifiée à l'espacement des particules et ne
+    /// laissait lire aucune période (P4b).
     jauge: f64,
 }
 
@@ -528,6 +536,11 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
         }
     }
     let duree = debut.elapsed().as_secs_f64();
+    if std::env::var("LOT5_SERIE").is_ok() {
+        for r in &releves {
+            eprintln!("SERIE {:.4} {:.6} {:.6} {:.3} {:.3} {:.4} {}", r.t, r.jauge, r.volume, r.e_cin, r.e_pot, r.front, r.couches);
+        }
+    }
     let m0 = releves[0];
     let fin = *releves.last().unwrap();
     let e0 = scene.energie_initiale();
@@ -536,6 +549,11 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
     let couches_max = releves.iter().map(|r| r.couches).max().unwrap_or(0);
     let t_deux_couches = releves.iter().find(|r| r.couches >= 2).map(|r| r.t).unwrap_or(f64::NAN);
     let u_max = releves.iter().fold(0f64, |m, r| m.max(r.u_max));
+    let occ = if m0.occupation > 0.0 {
+        releves.iter().fold(0f64, |m, r| m.max((r.occupation - m0.occupation).abs())) / m0.occupation
+    } else {
+        f64::NAN
+    };
     println!(
         "LOT5_S318 candidat={} cas={:?} dx={} degres={} pas={pas} duree_calcul_s={duree:.2} \
          ms_par_pas={:.4} us_par_pas_et_degre={:.4} s_calcul_par_s_simulee={:.3} \
@@ -543,7 +561,7 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
          ecart_initial={:e} derive_volume_finale={:e} derive_volume_max={derive_max:e} \
          energie_initiale_exacte={e0:.3} energie_initiale={:.3} energie_max={e_max:.3} \
          energie_finale={:.3} couches_max={couches_max} premier_retournement_s={t_deux_couches:.3} \
-         vitesse_max={u_max:.4}",
+         vitesse_max={u_max:.4} derive_occupation_max={occ:e}",
         c.nom(),
         scene.cas,
         scene.dx,
@@ -613,12 +631,22 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
 // ═════════════════════════════════════════════════════════════════════════════════════════════
 
 /// **Particules sur grille, en APIC** (Jiang et al., 2015) : chaque particule porte sa vitesse et
-/// une matrice affine `C` ; le transfert vers la grille est bilinéaire, la pression se calcule sur
-/// les cellules qui contiennent au moins une particule, `p = 0` au centre des cellules d'air
-/// (`θ = 1`). APIC plutôt que FLIP pur : même absence de diffusion numérique en volume, sans le
-/// bruit que FLIP laisse monter — c'est la variante qu'une production retiendrait.
+/// une matrice affine `C` ; le transfert vers la grille est bilinéaire. APIC plutôt que FLIP pur :
+/// même absence de diffusion numérique en volume, sans le bruit que FLIP laisse monter.
+///
+/// **La surface se reconstruit depuis les particules** (Zhu et Bridson, 2005) : aux centres des
+/// cellules, `φ = |x − x̄| − r`, `x̄` la position moyenne des particules voisines pondérée par un
+/// noyau de rayon `dx`. Les cellules où `φ < 0` sont de l'eau, et la pression voit l'iso-zéro à une
+/// fraction de maille, par le même fluide fantôme que l'ensemble de niveaux. Au premier passage,
+/// `p = 0` au centre des cellules d'air (`θ = 1`) : la surface n'était connue qu'à la maille près,
+/// un ballottement de 2 cm sur 2,5 cm de maille s'éteignait en trois secondes à 23 % de période —
+/// une faute de **mise en œuvre**, qu'aucune production ne commet, pas une propriété d'APIC (P4b).
+/// `r` se **calcule** : c'est la valeur qui place l'iso-zéro d'une nappe au repos à sa hauteur vraie.
 struct Apic {
     mac: Mac,
+    /// Distance signée reconstruite aux centres des cellules.
+    phi: Vec<f64>,
+    rayon: f64,
     x: Vec<[f64; 2]>,
     v: Vec<[f64; 2]>,
     c: Vec<[[f64; 2]; 2]>,
@@ -642,6 +670,8 @@ impl Apic {
         let n = x.len();
         Apic {
             mac: Mac::new(nx, ny, dx),
+            phi: vec![0.0; nx * ny],
+            rayon: Self::rayon_au_repos(dx),
             v: vec![[0.0; 2]; n],
             c: vec![[[0.0; 2]; 2]; n],
             x,
@@ -681,6 +711,63 @@ impl Apic {
         }
         n
     }
+
+    /// Position moyenne pondérée des particules à moins de `dx` d'un point, noyau
+    /// `(1 − s²/R²)³` ; `None` s'il n'y en a aucune.
+    fn moyenne(points: &[[f64; 2]], q: [f64; 2], rayon_noyau: f64) -> Option<[f64; 2]> {
+        let (mut sw, mut sx, mut sy) = (0.0, 0.0, 0.0);
+        for p in points {
+            let (a, b) = (p[0] - q[0], p[1] - q[1]);
+            let s2 = (a * a + b * b) / (rayon_noyau * rayon_noyau);
+            if s2 < 1.0 {
+                let w = (1.0 - s2).powi(3);
+                sw += w;
+                sx += w * p[0];
+                sy += w * p[1];
+            }
+        }
+        (sw > 0.0).then(|| [sx / sw, sy / sw])
+    }
+
+    /// **Le rayon au repos** : sur une nappe régulière de particules au quart de maille, dont la
+    /// surface vraie est en `y = 0`, la distance de `(0, 0)` à la moyenne pondérée de ses voisines.
+    /// Avec ce rayon, l'iso-zéro d'une eau au repos tombe exactement à sa hauteur.
+    fn rayon_au_repos(dx: f64) -> f64 {
+        let mut nappe = Vec::new();
+        for j in 0..8 {
+            for i in -8i32..8 {
+                nappe.push([(i as f64 + 0.25) * 0.5 * dx, -(j as f64 + 0.5) * 0.5 * dx]);
+            }
+        }
+        let m = Self::moyenne(&nappe, [0.0, 0.0], dx).unwrap();
+        (m[0] * m[0] + m[1] * m[1]).sqrt()
+    }
+
+    /// Reconstruit `φ` aux centres des cellules, depuis les particules des cellules voisines.
+    fn reconstruit(&mut self) {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let mut par_cellule: Vec<Vec<usize>> = vec![Vec::new(); nx * ny];
+        for (k, p) in self.x.iter().enumerate() {
+            let (i, j) = (((p[0] / dx) as usize).min(nx - 1), ((p[1] / dx) as usize).min(ny - 1));
+            par_cellule[j * nx + i].push(k);
+        }
+        let mut voisins: Vec<[f64; 2]> = Vec::new();
+        for j in 0..ny {
+            for i in 0..nx {
+                let q = [(i as f64 + 0.5) * dx, (j as f64 + 0.5) * dx];
+                voisins.clear();
+                for b in j.saturating_sub(1)..(j + 2).min(ny) {
+                    for a in i.saturating_sub(1)..(i + 2).min(nx) {
+                        voisins.extend(par_cellule[b * nx + a].iter().map(|&k| self.x[k]));
+                    }
+                }
+                self.phi[j * nx + i] = match Self::moyenne(&voisins, q, dx) {
+                    Some(m) => ((q[0] - m[0]).powi(2) + (q[1] - m[1]).powi(2)).sqrt() - self.rayon,
+                    None => dx,
+                };
+            }
+        }
+    }
 }
 
 impl Candidat for Apic {
@@ -691,7 +778,7 @@ impl Candidat for Apic {
         self.x.len()
     }
     fn definition_du_volume(&self) -> &'static str {
-        "somme des min(1, n/4)*dx^2 sur les cellules ; masse exacte (particules comptees)"
+        "masse/rho, exacte par construction ; l'occupation min(1,n/4)*dx^2 est publiee a part"
     }
     fn pas(&mut self, dt_max: f64) -> f64 {
         let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
@@ -721,16 +808,21 @@ impl Candidat for Apic {
         for k in 0..mv.len() {
             self.mac.v[k] = if wv[k] > 0.0 { mv[k] / wv[k] } else { 0.0 };
         }
-        // ── Étiquettes : une cellule qui contient une particule est de l'eau.
-        let n = self.occupation();
-        for (e, c) in self.mac.etiquette.iter_mut().zip(&n) {
-            *e = if *c > 0 { EAU } else { AIR };
+        // ── Étiquettes et fluide fantôme depuis la surface reconstruite.
+        self.reconstruit();
+        for (e, f) in self.mac.etiquette.iter_mut().zip(&self.phi) {
+            *e = if *f < 0.0 { EAU } else { AIR };
         }
         // ── Gravité, projection, extrapolation.
         for v in self.mac.v.iter_mut() {
             *v -= G * dt;
         }
-        self.mac.projette(dt, &|_, _, _, _| 1.0);
+        let phi = &self.phi;
+        let theta = |i: usize, j: usize, a: isize, b: isize| {
+            let (fi, fa) = (phi[j * nx + i], phi[b as usize * nx + a as usize]);
+            fi / (fi - fa)
+        };
+        self.mac.projette(dt, &theta);
         self.mac.extrapole(3);
         // ── Grille → particules, APIC : vitesse et matrice affine.
         for k in 0..self.x.len() {
@@ -768,7 +860,8 @@ impl Candidat for Apic {
     fn mesure(&self, t: f64) -> Mesure {
         let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
         let n = self.occupation();
-        let volume: f64 = n.iter().map(|c| (*c as f64 / 4.0).min(1.0) * dx * dx).sum();
+        let volume = self.masse * self.x.len() as f64 / RHO;
+        let occupation: f64 = n.iter().map(|c| (*c as f64 / 4.0).min(1.0) * dx * dx).sum();
         let couches = (0..nx).map(|i| segments((0..ny).map(|j| n[j * nx + i] > 0))).max().unwrap_or(0);
         let (mut e_cin, mut e_pot, mut front, mut u_max, mut jauge) = (0.0, 0.0, 0f64, 0f64, 0f64);
         for (p, v) in self.x.iter().zip(&self.v) {
@@ -776,13 +869,16 @@ impl Candidat for Apic {
             e_pot += self.masse * G * p[1];
             front = front.max(p[0] + 0.25 * dx);
             u_max = u_max.max((v[0] * v[0] + v[1] * v[1]).sqrt());
-            if p[0] < dx {
-                jauge = jauge.max(p[1] + 0.25 * dx);
-            }
+            // Poids de bord : une particule compte pour la fraction de son espacement (dx/2) qui
+            // tombe dans la bande — sinon la jauge saute d'une colonne entière de particules.
+            let bord = 0.25 * nx as f64 * dx;
+            jauge += 0.25 * dx * dx * ((bord - p[0]) / (0.5 * dx) + 0.5).clamp(0.0, 1.0);
         }
+        jauge /= 0.25 * nx as f64 * dx;
         Mesure {
             t,
             volume,
+            occupation,
             masse: self.masse * self.x.len() as f64,
             e_cin,
             e_pot,

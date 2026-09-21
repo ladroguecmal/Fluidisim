@@ -110,7 +110,7 @@ Critères, écrits avant le code :
   D5), références et leur provenance.
 - [x] **P3** — le socle commun 2D : boîte, gravité, parois, mesures (volume, énergie, front, coût).
 - [x] **P4a** — candidat 1, FLIP/APIC sur grille MAC : particules, transferts, pression sur masque.
-- [ ] **P4b** — candidat 1 au repos et en ballottement.
+- [x] **P4b** — candidat 1 au repos et en ballottement.
 - [ ] **P5a** — candidat 2, SPH.
 - [ ] **P5b** — candidat 2 au repos et en ballottement.
 - [ ] **P6a** — candidat 3, ensemble de niveaux sur grille MAC.
@@ -1398,4 +1398,35 @@ maille, et rien ne le conserve par construction.
 ballottement est la relation de dispersion linéaire (SPEC-001 §1) ; le plafond du front est la
 solution de Ritter pour un fond sec ; la géométrie `a × 2a` est celle de Martin et Moyce, dont les
 données — derrière un péage — ne sont **pas** utilisées.
+
+**P4b — APIC au repos et en ballottement (21:27), et deux corrections du protocole.**
+
+*Amendements déclarés.* (1) **`A` = 2 cm et non 1 cm** : à `dx` = 5 cm, 1 cm est sous l'espacement
+des particules (2,5 cm), aucune n'est placée au-dessus du repos, et le mode **n'existe pas** — ce qui
+est déjà un résultat : une représentation particulaire ne porte pas une onde plus petite que son
+espacement. (2) **La jauge devient la hauteur moyenne sur le premier quart du bassin**, déduite du
+volume représenté, avec un poids de bord : la particule la plus haute au bord était quantifiée, et
+la bande sans poids sautait d'une colonne entière de particules (41 d'un coup).
+
+*La faute du premier passage.* `p = 0` au centre des cellules d'air (`θ = 1`) : la surface n'est
+connue qu'à la maille près, et le ballottement s'éteignait en trois secondes, période fausse de 23 à
+34 %. Corrigé comme le fait toute production — surface **reconstruite** des particules (Zhu et
+Bridson 2005), `φ = |x − x̄| − r`, `r` calculé pour qu'une nappe au repos ait son iso-zéro à sa
+hauteur vraie — et le même fluide fantôme que l'ensemble de niveaux. Leçon candidate : **la
+condition de surface, pas la représentation, décidait du résultat** ; comparer deux représentations
+exige la même qualité de frontière.
+
+| APIC | repos, 5 cm | ballottement, 5 cm | ballottement, 2,5 cm |
+|---|---:|---:|---:|
+| degrés de liberté | 1 600 | 1 600 | 6 400 |
+| période (zéros ; périodogramme) | | +5,9 % ; +6,4 % | **−0,15 % ; −0,01 %** |
+| amortissement par période | | 1·10⁻⁴ | 2,1 % |
+| volume (masse / ρ) | exact | exact | exact |
+| occupation, dérive maximale | 0 | 5,6 % | 4,8 % |
+| énergie : maximum − initiale | +0,001 J | +0,37 J | +0,06 J |
+| vitesse parasite au repos | 4,4 mm/s | | |
+| coût | 1,3 ms/pas | 1,6 s pour 10 s | 11,6 s pour 10 s |
+
+L'amplitude **semée** n'est pas 2 cm : 2,66 cm à 5 cm, 1,76 cm à 2,5 cm — les particules posent un
+profil en marches ; la période se lit quand même, et c'est elle qui se compare.
 
