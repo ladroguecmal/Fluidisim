@@ -108,7 +108,7 @@ Critères :
 - [x] **P4** — *fusionnée avec P3, déclaré* — E1 : le verdict, et ce qu'il dit de la restitution en mer réelle.
 - [x] **P5** — E2 : le paquet dans la mer.
 - [x] **P6** — *reportée, déclaré (P5)* — E3 : le contour fermé à quatre côtés ; datée dans la file.
-- [ ] **P7** — preuve publiée.
+- [x] **P7** — preuve publiée.
 - [ ] **P8** — rituel REPRISE §6.
 
 ### Notes de reprise
@@ -1577,4 +1577,8 @@ fait vivre un domaine δ plus de quelques secondes sous une houle** (S302 : 6 s)
 n'a de sens en mer ; E3 (contour fermé, sans houle) ne dépend pas de ce défaut mais n'apprendrait rien
 qui débloque. **Découpage déclaré : E3 est reporté**, daté dans la file ; la session publie ce qu'elle a
 trouvé.
+
+**12,5 cm, houle 2,5 cm, 120 s (22:57)** : δ 3,0 mm à 20 s, 11,8 mm à 60 s, **3,95 cm à 115 s** —
+taux ≈ 0,034 s⁻¹ contre 0,043 à 25 cm. **Un peu plus lent à maille fine** : l'advection centrée, qui
+irait quatre fois plus vite, n'est pas la cause dominante. Reçu à droite : 265 fois un paquet.
 
