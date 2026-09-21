@@ -137,7 +137,7 @@ décalage.
 - [x] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
 - [x] **P7a** — *découpage déclaré* : prédiction écrite (notes), oblique à 12,5 cm **lancé** à 20° et
   40° le 2026-09-21 à 08:01.
-- [ ] **P7b** — l'oblique à **maille plus fine** : l'écart d'angle se partage-t-il entre δ et
+- [x] **P7b** — l'oblique à **maille plus fine** : l'écart d'angle se partage-t-il entre δ et
   l'instrument comme S315 l'a prévu ? *(si le coût mesuré le permet ; sinon, le coût est publié et
   l'essai daté dans la file)*.
 - [x] **P8** — A306 : les **deux emplois** de l'estimateur par passages par zéro dans le harnais,
@@ -1347,4 +1347,31 @@ compensant l'erreur de δ par une information qu'une scène n'a pas — et ne ch
 croissante de Stokes (phase) et un transfert d'énergie vers la fréquence centrale (amplitude), les
 deux en `a²` ; **W, linéaire par construction, ne les porte pas**. Ce n'est ni un défaut du raccord
 ni une erreur de δ : c'est la frontière du modèle de W, et elle se voit dès dix longueurs d'onde.
+
+**Suite complète** (`cargo test --workspace --release`, 10:13) : **571 réussis, 18 ignorés, 0 échec**
+— cœur 450, harnais 98 dont les trois `a306_*`, le reste inchangé.
+
+**P7b — 20° à 12,5 cm (10:38).** Angle lu **21,03°** (écart **1,03°**, contre 2,57° à 25 cm) —
+**dans la fourchette prédite** (20,9–21,3°). `ω` lue 5,5584 (+0,12 % sur la posée), `k_y` **+5,2 %**
+(+5,3 % à 25 cm), miroir transverse **1,2·10⁻⁷**. Lecture : la part de `ω` converge (δ) ; celle de
+`k_y` **ne converge pas du tout** — elle revient à la **lecture de la direction** (maximum du
+périodogramme en `k_y` pour un paquet court, σ = 1 λ), donc au raccord qui s'en sert. Ma
+décomposition (+2,5 % d'instrument) en sous-estimait la moitié ; la limite est ≈ **+1,1° à 20°**.
+S315 attribuait tout l'écart à la maille de δ : juste pour moitié.
+
+**P7b — 40° à 12,5 cm (11:08), et le bilan de l'oblique.**
+
+| `θ` posé | lu à 25 cm | lu à 12,5 cm | `k_y` à 25 / 12,5 cm | miroir à 25 / 12,5 cm |
+|---:|---:|---:|---:|---:|
+| 20° | 22,57° | **21,03°** | +5,3 % / **+5,2 %** | 1,3·10⁻⁶ / **1,2·10⁻⁷** |
+| 40° | 45,10° | **41,85°** | +4,0 % / **+4,3 %** | 2,1·10⁻⁷ / **2,2·10⁻⁸** |
+
+Prédiction : 20,9–21,3° **tenue** ; 42,0–43,1° **manquée de 0,15°** — j'avais pris l'erreur de `ω`
+du cas 1D (−0,83 %), alors qu'avec ce paquet plus court (σ = 1 λ) `ω` lue passe **au-dessus** de la
+posée (+0,12 % et +0,25 %) : le décalage du jacobien (P4b′) vaut ici `σ_k²/(2k)` ≈ 4 % sur `k`.
+**Attribution** : l'écart d'angle converge pour sa part `ω` (δ, et le jacobien) ; sa part `k_y`,
++4 à +5 %, **ne bouge pas avec la maille** — c'est la **lecture de la direction** par le maximum du
+périodogramme, donc le raccord qui la consomme. Le train est construit sur la direction lue (41,855°
+porté) : **le raccord transmet fidèlement une direction qu'il lit biaisée d'environ +1 à +2°**. La
+composante transverse parasite **décroît** avec la maille (×0,1) : aucune.
 
