@@ -16146,3 +16146,43 @@ partiel. Consommateurs : la décision de l'utilisateur sur le qualificatif du tr
 la comparaison du lot 5. Deux leçons : L364, L365. Angles morts : A306 et A307 closes, A308 (close),
 A309 (ouverte). Recommandation du dernier bilan (S293) : sans objet pour ce lot, l'ordre venant
 d'ADR-178 et ADR-184.
+
+## S317 — 2026-09-21 — l'ordre D : le volume net a un receveur, et ce receveur n'est pas le monde
+
+**Entrée.** Décision de l'utilisateur, le soir même : *« On passe à l'ordre D »*. Rien n'a été dit
+du qualificatif du transfert : il reste « partiel » (ADR-183 D6, lecture prudente).
+
+**La question posée avant tout code.** ADR-181 D1 nommait V ou le niveau régional de B comme
+receveurs. Mais δ tourne sur le client, sans autorité ; B et V sont répliqués ; I-11 interdit tout
+chemin du client vers le monde répliqué, et I-15 le tranche sans arbitrage. **ADR-185** : en eau
+ouverte, le receveur est le niveau de B **tel que ce client le représente** — le statut de
+`W_local` — porté par une région déclarée, adossée à la ligne de contrôle ; en contenant, δ
+s'asservit à V (porte E). Construire d'abord aurait bâti un chemin qu'un invariant interdit (L367).
+
+**La grandeur** ([preuve](../docs/validation/RESTITUTION-S317.md) §2). Le flux à la ligne ferme le
+bilan de l'intérieur au plancher d'arrondi : 1,6·10⁻¹⁰ et 2,5·10⁻¹⁰ m³ pour 0,13 et 0,053 m³ de flux
+cumulé (prédit ≤ 10⁻¹⁰ : borne trop serrée d'un facteur 3 à 5). Deux faits inattendus : **l'eau entre
+aussi par l'arrière** — ce qui sort devant revient derrière à 2 % près à 12,5 cm, le paquet déplace
+de l'eau (L366) — et **les éponges en ajoutent**, en ramenant un niveau abaissé au repos.
+
+**Le receveur.** `RegionalLevel` : une région adossée à un segment de ligne, profondeur déclarée,
+niveau = volume / aire, frontière à zéro par choix déclaré (ADR-185 D8) ; un `Receipt` qui ne se
+construit que par `receive`, ne se copie pas et se consomme au registre ; `Ledger3` gagne
+`restituted`, et **`global_conservation_claimable` devient faux dès qu'une région locale a reçu** —
+la représentation se ferme, pas le monde. Sept essais, verts au premier passage.
+
+**La restitution sur le banc.** Une région par ligne : attente des deux registres **exactement
+nulle**, aucune eau créée, bilan δ + régions à 1,6·10⁻¹⁰ et 2,5·10⁻¹⁰ m³ ; niveaux de −15 à +5 µm —
+invisibles, mais comptés. Suite complète : **578 réussis, 18 ignorés, 0 échec** (cœur 457, dont sept neufs).
+
+**Ce que l'ordre D ne fait pas encore.** Le rayonnement de l'anomalie hors de sa région (onde
+longue à `√(g·h)`) ; le cas couplé où la bande B/W traverse la ligne (ordre E) ; le contenant, δ
+asservi à V (porte E) ; l'affichage du niveau dans la composition ; la production GPU.
+
+**Limites.** Deux lignes de contrôle, pas un contour fermé à quatre côtés ; pas de fond B/W ; un
+paquet en eau profonde, deux mailles.
+
+**Rituel.** Maillons **0**. Capacité : **le volume net qui quitte δ a un receveur**, et le bilan de
+la représentation se ferme par construction ; points 1.1, 4.8 et 4.18 avancés. Consommateur :
+l'ordre E. Deux leçons : L366, L367. Aucun angle mort nouveau — le rayonnement est une limite
+déclarée, portée par la file. Suivant, selon ADR-184 : le lot 5.

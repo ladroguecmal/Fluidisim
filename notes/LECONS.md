@@ -6381,3 +6381,26 @@ la prédiction ratait de 0,04 à 0,07 tour.
 **La règle.** « Le `k` d'un paquet » n'existe pas sans dire **dans quel espace** on prend son
 maximum ; une prédiction qui passe de l'un à l'autre porte le jacobien, ou elle est fausse d'autant.
 Famille de L363 : une grandeur n'a de sens qu'avec son origine.
+
+## L366 — Un volume net n'est pas un volume sortant
+
+S317. Le volume que le paquet emporte à travers la ligne de l'ordre C — 5,3·10⁻⁵ m³ à 12,5 cm —
+semblait être « le volume net » à restituer. Un volume de contrôle **fermé des deux côtés** a
+montré autre chose : une onde longue du second ordre ramène **par derrière** presque autant d'eau
+(5,4·10⁻⁵), et l'intérieur ne gagne que 8·10⁻⁷. Le paquet **déplace** de l'eau ; il n'en fait pas
+sortir. Compter la seule ligne de sortie aurait restitué cinquante fois trop à une région, et
+laissé l'autre en déficit sans le savoir.
+
+**La règle.** Un bilan de volume se ferme sur un contour **fermé**, et chaque segment de ce contour
+a son receveur, signé. Une ligne seule mesure un flux, pas un net.
+
+## L367 — Une décision qui nomme une couche ne fixe pas son autorité
+
+S317. ADR-181 D1 — une décision de l'utilisateur — désignait V et le niveau de B comme receveurs du
+volume net de δ. Lue à la lettre, elle faisait écrire un client dans l'état répliqué : exactement ce
+qu'I-11 interdit. Ni la décision ni l'invariant n'étaient faux ; la décision nommait **la couche**,
+l'invariant fixe **le statut** — local ou autoritaire — de ce qui s'y écrit.
+
+**La règle.** Avant de construire un chemin entre deux couches, le tester contre I-15 (*« plutôt que
+de faire l'objet d'un arbitrage »*). Le faire **avant** le code : après, le chemin interdit existe, et
+il a des appelants.

@@ -40,8 +40,8 @@ pas recopiée ici (L137).
 - [ ] **1.1 Eau = somme de quatre couches B, W, δ, V, dans le code** — *partiel* : B, W, un δ
   candidat 2D et le noyau V existent ; B+W sont composés par le cœur (S214, S236) ; B/W sont
   raccordés à δ en 2D (S250–S254) puis **en 3D** (S297, S302) ; somme rendue B+δ en direct
-  depuis la surface publiée ([S302](validation/SCENE-DELTA3D-S302.md)). Manquent l'articulation
-  V↔δ et la restitution du volume net ; le **retour de δ vers W** existe en 3D sur la référence
+  depuis la surface publiée ([S302](validation/SCENE-DELTA3D-S302.md)). Manque l'articulation
+  V↔δ ; le volume net a un receveur **local** depuis S317 ([ordre D](validation/RESTITUTION-S317.md)) ; le **retour de δ vers W** existe en 3D sur la référence
   CPU, qualifié propriété par propriété en S316 ([ordre C](validation/ORDRE-C-S316.md)), partiel.
 - [x] **1.2 Le cœur est une bibliothèque sans dépendance moteur** — *validé* : `water-core` n'a
   aucune dépendance (ADR-020, ADR-028).
@@ -160,8 +160,8 @@ pas recopiée ici (L137).
   et `λ_cut` de B2) — *partiel* : le chemin existe depuis S312 sur la référence CPU — ligne de
   contrôle, identification, train orienté de W (S314) — et **S316 l'a qualifié** propriété par
   propriété : primitive exacte, raccord à un degré et 2 à 4 % de spectre près, le reste à δ
-  ([ordre C](validation/ORDRE-C-S316.md)). Manquent le volume net (ordre D), le couplage complet
-  (ordre E), la production GPU et le sens W → δ. Lot 2 d'[ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7.
+  ([ordre C](validation/ORDRE-C-S316.md)). Le volume net est reçu par une région locale (S317,
+  [ordre D](validation/RESTITUTION-S317.md)). Manquent le couplage complet (ordre E), la production GPU et le sens W → δ. Lot 2 d'[ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7.
 - [ ] **4.9 Fusion et séparation de domaines** sans rupture — *absent*.
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
@@ -188,7 +188,8 @@ pas recopiée ici (L137).
   fuite de volume du schéma.** Dissipation numérique mesurée : 0,0935 % par seconde. **Manquent**
   le compteur sur la carte, et les bilans d'**énergie** et de **quantité de mouvement** — publiés
   comme états, termes manquants nommés (travail de la pression au bord, flux advectif). C09 non
-  exécuté.
+  exécuté. **S317** : le volume qui **quitte** δ a un receveur local, et le bilan δ + régions se
+  ferme au résidu ([ordre D](validation/RESTITUTION-S317.md)) — la représentation, pas le monde.
 - [ ] **4.19 Coût de δ compatible avec le budget** — *partiel* : carte du coût (S244), multigrille
   (S252), **multigrille du mode mobile (S274, ADR-167)** : le pas couplé à 16 384 mailles passe de
   280 à 49 ms, environ 24 fois le budget d'eau. **S276 : δ en direct à 40 images/s** — bande de

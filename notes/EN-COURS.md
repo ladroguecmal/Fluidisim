@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S317 — **en cours**. L'**ordre D** d'ADR-181 D10 : la comptabilité et la restitution
+Session : S317 — **terminée**. L'**ordre D** d'ADR-181 D10 : la comptabilité et la restitution
 effective du volume net à travers B ou V, suivant l'environnement.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : **décision de l'utilisateur du 2026-09-21, 20:2x** — *« On passe à l'ordre D »*, en
@@ -116,7 +116,7 @@ GPU ; le sens W → δ ; toute écriture dans l'état répliqué de B ou de V.
 - [x] **P6** — le banc : l'ordre C à 12,5 cm, le volume net restitué à une région ; bilan δ +
   région publié à chaque pas.
 - [x] **P7** — preuve publiée.
-- [ ] **P8** — rituel REPRISE §6.
+- [x] **P8** — rituel REPRISE §6.
 
 ### Notes de reprise
 

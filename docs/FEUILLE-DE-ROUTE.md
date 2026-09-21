@@ -132,8 +132,8 @@ multigrille, frontières (ADR-143 à 169) — [S253](validation/SURFACE-COUPLEE-
 `WaveTrain` orienté ([S314](validation/TRANSFERT-ORIENTE-S314.md)) ; oblique sans composante transverse
 ([S315](validation/ORACLE-ET-OBLIQUE-S315.md)) ; **ordre C**, six propriétés attribuées — primitive exacte à
 10⁻⁴, au raccord un degré de phase et 2 à 4 % de spectre, le reste à δ sauf une part non linéaire que
-W ne porte pas ([S316](validation/ORDRE-C-S316.md)). Restent l'ordre D, sur décision de l'utilisateur, et
-l'ordre E.
+W ne porte pas ([S316](validation/ORDRE-C-S316.md)) ; **ordre D**, un receveur local, attente
+exactement nulle ([S317](validation/RESTITUTION-S317.md)). Reste l'ordre E.
 
 *Manque* : cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité (B10) ; phase
 δ/B (A289) ; A274 ; A286 ; **compteur carte, énergie, quantité de mouvement, sens W → δ** (A302) ;
