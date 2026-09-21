@@ -625,9 +625,11 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
             let ritter = 2.0 * (G * 2.0 * scene.h).sqrt();
             let mut depasse = 0f64;
             let mut ligne = String::new();
-            for r in &releves {
+            // Un relevé tous les dix échantillons, soit toutes les 0,1 s. Au premier passage, le
+            // test portait sur `t` cumulé en flottant, et seul `t = 0` passait.
+            for (n, r) in releves.iter().enumerate() {
                 depasse = depasse.max(r.front - (scene.h + ritter * r.t));
-                if (r.t * 10.0).fract() < 1e-6 || ((r.t * 10.0).fract() - 1.0).abs() < 1e-6 {
+                if n % 10 == 0 && r.t <= 1.0 + 1e-9 {
                     ligne.push_str(&format!("{:.1}:{:.3} ", r.t, r.front));
                 }
             }

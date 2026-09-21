@@ -115,7 +115,7 @@ Critères, écrits avant le code :
 - [ ] **P5b** — candidat 2 au repos et en ballottement.
 - [x] **P6a** — candidat 3, ensemble de niveaux sur grille MAC.
 - [x] **P6b** — candidat 3 au repos et en ballottement.
-- [ ] **P7** — la rupture de barrage, les trois candidats, deux résolutions.
+- [x] **P7** — la rupture de barrage, les trois candidats, deux résolutions.
 - [ ] **P8** — preuve publiée : le tableau chiffré, et ce qu'il ne tranche pas.
 - [ ] **P9** — rituel REPRISE §6.
 
@@ -1458,4 +1458,31 @@ l'extrapolation n'atteint pas gardent leur valeur. APIC retrouve ses chiffres de
 
 Amplitude représentée 1,85–1,89 cm pour 2 cm posés : la distance signée porte l'onde **à une
 fraction de maille** — ce que les particules, en marches, ne font pas (2,66 et 1,76 cm).
+
+**P7 — la rupture de barrage, trois candidats, deux mailles (21:49).** Colonne 0,8 × 1,6 m, 2 s.
+
+| | APIC 5 cm | APIC 2,5 cm | niveaux 5 cm | niveaux 2,5 cm | SPH 5 cm | SPH 2,5 cm |
+|---|---:|---:|---:|---:|---:|---:|
+| degrés de liberté | 2 048 | 8 192 | 2 560 | 10 240 | 2 048 | 8 192 |
+| volume, dérive max | **0** (masse) | **0** | **7,8 %** | **3,7 %** | 0,36 % | 0,37 % |
+| énergie max − initiale | 0 | 0 | **+1,5 %** | **+8,0 %** | +0,1 % | +0,1 % |
+| énergie finale / initiale | 0,49 | 0,78 | 0,62 | 0,84 | 0,68 | 0,73 |
+| front à 0,3 s (m) | 1,627 | 1,632 | 1,580 | 1,606 | 1,608 | 1,611 |
+| front à 0,5 s (m) | 2,611 | 2,626 | 2,575 | 2,617 | 2,588 | 2,619 |
+| impact sur la paroi | 0,60 s | 0,60 s | 0,60 s | 0,60 s | 0,60 s | 0,60 s |
+| couches max sur une verticale | 5 | 7 | 3 | 6 | 5 | 9 |
+| premier retournement | 0,88 s | 0,46 s | 0,72 s | 0,71 s | 0,67 s | 0,63 s |
+| vitesse maximale | 9,5 | 16,0 | 13,4 | **23,7** | 12,1 | 11,6 m/s |
+| s de calcul par s simulée | **0,94** | **10,4** | 2,2 | 26,6 | 49 | **405** |
+
+- **Les trois fronts s'accordent à 1,6 % à 2,5 cm**, tous sous le plafond de Ritter (7,9 m/s) :
+  accord entre trois méthodes indépendantes, **pas** une validation (I-14 ; Martin et Moyce
+  inaccessibles).
+- **L'ensemble de niveaux perd puis regagne du volume** (−7,6 % puis +1,6 %) et **crée de
+  l'énergie** (+8 % à 2,5 cm), avec des vitesses parasites de 24 m/s sur les lames minces : la
+  faiblesse connue de la famille dans un écoulement violent, **sans** particules de correction.
+- **APIC conserve la masse exactement et n'a jamais créé d'énergie** ; SPH respire de 0,37 % et
+  échange 0,1 % avec son énergie élastique.
+- **Le coût sépare les familles** : SPH paie son pas acoustique — **40 fois** APIC par seconde
+  simulée à la même maille.
 
