@@ -1150,6 +1150,306 @@ fn instrument() -> Result<(), String> {
     Ok(())
 }
 
+/// Le paquet de `cas`, posé dans `domain` — qui peut être plus long que celui de `cas`. Même
+/// condition initiale que `distance`, écrite une fois pour l'ordre C.
+fn pose_paquet(v: &mut Volume3, domain: Domain3, c: &Cas) -> Result<(), String> {
+    let (nx, ny, nz, dx) = (domain.nx, domain.ny, domain.nz, domain.dx);
+    let Cas { h0, a, sigma, x0, k, omega, .. } = *c;
+    let enveloppe = |x: f32| a * (-(x - x0) * (x - x0) / (2. * sigma * sigma)).exp();
+    let eta: Vec<f32> = (0..domain.columns())
+        .map(|i| {
+            let x = ((i % nx) as f32 + 0.5) * dx;
+            h0 + enveloppe(x) * (k * (x - x0)).cos()
+        })
+        .collect();
+    v.set_free_surface(&eta, h0).map_err(|e| format!("surface {e:?}"))?;
+    let mut u = vec![0f32; (nx + 1) * ny * nz];
+    let mut w = vec![0f32; nx * ny * (nz + 1)];
+    for kz in 0..nz {
+        let zc = (kz as f32 + 0.5) * dx - h0;
+        for j in 0..ny {
+            for i in 1..nx {
+                let x = i as f32 * dx;
+                u[kz * (nx + 1) * ny + j * (nx + 1) + i] =
+                    omega * enveloppe(x) * (k * zc).exp() * (k * (x - x0)).cos();
+            }
+        }
+    }
+    for kz in 1..nz {
+        let z = kz as f32 * dx - h0;
+        for j in 0..ny {
+            for i in 0..nx {
+                let x = (i as f32 + 0.5) * dx;
+                w[kz * nx * ny + j * nx + i] =
+                    omega * enveloppe(x) * (k * z).exp() * (k * (x - x0)).sin();
+            }
+        }
+    }
+    v.set_velocity(&u, &vec![0.; nx * (ny + 1) * nz], &w)
+        .map_err(|e| format!("vitesse {e:?}"))
+}
+
+/// **L'ordre C** — les six propriétés du **même** transfert, à une maille (ADR-183 D5).
+///
+/// Un seul relevé de δ, sur **toutes** les colonnes entre les deux lignes, et deux raccords
+/// comparés dessus :
+///
+/// - `S315` — le raccord tel qu'il était : largeur spatiale par la vitesse de groupe **posée**,
+///   train né sur la **face** de la ligne ;
+/// - `S316` — le même sans ces deux fuites : largeur par la vitesse de groupe de l'onde **émise**,
+///   `g/(2ω)`, et naissance au **centre** de la colonne où la jauge lit.
+///
+/// Ce que chaque grandeur mesure, et à qui elle s'attribue d'office :
+///
+/// | grandeur | lecture | attributaire |
+/// |---|---|---|
+/// | `D(x₁)` à `ω₀` | écart de phase à l'émission, fenêtre commune | raccord |
+/// | `D(x₂) − D(x₁)` | phase déroulée sur 10 λ | δ, si elle converge |
+/// | `k_δ(ω₀)` | pente de la phase **de δ seul**, déroulée | δ |
+/// | lenteur `∂²D/∂ω∂x` | retard de groupe, pente en `x` sur relevés complets | δ, si elle converge |
+/// | `|Z_δ(x₂)|/|Z_δ(x₁)|` | à fréquence fixe, l'étalement ne change pas `|Z|` : c'est la **dissipation** | δ |
+/// | `|Z_W(x₂)|/|Z_W(x_a)|` | même lecture sur le train | primitive (doit valoir 1) |
+/// | spectre `|Z_W(x_a, ω)|` contre `|Z_δ(x₁, ω)|` | relevés complets tous deux | raccord |
+/// | réflexion | fenêtre de retour à la seconde ligne, protocole de S311 | éponge de δ |
+/// | volume | registre à la première ligne | architecture — ordre D |
+fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
+    let tau = core::f64::consts::TAU;
+    let (lambda, separation) = (2.0f32, 20.0f32);
+    let c = cas(dx, lambda, 1.5);
+    let Cas { h0, sigma, x0, eponge, k, omega, .. } = c;
+    // Vitesse de groupe **posée** : elle dimensionne le banc — durée et fenêtres —, jamais le
+    // raccord S316.
+    let cg_pose = 0.5 * omega / k;
+    let ligne1_m = x0 + 4. * sigma;
+    let domain = Domain3 {
+        nx: ((ligne1_m + separation + eponge) / dx) as usize,
+        ny: 2,
+        nz: (h0 / dx) as usize + 2,
+        dx,
+    };
+    let (nx, ny) = (domain.nx, domain.ny);
+    let ligne1 = (ligne1_m / dx) as usize;
+    let ligne2 = ligne1 + (separation / dx).round() as usize;
+    let stations = ligne2 - ligne1 + 1;
+    let centre = |i: usize| (i as f32 + 0.5) * dx;
+
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 30);
+    let mut v = Volume3::configure(
+        &mut HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink },
+        domain,
+        RHO,
+        G,
+    )
+    .map_err(|e| format!("volume {e:?}"))?;
+    pose_paquet(&mut v, domain, &c)?;
+
+    let zero = BackgroundSample::default();
+    let (bu, bv, bw) = (
+        vec![zero; (nx + 1) * ny * domain.nz],
+        vec![zero; nx * (ny + 1) * domain.nz],
+        vec![zero; nx * ny * (domain.nz + 1)],
+    );
+    let sponge = Sponge3 { width_x: eponge, width_y: 0., rate_per_s: 10. * cg_pose / eponge };
+    let dt = dt_us as f64 * 1e-6;
+    // Durée : le passage à la seconde ligne, puis l'aller-retour dans l'éponge — la réflexion se
+    // mesure sur le **même** relevé, au protocole de S311.
+    let t2_arr = ((centre(ligne2) - x0) / cg_pose) as f64;
+    let passage = (4. * sigma / cg_pose) as f64;
+    let t_retour = t2_arr + 2. * (eponge / cg_pose) as f64 - passage;
+    let pas = ((t_retour + passage) / dt) as u64;
+
+    let jauge_j = ny / 2;
+    let mut volume = Ledger3::default();
+    let mut eta_delta: Vec<f64> = Vec::with_capacity(pas as usize * stations);
+    let depart = std::time::Instant::now();
+    for n in 0..pas {
+        let time = SimTime(n * dt_us);
+        let bg = BackgroundFaces3 { domain, time, density: RHO, gravity: G, u: &bu, v: &bv, w: &bw };
+        v.step_perturbation_mobile(time, dt_us, 60_000, &bg, sponge, &jobs)
+            .map_err(|e| format!("pas {n}: {e:?}"))?;
+        let q = v.control_flux_x(ligne1, dt).map_err(|e| format!("ligne {e:?}"))?;
+        volume
+            .account(q, 0., v.balance().residual)
+            .map_err(|e| format!("registre {e:?}"))?;
+        let surface = v.surface();
+        eta_delta.extend((ligne1..=ligne2).map(|i| (surface[jauge_j * nx + i] - h0) as f64));
+    }
+    let duree_s = depart.elapsed().as_secs_f64();
+    let rel_delta = Releve { t0: dt, dt, stations, eta: eta_delta };
+    let serie = |s: usize| -> Vec<(f64, f64)> {
+        (0..rel_delta.instants())
+            .map(|n| (rel_delta.instant(n), rel_delta.eta[n * stations + s]))
+            .collect()
+    };
+
+    // ── Le raccord ne lit la première ligne qu'avec ce qu'elle lui montre : aucune fenêtre calée
+    //    sur une arrivée **théorique**. Un premier passage sur tout le relevé donne l'arrivée et la
+    //    largeur par les moments de `η²` ; la fenêtre d'identification s'arrête quatre largeurs
+    //    après — sinon la traîne dispersive, plus courte et plus lente, entrerait dans le comptage
+    //    des passages par zéro qui borne la recherche de `ω` (A306).
+    let brouillon = identifie(&serie(0), f64::INFINITY, f64::INFINITY);
+    let sig1 = identifie(
+        &serie(0),
+        brouillon.arrivee_s + 4. * brouillon.sigma_t,
+        f64::INFINITY,
+    );
+    let sig2 = identifie(&serie(stations - 1), t_retour, t_retour);
+    let reflexion = sig2.retour / sig2.incident.max(f64::MIN_POSITIVE);
+    let omega0 = sig1.omega;
+    let g = G as f64;
+    let k_train = omega0 * omega0 / g;
+    let cg_train = g / (2. * omega0);
+
+    // Fenêtre des projections : de la naissance du train à la fin du passage de δ à la seconde
+    // ligne, **avant** le retour de l'éponge.
+    let n_fin = (((sig2.arrivee_s + 4. * sig2.sigma_t).min(t_retour) - rel_delta.t0) / dt) as usize;
+    let n_naissance = ((sig1.arrivee_s - rel_delta.t0) / dt).ceil().max(0.) as usize;
+    let pulsations: Vec<f64> = (-8..=8).map(|j| omega0 * (1. + 0.0125 * j as f64)).collect();
+    let centrales: Vec<usize> = (4..=12).collect();
+    let dx64 = dx as f64;
+    let xs_tous: Vec<f64> = (0..stations).map(|s| s as f64 * dx64).collect();
+
+    // ── δ seul, sur tout son relevé : sa phase déroulée donne `k_δ(ω)`, son module la dissipation.
+    let mut k_delta = Vec::new();
+    let mut z_delta_plein: Vec<Vec<(f64, f64)>> = Vec::new();
+    let mut saut_delta = 0f64;
+    for &w in &pulsations {
+        let z = projette(&rel_delta, w, 0, n_fin);
+        let (phi, s) = deroule(&z.iter().map(|z| tours(*z)).collect::<Vec<_>>());
+        saut_delta = saut_delta.max(s);
+        k_delta.push(pente(&xs_tous, &phi) * tau);
+        z_delta_plein.push(z);
+    }
+    let lenteur_delta = pente(
+        &centrales.iter().map(|&j| pulsations[j]).collect::<Vec<_>>(),
+        &centrales.iter().map(|&j| k_delta[j]).collect::<Vec<_>>(),
+    );
+    let dissipation = module(z_delta_plein[8][stations - 1]) / module(z_delta_plein[8][0]);
+    println!(
+        "ORDRE_C_S316 delta dx={dx} dt_us={dt_us} nx={nx} nz={} pas={pas} duree_calcul_s={duree_s:.0} \
+         omega0={omega0:.5} k_pose={k:.5} k_delta={:.5} k_train={k_train:.5} \
+         cg_delta={:.5} cg_train={cg_train:.5} cg_pose={cg_pose:.5} ecart_cg_delta={:.5} \
+         saut_max_tours={saut_delta:.4} dissipation_amplitude_10l={:.5} \
+         arrivee1_s={:.3} arrivee2_s={:.3} reflexion_en_energie={reflexion:e} \
+         volume_en_attente_m3={:e} volume_transfere_m3={:e}",
+        domain.nz,
+        k_delta[8],
+        1. / lenteur_delta,
+        (1. / lenteur_delta - cg_train) / cg_train,
+        1. - dissipation,
+        sig1.arrivee_s,
+        sig2.arrivee_s,
+        volume.pending(),
+        volume.transferred()
+    );
+
+    // ── Les deux raccords, sur le même relevé.
+    for (nom, cg_enveloppe, origine_x) in [
+        ("S315", cg_pose as f64, ligne1 as f32 * dx),
+        ("S316", cg_train, centre(ligne1)),
+    ] {
+        let age_utile = ((n_fin as f64 * dt + rel_delta.t0 - sig1.arrivee_s) * 1e6) as u64 + 1_000_000;
+        let spec = TrainSpec {
+            origin: [origine_x, ny as f32 * dx * 0.5],
+            birth: SimTime((sig1.arrivee_s * 1e6) as u64),
+            frame: FrameId(0),
+            cell: 0,
+            direction: [1., 0.],
+            wavelength_m: (tau / k_train) as f32,
+            amplitude_m: sig1.amplitude_m as f32,
+            envelope_m: (sig1.sigma_t * cg_enveloppe) as f32,
+            spread_turns: 0.,
+            directions: 1,
+            phase: PhaseQ32((sig1.phase_tours.rem_euclid(1.) * 4_294_967_296.0) as u32),
+            age_us: age_utile,
+            radius_m: separation + 20. * sigma,
+            spread_limit: 0.35,
+        };
+        let medium = Medium { gravity: G, density: RHO, depth: h0, max_slope: BREAKING_SLOPE };
+        let train =
+            WaveTrain::<128>::new(spec, medium).map_err(|e| format!("train {nom} refusé : {e:?}"))?;
+        let abscisses: Vec<f32> = (ligne1..=ligne2).map(centre).collect();
+        let rel_train =
+            releve_train(&train, &abscisses, spec.origin[1], rel_delta.t0, dt, n_fin)?;
+        // Première station au relevé **complet** pour le train : 4,5 enveloppes au-delà de sa
+        // naissance.
+        let s_a = (((origine_x + 4.5 * spec.envelope_m) - centre(ligne1)) / dx).ceil() as usize;
+        if s_a + 8 >= stations {
+            return Err(format!("{nom} : trop peu de stations au relevé complet ({s_a})"));
+        }
+
+        let mut d_par_pulsation: Vec<Vec<f64>> = Vec::new();
+        let mut z_train: Vec<Vec<(f64, f64)>> = Vec::new();
+        let mut saut = 0f64;
+        for &w in &pulsations {
+            let zw = projette(&rel_train, w, n_naissance, n_fin);
+            let zd = projette(&rel_delta, w, n_naissance, n_fin);
+            let brut: Vec<f64> = zw.iter().zip(&zd).map(|(a, b)| tours(*a) - tours(*b)).collect();
+            let (d, s) = deroule(&brut);
+            saut = saut.max(s);
+            d_par_pulsation.push(d);
+            z_train.push(zw);
+        }
+        let d0 = &d_par_pulsation[8];
+        let ecart_10l = d0[stations - 1] - d0[0];
+        // Phase : pente en `x` et ordonnée ramenée à la ligne, sur les relevés complets.
+        let xs: Vec<f64> = (s_a..stations).map(|s| s as f64 * dx64).collect();
+        let pente_d = pente(&xs, &d0[s_a..].to_vec());
+        let d_emission_ajuste = d0[s_a] - pente_d * xs[0];
+        // Retard de groupe : pente en `x` de `∂D/∂ω`, sur les mêmes stations (P3).
+        let retards: Vec<f64> = (s_a..stations)
+            .map(|s| {
+                let d: Vec<f64> = centrales.iter().map(|&j| d_par_pulsation[j][s]).collect();
+                pente(&centrales.iter().map(|&j| pulsations[j]).collect::<Vec<_>>(), &d) * tau
+            })
+            .collect();
+        let lenteur = pente(&xs, &retards);
+        let retard_10l = lenteur * separation as f64;
+        let retard_emission = retards[0] - lenteur * xs[0];
+        // Primitive : sans perte à fréquence fixe.
+        let conservation_train = module(z_train[8][stations - 1]) / module(z_train[8][s_a]);
+        // Raccord : spectre du train (relevé complet, sans perte) contre celui de δ à la ligne
+        // (relevé entier).
+        let (mut num, mut den, mut mw, mut md, mut pw, mut pd) = (0f64, 0f64, 0f64, 0f64, 0f64, 0f64);
+        let (mut vw, mut vd) = (0f64, 0f64);
+        for (j, &w) in pulsations.iter().enumerate() {
+            let (aw, ad) = (module(z_train[j][s_a]), module(z_delta_plein[j][0]));
+            num += (aw - ad) * (aw - ad);
+            den += ad * ad;
+            mw += w * aw * aw;
+            md += w * ad * ad;
+            pw += aw * aw;
+            pd += ad * ad;
+        }
+        let (cw, cd) = (mw / pw, md / pd);
+        for (j, &w) in pulsations.iter().enumerate() {
+            let (aw, ad) = (module(z_train[j][s_a]), module(z_delta_plein[j][0]));
+            vw += (w - cw) * (w - cw) * aw * aw;
+            vd += (w - cd) * (w - cd) * ad * ad;
+        }
+        let amplitude_emission = module(z_train[8][s_a]) / module(z_delta_plein[8][0]);
+        println!(
+            "ORDRE_C_S316 raccord={nom} dx={dx} dt_us={dt_us} origine_m={origine_x:.4} \
+             enveloppe_m={:.4} station_complete={s_a} saut_max_tours={saut:.4} \
+             phase_emission_tours={:.5} phase_emission_ajustee_tours={d_emission_ajuste:.5} \
+             ecart_10l_tours={ecart_10l:.5} prediction_s315_tours={prediction_s315} \
+             ecart_a_la_prediction_tours={:.5} pente_phase_rad_m={:.5} \
+             retard_10l_s={retard_10l:.4} retard_emission_s={retard_emission:.4} \
+             amplitude_emission={amplitude_emission:.5} ecart_spectre={:.5} \
+             centroide_relatif={:.5} largeur_relative={:.5} conservation_train={conservation_train:.6}",
+            spec.envelope_m,
+            d0[0],
+            ecart_10l - prediction_s315,
+            pente_d * tau,
+            (num / den).sqrt(),
+            (cw - cd) / cd,
+            (vw / pw).sqrt() / (vd / pd).sqrt() - 1.
+        );
+    }
+    Ok(())
+}
+
 fn main() -> Result<(), String> {
     match std::env::args().nth(1).unwrap_or_else(|| "paquet".into()).as_str() {
         // **Essai 1** — une onde progressive quasi monochromatique : enveloppe large, donc bande
@@ -1182,6 +1482,20 @@ fn main() -> Result<(), String> {
         }
         // **Ordre C, préalable** — l'instrument de phase déroulée, sur un écart connu (S316).
         "instrument" => instrument(),
+        // **Ordre C** — une maille par appel, pour que les trois tournent en parallèle ; les
+        // prédictions de S315 §2 sont passées telles qu'écrites, jamais recalculées.
+        "ordre_c" => {
+            let dx: f32 = std::env::args().nth(2).ok_or("maille ?")?.parse().map_err(|_| "maille")?;
+            let dt_us: u64 =
+                std::env::args().nth(3).unwrap_or_else(|| "10000".into()).parse().map_err(|_| "pas")?;
+            let prediction = match dx {
+                d if d == 0.25 => -0.853,
+                d if d == 0.125 => -0.165,
+                d if d == 0.0625 => -0.0072,
+                _ => f64::NAN,
+            };
+            ordre_c(dx, dt_us, prediction)
+        }
         autre => Err(format!("essai inconnu : {autre}")),
     }
 }

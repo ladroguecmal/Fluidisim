@@ -119,7 +119,11 @@ décalage.
   (notes de reprise).
 - [x] **P3** — l'instrument de phase déroulée, et son **essai sur un défaut connu** : deux trains
   de nombres d'onde différents, écart attendu > ½ tour à 10 λ.
-- [ ] **P4** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
+- [x] **P4a** — *découpage déclaré en cours de route* : le banc de l'ordre C écrit et **lancé**
+  aux trois mailles, plus 6,25 cm à 5 ms (le discriminant du pas de temps, P2). Quatre calculs
+  parallèles, de 3 min à ~1 h 20 ; **P6 et P8 s'exécutent pendant ce temps**, puisqu'ils n'en
+  dépendent pas.
+- [ ] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
 - [ ] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
   phase, vitesse de groupe, réflexion, volume.
 - [ ] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
