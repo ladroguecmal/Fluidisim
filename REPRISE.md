@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-21 23:01 +02:00
+Battement        : 2026-09-21 23:09 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S320 — lot 5 : B10 sur APIC, un objet cinématique entre dans l'eau
 Dernière session : S319 — **ordre E, premier échelon** : sous une houle B seule, δ **croît** jusqu'à trois fois l'amplitude de la mer en deux minutes, presque indépendamment de la maille ; la restitution de S317 reçoit des centaines de fois un paquet ; A289 bloque l'ordre E ([preuve](docs/validation/MER-S319.md)) ; **APIC retenue** ([ADR-186](docs/adr/ADR-186-apic-seconde-representation.md))

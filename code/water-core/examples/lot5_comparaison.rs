@@ -41,6 +41,13 @@ enum Cas {
     Ballottement,
     /// Colonne `a × 2a` contre la paroi gauche, boîte `4a × 2,5a`, `a` = 0,8 m.
     Barrage,
+    /// **B10, S320** : un cylindre de diamètre `D` entre dans l'eau à vitesse imposée, `Fr = U/√(gD)`.
+    Entree,
+    /// Le même cylindre, à demi immergé et **au repos** : il ne doit créer aucun écoulement.
+    CorpsRepos,
+    /// Le même cylindre enfoncé **lentement** jusqu'à l'immersion complète : le niveau doit monter
+    /// de son volume, `πR²/L`, exactement.
+    CorpsLent,
 }
 
 /// La géométrie et la durée d'un cas. Tout est déclaré ici, rien dans les candidats.
@@ -54,17 +61,57 @@ struct Scene {
     /// Profondeur au repos (repos, ballottement) ou largeur de colonne `a` (barrage).
     h: f64,
     amplitude: f64,
+    /// Diamètre et vitesse d'enfoncement du corps cinématique ; nuls sans corps.
+    d_corps: f64,
+    u_corps: f64,
+    /// Profondeur de la **base** du corps, sous la surface au repos, où il s'arrête.
+    arret: f64,
 }
 
 impl Scene {
     fn new(cas: Cas, dx: f64) -> Self {
+        let sans = |cas, lx, ly, t_fin, h, amplitude| Scene {
+            cas, lx, ly, dx, t_fin, h, amplitude, d_corps: 0.0, u_corps: 0.0, arret: 0.0,
+        };
         match cas {
-            Cas::Repos => Scene { cas, lx: 2.0, ly: 1.0, dx, t_fin: 10.0, h: 0.5, amplitude: 0.0 },
-            Cas::Ballottement => {
-                Scene { cas, lx: 2.0, ly: 1.0, dx, t_fin: 10.0, h: 0.5, amplitude: 0.02 }
-            }
-            Cas::Barrage => Scene { cas, lx: 3.2, ly: 2.0, dx, t_fin: 2.0, h: 0.8, amplitude: 0.0 },
+            Cas::Repos => sans(cas, 2.0, 1.0, 10.0, 0.5, 0.0),
+            Cas::Ballottement => sans(cas, 2.0, 1.0, 10.0, 0.5, 0.02),
+            Cas::Barrage => sans(cas, 3.2, 2.0, 2.0, 0.8, 0.0),
+            Cas::Entree | Cas::CorpsRepos | Cas::CorpsLent => Self::entree(cas, dx, 0.4, 2.0),
         }
+    }
+    /// Scène B10 : cylindre de diamètre `d`, bassin `8d × 9d`, eau sur `6d`. Le corps part la base
+    /// au ras de la surface, descend à `U = Fr·√(g·d)` et **s'arrête** quand sa base atteint `4d` de
+    /// profondeur ; la scène dure encore `4√(d/g)` pour laisser le jet se former.
+    fn entree(cas: Cas, dx: f64, d: f64, fr: f64) -> Self {
+        let echelle = (d / G).sqrt();
+        let (u, arret, t_fin) = match cas {
+            Cas::Entree => {
+                let u = fr * (G * d).sqrt();
+                (u, 4.0 * d, 4.0 * d / u + 4.0 * echelle)
+            }
+            Cas::CorpsRepos => (0.0, 0.5 * d, 5.0),
+            // Assez lent pour rester quasi statique : `Fr` = 0,025.
+            _ => (0.025 * (G * d).sqrt(), 1.5 * d, 1.5 * d / (0.025 * (G * d).sqrt()) + 2.0),
+        };
+        Scene { cas, lx: 8.0 * d, ly: 9.0 * d, dx, t_fin, h: 6.0 * d, amplitude: 0.0, d_corps: d, u_corps: u, arret }
+    }
+    /// Centre du corps à l'instant `t`.
+    fn corps(&self, t: f64) -> Option<([f64; 2], f64, [f64; 2])> {
+        if self.d_corps <= 0.0 {
+            return None;
+        }
+        let r = 0.5 * self.d_corps;
+        let depart = match self.cas {
+            Cas::CorpsRepos => self.h,
+            _ => self.h + r,
+        };
+        // Déplacement du centre jusqu'à l'arrêt : la base part de `h + r − depart − r` de profondeur.
+        let course = self.arret - (self.h + r - depart);
+        let descente = (self.u_corps * t).min(if self.cas == Cas::CorpsRepos { 0.0 } else { course });
+        let bouge = self.u_corps > 0.0 && self.u_corps * t < course;
+        let v = if bouge { [0.0, -self.u_corps] } else { [0.0, 0.0] };
+        Some(([0.5 * self.lx, depart - descente], r, v))
     }
     fn nx(&self) -> usize {
         (self.lx / self.dx).round() as usize
@@ -78,8 +125,13 @@ impl Scene {
     }
     /// Le point `(x, y)` est-il dans l'eau au départ ?
     fn dans_eau(&self, x: f64, y: f64) -> bool {
+        if let Some((c, r, _)) = self.corps(0.0) {
+            if (x - c[0]).powi(2) + (y - c[1]).powi(2) < r * r {
+                return false;
+            }
+        }
         match self.cas {
-            Cas::Repos => y < self.h,
+            Cas::Repos | Cas::Entree | Cas::CorpsRepos | Cas::CorpsLent => y < self.h,
             Cas::Ballottement => y < self.h + self.amplitude * (self.k() * x).cos(),
             Cas::Barrage => x < self.h && y < 2.0 * self.h,
         }
@@ -87,7 +139,7 @@ impl Scene {
     /// Distance signée à la surface de départ, négative dans l'eau — pour l'ensemble de niveaux.
     fn distance_initiale(&self, x: f64, y: f64) -> f64 {
         match self.cas {
-            Cas::Repos => y - self.h,
+            Cas::Repos | Cas::Entree | Cas::CorpsRepos | Cas::CorpsLent => y - self.h,
             // Au premier ordre en `A·k`, la distance verticale suffit : `|∇η|` ≤ 0,016.
             Cas::Ballottement => y - (self.h + self.amplitude * (self.k() * x).cos()),
             Cas::Barrage => {
@@ -103,7 +155,18 @@ impl Scene {
     }
     /// Volume d'eau de départ, exact, m² par mètre de largeur.
     fn volume_initial(&self) -> f64 {
+        let immerge = match self.corps(0.0) {
+            Some((c, r, _)) if c[1] < self.h + r => {
+                // Segment de disque sous `y = h`.
+                let d = (self.h - c[1]).clamp(-r, r);
+                let a = (d / r).acos();
+                let segment = r * r * (a - a.sin() * a.cos());
+                std::f64::consts::PI * r * r - segment
+            }
+            _ => 0.0,
+        };
         match self.cas {
+            Cas::Entree | Cas::CorpsRepos | Cas::CorpsLent => self.h * self.lx - immerge,
             Cas::Repos | Cas::Ballottement => self.h * self.lx,
             Cas::Barrage => 2.0 * self.h * self.h,
         }
@@ -111,7 +174,7 @@ impl Scene {
     /// Énergie potentielle de départ, J par mètre de largeur.
     fn energie_initiale(&self) -> f64 {
         match self.cas {
-            Cas::Repos => RHO * G * self.lx * self.h * self.h / 2.0,
+            Cas::Repos | Cas::Entree | Cas::CorpsRepos | Cas::CorpsLent => RHO * G * self.lx * self.h * self.h / 2.0,
             Cas::Ballottement => {
                 // ρg/2 ∫ η² dx, η = h + A cos(kx) : le terme croisé s'annule sur le bassin.
                 RHO * G / 2.0 * (self.lx * self.h * self.h + self.amplitude.powi(2) * self.lx / 2.0)
@@ -139,6 +202,17 @@ struct Mesure {
     /// Plus grand nombre de segments d'eau le long d'une verticale.
     couches: usize,
     u_max: f64,
+    /// **B10** : aire d'air **enfermé** sous la surface au repos — inaccessible depuis l'atmosphère ;
+    /// profondeur de la cavité **ouverte** la plus basse ; haut de l'air enfermé ; base du corps.
+    enferme: f64,
+    cavite: f64,
+    bulle_haut: f64,
+    base_corps: f64,
+    /// Hauteur d'eau moyenne loin du corps (au-delà de `1,5·D` de son axe) — le niveau que le corps
+    /// élève en s'enfonçant.
+    niveau_loin: f64,
+    /// Altitude de l'eau la plus haute — couronne et jet de B10.
+    sommet: f64,
     /// **La jauge du ballottement** : hauteur d'eau moyenne sur le premier quart du bassin,
     /// `x < L/4`, déduite du volume que le candidat y représente. Une jauge ponctuelle — la
     /// particule la plus haute au bord — était quantifiée à l'espacement des particules et ne
@@ -227,6 +301,8 @@ fn periodes(t: &[f64], y: &[f64]) -> (f64, f64) {
 
 const AIR: u8 = 0;
 const EAU: u8 = 1;
+/// Cellule occupée par un corps : paroi mobile pour la pression, vitesse imposée sur ses faces.
+const SOLIDE: u8 = 2;
 
 /// Grille décalée : `u` sur les faces verticales `(nx+1)×ny`, `v` sur les horizontales
 /// `nx×(ny+1)`, pression et étiquettes aux centres. Le bord du domaine est une **paroi**.
@@ -271,6 +347,36 @@ impl Mac {
             && (j as usize) < self.ny
             && self.etiquette[self.ic(i as usize, j as usize)] == EAU
     }
+    fn solide(&self, i: isize, j: isize) -> bool {
+        i >= 0
+            && j >= 0
+            && (i as usize) < self.nx
+            && (j as usize) < self.ny
+            && self.etiquette[self.ic(i as usize, j as usize)] == SOLIDE
+    }
+    /// **Le corps dans la grille** : ses cellules deviennent solides, et toute face qui touche une
+    /// cellule solide prend la vitesse du corps. Appelé avant et après chaque opération qui écrit
+    /// les faces — sans quoi une extrapolation ou une correction réécrirait la paroi.
+    fn impose_corps(&mut self, corps: Option<([f64; 2], f64, [f64; 2])>) {
+        let Some((_, _, vit)) = corps else { return };
+        let (nx, ny) = (self.nx, self.ny);
+        for j in 0..ny {
+            for i in 0..=nx {
+                if self.solide(i as isize - 1, j as isize) || self.solide(i as isize, j as isize) {
+                    let k = self.iu(i, j);
+                    self.u[k] = vit[0];
+                }
+            }
+        }
+        for j in 0..=ny {
+            for i in 0..nx {
+                if self.solide(i as isize, j as isize - 1) || self.solide(i as isize, j as isize) {
+                    let k = self.iv(i, j);
+                    self.v[k] = vit[1];
+                }
+            }
+        }
+    }
 
     /// Vitesse interpolée en `(x, y)`, bilinéaire sur chaque composante décalée.
     fn vitesse(&self, x: f64, y: f64) -> (f64, f64) {
@@ -309,6 +415,13 @@ impl Mac {
     /// niveaux) ; une paroi impose un flux nul. Gradient conjugué préconditionné par la
     /// diagonale, tolérance relative 10⁻¹⁰.
     fn projette(&mut self, dt: f64, theta: &dyn Fn(usize, usize, isize, isize) -> f64) {
+        self.projette_vers(dt, theta, None);
+    }
+
+    /// La projection, avec une **divergence cible** par cellule : zéro partout pour un fluide
+    /// incompressible ; positive là où un candidat veut écarter la matière — la correction de
+    /// densité d'APIC.
+    fn projette_vers(&mut self, dt: f64, theta: &dyn Fn(usize, usize, isize, isize) -> f64, cible: Option<&[f64]>) {
         let (nx, ny, dx) = (self.nx, self.ny, self.dx);
         self.parois();
         let n = nx * ny;
@@ -328,11 +441,11 @@ impl Mac {
                     + self.v[self.iv(i, j + 1)]
                     - self.v[self.iv(i, j)])
                     / dx;
-                rhs[c] = -RHO * dx * dx / dt * div;
+                rhs[c] = -RHO * dx * dx / dt * (div - cible.map_or(0.0, |t| t[c]));
                 for (a, b) in voisins(i, j) {
                     let dedans = a >= 0 && b >= 0 && (a as usize) < nx && (b as usize) < ny;
-                    if !dedans {
-                        continue; // paroi
+                    if !dedans || self.solide(a, b) {
+                        continue; // paroi, fixe ou mobile : flux imposé, pas de pression
                     }
                     if self.eau(a, b) {
                         diag[c] += 1.0;
@@ -402,6 +515,9 @@ impl Mac {
         let echelle = dt / (RHO * dx);
         for j in 0..ny {
             for i in 1..nx {
+                if self.solide(i as isize - 1, j as isize) || self.solide(i as isize, j as isize) {
+                    continue;
+                }
                 let (g, dr) = (self.eau(i as isize - 1, j as isize), self.eau(i as isize, j as isize));
                 let k = self.iu(i, j);
                 if g && dr {
@@ -417,6 +533,9 @@ impl Mac {
         }
         for j in 1..ny {
             for i in 0..nx {
+                if self.solide(i as isize, j as isize - 1) || self.solide(i as isize, j as isize) {
+                    continue;
+                }
                 let (b, h) = (self.eau(i as isize, j as isize - 1), self.eau(i as isize, j as isize));
                 let k = self.iv(i, j);
                 if b && h {
@@ -644,6 +763,46 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
             );
         }
         Cas::Repos => {}
+        Cas::Entree | Cas::CorpsRepos | Cas::CorpsLent => {
+            let (d, h) = (scene.d_corps, scene.h);
+            let echelle = (d / G).sqrt();
+            let seuil = 4.0 * scene.dx * scene.dx;
+            let pincement = releves.iter().find(|r| r.enferme > seuil);
+            let t_p = pincement.map(|r| r.t).unwrap_or(f64::NAN);
+            let avant = |r: &&Mesure| t_p.is_nan() || r.t < t_p;
+            let apres = |r: &&Mesure| !t_p.is_nan() && r.t > t_p;
+            let cavite_max = releves.iter().filter(avant).fold(0f64, |m, r| m.max(r.cavite));
+            let couronne = releves.iter().filter(avant).fold(0f64, |m, r| m.max(r.sommet - h));
+            let jet = releves.iter().filter(apres).fold(0f64, |m, r| m.max(r.sommet - h));
+            let niveau0 = releves[0].niveau_loin;
+            let niveau1 = releves.last().unwrap().niveau_loin;
+            let r = 0.5 * d;
+            let montee_attendue = match scene.cas {
+                Cas::CorpsLent => std::f64::consts::PI * r * r / scene.lx,
+                _ => f64::NAN,
+            };
+            println!(
+                "LOT5_S320 b10 candidat={} cas={:?} dx={} d={d} d_sur_dx={:.1} fr={:.3} u={:.4} \
+                 pincement_t_s={t_p:.4} pincement_t_sur_echelle={:.4} pincement_profondeur_sur_d={:.4} \
+                 base_corps_au_pincement_sur_d={:.4} cavite_max_sur_d={:.4} couronne_sur_d={:.4} \
+                 jet_sur_d={:.4} air_enferme_au_pincement_m2={:e} niveau_loin_initial={niveau0:.5} \
+                 niveau_loin_final={niveau1:.5} montee={:.5} montee_attendue={montee_attendue:.5}",
+                c.nom(),
+                scene.cas,
+                scene.dx,
+                d / scene.dx,
+                scene.u_corps / (G * d).sqrt(),
+                scene.u_corps,
+                t_p / echelle,
+                pincement.map(|r| (h - r.bulle_haut) / d).unwrap_or(f64::NAN),
+                pincement.map(|r| (h - r.base_corps) / d).unwrap_or(f64::NAN),
+                cavite_max / d,
+                couronne / d,
+                jet / d,
+                pincement.map(|r| r.enferme).unwrap_or(0.0),
+                niveau1 - niveau0
+            );
+        }
     }
 }
 
@@ -664,6 +823,8 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
 /// une faute de **mise en œuvre**, qu'aucune production ne commet, pas une propriété d'APIC (P4b).
 /// `r` se **calcule** : c'est la valeur qui place l'iso-zéro d'une nappe au repos à sa hauteur vraie.
 struct Apic {
+    scene: Scene,
+    t: f64,
     mac: Mac,
     /// Distance signée reconstruite aux centres des cellules.
     phi: Vec<f64>,
@@ -690,6 +851,8 @@ impl Apic {
         }
         let n = x.len();
         Apic {
+            scene,
+            t: 0.0,
             mac: Mac::new(nx, ny, dx),
             phi: vec![0.0; nx * ny],
             rayon: Self::rayon_au_repos(dx),
@@ -764,6 +927,112 @@ impl Apic {
         (m[0] * m[0] + m[1] * m[1]).sqrt()
     }
 
+    /// **Les mesures de B10**, sur l'occupation des cellules par les particules et la position du
+    /// corps : air enfermé sous la surface au repos (remplissage depuis la rangée du haut à travers
+    /// l'air), cavité ouverte la plus basse, haut de l'air enfermé, base du corps, niveau loin du
+    /// corps. Toutes en mètres ; zéro sans corps.
+    fn b10(&self, t: f64) -> (f64, f64, f64, f64, f64) {
+        let Some((c, r, _)) = self.scene.corps(t) else { return (0.0, 0.0, 0.0, 0.0, 0.0) };
+        let (nx, ny, dx, h) = (self.mac.nx, self.mac.ny, self.mac.dx, self.scene.h);
+        let n = self.occupation();
+        let solide = |i: usize, j: usize| {
+            let (x, y) = ((i as f64 + 0.5) * dx, (j as f64 + 0.5) * dx);
+            (x - c[0]).powi(2) + (y - c[1]).powi(2) < r * r
+        };
+        let air = |i: usize, j: usize| n[j * nx + i] == 0 && !solide(i, j);
+        let mut atteint = vec![false; nx * ny];
+        let mut pile: Vec<(usize, usize)> = (0..nx).filter(|&i| air(i, ny - 1)).map(|i| (i, ny - 1)).collect();
+        for &(i, j) in &pile {
+            atteint[j * nx + i] = true;
+        }
+        while let Some((i, j)) = pile.pop() {
+            for (a, b) in [(i as isize - 1, j as isize), (i as isize + 1, j as isize), (i as isize, j as isize - 1), (i as isize, j as isize + 1)] {
+                if a < 0 || b < 0 || a as usize >= nx || b as usize >= ny {
+                    continue;
+                }
+                let (a, b) = (a as usize, b as usize);
+                if !atteint[b * nx + a] && air(a, b) {
+                    atteint[b * nx + a] = true;
+                    pile.push((a, b));
+                }
+            }
+        }
+        let (mut enferme, mut cavite, mut bulle_haut) = (0.0, 0f64, f64::NAN);
+        for j in 0..ny {
+            let y = (j as f64 + 0.5) * dx;
+            if y >= h {
+                continue;
+            }
+            for i in 0..nx {
+                if !air(i, j) {
+                    continue;
+                }
+                if atteint[j * nx + i] {
+                    cavite = cavite.max(h - y);
+                } else {
+                    enferme += dx * dx;
+                    bulle_haut = if bulle_haut.is_nan() { y } else { bulle_haut.max(y) };
+                }
+            }
+        }
+        // Le niveau loin du corps : hauteur d'eau des colonnes à plus de 1,5·D de son axe.
+        let (mut somme, mut colonnes) = (0.0, 0usize);
+        for i in 0..nx {
+            let x = (i as f64 + 0.5) * dx;
+            if (x - c[0]).abs() < 3.0 * r || x < 2.0 * dx || x > (nx as f64 - 2.0) * dx {
+                continue;
+            }
+            let compte: u32 = (0..ny).map(|j| n[j * nx + i]).sum();
+            somme += compte as f64 * 0.25 * dx;
+            colonnes += 1;
+        }
+        let niveau = if colonnes > 0 { somme / colonnes as f64 } else { f64::NAN };
+        (enferme, cavite, bulle_haut, c[1] - r, niveau)
+    }
+
+    /// Écarte les paires de particules plus proches que `d_min`, `passes` fois.
+    fn separe(&mut self, d_min: f64, passes: usize) {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let (lx, ly) = (nx as f64 * dx, ny as f64 * dx);
+        for _ in 0..passes {
+            let mut par_cellule: Vec<Vec<usize>> = vec![Vec::new(); nx * ny];
+            for (k, p) in self.x.iter().enumerate() {
+                let (i, j) = (((p[0] / dx) as usize).min(nx - 1), ((p[1] / dx) as usize).min(ny - 1));
+                par_cellule[j * nx + i].push(k);
+            }
+            let mut deplacement = vec![[0.0f64; 2]; self.x.len()];
+            for j in 0..ny {
+                for i in 0..nx {
+                    for &a in &par_cellule[j * nx + i] {
+                        for b_j in j.saturating_sub(1)..(j + 2).min(ny) {
+                            for b_i in i.saturating_sub(1)..(i + 2).min(nx) {
+                                for &b in &par_cellule[b_j * nx + b_i] {
+                                    if b <= a {
+                                        continue;
+                                    }
+                                    let (ex, ey) = (self.x[b][0] - self.x[a][0], self.x[b][1] - self.x[a][1]);
+                                    let d = (ex * ex + ey * ey).sqrt();
+                                    if d < d_min && d > 1e-12 {
+                                        let m = 0.25 * (d_min - d) / d;
+                                        deplacement[a][0] -= m * ex;
+                                        deplacement[a][1] -= m * ey;
+                                        deplacement[b][0] += m * ex;
+                                        deplacement[b][1] += m * ey;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            let marge = 1e-3 * dx;
+            for (p, d) in self.x.iter_mut().zip(&deplacement) {
+                p[0] = (p[0] + d[0]).clamp(marge, lx - marge);
+                p[1] = (p[1] + d[1]).clamp(marge, ly - marge);
+            }
+        }
+    }
+
     /// Reconstruit `φ` aux centres des cellules, depuis les particules des cellules voisines.
     fn reconstruit(&mut self) {
         let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
@@ -829,15 +1098,29 @@ impl Candidat for Apic {
         for k in 0..mv.len() {
             self.mac.v[k] = if wv[k] > 0.0 { mv[k] / wv[k] } else { 0.0 };
         }
-        // ── Étiquettes et fluide fantôme depuis la surface reconstruite.
+        // ── Étiquettes et fluide fantôme depuis la surface reconstruite ; le corps par-dessus.
+        let corps = self.scene.corps(self.t);
         self.reconstruit();
         for (e, f) in self.mac.etiquette.iter_mut().zip(&self.phi) {
             *e = if *f < 0.0 { EAU } else { AIR };
         }
+        if let Some((c, r, _)) = corps {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let (x, y) = ((i as f64 + 0.5) * dx, (j as f64 + 0.5) * dx);
+                    if (x - c[0]).powi(2) + (y - c[1]).powi(2) < r * r {
+                        let k = j * nx + i;
+                        self.mac.etiquette[k] = SOLIDE;
+                    }
+                }
+            }
+        }
+        self.mac.impose_corps(corps);
         // ── Gravité, projection, extrapolation.
         for v in self.mac.v.iter_mut() {
             *v -= G * dt;
         }
+        self.mac.impose_corps(corps);
         let phi = &self.phi;
         let theta = |i: usize, j: usize, a: isize, b: isize| {
             let (fi, fa) = (phi[j * nx + i], phi[b as usize * nx + a as usize]);
@@ -846,6 +1129,7 @@ impl Candidat for Apic {
         self.mac.projette(dt, &theta);
         let (pu, pv): (Vec<bool>, Vec<bool>) = (wu.iter().map(|w| *w > 0.0).collect(), wv.iter().map(|w| *w > 0.0).collect());
         self.mac.extrapole(3, Some((&pu, &pv)));
+        self.mac.impose_corps(corps);
         // ── Grille → particules, APIC : vitesse et matrice affine.
         for k in 0..self.x.len() {
             let p = self.x[k];
@@ -877,6 +1161,35 @@ impl Candidat for Apic {
             p[0] = (p[0] + dt * u2).clamp(marge, lx - marge);
             p[1] = (p[1] + dt * v2).clamp(marge, ly - marge);
         }
+        // ── **Séparation des particules** (S320 P3), en position seulement. Sans elle, un corps qui
+        // s'enfonce **tasse** les particules contre sa paroi au lieu de soulever l'eau : le niveau ne
+        // montait que de 39 % du volume déplacé, la masse restant exacte. Une première correction par
+        // la vitesse — viser une divergence proportionnelle à l'excès de particules — **explosait**
+        // (707 m/s, et le ballottement divergeait) : elle injectait de l'énergie à chaque pas. Ici,
+        // deux particules plus proches que 0,4 maille s'écartent symétriquement de la moitié de leur
+        // recouvrement, deux passes ; les vitesses ne sont pas touchées, et une eau au repos — à une
+        // demi-maille d'écart — ne l'est pas non plus.
+        self.separe(0.4 * dx, 2);
+        // ── Le corps avance, puis repousse hors de lui les particules qu'il a atteintes.
+        self.t += dt;
+        if let Some((c, r, vit)) = self.scene.corps(self.t) {
+            for (p, v) in self.x.iter_mut().zip(self.v.iter_mut()) {
+                let (ex, ey) = (p[0] - c[0], p[1] - c[1]);
+                let d = (ex * ex + ey * ey).sqrt();
+                if d < r + 0.05 * dx {
+                    let n = if d > 0.0 { [ex / d, ey / d] } else { [0.0, 1.0] };
+                    p[0] = c[0] + n[0] * (r + 0.05 * dx);
+                    p[1] = c[1] + n[1] * (r + 0.05 * dx);
+                    // Vitesse normale au moins celle de la paroi : la particule ne rentre plus.
+                    let vn = v[0] * n[0] + v[1] * n[1];
+                    let wn = vit[0] * n[0] + vit[1] * n[1];
+                    if vn < wn {
+                        v[0] += (wn - vn) * n[0];
+                        v[1] += (wn - vn) * n[1];
+                    }
+                }
+            }
+        }
         dt
     }
     fn mesure(&self, t: f64) -> Mesure {
@@ -886,6 +1199,7 @@ impl Candidat for Apic {
         let occupation: f64 = n.iter().map(|c| (*c as f64 / 4.0).min(1.0) * dx * dx).sum();
         let couches = (0..nx).map(|i| segments((0..ny).map(|j| n[j * nx + i] > 0))).max().unwrap_or(0);
         let (mut e_cin, mut e_pot, mut front, mut u_max, mut jauge) = (0.0, 0.0, 0f64, 0f64, 0f64);
+        let sommet = self.x.iter().fold(0f64, |m, p| m.max(p[1] + 0.25 * dx));
         for (p, v) in self.x.iter().zip(&self.v) {
             e_cin += 0.5 * self.masse * (v[0] * v[0] + v[1] * v[1]);
             e_pot += self.masse * G * p[1];
@@ -897,10 +1211,17 @@ impl Candidat for Apic {
             jauge += 0.25 * dx * dx * ((bord - p[0]) / (0.5 * dx) + 0.5).clamp(0.0, 1.0);
         }
         jauge /= 0.25 * nx as f64 * dx;
+        let (enferme, cavite, bulle_haut, base_corps, niveau_loin) = self.b10(t);
         Mesure {
             t,
             volume,
             occupation,
+            enferme,
+            cavite,
+            bulle_haut,
+            base_corps,
+            niveau_loin,
+            sommet,
             masse: self.masse * self.x.len() as f64,
             e_cin,
             e_pot,
@@ -956,7 +1277,7 @@ impl Sph {
         let b = c0 * c0 * RHO / 7.0;
         let surface = |x: f64| match scene.cas {
             Cas::Barrage => 2.0 * scene.h,
-            Cas::Repos => scene.h,
+            Cas::Repos | Cas::Entree | Cas::CorpsRepos | Cas::CorpsLent => scene.h,
             Cas::Ballottement => scene.h + scene.amplitude * (scene.k() * x).cos(),
         };
         let (mut x, mut rho) = (Vec::new(), Vec::new());
@@ -1157,6 +1478,7 @@ impl Candidat for Sph {
             couches,
             u_max,
             jauge: jauge / bord,
+            ..Mesure::default()
         }
     }
 }
@@ -1393,6 +1715,7 @@ impl Candidat for Niveaux {
             couches,
             u_max: self.mac.vitesse_max(),
             jauge: jauge / (bande as f64 * dx),
+            ..Mesure::default()
         }
     }
 }
@@ -1404,10 +1727,19 @@ fn main() -> Result<(), String> {
         Some("repos") => Cas::Repos,
         Some("ballottement") => Cas::Ballottement,
         Some("barrage") => Cas::Barrage,
-        _ => return Err("cas : repos | ballottement | barrage".into()),
+        Some("entree") => Cas::Entree,
+        Some("corps_repos") => Cas::CorpsRepos,
+        Some("corps_lent") => Cas::CorpsLent,
+        _ => return Err("cas : repos | ballottement | barrage | entree | corps_repos | corps_lent".into()),
     };
     let dx: f64 = args.get(3).ok_or("dx ?")?.parse().map_err(|_| "dx")?;
-    let scene = Scene::new(cas, dx);
+    // B10 : `entree <dx> <Fr> <D>` ; par défaut Fr = 2, D = 0,4 m.
+    let fr: f64 = args.get(4).map_or(Ok(2.0), |v| v.parse()).map_err(|_| "Fr")?;
+    let d: f64 = args.get(5).map_or(Ok(0.4), |v| v.parse()).map_err(|_| "D")?;
+    let scene = match cas {
+        Cas::Entree | Cas::CorpsRepos | Cas::CorpsLent => Scene::entree(cas, dx, d, fr),
+        _ => Scene::new(cas, dx),
+    };
     match candidat {
         "apic" => {
             execute(scene, &mut Apic::new(scene));

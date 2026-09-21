@@ -97,10 +97,10 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — le corps cinématique dans la grille : cellules solides, faces à la vitesse du corps,
+- [x] **P2** — *fusionnée avec P4, déclaré* — le corps cinématique dans la grille : cellules solides, faces à la vitesse du corps,
   particules repoussées.
-- [ ] **P3** — le corps au repos, puis déplacé lentement : écoulement nul, niveau élevé de son volume.
-- [ ] **P4** — la détection : air enfermé, pincement, couronne, jet.
+- [x] **P3** — le corps au repos, puis déplacé lentement : écoulement nul, niveau élevé de son volume.
+- [x] **P4** — la détection : air enfermé, pincement, couronne, jet.
 - [ ] **P5** — B10 : trois `Fr`, similitude à deux échelles, convergence.
 - [ ] **P6** — preuve publiée.
 - [ ] **P7** — rituel REPRISE §6.
@@ -1575,4 +1575,33 @@ trouvé.
 **12,5 cm, houle 2,5 cm, 120 s (22:57)** : δ 3,0 mm à 20 s, 11,8 mm à 60 s, **3,95 cm à 115 s** —
 taux ≈ 0,034 s⁻¹ contre 0,043 à 25 cm. **Un peu plus lent à maille fine** : l'advection centrée, qui
 irait quatre fois plus vite, n'est pas la cause dominante. Reçu à droite : 265 fois un paquet.
+
+**P2 à P4 — le corps dans la grille, ses deux essais, et un défaut d'APIC que S318 n'avait pas vu
+(23:09).** Cellules à centre dans le cylindre → solides ; faces qui les touchent → vitesse du corps,
+réimposée après chaque écriture ; paroi mobile pour la pression (flux imposé) ; particules entrées
+dans le corps repoussées à sa surface, vitesse normale au moins celle de la paroi. Détection B10 :
+air enfermé sous la surface par remplissage depuis le haut, cavité ouverte, couronne, jet.
+*Non-régression* : APIC en ballottement retrouve S318 **au bit** avant la correction ci-dessous.
+
+| essai (D = 0,4 m, 5 cm) | mesuré | attendu |
+|---|---:|---:|
+| corps à demi immergé, au repos, 5 s — vitesse maximale | 5,4 mm/s | ≈ 0 (repos seul : 4,4 mm/s) |
+| même, niveau loin du corps | inchangé | inchangé |
+| corps enfoncé lentement (`Fr` = 0,025) jusqu'à immersion — montée du niveau | **1,53 cm** | **3,93 cm** |
+
+**Défaut** : masse exacte, mais **le volume géométrique ne l'est pas** — les particules repoussées se
+**tassent** contre la paroi au lieu de soulever l'eau (occupation −2,6 %, soit plus que l'aire du
+corps). S318 disait « volume exact » pour APIC : c'était la **masse** ; l'occupation (5 %) le laissait
+voir, et je ne l'ai pas lu ainsi. Remèdes :
+
+1. *par la vitesse* — viser une divergence `0,5·(n/4 − 1)/dt` dans les cellules trop denses : **explose**
+   (707 m/s ; le ballottement diverge) ; abandonné ;
+2. *par la position* — écarter symétriquement les paires plus proches que `d_min`, vitesses intactes :
+   **0,4 maille, deux passes → 3,61 cm (92 %)** ; 0,45 maille, trois passes → 4,31 cm (**110 %**). Le
+   volume dépend de la règle à ±10 % : **je garde 0,4, choisi avant la mesure**, et je publie la
+   sensibilité au lieu de caler le paramètre sur l'essai. Ballottement à 5 cm avec la séparation :
+   période +5,6 % au lieu de +5,9 %, énergie inchangée.
+
+Leçon candidate : **« masse exacte » ne dit rien du volume** — une représentation particulaire peut
+garder chaque gramme et perdre un dixième de son volume en se tassant.
 
