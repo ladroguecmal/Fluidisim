@@ -108,7 +108,7 @@ Critères, écrits avant le code :
 - [x] **P1** — amorce, jeton, plan seul.
 - [x] **P2** — le protocole écrit : grandeurs, tolérances d'usage, hypothèses déclarées (ADR-184
   D5), références et leur provenance.
-- [ ] **P3** — le socle commun 2D : boîte, gravité, parois, mesures (volume, énergie, front, coût).
+- [x] **P3** — le socle commun 2D : boîte, gravité, parois, mesures (volume, énergie, front, coût).
 - [ ] **P4a** — candidat 1, FLIP/APIC sur grille MAC : particules, transferts, pression sur masque.
 - [ ] **P4b** — candidat 1 au repos et en ballottement.
 - [ ] **P5a** — candidat 2, SPH.
