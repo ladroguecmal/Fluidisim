@@ -110,7 +110,7 @@ structure fine restent dus, **avec leur cible chiffrée**.
 éponge vers B+W (ADR-005) — sur des cas bornés : cavité et gerbe d'impact, proche-coque. Un
 domaine borné est une **étape** du δ général (ADR-127 D3).
 
-*État au 2026-09-20* — **reçu en 2D ; la 3D est la porte B** ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)). **Référence CPU 3D reçue** : HOS à 0,148 % / 0,178 %, couplage B/W ([S297](validation/DELTA3D-COUPLEE-S297.md)) ; cas limites S269–S274 à 1,19·10⁻⁷ m ([S298](validation/DELTA3D-FOND-REEL-S298.md)).
+*État au 2026-09-21* — **reçu en 2D ; la 3D est la porte B** ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)). **Référence CPU 3D reçue** : HOS à 0,148 % / 0,178 %, couplage B/W ([S297](validation/DELTA3D-COUPLEE-S297.md)) ; cas limites S269–S274 à 1,19·10⁻⁷ m ([S298](validation/DELTA3D-FOND-REEL-S298.md)).
 
 La mer étalée **ne se juge pas sur un banc CPU** (S298 §5) : elle demande la production GPU.
 **S301 l'a complète**, chaque étage reçu contre le cœur ; elle suit la référence à 2·10⁻⁵ m jusqu'à
@@ -124,23 +124,16 @@ Tranche MAC x-z (2D), reçue : surface mobile couplée contre HOS à 0,162 % / 0
 multigrille, frontières (ADR-143 à 169) — [S253](validation/SURFACE-COUPLEE-S253.md),
 [S274](validation/HOULE-USAGE-S274.md).
 
-**S310 à S314, la conservation et le retour vers W** (lot 2 d'ADR-178 D7, sous les ADR
-[179](adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md),
-[180](adr/ADR-180-retour-delta-w-et-conservation-du-volume.md),
-[181](adr/ADR-181-conservation-transfert-oriente-et-ordre-du-lot-2.md) et
-[182](adr/ADR-182-criteres-de-conservation-actes-et-ordre-b.md)). Bilan de masse exact par
-télescopage, **A302 chiffrée** ([S310](validation/BILAN-MASSE-S310.md)) ; la frontière est une
-**paroi**, la sortie se lit sur une **ligne de contrôle intérieure**
-([S311](validation/SORTIE-DELTA-S311.md)) ; le premier transfert existe et dit ce qui manque — **W n'a de mode
-`k = 0` nulle part**, il est en **eau profonde** et **isotrope**
-([S312](validation/TRANSFERT-DELTA-W-S312.md)). **Ordre A** : loi du résidu `u₃₂·activité/√N`,
-fuite de bilan vue à **10⁻¹³ m³/pas**, fuite d'état **invisible**, **T2 tenue sur 10 s**
-([S313](validation/PLANCHER-BILAN-S313.md)). **Ordre B** : `WaveTrain`,
-ondes planes bornées en bande et en secteur, horizon et rayon **calculés** — direction **1,00000**
-pour 0,500, bande **3,5 %**, célérité **0,035 %** ([S314](validation/TRANSFERT-ORIENTE-S314.md)).
-**S315, l'oblique à la frontière** : la direction se **lit**, et le raccord ne crée **aucune
-composante transverse** (miroir 10⁻⁶–10⁻⁷) ; la **phase à dix longueurs d'onde reste indéterminée**
-(A307) ([S315](validation/ORACLE-ET-OBLIQUE-S315.md)). Restent : les ordres C à E.
+**S310 à S316, le lot 2 d'ADR-178 D7** (ADR [179](adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md)
+à [183](adr/ADR-183-essai-oblique-phase-a-distance-et-ordre-c.md)) : bilan de masse exact, A302 chiffrée
+([S310](validation/BILAN-MASSE-S310.md)) ; sortie lue sur une ligne de contrôle intérieure
+([S311](validation/SORTIE-DELTA-S311.md)) ; premier transfert ([S312](validation/TRANSFERT-DELTA-W-S312.md)) ;
+**ordre A**, loi du résidu et T2 tenue sur 10 s ([S313](validation/PLANCHER-BILAN-S313.md)) ; **ordre B**,
+`WaveTrain` orienté ([S314](validation/TRANSFERT-ORIENTE-S314.md)) ; oblique sans composante transverse
+([S315](validation/ORACLE-ET-OBLIQUE-S315.md)) ; **ordre C**, six propriétés attribuées — primitive exacte à
+10⁻⁴, au raccord un degré de phase et 2 à 4 % de spectre, le reste à δ sauf une part non linéaire que
+W ne porte pas ([S316](validation/ORDRE-C-S316.md)). Restent l'ordre D, sur décision de l'utilisateur, et
+l'ordre E.
 
 *Manque* : cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité (B10) ; phase
 δ/B (A289) ; A274 ; A286 ; **compteur carte, énergie, quantité de mouvement, sens W → δ** (A302) ;
@@ -255,7 +248,9 @@ conservation, retour δ → W, faces coupées 3D, corps rigides *(ces deux-là f
 D, donc la v1)*, seconde représentation de surface libre, requête de jeu à travers δ, puis
 adaptation et budget. **A est déclaré suffisant pour servir B et C** : aucun lot de
 perfectionnement visuel ne s'ouvre avant que la physique le demande. Le profil d'ADR-174 D3 reste
-**mesuré et publié**, sans être opposable pendant la construction (ADR-178 D4).
+**mesuré et publié**, sans être opposable pendant la construction (ADR-178 D4). **Le 2026-09-21**
+([ADR-184](adr/ADR-184-seconde-representation-en-parallele.md)), l'utilisateur fait avancer le lot 5
+**en parallèle** du lot 2, par sessions alternées ; la v1 reste la porte D.
 
 ### La v1 — tranchée par l'utilisateur le 2026-09-19 (ADR-174 D4)
 
@@ -277,8 +272,9 @@ date. Profil de travail de la porte C : [ADR-174](adr/ADR-174-arbitrages-du-2026
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 51 partiels,
-66 absents — **recalculé point par point en S309**, le total de S276 étant faux de deux unités. Ce
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 52 partiels,
+65 absents — **recalculé point par point en S309**, le point 4.8 passé à partiel en S316 ; le
+total de S276 était faux de deux unités. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
 réception**, et entre S276 et S308 le dépôt a écrit un solveur 3D, l'a porté sur GPU et l'a rendu

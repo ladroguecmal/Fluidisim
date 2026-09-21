@@ -6353,3 +6353,31 @@ pas ne peut pas conclure, et il doit le dire **au lieu de choisir l'enroulement 
 Et l'interdit qui va avec : décaler l'un des deux signaux pour les superposer **mesure exactement
 rien**. C'est le même geste que corriger un spectre par une amplitude (ADR-182 D8) — remplacer une
 grandeur qu'on n'a pas su reproduire par une autre qu'on ajuste.
+
+## L364 — Une station seule ne sait pas dans quel sens va ce qu'elle voit
+
+S316. La réflexion de l'éponge se lisait, depuis S311, comme l'énergie qui passe à une jauge
+**après** le retour attendu. À 25 cm, δ est 25 % plus lent que l'onde posée : la fenêtre, calée sur
+la vitesse posée, lisait la traîne du passage direct — 1,1·10⁻⁴ « réfléchis ». Calée sur la vitesse
+mesurée, elle lisait encore les ondes courtes, si lentes qu'elles passent **vers l'avant** pendant la
+fenêtre de retour ; et à 12,5 cm, la même lecture croissait comme `a²` — de l'ordre deux, pas de la
+réflexion. Séparée par sens sur une rangée de stations — `Z(x) = R·e^{ikx} + L·e^{−ikx}` —, la
+réflexion vaut 1·10⁻⁷ à 1,5·10⁻⁶, et ne dépend pas de l'amplitude.
+
+**La règle.** Une réflexion est une onde qui va **dans l'autre sens** : elle se mesure par
+décomposition en sens de propagation, sur plusieurs stations, jamais par une fenêtre de temps en un
+point. Et le signe qu'une « réflexion » n'en est pas une se lit simplement : elle varie avec
+l'amplitude.
+
+## L365 — Deux définitions de « la » longueur d'onde d'un paquet diffèrent d'un jacobien
+
+S316. S315 prédisait la phase à dix longueurs d'onde en supposant que δ, à la pulsation que lit le
+raccord, garde le nombre d'onde de sa condition initiale. Il ne le garde pas : le raccord lit le
+maximum du spectre **temporel**, la condition initiale pose celui du spectre **spatial**, et les
+deux sont reliés par `dk/dω = 1/c_g`, qui croît avec `k`. Le maximum temporel est décalé de
+`σ_k²/(2k)` — +0,6 % pour un paquet de trois mètres, +4 % pour un paquet d'une longueur d'onde —, et
+la prédiction ratait de 0,04 à 0,07 tour.
+
+**La règle.** « Le `k` d'un paquet » n'existe pas sans dire **dans quel espace** on prend son
+maximum ; une prédiction qui passe de l'un à l'autre porte le jacobien, ou elle est fausse d'autant.
+Famille de L363 : une grandeur n'a de sens qu'avec son origine.

@@ -41,7 +41,8 @@ pas recopiée ici (L137).
   candidat 2D et le noyau V existent ; B+W sont composés par le cœur (S214, S236) ; B/W sont
   raccordés à δ en 2D (S250–S254) puis **en 3D** (S297, S302) ; somme rendue B+δ en direct
   depuis la surface publiée ([S302](validation/SCENE-DELTA3D-S302.md)). Manquent l'articulation
-  V↔δ et le **retour de δ vers W**, qui n'existe dans aucune dimension (A302, lot 2 d'ADR-178).
+  V↔δ et la restitution du volume net ; le **retour de δ vers W** existe en 3D sur la référence
+  CPU, qualifié propriété par propriété en S316 ([ordre C](validation/ORDRE-C-S316.md)), partiel.
 - [x] **1.2 Le cœur est une bibliothèque sans dépendance moteur** — *validé* : `water-core` n'a
   aucune dépendance (ADR-020, ADR-028).
 - [ ] **1.3 Interfaces de SPEC-004** (solveur δ, solveur W, fond, solides, services d'hôte) —
@@ -156,9 +157,11 @@ pas recopiée ici (L137).
   « invisible » — mais la réflexion n'a jamais été chiffrée** (A302). Un jugement visuel ne vaut
   pas une mesure (ADR-178 D3).
 - [ ] **4.8 Sortie des perturbations vers W** (transduction δ→W, W local cosmétique ; coupure W–δ
-  et `λ_cut` de B2) — *absent*, **et c'est une absence de chemin, pas de réglage** : l'éponge
-  **absorbe** vers B+W, rien n'écrit en retour dans W. Constaté en S308 ; aucun document d'état ne
-  le disait avant. Lot 2 d'[ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7.
+  et `λ_cut` de B2) — *partiel* : le chemin existe depuis S312 sur la référence CPU — ligne de
+  contrôle, identification, train orienté de W (S314) — et **S316 l'a qualifié** propriété par
+  propriété : primitive exacte, raccord à un degré et 2 à 4 % de spectre près, le reste à δ
+  ([ordre C](validation/ORDRE-C-S316.md)). Manquent le volume net (ordre D), le couplage complet
+  (ordre E), la production GPU et le sens W → δ. Lot 2 d'[ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7.
 - [ ] **4.9 Fusion et séparation de domaines** sans rupture — *absent*.
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.

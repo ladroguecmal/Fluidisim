@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S316 — **en cours**. L'**ordre C** d'ADR-181 D10 : les six propriétés du transfert
+Session : S316 — **terminée**. L'**ordre C** d'ADR-181 D10 : les six propriétés du transfert
 δ → W mesurées **ensemble**, chacune **attribuée** à la primitive, au raccord ou à δ ; et la phase
 à dix longueurs d'onde, qu'S315 a laissée **indéterminée**, **déroulée** (A307).
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -144,7 +144,7 @@ décalage.
 - [x] **P8′** — *ajoutée en cours de session, sur décision de l'utilisateur (08:53)* : ADR-184, la
   seconde représentation avance en parallèle du lot 2, par sessions alternées.
 - [x] **P9** — preuve publiée : le tableau d'attribution de l'ordre C.
-- [ ] **P10** — rituel REPRISE §6.
+- [x] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise
 

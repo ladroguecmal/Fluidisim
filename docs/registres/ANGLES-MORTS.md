@@ -4138,3 +4138,32 @@ comparée à distance, parce qu'aucune n'a été tentée avant S315.
 nommé et n'est pas construit : **suivre la porteuse en continu** le long du trajet — déroulement
 de phase entre les deux lignes — plutôt que la lire aux extrémités. Interdit associé (ADR-183 D3,
 L363) : décaler un signal pour superposer les deux **ne mesure rien**.
+
+**A306 — close en S316, 2026-09-21.** Tous les emplois réels d'un estimateur par passages par zéro
+sont examinés : `transfert_paquet.rs` (S314), `physics.rs`, `physics_shallow.rs` et
+`physics_dispersif.rs` (S316, essais `a306_*`, écarts 0,03 à 0,24 % pour 1 % de marge). **Aucune
+réception affectée.** `frame_cost.rs`, cité plus haut, n'en contient pas : la liste était fausse sur
+ce point. Et sur ces signaux de mode, c'est le second estimateur qui se trompe — fuite de fenêtre,
+−0,236 % à huit périodes ([preuve](../validation/ORDRE-C-S316.md) §11).
+
+**A307 — close en S316, 2026-09-21.** L'instrument existe : projection à fréquence fixe, fenêtre
+commune, déroulement ancré en `ω` puis en `x`, éprouvé sur un écart connu de −0,853 tour. La phase à
+dix longueurs d'onde vaut −0,914 ; −0,237 ; −0,045 tour aux trois mailles
+([preuve](../validation/ORDRE-C-S316.md) §2 et §5).
+
+**A308 — S316, 2026-09-21 (sévérité 2, close dans le banc de l'ordre C). Les bancs du transfert
+tiraient de l'onde posée ce qu'une scène ne leur donnerait pas.** Trois fuites : la largeur
+temporelle devenait spatiale par la vitesse de groupe **posée** ; les fenêtres d'identification et
+de retour étaient calées sur l'arrivée **théorique** ; et le train naissait sur la face de la ligne
+quand la jauge lisait le centre de la colonne. À 25 cm, où δ va 25 % moins vite, la fenêtre de
+retour lisait la traîne du passage direct comme une réflexion. Corrigé dans `ordre_c`, dont la
+durée se décide sur la vitesse **mesurée** ; `essai` et `distance` restent tels quels, bancs de
+leurs preuves, qui portent désormais une note datée.
+
+**A309 — S316, 2026-09-21 (sévérité 2, ouverte). La direction que lit le raccord est biaisée, et le
+biais ne converge pas.** Sur un paquet court (σ = 1 λ), le maximum du périodogramme en `k_y` lit
+**+5,3 puis +5,2 %** à 20°, **+4,0 puis +4,3 %** à 40°, à 25 puis 12,5 cm : l'écart d'angle ne se
+réduit que de sa part `ω`. Le train porte fidèlement une direction lue **+1 à +2°** trop ouverte
+([preuve](../validation/ORDRE-C-S316.md) §10). **Déclencheur** : l'ordre E, ou tout train oblique
+consommé loin de sa ligne. **Remède à éprouver comme l'instrument de phase** : un estimateur de
+direction mesuré d'abord sur un paquet synthétique d'angle connu.

@@ -16076,3 +16076,73 @@ Deux leçons : L362, L363. Un angle mort : A307.
 
 *Tenue du plan* : dix étapes, **deux fusions déclarées** (P5..P9 ; le balayage de séparation ajouté
 en cours de P4 comme discriminant). Battement reporté de l'horloge à chaque commit.
+
+## S316 — 2026-09-21 — l'ordre C : la primitive est exacte, le raccord ne coûte qu'un degré, et le reste appartient à δ
+
+**Entrée.** La décision de l'utilisateur du 2026-09-20 (ADR-183 D5) : les six propriétés d'un même
+transfert, ensemble, chacune attribuée à la primitive, au raccord ou à δ. Contrôle de REPRISE §6.7 :
+le lot 2 portait S310–S315 ; c'est la décision de l'utilisateur, qui nommait l'ordre C, qui a
+autorisé une septième session sur le même fil.
+
+**L'instrument d'abord (A307).** La phase se projette à **fréquence fixe**, sur une fenêtre commune,
+et se **déroule** le long des colonnes : plus de pulsation ajustée, plus de terme de temps. Éprouvé
+sur un défaut connu — deux trains exacts dans deux gravités — : −0,85299 tour lu pour −0,85299
+attendu, là où l'extrémité seule lisait +0,147. Deux impasses sur la route : le retard de groupe
+pris entre les lignes ratait de 11 % (une gaussienne coupée à la naissance a son propre retard) ;
+et le déroulement doit être ancré **en `ω`** avant de l'être en `x`, faute de quoi un tour d'écart
+entre deux fréquences se lit comme 4,8 s de retard.
+
+**Ce que la mesure attribue** ([preuve](../docs/validation/ORDRE-C-S316.md), trois mailles, deux
+amplitudes, un pas de temps moitié) :
+
+- **primitive** : rien — 10⁻⁴ contre l'évolution exacte de sa propre demande, sans croissance ;
+- **raccord** : ≈ 1° de phase, 0,03 s de retard, ≤ 0,3 % d'amplitude, 2 à 4 % de spectre — une
+  porteuse sous enveloppe gaussienne ne décrit pas le chirp d'un paquet déjà dispersé ; et une
+  direction lue **+1 à +2°** trop ouverte, qui ne converge pas (A309) ;
+- **δ** : la phase à dix longueurs d'onde, **déroulée**, −0,914 ; −0,237 ; −0,045 tour, dont la
+  part linéaire converge à l'ordre deux ; la vitesse de groupe, −25 ; −7,2 ; −1,65 % ; l'éponge,
+  réflexion ≤ 1,5·10⁻⁶ **séparée par sens** ;
+- **ce que W ne porte pas** — une colonne que la règle ne prévoyait pas : la non-linéarité. δ porte
+  6, 17 puis 24 % de la correction de Stokes, et un transfert d'énergie vers la fréquence centrale,
+  les deux en `a²` ;
+- **volume net** : d'ordre deux (×4,0 quand `a` double), ≈ 1,5·10⁻⁴ m³ par mètre de crête —
+  intégralement en attente, pour l'ordre D.
+
+**Corrections du passé.** Le raccord de S314/S315 tirait de l'onde **posée** sa conversion
+d'enveloppe, et faisait naître le train une demi-maille avant la jauge (A308, close dans le banc
+de l'ordre C). Les « 6,3 % de dissipation » de S315 étaient une différence d'étalement — à fréquence
+fixe, rien ne se perd ; ses prédictions de phase ignoraient le jacobien `1/c_g` entre spectres
+temporel et spatial (L365). La réflexion de S314 à 25 cm était lue avec une fenêtre calée sur la
+vitesse posée d'un δ 25 % plus lent (L364). Notes datées ajoutées aux deux preuves.
+
+**Prédictions écrites avant, et leur sort.** S315 (−0,853 ; −0,165 ; −0,0072) : manquées de 0,04 à
+0,07 tour, par le jacobien. Retard de groupe à 12,5 cm : 1,66 s contre 0,93 s — **la loi en
+`(k·dx)²` est réfutée** (1,75 s). Stokes « indépendante de la maille » (P4a′) : **fausse**, elle
+converge avec δ. 6,25 cm révisée depuis deux mailles : tenue sous 2 cm, manquée de 0,005 sous 1 cm.
+Oblique : 20° tenue, 40° manquée de 0,15°. Pas de temps « suspect » (P2) : **levé**, 7·10⁻⁴ tour.
+
+**A306 close.** Les emplois de l'estimateur de période dans le harnais relus par un second
+estimateur, sur le même signal : écarts 0,03 à 0,24 % pour 1 % de marge, aucune réception affectée
+— et c'est le périodogramme qui se trompe sur ces signaux de mode (fuite de fenêtre, −0,236 % à huit
+périodes). Trois essais permanents `a306_*`. Suite : **571 réussis, 18 ignorés, 0 échec**.
+
+**L'utilisateur, en cours de session.** Il a rappelé que δ doit permettre **plusieurs couches d'eau
+sur une même verticale** — des billes ou autres. L'exigence est dans les sources et dans ADR-001 ;
+ADR-175 D5 avait démarré la 3D en colonnes et renvoyé le reste au lot 5, après la v1. Il a confirmé
+l'ordre, puis suivi la recommandation : **ADR-184**, le lot 5 avance en parallèle du lot 2, par
+sessions alternées, en commençant par une comparaison chiffrée.
+
+**Limites.** Un paquet, une ligne, une émission ; trois mailles, donc des limites extrapolées sur
+trois points ; couplage à un sens (A302) ; A305 ouverte. Coût : 6,25 cm demande 1 h 52 par calcul
+(3 h 07 au pas moitié), le pas de δ 3D sur CPU ne se parallélisant pas.
+
+**Méthode.** Trois fois le battement a été écrit **avant** de lire l'horloge (08:00, 08:09, 10:12
+au lieu de 07:49, 08:00, 10:09), chaque fois corrigé au commit suivant ou avant le sien : L237 dit
+de lire l'horloge **dans un appel séparé**, et je l'appelais en parallèle de l'écriture.
+
+**Rituel.** Maillons **0**. Capacité : **le transfert δ → W est qualifié propriété par propriété**,
+chaque écart attribué, la phase à distance mesurable ; point 4.8 de la liste passé d'absent à
+partiel. Consommateurs : la décision de l'utilisateur sur le qualificatif du transfert et l'ordre D ;
+la comparaison du lot 5. Deux leçons : L364, L365. Angles morts : A306 et A307 closes, A308 (close),
+A309 (ouverte). Recommandation du dernier bilan (S293) : sans objet pour ce lot, l'ordre venant
+d'ADR-178 et ADR-184.
