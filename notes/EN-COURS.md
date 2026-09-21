@@ -104,8 +104,8 @@ Critères :
 
 - [x] **P1** — amorce, jeton, plan seul.
 - [x] **P2** — ADR-186 : APIC retenu pour la seconde représentation — décision de l'utilisateur.
-- [ ] **P3** — E1 : le banc de la mer seule, écrit et lancé à 25 cm.
-- [ ] **P4** — E1 : le verdict, et ce qu'il dit de la restitution en mer réelle.
+- [x] **P3** — E1 : le banc de la mer seule, écrit et lancé à 25 cm.
+- [x] **P4** — *fusionnée avec P3, déclaré* — E1 : le verdict, et ce qu'il dit de la restitution en mer réelle.
 - [ ] **P5** — E2 : le paquet dans la mer.
 - [ ] **P6** — E3 : le contour fermé à quatre côtés, paquet oblique.
 - [ ] **P7** — preuve publiée.
@@ -1508,4 +1508,33 @@ SPH** : ce banc ne met pas SPH au même niveau que les deux autres, et la compar
 contre lui que ce qui ne dépend pas de ce défaut — la conservation (masse exacte, volume à 0,4 %) et le
 **coût du pas acoustique**, propre au SPH **faiblement compressible** (les variantes incompressibles,
 IISPH ou DFSPH, changent ce compte).
+
+**P3 + P4 — E1, la mer seule : la restitution de S317 ne tient pas en mer réelle (22:16).**
+Houle B d'une composante, λ = 4 m, δ nul au départ, 20 s ; restitution par reçus aux deux lignes.
+
+| | 25 cm, a = 5 cm | 25 cm, a = 2,5 cm | 12,5 cm, a = 5 cm |
+|---|---:|---:|---:|
+| δ parasite maximal | **2,83 cm** | 0,28 cm | **2,46 cm** |
+| reçu à droite | 3,41·10⁻² m³ | 1,87·10⁻³ | 9,49·10⁻³ (largeur moitié) |
+| reçu à droite / paquet de 2 cm (S317) | **292** | 16 | **179** |
+| bilan de l'intérieur (final) | 6,8·10⁻⁴ m³ | 7,2·10⁻⁵ | 8,7·10⁻⁵ |
+| transport de Stokes de la houle, même largeur, 20 s | 4,9·10⁻² | 1,2·10⁻² | 2,5·10⁻² |
+
+**Le critère (< 10 % d'un paquet) est manqué d'un facteur mille.** Trois lectures :
+
+1. **δ n'est pas petit sous une vraie mer** : 2,8 cm pour une houle de 5 cm, croissant le long du
+   sens de propagation (3 mm à l'entrée, 2,7 cm à 30 m) — une onde de **désaccord** qui s'accumule.
+2. **Ce n'est pas la maille** — 2,83 puis 2,46 cm à maille moitié — **c'est la non-linéarité** : à
+   demi-amplitude, δ tombe dix fois (≈ `a³`) et le flux dix-huit fois (≈ `a⁴`). δ porte la
+   correction d'amplitude de la vitesse de phase que B, linéaire, n'a pas : **A289 se matérialise
+   dans le bilan de volume** (S274 l'avait vue en hauteur, `η'` croissant comme `a·ω₂·t`).
+3. **Le flux restitué est le transport croisé** `a_B·a_δ·ω/2` — environ 2,8·10⁻² m³ en 20 s à 25 cm,
+   3,4·10⁻² lus —, que ce δ **calé en phase** sur B fait passer à la ligne. La restitution de S317 le
+   prend pour de l'eau sortie de δ. Et le bilan de l'intérieur ne ferme plus : le couplage à B
+   apporte du volume **dans** l'intérieur, pas seulement à travers ses bords.
+
+**Conséquence pour l'ordre D** : ADR-185 D6 renvoyait le cas couplé ici, et il ne se règle pas par
+un raffinement. Remède à éprouver en E2 : un **δ témoin** — même domaine, même mer, sans le paquet —
+et la restitution de la **différence** des flux ; le banc `delta3d_preview` isole déjà la perturbation
+ainsi pour l'affichage. Il coûte un second domaine.
 

@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-21 22:07 +02:00
+Battement        : 2026-09-21 22:16 +02:00
 Agent            : Claude Opus 5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S319 — ordre E du lot 2 : la mer B autour de δ, le paquet dans la mer, le contour fermé ; et ADR-186, APIC retenu
 Dernière session : S318 — **lot 5, la comparaison** : APIC, ensemble de niveaux et SPH, en 2D, au même niveau — APIC garde la masse exactement, tient la période à 0,15 % et coûte le moins ; l'ensemble de niveaux perd jusqu'à 7,6 % de volume et crée 8 % d'énergie ; SPH coûte 40 fois plus ; **proposition APIC, choix de l'utilisateur en attente** ([preuve](docs/validation/COMPARAISON-LOT5-S318.md))

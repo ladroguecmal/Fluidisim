@@ -1871,6 +1871,148 @@ fn restitution(dx: f32, amplitude: f32) -> Result<(), String> {
     Ok(())
 }
 
+/// **L'ordre E, échelons E1 et E2 — S319.** Le banc de restitution de S317, cette fois **dans une
+/// vraie mer** : une houle B d'une composante, λ = 4 m, 5 cm d'amplitude, échantillonnée sur les
+/// faces du domaine à chaque pas (`BackgroundGrid3`). E1 : δ nul au départ — **une mer que δ ne
+/// perturbe pas ne doit rien faire restituer**. E2 : le paquet de l'ordre C posé dans cette mer.
+///
+/// Ce qui se publie : le flux net à chaque ligne, ce que chaque région reçoit, la bande `band_in`,
+/// le bilan de l'intérieur, et — pour échelle — le transport de Stokes de la houle, `a²ω/2` par
+/// mètre de crête et par seconde, que B linéaire ne porte pas.
+fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
+    use water_core::background::{Background, SeaState};
+    use water_core::delta3d::BackgroundGrid3;
+    use water_core::regional_level::{RegionSpec, RegionalLevel};
+    use water_core::WorldPos;
+    let (lambda, separation, prolongement) = (2.0f32, 20.0f32, 10.0f32);
+    let c = cas(dx, lambda, 1.5);
+    let Cas { h0, sigma, x0, eponge, k, omega, .. } = c;
+    let cg_pose = 0.5 * omega / k;
+    let ligne1_m = x0 + 4. * sigma;
+    let domain = Domain3 {
+        nx: ((ligne1_m + separation + prolongement + eponge) / dx) as usize,
+        ny: 2,
+        nz: (h0 / dx) as usize + 2,
+        dx,
+    };
+    let (nx, ny) = (domain.nx, domain.ny);
+    let (ligne_g, ligne_d) = ((eponge / dx).ceil() as usize, (ligne1_m / dx) as usize);
+    let largeur = ny as f32 * dx;
+    let (x_g, x_d, longueur) = (ligne_g as f32 * dx, ligne_d as f32 * dx, nx as f32 * dx);
+    let region = |x: f32, sens: f32, profondeur: f32| {
+        RegionalLevel::new(RegionSpec {
+            frame: FrameId(0),
+            cell: 0,
+            line: [[x, 0.], [x, largeur]],
+            outward: [sens, 0.],
+            depth_m: profondeur,
+        })
+        .map_err(|e| format!("région {e:?}"))
+    };
+    let (mut region_g, mut region_d) = (region(x_g, -1., x_g)?, region(x_d, 1., longueur - x_d)?);
+
+    // La houle : une composante, λ_B = 4 m (`tp` = 2·T = 3,2 s, puisque `configure` pose la période
+    // à `tp/2` quand il n'y en a qu'une), amplitude `hs/(2√2)` = 5 cm, vers +x.
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 30);
+    let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
+    let houle = Background::configure(
+        &mut hote,
+        SeaState { hs: a_houle * 2. * 2f32.sqrt(), tp: 3.2, theta_turns: 0., components: 1, graine: 7 },
+        WorldPos::from_units(0, 0, 0),
+    )
+    .map_err(|e| format!("houle {e:?}"))?;
+    let comp = houle.components()[0];
+    let (a_b, k_b) = (comp.amplitude as f64, comp.k_turns_per_m as f64 * core::f64::consts::TAU);
+    let omega_b = (G as f64 * k_b).sqrt();
+    let mut grille = BackgroundGrid3::configure(&mut hote, domain, [0., 0., -h0], RHO)
+        .map_err(|e| format!("grille {e:?}"))?;
+    let mut v = Volume3::configure(&mut hote, domain, RHO, G).map_err(|e| format!("volume {e:?}"))?;
+    if avec_paquet {
+        pose_paquet(&mut v, domain, &c)?;
+    } else {
+        v.set_free_surface(&vec![h0; domain.columns()], h0).map_err(|e| format!("surface {e:?}"))?;
+    }
+    let sponge = Sponge3 { width_x: eponge, width_y: 0., rate_per_s: 10. * cg_pose / eponge };
+    let dt_us = 10_000u64;
+    let dt = dt_us as f64 * 1e-6;
+    let duree = if avec_paquet {
+        ((longueur - eponge - x0) / (0.7 * cg_pose) + 8. * sigma / cg_pose) as f64
+    } else {
+        20.0
+    };
+    let pas = (duree / dt) as u64;
+
+    let (mut registre_g, mut registre_d) = (Ledger3::default(), Ledger3::default());
+    let v_int0 = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
+    let (mut v_int_prec, mut bilan_max, mut bande, mut eponge_out) = (v_int0, 0f64, 0f64, 0f64);
+    let (mut flux_abs_d, mut perturbation_max) = (0f64, 0f64);
+    let mut profil = vec![0f64; nx];
+    let depart = std::time::Instant::now();
+    for n in 0..pas {
+        let time = SimTime(n * dt_us);
+        grille.sample(&houle, time).map_err(|e| format!("houle {e:?}"))?;
+        let bg = grille.view().ok_or("houle non publiée")?;
+        v.step_perturbation_mobile(time, dt_us, 60_000, &bg, sponge, &jobs)
+            .map_err(|e| format!("pas {n}: {e:?}"))?;
+        let q_d = v.control_flux_x(ligne_d, dt).map_err(|e| format!("{e:?}"))?;
+        let q_g = v.control_flux_x(ligne_g, dt).map_err(|e| format!("{e:?}"))?;
+        let v_int = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
+        let b = v.balance();
+        bande += b.band_in;
+        eponge_out += b.sponge_out;
+        flux_abs_d += q_d.abs();
+        let residu_pas = (v_int - v_int_prec) + q_d - q_g;
+        v_int_prec = v_int;
+        registre_d.account(q_d, 0., residu_pas).map_err(|e| format!("{e:?}"))?;
+        registre_g.account(-q_g, 0., 0.).map_err(|e| format!("{e:?}"))?;
+        registre_d
+            .account_restitution(region_d.receive(q_d).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?;
+        registre_g
+            .account_restitution(region_g.receive(-q_g).map_err(|e| format!("{e:?}"))?)
+            .map_err(|e| format!("{e:?}"))?;
+        let bilan = (v_int - v_int0) + region_g.volume() + region_d.volume();
+        bilan_max = bilan_max.max(bilan.abs());
+        let pmax = v.surface().iter().fold(0f32, |m, e| m.max((e - h0).abs())) as f64;
+        perturbation_max = perturbation_max.max(pmax);
+        for (i, m) in profil.iter_mut().enumerate() {
+            *m = m.max((v.surface()[i] - h0).abs() as f64);
+        }
+    }
+    if std::env::var("MER_PROFIL").is_ok() {
+        let pas_x = (nx / 40).max(1);
+        let ligne: Vec<String> = (0..nx).step_by(pas_x).map(|i| format!("{:.1}:{:.4}", (i as f32 + 0.5) * dx, profil[i])).collect();
+        eprintln!("PROFIL_MAX_ABS_DELTA eponge_m={eponge} ligne_g_m={x_g} ligne_d_m={x_d} {}", ligne.join(" "));
+    }
+    let duree_calcul = depart.elapsed().as_secs_f64();
+    let v_int = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
+    // Pour échelle : le transport de Stokes de la houle sur la largeur du domaine et la durée.
+    let stokes = 0.5 * a_b * a_b * omega_b * largeur as f64 * duree;
+    // Le volume net d'un paquet de 2 cm, mesuré en S317 à la même maille.
+    let paquet_s317 = if dx == 0.25 { 1.1673e-4 } else if dx == 0.125 { 5.2876e-5 } else { f64::NAN };
+    println!(
+        "MER_S319 dx={dx} paquet={avec_paquet} pas={pas} duree_s={duree:.1} duree_calcul_s={duree_calcul:.0} \
+         houle_a_m={a_b:.4} houle_k={k_b:.4} houle_omega={omega_b:.4} largeur_m={largeur} \
+         perturbation_max_m={perturbation_max:e} recu_gauche_m3={:e} recu_droite_m3={:e} \
+         niveau_gauche_m={:e} niveau_droite_m={:e} flux_absolu_droite_m3={flux_abs_d:e} \
+         bande_cumulee_m3={bande:e} eponges_retirent_m3={eponge_out:e} delta_interieur_m3={:e} \
+         bilan_final_m3={:e} bilan_max_m3={bilan_max:e} attente={:e} representation_fermee={} \
+         transport_stokes_houle_m3={stokes:e} paquet_seul_s317_droite_m3={paquet_s317:e} \
+         recu_droite_sur_paquet={:.4}",
+        region_g.volume(),
+        region_d.volume(),
+        region_g.level_m(),
+        region_d.level_m(),
+        v_int - v_int0,
+        (v_int - v_int0) + region_g.volume() + region_d.volume(),
+        registre_g.pending() + registre_d.pending(),
+        registre_g.representation_closed() && registre_d.representation_closed(),
+        region_d.volume() / paquet_s317
+    );
+    Ok(())
+}
+
 fn main() -> Result<(), String> {
     match std::env::args().nth(1).unwrap_or_else(|| "paquet".into()).as_str() {
         // **Essai 1** — une onde progressive quasi monochromatique : enveloppe large, donc bande
@@ -1910,6 +2052,13 @@ fn main() -> Result<(), String> {
         }
         // **Ordre C, préalable** — l'instrument de phase déroulée, sur un écart connu (S316).
         "instrument" => instrument(),
+        // **Ordre E, E1 et E2** — la restitution dans une vraie mer (S319).
+        "mer" | "mer_paquet" => {
+            let dx: f32 = std::env::args().nth(2).ok_or("maille ?")?.parse().map_err(|_| "maille")?;
+            let a: f32 =
+                std::env::args().nth(3).unwrap_or_else(|| "0.05".into()).parse().map_err(|_| "a")?;
+            mer(dx, std::env::args().nth(1).as_deref() == Some("mer_paquet"), a)
+        }
         // **Ordre D, P6** — le volume net restitué à deux régions locales (S317).
         "restitution" => {
             let dx: f32 = std::env::args().nth(2).ok_or("maille ?")?.parse().map_err(|_| "maille")?;
