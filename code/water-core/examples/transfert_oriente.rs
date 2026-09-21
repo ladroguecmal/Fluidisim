@@ -1608,6 +1608,13 @@ fn main() -> Result<(), String> {
             }
             Ok(())
         }
+        // **Essai 3 à maille fine** (S316) — un angle par appel, pour que les angles tournent en
+        // parallèle : le pas de δ 3D sur CPU ne se parallélise pas lui-même.
+        "oblique_maille" => {
+            let dx: f32 = std::env::args().nth(2).ok_or("maille ?")?.parse().map_err(|_| "maille")?;
+            let deg: f32 = std::env::args().nth(3).ok_or("angle ?")?.parse().map_err(|_| "angle")?;
+            oblique(dx, 2.0, deg / 360.)
+        }
         // **Ordre C, préalable** — l'instrument de phase déroulée, sur un écart connu (S316).
         "instrument" => instrument(),
         // **Ordre C** — la primitive seule, contre l'évolution exacte de sa propre demande.

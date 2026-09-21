@@ -131,7 +131,9 @@ décalage.
 - [ ] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
   phase, vitesse de groupe, réflexion, volume.
 - [x] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
-- [ ] **P7** — l'oblique à **maille plus fine** : l'écart d'angle se partage-t-il entre δ et
+- [x] **P7a** — *découpage déclaré* : prédiction écrite (notes), oblique à 12,5 cm **lancé** à 20° et
+  40° le 2026-09-21 à 08:01.
+- [ ] **P7b** — l'oblique à **maille plus fine** : l'écart d'angle se partage-t-il entre δ et
   l'instrument comme S315 l'a prévu ? *(si le coût mesuré le permet ; sinon, le coût est publié et
   l'essai daté dans la file)*.
 - [>] **P8** — A306 : les **deux emplois** de l'estimateur par passages par zéro dans le harnais,
@@ -1172,4 +1174,14 @@ temps : c'était la non-linéarité.** Conséquences, chiffrées maintenant :
   tour**, si le pas de temps n'est pas en cause ;
 - et l'attribution change de nature : la part non linéaire ne revient **ni au raccord ni à δ** —
   δ a raison, W est linéaire. Elle revient au **modèle de la primitive**.
+
+**P7 — la prédiction de l'oblique à 12,5 cm, écrite avant son lancement.** À 25 cm, S315 lisait
+22,57° et 45,10° pour 20° et 40°, et attribuait l'écart à deux causes qui s'additionnent : `ω` lue à
+−3,3 % (δ) et `k_y` à +4–5 %. La seconde n'est **pas** toute de δ : pour un paquet de largeur
+angulaire `s = 1/(kσ)` = 0,159 rad, le maximum du périodogramme en `k_y` à `ω` fixée glisse vers les
+grands angles de `s²·tan θ` — **+2,5 % sur `k_y` aux deux angles**, une propriété de l'**instrument**,
+indépendante de la maille. À 12,5 cm, avec `ω` à −0,83 % : angle lu **20,9–21,3°** et **42,0–43,1°**
+— l'écart tombe de moitié environ, **pas à zéro**. S'il tombait à zéro, l'instrument n'y serait pour
+rien ; s'il ne bougeait pas, ce serait l'instrument seul. Coût : le pas de δ 3D sur CPU ne se
+parallélise pas (réductions séquentielles), ≈ 1 h 30 par angle ; lancé en parallèle du reste.
 
