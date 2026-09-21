@@ -111,9 +111,9 @@ Critères, écrits avant le code :
 - [x] **P3** — le socle commun 2D : boîte, gravité, parois, mesures (volume, énergie, front, coût).
 - [x] **P4a** — candidat 1, FLIP/APIC sur grille MAC : particules, transferts, pression sur masque.
 - [x] **P4b** — candidat 1 au repos et en ballottement.
-- [ ] **P5a** — candidat 2, SPH.
+- [x] **P5a** — *fusionnée avec P6a, même fichier, déclaré* — candidat 2, SPH.
 - [ ] **P5b** — candidat 2 au repos et en ballottement.
-- [ ] **P6a** — candidat 3, ensemble de niveaux sur grille MAC.
+- [x] **P6a** — candidat 3, ensemble de niveaux sur grille MAC.
 - [ ] **P6b** — candidat 3 au repos et en ballottement.
 - [ ] **P7** — la rupture de barrage, les trois candidats, deux résolutions.
 - [ ] **P8** — preuve publiée : le tableau chiffré, et ce qu'il ne tranche pas.
@@ -1429,4 +1429,18 @@ exige la même qualité de frontière.
 
 L'amplitude **semée** n'est pas 2 cm : 2,66 cm à 5 cm, 1,76 cm à 2,5 cm — les particules posent un
 profil en marches ; la période se lit quand même, et c'est elle qui se compare.
+
+**P5a + P6a — les deux autres candidats (21:34), et trois fautes attrapées avant de conclure.**
+SPH : Wendland C2, Tait (γ = 7, `c₀` = 10·√(2g·h)), δ-SPH (δ = 0,1), viscosité de Monaghan
+(α = 0,02), parois en particules dynamiques (trois rangées), densité initiale hydrostatique,
+point milieu. Ensemble de niveaux : MacCormack limité pour `φ` et les vitesses, réinitialisation
+tous les cinq pas par balayage rapide, fluide fantôme `θ` lu sur `φ`.
+*Fautes* : (1) le terme δ-SPH écrit avec `x_a − x_b` **concentrait** la densité — relu avant tout
+lancement, corrigé (`x_b − x_a`, Molteni et Colagrossi) ; (2) les faces d'air hors de la bande
+d'extrapolation **accumulaient la gravité** — 6 m/s « maximum » au repos pour l'ensemble de
+niveaux, pas de temps divisé par trois ; remises à zéro ; (3) le premier correctif de (2)
+déclarait **valides** les faces alimentées par des particules, et APIC **créait** de l'énergie
+(+11 % en 10 s) — les particules d'air au-dessus de la surface reconstruite gardaient une vitesse
+balistique ; ordre rétabli : on extrapole d'abord depuis l'eau, et seules les faces que
+l'extrapolation n'atteint pas gardent leur valeur. APIC retrouve ses chiffres de P4b **au bit**.
 

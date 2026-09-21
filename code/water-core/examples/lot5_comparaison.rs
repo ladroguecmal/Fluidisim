@@ -435,8 +435,17 @@ impl Mac {
 
     /// **Extrapolation** des vitesses de l'eau vers l'air, `couches` rangées : une face qui ne
     /// touche pas l'eau prend la moyenne de ses voisines déjà valides. Sans elle, l'advection près
-    /// de la surface lirait des zéros.
-    fn extrapole(&mut self, couches: usize) {
+    /// de la surface lirait des zéros. `garder` désigne des faces qui, **si l'extrapolation ne les
+    /// atteint pas**, gardent leur valeur — celles que des particules alimentent, pour qu'une goutte
+    /// lointaine garde sa chute libre. Au premier jet, ces faces étaient déclarées **valides** dès le
+    /// départ : les particules d'une cellule d'air juste au-dessus de la surface reconstruite
+    /// gardaient alors une vitesse balistique au lieu de celle de l'eau, et l'énergie montait de
+    /// 11 % en dix secondes.
+    ///
+    /// **Au-delà, les faces sont remises à zéro.** Au premier passage de l'ensemble de niveaux, les
+    /// faces d'air lointaines accumulaient la gravité à chaque pas : 6 m/s « maximum » au repos, un
+    /// pas de temps réduit d'autant, et une vitesse d'advection fausse loin de la surface.
+    fn extrapole(&mut self, couches: usize, garder: Option<(&[bool], &[bool])>) {
         let (nx, ny) = (self.nx, self.ny);
         let mut valide_u: Vec<bool> = (0..(nx + 1) * ny)
             .map(|k| {
@@ -496,6 +505,16 @@ impl Mac {
                         valide_v[k] = true;
                     }
                 }
+            }
+        }
+        for (k, (u, ok)) in self.u.iter_mut().zip(&valide_u).enumerate() {
+            if !ok && !garder.map_or(false, |(a, _)| a[k]) {
+                *u = 0.0;
+            }
+        }
+        for (k, (v, ok)) in self.v.iter_mut().zip(&valide_v).enumerate() {
+            if !ok && !garder.map_or(false, |(_, b)| b[k]) {
+                *v = 0.0;
             }
         }
         self.parois();
@@ -823,7 +842,8 @@ impl Candidat for Apic {
             fi / (fi - fa)
         };
         self.mac.projette(dt, &theta);
-        self.mac.extrapole(3);
+        let (pu, pv): (Vec<bool>, Vec<bool>) = (wu.iter().map(|w| *w > 0.0).collect(), wv.iter().map(|w| *w > 0.0).collect());
+        self.mac.extrapole(3, Some((&pu, &pv)));
         // ── Grille → particules, APIC : vitesse et matrice affine.
         for k in 0..self.x.len() {
             let p = self.x[k];
@@ -890,6 +910,484 @@ impl Candidat for Apic {
     }
 }
 
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// Candidat 2 — particules pures (SPH faiblement compressible)
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+
+/// **SPH faiblement compressible**, au niveau d'une production courante : noyau de Wendland C2,
+/// équation de Tait (`γ` = 7) avec une vitesse du son de dix fois la plus grande vitesse attendue,
+/// diffusion de densité δ-SPH (Molteni et Colagrossi 2009, `δ` = 0,1), viscosité artificielle
+/// (Monaghan, `α` = 0,02), parois en **particules de frontière dynamiques** — trois rangées fixes
+/// dont la densité évolue, le principe de DualSPHysics. Densité initiale **hydrostatique**, pour ne
+/// pas lancer d'onde de compression au départ.
+///
+/// Ce qu'il porte exactement : la **masse**. Ce qu'il ne porte pas exactement : le **volume**, qui
+/// vaut `Σ m/ρᵢ` et respire avec la compressibilité — c'est une des grandeurs de la comparaison.
+struct Sph {
+    nx: usize,
+    ny: usize,
+    dx: f64,
+    ecart: f64,
+    h: f64,
+    c0: f64,
+    masse: f64,
+    /// Particules d'eau puis particules de paroi : les `n_eau` premières bougent.
+    n_eau: usize,
+    x: Vec<[f64; 2]>,
+    v: Vec<[f64; 2]>,
+    rho: Vec<f64>,
+    lx: f64,
+}
+
+impl Sph {
+    fn new(scene: Scene) -> Self {
+        let dx = scene.dx;
+        let ecart = dx / 2.0;
+        let h = 1.3 * ecart;
+        let (lx, ly) = (scene.lx, scene.ly);
+        // Hauteur d'eau de référence pour la vitesse du son et l'hydrostatique.
+        let h_max = match scene.cas {
+            Cas::Barrage => 2.0 * scene.h,
+            _ => scene.h + scene.amplitude,
+        };
+        let c0 = 10.0 * (2.0 * G * h_max).sqrt();
+        let b = c0 * c0 * RHO / 7.0;
+        let surface = |x: f64| match scene.cas {
+            Cas::Barrage => 2.0 * scene.h,
+            Cas::Repos => scene.h,
+            Cas::Ballottement => scene.h + scene.amplitude * (scene.k() * x).cos(),
+        };
+        let (mut x, mut rho) = (Vec::new(), Vec::new());
+        let (mx, my) = ((lx / ecart).round() as usize, (ly / ecart).round() as usize);
+        for j in 0..my {
+            for i in 0..mx {
+                let p = [(i as f64 + 0.5) * ecart, (j as f64 + 0.5) * ecart];
+                if scene.dans_eau(p[0], p[1]) {
+                    let profondeur = (surface(p[0]) - p[1]).max(0.0);
+                    rho.push(RHO * (1.0 + RHO * G * profondeur / b).powf(1.0 / 7.0));
+                    x.push(p);
+                }
+            }
+        }
+        let n_eau = x.len();
+        // Parois : trois rangées hors du domaine, en bas, à gauche, à droite.
+        for k in 0..3 {
+            let d = (k as f64 + 0.5) * ecart;
+            for i in 0..(mx + 6) {
+                let px = (i as f64 - 3.0 + 0.5) * ecart;
+                x.push([px, -d]);
+            }
+            for j in 0..my {
+                let py = (j as f64 + 0.5) * ecart;
+                x.push([-d, py]);
+                x.push([lx + d, py]);
+            }
+        }
+        let n = x.len();
+        rho.resize(n, RHO);
+        Sph {
+            nx: scene.nx(),
+            ny: scene.ny(),
+            dx,
+            ecart,
+            h,
+            c0,
+            masse: RHO * ecart * ecart,
+            n_eau,
+            v: vec![[0.0; 2]; n],
+            x,
+            rho,
+            lx,
+        }
+    }
+
+    /// Wendland C2 en deux dimensions : noyau et dérivée `dW/dr`, support `2h`.
+    fn noyau(&self, r: f64) -> (f64, f64) {
+        let q = r / self.h;
+        if q >= 2.0 {
+            return (0.0, 0.0);
+        }
+        let a = 7.0 / (4.0 * std::f64::consts::PI * self.h * self.h);
+        let t = 1.0 - q / 2.0;
+        (a * t.powi(4) * (2.0 * q + 1.0), a * (-5.0 * q * t.powi(3)) / self.h)
+    }
+
+    fn pression(&self, rho: f64) -> f64 {
+        let b = self.c0 * self.c0 * RHO / 7.0;
+        b * ((rho / RHO).powi(7) - 1.0)
+    }
+
+    /// Voisinage par grille de cellules de côté `2h`.
+    fn voisinage(&self) -> (Vec<Vec<usize>>, f64, [f64; 2], usize) {
+        let taille = 2.0 * self.h;
+        let origine = [-4.0 * self.ecart, -4.0 * self.ecart];
+        let largeur = ((self.lx + 8.0 * self.ecart) / taille).ceil() as usize + 1;
+        let hauteur = ((self.ny as f64 * self.dx + 8.0 * self.ecart) / taille).ceil() as usize + 1;
+        let mut cellules = vec![Vec::new(); largeur * hauteur];
+        for (k, p) in self.x.iter().enumerate() {
+            let i = (((p[0] - origine[0]) / taille) as usize).min(largeur - 1);
+            let j = (((p[1] - origine[1]) / taille).max(0.0) as usize).min(hauteur - 1);
+            cellules[j * largeur + i].push(k);
+        }
+        (cellules, taille, origine, largeur)
+    }
+
+    /// Dérivées : `dρ/dt` pour tous, `dv/dt` pour l'eau.
+    fn derivees(&self) -> (Vec<f64>, Vec<[f64; 2]>) {
+        let n = self.x.len();
+        let (cellules, taille, origine, largeur) = self.voisinage();
+        let hauteur = cellules.len() / largeur;
+        let p: Vec<f64> = self.rho.iter().map(|r| self.pression(*r)).collect();
+        let (mut drho, mut acc) = (vec![0.0; n], vec![[0.0, -G]; n]);
+        let (alpha, delta) = (0.02, 0.1);
+        for a in 0..n {
+            let xa = self.x[a];
+            let ci = (((xa[0] - origine[0]) / taille) as usize).min(largeur - 1);
+            let cj = (((xa[1] - origine[1]) / taille).max(0.0) as usize).min(hauteur - 1);
+            for bj in cj.saturating_sub(1)..(cj + 2).min(hauteur) {
+                for bi in ci.saturating_sub(1)..(ci + 2).min(largeur) {
+                    for &b in &cellules[bj * largeur + bi] {
+                        if b == a || (a >= self.n_eau && b >= self.n_eau) {
+                            continue;
+                        }
+                        let (rx, ry) = (xa[0] - self.x[b][0], xa[1] - self.x[b][1]);
+                        let r = (rx * rx + ry * ry).sqrt();
+                        if r >= 2.0 * self.h || r == 0.0 {
+                            continue;
+                        }
+                        let (_, dw) = self.noyau(r);
+                        let (gx, gy) = (dw * rx / r, dw * ry / r);
+                        let (vx, vy) = (self.v[a][0] - self.v[b][0], self.v[a][1] - self.v[b][1]);
+                        // Continuité, et diffusion de densité δ-SPH : `ψ = 2(ρ_b − ρ_a)(x_b − x_a)/r²`.
+                        // Le signe de `x_b − x_a` est ce qui en fait une **diffusion** ; écrit avec
+                        // `x_a − x_b` au premier jet, il concentrait la densité au lieu de l'étaler.
+                        let psi = 2.0 * (self.rho[b] - self.rho[a]) / (r * r);
+                        drho[a] += self.masse * (vx * gx + vy * gy)
+                            - delta * self.h * self.c0 * psi * (rx * gx + ry * gy) * self.masse / self.rho[b];
+                        if a < self.n_eau {
+                            let vr = vx * rx + vy * ry;
+                            let visc = if vr < 0.0 {
+                                let rho_m = 0.5 * (self.rho[a] + self.rho[b]);
+                                -alpha * self.c0 * self.h * vr / (rho_m * (r * r + 0.01 * self.h * self.h))
+                            } else {
+                                0.0
+                            };
+                            let terme = p[a] / (self.rho[a] * self.rho[a]) + p[b] / (self.rho[b] * self.rho[b]) + visc;
+                            acc[a][0] -= self.masse * terme * gx;
+                            acc[a][1] -= self.masse * terme * gy;
+                        }
+                    }
+                }
+            }
+        }
+        (drho, acc)
+    }
+}
+
+impl Candidat for Sph {
+    fn nom(&self) -> &'static str {
+        "sph"
+    }
+    fn degres(&self) -> usize {
+        self.n_eau
+    }
+    fn definition_du_volume(&self) -> &'static str {
+        "somme des m/rho sur l'eau ; masse exacte, le volume respire avec la compressibilite"
+    }
+    fn pas(&mut self, dt_max: f64) -> f64 {
+        // Pas de Courant acoustique : 0,25·h/(c₀ + v_max). Plusieurs sous-pas par échantillon.
+        let vmax = self.v[..self.n_eau].iter().fold(0f64, |m, v| m.max((v[0] * v[0] + v[1] * v[1]).sqrt()));
+        let dt = dt_max.min(0.25 * self.h / (self.c0 + vmax));
+        // Prédicteur–correcteur (point milieu) sur la densité et, pour l'eau, vitesse et position.
+        let (x0, v0, r0) = (self.x.clone(), self.v.clone(), self.rho.clone());
+        let (d1, a1) = self.derivees();
+        for k in 0..self.x.len() {
+            self.rho[k] = r0[k] + 0.5 * dt * d1[k];
+            if k < self.n_eau {
+                self.v[k] = [v0[k][0] + 0.5 * dt * a1[k][0], v0[k][1] + 0.5 * dt * a1[k][1]];
+                self.x[k] = [x0[k][0] + 0.5 * dt * v0[k][0], x0[k][1] + 0.5 * dt * v0[k][1]];
+            }
+        }
+        let (d2, a2) = self.derivees();
+        for k in 0..self.x.len() {
+            self.rho[k] = (r0[k] + dt * d2[k]).max(0.5 * RHO);
+            if k < self.n_eau {
+                let v = [v0[k][0] + dt * a2[k][0], v0[k][1] + dt * a2[k][1]];
+                self.x[k] = [x0[k][0] + dt * self.v[k][0], x0[k][1] + dt * self.v[k][1]];
+                self.v[k] = v;
+            }
+        }
+        dt
+    }
+    fn mesure(&self, t: f64) -> Mesure {
+        let (nx, ny, dx) = (self.nx, self.ny, self.dx);
+        let mut occ = vec![false; nx * ny];
+        let (mut volume, mut e_cin, mut e_pot, mut front, mut u_max, mut jauge) = (0.0, 0.0, 0.0, 0f64, 0f64, 0.0);
+        let bord = 0.25 * self.lx;
+        for k in 0..self.n_eau {
+            let (p, v) = (self.x[k], self.v[k]);
+            let vol = self.masse / self.rho[k];
+            volume += vol;
+            e_cin += 0.5 * self.masse * (v[0] * v[0] + v[1] * v[1]);
+            e_pot += self.masse * G * p[1];
+            front = front.max(p[0] + 0.5 * self.ecart);
+            u_max = u_max.max((v[0] * v[0] + v[1] * v[1]).sqrt());
+            jauge += vol * ((bord - p[0]) / self.ecart + 0.5).clamp(0.0, 1.0);
+            let (i, j) = (((p[0] / dx).max(0.0) as usize).min(nx - 1), ((p[1] / dx).max(0.0) as usize).min(ny - 1));
+            occ[j * nx + i] = true;
+        }
+        let couches = (0..nx).map(|i| segments((0..ny).map(|j| occ[j * nx + i]))).max().unwrap_or(0);
+        Mesure {
+            t,
+            volume,
+            occupation: 0.0,
+            masse: self.masse * self.n_eau as f64,
+            e_cin,
+            e_pot,
+            front,
+            couches,
+            u_max,
+            jauge: jauge / bord,
+        }
+    }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// Candidat 3 — surface implicite (ensemble de niveaux)
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+
+/// **Ensemble de niveaux sur la grille MAC**, au niveau d'une production courante : la surface est
+/// l'iso-zéro d'une distance signée `φ` aux centres, négative dans l'eau ; advection de `φ` et des
+/// vitesses par **MacCormack limité** (Selle et al. 2008) — un semi-lagrangien simple amortirait le
+/// ballottement par sa seule diffusion, et la comparaison serait injuste ; pression par le même
+/// fluide fantôme qu'APIC, `θ` lu sur `φ` ; réinitialisation en distance tous les cinq pas, par
+/// balayage rapide, les cellules qui touchent l'interface fixées par interpolation linéaire.
+///
+/// Ce qu'il ne porte pas : **rien ne conserve le volume** — ni l'advection, ni la réinitialisation.
+/// C'est la faiblesse connue de la famille, et une des grandeurs de la comparaison.
+struct Niveaux {
+    mac: Mac,
+    phi: Vec<f64>,
+    pas: usize,
+}
+
+/// Échantillonnage bilinéaire d'un champ `largeur × hauteur` dont le nœud `(0,0)` est en `(ox, oy)` ;
+/// rend aussi le minimum et le maximum des quatre nœuds, pour le limiteur de MacCormack.
+fn echantillon(champ: &[f64], largeur: usize, hauteur: usize, dx: f64, ox: f64, oy: f64, x: f64, y: f64) -> (f64, f64, f64) {
+    let fx = ((x - ox) / dx).clamp(0.0, (largeur - 1) as f64);
+    let fy = ((y - oy) / dx).clamp(0.0, (hauteur - 1) as f64);
+    let (i0, j0) = (fx.floor() as usize, fy.floor() as usize);
+    let (i1, j1) = ((i0 + 1).min(largeur - 1), (j0 + 1).min(hauteur - 1));
+    let (sx, sy) = (fx - i0 as f64, fy - j0 as f64);
+    let (a, b, c, d) = (
+        champ[j0 * largeur + i0],
+        champ[j0 * largeur + i1],
+        champ[j1 * largeur + i0],
+        champ[j1 * largeur + i1],
+    );
+    let v = (a * (1.0 - sx) + b * sx) * (1.0 - sy) + (c * (1.0 - sx) + d * sx) * sy;
+    (v, a.min(b).min(c).min(d), a.max(b).max(c).max(d))
+}
+
+impl Niveaux {
+    fn new(scene: Scene) -> Self {
+        let (nx, ny, dx) = (scene.nx(), scene.ny(), scene.dx);
+        let mut phi = vec![0.0; nx * ny];
+        for j in 0..ny {
+            for i in 0..nx {
+                phi[j * nx + i] = scene.distance_initiale((i as f64 + 0.5) * dx, (j as f64 + 0.5) * dx);
+            }
+        }
+        Niveaux { mac: Mac::new(nx, ny, dx), phi, pas: 0 }
+    }
+
+    /// **MacCormack limité** d'un champ porté par la grille `largeur × hauteur` d'origine `(ox, oy)`,
+    /// dans la vitesse `vit` : aller, retour, correction de moitié, puis écrêtage aux bornes du
+    /// stencil de l'aller — sans quoi la correction peut créer des extrema.
+    fn advecte(champ: &[f64], largeur: usize, hauteur: usize, dx: f64, ox: f64, oy: f64, dt: f64, vit: &dyn Fn(f64, f64) -> (f64, f64)) -> Vec<f64> {
+        let remonte = |x: f64, y: f64, sens: f64| {
+            let (u1, v1) = vit(x, y);
+            let (xm, ym) = (x - 0.5 * sens * dt * u1, y - 0.5 * sens * dt * v1);
+            let (u2, v2) = vit(xm, ym);
+            (x - sens * dt * u2, y - sens * dt * v2)
+        };
+        let mut aller = vec![0.0; largeur * hauteur];
+        let mut bornes = vec![(0.0, 0.0); largeur * hauteur];
+        for j in 0..hauteur {
+            for i in 0..largeur {
+                let (x, y) = (ox + i as f64 * dx, oy + j as f64 * dx);
+                let (xp, yp) = remonte(x, y, 1.0);
+                let (v, lo, hi) = echantillon(champ, largeur, hauteur, dx, ox, oy, xp, yp);
+                aller[j * largeur + i] = v;
+                bornes[j * largeur + i] = (lo, hi);
+            }
+        }
+        let mut sortie = aller.clone();
+        for j in 0..hauteur {
+            for i in 0..largeur {
+                let (x, y) = (ox + i as f64 * dx, oy + j as f64 * dx);
+                let (xr, yr) = remonte(x, y, -1.0);
+                let (retour, _, _) = echantillon(&aller, largeur, hauteur, dx, ox, oy, xr, yr);
+                let k = j * largeur + i;
+                let (lo, hi) = bornes[k];
+                sortie[k] = (aller[k] + 0.5 * (champ[k] - retour)).clamp(lo, hi);
+            }
+        }
+        sortie
+    }
+
+    /// Réinitialisation en distance : cellules d'interface par interpolation linéaire le long des
+    /// axes, puis balayage rapide de `|∇φ| = 1` dans les quatre directions, deux fois.
+    fn reinitialise(&mut self) {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let grand = 1e9f64;
+        let ancien = self.phi.clone();
+        let mut d = vec![grand; nx * ny];
+        for j in 0..ny {
+            for i in 0..nx {
+                let k = j * nx + i;
+                let a = ancien[k];
+                for (di, dj) in [(-1isize, 0isize), (1, 0), (0, -1), (0, 1)] {
+                    let (ii, jj) = (i as isize + di, j as isize + dj);
+                    if ii < 0 || jj < 0 || ii as usize >= nx || jj as usize >= ny {
+                        continue;
+                    }
+                    let b = ancien[jj as usize * nx + ii as usize];
+                    if (a < 0.0) != (b < 0.0) {
+                        d[k] = d[k].min(a.abs() / (a - b).abs() * dx);
+                    }
+                }
+            }
+        }
+        let fixe: Vec<bool> = d.iter().map(|v| *v < grand).collect();
+        for _ in 0..2 {
+            for (sx, sy) in [(1isize, 1isize), (-1, 1), (1, -1), (-1, -1)] {
+                let is: Vec<usize> = if sx > 0 { (0..nx).collect() } else { (0..nx).rev().collect() };
+                let js: Vec<usize> = if sy > 0 { (0..ny).collect() } else { (0..ny).rev().collect() };
+                for &j in &js {
+                    for &i in &is {
+                        let k = j * nx + i;
+                        if fixe[k] {
+                            continue;
+                        }
+                        let a = d[j * nx + i.saturating_sub(1)].min(if i + 1 < nx { d[j * nx + i + 1] } else { grand });
+                        let b = d[j.saturating_sub(1) * nx + i].min(if j + 1 < ny { d[(j + 1) * nx + i] } else { grand });
+                        let nouveau = if (a - b).abs() >= dx {
+                            a.min(b) + dx
+                        } else {
+                            0.5 * (a + b + (2.0 * dx * dx - (a - b) * (a - b)).sqrt())
+                        };
+                        d[k] = d[k].min(nouveau);
+                    }
+                }
+            }
+        }
+        for k in 0..nx * ny {
+            self.phi[k] = if ancien[k] < 0.0 { -d[k] } else { d[k] };
+        }
+    }
+
+    fn etiquette(&mut self) {
+        for (e, f) in self.mac.etiquette.iter_mut().zip(&self.phi) {
+            *e = if *f < 0.0 { EAU } else { AIR };
+        }
+    }
+
+    /// Heaviside lissée sur une maille : la fraction d'eau d'une cellule.
+    fn fraction(phi: f64, eps: f64) -> f64 {
+        let x = -phi;
+        if x <= -eps {
+            0.0
+        } else if x >= eps {
+            1.0
+        } else {
+            0.5 * (1.0 + x / eps + (std::f64::consts::PI * x / eps).sin() / std::f64::consts::PI)
+        }
+    }
+}
+
+impl Candidat for Niveaux {
+    fn nom(&self) -> &'static str {
+        "niveaux"
+    }
+    fn degres(&self) -> usize {
+        self.mac.nx * self.mac.ny
+    }
+    fn definition_du_volume(&self) -> &'static str {
+        "aire de phi < 0, heaviside lissee sur une maille ; rien ne la conserve"
+    }
+    fn pas(&mut self, dt_max: f64) -> f64 {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let dt = dt_max.min(0.5 * dx / (self.mac.vitesse_max() + (G * dx).sqrt()));
+        // ── Advection de φ et des vitesses dans le champ de vitesse courant, extrapolé.
+        self.etiquette();
+        self.mac.extrapole(4, None);
+        let mac = &self.mac;
+        let vit = |x: f64, y: f64| mac.vitesse(x, y);
+        let phi = Self::advecte(&self.phi, nx, ny, dx, 0.5 * dx, 0.5 * dx, dt, &vit);
+        let u = Self::advecte(&mac.u, nx + 1, ny, dx, 0.0, 0.5 * dx, dt, &vit);
+        let v = Self::advecte(&mac.v, nx, ny + 1, dx, 0.5 * dx, 0.0, dt, &vit);
+        self.phi = phi;
+        self.mac.u = u;
+        self.mac.v = v;
+        self.pas += 1;
+        if self.pas % 5 == 0 {
+            self.reinitialise();
+        }
+        // ── Gravité, étiquettes, projection au fluide fantôme.
+        for w in self.mac.v.iter_mut() {
+            *w -= G * dt;
+        }
+        self.etiquette();
+        let phi = &self.phi;
+        let theta = |i: usize, j: usize, a: isize, b: isize| {
+            let (fi, fa) = (phi[j * nx + i], phi[b as usize * nx + a as usize]);
+            fi / (fi - fa)
+        };
+        self.mac.projette(dt, &theta);
+        self.mac.extrapole(4, None);
+        dt
+    }
+    fn mesure(&self, t: f64) -> Mesure {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let (mut volume, mut e_cin, mut e_pot, mut front, mut jauge) = (0.0, 0.0, 0.0, 0f64, 0.0);
+        let bande = nx / 4;
+        for j in 0..ny {
+            for i in 0..nx {
+                let k = j * nx + i;
+                let f = Self::fraction(self.phi[k], dx);
+                let aire = f * dx * dx;
+                volume += aire;
+                let (x, y) = ((i as f64 + 0.5) * dx, (j as f64 + 0.5) * dx);
+                let (u, v) = self.mac.vitesse(x, y);
+                e_cin += 0.5 * RHO * aire * (u * u + v * v);
+                e_pot += RHO * G * aire * y;
+                if i < bande {
+                    jauge += aire;
+                }
+                if self.phi[k] < 0.0 {
+                    let droite = if i + 1 < nx { self.phi[k + 1] } else { 0.0 };
+                    let avance = if droite > 0.0 { self.phi[k].abs() / (droite - self.phi[k]) } else { 0.5 };
+                    front = front.max(x + avance * dx);
+                }
+            }
+        }
+        let couches = (0..nx).map(|i| segments((0..ny).map(|j| self.phi[j * nx + i] < 0.0))).max().unwrap_or(0);
+        Mesure {
+            t,
+            volume,
+            occupation: 0.0,
+            masse: RHO * volume,
+            e_cin,
+            e_pot,
+            front,
+            couches,
+            u_max: self.mac.vitesse_max(),
+            jauge: jauge / (bande as f64 * dx),
+        }
+    }
+}
+
 fn main() -> Result<(), String> {
     let args: Vec<String> = std::env::args().collect();
     let candidat = args.get(1).ok_or("candidat ?")?.as_str();
@@ -904,6 +1402,14 @@ fn main() -> Result<(), String> {
     match candidat {
         "apic" => {
             execute(scene, &mut Apic::new(scene));
+            Ok(())
+        }
+        "sph" => {
+            execute(scene, &mut Sph::new(scene));
+            Ok(())
+        }
+        "niveaux" => {
+            execute(scene, &mut Niveaux::new(scene));
             Ok(())
         }
         _ => Err(format!("candidat inconnu : {candidat}")),
