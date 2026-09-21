@@ -144,7 +144,7 @@ décalage.
   et les réceptions antérieures qui en dépendent (ADR-183 D8).
 - [x] **P8′** — *ajoutée en cours de session, sur décision de l'utilisateur (08:53)* : ADR-184, la
   seconde représentation avance en parallèle du lot 2, par sessions alternées.
-- [ ] **P9** — preuve publiée : le tableau d'attribution de l'ordre C.
+- [x] **P9** — preuve publiée : le tableau d'attribution de l'ordre C.
 - [ ] **P10** — rituel REPRISE §6.
 
 ### Notes de reprise

@@ -234,3 +234,20 @@ ne le détecterait pas. Le train est émis **une fois**, à l'instant d'arrivée
 recouvrement, ni émission continue. `SPREAD_LIMIT` = 10 % est **choisi**, et dit comme tel dans le
 module ; ce n'est pas une limite physique mais la frontière du domaine où le champ est celui qu'on
 a demandé.
+
+## Note corrective du 2026-09-21 (S316)
+
+Deux mesures de cette preuve portent un biais de banc, identifié par l'ordre C
+([ORDRE-C-S316](ORDRE-C-S316.md) §4 et §8) :
+
+1. **Le train naissait sur la face de la ligne ; la jauge lisait le centre de la colonne**, une
+   demi-maille plus loin, soit `k·dx/2` de phase : 0,057 tour à 25 cm, 0,031 à 12,5 cm, 0,016 à
+   6,25 cm. La régression de §7 (0,9659 ; 0,9938 ; 1,0038) le contient.
+2. **La réflexion de §7.2 à 25 cm (5,67·10⁻⁶) a été lue avec une fenêtre calée sur la vitesse
+   posée**, alors que δ y va 25 % moins vite. Séparée par sens de propagation, la réflexion de
+   l'éponge vaut 1·10⁻⁷ à 25 cm, 8·10⁻⁷ à 12,5 cm, 1,5·10⁻⁶ à 6,25 cm, indépendante de l'amplitude.
+   Les conclusions — quatre à six ordres sous 1 % — tiennent.
+
+Et la conversion de la largeur temporelle en largeur spatiale par la vitesse de groupe **posée**
+est une information qu'une scène réelle ne donne pas ; le raccord de l'ordre C prend celle de
+l'onde émise.

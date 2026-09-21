@@ -224,3 +224,21 @@ tangentielle à une **discontinuité** n'est pas éprouvée. Aucune **réflexion
 oblique. L'oracle de phase suppose une **enveloppe gaussienne** et une **porteuse unique** des deux
 côtés. Le train est émis **une fois** : ni cadence, ni recouvrement. Et rien ici ne reboucle W dans
 δ — le couplage reste à un sens (A302).
+
+## Note corrective du 2026-09-21 (S316)
+
+L'ordre C ([ORDRE-C-S316](ORDRE-C-S316.md)), qui mesure à fréquence fixe et déroule la phase, corrige
+trois affirmations de cette preuve :
+
+1. **« 6,3 % de dissipation sur dix longueurs d'onde » est faux.** À fréquence fixe, le module de δ
+   ne perd rien entre les deux lignes (1,0000 à 25 cm) ; il **gagne** même 0,65 % à 12,5 cm sous
+   2 cm, par transfert non linéaire. Le rapport d'amplitudes de §5 comparait les **crêtes** de deux
+   paquets de dispersions différentes : une différence d'étalement, pas une perte.
+2. **Les prédictions de §2 supposaient `k_δ(ω₀) = k₀`.** Le raccord lit le maximum du spectre
+   temporel, la condition initiale pose celui du spectre spatial ; le jacobien `1/c_g` les sépare de
+   +0,6 à +1,0 %, d'où 0,04 à 0,07 tour d'écart avec la phase déroulée (L365).
+3. **La phase à dix longueurs d'onde n'est plus indéterminée** : déroulée, −0,914 ; −0,237 ;
+   −0,045 tour aux trois mailles. Et l'écart d'angle de §6.2 n'est dû à la maille de δ que pour
+   moitié : la part de `k_y`, +4 à +5 %, ne converge pas — c'est la lecture de la direction.
+
+La vitesse de groupe de §5.1 (7,5 % sous le train à 12,5 cm) est **confirmée** : 7,2 %.
