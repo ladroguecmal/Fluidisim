@@ -58,66 +58,58 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S318 — **terminée**. Le **lot 5**, première session du fil ouvert par
-[ADR-184](../docs/adr/ADR-184-seconde-representation-en-parallele.md) : la **comparaison
-chiffrée** des représentations où plusieurs couches d'eau tiennent sur une même verticale.
+Session : S319 — **en cours**. L'**ordre E** du lot 2 : le couplage complet, sur des configurations
+progressivement plus complexes (ADR-181 D10) ; et, d'abord, **acter le choix d'APIC**.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Continue »* de l'utilisateur, après S317 ; la suite déclarée était l'alternance
-d'ADR-184 — lot 5 d'abord, l'ordre E du lot 2 ensuite.
+Entrée : *« Continue »*, puis, en cours d'amorce, **décision de l'utilisateur : « Ok pour APIC »**
+— la seconde représentation (ADR-184 D2). L'ordre des sessions suit l'alternance d'ADR-184 D1 :
+S319 sur le lot 2, **S320 sur le lot 5, B10 sur APIC** ; l'utilisateur en est prévenu, et peut
+demander l'inverse.
 
-**Ce que la comparaison doit rendre possible** : que l'utilisateur **choisisse** la seconde
-représentation sur pièces (ADR-184 D2). Consommateur : ce choix, puis le premier domaine d'impact
-(B10) et le scénario 2 de B3 (impact d'un objet lourd : cavité, jet, refermeture).
+**Ce que l'ordre E doit éprouver.** Les ordres C et D ont été mesurés sur un paquet **seul**, dans une
+tranche à deux rangées, sans fond B. Trois choses n'ont jamais été vues ensemble :
 
-**Les trois candidats**, en deux dimensions, écrits au plus court et **au même niveau** :
+1. **une vraie mer B autour du domaine** — ADR-185 D6 renvoyait ici le cas où la bande B/W traverse
+   la ligne de contrôle : ce que la ligne lit n'est plus seulement ce que δ produit ;
+2. **un paquet dans cette mer** — la restitution isole-t-elle le paquet, ou prend-elle aussi la mer ?
+3. **un contour fermé à quatre côtés**, en trois dimensions, avec un paquet oblique — une région par
+   côté, et le bilan de l'intérieur fermé sur les quatre.
 
-1. **particules sur grille** (FLIP/APIC) — des particules portent l'eau, une grille MAC calcule la
-   pression sur le masque des cellules occupées ;
-2. **particules pures** (SPH, forme incompressible ou faiblement compressible) — pas de grille ;
-3. **surface implicite** (ensemble de niveaux sur grille MAC) — la surface est l'iso-zéro d'une
-   distance signée, advectée et réinitialisée.
+Échelons, du plus simple au plus complexe :
 
-**Les cas, et pourquoi ceux-là.** Les données expérimentales de Martin et Moyce (1952) sont derrière
-un péage (Royal Society, 403 ; deux sources secondaires sans table accessible) : **aucun chiffre de
-mémoire** (I-14). Les cas se jugent donc sur des références **analytiques** ou **intrinsèques** :
+- **E1 — la mer seule** : une houle B d'une composante (λ = 4 m, 5 cm), δ nul au départ. Le témoin nul
+  de l'ordre D : **une mer que δ ne perturbe pas ne doit rien faire restituer**. Ce que la ligne lit,
+  en volume net, se compare au volume net d'un paquet de 2 cm (1,5·10⁻⁴ m³/m, S317).
+- **E2 — le paquet dans la mer** : la même houle et le paquet de l'ordre C ; ce que la région reçoit,
+  comparé au paquet seul.
+- **E3 — le contour fermé** : domaine 3D, quatre lignes, quatre régions, paquet oblique à 20°, sans
+  houle ; bilan de l'intérieur sur les quatre côtés, attente de chaque registre.
 
-- **repos hydrostatique** — une colonne au repos ne doit ni bouger ni perdre d'eau : courants
-  parasites et dérive de volume ;
-- **ballottement linéaire** — un mode propre de bassin, fréquence exacte `ω² = g·k·tanh(k·h)` :
-  justesse de la dynamique, et amortissement numérique ;
-- **rupture de barrage** — colonne `a × 2a` dans une boîte, géométrie de Martin et Moyce : volume
-  conservé, énergie qui ne croît pas, front **sous** le plafond de Ritter `2√(g·2a)` ; puis
-  l'impact sur la paroi opposée et le **retournement** de la lame — c'est là que plusieurs couches
-  tiennent sur une verticale. L'accord **entre** candidats à deux résolutions est publié, et dit
-  pour ce qu'il est : pas une validation.
+**Prédiction, écrite avant la mesure, et je dis ce que je ne sais pas prédire.** Au second ordre, une
+houle transporte `a²ω/2` par mètre de crête et par seconde — 4,9·10⁻³ m²/s pour 5 cm : **trente fois**
+le volume net d'un paquet de 2 cm, **chaque seconde**. Si le flux de δ à la ligne contient ce transport
+— par ses termes croisés avec B —, le registre de l'ordre D restituera la mer, et la construction de
+S317 est fausse en mer réelle. S'il ne le contient pas, E1 lira un flux de moyenne nulle. **Je ne sais
+pas lequel des deux** sans lire le transport couplé ; le témoin tranche. Critère : en E1, le volume
+restitué sur 10 s doit rester sous **10 %** du volume net d'un paquet de 2 cm, sinon la restitution
+doit apprendre à séparer ce qui vient de B.
 
-Critères, écrits avant le code :
-1. Chaque candidat est éprouvé au repos et en ballottement **avant** d'être comparé sur la rupture.
-2. Les quatre grandeurs de chaque cas se publient séparément : **volume** (dérive relative),
-   **justesse** (fréquence, invariants), **coût** (par pas et par degré de liberté, même machine,
-   CPU, un fil), **capacité multicouche** (la lame retournée : représentée ou non, et à quel prix
-   en volume).
-3. Aucun candidat n'est « retenu » par la session : **le choix est à l'utilisateur**.
-4. Ce qui n'est pas comparé est dit : le cas B10 (objet qui entre dans l'eau) vient à la
-   prochaine session du fil ; la carte graphique n'est pas mesurée — son aptitude est **argumentée**.
-5. Rien n'entre dans le cœur : les prototypes sont des **instruments de comparaison**, dans un
-   exemple ; aucune réception antérieure touchée.
+Critères :
+1. E1 d'abord, et son verdict dit si E2 a un sens.
+2. Chaque échelon publie : flux net à chaque ligne, volume restitué, `band_in`, bilan de l'intérieur.
+3. Rien n'entre dans le cœur sans essai ; les réceptions antérieures au bit.
+4. Ce que l'ordre E ne fait pas est dit : le sens W → δ, la production GPU.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — le protocole écrit : grandeurs, tolérances d'usage, hypothèses déclarées (ADR-184
-  D5), références et leur provenance.
-- [x] **P3** — le socle commun 2D : boîte, gravité, parois, mesures (volume, énergie, front, coût).
-- [x] **P4a** — candidat 1, FLIP/APIC sur grille MAC : particules, transferts, pression sur masque.
-- [x] **P4b** — candidat 1 au repos et en ballottement.
-- [x] **P5a** — *fusionnée avec P6a, même fichier, déclaré* — candidat 2, SPH.
-- [x] **P5b** — candidat 2 au repos et en ballottement.
-- [x] **P6a** — candidat 3, ensemble de niveaux sur grille MAC.
-- [x] **P6b** — candidat 3 au repos et en ballottement.
-- [x] **P7** — la rupture de barrage, les trois candidats, deux résolutions.
-- [x] **P8** — preuve publiée : le tableau chiffré, et ce qu'il ne tranche pas.
-- [x] **P9** — rituel REPRISE §6.
+- [ ] **P2** — ADR-186 : APIC retenu pour la seconde représentation — décision de l'utilisateur.
+- [ ] **P3** — E1 : le banc de la mer seule, écrit et lancé à 25 cm.
+- [ ] **P4** — E1 : le verdict, et ce qu'il dit de la restitution en mer réelle.
+- [ ] **P5** — E2 : le paquet dans la mer.
+- [ ] **P6** — E3 : le contour fermé à quatre côtés, paquet oblique.
+- [ ] **P7** — preuve publiée.
+- [ ] **P8** — rituel REPRISE §6.
 
 ### Notes de reprise
 
