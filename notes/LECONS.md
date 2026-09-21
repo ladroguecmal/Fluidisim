@@ -6418,3 +6418,16 @@ fantôme, APIC tombe à 0,15 %, meilleur des trois.
 instruments ; un écart qui disparaît quand on égalise l'outillage n'appartient pas à la famille. Et
 quand un écart **ne** disparaît **pas** et qu'on ne sait pas l'isoler, ne pas le lui attribuer non plus
 (A310).
+
+## L369 — Un couplage stable six secondes ne dit rien d'une minute
+
+S319. Toutes les scènes δ couplées à B tournaient quelques secondes — six pour la plus longue (S302).
+Aucune n'avait fait vivre un domaine sous une houle pendant la durée de vie qu'un jeu lui donnerait.
+Deux minutes ont suffi pour voir δ croître jusqu'à trois fois l'amplitude de la mer qui le porte, et
+tout bilan construit dessus devenir faux de deux ordres de grandeur. A289 le prévoyait par formule
+depuis S274, avec un déclencheur — « premier domaine appelé à vivre plus de dix périodes » — que
+personne n'avait atteint, parce qu'aucun essai ne durait dix périodes.
+
+**La règle.** Un essai de couplage dure au moins la vie qu'on prête à ce qu'il couple — et, faute de
+la connaître, plusieurs dizaines de périodes. Un déclencheur d'angle mort qui n'est jamais atteint par
+les essais n'est pas un déclencheur : c'est un report.

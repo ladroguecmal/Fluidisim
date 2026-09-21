@@ -161,12 +161,12 @@ pas recopiée ici (L137).
   contrôle, identification, train orienté de W (S314) — et **S316 l'a qualifié** propriété par
   propriété : primitive exacte, raccord à un degré et 2 à 4 % de spectre près, le reste à δ
   ([ordre C](validation/ORDRE-C-S316.md)). Le volume net est reçu par une région locale (S317,
-  [ordre D](validation/RESTITUTION-S317.md)). Manquent le couplage complet (ordre E), la production GPU et le sens W → δ. Lot 2 d'[ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7.
+  [ordre D](validation/RESTITUTION-S317.md)) — **en eau calme seulement** : sous une vraie mer, δ dérive (A289, S319). Manquent le couplage complet (ordre E), la production GPU et le sens W → δ. Lot 2 d'[ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7.
 - [ ] **4.9 Fusion et séparation de domaines** sans rupture — *absent*.
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
 - [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *absent* — la seconde représentation est
-  comparée en S318 ([comparaison](validation/COMPARAISON-LOT5-S318.md), proposition APIC) — et **hors de la représentation
+  comparée en S318 ([comparaison](validation/COMPARAISON-LOT5-S318.md)), **APIC retenue** (ADR-186) — et **hors de la représentation
   actuelle par construction** : la surface de δ est une fonction hauteur (ADR-175 D5, qui renvoyait
   déjà à une seconde représentation). Lot 5 d'ADR-178 ; le choix particules / surface implicite
   reste une décision de l'utilisateur.

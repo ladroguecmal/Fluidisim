@@ -16225,3 +16225,37 @@ prochaine session du fil, sur le candidat choisi ; carte graphique argumentée, 
 la liste n'avance tant qu'elle n'est pas prise, et le compteur le dit. Une leçon : L368. Un angle
 mort : A310. Suivant : l'ordre E du lot 2, selon l'alternance — ou B10 sur le candidat choisi, si
 l'utilisateur tranche d'abord.
+
+## S319 — 2026-09-21 — l'ordre E devait commencer par un témoin nul ; le témoin n'est pas resté nul
+
+**Entrée.** *« Continue »*, puis, en cours d'amorce, **« Ok pour APIC »** : ADR-186 acte la seconde
+représentation. L'alternance d'ADR-184 gardait S319 pour le lot 2 — l'ordre E, le couplage complet
+— et donne B10 sur APIC à S320 ; l'utilisateur en a été prévenu.
+
+**Le premier échelon** ([preuve](../docs/validation/MER-S319.md)). Une houle B d'une composante autour
+du domaine, δ nul au départ : **une mer que δ ne perturbe pas ne doit rien faire restituer**. Elle fait
+restituer **292 fois** le volume d'un paquet de 2 cm à 25 cm, 179 fois à 12,5 cm — le critère était
+10 %. δ monte à 2,8 cm le long du sens de propagation, et, calé en phase sur B, fait passer à la ligne un
+transport croisé que la restitution de S317 prend pour de l'eau sortie de δ.
+
+**Le remède essayé, et pourquoi il échoue.** Un δ témoin, même mer sans paquet, et la différence des flux :
+18 fois le paquet encore, parce que **le témoin lui-même monte à 17 cm en 42 s**. Prolongé à deux minutes,
+δ sous la seule houle **croît jusqu'à trois fois l'amplitude de la mer** — taux ≈ 0,04 s⁻¹ sous 2,5 cm,
+≈ 0,10 sous 5 cm, un peu plus lent à maille moitié : ce n'est pas l'advection centrée, qui irait quatre
+fois plus vite. **A289 se matérialise** — B linéaire, δ porteur de l'onde totale non linéaire —, et plus
+vite que sa formule ne le disait. **Aucune session n'avait fait vivre δ plus de quelques secondes sous une
+houle** (L369).
+
+**Ce que je n'ai pas fait.** E3, le contour fermé, reporté : il n'apprendrait rien qui débloque. La cause
+n'est pas démontrée, seulement restreinte.
+
+**Deux fautes de méthode.** Un script d'édition a échoué sur un motif présent dans plusieurs fonctions, et
+j'ai compilé puis lancé **l'ancien binaire** sans le voir — L362 encore, par un autre chemin : la sortie
+avait l'air juste. Et j'ai d'abord prédit qu'E2 retrouverait le paquet à 30 % près : manqué.
+
+**Arbitrage proposé à l'utilisateur.** Les trois voies d'A289 — rappel lent de δ vers zéro, durée de vie
+bornée des domaines, dispersion d'amplitude dans B —, la dernière changeant la mer de tous les clients.
+
+**Rituel.** Maillons **2** : un défaut trouvé n'est pas une capacité reçue. À deux maillons, la suite se
+prend dans un lot qui fait avancer une capacité : **B10 sur APIC** (S320), que l'alternance désignait déjà.
+Une leçon : L369. A289 relevée ; ADR-186.

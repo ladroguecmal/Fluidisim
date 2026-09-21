@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S319 — **en cours**. L'**ordre E** du lot 2 : le couplage complet, sur des configurations
+Session : S319 — **terminée**. L'**ordre E** du lot 2 : le couplage complet, sur des configurations
 progressivement plus complexes (ADR-181 D10) ; et, d'abord, **acter le choix d'APIC**.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« Continue »*, puis, en cours d'amorce, **décision de l'utilisateur : « Ok pour APIC »**
@@ -109,7 +109,7 @@ Critères :
 - [x] **P5** — E2 : le paquet dans la mer.
 - [x] **P6** — *reportée, déclaré (P5)* — E3 : le contour fermé à quatre côtés ; datée dans la file.
 - [x] **P7** — preuve publiée.
-- [ ] **P8** — rituel REPRISE §6.
+- [x] **P8** — rituel REPRISE §6.
 
 ### Notes de reprise
 

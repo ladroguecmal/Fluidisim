@@ -4176,3 +4176,10 @@ les font bouger ([preuve](../validation/COMPARAISON-LOT5-S318.md) §3). Suspects
 retient contre SPH que la conservation et le coût du pas acoustique, qui n'en dépendent pas.
 **Déclencheur** : si l'utilisateur penche pour SPH, ou pour comparer un SPH incompressible — alors
 parois par particules fantômes et intégrateur symplectique, d'abord.
+
+**A289 — note datée du 2026-09-21 (S319) : déclencheur atteint, sévérité relevée à 3.** Sous une houle
+B d'une composante (λ = 4 m), δ sans perturbation **croît** — 0,28 cm puis 7,7 cm en 115 s sous 2,5 cm,
+16 cm sous 5 cm —, un peu plus lentement à maille fine ; plus vite et plus loin que la formule linéaire
+de S274 ([preuve](../validation/MER-S319.md) §4–5). **Il bloque l'ordre E** : la restitution de S317
+reçoit des centaines de fois le volume d'un paquet. Voies à choisir : rappel lent vers zéro, durée de
+vie bornée (I-12), dispersion d'amplitude dans B.
