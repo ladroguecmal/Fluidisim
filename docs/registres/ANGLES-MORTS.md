@@ -4167,3 +4167,12 @@ réduit que de sa part `ω`. Le train porte fidèlement une direction lue **+1 �
 ([preuve](../validation/ORDRE-C-S316.md) §10). **Déclencheur** : l'ordre E, ou tout train oblique
 consommé loin de sa ligne. **Remède à éprouver comme l'instrument de phase** : un estimateur de
 direction mesuré d'abord sur un paquet synthétique d'angle connu.
+
+**A310 — S318, 2026-09-21 (sévérité 1, ouverte). Le SPH du banc du lot 5 garde une erreur que je n'ai
+pas isolée.** Période du ballottement à −6,2 % et 27 à 29 % d'amortissement par période, **identiques
+à deux mailles** ; ni la diffusion δ, ni une viscosité divisée par quatre, ni des parois glissantes ne
+les font bouger ([preuve](../validation/COMPARAISON-LOT5-S318.md) §3). Suspects restants, non
+éprouvés : les parois en particules dynamiques, l'intégrateur. **Conséquence** : la comparaison ne
+retient contre SPH que la conservation et le coût du pas acoustique, qui n'en dépendent pas.
+**Déclencheur** : si l'utilisateur penche pour SPH, ou pour comparer un SPH incompressible — alors
+parois par particules fantômes et intégrateur symplectique, d'abord.

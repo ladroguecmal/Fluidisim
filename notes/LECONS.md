@@ -6404,3 +6404,17 @@ l'invariant fixe **le statut** — local ou autoritaire — de ce qui s'y écrit
 **La règle.** Avant de construire un chemin entre deux couches, le tester contre I-15 (*« plutôt que
 de faire l'objet d'un arbitrage »*). Le faire **avant** le code : après, le chemin interdit existe, et
 il a des appelants.
+
+## L368 — Comparer deux représentations, c'est d'abord leur donner la même frontière
+
+S318. Au premier passage, APIC imposait `p = 0` au centre des cellules d'air, quand l'ensemble de
+niveaux plaçait la surface à une fraction de maille par un fluide fantôme. Le ballottement d'APIC
+s'éteignait en trois secondes, à 23 % de période ; celui de l'ensemble de niveaux tenait à 1 %. La
+comparaison aurait conclu contre les particules — et elle aurait comparé **deux conditions de
+surface**, pas deux représentations. Avec une surface reconstruite des particules et le même fluide
+fantôme, APIC tombe à 0,15 %, meilleur des trois.
+
+**La règle.** Avant de comparer deux familles, leur donner la même qualité de frontière et les mêmes
+instruments ; un écart qui disparaît quand on égalise l'outillage n'appartient pas à la famille. Et
+quand un écart **ne** disparaît **pas** et qu'on ne sait pas l'isoler, ne pas le lui attribuer non plus
+(A310).

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S318 — **en cours**. Le **lot 5**, première session du fil ouvert par
+Session : S318 — **terminée**. Le **lot 5**, première session du fil ouvert par
 [ADR-184](../docs/adr/ADR-184-seconde-representation-en-parallele.md) : la **comparaison
 chiffrée** des représentations où plusieurs couches d'eau tiennent sur une même verticale.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -117,7 +117,7 @@ Critères, écrits avant le code :
 - [x] **P6b** — candidat 3 au repos et en ballottement.
 - [x] **P7** — la rupture de barrage, les trois candidats, deux résolutions.
 - [x] **P8** — preuve publiée : le tableau chiffré, et ce qu'il ne tranche pas.
-- [ ] **P9** — rituel REPRISE §6.
+- [x] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
 

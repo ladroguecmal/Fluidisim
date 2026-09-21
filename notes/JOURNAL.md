@@ -16186,3 +16186,42 @@ paquet en eau profonde, deux mailles.
 la représentation se ferme par construction ; points 1.1, 4.8 et 4.18 avancés. Consommateur :
 l'ordre E. Deux leçons : L366, L367. Aucun angle mort nouveau — le rayonnement est une limite
 déclarée, portée par la file. Suivant, selon ADR-184 : le lot 5.
+
+## S318 — 2026-09-21 — trois façons de porter plusieurs couches d'eau, comparées au même niveau
+
+**Entrée.** *« Continue »*, après S317 ; l'alternance d'ADR-184 désignait le lot 5 : la comparaison
+chiffrée des représentations où plusieurs couches d'eau tiennent sur une verticale, avant que
+l'utilisateur choisisse.
+
+**Le banc** ([preuve](../docs/validation/COMPARAISON-LOT5-S318.md)). APIC, ensemble de niveaux et SPH
+faiblement compressible, en deux dimensions, **au même niveau** : même grille MAC et même pression pour
+les deux qui en ont une, même fluide fantôme, mêmes mesures, mêmes degrés de liberté. Repos,
+ballottement contre la dispersion linéaire, rupture de barrage `a × 2a` contre ses invariants — les
+données de Martin et Moyce étant derrière un péage, aucun chiffre de mémoire (I-14).
+
+**Ce qu'il montre.** APIC garde la masse **exactement**, ne crée jamais d'énergie, tient la période à
+**0,15 %** à 2,5 cm et coûte le moins (10 s par seconde simulée sur le barrage fin). L'ensemble de
+niveaux porte l'onde à une fraction de maille (période à 0,19 %) mais **perd ou gagne jusqu'à 7,6 %
+de volume** et **crée 8 % d'énergie** dès que l'écoulement devient violent. SPH conserve la masse,
+respire de 0,4 % en volume, et coûte **40 fois** APIC par seconde simulée — le pas acoustique.
+Les trois fronts s'accordent à 1,6 % : un accord, pas une validation.
+
+**Six fautes attrapées en route**, dont une qui valait leçon : APIC avec `p = 0` au centre des
+cellules d'air éteignait le ballottement en trois secondes, à 23 % de période ; avec une surface
+**reconstruite** des particules et le fluide fantôme de l'ensemble de niveaux, 0,15 % (L368). Et une
+onde plus petite que l'espacement des particules n'existe pas : le protocole est passé de 1 à 2 cm.
+
+**Ce que je n'ai pas su faire.** SPH garde une erreur de période de −6 % et 27 % d'amortissement par
+période **qui ne convergent pas** ; quatre diagnostics — diffusion δ, viscosité, parois glissantes,
+maille — ne l'isolent pas. Il n'est pas attribué à la famille (A310).
+
+**Proposition à l'utilisateur** : **APIC**, qui partage la grille et la pression du δ construit, porte
+les gouttes, et ce que les sources décrivent pour le déferlement. **Le choix est le sien.**
+
+**Limites.** Deux dimensions, deux mailles, trois cas simples ; ni objet, ni cavité — B10 vient à la
+prochaine session du fil, sur le candidat choisi ; carte graphique argumentée, pas mesurée.
+
+**Rituel.** Maillons **1** : la comparaison **prépare** une décision de l'utilisateur ; aucun point de
+la liste n'avance tant qu'elle n'est pas prise, et le compteur le dit. Une leçon : L368. Un angle
+mort : A310. Suivant : l'ordre E du lot 2, selon l'alternance — ou B10 sur le candidat choisi, si
+l'utilisateur tranche d'abord.

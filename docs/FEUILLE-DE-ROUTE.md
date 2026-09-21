@@ -250,7 +250,8 @@ adaptation et budget. **A est déclaré suffisant pour servir B et C** : aucun l
 perfectionnement visuel ne s'ouvre avant que la physique le demande. Le profil d'ADR-174 D3 reste
 **mesuré et publié**, sans être opposable pendant la construction (ADR-178 D4). **Le 2026-09-21**
 ([ADR-184](adr/ADR-184-seconde-representation-en-parallele.md)), l'utilisateur fait avancer le lot 5
-**en parallèle** du lot 2, par sessions alternées ; la v1 reste la porte D.
+**en parallèle** du lot 2, par sessions alternées ; la v1 reste la porte D. **S318** : comparaison
+chiffrée des trois représentations, proposition APIC ([S318](validation/COMPARAISON-LOT5-S318.md)).
 
 ### La v1 — tranchée par l'utilisateur le 2026-09-19 (ADR-174 D4)
 

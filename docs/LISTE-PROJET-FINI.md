@@ -165,7 +165,8 @@ pas recopiée ici (L137).
 - [ ] **4.9 Fusion et séparation de domaines** sans rupture — *absent*.
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
-- [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *absent*, et **hors de la représentation
+- [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *absent* — la seconde représentation est
+  comparée en S318 ([comparaison](validation/COMPARAISON-LOT5-S318.md), proposition APIC) — et **hors de la représentation
   actuelle par construction** : la surface de δ est une fonction hauteur (ADR-175 D5, qui renvoyait
   déjà à une seconde représentation). Lot 5 d'ADR-178 ; le choix particules / surface implicite
   reste une décision de l'utilisateur.
