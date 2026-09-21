@@ -103,7 +103,7 @@ Critères :
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — ADR-186 : APIC retenu pour la seconde représentation — décision de l'utilisateur.
+- [x] **P2** — ADR-186 : APIC retenu pour la seconde représentation — décision de l'utilisateur.
 - [ ] **P3** — E1 : le banc de la mer seule, écrit et lancé à 25 cm.
 - [ ] **P4** — E1 : le verdict, et ce qu'il dit de la restitution en mer réelle.
 - [ ] **P5** — E2 : le paquet dans la mer.
