@@ -115,7 +115,7 @@ GPU ; le sens W → δ ; toute écriture dans l'état répliqué de B ou de V.
 - [x] **P5** — essais unitaires : conservation par construction, refus, aucun double comptage.
 - [x] **P6** — le banc : l'ordre C à 12,5 cm, le volume net restitué à une région ; bilan δ +
   région publié à chaque pas.
-- [ ] **P7** — preuve publiée.
+- [x] **P7** — preuve publiée.
 - [ ] **P8** — rituel REPRISE §6.
 
 ### Notes de reprise
