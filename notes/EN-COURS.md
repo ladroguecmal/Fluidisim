@@ -132,7 +132,7 @@ décalage.
 - [x] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
 - [ ] **P4c** — *découpage déclaré* : le témoin du pas de temps moitié (6,25 cm, 5 ms), encore en
   calcul à 10:08.
-- [ ] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
+- [x] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
   phase, vitesse de groupe, réflexion, volume.
 - [x] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
 - [x] **P7a** — *découpage déclaré* : prédiction écrite (notes), oblique à 12,5 cm **lancé** à 20° et
@@ -1312,4 +1312,39 @@ route §3 bis, index, mémoire.
   2,57 ; 1,96 ; 1,68·10⁻⁴ m³/m sous 2 cm, **×4,0 exactement** entre 1 et 2 cm aux trois mailles —
   une grandeur d'**ordre deux**, limite extrapolée ≈ 1,5·10⁻⁴ m³/m. W n'a pas de moyenne : son
   receveur est B ou V (ADR-181 D1), et c'est l'ordre D.
+
+**P5 — les six propriétés du même transfert, attribuées (raccord S316, 2 cm).** Règle de P1 :
+converge → δ ; présent dès l'émission et ne converge pas → raccord ; existe sans δ → primitive.
+
+| propriété | 25 cm | 12,5 cm | 6,25 cm | lecture | **attributaire** |
+|---|---:|---:|---:|---|---|
+| amplitude à l'émission, `|Z_W|/|Z_δ|` à `ω₀` | 1,0276 | 1,0102 | 1,0057 | converge vers ≈ 1,003 | δ ; **raccord ≤ 0,3 %** |
+| amplitude du train le long du trajet | 1,000004 | 1,000002 | 0,999985 | exacte | **primitive : rien** |
+| `|Z_δ|` de x₁ à x₂ | 1,0000 | 1,0065 | 1,0109 | en `a²` ; part linéaire ≈ 0 | **physique que W n'a pas** |
+| spectre, écart | 7,3 % | 4,0 % | 2,8 % | limite ≈ 2 % | δ ; **raccord ≈ 2 %** |
+| spectre, centroïde | +0,29 % | +0,24 % | +0,19 % | lent | **raccord** |
+| spectre, largeur | −7,5 % | −2,6 % | −1,5 % | limite ≈ −1,2 % | δ ; raccord |
+| phase à l'émission | 0,0078 | 0,0032 | 0,0027 tour | limite ≈ 0,0025 tour (0,9°) | **raccord** |
+| phase à 10 λ | −0,914 | −0,237 | −0,045 tour | linéaire d'ordre 2 ; non linéaire croissante | **δ** ; physique que W n'a pas |
+| retard à l'émission | −0,062 | −0,034 | −0,031 s | limite ≈ −0,03 s | **raccord** |
+| vitesse de groupe de δ | −25,3 % | −7,2 % | −1,65 % | ordre ≈ 2,1 | **δ** |
+| réflexion, par sens | 1,1·10⁻⁷ | 8,2·10⁻⁷ | 1,5·10⁻⁶ | indépendante de `a`, ≪ 1 % | **éponge de δ** |
+| volume net | 100 % attente | 100 % | 100 % | `a²`, ≈ 1,5·10⁻⁴ m³/m | **architecture — ordre D** |
+| direction | *(P7b)* | | | | |
+
+**Ce qui revient au raccord, et c'est peu** : 0,9° de phase, 0,03 s de retard, ≤ 0,3 % d'amplitude,
+≈ 2 % d'écart de spectre avec un centroïde décalé de +0,2 %. Nature : une porteuse sous enveloppe
+gaussienne, identifiée par les moments de `η²`, ne décrit ni le **chirp** qu'un paquet acquiert en
+se dispersant avant la ligne, ni l'asymétrie du jacobien — c'est la « limite de modèle » que P2
+prévoyait (4,9 % extrapolés sur la forme ; ≈ 2 % mesurés sur le spectre).
+
+**Les deux fuites** : la demi-maille est un décalage pur (§ P3) ; la vitesse posée **aidait par
+accident** la largeur de spectre aux mailles grossières (−3,5 % contre −7,5 % à 25 cm) en
+compensant l'erreur de δ par une information qu'une scène n'a pas — et ne change plus rien à
+6,25 cm (−1,47 contre −1,51 %), où les deux vitesses coïncident.
+
+**Et une cinquième colonne que la règle ne prévoyait pas** : la non-linéarité. δ porte une part
+croissante de Stokes (phase) et un transfert d'énergie vers la fréquence centrale (amplitude), les
+deux en `a²` ; **W, linéaire par construction, ne les porte pas**. Ce n'est ni un défaut du raccord
+ni une erreur de δ : c'est la frontière du modèle de W, et elle se voit dès dix longueurs d'onde.
 
