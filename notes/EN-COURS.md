@@ -105,7 +105,7 @@ GPU ; le sens W → δ ; toute écriture dans l'état répliqué de B ou de V.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seul.
-- [ ] **P2** — ADR-185 : l'ordre D sous I-15 — receveur local en eau ouverte, δ asservi en
+- [x] **P2** — ADR-185 : l'ordre D sous I-15 — receveur local en eau ouverte, δ asservi en
   contenant, région identifiable, grandeur restituée.
 - [ ] **P3** — *quelle grandeur restituer ?* Sur le banc, confronter les candidats — flux à la
   ligne, flux aux faces (`outgoing`, ADR-179 D3), volume retiré par l'éponge — à ce que δ perd
