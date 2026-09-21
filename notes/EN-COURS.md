@@ -130,8 +130,7 @@ décalage.
 - [x] **P4b′** — *découpage déclaré* : 25 et 12,5 cm reçus ; **prédiction révisée pour 6,25 cm
   écrite avant son résultat** (notes).
 - [x] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
-- [ ] **P4c** — *découpage déclaré* : le témoin du pas de temps moitié (6,25 cm, 5 ms), encore en
-  calcul à 10:08.
+- [x] **P4c** — *découpage déclaré* : le témoin du pas de temps moitié (6,25 cm, 5 ms), reçu à 11:21.
 - [x] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
   phase, vitesse de groupe, réflexion, volume.
 - [x] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
@@ -1374,4 +1373,11 @@ posée (+0,12 % et +0,25 %) : le décalage du jacobien (P4b′) vaut ici `σ_k²
 périodogramme, donc le raccord qui la consomme. Le train est construit sur la direction lue (41,855°
 porté) : **le raccord transmet fidèlement une direction qu'il lit biaisée d'environ +1 à +2°**. La
 composante transverse parasite **décroît** avec la maille (×0,1) : aucune.
+
+**P4c — le pas de temps moitié (11:21).** 6,25 cm, 2 cm, 5 ms contre 10 ms : `D(10 λ)` −0,04443
+contre −0,04517 (**7·10⁻⁴**, prédit < 0,005) ; retard −0,388 contre −0,381 s ; `c_g` de δ −1,68 %
+contre −1,65 % ; volume −1,4 % ; `ω₀` lue +0,11 % — le maximum du spectre bouge plus que la phase
+à fréquence fixe, qui est la mesure robuste. **Le pas de temps ne contribue pas.** L'écart de
+spectre du raccord varie de 2,8 à 4,4 % entre les deux pas : la fourchette « 2 à 4 % » est la
+bonne lecture, pas un chiffre à la décimale.
 

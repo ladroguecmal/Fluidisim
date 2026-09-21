@@ -123,8 +123,11 @@ stations avant l'éponge, relevé sur **toutes** les colonnes. Trois mailles, de
 À 25 cm, lue aux extrémités, la même phase aurait rendu **+0,086** : c'est l'indétermination de
 S315, levée. La **part linéaire converge à l'ordre deux** (rapports 3,76 puis 4,45 ; ordres 1,91 et
 2,15) : c'est la dispersion numérique de δ. Le pas de temps, fixé à 10 ms aux trois mailles, est
-éprouvé à part, à 6,25 cm sous 5 ms : **en calcul à la publication de cette preuve** ; son
-résultat s'ajoute ici au commit P4c.
+éprouvé à part, à 6,25 cm sous 5 ms (21 253 pas, 3 h 07 de calcul) : `D(10 λ)` passe de −0,04517
+à **−0,04443** tour — **7·10⁻⁴**, pour moins de 0,005 prédit. Retard −0,381 → −0,388 s, `c_g` de δ
+−1,65 → −1,68 %, volume −1,4 %. **Le pas de temps ne contribue pas** à l'écart de phase : le
+soupçon écrit avant la mesure (P2) est levé, et c'est la non-linéarité et le jacobien qui
+expliquaient le point à 6,25 cm.
 
 ### 5.2 Les prédictions de S315 manquées, et la raison est physique
 
