@@ -127,7 +127,9 @@ décalage.
   complet) et révélé une fenêtre de retour calée sur la vitesse posée. Banc prolongé de 10 m, durée
   décidée sur la vitesse **mesurée** de δ, amplitude en paramètre ; **l'hypothèse de Stokes écrite
   avant les résultats à 12,5 et 6,25 cm** (notes).
-- [ ] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
+- [x] **P4b′** — *découpage déclaré* : 25 et 12,5 cm reçus ; **prédiction révisée pour 6,25 cm
+  écrite avant son résultat** (notes).
+- [>] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
 - [ ] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
   phase, vitesse de groupe, réflexion, volume.
 - [x] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
@@ -1204,4 +1206,45 @@ d'énergie : les signaux de **mode** du harnais n'en ont pas (au mur de C03, les
 sont en phase et ne déplacent pas les zéros). Le cinquième emploi, C02 sur B, lit une composante
 **unique** analytique : hors d'atteinte par construction. **A306 se clôt pour le harnais** ; le
 remède de L360 reste vrai, avec son corollaire : **le second estimateur a son propre biais**.
+
+**P4b — premier discriminant de Stokes : contredit à 25 cm.** Demi-amplitude (1 cm) contre 2 cm :
+`D(10 λ)` passe de −0,9142 à −0,9160 tour, soit **−0,0018** pour **−0,030 prédit** ; `ω₀` **monte**
+de 0,057 % (5,31913 → 5,32218) au lieu de descendre de 0,15 %. **À 25 cm, δ ne porte pas la
+correction de Stokes.** Deux lectures, et 12,5 cm les sépare : δ est linéaire à ce degré ; ou sa
+non-linéarité n'est pas résolue quand l'amplitude vaut 8 % d'une maille. Tout le reste est
+indépendant de l'amplitude à mieux que 1 % (retard −7,37/−7,40 s, `c_g` −25,3/−25,4 %, réflexion
+~1·10⁻⁷). Pas de remaniement de la prédiction : elle est écrite, elle est confrontée.
+
+**P4b′ — 12,5 cm reçu, et la prédiction de 6,25 cm révisée avant son résultat (08:34).**
+
+| | 25 cm, 2 cm | 25 cm, 1 cm | 12,5 cm, 2 cm | 12,5 cm, 1 cm |
+|---|---:|---:|---:|---:|
+| `D(10 λ)` déroulé, raccord S316 | **−0,9142** | −0,9160 | **−0,2372** | −0,2422 |
+| prédiction S315 §2 | −0,853 | | −0,165 | |
+| `k_W(ω₀) − k_δ(ω₀)`, rad/m | −0,2894 | −0,2907 | −0,0765 | −0,0781 |
+| retard de groupe à 10 λ | −7,37 s | −7,40 s | **−1,75 s** | −1,77 s |
+| `c_g` de δ contre l'onde émise | −25,3 % | −25,4 % | −7,2 % | −7,3 % |
+| `|Z_δ(ω₀)|` : x₂ / x₁ | 1,0000 | 1,0000 | 1,0065 | 1,0017 |
+
+1. **La non-linéarité de δ converge avec la maille**, elle n'en est pas indépendante : part non
+   linéaire à 2 cm, extrapolée en `a²`, **+0,0024** tour à 25 cm, **+0,0067** à 12,5 cm, pour
+   **+0,040** de Stokes plein. δ n'en porte que 6 %, puis 17 %. P4a′ avait tort sur ce point.
+2. **Les prédictions de S315 manquent de 0,06 et 0,07 tour, et la cause est physique, pas
+   numérique** : `k_δ(ω₀)` ≠ `k₀` (+1,0 % ; +0,64 %). Le raccord lit le maximum du spectre
+   **temporel** ; la condition initiale pose celui du spectre **spatial**. Les deux diffèrent du
+   jacobien `dk/dω = 1/c_g`, qui croît avec `k` : décalage `σ_k²/(2k)` = +0,56 % à σ = 3 m, contre
+   +0,64 % mesuré. S315 supposait `k_δ(ω₀) = k₀`.
+3. **Le retard de groupe tranche entre les deux prédictions de P2** : −1,75 s, contre 1,66 s lu par
+   S315 sur les enveloppes et 0,93 s sous une loi en `(k·dx)²` — **la seconde est réfutée**.
+4. **Les « 6,3 % de dissipation » de S315 n'en étaient pas** : à fréquence fixe, `|Z_δ|` ne perd
+   rien entre les deux lignes (1,0000 à 25 cm) ; il **gagne** même 0,65 % à 12,5 cm sous 2 cm et
+   0,17 % sous 1 cm — un transfert non linéaire vers la fréquence centrale, en `a²`. Le rapport
+   d'amplitudes de S315 mesurait la **différence d'étalement** de deux paquets de dispersions
+   différentes, pas une perte.
+
+**Prédiction pour 6,25 cm, depuis 25 et 12,5 seuls.** Partie linéaire (extrapolée à `a → 0`) :
+−0,9166 puis −0,2438, rapport 3,72 (ordre 1,90) ⇒ **−0,066 tour** à 6,25 cm. Partie non linéaire
+sous 2 cm : entre **+0,010 et +0,034** (de la tendance à 85 % de Stokes, A289). D'où **D(10 λ) entre
+−0,056 et −0,032 tour à 6,25 cm, 2 cm** — et donc **la prédiction de S315 (−0,0072) manquée**.
+Sous 1 cm : entre −0,063 et −0,057. Et le pas moitié : écart < 0,005 tour.
 

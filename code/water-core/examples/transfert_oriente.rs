@@ -1298,7 +1298,9 @@ fn ordre_c(dx: f32, dt_us: u64, amplitude: f32, prediction_s315: f64) -> Result<
                 cg_transit = (stations - 1) as f64 * dx as f64 / (af - a0);
                 let sigma_t = sf * core::f64::consts::SQRT_2;
                 t_retour = af + 2. * eponge as f64 / cg_transit - 4. * sigma_t;
-                pas = (((t_retour + 4. * sigma_t) / dt) as u64).max(n + 1);
+                // Jusqu'à **quatre** largeurs après le retour attendu, et non zéro : la fenêtre de
+                // S311 s'arrêtait au centre du paquet réfléchi et n'en voyait que la moitié.
+                pas = (((t_retour + 8. * sigma_t) / dt) as u64).max(n + 1);
             }
         }
         let time = SimTime(n * dt_us);
@@ -1369,12 +1371,54 @@ fn ordre_c(dx: f32, dt_us: u64, amplitude: f32, prediction_s315: f64) -> Result<
         &centrales.iter().map(|&j| k_delta[j]).collect::<Vec<_>>(),
     );
     let dissipation = module(z_delta_plein[8][s2]) / module(z_delta_plein[8][0]);
+
+    // ── **La réflexion, par sens de propagation.** Une station seule ne sait pas dans quel sens va
+    //    ce qu'elle voit : à 25 cm, les ondes courtes de δ sont si lentes qu'elles passent encore
+    //    **vers l'avant** pendant la fenêtre de retour, et la jauge les comptait comme réfléchies.
+    //    Sur les stations du prolongement, `Z(x) = R·e^{ikx} + L·e^{−ikx}` à chaque fréquence, `k`
+    //    étant celui **de δ**, mesuré ; `R` monte, `L` descend. Moindres carrés, deux inconnues.
+    let separe = |z: &[(f64, f64)], k: f64| -> ((f64, f64), (f64, f64)) {
+        let (mut sr, mut si, mut n) = (0f64, 0f64, 0f64);
+        let (mut b1r, mut b1i, mut b2r, mut b2i) = (0f64, 0f64, 0f64, 0f64);
+        for (q, &(zr, zi)) in z.iter().enumerate() {
+            let x = q as f64 * dx64;
+            let (sn, cs) = (k * x).sin_cos();
+            // `conj(e^{ikx})·Z` et `conj(e^{−ikx})·Z`
+            b1r += cs * zr + sn * zi;
+            b1i += cs * zi - sn * zr;
+            b2r += cs * zr - sn * zi;
+            b2i += cs * zi + sn * zr;
+            // `S = Σ e^{−2ikx}`
+            let (s2n, s2c) = (2. * k * x).sin_cos();
+            sr += s2c;
+            si -= s2n;
+            n += 1.;
+        }
+        // [[n, S], [conj S, n]]·[R, L] = [b1, b2]
+        let det = n * n - (sr * sr + si * si);
+        let (sb2r, sb2i) = (sr * b2r - si * b2i, sr * b2i + si * b2r);
+        let r = ((n * b1r - sb2r) / det, (n * b1i - sb2i) / det);
+        let (sb1r, sb1i) = (sr * b1r + si * b1i, sr * b1i - si * b1r);
+        let l = ((n * b2r - sb1r) / det, (n * b2i - sb1i) / det);
+        (r, l)
+    };
+    let n_retour = ((t_retour - rel_delta.t0) / dt).max(0.) as usize;
+    let (mut inc_r, mut inc_l, mut ret_r, mut ret_l) = (0f64, 0f64, 0f64, 0f64);
+    for (j, &w) in pulsations.iter().enumerate() {
+        let z_ret = projette(&rel_delta, w, n_retour, rel_delta.instants());
+        let (ri, li) = separe(&z_delta_plein[j][s2..], k_delta[j]);
+        let (rr, lr) = separe(&z_ret[s2..], k_delta[j]);
+        inc_r += module(ri).powi(2);
+        inc_l += module(li).powi(2);
+        ret_r += module(rr).powi(2);
+        ret_l += module(lr).powi(2);
+    }
     println!(
         "ORDRE_C_S316 delta dx={dx} dt_us={dt_us} amplitude={amplitude} nx={nx} nz={} pas={pas}          stations={stations} s2={s2} cg_transit={cg_transit:.5} duree_calcul_s={duree_s:.0} \
          omega0={omega0:.5} k_pose={k:.5} k_delta={:.5} k_train={k_train:.5} \
          cg_delta={:.5} cg_train={cg_train:.5} cg_pose={cg_pose:.5} ecart_cg_delta={:.5} \
          saut_max_tours={saut_delta:.4} dissipation_amplitude_10l={:.5} \
-         arrivee1_s={:.3} arrivee2_s={:.3} reflexion_en_energie={reflexion:e} \
+         arrivee1_s={:.3} arrivee2_s={:.3} reflexion_une_station={reflexion:e}          reflechi_pendant_passage={:e} reflechi_au_retour={:e} avant_au_retour={:e} \
          volume_en_attente_m3={:e} volume_transfere_m3={:e}",
         domain.nz,
         k_delta[8],
@@ -1383,6 +1427,9 @@ fn ordre_c(dx: f32, dt_us: u64, amplitude: f32, prediction_s315: f64) -> Result<
         1. - dissipation,
         sig1.arrivee_s,
         sig2.arrivee_s,
+        inc_l / inc_r,
+        ret_l / inc_r,
+        ret_r / inc_r,
         volume.pending(),
         volume.transferred()
     );
@@ -1417,7 +1464,7 @@ fn ordre_c(dx: f32, dt_us: u64, amplitude: f32, prediction_s315: f64) -> Result<
         let medium = Medium { gravity: G, density: RHO, depth: h0, max_slope: BREAKING_SLOPE };
         let train =
             WaveTrain::<128>::new(spec, medium).map_err(|e| format!("train {nom} refusé : {e:?}"))?;
-        let abscisses: Vec<f32> = (ligne1..=ligne2).map(centre).collect();
+        let abscisses: Vec<f32> = (ligne1..=ligne_fin).map(centre).collect();
         let rel_train =
             releve_train(&train, &abscisses, spec.origin[1], rel_delta.t0, dt, n_fin)?;
         // Première station au relevé **complet** pour le train : 4,5 enveloppes au-delà de sa
@@ -1427,17 +1474,38 @@ fn ordre_c(dx: f32, dt_us: u64, amplitude: f32, prediction_s315: f64) -> Result<
             return Err(format!("{nom} : trop peu de stations au relevé complet ({s_a})"));
         }
 
-        let mut d_par_pulsation: Vec<Vec<f64>> = Vec::new();
+        let mut bruts: Vec<Vec<f64>> = Vec::new();
         let mut z_train: Vec<Vec<(f64, f64)>> = Vec::new();
-        let mut saut = 0f64;
         for &w in &pulsations {
             let zw = projette(&rel_train, w, n_naissance, n_fin);
             let zd = projette(&rel_delta, w, n_naissance, n_fin);
-            let brut: Vec<f64> = zw.iter().zip(&zd).map(|(a, b)| tours(*a) - tours(*b)).collect();
-            let (d, s) = deroule(&brut);
-            saut = saut.max(s);
-            d_par_pulsation.push(d);
+            bruts.push(zw.iter().zip(&zd).map(|(a, b)| tours(*a) - tours(*b)).collect());
             z_train.push(zw);
+        }
+        // **Le déroulement a deux directions.** Chaque fréquence se déroule le long de `x` depuis
+        // la première ligne ; mais la valeur **à** la première ligne n'est connue que modulo un
+        // tour, et deux fréquences voisines peuvent y tomber de part et d'autre de ±½. Au premier
+        // passage, le retard à l'émission du raccord S315 valait +4,8 s pour −0,06 s au S316 —
+        // un tour d'écart entre deux fréquences, lu comme un retard. On déroule donc d'abord **en
+        // `ω`**, à la première ligne, depuis la fréquence centrale ; puis chaque fréquence en `x`
+        // depuis cette ancre.
+        let mut ancre = vec![0f64; pulsations.len()];
+        ancre[8] = bruts[8][0];
+        for j in 9..pulsations.len() {
+            let d = bruts[j][0] - ancre[j - 1];
+            ancre[j] = ancre[j - 1] + d - d.round();
+        }
+        for j in (0..8).rev() {
+            let d = bruts[j][0] - ancre[j + 1];
+            ancre[j] = ancre[j + 1] + d - d.round();
+        }
+        let mut d_par_pulsation: Vec<Vec<f64>> = Vec::new();
+        let mut saut = 0f64;
+        for (j, brut) in bruts.iter().enumerate() {
+            let (d, s) = deroule(brut);
+            saut = saut.max(s);
+            let decalage = ancre[j] - d[0];
+            d_par_pulsation.push(d.iter().map(|v| v + decalage).collect());
         }
         let d0 = &d_par_pulsation[8];
         let ecart_10l = d0[s2] - d0[0];
