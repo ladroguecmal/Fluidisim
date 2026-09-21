@@ -116,7 +116,7 @@ Critères, écrits avant le code :
 - [x] **P6a** — candidat 3, ensemble de niveaux sur grille MAC.
 - [x] **P6b** — candidat 3 au repos et en ballottement.
 - [x] **P7** — la rupture de barrage, les trois candidats, deux résolutions.
-- [ ] **P8** — preuve publiée : le tableau chiffré, et ce qu'il ne tranche pas.
+- [x] **P8** — preuve publiée : le tableau chiffré, et ce qu'il ne tranche pas.
 - [ ] **P9** — rituel REPRISE §6.
 
 ### Notes de reprise
