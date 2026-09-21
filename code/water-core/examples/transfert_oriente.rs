@@ -1450,6 +1450,82 @@ fn ordre_c(dx: f32, dt_us: u64, prediction_s315: f64) -> Result<(), String> {
     Ok(())
 }
 
+/// **La part de la primitive seule** — sans δ, sans ligne, sans raccord.
+///
+/// Le train est une somme **discrète** de 128 modes, bande tronquée à ±4 écarts-types, phase en
+/// virgule fixe, amplitudes en `f32`. Ce qu'on lui a demandé est un paquet gaussien de spectre
+/// **continu**. L'écart entre les deux est la seule erreur qui lui appartienne, et elle se calcule :
+/// l'évolution exacte de la demande est une intégrale sur `k`, évaluée ici en `f64` par quadrature
+/// fine sur ±8 écarts-types — **une autre écriture**, pas le train relu.
+///
+/// Deux instants : la **naissance**, où l'on compare à la forme demandée elle-même, et l'âge du
+/// trajet de dix longueurs d'onde, où l'on compare à l'évolution exacte.
+fn primitive() -> Result<(), String> {
+    let tau = core::f64::consts::TAU;
+    let g = G as f64;
+    // La demande du raccord S316 à 12,5 cm : `ω₀` lue 5,5056, `k = ω₀²/g`, `σ` ≈ 3 m.
+    let (k0, sigma, a, phi) = (5.5056f64 * 5.5056 / g, 3.0f64, 0.02f64, 0.3f64);
+    let origine = [42f32, 0.0625];
+    let age_trajet = 40f64;
+    let spec = TrainSpec {
+        origin: origine,
+        birth: SimTime(0),
+        frame: FrameId(0),
+        cell: 0,
+        direction: [1., 0.],
+        wavelength_m: (tau / k0) as f32,
+        amplitude_m: a as f32,
+        envelope_m: sigma as f32,
+        spread_turns: 0.,
+        directions: 1,
+        phase: PhaseQ32((phi * 4_294_967_296.0) as u32),
+        age_us: (age_trajet * 1e6) as u64,
+        radius_m: 80.,
+        spread_limit: 0.35,
+    };
+    let medium = Medium { gravity: G, density: RHO, depth: 2.5, max_slope: BREAKING_SLOPE };
+    let train = WaveTrain::<128>::new(spec, medium).map_err(|e| format!("train refusé : {e:?}"))?;
+    // La phase que le train porte réellement : la quantification Q32 de `φ`.
+    let phi_q = spec.phase.0 as f64 / 4_294_967_296.0 * tau;
+    let exact = |d: f64, t: f64| -> f64 {
+        let (n, sk) = (4000usize, 1. / sigma);
+        let (k_min, pas) = (k0 - 8. * sk, 16. * sk / n as f64);
+        let mut somme = 0f64;
+        for i in 0..=n {
+            let k = k_min + i as f64 * pas;
+            let poids = if i == 0 || i == n { 0.5 } else { 1. };
+            let amp = (-0.5 * ((k - k0) / sk).powi(2)).exp() / (sk * tau.sqrt());
+            somme += poids * amp * (k * d - (g * k).sqrt() * t + phi_q).cos() * pas;
+        }
+        a * somme
+    };
+    for (nom, t) in [("naissance", 0f64), ("dix_longueurs", age_trajet)] {
+        let centre = train.group_speed() as f64 * t;
+        let (mut e2, mut s2) = (0f64, 0f64);
+        let n = 3000usize;
+        let demi = 6. * train.envelope_at((t * 1e6) as u64) as f64;
+        let mut max_ecart = 0f64;
+        for i in 0..n {
+            let d = centre - demi + 2. * demi * (i as f64 + 0.5) / n as f64;
+            let s = train
+                .sample(FrameId(0), 0, [origine[0] + d as f32, origine[1]], SimTime((t * 1e6) as u64))
+                .map_err(|e| format!("train {e:?}"))?;
+            let r = exact(d, t);
+            e2 += (s.eta as f64 - r) * (s.eta as f64 - r);
+            s2 += r * r;
+            max_ecart = max_ecart.max((s.eta as f64 - r).abs());
+        }
+        println!(
+            "PRIMITIVE_S316 instant={nom} age_s={t} modes={} erreur_forme={:e} ecart_max_m={max_ecart:e} \
+             ecart_max_relatif={:e}",
+            train.mode_count(),
+            (e2 / s2).sqrt(),
+            max_ecart / a
+        );
+    }
+    Ok(())
+}
+
 fn main() -> Result<(), String> {
     match std::env::args().nth(1).unwrap_or_else(|| "paquet".into()).as_str() {
         // **Essai 1** — une onde progressive quasi monochromatique : enveloppe large, donc bande
@@ -1482,6 +1558,8 @@ fn main() -> Result<(), String> {
         }
         // **Ordre C, préalable** — l'instrument de phase déroulée, sur un écart connu (S316).
         "instrument" => instrument(),
+        // **Ordre C** — la primitive seule, contre l'évolution exacte de sa propre demande.
+        "primitive" => primitive(),
         // **Ordre C** — une maille par appel, pour que les trois tournent en parallèle ; les
         // prédictions de S315 §2 sont passées telles qu'écrites, jamais recalculées.
         "ordre_c" => {

@@ -126,7 +126,7 @@ décalage.
 - [ ] **P4b** — la phase à 10 λ **déroulée**, à trois mailles, contre les prédictions de S315.
 - [ ] **P5** — les six propriétés **sur le même transfert**, à trois mailles : amplitude, spectre,
   phase, vitesse de groupe, réflexion, volume.
-- [ ] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
+- [x] **P6** — la part de la **primitive seule** : le train à sa naissance contre la forme demandée.
 - [ ] **P7** — l'oblique à **maille plus fine** : l'écart d'angle se partage-t-il entre δ et
   l'instrument comme S315 l'a prévu ? *(si le coût mesuré le permet ; sinon, le coût est publié et
   l'essai daté dans la file)*.
@@ -1134,3 +1134,11 @@ plus large qu'une longueur d'onde. La chaîne est fermée par un essai unitaire 
 `(k_x, k_y)` **mesurés** : la direction portée est la direction lue à **0,05°** près aux trois
 angles. Le banc est corrigé pour dimensionner son enveloppe sur la longueur d'onde **lue** ; la
 correction n'a pas été rejouée sur δ.
+
+**P6 — la primitive seule, contre l'évolution exacte de sa propre demande.** Quadrature continue
+en `f64` sur ±8 écarts-types — une autre écriture, pas le train relu. Demande du raccord S316 à
+12,5 cm (`k = ω₀²/g`, σ = 3 m, a = 20 mm). **Erreur de forme 1,02·10⁻⁴ à la naissance, 1,04·10⁻⁴
+après 40 s** — dix longueurs d'onde de trajet ; écart maximal **1,8 µm**. C'est la troncature de
+la bande à ±4 σ : `√erfc(4)` ≈ 1,2·10⁻⁴. Elle **ne croît pas** en se propageant. Prédiction de P2
+(< 10⁻³) tenue. En usage : 1,8 µm contre 3 mm de tolérance d'image — la primitive ne porte **aucune**
+part mesurable des écarts du transfert.
