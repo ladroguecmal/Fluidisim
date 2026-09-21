@@ -72,6 +72,7 @@ pub mod wave_journal;
 pub mod impact_field;
 pub mod radial_impact;
 pub mod wave_train;
+pub mod regional_level;
 pub mod impact_generator;
 pub mod composition;
 pub mod prepared_water;

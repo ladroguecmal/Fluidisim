@@ -58,6 +58,8 @@ pub enum LedgerError {
 pub struct Ledger3 {
     outgoing: f64,
     transferred: f64,
+    /// Volume **reçu par une région** — S317, ADR-185. Ne croît que par un reçu.
+    restituted: f64,
     numerical: f64,
     worst_numerical: f64,
     steps: u64,
@@ -93,14 +95,37 @@ impl Ledger3 {
         self.transferred
     }
 
-    /// **En attente de restitution** — sorti, non transféré. Dérivé, jamais écrit : aucun appel
-    /// ne peut le réduire autrement qu'en transférant.
+    /// **Présente le reçu d'une région** — S317, [ADR-185] D7. C'est la **seule** autre façon,
+    /// avec le transfert à W, de faire baisser l'attente : le reçu prouve qu'une région a pris le
+    /// volume, et il est consommé ici, une fois.
+    ///
+    /// [ADR-185]: ../../../docs/adr/ADR-185-ordre-d-receveur-sous-i15.md
+    pub fn account_restitution(
+        &mut self,
+        receipt: crate::regional_level::Receipt,
+    ) -> Result<(), LedgerError> {
+        let v = receipt.volume();
+        if !v.is_finite() {
+            return Err(LedgerError::NonFinite);
+        }
+        self.restituted += v;
+        Ok(())
+    }
+
+    /// Ce qu'une région **a reçu** — par reçus, jamais par déclaration.
+    pub fn restituted(&self) -> f64 {
+        self.restituted
+    }
+
+    /// **En attente de restitution** — sorti, ni transféré à W, ni reçu par une région. Dérivé,
+    /// jamais écrit : aucun appel ne peut le réduire autrement qu'en transférant ou en présentant
+    /// un reçu.
     ///
     /// **Négatif, il dit qu'on a créé de l'eau**, pas que le compte est bon. Voir [`created`].
     ///
     /// [`created`]: Self::created
     pub fn pending(&self) -> f64 {
-        self.outgoing - self.transferred
+        self.outgoing - self.transferred - self.restituted
     }
 
     /// La part du `pending` qui est **de l'eau créée** : `max(0, −pending)`. Toute valeur non
@@ -129,7 +154,18 @@ impl Ledger3 {
     /// **La conservation globale est-elle revendicable ?** ADR-180 D1 interdit de l'affirmer en
     /// prose ; cette méthode la calcule. Elle est fausse tant qu'un volume reste en attente, et
     /// fausse aussi si de l'eau a été créée.
+    ///
+    /// **Et fausse dès qu'une région locale a reçu quoi que ce soit** (S317, ADR-185 §3) : un
+    /// receveur local ferme le bilan **de la représentation**, pas celui du monde, que seules les
+    /// couches autoritaires portent. Voir [`Self::representation_closed`].
     pub fn global_conservation_claimable(&self) -> bool {
+        self.steps > 0 && self.pending() == 0.0 && self.restituted == 0.0
+    }
+
+    /// **Le bilan de la représentation est-il fermé ?** Rien en attente, rien de créé : tout ce
+    /// qui est sorti est parti dans W ou dans une région locale, par reçus. C'est ce que l'ordre D
+    /// peut revendiquer — et rien de plus.
+    pub fn representation_closed(&self) -> bool {
         self.steps > 0 && self.pending() == 0.0
     }
 }

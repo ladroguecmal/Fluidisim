@@ -107,12 +107,12 @@ GPU ; le sens W → δ ; toute écriture dans l'état répliqué de B ou de V.
 - [x] **P1** — amorce, jeton, plan seul.
 - [x] **P2** — ADR-185 : l'ordre D sous I-15 — receveur local en eau ouverte, δ asservi en
   contenant, région identifiable, grandeur restituée.
-- [ ] **P3** — *quelle grandeur restituer ?* Sur le banc, confronter les candidats — flux à la
+- [>] **P3** — *quelle grandeur restituer ?* Sur le banc, confronter les candidats — flux à la
   ligne, flux aux faces (`outgoing`, ADR-179 D3), volume retiré par l'éponge — à ce que δ perd
   réellement. Écrit avant de coder le receveur.
-- [ ] **P4** — `RegionalLevel` dans le cœur : emprise, volume reçu, niveau, frontière comptable,
+- [x] **P4** — *fusionnée avec P5, déclaré* — `RegionalLevel` dans le cœur : emprise, volume reçu, niveau, frontière comptable,
   refus ; reçu non falsifiable entre le registre et la région.
-- [ ] **P5** — essais unitaires : conservation par construction, refus, aucun double comptage.
+- [x] **P5** — essais unitaires : conservation par construction, refus, aucun double comptage.
 - [ ] **P6** — le banc : l'ordre C à 12,5 cm, le volume net restitué à une région ; bilan δ +
   région publié à chaque pas.
 - [ ] **P7** — preuve publiée.
@@ -1297,4 +1297,22 @@ contre −1,65 % ; volume −1,4 % ; `ω₀` lue +0,11 % — le maximum du spect
 à fréquence fixe, qui est la mesure robuste. **Le pas de temps ne contribue pas.** L'écart de
 spectre du raccord varie de 2,8 à 4,4 % entre les deux pas : la fourchette « 2 à 4 % » est la
 bonne lecture, pas un chiffre à la décimale.
+**P3 — prédiction, écrite avant le banc (20:27).** ADR-179 D3 a fixé la grandeur : le flux sortant
+à la surface de contrôle. Ce qui reste à montrer est que ce flux **ferme le bilan de l'intérieur** —
+le volume de δ entre une ligne gauche, au bord de l'éponge, et la ligne droite de l'ordre C :
+`ΔV_intérieur + Q_sortant(droite) + Q_sortant(gauche) = résidu`, au **plancher d'arrondi** puisque
+le transport télescope exactement (S310, S313 : 10⁻¹³ m³ par pas). Prédit : résidu cumulé ≤ 10⁻¹⁰
+m³ sur tout le trajet, pour un sortant net d'ordre 10⁻⁵ m³ (4,9·10⁻⁵ à 12,5 cm sous 2 cm, S316).
+Et le volume que les éponges effacent ensuite, cumulé, **rejoint** ce sortant une fois le paquet
+entré dans l'éponge — la même eau comptée plus tard, que la région ne doit pas recevoir deux fois.
+
+**P4 + P5 — le receveur (20:35).** `regional_level.rs` : une région adossée à un segment de ligne
+de contrôle, du côté sortant, profondeur déclarée ; niveau = volume reçu / aire ; `boundary_out`
+= 0, choix déclaré (ADR-185 D8) ; refus `Line`, `Outward`, `Depth`, `Domain`, `NonFinite` — une
+région qui déborderait de sa cellule est refusée, l'océan ne s'obtient pas en élargissant.
+`Receipt` : ne se construit que par `receive`, ne se copie pas, se consomme au registre.
+`Ledger3` : `restituted` ne croît que par `account_restitution(reçu)` ; `pending` en retranche ;
+**`global_conservation_claimable` devient faux dès qu'une région locale a reçu** — la
+représentation se ferme (`representation_closed`), pas le monde (ADR-185 §3). Sept essais neufs,
+**verts au premier passage** ; les huit du registre inchangés.
 
