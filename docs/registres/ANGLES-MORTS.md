@@ -4183,3 +4183,42 @@ B d'une composante (λ = 4 m), δ sans perturbation **croît** — 0,28 cm puis 
 de S274 ([preuve](../validation/MER-S319.md) §4–5). **Il bloque l'ordre E** : la restitution de S317
 reçoit des centaines de fois le volume d'un paquet. Voies à choisir : rappel lent vers zéro, durée de
 vie bornée (I-12), dispersion d'amplitude dans B.
+
+**A311 — S320, 2026-09-22 (sévérité 2, ouverte). L'air n'est pas modélisé : une bulle enfermée est à
+pression nulle.** Dans APIC comme dans les deux autres candidats de S318, une poche d'air enfermée
+garde la pression atmosphérique quelle que soit sa profondeur, et l'eau s'y engouffre sous la pression
+hydrostatique. Une bulle réelle se comprimerait, rebondirait et remonterait. B10 reçoit donc la
+**fermeture** de la cavité, pas **la vie de la bulle** après ([preuve](../validation/B10-APIC-S320.md)
+§6). **Conséquence** : le jet qui suit le pincement, et tout ce qui dépend de l'air enfermé, sont hors
+de portée. **Déclencheur** : C20 en production, ou une revue visuelle d'un impact. Remède à éprouver :
+une pression de bulle par volume enfermé (loi adiabatique), avant une phase d'air complète.
+
+**A312 — S320, 2026-09-22 (sévérité 2, ouverte). La couronne et le jet d'un impact sont des grandeurs
+de la maille.** De `D/dx` = 8 à 16, ils changent de 40 à 60 %, dans un sens ou dans l'autre, alors que
+le temps de pincement et la cavité maximale convergent à 10 % près
+([preuve](../validation/B10-APIC-S320.md) §5). Sans tension de surface ni viscosité, rien n'arrête
+l'amincissement d'une nappe. **Conséquence** : un δ de production, à maille de jeu, aura une gerbe
+fixée par sa maille. **Déclencheur** : le choix de la maille de production de la seconde
+représentation, ou le premier verdict de l'utilisateur sur une gerbe. Remède à chercher : un modèle
+sous-maille de nappe (rupture en gouttes, embruns), jugé sur l'image et non sur la convergence.
+
+**A313 — S320, 2026-09-22 (sévérité 1, ouverte). Le volume géométrique d'APIC n'a pas de mesure
+propre en écoulement agité.** La masse est exacte, mais le volume dépend de la règle de séparation à
+±10 % (0,4 contre 0,45 maille, P3). L'occupation est biaisée (−8 % sans cavité). L'écart entre niveau
+géométrique et niveau de masse **borne** à 0,7 maille loin du corps, sans tenir la similitude
+([preuve](../validation/B10-APIC-S320.md) §2 et §6). **Conséquence** : le jour où l'eau passera des
+particules aux colonnes, c'est le **volume** qui doit se conserver au raccord, et aucun instrument ne
+le mesure encore. **Déclencheur** : le raccord particules ↔ colonnes (ADR-186 §3) — avant lui, un
+compteur de volume géométrique global (aire sous la surface reconstruite, moins le corps et l'air
+enfermé), éprouvé sur le ballottement et le corps lent. **Hypothèse sur la cause du tassement**
+([lecture de simufluid](LECTURE-SIMUFLUID-S320.md) §3) : la loi de conservation géométrique est
+violée — des cellules entières basculent de fluide à solide sans que la pression voie le volume
+balayé. Épreuve : divergence cible des cellules coupées prise des volumes balayés, corps lent **sans**
+séparation.
+
+**A289 — note datée du 2026-09-22 (S320).** simufluid, même architecture fond + résidu, a mesuré une
+dérive du résidu sous houle **portée par le nombre de pas par période** : son taux change de signe
+entre 256 et 4096 pas, à physique fixée, et se reproduit avec un fond nul
+([lecture](LECTURE-SIMUFLUID-S320.md) §1). S319 n'a fait varier que la maille.
+**Avant l'arbitrage** : le témoin E1 à maille fixe et à trois pas de temps. Si le taux en dépend, la
+voie « dispersion d'amplitude dans B » ne soigne pas la cause.

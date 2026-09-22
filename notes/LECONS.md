@@ -6431,3 +6431,29 @@ personne n'avait atteint, parce qu'aucun essai ne durait dix périodes.
 **La règle.** Un essai de couplage dure au moins la vie qu'on prête à ce qu'il couple — et, faute de
 la connaître, plusieurs dizaines de périodes. Un déclencheur d'angle mort qui n'est jamais atteint par
 les essais n'est pas un déclencheur : c'est un report.
+
+## L370 — « Masse exacte » ne dit rien du volume
+
+S320. APIC porte sa masse au bit : chaque particule pèse la même chose et aucune ne disparaît. S318
+en avait conclu « volume exact », et l'avait écrit. Le premier corps qui pousse l'eau a montré le
+contraire : les particules repoussées **se tassent** contre sa paroi au lieu de soulever l'eau, et le
+niveau ne monte que de 39 % du volume déplacé, **la masse restant exacte**. Le diagnostic qui aurait
+dû le dire — l'occupation des cellules — est lui-même biaisé (−8 % sans aucune cavité), et ne mesure
+pas non plus un volume.
+
+**La règle.** Dans une représentation particulaire, la conservation de la masse et celle du volume
+sont **deux propriétés**, et la seconde ne découle pas de la première. Mesurer le volume par la
+géométrie — là où la surface reconstruite place l'eau —, jamais par le compte des particules ni par un
+estimateur plafonné.
+
+## L371 — Une similitude exacte prouve l'absence d'échelle cachée, pas la prévisibilité
+
+S320. Deux entrées de même `Fr` à deux échelles donnaient les mêmes grandeurs sans dimension à 10⁻⁴
+près. Une perturbation de 10⁻⁶ du seul `Fr`, à la **même** échelle, déplaçait le pincement de 8 % et le
+jet de 4 %. La similitude était exacte **parce que le calcul flottant est presque invariant d'échelle**
+— positions doublées exactement, suites de pas homologues —, pas parce que l'écoulement était
+déterminé. Elle a pourtant bien servi à ce qu'elle mesure : quatre fautes du banc, dont une horloge
+d'échantillonnage fixe qui bornait le pas, ne se sont vues qu'à elle.
+
+**La règle.** Un essai de similitude se lit comme un **détecteur d'échelle absolue** dans le code. La
+barre d'erreur d'une mesure se lit par **perturbation** à la même échelle, et se publie à côté.

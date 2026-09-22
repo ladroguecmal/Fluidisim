@@ -55,3 +55,11 @@ ne portent pas.
 
 **Et « retenu » ne veut pas dire « reçu ».** Le candidat n'a vu ni cavité, ni trois dimensions, ni
 carte ; sa réception se fera sur B10 et C20, pas sur ce choix.
+
+---
+
+**Note du 2026-09-22 (S320).** B10 est mesuré ([B10-APIC-S320](../validation/B10-APIC-S320.md)).
+Une cavité se forme et se pince à `Fr` = 2 et 4. Le temps de pincement est indépendant de l'échelle et
+converge à 5 % près ; la couronne et le jet sont des grandeurs de la maille (A312). La bulle enfermée
+n'est pas de l'air (A311). La « masse exacte » de §2 est juste, mais **le volume géométrique ne l'est
+pas** sans séparation des particules, et n'a pas encore de mesure propre (A313, L370).

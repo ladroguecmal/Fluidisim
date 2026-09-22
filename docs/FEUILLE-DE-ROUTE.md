@@ -136,7 +136,7 @@ W ne porte pas ([S316](validation/ORDRE-C-S316.md)) ; **ordre D**, un receveur l
 exactement nulle ([S317](validation/RESTITUTION-S317.md)). **Ordre E bloqué** : sous une vraie mer, δ
 croît jusqu'à trois fois la houle (A289, [S319](validation/MER-S319.md)).
 
-*Manque* : cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité (B10) ; phase
+*Manque* : cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité dans δ (B10 reçu sur le banc 2D d'APIC, [S320](validation/B10-APIC-S320.md)) ; phase
 δ/B (A289) ; A274 ; A286 ; **compteur carte, énergie, quantité de mouvement, sens W → δ** (A302) ;
 **résidu biaisé en cas ouvert** (A305).
 
@@ -253,7 +253,8 @@ perfectionnement visuel ne s'ouvre avant que la physique le demande. Le profil d
 ([ADR-184](adr/ADR-184-seconde-representation-en-parallele.md)), l'utilisateur fait avancer le lot 5
 **en parallèle** du lot 2, par sessions alternées ; la v1 reste la porte D. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**
-par l'utilisateur ([ADR-186](adr/ADR-186-apic-seconde-representation.md)).
+par l'utilisateur ([ADR-186](adr/ADR-186-apic-seconde-representation.md)) ; **S320** : B10 sur APIC,
+une cavité se pince au même instant à toute échelle ([S320](validation/B10-APIC-S320.md)).
 
 ### La v1 — tranchée par l'utilisateur le 2026-09-19 (ADR-174 D4)
 

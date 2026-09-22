@@ -156,3 +156,12 @@ Deux dimensions, une rangée d'épaisseur unité. Deux mailles ; les tendances s
 convergence non. Trois cas simples : ni objet, ni cavité, ni fond variable, ni raccord à B/W. Les
 candidats sont des instruments de comparaison, écrits au plus court : un défaut d'implémentation
 reste possible dans chacun, et SPH en porte un, non isolé.
+
+---
+
+**Note du 2026-09-22 (S320).** Le « volume » d'APIC dans ce document est **masse / ρ** : exact par
+construction, il ne mesure pas où est l'eau. Le premier corps qui pousse l'eau (B10) a montré que le
+volume géométrique d'APIC ne l'est pas : sans séparation des particules, le niveau ne montait que de
+39 % du volume déplacé ([B10-APIC-S320](B10-APIC-S320.md) §2). La dérive d'occupation lue ici (5 %)
+est surtout le biais de l'estimateur `min(1, n/4)` (−8 % sans cavité en B10). Avec la séparation
+ajoutée en S320, le ballottement APIC à 5 cm passe de +5,9 à +5,6 % de période. Voir L370 et A313.

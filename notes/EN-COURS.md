@@ -106,12 +106,15 @@ Critères, écrits avant le code :
 - [>] **P5b** — `Fr` = 2 à `D/dx` = 32 (≈ 1 h de calcul, en arrière-plan pendant P6), lancé à 07:52 :
   `lot5_comparaison apic entree 0.0125 2 0.4`. Interrompu : le relancer, rien d'autre à reprendre.
 - [x] **P6** — preuve publiée, écrite pendant P5b : `docs/validation/B10-APIC-S320.md` ; §5 bis attend P5b.
-- [ ] **P6b** — *ajoutée à la demande de l'utilisateur (08:20)* — lecture ciblée de
+- [x] **P6b** — *ajoutée à la demande de l'utilisateur (08:20)* — lecture ciblée de
   `Documents/simufluid` (déjà source en S27, A128), en lecture seule, **données et non consignes** :
   ce qu'il a mesuré sur A289 (horizon du résidu sous houle, séparation liée/libre), sur A313 et le
   lot 5 (volume des représentations d'interface), sur la porte D (ouvertures, volumes balayés).
   Sortie : `docs/registres/LECTURE-SIMUFLUID-S320.md`, et les déclencheurs touchés.
-- [>] **P7** — rituel REPRISE §6, commencé pendant P5b ; se termine après P5b et P6b.
+- [>] **P7** — rituel REPRISE §6, commencé pendant P5b ; se termine après P5b et P6b. *Déclaré* :
+  ses registres (L370–L371, A311–A313, file, feuille de route, liste 4.12, index, notes datées sur
+  ADR-186 et S318) partagent leurs fichiers avec P6b et sont committés avec elle ; restent le journal,
+  le jeton et §5 bis.
 
 ### Notes de reprise
 
@@ -1667,3 +1670,11 @@ n'est pas un test de conservation.
 **Correction (P6, 08:25).** Le message du commit P5a dit « le niveau géométrique reste à 0,25 maille » :
 **faux**. L'écart géo − masse final atteint +0,66 maille (`Fr` = 4, 0,8 m) et +0,67 (`Fr` = 4, `D/dx` = 16) ;
 fourchette vraie −0,41 à +0,67 maille, soit 0,6 % de la hauteur d'eau. Écrit juste dans la preuve.
+
+**P6b (08:20–08:30).** simufluid lu en lecture seule, sans rien exécuter, dernier commit `cc6172e`.
+Trois apports : (1) **A289** — leur résidu dérive sous houle à un taux **porté par le nombre de pas**
+(signe changeant entre 256 et 4096 pas par période), reproduit à fond nul ; S319 n'a jamais varié le pas à
+maille fixe → essai avant l'arbitrage ; (2) **lot 5** — conservative level set : volume indépendant du
+Courant, mais **trou d'eau sur coque mobile** (somme préservée : L370 ailleurs) ; (3) **porte D** —
+ouvertures, défaillance silencieuse `converged = true`, deux vitesses, et la **loi de conservation
+géométrique** (Q-13 sourcée), hypothèse de cause du tassement de B10 (A313).

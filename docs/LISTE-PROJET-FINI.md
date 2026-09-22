@@ -165,11 +165,11 @@ pas recopiée ici (L137).
 - [ ] **4.9 Fusion et séparation de domaines** sans rupture — *absent*.
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
-- [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *absent* — la seconde représentation est
-  comparée en S318 ([comparaison](validation/COMPARAISON-LOT5-S318.md)), **APIC retenue** (ADR-186) — et **hors de la représentation
-  actuelle par construction** : la surface de δ est une fonction hauteur (ADR-175 D5, qui renvoyait
-  déjà à une seconde représentation). Lot 5 d'ADR-178 ; le choix particules / surface implicite
-  reste une décision de l'utilisateur.
+- [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *partiel* — **la cavité est portée sur le banc
+  2D d'APIC** (S320, [B10](validation/B10-APIC-S320.md)) : pincement indépendant de l'échelle, temps
+  convergé à 5 %, masse exacte. Hors de δ : sa surface est une fonction hauteur (ADR-175 D5). Manquent
+  la gerbe, qui suit la maille (A312), la bulle, qui n'est pas de l'air (A311), le raccord aux
+  colonnes, la 3D et C20. Lot 5 d'ADR-178, APIC retenue par l'utilisateur (ADR-186).
 - [ ] **4.13 Proche-coque et gerbe d'étrave** — *absent*.
 - [ ] **4.14 Plage** : rouleau 3D, mouillage et séchage (C04) — *absent* : C04 exécuté sur un
   véhicule d'essai 1D seulement.
