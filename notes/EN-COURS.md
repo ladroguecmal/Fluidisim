@@ -94,8 +94,8 @@ Critères, écrits avant le travail :
 - [x] **P3** — ADR-187 : les principes refondus, pourquoi, et comment les défaire.
 - [x] **P4** — `EN-COURS` refondu : archives purgées (Git et les preuves les gardent), session en
   cours seule.
-- [>] **P5** — METHODE refondue : principes, protections actives.
-- [ ] **P6** — REPRISE : lecture à froid bornée (§3), état court (§4), rituel en deux parties (§6),
+- [x] **P5** — METHODE refondue : principes, protections actives.
+- [>] **P6** — REPRISE : lecture à froid bornée (§3), état court (§4), rituel en deux parties (§6),
   plafonds (§8).
 - [ ] **P7** — `etat_projet.py --check` étendu, avec essais : taille d'`EN-COURS`, encodage,
   fichiers produits versionnés, décompte de la liste, « Reproduire » des preuves nouvelles.
