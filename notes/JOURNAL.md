@@ -16361,3 +16361,24 @@ de 0,2 maille manqué ; la masse tient.
 quelle grandeur conserver ; les deux sont établis, et la borne trouvée. Aucun point de liste ne bouge.
 Suivant : **la décision de l'utilisateur** sur le lot 3 à la place du lot 2 bloqué ; à défaut, le
 raccord dynamique. Un angle mort : A314.
+
+## S324 — 2026-09-22/23 — lot 3 : le fond coupé entre dans la référence 3D
+
+**Entrée.** *« Je suis ta recommandation »* : le lot 3 prend la place du lot 2 bloqué dans
+l'alternance (ADR-188). Maillons à 3 : il fallait une capacité.
+**La géométrie** ([preuve](../docs/validation/FACES-COUPEES-3D-S324.md)). La découpe de S232 portée en
+x-y-z : coins par moyennes emboîtées, empreinte en quatre triangles, intégrales exactes ; les formules
+2D servent telles quelles quand le fond ne dépend pas de `y`. Identique au bit à la 2D ; plan exact.
+**L'opérateur.** Pondéré comme la 2D, sur un chemin séparé : le fond plat reste S295 au bit. À `ny` = 1
+sur les trois fonds de S232, 200 pas linéaires identiques au bit à la 2D ; lac au repos exact ; les
+pas mobile et couplé refusent la découpe. Suite : 589 réussis, afficheur 36.
+**L'ordre.** Débit ouvert après un pas : témoin sans `y` à 1,4·10⁻⁶ de S232 ; bosse 3D d'ordre
+**1,956**. Mais à 128, **16 029 itérations et 708 s** pour un pas, contre 347 et 4 s : les petites
+cellules, sans préconditionneur (A315).
+**Méthode.** Les longs blocs passés au shell ne s'analysent plus : écrire par fichier. Première
+preuve contrôlée par « Reproduire ».
+**Non fait.** Mode mobile, obstacles, Jacobi ; S320 P5b, toujours en calcul (file).
+**Rituel.** Maillons **0** : ce qui devient possible — un domaine δ 3D sur un fond non plat ; le chemin
+qui le consomme — le lot 3, puis les corps du lot 4 ; la preuve — FACES-COUPEES-3D-S324 ; 4.15 avance
+(la 3D qu'il déclarait manquante). Un angle mort : A315. Suivant, selon ADR-188 : **S325, lot 5 — le
+raccord dynamique** ; le lot 3 reprend ensuite par Jacobi.

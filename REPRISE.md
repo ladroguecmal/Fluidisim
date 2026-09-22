@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-23 01:21 +02:00
+JETON            : libre
+Battement        : 2026-09-23 01:22 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S324 — lot 3, les faces coupées de δ en 3D (le lot 3 prend la place du lot 2 bloqué, décision de l'utilisateur)
-Dernière session : S323 — **lot 5** : compteur de volume géométrique d'APIC (A313 résolu, tassement mesuré : −12 % en B10 sans séparation) ; une région passe des particules aux colonnes et retour **à masse exacte**, la surface sautant de 0,07 à 0,17 maille — le volume d'une masse dépend de l'arrangement (A314) ([preuve](docs/validation/B10-APIC-S320.md) §10)
-Session suivante : **décision de l'utilisateur attendue** — le lot 3 (faces coupées 3D, voie de la v1) à la place du lot 2 bloqué par A289 ([bilan](docs/registres/BILAN-GLOBAL-S321.md) §7) ; à défaut, lot 5, le raccord dynamique. Verser S320 P5b à son retour (file)
-Maillons        : 3 — justifiés au journal de S323 : le raccord demandait son instrument et la grandeur à conserver, établis ; aucun point de liste n'a bougé. La suite doit faire avancer une capacité
+Session en cours : aucune
+Dernière session : S324 — **lot 3** (ADR-188, décision de l'utilisateur) : le fond coupé entre dans la référence 3D — identique au bit à la 2D sans `y`, **ordre 1,956** sur une bosse 3D ; mais 16 029 itérations à 128, les petites cellules sans préconditionneur (A315) ([preuve](docs/validation/FACES-COUPEES-3D-S324.md))
+Session suivante : **S325, lot 5 — le raccord dynamique** (alternance d'ADR-188) : une région en colonnes qui évolue à côté d'une région en particules ; le lot 3 reprendra par Jacobi sur le chemin coupé (A315). Verser S320 P5b à son retour (file)
+Maillons        : 0 — S324 : un domaine δ 3D sur fond non plat, consommé par le lot 3 puis les corps du lot 4 ; point 4.15 avancé (la 3D)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

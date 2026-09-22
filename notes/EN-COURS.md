@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S324 — **en cours**. **Lot 3, premier lot : les faces coupées de δ en trois dimensions**
+Session : S324 — **terminée** (2026-09-23 01:22, P7 reportée). **Lot 3, premier lot : les faces coupées de δ en trois dimensions**
 — la moitié basse d'I3 ([TROIS-SYSTEMES-S308](../docs/registres/TROIS-SYSTEMES-S308.md) §5), sur le
 chemin de la porte D, donc de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -104,8 +104,9 @@ Critères, écrits avant le code :
 - [x] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
 - [x] **P6** — preuve `docs/validation/FACES-COUPEES-3D-S324.md`, avec « Reproduire » ; file, liste 4.15,
   feuille de route.
-- [>] **P7** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
-- [ ] **P8** — rituel.
+- [ ] **P7** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone. **Reportée** : encore
+  en calcul à 01:22, cinq heures après son lancement ; le point daté de la file la porte.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 
