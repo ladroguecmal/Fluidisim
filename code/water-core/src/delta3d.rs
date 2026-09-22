@@ -672,3 +672,5 @@ pub use transfer::{Ledger3, LedgerError};
 #[path = "delta3d_closure.rs"]
 mod closure;
 pub use closure::{Closure3, ClosureError};
+#[path = "delta3d_cut.rs"]
+mod cut;

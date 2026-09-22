@@ -780,26 +780,40 @@ impl Volume {
                 self.open_w[idx] = if k == 0 {
                     0. // fond imperméable
                 } else {
-                    let open = if a < z && b < z {
-                        1.
-                    } else if a >= z && b >= z {
-                        0.
-                    } else {
-                        let t = (z - a) / (b - a);
-                        if a < z { t } else { 1. - t }
-                    };
                     // Couvercle : **frontière à pression imposée**, donc ouverte. C'est par
                     // elle que `η` — et donc `g_eff` — agit ; un couvercle fermé rendrait
                     // la gravité inerte et le contrôle de `g_eff` vide de sens.
-                    open.clamp(0., 1.)
+                    Self::open_below(a, b, z)
                 };
             }
         }
     }
 
+    /// La **fraction de largeur** où un fond linéaire de `a` à `b` passe sous la hauteur `z` :
+    /// l'ouverture d'une face horizontale. Sortie de `cut` en S324, opérations inchangées, pour que
+    /// la découpe 3D l'emploie telle quelle quand le fond ne dépend pas de `y` (L137).
+    pub(crate) fn open_below(a: f32, b: f32, z: f32) -> f32 {
+        let open = if a < z && b < z {
+            1.
+        } else if a >= z && b >= z {
+            0.
+        } else {
+            let t = (z - a) / (b - a);
+            if a < z { t } else { 1. - t }
+        };
+        open.clamp(0., 1.)
+    }
+
+    /// Les ouvertures des faces `u` et `w`, pour les réceptions de la découpe 3D (S324).
+    #[cfg(test)]
+    pub(crate) fn apertures(&self) -> (&[f32], &[f32]) {
+        (&self.open_u, &self.open_w)
+    }
+
     /// Intégrale de clamp((top-b(t))/dx, 0, 1), b linéaire. Rectangle plein puis
     /// trapèze coupé ; aucun échantillonnage ne peut supprimer un triangle étroit.
-    fn cut_fraction(a: f32, b: f32, top: f32, dx: f32) -> f32 {
+    /// `pub(crate)` depuis S324 : la découpe 3D l'emploie telle quelle (L137).
+    pub(crate) fn cut_fraction(a: f32, b: f32, top: f32, dx: f32) -> f32 {
         let (low, high) = (a.min(b), a.max(b));
         if low >= top { return 0.; }
         if high <= top - dx { return 1.; }

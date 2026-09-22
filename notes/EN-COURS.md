@@ -98,8 +98,8 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-188 : la décision de l'utilisateur ; file, feuille de route.
-- [>] **P3** — la géométrie coupée 3D et ses essais (critère 1).
-- [ ] **P4** — l'opérateur, la divergence et la correction pondérés ; `configure_with_bottom` ; essais du
+- [x] **P3** — la géométrie coupée 3D et ses essais (critère 1).
+- [>] **P4** — l'opérateur, la divergence et la correction pondérés ; `configure_with_bottom` ; essais du
   critère 2.
 - [ ] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
 - [ ] **P6** — preuve `docs/validation/FACES-COUPEES-3D-S324.md`, avec « Reproduire » ; file, liste 4.15,
@@ -109,3 +109,8 @@ Critères, écrits avant le code :
 
 ### Notes de reprise
 
+**P3 (22:04).** `delta3d_cut.rs` : coins par moyennes emboîtées, **quatre triangles** autour du centre
+(symétrique en `x` et `y`), intégrales exactes ; les formules 2D (`cut_fraction`, `open_below`, sortie
+de `cut` sans changer une opération) servent quand l'empreinte ne dépend pas de `y`. Cinq essais verts
+au premier passage : identité **au bit** avec la 2D sur les trois fonds de S232 ; plan exact à 2·10⁻⁶ ;
+colonnes à 2·10⁻⁶ ; coin étroit contre quadrature ; symétrie miroir à 10⁻⁶. Les 67 essais δ 2D passent.
