@@ -4222,3 +4222,8 @@ entre 256 et 4096 pas, à physique fixée, et se reproduit avec un fond nul
 ([lecture](LECTURE-SIMUFLUID-S320.md) §1). S319 n'a fait varier que la maille.
 **Avant l'arbitrage** : le témoin E1 à maille fixe et à trois pas de temps. Si le taux en dépend, la
 voie « dispersion d'amplitude dans B » ne soigne pas la cause.
+
+**A289 — note datée du 2026-09-22 (S322).** L'essai demandé ci-dessus est fait : à maille fixe (25 cm),
+le taux de croissance vaut 0,1015, 0,1012, 0,1009 et 0,1007 s⁻¹ à 20, 10, 5 et 2,5 ms — 0,8 % sur un
+facteur huit ([preuve](../validation/MER-S319.md) §8). **Ce n'est pas un défaut d'intégration du pas
+couplé.** Le mécanisme reste à nommer ; les trois voies restent ouvertes, au choix de l'utilisateur.

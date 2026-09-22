@@ -134,7 +134,8 @@ multigrille, frontières (ADR-143 à 169) — [S253](validation/SURFACE-COUPLEE-
 10⁻⁴, au raccord un degré de phase et 2 à 4 % de spectre, le reste à δ sauf une part non linéaire que
 W ne porte pas ([S316](validation/ORDRE-C-S316.md)) ; **ordre D**, un receveur local, attente
 exactement nulle ([S317](validation/RESTITUTION-S317.md)). **Ordre E bloqué** : sous une vraie mer, δ
-croît jusqu'à trois fois la houle (A289, [S319](validation/MER-S319.md)).
+croît jusqu'à trois fois la houle (A289, [S319](validation/MER-S319.md)), indépendamment du pas de
+temps (S322).
 
 *Manque* : cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité dans δ (B10 reçu sur le banc 2D d'APIC, [S320](validation/B10-APIC-S320.md)) ; phase
 δ/B (A289) ; A274 ; A286 ; **compteur carte, énergie, quantité de mouvement, sens W → δ** (A302) ;
