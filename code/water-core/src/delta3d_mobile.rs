@@ -658,6 +658,7 @@ impl Volume3 {
         max_iters: u32,
         jobs: &dyn JobSystem,
     ) -> Result<Report, Error> {
+        self.refuse_cut()?;
         if duration_us == 0 || duration_us > (1u64 << 53) {
             return Err(Error::NotFinite);
         }

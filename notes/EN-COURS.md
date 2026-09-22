@@ -99,9 +99,9 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-188 : la décision de l'utilisateur ; file, feuille de route.
 - [x] **P3** — la géométrie coupée 3D et ses essais (critère 1).
-- [>] **P4** — l'opérateur, la divergence et la correction pondérés ; `configure_with_bottom` ; essais du
+- [x] **P4** — l'opérateur, la divergence et la correction pondérés ; `configure_with_bottom` ; essais du
   critère 2.
-- [ ] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
+- [>] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
 - [ ] **P6** — preuve `docs/validation/FACES-COUPEES-3D-S324.md`, avec « Reproduire » ; file, liste 4.15,
   feuille de route.
 - [ ] **P7** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
@@ -114,3 +114,12 @@ Critères, écrits avant le code :
 de `cut` sans changer une opération) servent quand l'empreinte ne dépend pas de `y`. Cinq essais verts
 au premier passage : identité **au bit** avec la 2D sur les trois fonds de S232 ; plan exact à 2·10⁻⁶ ;
 colonnes à 2·10⁻⁶ ; coin étroit contre quadrature ; symétrie miroir à 10⁻⁶. Les 67 essais δ 2D passent.
+
+**P4 (01:06, le 23).** Chemin coupé séparé du chemin plat (`cut: Option<Cut3>`, `None` = S295 au bit) :
+opérateur, divergence, second membre, erreur inverse, correction et flux de colonne pondérés comme la
+2D ; couvercle entièrement mouillé exigé ; pas mobile et couplé refusent la découpe. Six essais verts :
+`ny` = 1 sur les trois fonds de S232 **identique au bit à la 2D sur 200 pas** (surface, `u`, `w`,
+itérations) ; lac au repos exact ; opérateur symétrique défini positif ; divergence ouverte tenue ;
+faces fermées sans vitesse ; refus du pas mobile. Suite : **589 réussis**, 0 échec. Heurt : le long bloc
+de texte passé au shell ne s'analysait plus (`unexpected EOF`) — passer par un fichier. Pause de
+l'utilisateur entre 22:05 et 01:03.

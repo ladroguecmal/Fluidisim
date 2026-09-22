@@ -838,3 +838,156 @@ fn energie_et_quantite_de_mouvement_disent_ce_qu_elles_valent_s310() {
     assert!((m[0] / attendu - 1.).abs() < 1e-6, "{m:?} contre {attendu}");
     assert_eq!((m[1], m[2]), (0., 0.));
 }
+
+// ─────────────────────────────── S324 : le fond coupé (lot 3, critère 2) ───────────────────────────────
+
+fn volume_bottom(nx: usize, ny: usize, nz: usize, dx: f32, fond: &[f32]) -> (Volume3, Arena) {
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let v = Volume3::configure_with_bottom(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain3 { nx, ny, nz, dx }, 1025., 9.81, fond).unwrap();
+    (v, arena)
+}
+
+/// Les trois fonds de S232, en coordonnée physique.
+fn fond_s232(forme: usize, x: f32) -> f32 {
+    let d = (x - 3.0) / 1.2;
+    match forme {
+        0 => 0.5,
+        1 => 0.4 + 0.6 * (-(d * d)).exp(),
+        _ => 0.4 + 0.6 * (-(d * d)).exp() + 0.125 * (1.0 + (2.0 * (x - 6.0)).tanh()),
+    }
+}
+
+/// Une bosse vraiment tridimensionnelle, centrée hors des axes du domaine.
+fn bosse(x: f32, y: f32) -> f32 {
+    let (a, b) = ((x - 3.0) / 1.2, (y - 1.3) / 0.9);
+    0.4 + 0.6 * (-(a * a + b * b)).exp()
+}
+
+/// La découpe se compte : les tampons du fond plat, puis ceux de la découpe, en deux appels ; un fond
+/// hors de `[0, z₀[` ou de mauvaise taille est refusé ; le fond plat ne publie aucune découpe.
+#[test]
+fn a_cut_bottom_counts_its_buffers_and_refuses_what_it_cannot_hold_s324() {
+    let (plat, a0) = volume(6, 4, 5, 0.5, 9.81);
+    assert!(plat.fluid_fraction().is_none() && plat.apertures().is_none());
+    let fond = vec![0.3f32; 24];
+    let (v, a1) = volume_bottom(6, 4, 5, 0.5, &fond);
+    let (nx, ny, nz) = (6usize, 4usize, 5usize);
+    let extra = ((nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1) + nx * ny * nz) * 4;
+    assert_eq!(a1.stats.persistent_bytes, a0.stats.persistent_bytes + extra);
+    assert_eq!(a1.stats.persistent_calls, 2);
+    assert!(v.fluid_fraction().is_some());
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    let d = Domain3 { nx, ny, nz, dx: 0.5 };
+    assert_eq!(Volume3::configure_with_bottom(&mut host, d, 1025., 9.81, &fond[..23]).err(), Some(Error::Shape));
+    assert_eq!(Volume3::configure_with_bottom(&mut host, d, 1025., 9.81, &vec![-0.1; 24]).err(), Some(Error::NotFinite));
+    assert_eq!(Volume3::configure_with_bottom(&mut host, d, 1025., 9.81, &vec![2.5; 24]).err(), Some(Error::NotFinite));
+}
+
+/// **Critère 2a.** À `ny = 1`, sur les trois fonds de S232, la trajectoire linéaire de la 3D est celle
+/// de la 2D **au bit** — surface, vitesses et nombre d'itérations, pas après pas.
+#[test]
+fn ny_1_on_the_s232_bottoms_reproduces_the_2d_linear_trajectory_s324() {
+    use crate::delta_projection::{Domain, Volume};
+    struct Still;
+    impl crate::host::MonotonicClock for Still { fn now_ns(&self) -> u64 { 0 } }
+    let (n, us) = (32usize, 2000u64);
+    let dx = 8. / n as f32;
+    for forme in 0..3 {
+        let fond: Vec<f32> = (0..n).map(|i| fond_s232(forme, (i as f32 + 0.5) * dx)).collect();
+        let (mut v3, _) = volume_bottom(n, 1, n / 2, dx, &fond);
+        let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+        let mut v2 = Volume::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+            Domain { nx: n, nz: n / 2, dx }, 1025., 9.81, &fond).unwrap();
+        let eta = s233_surface(n);
+        v3.set_surface(&eta).unwrap();
+        v2.set_surface(&eta).unwrap();
+        for step in 0..200 {
+            let r3 = v3.step_surface_linear(us, 4000, &Jobs).unwrap();
+            let r2 = v2.step_surface_linear(us, 4000, 1_000_000, &Jobs, &Still).unwrap().report.unwrap();
+            assert_eq!(r3.iterations, r2.iterations, "fond {forme}, pas {step}");
+            for (a, b) in v3.surface().iter().zip(v2.surface()) {
+                assert_eq!(a.to_bits(), b.to_bits(), "fond {forme}, pas {step} : surface");
+            }
+            for (a, b) in v3.velocity_u().iter().zip(v2.velocity_u()) {
+                assert_eq!(a.to_bits(), b.to_bits(), "fond {forme}, pas {step} : u");
+            }
+            for (a, b) in v3.velocity_w().iter().zip(v2.velocity_w()) {
+                assert_eq!(a.to_bits(), b.to_bits(), "fond {forme}, pas {step} : w");
+            }
+        }
+    }
+}
+
+/// **Critère 2b.** Un lac au repos sur un fond coupé vraiment 3D reste **exactement** au repos : cent
+/// pas, vitesses et surface au bit.
+#[test]
+fn a_lake_at_rest_on_a_cut_bottom_stays_exactly_at_rest_s324() {
+    let (nx, ny, nz, dx) = (24usize, 12usize, 10usize, 0.25f32);
+    let fond: Vec<f32> = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| bosse((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx)))
+        .collect();
+    let (mut v, _) = volume_bottom(nx, ny, nz, dx, &fond);
+    let repos = v.surface().to_vec();
+    for _ in 0..100 {
+        let r = v.step_surface_linear(2000, 2000, &Jobs).unwrap();
+        assert!(!r.degraded);
+    }
+    assert!(v.velocity_u().iter().chain(v.velocity_v()).chain(v.velocity_w()).all(|x| x.to_bits() == 0));
+    assert!(v.surface().iter().zip(&repos).all(|(a, b)| a.to_bits() == b.to_bits()));
+}
+
+/// **Critère 2c.** L'opérateur pondéré reste symétrique et défini positif sur les mailles fluides —
+/// ce qui garde le gradient conjugué valide.
+#[test]
+fn the_cut_operator_is_symmetric_and_positive_s324() {
+    let (nx, ny, nz, dx) = (10usize, 7usize, 6usize, 0.25f32);
+    let fond: Vec<f32> = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| 0.2 + 0.5 * bosse((i as f32 + 0.5) * dx * 2.4, (j as f32 + 0.5) * dx * 2.4)))
+        .collect();
+    let (v, _) = volume_bottom(nx, ny, nz, dx, &fond);
+    let frac = v.fluid_fraction().unwrap().to_vec();
+    let n = v.domain.cells();
+    let masque = |x: Vec<f32>| x.iter().zip(&frac).map(|(a, f)| if *f > 0. { *a } else { 0. }).collect::<Vec<f32>>();
+    let (x, y) = (masque(noise(n, 17)), masque(noise(n, 23)));
+    let (mut ax, mut ay) = (vec![0.; n], vec![0.; n]);
+    v.apply(&x, &mut ax);
+    v.apply(&y, &mut ay);
+    let dot = |a: &[f32], b: &[f32]| a.iter().zip(b).map(|(p, q)| *p as f64 * *q as f64).sum::<f64>();
+    let (xay, yax, xax) = (dot(&x, &ay), dot(&y, &ax), dot(&x, &ax));
+    let scale = dot(&x, &x).sqrt() * dot(&ay, &ay).sqrt();
+    assert!((xay - yax).abs() <= 1e-5 * scale, "{xay} contre {yax}");
+    assert!(xax > 0.);
+    assert!(frac.iter().any(|f| *f > 0. && *f < 1.), "le fond ne coupe aucune maille");
+}
+
+/// **Critère 2d.** Sur un fond vraiment 3D, un pas depuis une surface bosselée laisse un champ dont la
+/// divergence **ouverte** tient la tolérance physique ; les faces fermées par le fond n'ont aucune
+/// vitesse, et l'écoulement a bien une composante transverse.
+#[test]
+fn a_step_on_a_cut_bottom_leaves_an_open_divergence_free_field_s324() {
+    let (nx, ny, nz, dx) = (24usize, 12usize, 10usize, 0.25f32);
+    let fond: Vec<f32> = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| bosse((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx)))
+        .collect();
+    let (mut v, _) = volume_bottom(nx, ny, nz, dx, &fond);
+    let z0 = v.domain.z0();
+    let eta: Vec<f32> = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| z0 + 0.01 * ((i as f32 + 0.5) * dx * 0.8).sin() * ((j as f32 + 0.5) * dx * 1.1).cos()))
+        .collect();
+    v.set_surface(&eta).unwrap();
+    let r = v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+    assert!(!r.degraded && r.divergence <= PROJECTION_DIVERGENCE_TOLERANCE as f64, "divergence {}", r.divergence);
+    let (ou, ov, ow) = v.apertures().unwrap();
+    let fermees = |vit: &[f32], o: &[f32]| vit.iter().zip(o).all(|(x, a)| *a != 0. || x.to_bits() == 0);
+    assert!(fermees(v.velocity_u(), ou) && fermees(v.velocity_v(), ov) && fermees(v.velocity_w(), ow));
+    assert!(v.velocity_v().iter().any(|x| *x != 0.), "aucun écoulement transverse");
+}
+
+/// Le pas mobile ne porte pas encore la découpe : il la refuse au lieu de l'ignorer.
+#[test]
+fn the_mobile_step_refuses_a_cut_bottom_s324() {
+    let (mut v, _) = volume_bottom(6, 4, 5, 0.5, &vec![0.3f32; 24]);
+    assert_eq!(v.step_surface_mobile(2000, 100, &Jobs).err(), Some(Error::Domain));
+}

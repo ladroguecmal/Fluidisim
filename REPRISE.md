@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-22 22:04 +02:00
+Battement        : 2026-09-23 01:06 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S324 — lot 3, les faces coupées de δ en 3D (le lot 3 prend la place du lot 2 bloqué, décision de l'utilisateur)
 Dernière session : S323 — **lot 5** : compteur de volume géométrique d'APIC (A313 résolu, tassement mesuré : −12 % en B10 sans séparation) ; une région passe des particules aux colonnes et retour **à masse exacte**, la surface sautant de 0,07 à 0,17 maille — le volume d'une masse dépend de l'arrangement (A314) ([preuve](docs/validation/B10-APIC-S320.md) §10)

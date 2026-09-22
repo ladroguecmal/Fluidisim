@@ -105,6 +105,10 @@ pub struct Volume3 {
     flux_y: Vec<f32>,
     /// S310 : bilan de masse du dernier pas couplé. Des `f64` : aucune allocation, aucun tampon.
     balance: Balance3,
+    /// **S324 : la découpe du fond** — fractions et ouvertures, `None` pour le fond plat de S295,
+    /// dont tous les chemins restent ceux d'avant, au bit. Mode linéaire seulement : les pas mobile
+    /// et couplé la refusent tant qu'ils ne la portent pas.
+    cut: Option<cut::Cut3>,
 }
 
 impl Volume3 {
@@ -201,7 +205,46 @@ impl Volume3 {
             flux_x: vec![0.; fx],
             flux_y: vec![0.; fy],
             balance: Balance3::default(),
+            cut: None,
         })
+    }
+
+    /// **S324 : la référence sur un fond coupé.** Le fond est fourni au centre des colonnes, `nx·ny`
+    /// valeurs, `x` le plus rapide, entre `0` et `z₀` ; la découpe de `delta3d_cut.rs` en tire les
+    /// fractions et les ouvertures, **comptées auprès de l'hôte** avant `seal()` (I-06). Mode
+    /// linéaire seulement ; le couvercle doit rester entièrement mouillé, comme en 2D.
+    pub fn configure_with_bottom(host: &mut HostServices, domain: Domain3, rho: f32, g_eff: f32,
+        bottom: &[f32]) -> Result<Self, Error> {
+        let Domain3 { nx, ny, nz, .. } = domain;
+        if bottom.len() != nx.checked_mul(ny).ok_or(Error::Domain)? {
+            return Err(Error::Shape);
+        }
+        if bottom.iter().any(|b| !b.is_finite() || *b < 0. || *b >= domain.z0()) {
+            return Err(Error::NotFinite);
+        }
+        let mut v = Self::configure(host, domain, rho, g_eff)?;
+        let faces = (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1);
+        let bytes = (faces + nx * ny * nz).checked_mul(core::mem::size_of::<f32>()).ok_or(Error::Domain)?;
+        host.alloc.alloc_persistent(bytes).map_err(|e| match e {
+            AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
+        })?;
+        v.cut = Some(cut::cut(domain, bottom));
+        Ok(v)
+    }
+
+    /// S324 : la fraction fluide de chaque maille ; `None` sur le fond plat.
+    pub fn fluid_fraction(&self) -> Option<&[f32]> {
+        self.cut.as_ref().map(|g| g.frac.as_slice())
+    }
+
+    /// S324 : les ouvertures des faces `u`, `v` et `w` ; `None` sur le fond plat.
+    pub fn apertures(&self) -> Option<(&[f32], &[f32], &[f32])> {
+        self.cut.as_ref().map(|g| (g.open_u.as_slice(), g.open_v.as_slice(), g.open_w.as_slice()))
+    }
+
+    /// S324 : les pas mobile et couplé ne portent pas encore la découpe ; ils la refusent.
+    pub(crate) fn refuse_cut(&self) -> Result<(), Error> {
+        if self.cut.is_some() { Err(Error::Domain) } else { Ok(()) }
     }
 
     pub fn domain(&self) -> Domain3 {
@@ -273,6 +316,12 @@ impl Volume3 {
                 self.w[f] = 0.;
             }
         }
+        // S324 : une face que le fond ferme n'a pas de vitesse.
+        if let Some(g) = &self.cut {
+            for (x, a) in self.u.iter_mut().zip(&g.open_u) { if *a == 0. { *x = 0.; } }
+            for (x, a) in self.v.iter_mut().zip(&g.open_v) { if *a == 0. { *x = 0.; } }
+            for (x, a) in self.w.iter_mut().zip(&g.open_w) { if *a == 0. { *x = 0.; } }
+        }
     }
 
     /// Pression dynamique imposée au couvercle de la colonne `(i, j)` ; `homogeneous` l'annule.
@@ -288,6 +337,9 @@ impl Volume3 {
     /// gauche, droite, avant, arrière, bas, haut : à `ny = 1`, les faces `y` sont des murs et
     /// n'ajoutent rien, et la somme est celle de la 2D, terme à terme.
     pub(crate) fn apply(&self, p: &[f32], out: &mut [f32]) {
+        if let Some(g) = &self.cut {
+            return self.apply_cut(g, p, out);
+        }
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let inv = 1. / (dx * dx);
         for k in 0..nz {
@@ -311,6 +363,9 @@ impl Volume3 {
     /// Divergence des faces, dans `out`. Parties `x` puis `z` dans l'ordre de la 2D, la partie `y`
     /// ajoutée ensuite : à `ny = 1` elle vaut zéro et la valeur est celle de la 2D.
     fn divergence(&self, u: &[f32], v: &[f32], w: &[f32], out: &mut [f32]) {
+        if let Some(g) = &self.cut {
+            return self.divergence_cut(g, u, v, w, out);
+        }
         let Domain3 { nx, ny, nz, dx } = self.domain;
         for k in 0..nz {
             for j in 0..ny {
@@ -319,6 +374,70 @@ impl Volume3 {
                     let (fl, fr) = (u[self.fu(i, j, k)], u[self.fu(i + 1, j, k)]);
                     let (ff, fk) = (v[self.fv(i, j, k)], v[self.fv(i, j + 1, k)]);
                     let (fb, ft) = (w[self.fw(i, j, k)], w[self.fw(i, j, k + 1)]);
+                    out[c] = ((fr - fl + ft - fb) + (fk - ff)) / dx;
+                }
+            }
+        }
+    }
+
+    /// **S324 : `L p` pondéré par les ouvertures**, la ligne de la 2D portée à six faces : une maille
+    /// solide rend zéro, une face ouverte sur du solide ne porte rien, le couvercle garde sa demi-maille.
+    /// Ordre gauche, droite, avant, arrière, bas, haut : à `ny = 1` les faces `y` sont des murs
+    /// d'ouverture nulle, et la somme est celle de la 2D, terme à terme.
+    fn apply_cut(&self, g: &cut::Cut3, p: &[f32], out: &mut [f32]) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let inv = 1. / (dx * dx);
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let c = self.c(i, j, k);
+                    if g.frac[c] == 0. {
+                        out[c] = 0.;
+                        continue;
+                    }
+                    let mut acc = 0.0f32;
+                    let mut face = |a: f32, n: Option<usize>, lid: bool| {
+                        if a == 0. {
+                            return;
+                        }
+                        match n {
+                            Some(m) if g.frac[m] > 0. => acc += a * (p[c] - p[m]),
+                            Some(_) => {}
+                            None if lid => acc += 2. * a * p[c],
+                            None => {}
+                        }
+                    };
+                    face(g.open_u[self.fu(i, j, k)], (i > 0).then(|| c - 1), false);
+                    face(g.open_u[self.fu(i + 1, j, k)], (i + 1 < nx).then(|| c + 1), false);
+                    face(g.open_v[self.fv(i, j, k)], (j > 0).then(|| c - nx), false);
+                    face(g.open_v[self.fv(i, j + 1, k)], (j + 1 < ny).then(|| c + nx), false);
+                    face(g.open_w[self.fw(i, j, k)], (k > 0).then(|| c - nx * ny), false);
+                    face(g.open_w[self.fw(i, j, k + 1)], (k + 1 < nz).then(|| c + nx * ny), true);
+                    out[c] = acc * inv;
+                }
+            }
+        }
+    }
+
+    /// **S324 : divergence pondérée par les ouvertures**, parties `x` puis `z` comme la 2D, `y`
+    /// ensuite ; une maille solide rend zéro.
+    fn divergence_cut(&self, g: &cut::Cut3, u: &[f32], v: &[f32], w: &[f32], out: &mut [f32]) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let c = self.c(i, j, k);
+                    if g.frac[c] == 0. {
+                        out[c] = 0.;
+                        continue;
+                    }
+                    let a = |o: f32, x: f32| o * x;
+                    let fl = a(g.open_u[self.fu(i, j, k)], u[self.fu(i, j, k)]);
+                    let fr = a(g.open_u[self.fu(i + 1, j, k)], u[self.fu(i + 1, j, k)]);
+                    let ff = a(g.open_v[self.fv(i, j, k)], v[self.fv(i, j, k)]);
+                    let fk = a(g.open_v[self.fv(i, j + 1, k)], v[self.fv(i, j + 1, k)]);
+                    let fb = a(g.open_w[self.fw(i, j, k)], w[self.fw(i, j, k)]);
+                    let ft = a(g.open_w[self.fw(i, j, k + 1)], w[self.fw(i, j, k + 1)]);
                     out[c] = ((fr - fl + ft - fb) + (fk - ff)) / dx;
                 }
             }
@@ -350,6 +469,9 @@ impl Volume3 {
     /// `max_i |r_i| / (|b| + |A||p|)_i`. Certificat d'arrêt au plancher (ADR-143), jamais critère
     /// d'acceptation. Doit être appelée quand `res = rhs − A·p`.
     fn backward_error(&self) -> f32 {
+        if let Some(g) = &self.cut {
+            return self.backward_error_cut(g);
+        }
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let inv = 1. / (dx * dx);
         let mut worst = 0f32;
@@ -373,9 +495,51 @@ impl Volume3 {
         worst
     }
 
+    /// S324 : l'erreur inverse sur les lignes pondérées, comme la 2D en mode fixe.
+    fn backward_error_cut(&self, g: &cut::Cut3) -> f32 {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let inv = 1. / (dx * dx);
+        let mut worst = 0f32;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let c = self.c(i, j, k);
+                    if g.frac[c] == 0. {
+                        continue;
+                    }
+                    let pc = self.p[c].abs();
+                    let mut acc = 0f32;
+                    let mut face = |a: f32, n: Option<usize>, lid: bool| {
+                        if a == 0. {
+                            return;
+                        }
+                        match n {
+                            Some(m) if g.frac[m] > 0. => acc += a * (pc + self.p[m].abs()),
+                            Some(_) => {}
+                            None if lid => acc += a * pc * 2.,
+                            None => {}
+                        }
+                    };
+                    face(g.open_u[self.fu(i, j, k)], (i > 0).then(|| c - 1), false);
+                    face(g.open_u[self.fu(i + 1, j, k)], (i + 1 < nx).then(|| c + 1), false);
+                    face(g.open_v[self.fv(i, j, k)], (j > 0).then(|| c - nx), false);
+                    face(g.open_v[self.fv(i, j + 1, k)], (j + 1 < ny).then(|| c + nx), false);
+                    face(g.open_w[self.fw(i, j, k)], (k > 0).then(|| c - nx * ny), false);
+                    face(g.open_w[self.fw(i, j, k + 1)], (k + 1 < nz).then(|| c + nx * ny), true);
+                    let scale = self.rhs[c].abs() + acc * inv;
+                    if scale > 0. { worst = worst.max(self.res[c].abs() / scale); }
+                }
+            }
+        }
+        worst
+    }
+
     /// Correction du champ prédit dans les tampons publiés : `u = u* − (dt/ρ)·∇p`, demi-maille au
     /// couvercle, faces de mur intouchées.
     fn correct(&mut self, k1: f32) {
+        if self.cut.is_some() {
+            return self.correct_cut(k1);
+        }
         let Domain3 { nx, ny, nz, dx } = self.domain;
         self.u.copy_from_slice(&self.us);
         self.v.copy_from_slice(&self.vs);
@@ -405,6 +569,58 @@ impl Volume3 {
                         self.w[f] -= k1 * (self.p[above] - self.p[below]) / dx;
                     } else {
                         self.w[f] -= k1 * (self.lid(i, j) - self.p[below]) / (0.5 * dx);
+                    }
+                }
+            }
+        }
+    }
+
+    /// **S324 : la correction sur fond coupé**, comme la 2D : une face fermée n'est pas corrigée, une
+    /// face ne l'est qu'entre deux mailles fluides, le couvercle à sa demi-maille.
+    fn correct_cut(&mut self, k1: f32) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        self.u.copy_from_slice(&self.us);
+        self.v.copy_from_slice(&self.vs);
+        self.w.copy_from_slice(&self.ws);
+        let g = self.cut.as_ref().expect("fond coupé");
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 1..nx {
+                    let f = self.fu(i, j, k);
+                    let (l, r) = (self.c(i - 1, j, k), self.c(i, j, k));
+                    if g.open_u[f] != 0. && g.frac[l] > 0. && g.frac[r] > 0. {
+                        self.u[f] -= k1 * (self.p[r] - self.p[l]) / dx;
+                    }
+                }
+            }
+        }
+        for k in 0..nz {
+            for j in 1..ny {
+                for i in 0..nx {
+                    let f = self.fv(i, j, k);
+                    let (a, b) = (self.c(i, j - 1, k), self.c(i, j, k));
+                    if g.open_v[f] != 0. && g.frac[a] > 0. && g.frac[b] > 0. {
+                        self.v[f] -= k1 * (self.p[b] - self.p[a]) / dx;
+                    }
+                }
+            }
+        }
+        for k in 1..=nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let f = self.fw(i, j, k);
+                    let below = self.c(i, j, k - 1);
+                    if g.open_w[f] == 0. || g.frac[below] == 0. {
+                        continue;
+                    }
+                    if k < nz {
+                        let above = self.c(i, j, k);
+                        if g.frac[above] > 0. {
+                            self.w[f] -= k1 * (self.p[above] - self.p[below]) / dx;
+                        }
+                    } else {
+                        let lid = self.lid(i, j);
+                        self.w[f] -= k1 * (lid - self.p[below]) / (0.5 * dx);
                     }
                 }
             }
@@ -443,7 +659,15 @@ impl Volume3 {
                     let c = self.c(i, j, k);
                     let mut b = scale * self.rhs[c];
                     // La valeur imposée au couvercle entre ici, et nulle part ailleurs.
-                    if k + 1 == nz { b += 2. * self.lid(i, j) * inv; }
+                    if let Some(g) = &self.cut {
+                        // S324 : pondérée par l'ouverture du couvercle, comme la 2D.
+                        if g.frac[c] == 0. {
+                            b = 0.;
+                        } else if k + 1 == nz {
+                            let a = g.open_w[self.fw(i, j, k + 1)];
+                            if a > 0. { b += 2. * a * self.lid(i, j) * inv; }
+                        }
+                    } else if k + 1 == nz { b += 2. * self.lid(i, j) * inv; }
                     self.rhs[c] = b;
                 }
             }
@@ -591,6 +815,12 @@ impl Volume3 {
     fn linear(&mut self, scale: f32, correction: f32, transport: f32, max_iters: u32,
         jobs: &dyn JobSystem) -> Result<Report, Error> {
         let Domain3 { nx, ny, nz, dx } = self.domain;
+        // S324 : sur fond coupé, le couvercle doit rester entièrement mouillé, comme en 2D.
+        if let Some(g) = &self.cut {
+            if (0..nx * ny).any(|c| g.open_w[nz * nx * ny + c] != 1.) {
+                return Err(Error::Domain);
+            }
+        }
         // Le modèle est linéaire : le champ prédit est le champ publié, sans terme quadratique.
         self.us.copy_from_slice(&self.u);
         self.vs.copy_from_slice(&self.v);
@@ -603,14 +833,21 @@ impl Volume3 {
         for j in 0..ny {
             for i in 0..=nx {
                 let mut q = 0f32;
-                for k in 0..nz { q += self.u[self.fu(i, j, k)] * dx; }
+                match &self.cut {
+                    // S324 : flux ouvert, `ouverture·u·dx`, dans l'ordre de la 2D.
+                    Some(g) => for k in 0..nz { let f = self.fu(i, j, k); q += g.open_u[f] * self.u[f] * dx; },
+                    None => for k in 0..nz { q += self.u[self.fu(i, j, k)] * dx; },
+                }
                 self.flux_x[j * (nx + 1) + i] = q;
             }
         }
         for j in 0..=ny {
             for i in 0..nx {
                 let mut q = 0f32;
-                for k in 0..nz { q += self.v[self.fv(i, j, k)] * dx; }
+                match &self.cut {
+                    Some(g) => for k in 0..nz { let f = self.fv(i, j, k); q += g.open_v[f] * self.v[f] * dx; },
+                    None => for k in 0..nz { q += self.v[self.fv(i, j, k)] * dx; },
+                }
                 self.flux_y[j * nx + i] = q;
             }
         }
