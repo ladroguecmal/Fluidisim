@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-22 20:25 +02:00
-Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web) — reprise à chaud de S320 à 20:11
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-22 20:26 +02:00
+Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
+Session en cours : S321 — analyse complète et réorganisation de la méthode, demande de l'utilisateur
 Dernière session : S320 — **lot 5, B10 sur APIC** : une cavité d'air derrière un corps se pince à 2,2–2,5 `√(D/g)`, indépendamment de l'échelle à 4·10⁻⁴ près, temps convergé à 5 % ; couronne et jet suivent la maille (A312) ; la masse d'APIC est exacte, son volume géométrique non (L370, A313) ([preuve](docs/validation/B10-APIC-S320.md)) ; §5 bis en calcul, versé par S321
 Session suivante : **S321, demande de l'utilisateur** — analyse complète du code, des documents et de la méthode, et réorganisation des principes améliorables
 Maillons        : 0 — S320 : la cavité que la fonction hauteur ne peut pas porter existe sur la seconde représentation ; point 4.12 absent → partiel ; consommateur : le raccord particules ↔ colonnes

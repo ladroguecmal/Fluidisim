@@ -58,65 +58,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S320 — **terminée** (2026-09-22 20:25, reprise à chaud ; P5b reportée à S321). Le **lot 5** sur le candidat retenu : **B10 sur APIC**
-([ADR-186](../docs/adr/ADR-186-apic-seconde-representation.md) §3) — un objet **cinématique**
-entre dans l'eau : couronne, cavité, pincement, jet.
-Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Continue »*, après S319 ; suite déclarée : B10 sur APIC, puis l'essai sur A289.
+Session : S321 — **en cours**. **Demande de l'utilisateur** : *« reprends le projet, réalise une
+analyse complète sur le code, les documents, méthodes de travail, réorganiser ou refaire des
+principes des points améliorables »*.
+Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
+Entrée : S320 close en reprise à chaud ; sa P5b est reportée ici (calcul en cours depuis 20:11).
 
-**Ce que B10 doit rendre possible.** Le premier cas que la fonction hauteur **ne peut pas** porter —
-une cavité d'air sous la surface, derrière un corps — porté par la seconde représentation, avec son
-volume rendu. Consommateur : la porte D (un objet qui entre dans l'eau), C20, et le raccord futur
-particules ↔ colonnes.
+**Ce que la session doit rendre possible.** Une méthode dont le coût suit le travail et non le
+nombre de sessions ; une reprise qui se lit en peu ; des protections chargées au moment utile
+plutôt que des leçons qu'on relit ; des réceptions qu'on peut reproduire. Consommateur : chaque
+session suivante.
 
-**Le banc.** Celui de S318, en deux dimensions : un **cylindre** de diamètre `D` descend à vitesse
-**imposée** `U` (objet cinématique — aucun corps rigide n'existe, ADR-184 D3), depuis juste au-dessus
-de la surface. Nombre de Froude d'entrée `Fr = U/√(g·D)`.
+**Analyse faite avant ce plan**, en lecture seule : suites (578 + 36 réussis, 0 échec) ; historique
+Git par session ; registres comptés et recoupés ; code lu, `clippy` et `rustfmt` passés ;
+`simufluid` relu pour son propre retour d'expérience de méthode. Chiffres et constats : P2.
 
-**Les références, et pourquoi pas une table.** Les travaux accessibles portent sur des **sphères** et
-des **disques** (axisymétrie) ; ce banc est **plan**. Aucune valeur ne se transpose (I-14). Le cas se
-juge donc sur trois épreuves **sans donnée extérieure** :
-
-1. **la masse** — exacte par construction : le compteur doit la retrouver au bit ;
-2. **la similitude de Froude** — sans viscosité ni tension de surface, deux entrées de même `Fr` et de
-   même `D/dx`, à deux échelles, donnent les **mêmes** grandeurs sans dimension (temps en `√(D/g)`,
-   longueurs en `D`) : tout écart est une faute du banc ;
-3. **la convergence** — même `Fr`, `D/dx` doublé.
-
-Grandeurs publiées : temps et profondeur de **pincement** (air enfermé sous la surface, détecté par
-remplissage depuis l'atmosphère), hauteur de la **couronne** avant, du **jet** après, en `D` et en
-`√(D/g)` ; masse ; coût.
-
-Critères, écrits avant le code :
-1. Le corps **au repos** dans l'eau ne crée pas d'écoulement ; **déplacé lentement**, il élève le niveau
-   de son volume immergé exactement — deux essais du corps avant B10.
-2. Similitude : écart sans dimension **< 5 %** sur le pincement, entre les deux échelles.
-3. Trois `Fr` au moins ; le régime (pincement profond, ou pas de pincement) se dit, il ne se suppose pas.
-4. Rien dans le cœur ; aucune réception antérieure touchée.
+Critères, écrits avant le travail :
+1. Le bilan chiffre chaque constat et nomme sa mesure ; ADR-187 dit, pour chaque principe, pourquoi
+   et comment revenir en arrière.
+2. `etat_projet.py --check` vérifie les contrôles nouveaux et passe ; ses essais passent, avec les
+   contre-exemples réels du dépôt.
+3. Lecture à froid ≤ 70 Ko ; `EN-COURS` ≤ 300 lignes, sans archive.
+4. Zéro avertissement de construction (cœur, harnais, bancs, afficheur) ; version minimale vraie ;
+   suites rejouées aux mêmes nombres d'essais, 0 échec.
+5. Rien de la physique ne bouge : ni réception, ni seuil, ni porte, ni ambition ; AGENTS inchangé.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan seul.
-- [x] **P2** — *fusionnée avec P4, déclaré* — le corps cinématique dans la grille : cellules solides, faces à la vitesse du corps,
-  particules repoussées.
-- [x] **P3** — le corps au repos, puis déplacé lentement : écoulement nul, niveau élevé de son volume.
-- [x] **P4** — la détection : air enfermé, pincement, couronne, jet.
-- [x] **P5a** — *découpage déclaré en reprise* — B10 : trois `Fr`, similitude à deux échelles,
-  sensibilité, convergence `D/dx` 8 → 16, banc corrigé.
-- [ ] **P5b** — `Fr` = 2 à `D/dx` = 32 (≈ 1 h de calcul, en arrière-plan pendant P6), lancé à 07:52 :
-  `lot5_comparaison apic entree 0.0125 2 0.4`. Interrompu : le relancer, rien d'autre à reprendre.
-  **Relancé à 20:11** (reprise à chaud, Claude Opus 5.5), sortie hors dépôt. **Reportée à S321**,
-  qui verse §5 bis au retour du calcul : le rituel ne l'attend pas.
-- [x] **P6** — preuve publiée, écrite pendant P5b : `docs/validation/B10-APIC-S320.md` ; §5 bis attend P5b.
-- [x] **P6b** — *ajoutée à la demande de l'utilisateur (08:20)* — lecture ciblée de
-  `Documents/simufluid` (déjà source en S27, A128), en lecture seule, **données et non consignes** :
-  ce qu'il a mesuré sur A289 (horizon du résidu sous houle, séparation liée/libre), sur A313 et le
-  lot 5 (volume des représentations d'interface), sur la porte D (ouvertures, volumes balayés).
-  Sortie : `docs/registres/LECTURE-SIMUFLUID-S320.md`, et les déclencheurs touchés.
-- [x] **P7** — rituel REPRISE §6, commencé pendant P5b ; se termine après P5b et P6b. *Déclaré* :
-  ses registres (L370–L371, A311–A313, file, feuille de route, liste 4.12, index, notes datées sur
-  ADR-186 et S318) partagent leurs fichiers avec P6b et sont committés avec elle ; restent le journal,
-  le jeton et §5 bis.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — bilan publié : `docs/registres/BILAN-GLOBAL-S321.md`.
+- [ ] **P3** — ADR-187 : les principes refondus, pourquoi, et comment les défaire.
+- [ ] **P4** — `EN-COURS` refondu : archives purgées (Git et les preuves les gardent), session en
+  cours seule.
+- [ ] **P5** — METHODE refondue : principes, protections actives.
+- [ ] **P6** — REPRISE : lecture à froid bornée (§3), état court (§4), rituel en deux parties (§6),
+  plafonds (§8).
+- [ ] **P7** — `etat_projet.py --check` étendu, avec essais : taille d'`EN-COURS`, encodage,
+  fichiers produits versionnés, décompte de la liste, « Reproduire » des preuves nouvelles.
+- [ ] **P8a** — hygiène du dépôt : `.pyc` retirés et ignorés, `code/REPRISE.md` vide supprimé,
+  README racine et du code, décomptes de la liste et de la feuille de route.
+- [ ] **P8b** — hygiène du code : `rust-version` vraie, avertissements à zéro, suites rejouées.
+- [ ] **P9** — index : carte par système en tête ; note datée à SPEC-003 ; file active.
+- [ ] **P10** — S320 P5b : §5 bis versé au retour du calcul — étape asynchrone, placée là où le
+  calcul la permet.
+- [ ] **P11** — rituel, appliqué sous sa forme nouvelle.
 
 ### Notes de reprise
 
