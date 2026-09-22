@@ -87,8 +87,8 @@ Critères, écrits avant le travail :
 
 - [x] **P1** — jeton, plan seul. *(Committé avec `[>]` par erreur ; coché en P2.)*
 - [x] **P2** — bilan publié : `docs/registres/BILAN-GLOBAL-S321.md`.
-- [>] **P3** — ADR-187 : les principes refondus, pourquoi, et comment les défaire.
-- [ ] **P4** — `EN-COURS` refondu : archives purgées (Git et les preuves les gardent), session en
+- [x] **P3** — ADR-187 : les principes refondus, pourquoi, et comment les défaire.
+- [>] **P4** — `EN-COURS` refondu : archives purgées (Git et les preuves les gardent), session en
   cours seule.
 - [ ] **P5** — METHODE refondue : principes, protections actives.
 - [ ] **P6** — REPRISE : lecture à froid bornée (§3), état court (§4), rituel en deux parties (§6),

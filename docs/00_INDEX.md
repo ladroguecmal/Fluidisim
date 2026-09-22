@@ -315,6 +315,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-184](adr/ADR-184-seconde-representation-en-parallele.md) | La **seconde représentation** de surface libre — plusieurs couches d'eau sur une même verticale — avance **en parallèle** du lot 2, par sessions alternées ; elle commence par une **comparaison chiffrée** (particules sur grille, SPH, surface implicite) et son choix revient à l'utilisateur |
 | [ADR-185](adr/ADR-185-ordre-d-receveur-sous-i15.md) | L'ordre D est ouvert ; un volume issu de δ n'entre **jamais** dans l'état répliqué de B ni de V (I-11, I-15) : en eau ouverte, le receveur est le niveau de B **tel que ce client le représente**, porté par une région déclarée adossée à la ligne ; en contenant, δ s'asservit à V ; rien ne se restitue sans reçu |
 | [ADR-186](adr/ADR-186-apic-seconde-representation.md) | **APIC** est la seconde représentation de surface libre — décision de l'utilisateur sur la comparaison de S318 : particules sur la **même grille** et la même pression que δ, là où plusieurs couches d'eau tiennent sur une verticale ; les colonnes restent la représentation par défaut |
+| [ADR-187](adr/ADR-187-methode-refondue-s321.md) | La méthode refondue sur l'analyse de S321 : rituel en deux parties, lecture à froid bornée, `EN-COURS` limité à la session en cours, **protections plutôt que leçons**, contrôles plutôt que consignes, réceptions reproductibles, un fil une preuve — sur demande de l'utilisateur ; le périmètre et l'ordre des lots inchangés |
 
 ## Travail et historique
 
