@@ -101,8 +101,8 @@ Critères, écrits avant le code :
 - [x] **P3** — la géométrie coupée 3D et ses essais (critère 1).
 - [x] **P4** — l'opérateur, la divergence et la correction pondérés ; `configure_with_bottom` ; essais du
   critère 2.
-- [>] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
-- [ ] **P6** — preuve `docs/validation/FACES-COUPEES-3D-S324.md`, avec « Reproduire » ; file, liste 4.15,
+- [x] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
+- [>] **P6** — preuve `docs/validation/FACES-COUPEES-3D-S324.md`, avec « Reproduire » ; file, liste 4.15,
   feuille de route.
 - [ ] **P7** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
 - [ ] **P8** — rituel.
@@ -123,3 +123,12 @@ itérations) ; lac au repos exact ; opérateur symétrique défini positif ; div
 faces fermées sans vitesse ; refus du pas mobile. Suite : **589 réussis**, 0 échec. Heurt : le long bloc
 de texte passé au shell ne s'analysait plus (`unexpected EOF`) — passer par un fichier. Pause de
 l'utilisateur entre 22:05 et 01:03.
+
+**P5 (01:20).** `delta3d_fond_coupe` : débit ouvert à `x = L/2`, un pas depuis le repos. **Témoin** (fond
+lisse de S232, invariant en `y`, en vraie 3D) : débit par largeur égal à S232 à ≤ 1,4·10⁻⁶ près, ordre
+1,951, mêmes 347 itérations à 128. **Bosse 3D** : 9,1446 / 9,1692 / 9,1755·10⁻⁴ m³/s, **ordre 1,956**,
+Richardson 0,024 % — critère 3 tenu. **Mais** à 128 : **16 029 itérations, 708 s** pour un pas, contre 347
+et 4 s sans la bosse ; divergence atteinte à 1,000·10⁻⁵ exactement — la cible resserrée d'ADR-144 ne
+se referme que lentement dans les petites cellules (fractions jusqu'à 10⁻⁹, ouvertures 10⁻⁶). Le fond
+invariant a aussi des coins à 7·10⁻⁶ et converge : ce n'est pas la seule petitesse. Remède à éprouver :
+Jacobi sur le chemin coupé, comme le mode mobile 3D (A315).
