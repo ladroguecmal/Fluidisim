@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-22 21:50 +02:00
+JETON            : occupé
+Battement        : 2026-09-22 21:58 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S324 — lot 3, les faces coupées de δ en 3D (le lot 3 prend la place du lot 2 bloqué, décision de l'utilisateur)
 Dernière session : S323 — **lot 5** : compteur de volume géométrique d'APIC (A313 résolu, tassement mesuré : −12 % en B10 sans séparation) ; une région passe des particules aux colonnes et retour **à masse exacte**, la surface sautant de 0,07 à 0,17 maille — le volume d'une masse dépend de l'arrangement (A314) ([preuve](docs/validation/B10-APIC-S320.md) §10)
 Session suivante : **décision de l'utilisateur attendue** — le lot 3 (faces coupées 3D, voie de la v1) à la place du lot 2 bloqué par A289 ([bilan](docs/registres/BILAN-GLOBAL-S321.md) §7) ; à défaut, lot 5, le raccord dynamique. Verser S320 P5b à son retour (file)
 Maillons        : 3 — justifiés au journal de S323 : le raccord demandait son instrument et la grandeur à conserver, établis ; aucun point de liste n'a bougé. La suite doit faire avancer une capacité

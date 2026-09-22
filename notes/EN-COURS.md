@@ -62,81 +62,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S323 — **terminée** (2026-09-22 21:50, P6 reportée). **Lot 5, le raccord particules ↔ colonnes**
-([ADR-186](../docs/adr/ADR-186-apic-seconde-representation.md) §3), précédé du compteur de volume
-géométrique d'APIC qu'A313 exige avant lui.
+Session : S324 — **en cours**. **Lot 3, premier lot : les faces coupées de δ en trois dimensions**
+— la moitié basse d'I3 ([TROIS-SYSTEMES-S308](../docs/registres/TROIS-SYSTEMES-S308.md) §5), sur le
+chemin de la porte D, donc de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Continue »*, après S322 ; alternance d'ADR-184 et règle des deux maillons (à 2) : la
-session doit faire avancer une capacité.
+Entrée : *« Je suis ta recommandation »* (2026-09-22) — **le lot 3 prend la place du lot 2 dans
+l'alternance d'ADR-184 tant que l'ordre E est bloqué** ; à consigner en ADR-188. Maillons à 3 : la
+session doit recevoir une capacité.
 
-**Ce que la session doit rendre possible.** Faire passer une région d'eau d'une représentation à
-l'autre — des particules d'APIC aux colonnes d'une fonction hauteur, et retour — **en conservant son
-volume**, et savoir le mesurer. C'est le geste qui fera consommer B10 par δ ; il fait avancer 4.16
-(surface non graphe) et 4.20 (changement de représentation en cours de simulation). Consommateur :
-le raccord dynamique, puis la porte D et C20.
+**Ce que la session doit rendre possible.** Un fond qui n'est pas plat dans la référence 3D : la
+découpe de S232 — fractions de volume et ouvertures de faces sur un fond **linéaire par morceaux**
+— portée à la grille x-y-z, dans l'opérateur, la divergence et la correction du mode linéaire. C'est
+la géométrie sur laquelle reposeront obstacles fixes, puis corps. Consommateur : le lot 4 (corps
+rigides), la porte D, et le point 4.15 de la liste.
 
-**Le compteur (A313).** Volume géométrique = aire où `φ < 0`, `φ` la surface reconstruite des
-particules, par carrés marchants sur la grille des centres — **l'interface même que voit le fluide
-fantôme** —, bandes contre les parois comprises, corps et air enfermé exclus par construction.
-
-**Les primitives.** *Particules → colonnes* : dans une colonne à un seul segment d'eau posé sur le
-fond, `η` = volume géométrique de la colonne / `dx`. *Colonnes → particules* : ensemencer sous `η` au
-quart de maille, le reste de chaque colonne reporté à la suivante pour que la masse totale tienne.
+**La géométrie.** Fond fourni au centre des colonnes, ramené aux coins par moyennes emboîtées ;
+chaque empreinte de colonne coupée en deux triangles par une diagonale fixe, le fond **linéaire sur
+chacun** : toutes les intégrales sont alors exactes — ouverture d'une face latérale par la formule 1D
+de S232 le long de son arête, ouverture d'une face horizontale par l'aire où le fond est dessous,
+fraction de volume par l'intégrale exacte de `clamp((haut − fond)/dx)` sur chaque triangle. Quand le
+fond ne dépend pas de `y`, **les formules de la 2D elles-mêmes**, pour garder l'identité au bit.
 
 Critères, écrits avant le code :
-1. Compteur **exact** sur une interface plane (à l'arrondi), **d'ordre deux** sur un disque — le
-   rapport d'erreur vaut ≈ 4 quand la maille est divisée par deux.
-2. Publiés : sa dérive au repos et en ballottement sur 10 s ; le tassement du corps lent, **avec et
-   sans séparation**, lu directement comme l'écart entre volume géométrique et masse.
-3. Aller-retour colonnes → particules → colonnes sur un état réel : masse totale à **une particule
-   près** (`dx²/4`), volume géométrique par colonne à **0,2 maille** de hauteur près.
-4. Rien dans le cœur ; aucune réception antérieure touchée (ballottement de S318 au bit).
+1. **Géométrie** : fond indépendant de `y` → ouvertures et fractions identiques **au bit** à la 2D ;
+   fond plan `αx + βy + γ` → fractions exactes à l'arrondi f32 contre une forme fermée indépendante ;
+   `Σ_k fraction·dx` = profondeur moyenne de l'empreinte à 10⁻⁶ près ; aucun coin étroit perdu.
+2. **Opérateur** : fond plat → toutes les réceptions 3D antérieures **au bit** ; lac au repos sur fond
+   coupé → vitesse **nulle en bits** ; `ny` = 1 sur les trois fonds de S232 → vitesses du premier pas
+   identiques au bit à la 2D.
+3. **Fond vraiment 3D** : débit à travers `x = L/2`, un pas depuis le repos, à trois mailles → ordre
+   **≥ 1,8**, incréments de même signe et décroissants (garde de S197), comme S232 en 2D.
+4. Aucune allocation dans le pas ; coût publié ; rien du mode mobile ni du couplage touché.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le compteur, et son épreuve sur des distances exactes (plan, disque, trois mailles).
-- [x] **P3** — le compteur sur repos, ballottement, corps lent avec et sans séparation, B10 à `Fr` = 2.
-- [x] **P4** — les deux primitives, et l'aller-retour sur un état réel.
-- [x] **P5** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
-  « Reproduire » ; A313, file, liste 4.16 et 4.20 si la mesure le permet.
-- [ ] **P6** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone. **Reportée** : encore
-  en calcul à 21:50 ; le point daté de la file la porte.
-- [x] **P7** — rituel.
+- [ ] **P2** — ADR-188 : la décision de l'utilisateur ; file, feuille de route.
+- [ ] **P3** — la géométrie coupée 3D et ses essais (critère 1).
+- [ ] **P4** — l'opérateur, la divergence et la correction pondérés ; `configure_with_bottom` ; essais du
+  critère 2.
+- [ ] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
+- [ ] **P6** — preuve `docs/validation/FACES-COUPEES-3D-S324.md`, avec « Reproduire » ; file, liste 4.15,
+  feuille de route.
+- [ ] **P7** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
 
-**P2.** `lot5_comparaison compteur` : plan exact à ≤ 2·10⁻¹⁴ (trois hauteurs, deux mailles, bandes des
-parois comprises) ; disque `r` = 0,3 m : −5,7·10⁻³, −1,4·10⁻³, −3,6·10⁻⁴, −8,9·10⁻⁵, rapports **3,96 ;
-3,98 ; 4,03** — ordre deux. Construit dans un répertoire cible hors dépôt : P5b verrouille l'exécutable.
-
-**P3 (21:44).** `V_geo/V_masse − 1`, 5 cm sauf mention. **Repos** −1,466 % = biais générique de
-reconstruction, −0,146 maille par longueur de surface ; dérive 1·10⁻⁵ en 10 s. **Ballottement** : −0,64 %
-au départ (le remplissage initial du cosinus), **relaxé** vers le biais générique en 7 s puis stable
-(−1,49 à −1,55 %) ; à 2,5 cm, autour de −0,6 à −0,7 % pour −0,73 % générique ; séparation sans
-effet (−0,87 % contre −0,85 %). **Corps lent** : −0,32 → −0,54 % avec séparation, → **−1,56 %** sans
-(montée de masse 39 %, géométrique 45 %). **B10 `Fr` = 2, `D/dx` = 8** : entre −0,47 et −0,15 % avec
-séparation ; **−12,2 %** sans — la séparation est indispensable. Non-régression : période du
-ballottement +5,59 % avec séparation, +5,85 % sans (S320 : +5,6 et +5,9) ; pincement 2,20 √(D/g).
-
-**P4, premier passage (21:46).** Aucune des deux voies ne tient le critère 3. *Masse* : masse exacte
-et point fixe dès le 2ᵉ tour, mais une colonne saute de 3,96 mailles, volume géométrique +0,82 %.
-*Géométrie* : 0,20 à 0,30 maille, mais −14 particules au 1ᵉʳ tour et une dérive (−27 en dix).
-**Cause** : après une seconde de mouvement, les particules se regroupent en `x` ; la hauteur de masse
-par colonne va de 0,35 à 0,71 m quand la surface géométrique reste entre 0,47 et 0,53 m. **La masse par
-colonne n'est pas une hauteur.** *Déclaré avant la mesure* : une **voie mixte** — la forme par la
-géométrie, le niveau par la masse (décalage uniforme qui rend la masse des colonnes converties
-exacte) ; prédiction : masse à une particule près, géométrie par colonne à 0,2 maille, pas de dérive
-sur dix tours.
-
-**P4b (21:48), la voie mixte.** Masse **exacte** partout. Ballottement : 1ᵉʳ passage +0,069 maille
-en moyenne (5 cm), +0,097 (2,5 cm), max 0,23 et 0,28 ; ensuite ni dérive ni saut (point fixe en quatre
-tours à 5 cm, ±0,005 à 2,5 cm). B10 au pincement (`Fr` = 2, `D/dx` = 8) : 58 colonnes sur 64
-converties, les 6 du corps et de la cavité laissées aux particules ; +0,17 en moyenne, max 0,35,
-puis +0,02 en neuf tours. **Critère 3 : masse tenue, géométrie non** (0,2 maille manqué de 0,03 à 0,15).
-**Pourquoi** : le volume géométrique d'une masse donnée dépend de l'arrangement des particules ;
-réensemencer en réseau régulier change le biais de reconstruction. On ne peut conserver que l'un des
-deux ; la masse l'est, la surface saute de la différence des biais. Remède à chercher : une
-reconstruction dont le biais ne dépend pas de l'arrangement.
-
-**P5.** Liste : 4.16 et 4.20 **inchangés** — la conversion est statique, aucun raccord ne tourne encore.
