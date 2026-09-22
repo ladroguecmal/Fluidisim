@@ -16340,3 +16340,24 @@ en tête, sortie brute de la non-régression gardée. P1 committé avec `[>]` un
 doit en faire avancer une : **S323, lot 5 — le raccord particules ↔ colonnes**, précédé du compteur
 de volume géométrique (A313) ; l'alternance d'ADR-184 le désigne aussi. Trois décisions attendent
 l'utilisateur (file).
+
+## S323 — 2026-09-22 — lot 5 : un raccord à masse exacte, et la surface qui dépend de l'arrangement
+
+**Entrée.** *« Continue »* ; alternance d'ADR-184, et deux maillons : la session devait viser une
+capacité — le raccord particules ↔ colonnes, qu'A313 faisait précéder d'un compteur de volume.
+**Le compteur** ([preuve](../docs/validation/B10-APIC-S320.md) §10). Aire sous la surface
+reconstruite, par carrés marchants sur l'interface que voit le fluide fantôme : exacte sur un plan,
+d'ordre deux sur un disque. Il mesure enfin le tassement : −1,24 % au corps lent sans séparation,
+**−12 %** en B10, ±0,3 % avec. Au repos, le volume géométrique est sous la masse de 0,146 maille par
+longueur de surface, et un écoulement s'y relaxe : ce n'est pas une dérive (A313 résolu).
+**Le raccord, statique.** Une colonne à un seul segment posé sur le fond passe aux colonnes ; les
+autres — corps, cavité — restent aux particules. **La masse par colonne n'est pas une hauteur** : après
+une seconde, elle varie du simple au double quand la surface reste lisse. Voie mixte, déclarée avant
+sa mesure : forme géométrique, niveau de masse — masse exacte, puis point fixe ; mais la surface saute
+de 0,07 à 0,17 maille, jusqu'à 0,35 : le volume d'une masse dépend de l'arrangement (A314). Critère
+de 0,2 maille manqué ; la masse tient.
+**Non fait.** Le raccord dynamique ; S320 P5b, encore en calcul (file).
+**Rituel.** Maillons **3**, justifiés : le raccord ne se construit pas sans son instrument ni sans savoir
+quelle grandeur conserver ; les deux sont établis, et la borne trouvée. Aucun point de liste ne bouge.
+Suivant : **la décision de l'utilisateur** sur le lot 3 à la place du lot 2 bloqué ; à défaut, le
+raccord dynamique. Un angle mort : A314.

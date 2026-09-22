@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-22 21:49 +02:00
+JETON            : libre
+Battement        : 2026-09-22 21:50 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S323 — lot 5, le raccord particules ↔ colonnes, précédé du compteur de volume géométrique d'APIC (A313)
-Dernière session : S322 — **A289** : la croissance de δ sous houle **ne dépend pas du pas de temps** — 0,1015 à 0,1007 s⁻¹ de 20 à 2,5 ms, 0,8 % sur un facteur huit ([preuve](docs/validation/MER-S319.md) §8) ; pas un défaut d'intégration du pas couplé ; la voie reste à l'utilisateur
-Session suivante : **S323, lot 5 — le raccord particules ↔ colonnes**, précédé du compteur de volume géométrique d'APIC (A313) ; alternance d'ADR-184 et règle des deux maillons ; verser S320 P5b à son retour (file)
-Maillons        : 2 — S321 : une méthode ; S322 : un diagnostic qui restreint une cause ; aucune capacité reçue. La suite doit en faire avancer une
+Session en cours : aucune
+Dernière session : S323 — **lot 5** : compteur de volume géométrique d'APIC (A313 résolu, tassement mesuré : −12 % en B10 sans séparation) ; une région passe des particules aux colonnes et retour **à masse exacte**, la surface sautant de 0,07 à 0,17 maille — le volume d'une masse dépend de l'arrangement (A314) ([preuve](docs/validation/B10-APIC-S320.md) §10)
+Session suivante : **décision de l'utilisateur attendue** — le lot 3 (faces coupées 3D, voie de la v1) à la place du lot 2 bloqué par A289 ([bilan](docs/registres/BILAN-GLOBAL-S321.md) §7) ; à défaut, lot 5, le raccord dynamique. Verser S320 P5b à son retour (file)
+Maillons        : 3 — justifiés au journal de S323 : le raccord demandait son instrument et la grandeur à conserver, établis ; aucun point de liste n'a bougé. La suite doit faire avancer une capacité
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

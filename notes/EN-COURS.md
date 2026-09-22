@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S323 — **en cours**. **Lot 5, le raccord particules ↔ colonnes**
+Session : S323 — **terminée** (2026-09-22 21:50, P6 reportée). **Lot 5, le raccord particules ↔ colonnes**
 ([ADR-186](../docs/adr/ADR-186-apic-seconde-representation.md) §3), précédé du compteur de volume
 géométrique d'APIC qu'A313 exige avant lui.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -100,8 +100,9 @@ Critères, écrits avant le code :
 - [x] **P4** — les deux primitives, et l'aller-retour sur un état réel.
 - [x] **P5** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; A313, file, liste 4.16 et 4.20 si la mesure le permet.
-- [>] **P6** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
-- [ ] **P7** — rituel.
+- [ ] **P6** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone. **Reportée** : encore
+  en calcul à 21:50 ; le point daté de la file la porte.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 
