@@ -4256,3 +4256,12 @@ petitesse. **Conséquence** : aucune trajectoire à maille fine, donc pas de fro
 la prochaine session du lot 3. Remède à éprouver d'abord : **Jacobi** sur le chemin coupé, comme le
 mode mobile 3D, l'identité 2D gardée à `ny` = 1 ; critère : itérations à 128 comparables au témoin.
 Ensuite seulement, fusion des petites cellules ou multigrille.
+
+**A316 — S325, 2026-09-23 (sévérité 2, ouverte). La frontière du raccord dynamique décale la surface et
+dissipe.** Colonnes et particules côte à côte, échanges comptés : la masse tient à l'arrondi, mais la
+surface saute de **1,8 à 2,8 mailles** à la frontière (APIC seul : 0,15), le ballottement perd **jusqu'à
+16 % par période**, et des vitesses parasites de 0,5 m/s apparaissent ([preuve](../validation/B10-APIC-S320.md)
+§11). L'amortissement ne suit pas la taille de la zone des colonnes : le lissage grille → réseau → grille
+n'est pas la seule cause. **Conséquence** : le raccord ne se consomme pas encore. **Déclencheur** : la
+prochaine session du lot 5. Suspects, un par un : insertion des particules sortantes, quantification
+de l'ensemencement, colonnes sans vitesse propre — δ porte les siennes sur sa grille.

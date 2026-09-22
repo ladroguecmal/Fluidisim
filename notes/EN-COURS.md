@@ -94,9 +94,9 @@ Critères, écrits avant le code :
 - [x] **P2** — le candidat hybride dans le banc : colonnes à droite, particules à gauche, échanges
   à la frontière.
 - [x] **P3** — repos et ballottement, deux mailles : masse, période, écart à la frontière.
-- [>] **P4** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
+- [x] **P4** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; file, liste 4.20 si la mesure le permet.
-- [ ] **P5** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
+- [>] **P5** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -112,3 +112,5 @@ sens (0,155 entré, 0,154 sorti à 5 cm) ; **écart à la frontière 1,81 et 2,8
 manqué. **Hypothèse du lissage grille → réseau → grille, contredite** : l'amortissement ne suit pas la
 taille de la zone — 16 % (frontière à L/2), 0,9 % (3L/4), 10 % (7L/8). Cause non attribuée ; suspects :
 l'insertion des particules sortantes, la quantification de l'ensemencement, la frontière au nœud du mode.
+
+**P4.** Liste 4.20 **inchangée** : l'échange à masse exacte est reçu, la frontière non.

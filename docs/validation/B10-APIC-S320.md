@@ -19,6 +19,9 @@ surface, c'est la maille qui les arrête.
 plan et d'ordre deux ; il mesure le tassement — −12 % en B10 sans séparation, ±0,3 % avec. Une région
 passe des particules aux colonnes et retour **à masse exacte** ; sa surface saute alors de 0,07 à 0,17
 maille en moyenne, la différence des biais de reconstruction entre deux arrangements.
+**S325 (§11)** : le raccord **dynamique** — colonnes et particules côte à côte, échanges à la frontière —
+conserve la masse exactement, mais sa frontière décale la surface de 1,8 à 2,8 mailles et amortit le
+ballottement jusqu'à 16 % par période : pas encore reçu.
 
 ---
 
@@ -296,3 +299,70 @@ moyenne, soit à la maille de 25 cm d'une scène de jeu, 2 à 4 cm.
 exacte, en laissant aux particules ce que les colonnes ne portent pas. **Ce qui manque** : le raccord
 **dynamique** — une région en colonnes qui évolue à côté d'une région en particules —, et une
 reconstruction dont le biais ne dépende pas de l'arrangement, sans quoi chaque conversion se verra.
+
+---
+
+## 11. S325 — le raccord dynamique, premier montage : la masse tient, la frontière non
+
+2026-09-23. **Lot 5**, alternance d'[ADR-188](../adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md). La
+première eau qui vit **à la fois** en colonnes et en particules, et passe de l'une à l'autre en cours de
+simulation.
+
+### Reproduire
+
+- Commit `a403d233` ou plus récent ; machine de référence, CPU, un fil.
+- `cargo run -p water-core --release --offline --example lot5_comparaison -- raccord_dyn <repos|ballottement> <dx>`
+  — ligne `RACCORD_DYN_S325`, puis les lignes de synthèse d'APIC seul et de l'hybride ; `hybride
+  ballottement <dx>` pour l'hybride seul ; `RACCORD_ZONE=<part>` déplace la frontière (0,5 par défaut).
+- Durées : 5 s (repos) à 40 s (ballottement à 2,5 cm).
+
+### Le montage
+
+Dans le banc APIC 2D, la moitié droite du bassin est portée par des **colonnes** — une hauteur par
+colonne, transportée par les flux ouverts de la grille, hauteur mouillée prise en amont —, le modèle
+des colonnes de δ. Ses particules sont **réensemencées à chaque pas** depuis les hauteurs, avec la
+vitesse et la matrice affine de la grille : elles ne servent qu'au transfert vers la grille et à la
+surface que voit la pression. À la frontière : une particule libre qui entre est retirée et sa masse
+versée à la colonne ; la part **sortante** du flux de la grille quitte la première colonne et
+s'accumule, profondeur par profondeur, jusqu'à former une particule libre. Une faute du premier jet,
+corrigée avant toute mesure : une particule de colonne qui glisse à gauche pendant le pas aurait été
+gardée, et comptée deux fois.
+
+### Ce qui est mesuré
+
+| | repos, 5 cm | ballottement, 5 cm | ballottement, 2,5 cm |
+|---|---:|---:|---:|
+| masse, écart relatif maximal | **2·10⁻¹⁶** | **3·10⁻¹⁶** | **1,3·10⁻¹⁵** |
+| entré / sorti par la frontière, m² | 0 / 4,8·10⁻⁴ | 0,155 / 0,154 | 0,135 / 0,142 |
+| écart de surface à la frontière, mailles — APIC seul au même endroit | 0,002 — 0,000 | **1,81** — 0,14 | **2,85** — 0,17 |
+| vitesse maximale | 1,4 cm/s *(APIC 4,4 mm/s)* | 0,63 m/s | 0,87 m/s |
+| période, zéros / périodogramme — APIC seul | — | +7,6 / +5,2 % — +5,6 / +6,1 % | +2,4 / +0,14 % — −0,18 / −0,08 % |
+| amortissement par période — APIC seul | — | **16 %** — −0,4 % | **5,4 %** — 0,3 % |
+
+**Critère 1 tenu** : la masse des particules libres, des colonnes et de l'attente se conserve à
+l'arrondi, et l'eau passe dans les deux sens. **Critères 2 et 3 manqués** : vitesses parasites au repos,
+écart de surface de deux mailles, amortissement fort.
+
+### Une hypothèse contredite
+
+Le réensemencement à chaque pas fait passer la vitesse de la grille à un réseau fixe de particules,
+puis de nouveau à la grille : un lissage, qui dissiperait **en proportion de la zone des colonnes**.
+Épreuve, à 5 cm, frontière déplacée :
+
+| part laissée aux colonnes | 1/2 (frontière à `L/2`) | 1/4 (`3L/4`) | 1/8 (`7L/8`) |
+|---|---:|---:|---:|
+| amortissement par période | 16 % | 0,9 % | 10 % |
+
+**L'amortissement ne suit pas la taille de la zone** : l'hypothèse n'est pas la bonne, ou pas la seule.
+La frontière au milieu du bassin tombe au nœud du premier mode, là où la vitesse horizontale — donc
+l'échange — est la plus forte. Les vitesses parasites, de l'ordre de 0,5 m/s, sont présentes quelle
+que soit la position.
+
+### Verdict et suite
+
+**Ce qui est reçu** : un échange **à masse exacte** entre deux représentations vivantes, dans les deux
+sens. **Ce qui ne l'est pas** : une frontière invisible et non dissipative. La cause n'est pas
+attribuée ; trois suspects, à éprouver **un par un** : l'insertion des particules sortantes contre la
+frontière, la quantification de l'ensemencement (`round(4h/dx)` : une particule de plus ou de moins
+change la surface d'un quart de maille), et la vitesse des colonnes, qui ne garde aucune mémoire propre
+d'un pas à l'autre — δ, lui, porte ses vitesses sur sa grille (A316).
