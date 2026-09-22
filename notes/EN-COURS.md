@@ -95,8 +95,8 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le compteur, et son épreuve sur des distances exactes (plan, disque, trois mailles).
-- [ ] **P3** — le compteur sur repos, ballottement, corps lent avec et sans séparation, B10 à `Fr` = 2.
+- [x] **P2** — le compteur, et son épreuve sur des distances exactes (plan, disque, trois mailles).
+- [>] **P3** — le compteur sur repos, ballottement, corps lent avec et sans séparation, B10 à `Fr` = 2.
 - [ ] **P4** — les deux primitives, et l'aller-retour sur un état réel.
 - [ ] **P5** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; A313, file, liste 4.16 et 4.20 si la mesure le permet.
@@ -105,3 +105,6 @@ Critères, écrits avant le code :
 
 ### Notes de reprise
 
+**P2.** `lot5_comparaison compteur` : plan exact à ≤ 2·10⁻¹⁴ (trois hauteurs, deux mailles, bandes des
+parois comprises) ; disque `r` = 0,3 m : −5,7·10⁻³, −1,4·10⁻³, −3,6·10⁻⁴, −8,9·10⁻⁵, rapports **3,96 ;
+3,98 ; 4,03** — ordre deux. Construit dans un répertoire cible hors dépôt : P5b verrouille l'exécutable.

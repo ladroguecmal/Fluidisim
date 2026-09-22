@@ -229,6 +229,110 @@ struct Mesure {
     /// particule la plus haute au bord — était quantifiée à l'espacement des particules et ne
     /// laissait lire aucune période (P4b).
     jauge: f64,
+    /// **Le volume géométrique** (S323, A313) : l'aire sous la surface reconstruite, corps et air
+    /// enfermé exclus — [`aire_eau`]. Zéro pour les candidats qui n'en publient pas.
+    volume_geo: f64,
+}
+
+/// **Le compteur de volume géométrique (S323, A313).** L'aire où `φ < 0`, `φ` donné aux centres des
+/// cellules, l'iso-zéro **linéaire entre deux centres** — l'interface même que voit le fluide
+/// fantôme. Carrés marchants sur la grille des centres ; au-delà des parois, des fantômes miroirs,
+/// pour les demi-bandes qui les longent. Une cellule `solide` compte comme de l'air. Exacte pour une
+/// interface plane, d'ordre deux pour une interface courbe : le mode `compteur` l'éprouve.
+fn aire_eau(phi: &[f64], nx: usize, ny: usize, dx: f64, solide: &dyn Fn(usize, usize) -> bool) -> f64 {
+    let valeur = |i: isize, j: isize| {
+        let (a, b) = (i.clamp(0, nx as isize - 1) as usize, j.clamp(0, ny as isize - 1) as usize);
+        if solide(a, b) {
+            phi[b * nx + a].max(dx)
+        } else {
+            phi[b * nx + a]
+        }
+    };
+    let mut aire = 0.0;
+    for j in -1..ny as isize {
+        for i in -1..nx as isize {
+            let demi = |k: isize, n: usize| if k == -1 || k == n as isize - 1 { 0.5 } else { 1.0 };
+            let coins = [valeur(i, j), valeur(i + 1, j), valeur(i + 1, j + 1), valeur(i, j + 1)];
+            aire += demi(i, nx) * demi(j, ny) * aire_carre(coins, dx);
+        }
+    }
+    aire
+}
+
+/// L'aire où une fonction est négative dans un carré de côté `s`, coins `[bas-gauche, bas-droite,
+/// haut-droite, haut-gauche]`, l'iso-zéro linéaire sur chaque arête. Un point-selle se tranche par
+/// la moyenne des quatre coins.
+fn aire_carre(v: [f64; 4], s: f64) -> f64 {
+    let coins = [[0.0, 0.0], [s, 0.0], [s, s], [0.0, s]];
+    let neg = v.map(|x| x < 0.0);
+    let n = neg.iter().filter(|&&b| b).count();
+    if n == 0 {
+        return 0.0;
+    }
+    if n == 4 {
+        return s * s;
+    }
+    let coupe = |k: usize, l: usize| {
+        let t = v[k] / (v[k] - v[l]);
+        [coins[k][0] + t * (coins[l][0] - coins[k][0]), coins[k][1] + t * (coins[l][1] - coins[k][1])]
+    };
+    if n == 2 && neg[0] == neg[2] && v.iter().sum::<f64>() >= 0.0 {
+        // Point-selle dont le centre est sec : deux coins d'eau séparés, deux triangles rectangles.
+        return (0..4)
+            .filter(|&k| neg[k])
+            .map(|k| {
+                let (a, b) = (coupe(k, (k + 1) % 4), coupe(k, (k + 3) % 4));
+                let jambe = |p: [f64; 2]| (p[0] - coins[k][0]).abs() + (p[1] - coins[k][1]).abs();
+                0.5 * jambe(a) * jambe(b)
+            })
+            .sum();
+    }
+    let mut poly: Vec<[f64; 2]> = Vec::with_capacity(8);
+    for k in 0..4 {
+        let l = (k + 1) % 4;
+        if neg[k] {
+            poly.push(coins[k]);
+        }
+        if neg[k] != neg[l] {
+            poly.push(coupe(k, l));
+        }
+    }
+    let mut double = 0.0;
+    for k in 0..poly.len() {
+        let (p, q) = (poly[k], poly[(k + 1) % poly.len()]);
+        double += p[0] * q[1] - q[0] * p[1];
+    }
+    0.5 * double.abs()
+}
+
+/// **Le compteur éprouvé sur des distances exactes** (S323 P2) : une interface plane à des hauteurs
+/// quelconques — exacte à l'arrondi, bandes des parois comprises —, puis un disque à quatre mailles —
+/// ordre deux attendu, le rapport des écarts vers 4.
+fn epreuve_compteur() {
+    let (lx, ly) = (2.0, 1.0);
+    for eta in [0.4373, 0.5, 0.61] {
+        for dx in [0.05, 0.025] {
+            let (nx, ny) = ((lx / dx) as usize, (ly / dx) as usize);
+            let phi: Vec<f64> = (0..nx * ny).map(|k| ((k / nx) as f64 + 0.5) * dx - eta).collect();
+            let aire = aire_eau(&phi, nx, ny, dx, &|_, _| false);
+            println!("COMPTEUR_S323 plan eta={eta} dx={dx} ecart_relatif={:e}", aire / (eta * lx) - 1.0);
+        }
+    }
+    let (c, r) = ([0.93, 0.47], 0.3);
+    let exacte = std::f64::consts::PI * r * r;
+    let mut precedent = f64::NAN;
+    for dx in [0.05, 0.025, 0.0125, 0.00625] {
+        let (nx, ny) = ((lx / dx) as usize, (ly / dx) as usize);
+        let phi: Vec<f64> = (0..nx * ny)
+            .map(|k| {
+                let (x, y) = (((k % nx) as f64 + 0.5) * dx, ((k / nx) as f64 + 0.5) * dx);
+                ((x - c[0]).powi(2) + (y - c[1]).powi(2)).sqrt() - r
+            })
+            .collect();
+        let ecart = aire_eau(&phi, nx, ny, dx, &|_, _| false) - exacte;
+        println!("COMPTEUR_S323 disque r={r} dx={dx} ecart_relatif={:e} rapport={:.3}", ecart / exacte, precedent / ecart);
+        precedent = ecart;
+    }
 }
 
 /// Compte les segments d'eau d'une colonne d'occupation, de bas en haut. **Deux segments ne sont
@@ -690,7 +794,7 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
     let duree = debut.elapsed().as_secs_f64();
     if std::env::var("LOT5_SERIE").is_ok() {
         for r in &releves {
-            eprintln!("SERIE {:.4} {:.6} {:.6} {:.3} {:.3} {:.4} {}", r.t, r.jauge, r.volume, r.e_cin, r.e_pot, r.front, r.couches);
+            eprintln!("SERIE {:.4} {:.6} {:.6} {:.3} {:.3} {:.4} {} {:.6}", r.t, r.jauge, r.volume, r.e_cin, r.e_pot, r.front, r.couches, r.volume_geo);
         }
     }
     let m0 = releves[0];
@@ -729,6 +833,27 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
         m0.e_cin + m0.e_pot,
         fin.e_cin + fin.e_pot
     );
+    // **Le volume géométrique** (S323, A313), sur une ligne à part : la ligne ci-dessus reste
+    // celle de S318, au bit. Écart rapporté au volume de masse : `V_geo / V_masse − 1`.
+    if m0.volume_geo > 0.0 {
+        let relatif = |r: &Mesure| r.volume_geo / r.volume - 1.0;
+        let (mut plus_bas, mut plus_haut) = (f64::MAX, f64::MIN);
+        for r in &releves {
+            plus_bas = plus_bas.min(relatif(r));
+            plus_haut = plus_haut.max(relatif(r));
+        }
+        println!(
+            "LOT5_S323 volume_geo candidat={} cas={:?} dx={} geo_sur_masse_initial={:e} \
+             geo_sur_masse_final={:e} geo_sur_masse_min={plus_bas:e} geo_sur_masse_max={plus_haut:e} \
+             derive_geo_finale={:e}",
+            c.nom(),
+            scene.cas,
+            scene.dx,
+            relatif(&m0),
+            relatif(&fin),
+            (fin.volume_geo - m0.volume_geo) / m0.volume_geo
+        );
+    }
     match scene.cas {
         Cas::Ballottement => {
             let t: Vec<f64> = releves.iter().map(|r| r.t).collect();
@@ -1280,6 +1405,12 @@ impl Candidat for Apic {
         }
         jauge /= 0.25 * nx as f64 * dx;
         let (enferme, cavite, bulle_haut, base_corps, niveau_loin, niveau_geo) = self.b10(t);
+        let corps = self.scene.corps(t);
+        let dans_corps = |i: usize, j: usize| match corps {
+            Some((c, r, _)) => ((i as f64 + 0.5) * dx - c[0]).powi(2) + ((j as f64 + 0.5) * dx - c[1]).powi(2) < r * r,
+            None => false,
+        };
+        let volume_geo = aire_eau(&self.distance(), nx, ny, dx, &dans_corps);
         Mesure {
             t,
             volume,
@@ -1298,6 +1429,7 @@ impl Candidat for Apic {
             couches,
             u_max,
             jauge,
+            volume_geo,
         }
     }
 }
@@ -1790,6 +1922,10 @@ impl Candidat for Niveaux {
 fn main() -> Result<(), String> {
     let args: Vec<String> = std::env::args().collect();
     let candidat = args.get(1).ok_or("candidat ?")?.as_str();
+    if candidat == "compteur" {
+        epreuve_compteur();
+        return Ok(());
+    }
     let cas = match args.get(2).map(|s| s.as_str()) {
         Some("repos") => Cas::Repos,
         Some("ballottement") => Cas::Ballottement,
