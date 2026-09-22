@@ -2,7 +2,12 @@
 
 ## File active
 
-> **Décisions de l'utilisateur** — un seul endroit, daté. **Une proposée au 2026-09-21 (S319)** : la voie
+> **Décisions de l'utilisateur** — un seul endroit, daté. **Deux proposées au 2026-09-22 (S321)**,
+> ([bilan](BILAN-GLOBAL-S321.md) §7) : l'**essai du pas de temps** avant l'arbitrage d'A289, puis le
+> **lot 3** à la place du lot 2 dans l'alternance d'ADR-184 tant que l'ordre E est bloqué ; une
+> **sauvegarde** par `git bundle` sur un support externe, qui n'est pas un dépôt distant. La méthode
+> refondue est appliquée ([ADR-187](../adr/ADR-187-methode-refondue-s321.md)), réversible point par point.
+> **Une proposée au 2026-09-21 (S319)** : la voie
 > d'**A289** — rappel lent de δ, durée de vie bornée des domaines, ou dispersion d'amplitude dans B (qui
 > change la mer de tous) — sous une vraie mer, δ croît jusqu'à trois fois la houle ([S319](../validation/MER-S319.md)).
 > **2026-09-21, S319** : **APIC** retenue pour la seconde représentation
@@ -40,7 +45,7 @@
 > GPU) ; v1 = porte D franchie ; aucun dépôt distant ; porte B avant la suite du coût en 2D ;
 > onde de S277 sans verdict attendu.
 
-**État relu en S304, 2026-09-20** — lignes rangées par porte, 90 mots au plus (REPRISE §8). Porteur des travaux internes : la session du dépôt.
+**État relu en S321, 2026-09-22** — lignes rangées par porte, 90 mots au plus (REPRISE §8). Porteur des travaux internes : la session du dépôt.
 Trajectoire : [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md). Priorité et protocole d'arrêt :
 [BILAN-GLOBAL-S293](BILAN-GLOBAL-S293.md), qui remplace [S227](BILAN-GLOBAL-S227.md) pour l'ordre. Remplacer les états touchés ; ne plus empiler ici des
 suivis de session. Les preuves et l'histoire restent dans le journal et Git.
@@ -105,7 +110,10 @@ suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 | **A216 / A241** | Coefficient S161 inexpliqué ; suspect de repli S196 réfuté par S197 | Recherche différée tant qu'aucune décision de construction n'en dépend ; conserver contrôle d'exposition au biais (L278) |
 | **A213 / précision de omega** | Remède identifié, non appliqué ; reçu S95 à renouveler si retenu | Extension d'horizon ou consommateur sensible à la phase ; préserver le reçu ancien et expliquer les nouveaux bits |
 | **A94/A95 / dossier de réunions** | Quatorze fiches historiques, aucune autre équipe présente (ADR-028) | Traiter les décisions internes au lot concerné ; seuls les faits externes et actions d'infrastructure nécessitent l'utilisateur |
-| **A211 / A243 / pilotage** | S293 : dix sessions sur dix ont repris la suite de la précédente (S283–S292), maillons remis à zéro par des optimisations, documents d'état ×3 à ×6 depuis S227 ([bilan](BILAN-GLOBAL-S293.md) §3.4). S294 : lot pris dans la porte en cours, maillons liés aux critères de porte, plafonds contrôlés | Juger aux sessions suivantes : si la porte B n'a rien reçu en trois sessions, le correctif a échoué |
+| **A211 / A243 / pilotage et méthode** | S293 : pilotage par la suite déclarée ; S294 : lot pris dans la porte, maillons liés aux portes. **S321** : coût de méthode par session, registres qui regrossissent, leçons non chargées ([bilan](BILAN-GLOBAL-S321.md)) ; méthode refondue ([ADR-187](../adr/ADR-187-methode-refondue-s321.md)), contrôles dans `etat_projet.py --check` | **À S330** : taille d'`EN-COURS` et de la file, part des commits de rituel, leçons par session ; s'ils regrossissent, corriger le contrôle, pas ajouter une règle |
+| **Réceptions portées par des bancs** *(S321, C4)* | APIC n'existe que dans `examples/lot5_comparaison.rs`, le transfert δ → W dans `transfert_oriente.rs` ; un banc n'est exécuté par aucune suite, sa réception n'est protégée que par sa preuve ([bilan](BILAN-GLOBAL-S321.md) §3) | Au raccord particules ↔ colonnes : APIC entre dans le cœur **avec ses essais** ; le transfert, quand le système le consommera (ADR-187 D6) |
+| **Bancs sur l'oracle HOS** *(S321)* | `delta3d_mobile` (réception S296) et `nl_surface_2d` n'appellent pas `dispersion_error`, que le module demande à tout banc (L277) : l'écart de l'oracle à sa configuration n'est pas publié à côté de la réception | Au prochain usage de ce banc ou de la référence 3D mobile : une ligne de plus, la valeur publiée dans la preuve |
+| **Afficheur, lanceur de bancs** *(S321, C6)* | `viewer/src/main.rs` : 3 489 lignes, **104 options** (3 000 et 67 en S293) — les bancs s'empilent dans l'hôte de rendu | Au prochain lot qui touche la boucle d'image — la scène-témoin de la porte D : séparer les bancs de l'hôte interactif, sans changer une image |
 | **A215 / copies de travail** | Jeton versionné, donc non atomique entre copies ; contrôles Git conservés | Toute reprise et fin de session selon AGENTS ; aucune suppression sans preuve de copie morte |
 
 **Clos et à ne pas redemander** : A306 et A307 (S316 : estimateurs de période du harnais relus, aucune réception affectée ; phase déroulée) ; A303 (S314–S316 : primitive orientée construite, exacte à 10⁻⁴) ; A308 (S316, banc de l'ordre C) ; A292 (S290, coût d'appel du cycle GPU) ; A293 (S291, pas décomposé) ; A296 (S294, part de δ nommée par ADR-174) ; A284/A285 (S252, coût attribué au β fautif du GC multigrille, corrigé ; A275 tenue par ADR-151) ; A283 (S251, démarrage plat reçu, ADR-150) ; A266 (S228, géométrie polyédrique reçue ; tables historiques +Z) ;

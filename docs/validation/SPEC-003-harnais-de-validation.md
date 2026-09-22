@@ -5,6 +5,16 @@
 - **Dépend de** : ADR-003 (déterminisme), ADR-020 (bibliothèque autonome)
 - **Conditionne** : les onze bancs de `PLAN-BENCHMARK.md` et l'ensemble des seuils « à calibrer »
 
+> **Note datée S321, 2026-09-22** ([BILAN-GLOBAL-S321](../registres/BILAN-GLOBAL-S321.md) C5) — ce
+> qui existe de ce harnais : H1 (lecteur de scénario, `check`, hashes, compteur d'allocations) et une
+> part de H3 (`physics`, campagnes C22) ; **deux scénarios**, C02 et C18. Ni série de coût, ni
+> bisection, ni batteries de famine ou de saturation, ni intégration continue. La pratique a pris
+> d'autres porteurs : `cargo test`, les bancs de `examples/` lancés à la main, les preuves de
+> `docs/validation/`. Ce que cette spécification visait d'abord — une réception protégée contre la
+> dérive (§7.1) — n'est tenu que pour ce qui est devenu essai ; depuis S321, toute preuve nouvelle
+> s'ouvre sur « Reproduire » ([ADR-187](../adr/ADR-187-methode-refondue-s321.md) D6). Le reste de ce
+> texte décrit une intention, pas un état.
+
 ---
 
 ## 1. Objet et critère de réussite

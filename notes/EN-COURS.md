@@ -102,8 +102,8 @@ Critères, écrits avant le travail :
 - [x] **P8a** — hygiène du dépôt : `.pyc` retirés et ignorés, `code/REPRISE.md` vide supprimé,
   README racine et du code, décomptes de la liste et de la feuille de route.
 - [x] **P8b** — hygiène du code : `rust-version` vraie, avertissements à zéro, suites rejouées.
-- [>] **P9** — index : carte par système en tête ; note datée à SPEC-003 ; file active.
-- [ ] **P10** — S320 P5b : §5 bis versé au retour du calcul — étape asynchrone, placée là où le
+- [x] **P9** — index : carte par système en tête ; note datée à SPEC-003 ; file active.
+- [>] **P10** — S320 P5b : §5 bis versé au retour du calcul — étape asynchrone, placée là où le
   calcul la permet.
 - [ ] **P11** — rituel, appliqué sous sa forme nouvelle.
 

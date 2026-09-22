@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-22 20:47 +02:00
+Battement        : 2026-09-22 20:49 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S321 — analyse complète et réorganisation de la méthode, demande de l'utilisateur
 Dernière session : S320 — **lot 5, B10 sur APIC** : une cavité d'air derrière un corps se pince à 2,2–2,5 `√(D/g)`, indépendamment de l'échelle à 4·10⁻⁴ près, temps convergé à 5 % ; couronne et jet suivent la maille (A312) ; la masse d'APIC est exacte, son volume géométrique non (L370, A313) ([preuve](docs/validation/B10-APIC-S320.md)) ; §5 bis en calcul, versé par S321

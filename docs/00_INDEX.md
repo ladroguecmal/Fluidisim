@@ -2,10 +2,30 @@
 
 [Reprise](../REPRISE.md) · [Feuille de route](FEUILLE-DE-ROUTE.md) · [File active](registres/QUESTIONS-OUVERTES.md#file-active) · [Liste du projet fini](LISTE-PROJET-FINI.md)
 
+## Carte par système — par où entrer
+
+*S321 ([ADR-187](adr/ADR-187-methode-refondue-s321.md)).* Cet index **se consulte**, il ne se lit
+pas en entier. Pour chaque système : les décisions qui le gouvernent et les preuves de son état
+présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md), les travaux dans la
+[file active](registres/QUESTIONS-OUVERTES.md#file-active). Le catalogue complet suit.
+
+| système | décisions | preuves de l'état présent |
+|---|---|---|
+| **pilotage et méthode** | [127](adr/ADR-127-ambition-complete-construction-progressive.md) ambition, [174](adr/ADR-174-arbitrages-du-2026-09-19.md) arbitrages, [178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) trois systèmes, [187](adr/ADR-187-methode-refondue-s321.md) méthode | [BILAN-GLOBAL-S321](registres/BILAN-GLOBAL-S321.md), [TROIS-SYSTEMES-S308](registres/TROIS-SYSTEMES-S308.md), [liste du projet fini](LISTE-PROJET-FINI.md) |
+| **A — haute mer (B + W)** | [129](adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md), [130](adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md), [155](adr/ADR-155-queue-spectrale-en-pentes-par-pixel.md) à [163](adr/ADR-163-sommes-des-ondes-filtrees.md), [176](adr/ADR-176-asymetries-de-la-surface-rendue.md), [177](adr/ADR-177-couleur-du-corps-d-eau-derivee-de-ses-sources.md) | [S259](validation/MER-MULTIMODALE-S259.md), [S260](validation/VAGUES-POINTUES-S260.md), [S267](validation/CUISSON-SILLAGE-S267.md), [S304](validation/ASYMETRIES-S304.md), [S306](validation/STRIES-S306.md), [S307](validation/RENDU-ECART-S307.md), [revue visuelle](validation/REVUE-VISUELLE.md) |
+| **B — δ volumique 3D** | [175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) exécution, [184](adr/ADR-184-seconde-representation-en-parallele.md) et [186](adr/ADR-186-apic-seconde-representation.md) seconde représentation | 3D : [S297](validation/DELTA3D-COUPLEE-S297.md), [S298](validation/DELTA3D-FOND-REEL-S298.md), [S301](validation/DELTA3D-PAS-GPU-S301.md), [S302](validation/SCENE-DELTA3D-S302.md), [S305](validation/CUVE-GPU-S305.md) ; APIC : [S318](validation/COMPARAISON-LOT5-S318.md), [S320](validation/B10-APIC-S320.md) ; 2D : [S253](validation/SURFACE-COUPLEE-S253.md), [S274](validation/HOULE-USAGE-S274.md) |
+| **C — couplage** | [179](adr/ADR-179-tolerances-de-conservation-et-grandeur-restituee.md) à [183](adr/ADR-183-essai-oblique-phase-a-distance-et-ordre-c.md), [185](adr/ADR-185-ordre-d-receveur-sous-i15.md) | [S310](validation/BILAN-MASSE-S310.md), [S311](validation/SORTIE-DELTA-S311.md), [S312](validation/TRANSFERT-DELTA-W-S312.md), [S313](validation/PLANCHER-BILAN-S313.md), [S314](validation/TRANSFERT-ORIENTE-S314.md), [S315](validation/ORACLE-ET-OBLIQUE-S315.md), [S316](validation/ORDRE-C-S316.md), [S317](validation/RESTITUTION-S317.md), [S319](validation/MER-S319.md) |
+| **porte D — solides** | [008](adr/ADR-008-flottabilite-et-autorite.md) autorité | faces coupées 2D : [S232](validation/FLUX-COUPES-S232.md) ; rien en 3D |
+| **V — volumes finis** | [010](adr/ADR-010-reseau-hydraulique-volumes-finis.md), [139](adr/ADR-139-volume-et-plan-oriente-des-contenants.md), [140](adr/ADR-140-restauration-du-graphe-V.md) | [S224](validation/NOYAU-V-S224.md), [S228](validation/VOLUME-ORIENTE-S228.md), [S229](validation/RESTAURATION-V-S229.md) |
+| **porte A — ordonnanceur** | [012](adr/ADR-012-ordonnanceur-budget-degradation.md), [170](adr/ADR-170-les-trois-poids-sont-bornes.md), [171](adr/ADR-171-les-seuils-d-activation-appartiennent-au-profil.md) | [S279](validation/ORDONNANCEUR-S279.md), [S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md) |
+| **coût** | [125](adr/ADR-125-budget-image-60hz-deux-ms.md), [131](adr/ADR-131-un-depassement-qualifie-une-implementation.md) | [S276](validation/COUT-DIRECT-S276.md), [S291](validation/PAS-DECOMPOSE-S291.md), [S302](validation/SCENE-DELTA3D-S302.md) §2 |
+| **références et bancs** | — | [cas canoniques](validation/CAS-CANONIQUES.md), [plan des bancs](validation/PLAN-BENCHMARK.md), [comparables externes](COMPARABLES-EXTERNES.md), [simufluid](registres/LECTURE-SIMUFLUID-S320.md) |
+
 ## Socle et état courant
 
 - [Intentions initiales](sources/systeme_eau_architecture_globale.md) et [questions sources](sources/systeme_eau_zones_ouvertes_et_decisions_a_valider.md).
 - [Invariants](01_INVARIANTS.md), [décomposition ADR-001](adr/ADR-001-decomposition-en-couches.md).
+- [Bilan global S321](registres/BILAN-GLOBAL-S321.md) : code, documents, méthode — le dispositif s'use par accumulation ; la méthode refondue.
 - [Bilan global S293](registres/BILAN-GLOBAL-S293.md) : où l'avancement bloque — porte B verrouillée, architecture de δ, budget sans répartition, pilotage.
 - [Trois systèmes — S308](registres/TROIS-SYSTEMES-S308.md) : la stratégie A / B / C confrontée au code — ce qui existe, les six interfaces manquantes, le banc de la piscine essai par essai, l'ordre en sept lots.
 - [Bilan global S227](registres/BILAN-GLOBAL-S227.md) : dérives, procédure et correctifs.
