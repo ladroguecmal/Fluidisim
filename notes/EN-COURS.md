@@ -102,9 +102,9 @@ Critères, écrits avant le code :
 - [x] **P4** — l'opérateur, la divergence et la correction pondérés ; `configure_with_bottom` ; essais du
   critère 2.
 - [x] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
-- [>] **P6** — preuve `docs/validation/FACES-COUPEES-3D-S324.md`, avec « Reproduire » ; file, liste 4.15,
+- [x] **P6** — preuve `docs/validation/FACES-COUPEES-3D-S324.md`, avec « Reproduire » ; file, liste 4.15,
   feuille de route.
-- [ ] **P7** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
+- [>] **P7** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise

@@ -4245,3 +4245,14 @@ chaque passage d'une région d'une représentation à l'autre se verra. **Décle
 dynamique, ou toute conversion dans une scène rendue. Remède à chercher : une reconstruction dont le
 biais ne dépende pas de l'arrangement — rayon calé sur l'espacement local, ou surface portée par un
 ensemble de niveaux conservatif advecté avec les particules.
+
+**A315 — S324, 2026-09-23 (sévérité 2, ouverte). Les petites cellules d'un fond coupé 3D font ramper le
+gradient conjugué du mode linéaire.** Sur une bosse vraiment 3D à 128 mailles de long, un pas coûte
+**16 029 itérations et 708 s**, contre 347 et 4 s pour un fond invariant en `y` de même taille ; la
+divergence finale vaut 1,000·10⁻⁵, la tolérance d'ADR-144 à l'arrondi près
+([preuve](../validation/FACES-COUPEES-3D-S324.md) §4). Fractions jusqu'à 6·10⁻⁹, ouvertures jusqu'à
+1,5·10⁻⁶ — mais le témoin a aussi des coins à 7·10⁻⁶ et converge : la forme compte, pas la seule
+petitesse. **Conséquence** : aucune trajectoire à maille fine, donc pas de frontière mobile. **Déclencheur** :
+la prochaine session du lot 3. Remède à éprouver d'abord : **Jacobi** sur le chemin coupé, comme le
+mode mobile 3D, l'identité 2D gardée à `ny` = 1 ; critère : itérations à 128 comparables au témoin.
+Ensuite seulement, fusion des petites cellules ou multigrille.
