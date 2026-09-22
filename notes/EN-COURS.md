@@ -117,3 +117,13 @@ effet (−0,87 % contre −0,85 %). **Corps lent** : −0,32 → −0,54 % avec 
 (montée de masse 39 %, géométrique 45 %). **B10 `Fr` = 2, `D/dx` = 8** : entre −0,47 et −0,15 % avec
 séparation ; **−12,2 %** sans — la séparation est indispensable. Non-régression : période du
 ballottement +5,59 % avec séparation, +5,85 % sans (S320 : +5,6 et +5,9) ; pincement 2,20 √(D/g).
+
+**P4, premier passage (21:46).** Aucune des deux voies ne tient le critère 3. *Masse* : masse exacte
+et point fixe dès le 2ᵉ tour, mais une colonne saute de 3,96 mailles, volume géométrique +0,82 %.
+*Géométrie* : 0,20 à 0,30 maille, mais −14 particules au 1ᵉʳ tour et une dérive (−27 en dix).
+**Cause** : après une seconde de mouvement, les particules se regroupent en `x` ; la hauteur de masse
+par colonne va de 0,35 à 0,71 m quand la surface géométrique reste entre 0,47 et 0,53 m. **La masse par
+colonne n'est pas une hauteur.** *Déclaré avant la mesure* : une **voie mixte** — la forme par la
+géométrie, le niveau par la masse (décalage uniforme qui rend la masse des colonnes converties
+exacte) ; prédiction : masse à une particule près, géométrie par colonne à 0,2 maille, pas de dérive
+sur dix tours.

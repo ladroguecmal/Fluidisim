@@ -335,6 +335,69 @@ fn epreuve_compteur() {
     }
 }
 
+/// **L'aller-retour du raccord** (S323 P4). Un ballottement réel, agité une seconde ; ses colonnes à
+/// un seul segment passent aux colonnes puis reviennent aux particules, dix fois de suite, par l'une
+/// des deux hauteurs — la masse ou la géométrie. À chaque tour : colonnes converties, masse en
+/// particules, volume géométrique total, et l'écart de hauteur par colonne, en mailles.
+fn epreuve_raccord(dx: f64) {
+    let scene = Scene::new(Cas::Ballottement, dx);
+    let (nx, ny) = (scene.nx(), scene.ny());
+    for voie in ["masse", "geometrie"] {
+        let mut a = Apic::new(scene);
+        while a.t < 1.0 - 1e-12 {
+            a.pas((1.0 - a.t).max(1e-9));
+        }
+        let geo = |a: &Apic| aire_eau(&a.distance(), nx, ny, dx, &|_, _| false);
+        let (n0, v0) = (a.x.len() as f64, geo(&a));
+        let depart = a.colonnes();
+        for tour in 1..=10 {
+            let avant = a.colonnes();
+            let hauteurs: Vec<Option<f64>> =
+                avant.iter().map(|c| c.map(|(hm, hg)| if voie == "masse" { hm } else { hg })).collect();
+            a.ensemence(&hauteurs);
+            let apres = a.colonnes();
+            let (mut converties, mut perdues, mut dg_max, mut dg_somme, mut dm_max) = (0usize, 0usize, 0f64, 0f64, 0f64);
+            let mut cumul = 0.0;
+            for i in 0..nx {
+                if hauteurs[i].is_none() {
+                    continue;
+                }
+                converties += 1;
+                match (avant[i], apres[i]) {
+                    (Some((hm0, hg0)), Some((hm1, hg1))) => {
+                        dg_max = dg_max.max((hg1 - hg0).abs());
+                        dg_somme += hg1 - hg0;
+                        dm_max = dm_max.max((hm1 - hm0).abs());
+                    }
+                    _ => perdues += 1,
+                }
+                if let (Some((_, g0)), Some((_, g1))) = (depart[i], apres[i]) {
+                    cumul += g1 - g0;
+                }
+            }
+            let par_colonne = converties.max(1) as f64 * dx;
+            if tour == 1 && std::env::var("RACCORD_COLONNES").is_ok() {
+                for i in 0..nx {
+                    if let (Some((hm0, hg0)), Some((hm1, hg1))) = (avant[i], apres[i]) {
+                        eprintln!("COLONNE voie={voie} i={i} h_masse={hm0:.4}->{hm1:.4} h_geo={hg0:.4}->{hg1:.4}");
+                    }
+                }
+            }
+            println!(
+                "RACCORD_S323 voie={voie} dx={dx} tour={tour} colonnes={converties}/{nx} non_graphes_apres={perdues} \
+                 masse_ecart_particules={:+.1} volume_geo_ecart_rel={:+e} dh_geo_max_mailles={:.4} \
+                 dh_geo_moyen_mailles={:+.4} dh_masse_max_mailles={:.4} dh_geo_cumule_moyen_mailles={:+.4}",
+                a.x.len() as f64 - n0,
+                geo(&a) / v0 - 1.0,
+                dg_max / dx,
+                dg_somme / par_colonne,
+                dm_max / dx,
+                cumul / par_colonne,
+            );
+        }
+    }
+}
+
 /// Compte les segments d'eau d'une colonne d'occupation, de bas en haut. **Deux segments ne sont
 /// distincts que séparés d'au moins deux mailles d'air** : un trou d'une maille dans la masse — une
 /// cellule sans particule, chose courante en FLIP comme en SPH — n'est pas une lame retournée. La
@@ -1215,6 +1278,69 @@ impl Apic {
         }
     }
 
+    /// **Particules → colonnes (S323, le raccord).** Pour chaque colonne qu'une fonction hauteur peut
+    /// porter — un seul segment d'eau posé sur le fond, d'après la surface reconstruite —, sa hauteur
+    /// par la **masse** (particules de la colonne) et par la **géométrie** (iso-zéro sur la verticale
+    /// des centres). `None` : plusieurs couches, fond sec ou colonne pleine ; elle reste aux particules.
+    fn colonnes(&self) -> Vec<Option<(f64, f64)>> {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let (phi, n) = (self.distance(), self.occupation());
+        (0..nx)
+            .map(|i| {
+                let f = |j: usize| phi[j * nx + i];
+                if f(0) >= 0.0 {
+                    return None;
+                }
+                let passage = (0..ny - 1).find(|&j| f(j) < 0.0 && f(j + 1) >= 0.0)?;
+                if (passage + 1..ny).any(|j| f(j) < 0.0) {
+                    return None;
+                }
+                let h_geo = (passage as f64 + 0.5) * dx + dx * f(passage) / (f(passage) - f(passage + 1));
+                let particules: u32 = (0..ny).map(|j| n[j * nx + i]).sum();
+                Some((particules as f64 * 0.25 * dx, h_geo))
+            })
+            .collect()
+    }
+
+    /// **Colonnes → particules (S323, le raccord).** Retire les particules des colonnes désignées et
+    /// les ré-ensemence sous la hauteur demandée, au quart de maille comme au départ, à la vitesse de
+    /// la grille. Chaque colonne reçoit `round(4h/dx + report)` particules, le reste reporté à la
+    /// suivante : la masse totale tient à une demi-particule près.
+    fn ensemence(&mut self, hauteurs: &[Option<f64>]) {
+        let (nx, dx) = (self.mac.nx, self.mac.dx);
+        let colonne = |p: &[f64; 2]| ((p[0] / dx) as usize).min(nx - 1);
+        let garde: Vec<bool> = self.x.iter().map(|p| hauteurs[colonne(p)].is_none()).collect();
+        let mut k = 0;
+        self.x.retain(|_| {
+            k += 1;
+            garde[k - 1]
+        });
+        k = 0;
+        self.v.retain(|_| {
+            k += 1;
+            garde[k - 1]
+        });
+        k = 0;
+        self.c.retain(|_| {
+            k += 1;
+            garde[k - 1]
+        });
+        let mut report = 0.0;
+        for (i, h) in hauteurs.iter().enumerate() {
+            let Some(h) = h else { continue };
+            let voulu = 4.0 * h / dx + report;
+            let n = voulu.round().max(0.0) as usize;
+            report = voulu - n as f64;
+            for m in 0..n {
+                let p = [(i as f64 + 0.25 + 0.5 * (m % 2) as f64) * dx, ((m / 2) as f64 + 0.5) * 0.5 * dx];
+                let (u, w) = self.mac.vitesse(p[0], p[1]);
+                self.x.push(p);
+                self.v.push([u, w]);
+                self.c.push([[0.0; 2]; 2]);
+            }
+        }
+    }
+
     /// Reconstruit `φ` aux centres des cellules, depuis les particules des cellules voisines.
     fn reconstruit(&mut self) {
         self.phi = self.distance();
@@ -1927,6 +2053,11 @@ fn main() -> Result<(), String> {
     let candidat = args.get(1).ok_or("candidat ?")?.as_str();
     if candidat == "compteur" {
         epreuve_compteur();
+        return Ok(());
+    }
+    if candidat == "raccord" {
+        let dx: f64 = args.get(2).ok_or("dx ?")?.parse().map_err(|_| "dx")?;
+        epreuve_raccord(dx);
         return Ok(());
     }
     let cas = match args.get(2).map(|s| s.as_str()) {
