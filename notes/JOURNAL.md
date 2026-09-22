@@ -16296,3 +16296,26 @@ leçons : L370, L371. Trois angles morts : A311, A312, A313. Suivant : **S321, d
 l'utilisateur** — analyse complète et réorganisation de la méthode. Le fil du lot 5 reprendra au
 raccord, précédé du compteur de volume géométrique (A313) ; A289 attend l'essai du pas de temps,
 puis la voie de l'utilisateur.
+
+## S321 — 2026-09-22 — analyse complète, et une méthode qui retire au lieu d'ajouter
+
+**Entrée.** Demande de l'utilisateur : analyser code, documents et méthode, réorganiser ce qui peut
+l'être. S320, coupée à 08:30, reprise à chaud et close d'abord.
+**Constats** ([bilan](../docs/registres/BILAN-GLOBAL-S321.md)). Code sain : 578 + 36 essais, 0 échec.
+Le dispositif s'usait par accumulation — `EN-COURS` 93 → 1 686 lignes, lecture à froid 155 Ko,
+une leçon par session et les erreurs récurrentes revenues avec leur leçon écrite, 28 % des commits
+récents en plans et rituels. Les réceptions portées par des bancs ne sont protégées par rien ;
+APIC n'existe que dans un banc ; décomptes de la liste divergents ; version minimale fausse.
+**Refonte** ([ADR-187](../docs/adr/ADR-187-methode-refondue-s321.md)). Rituel en deux parties ;
+lecture à froid 68 Ko ; `EN-COURS` limité à la session en cours ; dix-sept protections actives
+dans METHODE, LECONS en archive ; six contrôles de plus dans `etat_projet.py --check`, chacun
+contre son contre-exemple réel ; « Reproduire » en tête des preuves ; carte par système en tête
+de l'index. Hygiène : `.pyc` retirés, README réécrits, `rust-version` 1.83, zéro avertissement —
+dont un vrai défaut, `wake_plafond` imprimait des refus vides. Suites inchangées.
+**S320 P5b** : calcul encore en cours à la clôture — reporté, point daté de la file avec sa commande.
+Piège d'outillage : l'outil d'édition convertit les échappements Unicode, et le contrôle d'encodage
+s'est d'abord attrapé lui-même ; son motif est désormais construit par `chr(92)`.
+**Limites.** Aucune physique rejouée hors des suites ; la refonte se juge en S330 (file).
+**Rituel.** Maillons **1** : une méthode, pas une capacité. Ni leçon ni angle mort neufs ; quatre
+points de file. Suivant, proposé : **S322, lot 2 — l'essai du pas de temps d'A289**, avant
+l'arbitrage ; les deux décisions proposées sont au bilan §7.

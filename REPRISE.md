@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-22 20:49 +02:00
+JETON            : libre
+Battement        : 2026-09-22 21:03 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S321 — analyse complète et réorganisation de la méthode, demande de l'utilisateur
-Dernière session : S320 — **lot 5, B10 sur APIC** : une cavité d'air derrière un corps se pince à 2,2–2,5 `√(D/g)`, indépendamment de l'échelle à 4·10⁻⁴ près, temps convergé à 5 % ; couronne et jet suivent la maille (A312) ; la masse d'APIC est exacte, son volume géométrique non (L370, A313) ([preuve](docs/validation/B10-APIC-S320.md)) ; §5 bis en calcul, versé par S321
-Session suivante : **S321, demande de l'utilisateur** — analyse complète du code, des documents et de la méthode, et réorganisation des principes améliorables
-Maillons        : 0 — S320 : la cavité que la fonction hauteur ne peut pas porter existe sur la seconde représentation ; point 4.12 absent → partiel ; consommateur : le raccord particules ↔ colonnes
+Session en cours : aucune
+Dernière session : S321 — **analyse complète, méthode refondue** ([bilan](docs/registres/BILAN-GLOBAL-S321.md), [ADR-187](docs/adr/ADR-187-methode-refondue-s321.md)) : code sain ; rituel en deux parties, lecture à froid 68 Ko, `EN-COURS` limité à la session en cours, dix-sept protections actives, six contrôles de plus ; zéro avertissement ; S320 P5b reportée, en calcul (file)
+Session suivante : **S322, lot 2 — A289** : le taux de croissance de δ sous houle contre le pas de temps, à maille fixe, avant l'arbitrage de l'utilisateur (proposition, [bilan](docs/registres/BILAN-GLOBAL-S321.md) §7) ; verser S320 P5b à son retour
+Maillons        : 1 — S321 : une méthode, pas une capacité ; à deux, un lot qui fait avancer une capacité
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -37,7 +37,7 @@ séparé, puis reporter sa valeur à chaque commit d'étape (L237). Une seule se
 
 [Questions ouvertes — file active](docs/registres/QUESTIONS-OUVERTES.md#file-active) porte les
 travaux, états et déclencheurs. [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) porte seule les jalons.
-Ne pas recopier leurs suivis ici. [Liste du projet fini](docs/LISTE-PROJET-FINI.md) : ce que l'ambition complète contient, cochée à la demande de l'utilisateur. Dernier audit global : [BILAN-GLOBAL-S321](docs/registres/BILAN-GLOBAL-S321.md) — code, documents et méthode ; la méthode refondue (ADR-187).
+Ne pas recopier leurs suivis ici. [Liste du projet fini](docs/LISTE-PROJET-FINI.md) : ce que l'ambition complète contient, demandée par l'utilisateur, tenue à chaque changement d'état ; son décompte est vérifié par l'outil. Dernier audit global : [BILAN-GLOBAL-S321](docs/registres/BILAN-GLOBAL-S321.md) — code, documents et méthode ; la méthode refondue (ADR-187).
 
 ## 1. Ce qu'est ce projet
 

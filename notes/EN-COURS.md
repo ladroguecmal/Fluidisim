@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S321 — **en cours**. **Demande de l'utilisateur** : *« reprends le projet, réalise une
+Session : S321 — **terminée** (2026-09-22, P10 reportée). **Demande de l'utilisateur** : *« reprends le projet, réalise une
 analyse complète sur le code, les documents, méthodes de travail, réorganiser ou refaire des
 principes des points améliorables »*.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -103,9 +103,10 @@ Critères, écrits avant le travail :
   README racine et du code, décomptes de la liste et de la feuille de route.
 - [x] **P8b** — hygiène du code : `rust-version` vraie, avertissements à zéro, suites rejouées.
 - [x] **P9** — index : carte par système en tête ; note datée à SPEC-003 ; file active.
-- [>] **P10** — S320 P5b : §5 bis versé au retour du calcul — étape asynchrone, placée là où le
-  calcul la permet.
-- [ ] **P11** — rituel, appliqué sous sa forme nouvelle.
+- [ ] **P10** — S320 P5b : §5 bis versé au retour du calcul — étape asynchrone, placée là où le
+  calcul la permet. **Reportée** : calcul encore en cours à 21:02, la session ne l'attend pas ; point
+  daté de la file, avec sa commande.
+- [x] **P11** — rituel, appliqué sous sa forme nouvelle.
 
 ### Notes de reprise
 

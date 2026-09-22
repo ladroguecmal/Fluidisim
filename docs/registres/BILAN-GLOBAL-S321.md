@@ -75,7 +75,12 @@ Une machine neuve suivant la déclaration échouerait. *Corrigé.*
 **C2 — Le bruit de construction cache le signal.** 17 avertissements distincts dans le cœur et ses
 bancs, presque tous des modules `support/` inclus par plusieurs bancs et répétés à chaque
 inclusion ; 13 dans l'afficheur. Un
-avertissement neuf s'y perd — c'est le terrain de L362. *Ramené à zéro.*
+avertissement neuf s'y perd — c'est le terrain de L362 — et la construction normale du harnais en
+ajoute une quarantaine, ses campagnes n'étant appelées que par les essais. *Ramené à zéro* ; trois
+cachaient de vrais défauts d'instrument : `wake_plafond` imprimait un refus **vide** quand il venait
+du deuxième ou du troisième profil ; `lot5_comparaison` calculait une masse par mesure qu'il ne
+lisait jamais ; deux bancs sur l'oracle HOS, dont `delta3d_mobile` (réception de S296), ne déclarent
+pas l'écart de dispersion que leur module exige (L277) — versé à la file.
 
 **C3 — Des fichiers produits sont versionnés, et l'essai les salit.** `outils/__pycache__/*.pyc`
 (10 fichiers) : lancer `pytest` fait apparaître des fichiers dans `git status`, que la procédure de
@@ -171,7 +176,7 @@ Décisions de méthode : [ADR-187](../adr/ADR-187-methode-refondue-s321.md). En 
 | | principe | appliqué dans |
 |---|---|---|
 | **P1** | **Un rituel en deux parties.** Toujours : `EN-COURS` purgé, journal ≤ 20 lignes, jeton, contrôle. Seulement si l'état a changé — capacité, critère de porte, point de liste, décision, défaut bloquant : feuille de route, file, liste, index, en remplacement | REPRISE §6 |
-| **P2** | **Lire peu, consulter le reste.** Lecture à froid ≈ 65 Ko : l'index, la feuille entière et la file entière se consultent | REPRISE §3 |
+| **P2** | **Lire peu, consulter le reste.** Lecture à froid **68 Ko**, mesurée : l'index, la feuille entière et la file entière se consultent | REPRISE §3 |
 | **P3** | **`EN-COURS` ne porte que la session en cours**, purgé à chaque clôture, ≤ 300 lignes, sans archive | `EN-COURS`, `etat_projet.py --check` |
 | **P4** | **Protections plutôt que leçons.** Dix-sept protections chargées à froid, chacune avec son moment ; une leçon ne s'écrit que si elle en crée ou en change une | METHODE |
 | **P5** | **Une erreur qui revient se corrige par un contrôle.** Encodage, fichiers produits, décompte de la liste, taille d'EN-COURS : vérifiés par l'outil ; zéro avertissement de construction | `etat_projet.py`, code |
