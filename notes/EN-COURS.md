@@ -101,7 +101,9 @@ Critères, écrits avant le code :
   particules repoussées.
 - [x] **P3** — le corps au repos, puis déplacé lentement : écoulement nul, niveau élevé de son volume.
 - [x] **P4** — la détection : air enfermé, pincement, couronne, jet.
-- [ ] **P5** — B10 : trois `Fr`, similitude à deux échelles, convergence.
+- [x] **P5a** — *découpage déclaré en reprise* — B10 : trois `Fr`, similitude à deux échelles,
+  sensibilité, convergence `D/dx` 8 → 16, banc corrigé.
+- [ ] **P5b** — `Fr` = 2 à `D/dx` = 32 (≈ 1 h de calcul, en arrière-plan pendant P6).
 - [ ] **P6** — preuve publiée.
 - [ ] **P7** — rituel REPRISE §6.
 
@@ -1605,3 +1607,53 @@ voir, et je ne l'ai pas lu ainsi. Remèdes :
 Leçon candidate : **« masse exacte » ne dit rien du volume** — une représentation particulaire peut
 garder chaque gramme et perdre un dixième de son volume en se tassant.
 
+**Reprise à chaud (2026-09-22 07:34).** Battement de 23:09, P5 non marquée ; diff dans
+`lot5_comparaison.rs` : bassin porté à `8d × 16d`, arrêt à `8d`, cavité restreinte à la colonne
+au-dessus du corps. Cohérent avec la thèse du plan : **complété**, pas annulé.
+
+**P5, premier passage (arrêt à `8d` pour tous, sommet global pour le jet)** — `D/dx` = 8 :
+
+| `Fr` | échelle | pincement `t/√(D/g)` | profondeur / D | cavité max / D | couronne / D | jet / D |
+|---|---|---:|---:|---:|---:|---:|
+| 1 | 0,4 / 0,8 m | — / — | — | 1,0625 / 1,0625 | 1,3381 / 1,3381 | — |
+| 2 | 0,4 / 0,8 m | 2,2000 / 2,2000 | 1,5625 / 1,5625 | 3,1875 / 3,1875 | 1,0295 / 1,0295 | 2,9416 / 2,9417 |
+| 4 | 0,4 / 0,8 m | 2,55 / 2,50 | 2,69 / 2,56 | 6,94 / 6,94 | 2,586 / 2,586 | 3,74 / 3,43 |
+
+Similitude **à 10⁻⁴ à `Fr` = 1 et 2** ; à `Fr` = 4, 2 à 12 %, et le pincement tombe **après l'arrêt**
+(base à 8,0 D). Trois corrections du banc avant de conclure : (1) l'échantillonnage, qui borne le pas,
+suit désormais `√(D/g)` en B10 — à 0,01 s fixe, les deux échelles ne faisaient pas la même suite de pas ;
+(2) arrêt à `max(8, 3·Fr)·D`, bassin à proportion ; (3) jet = sommet **sur l'axe** du corps, plus le sommet
+global. Ajouts : occupation finale et minimale, air enfermé final, montée attendue. Essais de sensibilité
+`Fr` = 2,000002 et 4,000004 à la même échelle, pour dire si l'écart de `Fr` = 4 est du chaos ou une faute.
+Montée finale loin du corps : 96 % à `Fr` = 1, 254 % à `Fr` = 2 — les vagues dominent en fin d'essai ;
+elle ne sert pas de « volume rendu ». Coût : 30 s pour 2,4 s simulées à `D/dx` = 8.
+
+**P5, deuxième passage (07:40–08:07).** Arrêt à `max(8, 3·Fr)·D` : à `Fr` = 4 le pincement tombe
+désormais **pendant** la descente (base à 10 D, arrêt à 12 D) et la similitude y tient à 3·10⁻⁴ (jet
+4,2174 / 4,2188). **Sensibilité** (même échelle, `Fr` perturbé de 10⁻⁶) : à `Fr` = 2, pincement
+identique, jet 2,94 → 3,05 (+3,7 %) ; à `Fr` = 4, pincement 2,50 → 2,30 `√(D/g)`, profondeur 2,69 → 2,31 D.
+La similitude est exacte **parce que** le flottant est presque invariant d'échelle ; la sensibilité dit
+l'incertitude vraie. **Convergence 8 → 16** (seuil encore en mailles) : `Fr` = 2, pincement 2,20 → 2,30,
+profondeur 1,56 → 1,22 D, cavité max 3,19 → 3,47 D, couronne 1,03 → 1,65 D, jet 2,94 → 4,66 D ; `Fr` = 1,
+une petite bulle (0,094 D²) apparaît à 16. **Faute du banc** : seuil de 4 mailles → à 16, une poche de
+5 mailles à `Fr` = 4 prise pour le pincement ; seuil passé à 1/16 D². **Volume** : masse exacte partout
+(`derive_volume_max` = 0) ; air enfermé final nul sauf 0,031 D² (`Fr` = 2, 0,8 m) ; occupation −8 % à tous
+les `Fr` **même sans cavité** = biais de `min(n/4, 1)` sur une répartition irrégulière ; niveau
+géométrique (iso-zéro) loin du corps − niveau de masse : −0,146 dx au départ (interpolation linéaire
+entre centres), de −0,41 à +0,52 dx à la fin, **sans similitude** (petite différence dans un état final
+agité). Corps lent : montée 3,61 cm en masse (P3 au bit), **3,875 cm en géométrie (99 %)**.
+Coût `D/dx` = 16 : 369 à 805 s de calcul pour 2,4 à 3,0 s simulées, 82 à 115 k particules.
+
+**P5a, série corrigée (seuil 1/16 D², 08:07).** `D/dx` = 8 inchangé au bit. `D/dx` 8 → 16 :
+
+| `Fr` | pincement `t/√(D/g)` | profondeur / D | cavité max / D | couronne / D | jet / D | air au pincement / D² |
+|---|---:|---:|---:|---:|---:|---:|
+| 1 | — → 2,25 | — → 0,78 | 1,06 → 1,16 | 1,34 → 0,64 | — → 1,87 | ≤ 0,0625 → 0,094 |
+| 2 | 2,20 → 2,30 | 1,56 → 1,22 | 3,19 → 3,47 | 1,03 → 1,65 | 2,94 → 4,66 | 0,875 → 1,31 |
+| 4 | 2,50 → 2,50 | 2,69 → 3,53 | 8,69 → 8,78 | 2,59 → 4,14 | 4,22 → 6,02 | 4,84 → 5,66 |
+
+Sensibilité à `D/dx` = 16, `Fr` = 2 : pincement identique, jet 4,66 → 4,62 (0,8 %). `Fr` = 1 : la poche
+enfermée (0,0625 D² à 8, exactement le seuil ; 0,094 à 16) est **au seuil** — régime de fermeture peu
+profonde, pas de cavité. Géo − masse à 16 : −0,146 dx au départ, final −0,03 à −0,24 dx.
+Énergie max au-dessus de l'initiale : 1,7 % (`Fr` = 1) à 11 % (`Fr` = 4) — le corps travaille, ce
+n'est pas un test de conservation.
