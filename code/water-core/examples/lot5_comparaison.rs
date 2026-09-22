@@ -339,21 +339,47 @@ fn epreuve_compteur() {
 /// un seul segment passent aux colonnes puis reviennent aux particules, dix fois de suite, par l'une
 /// des deux hauteurs — la masse ou la géométrie. À chaque tour : colonnes converties, masse en
 /// particules, volume géométrique total, et l'écart de hauteur par colonne, en mailles.
-fn epreuve_raccord(dx: f64) {
-    let scene = Scene::new(Cas::Ballottement, dx);
+fn epreuve_raccord(dx: f64, etat: &str) {
+    // L'état réel : un ballottement agité une seconde, ou B10 à `Fr` = 2 au moment du pincement —
+    // cavité ouverte et colonnes à plusieurs couches au-dessus du corps, qui restent aux particules.
+    let (scene, t_etat) = match etat {
+        "b10" => (Scene::entree(Cas::Entree, dx, 0.4, 2.0), 2.2 * (0.4 / G).sqrt()),
+        _ => (Scene::new(Cas::Ballottement, dx), 1.0),
+    };
     let (nx, ny) = (scene.nx(), scene.ny());
-    for voie in ["masse", "geometrie"] {
+    for voie in ["masse", "geometrie", "mixte"] {
         let mut a = Apic::new(scene);
-        while a.t < 1.0 - 1e-12 {
-            a.pas((1.0 - a.t).max(1e-9));
+        while a.t < t_etat - 1e-12 {
+            a.pas((t_etat - a.t).max(1e-9));
         }
-        let geo = |a: &Apic| aire_eau(&a.distance(), nx, ny, dx, &|_, _| false);
+        let corps = scene.corps(a.t);
+        let dans_corps = move |i: usize, j: usize| match corps {
+            Some((c, r, _)) => ((i as f64 + 0.5) * dx - c[0]).powi(2) + ((j as f64 + 0.5) * dx - c[1]).powi(2) < r * r,
+            None => false,
+        };
+        let geo = |a: &Apic| aire_eau(&a.distance(), nx, ny, dx, &dans_corps);
         let (n0, v0) = (a.x.len() as f64, geo(&a));
         let depart = a.colonnes();
         for tour in 1..=10 {
             let avant = a.colonnes();
-            let hauteurs: Vec<Option<f64>> =
-                avant.iter().map(|c| c.map(|(hm, hg)| if voie == "masse" { hm } else { hg })).collect();
+            // **La voie mixte** (déclarée en P4a) : la forme par la géométrie, le niveau par la masse —
+            // un décalage uniforme rend la masse des colonnes converties exacte. La masse par colonne
+            // n'est pas une hauteur : les particules se regroupent en `x`.
+            let (somme_m, somme_g, n_conv) = avant
+                .iter()
+                .flatten()
+                .fold((0.0, 0.0, 0usize), |(m, g, n), &(hm, hg)| (m + hm, g + hg, n + 1));
+            let decalage = if n_conv > 0 { (somme_m - somme_g) / n_conv as f64 } else { 0.0 };
+            let hauteurs: Vec<Option<f64>> = avant
+                .iter()
+                .map(|c| {
+                    c.map(|(hm, hg)| match voie {
+                        "masse" => hm,
+                        "geometrie" => hg,
+                        _ => hg + decalage,
+                    })
+                })
+                .collect();
             a.ensemence(&hauteurs);
             let apres = a.colonnes();
             let (mut converties, mut perdues, mut dg_max, mut dg_somme, mut dm_max) = (0usize, 0usize, 0f64, 0f64, 0f64);
@@ -384,7 +410,7 @@ fn epreuve_raccord(dx: f64) {
                 }
             }
             println!(
-                "RACCORD_S323 voie={voie} dx={dx} tour={tour} colonnes={converties}/{nx} non_graphes_apres={perdues} \
+                "RACCORD_S323 etat={etat} voie={voie} dx={dx} tour={tour} colonnes={converties}/{nx} non_graphes_apres={perdues} \
                  masse_ecart_particules={:+.1} volume_geo_ecart_rel={:+e} dh_geo_max_mailles={:.4} \
                  dh_geo_moyen_mailles={:+.4} dh_masse_max_mailles={:.4} dh_geo_cumule_moyen_mailles={:+.4}",
                 a.x.len() as f64 - n0,
@@ -2057,7 +2083,7 @@ fn main() -> Result<(), String> {
     }
     if candidat == "raccord" {
         let dx: f64 = args.get(2).ok_or("dx ?")?.parse().map_err(|_| "dx")?;
-        epreuve_raccord(dx);
+        epreuve_raccord(dx, args.get(3).map_or("ballottement", |s| s.as_str()));
         return Ok(());
     }
     let cas = match args.get(2).map(|s| s.as_str()) {
