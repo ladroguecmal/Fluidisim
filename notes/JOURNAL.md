@@ -16382,3 +16382,21 @@ preuve contrôlée par « Reproduire ».
 qui le consomme — le lot 3, puis les corps du lot 4 ; la preuve — FACES-COUPEES-3D-S324 ; 4.15 avance
 (la 3D qu'il déclarait manquante). Un angle mort : A315. Suivant, selon ADR-188 : **S325, lot 5 — le
 raccord dynamique** ; le lot 3 reprend ensuite par Jacobi.
+
+## S325 — 2026-09-23 — lot 5 : le raccord dynamique tient la masse, pas encore la frontière
+
+**Entrée.** *« Continue »* ; alternance d'ADR-188 : le lot 5, le raccord dynamique.
+**Le montage** ([preuve](../docs/validation/B10-APIC-S320.md) §11). Dans le banc APIC, la moitié droite
+en colonnes transportées par les flux de la grille, particules réensemencées depuis elles ; à la
+frontière, une particule libre qui entre verse sa masse à la colonne, le flux sortant devient
+particules. Une faute attrapée avant la mesure : une particule de colonne glissée à gauche aurait été
+comptée deux fois.
+**Ce qui tient.** La masse, à l'arrondi, et l'échange dans les deux sens (0,155 m² entrés, 0,154 sortis).
+**Ce qui ne tient pas.** Au repos, 1,4 cm/s de vitesse parasite ; en ballottement, la surface saute
+de 1,8 à 2,8 mailles à la frontière, le mode perd jusqu'à 16 % par période. L'hypothèse du lissage
+grille → réseau → grille est **contredite** : l'amortissement ne suit pas la taille de la zone
+(16 %, 0,9 %, 10 %). Cause non attribuée (A316).
+**Non fait.** L'attribution, un suspect à la fois ; S320 P5b, toujours en calcul (file).
+**Rituel.** Maillons **1** : un échange à masse exacte, mais pas de frontière reçue ; la liste ne bouge
+pas. Un angle mort : A316. Suivant, selon ADR-188 : **S326, lot 3 — Jacobi sur le chemin coupé**
+(A315) ; le lot 5 reprendra par A316.

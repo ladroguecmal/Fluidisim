@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-23 01:31 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S325 — lot 5, le raccord dynamique : colonnes et particules côte à côte, échanges comptés à la frontière
-Dernière session : S324 — **lot 3** (ADR-188, décision de l'utilisateur) : le fond coupé entre dans la référence 3D — identique au bit à la 2D sans `y`, **ordre 1,956** sur une bosse 3D ; mais 16 029 itérations à 128, les petites cellules sans préconditionneur (A315) ([preuve](docs/validation/FACES-COUPEES-3D-S324.md))
-Session suivante : **S325, lot 5 — le raccord dynamique** (alternance d'ADR-188) : une région en colonnes qui évolue à côté d'une région en particules ; le lot 3 reprendra par Jacobi sur le chemin coupé (A315). Verser S320 P5b à son retour (file)
-Maillons        : 0 — S324 : un domaine δ 3D sur fond non plat, consommé par le lot 3 puis les corps du lot 4 ; point 4.15 avancé (la 3D)
+Session en cours : aucune
+Dernière session : S325 — **lot 5, raccord dynamique** : colonnes et particules côte à côte, masse exacte et échanges dans les deux sens ; mais la frontière décale la surface de 1,8 à 2,8 mailles et amortit jusqu'à 16 % par période, cause non attribuée (A316) ([preuve](docs/validation/B10-APIC-S320.md) §11)
+Session suivante : **S326, lot 3 — Jacobi sur le chemin coupé** (A315, alternance d'ADR-188) : itérations à 128 comparables au fond invariant, identité 2D gardée à `ny` = 1 ; le lot 5 reprendra par A316. Verser S320 P5b à son retour (file)
+Maillons        : 1 — S325 : un échange à masse exacte, pas de frontière reçue ; aucun point de liste n'a bougé
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

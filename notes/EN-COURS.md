@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S325 — **en cours**. **Lot 5, le raccord dynamique** — une région en colonnes qui évolue à
+Session : S325 — **terminée** (2026-09-23 01:31, P5 reportée). **Lot 5, le raccord dynamique** — une région en colonnes qui évolue à
 côté d'une région en particules, alternance d'[ADR-188](../docs/adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« Continue »*, après S324 ; suite déclarée : le raccord dynamique.
@@ -96,8 +96,9 @@ Critères, écrits avant le code :
 - [x] **P3** — repos et ballottement, deux mailles : masse, période, écart à la frontière.
 - [x] **P4** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; file, liste 4.20 si la mesure le permet.
-- [>] **P5** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
-- [ ] **P6** — rituel.
+- [ ] **P5** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone. **Reportée** : encore
+  en calcul à 01:31 ; le point daté de la file la porte.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 
