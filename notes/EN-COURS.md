@@ -62,81 +62,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S321 — **terminée** (2026-09-22, P10 reportée). **Demande de l'utilisateur** : *« reprends le projet, réalise une
-analyse complète sur le code, les documents, méthodes de travail, réorganiser ou refaire des
-principes des points améliorables »*.
+Session : S322 — **en cours**. **Lot 2, A289** : la croissance de δ sous une houle B, contre le pas
+de temps à maille fixe — l'essai qu'il faut faire **avant** l'arbitrage de l'utilisateur.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : S320 close en reprise à chaud ; sa P5b est reportée ici (calcul en cours depuis 20:11).
+Entrée : *« Continue »*, après S321 ; suite proposée par S321 ([bilan](../docs/registres/BILAN-GLOBAL-S321.md)
+§7) et par la lecture de `simufluid` (S320, [§1](../docs/registres/LECTURE-SIMUFLUID-S320.md)).
 
-**Ce que la session doit rendre possible.** Une méthode dont le coût suit le travail et non le
-nombre de sessions ; une reprise qui se lit en peu ; des protections chargées au moment utile
-plutôt que des leçons qu'on relit ; des réceptions qu'on peut reproduire. Consommateur : chaque
-session suivante.
+**Ce que la session doit rendre possible.** Savoir si la croissance de S319 est, au moins en partie,
+un **défaut d'intégration du pas couplé** — elle dépend alors du pas de temps à maille fixe, comme
+chez `simufluid` — ou une **propriété du modèle** — elle n'en dépend pas. Consommateur : le choix de
+la voie d'A289 par l'utilisateur ; si la cause est numérique, ajouter la dispersion d'amplitude à B
+ne la soignerait pas. Puis l'ordre E.
 
-**Analyse faite avant ce plan**, en lecture seule : suites (578 + 36 réussis, 0 échec) ; historique
-Git par session ; registres comptés et recoupés ; code lu, `clippy` et `rustfmt` passés ;
-`simufluid` relu pour son propre retour d'expérience de méthode. Chiffres et constats : P2.
+**Le banc.** E1 de S319 ([preuve](../docs/validation/MER-S319.md)), `transfert_oriente mer` : houle
+d'une composante, 5 cm, λ = 4 m, `T` = 1,6 s ; δ nul au départ ; **maille fixe, 25 cm** ; pas de
+20, 10, 5 et 2,5 ms, soit 80 à 640 pas par période. Option `MER_DT_US`, défaut 10 000 : **sans
+elle, le banc de S319 est inchangé au bit**. Mesure : `δ_max` chaque seconde ; **taux** = pente de
+`ln δ_max` entre 10 et 30 s, dans la phase exponentielle de S319.
 
-Critères, écrits avant le travail :
-1. Le bilan chiffre chaque constat et nomme sa mesure ; ADR-187 dit, pour chaque principe, pourquoi
-   et comment revenir en arrière.
-2. `etat_projet.py --check` vérifie les contrôles nouveaux et passe ; ses essais passent, avec les
-   contre-exemples réels du dépôt.
-3. Lecture à froid ≤ 70 Ko ; `EN-COURS` ≤ 300 lignes, sans archive.
-4. Zéro avertissement de construction (cœur, harnais, bancs, afficheur) ; version minimale vraie ;
-   suites rejouées aux mêmes nombres d'essais, 0 échec.
-5. Rien de la physique ne bouge : ni réception, ni seuil, ni porte, ni ambition ; AGENTS inchangé.
+**Prédiction, écrite avant la mesure.** Si A289 domine — une onde totale que B linéaire ne suit
+pas —, le taux ne dépend pas du pas : écart **< 10 %** entre 20 et 2,5 ms. Si le pas couplé y
+contribue, l'écart dépasse **30 %**, et le taux peut changer de signe. Entre les deux : indéterminé,
+un point de plus.
+
+Critères :
+1. À 10 ms, la trace reproduit S319 **au bit** : 2,83 cm à 20 s.
+2. Taux publiés aux quatre pas ; la règle ci-dessus appliquée telle qu'écrite.
+3. Rien dans le cœur ; aucune réception touchée.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul. *(Committé avec `[>]` par erreur ; coché en P2.)*
-- [x] **P2** — bilan publié : `docs/registres/BILAN-GLOBAL-S321.md`.
-- [x] **P3** — ADR-187 : les principes refondus, pourquoi, et comment les défaire.
-- [x] **P4** — `EN-COURS` refondu : archives purgées (Git et les preuves les gardent), session en
-  cours seule.
-- [x] **P5** — METHODE refondue : principes, protections actives.
-- [x] **P6** — REPRISE : lecture à froid bornée (§3), état court (§4), rituel en deux parties (§6),
-  plafonds (§8).
-- [x] **P7** — `etat_projet.py --check` étendu, avec essais : taille d'`EN-COURS`, encodage,
-  fichiers produits versionnés, décompte de la liste, « Reproduire » des preuves nouvelles.
-- [x] **P8a** — hygiène du dépôt : `.pyc` retirés et ignorés, `code/REPRISE.md` vide supprimé,
-  README racine et du code, décomptes de la liste et de la feuille de route.
-- [x] **P8b** — hygiène du code : `rust-version` vraie, avertissements à zéro, suites rejouées.
-- [x] **P9** — index : carte par système en tête ; note datée à SPEC-003 ; file active.
-- [ ] **P10** — S320 P5b : §5 bis versé au retour du calcul — étape asynchrone, placée là où le
-  calcul la permet. **Reportée** : calcul encore en cours à 21:02, la session ne l'attend pas ; point
-  daté de la file, avec sa commande.
-- [x] **P11** — rituel, appliqué sous sa forme nouvelle.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — `MER_DT_US` et trace à la seconde ; non-régression à 10 ms sur 20 s.
+- [ ] **P3** — les quatre pas, 40 s, en parallèle ; taux et verdict selon la règle.
+- [ ] **P4** — *si la règle dit « indéterminé »* : le point manquant, déclaré avant.
+- [ ] **P5** — preuve : section datée de [MER-S319](../docs/validation/MER-S319.md) — un fil, une
+  preuve (ADR-187 D7) —, avec « Reproduire » ; file, A289.
+- [ ] **P6** — S320 P5b : §5 bis de B10 au retour du calcul lancé à 20:11 — asynchrone.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
 
-**Reprise de S320 (20:11–20:25).** Arbre propre ; P5b relancée (`lot5_comparaison apic entree 0.0125 2
-0.4`, sortie dans le répertoire temporaire de la session, hors dépôt) ; rituel de S320 terminé sans
-attendre le calcul. Si la session est coupée avant P10 : **relancer la même commande** — ≈ 1 h à
-1 h 45 à `D/dx` = 32 d'après les coûts de `D/dx` = 16 — puis verser §5 bis.
-
-**P4.** Les notes archivées de S301 à S320 (1 560 lignes) sortent du fichier. Recoupées avant la
-purge : leurs chiffres porteurs sont dans les preuves et le journal ; trois restent seulement dans
-Git (le coût intermédiaire de 4,23 ms à 344 064 mailles de S302, la courbe `1 ; 1,4 ; 6` de S308,
-dépassée par P7 de la même session, et l'indice de la bascule de S301, `n` = 215, maille
-(19, 10, 32)) — retrouvables par la commande ci-dessus.
-
-**P6.** Lecture à froid mesurée après la révision : **68 Ko** (AGENTS 10,3 ; REPRISE 12,8 ; dernière
-entrée 2,8 ; invariants 11,7 ; ADR-001 §2 3,4 ; feuille §3 bis 8,6 ; décisions de la file 3,3 ; dix
-lignes de porte 5,1 ; METHODE 10,3), contre 155 Ko avant.
-
-**P7.** Six contrôles, chacun refusant son contre-exemple réel ; 16 essais de l'outil, 26 essais
-Python au total. Au commit, `--check` échoue sur **douze** anomalies, toutes réelles et toutes pour
-P8a : dix `.pyc` versionnés, et le décompte de la liste (section 4 et total : affiché 3 / 51 / 66,
-compté 3 / 53 / 64). Piège rencontré : l'outil d'édition convertit les échappements Unicode en
-caractères — le motif d'encodage s'est d'abord attrapé lui-même ; il est désormais écrit en
-échappements construits par `chr(92)`, et l'outil ne se signale plus.
-
-**P8b.** Zéro avertissement : `cargo test --no-run` et `cargo build` du code et de l'afficheur ;
-suites rejouées **578 + 36 réussis, 0 échec**, 18 + 1 ignorés — mêmes nombres. Construit dans un
-répertoire cible hors dépôt, parce que P5b tient `lot5_comparaison.exe` verrouillé (Windows).
-Trois avertissements étaient de vrais défauts : `wake_plafond` imprimait un refus **vide** quand le
-refus venait du deuxième ou du troisième profil (motif `(e, _, _) | …` inaccessible) ; `Mesure.masse`
-de `lot5_comparaison` était calculée et jamais lue ; `delta3d_mobile` (S296) et `nl_surface_2d`
-n'appellent pas `dispersion_error`, que leur module demande à tout banc (L277) — point de file.
-Les campagnes du harnais que seuls les essais appellent sont déclarées au niveau du module.
