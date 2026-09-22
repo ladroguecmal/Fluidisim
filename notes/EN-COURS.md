@@ -103,9 +103,10 @@ Critères, écrits avant le code :
 - [x] **P4** — la détection : air enfermé, pincement, couronne, jet.
 - [x] **P5a** — *découpage déclaré en reprise* — B10 : trois `Fr`, similitude à deux échelles,
   sensibilité, convergence `D/dx` 8 → 16, banc corrigé.
-- [ ] **P5b** — `Fr` = 2 à `D/dx` = 32 (≈ 1 h de calcul, en arrière-plan pendant P6).
-- [ ] **P6** — preuve publiée.
-- [ ] **P7** — rituel REPRISE §6.
+- [>] **P5b** — `Fr` = 2 à `D/dx` = 32 (≈ 1 h de calcul, en arrière-plan pendant P6), lancé à 07:52 :
+  `lot5_comparaison apic entree 0.0125 2 0.4`. Interrompu : le relancer, rien d'autre à reprendre.
+- [x] **P6** — preuve publiée, écrite pendant P5b : `docs/validation/B10-APIC-S320.md` ; §5 bis attend P5b.
+- [>] **P7** — rituel REPRISE §6, commencé pendant P5b.
 
 ### Notes de reprise
 
@@ -1657,3 +1658,7 @@ enfermée (0,0625 D² à 8, exactement le seuil ; 0,094 à 16) est **au seuil** 
 profonde, pas de cavité. Géo − masse à 16 : −0,146 dx au départ, final −0,03 à −0,24 dx.
 Énergie max au-dessus de l'initiale : 1,7 % (`Fr` = 1) à 11 % (`Fr` = 4) — le corps travaille, ce
 n'est pas un test de conservation.
+
+**Correction (P6, 08:25).** Le message du commit P5a dit « le niveau géométrique reste à 0,25 maille » :
+**faux**. L'écart géo − masse final atteint +0,66 maille (`Fr` = 4, 0,8 m) et +0,67 (`Fr` = 4, `D/dx` = 16) ;
+fourchette vraie −0,41 à +0,67 maille, soit 0,6 % de la hauteur d'eau. Écrit juste dans la preuve.
