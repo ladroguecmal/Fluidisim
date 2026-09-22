@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-22 21:04 +02:00
+Battement        : 2026-09-22 21:07 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S322 — lot 2, A289 : la croissance de δ sous houle contre le pas de temps, à maille fixe
 Dernière session : S321 — **analyse complète, méthode refondue** ([bilan](docs/registres/BILAN-GLOBAL-S321.md), [ADR-187](docs/adr/ADR-187-methode-refondue-s321.md)) : code sain ; rituel en deux parties, lecture à froid 68 Ko, `EN-COURS` limité à la session en cours, dix-sept protections actives, six contrôles de plus ; zéro avertissement ; S320 P5b reportée, en calcul (file)

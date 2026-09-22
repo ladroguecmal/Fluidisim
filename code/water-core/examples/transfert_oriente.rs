@@ -1943,7 +1943,11 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     let (mut region_dg, mut region_dd) = (region(x_g, -1., x_g)?, region(x_d, 1., longueur - x_d)?);
     let (mut registre_dg, mut registre_dd) = (Ledger3::default(), Ledger3::default());
     let sponge = Sponge3 { width_x: eponge, width_y: 0., rate_per_s: 10. * cg_pose / eponge };
-    let dt_us = 10_000u64;
+    // `MER_DT_US` (S322, A289) : le pas de temps, à maille fixe ; 10 ms par défaut, le banc de S319.
+    let dt_us: u64 = std::env::var("MER_DT_US").ok().and_then(|v| v.parse().ok()).unwrap_or(10_000);
+    if dt_us == 0 || 1_000_000 % dt_us != 0 {
+        return Err(format!("MER_DT_US = {dt_us} : un diviseur de la seconde est attendu"));
+    }
     let dt = dt_us as f64 * 1e-6;
     let duree = if avec_paquet {
         ((longueur - eponge - x0) / (0.7 * cg_pose) + 8. * sigma / cg_pose) as f64
@@ -2004,7 +2008,8 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         bilan_max = bilan_max.max(bilan.abs());
         let pmax = v.surface().iter().fold(0f32, |m, e| m.max((e - h0).abs())) as f64;
         perturbation_max = perturbation_max.max(pmax);
-        if std::env::var("MER_TRACE").is_ok() && n % 100 == 0 {
+        // Une trace par seconde simulée, quel que soit le pas (S322) ; à 10 ms, tous les cent pas.
+        if std::env::var("MER_TRACE").is_ok() && n % (1_000_000 / dt_us) == 0 {
             let tmax = temoin.surface().iter().fold(0f32, |m, e| m.max((e - h0).abs()));
             eprintln!("TRACE t={:.1} delta_max={pmax:.4} temoin_max={tmax:.4}", (n + 1) as f64 * dt);
         }
@@ -2038,7 +2043,7 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         );
     }
     println!(
-        "MER_S319 dx={dx} paquet={avec_paquet} a_houle={a_houle} pas={pas} duree_s={duree:.1} duree_calcul_s={duree_calcul:.0} \
+        "MER_S319 dx={dx} dt_us={dt_us} paquet={avec_paquet} a_houle={a_houle} pas={pas} duree_s={duree:.1} duree_calcul_s={duree_calcul:.0} \
          houle_a_m={a_b:.4} houle_k={k_b:.4} houle_omega={omega_b:.4} largeur_m={largeur} \
          perturbation_max_m={perturbation_max:e} recu_gauche_m3={:e} recu_droite_m3={:e} \
          niveau_gauche_m={:e} niveau_droite_m={:e} flux_absolu_droite_m3={flux_abs_d:e} \

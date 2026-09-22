@@ -92,9 +92,9 @@ Critères :
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — `MER_DT_US` et trace à la seconde ; non-régression à 10 ms sur 20 s.
-- [ ] **P3** — les quatre pas, 40 s, en parallèle ; taux et verdict selon la règle.
+- [x] **P1** — jeton, plan seul. *(Committé avec `[>]` — même oubli qu'en S321 ; coché en P2. Écrire P1 déjà coché dans le plan.)*
+- [x] **P2** — `MER_DT_US` et trace à la seconde ; non-régression à 10 ms sur 20 s.
+- [>] **P3** — les quatre pas, 40 s, en parallèle ; taux et verdict selon la règle.
 - [ ] **P4** — *si la règle dit « indéterminé »* : le point manquant, déclaré avant.
 - [ ] **P5** — preuve : section datée de [MER-S319](../docs/validation/MER-S319.md) — un fil, une
   preuve (ADR-187 D7) —, avec « Reproduire » ; file, A289.
@@ -103,3 +103,7 @@ Critères :
 
 ### Notes de reprise
 
+**P2 (21:07).** Non-régression à 10 ms, 20 s, 25 cm, houle 5 cm — sortie brute gardée ici, faute
+de l'avoir été en S319 : `perturbation_max_m=2.828526496887207e-2 recu_droite_m3=3.4107479323174636e-2
+bilan_final_m3=-6.788354459604101e-4 recu_droite_sur_paquet=292.1912` ; publiés en S319 : 2,83 cm,
+3,4·10⁻² m³, 6,8·10⁻⁴ m³, 292 — **identiques aux chiffres publiés**, seuls comparables. 56 s de calcul.
