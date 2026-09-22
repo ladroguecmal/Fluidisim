@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-22 21:15 +02:00
+JETON            : libre
+Battement        : 2026-09-22 21:16 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S322 — lot 2, A289 : la croissance de δ sous houle contre le pas de temps, à maille fixe
-Dernière session : S321 — **analyse complète, méthode refondue** ([bilan](docs/registres/BILAN-GLOBAL-S321.md), [ADR-187](docs/adr/ADR-187-methode-refondue-s321.md)) : code sain ; rituel en deux parties, lecture à froid 68 Ko, `EN-COURS` limité à la session en cours, dix-sept protections actives, six contrôles de plus ; zéro avertissement ; S320 P5b reportée, en calcul (file)
-Session suivante : **S322, lot 2 — A289** : le taux de croissance de δ sous houle contre le pas de temps, à maille fixe, avant l'arbitrage de l'utilisateur (proposition, [bilan](docs/registres/BILAN-GLOBAL-S321.md) §7) ; verser S320 P5b à son retour
-Maillons        : 1 — S321 : une méthode, pas une capacité ; à deux, un lot qui fait avancer une capacité
+Session en cours : aucune
+Dernière session : S322 — **A289** : la croissance de δ sous houle **ne dépend pas du pas de temps** — 0,1015 à 0,1007 s⁻¹ de 20 à 2,5 ms, 0,8 % sur un facteur huit ([preuve](docs/validation/MER-S319.md) §8) ; pas un défaut d'intégration du pas couplé ; la voie reste à l'utilisateur
+Session suivante : **S323, lot 5 — le raccord particules ↔ colonnes**, précédé du compteur de volume géométrique d'APIC (A313) ; alternance d'ADR-184 et règle des deux maillons ; verser S320 P5b à son retour (file)
+Maillons        : 2 — S321 : une méthode ; S322 : un diagnostic qui restreint une cause ; aucune capacité reçue. La suite doit en faire avancer une
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

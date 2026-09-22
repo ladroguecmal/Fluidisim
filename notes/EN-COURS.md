@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S322 — **en cours**. **Lot 2, A289** : la croissance de δ sous une houle B, contre le pas
+Session : S322 — **terminée** (2026-09-22 21:16, P6 reportée). **Lot 2, A289** : la croissance de δ sous une houle B, contre le pas
 de temps à maille fixe — l'essai qu'il faut faire **avant** l'arbitrage de l'utilisateur.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« Continue »*, après S321 ; suite proposée par S321 ([bilan](../docs/registres/BILAN-GLOBAL-S321.md)
@@ -98,8 +98,9 @@ Critères :
 - [x] **P4** — *si la règle dit « indéterminé »* : le point manquant, déclaré avant. **Sans objet** : la règle tranche.
 - [x] **P5** — preuve : section datée de [MER-S319](../docs/validation/MER-S319.md) — un fil, une
   preuve (ADR-187 D7) —, avec « Reproduire » ; file, A289.
-- [>] **P6** — S320 P5b : §5 bis de B10 au retour du calcul lancé à 20:11 — asynchrone.
-- [ ] **P7** — rituel.
+- [ ] **P6** — S320 P5b : §5 bis de B10 au retour du calcul lancé à 20:11 — asynchrone. **Reportée** :
+  encore en calcul à 21:16 ; le point daté de la file (S321) la porte.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 
@@ -108,5 +109,5 @@ de l'avoir été en S319 : `perturbation_max_m=2.828526496887207e-2 recu_droite_
 bilan_final_m3=-6.788354459604101e-4 recu_droite_sur_paquet=292.1912` ; publiés en S319 : 2,83 cm,
 3,4·10⁻² m³, 6,8·10⁻⁴ m³, 292 — **identiques aux chiffres publiés**, seuls comparables. 56 s de calcul.
 
-**P3 (21:14).** Taux 0,1015 / 0,1012 / 0,1009 / 0,1007 s⁻¹ à 20 / 10 / 5 / 2,5 ms, R² 0,995 ; écart 0,8 %.
+**P3 à P5 (21:14), fusion déclarée au commit.** Taux 0,1015 / 0,1012 / 0,1009 / 0,1007 s⁻¹ à 20 / 10 / 5 / 2,5 ms, R² 0,995 ; écart 0,8 %.
 Calcul 59 / 112 / 205 / 378 s, quatre processus en parallèle avec P5b.

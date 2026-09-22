@@ -16319,3 +16319,24 @@ s'est d'abord attrapé lui-même ; son motif est désormais construit par `chr(9
 **Rituel.** Maillons **1** : une méthode, pas une capacité. Ni leçon ni angle mort neufs ; quatre
 points de file. Suivant, proposé : **S322, lot 2 — l'essai du pas de temps d'A289**, avant
 l'arbitrage ; les deux décisions proposées sont au bilan §7.
+
+## S322 — 2026-09-22 — A289 : la croissance de δ sous houle ne suit pas le pas de temps
+
+**Entrée.** *« Continue »* ; suite proposée par S321 et par la lecture de `simufluid` : l'essai du
+pas de temps, à faire avant l'arbitrage d'A289.
+**Mesure** ([preuve](../docs/validation/MER-S319.md) §8). E1 de S319 — houle 5 cm, λ = 4 m, δ nul au
+départ, maille 25 cm — à 20, 10, 5 et 2,5 ms, soit 80 à 640 pas par période. Taux de `δ_max` entre
+10 et 30 s : 0,1015, 0,1012, 0,1009, 0,1007 s⁻¹ — **0,8 %** d'écart, pour moins de 10 % prédits si
+le modèle domine. À 10 ms, S319 se reproduit aux chiffres publiés.
+**Ce que cela dit.** Pas un défaut d'intégration du pas couplé : chez `simufluid`, le taux changeait
+de signe avec le nombre de pas ; ici, il ne bouge pas. L'advection croisée explicite, dont le taux
+suivrait le pas, est exclue, comme la maille l'avait fait en S319. Le mécanisme reste à nommer ; la
+voie d'A289 reste à l'utilisateur, et un remède numérique du pas ne servirait à rien.
+**Méthode.** Première preuve au format de S321 : section datée dans la preuve du fil, « Reproduire »
+en tête, sortie brute de la non-régression gardée. P1 committé avec `[>]` une deuxième fois :
+écrire P1 déjà coché dans le plan.
+**Non fait.** S320 P5b, encore en calcul (file).
+**Rituel.** Maillons **2** : un diagnostic qui restreint une cause n'est pas une capacité. La suite
+doit en faire avancer une : **S323, lot 5 — le raccord particules ↔ colonnes**, précédé du compteur
+de volume géométrique (A313) ; l'alternance d'ADR-184 le désigne aussi. Trois décisions attendent
+l'utilisateur (file).
