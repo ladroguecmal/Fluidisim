@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-22 21:16 +02:00
+JETON            : occupé
+Battement        : 2026-09-22 21:38 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S323 — lot 5, le raccord particules ↔ colonnes, précédé du compteur de volume géométrique d'APIC (A313)
 Dernière session : S322 — **A289** : la croissance de δ sous houle **ne dépend pas du pas de temps** — 0,1015 à 0,1007 s⁻¹ de 20 à 2,5 ms, 0,8 % sur un facteur huit ([preuve](docs/validation/MER-S319.md) §8) ; pas un défaut d'intégration du pas couplé ; la voie reste à l'utilisateur
 Session suivante : **S323, lot 5 — le raccord particules ↔ colonnes**, précédé du compteur de volume géométrique d'APIC (A313) ; alternance d'ADR-184 et règle des deux maillons ; verser S320 P5b à son retour (file)
 Maillons        : 2 — S321 : une méthode ; S322 : un diagnostic qui restreint une cause ; aucune capacité reçue. La suite doit en faire avancer une

@@ -62,52 +62,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S322 — **terminée** (2026-09-22 21:16, P6 reportée). **Lot 2, A289** : la croissance de δ sous une houle B, contre le pas
-de temps à maille fixe — l'essai qu'il faut faire **avant** l'arbitrage de l'utilisateur.
+Session : S323 — **en cours**. **Lot 5, le raccord particules ↔ colonnes**
+([ADR-186](../docs/adr/ADR-186-apic-seconde-representation.md) §3), précédé du compteur de volume
+géométrique d'APIC qu'A313 exige avant lui.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Continue »*, après S321 ; suite proposée par S321 ([bilan](../docs/registres/BILAN-GLOBAL-S321.md)
-§7) et par la lecture de `simufluid` (S320, [§1](../docs/registres/LECTURE-SIMUFLUID-S320.md)).
+Entrée : *« Continue »*, après S322 ; alternance d'ADR-184 et règle des deux maillons (à 2) : la
+session doit faire avancer une capacité.
 
-**Ce que la session doit rendre possible.** Savoir si la croissance de S319 est, au moins en partie,
-un **défaut d'intégration du pas couplé** — elle dépend alors du pas de temps à maille fixe, comme
-chez `simufluid` — ou une **propriété du modèle** — elle n'en dépend pas. Consommateur : le choix de
-la voie d'A289 par l'utilisateur ; si la cause est numérique, ajouter la dispersion d'amplitude à B
-ne la soignerait pas. Puis l'ordre E.
+**Ce que la session doit rendre possible.** Faire passer une région d'eau d'une représentation à
+l'autre — des particules d'APIC aux colonnes d'une fonction hauteur, et retour — **en conservant son
+volume**, et savoir le mesurer. C'est le geste qui fera consommer B10 par δ ; il fait avancer 4.16
+(surface non graphe) et 4.20 (changement de représentation en cours de simulation). Consommateur :
+le raccord dynamique, puis la porte D et C20.
 
-**Le banc.** E1 de S319 ([preuve](../docs/validation/MER-S319.md)), `transfert_oriente mer` : houle
-d'une composante, 5 cm, λ = 4 m, `T` = 1,6 s ; δ nul au départ ; **maille fixe, 25 cm** ; pas de
-20, 10, 5 et 2,5 ms, soit 80 à 640 pas par période. Option `MER_DT_US`, défaut 10 000 : **sans
-elle, le banc de S319 est inchangé au bit**. Mesure : `δ_max` chaque seconde ; **taux** = pente de
-`ln δ_max` entre 10 et 30 s, dans la phase exponentielle de S319.
+**Le compteur (A313).** Volume géométrique = aire où `φ < 0`, `φ` la surface reconstruite des
+particules, par carrés marchants sur la grille des centres — **l'interface même que voit le fluide
+fantôme** —, bandes contre les parois comprises, corps et air enfermé exclus par construction.
 
-**Prédiction, écrite avant la mesure.** Si A289 domine — une onde totale que B linéaire ne suit
-pas —, le taux ne dépend pas du pas : écart **< 10 %** entre 20 et 2,5 ms. Si le pas couplé y
-contribue, l'écart dépasse **30 %**, et le taux peut changer de signe. Entre les deux : indéterminé,
-un point de plus.
+**Les primitives.** *Particules → colonnes* : dans une colonne à un seul segment d'eau posé sur le
+fond, `η` = volume géométrique de la colonne / `dx`. *Colonnes → particules* : ensemencer sous `η` au
+quart de maille, le reste de chaque colonne reporté à la suivante pour que la masse totale tienne.
 
-Critères :
-1. À 10 ms, la trace reproduit S319 **au bit** : 2,83 cm à 20 s.
-2. Taux publiés aux quatre pas ; la règle ci-dessus appliquée telle qu'écrite.
-3. Rien dans le cœur ; aucune réception touchée.
+Critères, écrits avant le code :
+1. Compteur **exact** sur une interface plane (à l'arrondi), **d'ordre deux** sur un disque — le
+   rapport d'erreur vaut ≈ 4 quand la maille est divisée par deux.
+2. Publiés : sa dérive au repos et en ballottement sur 10 s ; le tassement du corps lent, **avec et
+   sans séparation**, lu directement comme l'écart entre volume géométrique et masse.
+3. Aller-retour colonnes → particules → colonnes sur un état réel : masse totale à **une particule
+   près** (`dx²/4`), volume géométrique par colonne à **0,2 maille** de hauteur près.
+4. Rien dans le cœur ; aucune réception antérieure touchée (ballottement de S318 au bit).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul. *(Committé avec `[>]` — même oubli qu'en S321 ; coché en P2. Écrire P1 déjà coché dans le plan.)*
-- [x] **P2** — `MER_DT_US` et trace à la seconde ; non-régression à 10 ms sur 20 s.
-- [x] **P3** — les quatre pas, 40 s, en parallèle ; taux et verdict selon la règle.
-- [x] **P4** — *si la règle dit « indéterminé »* : le point manquant, déclaré avant. **Sans objet** : la règle tranche.
-- [x] **P5** — preuve : section datée de [MER-S319](../docs/validation/MER-S319.md) — un fil, une
-  preuve (ADR-187 D7) —, avec « Reproduire » ; file, A289.
-- [ ] **P6** — S320 P5b : §5 bis de B10 au retour du calcul lancé à 20:11 — asynchrone. **Reportée** :
-  encore en calcul à 21:16 ; le point daté de la file (S321) la porte.
-- [x] **P7** — rituel.
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — le compteur, et son épreuve sur des distances exactes (plan, disque, trois mailles).
+- [ ] **P3** — le compteur sur repos, ballottement, corps lent avec et sans séparation, B10 à `Fr` = 2.
+- [ ] **P4** — les deux primitives, et l'aller-retour sur un état réel.
+- [ ] **P5** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
+  « Reproduire » ; A313, file, liste 4.16 et 4.20 si la mesure le permet.
+- [ ] **P6** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
 
-**P2 (21:07).** Non-régression à 10 ms, 20 s, 25 cm, houle 5 cm — sortie brute gardée ici, faute
-de l'avoir été en S319 : `perturbation_max_m=2.828526496887207e-2 recu_droite_m3=3.4107479323174636e-2
-bilan_final_m3=-6.788354459604101e-4 recu_droite_sur_paquet=292.1912` ; publiés en S319 : 2,83 cm,
-3,4·10⁻² m³, 6,8·10⁻⁴ m³, 292 — **identiques aux chiffres publiés**, seuls comparables. 56 s de calcul.
-
-**P3 à P5 (21:14), fusion déclarée au commit.** Taux 0,1015 / 0,1012 / 0,1009 / 0,1007 s⁻¹ à 20 / 10 / 5 / 2,5 ms, R² 0,995 ; écart 0,8 %.
-Calcul 59 / 112 / 205 / 378 s, quatre processus en parallèle avec P5b.
