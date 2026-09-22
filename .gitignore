@@ -19,3 +19,8 @@ desktop.ini
 .idea/
 *.swp
 *~
+
+# Produits de Python — un essai les réécrit, et la reprise à chaud prendrait le diff pour celui de
+# l'étape interrompue (S321, contrôle `etat_projet.py --check`)
+__pycache__/
+*.py[co]

@@ -99,9 +99,9 @@ Critères, écrits avant le travail :
   plafonds (§8).
 - [x] **P7** — `etat_projet.py --check` étendu, avec essais : taille d'`EN-COURS`, encodage,
   fichiers produits versionnés, décompte de la liste, « Reproduire » des preuves nouvelles.
-- [>] **P8a** — hygiène du dépôt : `.pyc` retirés et ignorés, `code/REPRISE.md` vide supprimé,
+- [x] **P8a** — hygiène du dépôt : `.pyc` retirés et ignorés, `code/REPRISE.md` vide supprimé,
   README racine et du code, décomptes de la liste et de la feuille de route.
-- [ ] **P8b** — hygiène du code : `rust-version` vraie, avertissements à zéro, suites rejouées.
+- [>] **P8b** — hygiène du code : `rust-version` vraie, avertissements à zéro, suites rejouées.
 - [ ] **P9** — index : carte par système en tête ; note datée à SPEC-003 ; file active.
 - [ ] **P10** — S320 P5b : §5 bis versé au retour du calcul — étape asynchrone, placée là où le
   calcul la permet.
