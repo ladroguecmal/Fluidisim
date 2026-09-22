@@ -96,8 +96,8 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le compteur, et son épreuve sur des distances exactes (plan, disque, trois mailles).
-- [>] **P3** — le compteur sur repos, ballottement, corps lent avec et sans séparation, B10 à `Fr` = 2.
-- [ ] **P4** — les deux primitives, et l'aller-retour sur un état réel.
+- [x] **P3** — le compteur sur repos, ballottement, corps lent avec et sans séparation, B10 à `Fr` = 2.
+- [>] **P4** — les deux primitives, et l'aller-retour sur un état réel.
 - [ ] **P5** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; A313, file, liste 4.16 et 4.20 si la mesure le permet.
 - [ ] **P6** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
@@ -108,3 +108,12 @@ Critères, écrits avant le code :
 **P2.** `lot5_comparaison compteur` : plan exact à ≤ 2·10⁻¹⁴ (trois hauteurs, deux mailles, bandes des
 parois comprises) ; disque `r` = 0,3 m : −5,7·10⁻³, −1,4·10⁻³, −3,6·10⁻⁴, −8,9·10⁻⁵, rapports **3,96 ;
 3,98 ; 4,03** — ordre deux. Construit dans un répertoire cible hors dépôt : P5b verrouille l'exécutable.
+
+**P3 (21:44).** `V_geo/V_masse − 1`, 5 cm sauf mention. **Repos** −1,466 % = biais générique de
+reconstruction, −0,146 maille par longueur de surface ; dérive 1·10⁻⁵ en 10 s. **Ballottement** : −0,64 %
+au départ (le remplissage initial du cosinus), **relaxé** vers le biais générique en 7 s puis stable
+(−1,49 à −1,55 %) ; à 2,5 cm, autour de −0,6 à −0,7 % pour −0,73 % générique ; séparation sans
+effet (−0,87 % contre −0,85 %). **Corps lent** : −0,32 → −0,54 % avec séparation, → **−1,56 %** sans
+(montée de masse 39 %, géométrique 45 %). **B10 `Fr` = 2, `D/dx` = 8** : entre −0,47 et −0,15 % avec
+séparation ; **−12,2 %** sans — la séparation est indispensable. Non-régression : période du
+ballottement +5,59 % avec séparation, +5,85 % sans (S320 : +5,6 et +5,9) ; pincement 2,20 √(D/g).

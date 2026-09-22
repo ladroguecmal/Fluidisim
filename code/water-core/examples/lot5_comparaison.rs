@@ -1358,7 +1358,10 @@ impl Candidat for Apic {
         // deux particules plus proches que 0,4 maille s'écartent symétriquement de la moitié de leur
         // recouvrement, deux passes ; les vitesses ne sont pas touchées, et une eau au repos — à une
         // demi-maille d'écart — ne l'est pas non plus.
-        self.separe(0.4 * dx, 2);
+        // `LOT5_SANS_SEPARATION` (S323) : le témoin sans séparation, pour lire le tassement au compteur.
+        if std::env::var("LOT5_SANS_SEPARATION").is_err() {
+            self.separe(0.4 * dx, 2);
+        }
         // ── Le corps avance, puis repousse hors de lui les particules qu'il a atteintes.
         self.t += dt;
         if let Some((c, r, vit)) = self.scene.corps(self.t) {
