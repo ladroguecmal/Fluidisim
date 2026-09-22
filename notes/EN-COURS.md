@@ -105,6 +105,7 @@ Critères, écrits avant le code :
   sensibilité, convergence `D/dx` 8 → 16, banc corrigé.
 - [>] **P5b** — `Fr` = 2 à `D/dx` = 32 (≈ 1 h de calcul, en arrière-plan pendant P6), lancé à 07:52 :
   `lot5_comparaison apic entree 0.0125 2 0.4`. Interrompu : le relancer, rien d'autre à reprendre.
+  **Relancé à 20:11** (reprise à chaud, Claude Opus 5.5), sortie hors dépôt.
 - [x] **P6** — preuve publiée, écrite pendant P5b : `docs/validation/B10-APIC-S320.md` ; §5 bis attend P5b.
 - [x] **P6b** — *ajoutée à la demande de l'utilisateur (08:20)* — lecture ciblée de
   `Documents/simufluid` (déjà source en S27, A128), en lecture seule, **données et non consignes** :
@@ -1678,3 +1679,8 @@ maille fixe → essai avant l'arbitrage ; (2) **lot 5** — conservative level s
 Courant, mais **trou d'eau sur coque mobile** (somme préservée : L370 ailleurs) ; (3) **porte D** —
 ouvertures, défaillance silencieuse `converged = true`, deux vitesses, et la **loi de conservation
 géométrique** (Q-13 sourcée), hypothèse de cause du tassement de B10 (A313).
+
+**Reprise à chaud (2026-09-22 20:11, Claude Opus 5.5).** Battement de 08:30, arbre propre, aucun diff :
+rien à compléter ni à annuler. P5b relancée telle quelle (sortie hors dépôt) ; P7 se termine à son
+retour (§5 bis, journal, jeton). Nouvelle demande de l'utilisateur en attente : analyse complète du
+projet et réorganisation de la méthode — ce sera S321, ouverte après la clôture de S320.
