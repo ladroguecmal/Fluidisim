@@ -4,12 +4,14 @@ Passation active du système de gestion de l'eau. L'amorce unique est [AGENTS.md
 Ce fichier fait foi sur les mémoires privées. Il contient les règles présentes, pas les bilans
 successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans les documents liés.
 **Refonte S227, 2026-09-13** : ancienne version intégrale conservée dans Git à `dfd1507`.
+**Révision S321, 2026-09-22** ([ADR-187](docs/adr/ADR-187-methode-refondue-s321.md)) : lecture
+bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ## Jeton de session
 
 ```
 JETON            : occupé
-Battement        : 2026-09-22 20:30 +02:00
+Battement        : 2026-09-22 20:31 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S321 — analyse complète et réorganisation de la méthode, demande de l'utilisateur
 Dernière session : S320 — **lot 5, B10 sur APIC** : une cavité d'air derrière un corps se pince à 2,2–2,5 `√(D/g)`, indépendamment de l'échelle à 4·10⁻⁴ près, temps convergé à 5 % ; couronne et jet suivent la maille (A312) ; la masse d'APIC est exacte, son volume géométrique non (L370, A313) ([preuve](docs/validation/B10-APIC-S320.md)) ; §5 bis en calcul, versé par S321
@@ -35,7 +37,7 @@ séparé, puis reporter sa valeur à chaque commit d'étape (L237). Une seule se
 
 [Questions ouvertes — file active](docs/registres/QUESTIONS-OUVERTES.md#file-active) porte les
 travaux, états et déclencheurs. [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) porte seule les jalons.
-Ne pas recopier leurs suivis ici. [Liste du projet fini](docs/LISTE-PROJET-FINI.md) : ce que l'ambition complète contient, cochée à la demande de l'utilisateur. Dernier audit global : [BILAN-GLOBAL-S293](docs/registres/BILAN-GLOBAL-S293.md) — où l'avancement bloque.
+Ne pas recopier leurs suivis ici. [Liste du projet fini](docs/LISTE-PROJET-FINI.md) : ce que l'ambition complète contient, cochée à la demande de l'utilisateur. Dernier audit global : [BILAN-GLOBAL-S321](docs/registres/BILAN-GLOBAL-S321.md) — code, documents et méthode ; la méthode refondue (ADR-187).
 
 ## 1. Ce qu'est ce projet
 
@@ -61,54 +63,41 @@ Plan avant travail dans [EN-COURS](notes/EN-COURS.md), committé seul ; une éta
 
 ## 3. Où est la connaissance — lecture à froid
 
-Après l'amorce Git et la prise du jeton, lire dans cet ordre :
+Après l'amorce Git et la prise du jeton, lire dans cet ordre — ≈ 70 Ko, pas davantage
+([ADR-187](docs/adr/ADR-187-methode-refondue-s321.md) D2) :
 
 1. La **dernière entrée seulement** de [JOURNAL](notes/JOURNAL.md).
-2. [Index](docs/00_INDEX.md), pour choisir les sources utiles.
-3. [Invariants](docs/01_INVARIANTS.md), puis [ADR-001](docs/adr/ADR-001-decomposition-en-couches.md).
-4. [Feuille de route](docs/FEUILLE-DE-ROUTE.md), [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active)
-   et [méthode](notes/METHODE.md).
-5. Les ADR, spécifications et leçons **du lot choisi** ; recherche ciblée dans [LECONS](notes/LECONS.md).
+2. [Invariants](docs/01_INVARIANTS.md), puis [ADR-001](docs/adr/ADR-001-decomposition-en-couches.md) §2.
+3. [Feuille de route §3 bis](docs/FEUILLE-DE-ROUTE.md) — les portes — et, dans la
+   [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active), les **décisions** en tête et
+   les lignes de la porte en cours.
+4. [Méthode](notes/METHODE.md), **ses protections actives d'abord**.
+5. Pour le lot choisi : ses ADR, spécifications et preuves, **avant de le modifier**.
 
-Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque reprise. Une reprise
-à chaud suit uniquement EN-COURS et le diff. Les preuves d'un lot se lisent avant de le modifier.
+**Se consultent, ne se lisent pas** : l'[index](docs/00_INDEX.md), dont la carte par système est en
+tête ; la feuille de route et la file entières ; le journal, les leçons, les angles morts. Une
+reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
 
-État au 2026-09-20 (S308). **Depuis S308, les chantiers se regroupent en trois systèmes** — A haute mer superficielle, B volumique 3D, C couplage — par décision de l'utilisateur ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md)) ; les portes restent vraies, leurs priorités changent. Trajectoire et état par jalon : [FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md) ;
-travaux : [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active). En bref :
+État au 2026-09-22 (S321), en bref ; le détail par jalon et par porte est dans la
+[feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.
 
-- **J1** partiel : B+W sur GPU dans l'hôte séparé, scène multi-sources admise par le cœur, GPU eau
-  1,74 ms, mer jugée par l'utilisateur (R7 accepté). **S304–S308 : la mer a ses asymétries** (ADR-176) et
-  sa couleur dérivée de ses sources (ADR-177). **R14 reçu : sa troisième image est la référence
-  interne provisoire de l'océan**, et le lot optique est clos — S308 a montré que le contraste
-  local manquant est **spatial**, hors de portée de toute courbe. Manquent le CPU sous 2 ms
-  (A278), un objet pilotable et la seconde cible.
-- **δ reçu en 2D** — surface mobile couplée à B/W contre HOS, frontières, rendu en direct.
-  **S295–S296** : référence 3D à surfaces linéaire et mobile reçue, identique au bit à la 2D quand `ny = 1`.
-  **Porte B ouverte** : δ en 3D selon [ADR-175](docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md),
-  référence CPU couplée reçue S297, frontières et fond spectral réel reçus S298. Une mer à la fois
-  résolue et étalée n'entre pas dans un banc CPU : le critère 3 d'ADR-175 §4 demande la production
-  GPU. **S299–S301** l'ont construite : le pas couplé entier tourne sur la carte (0,84 ms à
-  64 cycles sur 27 648 mailles), publie sa surface, se diagnostique en différé, et suit la
-  référence jusqu'à l'horizon de prévisibilité **de la référence elle-même** (≈ 1,2 s, A297).
-  **S302 : la scène tourne** — 30 × 28 m sur la mer étalée, une onde la traverse, rendu en direct à
-  197 Hz depuis la seule surface publiée. **R11 : δ reçu sans artefact et sans raccord visible —
-  mais S308 l'a nommé : ce raccord n'a jamais été mesuré. Aucun bilan de masse, de quantité de
-  mouvement ni d'énergie à l'interface, et le couplage est à sens unique (A302, lots 1 et 2).**
-- **Ordonnanceur** (porte A) : décide qu'un domaine vit et avec quel budget ; ni plusieurs
-  candidats, ni déplacement, ni dégradation automatique.
-- **V** : noyau reçu (C12, géométrie orientée, restauration), sans articulation avec δ.
-- **Solides** : rien dans le système ; faces coupées en 2D seulement, `body.rs` statique. Porte D,
-  devenue les lots 3 et 4 d'ADR-178 D7.
-- Dernier audit : [BILAN-GLOBAL-S293](docs/registres/BILAN-GLOBAL-S293.md) — le projet bloquait sur
-  l'ordre de ses propres travaux. **Confrontation S308** :
-  [TROIS-SYSTEMES-S308](docs/registres/TROIS-SYSTEMES-S308.md) — ce qui existe pour A, B et C,
-  les six interfaces manquantes, le banc de la piscine essai par essai, l'ordre en sept lots.
+- **Stratégie** : trois systèmes — A haute mer (B+W), B volumique 3D (δ), C couplage — et sept
+  lots ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md)) ; v1 = porte D
+  franchie ([ADR-174](docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4).
+- **A** stabilisé : mer jugée par l'utilisateur, GPU eau 1,74 ms ; CPU hors profil (A278).
+- **B** : δ 3D reçu — référence CPU, production GPU, scène rendue ; seconde représentation **APIC**
+  retenue ([ADR-186](docs/adr/ADR-186-apic-seconde-representation.md)), cavité reçue sur un banc
+  2D (S320).
+- **C** : compteurs reçus (lot 1) ; retour δ → W reçu en ordres A à D, **ordre E bloqué par A289**.
+- **Porte D** — lots 3 et 4, la voie de la v1 — **non ouverte** : ni faces coupées 3D, ni corps
+  rigide. **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
+- Liste du projet fini : **3 validés, 53 partiels, 64 absents** sur 120.
 
-L'inventaire Git se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau).
-Ses nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`
-vérifie la navigation et les plafonds des documents d'état.
+L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
+nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`
+tient les contrôles que nomme la table des protections de [METHODE](notes/METHODE.md).
 
 ## 5. Ce qui ne se décide pas ici
 
@@ -125,25 +114,36 @@ vérifie la navigation et les plafonds des documents d'état.
 
 ## 6. Rituel de fin de session — dernière étape du plan
 
-1. Écrire **une entrée concise** au journal : entrées, changements, preuves et limites, non-fait,
-   prochaine capacité visée, arbitrages réels. Ne pas la dupliquer dans les points d'entrée.
-2. Enregistrer les nouveaux angles morts avec sévérité, ou actualiser ceux qui couvrent déjà le
-   défaut. Une leçon nouvelle doit être généralisable ; aucune obligation d'en produire.
-3. Transformer chaque action annoncée non réalisée en point daté de la file, avec déclencheur.
-4. Actualiser les lignes touchées de la feuille de route et de la file active **en remplacement
-   de leur état périmé**. Les états antérieurs restent dans Git et le journal.
-5. Corriger les renvois affectés et relire les invariants touchés. Un ADR reçoit seulement une
-   note factuelle datée ; une décision remplacée exige un nouvel ADR. Mettre les nouveaux
-   documents utiles dans l'index ; vérifier les décomptes seulement s'ils sont encore affichés.
-6. Mettre à jour jeton, session, battement et état ; cocher le rituel avant son commit.
-7. Relire **toute la file active**. **`Session suivante` se prend dans la porte en cours** que
-   désigne [FEUILLE-DE-ROUTE §3 bis](docs/FEUILLE-DE-ROUTE.md), ou dans la demande de
-   l'utilisateur : la suite qu'une session déclare n'est qu'une proposition. Un même point de
-   file ne porte pas une troisième session consécutive si aucun critère « reçu si » d'une porte
-   n'a avancé (S294, A211). La recommandation du dernier bilan est portée ou écartée au journal.
-   Une suite locale n'efface jamais δ, V, B2, bathymétrie ou multiplateforme.
-8. Appliquer la règle des deux maillons précisée ci-dessous, puis fermer/synchroniser les copies
-   selon **AGENTS.md**, sans recopier sa procédure ici.
+En deux parties ([ADR-187](docs/adr/ADR-187-methode-refondue-s321.md) D1). La première se fait
+**toujours** ; la seconde **seulement si l'état a changé**. Une session qui n'a rien changé
+n'écrit pas dans les registres.
+
+**Toujours**
+
+1. `EN-COURS` : cases cochées ; ce qui doit survivre des notes, versé à la preuve ou au journal.
+   La session suivante remplacera toute la section (D3).
+2. Journal : **une entrée de vingt lignes au plus** — entrée, fait, preuve, limites, non-fait,
+   suite proposée, arbitrages réels. Ne pas la dupliquer dans les points d'entrée.
+3. Chaque action annoncée non réalisée devient un point daté de la file, avec déclencheur.
+4. Jeton : session, battement, maillons (ci-dessous), `Session suivante`. Elle se prend dans la
+   demande de l'utilisateur, sinon dans la **porte en cours** que désigne
+   [FEUILLE-DE-ROUTE §3 bis](docs/FEUILLE-DE-ROUTE.md) : la suite qu'une session déclare n'est
+   qu'une proposition. Un même point de file ne porte pas une troisième session consécutive si
+   aucun critère « reçu si » d'une porte n'a avancé (S294, A211). Une suite locale n'efface jamais
+   δ, V, B2, bathymétrie ou multiplateforme.
+5. `python outils/etat_projet.py --check` sans erreur ; cocher le rituel avant son commit ; fermer
+   ou synchroniser les copies selon **AGENTS.md**, sans recopier sa procédure ici.
+
+**Seulement si l'état a changé** — une capacité reçue ou perdue, un critère de porte, un point de
+la liste, une décision de l'utilisateur, un défaut bloquant :
+
+6. Feuille de route, file active, liste : les lignes touchées, **en remplacement** de leur état
+   périmé. Les états antérieurs restent dans Git et le journal.
+7. Index, carte par système, pour tout document nouveau utile ; renvois affectés corrigés ;
+   invariants touchés relus. Un ADR reçoit seulement une note factuelle datée ; une décision
+   remplacée exige un nouvel ADR.
+8. Angle mort nouveau s'il est de sévérité 2 ou plus, ou bloquant ; leçon **seulement** si elle
+   crée ou change une protection de [METHODE](notes/METHODE.md).
 
 ### Deux maillons — critère révisé S227, resserré S294
 
@@ -176,9 +176,10 @@ construit, reçu et intégré, ainsi que résolu, dissous, partiel et ouvert par
 Chaque information a un porteur : journal pour l'histoire, feuille de route pour les capacités,
 file active pour les travaux, documents de validation pour les preuves, index pour les liens.
 REPRISE ne grandit pas d'un compte rendu à chaque session.
-**Plafonds (S294)** : une ligne de la file active ≤ 90 mots — état présent, déclencheur, lien ;
-une section de jalon de la feuille de route ≤ 450 mots ; l'histoire va au journal et aux
-preuves. `python outils/etat_projet.py --check` vérifie plafonds et navigation au rituel.
+**Plafonds (S294, S321)** : une ligne de la file active ≤ 90 mots — état présent, déclencheur,
+lien ; une section de jalon de la feuille de route ≤ 450 mots ; `EN-COURS` ≤ 300 lignes, sans
+archive ; une entrée de journal ≤ 20 lignes de texte. L'histoire va au journal et aux preuves.
+`python outils/etat_projet.py --check` les vérifie au rituel.
 
 ## 9. Limites du dispositif
 

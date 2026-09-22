@@ -95,9 +95,9 @@ Critères, écrits avant le travail :
 - [x] **P4** — `EN-COURS` refondu : archives purgées (Git et les preuves les gardent), session en
   cours seule.
 - [x] **P5** — METHODE refondue : principes, protections actives.
-- [>] **P6** — REPRISE : lecture à froid bornée (§3), état court (§4), rituel en deux parties (§6),
+- [x] **P6** — REPRISE : lecture à froid bornée (§3), état court (§4), rituel en deux parties (§6),
   plafonds (§8).
-- [ ] **P7** — `etat_projet.py --check` étendu, avec essais : taille d'`EN-COURS`, encodage,
+- [>] **P7** — `etat_projet.py --check` étendu, avec essais : taille d'`EN-COURS`, encodage,
   fichiers produits versionnés, décompte de la liste, « Reproduire » des preuves nouvelles.
 - [ ] **P8a** — hygiène du dépôt : `.pyc` retirés et ignorés, `code/REPRISE.md` vide supprimé,
   README racine et du code, décomptes de la liste et de la feuille de route.
@@ -119,3 +119,7 @@ purge : leurs chiffres porteurs sont dans les preuves et le journal ; trois rest
 Git (le coût intermédiaire de 4,23 ms à 344 064 mailles de S302, la courbe `1 ; 1,4 ; 6` de S308,
 dépassée par P7 de la même session, et l'indice de la bascule de S301, `n` = 215, maille
 (19, 10, 32)) — retrouvables par la commande ci-dessus.
+
+**P6.** Lecture à froid mesurée après la révision : **68 Ko** (AGENTS 10,3 ; REPRISE 12,8 ; dernière
+entrée 2,8 ; invariants 11,7 ; ADR-001 §2 3,4 ; feuille §3 bis 8,6 ; décisions de la file 3,3 ; dix
+lignes de porte 5,1 ; METHODE 10,3), contre 155 Ko avant.
