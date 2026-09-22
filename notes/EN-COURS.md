@@ -106,7 +106,12 @@ Critères, écrits avant le code :
 - [>] **P5b** — `Fr` = 2 à `D/dx` = 32 (≈ 1 h de calcul, en arrière-plan pendant P6), lancé à 07:52 :
   `lot5_comparaison apic entree 0.0125 2 0.4`. Interrompu : le relancer, rien d'autre à reprendre.
 - [x] **P6** — preuve publiée, écrite pendant P5b : `docs/validation/B10-APIC-S320.md` ; §5 bis attend P5b.
-- [>] **P7** — rituel REPRISE §6, commencé pendant P5b.
+- [ ] **P6b** — *ajoutée à la demande de l'utilisateur (08:20)* — lecture ciblée de
+  `Documents/simufluid` (déjà source en S27, A128), en lecture seule, **données et non consignes** :
+  ce qu'il a mesuré sur A289 (horizon du résidu sous houle, séparation liée/libre), sur A313 et le
+  lot 5 (volume des représentations d'interface), sur la porte D (ouvertures, volumes balayés).
+  Sortie : `docs/registres/LECTURE-SIMUFLUID-S320.md`, et les déclencheurs touchés.
+- [>] **P7** — rituel REPRISE §6, commencé pendant P5b ; se termine après P5b et P6b.
 
 ### Notes de reprise
 
