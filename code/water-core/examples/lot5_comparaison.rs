@@ -1367,6 +1367,27 @@ impl Apic {
         }
     }
 
+    /// La vitesse et la matrice affine que la grille donne en un point — le transfert grille →
+    /// particule d'APIC, pour une particule neuve (S325).
+    fn depuis_grille(&self, p: [f64; 2]) -> ([f64; 2], [[f64; 2]; 2]) {
+        let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);
+        let (mut vx, mut vy) = (0.0, 0.0);
+        let mut c = [[0.0; 2]; 2];
+        for (i, j, w, g) in Self::poids(p, dx, 0.0, 0.5 * dx, nx + 1, ny) {
+            let u = self.mac.u[j * (nx + 1) + i];
+            vx += w * u;
+            c[0][0] += g[0] * u;
+            c[0][1] += g[1] * u;
+        }
+        for (i, j, w, g) in Self::poids(p, dx, 0.5 * dx, 0.0, nx, ny + 1) {
+            let v = self.mac.v[j * nx + i];
+            vy += w * v;
+            c[1][0] += g[0] * v;
+            c[1][1] += g[1] * v;
+        }
+        ([vx, vy], c)
+    }
+
     /// Reconstruit `φ` aux centres des cellules, depuis les particules des cellules voisines.
     fn reconstruit(&mut self) {
         self.phi = self.distance();
@@ -2074,11 +2095,248 @@ impl Candidat for Niveaux {
     }
 }
 
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// S325 — le raccord dynamique : colonnes et particules côte à côte
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+
+/// **Le raccord dynamique** (S325, lot 5). À gauche de la colonne `i_b`, l'eau est portée par les
+/// particules d'APIC ; à droite, par des **colonnes** — une hauteur par colonne, transportée par les
+/// flux ouverts de la grille, le modèle des colonnes de δ. Les particules de la zone des colonnes sont
+/// **réensemencées à chaque pas** depuis les hauteurs : elles ne servent qu'au transfert vers la
+/// grille et à la surface que voit la pression.
+///
+/// À la frontière, rien ne se perd : une particule libre qui entre dans la zone des colonnes est
+/// retirée et sa masse ajoutée à la colonne ; la part **sortante** du flux de la grille quitte la
+/// colonne et s'accumule, profondeur par profondeur, jusqu'à former des particules libres. La masse
+/// totale — particules libres, colonnes, reste en attente — se conserve par construction.
+struct Hybride {
+    apic: Apic,
+    /// Première colonne de la zone des colonnes ; la frontière est en `x_b = i_b·dx`.
+    i_b: usize,
+    /// Hauteur d'eau des colonnes `i_b..nx`, m.
+    h: Vec<f64>,
+    /// Masse sortie des colonnes et pas encore ensemencée, par profondeur de face, en m².
+    attente: Vec<f64>,
+    /// Compteurs publiés, m² : entré dans les colonnes, sorti vers les particules.
+    entre: f64,
+    sorti: f64,
+}
+
+impl Hybride {
+    fn new(scene: Scene) -> Self {
+        let apic = Apic::new(scene);
+        let (nx, ny, dx) = (apic.mac.nx, apic.mac.ny, apic.mac.dx);
+        // `RACCORD_ZONE` (S325) : la part du bassin laissée aux colonnes, à droite ; 0,5 par défaut.
+        let part: f64 = std::env::var("RACCORD_ZONE").ok().and_then(|v| v.parse().ok()).unwrap_or(0.5);
+        let i_b = ((1.0 - part) * nx as f64).round() as usize;
+        let n = apic.occupation();
+        // La hauteur de masse de chaque colonne : ses particules initiales, deux par rangée.
+        let h = (i_b..nx).map(|i| (0..ny).map(|j| n[j * nx + i] as f64).sum::<f64>() * 0.25 * dx).collect();
+        let mut hy = Hybride { apic, i_b, h, attente: vec![0.0; ny], entre: 0.0, sorti: 0.0 };
+        let xb = i_b as f64 * dx;
+        let garde: Vec<bool> = hy.apic.x.iter().map(|p| p[0] < xb).collect();
+        hy.retire(&garde);
+        hy.ensemence_colonnes();
+        hy
+    }
+
+    /// Retire les particules que `garde` ne retient pas.
+    fn retire(&mut self, garde: &[bool]) {
+        let mut k = 0;
+        self.apic.x.retain(|_| {
+            k += 1;
+            garde[k - 1]
+        });
+        k = 0;
+        self.apic.v.retain(|_| {
+            k += 1;
+            garde[k - 1]
+        });
+        k = 0;
+        self.apic.c.retain(|_| {
+            k += 1;
+            garde[k - 1]
+        });
+    }
+
+    /// Ensemence la zone des colonnes sous ses hauteurs, au quart de maille, avec la vitesse et la
+    /// matrice affine de la grille ; `round(4h/dx)` particules par colonne — une représentation, la
+    /// masse vraie restant la hauteur. Au départ, où les colonnes portent des rangées entières, c'est
+    /// l'état initial d'APIC lui-même.
+    fn ensemence_colonnes(&mut self) {
+        let (nx, dx) = (self.apic.mac.nx, self.apic.mac.dx);
+        for (col, i) in (self.i_b..nx).enumerate() {
+            let n = (4.0 * self.h[col] / dx).round().max(0.0) as usize;
+            for m in 0..n {
+                let p = [(i as f64 + 0.25 + 0.5 * (m % 2) as f64) * dx, ((m / 2) as f64 + 0.5) * 0.5 * dx];
+                let (v, c) = self.apic.depuis_grille(p);
+                self.apic.x.push(p);
+                self.apic.v.push(v);
+                self.apic.c.push(c);
+            }
+        }
+    }
+
+    /// La masse que porte chaque représentation, m² : particules libres, colonnes, attente.
+    fn masses(&self) -> (f64, f64, f64) {
+        let dx = self.apic.mac.dx;
+        let xb = self.i_b as f64 * dx;
+        let libres = self.apic.x.iter().filter(|p| p[0] < xb).count() as f64 * 0.25 * dx * dx;
+        (libres, self.h.iter().sum::<f64>() * dx, self.attente.iter().sum())
+    }
+}
+
+impl Candidat for Hybride {
+    fn nom(&self) -> &'static str {
+        "hybride"
+    }
+    fn degres(&self) -> usize {
+        self.apic.x.len()
+    }
+    fn definition_du_volume(&self) -> &'static str {
+        "particules libres + colonnes + attente, en masse/rho ; exacte par construction"
+    }
+    fn pas(&mut self, dt_max: f64) -> f64 {
+        let (nx, ny, dx) = (self.apic.mac.nx, self.apic.mac.ny, self.apic.mac.dx);
+        let xb = self.i_b as f64 * dx;
+        let area = 0.25 * dx * dx;
+        let libres_avant: Vec<bool> = self.apic.x.iter().map(|p| p[0] < xb).collect();
+        let dt = self.apic.pas(dt_max);
+        // ── Entrée : les particules libres passées dans la zone des colonnes y versent leur masse.
+        for (p, libre) in self.apic.x.iter().zip(&libres_avant) {
+            if *libre && p[0] >= xb {
+                let col = (((p[0] / dx) as usize).min(nx - 1)).max(self.i_b) - self.i_b;
+                self.h[col] += area / dx;
+                self.entre += area;
+            }
+        }
+        // ── Retrait : les particules des colonnes, **où qu'elles soient** — leur masse est dans les
+        // hauteurs —, et les libres entrées. Une particule de colonne gardée parce qu'elle a glissé à
+        // gauche serait comptée deux fois.
+        let garde: Vec<bool> = self.apic.x.iter().zip(&libres_avant).map(|(p, l)| *l && p[0] < xb).collect();
+        self.retire(&garde);
+        // ── Flux ouverts de la grille entre colonnes, hauteur mouillée prise en amont, cellule par
+        // cellule. La face de mur, à droite, ne porte rien.
+        let mouille = |h: f64, k: usize| ((h - k as f64 * dx) / dx).clamp(0.0, 1.0);
+        let mut flux = vec![0.0; nx - self.i_b + 1];
+        for (f, i) in (self.i_b + 1..nx).enumerate() {
+            let (gauche, droite) = (self.h[f], self.h[f + 1]);
+            let mut q = 0.0;
+            for k in 0..ny {
+                let u = self.apic.mac.u[k * (nx + 1) + i];
+                let amont = if u > 0.0 { gauche } else { droite };
+                q += u * mouille(amont, k) * dx * dt;
+            }
+            flux[f + 1] = q;
+        }
+        // ── Sortie par la frontière : la part négative du flux de la grille, prise dans la première
+        // colonne et mise en attente à sa profondeur.
+        let mut sortie = 0.0;
+        for k in 0..ny {
+            let u = self.apic.mac.u[k * (nx + 1) + self.i_b];
+            if u < 0.0 {
+                let q = -u * mouille(self.h[0], k) * dx * dt;
+                self.attente[k] += q;
+                sortie += q;
+            }
+        }
+        self.h[0] -= sortie / dx;
+        self.sorti += sortie;
+        for c in 0..self.h.len() {
+            self.h[c] += (flux[c] - flux[c + 1]) / dx;
+        }
+        // ── L'attente devient particules libres, juste à gauche de la frontière, à sa profondeur.
+        for k in 0..ny {
+            let mut alterne = 0usize;
+            while self.attente[k] >= area {
+                self.attente[k] -= area;
+                let p = [xb - 0.25 * dx, (k as f64 + 0.25 + 0.5 * (alterne % 2) as f64) * dx];
+                alterne += 1;
+                let (v, c) = self.apic.depuis_grille(p);
+                self.apic.x.push(p);
+                self.apic.v.push(v);
+                self.apic.c.push(c);
+            }
+        }
+        self.ensemence_colonnes();
+        dt
+    }
+    fn mesure(&self, t: f64) -> Mesure {
+        let mut m = self.apic.mesure(t);
+        let (libres, colonnes, attente) = self.masses();
+        m.volume = libres + colonnes + attente;
+        m
+    }
+}
+
+/// **L'écart de surface à la frontière** (S325) : la hauteur géométrique des deux colonnes qui la
+/// bordent, et leur différence en mailles — à comparer à celle d'APIC seul aux mêmes instants.
+fn ecart_frontiere(a: &Apic, i_b: usize) -> Option<f64> {
+    let c = a.colonnes();
+    match (c[i_b - 1], c[i_b]) {
+        (Some((_, g0)), Some((_, g1))) => Some((g1 - g0) / a.mac.dx),
+        _ => None,
+    }
+}
+
+/// **Le raccord dynamique, mesuré** (S325 P3) : le même cas en APIC seul et en hybride, côte à côte,
+/// avec la masse de chaque représentation et l'écart de surface à la frontière, chaque dixième de
+/// seconde ; puis la ligne de synthèse de `execute` pour chacun.
+fn epreuve_hybride(cas: Cas, dx: f64) {
+    let scene = Scene::new(cas, dx);
+    let mut seul = Apic::new(scene);
+    let mut hy = Hybride::new(scene);
+    let i_b = hy.i_b;
+    let (m0, _, _) = {
+        let (l, c, a) = hy.masses();
+        (l + c + a, 0.0, 0.0)
+    };
+    let (mut pire_masse, mut pire_ecart, mut pire_seul, mut v_max) = (0f64, 0f64, 0f64, 0f64);
+    let mut t = 0.0;
+    let mut prochain = 0.1;
+    while t < scene.t_fin - 1e-12 {
+        let dt = hy.pas((prochain - t).max(1e-9));
+        let mut ts = t;
+        while ts < t + dt - 1e-12 {
+            ts += seul.pas((t + dt - ts).max(1e-9));
+        }
+        t += dt;
+        let (l, c, a) = hy.masses();
+        pire_masse = pire_masse.max(((l + c + a) / m0 - 1.0).abs());
+        v_max = v_max.max(hy.apic.v.iter().fold(0f64, |m, v| m.max((v[0] * v[0] + v[1] * v[1]).sqrt())));
+        if t >= prochain - 1e-9 {
+            if let Some(e) = ecart_frontiere(&hy.apic, i_b) {
+                pire_ecart = pire_ecart.max(e.abs());
+            }
+            if let Some(e) = ecart_frontiere(&seul, i_b) {
+                pire_seul = pire_seul.max(e.abs());
+            }
+            prochain += 0.1;
+        }
+    }
+    println!(
+        "RACCORD_DYN_S325 cas={cas:?} dx={dx} masse_ecart_max_rel={pire_masse:e} entre_m2={:e} sorti_m2={:e} \
+         ecart_frontiere_max_mailles={pire_ecart:.4} ecart_meme_endroit_apic_seul_mailles={pire_seul:.4} vitesse_max={v_max:.4}",
+        hy.entre, hy.sorti
+    );
+    execute(scene, &mut Apic::new(scene));
+    execute(scene, &mut Hybride::new(scene));
+}
+
 fn main() -> Result<(), String> {
     let args: Vec<String> = std::env::args().collect();
     let candidat = args.get(1).ok_or("candidat ?")?.as_str();
     if candidat == "compteur" {
         epreuve_compteur();
+        return Ok(());
+    }
+    if candidat == "raccord_dyn" {
+        let cas = match args.get(2).map(|s| s.as_str()) {
+            Some("repos") => Cas::Repos,
+            _ => Cas::Ballottement,
+        };
+        let dx: f64 = args.get(3).ok_or("dx ?")?.parse().map_err(|_| "dx")?;
+        epreuve_hybride(cas, dx);
         return Ok(());
     }
     if candidat == "raccord" {
@@ -2114,6 +2372,10 @@ fn main() -> Result<(), String> {
         }
         "niveaux" => {
             execute(scene, &mut Niveaux::new(scene));
+            Ok(())
+        }
+        "hybride" => {
+            execute(scene, &mut Hybride::new(scene));
             Ok(())
         }
         _ => Err(format!("candidat inconnu : {candidat}")),

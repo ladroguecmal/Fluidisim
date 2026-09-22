@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-23 01:25 +02:00
+Battement        : 2026-09-23 01:30 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S325 — lot 5, le raccord dynamique : colonnes et particules côte à côte, échanges comptés à la frontière
 Dernière session : S324 — **lot 3** (ADR-188, décision de l'utilisateur) : le fond coupé entre dans la référence 3D — identique au bit à la 2D sans `y`, **ordre 1,956** sur une bosse 3D ; mais 16 029 itérations à 128, les petites cellules sans préconditionneur (A315) ([preuve](docs/validation/FACES-COUPEES-3D-S324.md))

@@ -91,13 +91,24 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le candidat hybride dans le banc : colonnes à droite, particules à gauche, échanges
+- [x] **P2** — le candidat hybride dans le banc : colonnes à droite, particules à gauche, échanges
   à la frontière.
-- [ ] **P3** — repos et ballottement, deux mailles : masse, période, écart à la frontière.
-- [ ] **P4** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
+- [x] **P3** — repos et ballottement, deux mailles : masse, période, écart à la frontière.
+- [>] **P4** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; file, liste 4.20 si la mesure le permet.
 - [ ] **P5** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
 
+**P2 + P3 (01:30), fusion déclarée.** Candidat `hybride` et mode `raccord_dyn`. Défaut corrigé avant la
+première mesure : une particule de colonne qui glisse à gauche aurait été gardée et comptée deux fois —
+toutes les particules de colonne sont retirées après chaque pas. **Masse exacte** partout (≤ 1,3·10⁻¹⁵).
+*Repos 5 cm* : écart à la frontière 0,002 maille ; vitesse max **1,4 cm/s** (APIC seul 4,4 mm/s) —
+critère 2 manqué ; fuite à sens unique de 4,8·10⁻⁴ m² en 10 s. *Ballottement* : échanges dans les deux
+sens (0,155 entré, 0,154 sorti à 5 cm) ; **écart à la frontière 1,81 et 2,85 mailles** (APIC seul 0,14 et
+0,17) ; amortissement **16 % puis 5 % par période** (APIC 0,4 et 0,3 %) ; période +7,6 % zéros /
++5,2 % périodogramme à 5 cm, +2,4 / +0,14 % à 2,5 cm ; vitesses parasites 0,6 et 0,9 m/s. Critère 3
+manqué. **Hypothèse du lissage grille → réseau → grille, contredite** : l'amortissement ne suit pas la
+taille de la zone — 16 % (frontière à L/2), 0,9 % (3L/4), 10 % (7L/8). Cause non attribuée ; suspects :
+l'insertion des particules sortantes, la quantification de l'ensemencement, la frontière au nœud du mode.
