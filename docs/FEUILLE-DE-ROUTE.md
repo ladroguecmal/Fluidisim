@@ -255,7 +255,9 @@ perfectionnement visuel ne s'ouvre avant que la physique le demande. Le profil d
 **en parallèle** du lot 2, par sessions alternées ; la v1 reste la porte D. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**
 par l'utilisateur ([ADR-186](adr/ADR-186-apic-seconde-representation.md)) ; **S320** : B10 sur APIC,
-une cavité se pince au même instant à toute échelle ([S320](validation/B10-APIC-S320.md)).
+une cavité se pince au même instant à toute échelle ([S320](validation/B10-APIC-S320.md)) ; **S323** :
+une région passe des particules aux colonnes et retour à masse exacte, la surface sautant de la
+différence des biais de reconstruction (A314, [§10](validation/B10-APIC-S320.md)).
 
 ### La v1 — tranchée par l'utilisateur le 2026-09-19 (ADR-174 D4)
 

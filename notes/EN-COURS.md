@@ -98,9 +98,9 @@ Critères, écrits avant le code :
 - [x] **P2** — le compteur, et son épreuve sur des distances exactes (plan, disque, trois mailles).
 - [x] **P3** — le compteur sur repos, ballottement, corps lent avec et sans séparation, B10 à `Fr` = 2.
 - [x] **P4** — les deux primitives, et l'aller-retour sur un état réel.
-- [>] **P5** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
+- [x] **P5** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; A313, file, liste 4.16 et 4.20 si la mesure le permet.
-- [ ] **P6** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
+- [>] **P6** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -137,3 +137,5 @@ puis +0,02 en neuf tours. **Critère 3 : masse tenue, géométrie non** (0,2 mai
 réensemencer en réseau régulier change le biais de reconstruction. On ne peut conserver que l'un des
 deux ; la masse l'est, la surface saute de la différence des biais. Remède à chercher : une
 reconstruction dont le biais ne dépend pas de l'arrangement.
+
+**P5.** Liste : 4.16 et 4.20 **inchangés** — la conversion est statique, aucun raccord ne tourne encore.

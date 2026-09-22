@@ -4227,3 +4227,21 @@ voie « dispersion d'amplitude dans B » ne soigne pas la cause.
 le taux de croissance vaut 0,1015, 0,1012, 0,1009 et 0,1007 s⁻¹ à 20, 10, 5 et 2,5 ms — 0,8 % sur un
 facteur huit ([preuve](../validation/MER-S319.md) §8). **Ce n'est pas un défaut d'intégration du pas
 couplé.** Le mécanisme reste à nommer ; les trois voies restent ouvertes, au choix de l'utilisateur.
+
+**A313 — note datée du 2026-09-22 (S323) : résolu pour la mesure.** Le compteur existe — aire sous la
+surface reconstruite par carrés marchants, exacte sur un plan, d'ordre deux sur un disque — et il
+mesure le tassement : −1,24 % au corps lent sans séparation, −12,2 % en B10, ±0,3 % avec séparation
+([preuve](../validation/B10-APIC-S320.md) §10). Au repos, le volume géométrique est sous la masse de
+0,146 maille par longueur de surface — un biais de reconstruction, vers lequel un écoulement se relaxe.
+L'hypothèse de la loi de conservation géométrique n'est pas éprouvée : la séparation contient le
+tassement, elle ne dit pas sa cause. Ce qui reste ouvert passe à A314.
+
+**A314 — S323, 2026-09-22 (sévérité 2, ouverte). La surface d'APIC dépend de l'arrangement de ses
+particules.** À masse égale, deux arrangements n'ont pas le même volume géométrique : le biais de
+reconstruction change. Une conversion particules → colonnes → particules **à masse exacte** fait donc
+sauter la surface de la différence des biais — **+0,07 à +0,17 maille** en moyenne, jusqu'à 0,35 par
+colonne ([preuve](../validation/B10-APIC-S320.md) §10) ; à 25 cm de maille, 2 à 4 cm. **Conséquence** :
+chaque passage d'une région d'une représentation à l'autre se verra. **Déclencheur** : le raccord
+dynamique, ou toute conversion dans une scène rendue. Remède à chercher : une reconstruction dont le
+biais ne dépende pas de l'arrangement — rayon calé sur l'espacement local, ou surface portée par un
+ensemble de niveaux conservatif advecté avec les particules.

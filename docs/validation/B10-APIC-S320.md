@@ -15,6 +15,11 @@ quand la maille est divisée par deux** ; la masse est exacte et l'air enfermé 
 et le **jet**, eux, changent de 40 à 60 % quand la maille est divisée par deux : sans tension de
 surface, c'est la maille qui les arrête.
 
+**État présent du fil (S323, §10).** Le volume géométrique d'APIC a désormais un compteur, exact sur un
+plan et d'ordre deux ; il mesure le tassement — −12 % en B10 sans séparation, ±0,3 % avec. Une région
+passe des particules aux colonnes et retour **à masse exacte** ; sa surface saute alors de 0,07 à 0,17
+maille en moyenne, la différence des biais de reconstruction entre deux arrangements.
+
 ---
 
 ## 1. Le banc
@@ -208,3 +213,86 @@ la fonction hauteur ne peut pas porter.
 - **Une phase d'air**, ou au moins une pression de bulle, si la vie de la bulle doit compter ; ce
   n'est pas décidé ici.
 - **C20 en trois dimensions**, quand la seconde représentation y sera.
+
+---
+
+## 10. S323 — le volume géométrique, et les deux gestes du raccord
+
+2026-09-22. **Lot 5, première session du raccord** particules ↔ colonnes
+([ADR-186](../adr/ADR-186-apic-seconde-representation.md) §3). A313 exigeait d'abord un compteur de
+volume géométrique : c'est le **volume**, pas la masse, qui doit se conserver le jour où l'eau passe
+d'une représentation à l'autre.
+
+### Reproduire
+
+- Commit `4800bddd` ou plus récent ; machine de référence, CPU, un fil. Banc
+  `cargo run -p water-core --release --offline --example lot5_comparaison -- <arguments>` :
+  - `compteur` — l'épreuve du compteur sur des distances exactes (moins d'une seconde) ;
+  - `apic repos 0.05`, `apic ballottement 0.05`, `apic ballottement 0.025`, `apic corps_lent 0.05`,
+    `apic entree 0.05 2 0.4`, chacun aussi avec `LOT5_SANS_SEPARATION=1` — la ligne `LOT5_S323
+    volume_geo` ; `LOT5_SERIE=1` publie la série, volume géométrique en dernière colonne ;
+  - `raccord 0.05`, `raccord 0.025`, `raccord 0.05 b10` — les allers-retours, lignes `RACCORD_S323`.
+- Sans ces options, le banc est celui de S320 : période du ballottement +5,59 % à 5 cm, pincement à
+  2,20 `√(D/g)`.
+- Durées : 2 à 45 s par essai.
+
+### Le compteur
+
+Aire où `φ < 0`, `φ` la surface reconstruite des particules, par **carrés marchants** sur la grille des
+centres : l'iso-zéro linéaire entre deux centres est **l'interface même que voit le fluide fantôme**.
+Fantômes miroirs au-delà des parois ; le corps compte comme de l'air ; l'air enfermé, sans
+particule, s'exclut seul. Épreuve sur des distances exactes : **plan exact à 2·10⁻¹⁴** (trois hauteurs,
+deux mailles), **disque d'ordre deux** (rapports 3,96 ; 3,98 ; 4,03 de 5 à 0,625 cm).
+
+### Ce qu'il mesure — `V_geo / V_masse − 1`
+
+| essai (5 cm sauf mention) | départ | fin | commentaire |
+|---|---:|---:|---|
+| repos, 10 s | −1,466 % | −1,467 % | **le biais de reconstruction** : −0,146 maille par longueur de surface |
+| ballottement, 10 s | −0,64 % | −1,49 % | **relaxé** vers ce biais en 7 s, puis stable ; séparation sans effet |
+| ballottement, 2,5 cm | −0,32 % | −0,71 % | biais générique −0,73 % |
+| corps lent, avec séparation | −0,32 % | −0,54 % | montée : masse 92 %, géométrie 99 % (§2) |
+| corps lent, **sans** séparation | −0,32 % | **−1,56 %** | le tassement, lu au compteur |
+| B10, `Fr` = 2, avec séparation | −0,19 % | −0,44 % | extrêmes −0,47 et −0,15 % à travers cavité et pincement |
+| B10, `Fr` = 2, **sans** séparation | −0,19 % | **−12,2 %** | la séparation est indispensable |
+
+**Le volume géométrique ne dérive pas** : il porte un biais de reconstruction, proportionnel à la maille
+et à la longueur de surface, vers lequel il se relaxe. Ce qui en change vraiment, c'est le tassement
+contre un corps — et la séparation de S320 le contient à ±0,3 %.
+
+### Les deux gestes du raccord
+
+*Particules → colonnes* : une colonne est convertible si la surface reconstruite y forme **un seul
+segment d'eau posé sur le fond** ; sinon — plusieurs couches, cavité, corps — elle reste aux
+particules. *Colonnes → particules* : ensemencer sous la hauteur au quart de maille, le reste de chaque
+colonne reporté à la suivante.
+
+Allers-retours sur des **états réels**, dix de suite. Critère écrit avant : masse totale à une particule
+près, hauteur géométrique par colonne à 0,2 maille près.
+
+| voie | état | masse | écart géométrique, 1ᵉʳ tour : moyen / max | dix tours |
+|---|---|---:|---:|---|
+| masse | ballottement, 5 cm | exacte | +0,12 / **3,96** mailles | point fixe |
+| géométrie | ballottement, 5 cm | **−14 particules** | −0,02 / 0,20 | −27 particules |
+| **mixte** | ballottement, 5 cm | exacte | +0,07 / 0,23 | point fixe en quatre tours |
+| **mixte** | ballottement, 2,5 cm | exacte | +0,10 / 0,28 | ±0,005 par tour |
+| **mixte** | B10 au pincement, 58 colonnes sur 64 | exacte | +0,17 / 0,35 | +0,02 en neuf tours |
+
+**La masse par colonne n'est pas une hauteur.** Après une seconde de ballottement, les particules se
+regroupent en `x` : la hauteur de masse va de 0,35 à 0,71 m d'une colonne à l'autre quand la surface
+reste entre 0,47 et 0,53 m. D'où la **voie mixte**, déclarée avant sa mesure : la forme par la
+géométrie, le niveau par la masse — un décalage uniforme qui rend exacte la masse des colonnes
+converties.
+
+### Verdict
+
+**Critère 3 : la masse tient, la géométrie non** — 0,2 maille manqué de 0,03 à 0,15. Et ce n'est pas un
+réglage : **le volume géométrique d'une masse donnée dépend de l'arrangement de ses particules.**
+Réensemencer en réseau régulier change le biais de reconstruction ; on ne peut conserver que l'un des
+deux, et la masse l'est. La surface saute alors de la différence des biais — 0,07 à 0,17 maille en
+moyenne, soit à la maille de 25 cm d'une scène de jeu, 2 à 4 cm.
+
+**Ce qui devient possible** : faire passer une région d'eau d'une représentation à l'autre à masse
+exacte, en laissant aux particules ce que les colonnes ne portent pas. **Ce qui manque** : le raccord
+**dynamique** — une région en colonnes qui évolue à côté d'une région en particules —, et une
+reconstruction dont le biais ne dépende pas de l'arrangement, sans quoi chaque conversion se verra.
