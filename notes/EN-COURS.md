@@ -62,74 +62,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S324 — **terminée** (2026-09-23 01:22, P7 reportée). **Lot 3, premier lot : les faces coupées de δ en trois dimensions**
-— la moitié basse d'I3 ([TROIS-SYSTEMES-S308](../docs/registres/TROIS-SYSTEMES-S308.md) §5), sur le
-chemin de la porte D, donc de la v1.
+Session : S325 — **en cours**. **Lot 5, le raccord dynamique** — une région en colonnes qui évolue à
+côté d'une région en particules, alternance d'[ADR-188](../docs/adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Je suis ta recommandation »* (2026-09-22) — **le lot 3 prend la place du lot 2 dans
-l'alternance d'ADR-184 tant que l'ordre E est bloqué** ; à consigner en ADR-188. Maillons à 3 : la
-session doit recevoir une capacité.
+Entrée : *« Continue »*, après S324 ; suite déclarée : le raccord dynamique.
 
-**Ce que la session doit rendre possible.** Un fond qui n'est pas plat dans la référence 3D : la
-découpe de S232 — fractions de volume et ouvertures de faces sur un fond **linéaire par morceaux**
-— portée à la grille x-y-z, dans l'opérateur, la divergence et la correction du mode linéaire. C'est
-la géométrie sur laquelle reposeront obstacles fixes, puis corps. Consommateur : le lot 4 (corps
-rigides), la porte D, et le point 4.15 de la liste.
+**Ce que la session doit rendre possible.** La première eau qui vit **à la fois** en colonnes et en
+particules, et passe de l'une à l'autre en cours de simulation — le geste qui fera consommer APIC par
+δ, et le point 4.20 (changement de représentation en cours de simulation). Consommateur : le raccord
+en 3D, puis la porte D et C20.
 
-**La géométrie.** Fond fourni au centre des colonnes, ramené aux coins par moyennes emboîtées ;
-chaque empreinte de colonne coupée en deux triangles par une diagonale fixe, le fond **linéaire sur
-chacun** : toutes les intégrales sont alors exactes — ouverture d'une face latérale par la formule 1D
-de S232 le long de son arête, ouverture d'une face horizontale par l'aire où le fond est dessous,
-fraction de volume par l'intégrale exacte de `clamp((haut − fond)/dx)` sur chaque triangle. Quand le
-fond ne dépend pas de `y`, **les formules de la 2D elles-mêmes**, pour garder l'identité au bit.
+**Le montage, le plus petit qui soit dynamique.** Dans le banc APIC 2D, la moitié droite du bassin
+est portée par des **colonnes** : une hauteur par colonne, transportée par les flux ouverts de la
+grille — le modèle des colonnes de δ. Ses particules sont **réensemencées à chaque pas** depuis ces
+hauteurs : elles ne servent qu'au transfert vers la grille et à la surface que voit la pression. À
+la frontière : une particule libre qui entre dans la zone des colonnes est retirée et sa masse ajoutée
+à la colonne ; la part sortante du flux de la grille est ensemencée en particules libres, le reste
+reporté. La masse totale est la masse des particules libres plus celle des colonnes.
 
 Critères, écrits avant le code :
-1. **Géométrie** : fond indépendant de `y` → ouvertures et fractions identiques **au bit** à la 2D ;
-   fond plan `αx + βy + γ` → fractions exactes à l'arrondi f32 contre une forme fermée indépendante ;
-   `Σ_k fraction·dx` = profondeur moyenne de l'empreinte à 10⁻⁶ près ; aucun coin étroit perdu.
-2. **Opérateur** : fond plat → toutes les réceptions 3D antérieures **au bit** ; lac au repos sur fond
-   coupé → vitesse **nulle en bits** ; `ny` = 1 sur les trois fonds de S232 → vitesses du premier pas
-   identiques au bit à la 2D.
-3. **Fond vraiment 3D** : débit à travers `x = L/2`, un pas depuis le repos, à trois mailles → ordre
-   **≥ 1,8**, incréments de même signe et décroissants (garde de S197), comme S232 en 2D.
-4. Aucune allocation dans le pas ; coût publié ; rien du mode mobile ni du couplage touché.
+1. **Masse** : particules libres + colonnes conservées à 10⁻¹⁰ près en relatif, par construction.
+2. **Repos**, 5 s : vitesse maximale sous 1 cm/s (APIC seul : 4,4 mm/s) ; écart de surface à la
+   frontière sous 0,2 maille.
+3. **Ballottement**, 10 s, 5 et 2,5 cm : période à 1 % de celle d'APIC seul à la même maille ; écart
+   de surface à la frontière sous 0,5 maille ; aucune divergence.
+4. Rien dans le cœur ; APIC seul inchangé au bit.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-188 : la décision de l'utilisateur ; file, feuille de route.
-- [x] **P3** — la géométrie coupée 3D et ses essais (critère 1).
-- [x] **P4** — l'opérateur, la divergence et la correction pondérés ; `configure_with_bottom` ; essais du
-  critère 2.
-- [x] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
-- [x] **P6** — preuve `docs/validation/FACES-COUPEES-3D-S324.md`, avec « Reproduire » ; file, liste 4.15,
-  feuille de route.
-- [ ] **P7** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone. **Reportée** : encore
-  en calcul à 01:22, cinq heures après son lancement ; le point daté de la file la porte.
-- [x] **P8** — rituel.
+- [ ] **P2** — le candidat hybride dans le banc : colonnes à droite, particules à gauche, échanges
+  à la frontière.
+- [ ] **P3** — repos et ballottement, deux mailles : masse, période, écart à la frontière.
+- [ ] **P4** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
+  « Reproduire » ; file, liste 4.20 si la mesure le permet.
+- [ ] **P5** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
 
-**P3 (22:04).** `delta3d_cut.rs` : coins par moyennes emboîtées, **quatre triangles** autour du centre
-(symétrique en `x` et `y`), intégrales exactes ; les formules 2D (`cut_fraction`, `open_below`, sortie
-de `cut` sans changer une opération) servent quand l'empreinte ne dépend pas de `y`. Cinq essais verts
-au premier passage : identité **au bit** avec la 2D sur les trois fonds de S232 ; plan exact à 2·10⁻⁶ ;
-colonnes à 2·10⁻⁶ ; coin étroit contre quadrature ; symétrie miroir à 10⁻⁶. Les 67 essais δ 2D passent.
-
-**P4 (01:06, le 23).** Chemin coupé séparé du chemin plat (`cut: Option<Cut3>`, `None` = S295 au bit) :
-opérateur, divergence, second membre, erreur inverse, correction et flux de colonne pondérés comme la
-2D ; couvercle entièrement mouillé exigé ; pas mobile et couplé refusent la découpe. Six essais verts :
-`ny` = 1 sur les trois fonds de S232 **identique au bit à la 2D sur 200 pas** (surface, `u`, `w`,
-itérations) ; lac au repos exact ; opérateur symétrique défini positif ; divergence ouverte tenue ;
-faces fermées sans vitesse ; refus du pas mobile. Suite : **589 réussis**, 0 échec. Heurt : le long bloc
-de texte passé au shell ne s'analysait plus (`unexpected EOF`) — passer par un fichier. Pause de
-l'utilisateur entre 22:05 et 01:03.
-
-**P5 (01:20).** `delta3d_fond_coupe` : débit ouvert à `x = L/2`, un pas depuis le repos. **Témoin** (fond
-lisse de S232, invariant en `y`, en vraie 3D) : débit par largeur égal à S232 à ≤ 1,4·10⁻⁶ près, ordre
-1,951, mêmes 347 itérations à 128. **Bosse 3D** : 9,1446 / 9,1692 / 9,1755·10⁻⁴ m³/s, **ordre 1,956**,
-Richardson 0,024 % — critère 3 tenu. **Mais** à 128 : **16 029 itérations, 708 s** pour un pas, contre 347
-et 4 s sans la bosse ; divergence atteinte à 1,000·10⁻⁵ exactement — la cible resserrée d'ADR-144 ne
-se referme que lentement dans les petites cellules (fractions jusqu'à 10⁻⁹, ouvertures 10⁻⁶). Le fond
-invariant a aussi des coins à 7·10⁻⁶ et converge : ce n'est pas la seule petitesse. Remède à éprouver :
-Jacobi sur le chemin coupé, comme le mode mobile 3D (A315).
