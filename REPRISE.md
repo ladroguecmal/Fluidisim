@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-22 20:19 +02:00
+JETON            : libre
+Battement        : 2026-09-22 20:25 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web) — reprise à chaud de S320 à 20:11
-Session en cours : S320 — lot 5 : B10 sur APIC, un objet cinématique entre dans l'eau
-Dernière session : S319 — **ordre E, premier échelon** : sous une houle B seule, δ **croît** jusqu'à trois fois l'amplitude de la mer en deux minutes, presque indépendamment de la maille ; la restitution de S317 reçoit des centaines de fois un paquet ; A289 bloque l'ordre E ([preuve](docs/validation/MER-S319.md)) ; **APIC retenue** ([ADR-186](docs/adr/ADR-186-apic-seconde-representation.md))
-Session suivante : **S320, lot 5 — B10 sur APIC** : un objet cinématique entre dans l'eau, couronne, cavité, pincement, jet, volume rendu (ADR-186 §3) ; la voie d'A289, proposée à l'utilisateur, ouvrira la suite de l'ordre E
-Maillons        : 2 — S318 préparait un choix, S319 a trouvé un défaut bloquant ; aucun des deux n'est une capacité reçue. À deux maillons : un lot qui fait avancer une capacité — B10 sur APIC
+Session en cours : aucune
+Dernière session : S320 — **lot 5, B10 sur APIC** : une cavité d'air derrière un corps se pince à 2,2–2,5 `√(D/g)`, indépendamment de l'échelle à 4·10⁻⁴ près, temps convergé à 5 % ; couronne et jet suivent la maille (A312) ; la masse d'APIC est exacte, son volume géométrique non (L370, A313) ([preuve](docs/validation/B10-APIC-S320.md)) ; §5 bis en calcul, versé par S321
+Session suivante : **S321, demande de l'utilisateur** — analyse complète du code, des documents et de la méthode, et réorganisation des principes améliorables
+Maillons        : 0 — S320 : la cavité que la fonction hauteur ne peut pas porter existe sur la seconde représentation ; point 4.12 absent → partiel ; consommateur : le raccord particules ↔ colonnes
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

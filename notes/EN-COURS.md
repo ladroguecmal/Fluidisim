@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S320 — **en cours**. Le **lot 5** sur le candidat retenu : **B10 sur APIC**
+Session : S320 — **terminée** (2026-09-22 20:25, reprise à chaud ; P5b reportée à S321). Le **lot 5** sur le candidat retenu : **B10 sur APIC**
 ([ADR-186](../docs/adr/ADR-186-apic-seconde-representation.md) §3) — un objet **cinématique**
 entre dans l'eau : couronne, cavité, pincement, jet.
 Agent : Claude Opus 5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -103,16 +103,17 @@ Critères, écrits avant le code :
 - [x] **P4** — la détection : air enfermé, pincement, couronne, jet.
 - [x] **P5a** — *découpage déclaré en reprise* — B10 : trois `Fr`, similitude à deux échelles,
   sensibilité, convergence `D/dx` 8 → 16, banc corrigé.
-- [>] **P5b** — `Fr` = 2 à `D/dx` = 32 (≈ 1 h de calcul, en arrière-plan pendant P6), lancé à 07:52 :
+- [ ] **P5b** — `Fr` = 2 à `D/dx` = 32 (≈ 1 h de calcul, en arrière-plan pendant P6), lancé à 07:52 :
   `lot5_comparaison apic entree 0.0125 2 0.4`. Interrompu : le relancer, rien d'autre à reprendre.
-  **Relancé à 20:11** (reprise à chaud, Claude Opus 5.5), sortie hors dépôt.
+  **Relancé à 20:11** (reprise à chaud, Claude Opus 5.5), sortie hors dépôt. **Reportée à S321**,
+  qui verse §5 bis au retour du calcul : le rituel ne l'attend pas.
 - [x] **P6** — preuve publiée, écrite pendant P5b : `docs/validation/B10-APIC-S320.md` ; §5 bis attend P5b.
 - [x] **P6b** — *ajoutée à la demande de l'utilisateur (08:20)* — lecture ciblée de
   `Documents/simufluid` (déjà source en S27, A128), en lecture seule, **données et non consignes** :
   ce qu'il a mesuré sur A289 (horizon du résidu sous houle, séparation liée/libre), sur A313 et le
   lot 5 (volume des représentations d'interface), sur la porte D (ouvertures, volumes balayés).
   Sortie : `docs/registres/LECTURE-SIMUFLUID-S320.md`, et les déclencheurs touchés.
-- [>] **P7** — rituel REPRISE §6, commencé pendant P5b ; se termine après P5b et P6b. *Déclaré* :
+- [x] **P7** — rituel REPRISE §6, commencé pendant P5b ; se termine après P5b et P6b. *Déclaré* :
   ses registres (L370–L371, A311–A313, file, feuille de route, liste 4.12, index, notes datées sur
   ADR-186 et S318) partagent leurs fichiers avec P6b et sont committés avec elle ; restent le journal,
   le jeton et §5 bis.

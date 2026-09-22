@@ -142,7 +142,8 @@ millimétriques. Aucune maille de jeu ne résoudra cette échelle. **La couronne
 production seront donc des grandeurs de la maille, pas de la physique**, tant qu'aucun modèle
 sous-maille ne les prendra en charge.
 
-§ 5 bis — `D/dx` = 32, `Fr` = 2 : *en calcul (P5b).*
+§ 5 bis — `D/dx` = 32, `Fr` = 2 : *en calcul (P5b), interrompu à 08:30 par une coupure de session,
+relancé le 2026-09-22 à 20:11 ; versé ici par S321 à son retour.*
 
 ## 6. Le volume
 

@@ -16259,3 +16259,40 @@ bornée des domaines, dispersion d'amplitude dans B —, la dernière changeant 
 **Rituel.** Maillons **2** : un défaut trouvé n'est pas une capacité reçue. À deux maillons, la suite se
 prend dans un lot qui fait avancer une capacité : **B10 sur APIC** (S320), que l'alternance désignait déjà.
 Une leçon : L369. A289 relevée ; ADR-186.
+
+## S320 — 2026-09-21/22 — lot 5 : une cavité se pince au même instant à toute échelle, la gerbe suit la maille
+
+**Entrée.** *« Continue »*, après S319 ; l'alternance d'ADR-184 donnait B10 sur APIC.
+Coupée à 08:30 pendant le calcul de P5b ; **reprise à chaud à 20:11** (Claude Opus 5.5) : arbre propre, calcul relancé, rituel
+terminé sans attendre son résultat, que S321 versera.
+
+**Le corps dans APIC** ([preuve](../docs/validation/B10-APIC-S320.md) §2). Un cylindre **cinématique** —
+aucun corps rigide n'existe (ADR-184 D3) — : cellules solides, faces à sa vitesse, particules repoussées.
+Au repos il ne crée pas d'écoulement ; enfoncé lentement, il ne soulevait l'eau que de **39 %** de son
+volume : **la masse d'APIC est exacte, son volume géométrique ne l'est pas** (L370), les particules se
+tassent contre la paroi. Séparation des paires à 0,4 maille, fixée avant la mesure : 92 % en masse,
+**99 % en géométrie** ; sensible (110 % à 0,45).
+
+**B10** (§3 à §5). `Fr` = 1 : fermeture peu profonde, pas de cavité. `Fr` = 2 et 4 : **pincement** à
+2,2 et 2,5 `√(D/g)`. Similitude de Froude **à 4·10⁻⁴** entre `D` = 0,4 et 0,8 m, après quatre fautes du
+banc que la similitude a trouvées ; la sensibilité (`Fr` × (1 + 10⁻⁶)) dit l'incertitude vraie — 8 % sur
+le pincement à `Fr` = 4 (L371). Convergence `D/dx` 8 → 16 : temps de pincement à 5 %, cavité maximale à
+9 % ; **la couronne et le jet changent de 40 à 60 %** — sans tension de surface, c'est la maille qui les
+arrête (A312). §5 bis, `D/dx` = 32 à `Fr` = 2, est en calcul : relancé à 20:11, versé par S321 à son retour.
+
+**Lecture de simufluid**, à la demande de l'utilisateur ([lecture](../docs/registres/LECTURE-SIMUFLUID-S320.md)) :
+leur résidu dérive sous houle à un taux porté par le **nombre de pas** — S319 n'a jamais varié le pas à
+maille fixe, essai à faire avant l'arbitrage d'A289 ; la level set conservative garde son volume mais
+échoue sur coque mobile ; la **loi de conservation géométrique** est l'hypothèse de cause du tassement
+(A313).
+
+**Limites.** Deux dimensions, corps imposé, air non modélisé (A311), un seul corps, banc hors du cœur ;
+aucune référence expérimentale (géométrie plane, I-14).
+
+**Rituel.** Maillons **0** : ce qui devient possible — **une cavité d'air derrière un corps, que la
+fonction hauteur ne peut pas porter** ; le chemin qui le consomme — le raccord particules ↔ colonnes,
+puis la porte D et C20 ; la preuve — B10-APIC-S320 ; point **4.12** passé d'absent à partiel. Deux
+leçons : L370, L371. Trois angles morts : A311, A312, A313. Suivant : **S321, demande de
+l'utilisateur** — analyse complète et réorganisation de la méthode. Le fil du lot 5 reprendra au
+raccord, précédé du compteur de volume géométrique (A313) ; A289 attend l'essai du pas de temps,
+puis la voie de l'utilisateur.
