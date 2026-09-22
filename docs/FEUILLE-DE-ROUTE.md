@@ -252,7 +252,9 @@ adaptation et budget. **A est déclaré suffisant pour servir B et C** : aucun l
 perfectionnement visuel ne s'ouvre avant que la physique le demande. Le profil d'ADR-174 D3 reste
 **mesuré et publié**, sans être opposable pendant la construction (ADR-178 D4). **Le 2026-09-21**
 ([ADR-184](adr/ADR-184-seconde-representation-en-parallele.md)), l'utilisateur fait avancer le lot 5
-**en parallèle** du lot 2, par sessions alternées ; la v1 reste la porte D. **S318** : comparaison
+**en parallèle** du lot 2, par sessions alternées ; la v1 reste la porte D. **Le 2026-09-22**
+([ADR-188](adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md)), le lot 3 prend la place du lot 2, bloqué
+par A289, dans cette alternance. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**
 par l'utilisateur ([ADR-186](adr/ADR-186-apic-seconde-representation.md)) ; **S320** : B10 sur APIC,
 une cavité se pince au même instant à toute échelle ([S320](validation/B10-APIC-S320.md)) ; **S323** :

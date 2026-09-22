@@ -97,8 +97,8 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-188 : la décision de l'utilisateur ; file, feuille de route.
-- [ ] **P3** — la géométrie coupée 3D et ses essais (critère 1).
+- [x] **P2** — ADR-188 : la décision de l'utilisateur ; file, feuille de route.
+- [>] **P3** — la géométrie coupée 3D et ses essais (critère 1).
 - [ ] **P4** — l'opérateur, la divergence et la correction pondérés ; `configure_with_bottom` ; essais du
   critère 2.
 - [ ] **P5** — le banc du fond 3D : ordre de convergence du débit ouvert (critère 3).
