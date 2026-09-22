@@ -523,7 +523,7 @@ mod tests {
     #[test]
     fn le_delai_d_extinction_se_remet_a_zero_s278() {
         let mut s = scheduler(4);
-        let mut jouer = |s: &mut Scheduler, t: u64, score: f32| {
+        let jouer = |s: &mut Scheduler, t: u64, score: f32| {
             s.begin();
             s.submit(bid(1, score, 1., 1., 0.5)).unwrap();
             s.decide(SimTime(t)).unwrap();

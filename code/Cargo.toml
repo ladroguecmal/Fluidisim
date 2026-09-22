@@ -5,7 +5,9 @@ members = ["water-core", "water-harness"]
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.75"
+# S321 : 1.83 et non 1.75 — le cœur emploie `f32::from_bits` en contexte constant (1.83) et
+# `as_flattened_mut` (1.80) ; `cargo clippy` le vérifie.
+rust-version = "1.83"
 
 # ADR-020 : le cœur est une bibliothèque sans dépendance moteur.
 # Aucun membre de ce workspace n'a de dépendance externe — ni le cœur, ni le harnais.

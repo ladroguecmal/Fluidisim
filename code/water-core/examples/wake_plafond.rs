@@ -131,13 +131,16 @@ fn main() {
                     profil(sigma, cutoff, 512, us),
                 ) {
                     (Ok(a), Ok(b), Ok(c)) => (a, b, c),
-                    (e, _, _) | (_, e, _) | (_, _, e) => {
+                    (a, b, c) => {
                         // Un refus de construction est un fait du montage, pas de la sonde : il
-                        // se dit et la ligne s'écarte, elle ne s'invente pas.
+                        // se dit et la ligne s'écarte, elle ne s'invente pas. S321 : le premier
+                        // refus des trois — l'ancien motif prenait le premier profil, qui pouvait
+                        // être accepté, et imprimait alors un refus vide.
+                        let refus = [a.err(), b.err(), c.err()].into_iter().flatten().next();
                         println!(
                             "| {sigma} / {cutoff} | {radial} | {} s | refus | {} | — |",
                             us / 1_000_000,
-                            e.err().unwrap_or_default()
+                            refus.unwrap_or_default()
                         );
                         continue;
                     }

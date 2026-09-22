@@ -4,6 +4,9 @@
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
 mod host_impl;
+// S321 : ce banc n'appelle pas `dispersion_error`, que le module demande à tout banc (L277) —
+// point « Bancs sur l'oracle HOS » de la file active.
+#[allow(dead_code)]
 #[path = "support/nl_surface.rs"]
 #[allow(dead_code)]
 mod nl;

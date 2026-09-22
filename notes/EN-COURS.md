@@ -101,8 +101,8 @@ Critères, écrits avant le travail :
   fichiers produits versionnés, décompte de la liste, « Reproduire » des preuves nouvelles.
 - [x] **P8a** — hygiène du dépôt : `.pyc` retirés et ignorés, `code/REPRISE.md` vide supprimé,
   README racine et du code, décomptes de la liste et de la feuille de route.
-- [>] **P8b** — hygiène du code : `rust-version` vraie, avertissements à zéro, suites rejouées.
-- [ ] **P9** — index : carte par système en tête ; note datée à SPEC-003 ; file active.
+- [x] **P8b** — hygiène du code : `rust-version` vraie, avertissements à zéro, suites rejouées.
+- [>] **P9** — index : carte par système en tête ; note datée à SPEC-003 ; file active.
 - [ ] **P10** — S320 P5b : §5 bis versé au retour du calcul — étape asynchrone, placée là où le
   calcul la permet.
 - [ ] **P11** — rituel, appliqué sous sa forme nouvelle.
@@ -130,3 +130,12 @@ P8a : dix `.pyc` versionnés, et le décompte de la liste (section 4 et total : 
 compté 3 / 53 / 64). Piège rencontré : l'outil d'édition convertit les échappements Unicode en
 caractères — le motif d'encodage s'est d'abord attrapé lui-même ; il est désormais écrit en
 échappements construits par `chr(92)`, et l'outil ne se signale plus.
+
+**P8b.** Zéro avertissement : `cargo test --no-run` et `cargo build` du code et de l'afficheur ;
+suites rejouées **578 + 36 réussis, 0 échec**, 18 + 1 ignorés — mêmes nombres. Construit dans un
+répertoire cible hors dépôt, parce que P5b tient `lot5_comparaison.exe` verrouillé (Windows).
+Trois avertissements étaient de vrais défauts : `wake_plafond` imprimait un refus **vide** quand le
+refus venait du deuxième ou du troisième profil (motif `(e, _, _) | …` inaccessible) ; `Mesure.masse`
+de `lot5_comparaison` était calculée et jamais lue ; `delta3d_mobile` (S296) et `nl_surface_2d`
+n'appellent pas `dispersion_error`, que leur module demande à tout banc (L277) — point de file.
+Les campagnes du harnais que seuls les essais appellent sont déclarées au niveau du module.

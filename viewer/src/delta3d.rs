@@ -21,6 +21,7 @@ pub(crate) const GROUP: u32 = 64;
 pub struct Resident3 {
     device: wgpu::Device,
     queue: wgpu::Queue,
+    #[allow(dead_code)] // S321 : lu seulement par un accesseur sans appelant.
     domain: Domain3,
     apply: wgpu::ComputePipeline,
     assemble: wgpu::ComputePipeline,
@@ -156,6 +157,8 @@ impl Resident3 {
         })
     }
 
+    // S321 : accesseur conservé, sans appelant aujourd'hui.
+    #[allow(dead_code)]
     pub fn domain(&self) -> Domain3 {
         self.domain
     }

@@ -554,7 +554,7 @@ fn topologie_images(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// retrouver ceux de S247 — 2,589 m a la pose de reference, 8,243 m a la rasante —, faute de quoi
 /// la carte est fausse et on le sait avant de la regarder.
 fn lod_mesh(
-    frame: &mut FrameData<'_>,
+    _frame: &mut FrameData<'_>,
     nom: &str,
     eye: [f32; 3],
     yaw: f32,

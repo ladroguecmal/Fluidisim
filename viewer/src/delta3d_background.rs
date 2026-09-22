@@ -32,6 +32,8 @@ pub struct Background3 {
     query_read: wgpu::Buffer,
     /// Dimensions du domaine déclaré, pour ne pas les redemander à chaque appel.
     declared: Option<water_core::delta3d::Domain3>,
+    // S321 : tient le tampon lié au groupe de liaisons ; jamais relu par le CPU.
+    #[allow(dead_code)]
     components: wgpu::Buffer,
     time_phase: wgpu::Buffer,
     points: wgpu::Buffer,
@@ -932,7 +934,7 @@ pub fn recevoir_couplage() -> Result<(), String> {
                     montrees += 1;
                     let (i, j, k) = (c % domain.nx, (c / domain.nx) % domain.ny, c / (domain.nx * domain.ny));
                     let col = j * domain.nx + i;
-                    let h_coeur = perturbation[col] + vue.w[(j * domain.nx + i)].eta;
+                    let h_coeur = perturbation[col] + vue.w[j * domain.nx + i].eta;
                     let zc = (k as f32 + 0.5) * domain.dx;
                     println!(
                         "DELTA3D_COUPLAGE_S300   maille=({i},{j},{k}) zc={zc:.6} h_coeur={h_coeur:.9} h_carte={:.9} mouillee_coeur={} mouillee_carte={} rhs_coeur={:e} rhs_carte={:e}",

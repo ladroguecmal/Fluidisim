@@ -26,6 +26,7 @@ const NAMES: [&str; 12] = [
 pub struct Projection3 {
     device: wgpu::Device,
     queue: wgpu::Queue,
+    #[allow(dead_code)] // S321 : lu seulement par un accesseur sans appelant.
     domain: Domain3,
     pipelines: Vec<wgpu::ComputePipeline>,
     bind: wgpu::BindGroup,
@@ -51,6 +52,8 @@ pub struct Solved {
     /// `‖b‖`, calculée sur la carte après l'assemblage : c'est l'échelle du résidu. Elle n'a
     /// rien à voir avec la divergence d'entrée, que les fantômes dominent d'ordres de grandeur.
     pub rhs_norm: f32,
+    // S321 : publié au rapport de l'appelant ; aucun ne le lit encore.
+    #[allow(dead_code)]
     pub cycles: u32,
     pub dispatches: u32,
     /// Temps de la passe sur la carte, quand l'horodatage est disponible. C'est le coût du
@@ -198,6 +201,8 @@ impl Projection3 {
         })
     }
 
+    // S321 : accesseur conservé, sans appelant aujourd'hui.
+    #[allow(dead_code)]
     pub fn domain(&self) -> Domain3 {
         self.domain
     }
@@ -241,7 +246,7 @@ impl Projection3 {
                 }),
             });
             pass.set_bind_group(0, &self.bind, &[]);
-            let mut dispatch = |pass: &mut wgpu::ComputePass, index: usize, count: u32| {
+            let dispatch = |pass: &mut wgpu::ComputePass, index: usize, count: u32| {
                 pass.set_pipeline(&self.pipelines[index]);
                 pass.dispatch_workgroups(count, 1, 1);
             };

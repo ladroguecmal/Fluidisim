@@ -1302,7 +1302,7 @@ impl Volume {
         // S291 : porte l'état corrigé et sa divergence quand la porte d'ADR-144 vient de les
         // produire pour le `p` courant. Remis à zéro à chaque tour, parce que la boucle interne
         // peut alors déplacer `p`.
-        let mut settled: Option<Projected> = None;
+        let mut settled: Option<Projected>;
         let actual_rr = loop {
             ctl.mark(Stage::Iterate);
             settled = None;

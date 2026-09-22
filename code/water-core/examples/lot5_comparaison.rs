@@ -197,8 +197,6 @@ struct Mesure {
     t: f64,
     /// Volume d'eau tel que le candidat le représente, m².
     volume: f64,
-    /// Masse portée, kg — exacte pour les particules, déduite du volume pour la grille.
-    masse: f64,
     /// Diagnostic des particules : `Σ min(1, n/4)·dx²` — ce qu'elles couvrent, qui n'est pas ce
     /// qu'elles portent. Zéro pour la grille.
     occupation: f64,
@@ -1294,7 +1292,6 @@ impl Candidat for Apic {
             niveau_geo,
             sommet,
             sommet_axe,
-            masse: self.masse * self.x.len() as f64,
             e_cin,
             e_pot,
             front,
@@ -1543,7 +1540,6 @@ impl Candidat for Sph {
             t,
             volume,
             occupation: 0.0,
-            masse: self.masse * self.n_eau as f64,
             e_cin,
             e_pot,
             front,
@@ -1780,7 +1776,6 @@ impl Candidat for Niveaux {
             t,
             volume,
             occupation: 0.0,
-            masse: RHO * volume,
             e_cin,
             e_pot,
             front,

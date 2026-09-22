@@ -1382,7 +1382,7 @@ pub fn c08_convergence_reguliere(
         return refuse("FAMILLE INVALIDE".into());
     }
 
-    let mut oracle_h: Vec<f64> = Vec::new();
+    let oracle_h: Vec<f64>;
     {
         let b = Bassin {
             nx: nx_oracle,
@@ -1532,8 +1532,11 @@ pub struct Seiche {
     /// Coefficient de détermination de l'ajustement exponentiel. Sous 0,9, la décroissance n'est
     /// pas exponentielle et la demi-vie n'a pas le sens qu'on lui prête.
     pub r2: f64,
-    /// Amplitude du premier et du dernier extremum, en mètres.
+    /// Amplitude du premier et du dernier extremum, en mètres. Publiées pour l'appelant ; aucun
+    /// rapport ne les lit encore (S321).
+    #[allow(dead_code)]
     pub amplitude_debut: f64,
+    #[allow(dead_code)]
     pub amplitude_fin: f64,
 }
 
@@ -2512,7 +2515,9 @@ pub fn c31_paquet_localise(
 pub struct DecroissanceSpatiale {
     pub lambda_m: f64,
     pub dx_m: f64,
-    /// `(x, amplitude)` relevés en régime établi.
+    /// `(x, amplitude)` relevés en régime établi. Publié pour l'appelant ; aucun rapport ne le lit
+    /// encore (S321).
+    #[allow(dead_code)]
     pub profil: Vec<(f64, f64)>,
     /// `L½` mesurée par régression de `log₂ A` sur `x`.
     pub l_demi_mesuree: f64,

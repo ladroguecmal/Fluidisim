@@ -23,9 +23,14 @@
 
 mod host_impl;
 mod c22_shallow;
+// S321 : ces trois modules portent aussi des campagnes que seuls les essais appellent ; hors
+// essai, elles sont mortes pour le binaire. Leur code mort se lit dans `cargo test`, qui les compile.
+#[cfg_attr(not(test), allow(dead_code))]
 mod oracle;
 mod physics;
+#[cfg_attr(not(test), allow(dead_code))]
 mod physics_dispersif;
+#[cfg_attr(not(test), allow(dead_code))]
 mod physics_shallow;
 mod scenario;
 mod rapport_convergence;

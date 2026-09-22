@@ -352,6 +352,8 @@ impl Projection {
 /// tombe dans son domaine horizontal. L'emprise est l'image continue et injective du rectangle
 /// écran ; son bord est l'image du bord du rectangle, échantillonné ici **à chaque sommet de bord**
 /// avec les opérations de `ocean_vertex`. Rend le contour et sa plus longue arête (publiée).
+// S321 : la boucle d'image emploie `footprint_into` (S240) ; cette forme ne sert plus qu'aux essais.
+#[cfg(test)]
 pub fn footprint(p: &Projection, nx: u32, ny: u32) -> (Vec<[f32; 2]>, f32) {
     let mut poly = Vec::new();
     let chord = footprint_into(p, nx, ny, &mut poly);

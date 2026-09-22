@@ -757,6 +757,8 @@ impl Step3 {
         &self.published
     }
 
+    // S321 : accesseur conservé, sans appelant aujourd'hui.
+    #[allow(dead_code)]
     pub fn domain(&self) -> Domain3 {
         self.domain
     }
@@ -1840,7 +1842,7 @@ pub fn recevoir_cuve() -> Result<(), String> {
         );
 
         // ── Critère 1b : le pas tourne dans la cuve, murs et fond nul. ──
-        let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+        let carte = Step3::new(&background, domain, origin, rho, g).await?;
         carte.set_step(1_000, rest, Sponge3::default())?;
         println!(
             "CUVE_S305 carte={:?} backend={} dispatchs_64={}",

@@ -11,6 +11,8 @@ use water_core::{AllocError, AllocStats, Allocator, JobSystem, Sink};
 /// Après `seal()`, toute allocation **échoue** au lieu d'être comptée : I-06 devient une propriété
 /// mécanique et non une consigne. Les tentatives refusées sont comptées séparément, parce qu'une
 /// tentative refusée est un défaut à corriger, pas un incident à ignorer.
+// S321 : module inclus aussi par les bancs (`#[path]`), qui n'en emploient qu'une partie.
+#[allow(dead_code)]
 pub struct ArenaAllocator {
     capacity: usize,
     used: usize,
@@ -18,6 +20,7 @@ pub struct ArenaAllocator {
     stats: AllocStats,
 }
 
+#[allow(dead_code)]
 impl ArenaAllocator {
     pub fn with_capacity(bytes: usize) -> Self {
         ArenaAllocator {
@@ -100,10 +103,13 @@ impl JobSystem for SequentialJobs {
 /// partagé, et les emprunts restent vérifiés par le compilateur — le harnais n'a pas de `unsafe`.
 /// Le prix de cette simplicité est le coût de création des fils, mesuré et publié
 /// (`docs/validation/PARALLELISME-S243.md`).
+// S321 : module inclus aussi par les bancs (`#[path]`), qui n'en emploient qu'une partie.
+#[allow(dead_code)]
 pub struct ScopedJobs {
     workers: u32,
 }
 
+#[allow(dead_code)]
 impl ScopedJobs {
     /// `workers` fils au plus ; `1` rend exactement le chemin séquentiel, sans créer de fil.
     pub fn with_workers(workers: u32) -> Self {
@@ -173,6 +179,8 @@ impl JobSystem for ScopedJobs {
 }
 
 /// Journal du harnais. Écrit sur la sortie d'erreur pour ne pas polluer le rapport.
+// S321 : module inclus aussi par les bancs (`#[path]`), qui n'en emploient qu'une partie.
+#[allow(dead_code)]
 pub struct StderrSink;
 
 impl Sink for StderrSink {

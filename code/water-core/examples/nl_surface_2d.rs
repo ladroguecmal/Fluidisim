@@ -1,5 +1,8 @@
 //! Réception Stokes S193 ; véhicule de banc uniquement. Voir SURFACE-LIBRE-NL-S193.md.
 //! `cargo run -p water-core --release --example nl_surface_2d`
+// S321 : ce banc n'appelle pas `dispersion_error`, que le module demande à tout banc (L277) —
+// point « Bancs sur l'oracle HOS » de la file active.
+#[allow(dead_code)]
 #[path = "support/nl_surface.rs"]
 mod nl;
 use nl::{cabs, NlSurface, C};

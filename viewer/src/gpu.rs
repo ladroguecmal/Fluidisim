@@ -45,6 +45,8 @@ pub struct Gpu {
     /// qu'aucun domaine n'est attache — le rendu reste alors identique au bit.
     delta3d_layout: wgpu::BindGroupLayout,
     delta3d_bind: wgpu::BindGroup,
+    // S321 : tient le tampon lié au groupe de liaisons ; jamais relu par le CPU.
+    #[allow(dead_code)]
     delta3d_dummy: wgpu::Buffer,
     delta3d_uniform: wgpu::Buffer,
 }

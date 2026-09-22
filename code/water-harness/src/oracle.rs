@@ -451,7 +451,7 @@ pub fn bilan_c04(duree_s: f64) -> Bilan {
 /// de 1 ; la saturation doit alors mordre, et **elle doit être vue mordre**.
 pub fn declenchement_c04(cfl: f64, duree_s: f64) -> Bilan {
     use water_core::Flux;
-    let (mut d, mut s) = avec_hote(1 << 22, |h| {
+    let (d, mut s) = avec_hote(1 << 22, |h| {
         let d = Delta1D::configure(h, Bassin::c04()).expect("delta");
         let s = Shallow1D::configure_barrage(h, 800, 0.05, 1.0).expect("shallow");
         (d, s)
