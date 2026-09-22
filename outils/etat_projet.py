@@ -17,7 +17,7 @@ from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parent.parent
 ACTIVE = ("REPRISE.md", "README.md", "docs/00_INDEX.md", "notes/METHODE.md",
-          "docs/FEUILLE-DE-ROUTE.md")
+          "docs/FEUILLE-DE-ROUTE.md", "notes/EN-COURS.md")
 
 
 def git(*args: str) -> str:
@@ -150,6 +150,131 @@ def heartbeat(reprise: str, now: datetime | None = None) -> list[str]:
     return []
 
 
+# S321 (ADR-187 D3, D5, D6) : les consignes qu'on oubliait deviennent des contrôles. Chacun porte le
+# contre-exemple réel qui l'a fait naître ; ceux qui visent des écrits neufs ne jugent que S321 et après.
+EN_COURS_LINES = 300
+JOURNAL_ENTRY_LINES = 20
+FROM_SESSION = 321
+# Texte UTF-8 relu comme ANSI puis réécrit : une lettre accentuée devient deux caractères, un A
+# tilde ou un A circonflexe suivi d'un octet de continuation. Écrit en échappements : ce fichier est
+# lui-même contrôlé.
+MOJIBAKE = re.compile("\u00c3[\u0080-\u00bf]|\u00e2\u20ac[\u0080-\u00bf\u0152\u0153\u0160\u0161"
+                      "\u0178\u017d\u017e\u0192\u02c6\u02dc\u2013\u2014\u2018-\u201e\u2020-\u2022"
+                      "\u2026\u2030\u2039\u203a\u2122]|\u00c2[\u00a0-\u00bf]|\ufffd")
+PRODUCED = re.compile(r"(^|/)(__pycache__|target)/|\.py[co]$")
+
+
+def en_cours(text: str) -> list[str]:
+    """`EN-COURS` ne porte que la session en cours (ADR-187 D3).
+
+    Contre-exemple réel : 1 686 lignes à la fin de S320, dont 1 560 de « Archive — notes de S30x »
+    placées **avant** les notes de la session courante ; la reprise « de cinq minutes » lisait 115 Ko.
+    """
+    found = []
+    lines = text.splitlines()
+    if len(lines) > EN_COURS_LINES:
+        found.append(f"EN-COURS : {len(lines)} lignes > {EN_COURS_LINES} — verser les notes "
+                     "closes à leur preuve ou au journal")
+    for line in lines:
+        if re.match(r"#+ .*\barchive", line, re.I):
+            found.append(f"EN-COURS : section d'archive « {line.lstrip('# ')} » — Git garde les "
+                         "sessions closes")
+    return found
+
+
+def encoding(texts: dict[str, str]) -> list[str]:
+    """Un fichier suivi relu en ANSI puis réécrit porte des séquences que le français n'a jamais.
+
+    Contre-exemple réel : S301, `Get-Content -Raw | Set-Content` de Windows PowerShell 5.1 a
+    ré-encodé `REPRISE.md` (commit `fff03d5`), restauré depuis `7ebeeb5`. Une ligne par fichier.
+    """
+    found = []
+    for path, content in texts.items():
+        for number, line in enumerate(content.splitlines(), 1):
+            match = MOJIBAKE.search(line)
+            if match:
+                extrait = line[max(0, match.start() - 20):match.end() + 20]
+                found.append(f"{path}:{number} : encodage abîmé près de « {extrait} »")
+                break
+    return found
+
+
+def produced(paths: list[str]) -> list[str]:
+    """Un fichier produit ne se versionne pas : un essai le réécrit, et la reprise à chaud prend le
+    diff pour celui de l'étape interrompue. Contre-exemple réel : `outils/__pycache__/*.pyc`,
+    versionnés jusqu'en S321."""
+    return [f"fichier produit versionné : {p}" for p in paths if PRODUCED.search(p)]
+
+
+def checklist(text: str) -> list[str]:
+    """Le tableau « Décompte » de la liste égale le compte de ses points, section par section.
+
+    Contre-exemple réel : S321 trouve 3 / 51 / 66 affichés pour 3 / 53 / 64 comptés — 4.8 (S316) et
+    4.12 (S320) avaient changé de case sans que le tableau suive. REPRISE §6 le demandait (L349).
+    """
+    body, _, table = text.partition("## Décompte")
+    counted: dict[int, Counter] = {}
+    for item in re.split(r"\n(?=- \[[ x]\] \*\*\d+\.\d+)", body):
+        head = re.match(r"- \[([ x])\] \*\*(\d+)\.\d+", item)
+        if not head:
+            continue
+        state = re.search(r"\*(partiel|absent)\*", item[:400])
+        key = "validés" if head[1] == "x" else (state[1] + "s" if state else "?")
+        section = counted.setdefault(int(head[2]), Counter())
+        section[key] += 1
+        section["points"] += 1
+    found = [f"liste : point de la section {s} sans état lisible" for s, c in counted.items() if c["?"]]
+    columns = ("points", "validés", "partiels", "absents")
+    total = sum(counted.values(), Counter())
+    for row in table.splitlines():
+        cells = [c.strip().strip("*") for c in row.strip().strip("|").split("|")]
+        if len(cells) != 5 or not all(c.isdigit() for c in cells[1:]):
+            continue
+        shown = tuple(int(c) for c in cells[1:])
+        name = cells[0]
+        number = re.match(r"(\d+)\.", name)
+        source = counted.get(int(number[1]), Counter()) if number else total if name == "total" else None
+        if source is None:
+            continue
+        real = tuple(source[c] for c in columns)
+        if shown != real:
+            found.append(f"liste, décompte « {name} » : affiché {shown}, compté {real} "
+                         "(points, validés, partiels, absents)")
+    return found
+
+
+def reproduce(first_session: dict[str, int], texts: dict[str, str]) -> list[str]:
+    """Toute preuve ouverte à partir de S321 commence par « Reproduire » (ADR-187 D6)."""
+    return [f"{path} : preuve ouverte en S{session} sans section « Reproduire »"
+            for path, session in sorted(first_session.items())
+            if path.startswith("docs/validation/") and path.endswith(".md")
+            and session >= FROM_SESSION
+            and not re.search(r"^(#+ .*|\*\*)Reproduire", texts.get(path, ""), re.M)]
+
+
+def journal(text: str) -> list[str]:
+    """Une entrée de journal tient en vingt lignes de texte, titre exclu, à partir de S321."""
+    found = []
+    for block in re.split(r"\n(?=## S\d+)", text):
+        head = re.match(r"## S(\d+)", block)
+        if not head or int(head[1]) < FROM_SESSION:
+            continue
+        lines = [line for line in block.splitlines()[1:] if line.strip()]
+        if len(lines) > JOURNAL_ENTRY_LINES:
+            found.append(f"journal, S{head[1]} : {len(lines)} lignes de texte > {JOURNAL_ENTRY_LINES}")
+    return found
+
+
+def first_sessions(commits: list[dict], paths: list[str], latest: int) -> dict[str, int]:
+    """Session du premier commit qui touche chaque fichier ; un fichier pas encore committé est de
+    la session en cours."""
+    first: dict[str, int] = {}
+    for commit in reversed(commits):
+        for _added, _removed, path in commit["changes"]:
+            first.setdefault(path, commit["session"] or 0)
+    return {path: first.get(path, latest) for path in paths}
+
+
 def inspect(since: int | None) -> dict:
     paths = sorted(filter(None, git("ls-files", "-z").split("\0")))
     commits = history(git("log", "--first-parent", "--no-renames", "--numstat",
@@ -184,6 +309,10 @@ def inspect(since: int | None) -> dict:
     errors += [f"ADR absent de l'index : {p}" for p in adrs if p.removeprefix("docs/") not in index]
     sizes = oversized(active_questions, texts["docs/FEUILLE-DE-ROUTE.md"])
     clock = heartbeat(texts["REPRISE.md"])
+    controls = (en_cours(texts["notes/EN-COURS.md"]) + encoding(texts) + produced(paths)
+                + checklist(texts["docs/LISTE-PROJET-FINI.md"])
+                + reproduce(first_sessions(commits, paths, latest), texts)
+                + journal(texts["notes/JOURNAL.md"]))
     return dict(head=git("rev-parse", "--short", "HEAD").strip(),
                 note="Fichiers suivis présents ; lignes brutes, tests/commentaires inclus. "
                      "Ajouts Git sans renommages ; ni temps, ni productivité, ni capacités. "
@@ -194,15 +323,15 @@ def inspect(since: int | None) -> dict:
                 file_active_lignes=len(active_questions.splitlines()),
                 couches=layers, depuis_session=since,
                 ajouts_par_ere=activity(commits, since), erreurs_navigation=errors,
-                plafonds_depasses=sizes, battement=clock)
+                plafonds_depasses=sizes, battement=clock, controles=controls)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--check", action="store_true",
-                        help="échouer si navigation active incomplète, plafond dépassé, "
-                             "ou battement du jeton dans le futur")
+                        help="échouer si navigation active incomplète, plafond dépassé, battement "
+                             "du jeton dans le futur, ou contrôle de S321 en défaut")
     parser.add_argument("--since-session", type=int)
     args = parser.parse_args()
     if args.since_session is not None and args.since_session < 0:
@@ -231,8 +360,12 @@ def main() -> int:
         print(f"Battement du jeton : {len(result['battement'])} anomalie(s)")
         for anomaly in result["battement"]:
             print(anomaly)
+        print(f"Contrôles (EN-COURS, encodage, fichiers produits, liste, preuves, journal) : "
+              f"{len(result['controles'])} anomalie(s)")
+        for anomaly in result["controles"]:
+            print(anomaly)
     return int(args.check and bool(result["erreurs_navigation"] or result["plafonds_depasses"]
-                                   or result["battement"]))
+                                   or result["battement"] or result["controles"]))
 
 
 if __name__ == "__main__":

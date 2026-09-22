@@ -97,9 +97,9 @@ Critères, écrits avant le travail :
 - [x] **P5** — METHODE refondue : principes, protections actives.
 - [x] **P6** — REPRISE : lecture à froid bornée (§3), état court (§4), rituel en deux parties (§6),
   plafonds (§8).
-- [>] **P7** — `etat_projet.py --check` étendu, avec essais : taille d'`EN-COURS`, encodage,
+- [x] **P7** — `etat_projet.py --check` étendu, avec essais : taille d'`EN-COURS`, encodage,
   fichiers produits versionnés, décompte de la liste, « Reproduire » des preuves nouvelles.
-- [ ] **P8a** — hygiène du dépôt : `.pyc` retirés et ignorés, `code/REPRISE.md` vide supprimé,
+- [>] **P8a** — hygiène du dépôt : `.pyc` retirés et ignorés, `code/REPRISE.md` vide supprimé,
   README racine et du code, décomptes de la liste et de la feuille de route.
 - [ ] **P8b** — hygiène du code : `rust-version` vraie, avertissements à zéro, suites rejouées.
 - [ ] **P9** — index : carte par système en tête ; note datée à SPEC-003 ; file active.
@@ -123,3 +123,10 @@ dépassée par P7 de la même session, et l'indice de la bascule de S301, `n` = 
 **P6.** Lecture à froid mesurée après la révision : **68 Ko** (AGENTS 10,3 ; REPRISE 12,8 ; dernière
 entrée 2,8 ; invariants 11,7 ; ADR-001 §2 3,4 ; feuille §3 bis 8,6 ; décisions de la file 3,3 ; dix
 lignes de porte 5,1 ; METHODE 10,3), contre 155 Ko avant.
+
+**P7.** Six contrôles, chacun refusant son contre-exemple réel ; 16 essais de l'outil, 26 essais
+Python au total. Au commit, `--check` échoue sur **douze** anomalies, toutes réelles et toutes pour
+P8a : dix `.pyc` versionnés, et le décompte de la liste (section 4 et total : affiché 3 / 51 / 66,
+compté 3 / 53 / 64). Piège rencontré : l'outil d'édition convertit les échappements Unicode en
+caractères — le motif d'encodage s'est d'abord attrapé lui-même ; il est désormais écrit en
+échappements construits par `chr(92)`, et l'outil ne se signale plus.

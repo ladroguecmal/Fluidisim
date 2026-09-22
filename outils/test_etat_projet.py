@@ -2,8 +2,9 @@
 import unittest
 from datetime import datetime, timezone
 
-from etat_projet import (MILESTONE_WORDS, QUEUE_ROW_WORDS, activity, category, heartbeat,
-                         history, layer, oversized)
+from etat_projet import (EN_COURS_LINES, JOURNAL_ENTRY_LINES, MILESTONE_WORDS, QUEUE_ROW_WORDS,
+                         activity, category, checklist, en_cours, encoding, first_sessions,
+                         heartbeat, history, journal, layer, oversized, produced, reproduce)
 
 
 class InventoryTests(unittest.TestCase):
@@ -59,6 +60,76 @@ class HeartbeatTests(unittest.TestCase):
     def test_ligne_absente_ou_illisible_est_une_anomalie(self):
         self.assertTrue(heartbeat("JETON : libre\n", self.MAINTENANT))
         self.assertTrue(heartbeat("Battement : hier soir\n", self.MAINTENANT))
+
+
+class ControlesS321Tests(unittest.TestCase):
+    """S321, ADR-187 D3, D5, D6 : chaque contrôle refuse le contre-exemple réel qui l'a fait naître."""
+
+    def test_en_cours_refuse_les_archives_et_la_longueur_de_s320(self):
+        vrai = "# Travail en cours\n\n## Session en cours\n\n## Archive — notes de S308 (lot du rendu)\n"
+        (message,) = en_cours(vrai)
+        self.assertIn("archive", message)
+        self.assertTrue(en_cours("ligne\n" * (EN_COURS_LINES + 1)))
+        self.assertEqual(en_cours("# Travail en cours\n\n## Session en cours\n\nAucune section d'archive.\n"), [])
+
+    def test_encodage_abime_par_powershell_est_refuse_s301(self):
+        abime = "Battement : r" + chr(0xC3) + chr(0xA9) + "cent"  # « é » relu en ANSI
+        apostrophe = "l" + chr(0xE2) + chr(0x20AC) + chr(0x2122) + "eau"  # « ’ » relu en ANSI
+        found = encoding({"REPRISE.md": abime, "notes/JOURNAL.md": apostrophe})
+        self.assertEqual(len(found), 2)
+        propre = "Résultat déjà réécrit — « l’eau », Âge, Été, δ ≈ 3·10⁻⁷, √(D/g)"
+        self.assertEqual(encoding({"docs/x.md": propre}), [])
+
+    def test_fichiers_produits_versionnes_sont_refuses(self):
+        paths = ["outils/__pycache__/etat_projet.cpython-312.pyc", "code/target/release/x.exe",
+                 "outils/etat_projet.py", "docs/validation/CIBLE-target.md"]
+        self.assertEqual(produced(paths),
+                         ["fichier produit versionné : outils/__pycache__/etat_projet.cpython-312.pyc",
+                          "fichier produit versionné : code/target/release/x.exe"])
+
+    LISTE = """## 4. Volumique
+
+- [ ] **4.8 Sortie vers W** — *partiel* — transfert.
+- [ ] **4.9 Fusion** — *absent*.
+- [ ] **4.12 Cavité** — *partiel* — banc 2D ; *absent* avant S320.
+- [x] **4.20 Validé** — reçu.
+
+## Décompte
+
+| section | points | validés | partiels | absents |
+|---|---:|---:|---:|---:|
+"""
+
+    def test_decompte_de_la_liste_suit_ses_points_s316_s320(self):
+        juste = self.LISTE + "| 4. Volumique | 4 | 1 | 2 | 1 |\n| **total** | **4** | **1** | **2** | **1** |\n"
+        self.assertEqual(checklist(juste), [])
+        perime = self.LISTE + "| 4. Volumique | 4 | 1 | 0 | 3 |\n| **total** | **4** | **1** | **0** | **3** |\n"
+        found = checklist(perime)
+        self.assertEqual(len(found), 2)
+        self.assertIn("affiché (4, 1, 0, 3), compté (4, 1, 2, 1)", found[0])
+
+    def test_preuve_nouvelle_sans_reproduire_est_refusee(self):
+        first = {"docs/validation/B10-APIC-S320.md": 320, "docs/validation/NEUVE-S321.md": 321,
+                 "docs/validation/AVEC-S321.md": 321, "notes/JOURNAL.md": 321}
+        texts = {"docs/validation/NEUVE-S321.md": "# Neuve\n\nRésultat.\n",
+                 "docs/validation/AVEC-S321.md": "# Avec\n\n## Reproduire\n\n`cargo run`\n"}
+        (message,) = reproduce(first, texts)
+        self.assertIn("NEUVE-S321", message)
+
+    def test_entree_de_journal_bornee_a_partir_de_s321(self):
+        ancienne = "## S320 — longue\n\n" + "texte\n" * 37
+        neuve = "## S321 — courte\n\n" + "texte\n\n" * JOURNAL_ENTRY_LINES
+        self.assertEqual(journal(ancienne + "\n" + neuve), [])
+        (message,) = journal(neuve + "texte\n")
+        self.assertIn("S321 : 21 lignes", message)
+
+    def test_premiere_session_d_un_fichier(self):
+        # `git log` rend le plus récent d'abord ; un commit sans numéro vaut 0 (ancien).
+        commits = [dict(session=321, changes=[(1, 0, "b.md"), (1, 0, "a.md")]),
+                   dict(session=None, changes=[(1, 0, "c.md")]),
+                   dict(session=300, changes=[(1, 0, "a.md")])]
+        self.assertEqual(first_sessions(commits, ["a.md", "b.md", "c.md", "neuf.md"], 321),
+                         {"a.md": 300, "b.md": 321, "c.md": 0, "neuf.md": 321})
 
 
 if __name__ == "__main__":
