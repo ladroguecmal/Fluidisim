@@ -94,7 +94,7 @@ Critères, écrits avant le code (eau de mer, ρ = 1025 kg/m³) :
 - [x] **P2** — `rigid_body.rs` : corps, proxy, requête d'eau, intégrateur ; critères 1 et 6.
 - [x] **P3** — C10 : tirant, période, masse ajoutée (critères 2 à 4).
 - [x] **P4** — roulis du pavé (critère 5).
-- [ ] **P5** — preuve : `docs/validation/CORPS-RIGIDE-S331.md`, avec « Reproduire » ; C10 exécuté,
+- [x] **P5** — preuve : `docs/validation/CORPS-RIGIDE-S331.md`, avec « Reproduire » ; C10 exécuté,
   file, liste 6.1.
 - [ ] **P6** — rituel.
 

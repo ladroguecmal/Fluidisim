@@ -145,7 +145,7 @@ rend **1,0030**. Voir la note S36 d'`ADR-040` et l'angle mort **A162**.
 | C07 | Sillage profond et peu profond | W | **analytique** | angle de Kelvin, `Fr_h` |
 | C08 | Convergence sous raffinement | δ | oracle / Richardson | solveur qui ne converge pas — *exécuté en S23-S24 ; **sans verdict**, voir ADR-032* |
 | C09 | Conservation masse et énergie | δ, V | **analytique** | fuites, instabilités |
-| C10 | Cube flottant | flottabilité | **analytique** | tirant d'eau, période, masse ajoutée — *statique exécutée depuis S21 ; la masse ajoutée attend* |
+| C10 | Cube flottant | flottabilité | **analytique** | tirant d'eau, période, masse ajoutée — *statique exécutée depuis S21 ; **dynamique et masse ajoutée exécutées depuis S331** ([corps rigide](CORPS-RIGIDE-S331.md))* |
 | C11 | Petit objet léger | flottabilité | **analytique** | divergence, bascule en mode contraint |
 | C12 | Vidange d'un réservoir | V | **analytique** | intégration à charge variable |
 | C13 | Remontée de bulle | ADR-014 | **analytique** | traînée, vitesse terminale |

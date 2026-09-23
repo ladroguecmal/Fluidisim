@@ -238,8 +238,9 @@ pas recopiée ici (L137).
 
 ## 6. Solides et flottabilité
 
-- [ ] **6.1 Flottabilité des objets importants** (C10, C11, B6) — *partiel* : véhicules d'essai 1D
-  et cube statique. Rien dans le système.
+- [ ] **6.1 Flottabilité des objets importants** (C10, C11, B6) — *partiel* : **corps rigide à six degrés
+  de liberté dans le cœur** depuis S331 — proxy sur B + W, masse ajoutée ; C10 tenu à 0,02 % sur le tirant
+  ([preuve](validation/CORPS-RIGIDE-S331.md)). Manquent la houle derrière la requête d'eau et le lien à δ.
 - [ ] **6.2 Forces de l'eau sur les objets** : vagues, courant, turbulence, sous la frontière
   d'autorité d'ADR-008 — *absent*.
 - [ ] **6.3 Un objet en mouvement produit son sillage** — *partiel* : mouvement et charge prescrits
