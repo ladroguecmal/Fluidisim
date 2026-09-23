@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-23 22:28 +02:00
+JETON            : libre
+Battement        : 2026-09-23 22:29 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S327 — lot 5, recevoir le raccord dynamique (A316)
-Dernière session : S326 — **lot 3, Jacobi sur le chemin coupé** : la bosse de S324 à 128 converge en 425 itérations et 5,7 s au lieu de 16 029 et 708 s, identité 2D gardée ; A315 résolu ([preuve](docs/validation/FACES-COUPEES-3D-S324.md) §6). **S320 P5b tranché** : le temps de pincement ne converge pas à trois mailles, et la bulle sans pression emballait le calcul fin — 13 h sans rien écrire (A311, L372, [preuve](docs/validation/B10-APIC-S320.md) §5 bis)
-Session suivante : **S327, lot 5 — recevoir le raccord dynamique** (4.12, A316, alternance d'ADR-188) : attribuer l'écart de frontière un suspect à la fois — insertion des particules sortantes, quantification des colonnes, colonnes sans mémoire de vitesse —, puis le corriger ; à deux maillons, la session vise une capacité, pas un diagnostic. Le lot 3 reprendra par le mode mobile sur fond coupé
-Maillons        : 2 — S326 : une optimisation pas encore consommée, et une affirmation de convergence retirée ; 4.15 et 4.12 restent partiels
+Session en cours : aucune
+Dernière session : S327 — **lot 5, raccord dynamique attribué** : l'échange asymétrique faisait le saut, la surface arrondie des colonnes la dissipation ; corrigés, écart 0,24 / 0,59 maille et amortissement 4,2 / 0,71 % à 5 / 2,5 cm — non reçu (A316, [preuve](docs/validation/B10-APIC-S320.md) §12)
+Session suivante : **S328, lot 3 — le mode mobile sur fond coupé** (4.15, alternance d'ADR-188) : le pas mobile 3D, qui refuse aujourd'hui la découpe, la porte, identité 2D gardée à `ny` = 1 ; maillons à 3, une capacité est due. Le lot 5 reprendra par la dissipation propre aux colonnes à 5 cm, après avoir vérifié qu'elle bloque encore l'usage
+Maillons        : 3 — S327 : deux causes attribuées et corrigées, raccord non reçu ; aucun point de liste n'a bougé (justification au journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -80,7 +80,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
 
-État au 2026-09-23 (S326), en bref ; le détail par jalon et par porte est dans la
+État au 2026-09-23 (S327), en bref ; le détail par jalon et par porte est dans la
 [feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.
 
 - **Stratégie** : trois systèmes — A haute mer (B+W), B volumique 3D (δ), C couplage — et sept
@@ -90,7 +90,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 - **B** : δ 3D reçu — référence CPU, production GPU, scène rendue ; seconde représentation **APIC**
   retenue ([ADR-186](docs/adr/ADR-186-apic-seconde-representation.md)), cavité reçue sur un banc
   2D (S320), temps de pincement non convergé à trois mailles (S326) ; raccord aux colonnes à masse
-  exacte, frontière non reçue (S325, A316).
+  exacte, frontière non reçue (S325–S327, A316 attribué en partie).
 - **C** : compteurs reçus (lot 1) ; retour δ → W reçu en ordres A à D, **ordre E bloqué par A289**.
 - **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte** (ADR-188) : fond coupé dans la référence 3D, mode
   linéaire, préconditionné (S324, S326) ; ni mode mobile sur ce fond, ni obstacle, ni corps rigide.

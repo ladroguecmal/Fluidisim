@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S327 — **en cours**. **Lot 5 : recevoir le raccord dynamique** (A316), alternance
+Session : S327 — **terminée** (2026-09-23 22:29). **Lot 5 : recevoir le raccord dynamique** (A316), alternance
 d'[ADR-188](../docs/adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« Continue »*, après S326 ; suite déclarée : recevoir le raccord dynamique. **Maillons à 2** :
@@ -103,7 +103,7 @@ seul — son effet mesuré contre le montage de S325 — reste une attribution p
 - [x] **P7** — le raccord corrigé, contre les critères, deux mailles.
 - [x] **P8** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; file, liste.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 Les quatre suspects : (a) la surface des colonnes vue par la pression, arrondie au quart de maille par
 `round(4h/dx)` — sur une onde de 0,4 maille à 5 cm ; (b) l'insertion des particules sortantes, toutes à

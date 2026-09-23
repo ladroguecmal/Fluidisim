@@ -16420,3 +16420,23 @@ double de sa durée (L372) ; qui change un défaut corrige les « Reproduire » 
 4.12 restent partiels. À deux maillons, la suite vise une capacité : **S327, lot 5 — recevoir le raccord
 dynamique** (4.12), A316 un suspect à la fois puis corrigé ; troisième session du raccord, vérifiée —
 sans lui, APIC reste un banc isolé. A315 résolu ; notes datées sur A311 et A312.
+
+## S327 — 2026-09-23 — lot 5 : le raccord dynamique attribué, pas encore reçu
+
+**Entrée.** *« Continue »* ; alternance d'ADR-188, maillons à 2 : recevoir le raccord (A316).
+**La série** ([preuve](../docs/validation/B10-APIC-S320.md) §12). À la frontière, la première colonne se
+vidait par le flux de la grille avant qu'aucune particule ne franchisse, puis les recevait en rafale.
+**Deux causes, chacune éprouvée seule.** L'échange asymétrique fait le saut (1,81 → 0,71 maille) ; la
+surface des colonnes arrondie au quart de maille fait la dissipation (16 → 6,3 %). Une règle en sort :
+tout retard entre la colonne qui reçoit l'eau et les particules qui la perdent agit comme une
+résistance. Le meilleur montage — ensemencement continu, frontière en paroi pour les particules — donne
+0,24 / 0,59 maille et 4,2 / 0,71 % d'amortissement à 5 / 2,5 cm ; repos 0,65 cm/s ; APIC seul au bit.
+**Contredites** : hauteur mouillée centrée, demi-quantum, solde signé, hystérésis, insertion au réseau
+(b), mémoire de vitesse sur la grille (d).
+**Non reçu** : amortissement à 5 cm (4,2 % pour −0,4 % ± 1), période aux zéros à 5 cm (+1,9 point),
+écart à 2,5 cm (0,59, un bruit sans biais). Les colonnes dissipent d'elles-mêmes à 5 cm, cause inconnue.
+**Rituel.** Maillons **3**, justifiés : la session visait une capacité et l'a manquée de peu à 2,5 cm ;
+deux causes sont attribuées et corrigées, sept hypothèses écartées, et le reste est localisé. Aucun point
+de liste ne bouge. Suivant, selon ADR-188 : **S328, lot 3 — le mode mobile sur fond coupé** (4.15), une
+capacité à portée ; le lot 5 reprendra par la dissipation à 5 cm, après avoir vérifié qu'elle bloque
+encore l'usage — ce sera la quatrième session du raccord.
