@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-23 23:43 +02:00
+JETON            : libre
+Battement        : 2026-09-23 23:44 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S332 — lot 4, le corps dans δ (ADR-189)
-Dernière session : S331 — **lot 4, le corps rigide du jeu** : six degrés de liberté, proxy de flottabilité sur B + W, masse ajoutée ; C10 tenu — tirant à 0,02 %, période à 2·10⁻⁶, rapport √2 à 10⁻⁵ du modèle ; roulis d'un pavé à 0,04 % ([preuve](docs/validation/CORPS-RIGIDE-S331.md))
-Session suivante : **S332, lot 4 — le corps dans δ** (ADR-189) : le corps du jeu déplace sa paroi dans δ linéaire — mouvement rigide (rotation comprise) dans `set_solid`, coque qui perce le couvercle ; δ ne rend au corps qu'un décalage visuel borné (≤ 8 cm, ≤ 3°) ; la trajectoire de jeu identique au bit avec ou sans δ (I-04) ; les vagues rayonnées mesurées. Puis S333 : le bateau sur B + W, la porte D
-Maillons        : 0 — S331 : corps rigide reçu, C10 exécuté, 6.1 avance
+Session en cours : aucune
+Dernière session : S332 — **lot 4, le corps dans δ** : paroi en mouvement rigide, coque qui perce la surface linéaire, le corps du jeu pilote sa paroi et δ ne le pilote jamais — trajectoire identique au bit ; masse ajoutée du cube de C10 selon δ 41,7 kg, le disque de C10 la surestime de 47 % ([preuve](docs/validation/CORPS-RIGIDE-S331.md) §4)
+Session suivante : **S333, la porte D** (ADR-189) : le bateau sur une houle B — `WaterQuery` sur B, paroi de δ relative à l'eau qui la porte (vitesse de paroi par face) ; mesure de la perturbation et de la conservation ; images de la scène ; puis **arrêt pour le verdict visuel de l'utilisateur** (ADR-178 D3, ADR-189 D3). Signaler : la porte D cite C13 et C14, qui ne portent pas sur les solides
+Maillons        : 0 — S332 : corps du jeu dans δ reçu, 6.1 avance
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -80,7 +80,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
 
-État au 2026-09-23 (S331), en bref ; le détail par jalon et par porte est dans la
+État au 2026-09-23 (S332), en bref ; le détail par jalon et par porte est dans la
 [feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.
 
 - **Stratégie** : trois systèmes — A haute mer (B+W), B volumique 3D (δ), C couplage — et sept
@@ -93,8 +93,8 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   exacte, frontière non reçue (S325–S327, A316 attribué en partie).
 - **C** : compteurs reçus (lot 1) ; retour δ → W reçu en ordres A à D, **ordre E bloqué par A289**.
 - **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte**, **priorité** (ADR-189) : fond coupé et solide immergé
-  quelconque, fixe ou en mouvement imposé (S324–S330) ; corps rigide du jeu sur B + W, C10 tenu (S331) ;
-  le corps n'est pas encore dans δ.
+  quelconque, fixe ou en mouvement (S324–S330) ; corps rigide du jeu sur B + W, C10 tenu, qui pilote
+  sa coque dans δ sans que δ le pilote (S331–S332). Manque le bateau sur la houle.
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 53 partiels, 64 absents** sur 120.
 

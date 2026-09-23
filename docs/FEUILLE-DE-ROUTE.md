@@ -260,7 +260,8 @@ sont préconditionnées en **S326** : 425 itérations à 128 au lieu de 16 029 (
 **S328** : le **mode mobile** porte la découpe, au bit de la 2D sans `y`, ordre 1,954 sur la bosse (§7) ;
 **S329** : un **solide quelconque** immergé — Archimède exact au niveau discret, sphère d'ordre 1,966 (§8) ;
 **S330** : il **bouge** — masse ajoutée d'une sphère `C_m` = 0,508 (§9) ; **S331** : le **corps rigide du
-jeu**, sur B + W, tient C10 ([preuve](validation/CORPS-RIGIDE-S331.md)) — lot 4 ouvert.
+jeu**, sur B + W, tient C10 ([preuve](validation/CORPS-RIGIDE-S331.md)) — lot 4 ouvert ; **S332** : il pilote
+sa coque dans δ, qui perce la surface, et δ ne le pilote jamais — trajectoire identique au bit (§4).
 **Le 2026-09-23** ([ADR-189](adr/ADR-189-la-v1-d-abord.md)), l'utilisateur demande la v1 d'abord : lots 3
 et 4 jusqu'à la porte D, l'alternance avec le lot 5 suspendue jusque-là. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S332 — **en cours**. **Lot 4 : le corps dans δ** ; chemin de la v1
+Session : S332 — **terminée** (2026-09-23 23:44). **Lot 4 : le corps dans δ** ; chemin de la v1
 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S331.
@@ -95,7 +95,7 @@ Critères, écrits avant le code :
 - [x] **P5** — le corps du jeu pilote sa paroi, décalage visuel borné ; critère 5.
 - [x] **P6** — preuve : section datée de [CORPS-RIGIDE-S331](../docs/validation/CORPS-RIGIDE-S331.md), avec
   « Reproduire » ; file, liste.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 **P2 (23:35).** `set_solid_rigid(nœuds, V, Ω, c)` : la part couverte de chaque face avance à `V + Ω × (x − c)`

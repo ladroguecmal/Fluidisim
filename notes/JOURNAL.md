@@ -16515,3 +16515,22 @@ passe par la production GPU. La porte D se recevra sur la référence CPU (ADR-1
 **Rituel.** Maillons **0** : ce qui devient possible — un objet qui flotte sous l'autorité de B + W ; le
 chemin qui le consomme — le corps dans δ, puis le bateau de la porte D ; la preuve — CORPS-RIGIDE-S331 ;
 6.1 avance. Suivant : **S332, le corps dans δ**.
+
+## S332 — 2026-09-23 — lot 4 : le corps dans δ, et δ ne le pilote jamais
+
+**Entrée.** *« continue, jusqu'à la v1 »* (ADR-189) ; suite déclarée par S331.
+**Le couplage** ([preuve](../docs/validation/CORPS-RIGIDE-S331.md) §4). Paroi de δ en mouvement de corps
+rigide ; coque qui perce le couvercle linéaire — l'opérateur pondérait déjà la condition de surface par
+l'ouverture ; le corps du jeu donne sa coque à δ à chaque pas, et la force de δ n'anime qu'un ressort
+visuel borné à 8 cm.
+**Mesuré.** Trajectoire de jeu **identique au bit** avec ou sans δ (I-04) ; décalage visuel 6,7 cm au plus.
+Lac au repos exact autour de la coque ; volume tenu à 2,7·10⁻¹⁰ m³. Masse ajoutée du cube de C10 selon δ :
+**41,7 kg**, 0,67 de sa masse — le disque de C10 la surestime de 47 %, le rapport des périodes deviendrait
+1,291, encore dans sa tolérance.
+**Un critère manqué, publié.** Sphère qui tourne sur elle-même : 1,08 % de `Ω·R` à 6 mailles par rayon,
+0,73 % à 12, ordre 0,56 — la vitesse de paroi est prise au centre des faces. Remède nommé.
+**Non fait.** La houle, la paroi relative à l'eau qui la porte, la rotation du décalage visuel.
+**Signalé.** La porte D cite C13 et C14 — bulle et moutons —, qui ne portent pas sur les solides.
+**Rituel.** Maillons **0** : ce qui devient possible — un corps de jeu qui remue l'eau de δ sans que δ ait
+d'autorité ; le chemin — la porte D ; la preuve — §4 ; 6.1 avance. Suivant : **S333, la porte D**, puis
+le verdict visuel de l'utilisateur.
