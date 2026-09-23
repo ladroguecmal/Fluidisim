@@ -104,3 +104,28 @@ fn two_trajectories_are_identical_to_the_bit_s331() {
     assert_eq!(format!("{:?}", a.2.map(f64::to_bits)), format!("{:?}", b.2.map(f64::to_bits)));
     assert_eq!(format!("{:?}", a.3.map(f64::to_bits)), format!("{:?}", b.3.map(f64::to_bits)));
 }
+
+/// **Critère 5.** Un pavé plat, 1 × 1 × 0,3 m à 500 kg/m³, stable — `GM = d/2 + b²/(12d) − c/2` ≈ 0,49 m —,
+/// lâché à son tirant et incliné de 5° autour de `x` : période de roulis à ± 5 % de `2π√(I/(m·g·GM))`.
+#[test]
+fn a_flat_box_rolls_at_its_metacentric_period_s331() {
+    let (b, c, rho_c) = (1.0f64, 0.3f64, 500.);
+    let d = c * rho_c / 1025.;
+    let mut p = RigidBody::cuboid([1., b, c], rho_c, [0., 0., c / 2. - d], [16, 16, 8]);
+    let demi = 2.5f64.to_radians();
+    p.orientation = [demi.cos(), demi.sin(), 0., 0.];
+    let calme = CalmWater { level: 0. };
+    let dt = 1e-3;
+    let angles: Vec<f64> = (0..5000).map(|_| {
+        p.step(dt, &calme, MER);
+        2. * p.orientation[1].atan2(p.orientation[0])
+    }).collect();
+    let t = maxima(&angles, dt);
+    assert!(t.len() >= 3, "{} maxima", t.len());
+    let periode = (t[t.len() - 1] - t[0]) / (t.len() - 1) as f64;
+    let gm = d / 2. + b * b / (12. * d) - c / 2.;
+    let reference = 2. * core::f64::consts::PI * (p.inertia[0] / (p.mass * G * gm)).sqrt();
+    let amplitude = angles.iter().fold(0f64, |m, a| m.max(a.abs())).to_degrees();
+    println!("S331 : roulis {periode:.5} s (réf. {reference:.5}, GM {gm:.4} m), amplitude {amplitude:.3}°");
+    assert!((periode / reference - 1.).abs() <= 0.05, "{periode} contre {reference}");
+}
