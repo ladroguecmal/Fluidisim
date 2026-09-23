@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S331 — **en cours**. **Lot 4 : le corps rigide sur B + W**, jugé sur C10 ; chemin de la v1
+Session : S331 — **terminée** (2026-09-23 23:29). **Lot 4 : le corps rigide sur B + W**, jugé sur C10 ; chemin de la v1
 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S330.
@@ -96,7 +96,7 @@ Critères, écrits avant le code (eau de mer, ρ = 1025 kg/m³) :
 - [x] **P4** — roulis du pavé (critère 5).
 - [x] **P5** — preuve : `docs/validation/CORPS-RIGIDE-S331.md`, avec « Reproduire » ; C10 exécuté,
   file, liste 6.1.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 **P2 + P3 (23:26), fusion déclarée** : les essais de C10 sont trois fonctions du fichier d'essais du

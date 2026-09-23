@@ -16496,3 +16496,22 @@ les deux ne se coupaient pas pareil. Un essai de bit compare deux choses constru
 **Rituel.** Maillons **0** : ce qui devient possible — un corps que le jeu déplace et que l'eau de δ
 entraîne avec sa masse ajoutée ; le chemin qui le consomme — le corps du lot 4, puis le bateau de la
 porte D ; la preuve — §9 ; 4.15 avance. Suivant : **S331, le corps rigide sur B + W**, jugé sur C10.
+
+## S331 — 2026-09-23 — lot 4 : le corps rigide du jeu tient C10
+
+**Entrée.** *« continue, jusqu'à la v1 »* (ADR-189) ; suite déclarée par S330 : le lot 4.
+**Le corps** ([preuve](../docs/validation/CORPS-RIGIDE-S331.md)). `rigid_body.rs` : six degrés de liberté,
+quaternion, inertie principale, masse ajoutée diagonale ; poussée par un proxy de points volumiques
+(ADR-008 §2), exacte pour une ligne d'eau plane ; pas symplectique en `f64`. L'eau n'arrive que par une
+requête — B + W, jamais δ (I-04).
+**C10.** Tirant **0,243958** m pour 0,243902 ; période **0,990724** s pour 0,990726 ; avec la masse ajoutée
+du disque équivalent, rapport **1,40775** — C10 attendait cette masse ajoutée depuis S21. Roulis d'un
+pavé plat à 0,04 % de sa période métacentrique. Deux trajectoires identiques au bit.
+**Un fait écrit avant la mesure.** Le cube de C10 à 500 kg/m³ en mer a `GM` = −4,3 cm : instable en
+roulis, comme un cube réel de cette densité. L'essai de pilonnement reste bref.
+**Non fait.** La houle derrière la requête d'eau ; le corps dans δ ; la masse ajoutée en rotation.
+**Constat pour la suite.** Ni l'afficheur ni le harnais n'appellent les pas CPU de δ : la scène rendue
+passe par la production GPU. La porte D se recevra sur la référence CPU (ADR-178 D4, D5).
+**Rituel.** Maillons **0** : ce qui devient possible — un objet qui flotte sous l'autorité de B + W ; le
+chemin qui le consomme — le corps dans δ, puis le bateau de la porte D ; la preuve — CORPS-RIGIDE-S331 ;
+6.1 avance. Suivant : **S332, le corps dans δ**.
