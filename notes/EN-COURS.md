@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 - [x] **P3** — la coque de δ relative à l'eau qui la porte ; critère 2.
 - [x] **P4** — banc `porte_d` : coque 4 × 1,6 × 1 m sur une houle ; critères 3 à 5, champs écrits.
 - [x] **P5** — images de la scène (critère 6).
-- [ ] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
+- [x] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
   partie numérique), liste, file.
 - [ ] **P7** — rituel ; arrêt pour le verdict visuel.
 
@@ -159,3 +159,6 @@ Critères, écrits avant le code :
   `--decalage-y 0.055` rend l'ancien au bit (carte 8 s `0xb614282e3e5cd161`). **Impasse écartée** : hypothèse
   d'un roulis paramétrique du jeu (ω_pilonnement 4,48 ≈ 2 × ω_roulis 2,45) — le proxy symétrique au bit ne
   l'amorce pas.
+- **P6** : preuve [PORTE-D-S333](../docs/validation/PORTE-D-S333.md) ; feuille de route (porte D, partie
+  numérique), liste (6.1 ; **6.2 absent → partiel** : 54 partiels, 63 absents), file (lots 3–4, scène-témoin,
+  A317), index, A317 aux angles morts. Cœur : 494 réussis, 14 ignorés ; intégration 23 ; 0 avertissement.

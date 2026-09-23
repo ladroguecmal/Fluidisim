@@ -241,9 +241,13 @@ pas recopiée ici (L137).
 - [ ] **6.1 Flottabilité des objets importants** (C10, C11, B6) — *partiel* : **corps rigide à six degrés
   de liberté dans le cœur** depuis S331 — proxy sur B + W, masse ajoutée ; C10 tenu à 0,02 % sur le tirant
   ([preuve](validation/CORPS-RIGIDE-S331.md)) ; **sa coque pilotée dans δ** depuis S332, sans que δ touche la
-  trajectoire (I-04). Manque la houle derrière la requête d'eau.
+  trajectoire (I-04) ; **sur une houle de B** depuis S333, pilonnement forcé à 3·10⁻⁵, δ relatif à l'eau
+  qui la porte ([preuve](validation/PORTE-D-S333.md)). Manquent W derrière la requête, l'amortissement par
+  rayonnement, le verdict visuel de la porte D.
 - [ ] **6.2 Forces de l'eau sur les objets** : vagues, courant, turbulence, sous la frontière
-  d'autorité d'ADR-008 — *absent*.
+  d'autorité d'ADR-008 — *partiel* depuis S333 : les **vagues de B** — poussée et gradient de la pression
+  du proxy, la coque cavale avec la houle à 0,1 % ([preuve](validation/PORTE-D-S333.md)). Manquent W, le
+  courant, la turbulence.
 - [ ] **6.3 Un objet en mouvement produit son sillage** — *partiel* : mouvement et charge prescrits
   vers la source de pression (ADR-103). Manque le corps réel couplé.
 - [ ] **6.4 Parois et corps mobiles dans δ** (C23) — *absent* sur le système ; C23 exécuté sur un
@@ -412,7 +416,7 @@ pas recopiée ici (L137).
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 9 | 12 |
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
-| 6. Solides | 8 | 0 | 3 | 5 |
+| 6. Solides | 8 | 0 | 4 | 4 |
 | 7. Secondaires | 8 | 0 | 0 | 8 |
 | 8. Rendu | 10 | 0 | 7 | 3 |
 | 9. Activation et budget | 13 | 0 | 6 | 7 |
@@ -420,7 +424,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **53** | **64** |
+| **total** | **120** | **3** | **54** | **63** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

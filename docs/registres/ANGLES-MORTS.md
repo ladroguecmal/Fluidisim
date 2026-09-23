@@ -4288,3 +4288,13 @@ vitesse — et un bruit de frontière, sans biais, à 2,5 cm.
 3D — ramène la bosse à 128 de 16 029 à **425 itérations** (5,7 s au lieu de 708), débits inchangés à
 2,4·10⁻⁶ près ; à `ny` = 1, identité 2D gardée ([preuve](../validation/FACES-COUPEES-3D-S324.md) §6).
 
+**A317 — S333, 2026-09-24 (sévérité 2, ouverte). Une coque qui perce le couvercle de δ rayonne selon la
+position de sa paroi dans la maille.** Même scène de la porte D, grille décalée de 5,5 cm : parois à 8 % et
+52 % d'eau dans leurs mailles de bord au lieu de 30 et 30 % — le rayonnement, symétrique à 2 s, devient
+franchement dissymétrique à 8 s, fort du côté de la lamelle de 8 %, et la perturbation passe de 9,4 à
+13,7 cm ([preuve](../validation/PORTE-D-S333.md) §4). La trajectoire de jeu est la même au bit et ne roule
+pas : c'est δ. **Conséquence** : une coque qui se déplace dans la grille rayonnera selon sa position sous la
+maille ; la scène est posée à 30/30. **Déclencheur** : une coque mobile dans δ, ou la production. Suspects :
+la colonne en partie couverte, dont la surface s'élève sur toute sa section quand la pression ne voit que sa
+part libre ; la vitesse de paroi prise au centre des faces (S332). Critère : même rayonnement, à quelques
+pour cent, pour tout décalage sous la maille.

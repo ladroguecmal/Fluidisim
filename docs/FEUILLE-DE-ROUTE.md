@@ -236,7 +236,7 @@ D6) ; D ne dépend que de B+W. Ordre accepté par l'utilisateur ([ADR-174](adr/A
 | **A — ce qui décide** *(en cours)* | l'ordonnanceur : quels domaines vivent, où, de quelle forme, et ce qu'on dégrade quand le budget manque | banc **B8** (seuils, inexistant) ; la bande δ de l'afficheur comme premier consommateur | plusieurs candidats réels se disputent un budget ; un domaine **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint ; la dégradation d'ADR-012 §4 rang 1 existe, donc la famine a une issue |
 | **B — δ sur les deux dimensions horizontales** *(ouverte S294 ; référence S297–S298 ; pas de production S299–S301 ; scène rendue S302 ; **R11 : δ reçu sans artefact, mer à corriger — ADR-176** ; **S305 : critère 2 mesuré sur les cas de cuve**)* | le solveur volumique qui n'est plus une tranche : domaine 3D, mer étalée, interaction avec des vagues réelles ; représentation et critères posés par [ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) D5 et §4 | banc **B3** (technique δ), cas **C10**, **C11** ; revue visuelle de l'utilisateur | une onde traverse une mer **étalée** et s'y déforme, jugée convaincante par l'utilisateur ; les réceptions 2D (S253, S268–S274) tiennent encore à trois dimensions. **S305** : la production suit la référence à 3·10⁻⁷ m pour 3 mm exigés sur les cas de cuve, phase décroissante ([preuve](validation/CUVE-GPU-S305.md)) ; il ne reste que le **verdict de l'utilisateur** |
 | **C — δ sous budget** | cadence découplée de l'image (I-05), δ sur GPU — **décidé S294** : pas résident à travail borné ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)) —, multigrille hors repli | **B7** sur la machine de référence ([ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) D1), cartes de coût selon ADR-131 | le pas tient **δ ≤ 2 ms GPU** (ADR-174 D3) sur la scène de la porte B, au 99ᵉ centile, **techniques présentes et absentes publiées** |
-| **D — solides et flottabilité** | corps flottants pris dans B+W+δ, forces rendues au jeu | **B6** (flottabilité), **B4** (forces et perception), cas **C13**, **C14** | un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le gameplay (I-04) |
+| **D — solides et flottabilité** *(S333 : partie numérique sur la référence CPU, [preuve](validation/PORTE-D-S333.md) ; verdict visuel attendu)* | corps flottants pris dans B+W+δ, forces rendues au jeu | **B6** (flottabilité), **B4** (forces et perception), cas **C13**, **C14** | un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le gameplay (I-04) |
 | **E — V articulé avec δ** | inondations : V expose sa surface, déclenche un δ local, la masse reste celle de V | cas **C17**, **C21**, **C19** complet | la comptabilité de masse est identique **avec et sans** δ (C21) |
 | **F — grande échelle** | référentiels multiples, bathymétrie, hauts-fonds, conformité multiplateforme | **B7** complet, **A98** | une scène lointaine et une scène proche coexistent sans rupture ni perte de précision |
 
@@ -261,7 +261,9 @@ sont préconditionnées en **S326** : 425 itérations à 128 au lieu de 16 029 (
 **S329** : un **solide quelconque** immergé — Archimède exact au niveau discret, sphère d'ordre 1,966 (§8) ;
 **S330** : il **bouge** — masse ajoutée d'une sphère `C_m` = 0,508 (§9) ; **S331** : le **corps rigide du
 jeu**, sur B + W, tient C10 ([preuve](validation/CORPS-RIGIDE-S331.md)) — lot 4 ouvert ; **S332** : il pilote
-sa coque dans δ, qui perce la surface, et δ ne le pilote jamais — trajectoire identique au bit (§4).
+sa coque dans δ, qui perce la surface, et δ ne le pilote jamais — trajectoire identique au bit (§4) ;
+**S333** : la coque sur une houle de B, et δ qui porte sa perturbation **relative à l'eau qui la porte** —
+anneaux de 9,4 cm, I-04 au bit ([preuve](validation/PORTE-D-S333.md)) ; verdict visuel attendu, A317 ouverte.
 **Le 2026-09-23** ([ADR-189](adr/ADR-189-la-v1-d-abord.md)), l'utilisateur demande la v1 d'abord : lots 3
 et 4 jusqu'à la porte D, l'alternance avec le lot 5 suspendue jusque-là. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**
@@ -292,8 +294,8 @@ date. Profil de travail de la porte C : [ADR-174](adr/ADR-174-arbitrages-du-2026
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 53 partiels,
-64 absents — **recalculé point par point en S309**, 4.8 (S316) et 4.12 (S320) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 54 partiels,
+63 absents — **recalculé point par point en S309**, 4.8 (S316), 4.12 (S320) et 6.2 (S333) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la

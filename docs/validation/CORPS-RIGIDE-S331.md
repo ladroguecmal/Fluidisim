@@ -20,7 +20,9 @@ que C10 attendait depuis S21.
 
 **État présent (S332, §4).** Le corps du jeu pilote sa paroi dans δ — qui perce la surface du mode
 linéaire —, et δ ne le pilote jamais : trajectoire identique au bit avec ou sans δ. La masse ajoutée du
-cube de C10 selon δ vaut 41,7 kg, 0,67 de sa masse.
+cube de C10 selon δ vaut 41,7 kg, 0,67 de sa masse. **S333** : la houle de B derrière la requête du corps, la
+poussée qui suit le gradient de pression, et la coque dans δ relative à l'eau qui la porte — la scène de la
+porte D, [PORTE-D-S333](PORTE-D-S333.md).
 
 ## 1. Le modèle
 
