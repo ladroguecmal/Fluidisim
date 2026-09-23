@@ -991,3 +991,40 @@ fn the_mobile_step_refuses_a_cut_bottom_s324() {
     let (mut v, _) = volume_bottom(6, 4, 5, 0.5, &vec![0.3f32; 24]);
     assert_eq!(v.step_surface_mobile(2000, 100, &Jobs).err(), Some(Error::Domain));
 }
+
+/// **S326, critère 2.** Jacobi sur le chemin coupé : la même solution à la tolérance près, en bien moins
+/// d'itérations, sur la bosse de S324 à la maille moyenne de son banc ; à `ny = 1`, rien ne change —
+/// les essais de S324 le gardent.
+#[test]
+fn jacobi_on_the_cut_path_keeps_the_solution_and_cuts_the_iterations_s326() {
+    let (nx, ny, nz, dx) = (64usize, 32usize, 32usize, 0.125f32);
+    let fond: Vec<f32> = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| bosse((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx)))
+        .collect();
+    let mut sorties = Vec::new();
+    for on in [false, true] {
+        let (mut v, _) = volume_bottom(nx, ny, nz, dx, &fond);
+        v.set_precondition_cut(on);
+        let z0 = v.domain.z0();
+        let eta: Vec<f32> = (0..ny)
+            .flat_map(|_| (0..nx).map(move |i| z0 + 0.01 * (core::f32::consts::TAU * (i as f32 + 0.5) * dx / 8.).sin()))
+            .collect();
+        v.set_surface(&eta).unwrap();
+        let r = v.step_surface_linear(2000, 20_000, &Jobs).unwrap();
+        let (ou, _, _) = v.apertures().unwrap();
+        let i = nx / 2;
+        let mut q = 0f64;
+        for k in 0..nz {
+            for j in 0..ny {
+                let f = (k * ny + j) * (nx + 1) + i;
+                q += ou[f] as f64 * v.velocity_u()[f] as f64 * (dx * dx) as f64;
+            }
+        }
+        sorties.push((r.iterations, q, r.divergence));
+    }
+    let ((it_sans, q_sans, _), (it_avec, q_avec, d_avec)) = (sorties[0], sorties[1]);
+    println!("S326 : sans Jacobi {it_sans} itérations, avec {it_avec} ; débit {q_sans:e} contre {q_avec:e}");
+    assert!(it_avec * 2 < it_sans, "{it_avec} contre {it_sans}");
+    assert!(((q_avec - q_sans) / q_sans).abs() < 1e-5, "débit {q_avec} contre {q_sans}");
+    assert!(d_avec <= PROJECTION_DIVERGENCE_TOLERANCE as f64);
+}

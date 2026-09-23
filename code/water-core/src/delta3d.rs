@@ -109,6 +109,9 @@ pub struct Volume3 {
     /// dont tous les chemins restent ceux d'avant, au bit. Mode linéaire seulement : les pas mobile
     /// et couplé la refusent tant qu'ils ne la portent pas.
     cut: Option<cut::Cut3>,
+    /// **S326 : Jacobi sur le chemin coupé** (A315), actif par défaut quand `ny > 1` ; à `ny = 1`, la 3D
+    /// reste la 2D au bit, et la 2D résout sans préconditionneur. Le couper sert à la mesure.
+    precondition_cut: bool,
 }
 
 impl Volume3 {
@@ -206,6 +209,7 @@ impl Volume3 {
             flux_y: vec![0.; fy],
             balance: Balance3::default(),
             cut: None,
+            precondition_cut: true,
         })
     }
 
@@ -229,7 +233,52 @@ impl Volume3 {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
         v.cut = Some(cut::cut(domain, bottom));
+        v.prec_cut();
         Ok(v)
+    }
+
+    /// S326 : active ou coupe le Jacobi du chemin coupé — pour la mesure ; actif par défaut.
+    pub fn set_precondition_cut(&mut self, on: bool) {
+        self.precondition_cut = on;
+    }
+
+    /// **S326 : la diagonale de Jacobi du chemin coupé** — ouvertures des faces vers une maille fluide,
+    /// deux fois celle du couvercle, comme la ligne de `apply_cut` ; zéro sur une maille solide. La
+    /// géométrie est fixe : calculée une fois, à la configuration.
+    fn prec_cut(&mut self) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let inv = 1. / (dx * dx);
+        let g = self.cut.as_ref().expect("fond coupé");
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let c = self.c(i, j, k);
+                    if g.frac[c] == 0. {
+                        self.prec[c] = 0.;
+                        continue;
+                    }
+                    let mut diag = 0f32;
+                    let mut face = |a: f32, n: Option<usize>, lid: bool| {
+                        if a == 0. {
+                            return;
+                        }
+                        match n {
+                            Some(m) if g.frac[m] > 0. => diag += a,
+                            Some(_) => {}
+                            None if lid => diag += 2. * a,
+                            None => {}
+                        }
+                    };
+                    face(g.open_u[self.fu(i, j, k)], (i > 0).then(|| c - 1), false);
+                    face(g.open_u[self.fu(i + 1, j, k)], (i + 1 < nx).then(|| c + 1), false);
+                    face(g.open_v[self.fv(i, j, k)], (j > 0).then(|| c - nx), false);
+                    face(g.open_v[self.fv(i, j + 1, k)], (j + 1 < ny).then(|| c + nx), false);
+                    face(g.open_w[self.fw(i, j, k)], (k > 0).then(|| c - nx * ny), false);
+                    face(g.open_w[self.fw(i, j, k + 1)], (k + 1 < nz).then(|| c + nx * ny), true);
+                    self.prec[c] = if diag > 0. { 1. / (diag * inv) } else { 0. };
+                }
+            }
+        }
     }
 
     /// S324 : la fraction fluide de chaque maille ; `None` sur le fond plat.
@@ -677,6 +726,9 @@ impl Volume3 {
         self.res.copy_from_slice(&self.rhs);
         let mut rr = b2;
         let mut primed = false;
+        // S326 : Jacobi sur le chemin coupé quand `ny > 1` ; ailleurs, le gradient conjugué de S295.
+        let jacobi = self.cut.is_some() && self.precondition_cut && ny > 1;
+        let mut rz = 0f32;
         let mut it = 0u32;
         let tol = 1e-12_f32;
         let mut floor_stop = false;
@@ -688,7 +740,11 @@ impl Volume3 {
             let before = it;
             while b2 > 0. && (rr > tol * b2 || rr > physical_target) && it < max_iters {
                 if !primed {
-                    self.dir.copy_from_slice(&self.res);
+                    if jacobi {
+                        rz = self.prime_mobile3(0., jobs)?;
+                    } else {
+                        self.dir.copy_from_slice(&self.res);
+                    }
                     primed = true;
                 }
                 let mut tmp = core::mem::take(&mut self.tmp);
@@ -696,15 +752,22 @@ impl Volume3 {
                 self.tmp = tmp;
                 let dq = self.dot(&self.dir, &self.tmp, jobs);
                 if !(dq > 0.) { break; }
-                let alpha = rr / dq;
+                let alpha = if jacobi { rz / dq } else { rr / dq };
                 for c in 0..self.p.len() {
                     self.p[c] += alpha * self.dir[c];
                     self.res[c] -= alpha * self.tmp[c];
                 }
                 let rn = self.norm2(&self.res, jobs)?;
-                let beta = rn / rr;
-                for c in 0..self.dir.len() {
-                    self.dir[c] = self.res[c] + beta * self.dir[c];
+                if jacobi {
+                    let zn = self.dot_prec3(jobs)?;
+                    let beta = zn / rz;
+                    self.prime_mobile3(beta, jobs)?;
+                    rz = zn;
+                } else {
+                    let beta = rn / rr;
+                    for c in 0..self.dir.len() {
+                        self.dir[c] = self.res[c] + beta * self.dir[c];
+                    }
                 }
                 rr = rn;
                 it += 1;
@@ -744,7 +807,11 @@ impl Volume3 {
                 since = 0;
             }
             rr = actual;
-            self.dir.copy_from_slice(&self.res);
+            if jacobi {
+                rz = self.prime_mobile3(0., jobs)?;
+            } else {
+                self.dir.copy_from_slice(&self.res);
+            }
         };
         let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
         let divergence = match settled {

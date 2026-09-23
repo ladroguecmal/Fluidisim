@@ -307,7 +307,7 @@ impl Volume3 {
         ((all * ratio) as f64, (plain * ratio) as f64)
     }
 
-    fn prime_mobile3(&mut self, beta: f32, jobs: &dyn JobSystem) -> Result<f32, Error> {
+    pub(super) fn prime_mobile3(&mut self, beta: f32, jobs: &dyn JobSystem) -> Result<f32, Error> {
         for c in 0..self.dir.len() {
             let z = self.prec[c] * self.res[c];
             self.dir[c] = if beta == 0. {
@@ -319,7 +319,7 @@ impl Volume3 {
         self.dot_prec3(jobs)
     }
 
-    fn dot_prec3(&self, jobs: &dyn JobSystem) -> Result<f32, Error> {
+    pub(super) fn dot_prec3(&self, jobs: &dyn JobSystem) -> Result<f32, Error> {
         let reduce = |start: usize, end: usize| {
             let mut acc = 0f32;
             for c in start..end {

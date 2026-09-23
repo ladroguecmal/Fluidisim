@@ -87,12 +87,19 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — Jacobi sur le chemin coupé, commutable pour la mesure ; essais.
-- [ ] **P3** — le banc de S324 rejoué, avec et sans Jacobi.
-- [ ] **P4** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
+- [x] **P2** — Jacobi sur le chemin coupé, commutable pour la mesure ; essais.
+- [x] **P3** — le banc de S324 rejoué, avec et sans Jacobi.
+- [>] **P4** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; A315, file.
 - [ ] **P5** — S320 P5b : §5 bis au retour du calcul lancé le 22 à 20:11 — asynchrone.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
 
+**P2 + P3 (07:32), fusion déclarée : le banc ne change pas, il se rejoue.** `prime_mobile3` et `dot_prec3`
+rendus `pub(super)` ; diagonale du chemin coupé calculée une fois à la configuration ; Jacobi quand
+`ny > 1`, commutable (`set_precondition_cut`). Essai à 64 : 645 → **220** itérations, débit à 2,4·10⁻⁶.
+Suite : **590 réussis**, 0 échec ; les essais de S324 — identité 2D à `ny` = 1 — passent. Banc : bosse à
+128, **16 029 → 425 itérations, 708 → 5,7 s** ; débits à ≤ 2,4·10⁻⁶ de S324 ; ordre 1,947. Témoin :
+347 → 422 itérations — Jacobi y coûte un peu, ses petites cellules ne gênaient pas. Banc entier : 12 min
+→ 12 s.
