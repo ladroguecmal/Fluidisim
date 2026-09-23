@@ -97,10 +97,12 @@ seul — son effet mesuré contre le montage de S325 — reste une attribution p
 - [x] **P3** — suspect choisi par P2 ; commutable, mesuré seul.
 - [x] **P4** — suspect suivant ; commutable, mesuré seul.
 - [x] **P5** — suspect suivant ; commutable, mesuré seul.
-- [ ] **P6** — le raccord corrigé, contre les critères, deux mailles.
-- [ ] **P7** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
+- [ ] **P6** — *(ajoutée à 22:09, après P5)* la dissipation propre aux colonnes : hauteur mouillée
+  **centrée** dans leur transport au lieu d'amont, commutable ; zone à 95 % et 50 %.
+- [ ] **P7** — le raccord corrigé, contre les critères, deux mailles.
+- [ ] **P8** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; file, liste.
-- [ ] **P8** — rituel.
+- [ ] **P9** — rituel.
 
 Les quatre suspects : (a) la surface des colonnes vue par la pression, arrondie au quart de maille par
 `round(4h/dx)` — sur une onde de 0,4 maille à 5 cm ; (b) l'insertion des particules sortantes, toutes à
