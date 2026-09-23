@@ -62,56 +62,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S325 — **terminée** (2026-09-23 01:31, P5 reportée). **Lot 5, le raccord dynamique** — une région en colonnes qui évolue à
-côté d'une région en particules, alternance d'[ADR-188](../docs/adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md).
+Session : S326 — **en cours**. **Lot 3 : Jacobi sur le chemin coupé** (A315), alternance
+d'[ADR-188](../docs/adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Continue »*, après S324 ; suite déclarée : le raccord dynamique.
+Entrée : *« continue »*, après S325 ; suite déclarée : Jacobi sur le chemin coupé.
 
-**Ce que la session doit rendre possible.** La première eau qui vit **à la fois** en colonnes et en
-particules, et passe de l'une à l'autre en cours de simulation — le geste qui fera consommer APIC par
-δ, et le point 4.20 (changement de représentation en cours de simulation). Consommateur : le raccord
-en 3D, puis la porte D et C20.
+**Ce que la session doit rendre possible.** Une trajectoire à maille fine sur fond coupé : à 128, la
+bosse de S324 coûtait **16 029 itérations et 708 s** pour un pas, contre 347 et 4 s sans elle — la
+tolérance physique d'ADR-144 ne se refermait que lentement dans les petites cellules, le mode linéaire
+n'ayant aucun préconditionneur. Consommateur : la frontière mobile du lot 3, puis les corps du lot 4.
 
-**Le montage, le plus petit qui soit dynamique.** Dans le banc APIC 2D, la moitié droite du bassin
-est portée par des **colonnes** : une hauteur par colonne, transportée par les flux ouverts de la
-grille — le modèle des colonnes de δ. Ses particules sont **réensemencées à chaque pas** depuis ces
-hauteurs : elles ne servent qu'au transfert vers la grille et à la surface que voit la pression. À
-la frontière : une particule libre qui entre dans la zone des colonnes est retirée et sa masse ajoutée
-à la colonne ; la part sortante du flux de la grille est ensemencée en particules libres, le reste
-reporté. La masse totale est la masse des particules libres plus celle des colonnes.
+**Le remède.** Le Jacobi du mode mobile 3D (`prime_mobile3`, `dot_prec3`), porté au chemin coupé du mode
+linéaire : diagonale de la ligne pondérée — ouvertures des faces vers une maille fluide, deux fois
+l'ouverture du couvercle. **Seulement quand `ny > 1`** : à `ny = 1`, la 3D reste la 2D au bit, et la 2D
+résout sans préconditionneur. Le fond plat n'est pas touché.
 
 Critères, écrits avant le code :
-1. **Masse** : particules libres + colonnes conservées à 10⁻¹⁰ près en relatif, par construction.
-2. **Repos**, 5 s : vitesse maximale sous 1 cm/s (APIC seul : 4,4 mm/s) ; écart de surface à la
-   frontière sous 0,2 maille.
-3. **Ballottement**, 10 s, 5 et 2,5 cm : période à 1 % de celle d'APIC seul à la même maille ; écart
-   de surface à la frontière sous 0,5 maille ; aucune divergence.
-4. Rien dans le cœur ; APIC seul inchangé au bit.
+1. Identité 2D à `ny = 1` et fond plat : tous les essais antérieurs **au bit** ; suite complète verte.
+2. Bosse à 128 : **au plus 1 000 itérations** (16 029 avant).
+3. Débits à 32, 64 et 128 égaux à ceux de S324 à **10⁻⁵ près** en relatif — deux solutions convergées à
+   la même tolérance ; ordre toujours ≥ 1,8.
+4. Aucune allocation dans le pas : le tampon `prec` existe.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le candidat hybride dans le banc : colonnes à droite, particules à gauche, échanges
-  à la frontière.
-- [x] **P3** — repos et ballottement, deux mailles : masse, période, écart à la frontière.
-- [x] **P4** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
-  « Reproduire » ; file, liste 4.20 si la mesure le permet.
-- [ ] **P5** — S320 P5b : §5 bis au retour du calcul lancé à 20:11 — asynchrone. **Reportée** : encore
-  en calcul à 01:31 ; le point daté de la file la porte.
-- [x] **P6** — rituel.
+- [ ] **P2** — Jacobi sur le chemin coupé, commutable pour la mesure ; essais.
+- [ ] **P3** — le banc de S324 rejoué, avec et sans Jacobi.
+- [ ] **P4** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
+  avec « Reproduire » ; A315, file.
+- [ ] **P5** — S320 P5b : §5 bis au retour du calcul lancé le 22 à 20:11 — asynchrone.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
 
-**P2 + P3 (01:30), fusion déclarée.** Candidat `hybride` et mode `raccord_dyn`. Défaut corrigé avant la
-première mesure : une particule de colonne qui glisse à gauche aurait été gardée et comptée deux fois —
-toutes les particules de colonne sont retirées après chaque pas. **Masse exacte** partout (≤ 1,3·10⁻¹⁵).
-*Repos 5 cm* : écart à la frontière 0,002 maille ; vitesse max **1,4 cm/s** (APIC seul 4,4 mm/s) —
-critère 2 manqué ; fuite à sens unique de 4,8·10⁻⁴ m² en 10 s. *Ballottement* : échanges dans les deux
-sens (0,155 entré, 0,154 sorti à 5 cm) ; **écart à la frontière 1,81 et 2,85 mailles** (APIC seul 0,14 et
-0,17) ; amortissement **16 % puis 5 % par période** (APIC 0,4 et 0,3 %) ; période +7,6 % zéros /
-+5,2 % périodogramme à 5 cm, +2,4 / +0,14 % à 2,5 cm ; vitesses parasites 0,6 et 0,9 m/s. Critère 3
-manqué. **Hypothèse du lissage grille → réseau → grille, contredite** : l'amortissement ne suit pas la
-taille de la zone — 16 % (frontière à L/2), 0,9 % (3L/4), 10 % (7L/8). Cause non attribuée ; suspects :
-l'insertion des particules sortantes, la quantification de l'ensemencement, la frontière au nœud du mode.
-
-**P4.** Liste 4.20 **inchangée** : l'échange à masse exacte est reçu, la frontière non.
