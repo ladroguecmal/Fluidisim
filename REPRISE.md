@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-23 22:48 +02:00
+JETON            : occupé
+Battement        : 2026-09-23 22:53 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S329 — la v1 d'abord (ADR-189) ; lot 3, un obstacle qui n'est pas un fond
 Dernière session : S328 — **lot 3, le mode mobile sur fond coupé** : le pas à surface mobile porte la découpe, au bit de la 2D à `ny` = 1 sur les fonds de S232, ordre 1,954 sur une bosse 3D, à 3·10⁻⁶ du mode linéaire ([preuve](docs/validation/FACES-COUPEES-3D-S324.md) §7)
 Session suivante : **S329, lot 5 — la dissipation propre aux colonnes** (A316, alternance d'ADR-188) : d'abord vérifier qu'elle bloque encore l'usage — quatrième session du raccord —, puis la localiser ; piste, une bande de recouvrement. Le lot 3 reprendra par les obstacles qui ne sont pas un fond
 Maillons        : 0 — S328 : mode mobile sur fond coupé reçu, 4.15 avance

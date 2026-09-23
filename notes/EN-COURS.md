@@ -62,72 +62,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S328 — **terminée** (2026-09-23 22:48). **Lot 3 : le mode mobile sur fond coupé** (4.15), alternance
-d'[ADR-188](../docs/adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md).
+Session : S329 — **en cours**. **La v1 d'abord** (ADR-189, à écrire en P2) ; **lot 3 : un obstacle qui
+n'est pas un fond** — essai 2 de la piscine, la boule immergée.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« continue »*, après S327 ; suite déclarée : le mode mobile sur fond coupé. **Maillons à 3** :
-une capacité est due.
+Entrée : *« continue, jusqu'à la v1 »*, après S328.
 
-**Ce que la session doit rendre possible.** La référence 3D de δ porte depuis S324 un fond coupé, mais
-en mode **linéaire** seulement : le pas à surface mobile le refuse. Or c'est la surface mobile qui porte
-les corps flottants du lot 4 et la frontière mobile du lot 3. Point 4.15 : « Manquent … le mode mobile ».
-Le pas mobile **2D** porte déjà la découpe (S237, `delta_mobile.rs`) : la 3D doit la reproduire au bit à
-`ny` = 1, comme S324 l'a fait pour le mode linéaire.
+**Le chemin de la v1, lu dans le dépôt.** v1 = porte D franchie (ADR-174 D4, ADR-178 D7) : lots 3 et 4.
+Lot 3 : faces coupées 3D « fixes d'abord, puis à frontière mobile » — essais 2 (boule immergée : volume
+déplacé, flottabilité) et 3 (mouvement imposé : forces, vagues). Lot 4 : corps rigide, forces rendues,
+masse ajoutée — une boule libre à son tirant et à la période de C10 (cube 0,5 m à 500 kg/m³ : tirant
+0,25 m ± 1 %, période 1,00 s ± 5 %, rapport √2 ± 15 % avec la masse ajoutée). Porte D : un bateau flotte
+et perturbe l'eau qui le porte, **sans autorité de δ sur le jeu** (I-04, ADR-008) — le jeu le fait
+flotter sur B + W ; δ le voit comme une paroi mobile et ne lui rend qu'un décalage visuel borné.
 
-**Le portage.** Maille mouillée : fraction non nulle et centre sous la surface. Lignes de pression
-pondérées par les ouvertures, fantômes compris ; second membre par la divergence ouverte ; correction et
-extrapolation limitées aux faces ouvertes entre mailles de fluide ; transport des hauteurs par débits
-ouverts ; advection qui saute les faces fermées ; garde de géométrie : surface à deux mailles au moins
-au-dessus du plus haut coin du fond de sa colonne — celle de la 2D. Le fond plat, poids 1, reste au bit.
-Le pas **couplé** à B/W continue de refuser la découpe.
+**Ce que la session doit rendre possible.** La découpe de δ ne connaît qu'un fond en hauteur. Il lui
+faut un **solide quelconque** : une forme donnée par sa distance signée aux nœuds de la grille, coupée
+exactement pour un champ linéaire par morceaux — faces en quatre triangles autour de leur centre,
+mailles en vingt-quatre tétraèdres qui s'appuient sur eux, formules closes sans soustraction instable.
+Fixe dans cette session ; la frontière mobile suivra sur les mêmes tampons.
 
 Critères, écrits avant le code :
-1. **Fond plat** : le pas mobile 3D inchangé au bit — tous les essais antérieurs passent.
-2. **`ny` = 1**, trois fonds de S232 : 200 pas mobiles **identiques au bit** au pas mobile 2D — surface,
-   `u`, `w`, pression, itérations.
-3. **Lac au repos** sur la bosse 3D : 100 pas mobiles, vitesses et surface nulles en bits.
-4. **Invariance transverse** : fond sans `y`, `ny` = 4 — les tranches identiques entre elles au bit, et
-   à 10⁻⁵ près en relatif de la tranche `ny` = 1 après 100 pas.
-5. **Ordre** du débit ouvert au premier pas, en mode mobile, sur la bosse 3D : **≥ 1,8**, comme S324.
-6. **Refus** : surface à moins de deux mailles du fond coupé → `Domain`, état restauré au bit.
+1. **Plan** : une distance signée plane donne fractions et ouvertures exactes à 10⁻⁶ ; un solide absent
+   laisse la géométrie du fond **au bit**.
+2. **Sphère immergée** : volume déplacé `Σ(1 − fraction)·dx³` d'**ordre ≥ 1,8** vers `4πR³/3` ; ouvertures
+   et fractions symétriques par réflexion.
+3. **Cohérence** : pour chaque maille, `Σ ouvertures·normales` des faces et paroi solide se ferment
+   (théorème de la divergence discret) ; la poussée hydrostatique intégrée sur la paroi discrète tend
+   vers `ρgV` à l'ordre ≥ 1,8.
+4. **Les pas** : lac au repos exact autour de la sphère, modes linéaire et mobile ; la sphère qui touche
+   le fond ou approche la surface est refusée (`Domain`).
+5. **Ordre** du débit ouvert au premier pas autour de la sphère, mode linéaire : **≥ 1,8**.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le pas mobile 3D porte la découpe ; fond plat au bit, suite verte.
-- [x] **P3** — essais des critères 2, 3, 4 et 6.
-- [x] **P4** — banc : le premier pas mobile sur la bosse, trois mailles, ordre ; écart au mode linéaire.
-- [x] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
+- [ ] **P2** — ADR-189 : la v1 d'abord ; index, file.
+- [ ] **P3** — géométrie : solide par distance signée aux nœuds, faces et mailles exactes pour le champ
+  linéaire ; critères 1 à 3 en essais.
+- [ ] **P4** — le solide dans les pas linéaire et mobile ; critère 4.
+- [ ] **P5** — banc : débit autour de la sphère, trois mailles, ordre ; poussée.
+- [ ] **P6** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste 4.15.
-- [x] **P6** — rituel.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-**P2 (22:39).** `delta3d_mobile.rs` : maille mouillée = fraction non nulle et centre sous la surface ;
-lignes `(voisin, ouverture, 1/θ, valeur)`, l'ouverture valant 1 sans découpe — `a·(p−q)`, `a·p·θ⁻¹`,
-`a·valeur·θ⁻¹·dx⁻²`, `a·u·dx·mouillé`, l'ordre de la 2D ; correction, extrapolation et advection
-sautent les faces fermées ; garde : plancher = plus haut coin du fond de la colonne (`Cut3::floor`,
-compté à la configuration) + deux mailles. Le pas mobile restaure la diagonale de Jacobi du chemin
-linéaire coupé. Le pas couplé refuse toujours la découpe (essai de S324 réécrit sur lui). Cœur : **469
-réussis**, 0 échec ; les identités 2D du mode mobile sur fond plat (S296, 1 604 pas) passent au bit.
 
-**P3 (22:44).** Quatre essais `…_s328`, tous tenus. **Critère 2** : à `ny` = 1, sur les trois fonds de
-S232, 200 pas mobiles **identiques au bit** au pas mobile 2D — surface, pression, `u`, `w`, itérations.
-**Critère 3** : lac au repos sur la bosse 3D, 100 pas, vitesses et surface nulles en bits. **Critère 4** :
-fond sans `y`, `ny` = 4 — tranches identiques au bit entre elles, **et à la tranche `ny` = 1** après cent
-pas (écart nul). L'écoulement transverse, lui, n'est nul qu'à l'arrondi : 6·10⁻⁹ m/s ; **le fond plat
-de S296 en fait autant** (5·10⁻⁹ pour 0,037 m/s de `u`) — la diagonale de Jacobi des rangées de bord
-n'est pas celle des rangées intérieures. L'essai exigeait `v` nul au bit, ce que le critère ne demandait
-pas : borne relative 10⁻⁶ de `u`. **Critère 6** : surface à 1,4 m sur la bosse refusée, état restauré au
-bit ; la même profondeur passe sur un fond plat à 0,3 m. Suite complète : **594 réussis**, 0 échec.
-
-**P4 (22:45).** `delta3d_fond_coupe --mobile` : surface au repos à 4 m — la hauteur du couvercle
-linéaire — dans un domaine de 6 m ; débit ouvert **et mouillé** à `x = L/2` ; 45 s en tout.
-
-| fond | 32 | 64 | 128 | ordre | écart au linéaire, 32 / 64 / 128 |
-|---|---:|---:|---:|---:|---:|
-| bosse 3D | 9,144654995·10⁻⁴ | 9,169156332·10⁻⁴ | 9,175479984·10⁻⁴ | **1,954** | +9·10⁻⁷ / +5·10⁻⁷ / −2,8·10⁻⁶ |
-| témoin sans `y` | 9,009922527·10⁻⁴ | 9,033861207·10⁻⁴ | 9,040044679·10⁻⁴ | 1,953 | −8·10⁻⁶ / −9·10⁻⁶ / −1·10⁻⁵ |
-
-**Critère 5 tenu.** Itérations comme le linéaire (444 contre 425 à 128) ; le pas mobile à 128 (786 432
-mailles) coûte 16,6 s, contre 5,7 s au linéaire sur 524 288 mailles — ses lignes se recalculent à
-chaque produit, la référence CPU ne l'a jamais caché.
