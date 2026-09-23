@@ -62,65 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S332 — **terminée** (2026-09-23 23:44). **Lot 4 : le corps dans δ** ; chemin de la v1
-([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
+Session : S333 — **en cours**. **La porte D** : un bateau flotte et perturbe l'eau qui le porte, sans
+autorité de δ sur le jeu ; chemin de la v1 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S331.
+Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S332.
 
-**Ce que la session doit rendre possible.** Le corps du jeu (S331) **déplace sa paroi dans δ** : à chaque pas,
-sa pose donne la distance signée de sa coque aux nœuds, sa vitesse de corps rigide — translation **et
-rotation** — donne celle de la paroi ; la coque **perce le couvercle** du mode linéaire, dont les faces
-qu'elle couvre se ferment. δ rend au corps une force, qui ne nourrit qu'un **décalage visuel borné**
-(ADR-008 §1 : ≤ 8 cm) — jamais la trajectoire de jeu (I-04). Consommateur : le bateau de la porte D.
+**Ce que la session doit rendre possible.** La scène de la porte D, sur la référence CPU (ADR-178 D4, D5) :
+une coque de jeu sur une **houle de B**, et δ qui porte **la perturbation qu'elle ajoute** — rayonnement de
+son mouvement relatif à l'eau qui la porte. **La théorie linéaire dit comment la poser** : la coque se place
+dans δ à sa position **relative** à la surface incidente, et sa paroi avance à la vitesse **relative** —
+corps moins houle, prise au centre de la coque, valable pour une coque courte devant la longueur d'onde.
+Prendre sa pose absolue compterait deux fois le mouvement de la houle. Puis des images, et **l'arrêt pour
+le verdict visuel de l'utilisateur** : ADR-178 D3 exige les deux validations, ADR-189 D3 dit de s'arrêter.
 
 Critères, écrits avant le code :
-1. **Rotation** : une sphère qui tourne sur elle-même ne pousse pas l'eau — vitesse maximale sous 1 % de
-   `Ω·R` après un pas ; un pavé qui tourne en pousse. Translation seule : le chemin de S330 **au bit**
-   (les valeurs de `C_m` de §9 se retrouvent).
-2. **Coque qui perce** : le pas linéaire l'accepte ; un lac au repos autour d'elle reste au repos au bit.
-3. **Volume** : cube de C10 qui pilonne en perçant le couvercle — `Σ(η − reste − z₀)·dx²` suit le volume
-   immergé du solide dans le domaine à 10⁻⁹ m³ près.
-4. **Masse ajoutée du cube flottant**, départ impulsif en pilonnement, trois mailles : convergente ; publiée
-   contre le disque de même aire en fluide illimité, `(8/3)ρR³` (la référence de C10), et sa moitié
-   `(4/3)ρR³` (un corps qui flotte, surface à pression nulle).
-5. **I-04** : la trajectoire du corps avec δ attaché, **identique au bit** à celle sans δ ; le décalage
-   visuel reste sous 8 cm et n'est pas nul.
+1. **B derrière la requête d'eau** : une coque sur une houle longue pilonne à l'amplitude que donne
+   `1/(1 − ω²/ωₙ²)` — réponse d'un pavé droit sous Froude–Krylov hydrostatique — à ± 5 %.
+2. **Au repos relatif**, pas de perturbation : une coque qui suit exactement la houle (vitesse relative
+   nulle) laisse δ au repos au bit.
+3. **I-04** : la trajectoire de jeu identique au bit avec ou sans δ, dans la scène de la porte D.
+4. **Conservation** : le volume de δ suit celui de la coque plongée à 10⁻⁹ m³ près.
+5. **La perturbation existe et reste bornée** : élévation de δ non nulle, sous l'amplitude de la houle.
+6. **Images** de la surface totale — houle B plus perturbation δ — autour de la coque, à plusieurs instants.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — mouvement rigide de la paroi ; critère 1.
-- [x] **P3** — la coque perce le couvercle ; critères 2 et 3.
-- [x] **P4** — banc : masse ajoutée du cube flottant, trois mailles (critère 4).
-- [x] **P5** — le corps du jeu pilote sa paroi, décalage visuel borné ; critère 5.
-- [x] **P6** — preuve : section datée de [CORPS-RIGIDE-S331](../docs/validation/CORPS-RIGIDE-S331.md), avec
-  « Reproduire » ; file, liste.
-- [x] **P7** — rituel.
+- [ ] **P2** — `BackgroundWater` : la requête d'eau sur B ; critère 1.
+- [ ] **P3** — la coque de δ relative à l'eau qui la porte ; critère 2.
+- [ ] **P4** — banc `porte_d` : coque 4 × 1,6 × 1 m sur une houle ; critères 3 à 5, champs écrits.
+- [ ] **P5** — images de la scène (critère 6).
+- [ ] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
+  partie numérique), liste, file.
+- [ ] **P7** — rituel ; arrêt pour le verdict visuel.
 
 ### Notes de reprise
-**P2 (23:35).** `set_solid_rigid(nœuds, V, Ω, c)` : la part couverte de chaque face avance à `V + Ω × (x − c)`
-prise au centre de la face ; faces qui naissent à cette vitesse ; `set_solid` = sans rotation, au bit —
-les `C_m` de S330 se retrouvent à l'identique. **Critère 1, verdict partagé** : sphère qui tourne sur
-elle-même, vitesse maximale **1,08 %** de `Ω·R` à 6 mailles par rayon — *manqué* —, **0,73 %** à 12 —
-*tenu* ; décroissance d'ordre **0,56** seulement. Cause lue : la vitesse de paroi au centre de la face,
-non au centroïde de sa part couverte — une petite part couverte au coin d'une face s'écarte de `Ω·dx/2`,
-et une petite maille l'amplifie. Remède nommé, non fait : le centroïde de la part couverte. Pavé qui
-tourne : 0,42 m/s, il pousse l'eau.
-**P3 (23:38).** `configure_with_floating_solid` : le solide peut occuper la couche du couvercle ; le pas
-linéaire ne refuse plus qu'un **fond** qui l'atteindrait. L'opérateur pondérait déjà la condition du
-couvercle par l'ouverture : une face couverte devient paroi, une face en partie couverte garde la
-condition sur sa part libre ; la part couverte avance à la vitesse de la coque. Cube de C10 à son tirant,
-24³ : **lac au repos au bit**, 100 pas ; pilonnement imposé 2 cm à 2 Hz, 100 pas : la surface suit le
-volume de coque plongé à **2,7·10⁻¹⁰ m³**. Sans l'autorisation, la configuration refuse. Cœur : 490.
-**P4 (23:39).** `delta3d_fond_coupe --masse-ajoutee-flottant` : cube de C10 à son tirant, 2,4 × 2,4 m sur 1,2 m
-d'eau, départ impulsif en pilonnement ; 5 s. Masse ajoutée **33,20 / 41,26 / 41,66 kg**, limite extrapolée
-**41,69 kg** — convergente, **critère 4 tenu**. Contre les deux disques : `(8/3)ρR³` = 61,36 kg, la référence
-de C10, la **surestime de 47 %** ; `(4/3)ρR³` = 30,68 kg la sous-estime. 41,7 kg = 0,67 de la masse du cube :
-le rapport des périodes deviendrait √(1 + 41,7/62,5) = **1,291**, encore dans la tolérance de C10 (1,414 ±
-15 %). δ peut donner au jeu son coefficient de masse ajoutée, mesuré hors ligne — un paramètre, pas une force
-de δ au pas : I-04 tient.
-**P5 (23:42).** `rigid_body.rs` : `oriented_box_distance` — la coque d'un corps aux nœuds de δ — et
-`RenderOffset`, le ressort borné d'ADR-008 §1 (8 cm ; la part en rotation, ≤ 3°, manque). Cube de C10
-lâché la base à la surface, 300 pas : sa coque pilotée dans δ par `set_solid_rigid`, la force de δ sur la
-coque n'anime que le ressort. **Trajectoire de jeu identique au bit** à celle du corps seul ; décalage
-maximal **6,7 cm** ; coque descendue à 0,488 m. Critère 5 tenu. Cœur : 491 réussis.
+

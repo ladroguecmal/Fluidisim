@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-23 23:44 +02:00
+JETON            : occupé
+Battement        : 2026-09-23 23:46 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S333 — la porte D (ADR-189)
 Dernière session : S332 — **lot 4, le corps dans δ** : paroi en mouvement rigide, coque qui perce la surface linéaire, le corps du jeu pilote sa paroi et δ ne le pilote jamais — trajectoire identique au bit ; masse ajoutée du cube de C10 selon δ 41,7 kg, le disque de C10 la surestime de 47 % ([preuve](docs/validation/CORPS-RIGIDE-S331.md) §4)
 Session suivante : **S333, la porte D** (ADR-189) : le bateau sur une houle B — `WaterQuery` sur B, paroi de δ relative à l'eau qui la porte (vitesse de paroi par face) ; mesure de la perturbation et de la conservation ; images de la scène ; puis **arrêt pour le verdict visuel de l'utilisateur** (ADR-178 D3, ADR-189 D3). Signaler : la porte D cite C13 et C14, qui ne portent pas sur les solides
 Maillons        : 0 — S332 : corps du jeu dans δ reçu, 6.1 avance
