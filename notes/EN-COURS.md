@@ -92,7 +92,7 @@ Critères, écrits avant le code :
   meurent, eau déplacée ; flux du solide dans la divergence ; critères 1, 3, 5.
 - [x] **P3** — volume (critère 2) ; force de pression sur la paroi depuis la pression de δ.
 - [x] **P4** — banc : départ impulsif, trois mailles, `C_m`.
-- [ ] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
+- [x] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste.
 - [ ] **P6** — rituel.
 

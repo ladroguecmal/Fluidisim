@@ -31,6 +31,7 @@ itérations et 5,7 s**, comme le fond sans bosse ; débits inchangés à 2,4·10
 **S328 (§7)** : le **mode mobile** porte la découpe — au bit de la 2D à `ny` = 1, ordre 1,954 sur la
 bosse, à 3·10⁻⁶ du mode linéaire. **S329 (§8)** : un **solide quelconque** par distance signée — volume
 déplacé d'ordre 2, Archimède exact au niveau discret, débit autour d'une sphère d'ordre 1,966.
+**S330 (§9)** : le solide **bouge** — volume suivi à 4·10⁻¹¹ m³, masse ajoutée d'une sphère `C_m` = 0,508.
 
 ## 1. La géométrie
 
@@ -263,3 +264,51 @@ sautées ; l'identité 2D de §7 tient au bit.
 **Possible** : un obstacle quelconque, immergé et fixe, dans la référence 3D — l'essai 2 de la piscine,
 et la géométrie d'une coque. **Manquent** : un solide qui **bouge** — la frontière mobile, l'essai 3 ; un
 solide qui **perce la surface** — le bateau ; un solide au contact du fond ; le pas couplé à B/W.
+
+---
+
+## 9. S330 — la frontière mobile : la boule à mouvement imposé
+
+2026-09-23. **Lot 3**, chemin de la v1 ([ADR-189](../adr/ADR-189-la-v1-d-abord.md)) : l'essai 3 de la
+piscine. Le solide de §8 **bouge**, en mode linéaire — celui où un bateau percera un jour le couvercle.
+
+### Reproduire
+
+- Commit `238e928d` ou plus récent ; machine de référence, CPU, un fil.
+- `cargo test -p water-core --release --offline s330` — trois essais, 5 s.
+- `cargo run -p water-core --release --offline --example delta3d_fond_coupe -- --masse-ajoutee` — lignes
+  `FOND3D_S330`, 11 s.
+- Valeurs attendues : `C_m` = 0,48969 / 0,50506 / 0,50792 à 3 / 6 / 12 mailles par rayon.
+- Cœur : 482 réussis.
+
+### Ce qui change
+
+L'hôte donne à δ, avant chaque pas, la distance signée du solide à sa nouvelle position et sa vitesse de
+translation (`Volume3::set_solid`). La découpe est refaite **en place, sans allocation**, depuis une copie
+du fond seul comptée à la configuration ; les refus sont vérifiés avant toute écriture. Dans la
+divergence, la part d'une face que le solide couvre avance à sa vitesse — la formulation pondérée par les
+ouvertures ; une face qui s'ouvre naît à la vitesse du solide, une face qui se ferme perd la sienne ;
+l'eau que le solide déplace dans une colonne en élève la surface, par la somme compensée du transport.
+`solid_force` rend la force de la pression de δ sur la paroi : la pression de chaque maille sur ses
+polygones de coupe.
+
+### Ce qui est mesuré
+
+| critère, écrit avant le code | verdict |
+|---|---|
+| 1. reposer le même solide immobile | 50 pas linéaires sous une onde **au bit** d'un volume qui ne l'a pas reposé |
+| 2. volume | sphère à 1 m/s, 50 pas : la surface suit la variation du volume discret du solide à **3,6·10⁻¹¹ m³**, pour 10⁻⁹ exigé |
+| 3. faces | deux mailles traversées : des faces naissent, divergence sous la tolérance à chaque pas, aucune vitesse sur une face fermée, rien de non fini ; un solide contre le couvercle refusé sans rien écrire |
+| 4. masse ajoutée, départ impulsif, un pas | `C_m` = 0,490 / 0,505 / **0,508** à 3 / 6 / 12 mailles par rayon, convergent (limite ≈ 0,509) : **1,6 % de 0,5** |
+| 5. solides fixes et fond | suite du cœur verte |
+
+L'excès de `C_m` sur 0,5 va dans le sens du confinement : des murs rigides à quatre rayons augmentent la
+masse ajoutée de quelques pourcents — `(1 + 2q)/(1 − q)` = 1,048 dans une sphère rigide de rayon
+quadruple, `q = (1/4)³` ; le cube, plus grand, moins. **δ rend à un corps qu'on met en mouvement la masse
+d'eau qu'il entraîne** — la grandeur dont le lot 4 a besoin, et que C10 juge.
+
+### Ce qui manque
+
+La **rotation** du solide (la vitesse est une translation) ; un solide qui **perce la surface** — le
+couvercle du mode linéaire doit encore être entièrement mouillé ; le mode mobile et le pas couplé avec un
+solide qui bouge ; les vagues rayonnées, montrées mais pas mesurées.
