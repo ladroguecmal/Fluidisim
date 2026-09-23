@@ -100,7 +100,7 @@ Critères, écrits avant le code :
 - [x] **P3** — géométrie : solide par distance signée aux nœuds, faces et mailles exactes pour le champ
   linéaire ; critères 1 à 3 en essais.
 - [x] **P4** — le solide dans les pas linéaire et mobile ; critère 4.
-- [ ] **P5** — banc : débit autour de la sphère, trois mailles, ordre ; poussée.
+- [x] **P5** — banc : débit autour de la sphère, trois mailles, ordre ; poussée.
 - [ ] **P6** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste 4.15.
 - [ ] **P7** — rituel.
@@ -121,3 +121,7 @@ refusée, état restauré. **Défaut trouvé et corrigé** : une face fermée po
 mobile remonte chaque colonne de faces et remplissait celles du solide avec la vitesse d'en dessous ;
 sous un fond, aucune face résolue ne les précède, la 2D ne pouvait pas le voir. Elle saute désormais
 les faces fermées ; l'identité 2D de S328 tient au bit. Cœur : 479 réussis.
+**P5 (23:05).** `delta3d_fond_coupe --sphere` : sphère de 0,8 m en (3,6 ; 1,6 ; 1,8), que le plan de mesure
+coupe ; 10 s. Débit 9,212230492·10⁻⁴ / 9,230888226·10⁻⁴ / 9,235664830·10⁻⁴ m³/s à 32 / 64 / 128 ; **ordre
+1,966** ; la sphère retire 2,07 / 2,13 / 2,14 % du débit sans elle ; 425 itérations à 128, comme sans
+sphère. La poussée est reçue par l'essai de P3 (identité à 10⁻⁹), pas par le banc.

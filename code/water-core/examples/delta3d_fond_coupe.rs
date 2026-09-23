@@ -17,6 +17,9 @@
 //! mailles, et son écart au mode linéaire. Le débit ne compte que la part mouillée des faces, comme le
 //! transport des hauteurs.
 //!
+//! **S329, `--sphere`** : le premier pas linéaire autour d'une **sphère immergée** de 0,8 m, décentrée, que
+//! le plan `x = L/2` traverse — ses faces y sont ouvertes en partie ; ordre sur trois mailles.
+//!
 //!     cargo run -p water-core --release --offline --example delta3d_fond_coupe
 
 #[path = "../../water-harness/src/host_impl.rs"]
@@ -118,6 +121,46 @@ fn debit_mobile(fond: fn(f32, f32) -> f32, nx: usize) -> (f64, u32, f64, f64, us
     (q, r.iterations, r.divergence, duree, nx * ny * nz)
 }
 
+/// **S329 : le premier pas linéaire autour d'une sphère immergée** — rayon 0,8 m, centre (3,6 ; 1,6 ;
+/// 1,8) m : le plan `x = L/2` la coupe. Fond plat. Débit ouvert à travers ce plan.
+fn debit_sphere(nx: usize) -> (f64, u32, f64, f64, usize) {
+    let (ny, nz) = (nx / 2, nx / 2);
+    let dx = LX / nx as f32;
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 31);
+    let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
+    let mut noeuds = Vec::with_capacity((nx + 1) * (ny + 1) * (nz + 1));
+    for k in 0..=nz {
+        for j in 0..=ny {
+            for i in 0..=nx {
+                let (x, y, z) = (i as f64 * dx as f64, j as f64 * dx as f64, k as f64 * dx as f64);
+                noeuds.push((((x - 3.6).powi(2) + (y - 1.6).powi(2) + (z - 1.8).powi(2)).sqrt() - 0.8) as f32);
+            }
+        }
+    }
+    let mut v = Volume3::configure_with_solid(&mut hote, Domain3 { nx, ny, nz, dx }, RHO, G, &vec![0.; nx * ny], &noeuds)
+        .expect("configuration");
+    let z0 = v.domain().z0();
+    let eta: Vec<f32> = (0..ny)
+        .flat_map(|_| (0..nx).map(move |i| z0 + A * (core::f32::consts::TAU * (i as f32 + 0.5) * dx / LX).sin()))
+        .collect();
+    v.set_surface(&eta).expect("surface");
+    let debut = Instant::now();
+    let r = v.step_surface_linear(DT_US, 20_000, &jobs).expect("pas");
+    let duree = debut.elapsed().as_secs_f64();
+    assert!(!r.degraded, "pas dégradé");
+    let (ou, _, _) = v.apertures().expect("découpe");
+    let i = nx / 2;
+    let mut q = 0.0f64;
+    for k in 0..nz {
+        for j in 0..ny {
+            let f = (k * ny + j) * (nx + 1) + i;
+            q += ou[f] as f64 * v.velocity_u()[f] as f64 * dx as f64 * dx as f64;
+        }
+    }
+    (q, r.iterations, r.divergence, duree, nx * ny * nz)
+}
+
 /// **Les petites cellules**, sans rien résoudre : la plus petite fraction et la plus petite ouverture
 /// non nulles, et combien passent sous 10⁻³ — ce qui conditionne l'opérateur (`--geometrie`).
 fn petites_cellules(fond: fn(f32, f32) -> f32, nx: usize) {
@@ -146,6 +189,28 @@ fn petites_cellules(fond: fn(f32, f32) -> f32, nx: usize) {
 }
 
 fn main() {
+    if std::env::args().any(|a| a == "--sphere") {
+        println!("S329 — sphère immergée, mode linéaire : débit du premier pas à x = L/2");
+        let mut q = Vec::new();
+        for nx in [32usize, 64, 128] {
+            let (s, it, div, duree, mailles) = debit_sphere(nx);
+            let (plat, _, _, _, _) = debit(|_, _| 0., nx);
+            println!(
+                "FOND3D_S329 nx={nx} mailles={mailles} debit_m3_s={s:+.9e} iterations={it} divergence={div:.3e}                  duree_pas_s={duree:.3} debit_sans_sphere_m3_s={plat:+.9e} effet_relatif={:+.3e}",
+                s / plat - 1.
+            );
+            q.push(s);
+        }
+        let (d1, d2) = (q[1] - q[0], q[2] - q[1]);
+        if d1 * d2 > 0. && d1.abs() > d2.abs() {
+            let ordre = (d1 / d2).abs().log2();
+            let verdict = if ordre >= 1.8 { "TENU" } else { "MANQUÉ" };
+            println!("FOND3D_S329 ordre={ordre:.3} critere_ordre_1_8={verdict}");
+        } else {
+            println!("FOND3D_S329 TRIPLET_INUTILISABLE increments={d1:+.3e},{d2:+.3e}");
+        }
+        return;
+    }
     if std::env::args().any(|a| a == "--mobile") {
         println!("S328 — fond coupé 3D, mode mobile : débit du premier pas à x = L/2, contre le mode linéaire");
         for (nom, fond) in [("lisse_s232", lisse as fn(f32, f32) -> f32), ("bosse_3d", bosse)] {
