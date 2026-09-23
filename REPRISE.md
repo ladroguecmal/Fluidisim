@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-23 22:29 +02:00
+JETON            : occupé
+Battement        : 2026-09-23 22:34 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S328 — lot 3, le mode mobile sur fond coupé (4.15)
 Dernière session : S327 — **lot 5, raccord dynamique attribué** : l'échange asymétrique faisait le saut, la surface arrondie des colonnes la dissipation ; corrigés, écart 0,24 / 0,59 maille et amortissement 4,2 / 0,71 % à 5 / 2,5 cm — non reçu (A316, [preuve](docs/validation/B10-APIC-S320.md) §12)
 Session suivante : **S328, lot 3 — le mode mobile sur fond coupé** (4.15, alternance d'ADR-188) : le pas mobile 3D, qui refuse aujourd'hui la découpe, la porte, identité 2D gardée à `ny` = 1 ; maillons à 3, une capacité est due. Le lot 5 reprendra par la dissipation propre aux colonnes à 5 cm, après avoir vérifié qu'elle bloque encore l'usage
 Maillons        : 3 — S327 : deux causes attribuées et corrigées, raccord non reçu ; aucun point de liste n'a bougé (justification au journal)

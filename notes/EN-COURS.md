@@ -62,150 +62,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S327 — **terminée** (2026-09-23 22:29). **Lot 5 : recevoir le raccord dynamique** (A316), alternance
+Session : S328 — **en cours**. **Lot 3 : le mode mobile sur fond coupé** (4.15), alternance
 d'[ADR-188](../docs/adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Continue »*, après S326 ; suite déclarée : recevoir le raccord dynamique. **Maillons à 2** :
-la session doit viser une capacité, pas un diagnostic.
+Entrée : *« continue »*, après S327 ; suite déclarée : le mode mobile sur fond coupé. **Maillons à 3** :
+une capacité est due.
 
-**Ce que la session doit rendre possible.** Une eau qui vit à la fois en colonnes et en particules
-**sans que la frontière se voie** : le geste qui fera consommer APIC par δ. Point 4.12 (« le raccord aux
-colonnes » y manque). Consommateur : le raccord en 3D, puis C20 et la porte D.
+**Ce que la session doit rendre possible.** La référence 3D de δ porte depuis S324 un fond coupé, mais
+en mode **linéaire** seulement : le pas à surface mobile le refuse. Or c'est la surface mobile qui porte
+les corps flottants du lot 4 et la frontière mobile du lot 3. Point 4.15 : « Manquent … le mode mobile ».
+Le pas mobile **2D** porte déjà la découpe (S237, `delta_mobile.rs`) : la 3D doit la reproduire au bit à
+`ny` = 1, comme S324 l'a fait pour le mode linéaire.
 
-**L'état laissé par S325** ([preuve](../docs/validation/B10-APIC-S320.md) §11). Masse exacte, échanges
-dans les deux sens ; mais au repos 1,4 cm/s de vitesse parasite, et en ballottement un écart de surface
-de 1,8 à 2,8 mailles à la frontière — **3,5 à 4,5 fois l'amplitude de l'onde** (2 cm) —, un amortissement
-de 16 % par période à 5 cm. Trois suspects nommés ; un quatrième se lit dans le code : l'échange est
-**asymétrique** — la sortie est un flux eulérien de la grille, l'entrée une traversée de particules —,
-ce qui redresse toute oscillation.
+**Le portage.** Maille mouillée : fraction non nulle et centre sous la surface. Lignes de pression
+pondérées par les ouvertures, fantômes compris ; second membre par la divergence ouverte ; correction et
+extrapolation limitées aux faces ouvertes entre mailles de fluide ; transport des hauteurs par débits
+ouverts ; advection qui saute les faces fermées ; garde de géométrie : surface à deux mailles au moins
+au-dessus du plus haut coin du fond de sa colonne — celle de la 2D. Le fond plat, poids 1, reste au bit.
+Le pas **couplé** à B/W continue de refuser la découpe.
 
-Critères, écrits avant le code — ceux de S325, plus l'amortissement, qu'ils ne bornaient pas :
-1. **Masse** : particules libres + colonnes + attente conservées à 10⁻¹⁰ près en relatif.
-2. **Repos**, 5 s : vitesse maximale sous 1 cm/s ; écart de surface à la frontière sous 0,2 maille.
-3. **Ballottement**, 10 s, mailles de 5 et 2,5 cm : période à 1 % de celle d'APIC seul ; écart à la
-   frontière sous 0,5 maille ; **amortissement par période à 1 point d'APIC seul** ; aucune divergence.
-4. APIC seul inchangé au bit ; rien dans le cœur.
-
-Tous tenus : le raccord est **reçu** sur le banc 2D, et 4.12 avance. Sinon, chaque suspect éprouvé
-seul — son effet mesuré contre le montage de S325 — reste une attribution publiée.
+Critères, écrits avant le code :
+1. **Fond plat** : le pas mobile 3D inchangé au bit — tous les essais antérieurs passent.
+2. **`ny` = 1**, trois fonds de S232 : 200 pas mobiles **identiques au bit** au pas mobile 2D — surface,
+   `u`, `w`, pression, itérations.
+3. **Lac au repos** sur la bosse 3D : 100 pas mobiles, vitesses et surface nulles en bits.
+4. **Invariance transverse** : fond sans `y`, `ny` = 4 — les tranches identiques entre elles au bit, et
+   à 10⁻⁵ près en relatif de la tranche `ny` = 1 après 100 pas.
+5. **Ordre** du débit ouvert au premier pas, en mode mobile, sur la bosse 3D : **≥ 1,8**, comme S324.
+6. **Refus** : surface à moins de deux mailles du fond coupé → `Domain`, état restauré au bit.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — instrument : série à la frontière — hauteurs géométriques des deux côtés, hauteurs de masse
-  des colonnes, flux entrant et sortant, APIC seul au même endroit. Quel côté s'écarte, et quand.
-- [x] **P3** — suspect choisi par P2 ; commutable, mesuré seul.
-- [x] **P4** — suspect suivant ; commutable, mesuré seul.
-- [x] **P5** — suspect suivant ; commutable, mesuré seul.
-- [x] **P6** — *(ajoutée à 22:09, après P5)* la dissipation propre aux colonnes : hauteur mouillée
-  **centrée** dans leur transport au lieu d'amont, commutable ; zone à 95 % et 50 %. *Étendue en cours
-  d'étape aux suspects restants — (b), (d) — et à trois variantes de l'échange ; toutes commutables.*
-- [x] **P7** — le raccord corrigé, contre les critères, deux mailles.
-- [x] **P8** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
-  « Reproduire » ; file, liste.
-- [x] **P9** — rituel.
-
-Les quatre suspects : (a) la surface des colonnes vue par la pression, arrondie au quart de maille par
-`round(4h/dx)` — sur une onde de 0,4 maille à 5 cm ; (b) l'insertion des particules sortantes, toutes à
-`x_b − dx/4` et à la même hauteur dans la maille, l'alternance repartant à zéro à chaque pas ; (c)
-l'échange asymétrique ; (d) les colonnes sans mémoire de vitesse propre.
+- [ ] **P2** — le pas mobile 3D porte la découpe ; fond plat au bit, suite verte.
+- [ ] **P3** — essais des critères 2, 3, 4 et 6.
+- [ ] **P4** — banc : le premier pas mobile sur la bosse, trois mailles, ordre ; écart au mode linéaire.
+- [ ] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
+  avec « Reproduire » ; file, liste 4.15.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-**P2 (21:58).** `RACCORD_SERIE=1 … raccord_dyn ballottement 0.05` : une ligne `SERIE_S327` par dixième de
-seconde. La frontière est au nœud du premier mode : APIC seul y reste à 0,48–0,50 m. **Séquence de
-l'hybride** : de 0 à 0,2 s, la première colonne se vide — `h[0]` 0,500 → 0,473 m — par le flux eulérien
-vers la colonne suivante, alors qu'**aucune particule n'a encore franchi** la frontière (entré = 0 ; la
-plus proche est à un quart de maille). Puis les particules libres **s'entassent** dans la dernière colonne
-libre — hauteur de masse 0,675 m pour 0,494 m géométrique à 0,4 s, 35 % de particules en trop — et
-entrent **en rafale** : `h[0]` 0,604 m à 0,5 s, 0,014 m² entrés en un dixième de seconde. D'où l'écart
-d'environ deux mailles. **Suspect (c) désigné** : l'entrée lagrangienne est en retard puis en rafale sur
-une sortie eulérienne immédiate. P3 l'éprouve : échange eulérien dans les deux sens.
 
-**P3 (22:02) — (c), l'échange eulérien, seul** (`RACCORD_ECHANGE=eulerien` ; défaut inchangé au bit : la
-ligne de S325 se retrouve). Le flux de la grille porte l'échange dans les deux sens ; l'entrée est
-créditée aussitôt, les particules libres la doivent — payée par celles qui franchissent, ou en
-retirant la plus proche de la frontière ; attente et dette se compensent. Masse à l'arrondi.
-
-| | S325 | (c) seul |
-|---|---:|---:|
-| écart à la frontière, 5 / 2,5 cm, mailles | 1,81 / 2,85 | **0,71 / 0,79** |
-| amortissement par période, 5 / 2,5 cm | 16 % / 5,4 % | 14 % / 5,9 % |
-| période (zéros), 5 / 2,5 cm — APIC +5,6 / −0,18 % | +7,6 / +2,4 % | +7,1 / +1,5 % |
-| vitesse maximale, repos 5 cm / ballottement 2,5 cm | 1,4 cm/s / 0,87 m/s | **4,7 cm/s / 1,02 m/s** |
-
-L'écart est divisé par 2,5 à 3,6 ; l'amortissement ne bouge pas, et le repos empire. **(c) explique le
-saut, pas la dissipation.** Suivant : (a), la surface des colonnes arrondie au quart de maille — à
-5 cm, chaque particule qui apparaît ou disparaît la fait sauter de 1,25 cm, pour une onde de 2 cm ; et
-(c) la fait bouger plus souvent, ce qui expliquerait le repos dégradé.
-
-**P4 (22:04) — (a), l'ensemencement continu** (`RACCORD_ENSEMENCE=continu`) : `round(2h/dx)` rangées
-étirées sur `[0, h]` ; au repos, le réseau de S325. À 5 cm :
-
-| | S325 | (a) seul | (a) + (c) |
-|---|---:|---:|---:|
-| écart à la frontière, mailles | 1,81 | 1,93 | 0,83 |
-| amortissement par période (APIC −0,4 %) | 16 % | **6,3 %** | **2,7 %** |
-| période, zéros / périodogramme (APIC +5,6 / +6,1 %) | +7,6 / +5,2 % | +6,0 / +3,6 % | +7,0 / +6,6 % |
-| repos : vitesse maximale | 1,4 cm/s | **0,65 cm/s** | 0,65 cm/s |
-
-**(a) porte la dissipation, (c) le saut** : chacun seul laisse l'autre défaut entier. Ensemble, le
-début suit APIC seul au millimètre jusqu'à 0,4 s ; puis la dernière colonne libre s'appauvrit —
-hauteur de masse 0,39 à 0,43 m pour une surface à 0,49 m, 20 % de particules en moins — et la
-première colonne reçoit des rafales (+5 cm à 0,5 s). **Cause lue dans le code** : la dette se paie
-en retirant **aussitôt** la particule la plus proche, qui aurait franchi quelques pas plus tard ; celle
-qui franchit ensuite, sans dette, est créditée en plus. Le bord se vide deux fois. P5 : la dette,
-mise en commun sur les profondeurs, ne se paie que par les traversées et par l'attente, et le retrait
-n'est plus qu'une soupape.
-
-**P5 (22:08) — le paiement de la dette.** Deux variantes, avec l'ensemencement continu, à 5 cm :
-
-| | (a) + (c), retrait aussitôt | dette payée par les traversées | **paroi** |
-|---|---:|---:|---:|
-| écart à la frontière, mailles (APIC seul 0,14) | 0,83 | 0,78 | **0,24** |
-| amortissement par période (APIC −0,4 %) | 2,7 % | 6,3 % | 4,2 % |
-| période, zéros / périodogramme (APIC +5,6 / +6,1 %) | +7,0 / +6,6 % | +7,2 / +7,4 % | +7,5 / +7,0 % |
-| vitesse maximale | 0,63 m/s | 0,40 m/s | 0,22 m/s |
-
-**Lecture** : plus la dette traîne, plus on dissipe — un retard entre la colonne qui reçoit l'eau et les
-particules qui la perdent agit comme une résistance. **Paroi** (`RACCORD_ECHANGE=paroi`) : une particule
-libre qui franchit la frontière y est ramenée ; l'eau ne passe que par le flux, et la particule la plus
-proche est retirée dès qu'une particule entière est due. **L'écart tient le critère** (0,24 < 0,5) ; le
-repos aussi (0,65 cm/s, 0,001 maille). Restent amortissement et période. **Où ?** Zone des colonnes à
-95 %, frontière près du mur : 1,3 % ; à 50 %, au nœud : 4,2 % ; à 25 % : 2,5 %, période d'APIC. Les
-colonnes dissipent **d'elles-mêmes** ≈ 1,7 point ; la frontière le reste, selon l'échange qu'elle porte.
-Suspect des colonnes : la hauteur mouillée prise **en amont** dans leur transport, un schéma diffusif.
-
-**P6 (22:24) — ce qui reste, éprouvé variante par variante**, toutes avec l'ensemencement continu, à la
-frontière du milieu sauf mention. Les quatre suspects sont désormais éprouvés.
-
-| variante | 5 cm : écart / amort. / période z. | 2,5 cm : écart / amort. / période z. |
-|---|---|---|
-| APIC seul | 0,14 / −0,4 % / +5,6 % | 0,16 / 0,34 % / −0,18 % |
-| **paroi** (P5) | **0,24** / 4,2 % / +7,5 % | 0,59 / **0,71 %** / **+0,14 %** |
-| paroi, hauteur mouillée centrée | 0,21 / 4,2 % / +7,8 % | — |
-| paroi, quantum arrondi à la demi-particule | 0,55 / 5,1 % / +7,8 % | 0,69 / 0,30 % / 0,00 % |
-| solde signé, traversées absorbées | 0,25 / 3,7 % / +6,9 % | 0,64 / 1,37 % / +0,22 % |
-| paroi, rangées à hystérésis | 0,21 / 3,9 % / +8,1 % | **0,28** / 2,7 % / +0,32 % |
-| paroi, insertion au réseau — (b) | 0,80 / 3,8 % / +6,9 % | 0,76 / 0,06 % / +0,66 % |
-| paroi, mémoire de vitesse sur la grille — (d) | 0,24 / 4,1 % / +7,5 % | 0,69 / 1,55 % / +0,12 % |
-
-Zone des colonnes à 95 % (frontière près du mur), 5 cm : paroi 1,3 % ; mémoire 2,65 % ; hystérésis
-**−17,6 %, instable**. **Contredites** : hauteur centrée (aucun effet), demi-quantum, insertion au
-réseau, mémoire sur la grille, dette payée par les traversées. **Aucune variante ne tient tous les
-critères** ; la meilleure reste la paroi. Écart à 2,5 cm, paroi : **moyenne −0,009 maille**, écart-type
-0,15 (APIC seul 0,063), deux relevés sur cent au-dessus de 0,5 — un bruit, pas un biais.
-
-**P7 (22:26) — le meilleur montage contre les critères** : `RACCORD_ENSEMENCE=continu RACCORD_ECHANGE=paroi`.
-APIC seul **identique au bit** au banc d'avant S327 (lignes de résultat, hors durées).
-
-| critère | 5 cm | 2,5 cm | verdict |
-|---|---|---|---|
-| 1. masse | 4·10⁻¹⁶ | 1·10⁻¹⁵ | **tenu** |
-| 2. repos : vitesse, écart | 0,65 cm/s ; 0,001 maille | — | **tenu** |
-| 3. écart à la frontière < 0,5 maille | 0,24 | 0,59 | 5 cm tenu ; **2,5 cm manqué** (deux pics sur cent) |
-| 3. période à 1 % d'APIC seul, zéros / périodogramme | +1,88 / +0,89 point | +0,32 / −0,27 point | **5 cm manqué** (zéros) ; 2,5 cm tenu |
-| 3. amortissement à 1 point d'APIC seul | 4,17 % contre −0,44 % | 0,71 % contre 0,34 % | **5 cm manqué** ; 2,5 cm tenu |
-| 4. APIC seul inchangé ; rien dans le cœur | au bit | au bit | **tenu** |
-
-**Non reçu.** Depuis S325 : écart 1,81 → 0,24 maille à 5 cm, 2,85 → 0,59 à 2,5 cm ; amortissement
-16 → 4,2 % et 5,4 → 0,71 % ; repos 1,4 → 0,65 cm/s.
