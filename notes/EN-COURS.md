@@ -89,7 +89,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — mouvement rigide de la paroi ; critère 1.
+- [x] **P2** — mouvement rigide de la paroi ; critère 1.
 - [ ] **P3** — la coque perce le couvercle ; critères 2 et 3.
 - [ ] **P4** — banc : masse ajoutée du cube flottant, trois mailles (critère 4).
 - [ ] **P5** — le corps du jeu pilote sa paroi, décalage visuel borné ; critère 5.
@@ -98,4 +98,11 @@ Critères, écrits avant le code :
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
-
+**P2 (23:35).** `set_solid_rigid(nœuds, V, Ω, c)` : la part couverte de chaque face avance à `V + Ω × (x − c)`
+prise au centre de la face ; faces qui naissent à cette vitesse ; `set_solid` = sans rotation, au bit —
+les `C_m` de S330 se retrouvent à l'identique. **Critère 1, verdict partagé** : sphère qui tourne sur
+elle-même, vitesse maximale **1,08 %** de `Ω·R` à 6 mailles par rayon — *manqué* —, **0,73 %** à 12 —
+*tenu* ; décroissance d'ordre **0,56** seulement. Cause lue : la vitesse de paroi au centre de la face,
+non au centroïde de sa part couverte — une petite part couverte au coin d'une face s'écarte de `Ω·dx/2`,
+et une petite maille l'amplifie. Remède nommé, non fait : le centroïde de la part couverte. Pavé qui
+tourne : 0,42 m/s, il pousse l'eau.

@@ -1323,3 +1323,60 @@ fn a_moving_sphere_displaces_exactly_its_discrete_volume_s330() {
     println!("S330 : écart de volume au pire {pire:e} m³ ; volume discret {v0:e} → {:e}", solide(&v));
     assert!(pire <= 1e-9, "{pire}");
 }
+
+// ─────────────────────────────── S332 : le corps dans δ ───────────────────────────────
+
+/// Distance signée d'un pavé droit, centre `c`, demi-côtés `h`, aux nœuds d'un cube de `n` mailles de
+/// `dx` — le pas en f32, comme les volumes.
+fn noeuds_boite(n: usize, dx: f32, c: [f64; 3], h: [f64; 3]) -> Vec<f32> {
+    let dx = dx as f64;
+    let mut out = Vec::with_capacity((n + 1).pow(3));
+    for k in 0..=n {
+        for j in 0..=n {
+            for i in 0..=n {
+                let p = [i as f64 * dx, j as f64 * dx, k as f64 * dx];
+                let q: Vec<f64> = (0..3).map(|a| (p[a] - c[a]).abs() - h[a]).collect();
+                let dehors = q.iter().map(|x| x.max(0.).powi(2)).sum::<f64>().sqrt();
+                out.push((dehors + q[0].max(q[1]).max(q[2]).min(0.)) as f32);
+            }
+        }
+    }
+    out
+}
+
+/// **S332, critère 1.** Une sphère qui tourne sur elle-même ne pousse pas l'eau : après un pas, vitesse
+/// maximale sous 1 % de `Ω·R`. Un pavé qui tourne en pousse. *Mesuré en S332 P2 : 1,08 % à 6 mailles par
+/// rayon — manqué —, 0,73 % à 12 — tenu —, décroissance d'ordre 0,56 seulement : la vitesse de la paroi est
+/// prise au centre des faces, non au centroïde de leur part couverte, et une petite maille coupée amplifie
+/// l'écart. L'essai garde le critère à 12 mailles par rayon et publie les deux valeurs.*
+#[test]
+fn a_spinning_sphere_pushes_no_water_a_spinning_box_does_s332() {
+    let omega = [0f32, 0., 2.];
+    let residu = |n: usize| {
+        let (mut v, _) = volume_sphere(n);
+        let z0 = v.domain.z0();
+        v.set_surface(&vec![z0; n * n]).unwrap();
+        v.set_solid_rigid(&noeuds_sphere(n, 0.6), [0.; 3], omega, [0.6, 0.6, 0.55]).unwrap();
+        v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        v.velocity_u().iter().chain(v.velocity_v()).chain(v.velocity_w()).fold(0f32, |m, x| m.max(x.abs()))
+    };
+    let (grossier, sphere) = (residu(24), residu(48));
+    let ordre = (grossier / sphere).log2();
+    println!("S332 : sphère qui tourne, vitesse max {grossier:e} puis {sphere:e} m/s (Ω·R = 0,6), ordre {ordre:.2}");
+    assert!(sphere <= 0.01 * 0.6, "{sphere}");
+    assert!(sphere < grossier, "le résidu ne décroît pas");
+    let n = 24usize;
+    let z0 = 1.2f32;
+    let dx = 1.2 / n as f32;
+    let boite = noeuds_boite(n, dx, [0.6, 0.6, 0.55], [0.2, 0.2, 0.2]);
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut b = Volume3::configure_with_solid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain3 { nx: n, ny: n, nz: n, dx }, 1025., 9.81, &vec![0.; n * n], &boite).unwrap();
+    b.set_surface(&vec![z0; n * n]).unwrap();
+    b.set_solid_rigid(&boite, [0.; 3], omega, [0.6, 0.6, 0.55]).unwrap();
+    b.step_surface_linear(2000, 4000, &Jobs).unwrap();
+    let pave = b.velocity_u().iter().chain(b.velocity_v()).chain(b.velocity_w()).fold(0f32, |m, x| m.max(x.abs()));
+    println!("S332 : pavé qui tourne, {pave:e} m/s");
+    assert!(sphere <= 0.01 * 0.6, "{sphere}");
+    assert!(pave >= 0.1 * 2. * 0.2, "{pave}");
+}

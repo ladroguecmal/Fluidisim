@@ -40,6 +40,10 @@ pub(crate) struct Cut3 {
     pub base: Option<Base3>,
     /// S330 : vitesse de translation du solide, m/s ; la part d'une face qu'il couvre avance avec elle.
     pub solid_velocity: [f32; 3],
+    /// S332 : vitesse angulaire du solide, rad/s, et le point autour duquel il tourne, m — la paroi
+    /// avance à `V + Ω × (x − c)`.
+    pub solid_angular: [f32; 3],
+    pub solid_center: [f32; 3],
 }
 
 /// S330 : la découpe du fond seul, et le volume du solide dans chaque colonne, m³.
@@ -237,7 +241,7 @@ pub(crate) fn cut(domain: Domain3, bottom: &[f32]) -> Cut3 {
         .flat_map(|j| (0..nx).map(move |i| (i, j)))
         .map(|(i, j)| footprint(i, j).into_iter().fold(f32::NEG_INFINITY, f32::max))
         .collect();
-    Cut3 { frac, open_u, open_v, open_w, floor, base: None, solid_velocity: [0.; 3] }
+    Cut3 { frac, open_u, open_v, open_w, floor, base: None, solid_velocity: [0.; 3], solid_angular: [0.; 3], solid_center: [0.; 3] }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════════════════════

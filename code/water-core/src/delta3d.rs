@@ -60,6 +60,16 @@ pub const ROUNDOFF_BACKWARD_ERROR_3D: f32 = {
     10. * u / (1. - 10. * u)
 };
 
+/// S332 : la composante `axis` de la vitesse d'une paroi rigide au point `x` — `V + Ω × (x − c)`.
+fn wall_velocity(v: [f32; 3], w: [f32; 3], c: [f32; 3], axis: usize, x: [f32; 3]) -> f32 {
+    let r = [x[0] - c[0], x[1] - c[1], x[2] - c[2]];
+    match axis {
+        0 => v[0] + (w[1] * r[2] - w[2] * r[1]),
+        1 => v[1] + (w[2] * r[0] - w[0] * r[2]),
+        _ => v[2] + (w[0] * r[1] - w[1] * r[0]),
+    }
+}
+
 /// S330 : le volume du solide dans chaque colonne, m³ — ce que la découpe retire au fond seul.
 fn solid_columns(domain: Domain3, base: &[f32], frac: &[f32], out: &mut [f32]) {
     let Domain3 { nx, ny, nz, dx } = domain;
@@ -293,12 +303,20 @@ impl Volume3 {
     /// atomique — `Shape`, `NotFinite`, `Domain` si le volume n'a pas de solide ou si le solide touche
     /// le fond ou la couche du couvercle — : rien n'est écrit.
     pub fn set_solid(&mut self, solid: &[f32], velocity: [f32; 3]) -> Result<(), Error> {
+        self.set_solid_rigid(solid, velocity, [0.; 3], [0.; 3])
+    }
+
+    /// **S332 : le solide en mouvement de corps rigide** — translation `velocity`, rotation `angular`
+    /// (rad/s) autour de `center` : la paroi avance à `V + Ω × (x − c)`, évaluée au centre de chaque face.
+    /// Sans rotation, c'est `set_solid`, au bit.
+    pub fn set_solid_rigid(&mut self, solid: &[f32], velocity: [f32; 3], angular: [f32; 3], center: [f32; 3])
+        -> Result<(), Error> {
         let domain = self.domain;
         let Domain3 { nx, ny, nz, dx } = domain;
         if solid.len() != (nx + 1) * (ny + 1) * (nz + 1) {
             return Err(Error::Shape);
         }
-        if solid.iter().chain(&velocity).any(|x| !x.is_finite()) {
+        if solid.iter().chain(&velocity).chain(&angular).chain(&center).any(|x| !x.is_finite()) {
             return Err(Error::NotFinite);
         }
         let g = self.cut.as_mut().ok_or(Error::Domain)?;
@@ -318,14 +336,37 @@ impl Volume3 {
         g.floor.copy_from_slice(&base.floor);
         cut::add_solid(g, domain, solid).expect("vérifié");
         g.solid_velocity = velocity;
-        for (x, (a, avant)) in self.u.iter_mut().zip(g.open_u.iter().zip(&self.saved_u)) {
-            if *a == 0. { *x = 0.; } else if *avant == 0. { *x = velocity[0]; }
+        g.solid_angular = angular;
+        g.solid_center = center;
+        // Une face qui s'ouvre naît à la vitesse normale de la paroi en son centre ; une face fermée perd la sienne.
+        let paroi = |axis: usize, x: [f32; 3]| wall_velocity(velocity, angular, center, axis, x);
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..=nx {
+                    let f = (k * ny + j) * (nx + 1) + i;
+                    if g.open_u[f] == 0. { self.u[f] = 0.; } else if self.saved_u[f] == 0. {
+                        self.u[f] = paroi(0, [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx]);
+                    }
+                }
+            }
+            for j in 0..=ny {
+                for i in 0..nx {
+                    let f = (k * (ny + 1) + j) * nx + i;
+                    if g.open_v[f] == 0. { self.v[f] = 0.; } else if self.saved_v[f] == 0. {
+                        self.v[f] = paroi(1, [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx]);
+                    }
+                }
+            }
         }
-        for (x, (a, avant)) in self.v.iter_mut().zip(g.open_v.iter().zip(&self.saved_v)) {
-            if *a == 0. { *x = 0.; } else if *avant == 0. { *x = velocity[1]; }
-        }
-        for (x, (a, avant)) in self.w.iter_mut().zip(g.open_w.iter().zip(&self.saved_w)) {
-            if *a == 0. { *x = 0.; } else if *avant == 0. { *x = velocity[2]; }
+        for k in 0..=nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let f = (k * ny + j) * nx + i;
+                    if g.open_w[f] == 0. { self.w[f] = 0.; } else if self.saved_w[f] == 0. {
+                        self.w[f] = paroi(2, [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, k as f32 * dx]);
+                    }
+                }
+            }
         }
         // L'eau déplacée : le volume solide gagné par une colonne en élève la surface. Le nouveau volume
         // est écrit dans `rhs`, libre entre deux pas : aucune allocation.
@@ -610,8 +651,23 @@ impl Volume3 {
                     let fb = a(g.open_w[self.fw(i, j, k)], w[self.fw(i, j, k)]);
                     let ft = a(g.open_w[self.fw(i, j, k + 1)], w[self.fw(i, j, k + 1)]);
                     out[c] = ((fr - fl + ft - fb) + (fk - ff)) / dx;
-                    // S330 : la part des faces que le solide couvre avance à sa vitesse.
-                    if let (Some(b), [su, sv, sw]) = (&g.base, g.solid_velocity) {
+                    // S330 : la part des faces que le solide couvre avance à sa vitesse ; S332 : en rotation,
+                    // à la vitesse de la paroi au centre de chaque face.
+                    if let (Some(b), true) = (&g.base, g.solid_angular != [0.; 3]) {
+                        let cov = |o: f32, base: f32| base - o;
+                        let pw = |axis: usize, x: [f32; 3]| wall_velocity(g.solid_velocity, g.solid_angular, g.solid_center, axis, x);
+                        let (xc, yc, zc) = ((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx);
+                        let (x0, x1) = (i as f32 * dx, (i + 1) as f32 * dx);
+                        let (y0, y1) = (j as f32 * dx, (j + 1) as f32 * dx);
+                        let (z0, z1) = (k as f32 * dx, (k + 1) as f32 * dx);
+                        let fx = cov(g.open_u[self.fu(i + 1, j, k)], b.open_u[self.fu(i + 1, j, k)]) * pw(0, [x1, yc, zc])
+                            - cov(g.open_u[self.fu(i, j, k)], b.open_u[self.fu(i, j, k)]) * pw(0, [x0, yc, zc]);
+                        let fy = cov(g.open_v[self.fv(i, j + 1, k)], b.open_v[self.fv(i, j + 1, k)]) * pw(1, [xc, y1, zc])
+                            - cov(g.open_v[self.fv(i, j, k)], b.open_v[self.fv(i, j, k)]) * pw(1, [xc, y0, zc]);
+                        let fz = cov(g.open_w[self.fw(i, j, k + 1)], b.open_w[self.fw(i, j, k + 1)]) * pw(2, [xc, yc, z1])
+                            - cov(g.open_w[self.fw(i, j, k)], b.open_w[self.fw(i, j, k)]) * pw(2, [xc, yc, z0]);
+                        out[c] += (fx + fy + fz) / dx;
+                    } else if let (Some(b), [su, sv, sw]) = (&g.base, g.solid_velocity) {
                         if su != 0. || sv != 0. || sw != 0. {
                             let cov = |o: f32, base: f32| base - o;
                             let x = cov(g.open_u[self.fu(i + 1, j, k)], b.open_u[self.fu(i + 1, j, k)])
