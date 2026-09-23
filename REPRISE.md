@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-23 23:29 +02:00
+JETON            : occupé
+Battement        : 2026-09-23 23:31 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S332 — lot 4, le corps dans δ (ADR-189)
 Dernière session : S331 — **lot 4, le corps rigide du jeu** : six degrés de liberté, proxy de flottabilité sur B + W, masse ajoutée ; C10 tenu — tirant à 0,02 %, période à 2·10⁻⁶, rapport √2 à 10⁻⁵ du modèle ; roulis d'un pavé à 0,04 % ([preuve](docs/validation/CORPS-RIGIDE-S331.md))
 Session suivante : **S332, lot 4 — le corps dans δ** (ADR-189) : le corps du jeu déplace sa paroi dans δ linéaire — mouvement rigide (rotation comprise) dans `set_solid`, coque qui perce le couvercle ; δ ne rend au corps qu'un décalage visuel borné (≤ 8 cm, ≤ 3°) ; la trajectoire de jeu identique au bit avec ou sans δ (I-04) ; les vagues rayonnées mesurées. Puis S333 : le bateau sur B + W, la porte D
 Maillons        : 0 — S331 : corps rigide reçu, C10 exécuté, 6.1 avance

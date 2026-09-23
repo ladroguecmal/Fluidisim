@@ -62,48 +62,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S331 — **terminée** (2026-09-23 23:29). **Lot 4 : le corps rigide sur B + W**, jugé sur C10 ; chemin de la v1
+Session : S332 — **en cours**. **Lot 4 : le corps dans δ** ; chemin de la v1
 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S330.
+Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S331.
 
-**Ce que la session doit rendre possible.** Un corps que **le jeu** fait flotter — I-04 : toute force de
-jeu vient de B + W, jamais de δ (ADR-008). `body.rs` n'a qu'un modèle statique. Il faut un corps rigide à
-six degrés de liberté — quaternion, inertie principale —, une poussée par **proxy de points volumiques**
-(ADR-008 §2 : immersion saturée sur l'épaisseur de chaque point, exacte pour une ligne d'eau plane), une
-masse ajoutée, un intégrateur symplectique déterministe, et l'eau reçue par une interface de requête —
-calme pour C10, B + W pour la porte D. Consommateur : le bateau de la porte D, que δ verra par `set_solid`.
+**Ce que la session doit rendre possible.** Le corps du jeu (S331) **déplace sa paroi dans δ** : à chaque pas,
+sa pose donne la distance signée de sa coque aux nœuds, sa vitesse de corps rigide — translation **et
+rotation** — donne celle de la paroi ; la coque **perce le couvercle** du mode linéaire, dont les faces
+qu'elle couvre se ferment. δ rend au corps une force, qui ne nourrit qu'un **décalage visuel borné**
+(ADR-008 §1 : ≤ 8 cm) — jamais la trajectoire de jeu (I-04). Consommateur : le bateau de la porte D.
 
-**Un fait à écrire avant la mesure.** Le cube de C10 à 500 kg/m³ en mer a une hauteur métacentrique
-`GM = d/2 + a²/(12d) − a/2 = −4,3 cm` : **il est instable en roulis** — un cube de cette densité flotte
-incliné. L'essai de pilonnement reste bref (l'arrondi y croît en `e^{3,2 t}`) ; la rotation s'éprouve sur
-un pavé plat, stable.
-
-Critères, écrits avant le code (eau de mer, ρ = 1025 kg/m³) :
-1. **Proxy** : volume immergé du cube droit = `A·d` exact à 10⁻¹², pour tout tirant.
-2. **Tirant** (C10) : moyenne du pilonnement sur des périodes entières = `(ρ_c/ρ)·H` = 0,24390 m **± 1 %**.
-3. **Période sans masse ajoutée** (C10) : `2π√(ρ_c·H/(ρ·g))` = 0,9907 s **± 5 %**.
-4. **Masse ajoutée** (C10) : disque équivalent, `m_a = (8/3)·ρ·(A/π)^{3/2}` ; rapport des périodes
-   **1,414 ± 15 %**, et à 1 % de `√(1 + m_a/m)`.
-5. **Roulis** : pavé 1 × 1 × 0,3 m à 500 kg/m³, lâché à 5° — période à **± 5 %** de `2π√(I/(m·g·GM))`.
-6. **Déterminisme** : deux trajectoires identiques au bit ; aucune allocation dans le pas.
+Critères, écrits avant le code :
+1. **Rotation** : une sphère qui tourne sur elle-même ne pousse pas l'eau — vitesse maximale sous 1 % de
+   `Ω·R` après un pas ; un pavé qui tourne en pousse. Translation seule : le chemin de S330 **au bit**
+   (les valeurs de `C_m` de §9 se retrouvent).
+2. **Coque qui perce** : le pas linéaire l'accepte ; un lac au repos autour d'elle reste au repos au bit.
+3. **Volume** : cube de C10 qui pilonne en perçant le couvercle — `Σ(η − reste − z₀)·dx²` suit le volume
+   immergé du solide dans le domaine à 10⁻⁹ m³ près.
+4. **Masse ajoutée du cube flottant**, départ impulsif en pilonnement, trois mailles : convergente ; publiée
+   contre le disque de même aire en fluide illimité, `(8/3)ρR³` (la référence de C10), et sa moitié
+   `(4/3)ρR³` (un corps qui flotte, surface à pression nulle).
+5. **I-04** : la trajectoire du corps avec δ attaché, **identique au bit** à celle sans δ ; le décalage
+   visuel reste sous 8 cm et n'est pas nul.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `rigid_body.rs` : corps, proxy, requête d'eau, intégrateur ; critères 1 et 6.
-- [x] **P3** — C10 : tirant, période, masse ajoutée (critères 2 à 4).
-- [x] **P4** — roulis du pavé (critère 5).
-- [x] **P5** — preuve : `docs/validation/CORPS-RIGIDE-S331.md`, avec « Reproduire » ; C10 exécuté,
-  file, liste 6.1.
-- [x] **P6** — rituel.
+- [ ] **P2** — mouvement rigide de la paroi ; critère 1.
+- [ ] **P3** — la coque perce le couvercle ; critères 2 et 3.
+- [ ] **P4** — banc : masse ajoutée du cube flottant, trois mailles (critère 4).
+- [ ] **P5** — le corps du jeu pilote sa paroi, décalage visuel borné ; critère 5.
+- [ ] **P6** — preuve : section datée de [CORPS-RIGIDE-S331](../docs/validation/CORPS-RIGIDE-S331.md), avec
+  « Reproduire » ; file, liste.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-**P2 + P3 (23:26), fusion déclarée** : les essais de C10 sont trois fonctions du fichier d'essais du
-module. `rigid_body.rs` : `RigidBody` (six degrés de liberté, quaternion, masse ajoutée diagonale),
-`ProxyPoint`, `WaterQuery` / `CalmWater`, `forces`, `step` symplectique. **Proxy exact** : `A·d` à 10⁻¹².
-**C10** : tirant **0,243958** m pour 0,243902 (0,02 %) ; période **0,990724** s pour 0,990726 (2·10⁻⁶) ;
-disque équivalent `m_a` = 61,359 kg, rapport **1,40775** — modèle 1,40774, C10 1,414 ± 15 %. Deux
-trajectoires à six degrés de liberté, traînée comprise, **identiques au bit**. Cœur : 486 réussis.
-**P4 (23:27).** Pavé 1 × 1 × 0,3 m à 500 kg/m³, proxy 16 × 16 × 8, lâché à son tirant incliné de 5° :
-roulis **0,86178 s** pour 0,86142 (0,04 %, GM 0,4926 m) ; amplitude gardée à 5,000° sans traînée.
+
