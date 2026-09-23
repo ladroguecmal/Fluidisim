@@ -12,6 +12,11 @@
 //!
 //! Critère écrit avant la mesure : ordre **≥ 1,8** sur la bosse, comme S232 en 2D.
 //!
+//! **S328, `--mobile`** : le même premier pas en **mode mobile** — surface au repos à 4 m, la hauteur du
+//! couvercle linéaire, dans un domaine de 6 m pour laisser l'air au-dessus —, son ordre sur trois
+//! mailles, et son écart au mode linéaire. Le débit ne compte que la part mouillée des faces, comme le
+//! transport des hauteurs.
+//!
 //!     cargo run -p water-core --release --offline --example delta3d_fond_coupe
 
 #[path = "../../water-harness/src/host_impl.rs"]
@@ -78,6 +83,41 @@ fn debit(fond: fn(f32, f32) -> f32, nx: usize) -> (f64, u32, f64, f64, usize) {
     (q, r.iterations, r.divergence, duree, nx * ny * nz)
 }
 
+/// **S328 : le premier pas en mode mobile**, surface au repos à `LZ` dans un domaine de `1,5·LZ`. Débit
+/// ouvert et mouillé à travers `x = L/2` — `Σ ouverture·u·dx·mouillé·dx`, la mouillure prise à la
+/// moyenne des deux colonnes, comme le transport.
+fn debit_mobile(fond: fn(f32, f32) -> f32, nx: usize) -> (f64, u32, f64, f64, usize) {
+    let (ny, nz) = (nx / 2, 3 * nx / 4);
+    let dx = LX / nx as f32;
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 31);
+    let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
+    let b: Vec<f32> = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| fond((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx)))
+        .collect();
+    let mut v = Volume3::configure_with_bottom(&mut hote, Domain3 { nx, ny, nz, dx }, RHO, G, &b).expect("configuration");
+    let eta: Vec<f32> = (0..ny)
+        .flat_map(|_| (0..nx).map(move |i| LZ + A * (core::f32::consts::TAU * (i as f32 + 0.5) * dx / LX).sin()))
+        .collect();
+    v.set_free_surface(&eta, LZ).expect("surface");
+    let debut = Instant::now();
+    let r = v.step_surface_mobile(DT_US, 20_000, &jobs).expect("pas");
+    let duree = debut.elapsed().as_secs_f64();
+    assert!(!r.degraded, "pas dégradé");
+    let (ou, _, _) = v.apertures().expect("fond coupé");
+    let (i, s) = (nx / 2, v.surface());
+    let mut q = 0.0f64;
+    for j in 0..ny {
+        let surface = 0.5 * (s[j * nx + i - 1] + s[j * nx + i]);
+        for k in 0..nz {
+            let mouille = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
+            let f = (k * ny + j) * (nx + 1) + i;
+            q += ou[f] as f64 * v.velocity_u()[f] as f64 * dx as f64 * mouille as f64 * dx as f64;
+        }
+    }
+    (q, r.iterations, r.divergence, duree, nx * ny * nz)
+}
+
 /// **Les petites cellules**, sans rien résoudre : la plus petite fraction et la plus petite ouverture
 /// non nulles, et combien passent sous 10⁻³ — ce qui conditionne l'opérateur (`--geometrie`).
 fn petites_cellules(fond: fn(f32, f32) -> f32, nx: usize) {
@@ -106,6 +146,30 @@ fn petites_cellules(fond: fn(f32, f32) -> f32, nx: usize) {
 }
 
 fn main() {
+    if std::env::args().any(|a| a == "--mobile") {
+        println!("S328 — fond coupé 3D, mode mobile : débit du premier pas à x = L/2, contre le mode linéaire");
+        for (nom, fond) in [("lisse_s232", lisse as fn(f32, f32) -> f32), ("bosse_3d", bosse)] {
+            let mut q = Vec::new();
+            for nx in [32usize, 64, 128] {
+                let (m, it, div, duree, mailles) = debit_mobile(fond, nx);
+                let (l, it_l, _, _, _) = debit(fond, nx);
+                println!(
+                    "FOND3D_S328 fond={nom} nx={nx} mailles={mailles} debit_mobile_m3_s={m:+.9e} iterations={it}                      divergence={div:.3e} duree_pas_s={duree:.3} debit_lineaire_m3_s={l:+.9e} iterations_lineaire={it_l}                      ecart_relatif={:+.3e}",
+                    m / l - 1.
+                );
+                q.push(m);
+            }
+            let (d1, d2) = (q[1] - q[0], q[2] - q[1]);
+            if d1 * d2 > 0. && d1.abs() > d2.abs() {
+                let ordre = (d1 / d2).abs().log2();
+                let verdict = if ordre >= 1.8 { "TENU" } else { "MANQUÉ" };
+                println!("FOND3D_S328 fond={nom} ordre_mobile={ordre:.3} critere_ordre_1_8={verdict}");
+            } else {
+                println!("FOND3D_S328 fond={nom} TRIPLET_INUTILISABLE increments={d1:+.3e},{d2:+.3e}");
+            }
+        }
+        return;
+    }
     if std::env::args().any(|a| a == "--geometrie") {
         for (nom, fond) in [("lisse_s232", lisse as fn(f32, f32) -> f32), ("bosse_3d", bosse)] {
             println!("FOND3D_S324 geometrie fond={nom}");

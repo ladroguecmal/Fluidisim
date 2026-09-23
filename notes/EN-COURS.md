@@ -96,7 +96,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le pas mobile 3D porte la découpe ; fond plat au bit, suite verte.
 - [x] **P3** — essais des critères 2, 3, 4 et 6.
-- [ ] **P4** — banc : le premier pas mobile sur la bosse, trois mailles, ordre ; écart au mode linéaire.
+- [x] **P4** — banc : le premier pas mobile sur la bosse, trois mailles, ordre ; écart au mode linéaire.
 - [ ] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste 4.15.
 - [ ] **P6** — rituel.
@@ -119,3 +119,15 @@ de S296 en fait autant** (5·10⁻⁹ pour 0,037 m/s de `u`) — la diagonale de
 n'est pas celle des rangées intérieures. L'essai exigeait `v` nul au bit, ce que le critère ne demandait
 pas : borne relative 10⁻⁶ de `u`. **Critère 6** : surface à 1,4 m sur la bosse refusée, état restauré au
 bit ; la même profondeur passe sur un fond plat à 0,3 m. Suite complète : **594 réussis**, 0 échec.
+
+**P4 (22:45).** `delta3d_fond_coupe --mobile` : surface au repos à 4 m — la hauteur du couvercle
+linéaire — dans un domaine de 6 m ; débit ouvert **et mouillé** à `x = L/2` ; 45 s en tout.
+
+| fond | 32 | 64 | 128 | ordre | écart au linéaire, 32 / 64 / 128 |
+|---|---:|---:|---:|---:|---:|
+| bosse 3D | 9,144654995·10⁻⁴ | 9,169156332·10⁻⁴ | 9,175479984·10⁻⁴ | **1,954** | +9·10⁻⁷ / +5·10⁻⁷ / −2,8·10⁻⁶ |
+| témoin sans `y` | 9,009922527·10⁻⁴ | 9,033861207·10⁻⁴ | 9,040044679·10⁻⁴ | 1,953 | −8·10⁻⁶ / −9·10⁻⁶ / −1·10⁻⁵ |
+
+**Critère 5 tenu.** Itérations comme le linéaire (444 contre 425 à 128) ; le pas mobile à 128 (786 432
+mailles) coûte 16,6 s, contre 5,7 s au linéaire sur 524 288 mailles — ses lignes se recalculent à
+chaque produit, la référence CPU ne l'a jamais caché.
