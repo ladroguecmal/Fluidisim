@@ -39,6 +39,8 @@ mod bessel_table;
 pub mod background;
 pub mod background_spectrum;
 pub mod body;
+/// S331 : le corps rigide du jeu, poussé par B + W (lot 4, I-04).
+pub mod rigid_body;
 pub mod delta;
 pub mod dispersif;
 pub mod eponge;

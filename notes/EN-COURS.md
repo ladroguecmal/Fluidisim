@@ -91,12 +91,17 @@ Critères, écrits avant le code (eau de mer, ρ = 1025 kg/m³) :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `rigid_body.rs` : corps, proxy, requête d'eau, intégrateur ; critères 1 et 6.
-- [ ] **P3** — C10 : tirant, période, masse ajoutée (critères 2 à 4).
+- [x] **P2** — `rigid_body.rs` : corps, proxy, requête d'eau, intégrateur ; critères 1 et 6.
+- [x] **P3** — C10 : tirant, période, masse ajoutée (critères 2 à 4).
 - [ ] **P4** — roulis du pavé (critère 5).
 - [ ] **P5** — preuve : `docs/validation/CORPS-RIGIDE-S331.md`, avec « Reproduire » ; C10 exécuté,
   file, liste 6.1.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
-
+**P2 + P3 (23:26), fusion déclarée** : les essais de C10 sont trois fonctions du fichier d'essais du
+module. `rigid_body.rs` : `RigidBody` (six degrés de liberté, quaternion, masse ajoutée diagonale),
+`ProxyPoint`, `WaterQuery` / `CalmWater`, `forces`, `step` symplectique. **Proxy exact** : `A·d` à 10⁻¹².
+**C10** : tirant **0,243958** m pour 0,243902 (0,02 %) ; période **0,990724** s pour 0,990726 (2·10⁻⁶) ;
+disque équivalent `m_a` = 61,359 kg, rapport **1,40775** — modèle 1,40774, C10 1,414 ± 15 %. Deux
+trajectoires à six degrés de liberté, traînée comprise, **identiques au bit**. Cœur : 486 réussis.
