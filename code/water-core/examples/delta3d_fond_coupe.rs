@@ -20,6 +20,10 @@
 //! **S329, `--sphere`** : le premier pas linéaire autour d'une **sphère immergée** de 0,8 m, décentrée, que
 //! le plan `x = L/2` traverse — ses faces y sont ouvertes en partie ; ordre sur trois mailles.
 //!
+//! **S330, `--masse-ajoutee`** : départ impulsif d'une sphère de 0,3 m au centre d'un cube de 2,4 m — un
+//! pas linéaire, la force de pression sur sa paroi, `C_m = −F·dt/(ρVU)`, à comparer à 0,5 (sphère en
+//! fluide illimité ; murs et surface à quatre rayons n'y changent que le millième).
+//!
 //!     cargo run -p water-core --release --offline --example delta3d_fond_coupe
 
 #[path = "../../water-harness/src/host_impl.rs"]
@@ -161,6 +165,39 @@ fn debit_sphere(nx: usize) -> (f64, u32, f64, f64, usize) {
     (q, r.iterations, r.divergence, duree, nx * ny * nz)
 }
 
+/// **S330 : la masse ajoutée d'une sphère, par un départ impulsif.** Fluide et sphère au repos ; la sphère
+/// reçoit d'un coup la vitesse `U` ; le premier pas linéaire en tire le potentiel de ce mouvement, et la
+/// force de pression sur la paroi vaut `−m_a·U/dt`.
+fn masse_ajoutee(n: usize) -> (f64, u32, f64, usize) {
+    let (l, r, u) = (2.4f64, 0.3f64, 0.1f32);
+    let dx = (l / n as f64) as f32;
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 31);
+    let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
+    let mut noeuds = Vec::with_capacity((n + 1).pow(3));
+    for k in 0..=n {
+        for j in 0..=n {
+            for i in 0..=n {
+                let (x, y, z) = (i as f64 * dx as f64, j as f64 * dx as f64, k as f64 * dx as f64);
+                noeuds.push((((x - 1.2).powi(2) + (y - 1.2).powi(2) + (z - 1.2).powi(2)).sqrt() - r) as f32);
+            }
+        }
+    }
+    let mut v = Volume3::configure_with_solid(&mut hote, Domain3 { nx: n, ny: n, nz: n, dx }, RHO, G, &vec![0.; n * n], &noeuds)
+        .expect("configuration");
+    let z0 = v.domain().z0();
+    v.set_surface(&vec![z0; n * n]).expect("surface");
+    v.set_solid(&noeuds, [u, 0., 0.]).expect("solide");
+    let debut = Instant::now();
+    let rep = v.step_surface_linear(DT_US, 20_000, &jobs).expect("pas");
+    let duree = debut.elapsed().as_secs_f64();
+    assert!(!rep.degraded, "pas dégradé");
+    let f = v.solid_force(&noeuds).expect("force");
+    let volume = 4. / 3. * core::f64::consts::PI * r.powi(3);
+    let cm = -f[0] * (DT_US as f64 * 1e-6) / (RHO as f64 * volume * u as f64);
+    (cm, rep.iterations, duree, n * n * n)
+}
+
 /// **Les petites cellules**, sans rien résoudre : la plus petite fraction et la plus petite ouverture
 /// non nulles, et combien passent sous 10⁻³ — ce qui conditionne l'opérateur (`--geometrie`).
 fn petites_cellules(fond: fn(f32, f32) -> f32, nx: usize) {
@@ -189,6 +226,19 @@ fn petites_cellules(fond: fn(f32, f32) -> f32, nx: usize) {
 }
 
 fn main() {
+    if std::env::args().any(|a| a == "--masse-ajoutee") {
+        println!("S330 — masse ajoutée d'une sphère, départ impulsif, un pas linéaire");
+        let mut cms = Vec::new();
+        for n in [24usize, 48, 96] {
+            let (cm, it, duree, mailles) = masse_ajoutee(n);
+            println!("FOND3D_S330 n={n} rayon_en_mailles={:.1} mailles={mailles} c_m={cm:.5} iterations={it} duree_pas_s={duree:.3}", 0.3 / (2.4 / n as f64));
+            cms.push(cm);
+        }
+        let ecart = (cms[2] / 0.5 - 1.).abs();
+        let verdict = if ecart <= 0.05 { "TENU" } else { "MANQUÉ" };
+        println!("FOND3D_S330 c_m_fin={:.5} ecart_a_0_5={:+.3}% critere_5pc={verdict}", cms[2], 100. * (cms[2] / 0.5 - 1.));
+        return;
+    }
     if std::env::args().any(|a| a == "--sphere") {
         println!("S329 — sphère immergée, mode linéaire : débit du premier pas à x = L/2");
         let mut q = Vec::new();

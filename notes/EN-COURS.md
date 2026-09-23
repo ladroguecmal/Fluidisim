@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 - [x] **P2** — `set_solid` : géométrie recoupée en place depuis le fond seul, faces qui naissent et
   meurent, eau déplacée ; flux du solide dans la divergence ; critères 1, 3, 5.
 - [x] **P3** — volume (critère 2) ; force de pression sur la paroi depuis la pression de δ.
-- [ ] **P4** — banc : départ impulsif, trois mailles, `C_m`.
+- [x] **P4** — banc : départ impulsif, trois mailles, `C_m`.
 - [ ] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste.
 - [ ] **P6** — rituel.
@@ -110,3 +110,8 @@ Une fausse alerte : l'essai calculait sa sphère avec un pas en f64, le volume e
 50 pas : `Σ(η − reste − z₀)·dx²` suit la variation du volume discret à **3,6·10⁻¹¹ m³** au pire (critère :
 10⁻⁹). Le volume discret de la sphère ne varie que de 4·10⁻¹⁰ m³ sur deux mailles de déplacement : l'erreur
 de l'interpolation linéaire tient à la courbure, pas à la position. Cœur : 482 réussis.
+**P4 (23:19).** `delta3d_fond_coupe --masse-ajoutee` : sphère de 0,3 m au centre d'un cube de 2,4 m, départ
+impulsif à 0,1 m/s, un pas ; 11 s. `C_m` = **0,48969 / 0,50506 / 0,50792** à 3 / 6 / 12 mailles par rayon ;
+incréments 0,0154 puis 0,0029 (ordre ≈ 2,4), limite extrapolée ≈ 0,509. **Critère 4 tenu** : 1,6 % de 0,5.
+L'excès va dans le sens du confinement — murs rigides à quatre rayons ; une sphère dans une sphère rigide de
+rayon quadruple aurait `(1 + 2q)/(1 − q)` = 1,048 avec `q = (1/4)³`, le cube, plus grand, moins.
