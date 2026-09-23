@@ -16534,3 +16534,23 @@ Lac au repos exact autour de la coque ; volume tenu à 2,7·10⁻¹⁰ m³. Mass
 **Rituel.** Maillons **0** : ce qui devient possible — un corps de jeu qui remue l'eau de δ sans que δ ait
 d'autorité ; le chemin — la porte D ; la preuve — §4 ; 6.1 avance. Suivant : **S333, la porte D**, puis
 le verdict visuel de l'utilisateur.
+
+## S333 — 2026-09-24 — porte D : une coque sur la houle de B, et δ qui porte sa perturbation
+
+**Entrée.** Reprise à chaud, *« Reprends le projets »* : S333 coupée à 23:47 au début de P2, diff cohérent
+(`BackgroundWater`) → **complété**. Plan amendé avant le code : P2 bis ajouté, P3 et P4 précisés.
+**Fait** ([preuve](../docs/validation/PORTE-D-S333.md)). B derrière la requête du corps ; la poussée suit le
+gradient de la pression du proxy — sur une houle, le corps était soulevé sans être entraîné (ADR-008 §2) ;
+la coque dans δ **relative à l'eau qui la porte**, pose f32, paroi par différence finie ; banc `porte_d`, images.
+**Mesuré.** Pilonnement forcé 1,04889·a pour 1,04892 prédit ; cavalement 0,99059·ξ ; au repos relatif, δ au
+repos au bit ; scène : trajectoire de jeu au bit sur 800 pas, anneaux de 9,4 cm pour un lâcher de 10 cm.
+**Manqué, publié.** Volume de δ à 3,8·10⁻⁹ m³ pour 10⁻⁹ : plancher f32 du transport — témoin sans coque,
+3,6·10⁻¹⁰ en 200 pas. La tolérance n'est pas réécrite.
+**Trouvé.** **A317** : une paroi qui ne laisse qu'une lamelle de 8 % dans sa maille rend le rayonnement de δ
+dissymétrique à 8 s ; scène posée à 30/30. Le jeu, lui, ne roule pas : impasse du roulis paramétrique écartée.
+**Non fait.** W derrière la requête ; amortissement par rayonnement ; rotation du décalage visuel ; la coque
+dans la production GPU.
+**Rituel.** Maillons **0** : ce qui devient possible — un bateau qui flotte sur la houle de B et rayonne dans
+δ sans autorité sur le jeu ; le chemin — le verdict de la porte D, donc la v1 ; la preuve — PORTE-D-S333 ;
+6.1 avance, 6.2 passe à partiel. Suivant : **le verdict visuel de l'utilisateur** (ADR-189 D3), puis A317.
+

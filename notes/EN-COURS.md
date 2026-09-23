@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S333 — **en cours**. **La porte D** : un bateau flotte et perturbe l'eau qui le porte, sans
+Session : S333 — **terminée**. **La porte D** : un bateau flotte et perturbe l'eau qui le porte, sans
 autorité de δ sur le jeu ; chemin de la v1 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S332.
@@ -96,7 +96,7 @@ Critères, écrits avant le code :
 - [x] **P5** — images de la scène (critère 6).
 - [x] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
   partie numérique), liste, file.
-- [ ] **P7** — rituel ; arrêt pour le verdict visuel.
+- [x] **P7** — rituel ; arrêt pour le verdict visuel.
 
 **Amendement de la reprise, déclaré avant le code.**
 - **P2 bis, pourquoi.** Le proxy intègre `p = ρg(η(x) − z)` mais n'en garde que la composante verticale :

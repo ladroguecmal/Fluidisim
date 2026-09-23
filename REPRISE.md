@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 01:09 +02:00
+JETON            : libre
+Battement        : 2026-09-24 01:10 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S333 — la porte D (ADR-189)
-Dernière session : S332 — **lot 4, le corps dans δ** : paroi en mouvement rigide, coque qui perce la surface linéaire, le corps du jeu pilote sa paroi et δ ne le pilote jamais — trajectoire identique au bit ; masse ajoutée du cube de C10 selon δ 41,7 kg, le disque de C10 la surestime de 47 % ([preuve](docs/validation/CORPS-RIGIDE-S331.md) §4)
-Session suivante : **S333, la porte D** (ADR-189) : le bateau sur une houle B — `WaterQuery` sur B, paroi de δ relative à l'eau qui la porte (vitesse de paroi par face) ; mesure de la perturbation et de la conservation ; images de la scène ; puis **arrêt pour le verdict visuel de l'utilisateur** (ADR-178 D3, ADR-189 D3). Signaler : la porte D cite C13 et C14, qui ne portent pas sur les solides
-Maillons        : 0 — S332 : corps du jeu dans δ reçu, 6.1 avance
+Session en cours : aucune
+Dernière session : S333 — **la porte D, partie numérique** : la coque du jeu sur la houle de B — pilonnement forcé à 3·10⁻⁵, cavalement avec l'eau, la poussée suivant le gradient de pression — et δ qui porte sa perturbation relative à l'eau qui la porte ; I-04 au bit, anneaux de 9,4 cm ; volume manqué au plancher du transport ; A317 ([preuve](docs/validation/PORTE-D-S333.md))
+Session suivante : **verdict visuel de l'utilisateur sur la porte D** (ADR-178 D3, ADR-189 D3 : s'arrêter et demander) — images `viewer/captures/s333`, questions et référence demandée au §3 de la preuve. Sans verdict, sur le chemin de la porte D : **A317**, la paroi dans sa maille
+Maillons        : 0 — S333 : la coque sur la houle, 6.1 avance, 6.2 partiel
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -80,7 +80,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
 
-État au 2026-09-23 (S332), en bref ; le détail par jalon et par porte est dans la
+État au 2026-09-24 (S333), en bref ; le détail par jalon et par porte est dans la
 [feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.
 
 - **Stratégie** : trois systèmes — A haute mer (B+W), B volumique 3D (δ), C couplage — et sept
@@ -94,9 +94,10 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 - **C** : compteurs reçus (lot 1) ; retour δ → W reçu en ordres A à D, **ordre E bloqué par A289**.
 - **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte**, **priorité** (ADR-189) : fond coupé et solide immergé
   quelconque, fixe ou en mouvement (S324–S330) ; corps rigide du jeu sur B + W, C10 tenu, qui pilote
-  sa coque dans δ sans que δ le pilote (S331–S332). Manque le bateau sur la houle.
+  sa coque dans δ sans que δ le pilote (S331–S332) ; **la coque sur la houle de B**, δ relatif à l'eau
+  qui la porte — partie numérique faite, **verdict visuel attendu**, A317 ouverte (S333).
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
-- Liste du projet fini : **3 validés, 53 partiels, 64 absents** sur 120.
+- Liste du projet fini : **3 validés, 54 partiels, 63 absents** sur 120.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
 nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`
