@@ -93,7 +93,7 @@ Critères, écrits avant le code :
   déjà, `ρg(η − z)` ; critère 1 bis.
 - [x] **P3** — la coque de δ relative à l'eau qui la porte ; critère 2.
 - [x] **P4** — banc `porte_d` : coque 4 × 1,6 × 1 m sur une houle ; critères 3 à 5, champs écrits.
-- [ ] **P5** — images de la scène (critère 6).
+- [x] **P5** — images de la scène (critère 6).
 - [ ] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
   partie numérique), liste, file.
 - [ ] **P7** — rituel ; arrêt pour le verdict visuel.
@@ -145,3 +145,17 @@ Critères, écrits avant le code :
   (rapport 1,3·10⁻⁴) ; **témoin** coque immobile, bosse 10 cm, 200 pas : 3,6·10⁻¹⁰ (rapport 6,3·10⁻⁴) → le
   plancher du transport f32, qui croît avec la grille (576 colonnes en S332, 9 216 ici), pas le couplage.
   Pilonnement relatif ±0,12 m ; décalage visuel 1,5 cm ; δ CPU **239 ms/pas**, 109 itérations.
+- **P5, images** à 2, 4, 6, 8 s : scène 1600 × 600 — B + δ à l'échelle | B + 5·δ —, carte de δ 600 × 600
+  (± 5 cm) ; `viewer/captures/s333`, PNG par `outils/apercu_ppm.py`. Empreintes scène / carte : 2 s
+  `0xb9a974e189acbed2` / `0xa0366797d73e2f97` ; 4 s `0x32ca3288ed68258c` / `0x0cba3fe9c000a959` ; 6 s
+  `0x4fd48091eeb78821` / `0x984edb9f4bddac25` ; 8 s `0x817b5a8d979abda7` / `0xe8a3a75362265bd9`.
+  Rendu : lumière de côté, pas de reflet solaire — les pentes réelles de δ (~0,03) sont sous le seuil
+  d'un ciel uniforme ; d'où le panneau ×5 (pratique de S297). **Pli droit au bord de δ** : murs, pas
+  d'éponge en mode linéaire.
+- **Trouvé en P5 → A317 (sévérité 2).** Premier placement : parois à 8 % et 52 % d'eau dans leurs mailles de
+  bord en `y` → rayonnement symétrique à 2 s, **franchement dissymétrique à 8 s** (fort du côté de la lamelle
+  de 8 %), δ max 13,7 cm. Le jeu, lui, ne roule pas (10⁻¹⁷ rad, y = 0 exact) : c'est δ. Placement 30 % / 30 %
+  → symétrique ; δ max **9,4 cm** ; volume 3,8·10⁻⁹ (plancher 1,8·10⁻⁵). Scène retenue : 30/30 ;
+  `--decalage-y 0.055` rend l'ancien au bit (carte 8 s `0xb614282e3e5cd161`). **Impasse écartée** : hypothèse
+  d'un roulis paramétrique du jeu (ω_pilonnement 4,48 ≈ 2 × ω_roulis 2,45) — le proxy symétrique au bit ne
+  l'amorce pas.

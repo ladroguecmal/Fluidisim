@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-24 00:43 +02:00
+Battement        : 2026-09-24 01:06 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S333 — la porte D (ADR-189)
 Dernière session : S332 — **lot 4, le corps dans δ** : paroi en mouvement rigide, coque qui perce la surface linéaire, le corps du jeu pilote sa paroi et δ ne le pilote jamais — trajectoire identique au bit ; masse ajoutée du cube de C10 selon δ 41,7 kg, le disque de C10 la surestime de 47 % ([preuve](docs/validation/CORPS-RIGIDE-S331.md) §4)
