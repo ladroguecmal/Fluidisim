@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — mouvement rigide de la paroi ; critère 1.
 - [x] **P3** — la coque perce le couvercle ; critères 2 et 3.
-- [ ] **P4** — banc : masse ajoutée du cube flottant, trois mailles (critère 4).
+- [x] **P4** — banc : masse ajoutée du cube flottant, trois mailles (critère 4).
 - [ ] **P5** — le corps du jeu pilote sa paroi, décalage visuel borné ; critère 5.
 - [ ] **P6** — preuve : section datée de [CORPS-RIGIDE-S331](../docs/validation/CORPS-RIGIDE-S331.md), avec
   « Reproduire » ; file, liste.
@@ -112,3 +112,10 @@ couvercle par l'ouverture : une face couverte devient paroi, une face en partie 
 condition sur sa part libre ; la part couverte avance à la vitesse de la coque. Cube de C10 à son tirant,
 24³ : **lac au repos au bit**, 100 pas ; pilonnement imposé 2 cm à 2 Hz, 100 pas : la surface suit le
 volume de coque plongé à **2,7·10⁻¹⁰ m³**. Sans l'autorisation, la configuration refuse. Cœur : 490.
+**P4 (23:39).** `delta3d_fond_coupe --masse-ajoutee-flottant` : cube de C10 à son tirant, 2,4 × 2,4 m sur 1,2 m
+d'eau, départ impulsif en pilonnement ; 5 s. Masse ajoutée **33,20 / 41,26 / 41,66 kg**, limite extrapolée
+**41,69 kg** — convergente, **critère 4 tenu**. Contre les deux disques : `(8/3)ρR³` = 61,36 kg, la référence
+de C10, la **surestime de 47 %** ; `(4/3)ρR³` = 30,68 kg la sous-estime. 41,7 kg = 0,67 de la masse du cube :
+le rapport des périodes deviendrait √(1 + 41,7/62,5) = **1,291**, encore dans la tolérance de C10 (1,414 ±
+15 %). δ peut donner au jeu son coefficient de masse ajoutée, mesuré hors ligne — un paramètre, pas une force
+de δ au pas : I-04 tient.

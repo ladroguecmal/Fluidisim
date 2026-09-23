@@ -24,6 +24,10 @@
 //! pas linéaire, la force de pression sur sa paroi, `C_m = −F·dt/(ρVU)`, à comparer à 0,5 (sphère en
 //! fluide illimité ; murs et surface à quatre rayons n'y changent que le millième).
 //!
+//! **S332, `--masse-ajoutee-flottant`** : le cube de C10 à son tirant, qui perce le couvercle, reçoit d'un coup
+//! une vitesse de pilonnement ; un pas linéaire donne sa masse ajoutée de haute fréquence, à comparer au
+//! disque de même aire en fluide illimité, `(8/3)ρR³` — la référence de C10 —, et à sa moitié `(4/3)ρR³`.
+//!
 //!     cargo run -p water-core --release --offline --example delta3d_fond_coupe
 
 #[path = "../../water-harness/src/host_impl.rs"]
@@ -198,6 +202,42 @@ fn masse_ajoutee(n: usize) -> (f64, u32, f64, usize) {
     (cm, rep.iterations, duree, n * n * n)
 }
 
+/// **S332 : la masse ajoutée de pilonnement du cube flottant de C10**, par un départ impulsif. Domaine de
+/// 2,4 × 2,4 m sur 1,2 m d'eau, cube de 0,5 m à son tirant de mer au milieu ; au premier pas, la surface
+/// libre n'a pas bougé : la condition du couvercle est celle de la haute fréquence, pression nulle.
+fn masse_ajoutee_flottant(n: usize) -> (f64, u32, f64, usize) {
+    let (l, h, a, w) = (2.4f64, 1.2f64, 0.5f64, 0.1f32);
+    let (nx, nz) = (n, n / 2);
+    let dx = (l / n as f64) as f32;
+    let d = 500. / RHO as f64 * a;
+    let c = [1.2, 1.2, h - d + a / 2.];
+    let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 31);
+    let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
+    let mut noeuds = Vec::with_capacity((nx + 1) * (nx + 1) * (nz + 1));
+    for k in 0..=nz {
+        for j in 0..=nx {
+            for i in 0..=nx {
+                let p = [i as f64 * dx as f64, j as f64 * dx as f64, k as f64 * dx as f64];
+                let q: Vec<f64> = (0..3).map(|e| (p[e] - c[e]).abs() - a / 2.).collect();
+                let dehors = q.iter().map(|x| x.max(0.).powi(2)).sum::<f64>().sqrt();
+                noeuds.push((dehors + q[0].max(q[1]).max(q[2]).min(0.)) as f32);
+            }
+        }
+    }
+    let mut v = Volume3::configure_with_floating_solid(&mut hote, Domain3 { nx, ny: nx, nz, dx }, RHO, G,
+        &vec![0.; nx * nx], &noeuds).expect("configuration");
+    let z0 = v.domain().z0();
+    v.set_surface(&vec![z0; nx * nx]).expect("surface");
+    v.set_solid(&noeuds, [0., 0., w]).expect("solide");
+    let debut = Instant::now();
+    let rep = v.step_surface_linear(DT_US, 20_000, &jobs).expect("pas");
+    let duree = debut.elapsed().as_secs_f64();
+    assert!(!rep.degraded, "pas dégradé");
+    let f = v.solid_force(&noeuds).expect("force");
+    (-f[2] * (DT_US as f64 * 1e-6) / w as f64, rep.iterations, duree, nx * nx * nz)
+}
+
 /// **Les petites cellules**, sans rien résoudre : la plus petite fraction et la plus petite ouverture
 /// non nulles, et combien passent sous 10⁻³ — ce qui conditionne l'opérateur (`--geometrie`).
 fn petites_cellules(fond: fn(f32, f32) -> f32, nx: usize) {
@@ -226,6 +266,27 @@ fn petites_cellules(fond: fn(f32, f32) -> f32, nx: usize) {
 }
 
 fn main() {
+    if std::env::args().any(|a| a == "--masse-ajoutee-flottant") {
+        println!("S332 — masse ajoutée de pilonnement du cube flottant de C10, départ impulsif");
+        let r = (0.25f64 / core::f64::consts::PI).sqrt();
+        let (disque, demi) = (8. / 3. * RHO as f64 * r.powi(3), 4. / 3. * RHO as f64 * r.powi(3));
+        let mut m = Vec::new();
+        for n in [24usize, 48, 96] {
+            let (ma, it, duree, mailles) = masse_ajoutee_flottant(n);
+            println!("FOND3D_S332 n={n} mailles={mailles} masse_ajoutee_kg={ma:.4} iterations={it} duree_pas_s={duree:.3}");
+            m.push(ma);
+        }
+        let (d1, d2) = (m[1] - m[0], m[2] - m[1]);
+        let limite = if d1 * d2 > 0. && d1.abs() > d2.abs() {
+            let o = (d1 / d2).abs().log2();
+            m[2] + d2 / (2f64.powf(o) - 1.)
+        } else {
+            f64::NAN
+        };
+        println!("FOND3D_S332 masse_fine_kg={:.4} limite_extrapolee_kg={limite:.4} disque_8_3_kg={disque:.4} demi_disque_4_3_kg={demi:.4} masse_du_cube_kg=62.5",
+            m[2]);
+        return;
+    }
     if std::env::args().any(|a| a == "--masse-ajoutee") {
         println!("S330 — masse ajoutée d'une sphère, départ impulsif, un pas linéaire");
         let mut cms = Vec::new();
