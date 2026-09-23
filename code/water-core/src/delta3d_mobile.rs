@@ -1,4 +1,6 @@
 //! S296 : fonction hauteur 3D, fond plat et murs, référence CPU hors boucle d'image.
+//! S328 : fond coupé — la ligne mobile de la 2D (S237) portée à six faces, pondérée par les ouvertures ;
+//! sur un fond plat, toute ouverture vaut 1 et chaque opération reste celle de S296, au bit.
 use super::*;
 use crate::delta_projection::SURFACE_THETA_MIN;
 
@@ -24,7 +26,28 @@ impl Volume3 {
     }
 
     pub(super) fn wet3(&self, i: usize, j: usize, k: usize) -> bool {
+        // S328 : une maille solide n'est jamais mouillée — `wet` de la 2D.
+        if self.solid3(self.c(i, j, k)) {
+            return false;
+        }
         (k as f32 + 0.5) * self.domain.dx < self.height3(i,j)
+    }
+
+    /// S328 : l'ouverture d'une face `u` (0), `v` (1) ou `w` (2) ; 1 sur un fond plat.
+    fn open3(&self, axis: usize, f: usize) -> f32 {
+        match &self.cut {
+            Some(g) => match axis {
+                0 => g.open_u[f],
+                1 => g.open_v[f],
+                _ => g.open_w[f],
+            },
+            None => 1.,
+        }
+    }
+
+    /// S328 : maille de fraction nulle — jamais sur un fond plat.
+    fn solid3(&self, c: usize) -> bool {
+        self.cut.as_ref().is_some_and(|g| g.frac[c] == 0.)
     }
 
     fn ghost_up3(&self, i: usize, j: usize, k: usize) -> (f32, f32) {
@@ -50,35 +73,43 @@ impl Volume3 {
         (1./theta,value)
     }
 
-    /// (voisin fluide, coefficient fantôme, valeur imposée), dans l'ordre x−, x+, y−,
-    /// y+, z−, z+. Un mur est (None, 0, 0). Pas de réserve ni d'allocation par ligne.
-    fn mobile_row(&self, i: usize, j: usize, k: usize) -> [(Option<usize>, f32, f32); 6] {
+    /// (voisin fluide, ouverture, coefficient fantôme, valeur imposée), dans l'ordre x−, x+, y−, y+,
+    /// z−, z+. Un mur, une face fermée ou un voisin solide est (None, 0, 0, 0) ; S328 : l'ouverture
+    /// pondère la face, et vaut 1 sur un fond plat. Pas de réserve ni d'allocation par ligne.
+    fn mobile_row(&self, i: usize, j: usize, k: usize) -> [(Option<usize>, f32, f32, f32); 6] {
         let Domain3 { nx, ny, nz, .. } = self.domain;
-        let mut row = [(None, 0., 0.); 6];
+        let mut row = [(None, 0., 0., 0.); 6];
         let neighbors = [
-            i.checked_sub(1).map(|x| (x, j)),
-            (i + 1 < nx).then_some((i + 1, j)),
-            j.checked_sub(1).map(|y| (i, y)),
-            (j + 1 < ny).then_some((i, j + 1)),
+            (i.checked_sub(1).map(|x| (x, j)), self.open3(0, self.fu(i, j, k))),
+            ((i + 1 < nx).then_some((i + 1, j)), self.open3(0, self.fu(i + 1, j, k))),
+            (j.checked_sub(1).map(|y| (i, y)), self.open3(1, self.fv(i, j, k))),
+            ((j + 1 < ny).then_some((i, j + 1)), self.open3(1, self.fv(i, j + 1, k))),
         ];
-        for (f, n) in neighbors.into_iter().enumerate() {
+        for (f, (n, a)) in neighbors.into_iter().enumerate() {
             if let Some((x, y)) = n {
+                if a == 0. || self.solid3(self.c(x, y, k)) {
+                    continue;
+                }
                 if self.wet3(x, y, k) {
-                    row[f].0 = Some(self.c(x, y, k));
+                    row[f] = (Some(self.c(x, y, k)), a, 0., 0.);
                 } else {
-                    let (a, b) = self.ghost_side3(i, j, k, x, y);
-                    row[f] = (None, a, b);
+                    let (it, b) = self.ghost_side3(i, j, k, x, y);
+                    row[f] = (None, a, it, b);
                 }
             }
         }
-        if k > 0 {
-            row[4].0 = Some(self.c(i, j, k - 1));
+        let down = self.open3(2, self.fw(i, j, k));
+        if k > 0 && down > 0. && !self.solid3(self.c(i, j, k - 1)) {
+            row[4] = (Some(self.c(i, j, k - 1)), down, 0., 0.);
         }
-        if k + 1 < nz && self.wet3(i, j, k + 1) {
-            row[5].0 = Some(self.c(i, j, k + 1));
-        } else {
-            let (a, b) = self.ghost_up3(i, j, k);
-            row[5] = (None, a, b);
+        let up = self.open3(2, self.fw(i, j, k + 1));
+        if up > 0. {
+            if k + 1 < nz && self.wet3(i, j, k + 1) {
+                row[5] = (Some(self.c(i, j, k + 1)), up, 0., 0.);
+            } else {
+                let (it, b) = self.ghost_up3(i, j, k);
+                row[5] = (None, up, it, b);
+            }
         }
         row
     }
@@ -95,11 +126,11 @@ impl Volume3 {
                         continue;
                     }
                     let mut acc = 0f32;
-                    for (n, a, _) in self.mobile_row(i, j, k) {
+                    for (n, a, it, _) in self.mobile_row(i, j, k) {
                         if let Some(n) = n {
-                            acc += p[c] - p[n];
+                            acc += a * (p[c] - p[n]);
                         } else if a > 0. {
-                            acc += p[c] * a;
+                            acc += a * p[c] * it;
                         }
                     }
                     out[c] = acc * inv;
@@ -121,12 +152,12 @@ impl Volume3 {
                         continue;
                     }
                     let (mut b, mut diag) = (scale * self.rhs[c], 0f32);
-                    for (n, a, value) in self.mobile_row(i, j, k) {
+                    for (n, a, it, value) in self.mobile_row(i, j, k) {
                         if n.is_some() {
-                            diag += 1.;
-                        } else if a > 0. {
                             diag += a;
-                            b += value * a * inv;
+                        } else if a > 0. {
+                            diag += a * it;
+                            b += a * value * it * inv;
                         }
                     }
                     self.rhs[c] = b;
@@ -149,11 +180,11 @@ impl Volume3 {
                     let c = self.c(i, j, k);
                     let pc = self.p[c].abs();
                     let mut acc = 0f32;
-                    for (n, a, _) in self.mobile_row(i, j, k) {
+                    for (n, a, it, _) in self.mobile_row(i, j, k) {
                         if let Some(n) = n {
-                            acc += pc + self.p[n].abs();
+                            acc += a * (pc + self.p[n].abs());
                         } else if a > 0. {
-                            acc += pc * a;
+                            acc += a * pc * it;
                         }
                     }
                     let scale = self.rhs[c].abs() + acc * inv;
@@ -191,6 +222,11 @@ impl Volume3 {
                         }
                         let (x, y) = if axis == 0 { (i - 1, j) } else { (i, j - 1) };
                         let (l, r) = (self.c(x, y, k), self.c(i, j, k));
+                        // S328 : face fermée, ou voisine d'une maille solide — non corrigée, comme en 2D.
+                        let face = if axis == 0 { self.fu(i, j, k) } else { self.fv(i, j, k) };
+                        if self.open3(axis, face) == 0. || self.solid3(l) || self.solid3(r) {
+                            continue;
+                        }
                         let change = match (self.wet3(x, y, k), self.wet3(i, j, k)) {
                             (true, true) => k1 * (self.p[r] - self.p[l]) / dx,
                             (true, false) => {
@@ -217,10 +253,10 @@ impl Volume3 {
         for k in 1..=nz {
             for j in 0..ny {
                 for i in 0..nx {
-                    if !self.wet3(i, j, k - 1) {
+                    let f = self.fw(i, j, k);
+                    if self.open3(2, f) == 0. || !self.wet3(i, j, k - 1) {
                         continue;
                     }
-                    let f = self.fw(i, j, k);
                     let below = self.c(i, j, k - 1);
                     if k < nz && self.wet3(i, j, k) {
                         self.w[f] -= k1 * (self.p[self.c(i, j, k)] - self.p[below]) / dx;
@@ -245,15 +281,22 @@ impl Volume3 {
                     let (start, end) = if axis == 2 { (1, nz + 1) } else { (0, nz) };
                     for k in start..end {
                         let (f, solved) = match axis {
+                            // S328 : une face résolue est ouverte et entre deux mailles de fluide.
                             0 => (
                                 self.fu(i, j, k),
-                                self.wet3(i - 1, j, k) || self.wet3(i, j, k),
+                                self.open3(0, self.fu(i, j, k)) > 0.
+                                    && !self.solid3(self.c(i - 1, j, k))
+                                    && !self.solid3(self.c(i, j, k))
+                                    && (self.wet3(i - 1, j, k) || self.wet3(i, j, k)),
                             ),
                             1 => (
                                 self.fv(i, j, k),
-                                self.wet3(i, j - 1, k) || self.wet3(i, j, k),
+                                self.open3(1, self.fv(i, j, k)) > 0.
+                                    && !self.solid3(self.c(i, j - 1, k))
+                                    && !self.solid3(self.c(i, j, k))
+                                    && (self.wet3(i, j - 1, k) || self.wet3(i, j, k)),
                             ),
-                            _ => (self.fw(i, j, k), self.wet3(i, j, k - 1)),
+                            _ => (self.fw(i, j, k), self.open3(2, self.fw(i, j, k)) > 0. && self.wet3(i, j, k - 1)),
                         };
                         let field = match axis {
                             0 => &mut self.u,
@@ -290,7 +333,7 @@ impl Volume3 {
                     if !self
                         .mobile_row(i, j, k)
                         .iter()
-                        .any(|(n, a, _)| n.is_none() && *a > 0.)
+                        .any(|(n, a, _, _)| n.is_none() && *a > 0.)
                     {
                         plain = plain.max(d);
                     }
@@ -484,6 +527,11 @@ impl Volume3 {
                 for a in 1..na {
                     for k in 0..nz {
                         let (i, j) = if axis == 0 { (a, b) } else { (b, a) };
+                        // S328 : une face fermée n'est pas advectée, comme en 2D.
+                        let face = if axis == 0 { self.fu(i, j, k) } else { self.fv(i, j, k) };
+                        if self.open3(axis, face) == 0. {
+                            continue;
+                        }
                         let val = |a: usize, b: usize, k: usize| {
                             if axis == 0 {
                                 self.u[self.fu(a, b, k)]
@@ -539,6 +587,9 @@ impl Volume3 {
             for i in 0..nx {
                 for k in 1..nz {
                     let f = self.fw(i, j, k);
+                    if self.open3(2, f) == 0. {
+                        continue;
+                    }
                     let wc = self.w[f];
                     let rt = if i + 1 < nx {
                         self.w[self.fw(i + 1, j, k)]
@@ -598,12 +649,15 @@ impl Volume3 {
                         if wet == 0. {
                             break;
                         }
-                        let u = if axis == 0 {
-                            self.u[self.fu(i, j, k)]
+                        // S328 : débit ouvert, `a·u·dx·mouillé` comme en 2D ; `a` = 1 sur un fond plat.
+                        let (u, a) = if axis == 0 {
+                            let f = self.fu(i, j, k);
+                            (self.u[f], self.open3(0, f))
                         } else {
-                            self.v[self.fv(i, j, k)]
+                            let f = self.fv(i, j, k);
+                            (self.v[f], self.open3(1, f))
                         };
-                        q += u * dx * wet;
+                        q += a * u * dx * wet;
                     }
                     if axis == 0 {
                         self.flux_x[j * (nx + 1) + i] = q;
@@ -646,19 +700,27 @@ impl Volume3 {
     pub(super) fn mobile_in_bounds(&self) -> bool {
         let dx = self.domain.dx;
         let top = (self.domain.nz - 1) as f32 * dx;
-        (0..self.domain.ny).all(|j| (0..self.domain.nx).all(|i| {let e=self.height3(i,j); e>=2.*dx && e<=top}))
+        // S328 : sur un fond coupé, deux mailles au-dessus du plus haut coin du fond de la colonne.
+        (0..self.domain.ny).all(|j| (0..self.domain.nx).all(|i| {
+            let e = self.height3(i, j);
+            let floor = match &self.cut {
+                Some(g) => g.floor[self.col(i, j)] + 2. * dx,
+                None => 2. * dx,
+            };
+            e >= floor && e <= top
+        }))
     }
 
     /// Référence CPU à surface mobile (S296, ADR-175), hors boucle d'image. Garde dt²g/dx≤1,
     /// projection de Jacobi à départ chaud, extrapolation et transport par débits mouillés.
     /// Aucune allocation. Refus atomique : les six champs publiés sont restaurés au bit.
+    /// S328 : fond plat ou coupé ; la surface reste à deux mailles au-dessus du fond de sa colonne.
     pub fn step_surface_mobile(
         &mut self,
         duration_us: u64,
         max_iters: u32,
         jobs: &dyn JobSystem,
     ) -> Result<Report, Error> {
-        self.refuse_cut()?;
         if duration_us == 0 || duration_us > (1u64 << 53) {
             return Err(Error::NotFinite);
         }
@@ -751,6 +813,11 @@ impl Volume3 {
             self.p.copy_from_slice(&self.saved_p);
             self.eta.copy_from_slice(&self.saved_eta);
             self.eta_roundoff.copy_from_slice(&self.saved_eta_roundoff);
+        }
+        // S328 : le pas mobile a réécrit la diagonale de Jacobi ; le chemin linéaire coupé retrouve la
+        // sienne, calculée une fois pour sa géométrie fixe (S326).
+        if self.cut.is_some() {
+            self.prec_cut();
         }
         result
     }

@@ -33,6 +33,9 @@ pub(crate) struct Cut3 {
     pub open_u: Vec<f32>,
     pub open_v: Vec<f32>,
     pub open_w: Vec<f32>,
+    /// **S328 : le plus haut coin du fond de chaque colonne**, `nx·ny` valeurs — la garde du pas mobile,
+    /// qui tient la surface à deux mailles au-dessus, comme la 2D au-dessus de ses deux arêtes.
+    pub floor: Vec<f32>,
 }
 
 /// Le fond aux coins des empreintes, `(nx + 1)·(ny + 1)` valeurs, `x` le plus rapide. Le long de
@@ -202,7 +205,11 @@ pub(crate) fn cut(domain: Domain3, bottom: &[f32]) -> Cut3 {
             }
         }
     }
-    Cut3 { frac, open_u, open_v, open_w }
+    let floor = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| (i, j)))
+        .map(|(i, j)| footprint(i, j).into_iter().fold(f32::NEG_INFINITY, f32::max))
+        .collect();
+    Cut3 { frac, open_u, open_v, open_w, floor }
 }
 
 #[cfg(test)]

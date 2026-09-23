@@ -215,8 +215,8 @@ impl Volume3 {
 
     /// **S324 : la référence sur un fond coupé.** Le fond est fourni au centre des colonnes, `nx·ny`
     /// valeurs, `x` le plus rapide, entre `0` et `z₀` ; la découpe de `delta3d_cut.rs` en tire les
-    /// fractions et les ouvertures, **comptées auprès de l'hôte** avant `seal()` (I-06). Mode
-    /// linéaire seulement ; le couvercle doit rester entièrement mouillé, comme en 2D.
+    /// fractions et les ouvertures, **comptées auprès de l'hôte** avant `seal()` (I-06). Modes linéaire
+    /// — le couvercle entièrement mouillé, comme en 2D — et mobile (S328) ; le pas couplé la refuse.
     pub fn configure_with_bottom(host: &mut HostServices, domain: Domain3, rho: f32, g_eff: f32,
         bottom: &[f32]) -> Result<Self, Error> {
         let Domain3 { nx, ny, nz, .. } = domain;
@@ -228,7 +228,8 @@ impl Volume3 {
         }
         let mut v = Self::configure(host, domain, rho, g_eff)?;
         let faces = (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1);
-        let bytes = (faces + nx * ny * nz).checked_mul(core::mem::size_of::<f32>()).ok_or(Error::Domain)?;
+        // S328 : plus le plancher de chaque colonne, garde du pas mobile.
+        let bytes = (faces + nx * ny * nz + nx * ny).checked_mul(core::mem::size_of::<f32>()).ok_or(Error::Domain)?;
         host.alloc.alloc_persistent(bytes).map_err(|e| match e {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
@@ -245,7 +246,7 @@ impl Volume3 {
     /// **S326 : la diagonale de Jacobi du chemin coupé** — ouvertures des faces vers une maille fluide,
     /// deux fois celle du couvercle, comme la ligne de `apply_cut` ; zéro sur une maille solide. La
     /// géométrie est fixe : calculée une fois, à la configuration.
-    fn prec_cut(&mut self) {
+    pub(super) fn prec_cut(&mut self) {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let inv = 1. / (dx * dx);
         let g = self.cut.as_ref().expect("fond coupé");
@@ -291,7 +292,8 @@ impl Volume3 {
         self.cut.as_ref().map(|g| (g.open_u.as_slice(), g.open_v.as_slice(), g.open_w.as_slice()))
     }
 
-    /// S324 : les pas mobile et couplé ne portent pas encore la découpe ; ils la refusent.
+    /// S324 : le pas couplé ne porte pas encore la découpe ; il la refuse. Le pas mobile la porte
+    /// depuis S328.
     pub(crate) fn refuse_cut(&self) -> Result<(), Error> {
         if self.cut.is_some() { Err(Error::Domain) } else { Ok(()) }
     }

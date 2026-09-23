@@ -873,7 +873,8 @@ fn a_cut_bottom_counts_its_buffers_and_refuses_what_it_cannot_hold_s324() {
     let fond = vec![0.3f32; 24];
     let (v, a1) = volume_bottom(6, 4, 5, 0.5, &fond);
     let (nx, ny, nz) = (6usize, 4usize, 5usize);
-    let extra = ((nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1) + nx * ny * nz) * 4;
+    // S328 : plus le plancher de chaque colonne, garde du pas mobile.
+    let extra = ((nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1) + nx * ny * nz + nx * ny) * 4;
     assert_eq!(a1.stats.persistent_bytes, a0.stats.persistent_bytes + extra);
     assert_eq!(a1.stats.persistent_calls, 2);
     assert!(v.fluid_fraction().is_some());
@@ -985,11 +986,16 @@ fn a_step_on_a_cut_bottom_leaves_an_open_divergence_free_field_s324() {
     assert!(v.velocity_v().iter().any(|x| *x != 0.), "aucun écoulement transverse");
 }
 
-/// Le pas mobile ne porte pas encore la découpe : il la refuse au lieu de l'ignorer.
+/// Le pas **couplé** ne porte pas encore la découpe : il la refuse au lieu de l'ignorer. *S324 le
+/// vérifiait du pas mobile, qui la porte depuis S328.*
 #[test]
-fn the_mobile_step_refuses_a_cut_bottom_s324() {
+fn the_coupled_step_refuses_a_cut_bottom_s324() {
+    use crate::{background::BackgroundSample, SimTime};
     let (mut v, _) = volume_bottom(6, 4, 5, 0.5, &vec![0.3f32; 24]);
-    assert_eq!(v.step_surface_mobile(2000, 100, &Jobs).err(), Some(Error::Domain));
+    let (u, vv, w) = (vec![BackgroundSample::default(); v.u.len()], vec![BackgroundSample::default(); v.v.len()],
+        vec![BackgroundSample::default(); v.w.len()]);
+    let bg = BackgroundFaces3 { domain: v.domain, time: SimTime(0), density: 1025., gravity: 9.81, u: &u, v: &vv, w: &w };
+    assert_eq!(v.step_perturbation_mobile(SimTime(0), 2000, 100, &bg, Sponge3::default(), &Jobs).err(), Some(Error::Domain));
 }
 
 /// **S326, critère 2.** Jacobi sur le chemin coupé : la même solution à la tolérance près, en bien moins

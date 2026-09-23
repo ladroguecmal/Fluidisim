@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le pas mobile 3D porte la découpe ; fond plat au bit, suite verte.
+- [x] **P2** — le pas mobile 3D porte la découpe ; fond plat au bit, suite verte.
 - [ ] **P3** — essais des critères 2, 3, 4 et 6.
 - [ ] **P4** — banc : le premier pas mobile sur la bosse, trois mailles, ordre ; écart au mode linéaire.
 - [ ] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
@@ -102,4 +102,10 @@ Critères, écrits avant le code :
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
-
+**P2 (22:39).** `delta3d_mobile.rs` : maille mouillée = fraction non nulle et centre sous la surface ;
+lignes `(voisin, ouverture, 1/θ, valeur)`, l'ouverture valant 1 sans découpe — `a·(p−q)`, `a·p·θ⁻¹`,
+`a·valeur·θ⁻¹·dx⁻²`, `a·u·dx·mouillé`, l'ordre de la 2D ; correction, extrapolation et advection
+sautent les faces fermées ; garde : plancher = plus haut coin du fond de la colonne (`Cut3::floor`,
+compté à la configuration) + deux mailles. Le pas mobile restaure la diagonale de Jacobi du chemin
+linéaire coupé. Le pas couplé refuse toujours la découpe (essai de S324 réécrit sur lui). Cœur : **469
+réussis**, 0 échec ; les identités 2D du mode mobile sur fond plat (S296, 1 604 pas) passent au bit.
