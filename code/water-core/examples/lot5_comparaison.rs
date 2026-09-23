@@ -861,6 +861,10 @@ trait Candidat {
     fn mesure(&self, t: f64) -> Mesure;
     /// Comment le candidat mesure son volume — publié avec le volume.
     fn definition_du_volume(&self) -> &'static str;
+    /// Itérations du dernier solveur de pression, pour la trace (S326) ; zéro sans solveur.
+    fn iterations(&self) -> usize {
+        0
+    }
 }
 
 fn execute(scene: Scene, c: &mut dyn Candidat) {
@@ -871,6 +875,12 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
     let mut releves: Vec<Mesure> = vec![c.mesure(0.0)];
     let (mut t, mut prochain, mut pas) = (0.0, echantillon, 0usize);
     let debut = Instant::now();
+    // **La trace de progression** (S326), sur l'erreur standard et seulement si `LOT5_TRACE` est
+    // posée : S320 P5b a tourné douze heures sans rien écrire, sans qu'on puisse dire s'il avançait.
+    // Par échantillon : pas pris dans l'intervalle — le pas moyen s'en déduit —, vitesse maximale,
+    // itérations du dernier solveur, degrés, temps écoulé. La sortie par défaut ne change pas.
+    let trace = std::env::var("LOT5_TRACE").is_ok();
+    let mut pas_au_releve = 0usize;
     while t < scene.t_fin - 1e-12 {
         let dt = c.pas((prochain - t).max(1e-9));
         t += dt;
@@ -878,6 +888,19 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
         if t >= prochain - 1e-9 {
             releves.push(c.mesure(t));
             prochain += echantillon;
+            if trace {
+                let n = pas - pas_au_releve;
+                eprintln!(
+                    "TRACE t={t:.4} t_fin={:.4} pas={pas} pas_intervalle={n} dt_moyen={:.3e} u_max={:.3} iterations={} degres={} ecoule_s={:.0}",
+                    scene.t_fin,
+                    echantillon / n as f64,
+                    releves.last().unwrap().u_max,
+                    c.iterations(),
+                    c.degres(),
+                    debut.elapsed().as_secs_f64()
+                );
+            }
+            pas_au_releve = pas;
         }
     }
     let duree = debut.elapsed().as_secs_f64();
@@ -1431,6 +1454,9 @@ impl Candidat for Apic {
     }
     fn definition_du_volume(&self) -> &'static str {
         "masse/rho, exacte par construction ; l'occupation min(1,n/4)*dx^2 est publiee a part"
+    }
+    fn iterations(&self) -> usize {
+        self.mac.iterations
     }
     fn pas(&mut self, dt_max: f64) -> f64 {
         let (nx, ny, dx) = (self.mac.nx, self.mac.ny, self.mac.dx);

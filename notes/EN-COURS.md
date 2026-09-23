@@ -97,6 +97,8 @@ Critères, écrits avant le code :
   conjugué plafonne à 4 000 itérations : il peut ramper ou s'être emballé. **P5a** — trace de progression
   par variable d'environnement (sortie par défaut inchangée), le même calcul rejoué en parallèle ;
   **P5b** — verdict : attendre, ou arrêter et dire pourquoi.
+  - [x] **P5a** — `LOT5_TRACE` : une ligne par échantillon sur l'erreur standard ; rejeu lancé à 08:53.
+  - [>] **P5b** — verdict.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -108,3 +110,10 @@ Suite : **590 réussis**, 0 échec ; les essais de S324 — identité 2D à `ny`
 128, **16 029 → 425 itérations, 708 → 5,7 s** ; débits à ≤ 2,4·10⁻⁶ de S324 ; ordre 1,947. Témoin :
 347 → 422 itérations — Jacobi y coûte un peu, ses petites cellules ne gênaient pas. Banc entier : 12 min
 → 12 s.
+
+**P5a (08:54).** Trace posée : par échantillon, pas pris dans l'intervalle, pas moyen, vitesse maximale,
+itérations du dernier gradient conjugué, degrés, temps écoulé ; sans `LOT5_TRACE`, sortie inchangée.
+Premiers chiffres — `D/dx` = 32 : 327 680 particules, **2,5 s par pas**, pas de 0,84 ms, 1 250 itérations ;
+`D/dx` = 16 : 0,35 s par pas, pas de 2,5 ms. À ce rythme, `t_fin` = 1,615 s demande **≈ 1 h** à 32 : le
+calcul d'origine, à 12 h 38, a quitté ce régime quelque part. Le rejeu est identique au bit (même chemin
+d'APIC) : il y passera au même instant simulé.
