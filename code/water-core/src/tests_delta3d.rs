@@ -1034,3 +1034,122 @@ fn jacobi_on_the_cut_path_keeps_the_solution_and_cuts_the_iterations_s326() {
     assert!(((q_avec - q_sans) / q_sans).abs() < 1e-5, "débit {q_avec} contre {q_sans}");
     assert!(d_avec <= PROJECTION_DIVERGENCE_TOLERANCE as f64);
 }
+
+// ─────────────────────────────── S328 : le mode mobile sur fond coupé (lot 3) ───────────────────────────────
+
+/// Une surface mobile de S296 posée à `repos + a·cos(πx/L)` sur chaque rangée.
+fn surface_mobile(nx: usize, ny: usize, repos: f32, a: f32) -> Vec<f32> {
+    (0..ny)
+        .flat_map(|_| (0..nx).map(move |i| (repos as f64 + a as f64 * (std::f64::consts::PI * (i as f64 + 0.5) / nx as f64).cos()) as f32))
+        .collect()
+}
+
+/// **S328, critère 2.** À `ny = 1`, sur les trois fonds de S232, la trajectoire **mobile** de la 3D est
+/// celle de la 2D (S237) **au bit** — surface, pression, vitesses et itérations, pas après pas.
+#[test]
+fn ny_1_on_the_s232_bottoms_reproduces_the_2d_mobile_trajectory_s328() {
+    use crate::delta_projection::{Domain, Volume, MOBILE_MULTIGRID_OFF};
+    struct Still;
+    impl crate::host::MonotonicClock for Still { fn now_ns(&self) -> u64 { 0 } }
+    struct Reset;
+    impl Drop for Reset { fn drop(&mut self) { MOBILE_MULTIGRID_OFF.with(|c| c.set(false)); } }
+    MOBILE_MULTIGRID_OFF.with(|c| c.set(true));
+    let _reset = Reset;
+    let (n, nz) = (32usize, 16usize);
+    let dx = 8. / n as f32;
+    for forme in 0..3 {
+        let fond: Vec<f32> = (0..n).map(|i| fond_s232(forme, (i as f32 + 0.5) * dx)).collect();
+        let (mut v3, _) = volume_bottom(n, 1, nz, dx, &fond);
+        let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+        let mut v2 = Volume::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+            Domain { nx: n, nz, dx }, 1025., 9.81, &fond).unwrap();
+        let eta = surface_mobile(n, 1, 2.5, 0.1);
+        v3.set_free_surface(&eta, 2.5).unwrap();
+        v2.set_free_surface(&eta, 2.5).unwrap();
+        for step in 0..200 {
+            let r3 = v3.step_surface_mobile(1000, 4000, &Jobs).unwrap();
+            let r2 = v2.step_surface_mobile(1000, 4000, 1_000_000, &Jobs, &Still).unwrap().report.unwrap();
+            assert_eq!(r3.iterations, r2.iterations, "fond {forme}, pas {step}");
+            for (a, b) in v3.surface().iter().zip(v2.surface()).chain(v3.pressure().iter().zip(v2.pressure()))
+                .chain(v3.velocity_u().iter().zip(v2.velocity_u())).chain(v3.velocity_w().iter().zip(v2.velocity_w())) {
+                assert_eq!(a.to_bits(), b.to_bits(), "fond {forme}, pas {step}");
+            }
+        }
+        assert!(v3.velocity_u().iter().any(|x| *x != 0.), "fond {forme} : rien n'a bougé");
+    }
+}
+
+/// **S328, critère 3.** Un lac au repos sur la bosse 3D, en mode mobile, reste **exactement** au repos :
+/// cent pas, vitesses et surface au bit.
+#[test]
+fn a_lake_at_rest_on_a_cut_bottom_stays_at_rest_in_mobile_mode_s328() {
+    let (nx, ny, nz, dx) = (24usize, 12usize, 10usize, 0.25f32);
+    let fond: Vec<f32> = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| bosse((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx)))
+        .collect();
+    let (mut v, _) = volume_bottom(nx, ny, nz, dx, &fond);
+    v.set_free_surface(&vec![2.; nx * ny], 2.).unwrap();
+    for pas in 0..100 {
+        v.step_surface_mobile(2000, 4000, &Jobs).unwrap();
+        assert!(v.velocity_u().iter().chain(v.velocity_v()).chain(v.velocity_w()).all(|x| x.to_bits() == 0), "pas {pas}");
+        assert!(v.surface().iter().all(|h| h.to_bits() == 2f32.to_bits()), "pas {pas}");
+    }
+}
+
+/// **S328, critère 4.** Un fond sans `y`, à `ny = 4` : les quatre tranches sont identiques entre elles au
+/// bit, et restent à 10⁻⁵ près en relatif de la tranche `ny = 1` après cent pas mobiles.
+#[test]
+fn a_bottom_without_y_keeps_the_mobile_slices_identical_s328() {
+    let (n, nz) = (32usize, 16usize);
+    let dx = 8. / n as f32;
+    let (repos, a) = (2.5f32, 0.1f32);
+    let mut surfaces = Vec::new();
+    for ny in [1usize, 4] {
+        let fond: Vec<f32> = (0..ny).flat_map(|_| (0..n).map(move |i| fond_s232(1, (i as f32 + 0.5) * dx))).collect();
+        let (mut v, _) = volume_bottom(n, ny, nz, dx, &fond);
+        v.set_free_surface(&surface_mobile(n, ny, repos, a), repos).unwrap();
+        for _ in 0..100 {
+            v.step_surface_mobile(1000, 4000, &Jobs).unwrap();
+        }
+        let s = v.surface().to_vec();
+        for j in 1..ny {
+            for i in 0..n {
+                assert_eq!(s[j * n + i].to_bits(), s[i].to_bits(), "tranche {j}, colonne {i}");
+            }
+        }
+        // L'écoulement transverse n'est nul qu'à l'arrondi près : la diagonale de Jacobi des rangées de
+        // bord n'est pas celle des rangées intérieures, et le fond plat de S296 en fait autant
+        // (5·10⁻⁹ m/s pour 0,037 m/s de `u`, S328 P3).
+        let vmax = v.velocity_v().iter().fold(0f32, |m, x| m.max(x.abs()));
+        let umax = v.velocity_u().iter().fold(0f32, |m, x| m.max(x.abs()));
+        assert!(vmax <= 1e-6 * umax, "écoulement transverse {vmax} pour {umax}");
+        surfaces.push(s);
+    }
+    let pire = (0..n).fold(0f32, |m, i| m.max(((surfaces[1][i] - repos) - (surfaces[0][i] - repos)).abs()));
+    println!("S328 : écart ny = 4 contre ny = 1 après cent pas, {:e} de l'amplitude", pire / a);
+    assert!(pire / a <= 1e-5, "{pire}");
+}
+
+/// **S328, critère 6.** Une surface à moins de deux mailles du plus haut coin du fond de sa colonne est
+/// refusée (`Domain`), et l'état publié est restauré au bit.
+#[test]
+fn a_mobile_surface_too_close_to_the_cut_bottom_is_refused_s328() {
+    let (nx, ny, nz, dx) = (24usize, 12usize, 10usize, 0.25f32);
+    let fond: Vec<f32> = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| bosse((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx)))
+        .collect();
+    let (mut v, _) = volume_bottom(nx, ny, nz, dx, &fond);
+    // Au sommet de la bosse, le fond approche 1 m : 1,4 m de surface y laisse moins de deux mailles.
+    v.set_free_surface(&vec![1.4; nx * ny], 1.4).unwrap();
+    let avant: Vec<u32> = v.surface().iter().chain(v.velocity_u()).chain(v.velocity_v()).chain(v.velocity_w())
+        .chain(v.pressure()).map(|x| x.to_bits()).collect();
+    assert_eq!(v.step_surface_mobile(2000, 4000, &Jobs).err(), Some(Error::Domain));
+    let apres: Vec<u32> = v.surface().iter().chain(v.velocity_u()).chain(v.velocity_v()).chain(v.velocity_w())
+        .chain(v.pressure()).map(|x| x.to_bits()).collect();
+    assert_eq!(avant, apres);
+    // Loin du sommet, la même profondeur passe : la garde est bien celle de la colonne.
+    let plat = vec![0.3f32; nx * ny];
+    let (mut w, _) = volume_bottom(nx, ny, nz, dx, &plat);
+    w.set_free_surface(&vec![1.4; nx * ny], 1.4).unwrap();
+    assert!(w.step_surface_mobile(2000, 4000, &Jobs).is_ok());
+}

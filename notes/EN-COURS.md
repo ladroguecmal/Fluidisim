@@ -95,7 +95,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le pas mobile 3D porte la découpe ; fond plat au bit, suite verte.
-- [ ] **P3** — essais des critères 2, 3, 4 et 6.
+- [x] **P3** — essais des critères 2, 3, 4 et 6.
 - [ ] **P4** — banc : le premier pas mobile sur la bosse, trois mailles, ordre ; écart au mode linéaire.
 - [ ] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste 4.15.
@@ -109,3 +109,13 @@ sautent les faces fermées ; garde : plancher = plus haut coin du fond de la col
 compté à la configuration) + deux mailles. Le pas mobile restaure la diagonale de Jacobi du chemin
 linéaire coupé. Le pas couplé refuse toujours la découpe (essai de S324 réécrit sur lui). Cœur : **469
 réussis**, 0 échec ; les identités 2D du mode mobile sur fond plat (S296, 1 604 pas) passent au bit.
+
+**P3 (22:44).** Quatre essais `…_s328`, tous tenus. **Critère 2** : à `ny` = 1, sur les trois fonds de
+S232, 200 pas mobiles **identiques au bit** au pas mobile 2D — surface, pression, `u`, `w`, itérations.
+**Critère 3** : lac au repos sur la bosse 3D, 100 pas, vitesses et surface nulles en bits. **Critère 4** :
+fond sans `y`, `ny` = 4 — tranches identiques au bit entre elles, **et à la tranche `ny` = 1** après cent
+pas (écart nul). L'écoulement transverse, lui, n'est nul qu'à l'arrondi : 6·10⁻⁹ m/s ; **le fond plat
+de S296 en fait autant** (5·10⁻⁹ pour 0,037 m/s de `u`) — la diagonale de Jacobi des rangées de bord
+n'est pas celle des rangées intérieures. L'essai exigeait `v` nul au bit, ce que le critère ne demandait
+pas : borne relative 10⁻⁶ de `u`. **Critère 6** : surface à 1,4 m sur la bosse refusée, état restauré au
+bit ; la même profondeur passe sur un fond plat à 0,3 m. Suite complète : **594 réussis**, 0 échec.
