@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 - [x] **P2** — `BackgroundWater` : la requête d'eau sur B ; critère 1.
 - [x] **P2 bis** — *ajouté à la reprise* : la poussée suit le gradient de la pression que le proxy suppose
   déjà, `ρg(η − z)` ; critère 1 bis.
-- [ ] **P3** — la coque de δ relative à l'eau qui la porte ; critère 2.
+- [x] **P3** — la coque de δ relative à l'eau qui la porte ; critère 2.
 - [ ] **P4** — banc `porte_d` : coque 4 × 1,6 × 1 m sur une houle ; critères 3 à 5, champs écrits.
 - [ ] **P5** — images de la scène (critère 6).
 - [ ] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
@@ -130,3 +130,10 @@ Critères, écrits avant le code :
   *sous la coque* : 1,04889·a pour 1,04892 prédit ; 3 s : 1,11914·a pour 1,11576 (+0,3 %).
   **Impasse évitée** : la demi-excursion comptait la dérive (1,157·a) puis le pilonnement libre que le
   cavalement excite au départ — non amorti, 5,2 % de Z à 3 s ; la projection les sépare.
+- **P3, critère 2 tenu au bit.** `HullInDelta` : hauteur `z − η` et inclinaison lues au centre, position
+  horizontale intégrée `Σ dt·(V − u)` — l'excursion eulérienne ne se lit qu'au second ordre près (une coque
+  qui suit la particule verrait `ξ(x_b) ≠ ξ(α)`, 7 mm) —, pose arrondie en f32, paroi = différence finie.
+  Coque qui suit la houle : pose constante, δ au repos au bit, 100 pas. Tenue immobile : 0,32 m/s, 8,2 cm.
+  **Piège de mesure** : sur une coque qui perce le couvercle, les faces couvertes gardent des vitesses que
+  rien ne lit (3,7 m/s) et les colonnes couvertes une hauteur de comptabilité ; mesurer sur les faces
+  ouvertes (`open = 1`) et les colonnes au couvercle libre — vaut pour P4 et les images.

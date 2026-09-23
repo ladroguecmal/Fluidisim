@@ -1491,3 +1491,78 @@ fn the_game_body_drives_its_wall_in_delta_and_delta_never_drives_it_s332() {
     println!("S332 : décalage visuel maximal {decalage:.4} m ; coque descendue à {:.3} m sous la surface", 1.2 + 0.25 - plus_bas);
     assert!(decalage > 0. && decalage <= 0.08 + 1e-12, "{decalage}");
 }
+
+/// **S333, critère 2 — au repos relatif, δ au repos.** Une coque 4 × 1,6 × 1 m qui suit exactement la houle
+/// de B — 6 s, 25 cm —, portée par la vitesse de l'eau sous elle, à la hauteur de sa surface et inclinée comme
+/// elle, entre dans δ à une pose **constante au bit**, sans vitesse de paroi : δ reste au repos au bit, 100 pas
+/// de 10 ms. Contre-épreuve : la même coque tenue immobile dans le monde, que la houle traverse, met δ en
+/// mouvement — c'est son mouvement relatif que δ voit. Mesures sur les faces entièrement ouvertes et les
+/// colonnes au couvercle libre : une face couverte par la coque garde une vitesse que rien ne lit — jusqu'à
+/// 3,7 m/s dans cette contre-épreuve —, et une lamelle ouverte à quelques pour cent y concentre son flux.
+#[test]
+fn a_hull_that_follows_the_swell_leaves_delta_at_rest_s333() {
+    use crate::background::{Background, SeaState};
+    use crate::rigid_body::{surface_tilt, BackgroundWater, HullInDelta, RigidBody, WaterQuery};
+    use crate::types::{SimTime, WorldPos};
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let sea = SeaState { hs: (2. * 2f64.sqrt() * 0.25) as f32, tp: 12., theta_turns: 0., components: 1, graine: 333 };
+    let b = Background::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, sea, WorldPos::default()).unwrap();
+    let (n, dx) = ([40usize, 20, 8], 0.2f64);
+    let z_r = 0.5 - 500. / 1025.;
+    let eau = |pas: u64| BackgroundWater { background: &b, time: SimTime(pas * 10_000) };
+    let lance = |suit: bool| -> (f32, f32) {
+        let mut corps = RigidBody::cuboid([4., 1.6, 1.], 500., [0., 0., z_r + eau(0).surface(0., 0.)], [16, 8, 4]);
+        if suit {
+            corps.orientation = surface_tilt(eau(0).slope(0., 0.));
+        }
+        let mut coque = HullInDelta::new(&corps, &eau(0), [-4., -2.], n[2] as f64 * dx);
+        let depart = (coque.center, coque.orientation);
+        let mut noeuds = Vec::new();
+        coque.box_nodes([2., 0.8, 0.5], n, dx, &mut noeuds);
+        let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+        let mut v = Volume3::configure_with_floating_solid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+            Domain3 { nx: n[0], ny: n[1], nz: n[2], dx: dx as f32 }, 1025., 9.81, &vec![0.; n[0] * n[1]], &noeuds).unwrap();
+        let z0 = v.domain.z0();
+        v.set_surface(&vec![z0; n[0] * n[1]]).unwrap();
+        let (mut vitesse, mut hauteur) = (0f32, 0f32);
+        for pas in 0..100u64 {
+            let w = eau(pas + 1);
+            if suit {
+                let [x, y, _] = corps.position;
+                let u = w.velocity([x, y, 0.]);
+                corps.position[0] += 0.01 * u[0];
+                corps.position[1] += 0.01 * u[1];
+                let [x, y, _] = corps.position;
+                let u = w.velocity([x, y, 0.]);
+                corps.velocity = [u[0], u[1], 0.];
+                corps.position[2] = z_r + w.surface(x, y);
+                corps.orientation = surface_tilt(w.slope(x, y));
+            }
+            let m = coque.advance(&corps, &w, 0.01);
+            if suit {
+                assert_eq!((m.center, m.orientation), depart, "pas {pas} : la pose relative a bougé");
+                assert!(m.velocity.iter().chain(&m.angular).all(|x| *x == 0.), "pas {pas} : {:?} {:?}", m.velocity, m.angular);
+            }
+            coque.box_nodes([2., 0.8, 0.5], n, dx, &mut noeuds);
+            v.set_solid_rigid(&noeuds, m.velocity, m.angular, m.center).unwrap();
+            let r = v.step_surface_linear(10_000, 4000, &Jobs).unwrap();
+            assert!(r.divergence <= PROJECTION_DIVERGENCE_TOLERANCE as f64, "pas {pas}");
+            // Faces entièrement ouvertes et colonnes au couvercle libre seulement : sous la coque, une face
+            // couverte garde une vitesse que rien ne lit, et une colonne une hauteur de pure comptabilité.
+            let g = v.cut.as_ref().unwrap();
+            let libre = |o: &[f32], x: &[f32]| o.iter().zip(x).filter(|(o, _)| **o == 1.).fold(0f32, |m, (_, x)| m.max(x.abs()));
+            vitesse = vitesse.max(libre(&g.open_u, v.velocity_u())).max(libre(&g.open_v, v.velocity_v())).max(libre(&g.open_w, v.velocity_w()));
+            let couvercle = &g.open_w[n[0] * n[1] * n[2]..];
+            hauteur = v.surface().iter().zip(couvercle).filter(|(_, o)| **o == 1.).fold(hauteur, |m, (h, _)| m.max((h - z0).abs()));
+            if suit {
+                assert!(v.velocity_u().iter().chain(v.velocity_v()).chain(v.velocity_w()).all(|x| x.to_bits() == 0), "pas {pas}");
+                assert!(v.surface().iter().all(|h| h.to_bits() == z0.to_bits()), "pas {pas}");
+            }
+        }
+        (vitesse, hauteur)
+    };
+    let (vitesse, hauteur) = lance(true);
+    let (tenue_v, tenue_h) = lance(false);
+    println!("S333 : coque qui suit la houle — δ {vitesse:e} m/s, {hauteur:e} m ; tenue immobile — {tenue_v:.4} m/s, {tenue_h:.4} m");
+    assert!(tenue_v > 0.01 && tenue_h > 0.001, "{tenue_v} {tenue_h}");
+}

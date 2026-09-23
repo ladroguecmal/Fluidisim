@@ -263,6 +263,115 @@ pub fn oriented_box_distance(c: [f64; 3], q: [f64; 4], h: [f64; 3], p: [f64; 3])
     dehors + d[0].max(d[1]).max(d[2]).min(0.)
 }
 
+/// Produit de quaternions `(w, x, y, z)`.
+fn quat_mul(a: [f64; 4], b: [f64; 4]) -> [f64; 4] {
+    [
+        a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3],
+        a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2],
+        a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1],
+        a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0],
+    ]
+}
+
+/// **S333 : l'inclinaison de la surface** de pente `(∂η/∂x, ∂η/∂y)` — le quaternion qui porte la verticale sur
+/// la normale, `(1 + n_z, ẑ × n)` normalisé. Une surface plane rend l'identité, exactement.
+pub fn surface_tilt(slope: [f64; 2]) -> [f64; 4] {
+    let n = (1. + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
+    let q = [n + 1., slope[1], -slope[0], 0.];
+    let len = (q[0] * q[0] + q[1] * q[1] + q[2] * q[2]).sqrt();
+    [q[0] / len, q[1] / len, q[2] / len, 0.]
+}
+
+/// Ce que δ reçoit d'une coque à un pas : sa pose dans la grille, et la vitesse de sa paroi — translation, et
+/// rotation autour du centre —, tout en f32.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WallMotion {
+    pub center: [f32; 3],
+    pub orientation: [f32; 4],
+    pub velocity: [f32; 3],
+    pub angular: [f32; 3],
+}
+
+/// **S333 : la coque dans δ, relative à l'eau qui la porte.** δ porte la perturbation — rayonnement et
+/// diffraction —, pas la houle, qui est à B + W : la coque y entre à sa pose **relative** à l'eau qui la
+/// porte, et sa paroi avance à la vitesse relative. Théorie linéaire d'une coque courte devant la longueur
+/// d'onde : l'eau est lue au centre de la coque — élévation, inclinaison, vitesse horizontale. Hauteur et
+/// inclinaison se lisent directement ; la position horizontale relative s'**intègre**, `Σ dt·(V − u)`, parce
+/// que l'excursion de la particule ne se lit, en eulérien, qu'au second ordre près. La pose est arrondie en
+/// f32, comme δ la reçoit, et les vitesses de paroi en sont la **différence finie** : découpe et paroi
+/// restent cohérentes au bit, et une coque qui suit l'eau garde exactement la même pose. En eau calme, c'est
+/// la pose absolue de S332, translatée dans la grille.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct HullInDelta {
+    /// Position horizontale relative du centre, dans la grille de δ, m.
+    horizontal: [f64; 2],
+    /// Altitude, dans la grille de δ, du couvercle où se tient la surface de l'eau qui porte la coque.
+    lid: f64,
+    /// La dernière pose rendue à δ.
+    pub center: [f32; 3],
+    pub orientation: [f32; 4],
+}
+
+impl HullInDelta {
+    /// La coque au centre `body.position`, posée dans une grille dont le coin horizontal est au point du monde
+    /// `origin` et le couvercle à l'altitude `lid`. `water` est l'eau à l'instant de `body`.
+    pub fn new(body: &RigidBody, water: &dyn WaterQuery, origin: [f64; 2], lid: f64) -> HullInDelta {
+        let mut h = HullInDelta {
+            horizontal: [body.position[0] - origin[0], body.position[1] - origin[1]],
+            lid,
+            center: [0.; 3],
+            orientation: [1., 0., 0., 0.],
+        };
+        (h.center, h.orientation) = h.pose(body, water);
+        h
+    }
+
+    /// Pose relative : hauteur au-dessus de la surface, orientation dans le repère incliné de la surface.
+    fn pose(&self, body: &RigidBody, water: &dyn WaterQuery) -> ([f32; 3], [f32; 4]) {
+        let [x, y, z] = body.position;
+        let t = surface_tilt(water.slope(x, y));
+        let q = quat_mul([t[0], -t[1], -t[2], -t[3]], body.orientation);
+        (
+            [self.horizontal[0] as f32, self.horizontal[1] as f32, (self.lid + (z - water.surface(x, y))) as f32],
+            q.map(|v| v as f32),
+        )
+    }
+
+    /// Après un pas `dt` du corps, `water` à l'instant nouveau : la pose relative avance, et la paroi reçoit la
+    /// différence finie des deux poses — vitesse de translation, et rotation `2·vec(q₁·q̄₀)/dt`.
+    pub fn advance(&mut self, body: &RigidBody, water: &dyn WaterQuery, dt: f64) -> WallMotion {
+        let [x, y, _] = body.position;
+        let u = water.velocity([x, y, water.surface(x, y)]);
+        self.horizontal[0] += dt * (body.velocity[0] - u[0]);
+        self.horizontal[1] += dt * (body.velocity[1] - u[1]);
+        let (c0, q0) = (self.center, self.orientation);
+        (self.center, self.orientation) = self.pose(body, water);
+        let pas = dt as f32;
+        let velocity = [0, 1, 2].map(|a| (self.center[a] - c0[a]) / pas);
+        let mut d = quat_mul(self.orientation.map(|v| v as f64), [q0[0] as f64, -q0[1] as f64, -q0[2] as f64, -q0[3] as f64]);
+        if d[0] < 0. {
+            d = d.map(|v| -v);
+        }
+        let angular = [1, 2, 3].map(|a| (2. * d[a] / dt) as f32);
+        WallMotion { center: self.center, orientation: self.orientation, velocity, angular }
+    }
+
+    /// La distance signée de la coque — un pavé de demi-côtés `half` — aux nœuds d'une grille de `cells`
+    /// mailles de côté `dx`, `x` le plus rapide : ce que `Volume3` reçoit.
+    pub fn box_nodes(&self, half: [f64; 3], cells: [usize; 3], dx: f64, out: &mut Vec<f32>) {
+        let c = self.center.map(|v| v as f64);
+        let q = self.orientation.map(|v| v as f64);
+        out.clear();
+        for k in 0..=cells[2] {
+            for j in 0..=cells[1] {
+                for i in 0..=cells[0] {
+                    out.push(oriented_box_distance(c, q, half, [i as f64 * dx, j as f64 * dx, k as f64 * dx]) as f32);
+                }
+            }
+        }
+    }
+}
+
 /// **S332 : le décalage visuel que δ rend au corps** — ADR-008 §1 : un ressort borné entre la pose physique
 /// et la pose affichée. La force de δ l'excite ; **la trajectoire de jeu ne la voit jamais** (I-04). Un
 /// client qui ne simule pas δ montre le même corps au même endroit, avec un peu moins de vie. Translation
