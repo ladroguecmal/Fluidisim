@@ -179,8 +179,9 @@ pas recopiée ici (L137).
   lisses en 2D (S232, ordres 1,947–1,966) **et en 3D depuis S324** — référence CPU, mode linéaire,
   identique au bit à la 2D sans `y`, ordre 1,956 sur une bosse ([preuve](validation/FACES-COUPEES-3D-S324.md)).
   Petites cellules préconditionnées (S326) ; **mode mobile** depuis S328 — au bit de la 2D sans `y`,
-  ordre 1,954 sur la bosse. Manquent les obstacles qui ne sont pas un fond, le couplage à B/W sur fond
-  coupé et la turbulence — **aucun modèle de turbulence n'existe nulle part dans le dépôt**. Lot 3 d'ADR-178.
+  ordre 1,954 sur la bosse ; **obstacles immergés quelconques** depuis S329 — sphère d'ordre 1,966,
+  Archimède exact au niveau discret. Manquent les obstacles mobiles ou qui percent la surface, le
+  couplage à B/W sur fond coupé et la turbulence — **aucun modèle de turbulence n'existe nulle part dans le dépôt**. Lot 3 d'ADR-178.
 - [ ] **4.16 Surface non graphe** : déferlement, éclaboussures détachées — *absent*. **C'est le
   point le plus lourd de la liste** : il demande un **second solveur**, pas une extension du
   premier (ADR-175 D5). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.

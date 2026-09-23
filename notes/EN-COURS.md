@@ -101,7 +101,7 @@ Critères, écrits avant le code :
   linéaire ; critères 1 à 3 en essais.
 - [x] **P4** — le solide dans les pas linéaire et mobile ; critère 4.
 - [x] **P5** — banc : débit autour de la sphère, trois mailles, ordre ; poussée.
-- [ ] **P6** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
+- [x] **P6** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste 4.15.
 - [ ] **P7** — rituel.
 

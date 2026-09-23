@@ -29,7 +29,8 @@ physique dans les petites cellules que le fond crée.
 **État présent (S326, §6).** Avec un Jacobi sur le chemin coupé, la bosse à 128 converge en **425
 itérations et 5,7 s**, comme le fond sans bosse ; débits inchangés à 2,4·10⁻⁶ près, ordre 1,947.
 **S328 (§7)** : le **mode mobile** porte la découpe — au bit de la 2D à `ny` = 1, ordre 1,954 sur la
-bosse, à 3·10⁻⁶ du mode linéaire.
+bosse, à 3·10⁻⁶ du mode linéaire. **S329 (§8)** : un **solide quelconque** par distance signée — volume
+déplacé d'ordre 2, Archimède exact au niveau discret, débit autour d'une sphère d'ordre 1,966.
 
 ## 1. La géométrie
 
@@ -209,3 +210,56 @@ indépendantes du même écoulement. Le pas mobile à 128 coûte 16,6 s pour 786
 corps flottants (lot 4, porte D) et s'approchera des obstacles. **Manquent** : le pas couplé à B/W sur
 fond coupé ; les obstacles qui ne sont pas un fond ; une surface qui descende à moins de deux mailles du
 fond — ni mouillage ni séchage, la plage de 4.14 ; la production GPU.
+
+---
+
+## 8. S329 — un solide quelconque : la boule immergée
+
+2026-09-23. **Lot 3**, sur le chemin de la v1 ([ADR-189](../adr/ADR-189-la-v1-d-abord.md)) : l'essai 2 de la
+piscine — une boule immergée, son volume déplacé, sa poussée. La découpe ne connaissait qu'un fond en
+hauteur ; elle porte désormais **un solide donné par sa distance signée aux nœuds**.
+
+### Reproduire
+
+- Commit `13845fd1` ou plus récent ; machine de référence, CPU, un fil.
+- `cargo test -p water-core --release --offline s329` — six essais, 2 s.
+- `cargo run -p water-core --release --offline --example delta3d_fond_coupe -- --sphere` — lignes
+  `FOND3D_S329`, 10 s.
+- Valeurs attendues : débit 9,212230492·10⁻⁴ / 9,230888226·10⁻⁴ / 9,235664830·10⁻⁴ m³/s, ordre 1,966 ;
+  volume déplacé d'une sphère de 0,3 m, 1,068100769·10⁻¹ / 1,115187333·10⁻¹ / 1,127050710·10⁻¹ m³ à 12,
+  24, 48 mailles par côté.
+- Cœur : 479 réussis.
+
+### Ce qui change
+
+Les valeurs aux nœuds définissent un champ **linéaire par morceaux** : chaque face coupée en quatre
+triangles autour de son centre, chaque maille en vingt-quatre tétraèdres qui s'appuient sur eux et sur
+le centre de la maille. Une face vue de ses deux mailles est donc coupée de la même façon, et le solide
+discret est un **polyèdre** dont la paroi est la réunion des polygones où le champ s'annule. Toutes les
+parts sont des formules closes, en `f64`, sans soustraction de grandeurs voisines — pour deux sommets
+négatifs d'un tétraèdre, la différence divisée de `x³/((c+x)(d+x))`, développée pour ne plus diviser par
+leur écart. Le solide s'ajoute en place à la découpe du fond, sans allocation — la frontière mobile
+réutilisera ces tampons. Solide et fond ne partagent ni maille ni face ; le solide ne touche pas la
+couche du couvercle ; le pas mobile garde la surface deux mailles au-dessus de lui.
+
+### Ce qui est mesuré
+
+| critère, écrit avant le code | verdict |
+|---|---|
+| 1. plan | horizontal : la découpe d'un fond de même hauteur à 10⁻⁶ ; oblique : la formule exacte du cube coupé par un plan (inclusion–exclusion) à 2·10⁻⁶ ; solide absent : fond au bit |
+| 2. sphère, volume déplacé | ordre **1,994** puis **2,009** vers `4πR³/3` ; réflexion à 10⁻⁶ |
+| 3. poussée hydrostatique sur la paroi discrète | **= ρg·V du polyèdre à 10⁻⁹**, poussée latérale nulle : le théorème de la divergence tient au niveau discret ; elle tend donc vers Archimède au même ordre |
+| 4. les pas | lac au repos au bit autour de la sphère, cent pas linéaires et cent mobiles ; une onde passe au-dessus sous la tolérance de divergence ; surface trop proche et solide contre le fond ou le couvercle refusés |
+| 5. débit du premier pas autour de la sphère | **ordre 1,966** ; la sphère retire 2,1 % du débit, et cet effet converge |
+
+**Un défaut trouvé en chemin.** L'extrapolation du mode mobile remonte chaque colonne de faces et remplit
+l'air au-dessus de la surface avec la dernière vitesse résolue. Sous un fond, aucune face résolue ne
+précède une face fermée ; au milieu d'une colonne, un solide immergé en avait : ses faces fermées
+recevaient la vitesse d'en dessous (7·10⁻⁵ m/s). La 2D ne pouvait pas le rencontrer. Elles sont désormais
+sautées ; l'identité 2D de §7 tient au bit.
+
+### Ce qui devient possible, et ce qui manque
+
+**Possible** : un obstacle quelconque, immergé et fixe, dans la référence 3D — l'essai 2 de la piscine,
+et la géométrie d'une coque. **Manquent** : un solide qui **bouge** — la frontière mobile, l'essai 3 ; un
+solide qui **perce la surface** — le bateau ; un solide au contact du fond ; le pas couplé à B/W.
