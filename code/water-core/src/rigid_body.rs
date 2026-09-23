@@ -216,6 +216,56 @@ impl RigidBody {
     }
 }
 
+/// **S332 : la distance signée d'un pavé orienté** — centre `c`, quaternion `q`, demi-côtés `h` — au point
+/// `p` du monde, négative dedans : la coque d'un corps, telle que δ la reçoit aux nœuds de sa grille.
+pub fn oriented_box_distance(c: [f64; 3], q: [f64; 4], h: [f64; 3], p: [f64; 3]) -> f64 {
+    let l = unrotate(q, sub(p, c));
+    let d = [l[0].abs() - h[0], l[1].abs() - h[1], l[2].abs() - h[2]];
+    let dehors = (d[0].max(0.).powi(2) + d[1].max(0.).powi(2) + d[2].max(0.).powi(2)).sqrt();
+    dehors + d[0].max(d[1]).max(d[2]).min(0.)
+}
+
+/// **S332 : le décalage visuel que δ rend au corps** — ADR-008 §1 : un ressort borné entre la pose physique
+/// et la pose affichée. La force de δ l'excite ; **la trajectoire de jeu ne la voit jamais** (I-04). Un
+/// client qui ne simule pas δ montre le même corps au même endroit, avec un peu moins de vie. Translation
+/// seule : la part en rotation, ≤ 3°, manque encore.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct RenderOffset {
+    pub offset: [f64; 3],
+    pub velocity: [f64; 3],
+    /// Pulsation propre du ressort, rad/s, et son amortissement réduit.
+    pub omega: f64,
+    pub zeta: f64,
+    /// Borne du décalage, m — 8 cm (ADR-008 §1).
+    pub limit: f64,
+}
+
+impl RenderOffset {
+    pub fn new(omega: f64, zeta: f64) -> RenderOffset {
+        RenderOffset { offset: [0.; 3], velocity: [0.; 3], omega, zeta, limit: 0.08 }
+    }
+
+    /// Un pas du ressort sous la force de δ, rapportée à la masse du corps ; la butée retire la vitesse qui
+    /// l'enfoncerait. Rend le décalage.
+    pub fn step(&mut self, dt: f64, force: [f64; 3], mass: f64) -> [f64; 3] {
+        for a in 0..3 {
+            let acc = force[a] / mass - self.omega * self.omega * self.offset[a] - 2. * self.zeta * self.omega * self.velocity[a];
+            self.velocity[a] += dt * acc;
+            self.offset[a] += dt * self.velocity[a];
+        }
+        let n = norm(self.offset);
+        if n > self.limit {
+            self.offset = scale(self.offset, self.limit / n);
+            let r = scale(self.offset, 1. / self.limit);
+            let vr = self.velocity[0] * r[0] + self.velocity[1] * r[1] + self.velocity[2] * r[2];
+            if vr > 0. {
+                self.velocity = sub(self.velocity, scale(r, vr));
+            }
+        }
+        self.offset
+    }
+}
+
 #[cfg(test)]
 #[path = "tests_rigid_body.rs"]
 mod tests;

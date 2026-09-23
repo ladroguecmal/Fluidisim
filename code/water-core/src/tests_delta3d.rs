@@ -1438,3 +1438,56 @@ fn a_heaving_hull_through_the_lid_keeps_the_water_volume_s332() {
     println!("S332 : coque qui pilonne, écart de volume au pire {pire:e} m³");
     assert!(pire <= 1e-9, "{pire}");
 }
+
+/// **S332, critère 5 (I-04).** Le cube de C10, lâché la base à la surface, pilonne sur B + W (eau calme) ;
+/// à chaque pas, δ reçoit sa coque — pose et vitesse de corps rigide — et lui rend une force qui n'anime
+/// que le décalage visuel. La trajectoire de jeu est **identique au bit** avec ou sans δ ; le décalage reste
+/// sous 8 cm et n'est pas nul.
+#[test]
+fn the_game_body_drives_its_wall_in_delta_and_delta_never_drives_it_s332() {
+    use crate::body::Milieu;
+    use crate::rigid_body::{oriented_box_distance, CalmWater, RenderOffset, RigidBody};
+    let n = 24usize;
+    let dx = 1.2 / n as f32;
+    let calme = CalmWater { level: 1.2 };
+    let depart = RigidBody::cuboid([0.5; 3], 500., [0.6, 0.6, 1.2 + 0.25], [8, 8, 8]);
+    let coque = |c: &RigidBody| -> Vec<f32> {
+        let mut out = Vec::with_capacity((n + 1).pow(3));
+        for k in 0..=n {
+            for j in 0..=n {
+                for i in 0..=n {
+                    let p = [i as f64 * dx as f64, j as f64 * dx as f64, k as f64 * dx as f64];
+                    out.push(oriented_box_distance(c.position, c.orientation, [0.25; 3], p) as f32);
+                }
+            }
+        }
+        out
+    };
+    let mut seul = depart.clone();
+    let reference: Vec<[u64; 3]> = (0..300).map(|_| {
+        seul.step(0.002, &calme, Milieu::MER);
+        seul.position.map(f64::to_bits)
+    }).collect();
+    let mut corps = depart.clone();
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut v = Volume3::configure_with_floating_solid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain3 { nx: n, ny: n, nz: n, dx }, 1025., 9.81, &vec![0.; n * n], &coque(&corps)).unwrap();
+    v.set_surface(&vec![1.2; n * n]).unwrap();
+    let mut rendu = RenderOffset::new(2. * core::f64::consts::PI * 2., 0.7);
+    let (mut decalage, mut plus_bas) = (0f64, f64::MAX);
+    for pas in 0..300 {
+        corps.step(0.002, &calme, Milieu::MER);
+        assert_eq!(corps.position.map(f64::to_bits), reference[pas], "pas {pas} : δ a touché la trajectoire de jeu");
+        let s = coque(&corps);
+        v.set_solid_rigid(&s, corps.velocity.map(|x| x as f32), corps.angular_velocity.map(|x| x as f32),
+            corps.position.map(|x| x as f32)).unwrap();
+        let r = v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        assert!(r.divergence <= PROJECTION_DIVERGENCE_TOLERANCE as f64, "pas {pas}");
+        let f = v.solid_force(&s).unwrap();
+        let o = rendu.step(0.002, f, corps.mass);
+        decalage = decalage.max((o[0] * o[0] + o[1] * o[1] + o[2] * o[2]).sqrt());
+        plus_bas = plus_bas.min(corps.position[2]);
+    }
+    println!("S332 : décalage visuel maximal {decalage:.4} m ; coque descendue à {:.3} m sous la surface", 1.2 + 0.25 - plus_bas);
+    assert!(decalage > 0. && decalage <= 0.08 + 1e-12, "{decalage}");
+}

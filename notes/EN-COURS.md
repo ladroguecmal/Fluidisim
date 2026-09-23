@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P2** — mouvement rigide de la paroi ; critère 1.
 - [x] **P3** — la coque perce le couvercle ; critères 2 et 3.
 - [x] **P4** — banc : masse ajoutée du cube flottant, trois mailles (critère 4).
-- [ ] **P5** — le corps du jeu pilote sa paroi, décalage visuel borné ; critère 5.
+- [x] **P5** — le corps du jeu pilote sa paroi, décalage visuel borné ; critère 5.
 - [ ] **P6** — preuve : section datée de [CORPS-RIGIDE-S331](../docs/validation/CORPS-RIGIDE-S331.md), avec
   « Reproduire » ; file, liste.
 - [ ] **P7** — rituel.
@@ -119,3 +119,8 @@ de C10, la **surestime de 47 %** ; `(4/3)ρR³` = 30,68 kg la sous-estime. 41,7 
 le rapport des périodes deviendrait √(1 + 41,7/62,5) = **1,291**, encore dans la tolérance de C10 (1,414 ±
 15 %). δ peut donner au jeu son coefficient de masse ajoutée, mesuré hors ligne — un paramètre, pas une force
 de δ au pas : I-04 tient.
+**P5 (23:42).** `rigid_body.rs` : `oriented_box_distance` — la coque d'un corps aux nœuds de δ — et
+`RenderOffset`, le ressort borné d'ADR-008 §1 (8 cm ; la part en rotation, ≤ 3°, manque). Cube de C10
+lâché la base à la surface, 300 pas : sa coque pilotée dans δ par `set_solid_rigid`, la force de δ sur la
+coque n'anime que le ressort. **Trajectoire de jeu identique au bit** à celle du corps seul ; décalage
+maximal **6,7 cm** ; coque descendue à 0,488 m. Critère 5 tenu. Cœur : 491 réussis.
