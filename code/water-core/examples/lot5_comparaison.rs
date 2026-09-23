@@ -2147,6 +2147,16 @@ struct Hybride {
     /// Compteurs publiés, m² : entré dans les colonnes, sorti vers les particules.
     entre: f64,
     sorti: f64,
+    /// **S327 : l'échange eulérien** (`RACCORD_ECHANGE=eulerien`). S325 faisait entrer l'eau dans les
+    /// colonnes par les particules qui franchissent la frontière, et sortir par le flux de la grille : la
+    /// colonne se vidait avant que les particules n'arrivent, puis les recevait en rafale (S327 P2). Ici,
+    /// le flux de la grille porte l'échange **dans les deux sens** ; l'entrée est créditée aussitôt aux
+    /// colonnes, et les particules libres la **doivent**.
+    eulerien: bool,
+    /// Masse due par les particules libres aux colonnes, par profondeur de face, m². Elle se paie par
+    /// une particule qui franchit la frontière, ou en retirant la plus proche d'elle ; elle se compense
+    /// avec l'attente de même profondeur.
+    dette: Vec<f64>,
 }
 
 impl Hybride {
@@ -2159,7 +2169,8 @@ impl Hybride {
         let n = apic.occupation();
         // La hauteur de masse de chaque colonne : ses particules initiales, deux par rangée.
         let h = (i_b..nx).map(|i| (0..ny).map(|j| n[j * nx + i] as f64).sum::<f64>() * 0.25 * dx).collect();
-        let mut hy = Hybride { apic, i_b, h, attente: vec![0.0; ny], entre: 0.0, sorti: 0.0 };
+        let eulerien = std::env::var("RACCORD_ECHANGE").is_ok_and(|v| v == "eulerien");
+        let mut hy = Hybride { apic, i_b, h, attente: vec![0.0; ny], entre: 0.0, sorti: 0.0, eulerien, dette: vec![0.0; ny] };
         let xb = i_b as f64 * dx;
         let garde: Vec<bool> = hy.apic.x.iter().map(|p| p[0] < xb).collect();
         hy.retire(&garde);
@@ -2204,12 +2215,14 @@ impl Hybride {
         }
     }
 
-    /// La masse que porte chaque représentation, m² : particules libres, colonnes, attente.
+    /// La masse que porte chaque représentation, m² : particules libres, colonnes, attente — nette de
+    /// la dette des particules libres (S327).
     fn masses(&self) -> (f64, f64, f64) {
         let dx = self.apic.mac.dx;
         let xb = self.i_b as f64 * dx;
         let libres = self.apic.x.iter().filter(|p| p[0] < xb).count() as f64 * 0.25 * dx * dx;
-        (libres, self.h.iter().sum::<f64>() * dx, self.attente.iter().sum())
+        let en_suspens = self.attente.iter().sum::<f64>() - self.dette.iter().sum::<f64>();
+        (libres, self.h.iter().sum::<f64>() * dx, en_suspens)
     }
 }
 
@@ -2232,9 +2245,21 @@ impl Candidat for Hybride {
         // ── Entrée : les particules libres passées dans la zone des colonnes y versent leur masse.
         for (p, libre) in self.apic.x.iter().zip(&libres_avant) {
             if *libre && p[0] >= xb {
-                let col = (((p[0] / dx) as usize).min(nx - 1)).max(self.i_b) - self.i_b;
-                self.h[col] += area / dx;
-                self.entre += area;
+                if self.eulerien {
+                    // S327 : sa masse est déjà dans les colonnes, par le flux ; elle paie la dette de sa
+                    // profondeur, et un surplus éventuel va à la première colonne.
+                    let k = ((p[1] / dx).max(0.0) as usize).min(ny - 1);
+                    self.dette[k] -= area;
+                    if self.dette[k] < 0.0 {
+                        self.h[0] -= self.dette[k] / dx;
+                        self.entre -= self.dette[k];
+                        self.dette[k] = 0.0;
+                    }
+                } else {
+                    let col = (((p[0] / dx) as usize).min(nx - 1)).max(self.i_b) - self.i_b;
+                    self.h[col] += area / dx;
+                    self.entre += area;
+                }
             }
         }
         // ── Retrait : les particules des colonnes, **où qu'elles soient** — leur masse est dans les
@@ -2258,17 +2283,51 @@ impl Candidat for Hybride {
         }
         // ── Sortie par la frontière : la part négative du flux de la grille, prise dans la première
         // colonne et mise en attente à sa profondeur.
-        let mut sortie = 0.0;
+        let (mut sortie, mut entree) = (0.0, 0.0);
         for k in 0..ny {
             let u = self.apic.mac.u[k * (nx + 1) + self.i_b];
             if u < 0.0 {
                 let q = -u * mouille(self.h[0], k) * dx * dt;
                 self.attente[k] += q;
                 sortie += q;
+            } else if self.eulerien && u > 0.0 {
+                // S327 : l'entrée, par le même flux et la même hauteur mouillée que la sortie.
+                let q = u * mouille(self.h[0], k) * dx * dt;
+                self.dette[k] += q;
+                entree += q;
             }
         }
-        self.h[0] -= sortie / dx;
+        self.h[0] += (entree - sortie) / dx;
         self.sorti += sortie;
+        self.entre += entree;
+        if self.eulerien {
+            // Attente et dette de même profondeur se compensent ; le reste de la dette se paie en retirant
+            // les particules libres de la dernière cellule les plus proches de la frontière.
+            for k in 0..ny {
+                let m = self.attente[k].min(self.dette[k]);
+                self.attente[k] -= m;
+                self.dette[k] -= m;
+            }
+            let mut proches: Vec<Vec<(f64, usize)>> = vec![Vec::new(); ny];
+            for (n, p) in self.apic.x.iter().enumerate() {
+                if p[0] < xb && p[0] >= xb - dx {
+                    proches[((p[1] / dx).max(0.0) as usize).min(ny - 1)].push((p[0], n));
+                }
+            }
+            let mut garde = vec![true; self.apic.x.len()];
+            for k in 0..ny {
+                proches[k].sort_by(|a, b| b.0.total_cmp(&a.0));
+                let mut suivant = proches[k].iter();
+                while self.dette[k] >= area {
+                    let Some(&(_, n)) = suivant.next() else { break };
+                    garde[n] = false;
+                    self.dette[k] -= area;
+                }
+            }
+            if garde.contains(&false) {
+                self.retire(&garde);
+            }
+        }
         for c in 0..self.h.len() {
             self.h[c] += (flux[c] - flux[c + 1]) / dx;
         }

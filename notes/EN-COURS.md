@@ -94,7 +94,7 @@ seul — son effet mesuré contre le montage de S325 — reste une attribution p
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — instrument : série à la frontière — hauteurs géométriques des deux côtés, hauteurs de masse
   des colonnes, flux entrant et sortant, APIC seul au même endroit. Quel côté s'écarte, et quand.
-- [ ] **P3** — suspect choisi par P2 ; commutable, mesuré seul.
+- [x] **P3** — suspect choisi par P2 ; commutable, mesuré seul.
 - [ ] **P4** — suspect suivant ; commutable, mesuré seul.
 - [ ] **P5** — suspect suivant ; commutable, mesuré seul.
 - [ ] **P6** — le raccord corrigé, contre les critères, deux mailles.
@@ -117,3 +117,20 @@ libre — hauteur de masse 0,675 m pour 0,494 m géométrique à 0,4 s, 35 % de 
 entrent **en rafale** : `h[0]` 0,604 m à 0,5 s, 0,014 m² entrés en un dixième de seconde. D'où l'écart
 d'environ deux mailles. **Suspect (c) désigné** : l'entrée lagrangienne est en retard puis en rafale sur
 une sortie eulérienne immédiate. P3 l'éprouve : échange eulérien dans les deux sens.
+
+**P3 (22:02) — (c), l'échange eulérien, seul** (`RACCORD_ECHANGE=eulerien` ; défaut inchangé au bit : la
+ligne de S325 se retrouve). Le flux de la grille porte l'échange dans les deux sens ; l'entrée est
+créditée aussitôt, les particules libres la doivent — payée par celles qui franchissent, ou en
+retirant la plus proche de la frontière ; attente et dette se compensent. Masse à l'arrondi.
+
+| | S325 | (c) seul |
+|---|---:|---:|
+| écart à la frontière, 5 / 2,5 cm, mailles | 1,81 / 2,85 | **0,71 / 0,79** |
+| amortissement par période, 5 / 2,5 cm | 16 % / 5,4 % | 14 % / 5,9 % |
+| période (zéros), 5 / 2,5 cm — APIC +5,6 / −0,18 % | +7,6 / +2,4 % | +7,1 / +1,5 % |
+| vitesse maximale, repos 5 cm / ballottement 2,5 cm | 1,4 cm/s / 0,87 m/s | **4,7 cm/s / 1,02 m/s** |
+
+L'écart est divisé par 2,5 à 3,6 ; l'amortissement ne bouge pas, et le repos empire. **(c) explique le
+saut, pas la dissipation.** Suivant : (a), la surface des colonnes arrondie au quart de maille — à
+5 cm, chaque particule qui apparaît ou disparaît la fait sauter de 1,25 cm, pour une onde de 2 cm ; et
+(c) la fait bouger plus souvent, ce qui expliquerait le repos dégradé.
