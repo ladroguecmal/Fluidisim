@@ -100,7 +100,7 @@ seul — son effet mesuré contre le montage de S325 — reste une attribution p
 - [x] **P6** — *(ajoutée à 22:09, après P5)* la dissipation propre aux colonnes : hauteur mouillée
   **centrée** dans leur transport au lieu d'amont, commutable ; zone à 95 % et 50 %. *Étendue en cours
   d'étape aux suspects restants — (b), (d) — et à trois variantes de l'échange ; toutes commutables.*
-- [ ] **P7** — le raccord corrigé, contre les critères, deux mailles.
+- [x] **P7** — le raccord corrigé, contre les critères, deux mailles.
 - [ ] **P8** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; file, liste.
 - [ ] **P9** — rituel.
@@ -194,3 +194,18 @@ Zone des colonnes à 95 % (frontière près du mur), 5 cm : paroi 1,3 % ; mémoi
 réseau, mémoire sur la grille, dette payée par les traversées. **Aucune variante ne tient tous les
 critères** ; la meilleure reste la paroi. Écart à 2,5 cm, paroi : **moyenne −0,009 maille**, écart-type
 0,15 (APIC seul 0,063), deux relevés sur cent au-dessus de 0,5 — un bruit, pas un biais.
+
+**P7 (22:26) — le meilleur montage contre les critères** : `RACCORD_ENSEMENCE=continu RACCORD_ECHANGE=paroi`.
+APIC seul **identique au bit** au banc d'avant S327 (lignes de résultat, hors durées).
+
+| critère | 5 cm | 2,5 cm | verdict |
+|---|---|---|---|
+| 1. masse | 4·10⁻¹⁶ | 1·10⁻¹⁵ | **tenu** |
+| 2. repos : vitesse, écart | 0,65 cm/s ; 0,001 maille | — | **tenu** |
+| 3. écart à la frontière < 0,5 maille | 0,24 | 0,59 | 5 cm tenu ; **2,5 cm manqué** (deux pics sur cent) |
+| 3. période à 1 % d'APIC seul, zéros / périodogramme | +1,88 / +0,89 point | +0,32 / −0,27 point | **5 cm manqué** (zéros) ; 2,5 cm tenu |
+| 3. amortissement à 1 point d'APIC seul | 4,17 % contre −0,44 % | 0,71 % contre 0,34 % | **5 cm manqué** ; 2,5 cm tenu |
+| 4. APIC seul inchangé ; rien dans le cœur | au bit | au bit | **tenu** |
+
+**Non reçu.** Depuis S325 : écart 1,81 → 0,24 maille à 5 cm, 2,85 → 0,59 à 2,5 cm ; amortissement
+16 → 4,2 % et 5,4 → 0,71 % ; repos 1,4 → 0,65 cm/s.
