@@ -8,8 +8,10 @@
 //! chacun représentant un volume, dont l'immersion passe de 0 à 1 sur son épaisseur
 //! ([ADR-008](../../../docs/adr/ADR-008-flottabilite-et-autorite.md) §2, la fonction `sat`). Pour un point
 //! tenu à plat sous une ligne d'eau plane, cette rampe est exacte : le volume immergé d'un pavé droit est
-//! celui de la géométrie, à l'arrondi près. La masse ajoutée est une matrice diagonale, dans le repère du
-//! monde ; l'intégrateur est symplectique — vitesses d'abord, positions ensuite —, en `f64`, déterministe.
+//! celui de la géométrie, à l'arrondi près. **S333 :** la force est celle de la pression que le proxy
+//! suppose, `ρg(η(x) − z)`, sur le volume plongé — `ρg(−∇η, 1)` : sa part horizontale entraîne le corps
+//! avec la houle. La masse ajoutée est une matrice diagonale, dans le repère du monde ; l'intégrateur est
+//! symplectique — vitesses d'abord, positions ensuite —, en `f64`, déterministe.
 //!
 //! # D'où vient l'eau — I-04
 //!
@@ -29,6 +31,8 @@ use crate::body::{Milieu, G};
 pub trait WaterQuery {
     /// Altitude de la surface libre au point horizontal `(x, y)`, m.
     fn surface(&self, x: f64, y: f64) -> f64;
+    /// **S333 :** pente de la surface libre, `(∂η/∂x, ∂η/∂y)` — nulle en eau calme.
+    fn slope(&self, x: f64, y: f64) -> [f64; 2];
     /// Vitesse de l'eau en un point, m/s — orbitale sous la houle, nulle en eau calme.
     fn velocity(&self, p: [f64; 3]) -> [f64; 3];
 }
@@ -42,6 +46,9 @@ pub struct CalmWater {
 impl WaterQuery for CalmWater {
     fn surface(&self, _: f64, _: f64) -> f64 {
         self.level
+    }
+    fn slope(&self, _: f64, _: f64) -> [f64; 2] {
+        [0.; 2]
     }
     fn velocity(&self, _: [f64; 3]) -> [f64; 3] {
         [0.; 3]
@@ -60,6 +67,10 @@ pub struct BackgroundWater<'a> {
 impl WaterQuery for BackgroundWater<'_> {
     fn surface(&self, x: f64, y: f64) -> f64 {
         self.background.eval_local([x as f32, y as f32, 0.], self.time).map_or(0., |s| s.eta as f64)
+    }
+    fn slope(&self, x: f64, y: f64) -> [f64; 2] {
+        self.background.eval_local([x as f32, y as f32, 0.], self.time)
+            .map_or([0.; 2], |s| [-(s.normal[0] / s.normal[2]) as f64, -(s.normal[1] / s.normal[2]) as f64])
     }
     fn velocity(&self, p: [f64; 3]) -> [f64; 3] {
         self.background.eval_local([p[0] as f32, p[1] as f32, 0.], self.time).map_or([0.; 3], |s| s.u_total.map(|v| v as f64))
@@ -186,7 +197,16 @@ impl RigidBody {
             }
             let immerse = p.volume * frac;
             immersed_volume += immerse;
-            let mut f = [0., 0., milieu.rho * G * immerse];
+            // S333 : la force de la pression que le proxy suppose, `p = ρg(η(x) − z)`, sur le volume plongé,
+            // est `ρg(−∇η, 1)` — sa part horizontale entraîne le corps avec la houle (ADR-008 §2). En eau
+            // calme, rien ne change au bit.
+            let poussee = milieu.rho * G * immerse;
+            let mut f = [0., 0., poussee];
+            let pente = water.slope(x[0], x[1]);
+            if pente != [0.; 2] {
+                f[0] = -poussee * pente[0];
+                f[1] = -poussee * pente[1];
+            }
             if self.drag > 0. {
                 let rel = sub(add(self.velocity, cross(self.angular_velocity, r)), water.velocity(x));
                 let k = -0.5 * milieu.rho * self.drag * p.area * frac * norm(rel);

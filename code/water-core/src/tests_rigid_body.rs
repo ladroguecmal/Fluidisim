@@ -170,11 +170,40 @@ fn houle(a: f64, periode: f64) -> Background {
     Background::configure(&mut HostServices { alloc: &mut Arena, jobs: &Jobs, sink: &Jobs }, sea, WorldPos::default()).unwrap()
 }
 
+/// Moindres carrés sur trois fonctions : équations normales accumulées `m`, `r`, résolues par Cramer.
+fn moindres_carres(m: [[f64; 3]; 3], r: [f64; 3]) -> [f64; 3] {
+    let det = |m: [[f64; 3]; 3]| {
+        m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+            + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0])
+    };
+    let colonne = |j: usize| {
+        let mut n = m;
+        for i in 0..3 {
+            n[i][j] = r[i];
+        }
+        det(n) / det(m)
+    };
+    [colonne(0), colonne(1), colonne(2)]
+}
+
+/// Accumule une ligne `v`, de valeur `y`, dans les équations normales.
+fn accumule(m: &mut [[f64; 3]; 3], r: &mut [f64; 3], v: [f64; 3], y: f64) {
+    for i in 0..3 {
+        for j in 0..3 {
+            m[i][j] += v[i] * v[j];
+        }
+        r[i] += v[i] * y;
+    }
+}
+
 /// **Le pilonnement forcé** de la coque de la porte D — 4 × 1,6 × 1 m à 500 kg/m³, proxy 16 × 8 × 4 — sur
-/// la houle `b`, lâchée **sur le régime forcé linéaire** `ζ = Z·η(0, t)/a`, `Z = a·S/(1 − ω²/ωₙ²)`, où `S` est
-/// la moyenne de `cos(k·x)` sur les points du proxy — la houle vue par la flottaison, 1 pour une houle
-/// infiniment longue. Pas de 2 ms sur `periodes` périodes. Rend `(écart ponctuel au régime forcé / Z,
-/// demi-excursion mesurée / Z, Z / a, 1/(1 − ω²/ωₙ²))`.
+/// la houle `b`, lâchée **sur le régime forcé linéaire** `ζ = Z·η/a`, `Z = a·S/(1 − ω²/ωₙ²)`, où `S` est la
+/// moyenne de `cos(k·x)` sur les points du proxy — la houle vue par la flottaison, 1 pour une houle
+/// infiniment longue —, et à la vitesse horizontale de l'eau qui la porte. Pas de 2 ms sur `periodes`
+/// périodes. Le pilonnement se décompose par moindres carrés sur la houle **sous la coque**, là où l'eau
+/// l'a portée : `ζ = α·η + β·(∂η/∂t)/ω + γ`. Le cavalement déphase le départ et excite un pilonnement libre,
+/// non amorti, que la projection écarte. Rend `(√(α² + β²), résidu quadratique / Z, S/(1 − ω²/ωₙ²),
+/// 1/(1 − ω²/ωₙ²))`, les deux premiers en unités de `a`.
 fn pilonnement_force(b: &Background, periodes: usize) -> (f64, f64, f64, f64) {
     let c = b.components()[0];
     let (a, k) = (c.amplitude as f64, c.k_turns_per_m as f64 * core::f64::consts::TAU);
@@ -185,36 +214,72 @@ fn pilonnement_force(b: &Background, periodes: usize) -> (f64, f64, f64, f64) {
     let amplification = 1. / (1. - omega * omega / omega_n2);
     let rapport = s * amplification;
     let z_eq = 0.5 - 500. / 1025.;
-    let centre = |t: u64| b.eval_local([0.; 3], SimTime(t)).unwrap();
-    coque.position[2] = z_eq + rapport * centre(0).eta as f64;
-    coque.velocity[2] = rapport * centre(0).deta_dt as f64;
+    let sous = |x: f64, t: u64| b.eval_local([x as f32, 0., 0.], SimTime(t)).unwrap();
+    coque.position[2] = z_eq + rapport * sous(0., 0).eta as f64;
+    coque.velocity = [s * sous(0., 0).u_total[0] as f64, 0., rapport * sous(0., 0).deta_dt as f64];
     let pas = (periodes as f64 * core::f64::consts::TAU / omega / 0.002).round() as u64;
-    let (mut ecart, mut haut, mut bas) = (0f64, f64::MIN, f64::MAX);
+    let (mut m, mut r, mut serie) = ([[0f64; 3]; 3], [0f64; 3], Vec::with_capacity(pas as usize));
     for n in 0..pas {
         coque.step(0.002, &BackgroundWater { background: b, time: SimTime(n * 2000) }, MER);
-        let zeta = coque.position[2] - z_eq;
-        ecart = ecart.max((zeta - rapport * centre((n + 1) * 2000).eta as f64).abs());
-        (haut, bas) = (haut.max(zeta), bas.min(zeta));
+        let e = sous(coque.position[0], (n + 1) * 2000);
+        let v = [e.eta as f64, e.deta_dt as f64 / omega, 1.];
+        accumule(&mut m, &mut r, v, coque.position[2] - z_eq);
+        serie.push((v, coque.position[2] - z_eq));
     }
-    let z = rapport * a;
-    (ecart / z, 0.5 * (haut - bas) / z, rapport, amplification)
+    let [alpha, beta, gamma] = moindres_carres(m, r);
+    let residu = (serie.iter().map(|(v, y)| (y - alpha * v[0] - beta * v[1] - gamma).powi(2)).sum::<f64>() / pas as f64).sqrt();
+    ((alpha * alpha + beta * beta).sqrt(), residu / (rapport * a), rapport, amplification)
 }
 
 /// **S333, critère 1 — B derrière la requête du corps.** Sur une houle longue de B — 6 s, λ = 56 m, 25 cm —,
-/// la coque pilonne à l'amplitude `a/(1 − ω²/ωₙ²)` à ± 5 %, et suit le régime forcé pas à pas. Sur une houle
-/// de 3 s, que la coque n'égale plus (λ = 14 m), l'amplification 1,28 n'est tenue qu'avec la houle vue par
-/// la flottaison, `S` = 0,87 : c'est elle que le proxy intègre, à ± 1 % sur les deux houles.
+/// la coque pilonne à l'amplitude `a/(1 − ω²/ωₙ²)` à ± 5 %. Sur une houle de 3 s, que la coque n'égale
+/// plus (λ = 14 m), l'amplification 1,28 n'est tenue qu'avec la houle vue par la flottaison, `S` = 0,87 :
+/// c'est elle que le proxy intègre, à ± 1 % sur les deux houles. Le pilonnement libre que le départ excite,
+/// que rien n'amortit — le proxy n'a pas de rayonnement —, reste sous 10 % de `Z` : 0,35 % à 6 s, 5,2 % à 3 s.
 #[test]
 fn a_hull_heaves_on_a_swell_of_b_at_its_forced_response_s333() {
     for (a, periode, critere) in [(0.25, 6., true), (0.05, 3., false)] {
         let b = houle(a, periode);
-        let (ecart, excursion, rapport, amplification) = pilonnement_force(&b, 4);
-        let mesure = excursion * rapport;
-        println!("S333 : houle {periode} s, pilonnement {mesure:.5}·a (forcé {rapport:.5}·a, 1/(1 − ω²/ωₙ²) = {amplification:.5}), écart au régime forcé {ecart:.2e}·Z");
-        assert!((excursion - 1.).abs() <= 0.01, "{periode} s : {excursion}");
-        assert!(ecart <= 0.01, "{periode} s : {ecart}");
+        let (mesure, residu, rapport, amplification) = pilonnement_force(&b, 4);
+        println!("S333 : houle {periode} s, pilonnement forcé {mesure:.5}·a (prédit {rapport:.5}·a, 1/(1 − ω²/ωₙ²) = {amplification:.5}), résidu libre {residu:.2e}·Z");
+        assert!((mesure / rapport - 1.).abs() <= 0.01, "{periode} s : {mesure} contre {rapport}");
+        assert!(residu <= 0.1, "{periode} s : {residu}");
         if critere {
             assert!((mesure / amplification - 1.).abs() <= 0.05, "critère 1 : {mesure} contre {amplification}");
         }
     }
+}
+
+/// **S333, critère 1 bis — la houle entraîne la coque.** Sur la houle longue du critère 1, la coque libre,
+/// lâchée à la vitesse horizontale de l'eau qu'elle suit, `S·u(0)`, cavale avec l'eau. Sa trajectoire se
+/// décompose par moindres carrés en `x = x₀ + U·t + c·ξ(t)`, `ξ` l'excursion de la particule de surface au
+/// centre : **`c` à ± 5 % de 1**, et à 1 % de `S`, la houle vue par la flottaison. `U` est une **dérive** du
+/// second ordre, de l'ordre de la dérive de Stokes `a²ωk` ; elle est publiée, pas jugée. Sans la part
+/// horizontale de la pression, `c` serait nul.
+#[test]
+fn the_swell_carries_the_hull_along_s333() {
+    let b = houle(0.25, 6.);
+    let c = b.components()[0];
+    let (a, k) = (c.amplitude as f64, c.k_turns_per_m as f64 * core::f64::consts::TAU);
+    let omega = c.freq_q32 as f64 / 4_294_967_296. * core::f64::consts::TAU;
+    let mut coque = RigidBody::cuboid([4., 1.6, 1.], 500., [0.; 3], [16, 8, 4]);
+    let s = coque.proxy.iter().map(|p| (k * p.body[0]).cos()).sum::<f64>() / coque.proxy.len() as f64;
+    let rapport = s / (1. - omega * omega / (MER.rho * G * 6.4 / coque.mass));
+    let z_eq = 0.5 - 500. / 1025.;
+    // L'excursion horizontale de la particule de surface au centre, `a·cos φ = −(∂η/∂t)/ω` pour une houle
+    // monochromatique vers +x.
+    let centre = |t: u64| b.eval_local([0.; 3], SimTime(t)).unwrap();
+    let xi = |t: u64| -(centre(t).deta_dt as f64) / omega;
+    coque.position[2] = z_eq + rapport * centre(0).eta as f64;
+    coque.velocity = [s * centre(0).u_total[0] as f64, 0., rapport * centre(0).deta_dt as f64];
+    let pas = (4. * core::f64::consts::TAU / omega / 0.002).round() as u64;
+    let (mut m, mut r) = ([[0f64; 3]; 3], [0f64; 3]);
+    for n in 0..pas {
+        coque.step(0.002, &BackgroundWater { background: &b, time: SimTime(n * 2000) }, MER);
+        accumule(&mut m, &mut r, [1., (n + 1) as f64 * 0.002, xi((n + 1) * 2000)], coque.position[0]);
+    }
+    let [_, derive, cavalement] = moindres_carres(m, r);
+    println!("S333 : cavalement {cavalement:.5}·ξ (S = {s:.5}), dérive {derive:.2e} m/s (Stokes a²ωk = {:.2e})", a * a * omega * k);
+    assert!((cavalement - 1.).abs() <= 0.05, "critère 1 bis : {cavalement}");
+    assert!((cavalement / s - 1.).abs() <= 0.01, "{cavalement} contre S = {s}");
 }

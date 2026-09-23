@@ -89,10 +89,14 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `BackgroundWater` : la requête d'eau sur B ; critère 1.
-- [ ] **P2 bis** — *ajouté à la reprise* : la poussée suit le gradient de la pression que le proxy suppose
+- [x] **P2 bis** — *ajouté à la reprise* : la poussée suit le gradient de la pression que le proxy suppose
   déjà, `ρg(η − z)` ; critère 1 bis.
 - [ ] **P3** — la coque de δ relative à l'eau qui la porte ; critère 2.
 - [ ] **P4** — banc `porte_d` : coque 4 × 1,6 × 1 m sur une houle ; critères 3 à 5, champs écrits.
+- [ ] **P5** — images de la scène (critère 6).
+- [ ] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
+  partie numérique), liste, file.
+- [ ] **P7** — rituel ; arrêt pour le verdict visuel.
 
 **Amendement de la reprise, déclaré avant le code.**
 - **P2 bis, pourquoi.** Le proxy intègre `p = ρg(η(x) − z)` mais n'en garde que la composante verticale :
@@ -108,10 +112,6 @@ Critères, écrits avant le code :
 - **P4 précisé.** Sur une houle longue, la perturbation d'une coque qui suit l'eau est d'ordre `kd`
   (~1 cm), invisible et du même ordre que l'erreur de l'approximation de coque courte. La coque est donc
   **lâchée 10 cm au-dessus de son équilibre** : son pilonnement relatif rayonne des anneaux que δ porte.
-- [ ] **P5** — images de la scène (critère 6).
-- [ ] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
-  partie numérique), liste, file.
-- [ ] **P7** — rituel ; arrêt pour le verdict visuel.
 
 ### Notes de reprise
 
@@ -123,3 +123,10 @@ Critères, écrits avant le code :
   prédiction avec la houle vue par la flottaison `S = ⟨cos kx⟩` : 1,04892·a (10⁻⁴). Houle 3 s (λ 14 m) →
   1,11574·a pour 1,11576·a prédit, alors que `1/(1 − ω²/ωₙ²)` seul dirait 1,279 : **le critère 1 ne vaut
   que pour une houle longue**. Écart ponctuel au régime forcé 2,6·10⁻⁴ et 1,9·10⁻³ de Z.
+- **P2 bis, critère 1 bis tenu.** Force `ρg(−∇η, 1)` par volume plongé ; S331–S332 inchangés (mêmes
+  valeurs imprimées). Houle 6 s : trajectoire horizontale = `x₀ + U·t + c·ξ`, **c = 0,99059** pour
+  `S` = 0,99172 (−0,11 %) ; **dérive U = 4,05 mm/s** dans le sens de la houle, second ordre — Stokes `a²ωk`
+  = 7,3 mm/s ; publiée, pas jugée. Critère 1 re-mesuré avec cavalement, par moindres carrés sur la houle
+  *sous la coque* : 1,04889·a pour 1,04892 prédit ; 3 s : 1,11914·a pour 1,11576 (+0,3 %).
+  **Impasse évitée** : la demi-excursion comptait la dérive (1,157·a) puis le pilonnement libre que le
+  cavalement excite au départ — non amorti, 5,2 % de Z à 3 s ; la projection les sépare.
