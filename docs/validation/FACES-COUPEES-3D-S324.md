@@ -28,6 +28,8 @@ physique dans les petites cellules que le fond crée.
 
 **État présent (S326, §6).** Avec un Jacobi sur le chemin coupé, la bosse à 128 converge en **425
 itérations et 5,7 s**, comme le fond sans bosse ; débits inchangés à 2,4·10⁻⁶ près, ordre 1,947.
+**S328 (§7)** : le **mode mobile** porte la découpe — au bit de la 2D à `ny` = 1, ordre 1,954 sur la
+bosse, à 3·10⁻⁶ du mode linéaire.
 
 ## 1. La géométrie
 
@@ -157,3 +159,53 @@ général.
 **Ce qui devient possible** : des trajectoires sur fond coupé à maille fine — donc la suite du lot 3,
 mode mobile et obstacles, puis les corps du lot 4.
 
+---
+
+## 7. S328 — le mode mobile sur fond coupé
+
+2026-09-23. **Lot 3**, alternance d'[ADR-188](../adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md) : la
+découpe portée au pas à **surface mobile**, celui qui portera les corps flottants du lot 4.
+
+### Reproduire
+
+- Commit `13f58a37` ou plus récent ; machine de référence, CPU, un fil.
+- `cargo test -p water-core --release --offline s328` — quatre essais, 0,6 s.
+- `cargo run -p water-core --release --offline --example delta3d_fond_coupe -- --mobile` — lignes
+  `FOND3D_S328`, 45 s.
+- Valeurs attendues : bosse, débit mobile 9,144654995·10⁻⁴ / 9,169156332·10⁻⁴ / 9,175479984·10⁻⁴ m³/s,
+  ordre 1,954 ; témoin sans `y`, 9,009922527·10⁻⁴ / 9,033861207·10⁻⁴ / 9,040044679·10⁻⁴, ordre 1,953.
+- Suite complète : 594 réussis, 0 échec, 18 ignorés.
+
+### Ce qui change
+
+La ligne mobile de la 2D ([S237](SURFACE-MOBILE-S237.md), `delta_mobile.rs`) portée à six faces : une
+maille est mouillée si sa fraction est non nulle et son centre sous la surface ; chaque face — fluide ou
+fantôme — est pondérée par son ouverture, dans l'ordre des opérations de la 2D ; correction,
+extrapolation et advection sautent les faces fermées ; les hauteurs sont transportées par débits
+ouverts. **Garde** : la surface reste à deux mailles au-dessus du plus haut coin du fond de sa colonne,
+comme la 2D au-dessus de ses deux arêtes (`Cut3::floor`, compté à la configuration). Sur un fond plat,
+toute ouverture vaut 1 et chaque opération reste celle de S296, au bit. Le pas **couplé** à B/W refuse
+toujours la découpe.
+
+### Ce qui est mesuré
+
+| critère, écrit avant le code | verdict |
+|---|---|
+| 1. fond plat inchangé | les identités de S296 — 1 604 pas au bit de la 2D — passent |
+| 2. `ny` = 1, trois fonds de S232, 200 pas mobiles | surface, pression, `u`, `w` et itérations **identiques au bit** au pas mobile 2D |
+| 3. lac au repos sur la bosse 3D, 100 pas | vitesses et surface nulles en bits |
+| 4. fond sans `y`, `ny` = 4, 100 pas | tranches identiques au bit entre elles **et à `ny` = 1** ; `v` nul à l'arrondi du Jacobi près — 6·10⁻⁹ m/s, comme le fond plat de S296 (5·10⁻⁹) |
+| 5. ordre du débit au premier pas, bosse 3D | **1,954** ; écart au mode linéaire de +9·10⁻⁷, +5·10⁻⁷, −2,8·10⁻⁶ aux trois mailles |
+| 6. surface à moins de deux mailles du fond | `Domain`, état restauré au bit |
+
+Le mode mobile et le mode linéaire donnent le même débit à 3·10⁻⁶ près sur la bosse, alors que l'un pose
+la surface à sa place par fluide fantôme et l'autre sous un couvercle : deux discrétisations
+indépendantes du même écoulement. Le pas mobile à 128 coûte 16,6 s pour 786 432 mailles, le linéaire
+5,7 s pour 524 288 : ses lignes se recalculent à chaque produit.
+
+### Ce qui devient possible, et ce qui manque
+
+**Possible** : une surface libre qui bouge au-dessus d'un fond non plat, en 3D — celle qui portera les
+corps flottants (lot 4, porte D) et s'approchera des obstacles. **Manquent** : le pas couplé à B/W sur
+fond coupé ; les obstacles qui ne sont pas un fond ; une surface qui descende à moins de deux mailles du
+fond — ni mouillage ni séchage, la plage de 4.14 ; la production GPU.

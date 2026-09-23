@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 - [x] **P2** — le pas mobile 3D porte la découpe ; fond plat au bit, suite verte.
 - [x] **P3** — essais des critères 2, 3, 4 et 6.
 - [x] **P4** — banc : le premier pas mobile sur la bosse, trois mailles, ordre ; écart au mode linéaire.
-- [ ] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
+- [x] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste 4.15.
 - [ ] **P6** — rituel.
 
