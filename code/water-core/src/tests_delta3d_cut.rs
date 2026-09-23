@@ -316,7 +316,7 @@ fn an_immersed_sphere_displaces_its_volume_and_feels_archimedes_s329() {
                 }
             }
         }
-        let f = solid_wall_force(d, &s, &|p| rho * g_eff * (surface - p[2]));
+        let f = solid_wall_force(d, &s, &|p, _| rho * g_eff * (surface - p[2]));
         let polyedre: f64 = (0..n).flat_map(|k| (0..n).flat_map(move |j| (0..n).map(move |i| (i, j, k))))
             .map(|(i, j, k)| solid_cell_fraction(d, &s, i, j, k) * (dx as f64).powi(3)).sum();
         assert!((f[2] / (rho * g_eff) - polyedre).abs() <= 1e-9 * polyedre, "{} contre {polyedre}", f[2] / (rho * g_eff));

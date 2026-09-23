@@ -36,6 +36,34 @@ pub(crate) struct Cut3 {
     /// **S328 : le plus haut coin du fond de chaque colonne**, `nx·ny` valeurs — la garde du pas mobile,
     /// qui tient la surface à deux mailles au-dessus, comme la 2D au-dessus de ses deux arêtes.
     pub floor: Vec<f32>,
+    /// **S330 : la découpe du fond seul**, point de départ d'un solide qui bouge — `None` sans solide.
+    pub base: Option<Base3>,
+    /// S330 : vitesse de translation du solide, m/s ; la part d'une face qu'il couvre avance avec elle.
+    pub solid_velocity: [f32; 3],
+}
+
+/// S330 : la découpe du fond seul, et le volume du solide dans chaque colonne, m³.
+pub(crate) struct Base3 {
+    pub frac: Vec<f32>,
+    pub open_u: Vec<f32>,
+    pub open_v: Vec<f32>,
+    pub open_w: Vec<f32>,
+    pub floor: Vec<f32>,
+    pub solid_col: Vec<f32>,
+}
+
+impl Cut3 {
+    /// S330 : la copie du fond seul — à la configuration, comptée par l'appelant.
+    pub fn base(&self, columns: usize) -> Base3 {
+        Base3 {
+            frac: self.frac.clone(),
+            open_u: self.open_u.clone(),
+            open_v: self.open_v.clone(),
+            open_w: self.open_w.clone(),
+            floor: self.floor.clone(),
+            solid_col: vec![0.; columns],
+        }
+    }
 }
 
 /// Le fond aux coins des empreintes, `(nx + 1)·(ny + 1)` valeurs, `x` le plus rapide. Le long de
@@ -209,7 +237,7 @@ pub(crate) fn cut(domain: Domain3, bottom: &[f32]) -> Cut3 {
         .flat_map(|j| (0..nx).map(move |i| (i, j)))
         .map(|(i, j)| footprint(i, j).into_iter().fold(f32::NEG_INFINITY, f32::max))
         .collect();
-    Cut3 { frac, open_u, open_v, open_w, floor }
+    Cut3 { frac, open_u, open_v, open_w, floor, base: None, solid_velocity: [0.; 3] }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════════════════════
@@ -343,6 +371,8 @@ fn seal_isolated(g: &mut Cut3, domain: Domain3) {
 /// au-dessus.
 pub(crate) fn add_solid(g: &mut Cut3, domain: Domain3, solid: &[f32]) -> Result<(), crate::delta_projection::Error> {
     use crate::delta_projection::Error;
+    // S330 : vérifier d'abord, écrire ensuite — un refus laisse la découpe intacte.
+    check_solid(&g.frac, &g.open_u, &g.open_v, &g.open_w, domain, solid)?;
     let Domain3 { nx, ny, nz, dx } = domain;
     let node = |a: usize, b: usize, c: usize| solid[(c * (ny + 1) + b) * (nx + 1) + a] as f64;
     for k in 0..nz {
@@ -351,9 +381,6 @@ pub(crate) fn add_solid(g: &mut Cut3, domain: Domain3, solid: &[f32]) -> Result<
                 let s = cell_negative(cell_nodes(domain, solid, i, j, k));
                 if s > 0. {
                     let c = (k * ny + j) * nx + i;
-                    if g.frac[c] < 1. || k + 1 == nz {
-                        return Err(Error::Domain);
-                    }
                     g.frac[c] = (1. - s) as f32;
                     let top = (k + 1) as f32 * dx;
                     if top > g.floor[j * nx + i] {
@@ -366,9 +393,6 @@ pub(crate) fn add_solid(g: &mut Cut3, domain: Domain3, solid: &[f32]) -> Result<
     let face = |open: &mut f32, c: [f64; 4]| -> Result<(), Error> {
         let s = face_negative(c);
         if s > 0. {
-            if *open < 1. {
-                return Err(Error::Domain);
-            }
             *open = (1. - s) as f32;
         }
         Ok(())
@@ -399,14 +423,57 @@ pub(crate) fn add_solid(g: &mut Cut3, domain: Domain3, solid: &[f32]) -> Result<
     Ok(())
 }
 
+/// **S330 : les refus de `add_solid`, sans rien écrire** — une maille ou une face que fond et solide
+/// coupent tous deux, un solide dans la couche du couvercle.
+pub(crate) fn check_solid(frac: &[f32], open_u: &[f32], open_v: &[f32], open_w: &[f32], domain: Domain3, solid: &[f32])
+    -> Result<(), crate::delta_projection::Error> {
+    use crate::delta_projection::Error;
+    let Domain3 { nx, ny, nz, .. } = domain;
+    let node = |a: usize, b: usize, c: usize| solid[(c * (ny + 1) + b) * (nx + 1) + a] as f64;
+    for k in 0..nz {
+        for j in 0..ny {
+            for i in 0..nx {
+                if cell_negative(cell_nodes(domain, solid, i, j, k)) > 0. && (frac[(k * ny + j) * nx + i] < 1. || k + 1 == nz) {
+                    return Err(Error::Domain);
+                }
+            }
+        }
+    }
+    let partage = |open: f32, c: [f64; 4]| open < 1. && face_negative(c) > 0.;
+    for k in 0..nz {
+        for j in 0..ny {
+            for i in 1..nx {
+                if partage(open_u[(k * ny + j) * (nx + 1) + i], [node(i, j, k), node(i, j + 1, k), node(i, j + 1, k + 1), node(i, j, k + 1)]) {
+                    return Err(Error::Domain);
+                }
+            }
+        }
+        for j in 1..ny {
+            for i in 0..nx {
+                if partage(open_v[(k * (ny + 1) + j) * nx + i], [node(i, j, k), node(i + 1, j, k), node(i + 1, j, k + 1), node(i, j, k + 1)]) {
+                    return Err(Error::Domain);
+                }
+            }
+        }
+    }
+    for k in 1..=nz {
+        for j in 0..ny {
+            for i in 0..nx {
+                if partage(open_w[(k * ny + j) * nx + i], [node(i, j, k), node(i + 1, j, k), node(i + 1, j + 1, k), node(i, j + 1, k)]) {
+                    return Err(Error::Domain);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 /// **S329 : la force d'une pression sur la paroi du solide discret**, en newtons — `∫ p n dA`, `n` tourné
 /// vers le solide. Dans chaque tétraèdre coupé, la paroi est un triangle ou un quadrilatère plan ; la
 /// pression, lue à son centroïde, en donne l'intégrale **exacte** pour tout champ linéaire. Une pression
 /// hydrostatique rend donc exactement `ρ·g·V` du polyèdre discret : c'est Archimède, et c'est le théorème
 /// de la divergence de la découpe.
-// Consommée par les forces rendues au corps (lot 4) ; les essais de S329 la reçoivent d'abord.
-#[cfg_attr(not(test), allow(dead_code))]
-pub(crate) fn solid_wall_force(domain: Domain3, solid: &[f32], p: &dyn Fn([f64; 3]) -> f64) -> [f64; 3] {
+pub(crate) fn solid_wall_force(domain: Domain3, solid: &[f32], p: &dyn Fn([f64; 3], usize) -> f64) -> [f64; 3] {
     let Domain3 { nx, ny, nz, dx } = domain;
     let dx = dx as f64;
     let mut force = [0f64; 3];
@@ -457,7 +524,7 @@ pub(crate) fn solid_wall_force(domain: Domain3, solid: &[f32], p: &dyn Fn([f64; 
                             let half = [0.5 * a[0], 0.5 * a[1], 0.5 * a[2]];
                             let g = [(poly[0][0] + poly[t][0] + poly[t + 1][0]) / 3., (poly[0][1] + poly[t][1] + poly[t + 1][1]) / 3.,
                                 (poly[0][2] + poly[t][2] + poly[t + 1][2]) / 3.];
-                            let pg = p(g);
+                            let pg = p(g, (k * ny + j) * nx + i);
                             for q in 0..3 {
                                 area[q] += half[q];
                                 moment[q] += pg * half[q];

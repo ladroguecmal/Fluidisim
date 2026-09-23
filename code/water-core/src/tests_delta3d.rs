@@ -1222,3 +1222,81 @@ fn a_mobile_surface_too_close_to_the_sphere_is_refused_s329() {
     let apres: Vec<u32> = v.surface().iter().chain(v.velocity_u()).map(|x| x.to_bits()).collect();
     assert_eq!(avant, apres);
 }
+
+// ─────────────────────────────── S330 : la frontière mobile ───────────────────────────────
+
+/// La sphère de S329, centrée en `x = cx`, distance signée aux nœuds d'un cube de 1,2 m.
+fn noeuds_sphere(n: usize, cx: f64) -> Vec<f32> {
+    // Le pas de `volume_sphere`, en f32 : deux sphères qui en diffèrent d'un arrondi ne se coupent pas pareil.
+    let dx = (1.2 / n as f32) as f64;
+    let mut noeuds = Vec::with_capacity((n + 1).pow(3));
+    for k in 0..=n {
+        for j in 0..=n {
+            for i in 0..=n {
+                let (x, y, z) = (i as f64 * dx, j as f64 * dx, k as f64 * dx);
+                noeuds.push((((x - cx).powi(2) + (y - 0.6).powi(2) + (z - 0.55).powi(2)).sqrt() - 0.3) as f32);
+            }
+        }
+    }
+    noeuds
+}
+
+/// **S330, critère 1.** Reposer le même solide à vitesse nulle ne change rien : cinquante pas linéaires
+/// sous une onde, au bit d'un volume qui ne l'a pas reposé.
+#[test]
+fn setting_the_same_solid_at_rest_changes_nothing_s330() {
+    let n = 24usize;
+    let (mut a, _) = volume_sphere(n);
+    let (mut b, _) = volume_sphere(n);
+    let z0 = a.domain.z0();
+    let eta: Vec<f32> = (0..n).flat_map(|_| (0..n).map(move |i| z0 + 0.01 * (core::f32::consts::TAU * (i as f32 + 0.5) / n as f32).cos())).collect();
+    a.set_surface(&eta).unwrap();
+    b.set_surface(&eta).unwrap();
+    let s = noeuds_sphere(n, 0.6);
+    for pas in 0..50 {
+        b.set_solid(&s, [0.; 3]).unwrap();
+        let ra = a.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        let rb = b.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        assert_eq!(ra.iterations, rb.iterations, "pas {pas}");
+        for (x, y) in a.surface().iter().zip(b.surface()).chain(a.velocity_u().iter().zip(b.velocity_u()))
+            .chain(a.velocity_v().iter().zip(b.velocity_v())).chain(a.velocity_w().iter().zip(b.velocity_w())) {
+            assert_eq!(x.to_bits(), y.to_bits(), "pas {pas}");
+        }
+    }
+}
+
+/// **S330, critère 3.** Une sphère qui traverse deux mailles à 1 m/s : des faces naissent et meurent,
+/// la divergence reste sous la tolérance, aucune face fermée ne porte de vitesse, rien n'est non fini ;
+/// un solide qui toucherait le couvercle est refusé sans rien écrire.
+#[test]
+fn a_moving_sphere_keeps_the_faces_sound_s330() {
+    let n = 24usize;
+    let (mut v, _) = volume_sphere(n);
+    let z0 = v.domain.z0();
+    v.set_surface(&vec![z0; n * n]).unwrap();
+    let (u, dt) = (1.0f64, 0.002f64);
+    let mut nees = 0usize;
+    for pas in 1..=50 {
+        let s = noeuds_sphere(n, 0.6 + u * dt * pas as f64);
+        let avant: Vec<f32> = v.apertures().unwrap().0.to_vec();
+        v.set_solid(&s, [u as f32, 0., 0.]).unwrap();
+        nees += v.apertures().unwrap().0.iter().zip(&avant).filter(|(a, b)| **a > 0. && **b == 0.).count();
+        let r = v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        assert!(r.divergence <= PROJECTION_DIVERGENCE_TOLERANCE as f64, "pas {pas} : {}", r.divergence);
+        let (ou, ov, ow) = v.apertures().unwrap();
+        for (a, x) in ou.iter().zip(v.velocity_u()).chain(ov.iter().zip(v.velocity_v())).chain(ow.iter().zip(v.velocity_w())) {
+            assert!(x.is_finite());
+            if *a == 0. {
+                assert_eq!(*x, 0., "pas {pas} : vitesse sur une face fermée");
+            }
+        }
+    }
+    assert!(nees > 0, "aucune face n'est née");
+    let haut: Vec<f32> = noeuds_sphere(n, 0.6).iter().enumerate().map(|(q, x)| {
+        let k = q / ((n + 1) * (n + 1));
+        if k >= n - 1 { -1. } else { *x }
+    }).collect();
+    let bits: Vec<u32> = v.apertures().unwrap().0.iter().map(|x| x.to_bits()).collect();
+    assert_eq!(v.set_solid(&haut, [0.; 3]).err(), Some(Error::Domain));
+    assert_eq!(bits, v.apertures().unwrap().0.iter().map(|x| x.to_bits()).collect::<Vec<_>>());
+}

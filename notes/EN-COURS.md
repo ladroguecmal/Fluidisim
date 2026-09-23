@@ -88,7 +88,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `set_solid` : géométrie recoupée en place depuis le fond seul, faces qui naissent et
+- [x] **P2** — `set_solid` : géométrie recoupée en place depuis le fond seul, faces qui naissent et
   meurent, eau déplacée ; flux du solide dans la divergence ; critères 1, 3, 5.
 - [ ] **P3** — volume (critère 2) ; force de pression sur la paroi depuis la pression de δ.
 - [ ] **P4** — banc : départ impulsif, trois mailles, `C_m`.
@@ -97,4 +97,12 @@ Critères, écrits avant le code :
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
-
+**P2 (23:16).** `Volume3::set_solid(nœuds, vitesse)` : la découpe refaite en place depuis celle du fond
+seul (`Base3`, comptée à la configuration avec le volume du solide par colonne) ; `add_solid` vérifie
+d'abord (`check_solid`), écrit ensuite — refus atomique ; face qui s'ouvre = vitesse du solide, face
+fermée = 0 ; l'eau déplacée monte dans sa colonne, le nouveau volume calculé dans `rhs`, libre entre
+deux pas — aucune allocation ; la diagonale de Jacobi suit. Divergence : la part couverte par le solide
+(`ouverture du fond − ouverture`) avance à sa vitesse. `solid_force` : la pression de la maille sur ses
+polygones de coupe. Essais : **reposer le solide immobile, 50 pas au bit** ; sphère à 1 m/s sur deux
+mailles, faces qui naissent, divergence sous la tolérance, faces fermées à zéro, refus sans écriture.
+Une fausse alerte : l'essai calculait sa sphère avec un pas en f64, le volume en f32 converti. Cœur : 481.

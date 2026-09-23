@@ -60,6 +60,22 @@ pub const ROUNDOFF_BACKWARD_ERROR_3D: f32 = {
     10. * u / (1. - 10. * u)
 };
 
+/// S330 : le volume du solide dans chaque colonne, m³ — ce que la découpe retire au fond seul.
+fn solid_columns(domain: Domain3, base: &[f32], frac: &[f32], out: &mut [f32]) {
+    let Domain3 { nx, ny, nz, dx } = domain;
+    let cube = (dx as f64).powi(3);
+    for j in 0..ny {
+        for i in 0..nx {
+            let mut s = 0f64;
+            for k in 0..nz {
+                let c = (k * ny + j) * nx + i;
+                s += (base[c] - frac[c]) as f64;
+            }
+            out[j * nx + i] = (s * cube) as f32;
+        }
+    }
+}
+
 /// La référence tridimensionnelle. Tampons réservés auprès de l'hôte avant `seal()` (I-06) ;
 /// aucun appel à l'allocateur global dans le pas.
 pub struct Volume3 {
@@ -255,9 +271,87 @@ impl Volume3 {
             return Err(Error::NotFinite);
         }
         let mut v = Self::configure_with_bottom(host, domain, rho, g_eff, bottom)?;
-        cut::add_solid(v.cut.as_mut().expect("fond coupé"), domain, solid)?;
+        // S330 : la découpe du fond seul et le volume du solide par colonne, pour qu'il puisse bouger.
+        let faces = (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1);
+        let bytes = (faces + nx * ny * nz + 2 * nx * ny).checked_mul(core::mem::size_of::<f32>()).ok_or(Error::Domain)?;
+        host.alloc.alloc_persistent(bytes).map_err(|e| match e {
+            AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
+        })?;
+        let g = v.cut.as_mut().expect("fond coupé");
+        let mut base = g.base(nx * ny);
+        cut::add_solid(g, domain, solid)?;
+        solid_columns(domain, &base.frac, &g.frac, &mut base.solid_col);
+        g.base = Some(base);
         v.prec_cut();
         Ok(v)
+    }
+
+    /// **S330 : le solide bouge.** L'hôte donne sa distance signée à la nouvelle position et sa vitesse
+    /// de translation. La découpe est refaite **en place, sans allocation**, depuis celle du fond seul ;
+    /// une face qui s'ouvre naît à la vitesse du solide, une face qui se ferme perd la sienne ; l'eau que
+    /// le solide déplace dans une colonne en élève la surface ; la diagonale de Jacobi suit. Refus
+    /// atomique — `Shape`, `NotFinite`, `Domain` si le volume n'a pas de solide ou si le solide touche
+    /// le fond ou la couche du couvercle — : rien n'est écrit.
+    pub fn set_solid(&mut self, solid: &[f32], velocity: [f32; 3]) -> Result<(), Error> {
+        let domain = self.domain;
+        let Domain3 { nx, ny, nz, dx } = domain;
+        if solid.len() != (nx + 1) * (ny + 1) * (nz + 1) {
+            return Err(Error::Shape);
+        }
+        if solid.iter().chain(&velocity).any(|x| !x.is_finite()) {
+            return Err(Error::NotFinite);
+        }
+        let g = self.cut.as_mut().ok_or(Error::Domain)?;
+        let mut base = g.base.take().ok_or(Error::Domain)?;
+        if let Err(e) = cut::check_solid(&base.frac, &base.open_u, &base.open_v, &base.open_w, domain, solid) {
+            g.base = Some(base);
+            return Err(e);
+        }
+        // Les ouvertures d'avant, dans les tampons de sauvegarde, libres entre deux pas.
+        self.saved_u.copy_from_slice(&g.open_u);
+        self.saved_v.copy_from_slice(&g.open_v);
+        self.saved_w.copy_from_slice(&g.open_w);
+        g.frac.copy_from_slice(&base.frac);
+        g.open_u.copy_from_slice(&base.open_u);
+        g.open_v.copy_from_slice(&base.open_v);
+        g.open_w.copy_from_slice(&base.open_w);
+        g.floor.copy_from_slice(&base.floor);
+        cut::add_solid(g, domain, solid).expect("vérifié");
+        g.solid_velocity = velocity;
+        for (x, (a, avant)) in self.u.iter_mut().zip(g.open_u.iter().zip(&self.saved_u)) {
+            if *a == 0. { *x = 0.; } else if *avant == 0. { *x = velocity[0]; }
+        }
+        for (x, (a, avant)) in self.v.iter_mut().zip(g.open_v.iter().zip(&self.saved_v)) {
+            if *a == 0. { *x = 0.; } else if *avant == 0. { *x = velocity[1]; }
+        }
+        for (x, (a, avant)) in self.w.iter_mut().zip(g.open_w.iter().zip(&self.saved_w)) {
+            if *a == 0. { *x = 0.; } else if *avant == 0. { *x = velocity[2]; }
+        }
+        // L'eau déplacée : le volume solide gagné par une colonne en élève la surface. Le nouveau volume
+        // est écrit dans `rhs`, libre entre deux pas : aucune allocation.
+        solid_columns(domain, &base.frac, &g.frac, &mut self.rhs[..nx * ny]);
+        let area = dx * dx;
+        for c in 0..nx * ny {
+            self.eta[c] += (self.rhs[c] - base.solid_col[c]) / area;
+            base.solid_col[c] = self.rhs[c];
+        }
+        g.base = Some(base);
+        self.prec_cut();
+        Ok(())
+    }
+
+    /// **S330 : la force de la pression de δ sur la paroi du solide**, en newtons — la pression de la
+    /// maille, sur les polygones de coupe qu'elle contient. `Domain` sans découpe, `Shape` sur une
+    /// mauvaise longueur.
+    pub fn solid_force(&self, solid: &[f32]) -> Result<[f64; 3], Error> {
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        if self.cut.is_none() {
+            return Err(Error::Domain);
+        }
+        if solid.len() != (nx + 1) * (ny + 1) * (nz + 1) {
+            return Err(Error::Shape);
+        }
+        Ok(cut::solid_wall_force(self.domain, solid, &|_, c| self.p[c] as f64))
     }
 
     /// S326 : active ou coupe le Jacobi du chemin coupé — pour la mesure ; actif par défaut.
@@ -512,6 +606,19 @@ impl Volume3 {
                     let fb = a(g.open_w[self.fw(i, j, k)], w[self.fw(i, j, k)]);
                     let ft = a(g.open_w[self.fw(i, j, k + 1)], w[self.fw(i, j, k + 1)]);
                     out[c] = ((fr - fl + ft - fb) + (fk - ff)) / dx;
+                    // S330 : la part des faces que le solide couvre avance à sa vitesse.
+                    if let (Some(b), [su, sv, sw]) = (&g.base, g.solid_velocity) {
+                        if su != 0. || sv != 0. || sw != 0. {
+                            let cov = |o: f32, base: f32| base - o;
+                            let x = cov(g.open_u[self.fu(i + 1, j, k)], b.open_u[self.fu(i + 1, j, k)])
+                                - cov(g.open_u[self.fu(i, j, k)], b.open_u[self.fu(i, j, k)]);
+                            let y = cov(g.open_v[self.fv(i, j + 1, k)], b.open_v[self.fv(i, j + 1, k)])
+                                - cov(g.open_v[self.fv(i, j, k)], b.open_v[self.fv(i, j, k)]);
+                            let z = cov(g.open_w[self.fw(i, j, k + 1)], b.open_w[self.fw(i, j, k + 1)])
+                                - cov(g.open_w[self.fw(i, j, k)], b.open_w[self.fw(i, j, k)]);
+                            out[c] += (su * x + sv * y + sw * z) / dx;
+                        }
+                    }
                 }
             }
         }
