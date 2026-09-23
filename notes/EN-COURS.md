@@ -89,9 +89,9 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — Jacobi sur le chemin coupé, commutable pour la mesure ; essais.
 - [x] **P3** — le banc de S324 rejoué, avec et sans Jacobi.
-- [>] **P4** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
+- [x] **P4** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; A315, file.
-- [ ] **P5** — S320 P5b : §5 bis au retour du calcul lancé le 22 à 20:11 — asynchrone.
+- [>] **P5** — S320 P5b : §5 bis au retour du calcul lancé le 22 à 20:11 — asynchrone.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise

@@ -4265,3 +4265,8 @@ surface saute de **1,8 à 2,8 mailles** à la frontière (APIC seul : 0,15), le 
 n'est pas la seule cause. **Conséquence** : le raccord ne se consomme pas encore. **Déclencheur** : la
 prochaine session du lot 5. Suspects, un par un : insertion des particules sortantes, quantification
 de l'ensemencement, colonnes sans vitesse propre — δ porte les siennes sur sa grille.
+
+**A315 — note datée du 2026-09-23 (S326) : résolu.** Un Jacobi sur le chemin coupé — celui du mode mobile
+3D — ramène la bosse à 128 de 16 029 à **425 itérations** (5,7 s au lieu de 708), débits inchangés à
+2,4·10⁻⁶ près ; à `ny` = 1, identité 2D gardée ([preuve](../validation/FACES-COUPEES-3D-S324.md) §6).
+

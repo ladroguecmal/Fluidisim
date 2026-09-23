@@ -7,7 +7,9 @@ mode linéaire. C'est la géométrie sur laquelle reposeront obstacles fixes, pu
 
 ## Reproduire
 
-- Commit `7a707492` ou plus récent ; machine de référence, CPU, un fil.
+- Commit `7a707492` ; machine de référence, CPU, un fil. *Depuis S326, un Jacobi est actif par défaut
+  sur le chemin coupé : sur un commit plus récent, `Volume3::set_precondition_cut(false)` rend les
+  chiffres ci-dessous (§6).*
 - Essais : `cargo test -p water-core --release --offline s324` — onze essais, moins d'une seconde.
 - Banc : `cargo run -p water-core --release --offline --example delta3d_fond_coupe` — lignes
   `FOND3D_S324` ; **≈ 12 min**, dont 708 s pour le seul pas de la bosse à 128. Avec `--geometrie` :
@@ -23,6 +25,9 @@ La référence 3D porte désormais un fond non plat : **identique au bit à la 2
 pas de `y`, **d'ordre 1,956** sur une bosse vraiment tridimensionnelle — mais à maille fine, le
 gradient conjugué sans préconditionneur met **46 fois plus d'itérations** à refermer la tolérance
 physique dans les petites cellules que le fond crée.
+
+**État présent (S326, §6).** Avec un Jacobi sur le chemin coupé, la bosse à 128 converge en **425
+itérations et 5,7 s**, comme le fond sans bosse ; débits inchangés à 2,4·10⁻⁶ près, ordre 1,947.
 
 ## 1. La géométrie
 
@@ -109,3 +114,46 @@ trajectoire à cette maille, donc la frontière mobile du lot 3 : le remède pr�
 - la **frontière mobile** ;
 - la **production GPU** ;
 - un **ordre local** des vitesses : le débit est une fonctionnelle intégrale, comme en S232.
+
+---
+
+## 6. S326 — Jacobi sur le chemin coupé
+
+2026-09-23. **Lot 3**, alternance d'[ADR-188](../adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md) : le
+remède de §4, éprouvé.
+
+### Reproduire
+
+- Commit `20b63489` ou plus récent ; machine de référence, CPU, un fil.
+- `cargo test -p water-core --release --offline s32` — douze essais, dont celui de S326, 1,5 s.
+- `cargo run -p water-core --release --offline --example delta3d_fond_coupe` — lignes `FOND3D_S324` ;
+  **12 s** au lieu de 12 min. `Volume3::set_precondition_cut(false)` rend le solveur de S324.
+- Valeurs attendues : bosse 9,144646532·10⁻⁴ / 9,169151446·10⁻⁴ / 9,175505848·10⁻⁴ m³/s en
+  117 / 220 / 425 itérations, ordre 1,947.
+
+### Ce qui change
+
+Le préconditionneur de Jacobi du mode mobile 3D, porté au chemin coupé du mode linéaire : diagonale de
+la ligne pondérée — ouvertures des faces vers une maille fluide, deux fois celle du couvercle —,
+calculée une fois à la configuration, la géométrie étant fixe. **Seulement quand `ny > 1`** : à
+`ny = 1`, la 3D reste la 2D au bit, et la 2D résout sans préconditionneur. Le fond plat n'est pas
+touché.
+
+### Ce qui est mesuré
+
+| | S324, sans Jacobi | **S326, avec** |
+|---|---:|---:|
+| bosse à 128 : itérations, durée du pas | 16 029, 708 s | **425, 5,7 s** |
+| bosse à 64 : itérations | 645 | 220 |
+| débit de la bosse à 32 / 64 / 128, écart relatif à S324 | — | 8·10⁻¹⁰ / 2,4·10⁻⁶ / 1,0·10⁻⁶ |
+| ordre de la bosse | 1,956 | 1,947 |
+| témoin sans `y` à 128 : itérations | 347 | 422 |
+
+**Critères tenus** : au plus 1 000 itérations à 128 (425) ; débits à 10⁻⁵ près ; identité 2D et fond
+plat au bit — tous les essais antérieurs passent ; 590 réussis. Le témoin, dont les petites cellules
+ne gênaient pas, coûte un peu plus avec Jacobi (+22 %) : le remède est pour les coins, pas un gain
+général.
+
+**Ce qui devient possible** : des trajectoires sur fond coupé à maille fine — donc la suite du lot 3,
+mode mobile et obstacles, puis les corps du lot 4.
+
