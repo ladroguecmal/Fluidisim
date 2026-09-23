@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S330 — **en cours**. **Lot 3 : la frontière mobile** — essai 3 de la piscine, une boule à
+Session : S330 — **terminée** (2026-09-23 23:21). **Lot 3 : la frontière mobile** — essai 3 de la piscine, une boule à
 mouvement imposé ; chemin de la v1 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S329.
@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 - [x] **P4** — banc : départ impulsif, trois mailles, `C_m`.
 - [x] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 **P2 (23:16).** `Volume3::set_solid(nœuds, vitesse)` : la découpe refaite en place depuis celle du fond

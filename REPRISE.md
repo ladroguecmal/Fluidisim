@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-23 23:20 +02:00
+JETON            : libre
+Battement        : 2026-09-23 23:21 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S330 — lot 3, la frontière mobile (ADR-189)
-Dernière session : S329 — **la v1 d'abord** (ADR-189) ; **lot 3, un solide quelconque** : distance signée aux nœuds coupée exactement pour le champ linéaire, volume déplacé d'ordre 2, Archimède exact au niveau discret, débit autour d'une sphère d'ordre 1,966 ([preuve](docs/validation/FACES-COUPEES-3D-S324.md) §8)
-Session suivante : **S330, lot 3 — la frontière mobile** (ADR-189, essai 3 de la piscine) : une sphère à mouvement imposé — découpe recalculée à chaque pas sans allocation, vitesse du solide sur ses faces, mailles qui naissent et meurent, masse tenue ; forces et vagues mesurées. Puis le lot 4, C10
-Maillons        : 0 — S329 : obstacle immergé quelconque reçu, 4.15 avance
+Session en cours : aucune
+Dernière session : S330 — **lot 3, la frontière mobile** : le solide bouge dans la référence 3D, découpe refaite en place sans allocation, volume suivi à 4·10⁻¹¹ m³, masse ajoutée d'une sphère `C_m` = 0,508, à 1,6 % de la théorie ([preuve](docs/validation/FACES-COUPEES-3D-S324.md) §9)
+Session suivante : **S331, lot 4 — le corps rigide sur B + W** (ADR-189, C10) : intégrateur de pilonnement, poussée par proxy sur B + W (ADR-008 §2), masse ajoutée ; cube de 0,5 m à 500 kg/m³ — tirant 0,25 m ± 1 %, période 1,00 s ± 5 % sans masse ajoutée, rapport √2 ± 15 % avec. Puis un solide qui perce la surface, et le bateau de la porte D
+Maillons        : 0 — S330 : solide en mouvement imposé reçu, 4.15 avance
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -80,7 +80,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
 
-État au 2026-09-23 (S329), en bref ; le détail par jalon et par porte est dans la
+État au 2026-09-23 (S330), en bref ; le détail par jalon et par porte est dans la
 [feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.
 
 - **Stratégie** : trois systèmes — A haute mer (B+W), B volumique 3D (δ), C couplage — et sept
@@ -93,7 +93,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   exacte, frontière non reçue (S325–S327, A316 attribué en partie).
 - **C** : compteurs reçus (lot 1) ; retour δ → W reçu en ordres A à D, **ordre E bloqué par A289**.
 - **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte**, **priorité** (ADR-189) : fond coupé et solide immergé
-  quelconque, modes linéaire et mobile (S324–S329) ; ni solide mobile, ni corps rigide.
+  quelconque, fixe ou en mouvement imposé (S324–S330) ; aucun corps rigide encore.
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 53 partiels, 64 absents** sur 120.
 

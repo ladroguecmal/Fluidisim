@@ -16478,3 +16478,21 @@ d'un solide immergé — invisible sous un fond, donc en 2D.
 **Rituel.** Maillons **0** : ce qui devient possible — un obstacle quelconque immergé dans la référence
 3D, la géométrie d'une coque ; le chemin qui le consomme — la frontière mobile, puis le corps du lot 4 ;
 la preuve — §8 ; 4.15 avance. Suivant : **S330, la frontière mobile** — l'essai 3.
+
+## S330 — 2026-09-23 — lot 3 : la frontière mobile, la masse ajoutée d'une sphère
+
+**Entrée.** *« continue, jusqu'à la v1 »* (ADR-189) ; suite déclarée par S329 : l'essai 3 de la piscine.
+**Le solide bouge** ([preuve](../docs/validation/FACES-COUPEES-3D-S324.md) §9). L'hôte donne, avant chaque
+pas, la distance signée à la nouvelle position et la vitesse ; la découpe est refaite en place depuis le
+fond seul, sans allocation ; la part des faces couverte par le solide avance à sa vitesse dans la
+divergence ; les faces qui s'ouvrent naissent à sa vitesse ; l'eau déplacée monte dans sa colonne par la
+somme compensée. Refus vérifiés avant toute écriture.
+**Mesuré.** Solide reposé immobile : 50 pas au bit. Sphère à 1 m/s : volume suivi à 3,6·10⁻¹¹ m³, faces
+saines. Départ impulsif : **masse ajoutée `C_m` = 0,508** à 12 mailles par rayon, 1,6 % de la théorie,
+convergent — l'excès dans le sens du confinement. Cœur : 482 réussis.
+**Méthode.** Une fausse alerte : l'essai calculait sa sphère avec un pas en f64, le volume en f32 converti ;
+les deux ne se coupaient pas pareil. Un essai de bit compare deux choses construites de la même façon.
+**Non fait.** Rotation ; solide qui perce la surface ; mode mobile et pas couplé avec un solide qui bouge.
+**Rituel.** Maillons **0** : ce qui devient possible — un corps que le jeu déplace et que l'eau de δ
+entraîne avec sa masse ajoutée ; le chemin qui le consomme — le corps du lot 4, puis le bateau de la
+porte D ; la preuve — §9 ; 4.15 avance. Suivant : **S331, le corps rigide sur B + W**, jugé sur C10.

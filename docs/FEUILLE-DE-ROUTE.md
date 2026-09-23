@@ -258,7 +258,8 @@ par A289, dans cette alternance. **S324** : le fond coupé entre dans la référ
 à la 2D sans `y`, ordre 1,956 sur une bosse ; ses petites cellules, qui faisaient ramper le solveur (A315),
 sont préconditionnées en **S326** : 425 itérations à 128 au lieu de 16 029 ([preuve](validation/FACES-COUPEES-3D-S324.md) §6) ;
 **S328** : le **mode mobile** porte la découpe, au bit de la 2D sans `y`, ordre 1,954 sur la bosse (§7) ;
-**S329** : un **solide quelconque** immergé — Archimède exact au niveau discret, sphère d'ordre 1,966 (§8).
+**S329** : un **solide quelconque** immergé — Archimède exact au niveau discret, sphère d'ordre 1,966 (§8) ;
+**S330** : il **bouge** — masse ajoutée d'une sphère `C_m` = 0,508 (§9).
 **Le 2026-09-23** ([ADR-189](adr/ADR-189-la-v1-d-abord.md)), l'utilisateur demande la v1 d'abord : lots 3
 et 4 jusqu'à la porte D, l'alternance avec le lot 5 suspendue jusque-là. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**
