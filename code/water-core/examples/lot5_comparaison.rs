@@ -2163,6 +2163,20 @@ struct Hybride {
     /// rangées **étirées** pour remplir exactement `[0, h]` : la surface suit la hauteur continûment, et
     /// au repos, où `2h/dx` est entier, c'est le réseau de S325.
     continu: bool,
+    /// **S327 P5 : la dette payée par les traversées** (`RACCORD_ECHANGE=traversee`, échange eulérien). P3
+    /// payait la dette en retirant aussitôt la particule la plus proche, qui aurait franchi quelques pas
+    /// plus tard ; celle qui franchissait ensuite, sans dette, était créditée en plus : le bord libre se
+    /// vidait deux fois. Ici la dette est **commune** aux profondeurs, ne se paie que par les particules
+    /// qui franchissent et par l'attente, et le retrait n'est plus qu'une soupape, au-delà d'une
+    /// demi-maille d'eau de la première colonne.
+    paresseux: bool,
+    dette_commune: f64,
+    /// **S327 P5 : la frontière comme paroi pour les particules** (`RACCORD_ECHANGE=paroi`, échange
+    /// eulérien). Une particule libre qui la franchit y est ramenée au lieu d'être absorbée : l'eau ne
+    /// passe que par le flux de la grille, et chaque côté la voit passer **au même pas** — la particule
+    /// la plus proche est retirée dès qu'une particule entière est due, à sa profondeur ou à la plus
+    /// voisine. Tout retard entre les deux côtés agit comme une résistance, donc dissipe (P3–P5).
+    paroi: bool,
 }
 
 impl Hybride {
@@ -2175,10 +2189,25 @@ impl Hybride {
         let n = apic.occupation();
         // La hauteur de masse de chaque colonne : ses particules initiales, deux par rangée.
         let h = (i_b..nx).map(|i| (0..ny).map(|j| n[j * nx + i] as f64).sum::<f64>() * 0.25 * dx).collect();
-        let eulerien = std::env::var("RACCORD_ECHANGE").is_ok_and(|v| v == "eulerien");
+        let echange = std::env::var("RACCORD_ECHANGE").unwrap_or_default();
+        let (eulerien, paresseux, paroi) =
+            (matches!(echange.as_str(), "eulerien" | "traversee" | "paroi"), echange == "traversee", echange == "paroi");
         let continu = std::env::var("RACCORD_ENSEMENCE").is_ok_and(|v| v == "continu");
         let mut hy =
-            Hybride { apic, i_b, h, attente: vec![0.0; ny], entre: 0.0, sorti: 0.0, eulerien, dette: vec![0.0; ny], continu };
+            Hybride {
+                apic,
+                i_b,
+                h,
+                attente: vec![0.0; ny],
+                entre: 0.0,
+                sorti: 0.0,
+                eulerien,
+                dette: vec![0.0; ny],
+                continu,
+                paresseux,
+                dette_commune: 0.0,
+                paroi,
+            };
         let xb = i_b as f64 * dx;
         let garde: Vec<bool> = hy.apic.x.iter().map(|p| p[0] < xb).collect();
         hy.retire(&garde);
@@ -2243,7 +2272,7 @@ impl Hybride {
         let dx = self.apic.mac.dx;
         let xb = self.i_b as f64 * dx;
         let libres = self.apic.x.iter().filter(|p| p[0] < xb).count() as f64 * 0.25 * dx * dx;
-        let en_suspens = self.attente.iter().sum::<f64>() - self.dette.iter().sum::<f64>();
+        let en_suspens = self.attente.iter().sum::<f64>() - self.dette.iter().sum::<f64>() - self.dette_commune;
         (libres, self.h.iter().sum::<f64>() * dx, en_suspens)
     }
 }
@@ -2264,10 +2293,26 @@ impl Candidat for Hybride {
         let area = 0.25 * dx * dx;
         let libres_avant: Vec<bool> = self.apic.x.iter().map(|p| p[0] < xb).collect();
         let dt = self.apic.pas(dt_max);
+        if self.paroi {
+            // S327 P5 : la frontière est une paroi pour les particules libres.
+            let bord = xb - 1e-6 * dx;
+            for (p, libre) in self.apic.x.iter_mut().zip(&libres_avant) {
+                if *libre && p[0] >= xb {
+                    p[0] = bord;
+                }
+            }
+        }
         // ── Entrée : les particules libres passées dans la zone des colonnes y versent leur masse.
         for (p, libre) in self.apic.x.iter().zip(&libres_avant) {
             if *libre && p[0] >= xb {
-                if self.eulerien {
+                if self.paresseux {
+                    self.dette_commune -= area;
+                    if self.dette_commune < 0.0 {
+                        self.h[0] -= self.dette_commune / dx;
+                        self.entre -= self.dette_commune;
+                        self.dette_commune = 0.0;
+                    }
+                } else if self.eulerien {
                     // S327 : sa masse est déjà dans les colonnes, par le flux ; elle paie la dette de sa
                     // profondeur, et un surplus éventuel va à la première colonne.
                     let k = ((p[1] / dx).max(0.0) as usize).min(ny - 1);
@@ -2315,14 +2360,41 @@ impl Candidat for Hybride {
             } else if self.eulerien && u > 0.0 {
                 // S327 : l'entrée, par le même flux et la même hauteur mouillée que la sortie.
                 let q = u * mouille(self.h[0], k) * dx * dt;
-                self.dette[k] += q;
+                if self.paresseux {
+                    self.dette_commune += q;
+                } else {
+                    self.dette[k] += q;
+                }
                 entree += q;
             }
         }
         self.h[0] += (entree - sortie) / dx;
         self.sorti += sortie;
         self.entre += entree;
-        if self.eulerien {
+        if self.paresseux {
+            for k in 0..ny {
+                let m = self.attente[k].min(self.dette_commune);
+                self.attente[k] -= m;
+                self.dette_commune -= m;
+            }
+            let borne = 0.5 * dx * self.h[0];
+            if self.dette_commune > borne {
+                let mut proches: Vec<(f64, usize)> =
+                    self.apic.x.iter().enumerate().filter(|(_, p)| p[0] < xb && p[0] >= xb - dx).map(|(n, p)| (p[0], n)).collect();
+                proches.sort_by(|a, b| b.0.total_cmp(&a.0));
+                let mut garde = vec![true; self.apic.x.len()];
+                for &(_, n) in &proches {
+                    if self.dette_commune <= borne {
+                        break;
+                    }
+                    garde[n] = false;
+                    self.dette_commune -= area;
+                }
+                if garde.contains(&false) {
+                    self.retire(&garde);
+                }
+            }
+        } else if self.eulerien {
             // Attente et dette de même profondeur se compensent ; le reste de la dette se paie en retirant
             // les particules libres de la dernière cellule les plus proches de la frontière.
             for k in 0..ny {
@@ -2339,6 +2411,19 @@ impl Candidat for Hybride {
             let mut garde = vec![true; self.apic.x.len()];
             for k in 0..ny {
                 proches[k].sort_by(|a, b| b.0.total_cmp(&a.0));
+            }
+            for k in 0..ny {
+                if self.paroi {
+                    // La plus proche de la frontière, à cette profondeur ou à la plus voisine qui en a une.
+                    while self.dette[k] >= area {
+                        let voisine = (0..ny).filter(|&j| !proches[j].is_empty()).min_by_key(|&j| j.abs_diff(k));
+                        let Some(j) = voisine else { break };
+                        let (_, n) = proches[j].remove(0);
+                        garde[n] = false;
+                        self.dette[k] -= area;
+                    }
+                    continue;
+                }
                 let mut suivant = proches[k].iter();
                 while self.dette[k] >= area {
                     let Some(&(_, n)) = suivant.next() else { break };

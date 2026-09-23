@@ -96,7 +96,7 @@ seul — son effet mesuré contre le montage de S325 — reste une attribution p
   des colonnes, flux entrant et sortant, APIC seul au même endroit. Quel côté s'écarte, et quand.
 - [x] **P3** — suspect choisi par P2 ; commutable, mesuré seul.
 - [x] **P4** — suspect suivant ; commutable, mesuré seul.
-- [ ] **P5** — suspect suivant ; commutable, mesuré seul.
+- [x] **P5** — suspect suivant ; commutable, mesuré seul.
 - [ ] **P6** — le raccord corrigé, contre les critères, deux mailles.
 - [ ] **P7** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; file, liste.
@@ -153,3 +153,21 @@ en retirant **aussitôt** la particule la plus proche, qui aurait franchi quelqu
 qui franchit ensuite, sans dette, est créditée en plus. Le bord se vide deux fois. P5 : la dette,
 mise en commun sur les profondeurs, ne se paie que par les traversées et par l'attente, et le retrait
 n'est plus qu'une soupape.
+
+**P5 (22:08) — le paiement de la dette.** Deux variantes, avec l'ensemencement continu, à 5 cm :
+
+| | (a) + (c), retrait aussitôt | dette payée par les traversées | **paroi** |
+|---|---:|---:|---:|
+| écart à la frontière, mailles (APIC seul 0,14) | 0,83 | 0,78 | **0,24** |
+| amortissement par période (APIC −0,4 %) | 2,7 % | 6,3 % | 4,2 % |
+| période, zéros / périodogramme (APIC +5,6 / +6,1 %) | +7,0 / +6,6 % | +7,2 / +7,4 % | +7,5 / +7,0 % |
+| vitesse maximale | 0,63 m/s | 0,40 m/s | 0,22 m/s |
+
+**Lecture** : plus la dette traîne, plus on dissipe — un retard entre la colonne qui reçoit l'eau et les
+particules qui la perdent agit comme une résistance. **Paroi** (`RACCORD_ECHANGE=paroi`) : une particule
+libre qui franchit la frontière y est ramenée ; l'eau ne passe que par le flux, et la particule la plus
+proche est retirée dès qu'une particule entière est due. **L'écart tient le critère** (0,24 < 0,5) ; le
+repos aussi (0,65 cm/s, 0,001 maille). Restent amortissement et période. **Où ?** Zone des colonnes à
+95 %, frontière près du mur : 1,3 % ; à 50 %, au nœud : 4,2 % ; à 25 % : 2,5 %, période d'APIC. Les
+colonnes dissipent **d'elles-mêmes** ≈ 1,7 point ; la frontière le reste, selon l'échange qu'elle porte.
+Suspect des colonnes : la hauteur mouillée prise **en amont** dans leur transport, un schéma diffusif.
