@@ -25,6 +25,9 @@ ballottement jusqu'à 16 % par période : pas encore reçu.
 **S326 (§5 bis)** : à trois mailles, le temps de pincement **ne converge pas encore** — 2,20 → 2,30 →
 2,40 `√(D/g)` — et la cavité lentement ; au-delà du pincement, à `D/dx` = 32, la vitesse s'emballe à la
 fermeture de la poche sans pression (290 m/s, A311), et le calcul complet devient impraticable.
+**S327 (§12)** : A316 attribué — l'échange asymétrique fait le saut, la surface arrondie des colonnes
+la dissipation. Corrigé : écart 1,81 → 0,24 maille à 5 cm, 2,85 → 0,59 à 2,5 cm ; amortissement 16 →
+4,2 % et 5,4 → 0,71 %. **Pas encore reçu** : l'amortissement à 5 cm, le bruit de frontière à 2,5 cm.
 
 ---
 
@@ -409,3 +412,91 @@ attribuée ; trois suspects, à éprouver **un par un** : l'insertion des partic
 frontière, la quantification de l'ensemencement (`round(4h/dx)` : une particule de plus ou de moins
 change la surface d'un quart de maille), et la vitesse des colonnes, qui ne garde aucune mémoire propre
 d'un pas à l'autre — δ, lui, porte ses vitesses sur sa grille (A316).
+
+---
+
+## 12. S327 — le raccord dynamique attribué : deux causes trouvées, pas encore reçu
+
+2026-09-23. **Lot 5**, alternance d'[ADR-188](../adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md) ; A316.
+Les critères de S325, plus l'amortissement, qu'ils ne bornaient pas — écrits avant le code.
+
+### Reproduire
+
+- Commit `53b638b8` ou plus récent ; machine de référence, CPU, un fil.
+- Le meilleur montage : `RACCORD_ENSEMENCE=continu RACCORD_ECHANGE=paroi cargo run -p water-core --release
+  --offline --example lot5_comparaison -- raccord_dyn <repos|ballottement> <dx>` ; 2 s à 5 cm, 40 s à
+  2,5 cm. `RACCORD_SERIE=1` écrit la série à la frontière, chaque dixième de seconde.
+- Valeurs attendues : ballottement à 5 cm, écart 0,2436 maille, amortissement 4,168 %, période aux zéros
+  2,12419 s ; à 2,5 cm, 0,5928, 0,708 %, 1,97928 s ; repos à 5 cm, vitesse maximale 0,0065 m/s.
+- Sans variable : le montage de S325, au bit. Les variantes du tableau plus bas : `RACCORD_ECHANGE=
+  eulerien|traversee|solde`, `RACCORD_QUANTUM=arrondi`, `RACCORD_MOUILLE=centre`,
+  `RACCORD_ENSEMENCE=hysterese`, `RACCORD_INSERTION=reseau`, `RACCORD_MEMOIRE=grille`.
+
+### Ce que la série montre
+
+La frontière est au nœud du premier mode, où l'eau passe le plus. Dans le montage de S325, de 0 à
+0,2 s, la première colonne perd 2,7 cm par le flux de la grille vers sa voisine **avant qu'aucune
+particule n'ait franchi** la frontière — la plus proche en est à un quart de maille. Les particules
+libres s'entassent ensuite contre elle (35 % de trop dans la dernière colonne libre), puis entrent
+**en rafale** : +10 cm dans la première colonne en un dixième de seconde. D'où l'écart de deux mailles.
+
+### Deux causes, chacune éprouvée seule
+
+| à 5 cm | S325 | (c) échange eulérien seul | (a) ensemencement continu seul |
+|---|---:|---:|---:|
+| écart à la frontière, mailles | 1,81 | **0,71** | 1,93 |
+| amortissement par période | 16 % | 14 % | **6,3 %** |
+| repos : vitesse maximale | 1,4 cm/s | 4,7 cm/s | **0,65 cm/s** |
+
+- **(c) L'échange asymétrique fait le saut.** L'eau sortait par le flux de la grille, entrait par les
+  particules qui franchissent : en retard, puis en rafale. Le flux porte désormais l'échange dans les
+  deux sens ; l'entrée est créditée aussitôt aux colonnes, et les particules libres la **doivent**.
+- **(a) La surface arrondie fait la dissipation.** `round(4h/dx)` arrondissait au quart de maille la
+  surface que la pression voit dans les colonnes — 1,25 cm à 5 cm, pour une onde de 2 cm — et chaque
+  particule ajoutée ou ôtée la faisait sauter. Des rangées **étirées** sur `[0, h]` la font suivre la
+  hauteur continûment ; au repos, c'est le réseau de S325.
+
+**Comment payer la dette** a décidé du reste, et d'une règle : **tout retard entre la colonne qui reçoit
+l'eau et les particules qui la perdent agit comme une résistance, donc dissipe.** Avec (a), à 5 cm :
+retrait aussitôt de la plus proche, mais créditée en plus quand une autre franchit — 0,83 maille,
+2,7 % ; dette payée par les seules traversées, plus lente — 0,78, 6,3 % ; **paroi** — une particule
+libre qui franchit est ramenée, l'eau ne passe que par le flux, la plus proche est retirée dès qu'une
+particule entière est due — **0,24**, 4,2 %.
+
+### Ce qui est contredit
+
+| variante, avec (a) | 5 cm : écart / amortissement | 2,5 cm : écart / amortissement |
+|---|---|---|
+| **paroi** — le meilleur montage | **0,24** / 4,2 % | 0,59 / **0,71 %** |
+| paroi, hauteur mouillée centrée au lieu d'amont | 0,21 / 4,2 % | — |
+| paroi, quantum arrondi à la demi-particule | 0,55 / 5,1 % | 0,69 / 0,30 % |
+| solde signé, traversées absorbées | 0,25 / 3,7 % | 0,64 / 1,37 % |
+| paroi, rangées à hystérésis | 0,21 / 3,9 % | **0,28** / 2,7 % |
+| paroi, insertion aux quatre places du réseau — suspect (b) | 0,80 / 3,8 % | 0,76 / 0,06 % |
+| paroi, vitesse des colonnes gardée sur la grille — suspect (d) | 0,24 / 4,1 % | 0,69 / 1,55 % |
+
+APIC seul : 0,14 / −0,4 % à 5 cm, 0,16 / 0,34 % à 2,5 cm. Avec 95 % du bassin en colonnes, frontière
+près du mur où l'eau passe à peine, la paroi amortit encore 1,3 % à 5 cm : **les colonnes dissipent
+d'elles-mêmes** — ni par leur transport en amont, ni par le réespacement de leurs rangées (l'hystérésis
+y devient instable, −17,6 %), ni par l'aller-retour de leur vitesse (la mémoire sur la grille y porte
+l'amortissement à 2,65 %).
+
+### Verdict
+
+| critère | 5 cm | 2,5 cm |
+|---|---|---|
+| 1. masse | 4·10⁻¹⁶ — tenu | 1·10⁻¹⁵ — tenu |
+| 2. repos : vitesse < 1 cm/s, écart < 0,2 maille | 0,65 cm/s ; 0,001 — tenu | — |
+| 3. écart < 0,5 maille | 0,24 — tenu | **0,59 — manqué** |
+| 3. période à 1 % d'APIC seul, zéros / périodogramme | **+1,9** / +0,9 point — manqué | +0,3 / −0,3 — tenu |
+| 3. amortissement à 1 point d'APIC seul | **4,2 %** contre −0,4 % — manqué | 0,71 % contre 0,34 % — tenu |
+| 4. APIC seul inchangé ; rien dans le cœur | au bit — tenu | au bit — tenu |
+
+**Non reçu.** Depuis S325, l'écart est divisé par 7,5 à 5 cm et par 4,8 à 2,5 cm, l'amortissement passe
+de 16 à 4,2 % et de 5,4 à 0,71 %. À 2,5 cm, l'écart manqué est un **bruit sans biais** — moyenne −0,009
+maille, écart-type 0,15 contre 0,063 pour APIC seul, deux relevés sur cent au-dessus de 0,5 —, et la
+maille qui échoue est celle où l'onde fait 0,4 maille et une particule 62 % de son amplitude.
+
+**Suite.** La dissipation propre aux colonnes à 5 cm, dont aucune des trois causes pressenties n'est la
+bonne ; le bruit de la frontière à 2,5 cm. Piste non éprouvée : une bande où les deux représentations
+se recouvrent, la surface que voit la pression passant de l'une à l'autre au lieu de sauter.

@@ -101,7 +101,7 @@ seul — son effet mesuré contre le montage de S325 — reste une attribution p
   **centrée** dans leur transport au lieu d'amont, commutable ; zone à 95 % et 50 %. *Étendue en cours
   d'étape aux suspects restants — (b), (d) — et à trois variantes de l'échange ; toutes commutables.*
 - [x] **P7** — le raccord corrigé, contre les critères, deux mailles.
-- [ ] **P8** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
+- [x] **P8** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; file, liste.
 - [ ] **P9** — rituel.
 

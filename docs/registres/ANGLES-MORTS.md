@@ -4277,6 +4277,13 @@ n'est pas la seule cause. **Conséquence** : le raccord ne se consomme pas encor
 prochaine session du lot 5. Suspects, un par un : insertion des particules sortantes, quantification
 de l'ensemencement, colonnes sans vitesse propre — δ porte les siennes sur sa grille.
 
+**A316 — note datée du 2026-09-23 (S327). Attribué en partie** ([preuve](../validation/B10-APIC-S320.md)
+§12). L'échange asymétrique — sortie par le flux, entrée par les particules qui franchissent — fait le
+saut ; la surface des colonnes arrondie au quart de maille fait la dissipation. Corrigés, commutables :
+écart 0,24 maille à 5 cm, 0,59 à 2,5 cm ; amortissement 4,2 % et 0,71 %. **Reste ouvert** : une
+dissipation propre aux colonnes à 5 cm — ni transport en amont, ni réespacement, ni aller-retour de
+vitesse — et un bruit de frontière, sans biais, à 2,5 cm.
+
 **A315 — note datée du 2026-09-23 (S326) : résolu.** Un Jacobi sur le chemin coupé — celui du mode mobile
 3D — ramène la bosse à 128 de 16 029 à **425 itérations** (5,7 s au lieu de 708), débits inchangés à
 2,4·10⁻⁶ près ; à `ny` = 1, identité 2D gardée ([preuve](../validation/FACES-COUPEES-3D-S324.md) §6).
