@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S329 — **en cours**. **La v1 d'abord** (ADR-189, à écrire en P2) ; **lot 3 : un obstacle qui
+Session : S329 — **terminée** (2026-09-23 23:06). **La v1 d'abord** (ADR-189, à écrire en P2) ; **lot 3 : un obstacle qui
 n'est pas un fond** — essai 2 de la piscine, la boule immergée.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« continue, jusqu'à la v1 »*, après S328.
@@ -103,7 +103,7 @@ Critères, écrits avant le code :
 - [x] **P5** — banc : débit autour de la sphère, trois mailles, ordre ; poussée.
 - [x] **P6** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste 4.15.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 **P3 (23:00).** `delta3d_cut.rs` : `add_solid` coupe en place, sans allocation, la découpe du fond par un

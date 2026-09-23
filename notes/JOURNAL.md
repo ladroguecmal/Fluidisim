@@ -16460,3 +16460,21 @@ plat, en 3D ; le chemin qui le consomme — les corps flottants du lot 4 (porte 
 la preuve — FACES-COUPEES-3D-S324 §7 ; 4.15 avance, le mode mobile n'y manque plus. Suivant, selon
 ADR-188 : **S329, lot 5** — la dissipation propre aux colonnes à 5 cm, après avoir vérifié qu'elle bloque
 encore l'usage (quatrième session du raccord).
+
+## S329 — 2026-09-23 — la v1 d'abord ; lot 3 : un solide quelconque, Archimède exact
+
+**Entrée.** *« continue, jusqu'à la v1 »*. **ADR-189** : les lots 3 et 4 jusqu'à la porte D ; l'alternance
+avec le lot 5 suspendue jusque-là — interprétation écrite comme telle, réversible sur un mot.
+**Le chemin, lu dans le dépôt.** Lot 3 : obstacles fixes puis mobiles (essais 2 et 3) ; lot 4 : corps
+rigide jugé sur C10 ; porte D : un bateau qui flotte sur B + W et que δ voit comme une paroi (I-04).
+**La géométrie** ([preuve](../docs/validation/FACES-COUPEES-3D-S324.md) §8). Un solide par sa distance
+signée aux nœuds, coupé exactement pour le champ linéaire — faces en 4 triangles, mailles en 24
+tétraèdres, formules closes stables. Volume déplacé d'une sphère d'**ordre 2,0** ; poussée hydrostatique
+intégrée sur la paroi discrète **= ρg·V du polyèdre à 10⁻⁹** — Archimède au niveau discret.
+**Les pas.** Lac au repos au bit autour de la sphère, modes linéaire et mobile ; débit du premier pas
+autour d'elle d'**ordre 1,966**. Un défaut corrigé : l'extrapolation mobile remplissait les faces fermées
+d'un solide immergé — invisible sous un fond, donc en 2D.
+**Non fait.** Le solide qui bouge ; celui qui perce la surface ; le pas couplé.
+**Rituel.** Maillons **0** : ce qui devient possible — un obstacle quelconque immergé dans la référence
+3D, la géométrie d'une coque ; le chemin qui le consomme — la frontière mobile, puis le corps du lot 4 ;
+la preuve — §8 ; 4.15 avance. Suivant : **S330, la frontière mobile** — l'essai 3.
