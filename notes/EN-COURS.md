@@ -62,56 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S330 — **terminée** (2026-09-23 23:21). **Lot 3 : la frontière mobile** — essai 3 de la piscine, une boule à
-mouvement imposé ; chemin de la v1 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
+Session : S331 — **en cours**. **Lot 4 : le corps rigide sur B + W**, jugé sur C10 ; chemin de la v1
+([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S329.
+Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S330.
 
-**Ce que la session doit rendre possible.** Un solide qui **bouge** dans la référence 3D, mode linéaire —
-celui où un bateau percera un jour le couvercle. L'hôte fournit, avant chaque pas, la distance signée du
-solide à sa nouvelle position et sa vitesse de translation. δ recoupe sa géométrie **en place, sans
-allocation**, depuis une copie du fond seul comptée à la configuration ; la part d'une face que le solide
-couvre avance à sa vitesse dans la divergence (formulation pondérée par les ouvertures) ; une face qui
-s'ouvre naît à la vitesse du solide ; l'eau que le solide déplace dans une colonne en élève la surface.
-Consommateur : le corps du lot 4, puis le bateau de la porte D.
+**Ce que la session doit rendre possible.** Un corps que **le jeu** fait flotter — I-04 : toute force de
+jeu vient de B + W, jamais de δ (ADR-008). `body.rs` n'a qu'un modèle statique. Il faut un corps rigide à
+six degrés de liberté — quaternion, inertie principale —, une poussée par **proxy de points volumiques**
+(ADR-008 §2 : immersion saturée sur l'épaisseur de chaque point, exacte pour une ligne d'eau plane), une
+masse ajoutée, un intégrateur symplectique déterministe, et l'eau reçue par une interface de requête —
+calme pour C10, B + W pour la porte D. Consommateur : le bateau de la porte D, que δ verra par `set_solid`.
 
-Critères, écrits avant le code :
-1. **Immobile** : reposer le même solide à vitesse nulle ne change rien, au bit.
-2. **Volume** : une sphère immergée qui se déplace — `Σ(η − η₀)·dx²` suit la variation du volume discret
-   du solide à 10⁻⁹ m³ près, pas après pas.
-3. **Faces** : divergence sous la tolérance à chaque pas ; aucune vitesse sur une face fermée ; aucune
-   valeur non finie quand des faces naissent et meurent.
-4. **Masse ajoutée** : départ impulsif d'une sphère immergée, un pas — la force de pression donne
-   `C_m = m_a/(ρV)` ; **à 5 % de 0,5** (sphère en fluide illimité) à la maille la plus fine, et convergent.
-5. **Rien de changé** pour les solides fixes et le fond : suite complète verte.
+**Un fait à écrire avant la mesure.** Le cube de C10 à 500 kg/m³ en mer a une hauteur métacentrique
+`GM = d/2 + a²/(12d) − a/2 = −4,3 cm` : **il est instable en roulis** — un cube de cette densité flotte
+incliné. L'essai de pilonnement reste bref (l'arrondi y croît en `e^{3,2 t}`) ; la rotation s'éprouve sur
+un pavé plat, stable.
+
+Critères, écrits avant le code (eau de mer, ρ = 1025 kg/m³) :
+1. **Proxy** : volume immergé du cube droit = `A·d` exact à 10⁻¹², pour tout tirant.
+2. **Tirant** (C10) : moyenne du pilonnement sur des périodes entières = `(ρ_c/ρ)·H` = 0,24390 m **± 1 %**.
+3. **Période sans masse ajoutée** (C10) : `2π√(ρ_c·H/(ρ·g))` = 0,9907 s **± 5 %**.
+4. **Masse ajoutée** (C10) : disque équivalent, `m_a = (8/3)·ρ·(A/π)^{3/2}` ; rapport des périodes
+   **1,414 ± 15 %**, et à 1 % de `√(1 + m_a/m)`.
+5. **Roulis** : pavé 1 × 1 × 0,3 m à 500 kg/m³, lâché à 5° — période à **± 5 %** de `2π√(I/(m·g·GM))`.
+6. **Déterminisme** : deux trajectoires identiques au bit ; aucune allocation dans le pas.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `set_solid` : géométrie recoupée en place depuis le fond seul, faces qui naissent et
-  meurent, eau déplacée ; flux du solide dans la divergence ; critères 1, 3, 5.
-- [x] **P3** — volume (critère 2) ; force de pression sur la paroi depuis la pression de δ.
-- [x] **P4** — banc : départ impulsif, trois mailles, `C_m`.
-- [x] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
-  avec « Reproduire » ; file, liste.
-- [x] **P6** — rituel.
+- [ ] **P2** — `rigid_body.rs` : corps, proxy, requête d'eau, intégrateur ; critères 1 et 6.
+- [ ] **P3** — C10 : tirant, période, masse ajoutée (critères 2 à 4).
+- [ ] **P4** — roulis du pavé (critère 5).
+- [ ] **P5** — preuve : `docs/validation/CORPS-RIGIDE-S331.md`, avec « Reproduire » ; C10 exécuté,
+  file, liste 6.1.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-**P2 (23:16).** `Volume3::set_solid(nœuds, vitesse)` : la découpe refaite en place depuis celle du fond
-seul (`Base3`, comptée à la configuration avec le volume du solide par colonne) ; `add_solid` vérifie
-d'abord (`check_solid`), écrit ensuite — refus atomique ; face qui s'ouvre = vitesse du solide, face
-fermée = 0 ; l'eau déplacée monte dans sa colonne, le nouveau volume calculé dans `rhs`, libre entre
-deux pas — aucune allocation ; la diagonale de Jacobi suit. Divergence : la part couverte par le solide
-(`ouverture du fond − ouverture`) avance à sa vitesse. `solid_force` : la pression de la maille sur ses
-polygones de coupe. Essais : **reposer le solide immobile, 50 pas au bit** ; sphère à 1 m/s sur deux
-mailles, faces qui naissent, divergence sous la tolérance, faces fermées à zéro, refus sans écriture.
-Une fausse alerte : l'essai calculait sa sphère avec un pas en f64, le volume en f32 converti. Cœur : 481.
-**P3 (23:18).** L'eau déplacée entre dans `η` par la somme compensée du transport (S233). Sphère à 1 m/s,
-50 pas : `Σ(η − reste − z₀)·dx²` suit la variation du volume discret à **3,6·10⁻¹¹ m³** au pire (critère :
-10⁻⁹). Le volume discret de la sphère ne varie que de 4·10⁻¹⁰ m³ sur deux mailles de déplacement : l'erreur
-de l'interpolation linéaire tient à la courbure, pas à la position. Cœur : 482 réussis.
-**P4 (23:19).** `delta3d_fond_coupe --masse-ajoutee` : sphère de 0,3 m au centre d'un cube de 2,4 m, départ
-impulsif à 0,1 m/s, un pas ; 11 s. `C_m` = **0,48969 / 0,50506 / 0,50792** à 3 / 6 / 12 mailles par rayon ;
-incréments 0,0154 puis 0,0029 (ordre ≈ 2,4), limite extrapolée ≈ 0,509. **Critère 4 tenu** : 1,6 % de 0,5.
-L'excès va dans le sens du confinement — murs rigides à quatre rayons ; une sphère dans une sphère rigide de
-rayon quadruple aurait `(1 + 2q)/(1 − q)` = 1,048 avec `q = (1/4)³`, le cube, plus grand, moins.
+

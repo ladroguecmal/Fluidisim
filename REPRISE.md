@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-23 23:21 +02:00
+JETON            : occupé
+Battement        : 2026-09-23 23:22 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S331 — lot 4, le corps rigide sur B + W (C10, ADR-189)
 Dernière session : S330 — **lot 3, la frontière mobile** : le solide bouge dans la référence 3D, découpe refaite en place sans allocation, volume suivi à 4·10⁻¹¹ m³, masse ajoutée d'une sphère `C_m` = 0,508, à 1,6 % de la théorie ([preuve](docs/validation/FACES-COUPEES-3D-S324.md) §9)
 Session suivante : **S331, lot 4 — le corps rigide sur B + W** (ADR-189, C10) : intégrateur de pilonnement, poussée par proxy sur B + W (ADR-008 §2), masse ajoutée ; cube de 0,5 m à 500 kg/m³ — tirant 0,25 m ± 1 %, période 1,00 s ± 5 % sans masse ajoutée, rapport √2 ± 15 % avec. Puis un solide qui perce la surface, et le bateau de la porte D
 Maillons        : 0 — S330 : solide en mouvement imposé reçu, 4.15 avance
