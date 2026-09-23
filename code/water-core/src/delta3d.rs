@@ -330,9 +330,13 @@ impl Volume3 {
         // L'eau déplacée : le volume solide gagné par une colonne en élève la surface. Le nouveau volume
         // est écrit dans `rhs`, libre entre deux pas : aucune allocation.
         solid_columns(domain, &base.frac, &g.frac, &mut self.rhs[..nx * ny]);
+        // Somme compensée f32, comme le transport (S233) : le reste d'arrondi porte ce que `η` perd.
         let area = dx * dx;
         for c in 0..nx * ny {
-            self.eta[c] += (self.rhs[c] - base.solid_col[c]) / area;
+            let increment = (self.rhs[c] - base.solid_col[c]) / area - self.eta_roundoff[c];
+            let height = self.eta[c] + increment;
+            self.eta_roundoff[c] = (height - self.eta[c]) - increment;
+            self.eta[c] = height;
             base.solid_col[c] = self.rhs[c];
         }
         g.base = Some(base);

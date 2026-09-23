@@ -1300,3 +1300,26 @@ fn a_moving_sphere_keeps_the_faces_sound_s330() {
     assert_eq!(v.set_solid(&haut, [0.; 3]).err(), Some(Error::Domain));
     assert_eq!(bits, v.apertures().unwrap().0.iter().map(|x| x.to_bits()).collect::<Vec<_>>());
 }
+
+/// **S330, critère 2.** Le volume : une sphère immergée qui se déplace — `Σ(η − reste − z₀)·dx²` suit
+/// la variation du volume discret du solide à 10⁻⁹ m³ près, pas après pas.
+#[test]
+fn a_moving_sphere_displaces_exactly_its_discrete_volume_s330() {
+    let n = 24usize;
+    let (mut v, _) = volume_sphere(n);
+    let z0 = v.domain.z0();
+    v.set_surface(&vec![z0; n * n]).unwrap();
+    let dx = v.domain.dx as f64;
+    let solide = |v: &Volume3| v.cut.as_ref().unwrap().base.as_ref().unwrap().solid_col.iter().map(|x| *x as f64).sum::<f64>();
+    let v0 = solide(&v);
+    let mut pire = 0f64;
+    for pas in 1..=50 {
+        let s = noeuds_sphere(n, 0.6 + 0.002 * pas as f64);
+        v.set_solid(&s, [1., 0., 0.]).unwrap();
+        v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        let eau: f64 = v.eta.iter().zip(&v.eta_roundoff).map(|(h, r)| (*h as f64 - *r as f64 - z0 as f64) * dx * dx).sum();
+        pire = pire.max((eau - (solide(&v) - v0)).abs());
+    }
+    println!("S330 : écart de volume au pire {pire:e} m³ ; volume discret {v0:e} → {:e}", solide(&v));
+    assert!(pire <= 1e-9, "{pire}");
+}

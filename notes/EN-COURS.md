@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `set_solid` : géométrie recoupée en place depuis le fond seul, faces qui naissent et
   meurent, eau déplacée ; flux du solide dans la divergence ; critères 1, 3, 5.
-- [ ] **P3** — volume (critère 2) ; force de pression sur la paroi depuis la pression de δ.
+- [x] **P3** — volume (critère 2) ; force de pression sur la paroi depuis la pression de δ.
 - [ ] **P4** — banc : départ impulsif, trois mailles, `C_m`.
 - [ ] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste.
@@ -106,3 +106,7 @@ deux pas — aucune allocation ; la diagonale de Jacobi suit. Divergence : la pa
 polygones de coupe. Essais : **reposer le solide immobile, 50 pas au bit** ; sphère à 1 m/s sur deux
 mailles, faces qui naissent, divergence sous la tolérance, faces fermées à zéro, refus sans écriture.
 Une fausse alerte : l'essai calculait sa sphère avec un pas en f64, le volume en f32 converti. Cœur : 481.
+**P3 (23:18).** L'eau déplacée entre dans `η` par la somme compensée du transport (S233). Sphère à 1 m/s,
+50 pas : `Σ(η − reste − z₀)·dx²` suit la variation du volume discret à **3,6·10⁻¹¹ m³** au pire (critère :
+10⁻⁹). Le volume discret de la sphère ne varie que de 4·10⁻¹⁰ m³ sur deux mailles de déplacement : l'erreur
+de l'interpolation linéaire tient à la courbure, pas à la position. Cœur : 482 réussis.

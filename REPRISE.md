@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-23 23:16 +02:00
+Battement        : 2026-09-23 23:18 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S330 — lot 3, la frontière mobile (ADR-189)
 Dernière session : S329 — **la v1 d'abord** (ADR-189) ; **lot 3, un solide quelconque** : distance signée aux nœuds coupée exactement pour le champ linéaire, volume déplacé d'ordre 2, Archimède exact au niveau discret, débit autour d'une sphère d'ordre 1,966 ([preuve](docs/validation/FACES-COUPEES-3D-S324.md) §8)
