@@ -89,8 +89,25 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `BackgroundWater` : la requête d'eau sur B ; critère 1.
+- [ ] **P2 bis** — *ajouté à la reprise* : la poussée suit le gradient de la pression que le proxy suppose
+  déjà, `ρg(η − z)` ; critère 1 bis.
 - [ ] **P3** — la coque de δ relative à l'eau qui la porte ; critère 2.
 - [ ] **P4** — banc `porte_d` : coque 4 × 1,6 × 1 m sur une houle ; critères 3 à 5, champs écrits.
+
+**Amendement de la reprise, déclaré avant le code.**
+- **P2 bis, pourquoi.** Le proxy intègre `p = ρg(η(x) − z)` mais n'en garde que la composante verticale :
+  sur la houle, la coque monte et descend sans être entraînée — le défaut qu'ADR-008 §2 nomme
+  « immédiatement perceptible » — et δ verrait un cavalement relatif de l'ordre de `a`, 0,26 m/s, qui
+  n'existe pas pour un corps libre. La force par volume plongé est `ρg(−∇η, 1)`. **Critère 1 bis** : sur
+  la houle longue, la coque libre cavale avec l'eau, excursion à ± 5 % de `a` ; en eau calme, essais
+  S331–S332 inchangés.
+- **P3 précisé.** La coque entre dans δ à sa pose relative au **repère de l'eau qui la porte** :
+  déplacement de la particule de surface au centre (`ξ`, `η`) et inclinaison de la surface ; vitesses de
+  paroi par **différence finie de cette pose**, en f32 — découpe et paroi cohérentes au bit, pose
+  constante pour une coque qui suit l'eau (critère 2).
+- **P4 précisé.** Sur une houle longue, la perturbation d'une coque qui suit l'eau est d'ordre `kd`
+  (~1 cm), invisible et du même ordre que l'erreur de l'approximation de coque courte. La coque est donc
+  **lâchée 10 cm au-dessus de son équilibre** : son pilonnement relatif rayonne des anneaux que δ porte.
 - [ ] **P5** — images de la scène (critère 6).
 - [ ] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
   partie numérique), liste, file.
