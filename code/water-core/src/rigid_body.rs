@@ -48,6 +48,24 @@ impl WaterQuery for CalmWater {
     }
 }
 
+/// **S333 : l'eau de B derrière la requête du corps** — la houle analytique à l'instant `time`, interrogée
+/// dans le repère local de son ancre, où vit le corps : le cœur ne convertit jamais de mètres en position du
+/// monde à l'exécution. La vitesse est la vitesse orbitale de surface de B, sans atténuation en profondeur :
+/// elle ne sert qu'à la traînée. Hors du rayon de référentiel, une eau calme au niveau zéro.
+pub struct BackgroundWater<'a> {
+    pub background: &'a crate::background::Background,
+    pub time: crate::types::SimTime,
+}
+
+impl WaterQuery for BackgroundWater<'_> {
+    fn surface(&self, x: f64, y: f64) -> f64 {
+        self.background.eval_local([x as f32, y as f32, 0.], self.time).map_or(0., |s| s.eta as f64)
+    }
+    fn velocity(&self, p: [f64; 3]) -> [f64; 3] {
+        self.background.eval_local([p[0] as f32, p[1] as f32, 0.], self.time).map_or([0.; 3], |s| s.u_total.map(|v| v as f64))
+    }
+}
+
 /// Un point du proxy de flottabilité, dans le repère du corps : position par rapport au centre de masse,
 /// volume représenté, épaisseur sur laquelle son immersion passe de 0 à 1, aire qu'il oppose à la traînée.
 #[derive(Clone, Copy, Debug, PartialEq)]

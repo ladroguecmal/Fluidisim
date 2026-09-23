@@ -129,3 +129,92 @@ fn a_flat_box_rolls_at_its_metacentric_period_s331() {
     println!("S331 : roulis {periode:.5} s (réf. {reference:.5}, GM {gm:.4} m), amplitude {amplitude:.3}°");
     assert!((periode / reference - 1.).abs() <= 0.05, "{periode} contre {reference}");
 }
+
+// ——— S333 : la houle de B derrière la requête du corps ———
+
+use crate::background::{Background, SeaState};
+use crate::host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink};
+use crate::types::{SimTime, WorldPos};
+
+struct Arena;
+impl Allocator for Arena {
+    fn alloc_persistent(&mut self, _: usize) -> Result<usize, AllocError> {
+        Ok(0)
+    }
+    fn seal(&mut self) {}
+    fn is_sealed(&self) -> bool {
+        false
+    }
+    fn stats(&self) -> AllocStats {
+        AllocStats::default()
+    }
+}
+struct Jobs;
+impl Sink for Jobs {
+    fn warn(&self, _: &str) {}
+    fn metric(&self, _: &str, _: f64) {}
+}
+impl JobSystem for Jobs {
+    fn worker_count(&self) -> u32 {
+        1
+    }
+    fn parallel_reduce_ordered_f64(&self, n: usize, _: usize, r: &dyn Fn(usize, usize) -> f64, m: &dyn Fn(f64, f64) -> f64, init: f64) -> f64 {
+        m(init, r(0, n))
+    }
+}
+
+/// Une houle monochromatique de B, amplitude `a`, période `periode`, vers +x : une seule composante, dont
+/// `configure` pose l'amplitude `Hs/(2√2)` et la période `Tp/2`.
+fn houle(a: f64, periode: f64) -> Background {
+    let sea = SeaState { hs: (2. * 2f64.sqrt() * a) as f32, tp: (2. * periode) as f32, theta_turns: 0., components: 1, graine: 333 };
+    Background::configure(&mut HostServices { alloc: &mut Arena, jobs: &Jobs, sink: &Jobs }, sea, WorldPos::default()).unwrap()
+}
+
+/// **Le pilonnement forcé** de la coque de la porte D — 4 × 1,6 × 1 m à 500 kg/m³, proxy 16 × 8 × 4 — sur
+/// la houle `b`, lâchée **sur le régime forcé linéaire** `ζ = Z·η(0, t)/a`, `Z = a·S/(1 − ω²/ωₙ²)`, où `S` est
+/// la moyenne de `cos(k·x)` sur les points du proxy — la houle vue par la flottaison, 1 pour une houle
+/// infiniment longue. Pas de 2 ms sur `periodes` périodes. Rend `(écart ponctuel au régime forcé / Z,
+/// demi-excursion mesurée / Z, Z / a, 1/(1 − ω²/ωₙ²))`.
+fn pilonnement_force(b: &Background, periodes: usize) -> (f64, f64, f64, f64) {
+    let c = b.components()[0];
+    let (a, k) = (c.amplitude as f64, c.k_turns_per_m as f64 * core::f64::consts::TAU);
+    let omega = c.freq_q32 as f64 / 4_294_967_296. * core::f64::consts::TAU;
+    let mut coque = RigidBody::cuboid([4., 1.6, 1.], 500., [0.; 3], [16, 8, 4]);
+    let omega_n2 = MER.rho * G * 6.4 / coque.mass;
+    let s = coque.proxy.iter().map(|p| (k * p.body[0]).cos()).sum::<f64>() / coque.proxy.len() as f64;
+    let amplification = 1. / (1. - omega * omega / omega_n2);
+    let rapport = s * amplification;
+    let z_eq = 0.5 - 500. / 1025.;
+    let centre = |t: u64| b.eval_local([0.; 3], SimTime(t)).unwrap();
+    coque.position[2] = z_eq + rapport * centre(0).eta as f64;
+    coque.velocity[2] = rapport * centre(0).deta_dt as f64;
+    let pas = (periodes as f64 * core::f64::consts::TAU / omega / 0.002).round() as u64;
+    let (mut ecart, mut haut, mut bas) = (0f64, f64::MIN, f64::MAX);
+    for n in 0..pas {
+        coque.step(0.002, &BackgroundWater { background: b, time: SimTime(n * 2000) }, MER);
+        let zeta = coque.position[2] - z_eq;
+        ecart = ecart.max((zeta - rapport * centre((n + 1) * 2000).eta as f64).abs());
+        (haut, bas) = (haut.max(zeta), bas.min(zeta));
+    }
+    let z = rapport * a;
+    (ecart / z, 0.5 * (haut - bas) / z, rapport, amplification)
+}
+
+/// **S333, critère 1 — B derrière la requête du corps.** Sur une houle longue de B — 6 s, λ = 56 m, 25 cm —,
+/// la coque pilonne à l'amplitude `a/(1 − ω²/ωₙ²)` à ± 5 %, et suit le régime forcé pas à pas. Sur une houle
+/// de 3 s, que la coque n'égale plus (λ = 14 m), l'amplification 1,28 n'est tenue qu'avec la houle vue par
+/// la flottaison, `S` = 0,87 : c'est elle que le proxy intègre, à ± 1 % sur les deux houles.
+#[test]
+fn a_hull_heaves_on_a_swell_of_b_at_its_forced_response_s333() {
+    for (a, periode, critere) in [(0.25, 6., true), (0.05, 3., false)] {
+        let b = houle(a, periode);
+        let (ecart, excursion, rapport, amplification) = pilonnement_force(&b, 4);
+        let mesure = excursion * rapport;
+        println!("S333 : houle {periode} s, pilonnement {mesure:.5}·a (forcé {rapport:.5}·a, 1/(1 − ω²/ωₙ²) = {amplification:.5}), écart au régime forcé {ecart:.2e}·Z");
+        assert!((excursion - 1.).abs() <= 0.01, "{periode} s : {excursion}");
+        assert!(ecart <= 0.01, "{periode} s : {ecart}");
+        if critere {
+            assert!((mesure / amplification - 1.).abs() <= 0.05, "critère 1 : {mesure} contre {amplification}");
+        }
+    }
+}

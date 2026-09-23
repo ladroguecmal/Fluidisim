@@ -88,7 +88,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `BackgroundWater` : la requête d'eau sur B ; critère 1.
+- [x] **P2** — `BackgroundWater` : la requête d'eau sur B ; critère 1.
 - [ ] **P3** — la coque de δ relative à l'eau qui la porte ; critère 2.
 - [ ] **P4** — banc `porte_d` : coque 4 × 1,6 × 1 m sur une houle ; critères 3 à 5, champs écrits.
 - [ ] **P5** — images de la scène (critère 6).
@@ -98,3 +98,11 @@ Critères, écrits avant le code :
 
 ### Notes de reprise
 
+- **Reprise à chaud, 2026-09-24 00:00** (nouvelle conversation, *« Reprends le projets »*) : la session
+  s'était arrêtée à 23:47, P2 commencé sans `[>]` ; diff de 18 lignes, `BackgroundWater` dans
+  `rigid_body.rs`, cohérent avec la thèse de P2 → **compléter**. Aucune autre session active (vérifié).
+- **P2, critère 1 tenu.** Coque 4 × 1,6 × 1 m, 500 kg/m³, proxy 16 × 8 × 4, lâchée sur le régime forcé :
+  houle 6 s (λ 56 m, 25 cm) → pilonnement **1,04903·a** ; `1/(1 − ω²/ωₙ²)` = 1,05767, écart −0,82 % (± 5 %) ;
+  prédiction avec la houle vue par la flottaison `S = ⟨cos kx⟩` : 1,04892·a (10⁻⁴). Houle 3 s (λ 14 m) →
+  1,11574·a pour 1,11576·a prédit, alors que `1/(1 − ω²/ωₙ²)` seul dirait 1,279 : **le critère 1 ne vaut
+  que pour une houle longue**. Écart ponctuel au régime forcé 2,6·10⁻⁴ et 1,9·10⁻³ de Z.
