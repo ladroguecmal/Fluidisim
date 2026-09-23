@@ -62,66 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S329 — **terminée** (2026-09-23 23:06). **La v1 d'abord** (ADR-189, à écrire en P2) ; **lot 3 : un obstacle qui
-n'est pas un fond** — essai 2 de la piscine, la boule immergée.
+Session : S330 — **en cours**. **Lot 3 : la frontière mobile** — essai 3 de la piscine, une boule à
+mouvement imposé ; chemin de la v1 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« continue, jusqu'à la v1 »*, après S328.
+Entrée : *« continue, jusqu'à la v1 »* ; suite déclarée par S329.
 
-**Le chemin de la v1, lu dans le dépôt.** v1 = porte D franchie (ADR-174 D4, ADR-178 D7) : lots 3 et 4.
-Lot 3 : faces coupées 3D « fixes d'abord, puis à frontière mobile » — essais 2 (boule immergée : volume
-déplacé, flottabilité) et 3 (mouvement imposé : forces, vagues). Lot 4 : corps rigide, forces rendues,
-masse ajoutée — une boule libre à son tirant et à la période de C10 (cube 0,5 m à 500 kg/m³ : tirant
-0,25 m ± 1 %, période 1,00 s ± 5 %, rapport √2 ± 15 % avec la masse ajoutée). Porte D : un bateau flotte
-et perturbe l'eau qui le porte, **sans autorité de δ sur le jeu** (I-04, ADR-008) — le jeu le fait
-flotter sur B + W ; δ le voit comme une paroi mobile et ne lui rend qu'un décalage visuel borné.
-
-**Ce que la session doit rendre possible.** La découpe de δ ne connaît qu'un fond en hauteur. Il lui
-faut un **solide quelconque** : une forme donnée par sa distance signée aux nœuds de la grille, coupée
-exactement pour un champ linéaire par morceaux — faces en quatre triangles autour de leur centre,
-mailles en vingt-quatre tétraèdres qui s'appuient sur eux, formules closes sans soustraction instable.
-Fixe dans cette session ; la frontière mobile suivra sur les mêmes tampons.
+**Ce que la session doit rendre possible.** Un solide qui **bouge** dans la référence 3D, mode linéaire —
+celui où un bateau percera un jour le couvercle. L'hôte fournit, avant chaque pas, la distance signée du
+solide à sa nouvelle position et sa vitesse de translation. δ recoupe sa géométrie **en place, sans
+allocation**, depuis une copie du fond seul comptée à la configuration ; la part d'une face que le solide
+couvre avance à sa vitesse dans la divergence (formulation pondérée par les ouvertures) ; une face qui
+s'ouvre naît à la vitesse du solide ; l'eau que le solide déplace dans une colonne en élève la surface.
+Consommateur : le corps du lot 4, puis le bateau de la porte D.
 
 Critères, écrits avant le code :
-1. **Plan** : une distance signée plane donne fractions et ouvertures exactes à 10⁻⁶ ; un solide absent
-   laisse la géométrie du fond **au bit**.
-2. **Sphère immergée** : volume déplacé `Σ(1 − fraction)·dx³` d'**ordre ≥ 1,8** vers `4πR³/3` ; ouvertures
-   et fractions symétriques par réflexion.
-3. **Cohérence** : pour chaque maille, `Σ ouvertures·normales` des faces et paroi solide se ferment
-   (théorème de la divergence discret) ; la poussée hydrostatique intégrée sur la paroi discrète tend
-   vers `ρgV` à l'ordre ≥ 1,8.
-4. **Les pas** : lac au repos exact autour de la sphère, modes linéaire et mobile ; la sphère qui touche
-   le fond ou approche la surface est refusée (`Domain`).
-5. **Ordre** du débit ouvert au premier pas autour de la sphère, mode linéaire : **≥ 1,8**.
+1. **Immobile** : reposer le même solide à vitesse nulle ne change rien, au bit.
+2. **Volume** : une sphère immergée qui se déplace — `Σ(η − η₀)·dx²` suit la variation du volume discret
+   du solide à 10⁻⁹ m³ près, pas après pas.
+3. **Faces** : divergence sous la tolérance à chaque pas ; aucune vitesse sur une face fermée ; aucune
+   valeur non finie quand des faces naissent et meurent.
+4. **Masse ajoutée** : départ impulsif d'une sphère immergée, un pas — la force de pression donne
+   `C_m = m_a/(ρV)` ; **à 5 % de 0,5** (sphère en fluide illimité) à la maille la plus fine, et convergent.
+5. **Rien de changé** pour les solides fixes et le fond : suite complète verte.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-189 : la v1 d'abord ; index, file.
-- [x] **P3** — géométrie : solide par distance signée aux nœuds, faces et mailles exactes pour le champ
-  linéaire ; critères 1 à 3 en essais.
-- [x] **P4** — le solide dans les pas linéaire et mobile ; critère 4.
-- [x] **P5** — banc : débit autour de la sphère, trois mailles, ordre ; poussée.
-- [x] **P6** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
-  avec « Reproduire » ; file, liste 4.15.
-- [x] **P7** — rituel.
+- [ ] **P2** — `set_solid` : géométrie recoupée en place depuis le fond seul, faces qui naissent et
+  meurent, eau déplacée ; flux du solide dans la divergence ; critères 1, 3, 5.
+- [ ] **P3** — volume (critère 2) ; force de pression sur la paroi depuis la pression de δ.
+- [ ] **P4** — banc : départ impulsif, trois mailles, `C_m`.
+- [ ] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
+  avec « Reproduire » ; file, liste.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-**P3 (23:00).** `delta3d_cut.rs` : `add_solid` coupe en place, sans allocation, la découpe du fond par un
-solide donné aux nœuds ; faces en 4 triangles, mailles en 24 tétraèdres ; formules closes — deux
-sommets négatifs d'un tétraèdre : la différence divisée de `x³/((c+x)(d+x))` développée, sans division
-par `a − b`. `solid_wall_force` intègre une pression sur les polygones de coupe, exacte pour un champ
-linéaire. `Volume3::configure_with_solid`. Essais `…_s329` : plan horizontal = fond de même hauteur à
-10⁻⁶, solide absent au bit ; plan oblique contre l'inclusion–exclusion exacte à 2·10⁻⁶ ; sphère R = 0,3 :
-volume déplacé d'**ordre 1,994 puis 2,009**, réflexion à 10⁻⁶ ; **poussée hydrostatique = ρg·V du polyèdre
-à 10⁻⁹**, latérale nulle — le théorème de la divergence de la découpe ; refus au fond et au couvercle.
-Cœur : 477 réussis.
-**P4 (23:04).** Sphère immergée, 24³ : lac au repos **au bit**, cent pas linéaires et cent mobiles ; onde
-de 1 cm au-dessus, vingt pas mobiles, divergence franche sous la tolérance ; surface trop près du sommet
-refusée, état restauré. **Défaut trouvé et corrigé** : une face fermée portait 7·10⁻⁵ m/s — l'extrapolation
-mobile remonte chaque colonne de faces et remplissait celles du solide avec la vitesse d'en dessous ;
-sous un fond, aucune face résolue ne les précède, la 2D ne pouvait pas le voir. Elle saute désormais
-les faces fermées ; l'identité 2D de S328 tient au bit. Cœur : 479 réussis.
-**P5 (23:05).** `delta3d_fond_coupe --sphere` : sphère de 0,8 m en (3,6 ; 1,6 ; 1,8), que le plan de mesure
-coupe ; 10 s. Débit 9,212230492·10⁻⁴ / 9,230888226·10⁻⁴ / 9,235664830·10⁻⁴ m³/s à 32 / 64 / 128 ; **ordre
-1,966** ; la sphère retire 2,07 / 2,13 / 2,14 % du débit sans elle ; 425 itérations à 128, comme sans
-sphère. La poussée est reçue par l'essai de P3 (identité à 10⁻⁹), pas par le banc.
+
