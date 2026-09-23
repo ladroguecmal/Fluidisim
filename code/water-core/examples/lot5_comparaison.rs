@@ -2157,6 +2157,12 @@ struct Hybride {
     /// une particule qui franchit la frontière, ou en retirant la plus proche d'elle ; elle se compense
     /// avec l'attente de même profondeur.
     dette: Vec<f64>,
+    /// **S327 : l'ensemencement continu** (`RACCORD_ENSEMENCE=continu`). `round(4h/dx)` arrondit la
+    /// surface que la pression voit dans les colonnes au quart de maille — 1,25 cm à 5 cm, pour une onde
+    /// de 2 cm — et chaque particule qui apparaît ou disparaît la fait sauter. Ici, `round(2h/dx)`
+    /// rangées **étirées** pour remplir exactement `[0, h]` : la surface suit la hauteur continûment, et
+    /// au repos, où `2h/dx` est entier, c'est le réseau de S325.
+    continu: bool,
 }
 
 impl Hybride {
@@ -2170,7 +2176,9 @@ impl Hybride {
         // La hauteur de masse de chaque colonne : ses particules initiales, deux par rangée.
         let h = (i_b..nx).map(|i| (0..ny).map(|j| n[j * nx + i] as f64).sum::<f64>() * 0.25 * dx).collect();
         let eulerien = std::env::var("RACCORD_ECHANGE").is_ok_and(|v| v == "eulerien");
-        let mut hy = Hybride { apic, i_b, h, attente: vec![0.0; ny], entre: 0.0, sorti: 0.0, eulerien, dette: vec![0.0; ny] };
+        let continu = std::env::var("RACCORD_ENSEMENCE").is_ok_and(|v| v == "continu");
+        let mut hy =
+            Hybride { apic, i_b, h, attente: vec![0.0; ny], entre: 0.0, sorti: 0.0, eulerien, dette: vec![0.0; ny], continu };
         let xb = i_b as f64 * dx;
         let garde: Vec<bool> = hy.apic.x.iter().map(|p| p[0] < xb).collect();
         hy.retire(&garde);
@@ -2204,6 +2212,20 @@ impl Hybride {
     fn ensemence_colonnes(&mut self) {
         let (nx, dx) = (self.apic.mac.nx, self.apic.mac.dx);
         for (col, i) in (self.i_b..nx).enumerate() {
+            if self.continu {
+                let rangees = (2.0 * self.h[col] / dx).round().max(0.0) as usize;
+                let pas = self.h[col] / rangees.max(1) as f64;
+                for r in 0..rangees {
+                    for cote in [0.25, 0.75] {
+                        let p = [(i as f64 + cote) * dx, (r as f64 + 0.5) * pas];
+                        let (v, c) = self.apic.depuis_grille(p);
+                        self.apic.x.push(p);
+                        self.apic.v.push(v);
+                        self.apic.c.push(c);
+                    }
+                }
+                continue;
+            }
             let n = (4.0 * self.h[col] / dx).round().max(0.0) as usize;
             for m in 0..n {
                 let p = [(i as f64 + 0.25 + 0.5 * (m % 2) as f64) * dx, ((m / 2) as f64 + 0.5) * 0.5 * dx];

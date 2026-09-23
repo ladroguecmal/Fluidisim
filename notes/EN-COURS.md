@@ -95,7 +95,7 @@ seul — son effet mesuré contre le montage de S325 — reste une attribution p
 - [x] **P2** — instrument : série à la frontière — hauteurs géométriques des deux côtés, hauteurs de masse
   des colonnes, flux entrant et sortant, APIC seul au même endroit. Quel côté s'écarte, et quand.
 - [x] **P3** — suspect choisi par P2 ; commutable, mesuré seul.
-- [ ] **P4** — suspect suivant ; commutable, mesuré seul.
+- [x] **P4** — suspect suivant ; commutable, mesuré seul.
 - [ ] **P5** — suspect suivant ; commutable, mesuré seul.
 - [ ] **P6** — le raccord corrigé, contre les critères, deux mailles.
 - [ ] **P7** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
@@ -134,3 +134,22 @@ L'écart est divisé par 2,5 à 3,6 ; l'amortissement ne bouge pas, et le repos 
 saut, pas la dissipation.** Suivant : (a), la surface des colonnes arrondie au quart de maille — à
 5 cm, chaque particule qui apparaît ou disparaît la fait sauter de 1,25 cm, pour une onde de 2 cm ; et
 (c) la fait bouger plus souvent, ce qui expliquerait le repos dégradé.
+
+**P4 (22:04) — (a), l'ensemencement continu** (`RACCORD_ENSEMENCE=continu`) : `round(2h/dx)` rangées
+étirées sur `[0, h]` ; au repos, le réseau de S325. À 5 cm :
+
+| | S325 | (a) seul | (a) + (c) |
+|---|---:|---:|---:|
+| écart à la frontière, mailles | 1,81 | 1,93 | 0,83 |
+| amortissement par période (APIC −0,4 %) | 16 % | **6,3 %** | **2,7 %** |
+| période, zéros / périodogramme (APIC +5,6 / +6,1 %) | +7,6 / +5,2 % | +6,0 / +3,6 % | +7,0 / +6,6 % |
+| repos : vitesse maximale | 1,4 cm/s | **0,65 cm/s** | 0,65 cm/s |
+
+**(a) porte la dissipation, (c) le saut** : chacun seul laisse l'autre défaut entier. Ensemble, le
+début suit APIC seul au millimètre jusqu'à 0,4 s ; puis la dernière colonne libre s'appauvrit —
+hauteur de masse 0,39 à 0,43 m pour une surface à 0,49 m, 20 % de particules en moins — et la
+première colonne reçoit des rafales (+5 cm à 0,5 s). **Cause lue dans le code** : la dette se paie
+en retirant **aussitôt** la particule la plus proche, qui aurait franchi quelques pas plus tard ; celle
+qui franchit ensuite, sans dette, est créditée en plus. Le bord se vide deux fois. P5 : la dette,
+mise en commun sur les profondeurs, ne se paie que par les traversées et par l'attente, et le retrait
+n'est plus qu'une soupape.
