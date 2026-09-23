@@ -1102,6 +1102,11 @@ struct Apic {
     v: Vec<[f64; 2]>,
     c: Vec<[[f64; 2]; 2]>,
     masse: f64,
+    /// **S327 : des faces dont la vitesse est tenue hors des particules** — `u` puis `v`, `None` pour
+    /// une face ordinaire. Posées après le transfert vers la grille, avant la gravité et la pression.
+    /// Vides pour APIC seul, qui reste inchangé au bit ; l'hybride y range la vitesse de sa zone de
+    /// colonnes, que δ porte sur sa grille (suspect (d)).
+    imposee: Option<(Vec<Option<f64>>, Vec<Option<f64>>)>,
 }
 
 impl Apic {
@@ -1129,6 +1134,7 @@ impl Apic {
             c: vec![[[0.0; 2]; 2]; n],
             x,
             masse: RHO * dx * dx / 4.0,
+            imposee: None,
         }
     }
 
@@ -1486,6 +1492,18 @@ impl Candidat for Apic {
         }
         for k in 0..mv.len() {
             self.mac.v[k] = if wv[k] > 0.0 { mv[k] / wv[k] } else { 0.0 };
+        }
+        if let Some((u, v)) = &self.imposee {
+            for (k, w) in u.iter().enumerate() {
+                if let Some(w) = w {
+                    self.mac.u[k] = *w;
+                }
+            }
+            for (k, w) in v.iter().enumerate() {
+                if let Some(w) = w {
+                    self.mac.v[k] = *w;
+                }
+            }
         }
         // ── Étiquettes et fluide fantôme depuis la surface reconstruite ; le corps par-dessus.
         let corps = self.scene.corps(self.t);
@@ -2177,6 +2195,41 @@ struct Hybride {
     /// la plus proche est retirée dès qu'une particule entière est due, à sa profondeur ou à la plus
     /// voisine. Tout retard entre les deux côtés agit comme une résistance, donc dissipe (P3–P5).
     paroi: bool,
+    /// **S327 P6 : la hauteur mouillée centrée** (`RACCORD_MOUILLE=centre`). Le transport des colonnes
+    /// prenait la hauteur mouillée **en amont**, ce qui diffuse la surface d'un coefficient `|u|·dx/2` —
+    /// de l'ordre du point par période sur le ballottement. Ici la moyenne des deux colonnes, comme la
+    /// continuité d'une grille décalée qui conserve l'énergie. La face de la frontière garde la hauteur
+    /// de la première colonne.
+    centre: bool,
+    /// **S327 P6 : l'échange arrondi** (`RACCORD_QUANTUM=arrondi`, avec la paroi). L'eau passe par
+    /// particules entières : retirée quand la dette atteint une particule, créée quand l'attente en
+    /// atteint une, le côté libre garde en moyenne **une demi-particule de retard** par rangée, dans le
+    /// sens de l'écoulement — une résistance, qui dissipe d'autant plus que la particule est grosse
+    /// devant l'onde. Ici un solde signé par profondeur, arrondi à la particule la plus proche : retard
+    /// moyen nul.
+    arrondi: bool,
+    /// **S327 P6 : le solde signé** (`RACCORD_ECHANGE=solde`). Comme la paroi, l'eau passe par le flux de
+    /// la grille ; mais une particule libre qui franchit la frontière est **absorbée** et paie d'avance
+    /// au solde de sa profondeur, au lieu d'être ramenée sur une même ligne contre la frontière. Le solde
+    /// crée ou retire une particule à la frontière dès qu'il atteint une particule entière — ou une
+    /// demie avec `RACCORD_QUANTUM=arrondi`.
+    solde: bool,
+    /// **S327 P6 : les rangées à hystérésis** (`RACCORD_ENSEMENCE=hysterese`). L'ensemencement continu
+    /// change le nombre de rangées d'une colonne dès que `2h/dx` franchit un demi-entier, et tout son réseau
+    /// se réespace d'un coup. Ici chaque colonne garde son nombre de rangées tant que leur espacement reste
+    /// entre 0,35 et 0,65 maille : seule la hauteur étire le réseau.
+    rangees: Option<Vec<usize>>,
+    /// **S327 P6 : l'insertion au réseau** (`RACCORD_INSERTION=reseau`), suspect (b). S325 posait toute
+    /// particule sortante en `x_b − dx/4`, dans le bas de sa maille — l'alternance repartait à zéro à
+    /// chaque pas —, même dans une couche à peine mouillée, donc au-dessus de la surface de la colonne.
+    /// Ici chaque profondeur parcourt les quatre places du réseau de sa maille, et la couche du haut
+    /// pose la sienne au milieu de sa part mouillée.
+    insertion: Option<Vec<usize>>,
+    /// **S327 P6 : la mémoire de vitesse sur la grille** (`RACCORD_MEMOIRE=grille`), suspect (d). Les
+    /// colonnes n'ont pas de vitesse propre : chaque pas la fait passer de la grille à un réseau de
+    /// particules, puis de nouveau à la grille — un lissage. Ici les faces intérieures à la zone des
+    /// colonnes gardent la vitesse projetée du pas précédent, comme δ sur sa grille.
+    memoire: bool,
 }
 
 impl Hybride {
@@ -2191,8 +2244,9 @@ impl Hybride {
         let h = (i_b..nx).map(|i| (0..ny).map(|j| n[j * nx + i] as f64).sum::<f64>() * 0.25 * dx).collect();
         let echange = std::env::var("RACCORD_ECHANGE").unwrap_or_default();
         let (eulerien, paresseux, paroi) =
-            (matches!(echange.as_str(), "eulerien" | "traversee" | "paroi"), echange == "traversee", echange == "paroi");
-        let continu = std::env::var("RACCORD_ENSEMENCE").is_ok_and(|v| v == "continu");
+            (matches!(echange.as_str(), "eulerien" | "traversee" | "paroi" | "solde"), echange == "traversee", echange == "paroi");
+        let ensemence = std::env::var("RACCORD_ENSEMENCE").unwrap_or_default();
+        let continu = ensemence == "continu" || ensemence == "hysterese";
         let mut hy =
             Hybride {
                 apic,
@@ -2207,7 +2261,16 @@ impl Hybride {
                 paresseux,
                 dette_commune: 0.0,
                 paroi,
+                centre: std::env::var("RACCORD_MOUILLE").is_ok_and(|v| v == "centre"),
+                arrondi: std::env::var("RACCORD_QUANTUM").is_ok_and(|v| v == "arrondi"),
+                solde: echange == "solde",
+                rangees: None,
+                insertion: std::env::var("RACCORD_INSERTION").is_ok_and(|v| v == "reseau").then(|| vec![0; ny]),
+                memoire: std::env::var("RACCORD_MEMOIRE").is_ok_and(|v| v == "grille"),
             };
+        if ensemence == "hysterese" {
+            hy.rangees = Some(hy.h.iter().map(|h| (2.0 * h / dx).round().max(0.0) as usize).collect());
+        }
         let xb = i_b as f64 * dx;
         let garde: Vec<bool> = hy.apic.x.iter().map(|p| p[0] < xb).collect();
         hy.retire(&garde);
@@ -2242,7 +2305,19 @@ impl Hybride {
         let (nx, dx) = (self.apic.mac.nx, self.apic.mac.dx);
         for (col, i) in (self.i_b..nx).enumerate() {
             if self.continu {
-                let rangees = (2.0 * self.h[col] / dx).round().max(0.0) as usize;
+                let rangees = match self.rangees.as_mut() {
+                    Some(r) => {
+                        let h = self.h[col].max(0.0);
+                        while r[col] > 0 && h / (r[col] as f64) < 0.35 * dx {
+                            r[col] -= 1;
+                        }
+                        while h / (r[col].max(1) as f64) > 0.65 * dx || (r[col] == 0 && h >= 0.25 * dx) {
+                            r[col] += 1;
+                        }
+                        r[col]
+                    }
+                    None => (2.0 * self.h[col] / dx).round().max(0.0) as usize,
+                };
                 let pas = self.h[col] / rangees.max(1) as f64;
                 for r in 0..rangees {
                     for cote in [0.25, 0.75] {
@@ -2305,7 +2380,10 @@ impl Candidat for Hybride {
         // ── Entrée : les particules libres passées dans la zone des colonnes y versent leur masse.
         for (p, libre) in self.apic.x.iter().zip(&libres_avant) {
             if *libre && p[0] >= xb {
-                if self.paresseux {
+                if self.solde {
+                    let k = ((p[1] / dx).max(0.0) as usize).min(ny - 1);
+                    self.attente[k] += area;
+                } else if self.paresseux {
                     self.dette_commune -= area;
                     if self.dette_commune < 0.0 {
                         self.h[0] -= self.dette_commune / dx;
@@ -2343,7 +2421,7 @@ impl Candidat for Hybride {
             let mut q = 0.0;
             for k in 0..ny {
                 let u = self.apic.mac.u[k * (nx + 1) + i];
-                let amont = if u > 0.0 { gauche } else { droite };
+                let amont = if self.centre { 0.5 * (gauche + droite) } else if u > 0.0 { gauche } else { droite };
                 q += u * mouille(amont, k) * dx * dt;
             }
             flux[f + 1] = q;
@@ -2360,7 +2438,10 @@ impl Candidat for Hybride {
             } else if self.eulerien && u > 0.0 {
                 // S327 : l'entrée, par le même flux et la même hauteur mouillée que la sortie.
                 let q = u * mouille(self.h[0], k) * dx * dt;
-                if self.paresseux {
+                if self.arrondi || self.solde {
+                    // Le solde signé : l'attente devient négative quand les particules libres doivent.
+                    self.attente[k] -= q;
+                } else if self.paresseux {
                     self.dette_commune += q;
                 } else {
                     self.dette[k] += q;
@@ -2371,7 +2452,32 @@ impl Candidat for Hybride {
         self.h[0] += (entree - sortie) / dx;
         self.sorti += sortie;
         self.entre += entree;
-        if self.paresseux {
+        if self.arrondi || self.solde {
+            // Le solde se règle à la frontière : on retire dès qu'une particule — une demie en arrondi — est due.
+            let seuil = if self.arrondi { 0.5 * area } else { area };
+            let mut proches: Vec<Vec<(f64, usize)>> = vec![Vec::new(); ny];
+            for (n, p) in self.apic.x.iter().enumerate() {
+                if p[0] < xb && p[0] >= xb - dx {
+                    proches[((p[1] / dx).max(0.0) as usize).min(ny - 1)].push((p[0], n));
+                }
+            }
+            for k in 0..ny {
+                proches[k].sort_by(|a, b| b.0.total_cmp(&a.0));
+            }
+            let mut garde = vec![true; self.apic.x.len()];
+            for k in 0..ny {
+                while self.attente[k] <= -seuil {
+                    let voisine = (0..ny).filter(|&j| !proches[j].is_empty()).min_by_key(|&j| j.abs_diff(k));
+                    let Some(j) = voisine else { break };
+                    let (_, n) = proches[j].remove(0);
+                    garde[n] = false;
+                    self.attente[k] += area;
+                }
+            }
+            if garde.contains(&false) {
+                self.retire(&garde);
+            }
+        } else if self.paresseux {
             for k in 0..ny {
                 let m = self.attente[k].min(self.dette_commune);
                 self.attente[k] -= m;
@@ -2439,12 +2545,20 @@ impl Candidat for Hybride {
             self.h[c] += (flux[c] - flux[c + 1]) / dx;
         }
         // ── L'attente devient particules libres, juste à gauche de la frontière, à sa profondeur.
+        let seuil = if self.arrondi { 0.5 * area } else { area };
         for k in 0..ny {
             let mut alterne = 0usize;
-            while self.attente[k] >= area {
+            while self.attente[k] >= seuil {
                 self.attente[k] -= area;
-                let p = [xb - 0.25 * dx, (k as f64 + 0.25 + 0.5 * (alterne % 2) as f64) * dx];
+                let mut p = [xb - 0.25 * dx, (k as f64 + 0.25 + 0.5 * (alterne % 2) as f64) * dx];
                 alterne += 1;
+                if let Some(places) = self.insertion.as_mut() {
+                    let s = places[k] % 4;
+                    places[k] += 1;
+                    let mouillee = (self.h[0] - k as f64 * dx).clamp(0.0, dx);
+                    let y = if mouillee < dx { k as f64 * dx + 0.5 * mouillee } else { (k as f64 + 0.25 + 0.5 * (s / 2) as f64) * dx };
+                    p = [xb - (0.25 + 0.5 * (s % 2) as f64) * dx, y];
+                }
                 let (v, c) = self.apic.depuis_grille(p);
                 self.apic.x.push(p);
                 self.apic.v.push(v);
@@ -2452,6 +2566,12 @@ impl Candidat for Hybride {
             }
         }
         self.ensemence_colonnes();
+        if self.memoire {
+            let (u, v) = (&self.apic.mac.u, &self.apic.mac.v);
+            let fu = (0..u.len()).map(|f| (f % (nx + 1) > self.i_b).then(|| u[f])).collect();
+            let fv = (0..v.len()).map(|f| (f % nx >= self.i_b).then(|| v[f])).collect();
+            self.apic.imposee = Some((fu, fv));
+        }
         dt
     }
     fn mesure(&self, t: f64) -> Mesure {

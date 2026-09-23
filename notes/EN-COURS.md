@@ -97,8 +97,9 @@ seul — son effet mesuré contre le montage de S325 — reste une attribution p
 - [x] **P3** — suspect choisi par P2 ; commutable, mesuré seul.
 - [x] **P4** — suspect suivant ; commutable, mesuré seul.
 - [x] **P5** — suspect suivant ; commutable, mesuré seul.
-- [ ] **P6** — *(ajoutée à 22:09, après P5)* la dissipation propre aux colonnes : hauteur mouillée
-  **centrée** dans leur transport au lieu d'amont, commutable ; zone à 95 % et 50 %.
+- [x] **P6** — *(ajoutée à 22:09, après P5)* la dissipation propre aux colonnes : hauteur mouillée
+  **centrée** dans leur transport au lieu d'amont, commutable ; zone à 95 % et 50 %. *Étendue en cours
+  d'étape aux suspects restants — (b), (d) — et à trois variantes de l'échange ; toutes commutables.*
 - [ ] **P7** — le raccord corrigé, contre les critères, deux mailles.
 - [ ] **P8** — preuve : section datée de [B10-APIC-S320](../docs/validation/B10-APIC-S320.md), avec
   « Reproduire » ; file, liste.
@@ -173,3 +174,23 @@ repos aussi (0,65 cm/s, 0,001 maille). Restent amortissement et période. **Où 
 95 %, frontière près du mur : 1,3 % ; à 50 %, au nœud : 4,2 % ; à 25 % : 2,5 %, période d'APIC. Les
 colonnes dissipent **d'elles-mêmes** ≈ 1,7 point ; la frontière le reste, selon l'échange qu'elle porte.
 Suspect des colonnes : la hauteur mouillée prise **en amont** dans leur transport, un schéma diffusif.
+
+**P6 (22:24) — ce qui reste, éprouvé variante par variante**, toutes avec l'ensemencement continu, à la
+frontière du milieu sauf mention. Les quatre suspects sont désormais éprouvés.
+
+| variante | 5 cm : écart / amort. / période z. | 2,5 cm : écart / amort. / période z. |
+|---|---|---|
+| APIC seul | 0,14 / −0,4 % / +5,6 % | 0,16 / 0,34 % / −0,18 % |
+| **paroi** (P5) | **0,24** / 4,2 % / +7,5 % | 0,59 / **0,71 %** / **+0,14 %** |
+| paroi, hauteur mouillée centrée | 0,21 / 4,2 % / +7,8 % | — |
+| paroi, quantum arrondi à la demi-particule | 0,55 / 5,1 % / +7,8 % | 0,69 / 0,30 % / 0,00 % |
+| solde signé, traversées absorbées | 0,25 / 3,7 % / +6,9 % | 0,64 / 1,37 % / +0,22 % |
+| paroi, rangées à hystérésis | 0,21 / 3,9 % / +8,1 % | **0,28** / 2,7 % / +0,32 % |
+| paroi, insertion au réseau — (b) | 0,80 / 3,8 % / +6,9 % | 0,76 / 0,06 % / +0,66 % |
+| paroi, mémoire de vitesse sur la grille — (d) | 0,24 / 4,1 % / +7,5 % | 0,69 / 1,55 % / +0,12 % |
+
+Zone des colonnes à 95 % (frontière près du mur), 5 cm : paroi 1,3 % ; mémoire 2,65 % ; hystérésis
+**−17,6 %, instable**. **Contredites** : hauteur centrée (aucun effet), demi-quantum, insertion au
+réseau, mémoire sur la grille, dette payée par les traversées. **Aucune variante ne tient tous les
+critères** ; la meilleure reste la paroi. Écart à 2,5 cm, paroi : **moyenne −0,009 maille**, écart-type
+0,15 (APIC seul 0,063), deux relevés sur cent au-dessus de 0,5 — un bruit, pas un biais.
