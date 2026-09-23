@@ -22,6 +22,9 @@ maille en moyenne, la différence des biais de reconstruction entre deux arrange
 **S325 (§11)** : le raccord **dynamique** — colonnes et particules côte à côte, échanges à la frontière —
 conserve la masse exactement, mais sa frontière décale la surface de 1,8 à 2,8 mailles et amortit le
 ballottement jusqu'à 16 % par période : pas encore reçu.
+**S326 (§5 bis)** : à trois mailles, le temps de pincement **ne converge pas encore** — 2,20 → 2,30 →
+2,40 `√(D/g)` — et la cavité lentement ; au-delà du pincement, à `D/dx` = 32, la vitesse s'emballe à la
+fermeture de la poche sans pression (290 m/s, A311), et le calcul complet devient impraticable.
 
 ---
 
@@ -136,7 +139,8 @@ l'écoulement est prévisible.** C'est ce que dit la dernière colonne. Une pert
 
 **Deux familles de grandeurs**, et la frontière est physique.
 
-- **Les grandes échelles convergent** : le temps de pincement à 5 % près, la cavité maximale à 9 % et
+- **Les grandes échelles convergent** *(démenti pour le temps de pincement par le troisième point,
+  §5 bis)* : le temps de pincement à 5 % près, la cavité maximale à 9 % et
   1 % près. La **profondeur** du pincement bouge encore de 22 à 31 %, parce que le col n'a que
   quelques mailles.
 - **Les petites échelles ne convergent pas**, et **ne doivent pas** : la couronne et le jet changent de
@@ -150,8 +154,47 @@ millimétriques. Aucune maille de jeu ne résoudra cette échelle. **La couronne
 production seront donc des grandeurs de la maille, pas de la physique**, tant qu'aucun modèle
 sous-maille ne les prendra en charge.
 
-§ 5 bis — `D/dx` = 32, `Fr` = 2 : *en calcul (P5b), interrompu à 08:30 par une coupure de session,
-relancé le 2026-09-22 à 20:11 ; versé ici par S321 à son retour.*
+### 5 bis. `D/dx` = 32, `Fr` = 2 — S326
+
+2026-09-23. Le troisième point que §5 attendait : une convergence se lit sur trois points au moins
+([METHODE](../../notes/METHODE.md)).
+
+**Reproduire.** Le commit du message « S326 P5b » ou plus récent ; machine de référence, CPU, un fil.
+`LOT5_T_FIN=0.6 cargo run -p water-core --release --offline --example lot5_comparaison -- apic entree 0.0125 2 0.4`
+— ligne `LOT5_S320 b10`, **32 min**. `LOT5_T_FIN` arrête plus tôt sur la même suite de pas ; à `D/dx` =
+16, pincement, profondeur, cavité, couronne et air en sortent identiques au calcul complet — seul le jet
+est tronqué. `LOT5_TRACE=1` écrit une ligne par échantillon. Valeurs attendues : pincement à 0,4846 s,
+soit `2,40 √(D/g)` ; profondeur 1,4844 D ; cavité maximale 3,6719 D ; couronne 2,3897 D ; air enfermé
+0,1931 m².
+
+| `Fr` = 2 | `D/dx` = 8 | 16 | 32 | lecture |
+|---|---:|---:|---:|---|
+| pincement `t/√(D/g)` | 2,20 | 2,30 | **2,40** | incréments égaux : **aucune convergence visible** |
+| profondeur / D | 1,56 | 1,22 | 1,48 | non monotone |
+| cavité max / D | 3,19 | 3,47 | **3,67** | incréments 0,28 puis 0,20 : ordre ≈ 0,5 |
+| couronne / D | 1,03 | 1,65 | 2,39 | croît, comme attendu (A312) |
+| air au pincement / D² | 0,875 | 1,31 | 1,21 | non monotone |
+
+Le pincement est lu à l'échantillon, tous les `0,05 √(D/g)` : chaque incrément vaut deux échantillons,
+au-dessus de la résolution.
+
+**Ce que cela change.** §5 lisait sur deux points que les grandes échelles convergent. Le troisième le
+**dément pour le temps de pincement**, qui recule de 4 % à chaque division de la maille sans ralentir,
+et ne le confirme qu'à demi pour la cavité. Le pincement reste **indépendant de l'échelle** (§4) ; il
+**dépend encore de la maille**, jusqu'à `D/dx` = 32 au moins.
+
+**Pourquoi le calcul complet n'a jamais rendu.** Lancé le 22 à 20:10 pour 1 à 2 h, il a été arrêté le 23
+à 09:23, après 13 h sans rien écrire. Rejoué avec la trace — identique au bit : un fil, aucun hasard —,
+il est sain jusqu'au pincement, puis à 17 m/s. À t = 0,717 s, la vitesse maximale passe de 9 à 62 m/s ;
+à 0,727 s, à **290 m/s** : pas de 3·10⁻⁵ s, 17 min de calcul par centième de seconde simulé. À `D/dx` =
+16, la vitesse ne dépasse jamais 13,6 m/s, et la poche enfermée se referme de 0,21 m² à 6·10⁻⁴ m² — une
+maille — entre 0,46 et 0,65 s, puis une seconde poche jusqu'à 0,85 s. **Cause probable** : la poche sans
+pression (A311) s'effondre jusqu'à la maille, donc plus loin et plus vite quand la maille est plus fine.
+**Non prouvée** : 290 m/s dépasse de loin ce que l'effondrement seul donnerait pour une poche quatre fois
+plus petite, et une instabilité numérique à la fermeture n'est pas exclue. Le rejeu,
+arrêté le 23 à 10:25, n'avait pas fini l'intervalle suivant après 28 min — plus lent encore que le
+précédent : la vitesse ne retombe pas dans le centième de seconde qui suit, ce qui ne départage pas les
+deux causes.
 
 ## 6. Le volume
 

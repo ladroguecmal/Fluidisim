@@ -878,7 +878,7 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
     // **La trace de progression** (S326), sur l'erreur standard et seulement si `LOT5_TRACE` est
     // posée : S320 P5b a tourné douze heures sans rien écrire, sans qu'on puisse dire s'il avançait.
     // Par échantillon : pas pris dans l'intervalle — le pas moyen s'en déduit —, vitesse maximale,
-    // itérations du dernier solveur, degrés, temps écoulé. La sortie par défaut ne change pas.
+    // itérations du dernier solveur, degrés, temps écoulé, air enfermé. La sortie par défaut ne change pas.
     let trace = std::env::var("LOT5_TRACE").is_ok();
     let mut pas_au_releve = 0usize;
     while t < scene.t_fin - 1e-12 {
@@ -891,13 +891,14 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
             if trace {
                 let n = pas - pas_au_releve;
                 eprintln!(
-                    "TRACE t={t:.4} t_fin={:.4} pas={pas} pas_intervalle={n} dt_moyen={:.3e} u_max={:.3} iterations={} degres={} ecoule_s={:.0}",
+                    "TRACE t={t:.4} t_fin={:.4} pas={pas} pas_intervalle={n} dt_moyen={:.3e} u_max={:.3} iterations={} degres={} ecoule_s={:.0} air_enferme_m2={:.4}",
                     scene.t_fin,
                     echantillon / n as f64,
                     releves.last().unwrap().u_max,
                     c.iterations(),
                     c.degres(),
-                    debut.elapsed().as_secs_f64()
+                    debut.elapsed().as_secs_f64(),
+                    releves.last().unwrap().enferme
                 );
             }
             pas_au_releve = pas;
@@ -2383,10 +2384,15 @@ fn main() -> Result<(), String> {
     // B10 : `entree <dx> <Fr> <D>` ; par défaut Fr = 2, D = 0,4 m.
     let fr: f64 = args.get(4).map_or(Ok(2.0), |v| v.parse()).map_err(|_| "Fr")?;
     let d: f64 = args.get(5).map_or(Ok(0.4), |v| v.parse()).map_err(|_| "D")?;
-    let scene = match cas {
+    let mut scene = match cas {
         Cas::Entree | Cas::CorpsRepos | Cas::CorpsLent => Scene::entree(cas, dx, d, fr),
         _ => Scene::new(cas, dx),
     };
+    // `LOT5_T_FIN` (S326) : arrête plus tôt, sur la même suite de pas — le pas ne dépend pas de `t_fin`.
+    // En B10, pincement, cavité et couronne se lisent avant le pincement ; le jet, après, reste tronqué.
+    if let Ok(v) = std::env::var("LOT5_T_FIN") {
+        scene.t_fin = v.parse().map_err(|_| "LOT5_T_FIN")?;
+    }
     match candidat {
         "apic" => {
             execute(scene, &mut Apic::new(scene));

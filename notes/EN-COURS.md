@@ -91,14 +91,15 @@ Critères, écrits avant le code :
 - [x] **P3** — le banc de S324 rejoué, avec et sans Jacobi.
 - [x] **P4** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; A315, file.
-- [>] **P5** — S320 P5b : §5 bis au retour du calcul lancé le 22 à 20:11 — asynchrone. **Redéclarée à 08:55**,
+- [x] **P5** — S320 P5b : §5 bis au retour du calcul lancé le 22 à 20:11 — asynchrone. **Redéclarée à 08:55**,
   sur question de l'utilisateur (*« Il n'y a pas de problème avec P5b ? »*) : annoncé pour 1 à 2 h, le calcul
   tourne depuis 12 h 38 (12 h 17 de CPU) sans rien écrire. Le pas d'APIC n'a pas de plancher et le gradient
   conjugué plafonne à 4 000 itérations : il peut ramper ou s'être emballé. **P5a** — trace de progression
   par variable d'environnement (sortie par défaut inchangée), le même calcul rejoué en parallèle ;
   **P5b** — verdict : attendre, ou arrêter et dire pourquoi.
   - [x] **P5a** — `LOT5_TRACE` : une ligne par échantillon sur l'erreur standard ; rejeu lancé à 08:53.
-  - [>] **P5b** — verdict.
+  - [x] **P5b** — verdict : arrêté ; la part utile, lue avant le pincement, dément la convergence de 4.12
+    ([preuve](../docs/validation/B10-APIC-S320.md) §5 bis) ; A311, A312, L372.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -117,3 +118,23 @@ Premiers chiffres — `D/dx` = 32 : 327 680 particules, **2,5 s par pas**, pas d
 `D/dx` = 16 : 0,35 s par pas, pas de 2,5 ms. À ce rythme, `t_fin` = 1,615 s demande **≈ 1 h** à 32 : le
 calcul d'origine, à 12 h 38, a quitté ce régime quelque part. Le rejeu est identique au bit (même chemin
 d'APIC) : il y passera au même instant simulé.
+
+**P5b, en cours (09:25).** `D/dx` = 16 tracé jusqu'au bout : 952 pas, **399 s**, vitesse maximale 12,8 m/s
+juste après le pincement (t = 0,46 s), puis décroissante ; gradient conjugué 600 à 830 itérations, loin du
+plafond ; §5 reproduit au chiffre près. `D/dx` = 32 rejoué : sain jusqu'à t = 0,555 s — 17 m/s après le
+pincement (1,3 fois la vitesse à 16), pas de 0,35 ms, 3,3 s par pas, ≈ 1 550 itérations. À ce régime, la
+fin demande ≈ 2 h en tout : **l'estimation de 1 à 2 h était juste, et les 12 h 38 du calcul d'origine sont
+anormales**. Rejeu identique au bit (aucun hasard, un fil ; depuis la construction d'origine, le chemin
+d'APIC n'a changé que d'une variable d'environnement non posée). `LOT5_T_FIN` ajoutée : même suite de
+pas, arrêt plus tôt ; à 16 et 0,6 s, pincement, profondeur, cavité, couronne, air **identiques** au calcul
+complet — seul le jet est tronqué. Lancée à 32 jusqu'à 0,6 s (09:22).
+
+**09:23 : calcul d'origine arrêté** (13 h 13, rien écrit) — après la question de l'utilisateur *« Ce
+calcul est essentiel ou non ? »* : non ; seul le point à 32 jusqu'au pincement sert (4.12, trois points).
+**09:50 : `D/dx` = 32 tronqué à 0,6 s**, 656 pas, 1 933 s, masse exacte. `Fr` = 2, 8 → 16 → 32 : pincement
+`t/√(D/g)` 2,20 → 2,30 → **2,40** (incréments égaux, échantillonnage 0,05) ; profondeur 1,56 → 1,22 →
+1,48 ; cavité max 3,19 → 3,47 → **3,67** (ordre ≈ 0,5) ; couronne 1,03 → 1,65 → 2,39 ; air 0,875 → 1,31 →
+1,21 D². **Le « temps convergé à 5 % » de 4.12 tombe** : lecture à deux points, que le troisième dément.
+Rejeu complet : à t = 0,717 s, **u_max 9 → 62 m/s** (à 16 : 9,4 au même instant).
+**10:25 : rejeu arrêté** — 0,727 s, 290 m/s, pas de 3·10⁻⁵ s ; l'intervalle suivant, inachevé après 28 min.
+À 16, la poche se referme de 0,21 à 6·10⁻⁴ m² entre 0,46 et 0,65 s. Aucun processus du banc ne reste.

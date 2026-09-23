@@ -4193,6 +4193,13 @@ hydrostatique. Une bulle réelle se comprimerait, rebondirait et remonterait. B1
 de portée. **Déclencheur** : C20 en production, ou une revue visuelle d'un impact. Remède à éprouver :
 une pression de bulle par volume enfermé (loi adiabatique), avant une phase d'air complète.
 
+**A311 — note datée du 2026-09-23 (S326). La bulle sans pression bloque le calcul fin.** À `D/dx` =
+32, à la fermeture de la poche, la vitesse maximale passe de 9 à 290 m/s en 0,01 s simulée et le pas
+tombe à 3·10⁻⁵ s : le calcul complet de B10 a tourné 13 h sans finir, pour 1 à 2 h attendues
+([preuve](../validation/B10-APIC-S320.md) §5 bis). Cause probable, non prouvée — une instabilité à la
+fermeture n'est pas exclue. **Conséquence nouvelle** : la vie de la bulle n'est pas seulement fausse,
+elle **arrête le calcul** à maille fine ; le remède d'A311 précède toute maille fine de production.
+
 **A312 — S320, 2026-09-22 (sévérité 2, ouverte). La couronne et le jet d'un impact sont des grandeurs
 de la maille.** De `D/dx` = 8 à 16, ils changent de 40 à 60 %, dans un sens ou dans l'autre, alors que
 le temps de pincement et la cavité maximale convergent à 10 % près
@@ -4201,6 +4208,10 @@ l'amincissement d'une nappe. **Conséquence** : un δ de production, à maille d
 fixée par sa maille. **Déclencheur** : le choix de la maille de production de la seconde
 représentation, ou le premier verdict de l'utilisateur sur une gerbe. Remède à chercher : un modèle
 sous-maille de nappe (rupture en gouttes, embruns), jugé sur l'image et non sur la convergence.
+
+**A312 — note datée du 2026-09-23 (S326).** Le contraste ci-dessus ne tient qu'à moitié : à trois
+mailles, le temps de pincement ne converge pas non plus — 2,20 → 2,30 → 2,40 `√(D/g)` — et la cavité
+maximale lentement, d'ordre ≈ 0,5 ([preuve](../validation/B10-APIC-S320.md) §5 bis).
 
 **A313 — S320, 2026-09-22 (sévérité 1, ouverte). Le volume géométrique d'APIC n'a pas de mesure
 propre en écoulement agité.** La masse est exacte, mais le volume dépend de la règle de séparation à

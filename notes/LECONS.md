@@ -6457,3 +6457,15 @@ d'échantillonnage fixe qui bornait le pas, ne se sont vues qu'à elle.
 
 **La règle.** Un essai de similitude se lit comme un **détecteur d'échelle absolue** dans le code. La
 barre d'erreur d'une mesure se lit par **perturbation** à la même échelle, et se publie à côté.
+
+## L372 — Un calcul muet ne se reporte pas
+
+S326. Le point `D/dx` = 32 de B10, lancé en S321 pour une à deux heures, a été reporté de session en
+session — S322, S323, S324, S325 — sur la foi d'un processus vivant. Il tournait depuis 13 h quand
+l'utilisateur a demandé s'il n'y avait pas un problème. Il n'écrivait rien avant la fin : personne ne
+pouvait dire s'il avançait. Une trace, posée en dix minutes, a montré en une heure ce que douze heures
+avaient caché : la vitesse s'emballait après le pincement, et le pas tombait à 3·10⁻⁵ s. Le calcul
+complet ne servait d'ailleurs pas : les grandeurs utiles se lisaient avant le pincement, en 32 minutes.
+
+**La règle.** Un calcul long écrit sa progression. Au double de sa durée annoncée, on le diagnostique ;
+on ne le reporte pas. Et avant de l'attendre, on se demande quelle part de lui sert.

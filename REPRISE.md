@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-23 08:54 +02:00
+Battement        : 2026-09-23 10:25 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S326 — lot 3, Jacobi sur le chemin coupé (A315)
 Dernière session : S325 — **lot 5, raccord dynamique** : colonnes et particules côte à côte, masse exacte et échanges dans les deux sens ; mais la frontière décale la surface de 1,8 à 2,8 mailles et amortit jusqu'à 16 % par période, cause non attribuée (A316) ([preuve](docs/validation/B10-APIC-S320.md) §11)

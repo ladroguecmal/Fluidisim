@@ -25,7 +25,7 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | | Le compilateur est dans la boucle : une identité flottante du source n'est pas celle du binaire, carte graphique comprise — la vérifier sur la cible | L345, L346 | — |
 | **en lançant** | Un binaire ne s'exécute qu'après une compilation **réussie** et lue : `cargo run`, ou code de sortie vérifié, jamais une sortie filtrée | L362 | zéro avertissement de construction : un avertissement neuf se voit |
 | | Une revue visuelle part avec ses options explicites (`--meilleur`) ; deux rendus se comparent à horizon forcé | L349, A301 | — |
-| | Un calcul long en arrière-plan : vérifier ensemble processus, journal et cible ; recompter les processus avant toute relance — l'absence de journal ne prouve pas l'absence de calcul | *simufluid* | — |
+| | Un calcul long en arrière-plan **écrit sa progression**, et au double de sa durée annoncée **se diagnostique au lieu de se reporter** ; vérifier ensemble processus, journal et cible ; recompter les processus avant toute relance — l'absence de journal ne prouve pas l'absence de calcul | *simufluid*, L372 | — |
 | **en écrivant** | Une règle ou un fait vit à un seul endroit ; ailleurs, un renvoi | L137 | — |
 | | L'horloge se lit dans un appel séparé, à chaque commit d'étape | L237 | battement |
 | | Jamais `Get-Content` ni `Set-Content` de Windows PowerShell sur un fichier du dépôt — il lit en ANSI ; l'outil d'édition, ou Python en UTF-8 | S301 | encodage |
