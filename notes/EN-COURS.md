@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S326 — **en cours**. **Lot 3 : Jacobi sur le chemin coupé** (A315), alternance
+Session : S326 — **terminée** (2026-09-23 10:26). **Lot 3 : Jacobi sur le chemin coupé** (A315), alternance
 d'[ADR-188](../docs/adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« continue »*, après S325 ; suite déclarée : Jacobi sur le chemin coupé.
@@ -100,7 +100,7 @@ Critères, écrits avant le code :
   - [x] **P5a** — `LOT5_TRACE` : une ligne par échantillon sur l'erreur standard ; rejeu lancé à 08:53.
   - [x] **P5b** — verdict : arrêté ; la part utile, lue avant le pincement, dément la convergence de 4.12
     ([preuve](../docs/validation/B10-APIC-S320.md) §5 bis) ; A311, A312, L372.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 

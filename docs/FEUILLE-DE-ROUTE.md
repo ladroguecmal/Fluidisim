@@ -255,11 +255,13 @@ perfectionnement visuel ne s'ouvre avant que la physique le demande. Le profil d
 **en parallèle** du lot 2, par sessions alternées ; la v1 reste la porte D. **Le 2026-09-22**
 ([ADR-188](adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md)), le lot 3 prend la place du lot 2, bloqué
 par A289, dans cette alternance. **S324** : le fond coupé entre dans la référence 3D — identique au bit
-à la 2D sans `y`, ordre 1,956 sur une bosse ; les petites cellules font ramper le solveur (A315,
-[preuve](validation/FACES-COUPEES-3D-S324.md)). **S318** : comparaison
+à la 2D sans `y`, ordre 1,956 sur une bosse ; ses petites cellules, qui faisaient ramper le solveur (A315),
+sont préconditionnées en **S326** : 425 itérations à 128 au lieu de 16 029 ([preuve](validation/FACES-COUPEES-3D-S324.md) §6). **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**
 par l'utilisateur ([ADR-186](adr/ADR-186-apic-seconde-representation.md)) ; **S320** : B10 sur APIC,
-une cavité se pince au même instant à toute échelle ([S320](validation/B10-APIC-S320.md)) ; **S323** :
+une cavité se pince au même instant à toute échelle ([S320](validation/B10-APIC-S320.md)) — mais ce
+temps ne converge pas encore à trois mailles, et la bulle sans pression emballe le calcul fin (S326,
+§5 bis) ; **S323** :
 une région passe des particules aux colonnes et retour à masse exacte, la surface sautant de la
 différence des biais de reconstruction (A314, [§10](validation/B10-APIC-S320.md)).
 

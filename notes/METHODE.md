@@ -82,7 +82,9 @@ vient d'une formule ou d'un banc identifié, jamais d'un chiffre choisi après c
 **Bancs et système** (ADR-187 D6). Un banc de `examples/` est un **instrument** : compilé par
 `cargo test`, exécuté par aucune suite. Ce qu'il reçoit n'est donc protégé que par sa preuve. Toute
 preuve ouverte depuis S321 commence par une section **« Reproduire »** — commit, commandes exactes,
-valeurs attendues, durée — et l'outil le vérifie. Une capacité qui passe d'un banc au système, cœur
+valeurs attendues, durée — et l'outil le vérifie. « Ou plus récent » suppose qu'aucun comportement
+par défaut ne change sur ce chemin : **une session qui en change un corrige les « Reproduire » qui le
+citent** (S326). Une capacité qui passe d'un banc au système, cœur
 ou afficheur, **y entre avec ses essais** : les chiffres de sa réception deviennent des assertions,
 ignorées par défaut si elles sont lentes. APIC y entrera au raccord particules ↔ colonnes.
 

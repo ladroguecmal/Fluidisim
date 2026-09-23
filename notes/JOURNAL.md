@@ -16400,3 +16400,23 @@ grille → réseau → grille est **contredite** : l'amortissement ne suit pas l
 **Rituel.** Maillons **1** : un échange à masse exacte, mais pas de frontière reçue ; la liste ne bouge
 pas. Un angle mort : A316. Suivant, selon ADR-188 : **S326, lot 3 — Jacobi sur le chemin coupé**
 (A315) ; le lot 5 reprendra par A316.
+
+## S326 — 2026-09-23 — lot 3 : les petites cellules préconditionnées ; S320 P5b tranché
+
+**Entrée.** *« continue »* ; alternance d'ADR-188 : le lot 3, contre les 16 029 itérations de S324 (A315).
+**Le remède** ([preuve](../docs/validation/FACES-COUPEES-3D-S324.md) §6). Le Jacobi du mode mobile 3D,
+porté au chemin coupé du mode linéaire, seulement quand `ny > 1` : la 3D reste la 2D au bit à `ny` = 1.
+Bosse à 128 : **16 029 → 425 itérations, 708 → 5,7 s** ; débits à 2,4·10⁻⁶ près ; ordre 1,947 ; suite :
+590 réussis. Le témoin sans `y` coûte un peu plus (347 → 422) : le remède sert les coins.
+**P5b, sur deux questions de l'utilisateur** — *« Il n'y a pas de problème avec P5b ? »*, puis *« Ce
+calcul est essentiel ou non ? »* : oui, et non. Annoncé pour 1 à 2 h, reporté depuis S321, il tournait
+depuis 13 h sans rien écrire. Une trace a montré la vitesse qui s'emballe (9 → 290 m/s) à la fermeture de
+la poche sans pression, et le pas à 3·10⁻⁵ s (A311). Arrêté ; la part utile, lue avant le pincement, a
+coûté 32 min ([preuve](../docs/validation/B10-APIC-S320.md) §5 bis) : **le temps de pincement ne
+converge pas** à trois mailles (2,20 → 2,30 → 2,40), contrairement à ce que 4.12 affirmait sur deux.
+**Méthode.** Deux protections changées : un calcul long écrit sa progression et se diagnostique au
+double de sa durée (L372) ; qui change un défaut corrige les « Reproduire » qui le citent.
+**Rituel.** Maillons **2** : une optimisation pas encore consommée, et une affirmation retirée ; 4.15 et
+4.12 restent partiels. À deux maillons, la suite vise une capacité : **S327, lot 5 — recevoir le raccord
+dynamique** (4.12), A316 un suspect à la fois puis corrigé ; troisième session du raccord, vérifiée —
+sans lui, APIC reste un banc isolé. A315 résolu ; notes datées sur A311 et A312.

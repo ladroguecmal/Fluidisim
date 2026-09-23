@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-23 10:25 +02:00
+JETON            : libre
+Battement        : 2026-09-23 10:26 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S326 — lot 3, Jacobi sur le chemin coupé (A315)
-Dernière session : S325 — **lot 5, raccord dynamique** : colonnes et particules côte à côte, masse exacte et échanges dans les deux sens ; mais la frontière décale la surface de 1,8 à 2,8 mailles et amortit jusqu'à 16 % par période, cause non attribuée (A316) ([preuve](docs/validation/B10-APIC-S320.md) §11)
-Session suivante : **S326, lot 3 — Jacobi sur le chemin coupé** (A315, alternance d'ADR-188) : itérations à 128 comparables au fond invariant, identité 2D gardée à `ny` = 1 ; le lot 5 reprendra par A316. Verser S320 P5b à son retour (file)
-Maillons        : 1 — S325 : un échange à masse exacte, pas de frontière reçue ; aucun point de liste n'a bougé
+Session en cours : aucune
+Dernière session : S326 — **lot 3, Jacobi sur le chemin coupé** : la bosse de S324 à 128 converge en 425 itérations et 5,7 s au lieu de 16 029 et 708 s, identité 2D gardée ; A315 résolu ([preuve](docs/validation/FACES-COUPEES-3D-S324.md) §6). **S320 P5b tranché** : le temps de pincement ne converge pas à trois mailles, et la bulle sans pression emballait le calcul fin — 13 h sans rien écrire (A311, L372, [preuve](docs/validation/B10-APIC-S320.md) §5 bis)
+Session suivante : **S327, lot 5 — recevoir le raccord dynamique** (4.12, A316, alternance d'ADR-188) : attribuer l'écart de frontière un suspect à la fois — insertion des particules sortantes, quantification des colonnes, colonnes sans mémoire de vitesse —, puis le corriger ; à deux maillons, la session vise une capacité, pas un diagnostic. Le lot 3 reprendra par le mode mobile sur fond coupé
+Maillons        : 2 — S326 : une optimisation pas encore consommée, et une affirmation de convergence retirée ; 4.15 et 4.12 restent partiels
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -80,7 +80,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
 
-État au 2026-09-22 (S321), en bref ; le détail par jalon et par porte est dans la
+État au 2026-09-23 (S326), en bref ; le détail par jalon et par porte est dans la
 [feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.
 
 - **Stratégie** : trois systèmes — A haute mer (B+W), B volumique 3D (δ), C couplage — et sept
@@ -89,10 +89,12 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 - **A** stabilisé : mer jugée par l'utilisateur, GPU eau 1,74 ms ; CPU hors profil (A278).
 - **B** : δ 3D reçu — référence CPU, production GPU, scène rendue ; seconde représentation **APIC**
   retenue ([ADR-186](docs/adr/ADR-186-apic-seconde-representation.md)), cavité reçue sur un banc
-  2D (S320).
+  2D (S320), temps de pincement non convergé à trois mailles (S326) ; raccord aux colonnes à masse
+  exacte, frontière non reçue (S325, A316).
 - **C** : compteurs reçus (lot 1) ; retour δ → W reçu en ordres A à D, **ordre E bloqué par A289**.
-- **Porte D** — lots 3 et 4, la voie de la v1 — **non ouverte** : ni faces coupées 3D, ni corps
-  rigide. **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
+- **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte** (ADR-188) : fond coupé dans la référence 3D, mode
+  linéaire, préconditionné (S324, S326) ; ni mode mobile sur ce fond, ni obstacle, ni corps rigide.
+  **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 53 partiels, 64 absents** sur 120.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
