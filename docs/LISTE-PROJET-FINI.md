@@ -240,7 +240,8 @@ pas recopiée ici (L137).
 
 - [ ] **6.1 Flottabilité des objets importants** (C10, C11, B6) — *partiel* : **corps rigide à six degrés
   de liberté dans le cœur** depuis S331 — proxy sur B + W, masse ajoutée ; C10 tenu à 0,02 % sur le tirant
-  ([preuve](validation/CORPS-RIGIDE-S331.md)). Manquent la houle derrière la requête d'eau et le lien à δ.
+  ([preuve](validation/CORPS-RIGIDE-S331.md)) ; **sa coque pilotée dans δ** depuis S332, sans que δ touche la
+  trajectoire (I-04). Manque la houle derrière la requête d'eau.
 - [ ] **6.2 Forces de l'eau sur les objets** : vagues, courant, turbulence, sous la frontière
   d'autorité d'ADR-008 — *absent*.
 - [ ] **6.3 Un objet en mouvement produit son sillage** — *partiel* : mouvement et charge prescrits

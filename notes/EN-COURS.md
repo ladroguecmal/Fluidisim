@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 - [x] **P3** — la coque perce le couvercle ; critères 2 et 3.
 - [x] **P4** — banc : masse ajoutée du cube flottant, trois mailles (critère 4).
 - [x] **P5** — le corps du jeu pilote sa paroi, décalage visuel borné ; critère 5.
-- [ ] **P6** — preuve : section datée de [CORPS-RIGIDE-S331](../docs/validation/CORPS-RIGIDE-S331.md), avec
+- [x] **P6** — preuve : section datée de [CORPS-RIGIDE-S331](../docs/validation/CORPS-RIGIDE-S331.md), avec
   « Reproduire » ; file, liste.
 - [ ] **P7** — rituel.
 
