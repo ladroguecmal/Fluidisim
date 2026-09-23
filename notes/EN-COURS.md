@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P2 bis** — *ajouté à la reprise* : la poussée suit le gradient de la pression que le proxy suppose
   déjà, `ρg(η − z)` ; critère 1 bis.
 - [x] **P3** — la coque de δ relative à l'eau qui la porte ; critère 2.
-- [ ] **P4** — banc `porte_d` : coque 4 × 1,6 × 1 m sur une houle ; critères 3 à 5, champs écrits.
+- [x] **P4** — banc `porte_d` : coque 4 × 1,6 × 1 m sur une houle ; critères 3 à 5, champs écrits.
 - [ ] **P5** — images de la scène (critère 6).
 - [ ] **P6** — preuve : `docs/validation/PORTE-D-S333.md`, avec « Reproduire » ; feuille de route (porte D :
   partie numérique), liste, file.
@@ -137,3 +137,11 @@ Critères, écrits avant le code :
   **Piège de mesure** : sur une coque qui perce le couvercle, les faces couvertes gardent des vitesses que
   rien ne lit (3,7 m/s) et les colonnes couvertes une hauteur de comptabilité ; mesurer sur les faces
   ouvertes (`open = 1`) et les colonnes au couvercle libre — vaut pour P4 et les images.
+- **P4, banc `porte_d`** (houle 25 cm / 6 s, coque lâchée 10 cm au-dessus de l'équilibre relatif, δ 96 × 96 × 8
+  à 25 cm, 800 pas de 10 ms). « Champs écrits » lu sous **I-17** : aucun champ δ n'est écrit ; mesures
+  imprimées, images rendues en mémoire (P5). **Critère 3 tenu** : trajectoire au bit, 800 pas. **Critère 5
+  tenu** : δ 13,7 cm au plus sur les colonnes libres (houle 25 cm), 0,61 m/s. **Critère 4 manqué au sens
+  strict** : 2,28·10⁻⁹ m³ pour 10⁻⁹ — sans dérive, signe alterné ; borne d'arrondi du transport 1,8·10⁻⁵
+  (rapport 1,3·10⁻⁴) ; **témoin** coque immobile, bosse 10 cm, 200 pas : 3,6·10⁻¹⁰ (rapport 6,3·10⁻⁴) → le
+  plancher du transport f32, qui croît avec la grille (576 colonnes en S332, 9 216 ici), pas le couplage.
+  Pilonnement relatif ±0,12 m ; décalage visuel 1,5 cm ; δ CPU **239 ms/pas**, 109 itérations.
