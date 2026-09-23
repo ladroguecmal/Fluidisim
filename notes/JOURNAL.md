@@ -16440,3 +16440,23 @@ deux causes sont attribuées et corrigées, sept hypothèses écartées, et le r
 de liste ne bouge. Suivant, selon ADR-188 : **S328, lot 3 — le mode mobile sur fond coupé** (4.15), une
 capacité à portée ; le lot 5 reprendra par la dissipation à 5 cm, après avoir vérifié qu'elle bloque
 encore l'usage — ce sera la quatrième session du raccord.
+
+## S328 — 2026-09-23 — lot 3 : le mode mobile porte le fond coupé
+
+**Entrée.** *« continue »* ; alternance d'ADR-188, maillons à 3 : une capacité était due.
+**Le portage** ([preuve](../docs/validation/FACES-COUPEES-3D-S324.md) §7). Le pas mobile 2D portait déjà
+la découpe (S237) ; sa ligne, portée à six faces et pondérée par les ouvertures dans l'ordre de ses
+opérations, donne à la 3D un pas à surface mobile sur fond coupé. Garde : deux mailles au-dessus du plus
+haut coin du fond. Fond plat au bit de S296 ; le pas couplé refuse toujours la découpe.
+**Mesuré.** À `ny` = 1, trois fonds de S232 : 200 pas mobiles **identiques au bit** à la 2D. Lac au repos
+exact sur la bosse. Fond sans `y` à `ny` = 4 : tranches identiques au bit à `ny` = 1 ; `v` nul à
+l'arrondi du Jacobi, comme sur fond plat. Premier pas sur la bosse : ordre **1,954**, à 3·10⁻⁶ du mode
+linéaire. Suite : 594 réussis.
+**Méthode.** Un essai exigeait `v` nul au bit, ce que le critère ne demandait pas ; le fond plat de S296
+montre le même arrondi : borne relative, et la raison écrite dans l'essai.
+**Non fait.** Le pas couplé à B/W sur fond coupé ; les obstacles qui ne sont pas un fond.
+**Rituel.** Maillons **0** : ce qui devient possible — une surface libre mobile au-dessus d'un fond non
+plat, en 3D ; le chemin qui le consomme — les corps flottants du lot 4 (porte D), puis les obstacles ;
+la preuve — FACES-COUPEES-3D-S324 §7 ; 4.15 avance, le mode mobile n'y manque plus. Suivant, selon
+ADR-188 : **S329, lot 5** — la dissipation propre aux colonnes à 5 cm, après avoir vérifié qu'elle bloque
+encore l'usage (quatrième session du raccord).

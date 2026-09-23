@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S328 — **en cours**. **Lot 3 : le mode mobile sur fond coupé** (4.15), alternance
+Session : S328 — **terminée** (2026-09-23 22:48). **Lot 3 : le mode mobile sur fond coupé** (4.15), alternance
 d'[ADR-188](../docs/adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« continue »*, après S327 ; suite déclarée : le mode mobile sur fond coupé. **Maillons à 3** :
@@ -99,7 +99,7 @@ Critères, écrits avant le code :
 - [x] **P4** — banc : le premier pas mobile sur la bosse, trois mailles, ordre ; écart au mode linéaire.
 - [x] **P5** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste 4.15.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 **P2 (22:39).** `delta3d_mobile.rs` : maille mouillée = fraction non nulle et centre sous la surface ;

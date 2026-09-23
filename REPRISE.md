@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-23 22:47 +02:00
+JETON            : libre
+Battement        : 2026-09-23 22:48 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S328 — lot 3, le mode mobile sur fond coupé (4.15)
-Dernière session : S327 — **lot 5, raccord dynamique attribué** : l'échange asymétrique faisait le saut, la surface arrondie des colonnes la dissipation ; corrigés, écart 0,24 / 0,59 maille et amortissement 4,2 / 0,71 % à 5 / 2,5 cm — non reçu (A316, [preuve](docs/validation/B10-APIC-S320.md) §12)
-Session suivante : **S328, lot 3 — le mode mobile sur fond coupé** (4.15, alternance d'ADR-188) : le pas mobile 3D, qui refuse aujourd'hui la découpe, la porte, identité 2D gardée à `ny` = 1 ; maillons à 3, une capacité est due. Le lot 5 reprendra par la dissipation propre aux colonnes à 5 cm, après avoir vérifié qu'elle bloque encore l'usage
-Maillons        : 3 — S327 : deux causes attribuées et corrigées, raccord non reçu ; aucun point de liste n'a bougé (justification au journal)
+Session en cours : aucune
+Dernière session : S328 — **lot 3, le mode mobile sur fond coupé** : le pas à surface mobile porte la découpe, au bit de la 2D à `ny` = 1 sur les fonds de S232, ordre 1,954 sur une bosse 3D, à 3·10⁻⁶ du mode linéaire ([preuve](docs/validation/FACES-COUPEES-3D-S324.md) §7)
+Session suivante : **S329, lot 5 — la dissipation propre aux colonnes** (A316, alternance d'ADR-188) : d'abord vérifier qu'elle bloque encore l'usage — quatrième session du raccord —, puis la localiser ; piste, une bande de recouvrement. Le lot 3 reprendra par les obstacles qui ne sont pas un fond
+Maillons        : 0 — S328 : mode mobile sur fond coupé reçu, 4.15 avance
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -80,7 +80,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
 
-État au 2026-09-23 (S327), en bref ; le détail par jalon et par porte est dans la
+État au 2026-09-23 (S328), en bref ; le détail par jalon et par porte est dans la
 [feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.
 
 - **Stratégie** : trois systèmes — A haute mer (B+W), B volumique 3D (δ), C couplage — et sept
@@ -92,8 +92,8 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   2D (S320), temps de pincement non convergé à trois mailles (S326) ; raccord aux colonnes à masse
   exacte, frontière non reçue (S325–S327, A316 attribué en partie).
 - **C** : compteurs reçus (lot 1) ; retour δ → W reçu en ordres A à D, **ordre E bloqué par A289**.
-- **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte** (ADR-188) : fond coupé dans la référence 3D, mode
-  linéaire, préconditionné (S324, S326) ; ni mode mobile sur ce fond, ni obstacle, ni corps rigide.
+- **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte** (ADR-188) : fond coupé dans la référence 3D, modes
+  linéaire et mobile (S324–S328) ; ni obstacle qui ne soit un fond, ni corps rigide.
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 53 partiels, 64 absents** sur 120.
 
