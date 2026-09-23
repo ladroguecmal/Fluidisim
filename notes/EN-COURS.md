@@ -96,7 +96,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-189 : la v1 d'abord ; index, file.
+- [x] **P2** — ADR-189 : la v1 d'abord ; index, file.
 - [ ] **P3** — géométrie : solide par distance signée aux nœuds, faces et mailles exactes pour le champ
   linéaire ; critères 1 à 3 en essais.
 - [ ] **P4** — le solide dans les pas linéaire et mobile ; critère 4.
