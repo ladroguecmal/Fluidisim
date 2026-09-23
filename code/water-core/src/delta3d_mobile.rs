@@ -298,6 +298,12 @@ impl Volume3 {
                             ),
                             _ => (self.fw(i, j, k), self.open3(2, self.fw(i, j, k)) > 0. && self.wet3(i, j, k - 1)),
                         };
+                        // S329 : une face fermée n'est ni résolue ni remplie. Sous un fond, aucune face
+                        // résolue ne la précède ; au milieu d'une colonne — un solide immergé —, elle
+                        // recevrait la vitesse de la face d'en dessous.
+                        if self.open3(axis, f) == 0. {
+                            continue;
+                        }
                         let field = match axis {
                             0 => &mut self.u,
                             1 => &mut self.v,

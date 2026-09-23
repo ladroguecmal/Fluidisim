@@ -1153,3 +1153,72 @@ fn a_mobile_surface_too_close_to_the_cut_bottom_is_refused_s328() {
     w.set_free_surface(&vec![1.4; nx * ny], 1.4).unwrap();
     assert!(w.step_surface_mobile(2000, 4000, &Jobs).is_ok());
 }
+
+// ─────────────────────────────── S329 : un solide quelconque dans les pas ───────────────────────────────
+
+/// Sphère de rayon 0,3 m centrée en (0,6 ; 0,6 ; 0,55) dans un cube de 1,2 m, distance signée aux nœuds.
+fn volume_sphere(n: usize) -> (Volume3, Arena) {
+    let dx = 1.2 / n as f32;
+    let mut noeuds = Vec::with_capacity((n + 1).pow(3));
+    for k in 0..=n {
+        for j in 0..=n {
+            for i in 0..=n {
+                let (x, y, z) = (i as f64 * dx as f64, j as f64 * dx as f64, k as f64 * dx as f64);
+                noeuds.push((((x - 0.6).powi(2) + (y - 0.6).powi(2) + (z - 0.55).powi(2)).sqrt() - 0.3) as f32);
+            }
+        }
+    }
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let v = Volume3::configure_with_solid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain3 { nx: n, ny: n, nz: n, dx }, 1025., 9.81, &vec![0.; n * n], &noeuds).unwrap();
+    (v, arena)
+}
+
+/// **S329, critère 4.** Autour d'une sphère immergée, un lac au repos reste **exactement** au repos,
+/// en mode linéaire comme en mode mobile : cent pas, vitesses et surface au bit. Une onde qui passe
+/// au-dessus garde sa divergence sous la tolérance, et aucune face fermée ne porte de vitesse.
+#[test]
+fn an_immersed_sphere_keeps_the_lake_at_rest_and_lets_a_wave_pass_s329() {
+    let n = 24usize;
+    let (mut lin, _) = volume_sphere(n);
+    let z0 = lin.domain.z0();
+    lin.set_surface(&vec![z0; n * n]).unwrap();
+    for pas in 0..100 {
+        lin.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        assert!(lin.velocity_u().iter().chain(lin.velocity_v()).chain(lin.velocity_w()).all(|x| x.to_bits() == 0), "linéaire, pas {pas}");
+    }
+    let (mut mob, _) = volume_sphere(n);
+    mob.set_free_surface(&vec![1.05; n * n], 1.05).unwrap();
+    for pas in 0..100 {
+        mob.step_surface_mobile(2000, 4000, &Jobs).unwrap();
+        assert!(mob.velocity_u().iter().chain(mob.velocity_v()).chain(mob.velocity_w()).all(|x| x.to_bits() == 0), "mobile, pas {pas}");
+        assert!(mob.surface().iter().all(|h| h.to_bits() == 1.05f32.to_bits()), "mobile, pas {pas}");
+    }
+    let (mut onde, _) = volume_sphere(n);
+    let eta: Vec<f32> = (0..n).flat_map(|_| (0..n).map(move |i| 1.05 + 0.01 * (core::f32::consts::TAU * (i as f32 + 0.5) / n as f32).cos())).collect();
+    onde.set_free_surface(&eta, 1.05).unwrap();
+    for _ in 0..20 {
+        let r = onde.step_surface_mobile(2000, 4000, &Jobs).unwrap();
+        assert!(r.divergence_plain <= PROJECTION_DIVERGENCE_TOLERANCE as f64, "{}", r.divergence_plain);
+    }
+    let (ou, ov, ow) = onde.apertures().unwrap();
+    for (a, x) in ou.iter().zip(onde.velocity_u()).chain(ov.iter().zip(onde.velocity_v())).chain(ow.iter().zip(onde.velocity_w())) {
+        if *a == 0. {
+            assert_eq!(*x, 0., "vitesse sur une face fermée");
+        }
+    }
+    assert!(onde.velocity_u().iter().any(|x| *x != 0.));
+}
+
+/// **S329, critère 4.** Le pas mobile garde la surface deux mailles au-dessus du solide : trop près du
+/// sommet de la sphère, le pas est refusé et l'état restauré.
+#[test]
+fn a_mobile_surface_too_close_to_the_sphere_is_refused_s329() {
+    let n = 24usize;
+    let (mut v, _) = volume_sphere(n);
+    v.set_free_surface(&vec![0.95; n * n], 0.95).unwrap();
+    let avant: Vec<u32> = v.surface().iter().chain(v.velocity_u()).map(|x| x.to_bits()).collect();
+    assert_eq!(v.step_surface_mobile(2000, 4000, &Jobs).err(), Some(Error::Domain));
+    let apres: Vec<u32> = v.surface().iter().chain(v.velocity_u()).map(|x| x.to_bits()).collect();
+    assert_eq!(avant, apres);
+}

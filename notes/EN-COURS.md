@@ -99,7 +99,7 @@ Critères, écrits avant le code :
 - [x] **P2** — ADR-189 : la v1 d'abord ; index, file.
 - [x] **P3** — géométrie : solide par distance signée aux nœuds, faces et mailles exactes pour le champ
   linéaire ; critères 1 à 3 en essais.
-- [ ] **P4** — le solide dans les pas linéaire et mobile ; critère 4.
+- [x] **P4** — le solide dans les pas linéaire et mobile ; critère 4.
 - [ ] **P5** — banc : débit autour de la sphère, trois mailles, ordre ; poussée.
 - [ ] **P6** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; file, liste 4.15.
@@ -115,3 +115,9 @@ linéaire. `Volume3::configure_with_solid`. Essais `…_s329` : plan horizontal 
 volume déplacé d'**ordre 1,994 puis 2,009**, réflexion à 10⁻⁶ ; **poussée hydrostatique = ρg·V du polyèdre
 à 10⁻⁹**, latérale nulle — le théorème de la divergence de la découpe ; refus au fond et au couvercle.
 Cœur : 477 réussis.
+**P4 (23:04).** Sphère immergée, 24³ : lac au repos **au bit**, cent pas linéaires et cent mobiles ; onde
+de 1 cm au-dessus, vingt pas mobiles, divergence franche sous la tolérance ; surface trop près du sommet
+refusée, état restauré. **Défaut trouvé et corrigé** : une face fermée portait 7·10⁻⁵ m/s — l'extrapolation
+mobile remonte chaque colonne de faces et remplissait celles du solide avec la vitesse d'en dessous ;
+sous un fond, aucune face résolue ne les précède, la 2D ne pouvait pas le voir. Elle saute désormais
+les faces fermées ; l'identité 2D de S328 tient au bit. Cœur : 479 réussis.
