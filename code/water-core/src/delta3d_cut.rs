@@ -44,6 +44,9 @@ pub(crate) struct Cut3 {
     /// avance à `V + Ω × (x − c)`.
     pub solid_angular: [f32; 3],
     pub solid_center: [f32; 3],
+    /// **S332 : le solide peut percer le couvercle** — une coque qui flotte. Mode linéaire seulement :
+    /// les faces du couvercle qu'elle couvre deviennent paroi ; le pas mobile garde son plancher.
+    pub piercing: bool,
 }
 
 /// S330 : la découpe du fond seul, et le volume du solide dans chaque colonne, m³.
@@ -241,7 +244,7 @@ pub(crate) fn cut(domain: Domain3, bottom: &[f32]) -> Cut3 {
         .flat_map(|j| (0..nx).map(move |i| (i, j)))
         .map(|(i, j)| footprint(i, j).into_iter().fold(f32::NEG_INFINITY, f32::max))
         .collect();
-    Cut3 { frac, open_u, open_v, open_w, floor, base: None, solid_velocity: [0.; 3], solid_angular: [0.; 3], solid_center: [0.; 3] }
+    Cut3 { frac, open_u, open_v, open_w, floor, base: None, solid_velocity: [0.; 3], solid_angular: [0.; 3], solid_center: [0.; 3], piercing: false }
 }
 
 // ═════════════════════════════════════════════════════════════════════════════════════════════
@@ -376,7 +379,7 @@ fn seal_isolated(g: &mut Cut3, domain: Domain3) {
 pub(crate) fn add_solid(g: &mut Cut3, domain: Domain3, solid: &[f32]) -> Result<(), crate::delta_projection::Error> {
     use crate::delta_projection::Error;
     // S330 : vérifier d'abord, écrire ensuite — un refus laisse la découpe intacte.
-    check_solid(&g.frac, &g.open_u, &g.open_v, &g.open_w, domain, solid)?;
+    check_solid(&g.frac, &g.open_u, &g.open_v, &g.open_w, domain, solid, g.piercing)?;
     let Domain3 { nx, ny, nz, dx } = domain;
     let node = |a: usize, b: usize, c: usize| solid[(c * (ny + 1) + b) * (nx + 1) + a] as f64;
     for k in 0..nz {
@@ -429,15 +432,15 @@ pub(crate) fn add_solid(g: &mut Cut3, domain: Domain3, solid: &[f32]) -> Result<
 
 /// **S330 : les refus de `add_solid`, sans rien écrire** — une maille ou une face que fond et solide
 /// coupent tous deux, un solide dans la couche du couvercle.
-pub(crate) fn check_solid(frac: &[f32], open_u: &[f32], open_v: &[f32], open_w: &[f32], domain: Domain3, solid: &[f32])
-    -> Result<(), crate::delta_projection::Error> {
+pub(crate) fn check_solid(frac: &[f32], open_u: &[f32], open_v: &[f32], open_w: &[f32], domain: Domain3, solid: &[f32],
+    piercing: bool) -> Result<(), crate::delta_projection::Error> {
     use crate::delta_projection::Error;
     let Domain3 { nx, ny, nz, .. } = domain;
     let node = |a: usize, b: usize, c: usize| solid[(c * (ny + 1) + b) * (nx + 1) + a] as f64;
     for k in 0..nz {
         for j in 0..ny {
             for i in 0..nx {
-                if cell_negative(cell_nodes(domain, solid, i, j, k)) > 0. && (frac[(k * ny + j) * nx + i] < 1. || k + 1 == nz) {
+                if cell_negative(cell_nodes(domain, solid, i, j, k)) > 0. && (frac[(k * ny + j) * nx + i] < 1. || (k + 1 == nz && !piercing)) {
                     return Err(Error::Domain);
                 }
             }

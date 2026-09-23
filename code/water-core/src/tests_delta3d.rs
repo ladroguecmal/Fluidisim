@@ -1380,3 +1380,61 @@ fn a_spinning_sphere_pushes_no_water_a_spinning_box_does_s332() {
     assert!(sphere <= 0.01 * 0.6, "{sphere}");
     assert!(pave >= 0.1 * 2. * 0.2, "{pave}");
 }
+
+/// Le cube de C10 à son tirant de mer, centré en (0,6 ; 0,6), dans un cube de 1,2 m de 24 mailles : il
+/// perce le couvercle, élevé de `dz`.
+fn cube_flottant(dz: f64) -> (Vec<f32>, [f64; 3]) {
+    let d = 500. / 1025. * 0.5;
+    let c = [0.6, 0.6, 1.2 - d + 0.25 + dz];
+    (noeuds_boite(24, 1.2 / 24., c, [0.25, 0.25, 0.25]), c)
+}
+
+/// **S332, critère 2.** Une coque qui perce le couvercle : le pas linéaire l'accepte, et un lac au repos
+/// autour d'elle reste au repos au bit ; sans l'autorisation de percer, la configuration la refuse.
+#[test]
+fn a_floating_hull_pierces_the_lid_and_the_lake_stays_at_rest_s332() {
+    let n = 24usize;
+    let dx = 1.2 / n as f32;
+    let (s, _) = cube_flottant(0.);
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    let d = Domain3 { nx: n, ny: n, nz: n, dx };
+    assert_eq!(Volume3::configure_with_solid(&mut host, d, 1025., 9.81, &vec![0.; n * n], &s).err(), Some(Error::Domain));
+    let mut v = Volume3::configure_with_floating_solid(&mut host, d, 1025., 9.81, &vec![0.; n * n], &s).unwrap();
+    let (_, _, ow) = v.apertures().unwrap();
+    assert!(ow[n * n * n..].iter().any(|a| *a == 0.), "le couvercle n'est pas percé");
+    v.set_surface(&vec![1.2; n * n]).unwrap();
+    for pas in 0..100 {
+        v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        assert!(v.velocity_u().iter().chain(v.velocity_v()).chain(v.velocity_w()).all(|x| x.to_bits() == 0), "pas {pas}");
+        assert!(v.surface().iter().all(|h| h.to_bits() == 1.2f32.to_bits()), "pas {pas}");
+    }
+}
+
+/// **S332, critère 3.** Le cube de C10 pilonne en perçant le couvercle, 2 cm à 2 Hz : la surface suit le
+/// volume de coque plongé dans le domaine à 10⁻⁹ m³ près, pas après pas ; divergence sous la tolérance.
+#[test]
+fn a_heaving_hull_through_the_lid_keeps_the_water_volume_s332() {
+    let n = 24usize;
+    let dx = 1.2 / n as f32;
+    let (s0, _) = cube_flottant(0.);
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut v = Volume3::configure_with_floating_solid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain3 { nx: n, ny: n, nz: n, dx }, 1025., 9.81, &vec![0.; n * n], &s0).unwrap();
+    v.set_surface(&vec![1.2; n * n]).unwrap();
+    let solide = |v: &Volume3| v.cut.as_ref().unwrap().base.as_ref().unwrap().solid_col.iter().map(|x| *x as f64).sum::<f64>();
+    let v0 = solide(&v);
+    let (a, w) = (0.02f64, 2. * core::f64::consts::PI * 2.);
+    let mut pire = 0f64;
+    for pas in 1..=100 {
+        let t = pas as f64 * 0.002;
+        let (s, _) = cube_flottant(a * (w * t).sin());
+        v.set_solid(&s, [0., 0., (a * w * (w * t).cos()) as f32]).unwrap();
+        let r = v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        assert!(r.divergence <= PROJECTION_DIVERGENCE_TOLERANCE as f64, "pas {pas} : {}", r.divergence);
+        let eau: f64 = v.eta.iter().zip(&v.eta_roundoff).map(|(h, r)| (*h as f64 - *r as f64 - 1.2f32 as f64) * (dx as f64).powi(2)).sum();
+        pire = pire.max((eau - (solide(&v) - v0)).abs());
+    }
+    println!("S332 : coque qui pilonne, écart de volume au pire {pire:e} m³");
+    assert!(pire <= 1e-9, "{pire}");
+}

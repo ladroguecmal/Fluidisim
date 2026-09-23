@@ -272,6 +272,20 @@ impl Volume3 {
     /// la mémoire de δ.
     pub fn configure_with_solid(host: &mut HostServices, domain: Domain3, rho: f32, g_eff: f32, bottom: &[f32],
         solid: &[f32]) -> Result<Self, Error> {
+        Self::configure_solid(host, domain, rho, g_eff, bottom, solid, false)
+    }
+
+    /// **S332 : la référence autour d'une coque qui flotte** — le solide peut percer le couvercle du mode
+    /// linéaire, dont les faces qu'il couvre deviennent paroi ; la condition de surface ne tient que sur la
+    /// part libre de chaque face. Le fond, lui, ne doit toujours pas l'atteindre. Le pas mobile refuse un
+    /// solide dans la couche du couvercle par son plancher.
+    pub fn configure_with_floating_solid(host: &mut HostServices, domain: Domain3, rho: f32, g_eff: f32, bottom: &[f32],
+        solid: &[f32]) -> Result<Self, Error> {
+        Self::configure_solid(host, domain, rho, g_eff, bottom, solid, true)
+    }
+
+    fn configure_solid(host: &mut HostServices, domain: Domain3, rho: f32, g_eff: f32, bottom: &[f32],
+        solid: &[f32], piercing: bool) -> Result<Self, Error> {
         let Domain3 { nx, ny, nz, .. } = domain;
         let nodes = (nx + 1).checked_mul(ny + 1).and_then(|n| n.checked_mul(nz + 1)).ok_or(Error::Domain)?;
         if solid.len() != nodes {
@@ -288,6 +302,7 @@ impl Volume3 {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
         let g = v.cut.as_mut().expect("fond coupé");
+        g.piercing = piercing;
         let mut base = g.base(nx * ny);
         cut::add_solid(g, domain, solid)?;
         solid_columns(domain, &base.frac, &g.frac, &mut base.solid_col);
@@ -321,7 +336,7 @@ impl Volume3 {
         }
         let g = self.cut.as_mut().ok_or(Error::Domain)?;
         let mut base = g.base.take().ok_or(Error::Domain)?;
-        if let Err(e) = cut::check_solid(&base.frac, &base.open_u, &base.open_v, &base.open_w, domain, solid) {
+        if let Err(e) = cut::check_solid(&base.frac, &base.open_u, &base.open_v, &base.open_w, domain, solid, g.piercing) {
             g.base = Some(base);
             return Err(e);
         }
@@ -1073,9 +1088,14 @@ impl Volume3 {
     fn linear(&mut self, scale: f32, correction: f32, transport: f32, max_iters: u32,
         jobs: &dyn JobSystem) -> Result<Report, Error> {
         let Domain3 { nx, ny, nz, dx } = self.domain;
-        // S324 : sur fond coupé, le couvercle doit rester entièrement mouillé, comme en 2D.
+        // S324 : sur fond coupé, le couvercle doit rester entièrement mouillé, comme en 2D ; S332 : une coque
+        // qui perce le couvercle en ferme une part, mais le fond seul ne doit jamais l'atteindre.
         if let Some(g) = &self.cut {
-            if (0..nx * ny).any(|c| g.open_w[nz * nx * ny + c] != 1.) {
+            let couvercle = match (&g.base, g.piercing) {
+                (Some(b), true) => &b.open_w,
+                _ => &g.open_w,
+            };
+            if (0..nx * ny).any(|c| couvercle[nz * nx * ny + c] != 1.) {
                 return Err(Error::Domain);
             }
         }

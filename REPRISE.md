@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-23 23:35 +02:00
+Battement        : 2026-09-23 23:38 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S332 — lot 4, le corps dans δ (ADR-189)
 Dernière session : S331 — **lot 4, le corps rigide du jeu** : six degrés de liberté, proxy de flottabilité sur B + W, masse ajoutée ; C10 tenu — tirant à 0,02 %, période à 2·10⁻⁶, rapport √2 à 10⁻⁵ du modèle ; roulis d'un pavé à 0,04 % ([preuve](docs/validation/CORPS-RIGIDE-S331.md))

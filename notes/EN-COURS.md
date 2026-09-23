@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — mouvement rigide de la paroi ; critère 1.
-- [ ] **P3** — la coque perce le couvercle ; critères 2 et 3.
+- [x] **P3** — la coque perce le couvercle ; critères 2 et 3.
 - [ ] **P4** — banc : masse ajoutée du cube flottant, trois mailles (critère 4).
 - [ ] **P5** — le corps du jeu pilote sa paroi, décalage visuel borné ; critère 5.
 - [ ] **P6** — preuve : section datée de [CORPS-RIGIDE-S331](../docs/validation/CORPS-RIGIDE-S331.md), avec
@@ -106,3 +106,9 @@ elle-même, vitesse maximale **1,08 %** de `Ω·R` à 6 mailles par rayon — *m
 non au centroïde de sa part couverte — une petite part couverte au coin d'une face s'écarte de `Ω·dx/2`,
 et une petite maille l'amplifie. Remède nommé, non fait : le centroïde de la part couverte. Pavé qui
 tourne : 0,42 m/s, il pousse l'eau.
+**P3 (23:38).** `configure_with_floating_solid` : le solide peut occuper la couche du couvercle ; le pas
+linéaire ne refuse plus qu'un **fond** qui l'atteindrait. L'opérateur pondérait déjà la condition du
+couvercle par l'ouverture : une face couverte devient paroi, une face en partie couverte garde la
+condition sur sa part libre ; la part couverte avance à la vitesse de la coque. Cube de C10 à son tirant,
+24³ : **lac au repos au bit**, 100 pas ; pilonnement imposé 2 cm à 2 Hz, 100 pas : la surface suit le
+volume de coque plongé à **2,7·10⁻¹⁰ m³**. Sans l'autorisation, la configuration refuse. Cœur : 490.
