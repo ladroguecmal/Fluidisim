@@ -91,7 +91,12 @@ Critères, écrits avant le code :
 - [x] **P3** — le banc de S324 rejoué, avec et sans Jacobi.
 - [x] **P4** — preuve : section datée de [FACES-COUPEES-3D-S324](../docs/validation/FACES-COUPEES-3D-S324.md),
   avec « Reproduire » ; A315, file.
-- [>] **P5** — S320 P5b : §5 bis au retour du calcul lancé le 22 à 20:11 — asynchrone.
+- [>] **P5** — S320 P5b : §5 bis au retour du calcul lancé le 22 à 20:11 — asynchrone. **Redéclarée à 08:55**,
+  sur question de l'utilisateur (*« Il n'y a pas de problème avec P5b ? »*) : annoncé pour 1 à 2 h, le calcul
+  tourne depuis 12 h 38 (12 h 17 de CPU) sans rien écrire. Le pas d'APIC n'a pas de plancher et le gradient
+  conjugué plafonne à 4 000 itérations : il peut ramper ou s'être emballé. **P5a** — trace de progression
+  par variable d'environnement (sortie par défaut inchangée), le même calcul rejoué en parallèle ;
+  **P5b** — verdict : attendre, ou arrêter et dire pourquoi.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
