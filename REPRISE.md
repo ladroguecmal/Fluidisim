@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-23 10:26 +02:00
+JETON            : occupé
+Battement        : 2026-09-23 21:56 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S327 — lot 5, recevoir le raccord dynamique (A316)
 Dernière session : S326 — **lot 3, Jacobi sur le chemin coupé** : la bosse de S324 à 128 converge en 425 itérations et 5,7 s au lieu de 16 029 et 708 s, identité 2D gardée ; A315 résolu ([preuve](docs/validation/FACES-COUPEES-3D-S324.md) §6). **S320 P5b tranché** : le temps de pincement ne converge pas à trois mailles, et la bulle sans pression emballait le calcul fin — 13 h sans rien écrire (A311, L372, [preuve](docs/validation/B10-APIC-S320.md) §5 bis)
 Session suivante : **S327, lot 5 — recevoir le raccord dynamique** (4.12, A316, alternance d'ADR-188) : attribuer l'écart de frontière un suspect à la fois — insertion des particules sortantes, quantification des colonnes, colonnes sans mémoire de vitesse —, puis le corriger ; à deux maillons, la session vise une capacité, pas un diagnostic. Le lot 3 reprendra par le mode mobile sur fond coupé
 Maillons        : 2 — S326 : une optimisation pas encore consommée, et une affirmation de convergence retirée ; 4.15 et 4.12 restent partiels
