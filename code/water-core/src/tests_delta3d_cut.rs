@@ -212,3 +212,132 @@ fn the_cut_is_mirror_symmetric_s324() {
         }
     }
 }
+
+// ─────────────────────────────── S329 : un solide quelconque ───────────────────────────────
+
+/// Une distance signée évaluée aux nœuds, `x` le plus rapide puis `y` puis `z`.
+fn noeuds(d: Domain3, f: impl Fn(f64, f64, f64) -> f64) -> Vec<f32> {
+    let Domain3 { nx, ny, nz, dx } = d;
+    let dx = dx as f64;
+    let mut out = Vec::with_capacity((nx + 1) * (ny + 1) * (nz + 1));
+    for k in 0..=nz {
+        for j in 0..=ny {
+            for i in 0..=nx {
+                out.push(f(i as f64 * dx, j as f64 * dx, k as f64 * dx) as f32);
+            }
+        }
+    }
+    out
+}
+
+/// **S329, critère 1a.** Un solide plan horizontal donne la découpe d'un fond de même hauteur, à 10⁻⁶ ;
+/// un solide absent laisse la découpe du fond — une bosse — **au bit**.
+#[test]
+fn a_flat_solid_is_a_flat_bottom_and_an_absent_one_changes_nothing_s329() {
+    let d = Domain3 { nx: 6, ny: 5, nz: 8, dx: 0.25 };
+    let zp = 0.61f32;
+    let mut g = cut(d, &vec![0.; 30]);
+    add_solid(&mut g, d, &noeuds(d, |_, _, z| z - zp as f64)).unwrap();
+    let h = cut(d, &vec![zp; 30]);
+    for (a, b) in g.frac.iter().zip(&h.frac).chain(g.open_u.iter().zip(&h.open_u))
+        .chain(g.open_v.iter().zip(&h.open_v)).chain(g.open_w.iter().zip(&h.open_w)) {
+        assert!((a - b).abs() <= 1e-6, "{a} contre {b}");
+    }
+    let bosse: Vec<f32> = (0..5).flat_map(|j| (0..6).map(move |i| {
+        let (x, y) = ((i as f32 + 0.5) * 0.25, (j as f32 + 0.5) * 0.25);
+        0.2 + 0.3 * (-((x - 0.7) * (x - 0.7) + (y - 0.6) * (y - 0.6)) / 0.1).exp()
+    })).collect();
+    let mut g = cut(d, &bosse);
+    add_solid(&mut g, d, &noeuds(d, |_, _, _| 1.)).unwrap();
+    let h = cut(d, &bosse);
+    for (a, b) in g.frac.iter().zip(&h.frac).chain(g.open_u.iter().zip(&h.open_u)).chain(g.open_v.iter().zip(&h.open_v))
+        .chain(g.open_w.iter().zip(&h.open_w)).chain(g.floor.iter().zip(&h.floor)) {
+        assert_eq!(a.to_bits(), b.to_bits());
+    }
+}
+
+/// **S329, critère 1b.** Un solide plan oblique : chaque part solide contre la formule exacte du cube
+/// coupé par un plan — inclusion–exclusion sur ses huit sommets, qui ne partage rien avec la découpe.
+#[test]
+fn an_oblique_solid_plane_is_cut_exactly_s329() {
+    let d = Domain3 { nx: 8, ny: 8, nz: 8, dx: 0.125 };
+    let (a, b, c, e) = (0.3f64, 0.5, 0.8, 0.55);
+    let mut g = cut(d, &vec![0.; 64]);
+    add_solid(&mut g, d, &noeuds(d, |x, y, z| a * x + b * y + c * z - e)).unwrap();
+    let dx = 0.125f64;
+    let (al, be, ga) = (a * dx, b * dx, c * dx);
+    let mut coupees = 0;
+    for k in 0..8 {
+        for j in 0..8 {
+            for i in 0..8 {
+                let reste = e - (a * i as f64 + b * j as f64 + c * k as f64) * dx;
+                let mut v = 0f64;
+                for s in 0..8usize {
+                    let (p, q, r) = ((s & 1) as f64, ((s >> 1) & 1) as f64, (s >> 2) as f64);
+                    let signe = if (s.count_ones() % 2) == 0 { 1. } else { -1. };
+                    v += signe * (reste - al * p - be * q - ga * r).max(0.).powi(3);
+                }
+                let exacte = (v / (6. * al * be * ga)).clamp(0., 1.);
+                let solide = 1. - g.frac[(k * 8 + j) * 8 + i] as f64;
+                assert!((solide - exacte).abs() <= 2e-6, "maille ({i},{j},{k}) : {solide} contre {exacte}");
+                coupees += (exacte > 0. && exacte < 1.) as usize;
+            }
+        }
+    }
+    assert!(coupees > 50, "{coupees}");
+}
+
+/// Sphère de rayon 0,3 m au milieu d'un cube de 1,2 m, sous la couche du couvercle.
+fn sphere(d: Domain3) -> Vec<f32> {
+    noeuds(d, |x, y, z| ((x - 0.6).powi(2) + (y - 0.6).powi(2) + (z - 0.55).powi(2)).sqrt() - 0.3)
+}
+
+/// **S329, critères 2 et 3.** Sphère immergée : volume déplacé d'ordre ≥ 1,8 vers `4πR³/3`, parts
+/// symétriques par réflexion ; la poussée hydrostatique intégrée sur la paroi discrète vaut `ρgV` du
+/// polyèdre à l'arrondi près — le théorème de la divergence de la découpe —, donc tend vers Archimède au
+/// même ordre ; poussée latérale nulle.
+#[test]
+fn an_immersed_sphere_displaces_its_volume_and_feels_archimedes_s329() {
+    let (rho, g_eff, surface) = (1025f64, 9.81f64, 1.2f64);
+    let exact = 4. / 3. * core::f64::consts::PI * 0.3f64.powi(3);
+    let mut erreurs = Vec::new();
+    for n in [12usize, 24, 48] {
+        let dx = 1.2 / n as f32;
+        let d = Domain3 { nx: n, ny: n, nz: n, dx };
+        let s = sphere(d);
+        let mut g = cut(d, &vec![0.; n * n]);
+        add_solid(&mut g, d, &s).unwrap();
+        let volume: f64 = g.frac.iter().map(|f| (1. - *f as f64) * (dx as f64).powi(3)).sum();
+        for k in 0..n {
+            for j in 0..n {
+                for i in 0..n {
+                    let (a, b) = (g.frac[(k * n + j) * n + i], g.frac[(k * n + j) * n + (n - 1 - i)]);
+                    assert!((a - b).abs() <= 1e-6, "réflexion ({i},{j},{k}) : {a} contre {b}");
+                }
+            }
+        }
+        let f = solid_wall_force(d, &s, &|p| rho * g_eff * (surface - p[2]));
+        let polyedre: f64 = (0..n).flat_map(|k| (0..n).flat_map(move |j| (0..n).map(move |i| (i, j, k))))
+            .map(|(i, j, k)| solid_cell_fraction(d, &s, i, j, k) * (dx as f64).powi(3)).sum();
+        assert!((f[2] / (rho * g_eff) - polyedre).abs() <= 1e-9 * polyedre, "{} contre {polyedre}", f[2] / (rho * g_eff));
+        assert!(f[0].abs() <= 1e-9 * f[2] && f[1].abs() <= 1e-9 * f[2], "poussée latérale {f:?}");
+        println!("S329 : n={n} volume={volume:.9e} poussée/ρg={:.9e} exact={exact:.9e}", f[2] / (rho * g_eff));
+        erreurs.push(volume - exact);
+    }
+    let (o1, o2) = ((erreurs[0] / erreurs[1]).abs().log2(), (erreurs[1] / erreurs[2]).abs().log2());
+    println!("S329 : ordres du volume déplacé {o1:.3}, {o2:.3}");
+    assert!(o1 >= 1.8 && o2 >= 1.8, "ordres {o1}, {o2}");
+}
+
+/// **S329.** Solide et fond ne se partagent pas une maille, et le solide ne touche pas la couche du
+/// couvercle : refus.
+#[test]
+fn a_solid_that_touches_the_bottom_or_the_lid_is_refused_s329() {
+    let d = Domain3 { nx: 8, ny: 8, nz: 8, dx: 0.125 };
+    let mut g = cut(d, &vec![0.3; 64]);
+    let bas = noeuds(d, |x, y, z| ((x - 0.5).powi(2) + (y - 0.5).powi(2) + (z - 0.4).powi(2)).sqrt() - 0.2);
+    assert_eq!(add_solid(&mut g, d, &bas).err(), Some(crate::delta_projection::Error::Domain));
+    let mut g = cut(d, &vec![0.; 64]);
+    let haut = noeuds(d, |x, y, z| ((x - 0.5).powi(2) + (y - 0.5).powi(2) + (z - 0.85).powi(2)).sqrt() - 0.2);
+    assert_eq!(add_solid(&mut g, d, &haut).err(), Some(crate::delta_projection::Error::Domain));
+}

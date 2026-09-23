@@ -238,6 +238,28 @@ impl Volume3 {
         Ok(v)
     }
 
+    /// **S329 : la référence autour d'un solide quelconque**, posé sur le fond coupé de S324. Le solide est
+    /// donné par sa distance signée aux nœuds, négative dedans, `(nx+1)·(ny+1)·(nz+1)` valeurs, `x` le plus
+    /// rapide puis `y` puis `z` ; coupé exactement pour le champ linéaire qu'elles définissent
+    /// (`delta3d_cut.rs`). Il ne partage aucune maille ni aucune face avec le fond et ne touche pas la
+    /// couche du couvercle (`Domain`). Mêmes tampons que `configure_with_bottom` : le solide n'ajoute rien à
+    /// la mémoire de δ.
+    pub fn configure_with_solid(host: &mut HostServices, domain: Domain3, rho: f32, g_eff: f32, bottom: &[f32],
+        solid: &[f32]) -> Result<Self, Error> {
+        let Domain3 { nx, ny, nz, .. } = domain;
+        let nodes = (nx + 1).checked_mul(ny + 1).and_then(|n| n.checked_mul(nz + 1)).ok_or(Error::Domain)?;
+        if solid.len() != nodes {
+            return Err(Error::Shape);
+        }
+        if solid.iter().any(|x| !x.is_finite()) {
+            return Err(Error::NotFinite);
+        }
+        let mut v = Self::configure_with_bottom(host, domain, rho, g_eff, bottom)?;
+        cut::add_solid(v.cut.as_mut().expect("fond coupé"), domain, solid)?;
+        v.prec_cut();
+        Ok(v)
+    }
+
     /// S326 : active ou coupe le Jacobi du chemin coupé — pour la mesure ; actif par défaut.
     pub fn set_precondition_cut(&mut self, on: bool) {
         self.precondition_cut = on;

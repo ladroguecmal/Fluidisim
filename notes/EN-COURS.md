@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-189 : la v1 d'abord ; index, file.
-- [ ] **P3** — géométrie : solide par distance signée aux nœuds, faces et mailles exactes pour le champ
+- [x] **P3** — géométrie : solide par distance signée aux nœuds, faces et mailles exactes pour le champ
   linéaire ; critères 1 à 3 en essais.
 - [ ] **P4** — le solide dans les pas linéaire et mobile ; critère 4.
 - [ ] **P5** — banc : débit autour de la sphère, trois mailles, ordre ; poussée.
@@ -106,4 +106,12 @@ Critères, écrits avant le code :
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
-
+**P3 (23:00).** `delta3d_cut.rs` : `add_solid` coupe en place, sans allocation, la découpe du fond par un
+solide donné aux nœuds ; faces en 4 triangles, mailles en 24 tétraèdres ; formules closes — deux
+sommets négatifs d'un tétraèdre : la différence divisée de `x³/((c+x)(d+x))` développée, sans division
+par `a − b`. `solid_wall_force` intègre une pression sur les polygones de coupe, exacte pour un champ
+linéaire. `Volume3::configure_with_solid`. Essais `…_s329` : plan horizontal = fond de même hauteur à
+10⁻⁶, solide absent au bit ; plan oblique contre l'inclusion–exclusion exacte à 2·10⁻⁶ ; sphère R = 0,3 :
+volume déplacé d'**ordre 1,994 puis 2,009**, réflexion à 10⁻⁶ ; **poussée hydrostatique = ρg·V du polyèdre
+à 10⁻⁹**, latérale nulle — le théorème de la divergence de la découpe ; refus au fond et au couvercle.
+Cœur : 477 réussis.

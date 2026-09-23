@@ -212,6 +212,277 @@ pub(crate) fn cut(domain: Domain3, bottom: &[f32]) -> Cut3 {
     Cut3 { frac, open_u, open_v, open_w, floor }
 }
 
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+// S329 — un solide quelconque, donné par sa distance signée aux nœuds
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+//
+// Le fond ne sait décrire qu'une hauteur par colonne. Un solide quelconque — sphère, coque — est donné
+// par sa **distance signée aux nœuds** de la grille, négative dans le solide, `(nx+1)·(ny+1)·(nz+1)`
+// valeurs, `x` le plus rapide puis `y` puis `z`. Il est coupé **exactement pour le champ linéaire par
+// morceaux** que ces valeurs définissent : chaque face en quatre triangles autour de son centre, chaque
+// maille en vingt-quatre tétraèdres qui s'appuient sur eux et sur le centre de la maille — les centres
+// valent la moyenne des nœuds qui les entourent. Une face vue de ses deux mailles est donc coupée de la
+// même façon, et le solide discret est un polyèdre dont la paroi est la réunion des polygones où le champ
+// s'annule : le théorème de la divergence y est exact. Géométrie calculée en `f64`, par des formules
+// closes **sans soustraction de grandeurs voisines** — deux sommets presque égaux sont le cas courant
+// d'une forme symétrique.
+
+/// Part d'un triangle où un champ linéaire, de valeurs `w` aux sommets, est **négatif**.
+fn tri_negative(w: [f64; 3]) -> f64 {
+    let mut v = w;
+    v.sort_by(|a, b| a.total_cmp(b));
+    let [v0, v1, v2] = v;
+    if v0 >= 0. {
+        0.
+    } else if v2 < 0. {
+        1.
+    } else if v1 >= 0. {
+        let a = -v0;
+        a * a / ((a + v1) * (a + v2))
+    } else {
+        1. - v2 * v2 / ((v2 - v0) * (v2 - v1))
+    }
+}
+
+/// Part d'un tétraèdre où un champ linéaire est négatif. Deux sommets négatifs `−a, −b` et deux positifs
+/// `c, d` : la différence divisée de `x³/((c+x)(d+x))` entre `a` et `b`, développée pour que `a = b` ne
+/// divise plus par zéro.
+fn tet_negative(w: [f64; 4]) -> f64 {
+    let mut v = w;
+    v.sort_by(|a, b| a.total_cmp(b));
+    let [v0, v1, v2, v3] = v;
+    if v0 >= 0. {
+        0.
+    } else if v3 < 0. {
+        1.
+    } else if v1 >= 0. {
+        let a = -v0;
+        a * a * a / ((a + v1) * (a + v2) * (a + v3))
+    } else if v2 >= 0. {
+        let (a, b, c, d) = (-v0, -v1, v2, v3);
+        (c * d * (a * a + a * b + b * b) + (c + d) * a * b * (a + b) + a * a * b * b)
+            / ((c + a) * (d + a) * (c + b) * (d + b))
+    } else {
+        1. - v3 * v3 * v3 / ((v3 - v0) * (v3 - v1) * (v3 - v2))
+    }
+}
+
+/// Part solide d'une face, coins en ordre cyclique : quatre triangles autour du centre.
+fn face_negative(c: [f64; 4]) -> f64 {
+    let m = 0.25 * (c[0] + c[1] + c[2] + c[3]);
+    0.25 * (tri_negative([c[0], c[1], m])
+        + tri_negative([c[1], c[2], m])
+        + tri_negative([c[2], c[3], m])
+        + tri_negative([c[3], c[0], m]))
+}
+
+/// Les six faces d'une maille en ordre cyclique, nœuds indexés `x + 2y + 4z` : x−, x+, y−, y+, z−, z+ —
+/// les ordres mêmes des faces `u`, `v`, `w` vues de la grille.
+const CELL_FACES: [[usize; 4]; 6] = [[0, 2, 6, 4], [1, 3, 7, 5], [0, 1, 5, 4], [2, 3, 7, 6], [0, 1, 3, 2], [4, 5, 7, 6]];
+
+/// Part solide d'une maille : vingt-quatre tétraèdres de même volume, un par triangle de face, fermés
+/// au centre de la maille.
+fn cell_negative(n: [f64; 8]) -> f64 {
+    let m = n.iter().sum::<f64>() / 8.;
+    let mut s = 0.;
+    for f in CELL_FACES {
+        let c = [n[f[0]], n[f[1]], n[f[2]], n[f[3]]];
+        let fc = 0.25 * (c[0] + c[1] + c[2] + c[3]);
+        for e in 0..4 {
+            s += tet_negative([c[e], c[(e + 1) % 4], fc, m]);
+        }
+    }
+    s / 24.
+}
+
+/// Les huit nœuds d'une maille, `x + 2y + 4z`.
+fn cell_nodes(domain: Domain3, solid: &[f32], i: usize, j: usize, k: usize) -> [f64; 8] {
+    let Domain3 { nx, ny, .. } = domain;
+    let node = |a: usize, b: usize, c: usize| solid[(c * (ny + 1) + b) * (nx + 1) + a] as f64;
+    [
+        node(i, j, k),
+        node(i + 1, j, k),
+        node(i, j + 1, k),
+        node(i + 1, j + 1, k),
+        node(i, j, k + 1),
+        node(i + 1, j, k + 1),
+        node(i, j + 1, k + 1),
+        node(i + 1, j + 1, k + 1),
+    ]
+}
+
+/// Une maille fluide dont aucune face n'est ouverte rendrait l'opérateur singulier : elle est déclarée
+/// solide, comme en 2D.
+fn seal_isolated(g: &mut Cut3, domain: Domain3) {
+    let Domain3 { nx, ny, nz, .. } = domain;
+    for k in 0..nz {
+        for j in 0..ny {
+            for i in 0..nx {
+                let c = (k * ny + j) * nx + i;
+                if g.frac[c] == 0. {
+                    continue;
+                }
+                let a = g.open_u[(k * ny + j) * (nx + 1) + i]
+                    + g.open_u[(k * ny + j) * (nx + 1) + i + 1]
+                    + g.open_v[(k * (ny + 1) + j) * nx + i]
+                    + g.open_v[(k * (ny + 1) + j + 1) * nx + i]
+                    + g.open_w[(k * ny + j) * nx + i]
+                    + g.open_w[((k + 1) * ny + j) * nx + i];
+                if a == 0. {
+                    g.frac[c] = 0.;
+                }
+            }
+        }
+    }
+}
+
+/// **S329 : ajoute un solide à la découpe du fond**, en place, sans allocation. Le solide et le fond ne
+/// partagent aucune maille ni aucune face : une maille ou une face que les deux coupent est refusée
+/// (`Domain`), comme une maille solide dans la couche du couvercle. Le plancher de chaque colonne monte
+/// au sommet de la plus haute maille que le solide touche : le pas mobile garde la surface deux mailles
+/// au-dessus.
+pub(crate) fn add_solid(g: &mut Cut3, domain: Domain3, solid: &[f32]) -> Result<(), crate::delta_projection::Error> {
+    use crate::delta_projection::Error;
+    let Domain3 { nx, ny, nz, dx } = domain;
+    let node = |a: usize, b: usize, c: usize| solid[(c * (ny + 1) + b) * (nx + 1) + a] as f64;
+    for k in 0..nz {
+        for j in 0..ny {
+            for i in 0..nx {
+                let s = cell_negative(cell_nodes(domain, solid, i, j, k));
+                if s > 0. {
+                    let c = (k * ny + j) * nx + i;
+                    if g.frac[c] < 1. || k + 1 == nz {
+                        return Err(Error::Domain);
+                    }
+                    g.frac[c] = (1. - s) as f32;
+                    let top = (k + 1) as f32 * dx;
+                    if top > g.floor[j * nx + i] {
+                        g.floor[j * nx + i] = top;
+                    }
+                }
+            }
+        }
+    }
+    let face = |open: &mut f32, c: [f64; 4]| -> Result<(), Error> {
+        let s = face_negative(c);
+        if s > 0. {
+            if *open < 1. {
+                return Err(Error::Domain);
+            }
+            *open = (1. - s) as f32;
+        }
+        Ok(())
+    };
+    for k in 0..nz {
+        for j in 0..ny {
+            for i in 1..nx {
+                face(&mut g.open_u[(k * ny + j) * (nx + 1) + i],
+                    [node(i, j, k), node(i, j + 1, k), node(i, j + 1, k + 1), node(i, j, k + 1)])?;
+            }
+        }
+        for j in 1..ny {
+            for i in 0..nx {
+                face(&mut g.open_v[(k * (ny + 1) + j) * nx + i],
+                    [node(i, j, k), node(i + 1, j, k), node(i + 1, j, k + 1), node(i, j, k + 1)])?;
+            }
+        }
+    }
+    for k in 1..=nz {
+        for j in 0..ny {
+            for i in 0..nx {
+                face(&mut g.open_w[(k * ny + j) * nx + i],
+                    [node(i, j, k), node(i + 1, j, k), node(i + 1, j + 1, k), node(i, j + 1, k)])?;
+            }
+        }
+    }
+    seal_isolated(g, domain);
+    Ok(())
+}
+
+/// **S329 : la force d'une pression sur la paroi du solide discret**, en newtons — `∫ p n dA`, `n` tourné
+/// vers le solide. Dans chaque tétraèdre coupé, la paroi est un triangle ou un quadrilatère plan ; la
+/// pression, lue à son centroïde, en donne l'intégrale **exacte** pour tout champ linéaire. Une pression
+/// hydrostatique rend donc exactement `ρ·g·V` du polyèdre discret : c'est Archimède, et c'est le théorème
+/// de la divergence de la découpe.
+// Consommée par les forces rendues au corps (lot 4) ; les essais de S329 la reçoivent d'abord.
+#[cfg_attr(not(test), allow(dead_code))]
+pub(crate) fn solid_wall_force(domain: Domain3, solid: &[f32], p: &dyn Fn([f64; 3]) -> f64) -> [f64; 3] {
+    let Domain3 { nx, ny, nz, dx } = domain;
+    let dx = dx as f64;
+    let mut force = [0f64; 3];
+    let sub = |a: [f64; 3], b: [f64; 3]| [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+    let cross = |a: [f64; 3], b: [f64; 3]| [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    let dot = |a: [f64; 3], b: [f64; 3]| a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    for k in 0..nz {
+        for j in 0..ny {
+            for i in 0..nx {
+                let n = cell_nodes(domain, solid, i, j, k);
+                if n.iter().all(|x| *x >= 0.) || n.iter().all(|x| *x < 0.) {
+                    continue;
+                }
+                let pos = |b: usize| [(i + (b & 1)) as f64 * dx, (j + ((b >> 1) & 1)) as f64 * dx, (k + (b >> 2)) as f64 * dx];
+                let centre = [(i as f64 + 0.5) * dx, (j as f64 + 0.5) * dx, (k as f64 + 0.5) * dx];
+                let m = n.iter().sum::<f64>() / 8.;
+                for f in CELL_FACES {
+                    let fc_val = 0.25 * (n[f[0]] + n[f[1]] + n[f[2]] + n[f[3]]);
+                    let fc_pos = {
+                        let (a, b, c, d) = (pos(f[0]), pos(f[1]), pos(f[2]), pos(f[3]));
+                        [0.25 * (a[0] + b[0] + c[0] + d[0]), 0.25 * (a[1] + b[1] + c[1] + d[1]), 0.25 * (a[2] + b[2] + c[2] + d[2])]
+                    };
+                    for e in 0..4 {
+                        let verts = [(pos(f[e]), n[f[e]]), (pos(f[(e + 1) % 4]), n[f[(e + 1) % 4]]), (fc_pos, fc_val), (centre, m)];
+                        let negatives: Vec<usize> = (0..4).filter(|&q| verts[q].1 < 0.).collect();
+                        if negatives.is_empty() || negatives.len() == 4 {
+                            continue;
+                        }
+                        let positives: Vec<usize> = (0..4).filter(|&q| verts[q].1 >= 0.).collect();
+                        let cut = |a: usize, b: usize| {
+                            let (pa, va) = verts[a];
+                            let (pb, vb) = verts[b];
+                            let t = va / (va - vb);
+                            [pa[0] + t * (pb[0] - pa[0]), pa[1] + t * (pb[1] - pa[1]), pa[2] + t * (pb[2] - pa[2])]
+                        };
+                        // Le polygone où le champ s'annule, en ordre cyclique.
+                        let poly: Vec<[f64; 3]> = if negatives.len() == 2 {
+                            let (n0, n1, p0, p1) = (negatives[0], negatives[1], positives[0], positives[1]);
+                            vec![cut(n0, p0), cut(n0, p1), cut(n1, p1), cut(n1, p0)]
+                        } else if negatives.len() == 1 {
+                            positives.iter().map(|&q| cut(negatives[0], q)).collect()
+                        } else {
+                            negatives.iter().map(|&q| cut(q, positives[0])).collect()
+                        };
+                        let (mut area, mut moment) = ([0f64; 3], [0f64; 3]);
+                        for t in 1..poly.len() - 1 {
+                            let a = cross(sub(poly[t], poly[0]), sub(poly[t + 1], poly[0]));
+                            let half = [0.5 * a[0], 0.5 * a[1], 0.5 * a[2]];
+                            let g = [(poly[0][0] + poly[t][0] + poly[t + 1][0]) / 3., (poly[0][1] + poly[t][1] + poly[t + 1][1]) / 3.,
+                                (poly[0][2] + poly[t][2] + poly[t + 1][2]) / 3.];
+                            let pg = p(g);
+                            for q in 0..3 {
+                                area[q] += half[q];
+                                moment[q] += pg * half[q];
+                            }
+                        }
+                        // Orientée vers le solide : du côté d'un sommet négatif.
+                        let into = sub(verts[negatives[0]].0, poly[0]);
+                        let sign = if dot(area, into) < 0. { -1. } else { 1. };
+                        for q in 0..3 {
+                            force[q] += sign * moment[q];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    force
+}
+
+/// S329 : la part solide d'une maille, pour les essais et le banc — `1 − fraction` du solide seul.
+#[cfg(test)]
+pub(crate) fn solid_cell_fraction(domain: Domain3, solid: &[f32], i: usize, j: usize, k: usize) -> f64 {
+    cell_negative(cell_nodes(domain, solid, i, j, k))
+}
+
 #[cfg(test)]
 #[path = "tests_delta3d_cut.rs"]
 mod tests;
