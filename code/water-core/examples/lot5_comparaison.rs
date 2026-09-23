@@ -2321,6 +2321,11 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
     let (mut pire_masse, mut pire_ecart, mut pire_seul, mut v_max) = (0f64, 0f64, 0f64, 0f64);
     let mut t = 0.0;
     let mut prochain = 0.1;
+    // `RACCORD_SERIE` (S327) : la série à la frontière, chaque dixième de seconde, sur l'erreur standard —
+    // hauteurs géométriques des deux côtés `[i_b−2 i_b−1 | i_b i_b+1]`, hauteur de masse des particules
+    // libres en `i_b−1` et des deux premières colonnes, les mêmes grandeurs pour APIC seul, la vitesse
+    // moyenne sur la face de la frontière et les échanges cumulés.
+    let serie = std::env::var("RACCORD_SERIE").is_ok();
     while t < scene.t_fin - 1e-12 {
         let dt = hy.pas((prochain - t).max(1e-9));
         let mut ts = t;
@@ -2337,6 +2342,28 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
             }
             if let Some(e) = ecart_frontiere(&seul, i_b) {
                 pire_seul = pire_seul.max(e.abs());
+            }
+            if serie {
+                let (ch, cs) = (hy.apic.colonnes(), seul.colonnes());
+                let g = |c: &[Option<(f64, f64)>], i: usize| c[i].map_or(f64::NAN, |(_, g)| g);
+                let m = |c: &[Option<(f64, f64)>], i: usize| c[i].map_or(f64::NAN, |(m, _)| m);
+                let (nx, ny) = (hy.apic.mac.nx, hy.apic.mac.ny);
+                let (mut u, mut n) = (0.0, 0);
+                for k in 0..ny {
+                    if (k as f64 + 0.5) * dx < hy.h[0] {
+                        u += hy.apic.mac.u[k * (nx + 1) + i_b];
+                        n += 1;
+                    }
+                }
+                let (_, _, attente) = hy.masses();
+                eprintln!(
+                    "SERIE_S327 t={t:.2} hy_g=[{:.4} {:.4} | {:.4} {:.4}] hy_m=[{:.4} | {:.4} {:.4}]                      seul_g=[{:.4} {:.4} | {:.4} {:.4}] seul_m=[{:.4} | {:.4}] u_front={:+.4} entre={:.5} sorti={:.5} attente={:.5}",
+                    g(&ch, i_b - 2), g(&ch, i_b - 1), g(&ch, i_b), g(&ch, i_b + 1),
+                    m(&ch, i_b - 1), hy.h[0], hy.h[1],
+                    g(&cs, i_b - 2), g(&cs, i_b - 1), g(&cs, i_b), g(&cs, i_b + 1),
+                    m(&cs, i_b - 1), m(&cs, i_b),
+                    u / n.max(1) as f64, hy.entre, hy.sorti, attente
+                );
             }
             prochain += 0.1;
         }

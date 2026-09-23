@@ -92,7 +92,7 @@ seul — son effet mesuré contre le montage de S325 — reste une attribution p
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — instrument : série à la frontière — hauteurs géométriques des deux côtés, hauteurs de masse
+- [x] **P2** — instrument : série à la frontière — hauteurs géométriques des deux côtés, hauteurs de masse
   des colonnes, flux entrant et sortant, APIC seul au même endroit. Quel côté s'écarte, et quand.
 - [ ] **P3** — suspect choisi par P2 ; commutable, mesuré seul.
 - [ ] **P4** — suspect suivant ; commutable, mesuré seul.
@@ -108,4 +108,12 @@ Les quatre suspects : (a) la surface des colonnes vue par la pression, arrondie 
 l'échange asymétrique ; (d) les colonnes sans mémoire de vitesse propre.
 
 ### Notes de reprise
-
+**P2 (21:58).** `RACCORD_SERIE=1 … raccord_dyn ballottement 0.05` : une ligne `SERIE_S327` par dixième de
+seconde. La frontière est au nœud du premier mode : APIC seul y reste à 0,48–0,50 m. **Séquence de
+l'hybride** : de 0 à 0,2 s, la première colonne se vide — `h[0]` 0,500 → 0,473 m — par le flux eulérien
+vers la colonne suivante, alors qu'**aucune particule n'a encore franchi** la frontière (entré = 0 ; la
+plus proche est à un quart de maille). Puis les particules libres **s'entassent** dans la dernière colonne
+libre — hauteur de masse 0,675 m pour 0,494 m géométrique à 0,4 s, 35 % de particules en trop — et
+entrent **en rafale** : `h[0]` 0,604 m à 0,5 s, 0,014 m² entrés en un dixième de seconde. D'où l'écart
+d'environ deux mailles. **Suspect (c) désigné** : l'entrée lagrangienne est en retard puis en rafale sur
+une sortie eulérienne immédiate. P3 l'éprouve : échange eulérien dans les deux sens.
