@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 22:31 +02:00
+JETON            : libre
+Battement        : 2026-09-24 22:32 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S353 — **la v1 en scène vivante, 1** : δ à 30 Hz dans la fenêtre, en deux parts, interpolé au rendu (ADR-012 §7) ; la cadence en direct avec le rendu ; revue R18 préparée
-Dernière session : S352 — **la liste rangée par dépendance** (ADR-190 D3) : [registre](docs/registres/DEPENDANCES-LISTE.md) calculé et contrôlé, 34 points au front 0, 41 en attente d'un fait extérieur (le réseau en commande 14) ; l'ordre en feuille de route §3 ter. Avant : S351, la porte A reçue, **la v1 atteinte au sens d'ADR-174 D4**
-Session suivante : **la v1 en scène vivante** (feuille de route §3 ter, 1) — d'abord l'interpolation du rendu entre deux pas de 30 Hz (4.19, 8.7) ; puis la coque dans la production de δ (6.4) et l'ordonnanceur dans l'afficheur (4.2). **Une session sur deux au lot 5** (4.16 par A316, ADR-184 D1). La revue du prix du rang 1 (A319) quand l'afficheur le porte
-Maillons        : 1 — S352 : une carte, aucune capacité
+Session en cours : aucune
+Dernière session : S353 — **la v1 en scène vivante, 1** : δ à 30 Hz dans la fenêtre, interpolé au rendu — aucune image immobile, part de δ en direct 1,49 ms par image contre 3,31 à 60 Hz ([preuve](docs/validation/COUT-DELTA3D-S341.md) §12) ; revue **R18** préparée, en direct. Avant : S352, la liste rangée par dépendance ; S351, la v1 atteinte au sens d'ADR-174 D4
+Session suivante : **le lot 5** (alternance d'ADR-184 D1) — 4.16, la surface non graphe, par A316 : le raccord particules ↔ colonnes, dont la dissipation à 5 cm (S327). Ensuite, la v1 en scène vivante reprend : la coque dans la production de δ (6.4), puis l'ordonnanceur et le rang 1 dans l'afficheur (4.2). En attente : le verdict R18
+Maillons        : 0 — S353 : δ à 30 Hz interpolé, en direct
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

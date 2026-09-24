@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S353 — **en cours**. **La v1 en scène vivante, 1 : δ à 30 Hz dans la fenêtre, interpolé au rendu**
+Session : S353 — **terminée**. **La v1 en scène vivante, 1 : δ à 30 Hz dans la fenêtre, interpolé au rendu**
 (ADR-012 §7) — liste 4.19 et 8.7, feuille de route §3 ter.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — S352 : l'ordre après la v1. S348 avait reçu la porte C au banc et laissé ceci : « l'interpolation du rendu
@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 - [x] **P5** — la saccade mesurée (critère 3).
 - [x] **P6** — la cadence en direct (critère 4).
 - [x] **P7** — preuve, liste, file, feuille de route ; R18 préparée (critère 5).
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 - **P2.** `published_prev` : copie de `published` sur la carte avant la passe qui publie (pas entier et partie 1),

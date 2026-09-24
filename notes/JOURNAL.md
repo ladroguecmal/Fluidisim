@@ -16881,3 +16881,22 @@ une fausse la corrige dans les données. Les systèmes refaits par énoncé comp
 **Rituel.** Maillons **1** : une carte, pas une capacité — aucun point ne change d'état, comme le plan l'annonçait.
 Suivant : **la v1 en scène vivante**, en commençant par l'interpolation du rendu à 30 Hz (4.19, 8.7) ; puis le lot 5
 (4.16 par A316), une session sur deux.
+
+## S353 — 2026-09-24 — la v1 en scène vivante, 1 : δ à 30 Hz dans la fenêtre, interpolé au rendu
+
+**Entrée.** *« Continue »*. Feuille de route §3 ter, front 0, point 1 : réunir les portes en une scène vivante. S348
+avait reçu la porte C au banc et laissé l'interpolation d'ADR-012 §7 : δ changeait à 30 Hz dans une image à 60.
+**Fait** ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §12). Le pas garde la surface qu'il remplace, copiée sur la
+carte avant la passe qui publie ; le rendu lie les deux et mélange selon β, une branche rendant la lecture d'avant à
+β = 0 ; la fenêtre fait une part du pas par image, β = ½ après la part 1. Touche `I`, témoin `--delta3d-sans-pas`.
+**Mesuré.** Captures de l'anneau : 4 empreintes sur 4 inchangées ; image à β = ½ identique au bit à celle de la
+moyenne calculée sur CPU (témoin : 550 530 octets différents) ; saccade — sans interpolation une image sur deux
+immobile (119 sur 239), avec aucune, chaque image variant comme à 60 Hz (0,72 à 1,24 fois la médiane) ; **en direct
+avec le rendu**, même scène : part de δ par image **3,31 ms à 60 Hz, 1,49 à 30 Hz interpolé**.
+**Défaut de parcours, trouvé en P6 et corrigé.** À 30 Hz, P4 laissait la fenêtre avancer B d'un pas entier par image :
+B et δ divergeaient. Pas d'image ramené à 16,667 ms, horloge de δ décalée d'une demi-image, captures en pas entiers.
+**Limites.** Mesure en direct par différence d'intervalles, 960 × 540, sans 99ᵉ centile ; une scène, un domaine ; la
+fluidité se juge à l'œil — **R18 préparée**, en direct (REVUE-VISUELLE §23).
+**Rituel.** Maillons **0** : ce qui devient possible — δ à 30 Hz dans la fenêtre sans saccade, à 1,49 ms par image ;
+le chemin — la v1 en scène vivante, la coque dans la production puis l'ordonnanceur dans l'afficheur ; la preuve —
+§12 ; 4.19 et 8.7 avancent. Suivant, par l'alternance d'ADR-184 : **le lot 5** — 4.16, par A316. Verdict R18 attendu.
