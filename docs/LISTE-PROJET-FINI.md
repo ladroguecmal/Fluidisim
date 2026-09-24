@@ -60,9 +60,9 @@ pas recopiée ici (L137).
   ([ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md), ADR-171). **S344** : il arbitre **deux
   domaines δ 3D réels** sous un budget, et l'exclusion absorbante, reproduite en 3D, est levée par
   l'oubli des coûts — dans chaque hôte, pas dans le cœur ([preuve](validation/ARBITRAGE-3D-S344.md)
-  §3) ; **S349** : un domaine **se déplace**, au bit, décidé par l'hôte (§5). Manquent le point
-  d'entrée `WaterSystem` lui-même, la dégradation (ADR-012 §4), la forme des domaines décidée par
-  l'ordonnanceur, et l'oubli dans le cœur.
+  §3) ; **S349–S350** : un domaine **se déplace et se redimensionne**, au bit, décidé par l'hôte
+  (§5–6). Manquent le point d'entrée `WaterSystem` lui-même, la dégradation (ADR-012 §4), la forme
+  des domaines décidée par l'ordonnanceur, et l'oubli dans le cœur.
 - [ ] **1.5 Grille 3D de référence stable** : adressage, zones actives, échanges client/serveur —
   *absent*, conçu (ADR-006).
 - [ ] **1.6 Cellules, domaines et solveurs distincts, niveaux d'activité des cellules** — *absent*,
@@ -140,8 +140,9 @@ pas recopiée ici (L137).
 - [ ] **4.5 Création, croissance, réduction et disparition visuellement gratuites** (I-12) —
   *partiel* : naissance à zéro reçue sous fond couplé (S251, S253) ; en 3D, un domaine qui renaît
   repart de δ = 0 (S344), et **ce qui entre dans un domaine qui se déplace naît au repos**, au bit
-  (S349, [preuve](validation/ARBITRAGE-3D-S344.md) §5). Manquent la croissance, la réduction, la
-  disparition, et tout verdict visuel sur ces passages.
+  (S349) ; **S350 : croissance et réduction** d'un domaine 3D, l'état gardé au bit dans le
+  recouvrement, ce qui entre au repos ([preuve](validation/ARBITRAGE-3D-S344.md) §5–6). Manquent une
+  disparition progressive et tout verdict visuel sur ces passages.
 - [ ] **4.6 Entrée des vagues de B/W dans le domaine** — *partiel* : source volumique, surface
   mobile couplée, fond B prolongé (ADR-149 à 154). Flux de bande aux frontières reçus
   sur courant/niveau uniformes (S270, [preuve](validation/FOND-TRAVERSANT-S270.md), ADR-165).
@@ -246,8 +247,9 @@ pas recopiée ici (L137).
   **4,62 ms par pas contre 2 ms** visés, et le tampon des faces plafonne le domaine à 1,15 M faces
   ([S302](validation/SCENE-DELTA3D-S302.md) §2). **S341–S348** : fond factorisé et dix champs par face, au bit —
   3,68 ms par pas — ; **cadence de 30 Hz, un pas en deux parts : 1,92 ms au 99ᵉ centile par image**, porte C reçue
-  sur le banc ([preuve](validation/COUT-DELTA3D-S341.md) §11). Manquent l'interpolation du rendu, la mesure en
-  direct avec le rendu, d'autres scènes et plusieurs domaines.
+  sur le banc ([preuve](validation/COUT-DELTA3D-S341.md) §11) ; **S350** : le coût suit l'emprise d'un domaine
+  redimensionné, 0,09 ms + 3,57 ms × surface ([preuve](validation/ARBITRAGE-3D-S344.md) §6). Manquent
+  l'interpolation du rendu, la mesure en direct avec le rendu, d'autres scènes et plusieurs domaines.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *absent*.
   Besoin découvert S274 : B est linéaire, un δ fidèle dérive de la dispersion d'amplitude
@@ -402,7 +404,10 @@ pas recopiée ici (L137).
   lointaines, fréquence, effets — *absent* au sens de cette liste : le **rétrécissement** d'un
   domaine est construit (S283–S285) mais **non reçu** — dérive de 66,994 mm, A290
   ([ATTRIBUTION-RETRECISSEMENT-S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md)). Construit et
-  non reçu ne vaut pas partiel (§ « Comment lire un point »).
+  non reçu ne vaut pas partiel (§ « Comment lire un point »). **S350** : en 3D, le redimensionnement
+  est reçu au bit et le coût suit la surface ([preuve](validation/ARBITRAGE-3D-S344.md) §6) — le
+  moyen de la dégradation de taille ; la dégradation elle-même, que l'ordonnanceur décide, n'est pas
+  écrite.
 - [ ] **9.10 Profils de qualité, adaptation au matériel et à la charge** (I-16) — *absent*.
 - [ ] **9.11 60 images/s avec 2 ms pour l'eau sur une scène représentative** (ADR-125) — *partiel* :
   scène filtrée S267 : GPU eau médian ~1,74 ms en 1280×720, cuisson 0,574–0,585 ms,
@@ -411,7 +416,8 @@ pas recopiée ici (L137).
   centile par image** (30 Hz en deux parts, S348), mesuré seul. Profil de travail : ADR-174 D3, **non
   opposable pendant la construction physique** mais toujours mesuré et publié (ADR-178 D4).
 - [ ] **9.12 Aucune allocation à l'exécution** (I-06) — *partiel* : pas de δ et boucle d'image de
-  l'hôte reçus (S200, S240), pas couplé avec flux de bord reçu S270. Système entier non éprouvé.
+  l'hôte reçus (S200, S240), pas couplé avec flux de bord reçu S270 ; redimensionnement de δ 3D
+  sans allocation, constaté à l'allocateur de la carte (S350). Système entier non éprouvé.
 - [ ] **9.13 Dépassement critique temporaire** sans retard global perceptible — *absent*.
 
 ## 10. Multijoueur, autorité et persistance
@@ -505,8 +511,8 @@ pas recopiée ici (L137).
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
 --check` compare ce tableau aux points, section par section. *S338, 2026-09-24* : **6.4** passe à partiel —
 parois et corps mobiles dans δ depuis S330–S332, que la liste n'avait pas suivis — ; 4.15, 6.1, 6.3 et 6.5
-corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ; dix-huit points corrigés sans
-changer de case (actualisation complète, ci-dessous).
+corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ; vingt et un points corrigés sans
+changer de case — dix-huit sur S309–S349 (actualisation complète, ci-dessous), trois sur S350 (4.19, 9.9, 9.12).
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.
@@ -515,7 +521,8 @@ partiels portent l'essentiel de leur difficulté, et un point validé peut être
 retouchés, après relecture de chaque session de S309 à S349 contre la liste : les réceptions de
 cette période avaient été reportées là où elles touchaient un point de front, pas là où elles le
 touchaient de biais — masse comptée à l'interface (4.6), réflexion chiffrée (4.7), C10 sur le cœur
-(13.2), verdicts R15 à R17 (8.7, 8.10). **Un seul point change de catégorie** — **4.13**, absent →
+(13.2), verdicts R15 à R17 (8.7, 8.10) ; S350 y ajoute ses propres résultats (1.4, 4.5, 4.19,
+9.9, 9.12). **Un seul point change de catégorie** — **4.13**, absent →
 partiel : la coque de la porte D dans δ est la première part reçue du proche-coque, qu'ADR-001 range
 dans δ. **Aucun point ne devient validé**, et c'est encore le fait principal : entre S309 et S349,
 trois des quatre portes de la v1 ont été reçues — D (S338), B (S340), C (S348) — sans amener un seul

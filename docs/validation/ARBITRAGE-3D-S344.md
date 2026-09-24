@@ -61,6 +61,8 @@ un troisième hôte le recopierait. Sa place est à côté de l'ordonnanceur, da
 - **Le rendu** : aucun pixel n'est produit ; la part d'écran est calculée, pas observée.
 - **`W_gameplay` et `W_urgence`** : sans source dans un banc, déclarés à 1.
 
+*Note S350 (2026-09-24)* : le déplacement et le redimensionnement sont au §5 et au §6 ; reste le rang 1.
+
 ---
 
 ## 5. S349 — un domaine qui se déplace
@@ -106,4 +108,53 @@ surface de **7,2 cm** près du mur et de 3 cm au loin (`--delta3d-murs`, scène 
 ci-dessus comparait à l'ancien translaté, murs compris, et ne pouvait pas le voir. **Corrigé** : un décalage laisse ces
 faces nulles ; l'identité compte 6 272 murs `u` et 6 720 murs `v`, tous nuls, et aucune autre différence. Les résultats
 d'ordonnancement du tableau restent vrais ; l'état du domaine qui suivait était faux près de ses bords.
+
+## 6. S350 — un domaine qui se redimensionne
+
+2026-09-24. Deuxième critère de la porte A, seconde moitié : un domaine qui **se redimensionne**. Avec le §5, le
+deuxième critère de §3 bis est tenu ; reste le troisième, la dégradation de rang 1.
+
+**Reproduire** : commit `e0dcb281` ou plus récent ; `… -- --delta3d-redimensionnement` (identité, lignes
+`DELTA3D_REDIM_S350`, une vingtaine de secondes) ; `… -- --delta3d-cout-emprise` (coût, `DELTA3D_EMPRISE_S350`,
+alimentation relevée avant et après — A270) ; non-régression : `… -- --delta3d-empreinte` (empreintes S343) et
+`… -- --delta3d-decalage`.
+
+**Le mécanisme.** Les noyaux lisent les dimensions dans des uniformes ; les tampons sont réservés à la **capacité**,
+la forme de création (I-06). Une **forme courante** — `nx`, `ny` au plus la capacité, `nz` égal — commande comptes,
+dispatchs, copies et relectures ; quand elle vaut la capacité, les empreintes de S343 (60 et 600 pas) sont
+inchangées. `Step3::resize(di, dj, nx, ny)` recopie tout l'état de la forme courante dans le tampon de travail, puis
+réécrit chaque tableau dans la nouvelle disposition — l'ancien `(i + di, j + dj, k)` s'il existe, le repos sinon, les
+murs nuls — en **une seule soumission**, un uniforme par tableau ; les uniformes du fond, de la projection et du pas
+suivent la forme, l'origine avance. `shift` en est le cas à forme égale.
+
+**Au bit**, scène de B après 30 pas, deux redimensionnements successifs du même domaine :
+
+| | rétréci 120×112 → 90×84, depuis (13, 17) | élargi → 110×96, depuis (−6, −9) |
+|---|---|---|
+| (a) état réécrit, sept tableaux | **0** différence ; murs nuls, 4 704 `u` et 5 040 `v` | **0** ; entrant au repos, 78 960 `u` et 3 000 colonnes |
+| (b) un domaine **créé** à cette forme et à cette origine reçoit le même état ; 60 pas chacun | **0** différence sur 881 832 valeurs ; volume 29,74 m³ des deux côtés | **0** sur 1 230 728 ; 31,65 m³ |
+| (c) allocateur de la carte, avant et après | 89 784 320 octets, 27 allocations — inchangé | inchangé |
+
+(b) est ce qui fait **un domaine, et non une vue** : rien dans le pas ne se souvient de la capacité.
+
+**Le coût suit l'emprise** — secteur aux deux bornes (`BatteryStatus` 2, 97 %, `PowerOnline` vrai), un domaine
+redimensionné en place, centré, 500 pas horodatés par forme :
+
+| forme | surface | pas, médiane / q99 | rapport à la pleine forme |
+|---|---:|---:|---:|
+| 120×112 | 1,00 | 3,695 / 3,736 ms | 1,000 |
+| 104×97 | 0,75 | 2,743 / 2,787 | 0,742 |
+| 85×79 | 0,50 | 1,834 / 1,877 | 0,496 |
+| 60×56 | 0,25 | 1,019 / 1,064 | 0,276 |
+
+Moindres carrés : **0,09 ms + 3,57 ms × surface** ; les trois passes suivent la surface, aucune colonne hors bornes ;
+témoin à la pleine forme 3,695 ms contre 3,679 en S343. **Ce que le rang 1 en attend** : rétrécir un domaine de
+moitié libère la moitié de son coût, à 0,09 ms près.
+
+**Le décalage, remesuré** en temps mural, soumission et attente comprises : **0,375 ms** en médiane, q99 1,05, max
+1,22 — contre 1,463 en S349, en sept soumissions ; un changement de forme 100 ↔ 75 % : 0,360 ms, q99 1,31.
+
+**Ce que cela ne dit pas** : l'ordonnanceur ne **décide** pas encore de rétrécir — c'est le rang 1 ; un domaine ne
+dépasse pas sa capacité, fixée à la création, et `nz` ne change pas ; la bande qui naît au repos en s'élargissant
+n'a reçu aucun verdict visuel ; ce qui sort n'est pas rendu à W (A289).
 

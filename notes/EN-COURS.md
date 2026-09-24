@@ -101,7 +101,7 @@ Critères, écrits avant le code :
 - [x] **P6** — la liste réécrite : points touchés en remplacement, décompte recompté point par point, « État au » ;
   `--check`.
 - [x] **P7** — le coût selon l'emprise ; critère 4.
-- [ ] **P8** — preuve, file, feuille de route, et les lignes de la liste que S350 touche ; critère 5.
+- [x] **P8** — preuve, file, feuille de route, et les lignes de la liste que S350 touche ; critère 5.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
