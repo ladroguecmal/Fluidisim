@@ -139,3 +139,87 @@ grille verra son rayonnement dépendre de sa position sous la maille ; la scène
 - **δ** : domaine fixe à murs, qui renvoient les anneaux ; mode linéaire seulement ; 12 mailles par longueur
   d'onde rayonnée (3,1 m) ; aucune coque dans la production GPU.
 - **Le décalage visuel** : translation seule ; la rotation manque.
+
+---
+
+## 6. S334 — A317 : la paroi de la coque dans sa maille
+
+2026-09-24. Chemin de la porte D, sans verdict visuel : l'utilisateur n'a pas trouvé de référence (R15,
+[revue visuelle](REVUE-VISUELLE.md) §20).
+
+### Reproduire
+
+- Commit `cbd1560a` ou plus récent ; machine de référence, CPU, un fil par passage.
+- `cargo run -p water-core --release --offline --example a317_lamelle` — la coque 3D en pilonnement imposé,
+  cinq placements, ≈ 5 min ; lignes `A317`.
+- `… --example a317_lamelle -- --tranche --dx <0.25|0.125|0.0625> --phi 0.05,0.30,0.55,0.80 [--couvercle-partiel]`
+  — la convergence ; 7 s, 1 min, 20 min par passage.
+- `… --example porte_d -- --couvercle-partiel [--decalage-y 0.055] [--images viewer/captures/s334]` — la scène
+  au couvercle partiel ; lignes `PORTE_D flancs`. Sans option, les valeurs du §2 au bit.
+
+### Reproduit hors du jeu, puis attribué
+
+Pilonnement imposé de 5 cm à 4,48 rad/s ; amplitude quadratique moyenne de δ à 2,5–3,5 m de chaque flanc,
+entre 3 et 6 s ; `φ`, la part d'eau que la paroi laisse dans sa maille de bord. **En 3D, à 25 cm** : 16,1 mm à
+`φ` = 5 %, 10,9 à 30 %, 8,3–8,9 vers 50 %, 16,0 à 80 % — **écart 35 %**, rapport de flancs jusqu'à 1,91.
+
+**Le mécanisme.** δ porte par colonne une hauteur de *remplissage* — l'excès d'eau rapporté à la section
+entière — et le couvercle y impose `ρg(η − z₀)`. Sous une coque qui perce le couvercle, cet excès se tient
+dans la seule part libre `a` : la vraie surface vaut `(η − z₀)/a`. **La surface d'une colonne en partie
+couverte est `1/a` fois trop molle.** Le **couvercle partiel** (`Volume3::set_partial_lid`) y impose
+`ρg(η − z₀)/a`, avec deux précautions : l'eau que la coque vient de déposer dans la colonne en est exclue
+— le flux de sa paroi la retire pendant le pas (`Base3::deposit`) —, et l'ouverture est bornée par
+`dt²·g/dx`, garde du pas explicite de la hauteur.
+
+**Convergence sur une tranche** — la même section, infiniment longue, `ny` = 2 :
+
+| maille | couvercle de S332 : moyenne, écart | couvercle partiel : moyenne, écart |
+|---|---|---|
+| 25 cm | 18,40 mm, 38,5 % | 26,93 mm, 33,4 % |
+| 12,5 cm | 17,04 mm, 44,2 % | 21,99 mm, 10,9 % |
+| 6,25 cm | 17,79 mm, 30,5 % | 20,56 mm, **1,8 %** |
+
+**Le couvercle de S332 ne converge pas : A317 est un défaut de structure.** Le couvercle partiel converge,
+ordre 1,8 sur la moyenne, **extrapolée à 19,98 mm** ; le couvercle de S332 reste 11 % dessous et dépend du
+placement à ± 30–44 % quelle que soit la maille. À 3,125 cm, le gradient conjugué ne converge pas au pas 23
+(8 000 itérations), les deux couvercles : de petites cellules sous le fond de la coque.
+
+**Résolution.** Même corrigée, une coque de 6,4 mailles de large rayonne à ± 33 % selon son placement ; il
+en faut ~13 pour ± 11 %, ~25 pour ± 2 %.
+
+### Pourquoi le couvercle partiel reste éteint par défaut
+
+Une colonne dont l'ouverture se referme — coque qui glisse — gardait son excès d'eau, que `1/a` change en
+pointe : 12,2 m/s dans la contre-épreuve du critère 2 (coque tenue fixe sur la houle), 0,32 avec le
+couvercle de S332. **L'eau poussée par la paroi** passe désormais aux colonnes voisines au couvercle ouvert :
+5,47 m/s. Par mouvement : glissement pur 0,39 m/s, pilonnement relatif pur 0,34 m/s ; **dès que la coque
+tourne par rapport à l'eau**, 1,4 à 5,5 m/s, toujours dans une colonne de coin ouverte à 7–8 % — le résidu de
+rotation de S332, vitesse de paroi prise au centre des faces et non au centroïde de leur part couverte, que
+`1/a` amplifie. Critère posé avant le code : ≤ 1 m/s. **Manqué : éteint par défaut**, les valeurs S3xx au
+bit. Allumé, trois valeurs changent : pilonnement de S332 2,7266 → 2,7434·10⁻¹⁰ m³, décalage 0,0667 →
+0,0666 m — couvercles « poussière » du cube —, contre-épreuve de S333 0,32 → 5,47 m/s.
+
+### La scène de la porte D au couvercle partiel
+
+Amplitude à 2,5–3,5 m des flancs longs, 3 à 8 s :
+
+| couvercle | parois à 30 % / 30 % | parois à 8 % / 52 % |
+|---|---|---|
+| S332 | 34,3 / 34,3 mm | **51,2 / 15,0 mm — rapport 3,42** |
+| partiel | 46,5 / 46,5 mm | 55,3 / 45,4 mm — **rapport 1,22** |
+
+Carte à 8 s du placement 8/52 presque identique à celle du 30/30. Critère 3 au bit ; volume 8,3 et
+9,3·10⁻⁹ m³, toujours ~3·10⁻⁴ de la borne d'arrondi ; perturbation 13,2 cm (30/30). **Critère posé : les deux
+flancs à ± 5 % l'un de l'autre — manqué** : résolution de 25 cm et résidu de rotation, dont le bruit près des
+coins se voit à ×5. Images `viewer/captures/s334` : scène / carte 2 s `0xdc67e48d93ed4533` /
+`0x6e476e9fd79ea811` ; 4 s `0x4ac9326e7d7003d6` / `0xc8c7f61964126c39` ; 6 s `0x2db0f7edc09d42bf` /
+`0x12ed29a898550da5` ; 8 s `0x02c587bba1e7f64a` / `0x67457176f1526445` ; carte 8/52 à 8 s `0xf14d3c45be994d27`.
+
+### Ce qui reste
+
+- **La vitesse de paroi au centroïde de la part couverte** — le remède nommé en S332 —, puis le couvercle
+  partiel **allumé par défaut** et la scène de la porte D rejouée.
+- **La résolution près des coques** : ~25 mailles de largeur pour ± 2 % ; hors de portée de la référence CPU
+  en 3D, c'est une question de production ou de maille locale.
+- Le **critère de volume** rapporté au plancher du transport (§2).
+

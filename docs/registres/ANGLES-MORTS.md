@@ -4298,3 +4298,15 @@ maille ; la scène est posée à 30/30. **Déclencheur** : une coque mobile dans
 la colonne en partie couverte, dont la surface s'élève sur toute sa section quand la pression ne voit que sa
 part libre ; la vitesse de paroi prise au centre des faces (S332). Critère : même rayonnement, à quelques
 pour cent, pour tout décalage sous la maille.
+
+**A317 — note datée du 2026-09-24 (S334) : attribué — défaut de structure — ; remède construit, éteint.**
+Reproduit hors du jeu, en pilonnement imposé : écart de 35 % en 3D à 25 cm. Sur une tranche, le couvercle de
+S332 **ne converge pas** — 38,5 ; 44,2 ; 30,5 % à 25 ; 12,5 ; 6,25 cm — : la colonne en partie couverte porte
+sa hauteur de remplissage comme si toute sa section était libre, surface `1/a` fois trop molle. Le
+**couvercle partiel** (`set_partial_lid`) converge — 33,4 ; 10,9 ; 1,8 %, moyenne extrapolée 19,98 mm, 11 %
+au-dessus de celle de S332 — et ramène la scène de la porte D de 3,42 à 1,22 entre flancs
+([preuve](../validation/PORTE-D-S333.md) §6). **Reste ouvert** : il amplifie le résidu de rotation de S332
+dans les colonnes en lamelle — 5,5 m/s dans la contre-épreuve de S333 —, d'où l'état éteint par défaut ;
+**déclencheur** : la vitesse de paroi au centroïde de la part couverte, puis l'allumer. Et même corrigée, une
+coque de 6,4 mailles rayonne à ± 33 % selon son placement : ~25 mailles pour ± 2 %.
+

@@ -844,3 +844,18 @@ restent dans le dépôt, inchangées.
 
 **Règle de protocole ajoutée** : comparer deux rendus demande `--horizon=<y>` **forcé**. La
 détection automatique s'est trompée deux fois, en silence et avec un résultat plausible (A301).
+
+## 20. R15 — la porte D, une coque sur la houle, S333
+
+Revue de la **porte D**, non du lot de rendu clos en S308. Images : [PORTE-D-S333](PORTE-D-S333.md) §3 —
+`viewer/captures/s333`, quatre instants, B + δ à l'échelle et B + 5·δ, carte de δ. Questions posées : les
+anneaux sont-ils crédibles (espacement ≈ 3 m, dix centimètres au plus près de la coque) ; la perturbation
+se perçoit-elle à l'échelle ; le bateau qui pilonne et cavale sans rouler est-il plausible. Référence
+demandée : une vidéo d'un ponton, d'une barge ou d'une barque qui pilonne en eau calme ou sur une houle
+faible, taille de l'objet, hauteur et distance d'observation connues.
+
+**Retour du 2026-09-24, 08:00** : *« Continue, pour la référence je n'ai pas trouvé »*. Aucune référence,
+aucun verdict sur les images : la porte D reste **en attente de son verdict** (ADR-178 D3). Le travail
+continue sur son chemin — S334, A317, qui change l'amplitude des anneaux (§6 de la preuve). Un verdict sur
+les images seules, sans référence, reste possible : il qualifierait la perception, pas la physique.
+

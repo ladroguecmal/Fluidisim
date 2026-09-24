@@ -102,7 +102,7 @@ Critères, écrits avant le code :
   d'une colonne se referme, l'eau de surface de la part recouverte passe aux colonnes voisines au couvercle
   ouvert ; puis **couvercle partiel par défaut** si les critères 9 à 11 tiennent.
 - [x] **P5 bis** — la scène de la porte D rejouée avec le couvercle partiel : critères 3 à 5, images.
-- [ ] **P6** — preuve (PORTE-D-S333 §6, S334) ; A317 note datée ; R15 au registre des revues ; file, feuille
+- [x] **P6** — preuve (PORTE-D-S333 §6, S334) ; A317 note datée ; R15 au registre des revues ; file, feuille
   de route si un état change.
 - [ ] **P7** — rituel.
 
@@ -175,3 +175,6 @@ valeurs changées est publiée.
   `0xdc67e48d93ed4533` / `0x6e476e9fd79ea811` ; 4 s `0x4ac9326e7d7003d6` / `0xc8c7f61964126c39` ; 6 s
   `0x2db0f7edc09d42bf` / `0x12ed29a898550da5` ; 8 s `0x02c587bba1e7f64a` / `0x67457176f1526445` ; carte 8/52 à 8 s
   `0xf14d3c45be994d27`. Lecture de la tranche à 30 % : S332 ~13 % sous la limite, partiel ~12 % au-dessus.
+- **P6** : preuve [PORTE-D-S333 §6](../docs/validation/PORTE-D-S333.md) ; A317 note datée (attribué) ; R15 au
+  registre des revues (§20) ; ligne A317 de la file. Feuille de route inchangée : δ inchangé par défaut, porte D
+  toujours en attente de verdict. Cœur : 494 réussis, 14 ignorés ; intégration 23 ; 0 avertissement.
