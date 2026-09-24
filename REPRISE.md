@@ -87,7 +87,8 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   lots ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md)) ; v1 = portes A, B, C
   et D franchies ([ADR-174](docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4).
 - **A** stabilisé : mer jugée par l'utilisateur, GPU eau 1,74 ms ; CPU hors profil (A278).
-- **B** : δ 3D reçu — référence CPU, production GPU, scène rendue ; seconde représentation **APIC**
+- **B** : δ 3D reçu, **porte B reçue** (S340) — référence CPU, production GPU sur les trois cas de cuve, scène
+  jugée (R16) ; seconde représentation **APIC**
   retenue ([ADR-186](docs/adr/ADR-186-apic-seconde-representation.md)), cavité reçue sur un banc
   2D (S320), temps de pincement non convergé à trois mailles (S326) ; raccord aux colonnes à masse
   exacte, frontière non reçue (S325–S327, A316 attribué en partie).
@@ -96,7 +97,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   [preuve](docs/validation/PORTE-D-S333.md) §9) : solide immergé quelconque, fixe ou en mouvement (S324–S330) ;
   corps rigide du jeu sur B, C10 tenu, qui pilote sa coque dans δ sans que δ le pilote (S331–S333) ; A317
   corrigé (S335) ; rayonnement mesuré par δ (S336) ; bord de δ invisible (S337). Restent W derrière la requête
-  du corps, la coque dans la production de δ. **La v1 demande encore A, B et C.**
+  du corps, la coque dans la production de δ. **La v1 demande encore A et C.**
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 55 partiels, 62 absents** sur 120.
 

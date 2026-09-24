@@ -169,3 +169,85 @@ et ne servent à aucune décision. Le poste n'a pas été débranché pendant la
 
 Suite de tests du cœur rejouée à la fin du lot : `cargo test --offline --release`, **0 échec**
 (95 passés et 4 ignorés au plus gros module).
+
+---
+
+## 9. S340 — les cas 1 et 2 sur la production
+
+2026-09-24. Porte B, **critère 2** d'ADR-175 §4, sur les deux cas que §7.1 laissait non mesurés pour la
+production. Même carte, même pas de production (S301), aucun nuanceur modifié ; un constructeur ajouté au
+cœur, `Background::from_components`, essayé (S340 P3).
+
+### Reproduire
+
+- Commit `34c33b29` ou plus récent.
+- `cargo run -p water-core --release --offline --example delta3d_mobile -- coupled-b` — lignes `HOS_B`, 16 min ;
+  `CHAINON_SEUL=1` : le chaînon seul, quelques secondes.
+- `cargo run --manifest-path viewer/Cargo.toml --release --offline -- --delta3d-cas2` — lignes `DELTA3D_CAS2_S340`,
+  une minute ; `HOULE=0.1` rejoue le premier essai, au-delà du centre de maille.
+- `… -- --delta3d-cas1` — lignes `DELTA3D_CAS1_S340` ; `NX=32,64` ≈ 3 min, `NX=128` ≈ 400 s.
+
+### Cas 2 — une houle de B d'une seule direction
+
+32×8×36 à 25 cm, repos 8 m (`e^{−k·8}` ≈ 3·10⁻⁶ : aucun flux du fond d'eau profonde au bas du domaine), pas de
+5 ms, éponge d'un mètre en `x`, murs en `y`, 64 cycles, 2 s. Houle de B de 4 m **exactement** selon `x` ; crête
+initiale de 10 cm invariante en `y`.
+
+| houle | carte − référence | quadratique | pente | invariance en `y`, carte | cœur |
+|---|---:|---:|---:|---:|---:|
+| 5 cm | **1,02·10⁻⁶ m** | 4,6·10⁻⁷ | 3,7·10⁻⁶ | **9,5·10⁻⁷ m — 1,00 ulp du repos** | 3,4·10⁻⁸ |
+| 10 cm | 8,3·10⁻³ m à 2 s | 7,7·10⁻⁴ | 4,6·10⁻² | 6,1·10⁻³ | 1,3·10⁻⁵ |
+
+À 10 cm, la carte suit la référence au micron jusqu'à 1,25 s, puis s'en écarte de 5 mm à 1,5 s et perd
+l'invariance : la surface totale franchit le centre de maille, à 12,5 cm du repos — **A297**, l'horizon de S298.
+Seule l'amplitude change entre les deux lignes. Le cas retenu est celui de §3 : sous le seuil, A297 entière.
+
+### Cas 1 — `ny` = 1, contre HOS, sur le fond de B
+
+**Pourquoi un autre fond.** La production n'évalue que B ; le cas couplé de S297 prend une onde stationnaire
+analytique en profondeur finie (`L` = `h` = 2 m, `k·h` = π). Elle y devient **deux composantes de B opposées**,
+de `a/2`, à la fréquence de profondeur finie, mais à la décroissance d'eau profonde et au prolongement borné
+d'ADR-154. **Chaînon**, à 0 et `T/4` (écart au plus sur les faces / maximum de l'analytique) :
+
+| | η | u | w | du/dt | p |
+|---|---:|---:|---:|---:|---:|
+| dans l'eau, 5 cm | 3,7·10⁻⁹ m | 4,4 % | 4,4 % | 4,4 % | 4,3 % |
+| au-dessus du plan moyen, 5 cm | 3,7·10⁻⁹ m | 33 % | 6,1 % | 33 % | 5,9 % |
+
+Dans l'eau, l'écart est au bas du domaine — eau profonde contre profondeur finie, un flux de 8,5·10⁻³ m/s au
+fond à 5 cm, que l'analytique n'a pas ; au-dessus, c'est le prolongement. **La référence sur ce fond contre
+HOS**, une période de 1 ms, tolérances de S253 :
+
+| | profil 32 / 64 / 128 | harmonique 32 / 64 / 128 |
+|---|---|---|
+| 5 cm | 1,646 / 1,034 / **0,984 %** | 2,694 / 1,566 / **1,231 %** |
+| 10 cm | 1,426 / 1,161 / **1,069 %** | 3,072 / 1,996 / **1,353 %** |
+
+Décroissants, sous 2 % et 20 % : **tenu** — six fois moins bien qu'au fond analytique (0,148 / 0,178 %, S297).
+L'écart est celui du fond, non du solveur. **La production contre la référence**, sur ce fond, une période,
+64 cycles :
+
+| | `nx` | écart de hauteur | pente | amplitude modale |
+|---|---:|---:|---:|---:|
+| 5 cm | 32 | 3,9·10⁻⁷ m | 8,5·10⁻⁶ | 4,4·10⁻⁸ m |
+| 5 cm | 64 | 1,3·10⁻⁶ m | 6,2·10⁻⁵ | 3,5·10⁻⁸ m |
+| 5 cm | 128 | 1,4·10⁻⁶ m | 1,7·10⁻⁴ | 5,5·10⁻⁸ m |
+| 10 cm | 32 | 1,8·10⁻⁵ m | 4,4·10⁻⁴ | 3,4·10⁻⁷ m |
+| 10 cm | 64 | 4,2·10⁻⁶ m | 2,3·10⁻⁴ | 8,5·10⁻⁸ m |
+| 10 cm | 128 | 8,2·10⁻⁵ m | 8,9·10⁻³ | 3,7·10⁻⁷ m |
+
+Aucun écart n'atteint le millimètre ; **critère tenu**, pour 3 mm exigés. L'amplitude modale — la projection de
+δ sur `cos(k·x)` — dit que la phase de la carte est celle de la référence. **La pente**, publiée comme le critère
+le demande, s'écarte au plus de 8,9·10⁻³ à 10 cm et 128 mailles : 82 µm sur une maille de 1,6 cm, au pas 1 530 —
+au-dessus des 5·10⁻⁴ de S260 que §5 citait pour information. Non attribué ; candidat, A297 : la surface totale
+franchit sans cesse des centres de maille de 1,6 cm, et une bascule décalée d'un pas entre carte et référence
+laisse ce genre de marche.
+
+### Ce qui est reçu, et ce qui ne l'est pas
+
+**Le critère 2 d'ADR-175 §4 tient sur les trois cas** : 3 (§5), 2 et 1 (ici). Trois réserves, publiées : le cas
+2 sous le seuil d'A297, comme §3 ; le cas 1 sur le fond de B, non sur l'analytique — c'est le fond que la
+production reçoit en jeu, et son écart à l'analytique est chiffré ; une pente à 8,9·10⁻³ au maillage le plus
+fin, non attribuée. Avec la référence (S295–S298 : HOS, invariance,
+onde oblique, et les réceptions 2D S269–S274 rejouées en cas limites) et la revue R16 : **la porte B est reçue**
+(S340). Le critère 4, le coût, relève de la porte C : 4,6 ms par pas sur la scène, pour 2 ms.

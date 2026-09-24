@@ -99,7 +99,7 @@ Critères, écrits avant le code :
 - [x] **P4** — le cas 2 sur la production ; critère 3.
 - [x] **P5** — le cas 1 : fond de B stationnaire, chaînon et HOS sur la référence.
 - [x] **P6** — le cas 1 : production contre référence ; critère 4.
-- [ ] **P7** — preuve ; la porte B, si elle tient ; critère 5.
+- [x] **P7** — preuve ; la porte B, si elle tient ; critère 5.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise

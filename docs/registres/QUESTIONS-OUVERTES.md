@@ -2,7 +2,8 @@
 
 ## File active
 
-> **Décisions de l'utilisateur** — un seul endroit, daté. **2026-09-24, S338** : verdict final de R15,
+> **Décisions de l'utilisateur** — un seul endroit, daté. **2026-09-24, S340** : verdict R16, *« Tout parrait bon
+> visuellement »* — critère 3 de la porte B ; avec la production sur les trois cas, **porte B reçue**. **2026-09-24, S338** : verdict final de R15,
 > *« Plus de coupure »* — **porte D reçue** sur la référence CPU, ADR-189 D1 tenue ; la v1 demande encore A, B
 > et C (ADR-174 D4). Le terme de D2 — la porte D, ou la v1 entière — reste à confirmer. **2026-09-23, S329** : **la v1 d'abord** —
 > les lots 3 et 4 jusqu'à la porte D, l'alternance avec le lot 5 suspendue jusque-là
@@ -58,7 +59,7 @@ suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 
 | travail | état et preuve | déclencheur / prochain résultat utile |
 |---|---|---|
-| **Porte B / δ 3D / A295 — en cours depuis S294** | Référence CPU (S297–S298), production sur la carte (S299–S302). **S305** : production contre référence, cas 3 de §4, 3·10⁻⁷ m pour 3 mm ([preuve](../validation/CUVE-GPU-S305.md)). R11 : δ sans artefact ; **R14** : référence interne provisoire de la mer (S308). **R16 (S340) : critère 3 reçu** ([§8](../validation/SCENE-DELTA3D-S302.md)). Manquent les cas 1 et 2 sur la production | **S340** : cas 1 et 2 — HOS à `ny` = 1, invariance en `y` — production contre référence |
+| **Porte B / δ 3D / A295 — reçue S340** | Référence CPU (S297–S298) ; production (S299–S302) ; critère 2 sur les trois cas de cuve — S305, puis cas 1 et 2 en S340, sous 10⁻⁴ m ([preuve](../validation/CUVE-GPU-S305.md) §9) ; **R16** : l'onde convainc. Réserves : cas 2 sous le seuil d'A297, cas 1 sur le fond de B | Le coût : porte C, 4,6 ms pour 2 ms. A297 et A289 restent ouvertes |
 | **Lot 1 — compteurs de conservation — reçu S310** | **Masse : exacte par télescopage**, tenue par les deux pas, plancher publié ([preuve](../validation/BILAN-MASSE-S310.md)). Cuve fermée : murs à zéro exact, dérive 7,4·10⁻¹² m sur 5 s — **A298 n'est pas une fuite de volume**. Scène couplée : l'éponge **efface 10,2 % du domaine par seconde**. Dissipation du schéma 0,0935 %/s. Énergie et quantité de mouvement : des **états** | **Trois tolérances proposées** : décision de l'utilisateur. Puis le compteur sur la **carte**, et la fermeture des deux autres bilans |
 | **Lot 2 — A à D reçus ; E bloqué** | **Ordre E (S319)** : sous une houle B seule, δ croît jusqu'à trois fois la mer en deux minutes ; la restitution de S317 reçoit des centaines de fois un paquet ([preuve](../validation/MER-S319.md)). **S322** : indépendamment du pas de temps. E3, contour fermé, reporté | **A289 d'abord** (choix de la voie) ; puis E1 à E3 rejoués. En attendant, le lot 3 peut prendre la place du lot 2 (proposition S321) |
 | **Niveau régional local / onde longue** *(ADR-185 D8)* | La région **garde** son volume : `boundary_out` vaut zéro par choix déclaré. Physiquement, l'anomalie rayonne en onde longue à `√(g·h)` et se dilue. Niveaux mesurés : quelques micromètres ([preuve](../validation/RESTITUTION-S317.md) §5) | Premier domaine vivant plusieurs minutes, ou région dont le niveau approche 1 mm : rayonnement par la frontière, publié par `boundary_out`, sans changer l'équation des appelants |

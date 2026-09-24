@@ -122,7 +122,8 @@ pas recopiée ici (L137).
   ([S297](validation/DELTA3D-COUPLEE-S297.md)) ; cas limites 2D reproduits à 1,19·10⁻⁷ m
   ([S298](validation/DELTA3D-FOND-REEL-S298.md)) ; production GPU reçue étage par étage
   ([S301](validation/DELTA3D-PAS-GPU-S301.md)) ; cuve fermée à 3·10⁻⁷ m pour 3 mm exigés
-  ([S305](validation/CUVE-GPU-S305.md)). **Manque le périmètre final** : la surface est un graphe,
+  ([S305](validation/CUVE-GPU-S305.md)) ; la production sur les trois cas de cuve, et **la porte B reçue** (S340,
+  [§9](validation/CUVE-GPU-S305.md)). **Manque le périmètre final** : la surface est un graphe,
   donc ni cavité, ni jet, ni déferlement (4.16) — seconde représentation, lot 5 d'ADR-178.
 - [ ] **4.2 Plusieurs domaines actifs simultanés** — *absent*.
 - [ ] **4.3 Subdivision adaptative anisotrope, blocs épars** épousant la forme utile (B5) — *absent*.
@@ -143,7 +144,8 @@ pas recopiée ici (L137).
   ([usage](validation/HOULE-USAGE-S274.md)).
   **S297–S302 : l'entrée existe en 3D** — fond B+W sommé aux faces MAC x/y/z, `eta` identique au
   bit verticalement, et une onde de 65 cm traverse un domaine de 30 × 28 m sur la mer étalée
-  ([S302](validation/SCENE-DELTA3D-S302.md)).
+  ([S302](validation/SCENE-DELTA3D-S302.md)) ; une onde née d'un point traverse la mer de R14 et s'y déforme,
+  jugée convaincante (R16, S340).
   Manquent la houle progressive traversante reçue sur une durée utile, les frontières
   générales du total et W au-dessus du plan moyen ; B4 reste partiel. **Et l'entrée n'est
   comptée par aucun bilan** : masse, quantité de mouvement et énergie ne sont pas mesurées à
