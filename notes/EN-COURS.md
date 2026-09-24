@@ -87,9 +87,17 @@ Critères, écrits avant le travail :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le registre, sections 1 à 6 de la liste (socle, B, W, δ, V, solides).
-- [ ] **P3** — le registre, sections 7 à 13 ; le compte des 117 points par script.
+- [x] **P2** — le registre, sections 1 à 6 de la liste (socle, B, W, δ, V, solides).
+- [x] **P3** — le registre, sections 7 à 13 ; le compte des 117 points par script. *Fusion déclarée P2+P3 :
+  un seul outil écrit et compte les treize sections.*
 - [ ] **P4** — les fronts dans la feuille de route ; file, index, liste (renvoi).
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2+P3.** `outils/dependances_liste.py` : données écrites à la main (système, maintenant, attend, attente
+  extérieure), fronts et « débloque » calculés, couverture et cycles contrôlés ; `--ecrire` régénère les tables de
+  `docs/registres/DEPENDANCES-LISTE.md` ; `etat_projet.py --check` appelle `ecarts`, éprouvé sur trois défauts
+  fabriqués (tables modifiées, point absent, dépendance inconnue). Un cycle trouvé et levé : 4.2 ↔ 4.9 — les
+  interactions relèvent de 4.9. Résultat : **117 points ; front 0 : 34, 1 : 25, 2 : 9, 3 : 5, 4 : 2, 5 : 1, E : 41**
+  (22 directs ; le réseau, 10.1, en commande 14). En aval transitif : 4.16 → 22 points, 2.7 → 20, 10.1 → 16.
+  Systèmes refaits par énoncé : A 20, B 25, C 7, H 65 ouverts (S309 : B 29, H 64 sur 120).

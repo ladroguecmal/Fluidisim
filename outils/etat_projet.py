@@ -15,6 +15,8 @@ import subprocess
 import sys
 from urllib.parse import unquote
 
+import dependances_liste  # S352 : le registre des dépendances suit la liste (ADR-190 D3)
+
 ROOT = Path(__file__).resolve().parent.parent
 ACTIVE = ("REPRISE.md", "README.md", "docs/00_INDEX.md", "notes/METHODE.md",
           "docs/FEUILLE-DE-ROUTE.md", "notes/EN-COURS.md")
@@ -311,6 +313,8 @@ def inspect(since: int | None) -> dict:
     clock = heartbeat(texts["REPRISE.md"])
     controls = (en_cours(texts["notes/EN-COURS.md"]) + encoding(texts) + produced(paths)
                 + checklist(texts["docs/LISTE-PROJET-FINI.md"])
+                + dependances_liste.ecarts(texts["docs/LISTE-PROJET-FINI.md"],
+                                           texts.get(dependances_liste.REGISTRE, ""))
                 + reproduce(first_sessions(commits, paths, latest), texts)
                 + journal(texts["notes/JOURNAL.md"]))
     return dict(head=git("rev-parse", "--short", "HEAD").strip(),
@@ -360,7 +364,7 @@ def main() -> int:
         print(f"Battement du jeton : {len(result['battement'])} anomalie(s)")
         for anomaly in result["battement"]:
             print(anomaly)
-        print(f"Contrôles (EN-COURS, encodage, fichiers produits, liste, preuves, journal) : "
+        print(f"Contrôles (EN-COURS, encodage, fichiers produits, liste, dépendances, preuves, journal) : "
               f"{len(result['controles'])} anomalie(s)")
         for anomaly in result["controles"]:
             print(anomaly)

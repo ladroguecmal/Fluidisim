@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-24 21:59 +02:00
+Battement        : 2026-09-24 22:07 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S352 — **ADR-190 D3 : la liste du projet fini rangée par dépendance** — registre des 117 points restants (système, attente, déblocage, front) et fronts dans la feuille de route
 Dernière session : S351 — **porte A, la dégradation de rang 1** : aucune image affamée contre 612, q99 mesuré 4,983 ms pour 5 ; **porte A reçue sur le banc, les quatre portes reçues — la v1 atteinte au sens d'ADR-174 D4** ([preuve](docs/validation/ARBITRAGE-3D-S344.md) §7) ; décision de l'utilisateur : après la v1, la liste entière ([ADR-190](docs/adr/ADR-190-apres-la-v1-la-liste-entiere.md))
