@@ -2230,6 +2230,12 @@ struct Hybride {
     /// particules, puis de nouveau à la grille — un lissage. Ici les faces intérieures à la zone des
     /// colonnes gardent la vitesse projetée du pas précédent, comme δ sur sa grille.
     memoire: bool,
+    /// **S354 : la jauge lue sur les hauteurs** (`RACCORD_JAUGE=hauteurs`). La jauge du ballottement compte les
+    /// particules du quart gauche du bassin ; dans la zone des colonnes, ce sont des particules **réensemencées**,
+    /// `round(2h/dx)` rangées de deux : la masse qu'elle y lit est quantifiée par demi-maille — 2,5 cm à 5 cm, pour
+    /// une onde de 2 cm. Ici, la zone des colonnes compte par sa hauteur `h`, exacte ; les particules libres, comme
+    /// avant.
+    jauge_hauteurs: bool,
 }
 
 impl Hybride {
@@ -2267,6 +2273,7 @@ impl Hybride {
                 rangees: None,
                 insertion: std::env::var("RACCORD_INSERTION").is_ok_and(|v| v == "reseau").then(|| vec![0; ny]),
                 memoire: std::env::var("RACCORD_MEMOIRE").is_ok_and(|v| v == "grille"),
+                jauge_hauteurs: std::env::var("RACCORD_JAUGE").is_ok_and(|v| v == "hauteurs"),
             };
         if ensemence == "hysterese" {
             hy.rangees = Some(hy.h.iter().map(|h| (2.0 * h / dx).round().max(0.0) as usize).collect());
@@ -2339,6 +2346,27 @@ impl Hybride {
                 self.apic.c.push(c);
             }
         }
+    }
+
+    /// **S354 : la jauge du ballottement**, lue sur ce que chaque représentation porte vraiment : les particules
+    /// libres à gauche de la frontière, pondérées comme dans `Apic::mesure` ; la hauteur `h` de chaque colonne,
+    /// pour la part de sa largeur qui tombe dans la bande ; l'attente nette, à la frontière, si elle y tombe.
+    fn jauge(&self) -> f64 {
+        let (nx, dx) = (self.apic.mac.nx, self.apic.mac.dx);
+        let xb = self.i_b as f64 * dx;
+        let bord = 0.25 * nx as f64 * dx;
+        let mut jauge = 0.0;
+        for p in self.apic.x.iter().filter(|p| p[0] < xb) {
+            jauge += 0.25 * dx * dx * ((bord - p[0]) / (0.5 * dx) + 0.5).clamp(0.0, 1.0);
+        }
+        for (c, h) in self.h.iter().enumerate() {
+            let x0 = (self.i_b + c) as f64 * dx;
+            jauge += h * dx * ((bord - x0) / dx).clamp(0.0, 1.0);
+        }
+        if xb < bord {
+            jauge += self.attente.iter().sum::<f64>() - self.dette.iter().sum::<f64>() - self.dette_commune;
+        }
+        jauge / bord
     }
 
     /// La masse que porte chaque représentation, m² : particules libres, colonnes, attente — nette de
@@ -2578,6 +2606,9 @@ impl Candidat for Hybride {
         let mut m = self.apic.mesure(t);
         let (libres, colonnes, attente) = self.masses();
         m.volume = libres + colonnes + attente;
+        if self.jauge_hauteurs {
+            m.jauge = self.jauge();
+        }
         m
     }
 }
@@ -2585,6 +2616,10 @@ impl Candidat for Hybride {
 /// **L'écart de surface à la frontière** (S325) : la hauteur géométrique des deux colonnes qui la
 /// bordent, et leur différence en mailles — à comparer à celle d'APIC seul aux mêmes instants.
 fn ecart_frontiere(a: &Apic, i_b: usize) -> Option<f64> {
+    // S354 : colonnes seules (`RACCORD_ZONE=1`), aucune frontière.
+    if i_b == 0 {
+        return None;
+    }
     let c = a.colonnes();
     match (c[i_b - 1], c[i_b]) {
         (Some((_, g0)), Some((_, g1))) => Some((g1 - g0) / a.mac.dx),
@@ -2629,7 +2664,7 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
             if let Some(e) = ecart_frontiere(&seul, i_b) {
                 pire_seul = pire_seul.max(e.abs());
             }
-            if serie {
+            if serie && i_b >= 2 {
                 let (ch, cs) = (hy.apic.colonnes(), seul.colonnes());
                 let g = |c: &[Option<(f64, f64)>], i: usize| c[i].map_or(f64::NAN, |(_, g)| g);
                 let m = |c: &[Option<(f64, f64)>], i: usize| c[i].map_or(f64::NAN, |(m, _)| m);

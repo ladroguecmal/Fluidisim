@@ -90,10 +90,18 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la jauge des hauteurs, les colonnes seules ; critère 1.
+- [x] **P2** — la jauge des hauteurs, les colonnes seules ; critère 1.
 - [ ] **P3** — l'attribution : colonnes seules et 95 %, deux mailles, deux jauges ; critère 2.
 - [ ] **P4** — la cause que P3 désigne, éprouvée seule ; critère 3.
 - [ ] **P5** — preuve §13, A316, file, liste ; critère 4.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2.** `RACCORD_JAUGE=hauteurs` : particules libres comme `Apic::mesure`, colonnes par `h` au prorata de leur
+  largeur dans la bande, attente nette si la frontière y tombe ; `RACCORD_ZONE=1` sans frontière (gardes de
+  `ecart_frontiere` et de la série). **Sans variable, au bit** : écart 0,2436, amortissement 4,168 %, période aux
+  zéros 2,12419 s (S327). **Critère 1, tel qu'écrit, manqué** : au repos, colonnes seules, la jauge des hauteurs
+  varie de **0,126 mm** — le repos n'est pas immobile, 4,1 mm/s, comme APIC seul (0,110 mm, 4,4 mm/s). L'ancienne
+  jauge y reste **à 0,5 exactement** : aveugle sous son palier. L'instrument suit l'eau ; la réponse « constante »
+  supposée n'était pas celle du modèle.
+
