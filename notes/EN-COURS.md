@@ -97,7 +97,11 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'impact dans la scène ; options lues avant les captures ; critère 1.
 - [x] **P3** — banc sans fenêtre ; critère 2, choix de `A` et `σ`.
-- [ ] **P4** — captures, aperçus ; critère 3.
+- [x] **P4** — captures, aperçus ; critère 3.
+- [ ] **P4 bis** *(ajoutée après P4)* — **l'anneau** : un paquet circulaire préparé comme le front de R11 —
+  `η = a·cos(k·(r − r₀))·e^{−(r−r₀)²/2s²}`, vitesses sortantes de la théorie linéaire, `a·k` = 0,26 comme le paquet
+  de S302 —, `--anneau` ; banc (zéro colonne hors bornes ; rayon de la crête au trajet de la vitesse de groupe,
+  facteur 1,5) ; captures, aperçus.
 - [ ] **P5** — preuve (SCENE-DELTA3D-S302 §6) ; R16 au registre ; file.
 - [ ] **P6** — rituel ; arrêt pour le verdict.
 
@@ -115,4 +119,11 @@ Critères, écrits avant le code :
   0,079 à 10,25 (5 s) ; maximum isolé 0,13–0,17 m. Rayon / trajet de groupe (2,08 m/s) : 3 s 1,08 ; 4 s 0,81 ;
   5 s 0,98 ; 6 s 0,78 — **tenu** ; avant 3 s le maximum est le bord du cratère qui s'effondre ; 7 s 0,63, 8 s 0,74 :
   l'anneau dominant a passé 11 m, l'éponge. Coût 4,6 ms, inchangé.
+- **P4, critère 3 tenu, et ce qu'il montre.** `INSTANTS=0,60,180,300 --meilleur --eau-physique=2 --delta3d --impact
+  --captures` : 32 images `viewer/captures/s339`, aperçus PNG, différences ×6. **Le cratère se voit** (0 et 1 s,
+  poses rasante et proche) ; **les anneaux de 10 à 17 cm ne se voient pas** dans la mer de `Hs` 2,5 m — à 3 s, avec
+  et sans δ indiscernables à l'œil ; la différence ×6 les montre, déformés. Physiquement attendu ; mais une revue
+  sur une onde invisible n'informe pas le critère 3. D'où P4 bis. Octets changés, pose de référence : 4,95 % (0 s),
+  15,7 (1 s), 13,0 (3 s), 14,6 (5 s). Bande claire en bas de la pose rasante, avec et sans δ : la mer coupée au
+  plan proche, préexistante.
 
