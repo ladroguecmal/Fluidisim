@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'horodatage par passe ; critère 1.
 - [x] **P3** — le banc, le témoin, l'alimentation ; critères 2 et 3.
-- [ ] **P4** — la preuve, le premier levier ; file, feuille de route ; critère 4.
+- [x] **P4** — la preuve, le premier levier ; file, feuille de route ; critère 4.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
