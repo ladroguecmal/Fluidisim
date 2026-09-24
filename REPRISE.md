@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 09:21 +02:00
+JETON            : libre
+Battement        : 2026-09-24 09:22 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S334 — A317, la paroi de la coque dans sa maille (chemin de la porte D)
-Dernière session : S333 — **la porte D, partie numérique** : la coque du jeu sur la houle de B — pilonnement forcé à 3·10⁻⁵, cavalement avec l'eau, la poussée suivant le gradient de pression — et δ qui porte sa perturbation relative à l'eau qui la porte ; I-04 au bit, anneaux de 9,4 cm ; volume manqué au plancher du transport ; A317 ([preuve](docs/validation/PORTE-D-S333.md))
-Session suivante : **verdict visuel de l'utilisateur sur la porte D** (ADR-178 D3, ADR-189 D3 : s'arrêter et demander) — images `viewer/captures/s333`, questions et référence demandée au §3 de la preuve. Sans verdict, sur le chemin de la porte D : **A317**, la paroi dans sa maille
-Maillons        : 0 — S333 : la coque sur la houle, 6.1 avance, 6.2 partiel
+Session en cours : aucune
+Dernière session : S334 — **A317 attribué** : la colonne en partie couverte avait une surface `1/a` fois trop molle — défaut de structure, le couvercle de S332 ne converge pas (± 30–44 %) ; le **couvercle partiel** converge (1,8 % à 6,25 cm) et ramène la porte D de 3,42 à 1,22 entre flancs, mais reste **éteint** : il amplifie le résidu de rotation de S332 ([preuve](docs/validation/PORTE-D-S333.md) §6)
+Session suivante : **S335, la vitesse de paroi au centroïde de la part couverte** (remède nommé en S332), puis couvercle partiel allumé par défaut et scène de la porte D rejouée — chemin de la porte D. Le **verdict visuel** reste attendu (R15 : pas de référence trouvée)
+Maillons        : 1 — S334 : A317 attribué, remède construit mais éteint
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -95,7 +95,8 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 - **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte**, **priorité** (ADR-189) : fond coupé et solide immergé
   quelconque, fixe ou en mouvement (S324–S330) ; corps rigide du jeu sur B + W, C10 tenu, qui pilote
   sa coque dans δ sans que δ le pilote (S331–S332) ; **la coque sur la houle de B**, δ relatif à l'eau
-  qui la porte — partie numérique faite, **verdict visuel attendu**, A317 ouverte (S333).
+  qui la porte — partie numérique faite, **verdict visuel attendu** (S333) ; A317 attribué, couvercle
+  partiel construit mais éteint (S334).
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 54 partiels, 63 absents** sur 120.
 

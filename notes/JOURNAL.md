@@ -16554,3 +16554,22 @@ dans la production GPU.
 δ sans autorité sur le jeu ; le chemin — le verdict de la porte D, donc la v1 ; la preuve — PORTE-D-S333 ;
 6.1 avance, 6.2 passe à partiel. Suivant : **le verdict visuel de l'utilisateur** (ADR-189 D3), puis A317.
 
+## S334 — 2026-09-24 — A317 : la paroi dans sa maille, un défaut de structure du couvercle
+
+**Entrée.** *« Continue, pour la référence je n'ai pas trouvé »* — R15 sans référence ni verdict ; suite : A317.
+**Fait** ([preuve](../docs/validation/PORTE-D-S333.md) §6). Banc `a317_lamelle` — pilonnement imposé, 3D et
+tranche ; **couvercle partiel** : surface `(η − z₀)/a`, dépôt de la coque exclu, eau poussée par une paroi
+qui glisse rendue aux voisines ; commutable.
+**Mesuré.** 3D à 25 cm : 35 % d'écart selon le placement. Tranche : le couvercle de S332 **ne converge pas**
+(38,5 → 44,2 → 30,5 %), le partiel si (33,4 → 10,9 → 1,8 %), moyenne extrapolée 19,98 mm, S332 11 % dessous.
+Porte D : dissymétrie des flancs 3,42 → 1,22.
+**Une erreur de parcours, publiée.** P3 a jugé le diagnostic faux sur une seule maille ; la convergence l'a
+rétabli. Et diviser par `a` exige d'exclure l'eau que la coque vient de déposer.
+**Manqué.** Critère 9 : 5,47 m/s dans la contre-épreuve de S333 — le résidu de rotation de S332, amplifié en
+lamelle — : couvercle partiel **éteint par défaut**, S3xx au bit. Critère 5 : flancs à 1,22, non ± 5 %.
+**Non fait.** Vitesse de paroi au centroïde de la part couverte ; résolution près des coques (~25 mailles
+pour ± 2 %) ; 3,125 cm : gradient conjugué non convergé.
+**Rituel.** Maillons **1** : A317 attribué, remède construit mais éteint — aucune capacité reçue par défaut.
+Suivant : **S335, la vitesse de paroi au centroïde** — troisième session sur ce fil, justifiée : elle seule
+allume le couvercle partiel, sans lequel une coque qui bouge dans δ rayonne selon sa maille. Verdict attendu.
+

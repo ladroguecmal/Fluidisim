@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S334 — **en cours**. **A317** : une coque qui perce le couvercle de δ rayonne selon la position de sa
+Session : S334 — **terminée**. **A317** : une coque qui perce le couvercle de δ rayonne selon la position de sa
 paroi dans la maille ; chemin de la porte D ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée : *« Continue, pour la référence je n'ai pas trouvé »* (2026-09-24, 08:00) — aucune référence réelle,
@@ -104,7 +104,7 @@ Critères, écrits avant le code :
 - [x] **P5 bis** — la scène de la porte D rejouée avec le couvercle partiel : critères 3 à 5, images.
 - [x] **P6** — preuve (PORTE-D-S333 §6, S334) ; A317 note datée ; R15 au registre des revues ; file, feuille
   de route si un état change.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 **Amendement après P3, déclaré avant le code.** Le couvercle partiel ne retire pas la dépendance au placement.
 Question suivante : A317 est-il une **erreur de résolution** près de la paroi — la colonne voisine de la coque
