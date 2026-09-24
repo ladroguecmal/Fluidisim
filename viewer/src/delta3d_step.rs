@@ -90,7 +90,11 @@ impl Diagnostics {
 pub struct Step3 {
     device: wgpu::Device,
     queue: wgpu::Queue,
-    domain: Domain3,
+    /// S350 : la **capacité** — la forme de création, à laquelle tout est réservé — et la **forme courante**, au
+    /// plus la capacité en `nx` et `ny`, `nz` égal. Uniformes, dispatchs, copies et relectures suivent la forme
+    /// courante ; les comptes qui en découlent sont des méthodes, plus des champs.
+    capacity: Domain3,
+    shape: std::cell::Cell<Domain3>,
     rho: f32,
     g_eff: f32,
     rest: std::cell::Cell<f32>,
@@ -102,9 +106,8 @@ pub struct Step3 {
     cells_out: wgpu::Buffer,
     faces: wgpu::Buffer,
     bg: Vec<wgpu::ComputePipeline>,
-    /// S342 : le fond par tuiles (vrai par défaut jusqu'à 64 composantes), et son nombre de groupes.
+    /// S342 : le fond par tuiles (vrai par défaut jusqu'à 64 composantes).
     tiled: std::cell::Cell<bool>,
-    tile_groups: u32,
     /// S349 — le décalage de l'état (porte A) : noyau, uniforme, tampon de travail réservé à la configuration,
     /// un groupe de liaison par tableau cible (vitesses, surface, pression, surface publiée) ; et l'origine
     /// courante du domaine, que le fond lit.
@@ -125,23 +128,17 @@ pub struct Step3 {
     vel: wgpu::Buffer,
     published: wgpu::Buffer,
     step: Vec<wgpu::ComputePipeline>,
-    column_faces: usize,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
     query_resolve: wgpu::Buffer,
     query_read: wgpu::Buffer,
     work: wgpu::Buffer,
-    diag_groups: u32,
-    diag_offset: usize,
     ring: Vec<wgpu::Buffer>,
     ring_ready: Vec<std::sync::Arc<std::sync::atomic::AtomicBool>>,
     ring_step: Vec<Option<u64>>,
     steps: u64,
     phases: Vec<u32>,
     count: usize,
-    face_total: usize,
-    cells: usize,
-    columns: usize,
     pub adapter: String,
     pub backend: String,
 }
@@ -428,7 +425,8 @@ impl Step3 {
         let this = Self {
             device,
             queue,
-            domain,
+            capacity: domain,
+            shape: std::cell::Cell::new(domain),
             rho,
             g_eff,
             rest: std::cell::Cell::new(domain.z0()),
@@ -445,12 +443,6 @@ impl Step3 {
             shift_scratch,
             shift_binds,
             origin: std::cell::Cell::new(origin),
-            tile_groups: (0..3)
-                .map(|axis| {
-                    let (fx_, fy_, fz_) = (nx + usize::from(axis == 0), ny + usize::from(axis == 1), nz + usize::from(axis == 2));
-                    ((fx_ * fy_).div_ceil(16) * fz_.div_ceil(16)) as u32
-                })
-                .sum(),
             cg_bind,
             heights,
             state,
@@ -461,14 +453,11 @@ impl Step3 {
             vel,
             published,
             step,
-            column_faces: fx + fy,
             read,
             query,
             query_resolve,
             query_read,
             work,
-            diag_groups,
-            diag_offset,
             ring: (0..RING)
                 .map(|_| buffer(&device_ring, 64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ))
                 .collect(),
@@ -477,9 +466,6 @@ impl Step3 {
             steps: 0,
             phases: vec![0; count],
             count,
-            face_total: faces,
-            cells,
-            columns,
             adapter: info.name.clone(),
             backend: format!("{:?}", info.backend),
         };
@@ -488,9 +474,9 @@ impl Step3 {
     }
 
     fn write_step_uniform(&self, rest: f32, dt: f64, sponge: Sponge3) {
-        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Domain3 { nx, ny, nz, dx } = self.shape.get();
         let mut bytes = Vec::with_capacity(64);
-        for v in [nx as u32, ny as u32, nz as u32, self.face_total as u32] {
+        for v in [nx as u32, ny as u32, nz as u32, self.face_total() as u32] {
             bytes.extend_from_slice(&v.to_le_bytes());
         }
         // Coefficients temporels en f64 puis arrondis, comme le cœur (I-08, ADR-141).
@@ -519,7 +505,7 @@ impl Step3 {
         if duration_us == 0 || duration_us > 1u64 << 53 {
             return Err("durée hors domaine".into());
         }
-        let Domain3 { nx, ny, dx, .. } = self.domain;
+        let Domain3 { nx, ny, dx, .. } = self.shape.get();
         if !sponge.rate_per_s.is_finite() || sponge.rate_per_s < 0. {
             return Err("éponge : taux invalide".into());
         }
@@ -549,26 +535,26 @@ impl Step3 {
     /// État initial : vitesses aux faces et surface absolue par colonne. La pression et le reste
     /// de la somme compensée repartent de zéro, comme `set_free_surface` du cœur. **Hors pas.**
     pub fn set_state(&self, u: &[f32], v: &[f32], w: &[f32], eta: &[f32]) -> Result<(), String> {
-        let Domain3 { nx, ny, nz, .. } = self.domain;
+        let Domain3 { nx, ny, nz, .. } = self.shape.get();
         if u.len() != (nx + 1) * ny * nz || v.len() != nx * (ny + 1) * nz || w.len() != nx * ny * (nz + 1) {
             return Err("vitesses : longueurs du domaine attendues".into());
         }
-        if eta.len() != self.columns {
+        if eta.len() != self.columns() {
             return Err("surface : une hauteur par colonne attendue".into());
         }
         if u.iter().chain(v).chain(w).chain(eta).any(|x| !x.is_finite()) {
             return Err("état non fini".into());
         }
-        let mut current = Vec::with_capacity(self.face_total);
+        let mut current = Vec::with_capacity(self.face_total());
         current.extend_from_slice(u);
         current.extend_from_slice(v);
         current.extend_from_slice(w);
         self.queue.write_buffer(&self.vel, 0, bytemuck_cast(&current));
         self.queue.write_buffer(&self.cells_in, 0, bytemuck_cast(eta));
-        let zeros = vec![0f32; self.cells.max(self.columns)];
+        let zeros = vec![0f32; self.cells().max(self.columns())];
         self.queue
-            .write_buffer(&self.cells_in, ((self.columns + self.cells) * 4) as u64, bytemuck_cast(&zeros[..self.columns]));
-        self.queue.write_buffer(&self.state, 0, bytemuck_cast(&zeros[..self.cells]));
+            .write_buffer(&self.cells_in, ((self.columns() + self.cells()) * 4) as u64, bytemuck_cast(&zeros[..self.columns()]));
+        self.queue.write_buffer(&self.state, 0, bytemuck_cast(&zeros[..self.cells()]));
         // Surface publiée de l'état initial : la perturbation, reste nul. `O(colonnes)` à la
         // configuration d'un état, jamais dans le pas.
         let rest = self.rest.get();
@@ -590,8 +576,47 @@ impl Step3 {
         Ok(())
     }
 
+    /// S350 — les comptes de la **forme courante**.
+    fn face_total(&self) -> usize {
+        face_total(self.shape.get())
+    }
+
+    fn cells(&self) -> usize {
+        self.shape.get().cells()
+    }
+
+    fn columns(&self) -> usize {
+        self.shape.get().columns()
+    }
+
+    /// Faces verticales en x puis en y, une par colonne de faces : les débits du transport.
+    fn column_faces(&self) -> usize {
+        let Domain3 { nx, ny, .. } = self.shape.get();
+        (nx + 1) * ny + nx * (ny + 1)
+    }
+
+    /// Groupes des diagnostics D3 et rang de leur résultat dans `work`, comme `diag_groups` et `diag_result` du noyau.
+    fn diag_groups(&self) -> u32 {
+        (self.cells().max(self.face_total()) as u32).div_ceil(GROUP)
+    }
+
+    fn diag_offset(&self) -> usize {
+        2 * self.column_faces() + 5 * self.diag_groups() as usize
+    }
+
+    /// Groupes du fond par tuiles : seize colonnes de faces sur seize couches, par famille.
+    fn tile_groups(&self) -> u32 {
+        let Domain3 { nx, ny, nz, .. } = self.shape.get();
+        (0..3)
+            .map(|axis| {
+                let (fx, fy, fz) = (nx + usize::from(axis == 0), ny + usize::from(axis == 1), nz + usize::from(axis == 2));
+                ((fx * fy).div_ceil(16) * fz.div_ceil(16)) as u32
+            })
+            .sum()
+    }
+
     fn face_groups(&self) -> u32 {
-        (self.face_total as u32).div_ceil(GROUP)
+        (self.face_total() as u32).div_ceil(GROUP)
     }
 
     /// Nombre de dispatchs du pas jusqu'à `upto`, pour `cycles` cycles de projection. Il ne
@@ -649,15 +674,15 @@ impl Step3 {
         };
         let (faces, cells, columns) = (
             self.face_groups(),
-            (self.cells as u32).div_ceil(GROUP),
-            (self.columns as u32).div_ceil(GROUP),
+            (self.cells() as u32).div_ceil(GROUP),
+            (self.columns() as u32).div_ceil(GROUP),
         );
         if partie != Some(1) {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(0) });
             pass.set_bind_group(0, &self.bg_bind, &[]);
             if self.tiled.get() {
                 pass.set_pipeline(&self.bg[3]);
-                pass.dispatch_workgroups(self.tile_groups, 1, 1);
+                pass.dispatch_workgroups(self.tile_groups(), 1, 1);
             } else {
                 pass.set_pipeline(&self.bg[0]);
                 pass.dispatch_workgroups(faces, 1, 1);
@@ -678,7 +703,7 @@ impl Step3 {
         }
         // Surface totale → géométrie de l'opérateur ; second membre et préconditionneur couplés
         // → tranches B et M de la projection.
-        let (col_bytes, cell_bytes) = ((self.columns * 4) as u64, (self.cells * 4) as u64);
+        let (col_bytes, cell_bytes) = ((self.columns() * 4) as u64, (self.cells() * 4) as u64);
         if partie != Some(1) {
             encoder.copy_buffer_to_buffer(&self.cells_out, 0, &self.heights, 0, col_bytes);
             encoder.copy_buffer_to_buffer(&self.cells_out, 2 * col_bytes, &self.state, 6 * cell_bytes, cell_bytes);
@@ -721,11 +746,11 @@ impl Step3 {
                 return;
             }
             pass.set_pipeline(&self.step[FLUXES]);
-            pass.dispatch_workgroups((self.column_faces as u32).div_ceil(GROUP), 1, 1);
+            pass.dispatch_workgroups((self.column_faces() as u32).div_ceil(GROUP), 1, 1);
             pass.set_pipeline(&self.step[ADVANCE]);
             pass.dispatch_workgroups(columns, 1, 1);
             pass.set_pipeline(&self.step[DIAGNOSE]);
-            pass.dispatch_workgroups(self.diag_groups, 1, 1);
+            pass.dispatch_workgroups(self.diag_groups(), 1, 1);
             pass.set_pipeline(&self.step[DIAGNOSE_FINISH]);
             pass.dispatch_workgroups(1, 1, 1);
         }
@@ -741,7 +766,7 @@ impl Step3 {
         self.encode(&mut encoder, cycles, Upto::Full);
         let slot = self.ring_step.iter().position(|s| s.is_none());
         if let Some(slot) = slot {
-            encoder.copy_buffer_to_buffer(&self.work, (self.diag_offset * 4) as u64, &self.ring[slot], 0, 20);
+            encoder.copy_buffer_to_buffer(&self.work, (self.diag_offset() * 4) as u64, &self.ring[slot], 0, 20);
             encoder.copy_buffer_to_buffer(&self.scalar, 0, &self.ring[slot], 32, 32);
         }
         self.queue.submit([encoder.finish()]);
@@ -805,7 +830,7 @@ impl Step3 {
         self.encode_split(&mut encoder, cycles, Upto::Full, false, Some((k, partie)));
         let slot = if partie == 1 { self.ring_step.iter().position(|s| s.is_none()) } else { None };
         if let Some(slot) = slot {
-            encoder.copy_buffer_to_buffer(&self.work, (self.diag_offset * 4) as u64, &self.ring[slot], 0, 20);
+            encoder.copy_buffer_to_buffer(&self.work, (self.diag_offset() * 4) as u64, &self.ring[slot], 0, 20);
             encoder.copy_buffer_to_buffer(&self.scalar, 0, &self.ring[slot], 32, 32);
         }
         self.queue.submit([encoder.finish()]);
@@ -917,7 +942,7 @@ impl Step3 {
             pass.set_bind_group(0, &self.bg_bind, &[]);
             if self.tiled.get() {
                 pass.set_pipeline(&self.bg[3]);
-                pass.dispatch_workgroups(self.tile_groups, 1, 1);
+                pass.dispatch_workgroups(self.tile_groups(), 1, 1);
             } else {
                 pass.set_pipeline(&self.bg[0]);
                 pass.dispatch_workgroups(self.face_groups(), 1, 1);
@@ -960,7 +985,7 @@ impl Step3 {
     /// restent des murs, nulles — S349 y recopiait des vitesses intérieures, figées ensuite (2,8 m³/s à travers le
     /// bord après l'aller du banc de suivi).
     pub fn shift(&self, di: i32, dj: i32) -> Result<(), String> {
-        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Domain3 { nx, ny, nz, dx } = self.shape.get();
         if di.unsigned_abs() as usize >= nx || dj.unsigned_abs() as usize >= ny {
             return Err("décalage : plus grand que le domaine".into());
         }
@@ -973,7 +998,7 @@ impl Step3 {
             (0, nu, [nx, ny + 1, nz], 0., 2),
             (0, nu + nv, [nx, ny, nz + 1], 0., 0),
             (1, 0, [nx, ny, 1], rest, 0),
-            (1, self.columns + self.cells, [nx, ny, 1], 0., 0),
+            (1, self.columns() + self.cells(), [nx, ny, 1], 0., 0),
             (2, 0, [nx, ny, nz], 0., 0),
             (3, 0, [nx, ny, 1], 0., 0),
         ];
@@ -1016,7 +1041,7 @@ impl Step3 {
     /// volume. Le chemin de production les relit en différé (ADR-175 D3) ; un banc qui mesure un pas horodaté n'a pas
     /// d'anneau.
     pub fn diagnostics_now(&self) -> Result<Diagnostics, String> {
-        let v = self.relire(&self.work, self.diag_offset, 5)?;
+        let v = self.relire(&self.work, self.diag_offset(), 5)?;
         let sc = self.relire(&self.scalar, 0, 8)?;
         let (residual, rhs) = (sc[1].max(0.).sqrt(), sc[4].max(0.).sqrt());
         Ok(Diagnostics {
@@ -1065,7 +1090,7 @@ impl Step3 {
             pass.set_bind_group(0, &self.bg_bind, &[]);
             if self.tiled.get() {
                 pass.set_pipeline(&self.bg[3]);
-                pass.dispatch_workgroups(self.tile_groups, 1, 1);
+                pass.dispatch_workgroups(self.tile_groups(), 1, 1);
             } else {
                 pass.set_pipeline(&self.bg[0]);
                 pass.dispatch_workgroups(self.face_groups(), 1, 1);
@@ -1078,7 +1103,7 @@ impl Step3 {
 
     /// **Banc S342** : tous les champs de toutes les faces, relus par morceaux.
     pub fn faces_values(&self) -> Result<Vec<f32>, String> {
-        let total = self.face_total * STEP_FIELDS;
+        let total = self.face_total() * STEP_FIELDS;
         let morceau = (self.read.size() / 4) as usize;
         let mut out = Vec::with_capacity(total);
         let mut debut = 0;
@@ -1096,18 +1121,18 @@ impl Step3 {
 
     /// **Banc** : vitesses prédites `[us | vs | ws]`.
     pub fn predicted(&self) -> Result<Vec<f32>, String> {
-        self.relire(&self.vel, self.face_total, self.face_total)
+        self.relire(&self.vel, self.face_total(), self.face_total())
     }
 
     /// **Banc** : vitesses courantes `[u | v | w]`.
     pub fn velocities(&self) -> Result<Vec<f32>, String> {
-        self.relire(&self.vel, 0, self.face_total)
+        self.relire(&self.vel, 0, self.face_total())
     }
 
     /// **Banc S350** : réécrit les vitesses courantes `[u | v | w]` telles quelles, sans rien remettre à zéro — pour
     /// rejouer un état fabriqué par un banc. Hors pas.
     pub fn write_velocities(&self, vel: &[f32]) -> Result<(), String> {
-        if vel.len() != self.face_total {
+        if vel.len() != self.face_total() {
             return Err("vitesses : une par face attendue".into());
         }
         self.queue.write_buffer(&self.vel, 0, bytemuck_cast(vel));
@@ -1123,23 +1148,23 @@ impl Step3 {
     // S321 : accesseur conservé, sans appelant aujourd'hui.
     #[allow(dead_code)]
     pub fn domain(&self) -> Domain3 {
-        self.domain
+        self.shape.get()
     }
 
     /// **Banc** : surface absolue et reste de la somme compensée, par colonne.
     pub fn surface(&self) -> Result<(Vec<f32>, Vec<f32>), String> {
-        let all = self.relire(&self.cells_in, 0, 2 * self.columns + self.cells)?;
-        Ok((all[..self.columns].to_vec(), all[self.columns + self.cells..].to_vec()))
+        let all = self.relire(&self.cells_in, 0, 2 * self.columns() + self.cells())?;
+        Ok((all[..self.columns()].to_vec(), all[self.columns() + self.cells()..].to_vec()))
     }
 
     /// **Banc** : surface publiée (ADR-175 D7), perturbation de hauteur par colonne.
     pub fn published(&self) -> Result<Vec<f32>, String> {
-        self.relire(&self.published, 0, self.columns)
+        self.relire(&self.published, 0, self.columns())
     }
 
     /// **Banc** : pression (tranche X de la projection).
     pub fn pressure(&self) -> Result<Vec<f32>, String> {
-        self.relire(&self.state, 0, self.cells)
+        self.relire(&self.state, 0, self.cells())
     }
 
     /// **Banc** : `(‖b − A·x‖, ‖b‖)` tels que la carte les a rangés en fin de projection. En

@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les murs après un décalage ; critère 1.
-- [ ] **P3** — la forme courante dans `Step3` ; critère 2.
+- [x] **P3** — la forme courante dans `Step3` ; critère 2.
 - [ ] **P4** — `Step3::resize` en une soumission ; critère 3.
 - [ ] **P5** — le coût selon l'emprise ; critère 4.
 - [ ] **P6** — preuve, file, feuille de route ; critère 5.
@@ -108,4 +108,8 @@ Critères, écrits avant le code :
   −0,385 m³/s, 120 pas) : surface écartée de **7,2 cm** à moins de 3 mailles du mur, 1,8 cm à 3–30 mailles, 3,0 cm
   au-delà ; vitesse jusqu'à 1,25 m/s ; témoin `CONTROLE=1` identique au bit. Identité du décalage : 6 272 murs `u`,
   6 720 `v`, 0 différence. Correction datée ajoutée à la preuve §5.
+- **P3, critère 2 tenu.** `Step3` : `capacity` (forme de création, réservations) et `shape` (forme courante) ; comptes
+  de faces, mailles, colonnes, débits, diagnostics et tuiles devenus des méthodes de la forme courante. Empreintes
+  S343 **inchangées** : 60 pas 0x5efa267462dfa0ad / 0xc5c6a85d3d29f44b, 600 pas 0x9325cf58781f8b74 /
+  0xea1bebe0ffabc19a ; décalage (+3, −2) toujours 0 différence.
 
