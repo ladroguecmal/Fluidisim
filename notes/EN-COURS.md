@@ -98,7 +98,7 @@ Critères, écrits avant le code :
 - [x] **P2** — l'impact dans la scène ; options lues avant les captures ; critère 1.
 - [x] **P3** — banc sans fenêtre ; critère 2, choix de `A` et `σ`.
 - [x] **P4** — captures, aperçus ; critère 3.
-- [ ] **P4 bis** *(ajoutée après P4)* — **l'anneau** : un paquet circulaire préparé comme le front de R11 —
+- [x] **P4 bis** *(ajoutée après P4)* — **l'anneau** : un paquet circulaire préparé comme le front de R11 —
   `η = a·cos(k·(r − r₀))·e^{−(r−r₀)²/2s²}`, vitesses sortantes de la théorie linéaire, `a·k` = 0,26 comme le paquet
   de S302 —, `--anneau` ; banc (zéro colonne hors bornes ; rayon de la crête au trajet de la vitesse de groupe,
   facteur 1,5) ; captures, aperçus.
@@ -126,4 +126,13 @@ Critères, écrits avant le code :
   sur une onde invisible n'informe pas le critère 3. D'où P4 bis. Octets changés, pose de référence : 4,95 % (0 s),
   15,7 (1 s), 13,0 (3 s), 14,6 (5 s). Bande claire en bas de la pose rasante, avec et sans δ : la mer coupée au
   plan proche, préexistante.
+- **P4 bis, tenu.** `Ring` et `Config::ring_review()` : 41 cm, λ 10 m (`a·k` 0,258), crête à 5 m du centre
+  (0, 16), enveloppe 3,5 m ; pente initiale 0,226 ; volume net 9,55 m³ (une crête, pas un train : 1,1 cm sur le
+  domaine). Banc 12 s : **zéro colonne hors bornes**, pas dégradés comme le témoin, divergence franche max 0,043
+  (témoin 0,022). Rayon de la crête / (r₀ + trajet de groupe 1,98 m/s) : 1 s 1,33 ; 2 s 1,37 ; 3 s 1,08 ; 4 s 1,18 ;
+  5 s 0,96 ; 6 s 1,02 ; 7 s 1,05 ; 8 s 0,83 — dans le facteur 1,5. Moyenne azimutale de la crête 0,40 → 0,26 (2 s)
+  → 0,11 m (5 s). Captures `INSTANTS=0,60,120,180 … --anneau --captures`, préfixe `s339a` : **l'anneau se lit** —
+  proche 1 et 2 s, haute 1 s ; il se déforme en traversant. Une fine ligne claire suit sa crête (vue haute) :
+  question posée, non attribuée. Empreintes : proche avec 1 s `0x5a79f01d64083ef3`, 2 s `0x2e37efc6f485f73d` ;
+  haute avec 1 s `0xd4e6d1e43e57c1cb` ; les images « sans » de 0 et 1 s égales au bit à celles de l'impact.
 

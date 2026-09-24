@@ -1724,7 +1724,7 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// pose). Ce sont ces paires que la revue compare. Aucune publication.
 /// S339 : `tag` — `s302` (le front, R11) ou `s339` (l'impact, R16) : dossier et préfixe des images.
 fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config, tag: &str) -> Result<(), String> {
-    let dir = if tag == "s339" { captures!("s339") } else { captures!("s302") };
+    let dir = if tag.starts_with("s339") { captures!("s339") } else { captures!("s302") };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -2598,7 +2598,7 @@ fn run() -> Result<(), String> {
         return delta3d_step::longue_cuve();
     }
     if args.iter().any(|a| a == "--delta3d-scene-mesure") {
-        return delta3d_scene::mesurer(args.iter().any(|a| a == "--impact"));
+        return delta3d_scene::mesurer(args.iter().any(|a| a == "--impact"), args.iter().any(|a| a == "--anneau"));
     }
     if args.iter().any(|a| a == "--delta3d-scene-acoups") {
         return delta3d_scene::acoups();
@@ -2727,8 +2727,16 @@ fn run() -> Result<(), String> {
     }
     // S339 : `--impact` — la scène de la revue R16, un impact au lieu du front.
     let delta3d_impact = args.iter().any(|a| a == "--impact");
+    // S339 P4 bis : `--anneau` — l'anneau préparé ; ses images vont dans `s339` aussi, préfixe `s339a`.
+    let delta3d_anneau = args.iter().any(|a| a == "--anneau");
     let delta3d_config = delta3d_scene_on.then(|| {
-        if delta3d_impact { delta3d_scene::Config::impact_review() } else { delta3d_scene::Config::review() }
+        if delta3d_anneau {
+            delta3d_scene::Config::ring_review()
+        } else if delta3d_impact {
+            delta3d_scene::Config::impact_review()
+        } else {
+            delta3d_scene::Config::review()
+        }
     });
     // S277 — `--delta-hs=<m>` / `--delta-tp=<s>` : la houle de la scène δ, pour voir l'onde se
     // déformer. Sans eux, la houle de S275 au bit. La cambrure commande (ONDE-INJECTEE-S277) :
@@ -2909,7 +2917,8 @@ fn run() -> Result<(), String> {
     // partaient sans elles : R11 n'aurait pas pu montrer la couleur que R14 a retenue.
     if let Some(config) = delta3d_config {
         if args.iter().any(|a| a == "--captures") {
-            return delta3d_captures(&mut frame, config, if delta3d_impact { "s339" } else { "s302" });
+            let tag = if delta3d_anneau { "s339a" } else if delta3d_impact { "s339" } else { "s302" };
+            return delta3d_captures(&mut frame, config, tag);
         }
     }
     if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--test-ab=")) {
