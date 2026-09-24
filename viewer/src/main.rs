@@ -2573,6 +2573,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-trajectoire") {
         return delta3d_step::trajectoire();
     }
+    if args.iter().any(|a| a == "--delta3d-cout-scene") {
+        return delta3d_step::cout_scene();
+    }
     if args.iter().any(|a| a == "--delta3d-horodatage") {
         return delta3d_step::identite_horodatage();
     }

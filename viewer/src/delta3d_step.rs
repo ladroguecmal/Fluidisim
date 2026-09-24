@@ -742,6 +742,45 @@ impl Step3 {
         Ok(ms)
     }
 
+    /// **Banc S341** : l'évaluation du fond de B **seule** — le noyau `sample_faces`, une passe horodatée à
+    /// lui seul —, en millisecondes. Réécrit les échantillons du pas courant avec les mêmes valeurs.
+    pub fn timed_background(&self) -> Result<Option<f64>, String> {
+        let Some(q) = self.query.as_ref() else { return Ok(None) };
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+                label: None,
+                timestamp_writes: Some(wgpu::ComputePassTimestampWrites {
+                    query_set: q,
+                    beginning_of_pass_write_index: Some(0),
+                    end_of_pass_write_index: Some(1),
+                }),
+            });
+            pass.set_bind_group(0, &self.bg_bind, &[]);
+            pass.set_pipeline(&self.bg[0]);
+            pass.dispatch_workgroups(self.face_groups(), 1, 1);
+        }
+        encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
+        encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
+        self.queue.submit([encoder.finish()]);
+        let slice = self.query_read.slice(..16);
+        let (tx, rx) = std::sync::mpsc::channel();
+        slice.map_async(wgpu::MapMode::Read, move |r| {
+            let _ = tx.send(r);
+        });
+        self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+        rx.recv().map_err(|e| e.to_string())?.map_err(|e| e.to_string())?;
+        let ms;
+        {
+            let data = slice.get_mapped_range().map_err(|e| e.to_string())?;
+            let a = u64::from_le_bytes(data[..8].try_into().unwrap());
+            let b = u64::from_le_bytes(data[8..16].try_into().unwrap());
+            ms = b.checked_sub(a).map(|d| d as f64 * self.queue.get_timestamp_period() as f64 / 1e6);
+        }
+        self.query_read.unmap();
+        Ok(ms)
+    }
+
     /// **Banc** : exécute le pas jusqu'à `upto` et attend la carte.
     fn run_for_bench(&self, cycles: u32, upto: Upto) -> Result<(), String> {
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
@@ -1689,6 +1728,97 @@ pub fn identite_horodatage() -> Result<(), String> {
             "DELTA3D_HORODATAGE_S341 carte={:?} pas=60 horodates={horodate} colonnes={} differentes_au_bit={differents}",
             cartes[0].adapter, a.len()
         );
+        Ok(())
+    })
+}
+
+/// S341, porte C, critères 2 et 3 — **le coût du pas sur la scène de la porte B**, par passe. `Config::review`
+/// (120×112×28 à 25 cm, 64 composantes de B, 32 cycles, pas de 16,667 ms). 30 pas de chauffe, puis `PAS=`
+/// (1 000) pas horodatés, l'instant avançant comme dans la scène : médiane, 99ᵉ centile et maximum du pas
+/// entier et de chaque passe. Puis la projection à 0, 8, 16, 32 et 64 cycles, 200 pas chacun depuis l'état
+/// initial : coût par cycle et part fixe. **Ce que la grandeur mesure** : le temps GPU des passes du pas,
+/// chaque pas soumis seul et attendu — sans rendu concurrent, sans recouvrement entre images.
+pub fn cout_scene() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let config = crate::delta3d_scene::Config::review();
+        let (u, v, w, eta) = config.initial_state();
+        let carte = Step3::new(background, config.domain, config.origin, crate::delta3d_scene::RHO, crate::delta3d_scene::G).await?;
+        let mut carte = carte;
+        carte.set_step(config.step_us, config.rest, config.sponge)?;
+        carte.set_state(&u, &v, &w, &eta)?;
+        let pas: usize = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(1000);
+        println!(
+            "DELTA3D_COUT_S341 carte={:?} backend={} domaine={}x{}x{} mailles={} faces={} composantes={} cycles={} dispatchs={} pas={pas}",
+            carte.adapter, carte.backend, config.domain.nx, config.domain.ny, config.domain.nz, config.domain.cells(),
+            face_total(config.domain), background.components().len(), config.cycles, Step3::dispatches(config.cycles, Upto::Full)
+        );
+        let quantiles = |v: &mut Vec<f64>| -> (f64, f64, f64) {
+            v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            let q = |f: f64| v[(((v.len() - 1) as f64) * f).round() as usize];
+            (q(0.5), q(0.99), *v.last().unwrap())
+        };
+        let mut n = 0u64;
+        let mut mesurer = |carte: &mut Step3, cycles: u32, combien: usize| -> Result<Vec<[f64; 4]>, String> {
+            let mut out = Vec::with_capacity(combien);
+            for _ in 0..combien {
+                carte.publish_time(background, SimTime(n * config.step_us))?;
+                n += 1;
+                if let Some(t) = carte.timed_step_passes(cycles)? {
+                    out.push(t);
+                }
+            }
+            Ok(out)
+        };
+        let _ = mesurer(&mut carte, config.cycles, 30)?;
+        let serie = mesurer(&mut carte, config.cycles, pas)?;
+        let noms = ["pas", "fond_prediction", "projection", "correction_transport"];
+        for (k, nom) in noms.iter().enumerate() {
+            let mut v: Vec<f64> = serie.iter().map(|t| t[k]).collect();
+            let (m, q99, max) = quantiles(&mut v);
+            println!("DELTA3D_COUT_S341 {nom} mediane_ms={m:.3} q99_ms={q99:.3} max_ms={max:.3} echantillons={}", v.len());
+        }
+        let mut ecarts: Vec<f64> = serie.iter().map(|t| t[0] - t[1] - t[2] - t[3]).collect();
+        let (m, q99, max) = quantiles(&mut ecarts);
+        println!("DELTA3D_COUT_S341 copies_et_intervalles mediane_ms={m:.3} q99_ms={q99:.3} max_ms={max:.3}");
+        // L'évaluation du fond seule, dans la première passe : 200 mesures au dernier instant publié.
+        let mut fond: Vec<f64> = Vec::new();
+        for _ in 0..200 {
+            if let Some(ms) = carte.timed_background()? {
+                fond.push(ms);
+            }
+        }
+        if !fond.is_empty() {
+            let (m, q99, max) = quantiles(&mut fond);
+            println!(
+                "DELTA3D_COUT_S341 fond_seul mediane_ms={m:.3} q99_ms={q99:.3} max_ms={max:.3} faces={} champs_par_face=26",
+                face_total(config.domain)
+            );
+        }
+        // Balayage des cycles : la projection, et le pas entier, en médiane.
+        let mut points = Vec::new();
+        for cycles in [0u32, 8, 16, 32, 64] {
+            carte.set_state(&u, &v, &w, &eta)?;
+            let _ = mesurer(&mut carte, cycles, 20)?;
+            let serie = mesurer(&mut carte, cycles, 200)?;
+            let mut proj: Vec<f64> = serie.iter().map(|t| t[2]).collect();
+            let mut total: Vec<f64> = serie.iter().map(|t| t[0]).collect();
+            let (pm, pq, _) = quantiles(&mut proj);
+            let (tm, tq, _) = quantiles(&mut total);
+            println!(
+                "DELTA3D_COUT_S341 cycles={cycles} dispatchs={} projection_mediane_ms={pm:.3} projection_q99_ms={pq:.3} pas_mediane_ms={tm:.3} pas_q99_ms={tq:.3}",
+                Step3::dispatches(cycles, Upto::Full)
+            );
+            points.push((cycles as f64, pm));
+        }
+        // Moindres carrés : projection = fixe + cycles × par_cycle.
+        let nb = points.len() as f64;
+        let (sx, sy) = (points.iter().map(|p| p.0).sum::<f64>(), points.iter().map(|p| p.1).sum::<f64>());
+        let (sxx, sxy) = (points.iter().map(|p| p.0 * p.0).sum::<f64>(), points.iter().map(|p| p.0 * p.1).sum::<f64>());
+        let pente = (nb * sxy - sx * sy) / (nb * sxx - sx * sx);
+        let fixe = (sy - pente * sx) / nb;
+        println!("DELTA3D_COUT_S341 projection par_cycle_ms={pente:.4} fixe_ms={fixe:.3}");
         Ok(())
     })
 }

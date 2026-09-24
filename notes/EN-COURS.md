@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'horodatage par passe ; critère 1.
-- [ ] **P3** — le banc, le témoin, l'alimentation ; critères 2 et 3.
+- [x] **P3** — le banc, le témoin, l'alimentation ; critères 2 et 3.
 - [ ] **P4** — la preuve, le premier levier ; file, feuille de route ; critère 4.
 - [ ] **P5** — rituel.
 
@@ -99,4 +99,10 @@ Critères, écrits avant le code :
 - **P2, critère 1 tenu.** Six horodatages — début et fin des trois passes — et `timed_step_passes` ; `timed_step`
   garde son sens (début de la première passe, fin de la dernière). `--delta3d-horodatage` : scène de la porte B,
   60 pas horodatés contre 60 nus depuis le même état — **0 colonne différente au bit** sur 13 440, 60 horodatages.
+- **P3, critères 2 et 3 tenus** (`--delta3d-cout-scene`, deux passages ; secteur au début et à la fin des deux,
+  `BatteryStatus` 2, charge 97 %, `PowerOnline` vrai ; témoin S302 `--delta3d-scene-mesure` : 4,630 ms, pour 4,62
+  publiés). **Pas entier**, 1 000 pas : médiane 4,452 / 4,477 ms, **99ᵉ centile 4,505 / 4,651**, max 4,834 / 4,852.
+  **Par passe**, médianes : fond et prédiction 1,98–1,99 ms, dont **l'évaluation du fond seule 1,533** (q99 1,554) ;
+  projection 2,06 ; correction et transport 0,39 ; copies 0,03. **Projection = 0,087 ms + 0,062 ms par cycle**
+  (0 → 0,093 ; 8 → 0,582 ; 16 → 1,073 ; 32 → 2,068 ; 64 → 4,056). Pas entier à 0 cycle : 2,53 ms.
 
