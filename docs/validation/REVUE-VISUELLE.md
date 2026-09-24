@@ -896,3 +896,9 @@ Ce que R11 n'avait pas : **l'origine de l'onde**. Deux sources ont été essayé
 4. **Autre défaut** — la mer, la jonction, la lumière ?
 
 Un mot par question suffit.
+
+**Verdict R16 — reçu le 2026-09-24 (S340)** : *« Tout parrait bon visuellement »*. Lu sur les quatre questions :
+l'anneau se lit comme une onde circulaire qui traverse la mer et s'y déforme, et convainc ; la fine ligne claire
+de sa crête n'est pas un défaut ; que les anneaux d'un impact réaliste se perdent dans une mer de 2,5 m est
+juste ; aucun autre défaut. **Classe** : aucune — réception. **Le critère 3 de la porte B est reçu** (ADR-175 §4) ;
+restent, pour elle, les cas 1 et 2 sur la production (critère 2).

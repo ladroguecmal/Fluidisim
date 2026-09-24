@@ -186,7 +186,8 @@ d'un creux, qui s'élargit et se déforme en traversant la mer (images proche 1 
 
 ### Ce que cette section ne reçoit pas
 
-- **Le verdict** : R16 ([revue](REVUE-VISUELLE.md) §21).
+- **Le verdict**, reçu depuis, en S340 : *« Tout parrait bon visuellement »* ([revue](REVUE-VISUELLE.md) §21) —
+  **critère 3 de la porte B reçu**.
 - **Une fine ligne claire** suit la crête de l'anneau, vue de haut : non attribuée — la crête elle-même, ou la
   composition de δ avec les vagues pointues (CWM) ; question posée.
 - **La bande claire** en bas de la pose rasante, avec et sans δ : la mer coupée au plan proche, préexistante.

@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le verdict R16 : critère 3 reçu ; critère 1.
+- [x] **P2** — le verdict R16 : critère 3 reçu ; critère 1.
 - [ ] **P3** — `Background::from_components` et son essai ; critère 2.
 - [ ] **P4** — le cas 2 sur la production ; critère 3.
 - [ ] **P5** — le cas 1 : fond de B stationnaire, chaînon et HOS sur la référence.
