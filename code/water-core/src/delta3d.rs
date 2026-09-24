@@ -141,9 +141,10 @@ pub struct Volume3 {
     /// **S334 : la surface d'une colonne en partie couverte** (A317). Sous une coque qui perce le couvercle,
     /// `η` reste la hauteur de *remplissage* de la colonne — l'excès d'eau rapporté à sa section entière, ce
     /// que le transport conserve —, mais cet excès se tient dans la seule part libre `a` du couvercle, où la
-    /// surface et la pression valent `(η − z₀)/a` fois `ρg`. **Éteint par défaut** : éprouvé en S334, il ne
-    /// retire pas la dépendance au placement d'A317, et une colonne dont l'ouverture se referme y garde un
-    /// excès d'eau que `1/a` change en pointe de pression. Il sert à la mesure.
+    /// surface et la pression valent `(η − z₀)/a` fois `ρg`. **Éteint par défaut**, bien qu'il soit la bonne
+    /// physique — il converge avec la maille, le couvercle de S332 non (S334) : une coque qui **tourne** par
+    /// rapport à l'eau laisse, dans les colonnes en lamelle, le résidu de la vitesse de paroi prise au centre
+    /// des faces (S332), que `1/a` change en pointe. Il sert à la mesure, et à la scène de la porte D.
     partial_lid: bool,
     /// Ouverture minimale de ce quotient : `dt²·g/dx` du pas en cours. Une lamelle plus mince aurait une surface
     /// plus raide que le pas explicite de la hauteur ne la porte ; elle garde celle de ce plancher.
@@ -408,6 +409,58 @@ impl Volume3 {
             self.eta_roundoff[c] = (height - self.eta[c]) - increment;
             self.eta[c] = height;
             base.solid_col[c] = self.rhs[c];
+        }
+        // S334 : l'eau poussée par une paroi qui glisse (A317). Quand l'ouverture du couvercle d'une colonne se
+        // referme, l'eau de surface de la part recouverte — hors l'eau que la coque vient d'y déposer, que son
+        // flux retire — passe aux voisines de la couche du haut, au prorata de l'ouverture de la face partagée et
+        // du couvercle voisin : la paroi la pousse devant elle. Sans ce transfert, `1/a` en ferait une pointe de
+        // pression. Transferts écrits dans `rhs[nx·ny..2·nx·ny]`, libre entre deux pas, puis appliqués ensemble :
+        // l'ordre des colonnes n'y entre pas ; la dernière voisine reçoit le reste, la somme est exacte.
+        if self.partial_lid && nz >= 2 {
+            let (top, z0, k) = (nz * nx * ny, domain.z0(), nz - 1);
+            let t = &mut self.rhs[nx * ny..2 * nx * ny];
+            t.fill(0.);
+            for j in 0..ny {
+                for i in 0..nx {
+                    let c = j * nx + i;
+                    let (avant, apres) = (self.saved_w[top + c], g.open_w[top + c]);
+                    if !(avant > 0. && apres < avant) {
+                        continue;
+                    }
+                    let surface = ((self.eta[c] - z0) - self.eta_roundoff[c]) - base.deposit[c];
+                    let pousse = surface * (1. - apres / avant);
+                    let fu = |i: usize| (k * ny + j) * (nx + 1) + i;
+                    let fv = |j: usize| (k * (ny + 1) + j) * nx + i;
+                    let mut cibles = [(0usize, 0f32); 4];
+                    if i > 0 { cibles[0] = (c - 1, g.open_u[fu(i)] * g.open_w[top + c - 1]); }
+                    if i + 1 < nx { cibles[1] = (c + 1, g.open_u[fu(i + 1)] * g.open_w[top + c + 1]); }
+                    if j > 0 { cibles[2] = (c - nx, g.open_v[fv(j)] * g.open_w[top + c - nx]); }
+                    if j + 1 < ny { cibles[3] = (c + nx, g.open_v[fv(j + 1)] * g.open_w[top + c + nx]); }
+                    let total: f32 = cibles.iter().map(|x| x.1).sum();
+                    if !(total > 0.) || pousse == 0. {
+                        continue;
+                    }
+                    let (mut reste, mut derniere) = (pousse, c);
+                    for (n, poids) in cibles {
+                        if poids > 0. {
+                            let part = pousse * (poids / total);
+                            t[n] += part;
+                            reste -= part;
+                            derniere = n;
+                        }
+                    }
+                    t[derniere] += reste;
+                    t[c] -= pousse;
+                }
+            }
+            for c in 0..nx * ny {
+                if t[c] != 0. {
+                    let increment = t[c] - self.eta_roundoff[c];
+                    let height = self.eta[c] + increment;
+                    self.eta_roundoff[c] = (height - self.eta[c]) - increment;
+                    self.eta[c] = height;
+                }
+            }
         }
         g.base = Some(base);
         self.prec_cut();

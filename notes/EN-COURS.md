@@ -98,7 +98,7 @@ Critères, écrits avant le code :
 - [ ] ~~**P4** — banc après correctif ; critère 2.~~ *Caduc : le correctif ne porte pas A317 (P3).*
 - [x] **P4** — *amendé* : **convergence** sur une tranche quasi-2D — coque infiniment longue, `ny` = 2 —,
   mailles de 25 ; 12,5 ; 6,25 ; 3,125 cm, quatre placements chacune ; couvercle partiel éteint puis allumé.
-- [ ] **P5** — *amendé deux fois* : **l'eau poussée par une paroi qui glisse** — quand l'ouverture du couvercle
+- [x] **P5** — *amendé deux fois* : **l'eau poussée par une paroi qui glisse** — quand l'ouverture du couvercle
   d'une colonne se referme, l'eau de surface de la part recouverte passe aux colonnes voisines au couvercle
   ouvert ; puis **couvercle partiel par défaut** si les critères 9 à 11 tiennent.
 - [ ] **P5 bis** — la scène de la porte D rejouée avec le couvercle partiel : critères 3 à 5, images.
@@ -156,3 +156,12 @@ valeurs changées est publiée.
   critère 6 tenu (tranche à 25 cm, 38,5 % ≥ 20 %) ; critère 7 — S332 **ne converge pas** (38,5 → 44,2 →
   30,5 %), défaut de structure ; partiel **converge** (33,4 → 10,9 → 1,8 %) ; critère 8 — moyenne partielle
   26,93 → 21,99 → 20,56 mm, ordre 1,79, **extrapolée 19,98 mm** ; S332 reste à 17–18 mm, 11 % sous la limite.
+- **P5, l'eau poussée par une paroi qui glisse** : faite (transferts vers les voisines de la couche du haut,
+  somme exacte). Contre-épreuve de S333 avec le couvercle partiel : 12,2 → **5,47 m/s** — critère 9 **non
+  tenu**. Localisée par mode : glissement pur 0,39 m/s, pilonnement relatif pur 0,34 m/s ; **dès que la coque
+  tourne par rapport à l'eau**, 1,37 à 5,47 m/s, toujours dans une colonne de coin au couvercle ouvert à 7–8 % :
+  le résidu de rotation de S332 — vitesse de paroi au centre des faces, non au centroïde de leur part couverte
+  — que `1/a` amplifie. **Décision, selon le plan** : couvercle partiel **éteint par défaut** ; S3xx au bit.
+  **Préalable nommé** : la vitesse de paroi au centroïde de la part couverte (remède de S332), puis défaut
+  allumé. Valeurs changées si on l'allume : S332 pilonnement 2,7266 → 2,7434·10⁻¹⁰ m³, décalage 0,0667 →
+  0,0666 m (couvercles « poussière » du cube), contre-épreuve S333 0,32 → 5,47 m/s.
