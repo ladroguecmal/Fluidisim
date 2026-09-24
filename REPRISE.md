@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-24 11:52 +02:00
+JETON            : occupé
+Battement        : 2026-09-24 12:05 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S338 — **la porte D reçue** : consigner le verdict final de R15 (« Plus de coupure ») et ce qu'il reçoit ; la v1 d'ADR-174 D4 demande encore A, B et C
 Dernière session : S337 — **la coupure au bord de δ**, d'après le verdict R15 (le bateau qui se pose est juste ; le bord de δ se voyait) : éponge du mode linéaire, celle du pas couplé, et fondu de composition de la production ; plus de pli dans la scène de la porte D ([preuve](docs/validation/PORTE-D-S333.md) §8)
 Session suivante : **verdict de l'utilisateur sur les images de S337** (`viewer/captures/s337`, ADR-189 D3) — s'il reçoit la porte D, la consigner (feuille de route, liste, file) ; sinon, le défaut qu'il nomme. Puis **W derrière la requête du corps**
 Maillons        : 0 — S337 : bord de δ invisible, sur verdict R15

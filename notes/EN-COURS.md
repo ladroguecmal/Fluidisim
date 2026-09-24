@@ -62,56 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S337 — **terminée**. **La coupure au bord de δ** : le verdict R15 de la porte D la voit encore ;
-chemin de la porte D ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
+Session : S338 — **en cours**. **La porte D reçue** : consigner le verdict final de R15 et ce qu'il reçoit ;
+chemin de la v1 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md), [ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — **verdict R15 de l'utilisateur**, sur les images de S336 : *« 1. Oui »* — le bateau lâché qui se pose en
-3 à 4 s sur la houle est juste ; *« 2. On voit la coupure encore »* — les anneaux s'arrêtent sur le bord droit de
-la grille de δ, visible au loin ; *« 3. Pas forcément »* — pas d'autre défaut.
+Entrée — **verdict de l'utilisateur sur les images de S337** : *« Plus de coupure »*. Avec R15 — *« 1. Oui »*, le
+bateau qui se pose est juste ; *« 3. Pas forcément »*, pas d'autre défaut —, le critère visuel de la porte D est
+tenu.
 
-**Ce que la session doit rendre possible.** Un δ dont le bord ne se voit pas, dans la scène de la porte D. La
-production l'a déjà fait, et R11 l'a jugé : **éponge** au bord du domaine et **fondu de 3 m** à la composition
-— *« pas de problème sur la transition »* (S303). Le banc de la porte D n'a ni l'un ni l'autre : le mode
-linéaire de δ a des murs, qui renvoient les anneaux, et le rendu y ajoute δ jusqu'au dernier rang de mailles.
-Le pli n'est pas de la physique de l'eau : c'est le bord d'un domaine local, qu'ADR-001 veut invisible. Le
-rendre à W — le retour δ → W — reste bloqué par A289 ; ici, l'éponge éteint les anneaux avant le mur.
+**Ce que la session doit rendre possible.** Que le dépôt dise vrai. La porte D est franchie **sur la référence
+CPU** : son « reçu si » — un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le jeu — tient
+par la partie numérique (S333–S337) et par le verdict R15. **La v1 n'est pas atteinte** : ADR-174 D4 la définit
+par les portes A, B, C et D, et le tableau d'ADR-189 §1 ne nommait que la D. Ce qui éprouve la porte reste
+partiel — B6 : un archétype sur une houle, sans roulis ni tangage ; le tableau de §3 bis cite C13 et C14, bulles
+et écume de J3 — ; W derrière la requête, la coque dans la production de δ et le pilotage sont des suites, pas
+des critères. Trois points de la liste sont périmés depuis S324–S332 : 4.15 (rotation, obstacle qui perce la
+surface), 6.4 (parois mobiles dans δ, dit absent), 6.5 (dit sans faces coupées 3D).
 
-Critères, écrits avant le code :
-1. **L'éponge du mode linéaire** (`Sponge3`, celle du pas couplé) : une bosse lâchée au centre d'un δ linéaire
-   ne revient pas — hauteur au centre après le passage des ondes sous 20 % de celle que les murs renvoient —,
-   et le volume qu'elle retire est compté : volume de δ plus volume retiré constant au plancher d'arrondi.
-   Éponge absente par défaut : essais du cœur verts, valeurs S3xx au bit.
-2. **Le fondu de composition** : δ pèse zéro au bord de la grille et un à 3 m de lui, comme la production.
-3. **La scène de la porte D**, 12 s, avec éponge et fondu : critères 3 et 5 de S333 ; volume suivi en comptant
-   l'éponge ; anneaux qui sortent sans revenir.
-4. **Images** refaites, puis **arrêt pour le verdict** (ADR-189 D3).
+Critères, écrits avant l'écriture :
+1. Chaque registre dit la porte D reçue sur la référence CPU, preuve et verdict cités, **en remplacement** de
+   « verdict attendu » : revue visuelle, preuve, feuille de route (porte, porte en cours, J3), liste, file,
+   REPRISE.
+2. Aucun registre ne dit la v1 atteinte ; la porte suivante est celle que §3 bis désigne — B, dont ne manque
+   que le verdict de l'utilisateur sur une mer jugée convaincante.
+3. Liste : 4.15, 6.1, 6.3, 6.4, 6.5 actualisés, chaque état cité par sa preuve ; décompte suivi (6.4 absent →
+   partiel : 3 / 55 / 62).
+4. ADR-189 reçoit une note datée, sans réécriture : D1 tenue ; la v1 demande encore A, B et C ; D2 inchangée.
+5. `etat_projet.py --check` vert.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul, verdict R15 consigné ici.
-- [x] **P2** — l'éponge du mode linéaire ; critère 1.
-- [x] **P3** — le fondu de composition dans le rendu de la porte D ; critère 2.
-- [x] **P4** — la scène de la porte D, éponge et fondu, 12 s ; critère 3 ; images (critère 4).
-- [x] **P5** — preuve ; R15 au registre des revues ; file, feuille de route.
-- [x] **P6** — rituel ; arrêt pour le verdict.
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — le verdict : revue visuelle, preuve ; la réception dans la feuille de route et REPRISE.
+- [ ] **P3** — la liste : 4.15, 6.1, 6.3, 6.4, 6.5, décompte ; la file : porte D, lots 3–4, décisions.
+- [ ] **P4** — note datée d'ADR-189.
+- [ ] **P5** — rituel ; suite : la porte B.
 
 ### Notes de reprise
-- **P2, critère 1 tenu.** `Volume3::set_linear_sponge` : l'éponge du pas couplé (vitesses prédites amorties, hauteur
-  rappelée au repos, volume retiré compté par `linear_sponge_removed`). Tranche 32 m, crête 10 cm, 20 s, éponge 4 m à
-  2 /s : énergie de surface intérieure **0,4 %** de celle des murs ; volume de δ plus retiré, écart 2,2·10⁻⁹ m³ pour une
-  borne d'arrondi de 1,0·10⁻⁶ (murs : 6,8·10⁻¹⁰). Le plan disait « au plancher d'arrondi » : l'essai compare à la
-  borne cumulée, non aux 10⁻⁹ d'abord codés. Défaut sans éponge : S3xx au bit.
-- **P3, critère 2** : `fondu` de `porte_d` = `delta_fade` de `water.wgsl` — `½ − ½·cos(π·s/w)`, produit des
-  fondus en x et en y ; `--fondu 3` : zéro au bord, un à 3 m. Sans l'option, les images de S333–S336 inchangées.
-- **P4, critère 3 tenu** (16 s au lieu des 12 prévues : les anneaux mettent ~13 s à revenir d'un mur). Scène
-  `--couvercle-partiel --archetype --eponge --fondu 3 --pas 1600` : critères 3 (au bit) et 5 de S333 ; volume de δ
-  plus retiré suit la coque, 1,95·10⁻⁹ m³, au plancher (1,9·10⁻⁵) ; **l'éponge retire 0,49 m³** — l'eau que la coque
-  déplace en se posant, qu'une mer ouverte étale. Agitation du centre après 12 s : **4,03 mm** avec éponge, **8,19 mm**
-  avec murs ; le reste vient de la coque, qui remue encore l'eau sur la houle — son tangage n'est pas amorti. Énergie
-  0,981 (murs 0,956). Plus de pli au bord dans les images. `viewer/captures/s337`, scène / carte : 2 s
-  `0x28e004971a52f585` / `0x2cf65f51fae160b1` ; 4 s `0xc33c5065fb79fcff` / `0xba406b73662214c1` ; 6 s
-  `0x7cd8db9d4c41f85e` / `0x8a41b853a480b80d` ; 8 s `0x21d2ccff6a239506` / `0x11e4c93ea60047cf` ; 10 s
-  `0xc4f0a58ae159079e` / `0x199806393a2489a3` ; 12 s `0xb42556af028c4e0c` / `0xef75f9c6f4391133` ; 14 s
-  `0xbfc0e4afe228ce0a` / `0xf10f55ab736a94df` ; 16 s `0xe315eb83a715c715` / `0x871e3986adbe3d09`.
-- **P5** : preuve [PORTE-D-S333 §8](../docs/validation/PORTE-D-S333.md) ; R15 au registre (§20, consigné en P4) ;
-  ligne de la porte D de la file ; chronologie de la feuille de route. Cœur : 499 réussis, 0 avertissement.
