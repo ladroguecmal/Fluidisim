@@ -40,3 +40,22 @@ quand un défaut bloquant n'a plus de chemin qu'elle puisse éprouver.
   pas d'A289 — un corps flotte d'abord en eau calme (ADR-188 §1).
 - **La forme du bateau** de la porte D : une coque simple d'abord ; la session qui l'ouvre la déclare.
 - **Le budget** : ADR-178 D4 le garde mesuré et publié, non opposable avant la porte C.
+
+## Note datée du 2026-09-24 (S338) — la porte D reçue
+
+**D1 est tenue.** Le verdict R15 — *« 1. Oui »*, *« 3. Pas forcément »* — puis *« Plus de coupure »* sur les
+images de S337 reçoivent la porte D **sur la référence CPU** ([PORTE-D-S333](../validation/PORTE-D-S333.md) §9),
+au bout des sessions S329 à S337. W derrière la requête du corps, la coque dans la production de δ et les
+autres degrés de liberté restent des suites, non des critères de la porte.
+
+**Un fait que le §1 n'écrivait pas.** [ADR-174](ADR-174-arbitrages-du-2026-09-19.md) D4 définit la v1 par les
+**portes A, B, C et D** de la feuille de route §3 bis ; le tableau du §1 ne nommait que la D. La v1 n'est donc
+pas atteinte. Restent la porte B, dont ne manque que le verdict de l'utilisateur sur une mer jugée
+convaincante ; la porte C, δ ≤ 2 ms GPU sur la scène de la porte B — 4,62 ms mesurés en S302 ; la porte A,
+l'ordonnanceur sur des domaines 3D.
+
+**Ce que ce fait laisse ouvert.** D2 suspend le lot 5 « jusqu'à la v1 », que le §1 lisait comme la porte D :
+la suspension court-elle jusqu'à la porte D, désormais reçue, ou jusqu'à la v1 entière ? C'est
+l'interprétation que D2 disait déjà à confirmer ; elle revient à l'utilisateur. D'ici là, rien ne change :
+les sessions suivent la porte en cours de §3 bis, B.
+
