@@ -59,3 +59,8 @@ la suspension court-elle jusqu'à la porte D, désormais reçue, ou jusqu'à la 
 l'interprétation que D2 disait déjà à confirmer ; elle revient à l'utilisateur. D'ici là, rien ne change :
 les sessions suivent la porte en cours de §3 bis, B.
 
+**Correctif, même jour (S338).** La porte B n'attend pas que le verdict : les deux premiers cas du critère 1
+d'[ADR-175](ADR-175-architecture-d-execution-de-delta-en-3d.md) §4 — reproduction des réceptions 2D à `ny` = 1,
+invariance en `y` sous une houle à crêtes longues — ne sont pas mesurés sur la production (critère 2,
+[CUVE-GPU-S305](../validation/CUVE-GPU-S305.md) §7). La phrase ci-dessus reprenait la feuille de route, qui
+l'écrivait depuis S305.

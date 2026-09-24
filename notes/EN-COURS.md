@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S338 — **en cours**. **La porte D reçue** : consigner le verdict final de R15 et ce qu'il reçoit ;
+Session : S338 — **terminée**. **La porte D reçue** : consigner le verdict final de R15 et ce qu'il reçoit ;
 chemin de la v1 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md), [ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — **verdict de l'utilisateur sur les images de S337** : *« Plus de coupure »*. Avec R15 — *« 1. Oui »*, le
@@ -95,6 +95,9 @@ Critères, écrits avant l'écriture :
 - [x] **P2** — le verdict : revue visuelle, preuve ; la réception dans la feuille de route et REPRISE.
 - [x] **P3** — la liste : 4.15, 6.1, 6.3, 6.4, 6.5, décompte ; la file : porte D, lots 3–4, décisions.
 - [x] **P4** — note datée d'ADR-189.
-- [ ] **P5** — rituel ; suite : la porte B.
+- [x] **P5** — rituel ; suite : la porte B.
 
 ### Notes de reprise
+- **P2–P4** : porte D reçue dans la revue (§20), la preuve (§9), la feuille de route, la liste, la file, REPRISE ;
+  note datée d'ADR-189. **P5** : la porte B n'attend pas que le verdict — cas 1 et 2 d'ADR-175 §4 non mesurés
+  sur la production (CUVE-GPU-S305 §7) ; correctif daté à ADR-189, feuille de route et file corrigées.

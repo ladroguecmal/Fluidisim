@@ -16626,3 +16626,21 @@ pas, sur la décision de l'utilisateur (R15) ; le chemin — la réception visue
 Suivant : **le verdict sur les images de S337** ; s'il reçoit la porte D, la consigner — puis W derrière la
 requête du corps.
 
+## S338 — 2026-09-24 — la porte D reçue sur la référence CPU
+
+**Entrée — verdict final** sur les images de S337 : *« Plus de coupure »*. Avec R15 (*« 1. Oui »*, *« 3. Pas
+forcément »*), le critère visuel de la porte D est tenu.
+**Fait.** La porte D est consignée **reçue sur la référence CPU** — son « reçu si » tient par S333–S337 et R15
+([preuve](../docs/validation/PORTE-D-S333.md) §9) — dans la revue visuelle, la feuille de route, la liste, la file
+et REPRISE. **La v1 n'est pas atteinte** : ADR-174 D4 la définit par les portes A, B, C et D ; le tableau
+d'ADR-189 §1 ne nommait que la D (note datée) et REPRISE écrivait « v1 = porte D franchie » (corrigé). Liste :
+**6.4** passe à partiel (3 / 55 / 62) — les parois mobiles de S330–S332 n'y étaient pas reportées — ; 4.15, 6.1,
+6.3, 6.5 actualisés. Le tableau des portes citait C13 et C14, bulles et écume, pour D : C10, C11, C23.
+**Limites.** Réception sur B : W, nul dans la scène, n'est pas derrière la requête ; aucune coque dans la
+production GPU ; B6 sur un archétype ; le verdict juge la perception, sans référence réelle.
+**Erreur de parcours.** La note d'ADR-189 disait que la porte B n'attend que le verdict ; les cas 1 et 2
+d'ADR-175 §4 sur la production manquent aussi (CUVE-GPU-S305 §7) — correctif daté, feuille de route corrigée.
+**Arbitrage réel.** Le terme de la suspension du lot 5 (ADR-189 D2) : la porte D, ou la v1 entière.
+**Rituel.** Maillons **0** : ce qui devient possible — la porte D franchie, la v1 passe aux portes B, C et A ;
+le chemin — la porte B ; la preuve — PORTE-D-S333 §9. Suivant : **porte B**, la revue R16 — une onde de δ née
+d'un impact sur la mer de référence provisoire (R14) — pour le verdict ; puis les cas 1 et 2 sur la production.
