@@ -685,3 +685,75 @@ pub fn empreinte() -> Result<(), String> {
     })
 }
 
+/// S345, porte C, critère 2 — **la scène de B à 30 Hz contre 60 Hz.** Quatre domaines : le front de S302 et son
+/// témoin, au pas de 16,667 ms, puis de 33,333 ms. Chaque seconde : l'onde isolée (avec − témoin) — la position
+/// de son maximum et sa valeur — aux deux cadences, et les colonnes hors bornes. `--delta3d-cadence-scene`.
+pub fn cadence_scene() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let secondes: u64 = std::env::var("SECONDES").ok().and_then(|v| v.parse().ok()).unwrap_or(12);
+        // `CADENCES=pas_us:cycles,…` — la première est la référence. Défaut : 60 Hz et 30 Hz à 32 cycles. Le témoin
+        // de sensibilité, `16667:32,16667:64`, change la projection au lieu de la cadence (S345 P3).
+        let liste: Vec<(u64, u32)> = std::env::var("CADENCES")
+            .unwrap_or_else(|_| "16667:32,33333:32".into())
+            .split(',')
+            .filter_map(|x| {
+                let mut it = x.split(':');
+                Some((it.next()?.parse().ok()?, it.next()?.parse().ok()?))
+            })
+            .collect();
+        let mut cadences = Vec::new();
+        for &(pas_us, cycles) in &liste {
+            let mut config = Config::review();
+            config.step_us = pas_us;
+            config.cycles = cycles;
+            let mut avec = Live::new(Step3::new(background, config.domain, config.origin, RHO, G).await?, config, 0)?;
+            let temoin_cfg = config.without_packet();
+            let mut sans = Live::new(Step3::new(background, config.domain, config.origin, RHO, G).await?, temoin_cfg, 0)?;
+            let (nx, dx) = (config.domain.nx, config.domain.dx);
+            let colonne = |c: usize| (config.origin[0] + ((c % nx) as f32 + 0.5) * dx, config.origin[1] + ((c / nx) as f32 + 0.5) * dx);
+            let mut releves = Vec::new();
+            let mut hors = 0u32;
+            // Pas par seconde arrondis : 60 et 30, pour des relevés aux mêmes instants à 30 µs près.
+            let pas_par_seconde = (1_000_000 + pas_us / 2) / pas_us;
+            let total = secondes * pas_par_seconde;
+            for n in 0..=total {
+                if n % pas_par_seconde == 0 {
+                    let (pa, ps) = (avec.step.published()?, sans.step.published()?);
+                    let (mut onde, mut lieu) = (0f32, 0usize);
+                    for c in 0..pa.len() {
+                        let d = (pa[c] - ps[c]).abs();
+                        if d > onde { onde = d; lieu = c; }
+                    }
+                    releves.push((n / pas_par_seconde, onde, colonne(lieu)));
+                }
+                if n == total { break; }
+                for live in [&mut avec, &mut sans] {
+                    live.advance(background)?;
+                    if let Some(d) = live.last.take() {
+                        hors = hors.max(d.columns_outside);
+                    }
+                }
+            }
+            println!("DELTA3D_CADENCE_S345 scene pas_ms={:.3} cycles={cycles} hors_bornes_max={hors}", pas_us as f64 * 1e-3);
+            cadences.push(releves);
+        }
+        let (mut pire_position, mut pire_amplitude) = (0f32, 0f32);
+        for (a, b) in cadences[0].iter().zip(&cadences[1]) {
+            let ecart = ((a.2 .0 - b.2 .0).powi(2) + (a.2 .1 - b.2 .1).powi(2)).sqrt();
+            let rapport = if a.1 > 0. { b.1 / a.1 - 1. } else { 0. };
+            if a.0 > 0 {
+                pire_position = pire_position.max(ecart);
+                pire_amplitude = pire_amplitude.max(rapport.abs());
+            }
+            println!(
+                "DELTA3D_CADENCE_S345 scene t={}s onde_60hz={:.4} en=({:.2},{:.2}) onde_30hz={:.4} en=({:.2},{:.2}) ecart_position_m={ecart:.3} ecart_amplitude_pct={:.2}",
+                a.0, a.1, a.2 .0, a.2 .1, b.1, b.2 .0, b.2 .1, 100. * rapport
+            );
+        }
+        println!("DELTA3D_CADENCE_S345 scene bilan pire_ecart_position_m={pire_position:.3} pire_ecart_amplitude_pct={:.2}", 100. * pire_amplitude);
+        Ok(())
+    })
+}
+

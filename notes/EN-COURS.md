@@ -85,7 +85,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le banc de cadence : la cuve à trois pas de temps ; critère 1.
-- [ ] **P3** — la scène de B à 30 et 60 Hz ; critère 2.
+- [x] **P3** — la scène de B à 30 et 60 Hz ; critère 2.
 - [ ] **P4** — preuve, file ; critère 3.
 - [ ] **P5** — rituel.
 
@@ -94,4 +94,12 @@ Critères, écrits avant le code :
   amplitude au dernier extrême : **1 ms** 2,150743 s (+0,376 % à la théorie, spatial) / 1,00005 ; **16,7 ms**
   2,150533 / 1,00002 ; **33,3 ms 2,149899 / 0,99987** — soit −0,039 % de période et −0,013 % d'amplitude contre
   1 ms, pour 1 % permis. Le pas de temps ne pèse presque pas sur ce mode.
+- **P3, critère 2 NON TENU** (`--delta3d-cadence-scene`, 12 s, front de S302, témoins). Aucune colonne hors bornes
+  aux deux cadences. 30 Hz contre 60 Hz, 32 cycles : amplitude de l'onde isolée **+3,9 % (1 s), +5,7 % (5 s),
+  +6,3 % (8 s)**, au plus 6,28 % — au-delà des 5 % ; position du maximum 0 à 0,35 m, 1,03 m à 3 s, 7,9 m à 12 s.
+  **Témoin** (60 Hz, 32 contre 64 cycles) : amplitude au plus **1,31 %**, mais la position saute aussi de 8 m à
+  6 s — **la partie « position » du critère était mal posée** (le maximum d'une onde dispersée n'est pas stable) ;
+  la partie « amplitude » mesure un effet réel de la cadence. **30 Hz à 64 cycles** : jusqu'à **8,35 %** — ce n'est
+  pas la projection ; l'éponge est exacte en temps (`exp(−taux·dt·…)`). Candidat, non démontré : la dissipation
+  numérique de l'advection par la mer, par pas — la cuve, sans advection, ne montrait rien.
 
