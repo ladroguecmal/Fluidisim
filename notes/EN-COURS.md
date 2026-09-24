@@ -82,9 +82,14 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le front sur une mer au repos, aux deux cadences ; critère 1.
+- [x] **P2** — le front sur une mer au repos, aux deux cadences ; critère 1.
 - [ ] **P3** — la scène de B à 40 Hz ; critère 2.
 - [ ] **P4** — preuve, file, A318 ; critère 3.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 : partagé.** `MER=repos … --delta3d-cadence-scene` (fond de B d'amplitude nulle) : 30 contre 60 Hz,
+  amplitude **+1,0 à +3,9 %** (1,72 ; 1,89 ; 1,31 ; 1,60 ; 1,03 ; 3,11 ; 1,32 ; **3,87** ; 0,30 ; −0,70 ; 0,47 ; 0,16),
+  presque toujours positive ; avec la mer, 6,3 % ; témoin des cycles, 1,3 %. **La dynamique propre de l'onde dépend
+  du pas** — moins d'amortissement quand les pas sont moins nombreux —, **et la mer en rajoute**.
+

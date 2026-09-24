@@ -691,7 +691,19 @@ pub fn empreinte() -> Result<(), String> {
 pub fn cadence_scene() -> Result<(), String> {
     pollster::block_on(async {
         let scene = crate::scene::Scene::build(true, false, None);
-        let background = &scene.background;
+        // S346 : `MER=repos` — un fond de B d'amplitude nulle, pour séparer le couplage à la mer de la
+        // dynamique propre de l'onde (A318). Le témoin sans paquet y reste exactement au repos.
+        let repos = std::env::var("MER").is_ok_and(|v| v == "repos");
+        let mut alloc = crate::scene::host_impl::ArenaAllocator::with_capacity(1 << 16);
+        let (jobs, sink) = (crate::scene::host_impl::SequentialJobs, crate::scene::host_impl::StderrSink);
+        let calme = water_core::Background::configure(
+            &mut water_core::host::HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+            water_core::SeaState { hs: 0., tp: 4., theta_turns: 0., components: 1, graine: 346 },
+            water_core::WorldPos::from_units(0, 0, 0),
+        )
+        .map_err(|e| format!("mer au repos : {e:?}"))?;
+        let background = if repos { &calme } else { &scene.background };
+        println!("DELTA3D_CADENCE_S345 scene mer={}", if repos { "repos" } else { "--houle" });
         let secondes: u64 = std::env::var("SECONDES").ok().and_then(|v| v.parse().ok()).unwrap_or(12);
         // `CADENCES=pas_us:cycles,…` — la première est la référence. Défaut : 60 Hz et 30 Hz à 32 cycles. Le témoin
         // de sensibilité, `16667:32,16667:64`, change la projection au lieu de la cadence (S345 P3).
