@@ -90,9 +90,13 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'horodatage par passe ; critère 1.
+- [x] **P2** — l'horodatage par passe ; critère 1.
 - [ ] **P3** — le banc, le témoin, l'alimentation ; critères 2 et 3.
 - [ ] **P4** — la preuve, le premier levier ; file, feuille de route ; critère 4.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** Six horodatages — début et fin des trois passes — et `timed_step_passes` ; `timed_step`
+  garde son sens (début de la première passe, fin de la dernière). `--delta3d-horodatage` : scène de la porte B,
+  60 pas horodatés contre 60 nus depuis le même état — **0 colonne différente au bit** sur 13 440, 60 horodatages.
+

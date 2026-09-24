@@ -360,10 +360,12 @@ impl Step3 {
             .unwrap_or(1);
         let read = buffer(&device, (largest * 4) as u64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
         let query = (!features.is_empty()).then(|| {
-            device.create_query_set(&wgpu::QuerySetDescriptor { label: None, ty: wgpu::QueryType::Timestamp, count: 2 })
+            // S341 : début et fin de chacune des trois passes du pas — fond et prédiction, projection,
+            // correction et transport ; les copies entre passes tombent dans les écarts.
+            device.create_query_set(&wgpu::QuerySetDescriptor { label: None, ty: wgpu::QueryType::Timestamp, count: 6 })
         });
-        let query_resolve = buffer(&device, 16, wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC);
-        let query_read = buffer(&device, 16, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
+        let query_resolve = buffer(&device, 48, wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC);
+        let query_read = buffer(&device, 48, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
 
         let device_ring = device.clone();
         let this = Self {
@@ -553,11 +555,12 @@ impl Step3 {
     /// Comme `encode` ; `timed` horodate le début de la première passe et la fin de la dernière
     /// quand le pas est entier et que la carte sait horodater.
     fn encode_timed(&self, encoder: &mut wgpu::CommandEncoder, cycles: u32, upto: Upto, timed: bool) {
-        let stamp = |begin: bool| {
+        // S341 : la passe `n` écrit ses horodatages de début et de fin en `2n` et `2n + 1`.
+        let stamp = |n: u32| {
             self.query.as_ref().filter(|_| timed && upto == Upto::Full).map(|q| wgpu::ComputePassTimestampWrites {
                 query_set: q,
-                beginning_of_pass_write_index: begin.then_some(0),
-                end_of_pass_write_index: (!begin).then_some(1),
+                beginning_of_pass_write_index: Some(2 * n),
+                end_of_pass_write_index: Some(2 * n + 1),
             })
         };
         let (faces, cells, columns) = (
@@ -566,7 +569,7 @@ impl Step3 {
             (self.columns as u32).div_ceil(GROUP),
         );
         {
-            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(true) });
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(0) });
             pass.set_bind_group(0, &self.bg_bind, &[]);
             pass.set_pipeline(&self.bg[0]);
             pass.dispatch_workgroups(faces, 1, 1);
@@ -591,7 +594,7 @@ impl Step3 {
         encoder.copy_buffer_to_buffer(&self.cells_out, 2 * col_bytes, &self.state, 6 * cell_bytes, cell_bytes);
         encoder.copy_buffer_to_buffer(&self.cells_out, 2 * col_bytes + cell_bytes, &self.state, 5 * cell_bytes, cell_bytes);
         {
-            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(1) });
             pass.set_bind_group(0, &self.cg_bind, &[]);
             let mut run = |index: usize, groups: u32| {
                 pass.set_pipeline(&self.cg[index]);
@@ -613,7 +616,7 @@ impl Step3 {
             return;
         }
         {
-            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(false) });
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(2) });
             pass.set_bind_group(0, &self.step_bind, &[]);
             pass.set_pipeline(&self.step[CORRECT]);
             pass.dispatch_workgroups(faces, 1, 1);
@@ -700,6 +703,13 @@ impl Step3 {
     /// **Banc P6** : un pas entier horodaté sur la carte, sans aucune relecture d'état. C'est la
     /// forme que le pas aura en production ; le temps rendu est celui des passes, copies comprises.
     pub fn timed_step(&self, cycles: u32) -> Result<Option<f64>, String> {
+        Ok(self.timed_step_passes(cycles)?.map(|t| t[0]))
+    }
+
+    /// **Banc S341** : le pas entier horodaté, et chacune de ses trois passes — `[pas, fond et
+    /// prédiction, projection, correction et transport]`, en millisecondes. Le pas va du début de la
+    /// première passe à la fin de la dernière ; les copies entre passes sont dans la différence.
+    pub fn timed_step_passes(&self, cycles: u32) -> Result<Option<[f64; 4]>, String> {
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         self.encode_timed(&mut encoder, cycles, Upto::Full, true);
         let Some(q) = self.query.as_ref() else {
@@ -707,8 +717,8 @@ impl Step3 {
             self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
             return Ok(None);
         };
-        encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
-        encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
+        encoder.resolve_query_set(q, 0..6, &self.query_resolve, 0);
+        encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 48);
         self.queue.submit([encoder.finish()]);
         let slice = self.query_read.slice(..);
         let (tx, rx) = std::sync::mpsc::channel();
@@ -720,9 +730,13 @@ impl Step3 {
         let ms;
         {
             let data = slice.get_mapped_range().map_err(|e| e.to_string())?;
-            let a = u64::from_le_bytes(data[..8].try_into().unwrap());
-            let b = u64::from_le_bytes(data[8..16].try_into().unwrap());
-            ms = b.checked_sub(a).map(|d| d as f64 * self.queue.get_timestamp_period() as f64 / 1e6);
+            let t: Vec<u64> = data.chunks_exact(8).map(|b| u64::from_le_bytes(b.try_into().unwrap())).collect();
+            let period = self.queue.get_timestamp_period() as f64 / 1e6;
+            let d = |a: usize, b: usize| t[b].checked_sub(t[a]).map(|x| x as f64 * period);
+            ms = match (d(0, 5), d(0, 1), d(2, 3), d(4, 5)) {
+                (Some(a), Some(b), Some(c), Some(e)) => Some([a, b, c, e]),
+                _ => None,
+            };
         }
         self.query_read.unmap();
         Ok(ms)
@@ -1639,6 +1653,42 @@ pub fn cas1_production() -> Result<(), String> {
                 );
             }
         }
+        Ok(())
+    })
+}
+
+/// S341, porte C, critère 1 — **l'horodatage ne touche pas au pas**. La scène de la porte B, deux pas de
+/// production depuis le même état : 60 pas horodatés par passe, 60 pas nus ; la surface publiée doit être
+/// identique au bit. `--delta3d-horodatage`.
+pub fn identite_horodatage() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let config = crate::delta3d_scene::Config::review();
+        let (u, v, w, eta) = config.initial_state();
+        let mut cartes = Vec::new();
+        for _ in 0..2 {
+            let carte = Step3::new(background, config.domain, config.origin, crate::delta3d_scene::RHO, crate::delta3d_scene::G).await?;
+            carte.set_step(config.step_us, config.rest, config.sponge)?;
+            carte.set_state(&u, &v, &w, &eta)?;
+            cartes.push(carte);
+        }
+        let mut horodate = 0usize;
+        for n in 0..60u64 {
+            let time = SimTime(n * config.step_us);
+            cartes[0].publish_time(background, time)?;
+            if cartes[0].timed_step_passes(config.cycles)?.is_some() {
+                horodate += 1;
+            }
+            cartes[1].publish_time(background, time)?;
+            cartes[1].run_for_bench(config.cycles, Upto::Full)?;
+        }
+        let (a, b) = (cartes[0].published()?, cartes[1].published()?);
+        let differents = a.iter().zip(&b).filter(|(x, y)| x.to_bits() != y.to_bits()).count();
+        println!(
+            "DELTA3D_HORODATAGE_S341 carte={:?} pas=60 horodates={horodate} colonnes={} differentes_au_bit={differents}",
+            cartes[0].adapter, a.len()
+        );
         Ok(())
     })
 }
