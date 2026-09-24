@@ -81,8 +81,12 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le pas de la scène réglable ; identité des captures sans lui ; critère 1.
+- [x] **P2** — le pas de la scène réglable ; identité des captures sans lui ; critère 1.
 - [ ] **P3** — les captures aux deux cadences, aperçus, différences ; critère 2.
 - [ ] **P4** — R17 au registre, preuve (§10), file ; rituel ; arrêt ; critère 3.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** `--pas-delta=<µs>` règle `Config::step_us` ; captures étiquetées `s347_<Hz>hz` dans
+  `viewer/captures/s347`. Sans l'option, `INSTANTS=60,120 --houle --delta3d --captures` : **16 empreintes identiques
+  au bit** à celles relevées en S339 — les leviers de S342–S343 n'ont pas bougé un pixel non plus.
+

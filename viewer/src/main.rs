@@ -1725,7 +1725,13 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// pose). Ce sont ces paires que la revue compare. Aucune publication.
 /// S339 : `tag` — `s302` (le front, R11) ou `s339` (l'impact, R16) : dossier et préfixe des images.
 fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config, tag: &str) -> Result<(), String> {
-    let dir = if tag.starts_with("s339") { captures!("s339") } else { captures!("s302") };
+    let dir = if tag.starts_with("s339") {
+        captures!("s339")
+    } else if tag.starts_with("s347") {
+        captures!("s347")
+    } else {
+        captures!("s302")
+    };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -2760,14 +2766,21 @@ fn run() -> Result<(), String> {
     let delta3d_impact = args.iter().any(|a| a == "--impact");
     // S339 P4 bis : `--anneau` — l'anneau préparé ; ses images vont dans `s339` aussi, préfixe `s339a`.
     let delta3d_anneau = args.iter().any(|a| a == "--anneau");
+    // S347 : `--pas-delta=<µs>` — le pas de la scène δ 3D, pour la revue R17 des cadences (ADR-012 §7). Sans
+    // lui, le pas de S302, au bit.
+    let pas_delta: Option<u64> = args.iter().find_map(|a| a.strip_prefix("--pas-delta=")).and_then(|v| v.parse().ok());
     let delta3d_config = delta3d_scene_on.then(|| {
-        if delta3d_anneau {
+        let mut c = if delta3d_anneau {
             delta3d_scene::Config::ring_review()
         } else if delta3d_impact {
             delta3d_scene::Config::impact_review()
         } else {
             delta3d_scene::Config::review()
+        };
+        if let Some(p) = pas_delta {
+            c.step_us = p;
         }
+        c
     });
     // S277 — `--delta-hs=<m>` / `--delta-tp=<s>` : la houle de la scène δ, pour voir l'onde se
     // déformer. Sans eux, la houle de S275 au bit. La cambrure commande (ONDE-INJECTEE-S277) :
@@ -2948,8 +2961,13 @@ fn run() -> Result<(), String> {
     // partaient sans elles : R11 n'aurait pas pu montrer la couleur que R14 a retenue.
     if let Some(config) = delta3d_config {
         if args.iter().any(|a| a == "--captures") {
-            let tag = if delta3d_anneau { "s339a" } else if delta3d_impact { "s339" } else { "s302" };
-            return delta3d_captures(&mut frame, config, tag);
+            let tag = match pas_delta {
+                Some(p) => format!("s347_{}hz", (1e6 / p as f64).round()),
+                None if delta3d_anneau => "s339a".into(),
+                None if delta3d_impact => "s339".into(),
+                None => "s302".into(),
+            };
+            return delta3d_captures(&mut frame, config, &tag);
         }
     }
     if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--test-ab=")) {
