@@ -89,12 +89,17 @@ Critères, écrits avant le code :
 
 ### Plan
 
+*Amendé à 00 h 55, sur la demande de l'utilisateur : « Peut être godot ou unreal serait envisageable car rendu toujours
+pas convaincant », puis le choix de **Godot 4** — [ADR-192](../docs/adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md). Les
+images et la revue R19 **dans l'afficheur** perdent leur objet : le jugement se fera dans Godot. Le coût se mesure
+quand même, le module restant la référence à porter.*
+
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la loi de `s` et le seuil ; critère 1.
 - [x] **P3** — l'écume au rendu ; critère 2.
 - [x] **P4** — la lumière des crêtes ; critère 3.
-- [ ] **P5** — images et coût ; critère 4.
-- [ ] **P6** — R19, preuve, file, feuille de route, liste ; critère 5.
+- [x] **P5** — la décision de l'utilisateur (ADR-192) et le coût du module ; critère 4 réduit au coût.
+- [ ] **P6** — preuve, file, feuille de route, liste, index ; critère 5 sans R19.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -120,4 +125,9 @@ Critères, écrits avant le code :
 - **P4.** Première teinte, celle du corps d'eau (`SEA_R0`, B/G 10,9) : taches **bleu électrique**, artificielles.
   Remplacée par la **transmission de l'eau pure sur une crête**, `exp(−a·Hs)`, `a` de Pope & Fry (mêmes absorptions
   qu'ADR-177) : (0,599 ; 0,919 ; 0,986), un cyan clair ; force 0,15, exposant 4, à calibrer par R19 ; effet discret.
+- **P5.** Godot 4.4.1 (et 4.2, 4.4) présent dans Téléchargements ; Unreal absent (lanceur Epic, RealityScan). ADR-192 ;
+  notes datées d'ADR-191 ; file, feuille de route §3 ter, liste 8.1, REPRISE §5, index. **Coût du module**
+  (`--cretes-bench`, 1280 × 720, 120 images, secteur 96 % avant et après) : médiane GPU de l'eau, référence 2,106 ms
+  sans, +0,018 écume, +0,012 crêtes, +0,026 les deux ; rasante 2,095, +0,010, +0,008, +0,012. Le calcul de `σ` et de
+  `fwidth(s)`, fait sans condition, est dans les deux états : non séparé.
 

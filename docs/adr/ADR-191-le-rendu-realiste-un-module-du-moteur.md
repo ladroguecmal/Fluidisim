@@ -65,3 +65,10 @@ FluidNinja LIVE-2 en est une, de style. Chaque élément garde un coût mesuré,
 **« Rendu réaliste » ne veut pas dire « l'afficheur devient le jeu »** : c'est un module pour un moteur. **Ni que la
 physique s'arrête** : elle alterne. **Ni qu'un effet de rendu remplace une physique** du périmètre (ADR-127) : une
 écume dessinée n'est pas un déferlement reçu, et la liste ne coche pas l'un pour l'autre.
+
+---
+
+**Note datée du 2026-09-25 (S356).** D2 est **remplacé en ce qu'il désignait un moteur maison à construire** par
+[ADR-192](ADR-192-le-rendu-de-l-eau-dans-godot-4.md), décision de l'utilisateur : le rendu final de l'eau se fait dans
+**Godot 4**, et l'afficheur reste le banc. D1, D3 et D4 demeurent.
+

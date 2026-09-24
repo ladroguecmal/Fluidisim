@@ -339,7 +339,7 @@ pas recopiée ici (L137).
 
 - [ ] **8.1 Rendu temps réel de la surface sur GPU** — *partiel* : hôte séparé B + impacts +
   sillages (ADR-130, S211–S249), habillage de banc ; le rendu ne pilote pas la physique (I-13). Manque l'intégration au moteur du jeu —
-  **maison, à construire** ; la part de l'eau s'y écrit en module, depuis l'afficheur ([ADR-191](adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md)).
+  **Godot 4** depuis S356 ([ADR-192](adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md)) ; l'afficheur reste le banc.
 - [ ] **8.2 LOD de la géométrie de surface** — *partiel* : grille projetée à pas écran. Manquent le LOD
   du maillage et le choix déplacement ou normales selon la vue (critère de parallaxe chiffré S257).
 - [ ] **8.3 LOD par source** : grille du sillage, visibilité, filtre spectral — *partiel* (S234,

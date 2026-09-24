@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 00:52 +02:00
+Battement        : 2026-09-25 00:58 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S356 — **rendu 1 (ADR-191) : les crêtes de B** — l'écume à la couverture de Monahan, seuil normalisé par l'écart-type du jacobien au pixel ; la lumière qui traverse les crêtes ; images pour R19
 Dernière session : S355 — **la question du réalisme** : [ADR-191](docs/adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md), décision de l'utilisateur — l'architecture de l'eau ne change pas ; moteur maison à construire, dont nous écrivons la part de l'eau en module depuis l'afficheur ; une session de rendu, une de physique. La coque sur la carte, pas commencée, reportée telle quelle
@@ -120,8 +120,9 @@ tient les contrôles que nomme la table des protections de [METHODE](notes/METHO
 - Une réduction d'ambition demande une décision explicite de l'utilisateur (ADR-127). **Après la v1,
   l'objectif est la liste du projet fini entière**, ses points validés au périmètre final
   ([ADR-190](docs/adr/ADR-190-apres-la-v1-la-liste-entiere.md), décision du 2026-09-24). **Le rendu, 2026-09-25**
-  ([ADR-191](docs/adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md)) : celui du moteur maison, à construire ;
-  nous en écrivons la part de l'eau en module, depuis l'afficheur ; une session de rendu, une de physique.
+  ([ADR-191](docs/adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md), [ADR-192](docs/adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md)) :
+  le rendu final de l'eau se fait dans **Godot 4**, nos nuanceurs portés dans son langage ; l'afficheur reste le banc ;
+  une session de rendu, une de physique.
 - Les faits d'intégration non constatés et les actions d'infrastructure restent distincts des
   décisions techniques : ne pas inventer terrain, format réseau, personnes ou dépôt distant.
 
