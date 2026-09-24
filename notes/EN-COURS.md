@@ -62,84 +62,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S354 — **terminée**. **Lot 5, A316 : ce qui dissipe au raccord particules ↔ colonnes** ; alternance
-d'ADR-184 D1, après S353 (la v1 en scène vivante).
+Session : S355 — **en cours**. **La v1 en scène vivante, 2 : la coque dans la production de δ** — d'abord le pas
+linéaire sur la carte.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — *« Reprends le projet »*. S327 a laissé A316 attribué en partie : le meilleur montage (ensemencement
-continu, échange en paroi) écarte la surface de 0,24 maille et amortit **4,2 % par période** à 5 cm, contre −0,4 %
-pour APIC seul. Il en concluait que **les colonnes dissipent d'elles-mêmes** : 1,3 % avec 95 % du bassin en
-colonnes, frontière près du mur.
-
-**Un doute sur l'instrument, trouvé en préparant.** La jauge du ballottement compte les particules du quart gauche
-du bassin. Avec 95 % en colonnes, ce quart est en colonnes, dont les particules sont **réensemencées** à chaque pas,
-deux par rangée, `round(2h/dx)` rangées : la masse que la jauge y lit est quantifiée par demi-maille — 2,5 cm à
-5 cm, pour une onde de 2 cm. La hauteur vraie des colonnes est `h`, exacte. Le 1,3 % a pu être lu sur un escalier.
+Entrée — *« Continue »*. Liste 6.4 : manque la production GPU. **Constat** : la coque a été reçue dans le **mode
+linéaire** de δ — couvercle, faces coupées, couvercle partiel (S330–S337, porte D) ; la production est le pas
+**mobile couplé**, qui n'a de solide nulle part, même sur CPU, et une coque qui perce une surface mobile serait une
+physique nouvelle. **Chemin retenu**, à écrire en ADR sur les mesures : le domaine δ d'une coque est un domaine
+**linéaire**, le mode reçu par la porte D, porté sur la carte ; le pas mobile couplé garde les autres domaines.
+Découpage : S355 le pas linéaire à ouvertures, toutes ouvertes ; puis la découpe d'un solide fixe ; puis la coque
+qui bouge et perce le couvercle ; puis la scène — une session du lot 5 entre chacune (ADR-184 D1).
 
 Critères, écrits avant le code :
-1. **L'instrument** : une jauge qui lit `h` dans la zone des colonnes et les particules ailleurs
-   (`RACCORD_JAUGE=hauteurs`) ; colonnes seules possibles (`RACCORD_ZONE=1`, sans frontière). Au repos, colonnes
-   seules : jauge constante à l'arrondi. Sans variable, tout au bit — les valeurs de S327.
-2. **L'attribution** : ballottement, colonnes seules et 95 % en colonnes, à 5 et 2,5 cm, les deux jauges.
-   **Prédiction** : avec la nouvelle, les colonnes seules amortissent comme APIC seul à 1 point près — elles ne
-   dissipent pas, et le 4,2 % est à la frontière. Sinon, elles dissipent, et on éteint un à un les termes qu'APIC
-   n'a pas.
-3. **Selon 2** : la cause désignée — frontière ou colonnes — éprouvée seule, avec son témoin ; critères de S327
-   inchangés : amortissement à 1 point d'APIC seul, période à 1 %, écart à la frontière < 0,5 maille.
-4. Preuve §13, A316, file, liste.
+1. **`Linear3` sur la carte** : le pas linéaire de `Volume3` — prédiction égale au courant, éponge, divergence
+   pondérée par les ouvertures, terme du couvercle, opérateur pondéré au couvercle à demi-maille, gradient conjugué
+   à cycles fixes repartant du pas précédent, correction, flux de colonne, hauteur compensée, rappel de l'éponge.
+   Ouvertures réservées à la création, toutes ouvertes (I-06).
+2. **Contre la référence** : bosse de 10 cm sur la grille de la porte D (96 × 96 × 8, 25 cm, 2 m), pas de 10 ms,
+   200 pas, éponge de 3 m à 2,5 /s : **|Δη| ≤ 10⁻⁴ m** partout, relevé tous les vingt pas ; volume de δ au plancher
+   du transport.
+3. **Le coût** sur cette grille : p50 et p99 du pas horodaté, au nombre de cycles qui tient le critère 2 ;
+   alimentation relevée (A270).
+4. ADR-191, preuve, file, feuille de route, liste 6.4.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la jauge des hauteurs, les colonnes seules ; critère 1.
-- [x] **P3** — l'attribution : colonnes seules et 95 %, deux mailles, deux jauges ; critère 2.
-- [x] **P4** — la cause que P3 désigne, éprouvée seule ; critère 3.
-- [x] **P5** — preuve §13, A316, file, liste ; critère 4.
-- [x] **P6** — rituel.
+- [ ] **P2** — `Linear3` : tampons, noyaux, pas ; critère 1.
+- [ ] **P3** — le banc contre `Volume3` ; critère 2.
+- [ ] **P4** — le coût ; critère 3.
+- [ ] **P5** — ADR-191, preuve, file, feuille de route, liste ; critère 4.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2.** `RACCORD_JAUGE=hauteurs` : particules libres comme `Apic::mesure`, colonnes par `h` au prorata de leur
-  largeur dans la bande, attente nette si la frontière y tombe ; `RACCORD_ZONE=1` sans frontière (gardes de
-  `ecart_frontiere` et de la série). **Sans variable, au bit** : écart 0,2436, amortissement 4,168 %, période aux
-  zéros 2,12419 s (S327). **Critère 1, tel qu'écrit, manqué** : au repos, colonnes seules, la jauge des hauteurs
-  varie de **0,126 mm** — le repos n'est pas immobile, 4,1 mm/s, comme APIC seul (0,110 mm, 4,4 mm/s). L'ancienne
-  jauge y reste **à 0,5 exactement** : aveugle sous son palier. L'instrument suit l'eau ; la réponse « constante »
-  supposée n'était pas celle du modèle.
-- **P3, l'instrument d'abord.** Épreuve à réponse connue (`regression`) : `cos` amorti de 0, 1, 4 % par période plus
-  un troisième mode à 10 %, échantillonné à 0,01 s. **Sur 10 s, la mesure de S318 se trompe de 0,3 à 1,2 point**, la
-  régression de 0,9 (± 2,5) ; **sur 30 s**, 0,04 à 0,15 et 0,03 (± 0,35). Le critère « à 1 point d'APIC seul » ne se
-  lit pas sur 10 s. Ajoutés : ligne `LOT5_S354` (régression sur les extrema, un par demi-période), `LOT5_T_FIN` dans
-  `raccord_dyn`, ligne `RACCORD_S354` (masse à gauche de la frontière par tranche de 10 s).
-- **P3, 30 s, jauge des hauteurs** (continu + paroi) — période aux zéros / amortissement S318 / régression :
-  5 cm : APIC seul +7,31 % / +0,14 % / +1,18 ± 0,80 ; colonnes seules +5,38 / +0,80 / +0,61 ± 0,59 ; 95 % +6,35 /
-  −0,09 / +1,32 ± 0,77 ; frontière au nœud +9,96 / +1,12 / +1,20 ± 1,36. 2,5 cm : APIC +1,60 / +1,04 / +2,15 ± 0,68 ;
-  colonnes +1,25 / +1,72 / +1,47 ± 0,28 ; 95 % −0,19 / +0,20 / +2,02 ± 0,93 ; nœud +1,19 / +0,96 / +0,31 ± 0,58.
-  Enveloppe (demi-somme de deux extrema voisins), 5 cm : APIC 22,5 → 20,1 mm, colonnes 22,2 → 20,1 mm en 28 s.
-  **Prédiction tenue en substance : les colonnes seules ne dissipent pas plus qu'APIC seul** ; le « 1,3 % » de S327
-  venait de la jauge aveugle sur 10 s. APIC seul non plus n'est pas « −0,4 % » sur 30 s.
-- **P3, ce que 30 s montrent et que 10 s cachaient** (nœud, 5 cm) : la **masse des particules libres croît** —
-  0,50098 / 0,50734 / 0,51211 m² par tranche de 10 s, APIC seul 0,50005 / 0,50159 / 0,50080 : **+12 mm** de niveau
-  équivalent en 30 s. Le saut géométrique à la frontière reste sans biais (moyenne signée −0,011 à +0,001 maille,
-  max 0,39) : les particules se **tassent**. Énergie des particules −87 J en 30 s (APIC seul −1,4 J), le centre de
-  masse descend. Période : +9,96 % contre +7,31 % — 2,65 points de trop. Suspect : la paroi, qui ramène les
-  particules au lieu de les absorber, retire au débit nominal de la grille, et ne voit pas leur densité.
-- **P4, écrit avant la mesure.** Cause désignée : la paroi ramène les particules qui franchissent au lieu de les
-  absorber. Témoin qui en est privé : le **solde** (S327), où elles sont absorbées et paient d'avance ; puis
-  l'échange eulérien. **Prédiction** : sans paroi, la masse à gauche de la frontière ne croît plus au-delà de
-  l'écart d'APIC seul (±0,002 m² sur 30 s), et l'occupation de la dernière colonne de cellules reste près de 4.
-- **P4, prédiction contredite.** 30 s, continu, jauge des hauteurs — masse à gauche de la frontière par tranche de
-  10 s ; particules par cellule occupée juste avant la frontière (4 au départ) ; saut max ; période aux zéros :
-  5 cm — **paroi** 0,50098 → 0,51211, 4,02 → 4,96, 0,39, +9,96 % ; **solde** (absorbées) 0,50040 → 0,51179, 3,97 →
-  **5,26**, 0,53, +9,47 % ; **eulérien** 0,49742 → 0,50181, **3,18 → 3,65**, 0,83, +9,69 %. 2,5 cm — paroi 0,50086 →
-  0,50583, 3,88 → 4,19, **1,00**, +1,19 % ; solde +0,0054, 4,24, 0,64, +1,72 % ; eulérien **plat** (0,49979 → 0,50001),
-  3,49 → 3,54, 0,79, +2,01 %, amortissement 2,15 %. APIC seul : ±0,002 m², 3,9 à 4,05.
-  **Absorber au lieu de ramener ne change rien** : la paroi n'est pas la cause. Ce qui est commun : l'échange
-  convertit un débit de volume en particules **à densité nominale**, sans voir la densité locale ; chaque variante
-  fixe la densité près de la frontière à sa façon — tassée (paroi, solde), dilatée (eulérien) — et **rien ne la
-  ramène à 4**. La masse suit la densité ; la pression, qui voit la surface géométrique, n'y oppose aucune force.
-  La dérive suit la maille (paroi : +0,011 m² à 5 cm, +0,005 à 2,5 cm).
-  **Critères de S327 sur 30 s, meilleur montage (paroi)** : 5 cm — période +9,96 % contre +7,31 %, **manqué** ;
-  amortissement 1,12 contre 0,14 (S318) ou 1,20 contre 1,18 (régression), tenu de justesse ; saut 0,39, tenu.
-  2,5 cm — période et amortissement tenus ; saut **1,00 maille, manqué**. **Non reçu.** Suite : une densité tenue
-  près de la frontière — la dernière colonne de cellules réensemencée depuis sa hauteur géométrique, la différence de
-  masse passée à la première colonne : la bande de recouvrement, sous sa forme la plus simple.
-

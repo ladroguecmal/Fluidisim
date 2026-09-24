@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-25 00:04 +02:00
+JETON            : occupé
+Battement        : 2026-09-25 00:15 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S355 — **la v1 en scène vivante, 2 : la coque dans la production de δ** — le pas linéaire de la porte D porté sur la carte, contre la référence CPU ; le chemin (un domaine linéaire pour la coque) écrit en ADR sur les mesures
 Dernière session : S354 — **lot 5, A316, l'instrument relu sur 30 s** : les colonnes ne dissipent pas plus qu'APIC seul ; la frontière ne tient pas la densité des particules, la masse migre, +12 mm en 30 s à 5 cm — non reçu ([preuve](docs/validation/B10-APIC-S320.md) §13). Avant : S353, δ à 30 Hz interpolé en direct, R18 préparée
 Session suivante : **la v1 en scène vivante** (alternance d'ADR-184 D1) — la coque dans la production de δ (6.4), puis l'ordonnanceur et le rang 1 dans l'afficheur (4.2). Au lot 5 ensuite : la densité tenue à la frontière (A316). En attente : le verdict R18
 Maillons        : 1 — S354 : une attribution corrigée, aucune capacité
