@@ -322,3 +322,39 @@ fn the_damped_hull_rings_down_at_its_radiation_rate_s336() {
     assert!((p1 / p0 - 1.).abs() <= 1e-3, "{p0} {p1}");
 }
 
+/// **S336, critère 2 bis — la masse ajoutée voit l'eau accélérée.** La coque de la porte D avec A = 3 200 kg, sur
+/// les houles de 6 et 3 s : son pilonnement forcé vaut `(K·S − A·ω²)/(K − (m + A)·ω²)` — la poussée de la houle
+/// vue par la flottaison, moins l'inertie de l'eau qu'elle entraîne, qui l'accompagne —, à ± 1 %, par moindres
+/// carrés sur la houle sous la coque. Une masse ajoutée sur l'accélération absolue donnerait `K·S/(K − (m + A)·ω²)`.
+#[test]
+fn the_added_mass_follows_the_accelerating_water_s336() {
+    let masse_ajoutee = 3200.;
+    for (a_houle, periode) in [(0.25, 6.), (0.05, 3.)] {
+        let b = houle(a_houle, periode);
+        let c = b.components()[0];
+        let (a, k) = (c.amplitude as f64, c.k_turns_per_m as f64 * core::f64::consts::TAU);
+        let omega = c.freq_q32 as f64 / 4_294_967_296. * core::f64::consts::TAU;
+        let mut coque = RigidBody::cuboid([4., 1.6, 1.], 500., [0.; 3], [16, 8, 4]);
+        coque.added_mass = [0., 0., masse_ajoutee];
+        let (m, raideur) = (coque.mass, MER.rho * G * 6.4);
+        let s = coque.proxy.iter().map(|p| (k * p.body[0]).cos()).sum::<f64>() / coque.proxy.len() as f64;
+        let relatif = (raideur * s - masse_ajoutee * omega * omega) / (raideur - (m + masse_ajoutee) * omega * omega);
+        let absolu = raideur * s / (raideur - (m + masse_ajoutee) * omega * omega);
+        let z_eq = 0.5 - 500. / 1025.;
+        let sous = |x: f64, t: u64| b.eval_local([x as f32, 0., 0.], SimTime(t)).unwrap();
+        coque.position[2] = z_eq + relatif * sous(0., 0).eta as f64;
+        coque.velocity = [s * sous(0., 0).u_total[0] as f64, 0., relatif * sous(0., 0).deta_dt as f64];
+        let pas = (4. * core::f64::consts::TAU / omega / 0.002).round() as u64;
+        let (mut mm, mut r) = ([[0f64; 3]; 3], [0f64; 3]);
+        for n in 0..pas {
+            coque.step(0.002, &BackgroundWater { background: &b, time: SimTime(n * 2000) }, MER);
+            let e = sous(coque.position[0], (n + 1) * 2000);
+            accumule(&mut mm, &mut r, [e.eta as f64, e.deta_dt as f64 / omega, 1.], coque.position[2] - z_eq);
+        }
+        let [alpha, beta, _] = moindres_carres(mm, r);
+        let mesure = (alpha * alpha + beta * beta).sqrt();
+        println!("S336 : houle {periode} s, masse ajoutée {masse_ajoutee} kg — pilonnement {mesure:.5}·a (relatif {relatif:.5}, absolu {absolu:.5}) ; a = {a:.3} m");
+        assert!((mesure / relatif - 1.).abs() <= 0.01, "{periode} s : {mesure} contre {relatif}");
+    }
+}
+

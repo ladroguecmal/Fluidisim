@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — banc `rayonnement_coque` : pilonnement imposé, force de δ, `A` et `B` ; critère 1.
 - [x] **P3** — le corps du jeu amorti, constantes de l'archétype ; critère 2.
-- [ ] **P3 bis** — *ajouté, déclaré avant le code* : la masse ajoutée agit sur l'accélération **relative** à
+- [x] **P3 bis** — *ajouté, déclaré avant le code* : la masse ajoutée agit sur l'accélération **relative** à
   l'eau ; critère 2 bis.
 - [ ] **P4** — la scène de la porte D amortie ; critère 3 ; images (critère 4).
 - [ ] **P5** — preuve `docs/validation/RAYONNEMENT-COQUE-S336.md` ; liste, file, feuille de route.
@@ -113,3 +113,6 @@ Critères, écrits avant le code :
   `K·S/(K − (m + A)ω²)` au lieu de `(K·S − A·ω²)/(K − (m + A)ω²)`, 1,12·a au lieu de 1,05·a sur la houle de 6 s.
   **Critère 2 bis** : avec A = 3 200 kg, pilonnement forcé sur les houles de 6 et 3 s à ± 1 % de
   `(K·S − A·ω²)/(K − (m + A)ω²)` ; sans masse ajoutée, S333 inchangé au bit.
+- **P3 bis, critère 2 bis tenu.** `WaterQuery::acceleration`, analytique sur B (`acceleration_local`, mêmes
+  phases). A = 3 200 kg : houle 6 s → 1,05201·a pour 1,05191 (relatif ; l'absolu dirait 1,11312) ; 3 s →
+  1,15922·a pour 1,16055 (absolu : 1,54745). Cœur : 498 réussis, 0 avertissement ; S331–S333 inchangés.

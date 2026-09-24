@@ -24,7 +24,8 @@
 //!
 //! Ni contact, ni collision, ni masse ajoutée en rotation — seulement une traînée quadratique facultative par
 //! point immergé et, depuis S336, un **amortissement de rayonnement** linéaire : une constante de l'archétype,
-//! que δ mesure hors ligne comme la masse ajoutée, jamais une force de δ au pas.
+//! que δ mesure hors ligne comme la masse ajoutée, jamais une force de δ au pas. Depuis S336, la masse
+//! ajoutée agit sur l'accélération **relative** à l'eau.
 
 use crate::body::{Milieu, G};
 
@@ -36,6 +37,8 @@ pub trait WaterQuery {
     fn slope(&self, x: f64, y: f64) -> [f64; 2];
     /// Vitesse de l'eau en un point, m/s — orbitale sous la houle, nulle en eau calme.
     fn velocity(&self, p: [f64; 3]) -> [f64; 3];
+    /// **S336 :** accélération de l'eau en un point, m/s² — ce que la masse ajoutée voit ; nulle en eau calme.
+    fn acceleration(&self, p: [f64; 3]) -> [f64; 3];
 }
 
 /// Une eau calme, à l'altitude donnée.
@@ -52,6 +55,9 @@ impl WaterQuery for CalmWater {
         [0.; 2]
     }
     fn velocity(&self, _: [f64; 3]) -> [f64; 3] {
+        [0.; 3]
+    }
+    fn acceleration(&self, _: [f64; 3]) -> [f64; 3] {
         [0.; 3]
     }
 }
@@ -75,6 +81,9 @@ impl WaterQuery for BackgroundWater<'_> {
     }
     fn velocity(&self, p: [f64; 3]) -> [f64; 3] {
         self.background.eval_local([p[0] as f32, p[1] as f32, 0.], self.time).map_or([0.; 3], |s| s.u_total.map(|v| v as f64))
+    }
+    fn acceleration(&self, p: [f64; 3]) -> [f64; 3] {
+        self.background.acceleration_local([p[0] as f32, p[1] as f32, 0.], self.time).map_or([0.; 3], |a| a.map(|v| v as f64))
     }
 }
 
@@ -228,6 +237,18 @@ impl RigidBody {
             let u = water.velocity([x, y, water.surface(x, y)]);
             for a in 0..3 {
                 force[a] -= self.radiation_damping[a] * (self.velocity[a] - u[a]);
+            }
+        }
+        // S336 : la masse ajoutée agit sur l'accélération relative à l'eau — `(m + A)·v̇ = F + A·a_eau` : l'eau
+        // accélérée pousse la coque de `A·a_eau`. Sans ce terme, sur la houle, la coque surréagit ; en eau calme,
+        // il est nul.
+        if self.added_mass != [0.; 3] {
+            let [x, y, _] = self.position;
+            let a = water.acceleration([x, y, water.surface(x, y)]);
+            if a != [0.; 3] {
+                for k in 0..3 {
+                    force[k] += self.added_mass[k] * a[k];
+                }
             }
         }
         Forces { force, torque, immersed_volume }

@@ -267,6 +267,24 @@ impl Background {
         self.eval_local(local, t)
     }
 
+    /// **S336 : l'accélération de l'eau à la surface**, `∂u/∂t` de la vitesse orbitale de `eval_local` — mêmes
+    /// phases entières, même ordre de sommation : `−a·ω²·cos φ` le long de la direction, `−a·ω²·sin φ` à la
+    /// verticale. Ce que la masse ajoutée d'un corps flottant doit voir (`rigid_body`).
+    pub(crate) fn acceleration_local(&self, local: [f32; 3], t: SimTime) -> Option<[f32; 3]> {
+        if !admits_local(local) { return None; }
+        let mut a = [0f32; 3];
+        for c in &self.components {
+            let phase = phase_spatiale(c, [local[0], local[1]])
+                .wrapping_add(PhaseQ32(c.phase0.0.wrapping_sub(PhaseQ32::from_time(c.freq_q32, t).0)));
+            let omega = (c.freq_q32 as f64 / 4_294_967_296.0 * core::f64::consts::TAU) as f32;
+            let ao = c.amplitude * omega * omega;
+            a[0] -= ao * phase.cos() * c.dir[0];
+            a[1] -= ao * phase.cos() * c.dir[1];
+            a[2] -= ao * phase.sin();
+        }
+        Some(a)
+    }
+
     /// Chemin interne après conversion commune B/W ; mêmes opérations que eval.
     pub(crate) fn eval_local(&self, local: [f32; 3], t: SimTime) -> Option<WaterSample> {
         if !admits_local(local) { return None; }
