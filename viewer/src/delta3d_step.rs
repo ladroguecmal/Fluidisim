@@ -1529,6 +1529,120 @@ pub fn cas2_production() -> Result<(), String> {
     })
 }
 
+/// S340, porte B — **le cas 1 d'ADR-175 §4 sur la production** (critère 2) : `ny` = 1, la géométrie de
+/// S297 — `L` = `h` = 2 m, murs, boîte de 2,25 m, départ perturbatif nul — couplée au **fond de B** de S340 P5,
+/// l'onde stationnaire de deux composantes opposées (fréquence de profondeur finie, décroissance d'eau
+/// profonde). La carte contre la référence sur une période, pas de 1 ms : hauteur, pente, et amplitude
+/// modale de δ sur `cos(k·x)` — sa phase. Critère : **sous 3 mm**. `AMPLITUDES=0.05,0.1`, `NX=32,64,128`,
+/// `CYCLES=` (64).
+pub fn cas1_production() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use std::f64::consts::PI;
+    use water_core::delta3d::{BackgroundGrid3, Volume3};
+    use water_core::host::HostServices;
+    use water_core::phase::freq_hz_to_q32;
+    use water_core::{Component, WorldPos};
+
+    let liste = |cle: &str, defaut: &str| -> Vec<f64> {
+        std::env::var(cle).unwrap_or_else(|_| defaut.into()).split(',').filter_map(|x| x.parse().ok()).collect()
+    };
+    let (amplitudes, tailles) = (liste("AMPLITUDES", "0.05,0.1"), liste("NX", "32,64,128"));
+    let cycles: u32 = std::env::var("CYCLES").ok().and_then(|v| v.parse().ok()).unwrap_or(64);
+    let (l, h, g, rho) = (2f64, 2f64, 9.81f64, 1025f32);
+    let k = PI / l;
+    let omega = (g * k * (k * h).tanh()).sqrt();
+    let steps = (2. * PI / omega / 0.001).round() as u64;
+    pollster::block_on(async {
+        for &a in &amplitudes {
+            for &nx in &tailles {
+                let nx = nx as usize;
+                let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+                let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 27);
+                let dx = l / nx as f64;
+                let domain = Domain3 { nx, ny: 1, nz: (2.25 / dx).round() as usize, dx: dx as f32 };
+                let rest = h as f32;
+                let origin = [0., 0., -rest];
+                let onde = |dir: [f32; 2]| Component {
+                    amplitude: (a / 2.) as f32,
+                    k_turns_per_m: (k / (2. * PI)) as f32,
+                    dir,
+                    freq_q32: freq_hz_to_q32(omega / (2. * PI)),
+                    phase0: PhaseQ32(1 << 30),
+                };
+                let background = Background::from_components(
+                    &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink },
+                    &[onde([1., 0.]), onde([-1., 0.])], WorldPos::from_units(0, 0, 0), g as f32)
+                    .map_err(|e| format!("fond {e:?}"))?;
+                let eta = vec![rest; nx];
+                let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g as f32)
+                    .map_err(|e| format!("volume {e:?}"))?;
+                volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+                let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
+                    .map_err(|e| format!("grille {e:?}"))?;
+                let (u0, v0, w0) = (volume.velocity_u().to_vec(), volume.velocity_v().to_vec(), volume.velocity_w().to_vec());
+                let mut carte = Step3::new(&background, domain, origin, rho, g as f32).await?;
+                let sponge = Sponge3::default();
+                carte.set_step(1000, rest, sponge)?;
+                carte.set_state(&u0, &v0, &w0, &eta)?;
+                let modale = |d: &[f32]| -> f64 {
+                    (0..nx).map(|i| 2. / nx as f64 * d[i] as f64 * (k * (i as f64 + 0.5) * dx).cos()).sum()
+                };
+                let (mut pire, mut rms_max, mut pente_max, mut modal_max, mut au_pas) = (0f32, 0f64, 0f32, 0f64, 0u64);
+                let (mut horizon, mut crete, mut iter_max, mut affinages) = (None, 0f32, 0u32, 0u32);
+                let debut = std::time::Instant::now();
+                for n in 0..=steps {
+                    if n % 10 == 0 {
+                        let coeur: Vec<f32> = volume
+                            .surface()
+                            .iter()
+                            .zip(volume.surface_roundoff_for_trials())
+                            .map(|(e, r)| (e - rest) - r)
+                            .collect();
+                        let publiee = carte.published()?;
+                        let (mut dh, mut somme, mut dpente) = (0f32, 0f64, 0f32);
+                        for i in 0..nx {
+                            dh = dh.max((coeur[i] - publiee[i]).abs());
+                            somme += ((coeur[i] - publiee[i]) as f64).powi(2);
+                            if i + 1 < nx {
+                                let (pc, pk) = ((coeur[i + 1] - coeur[i]) / dx as f32, (publiee[i + 1] - publiee[i]) / dx as f32);
+                                dpente = dpente.max((pc - pk).abs());
+                            }
+                        }
+                        crete = crete.max(coeur.iter().fold(0f32, |m, x| m.max(x.abs())));
+                        if dh > pire {
+                            (pire, au_pas) = (dh, n);
+                        }
+                        rms_max = rms_max.max((somme / nx as f64).sqrt());
+                        pente_max = pente_max.max(dpente);
+                        modal_max = modal_max.max((modale(&coeur) - modale(&publiee)).abs());
+                        if horizon.is_none() && dh > 1e-3 {
+                            horizon = Some(n);
+                        }
+                    }
+                    if n == steps {
+                        break;
+                    }
+                    let time = SimTime(n * 1000);
+                    grille.sample(&background, time).map_err(|e| format!("grille pas {n}: {e:?}"))?;
+                    let vue = grille.view().ok_or("la grille ne publie rien")?;
+                    let r = volume
+                        .step_perturbation_mobile(time, 1000, 4000, &vue, sponge, &jobs)
+                        .map_err(|e| format!("coeur pas {n}: {e:?}"))?;
+                    iter_max = iter_max.max(r.iterations);
+                    affinages += r.refinements;
+                    carte.publish_time(&background, time)?;
+                    carte.run_for_bench(cycles, Upto::Full)?;
+                }
+                println!(
+                    "DELTA3D_CAS1_S340 a={a} nx={nx} nz={} pas={steps} cycles={cycles} dh_max={pire:.4e} m au_pas={au_pas} dh_rms_max={rms_max:.3e} dpente_max={pente_max:.3e} modal_max={modal_max:.3e} m ({:.3} % de a) horizon_1mm={horizon:?} crete_delta={crete:.5} coeur_iterations_max={iter_max} affinages={affinages} secondes={:.1}",
+                    domain.nz, 100. * modal_max / a, debut.elapsed().as_secs_f64()
+                );
+            }
+        }
+        Ok(())
+    })
+}
+
 /// Banc P6 : **coût du pas entier sur la carte**, machine de référence (ADR-174 D1). Passe
 /// horodatée du premier dispatch au dernier, copies comprises, sans aucune relecture d'état : la
 /// forme de production. Fond spectral réel du cas S298 (64 composantes). Premier passage écarté.

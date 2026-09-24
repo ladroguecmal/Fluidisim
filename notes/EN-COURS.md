@@ -98,7 +98,7 @@ Critères, écrits avant le code :
 - [x] **P3** — `Background::from_components` et son essai ; critère 2.
 - [x] **P4** — le cas 2 sur la production ; critère 3.
 - [x] **P5** — le cas 1 : fond de B stationnaire, chaînon et HOS sur la référence.
-- [ ] **P6** — le cas 1 : production contre référence ; critère 4.
+- [x] **P6** — le cas 1 : production contre référence ; critère 4.
 - [ ] **P7** — preuve ; la porte B, si elle tient ; critère 5.
 - [ ] **P8** — rituel.
 
@@ -120,4 +120,10 @@ Critères, écrits avant le code :
   HOS** (32 / 64 / 128) : 5 cm, profil 1,646 / 1,034 / **0,984 %**, harmonique 2,694 / 1,566 / **1,231 %** ; 10 cm,
   1,426 / 1,161 / **1,069 %** et 3,072 / 1,996 / **1,353 %** — décroissants, **tolérances de S253 tenues** (2 %,
   20 %), six fois moins bien qu'au fond analytique (0,148 / 0,178 %) : l'écart est celui du fond, non du solveur.
+- **P6, critère 4 tenu** (`--delta3d-cas1`, `ny` = 1, fond de B de P5, 1 604 pas de 1 ms, 64 cycles). Carte contre
+  référence, écart de hauteur au pire — 5 cm : 3,9·10⁻⁷ / 1,3·10⁻⁶ / **1,4·10⁻⁶ m** (32 / 64 / 128) ; 10 cm :
+  1,8·10⁻⁵ / 4,2·10⁻⁶ / **8,2·10⁻⁵ m**. Jamais le millimètre ; amplitude modale à 3,7·10⁻⁷ m au plus : même phase.
+  **Pente** : 8,5·10⁻⁶ à 1,7·10⁻⁴ à 5 cm ; à 10 cm, 4,4·10⁻⁴ / 2,3·10⁻⁴ / **8,9·10⁻³** — 82 µm sur une maille de
+  1,6 cm, au pas 1 530 ; au-dessus des 5·10⁻⁴ de S260 que S305 citait pour information ; non attribué — candidat
+  A297, la surface totale franchissant sans cesse des centres de maille. Durées : 14 à 68 s, 400 s à 128.
 
