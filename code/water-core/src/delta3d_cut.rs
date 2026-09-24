@@ -319,7 +319,7 @@ fn face_negative(c: [f64; 4]) -> f64 {
 /// **S335 : la part négative d'un triangle et son moment** — sommets `p` dans le plan de la face, valeurs `w`
 /// d'un champ linéaire. Rend `(part, moment)`, le moment valant la part fois le centroïde de la part négative.
 /// Mêmes formes closes que `tri_negative`, sommets suivis : la part est la sienne au bit.
-#[cfg_attr(not(test), allow(dead_code))] // lue par la divergence en S335 P3
+#[cfg_attr(not(test), allow(dead_code))] // éprouvée pour la paroi en S335, écartée — preuve PORTE-D-S333 §7
 fn tri_negative_moment(w: [f64; 3], p: [[f64; 2]; 3]) -> (f64, [f64; 2]) {
     let mut o = [0usize, 1, 2];
     o.sort_by(|a, b| w[*a].total_cmp(&w[*b]));
@@ -348,7 +348,7 @@ fn tri_negative_moment(w: [f64; 3], p: [[f64; 2]; 3]) -> (f64, [f64; 2]) {
 /// locales de la face — coins `(0,0) (1,0) (1,1) (0,1)`, en fractions de maille. Quatre triangles autour du
 /// centre, comme `face_negative` ; `None` sans part solide. Le flux d'un champ linéaire à travers la part
 /// couverte vaut sa valeur en ce point, fois l'aire : c'est là que la paroi d'un corps rigide doit être lue.
-#[cfg_attr(not(test), allow(dead_code))] // lue par la divergence en S335 P3
+#[cfg_attr(not(test), allow(dead_code))] // éprouvée pour la paroi en S335, écartée — preuve PORTE-D-S333 §7
 pub(crate) fn face_negative_centroid(c: [f64; 4]) -> Option<(f64, [f64; 2])> {
     const COINS: [[f64; 2]; 4] = [[0., 0.], [1., 0.], [1., 1.], [0., 1.]];
     let m = 0.25 * (c[0] + c[1] + c[2] + c[3]);

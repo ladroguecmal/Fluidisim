@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le centroïde de la part couverte d'une face (`delta3d_cut.rs`) ; critère 1.
 - [x] **P3** — la paroi au centroïde : stocké à la découpe, lu par la divergence ; critère 2.
-- [ ] **P3 bis** — *ajouté* : le **plancher d'ouverture** du couvercle partiel, 10 % ; critère 3.
+- [x] **P3 bis** — *ajouté* : le **plancher d'ouverture** du couvercle partiel, 10 % ; critère 3.
 - [ ] **P4** — *amendé* : la convergence de la tranche **avec ce plancher** — 25 ; 12,5 ; 6,25 cm — et le banc 3D ;
   critère 4 bis ; défaut allumé si tenu ; critère 4.
 - [ ] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
@@ -121,3 +121,5 @@ avant la mesure : avec ce plancher, la tranche converge encore — écart ≤ 5 
 - **La vraie source des pointes, mesurée** : un plancher d'ouverture du couvercle partiel — 0,1 → 0,55 m/s ;
   0,25 → 0,39 ; 0,5 → 0,36 (S332 : 0,32). Ce sont les colonnes ouvertes à moins de 10 %, où `1/a > 10` change
   le reste de découpe d'une coque qui tourne en pointe.
+- **P3 bis, critère 3 tenu.** `PARTIAL_LID_MIN_APERTURE` = 0,1 ; essai permanent : coque tenue sur la houle,
+  couvercle partiel **0,554 m/s** (S332 : 0,323). Défaut toujours éteint : les 18 valeurs S3xx au bit.

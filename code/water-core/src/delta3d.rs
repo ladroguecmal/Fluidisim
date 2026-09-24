@@ -29,6 +29,11 @@
 use crate::delta_projection::{Error, Report, PROJECTION_DIVERGENCE_TOLERANCE};
 use crate::host::{AllocError, HostServices, JobSystem};
 
+/// **S335 : l'ouverture la plus mince que le couvercle partiel prenne au mot** (A317). Une colonne en lamelle
+/// plus mince garde la raideur de celle-ci : la découpe d'une coque qui tourne laisse, d'un pas à l'autre, un
+/// reste dans la hauteur de remplissage que `1/a` changerait en pointe — 5,5 m/s sous 10 %, 0,55 m/s à 10 %.
+pub const PARTIAL_LID_MIN_APERTURE: f32 = 0.1;
+
 /// Domaine local, cellules cubiques de côté `dx`. `z₀ = nz·dx` est le couvercle.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Domain3 {
@@ -1163,8 +1168,9 @@ impl Volume3 {
         self.saved_p.copy_from_slice(&self.p);
         self.saved_eta.copy_from_slice(&self.eta);
         self.saved_eta_roundoff.copy_from_slice(&self.eta_roundoff);
-        // S334 : le plancher d'ouverture du couvercle en partie couvert, garde du pas explicite de la hauteur.
-        self.lid_floor = ((dt * dt * self.g_eff as f64 / dx as f64) as f32).min(1.);
+        // S334 : le plancher d'ouverture du couvercle en partie couvert, garde du pas explicite de la hauteur ;
+        // S335 : jamais sous `PARTIAL_LID_MIN_APERTURE`.
+        self.lid_floor = ((dt * dt * self.g_eff as f64 / dx as f64) as f32).min(1.).max(PARTIAL_LID_MIN_APERTURE);
         let result = self.linear(scale, correction, transport, max_iters, jobs);
         if result.is_ok() {
             // S334 : le flux de paroi a retiré pendant le pas l'eau que la coque avait déposée.

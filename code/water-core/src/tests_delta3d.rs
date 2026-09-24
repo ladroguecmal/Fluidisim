@@ -1566,3 +1566,48 @@ fn a_hull_that_follows_the_swell_leaves_delta_at_rest_s333() {
     println!("S333 : coque qui suit la houle — δ {vitesse:e} m/s, {hauteur:e} m ; tenue immobile — {tenue_v:.4} m/s, {tenue_h:.4} m");
     assert!(tenue_v > 0.01 && tenue_h > 0.001, "{tenue_v} {tenue_h}");
 }
+
+/// **S335, critère 3 — le couvercle partiel sans pointe.** La contre-épreuve du critère 2 de S333 — coque
+/// tenue fixe sur la houle, qui glisse, pilonne et s'incline dans δ — au couvercle partiel : vitesse sur les
+/// faces entièrement ouvertes sous 1 m/s. Sans plancher d'ouverture, 5,47 m/s : une lamelle ouverte à quelques
+/// pour cent change en pointe le reste de découpe d'une coque qui tourne (S335 P3).
+#[test]
+fn a_hull_held_on_the_swell_stays_calm_under_the_partial_lid_s335() {
+    use crate::background::{Background, SeaState};
+    use crate::rigid_body::{BackgroundWater, HullInDelta, RigidBody, WaterQuery};
+    use crate::types::{SimTime, WorldPos};
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let sea = SeaState { hs: (2. * 2f64.sqrt() * 0.25) as f32, tp: 12., theta_turns: 0., components: 1, graine: 333 };
+    let b = Background::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, sea, WorldPos::default()).unwrap();
+    let (n, dx) = ([40usize, 20, 8], 0.2f64);
+    let z_r = 0.5 - 500. / 1025.;
+    let eau = |pas: u64| BackgroundWater { background: &b, time: SimTime(pas * 10_000) };
+    let mesure = |partiel: bool| -> f32 {
+        let corps = RigidBody::cuboid([4., 1.6, 1.], 500., [0., 0., z_r + eau(0).surface(0., 0.)], [16, 8, 4]);
+        let mut coque = HullInDelta::new(&corps, &eau(0), [-4., -2.], n[2] as f64 * dx);
+        let mut noeuds = Vec::new();
+        coque.box_nodes([2., 0.8, 0.5], n, dx, &mut noeuds);
+        let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+        let mut v = Volume3::configure_with_floating_solid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+            Domain3 { nx: n[0], ny: n[1], nz: n[2], dx: dx as f32 }, 1025., 9.81, &vec![0.; n[0] * n[1]], &noeuds).unwrap();
+        let z0 = v.domain.z0();
+        v.set_surface(&vec![z0; n[0] * n[1]]).unwrap();
+        v.set_partial_lid(partiel);
+        let mut pire = 0f32;
+        for pas in 0..100u64 {
+            let w = eau(pas + 1);
+            let m = coque.advance(&corps, &w, 0.01);
+            coque.box_nodes([2., 0.8, 0.5], n, dx, &mut noeuds);
+            v.set_solid_rigid(&noeuds, m.velocity, m.angular, m.center).unwrap();
+            let r = v.step_surface_linear(10_000, 4000, &Jobs).unwrap();
+            assert!(r.divergence <= PROJECTION_DIVERGENCE_TOLERANCE as f64, "pas {pas}");
+            let g = v.cut.as_ref().unwrap();
+            let libre = |o: &[f32], x: &[f32]| o.iter().zip(x).filter(|(o, _)| **o == 1.).fold(0f32, |m, (_, x)| m.max(x.abs()));
+            pire = pire.max(libre(&g.open_u, v.velocity_u())).max(libre(&g.open_v, v.velocity_v())).max(libre(&g.open_w, v.velocity_w()));
+        }
+        pire
+    };
+    let (s332, partiel) = (mesure(false), mesure(true));
+    println!("S335 : coque tenue sur la houle — couvercle de S332 {s332:.4} m/s, couvercle partiel {partiel:.4} m/s");
+    assert!(partiel <= 1., "{partiel}");
+}
