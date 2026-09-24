@@ -135,6 +135,9 @@ pub struct Step3 {
     step_uniform: wgpu::Buffer,
     vel: wgpu::Buffer,
     published: wgpu::Buffer,
+    /// S353 — la surface publiée par le pas **précédent**, recopiée sur la carte juste avant chaque publication :
+    /// ce que le rendu mélange à la courante quand δ tourne à 30 Hz dans une image à 60 (ADR-012 §7).
+    published_prev: wgpu::Buffer,
     step: Vec<wgpu::ComputePipeline>,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
@@ -396,6 +399,7 @@ impl Step3 {
         let diag_offset = 2 * fx + 2 * fy + 5 * diag_groups as usize;
         let work = buffer(&device, ((diag_offset + 8) * 4) as u64, storage);
         let published = buffer(&device, (columns * 4) as u64, storage);
+        let published_prev = buffer(&device, (columns * 4) as u64, storage);
         let step_uniform = buffer(&device, 64, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
         let step_layout = layout(&device, &['w', 'r', 'w', 'r', 'r', 'w', 'u', 'w']);
         let step_bind = bind(
@@ -488,6 +492,7 @@ impl Step3 {
             step_uniform,
             vel,
             published,
+            published_prev,
             step,
             read,
             query,
@@ -598,6 +603,7 @@ impl Step3 {
         let rest = self.rest.get();
         let initial: Vec<f32> = eta.iter().map(|e| e - rest).collect();
         self.queue.write_buffer(&self.published, 0, bytemuck_cast(&initial));
+        self.queue.write_buffer(&self.published_prev, 0, bytemuck_cast(&initial));
         Ok(())
     }
 
@@ -772,6 +778,11 @@ impl Step3 {
         }
         if upto == Upto::Projection || partie == Some(0) {
             return;
+        }
+        // S353 : la surface que ce pas va remplacer devient la précédente — une copie sur la carte, avant la passe qui
+        // publie ; l'état n'en dépend pas.
+        if upto == Upto::Full {
+            encoder.copy_buffer_to_buffer(&self.published, 0, &self.published_prev, 0, col_bytes);
         }
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(2) });
@@ -1091,6 +1102,9 @@ impl Step3 {
                 pass.dispatch_workgroups((count as u32).div_ceil(GROUP), 1, 1);
             }
         }
+        // S353 : la surface précédente suit la nouvelle disposition en prenant la courante — jusqu'à la prochaine
+        // publication, le rendu ne mélange rien.
+        encoder.copy_buffer_to_buffer(&self.published, 0, &self.published_prev, 0, octets(new.columns()));
         self.queue.submit([encoder.finish()]);
         self.shape.set(new);
         let o = self.origin.get();
@@ -1137,6 +1151,7 @@ impl Step3 {
         self.queue.write_buffer(&self.cells_in, ((c + n) * 4) as u64, bytemuck_cast(reste));
         self.queue.write_buffer(&self.state, 0, bytemuck_cast(pression));
         self.queue.write_buffer(&self.published, 0, bytemuck_cast(publiee));
+        self.queue.write_buffer(&self.published_prev, 0, bytemuck_cast(publiee));
         Ok(())
     }
 
@@ -1246,6 +1261,18 @@ impl Step3 {
     /// `j·nx + i`, au centre des colonnes. **Le seul tampon de δ que le rendu a le droit de lier.**
     pub fn published_buffer(&self) -> &wgpu::Buffer {
         &self.published
+    }
+
+    /// S353 : la surface publiée par le pas précédent — le second tampon que le rendu a le droit de lier (ADR-175 D7),
+    /// pour l'interpolation d'ADR-012 §7.
+    #[allow(dead_code)] // S353 P3 : lié par le rendu.
+    pub fn published_prev_buffer(&self) -> &wgpu::Buffer {
+        &self.published_prev
+    }
+
+    /// **Banc S353** : la surface publiée par le pas précédent.
+    pub fn published_prev(&self) -> Result<Vec<f32>, String> {
+        self.relire(&self.published_prev, 0, self.columns())
     }
 
     /// La forme courante (S350 : au plus la capacité).

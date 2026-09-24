@@ -672,7 +672,14 @@ pub fn empreinte() -> Result<(), String> {
         };
         println!("DELTA3D_EMPREINTE_S343 carte={:?} fond_par_tuiles={}", carte.adapter, carte.tiled_background());
         for n in 0..600u64 {
+            // S353 : au pas 60, la surface « précédente » que le pas laisse doit être celle qu'il a remplacée, au bit.
+            let avant = if n + 1 == 60 { Some(carte.published()?) } else { None };
             carte.step(background, water_core::SimTime(n * config.step_us), config.cycles)?;
+            if let Some(avant) = avant {
+                let prec = carte.published_prev()?;
+                let faux = avant.iter().zip(&prec).filter(|(a, b)| a.to_bits() != b.to_bits()).count();
+                println!("DELTA3D_EMPREINTE_S353 pas=60 precedente_egale_a_la_publiee_d_avant colonnes={} differentes_au_bit={faux}", prec.len());
+            }
             if n + 1 == 60 || n + 1 == 600 {
                 let (h, vit) = (carte.published()?, carte.velocities()?);
                 println!(

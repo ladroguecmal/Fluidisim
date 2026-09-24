@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `Step3` : la surface précédente, copiée avant chaque publication ; empreintes S343, identité S350.
+- [x] **P2** — `Step3` : la surface précédente, copiée avant chaque publication ; empreintes S343, identité S350.
 - [ ] **P3** — le rendu : la liaison du précédent, β, la branche ; captures de l'anneau au bit (critère 1).
 - [ ] **P4** — la fenêtre : deux parts à `--pas-delta=33333`, β alterné, touche d'interpolation ; banc du mélange au
   bit (critère 2).
@@ -100,3 +100,8 @@ Critères, écrits avant le code :
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
+- **P2.** `published_prev` : copie de `published` sur la carte avant la passe qui publie (pas entier et partie 1),
+  dans `set_state`, `set_full_state` et `resize` (la précédente prend la courante réécrite : pas de mélange jusqu'à
+  la publication suivante). Au pas 60, précédente = publiée d'avant, **0 différence** sur 13 440 colonnes ; empreintes
+  S343 inchangées ; redimensionnement S350 au bit, allocateur avant = après, **89 849 856 octets, 28 allocations** —
+  un tampon de plus que S350 (27).
