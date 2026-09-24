@@ -153,6 +153,10 @@ pub struct Volume3 {
     /// Ouverture minimale de ce quotient : `dt²·g/dx` du pas en cours. Une lamelle plus mince aurait une surface
     /// plus raide que le pas explicite de la hauteur ne la porte ; elle garde celle de ce plancher.
     lid_floor: f32,
+    /// **S337 : l'éponge du mode linéaire** — celle du pas couplé (ADR-164) ; `None` par défaut : des murs.
+    linear_sponge: Option<Sponge3>,
+    /// Le volume que cette éponge a retiré depuis la configuration, m³ — ce que le bilan doit lui rendre.
+    sponge_removed: f64,
 }
 
 impl Volume3 {
@@ -253,6 +257,8 @@ impl Volume3 {
             precondition_cut: true,
             partial_lid: true,
             lid_floor: 1.,
+            linear_sponge: None,
+            sponge_removed: 0.,
         })
     }
 
@@ -494,6 +500,24 @@ impl Volume3 {
     /// défaut depuis S335**. Coupée, une colonne en lamelle garde la surface de S332, `1/a` fois trop molle.
     pub fn set_partial_lid(&mut self, on: bool) {
         self.partial_lid = on;
+    }
+
+    /// **S337 : l'éponge du mode linéaire**, celle du pas couplé (ADR-164) : au bord du domaine, les vitesses
+    /// prédites s'amortissent et la hauteur revient au repos, au taux quadratique `Sponge3`. Sans elle, le mode
+    /// linéaire a des murs, qui renvoient les ondes — et le bord d'un δ local se voit (verdict R15). `None` :
+    /// des murs, le défaut. Refus `Domain` sur une éponge que le pas couplé refuserait.
+    pub fn set_linear_sponge(&mut self, sponge: Option<Sponge3>) -> Result<(), Error> {
+        if let Some(e) = sponge {
+            e.validate(self.domain)?;
+        }
+        self.linear_sponge = sponge;
+        Ok(())
+    }
+
+    /// S337 : le volume que l'éponge du mode linéaire a retiré depuis la configuration, m³ — positif quand elle
+    /// retire. Le volume de δ plus celui-ci suit ce que les parois déplacent.
+    pub fn linear_sponge_removed(&self) -> f64 {
+        self.sponge_removed
     }
 
     /// **S326 : la diagonale de Jacobi du chemin coupé** — ouvertures des faces vers une maille fluide,
@@ -1167,10 +1191,11 @@ impl Volume3 {
         self.saved_p.copy_from_slice(&self.p);
         self.saved_eta.copy_from_slice(&self.eta);
         self.saved_eta_roundoff.copy_from_slice(&self.eta_roundoff);
+        let retire_avant = self.sponge_removed;
         // S334 : le plancher d'ouverture du couvercle en partie couvert, garde du pas explicite de la hauteur ;
         // S335 : jamais sous `PARTIAL_LID_MIN_APERTURE`.
         self.lid_floor = ((dt * dt * self.g_eff as f64 / dx as f64) as f32).min(1.).max(PARTIAL_LID_MIN_APERTURE);
-        let result = self.linear(scale, correction, transport, max_iters, jobs);
+        let result = self.linear(scale, correction, transport, max_iters, dt, jobs);
         if result.is_ok() {
             // S334 : le flux de paroi a retiré pendant le pas l'eau que la coque avait déposée.
             if let Some(b) = self.cut.as_mut().and_then(|g| g.base.as_mut()) {
@@ -1184,11 +1209,12 @@ impl Volume3 {
             self.p.copy_from_slice(&self.saved_p);
             self.eta.copy_from_slice(&self.saved_eta);
             self.eta_roundoff.copy_from_slice(&self.saved_eta_roundoff);
+            self.sponge_removed = retire_avant;
         }
         result
     }
 
-    fn linear(&mut self, scale: f32, correction: f32, transport: f32, max_iters: u32,
+    fn linear(&mut self, scale: f32, correction: f32, transport: f32, max_iters: u32, dt: f64,
         jobs: &dyn JobSystem) -> Result<Report, Error> {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         // S324 : sur fond coupé, le couvercle doit rester entièrement mouillé, comme en 2D ; S332 : une coque
@@ -1206,6 +1232,32 @@ impl Volume3 {
         self.us.copy_from_slice(&self.u);
         self.vs.copy_from_slice(&self.v);
         self.ws.copy_from_slice(&self.w);
+        // S337 : l'éponge amortit les vitesses prédites au bord, comme le pas couplé.
+        if let Some(e) = self.linear_sponge {
+            let d = self.domain;
+            for k in 0..nz {
+                for j in 0..ny {
+                    for i in 0..=nx {
+                        let f = self.fu(i, j, k);
+                        self.us[f] *= e.factor(i as f32 * dx, (j as f32 + 0.5) * dx, d, dt);
+                    }
+                }
+                for j in 0..=ny {
+                    for i in 0..nx {
+                        let f = self.fv(i, j, k);
+                        self.vs[f] *= e.factor((i as f32 + 0.5) * dx, j as f32 * dx, d, dt);
+                    }
+                }
+            }
+            for k in 0..=nz {
+                for j in 0..ny {
+                    for i in 0..nx {
+                        let f = self.fw(i, j, k);
+                        self.ws[f] *= e.factor((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, d, dt);
+                    }
+                }
+            }
+        }
         let report = self.project(scale, correction, max_iters, jobs)?;
         if report.degraded {
             return Err(Error::Convergence);
@@ -1244,6 +1296,10 @@ impl Volume3 {
                 self.eta_roundoff[c] = (height - self.eta[c]) - increment;
                 self.eta[c] = height;
             }
+        }
+        // S337 : puis la hauteur revient au repos dans l'éponge ; le volume retiré est compté.
+        if let Some(e) = self.linear_sponge {
+            self.sponge_removed += self.relax_coupled3(e, dt);
         }
         let finite = self.u.iter().chain(&self.v).chain(&self.w).chain(&self.p).chain(&self.eta)
             .chain(&self.eta_roundoff).chain(&self.rhs).chain(&self.res).chain(&self.dir).chain(&self.tmp)

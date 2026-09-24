@@ -25,7 +25,7 @@ pub struct Sponge3 {
     pub rate_per_s: f32,
 }
 impl Sponge3 {
-    fn validate(self, d: Domain3) -> Result<(), Error> {
+    pub(super) fn validate(self, d: Domain3) -> Result<(), Error> {
         if !self.rate_per_s.is_finite() || self.rate_per_s < 0. {
             return Err(Error::Domain);
         }
@@ -39,7 +39,7 @@ impl Sponge3 {
         }
         Ok(())
     }
-    fn factor(self, x: f32, y: f32, d: Domain3, dt: f64) -> f32 {
+    pub(super) fn factor(self, x: f32, y: f32, d: Domain3, dt: f64) -> f32 {
         if self.rate_per_s == 0. {
             return 1.;
         }
@@ -408,7 +408,7 @@ impl Volume3 {
     /// Rend le volume **retiré** (positif) — S310. L'éponge ne range ses incréments nulle part,
     /// et c'est la seule intrusion du bilan dans le pas : aucune opération flottante sur `eta`
     /// n'est touchée, la somme rendue vit à côté, en `f64`.
-    fn relax_coupled3(&mut self, sponge: Sponge3, dt: f64) -> f64 {
+    pub(super) fn relax_coupled3(&mut self, sponge: Sponge3, dt: f64) -> f64 {
         let Domain3 { nx, ny, dx, .. } = self.domain;
         let mut removed = 0f64;
         for j in 0..ny {

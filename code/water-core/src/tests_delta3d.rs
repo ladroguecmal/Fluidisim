@@ -1611,3 +1611,49 @@ fn a_hull_held_on_the_swell_stays_calm_under_the_partial_lid_s335() {
     println!("S335 : coque tenue sur la houle — couvercle de S332 {s332:.4} m/s, couvercle partiel {partiel:.4} m/s");
     assert!(partiel <= 1., "{partiel}");
 }
+
+/// **S337, critère 1 — l'éponge du mode linéaire.** Une crête de 10 cm lâchée au milieu d'une tranche de 32 m sur
+/// 2 m, mailles de 25 cm, 20 s : avec des murs, les ondes restent ; avec l'éponge du pas couplé — 4 m, 2 /s —,
+/// l'énergie de surface de l'intérieur (`Σ(η − z₀)²` hors des bandes d'éponge) tombe sous 20 % de celle des
+/// murs, et le volume de δ plus celui que l'éponge retire reste celui de la crête, au plancher d'arrondi : sous
+/// la borne cumulée du transport, `3·2⁻²⁴·Σ|Δη|·dx²` (S333) — avec des murs, l'écart est du même ordre.
+#[test]
+fn the_linear_sponge_lets_the_waves_out_s337() {
+    let (nx, nz, dx) = (128usize, 8usize, 0.25f32);
+    let lance = |eponge: bool| -> (f64, f64, f64) {
+        let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+        let mut v = Volume3::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+            Domain3 { nx, ny: 2, nz, dx }, 1025., 9.81).unwrap();
+        let z0 = v.domain.z0();
+        let mut eta = vec![z0; nx * 2];
+        for j in 0..2 {
+            for i in 0..nx {
+                let x = (i as f32 + 0.5) * dx - 16.;
+                eta[j * nx + i] += 0.1 * (-x * x / (2. * 0.6 * 0.6)).exp();
+            }
+        }
+        v.set_surface(&eta).unwrap();
+        if eponge {
+            v.set_linear_sponge(Some(Sponge3 { width_x: 4., width_y: 0., rate_per_s: 2. })).unwrap();
+        }
+        let v0 = v.perturbation_volume();
+        let (mut pire, mut plancher, mut avant) = (0f64, 0f64, v.surface().to_vec());
+        for _ in 0..2000 {
+            v.step_surface_linear(10_000, 4000, &Jobs).unwrap();
+            pire = pire.max((v.perturbation_volume() + v.linear_sponge_removed() - v0).abs());
+            plancher += v.surface().iter().zip(&avant).map(|(h, a)| (h - a).abs() as f64).sum::<f64>() * (dx as f64).powi(2) * 3. / 16_777_216.;
+            avant.copy_from_slice(v.surface());
+        }
+        let interieur: f64 = (0..nx)
+            .filter(|i| { let x = (*i as f32 + 0.5) * dx; x > 4. && x < 28. })
+            .map(|i| ((v.surface()[i] - z0) as f64).powi(2))
+            .sum();
+        (interieur, pire, plancher)
+    };
+    let (murs, volume_murs, _) = lance(false);
+    let (eponge, volume, plancher) = lance(true);
+    println!("S337 : énergie de surface intérieure à 20 s — murs {murs:.3e}, éponge {eponge:.3e} ({:.1} %) ; volume de δ plus retiré, écart {volume:.2e} m³ pour une borne d'arrondi {plancher:.2e} (murs : {volume_murs:.2e})", 100. * eponge / murs);
+    assert!(eponge <= 0.2 * murs, "{eponge} contre {murs}");
+    assert!(volume <= plancher, "{volume} contre {plancher}");
+}
+

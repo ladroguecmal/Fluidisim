@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-24 11:32 +02:00
+Battement        : 2026-09-24 11:37 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S337 — la coupure au bord de δ, d'après le verdict R15 (porte D)
 Dernière session : S336 — **la coque qui cesse de pilonner** : δ mesure la masse ajoutée (≈ 3 200 kg) et l'amortissement de rayonnement (≈ 6 400 N·s/m) de la coque de la porte D, constantes de son archétype ; la masse ajoutée agit désormais sur l'accélération relative à l'eau ; dans la scène, la coque dissipe 353 J et δ en reçoit 345 ([preuve](docs/validation/RAYONNEMENT-COQUE-S336.md))

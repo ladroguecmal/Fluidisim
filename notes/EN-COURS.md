@@ -89,11 +89,15 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul, verdict R15 consigné ici.
-- [ ] **P2** — l'éponge du mode linéaire ; critère 1.
+- [x] **P2** — l'éponge du mode linéaire ; critère 1.
 - [ ] **P3** — le fondu de composition dans le rendu de la porte D ; critère 2.
 - [ ] **P4** — la scène de la porte D, éponge et fondu, 12 s ; critère 3 ; images (critère 4).
 - [ ] **P5** — preuve ; R15 au registre des revues ; file, feuille de route.
 - [ ] **P6** — rituel ; arrêt pour le verdict.
 
 ### Notes de reprise
-
+- **P2, critère 1 tenu.** `Volume3::set_linear_sponge` : l'éponge du pas couplé (vitesses prédites amorties, hauteur
+  rappelée au repos, volume retiré compté par `linear_sponge_removed`). Tranche 32 m, crête 10 cm, 20 s, éponge 4 m à
+  2 /s : énergie de surface intérieure **0,4 %** de celle des murs ; volume de δ plus retiré, écart 2,2·10⁻⁹ m³ pour une
+  borne d'arrondi de 1,0·10⁻⁶ (murs : 6,8·10⁻¹⁰). Le plan disait « au plancher d'arrondi » : l'essai compare à la
+  borne cumulée, non aux 10⁻⁹ d'abord codés. Défaut sans éponge : S3xx au bit.
