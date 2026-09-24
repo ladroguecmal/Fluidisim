@@ -80,24 +80,23 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
 
-État au 2026-09-24 (S333), en bref ; le détail par jalon et par porte est dans la
+État au 2026-09-24 (S338), en bref ; le détail par jalon et par porte est dans la
 [feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.
 
 - **Stratégie** : trois systèmes — A haute mer (B+W), B volumique 3D (δ), C couplage — et sept
-  lots ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md)) ; v1 = porte D
-  franchie ([ADR-174](docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4).
+  lots ([ADR-178](docs/adr/ADR-178-strategie-en-trois-systemes-physiques.md)) ; v1 = portes A, B, C
+  et D franchies ([ADR-174](docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4).
 - **A** stabilisé : mer jugée par l'utilisateur, GPU eau 1,74 ms ; CPU hors profil (A278).
 - **B** : δ 3D reçu — référence CPU, production GPU, scène rendue ; seconde représentation **APIC**
   retenue ([ADR-186](docs/adr/ADR-186-apic-seconde-representation.md)), cavité reçue sur un banc
   2D (S320), temps de pincement non convergé à trois mailles (S326) ; raccord aux colonnes à masse
   exacte, frontière non reçue (S325–S327, A316 attribué en partie).
 - **C** : compteurs reçus (lot 1) ; retour δ → W reçu en ordres A à D, **ordre E bloqué par A289**.
-- **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte**, **priorité** (ADR-189) : fond coupé et solide immergé
-  quelconque, fixe ou en mouvement (S324–S330) ; corps rigide du jeu sur B + W, C10 tenu, qui pilote
-  sa coque dans δ sans que δ le pilote (S331–S332) ; **la coque sur la houle de B**, δ relatif à l'eau
-  qui la porte — partie numérique faite, **verdict visuel attendu** (S333) ; A317 corrigé, couvercle
-  partiel actif par défaut (S334–S335) ; coque amortie selon δ (S336) ; **R15** : le bateau juste, le bord de
-  δ traité (S337) — verdict final attendu.
+- **Porte D** — lots 3 et 4 — **reçue sur la référence CPU** (S338, verdict R15,
+  [preuve](docs/validation/PORTE-D-S333.md) §9) : solide immergé quelconque, fixe ou en mouvement (S324–S330) ;
+  corps rigide du jeu sur B, C10 tenu, qui pilote sa coque dans δ sans que δ le pilote (S331–S333) ; A317
+  corrigé (S335) ; rayonnement mesuré par δ (S336) ; bord de δ invisible (S337). Restent W derrière la requête
+  du corps, la coque dans la production de δ. **La v1 demande encore A, B et C.**
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 54 partiels, 63 absents** sur 120.
 
@@ -112,7 +111,7 @@ tient les contrôles que nomme la table des protections de [METHODE](notes/METHO
   déjà autorisées : ne pas redemander ces accords. **Arbitrages du 2026-09-19**
   ([ADR-174](docs/adr/ADR-174-arbitrages-du-2026-09-19.md)) : machine de référence = ce poste ;
   temps de l'eau au service de l'objectif, profil de travail eau ≤ 4 ms GPU et ≤ 2 ms CPU, dont δ
-  ≤ 2 ms GPU ; v1 = porte D franchie ; aucun dépôt distant. Un dépassement qualifie
+  ≤ 2 ms GPU ; v1 = portes A à D franchies ; aucun dépôt distant. Un dépassement qualifie
   l'implémentation et s'éprouve sur la combinaison des techniques (ADR-131).
 - Une réduction d'ambition demande une décision explicite de l'utilisateur (ADR-127).
 - Les faits d'intégration non constatés et les actions d'infrastructure restent distincts des

@@ -3,8 +3,9 @@
 2026-09-24. **Porte D**, chemin de la v1 ([ADR-189](../adr/ADR-189-la-v1-d-abord.md)) : une coque de jeu sur une
 houle de B, qui flotte sous l'autorité de B, et δ qui porte **la perturbation qu'elle ajoute** — sans aucune
 autorité sur le jeu (I-04, [ADR-008](../adr/ADR-008-flottabilite-et-autorite.md) §1). Suite de
-[CORPS-RIGIDE-S331](CORPS-RIGIDE-S331.md) §4. **Partie numérique** : la porte attend le verdict visuel de
-l'utilisateur (ADR-178 D3, ADR-189 D3).
+[CORPS-RIGIDE-S331](CORPS-RIGIDE-S331.md) §4. **Partie numérique** ; le verdict visuel de
+l'utilisateur (ADR-178 D3, ADR-189 D3) — R15, puis *« Plus de coupure »* — **reçoit la porte le 2026-09-24**,
+sur la référence CPU (§9).
 
 ## Reproduire
 
@@ -321,10 +322,35 @@ de mailles. Rendre ces ondes à W — le retour δ → W — reste bloqué par A
 | 1. crête lâchée dans une tranche de 32 m, 20 s : l'éponge éteint les ondes ; volume de δ plus retiré au plancher | énergie intérieure **0,4 %** de celle des murs ; écart 2,2·10⁻⁹ m³ pour une borne d'arrondi de 1,0·10⁻⁶ (murs : 6,8·10⁻¹⁰) | tenu |
 | 2. fondu : zéro au bord, un à 3 m, comme la production | par construction, `delta_fade` recopié | tenu |
 | 3. la scène, 16 s, éponge 3 m à 2,5 /s et fondu : critères 3 et 5 de S333, volume en comptant l'éponge, anneaux qui ne reviennent pas | I-04 au bit ; volume 1,95·10⁻⁹ m³, au plancher ; l'éponge retire 0,49 m³ — l'eau que la coque déplace en se posant ; agitation du centre après 12 s **4,0 mm, contre 8,2 avec des murs** | tenu |
-| 4. images refaites | plus de pli au bord | **verdict attendu** |
+| 4. images refaites | plus de pli au bord | **tenu** — *« Plus de coupure »* (S338, §9) |
 
 L'agitation qui reste au centre après 12 s vient de la coque elle-même, qui remue encore l'eau sur la houle :
 son tangage n'est pas amorti (§4 de [RAYONNEMENT-COQUE-S336](RAYONNEMENT-COQUE-S336.md)) — de fines ondulations, visibles
 à ×5, faibles à l'échelle. Images `viewer/captures/s337`, 2 à 16 s ; à 6 s, scène `0x7cd8db9d4c41f85e`, carte
 `0x8a41b853a480b80d` ; à 16 s, `0xe315eb83a715c715`, `0x871e3986adbe3d09` (toutes au journal d'intention de S337).
 
+---
+
+## 9. S338 — la porte reçue sur la référence CPU
+
+2026-09-24. **Verdict final** sur les images de S337 : *« Plus de coupure »* ([revue](REVUE-VISUELLE.md) §20).
+Avec R15 — *« 1. Oui »*, le bateau qui se pose est juste ; *« 3. Pas forcément »*, pas d'autre défaut —, le
+critère 6 de §5 est tenu. Le « reçu si » de la porte D — **un bateau flotte et perturbe l'eau qui le porte, sans
+autorité de δ sur le jeu** — l'est donc **sur la référence CPU** (ADR-178 D3) : §1–4, §6–8 et
+[RAYONNEMENT-COQUE-S336](RAYONNEMENT-COQUE-S336.md).
+
+**Ce que la réception ne couvre pas** — des suites, non des critères de la porte :
+
+- **W derrière la requête du corps** : le corps flotte sur B ; W, nul dans cette scène, n'agirait pas sur lui.
+- **Ce qui éprouve la porte** (feuille de route §3 bis) : B6 sur une coque et une houle — manquent quatre
+  archétypes, trois états de mer, l'amortissement des autres degrés de liberté (le tangage remue encore l'eau,
+  §8) — ; C11 et C23 non exécutés sur le système ; B4, forces et perception, non reçu.
+- **La production** : aucune coque dans le pas GPU de δ ; l'afficheur n'appelle pas les pas CPU ; aucun objet
+  pilotable.
+- **La résolution** près de la coque : ± 43–49 % sur le rayonnement à 25 cm (§7) ; ~25 mailles de largeur
+  pour ± 3 %.
+- **Le verdict qualifie la perception**, sans référence réelle (aucune trouvée) ; la physique repose sur les
+  mesures des §2, §6–8.
+
+**La v1 n'est pas atteinte** : [ADR-174](../adr/ADR-174-arbitrages-du-2026-09-19.md) D4 la définit par les portes
+A, B, C et D.

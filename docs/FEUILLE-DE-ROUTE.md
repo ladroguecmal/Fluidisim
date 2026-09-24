@@ -173,8 +173,8 @@ géométries et tailles supplémentaires. Cuisson réelle et budget encore à re
 substitutif et sa restauration depuis graine (ADR-001 §3.3, ADR-013, I-17), référentiel accéléré,
 aération et bulles, écume, vue sous-marine.
 
-*État au 2026-09-19* : véhicules d'essai 1D à paroi mobile et corps flottant statique (S21–S58),
-hors système. **L'ordonnanceur est ouvert** (porte A) : `scheduler.rs` décide quels domaines
+*État au 2026-09-24* : parois et corps mobiles dans la référence 3D de δ (S330–S332), corps rigide du
+jeu (S331) ; **porte D reçue** sur la référence CPU (S338, [preuve](validation/PORTE-D-S333.md) §9). **L'ordonnanceur est ouvert** (porte A) : `scheduler.rs` décide quels domaines
 vivent et avec quel budget (S278, ADR-170), branché sur la bande δ (S279, ADR-171) ; coût estimé
 par la médiane des pas payés et oublié selon le temps (S280, S282, S286) ; rétrécissement manuel
 puis préparé (S283–S285), fidélité temporelle non reçue (A290). Cadences lentes mesurées, non
@@ -183,8 +183,8 @@ activées (S286). Preuves : [ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md)
 
 *Manque* : plusieurs candidats réels, domaine qui se déplace et se redimensionne, dégradation
 automatique (ADR-012 §4), régime substitutif et son critère `0,35·Hs_local` jamais calibré —
-sur les domaines 3D de la porte B ; seuils sans banc B8 ; aucun corps rigide dans le système
-(porte D).
+sur les domaines 3D de la porte B ; seuils sans banc B8 ; W derrière la requête du corps, la coque
+dans la production de δ.
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation), **B9** (écume), **B11** (rendu
 sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.
@@ -226,6 +226,7 @@ Si les deux divergent un jour, **§2 fait foi** et cette section est fausse (L13
 système qu'on n'a pas éprouvé n'est pas construit : il est écrit.
 
 **Porte en cours, S294 (2026-09-19) : B**, avec **D en parallèle** par la scène-témoin de la v1.
+**S338 (2026-09-24) : D reçue** sur la référence CPU ; la v1 demande encore A, B et C (ADR-174 D4).
 Dépendances qui fondent cet ordre (ADR-127 §6, L343) : la porte C se reçoit sur la scène de B ;
 les critères restants de A — plusieurs candidats, domaine qui se déplace et se redimensionne —
 portent sur les domaines 3D que B définit ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)
@@ -236,7 +237,7 @@ D6) ; D ne dépend que de B+W. Ordre accepté par l'utilisateur ([ADR-174](adr/A
 | **A — ce qui décide** *(en cours)* | l'ordonnanceur : quels domaines vivent, où, de quelle forme, et ce qu'on dégrade quand le budget manque | banc **B8** (seuils, inexistant) ; la bande δ de l'afficheur comme premier consommateur | plusieurs candidats réels se disputent un budget ; un domaine **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint ; la dégradation d'ADR-012 §4 rang 1 existe, donc la famine a une issue |
 | **B — δ sur les deux dimensions horizontales** *(ouverte S294 ; référence S297–S298 ; pas de production S299–S301 ; scène rendue S302 ; **R11 : δ reçu sans artefact, mer à corriger — ADR-176** ; **S305 : critère 2 mesuré sur les cas de cuve**)* | le solveur volumique qui n'est plus une tranche : domaine 3D, mer étalée, interaction avec des vagues réelles ; représentation et critères posés par [ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) D5 et §4 | banc **B3** (technique δ), cas **C10**, **C11** ; revue visuelle de l'utilisateur | une onde traverse une mer **étalée** et s'y déforme, jugée convaincante par l'utilisateur ; les réceptions 2D (S253, S268–S274) tiennent encore à trois dimensions. **S305** : la production suit la référence à 3·10⁻⁷ m pour 3 mm exigés sur les cas de cuve, phase décroissante ([preuve](validation/CUVE-GPU-S305.md)) ; il ne reste que le **verdict de l'utilisateur** |
 | **C — δ sous budget** | cadence découplée de l'image (I-05), δ sur GPU — **décidé S294** : pas résident à travail borné ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)) —, multigrille hors repli | **B7** sur la machine de référence ([ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) D1), cartes de coût selon ADR-131 | le pas tient **δ ≤ 2 ms GPU** (ADR-174 D3) sur la scène de la porte B, au 99ᵉ centile, **techniques présentes et absentes publiées** |
-| **D — solides et flottabilité** *(S333 : partie numérique sur la référence CPU, [preuve](validation/PORTE-D-S333.md) ; verdict visuel attendu)* | corps flottants pris dans B+W+δ, forces rendues au jeu | **B6** (flottabilité), **B4** (forces et perception), cas **C13**, **C14** | un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le gameplay (I-04) |
+| **D — solides et flottabilité** *(**reçue S338** sur la référence CPU : partie numérique S333–S337, verdict R15 ; [preuve](validation/PORTE-D-S333.md) §9)* | corps flottants pris dans B+W+δ, forces rendues au jeu | **B6** (flottabilité), **B4** (forces et perception), cas **C10**, **C11**, **C23** *(C13 et C14, écrits ici en S281, sont les bulles et l'écume de J3 : corrigé S338)* | un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le gameplay (I-04) |
 | **E — V articulé avec δ** | inondations : V expose sa surface, déclenche un δ local, la masse reste celle de V | cas **C17**, **C21**, **C19** complet | la comptabilité de masse est identique **avec et sans** δ (C21) |
 | **F — grande échelle** | référentiels multiples, bathymétrie, hauts-fonds, conformité multiplateforme | **B7** complet, **A98** | une scène lointaine et une scène proche coexistent sans rupture ni perte de précision |
 
@@ -266,7 +267,8 @@ sa coque dans δ, qui perce la surface, et δ ne le pilote jamais — trajectoir
 anneaux de 9,4 cm, I-04 au bit ([preuve](validation/PORTE-D-S333.md)) ; verdict visuel attendu ; **S334–S335** :
 A317 corrigé — le couvercle partiel, actif par défaut, converge (§6–7) ; **S336** : la coque reçoit la masse
 ajoutée et l'amortissement que δ lui mesure, et s'arrête ([preuve](validation/RAYONNEMENT-COQUE-S336.md)) ;
-**R15** : le bateau qui se pose est juste, la coupure au bord de δ se voyait — **S337** : éponge et fondu (§8).
+**R15** : le bateau qui se pose est juste, la coupure au bord de δ se voyait — **S337** : éponge et fondu (§8) ;
+**S338** : *« Plus de coupure »* — **porte D reçue** sur la référence CPU (§9).
 **Le 2026-09-23** ([ADR-189](adr/ADR-189-la-v1-d-abord.md)), l'utilisateur demande la v1 d'abord : lots 3
 et 4 jusqu'à la porte D, l'alternance avec le lot 5 suspendue jusque-là. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**

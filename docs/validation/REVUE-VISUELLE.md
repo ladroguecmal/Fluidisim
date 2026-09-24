@@ -867,3 +867,8 @@ jusqu'au dernier rang de mailles, là où la production amortit ses ondes par un
 sur la largeur de celle-ci, ce que R11 a jugé sans raccord visible. **Suite** : S337, éponge du mode linéaire
 et fondu de composition, images refaites ([PORTE-D-S333](PORTE-D-S333.md) §8).
 
+**Verdict final — reçu le 2026-09-24 (S338)**, sur les images de S337 (éponge et fondu) : *« Plus de coupure »*.
+Avec R15 — le bateau qui se pose est juste, pas d'autre défaut —, **la porte D est reçue sur la référence CPU**
+(ADR-178 D3) : partie numérique [PORTE-D-S333](PORTE-D-S333.md) §1–8 et [RAYONNEMENT-COQUE-S336](RAYONNEMENT-COQUE-S336.md),
+réception au §9. Ce verdict qualifie la perception, sans référence réelle ; il ne juge ni la mer de B, que la
+porte B attend encore, ni la production GPU, où la coque n'entre pas encore.
