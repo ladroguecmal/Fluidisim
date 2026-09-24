@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S339 — **en cours**. **Porte B, revue R16** : une onde circulaire née d'un impact, sur la mer de
+Session : S339 — **terminée**. **Porte B, revue R16** : une onde circulaire née d'un impact, sur la mer de
 référence provisoire ; chemin de la v1 ([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4), porte en
 cours de §3 bis.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -103,7 +103,7 @@ Critères, écrits avant le code :
   de S302 —, `--anneau` ; banc (zéro colonne hors bornes ; rayon de la crête au trajet de la vitesse de groupe,
   facteur 1,5) ; captures, aperçus.
 - [x] **P5** — preuve (SCENE-DELTA3D-S302 §8) ; R16 au registre ; file.
-- [ ] **P6** — rituel ; arrêt pour le verdict.
+- [x] **P6** — rituel ; arrêt pour le verdict.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `Impact` (cratère de Ricker, au repos) et `Config::impact_review()` — A 0,4 m, σ 1,5 m,

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 13:09 +02:00
+JETON            : libre
+Battement        : 2026-09-24 13:32 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S339 — **porte B, revue R16** : une onde circulaire née d'un impact, sur la mer de référence provisoire (R14), pour le verdict du critère 3
-Dernière session : S338 — **la porte D reçue sur la référence CPU**, sur le verdict final de R15 (*« Plus de coupure »*) ([preuve](docs/validation/PORTE-D-S333.md) §9) ; la v1 d'ADR-174 D4 demande encore les portes A, B et C ; liste 3 / 55 / 62
-Session suivante : **porte B** (§3 bis) — la revue **R16** : une onde de δ née d'un impact (R11) qui traverse la mer de référence provisoire (R14), pour le critère 3, verdict de l'utilisateur (ADR-189 D3) ; puis les cas 1 et 2 d'ADR-175 §4 sur la production. En attente de l'utilisateur : le terme de D2 (lot 5)
-Maillons        : 0 — S338 : porte D reçue
+Session en cours : aucune
+Dernière session : S339 — **porte B, revue R16** : les captures de δ 3D lisent les options de rendu (scène de S302 au bit) ; un impact réaliste se perd dans la mer de 2,5 m, un anneau préparé de 41 cm se lit et se déforme ([preuve](docs/validation/SCENE-DELTA3D-S302.md) §8)
+Session suivante : **verdict R16 de l'utilisateur** (`viewer/captures/s339`, ADR-189 D3) — s'il reçoit le critère 3 de la porte B, le consigner ; puis les cas 1 et 2 d'ADR-175 §4 sur la production (critère 2). En attente aussi : le terme de D2 (lot 5)
+Maillons        : 1 — S339 : R16 préparée, verdict attendu
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

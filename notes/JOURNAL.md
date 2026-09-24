@@ -16644,3 +16644,19 @@ d'ADR-175 §4 sur la production manquent aussi (CUVE-GPU-S305 §7) — correctif
 **Rituel.** Maillons **0** : ce qui devient possible — la porte D franchie, la v1 passe aux portes B, C et A ;
 le chemin — la porte B ; la preuve — PORTE-D-S333 §9. Suivant : **porte B**, la revue R16 — une onde de δ née
 d'un impact sur la mer de référence provisoire (R14) — pour le verdict ; puis les cas 1 et 2 sur la production.
+
+## S339 — 2026-09-24 — porte B : une onde née d'un point, sur la mer de R14 (revue R16)
+
+**Entrée.** Porte en cours B (§3 bis), après la porte D (S338). Critère 3 : une onde qui traverse une mer étalée
+et s'y déforme, jugée convaincante ; R11 ne savait pas dire si le front était « circulaire ou bien linéaire » ;
+R14 a fixé la mer de référence, que δ n'avait jamais traversée.
+**Fait** ([preuve](../docs/validation/SCENE-DELTA3D-S302.md) §8). Deux défauts de chemin : les captures de δ 3D
+partaient avant la lecture de `--eau-physique` et des autres options de rendu — déplacées, scène de S302 au bit — ;
+la scène ne savait injecter qu'un front. **L'impact** (cratère de Cauchy–Poisson, 65 cm sur 5 m, pente sous 0,26) :
+stable, anneaux à la vitesse de groupe, mais de 10 à 17 cm — **invisibles** dans une mer de `Hs` 2,5 m. **L'anneau
+préparé** (41 cm pour 10 m, `a·k` 0,26 comme le front) : stable, crête au trajet prévu ; **il se lit** et se déforme.
+**Limites.** Anneau préparé, non né d'un impact ; volume net 9,6 m³ ; fine ligne claire sur sa crête, non
+attribuée ; bande claire en bas de la pose rasante, préexistante ; domaine de 30 m, plafonné par le tampon des faces.
+**Non fait.** Les cas 1 et 2 d'ADR-175 §4 sur la production (critère 2) ; la porte C.
+**Rituel.** Maillons **1** : R16 prête, aucun critère « reçu si » n'a encore bougé. Suivant : **le verdict R16** ;
+s'il reçoit le critère 3, les cas 1 et 2 sur la production.
