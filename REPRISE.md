@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-24 01:10 +02:00
+JETON            : occupé
+Battement        : 2026-09-24 08:05 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S334 — A317, la paroi de la coque dans sa maille (chemin de la porte D)
 Dernière session : S333 — **la porte D, partie numérique** : la coque du jeu sur la houle de B — pilonnement forcé à 3·10⁻⁵, cavalement avec l'eau, la poussée suivant le gradient de pression — et δ qui porte sa perturbation relative à l'eau qui la porte ; I-04 au bit, anneaux de 9,4 cm ; volume manqué au plancher du transport ; A317 ([preuve](docs/validation/PORTE-D-S333.md))
 Session suivante : **verdict visuel de l'utilisateur sur la porte D** (ADR-178 D3, ADR-189 D3 : s'arrêter et demander) — images `viewer/captures/s333`, questions et référence demandée au §3 de la preuve. Sans verdict, sur le chemin de la porte D : **A317**, la paroi dans sa maille
 Maillons        : 0 — S333 : la coque sur la houle, 6.1 avance, 6.2 partiel
