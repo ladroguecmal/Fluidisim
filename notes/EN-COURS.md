@@ -82,11 +82,18 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le pas de la scène réglable ; identité des captures sans lui ; critère 1.
-- [ ] **P3** — les captures aux deux cadences, aperçus, différences ; critère 2.
+- [x] **P3** — les captures aux deux cadences, aperçus, différences ; critère 2.
 - [ ] **P4** — R17 au registre, preuve (§10), file ; rituel ; arrêt ; critère 3.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `--pas-delta=<µs>` règle `Config::step_us` ; captures étiquetées `s347_<Hz>hz` dans
   `viewer/captures/s347`. Sans l'option, `INSTANTS=60,120 --houle --delta3d --captures` : **16 empreintes identiques
   au bit** à celles relevées en S339 — les leviers de S342–S343 n'ont pas bougé un pixel non plus.
+- **P3, critère 2 tenu.** `INSTANTS=120,300,480 … --pas-delta=16667` et `INSTANTS=60,150,240 … --pas-delta=33333`,
+  `--meilleur --eau-physique=2 --delta3d --captures` : 2, 5 et 8 s, quatre poses. Instants à 60 µs près entre
+  cadences (120 × 16,667 contre 60 × 33,333 ms) : les images « B seul » diffèrent d'autant. **Pixels différents entre
+  cadences** (avec δ) : référence 17–21 % dont 3,9–5,8 % de plus de 4 niveaux ; proche 36–41 % dont 12–15 % ; rasante
+  11–14 % dont 1,3–1,8 % ; haute 9–14 % dont 1,3–2,8 %. À l'œil : les mêmes vagues ; la différence ×6 est un grain
+  fin sur l'emprise de δ, pas la forme de l'onde. Empreintes proche avec 5 s : 60 Hz `0x3194cb20dc2cc6d6`, 30 Hz
+  `0x887a04c139e18030`.
 
