@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-24 21:27 +02:00
+JETON            : occupé
+Battement        : 2026-09-24 21:34 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S351 — **porte A, la dégradation de rang 1** d'ADR-012 §4 : le focal entier, les non-focaux rétrécis au lieu d'affamés, sans pompage ; et la décision de l'utilisateur sur l'après-v1 — la liste du projet fini entière (ADR-190)
 Dernière session : S350 — **porte A, un domaine qui se redimensionne** : état réécrit au bit, pas identique à celui d'un domaine créé à sa forme, coût proportionnel à la surface ([preuve](docs/validation/ARBITRAGE-3D-S344.md) §6) ; et, à la demande de l'utilisateur, la [liste du projet fini](docs/LISTE-PROJET-FINI.md) actualisée sur S309–S350 (3 / 56 / 61)
 Session suivante : **porte A** — la **dégradation de rang 1** d'ADR-012 §4 : l'ordonnanceur rétrécit un domaine non focal au lieu de l'affamer — le dernier critère de la porte A, donc de la v1. Suite de la porte C : l'interpolation du rendu. En attente : le terme de D2 (lot 5)
 Maillons        : 0 — S350 : un domaine qui se redimensionne

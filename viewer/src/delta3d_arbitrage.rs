@@ -55,11 +55,13 @@ pub fn emprise(config: &Config) -> ([f32; 2], [f32; 2]) {
 }
 
 /// Les deux domaines : la scène de la porte B, et la même décalée de 60 m en `x`. Sans paquet : leur
-/// contenu ne décide de rien ici.
+/// contenu ne décide de rien ici. **S351** : `ECART=` change l'écart, pour chercher une pose où les deux sont
+/// voulus à la fois.
 pub fn domaines() -> [Config; 2] {
+    let ecart = std::env::var("ECART").ok().and_then(|v| v.parse::<f32>().ok()).unwrap_or(ECART_X);
     let a = Config::review().without_packet();
     let mut b = a;
-    b.origin[0] += ECART_X;
+    b.origin[0] += ecart;
     [a, b]
 }
 
