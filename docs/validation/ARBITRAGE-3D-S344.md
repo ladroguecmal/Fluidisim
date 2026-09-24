@@ -96,3 +96,14 @@ uniformes, en retirerait l'essentiel ; tel quel, un décalage par image s'ajoute
 **Ce que cela ne dit pas** : le **redimensionnement** — rétrécir un domaine non focal, le rang 1 d'ADR-012 §4 — reste ;
 l'ordonnanceur ne commande pas encore le déplacement, l'hôte le fait (le centre sous l'œil) ; l'état qui sort du domaine
 n'est pas rendu à W (A289).
+
+**Correction S350 (2026-09-24).** Le décalage recopiait aussi les **faces normales du bord** — `u` en `i = 0` et
+`i = nx`, `v` en `j = 0` et `j = ny` —, que le pas n'écrit jamais : les murs de δ, nuls depuis l'état initial. Les
+vitesses intérieures qu'il y posait restaient figées : jusqu'à 0,17 m/s, 2,8 m³/s à travers le bord après l'aller du
+suivi. La hauteur ne les transporte pas — la dérive du volume de δ est la même avant et après la correction, celle du
+fond —, mais la divergence les lit, donc la projection : **un seul décalage de trois mailles**, figé 2 s, écarte la
+surface de **7,2 cm** près du mur et de 3 cm au loin (`--delta3d-murs`, scène de B ; témoin identique au bit). L'identité
+ci-dessus comparait à l'ancien translaté, murs compris, et ne pouvait pas le voir. **Corrigé** : un décalage laisse ces
+faces nulles ; l'identité compte 6 272 murs `u` et 6 720 murs `v`, tous nuls, et aucune autre différence. Les résultats
+d'ordonnancement du tableau restent vrais ; l'état du domaine qui suivait était faux près de ses bords.
+

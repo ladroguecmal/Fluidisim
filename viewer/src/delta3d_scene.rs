@@ -836,6 +836,7 @@ pub fn deux_parts() -> Result<(), String> {
 /// S349, porte A, critère 1 — **le décalage, au bit.** Scène de la porte B après 30 pas ; `Step3::shift(3, −2)` ;
 /// chaque tableau relu avant et après : dans le recouvrement, l'élément `(i, j, k)` vaut l'ancien `(i + 3, j − 2, k)`
 /// au bit ; hors du recouvrement, la valeur de repos. Et l'origine avance de `(3·dx, −2·dx)`. `--delta3d-decalage`.
+/// **S350** : les faces normales du bord de `u` et de `v` sont des murs, attendues nulles.
 pub fn decalage_identite() -> Result<(), String> {
     pollster::block_on(async {
         let scene = crate::scene::Scene::build(true, false, None);
@@ -861,25 +862,29 @@ pub fn decalage_identite() -> Result<(), String> {
         let crate::delta3d_scene::Config { domain, rest, .. } = config;
         let (nx, ny, nz) = (domain.nx, domain.ny, domain.nz);
         let (nu, nv) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz);
-        // (nom, tableau relu, décalage, dimensions, repos).
-        let tableaux: [(&str, usize, usize, [usize; 3], f32); 7] = [
-            ("u", 0, 0, [nx + 1, ny, nz], 0.),
-            ("v", 0, nu, [nx, ny + 1, nz], 0.),
-            ("w", 0, nu + nv, [nx, ny, nz + 1], 0.),
-            ("eta", 1, 0, [nx, ny, 1], rest),
-            ("reste", 2, 0, [nx, ny, 1], 0.),
-            ("pression", 3, 0, [nx, ny, nz], 0.),
-            ("publiee", 4, 0, [nx, ny, 1], 0.),
+        // (nom, tableau relu, décalage, dimensions, repos, murs : 1 en x, 2 en y).
+        let tableaux: [(&str, usize, usize, [usize; 3], f32, u32); 7] = [
+            ("u", 0, 0, [nx + 1, ny, nz], 0., 1),
+            ("v", 0, nu, [nx, ny + 1, nz], 0., 2),
+            ("w", 0, nu + nv, [nx, ny, nz + 1], 0., 0),
+            ("eta", 1, 0, [nx, ny, 1], rest, 0),
+            ("reste", 2, 0, [nx, ny, 1], 0., 0),
+            ("pression", 3, 0, [nx, ny, nz], 0., 0),
+            ("publiee", 4, 0, [nx, ny, 1], 0., 0),
         ];
         let mut total_faux = 0usize;
-        for (nom, t, off, d, repos) in tableaux {
-            let (mut faux, mut dedans, mut dehors) = (0usize, 0usize, 0usize);
+        for (nom, t, off, d, repos, mur) in tableaux {
+            let (mut faux, mut dedans, mut dehors, mut murs) = (0usize, 0usize, 0usize, 0usize);
             for k in 0..d[2] {
                 for j in 0..d[1] {
                     for i in 0..d[0] {
                         let n = off + (k * d[1] + j) * d[0] + i;
                         let (si, sj) = (i as i32 + di, j as i32 + dj);
-                        let attendu = if si >= 0 && (si as usize) < d[0] && sj >= 0 && (sj as usize) < d[1] {
+                        let est_mur = (mur == 1 && (i == 0 || i + 1 == d[0])) || (mur == 2 && (j == 0 || j + 1 == d[1]));
+                        let attendu = if est_mur {
+                            murs += 1;
+                            repos
+                        } else if si >= 0 && (si as usize) < d[0] && sj >= 0 && (sj as usize) < d[1] {
                             dedans += 1;
                             avant[t][off + (k * d[1] + sj as usize) * d[0] + si as usize]
                         } else {
@@ -893,10 +898,78 @@ pub fn decalage_identite() -> Result<(), String> {
                 }
             }
             total_faux += faux;
-            println!("DELTA3D_DECALAGE_S349 tableau={nom} recouvrement={dedans} entrant={dehors} differents_au_bit={faux}");
+            println!("DELTA3D_DECALAGE_S349 tableau={nom} recouvrement={dedans} entrant={dehors} murs={murs} differents_au_bit={faux}");
         }
         println!(
             "DELTA3D_DECALAGE_S349 decalage=({di},{dj}) origine_avant={o0:?} origine_apres={o1:?} total_differents={total_faux}"
+        );
+        Ok(())
+    })
+}
+
+/// S350 — **ce que les murs figés de S349 faisaient au pas.** Deux domaines identiques, scène de la porte B après
+/// 30 pas, décalés de (+3, 0) ; dans le second, le mur gauche reçoit ce que S349 y recopiait — les vitesses de
+/// l'ancienne face `i = 3` —, qui restent figées ensuite. 120 pas, 2 s ; écarts de surface publiée par distance au
+/// mur, et de vitesse. `--delta3d-murs`.
+pub fn murs_effet() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let config = Config::review();
+        let (u, v, w, eta) = config.initial_state();
+        let mut cartes = Vec::new();
+        for _ in 0..2 {
+            let mut c = Step3::new(background, config.domain, config.origin, RHO, G).await?;
+            c.set_step(config.step_us, config.rest, config.sponge)?;
+            c.set_state(&u, &v, &w, &eta)?;
+            for n in 0..30u64 {
+                c.step(background, water_core::SimTime(n * config.step_us), config.cycles)?;
+            }
+            cartes.push(c);
+        }
+        let Domain3 { nx, ny, nz, dx } = config.domain;
+        let avant = cartes[1].velocities()?;
+        for c in &cartes {
+            c.shift(3, 0)?;
+        }
+        // Le mur de S349 : u(0, j, k) ← ancien u(3, j, k), sous le repos compris ; son débit net. `CONTROLE=1` : les
+        // murs laissés nuls — les deux domaines doivent alors rester identiques au bit.
+        let controle = std::env::var("CONTROLE").is_ok_and(|v| v == "1");
+        let mut vel = cartes[1].velocities()?;
+        let mut debit = 0f64;
+        for k in 0..nz {
+            for j in 0..ny {
+                let r = (k * ny + j) * (nx + 1);
+                if !controle {
+                    vel[r] = avant[r + 3];
+                }
+                if (k as f32 + 0.5) * dx < config.rest {
+                    debit += avant[r + 3] as f64 * (dx * dx) as f64;
+                }
+            }
+        }
+        cartes[1].write_velocities(&vel)?;
+        let pas = 120u64;
+        for n in 30..30 + pas {
+            for c in cartes.iter_mut() {
+                c.step(background, water_core::SimTime(n * config.step_us), config.cycles)?;
+            }
+        }
+        let (a, b) = (cartes[0].published()?, cartes[1].published()?);
+        // Écart par bande de distance au mur gauche : moins de 3 mailles, 3 à 10, 10 à 30, au-delà.
+        let mut bandes = [0f32; 4];
+        for c in 0..nx * ny {
+            let i = c % nx;
+            let bande = if i < 3 { 0 } else if i < 10 { 1 } else if i < 30 { 2 } else { 3 };
+            bandes[bande] = bandes[bande].max((a[c] - b[c]).abs());
+        }
+        let echelle = a.iter().fold(0f32, |m, x| m.max(x.abs()));
+        let (va, vb) = (cartes[0].velocities()?, cartes[1].velocities()?);
+        let dv = va.iter().zip(&vb).fold(0f32, |m, (x, y)| m.max((x - y).abs()));
+        let vmax = va.iter().fold(0f32, |m, x| m.max(x.abs()));
+        println!(
+            "DELTA3D_MURS_S350 controle={controle} decalage=(3,0) pas={pas} debit_mur_s349_m3_s={debit:.4e} surface_max_m={echelle:.4e} ecart_surface_m mur_0_3={:.3e} mur_3_10={:.3e} mur_10_30={:.3e} au_dela={:.3e} vitesse_max={vmax:.4e} ecart_vitesse_max={dv:.3e}",
+            bandes[0], bandes[1], bandes[2], bandes[3]
         );
         Ok(())
     })

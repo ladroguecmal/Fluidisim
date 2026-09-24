@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les murs après un décalage ; critère 1.
+- [x] **P2** — les murs après un décalage ; critère 1.
 - [ ] **P3** — la forme courante dans `Step3` ; critère 2.
 - [ ] **P4** — `Step3::resize` en une soumission ; critère 3.
 - [ ] **P5** — le coût selon l'emprise ; critère 4.
@@ -100,3 +100,12 @@ Critères, écrits avant le code :
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** Avant correction, au suivi : murs figés jusqu'à **0,169 m/s**, débit net **−2,80 m³/s** après
+  l'aller, +2,76 après le retour ; après : **0 exactement**. Dérive du volume de δ quand le domaine ne bouge pas :
+  −2,42 → −2,23 m³/s après l'aller, +3,60 → +3,28 après le retour, +0,39 → +0,64 avant tout décalage — **la même** :
+  c'est le fond qui la porte (le volume de δ n'est pas conservé sous B), et `fluxes` n'emploie pas les faces de bord.
+  Mais `divergence` les lit : essai déterministe `--delta3d-murs` (deux domaines, décalage (+3, 0), mur gauche de S349,
+  −0,385 m³/s, 120 pas) : surface écartée de **7,2 cm** à moins de 3 mailles du mur, 1,8 cm à 3–30 mailles, 3,0 cm
+  au-delà ; vitesse jusqu'à 1,25 m/s ; témoin `CONTROLE=1` identique au bit. Identité du décalage : 6 272 murs `u`,
+  6 720 `v`, 0 différence. Correction datée ajoutée à la preuve §5.
+

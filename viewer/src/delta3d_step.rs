@@ -416,7 +416,7 @@ impl Step3 {
 
         // S349 : le décalage. Tampon de travail à la taille du plus grand tableau décalé (une famille de faces).
         let shift_scratch = buffer(&device, (faces.max(cells) * 4) as u64, storage);
-        let shift_uniform = buffer(&device, 32, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
+        let shift_uniform = buffer(&device, 48, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
         let shift_layout = layout(&device, &['r', 'w', 'u']);
         let shift_module = device.create_shader_module(wgpu::include_wgsl!("delta3d_shift.wgsl"));
         let shift_pipeline = pipelines(&device, &shift_layout, &shift_module, &["shift"]).remove(0);
@@ -956,7 +956,9 @@ impl Step3 {
     /// S349 — **déplace le domaine** de `(di, dj)` mailles, porte A : l'état est décalé — vitesses des trois
     /// familles de faces, surface et son reste compensé, pression de départ, surface publiée — et l'origine du
     /// fond avance de `(di·dx, dj·dx)`. Ce qui entre naît au repos (δ = 0, I-12) ; ce qui sort est perdu. Un
-    /// déplacement de données, au bit ; hors pas, entre deux pas.
+    /// déplacement de données, au bit ; hors pas, entre deux pas. **S350** : les faces normales du nouveau bord
+    /// restent des murs, nulles — S349 y recopiait des vitesses intérieures, figées ensuite (2,8 m³/s à travers le
+    /// bord après l'aller du banc de suivi).
     pub fn shift(&self, di: i32, dj: i32) -> Result<(), String> {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         if di.unsigned_abs() as usize >= nx || dj.unsigned_abs() as usize >= ny {
@@ -964,20 +966,21 @@ impl Step3 {
         }
         let (nu, nv) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz);
         let rest = self.rest.get();
-        // (tableau cible, décalage dans ce tableau, dimensions, valeur de repos).
-        let tableaux: [(usize, usize, [usize; 3], f32); 7] = [
-            (0, 0, [nx + 1, ny, nz], 0.),
-            (0, nu, [nx, ny + 1, nz], 0.),
-            (0, nu + nv, [nx, ny, nz + 1], 0.),
-            (1, 0, [nx, ny, 1], rest),
-            (1, self.columns + self.cells, [nx, ny, 1], 0.),
-            (2, 0, [nx, ny, nz], 0.),
-            (3, 0, [nx, ny, 1], 0.),
+        // (tableau cible, décalage dans ce tableau, dimensions, valeur de repos, murs). S350 : les faces normales du
+        // bord de `u` (1) et de `v` (2) sont les murs de δ, nuls ; un décalage ne leur recopie rien.
+        let tableaux: [(usize, usize, [usize; 3], f32, u32); 7] = [
+            (0, 0, [nx + 1, ny, nz], 0., 1),
+            (0, nu, [nx, ny + 1, nz], 0., 2),
+            (0, nu + nv, [nx, ny, nz + 1], 0., 0),
+            (1, 0, [nx, ny, 1], rest, 0),
+            (1, self.columns + self.cells, [nx, ny, 1], 0., 0),
+            (2, 0, [nx, ny, nz], 0., 0),
+            (3, 0, [nx, ny, 1], 0., 0),
         ];
         let cibles = [&self.vel, &self.cells_in, &self.state, &self.published];
-        for (cible, decalage, dims, repos) in tableaux {
+        for (cible, decalage, dims, repos, mur) in tableaux {
             let count = dims[0] * dims[1] * dims[2];
-            let mut u = Vec::with_capacity(32);
+            let mut u = Vec::with_capacity(48);
             for v in [dims[0] as u32, dims[1] as u32, dims[2] as u32, count as u32] {
                 u.extend_from_slice(&v.to_le_bytes());
             }
@@ -985,6 +988,9 @@ impl Step3 {
             u.extend_from_slice(&dj.to_le_bytes());
             u.extend_from_slice(&(decalage as u32).to_le_bytes());
             u.extend_from_slice(&repos.to_le_bytes());
+            for v in [mur, 0, 0, 0] {
+                u.extend_from_slice(&v.to_le_bytes());
+            }
             self.queue.write_buffer(&self.shift_uniform, 0, &u);
             let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
             encoder.copy_buffer_to_buffer(cibles[cible], (decalage * 4) as u64, &self.shift_scratch, 0, (count * 4) as u64);
@@ -1096,6 +1102,16 @@ impl Step3 {
     /// **Banc** : vitesses courantes `[u | v | w]`.
     pub fn velocities(&self) -> Result<Vec<f32>, String> {
         self.relire(&self.vel, 0, self.face_total)
+    }
+
+    /// **Banc S350** : réécrit les vitesses courantes `[u | v | w]` telles quelles, sans rien remettre à zéro — pour
+    /// rejouer un état fabriqué par un banc. Hors pas.
+    pub fn write_velocities(&self, vel: &[f32]) -> Result<(), String> {
+        if vel.len() != self.face_total {
+            return Err("vitesses : une par face attendue".into());
+        }
+        self.queue.write_buffer(&self.vel, 0, bytemuck_cast(vel));
+        Ok(())
     }
 
     /// Surface publiée (ADR-175 D7) : la perturbation de hauteur compensée par colonne,

@@ -2583,6 +2583,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-suivi") {
         return delta3d_arbitrage::suivi();
     }
+    if args.iter().any(|a| a == "--delta3d-murs") {
+        return delta3d_scene::murs_effet();
+    }
     if args.iter().any(|a| a == "--delta3d-decalage") {
         return delta3d_scene::decalage_identite();
     }

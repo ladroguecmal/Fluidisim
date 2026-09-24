@@ -209,6 +209,29 @@ pub fn arbitrage() -> Result<(), String> {
     })
 }
 
+/// S350 — les **murs** de δ : faces normales du bord, `u` en `i = 0` et `i = nx`, `v` en `j = 0` et `j = ny`, sous
+/// le repos. Le pas ne les écrit jamais ; l'état initial les tient nulles. Rend la plus grande vitesse qu'on y
+/// trouve et le débit net entrant, m³/s.
+fn murs(vel: &[f32], config: &Config) -> (f32, f64) {
+    let crate::delta3d_scene::Config { domain, rest, .. } = *config;
+    let (nx, ny, nz, dx) = (domain.nx, domain.ny, domain.nz, domain.dx);
+    let nu = (nx + 1) * ny * nz;
+    let (mut pire, mut debit) = (0f32, 0f64);
+    for k in (0..nz).filter(|k| (*k as f32 + 0.5) * dx < rest) {
+        for j in 0..ny {
+            let (a, b) = (vel[(k * ny + j) * (nx + 1)], vel[(k * ny + j) * (nx + 1) + nx]);
+            pire = pire.max(a.abs()).max(b.abs());
+            debit += a as f64 - b as f64;
+        }
+        for i in 0..nx {
+            let (a, b) = (vel[nu + k * (ny + 1) * nx + i], vel[nu + (k * (ny + 1) + ny) * nx + i]);
+            pire = pire.max(a.abs()).max(b.abs());
+            debit += a as f64 - b as f64;
+        }
+    }
+    (pire, debit * (dx * dx) as f64)
+}
+
 /// S349, **porte A, critère 2 — un domaine qui se déplace** au lieu d'être allumé ou éteint. La côte de S344, la même
 /// caméra, le même ordonnanceur et le même budget ; mais **un seul domaine**, qui se décale vers le point regardé —
 /// son centre sous l'œil en `x` —, au plus deux mailles par image. Publiés : naissances et extinctions, décalages,
@@ -234,6 +257,7 @@ pub fn suivi() -> Result<(), String> {
         let (mut vivant_avant, mut naissances, mut extinctions) = (false, 0usize, 0usize);
         let (mut decalages, mut mailles, mut hors, mut part_min_regime) = (0usize, 0i64, 0u32, f32::INFINITY);
         let mut duree_decalage: Vec<f64> = Vec::new();
+        let mut volumes: Vec<(f64, f64)> = Vec::new();
         let mut oubli_depuis: Option<u64> = None;
         let images = (SECONDES * 1e6 / FRAME_US as f64) as u64;
         for n in 0..=images {
@@ -287,21 +311,42 @@ pub fn suivi() -> Result<(), String> {
                     couts.push(ms);
                     if couts.len() > ECHANTILLONS { couts.remove(0); }
                 }
-                hors = hors.max(carte.diagnostics_now()?.columns_outside);
+                let d = carte.diagnostics_now()?;
+                hors = hors.max(d.columns_outside);
+                volumes.push((t, d.volume as f64));
+            }
+            // S350 : les faces normales du bord, murs de δ, après l'aller, avant le retour et après le retour.
+            if [540, 780, 1020].contains(&n) {
+                let (pire, debit) = murs(&carte.velocities()?, &config);
+                println!("DELTA3D_SUIVI_S350 t={t:.2} murs_vitesse_max_m_s={pire:.4e} murs_debit_net_m3_s={debit:.4e}");
             }
             if n % 30 == 0 {
                 println!(
-                    "DELTA3D_SUIVI_S349 t={t:.2} oeil_x={:.2} origine_x={:.2} part={part:.4} vivant={vivant} accorde={accorde} decalages={decalages}",
-                    cam.eye[0], o[0]
+                    "DELTA3D_SUIVI_S349 t={t:.2} oeil_x={:.2} origine_x={:.2} part={part:.4} vivant={vivant} accorde={accorde} decalages={decalages} volume_m3={:.4}",
+                    cam.eye[0], o[0], volumes.last().map_or(f64::NAN, |v| v.1)
                 );
             }
         }
         duree_decalage.sort_by(|a, b| a.partial_cmp(b).unwrap());
         let q = |v: &Vec<f64>, f: f64| if v.is_empty() { f64::NAN } else { v[(((v.len() - 1) as f64) * f).round() as usize] };
         couts.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        // S350 : la dérive du volume de δ quand le domaine ne bouge pas — avant tout décalage (1–4,5 s), après les
+        // 240 décalages de l'aller (9,5–12,5 s) et du retour (17,5–20 s). Un bord fermé la tient nulle.
+        let pente = |a: f64, b: f64| -> f64 {
+            let w: Vec<&(f64, f64)> = volumes.iter().filter(|(t, _)| *t >= a && *t <= b).collect();
+            let n = w.len() as f64;
+            let (mt, mv) = (w.iter().map(|p| p.0).sum::<f64>() / n, w.iter().map(|p| p.1).sum::<f64>() / n);
+            let cov: f64 = w.iter().map(|p| (p.0 - mt) * (p.1 - mv)).sum();
+            let var: f64 = w.iter().map(|p| (p.0 - mt) * (p.0 - mt)).sum();
+            cov / var
+        };
         println!(
             "DELTA3D_SUIVI_S349 bilan images={} naissances={naissances} extinctions={extinctions} decalages={decalages} mailles_parcourues={mailles} part_min_apres_1s={part_min_regime:.4} hors_bornes_max={hors} decalage_mediane_ms={:.3} decalage_max_ms={:.3}",
             images + 1, q(&duree_decalage, 0.5), q(&duree_decalage, 1.)
+        );
+        println!(
+            "DELTA3D_SUIVI_S350 derive_volume_m3_par_s avant={:.3e} apres_aller={:.3e} apres_retour={:.3e}",
+            pente(1., 4.5), pente(9.5, 12.5), pente(17.5, 20.)
         );
         Ok(())
     })
