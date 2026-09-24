@@ -187,3 +187,35 @@ cadences n'est « la vraie » : sans référence convergée en temps, on sait qu
 l'écart (l'advection seule, un paquet sur une mer au repos, à 30 et 60 Hz) ; ou le **faire juger** — la même scène
 rendue aux deux cadences, côte à côte : un écart de 4 cm sur une onde de 65 cm, dans une mer de 2,5 m, peut être
 invisible, et c'est l'utilisateur qui supervise les rendus.
+
+---
+
+## 9. S346 — A318, attribué en partie
+
+2026-09-24. D'où vient l'écart d'amplitude entre 30 et 60 Hz (§8) ?
+
+**Reproduire** : commit `e98fa1ee` ou plus récent ; `MER=repos … --delta3d-cadence-scene` (fond de B d'amplitude
+nulle) ; `CADENCES=16667:32,25000:32 … --delta3d-cadence-scene` (40 Hz).
+
+| écart d'amplitude de l'onde isolée, contre 60 Hz à 32 cycles | 1 à 5 s | 6 à 12 s |
+|---|---:|---:|
+| témoin : 60 Hz, 64 cycles | ≤ 1,3 % | ≤ 1,2 % |
+| **40 Hz** | **≤ 0,73 %** | jusqu'à 9,2 % (12 s) |
+| **30 Hz**, mer au repos | +1,0 à +1,9 % | jusqu'à +3,9 % |
+| **30 Hz**, mer de la porte B | **jusqu'à +5,7 %** | jusqu'à +6,3 % |
+
+**Ce que cela établit.**
+
+- **Tant que l'onde est groupée** (jusqu'à 5 s), l'écart **suit le pas** : 40 Hz au niveau du témoin des cycles,
+  30 Hz nettement au-dessus, et **toujours du même signe** — plus d'amplitude quand les pas sont moins nombreux.
+  C'est la signature d'un amortissement numérique **par pas**.
+- **La mer en rajoute** sans en être la seule cause : sans elle, l'écart à 30 Hz tombe à 1–2 % au début, 3,9 % au
+  plus. L'onde elle-même — d'amplitude 65 cm, cambrure 0,26, advectée par ses propres vitesses — y contribue.
+- **Une fois l'onde dispersée**, les écarts n'ont plus d'ordre (40 Hz plus loin que 30 Hz à 12 s) : c'est l'horizon
+  de prévisibilité de la scène (A297, S298), au-delà duquel une comparaison point par point perd son sens.
+- La cuve de S305, linéaire et sans advection, ne dépendait pas du pas (§8). Le candidat reste l'**advection non
+  linéaire** du pas couplé ; il n'est pas localisé dans le code.
+
+**Ce que cela décide.** Aucune cadence n'est « la vraie » : à 60 Hz, l'onde est un peu plus amortie qu'à 30 Hz. La
+cadence de 30 Hz change l'amplitude d'une onde forte de quelques pour cent, 4 cm sur 65 dans une mer de 2,5 m. La voir
+ou non est une question de rendu : **revue R17**, la scène aux deux cadences, côte à côte.

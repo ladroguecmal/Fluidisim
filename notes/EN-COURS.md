@@ -84,7 +84,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le front sur une mer au repos, aux deux cadences ; critère 1.
 - [x] **P3** — la scène de B à 40 Hz ; critère 2.
-- [ ] **P4** — preuve, file, A318 ; critère 3.
+- [x] **P4** — preuve, file, A318 ; critère 3.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise

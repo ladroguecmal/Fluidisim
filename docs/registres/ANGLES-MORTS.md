@@ -4325,3 +4325,9 @@ la scène de B, l'onde isolée diffère de +3,9 à +6,3 % entre 30 et 60 Hz, cin
 cycles — ni la projection ni l'éponge. Candidat : la dissipation de l'advection, par pas. Bloque l'adoption de la
 cadence, pas la porte C elle-même. Déclencheur : un paquet sur une mer au repos, aux deux cadences ; ou une revue.
 [Preuve](../validation/COUT-DELTA3D-S341.md) §8.
+
+**A318 — note datée du 2026-09-24 (S346) : attribué en partie.** Tant que l'onde est groupée, l'écart suit le pas —
+40 Hz au niveau du témoin des cycles (≤ 0,73 %), 30 Hz jusqu'à 5,7 %, toujours plus d'amplitude — : un amortissement
+numérique par pas, porté par l'onde elle-même (mer au repos : 1 à 3,9 %) et accru par la mer. Une fois l'onde
+dispersée, les écarts n'ont plus d'ordre (horizon d'A297). Candidat : l'advection non linéaire du pas couplé, non
+localisée. Suite : revue R17 aux deux cadences. [Preuve](../validation/COUT-DELTA3D-S341.md) §9.
