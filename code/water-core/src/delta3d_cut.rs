@@ -57,6 +57,10 @@ pub(crate) struct Base3 {
     pub open_w: Vec<f32>,
     pub floor: Vec<f32>,
     pub solid_col: Vec<f32>,
+    /// **S334 : l'eau que le solide a déposée dans chaque colonne** depuis le dernier pas, en hauteur de
+    /// remplissage — que le flux de sa paroi retire pendant le pas suivant. La surface d'une colonne en partie
+    /// couverte se lit sans elle (A317).
+    pub deposit: Vec<f32>,
 }
 
 impl Cut3 {
@@ -69,6 +73,7 @@ impl Cut3 {
             open_w: self.open_w.clone(),
             floor: self.floor.clone(),
             solid_col: vec![0.; columns],
+            deposit: vec![0.; columns],
         }
     }
 }

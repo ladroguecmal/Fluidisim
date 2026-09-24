@@ -138,6 +138,16 @@ pub struct Volume3 {
     /// **S326 : Jacobi sur le chemin coupé** (A315), actif par défaut quand `ny > 1` ; à `ny = 1`, la 3D
     /// reste la 2D au bit, et la 2D résout sans préconditionneur. Le couper sert à la mesure.
     precondition_cut: bool,
+    /// **S334 : la surface d'une colonne en partie couverte** (A317). Sous une coque qui perce le couvercle,
+    /// `η` reste la hauteur de *remplissage* de la colonne — l'excès d'eau rapporté à sa section entière, ce
+    /// que le transport conserve —, mais cet excès se tient dans la seule part libre `a` du couvercle, où la
+    /// surface et la pression valent `(η − z₀)/a` fois `ρg`. **Éteint par défaut** : éprouvé en S334, il ne
+    /// retire pas la dépendance au placement d'A317, et une colonne dont l'ouverture se referme y garde un
+    /// excès d'eau que `1/a` change en pointe de pression. Il sert à la mesure.
+    partial_lid: bool,
+    /// Ouverture minimale de ce quotient : `dt²·g/dx` du pas en cours. Une lamelle plus mince aurait une surface
+    /// plus raide que le pas explicite de la hauteur ne la porte ; elle garde celle de ce plancher.
+    lid_floor: f32,
 }
 
 impl Volume3 {
@@ -236,6 +246,8 @@ impl Volume3 {
             balance: Balance3::default(),
             cut: None,
             precondition_cut: true,
+            partial_lid: false,
+            lid_floor: 1.,
         })
     }
 
@@ -295,9 +307,10 @@ impl Volume3 {
             return Err(Error::NotFinite);
         }
         let mut v = Self::configure_with_bottom(host, domain, rho, g_eff, bottom)?;
-        // S330 : la découpe du fond seul et le volume du solide par colonne, pour qu'il puisse bouger.
+        // S330 : la découpe du fond seul et le volume du solide par colonne, pour qu'il puisse bouger ; S334 : l'eau
+        // qu'il dépose dans chaque colonne.
         let faces = (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1);
-        let bytes = (faces + nx * ny * nz + 2 * nx * ny).checked_mul(core::mem::size_of::<f32>()).ok_or(Error::Domain)?;
+        let bytes = (faces + nx * ny * nz + 3 * nx * ny).checked_mul(core::mem::size_of::<f32>()).ok_or(Error::Domain)?;
         host.alloc.alloc_persistent(bytes).map_err(|e| match e {
             AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
         })?;
@@ -389,6 +402,7 @@ impl Volume3 {
         // Somme compensée f32, comme le transport (S233) : le reste d'arrondi porte ce que `η` perd.
         let area = dx * dx;
         for c in 0..nx * ny {
+            base.deposit[c] += (self.rhs[c] - base.solid_col[c]) / area;
             let increment = (self.rhs[c] - base.solid_col[c]) / area - self.eta_roundoff[c];
             let height = self.eta[c] + increment;
             self.eta_roundoff[c] = (height - self.eta[c]) - increment;
@@ -417,6 +431,12 @@ impl Volume3 {
     /// S326 : active ou coupe le Jacobi du chemin coupé — pour la mesure ; actif par défaut.
     pub fn set_precondition_cut(&mut self, on: bool) {
         self.precondition_cut = on;
+    }
+
+    /// S334 : active ou coupe la surface des colonnes en partie couvertes (A317) — pour la mesure ; **coupée par
+    /// défaut**, une colonne en lamelle garde la surface de S332, `1/a` fois trop molle.
+    pub fn set_partial_lid(&mut self, on: bool) {
+        self.partial_lid = on;
     }
 
     /// **S326 : la diagonale de Jacobi du chemin coupé** — ouvertures des faces vers une maille fluide,
@@ -551,11 +571,28 @@ impl Volume3 {
         }
     }
 
-    /// Pression dynamique imposée au couvercle de la colonne `(i, j)` ; `homogeneous` l'annule.
+    /// Pression dynamique imposée au couvercle de la colonne `(i, j)` ; `homogeneous` l'annule. **S334** : sous
+    /// une coque qui perce le couvercle, l'excès d'eau d'une colonne en partie couverte se tient dans sa part
+    /// libre `a`, où la surface — et la pression — valent `1/a` fois celles de la hauteur de remplissage, l'eau
+    /// que la coque vient d'y déposer mise à part (A317). Couvercle plein ou fermé : la valeur d'avant, au bit.
     #[inline]
     fn lid(&self, i: usize, j: usize) -> f32 {
         let c = self.col(i, j);
-        self.rho * self.g_eff * ((self.eta[c] - self.domain.z0()) - self.eta_roundoff[c])
+        let pression = self.rho * self.g_eff * ((self.eta[c] - self.domain.z0()) - self.eta_roundoff[c]);
+        match &self.cut {
+            Some(g) if self.partial_lid => {
+                let a = g.open_w[self.fw(i, j, self.domain.nz)];
+                if a > 0. && a < 1. {
+                    // L'eau que la coque vient de déposer dans la colonne n'est pas à la surface : le flux de sa
+                    // paroi la retire pendant ce pas. Divisée par `a`, elle ferait une pression de pure comptabilité.
+                    let depot = g.base.as_ref().map_or(0., |b| b.deposit[c]);
+                    self.rho * self.g_eff * (((self.eta[c] - self.domain.z0()) - self.eta_roundoff[c]) - depot) / a.max(self.lid_floor)
+                } else {
+                    pression
+                }
+            }
+            _ => pression,
+        }
     }
 
     /// `L p`, avec `L = −∇·∇` sur la grille MAC, Neumann aux murs et au fond, **Dirichlet
@@ -1073,7 +1110,15 @@ impl Volume3 {
         self.saved_p.copy_from_slice(&self.p);
         self.saved_eta.copy_from_slice(&self.eta);
         self.saved_eta_roundoff.copy_from_slice(&self.eta_roundoff);
+        // S334 : le plancher d'ouverture du couvercle en partie couvert, garde du pas explicite de la hauteur.
+        self.lid_floor = ((dt * dt * self.g_eff as f64 / dx as f64) as f32).min(1.);
         let result = self.linear(scale, correction, transport, max_iters, jobs);
+        if result.is_ok() {
+            // S334 : le flux de paroi a retiré pendant le pas l'eau que la coque avait déposée.
+            if let Some(b) = self.cut.as_mut().and_then(|g| g.base.as_mut()) {
+                b.deposit.fill(0.);
+            }
+        }
         if result.is_err() {
             self.u.copy_from_slice(&self.saved_u);
             self.v.copy_from_slice(&self.saved_v);

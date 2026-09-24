@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-24 08:12 +02:00
+Battement        : 2026-09-24 08:27 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S334 — A317, la paroi de la coque dans sa maille (chemin de la porte D)
 Dernière session : S333 — **la porte D, partie numérique** : la coque du jeu sur la houle de B — pilonnement forcé à 3·10⁻⁵, cavalement avec l'eau, la poussée suivant le gradient de pression — et δ qui porte sa perturbation relative à l'eau qui la porte ; I-04 au bit, anneaux de 9,4 cm ; volume manqué au plancher du transport ; A317 ([preuve](docs/validation/PORTE-D-S333.md))

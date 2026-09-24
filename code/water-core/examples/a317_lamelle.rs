@@ -7,7 +7,8 @@
 //! une bande à 2,5–3,5 m de chaque flanc long, `|x − x_c| ≤ 2 m`, entre 3 et 6 s — avant que les murs ne
 //! renvoient les anneaux. Une coque symétrique rayonne pareil de ses deux flancs, quel que soit son placement.
 //!
-//! `cargo run -p water-core --release --offline --example a317_lamelle` — lignes `A317`, ≈ 5 min.
+//! `cargo run -p water-core --release --offline --example a317_lamelle [-- --couvercle-partiel]` — lignes
+//! `A317`, ≈ 5 min ; l'option active la surface des colonnes en partie couvertes de S334 (`set_partial_lid`).
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
 mod host_impl;
@@ -58,7 +59,7 @@ fn pilonnement(t: f64) -> f64 {
 }
 
 /// Une scène : rend les amplitudes quadratiques moyennes des bandes −y et +y, m.
-fn scene(phi: f64) -> Result<(f64, f64), String> {
+fn scene(phi: f64, partiel: bool) -> Result<(f64, f64), String> {
     let d = Domain3 { nx: MAILLES[0], ny: MAILLES[1], nz: MAILLES[2], dx: DX as f32 };
     let z0 = d.z0() as f64;
     let mut c = centre(phi, 0., z0);
@@ -70,6 +71,7 @@ fn scene(phi: f64) -> Result<(f64, f64), String> {
         d, Milieu::MER.rho as f32, 9.81, &vec![0.; d.columns()], &n,
     ).map_err(|e| format!("configuration : {e:?}"))?;
     v.set_surface(&vec![d.z0(); d.columns()]).map_err(|e| format!("{e:?}"))?;
+    v.set_partial_lid(partiel);
     let paroi = (MAILLE_PAROI + phi) * DX;
     let bande = |y: f64| -> Option<usize> {
         if y > paroi - 3.5 && y < paroi - 2.5 { Some(0) } else if y > paroi + 1.6 + 2.5 && y < paroi + 1.6 + 3.5 { Some(1) } else { None }
@@ -105,11 +107,13 @@ fn scene(phi: f64) -> Result<(f64, f64), String> {
 }
 
 fn main() -> Result<(), String> {
+    let partiel = std::env::args().any(|a| a == "--couvercle-partiel");
+    println!("A317 couvercle_partiel={partiel}");
     println!("A317 scene pilonnement_m={AMPLITUDE} omega_rad_s={OMEGA} delta={MAILLES:?} dx={DX} pas_s={DT} duree_s={} bandes=2.5-3.5m fenetre=3-6s",
         PAS as f64 * DT);
     let mut toutes = Vec::new();
     for phi in [0.05, 0.08, 0.30, 0.55, 0.80] {
-        let (moins, plus) = scene(phi)?;
+        let (moins, plus) = scene(phi, partiel)?;
         let phi_plus = 1. - (phi + 0.4f64).fract();
         println!("A317 placement phi_moins={phi:.2} phi_plus={phi_plus:.2} amplitude_moins_m={moins:.6} amplitude_plus_m={plus:.6} rapport={:.4}", moins / plus);
         toutes.extend([moins, plus]);

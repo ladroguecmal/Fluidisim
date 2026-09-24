@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — banc `a317_lamelle` : pilonnement imposé, cinq placements ; critère 1 (avant correctif).
-- [ ] **P3** — correctif : la pression du couvercle en partie couvert, commutable pour la mesure ; critère 3.
+- [x] **P3** — correctif : la pression du couvercle en partie couvert, commutable pour la mesure ; critère 3.
 - [ ] **P4** — banc après correctif ; critère 2.
 - [ ] **P5** — scène de la porte D rejouée, deux placements, images ; critères 4 et 5 ; masse ajoutée de S332
   re-mesurée.
@@ -109,3 +109,13 @@ Critères, écrits avant le code :
   15,99. Moyenne 12,78 mm, **écart 35 %**. **Le diagnostic écrit ne suffit pas** : l'amplitude n'est pas
   monotone en l'ouverture du couvercle — 0,80 rayonne comme 0,05 ; minimum vers 0,5, paroi au centre de la
   maille. Un second mécanisme est probable.
+- **P3, le correctif éprouvé ne suffit pas.** Pression du couvercle partiel `ρg(η − z₀)/a`, ouverture bornée par
+  `dt²·g/dx`. **Premier piège** : `set_solid_rigid` dépose l'eau que la coque déplace dans la hauteur de
+  remplissage *avant* la projection ; le flux de paroi la retire *pendant* le pas — divisée par `a`, pointe à
+  10,7 m/s ; le dépôt est donc mis à part (`Base3::deposit`, remis à zéro après un pas réussi). **Second
+  piège, sans remède ici** : une colonne dont l'ouverture se referme — coque qui glisse — garde son excès
+  d'eau, que `1/a` change en pression : 12,2 m/s dans la contre-épreuve de S333. **Et sur le pilonnement pur**
+  (ouvertures fixes) : amplitudes 27,4 / 17,1 (0,05/0,55), 25,1 / 16,9, 15,8 / 15,9, 17,0 / 27,4, 19,2 / 19,2 mm —
+  toutes plus fortes (+20 à +90 %), **écart 36,5 %, dissymétrie 1,60** : la mollesse du couvercle partiel est
+  réelle, mais elle **n'est pas** le mécanisme d'A317. **Décision** : commutable, **éteint par défaut** ; les
+  18 valeurs imprimées des essais S3xx sont alors identiques au bit (critère 3).
