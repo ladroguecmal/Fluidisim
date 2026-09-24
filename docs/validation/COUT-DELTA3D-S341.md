@@ -110,3 +110,35 @@ n'étaient pas l'essentiel. Ce qui reste est l'accumulation des **26 champs** de
 écriture — 120 Mo par pas. D'où le levier suivant : **n'écrire que les champs lus**, une dizaine selon l'axe de la
 face (§3), ce qui retire à la fois le calcul et l'écriture de seize champs sur vingt-six.
 
+---
+
+## 7. S343 — dix champs par face au lieu de 26
+
+2026-09-24. Suite du §6 : ce qui restait du fond était l'accumulation des 26 champs de chaque face et leur
+écriture, dont le pas ne lit que dix. **La disposition compacte** — `override COMPACT` dans les noyaux du fond,
+vraie pour le pas seulement : `η`, `u` (3), `du/dt`, la ligne de `grad u` et `grad p` de l'axe de la face, `p`. Le
+tampon du pas passe de 120 à 46 Mo. Les bancs de S300 compilent le même fichier sans la constante et rendent
+leurs nombres publiés — 1,46 à 2,44·10⁻³ Pa sur `p_dyn`, 6,0425·10⁻⁸ et 3,9462·10⁻⁷ au couplage.
+
+**Reproduire** : commit `46c294d3` ou plus récent ; `… -- --delta3d-empreinte` (surface publiée et vitesses après 60
+et 600 pas, empreintes FNV) ; `… --delta3d-cout-scene`, `FOND=faces … --delta3d-cout-scene` ; secteur relevé.
+
+**Identité, au bit** : empreintes relevées avant le changement, rejouées après — 60 pas `0x5efa267462dfa0ad` /
+`0xc5c6a85d3d29f44b`, 600 pas `0x9325cf58781f8b74` / `0xea1bebe0ffabc19a`, identiques.
+
+**Trouvé en mesurant — un défaut de S342** : créer le pas prenait **247 s** depuis le noyau par tuiles. Le
+compilateur Dx12 déroulait la mise à zéro de ses 12 Ko de mémoire de groupe, que wgpu ajoute par défaut. Le noyau
+écrit cette mémoire entière avant de la lire : la mise à zéro est désactivée pour les noyaux du fond du pas —
+**4,8 s**, empreintes inchangées, et 0,05 ms gagnées au fond.
+
+| secteur, 97 % | fond seul | passe 1 | projection | passe 3 | pas, médiane / q99 |
+|---|---:|---:|---:|---:|---:|
+| S341, départ | 1,533 | 1,978 | 2,056 | 0,391 | 4,452 / 4,505 ms |
+| S342, par tuiles | 1,237 | 1,819 | 2,055 | 0,443 | 4,348 / 4,405 |
+| **S343, compact, par tuiles** | **1,038** | **1,303** | 2,059 | **0,288** | **3,679 / 3,727** |
+| S343, compact, face par face | 1,374 | 1,579 | | | 3,933 / 3,981 |
+
+**Ce que cela dit.** La charge utile compte plus que la factorisation : la prédiction, le couplage et la
+correction lisent le fond, et lire dix champs au lieu de vingt-six les accélère autant que le fond lui-même. Le
+pas perd 0,77 ms depuis S341 (−17 %). **La projection pèse désormais 56 % du pas**, inchangée : c'est le levier
+suivant. Il manque 1,73 ms au 99ᵉ centile.

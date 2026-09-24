@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 15:07 +02:00
+JETON            : libre
+Battement        : 2026-09-24 15:53 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S343 — **porte C, charge utile** : le fond de δ n'écrit, par face, que les dix champs que le pas lit, au lieu de 26 — reçu au bit
-Dernière session : S342 — **porte C, le fond de δ factorisé** par colonne et par couche, au bit : fond 1,53 → 1,24 ms, pas 4,46 → 4,35 ms ([preuve](docs/validation/COUT-DELTA3D-S341.md) §6)
-Session suivante : **porte C, charge utile** — n'écrire, par face, que les champs que le pas lit (une dizaine sur 26 selon l'axe), reçu au bit sur la surface publiée ; puis la projection (multigrille, fusion), puis la cadence découplée. En attente : le terme de D2 (lot 5)
-Maillons        : 2 — S341 : mesure ; S342 : fond factorisé, aucun critère franchi (justifié au journal)
+Session en cours : aucune
+Dernière session : S343 — **porte C, dix champs par face** au lieu de 26, au bit : pas de δ **3,68 ms, q99 3,73** (4,45 / 4,51 en S341) ; création du pas ramenée de 247 à 4,8 s ([preuve](docs/validation/COUT-DELTA3D-S341.md) §7)
+Session suivante : **porte C, la projection** (2,06 ms, 56 % du pas, 0,062 ms par cycle) — mesurer puis réduire : fusion des cinq dispatchs d'un cycle, multigrille ; ensuite la cadence découplée (I-05), à éprouver contre la référence. En attente : le terme de D2 (lot 5)
+Maillons        : 3 — S341–S343 sur la porte C, aucun critère franchi ; justifié au journal (S343)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

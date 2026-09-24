@@ -16707,3 +16707,20 @@ champs de chaque face et leur écriture, 120 Mo par pas, dont le pas ne lit qu'u
 **Rituel.** Maillons **2** : aucun critère de porte franchi depuis S340 ; la suite reste sur la porte C, qui ne se
 franchit que par la combinaison — justification : c'est la porte en cours, et chaque levier est mesuré. Suivant :
 **n'écrire que les champs lus**, reçu au bit.
+
+## S343 — 2026-09-24 — porte C : dix champs par face
+
+**Entrée.** S342 : le fond factorisé ne retirait que 0,11 ms ; restaient l'accumulation et l'écriture des 26
+champs de chaque face, dont le pas n'en lit que dix.
+**Fait** ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §7). `override COMPACT` : le fond du pas écrit dix champs
+par face selon son axe ; les bancs de S300, sans la constante, rendent leurs nombres publiés. **Au bit** :
+empreintes de la surface et des vitesses après 60 et 600 pas, relevées avant, identiques après.
+**Trouvé** : depuis S342, créer le pas prenait **247 s** — la mise à zéro de la mémoire de groupe, déroulée par le
+compilateur Dx12 ; désactivée pour le fond du pas, qui l'écrit avant de la lire : **4,8 s**.
+**Mesuré** (secteur) : **pas 3,679 ms, q99 3,727** — contre 4,452 / 4,505 en S341 ; la projection, inchangée,
+pèse 56 %.
+**Limites.** Il manque 1,73 ms au 99ᵉ centile ; aucun critère de porte franchi.
+**Rituel.** Maillons **3** — justification : la porte C est la porte en cours et ne se franchit que par la
+combinaison (ADR-131 D4) ; chaque session a livré une part mesurée et reçue au bit (−17 % en trois) ; la suite
+débloque encore la v1, qui l'exige. Suivant : **la projection** — fusion du cycle, puis multigrille ; puis la
+cadence découplée.

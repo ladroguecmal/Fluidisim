@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S343 — **en cours**. **Porte C, charge utile du fond** ; chemin de la v1.
+Session : S343 — **terminée**. **Porte C, charge utile du fond** ; chemin de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — S342 ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §6) : le fond factorisé, au bit, ne retire que
 0,11 ms au pas ; ce qui reste est l'**accumulation des 26 champs** de chaque face et leur **écriture**, 120 Mo par
@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P2** — le banc d'empreinte ; l'empreinte de référence ; critère 1.
 - [x] **P3** — la disposition compacte : noyaux, couplage, pas, tampon ; relectures de banc.
 - [x] **P4** — l'identité, les bancs de S300, le coût ; critères 2 et 3.
-- [ ] **P5** — preuve, file ; rituel.
+- [x] **P5** — preuve, file ; rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `--delta3d-empreinte`, commit `fc37f7b5` + banc, fond par tuiles, deux passages
