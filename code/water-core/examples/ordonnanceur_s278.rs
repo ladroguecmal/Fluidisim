@@ -98,6 +98,7 @@ fn run() -> (u64, [u32; ISLETS.len()], f32, u64, usize) {
                     cost_ms: COST_MS,
                     blocks: 8,
                     regime: Regime::Perturbative,
+                    shrink: None,
                 })
                 .expect("soumission");
         }

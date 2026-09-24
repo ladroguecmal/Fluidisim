@@ -98,7 +98,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-190, la décision de l'utilisateur ; file (décisions), REPRISE §5, feuille de route, liste.
-- [ ] **P3** — le rang 1 dans le cœur : `Shrink`, focal, échelle commune ; essais (critère 1 a, b, d, e).
+- [x] **P3** — le rang 1 dans le cœur : `Shrink`, focal, échelle commune ; essais (critère 1 a, b, d, e).
 - [ ] **P4** — l'anti-pompage : engagement et rampe ; essais (critère 1 c).
 - [ ] **P5** — le banc de la côte avec rang 1, et son témoin ; critères 2 et 3.
 - [ ] **P6** — preuve, file, feuille de route, liste ; la porte A et la v1 si reçues ; critère 4.
@@ -107,3 +107,8 @@ Critères, écrits avant le code :
 ### Notes de reprise
 - Écart réglable `ECART=` ajouté à `domaines()` (défaut 60 m, S344 inchangé). Parts d'écran à 36 m : x = 18,8 m →
   A 0,0993, B 0,1069 ; x = 22,5 → 0,0796 / 0,1248 ; à 30 m, x = 15 → 0,1178 chacun.
+- **P3, critère 1 (a, b, d, e) tenu.** `Shrink { min_scale, fixed_ms }`, `Grant::scale`, `Error::Shrink` (substitutif
+  refusé). Sans déclaration : décision de S278 au bit — empreinte de l'exemple `6aebff024c734fc9` inchangée. Avec :
+  focal entier, non-focaux au minimum puis échelle commune par dichotomie (24 étapes) ; 3,7 + 3,7 ms pour 5 → le
+  second à (5 − 3,7 − 0,09)/3,61 = 0,335. Sept essais `_s351`, 25 de l'ordonnanceur verts. Un essai mal monté
+  corrigé : à 6 ms, un minimum de 0,4 ne tenait pas — le rang 1 avait raison.

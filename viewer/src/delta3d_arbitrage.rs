@@ -136,7 +136,7 @@ pub fn arbitrage() -> Result<(), String> {
             ordonnanceur.begin();
             for d in 0..2 {
                 let bid = Bid { id: DomainId(d as u32), gameplay: 1., perception: parts[d], urgency: 1.,
-                    cost_ms: mediane(&couts[d]), blocks: 1, regime: Regime::Perturbative };
+                    cost_ms: mediane(&couts[d]), blocks: 1, regime: Regime::Perturbative, shrink: None };
                 ordonnanceur.submit(bid).map_err(|e| format!("soumission : {e:?}"))?;
             }
             ordonnanceur.decide(SimTime(n * FRAME_US)).map_err(|e| format!("décision : {e:?}"))?;
@@ -289,7 +289,7 @@ pub fn suivi() -> Result<(), String> {
                 w.sort_by(|a, b| a.partial_cmp(b).unwrap());
                 w[w.len() / 2] as f32
             };
-            ordonnanceur.submit(Bid { id: DomainId(0), gameplay: 1., perception: part, urgency: 1., cost_ms: cout, blocks: 1, regime: Regime::Perturbative })
+            ordonnanceur.submit(Bid { id: DomainId(0), gameplay: 1., perception: part, urgency: 1., cost_ms: cout, blocks: 1, regime: Regime::Perturbative, shrink: None })
                 .map_err(|e| format!("soumission : {e:?}"))?;
             ordonnanceur.decide(SimTime(n * FRAME_US)).map_err(|e| format!("décision : {e:?}"))?;
             ordonnanceur.allocate();

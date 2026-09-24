@@ -750,7 +750,7 @@ impl<'a> Layer<'a> {
         let perception = view.map_or(1., |p| p.screen_fraction(emprise.0, emprise.1));
         self.scheduler.begin();
         let bid = Bid { id: DomainId(0), gameplay: GAMEPLAY, perception, urgency: URGENCY,
-            cost_ms: self.cost_ms(), blocks: 1, regime: Regime::Perturbative };
+            cost_ms: self.cost_ms(), blocks: 1, regime: Regime::Perturbative, shrink: None };
         if self.scheduler.submit(bid).is_err() {
             return self.granted;
         }

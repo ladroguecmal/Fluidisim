@@ -22,7 +22,11 @@
 //!
 //! Il décide **qu'un** domaine vit et avec quel budget. Il ne décide pas encore de sa **forme** :
 //! grille de référence, blocs épars, fusion et séparation géométriques (liste 1.5 et 1.6), les
-//! sept rangs de dégradation d'ADR-012 §4, le régime substitutif et sa restauration depuis graine.
+//! rangs 2 à 7 de dégradation d'ADR-012 §4, le régime substitutif et sa restauration depuis graine.
+//!
+//! **S351 — le rang 1** d'ADR-012 §4 : quand le budget ne tient pas tous les vivants, le domaine
+//! **focal** est servi entier et les autres **rétrécissent** au lieu d'être affamés — s'ils l'ont
+//! déclaré (`Shrink`). L'ordonnanceur rend une **échelle** ; l'hôte en fait une emprise.
 //!
 //! # Ce que l'hôte fournit, et qu'on ne calcule pas ici
 //!
@@ -68,6 +72,18 @@ impl Profile {
     }
 }
 
+/// S351, ADR-012 §4 rang 1 — ce qu'un candidat accepte de céder : **rétrécir son emprise**. L'échelle
+/// est une fraction de sa surface, dans `[min_scale, 1]`, et son coût la suit :
+/// `fixed_ms + (cost_ms − fixed_ms)·échelle` — la loi mesurée en S350, où le pas de δ 3D vaut
+/// 0,09 ms + 3,57 ms × surface.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Shrink {
+    /// La plus petite fraction de surface que le domaine accepte, dans `]0, 1]`.
+    pub min_scale: f32,
+    /// La part du coût, ms, qui ne suit pas la surface — dans `[0, cost_ms]`.
+    pub fixed_ms: f32,
+}
+
 /// Ce qu'un candidat soumissionne à chaque pas — domaine déjà vivant ou simple prétendant.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Bid {
@@ -78,10 +94,13 @@ pub struct Bid {
     pub perception: f32,
     /// `W_urgence` : `1/(temps avant que l'absence du domaine devienne visible)`.
     pub urgency: f32,
-    /// `C` — coût estimé du pas, **mesuré** par le solveur et réinjecté ici.
+    /// `C` — coût estimé du pas **à pleine emprise**, **mesuré** par le solveur et réinjecté ici.
     pub cost_ms: f32,
     pub blocks: u32,
     pub regime: Regime,
+    /// S351 : `Some` si le domaine accepte le rang 1. Un substitutif ne le peut pas : son emprise est le
+    /// champ total qu'il possède, et la rétrécir n'est pas gratuit (ADR-012 §4, I-12).
+    pub shrink: Option<Shrink>,
 }
 
 impl Bid {
@@ -90,6 +109,20 @@ impl Bid {
     /// sans facteur d'échelle.
     pub fn priority(&self) -> f32 {
         self.gameplay * self.perception * self.urgency
+    }
+
+    /// S351 : l'échelle effective quand l'échelle commune vaut `q` — jamais sous le minimum déclaré ; 1 sans
+    /// déclaration.
+    pub fn scale_for(&self, q: f32) -> f32 {
+        self.shrink.map_or(1., |s| q.clamp(s.min_scale, 1.))
+    }
+
+    /// S351 : le coût à l'échelle commune `q`.
+    pub fn cost_for(&self, q: f32) -> f32 {
+        match self.shrink {
+            Some(s) => s.fixed_ms + (self.cost_ms - s.fixed_ms) * self.scale_for(q),
+            None => self.cost_ms,
+        }
     }
 }
 
@@ -128,6 +161,9 @@ struct Live {
 pub struct Grant {
     pub id: DomainId,
     pub budget_ms: f32,
+    /// S351 : la fraction de sa surface accordée — 1, entier ; moins, rétréci au rang 1. Le budget est le coût
+    /// à cette échelle.
+    pub scale: f32,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -141,6 +177,9 @@ pub enum Error {
     /// Le temps fourni est antérieur à celui du pas précédent. L'horloge n'est jamais implicite,
     /// et une horloge qui recule ferait vivre éternellement ce qui devrait mourir.
     Clock,
+    /// S351 : déclaration de rétrécissement invalide — échelle minimale hors de `]0, 1]`, part fixe hors de
+    /// `[0, coût]`, ou domaine substitutif.
+    Shrink,
 }
 
 /// L'ordonnanceur. Sa capacité est fixée à la construction et sa mémoire demandée à l'hôte :
@@ -151,6 +190,9 @@ pub struct Scheduler {
     grants: Vec<Grant>,
     live: Vec<Live>,
     last_us: Option<u64>,
+    /// S351 — le rang 1 : le domaine focal, protégé (ADR-012 §4), et l'échelle commune des autres.
+    focal: Option<DomainId>,
+    scale: f32,
 }
 
 impl Scheduler {
@@ -176,6 +218,8 @@ impl Scheduler {
             grants: Vec::with_capacity(capacity),
             live: Vec::with_capacity(capacity),
             last_us: None,
+            focal: None,
+            scale: 1.,
         })
     }
 
@@ -218,6 +262,13 @@ impl Scheduler {
         }
         if !(bid.cost_ms.is_finite() && bid.cost_ms >= 0.) {
             return Err(Error::NotFinite);
+        }
+        if let Some(s) = bid.shrink {
+            let echelle = s.min_scale.is_finite() && s.min_scale > 0. && s.min_scale <= 1.;
+            let fixe = s.fixed_ms.is_finite() && s.fixed_ms >= 0. && s.fixed_ms <= bid.cost_ms;
+            if !(echelle && fixe) || bid.regime == Regime::Substitutive {
+                return Err(Error::Shrink);
+            }
         }
         if self.bids.iter().any(|b| b.id == bid.id) {
             return Err(Error::Duplicate);
@@ -290,25 +341,129 @@ impl Scheduler {
     /// Un candidat trop gros est **sauté**, pas bloquant : les suivants remplissent le reliquat.
     /// Un gros domaine peut donc jeûner tant que de petits se présentent — limite connue, à
     /// éprouver au banc B8, qui n'existe pas.
+    ///
+    /// **S351 — le rang 1** (ADR-012 §4). Si ce sac à dos laisse un vivant sans budget et qu'un non-focal a déclaré
+    /// pouvoir rétrécir, le **focal** — la plus forte priorité — est servi entier, puis les autres par `P/C`
+    /// décroissant à leur échelle minimale, autant qu'il en tient ; enfin l'**échelle commune** monte au plus haut
+    /// que ce budget permet. Sans aucune déclaration, la décision reste exactement celle de S278.
     pub fn allocate(&mut self) {
-        self.grants.clear();
         self.bids.sort_unstable_by(|a, b| {
             (b.priority() * a.cost_ms)
                 .total_cmp(&(a.priority() * b.cost_ms))
                 .then(a.id.cmp(&b.id))
         });
-        let (mut ms, mut blocks) = (0f32, 0u32);
-        for bid in &self.bids {
-            if !self.live.iter().any(|l| l.id == bid.id && l.active) {
-                continue;
-            }
-            if ms + bid.cost_ms > self.profile.cpu_sim_ms || blocks + bid.blocks > self.profile.blocks {
-                continue;
-            }
-            ms += bid.cost_ms;
-            blocks += bid.blocks;
-            self.grants.push(Grant { id: bid.id, budget_ms: bid.cost_ms });
+        let affame = self.fund(1., false);
+        self.focal = self.choose_focal();
+        let focal = self.focal;
+        let declarent = self.bids.iter().any(|b| {
+            b.shrink.is_some() && Some(b.id) != focal && self.live.iter().any(|l| l.id == b.id && l.active)
+        });
+        if !declarent {
+            self.scale = 1.;
+            return;
         }
+        let cible = if affame {
+            self.fund(0., true);
+            self.largest_scale()
+        } else {
+            1.
+        };
+        let q = self.next_scale(cible);
+        self.scale = q;
+        if !affame && q >= 1. {
+            return;
+        }
+        if !affame {
+            self.fund(0., true);
+        }
+        for g in self.grants.iter_mut() {
+            if Some(g.id) == focal {
+                continue;
+            }
+            if let Some(b) = self.bids.iter().find(|b| b.id == g.id) {
+                g.scale = b.scale_for(q);
+                g.budget_ms = b.cost_for(q);
+            }
+        }
+    }
+
+    /// Remplit `grants` à l'échelle commune `q`, sans jamais dépasser budget ni blocs : avec `rang1`, le focal
+    /// d'abord et entier, puis les autres par `P/C` décroissant à leur échelle ; sans, le sac à dos de S278, tout à
+    /// pleine emprise. Rend vrai si un vivant reste sans budget.
+    fn fund(&mut self, q: f32, rang1: bool) -> bool {
+        self.grants.clear();
+        let focal = if rang1 { self.focal } else { None };
+        let (mut ms, mut blocks, mut affame) = (0f32, 0u32, false);
+        for passe in 0..2 {
+            for bid in &self.bids {
+                let est_focal = focal == Some(bid.id);
+                if (passe == 0) != est_focal || !self.live.iter().any(|l| l.id == bid.id && l.active) {
+                    continue;
+                }
+                let (echelle, cout) = if rang1 && !est_focal { (bid.scale_for(q), bid.cost_for(q)) } else { (1., bid.cost_ms) };
+                if ms + cout > self.profile.cpu_sim_ms || blocks + bid.blocks > self.profile.blocks {
+                    affame = true;
+                    continue;
+                }
+                ms += cout;
+                blocks += bid.blocks;
+                self.grants.push(Grant { id: bid.id, budget_ms: cout, scale: echelle });
+            }
+        }
+        affame
+    }
+
+    /// Le focal d'ADR-012 §4 : parmi les vivants qui soumissionnent, la plus forte priorité — un domaine qui porte
+    /// l'acteur du joueur a `W_gameplay` = 1, qui domine le produit (ADR-012 §2). L'égalité se départage par
+    /// identité.
+    fn choose_focal(&self) -> Option<DomainId> {
+        self.bids
+            .iter()
+            .filter(|b| self.live.iter().any(|l| l.id == b.id && l.active))
+            .max_by(|a, b| a.priority().total_cmp(&b.priority()).then(b.id.cmp(&a.id)))
+            .map(|b| b.id)
+    }
+
+    /// La plus grande échelle commune qui tient les servis dans le budget : dichotomie de 24 étapes, la
+    /// résolution d'un `f32` sur `[0, 1]`. Le coût croît avec l'échelle, donc 0 — où `fund` les a choisis — tient.
+    fn largest_scale(&self) -> f32 {
+        let focal = self.focal;
+        let total = |q: f32| -> f32 {
+            self.grants
+                .iter()
+                .filter_map(|g| self.bids.iter().find(|b| b.id == g.id))
+                .map(|b| if Some(b.id) == focal { b.cost_ms } else { b.cost_for(q) })
+                .sum()
+        };
+        let budget = self.profile.cpu_sim_ms;
+        if total(1.) <= budget {
+            return 1.;
+        }
+        let (mut lo, mut hi) = (0f32, 1f32);
+        for _ in 0..24 {
+            let mid = 0.5 * (lo + hi);
+            if total(mid) <= budget {
+                lo = mid;
+            } else {
+                hi = mid;
+            }
+        }
+        lo
+    }
+
+    /// L'échelle commune de ce pas, vers `cible`.
+    fn next_scale(&self, cible: f32) -> f32 {
+        cible
+    }
+
+    /// S351 : le domaine focal du dernier `allocate`, protégé du rang 1.
+    pub fn focal(&self) -> Option<DomainId> {
+        self.focal
+    }
+
+    /// S351 : l'échelle commune des non-focaux au dernier `allocate` — 1 quand rien n'est dégradé.
+    pub fn scale(&self) -> f32 {
+        self.scale
     }
 
     /// Somme des budgets distribués. Ne dépasse jamais `profile.cpu_sim_ms` : c'est la propriété
@@ -324,6 +479,8 @@ impl Scheduler {
         self.live.clear();
         self.grants.clear();
         self.last_us = None;
+        self.focal = None;
+        self.scale = 1.;
     }
 
     /// Les domaines que la décision laisse vivants, dans l'ordre où ils se sont allumés.
@@ -386,7 +543,133 @@ mod tests {
             cost_ms: cost,
             blocks: 1,
             regime: Regime::Perturbative,
+            shrink: None,
         }
+    }
+
+    /// S351 : un domaine δ 3D de la scène de la porte B — 3,7 ms entier, 0,09 ms de part fixe (S350), et qui
+    /// accepte de descendre à `min` de sa surface.
+    fn bid3(id: u32, score: f32, min: f32) -> Bid {
+        Bid { shrink: Some(Shrink { min_scale: min, fixed_ms: 0.09 }), ..bid(id, score, 1., 1., 3.7) }
+    }
+
+    fn profil(budget: f32) -> Scheduler {
+        let mut alloc = Hote { used: core::cell::Cell::new(0), limit: 1 << 16 };
+        let services = Hote { used: core::cell::Cell::new(0), limit: 0 };
+        let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+        Scheduler::with_capacity(&mut host, Profile { cpu_sim_ms: budget, blocks: 64, on: 0.1, off: 0.05 }, 8).unwrap()
+    }
+
+    /// Un pas complet : soumissions, décision, allocation.
+    fn servir(s: &mut Scheduler, t_us: u64, bids: &[Bid]) {
+        s.begin();
+        for b in bids {
+            s.submit(*b).unwrap();
+        }
+        s.decide(SimTime(t_us)).unwrap();
+        s.allocate();
+    }
+
+    fn accorde(s: &Scheduler, id: u32) -> Option<Grant> {
+        s.grants().iter().copied().find(|g| g.id == DomainId(id))
+    }
+
+    /// Critère 1 (b) : là où S278 affamait le second domaine — 3,7 + 3,7 ms pour 5 —, le rang 1 le sert rétréci.
+    /// Le focal reste entier ; l'autre prend ce qui reste, 1,3 ms, soit une échelle de (1,3 − 0,09)/3,61.
+    #[test]
+    fn le_rang_1_retrecit_le_non_focal_au_lieu_de_l_affamer_s351() {
+        let mut s = profil(5.);
+        servir(&mut s, 0, &[bid3(1, 0.12, 0.05), bid3(2, 0.11, 0.05)]);
+        assert_eq!(s.focal(), Some(DomainId(1)));
+        let (a, b) = (accorde(&s, 1).unwrap(), accorde(&s, 2).expect("le rang 1 doit servir le second"));
+        assert_eq!((a.scale, a.budget_ms), (1., 3.7), "le focal est entier");
+        let attendu = (5. - 3.7 - 0.09) / 3.61;
+        assert!((b.scale - attendu).abs() < 1e-5, "échelle {} pour {attendu}", b.scale);
+        assert!(s.granted_ms() <= 5., "{} ms", s.granted_ms());
+        assert!(s.granted_ms() > 5. - 1e-4, "le budget est employé : {} ms", s.granted_ms());
+    }
+
+    /// Critère 1 (b) : le focal est la plus forte **priorité**, même quand son rapport `P/C` est le moins bon — il
+    /// est protégé des rangs 1 à 5 (ADR-012 §4) ; c'est l'autre qui rétrécit.
+    #[test]
+    fn le_focal_n_est_jamais_retreci_s351() {
+        let mut s = profil(5.);
+        let cher = Bid { cost_ms: 4.5, ..bid3(1, 0.2, 0.05) };
+        servir(&mut s, 0, &[cher, bid3(2, 0.15, 0.05)]);
+        assert_eq!(s.focal(), Some(DomainId(1)));
+        assert_eq!(accorde(&s, 1).map(|g| g.scale), Some(1.));
+        let b = accorde(&s, 2).expect("servi à son minimum : 0,09 + 3,61 × 0,05 = 0,27 ms tiennent dans 0,5");
+        assert!(b.scale < 0.2 && b.scale >= 0.05);
+    }
+
+    /// Critère 1 (b) : une échelle **commune**, jamais sous le minimum de chacun ; un non-déclarant reste entier.
+    #[test]
+    fn l_echelle_est_commune_et_respecte_chaque_minimum_s351() {
+        // 3,7 (focal) + 0,5 (entier) + 0,27 et 1,53 aux minimums = 6,00 : tout tient à 6,5 ms ; l'échelle commune
+        // monte alors à (6,5 − 5,824)/3,61 = 0,187, sous le minimum 0,4 du troisième.
+        let mut s = profil(6.5);
+        let entier = Bid { cost_ms: 0.5, ..bid(4, 0.13, 1., 1., 0.5) };
+        servir(&mut s, 0, &[bid3(1, 0.2, 0.05), bid3(2, 0.15, 0.05), bid3(3, 0.14, 0.4), entier]);
+        let q = s.scale();
+        assert!(q < 0.4, "l'échelle commune {q} doit passer sous le minimum du troisième");
+        assert_eq!(accorde(&s, 2).unwrap().scale, q);
+        assert_eq!(accorde(&s, 3).unwrap().scale, 0.4, "jamais sous son minimum");
+        assert_eq!(accorde(&s, 4).unwrap().scale, 1., "un non-déclarant ne rétrécit pas");
+        assert!(s.granted_ms() <= 6.5);
+    }
+
+    /// Critère 1 (b) : un candidat qui ne tient pas même à son minimum reste sans budget — le rang 5 le
+    /// détruirait, il n'est pas écrit ; le plus mauvais rapport `P/C` cède le premier.
+    #[test]
+    fn qui_ne_tient_pas_a_son_minimum_reste_affame_s351() {
+        let mut s = profil(4.);
+        servir(&mut s, 0, &[bid3(1, 0.3, 0.05), bid3(2, 0.2, 0.05), bid3(3, 0.15, 0.05)]);
+        // 3,7 pour le focal ; 0,3 restent, un seul minimum (0,27 ms) y tient.
+        assert_eq!(s.grants().len(), 2);
+        assert!(accorde(&s, 2).is_some() && accorde(&s, 3).is_none());
+        assert!(s.granted_ms() <= 4.);
+    }
+
+    /// Critère 1 (a) : sans aucune déclaration, rien ne change — le second reste affamé, comme en S278.
+    #[test]
+    fn sans_declaration_la_decision_de_s278_s351() {
+        let mut s = profil(5.);
+        servir(&mut s, 0, &[bid(1, 0.12, 1., 1., 3.7), bid(2, 0.11, 1., 1., 3.7)]);
+        assert_eq!(s.grants(), &[Grant { id: DomainId(1), budget_ms: 3.7, scale: 1. }]);
+        assert_eq!(s.scale(), 1.);
+    }
+
+    /// Critère 1 (d) : l'ordre de soumission ne change rien au bit — ensemble, échelles et budgets.
+    #[test]
+    fn le_rang_1_ne_depend_pas_de_l_ordre_de_soumission_s351() {
+        let bids = [bid3(1, 0.2, 0.05), bid3(2, 0.15, 0.05), bid3(3, 0.14, 0.4), bid3(5, 0.15, 0.1)];
+        let decision = |ordre: [usize; 4]| {
+            let mut s = profil(6.);
+            let b: Vec<Bid> = ordre.iter().map(|&i| bids[i]).collect();
+            servir(&mut s, 0, &b);
+            let mut g: Vec<(u32, u32, u32)> =
+                s.grants().iter().map(|g| (g.id.0, g.scale.to_bits(), g.budget_ms.to_bits())).collect();
+            g.sort();
+            g
+        };
+        let a = decision([0, 1, 2, 3]);
+        assert_eq!(a, decision([3, 2, 1, 0]));
+        assert_eq!(a, decision([2, 0, 3, 1]));
+    }
+
+    /// Critère 1 (e) : un substitutif ne se déclare pas rétrécissable, et une déclaration invalide est refusée
+    /// avant de rien toucher.
+    #[test]
+    fn une_declaration_invalide_est_refusee_s351() {
+        let mut s = profil(5.);
+        s.begin();
+        let sub = Bid { regime: Regime::Substitutive, ..bid3(1, 0.2, 0.05) };
+        assert_eq!(s.submit(sub), Err(Error::Shrink));
+        for (min, fixe) in [(0., 0.09), (1.5, 0.09), (0.5, 4.), (f32::NAN, 0.), (0.5, -1.)] {
+            let b = Bid { shrink: Some(Shrink { min_scale: min, fixed_ms: fixe }), ..bid(2, 0.2, 1., 1., 3.7) };
+            assert_eq!(s.submit(b), Err(Error::Shrink), "min {min}, part fixe {fixe}");
+        }
+        assert!(s.bids().is_empty());
     }
 
     fn scheduler(capacity: usize) -> Scheduler {
