@@ -346,7 +346,8 @@ pas recopiée ici (L137).
   S235, S249) : filtre spectral reçu pour B et sillage ; cuisson des huit bandes
   accélérée de 46 % au bit (S267). Manquent le filtre des impacts, la généralisation
   aux autres sources et le LOD temporel.
-- [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent*.
+- [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent* : S356, l'écume des crêtes de B
+  à la couverture de Monahan dans l'afficheur, non jugée, référence à porter dans Godot ([preuve](validation/RENDU-CRETES-S356.md)).
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *absent*.
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *absent*.
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *partiel* : **S275, ADR-168** —

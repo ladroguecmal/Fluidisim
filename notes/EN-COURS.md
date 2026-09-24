@@ -99,7 +99,7 @@ quand même, le module restant la référence à porter.*
 - [x] **P3** — l'écume au rendu ; critère 2.
 - [x] **P4** — la lumière des crêtes ; critère 3.
 - [x] **P5** — la décision de l'utilisateur (ADR-192) et le coût du module ; critère 4 réduit au coût.
-- [ ] **P6** — preuve, file, feuille de route, liste, index ; critère 5 sans R19.
+- [x] **P6** — preuve, file, feuille de route, liste, index ; critère 5 sans R19.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
