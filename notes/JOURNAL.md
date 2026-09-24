@@ -16787,3 +16787,18 @@ n'est pas montrée.
 **Rituel.** Maillons **3** — justification : R17 est une question à l'utilisateur, qui décide de la voie de la
 porte C ; aucune session de plus sur ce point sans son verdict. Suivant : **le verdict R17** ; s'il ne voit rien,
 étaler le pas sur deux images ; sinon, la porte A pendant que l'écart se corrige.
+
+## S348 — 2026-09-24 — porte C reçue sur le banc
+
+**Entrée — verdict R17** : *« Continue je valide »* — la cadence de 30 Hz d'ADR-012 §7 validée à l'œil (A318 accepté).
+**Fait** ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §11). Le pas de 33,3 ms coupé en **deux parts**, une par
+image de 60 Hz — fond, prédiction, couplage et 7 cycles ; puis les 25 autres, le résidu et la fin du pas — : mêmes
+dispatchs, même ordre ; **60 pas identiques au bit** au pas d'un seul tenant, dont l'empreinte n'a pas bougé.
+**Mesuré** (secteur, 1 000 pas) : **1,848 et 1,918 ms au 99ᵉ centile**, 1,934 au pire ; le balayage de `k` donne 7
+pour l'équilibre. **Porte C reçue sur le banc** (ADR-175 §4.4).
+**Limites.** Parts soumises seules, sans rendu concurrent ; l'interpolation du rendu d'ADR-012 §7 manque — δ change
+à 30 Hz dans une image à 60 ; marge de 4 % ; une scène, un domaine.
+**Écart de méthode.** P3 et P4 dans un même commit : le plan les séparait.
+**Rituel.** Maillons **0** : ce qui devient possible — δ tient son budget par image sur la scène de la porte B ; le
+chemin — la v1, dont il ne reste que la porte A ; la preuve — §11. Suivant : **porte A**, un domaine qui se déplace
+et se redimensionne ; l'interpolation du rendu, suite de la porte C.

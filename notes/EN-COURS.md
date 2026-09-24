@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S348 — **en cours**. **Porte C, le pas étalé sur deux images** ; chemin de la v1.
+Session : S348 — **terminée**. **Porte C, le pas étalé sur deux images** ; chemin de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — **verdict R17** de l'utilisateur sur les images de S347 : *« Continue je valide »* — la cadence de 30 Hz
 d'ADR-012 §7 est validée à l'œil ; l'écart d'amplitude d'A318 n'y fait pas obstacle.
@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 - [x] **P3** — le pas en deux parts, et l'identité ; critère 2.
 - [x] **P4** — le coût de chaque part ; critère 3.
 - [x] **P5** — preuve ; la porte C si elle tient ; critère 4.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P3, critère 2 tenu.** `encode_split` : partie 0 — première passe, copies, mise en route de la projection, `k`
