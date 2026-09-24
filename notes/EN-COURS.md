@@ -62,44 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S355 — **terminée**. **La v1 en scène vivante, 2 : la coque dans la production de δ** — d'abord le pas
-linéaire sur la carte.
+Session : S356 — **en cours**. **Rendu 1 (ADR-191) : les crêtes de B — l'écume et la lumière qui les traverse.**
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — *« Continue »*. Liste 6.4 : manque la production GPU. **Constat** : la coque a été reçue dans le **mode
-linéaire** de δ — couvercle, faces coupées, couvercle partiel (S330–S337, porte D) ; la production est le pas
-**mobile couplé**, qui n'a de solide nulle part, même sur CPU, et une coque qui perce une surface mobile serait une
-physique nouvelle. **Chemin retenu**, à écrire en ADR sur les mesures : le domaine δ d'une coque est un domaine
-**linéaire**, le mode reçu par la porte D, porté sur la carte ; le pas mobile couplé garde les autres domaines.
-Découpage : S355 le pas linéaire à ouvertures, toutes ouvertes ; puis la découpe d'un solide fixe ; puis la coque
-qui bouge et perce le couvercle ; puis la scène — une session du lot 5 entre chacune (ADR-184 D1).
+Entrée — ADR-191 : une session de rendu, une de physique ; la part de l'eau du rendu du moteur maison s'écrit en
+module, depuis l'afficheur. **Ce qui est déjà su** : au verdict R14 (S308), l'utilisateur a nommé le travail
+optique prioritaire — ciel, exposition, absorption, **diffusion aux crêtes**, **écume**, hautes fréquences du reflet ;
+S307 en a fait l'ordre (RENDU-ECART-S307 §6) : la couleur du corps d'eau (faite), **la lumière des crêtes, pilotée
+par le jacobien de CWM déjà calculé à chaque pixel**, puis **l'écume, couverture de Monahan & O'Muircheartaigh —
+0,42 % à `U₁₀` ≈ 7,8 m/s —, réflectance effective de Koepke 0,22**.
+
+**Le point délicat** : le rendu filtre les ondes courtes avec l'empreinte du pixel ; un seuil fixe sur le jacobien
+ferait disparaître l'écume au loin. Le seuil porte donc sur la variable normalisée `s = (J − 1)/σ(h)`, `σ(h)`
+l'écart-type du jacobien au filtrage du pixel ; `s_t` se tire de la loi de `s` à pleine résolution, pas d'un choix.
 
 Critères, écrits avant le code :
-1. **`Linear3` sur la carte** : le pas linéaire de `Volume3` — prédiction égale au courant, éponge, divergence
-   pondérée par les ouvertures, terme du couvercle, opérateur pondéré au couvercle à demi-maille, gradient conjugué
-   à cycles fixes repartant du pas précédent, correction, flux de colonne, hauteur compensée, rappel de l'éponge.
-   Ouvertures réservées à la création, toutes ouvertes (I-06).
-2. **Contre la référence** : bosse de 10 cm sur la grille de la porte D (96 × 96 × 8, 25 cm, 2 m), pas de 10 ms,
-   200 pas, éponge de 3 m à 2,5 /s : **|Δη| ≤ 10⁻⁴ m** partout, relevé tous les vingt pas ; volume de δ au plancher
-   du transport.
-3. **Le coût** sur cette grille : p50 et p99 du pas horodaté, au nombre de cycles qui tient le critère 2 ;
-   alimentation relevée (A270).
-4. ADR-191, preuve, file, feuille de route, liste 6.4.
+1. **La couverture** : sur CPU, loi de `s` pour la mer de `--meilleur` (bande et queue, pleine résolution, plusieurs
+   instants et lieux) ; `s_t` tel que `P(s < s_t) = W(U₁₀)` ; écart à la gaussienne et incertitude publiés.
+2. **L'écume** (`--ecume`), module WGSL séparé : couverture par pixel tirée de `s_t` et de `σ(h)`, bord adouci,
+   réflectance 0,22 éclairée comme l'eau. Sans l'option, les images de `--revue-mer` **au bit**. Avec : couverture
+   recalculée sur CPU aux empreintes de 0, 0,5 et 2 m, à ± 30 % de `W`.
+3. **La lumière des crêtes** (`--cretes`), même module : masque de compression tiré du même jacobien, diffusion vers
+   l'avant, couleur de diffusion dérivée du corps d'eau (ADR-177) ; ses deux paramètres **à calibrer par R19**
+   (I-14). Sans l'option, au bit.
+4. **Images et coût** : quatre états (base, écume, crêtes, les deux) aux quatre poses de R14 ; surcoût GPU mesuré.
+5. **R19** préparée, références demandées ; preuve, file, feuille de route, liste 8.4.
 
 ### Plan
 
-*Amendé en cours de session, sur la demande de l'utilisateur (00 h 20) : sa question sur le réalisme du rendu, puis cinq
-réponses — [ADR-191](../docs/adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md). Le pas linéaire sur la carte n'avait pas
-commencé (aucun diff) : ses étapes — `Linear3`, le banc, le coût, l'ADR de la coque — passent **telles quelles** à la
-prochaine session de physique ; le plan initial est au commit `a2c81dea`.*
-
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la décision de l'utilisateur : ADR-191, note datée d'ADR-178, file, feuille de route, liste 8.1, index,
-  REPRISE §5.
-- [x] **P3** — rituel.
+- [ ] **P2** — la loi de `s` et le seuil ; critère 1.
+- [ ] **P3** — l'écume au rendu ; critère 2.
+- [ ] **P4** — la lumière des crêtes ; critère 3.
+- [ ] **P5** — images et coût ; critère 4.
+- [ ] **P6** — R19, preuve, file, feuille de route, liste ; critère 5.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-- **P2, la question et les réponses.** Référence de l'utilisateur : FluidNinja LIVE-2 (Fab, Unreal, Andras Ketzer) —
-  « using 2D sim to drive 3D visualization », simulation attachée au joueur, lointain en motifs passifs ; images :
-  un tourbillon, de l'eau turquoise peu profonde avec un fond visible, des traînées d'écume. Réponses : moteur maison,
-  à construire ; rendu final dans le moteur ; nous l'écrivons en module ; alterner avec la physique. ADR-191.
-

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-25 00:29 +02:00
+JETON            : occupé
+Battement        : 2026-09-25 00:32 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S356 — **rendu 1 (ADR-191) : les crêtes de B** — l'écume à la couverture de Monahan, seuil normalisé par l'écart-type du jacobien au pixel ; la lumière qui traverse les crêtes ; images pour R19
 Dernière session : S355 — **la question du réalisme** : [ADR-191](docs/adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md), décision de l'utilisateur — l'architecture de l'eau ne change pas ; moteur maison à construire, dont nous écrivons la part de l'eau en module depuis l'afficheur ; une session de rendu, une de physique. La coque sur la carte, pas commencée, reportée telle quelle
 Session suivante : **rendu 1** (ADR-191 D3) — **l'écume des crêtes de B** (8.4) : là où le jacobien du déplacement CWM, déjà calculé par pixel, se replie, la crête blanchit ; seuil tiré d'une loi de couverture mesurée, pas choisi ; écrit séparable (module WGSL, entrées publiées, coût) ; images avant/après pour une revue R19. Puis la physique : la coque sur la carte (`Linear3`, plan de S355 au commit `a2c81dea`). En attente : R18
 Maillons        : 2 — S354 : une attribution corrigée ; S355 : une décision, pas une capacité
