@@ -146,10 +146,9 @@ pub struct Volume3 {
     /// **S334 : la surface d'une colonne en partie couverte** (A317). Sous une coque qui perce le couvercle,
     /// `η` reste la hauteur de *remplissage* de la colonne — l'excès d'eau rapporté à sa section entière, ce
     /// que le transport conserve —, mais cet excès se tient dans la seule part libre `a` du couvercle, où la
-    /// surface et la pression valent `(η − z₀)/a` fois `ρg`. **Éteint par défaut**, bien qu'il soit la bonne
-    /// physique — il converge avec la maille, le couvercle de S332 non (S334) : une coque qui **tourne** par
-    /// rapport à l'eau laisse, dans les colonnes en lamelle, le résidu de la vitesse de paroi prise au centre
-    /// des faces (S332), que `1/a` change en pointe. Il sert à la mesure, et à la scène de la porte D.
+    /// surface et la pression valent `(η − z₀)/a` fois `ρg`. **Actif par défaut depuis S335** : il converge avec
+    /// la maille, le couvercle de S332 non (S334) ; l'ouverture prise au mot ne descend pas sous
+    /// `PARTIAL_LID_MIN_APERTURE`, sans quoi une coque qui tourne ferait des pointes. Le couper sert à la mesure.
     partial_lid: bool,
     /// Ouverture minimale de ce quotient : `dt²·g/dx` du pas en cours. Une lamelle plus mince aurait une surface
     /// plus raide que le pas explicite de la hauteur ne la porte ; elle garde celle de ce plancher.
@@ -252,7 +251,7 @@ impl Volume3 {
             balance: Balance3::default(),
             cut: None,
             precondition_cut: true,
-            partial_lid: false,
+            partial_lid: true,
             lid_floor: 1.,
         })
     }
@@ -491,8 +490,8 @@ impl Volume3 {
         self.precondition_cut = on;
     }
 
-    /// S334 : active ou coupe la surface des colonnes en partie couvertes (A317) — pour la mesure ; **coupée par
-    /// défaut**, une colonne en lamelle garde la surface de S332, `1/a` fois trop molle.
+    /// S334 : active ou coupe la surface des colonnes en partie couvertes (A317) — pour la mesure ; **active par
+    /// défaut depuis S335**. Coupée, une colonne en lamelle garde la surface de S332, `1/a` fois trop molle.
     pub fn set_partial_lid(&mut self, on: bool) {
         self.partial_lid = on;
     }

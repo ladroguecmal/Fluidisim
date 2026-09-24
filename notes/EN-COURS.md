@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 - [x] **P2** — le centroïde de la part couverte d'une face (`delta3d_cut.rs`) ; critère 1.
 - [x] **P3** — la paroi au centroïde : stocké à la découpe, lu par la divergence ; critère 2.
 - [x] **P3 bis** — *ajouté* : le **plancher d'ouverture** du couvercle partiel, 10 % ; critère 3.
-- [ ] **P4** — *amendé* : la convergence de la tranche **avec ce plancher** — 25 ; 12,5 ; 6,25 cm — et le banc 3D ;
+- [x] **P4** — *amendé* : la convergence de la tranche **avec ce plancher** — 25 ; 12,5 ; 6,25 cm — et le banc 3D ;
   critère 4 bis ; défaut allumé si tenu ; critère 4.
 - [ ] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
 - [ ] **P6** — preuve (PORTE-D-S333 §7) ; A317 ; file, feuille de route, liste si un état change.
@@ -123,3 +123,10 @@ avant la mesure : avec ce plancher, la tranche converge encore — écart ≤ 5 
   le reste de découpe d'une coque qui tourne en pointe.
 - **P3 bis, critère 3 tenu.** `PARTIAL_LID_MIN_APERTURE` = 0,1 ; essai permanent : coque tenue sur la houle,
   couvercle partiel **0,554 m/s** (S332 : 0,323). Défaut toujours éteint : les 18 valeurs S3xx au bit.
+- **P4, critère 4 bis tenu** — tranche au couvercle partiel **avec plancher** : 25 cm → 39,7 (0,05) ; 23,0 ;
+  22,3 ; 26,2 mm — écart **42,8 %** (33,4 sans plancher : la lamelle de 5 % prise à 10 %) ; 12,5 cm → écart
+  **10,6 %** (10,9) ; 6,25 cm → 19,9 ; 20,8 ; 20,8 ; 20,5 ; 20,9 ; 20,2 ; 20,3 ; 20,8 — moyenne 20,51, écart
+  **3,1 %** (1,8). 3D à 25 cm : 30,9 ; 25,6 ; 15,8 ; 16,9 ; 19,2 mm — écart 48,8 % (36,5). **Le plancher ne coûte
+  qu'aux lamelles de moins de 10 % à maille grossière, et la convergence demeure.** **Défaut allumé** (critère 4) :
+  496 réussis, 0 avertissement ; trois valeurs S3xx changent — pilonnement de S332 2,7266 → 2,7250·10⁻¹⁰ m³,
+  décalage 0,0667 → 0,0666 m (couvercles « poussière » du cube), contre-épreuve de S333 0,3234 → 0,5541 m/s.
