@@ -350,7 +350,7 @@ tenu par `etat_projet.py --check`. Ici, l'ordre. Les jalons du §2 et les portes
 mêmes dépendances, en plus gros.
 
 **Depuis S355 ([ADR-191](adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md), décision de l'utilisateur), une session de rendu alterne avec une session de physique** ; **depuis S356 ([ADR-192](adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md)),
-le rendu de l'eau se fait dans Godot 4** — premier pas, la mer de B rendue dans Godot, jugée sur images ; puis 8.4, 8.5,
+le rendu de l'eau se fait dans Godot 4** — premier pas, la mer de B rendue dans Godot (S357, verdict R19 attendu) ; puis 8.4, 8.5,
 8.6, 8.9. L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
 
 **Front 0 — 34 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :

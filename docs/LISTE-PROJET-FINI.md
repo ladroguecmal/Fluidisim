@@ -339,7 +339,8 @@ pas recopiée ici (L137).
 
 - [ ] **8.1 Rendu temps réel de la surface sur GPU** — *partiel* : hôte séparé B + impacts +
   sillages (ADR-130, S211–S249), habillage de banc ; le rendu ne pilote pas la physique (I-13). Manque l'intégration au moteur du jeu —
-  **Godot 4** depuis S356 ([ADR-192](adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md)) ; l'afficheur reste le banc.
+  **Godot 4** depuis S356 ([ADR-192](adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md)) ; l'afficheur reste le banc ;
+  S357, la mer de B dans Godot, prototype sans intégration native ([preuve](validation/PROTOTYPE-GODOT-S357.md)).
 - [ ] **8.2 LOD de la géométrie de surface** — *partiel* : grille projetée à pas écran. Manquent le LOD
   du maillage et le choix déplacement ou normales selon la vue (critère de parallaxe chiffré S257).
 - [ ] **8.3 LOD par source** : grille du sillage, visibilité, filtre spectral — *partiel* (S234,

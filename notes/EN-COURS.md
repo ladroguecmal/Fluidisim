@@ -87,7 +87,7 @@ Critères, écrits avant le code :
 - [x] **P2** — l'export depuis l'afficheur ; critère 1 (partie données).
 - [x] **P3** — le projet Godot : scène, nuanceur, environnement ; critère 2 et la hauteur du critère 1.
 - [x] **P4** — les captures et la revue R19 ; critère 3.
-- [ ] **P5** — preuve, file, feuille de route, liste ; critère 4.
+- [x] **P5** — preuve, file, feuille de route, liste ; critère 4.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
