@@ -89,7 +89,9 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — banc `rayonnement_coque` : pilonnement imposé, force de δ, `A` et `B` ; critère 1.
-- [ ] **P3** — le corps du jeu amorti, constantes de l'archétype ; critère 2.
+- [x] **P3** — le corps du jeu amorti, constantes de l'archétype ; critère 2.
+- [ ] **P3 bis** — *ajouté, déclaré avant le code* : la masse ajoutée agit sur l'accélération **relative** à
+  l'eau ; critère 2 bis.
 - [ ] **P4** — la scène de la porte D amortie ; critère 3 ; images (critère 4).
 - [ ] **P5** — preuve `docs/validation/RAYONNEMENT-COQUE-S336.md` ; liste, file, feuille de route.
 - [ ] **P6** — rituel.
@@ -103,3 +105,11 @@ Critères, écrits avant le code :
   et une dérive lente ; `A` et `B` restent déterminés à ~10 % près. **Constantes retenues pour l'archétype** :
   pulsation propre cohérente `ω' = √(K/(m + A))` ≈ 3,17 rad/s ; **A = 3 200 kg, B = 6 400 N·s/m** (12,5 cm
   extrapolé), ± 10 % ; `ζ = B/(2√(K(m + A)))` ≈ 0,158 ; période propre 1,98 s au lieu de 1,40.
+- **P3, critère 2 tenu.** `radiation_damping` ; lâcher de 10 cm en eau calme, A = 3 200 kg, B = 6 400 N·s/m :
+  période 2,0056 s pour 2,0066, décrément 1,0038 pour 1,0033 (ζ = 0,1577) ; sans amortissement, crêtes 0,1000
+  puis 0,1000 m. S331–S333 inchangés.
+- **P3 bis, pourquoi.** La masse ajoutée de S331 agit sur l'accélération absolue — juste en eau calme, fausse
+  sur la houle : la force de l'eau accélérée sur la coque, `A·a_eau`, manque, et la coque surréagit —
+  `K·S/(K − (m + A)ω²)` au lieu de `(K·S − A·ω²)/(K − (m + A)ω²)`, 1,12·a au lieu de 1,05·a sur la houle de 6 s.
+  **Critère 2 bis** : avec A = 3 200 kg, pilonnement forcé sur les houles de 6 et 3 s à ± 1 % de
+  `(K·S − A·ω²)/(K − (m + A)ω²)` ; sans masse ajoutée, S333 inchangé au bit.

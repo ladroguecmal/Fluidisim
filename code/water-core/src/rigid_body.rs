@@ -22,8 +22,9 @@
 //!
 //! # Ce que ce module n'est pas encore
 //!
-//! Ni contact, ni collision, ni masse ajoutée en rotation, ni amortissement par rayonnement — seulement
-//! une traînée quadratique facultative par point immergé.
+//! Ni contact, ni collision, ni masse ajoutée en rotation — seulement une traînée quadratique facultative par
+//! point immergé et, depuis S336, un **amortissement de rayonnement** linéaire : une constante de l'archétype,
+//! que δ mesure hors ligne comme la masse ajoutée, jamais une force de δ au pas.
 
 use crate::body::{Milieu, G};
 
@@ -116,6 +117,10 @@ pub struct RigidBody {
     pub proxy: Vec<ProxyPoint>,
     /// Coefficient de traînée quadratique par point immergé ; 0 : aucune.
     pub drag: f64,
+    /// **S336 : amortissement de rayonnement**, diagonal, repère du monde, N·s/m — linéaire en la vitesse du
+    /// centre de masse relative à l'eau qui le porte. Constante de l'archétype (ADR-008 §2), mesurée par δ ; 0 :
+    /// aucun.
+    pub radiation_damping: [f64; 3],
 }
 
 fn add(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
@@ -178,6 +183,7 @@ impl RigidBody {
             angular_velocity: [0.; 3],
             proxy,
             drag: 0.,
+            radiation_damping: [0.; 3],
         }
     }
 
@@ -214,6 +220,15 @@ impl RigidBody {
             }
             force = add(force, f);
             torque = add(torque, cross(r, f));
+        }
+        // S336 : l'eau que la coque met en mouvement emporte son énergie en ondes — un amortissement linéaire en la
+        // vitesse relative à l'eau au centre de masse. Nul par défaut : rien ne change.
+        if self.radiation_damping != [0.; 3] {
+            let [x, y, _] = self.position;
+            let u = water.velocity([x, y, water.surface(x, y)]);
+            for a in 0..3 {
+                force[a] -= self.radiation_damping[a] * (self.velocity[a] - u[a]);
+            }
         }
         Forces { force, torque, immersed_volume }
     }

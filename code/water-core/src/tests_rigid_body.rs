@@ -283,3 +283,42 @@ fn the_swell_carries_the_hull_along_s333() {
     assert!((cavalement - 1.).abs() <= 0.05, "critère 1 bis : {cavalement}");
     assert!((cavalement / s - 1.).abs() <= 0.01, "{cavalement} contre S = {s}");
 }
+
+/// **S336, critère 2 — la coque amortie.** La coque de la porte D, avec les constantes que δ lui mesure — masse
+/// ajoutée 3 200 kg, amortissement 6 400 N·s/m —, lâchée 10 cm au-dessus de son tirant en eau calme : elle
+/// pilonne à `ω'·√(1 − ζ²)`, `ω'² = K/(m + A)`, et ses crêtes décroissent du décrément `2πζ/√(1 − ζ²)`,
+/// `ζ = B/(2√(K(m + A)))`, les deux à ± 2 %. Sans amortissement, ses crêtes ne décroissent pas.
+#[test]
+fn the_damped_hull_rings_down_at_its_radiation_rate_s336() {
+    let (masse_ajoutee, amortissement) = (3200., 6400.);
+    let z_eq = 0.5 - 500. / 1025.;
+    let lance = |b: f64| -> Vec<f64> {
+        let mut c = RigidBody::cuboid([4., 1.6, 1.], 500., [0., 0., z_eq + 0.1], [16, 8, 4]);
+        c.added_mass = [0., 0., masse_ajoutee];
+        c.radiation_damping = [0., 0., b];
+        let calme = CalmWater { level: 0. };
+        (0..5000).map(|_| {
+            c.step(0.002, &calme, MER);
+            c.position[2] - z_eq
+        }).collect()
+    };
+    let z = lance(amortissement);
+    let t = maxima(&z, 0.002);
+    assert!(t.len() >= 3, "{} maxima", t.len());
+    let periode = t[1] - t[0];
+    let pics: Vec<f64> = t.iter().map(|x| z[(x / 0.002).round() as usize - 1]).collect();
+    let decrement = (pics[0] / pics[1]).ln();
+    let (m, k) = (3200., 1025. * G * 6.4);
+    let omega = (k / (m + masse_ajoutee)).sqrt();
+    let zeta = amortissement / (2. * (k * (m + masse_ajoutee)).sqrt());
+    let (periode_ref, decrement_ref) = (2. * core::f64::consts::PI / (omega * (1. - zeta * zeta).sqrt()),
+        2. * core::f64::consts::PI * zeta / (1. - zeta * zeta).sqrt());
+    let libre = lance(0.);
+    let t0 = maxima(&libre, 0.002);
+    let (p0, p1) = (libre[(t0[0] / 0.002).round() as usize - 1], libre[(t0[1] / 0.002).round() as usize - 1]);
+    println!("S336 : période {periode:.4} s (réf. {periode_ref:.4}), décrément {decrement:.4} (réf. {decrement_ref:.4}, ζ = {zeta:.4}) ; sans amortissement, crêtes {p0:.4} puis {p1:.4} m");
+    assert!((periode / periode_ref - 1.).abs() <= 0.02, "{periode} contre {periode_ref}");
+    assert!((decrement / decrement_ref - 1.).abs() <= 0.02, "{decrement} contre {decrement_ref}");
+    assert!((p1 / p0 - 1.).abs() <= 1e-3, "{p0} {p1}");
+}
+
