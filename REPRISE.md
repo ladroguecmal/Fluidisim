@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-24 14:37 +02:00
+JETON            : occupé
+Battement        : 2026-09-24 14:39 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S342 — **porte C, premier levier** : le fond de δ factorisé sur la carte — sinus, cosinus et atténuation par colonne et par couche, non par face — reçu au bit
 Dernière session : S341 — **porte C, la mesure** : pas de δ de 4,45 ms, 99ᵉ centile 4,5–4,65 sur la scène de B ; fond 1,53 ms, projection 2,06 (0,087 + 0,062 par cycle), fin 0,39 ([preuve](docs/validation/COUT-DELTA3D-S341.md))
 Session suivante : **porte C, premier levier** — l'évaluation du fond de δ sur la carte : phase par colonne, atténuation par couche, n'écrire que les champs lus ; reçu si la surface publiée reste identique au bit, coût publié. Puis la projection. En attente : le terme de D2 (lot 5)
 Maillons        : 1 — S341 : mesure de la porte C, aucun critère franchi

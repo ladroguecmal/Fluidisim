@@ -62,47 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S341 — **terminée**. **Porte C, la mesure qui manque** ; chemin de la v1
-([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4), porte en cours de §3 bis depuis S340.
+Session : S342 — **en cours**. **Porte C, premier levier : le fond de δ factorisé** ; chemin de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — l'utilisateur : *« Continue »*, après la porte B reçue (S340). Le terme de D2 (lot 5) reste sans réponse :
-le lot 5 reste suspendu.
+Entrée — S341 ([preuve](../docs/validation/COUT-DELTA3D-S341.md)) : l'évaluation du fond de B coûte **1,53 ms** des
+4,45 du pas. Le noyau `sample_faces` calcule, pour chacune des 1 148 896 faces et des 64 composantes, une phase,
+un sinus, un cosinus et une atténuation. Or la phase ne dépend que de la **colonne** de la face, et l'atténuation
+que de sa **couche** : 64 × 1,15 million de calculs pour ce qui en demande 64 × 40 500 et 64 × 29 × 3.
 
-**Ce que la porte C demande** ([ADR-175](../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) §4.4) :
-le pas de δ tient **2 ms GPU au 99ᵉ centile de la contribution par image**, sur la scène de la porte B, machine de
-référence, **techniques présentes et absentes publiées** (ADR-131 D3). **Ce qu'on sait** : 4,62 ms par pas en
-médiane de banc, 30 pas, 32 cycles, 376 320 mailles, 177 dispatchs (S302). **Ce qu'on ne sait pas** : le 99ᵉ
-centile, et où vont les 4,6 ms — fond, prédiction, couplage, projection, correction, transport. Choisir un levier
-sans cette décomposition serait deviner.
+**Ce que la session doit rendre possible.** Un fond de δ évalué moins cher, **au bit** du précédent : un second
+noyau, `sample_faces_tiled`, par tuiles de 16 colonnes × 16 couches — sinus et cosinus de chaque colonne et
+atténuation de chaque couche calculés une fois dans la mémoire du groupe, puis la même accumulation, dans le même
+ordre, avec les mêmes primitives. L'ancien noyau reste : témoin, et repli au-delà de 64 composantes.
 
 Critères, écrits avant le code :
-1. **L'horodatage par passe** : début et fin de chacune des trois passes du pas, les copies entre elles comprises
-   dans l'écart ; le pas de production **inchangé au bit** — la surface publiée après 60 pas identique avec et
-   sans horodatage.
-2. **Le banc** (`--delta3d-cout-scene`) : la scène de la porte B (`Config::review`, 32 cycles), 1 000 pas horodatés
-   après 30 de chauffe : médiane, 99ᵉ centile et maximum du pas entier et de chaque passe ; la projection à 0, 8,
-   16, 32 et 64 cycles — coût par cycle et part fixe.
-3. **Le domaine** (ADR-131 D3, A270) : alimentation relevée au début et à la fin ; témoin — le coût de S302,
-   `--delta3d-scene-mesure`, rejoué dans le même état ; ce que la grandeur mesure et ne mesure pas.
-4. **La preuve** : techniques présentes, absentes, domaine ; la part de chaque étage ; **le premier levier**
-   choisi sur la mesure, avec ce qu'il doit publier.
+1. **Identité** : sur la scène de la porte B, les 26 champs des 1 148 896 faces identiques au bit entre les deux
+   noyaux, à trois instants ; puis 60 pas de production, surface publiée identique au bit. Si le compilateur
+   contracte autrement une expression et qu'un bit bouge, l'écart est publié et attribué, pas masqué.
+2. **Coût** : le fond seul et le pas entier, médiane et 99ᵉ centile (banc de S341), secteur relevé, témoin.
+3. Le nouveau noyau par défaut si ≤ 64 composantes ; preuve (§6 de COUT-DELTA3D-S341) ; file.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'horodatage par passe ; critère 1.
-- [x] **P3** — le banc, le témoin, l'alimentation ; critères 2 et 3.
-- [x] **P4** — la preuve, le premier levier ; file, feuille de route ; critère 4.
-- [x] **P5** — rituel.
+- [ ] **P2** — le noyau par tuiles et son branchement ; relecture des faces pour le banc.
+- [ ] **P3** — l'identité au bit ; critère 1.
+- [ ] **P4** — le coût ; critère 2 ; preuve, file ; critère 3.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu.** Six horodatages — début et fin des trois passes — et `timed_step_passes` ; `timed_step`
-  garde son sens (début de la première passe, fin de la dernière). `--delta3d-horodatage` : scène de la porte B,
-  60 pas horodatés contre 60 nus depuis le même état — **0 colonne différente au bit** sur 13 440, 60 horodatages.
-- **P3, critères 2 et 3 tenus** (`--delta3d-cout-scene`, deux passages ; secteur au début et à la fin des deux,
-  `BatteryStatus` 2, charge 97 %, `PowerOnline` vrai ; témoin S302 `--delta3d-scene-mesure` : 4,630 ms, pour 4,62
-  publiés). **Pas entier**, 1 000 pas : médiane 4,452 / 4,477 ms, **99ᵉ centile 4,505 / 4,651**, max 4,834 / 4,852.
-  **Par passe**, médianes : fond et prédiction 1,98–1,99 ms, dont **l'évaluation du fond seule 1,533** (q99 1,554) ;
-  projection 2,06 ; correction et transport 0,39 ; copies 0,03. **Projection = 0,087 ms + 0,062 ms par cycle**
-  (0 → 0,093 ; 8 → 0,582 ; 16 → 1,073 ; 32 → 2,068 ; 64 → 4,056). Pas entier à 0 cycle : 2,53 ms.
-
