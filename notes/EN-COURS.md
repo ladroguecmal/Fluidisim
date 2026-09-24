@@ -62,44 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S345 — **terminée**. **Porte C, la cadence de δ** ; chemin de la v1. Porte en cours de §3 bis ; la série
-S341–S343 a été interrompue par S344 (§6.4).
+Session : S346 — **en cours**. **Porte C, attribuer A318** ; chemin de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — le pas coûte 3,68 ms (S343), dont 2,06 de projection, déjà bornée par la mémoire ; fusionner ses
-réductions au bit obligerait chacun des 5 880 groupes à relire 5 880 partiels, plus cher que le gain (lu en S345).
-**ADR-012 §7 a tranché l'architecture** : *« Tick de simulation fixe à 30 Hz, indépendant du taux d'images. Le rendu
-interpole »*, δ avec au plus une image de retard. Un pas de 3,7 ms étalé sur deux images de 60 Hz contribue
-≈ 1,85 ms par image — sous les 2 ms. **Condition physique, à éprouver d'abord** : un pas de 33,3 ms au lieu de 16,7.
+Entrée — S345 ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §8) : la cadence de 30 Hz d'ADR-012 §7 tient sur la
+cuve (0,04 %), pas sur la scène de B : l'onde isolée y garde jusqu'à 6,3 % d'amplitude de plus qu'à 60 Hz, cinq fois
+le témoin des cycles ; ni la projection ni l'éponge. **A318**, sévérité 2 : il bloque l'adoption de la cadence.
+
+**Ce que la session doit rendre possible.** Savoir d'où vient l'écart, pour le corriger ou le faire juger. Deux
+sources possibles : le **couplage à la mer** — le fond de B, lu au début du pas, force δ sur tout le pas (ordre un en
+temps) — ou la **dynamique propre** de l'onde — son advection par elle-même, les bascules de mouillure (A297).
 
 Critères, écrits avant le code :
-1. **La cuve de S305** (mode (1, 1), `nx` = 32, 64 cycles, 4,3 s — deux périodes) sur la carte à 1, 16,7 et
-   33,3 ms : période et amplitude du mode. À 33,3 ms, la période s'écarte de celle à 1 ms de **moins de 1 %**,
-   l'amplitude après deux périodes de **moins de 1 %** ; sinon l'écart est publié et la cadence n'est pas reçue.
-2. **La scène de B** à 30 Hz contre 60 Hz, 12 s, avec témoins : aucune colonne hors bornes ; l'onde isolée (avec
-   − témoin) — position de son maximum à **moins d'une maille** (25 cm), amplitude à **moins de 5 %** de celle à
-   60 Hz, chaque seconde.
-3. Si 1 et 2 tiennent : la cadence de 30 Hz est recevable pour la physique ; le découpage du pas sur deux images
-   et l'interpolation du rendu sont la suite. Preuve (§8 de COUT-DELTA3D-S341), file.
+1. **Le front sur une mer au repos** (fond de B d'amplitude nulle), 30 contre 60 Hz, 12 s : amplitude de l'onde
+   chaque seconde. Si l'écart tombe au niveau du témoin des cycles (≤ 1,3 %), le couplage à la mer est en cause ;
+   s'il reste de l'ordre de S345, c'est la dynamique propre.
+2. **Une troisième cadence**, 40 Hz (25 ms), sur la scène de B : l'écart suit-il le pas — ordre un — ou non.
+3. Preuve (§9), file, A318 : attribué, ou ce qui reste à éprouver ; la suite de la porte C en dépend.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le banc de cadence : la cuve à trois pas de temps ; critère 1.
-- [x] **P3** — la scène de B à 30 et 60 Hz ; critère 2.
-- [x] **P4** — preuve, file ; critère 3.
-- [x] **P5** — rituel.
+- [ ] **P2** — le front sur une mer au repos, aux deux cadences ; critère 1.
+- [ ] **P3** — la scène de B à 40 Hz ; critère 2.
+- [ ] **P4** — preuve, file, A318 ; critère 3.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu** (`--delta3d-cadence-cuve`, cuve de S305, `nx` 32, 64 cycles, deux périodes). Période /
-  amplitude au dernier extrême : **1 ms** 2,150743 s (+0,376 % à la théorie, spatial) / 1,00005 ; **16,7 ms**
-  2,150533 / 1,00002 ; **33,3 ms 2,149899 / 0,99987** — soit −0,039 % de période et −0,013 % d'amplitude contre
-  1 ms, pour 1 % permis. Le pas de temps ne pèse presque pas sur ce mode.
-- **P3, critère 2 NON TENU** (`--delta3d-cadence-scene`, 12 s, front de S302, témoins). Aucune colonne hors bornes
-  aux deux cadences. 30 Hz contre 60 Hz, 32 cycles : amplitude de l'onde isolée **+3,9 % (1 s), +5,7 % (5 s),
-  +6,3 % (8 s)**, au plus 6,28 % — au-delà des 5 % ; position du maximum 0 à 0,35 m, 1,03 m à 3 s, 7,9 m à 12 s.
-  **Témoin** (60 Hz, 32 contre 64 cycles) : amplitude au plus **1,31 %**, mais la position saute aussi de 8 m à
-  6 s — **la partie « position » du critère était mal posée** (le maximum d'une onde dispersée n'est pas stable) ;
-  la partie « amplitude » mesure un effet réel de la cadence. **30 Hz à 64 cycles** : jusqu'à **8,35 %** — ce n'est
-  pas la projection ; l'éponge est exacte en temps (`exp(−taux·dt·…)`). Candidat, non démontré : la dissipation
-  numérique de l'advection par la mer, par pas — la cuve, sans advection, ne montrait rien.
-
