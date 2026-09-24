@@ -83,7 +83,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le front sur une mer au repos, aux deux cadences ; critère 1.
-- [ ] **P3** — la scène de B à 40 Hz ; critère 2.
+- [x] **P3** — la scène de B à 40 Hz ; critère 2.
 - [ ] **P4** — preuve, file, A318 ; critère 3.
 - [ ] **P5** — rituel.
 
@@ -92,4 +92,9 @@ Critères, écrits avant le code :
   amplitude **+1,0 à +3,9 %** (1,72 ; 1,89 ; 1,31 ; 1,60 ; 1,03 ; 3,11 ; 1,32 ; **3,87** ; 0,30 ; −0,70 ; 0,47 ; 0,16),
   presque toujours positive ; avec la mer, 6,3 % ; témoin des cycles, 1,3 %. **La dynamique propre de l'onde dépend
   du pas** — moins d'amortissement quand les pas sont moins nombreux —, **et la mer en rajoute**.
+- **P3, critère 2.** `CADENCES=16667:32,25000:32` : 40 contre 60 Hz, amplitude **≤ 0,73 % jusqu'à 5 s** (0,46 ; 0,31 ;
+  −0,03 ; −0,73 ; 0,42) — le niveau du témoin des cycles —, puis −3,28 (6 s), +5,64 (8 s), **+9,18 % (12 s)**, plus qu'à
+  30 Hz au même instant (2,2). **Deux régimes** : tant que l'onde est groupée (≤ 5 s), l'écart croît avec le pas — 40 Hz
+  au niveau du témoin, 30 Hz jusqu'à 5,7 % ; une fois dispersée, elle diverge sans ordre, comme toute scène au-delà
+  de l'horizon d'A297 (S298). À 40 Hz, un pas par image et demie : ≈ 2,45 ms par image, au-dessus des 2 ms.
 
