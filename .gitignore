@@ -11,6 +11,10 @@ runs/
 captures/
 *.trace
 
+# S357, ADR-192 — le projet Godot : données exportées par l'afficheur, cache d'import de Godot, captures
+godot/donnees/
+godot/.godot/
+
 # Systèmes et éditeurs
 .DS_Store
 Thumbs.db

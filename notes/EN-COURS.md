@@ -84,10 +84,15 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'export depuis l'afficheur ; critère 1 (partie données).
+- [x] **P2** — l'export depuis l'afficheur ; critère 1 (partie données).
 - [ ] **P3** — le projet Godot : scène, nuanceur, environnement ; critère 2 et la hauteur du critère 1.
 - [ ] **P4** — les captures et la revue R19 ; critère 3.
 - [ ] **P5** — preuve, file, feuille de route, liste ; critère 4.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2.** `--meilleur --export-godot[=fichier]` (`rendu_cretes::export_godot`) → `godot/donnees/mer_b.json`, dérivé et
+  ignoré par git : 64 lignes de bande, 60 de queue, `[a, kx, ky, φ, ω]` à l'origine et à 12 s ; `M` = 2, retard −0,2,
+  système 1 de 32 composantes, `k̄` 0,1742 et 0,0317 rad/m ; 14 seuils ; soleil (−0,424 ; 0,318 ; 0,848) ; cinq
+  points de contrôle, `η` linéaire de la bande à `t₀ + 3 s` calculé par le cœur (0,15376 m à l'origine).
+

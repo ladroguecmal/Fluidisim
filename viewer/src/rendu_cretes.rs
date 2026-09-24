@@ -282,3 +282,90 @@ pub fn loi_jacobien() -> Result<(), String> {
     }
     Ok(())
 }
+
+/// **S357, ADR-192 D2 — l'export vers Godot.** La mer de `--meilleur` à l'instant de revue (12 s après la naissance
+/// de la scène, comme `--revue-mer`) : pour chaque composante de la bande et de la queue retenue, `[a, kx, ky, φ, ω]`
+/// — amplitude (m), vecteur d'onde (rad/m) dans les axes de B, phase à l'origine et à cet instant (rad), pulsation
+/// (rad/s) ; la phase en `(x, t)` vaut `kx·x + ky·y + φ − ω·(t − t₀)`. Plus la modulation, les asymétries, les seuils
+/// de l'écume, le soleil, la couleur dérivée, et **des points de contrôle** : `η` linéaire de la bande calculé par le
+/// cœur à `t₀ + 3 s`, que le projet Godot recalcule depuis ces lignes. Fichier dérivé, non versionné. `--export-godot`.
+pub fn export_godot(scene: &Scene, asym: Option<&Asymmetry>, m: f32, chemin: &str) -> Result<(), String> {
+    use water_core::{types::WorldPos, SimTime};
+    let t0 = SimTime(crate::scene::BIRTH + 12_000_000);
+    let lignes = |bg: &water_core::background::Background, n: usize, t: SimTime| -> Result<Vec<[f64; 5]>, String> {
+        let mut rows = vec![[0f32; 4]; bg.component_count()];
+        bg.render_components(WorldPos::from_metres(0., 0., 0.), t, &mut rows).ok_or("composantes hors domaine")?;
+        Ok(rows
+            .iter()
+            .zip(bg.components())
+            .take(n)
+            .map(|(r, c)| [r[0] as f64, r[1] as f64, r[2] as f64, r[3] as f64, c.freq_q32 as f64 / 4_294_967_296.0 * std::f64::consts::TAU])
+            .collect())
+    };
+    let bande = lignes(&scene.background, usize::MAX, t0)?;
+    let queue = lignes(&scene.tail, scene.tail_count_28, t0)?;
+    let lag = asym.map_or(0., |a| a.lag_turns);
+    let w = couverture_monahan(u10_s201());
+    let seuils = MerCretes::de(scene, m, lag).seuils(w, 0x5356_0001, 20_000);
+    // Contrôle : η linéaire de la bande en cinq points, calculé par le cœur à t₀ + 3 s.
+    let t1 = SimTime(t0.0 + 3_000_000);
+    let bande_t1 = lignes(&scene.background, usize::MAX, t1)?;
+    let points = [[0.0f64, 0.0], [12.5, -7.0], [-40.0, 33.0], [250.0, 180.0], [-600.0, -410.0]];
+    let controle: Vec<String> = points
+        .iter()
+        .map(|q| {
+            let eta: f64 = bande_t1.iter().map(|r| r[0] * (r[1] * q[0] + r[2] * q[1] + r[3]).sin()).sum();
+            format!("[{}, {}, {:.9}]", q[0], q[1], eta)
+        })
+        .collect();
+    let tableau = |v: &[[f64; 5]]| {
+        v.iter().map(|r| format!("[{:.9e}, {:.9e}, {:.9e}, {:.9e}, {:.9e}]", r[0], r[1], r[2], r[3], r[4])).collect::<Vec<_>>().join(",
+    ")
+    };
+    let soleil = {
+        let v = [-0.4f64, 0.3, 0.8];
+        let n = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
+        [v[0] / n, v[1] / n, v[2] / n]
+    };
+    let json = format!(
+        "{{
+  \"source\": \"Fluidisim S357, afficheur, mer de --meilleur (ADR-192 D2)\",
+  \"instant_s\": 12.0,
+  \"controle_dt_s\": 3.0,
+  \"modulation_M\": {m},
+  \"retard_tours\": {lag},
+  \"asymetries\": {asy},
+  \"split\": {split},
+  \"k_moyens\": [{k1}, {k2}],
+  \"couverture_monahan\": {w:.6},
+  \"ecume_seuils\": [{seuils}],
+  \"soleil\": [{s0:.6}, {s1:.6}, {s2:.6}],
+  \"R0\": [0.00068, 0.00826, 0.08960],
+  \"transmission_crete\": [0.5987, 0.9187, 0.9863],
+  \"controle\": [{controle}],
+  \"bande\": [
+    {bande}],
+  \"queue\": [
+    {queue}]
+}}
+",
+        asy = asym.is_some(),
+        split = asym.map_or(bande.len() as u32, |a| a.split),
+        k1 = asym.map_or(0., |a| a.k_mean[0]),
+        k2 = asym.map_or(0., |a| a.k_mean[1]),
+        seuils = seuils.iter().map(|x| format!("{x:.6}")).collect::<Vec<_>>().join(", "),
+        s0 = soleil[0],
+        s1 = soleil[1],
+        s2 = soleil[2],
+        controle = controle.join(", "),
+        bande = tableau(&bande),
+        queue = tableau(&queue),
+    );
+    if let Some(dossier) = std::path::Path::new(chemin).parent() {
+        std::fs::create_dir_all(dossier).map_err(|e| e.to_string())?;
+    }
+    std::fs::write(chemin, json).map_err(|e| e.to_string())?;
+    println!("EXPORT_GODOT_S357 fichier={chemin} bande={} queue={} seuils={} controle={}", bande.len(), queue.len(), seuils.len(), points.len());
+    Ok(())
+}
+

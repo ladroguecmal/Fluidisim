@@ -3105,6 +3105,14 @@ fn run() -> Result<(), String> {
         frame.cretes[2] = exposant;
         println!("CRETES force={force} exposant={exposant} a_calibrer=R19");
     }
+    // S357, ADR-192 D2 : `--export-godot[=fichier]` — la mer de `--meilleur` pour le prototype Godot.
+    if let Some(e) = args.iter().find_map(|a| a.strip_prefix("--export-godot")) {
+        if !(frame.cwm && frame.modulation > 0.) {
+            return Err("--export-godot demande --meilleur".into());
+        }
+        let chemin = e.strip_prefix('=').unwrap_or("godot/donnees/mer_b.json");
+        return rendu_cretes::export_godot(&scene, frame.asymmetry.as_ref(), frame.modulation, chemin);
+    }
     // S356 P5 : le surcoût des crêtes, quatre états — rien, écume, lumière des crêtes, les deux — aux poses de référence
     // et rasante ; demande `--ecume` et `--cretes`, dont il reprend les paramètres.
     if args.iter().any(|a| a == "--cretes-bench") {
