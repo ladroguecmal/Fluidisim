@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la jauge des hauteurs, les colonnes seules ; critère 1.
 - [x] **P3** — l'attribution : colonnes seules et 95 %, deux mailles, deux jauges ; critère 2.
-- [ ] **P4** — la cause que P3 désigne, éprouvée seule ; critère 3.
+- [x] **P4** — la cause que P3 désigne, éprouvée seule ; critère 3.
 - [ ] **P5** — preuve §13, A316, file, liste ; critère 4.
 - [ ] **P6** — rituel.
 
@@ -122,4 +122,24 @@ Critères, écrits avant le code :
   max 0,39) : les particules se **tassent**. Énergie des particules −87 J en 30 s (APIC seul −1,4 J), le centre de
   masse descend. Période : +9,96 % contre +7,31 % — 2,65 points de trop. Suspect : la paroi, qui ramène les
   particules au lieu de les absorber, retire au débit nominal de la grille, et ne voit pas leur densité.
+- **P4, écrit avant la mesure.** Cause désignée : la paroi ramène les particules qui franchissent au lieu de les
+  absorber. Témoin qui en est privé : le **solde** (S327), où elles sont absorbées et paient d'avance ; puis
+  l'échange eulérien. **Prédiction** : sans paroi, la masse à gauche de la frontière ne croît plus au-delà de
+  l'écart d'APIC seul (±0,002 m² sur 30 s), et l'occupation de la dernière colonne de cellules reste près de 4.
+- **P4, prédiction contredite.** 30 s, continu, jauge des hauteurs — masse à gauche de la frontière par tranche de
+  10 s ; particules par cellule occupée juste avant la frontière (4 au départ) ; saut max ; période aux zéros :
+  5 cm — **paroi** 0,50098 → 0,51211, 4,02 → 4,96, 0,39, +9,96 % ; **solde** (absorbées) 0,50040 → 0,51179, 3,97 →
+  **5,26**, 0,53, +9,47 % ; **eulérien** 0,49742 → 0,50181, **3,18 → 3,65**, 0,83, +9,69 %. 2,5 cm — paroi 0,50086 →
+  0,50583, 3,88 → 4,19, **1,00**, +1,19 % ; solde +0,0054, 4,24, 0,64, +1,72 % ; eulérien **plat** (0,49979 → 0,50001),
+  3,49 → 3,54, 0,79, +2,01 %, amortissement 2,15 %. APIC seul : ±0,002 m², 3,9 à 4,05.
+  **Absorber au lieu de ramener ne change rien** : la paroi n'est pas la cause. Ce qui est commun : l'échange
+  convertit un débit de volume en particules **à densité nominale**, sans voir la densité locale ; chaque variante
+  fixe la densité près de la frontière à sa façon — tassée (paroi, solde), dilatée (eulérien) — et **rien ne la
+  ramène à 4**. La masse suit la densité ; la pression, qui voit la surface géométrique, n'y oppose aucune force.
+  La dérive suit la maille (paroi : +0,011 m² à 5 cm, +0,005 à 2,5 cm).
+  **Critères de S327 sur 30 s, meilleur montage (paroi)** : 5 cm — période +9,96 % contre +7,31 %, **manqué** ;
+  amortissement 1,12 contre 0,14 (S318) ou 1,20 contre 1,18 (régression), tenu de justesse ; saut 0,39, tenu.
+  2,5 cm — période et amortissement tenus ; saut **1,00 maille, manqué**. **Non reçu.** Suite : une densité tenue
+  près de la frontière — la dernière colonne de cellules réensemencée depuis sa hauteur géométrique, la différence de
+  masse passée à la première colonne : la bande de recouvrement, sous sa forme la plus simple.
 

@@ -2722,6 +2722,9 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
     // S354 : la masse de chaque côté de la frontière, moyennée par tranches de dix secondes — celle des particules
     // libres de l'hybride, celle des particules d'APIC seul à gauche de la même abscisse.
     let mut tranches: Vec<(f64, f64, usize)> = Vec::new();
+    // Et le tassement : particules par cellule occupée dans la dernière colonne de cellules avant la frontière, 4 au
+    // départ ; hybride et APIC seul, par les mêmes tranches.
+    let mut tasse: Vec<(f64, f64)> = Vec::new();
     let mut t = 0.0;
     let mut prochain = 0.1;
     // `RACCORD_SERIE` (S327) : la série à la frontière, chaque dixième de seconde, sur l'erreur standard —
@@ -2749,6 +2752,25 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
             tranches[tranche].0 += l;
             tranches[tranche].1 += gauche_seul;
             tranches[tranche].2 += 1;
+            if tasse.len() <= tranche {
+                tasse.resize(tranche + 1, (0.0, 0.0));
+            }
+            if i_b >= 1 {
+                let densite = |a: &Apic| {
+                    let (n, nx) = (a.occupation(), a.mac.nx);
+                    let (mut particules, mut cellules) = (0u32, 0u32);
+                    for j in 0..a.mac.ny {
+                        let c = n[j * nx + i_b - 1];
+                        if c > 0 {
+                            particules += c;
+                            cellules += 1;
+                        }
+                    }
+                    particules as f64 / cellules.max(1) as f64
+                };
+                tasse[tranche].0 += densite(&hy.apic);
+                tasse[tranche].1 += densite(&seul);
+            }
             if let Some(e) = ecart_frontiere(&hy.apic, i_b) {
                 pire_ecart = pire_ecart.max(e.abs());
             }
@@ -2791,6 +2813,13 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
         .map(|(k, (l, g, n))| format!("{}-{}s:{:.5}/{:.5}", 10 * k, 10 * (k + 1), l / *n as f64, g / *n as f64))
         .collect();
     println!("RACCORD_S354 masse_a_gauche_de_la_frontiere_m2_hybride/apic_seul {}", ligne.join(" "));
+    let ligne: Vec<String> = tasse
+        .iter()
+        .zip(&tranches)
+        .enumerate()
+        .map(|(k, ((h, a), (_, _, n)))| format!("{}-{}s:{:.3}/{:.3}", 10 * k, 10 * (k + 1), h / *n as f64, a / *n as f64))
+        .collect();
+    println!("RACCORD_S354 particules_par_cellule_avant_la_frontiere_hybride/apic_seul {}", ligne.join(" "));
     execute(scene, &mut Apic::new(scene));
     execute(scene, &mut Hybride::new(scene));
 }
