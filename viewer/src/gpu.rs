@@ -153,7 +153,8 @@ impl Gpu {
             // S303, ADR-176 : un douzième vec4 porte les asymétries.
             // S306 : un treizième porte le facteur de coupure spectrale.
             // S308 : un quatorzième porte la courbe de tonalité.
-            224,
+            // S356 : quatre pour les seuils de l'écume, un pour les crêtes.
+            304,
             wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         );
         let waves = buffer(
@@ -339,7 +340,11 @@ impl Gpu {
             bind_group_layouts: &[Some(&layout), None, None, Some(&lattice_write_layout)],
             immediate_size: 0,
         });
-        let shader = device.create_shader_module(wgpu::include_wgsl!("water.wgsl"));
+        // S356, ADR-191 : le module des crêtes, séparable, concaténé avant le nuanceur de l'eau qui l'appelle.
+        let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("eau"),
+            source: wgpu::ShaderSource::Wgsl(concat!(include_str!("water_cretes.wgsl"), "\n", include_str!("water.wgsl")).into()),
+        });
         let make_pipeline = |vs, fs, write_depth| {
             device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some(vs),
@@ -562,6 +567,10 @@ impl Gpu {
         // S308 : (exposition, contraste, point blanc, miroitement) ; exposition nulle = courbe
         // éteinte, miroitement 1 = comportement historique au bit.
         for v in [frame.tone[0], frame.tone[1], frame.tone[2], frame.glint] {
+            self.bytes.extend_from_slice(&v.to_le_bytes());
+        }
+        // S356, ADR-191 : les quatorze seuils de l'écume, deux zéros, puis les paramètres des crêtes.
+        for v in frame.ecume_seuils.iter().chain(&[0f32, 0.]).chain(&frame.cretes) {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);

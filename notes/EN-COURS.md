@@ -91,8 +91,8 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la loi de `s` et le seuil ; critère 1.
-- [ ] **P3** — l'écume au rendu ; critère 2.
-- [ ] **P4** — la lumière des crêtes ; critère 3.
+- [x] **P3** — l'écume au rendu ; critère 2.
+- [x] **P4** — la lumière des crêtes ; critère 3.
 - [ ] **P5** — images et coût ; critère 4.
 - [ ] **P6** — R19, preuve, file, feuille de route, liste ; critère 5.
 - [ ] **P7** — rituel.
@@ -107,4 +107,17 @@ Critères, écrits avant le code :
   `2^(i−7)` m (7,8 mm à 64 m), interpolé en `log₂ h`, 1,2 s de calcul (un fil par empreinte, 160 000 tirages) ;
   sur un **tirage indépendant**, couverture 0,93 / 0,97 / 1,03 / 1,02 / 1,00 / 1,04 / 1,03 × W à 0 / 1,2 cm / 5 cm /
   35 cm / 1,4 / 5,6 / 22 m.
+- **P3 et P4, un seul commit** : le module `water_cretes.wgsl` les porte ensemble. Concaténé avant `water.wgsl`
+  (`gpu.rs`) ; seuils et paramètres dans cinq vecteurs de plus de l'uniforme (224 → 304 octets) ; `σ²` de la bande
+  au sommet (`Cwm.v`, sortie `sigma2`), de la queue filtrée au fragment (`TailMoments.variance`) ; `fwidth(s)` en
+  flot uniforme pour le bord antialiasé. **Options éteintes : les quatre poses de `--revue-mer` identiques au bit**
+  au binaire d'avant (empreintes 0x6f8a…1761, 0x8e33…4281, 0xdd86…7a2f, 0x7d28…316a).
+- **P3, ce que l'image a dit.** Réflectance 0,22 (Koepke) sous `E/π` = gain 2 : luminance ≈ 0,41, **grise**, plus
+  sombre que le ciel reflété près de l'horizon — invisible en pose rasante. Koepke est une moyenne sur tout le
+  mouton ; l'écume fraîche est mesurée vers 0,55 (Whitlock et al. 1982) : `--ecume=0,55`, taches blanches. Pas de
+  partage cœur/frange publié trouvé (Monahan & Lu 1990 nomment les stades A et B, sans rapport chiffré) : **R19
+  montre les deux**. L'écume se place sur la crête de la grande houle, où la surface se comprime le plus.
+- **P4.** Première teinte, celle du corps d'eau (`SEA_R0`, B/G 10,9) : taches **bleu électrique**, artificielles.
+  Remplacée par la **transmission de l'eau pure sur une crête**, `exp(−a·Hs)`, `a` de Pope & Fry (mêmes absorptions
+  qu'ADR-177) : (0,599 ; 0,919 ; 0,986), un cyan clair ; force 0,15, exposant 4, à calibrer par R19 ; effet discret.
 

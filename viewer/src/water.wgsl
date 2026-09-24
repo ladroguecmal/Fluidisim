@@ -18,6 +18,11 @@ struct Params {
     // S308 : courbe de tonalité. (exposition, contraste, point blanc, facteur de miroitement).
     // `x <= 0` = courbe éteinte ; `w` vaut 1 par défaut, et multiplier par 1,0 est exact.
     tone: vec4<f32>,
+    // S356, ADR-191 — les crêtes de B (module `water_cretes.wgsl`) : les quatorze seuils de l'écume par empreinte,
+    // quatre par vecteur ; puis (réflectance de l'écume — 0 : éteinte —, force de la lumière des crêtes — 0 :
+    // éteinte —, exposant de sa diffusion vers l'avant, 0).
+    ecume_seuils: array<vec4<f32>, 4>,
+    cretes: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> p: Params;
 @group(0) @binding(1) var<storage, read> waves: array<vec4<f32>>;
@@ -108,8 +113,9 @@ fn spectral_band(k: f32) -> u32 {
 // S303, ADR-176 : `e2`/`qd` élévation et quadrature **par système**, `sa`/`sq` leurs pentes
 // (xy premier système, zw second), `eq` la quadrature de la déformation. Tout est accumulé dans
 // la même boucle : la somme des composantes n'est pas parcourue deux fois.
+// S356 : `v`, la variance de la partie linéaire du jacobien, `Σ (a·k)²/2` aux poids du filtrage — le `σ²` de l'écume.
 struct Cwm { d: vec2<f32>, s: vec2<f32>, g: vec3<f32>, e: f32, h: f32,
-             e2: vec2<f32>, qd: vec2<f32>, sa: vec4<f32>, sq: vec4<f32>, eq: f32 }
+             e2: vec2<f32>, qd: vec2<f32>, sa: vec4<f32>, sq: vec4<f32>, eq: f32, v: f32 }
 fn band_cwm(q: vec2<f32>, h: f32) -> Cwm {
     var o: Cwm;
     let split = u32(p.asym.x);
@@ -127,6 +133,7 @@ fn band_cwm(q: vec2<f32>, h: f32) -> Cwm {
         o.eq += a*k*cs;
         o.s += a*cs*c.yz;
         o.g -= a*k*sn*vec3<f32>(u.x*u.x, u.x*u.y, u.y*u.y);
+        o.v += 0.5*(a*k)*(a*k);
         // Branches explicites : FXC refuse d'indexer un vecteur dynamiquement en écriture (L345).
         if (i < split) {
             o.e2.x += a*sn; o.qd.x += a*cs;
@@ -178,7 +185,8 @@ fn tail_cwm(q: vec2<f32>, h: f32) -> Cwm {
     return o;
 }
 // ADR-161 : même queue, moyenne filtrée et covariance complémentaire (xx, xy, yy).
-struct TailMoments { cwm: Cwm, covariance: vec3<f32> }
+// S356 : `variance`, celle de la partie linéaire du jacobien que porte la queue filtrée.
+struct TailMoments { cwm: Cwm, covariance: vec3<f32>, variance: f32 }
 fn filtered_tail(q: vec2<f32>, h: f32) -> TailMoments {
     var o: TailMoments;
     for (var i = 0u; i < u32(p.spectral.z); i++) {
@@ -195,6 +203,7 @@ fn filtered_tail(q: vec2<f32>, h: f32) -> TailMoments {
             o.cwm.s += w*c.x*cos(phase)*c.yz;
             let u = inv.yz;
             o.cwm.g -= w*c.x*k*sin(phase)*vec3<f32>(u.x*u.x,u.x*u.y,u.y*u.y);
+            o.variance += 0.5*(w*c.x*k)*(w*c.x*k);
         }
     }
     return o;
@@ -552,7 +561,7 @@ fn verify(@builtin(global_invocation_id) id: vec3<u32>) {
         results[id.x] = vec4<f32>(water(q, h), h);
     }
 }
-struct Vertex { @builtin(position) clip: vec4<f32>, @location(0) local: vec3<f32>, @location(1) slope: vec2<f32>, @location(2) lag: vec2<f32>, @location(3) g: vec3<f32>, @location(4) eps: f32 }
+struct Vertex { @builtin(position) clip: vec4<f32>, @location(0) local: vec3<f32>, @location(1) slope: vec2<f32>, @location(2) lag: vec2<f32>, @location(3) g: vec3<f32>, @location(4) eps: f32, @location(5) sigma2: f32 }
 fn grid_point(index: vec2<f32>) -> vec2<f32> {
     let nx = u32(p.info.y); let ny = u32(p.info.z);
     let x = (index.x/f32(nx-1u)*2-1)*1.18;
@@ -593,6 +602,7 @@ fn grid_spacing(index: vec2<f32>, q: vec2<f32>) -> f32 {
         local = vec3<f32>(q + b.d, w.x-p.eye.z);
         o.g = b.g;
         o.eps = lagged_eps(b);
+        o.sigma2 = b.v;
     } else {
         w = water(q, h);
         local = vec3<f32>(q,w.x-p.eye.z);
@@ -753,6 +763,11 @@ fn filtered_fragment(v: Vertex) -> vec4<f32> {
         }
         }
     }
+    // S356 : les crêtes de B (module `water_cretes.wgsl`). `fwidth` hors de toute branche : flot uniforme.
+    let sigma = sqrt(max(v.sigma2 + energy*t.variance, 0.0));
+    let s_crete = (e.z - 1.0)/max(sigma, 1e-6);
+    let largeur = fwidth(s_crete);
+    color = cretes_couleur(color, s_crete, largeur, h, normalize(vec3<f32>(-slope, 1.0)), ray);
     if (p.eye.w > 0.5) {
         let d = length(v.local.xy);
         let haze = max(1.0-exp(-d/6000.0),smoothstep(0.66*p.impact.y,p.impact.y,d));

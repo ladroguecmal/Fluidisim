@@ -3064,6 +3064,67 @@ fn run() -> Result<(), String> {
         frame.cut_factor = f;
         println!("COUPURE facteur={f} plein_poids_a={} empreintes zero_a={} empreintes", 4. * f, 2. * f);
     }
+    // S356, ADR-191 : `--ecume[=réflectance]` — l'écume des crêtes de B à la couverture de Monahan, réflectance 0,22
+    // (effective, Koepke 1984) par défaut, 0,55 pour l'écume fraîche (Whitlock et al. 1982) ; `--cretes[=force,exposant]` — la
+    // lumière qui les traverse. Toutes deux demandent la mer de `--meilleur` (CWM, modulation, reflets filtrés) et
+    // `--eau-physique`, dont le gain tient lieu de `E/π` (ADR-177).
+    let ecume_arg = args.iter().find_map(|a| a.strip_prefix("--ecume"));
+    let ecume = ecume_arg.is_some();
+    let cretes = args.iter().find_map(|a| a.strip_prefix("--cretes"));
+    if (ecume || cretes.is_some()) && !(frame.cwm && frame.modulation > 0. && frame.reflection_order > 0 && frame.physical_color) {
+        return Err("--ecume et --cretes demandent --meilleur et --eau-physique".into());
+    }
+    if ecume {
+        let lag = frame.asymmetry.as_ref().map_or(0., |a| a.lag_turns);
+        let w = rendu_cretes::couverture_monahan(rendu_cretes::u10_s201());
+        let debut = std::time::Instant::now();
+        let seuils = rendu_cretes::MerCretes::de(&scene, frame.modulation, lag).seuils(w, 0x5356_0001, 20_000);
+        let mut reflectance = 0.22f32;
+        if let Some(v) = ecume_arg.and_then(|e| e.strip_prefix('=')) {
+            reflectance = v.parse().map_err(|_| "ecume : réflectance attendue")?;
+            if !(0.05..=0.9).contains(&reflectance) { return Err("ecume : réflectance dans [0,05;0,9]".into()); }
+        }
+        frame.ecume_seuils = seuils;
+        frame.cretes[0] = reflectance;
+        println!(
+            "ECUME couverture_monahan={w:.5} reflectance={reflectance} seuils_calcules_s={:.2} seuils={seuils:?}",
+            debut.elapsed().as_secs_f64()
+        );
+    }
+    if let Some(c) = cretes {
+        // Force et exposant de la diffusion vers l'avant : à calibrer par la revue R19 (I-14).
+        let (mut force, mut exposant) = (0.15f32, 4.0f32);
+        if let Some(v) = c.strip_prefix('=') {
+            let champs: Vec<f32> = v.split(',').map(|x| x.parse::<f32>().map_err(|_| "cretes : force,exposant".to_string())).collect::<Result<_, _>>()?;
+            if champs.len() != 2 || !(0. ..=50.).contains(&champs[0]) || !(0.5..=64.).contains(&champs[1]) {
+                return Err("cretes : force dans [0;50], exposant dans [0,5;64]".into());
+            }
+            (force, exposant) = (champs[0], champs[1]);
+        }
+        frame.cretes[1] = force;
+        frame.cretes[2] = exposant;
+        println!("CRETES force={force} exposant={exposant} a_calibrer=R19");
+    }
+    // S356 P5 : le surcoût des crêtes, quatre états — rien, écume, lumière des crêtes, les deux — aux poses de référence
+    // et rasante ; demande `--ecume` et `--cretes`, dont il reprend les paramètres.
+    if args.iter().any(|a| a == "--cretes-bench") {
+        if !(ecume && cretes.is_some()) {
+            return Err("--cretes-bench demande --ecume et --cretes".into());
+        }
+        let complet = frame.cretes;
+        let mut g = pollster::block_on(gpu::Gpu::new(&instance(), None, 1280, 720, frame.profile.len(), scene::WAKE_CAPACITY))?;
+        frame.cull = true;
+        frame.viewport = Some((1280. / 720., g.nx, g.ny));
+        for (name, camera) in [("reference", Camera::default()), ("rasante", grazing_camera())] {
+            frame.camera = camera;
+            for (etat, garde) in [("rien", [false, false]), ("ecume", [true, false]), ("cretes", [false, true]), ("les_deux", [true, true])] {
+                frame.cretes = [if garde[0] { complet[0] } else { 0. }, if garde[1] { complet[1] } else { 0. }, complet[2], 0.];
+                println!("CRETES_BENCH pose={name} etat={etat}");
+                g.benchmark(&mut frame, 12.)?;
+            }
+        }
+        return Ok(());
+    }
     // S339 : les captures de la scène δ 3D rendent la main **après** la lecture des options de rendu
     // — `--eau-physique`, `--tonalite`, `--ciel-mesure`, `--coupure`, `--miroitement`. Avant, elles
     // partaient sans elles : R11 n'aurait pas pu montrer la couleur que R14 a retenue.

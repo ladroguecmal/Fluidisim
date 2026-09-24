@@ -729,6 +729,10 @@ pub struct FrameData<'a> {
     pub tone: [f32; 3],
     /// S308 P6 : facteur du miroitement du soleil. 1 = comportement historique, au bit.
     pub glint: f32,
+    /// S356, ADR-191 : les seuils de l'écume par empreinte (`rendu_cretes.rs`), et les crêtes — (réflectance de
+    /// l'écume, force de la lumière des crêtes, exposant de sa diffusion, 0). Zéros : éteintes, rendu d'avant.
+    pub ecume_seuils: [f32; 14],
+    pub cretes: [f32; 4],
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -832,6 +836,8 @@ impl<'a> FrameData<'a> {
             sky_elevation_deg: 0.,
             tone: [0.; 3],
             glint: 1.,
+            ecume_seuils: [0.; 14],
+            cretes: [0.; 4],
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,
