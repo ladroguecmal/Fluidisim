@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P2** — l'éponge du mode linéaire ; critère 1.
 - [x] **P3** — le fondu de composition dans le rendu de la porte D ; critère 2.
 - [x] **P4** — la scène de la porte D, éponge et fondu, 12 s ; critère 3 ; images (critère 4).
-- [ ] **P5** — preuve ; R15 au registre des revues ; file, feuille de route.
+- [x] **P5** — preuve ; R15 au registre des revues ; file, feuille de route.
 - [ ] **P6** — rituel ; arrêt pour le verdict.
 
 ### Notes de reprise
@@ -113,3 +113,5 @@ Critères, écrits avant le code :
   `0x7cd8db9d4c41f85e` / `0x8a41b853a480b80d` ; 8 s `0x21d2ccff6a239506` / `0x11e4c93ea60047cf` ; 10 s
   `0xc4f0a58ae159079e` / `0x199806393a2489a3` ; 12 s `0xb42556af028c4e0c` / `0xef75f9c6f4391133` ; 14 s
   `0xbfc0e4afe228ce0a` / `0xf10f55ab736a94df` ; 16 s `0xe315eb83a715c715` / `0x871e3986adbe3d09`.
+- **P5** : preuve [PORTE-D-S333 §8](../docs/validation/PORTE-D-S333.md) ; R15 au registre (§20, consigné en P4) ;
+  ligne de la porte D de la file ; chronologie de la feuille de route. Cœur : 499 réussis, 0 avertissement.

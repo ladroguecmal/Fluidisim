@@ -283,3 +283,48 @@ de S332 : 3,42) ; critères 3 et 5 de S333 tenus ; volume 7,5 et 8,3·10⁻⁹ m
   placement ; ~13 mailles pour ± 11 %, ~25 pour ± 3 %. Question de production ou de maille locale.
 - Le **verdict visuel** de la porte D (R15) ; les images du couvercle partiel sont celles du §6.
 
+---
+
+## 8. S337 — la coupure au bord de δ
+
+2026-09-24. **Verdict R15** de l'utilisateur sur les images de S336 ([revue visuelle](REVUE-VISUELLE.md) §20) :
+*« 1. Oui »* — le bateau lâché qui se pose sur la houle est juste ; *« 2. On voit la coupure encore »* — le bord
+de la grille de δ se voit ; *« 3. Pas forcément »* — pas d'autre défaut.
+
+### Reproduire
+
+- Commit `65cee47a` ou plus récent.
+- `cargo test -p water-core --release --offline s337 -- --nocapture` — l'éponge du mode linéaire ; ligne `S337`.
+- `cargo run -p water-core --release --offline --example porte_d -- --couvercle-partiel --archetype --eponge
+  --fondu 3 --pas 1600 --images viewer/captures/s337` — lignes `PORTE_D`, dont `PORTE_D tardif` ; ≈ 7 min.
+
+### La cause, et ce que la production faisait déjà
+
+Le pli n'est pas de la physique de l'eau : c'est le bord d'un domaine local, qu'ADR-001 veut invisible. La
+production amortit les ondes de δ par une **éponge** au bord et fond δ **en cosinus** sur la largeur de celle-ci
+(`delta_fade`, `water.wgsl`) ; R11 l'a jugée sans raccord visible. Le banc de la porte D n'avait ni l'un ni
+l'autre : le mode linéaire a des murs, qui renvoient les anneaux, et le rendu ajoutait δ jusqu'au dernier rang
+de mailles. Rendre ces ondes à W — le retour δ → W — reste bloqué par A289.
+
+### Ce qui change
+
+- **L'éponge du mode linéaire** (`Volume3::set_linear_sponge`) : celle du pas couplé — vitesses prédites amorties
+  au bord, hauteur rappelée au repos au taux quadratique d'ADR-164 — ; le volume qu'elle retire est compté
+  (`linear_sponge_removed`). Absente par défaut : des murs, comme avant, au bit.
+- **Le fondu de composition** dans le rendu de la porte D (`--fondu`) : le poids de la production,
+  `½ − ½·cos(π·s/w)` en `x` et en `y`, sur 3 m.
+
+### Ce qui est mesuré
+
+| critère, écrit avant le code | mesure | verdict |
+|---|---|---|
+| 1. crête lâchée dans une tranche de 32 m, 20 s : l'éponge éteint les ondes ; volume de δ plus retiré au plancher | énergie intérieure **0,4 %** de celle des murs ; écart 2,2·10⁻⁹ m³ pour une borne d'arrondi de 1,0·10⁻⁶ (murs : 6,8·10⁻¹⁰) | tenu |
+| 2. fondu : zéro au bord, un à 3 m, comme la production | par construction, `delta_fade` recopié | tenu |
+| 3. la scène, 16 s, éponge 3 m à 2,5 /s et fondu : critères 3 et 5 de S333, volume en comptant l'éponge, anneaux qui ne reviennent pas | I-04 au bit ; volume 1,95·10⁻⁹ m³, au plancher ; l'éponge retire 0,49 m³ — l'eau que la coque déplace en se posant ; agitation du centre après 12 s **4,0 mm, contre 8,2 avec des murs** | tenu |
+| 4. images refaites | plus de pli au bord | **verdict attendu** |
+
+L'agitation qui reste au centre après 12 s vient de la coque elle-même, qui remue encore l'eau sur la houle :
+son tangage n'est pas amorti (§4 de [RAYONNEMENT-COQUE-S336](RAYONNEMENT-COQUE-S336.md)) — de fines ondulations, visibles
+à ×5, faibles à l'échelle. Images `viewer/captures/s337`, 2 à 16 s ; à 6 s, scène `0x7cd8db9d4c41f85e`, carte
+`0x8a41b853a480b80d` ; à 16 s, `0xe315eb83a715c715`, `0x871e3986adbe3d09` (toutes au journal d'intention de S337).
+
