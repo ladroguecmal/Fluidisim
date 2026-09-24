@@ -85,7 +85,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le noyau par tuiles et son branchement ; relecture des faces pour le banc.
-- [ ] **P3** — l'identité au bit ; critère 1.
+- [x] **P3** — l'identité au bit ; critère 1.
 - [ ] **P4** — le coût ; critère 2 ; preuve, file ; critère 3.
 - [ ] **P5** — rituel.
 
@@ -95,4 +95,7 @@ Critères, écrits avant le code :
   mêmes primitives, même expression de la position, même ordre d'accumulation. Branché par défaut jusqu'à 64
   composantes (`TILE_COMPONENTS`), `sample_faces` sinon ; 5 070 groupes sur la scène de B. Bascule et relecture
   des faces pour le banc.
+- **P3, critère 1 tenu** (`--delta3d-fond-tuiles`, scène de B, 64 composantes). Les **29 871 296** valeurs du fond —
+  26 champs × 1 148 896 faces — **identiques au bit** entre les deux noyaux, aux pas 0, 50 et 500 ; 60 pas de
+  production, l'un par tuiles, l'autre face par face : surface publiée **identique au bit** sur 13 440 colonnes.
 

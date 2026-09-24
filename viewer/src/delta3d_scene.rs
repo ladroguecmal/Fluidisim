@@ -591,3 +591,65 @@ pub fn acoups() -> Result<(), String> {
         Ok(())
     })
 }
+
+/// S342, porte C, critère 1 — **le fond par tuiles, au bit du fond face par face.** Scène de la porte B :
+/// les 26 champs des 1 148 896 faces évalués par les deux noyaux, à trois instants, comparés bit à bit ;
+/// puis deux pas de production depuis le même état, l'un par tuiles, l'autre face par face, 60 pas,
+/// surface publiée comparée bit à bit. Un écart est publié par champ, jamais masqué.
+/// `--delta3d-fond-tuiles`.
+pub fn identite_fond() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let config = Config::review();
+        let (u, v, w, eta) = config.initial_state();
+        let mut carte = Step3::new(background, config.domain, config.origin, RHO, G).await?;
+        carte.set_step(config.step_us, config.rest, config.sponge)?;
+        carte.set_state(&u, &v, &w, &eta)?;
+        println!("DELTA3D_FOND_TUILES_S342 carte={:?} composantes={} tuiles_par_defaut={}",
+            carte.adapter, background.components().len(), carte.tiled_background());
+        for n in [0u64, 50, 500] {
+            carte.publish_time(background, water_core::SimTime(n * config.step_us))?;
+            carte.set_tiled_background(false)?;
+            carte.run_background_for_bench()?;
+            let a = carte.faces_values()?;
+            carte.set_tiled_background(true)?;
+            carte.run_background_for_bench()?;
+            let b = carte.faces_values()?;
+            let mut par_champ = [0usize; 26];
+            let (mut differents, mut pire) = (0usize, 0f32);
+            for (idx, (x, y)) in a.iter().zip(&b).enumerate() {
+                if x.to_bits() != y.to_bits() {
+                    differents += 1;
+                    par_champ[idx % 26] += 1;
+                    if x.is_finite() && y.is_finite() {
+                        pire = pire.max((x - y).abs());
+                    }
+                }
+            }
+            println!(
+                "DELTA3D_FOND_TUILES_S342 pas={n} valeurs={} differentes_au_bit={differents} pire_ecart={pire:.3e} par_champ={par_champ:?}",
+                a.len()
+            );
+        }
+        // Deux pas de production, 60 pas.
+        let mut cartes = Vec::new();
+        for tuiles in [true, false] {
+            let c = Step3::new(background, config.domain, config.origin, RHO, G).await?;
+            c.set_step(config.step_us, config.rest, config.sponge)?;
+            c.set_state(&u, &v, &w, &eta)?;
+            c.set_tiled_background(tuiles)?;
+            cartes.push(c);
+        }
+        for n in 0..60u64 {
+            for c in cartes.iter_mut() {
+                c.step(background, water_core::SimTime(n * config.step_us), config.cycles)?;
+            }
+        }
+        let (a, b) = (cartes[0].published()?, cartes[1].published()?);
+        let differentes = a.iter().zip(&b).filter(|(x, y)| x.to_bits() != y.to_bits()).count();
+        println!("DELTA3D_FOND_TUILES_S342 pas_de_production=60 colonnes={} differentes_au_bit={differentes}", a.len());
+        Ok(())
+    })
+}
+
