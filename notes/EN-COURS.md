@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-190, la décision de l'utilisateur ; file (décisions), REPRISE §5, feuille de route, liste.
+- [x] **P2** — ADR-190, la décision de l'utilisateur ; file (décisions), REPRISE §5, feuille de route, liste.
 - [ ] **P3** — le rang 1 dans le cœur : `Shrink`, focal, échelle commune ; essais (critère 1 a, b, d, e).
 - [ ] **P4** — l'anti-pompage : engagement et rampe ; essais (critère 1 c).
 - [ ] **P5** — le banc de la côte avec rang 1, et son témoin ; critères 2 et 3.

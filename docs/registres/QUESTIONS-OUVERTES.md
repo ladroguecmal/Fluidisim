@@ -2,11 +2,14 @@
 
 ## File active
 
-> **Décisions de l'utilisateur** — un seul endroit, daté. **2026-09-24, S348** : verdict R17, *« Continue je
+> **Décisions de l'utilisateur** — un seul endroit, daté. **2026-09-24, S351** : *« Continue, après la V1 ton
+> objectif seras de completer entièrement la to do liste »* — après la v1, la **liste du projet fini entière**, ses
+> points validés au périmètre final ; le lot 5 reprend après la v1 entière
+> ([ADR-190](../adr/ADR-190-apres-la-v1-la-liste-entiere.md)). **2026-09-24, S348** : verdict R17, *« Continue je
 > valide »* — la cadence de 30 Hz d'ADR-012 §7 validée à l'œil ; **porte C reçue sur le banc**. **2026-09-24, S340** : verdict R16, *« Tout parrait bon
 > visuellement »* — critère 3 de la porte B ; avec la production sur les trois cas, **porte B reçue**. **2026-09-24, S338** : verdict final de R15,
 > *« Plus de coupure »* — **porte D reçue** sur la référence CPU, ADR-189 D1 tenue ; la v1 demande encore A, B
-> et C (ADR-174 D4). Le terme de D2 — la porte D, ou la v1 entière — reste à confirmer. **2026-09-23, S329** : **la v1 d'abord** —
+> et C (ADR-174 D4). Le terme de D2 — la v1 entière — est tranché en S351 (ADR-190 D4). **2026-09-23, S329** : **la v1 d'abord** —
 > les lots 3 et 4 jusqu'à la porte D, l'alternance avec le lot 5 suspendue jusque-là
 > ([ADR-189](../adr/ADR-189-la-v1-d-abord.md), D2 à confirmer). **2026-09-22, S324** : le **lot 3** prend la
 > place du lot 2 dans l'alternance tant que l'ordre E est bloqué

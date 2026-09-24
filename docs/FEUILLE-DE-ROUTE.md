@@ -229,7 +229,9 @@ système qu'on n'a pas éprouvé n'est pas construit : il est écrit.
 **Porte en cours, S294 (2026-09-19) : B**, avec **D en parallèle** par la scène-témoin de la v1.
 **S338 (2026-09-24) : D reçue** sur la référence CPU ; la v1 demande encore A, B et C (ADR-174 D4).
 **S340 (2026-09-24) : B reçue.** **S348 : C reçue sur le banc** — 30 Hz validé à l'œil (R17). **Porte en cours : A**,
-la dernière de la v1 : déplacement (S349) et redimensionnement (S350) reçus ; reste le rang 1.
+la dernière de la v1 : déplacement (S349) et redimensionnement (S350) reçus ; reste le rang 1. **Après la v1**
+(ADR-190, décision de l'utilisateur) : la [liste du projet fini](LISTE-PROJET-FINI.md) entière ; la première
+session qui suit la v1 range ici ses points restants par dépendance.
 Dépendances qui fondent cet ordre (ADR-127 §6, L343) : la porte C se reçoit sur la scène de B ;
 les critères restants de A — plusieurs candidats, domaine qui se déplace et se redimensionne —
 portent sur les domaines 3D que B définit ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)

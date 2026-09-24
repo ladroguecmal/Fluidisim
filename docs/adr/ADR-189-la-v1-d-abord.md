@@ -64,3 +64,9 @@ d'[ADR-175](ADR-175-architecture-d-execution-de-delta-en-3d.md) §4 — reproduc
 invariance en `y` sous une houle à crêtes longues — ne sont pas mesurés sur la production (critère 2,
 [CUVE-GPU-S305](../validation/CUVE-GPU-S305.md) §7). La phrase ci-dessus reprenait la feuille de route, qui
 l'écrivait depuis S305.
+
+## Note datée du 2026-09-24 (S351) — le terme de D2
+
+L'utilisateur a répondu : *« Continue, après la V1 ton objectif seras de completer entièrement la to do liste »*.
+D2 se lit donc jusqu'à la **v1 entière** — les portes A, B, C et D ; le lot 5 reprend ensuite, comme partie de la
+liste du projet fini ([ADR-190](ADR-190-apres-la-v1-la-liste-entiere.md) D4).

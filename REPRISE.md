@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-24 21:34 +02:00
+Battement        : 2026-09-24 21:36 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S351 — **porte A, la dégradation de rang 1** d'ADR-012 §4 : le focal entier, les non-focaux rétrécis au lieu d'affamés, sans pompage ; et la décision de l'utilisateur sur l'après-v1 — la liste du projet fini entière (ADR-190)
 Dernière session : S350 — **porte A, un domaine qui se redimensionne** : état réécrit au bit, pas identique à celui d'un domaine créé à sa forme, coût proportionnel à la surface ([preuve](docs/validation/ARBITRAGE-3D-S344.md) §6) ; et, à la demande de l'utilisateur, la [liste du projet fini](docs/LISTE-PROJET-FINI.md) actualisée sur S309–S350 (3 / 56 / 61)
@@ -115,7 +115,9 @@ tient les contrôles que nomme la table des protections de [METHODE](notes/METHO
   temps de l'eau au service de l'objectif, profil de travail eau ≤ 4 ms GPU et ≤ 2 ms CPU, dont δ
   ≤ 2 ms GPU ; v1 = portes A à D franchies ; aucun dépôt distant. Un dépassement qualifie
   l'implémentation et s'éprouve sur la combinaison des techniques (ADR-131).
-- Une réduction d'ambition demande une décision explicite de l'utilisateur (ADR-127).
+- Une réduction d'ambition demande une décision explicite de l'utilisateur (ADR-127). **Après la v1,
+  l'objectif est la liste du projet fini entière**, ses points validés au périmètre final
+  ([ADR-190](docs/adr/ADR-190-apres-la-v1-la-liste-entiere.md), décision du 2026-09-24).
 - Les faits d'intégration non constatés et les actions d'infrastructure restent distincts des
   décisions techniques : ne pas inventer terrain, format réseau, personnes ou dépôt distant.
 
