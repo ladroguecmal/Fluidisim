@@ -4318,3 +4318,10 @@ plancher d'ouverture de 10 %, la coque tenue sur la houle reste sous 0,56 m/s, l
 **Reste ouvert** : la dépendance au placement à maille grossière — ± 43–49 % à 6,4 mailles de largeur de coque,
 ~25 mailles pour ± 3 % ; **déclencheur** : une coque dans la production, ou une maille locale autour d'elle.
 
+**A318 — S345, 2026-09-24 (sévérité 2, ouverte). À 30 Hz, l'onde de δ sur une vraie mer garde jusqu'à 6 % de plus
+d'amplitude qu'à 60 Hz.** La cadence d'ADR-012 §7 est la voie de la porte C : un pas de 3,7 ms étalé sur deux
+images. Sur la cuve de S305, le pas de temps ne pèse rien (0,04 % de période, 0,013 % d'amplitude à 33,3 ms) ; sur
+la scène de B, l'onde isolée diffère de +3,9 à +6,3 % entre 30 et 60 Hz, cinq fois ce que change un doublement des
+cycles — ni la projection ni l'éponge. Candidat : la dissipation de l'advection, par pas. Bloque l'adoption de la
+cadence, pas la porte C elle-même. Déclencheur : un paquet sur une mer au repos, aux deux cadences ; ou une revue.
+[Preuve](../validation/COUT-DELTA3D-S341.md) §8.

@@ -86,7 +86,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le banc de cadence : la cuve à trois pas de temps ; critère 1.
 - [x] **P3** — la scène de B à 30 et 60 Hz ; critère 2.
-- [ ] **P4** — preuve, file ; critère 3.
+- [x] **P4** — preuve, file ; critère 3.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise

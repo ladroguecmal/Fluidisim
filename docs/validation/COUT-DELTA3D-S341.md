@@ -142,3 +142,48 @@ compilateur Dx12 déroulait la mise à zéro de ses 12 Ko de mémoire de groupe,
 correction lisent le fond, et lire dix champs au lieu de vingt-six les accélère autant que le fond lui-même. Le
 pas perd 0,77 ms depuis S341 (−17 %). **La projection pèse désormais 56 % du pas**, inchangée : c'est le levier
 suivant. Il manque 1,73 ms au 99ᵉ centile.
+
+---
+
+## 8. S345 — la cadence de 30 Hz, éprouvée avant d'être étalée
+
+2026-09-24. Troisième levier du §4 : [ADR-012](../adr/ADR-012-ordonnanceur-budget-degradation.md) §7 fixe le pas de
+simulation à **30 Hz**, le rendu interpolant ; un pas de 3,7 ms étalé sur deux images de 60 Hz contribuerait
+≈ 1,85 ms par image. Avant de l'étaler, la physique à 33,3 ms au lieu de 16,7. Pourquoi pas la projection d'abord :
+ses cycles sont déjà bornés par la mémoire, et fusionner ses réductions au bit obligerait chacun des 5 880 groupes à
+relire les 5 880 partiels — plus cher que le gain.
+
+**Reproduire** : commit `b1f72111` ou plus récent ; `… -- --delta3d-cadence-cuve` ; `… --delta3d-cadence-scene` —
+`CADENCES=pas_us:cycles,…`, la première en référence ; témoin : `CADENCES=16667:32,16667:64`.
+
+**Critère 1, la cuve de S305** (mode (1, 1), `nx` = 32, 64 cycles, deux périodes) — **tenu** :
+
+| pas | période | écart à la théorie | amplitude au dernier extrême / initiale |
+|---|---:|---:|---:|
+| 1 ms | 2,150743 s | +0,376 % (spatial) | 1,00005 |
+| 16,7 ms | 2,150533 | +0,366 % | 1,00002 |
+| **33,3 ms** | **2,149899** | +0,337 % | **0,99987** |
+
+À 33,3 ms, −0,039 % de période et −0,013 % d'amplitude contre 1 ms, pour 1 % permis : sur ce mode, le pas de temps
+ne pèse presque pas.
+
+**Critère 2, la scène de B, 30 Hz contre 60 Hz** (12 s, front de S302 et témoins) — **non tenu** :
+
+| écart au pire, chaque seconde | amplitude de l'onde isolée | position de son maximum |
+|---|---:|---:|
+| 30 Hz, 32 cycles | **6,28 %** (+3,9 à 1 s, +5,7 à 5 s, +6,3 à 8 s) | 0,35 m ; 1,03 à 3 s ; 7,9 à 12 s |
+| 30 Hz, 64 cycles | 8,35 % | 6,25 m à 2 s |
+| **témoin** : 60 Hz, 64 cycles au lieu de 32 | 1,31 % | 8,05 m à 6 s |
+
+Aucune colonne hors bornes aux deux cadences. **Ce que le témoin tranche** : la partie « position » du critère était
+**mal posée** — le maximum d'une onde dispersée saute d'une crête à l'autre même quand seule la projection change ;
+la partie « amplitude » mesure un **effet réel** de la cadence, cinq fois celui du témoin, et presque toujours dans
+le même sens : **plus d'amplitude à 30 Hz**. Ni la projection (64 cycles n'y changent rien) ni l'éponge (exacte en
+temps, `exp(−taux·dt·…)`) ne l'expliquent. **Candidat, non démontré** : la dissipation numérique de l'advection par
+la mer, par pas — moins de pas, moins d'amortissement ; la cuve, sans advection, ne montrait rien. Aucune des deux
+cadences n'est « la vraie » : sans référence convergée en temps, on sait qu'elles diffèrent, pas laquelle est juste.
+
+**Ce que cela décide.** La cadence de 30 Hz n'est **pas reçue** par ce critère. Deux voies, publiées : attribuer
+l'écart (l'advection seule, un paquet sur une mer au repos, à 30 et 60 Hz) ; ou le **faire juger** — la même scène
+rendue aux deux cadences, côte à côte : un écart de 4 cm sur une onde de 65 cm, dans une mer de 2,5 m, peut être
+invisible, et c'est l'utilisateur qui supervise les rendus.
