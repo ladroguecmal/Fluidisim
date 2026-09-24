@@ -105,6 +105,14 @@ pub struct Step3 {
     /// S342 : le fond par tuiles (vrai par défaut jusqu'à 64 composantes), et son nombre de groupes.
     tiled: std::cell::Cell<bool>,
     tile_groups: u32,
+    /// S349 — le décalage de l'état (porte A) : noyau, uniforme, tampon de travail réservé à la configuration,
+    /// un groupe de liaison par tableau cible (vitesses, surface, pression, surface publiée) ; et l'origine
+    /// courante du domaine, que le fond lit.
+    shift_pipeline: wgpu::ComputePipeline,
+    shift_uniform: wgpu::Buffer,
+    shift_scratch: wgpu::Buffer,
+    shift_binds: Vec<wgpu::BindGroup>,
+    origin: std::cell::Cell<[f32; 3]>,
     // Projection (S299).
     cg_bind: wgpu::BindGroup,
     heights: wgpu::Buffer,
@@ -406,6 +414,16 @@ impl Step3 {
         let query_resolve = buffer(&device, 48, wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC);
         let query_read = buffer(&device, 48, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
 
+        // S349 : le décalage. Tampon de travail à la taille du plus grand tableau décalé (une famille de faces).
+        let shift_scratch = buffer(&device, (faces.max(cells) * 4) as u64, storage);
+        let shift_uniform = buffer(&device, 32, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
+        let shift_layout = layout(&device, &['r', 'w', 'u']);
+        let shift_module = device.create_shader_module(wgpu::include_wgsl!("delta3d_shift.wgsl"));
+        let shift_pipeline = pipelines(&device, &shift_layout, &shift_module, &["shift"]).remove(0);
+        let shift_binds = [&vel, &cells_in, &state, &published]
+            .iter()
+            .map(|cible| bind(&device, &shift_layout, &[&shift_scratch, cible, &shift_uniform]))
+            .collect();
         let device_ring = device.clone();
         let this = Self {
             device,
@@ -422,6 +440,11 @@ impl Step3 {
             faces: faces_buf.clone(),
             bg,
             tiled: std::cell::Cell::new(count <= TILE_COMPONENTS),
+            shift_pipeline,
+            shift_uniform,
+            shift_scratch,
+            shift_binds,
+            origin: std::cell::Cell::new(origin),
             tile_groups: (0..3)
                 .map(|axis| {
                     let (fx_, fy_, fz_) = (nx + usize::from(axis == 0), ny + usize::from(axis == 1), nz + usize::from(axis == 2));
@@ -928,6 +951,64 @@ impl Step3 {
         self.queue.submit([encoder.finish()]);
         self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
         Ok(())
+    }
+
+    /// S349 — **déplace le domaine** de `(di, dj)` mailles, porte A : l'état est décalé — vitesses des trois
+    /// familles de faces, surface et son reste compensé, pression de départ, surface publiée — et l'origine du
+    /// fond avance de `(di·dx, dj·dx)`. Ce qui entre naît au repos (δ = 0, I-12) ; ce qui sort est perdu. Un
+    /// déplacement de données, au bit ; hors pas, entre deux pas.
+    pub fn shift(&self, di: i32, dj: i32) -> Result<(), String> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        if di.unsigned_abs() as usize >= nx || dj.unsigned_abs() as usize >= ny {
+            return Err("décalage : plus grand que le domaine".into());
+        }
+        let (nu, nv) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz);
+        let rest = self.rest.get();
+        // (tableau cible, décalage dans ce tableau, dimensions, valeur de repos).
+        let tableaux: [(usize, usize, [usize; 3], f32); 7] = [
+            (0, 0, [nx + 1, ny, nz], 0.),
+            (0, nu, [nx, ny + 1, nz], 0.),
+            (0, nu + nv, [nx, ny, nz + 1], 0.),
+            (1, 0, [nx, ny, 1], rest),
+            (1, self.columns + self.cells, [nx, ny, 1], 0.),
+            (2, 0, [nx, ny, nz], 0.),
+            (3, 0, [nx, ny, 1], 0.),
+        ];
+        let cibles = [&self.vel, &self.cells_in, &self.state, &self.published];
+        for (cible, decalage, dims, repos) in tableaux {
+            let count = dims[0] * dims[1] * dims[2];
+            let mut u = Vec::with_capacity(32);
+            for v in [dims[0] as u32, dims[1] as u32, dims[2] as u32, count as u32] {
+                u.extend_from_slice(&v.to_le_bytes());
+            }
+            u.extend_from_slice(&di.to_le_bytes());
+            u.extend_from_slice(&dj.to_le_bytes());
+            u.extend_from_slice(&(decalage as u32).to_le_bytes());
+            u.extend_from_slice(&repos.to_le_bytes());
+            self.queue.write_buffer(&self.shift_uniform, 0, &u);
+            let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+            encoder.copy_buffer_to_buffer(cibles[cible], (decalage * 4) as u64, &self.shift_scratch, 0, (count * 4) as u64);
+            {
+                let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+                pass.set_bind_group(0, &self.shift_binds[cible], &[]);
+                pass.set_pipeline(&self.shift_pipeline);
+                pass.dispatch_workgroups((count as u32).div_ceil(GROUP), 1, 1);
+            }
+            self.queue.submit([encoder.finish()]);
+        }
+        let o = self.origin.get();
+        let neuve = [o[0] + di as f32 * dx, o[1] + dj as f32 * dx, o[2]];
+        self.origin.set(neuve);
+        let mut b = Vec::with_capacity(8);
+        b.extend_from_slice(&neuve[0].to_le_bytes());
+        b.extend_from_slice(&neuve[1].to_le_bytes());
+        self.queue.write_buffer(&self.bg_uniform, 48, &b);
+        Ok(())
+    }
+
+    /// S349 : l'origine courante du domaine — son coin bas, local à l'ancre de B.
+    pub fn origin(&self) -> [f32; 3] {
+        self.origin.get()
     }
 
     /// **Banc S342** : choisit le noyau du fond — par tuiles ou face par face. Refuse les tuiles au-delà de

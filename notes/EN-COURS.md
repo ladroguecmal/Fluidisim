@@ -87,9 +87,16 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le noyau de décalage, `Step3::shift`, l'origine du fond ; critère 1.
+- [x] **P2** — le noyau de décalage, `Step3::shift`, l'origine du fond ; critère 1.
 - [ ] **P3** — le domaine qui suit la caméra ; critère 2.
 - [ ] **P4** — preuve, file, feuille de route ; critère 3.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** `delta3d_shift.wgsl` et `Step3::shift(di, dj)` : sept tableaux — `u`, `v`, `w`, surface,
+  reste compensé, pression de départ, surface publiée —, chacun recopié dans un tampon de travail réservé à la
+  configuration puis réécrit décalé ; l'origine du fond avance. `--delta3d-decalage`, scène de B après 30 pas,
+  décalage (+3, −2) : **0 valeur différente au bit** dans les recouvrements (363 440 faces `u`, 363 636 `v`, 373 230
+  `w`, 12 870 colonnes, 360 360 mailles), entrants au repos ; origine (−15 ; 0) → (−14,25 ; −0,5). Empreintes du pas
+  de S343 inchangées.
+

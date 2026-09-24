@@ -833,3 +833,72 @@ pub fn deux_parts() -> Result<(), String> {
     })
 }
 
+/// S349, porte A, critère 1 — **le décalage, au bit.** Scène de la porte B après 30 pas ; `Step3::shift(3, −2)` ;
+/// chaque tableau relu avant et après : dans le recouvrement, l'élément `(i, j, k)` vaut l'ancien `(i + 3, j − 2, k)`
+/// au bit ; hors du recouvrement, la valeur de repos. Et l'origine avance de `(3·dx, −2·dx)`. `--delta3d-decalage`.
+pub fn decalage_identite() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let config = Config::review();
+        let (u, v, w, eta) = config.initial_state();
+        let mut carte = Step3::new(background, config.domain, config.origin, RHO, G).await?;
+        carte.set_step(config.step_us, config.rest, config.sponge)?;
+        carte.set_state(&u, &v, &w, &eta)?;
+        for n in 0..30u64 {
+            carte.step(background, water_core::SimTime(n * config.step_us), config.cycles)?;
+        }
+        let lire = |c: &Step3| -> Result<Vec<Vec<f32>>, String> {
+            let (h, reste) = c.surface()?;
+            Ok(vec![c.velocities()?, h, reste, c.pressure()?, c.published()?])
+        };
+        let avant = lire(&carte)?;
+        let o0 = carte.origin();
+        let (di, dj) = (3i32, -2i32);
+        carte.shift(di, dj)?;
+        let apres = lire(&carte)?;
+        let o1 = carte.origin();
+        let crate::delta3d_scene::Config { domain, rest, .. } = config;
+        let (nx, ny, nz) = (domain.nx, domain.ny, domain.nz);
+        let (nu, nv) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz);
+        // (nom, tableau relu, décalage, dimensions, repos).
+        let tableaux: [(&str, usize, usize, [usize; 3], f32); 7] = [
+            ("u", 0, 0, [nx + 1, ny, nz], 0.),
+            ("v", 0, nu, [nx, ny + 1, nz], 0.),
+            ("w", 0, nu + nv, [nx, ny, nz + 1], 0.),
+            ("eta", 1, 0, [nx, ny, 1], rest),
+            ("reste", 2, 0, [nx, ny, 1], 0.),
+            ("pression", 3, 0, [nx, ny, nz], 0.),
+            ("publiee", 4, 0, [nx, ny, 1], 0.),
+        ];
+        let mut total_faux = 0usize;
+        for (nom, t, off, d, repos) in tableaux {
+            let (mut faux, mut dedans, mut dehors) = (0usize, 0usize, 0usize);
+            for k in 0..d[2] {
+                for j in 0..d[1] {
+                    for i in 0..d[0] {
+                        let n = off + (k * d[1] + j) * d[0] + i;
+                        let (si, sj) = (i as i32 + di, j as i32 + dj);
+                        let attendu = if si >= 0 && (si as usize) < d[0] && sj >= 0 && (sj as usize) < d[1] {
+                            dedans += 1;
+                            avant[t][off + (k * d[1] + sj as usize) * d[0] + si as usize]
+                        } else {
+                            dehors += 1;
+                            repos
+                        };
+                        if apres[t][n].to_bits() != attendu.to_bits() {
+                            faux += 1;
+                        }
+                    }
+                }
+            }
+            total_faux += faux;
+            println!("DELTA3D_DECALAGE_S349 tableau={nom} recouvrement={dedans} entrant={dehors} differents_au_bit={faux}");
+        }
+        println!(
+            "DELTA3D_DECALAGE_S349 decalage=({di},{dj}) origine_avant={o0:?} origine_apres={o1:?} total_differents={total_faux}"
+        );
+        Ok(())
+    })
+}
+
