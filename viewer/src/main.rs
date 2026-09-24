@@ -73,6 +73,9 @@ struct App<'a> {
     /// Configuration de ce domaine, gardée pour l'attacher quand la carte existe.
     delta3d_config: Option<delta3d_scene::Config>,
     delta3d_active: bool,
+    /// S353 : `--delta3d-sans-pas` — le domaine est créé et lié au rendu, mais ne fait aucun pas : le témoin de la
+    /// cadence, même scène sans le coût de δ.
+    delta3d_sans_pas: bool,
     birth: f64,
     paused: bool,
     enabled: bool,
@@ -178,7 +181,7 @@ impl App<'_> {
         // la surface publiée. Rien ne revient au CPU ; les diagnostics arrivent en différé.
         if let Some(live) = self.delta3d.as_mut() {
             let background = self.frame.background;
-            if !self.paused {
+            if !self.paused && !self.delta3d_sans_pas {
                 if let Err(error) = live.advance(background) {
                     self.fail(e, error);
                     return;
@@ -1883,7 +1886,7 @@ fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config, ta
             );
         }
         if n == dernier { break; }
-        live.advance(background)?;
+        live.advance_step(background)?;
     }
     if let Some(d) = live.last {
         println!(
@@ -3616,6 +3619,8 @@ fn run() -> Result<(), String> {
         // S275 : la scène `--delta` s'ouvre sans impact ni sillage (touche B pour les montrer).
         enabled: !delta_scene && !delta3d_scene_on,
         fixed_step: match (delta_direct, delta3d_config) {
+            // S353 P6 : à 30 Hz en deux parts, une image vaut un demi-pas de δ.
+            (_, Some(c)) if c.step_us == 33_333 => Some((c.step_us - c.step_us / 2) as f64 * 1e-6),
             (_, Some(c)) => Some(c.step_us as f64 * 1e-6),
             (true, None) => Some(delta::FRAME_US as f64 * 1e-6),
             _ => None,
@@ -3624,6 +3629,7 @@ fn run() -> Result<(), String> {
         delta3d: None,
         delta3d_config,
         delta3d_active: true,
+        delta3d_sans_pas: args.iter().any(|a| a == "--delta3d-sans-pas"),
         drag: false,
         cursor: None,
         frames: 0,

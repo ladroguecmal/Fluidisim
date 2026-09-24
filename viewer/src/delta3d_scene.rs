@@ -373,8 +373,15 @@ impl Live {
     /// milieu des deux derniers états (β = ½), la suivante l'état publié (β = 0) — chaque image avance d'un demi-pas,
     /// sans latence ajoutée, puisque la part est soumise avant l'image.
     pub fn advance(&mut self, background: &Background) -> Result<(), String> {
-        let time = water_core::SimTime(self.start_us + self.steps * self.config.step_us);
-        if self.deux_parts {
+        if !self.deux_parts {
+            return self.advance_step(background);
+        }
+        // S353 P6 : l'état publié par la part 1 d'une image doit valoir l'instant de B de l'image **suivante**, pour
+        // que le milieu affiché tombe sur l'instant de celle-ci : l'horloge de δ part d'une demi-image plus tard que
+        // l'instant d'injection, qui est celui de l'image d'avant la première.
+        let demi = self.config.step_us - self.config.step_us / 2;
+        let time = water_core::SimTime(self.start_us + demi + self.steps * self.config.step_us);
+        {
             let partie = self.partie;
             self.step.step_part(background, time, self.config.cycles, K_DEUX_PARTS, partie)?;
             if partie == 1 {
@@ -382,10 +389,19 @@ impl Live {
             }
             self.blend = if partie == 1 { 0.5 } else { 0. };
             self.partie = 1 - partie;
-        } else {
-            self.step.step(background, time, self.config.cycles)?;
-            self.steps += 1;
         }
+        if let Some(d) = self.step.diagnostics()? {
+            self.last = Some(d);
+        }
+        Ok(())
+    }
+
+    /// Un pas de production **entier**, quelle que soit la cadence — les captures et les bancs comptent en pas.
+    pub fn advance_step(&mut self, background: &Background) -> Result<(), String> {
+        let time = water_core::SimTime(self.start_us + self.steps * self.config.step_us);
+        self.step.step(background, time, self.config.cycles)?;
+        self.steps += 1;
+        self.blend = 0.;
         if let Some(d) = self.step.diagnostics()? {
             self.last = Some(d);
         }

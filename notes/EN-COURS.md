@@ -95,7 +95,7 @@ Critères, écrits avant le code :
 - [x] **P4** — la fenêtre : deux parts à `--pas-delta=33333`, β alterné, touche d'interpolation ; banc du mélange au
   bit (critère 2).
 - [x] **P5** — la saccade mesurée (critère 3).
-- [ ] **P6** — la cadence en direct (critère 4).
+- [x] **P6** — la cadence en direct (critère 4).
 - [ ] **P7** — preuve, liste, file, feuille de route ; R18 préparée (critère 5).
 - [ ] **P8** — rituel.
 
@@ -118,3 +118,15 @@ Critères, écrits avant le code :
   quadratique moyenne de la surface affichée d'une image à la suivante) : 30 Hz **sans** interpolation — 119 images
   immobiles sur 239, rapport à la médiane 0 à 1,71 ; 30 Hz **interpolé** — 0 immobile, rapport 0,721 à 1,233, médiane
   5,57 mm ; témoin 60 Hz à pas entier — 0 immobile, 0,727 à 1,260, médiane 5,43 mm.
+- **P6 — un défaut de P4 trouvé et corrigé.** À `--pas-delta=33333`, la fenêtre avançait B de 33 ms par image quand δ
+  n'avançait plus que d'un demi-pas : pas d'image ramené à 16,667 ms ; l'horloge de δ décalée d'une demi-image, pour
+  que le milieu affiché tombe à l'instant de B ; les captures comptent en pas entiers (`advance_step`), comme S347.
+  Saccade rejouée : interpolé 0 immobile, 0,723–1,235 ; sans, 119/239 ; 60 Hz 0,727–1,260.
+- **P6, critère 4** (`--cadence`, 960×540, sans synchronisation verticale, secteur 96 % à 22:25 et 22:29) :
+  | même scène (anneau) | intervalle médian / p95 / max | part de δ par image (médianes) |
+  |---|---:|---:|
+  | témoin, domaine sans pas (`--delta3d-sans-pas`) | 1,407 / 2,500 / 7,24 ms | — |
+  | δ à 60 Hz, un pas entier par image | 4,715 / 5,516 / 6,06 | **3,31 ms** |
+  | δ à 30 Hz en deux parts, interpolé | 2,896 / 3,834 / 4,74 | **1,49 ms** |
+  Témoin à 30 Hz sans pas : 1,449 ms. Rendu de l'eau 0,82–0,83 ms dans les quatre (horodatage sérialisé).
+  Premier passage écarté : son « B seul » n'était pas la même scène (sans `--delta3d`, rendu 1,39 ms).
