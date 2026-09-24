@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S346 — **en cours**. **Porte C, attribuer A318** ; chemin de la v1.
+Session : S346 — **terminée**. **Porte C, attribuer A318** ; chemin de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — S345 ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §8) : la cadence de 30 Hz d'ADR-012 §7 tient sur la
 cuve (0,04 %), pas sur la scène de B : l'onde isolée y garde jusqu'à 6,3 % d'amplitude de plus qu'à 60 Hz, cinq fois
@@ -85,7 +85,7 @@ Critères, écrits avant le code :
 - [x] **P2** — le front sur une mer au repos, aux deux cadences ; critère 1.
 - [x] **P3** — la scène de B à 40 Hz ; critère 2.
 - [x] **P4** — preuve, file, A318 ; critère 3.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 : partagé.** `MER=repos … --delta3d-cadence-scene` (fond de B d'amplitude nulle) : 30 contre 60 Hz,

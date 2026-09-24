@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 19:02 +02:00
+JETON            : libre
+Battement        : 2026-09-24 19:06 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S346 — **porte C, attribuer A318** : l'écart d'amplitude entre 30 et 60 Hz vient-il du couplage à la mer ou de l'onde elle-même ?
-Dernière session : S345 — **porte C, la cadence de 30 Hz** (ADR-012 §7) éprouvée : cuve de S305 tenue (0,04 % de période à 33,3 ms) ; scène de B non tenue — l'onde garde jusqu'à 6,3 % d'amplitude de plus qu'à 60 Hz, ni projection ni éponge (A318, [preuve](docs/validation/COUT-DELTA3D-S341.md) §8)
-Session suivante : **porte C** — attribuer A318 : le front de S302 sur une mer au repos, à 30 et 60 Hz ; selon le résultat, recevoir la cadence ou la faire juger (revue R17). Puis étaler le pas sur deux images et mesurer le 99ᵉ centile par image. Porte A ensuite : déplacement, redimensionnement, rang 1. En attente : le terme de D2 (lot 5)
-Maillons        : 1 — S345 : cadence éprouvée, aucun critère franchi
+Session en cours : aucune
+Dernière session : S346 — **porte C, A318 attribué en partie** : à 30 Hz l'onde forte garde quelques pour cent d'amplitude de plus qu'à 60 Hz — un amortissement numérique par pas, porté par l'onde et accru par la mer ; 40 Hz au niveau du témoin ([preuve](docs/validation/COUT-DELTA3D-S341.md) §9)
+Session suivante : **revue R17** (ADR-189 D3) — la scène de B rendue à 30 et à 60 Hz, aux mêmes instants, côte à côte ; arrêt pour le verdict. S'il ne voit rien : étaler le pas sur deux images, 99ᵉ centile par image. Porte A ensuite. En attente : le terme de D2 (lot 5)
+Maillons        : 2 — S345–S346 : cadence éprouvée et attribuée, aucun critère franchi
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -16759,3 +16759,17 @@ n'est « la vraie ». Angle mort **A318** (sévérité 2).
 enchaîné derrière un `tail`, ne bloquait pas ; ligne corrigée, contrôle désormais lu avant chaque commit.
 **Rituel.** Maillons **1** : aucun critère franchi. Suivant : **attribuer A318** — le front sur une mer au repos,
 aux deux cadences ; puis étaler le pas sur deux images et mesurer le 99ᵉ centile par image.
+
+## S346 — 2026-09-24 — porte C : A318 attribué en partie
+
+**Entrée.** S345 : à 30 Hz, l'onde de la scène de B garde jusqu'à 6,3 % d'amplitude de plus qu'à 60 Hz (A318).
+**Fait** ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §9). Le front sur **une mer au repos** : l'écart à 30 Hz
+tombe à 1–4 % — la mer en rajoute, sans en être la seule cause. **Une cadence de 40 Hz** : ≤ 0,73 % tant que l'onde
+est groupée, au niveau du témoin des cycles ; au-delà, écarts sans ordre (horizon d'A297). Tant que l'onde est
+groupée, l'écart **suit le pas**, toujours du même signe : un **amortissement numérique par pas**, dont le candidat
+est l'advection non linéaire du pas couplé.
+**Limites.** Candidat non localisé dans le code ; aucune cadence n'est « la vraie ». À 40 Hz le pas contribuerait
+≈ 2,45 ms par image : seul 30 Hz passe sous les 2 ms.
+**Rituel.** Maillons **2** : aucun critère franchi depuis S344. Comparée à la porte A (déplacement,
+redimensionnement), la revue R17 est courte et son verdict décide de la voie de la porte C. Suivant : **revue R17**
+— la scène de B à 30 et 60 Hz, côte à côte —, arrêt pour le verdict.
