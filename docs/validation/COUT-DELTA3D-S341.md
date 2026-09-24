@@ -276,3 +276,43 @@ diagnostics différés. **Absentes** : l'**interpolation du rendu** entre deux p
 **Domaine du chiffre** : chaque part soumise seule et attendue, horodatée sur la carte ; **pas de rendu concurrent**
 — la mer rendue sur la même carte pèse 1,74 ms (S267), le profil d'eau d'ADR-174 D3 est de 4 ms dont δ 2 — ; une
 scène, un domaine. **La marge est mince** : 4 % sous 2 ms.
+
+## 12. S353 — δ à 30 Hz dans la fenêtre, interpolé au rendu, mesuré avec le rendu
+
+2026-09-24. La suite que le §11 laissait : l'**interpolation du rendu** d'ADR-012 §7 — sans elle, δ change à 30 Hz
+dans une image à 60 — et la mesure **en direct**, rendu concurrent. Premier pas de la v1 en scène vivante (feuille de
+route §3 ter).
+
+**Reproduire** : commit `6166f79d` ou plus récent.
+- `… -- --delta3d-empreinte` (lignes `S343` inchangées, ligne `S353` : précédente = publiée d'avant, 0 différence).
+- `INSTANTS=0,60,120 … -- --meilleur --eau-physique=2 --delta3d --anneau --captures` : empreintes de SCENE-DELTA3D-S302
+  §8 inchangées.
+- `… -- --meilleur --eau-physique=2 --delta3d --anneau --melange` — ligne `DELTA3D_MELANGE_S353`.
+- `… -- --delta3d-saccade` — lignes `DELTA3D_SACCADE_S353`, un quart de minute.
+- `… -- --meilleur --eau-physique=2 --delta3d --anneau [--pas-delta=33333] [--delta3d-sans-pas] --cadence` — lignes
+  `CADENCE`, fenêtre 960 × 540, sans synchronisation verticale ; alimentation relevée avant et après (A270).
+- En direct : `… --delta3d --anneau --pas-delta=33333`, touche `I` (interpolation), `D` (couche), `R` (relance).
+
+**La construction.** Le pas garde la surface qu'il remplace (`published_prev`) : une copie sur la carte juste avant la
+passe qui publie, dans `set_state` et au redimensionnement — là, la précédente prend la courante réécrite, et rien
+ne se mélange jusqu'à la publication suivante. Le rendu lie les deux (ADR-175 D7 : des surfaces publiées, aucun
+tampon interne) et lit `courant·(1 − β) + précédent·β` ; β = 0 passe par une branche qui rend la lecture d'avant.
+La fenêtre, à `--pas-delta=33333`, fait **une part du pas par image** (S348, `k` = 7) ; l'image de la part 1 montre le
+milieu des deux derniers états (β = ½), celle de la part 0 l'état publié (β = 0). L'horloge de δ part d'une demi-image
+après l'injection : le milieu affiché tombe à l'instant de B de l'image. Aucune latence ajoutée.
+
+| critère, écrit avant le code | mesure | verdict |
+|---|---|---|
+| 1. identité sans interpolation | captures de l'anneau (R16) : **4 empreintes sur 4 identiques** ; pas de S343 inchangé ; S350 au bit | tenu |
+| 2. le mélange, au bit | image à β = ½ contre image du tampon (p + c)/2 calculé sur CPU : **0 octet différent** ; témoin, la courante seule : 550 530 | tenu |
+| 3. la saccade | 30 Hz **sans** : 119 images immobiles sur 239 ; **interpolé : aucune**, chaque variation entre 0,723 et 1,235 fois la médiane (5,56 mm) ; témoin 60 Hz : 0,727 à 1,260 (5,43 mm) | tenu |
+| 4. en direct, avec le rendu | même scène : témoin sans pas 1,407 ms par image (p95 2,500) ; **δ à 60 Hz 4,715 (p95 5,516)** ; **δ à 30 Hz interpolé 2,896 (p95 3,834)** — part de δ par image, en médiane, **3,31 → 1,49 ms** | mesuré |
+
+**Ce que cela ne dit pas.** La mesure en direct lit des intervalles d'image sur une fenêtre de 960 × 540 — part de δ
+par **différence**, médianes, p95 et maximum, pas de 99ᵉ centile ; une scène, un domaine. Le verdict visuel de la
+fluidité revient à l'utilisateur ([revue](REVUE-VISUELLE.md) §23, R18). L'horloge de la fenêtre avance d'une image
+fixe, comme avant : une image plus lente que 16,7 ms ralentit la scène entière, B compris. Un redimensionnement fige
+le mélange jusqu'à la publication suivante, une image au plus.
+
+**Techniques présentes**, en plus du §11 : l'interpolation du rendu entre deux pas (ADR-012 §7). **Absentes** :
+multigrille, fusion des réductions, précision mixte, LOD spectral du fond.

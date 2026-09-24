@@ -64,7 +64,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **6.7** | les acteurs du jeu : leur forme, leur physique |
 | **7.8** | un moteur audio pour en juger |
 | **8.1** | le moteur du jeu, pour l'intégration |
-| **8.7** | un verdict visuel |
+| **8.7** | les verdicts : R18 (en direct), puis la frontière |
 | **8.10** | les verdicts de l'utilisateur : poses, animation, scénarios |
 | **9.1** | `W_gameplay`, qui vient du jeu |
 | **9.4** | les objets contrôlables du jeu et leurs paliers |
@@ -139,7 +139,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **4.16** Surface non graphe | B | le raccord (A316), puis APIC en 3D | — | 3.3, 4.1, 4.12, 4.13, 4.14, 4.20, 7.2, 7.4 | **0** |
 | **4.17** Référentiel accéléré et invariance galiléenne | B | — | 1.8 | 13.2 | **1** |
 | **4.18** Conservation de la masse et de l'énergie | C | le compteur sur la carte ; énergie et quantité de mouvement ; C09 | — | 13.2 | **0** |
-| **4.19** Coût de δ compatible avec le budget | B | l'interpolation du rendu à 30 Hz ; la mesure en direct ; d'autres scènes | — | 9.11 | **0** |
+| **4.19** Coût de δ compatible avec le budget | B | d'autres scènes ; plusieurs domaines en direct ; un 99ᵉ centile en direct | — | 9.11 | **0** |
 | **4.20** Changement de solveur pendant une simulation | B | — | 4.16 | 4.11 | **1** |
 | **4.21** Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine | C | — | — | — | **E** — la voie d'A289 |
 
@@ -195,7 +195,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **8.4** Écume, spray, gouttes, bulles rendus, chacun avec son LOD | H | — | 7.1, 7.2, 7.3, 7.4 | — | **4** |
 | **8.5** Transparence, réfraction, caustiques, particules sous-marines | H | transparence, réfraction, caustiques | — | 8.6 | **0** |
 | **8.6** Vue sous-marine et passage de la surface | H | — | 8.5 | 13.3 | **1** |
-| **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | l'interpolation du rendu à 30 Hz ; une frontière sans fondu ; la tolérance de pente | — | — | **E** — un verdict visuel |
+| **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | une frontière sans fondu ; la tolérance de pente | — | — | **E** — les verdicts : R18 (en direct), puis la frontière |
 | **8.8** Lointain et horizon sans artefact | H | un certificat d'absence d'alias | — | — | **0** |
 | **8.9** Détails artificiels bon marché | H | capillaires ; queue des perturbations W ; LOD de la queue | — | — | **0** |
 | **8.10** Crédibilité perçue validée par un regard humain | H | de nouvelles revues, préparées | — | — | **E** — les verdicts de l'utilisateur : poses, animation, scénarios |

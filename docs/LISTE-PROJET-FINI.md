@@ -256,8 +256,10 @@ pas recopiée ici (L137).
   ([S302](validation/SCENE-DELTA3D-S302.md) §2). **S341–S348** : fond factorisé et dix champs par face, au bit —
   3,68 ms par pas — ; **cadence de 30 Hz, un pas en deux parts : 1,92 ms au 99ᵉ centile par image**, porte C reçue
   sur le banc ([preuve](validation/COUT-DELTA3D-S341.md) §11) ; **S350** : le coût suit l'emprise d'un domaine
-  redimensionné, 0,09 ms + 3,57 ms × surface ([preuve](validation/ARBITRAGE-3D-S344.md) §6). Manquent
-  l'interpolation du rendu, la mesure en direct avec le rendu, d'autres scènes et plusieurs domaines.
+  redimensionné, 0,09 ms + 3,57 ms × surface ([preuve](validation/ARBITRAGE-3D-S344.md) §6) ; **S353** :
+  interpolé au rendu et **mesuré en direct**, rendu concurrent — 1,49 ms de δ par image à 30 Hz contre 3,31 à
+  60 Hz ([preuve](validation/COUT-DELTA3D-S341.md) §12). Manquent d'autres scènes, plusieurs domaines en direct,
+  un 99ᵉ centile en direct.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *absent*.
   Besoin découvert S274 : B est linéaire, un δ fidèle dérive de la dispersion d'amplitude
@@ -356,9 +358,10 @@ pas recopiée ici (L137).
   ([preuve](validation/SCENE-DELTA3D-S302.md)). **Verdicts** : R15 (S337–S338), plus de coupure au
   bord de δ dans la scène de la porte D, par l'éponge et le même fondu ; R16 (S340), une onde de δ
   sur la mer de R14 ; R17 (S348), δ à 30 Hz validé à l'œil, sur images fixes
-  ([revue](validation/REVUE-VISUELLE.md) §20–22). Manquent l'interpolation du rendu qu'impose 30 Hz
-  (ADR-012 §7), une frontière δ↔B sans rupture autre qu'un fondu de rendu, une tolérance de pente
-  d'image, et le budget mesuré en direct avec le rendu.
+  ([revue](validation/REVUE-VISUELLE.md) §20–22). **S353** : l'interpolation du rendu qu'impose 30 Hz — plus
+  aucune image immobile, chaque image varie comme à 60 Hz — et le budget mesuré en direct avec le rendu
+  ([preuve](validation/COUT-DELTA3D-S341.md) §12) ; verdict R18 attendu (§23). Manquent une frontière δ↔B sans
+  rupture autre qu'un fondu de rendu, une tolérance de pente d'image, et ce verdict.
 - [ ] **8.8 Lointain et horizon sans artefact** — *partiel* : coupure spectrale B/sillage (S249) ;
   bande d'horizon mesurée (S247, S248) ; fin de grille à l'horizon géométrique sous le ciel clair
   (S262). Pas de certificat d'absence d'alias.

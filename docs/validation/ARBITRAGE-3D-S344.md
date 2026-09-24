@@ -219,3 +219,6 @@ comme la porte C.
 **Ce que cela ne dit pas** : l'échelle oscille d'une maille autour de sa cible, au rythme du bruit du coût — une bande
 morte reste à écrire ; l'estimateur au maximum vit dans l'hôte, comme l'oubli ; les rangs 2 à 7 et le régulateur PI
 d'ADR-012 §5 n'existent pas ; B8 non plus ; tout est au banc, sans rendu concurrent.
+
+*Note S353 (2026-09-24)* : le pas garde désormais la surface publiée précédente (COUT-DELTA3D-S341 §12) — un tampon
+de plus : au §6, l'allocateur compte **89 849 856 octets, 28 allocations**, toujours inchangés par le redimensionnement.

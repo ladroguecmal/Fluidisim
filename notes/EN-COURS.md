@@ -96,7 +96,7 @@ Critères, écrits avant le code :
   bit (critère 2).
 - [x] **P5** — la saccade mesurée (critère 3).
 - [x] **P6** — la cadence en direct (critère 4).
-- [ ] **P7** — preuve, liste, file, feuille de route ; R18 préparée (critère 5).
+- [x] **P7** — preuve, liste, file, feuille de route ; R18 préparée (critère 5).
 - [ ] **P8** — rituel.
 
 ### Notes de reprise

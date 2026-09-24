@@ -922,3 +922,25 @@ Un mot par question suffit.
 **Verdict R17 — reçu le 2026-09-24 (S348)** : *« Continue je valide »*. La cadence de 30 Hz d'ADR-012 §7 est
 **validée à l'œil** : l'écart d'amplitude d'A318 — quelques pour cent sur une onde forte — n'y fait pas obstacle.
 **Classe** : aucune — réception. Suite : le pas de δ étalé sur deux images (porte C).
+
+## 23. R18 — δ à 30 Hz interpolé, en direct, S353
+
+**Liste 8.7, porte C.** Depuis R17, δ tourne à 30 Hz ; mais le rendu, à 60, montrait deux fois le même pas : une
+image sur deux immobile, mesurée ([preuve](COUT-DELTA3D-S341.md) §12, critère 3). Le rendu **mélange** maintenant les
+deux derniers pas : chaque image avance d'un demi-pas, comme à 60 Hz. Cette revue se fait **en direct**, pas sur des
+images fixes — c'est le mouvement qui se juge :
+
+```text
+cargo run --manifest-path viewer/Cargo.toml --release --offline -- --meilleur --eau-physique=2 --delta3d --anneau --pas-delta=33333
+```
+
+L'anneau part du fond de la scène vers la caméra. Touches : **`I`** coupe ou rétablit l'interpolation ; **`R`** relance
+l'anneau ; **`D`** montre la mer sans δ ; flèches pour bouger ; Échap pour quitter.
+
+**Les questions :**
+
+1. **Interpolation active** (au lancement) : l'anneau bouge-t-il **sans à-coups**, aussi fluide que la mer autour ?
+2. **Avec `I`** (interpolation coupée) : voyez-vous une **saccade** sur l'anneau ?
+3. **Autre chose** qui gêne ?
+
+Un mot par question suffit.
