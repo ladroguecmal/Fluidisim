@@ -100,7 +100,7 @@ Critères, écrits avant le code :
   ce qui a bougé, avec sa preuve, noté ici.
 - [x] **P6** — la liste réécrite : points touchés en remplacement, décompte recompté point par point, « État au » ;
   `--check`.
-- [ ] **P7** — le coût selon l'emprise ; critère 4.
+- [x] **P7** — le coût selon l'emprise ; critère 4.
 - [ ] **P8** — preuve, file, feuille de route, et les lignes de la liste que S350 touche ; critère 5.
 - [ ] **P9** — rituel.
 
@@ -133,4 +133,16 @@ Critères, écrits avant le code :
   dans δ de la porte D, S332–S338 ; ADR-001 range le proche-coque dans δ) ; 1.3 (paroi par distance signée et corps
   du cœur, hors SPEC-004 §7) ; 1.4 et 9.8 (S344, S349) ; 8.7 et 8.10 (R15–R17) ; 9.2 (S349, sans prédiction : absent) ;
   10.4 (I-04 au bit, S332–S333) ; 13.2 (C10 sur le cœur, S331) ; 13.3 (B6 un archétype, B10 banc 2D). Attendu : 3/56/61.
+- **P6** : liste réécrite, `--check` 0 anomalie, 3 / 56 / 61 ; REPRISE §4 et feuille de route (décompte) suivis.
+- **P7, critère 4 tenu** (`--delta3d-cout-emprise`, secteur aux deux bornes : `BatteryStatus` 2, 97 %,
+  `PowerOnline` vrai, 21:22 et 21:23). Un domaine créé à 120×112, redimensionné en place, 500 pas par forme :
+  | forme | surface | pas médian / q99 | rapport | passes 1 / 2 / 3 |
+  |---|---:|---:|---:|---:|
+  | 120×112 | 1,000 | 3,695 / 3,736 | 1,000 | 1,312 / 2,067 / 0,291 |
+  | 104×97 | 0,751 | 2,743 / 2,787 | 0,742 | 0,951 / 1,572 / 0,191 |
+  | 85×79 | 0,500 | 1,834 / 1,877 | 0,496 | 0,603 / 1,083 / 0,115 |
+  | 60×56 | 0,250 | 1,019 / 1,064 | 0,276 | 0,308 / 0,623 / 0,065 |
+  Moindres carrés : **0,09 ms + 3,57 ms × surface**. Aucune colonne hors bornes. Témoin : 3,695 contre 3,679 (S343).
+  Temps mural (soumission et attente) : décalage d'une maille **0,375 ms** en médiane, q99 1,05, max 1,22 — S349 :
+  1,46 en sept soumissions ; redimensionnement 100 ↔ 75 % 0,360 ms, q99 1,31, max 1,52.
 

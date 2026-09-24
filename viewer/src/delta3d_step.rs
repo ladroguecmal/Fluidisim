@@ -2274,6 +2274,102 @@ pub fn cout_scene() -> Result<(), String> {
     })
 }
 
+/// S350, porte A, critère 4 — **le coût suit l'emprise.** La scène de la porte B, un seul domaine créé à sa forme
+/// (120 × 112), redimensionné en place à 100, 75, 50 et 25 % de sa surface, centré ; à chaque forme, 30 pas de
+/// chauffe puis `PAS=` (500) pas horodatés : médiane, 99ᵉ centile et maximum du pas et de ses trois passes. Puis,
+/// en temps mural — soumission et attente comprises, comme S349 —, 200 décalages d'une maille (un redimensionnement
+/// à forme égale) et 100 redimensionnements 100 % ↔ 75 %. `--delta3d-cout-emprise`.
+pub fn cout_emprise() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let config = crate::delta3d_scene::Config::review();
+        let (u, v, w, eta) = config.initial_state();
+        let mut carte = Step3::new(background, config.domain, config.origin, crate::delta3d_scene::RHO, crate::delta3d_scene::G).await?;
+        carte.set_step(config.step_us, config.rest, config.sponge)?;
+        carte.set_state(&u, &v, &w, &eta)?;
+        let pas: usize = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(500);
+        let cap = carte.capacity();
+        println!(
+            "DELTA3D_EMPRISE_S350 carte={:?} backend={} capacite={}x{}x{} cycles={} pas={pas}",
+            carte.adapter, carte.backend, cap.nx, cap.ny, cap.nz, config.cycles
+        );
+        let quantiles = |v: &mut Vec<f64>| -> (f64, f64, f64) {
+            v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            let q = |f: f64| v[(((v.len() - 1) as f64) * f).round() as usize];
+            (q(0.5), q(0.99), *v.last().unwrap())
+        };
+        let mut n = 0u64;
+        let mut reference = f64::NAN;
+        for part in [1.0f64, 0.75, 0.5, 0.25] {
+            let d = carte.domain();
+            let (nx2, ny2) = ((cap.nx as f64 * part.sqrt()).round() as usize, (cap.ny as f64 * part.sqrt()).round() as usize);
+            carte.resize(((d.nx - nx2) / 2) as i32, ((d.ny - ny2) / 2) as i32, nx2, ny2)?;
+            let mut serie = Vec::with_capacity(pas);
+            for k in 0..30 + pas {
+                carte.publish_time(background, SimTime(n * config.step_us))?;
+                n += 1;
+                if let Some(t) = carte.timed_step_passes(config.cycles)? {
+                    if k >= 30 {
+                        serie.push(t);
+                    }
+                }
+            }
+            let hors = carte.diagnostics_now()?.columns_outside;
+            let mut ligne = format!(
+                "DELTA3D_EMPRISE_S350 forme={nx2}x{ny2} surface={:.4} mailles={} hors_bornes={hors}",
+                (nx2 * ny2) as f64 / (cap.nx * cap.ny) as f64,
+                nx2 * ny2 * cap.nz
+            );
+            for (k, nom) in ["pas", "passe1", "passe2", "passe3"].iter().enumerate() {
+                let mut v: Vec<f64> = serie.iter().map(|t| t[k]).collect();
+                if v.is_empty() {
+                    continue;
+                }
+                let (m, q99, max) = quantiles(&mut v);
+                if k == 0 {
+                    if part == 1.0 {
+                        reference = m;
+                    }
+                    ligne += &format!(" pas_mediane_ms={m:.3} pas_q99_ms={q99:.3} pas_max_ms={max:.3} rapport_a_100={:.3}", m / reference);
+                } else {
+                    ligne += &format!(" {nom}_mediane_ms={m:.3}");
+                }
+            }
+            println!("{ligne}");
+        }
+        // Le décalage — un redimensionnement à forme égale —, puis le changement de forme, en temps mural.
+        let d = carte.domain();
+        carte.resize(-(((cap.nx - d.nx) / 2) as i32), -(((cap.ny - d.ny) / 2) as i32), cap.nx, cap.ny)?;
+        carte.wait()?;
+        let mut decalages = Vec::with_capacity(200);
+        for k in 0..200 {
+            let debut = std::time::Instant::now();
+            carte.shift(if k % 2 == 0 { 1 } else { -1 }, 0)?;
+            carte.wait()?;
+            decalages.push(debut.elapsed().as_secs_f64() * 1e3);
+        }
+        let (m, q99, max) = quantiles(&mut decalages);
+        println!("DELTA3D_EMPRISE_S350 decalage_une_maille forme={}x{} mediane_ms={m:.3} q99_ms={q99:.3} max_ms={max:.3} soumissions=1", cap.nx, cap.ny);
+        let (nx75, ny75) = ((cap.nx as f64 * 0.75f64.sqrt()).round() as usize, (cap.ny as f64 * 0.75f64.sqrt()).round() as usize);
+        let (di, dj) = (((cap.nx - nx75) / 2) as i32, ((cap.ny - ny75) / 2) as i32);
+        let mut formes = Vec::with_capacity(100);
+        for k in 0..100 {
+            let debut = std::time::Instant::now();
+            if k % 2 == 0 {
+                carte.resize(di, dj, nx75, ny75)?;
+            } else {
+                carte.resize(-di, -dj, cap.nx, cap.ny)?;
+            }
+            carte.wait()?;
+            formes.push(debut.elapsed().as_secs_f64() * 1e3);
+        }
+        let (m, q99, max) = quantiles(&mut formes);
+        println!("DELTA3D_EMPRISE_S350 redimensionnement_100_75 mediane_ms={m:.3} q99_ms={q99:.3} max_ms={max:.3}");
+        Ok(())
+    })
+}
+
 /// S345, porte C, critère 1 — **la cadence de δ** : la cuve de S305 (mode (1, 1), `nx` = 32, 64 cycles) sur la
 /// carte, au pas de 1, 16,667 et 33,333 ms, pendant deux périodes. Par pas de temps : la **période** du mode, tirée
 /// de ses passages par zéro, et son **amplitude** aux extrêmes, rapportée à l'amplitude initiale. ADR-012 §7 veut
