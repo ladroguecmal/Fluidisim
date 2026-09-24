@@ -326,9 +326,10 @@ pas recopiée ici (L137).
 - [ ] **9.1 Activation multicritère** : proximité, visibilité, taille à l'écran, regard, vitesse du
   joueur, énergie, enjeu de jeu, budget (ADR-013, B8) — *partiel* **depuis S278** : le **mécanisme**
   qui consomme les critères existe — sac à dos sous budget, `P/C` décroissant, hystérésis
-  ([ORDONNANCEUR-S278](validation/ORDONNANCEUR-S278.md), ADR-170). Manquent **les critères
-  eux-mêmes** : `W_gameplay` vient du jeu et `W_perception` du rendu, et aucun n'est calculé ;
-  aucun banc B8 ne fixe leurs seuils.
+  ([ORDONNANCEUR-S278](validation/ORDONNANCEUR-S278.md), ADR-170) ; **`W_perception` calculé** — part
+  d'écran — pour la bande δ (S279) puis **deux domaines δ 3D** qui se disputent un budget (S344,
+  [preuve](validation/ARBITRAGE-3D-S344.md)). Manquent `W_gameplay`, qui vient du jeu, `W_urgence`, et un banc B8
+  qui fixe les seuils ; ils sont calibrés par hôte (ADR-171).
 - [ ] **9.2 Domaine prédictif orienté devant le joueur** — *absent*.
 - [ ] **9.3 Prédiction d'objets balistiques** : point, vitesse, orientation, région utile — *absent*.
 - [ ] **9.4 Objets contrôlables : paliers de confiance** ; confiance réduite par le jeu — *absent*.

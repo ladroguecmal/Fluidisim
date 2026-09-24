@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les parts d'écran le long du trajet de caméra ; les seuils calibrés.
 - [x] **P3** — le banc d'arbitrage, deux domaines 3D ; critères 1 à 4.
-- [ ] **P4** — preuve, file, feuille de route, liste.
+- [x] **P4** — preuve, file, feuille de route, liste.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
