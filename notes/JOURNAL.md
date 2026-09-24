@@ -16802,3 +16802,20 @@ pour l'équilibre. **Porte C reçue sur le banc** (ADR-175 §4.4).
 **Rituel.** Maillons **0** : ce qui devient possible — δ tient son budget par image sur la scène de la porte B ; le
 chemin — la v1, dont il ne reste que la porte A ; la preuve — §11. Suivant : **porte A**, un domaine qui se déplace
 et se redimensionne ; l'interpolation du rendu, suite de la porte C.
+
+## S349 — 2026-09-24 — porte A : un domaine qui se déplace
+
+**Entrée.** Porte C reçue (S348) ; la v1 ne demande plus que la porte A. Deuxième critère, première moitié : un
+domaine qui se déplace au lieu d'être allumé ou éteint.
+**Fait** ([preuve](../docs/validation/ARBITRAGE-3D-S344.md) §5). La position du domaine n'entre dans le pas que par le
+fond de B. `Step3::shift(di, dj)` décale l'état de mailles entières — vitesses, surface et reste, pression de
+départ, surface publiée — et avance l'origine du fond ; ce qui entre naît au repos. **Au bit** : sept tableaux
+identiques à l'ancien translaté après (+3, −2) ; le pas entier garde ses empreintes.
+**Mesuré.** Sur la côte de S344, **un seul domaine suit la caméra** : 480 décalages d'une maille sur 120 m, part
+d'écran constante (0,1629), une naissance au départ et **aucune extinction** — deux domaines fixes en demandaient
+deux de chaque ; aucune colonne hors bornes. Décalage : 1,46 ms en médiane, sept soumissions séparées.
+**Limites.** Le décalage n'est pas groupé en une soumission ; l'hôte, non l'ordonnanceur, décide du déplacement ;
+ce qui sort n'est pas rendu à W (A289).
+**Rituel.** Maillons **0** : ce qui devient possible — un domaine δ 3D qui accompagne ce qu'on regarde ; le chemin
+— la porte A, dont restent le redimensionnement et le rang 1 ; la preuve — §5. Suivant : **se redimensionner**,
+puis la dégradation de rang 1.

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 20:30 +02:00
+JETON            : libre
+Battement        : 2026-09-24 20:36 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S349 — **porte A, un domaine qui se déplace** : l'état de δ décalé de mailles entières sur la carte, la position suivie par le fond ; un domaine qui accompagne la caméra au lieu de s'éteindre et de renaître
-Dernière session : S348 — **porte C reçue sur le banc** : verdict R17 (30 Hz validé) ; le pas de δ à 30 Hz coupé en deux parts, au bit, **1,85 et 1,92 ms au 99ᵉ centile par image** ([preuve](docs/validation/COUT-DELTA3D-S341.md) §11) ; la v1 ne demande plus que la porte A
-Session suivante : **porte A** (§3 bis), la dernière de la v1 — un domaine δ 3D qui **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint, puis la dégradation de rang 1 (ADR-012 §4) ; suite de la porte C : l'interpolation du rendu entre deux pas. En attente : le terme de D2 (lot 5)
-Maillons        : 0 — S348 : porte C reçue sur le banc
+Session en cours : aucune
+Dernière session : S349 — **porte A, un domaine qui se déplace** : l'état de δ décalé de mailles entières, au bit ; un seul domaine suit la caméra sur 120 m sans s'éteindre ([preuve](docs/validation/ARBITRAGE-3D-S344.md) §5)
+Session suivante : **porte A** — un domaine qui **se redimensionne** (état recopié dans une emprise plus petite ou plus grande, au bit dans le recouvrement), puis la **dégradation de rang 1** d'ADR-012 §4 : l'ordonnanceur rétrécit un domaine non focal au lieu de l'affamer. Suite de la porte C : l'interpolation du rendu. En attente : le terme de D2 (lot 5)
+Maillons        : 0 — S349 : un domaine qui se déplace
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

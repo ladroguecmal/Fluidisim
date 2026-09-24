@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S349 — **en cours**. **Porte A, un domaine qui se déplace** ; la dernière porte de la v1.
+Session : S349 — **terminée**. **Porte A, un domaine qui se déplace** ; la dernière porte de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — S348 : porte C reçue sur le banc ; la v1 ne demande plus que la porte A. Premier critère tenu au banc
 (S344) : deux domaines se disputent un budget — mais un domaine y **vit ou meurt**. Deuxième critère : un domaine
@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 - [x] **P2** — le noyau de décalage, `Step3::shift`, l'origine du fond ; critère 1.
 - [x] **P3** — le domaine qui suit la caméra ; critère 2.
 - [x] **P4** — preuve, file, feuille de route ; critère 3.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `delta3d_shift.wgsl` et `Step3::shift(di, dj)` : sept tableaux — `u`, `v`, `w`, surface,
