@@ -62,44 +62,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S342 — **terminée**. **Porte C, premier levier : le fond de δ factorisé** ; chemin de la v1.
+Session : S343 — **en cours**. **Porte C, charge utile du fond** ; chemin de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — S341 ([preuve](../docs/validation/COUT-DELTA3D-S341.md)) : l'évaluation du fond de B coûte **1,53 ms** des
-4,45 du pas. Le noyau `sample_faces` calcule, pour chacune des 1 148 896 faces et des 64 composantes, une phase,
-un sinus, un cosinus et une atténuation. Or la phase ne dépend que de la **colonne** de la face, et l'atténuation
-que de sa **couche** : 64 × 1,15 million de calculs pour ce qui en demande 64 × 40 500 et 64 × 29 × 3.
+Entrée — S342 ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §6) : le fond factorisé, au bit, ne retire que
+0,11 ms au pas ; ce qui reste est l'**accumulation des 26 champs** de chaque face et leur **écriture**, 120 Mo par
+pas. Le pas et le couplage n'en lisent que dix, selon l'axe de la face : `η`, `u` (3), `du/dt`, une ligne de
+`grad u` (3), `p`, `grad p` sur cet axe.
 
-**Ce que la session doit rendre possible.** Un fond de δ évalué moins cher, **au bit** du précédent : un second
-noyau, `sample_faces_tiled`, par tuiles de 16 colonnes × 16 couches — sinus et cosinus de chaque colonne et
-atténuation de chaque couche calculés une fois dans la mémoire du groupe, puis la même accumulation, dans le même
-ordre, avec les mêmes primitives. L'ancien noyau reste : témoin, et repli au-delà de 64 composantes.
+**Maillons à deux, et le choix** (REPRISE §6). La porte C est la porte en cours ; son critère ne se franchit que
+par la combinaison des leviers (ADR-131 D4), chacun mesuré. Chemin chiffré : charge utile (ici), puis projection
+(multigrille ou fusion, 2,06 ms linéaires en cycles), puis cadence découplée, qui divise la contribution par image.
+La porte A, comparée, demande l'ordonnanceur sur des domaines 3D et un banc B8 inexistant : plus loin d'un critère.
+**Choix : C**, justification au journal si le troisième maillon tombe.
+
+**Ce que la session doit rendre possible.** Un fond de δ à dix champs par face. Pour garder intacts les bancs de
+S300, qui compilent le même fichier de noyaux avec 26 champs, la disposition compacte est une **constante de
+compilation** (`override COMPACT`), vraie pour le pas seulement.
 
 Critères, écrits avant le code :
-1. **Identité** : sur la scène de la porte B, les 26 champs des 1 148 896 faces identiques au bit entre les deux
-   noyaux, à trois instants ; puis 60 pas de production, surface publiée identique au bit. Si le compilateur
-   contracte autrement une expression et qu'un bit bouge, l'écart est publié et attribué, pas masqué.
-2. **Coût** : le fond seul et le pas entier, médiane et 99ᵉ centile (banc de S341), secteur relevé, témoin.
-3. Le nouveau noyau par défaut si ≤ 64 composantes ; preuve (§6 de COUT-DELTA3D-S341) ; file.
+1. **Empreinte de référence**, relevée avant tout changement : surface publiée et vitesses après 60 et 600 pas sur
+   la scène de B, par un banc `--delta3d-empreinte`.
+2. **Identité** : après le changement, les mêmes empreintes, au bit. Les bancs de S300 (`--delta3d-faces`,
+   `--delta3d-couplage`) rendent leurs nombres publiés.
+3. **Coût** : fond seul et pas entier, médiane et 99ᵉ centile ; secteur relevé ; preuve (§7), file.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le noyau par tuiles et son branchement ; relecture des faces pour le banc.
-- [x] **P3** — l'identité au bit ; critère 1.
-- [x] **P4** — le coût ; critère 2 ; preuve, file ; critère 3.
-- [x] **P5** — rituel.
+- [ ] **P2** — le banc d'empreinte ; l'empreinte de référence ; critère 1.
+- [ ] **P3** — la disposition compacte : noyaux, couplage, pas, tampon ; relectures de banc.
+- [ ] **P4** — l'identité, les bancs de S300, le coût ; critères 2 et 3.
+- [ ] **P5** — preuve, file ; rituel.
 
 ### Notes de reprise
-- **P2, fait.** `sample_faces_tiled` (`delta3d_background.wgsl`) : groupes de 256 fils, tuiles de 16 colonnes × 16
-  couches d'une famille ; sinus et cosinus par colonne, atténuation par couche, en mémoire de groupe (12 Ko) ;
-  mêmes primitives, même expression de la position, même ordre d'accumulation. Branché par défaut jusqu'à 64
-  composantes (`TILE_COMPONENTS`), `sample_faces` sinon ; 5 070 groupes sur la scène de B. Bascule et relecture
-  des faces pour le banc.
-- **P3, critère 1 tenu** (`--delta3d-fond-tuiles`, scène de B, 64 composantes). Les **29 871 296** valeurs du fond —
-  26 champs × 1 148 896 faces — **identiques au bit** entre les deux noyaux, aux pas 0, 50 et 500 ; 60 pas de
-  production, l'un par tuiles, l'autre face par face : surface publiée **identique au bit** sur 13 440 colonnes.
-- **P4, critères 2 et 3 tenus** (secteur 97 % avant et après). Même session : face par face, fond 1,527 ms
-  (q99 1,551), pas 4,456 (q99 4,501) ; **par tuiles, fond 1,237 (q99 1,261), pas 4,348 (q99 4,405)**. −19 % au fond,
-  −0,11 ms au pas : le calcul transcendant n'était pas l'essentiel ; reste l'accumulation de 26 champs et leur
-  écriture. Preuve, §6 de COUT-DELTA3D-S341 ; file.
-
