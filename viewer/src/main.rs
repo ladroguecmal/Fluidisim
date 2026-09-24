@@ -384,7 +384,7 @@ impl ApplicationHandler for App<'_> {
                     return;
                 }
             };
-            g.attach_delta3d(step.published_buffer());
+            g.attach_delta3d(step.published_buffer(), step.published_prev_buffer());
             let start = (self.seconds * 1e6) as u64;
             match delta3d_scene::Live::new(step, config, start) {
                 Ok(live) => {
@@ -1745,7 +1745,7 @@ fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config, ta
         g.device.clone(), g.queue.clone(), &info, frame.background,
         config.domain, config.origin, delta3d_scene::RHO, delta3d_scene::G,
     )?;
-    g.attach_delta3d(step.published_buffer());
+    g.attach_delta3d(step.published_buffer(), step.published_prev_buffer());
     let mut live = delta3d_scene::Live::new(step, config, 0)?;
     let poses: [(&str, Camera); 4] = [
         ("reference", Camera::default()),

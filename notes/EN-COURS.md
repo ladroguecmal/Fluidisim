@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `Step3` : la surface précédente, copiée avant chaque publication ; empreintes S343, identité S350.
-- [ ] **P3** — le rendu : la liaison du précédent, β, la branche ; captures de l'anneau au bit (critère 1).
+- [x] **P3** — le rendu : la liaison du précédent, β, la branche ; captures de l'anneau au bit (critère 1).
 - [ ] **P4** — la fenêtre : deux parts à `--pas-delta=33333`, β alterné, touche d'interpolation ; banc du mélange au
   bit (critère 2).
 - [ ] **P5** — la saccade mesurée (critère 3).
@@ -105,3 +105,8 @@ Critères, écrits avant le code :
   la publication suivante). Au pas 60, précédente = publiée d'avant, **0 différence** sur 13 440 colonnes ; empreintes
   S343 inchangées ; redimensionnement S350 au bit, allocateur avant = après, **89 849 856 octets, 28 allocations** —
   un tampon de plus que S350 (27).
+- **P3, critère 1 tenu.** `water.wgsl` : liaison 3 (`delta3d_prev`), β dans `d3.size.w`, branche à β = 0 ; `View::blend` ;
+  `attach_delta3d(courante, précédente)`. Captures de l'anneau rejouées (`INSTANTS=0,60,120 … --meilleur
+  --eau-physique=2 --delta3d --anneau --captures`) : `s339a_proche_avec_1.0s` 0x5a79f01d64083ef3, `haute_avec_1.0s`
+  0xd4e6d1e43e57c1cb, `proche_avec_2.0s` 0x2e37efc6f485f73d, `rasante_avec_2.0s` 0x142774b45a5ca313 — **les quatre
+  identiques** aux empreintes publiées (SCENE-DELTA3D-S302 §8).

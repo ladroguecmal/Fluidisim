@@ -1265,7 +1265,6 @@ impl Step3 {
 
     /// S353 : la surface publiée par le pas précédent — le second tampon que le rendu a le droit de lier (ADR-175 D7),
     /// pour l'interpolation d'ADR-012 §7.
-    #[allow(dead_code)] // S353 P3 : lié par le rendu.
     pub fn published_prev_buffer(&self) -> &wgpu::Buffer {
         &self.published_prev
     }

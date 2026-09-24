@@ -123,6 +123,8 @@ pub struct View {
     pub nx: u32,
     pub ny: u32,
     pub active: bool,
+    /// S353 : le poids de la surface du pas précédent, dans `[0, 1]` — 0 montre la courante telle quelle.
+    pub blend: f32,
 }
 
 impl Config {
@@ -134,6 +136,7 @@ impl Config {
             nx: self.domain.nx as u32,
             ny: self.domain.ny as u32,
             active,
+            blend: 0.,
         }
     }
 }

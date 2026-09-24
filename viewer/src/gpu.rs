@@ -311,7 +311,7 @@ impl Gpu {
         };
         let delta3d_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("delta 3d published surface"),
-            entries: &[delta3d_entry(1, false), delta3d_entry(2, true)],
+            entries: &[delta3d_entry(1, false), delta3d_entry(2, true), delta3d_entry(3, false)],
         });
         let delta3d_dummy = buffer(&device, "delta 3d dummy height", 4, wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST);
         let delta3d_uniform = buffer(&device, "delta 3d geometry", 32, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
@@ -321,6 +321,7 @@ impl Gpu {
             entries: &[
                 wgpu::BindGroupEntry { binding: 1, resource: delta3d_dummy.as_entire_binding() },
                 wgpu::BindGroupEntry { binding: 2, resource: delta3d_uniform.as_entire_binding() },
+                wgpu::BindGroupEntry { binding: 3, resource: delta3d_dummy.as_entire_binding() },
             ],
         });
         let render_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -499,13 +500,15 @@ impl Gpu {
     }
     /// S302 : attache la surface publiee d'un domaine delta 3D (D7). Le tampon appartient au pas
     /// de production ; le rendu ne fait que le lire, jamais un tampon interne de delta (I-13).
-    pub fn attach_delta3d(&mut self, published: &wgpu::Buffer) {
+    /// S353 : et la surface publiée par le pas précédent, que le rendu mélange (ADR-012 §7).
+    pub fn attach_delta3d(&mut self, published: &wgpu::Buffer, previous: &wgpu::Buffer) {
         self.delta3d_bind = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("delta 3d published surface"),
             layout: &self.delta3d_layout,
             entries: &[
                 wgpu::BindGroupEntry { binding: 1, resource: published.as_entire_binding() },
                 wgpu::BindGroupEntry { binding: 2, resource: self.delta3d_uniform.as_entire_binding() },
+                wgpu::BindGroupEntry { binding: 3, resource: previous.as_entire_binding() },
             ],
         });
     }
@@ -568,7 +571,7 @@ impl Gpu {
         {
             let v = frame.delta3d;
             let g = v.map_or([0f32; 4], |v| [v.origin[0] - eye[0], v.origin[1] - eye[1], v.dx, v.fade]);
-            let s = v.map_or([0f32; 4], |v| [v.nx as f32, v.ny as f32, if v.active { 1. } else { 0. }, 0.]);
+            let s = v.map_or([0f32; 4], |v| [v.nx as f32, v.ny as f32, if v.active { 1. } else { 0. }, v.blend]);
             let mut bytes = Vec::with_capacity(32);
             for value in g.into_iter().chain(s) {
                 bytes.extend_from_slice(&value.to_le_bytes());

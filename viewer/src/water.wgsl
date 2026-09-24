@@ -35,8 +35,10 @@ struct Params {
 // S302, ADR-175 D7 : la surface **publiée** du domaine δ 3D — `η'` compensé par colonne, rangé
 // `j·nx + i`. C'est le seul tampon de δ que le rendu lie ; aucun tampon interne (I-13).
 @group(3) @binding(1) var<storage, read> delta3d_height: array<f32>;
+// S353, ADR-012 §7 : la surface publiée par le pas **précédent**, pour mélanger deux pas de 30 Hz dans une image à 60.
+@group(3) @binding(3) var<storage, read> delta3d_prev: array<f32>;
 // (x0, y0) coin du domaine relatif à la caméra, pas de maille, largeur du fondu ; puis (nx, ny,
-// actif, réserve).
+// actif, β) — β, S353 : le poids de la surface précédente ; 0 rend la surface courante telle quelle.
 struct Delta3 { geometry: vec4<f32>, size: vec4<f32> }
 @group(3) @binding(2) var<uniform> d3: Delta3;
 
@@ -407,7 +409,11 @@ fn cr_d(t: f32) -> vec4<f32> {
 }
 fn delta3d_at(i: i32, j: i32) -> f32 {
     let nx = i32(d3.size.x); let ny = i32(d3.size.y);
-    return delta3d_height[clamp(j, 0, ny - 1) * nx + clamp(i, 0, nx - 1)];
+    let k = clamp(j, 0, ny - 1) * nx + clamp(i, 0, nx - 1);
+    let c = delta3d_height[k];
+    if (d3.size.w == 0.0) { return c; }
+    // S353 : courant·(1 − β) + précédent·β — exact aux deux bouts, et à β = ½ égal au bit à (c + p)/2.
+    return c * (1.0 - d3.size.w) + delta3d_prev[k] * d3.size.w;
 }
 fn delta3d_row(i0: i32, j: i32, wx: vec4<f32>) -> f32 {
     return wx.x*delta3d_at(i0 - 1, j) + wx.y*delta3d_at(i0, j)
