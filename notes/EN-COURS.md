@@ -62,47 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S349 — **terminée**. **Porte A, un domaine qui se déplace** ; la dernière porte de la v1.
+Session : S350 — **en cours**. **Porte A, un domaine qui se redimensionne** ; la dernière porte de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — S348 : porte C reçue sur le banc ; la v1 ne demande plus que la porte A. Premier critère tenu au banc
-(S344) : deux domaines se disputent un budget — mais un domaine y **vit ou meurt**. Deuxième critère : un domaine
-qui **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint. Cette session : **se déplacer**.
+Entrée — S349 : un domaine δ 3D se déplace, au bit, et suit la caméra sans s'éteindre. Reste du deuxième critère :
+**se redimensionner** ; puis la dégradation de rang 1 (session suivante), qui en a besoin.
 
-**Ce qui le permet.** Dans le pas de production, la position du domaine n'entre que par l'évaluation du fond de B
-(un uniforme) ; le reste travaille en indices locaux. Déplacer le domaine de `(di, dj)` mailles, c'est **décaler son
-état** — vitesses aux faces, surface et son reste compensé, pression de départ, surface publiée — et **déplacer
-l'origine** du fond. Les mailles qui entrent naissent au repos, δ = 0 (I-12) ; celles qui sortent sont perdues, et
-leur volume compté.
+**Un défaut trouvé en préparant.** Les faces normales du bord — `u` en `i = 0` et `i = nx`, `v` en `j = 0` et
+`j = ny` — ne sont jamais écrites par le pas : ce sont des murs pour δ, nuls depuis l'état initial. Le décalage de
+S349 y recopie des valeurs intérieures, qui restent ensuite constantes : un débit parasite à travers le bord.
+L'identité de S349 l'a déclaré conforme parce qu'elle comparait à l'ancien translaté, murs compris.
+
+**Ce qui permet le redimensionnement.** Les noyaux lisent les dimensions dans des uniformes. Les tampons se
+réservent à la **capacité** — la forme de création — ; une **forme courante** (`nx`, `ny` au plus la capacité, `nz`
+fixe) commande comptes, dispatchs, copies et relectures. Redimensionner, c'est réécrire l'état dans la nouvelle
+disposition — recouvrement au bit, murs nuls, repos ailleurs —, puis les uniformes et l'origine.
 
 Critères, écrits avant le code :
-1. **Le décalage** (`Step3::shift`) : sur la scène de B, après un décalage de (+3, −2) mailles, chaque tableau
-   décalé est **identique au bit** à l'ancien translaté dans le recouvrement, au repos ailleurs ; zéro allocation
-   (tampon de travail réservé à la configuration).
-2. **Un domaine qui suit la caméra** le long de la côte de S344 : il se décale vers le point regardé, au plus deux
-   mailles par image ; aucune colonne hors bornes ; sa part d'écran reste celle d'un domaine vu de face ; **aucune
-   naissance ni extinction** pendant le trajet, là où deux domaines fixes en demandaient deux ; coût du décalage
-   publié.
-3. Preuve, file, feuille de route ; le redimensionnement et le rang 1 restent.
+1. **Les murs** : après un décalage, les faces normales du bord sont nulles, le reste au bit comme en S349 ; l'effet
+   sur le volume de δ, mesuré au banc de suivi avant et après.
+2. **La forme courante** : quand elle vaut la capacité, les empreintes du pas de S343 (60 et 600 pas) sont inchangées.
+3. **Le redimensionnement** (`Step3::resize`, une seule soumission) : (a) l'état réécrit est identique au bit à
+   l'ancien dans le recouvrement, murs nuls, repos ailleurs ; (b) **le pas d'un domaine redimensionné est identique
+   au bit à celui d'un domaine créé à cette forme** avec le même état — un domaine, pas une vue ; (c) aucune
+   allocation.
+4. **Le coût suit l'emprise** : pas médian et q99 à 100, 75, 50 et 25 % de la surface, alimentation relevée (A270) ;
+   le décalage, devenu un redimensionnement à forme égale, remesuré.
+5. Preuve, file, feuille de route.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le noyau de décalage, `Step3::shift`, l'origine du fond ; critère 1.
-- [x] **P3** — le domaine qui suit la caméra ; critère 2.
-- [x] **P4** — preuve, file, feuille de route ; critère 3.
-- [x] **P5** — rituel.
+- [ ] **P2** — les murs après un décalage ; critère 1.
+- [ ] **P3** — la forme courante dans `Step3` ; critère 2.
+- [ ] **P4** — `Step3::resize` en une soumission ; critère 3.
+- [ ] **P5** — le coût selon l'emprise ; critère 4.
+- [ ] **P6** — preuve, file, feuille de route ; critère 5.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu.** `delta3d_shift.wgsl` et `Step3::shift(di, dj)` : sept tableaux — `u`, `v`, `w`, surface,
-  reste compensé, pression de départ, surface publiée —, chacun recopié dans un tampon de travail réservé à la
-  configuration puis réécrit décalé ; l'origine du fond avance. `--delta3d-decalage`, scène de B après 30 pas,
-  décalage (+3, −2) : **0 valeur différente au bit** dans les recouvrements (363 440 faces `u`, 363 636 `v`, 373 230
-  `w`, 12 870 colonnes, 360 360 mailles), entrants au repos ; origine (−15 ; 0) → (−14,25 ; −0,5). Empreintes du pas
-  de S343 inchangées.
-- **P3, critère 2 tenu** (`--delta3d-suivi`, côte de S344, budget 5 ms, 1 200 images). **Un seul domaine** se décale
-  vers le point regardé : **480 décalages d'une maille** (120 m), un par image pendant les trajets ; part d'écran
-  **0,1629 constante** après 1 s — un domaine vu de face — ; **1 naissance (au départ), 0 extinction**, là où deux
-  domaines fixes en demandaient deux de chaque (S344) ; **aucune colonne hors bornes**. Décalage, temps réel de la
-  soumission à la fin sur la carte : **médiane 1,463 ms, max 4,872** — sept soumissions séparées ; les grouper en une,
-  avec sept uniformes, est la suite évidente. `diagnostics_now` et `wait` ajoutés pour le banc.
-
