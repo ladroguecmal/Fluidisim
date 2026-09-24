@@ -1935,6 +1935,63 @@ pub fn cout_scene() -> Result<(), String> {
     })
 }
 
+/// S345, porte C, critère 1 — **la cadence de δ** : la cuve de S305 (mode (1, 1), `nx` = 32, 64 cycles) sur la
+/// carte, au pas de 1, 16,667 et 33,333 ms, pendant deux périodes. Par pas de temps : la **période** du mode, tirée
+/// de ses passages par zéro, et son **amplitude** aux extrêmes, rapportée à l'amplitude initiale. ADR-012 §7 veut
+/// δ à 30 Hz : c'est le pas de 33,3 ms qu'il faut recevoir. `--delta3d-cadence-cuve`.
+pub fn cadence_cuve() -> Result<(), String> {
+    use crate::scene::host_impl;
+    pollster::block_on(async {
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 26);
+        let background = fond_nul(&mut alloc)?;
+        let (rho, g) = (1025_f32, 9.81_f32);
+        let Cuve { domain, rest, eta, mode } = cuve(32, g as f64);
+        let (kx, ky, _k, omega) = mode;
+        let periode_theorie = std::f64::consts::TAU / omega;
+        let total = face_total(domain);
+        let (nu, nv) = ((domain.nx + 1) * domain.ny * domain.nz, domain.nx * (domain.ny + 1) * domain.nz);
+        let zeros = vec![0f32; total];
+        println!("DELTA3D_CADENCE_S345 cuve nx=32 ny={} nz={} periode_theorie_s={periode_theorie:.6} amplitude_m={CUVE_A} cycles=64", domain.ny, domain.nz);
+        for pas_us in [1_000u64, 16_667, 33_333] {
+            let mut carte = Step3::new(&background, domain, [0., 0., -rest], rho, g).await?;
+            carte.set_step(pas_us, rest, Sponge3::default())?;
+            carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[..total - nu - nv], &eta)?;
+            let dt = pas_us as f64 * 1e-6;
+            let pas = (2.02 * periode_theorie / dt).ceil() as u64;
+            let (mut passages, mut extremes) = (Vec::new(), Vec::new());
+            let (mut avant, mut avant2) = (CUVE_A, CUVE_A);
+            for n in 0..pas {
+                carte.publish_time(&background, SimTime(n * pas_us))?;
+                carte.run_for_bench(64, Upto::Full)?;
+                let publiee = carte.published()?;
+                let (a, _) = projection_modale(&publiee, 0., domain, kx, ky);
+                let t = (n + 1) as f64 * dt;
+                if (a < 0.) != (avant < 0.) {
+                    passages.push(t - dt + dt * avant / (avant - a));
+                }
+                // Extrême : le pas précédent dépasse ses deux voisins en valeur absolue.
+                if n >= 1 && avant.abs() >= avant2.abs() && avant.abs() > a.abs() {
+                    extremes.push((t - dt, avant.abs()));
+                }
+                avant2 = avant;
+                avant = a;
+            }
+            let periode = if passages.len() >= 2 {
+                2. * (passages[passages.len() - 1] - passages[0]) / (passages.len() - 1) as f64
+            } else {
+                f64::NAN
+            };
+            let dernier = extremes.last().map_or(f64::NAN, |e| e.1 / CUVE_A);
+            println!(
+                "DELTA3D_CADENCE_S345 cuve pas_ms={:.3} pas={pas} passages={} periode_s={periode:.6} ecart_theorie_pct={:.4} extremes={} amplitude_derniere_extreme_sur_a0={dernier:.5} a_t={:.3}s",
+                dt * 1e3, passages.len(), 100. * (periode / periode_theorie - 1.), extremes.len(),
+                extremes.last().map_or(f64::NAN, |e| e.0)
+            );
+        }
+        Ok(())
+    })
+}
+
 /// Banc P6 : **coût du pas entier sur la carte**, machine de référence (ADR-174 D1). Passe
 /// horodatée du premier dispatch au dernier, copies comprises, sans aucune relecture d'état : la
 /// forme de production. Fond spectral réel du cas S298 (64 composantes). Premier passage écarté.

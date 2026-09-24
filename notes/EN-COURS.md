@@ -84,9 +84,14 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le banc de cadence : la cuve à trois pas de temps ; critère 1.
+- [x] **P2** — le banc de cadence : la cuve à trois pas de temps ; critère 1.
 - [ ] **P3** — la scène de B à 30 et 60 Hz ; critère 2.
 - [ ] **P4** — preuve, file ; critère 3.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu** (`--delta3d-cadence-cuve`, cuve de S305, `nx` 32, 64 cycles, deux périodes). Période /
+  amplitude au dernier extrême : **1 ms** 2,150743 s (+0,376 % à la théorie, spatial) / 1,00005 ; **16,7 ms**
+  2,150533 / 1,00002 ; **33,3 ms 2,149899 / 0,99987** — soit −0,039 % de période et −0,013 % d'amplitude contre
+  1 ms, pour 1 % permis. Le pas de temps ne pèse presque pas sur ce mode.
+
