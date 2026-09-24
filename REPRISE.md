@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-25 01:00 +02:00
+JETON            : libre
+Battement        : 2026-09-25 01:01 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S356 — **rendu 1 (ADR-191) : les crêtes de B** — l'écume à la couverture de Monahan, seuil normalisé par l'écart-type du jacobien au pixel ; la lumière qui traverse les crêtes ; images pour R19
-Dernière session : S355 — **la question du réalisme** : [ADR-191](docs/adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md), décision de l'utilisateur — l'architecture de l'eau ne change pas ; moteur maison à construire, dont nous écrivons la part de l'eau en module depuis l'afficheur ; une session de rendu, une de physique. La coque sur la carte, pas commencée, reportée telle quelle
-Session suivante : **rendu 1** (ADR-191 D3) — **l'écume des crêtes de B** (8.4) : là où le jacobien du déplacement CWM, déjà calculé par pixel, se replie, la crête blanchit ; seuil tiré d'une loi de couverture mesurée, pas choisi ; écrit séparable (module WGSL, entrées publiées, coût) ; images avant/après pour une revue R19. Puis la physique : la coque sur la carte (`Linear3`, plan de S355 au commit `a2c81dea`). En attente : R18
-Maillons        : 2 — S354 : une attribution corrigée ; S355 : une décision, pas une capacité
+Session en cours : aucune
+Dernière session : S356 — **rendu 1, les crêtes de B** : écume à la couverture de Monahan (un seuil par empreinte), lumière des crêtes (transmission de Pope & Fry), module séparable, au bit éteint ([preuve](docs/validation/RENDU-CRETES-S356.md)) ; puis **décision de l'utilisateur : le rendu de l'eau dans Godot 4** ([ADR-192](docs/adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md))
+Session suivante : **rendu 2 (ADR-192 D2) — la mer de B dans Godot 4.4.1** : un projet Godot hors du cœur, les composantes de B exportées par l'afficheur, un nuanceur d'eau qui porte le CWM de la bande et les crêtes de S356 dans l'environnement de Godot (ciel, tonalité AgX, reflets) ; images jugées par l'utilisateur (R19), sans intégration native ni téléchargement. Puis la physique : la coque sur la carte (plan de S355, `a2c81dea`). En attente : R18
+Maillons        : 3 — S354 : une attribution ; S355 : une décision ; S356 : un module non jugé et une décision (justifié au journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -16939,3 +16939,23 @@ l'ADR de la coque (plan au commit `a2c81dea`) — aucune ligne n'avait été éc
 l'écume des crêtes de B** (8.4) — le gradient du déplacement CWM est déjà calculé par pixel ; puis la physique, la
 coque sur la carte. Verdict R18 toujours attendu.
 
+## S356 — 2026-09-25 — rendu 1 : les crêtes de B ; le rendu de l'eau dans Godot (ADR-192)
+
+**Entrée.** ADR-191 : une session de rendu ; l'ordre de S307 que le verdict R14 nommait — lumière des crêtes, écume.
+**Fait** ([preuve](../docs/validation/RENDU-CRETES-S356.md)). La couverture de Monahan au vent de la mer, 0,421 % à
+`U₁₀` = 7,79 m/s, tirée du jacobien CWM normalisé, dont la queue basse est plus lourde que la gaussienne (−2,31 contre
+−2,64). **Hypothèse contredite** : un seuil normalisé unique ne tient pas quand le rendu filtre (jusqu'à 2 × W) ; un
+seuil par empreinte la tient à ±7 % sur tirage indépendant. Module séparable `water_cretes.wgsl` : écume (Koepke 0,22,
+écume fraîche 0,55), lumière des crêtes (transmission de Pope & Fry sur `Hs`, cyan) ; éteint, images au bit ; +0,026 ms.
+**Ce que les images ont dit.** À 0,22 l'écume est grise et disparaît en rasant ; à 0,55, des taches blanches sur la crête
+de la houle ; la première teinte des crêtes faisait du bleu électrique.
+**Décision de l'utilisateur**, en cours de session : *« Peut être godot ou unreal serait envisageable car rendu toujours
+pas convaincant »* → **Godot 4**, présent sur le poste (Unreal absent) — [ADR-192](../docs/adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md) :
+le rendu final de l'eau dans Godot, premier pas un prototype de la mer de B jugé sur images ; l'afficheur reste le banc.
+R19 dans l'afficheur abandonnée.
+**Limites.** Écume sans durée, sans texture, sans source hors de B ; crêtes non calibrées ; rien de jugé : 8.4 absent.
+**Rituel.** Maillons **3**, justifiés : deux décisions de l'utilisateur ont réorienté le rendu en deux sessions ; ce qui
+est construit — la loi de l'écume, la teinte des crêtes — ne dépend d'aucun moteur et se porte tel quel ; la suite rend
+une image à juger. Suivant : **le prototype Godot**, premier pas choisi par l'utilisateur (ADR-192 D2) ; l'alternance
+reprend ensuite avec la coque sur la carte (6.4). R18 toujours attendu.
+

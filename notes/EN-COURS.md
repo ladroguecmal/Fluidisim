@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S356 — **en cours**. **Rendu 1 (ADR-191) : les crêtes de B — l'écume et la lumière qui les traverse.**
+Session : S356 — **terminée**. **Rendu 1 (ADR-191) : les crêtes de B — l'écume et la lumière qui les traverse.**
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — ADR-191 : une session de rendu, une de physique ; la part de l'eau du rendu du moteur maison s'écrit en
 module, depuis l'afficheur. **Ce qui est déjà su** : au verdict R14 (S308), l'utilisateur a nommé le travail
@@ -100,7 +100,7 @@ quand même, le module restant la référence à porter.*
 - [x] **P4** — la lumière des crêtes ; critère 3.
 - [x] **P5** — la décision de l'utilisateur (ADR-192) et le coût du module ; critère 4 réduit au coût.
 - [x] **P6** — preuve, file, feuille de route, liste, index ; critère 5 sans R19.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu — avec une hypothèse contredite.** `--meilleur --ecume-loi` (`rendu_cretes.rs`) : bande 64,
