@@ -96,7 +96,7 @@ Critères, écrits avant le code :
 - [x] **P3 bis** — *ajouté* : le **plancher d'ouverture** du couvercle partiel, 10 % ; critère 3.
 - [x] **P4** — *amendé* : la convergence de la tranche **avec ce plancher** — 25 ; 12,5 ; 6,25 cm — et le banc 3D ;
   critère 4 bis ; défaut allumé si tenu ; critère 4.
-- [ ] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
+- [x] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
 - [ ] **P6** — preuve (PORTE-D-S333 §7) ; A317 ; file, feuille de route, liste si un état change.
 - [ ] **P7** — rituel.
 
@@ -130,3 +130,9 @@ avant la mesure : avec ce plancher, la tranche converge encore — écart ≤ 5 
   qu'aux lamelles de moins de 10 % à maille grossière, et la convergence demeure.** **Défaut allumé** (critère 4) :
   496 réussis, 0 avertissement ; trois valeurs S3xx changent — pilonnement de S332 2,7266 → 2,7250·10⁻¹⁰ m³,
   décalage 0,0667 → 0,0666 m (couvercles « poussière » du cube), contre-épreuve de S333 0,3234 → 0,5541 m/s.
+- **P5, scène de la porte D au couvercle partiel avec plancher** (`--couvercle-partiel` ; sans option, le
+  couvercle de S332, pour que S333 se reproduise au bit). 30/30 : **identique au bit** à S334 (parois à 30 %,
+  plancher sans effet) — flancs 46,49 / 46,52 mm, δ 13,2 cm, 0,69 m/s, volume 8,3·10⁻⁹. 8/52 : flancs 55,32 /
+  45,42 mm, **rapport 1,218** (S332 : 3,42), δ 16,8 cm, 0,90 m/s (sans plancher 1,07), volume 7,5·10⁻⁹. Critère 3
+  au bit, critère 5 de S333 tenu (sous 25 cm). Images `viewer/captures/s335` ; 8/52 à 8 s : scène
+  `0xc68ca482478b2d21`, carte `0x4f14be1962bb37e3`.
