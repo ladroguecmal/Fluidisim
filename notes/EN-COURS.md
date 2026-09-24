@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S355 — **en cours**. **La v1 en scène vivante, 2 : la coque dans la production de δ** — d'abord le pas
+Session : S355 — **terminée**. **La v1 en scène vivante, 2 : la coque dans la production de δ** — d'abord le pas
 linéaire sur la carte.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — *« Continue »*. Liste 6.4 : manque la production GPU. **Constat** : la coque a été reçue dans le **mode
@@ -95,7 +95,7 @@ prochaine session de physique ; le plan initial est au commit `a2c81dea`.*
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la décision de l'utilisateur : ADR-191, note datée d'ADR-178, file, feuille de route, liste 8.1, index,
   REPRISE §5.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
 - **P2, la question et les réponses.** Référence de l'utilisateur : FluidNinja LIVE-2 (Fab, Unreal, Andras Ketzer) —

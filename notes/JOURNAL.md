@@ -16919,3 +16919,23 @@ passait dans les colonnes, la durée d'usage non tenue (L360, L369). Aucune prot
 liste ne change d'état. Suivant, par l'alternance : **la v1 en scène vivante** — la coque dans la production de δ
 (6.4). Au lot 5 ensuite : la densité tenue à la frontière. Verdict R18 toujours attendu.
 
+## S355 — 2026-09-25 — la question du réalisme : ADR-191 ; la coque sur la carte reportée
+
+**Entrée.** *« Continue »* : la v1 en scène vivante, la coque dans la production de δ (6.4). Constat avant tout code :
+la coque a été reçue dans le mode **linéaire** (couvercle, S330–S337) ; la production est le pas mobile couplé, qui
+n'a de solide nulle part. Chemin retenu au plan : porter sur la carte le mode linéaire de la porte D.
+**Question de l'utilisateur**, avant la première ligne : *« Est ce que tu penses que l'architecture […] doit changé ?
+[…] pas assez réaliste »*, référence FluidNinja LIVE-2 — une simulation 2D attachée au joueur qui pilote, dans
+Unreal, un rendu riche : écume et détail entraînés par ses vitesses, particules, scène dessinée.
+**Réponse de la session.** Notre architecture a la même forme — δ près du joueur, B au loin — et va plus loin ;
+l'écart est dans le rendu, un instrument arrêté par ADR-178 D2 : ni écume, ni réfraction, ni absorption, ni lumière
+sous la surface, ni embruns, ni décor.
+**Décision de l'utilisateur** ([ADR-191](../docs/adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md)) :
+l'architecture ne change pas ; le jeu aura un **moteur maison, à construire** ; le rendu final s'y fait, et **nous
+en écrivons la part de l'eau en module**, depuis l'afficheur ; **une session de rendu, une de physique**.
+**Non fait, reporté tel quel** à la prochaine session de physique : `Linear3`, son banc contre `Volume3`, son coût,
+l'ADR de la coque (plan au commit `a2c81dea`) — aucune ligne n'avait été écrite.
+**Rituel.** Maillons **2** : une décision, pas une capacité ; la suite en est une. Suivant (ADR-191 D3) : **rendu 1,
+l'écume des crêtes de B** (8.4) — le gradient du déplacement CWM est déjà calculé par pixel ; puis la physique, la
+coque sur la carte. Verdict R18 toujours attendu.
+
