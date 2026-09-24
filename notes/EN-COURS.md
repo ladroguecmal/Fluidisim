@@ -96,7 +96,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'impact dans la scène ; options lues avant les captures ; critère 1.
-- [ ] **P3** — banc sans fenêtre ; critère 2, choix de `A` et `σ`.
+- [x] **P3** — banc sans fenêtre ; critère 2, choix de `A` et `σ`.
 - [ ] **P4** — captures, aperçus ; critère 3.
 - [ ] **P5** — preuve (SCENE-DELTA3D-S302 §6) ; R16 au registre ; file.
 - [ ] **P6** — rituel ; arrêt pour le verdict.
@@ -106,4 +106,13 @@ Critères, écrits avant le code :
   centre (0, 12), à régler en P3 ; `--impact` ; les captures δ 3D rendent la main après les options de rendu ;
   dossier `s339`. `INSTANTS=60,120 --houle --delta3d --captures` avant et après : **16 empreintes identiques au
   bit** (1 s : référence avec `0xa460b685bdc480b4` … ; 2 s : haute sans `0xd5be2b4afa89d233`).
+- **P3, critère 2.** `IMPACT=A,σ --delta3d-scene-mesure --impact`, 12 s, centre (0, 14). Six cratères, **tous sans
+  colonne hors bornes**, pas dégradés comme le témoin (tous, S302). Divergence franche max : 0,018 (0,4 ; 1,5),
+  0,026 (0,6 ; 1,5), 0,040 (0,8 ; 2), 0,059 (1 ; 2,5), 0,034 (0,65 ; 2,5), 0,057 (0,78 ; 3) — témoin 0,022, paquet
+  de S302 0,022–0,034. **Retenu : A 0,65 m, σ 2,5 m** — pente 0,252 (prévue 0,255) sous 0,26 (critère 1) ; volume
+  net −1,1·10⁻⁵ m³ pour 9,4 m³ de creux, arrondi f32 ; à σ 3 m la queue tronquée laisse −1,9·10⁻³ m³, rejeté ;
+  pentes 0,39 écartées par le critère 1. Anneaux (moyenne azimutale de l'onde isolée) : 0,105 m à 6,75 m (3 s),
+  0,079 à 10,25 (5 s) ; maximum isolé 0,13–0,17 m. Rayon / trajet de groupe (2,08 m/s) : 3 s 1,08 ; 4 s 0,81 ;
+  5 s 0,98 ; 6 s 0,78 — **tenu** ; avant 3 s le maximum est le bord du cratère qui s'effondre ; 7 s 0,63, 8 s 0,74 :
+  l'anneau dominant a passé 11 m, l'éponge. Coût 4,6 ms, inchangé.
 

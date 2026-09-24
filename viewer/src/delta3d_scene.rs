@@ -139,11 +139,22 @@ impl Config {
     }
 
     /// S339, revue R16 : la scène de R11, même domaine, même mer, même éponge — le front remplacé
-    /// par un impact devant la caméra, à 30 m d'elle. `A` et `σ` : choisis au banc sans fenêtre.
+    /// par un impact au milieu de la partie libre du domaine, à 32 m de la caméra. **A = 0,65 m,
+    /// σ = 2,5 m**, choisis au banc sans fenêtre (S339 P3) : le plus grand cratère dont la pente
+    /// reste sous celle du paquet de S302 (0,252 pour 0,26) et dont le profil tient dans le domaine
+    /// — à σ = 3 m, sa queue tronquée par les bords laisse 1,9·10⁻³ m³ de volume net. `IMPACT=A,σ`
+    /// les remplace, pour la mesure.
     pub fn impact_review() -> Self {
+        let (depth, sigma) = std::env::var("IMPACT")
+            .ok()
+            .and_then(|v| {
+                let mut it = v.split(',').filter_map(|x| x.parse::<f32>().ok());
+                Some((it.next()?, it.next()?))
+            })
+            .unwrap_or((0.65, 2.5));
         let mut c = Self::review();
         c.packet.amplitude = 0.;
-        c.impact = Some(Impact { depth: 0.4, sigma: 1.5, center: [0., 12.] });
+        c.impact = Some(Impact { depth, sigma, center: [0., 14.] });
         c
     }
 
