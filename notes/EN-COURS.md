@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S336 — **en cours**. **La coque qui cesse de pilonner** : δ mesure hors ligne la masse ajoutée et
+Session : S336 — **terminée**. **La coque qui cesse de pilonner** : δ mesure hors ligne la masse ajoutée et
 l'amortissement par rayonnement de la coque de la porte D, que le corps du jeu reçoit comme des constantes de
 son archétype — ADR-008 §2, I-04 intact ; chemin de la porte D ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -94,7 +94,7 @@ Critères, écrits avant le code :
   l'eau ; critère 2 bis.
 - [x] **P4** — la scène de la porte D amortie ; critère 3 ; images (critère 4).
 - [x] **P5** — preuve `docs/validation/RAYONNEMENT-COQUE-S336.md` ; liste, file, feuille de route.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2, `A(ω)` et `B(ω)`** (pilonnement imposé 5 cm, placement 30/30, fenêtre de deux périodes après 3 s). À 25 cm :

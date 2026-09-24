@@ -16591,3 +16591,20 @@ position sous la maille, à la résolution près ; le chemin — la porte D, un 
 preuve — §6–7, correction d'intégrité reproduite puis éprouvée. Suivant : **S336, l'amortissement par
 rayonnement de la coque**, mesuré par δ hors ligne ; verdict visuel toujours attendu (R15).
 
+## S336 — 2026-09-24 — porte D : la coque qui cesse de pilonner
+
+**Entrée.** *« Continue »* ; suite déclarée par S335. Verdict visuel toujours attendu (R15).
+**Fait** ([preuve](../docs/validation/RAYONNEMENT-COQUE-S336.md)). Banc `rayonnement_coque` : pilonnement imposé,
+force de δ décomposée en masse ajoutée et amortissement de rayonnement. Corps du jeu : `radiation_damping`,
+linéaire en la vitesse relative à l'eau ; masse ajoutée sur l'accélération **relative** — celle de S331
+agissait sur l'absolue, fausse sur la houle (+6 % à 6 s, +33 % à 3 s).
+**Mesuré.** A ≈ 0,9–1,05 fois la masse, B 4 800–7 100 N·s/m ; archétype A = 3 200 kg, B = 6 400 N·s/m, ζ = 0,158,
+± 10 %. Lâcher en eau calme : période et décrément à 0,05 %. Scène : la coque s'arrête en 3–4 s ; elle dissipe
+**353 J**, δ en reçoit **345 — rapport 0,977**.
+**Manqué, publié.** Le résidu de l'ajustement, 5–9 % pour 5 % : sauts de découpe quand le fond franchit une
+face.
+**Non fait.** Les autres degrés de liberté ; la dépendance en fréquence ; W derrière la requête.
+**Rituel.** Maillons **0** : ce qui devient possible — un bateau de jeu dont le mouvement et l'eau qu'il
+remue sont cohérents en énergie ; le chemin — la porte D ; la preuve — S336 ; 6.1 avance. Suivant : **le
+verdict visuel** sur les images de S336 (ADR-189 D3) ; sans verdict, W derrière la requête du corps.
+
