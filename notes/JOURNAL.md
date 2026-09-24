@@ -16840,3 +16840,24 @@ visuel sur une croissance ; ce qui sort n'est pas rendu à W (A289). Afficheur :
 **Rituel.** Maillons **0** : ce qui devient possible — rétrécir un domaine libère son coût au prorata de sa surface ;
 le chemin — la dégradation de rang 1, dernier critère de la porte A, donc de la v1 ; la preuve — §6. Suivant : **le
 rang 1**. En attente : le terme de D2 (lot 5). File, feuille de route, index et liste à jour.
+
+## S351 — 2026-09-24 — porte A : le rang 1 ; les quatre portes reçues, la v1 atteinte au sens d'ADR-174 D4
+
+**Entrée.** *« Continue, après la V1 ton objectif seras de completer entièrement la to do liste »* : **ADR-190** —
+après la v1, la liste du projet fini entière, points validés au périmètre final ; le lot 5 reprend après la v1 (D2
+d'ADR-189 tranchée). Porte en cours : A, dont restait la dégradation de rang 1 d'ADR-012 §4.
+**Fait** ([preuve](../docs/validation/ARBITRAGE-3D-S344.md) §7). Dans `scheduler.rs` : `Shrink` déclaré, focal servi
+entier, non-focaux à une échelle commune, descente immédiate, remontée rampée après une seconde ; sans déclaration,
+S278 au bit (empreinte `6aebff024c734fc9`). Dix essais `_s351`, suite du cœur 631 réussis. Banc `--delta3d-rang1` :
+deux domaines à 36 m, une pause où les deux sont voulus — à 60 m, aucune pose ne les rendait voulus ensemble.
+**Mesuré** (carte préchauffée) : **aucune image affamée contre 612** au témoin ; 615 images où les deux sont servis ;
+focal jamais rétréci ; q99 mesuré **4,983 ms pour 5** avec le coût annoncé au maximum des huit derniers pas — à la
+médiane, 20 images au-dessus, +0,045 ms au pire.
+**Manqué, publié.** Carte froide : un focal seul dont le premier pas coûte 22 ms reste affamé 17 images (témoin : 16),
+démarrage de S344 §3 ; le critère « aucune image affamée » n'est tenu que carte chaude.
+**Le prix** : une descente coupe jusqu'à **11,3 cm** de δ, sans verdict — **A319**, la gratuité jamais mesurée.
+**Porte A reçue sur le banc ; la v1 atteinte au sens de D4** — portes reçues chacune sur son banc ou sa référence, pas
+encore réunies en une scène vivante (feuille de route, « La v1 »). Liste : **4.2 et 9.9 à partiel**, 3 / 58 / 59.
+**Rituel.** Maillons **0** : ce qui devient possible — deux domaines δ servis ensemble sous un budget qui n'en tient
+qu'un ; le chemin — la liste, dont 4.2 et 9.9 ; la preuve — §7. Suivant (ADR-190 D3) : **ranger les points restants
+par dépendance** dans la feuille de route.

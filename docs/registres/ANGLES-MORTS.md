@@ -4336,3 +4336,12 @@ localisée. Suite : revue R17 aux deux cadences. [Preuve](../validation/COUT-DEL
 d'amplitude entre 30 et 60 Hz ne se voit pas, ou ne gêne pas. La cadence de 30 Hz est adoptée ; l'amortissement par
 pas reste une propriété mesurée du schéma, publiée, non corrigée. Reste ouvert comme connaissance, plus comme
 obstacle.
+
+**A319 — S351, 2026-09-24 (sévérité 2, ouverte). « Rétrécir ou détruire un domaine perturbatif est visuellement
+gratuit » n'a jamais été mesuré.** C'est la prémisse d'I-12, d'ADR-005 §5 et des rangs 1 et 5 d'ADR-012 §4 : δ = 0 au
+bord, donc rien à perdre. Le rang 1 l'a mesurée pour la première fois : sur la mer de la porte B (`Hs` 2,5 m), la
+correction couplée que δ porte monte à 18,6 cm, et une descente de 120 × 112 à 69 × 65 mailles en **retire jusqu'à
+11,3 cm** dans une bande que le rendu pondérait entièrement ; les descentes d'une maille coupent 0,3 à 10 cm, dans le
+fondu. Rien ne dit si cela se voit. Déclencheur : avant qu'un point de la liste ne s'appuie sur cette gratuité (4.5,
+9.9), une revue visuelle de la descente ; si elle se voit, un rétrécissement qui **amortit** avant de couper, comme
+ADR-012 §4 le décrit pour le rang 1 sous pression. [Preuve](../validation/ARBITRAGE-3D-S344.md) §7.

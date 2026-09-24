@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S351 — **en cours**. **Porte A, la dégradation de rang 1** — le dernier critère de la v1 ; et la décision
+Session : S351 — **terminée**. **Porte A, la dégradation de rang 1** — le dernier critère de la v1 ; et la décision
 de l'utilisateur sur l'après-v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — S350 : un domaine δ 3D se déplace et se redimensionne, au bit ; son coût suit sa surface (0,09 + 3,57 ms ×
@@ -102,7 +102,7 @@ Critères, écrits avant le code :
 - [x] **P4** — l'anti-pompage : engagement et rampe ; essais (critère 1 c).
 - [x] **P5** — le banc de la côte avec rang 1, et son témoin ; critères 2 et 3.
 - [x] **P6** — preuve, file, feuille de route, liste ; la porte A et la v1 si reçues ; critère 4.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - Écart réglable `ECART=` ajouté à `domaines()` (défaut 60 m, S344 inchangé). Parts d'écran à 36 m : x = 18,8 m →
