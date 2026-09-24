@@ -93,7 +93,7 @@ Critères, écrits avant l'écriture :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le verdict : revue visuelle, preuve ; la réception dans la feuille de route et REPRISE.
-- [ ] **P3** — la liste : 4.15, 6.1, 6.3, 6.4, 6.5, décompte ; la file : porte D, lots 3–4, décisions.
+- [x] **P3** — la liste : 4.15, 6.1, 6.3, 6.4, 6.5, décompte ; la file : porte D, lots 3–4, décisions.
 - [ ] **P4** — note datée d'ADR-189.
 - [ ] **P5** — rituel ; suite : la porte B.
 

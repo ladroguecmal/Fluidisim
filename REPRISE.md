@@ -98,7 +98,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   corrigé (S335) ; rayonnement mesuré par δ (S336) ; bord de δ invisible (S337). Restent W derrière la requête
   du corps, la coque dans la production de δ. **La v1 demande encore A, B et C.**
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
-- Liste du projet fini : **3 validés, 54 partiels, 63 absents** sur 120.
+- Liste du projet fini : **3 validés, 55 partiels, 62 absents** sur 120.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
 nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`

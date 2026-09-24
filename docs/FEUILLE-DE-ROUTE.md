@@ -299,8 +299,8 @@ date. Profil de travail de la porte C : [ADR-174](adr/ADR-174-arbitrages-du-2026
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 54 partiels,
-63 absents — **recalculé point par point en S309**, 4.8 (S316), 4.12 (S320) et 6.2 (S333) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 55 partiels,
+62 absents — **recalculé point par point en S309**, 4.8 (S316), 4.12 (S320), 6.2 (S333) et 6.4 (S338) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la

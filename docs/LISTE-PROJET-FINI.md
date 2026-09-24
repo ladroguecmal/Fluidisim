@@ -181,7 +181,8 @@ pas recopiée ici (L137).
   Petites cellules préconditionnées (S326) ; **mode mobile** depuis S328 — au bit de la 2D sans `y`,
   ordre 1,954 sur la bosse ; **obstacles immergés quelconques** depuis S329 — sphère d'ordre 1,966,
   Archimède exact au niveau discret ; **en mouvement imposé** depuis S330 — masse ajoutée d'une sphère
-  à 1,6 % de la théorie. Manquent la rotation, les obstacles qui percent la surface, le couplage à B/W
+  à 1,6 % de la théorie ; **rotation et coque qui perce la surface** depuis S332
+  ([preuve](validation/CORPS-RIGIDE-S331.md) §4), sous couvercle partiel depuis S335. Manquent le couplage à B/W
   sur fond coupé et la turbulence — **aucun modèle de turbulence n'existe nulle part dans le dépôt**. Lot 3 d'ADR-178.
 - [ ] **4.16 Surface non graphe** : déferlement, éclaboussures détachées — *absent*. **C'est le
   point le plus lourd de la liste** : il demande un **second solveur**, pas une extension du
@@ -244,19 +245,25 @@ pas recopiée ici (L137).
   trajectoire (I-04) ; **sur une houle de B** depuis S333, pilonnement forcé à 3·10⁻⁵, δ relatif à l'eau
   qui la porte ([preuve](validation/PORTE-D-S333.md)) ; **masse ajoutée et amortissement de rayonnement de
   pilonnement** mesurés par δ depuis S336, l'énergie dissipée égale à celle que δ reçoit à 2,3 % près
-  ([preuve](validation/RAYONNEMENT-COQUE-S336.md)). Manquent W derrière la requête, les autres degrés de
-  liberté, le verdict visuel de la porte D.
+  ([preuve](validation/RAYONNEMENT-COQUE-S336.md)) ; **porte D reçue** sur la référence CPU en S338, verdict
+  R15 ([preuve](validation/PORTE-D-S333.md) §9). Manquent W derrière la requête, l'amortissement des autres
+  degrés de liberté, C11 et B6 sur ses cinq archétypes.
 - [ ] **6.2 Forces de l'eau sur les objets** : vagues, courant, turbulence, sous la frontière
   d'autorité d'ADR-008 — *partiel* depuis S333 : les **vagues de B** — poussée et gradient de la pression
   du proxy, la coque cavale avec la houle à 0,1 % ([preuve](validation/PORTE-D-S333.md)). Manquent W, le
   courant, la turbulence.
 - [ ] **6.3 Un objet en mouvement produit son sillage** — *partiel* : mouvement et charge prescrits
-  vers la source de pression (ADR-103). Manque le corps réel couplé.
-- [ ] **6.4 Parois et corps mobiles dans δ** (C23) — *absent* sur le système ; C23 exécuté sur un
+  vers la source de pression (ADR-103). Le corps réel remue δ depuis S332, sans avancer (porte D) :
+  manque le corps en marche couplé à la source.
+- [ ] **6.4 Parois et corps mobiles dans δ** (C23) — *partiel* depuis S330 : un **solide en mouvement
+  imposé** dans la référence 3D, masse ajoutée d'une sphère à 1,6 % ([preuve](validation/FACES-COUPEES-3D-S324.md)
+  §9) ; la **coque du corps rigide**, qui tourne et perce la surface, pilotée par le jeu (S332–S337,
+  [porte D](validation/PORTE-D-S333.md)). Manquent la production GPU et C23 sur le système — exécuté sur un
   véhicule d'essai.
-- [ ] **6.5 Décor fixe comme frontière imposée** — *partiel* : fonds lisses coupés **en 2D
-  seulement** (S232) ; le solveur 3D n'a pas de faces coupées. Lot 3 d'ADR-178, qui conditionne
-  6.1, 6.4 et les essais 2 et 3 du banc de la piscine.
+- [ ] **6.5 Décor fixe comme frontière imposée** — *partiel* : fonds lisses coupés en 2D (S232) **et
+  en 3D** depuis S324 ; **solide immergé quelconque** depuis S329, Archimède exact au niveau discret —
+  référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8). Manquent la production GPU et un décor
+  qui perce la surface, éprouvé comme tel.
 - [ ] **6.6 Grands navires** — *absent*.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *absent*.
 - [ ] **6.8 Impulsion d'entrée dans l'eau** (slamming, C20) — *absent*.
@@ -418,7 +425,7 @@ pas recopiée ici (L137).
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 9 | 12 |
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
-| 6. Solides | 8 | 0 | 4 | 4 |
+| 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 0 | 8 |
 | 8. Rendu | 10 | 0 | 7 | 3 |
 | 9. Activation et budget | 13 | 0 | 6 | 7 |
@@ -426,11 +433,13 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **54** | **63** |
+| **total** | **120** | **3** | **55** | **62** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
---check` compare ce tableau aux points, section par section.
+--check` compare ce tableau aux points, section par section. *S338, 2026-09-24* : **6.4** passe à partiel —
+parois et corps mobiles dans δ depuis S330–S332, que la liste n'avait pas suivis — ; 4.15, 6.1, 6.3 et 6.5
+corrigés sans changer de case.
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.
