@@ -62,79 +62,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S335 — **terminée**. **La vitesse de paroi au centroïde de la part couverte** — le remède nommé en
-S332 —, puis le couvercle partiel d'A317 allumé par défaut ; chemin de la porte D
-([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
+Session : S336 — **en cours**. **La coque qui cesse de pilonner** : δ mesure hors ligne la masse ajoutée et
+l'amortissement par rayonnement de la coque de la porte D, que le corps du jeu reçoit comme des constantes de
+son archétype — ADR-008 §2, I-04 intact ; chemin de la porte D ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Continue »* (2026-09-24, 08:00), suite déclarée par S334. **Troisième session sur ce fil** —
-A317 trouvé en S333, attribué en S334 — : justifiée au journal de S334, elle seule allume le couvercle
-partiel, sans lequel une coque qui bouge dans δ rayonne selon sa maille (± 30–44 %). Verdict visuel attendu.
+Entrée : *« Continue »* ; suite déclarée par S335. Verdict visuel de la porte D toujours attendu (R15).
 
-**Ce que la session doit rendre possible.** Une paroi en mouvement rigide qui pousse dans δ **exactement**
-l'eau qu'elle balaie, face par face : le champ `V + Ω × r` est linéaire, son flux à travers la part couverte
-d'une face plane vaut sa valeur **au centroïde** de cette part, fois son aire. δ la prend au centre de la face
-(S332) : sur une petite part au coin d'une face, l'écart vaut `Ω·dx/2`, et le couvercle partiel l'amplifie de
-`1/a` (S334 : 5,47 m/s). La découpe est déjà linéaire par triangle — quatre par face, autour du centre — : le
-centroïde de la part négative de chaque triangle se calcule en forme close, comme son aire.
+**Ce que la session doit rendre possible.** Aujourd'hui la coque du jeu, lâchée de 10 cm, pilonne sans fin —
+± 12 cm pendant les 8 s de la scène — pendant que δ emporte l'énergie de ses anneaux : le jeu et l'eau se
+contredisent, et l'œil le voit. **La physique linéaire le dit** : en pilonnement imposé `z = Z·sin ωt`, la force
+de δ sur la coque vaut `A·ω²Z·sin ωt − B·ωZ·cos ωt` — `A` la masse ajoutée, `B` l'amortissement de rayonnement.
+δ les mesure, le jeu les reçoit à la pulsation propre qu'ils déterminent, `ω² = K/(m + A)`.
 
 Critères, écrits avant le code :
-1. **Géométrie** : le centroïde de la part couverte, exact sur des cas clos — demi-face, coin, face pleine —, et
-   la même aire que `face_negative` à l'arrondi près.
-2. **La sphère qui tourne** (S332, critère 1) : résidu à 12 mailles par rayon au plus la moitié de S332
-   (0,73 % de `Ω·R` → ≤ 0,37 %), décroissance d'ordre ≥ 1 entre 6 et 12 mailles (S332 : 0,56).
-3. **La contre-épreuve de S333 au couvercle partiel** : vitesse sur les faces ouvertes ≤ 1 m/s (S334 : 5,47).
-4. **Si 3 tient, couvercle partiel par défaut** : essais du cœur verts ; valeurs S3xx changées publiées une à
-   une — seuls la rotation et les couvercles en partie couverts les changent ; translation au bit.
-5. **La scène de la porte D** au nouveau défaut : critères 3 à 5 de S333, flancs des placements 30/30 et 8/52,
-   images refaites.
+1. **`A(ω)` et `B(ω)`** de la coque 4 × 1,6 × 1 m en pilonnement imposé, δ à 25 cm, placement 30/30, quatre
+   pulsations 3 à 4,5 rad/s ; la force se décompose à 5 % près — résidu de l'ajustement sous 5 % de son
+   amplitude. À 12,5 cm, deux pulsations : l'écart à 25 cm publié, comme la résolution d'A317 le demande.
+2. **Le corps du jeu amorti** : `radiation_damping`, linéaire en la vitesse relative à l'eau ; lâché en eau
+   calme, il pilonne à `ω'` et s'amortit au taux `ζ = B/(2√(K(m + A)))`, les deux à ± 2 % ; valeurs par défaut
+   nulles, C10 et S331–S333 inchangés au bit.
+3. **La scène de la porte D** avec ces constantes : critères 3 à 5 de S333 ; **bilan** — l'énergie que la
+   coque perd par son amortissement et celle que δ reçoit de sa paroi, à ± 25 % l'une de l'autre sur la scène.
+4. **Images** refaites.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le centroïde de la part couverte d'une face (`delta3d_cut.rs`) ; critère 1.
-- [x] **P3** — la paroi au centroïde : stocké à la découpe, lu par la divergence ; critère 2.
-- [x] **P3 bis** — *ajouté* : le **plancher d'ouverture** du couvercle partiel, 10 % ; critère 3.
-- [x] **P4** — *amendé* : la convergence de la tranche **avec ce plancher** — 25 ; 12,5 ; 6,25 cm — et le banc 3D ;
-  critère 4 bis ; défaut allumé si tenu ; critère 4.
-- [x] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
-- [x] **P6** — preuve (PORTE-D-S333 §7) ; A317 ; file, feuille de route, liste si un état change.
-- [x] **P7** — rituel.
-
-**Amendement après P3, déclaré avant le code.** La vitesse au centroïde n'était pas la cause : les pointes
-viennent des colonnes ouvertes à moins de 10 %, où `1/a > 10` amplifie le reste de découpe d'une coque qui
-tourne. Remède : **l'ouverture prise au mot jamais sous 10 %** (`PARTIAL_LID_MIN_APERTURE`) — une lamelle
-plus mince garde la raideur de 10 %, deux fois trop molle au pire au lieu de vingt. **Critère 4 bis**, écrit
-avant la mesure : avec ce plancher, la tranche converge encore — écart ≤ 5 % à 6,25 cm (1,8 % sans plancher),
-≤ 15 % à 12,5 cm (10,9 %).
+- [ ] **P2** — banc `rayonnement_coque` : pilonnement imposé, force de δ, `A` et `B` ; critère 1.
+- [ ] **P3** — le corps du jeu amorti, constantes de l'archétype ; critère 2.
+- [ ] **P4** — la scène de la porte D amortie ; critère 3 ; images (critère 4).
+- [ ] **P5** — preuve `docs/validation/RAYONNEMENT-COQUE-S336.md` ; liste, file, feuille de route.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu.** `face_negative_centroid` : face pleine (0,5 ; 0,5), demi-face (0,25 ; 0,5), coin d'un
-  champ linéaire (1/6 ; 1/6), part 1/8 ; aire identique à `face_negative` à 10⁻¹⁵ sur mille faces tirées.
-- **P3, impasse — la vitesse de paroi au centroïde, éprouvée et écartée.** Exacte pour le polyèdre discret :
-  sur les faces **pleinement ouvertes**, le résidu de la sphère qui tourne est divisé par deux (0,43 → 0,21 % de
-  `Ω·R` à 6 mailles par rayon ; 0,29 → 0,12 % à 12 ; ordre 0,56 → 0,83). Mais sur les **faces presque fermées**
-  (4–6 %), il double (6,5·10⁻³ → 1,25·10⁻² m/s) : les petites facettes du polyèdre pompent vraiment, et la
-  lecture au centre des faces le compensait en partie. Critère 1 de S332 (max sur toutes les faces ≤ 1 % à 12)
-  : 1,17 % — **manqué** ; critère 2 de S335 manqué. Et la contre-épreuve au couvercle partiel reste à
-  **5,46 m/s** : le diagnostic de S334 était faux. **Code revenu à P2** : la vitesse au centre des faces ; la
-  géométrie `face_negative_centroid` reste, éprouvée, inemployée.
-- **La vraie source des pointes, mesurée** : un plancher d'ouverture du couvercle partiel — 0,1 → 0,55 m/s ;
-  0,25 → 0,39 ; 0,5 → 0,36 (S332 : 0,32). Ce sont les colonnes ouvertes à moins de 10 %, où `1/a > 10` change
-  le reste de découpe d'une coque qui tourne en pointe.
-- **P3 bis, critère 3 tenu.** `PARTIAL_LID_MIN_APERTURE` = 0,1 ; essai permanent : coque tenue sur la houle,
-  couvercle partiel **0,554 m/s** (S332 : 0,323). Défaut toujours éteint : les 18 valeurs S3xx au bit.
-- **P4, critère 4 bis tenu** — tranche au couvercle partiel **avec plancher** : 25 cm → 39,7 (0,05) ; 23,0 ;
-  22,3 ; 26,2 mm — écart **42,8 %** (33,4 sans plancher : la lamelle de 5 % prise à 10 %) ; 12,5 cm → écart
-  **10,6 %** (10,9) ; 6,25 cm → 19,9 ; 20,8 ; 20,8 ; 20,5 ; 20,9 ; 20,2 ; 20,3 ; 20,8 — moyenne 20,51, écart
-  **3,1 %** (1,8). 3D à 25 cm : 30,9 ; 25,6 ; 15,8 ; 16,9 ; 19,2 mm — écart 48,8 % (36,5). **Le plancher ne coûte
-  qu'aux lamelles de moins de 10 % à maille grossière, et la convergence demeure.** **Défaut allumé** (critère 4) :
-  496 réussis, 0 avertissement ; trois valeurs S3xx changent — pilonnement de S332 2,7266 → 2,7250·10⁻¹⁰ m³,
-  décalage 0,0667 → 0,0666 m (couvercles « poussière » du cube), contre-épreuve de S333 0,3234 → 0,5541 m/s.
-- **P5, scène de la porte D au couvercle partiel avec plancher** (`--couvercle-partiel` ; sans option, le
-  couvercle de S332, pour que S333 se reproduise au bit). 30/30 : **identique au bit** à S334 (parois à 30 %,
-  plancher sans effet) — flancs 46,49 / 46,52 mm, δ 13,2 cm, 0,69 m/s, volume 8,3·10⁻⁹. 8/52 : flancs 55,32 /
-  45,42 mm, **rapport 1,218** (S332 : 3,42), δ 16,8 cm, 0,90 m/s (sans plancher 1,07), volume 7,5·10⁻⁹. Critère 3
-  au bit, critère 5 de S333 tenu (sous 25 cm). Images `viewer/captures/s335` ; 8/52 à 8 s : scène
-  `0xc68ca482478b2d21`, carte `0x4f14be1962bb37e3`.
-- **P6** : preuve [PORTE-D-S333 §7](../docs/validation/PORTE-D-S333.md) ; A317 note datée (corrigé par défaut,
-  reste la résolution) ; ligne A317 de la file ; chronologie de la feuille de route. Liste inchangée.
+
