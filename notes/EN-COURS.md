@@ -62,43 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S348 — **terminée**. **Porte C, le pas étalé sur deux images** ; chemin de la v1.
+Session : S349 — **en cours**. **Porte A, un domaine qui se déplace** ; la dernière porte de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — **verdict R17** de l'utilisateur sur les images de S347 : *« Continue je valide »* — la cadence de 30 Hz
-d'ADR-012 §7 est validée à l'œil ; l'écart d'amplitude d'A318 n'y fait pas obstacle.
+Entrée — S348 : porte C reçue sur le banc ; la v1 ne demande plus que la porte A. Premier critère tenu au banc
+(S344) : deux domaines se disputent un budget — mais un domaine y **vit ou meurt**. Deuxième critère : un domaine
+qui **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint. Cette session : **se déplacer**.
 
-**Ce que la session doit rendre possible.** Le critère de la porte C
-([ADR-175](../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) §4.4) : **δ ≤ 2 ms GPU au 99ᵉ centile de la
-contribution par image**, sur la scène de la porte B, techniques présentes et absentes publiées. À 30 Hz, un pas pour
-deux images de 60 Hz : le pas de 3,68 ms (S343) coupé en **deux parts**, l'une par image — la première passe (fond,
-prédiction, couplage, 1,30 ms), la mise en route de la projection et `k` cycles ; puis les `32 − k` autres, le
-résidu et la troisième passe (0,29 ms). À 0,062 ms le cycle, `k` = 7 équilibre les parts autour de 1,83 ms.
+**Ce qui le permet.** Dans le pas de production, la position du domaine n'entre que par l'évaluation du fond de B
+(un uniforme) ; le reste travaille en indices locaux. Déplacer le domaine de `(di, dj)` mailles, c'est **décaler son
+état** — vitesses aux faces, surface et son reste compensé, pression de départ, surface publiée — et **déplacer
+l'origine** du fond. Les mailles qui entrent naissent au repos, δ = 0 (I-12) ; celles qui sortent sont perdues, et
+leur volume compté.
 
 Critères, écrits avant le code :
-1. **R17** consigné : registre, preuve, A318, file.
-2. **Le pas coupé, au bit** : sur la scène de B à 30 Hz, 60 pas exécutés en deux parts donnent la surface publiée
-   identique au bit à 60 pas d'un seul tenant.
-3. **Le coût par image** : 1 000 pas, chaque part horodatée seule, secteur relevé, témoin ; **99ᵉ centile de chaque
-   part ≤ 2 ms** ; techniques présentes et absentes (ADR-131 D3).
-4. Si 3 tient : **la porte C reçue** sur ce banc, avec le domaine du chiffre — sans rendu concurrent, sans
-   l'interpolation du rendu qu'ADR-012 §7 demande, qui reste à faire. Feuille de route, file, liste.
+1. **Le décalage** (`Step3::shift`) : sur la scène de B, après un décalage de (+3, −2) mailles, chaque tableau
+   décalé est **identique au bit** à l'ancien translaté dans le recouvrement, au repos ailleurs ; zéro allocation
+   (tampon de travail réservé à la configuration).
+2. **Un domaine qui suit la caméra** le long de la côte de S344 : il se décale vers le point regardé, au plus deux
+   mailles par image ; aucune colonne hors bornes ; sa part d'écran reste celle d'un domaine vu de face ; **aucune
+   naissance ni extinction** pendant le trajet, là où deux domaines fixes en demandaient deux ; coût du décalage
+   publié.
+3. Preuve, file, feuille de route ; le redimensionnement et le rang 1 restent.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le verdict R17 ; critère 1.
-- [x] **P3** — le pas en deux parts, et l'identité ; critère 2.
-- [x] **P4** — le coût de chaque part ; critère 3.
-- [x] **P5** — preuve ; la porte C si elle tient ; critère 4.
-- [x] **P6** — rituel.
+- [ ] **P2** — le noyau de décalage, `Step3::shift`, l'origine du fond ; critère 1.
+- [ ] **P3** — le domaine qui suit la caméra ; critère 2.
+- [ ] **P4** — preuve, file, feuille de route ; critère 3.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P3, critère 2 tenu.** `encode_split` : partie 0 — première passe, copies, mise en route de la projection, `k`
-  cycles ; partie 1 — le reste, le résidu, la troisième passe ; `step_part` et `timed_part`. **60 pas à 30 Hz en
-  deux parts : surface identique au bit** au pas d'un seul tenant (13 440 colonnes) ; empreintes du pas entier de
-  S343 inchangées (`0x9325cf58781f8b74` à 600 pas).
-- **P4, critère 3 tenu** (`--delta3d-deux-parts`, secteur 97 % avant et après). `k` = 7, 1 000 pas : **partie 0
-  médiane 1,801 ms, q99 1,848, max 1,859 ; partie 1 médiane 1,874, q99 1,918, max 1,934**. Balayage, 200 pas :
-  k 5 → 1,760 / 2,040 (q99) ; 6 → 1,872 / 2,059 ; **7 → 1,899 / 1,924** ; 8 → 1,968 / 1,857 ; 9 → 2,021 / 1,797 —
-  7 équilibre.
-
