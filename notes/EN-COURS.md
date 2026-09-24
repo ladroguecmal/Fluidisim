@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 - [x] **P4** — *amendé* : la convergence de la tranche **avec ce plancher** — 25 ; 12,5 ; 6,25 cm — et le banc 3D ;
   critère 4 bis ; défaut allumé si tenu ; critère 4.
 - [x] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
-- [ ] **P6** — preuve (PORTE-D-S333 §7) ; A317 ; file, feuille de route, liste si un état change.
+- [x] **P6** — preuve (PORTE-D-S333 §7) ; A317 ; file, feuille de route, liste si un état change.
 - [ ] **P7** — rituel.
 
 **Amendement après P3, déclaré avant le code.** La vitesse au centroïde n'était pas la cause : les pointes
@@ -136,3 +136,5 @@ avant la mesure : avec ce plancher, la tranche converge encore — écart ≤ 5 
   45,42 mm, **rapport 1,218** (S332 : 3,42), δ 16,8 cm, 0,90 m/s (sans plancher 1,07), volume 7,5·10⁻⁹. Critère 3
   au bit, critère 5 de S333 tenu (sous 25 cm). Images `viewer/captures/s335` ; 8/52 à 8 s : scène
   `0xc68ca482478b2d21`, carte `0x4f14be1962bb37e3`.
+- **P6** : preuve [PORTE-D-S333 §7](../docs/validation/PORTE-D-S333.md) ; A317 note datée (corrigé par défaut,
+  reste la résolution) ; ligne A317 de la file ; chronologie de la feuille de route. Liste inchangée.

@@ -223,3 +223,63 @@ coins se voit à ×5. Images `viewer/captures/s334` : scène / carte 2 s `0xdc67
   en 3D, c'est une question de production ou de maille locale.
 - Le **critère de volume** rapporté au plancher du transport (§2).
 
+---
+
+## 7. S335 — le couvercle partiel par défaut ; une impasse, publiée
+
+2026-09-24. Suite d'A317, chemin de la porte D.
+
+### Reproduire
+
+- Commit `3509c4b4` ou plus récent ; machine de référence, CPU, un fil par passage.
+- `cargo test -p water-core --release --offline s335 -- --nocapture` — deux essais ; lignes `S335`.
+- `… --example a317_lamelle -- --tranche --dx <0.25|0.125|0.0625> --phi 0.05,0.30,0.55,0.80 --couvercle-partiel`
+  — la convergence avec le plancher ; `… --example a317_lamelle -- --couvercle-partiel`, la 3D.
+- `… --example porte_d -- --couvercle-partiel [--decalage-y 0.055] [--images viewer/captures/s335]`. Sans
+  option, `porte_d` garde le couvercle de S332 : les valeurs du §2 se reproduisent au bit.
+- Cœur : 496 réussis, 14 ignorés ; intégration 23.
+
+### Une impasse : la vitesse de paroi au centroïde
+
+S334 attribuait les pointes du couvercle partiel au résidu de rotation de S332 — la vitesse de paroi prise au
+centre des faces. Le remède nommé alors a été construit : le centroïde exact de la part couverte de chaque face
+(`face_negative_centroid`, quatre triangles, formes closes — demi-face, coin et face pleine exacts, aire de
+`face_negative` à 10⁻¹⁵). **Il ne retire pas les pointes** : 5,46 m/s contre 5,47. Sur la sphère qui tourne,
+il divise par deux le résidu des faces entièrement ouvertes (0,43 → 0,21 % de `Ω·R` à 6 mailles par rayon,
+0,29 → 0,12 % à 12 ; ordre 0,56 → 0,83), mais double celui des faces presque fermées (6,5·10⁻³ → 1,25·10⁻²
+m/s) : les petites facettes du polyèdre discret pompent vraiment, et la lecture au centre des faces le
+compensait en partie. Le critère 1 de S332 aurait été manqué — 1,17 % pour 1 % —. **Écartée** : la paroi est
+toujours lue au centre des faces ; la géométrie reste, éprouvée, inemployée.
+
+### La cause, et le plancher
+
+Un plancher d'ouverture du couvercle partiel, essayé à 0,1 ; 0,25 ; 0,5 : la contre-épreuve de S333 retombe à
+0,55 ; 0,39 ; 0,36 m/s (couvercle de S332 : 0,32). Les pointes naissent des colonnes ouvertes à **moins de
+10 %**, où `1/a > 10` change en pression le reste de découpe d'une coque qui tourne. **L'ouverture n'est plus
+prise au mot sous 10 %** (`PARTIAL_LID_MIN_APERTURE`) : essai permanent, coque tenue sur la houle, 0,554 m/s.
+
+**La convergence demeure** — tranche au couvercle partiel avec plancher :
+
+| maille | moyenne | écart selon le placement | sans plancher (S334) |
+|---|---|---|---|
+| 25 cm | 27,81 mm | 42,8 % | 33,4 % |
+| 12,5 cm | 21,98 mm | 10,6 % | 10,9 % |
+| 6,25 cm | 20,51 mm | **3,1 %** | 1,8 % |
+
+Le plancher ne coûte qu'aux lamelles de moins de 10 % à maille grossière — la lamelle de 5 %, prise à 10 %,
+rayonne 39,7 mm au lieu de 35,9 à 25 cm. En 3D à 25 cm : écart 48,8 %.
+
+### Allumé par défaut
+
+`Volume3` prend désormais le couvercle partiel par défaut. Essais du cœur verts ; trois valeurs imprimées
+changent — pilonnement de S332 2,7266 → 2,7250·10⁻¹⁰ m³ et décalage visuel 0,0667 → 0,0666 m, par les
+couvercles « poussière » du cube, et contre-épreuve de S333 0,32 → 0,55 m/s. **Scène de la porte D** au
+couvercle partiel : 30/30 identique au bit à S334 (§6) ; 8/52, flancs 55,3 / 45,4 mm, rapport **1,22** (couvercle
+de S332 : 3,42) ; critères 3 et 5 de S333 tenus ; volume 7,5 et 8,3·10⁻⁹ m³, au plancher du transport.
+
+### Ce qui reste
+
+- **La résolution près des coques** : à 25 cm, une coque de 6,4 mailles rayonne à ± 43–49 % selon son
+  placement ; ~13 mailles pour ± 11 %, ~25 pour ± 3 %. Question de production ou de maille locale.
+- Le **verdict visuel** de la porte D (R15) ; les images du couvercle partiel sont celles du §6.
+

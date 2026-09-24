@@ -4310,3 +4310,11 @@ dans les colonnes en lamelle — 5,5 m/s dans la contre-épreuve de S333 —, d'
 **déclencheur** : la vitesse de paroi au centroïde de la part couverte, puis l'allumer. Et même corrigée, une
 coque de 6,4 mailles rayonne à ± 33 % selon son placement : ~25 mailles pour ± 2 %.
 
+**A317 — note datée du 2026-09-24 (S335) : corrigé par défaut ; reste la résolution.** Les pointes du couvercle
+partiel ne venaient pas de la paroi lue au centre des faces — la lecture au centroïde, construite, ne les retire
+pas et fait manquer à S332 son critère 1 : écartée — mais des colonnes ouvertes à moins de 10 %. Avec un
+plancher d'ouverture de 10 %, la coque tenue sur la houle reste sous 0,56 m/s, la tranche converge encore (3,1 %
+à 6,25 cm), et le couvercle partiel est **actif par défaut** ([preuve](../validation/PORTE-D-S333.md) §7).
+**Reste ouvert** : la dépendance au placement à maille grossière — ± 43–49 % à 6,4 mailles de largeur de coque,
+~25 mailles pour ± 3 % ; **déclencheur** : une coque dans la production, ou une maille locale autour d'elle.
+

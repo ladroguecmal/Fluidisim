@@ -263,7 +263,8 @@ sont préconditionnées en **S326** : 425 itérations à 128 au lieu de 16 029 (
 jeu**, sur B + W, tient C10 ([preuve](validation/CORPS-RIGIDE-S331.md)) — lot 4 ouvert ; **S332** : il pilote
 sa coque dans δ, qui perce la surface, et δ ne le pilote jamais — trajectoire identique au bit (§4) ;
 **S333** : la coque sur une houle de B, et δ qui porte sa perturbation **relative à l'eau qui la porte** —
-anneaux de 9,4 cm, I-04 au bit ([preuve](validation/PORTE-D-S333.md)) ; verdict visuel attendu, A317 ouverte.
+anneaux de 9,4 cm, I-04 au bit ([preuve](validation/PORTE-D-S333.md)) ; verdict visuel attendu ; **S334–S335** :
+A317 corrigé — le couvercle partiel, actif par défaut, converge (§6–7).
 **Le 2026-09-23** ([ADR-189](adr/ADR-189-la-v1-d-abord.md)), l'utilisateur demande la v1 d'abord : lots 3
 et 4 jusqu'à la porte D, l'alternance avec le lot 5 suspendue jusque-là. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**
