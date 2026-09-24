@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-25 01:01 +02:00
-Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
+Session en cours : S357 — **rendu 2 (ADR-192 D2) : la mer de B dans Godot 4.4.1** — composantes exportées par l'afficheur, nuanceur d'eau porté (CWM, crêtes), environnement de Godot ; images pour R19
 Dernière session : S356 — **rendu 1, les crêtes de B** : écume à la couverture de Monahan (un seuil par empreinte), lumière des crêtes (transmission de Pope & Fry), module séparable, au bit éteint ([preuve](docs/validation/RENDU-CRETES-S356.md)) ; puis **décision de l'utilisateur : le rendu de l'eau dans Godot 4** ([ADR-192](docs/adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md))
 Session suivante : **rendu 2 (ADR-192 D2) — la mer de B dans Godot 4.4.1** : un projet Godot hors du cœur, les composantes de B exportées par l'afficheur, un nuanceur d'eau qui porte le CWM de la bande et les crêtes de S356 dans l'environnement de Godot (ciel, tonalité AgX, reflets) ; images jugées par l'utilisateur (R19), sans intégration native ni téléchargement. Puis la physique : la coque sur la carte (plan de S355, `a2c81dea`). En attente : R18
 Maillons        : 3 — S354 : une attribution ; S355 : une décision ; S356 : un module non jugé et une décision (justifié au journal)

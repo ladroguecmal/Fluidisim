@@ -62,72 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S356 — **terminée**. **Rendu 1 (ADR-191) : les crêtes de B — l'écume et la lumière qui les traverse.**
-Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — ADR-191 : une session de rendu, une de physique ; la part de l'eau du rendu du moteur maison s'écrit en
-module, depuis l'afficheur. **Ce qui est déjà su** : au verdict R14 (S308), l'utilisateur a nommé le travail
-optique prioritaire — ciel, exposition, absorption, **diffusion aux crêtes**, **écume**, hautes fréquences du reflet ;
-S307 en a fait l'ordre (RENDU-ECART-S307 §6) : la couleur du corps d'eau (faite), **la lumière des crêtes, pilotée
-par le jacobien de CWM déjà calculé à chaque pixel**, puis **l'écume, couverture de Monahan & O'Muircheartaigh —
-0,42 % à `U₁₀` ≈ 7,8 m/s —, réflectance effective de Koepke 0,22**.
-
-**Le point délicat** : le rendu filtre les ondes courtes avec l'empreinte du pixel ; un seuil fixe sur le jacobien
-ferait disparaître l'écume au loin. Le seuil porte donc sur la variable normalisée `s = (J − 1)/σ(h)`, `σ(h)`
-l'écart-type du jacobien au filtrage du pixel ; `s_t` se tire de la loi de `s` à pleine résolution, pas d'un choix.
+Session : S357 — **en cours**. **Rendu 2 (ADR-192 D2) : la mer de B dans Godot 4.4.1** — le prototype que l'utilisateur
+a choisi comme premier pas, jugé sur images avant tout portage.
+Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
+Entrée — S356 : les crêtes de B dans l'afficheur, puis *« rendu toujours pas convaincant »* et le choix de Godot 4.
+**Ce que le prototype est** : un projet Godot dans `godot/`, **sans intégration native ni téléchargement** — les
+composantes de la mer de `--meilleur` exportées par l'afficheur en un fichier de données (dérivé, non versionné) ; un
+nuanceur d'eau dans le langage de Godot qui porte le CWM de la bande, la queue en pentes filtrées, l'écume et la
+lumière des crêtes de S356 ; l'environnement de Godot — ciel, soleil à la direction de la scène, tonalité, reflets à
+l'écran, brume. **Ce qu'il n'est pas** : ni W, ni δ, ni la requête de jeu ; une image à juger.
 
 Critères, écrits avant le code :
-1. **La couverture** : sur CPU, loi de `s` pour la mer de `--meilleur` (bande et queue, pleine résolution, plusieurs
-   instants et lieux) ; `s_t` tel que `P(s < s_t) = W(U₁₀)` ; écart à la gaussienne et incertitude publiés.
-2. **L'écume** (`--ecume`), module WGSL séparé : couverture par pixel tirée de `s_t` et de `σ(h)`, bord adouci,
-   réflectance 0,22 éclairée comme l'eau. Sans l'option, les images de `--revue-mer` **au bit**. Avec : couverture
-   recalculée sur CPU aux empreintes de 0, 0,5 et 2 m, à ± 30 % de `W`.
-3. **La lumière des crêtes** (`--cretes`), même module : masque de compression tiré du même jacobien, diffusion vers
-   l'avant, couleur de diffusion dérivée du corps d'eau (ADR-177) ; ses deux paramètres **à calibrer par R19**
-   (I-14). Sans l'option, au bit.
-4. **Images et coût** : quatre états (base, écume, crêtes, les deux) aux quatre poses de R14 ; surcoût GPU mesuré.
-5. **R19** préparée, références demandées ; preuve, file, feuille de route, liste 8.4.
+1. **L'export** (`--export-godot`) : composantes de bande et de queue, `M`, retard, seuils de l'écume, gain ; le même
+   instant rejoué dans Godot rend la **même hauteur** que le cœur en quelques points (écart < 1 mm), lu par un script.
+2. **La scène Godot** : grille autour de la caméra, nuanceur, environnement ; phases temporelles repliées côté script en
+   double précision (I-08) ; lancée sans erreur de compilation du nuanceur.
+3. **Les images** : les poses de R14 (proche, rasante) à 12 s, capturées par Godot lui-même, et les mêmes poses de
+   l'afficheur à côté ; images pour la revue **R19**, questions et références demandées.
+4. Preuve, file, feuille de route, liste 8.1.
 
 ### Plan
 
-*Amendé à 00 h 55, sur la demande de l'utilisateur : « Peut être godot ou unreal serait envisageable car rendu toujours
-pas convaincant », puis le choix de **Godot 4** — [ADR-192](../docs/adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md). Les
-images et la revue R19 **dans l'afficheur** perdent leur objet : le jugement se fera dans Godot. Le coût se mesure
-quand même, le module restant la référence à porter.*
-
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la loi de `s` et le seuil ; critère 1.
-- [x] **P3** — l'écume au rendu ; critère 2.
-- [x] **P4** — la lumière des crêtes ; critère 3.
-- [x] **P5** — la décision de l'utilisateur (ADR-192) et le coût du module ; critère 4 réduit au coût.
-- [x] **P6** — preuve, file, feuille de route, liste, index ; critère 5 sans R19.
-- [x] **P7** — rituel.
+- [ ] **P2** — l'export depuis l'afficheur ; critère 1 (partie données).
+- [ ] **P3** — le projet Godot : scène, nuanceur, environnement ; critère 2 et la hauteur du critère 1.
+- [ ] **P4** — les captures et la revue R19 ; critère 3.
+- [ ] **P5** — preuve, file, feuille de route, liste ; critère 4.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu — avec une hypothèse contredite.** `--meilleur --ecume-loi` (`rendu_cretes.rs`) : bande 64,
-  queue 60, M = 2, retard −0,20 ; `U₁₀` = 7,787 m/s (Pierson–Moskowitz depuis `Hs` 1,5 m), **W = 0,421 %**.
-  1,2 million d'échantillons (2 km, huit instants) : `s` de moyenne 0,011, écart-type 1,004, **queue basse plus
-  lourde que la gaussienne** — `s_t` = −2,311 [−2,319 ; −2,305] contre −2,635 ; `J` jamais négatif (min 0,215),
-  `σ` moyen 0,206. **Le seuil unique ne tient pas la couverture** quand le rendu filtre : 1,55 × W à 10 cm
-  d'empreinte, 1,77 à 0,5 m, 1,83 à 2 m, 2,02 à 8 m. **Remède** : un seuil par empreinte, 14 empreintes
-  `2^(i−7)` m (7,8 mm à 64 m), interpolé en `log₂ h`, 1,2 s de calcul (un fil par empreinte, 160 000 tirages) ;
-  sur un **tirage indépendant**, couverture 0,93 / 0,97 / 1,03 / 1,02 / 1,00 / 1,04 / 1,03 × W à 0 / 1,2 cm / 5 cm /
-  35 cm / 1,4 / 5,6 / 22 m.
-- **P3 et P4, un seul commit** : le module `water_cretes.wgsl` les porte ensemble. Concaténé avant `water.wgsl`
-  (`gpu.rs`) ; seuils et paramètres dans cinq vecteurs de plus de l'uniforme (224 → 304 octets) ; `σ²` de la bande
-  au sommet (`Cwm.v`, sortie `sigma2`), de la queue filtrée au fragment (`TailMoments.variance`) ; `fwidth(s)` en
-  flot uniforme pour le bord antialiasé. **Options éteintes : les quatre poses de `--revue-mer` identiques au bit**
-  au binaire d'avant (empreintes 0x6f8a…1761, 0x8e33…4281, 0xdd86…7a2f, 0x7d28…316a).
-- **P3, ce que l'image a dit.** Réflectance 0,22 (Koepke) sous `E/π` = gain 2 : luminance ≈ 0,41, **grise**, plus
-  sombre que le ciel reflété près de l'horizon — invisible en pose rasante. Koepke est une moyenne sur tout le
-  mouton ; l'écume fraîche est mesurée vers 0,55 (Whitlock et al. 1982) : `--ecume=0,55`, taches blanches. Pas de
-  partage cœur/frange publié trouvé (Monahan & Lu 1990 nomment les stades A et B, sans rapport chiffré) : **R19
-  montre les deux**. L'écume se place sur la crête de la grande houle, où la surface se comprime le plus.
-- **P4.** Première teinte, celle du corps d'eau (`SEA_R0`, B/G 10,9) : taches **bleu électrique**, artificielles.
-  Remplacée par la **transmission de l'eau pure sur une crête**, `exp(−a·Hs)`, `a` de Pope & Fry (mêmes absorptions
-  qu'ADR-177) : (0,599 ; 0,919 ; 0,986), un cyan clair ; force 0,15, exposant 4, à calibrer par R19 ; effet discret.
-- **P5.** Godot 4.4.1 (et 4.2, 4.4) présent dans Téléchargements ; Unreal absent (lanceur Epic, RealityScan). ADR-192 ;
-  notes datées d'ADR-191 ; file, feuille de route §3 ter, liste 8.1, REPRISE §5, index. **Coût du module**
-  (`--cretes-bench`, 1280 × 720, 120 images, secteur 96 % avant et après) : médiane GPU de l'eau, référence 2,106 ms
-  sans, +0,018 écume, +0,012 crêtes, +0,026 les deux ; rasante 2,095, +0,010, +0,008, +0,012. Le calcul de `σ` et de
-  `fwidth(s)`, fait sans condition, est dans les deux états : non séparé.
-
