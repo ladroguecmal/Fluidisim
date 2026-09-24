@@ -95,7 +95,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le verdict R16 : critère 3 reçu ; critère 1.
-- [ ] **P3** — `Background::from_components` et son essai ; critère 2.
+- [x] **P3** — `Background::from_components` et son essai ; critère 2.
 - [ ] **P4** — le cas 2 sur la production ; critère 3.
 - [ ] **P5** — le cas 1 : fond de B stationnaire, chaînon et HOS sur la référence.
 - [ ] **P6** — le cas 1 : production contre référence ; critère 4.
@@ -103,3 +103,7 @@ Critères, écrits avant le code :
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
+- **P3, critère 2 tenu.** `Background::from_components` et `ComponentsError` (vide, non fini, allocation) ;
+  essai `two_opposed_components_make_a_standing_wave_s340` : deux composantes de `a/2`, opposées, quart de tour —
+  `a·cos(k·x)·cos(ω·t)` à 2·10⁻⁵ près à 0 et à T/2, refus vérifiés. Cœur : 500 réussis, 14 ignorés.
+

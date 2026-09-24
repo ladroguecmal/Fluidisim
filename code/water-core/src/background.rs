@@ -38,6 +38,17 @@ mod spectrum_reference_s147;
 #[path = "tests_background_spectrum.rs"]
 mod tests_background_spectrum;
 
+/// S340 : pourquoi [`Background::from_components`] refuse une liste.
+#[derive(Debug)]
+pub enum ComponentsError {
+    /// Aucune composante : la production refuse un fond vide (« fond sans composante »).
+    Empty,
+    /// Amplitude, nombre d'onde, direction ou gravité non finis.
+    NotFinite,
+    /// L'hôte a refusé l'allocation — arène pleine, ou système scellé.
+    Alloc(AllocError),
+}
+
 /// Une composante de houle. Paramètres figés à la configuration.
 #[derive(Clone, Copy, Debug)]
 pub struct Component {
@@ -194,6 +205,30 @@ impl Background {
         let components = spectrum.components();
         host.alloc.alloc_persistent(core::mem::size_of_val(components))?;
         Ok(Self { components: components.to_vec(), anchor, gravity: spectrum.recipe().gravity })
+    }
+
+    /// S340 — un fond **par ses composantes** : une onde stationnaire, une houle d'une seule direction.
+    /// Les cas de réception d'[ADR-175](../../../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)
+    /// §4 que la production ne reçoit que par B — elle n'évalue que ce fond-là. À l'initialisation,
+    /// avant seal ; allocation demandée à l'hôte comme [`Background::configure`]. Refus : liste vide,
+    /// amplitude, nombre d'onde ou direction non finis.
+    pub fn from_components(
+        host: &mut HostServices,
+        components: &[Component],
+        anchor: WorldPos,
+        gravity: f32,
+    ) -> Result<Self, ComponentsError> {
+        if components.is_empty() {
+            return Err(ComponentsError::Empty);
+        }
+        let finite = |c: &Component| {
+            c.amplitude.is_finite() && c.k_turns_per_m.is_finite() && c.dir.iter().all(|d| d.is_finite())
+        };
+        if !gravity.is_finite() || !components.iter().all(finite) {
+            return Err(ComponentsError::NotFinite);
+        }
+        host.alloc.alloc_persistent(core::mem::size_of_val(components)).map_err(ComponentsError::Alloc)?;
+        Ok(Self { components: components.to_vec(), anchor, gravity })
     }
 
     /// Gravité qui a servi à la dispersion ; comparée par les compositions B+W.
@@ -709,3 +744,63 @@ mod diagnostic_homogeneite_s66 {
 #[cfg(test)]
 #[path = "tests_pressure_world.rs"]
 mod tests_pressure_world;
+
+/// S340 — un fond par ses composantes : refus, et l'onde stationnaire de deux composantes opposées.
+#[cfg(test)]
+mod tests_components_s340 {
+    use super::*;
+    use crate::host::{Allocator, AllocStats, JobSystem, Sink};
+
+    struct Hote;
+    impl Allocator for Hote {
+        fn alloc_persistent(&mut self, _: usize) -> Result<usize, AllocError> { Ok(0) }
+        fn seal(&mut self) {}
+        fn is_sealed(&self) -> bool { false }
+        fn stats(&self) -> AllocStats { AllocStats::default() }
+    }
+    impl Sink for Hote {
+        fn warn(&self, _: &str) {}
+        fn metric(&self, _: &str, _: f64) {}
+    }
+    impl JobSystem for Hote {
+        fn worker_count(&self) -> u32 { 1 }
+        fn parallel_reduce_ordered_f64(&self, n: usize, _: usize,
+            reduce: &dyn Fn(usize, usize) -> f64, merge: &dyn Fn(f64, f64) -> f64,
+            init: f64) -> f64 { merge(init, reduce(0, n)) }
+    }
+
+    /// `a·cos(k·x)·cos(ω·t)` : deux composantes de `a/2`, directions opposées, déphasées d'un quart de
+    /// tour — `η = a·sin(φ)` dans B.
+    #[test]
+    fn two_opposed_components_make_a_standing_wave_s340() {
+        let (mut alloc, services) = (Hote, Hote);
+        let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+        let (a, k, g) = (0.05f32, core::f32::consts::PI / 2., 9.81f32);
+        let hz = ((g * k) as f64).sqrt() / core::f64::consts::TAU;
+        let onde = |dir: [f32; 2]| Component {
+            amplitude: a / 2.,
+            k_turns_per_m: k / core::f32::consts::TAU,
+            dir,
+            freq_q32: freq_hz_to_q32(hz),
+            phase0: PhaseQ32(1 << 30),
+        };
+        let origine = WorldPos::from_metres(0., 0., 0.);
+        let fond = Background::from_components(&mut host, &[onde([1., 0.]), onde([-1., 0.])], origine, g).unwrap();
+        let periode_us = (1e6 / hz) as u64;
+        let mut pire = 0f32;
+        for (t_us, facteur) in [(0u64, 1f32), (periode_us / 2, -1.)] {
+            for i in 0..16 {
+                let x = i as f32 * 0.125;
+                let s = fond.eval_local([x, 0., 0.], SimTime(t_us)).unwrap();
+                pire = pire.max((s.eta - facteur * a * (k * x).cos()).abs());
+                // Les ventres de vitesse sont aux nœuds de hauteur : `u` nul aux instants extrêmes.
+                pire = pire.max(s.u_total[0].abs() * 1e-2);
+            }
+        }
+        assert!(pire < 2e-5, "{pire}");
+        assert!(matches!(Background::from_components(&mut host, &[], origine, g), Err(ComponentsError::Empty)));
+        let mut faux = onde([1., 0.]);
+        faux.amplitude = f32::NAN;
+        assert!(matches!(Background::from_components(&mut host, &[faux], origine, g), Err(ComponentsError::NotFinite)));
+    }
+}
