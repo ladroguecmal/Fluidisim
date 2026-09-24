@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 - [x] **P2** — le verdict R16 : critère 3 reçu ; critère 1.
 - [x] **P3** — `Background::from_components` et son essai ; critère 2.
 - [x] **P4** — le cas 2 sur la production ; critère 3.
-- [ ] **P5** — le cas 1 : fond de B stationnaire, chaînon et HOS sur la référence.
+- [x] **P5** — le cas 1 : fond de B stationnaire, chaînon et HOS sur la référence.
 - [ ] **P6** — le cas 1 : production contre référence ; critère 4.
 - [ ] **P7** — preuve ; la porte B, si elle tient ; critère 5.
 - [ ] **P8** — rituel.
@@ -113,4 +113,11 @@ Critères, écrits avant le code :
   premier essai : au micron jusqu'à 1,25 s, puis 5,1 mm à 1,5 s, 8,3 mm à 2 s, invariance perdue (6·10⁻³) — la
   surface franchit le centre de maille à 12,5 cm : **A297**, l'horizon de S298. Seule l'amplitude change entre
   les deux. Le cas retenu est donc celui de S305 : sous le seuil, A297 entière.
+- **P5, fait** (`delta3d_mobile -- coupled-b`, 16 min). **Chaînon** — fond de B contre analytique, à 0 et T/4 : η
+  identique à 3,7·10⁻⁹ m ; **dans l'eau**, u, w, du/dt, p à 4,4 % de leur maximum, au bas du domaine — eau profonde
+  contre profondeur finie, flux de B au fond 8,5·10⁻³ m/s à 5 cm ; **au-dessus du plan moyen**, u et du/dt à 33 %,
+  w et p à 6 % — le prolongement borné d'ADR-154 contre le prolongement analytique. **Référence sur ce fond contre
+  HOS** (32 / 64 / 128) : 5 cm, profil 1,646 / 1,034 / **0,984 %**, harmonique 2,694 / 1,566 / **1,231 %** ; 10 cm,
+  1,426 / 1,161 / **1,069 %** et 3,072 / 1,996 / **1,353 %** — décroissants, **tolérances de S253 tenues** (2 %,
+  20 %), six fois moins bien qu'au fond analytique (0,148 / 0,178 %) : l'écart est celui du fond, non du solveur.
 
