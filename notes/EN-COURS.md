@@ -93,10 +93,19 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le centroïde de la part couverte d'une face (`delta3d_cut.rs`) ; critère 1.
 - [x] **P3** — la paroi au centroïde : stocké à la découpe, lu par la divergence ; critère 2.
-- [ ] **P4** — la contre-épreuve de S333 au couvercle partiel ; critère 3 ; défaut allumé si tenu ; critère 4.
+- [ ] **P3 bis** — *ajouté* : le **plancher d'ouverture** du couvercle partiel, 10 % ; critère 3.
+- [ ] **P4** — *amendé* : la convergence de la tranche **avec ce plancher** — 25 ; 12,5 ; 6,25 cm — et le banc 3D ;
+  critère 4 bis ; défaut allumé si tenu ; critère 4.
 - [ ] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
 - [ ] **P6** — preuve (PORTE-D-S333 §7) ; A317 ; file, feuille de route, liste si un état change.
 - [ ] **P7** — rituel.
+
+**Amendement après P3, déclaré avant le code.** La vitesse au centroïde n'était pas la cause : les pointes
+viennent des colonnes ouvertes à moins de 10 %, où `1/a > 10` amplifie le reste de découpe d'une coque qui
+tourne. Remède : **l'ouverture prise au mot jamais sous 10 %** (`PARTIAL_LID_MIN_APERTURE`) — une lamelle
+plus mince garde la raideur de 10 %, deux fois trop molle au pire au lieu de vingt. **Critère 4 bis**, écrit
+avant la mesure : avec ce plancher, la tranche converge encore — écart ≤ 5 % à 6,25 cm (1,8 % sans plancher),
+≤ 15 % à 12,5 cm (10,9 %).
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `face_negative_centroid` : face pleine (0,5 ; 0,5), demi-face (0,25 ; 0,5), coin d'un
