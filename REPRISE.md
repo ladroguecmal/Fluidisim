@@ -97,7 +97,8 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   [preuve](docs/validation/PORTE-D-S333.md) §9) : solide immergé quelconque, fixe ou en mouvement (S324–S330) ;
   corps rigide du jeu sur B, C10 tenu, qui pilote sa coque dans δ sans que δ le pilote (S331–S333) ; A317
   corrigé (S335) ; rayonnement mesuré par δ (S336) ; bord de δ invisible (S337). Restent W derrière la requête
-  du corps, la coque dans la production de δ. **La v1 demande encore A et C.**
+  du corps, la coque dans la production de δ. **Porte C reçue sur le banc** (S348, 1,92 ms au 99ᵉ centile par
+  image, 30 Hz). **La v1 demande encore la porte A.**
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 55 partiels, 62 absents** sur 120.
 

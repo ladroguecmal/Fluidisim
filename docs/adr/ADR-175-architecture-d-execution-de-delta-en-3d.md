@@ -130,3 +130,11 @@ sur les trois cas de cuve — le 3 en S305, les 1 et 2 en S340, sous 10⁻⁴ m 
 production tourne sur **le fond de B** — deux composantes opposées —, non sur l'onde analytique en profondeur finie,
 que la production ne peut pas évaluer ; le cas 2 reste sous le seuil d'A297, comme la cuve de S305. Le critère 4
 relève de la porte C, désormais en cours.
+
+## Note datée du 2026-09-24 (S348) — le critère 4, tenu sur le banc
+
+Le critère 4 du §4 — le coût, mesuré sur la scène de la porte B, 99ᵉ centile de la contribution par image, contre
+δ ≤ 2 ms GPU — est tenu sur le banc : **1,92 ms**, à la cadence de 30 Hz d'[ADR-012](ADR-012-ordonnanceur-budget-degradation.md)
+§7, un pas coupé en deux parts, une par image ([COUT-DELTA3D-S341](../validation/COUT-DELTA3D-S341.md) §11). La
+cadence est validée à l'œil (R17, S348) ; l'interpolation du rendu qu'ADR-012 §7 demande reste à faire, et le tick
+découplé de D6 s'y réalise sans l'ordonnanceur, qui ne commande pas encore la cadence.

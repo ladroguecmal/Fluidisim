@@ -209,8 +209,10 @@ pas recopiée ici (L137).
   résident sur la carte, **0,84 ms à 64 cycles sur 27 648 mailles**
   ([S301](validation/DELTA3D-PAS-GPU-S301.md)) ; sur la scène de 376 320 mailles à 32 cycles,
   **4,62 ms par pas contre 2 ms** visés, et le tampon des faces plafonne le domaine à 1,15 M faces
-  ([S302](validation/SCENE-DELTA3D-S302.md) §2). Manque la cadence de δ découplée de l'image.
-  **Le budget n'est plus opposable pendant la construction** (ADR-178 D4) : il reste mesuré.
+  ([S302](validation/SCENE-DELTA3D-S302.md) §2). **S341–S348** : fond factorisé et dix champs par face, au bit —
+  3,68 ms par pas — ; **cadence de 30 Hz, un pas en deux parts : 1,92 ms au 99ᵉ centile par image**, porte C reçue
+  sur le banc ([preuve](validation/COUT-DELTA3D-S341.md) §11). Manquent l'interpolation du rendu, la mesure en
+  direct avec le rendu, d'autres scènes et plusieurs domaines.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *absent*.
   Besoin découvert S274 : B est linéaire, un δ fidèle dérive de la dispersion d'amplitude
@@ -354,8 +356,8 @@ pas recopiée ici (L137).
 - [ ] **9.11 60 images/s avec 2 ms pour l'eau sur une scène représentative** (ADR-125) — *partiel* :
   scène filtrée S267 : GPU eau médian ~1,74 ms en 1280×720, cuisson 0,574–0,585 ms,
   pointe 2,962 ms au premier passage ; CPU ~4,1 ms, pointes ~26 ms
-  ([preuve](validation/CUISSON-SILLAGE-S267.md)). Le budget global n'est pas reçu ; **δ 3D mesuré
-  à 4,62 ms par pas sur la scène de S302**, contre 2 ms. Profil de travail : ADR-174 D3, **non
+  ([preuve](validation/CUISSON-SILLAGE-S267.md)). Le budget global n'est pas reçu ; **δ 3D à 1,92 ms au 99ᵉ
+  centile par image** (30 Hz en deux parts, S348), mesuré seul. Profil de travail : ADR-174 D3, **non
   opposable pendant la construction physique** mais toujours mesuré et publié (ADR-178 D4).
 - [ ] **9.12 Aucune allocation à l'exécution** (I-06) — *partiel* : pas de δ et boucle d'image de
   l'hôte reçus (S200, S240), pas couplé avec flux de bord reçu S270. Système entier non éprouvé.

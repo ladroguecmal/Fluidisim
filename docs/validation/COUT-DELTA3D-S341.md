@@ -239,3 +239,40 @@ et `INSTANTS=60,150,240 … --pas-delta=33333 …`.
 Les instants tombent à 60 µs près d'une cadence à l'autre (120 × 16,667 contre 60 × 33,333 ms), ce qui décale aussi
 les images de B seul. **Verdict R17, S348** : *« Continue je valide »* — la cadence de 30 Hz est validée à l'œil
 ([revue](REVUE-VISUELLE.md) §22).
+
+---
+
+## 11. S348 — le pas étalé sur deux images : la porte C
+
+2026-09-24. **Verdict R17** : *« Continue je valide »* — la cadence de 30 Hz est validée à l'œil (§10, A318
+accepté). Le pas de 33,3 ms est coupé en **deux parts**, une par image de 60 Hz : la première — fond, prédiction,
+couplage, copies, mise en route de la projection, `k` cycles — ; la seconde — les `32 − k` autres cycles, le résidu,
+correction, transport, surface publiée et diagnostics. Les deux parts font exactement les dispatchs du pas entier,
+dans le même ordre.
+
+**Reproduire** : commit `16e0e7ba` ou plus récent ; `… -- --delta3d-deux-parts` — lignes `DELTA3D_DEUX_PARTS_S348` ;
+`K=` (7), `PAS=` (1 000) ; `… --delta3d-empreinte` (le pas entier, inchangé).
+
+**Identité, au bit** : 60 pas à 30 Hz en deux parts, surface publiée identique au pas d'un seul tenant sur 13 440
+colonnes ; le pas entier garde ses empreintes de S343.
+
+| secteur, 97 % ; 1 000 pas, `k` = 7 | médiane | **99ᵉ centile** | max |
+|---|---:|---:|---:|
+| part 1 (image paire) | 1,801 ms | **1,848** | 1,859 |
+| part 2 (image impaire) | 1,874 | **1,918** | 1,934 |
+
+Balayage de `k`, 200 pas (q99 part 1 / part 2) : 5 → 1,760 / 2,040 ; 6 → 1,872 / 2,059 ; **7 → 1,899 / 1,924** ;
+8 → 1,968 / 1,857 ; 9 → 2,021 / 1,797. Sept cycles dans la première part équilibrent les deux.
+
+**Le critère de la porte C** — δ ≤ 2 ms GPU au 99ᵉ centile de la contribution par image, sur la scène de la
+porte B, techniques présentes et absentes publiées (ADR-175 §4.4) — **est tenu sur ce banc** : 1,92 ms au pire
+centile, 1,93 au maximum.
+
+**Techniques présentes** : pas résident, travail fixe ; fond factorisé par colonne et par couche (S342) ; dix champs
+par face (S343) ; cadence de 30 Hz, un pas pour deux images, coupé en deux parts (S348) ; départ chaud ; Jacobi ;
+diagnostics différés. **Absentes** : l'**interpolation du rendu** entre deux pas (ADR-012 §7) — sans elle, δ change
+à 30 Hz dans une image à 60 ; multigrille ; fusion des réductions ; précision mixte ; LOD spectral du fond.
+
+**Domaine du chiffre** : chaque part soumise seule et attendue, horodatée sur la carte ; **pas de rendu concurrent**
+— la mer rendue sur la même carte pèse 1,74 ms (S267), le profil d'eau d'ADR-174 D3 est de 4 ms dont δ 2 — ; une
+scène, un domaine. **La marge est mince** : 4 % sous 2 ms.
