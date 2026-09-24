@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le banc d'empreinte ; l'empreinte de référence ; critère 1.
 - [x] **P3** — la disposition compacte : noyaux, couplage, pas, tampon ; relectures de banc.
-- [ ] **P4** — l'identité, les bancs de S300, le coût ; critères 2 et 3.
+- [x] **P4** — l'identité, les bancs de S300, le coût ; critères 2 et 3.
 - [ ] **P5** — preuve, file ; rituel.
 
 ### Notes de reprise
@@ -104,4 +104,10 @@ Critères, écrits avant le code :
   `STEP_FIELDS` = 10 (46 Mo au lieu de 120) ; noyaux du fond du pas compilés avec `COMPACT` (`pipelines_with`).
   **Empreintes après changement identiques** : 60 pas `0x5efa267462dfa0ad` / `0xc5c6a85d3d29f44b`, 600 pas
   `0x9325cf58781f8b74` / `0xea1bebe0ffabc19a`.
+- **P4, critères 2 et 3 tenus.** Bancs de S300 inchangés : `--delta3d-faces` 1,46 à 2,44·10⁻³ Pa sur `p_dyn`,
+  `--delta3d-couplage` 6,0425·10⁻⁸ et 3,9462·10⁻⁷ — les nombres publiés. **Trouvé en mesurant** : depuis S342,
+  **créer le pas prenait 247 s** — la mise à zéro de la mémoire de groupe du noyau par tuiles, que le compilateur
+  Dx12 déroule ; désactivée pour les noyaux du fond du pas (il l'écrit avant de la lire) : **4,8 s**, empreintes
+  toujours identiques. **Coût**, secteur 97 % avant et après : **pas 3,679 ms, q99 3,727**, max 3,795 ; passe 1
+  1,303 dont fond 1,038 ; projection 2,059 ; fin 0,288. Face par face compact : pas 3,933, fond 1,374.
 

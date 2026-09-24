@@ -222,7 +222,9 @@ fn pipelines_with(
                 layout: Some(&pipeline_layout),
                 module,
                 entry_point: Some(entry),
-                compilation_options: wgpu::PipelineCompilationOptions { constants, ..Default::default() },
+                // S343 : sans mise à zéro de la mémoire de groupe — seul `sample_faces_tiled` en a, et il
+                // l'écrit entière avant de la lire. Avec, le compilateur Dx12 mettait 247 s à créer le pas.
+                compilation_options: wgpu::PipelineCompilationOptions { constants, zero_initialize_workgroup_memory: false },
                 cache: None,
             })
         })
@@ -1846,7 +1848,10 @@ pub fn cout_scene() -> Result<(), String> {
         let background = &scene.background;
         let config = crate::delta3d_scene::Config::review();
         let (u, v, w, eta) = config.initial_state();
+        // S343 : la création du pas — la compilation de ses noyaux — mesurée, elle aussi.
+        let debut = std::time::Instant::now();
         let carte = Step3::new(background, config.domain, config.origin, crate::delta3d_scene::RHO, crate::delta3d_scene::G).await?;
+        println!("DELTA3D_COUT_S341 creation_du_pas_s={:.1}", debut.elapsed().as_secs_f64());
         let mut carte = carte;
         carte.set_step(config.step_us, config.rest, config.sponge)?;
         carte.set_state(&u, &v, &w, &eta)?;
@@ -1899,7 +1904,7 @@ pub fn cout_scene() -> Result<(), String> {
         if !fond.is_empty() {
             let (m, q99, max) = quantiles(&mut fond);
             println!(
-                "DELTA3D_COUT_S341 fond_seul mediane_ms={m:.3} q99_ms={q99:.3} max_ms={max:.3} faces={} champs_par_face=26",
+                "DELTA3D_COUT_S341 fond_seul mediane_ms={m:.3} q99_ms={q99:.3} max_ms={max:.3} faces={} champs_par_face={STEP_FIELDS}",
                 face_total(config.domain)
             );
         }
