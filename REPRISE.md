@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 11:51 +02:00
+JETON            : libre
+Battement        : 2026-09-24 11:52 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S337 — la coupure au bord de δ, d'après le verdict R15 (porte D)
-Dernière session : S336 — **la coque qui cesse de pilonner** : δ mesure la masse ajoutée (≈ 3 200 kg) et l'amortissement de rayonnement (≈ 6 400 N·s/m) de la coque de la porte D, constantes de son archétype ; la masse ajoutée agit désormais sur l'accélération relative à l'eau ; dans la scène, la coque dissipe 353 J et δ en reçoit 345 ([preuve](docs/validation/RAYONNEMENT-COQUE-S336.md))
-Session suivante : **verdict visuel de l'utilisateur sur la porte D** — images `viewer/captures/s336`, coque amortie, couvercle partiel (ADR-178 D3, ADR-189 D3) ; sans verdict, **W derrière la requête du corps** : le jeu flotte sur B + W, pas sur B seul
-Maillons        : 0 — S336 : coque amortie selon δ, énergie à 2,3 %, 6.1 avance
+Session en cours : aucune
+Dernière session : S337 — **la coupure au bord de δ**, d'après le verdict R15 (le bateau qui se pose est juste ; le bord de δ se voyait) : éponge du mode linéaire, celle du pas couplé, et fondu de composition de la production ; plus de pli dans la scène de la porte D ([preuve](docs/validation/PORTE-D-S333.md) §8)
+Session suivante : **verdict de l'utilisateur sur les images de S337** (`viewer/captures/s337`, ADR-189 D3) — s'il reçoit la porte D, la consigner (feuille de route, liste, file) ; sinon, le défaut qu'il nomme. Puis **W derrière la requête du corps**
+Maillons        : 0 — S337 : bord de δ invisible, sur verdict R15
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -96,7 +96,8 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   quelconque, fixe ou en mouvement (S324–S330) ; corps rigide du jeu sur B + W, C10 tenu, qui pilote
   sa coque dans δ sans que δ le pilote (S331–S332) ; **la coque sur la houle de B**, δ relatif à l'eau
   qui la porte — partie numérique faite, **verdict visuel attendu** (S333) ; A317 corrigé, couvercle
-  partiel actif par défaut (S334–S335) ; coque amortie selon δ (S336).
+  partiel actif par défaut (S334–S335) ; coque amortie selon δ (S336) ; **R15** : le bateau juste, le bord de
+  δ traité (S337) — verdict final attendu.
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 54 partiels, 63 absents** sur 120.
 

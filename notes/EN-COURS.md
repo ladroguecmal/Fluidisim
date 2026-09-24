@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S337 — **en cours**. **La coupure au bord de δ** : le verdict R15 de la porte D la voit encore ;
+Session : S337 — **terminée**. **La coupure au bord de δ** : le verdict R15 de la porte D la voit encore ;
 chemin de la porte D ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — **verdict R15 de l'utilisateur**, sur les images de S336 : *« 1. Oui »* — le bateau lâché qui se pose en
@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 - [x] **P3** — le fondu de composition dans le rendu de la porte D ; critère 2.
 - [x] **P4** — la scène de la porte D, éponge et fondu, 12 s ; critère 3 ; images (critère 4).
 - [x] **P5** — preuve ; R15 au registre des revues ; file, feuille de route.
-- [ ] **P6** — rituel ; arrêt pour le verdict.
+- [x] **P6** — rituel ; arrêt pour le verdict.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `Volume3::set_linear_sponge` : l'éponge du pas couplé (vitesses prédites amorties, hauteur

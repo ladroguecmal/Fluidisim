@@ -16608,3 +16608,21 @@ face.
 remue sont cohérents en énergie ; le chemin — la porte D ; la preuve — S336 ; 6.1 avance. Suivant : **le
 verdict visuel** sur les images de S336 (ADR-189 D3) ; sans verdict, W derrière la requête du corps.
 
+## S337 — 2026-09-24 — la coupure au bord de δ, d'après le verdict R15
+
+**Entrée — verdict R15** sur les images de S336 : *« 1. Oui »* (le bateau qui se pose est juste) ; *« 2. On voit
+la coupure encore »* (le bord de la grille de δ) ; *« 3. Pas forcément »* (pas d'autre défaut).
+**Fait** ([preuve](../docs/validation/PORTE-D-S333.md) §8). Le pli était le bord d'un domaine local, non de la
+physique de l'eau : le banc linéaire avait des murs et ajoutait δ jusqu'au bord, là où la production amortit
+par une éponge et fond en cosinus (R11 : sans raccord visible). **Éponge du mode linéaire** — celle du pas
+couplé, volume retiré compté — et **fondu de composition** de la production dans le rendu de la porte D.
+**Mesuré.** Tranche : énergie restante 0,4 % de celle des murs, volume au plancher. Scène de 16 s : plus de pli ;
+agitation du centre après 12 s 4,0 mm contre 8,2 avec des murs ; l'éponge retire 0,49 m³, l'eau que la coque
+déplace en se posant ; I-04 au bit.
+**Non fait.** Le retour δ → W (A289), qui rendrait ces anneaux à la mer au lieu de les éteindre ; le tangage
+de la coque, non amorti, qui remue encore l'eau.
+**Rituel.** Maillons **0** : ce qui devient possible — une scène de la porte D dont le bord de δ ne se voit
+pas, sur la décision de l'utilisateur (R15) ; le chemin — la réception visuelle de la porte D ; la preuve — §8.
+Suivant : **le verdict sur les images de S337** ; s'il reçoit la porte D, la consigner — puis W derrière la
+requête du corps.
+
