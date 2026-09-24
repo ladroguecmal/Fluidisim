@@ -46,7 +46,18 @@ struct Step {
 // tampon à part pour que le rendu ne lie jamais un tampon interne de δ (I-13).
 @group(0) @binding(7) var<storage, read_write> published: array<f32>;
 
-const FIELDS: u32 = 26u;
+// S343 : la disposition compacte du fond — dix champs par face, selon son axe `a` : `η`, `u` (3),
+// `du/dt[a]`, la ligne `a` de `grad u` (3), `p`, `grad p[a]`. Le pas ne lit que ceux-là, et toujours ceux de
+// l'axe de la face : `slot` rend leur rang depuis l'indice de `BackgroundSample`.
+const FIELDS: u32 = 10u;
+fn slot(field: u32) -> u32 {
+    if (field == 0u) { return 0u; }
+    if (field <= 6u) { return field - 3u; }
+    if (field <= 9u) { return 4u; }
+    if (field <= 18u) { return 5u + (field - 10u) % 3u; }
+    if (field == 19u) { return 8u; }
+    return 9u;
+}
 
 fn n_u() -> u32 { return (s.nx + 1u) * s.ny * s.nz; }
 fn n_v() -> u32 { return s.nx * (s.ny + 1u) * s.nz; }
@@ -69,7 +80,7 @@ fn face(axis: u32, p: vec3<u32>) -> u32 {
     return fw(p.x, p.y, p.z);
 }
 fn cur(axis: u32, p: vec3<u32>) -> f32 { return vel[face(axis, p)]; }
-fn bg(f: u32, field: u32) -> f32 { return faces[f * FIELDS + field]; }
+fn bg(f: u32, field: u32) -> f32 { return faces[f * FIELDS + slot(field)]; }
 
 /// Emplacement de face → (i, j, k, axe), par soustractions successives comme `sample_faces`.
 fn decode(slot: u32) -> vec4<u32> {

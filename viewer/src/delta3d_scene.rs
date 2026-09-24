@@ -616,12 +616,12 @@ pub fn identite_fond() -> Result<(), String> {
             carte.set_tiled_background(true)?;
             carte.run_background_for_bench()?;
             let b = carte.faces_values()?;
-            let mut par_champ = [0usize; 26];
+            let mut par_champ = [0usize; crate::delta3d_step::STEP_FIELDS];
             let (mut differents, mut pire) = (0usize, 0f32);
             for (idx, (x, y)) in a.iter().zip(&b).enumerate() {
                 if x.to_bits() != y.to_bits() {
                     differents += 1;
-                    par_champ[idx % 26] += 1;
+                    par_champ[idx % crate::delta3d_step::STEP_FIELDS] += 1;
                     if x.is_finite() && y.is_finite() {
                         pire = pire.max((x - y).abs());
                     }

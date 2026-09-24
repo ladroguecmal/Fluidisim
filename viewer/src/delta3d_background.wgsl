@@ -167,6 +167,71 @@ fn primitives(@builtin(global_invocation_id) id: vec3<u32>) {
 
 const FIELDS: u32 = 26u;
 
+// S343 — **la disposition compacte**, pour le pas seulement : dix champs par face, ceux que le pas et
+// le couplage lisent, selon l'axe `a` de la face — `η`, `u` (3), `du/dt[a]`, la ligne `a` de `grad u` (3),
+// `p`, `grad p[a]`. Les bancs de S300 compilent ce module sans la constante : 26 champs, comme avant.
+override COMPACT: bool = false;
+const FIELDS_STEP: u32 = 10u;
+fn stride() -> u32 {
+    if (COMPACT) { return FIELDS_STEP; }
+    return FIELDS;
+}
+/// Le rang, dans une face, du champ `f` de `BackgroundSample` que lit le couplage : `η`, `p`, `grad p[a]`.
+fn field_slot(f: u32) -> u32 {
+    if (!COMPACT) { return f; }
+    if (f == 0u) { return 0u; }
+    if (f == 19u) { return 8u; }
+    return 9u;
+}
+
+/// Range un échantillon de face : les 26 champs, ou les dix de son axe.
+fn store(base: u32, axis: u32, eta: f32, grad_eta: vec3<f32>, u: vec3<f32>, du_dt: vec3<f32>,
+         grad_u0: vec3<f32>, grad_u1: vec3<f32>, grad_u2: vec3<f32>, p_dyn: f32, grad_p_dyn: vec3<f32>,
+         laplacian_u: vec3<f32>) {
+    if (COMPACT) {
+        var row = grad_u0;
+        if (axis == 1u) { row = grad_u1; }
+        if (axis == 2u) { row = grad_u2; }
+        out[base + 0u] = eta;
+        out[base + 1u] = u.x;
+        out[base + 2u] = u.y;
+        out[base + 3u] = u.z;
+        out[base + 4u] = du_dt[axis];
+        out[base + 5u] = row.x;
+        out[base + 6u] = row.y;
+        out[base + 7u] = row.z;
+        out[base + 8u] = p_dyn;
+        out[base + 9u] = grad_p_dyn[axis];
+        return;
+    }
+    out[base + 0u] = eta;
+    out[base + 1u] = grad_eta.x;
+    out[base + 2u] = grad_eta.y;
+    out[base + 3u] = grad_eta.z;
+    out[base + 4u] = u.x;
+    out[base + 5u] = u.y;
+    out[base + 6u] = u.z;
+    out[base + 7u] = du_dt.x;
+    out[base + 8u] = du_dt.y;
+    out[base + 9u] = du_dt.z;
+    out[base + 10u] = grad_u0.x;
+    out[base + 11u] = grad_u0.y;
+    out[base + 12u] = grad_u0.z;
+    out[base + 13u] = grad_u1.x;
+    out[base + 14u] = grad_u1.y;
+    out[base + 15u] = grad_u1.z;
+    out[base + 16u] = grad_u2.x;
+    out[base + 17u] = grad_u2.y;
+    out[base + 18u] = grad_u2.z;
+    out[base + 19u] = p_dyn;
+    out[base + 20u] = grad_p_dyn.x;
+    out[base + 21u] = grad_p_dyn.y;
+    out[base + 22u] = grad_p_dyn.z;
+    out[base + 23u] = laplacian_u.x;
+    out[base + 24u] = laplacian_u.y;
+    out[base + 25u] = laplacian_u.z;
+}
+
 fn admits_local(p: vec3<f32>) -> bool {
     return abs(p.x) < 4096.0 && abs(p.y) < 4096.0 && abs(p.z) < 4096.0;
 }
@@ -311,7 +376,7 @@ fn faces_of(axis: u32) -> vec3<u32> {
     );
 }
 
-fn write_sample(base: u32, local: vec3<f32>) {
+fn write_sample(base: u32, local: vec3<f32>, axis: u32) {
     var eta = 0.0;
     var p_dyn = 0.0;
     var grad_eta = vec3<f32>(0.0);
@@ -324,7 +389,7 @@ fn write_sample(base: u32, local: vec3<f32>) {
     var grad_u2 = vec3<f32>(0.0);
 
     if (!admits_local(local)) {
-        for (var f = 0u; f < FIELDS; f = f + 1u) { out[base + f] = bitcast<f32>(0x7fc00000u); }
+        for (var f = 0u; f < stride(); f = f + 1u) { out[base + f] = bitcast<f32>(0x7fc00000u); }
         return;
     }
     let above = local.z > 0.0;
@@ -393,32 +458,7 @@ fn write_sample(base: u32, local: vec3<f32>) {
         }
     }
 
-    out[base + 0u] = eta;
-    out[base + 1u] = grad_eta.x;
-    out[base + 2u] = grad_eta.y;
-    out[base + 3u] = grad_eta.z;
-    out[base + 4u] = u.x;
-    out[base + 5u] = u.y;
-    out[base + 6u] = u.z;
-    out[base + 7u] = du_dt.x;
-    out[base + 8u] = du_dt.y;
-    out[base + 9u] = du_dt.z;
-    out[base + 10u] = grad_u0.x;
-    out[base + 11u] = grad_u0.y;
-    out[base + 12u] = grad_u0.z;
-    out[base + 13u] = grad_u1.x;
-    out[base + 14u] = grad_u1.y;
-    out[base + 15u] = grad_u1.z;
-    out[base + 16u] = grad_u2.x;
-    out[base + 17u] = grad_u2.y;
-    out[base + 18u] = grad_u2.z;
-    out[base + 19u] = p_dyn;
-    out[base + 20u] = grad_p_dyn.x;
-    out[base + 21u] = grad_p_dyn.y;
-    out[base + 22u] = grad_p_dyn.z;
-    out[base + 23u] = laplacian_u.x;
-    out[base + 24u] = laplacian_u.y;
-    out[base + 25u] = laplacian_u.z;
+    store(base, axis, eta, grad_eta, u, du_dt, grad_u0, grad_u1, grad_u2, p_dyn, grad_p_dyn, laplacian_u);
 }
 
 @compute @workgroup_size(64)
@@ -446,7 +486,7 @@ fn sample_faces(@builtin(global_invocation_id) id: vec3<u32>) {
         select(0.5, 0.0, axis == 2u),
     );
     let local = params.origin.xyz + (vec3<f32>(f32(i), f32(j), f32(k)) + half) * params.dx;
-    write_sample(slot * FIELDS, local);
+    write_sample(slot * stride(), local, axis);
 }
 
 // ── S342 : le même champ, factorisé par colonne et par couche ────────────────────────────────
@@ -529,11 +569,11 @@ fn sample_faces_tiled(@builtin(workgroup_id) wg: vec3<u32>, @builtin(local_invoc
     let k = layer0 + l;
     if (col >= ncols || k >= dims.z) { return; }
     let local = face_local(axis, col % dims.x, col / dims.x, k);
-    write_sample_tiled((offset + k * ncols + col) * FIELDS, local, c, l);
+    write_sample_tiled((offset + k * ncols + col) * stride(), local, c, l, axis);
 }
 
 /// `write_sample`, les sinus, cosinus et atténuations lus dans la tuile.
-fn write_sample_tiled(base: u32, local: vec3<f32>, c: u32, l: u32) {
+fn write_sample_tiled(base: u32, local: vec3<f32>, c: u32, l: u32, axis: u32) {
     var eta = 0.0;
     var p_dyn = 0.0;
     var grad_eta = vec3<f32>(0.0);
@@ -546,7 +586,7 @@ fn write_sample_tiled(base: u32, local: vec3<f32>, c: u32, l: u32) {
     var grad_u2 = vec3<f32>(0.0);
 
     if (!admits_local(local)) {
-        for (var f = 0u; f < FIELDS; f = f + 1u) { out[base + f] = bitcast<f32>(0x7fc00000u); }
+        for (var f = 0u; f < stride(); f = f + 1u) { out[base + f] = bitcast<f32>(0x7fc00000u); }
         return;
     }
     let above = local.z > 0.0;
@@ -613,32 +653,7 @@ fn write_sample_tiled(base: u32, local: vec3<f32>, c: u32, l: u32) {
         }
     }
 
-    out[base + 0u] = eta;
-    out[base + 1u] = grad_eta.x;
-    out[base + 2u] = grad_eta.y;
-    out[base + 3u] = grad_eta.z;
-    out[base + 4u] = u.x;
-    out[base + 5u] = u.y;
-    out[base + 6u] = u.z;
-    out[base + 7u] = du_dt.x;
-    out[base + 8u] = du_dt.y;
-    out[base + 9u] = du_dt.z;
-    out[base + 10u] = grad_u0.x;
-    out[base + 11u] = grad_u0.y;
-    out[base + 12u] = grad_u0.z;
-    out[base + 13u] = grad_u1.x;
-    out[base + 14u] = grad_u1.y;
-    out[base + 15u] = grad_u1.z;
-    out[base + 16u] = grad_u2.x;
-    out[base + 17u] = grad_u2.y;
-    out[base + 18u] = grad_u2.z;
-    out[base + 19u] = p_dyn;
-    out[base + 20u] = grad_p_dyn.x;
-    out[base + 21u] = grad_p_dyn.y;
-    out[base + 22u] = grad_p_dyn.z;
-    out[base + 23u] = laplacian_u.x;
-    out[base + 24u] = laplacian_u.y;
-    out[base + 25u] = laplacian_u.z;
+    store(base, axis, eta, grad_eta, u, du_dt, grad_u0, grad_u1, grad_u2, p_dyn, grad_p_dyn, laplacian_u);
 }
 
 // ── Le couplage : surface totale, fantômes de fond, second membre ────────────────────────────
@@ -660,15 +675,15 @@ fn v_faces() -> u32 { return params.nx * (params.ny + 1u) * params.nz; }
 /// Champ `f` de la face `w` d'indice (i, j, k), dans le tampon des faces.
 fn face_w(i: u32, j: u32, k: u32, f: u32) -> f32 {
     let index = u_faces() + v_faces() + (k * params.ny + j) * params.nx + i;
-    return out[index * FIELDS + f];
+    return out[index * stride() + field_slot(f)];
 }
 fn face_u(i: u32, j: u32, k: u32, f: u32) -> f32 {
     let index = (k * params.ny + j) * (params.nx + 1u) + i;
-    return out[index * FIELDS + f];
+    return out[index * stride() + field_slot(f)];
 }
 fn face_v(i: u32, j: u32, k: u32, f: u32) -> f32 {
     let index = u_faces() + (k * (params.ny + 1u) + j) * params.nx + i;
-    return out[index * FIELDS + f];
+    return out[index * stride() + field_slot(f)];
 }
 
 const F_ETA: u32 = 0u;

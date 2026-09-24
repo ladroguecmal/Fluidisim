@@ -44,6 +44,8 @@ const RING: usize = 3;
 /// Noyaux de `delta3d_background.wgsl`.
 /// S342 : `sample_faces_tiled`, le même champ factorisé par colonne et par couche, au bit.
 const BG: [&str; 4] = ["sample_faces", "couple_columns", "couple_rhs", "sample_faces_tiled"];
+/// S343 : champs du fond par face dans le pas — la disposition compacte (`COMPACT` des noyaux du fond).
+pub const STEP_FIELDS: usize = 10;
 /// S342 : composantes au plus pour le noyau par tuiles (sa mémoire de groupe) ; au-delà, `sample_faces`.
 const TILE_COMPONENTS: usize = 64;
 
@@ -199,6 +201,34 @@ fn pipelines(
         .collect()
 }
 
+/// S343 : comme `pipelines`, avec des constantes de compilation (`override`).
+fn pipelines_with(
+    device: &wgpu::Device,
+    layout: &wgpu::BindGroupLayout,
+    module: &wgpu::ShaderModule,
+    names: &[&str],
+    constants: &[(&str, f64)],
+) -> Vec<wgpu::ComputePipeline> {
+    let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: None,
+        bind_group_layouts: &[Some(layout)],
+        immediate_size: 0,
+    });
+    names
+        .iter()
+        .map(|entry| {
+            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some(entry),
+                layout: Some(&pipeline_layout),
+                module,
+                entry_point: Some(entry),
+                compilation_options: wgpu::PipelineCompilationOptions { constants, ..Default::default() },
+                cache: None,
+            })
+        })
+        .collect()
+}
+
 fn f32s(values: &[f32]) -> Vec<u8> {
     values.iter().flat_map(|v| v.to_le_bytes()).collect()
 }
@@ -279,7 +309,7 @@ impl Step3 {
         let time_phase = buffer(&device, (count * 4) as u64, storage);
         // Le noyau des sondes n'est pas employé par le pas ; sa liaison existe quand même.
         let points = buffer(&device, 16, storage);
-        let faces_buf = buffer(&device, (faces * crate::delta3d_background::FIELD_SLOTS * 4) as u64, storage);
+        let faces_buf = buffer(&device, (faces * STEP_FIELDS * 4) as u64, storage);
         // [eta | divergence | eta_roundoff] et [surface totale | fantôme du haut | rhs | prec].
         let cells_in = buffer(&device, ((2 * columns + cells) * 4) as u64, storage);
         let cells_out = buffer(&device, ((2 * columns + 2 * cells) * 4) as u64, storage);
@@ -309,7 +339,8 @@ impl Step3 {
             &[&components, &time_phase, &points, &faces_buf, &bg_uniform, &cells_in, &cells_out],
         );
         let bg_module = device.create_shader_module(wgpu::include_wgsl!("delta3d_background.wgsl"));
-        let bg = pipelines(&device, &bg_layout, &bg_module, &BG);
+        // S343 : la disposition compacte, pour le pas seulement.
+        let bg = pipelines_with(&device, &bg_layout, &bg_module, &BG, &[("COMPACT", 1.0)]);
 
         // ── Projection : mêmes tranches que `Projection3` (S299). ──
         let groups = (cells as u32).div_ceil(GROUP);
@@ -849,7 +880,7 @@ impl Step3 {
 
     /// **Banc S342** : tous les champs de toutes les faces, relus par morceaux.
     pub fn faces_values(&self) -> Result<Vec<f32>, String> {
-        let total = self.face_total * crate::delta3d_background::FIELD_SLOTS;
+        let total = self.face_total * STEP_FIELDS;
         let morceau = (self.read.size() / 4) as usize;
         let mut out = Vec::with_capacity(total);
         let mut debut = 0;
@@ -2096,11 +2127,11 @@ pub fn comparer_fond_s298() -> Result<(), String> {
             carte.run_for_bench(0, Upto::Prediction)?;
             // Faces `w` du fond (k = 0) : l'élévation de B par colonne, celle de la surface totale.
             let nw0 = total - domain.columns() * (domain.nz + 1);
-            let faces = carte.relire(&carte.faces_for_bench(), nw0 * crate::delta3d_background::FIELD_SLOTS, domain.columns() * crate::delta3d_background::FIELD_SLOTS)?;
+            let faces = carte.relire(&carte.faces_for_bench(), nw0 * STEP_FIELDS, domain.columns() * STEP_FIELDS)?;
             let coeur: Vec<&water_core::background::BackgroundSample> = vue.w[..domain.columns()].iter().collect();
             let (mut pire, mut lieu) = (0f32, 0usize);
             for (f, s) in coeur.iter().enumerate() {
-                let e = (s.eta - faces[f * crate::delta3d_background::FIELD_SLOTS]).abs();
+                let e = (s.eta - faces[f * STEP_FIELDS]).abs();
                 if e > pire { pire = e; lieu = f; }
             }
             println!("FOND_S298 n={n} t={:.3} eta_pire_ecart={pire:e} face={lieu} coeur={:e} carte={:e}",
