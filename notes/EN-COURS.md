@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 - [x] **P3** — le rendu : la liaison du précédent, β, la branche ; captures de l'anneau au bit (critère 1).
 - [x] **P4** — la fenêtre : deux parts à `--pas-delta=33333`, β alterné, touche d'interpolation ; banc du mélange au
   bit (critère 2).
-- [ ] **P5** — la saccade mesurée (critère 3).
+- [x] **P5** — la saccade mesurée (critère 3).
 - [ ] **P6** — la cadence en direct (critère 4).
 - [ ] **P7** — preuve, liste, file, feuille de route ; R18 préparée (critère 5).
 - [ ] **P8** — rituel.
@@ -114,3 +114,7 @@ Critères, écrits avant le code :
   la part 1, 0 après la part 0 ; touche `I`. Banc `--melange` (anneau, 61 pas, pose proche) : écart précédente/courante
   1,84 cm ; image β = ½ contre image du tampon (p + c)/2 calculé sur CPU : **0 octet différent** ; témoin courante
   seule : 550 530 octets différents. Fenêtre `--smoke` à 30 Hz en deux parts : 120 images, sans erreur.
+- **P5, critère 3 tenu** (`--delta3d-saccade`, anneau, 239 variations après 30 images de chauffe ; variation
+  quadratique moyenne de la surface affichée d'une image à la suivante) : 30 Hz **sans** interpolation — 119 images
+  immobiles sur 239, rapport à la médiane 0 à 1,71 ; 30 Hz **interpolé** — 0 immobile, rapport 0,721 à 1,233, médiane
+  5,57 mm ; témoin 60 Hz à pas entier — 0 immobile, 0,727 à 1,260, médiane 5,43 mm.

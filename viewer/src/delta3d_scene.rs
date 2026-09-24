@@ -1019,6 +1019,66 @@ pub fn murs_effet() -> Result<(), String> {
     })
 }
 
+/// S353, critère 3 — **la saccade, mesurée.** La scène de l'anneau, 240 images après 30 de chauffe. À 30 Hz en deux
+/// parts, la surface **affichée** de chaque image se calcule avec la formule du rendu — `c·(1 − β) + p·β` —, avec
+/// l'interpolation (β de `Live::view`) et sans (β = 0), sur le même calcul ; témoin : un pas entier par image à 60 Hz.
+/// Par image : la variation quadratique moyenne de la surface affichée depuis l'image précédente. Publiés : la médiane,
+/// les images immobiles (sous le dixième de la médiane), et le rapport de chaque variation à la médiane.
+/// `--delta3d-saccade`.
+pub fn saccade() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let mut resultats = Vec::new();
+        for pas_us in [33_333u64, 16_667] {
+            let mut config = Config::ring_review();
+            config.step_us = pas_us;
+            let step = Step3::new(background, config.domain, config.origin, RHO, G).await?;
+            let mut live = Live::new(step, config, 0)?;
+            let (mut avec, mut sans): (Vec<Vec<f32>>, Vec<Vec<f32>>) = (Vec::new(), Vec::new());
+            for n in 0..270 {
+                live.advance(background)?;
+                if n < 30 {
+                    continue;
+                }
+                let (c, p) = (live.step.published()?, live.step.published_prev()?);
+                let beta = live.view(true).blend;
+                avec.push(c.iter().zip(&p).map(|(c, p)| if beta == 0. { *c } else { c * (1. - beta) + p * beta }).collect());
+                sans.push(c);
+            }
+            let variations = |images: &Vec<Vec<f32>>| -> Vec<f64> {
+                images
+                    .windows(2)
+                    .map(|w| {
+                        let s: f64 = w[0].iter().zip(&w[1]).map(|(a, b)| ((b - a) as f64).powi(2)).sum();
+                        (s / w[0].len() as f64).sqrt()
+                    })
+                    .collect()
+            };
+            let series: Vec<(&str, Vec<f64>)> = if pas_us == 33_333 {
+                vec![("30hz_interpole", variations(&avec)), ("30hz_sans", variations(&sans))]
+            } else {
+                vec![("60hz_temoin", variations(&sans))]
+            };
+            for (nom, v) in series {
+                let mut tri = v.clone();
+                tri.sort_by(|a, b| a.partial_cmp(b).unwrap());
+                let mediane = tri[tri.len() / 2];
+                let immobiles = v.iter().filter(|&&x| x < 0.1 * mediane).count();
+                let (rmin, rmax) = v.iter().fold((f64::INFINITY, 0f64), |(lo, hi), &x| (lo.min(x / mediane), hi.max(x / mediane)));
+                resultats.push(format!(
+                    "DELTA3D_SACCADE_S353 serie={nom} images={} variation_mediane_m={mediane:.4e} immobiles={immobiles} rapport_a_la_mediane min={rmin:.3} max={rmax:.3}",
+                    v.len()
+                ));
+            }
+        }
+        for r in resultats {
+            println!("{r}");
+        }
+        Ok(())
+    })
+}
+
 /// Les tableaux de l'état d'un domaine, tels que `lire_etat` les rend : (nom, tableau relu, rang, dimensions, repos,
 /// murs : 1 en x, 2 en y).
 fn tableaux_etat(d: Domain3, rest: f32) -> [(&'static str, usize, usize, [usize; 3], f32, u32); 7] {
