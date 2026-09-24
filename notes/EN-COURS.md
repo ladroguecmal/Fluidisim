@@ -95,7 +95,7 @@ Critères, écrits avant le code :
 - [x] **P2** — les murs après un décalage ; critère 1.
 - [x] **P3** — la forme courante dans `Step3` ; critère 2.
 - [x] **P4** — `Step3::resize` en une soumission ; critère 3.
-- [ ] **P5** — **demande de l'utilisateur à la reprise** : « mets à jour le document de la to do list » — la
+- [x] **P5** — **demande de l'utilisateur à la reprise** : « mets à jour le document de la to do list » — la
   [liste du projet fini](../docs/LISTE-PROJET-FINI.md), nommée ainsi en S271. Relire S309–S349 contre ses points :
   ce qui a bougé, avec sa preuve, noté ici.
 - [ ] **P6** — la liste réécrite : points touchés en remplacement, décompte recompté point par point, « État au » ;
@@ -125,4 +125,12 @@ Critères, écrits avant le code :
   forme et à l'origine, même état : **0 différence** sur 881 832 puis 1 230 728 valeurs après 60 pas, volumes égaux
   (29,74 et 31,65 m³), surface jusqu'à 0,86 m ; (c) allocateur avant = après, **89 784 320 octets, 27 allocations**,
   les deux fois. Rejoués : empreintes S343 inchangées, décalage (+3, −2) 0 différence.
+- **P5, la liste relue contre S309–S349** (journal, preuves). Déjà reportés : 1.1, 4.1, 4.8, 4.12, 4.15, 4.18, 4.19,
+  6.1–6.5, 9.1, 9.11. **Non reportés** : 4.6 (masse comptée à l'interface, S310) ; 4.7 (réflexion chiffrée en 3D sur
+  cas contrôlé ≤ 1,5·10⁻⁶, S311–S316 ; l'éponge efface 10,2 %/s, S310) ; 4.12 (raccord à masse exacte S323–S327,
+  non reçu) ; 4.16 (APIC comparée puis retenue, banc 2D non reçu : reste absent) ; 4.18 (T2 sur 10 s, S313) ; 4.21
+  (A289 : S319, S322) ; 4.2 (deux domaines, un servi à la fois : absent) ; 4.5 (S349) ; **4.13 → partiel** (la coque
+  dans δ de la porte D, S332–S338 ; ADR-001 range le proche-coque dans δ) ; 1.3 (paroi par distance signée et corps
+  du cœur, hors SPEC-004 §7) ; 1.4 et 9.8 (S344, S349) ; 8.7 et 8.10 (R15–R17) ; 9.2 (S349, sans prédiction : absent) ;
+  10.4 (I-04 au bit, S332–S333) ; 13.2 (C10 sur le cœur, S331) ; 13.3 (B6 un archétype, B10 banc 2D). Attendu : 3/56/61.
 
