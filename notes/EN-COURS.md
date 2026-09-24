@@ -101,7 +101,7 @@ Critères, écrits avant le code :
 - [x] **P5** — *amendé deux fois* : **l'eau poussée par une paroi qui glisse** — quand l'ouverture du couvercle
   d'une colonne se referme, l'eau de surface de la part recouverte passe aux colonnes voisines au couvercle
   ouvert ; puis **couvercle partiel par défaut** si les critères 9 à 11 tiennent.
-- [ ] **P5 bis** — la scène de la porte D rejouée avec le couvercle partiel : critères 3 à 5, images.
+- [x] **P5 bis** — la scène de la porte D rejouée avec le couvercle partiel : critères 3 à 5, images.
 - [ ] **P6** — preuve (PORTE-D-S333 §6, S334) ; A317 note datée ; R15 au registre des revues ; file, feuille
   de route si un état change.
 - [ ] **P7** — rituel.
@@ -165,3 +165,13 @@ valeurs changées est publiée.
   **Préalable nommé** : la vitesse de paroi au centroïde de la part couverte (remède de S332), puis défaut
   allumé. Valeurs changées si on l'allume : S332 pilonnement 2,7266 → 2,7434·10⁻¹⁰ m³, décalage 0,0667 →
   0,0666 m (couvercles « poussière » du cube), contre-épreuve S333 0,32 → 5,47 m/s.
+- **P5 bis, scène de la porte D** (`--couvercle-partiel`, flancs à 2,5–3,5 m, 3–8 s ; quatre scènes en parallèle,
+  ≈ 345 ms/pas). Couvercle de S332 : 30/30 → 34,3 / 34,3 mm ; **8/52 → 51,2 / 15,0 mm, rapport 3,42**. Partiel :
+  30/30 → 46,5 / 46,5 mm ; **8/52 → 55,3 / 45,4 mm, rapport 1,22** — carte à 8 s presque identique au 30/30.
+  **Critère 5 non tenu** (± 5 %) : résolution de 25 cm et résidu de rotation — bruit près des coins, visible
+  à ×5 ; vitesse sur face ouverte 0,69 m/s (30/30), 1,07 m/s (8/52). Critère 3 tenu au bit ; critère 4 :
+  8,3 et 9,3·10⁻⁹ m³ (S332 : 3,8), toujours ~3·10⁻⁴ de la borne d'arrondi. Défaut (éteint) : valeurs de S333
+  retrouvées au bit (0,09385 m ; 3,8169·10⁻⁹ m³). Images `viewer/captures/s334` : scène / carte 2 s
+  `0xdc67e48d93ed4533` / `0x6e476e9fd79ea811` ; 4 s `0x4ac9326e7d7003d6` / `0xc8c7f61964126c39` ; 6 s
+  `0x2db0f7edc09d42bf` / `0x12ed29a898550da5` ; 8 s `0x02c587bba1e7f64a` / `0x67457176f1526445` ; carte 8/52 à 8 s
+  `0xf14d3c45be994d27`. Lecture de la tranche à 30 % : S332 ~13 % sous la limite, partiel ~12 % au-dessus.

@@ -11,7 +11,9 @@
 //! celui de la coque plongée à 10⁻⁹ m³ ; **5** — la perturbation existe et reste sous l'amplitude de la houle,
 //! mesurée sur les colonnes au couvercle libre. Aucun champ de δ n'est écrit (I-17). Le banc mesure et publie
 //! chaque critère ; il ne s'arrête pas sur un critère manqué. `--temoin` : le plancher d'arrondi du transport
-//! de δ sur la même grille, coque immobile.
+//! de δ sur la même grille, coque immobile. **S334** : `--couvercle-partiel` allume la surface des colonnes en
+//! partie couvertes (A317) ; les lignes `PORTE_D flancs` donnent l'amplitude quadratique moyenne de δ à
+//! 2,5–3,5 m de chaque flanc long, entre 3 et 8 s.
 //!
 //! `cargo run -p water-core --release --offline --example porte_d [-- --images <dossier>]` — lignes `PORTE_D` ;
 //! avec `--images`, à 2, 4, 6 et 8 s, la scène vue en perspective — B + δ, puis B + 5·δ — et la carte de δ,
@@ -201,6 +203,8 @@ fn main() -> Result<(), String> {
         d, mer.rho as f32, 9.81, &vec![0.; d.columns()], &noeuds,
     ).map_err(|e| format!("configuration : {e:?}"))?;
     v.set_surface(&vec![d.z0(); d.columns()]).map_err(|e| format!("{e:?}"))?;
+    let partiel = arguments.iter().any(|a| a == "--couvercle-partiel");
+    v.set_partial_lid(partiel);
     let solide0 = solide(&v, d);
     if std::env::args().any(|a| a == "--temoin") {
         return temoin(d, &noeuds);
@@ -212,6 +216,8 @@ fn main() -> Result<(), String> {
     let z_r = 0.5 - 500. / mer.rho;
     let (mut identique, mut pire_volume, mut hauteur_max, mut vitesse_max, mut decalage_max) = (true, 0f64, 0f32, 0f32, 0f64);
     let (mut relatif_min, mut relatif_max, mut iterations, mut temps) = (f64::MAX, f64::MIN, 0u64, 0f64);
+    // S334 : les deux flancs longs, bandes à 2,5–3,5 m de leurs parois dans δ, |x − x_c| ≤ 2 m, après 3 s.
+    let (mut flancs, mut comptes) = ([0f64; 2], [0usize; 2]);
     // Le plancher f32 du transport de δ : chaque colonne arrondit son incrément de hauteur — trois opérations,
     // `3·2⁻²⁴·|Δη|` au plus —, et la somme sur les colonnes ne se télescope plus exactement. Cumulé pas à pas.
     let (mut plancher, mut avant) = (0f64, v.surface().to_vec());
@@ -249,6 +255,26 @@ fn main() -> Result<(), String> {
             let decale = [corps.position[0] - m.center[0] as f64, corps.position[1] - m.center[1] as f64];
             images(dossier, (n + 1) as f64 * DT, &w, d, &delta, &couvertes, decale, &corps, o)?;
         }
+        if (n + 1) as f64 * DT > 3. {
+            let (cx, cy) = (m.center[0] as f64, m.center[1] as f64);
+            for j in 0..d.ny {
+                let y = (j as f64 + 0.5) * DX;
+                let bande = if y > cy - DEMI[1] - 3.5 && y < cy - DEMI[1] - 2.5 {
+                    0
+                } else if y > cy + DEMI[1] + 2.5 && y < cy + DEMI[1] + 3.5 {
+                    1
+                } else {
+                    continue;
+                };
+                for i in 0..d.nx {
+                    if ((i as f64 + 0.5) * DX - cx).abs() <= 2. {
+                        let h = (v.surface()[j * d.nx + i] - d.z0()) as f64;
+                        flancs[bande] += h * h;
+                        comptes[bande] += 1;
+                    }
+                }
+            }
+        }
         if (n + 1) % 100 == 0 {
             println!("PORTE_D t_s={:.2} corps_x_m={x:+.4} corps_z_m={z:+.4} pilonnement_relatif_m={relatif:+.4} delta_hauteur_m={h:.5} delta_vitesse_m_s={u:.4} force_delta_n=[{:.0},{:.0},{:.0}] decalage_m={:.4} iterations={} ecart_volume_m3={ecart:+.3e} plancher_f32_m3={plancher:.3e}",
                 (n + 1) as f64 * DT, f[0], f[1], f[2], (o[0] * o[0] + o[1] * o[1] + o[2] * o[2]).sqrt(), r.iterations);
@@ -257,6 +283,8 @@ fn main() -> Result<(), String> {
     println!("PORTE_D critere_3 trajectoire_identique_au_bit={identique} pas={duree}");
     println!("PORTE_D critere_4 ecart_volume_pire_m3={pire_volume:e} tolerance=1e-9 plancher_f32_cumule_m3={plancher:e}");
     println!("PORTE_D critere_5 delta_hauteur_max_m={hauteur_max:.5} delta_vitesse_max_m_s={vitesse_max:.4} houle_m={AMPLITUDE}");
+    let (moins, plus) = ((flancs[0] / comptes[0] as f64).sqrt(), (flancs[1] / comptes[1] as f64).sqrt());
+    println!("PORTE_D flancs couvercle_partiel={partiel} decalage_y_m={decalage_y} amplitude_moins_m={moins:.6} amplitude_plus_m={plus:.6} rapport={:.4}", moins / plus);
     println!("PORTE_D pilonnement_relatif_m=[{relatif_min:+.4},{relatif_max:+.4}] decalage_visuel_max_m={decalage_max:.4} iterations_moyennes={:.1} cpu_delta_ms_par_pas={:.2}",
         iterations as f64 / duree as f64, 1e3 * temps / duree as f64);
     let statut = |t: bool| if t { "tenu" } else { "MANQUE" };
