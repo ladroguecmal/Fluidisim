@@ -89,7 +89,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le noyau de décalage, `Step3::shift`, l'origine du fond ; critère 1.
 - [x] **P3** — le domaine qui suit la caméra ; critère 2.
-- [ ] **P4** — preuve, file, feuille de route ; critère 3.
+- [x] **P4** — preuve, file, feuille de route ; critère 3.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise

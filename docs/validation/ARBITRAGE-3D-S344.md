@@ -60,3 +60,39 @@ un troisième hôte le recopierait. Sa place est à côté de l'ordonnanceur, da
 - **Un budget de produit** : 5 ms est une contrainte de banc ; la porte C poursuit δ ≤ 2 ms par image.
 - **Le rendu** : aucun pixel n'est produit ; la part d'écran est calculée, pas observée.
 - **`W_gameplay` et `W_urgence`** : sans source dans un banc, déclarés à 1.
+
+---
+
+## 5. S349 — un domaine qui se déplace
+
+2026-09-24. Deuxième critère de la porte A, première moitié : un domaine qui **se déplace** au lieu d'être seulement
+allumé ou éteint.
+
+**Reproduire** : commit `47a8c5ec` ou plus récent ; `… -- --delta3d-decalage` (identité) ; `… --delta3d-suivi` (la
+côte).
+
+**Le mécanisme.** Dans le pas de production, la position du domaine n'entre que par l'évaluation du fond de B : le reste
+travaille en indices locaux. `Step3::shift(di, dj)` décale l'état de mailles entières — les vitesses des trois familles
+de faces, la surface et son reste compensé, la pression de départ, la surface publiée — et avance l'origine du fond.
+Ce qui entre naît au repos, δ = 0 (I-12) ; ce qui sort est perdu. Un noyau de recopie, un tampon de travail réservé à
+la configuration (I-06). **Au bit** : après un décalage de (+3, −2) sur la scène de B, les sept tableaux sont
+identiques à l'ancien translaté dans le recouvrement (363 440 à 373 230 faces par famille, 12 870 colonnes, 360 360
+mailles), au repos ailleurs ; le pas entier garde ses empreintes.
+
+**Sur la côte de S344**, même caméra, même ordonnanceur, même budget — mais **un seul domaine**, qui se décale vers le
+point regardé, au plus deux mailles par image :
+
+| | deux domaines fixes (§2) | **un domaine qui suit** |
+|---|---:|---:|
+| naissances / extinctions sur le trajet | 2 / 2 | **1 (au départ) / 0** |
+| part d'écran du domaine servi, en régime | de 0,1629 à 0,0389 aux croisements | **0,1629 constante** |
+| décalages | — | **480** d'une maille, 120 m |
+| colonnes hors bornes | 0 | **0** |
+
+**Le coût du décalage** : 1,463 ms en médiane, 4,872 au pire, temps réel de la soumission à la fin sur la carte — sept
+soumissions séparées, une par tableau, pour 6 Mo recopiés deux fois. Les grouper en une seule soumission, avec sept
+uniformes, en retirerait l'essentiel ; tel quel, un décalage par image s'ajoute au pas.
+
+**Ce que cela ne dit pas** : le **redimensionnement** — rétrécir un domaine non focal, le rang 1 d'ADR-012 §4 — reste ;
+l'ordonnanceur ne commande pas encore le déplacement, l'hôte le fait (le centre sous l'œil) ; l'état qui sort du domaine
+n'est pas rendu à W (A289).
