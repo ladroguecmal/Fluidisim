@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-24 22:09 +02:00
+JETON            : occupé
+Battement        : 2026-09-24 22:14 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S353 — **la v1 en scène vivante, 1** : δ à 30 Hz dans la fenêtre, en deux parts, interpolé au rendu (ADR-012 §7) ; la cadence en direct avec le rendu ; revue R18 préparée
 Dernière session : S352 — **la liste rangée par dépendance** (ADR-190 D3) : [registre](docs/registres/DEPENDANCES-LISTE.md) calculé et contrôlé, 34 points au front 0, 41 en attente d'un fait extérieur (le réseau en commande 14) ; l'ordre en feuille de route §3 ter. Avant : S351, la porte A reçue, **la v1 atteinte au sens d'ADR-174 D4**
 Session suivante : **la v1 en scène vivante** (feuille de route §3 ter, 1) — d'abord l'interpolation du rendu entre deux pas de 30 Hz (4.19, 8.7) ; puis la coque dans la production de δ (6.4) et l'ordonnanceur dans l'afficheur (4.2). **Une session sur deux au lot 5** (4.16 par A316, ADR-184 D1). La revue du prix du rang 1 (A319) quand l'afficheur le porte
 Maillons        : 1 — S352 : une carte, aucune capacité

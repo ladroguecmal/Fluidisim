@@ -62,42 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S352 — **terminée**. **ADR-190 D3 : la liste du projet fini, rangée par dépendance** — la première session
-après la v1.
+Session : S353 — **en cours**. **La v1 en scène vivante, 1 : δ à 30 Hz dans la fenêtre, interpolé au rendu**
+(ADR-012 §7) — liste 4.19 et 8.7, feuille de route §3 ter.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — S351 : porte A reçue au banc ; la v1 atteinte au sens d'ADR-174 D4, portes reçues séparément. Décision de
-l'utilisateur ([ADR-190](../docs/adr/ADR-190-apres-la-v1-la-liste-entiere.md)) : désormais, la liste entière — 3 validés,
-58 partiels, 59 absents.
+Entrée — S352 : l'ordre après la v1. S348 avait reçu la porte C au banc et laissé ceci : « l'interpolation du rendu
+d'ADR-012 §7 manque — δ change à 30 Hz dans une image à 60 ». La fenêtre fait aujourd'hui un pas entier par image.
 
-**Ce que D3 demande.** Pour chacun des 117 points non validés : ce qu'il attend, ce qu'il débloque, son système ; puis
-un ordre, pour que chaque session prenne un point dont les dépendances sont levées. **Lecture** : l'ordre — des
-**fronts** successifs — va dans la feuille de route, seule porteuse de la trajectoire ; le détail point par point, trop
-long pour elle, va dans un registre, comme le rangement par système de S309 (TROIS-SYSTEMES-S308 §8).
+**La construction.** `Step3` garde la surface publiée du pas précédent (`published_prev`) : copie sur la carte avant
+chaque publication, et dans `set_state` et `resize`. Le rendu lie les deux tampons et mélange
+`courant·(1 − β) + précédent·β`, β dans l'uniforme de δ ; β = 0 passe par une branche qui rend la lecture de S302
+telle quelle. La fenêtre, avec `--pas-delta=33333`, fait une part du pas par image (S348) : l'image de la partie 1
+voit l'état suivant publié et montre le milieu (β = 0,5) ; celle de la partie 0 montre l'état publié (β = 0). Aucune
+latence ajoutée : la part est soumise avant l'image (S302 D7).
 
-Critères, écrits avant le travail :
-1. **Le registre** couvre les 117 points non validés, un par ligne, aucun oublié — un script compte les deux listes.
-   Chaque ligne : système (A, B, C ou hors, repris de S308 §8), ce qui manque au périmètre final, ce qu'il attend —
-   d'autres points, ou un fait extérieur au sens d'ADR-190 D5 —, ce qu'il débloque, son **front**.
-2. **Les fronts** : 0 = rien d'autre à attendre qu'une session ; 1, 2… = après les points du front précédent ;
-   E = un fait ou une action de l'utilisateur. Chaque point E nomme ce qu'on lui demandera.
-3. **La feuille de route** porte les fronts, l'ordre proposé dans le front 0 et la place du lot 5 (ADR-184 D1 : une
-   session sur deux) ; **la file** et **l'index** pointent le registre.
-4. Aucun état de la liste ne change : c'est une carte, pas une capacité (maillons + 1, dit comme tel).
+Critères, écrits avant le code :
+1. **Identité** : sans interpolation, les captures de l'anneau (R16) gardent leurs empreintes publiées
+   (`s339a_proche_avec_1.0s` `0x5a79f01d64083ef3`…) ; les empreintes du pas de S343 et l'identité de S350 tiennent.
+2. **Le mélange, au bit** : une image rendue de (précédent, courant, β = 0,5) est identique au bit à celle du seul
+   tampon (précédent + courant)/2 — la multiplication par ½ est exacte.
+3. **La saccade, mesurée** sur 240 images à 30 Hz : sans interpolation, une image sur deux ne bouge pas ; avec,
+   aucune, et chaque variation d'image reste entre la moitié et le double de leur médiane.
+4. **En direct avec le rendu** (`--cadence`, sans synchronisation verticale) : intervalle médian et p95 — B seul,
+   B + δ à 60 Hz, B + δ à 30 Hz interpolé ; la part de δ par image lue par différence ; alimentation relevée.
+5. Preuve (COUT-DELTA3D-S341 §12), liste 4.19 et 8.7, file, feuille de route ; **revue R18 préparée** — la fenêtre
+   vivante, interpolée ou non — : le verdict revient à l'utilisateur.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le registre, sections 1 à 6 de la liste (socle, B, W, δ, V, solides).
-- [x] **P3** — le registre, sections 7 à 13 ; le compte des 117 points par script. *Fusion déclarée P2+P3 :
-  un seul outil écrit et compte les treize sections.*
-- [x] **P4** — les fronts dans la feuille de route ; file, index, liste (renvoi).
-- [x] **P5** — rituel.
+- [ ] **P2** — `Step3` : la surface précédente, copiée avant chaque publication ; empreintes S343, identité S350.
+- [ ] **P3** — le rendu : la liaison du précédent, β, la branche ; captures de l'anneau au bit (critère 1).
+- [ ] **P4** — la fenêtre : deux parts à `--pas-delta=33333`, β alterné, touche d'interpolation ; banc du mélange au
+  bit (critère 2).
+- [ ] **P5** — la saccade mesurée (critère 3).
+- [ ] **P6** — la cadence en direct (critère 4).
+- [ ] **P7** — preuve, liste, file, feuille de route ; R18 préparée (critère 5).
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
-- **P2+P3.** `outils/dependances_liste.py` : données écrites à la main (système, maintenant, attend, attente
-  extérieure), fronts et « débloque » calculés, couverture et cycles contrôlés ; `--ecrire` régénère les tables de
-  `docs/registres/DEPENDANCES-LISTE.md` ; `etat_projet.py --check` appelle `ecarts`, éprouvé sur trois défauts
-  fabriqués (tables modifiées, point absent, dépendance inconnue). Un cycle trouvé et levé : 4.2 ↔ 4.9 — les
-  interactions relèvent de 4.9. Résultat : **117 points ; front 0 : 34, 1 : 25, 2 : 9, 3 : 5, 4 : 2, 5 : 1, E : 41**
-  (22 directs ; le réseau, 10.1, en commande 14). En aval transitif : 4.16 → 22 points, 2.7 → 20, 10.1 → 16.
-  Systèmes refaits par énoncé : A 20, B 25, C 7, H 65 ouverts (S309 : B 29, H 64 sur 120).
