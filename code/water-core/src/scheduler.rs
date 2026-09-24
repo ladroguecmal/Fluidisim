@@ -143,6 +143,12 @@ pub const LIFETIME_US: u64 = 750_000;
 /// Délai avant extinction une fois le score passé sous `OFF` (ADR-013 §5). Remonter au-dessus
 /// d'`OFF` l'efface : c'est un séjour continu qui tue, pas un passage.
 pub const OFF_DELAY_US: u64 = 1_000_000;
+/// S351 : toute décision de dégradation est **engagée** au moins 30 images à 30 Hz, soit une seconde (ADR-012 §5)
+/// — le choix du focal comme l'échelle descendue.
+pub const ENGAGE_US: u64 = 1_000_000;
+/// S351 : la remontée est **lente et rampée**, ≈ 1 s de bout en bout (ADR-012 §5) : l'échelle commune monte d'au
+/// plus 1 par seconde. La descente, elle, est immédiate — elle protège la fréquence d'images.
+pub const RAMP_PER_S: f32 = 1.;
 
 /// L'état d'un domaine d'un pas à l'autre. C'est la seule mémoire de l'ordonnanceur : sans elle,
 /// l'hystérésis n'existe pas, puisqu'elle porte sur la décision précédente.
@@ -190,9 +196,13 @@ pub struct Scheduler {
     grants: Vec<Grant>,
     live: Vec<Live>,
     last_us: Option<u64>,
-    /// S351 — le rang 1 : le domaine focal, protégé (ADR-012 §4), et l'échelle commune des autres.
+    /// S351 — le rang 1 : le domaine focal, protégé (ADR-012 §4), et depuis quand ; l'échelle commune des autres,
+    /// l'instant de sa dernière descente et celui de sa dernière mise à jour (ADR-012 §5).
     focal: Option<DomainId>,
+    focal_since_us: u64,
     scale: f32,
+    scale_down_us: Option<u64>,
+    scale_us: Option<u64>,
 }
 
 impl Scheduler {
@@ -219,7 +229,10 @@ impl Scheduler {
             live: Vec::with_capacity(capacity),
             last_us: None,
             focal: None,
+            focal_since_us: 0,
             scale: 1.,
+            scale_down_us: None,
+            scale_us: None,
         })
     }
 
@@ -353,7 +366,8 @@ impl Scheduler {
                 .then(a.id.cmp(&b.id))
         });
         let affame = self.fund(1., false);
-        self.focal = self.choose_focal();
+        let now = self.last_us.unwrap_or(0);
+        self.update_focal(now);
         let focal = self.focal;
         let declarent = self.bids.iter().any(|b| {
             b.shrink.is_some() && Some(b.id) != focal && self.live.iter().any(|l| l.id == b.id && l.active)
@@ -368,7 +382,7 @@ impl Scheduler {
         } else {
             1.
         };
-        let q = self.next_scale(cible);
+        let q = self.next_scale(cible, now);
         self.scale = q;
         if !affame && q >= 1. {
             return;
@@ -415,13 +429,30 @@ impl Scheduler {
 
     /// Le focal d'ADR-012 §4 : parmi les vivants qui soumissionnent, la plus forte priorité — un domaine qui porte
     /// l'acteur du joueur a `W_gameplay` = 1, qui domine le produit (ADR-012 §2). L'égalité se départage par
-    /// identité.
-    fn choose_focal(&self) -> Option<DomainId> {
-        self.bids
+    /// identité. **Engagé** (ADR-012 §5) : un focal toujours vivant ne cède sa place qu'à une priorité strictement
+    /// plus forte, et pas avant une seconde ; un focal qui ne soumissionne plus, ou mort, est remplacé tout de suite.
+    fn update_focal(&mut self, now: u64) {
+        let vivant = |id: DomainId| self.live.iter().any(|l| l.id == id && l.active);
+        let meilleur = self
+            .bids
             .iter()
-            .filter(|b| self.live.iter().any(|l| l.id == b.id && l.active))
+            .filter(|b| vivant(b.id))
             .max_by(|a, b| a.priority().total_cmp(&b.priority()).then(b.id.cmp(&a.id)))
-            .map(|b| b.id)
+            .copied();
+        let actuel = self.focal.and_then(|f| self.bids.iter().find(|b| b.id == f && vivant(b.id)).copied());
+        let garde = match (actuel, meilleur) {
+            (Some(a), Some(m)) => {
+                m.id == a.id || m.priority() <= a.priority() || now.saturating_sub(self.focal_since_us) < ENGAGE_US
+            }
+            _ => false,
+        };
+        if !garde {
+            let nouveau = meilleur.map(|b| b.id);
+            if nouveau != self.focal {
+                self.focal_since_us = now;
+            }
+            self.focal = nouveau;
+        }
     }
 
     /// La plus grande échelle commune qui tient les servis dans le budget : dichotomie de 24 étapes, la
@@ -451,9 +482,22 @@ impl Scheduler {
         lo
     }
 
-    /// L'échelle commune de ce pas, vers `cible`.
-    fn next_scale(&self, cible: f32) -> f32 {
-        cible
+    /// L'échelle commune de ce pas, vers `cible` (ADR-012 §5) : **descente immédiate**, qui réarme l'engagement ;
+    /// **remontée** seulement une seconde après la dernière descente, d'au plus `RAMP_PER_S` par seconde écoulée
+    /// depuis la fin de l'engagement. `cible` tient toujours le budget : l'échelle rendue ne la dépasse jamais.
+    fn next_scale(&mut self, cible: f32, now: u64) -> f32 {
+        let q = self.scale;
+        let nouveau = if cible < q {
+            self.scale_down_us = Some(now);
+            cible
+        } else {
+            let fin = self.scale_down_us.map_or(0, |t| t.saturating_add(ENGAGE_US));
+            let debut = self.scale_us.unwrap_or(now).max(fin);
+            let monte = RAMP_PER_S * now.saturating_sub(debut) as f32 * 1e-6;
+            (q + monte).min(cible)
+        };
+        self.scale_us = Some(now);
+        nouveau
     }
 
     /// S351 : le domaine focal du dernier `allocate`, protégé du rang 1.
@@ -480,7 +524,10 @@ impl Scheduler {
         self.grants.clear();
         self.last_us = None;
         self.focal = None;
+        self.focal_since_us = 0;
         self.scale = 1.;
+        self.scale_down_us = None;
+        self.scale_us = None;
     }
 
     /// Les domaines que la décision laisse vivants, dans l'ordre où ils se sont allumés.
@@ -655,6 +702,80 @@ mod tests {
         let a = decision([0, 1, 2, 3]);
         assert_eq!(a, decision([3, 2, 1, 0]));
         assert_eq!(a, decision([2, 0, 3, 1]));
+    }
+
+    /// Critère 1 (c), ADR-012 §5 : la descente est immédiate ; la remontée attend une seconde après elle, puis monte
+    /// d'au plus 1 par seconde — jamais au-delà de ce que le budget tient.
+    #[test]
+    fn la_descente_est_immediate_la_remontee_rampee_apres_une_seconde_s351() {
+        let mut s = profil(5.);
+        let bids = [bid3(1, 0.2, 0.05), bid3(2, 0.15, 0.05)];
+        servir(&mut s, 0, &bids);
+        let bas = s.scale();
+        assert!((bas - (5. - 3.7 - 0.09) / 3.61).abs() < 1e-5, "descente immédiate : {bas}");
+        // Le budget s'élargit : tout tiendrait entier. L'échelle ne doit pas bouger pendant l'engagement.
+        s.set_profile(Profile { cpu_sim_ms: 8., blocks: 64, on: 0.1, off: 0.05 }).unwrap();
+        let (mut avant, mut t_avant, mut entier_a) = (bas, 0u64, None);
+        for n in 1..=150u64 {
+            let t = n * 16_667;
+            servir(&mut s, t, &bids);
+            let q = s.scale();
+            assert!(s.granted_ms() <= 8., "budget dépassé à {t} µs");
+            if t < ENGAGE_US {
+                assert_eq!(q, bas, "remontée pendant l'engagement, à {t} µs");
+            }
+            let permis = RAMP_PER_S * (t - t_avant) as f32 * 1e-6 + 1e-6;
+            assert!(q - avant <= permis, "remontée trop vive à {t} µs : {avant} → {q}");
+            assert!(q <= 1.);
+            if q == 1. && entier_a.is_none() {
+                entier_a = Some(t);
+            }
+            (avant, t_avant) = (q, t);
+        }
+        let t1 = entier_a.expect("l'échelle doit revenir à 1");
+        // Une seconde d'engagement, puis 0,665 à monter à 1 par seconde.
+        assert!(t1 >= ENGAGE_US + 660_000 && t1 <= ENGAGE_US + 700_000, "entier à {t1} µs");
+        assert_eq!(accorde(&s, 2).unwrap().scale, 1.);
+    }
+
+    /// Critère 1 (c) : une nouvelle descente pendant la remontée est immédiate et **réarme** l'engagement.
+    #[test]
+    fn une_descente_rearme_l_engagement_s351() {
+        let mut s = profil(5.);
+        let bids = [bid3(1, 0.2, 0.05), bid3(2, 0.15, 0.05)];
+        servir(&mut s, 0, &bids);
+        s.set_profile(Profile { cpu_sim_ms: 8., blocks: 64, on: 0.1, off: 0.05 }).unwrap();
+        servir(&mut s, 1_200_000, &bids);
+        let montee = s.scale();
+        assert!(montee > 0.4, "la remontée a commencé : {montee}");
+        s.set_profile(Profile { cpu_sim_ms: 5., blocks: 64, on: 0.1, off: 0.05 }).unwrap();
+        servir(&mut s, 1_216_667, &bids);
+        let bas = s.scale();
+        assert!(bas < 0.34, "descente immédiate : {bas}");
+        s.set_profile(Profile { cpu_sim_ms: 8., blocks: 64, on: 0.1, off: 0.05 }).unwrap();
+        servir(&mut s, 2_000_000, &bids);
+        assert_eq!(s.scale(), bas, "engagé jusqu'à 2,217 s");
+        servir(&mut s, 2_316_667, &bids);
+        assert!(s.scale() > bas && s.scale() <= bas + 0.1 + 1e-6, "{}", s.scale());
+    }
+
+    /// Critère 1 (c) : le focal est engagé une seconde — une priorité qui le dépasse ne le détrône qu'après ;
+    /// un focal qui ne soumissionne plus est remplacé tout de suite.
+    #[test]
+    fn le_focal_est_engage_une_seconde_s351() {
+        let mut s = profil(5.);
+        servir(&mut s, 0, &[bid3(1, 0.2, 0.05), bid3(2, 0.15, 0.05)]);
+        assert_eq!(s.focal(), Some(DomainId(1)));
+        servir(&mut s, 200_000, &[bid3(1, 0.2, 0.05), bid3(2, 0.25, 0.05)]);
+        assert_eq!(s.focal(), Some(DomainId(1)), "engagé : pas de bascule à 0,2 s");
+        assert_eq!(accorde(&s, 1).unwrap().scale, 1.);
+        servir(&mut s, 1_000_000, &[bid3(1, 0.2, 0.05), bid3(2, 0.25, 0.05)]);
+        assert_eq!(s.focal(), Some(DomainId(2)), "une seconde après, la plus forte priorité l'emporte");
+        assert_eq!(accorde(&s, 2).unwrap().scale, 1.);
+        assert!(accorde(&s, 1).unwrap().scale < 1., "l'ancien focal rétrécit");
+        // Le focal cesse de soumissionner : il vit encore (délais d'ADR-013), mais le focal change aussitôt.
+        servir(&mut s, 1_016_667, &[bid3(1, 0.2, 0.05)]);
+        assert_eq!(s.focal(), Some(DomainId(1)));
     }
 
     /// Critère 1 (e) : un substitutif ne se déclare pas rétrécissable, et une déclaration invalide est refusée

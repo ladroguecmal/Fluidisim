@@ -99,7 +99,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-190, la décision de l'utilisateur ; file (décisions), REPRISE §5, feuille de route, liste.
 - [x] **P3** — le rang 1 dans le cœur : `Shrink`, focal, échelle commune ; essais (critère 1 a, b, d, e).
-- [ ] **P4** — l'anti-pompage : engagement et rampe ; essais (critère 1 c).
+- [x] **P4** — l'anti-pompage : engagement et rampe ; essais (critère 1 c).
 - [ ] **P5** — le banc de la côte avec rang 1, et son témoin ; critères 2 et 3.
 - [ ] **P6** — preuve, file, feuille de route, liste ; la porte A et la v1 si reçues ; critère 4.
 - [ ] **P7** — rituel.
@@ -112,3 +112,8 @@ Critères, écrits avant le code :
   focal entier, non-focaux au minimum puis échelle commune par dichotomie (24 étapes) ; 3,7 + 3,7 ms pour 5 → le
   second à (5 − 3,7 − 0,09)/3,61 = 0,335. Sept essais `_s351`, 25 de l'ordonnanceur verts. Un essai mal monté
   corrigé : à 6 ms, un minimum de 0,4 ne tenait pas — le rang 1 avait raison.
+- **P4, critère 1 (c) tenu.** `ENGAGE_US` = 1 s (30 images à 30 Hz), `RAMP_PER_S` = 1 (ADR-012 §5). Descente
+  immédiate ; remontée depuis la fin de l'engagement : de 0,335 à 1 entre 1,0 et ≈ 1,67 s ; une descente pendant la
+  remontée réarme l'engagement ; le focal ne cède qu'à une priorité plus forte et après 1 s, tout de suite s'il ne
+  soumissionne plus. Trois essais de plus, 28 de l'ordonnanceur ; suite du cœur **631 réussis, 18 ignorés, 0 échec** ;
+  empreinte S278 inchangée.
