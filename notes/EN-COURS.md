@@ -88,11 +88,18 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — banc `rayonnement_coque` : pilonnement imposé, force de δ, `A` et `B` ; critère 1.
+- [x] **P2** — banc `rayonnement_coque` : pilonnement imposé, force de δ, `A` et `B` ; critère 1.
 - [ ] **P3** — le corps du jeu amorti, constantes de l'archétype ; critère 2.
 - [ ] **P4** — la scène de la porte D amortie ; critère 3 ; images (critère 4).
 - [ ] **P5** — preuve `docs/validation/RAYONNEMENT-COQUE-S336.md` ; liste, file, feuille de route.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
-
+- **P2, `A(ω)` et `B(ω)`** (pilonnement imposé 5 cm, placement 30/30, fenêtre de deux périodes après 3 s). À 25 cm :
+  ω = 3,0 → A 3 112 kg (0,97 m), B 7 104 N·s/m ; 3,5 → 2 808, 6 315 ; 4,0 → 2 886, 5 212 ; 4,5 → 3 030, 4 576. À
+  12,5 cm : 3,5 → **3 234, 5 866** ; 4,0 → **3 361, 4 760** — A +15 %, B −8 % en affinant (la résolution d'A317).
+  **Critère 1 manqué** sur le résidu : 5,2–6,8 % à 25 cm, 9,0–9,4 % à 12,5 cm, pour 5 % visés. Nature : des sauts
+  discrets quand le fond de la coque franchit une face — jusqu'à 505 N d'un pas à l'autre, 25 % de l'amplitude —
+  et une dérive lente ; `A` et `B` restent déterminés à ~10 % près. **Constantes retenues pour l'archétype** :
+  pulsation propre cohérente `ω' = √(K/(m + A))` ≈ 3,17 rad/s ; **A = 3 200 kg, B = 6 400 N·s/m** (12,5 cm
+  extrapolé), ± 10 % ; `ζ = B/(2√(K(m + A)))` ≈ 0,158 ; période propre 1,98 s au lieu de 1,40.
