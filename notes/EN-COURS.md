@@ -90,7 +90,7 @@ Critères, écrits avant le travail :
 - [x] **P2** — le registre, sections 1 à 6 de la liste (socle, B, W, δ, V, solides).
 - [x] **P3** — le registre, sections 7 à 13 ; le compte des 117 points par script. *Fusion déclarée P2+P3 :
   un seul outil écrit et compte les treize sections.*
-- [ ] **P4** — les fronts dans la feuille de route ; file, index, liste (renvoi).
+- [x] **P4** — les fronts dans la feuille de route ; file, index, liste (renvoi).
 - [ ] **P5** — rituel.
 
 ### Notes de reprise

@@ -11,7 +11,8 @@ spécifications, des [cas canoniques](validation/CAS-CANONIQUES.md) et des
 
 **Objectif des sessions après la v1** (décision de l'utilisateur, S351,
 [ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md)) : ses 120 points validés, chacun sur son
-périmètre final ; l'ordre reste celui de la feuille de route.
+périmètre final ; l'ordre reste celui de la feuille de route (§3 ter), qui le tire du
+[registre des dépendances](registres/DEPENDANCES-LISTE.md).
 
 **Remplissage à la demande de l'utilisateur.** Chaque remplissage met à jour les états touchés et la
 ligne « État au » ci-dessous. La trajectoire et l'ordre des travaux restent dans la

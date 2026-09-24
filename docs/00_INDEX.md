@@ -27,6 +27,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Invariants](01_INVARIANTS.md), [décomposition ADR-001](adr/ADR-001-decomposition-en-couches.md).
 - [Bilan global S321](registres/BILAN-GLOBAL-S321.md) : code, documents, méthode — le dispositif s'use par accumulation ; la méthode refondue.
 - [Bilan global S293](registres/BILAN-GLOBAL-S293.md) : où l'avancement bloque — porte B verrouillée, architecture de δ, budget sans répartition, pilotage.
+- [La liste par dépendance — S352](registres/DEPENDANCES-LISTE.md) : chacun des points non validés de la liste du projet fini, ce qu'il attend et ce qu'il débloque, son front — calculé par `outils/dependances_liste.py`, tenu par `--check` ; l'ordre est au §3 ter de la feuille de route (ADR-190 D3).
 - [Trois systèmes — S308](registres/TROIS-SYSTEMES-S308.md) : la stratégie A / B / C confrontée au code — ce qui existe, les six interfaces manquantes, le banc de la piscine essai par essai, l'ordre en sept lots.
 - [Bilan global S227](registres/BILAN-GLOBAL-S227.md) : dérives, procédure et correctifs.
 - [Comparables externes](COMPARABLES-EXTERNES.md) : systèmes du commerce regardés, avec le statut de chaque affirmation.

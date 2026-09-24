@@ -342,6 +342,28 @@ sont nommés : l'architecture d'exécution de δ (A295) et la part de δ dans le
 décision de l'utilisateur). La porte D n'a ni objet pilotable ni corps rigide. Ordre recommandé
 et questions : bilan §5 et §6 ; rien n'est retiré de l'ambition.
 
+## 3 ter. Après la v1 — la liste entière, par fronts
+
+*Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
+débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et
+tenu par `etat_projet.py --check`. Ici, l'ordre. Les jalons du §2 et les portes E et F restent vrais : ils disent les
+mêmes dépendances, en plus gros.
+
+**Front 0 — 34 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
+
+1. **La v1 en une scène vivante** — réunir ce que les portes ont reçu séparément : la coque dans la production de δ
+   (6.4), l'ordonnanceur et le rang 1 dans l'afficheur (4.2), l'interpolation du rendu à 30 Hz (4.19) ; puis la revue
+   du prix du rang 1 (A319), que 4.5 et 9.9 attendent.
+2. **Le lot 5, une session sur deux** (ADR-184 D1, ADR-190 D4) : 4.16, par A316 — 22 points en aval.
+3. **La bathymétrie** (2.7) — 20 points en aval —, puis W au-dessus du plan moyen (3.9) et les courants (2.6).
+4. **Le reste du front 0**, par système : couplage (4.7, 4.18), volumique (4.15, 6.5), V (5.2, 5.4, 5.6, 5.7),
+   solides (6.1, 6.3), rendu (8.2, 8.3, 8.5, 8.8, 8.9), budget (9.2, 9.3, 9.7, 9.8, 9.13), et 1.8, 7.1, 7.7, 10.8,
+   11.2, 12.1, 13.1.
+
+**Fronts 1 à 5 — 42 points**, qui s'ouvrent à mesure ; le registre dit lesquels. **E — 41 points** attendent un fait
+ou une action de l'utilisateur, demandé au moment où le point bloque (ADR-190 D5) : le réseau (10.1) en commande 14 à
+lui seul, puis la météo, le verdict du rang 1 et la voie d'A289.
+
 ## 4. Arbitrages explicites
 
 **Aucun accord de dépendances du lot S210/S211 n'est encore attendu.** GPU séparé choisi en
