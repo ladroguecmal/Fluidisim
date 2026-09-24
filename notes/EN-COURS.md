@@ -62,39 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S346 — **terminée**. **Porte C, attribuer A318** ; chemin de la v1.
+Session : S347 — **en cours**. **Revue R17, les deux cadences** ; chemin de la v1, porte C.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — S345 ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §8) : la cadence de 30 Hz d'ADR-012 §7 tient sur la
-cuve (0,04 %), pas sur la scène de B : l'onde isolée y garde jusqu'à 6,3 % d'amplitude de plus qu'à 60 Hz, cinq fois
-le témoin des cycles ; ni la projection ni l'éponge. **A318**, sévérité 2 : il bloque l'adoption de la cadence.
+Entrée — S345–S346 ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §8–9) : la cadence de 30 Hz d'ADR-012 §7, seule à
+passer sous 2 ms par image une fois étalée, change l'amplitude d'une onde forte de quelques pour cent — un
+amortissement numérique par pas (A318). Aucune cadence n'est « la vraie ». Savoir si cela se **voit** appartient à
+l'utilisateur (ADR-189 D3).
 
-**Ce que la session doit rendre possible.** Savoir d'où vient l'écart, pour le corriger ou le faire juger. Deux
-sources possibles : le **couplage à la mer** — le fond de B, lu au début du pas, force δ sur tout le pas (ordre un en
-temps) — ou la **dynamique propre** de l'onde — son advection par elle-même, les bascules de mouillure (A297).
+**Ce que la session doit rendre possible.** Le verdict : la scène de la porte B — le front de S302, la mer de R14
+(`--meilleur --eau-physique=2`) — rendue avec δ à 60 Hz et à 30 Hz, aux mêmes instants, aux mêmes poses.
 
 Critères, écrits avant le code :
-1. **Le front sur une mer au repos** (fond de B d'amplitude nulle), 30 contre 60 Hz, 12 s : amplitude de l'onde
-   chaque seconde. Si l'écart tombe au niveau du témoin des cycles (≤ 1,3 %), le couplage à la mer est en cause ;
-   s'il reste de l'ordre de S345, c'est la dynamique propre.
-2. **Une troisième cadence**, 40 Hz (25 ms), sur la scène de B : l'écart suit-il le pas — ordre un — ou non.
-3. Preuve (§9), file, A318 : attribué, ou ce qui reste à éprouver ; la suite de la porte C en dépend.
+1. `--pas-delta=<µs>` règle le pas de la scène δ 3D ; sans lui, la scène et ses captures de S302 et S339 au bit.
+2. Captures à 2, 5 et 8 s, quatre poses, aux deux cadences, dans `viewer/captures/s347` ; aperçus PNG et
+   différences ×6 entre cadences ; empreintes publiées.
+3. **R17** au registre, questions écrites ; **arrêt pour le verdict**.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le front sur une mer au repos, aux deux cadences ; critère 1.
-- [x] **P3** — la scène de B à 40 Hz ; critère 2.
-- [x] **P4** — preuve, file, A318 ; critère 3.
-- [x] **P5** — rituel.
+- [ ] **P2** — le pas de la scène réglable ; identité des captures sans lui ; critère 1.
+- [ ] **P3** — les captures aux deux cadences, aperçus, différences ; critère 2.
+- [ ] **P4** — R17 au registre, preuve (§10), file ; rituel ; arrêt ; critère 3.
 
 ### Notes de reprise
-- **P2, critère 1 : partagé.** `MER=repos … --delta3d-cadence-scene` (fond de B d'amplitude nulle) : 30 contre 60 Hz,
-  amplitude **+1,0 à +3,9 %** (1,72 ; 1,89 ; 1,31 ; 1,60 ; 1,03 ; 3,11 ; 1,32 ; **3,87** ; 0,30 ; −0,70 ; 0,47 ; 0,16),
-  presque toujours positive ; avec la mer, 6,3 % ; témoin des cycles, 1,3 %. **La dynamique propre de l'onde dépend
-  du pas** — moins d'amortissement quand les pas sont moins nombreux —, **et la mer en rajoute**.
-- **P3, critère 2.** `CADENCES=16667:32,25000:32` : 40 contre 60 Hz, amplitude **≤ 0,73 % jusqu'à 5 s** (0,46 ; 0,31 ;
-  −0,03 ; −0,73 ; 0,42) — le niveau du témoin des cycles —, puis −3,28 (6 s), +5,64 (8 s), **+9,18 % (12 s)**, plus qu'à
-  30 Hz au même instant (2,2). **Deux régimes** : tant que l'onde est groupée (≤ 5 s), l'écart croît avec le pas — 40 Hz
-  au niveau du témoin, 30 Hz jusqu'à 5,7 % ; une fois dispersée, elle diverge sans ordre, comme toute scène au-delà
-  de l'horizon d'A297 (S298). À 40 Hz, un pas par image et demie : ≈ 2,45 ms par image, au-dessus des 2 ms.
-

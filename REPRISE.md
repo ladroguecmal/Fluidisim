@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-24 19:06 +02:00
+JETON            : occupé
+Battement        : 2026-09-24 19:07 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S347 — **revue R17** : la scène de B rendue à 30 et à 60 Hz, côte à côte, pour juger si l'écart d'A318 se voit ; arrêt pour le verdict
 Dernière session : S346 — **porte C, A318 attribué en partie** : à 30 Hz l'onde forte garde quelques pour cent d'amplitude de plus qu'à 60 Hz — un amortissement numérique par pas, porté par l'onde et accru par la mer ; 40 Hz au niveau du témoin ([preuve](docs/validation/COUT-DELTA3D-S341.md) §9)
 Session suivante : **revue R17** (ADR-189 D3) — la scène de B rendue à 30 et à 60 Hz, aux mêmes instants, côte à côte ; arrêt pour le verdict. S'il ne voit rien : étaler le pas sur deux images, 99ᵉ centile par image. Porte A ensuite. En attente : le terme de D2 (lot 5)
 Maillons        : 2 — S345–S346 : cadence éprouvée et attribuée, aucun critère franchi
