@@ -341,3 +341,45 @@ fn a_solid_that_touches_the_bottom_or_the_lid_is_refused_s329() {
     let haut = noeuds(d, |x, y, z| ((x - 0.5).powi(2) + (y - 0.5).powi(2) + (z - 0.85).powi(2)).sqrt() - 0.2);
     assert_eq!(add_solid(&mut g, d, &haut).err(), Some(crate::delta_projection::Error::Domain));
 }
+
+/// **S335, critère 1 — le centroïde de la part couverte d'une face.** Cas clos : face pleine, demi-face, coin
+/// d'un champ linéaire, et un champ qui n'est linéaire que par triangle ; la part est celle de `face_negative`
+/// à l'arrondi près, sur mille faces tirées d'un générateur déterministe.
+#[test]
+fn the_covered_part_of_a_face_has_its_exact_centroid_s335() {
+    let proche = |a: [f64; 2], b: [f64; 2]| (a[0] - b[0]).abs() < 1e-14 && (a[1] - b[1]).abs() < 1e-14;
+    // Face pleine.
+    let (part, g) = face_negative_centroid([-1., -2., -1., -3.]).unwrap();
+    assert!(part == 1. && proche(g, [0.5, 0.5]), "{part} {g:?}");
+    // Rien de couvert.
+    assert!(face_negative_centroid([1., 2., 0.5, 0.]).is_none());
+    // Demi-face : le champ 2s − 1, négatif pour s < 1/2.
+    let (part, g) = face_negative_centroid([-1., 1., 1., -1.]).unwrap();
+    assert!((part - 0.5).abs() < 1e-15 && proche(g, [0.25, 0.5]), "{part} {g:?}");
+    // Coin : le champ s + t − 1/2, négatif sous la diagonale courte ; part 1/8, centroïde (1/6, 1/6).
+    let (part, g) = face_negative_centroid([-0.5, 0.5, 1.5, 0.5]).unwrap();
+    assert!((part - 0.125).abs() < 1e-15 && proche(g, [1. / 6., 1. / 6.]), "{part} {g:?}");
+    // Coin opposé, par symétrie : (5/6, 5/6).
+    let (part, g) = face_negative_centroid([1.5, 0.5, -0.5, 0.5]).unwrap();
+    assert!((part - 0.125).abs() < 1e-15 && proche(g, [5. / 6., 5. / 6.]), "{part} {g:?}");
+    // La part, au bit de l'ordre de l'arrondi, est celle de `face_negative`.
+    let mut graine = 0x9E37_79B9_7F4A_7C15u64;
+    let mut tire = || {
+        graine ^= graine << 13;
+        graine ^= graine >> 7;
+        graine ^= graine << 17;
+        (graine >> 11) as f64 / (1u64 << 53) as f64 * 2. - 1.
+    };
+    for _ in 0..1000 {
+        let c = [tire(), tire(), tire(), tire()];
+        let reference = face_negative(c);
+        match face_negative_centroid(c) {
+            None => assert_eq!(reference, 0., "{c:?}"),
+            Some((part, g)) => {
+                assert!((part - reference).abs() <= 1e-15, "{c:?} : {part} contre {reference}");
+                assert!(g.iter().all(|x| (0. ..=1.).contains(x)), "{c:?} : {g:?}");
+            }
+        }
+    }
+}
+

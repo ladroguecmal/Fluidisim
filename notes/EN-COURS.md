@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le centroïde de la part couverte d'une face (`delta3d_cut.rs`) ; critère 1.
+- [x] **P2** — le centroïde de la part couverte d'une face (`delta3d_cut.rs`) ; critère 1.
 - [ ] **P3** — la paroi au centroïde : stocké à la découpe, lu par la divergence ; critère 2.
 - [ ] **P4** — la contre-épreuve de S333 au couvercle partiel ; critère 3 ; défaut allumé si tenu ; critère 4.
 - [ ] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
@@ -99,4 +99,5 @@ Critères, écrits avant le code :
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
-
+- **P2, critère 1 tenu.** `face_negative_centroid` : face pleine (0,5 ; 0,5), demi-face (0,25 ; 0,5), coin d'un
+  champ linéaire (1/6 ; 1/6), part 1/8 ; aire identique à `face_negative` à 10⁻¹⁵ sur mille faces tirées.

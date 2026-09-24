@@ -316,6 +316,51 @@ fn face_negative(c: [f64; 4]) -> f64 {
         + tri_negative([c[3], c[0], m]))
 }
 
+/// **S335 : la part négative d'un triangle et son moment** — sommets `p` dans le plan de la face, valeurs `w`
+/// d'un champ linéaire. Rend `(part, moment)`, le moment valant la part fois le centroïde de la part négative.
+/// Mêmes formes closes que `tri_negative`, sommets suivis : la part est la sienne au bit.
+#[cfg_attr(not(test), allow(dead_code))] // lue par la divergence en S335 P3
+fn tri_negative_moment(w: [f64; 3], p: [[f64; 2]; 3]) -> (f64, [f64; 2]) {
+    let mut o = [0usize, 1, 2];
+    o.sort_by(|a, b| w[*a].total_cmp(&w[*b]));
+    let ([v0, v1, v2], [p0, p1, p2]) = ([w[o[0]], w[o[1]], w[o[2]]], [p[o[0]], p[o[1]], p[o[2]]]);
+    let vers = |a: [f64; 2], b: [f64; 2], t: f64| [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
+    let centre = |a: [f64; 2], b: [f64; 2], c: [f64; 2]| [(a[0] + b[0] + c[0]) / 3., (a[1] + b[1] + c[1]) / 3.];
+    if v0 >= 0. {
+        (0., [0.; 2])
+    } else if v2 < 0. {
+        (1., centre(p0, p1, p2))
+    } else if v1 >= 0. {
+        // Un sommet négatif : le petit triangle qu'il coupe.
+        let a = -v0;
+        let part = a * a / ((a + v1) * (a + v2));
+        let g = centre(p0, vers(p0, p1, a / (a + v1)), vers(p0, p2, a / (a + v2)));
+        (part, [part * g[0], part * g[1]])
+    } else {
+        // Deux sommets négatifs : le triangle entier, moins le petit triangle positif.
+        let positif = v2 * v2 / ((v2 - v0) * (v2 - v1));
+        let (t, g) = (centre(p0, p1, p2), centre(p2, vers(p2, p0, v2 / (v2 - v0)), vers(p2, p1, v2 / (v2 - v1))));
+        (1. - positif, [t[0] - positif * g[0], t[1] - positif * g[1]])
+    }
+}
+
+/// **S335 : la part solide d'une face et le centroïde de cette part**, coins en ordre cyclique, en coordonnées
+/// locales de la face — coins `(0,0) (1,0) (1,1) (0,1)`, en fractions de maille. Quatre triangles autour du
+/// centre, comme `face_negative` ; `None` sans part solide. Le flux d'un champ linéaire à travers la part
+/// couverte vaut sa valeur en ce point, fois l'aire : c'est là que la paroi d'un corps rigide doit être lue.
+#[cfg_attr(not(test), allow(dead_code))] // lue par la divergence en S335 P3
+pub(crate) fn face_negative_centroid(c: [f64; 4]) -> Option<(f64, [f64; 2])> {
+    const COINS: [[f64; 2]; 4] = [[0., 0.], [1., 0.], [1., 1.], [0., 1.]];
+    let m = 0.25 * (c[0] + c[1] + c[2] + c[3]);
+    let (mut part, mut moment) = (0., [0.; 2]);
+    for e in 0..4 {
+        let (a, g) = tri_negative_moment([c[e], c[(e + 1) % 4], m], [COINS[e], COINS[(e + 1) % 4], [0.5, 0.5]]);
+        part += a;
+        moment = [moment[0] + g[0], moment[1] + g[1]];
+    }
+    (part > 0.).then(|| (0.25 * part, [moment[0] / part, moment[1] / part]))
+}
+
 /// Les six faces d'une maille en ordre cyclique, nœuds indexés `x + 2y + 4z` : x−, x+, y−, y+, z−, z+ —
 /// les ordres mêmes des faces `u`, `v`, `w` vues de la grille.
 const CELL_FACES: [[usize; 4]; 6] = [[0, 2, 6, 4], [1, 3, 7, 5], [0, 1, 5, 4], [2, 3, 7, 6], [0, 1, 3, 2], [4, 5, 7, 6]];
