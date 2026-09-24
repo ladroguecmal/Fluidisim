@@ -62,68 +62,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S340 — **terminée**. **Porte B** : le verdict R16, puis le critère 2 sur la production, cas 1 et 2 ;
-chemin de la v1 ([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4), porte en cours de §3 bis.
+Session : S341 — **en cours**. **Porte C, la mesure qui manque** ; chemin de la v1
+([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4), porte en cours de §3 bis depuis S340.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — **verdict R16** de l'utilisateur sur les images de S339 : *« Tout parrait bon visuellement »*. Critère 3
-d'[ADR-175](../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) §4 : reçu. Restent, pour la porte B,
-les cas 1 et 2 du critère 1 **sur la production** — critère 2, *« production contre référence, sur les mêmes cas :
-écart de hauteur sous 3 mm, pente et phase publiées »* ; S305 n'a mesuré que le cas 3
-([CUVE-GPU-S305](../docs/validation/CUVE-GPU-S305.md) §7). Le critère 4, le coût, relève de la porte C.
+Entrée — l'utilisateur : *« Continue »*, après la porte B reçue (S340). Le terme de D2 (lot 5) reste sans réponse :
+le lot 5 reste suspendu.
 
-**Ce que la session doit rendre possible.** La porte B reçue, si les deux cas tiennent. **Ce qui contraint le
-cas 1** : la production n'évalue que le fond de B — des composantes progressives, en eau profonde —, et le cas 1
-de S297 couple la référence à une onde stationnaire analytique en eau finie (`L` = `h` = 2 m, `k·h` = π). Le fond
-du cas 1 sera donc **la même onde stationnaire faite de deux composantes de B** opposées, pour la référence comme
-pour la production ; l'écart de ce fond à l'analytique est publié, et la référence sur ce fond est rejouée contre
-HOS.
+**Ce que la porte C demande** ([ADR-175](../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) §4.4) :
+le pas de δ tient **2 ms GPU au 99ᵉ centile de la contribution par image**, sur la scène de la porte B, machine de
+référence, **techniques présentes et absentes publiées** (ADR-131 D3). **Ce qu'on sait** : 4,62 ms par pas en
+médiane de banc, 30 pas, 32 cycles, 376 320 mailles, 177 dispatchs (S302). **Ce qu'on ne sait pas** : le 99ᵉ
+centile, et où vont les 4,6 ms — fond, prédiction, couplage, projection, correction, transport. Choisir un levier
+sans cette décomposition serait deviner.
 
 Critères, écrits avant le code :
-1. **R16** consigné : critère 3 reçu — registre, preuve, feuille de route, file.
-2. **Un fond de B par ses composantes** (`Background::from_components`) : refus d'une liste vide, allocation
-   demandée à l'hôte comme `configure` ; essai du cœur.
-3. **Cas 2 sur la production** : une composante de B le long de `x` (direction (1, 0) exacte), une crête initiale
-   invariante en `y`, `ny` = 8, 2 s. La production reste **invariante en `y`** à quatre ulps du repos près, et
-   suit la référence **sous 3 mm** ; pente publiée.
-4. **Cas 1 sur la production** : `ny` = 1, géométrie de S297 (murs, boîte de 2,25 m), 5 et 10 cm, `nx` 32, 64 et
-   128 si la durée le permet, une période. Publiés : l'écart du fond de B à l'onde analytique ; la référence sur ce
-   fond contre HOS (tolérances de S253 : profil < 2 %, harmonique < 20 % à 128) ; **la production contre la
-   référence, sous 3 mm**, pente et phase.
-5. Si 3 et 4 tiennent : **porte B reçue** (critères 1 à 3 ; le 4 à la porte C) — feuille de route, file, liste.
+1. **L'horodatage par passe** : début et fin de chacune des trois passes du pas, les copies entre elles comprises
+   dans l'écart ; le pas de production **inchangé au bit** — la surface publiée après 60 pas identique avec et
+   sans horodatage.
+2. **Le banc** (`--delta3d-cout-scene`) : la scène de la porte B (`Config::review`, 32 cycles), 1 000 pas horodatés
+   après 30 de chauffe : médiane, 99ᵉ centile et maximum du pas entier et de chaque passe ; la projection à 0, 8,
+   16, 32 et 64 cycles — coût par cycle et part fixe.
+3. **Le domaine** (ADR-131 D3, A270) : alimentation relevée au début et à la fin ; témoin — le coût de S302,
+   `--delta3d-scene-mesure`, rejoué dans le même état ; ce que la grandeur mesure et ne mesure pas.
+4. **La preuve** : techniques présentes, absentes, domaine ; la part de chaque étage ; **le premier levier**
+   choisi sur la mesure, avec ce qu'il doit publier.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le verdict R16 : critère 3 reçu ; critère 1.
-- [x] **P3** — `Background::from_components` et son essai ; critère 2.
-- [x] **P4** — le cas 2 sur la production ; critère 3.
-- [x] **P5** — le cas 1 : fond de B stationnaire, chaînon et HOS sur la référence.
-- [x] **P6** — le cas 1 : production contre référence ; critère 4.
-- [x] **P7** — preuve ; la porte B, si elle tient ; critère 5.
-- [x] **P8** — rituel.
+- [ ] **P2** — l'horodatage par passe ; critère 1.
+- [ ] **P3** — le banc, le témoin, l'alimentation ; critères 2 et 3.
+- [ ] **P4** — la preuve, le premier levier ; file, feuille de route ; critère 4.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P3, critère 2 tenu.** `Background::from_components` et `ComponentsError` (vide, non fini, allocation) ;
-  essai `two_opposed_components_make_a_standing_wave_s340` : deux composantes de `a/2`, opposées, quart de tour —
-  `a·cos(k·x)·cos(ω·t)` à 2·10⁻⁵ près à 0 et à T/2, refus vérifiés. Cœur : 500 réussis, 14 ignorés.
-- **P4, critère 3 tenu** (`--delta3d-cas2`, 32×8×36 à 25 cm, repos 8 m, 400 pas de 5 ms, 64 cycles). Houle de B
-  d'une seule direction, `x` exact, 4 m ; crête initiale de 10 cm invariante en `y`. **À 5 cm de houle** : carte
-  contre référence **1,02·10⁻⁶ m** au pire sur 2 s (3 mm exigés), quadratique 4,6·10⁻⁷, pente 3,7·10⁻⁶ ;
-  invariance en `y` de la carte **9,5·10⁻⁷ m, 1,00 ulp du repos** (critère : 4), du cœur 3,4·10⁻⁸. **À 10 cm**, le
-  premier essai : au micron jusqu'à 1,25 s, puis 5,1 mm à 1,5 s, 8,3 mm à 2 s, invariance perdue (6·10⁻³) — la
-  surface franchit le centre de maille à 12,5 cm : **A297**, l'horizon de S298. Seule l'amplitude change entre
-  les deux. Le cas retenu est donc celui de S305 : sous le seuil, A297 entière.
-- **P5, fait** (`delta3d_mobile -- coupled-b`, 16 min). **Chaînon** — fond de B contre analytique, à 0 et T/4 : η
-  identique à 3,7·10⁻⁹ m ; **dans l'eau**, u, w, du/dt, p à 4,4 % de leur maximum, au bas du domaine — eau profonde
-  contre profondeur finie, flux de B au fond 8,5·10⁻³ m/s à 5 cm ; **au-dessus du plan moyen**, u et du/dt à 33 %,
-  w et p à 6 % — le prolongement borné d'ADR-154 contre le prolongement analytique. **Référence sur ce fond contre
-  HOS** (32 / 64 / 128) : 5 cm, profil 1,646 / 1,034 / **0,984 %**, harmonique 2,694 / 1,566 / **1,231 %** ; 10 cm,
-  1,426 / 1,161 / **1,069 %** et 3,072 / 1,996 / **1,353 %** — décroissants, **tolérances de S253 tenues** (2 %,
-  20 %), six fois moins bien qu'au fond analytique (0,148 / 0,178 %) : l'écart est celui du fond, non du solveur.
-- **P6, critère 4 tenu** (`--delta3d-cas1`, `ny` = 1, fond de B de P5, 1 604 pas de 1 ms, 64 cycles). Carte contre
-  référence, écart de hauteur au pire — 5 cm : 3,9·10⁻⁷ / 1,3·10⁻⁶ / **1,4·10⁻⁶ m** (32 / 64 / 128) ; 10 cm :
-  1,8·10⁻⁵ / 4,2·10⁻⁶ / **8,2·10⁻⁵ m**. Jamais le millimètre ; amplitude modale à 3,7·10⁻⁷ m au plus : même phase.
-  **Pente** : 8,5·10⁻⁶ à 1,7·10⁻⁴ à 5 cm ; à 10 cm, 4,4·10⁻⁴ / 2,3·10⁻⁴ / **8,9·10⁻³** — 82 µm sur une maille de
-  1,6 cm, au pas 1 530 ; au-dessus des 5·10⁻⁴ de S260 que S305 citait pour information ; non attribué — candidat
-  A297, la surface totale franchissant sans cesse des centres de maille. Durées : 14 à 68 s, 400 s à 128.
-
