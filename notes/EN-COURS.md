@@ -98,8 +98,10 @@ Critères, écrits avant le code :
 - [ ] ~~**P4** — banc après correctif ; critère 2.~~ *Caduc : le correctif ne porte pas A317 (P3).*
 - [x] **P4** — *amendé* : **convergence** sur une tranche quasi-2D — coque infiniment longue, `ny` = 2 —,
   mailles de 25 ; 12,5 ; 6,25 ; 3,125 cm, quatre placements chacune ; couvercle partiel éteint puis allumé.
-- [ ] **P5** — *amendé* : qualifier A317 — erreur de résolution d'ordre mesuré et maille qu'elle impose, ou
-  défaut de structure — ; la scène de la porte D ne se rejoue que si δ change par défaut.
+- [ ] **P5** — *amendé deux fois* : **l'eau poussée par une paroi qui glisse** — quand l'ouverture du couvercle
+  d'une colonne se referme, l'eau de surface de la part recouverte passe aux colonnes voisines au couvercle
+  ouvert ; puis **couvercle partiel par défaut** si les critères 9 à 11 tiennent.
+- [ ] **P5 bis** — la scène de la porte D rejouée avec le couvercle partiel : critères 3 à 5, images.
 - [ ] **P6** — preuve (PORTE-D-S333 §6, S334) ; A317 note datée ; R15 au registre des revues ; file, feuille
   de route si un état change.
 - [ ] **P7** — rituel.
@@ -111,6 +113,17 @@ tranche quasi-2D a le même mécanisme de paroi et coûte cent fois moins : quat
 **Critères** : (6) à 25 cm, la tranche reproduit l'écart de la 3D (≥ 20 %) ; (7) l'écart décroît avec la maille
 — ordre mesuré ; ≥ 1 : erreur de résolution, sinon défaut de structure ; (8) l'amplitude moyenne converge, et
 la valeur extrapolée dit quelle surface — S332 ou couvercle partiel — s'en approche le plus vite.
+
+**Second amendement, après P4, déclaré avant le code.** Le couvercle partiel est la bonne physique : il
+converge, S332 non. Il reste éteint pour une seule raison — une colonne dont l'ouverture se referme garde son
+excès d'eau, que `1/a` change en pointe. Remède : l'eau de surface de la part qui vient d'être recouverte,
+`(surface)·(1 − a_nouveau/a_ancien)`, va aux voisines de la couche du haut, au prorata de l'ouverture de la
+face partagée et du couvercle voisin — la paroi pousse l'eau devant elle. Somme exacte, aucune allocation.
+**Critères** : (9) contre-épreuve de S333 — coque tenue fixe, qui glisse de ± 25 cm dans δ — vitesse sur les
+faces ouvertes ≤ 1 m/s avec le couvercle partiel (12,2 m/s sans ce remède, 0,32 avec le couvercle de S332) ;
+(10) le volume de δ suit toujours la coque plongée — pilonnement de S332 ≤ 10⁻⁹ m³, glissement mesuré ;
+(11) par défaut : les valeurs S3xx ne changent que là où un couvercle est en partie couvert, et la liste des
+valeurs changées est publiée.
 
 ### Notes de reprise
 - **P2, critère 1 — A317 reproduit hors du jeu** (pilonnement imposé 5 cm, 4,484 rad/s ; bandes à 2,5–3,5 m ;
