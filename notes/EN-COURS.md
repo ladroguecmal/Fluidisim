@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `Step3` : la surface précédente, copiée avant chaque publication ; empreintes S343, identité S350.
 - [x] **P3** — le rendu : la liaison du précédent, β, la branche ; captures de l'anneau au bit (critère 1).
-- [ ] **P4** — la fenêtre : deux parts à `--pas-delta=33333`, β alterné, touche d'interpolation ; banc du mélange au
+- [x] **P4** — la fenêtre : deux parts à `--pas-delta=33333`, β alterné, touche d'interpolation ; banc du mélange au
   bit (critère 2).
 - [ ] **P5** — la saccade mesurée (critère 3).
 - [ ] **P6** — la cadence en direct (critère 4).
@@ -110,3 +110,7 @@ Critères, écrits avant le code :
   --eau-physique=2 --delta3d --anneau --captures`) : `s339a_proche_avec_1.0s` 0x5a79f01d64083ef3, `haute_avec_1.0s`
   0xd4e6d1e43e57c1cb, `proche_avec_2.0s` 0x2e37efc6f485f73d, `rasante_avec_2.0s` 0x142774b45a5ca313 — **les quatre
   identiques** aux empreintes publiées (SCENE-DELTA3D-S302 §8).
+- **P4, critère 2 tenu.** `Live` : à `--pas-delta=33333`, une part par image (`K_DEUX_PARTS` = 7, S348) ; β = ½ après
+  la part 1, 0 après la part 0 ; touche `I`. Banc `--melange` (anneau, 61 pas, pose proche) : écart précédente/courante
+  1,84 cm ; image β = ½ contre image du tampon (p + c)/2 calculé sur CPU : **0 octet différent** ; témoin courante
+  seule : 550 530 octets différents. Fenêtre `--smoke` à 30 Hz en deux parts : 120 images, sans erreur.

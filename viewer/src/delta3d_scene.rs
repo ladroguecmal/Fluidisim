@@ -319,6 +319,10 @@ impl Config {
     }
 }
 
+/// S353 : les cycles de projection de la première part du pas à 30 Hz — l'équilibre des deux parts mesuré en S348
+/// ([preuve](../../docs/validation/COUT-DELTA3D-S341.md) §11).
+pub const K_DEUX_PARTS: u32 = 7;
+
 /// Le domaine δ vivant d'une scène : le pas de production et son horloge entière.
 pub struct Live {
     pub step: Step3,
@@ -328,14 +332,29 @@ pub struct Live {
     /// Instant de B au pas zéro, en microseconds.
     pub start_us: u64,
     pub last: Option<Diagnostics>,
+    /// S353 — δ à 30 Hz dans une image à 60 (ADR-012 §7) : un pas de deux images, une part par image (S348). Vrai
+    /// quand le pas vaut deux images.
+    pub deux_parts: bool,
+    /// La part que la prochaine image soumet, 0 ou 1.
+    pub partie: u32,
+    /// Le rendu mélange-t-il la surface précédente (touche `I`) ?
+    pub interpolation: bool,
+    /// Le poids de la surface précédente pour l'image en cours : ½ quand la part 1 vient de publier, 0 sinon.
+    blend: f32,
 }
 
 impl Live {
     pub fn new(step: Step3, config: Config, start_us: u64) -> Result<Self, String> {
         step.set_step(config.step_us, config.rest, config.sponge)?;
-        let mut live = Live { step, config, steps: 0, start_us, last: None };
+        let deux_parts = config.step_us == 33_333;
+        let mut live = Live { step, config, steps: 0, start_us, last: None, deux_parts, partie: 0, interpolation: true, blend: 0. };
         live.inject(start_us)?;
         Ok(live)
+    }
+
+    /// S353 : la vue de l'image en cours — la géométrie de la couche et le poids β de la surface précédente.
+    pub fn view(&self, active: bool) -> View {
+        View { blend: if self.interpolation { self.blend } else { 0. }, ..self.config.view(active) }
     }
 
     /// (Ré)injecte l'état initial. Hors pas : `O(N)` sur CPU, à la demande de l'utilisateur.
@@ -344,14 +363,29 @@ impl Live {
         self.step.set_state(&u, &v, &w, &eta)?;
         self.steps = 0;
         self.start_us = start_us;
+        self.partie = 0;
+        self.blend = 0.;
         Ok(())
     }
 
-    /// Un pas de production. Ne lit rien ; les diagnostics reviennent en différé.
+    /// Ce que fait une image : un pas de production entier, ou — à 30 Hz — une part du pas (S348). Ne lit rien ; les
+    /// diagnostics reviennent en différé. **S353** : la part 1 publie l'état suivant ; l'image qui la suit montre le
+    /// milieu des deux derniers états (β = ½), la suivante l'état publié (β = 0) — chaque image avance d'un demi-pas,
+    /// sans latence ajoutée, puisque la part est soumise avant l'image.
     pub fn advance(&mut self, background: &Background) -> Result<(), String> {
         let time = water_core::SimTime(self.start_us + self.steps * self.config.step_us);
-        self.step.step(background, time, self.config.cycles)?;
-        self.steps += 1;
+        if self.deux_parts {
+            let partie = self.partie;
+            self.step.step_part(background, time, self.config.cycles, K_DEUX_PARTS, partie)?;
+            if partie == 1 {
+                self.steps += 1;
+            }
+            self.blend = if partie == 1 { 0.5 } else { 0. };
+            self.partie = 1 - partie;
+        } else {
+            self.step.step(background, time, self.config.cycles)?;
+            self.steps += 1;
+        }
         if let Some(d) = self.step.diagnostics()? {
             self.last = Some(d);
         }

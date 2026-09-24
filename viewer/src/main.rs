@@ -184,7 +184,7 @@ impl App<'_> {
                     return;
                 }
             }
-            self.frame.delta3d = Some(live.config.view(self.delta3d_active));
+            self.frame.delta3d = Some(live.view(self.delta3d_active));
             if self.frames % 120 == 0 {
                 if let Some(d) = live.last {
                     println!(
@@ -460,6 +460,18 @@ impl ApplicationHandler for App<'_> {
                                     }
                                 }
                                 KeyCode::KeyB => self.enabled = !self.enabled,
+                                // S353 : δ à 30 Hz — le rendu mélange ou non les deux derniers pas (ADR-012 §7).
+                                KeyCode::KeyI => {
+                                    if let Some(live) = self.delta3d.as_mut() {
+                                        live.interpolation = !live.interpolation;
+                                        println!(
+                                            "DELTA3D interpolation {} (pas {} µs, {})",
+                                            if live.interpolation { "active" } else { "coupée" },
+                                            live.config.step_us,
+                                            if live.deux_parts { "deux parts par pas" } else { "un pas par image" }
+                                        );
+                                    }
+                                }
                                 // S275 : B seul, B+δ (4 ms), B+δ (pas d'image).
                                 KeyCode::KeyD => {
                                     if let Some(layer) = self.frame.delta.as_mut() {
@@ -1724,6 +1736,71 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// instants demandés, deux fois : **avec** la couche δ et **sans** (B seul, même instant, même
 /// pose). Ce sont ces paires que la revue compare. Aucune publication.
 /// S339 : `tag` — `s302` (le front, R11) ou `s339` (l'impact, R16) : dossier et préfixe des images.
+/// S353 — rend une image de la scène δ 3D à la vue donnée et rend ses octets (PPM local, ADR-124).
+fn rendre_image_delta3d(
+    g: &mut gpu::Gpu,
+    frame: &mut FrameData<'_>,
+    view: delta3d_scene::View,
+    age: f64,
+    path: &str,
+) -> Result<Vec<u8>, String> {
+    frame.delta3d = Some(view);
+    frame.update(age, age, false);
+    g.upload(frame);
+    let target = g.target();
+    g.draw(&target.create_view(&Default::default()), false);
+    g.capture(&target, path)?;
+    std::fs::read(path).map_err(|e| e.to_string())
+}
+
+/// S353, critère 2 — **le mélange, au bit.** La scène donnée, 61 pas entiers : la surface précédente et la courante
+/// diffèrent. L'image rendue de (précédente, courante, β = ½) contre celle du seul tampon (précédente + courante)/2,
+/// β = 0 — la multiplication par ½ étant exacte, elles doivent être identiques au bit ; témoin : la courante seule,
+/// qui doit différer. Pose « proche » de R16. `--delta3d --anneau --melange`.
+fn delta3d_melange(frame: &mut FrameData<'_>, config: delta3d_scene::Config) -> Result<(), String> {
+    use wgpu::util::DeviceExt;
+    let dir = captures!("s353");
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    let (width, height) = (1280u32, 720u32);
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, width, height, frame.profile.len(), scene::WAKE_CAPACITY))?;
+    frame.lod = true;
+    frame.cull = true;
+    frame.viewport = Some((width as f32 / height as f32, g.nx, g.ny));
+    let info = g.adapter.get_info();
+    let step = delta3d_step::Step3::on_device(
+        g.device.clone(), g.queue.clone(), &info, frame.background,
+        config.domain, config.origin, delta3d_scene::RHO, delta3d_scene::G,
+    )?;
+    g.attach_delta3d(step.published_buffer(), step.published_prev_buffer());
+    let mut live = delta3d_scene::Live::new(step, config, 0)?;
+    let pas = 61u64;
+    for _ in 0..pas {
+        live.advance(frame.background)?;
+    }
+    let (c, p) = (live.step.published()?, live.step.published_prev()?);
+    let ecart = c.iter().zip(&p).fold(0f32, |m, (a, b)| m.max((a - b).abs()));
+    let moyenne: Vec<f32> = c.iter().zip(&p).map(|(a, b)| (a + b) * 0.5).collect();
+    let age = pas as f64 * config.step_us as f64 * 1e-6;
+    frame.camera = Camera { eye: [0., -7., 4.], yaw: 0., pitch: -0.18 };
+    let vue = config.view(true);
+    let demi = rendre_image_delta3d(&mut g, frame, delta3d_scene::View { blend: 0.5, ..vue }, age, &format!("{dir}/s353_melange_beta_demi.ppm"))?;
+    let courante = rendre_image_delta3d(&mut g, frame, vue, age, &format!("{dir}/s353_melange_courante.ppm"))?;
+    let tampon = g.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some("s353 moyenne"),
+        contents: delta3d::bytemuck_cast(&moyenne),
+        usage: wgpu::BufferUsages::STORAGE,
+    });
+    g.attach_delta3d(&tampon, &tampon);
+    let cpu = rendre_image_delta3d(&mut g, frame, vue, age, &format!("{dir}/s353_melange_moyenne_cpu.ppm"))?;
+    let differents = |x: &[u8], y: &[u8]| x.iter().zip(y).filter(|(u, v)| u != v).count();
+    println!(
+        "DELTA3D_MELANGE_S353 pas={pas} colonnes={} ecart_precedente_courante_max_m={ecart:.4e} octets_differents beta_demi/moyenne_cpu={} temoin courante/beta_demi={}",
+        c.len(), differents(&demi, &cpu), differents(&courante, &demi)
+    );
+    Ok(())
+}
+
 fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config, tag: &str) -> Result<(), String> {
     let dir = if tag.starts_with("s339") {
         captures!("s339")
@@ -2981,6 +3058,9 @@ fn run() -> Result<(), String> {
     // — `--eau-physique`, `--tonalite`, `--ciel-mesure`, `--coupure`, `--miroitement`. Avant, elles
     // partaient sans elles : R11 n'aurait pas pu montrer la couleur que R14 a retenue.
     if let Some(config) = delta3d_config {
+        if args.iter().any(|a| a == "--melange") {
+            return delta3d_melange(&mut frame, config);
+        }
         if args.iter().any(|a| a == "--captures") {
             let tag = match pas_delta {
                 Some(p) => format!("s347_{}hz", (1e6 / p as f64).round()),
