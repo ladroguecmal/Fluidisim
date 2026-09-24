@@ -14,6 +14,7 @@ mod delta3d_background;
 mod delta3d_step;
 mod delta3d_scene;
 mod delta3d_arbitrage;
+mod rendu_cretes;
 mod pressure_gpu;
 mod pressure_solver;
 mod gpu;
@@ -2615,6 +2616,9 @@ fn run() -> Result<(), String> {
         println!("MEILLEUR options={}", MEILLEUR.join(" "));
     }
     let args = args;
+    if args.iter().any(|a| a == "--ecume-loi") {
+        return rendu_cretes::loi_jacobien();
+    }
     if args.iter().any(|a| a == "--delta3d-operateur") {
         return delta3d::verifier();
     }

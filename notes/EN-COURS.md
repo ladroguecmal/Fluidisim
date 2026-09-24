@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la loi de `s` et le seuil ; critère 1.
+- [x] **P2** — la loi de `s` et le seuil ; critère 1.
 - [ ] **P3** — l'écume au rendu ; critère 2.
 - [ ] **P4** — la lumière des crêtes ; critère 3.
 - [ ] **P5** — images et coût ; critère 4.
@@ -98,3 +98,13 @@ Critères, écrits avant le code :
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu — avec une hypothèse contredite.** `--meilleur --ecume-loi` (`rendu_cretes.rs`) : bande 64,
+  queue 60, M = 2, retard −0,20 ; `U₁₀` = 7,787 m/s (Pierson–Moskowitz depuis `Hs` 1,5 m), **W = 0,421 %**.
+  1,2 million d'échantillons (2 km, huit instants) : `s` de moyenne 0,011, écart-type 1,004, **queue basse plus
+  lourde que la gaussienne** — `s_t` = −2,311 [−2,319 ; −2,305] contre −2,635 ; `J` jamais négatif (min 0,215),
+  `σ` moyen 0,206. **Le seuil unique ne tient pas la couverture** quand le rendu filtre : 1,55 × W à 10 cm
+  d'empreinte, 1,77 à 0,5 m, 1,83 à 2 m, 2,02 à 8 m. **Remède** : un seuil par empreinte, 14 empreintes
+  `2^(i−7)` m (7,8 mm à 64 m), interpolé en `log₂ h`, 1,2 s de calcul (un fil par empreinte, 160 000 tirages) ;
+  sur un **tirage indépendant**, couverture 0,93 / 0,97 / 1,03 / 1,02 / 1,00 / 1,04 / 1,03 × W à 0 / 1,2 cm / 5 cm /
+  35 cm / 1,4 / 5,6 / 22 m.
+
