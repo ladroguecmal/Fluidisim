@@ -16959,3 +16959,20 @@ est construit — la loi de l'écume, la teinte des crêtes — ne dépend d'auc
 une image à juger. Suivant : **le prototype Godot**, premier pas choisi par l'utilisateur (ADR-192 D2) ; l'alternance
 reprend ensuite avec la coque sur la carte (6.4). R18 toujours attendu.
 
+## S357 — 2026-09-25 — rendu 2 : la mer de B dans Godot 4.4.1
+
+**Entrée.** ADR-192 D2 : le premier pas choisi par l'utilisateur — la mer de B rendue dans Godot, jugée sur images avant
+tout portage. Godot 4.4.1 était sur le poste ; rien n'a été téléchargé.
+**Fait** ([preuve](../docs/validation/PROTOTYPE-GODOT-S357.md)). `--export-godot` : la mer de `--meilleur` à 12 s,
+bande, queue, modulation, asymétries, seuils de l'écume, points de contrôle du cœur. `godot/` : grille polaire autour
+de la caméra, phases repliées en double, nuanceur porté — CWM et Tayfun, queue filtrée, écume et crêtes de S356 ; à
+Godot, l'éclairage, les reflets, AgX, la brume ; la pente non résolue en rugosité. **Hauteur retrouvée à 1,05·10⁻⁷ m**
+contre le cœur.
+**Ce que les images ont dit.** Le ciel physique par défaut de Godot : un crépuscule gris — remplacé par le ciel clair de
+R14. Les reflets à l'écran assombrissaient la mer rasante — éteints. L'écume tombe où l'afficheur la mettait.
+**R19 préparée** (REVUE-VISUELLE §24) : les deux rendus côte à côte, proche et rasant ; images envoyées.
+**Limites.** Ni W, ni δ, ni corps, ni intégration native ; paramètres de Godot non calibrés ; coût non mesuré.
+**Rituel.** Maillons **4**, justifiés : l'utilisateur a déplacé le rendu vers Godot ; ce prototype est le premier pas
+qu'il a choisi, et son verdict décide de la suite. Suivant : **R19 d'abord** ; la physique en attendant, par
+l'alternance — la coque sur la carte (plan de S355). R18 toujours attendu.
+

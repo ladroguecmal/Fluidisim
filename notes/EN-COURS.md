@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S357 — **en cours**. **Rendu 2 (ADR-192 D2) : la mer de B dans Godot 4.4.1** — le prototype que l'utilisateur
+Session : S357 — **terminée**. **Rendu 2 (ADR-192 D2) : la mer de B dans Godot 4.4.1** — le prototype que l'utilisateur
 a choisi comme premier pas, jugé sur images avant tout portage.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 Entrée — S356 : les crêtes de B dans l'afficheur, puis *« rendu toujours pas convaincant »* et le choix de Godot 4.
@@ -88,7 +88,7 @@ Critères, écrits avant le code :
 - [x] **P3** — le projet Godot : scène, nuanceur, environnement ; critère 2 et la hauteur du critère 1.
 - [x] **P4** — les captures et la revue R19 ; critère 3.
 - [x] **P5** — preuve, file, feuille de route, liste ; critère 4.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2.** `--meilleur --export-godot[=fichier]` (`rendu_cretes::export_godot`) → `godot/donnees/mer_b.json`, dérivé et
