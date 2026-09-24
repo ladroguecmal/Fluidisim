@@ -95,12 +95,22 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — banc `a317_lamelle` : pilonnement imposé, cinq placements ; critère 1 (avant correctif).
 - [x] **P3** — correctif : la pression du couvercle en partie couvert, commutable pour la mesure ; critère 3.
-- [ ] **P4** — banc après correctif ; critère 2.
-- [ ] **P5** — scène de la porte D rejouée, deux placements, images ; critères 4 et 5 ; masse ajoutée de S332
-  re-mesurée.
+- [ ] ~~**P4** — banc après correctif ; critère 2.~~ *Caduc : le correctif ne porte pas A317 (P3).*
+- [ ] **P4** — *amendé* : **convergence** sur une tranche quasi-2D — coque infiniment longue, `ny` = 2 —,
+  mailles de 25 ; 12,5 ; 6,25 ; 3,125 cm, quatre placements chacune ; couvercle partiel éteint puis allumé.
+- [ ] **P5** — *amendé* : qualifier A317 — erreur de résolution d'ordre mesuré et maille qu'elle impose, ou
+  défaut de structure — ; la scène de la porte D ne se rejoue que si δ change par défaut.
 - [ ] **P6** — preuve (PORTE-D-S333 §6, S334) ; A317 note datée ; R15 au registre des revues ; file, feuille
   de route si un état change.
 - [ ] **P7** — rituel.
+
+**Amendement après P3, déclaré avant le code.** Le couvercle partiel ne retire pas la dépendance au placement.
+Question suivante : A317 est-il une **erreur de résolution** près de la paroi — la colonne voisine de la coque
+porte seule la surface qui rayonne, à 6,4 mailles de largeur de coque —, ou un **défaut de structure** ? Une
+tranche quasi-2D a le même mécanisme de paroi et coûte cent fois moins : quatre résolutions y sont possibles.
+**Critères** : (6) à 25 cm, la tranche reproduit l'écart de la 3D (≥ 20 %) ; (7) l'écart décroît avec la maille
+— ordre mesuré ; ≥ 1 : erreur de résolution, sinon défaut de structure ; (8) l'amplitude moyenne converge, et
+la valeur extrapolée dit quelle surface — S332 ou couvercle partiel — s'en approche le plus vite.
 
 ### Notes de reprise
 - **P2, critère 1 — A317 reproduit hors du jeu** (pilonnement imposé 5 cm, 4,484 rad/s ; bandes à 2,5–3,5 m ;
