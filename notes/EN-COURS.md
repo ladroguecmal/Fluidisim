@@ -90,9 +90,15 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les parts d'écran le long du trajet de caméra ; les seuils calibrés.
+- [x] **P2** — les parts d'écran le long du trajet de caméra ; les seuils calibrés.
 - [ ] **P3** — le banc d'arbitrage, deux domaines 3D ; critères 1 à 4.
 - [ ] **P4** — preuve, file, feuille de route, liste.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2, fait** (`--delta3d-parts`). **Premier trajet écarté** : tourner seulement la tête vers B laisse B plus
+  petit que A à l'écran (0,013 contre 0,034, B à 68 m) — la surface décide, pas le regard (ADR-012 §2). **Trajet
+  retenu** : l'œil longe la côte, devant A (0–5 s), vers B à 15 m/s (5–9 s), devant B (9–13 s), retour (13–17 s),
+  devant A (17–20 s). Parts d'écran : de face **0,1629** ; à mi-chemin 0,0389 chacun ; loin 0. **Seuils calibrés**
+  (ADR-171) sur la part de face : allumage **0,10** (0,61 ×), extinction **0,05** (0,31 ×).
+

@@ -13,6 +13,7 @@ mod delta3d_projection;
 mod delta3d_background;
 mod delta3d_step;
 mod delta3d_scene;
+mod delta3d_arbitrage;
 mod pressure_gpu;
 mod pressure_solver;
 mod gpu;
@@ -2572,6 +2573,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--delta3d-trajectoire") {
         return delta3d_step::trajectoire();
+    }
+    if args.iter().any(|a| a == "--delta3d-parts") {
+        return delta3d_arbitrage::parts();
     }
     if args.iter().any(|a| a == "--delta3d-empreinte") {
         return delta3d_scene::empreinte();
