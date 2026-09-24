@@ -62,42 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S338 — **terminée**. **La porte D reçue** : consigner le verdict final de R15 et ce qu'il reçoit ;
-chemin de la v1 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md), [ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4).
+Session : S339 — **en cours**. **Porte B, revue R16** : une onde circulaire née d'un impact, sur la mer de
+référence provisoire ; chemin de la v1 ([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4), porte en
+cours de §3 bis.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — **verdict de l'utilisateur sur les images de S337** : *« Plus de coupure »*. Avec R15 — *« 1. Oui »*, le
-bateau qui se pose est juste ; *« 3. Pas forcément »*, pas d'autre défaut —, le critère visuel de la porte D est
-tenu.
+Entrée — S338 : porte D reçue ; la v1 demande encore A, B et C. Critère 3 de la porte B
+([ADR-175](../docs/adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) §4) : *« une onde traverse une mer
+étalée et s'y déforme »*, jugée convaincante. **R11** (S303) : δ sans artefact, fondu invisible, mais *« je ne
+sais pas s'il s'agit d'une onde circulaire ou bien linéaire »* — le front injecté ne disait pas son origine —, et
+la mer pas réaliste. **R14** (S308) : la troisième image, `--meilleur --eau-physique=2`, devient la référence
+interne provisoire de l'océan. Aucune revue n'a montré δ sur cette mer.
 
-**Ce que la session doit rendre possible.** Que le dépôt dise vrai. La porte D est franchie **sur la référence
-CPU** : son « reçu si » — un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le jeu — tient
-par la partie numérique (S333–S337) et par le verdict R15. **La v1 n'est pas atteinte** : ADR-174 D4 la définit
-par les portes A, B, C et D, et le tableau d'ADR-189 §1 ne nommait que la D. Ce qui éprouve la porte reste
-partiel — B6 : un archétype sur une houle, sans roulis ni tangage ; le tableau de §3 bis cite C13 et C14, bulles
-et écume de J3 — ; W derrière la requête, la coque dans la production de δ et le pilotage sont des suites, pas
-des critères. Trois points de la liste sont périmés depuis S324–S332 : 4.15 (rotation, obstacle qui perce la
-surface), 6.4 (parois mobiles dans δ, dit absent), 6.5 (dit sans faces coupées 3D).
+**Ce que la session doit rendre possible.** Le verdict du critère 3, sur la mer que l'utilisateur a retenue
+et avec une onde qu'il peut lire. **Deux défauts de chemin, trouvés en lisant** : les captures de `--delta3d`
+rendent la main **avant** que `--eau-physique` (et `--tonalite`, `--ciel-mesure`, `--coupure`) soient lus — la
+revue R11 n'aurait pas pu montrer la couleur de R14 ; et la scène ne sait injecter qu'un front.
 
-Critères, écrits avant l'écriture :
-1. Chaque registre dit la porte D reçue sur la référence CPU, preuve et verdict cités, **en remplacement** de
-   « verdict attendu » : revue visuelle, preuve, feuille de route (porte, porte en cours, J3), liste, file,
-   REPRISE.
-2. Aucun registre ne dit la v1 atteinte ; la porte suivante est celle que §3 bis désigne — B, dont ne manque
-   que le verdict de l'utilisateur sur une mer jugée convaincante.
-3. Liste : 4.15, 6.1, 6.3, 6.4, 6.5 actualisés, chaque état cité par sa preuve ; décompte suivi (6.4 absent →
-   partiel : 3 / 55 / 62).
-4. ADR-189 reçoit une note datée, sans réécriture : D1 tenue ; la v1 demande encore A, B et C ; D2 inchangée.
-5. `etat_projet.py --check` vert.
+Critères, écrits avant le code :
+1. **L'impact** : un cratère à bord relevé, au repos — `η₀ = −A·(1 − r²/2σ²)·e^{−r²/2σ²}`, volume net nul —,
+   vitesses nulles (problème de Cauchy–Poisson). Pente maximale ≈ 0,98·A/σ, tenue sous la cambrure du paquet de
+   S302 (0,26). `Config::review()` inchangée ; les captures de `--houle --delta3d --captures` identiques au bit
+   avant et après le changement (deux instants, empreintes relevées sur la même carte).
+2. **Banc sans fenêtre** (`--delta3d-scene-mesure --impact`), 12 s : zéro colonne hors bornes, zéro pas dégradé ;
+   volume net initial de δ nul à l'arrondi ; les anneaux isolés (avec − témoin) **s'éloignent** du point
+   d'impact, rayon du maximum publié chaque seconde et comparé à la vitesse de groupe du nombre d'onde dominant
+   `√2/σ` — dans un facteur 1,5.
+3. **Captures** sur `--meilleur --eau-physique=2`, les poses de S302, avec et sans δ ; aperçus PNG.
+4. **R16** au registre, questions écrites ; **arrêt pour le verdict** (ADR-189 D3).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le verdict : revue visuelle, preuve ; la réception dans la feuille de route et REPRISE.
-- [x] **P3** — la liste : 4.15, 6.1, 6.3, 6.4, 6.5, décompte ; la file : porte D, lots 3–4, décisions.
-- [x] **P4** — note datée d'ADR-189.
-- [x] **P5** — rituel ; suite : la porte B.
+- [ ] **P2** — l'impact dans la scène ; options lues avant les captures ; critère 1.
+- [ ] **P3** — banc sans fenêtre ; critère 2, choix de `A` et `σ`.
+- [ ] **P4** — captures, aperçus ; critère 3.
+- [ ] **P5** — preuve (SCENE-DELTA3D-S302 §6) ; R16 au registre ; file.
+- [ ] **P6** — rituel ; arrêt pour le verdict.
 
 ### Notes de reprise
-- **P2–P4** : porte D reçue dans la revue (§20), la preuve (§9), la feuille de route, la liste, la file, REPRISE ;
-  note datée d'ADR-189. **P5** : la porte B n'attend pas que le verdict — cas 1 et 2 d'ADR-175 §4 non mesurés
-  sur la production (CUVE-GPU-S305 §7) ; correctif daté à ADR-189, feuille de route et file corrigées.
