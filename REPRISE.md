@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-24 21:16 +02:00
+Battement        : 2026-09-24 21:20 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S350 — **porte A, un domaine qui se redimensionne** : une forme courante sous la capacité réservée, l'état réécrit au bit, le pas d'un domaine redimensionné identique à celui d'un domaine créé à cette forme ; et les murs du bord après un décalage
 Dernière session : S349 — **porte A, un domaine qui se déplace** : l'état de δ décalé de mailles entières, au bit ; un seul domaine suit la caméra sur 120 m sans s'éteindre ([preuve](docs/validation/ARBITRAGE-3D-S344.md) §5)
@@ -100,7 +100,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   du corps, la coque dans la production de δ. **Porte C reçue sur le banc** (S348, 1,92 ms au 99ᵉ centile par
   image, 30 Hz). **La v1 demande encore la porte A.**
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
-- Liste du projet fini : **3 validés, 55 partiels, 62 absents** sur 120.
+- Liste du projet fini : **3 validés, 56 partiels, 61 absents** sur 120 — actualisée en entier en S350.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
 nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`
