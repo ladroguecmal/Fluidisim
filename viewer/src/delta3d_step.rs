@@ -1819,6 +1819,11 @@ pub fn cout_scene() -> Result<(), String> {
         let mut carte = carte;
         carte.set_step(config.step_us, config.rest, config.sponge)?;
         carte.set_state(&u, &v, &w, &eta)?;
+        // S342 : `FOND=faces` mesure avec le noyau face par face ; sinon, celui du pas (par tuiles).
+        if std::env::var("FOND").is_ok_and(|v| v == "faces") {
+            carte.set_tiled_background(false)?;
+        }
+        println!("DELTA3D_COUT_S341 fond_par_tuiles={}", carte.tiled_background());
         let pas: usize = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(1000);
         println!(
             "DELTA3D_COUT_S341 carte={:?} backend={} domaine={}x{}x{} mailles={} faces={} composantes={} cycles={} dispatchs={} pas={pas}",

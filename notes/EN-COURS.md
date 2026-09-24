@@ -86,7 +86,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le noyau par tuiles et son branchement ; relecture des faces pour le banc.
 - [x] **P3** — l'identité au bit ; critère 1.
-- [ ] **P4** — le coût ; critère 2 ; preuve, file ; critère 3.
+- [x] **P4** — le coût ; critère 2 ; preuve, file ; critère 3.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
@@ -98,4 +98,8 @@ Critères, écrits avant le code :
 - **P3, critère 1 tenu** (`--delta3d-fond-tuiles`, scène de B, 64 composantes). Les **29 871 296** valeurs du fond —
   26 champs × 1 148 896 faces — **identiques au bit** entre les deux noyaux, aux pas 0, 50 et 500 ; 60 pas de
   production, l'un par tuiles, l'autre face par face : surface publiée **identique au bit** sur 13 440 colonnes.
+- **P4, critères 2 et 3 tenus** (secteur 97 % avant et après). Même session : face par face, fond 1,527 ms
+  (q99 1,551), pas 4,456 (q99 4,501) ; **par tuiles, fond 1,237 (q99 1,261), pas 4,348 (q99 4,405)**. −19 % au fond,
+  −0,11 ms au pas : le calcul transcendant n'était pas l'essentiel ; reste l'accumulation de 26 champs et leur
+  écriture. Preuve, §6 de COUT-DELTA3D-S341 ; file.
 

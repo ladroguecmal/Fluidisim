@@ -84,3 +84,29 @@ pression ; préconditionneur de Jacobi ; diagnostics différés (ADR-175 D3) ; f
 
 Le coût d'un pas dans l'image rendue, avec le rendu de la mer sur la même carte ; le coût d'une autre scène ;
 le coût sur batterie (A270 : facteur 1,65 en S234).
+
+---
+
+## 6. S342 — le fond factorisé par colonne et par couche
+
+2026-09-24. Premier levier du §4. `sample_faces_tiled` : un groupe de 256 fils couvre 16 colonnes × 16 couches
+d'une famille de faces ; sinus et cosinus de chaque colonne, atténuation de chaque couche, calculés une fois en
+mémoire de groupe ; puis la même accumulation, dans le même ordre, avec les mêmes primitives. Par défaut jusqu'à
+64 composantes ; `sample_faces` reste, en repli et en témoin.
+
+**Reproduire** : commit `a880c7f1` ou plus récent ; `… -- --delta3d-fond-tuiles` (identité) ; `… --delta3d-cout-scene`
+et `FOND=faces … --delta3d-cout-scene` (les deux noyaux), secteur relevé avant et après.
+
+**Identité, au bit** : les 29 871 296 valeurs du fond — 26 champs × 1 148 896 faces — identiques entre les deux
+noyaux aux pas 0, 50 et 500 ; 60 pas de production, surface publiée identique sur 13 440 colonnes.
+
+| même session, secteur (97 %) | fond seul, médiane / q99 | passe 1 | pas entier, médiane / q99 |
+|---|---:|---:|---:|
+| face par face (`FOND=faces`) | 1,527 / 1,551 ms | 1,981 | 4,456 / 4,501 |
+| **par tuiles** | **1,237 / 1,261** | 1,819 | **4,348 / 4,405** |
+
+**Ce que cela dit.** Le fond perd 19 %, le pas 0,11 ms seulement : les sinus, cosinus et exponentielles
+n'étaient pas l'essentiel. Ce qui reste est l'accumulation des **26 champs** de chaque face, 64 fois, et leur
+écriture — 120 Mo par pas. D'où le levier suivant : **n'écrire que les champs lus**, une dizaine selon l'axe de la
+face (§3), ce qui retire à la fois le calcul et l'écriture de seize champs sur vingt-six.
+
