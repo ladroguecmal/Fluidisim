@@ -13,7 +13,9 @@
 //! chaque critère ; il ne s'arrête pas sur un critère manqué. `--temoin` : le plancher d'arrondi du transport
 //! de δ sur la même grille, coque immobile. **S334** : `--couvercle-partiel` allume la surface des colonnes en
 //! partie couvertes (A317) ; les lignes `PORTE_D flancs` donnent l'amplitude quadratique moyenne de δ à
-//! 2,5–3,5 m de chaque flanc long, entre 3 et 8 s.
+//! 2,5–3,5 m de chaque flanc long, entre 3 et 8 s. **S336** : `--archetype` donne à la coque les constantes que
+//! δ lui mesure — masse ajoutée 3 200 kg, amortissement de rayonnement 6 400 N·s/m en pilonnement — ; la ligne
+//! `PORTE_D energie` compare l'énergie que la coque dissipe à celle que sa paroi fournit à δ.
 //!
 //! `cargo run -p water-core --release --offline --example porte_d [-- --images <dossier>]` — lignes `PORTE_D` ;
 //! avec `--images`, à 2, 4, 6 et 8 s, la scène vue en perspective — B + δ, puis B + 5·δ — et la carte de δ,
@@ -53,6 +55,10 @@ const AMPLITUDE: f64 = 0.25;
 const PERIODE: f64 = 6.;
 /// Hauteur de lâcher au-dessus de l'équilibre relatif, m.
 const LACHER: f64 = 0.10;
+/// S336 : les constantes de l'archétype, mesurées par δ (`rayonnement_coque`) — masse ajoutée et amortissement de
+/// rayonnement en pilonnement, à la pulsation propre qu'elles déterminent, 3,17 rad/s ; ± 10 %.
+const MASSE_AJOUTEE: f64 = 3200.;
+const AMORTISSEMENT: f64 = 6400.;
 
 fn houle() -> Background {
     let sea = SeaState { hs: (2. * 2f64.sqrt() * AMPLITUDE) as f32, tp: (2. * PERIODE) as f32, theta_turns: 0., components: 1, graine: 333 };
@@ -63,12 +69,16 @@ fn houle() -> Background {
 
 /// La coque lâchée sur la houle, au centre du monde : `LACHER` au-dessus de son équilibre relatif, portée par
 /// la vitesse de l'eau sous elle, inclinée comme la surface.
-fn coque(eau: &dyn WaterQuery) -> RigidBody {
+fn coque(eau: &dyn WaterQuery, archetype: bool) -> RigidBody {
     let z_r = 0.5 - 500. / Milieu::MER.rho;
     let eta = eau.surface(0., 0.);
     let mut c = RigidBody::cuboid(TAILLE, 500., [0., 0., z_r + eta + LACHER], [16, 8, 4]);
     c.velocity = eau.velocity([0., 0., eta]);
     c.orientation = surface_tilt(eau.slope(0., 0.));
+    if archetype {
+        c.added_mass = [0., 0., MASSE_AJOUTEE];
+        c.radiation_damping = [0., 0., AMORTISSEMENT];
+    }
     c
 }
 
@@ -183,7 +193,8 @@ fn main() -> Result<(), String> {
     let mer = Milieu::MER;
 
     // La trajectoire de jeu seule : la référence du critère 3.
-    let mut seul = coque(&eau(0));
+    let archetype = arguments.iter().any(|a| a == "--archetype");
+    let mut seul = coque(&eau(0), archetype);
     let reference: Vec<([u64; 3], [u64; 4])> = (0..duree)
         .map(|n| {
             seul.step(DT, &eau(n), mer);
@@ -193,7 +204,7 @@ fn main() -> Result<(), String> {
 
     // La scène : le jeu, puis δ qui reçoit la coque relative à l'eau qui la porte.
     let d = Domain3 { nx: MAILLES[0], ny: MAILLES[1], nz: MAILLES[2], dx: DX as f32 };
-    let mut corps = coque(&eau(0));
+    let mut corps = coque(&eau(0), archetype);
     let mut relative = HullInDelta::new(&corps, &eau(0), origine, d.z0() as f64);
     let mut noeuds = Vec::with_capacity((d.nx + 1) * (d.ny + 1) * (d.nz + 1));
     relative.box_nodes(DEMI, MAILLES, DX, &mut noeuds);
@@ -218,6 +229,8 @@ fn main() -> Result<(), String> {
     let (mut relatif_min, mut relatif_max, mut iterations, mut temps) = (f64::MAX, f64::MIN, 0u64, 0f64);
     // S334 : les deux flancs longs, bandes à 2,5–3,5 m de leurs parois dans δ, |x − x_c| ≤ 2 m, après 3 s.
     let (mut flancs, mut comptes) = ([0f64; 2], [0usize; 2]);
+    // S336 : l'énergie que la coque dissipe par son amortissement, et le travail que sa paroi fournit à δ.
+    let (mut dissipe, mut travail) = (0f64, 0f64);
     // Le plancher f32 du transport de δ : chaque colonne arrondit son incrément de hauteur — trois opérations,
     // `3·2⁻²⁴·|Δη|` au plus —, et la somme sur les colonnes ne se télescope plus exactement. Cumulé pas à pas.
     let (mut plancher, mut avant) = (0f64, v.surface().to_vec());
@@ -243,6 +256,12 @@ fn main() -> Result<(), String> {
         let (h, u) = visible(&v, d);
         (hauteur_max, vitesse_max) = (hauteur_max.max(h), vitesse_max.max(u));
         let f = v.solid_force(&noeuds).map_err(|e| format!("{e:?}"))?;
+        travail -= (f[0] * m.velocity[0] as f64 + f[1] * m.velocity[1] as f64 + f[2] * m.velocity[2] as f64) * DT;
+        {
+            let [x, y, _] = corps.position;
+            let u = w.velocity([x, y, w.surface(x, y)]);
+            dissipe += (0..3).map(|a| corps.radiation_damping[a] * (corps.velocity[a] - u[a]).powi(2)).sum::<f64>() * DT;
+        }
         let o = rendu.step(DT, f, corps.mass);
         decalage_max = decalage_max.max((o[0] * o[0] + o[1] * o[1] + o[2] * o[2]).sqrt());
         let [x, y, z] = corps.position;
@@ -285,6 +304,10 @@ fn main() -> Result<(), String> {
     println!("PORTE_D critere_5 delta_hauteur_max_m={hauteur_max:.5} delta_vitesse_max_m_s={vitesse_max:.4} houle_m={AMPLITUDE}");
     let (moins, plus) = ((flancs[0] / comptes[0] as f64).sqrt(), (flancs[1] / comptes[1] as f64).sqrt());
     println!("PORTE_D flancs couvercle_partiel={partiel} decalage_y_m={decalage_y} amplitude_moins_m={moins:.6} amplitude_plus_m={plus:.6} rapport={:.4}", moins / plus);
+    if archetype {
+        println!("PORTE_D energie masse_ajoutee_kg={MASSE_AJOUTEE} amortissement_n_s_m={AMORTISSEMENT} dissipee_par_la_coque_j={dissipe:.2} fournie_a_delta_j={travail:.2} rapport={:.4}",
+            travail / dissipe);
+    }
     println!("PORTE_D pilonnement_relatif_m=[{relatif_min:+.4},{relatif_max:+.4}] decalage_visuel_max_m={decalage_max:.4} iterations_moyennes={:.1} cpu_delta_ms_par_pas={:.2}",
         iterations as f64 / duree as f64, 1e3 * temps / duree as f64);
     let statut = |t: bool| if t { "tenu" } else { "MANQUE" };

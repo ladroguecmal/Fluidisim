@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P3** — le corps du jeu amorti, constantes de l'archétype ; critère 2.
 - [x] **P3 bis** — *ajouté, déclaré avant le code* : la masse ajoutée agit sur l'accélération **relative** à
   l'eau ; critère 2 bis.
-- [ ] **P4** — la scène de la porte D amortie ; critère 3 ; images (critère 4).
+- [x] **P4** — la scène de la porte D amortie ; critère 3 ; images (critère 4).
 - [ ] **P5** — preuve `docs/validation/RAYONNEMENT-COQUE-S336.md` ; liste, file, feuille de route.
 - [ ] **P6** — rituel.
 
@@ -116,3 +116,10 @@ Critères, écrits avant le code :
 - **P3 bis, critère 2 bis tenu.** `WaterQuery::acceleration`, analytique sur B (`acceleration_local`, mêmes
   phases). A = 3 200 kg : houle 6 s → 1,05201·a pour 1,05191 (relatif ; l'absolu dirait 1,11312) ; 3 s →
   1,15922·a pour 1,16055 (absolu : 1,54745). Cœur : 498 réussis, 0 avertissement ; S331–S333 inchangés.
+- **P4, critère 3 tenu — le bilan d'énergie.** Scène `--couvercle-partiel --archetype` : la coque dissipe
+  **352,99 J** par son amortissement, sa paroi fournit **344,88 J** à δ — rapport **0,977** (± 25 % visés).
+  Pilonnement relatif lâché à +0,10 m, éteint en 3–4 s ([−0,060 ; +0,100] sur la scène) ; δ culmine à 6,5 cm (13,2
+  sans amortissement), flancs 11,66 / 11,66 mm, décalage visuel 0,7 cm. Critère 3 de S333 au bit ; volume
+  1,75·10⁻⁹ m³ (plancher 1,1·10⁻⁵). Images `viewer/captures/s336` : scène / carte 2 s `0x5bcee0e39127e82e` /
+  `0xc58da8c8de0a6f8b` ; 4 s `0xe8d0b8ce46f12bd5` / `0x121fe7d4ecf5d125` ; 6 s `0xf6b2b7b279a1c2d8` /
+  `0xac468acaedd43afb` ; 8 s `0xc99b2d47947a0766` / `0xab83f1e8df945f07`.
