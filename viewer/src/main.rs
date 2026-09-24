@@ -1722,8 +1722,9 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// Le domaine δ 3D avance d'un pas par image sur la carte du rendu, et l'image est prise aux
 /// instants demandés, deux fois : **avec** la couche δ et **sans** (B seul, même instant, même
 /// pose). Ce sont ces paires que la revue compare. Aucune publication.
-fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config) -> Result<(), String> {
-    let dir = captures!("s302");
+/// S339 : `tag` — `s302` (le front, R11) ou `s339` (l'impact, R16) : dossier et préfixe des images.
+fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config, tag: &str) -> Result<(), String> {
+    let dir = if tag == "s339" { captures!("s339") } else { captures!("s302") };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -1765,7 +1766,7 @@ fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config) ->
                     let target = g.target();
                     g.draw(&target.create_view(&Default::default()), false);
                     let couche = if actif { "avec" } else { "sans" };
-                    let path = format!("{dir}/s302_{nom}_{couche}_{:.1}s.ppm", age);
+                    let path = format!("{dir}/{tag}_{nom}_{couche}_{:.1}s.ppm", age);
                     g.capture(&target, &path)?;
                     let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
                     let entete = format!("P6\n{width} {height}\n255\n").len();
@@ -1782,7 +1783,7 @@ fn delta3d_captures(frame: &mut FrameData<'_>, config: delta3d_scene::Config) ->
             // Ce que la couche change, en pixels : la mesure que R10 avait déjà pour la bande 2D.
             let (mut changes, mut fort) = (0u64, 0u64);
             let lire = |nom: &str, couche: &str, age: f64| -> Result<Vec<u8>, String> {
-                std::fs::read(format!("{dir}/s302_{nom}_{couche}_{age:.1}s.ppm")).map_err(|e| e.to_string())
+                std::fs::read(format!("{dir}/{tag}_{nom}_{couche}_{age:.1}s.ppm")).map_err(|e| e.to_string())
             };
             let (a, b) = (lire("reference", "avec", age)?, lire("reference", "sans", age)?);
             for (x, y) in a.iter().zip(&b) {
@@ -2597,7 +2598,7 @@ fn run() -> Result<(), String> {
         return delta3d_step::longue_cuve();
     }
     if args.iter().any(|a| a == "--delta3d-scene-mesure") {
-        return delta3d_scene::mesurer();
+        return delta3d_scene::mesurer(args.iter().any(|a| a == "--impact"));
     }
     if args.iter().any(|a| a == "--delta3d-scene-acoups") {
         return delta3d_scene::acoups();
@@ -2724,7 +2725,11 @@ fn run() -> Result<(), String> {
     if delta3d_scene_on && delta_scene {
         return Err("--delta3d et --delta s'excluent : deux couches δ à la fois".into());
     }
-    let delta3d_config = delta3d_scene_on.then(delta3d_scene::Config::review);
+    // S339 : `--impact` — la scène de la revue R16, un impact au lieu du front.
+    let delta3d_impact = args.iter().any(|a| a == "--impact");
+    let delta3d_config = delta3d_scene_on.then(|| {
+        if delta3d_impact { delta3d_scene::Config::impact_review() } else { delta3d_scene::Config::review() }
+    });
     // S277 — `--delta-hs=<m>` / `--delta-tp=<s>` : la houle de la scène δ, pour voir l'onde se
     // déformer. Sans eux, la houle de S275 au bit. La cambrure commande (ONDE-INJECTEE-S277) :
     // 4 m / 8 s déforme l'onde de 28 %, 2 m / 8 s de 9 % seulement.
@@ -2843,11 +2848,6 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--topologie") {
         return topologie_images(&mut frame);
     }
-    if let Some(config) = delta3d_config {
-        if args.iter().any(|a| a == "--captures") {
-            return delta3d_captures(&mut frame, config);
-        }
-    }
     // S308 P6 : `--miroitement=<facteur>` — échelonne le reflet spéculaire du soleil sur l'eau.
     // Il n'est pas un réglage d'auteur : il sert à **mesurer** la part du miroitement dans les
     // pixels très clairs, que la photographie de référence dit 2,4 fois trop nombreux. 1 = rendu
@@ -2903,6 +2903,14 @@ fn run() -> Result<(), String> {
         if !(0.5..=8.).contains(&f) { return Err("coupure : entre 0,5 et 8".into()); }
         frame.cut_factor = f;
         println!("COUPURE facteur={f} plein_poids_a={} empreintes zero_a={} empreintes", 4. * f, 2. * f);
+    }
+    // S339 : les captures de la scène δ 3D rendent la main **après** la lecture des options de rendu
+    // — `--eau-physique`, `--tonalite`, `--ciel-mesure`, `--coupure`, `--miroitement`. Avant, elles
+    // partaient sans elles : R11 n'aurait pas pu montrer la couleur que R14 a retenue.
+    if let Some(config) = delta3d_config {
+        if args.iter().any(|a| a == "--captures") {
+            return delta3d_captures(&mut frame, config, if delta3d_impact { "s339" } else { "s302" });
+        }
     }
     if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--test-ab=")) {
         if !tag.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {

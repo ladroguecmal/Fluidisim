@@ -6,6 +6,10 @@
 //! configuration et qui traverse le domaine vers la caméra. L'état initial est construit sur CPU
 //! une fois (`O(N)` hors pas, I-06) ; ensuite tout vit sur la carte (`Step3`, S301).
 //!
+//! **S339** (revue R16) : `--impact` remplace le paquet par **un impact** — un cratère à bord relevé,
+//! au repos, dont naissent des anneaux (problème de Cauchy–Poisson). R11 ne savait pas dire si
+//! l'onde du front était « circulaire ou bien linéaire » : celle-ci dit d'où elle vient.
+//!
 //! Rien ici n'est une grandeur de jeu (I-04), rien n'est sérialisé (I-17).
 use crate::delta3d_step::{face_total, Diagnostics, Step3};
 use water_core::background::Background;
@@ -23,6 +27,8 @@ pub struct Config {
     pub cycles: u32,
     pub step_us: u64,
     pub packet: Packet,
+    /// S339 : l'impact, s'il y en a un — ajouté à la hauteur initiale, sans vitesse.
+    pub impact: Option<Impact>,
 }
 
 /// Paquet linéaire : `η = a·cos(k·d·x)·G`, vitesses de la théorie en eau profonde, `G`
@@ -37,6 +43,34 @@ pub struct Packet {
     pub direction: [f32; 2],
     pub sigma_long: f32,
     pub sigma_crest: f32,
+}
+
+/// S339 : **un impact** — le cratère à bord relevé qu'un objet laisse en entrant dans l'eau, lâché au
+/// repos : `η₀ = −A·(1 − r²/2σ²)·e^{−r²/2σ²}`. Son volume net est nul — le bord rend ce que le
+/// creux prend —, sa pente maximale vaut ≈ 0,98·A/σ, et son spectre culmine au nombre d'onde
+/// `√2/σ` : les anneaux s'éloignent à la vitesse de groupe de celui-ci, dispersés.
+#[derive(Clone, Copy, Debug)]
+pub struct Impact {
+    /// Profondeur du creux au centre, m.
+    pub depth: f32,
+    /// Rayon caractéristique, m : le creux s'annule à `√2·σ`, le bord culmine à `2·σ`.
+    pub sigma: f32,
+    /// Centre, coordonnées monde.
+    pub center: [f32; 2],
+}
+
+impl Impact {
+    /// La hauteur ajoutée en un point monde.
+    pub fn height(&self, x: f32, y: f32) -> f32 {
+        let (rx, ry) = (x - self.center[0], y - self.center[1]);
+        let u = (rx * rx + ry * ry) / (2. * self.sigma * self.sigma);
+        -self.depth * (1. - u) * (-u).exp()
+    }
+
+    /// Vitesse de groupe du nombre d'onde dominant `√2/σ`, eau profonde, m/s.
+    pub fn group_velocity(&self) -> f32 {
+        0.5 * (G * self.sigma / std::f32::consts::SQRT_2).sqrt()
+    }
 }
 
 /// Ce que le rendu doit savoir de la couche delta 3D : ou elle est, son pas, son fondu, et si elle
@@ -100,7 +134,17 @@ impl Config {
                 sigma_long: 9.,
                 sigma_crest: 12.,
             },
+            impact: None,
         }
+    }
+
+    /// S339, revue R16 : la scène de R11, même domaine, même mer, même éponge — le front remplacé
+    /// par un impact devant la caméra, à 30 m d'elle. `A` et `σ` : choisis au banc sans fenêtre.
+    pub fn impact_review() -> Self {
+        let mut c = Self::review();
+        c.packet.amplitude = 0.;
+        c.impact = Some(Impact { depth: 0.4, sigma: 1.5, center: [0., 12.] });
+        c
     }
 
     /// État initial : vitesses aux faces et surface absolue par colonne, dans le repère du domaine.
@@ -133,6 +177,9 @@ impl Config {
             for i in 0..nx {
                 let (x, y) = world(i as f32 + 0.5, j as f32 + 0.5);
                 eta[j * nx + i] += wave(x, y).0;
+                if let Some(impact) = self.impact {
+                    eta[j * nx + i] += impact.height(x, y);
+                }
             }
         }
         let mut u = vec![0f32; (nx + 1) * ny * nz];
@@ -168,6 +215,7 @@ impl Config {
 
     pub fn without_packet(mut self) -> Self {
         self.packet.amplitude = 0.;
+        self.impact = None;
         self
     }
 }
@@ -216,11 +264,11 @@ impl Live {
 /// l'autre sans (témoin) ; douze secondes à 60 Hz par le seul chemin de production. On relève ce
 /// qui décide si la scène est montrable : colonnes hors bornes, pas dégradés, amplitude de δ avec
 /// et sans paquet, et l'onde isolée (paquet − témoin), qui doit traverser le domaine.
-pub fn mesurer() -> Result<(), String> {
+pub fn mesurer(impact: bool) -> Result<(), String> {
     pollster::block_on(async {
         let scene = crate::scene::Scene::build(true, false, None);
         let background = &scene.background;
-        let config = Config::review();
+        let config = if impact { Config::impact_review() } else { Config::review() };
         let Domain3 { nx, ny, nz, dx } = config.domain;
         let secondes: f64 = std::env::var("SECONDES").ok().and_then(|v| v.parse().ok()).unwrap_or(12.);
         let pas = (secondes * 1e6 / config.step_us as f64) as u64;
@@ -233,6 +281,23 @@ pub fn mesurer() -> Result<(), String> {
         let temoin_cfg = config.without_packet();
         let mut sans = Live::new(Step3::new(background, config.domain, config.origin, RHO, G).await?, temoin_cfg, 0)?;
         println!("DELTA3D_SCENE_S302 carte={:?} backend={}", avec.step.adapter, avec.step.backend);
+        // S339 : l'impact au départ — volume net et pente maximale de la hauteur ajoutée, discrets.
+        if let Some(im) = config.impact {
+            let (eta0, rest) = (config.initial_state().3, config.rest);
+            let volume: f64 = eta0.iter().map(|h| (*h - rest) as f64).sum::<f64>() * (dx * dx) as f64;
+            let mut pente = 0f32;
+            for j in 1..ny - 1 {
+                for i in 1..nx - 1 {
+                    let c = j * nx + i;
+                    let (gx, gy) = ((eta0[c + 1] - eta0[c - 1]) / (2. * dx), (eta0[c + nx] - eta0[c - nx]) / (2. * dx));
+                    pente = pente.max((gx * gx + gy * gy).sqrt());
+                }
+            }
+            println!(
+                "DELTA3D_IMPACT_S339 depart profondeur_m={} sigma_m={} centre={:?} volume_net_m3={volume:.3e} pente_max={pente:.3} pente_prevue={:.3} vitesse_groupe_ms={:.3}",
+                im.depth, im.sigma, im.center, 0.98 * im.depth / im.sigma, im.group_velocity()
+            );
+        }
 
         let colonne = |c: usize| {
             let (i, j) = (c % nx, c / nx);
@@ -254,6 +319,35 @@ pub fn mesurer() -> Result<(), String> {
                     "DELTA3D_SCENE_S302 t={:.1} delta_max_avec={:.4} delta_max_temoin={:.4} onde_max={onde:.4} onde_en=({x:.1},{y:.1}) degrades={degrades:?} hors_bornes_max={hors:?} franche_max={franche_max:?}",
                     n as f64 * config.step_us as f64 * 1e-6, crete(&pa), crete(&ps)
                 );
+                // S339 : les anneaux — moyenne azimutale de l'onde isolée par couronnes de 50 cm autour
+                // du point d'impact, rayon et valeur du maximum au-delà du bord du cratère (`2·σ`),
+                // comparés au trajet de la vitesse de groupe dominante.
+                if let Some(im) = config.impact {
+                    let largeur = 0.5f32;
+                    let (mut somme, mut compte) = (vec![0f64; 64], vec![0u32; 64]);
+                    for c in 0..pa.len() {
+                        let (x, y) = colonne(c);
+                        let r = ((x - im.center[0]).powi(2) + (y - im.center[1]).powi(2)).sqrt();
+                        let b = (r / largeur) as usize;
+                        if b < somme.len() {
+                            somme[b] += (pa[c] - ps[c]).abs() as f64;
+                            compte[b] += 1;
+                        }
+                    }
+                    let (mut rayon, mut valeur) = (0f32, 0f64);
+                    for b in 0..somme.len() {
+                        let r = (b as f32 + 0.5) * largeur;
+                        if r >= 2. * im.sigma && compte[b] > 0 && somme[b] / compte[b] as f64 > valeur {
+                            valeur = somme[b] / compte[b] as f64;
+                            rayon = r;
+                        }
+                    }
+                    let t = n as f32 * config.step_us as f32 * 1e-6;
+                    println!(
+                        "DELTA3D_IMPACT_S339 t={t:.1} rayon_max_m={rayon:.2} moyenne_azimutale_m={valeur:.4} centre_m={:.4} trajet_groupe_m={:.2}",
+                        somme[0] / compte[0].max(1) as f64, im.group_velocity() * t
+                    );
+                }
             }
             if n == pas { break; }
             for (s, live) in [&mut avec, &mut sans].into_iter().enumerate() {

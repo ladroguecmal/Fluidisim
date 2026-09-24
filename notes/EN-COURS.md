@@ -83,7 +83,9 @@ Critères, écrits avant le code :
    vitesses nulles (problème de Cauchy–Poisson). Pente maximale ≈ 0,98·A/σ, tenue sous la cambrure du paquet de
    S302 (0,26). `Config::review()` inchangée ; les captures de `--houle --delta3d --captures` identiques au bit
    avant et après le changement (deux instants, empreintes relevées sur la même carte).
-2. **Banc sans fenêtre** (`--delta3d-scene-mesure --impact`), 12 s : zéro colonne hors bornes, zéro pas dégradé ;
+2. **Banc sans fenêtre** (`--delta3d-scene-mesure --impact`), 12 s : zéro colonne hors bornes ; pas dégradés et
+   divergence franche comme le témoin *(corrigé en P2, avant toute mesure : « zéro pas dégradé » était faux —
+   S302 §2 les déclare tous dégradés à 32 cycles, tolérance d'ADR-144, point de la porte C)* ;
    volume net initial de δ nul à l'arrondi ; les anneaux isolés (avec − témoin) **s'éloignent** du point
    d'impact, rayon du maximum publié chaque seconde et comparé à la vitesse de groupe du nombre d'onde dominant
    `√2/σ` — dans un facteur 1,5.
@@ -93,10 +95,15 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'impact dans la scène ; options lues avant les captures ; critère 1.
+- [x] **P2** — l'impact dans la scène ; options lues avant les captures ; critère 1.
 - [ ] **P3** — banc sans fenêtre ; critère 2, choix de `A` et `σ`.
 - [ ] **P4** — captures, aperçus ; critère 3.
 - [ ] **P5** — preuve (SCENE-DELTA3D-S302 §6) ; R16 au registre ; file.
 - [ ] **P6** — rituel ; arrêt pour le verdict.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** `Impact` (cratère de Ricker, au repos) et `Config::impact_review()` — A 0,4 m, σ 1,5 m,
+  centre (0, 12), à régler en P3 ; `--impact` ; les captures δ 3D rendent la main après les options de rendu ;
+  dossier `s339`. `INSTANTS=60,120 --houle --delta3d --captures` avant et après : **16 empreintes identiques au
+  bit** (1 s : référence avec `0xa460b685bdc480b4` … ; 2 s : haute sans `0xd5be2b4afa89d233`).
+
