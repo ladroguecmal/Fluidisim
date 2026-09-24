@@ -219,3 +219,22 @@ nulle) ; `CADENCES=16667:32,25000:32 … --delta3d-cadence-scene` (40 Hz).
 **Ce que cela décide.** Aucune cadence n'est « la vraie » : à 60 Hz, l'onde est un peu plus amortie qu'à 30 Hz. La
 cadence de 30 Hz change l'amplitude d'une onde forte de quelques pour cent, 4 cm sur 65 dans une mer de 2,5 m. La voir
 ou non est une question de rendu : **revue R17**, la scène aux deux cadences, côte à côte.
+
+---
+
+## 10. S347 — les deux cadences rendues, pour la revue R17
+
+2026-09-24. `--pas-delta=<µs>` règle le pas de la scène δ 3D ; sans lui, les captures de S302 restent identiques au
+bit (16 empreintes, les mêmes qu'en S339 : les leviers de S342–S343 n'ont pas bougé un pixel). **Reproduire** : commit
+`45bf56d7` ou plus récent ; `INSTANTS=120,300,480 … --meilleur --eau-physique=2 --delta3d --pas-delta=16667 --captures`
+et `INSTANTS=60,150,240 … --pas-delta=33333 …`.
+
+| pose | pixels différents entre cadences, avec δ | dont plus de 4 niveaux |
+|---|---:|---:|
+| référence | 17–21 % | 3,9–5,8 % |
+| proche | 36–41 % | 12–15 % |
+| rasante | 11–14 % | 1,3–1,8 % |
+| haute | 9–14 % | 1,3–2,8 % |
+
+Les instants tombent à 60 µs près d'une cadence à l'autre (120 × 16,667 contre 60 × 33,333 ms), ce qui décale aussi
+les images de B seul. **Verdict** : R17 ([revue](REVUE-VISUELLE.md) §22).

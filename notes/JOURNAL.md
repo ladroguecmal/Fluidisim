@@ -16773,3 +16773,17 @@ est l'advection non linéaire du pas couplé.
 **Rituel.** Maillons **2** : aucun critère franchi depuis S344. Comparée à la porte A (déplacement,
 redimensionnement), la revue R17 est courte et son verdict décide de la voie de la porte C. Suivant : **revue R17**
 — la scène de B à 30 et 60 Hz, côte à côte —, arrêt pour le verdict.
+
+## S347 — 2026-09-24 — porte C : revue R17, δ à 30 Hz contre 60 Hz
+
+**Entrée.** A318 attribué en partie (S346) : à 30 Hz, une onde forte garde quelques pour cent d'amplitude de plus ;
+savoir si cela se voit appartient à l'utilisateur (ADR-189 D3).
+**Fait** ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §10). `--pas-delta` règle le pas de la scène ; sans lui,
+captures de S302 identiques au bit — et les leviers de S342–S343 n'avaient bougé aucun pixel. La scène de la porte B
+sur la mer de R14, à 2, 5 et 8 s, quatre poses, aux deux cadences : les mêmes vagues à l'œil ; 9 à 41 % des pixels
+diffèrent, 1,3 à 15 % de plus de 4 niveaux — un grain fin sur l'emprise de δ.
+**Limites.** Instants à 60 µs près entre cadences ; images fixes : l'interpolation du rendu, que 30 Hz demandera,
+n'est pas montrée.
+**Rituel.** Maillons **3** — justification : R17 est une question à l'utilisateur, qui décide de la voie de la
+porte C ; aucune session de plus sur ce point sans son verdict. Suivant : **le verdict R17** ; s'il ne voit rien,
+étaler le pas sur deux images ; sinon, la porte A pendant que l'écart se corrige.

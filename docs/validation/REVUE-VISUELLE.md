@@ -902,3 +902,19 @@ l'anneau se lit comme une onde circulaire qui traverse la mer et s'y déforme, e
 de sa crête n'est pas un défaut ; que les anneaux d'un impact réaliste se perdent dans une mer de 2,5 m est
 juste ; aucun autre défaut. **Classe** : aucune — réception. **Le critère 3 de la porte B est reçu** (ADR-175 §4) ;
 restent, pour elle, les cas 1 et 2 sur la production (critère 2).
+
+## 22. R17 — δ à 30 Hz contre 60 Hz, S347
+
+**Porte C.** ADR-012 §7 fait tourner δ à 30 Hz, le rendu interpolant : c'est la seule cadence qui, étalée sur deux
+images, passe sous 2 ms par image. Mais à 30 Hz une onde forte garde quelques pour cent d'amplitude de plus
+qu'à 60 Hz — un amortissement numérique par pas (A318, [preuve](COUT-DELTA3D-S341.md) §8–9) ; aucune des deux n'est
+« la vraie ». Images `viewer/captures/s347`, la scène de la porte B — le front de S302, la mer de R14 —, aux mêmes
+instants (2, 5, 8 s) et aux mêmes poses, δ à 60 Hz (`s347_60hz_*`) et à 30 Hz (`s347_30hz_*`). À l'œil de la
+session : les mêmes vagues ; la différence amplifiée ×6 est un grain fin sur l'emprise de δ.
+
+**Les questions :**
+
+1. **Voyez-vous une différence** entre les images à 60 Hz et à 30 Hz ?
+2. **Si oui**, laquelle paraît la plus juste ?
+
+Un mot par question suffit.

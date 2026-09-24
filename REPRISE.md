@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 19:07 +02:00
+JETON            : libre
+Battement        : 2026-09-24 19:15 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S347 — **revue R17** : la scène de B rendue à 30 et à 60 Hz, côte à côte, pour juger si l'écart d'A318 se voit ; arrêt pour le verdict
-Dernière session : S346 — **porte C, A318 attribué en partie** : à 30 Hz l'onde forte garde quelques pour cent d'amplitude de plus qu'à 60 Hz — un amortissement numérique par pas, porté par l'onde et accru par la mer ; 40 Hz au niveau du témoin ([preuve](docs/validation/COUT-DELTA3D-S341.md) §9)
-Session suivante : **revue R17** (ADR-189 D3) — la scène de B rendue à 30 et à 60 Hz, aux mêmes instants, côte à côte ; arrêt pour le verdict. S'il ne voit rien : étaler le pas sur deux images, 99ᵉ centile par image. Porte A ensuite. En attente : le terme de D2 (lot 5)
-Maillons        : 2 — S345–S346 : cadence éprouvée et attribuée, aucun critère franchi
+Session en cours : aucune
+Dernière session : S347 — **revue R17** : la scène de la porte B rendue avec δ à 30 et à 60 Hz, aux mêmes instants — les mêmes vagues à l'œil, un grain fin sur l'emprise de δ ([preuve](docs/validation/COUT-DELTA3D-S341.md) §10) ; arrêt pour le verdict
+Session suivante : **verdict R17 de l'utilisateur** (`viewer/captures/s347`, ADR-189 D3) — s'il ne voit rien : étaler le pas de δ sur deux images et mesurer le 99ᵉ centile par image (porte C) ; sinon : la porte A (déplacement, redimensionnement) pendant que l'écart se corrige. En attente : le terme de D2 (lot 5)
+Maillons        : 3 — S345–S347 sur la cadence, aucun critère franchi ; justifié au journal (S347)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

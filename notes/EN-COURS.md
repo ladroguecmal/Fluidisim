@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S347 — **en cours**. **Revue R17, les deux cadences** ; chemin de la v1, porte C.
+Session : S347 — **terminée**. **Revue R17, les deux cadences** ; chemin de la v1, porte C.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — S345–S346 ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §8–9) : la cadence de 30 Hz d'ADR-012 §7, seule à
 passer sous 2 ms par image une fois étalée, change l'amplitude d'une onde forte de quelques pour cent — un
@@ -83,7 +83,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le pas de la scène réglable ; identité des captures sans lui ; critère 1.
 - [x] **P3** — les captures aux deux cadences, aperçus, différences ; critère 2.
-- [ ] **P4** — R17 au registre, preuve (§10), file ; rituel ; arrêt ; critère 3.
+- [x] **P4** — R17 au registre, preuve (§10), file ; rituel ; arrêt ; critère 3.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `--pas-delta=<µs>` règle `Config::step_us` ; captures étiquetées `s347_<Hz>hz` dans
