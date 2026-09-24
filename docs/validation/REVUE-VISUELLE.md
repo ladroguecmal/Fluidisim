@@ -918,3 +918,7 @@ session : les mêmes vagues ; la différence amplifiée ×6 est un grain fin sur
 2. **Si oui**, laquelle paraît la plus juste ?
 
 Un mot par question suffit.
+
+**Verdict R17 — reçu le 2026-09-24 (S348)** : *« Continue je valide »*. La cadence de 30 Hz d'ADR-012 §7 est
+**validée à l'œil** : l'écart d'amplitude d'A318 — quelques pour cent sur une onde forte — n'y fait pas obstacle.
+**Classe** : aucune — réception. Suite : le pas de δ étalé sur deux images (porte C).

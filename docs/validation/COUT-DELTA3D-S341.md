@@ -237,4 +237,5 @@ et `INSTANTS=60,150,240 … --pas-delta=33333 …`.
 | haute | 9–14 % | 1,3–2,8 % |
 
 Les instants tombent à 60 µs près d'une cadence à l'autre (120 × 16,667 contre 60 × 33,333 ms), ce qui décale aussi
-les images de B seul. **Verdict** : R17 ([revue](REVUE-VISUELLE.md) §22).
+les images de B seul. **Verdict R17, S348** : *« Continue je valide »* — la cadence de 30 Hz est validée à l'œil
+([revue](REVUE-VISUELLE.md) §22).

@@ -86,7 +86,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le verdict R17 ; critère 1.
+- [x] **P2** — le verdict R17 ; critère 1.
 - [ ] **P3** — le pas en deux parts, et l'identité ; critère 2.
 - [ ] **P4** — le coût de chaque part ; critère 3.
 - [ ] **P5** — preuve ; la porte C si elle tient ; critère 4.

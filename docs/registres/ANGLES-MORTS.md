@@ -4331,3 +4331,8 @@ cadence, pas la porte C elle-même. Déclencheur : un paquet sur une mer au repo
 numérique par pas, porté par l'onde elle-même (mer au repos : 1 à 3,9 %) et accru par la mer. Une fois l'onde
 dispersée, les écarts n'ont plus d'ordre (horizon d'A297). Candidat : l'advection non linéaire du pas couplé, non
 localisée. Suite : revue R17 aux deux cadences. [Preuve](../validation/COUT-DELTA3D-S341.md) §9.
+
+**A318 — note datée du 2026-09-24 (S348) : accepté à l'œil.** Verdict R17 : *« Continue je valide »* — l'écart
+d'amplitude entre 30 et 60 Hz ne se voit pas, ou ne gêne pas. La cadence de 30 Hz est adoptée ; l'amortissement par
+pas reste une propriété mesurée du schéma, publiée, non corrigée. Reste ouvert comme connaissance, plus comme
+obstacle.
