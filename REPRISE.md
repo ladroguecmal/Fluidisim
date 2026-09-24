@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 13:38 +02:00
+JETON            : libre
+Battement        : 2026-09-24 14:25 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S340 — **porte B** : verdict R16 consigné (critère 3) ; critère 2 sur la production, cas 1 et 2 d'ADR-175 §4
-Dernière session : S339 — **porte B, revue R16** : les captures de δ 3D lisent les options de rendu (scène de S302 au bit) ; un impact réaliste se perd dans la mer de 2,5 m, un anneau préparé de 41 cm se lit et se déforme ([preuve](docs/validation/SCENE-DELTA3D-S302.md) §8)
-Session suivante : **verdict R16 de l'utilisateur** (`viewer/captures/s339`, ADR-189 D3) — s'il reçoit le critère 3 de la porte B, le consigner ; puis les cas 1 et 2 d'ADR-175 §4 sur la production (critère 2). En attente aussi : le terme de D2 (lot 5)
-Maillons        : 1 — S339 : R16 préparée, verdict attendu
+Session en cours : aucune
+Dernière session : S340 — **la porte B reçue** : verdict R16 (critère 3) ; la production suit la référence sur les trois cas de cuve — cas 2 à 1,0·10⁻⁶ m, cas 1 sur un fond de B sous 10⁻⁴ m ([preuve](docs/validation/CUVE-GPU-S305.md) §9) ; la v1 demande encore les portes C et A
+Session suivante : **porte C** (§3 bis) — δ ≤ 2 ms GPU au 99ᵉ centile sur la scène de la porte B, techniques présentes et absentes publiées (ADR-131, ADR-175 §4) : aujourd'hui 4,6 ms par pas, 32 cycles, 376 320 mailles ; piste déjà nommée, la charge utile par face (26 flottants). Puis la porte A. En attente : le terme de D2 (lot 5)
+Maillons        : 0 — S340 : porte B reçue
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

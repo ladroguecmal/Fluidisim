@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S340 — **en cours**. **Porte B** : le verdict R16, puis le critère 2 sur la production, cas 1 et 2 ;
+Session : S340 — **terminée**. **Porte B** : le verdict R16, puis le critère 2 sur la production, cas 1 et 2 ;
 chemin de la v1 ([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4), porte en cours de §3 bis.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — **verdict R16** de l'utilisateur sur les images de S339 : *« Tout parrait bon visuellement »*. Critère 3
@@ -100,7 +100,7 @@ Critères, écrits avant le code :
 - [x] **P5** — le cas 1 : fond de B stationnaire, chaînon et HOS sur la référence.
 - [x] **P6** — le cas 1 : production contre référence ; critère 4.
 - [x] **P7** — preuve ; la porte B, si elle tient ; critère 5.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 - **P3, critère 2 tenu.** `Background::from_components` et `ComponentsError` (vide, non fini, allocation) ;

@@ -16660,3 +16660,19 @@ attribuée ; bande claire en bas de la pose rasante, préexistante ; domaine de 
 **Non fait.** Les cas 1 et 2 d'ADR-175 §4 sur la production (critère 2) ; la porte C.
 **Rituel.** Maillons **1** : R16 prête, aucun critère « reçu si » n'a encore bougé. Suivant : **le verdict R16** ;
 s'il reçoit le critère 3, les cas 1 et 2 sur la production.
+
+## S340 — 2026-09-24 — la porte B reçue
+
+**Entrée — verdict R16** : *« Tout parrait bon visuellement »* — critère 3 de la porte B. Restaient les cas 1 et
+2 sur la production (critère 2 d'ADR-175 §4).
+**Fait** ([preuve](../docs/validation/CUVE-GPU-S305.md) §9). `Background::from_components` : un fond de B par ses
+composantes. **Cas 2** : houle de B selon `x` ; la carte reste invariante en `y` à 1 ulp et suit la référence à
+1,0·10⁻⁶ m ; à 10 cm de houle, la surface franchit le centre de maille et A297 décroche la carte à 1,25 s — le
+cas retenu reste sous le seuil, comme S305. **Cas 1** : l'onde stationnaire de S297 faite de deux composantes de
+B ; ce fond s'écarte de l'analytique de 4,4 % dans l'eau, de 33 % au-dessus du plan moyen ; la référence sur ce
+fond tient les tolérances de S253 contre HOS (0,98 / 1,07 % à 128) ; la carte la suit sous 10⁻⁴ m aux trois
+maillages. **Porte B reçue** (critères 1 à 3 ; le coût à la porte C).
+**Limites.** Cas 1 sur le fond de B, non sur l'analytique ; pente à 8,9·10⁻³ au maillage le plus fin, non
+attribuée ; A297 et A289 ouvertes ; coût 4,6 ms pour 2 ms.
+**Rituel.** Maillons **0** : ce qui devient possible — la porte C, qui se reçoit sur la scène de B ; le chemin —
+le coût de δ sur cette scène ; la preuve — §9. Suivant : **porte C**, puis A. En attente : le terme de D2.

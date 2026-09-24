@@ -120,3 +120,13 @@ Elle ne choisit ni la représentation non graphe, ni le `dx` de production, ni l
 ne donne à δ aucune autorité de jeu, et n'ajoute aucune dépendance.
 
 Invariants relus : I-04, I-05, I-06, I-08, I-12, I-13, I-17 ; aucun amendé.
+
+## Note datée du 2026-09-24 (S340) — la porte B reçue
+
+Les critères 1 à 3 du §4 sont tenus. **1** : la référence, S295–S298. **2** : la production contre la référence
+sur les trois cas de cuve — le 3 en S305, les 1 et 2 en S340, sous 10⁻⁴ m pour 3 mm
+([CUVE-GPU-S305](../validation/CUVE-GPU-S305.md) §9). **3** : la revue R16, *« Tout parrait bon visuellement »*
+([REVUE-VISUELLE](../validation/REVUE-VISUELLE.md) §21). Deux écarts au texte du §4, publiés : le cas 1 de la
+production tourne sur **le fond de B** — deux composantes opposées —, non sur l'onde analytique en profondeur finie,
+que la production ne peut pas évaluer ; le cas 2 reste sous le seuil d'A297, comme la cuve de S305. Le critère 4
+relève de la porte C, désormais en cours.
