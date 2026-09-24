@@ -211,6 +211,253 @@ pub fn arbitrage() -> Result<(), String> {
     })
 }
 
+/// S351 — l'écart du banc du rang 1 : deux domaines voisins, 6 m entre eux. À 60 m (S344), aucune pose ne les rend
+/// voulus ensemble — 0,039 chacun au milieu, sous l'extinction ; à 36 m, l'œil à 20 m voit A à ≈ 0,09 et B à ≈ 0,11.
+const ECART_RANG1: f32 = 36.;
+/// S350 : la part du pas de δ 3D qui ne suit pas la surface — moindres carrés sur 100, 75, 50 et 25 % de l'emprise
+/// ([preuve](../../docs/validation/ARBITRAGE-3D-S344.md) §6).
+const PART_FIXE_MS: f32 = 0.09;
+
+/// Le trajet du rang 1 : devant A (0–4 s), vers le point d'où l'on voit les deux (4–6 s, 10 m/s), **pause de 8 s**
+/// (6–14 s), puis devant B (14–16 s) et y rester (16–20 s).
+pub fn camera_rang1(t: f64) -> Camera {
+    let base = Camera::default();
+    let f = |a: f64, b: f64| ((t - a) / (b - a)).clamp(0., 1.) as f32;
+    let x = if t < 14. { 20. * f(4., 6.) } else { 20. + 16. * f(14., 16.) };
+    Camera { eye: [base.eye[0] + x, base.eye[1], base.eye[2]], ..base }
+}
+
+/// **S351, porte A, critère 3 — la dégradation de rang 1** (ADR-012 §4), `--delta3d-rang1`. Deux pas de production,
+/// l'ordonnanceur du cœur, 5 ms ; chaque domaine déclare qu'il peut rétrécir jusqu'à ce que son éponge tienne
+/// (24 × 24 mailles), part fixe 0,09 ms. L'échelle accordée devient une emprise centrée — surface arrondie par défaut,
+/// jamais au-dessus du budget —, appliquée par `Step3::resize`. La part d'écran se mesure sur l'emprise **pleine** : ce
+/// que le domaine doit couvrir, pas ce que la dégradation lui laisse — sans quoi rétrécir ferait mourir. Le coût annoncé
+/// est ramené à la pleine emprise : `fixe + (mesuré − fixe)/échelle`. `RANG1=0` : le témoin, sans déclaration.
+pub fn rang1() -> Result<(), String> {
+    use water_core::scheduler::Shrink;
+    pollster::block_on(async {
+        let actif = std::env::var("RANG1").map_or(true, |v| v != "0");
+        // `PRECHAUFFE=1` : trente pas par domaine avant le trajet, puis retour au repos — une carte qui rend chaque image
+        // n'est jamais froide ; au repos, son premier pas coûte 22 ms (S344 §3). `COUT=max` : le coût annoncé est le plus
+        // grand des huit derniers pas, non leur médiane — ADR-012 §3 vise le 99ᵉ centile.
+        let prechauffe = std::env::var("PRECHAUFFE").is_ok_and(|v| v == "1");
+        let cout_max = std::env::var("COUT").is_ok_and(|v| v == "max");
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let a = Config::review().without_packet();
+        let mut b = a;
+        b.origin[0] += ECART_RANG1;
+        let doms = [a, b];
+        let emprises = [emprise(&doms[0]), emprise(&doms[1])];
+        let mut cartes = Vec::new();
+        for c in &doms {
+            let carte = Step3::new(background, c.domain, c.origin, RHO, G).await?;
+            carte.set_step(c.step_us, c.rest, c.sponge)?;
+            cartes.push(carte);
+        }
+        let cap = doms[0].domain;
+        let n_min = (2. * doms[0].sponge.width_x.max(doms[0].sponge.width_y) / cap.dx).ceil() as usize;
+        let echelle_min = (n_min * n_min) as f32 / (cap.nx * cap.ny) as f32;
+        let forme_pour = |s: f32| -> (usize, usize) {
+            let r = s.max(0.).sqrt();
+            (((cap.nx as f32 * r).floor() as usize).clamp(n_min, cap.nx), ((cap.ny as f32 * r).floor() as usize).clamp(n_min, cap.ny))
+        };
+        // Un domaine qui naît repart de δ = 0 (I-12), à la forme qu'il a.
+        let repos = |carte: &Step3, rest: f32| -> Result<(), String> {
+            let d = carte.domain();
+            let (nx, ny, nz) = (d.nx, d.ny, d.nz);
+            carte.set_state(
+                &vec![0.; (nx + 1) * ny * nz],
+                &vec![0.; nx * (ny + 1) * nz],
+                &vec![0.; nx * ny * (nz + 1)],
+                &vec![rest; nx * ny],
+            )
+        };
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 12);
+        let profil = Profile { cpu_sim_ms: BUDGET_MS, blocks: 2, on: ALLUMAGE, off: EXTINCTION };
+        let mut ordonnanceur = Scheduler::with_capacity(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, profil, 2)
+            .map_err(|e| format!("ordonnanceur : {e:?}"))?;
+        println!(
+            "DELTA3D_RANG1_S351 carte={:?} rang1={actif} ecart_x={ECART_RANG1} budget_ms={BUDGET_MS} allumage={ALLUMAGE} extinction={EXTINCTION} echelle_min={echelle_min:.4} part_fixe_ms={PART_FIXE_MS}",
+            cartes[0].adapter
+        );
+        let mediane = |v: &Vec<f64>| -> f32 {
+            if v.is_empty() {
+                return PREMIER_COUT_MS;
+            }
+            let mut w = v.clone();
+            w.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            (if cout_max { w[w.len() - 1] } else { w[w.len() / 2] }) as f32
+        };
+        if prechauffe {
+            for (d, carte) in cartes.iter_mut().enumerate() {
+                for n in 0..30u64 {
+                    carte.step(background, SimTime(n * FRAME_US), doms[d].cycles)?;
+                }
+                carte.wait()?;
+            }
+        }
+        println!("DELTA3D_RANG1_S351 prechauffe={prechauffe} cout={}", if cout_max { "max_des_8" } else { "mediane_des_8" });
+        let mut couts: [Vec<f64>; 2] = [Vec::new(), Vec::new()];
+        let mut oubli_depuis: [Option<u64>; 2] = [None; 2];
+        let mut decal = [[0usize; 2]; 2];
+        let mut images_mesurees: Vec<f64> = Vec::new();
+        let mut coupes: Vec<f32> = Vec::new();
+        let (mut vivant_avant, mut accorde_avant) = ([false; 2], [false; 2]);
+        let (mut affame, mut pas_payes, mut descentes, mut montees) = ([0usize; 2], [0usize; 2], [0usize; 2], [0usize; 2]);
+        let (mut pire_accorde, mut pire_image, mut images_hors_budget, mut focal_retreci, mut mal_servi) = (0f32, 0f64, 0usize, 0usize, 0usize);
+        let (mut coupe_max, mut surface_max) = (0f32, 0f32);
+        let mut duree_resize: Vec<f64> = Vec::new();
+        let mut deux_servis = 0usize;
+        let images = (SECONDES * 1e6 / FRAME_US as f64) as u64;
+        for n in 0..=images {
+            let t = n as f64 * FRAME_US as f64 * 1e-6;
+            let vue = projection(&camera_rang1(t));
+            let parts = [0, 1].map(|d| vue.screen_fraction(emprises[d].0, emprises[d].1));
+            ordonnanceur.begin();
+            for d in 0..2 {
+                let shrink = actif.then_some(Shrink { min_scale: echelle_min, fixed_ms: PART_FIXE_MS });
+                let bid = Bid { id: DomainId(d as u32), gameplay: 1., perception: parts[d], urgency: 1.,
+                    cost_ms: mediane(&couts[d]).max(PART_FIXE_MS), blocks: 1, regime: Regime::Perturbative, shrink };
+                ordonnanceur.submit(bid).map_err(|e| format!("soumission : {e:?}"))?;
+            }
+            ordonnanceur.decide(SimTime(n * FRAME_US)).map_err(|e| format!("décision : {e:?}"))?;
+            ordonnanceur.allocate();
+            pire_accorde = pire_accorde.max(ordonnanceur.granted_ms());
+            let focal = ordonnanceur.focal();
+            let mut image_ms = 0f64;
+            let mut servis = 0;
+            for d in 0..2 {
+                let id = DomainId(d as u32);
+                let vivant = ordonnanceur.is_active(id);
+                let grant = ordonnanceur.grants().iter().copied().find(|g| g.id == id);
+                let accorde = grant.is_some();
+                if vivant && !vivant_avant[d] {
+                    repos(&cartes[d], doms[d].rest)?;
+                }
+                if vivant && !accorde {
+                    affame[d] += 1;
+                }
+                if focal == Some(id) && grant.is_some_and(|g| g.scale < 1.) {
+                    focal_retreci += 1;
+                }
+                let now = n * FRAME_US;
+                match oubli_depuis[d] {
+                    Some(depuis) if !accorde && now >= depuis => {
+                        let k = (((now - depuis) / FRAME_US) as usize).min(couts[d].len());
+                        couts[d].drain(..k);
+                        oubli_depuis[d] = Some(depuis + ((now - depuis) / FRAME_US) * FRAME_US);
+                    }
+                    _ => oubli_depuis[d] = Some(now),
+                }
+                if let Some(g) = grant {
+                    servis += 1;
+                    let forme = cartes[d].domain();
+                    let (nx2, ny2) = forme_pour(g.scale);
+                    if (nx2, ny2) != (forme.nx, forme.ny) {
+                        let (i0, j0) = ((cap.nx - nx2) / 2, (cap.ny - ny2) / 2);
+                        if nx2 * ny2 < forme.nx * forme.ny {
+                            // Le prix : ce que δ portait dans les colonnes que la nouvelle emprise laisse dehors.
+                            let p = cartes[d].published()?;
+                            let mut coupe = 0f32;
+                            for j in 0..forme.ny {
+                                for i in 0..forme.nx {
+                                    let (ci, cj) = (decal[d][0] + i, decal[d][1] + j);
+                                    let h = p[j * forme.nx + i].abs();
+                                    surface_max = surface_max.max(h);
+                                    if ci < i0 || ci >= i0 + nx2 || cj < j0 || cj >= j0 + ny2 {
+                                        coupe = coupe.max(h);
+                                    }
+                                }
+                            }
+                            coupe_max = coupe_max.max(coupe);
+                            coupes.push(coupe);
+                            println!(
+                                "DELTA3D_RANG1_S351 t={t:.3} domaine={} retrecit={}x{}->{nx2}x{ny2} coupe_max_m={coupe:.4e}",
+                                ["A", "B"][d], forme.nx, forme.ny
+                            );
+                            descentes[d] += 1;
+                        } else {
+                            montees[d] += 1;
+                        }
+                        let debut = std::time::Instant::now();
+                        cartes[d].resize(i0 as i32 - decal[d][0] as i32, j0 as i32 - decal[d][1] as i32, nx2, ny2)?;
+                        cartes[d].wait()?;
+                        duree_resize.push(debut.elapsed().as_secs_f64() * 1e3);
+                        decal[d] = [i0, j0];
+                    }
+                    let f = cartes[d].domain();
+                    let echelle = (f.nx * f.ny) as f64 / (cap.nx * cap.ny) as f64;
+                    cartes[d].publish_time(background, SimTime(n * FRAME_US))?;
+                    if let Some(ms) = cartes[d].timed_step(doms[d].cycles)? {
+                        image_ms += ms;
+                        let fixe = PART_FIXE_MS as f64;
+                        couts[d].push(fixe + (ms - fixe).max(0.) / echelle);
+                        if couts[d].len() > ECHANTILLONS {
+                            couts[d].remove(0);
+                        }
+                    }
+                    pas_payes[d] += 1;
+                }
+                if vivant != vivant_avant[d] || accorde != accorde_avant[d] {
+                    let f = cartes[d].domain();
+                    println!(
+                        "DELTA3D_RANG1_S351 t={t:.3} domaine={} vivant={vivant} accorde={accorde} focal={} echelle={:.3} forme={}x{} part={:.4}",
+                        ["A", "B"][d], focal == Some(id), grant.map_or(0., |g| g.scale), f.nx, f.ny, parts[d]
+                    );
+                }
+                vivant_avant[d] = vivant;
+                accorde_avant[d] = accorde;
+            }
+            if servis == 2 {
+                deux_servis += 1;
+            }
+            pire_image = pire_image.max(image_ms);
+            if t >= 1. && image_ms > 0. {
+                images_mesurees.push(image_ms);
+            }
+            if image_ms > BUDGET_MS as f64 {
+                images_hors_budget += 1;
+            }
+            let plus = if parts[0] > parts[1] { 0 } else { 1 };
+            if (parts[0] - parts[1]).abs() > 0.01 && !ordonnanceur.grants().iter().any(|g| g.id == DomainId(plus as u32)) {
+                mal_servi += 1;
+            }
+            if n % 60 == 0 {
+                let e: Vec<String> = (0..2)
+                    .map(|d| ordonnanceur.grants().iter().find(|g| g.id == DomainId(d as u32)).map_or("-".into(), |g| format!("{:.3}", g.scale)))
+                    .collect();
+                println!(
+                    "DELTA3D_RANG1_S351 t={t:.2} parts={:.4}/{:.4} focal={:?} echelles={}/{} echelle_commune={:.3} accorde_ms={:.3} image_ms={image_ms:.3}",
+                    parts[0], parts[1], focal.map(|f| f.0), e[0], e[1], ordonnanceur.scale(), ordonnanceur.granted_ms()
+                );
+            }
+        }
+        duree_resize.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        images_mesurees.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let au_dessus: Vec<f64> = images_mesurees.iter().copied().filter(|&m| m > BUDGET_MS as f64).collect();
+        coupes.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let q = |v: &Vec<f64>, f: f64| if v.is_empty() { f64::NAN } else { v[(((v.len() - 1) as f64) * f).round() as usize] };
+        for d in 0..2 {
+            println!(
+                "DELTA3D_RANG1_S351 bilan domaine={} pas_payes={} images_affame={} retrecissements={} agrandissements={}",
+                ["A", "B"][d], pas_payes[d], affame[d], descentes[d], montees[d]
+            );
+        }
+        println!(
+            "DELTA3D_RANG1_S351 bilan_apres_1s images={} image_mediane_ms={:.3} image_q99_ms={:.3} image_max_ms={:.3} au_dessus_du_budget={} depassement_max_ms={:.3} coupes={} coupe_mediane_m={:.3e}",
+            images_mesurees.len(), q(&images_mesurees, 0.5), q(&images_mesurees, 0.99), q(&images_mesurees, 1.), au_dessus.len(),
+            au_dessus.last().map_or(0., |m| m - BUDGET_MS as f64), coupes.len(), coupes.get(coupes.len() / 2).copied().unwrap_or(0.)
+        );
+        println!(
+            "DELTA3D_RANG1_S351 bilan rang1={actif} images={} deux_servis={deux_servis} accorde_pire_ms={pire_accorde:.3} image_mesuree_pire_ms={pire_image:.3} images_mesurees_au_dessus_du_budget={images_hors_budget} focal_retreci={focal_retreci} plus_visible_non_servi={mal_servi} redimensionnements={} redimensionnement_mediane_ms={:.3} max_ms={:.3} coupe_max_m={coupe_max:.4e} surface_max_avant_coupe_m={surface_max:.4e}",
+            images + 1, duree_resize.len(), q(&duree_resize, 0.5), q(&duree_resize, 1.)
+        );
+        Ok(())
+    })
+}
+
 /// S350 — les **murs** de δ : faces normales du bord, `u` en `i = 0` et `i = nx`, `v` en `j = 0` et `j = ny`, sous
 /// le repos. Le pas ne les écrit jamais ; l'état initial les tient nulles. Rend la plus grande vitesse qu'on y
 /// trouve et le débit net entrant, m³/s.

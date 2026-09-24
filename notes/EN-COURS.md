@@ -100,7 +100,7 @@ Critères, écrits avant le code :
 - [x] **P2** — ADR-190, la décision de l'utilisateur ; file (décisions), REPRISE §5, feuille de route, liste.
 - [x] **P3** — le rang 1 dans le cœur : `Shrink`, focal, échelle commune ; essais (critère 1 a, b, d, e).
 - [x] **P4** — l'anti-pompage : engagement et rampe ; essais (critère 1 c).
-- [ ] **P5** — le banc de la côte avec rang 1, et son témoin ; critères 2 et 3.
+- [x] **P5** — le banc de la côte avec rang 1, et son témoin ; critères 2 et 3.
 - [ ] **P6** — preuve, file, feuille de route, liste ; la porte A et la v1 si reçues ; critère 4.
 - [ ] **P7** — rituel.
 
@@ -117,3 +117,18 @@ Critères, écrits avant le code :
   remontée réarme l'engagement ; le focal ne cède qu'à une priorité plus forte et après 1 s, tout de suite s'il ne
   soumissionne plus. Trois essais de plus, 28 de l'ordonnanceur ; suite du cœur **631 réussis, 18 ignorés, 0 échec** ;
   empreinte S278 inchangée.
+- **P5** (`--delta3d-rang1`, secteur 97 → 96 %, 21:48–21:54). Carte **froide** (premier passage, rang 1 et témoin) :
+  A seul, son premier pas coûte 22,4 ms > 5 → 17 images affamées au départ (témoin : 16), défaut du banc de S344 §3,
+  étranger au rang 1 ; critère 2 manqué tel qu'écrit, sur ce seul point. `PRECHAUFFE=1` (30 pas par domaine, puis repos) :
+  | | témoin | rang 1, médiane des 8 | rang 1, max des 8 |
+  |---|---:|---:|---:|
+  | images affamées A / B | 612 / 3 | **0 / 0** | **0 / 0** |
+  | images où les deux sont servis | 0 | 615 | 615 |
+  | accordé au pire | 4,014 | 5,000 | 5,000 |
+  | image mesurée (après 1 s) médiane / q99 / max | 3,694 / 3,737 / 3,762 | 4,946 / 5,009 / 5,045 | 4,912 / **4,983** / 5,004 |
+  | images mesurées > 5 ms | 0 | 20 (+0,045 au pire) | 1 (+0,004) |
+  | redimensionnements (A : descentes / montées) | 0 | 14 (7 / 5) | 19 (11 / 6) |
+  | coupe de δ : première / médiane / max | — | 11,3 cm / 2,8 / 11,3 | 11,3 cm / 3,5 / 11,3 |
+  Focal jamais rétréci ; plus visible toujours servi ; A à l'échelle 0,33–0,35, B entier ; redimensionnement 0,74–0,83 ms
+  mural. La coupe de la première descente (120×112 → 69×65) est **intérieure** : pleine pondération au rendu. Les
+  suivantes, d'une maille, tombent dans le fondu de 3 m. Aucun verdict visuel.
