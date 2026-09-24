@@ -200,10 +200,10 @@ pas recopiée ici (L137).
   et à maille fine la fermeture de la bulle sans pression emballe le calcul (A311).
   Hors de δ : sa surface est une fonction hauteur (ADR-175 D5). Manquent
   la gerbe, qui suit la maille (A312), la bulle, qui n'est pas de l'air (A311), le raccord aux
-  colonnes — **à masse exacte** dans les deux sens depuis S323–S325, sa frontière **non reçue**
-  (S327 : 4,2 % d'amortissement par période à 5 cm, A316 ; [§10–12](validation/B10-APIC-S320.md)) —,
-  la 3D et C20. Lot 5 d'ADR-178, APIC retenue par l'utilisateur (ADR-186) ; lot suspendu par
-  ADR-189 D2, dont le terme — porte D ou v1 entière — attend l'utilisateur.
+  colonnes — **à masse exacte** dans les deux sens depuis S323–S325, sa frontière **non reçue** :
+  S354, sur 30 s, elle ne tient pas la densité des particules, la masse migre et la période s'allonge
+  à 5 cm (A316 ; [§10–13](validation/B10-APIC-S320.md)) —, la 3D et C20. Lot 5 d'ADR-178, APIC retenue
+  par l'utilisateur (ADR-186), repris après la v1 (ADR-190 D4).
 - [ ] **4.13 Proche-coque et gerbe d'étrave** — *partiel* **depuis S332–S338** (ADR-001 range le
   proche-coque dans δ) : la coque d'un corps de jeu dans δ, qui perce la surface, rayonne relativement
   à l'eau qui la porte et reçoit la masse ajoutée et l'amortissement que δ lui mesure — porte D reçue

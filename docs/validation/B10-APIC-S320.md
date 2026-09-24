@@ -28,6 +28,10 @@ fermeture de la poche sans pression (290 m/s, A311), et le calcul complet devien
 **S327 (§12)** : A316 attribué — l'échange asymétrique fait le saut, la surface arrondie des colonnes
 la dissipation. Corrigé : écart 1,81 → 0,24 maille à 5 cm, 2,85 → 0,59 à 2,5 cm ; amortissement 16 →
 4,2 % et 5,4 → 0,71 %. **Pas encore reçu** : l'amortissement à 5 cm, le bruit de frontière à 2,5 cm.
+**S354 (§13)** : l'instrument relu. Sur 10 s, la mesure d'amortissement se trompe d'un point ; sur 30 s, **les
+colonnes seules ne dissipent pas plus qu'APIC seul** — le « 1,3 % » de S327 était lu sur une jauge aveugle. Ce que 30 s
+montrent : la frontière fixe la **densité** des particules près d'elle — tassée ou dilatée selon l'échange — et la
+masse la suit, +12 mm en 30 s à 5 cm. Période manquée à 5 cm, saut d'une maille à 2,5 cm : **pas reçu**.
 
 ---
 
@@ -500,3 +504,97 @@ maille qui échoue est celle où l'onde fait 0,4 maille et une particule 62 % de
 **Suite.** La dissipation propre aux colonnes à 5 cm, dont aucune des trois causes pressenties n'est la
 bonne ; le bruit de la frontière à 2,5 cm. Piste non éprouvée : une bande où les deux représentations
 se recouvrent, la surface que voit la pression passant de l'une à l'autre au lieu de sauter.
+
+---
+
+## 13. S354 — l'instrument relu sur 30 s : les colonnes ne dissipent pas, la frontière tasse
+
+2026-09-25. **Lot 5**, alternance d'[ADR-184](../adr/ADR-184-seconde-representation-en-parallele.md) D1, après la v1
+([ADR-190](../adr/ADR-190-apres-la-v1-la-liste-entiere.md) D4) ; A316. Critères écrits avant le code, dans le plan de
+la session.
+
+### Reproduire
+
+- Commit `f84e84e5` ou plus récent ; machine de référence, CPU, un fil par essai.
+  `cargo run --manifest-path code/Cargo.toml -p water-core --release --offline --example lot5_comparaison -- <arguments>` :
+  - `regression` — l'épreuve à réponse connue de l'estimateur (instantané) ;
+  - `LOT5_T_FIN=30 RACCORD_ENSEMENCE=continu RACCORD_ECHANGE=paroi RACCORD_JAUGE=hauteurs RACCORD_ZONE=<1|0.95|0.5>`
+    `-- hybride ballottement <dx>` et `LOT5_T_FIN=30 -- apic ballottement <dx>` — lignes `LOT5_S318` et `LOT5_S354` ;
+  - `LOT5_T_FIN=30 RACCORD_ENSEMENCE=continu RACCORD_JAUGE=hauteurs RACCORD_ECHANGE=<paroi|solde|eulerien>`
+    `-- raccord_dyn ballottement <dx>` — lignes `RACCORD_S354` : masse à gauche de la frontière et particules par cellule
+    juste avant elle, par tranche de 10 s.
+- Valeurs attendues, paroi à 5 cm : masse 0,50098 / 0,50734 / 0,51211 m², particules par cellule 4,017 / 4,846 /
+  4,960, saut 0,3893 maille, période aux zéros +9,96 % ; APIC seul à 5 cm sur 30 s, +7,31 %.
+- Sans les variables nouvelles, tout est au bit : écart 0,2436, amortissement 4,168 %, période 2,12419 s (§12).
+- Durées : 5 cm, 10 à 25 s par essai ; 2,5 cm, 2 à 3 min.
+
+### L'instrument
+
+**La jauge était aveugle dans la zone des colonnes.** Elle compte les particules du quart gauche du bassin ; dans les
+colonnes, ce sont des particules réensemencées à chaque pas, deux par rangée, `round(2h/dx)` rangées : la masse
+qu'elle y lit est quantifiée par demi-maille — 2,5 cm à 5 cm, pour une onde de 2 cm. Au repos, colonnes seules, elle
+reste à 0,5 **exactement** ; la jauge des hauteurs (`RACCORD_JAUGE=hauteurs` : `h` pour les colonnes, les particules
+libres comme avant) y varie de 0,126 mm, comme APIC seul (0,110 mm) : le repos n'est pas immobile, 4 mm/s dans les
+deux. Le « 1,3 % » de S327, 95 % du bassin en colonnes, avait été lu sur la jauge aveugle.
+
+**Dix secondes ne lisent pas le point.** Sur un signal connu — un cosinus amorti de 0, 1 ou 4 % par période, plus un
+troisième mode à 10 % qui bat, échantillonné comme le banc —, la mesure de S318 (première et dernière période) se
+trompe de **0,3 à 1,2 point sur 10 s**, de 0,04 à 0,15 sur 30 s ; une régression sur tous les extrema, un par
+demi-période, de 0,9 sur 10 s (incertitude 2,5) et **0,03 sur 30 s** (0,35). Le critère « à 1 point d'APIC seul »
+de S325–S327 se lit donc sur 30 s, et avec son incertitude.
+
+### Sur 30 s — les colonnes seules contre APIC seul
+
+| 30 s, jauge des hauteurs | période aux zéros | amortissement S318 | régression |
+|---|---:|---:|---:|
+| APIC seul, 5 cm | +7,31 % | +0,14 % | +1,18 ± 0,80 % |
+| colonnes seules, 5 cm | +5,38 % | +0,80 % | +0,61 ± 0,59 % |
+| frontière au nœud (paroi), 5 cm | **+9,96 %** | +1,12 % | +1,20 ± 1,36 % |
+| APIC seul, 2,5 cm | +1,60 % | +1,04 % | +2,15 ± 0,68 % |
+| colonnes seules, 2,5 cm | +1,25 % | +1,72 % | +1,47 ± 0,28 % |
+| frontière au nœud (paroi), 2,5 cm | +1,19 % | +0,96 % | +0,31 ± 0,58 % |
+
+**Les colonnes ne dissipent pas plus qu'APIC seul** : l'enveloppe, demi-somme de deux extrema voisins, passe de 22,5
+à 20,1 mm en 28 s pour APIC et de 22,2 à 20,1 mm pour les colonnes. C'est la **prédiction écrite avant la mesure**,
+tenue ; ce qui la contredisait était l'instrument. Et APIC seul n'est pas le « −0,4 % » de dix secondes.
+
+### Ce que trente secondes montrent — la densité à la frontière
+
+| 30 s | masse à gauche de la frontière, m², par tranche de 10 s | particules par cellule avant la frontière | saut max, mailles |
+|---|---|---|---:|
+| APIC seul, 5 cm | 0,50005 / 0,50159 / 0,50080 | 4,01 / 4,02 / 4,05 | 0,22 |
+| **paroi**, 5 cm | 0,50098 / 0,50734 / **0,51211** | 4,02 / 4,85 / **4,96** | 0,39 |
+| **solde** — absorbées, 5 cm | 0,50040 / 0,50564 / **0,51179** | 3,97 / 4,88 / **5,26** | 0,53 |
+| **eulérien**, 5 cm | 0,49742 / 0,49802 / 0,50181 | **3,18 / 3,60 / 3,65** | 0,83 |
+| paroi, 2,5 cm | 0,50086 / 0,50290 / 0,50583 | 3,88 / 4,27 / 4,19 | **1,00** |
+| solde, 2,5 cm | 0,50089 / 0,50345 / 0,50627 | 3,88 / 4,30 / 4,24 | 0,64 |
+| eulérien, 2,5 cm | 0,49979 / 0,50002 / 0,50001 | 3,49 / 3,57 / 3,54 | 0,79 |
+
+**La masse migre vers les particules** en paroi : +12 mm de niveau équivalent en 30 s à 5 cm, +5 mm à 2,5 cm, alors
+que le saut géométrique à la frontière reste sans biais (moyenne signée par tranche de −0,011 à +0,001 maille). Les
+particules se **tassent** : 5 particules par cellule au lieu de 4, et leur centre de masse descend — énergie des
+particules −87 J en 30 s, contre −1,4 J pour APIC seul, pour une onde qui en porte 2.
+
+**La cause désignée par P3 est contredite.** On soupçonnait la paroi, qui ramène les particules au lieu de les
+absorber : absorbées (**solde**), elles se tassent autant, et davantage. Ce qui est commun aux trois échanges : ils
+convertissent un débit de volume de la grille en particules **à densité nominale**, sans voir la densité locale.
+Chacun fixe la densité près de la frontière à sa façon — tassée, dilatée — et **rien ne la ramène à 4** : la pression
+voit la surface géométrique, pas la masse, et n'y oppose aucune force. La dérive suit la maille.
+
+### Verdict
+
+| critère de S327, sur 30 s, meilleur montage (paroi) | 5 cm | 2,5 cm |
+|---|---|---|
+| masse | 4·10⁻¹⁶ — tenu | 1·10⁻¹⁵ — tenu |
+| saut à la frontière < 0,5 maille | 0,39 — tenu | **1,00 — manqué** |
+| période à 1 % d'APIC seul | **+9,96 contre +7,31 — manqué** | +1,19 contre +1,60 — tenu |
+| amortissement à 1 point d'APIC seul | 1,12 contre 0,14 (S318), 1,20 contre 1,18 (régression) — tenu de justesse | 0,96 contre 1,04 — tenu |
+
+**Non reçu.** A316 change de nature : ce n'est plus une dissipation des colonnes, c'est une **densité non tenue à la
+frontière**, qui déplace la masse et, à 5 cm, la période.
+
+**Suite.** Tenir la densité près de la frontière : la dernière colonne de cellules du côté des particules
+réensemencée depuis sa hauteur géométrique, la différence de masse passée à la première colonne — la bande de
+recouvrement, sous sa forme la plus simple. Critère : masse à gauche de la frontière à l'écart d'APIC seul sur 30 s,
+densité à 4 ± 0,2, puis les critères de S327 sur 30 s.
+

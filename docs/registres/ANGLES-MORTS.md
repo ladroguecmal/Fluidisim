@@ -4284,6 +4284,14 @@ saut ; la surface des colonnes arrondie au quart de maille fait la dissipation. 
 dissipation propre aux colonnes à 5 cm — ni transport en amont, ni réespacement, ni aller-retour de
 vitesse — et un bruit de frontière, sans biais, à 2,5 cm.
 
+**A316 — note datée du 2026-09-25 (S354). Changé de nature** ([preuve](../validation/B10-APIC-S320.md) §13). La
+« dissipation propre aux colonnes » de S327 était lue sur une jauge aveugle — particules réensemencées, quantifiées
+par demi-maille — et sur 10 s, où la mesure d'amortissement se trompe d'un point : sur 30 s, les colonnes seules ne
+dissipent pas plus qu'APIC seul. Ce que 30 s montrent : **la densité des particules n'est pas tenue à la frontière**
+— tassée à 5 par cellule (paroi, solde), dilatée à 3,5 (eulérien) —, la masse migre vers les particules, +12 mm en
+30 s à 5 cm, et la période s'allonge de 2,65 points. **Reste ouvert.** Déclencheur : la prochaine session du lot 5.
+Remède à éprouver : la dernière colonne de cellules réensemencée depuis sa hauteur géométrique.
+
 **A315 — note datée du 2026-09-23 (S326) : résolu.** Un Jacobi sur le chemin coupé — celui du mode mobile
 3D — ramène la bosse à 128 de 16 029 à **425 itérations** (5,7 s au lieu de 708), débits inchangés à
 2,4·10⁻⁶ près ; à `ny` = 1, identité 2D gardée ([preuve](../validation/FACES-COUPEES-3D-S324.md) §6).

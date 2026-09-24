@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 - [x] **P2** — la jauge des hauteurs, les colonnes seules ; critère 1.
 - [x] **P3** — l'attribution : colonnes seules et 95 %, deux mailles, deux jauges ; critère 2.
 - [x] **P4** — la cause que P3 désigne, éprouvée seule ; critère 3.
-- [ ] **P5** — preuve §13, A316, file, liste ; critère 4.
+- [x] **P5** — preuve §13, A316, file, liste ; critère 4.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
