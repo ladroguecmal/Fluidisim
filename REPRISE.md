@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 18:44 +02:00
+JETON            : libre
+Battement        : 2026-09-24 18:51 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S344 — **porte A, premier critère** : plusieurs domaines δ 3D réels se disputent un budget, arbitrés par l'ordonnanceur sur leur part d'écran et leur coût mesuré
-Dernière session : S343 — **porte C, dix champs par face** au lieu de 26, au bit : pas de δ **3,68 ms, q99 3,73** (4,45 / 4,51 en S341) ; création du pas ramenée de 247 à 4,8 s ([preuve](docs/validation/COUT-DELTA3D-S341.md) §7)
-Session suivante : **porte A** — §6.4 interdit une quatrième session consécutive sur la porte C sans critère franchi (S343 était déjà la troisième, erreur de parcours) : l'ordonnanceur sur des domaines δ 3D, un domaine qui **se déplace**, premier critère à éprouver. La projection de la porte C (2,06 ms, 56 % du pas) reprend ensuite. En attente : le terme de D2 (lot 5)
-Maillons        : 3 — S341–S343 sur la porte C, aucun critère franchi ; justifié au journal (S343)
+Session en cours : aucune
+Dernière session : S344 — **porte A, premier critère** : deux domaines δ 3D de production se disputent un budget de 5 ms, arbitrés par l'ordonnanceur sur leur part d'écran et leur coût mesuré ; l'exclusion absorbante reproduite en 3D, levée par l'oubli ([preuve](docs/validation/ARBITRAGE-3D-S344.md))
+Session suivante : **porte C, la projection** (2,06 ms, 56 % du pas) — l'écart de la surface publiée selon le nombre de cycles, contre la solution convergée, sur la scène de B ; puis la fusion des dispatchs d'un cycle, au bit. Porte A ensuite : déplacement, redimensionnement, rang 1. En attente : le terme de D2 (lot 5)
+Maillons        : 0 — S344 : premier critère de la porte A tenu au banc
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

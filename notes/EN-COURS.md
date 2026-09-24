@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S344 — **en cours**. **Porte A, premier critère** ; chemin de la v1
+Session : S344 — **terminée**. **Porte A, premier critère** ; chemin de la v1
 ([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4). §6.4 interdit une quatrième session de suite sur
 la porte C (S343).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 - [x] **P2** — les parts d'écran le long du trajet de caméra ; les seuils calibrés.
 - [x] **P3** — le banc d'arbitrage, deux domaines 3D ; critères 1 à 4.
 - [x] **P4** — preuve, file, feuille de route, liste.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2, fait** (`--delta3d-parts`). **Premier trajet écarté** : tourner seulement la tête vers B laisse B plus

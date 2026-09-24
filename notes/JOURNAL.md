@@ -16725,3 +16725,20 @@ combinaison (ADR-131 D4) ; chaque session a livré une part mesurée et reçue a
 débloque encore la v1, qui l'exige. **Erreur de parcours**, vue à la clôture : §6.4 interdisait déjà cette
 troisième session consécutive sur le même point ; la justification des maillons ne la lève pas. Suivant : **la
 porte A** ; la projection de la porte C reprend après.
+
+## S344 — 2026-09-24 — porte A : deux domaines δ 3D se disputent un budget
+
+**Entrée.** *« Continue »* ; §6.4 écartait une quatrième session sur la porte C. Porte A, premier critère :
+plusieurs candidats réels se disputent un budget, sur des domaines 3D.
+**Fait** ([preuve](../docs/validation/ARBITRAGE-3D-S344.md)). Deux pas de production — la scène de la porte B, à 60 m
+l'un de l'autre —, une caméra qui longe la côte, l'ordonnanceur de S278 sous un budget de banc de 5 ms. Parts d'écran
+mesurées ; seuils calibrés dessus, 0,10 / 0,05. Un premier trajet, tête tournée seulement, écarté : B y reste plus
+petit que A — la surface décide.
+**Mesuré.** Budget tenu (3,720 ms au pire) ; le plus visible servi hors de la bande d'hystérésis (0,700 s par
+bascule) ; extinction 1,000 s après le seuil ; 6 images affamées par bascule ; coûts médians 3,69 et 3,68 ms.
+**Trouvé.** Sans l'oubli des coûts, le premier pas — carte froide, 22,6 ms — exclut le domaine pour toujours :
+l'exclusion absorbante de S279 §4, reproduite en 3D ; l'oubli de S286, recopié, la lève.
+**Limites.** Un domaine vit ou meurt : ni déplacement, ni redimensionnement, ni dégradation de rang 1. L'oubli vit
+dans chaque hôte ; sa place est dans le cœur.
+**Rituel.** Maillons **0** : ce qui devient possible — l'ordonnanceur arbitre des domaines 3D réels ; le chemin — les
+deux autres critères de la porte A ; la preuve — ARBITRAGE-3D-S344. Suivant : **porte C, la projection**.
