@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S345 — **en cours**. **Porte C, la cadence de δ** ; chemin de la v1. Porte en cours de §3 bis ; la série
+Session : S345 — **terminée**. **Porte C, la cadence de δ** ; chemin de la v1. Porte en cours de §3 bis ; la série
 S341–S343 a été interrompue par S344 (§6.4).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — le pas coûte 3,68 ms (S343), dont 2,06 de projection, déjà bornée par la mémoire ; fusionner ses
@@ -87,7 +87,7 @@ Critères, écrits avant le code :
 - [x] **P2** — le banc de cadence : la cuve à trois pas de temps ; critère 1.
 - [x] **P3** — la scène de B à 30 et 60 Hz ; critère 2.
 - [x] **P4** — preuve, file ; critère 3.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu** (`--delta3d-cadence-cuve`, cuve de S305, `nx` 32, 64 cycles, deux périodes). Période /

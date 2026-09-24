@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 18:53 +02:00
+JETON            : libre
+Battement        : 2026-09-24 19:02 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S345 — **porte C, cadence de δ à 30 Hz** : le pas à 33,3 ms éprouvé contre 16,7 et 1 ms — cuve de S305 et scène de B — avant de l'étaler sur deux images (ADR-012 §7)
-Dernière session : S344 — **porte A, premier critère** : deux domaines δ 3D de production se disputent un budget de 5 ms, arbitrés par l'ordonnanceur sur leur part d'écran et leur coût mesuré ; l'exclusion absorbante reproduite en 3D, levée par l'oubli ([preuve](docs/validation/ARBITRAGE-3D-S344.md))
-Session suivante : **porte C, la projection** (2,06 ms, 56 % du pas) — l'écart de la surface publiée selon le nombre de cycles, contre la solution convergée, sur la scène de B ; puis la fusion des dispatchs d'un cycle, au bit. Porte A ensuite : déplacement, redimensionnement, rang 1. En attente : le terme de D2 (lot 5)
-Maillons        : 0 — S344 : premier critère de la porte A tenu au banc
+Session en cours : aucune
+Dernière session : S345 — **porte C, la cadence de 30 Hz** (ADR-012 §7) éprouvée : cuve de S305 tenue (0,04 % de période à 33,3 ms) ; scène de B non tenue — l'onde garde jusqu'à 6,3 % d'amplitude de plus qu'à 60 Hz, ni projection ni éponge (A318, [preuve](docs/validation/COUT-DELTA3D-S341.md) §8)
+Session suivante : **porte C** — attribuer A318 : le front de S302 sur une mer au repos, à 30 et 60 Hz ; selon le résultat, recevoir la cadence ou la faire juger (revue R17). Puis étaler le pas sur deux images et mesurer le 99ᵉ centile par image. Porte A ensuite : déplacement, redimensionnement, rang 1. En attente : le terme de D2 (lot 5)
+Maillons        : 1 — S345 : cadence éprouvée, aucun critère franchi
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

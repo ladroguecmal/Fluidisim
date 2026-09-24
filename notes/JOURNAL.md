@@ -16742,3 +16742,20 @@ l'exclusion absorbante de S279 §4, reproduite en 3D ; l'oubli de S286, recopié
 dans chaque hôte ; sa place est dans le cœur.
 **Rituel.** Maillons **0** : ce qui devient possible — l'ordonnanceur arbitre des domaines 3D réels ; le chemin — les
 deux autres critères de la porte A ; la preuve — ARBITRAGE-3D-S344. Suivant : **porte C, la projection**.
+
+## S345 — 2026-09-24 — porte C : la cadence de 30 Hz, éprouvée
+
+**Entrée.** Le pas coûte 3,68 ms ; ADR-012 §7 fixe δ à 30 Hz, le rendu interpolant : étalé sur deux images, le
+pas contribuerait ≈ 1,85 ms par image. Avant de l'étaler, la physique à 33,3 ms. La fusion des réductions de la
+projection, au bit, a été écartée à la lecture : chaque groupe relirait les 5 880 partiels.
+**Fait** ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §8). **Cuve de S305** à 1, 16,7 et 33,3 ms : période à
+0,039 %, amplitude à 0,013 % — **tenu**. **Scène de B**, 30 contre 60 Hz, 12 s : aucune colonne hors bornes ;
+l'onde isolée **jusqu'à +6,3 %** d'amplitude — **non tenu** (5 %). Témoin (60 Hz, 64 cycles au lieu de 32) : 1,3 %
+d'amplitude, mais le maximum y saute aussi de 8 m — la partie « position » de mon critère était mal posée. 30 Hz à
+64 cycles : 8,4 % — pas la projection ; l'éponge est exacte en temps.
+**Limites.** Candidat non démontré : la dissipation de l'advection par la mer, par pas. Aucune des deux cadences
+n'est « la vraie ». Angle mort **A318** (sévérité 2).
+**Erreur de parcours.** Un commit intermédiaire a laissé passer une ligne de file à 100 mots : le contrôle,
+enchaîné derrière un `tail`, ne bloquait pas ; ligne corrigée, contrôle désormais lu avant chaque commit.
+**Rituel.** Maillons **1** : aucun critère franchi. Suivant : **attribuer A318** — le front sur une mer au repos,
+aux deux cadences ; puis étaler le pas sur deux images et mesurer le 99ᵉ centile par image.
