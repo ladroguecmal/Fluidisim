@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-25 00:03 +02:00
+JETON            : libre
+Battement        : 2026-09-25 00:04 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S354 — **lot 5, A316** : ce qui dissipe au raccord particules ↔ colonnes — la jauge du ballottement relue sur les hauteurs, les colonnes seules contre APIC seul, puis la cause désignée éprouvée seule
-Dernière session : S353 — **la v1 en scène vivante, 1** : δ à 30 Hz dans la fenêtre, interpolé au rendu — aucune image immobile, part de δ en direct 1,49 ms par image contre 3,31 à 60 Hz ([preuve](docs/validation/COUT-DELTA3D-S341.md) §12) ; revue **R18** préparée, en direct. Avant : S352, la liste rangée par dépendance ; S351, la v1 atteinte au sens d'ADR-174 D4
-Session suivante : **le lot 5** (alternance d'ADR-184 D1) — 4.16, la surface non graphe, par A316 : le raccord particules ↔ colonnes, dont la dissipation à 5 cm (S327). Ensuite, la v1 en scène vivante reprend : la coque dans la production de δ (6.4), puis l'ordonnanceur et le rang 1 dans l'afficheur (4.2). En attente : le verdict R18
-Maillons        : 0 — S353 : δ à 30 Hz interpolé, en direct
+Session en cours : aucune
+Dernière session : S354 — **lot 5, A316, l'instrument relu sur 30 s** : les colonnes ne dissipent pas plus qu'APIC seul ; la frontière ne tient pas la densité des particules, la masse migre, +12 mm en 30 s à 5 cm — non reçu ([preuve](docs/validation/B10-APIC-S320.md) §13). Avant : S353, δ à 30 Hz interpolé en direct, R18 préparée
+Session suivante : **la v1 en scène vivante** (alternance d'ADR-184 D1) — la coque dans la production de δ (6.4), puis l'ordonnanceur et le rang 1 dans l'afficheur (4.2). Au lot 5 ensuite : la densité tenue à la frontière (A316). En attente : le verdict R18
+Maillons        : 1 — S354 : une attribution corrigée, aucune capacité
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -91,7 +91,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   jugée (R16) ; seconde représentation **APIC**
   retenue ([ADR-186](docs/adr/ADR-186-apic-seconde-representation.md)), cavité reçue sur un banc
   2D (S320), temps de pincement non convergé à trois mailles (S326) ; raccord aux colonnes à masse
-  exacte, frontière non reçue (S325–S327, A316 attribué en partie).
+  exacte, frontière non reçue (S325–S354, A316 : la densité des particules n'y est pas tenue).
 - **C** : compteurs reçus (lot 1) ; retour δ → W reçu en ordres A à D, **ordre E bloqué par A289**.
 - **Porte D** — lots 3 et 4 — **reçue sur la référence CPU** (S338, verdict R15,
   [preuve](docs/validation/PORTE-D-S333.md) §9) : solide immergé quelconque, fixe ou en mouvement (S324–S330) ;

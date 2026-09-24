@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S354 — **en cours**. **Lot 5, A316 : ce qui dissipe au raccord particules ↔ colonnes** ; alternance
+Session : S354 — **terminée**. **Lot 5, A316 : ce qui dissipe au raccord particules ↔ colonnes** ; alternance
 d'ADR-184 D1, après S353 (la v1 en scène vivante).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — *« Reprends le projet »*. S327 a laissé A316 attribué en partie : le meilleur montage (ensemencement
@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 - [x] **P3** — l'attribution : colonnes seules et 95 %, deux mailles, deux jauges ; critère 2.
 - [x] **P4** — la cause que P3 désigne, éprouvée seule ; critère 3.
 - [x] **P5** — preuve §13, A316, file, liste ; critère 4.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2.** `RACCORD_JAUGE=hauteurs` : particules libres comme `Apic::mesure`, colonnes par `h` au prorata de leur

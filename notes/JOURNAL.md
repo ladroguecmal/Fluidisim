@@ -16900,3 +16900,22 @@ fluidité se juge à l'œil — **R18 préparée**, en direct (REVUE-VISUELLE §
 **Rituel.** Maillons **0** : ce qui devient possible — δ à 30 Hz dans la fenêtre sans saccade, à 1,49 ms par image ;
 le chemin — la v1 en scène vivante, la coque dans la production puis l'ordonnanceur dans l'afficheur ; la preuve —
 §12 ; 4.19 et 8.7 avancent. Suivant, par l'alternance d'ADR-184 : **le lot 5** — 4.16, par A316. Verdict R18 attendu.
+
+## S354 — 2026-09-25 — lot 5, A316 : l'instrument relu sur 30 s
+
+**Entrée.** *« Reprends le projet »* ; alternance d'ADR-184 après S353. S327 concluait que les colonnes dissipent
+d'elles-mêmes (1,3 %) et que le raccord amortit 4,2 % par période à 5 cm contre −0,4 % pour APIC seul.
+**Fait** ([preuve](../docs/validation/B10-APIC-S320.md) §13). La jauge du ballottement était **aveugle** dans les
+colonnes — particules réensemencées, quantifiées par demi-maille — : relue sur `h`. Et **dix secondes ne lisent pas
+le point** : sur un signal connu, la mesure se trompe de 0,3 à 1,2 point, de 0,15 au plus sur 30 s. Sur 30 s, **les
+colonnes seules ne dissipent pas plus qu'APIC seul** — prédiction écrite avant, tenue.
+**Ce que 30 s montrent.** La frontière ne tient pas la **densité** des particules : tassées à 5 par cellule (paroi,
+solde), dilatées à 3,5 (eulérien) ; la masse migre vers elles, +12 mm en 30 s à 5 cm. La paroi, soupçonnée, n'est
+pas la cause : absorbées, elles se tassent autant. Période +9,96 % contre +7,31 % à 5 cm, saut 1,0 maille à 2,5 cm :
+**non reçu**. A316 change de nature, note datée.
+**Écart de méthode, de S327.** Deux protections actives manquées : l'instrument non réépreuvé quand ce qu'il mesurait
+passait dans les colonnes, la durée d'usage non tenue (L360, L369). Aucune protection nouvelle : elles existaient.
+**Rituel.** Maillons **1** : une attribution corrigée, aucune capacité — aucun critère de porte, aucun point de la
+liste ne change d'état. Suivant, par l'alternance : **la v1 en scène vivante** — la coque dans la production de δ
+(6.4). Au lot 5 ensuite : la densité tenue à la frontière. Verdict R18 toujours attendu.
+
