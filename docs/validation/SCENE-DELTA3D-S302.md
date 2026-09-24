@@ -132,3 +132,62 @@ cargo run --manifest-path viewer/Cargo.toml --release --offline -- --houle --del
 Dans la fenêtre : **D** bascule la couche δ (B seul ↔ B + δ), **R** relance l'onde depuis
 l'instant courant, **Espace** met en pause, clic droit et flèches déplacent la caméra.
 `INSTANTS=` choisit les pas capturés, `SECONDES=` la durée des bancs, `CYCLES=` le balayage.
+
+---
+
+## 8. S339 — une onde née d'un point, sur la mer de R14, pour la revue R16
+
+2026-09-24. Porte B, critère 3 ([ADR-175](../adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) §4) :
+chemin de la v1 ([ADR-174](../adr/ADR-174-arbitrages-du-2026-09-19.md) D4). R11 avait reçu l'absence d'artefact et
+le fondu, mais pas l'onde : *« je ne sais pas s'il s'agit d'une onde circulaire ou bien linéaire »*. Depuis,
+R14 a fait de la troisième image — `--meilleur --eau-physique=2` — la référence interne provisoire de la mer.
+
+### Reproduire
+
+- Commit `98e25c33` ou plus récent ; machine de référence ; `viewer`.
+- `… -- --delta3d-scene-mesure --impact` et `… --anneau` — lignes `DELTA3D_IMPACT_S339` ; `IMPACT=A,σ` remplace le
+  cratère.
+- `INSTANTS=0,60,180,300 … -- --meilleur --eau-physique=2 --delta3d --impact --captures` → `viewer/captures/s339/s339_*` ;
+  `INSTANTS=0,60,120,180 … --anneau --captures` → `s339a_*`. Aperçus : `outils/apercu_ppm.py`.
+
+### Deux défauts de chemin, corrigés
+
+- **Les captures partaient sans les options de rendu.** `--delta3d --captures` rendait la main avant la lecture de
+  `--eau-physique`, `--tonalite`, `--ciel-mesure`, `--coupure` et `--miroitement` : R11 ne pouvait pas montrer la
+  couleur que R14 a retenue. Le branchement est déplacé après elles ; la scène de S302 reste **identique au bit**
+  (16 empreintes à 1 et 2 s, avant et après).
+- **La scène ne savait injecter qu'un front.** Deux sources s'ajoutent, au même domaine, sous la même mer.
+
+### L'impact : physiquement juste, invisible à l'échelle
+
+Un cratère à bord relevé lâché au repos — `η₀ = −A·(1 − r²/2σ²)·e^{−r²/2σ²}`, volume net nul (problème de
+Cauchy–Poisson). Retenu au banc : **A 0,65 m, σ 2,5 m**, le plus grand dont la pente reste sous celle du paquet
+de S302 (0,252 pour 0,26) et dont le profil tient dans le domaine. Stable — aucune colonne hors bornes, pas
+dégradés comme le témoin, divergence franche 0,034 pour 0,022 — ; ses anneaux vont à la vitesse de groupe du
+nombre d'onde dominant (rapport 0,78 à 1,08 de 3 à 6 s). **Mais ils font 10 à 17 cm**, et dans une mer de
+`Hs` 2,5 m ils ne se voient pas : à 3 s, avec et sans δ sont indiscernables à l'œil ; seule la différence ×6 les
+montre. Le cratère, lui, se voit à 0 et 1 s.
+
+### L'anneau : préparé, comme le front l'était
+
+Le paquet de S302 enroulé autour d'un point : `η = a·cos(k·(r − r₀))·e^{−(r−r₀)²/2s²}`, vitesses sortantes de la
+théorie linéaire ; **41 cm pour 10 m** (`a·k` 0,258, la cambrure du front), crête à 5 m du centre, enveloppe de
+3,5 m. Stable — aucune colonne hors bornes, divergence franche 0,043 — ; crête à 0,83–1,37 fois le trajet prévu
+de 1 à 8 s. Volume net 9,6 m³ : une crête seule, qui monte le domaine de 1,1 cm. **Il se lit** : un anneau autour
+d'un creux, qui s'élargit et se déforme en traversant la mer (images proche 1 et 2 s, haute 1 s).
+
+| image, avec δ | empreinte |
+|---|---|
+| anneau, `s339a_proche_avec_1.0s` | `0x5a79f01d64083ef3` |
+| anneau, `s339a_proche_avec_2.0s` | `0x2e37efc6f485f73d` |
+| anneau, `s339a_haute_avec_1.0s` | `0xd4e6d1e43e57c1cb` |
+| anneau, `s339a_rasante_avec_2.0s` | `0x142774b45a5ca313` |
+| impact, `s339_rasante_avec_1.0s` | `0xf584b997bf9ca1a1` |
+
+### Ce que cette section ne reçoit pas
+
+- **Le verdict** : R16 ([revue](REVUE-VISUELLE.md) §21).
+- **Une fine ligne claire** suit la crête de l'anneau, vue de haut : non attribuée — la crête elle-même, ou la
+  composition de δ avec les vagues pointues (CWM) ; question posée.
+- **La bande claire** en bas de la pose rasante, avec et sans δ : la mer coupée au plan proche, préexistante.
+- **Les cas 1 et 2** d'ADR-175 §4 sur la production (critère 2), et la porte C : 4,6 ms par pas, inchangé.

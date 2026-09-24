@@ -102,7 +102,7 @@ Critères, écrits avant le code :
   `η = a·cos(k·(r − r₀))·e^{−(r−r₀)²/2s²}`, vitesses sortantes de la théorie linéaire, `a·k` = 0,26 comme le paquet
   de S302 —, `--anneau` ; banc (zéro colonne hors bornes ; rayon de la crête au trajet de la vitesse de groupe,
   facteur 1,5) ; captures, aperçus.
-- [ ] **P5** — preuve (SCENE-DELTA3D-S302 §6) ; R16 au registre ; file.
+- [x] **P5** — preuve (SCENE-DELTA3D-S302 §8) ; R16 au registre ; file.
 - [ ] **P6** — rituel ; arrêt pour le verdict.
 
 ### Notes de reprise

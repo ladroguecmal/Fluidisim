@@ -872,3 +872,27 @@ Avec R15 — le bateau qui se pose est juste, pas d'autre défaut —, **la port
 (ADR-178 D3) : partie numérique [PORTE-D-S333](PORTE-D-S333.md) §1–8 et [RAYONNEMENT-COQUE-S336](RAYONNEMENT-COQUE-S336.md),
 réception au §9. Ce verdict qualifie la perception, sans référence réelle ; il ne juge ni la mer de B, que la
 porte B attend encore, ni la production GPU, où la coque n'entre pas encore.
+
+## 21. R16 — une onde née d'un point, sur la mer de R14, S339
+
+**Porte B, critère 3** : *« une onde traverse une mer étalée et s'y déforme »*, jugée convaincante. Mer : la
+troisième image de R14 (`--meilleur --eau-physique=2`), votre référence provisoire. Images `viewer/captures/s339`,
+1280×720 ; preuve [SCENE-DELTA3D-S302](SCENE-DELTA3D-S302.md) §8.
+
+Ce que R11 n'avait pas : **l'origine de l'onde**. Deux sources ont été essayées :
+
+- **un impact réaliste** — un cratère de 65 cm de creux sur 5 m, lâché au repos. Le creux se voit ; ses anneaux,
+  10 à 17 cm, se perdent dans une mer de 2,5 m de hauteur significative (`s339_rasante_avec_1.0s`) ;
+- **un anneau préparé**, comme le front de R11 l'était : 41 cm pour 10 m de longueur d'onde, autour d'un creux
+  (`s339a_proche_avec_1.0s`, `…_2.0s`, `s339a_haute_avec_1.0s`).
+
+**Les questions :**
+
+1. **L'anneau** : se lit-il comme une onde circulaire née d'un point, qui traverse la mer et s'y déforme ? Est-ce
+   convaincant ?
+2. **La fine ligne claire** qui suit sa crête, vue de haut : défaut, ou pas ?
+3. **L'impact réaliste** : que ses anneaux se perdent dans une mer de 2,5 m vous paraît-il juste, ou doivent-ils
+   se voir ?
+4. **Autre défaut** — la mer, la jonction, la lumière ?
+
+Un mot par question suffit.
