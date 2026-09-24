@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — banc `a317_lamelle` : pilonnement imposé, cinq placements ; critère 1 (avant correctif).
+- [x] **P2** — banc `a317_lamelle` : pilonnement imposé, cinq placements ; critère 1 (avant correctif).
 - [ ] **P3** — correctif : la pression du couvercle en partie couvert, commutable pour la mesure ; critère 3.
 - [ ] **P4** — banc après correctif ; critère 2.
 - [ ] **P5** — scène de la porte D rejouée, deux placements, images ; critères 4 et 5 ; masse ajoutée de S332
@@ -103,4 +103,9 @@ Critères, écrits avant le code :
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
-
+- **P2, critère 1 — A317 reproduit hors du jeu** (pilonnement imposé 5 cm, 4,484 rad/s ; bandes à 2,5–3,5 m ;
+  fenêtre 3–6 s). Amplitude quadratique moyenne des flancs −y / +y, mm : φ 0,05/0,55 → 16,08 / 8,89 (1,81) ;
+  0,08/0,52 → 15,81 / 8,28 (1,91) ; 0,30/0,30 → 10,89 / 10,91 ; 0,55/0,05 → 8,86 / 16,11 ; 0,80/0,80 → 15,99 /
+  15,99. Moyenne 12,78 mm, **écart 35 %**. **Le diagnostic écrit ne suffit pas** : l'amplitude n'est pas
+  monotone en l'ouverture du couvercle — 0,80 rayonne comme 0,05 ; minimum vers 0,5, paroi au centre de la
+  maille. Un second mécanisme est probable.
