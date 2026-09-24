@@ -62,52 +62,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S343 — **terminée**. **Porte C, charge utile du fond** ; chemin de la v1.
+Session : S344 — **en cours**. **Porte A, premier critère** ; chemin de la v1
+([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4). §6.4 interdit une quatrième session de suite sur
+la porte C (S343).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — S342 ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §6) : le fond factorisé, au bit, ne retire que
-0,11 ms au pas ; ce qui reste est l'**accumulation des 26 champs** de chaque face et leur **écriture**, 120 Mo par
-pas. Le pas et le couplage n'en lisent que dix, selon l'axe de la face : `η`, `u` (3), `du/dt`, une ligne de
-`grad u` (3), `p`, `grad p` sur cet axe.
+Entrée — l'utilisateur : *« Continue »*, après le passage proposé à la porte A. Critères de la porte A (§3 bis) :
+**plusieurs candidats réels se disputent un budget** ; un domaine **se déplace et se redimensionne** ; la
+dégradation de rang 1 d'ADR-012 §4 existe. Sur des domaines 3D (ADR-175 D6). L'ordonnanceur (`scheduler.rs`, S278)
+sait arbitrer plusieurs candidats, mais n'a jamais servi qu'une bande δ 2D (S279–S286).
 
-**Maillons à deux, et le choix** (REPRISE §6). La porte C est la porte en cours ; son critère ne se franchit que
-par la combinaison des leviers (ADR-131 D4), chacun mesuré. Chemin chiffré : charge utile (ici), puis projection
-(multigrille ou fusion, 2,06 ms linéaires en cycles), puis cadence découplée, qui divise la contribution par image.
-La porte A, comparée, demande l'ordonnanceur sur des domaines 3D et un banc B8 inexistant : plus loin d'un critère.
-**Choix : C**, justification au journal si le troisième maillon tombe.
-
-**Ce que la session doit rendre possible.** Un fond de δ à dix champs par face. Pour garder intacts les bancs de
-S300, qui compilent le même fichier de noyaux avec 26 champs, la disposition compacte est une **constante de
-compilation** (`override COMPACT`), vraie pour le pas seulement.
+**Ce que la session doit rendre possible.** Le premier critère, sur des domaines 3D réels : deux domaines δ de
+production (la scène de la porte B, `Config::review`), à 60 m l'un de l'autre ; une caméra qui passe de l'un à
+l'autre ; à chaque image, chacun soumissionne sa **part d'écran** (`screen_fraction`, ADR-012 §2) et son **coût
+mesuré** (médiane des huit derniers pas payés, horodatés) ; l'ordonnanceur décide et alloue sous **un budget de
+banc de 5 ms**, qui n'en tient qu'un (3,7 ms chacun, S343). Seuils d'allumage et d'extinction calibrés sur les parts
+d'écran mesurées, et écrits (ADR-171).
 
 Critères, écrits avant le code :
-1. **Empreinte de référence**, relevée avant tout changement : surface publiée et vitesses après 60 et 600 pas sur
-   la scène de B, par un banc `--delta3d-empreinte`.
-2. **Identité** : après le changement, les mêmes empreintes, au bit. Les bancs de S300 (`--delta3d-faces`,
-   `--delta3d-couplage`) rendent leurs nombres publiés.
-3. **Coût** : fond seul et pas entier, médiane et 99ᵉ centile ; secteur relevé ; preuve (§7), file.
+1. **Le budget n'est jamais dépassé** : la somme des budgets accordés ≤ 5 ms à chaque image.
+2. **Le domaine regardé est servi** : hors des transitions, le domaine accordé est celui qui occupe le plus
+   d'écran.
+3. **Les transitions suivent ADR-013 §5** : allumage sans délai au-dessus du seuil ; extinction après 1 s sous le
+   seuil bas ; l'état « vivant mais affamé » — l'ancien domaine, le temps de son délai — publié et borné.
+4. **Les coûts sont mesurés**, publiés par domaine ; un domaine rallumé est de nouveau servi (pas d'exclusion
+   absorbante, S279 §4).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le banc d'empreinte ; l'empreinte de référence ; critère 1.
-- [x] **P3** — la disposition compacte : noyaux, couplage, pas, tampon ; relectures de banc.
-- [x] **P4** — l'identité, les bancs de S300, le coût ; critères 2 et 3.
-- [x] **P5** — preuve, file ; rituel.
+- [ ] **P2** — les parts d'écran le long du trajet de caméra ; les seuils calibrés.
+- [ ] **P3** — le banc d'arbitrage, deux domaines 3D ; critères 1 à 4.
+- [ ] **P4** — preuve, file, feuille de route, liste.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu.** `--delta3d-empreinte`, commit `fc37f7b5` + banc, fond par tuiles, deux passages
-  identiques : **60 pas** surface `0x5efa267462dfa0ad`, vitesses `0xc5c6a85d3d29f44b` ; **600 pas** surface
-  `0x9325cf58781f8b74`, vitesses `0xea1bebe0ffabc19a` (h₀ 0,007277250 m). La carte est déterministe d'un passage à
-  l'autre.
-- **P3, fait.** `override COMPACT` dans `delta3d_background.wgsl` : `store` range dix champs selon l'axe (ou 26),
-  `stride` et `field_slot` pour les faces et le couplage ; `delta3d_step.wgsl` lit par `slot` ; tampon du pas à
-  `STEP_FIELDS` = 10 (46 Mo au lieu de 120) ; noyaux du fond du pas compilés avec `COMPACT` (`pipelines_with`).
-  **Empreintes après changement identiques** : 60 pas `0x5efa267462dfa0ad` / `0xc5c6a85d3d29f44b`, 600 pas
-  `0x9325cf58781f8b74` / `0xea1bebe0ffabc19a`.
-- **P4, critères 2 et 3 tenus.** Bancs de S300 inchangés : `--delta3d-faces` 1,46 à 2,44·10⁻³ Pa sur `p_dyn`,
-  `--delta3d-couplage` 6,0425·10⁻⁸ et 3,9462·10⁻⁷ — les nombres publiés. **Trouvé en mesurant** : depuis S342,
-  **créer le pas prenait 247 s** — la mise à zéro de la mémoire de groupe du noyau par tuiles, que le compilateur
-  Dx12 déroule ; désactivée pour les noyaux du fond du pas (il l'écrit avant de la lire) : **4,8 s**, empreintes
-  toujours identiques. **Coût**, secteur 97 % avant et après : **pas 3,679 ms, q99 3,727**, max 3,795 ; passe 1
-  1,303 dont fond 1,038 ; projection 2,059 ; fin 0,288. Face par face compact : pas 3,933, fond 1,374.
-
