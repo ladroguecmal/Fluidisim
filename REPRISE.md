@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-24 19:15 +02:00
+JETON            : occupé
+Battement        : 2026-09-24 20:23 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S348 — **porte C, le pas étalé sur deux images** : verdict R17 consigné (30 Hz validé) ; le pas de δ à 30 Hz coupé en deux parts, au bit ; le 99ᵉ centile de chaque part contre 2 ms
 Dernière session : S347 — **revue R17** : la scène de la porte B rendue avec δ à 30 et à 60 Hz, aux mêmes instants — les mêmes vagues à l'œil, un grain fin sur l'emprise de δ ([preuve](docs/validation/COUT-DELTA3D-S341.md) §10) ; arrêt pour le verdict
 Session suivante : **verdict R17 de l'utilisateur** (`viewer/captures/s347`, ADR-189 D3) — s'il ne voit rien : étaler le pas de δ sur deux images et mesurer le 99ᵉ centile par image (porte C) ; sinon : la porte A (déplacement, redimensionnement) pendant que l'écart se corrige. En attente : le terme de D2 (lot 5)
 Maillons        : 3 — S345–S347 sur la cadence, aucun critère franchi ; justifié au journal (S347)
