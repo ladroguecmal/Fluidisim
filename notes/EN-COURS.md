@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la jauge des hauteurs, les colonnes seules ; critère 1.
-- [ ] **P3** — l'attribution : colonnes seules et 95 %, deux mailles, deux jauges ; critère 2.
+- [x] **P3** — l'attribution : colonnes seules et 95 %, deux mailles, deux jauges ; critère 2.
 - [ ] **P4** — la cause que P3 désigne, éprouvée seule ; critère 3.
 - [ ] **P5** — preuve §13, A316, file, liste ; critère 4.
 - [ ] **P6** — rituel.
@@ -104,4 +104,22 @@ Critères, écrits avant le code :
   varie de **0,126 mm** — le repos n'est pas immobile, 4,1 mm/s, comme APIC seul (0,110 mm, 4,4 mm/s). L'ancienne
   jauge y reste **à 0,5 exactement** : aveugle sous son palier. L'instrument suit l'eau ; la réponse « constante »
   supposée n'était pas celle du modèle.
+- **P3, l'instrument d'abord.** Épreuve à réponse connue (`regression`) : `cos` amorti de 0, 1, 4 % par période plus
+  un troisième mode à 10 %, échantillonné à 0,01 s. **Sur 10 s, la mesure de S318 se trompe de 0,3 à 1,2 point**, la
+  régression de 0,9 (± 2,5) ; **sur 30 s**, 0,04 à 0,15 et 0,03 (± 0,35). Le critère « à 1 point d'APIC seul » ne se
+  lit pas sur 10 s. Ajoutés : ligne `LOT5_S354` (régression sur les extrema, un par demi-période), `LOT5_T_FIN` dans
+  `raccord_dyn`, ligne `RACCORD_S354` (masse à gauche de la frontière par tranche de 10 s).
+- **P3, 30 s, jauge des hauteurs** (continu + paroi) — période aux zéros / amortissement S318 / régression :
+  5 cm : APIC seul +7,31 % / +0,14 % / +1,18 ± 0,80 ; colonnes seules +5,38 / +0,80 / +0,61 ± 0,59 ; 95 % +6,35 /
+  −0,09 / +1,32 ± 0,77 ; frontière au nœud +9,96 / +1,12 / +1,20 ± 1,36. 2,5 cm : APIC +1,60 / +1,04 / +2,15 ± 0,68 ;
+  colonnes +1,25 / +1,72 / +1,47 ± 0,28 ; 95 % −0,19 / +0,20 / +2,02 ± 0,93 ; nœud +1,19 / +0,96 / +0,31 ± 0,58.
+  Enveloppe (demi-somme de deux extrema voisins), 5 cm : APIC 22,5 → 20,1 mm, colonnes 22,2 → 20,1 mm en 28 s.
+  **Prédiction tenue en substance : les colonnes seules ne dissipent pas plus qu'APIC seul** ; le « 1,3 % » de S327
+  venait de la jauge aveugle sur 10 s. APIC seul non plus n'est pas « −0,4 % » sur 30 s.
+- **P3, ce que 30 s montrent et que 10 s cachaient** (nœud, 5 cm) : la **masse des particules libres croît** —
+  0,50098 / 0,50734 / 0,51211 m² par tranche de 10 s, APIC seul 0,50005 / 0,50159 / 0,50080 : **+12 mm** de niveau
+  équivalent en 30 s. Le saut géométrique à la frontière reste sans biais (moyenne signée −0,011 à +0,001 maille,
+  max 0,39) : les particules se **tassent**. Énergie des particules −87 J en 30 s (APIC seul −1,4 J), le centre de
+  masse descend. Période : +9,96 % contre +7,31 % — 2,65 points de trop. Suspect : la paroi, qui ramène les
+  particules au lieu de les absorber, retire au débit nominal de la grille, et ne voit pas leur densité.
 

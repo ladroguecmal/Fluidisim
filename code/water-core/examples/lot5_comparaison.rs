@@ -447,6 +447,66 @@ fn segments(colonne: impl Iterator<Item = bool>) -> usize {
 /// **Deux estimateurs de période** (L360) : passages par zéro montants, et maximum du
 /// périodogramme. Leur écart se publie ; ni l'un ni l'autre n'est la vérité, et le second a son
 /// propre biais sur un signal court (S316, A306).
+/// **S354 : l'amortissement par régression**, par période de `t_ref` : un extremum par demi-période — le plus grand
+/// écart à la moyenne entre deux passages —, ceux d'après la première période, et la pente de leur logarithme contre
+/// le temps. Rend l'amortissement, l'écart-type des résidus du logarithme, l'incertitude de la pente par période et le
+/// nombre d'extrema retenus.
+fn amortissement_regression(t: &[f64], y: &[f64], t_ref: f64) -> (f64, f64, f64, usize) {
+    let moy = y.iter().sum::<f64>() / y.len() as f64;
+    let mut extrema: Vec<(f64, f64)> = Vec::new();
+    let (mut debut, mut pic) = (false, (0.0f64, 0.0f64));
+    for k in 1..y.len() {
+        let (a, b) = (y[k - 1] - moy, y[k] - moy);
+        if (a <= 0.0) != (b <= 0.0) {
+            if debut && pic.1 > 0.0 {
+                extrema.push(pic);
+            }
+            debut = true;
+            pic = (0.0, 0.0);
+        }
+        if debut && b.abs() > pic.1 {
+            pic = (t[k], b.abs());
+        }
+    }
+    let retenus: Vec<(f64, f64)> = extrema.into_iter().filter(|e| e.0 > t_ref).collect();
+    let n = retenus.len() as f64;
+    let (mt, ml) = (retenus.iter().map(|e| e.0).sum::<f64>() / n, retenus.iter().map(|e| e.1.ln()).sum::<f64>() / n);
+    let (mut sxy, mut sxx) = (0.0, 0.0);
+    for e in &retenus {
+        sxy += (e.0 - mt) * (e.1.ln() - ml);
+        sxx += (e.0 - mt) * (e.0 - mt);
+    }
+    let pente = sxy / sxx;
+    let residus = (retenus.iter().map(|e| (e.1.ln() - ml - pente * (e.0 - mt)).powi(2)).sum::<f64>() / (n - 2.0).max(1.0)).sqrt();
+    (1.0 - (pente * t_ref).exp(), residus, residus / sxx.sqrt() * t_ref, retenus.len())
+}
+
+/// **S354 : l'épreuve de la régression**, sur un cas de réponse connue : `cos(ωt)` amorti de 0 %, 1 % et 4 % par
+/// période, plus un troisième mode à 10 % qui bat, échantillonné comme le banc (0,01 s), 10 et 30 s.
+fn epreuve_regression() {
+    let t_ref = 1.97652;
+    for duree in [10.0, 30.0] {
+        for voulu in [0.0, 0.01, 0.04] {
+            let lambda = -(1.0f64 - voulu).ln() / t_ref;
+            let (w1, w3) = (std::f64::consts::TAU / t_ref, std::f64::consts::TAU / t_ref * 3f64.sqrt() * 1.05);
+            let t: Vec<f64> = (0..=(duree / 0.01) as usize).map(|k| k as f64 * 0.01).collect();
+            let y: Vec<f64> = t.iter().map(|&t| 0.5 + (-lambda * t).exp() * (0.02 * (w1 * t).cos() + 0.002 * (w3 * t).cos())).collect();
+            let (a, r, inc, n) = amortissement_regression(&t, &y, t_ref);
+            // La mesure de S318, sur le même signal : première et dernière période.
+            let moy = y.iter().sum::<f64>() / y.len() as f64;
+            let n_per = (t_ref / 0.01).round() as usize;
+            let amp = |tranche: &[f64]| tranche.iter().fold(0f64, |m, v| m.max((v - moy).abs()));
+            let (a0, a1) = (amp(&y[..n_per]), amp(&y[y.len() - n_per..]));
+            let s318 = 1.0 - (a1 / a0).powf(1.0 / (duree / t_ref - 1.0));
+            println!(
+                "LOT5_S354 epreuve_regression duree_s={duree} voulu={voulu} mesure={a:e} ecart={:e} incertitude={inc:e} residus={r:.4} extrema={n} mesure_s318={s318:e} ecart_s318={:e}",
+                a - voulu,
+                s318 - voulu
+            );
+        }
+    }
+}
+
 fn periodes(t: &[f64], y: &[f64]) -> (f64, f64) {
     let moy = y.iter().sum::<f64>() / y.len() as f64;
     let y: Vec<f64> = y.iter().map(|v| v - moy).collect();
@@ -990,6 +1050,21 @@ fn execute(scene: Scene, c: &mut dyn Candidat) {
                 (t_zc - t_ref) / t_ref,
                 (t_pg - t_ref) / t_ref,
                 1.0 - (a1 / a0).powf(1.0 / (periodes_vues - 1.0))
+            );
+            // **S354 : l'amortissement par régression.** La mesure ci-dessus ne compare qu'une première et une
+            // dernière période : les modes supérieurs y battent, et APIC seul y « gagne » 0,4 % par période. Ici, un
+            // extremum par demi-période — le plus grand écart entre deux passages à la moyenne —, tous ceux après la
+            // première période, et la pente de leur logarithme contre le temps, rapportée à la période de référence ;
+            // l'écart-type des résidus dit ce que vaut la pente. Ligne à part : celle de S318 reste au bit.
+            let (amort, residus, incertitude, retenus) = amortissement_regression(&t, &y, t_ref);
+            println!(
+                "LOT5_S354 ballottement candidat={} dx={} t_fin={} extrema={} amortissement_regression_par_periode={:e}                  ecart_type_residus_log={residus:.4} incertitude_pente_par_periode={:e}",
+                c.nom(),
+                scene.dx,
+                scene.t_fin,
+                retenus,
+                amort,
+                incertitude
             );
         }
         Cas::Barrage => {
@@ -2631,7 +2706,11 @@ fn ecart_frontiere(a: &Apic, i_b: usize) -> Option<f64> {
 /// avec la masse de chaque représentation et l'écart de surface à la frontière, chaque dixième de
 /// seconde ; puis la ligne de synthèse de `execute` pour chacun.
 fn epreuve_hybride(cas: Cas, dx: f64) {
-    let scene = Scene::new(cas, dx);
+    let mut scene = Scene::new(cas, dx);
+    // S354 : `LOT5_T_FIN` ici aussi — dix secondes ne disent pas ce que fait la frontière en trente.
+    if let Some(v) = std::env::var("LOT5_T_FIN").ok().and_then(|v| v.parse().ok()) {
+        scene.t_fin = v;
+    }
     let mut seul = Apic::new(scene);
     let mut hy = Hybride::new(scene);
     let i_b = hy.i_b;
@@ -2640,6 +2719,9 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
         (l + c + a, 0.0, 0.0)
     };
     let (mut pire_masse, mut pire_ecart, mut pire_seul, mut v_max) = (0f64, 0f64, 0f64, 0f64);
+    // S354 : la masse de chaque côté de la frontière, moyennée par tranches de dix secondes — celle des particules
+    // libres de l'hybride, celle des particules d'APIC seul à gauche de la même abscisse.
+    let mut tranches: Vec<(f64, f64, usize)> = Vec::new();
     let mut t = 0.0;
     let mut prochain = 0.1;
     // `RACCORD_SERIE` (S327) : la série à la frontière, chaque dixième de seconde, sur l'erreur standard —
@@ -2658,6 +2740,15 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
         pire_masse = pire_masse.max(((l + c + a) / m0 - 1.0).abs());
         v_max = v_max.max(hy.apic.v.iter().fold(0f64, |m, v| m.max((v[0] * v[0] + v[1] * v[1]).sqrt())));
         if t >= prochain - 1e-9 {
+            let tranche = (t / 10.0 - 1e-9).floor().max(0.0) as usize;
+            if tranches.len() <= tranche {
+                tranches.resize(tranche + 1, (0.0, 0.0, 0));
+            }
+            let xb = i_b as f64 * dx;
+            let gauche_seul = seul.x.iter().filter(|p| p[0] < xb).count() as f64 * 0.25 * dx * dx;
+            tranches[tranche].0 += l;
+            tranches[tranche].1 += gauche_seul;
+            tranches[tranche].2 += 1;
             if let Some(e) = ecart_frontiere(&hy.apic, i_b) {
                 pire_ecart = pire_ecart.max(e.abs());
             }
@@ -2694,6 +2785,12 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
          ecart_frontiere_max_mailles={pire_ecart:.4} ecart_meme_endroit_apic_seul_mailles={pire_seul:.4} vitesse_max={v_max:.4}",
         hy.entre, hy.sorti
     );
+    let ligne: Vec<String> = tranches
+        .iter()
+        .enumerate()
+        .map(|(k, (l, g, n))| format!("{}-{}s:{:.5}/{:.5}", 10 * k, 10 * (k + 1), l / *n as f64, g / *n as f64))
+        .collect();
+    println!("RACCORD_S354 masse_a_gauche_de_la_frontiere_m2_hybride/apic_seul {}", ligne.join(" "));
     execute(scene, &mut Apic::new(scene));
     execute(scene, &mut Hybride::new(scene));
 }
@@ -2703,6 +2800,10 @@ fn main() -> Result<(), String> {
     let candidat = args.get(1).ok_or("candidat ?")?.as_str();
     if candidat == "compteur" {
         epreuve_compteur();
+        return Ok(());
+    }
+    if candidat == "regression" {
+        epreuve_regression();
         return Ok(());
     }
     if candidat == "raccord_dyn" {
