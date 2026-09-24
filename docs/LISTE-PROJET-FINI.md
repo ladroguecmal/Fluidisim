@@ -242,8 +242,10 @@ pas recopiée ici (L137).
   de liberté dans le cœur** depuis S331 — proxy sur B + W, masse ajoutée ; C10 tenu à 0,02 % sur le tirant
   ([preuve](validation/CORPS-RIGIDE-S331.md)) ; **sa coque pilotée dans δ** depuis S332, sans que δ touche la
   trajectoire (I-04) ; **sur une houle de B** depuis S333, pilonnement forcé à 3·10⁻⁵, δ relatif à l'eau
-  qui la porte ([preuve](validation/PORTE-D-S333.md)). Manquent W derrière la requête, l'amortissement par
-  rayonnement, le verdict visuel de la porte D.
+  qui la porte ([preuve](validation/PORTE-D-S333.md)) ; **masse ajoutée et amortissement de rayonnement de
+  pilonnement** mesurés par δ depuis S336, l'énergie dissipée égale à celle que δ reçoit à 2,3 % près
+  ([preuve](validation/RAYONNEMENT-COQUE-S336.md)). Manquent W derrière la requête, les autres degrés de
+  liberté, le verdict visuel de la porte D.
 - [ ] **6.2 Forces de l'eau sur les objets** : vagues, courant, turbulence, sous la frontière
   d'autorité d'ADR-008 — *partiel* depuis S333 : les **vagues de B** — poussée et gradient de la pression
   du proxy, la coque cavale avec la houle à 0,1 % ([preuve](validation/PORTE-D-S333.md)). Manquent W, le

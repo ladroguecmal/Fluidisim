@@ -264,7 +264,8 @@ jeu**, sur B + W, tient C10 ([preuve](validation/CORPS-RIGIDE-S331.md)) — lot 
 sa coque dans δ, qui perce la surface, et δ ne le pilote jamais — trajectoire identique au bit (§4) ;
 **S333** : la coque sur une houle de B, et δ qui porte sa perturbation **relative à l'eau qui la porte** —
 anneaux de 9,4 cm, I-04 au bit ([preuve](validation/PORTE-D-S333.md)) ; verdict visuel attendu ; **S334–S335** :
-A317 corrigé — le couvercle partiel, actif par défaut, converge (§6–7).
+A317 corrigé — le couvercle partiel, actif par défaut, converge (§6–7) ; **S336** : la coque reçoit la masse
+ajoutée et l'amortissement que δ lui mesure, et s'arrête ([preuve](validation/RAYONNEMENT-COQUE-S336.md)).
 **Le 2026-09-23** ([ADR-189](adr/ADR-189-la-v1-d-abord.md)), l'utilisateur demande la v1 d'abord : lots 3
 et 4 jusqu'à la porte D, l'alternance avec le lot 5 suspendue jusque-là. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**

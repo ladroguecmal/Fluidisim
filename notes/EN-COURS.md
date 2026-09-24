@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 - [x] **P3 bis** — *ajouté, déclaré avant le code* : la masse ajoutée agit sur l'accélération **relative** à
   l'eau ; critère 2 bis.
 - [x] **P4** — la scène de la porte D amortie ; critère 3 ; images (critère 4).
-- [ ] **P5** — preuve `docs/validation/RAYONNEMENT-COQUE-S336.md` ; liste, file, feuille de route.
+- [x] **P5** — preuve `docs/validation/RAYONNEMENT-COQUE-S336.md` ; liste, file, feuille de route.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -123,3 +123,5 @@ Critères, écrits avant le code :
   1,75·10⁻⁹ m³ (plancher 1,1·10⁻⁵). Images `viewer/captures/s336` : scène / carte 2 s `0x5bcee0e39127e82e` /
   `0xc58da8c8de0a6f8b` ; 4 s `0xe8d0b8ce46f12bd5` / `0x121fe7d4ecf5d125` ; 6 s `0xf6b2b7b279a1c2d8` /
   `0xac468acaedd43afb` ; 8 s `0xc99b2d47947a0766` / `0xab83f1e8df945f07`.
+- **P5** : preuve [RAYONNEMENT-COQUE-S336](../docs/validation/RAYONNEMENT-COQUE-S336.md) ; liste 6.1 (amortissement
+  fait) ; ligne des lots 3–4 de la file ; chronologie de la feuille de route ; index.

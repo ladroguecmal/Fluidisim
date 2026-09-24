@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-24 11:04 +02:00
+Battement        : 2026-09-24 11:05 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S336 — l'amortissement par rayonnement de la coque, mesuré par δ (chemin de la porte D)
 Dernière session : S335 — **A317 corrigé** : le couvercle partiel est actif par défaut, avec un plancher d'ouverture de 10 % — la coque tenue sur la houle reste sous 0,56 m/s et la tranche converge encore (3,1 % à 6,25 cm) ; la porte D passe de 3,42 à 1,22 entre flancs. **Impasse publiée** : la vitesse de paroi au centroïde ne retirait pas les pointes ([preuve](docs/validation/PORTE-D-S333.md) §7)
