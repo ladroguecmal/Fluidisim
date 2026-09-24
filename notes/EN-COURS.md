@@ -62,71 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S353 — **terminée**. **La v1 en scène vivante, 1 : δ à 30 Hz dans la fenêtre, interpolé au rendu**
-(ADR-012 §7) — liste 4.19 et 8.7, feuille de route §3 ter.
+Session : S354 — **en cours**. **Lot 5, A316 : ce qui dissipe au raccord particules ↔ colonnes** ; alternance
+d'ADR-184 D1, après S353 (la v1 en scène vivante).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — S352 : l'ordre après la v1. S348 avait reçu la porte C au banc et laissé ceci : « l'interpolation du rendu
-d'ADR-012 §7 manque — δ change à 30 Hz dans une image à 60 ». La fenêtre fait aujourd'hui un pas entier par image.
+Entrée — *« Reprends le projet »*. S327 a laissé A316 attribué en partie : le meilleur montage (ensemencement
+continu, échange en paroi) écarte la surface de 0,24 maille et amortit **4,2 % par période** à 5 cm, contre −0,4 %
+pour APIC seul. Il en concluait que **les colonnes dissipent d'elles-mêmes** : 1,3 % avec 95 % du bassin en
+colonnes, frontière près du mur.
 
-**La construction.** `Step3` garde la surface publiée du pas précédent (`published_prev`) : copie sur la carte avant
-chaque publication, et dans `set_state` et `resize`. Le rendu lie les deux tampons et mélange
-`courant·(1 − β) + précédent·β`, β dans l'uniforme de δ ; β = 0 passe par une branche qui rend la lecture de S302
-telle quelle. La fenêtre, avec `--pas-delta=33333`, fait une part du pas par image (S348) : l'image de la partie 1
-voit l'état suivant publié et montre le milieu (β = 0,5) ; celle de la partie 0 montre l'état publié (β = 0). Aucune
-latence ajoutée : la part est soumise avant l'image (S302 D7).
+**Un doute sur l'instrument, trouvé en préparant.** La jauge du ballottement compte les particules du quart gauche
+du bassin. Avec 95 % en colonnes, ce quart est en colonnes, dont les particules sont **réensemencées** à chaque pas,
+deux par rangée, `round(2h/dx)` rangées : la masse que la jauge y lit est quantifiée par demi-maille — 2,5 cm à
+5 cm, pour une onde de 2 cm. La hauteur vraie des colonnes est `h`, exacte. Le 1,3 % a pu être lu sur un escalier.
 
 Critères, écrits avant le code :
-1. **Identité** : sans interpolation, les captures de l'anneau (R16) gardent leurs empreintes publiées
-   (`s339a_proche_avec_1.0s` `0x5a79f01d64083ef3`…) ; les empreintes du pas de S343 et l'identité de S350 tiennent.
-2. **Le mélange, au bit** : une image rendue de (précédent, courant, β = 0,5) est identique au bit à celle du seul
-   tampon (précédent + courant)/2 — la multiplication par ½ est exacte.
-3. **La saccade, mesurée** sur 240 images à 30 Hz : sans interpolation, une image sur deux ne bouge pas ; avec,
-   aucune, et chaque variation d'image reste entre la moitié et le double de leur médiane.
-4. **En direct avec le rendu** (`--cadence`, sans synchronisation verticale) : intervalle médian et p95 — B seul,
-   B + δ à 60 Hz, B + δ à 30 Hz interpolé ; la part de δ par image lue par différence ; alimentation relevée.
-5. Preuve (COUT-DELTA3D-S341 §12), liste 4.19 et 8.7, file, feuille de route ; **revue R18 préparée** — la fenêtre
-   vivante, interpolée ou non — : le verdict revient à l'utilisateur.
+1. **L'instrument** : une jauge qui lit `h` dans la zone des colonnes et les particules ailleurs
+   (`RACCORD_JAUGE=hauteurs`) ; colonnes seules possibles (`RACCORD_ZONE=1`, sans frontière). Au repos, colonnes
+   seules : jauge constante à l'arrondi. Sans variable, tout au bit — les valeurs de S327.
+2. **L'attribution** : ballottement, colonnes seules et 95 % en colonnes, à 5 et 2,5 cm, les deux jauges.
+   **Prédiction** : avec la nouvelle, les colonnes seules amortissent comme APIC seul à 1 point près — elles ne
+   dissipent pas, et le 4,2 % est à la frontière. Sinon, elles dissipent, et on éteint un à un les termes qu'APIC
+   n'a pas.
+3. **Selon 2** : la cause désignée — frontière ou colonnes — éprouvée seule, avec son témoin ; critères de S327
+   inchangés : amortissement à 1 point d'APIC seul, période à 1 %, écart à la frontière < 0,5 maille.
+4. Preuve §13, A316, file, liste.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `Step3` : la surface précédente, copiée avant chaque publication ; empreintes S343, identité S350.
-- [x] **P3** — le rendu : la liaison du précédent, β, la branche ; captures de l'anneau au bit (critère 1).
-- [x] **P4** — la fenêtre : deux parts à `--pas-delta=33333`, β alterné, touche d'interpolation ; banc du mélange au
-  bit (critère 2).
-- [x] **P5** — la saccade mesurée (critère 3).
-- [x] **P6** — la cadence en direct (critère 4).
-- [x] **P7** — preuve, liste, file, feuille de route ; R18 préparée (critère 5).
-- [x] **P8** — rituel.
+- [ ] **P2** — la jauge des hauteurs, les colonnes seules ; critère 1.
+- [ ] **P3** — l'attribution : colonnes seules et 95 %, deux mailles, deux jauges ; critère 2.
+- [ ] **P4** — la cause que P3 désigne, éprouvée seule ; critère 3.
+- [ ] **P5** — preuve §13, A316, file, liste ; critère 4.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2.** `published_prev` : copie de `published` sur la carte avant la passe qui publie (pas entier et partie 1),
-  dans `set_state`, `set_full_state` et `resize` (la précédente prend la courante réécrite : pas de mélange jusqu'à
-  la publication suivante). Au pas 60, précédente = publiée d'avant, **0 différence** sur 13 440 colonnes ; empreintes
-  S343 inchangées ; redimensionnement S350 au bit, allocateur avant = après, **89 849 856 octets, 28 allocations** —
-  un tampon de plus que S350 (27).
-- **P3, critère 1 tenu.** `water.wgsl` : liaison 3 (`delta3d_prev`), β dans `d3.size.w`, branche à β = 0 ; `View::blend` ;
-  `attach_delta3d(courante, précédente)`. Captures de l'anneau rejouées (`INSTANTS=0,60,120 … --meilleur
-  --eau-physique=2 --delta3d --anneau --captures`) : `s339a_proche_avec_1.0s` 0x5a79f01d64083ef3, `haute_avec_1.0s`
-  0xd4e6d1e43e57c1cb, `proche_avec_2.0s` 0x2e37efc6f485f73d, `rasante_avec_2.0s` 0x142774b45a5ca313 — **les quatre
-  identiques** aux empreintes publiées (SCENE-DELTA3D-S302 §8).
-- **P4, critère 2 tenu.** `Live` : à `--pas-delta=33333`, une part par image (`K_DEUX_PARTS` = 7, S348) ; β = ½ après
-  la part 1, 0 après la part 0 ; touche `I`. Banc `--melange` (anneau, 61 pas, pose proche) : écart précédente/courante
-  1,84 cm ; image β = ½ contre image du tampon (p + c)/2 calculé sur CPU : **0 octet différent** ; témoin courante
-  seule : 550 530 octets différents. Fenêtre `--smoke` à 30 Hz en deux parts : 120 images, sans erreur.
-- **P5, critère 3 tenu** (`--delta3d-saccade`, anneau, 239 variations après 30 images de chauffe ; variation
-  quadratique moyenne de la surface affichée d'une image à la suivante) : 30 Hz **sans** interpolation — 119 images
-  immobiles sur 239, rapport à la médiane 0 à 1,71 ; 30 Hz **interpolé** — 0 immobile, rapport 0,721 à 1,233, médiane
-  5,57 mm ; témoin 60 Hz à pas entier — 0 immobile, 0,727 à 1,260, médiane 5,43 mm.
-- **P6 — un défaut de P4 trouvé et corrigé.** À `--pas-delta=33333`, la fenêtre avançait B de 33 ms par image quand δ
-  n'avançait plus que d'un demi-pas : pas d'image ramené à 16,667 ms ; l'horloge de δ décalée d'une demi-image, pour
-  que le milieu affiché tombe à l'instant de B ; les captures comptent en pas entiers (`advance_step`), comme S347.
-  Saccade rejouée : interpolé 0 immobile, 0,723–1,235 ; sans, 119/239 ; 60 Hz 0,727–1,260.
-- **P6, critère 4** (`--cadence`, 960×540, sans synchronisation verticale, secteur 96 % à 22:25 et 22:29) :
-  | même scène (anneau) | intervalle médian / p95 / max | part de δ par image (médianes) |
-  |---|---:|---:|
-  | témoin, domaine sans pas (`--delta3d-sans-pas`) | 1,407 / 2,500 / 7,24 ms | — |
-  | δ à 60 Hz, un pas entier par image | 4,715 / 5,516 / 6,06 | **3,31 ms** |
-  | δ à 30 Hz en deux parts, interpolé | 2,896 / 3,834 / 4,74 | **1,49 ms** |
-  Témoin à 30 Hz sans pas : 1,449 ms. Rendu de l'eau 0,82–0,83 ms dans les quatre (horodatage sérialisé).
-  Premier passage écarté : son « B seul » n'était pas la même scène (sans `--delta3d`, rendu 1,39 ms).

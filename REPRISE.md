@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-24 22:32 +02:00
+JETON            : occupé
+Battement        : 2026-09-24 23:46 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S354 — **lot 5, A316** : ce qui dissipe au raccord particules ↔ colonnes — la jauge du ballottement relue sur les hauteurs, les colonnes seules contre APIC seul, puis la cause désignée éprouvée seule
 Dernière session : S353 — **la v1 en scène vivante, 1** : δ à 30 Hz dans la fenêtre, interpolé au rendu — aucune image immobile, part de δ en direct 1,49 ms par image contre 3,31 à 60 Hz ([preuve](docs/validation/COUT-DELTA3D-S341.md) §12) ; revue **R18** préparée, en direct. Avant : S352, la liste rangée par dépendance ; S351, la v1 atteinte au sens d'ADR-174 D4
 Session suivante : **le lot 5** (alternance d'ADR-184 D1) — 4.16, la surface non graphe, par A316 : le raccord particules ↔ colonnes, dont la dissipation à 5 cm (S327). Ensuite, la v1 en scène vivante reprend : la coque dans la production de δ (6.4), puis l'ordonnanceur et le rang 1 dans l'afficheur (4.2). En attente : le verdict R18
 Maillons        : 0 — S353 : δ à 30 Hz interpolé, en direct
