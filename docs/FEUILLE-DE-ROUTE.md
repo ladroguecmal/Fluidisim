@@ -349,6 +349,8 @@ débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé
 tenu par `etat_projet.py --check`. Ici, l'ordre. Les jalons du §2 et les portes E et F restent vrais : ils disent les
 mêmes dépendances, en plus gros.
 
+**Depuis S355 ([ADR-191](adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md), décision de l'utilisateur), une session de rendu alterne avec une session de physique** : la part de l'eau du rendu du moteur maison s'écrit en module, depuis l'afficheur — 8.4, 8.5, 8.6, 8.9. La physique garde l'ordre ci-dessous.
+
 **Front 0 — 34 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
 
 1. **La v1 en une scène vivante** — réunir ce que les portes ont reçu séparément : la coque dans la production de δ

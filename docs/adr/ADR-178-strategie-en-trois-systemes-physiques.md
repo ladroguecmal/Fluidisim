@@ -131,3 +131,11 @@ où il s'ouvrira.
 **Ce n'est pas non plus une autorisation de laisser filer le coût.** D4 suspend un critère
 d'arrêt, pas la mesure. Un lot qui ne publierait pas son coût, sa mémoire et sa complexité
 manquerait à cette décision autant qu'à ADR-131.
+
+---
+
+**Note datée du 2026-09-25 (S355).** D2 est **remplacé en ce qu'il arrêtait le perfectionnement visuel** par
+[ADR-191](ADR-191-le-rendu-realiste-un-module-du-moteur.md), décision de l'utilisateur : le rendu final est celui du
+moteur maison, à construire, et nous en écrivons la part de l'eau en module, depuis l'afficheur ; une session de
+rendu alterne avec une session de physique. Le reste de D2 — A suffisant pour servir B et C — demeure.
+

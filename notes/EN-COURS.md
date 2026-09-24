@@ -87,11 +87,19 @@ Critères, écrits avant le code :
 
 ### Plan
 
+*Amendé en cours de session, sur la demande de l'utilisateur (00 h 20) : sa question sur le réalisme du rendu, puis cinq
+réponses — [ADR-191](../docs/adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md). Le pas linéaire sur la carte n'avait pas
+commencé (aucun diff) : ses étapes — `Linear3`, le banc, le coût, l'ADR de la coque — passent **telles quelles** à la
+prochaine session de physique ; le plan initial est au commit `a2c81dea`.*
+
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `Linear3` : tampons, noyaux, pas ; critère 1.
-- [ ] **P3** — le banc contre `Volume3` ; critère 2.
-- [ ] **P4** — le coût ; critère 3.
-- [ ] **P5** — ADR-191, preuve, file, feuille de route, liste ; critère 4.
-- [ ] **P6** — rituel.
+- [x] **P2** — la décision de l'utilisateur : ADR-191, note datée d'ADR-178, file, feuille de route, liste 8.1, index,
+  REPRISE §5.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
+- **P2, la question et les réponses.** Référence de l'utilisateur : FluidNinja LIVE-2 (Fab, Unreal, Andras Ketzer) —
+  « using 2D sim to drive 3D visualization », simulation attachée au joueur, lointain en motifs passifs ; images :
+  un tourbillon, de l'eau turquoise peu profonde avec un fond visible, des traînées d'écume. Réponses : moteur maison,
+  à construire ; rendu final dans le moteur ; nous l'écrivons en module ; alterner avec la physique. ADR-191.
+

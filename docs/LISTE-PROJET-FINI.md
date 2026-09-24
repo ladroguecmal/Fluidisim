@@ -338,7 +338,8 @@ pas recopiée ici (L137).
 ## 8. Rendu et niveaux de détail visuels
 
 - [ ] **8.1 Rendu temps réel de la surface sur GPU** — *partiel* : hôte séparé B + impacts +
-  sillages (ADR-130, S211–S249), habillage de banc ; le rendu ne pilote pas la physique (I-13). Manque l'intégration au moteur du jeu.
+  sillages (ADR-130, S211–S249), habillage de banc ; le rendu ne pilote pas la physique (I-13). Manque l'intégration au moteur du jeu —
+  **maison, à construire** ; la part de l'eau s'y écrit en module, depuis l'afficheur ([ADR-191](adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md)).
 - [ ] **8.2 LOD de la géométrie de surface** — *partiel* : grille projetée à pas écran. Manquent le LOD
   du maillage et le choix déplacement ou normales selon la vue (critère de parallaxe chiffré S257).
 - [ ] **8.3 LOD par source** : grille du sillage, visibilité, filtre spectral — *partiel* (S234,

@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 00:15 +02:00
+Battement        : 2026-09-25 00:28 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S355 — **la v1 en scène vivante, 2 : la coque dans la production de δ** — le pas linéaire de la porte D porté sur la carte, contre la référence CPU ; le chemin (un domaine linéaire pour la coque) écrit en ADR sur les mesures
 Dernière session : S354 — **lot 5, A316, l'instrument relu sur 30 s** : les colonnes ne dissipent pas plus qu'APIC seul ; la frontière ne tient pas la densité des particules, la masse migre, +12 mm en 30 s à 5 cm — non reçu ([preuve](docs/validation/B10-APIC-S320.md) §13). Avant : S353, δ à 30 Hz interpolé en direct, R18 préparée
@@ -119,7 +119,9 @@ tient les contrôles que nomme la table des protections de [METHODE](notes/METHO
   l'implémentation et s'éprouve sur la combinaison des techniques (ADR-131).
 - Une réduction d'ambition demande une décision explicite de l'utilisateur (ADR-127). **Après la v1,
   l'objectif est la liste du projet fini entière**, ses points validés au périmètre final
-  ([ADR-190](docs/adr/ADR-190-apres-la-v1-la-liste-entiere.md), décision du 2026-09-24).
+  ([ADR-190](docs/adr/ADR-190-apres-la-v1-la-liste-entiere.md), décision du 2026-09-24). **Le rendu, 2026-09-25**
+  ([ADR-191](docs/adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md)) : celui du moteur maison, à construire ;
+  nous en écrivons la part de l'eau en module, depuis l'afficheur ; une session de rendu, une de physique.
 - Les faits d'intégration non constatés et les actions d'infrastructure restent distincts des
   décisions techniques : ne pas inventer terrain, format réseau, personnes ou dépôt distant.
 

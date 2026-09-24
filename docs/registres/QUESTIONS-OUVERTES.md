@@ -2,7 +2,7 @@
 
 ## File active
 
-> **Décisions de l'utilisateur** — un seul endroit, daté. **2026-09-24, S351** : *« Continue, après la V1 ton
+> **Décisions de l'utilisateur** — un seul endroit, daté. **2026-09-25, S355** : après *« Est ce que tu penses que l'architecture […] doit changé ? […] pas assez réaliste »* — l'architecture de l'eau ne change pas ; **le rendu final est celui du moteur maison, à construire, et nous en écrivons la part de l'eau en module**, depuis l'afficheur ; **une session de rendu, une session de physique** ([ADR-191](../adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md)). **2026-09-24, S351** : *« Continue, après la V1 ton
 > objectif seras de completer entièrement la to do liste »* — après la v1, la **liste du projet fini entière**, ses
 > points validés au périmètre final ; le lot 5 reprend après la v1 entière
 > ([ADR-190](../adr/ADR-190-apres-la-v1-la-liste-entiere.md)). **2026-09-24, S348** : verdict R17, *« Continue je
