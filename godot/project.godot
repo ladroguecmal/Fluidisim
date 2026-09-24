@@ -1,0 +1,20 @@
+; S357, ADR-192 D2 — le prototype : la mer de B rendue dans Godot 4.4.
+; Données : `donnees/mer_b.json`, exporté par l'afficheur (`--meilleur --export-godot`), dérivé, non versionné.
+
+config_version=5
+
+[application]
+
+config/name="Fluidisim - la mer de B"
+run/main_scene="res://mer.tscn"
+config/features=PackedStringArray("4.4", "Forward Plus")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+anti_aliasing/quality/msaa_3d=2

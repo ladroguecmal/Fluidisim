@@ -85,7 +85,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'export depuis l'afficheur ; critère 1 (partie données).
-- [ ] **P3** — le projet Godot : scène, nuanceur, environnement ; critère 2 et la hauteur du critère 1.
+- [x] **P3** — le projet Godot : scène, nuanceur, environnement ; critère 2 et la hauteur du critère 1.
 - [ ] **P4** — les captures et la revue R19 ; critère 3.
 - [ ] **P5** — preuve, file, feuille de route, liste ; critère 4.
 - [ ] **P6** — rituel.
@@ -95,4 +95,13 @@ Critères, écrits avant le code :
   ignoré par git : 64 lignes de bande, 60 de queue, `[a, kx, ky, φ, ω]` à l'origine et à 12 s ; `M` = 2, retard −0,2,
   système 1 de 32 composantes, `k̄` 0,1742 et 0,0317 rad/m ; 14 seuils ; soleil (−0,424 ; 0,318 ; 0,848) ; cinq
   points de contrôle, `η` linéaire de la bande à `t₀ + 3 s` calculé par le cœur (0,15376 m à l'origine).
+- **P3.** `godot/` : `project.godot` (Forward+, 1280 × 720, MSAA 2), `mer.tscn`, `mer.gd` (grille polaire 720 × 360
+  de 0,25 m à 12 km autour de la caméra, environnement, phases repliées en double, poses de R14, `--captures`,
+  `--controle`), `eau.gdshader` (bande CWM + Tayfun, queue filtrée, pente eulérienne, écume à seuils par empreinte,
+  crêtes en `BACKLIGHT`, pente non résolue en rugosité GGX `mss^(1/4)`, albédo `0,54·R(0⁻)`). **Contrôle** (`--headless
+  -- --controle`) : `η` de la bande recalculé par Godot contre le cœur à `t₀ + 3 s`, **1,0·10⁻⁷ m au pire** sur cinq
+  points (critère : 1 mm). Nuanceur compilé sans erreur (Vulkan 1.4, RTX 5070 Laptop). **Ce que les images ont dit** :
+  le ciel physique par défaut de Godot rend un **crépuscule gris** → ciel procédural aux couleurs du ciel clair de
+  l'afficheur (photo de R14) ; en rasant, **les reflets à l'écran remplaçaient le ciel par l'eau sombre** → éteints
+  (`REFLETS_ECRAN=1` les rallume) ; le demi-ciel bas pris à la couleur de l'horizon.
 
