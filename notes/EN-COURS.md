@@ -95,9 +95,14 @@ Critères, écrits avant le code :
 - [x] **P2** — les murs après un décalage ; critère 1.
 - [x] **P3** — la forme courante dans `Step3` ; critère 2.
 - [x] **P4** — `Step3::resize` en une soumission ; critère 3.
-- [ ] **P5** — le coût selon l'emprise ; critère 4.
-- [ ] **P6** — preuve, file, feuille de route ; critère 5.
-- [ ] **P7** — rituel.
+- [ ] **P5** — **demande de l'utilisateur à la reprise** : « mets à jour le document de la to do list » — la
+  [liste du projet fini](../docs/LISTE-PROJET-FINI.md), nommée ainsi en S271. Relire S309–S349 contre ses points :
+  ce qui a bougé, avec sa preuve, noté ici.
+- [ ] **P6** — la liste réécrite : points touchés en remplacement, décompte recompté point par point, « État au » ;
+  `--check`.
+- [ ] **P7** — le coût selon l'emprise ; critère 4.
+- [ ] **P8** — preuve, file, feuille de route, et les lignes de la liste que S350 touche ; critère 5.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** Avant correction, au suivi : murs figés jusqu'à **0,169 m/s**, débit net **−2,80 m³/s** après
