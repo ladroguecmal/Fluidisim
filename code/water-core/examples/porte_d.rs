@@ -141,11 +141,25 @@ fn temoin(d: Domain3, noeuds: &[f32]) -> Result<(), String> {
     Ok(())
 }
 
+/// S337 : le fondu de composition de la production (`delta_fade`, `water.wgsl`) — le poids de δ à `s` mètres du
+/// bord de sa grille, `½ − ½·cos(π·s/w)` sur `w` mètres, un au-delà ; `w` nul : aucun fondu.
+fn fondu(s: f32, w: f32) -> f32 {
+    if w <= 0. || s >= w {
+        1.
+    } else if s <= 0. {
+        0.
+    } else {
+        0.5 - 0.5 * (std::f32::consts::PI * s / w).cos()
+    }
+}
+
 /// Les images d'un instant : la scène — B + δ à l'échelle à gauche, B + 5·δ à droite, où les pentes de δ se lisent,
 /// la coque à sa pose visuelle — et la carte de δ. `delta` porte `η − z₀` des colonnes au couvercle libre, zéro sous la coque ; `decale` est le
-/// point du monde où tombe le coin de la grille de δ, qui suit l'eau qui porte la coque.
+/// point du monde où tombe le coin de la grille de δ, qui suit l'eau qui porte la coque. **S337** : δ entre dans la
+/// scène pondéré par le fondu de la production, sur `largeur_fondu` mètres depuis chaque bord — la carte montre δ
+/// tel qu'il est.
 fn images(dossier: &str, t: f64, eau: &dyn WaterQuery, d: Domain3, delta: &[f32], couvertes: &[bool], decale: [f64; 2],
-    corps: &RigidBody, visuel: [f64; 3]) -> Result<(), String> {
+    corps: &RigidBody, visuel: [f64; 3], largeur_fondu: f32) -> Result<(), String> {
     let (w, h) = (800usize, 600usize);
     let mut img = render::Image::new(2 * w, h);
     let dx = d.dx;
@@ -162,7 +176,12 @@ fn images(dossier: &str, t: f64, eau: &dyn WaterQuery, d: Domain3, delta: &[f32]
             let (x, y) = (ox + (gi as f32 + 0.5) * dx, oy + (gj as f32 + 0.5) * dx);
             let dedans = gi >= 0 && gj >= 0 && (gi as usize) < d.nx && (gj as usize) < d.ny;
             let gain = if panneau == 1 { 5. } else { 1. };
-            hb(x, y) + if dedans { gain * delta[gj as usize * d.nx + gi as usize] } else { 0. }
+            if !dedans {
+                return hb(x, y);
+            }
+            let (lx, ly) = ((gi as f32 + 0.5) * dx, (gj as f32 + 0.5) * dx);
+            let poids = fondu(lx.min(d.nx as f32 * dx - lx), largeur_fondu) * fondu(ly.min(d.ny as f32 * dx - ly), largeur_fondu);
+            hb(x, y) + gain * poids * delta[gj as usize * d.nx + gi as usize]
         };
         let coin = [ox + (0.5 - marge as f32) * dx, oy + (0.5 - marge as f32) * dx];
         cam.surface(&mut img, n, coin, dx, &surface);
@@ -194,6 +213,8 @@ fn main() -> Result<(), String> {
 
     // La trajectoire de jeu seule : la référence du critère 3.
     let archetype = arguments.iter().any(|a| a == "--archetype");
+    // S337 : `--fondu M` — δ fondu sur M mètres au bord de sa grille dans la scène rendue, comme la production.
+    let largeur_fondu: f32 = arguments.iter().position(|a| a == "--fondu").and_then(|i| arguments.get(i + 1)).and_then(|v| v.parse().ok()).unwrap_or(0.);
     let mut seul = coque(&eau(0), archetype);
     let reference: Vec<([u64; 3], [u64; 4])> = (0..duree)
         .map(|n| {
@@ -272,7 +293,7 @@ fn main() -> Result<(), String> {
             let couvertes: Vec<bool> = ow[d.nx * d.ny * d.nz..].iter().map(|o| *o != 1.).collect();
             let delta: Vec<f32> = v.surface().iter().zip(&couvertes).map(|(h, c)| if *c { 0. } else { h - d.z0() }).collect();
             let decale = [corps.position[0] - m.center[0] as f64, corps.position[1] - m.center[1] as f64];
-            images(dossier, (n + 1) as f64 * DT, &w, d, &delta, &couvertes, decale, &corps, o)?;
+            images(dossier, (n + 1) as f64 * DT, &w, d, &delta, &couvertes, decale, &corps, o, largeur_fondu)?;
         }
         if (n + 1) as f64 * DT > 3. {
             let (cx, cy) = (m.center[0] as f64, m.center[1] as f64);

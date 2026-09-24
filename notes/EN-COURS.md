@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul, verdict R15 consigné ici.
 - [x] **P2** — l'éponge du mode linéaire ; critère 1.
-- [ ] **P3** — le fondu de composition dans le rendu de la porte D ; critère 2.
+- [x] **P3** — le fondu de composition dans le rendu de la porte D ; critère 2.
 - [ ] **P4** — la scène de la porte D, éponge et fondu, 12 s ; critère 3 ; images (critère 4).
 - [ ] **P5** — preuve ; R15 au registre des revues ; file, feuille de route.
 - [ ] **P6** — rituel ; arrêt pour le verdict.
@@ -101,3 +101,5 @@ Critères, écrits avant le code :
   2 /s : énergie de surface intérieure **0,4 %** de celle des murs ; volume de δ plus retiré, écart 2,2·10⁻⁹ m³ pour une
   borne d'arrondi de 1,0·10⁻⁶ (murs : 6,8·10⁻¹⁰). Le plan disait « au plancher d'arrondi » : l'essai compare à la
   borne cumulée, non aux 10⁻⁹ d'abord codés. Défaut sans éponge : S3xx au bit.
+- **P3, critère 2** : `fondu` de `porte_d` = `delta_fade` de `water.wgsl` — `½ − ½·cos(π·s/w)`, produit des
+  fondus en x et en y ; `--fondu 3` : zéro au bord, un à 3 m. Sans l'option, les images de S333–S336 inchangées.
