@@ -96,7 +96,7 @@ Critères, écrits avant le code :
 - [x] **P2** — banc `a317_lamelle` : pilonnement imposé, cinq placements ; critère 1 (avant correctif).
 - [x] **P3** — correctif : la pression du couvercle en partie couvert, commutable pour la mesure ; critère 3.
 - [ ] ~~**P4** — banc après correctif ; critère 2.~~ *Caduc : le correctif ne porte pas A317 (P3).*
-- [ ] **P4** — *amendé* : **convergence** sur une tranche quasi-2D — coque infiniment longue, `ny` = 2 —,
+- [x] **P4** — *amendé* : **convergence** sur une tranche quasi-2D — coque infiniment longue, `ny` = 2 —,
   mailles de 25 ; 12,5 ; 6,25 ; 3,125 cm, quatre placements chacune ; couvercle partiel éteint puis allumé.
 - [ ] **P5** — *amendé* : qualifier A317 — erreur de résolution d'ordre mesuré et maille qu'elle impose, ou
   défaut de structure — ; la scène de la porte D ne se rejoue que si δ change par défaut.
@@ -129,3 +129,17 @@ la valeur extrapolée dit quelle surface — S332 ou couvercle partiel — s'en 
   toutes plus fortes (+20 à +90 %), **écart 36,5 %, dissymétrie 1,60** : la mollesse du couvercle partiel est
   réelle, mais elle **n'est pas** le mécanisme d'A317. **Décision** : commutable, **éteint par défaut** ; les
   18 valeurs imprimées des essais S3xx sont alors identiques au bit (critère 3).
+- **P4, convergence en tranche** (`--tranche`, pilonnement imposé, bandes à 2,5–3,5 m ; amplitudes en mm,
+  placement φ et fraction de la seconde paroi entre parenthèses). **Couvercle de S332** : 25 cm → 23,9 (0,05) ;
+  11,3 (0,55) ; 17,3 (0,30) ; 21,1 (0,80) — moyenne 18,4, **écart 38,5 %** ; 12,5 cm → 24,6 ; 19,9 ; 11,1 ; 20,4 ;
+  13,7 ; 16,5 ; 19,6 ; 10,5 — moyenne 17,0, **écart 44 %** : **ne converge pas**. **Couvercle partiel** : 25 cm →
+  35,9 ; 23,3 ; 22,3 ; 26,2 — moyenne 26,9, écart 33 % ; 12,5 cm → 24,4 ; 22,9 ; 21,4 ; 21,4 ; 21,2 ; 21,8 ; 22,2 ;
+  20,6 — moyenne 22,0, **écart 10,9 %** : **converge**, ordre ≈ 1,6. **La conclusion de P3 était prématurée** :
+  la mollesse du couvercle partiel est bien le défaut de structure ; à 25 cm, le correctif laisse une erreur
+  de résolution ordinaire. 3,125 cm : gradient conjugué non convergé au pas 23 (8 000 itérations), les deux
+  variantes — petites cellules sous le fond de la coque.
+- **P4, 6,25 cm.** S332 : 23,2 ; 15,5 ; 14,4 ; 15,6 ; 17,5 ; 19,2 ; 19,0 ; 17,9 — moyenne 17,8, **écart 30,5 %**.
+  Partiel : 20,3 ; 20,8 ; 20,8 ; 20,5 ; 20,9 ; 20,2 ; 20,3 ; 20,8 — moyenne 20,6, **écart 1,8 %**. **Bilan** :
+  critère 6 tenu (tranche à 25 cm, 38,5 % ≥ 20 %) ; critère 7 — S332 **ne converge pas** (38,5 → 44,2 →
+  30,5 %), défaut de structure ; partiel **converge** (33,4 → 10,9 → 1,8 %) ; critère 8 — moyenne partielle
+  26,93 → 21,99 → 20,56 mm, ordre 1,79, **extrapolée 19,98 mm** ; S332 reste à 17–18 mm, 11 % sous la limite.
