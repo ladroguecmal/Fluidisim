@@ -769,3 +769,67 @@ pub fn cadence_scene() -> Result<(), String> {
     })
 }
 
+/// S348, porte C — **le pas en deux parts, à 30 Hz**, sur la scène de la porte B. Critère 2 : 60 pas exécutés en deux
+/// parts donnent la surface publiée identique au bit à 60 pas d'un seul tenant. Critère 3 : après 30 pas de chauffe,
+/// `PAS=` (1 000) pas dont chaque part est horodatée seule — médiane, 99ᵉ centile, maximum ; puis `k` de 5 à 9,
+/// 200 pas chacun, pour l'équilibre. `K=` (7) : cycles de la première part. `--delta3d-deux-parts`.
+pub fn deux_parts() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let mut config = Config::review();
+        config.step_us = 33_333;
+        let (u, v, w, eta) = config.initial_state();
+        let k: u32 = std::env::var("K").ok().and_then(|v| v.parse().ok()).unwrap_or(7);
+        let pas: usize = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(1000);
+        let mut cartes = Vec::new();
+        for _ in 0..2 {
+            let c = Step3::new(background, config.domain, config.origin, RHO, G).await?;
+            c.set_step(config.step_us, config.rest, config.sponge)?;
+            c.set_state(&u, &v, &w, &eta)?;
+            cartes.push(c);
+        }
+        for n in 0..60u64 {
+            let t = water_core::SimTime(n * config.step_us);
+            cartes[0].step(background, t, config.cycles)?;
+            cartes[1].step_part(background, t, config.cycles, k, 0)?;
+            cartes[1].step_part(background, t, config.cycles, k, 1)?;
+        }
+        let (a, b) = (cartes[0].published()?, cartes[1].published()?);
+        let differentes = a.iter().zip(&b).filter(|(x, y)| x.to_bits() != y.to_bits()).count();
+        println!(
+            "DELTA3D_DEUX_PARTS_S348 carte={:?} pas_ms=33.333 cycles={} k={k} identite_60_pas colonnes={} differentes_au_bit={differentes}",
+            cartes[0].adapter, config.cycles, a.len()
+        );
+        let quantiles = |v: &mut Vec<f64>| -> (f64, f64, f64) {
+            v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            let q = |f: f64| v[(((v.len() - 1) as f64) * f).round() as usize];
+            (q(0.5), q(0.99), *v.last().unwrap())
+        };
+        let mut carte = cartes.pop().unwrap();
+        let mut n = 60u64;
+        let mut mesurer = |carte: &mut Step3, k: u32, combien: usize| -> Result<(Vec<f64>, Vec<f64>), String> {
+            let (mut p0, mut p1) = (Vec::new(), Vec::new());
+            for _ in 0..combien {
+                carte.publish_time(background, water_core::SimTime(n * config.step_us))?;
+                n += 1;
+                if let Some(ms) = carte.timed_part(config.cycles, k, 0)? { p0.push(ms); }
+                if let Some(ms) = carte.timed_part(config.cycles, k, 1)? { p1.push(ms); }
+            }
+            Ok((p0, p1))
+        };
+        let _ = mesurer(&mut carte, k, 30)?;
+        let (mut p0, mut p1) = mesurer(&mut carte, k, pas)?;
+        let (m0, q0, x0) = quantiles(&mut p0);
+        let (m1, q1, x1) = quantiles(&mut p1);
+        println!("DELTA3D_DEUX_PARTS_S348 k={k} partie_0 mediane_ms={m0:.3} q99_ms={q0:.3} max_ms={x0:.3} partie_1 mediane_ms={m1:.3} q99_ms={q1:.3} max_ms={x1:.3} pas={pas}");
+        for k2 in 5..=9u32 {
+            let (mut a0, mut a1) = mesurer(&mut carte, k2, 200)?;
+            let (m0, q0, _) = quantiles(&mut a0);
+            let (m1, q1, _) = quantiles(&mut a1);
+            println!("DELTA3D_DEUX_PARTS_S348 balayage k={k2} partie_0 mediane_ms={m0:.3} q99_ms={q0:.3} partie_1 mediane_ms={m1:.3} q99_ms={q1:.3}");
+        }
+        Ok(())
+    })
+}
+

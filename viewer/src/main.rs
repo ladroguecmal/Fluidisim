@@ -2580,6 +2580,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-trajectoire") {
         return delta3d_step::trajectoire();
     }
+    if args.iter().any(|a| a == "--delta3d-deux-parts") {
+        return delta3d_scene::deux_parts();
+    }
     if args.iter().any(|a| a == "--delta3d-cadence-scene") {
         return delta3d_scene::cadence_scene();
     }

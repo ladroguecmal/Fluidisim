@@ -87,9 +87,18 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le verdict R17 ; critère 1.
-- [ ] **P3** — le pas en deux parts, et l'identité ; critère 2.
-- [ ] **P4** — le coût de chaque part ; critère 3.
+- [x] **P3** — le pas en deux parts, et l'identité ; critère 2.
+- [x] **P4** — le coût de chaque part ; critère 3.
 - [ ] **P5** — preuve ; la porte C si elle tient ; critère 4.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P3, critère 2 tenu.** `encode_split` : partie 0 — première passe, copies, mise en route de la projection, `k`
+  cycles ; partie 1 — le reste, le résidu, la troisième passe ; `step_part` et `timed_part`. **60 pas à 30 Hz en
+  deux parts : surface identique au bit** au pas d'un seul tenant (13 440 colonnes) ; empreintes du pas entier de
+  S343 inchangées (`0x9325cf58781f8b74` à 600 pas).
+- **P4, critère 3 tenu** (`--delta3d-deux-parts`, secteur 97 % avant et après). `k` = 7, 1 000 pas : **partie 0
+  médiane 1,801 ms, q99 1,848, max 1,859 ; partie 1 médiane 1,874, q99 1,918, max 1,934**. Balayage, 200 pas :
+  k 5 → 1,760 / 2,040 (q99) ; 6 → 1,872 / 2,059 ; **7 → 1,899 / 1,924** ; 8 → 1,968 / 1,857 ; 9 → 2,021 / 1,797 —
+  7 équilibre.
+

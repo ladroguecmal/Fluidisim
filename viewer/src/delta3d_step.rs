@@ -601,6 +601,21 @@ impl Step3 {
     /// Comme `encode` ; `timed` horodate le début de la première passe et la fin de la dernière
     /// quand le pas est entier et que la carte sait horodater.
     fn encode_timed(&self, encoder: &mut wgpu::CommandEncoder, cycles: u32, upto: Upto, timed: bool) {
+        self.encode_split(encoder, cycles, upto, timed, None)
+    }
+
+    /// S348 — le pas **en deux parts**, pour la cadence de 30 Hz d'ADR-012 §7 : un pas pour deux images. `split =
+    /// Some((k, 0))` encode la première passe, les copies, la mise en route de la projection et ses `k` premiers
+    /// cycles ; `Some((k, 1))` les `cycles − k` autres, le résidu et la troisième passe. Les deux parts, soumises
+    /// l'une après l'autre, font **exactement** les dispatchs du pas entier, dans le même ordre. `None` : le pas
+    /// entier, comme avant.
+    fn encode_split(&self, encoder: &mut wgpu::CommandEncoder, cycles: u32, upto: Upto, timed: bool, split: Option<(u32, u32)>) {
+        let partie = split.map(|s| s.1);
+        let (premier, dernier) = match split {
+            Some((k, 0)) => (0, k.min(cycles)),
+            Some((k, _)) => (k.min(cycles), cycles),
+            None => (0, cycles),
+        };
         // S341 : la passe `n` écrit ses horodatages de début et de fin en `2n` et `2n + 1`.
         let stamp = |n: u32| {
             self.query.as_ref().filter(|_| timed && upto == Upto::Full).map(|q| wgpu::ComputePassTimestampWrites {
@@ -614,7 +629,7 @@ impl Step3 {
             (self.cells as u32).div_ceil(GROUP),
             (self.columns as u32).div_ceil(GROUP),
         );
-        {
+        if partie != Some(1) {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(0) });
             pass.set_bind_group(0, &self.bg_bind, &[]);
             if self.tiled.get() {
@@ -641,9 +656,11 @@ impl Step3 {
         // Surface totale → géométrie de l'opérateur ; second membre et préconditionneur couplés
         // → tranches B et M de la projection.
         let (col_bytes, cell_bytes) = ((self.columns * 4) as u64, (self.cells * 4) as u64);
-        encoder.copy_buffer_to_buffer(&self.cells_out, 0, &self.heights, 0, col_bytes);
-        encoder.copy_buffer_to_buffer(&self.cells_out, 2 * col_bytes, &self.state, 6 * cell_bytes, cell_bytes);
-        encoder.copy_buffer_to_buffer(&self.cells_out, 2 * col_bytes + cell_bytes, &self.state, 5 * cell_bytes, cell_bytes);
+        if partie != Some(1) {
+            encoder.copy_buffer_to_buffer(&self.cells_out, 0, &self.heights, 0, col_bytes);
+            encoder.copy_buffer_to_buffer(&self.cells_out, 2 * col_bytes, &self.state, 6 * cell_bytes, cell_bytes);
+            encoder.copy_buffer_to_buffer(&self.cells_out, 2 * col_bytes + cell_bytes, &self.state, 5 * cell_bytes, cell_bytes);
+        }
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(1) });
             pass.set_bind_group(0, &self.cg_bind, &[]);
@@ -651,19 +668,23 @@ impl Step3 {
                 pass.set_pipeline(&self.cg[index]);
                 pass.dispatch_workgroups(groups, 1, 1);
             };
-            run(CG_BNORM[0], cells);
-            run(CG_BNORM[1], 1);
-            run(CG_INIT_WARM, cells);
-            run(CG_FINISH_RZ, 1);
-            for _ in 0..cycles {
+            if partie != Some(1) {
+                run(CG_BNORM[0], cells);
+                run(CG_BNORM[1], 1);
+                run(CG_INIT_WARM, cells);
+                run(CG_FINISH_RZ, 1);
+            }
+            for _ in premier..dernier {
                 for (n, index) in CG_CYCLE.iter().enumerate() {
                     run(*index, if n % 2 == 1 { 1 } else { cells });
                 }
             }
-            run(CG_RESIDUAL[0], cells);
-            run(CG_RESIDUAL[1], 1);
+            if partie != Some(0) {
+                run(CG_RESIDUAL[0], cells);
+                run(CG_RESIDUAL[1], 1);
+            }
         }
-        if upto == Upto::Projection {
+        if upto == Upto::Projection || partie == Some(0) {
             return;
         }
         {
@@ -749,6 +770,69 @@ impl Step3 {
             }
         }
         Ok(best)
+    }
+
+    /// S348 — **une part du pas**, à 30 Hz : la partie 0 publie l'instant et encode la première moitié ; la partie
+    /// 1 encode la seconde, range les diagnostics dans l'anneau et compte le pas. Ne lit rien, n'attend rien.
+    pub fn step_part(&mut self, background: &Background, time: SimTime, cycles: u32, k: u32, partie: u32) -> Result<(), String> {
+        if partie == 0 {
+            self.publish_time(background, time)?;
+        }
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        self.encode_split(&mut encoder, cycles, Upto::Full, false, Some((k, partie)));
+        let slot = if partie == 1 { self.ring_step.iter().position(|s| s.is_none()) } else { None };
+        if let Some(slot) = slot {
+            encoder.copy_buffer_to_buffer(&self.work, (self.diag_offset * 4) as u64, &self.ring[slot], 0, 20);
+            encoder.copy_buffer_to_buffer(&self.scalar, 0, &self.ring[slot], 32, 32);
+        }
+        self.queue.submit([encoder.finish()]);
+        if let Some(slot) = slot {
+            let ready = self.ring_ready[slot].clone();
+            ready.store(false, std::sync::atomic::Ordering::Release);
+            self.ring[slot].slice(..).map_async(wgpu::MapMode::Read, move |r| {
+                if r.is_ok() {
+                    ready.store(true, std::sync::atomic::Ordering::Release);
+                }
+            });
+            self.ring_step[slot] = Some(self.steps);
+        }
+        if partie == 1 {
+            self.steps += 1;
+        }
+        Ok(())
+    }
+
+    /// **Banc S348** : une part du pas horodatée seule, en millisecondes — du début de sa première passe à la fin
+    /// de sa dernière. L'instant doit avoir été publié avant la partie 0.
+    pub fn timed_part(&self, cycles: u32, k: u32, partie: u32) -> Result<Option<f64>, String> {
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        self.encode_split(&mut encoder, cycles, Upto::Full, true, Some((k, partie)));
+        let Some(q) = self.query.as_ref() else {
+            self.queue.submit([encoder.finish()]);
+            self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+            return Ok(None);
+        };
+        encoder.resolve_query_set(q, 0..6, &self.query_resolve, 0);
+        encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 48);
+        self.queue.submit([encoder.finish()]);
+        let slice = self.query_read.slice(..);
+        let (tx, rx) = std::sync::mpsc::channel();
+        slice.map_async(wgpu::MapMode::Read, move |r| {
+            let _ = tx.send(r);
+        });
+        self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+        rx.recv().map_err(|e| e.to_string())?.map_err(|e| e.to_string())?;
+        let ms;
+        {
+            let data = slice.get_mapped_range().map_err(|e| e.to_string())?;
+            let t: Vec<u64> = data.chunks_exact(8).map(|b| u64::from_le_bytes(b.try_into().unwrap())).collect();
+            let period = self.queue.get_timestamp_period() as f64 / 1e6;
+            // Partie 0 : passes 1 et 2 (horodatages 0 à 3) ; partie 1 : passes 2 et 3 (2 à 5).
+            let (a, b) = if partie == 0 { (0, 3) } else { (2, 5) };
+            ms = t[b].checked_sub(t[a]).map(|x| x as f64 * period);
+        }
+        self.query_read.unmap();
+        Ok(ms)
     }
 
     /// **Banc P6** : un pas entier horodaté sur la carte, sans aucune relecture d'état. C'est la
