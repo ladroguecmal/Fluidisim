@@ -96,7 +96,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le verdict R16 : critère 3 reçu ; critère 1.
 - [x] **P3** — `Background::from_components` et son essai ; critère 2.
-- [ ] **P4** — le cas 2 sur la production ; critère 3.
+- [x] **P4** — le cas 2 sur la production ; critère 3.
 - [ ] **P5** — le cas 1 : fond de B stationnaire, chaînon et HOS sur la référence.
 - [ ] **P6** — le cas 1 : production contre référence ; critère 4.
 - [ ] **P7** — preuve ; la porte B, si elle tient ; critère 5.
@@ -106,4 +106,11 @@ Critères, écrits avant le code :
 - **P3, critère 2 tenu.** `Background::from_components` et `ComponentsError` (vide, non fini, allocation) ;
   essai `two_opposed_components_make_a_standing_wave_s340` : deux composantes de `a/2`, opposées, quart de tour —
   `a·cos(k·x)·cos(ω·t)` à 2·10⁻⁵ près à 0 et à T/2, refus vérifiés. Cœur : 500 réussis, 14 ignorés.
+- **P4, critère 3 tenu** (`--delta3d-cas2`, 32×8×36 à 25 cm, repos 8 m, 400 pas de 5 ms, 64 cycles). Houle de B
+  d'une seule direction, `x` exact, 4 m ; crête initiale de 10 cm invariante en `y`. **À 5 cm de houle** : carte
+  contre référence **1,02·10⁻⁶ m** au pire sur 2 s (3 mm exigés), quadratique 4,6·10⁻⁷, pente 3,7·10⁻⁶ ;
+  invariance en `y` de la carte **9,5·10⁻⁷ m, 1,00 ulp du repos** (critère : 4), du cœur 3,4·10⁻⁸. **À 10 cm**, le
+  premier essai : au micron jusqu'à 1,25 s, puis 5,1 mm à 1,5 s, 8,3 mm à 2 s, invariance perdue (6·10⁻³) — la
+  surface franchit le centre de maille à 12,5 cm : **A297**, l'horizon de S298. Seule l'amplitude change entre
+  les deux. Le cas retenu est donc celui de S305 : sous le seuil, A297 entière.
 

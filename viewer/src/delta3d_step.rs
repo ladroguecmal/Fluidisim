@@ -1409,6 +1409,126 @@ pub fn trajectoire() -> Result<(), String> {
     })
 }
 
+/// S340, porte B — **le cas 2 d'ADR-175 §4 sur la production** (critère 2) : une houle de B d'une seule
+/// direction, exactement `x`, et une crête initiale invariante en `y` ; la solution l'est aussi. La carte
+/// doit le rester à l'arrondi près, et suivre la référence **sous 3 mm**. 32×8×36 à 25 cm, repos 8 m —
+/// `e^{−k·8}` ≈ 3·10⁻⁶ : le fond d'eau profonde n'a pas de flux au bas du domaine (ADR-152) —, 5 ms,
+/// éponge d'un mètre en `x` seulement, murs en `y`. `PAS=` (400, soit 2 s) et `CYCLES=` (64).
+pub fn cas2_production() -> Result<(), String> {
+    use crate::scene::host_impl;
+    use water_core::delta3d::{BackgroundGrid3, Volume3};
+    use water_core::host::HostServices;
+    use water_core::phase::freq_hz_to_q32;
+    use water_core::{Component, WorldPos};
+
+    pollster::block_on(async {
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 28);
+        let (rho, g, rest) = (1025_f32, 9.81_f32, 8_f32);
+        // Houle de 5 cm pour 4 m, période 1,60 s : avec la crête, la surface reste sous le centre de
+        // maille à 12,5 cm du repos — A297 n'est jamais déclenchée, comme dans la cuve de S305. À 10 cm
+        // (`HOULE=0.1`), elle l'est : la carte suit la référence au micron jusqu'à 1,25 s, puis s'en écarte
+        // de 5 à 8 mm et perd l'invariance en `y` (S340 P4) — l'horizon de S298.
+        let lambda = 4f32;
+        let a: f32 = std::env::var("HOULE").ok().and_then(|v| v.parse().ok()).unwrap_or(0.05);
+        let k = std::f32::consts::TAU / lambda;
+        let hz = ((g * k) as f64).sqrt() / std::f64::consts::TAU;
+        let houle = Component { amplitude: a, k_turns_per_m: 1. / lambda, dir: [1., 0.], freq_q32: freq_hz_to_q32(hz), phase0: PhaseQ32(0) };
+        let background = Background::from_components(
+            &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, &[houle], WorldPos::from_units(0, 0, 0), g)
+            .map_err(|e| format!("fond {e:?}"))?;
+        let domain = Domain3 { nx: 32, ny: 8, nz: 36, dx: 0.25 };
+        let origin = [0., 0., -rest];
+        let sponge = Sponge3 { width_x: 1., width_y: 0., rate_per_s: 2. };
+        let duration = 5_000u64;
+        let pas_total: u64 = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(400);
+        let cycles: u32 = std::env::var("CYCLES").ok().and_then(|v| v.parse().ok()).unwrap_or(64);
+        let (nx, ny, columns) = (domain.nx, domain.ny, domain.columns());
+        // Crête de 10 cm invariante en `y` : le profil de l'impulsion de S298, en `x` seulement.
+        let mut eta = vec![rest; columns];
+        for j in 0..ny {
+            for i in 0..nx {
+                let x = (i as f32 + 0.5) * domain.dx - 4.;
+                let r = x * x / (2. * 0.55 * 0.55);
+                eta[j * nx + i] += 0.1 * (1. - r) * (-r).exp();
+            }
+        }
+        let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
+            .map_err(|e| format!("volume {e:?}"))?;
+        volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
+        let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
+            .map_err(|e| format!("grille {e:?}"))?;
+        let (u0, v0, w0) = (volume.velocity_u().to_vec(), volume.velocity_v().to_vec(), volume.velocity_w().to_vec());
+        let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+        carte.set_step(duration, rest, sponge)?;
+        carte.set_state(&u0, &v0, &w0, &eta)?;
+        println!(
+            "DELTA3D_CAS2_S340 carte={:?} backend={} domaine={nx}x{ny}x{} dx={} repos={rest} houle_a={a} lambda={lambda} periode_s={:.4} dt_us={duration} pas={pas_total} cycles={cycles} eponge=(1,0,2)",
+            carte.adapter, carte.backend, domain.nz, domain.dx, 1. / hz
+        );
+        // Invariance en `y` : l'écart de chaque rangée à la première, au pire.
+        let invariance = |h: &[f32]| -> f32 { (0..columns).fold(0f32, |m, c| m.max((h[c] - h[c % nx]).abs())) };
+        let pente_x = |h: &[f32]| -> Vec<f32> {
+            (0..columns).map(|c| if c % nx + 1 < nx { (h[c + 1] - h[c]) / domain.dx } else { 0. }).collect()
+        };
+        let (mut pire, mut pire_rms, mut pire_pente, mut au_pas) = (0f32, 0f64, 0f32, 0u64);
+        let (mut inv_carte, mut inv_coeur, mut crete_max) = (0f32, 0f32, 0f32);
+        let (mut iter_max, mut affinages) = (0u32, 0u32);
+        for n in 0..=pas_total {
+            if n % 10 == 0 {
+                let coeur: Vec<f32> = volume
+                    .surface()
+                    .iter()
+                    .zip(volume.surface_roundoff_for_trials())
+                    .map(|(e, r)| (e - rest) - r)
+                    .collect();
+                let publiee = carte.published()?;
+                let (mut dh, mut somme) = (0f32, 0f64);
+                for (x, y) in coeur.iter().zip(&publiee) {
+                    dh = dh.max((x - y).abs());
+                    somme += ((x - y) as f64).powi(2);
+                }
+                let rms = (somme / columns as f64).sqrt();
+                let dpente = pente_x(&coeur).iter().zip(pente_x(&publiee)).fold(0f32, |m, (x, y)| m.max((x - y).abs()));
+                let (ic, ik) = (invariance(&publiee), invariance(&coeur));
+                inv_carte = inv_carte.max(ic);
+                inv_coeur = inv_coeur.max(ik);
+                let crete = coeur.iter().fold(0f32, |m, x| m.max(x.abs()));
+                crete_max = crete_max.max(crete);
+                if dh > pire {
+                    (pire, au_pas, pire_pente) = (dh, n, dpente);
+                }
+                pire_rms = pire_rms.max(rms);
+                if n % 50 == 0 {
+                    println!(
+                        "DELTA3D_CAS2_S340 t={:.2} crete_coeur={crete:.5} dh_max={dh:.3e} dh_rms={rms:.3e} dpente={dpente:.3e} invariance_carte={ic:.3e} invariance_coeur={ik:.3e}",
+                        n as f64 * duration as f64 * 1e-6
+                    );
+                }
+            }
+            if n == pas_total {
+                break;
+            }
+            let time = SimTime(n * duration);
+            grille.sample(&background, time).map_err(|e| format!("grille pas {n}: {e:?}"))?;
+            let vue = grille.view().ok_or("la grille ne publie rien")?;
+            let r = volume
+                .step_perturbation_mobile(time, duration, 4000, &vue, sponge, &jobs)
+                .map_err(|e| format!("coeur pas {n}: {e:?}"))?;
+            iter_max = iter_max.max(r.iterations);
+            affinages += r.refinements;
+            carte.publish_time(&background, time)?;
+            carte.run_for_bench(cycles, Upto::Full)?;
+        }
+        let ulp = f32::EPSILON * rest;
+        println!(
+            "DELTA3D_CAS2_S340 bilan dh_max={pire:.4e} m au_pas={au_pas} dpente_alors={pire_pente:.3e} dh_rms_max={pire_rms:.3e} invariance_carte={inv_carte:.3e} m ({:.2} ulp du repos) invariance_coeur={inv_coeur:.3e} m crete_max={crete_max:.4} coeur_iterations_max={iter_max} affinages={affinages}",
+            inv_carte / ulp
+        );
+        Ok(())
+    })
+}
+
 /// Banc P6 : **coût du pas entier sur la carte**, machine de référence (ADR-174 D1). Passe
 /// horodatée du premier dispatch au dernier, copies comprises, sans aucune relecture d'état : la
 /// forme de production. Fond spectral réel du cas S298 (64 composantes). Premier passage écarté.
