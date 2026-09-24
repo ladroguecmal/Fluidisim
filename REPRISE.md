@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-24 09:25 +02:00
+Battement        : 2026-09-24 09:34 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S335 — la vitesse de paroi au centroïde de la part couverte ; le couvercle partiel par défaut
 Dernière session : S334 — **A317 attribué** : la colonne en partie couverte avait une surface `1/a` fois trop molle — défaut de structure, le couvercle de S332 ne converge pas (± 30–44 %) ; le **couvercle partiel** converge (1,8 % à 6,25 cm) et ramène la porte D de 3,42 à 1,22 entre flancs, mais reste **éteint** : il amplifie le résidu de rotation de S332 ([preuve](docs/validation/PORTE-D-S333.md) §6)

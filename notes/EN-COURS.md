@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le centroïde de la part couverte d'une face (`delta3d_cut.rs`) ; critère 1.
-- [ ] **P3** — la paroi au centroïde : stocké à la découpe, lu par la divergence ; critère 2.
+- [x] **P3** — la paroi au centroïde : stocké à la découpe, lu par la divergence ; critère 2.
 - [ ] **P4** — la contre-épreuve de S333 au couvercle partiel ; critère 3 ; défaut allumé si tenu ; critère 4.
 - [ ] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
 - [ ] **P6** — preuve (PORTE-D-S333 §7) ; A317 ; file, feuille de route, liste si un état change.
@@ -101,3 +101,14 @@ Critères, écrits avant le code :
 ### Notes de reprise
 - **P2, critère 1 tenu.** `face_negative_centroid` : face pleine (0,5 ; 0,5), demi-face (0,25 ; 0,5), coin d'un
   champ linéaire (1/6 ; 1/6), part 1/8 ; aire identique à `face_negative` à 10⁻¹⁵ sur mille faces tirées.
+- **P3, impasse — la vitesse de paroi au centroïde, éprouvée et écartée.** Exacte pour le polyèdre discret :
+  sur les faces **pleinement ouvertes**, le résidu de la sphère qui tourne est divisé par deux (0,43 → 0,21 % de
+  `Ω·R` à 6 mailles par rayon ; 0,29 → 0,12 % à 12 ; ordre 0,56 → 0,83). Mais sur les **faces presque fermées**
+  (4–6 %), il double (6,5·10⁻³ → 1,25·10⁻² m/s) : les petites facettes du polyèdre pompent vraiment, et la
+  lecture au centre des faces le compensait en partie. Critère 1 de S332 (max sur toutes les faces ≤ 1 % à 12)
+  : 1,17 % — **manqué** ; critère 2 de S335 manqué. Et la contre-épreuve au couvercle partiel reste à
+  **5,46 m/s** : le diagnostic de S334 était faux. **Code revenu à P2** : la vitesse au centre des faces ; la
+  géométrie `face_negative_centroid` reste, éprouvée, inemployée.
+- **La vraie source des pointes, mesurée** : un plancher d'ouverture du couvercle partiel — 0,1 → 0,55 m/s ;
+  0,25 → 0,39 ; 0,5 → 0,36 (S332 : 0,32). Ce sont les colonnes ouvertes à moins de 10 %, où `1/a > 10` change
+  le reste de découpe d'une coque qui tourne en pointe.
