@@ -16861,3 +16861,23 @@ encore réunies en une scène vivante (feuille de route, « La v1 »). Liste : *
 **Rituel.** Maillons **0** : ce qui devient possible — deux domaines δ servis ensemble sous un budget qui n'en tient
 qu'un ; le chemin — la liste, dont 4.2 et 9.9 ; la preuve — §7. Suivant (ADR-190 D3) : **ranger les points restants
 par dépendance** dans la feuille de route.
+
+## S352 — 2026-09-24 — après la v1 : la liste rangée par dépendance
+
+**Entrée.** Suite de S351 dans la même demande : la v1 atteinte, [ADR-190](../docs/adr/ADR-190-apres-la-v1-la-liste-entiere.md)
+D3 demande de ranger les points restants par dépendance avant de les prendre un à un.
+**Fait.** [DEPENDANCES-LISTE](../docs/registres/DEPENDANCES-LISTE.md) : pour chacun des 117 points non validés, son
+système, ce qu'une session peut en faire maintenant, ce qu'il attend, ce qu'il débloque et son front. Les données
+sont écrites à la main dans `outils/dependances_liste.py` ; fronts et « débloque » se calculent, et
+`etat_projet.py --check` refuse un registre qui ne suit plus la liste — éprouvé sur trois défauts fabriqués. Un cycle
+levé en route (4.2 ↔ 4.9). Feuille de route **§3 ter** : l'ordre.
+**Ce que la carte dit.** Front 0 : **34** points ; fronts 1 à 5 : 42 ; **41** attendent un fait de l'utilisateur, dont
+22 directement — **le réseau (10.1) en commande 14**, puis la météo, le verdict du rang 1, la voie d'A289. En aval :
+**4.16** commande 22 points, **2.7** 20. Ordre proposé : la v1 en scène vivante (6.4, 4.2, 4.19), le lot 5 une
+session sur deux, la bathymétrie.
+**Limites.** Les dépendances sont un jugement, point par point, sur l'énoncé et l'état : une session qui en trouve
+une fausse la corrige dans les données. Les systèmes refaits par énoncé comptent B 25 et H 65 là où S309 comptait
+29 et 64 — S308 §8 ne publiait que les comptes.
+**Rituel.** Maillons **1** : une carte, pas une capacité — aucun point ne change d'état, comme le plan l'annonçait.
+Suivant : **la v1 en scène vivante**, en commençant par l'interpolation du rendu à 30 Hz (4.19, 8.7) ; puis le lot 5
+(4.16 par A316), une session sur deux.

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 22:08 +02:00
+JETON            : libre
+Battement        : 2026-09-24 22:09 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S352 — **ADR-190 D3 : la liste du projet fini rangée par dépendance** — registre des 117 points restants (système, attente, déblocage, front) et fronts dans la feuille de route
-Dernière session : S351 — **porte A, la dégradation de rang 1** : aucune image affamée contre 612, q99 mesuré 4,983 ms pour 5 ; **porte A reçue sur le banc, les quatre portes reçues — la v1 atteinte au sens d'ADR-174 D4** ([preuve](docs/validation/ARBITRAGE-3D-S344.md) §7) ; décision de l'utilisateur : après la v1, la liste entière ([ADR-190](docs/adr/ADR-190-apres-la-v1-la-liste-entiere.md))
-Session suivante : **ADR-190 D3** — ranger les points restants de la [liste du projet fini](docs/LISTE-PROJET-FINI.md) par dépendance, dans la feuille de route : ce que chacun attend, ce qu'il débloque, son système ; puis les points dont les dépendances sont levées. Proposé en tête : la réunion des portes en une scène vivante (coque dans la production de δ, ordonnanceur dans l'afficheur, interpolation à 30 Hz), et la revue du prix du rang 1 (A319). Le lot 5 reprend (ADR-190 D4)
-Maillons        : 0 — S351 : le rang 1, la porte A reçue
+Session en cours : aucune
+Dernière session : S352 — **la liste rangée par dépendance** (ADR-190 D3) : [registre](docs/registres/DEPENDANCES-LISTE.md) calculé et contrôlé, 34 points au front 0, 41 en attente d'un fait extérieur (le réseau en commande 14) ; l'ordre en feuille de route §3 ter. Avant : S351, la porte A reçue, **la v1 atteinte au sens d'ADR-174 D4**
+Session suivante : **la v1 en scène vivante** (feuille de route §3 ter, 1) — d'abord l'interpolation du rendu entre deux pas de 30 Hz (4.19, 8.7) ; puis la coque dans la production de δ (6.4) et l'ordonnanceur dans l'afficheur (4.2). **Une session sur deux au lot 5** (4.16 par A316, ADR-184 D1). La revue du prix du rang 1 (A319) quand l'afficheur le porte
+Maillons        : 1 — S352 : une carte, aucune capacité
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

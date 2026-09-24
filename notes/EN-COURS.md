@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S352 — **en cours**. **ADR-190 D3 : la liste du projet fini, rangée par dépendance** — la première session
+Session : S352 — **terminée**. **ADR-190 D3 : la liste du projet fini, rangée par dépendance** — la première session
 après la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — S351 : porte A reçue au banc ; la v1 atteinte au sens d'ADR-174 D4, portes reçues séparément. Décision de
@@ -91,7 +91,7 @@ Critères, écrits avant le travail :
 - [x] **P3** — le registre, sections 7 à 13 ; le compte des 117 points par script. *Fusion déclarée P2+P3 :
   un seul outil écrit et compte les treize sections.*
 - [x] **P4** — les fronts dans la feuille de route ; file, index, liste (renvoi).
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2+P3.** `outils/dependances_liste.py` : données écrites à la main (système, maintenant, attend, attente
