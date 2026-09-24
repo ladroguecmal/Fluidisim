@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S350 — **en cours**. **Porte A, un domaine qui se redimensionne** ; la dernière porte de la v1.
+Session : S350 — **terminée**. **Porte A, un domaine qui se redimensionne** ; la dernière porte de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — S349 : un domaine δ 3D se déplace, au bit, et suit la caméra sans s'éteindre. Reste du deuxième critère :
 **se redimensionner** ; puis la dégradation de rang 1 (session suivante), qui en a besoin.
@@ -102,7 +102,7 @@ Critères, écrits avant le code :
   `--check`.
 - [x] **P7** — le coût selon l'emprise ; critère 4.
 - [x] **P8** — preuve, file, feuille de route, et les lignes de la liste que S350 touche ; critère 5.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** Avant correction, au suivi : murs figés jusqu'à **0,169 m/s**, débit net **−2,80 m³/s** après

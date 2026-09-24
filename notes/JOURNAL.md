@@ -16819,3 +16819,24 @@ ce qui sort n'est pas rendu à W (A289).
 **Rituel.** Maillons **0** : ce qui devient possible — un domaine δ 3D qui accompagne ce qu'on regarde ; le chemin
 — la porte A, dont restent le redimensionnement et le rang 1 ; la preuve — §5. Suivant : **se redimensionner**,
 puis la dégradation de rang 1.
+
+## S350 — 2026-09-24 — porte A : un domaine qui se redimensionne ; la liste du projet fini actualisée
+
+**Entrée.** S349 : un domaine se déplace ; reste du critère, se redimensionner. Coupée pendant P4 (après 20:52) ;
+**reprise à chaud** à 21:06 sur *« Reprends le projets, et mais à jour le document de la to do list »* : aucune
+autre session en ligne, diff de P4 cohérent → **complété** ; la liste du projet fini (ainsi nommée en S271) ajoutée au plan.
+**Fait** ([preuve](../docs/validation/ARBITRAGE-3D-S344.md) §6). Les murs : le décalage de S349 recopiait les faces
+normales du bord, que le pas n'écrit jamais — 7,2 cm d'écart en 2 s près du mur ; laissées nulles, correction datée
+au §5. Une forme courante sous la capacité réservée ; `Step3::resize` en une soumission, `shift` à forme égale.
+**Mesuré.** Rétréci 120×112 → 90×84 puis élargi → 110×96 : état au bit, murs nuls, entrant au repos ; un domaine
+**créé** à la même forme, même état, **identique au bit après 60 pas** ; allocateur inchangé. Coût **0,09 + 3,57 ms
+× surface** (3,70 / 2,74 / 1,83 / 1,02 ms à 100 / 75 / 50 / 25 %, secteur) ; décalage 1,46 → 0,38 ms. Empreintes S343 inchangées.
+**Liste** ([LISTE-PROJET-FINI](../docs/LISTE-PROJET-FINI.md)) : chaque session de S309 à S349 relue contre les 120 points ;
+dix-neuf retouchés, trois de plus pour S350 ; **4.13 passe à partiel** — le proche-coque de la porte D ; **3 / 56 / 61**,
+aucun point validé : trois portes de la v1 reçues depuis S309 sans amener un point à son périmètre final.
+**Limites.** L'hôte décide de la forme, pas l'ordonnanceur ; capacité fixée à la création, `nz` fixe ; aucun verdict
+visuel sur une croissance ; ce qui sort n'est pas rendu à W (A289). Afficheur : 36 essais réussis, 0 échec.
+**Écart de méthode.** L'identité de S349 comparait à l'ancien translaté, murs compris : elle ne pouvait pas voir des murs figés.
+**Rituel.** Maillons **0** : ce qui devient possible — rétrécir un domaine libère son coût au prorata de sa surface ;
+le chemin — la dégradation de rang 1, dernier critère de la porte A, donc de la v1 ; la preuve — §6. Suivant : **le
+rang 1**. En attente : le terme de D2 (lot 5). File, feuille de route, index et liste à jour.
