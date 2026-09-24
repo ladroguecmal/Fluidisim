@@ -944,3 +944,31 @@ l'anneau ; **`D`** montre la mer sans δ ; flèches pour bouger ; Échap pour qu
 3. **Autre chose** qui gêne ?
 
 Un mot par question suffit.
+
+## 24. R19 — la mer de B dans Godot, contre l'afficheur, S357
+
+**[ADR-192](../adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md) D2, liste 8.1 et 8.4.** Le premier pas du rendu dans
+Godot : **la même mer** — celle de `--meilleur`, ses composantes exportées du cœur —, **au même instant** (12 s), **aux
+mêmes poses** (proche, rasante). Dans Godot : son éclairage, ses reflets, sa tonalité AgX, sa perspective aérienne ; le
+ciel aux couleurs du ciel clair de R14 ; l'écume des crêtes, écume fraîche (0,55), et la lumière des crêtes de S356
+([preuve](RENDU-CRETES-S356.md)). Dans l'afficheur : le rendu que R14 a retenu, avec la même écume et les mêmes crêtes.
+
+| pose | afficheur | Godot |
+|---|---|---|
+| proche | `viewer/captures/s357/afficheur_proche_12s.png` | `viewer/captures/s357/godot_proche_12s.png` |
+| rasante | `viewer/captures/s357/afficheur_rasante_12s.png` | `viewer/captures/s357/godot_rasante_12s.png` |
+
+En mouvement : `cargo run --manifest-path viewer/Cargo.toml --release --offline -- --meilleur --export-godot`, puis
+Godot 4.4.1 sur le dossier `godot` — touches 1 à 4 pour les poses, Échap pour quitter.
+
+**Les questions :**
+
+1. **Lequel est le plus proche d'une mer réelle** : l'afficheur ou Godot ? Godot mérite-t-il qu'on y porte le reste ?
+2. **Dans Godot, qu'est-ce qui gêne le plus** : la couleur de l'eau, le ciel, les reflets, l'écume, l'horizon, le manque
+   de détail des vagues, autre chose ?
+3. **L'écume** : les taches blanches sont-elles crédibles — taille, nombre, blancheur ?
+4. **Une référence réelle**, si vous en avez une : une photo ou une vidéo d'une mer de force 4 (vent d'environ 8 m/s,
+   quelques moutons), avec l'heure et la hauteur de prise de vue si possible.
+
+Un mot par question suffit.
+

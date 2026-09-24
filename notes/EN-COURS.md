@@ -86,7 +86,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'export depuis l'afficheur ; critère 1 (partie données).
 - [x] **P3** — le projet Godot : scène, nuanceur, environnement ; critère 2 et la hauteur du critère 1.
-- [ ] **P4** — les captures et la revue R19 ; critère 3.
+- [x] **P4** — les captures et la revue R19 ; critère 3.
 - [ ] **P5** — preuve, file, feuille de route, liste ; critère 4.
 - [ ] **P6** — rituel.
 
@@ -104,4 +104,8 @@ Critères, écrits avant le code :
   le ciel physique par défaut de Godot rend un **crépuscule gris** → ciel procédural aux couleurs du ciel clair de
   l'afficheur (photo de R14) ; en rasant, **les reflets à l'écran remplaçaient le ciel par l'eau sombre** → éteints
   (`REFLETS_ECRAN=1` les rallume) ; le demi-ciel bas pris à la couleur de l'horizon.
+- **P4.** Captures de Godot par lui-même (`-- --captures`, douze images d'attente par pose) et de l'afficheur
+  (`--meilleur --eau-physique=2 --ecume=0.55 --cretes --revue-mer=s357afficheur`), rassemblées dans
+  `viewer/captures/s357` (SHA-256 : afficheur proche `c9627a43…`, rasante `af2aaf00…` ; Godot proche `0bb2491f…`,
+  rasante `959024d0…`) ; **R19** écrite (REVUE-VISUELLE §24), images envoyées à l'utilisateur.
 
