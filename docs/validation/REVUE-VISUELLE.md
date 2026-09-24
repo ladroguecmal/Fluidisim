@@ -859,3 +859,11 @@ aucun verdict sur les images : la porte D reste **en attente de son verdict** (A
 continue sur son chemin — S334, A317, qui change l'amplitude des anneaux (§6 de la preuve). Un verdict sur
 les images seules, sans référence, reste possible : il qualifierait la perception, pas la physique.
 
+**Verdict R15 — reçu le 2026-09-24 (S337)**, sur les images de S336 (coque amortie, couvercle partiel) :
+*« 1. Oui »* — le bateau lâché qui se pose en 3 à 4 s sur la houle est juste ; *« 2. On voit la coupure
+encore »* — le bord de la grille de δ se voit, pli droit au loin ; *« 3. Pas forcément »* — pas d'autre défaut.
+**Classe** : bord de domaine, non physique de l'eau — le banc linéaire de la porte D a des murs et ajoute δ
+jusqu'au dernier rang de mailles, là où la production amortit ses ondes par une éponge et fond δ en cosinus
+sur la largeur de celle-ci, ce que R11 a jugé sans raccord visible. **Suite** : S337, éponge du mode linéaire
+et fondu de composition, images refaites ([PORTE-D-S333](PORTE-D-S333.md) §8).
+

@@ -15,7 +15,9 @@
 //! partie couvertes (A317) ; les lignes `PORTE_D flancs` donnent l'amplitude quadratique moyenne de δ à
 //! 2,5–3,5 m de chaque flanc long, entre 3 et 8 s. **S336** : `--archetype` donne à la coque les constantes que
 //! δ lui mesure — masse ajoutée 3 200 kg, amortissement de rayonnement 6 400 N·s/m en pilonnement — ; la ligne
-//! `PORTE_D energie` compare l'énergie que la coque dissipe à celle que sa paroi fournit à δ.
+//! `PORTE_D energie` compare l'énergie que la coque dissipe à celle que sa paroi fournit à δ. **S337** : `--eponge`
+//! donne au mode linéaire l'éponge du pas couplé, 3 m à 2,5 /s — le volume qu'elle retire entre au bilan —, et
+//! `--fondu 3` fond δ dans la scène comme la production ; `PORTE_D tardif` mesure l'agitation du centre après 12 s.
 //!
 //! `cargo run -p water-core --release --offline --example porte_d [-- --images <dossier>]` — lignes `PORTE_D` ;
 //! avec `--images`, à 2, 4, 6 et 8 s, la scène vue en perspective — B + δ, puis B + 5·δ — et la carte de δ,
@@ -29,7 +31,7 @@ mod render;
 use std::time::Instant;
 use water_core::background::{Background, SeaState};
 use water_core::body::Milieu;
-use water_core::delta3d::{Domain3, Volume3};
+use water_core::delta3d::{Domain3, Sponge3, Volume3};
 use water_core::delta_projection::PROJECTION_DIVERGENCE_TOLERANCE;
 use water_core::host::HostServices;
 use water_core::rigid_body::{surface_tilt, BackgroundWater, HullInDelta, RenderOffset, RigidBody, WaterQuery};
@@ -237,6 +239,10 @@ fn main() -> Result<(), String> {
     v.set_surface(&vec![d.z0(); d.columns()]).map_err(|e| format!("{e:?}"))?;
     let partiel = arguments.iter().any(|a| a == "--couvercle-partiel");
     v.set_partial_lid(partiel);
+    let eponge = arguments.iter().any(|a| a == "--eponge");
+    if eponge {
+        v.set_linear_sponge(Some(Sponge3 { width_x: 3., width_y: 3., rate_per_s: 2.5 })).map_err(|e| format!("éponge : {e:?}"))?;
+    }
     let solide0 = solide(&v, d);
     if std::env::args().any(|a| a == "--temoin") {
         return temoin(d, &noeuds);
@@ -252,6 +258,9 @@ fn main() -> Result<(), String> {
     let (mut flancs, mut comptes) = ([0f64; 2], [0usize; 2]);
     // S336 : l'énergie que la coque dissipe par son amortissement, et le travail que sa paroi fournit à δ.
     let (mut dissipe, mut travail) = (0f64, 0f64);
+    // S337 : l'agitation du centre, 12 × 12 m autour de la coque, colonnes libres, après 12 s — ce que les bords
+    // renvoient, ou non.
+    let (mut tardif, mut tardif_n) = (0f64, 0usize);
     // Le plancher f32 du transport de δ : chaque colonne arrondit son incrément de hauteur — trois opérations,
     // `3·2⁻²⁴·|Δη|` au plus —, et la somme sur les colonnes ne se télescope plus exactement. Cumulé pas à pas.
     let (mut plancher, mut avant) = (0f64, v.surface().to_vec());
@@ -270,7 +279,7 @@ fn main() -> Result<(), String> {
         if r.divergence > PROJECTION_DIVERGENCE_TOLERANCE {
             return Err(format!("pas {n} : divergence {}", r.divergence));
         }
-        let ecart = v.perturbation_volume() - (solide(&v, d) - solide0);
+        let ecart = v.perturbation_volume() + v.linear_sponge_removed() - (solide(&v, d) - solide0);
         pire_volume = pire_volume.max(ecart.abs());
         plancher += v.surface().iter().zip(&avant).map(|(h, a)| (h - a).abs() as f64).sum::<f64>() * aire * 3. / 16_777_216.;
         avant.copy_from_slice(v.surface());
@@ -294,6 +303,19 @@ fn main() -> Result<(), String> {
             let delta: Vec<f32> = v.surface().iter().zip(&couvertes).map(|(h, c)| if *c { 0. } else { h - d.z0() }).collect();
             let decale = [corps.position[0] - m.center[0] as f64, corps.position[1] - m.center[1] as f64];
             images(dossier, (n + 1) as f64 * DT, &w, d, &delta, &couvertes, decale, &corps, o, largeur_fondu)?;
+        }
+        if (n + 1) as f64 * DT > 12. {
+            let (_, _, ow) = v.apertures().expect("découpe");
+            let couvercle = &ow[d.nx * d.ny * d.nz..];
+            for j in 0..d.ny {
+                for i in 0..d.nx {
+                    let (x, y) = ((i as f64 + 0.5) * DX, (j as f64 + 0.5) * DX);
+                    if (x - 12.).abs() < 6. && (y - 12.).abs() < 6. && couvercle[j * d.nx + i] == 1. {
+                        tardif += ((v.surface()[j * d.nx + i] - d.z0()) as f64).powi(2);
+                        tardif_n += 1;
+                    }
+                }
+            }
         }
         if (n + 1) as f64 * DT > 3. {
             let (cx, cy) = (m.center[0] as f64, m.center[1] as f64);
@@ -325,6 +347,9 @@ fn main() -> Result<(), String> {
     println!("PORTE_D critere_5 delta_hauteur_max_m={hauteur_max:.5} delta_vitesse_max_m_s={vitesse_max:.4} houle_m={AMPLITUDE}");
     let (moins, plus) = ((flancs[0] / comptes[0] as f64).sqrt(), (flancs[1] / comptes[1] as f64).sqrt());
     println!("PORTE_D flancs couvercle_partiel={partiel} decalage_y_m={decalage_y} amplitude_moins_m={moins:.6} amplitude_plus_m={plus:.6} rapport={:.4}", moins / plus);
+    if tardif_n > 0 {
+        println!("PORTE_D tardif eponge={eponge} agitation_centre_12s_m={:.6} volume_retire_m3={:.6}", (tardif / tardif_n as f64).sqrt(), v.linear_sponge_removed());
+    }
     if archetype {
         println!("PORTE_D energie masse_ajoutee_kg={MASSE_AJOUTEE} amortissement_n_s_m={AMORTISSEMENT} dissipee_par_la_coque_j={dissipe:.2} fournie_a_delta_j={travail:.2} rapport={:.4}",
             travail / dissipe);

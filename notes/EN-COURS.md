@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul, verdict R15 consigné ici.
 - [x] **P2** — l'éponge du mode linéaire ; critère 1.
 - [x] **P3** — le fondu de composition dans le rendu de la porte D ; critère 2.
-- [ ] **P4** — la scène de la porte D, éponge et fondu, 12 s ; critère 3 ; images (critère 4).
+- [x] **P4** — la scène de la porte D, éponge et fondu, 12 s ; critère 3 ; images (critère 4).
 - [ ] **P5** — preuve ; R15 au registre des revues ; file, feuille de route.
 - [ ] **P6** — rituel ; arrêt pour le verdict.
 
@@ -103,3 +103,13 @@ Critères, écrits avant le code :
   borne cumulée, non aux 10⁻⁹ d'abord codés. Défaut sans éponge : S3xx au bit.
 - **P3, critère 2** : `fondu` de `porte_d` = `delta_fade` de `water.wgsl` — `½ − ½·cos(π·s/w)`, produit des
   fondus en x et en y ; `--fondu 3` : zéro au bord, un à 3 m. Sans l'option, les images de S333–S336 inchangées.
+- **P4, critère 3 tenu** (16 s au lieu des 12 prévues : les anneaux mettent ~13 s à revenir d'un mur). Scène
+  `--couvercle-partiel --archetype --eponge --fondu 3 --pas 1600` : critères 3 (au bit) et 5 de S333 ; volume de δ
+  plus retiré suit la coque, 1,95·10⁻⁹ m³, au plancher (1,9·10⁻⁵) ; **l'éponge retire 0,49 m³** — l'eau que la coque
+  déplace en se posant, qu'une mer ouverte étale. Agitation du centre après 12 s : **4,03 mm** avec éponge, **8,19 mm**
+  avec murs ; le reste vient de la coque, qui remue encore l'eau sur la houle — son tangage n'est pas amorti. Énergie
+  0,981 (murs 0,956). Plus de pli au bord dans les images. `viewer/captures/s337`, scène / carte : 2 s
+  `0x28e004971a52f585` / `0x2cf65f51fae160b1` ; 4 s `0xc33c5065fb79fcff` / `0xba406b73662214c1` ; 6 s
+  `0x7cd8db9d4c41f85e` / `0x8a41b853a480b80d` ; 8 s `0x21d2ccff6a239506` / `0x11e4c93ea60047cf` ; 10 s
+  `0xc4f0a58ae159079e` / `0x199806393a2489a3` ; 12 s `0xb42556af028c4e0c` / `0xef75f9c6f4391133` ; 14 s
+  `0xbfc0e4afe228ce0a` / `0xf10f55ab736a94df` ; 16 s `0xe315eb83a715c715` / `0x871e3986adbe3d09`.
