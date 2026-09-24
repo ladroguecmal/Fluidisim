@@ -62,66 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S336 — **terminée**. **La coque qui cesse de pilonner** : δ mesure hors ligne la masse ajoutée et
-l'amortissement par rayonnement de la coque de la porte D, que le corps du jeu reçoit comme des constantes de
-son archétype — ADR-008 §2, I-04 intact ; chemin de la porte D ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
+Session : S337 — **en cours**. **La coupure au bord de δ** : le verdict R15 de la porte D la voit encore ;
+chemin de la porte D ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée : *« Continue »* ; suite déclarée par S335. Verdict visuel de la porte D toujours attendu (R15).
+Entrée — **verdict R15 de l'utilisateur**, sur les images de S336 : *« 1. Oui »* — le bateau lâché qui se pose en
+3 à 4 s sur la houle est juste ; *« 2. On voit la coupure encore »* — les anneaux s'arrêtent sur le bord droit de
+la grille de δ, visible au loin ; *« 3. Pas forcément »* — pas d'autre défaut.
 
-**Ce que la session doit rendre possible.** Aujourd'hui la coque du jeu, lâchée de 10 cm, pilonne sans fin —
-± 12 cm pendant les 8 s de la scène — pendant que δ emporte l'énergie de ses anneaux : le jeu et l'eau se
-contredisent, et l'œil le voit. **La physique linéaire le dit** : en pilonnement imposé `z = Z·sin ωt`, la force
-de δ sur la coque vaut `A·ω²Z·sin ωt − B·ωZ·cos ωt` — `A` la masse ajoutée, `B` l'amortissement de rayonnement.
-δ les mesure, le jeu les reçoit à la pulsation propre qu'ils déterminent, `ω² = K/(m + A)`.
+**Ce que la session doit rendre possible.** Un δ dont le bord ne se voit pas, dans la scène de la porte D. La
+production l'a déjà fait, et R11 l'a jugé : **éponge** au bord du domaine et **fondu de 3 m** à la composition
+— *« pas de problème sur la transition »* (S303). Le banc de la porte D n'a ni l'un ni l'autre : le mode
+linéaire de δ a des murs, qui renvoient les anneaux, et le rendu y ajoute δ jusqu'au dernier rang de mailles.
+Le pli n'est pas de la physique de l'eau : c'est le bord d'un domaine local, qu'ADR-001 veut invisible. Le
+rendre à W — le retour δ → W — reste bloqué par A289 ; ici, l'éponge éteint les anneaux avant le mur.
 
 Critères, écrits avant le code :
-1. **`A(ω)` et `B(ω)`** de la coque 4 × 1,6 × 1 m en pilonnement imposé, δ à 25 cm, placement 30/30, quatre
-   pulsations 3 à 4,5 rad/s ; la force se décompose à 5 % près — résidu de l'ajustement sous 5 % de son
-   amplitude. À 12,5 cm, deux pulsations : l'écart à 25 cm publié, comme la résolution d'A317 le demande.
-2. **Le corps du jeu amorti** : `radiation_damping`, linéaire en la vitesse relative à l'eau ; lâché en eau
-   calme, il pilonne à `ω'` et s'amortit au taux `ζ = B/(2√(K(m + A)))`, les deux à ± 2 % ; valeurs par défaut
-   nulles, C10 et S331–S333 inchangés au bit.
-3. **La scène de la porte D** avec ces constantes : critères 3 à 5 de S333 ; **bilan** — l'énergie que la
-   coque perd par son amortissement et celle que δ reçoit de sa paroi, à ± 25 % l'une de l'autre sur la scène.
-4. **Images** refaites.
+1. **L'éponge du mode linéaire** (`Sponge3`, celle du pas couplé) : une bosse lâchée au centre d'un δ linéaire
+   ne revient pas — hauteur au centre après le passage des ondes sous 20 % de celle que les murs renvoient —,
+   et le volume qu'elle retire est compté : volume de δ plus volume retiré constant au plancher d'arrondi.
+   Éponge absente par défaut : essais du cœur verts, valeurs S3xx au bit.
+2. **Le fondu de composition** : δ pèse zéro au bord de la grille et un à 3 m de lui, comme la production.
+3. **La scène de la porte D**, 12 s, avec éponge et fondu : critères 3 et 5 de S333 ; volume suivi en comptant
+   l'éponge ; anneaux qui sortent sans revenir.
+4. **Images** refaites, puis **arrêt pour le verdict** (ADR-189 D3).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — banc `rayonnement_coque` : pilonnement imposé, force de δ, `A` et `B` ; critère 1.
-- [x] **P3** — le corps du jeu amorti, constantes de l'archétype ; critère 2.
-- [x] **P3 bis** — *ajouté, déclaré avant le code* : la masse ajoutée agit sur l'accélération **relative** à
-  l'eau ; critère 2 bis.
-- [x] **P4** — la scène de la porte D amortie ; critère 3 ; images (critère 4).
-- [x] **P5** — preuve `docs/validation/RAYONNEMENT-COQUE-S336.md` ; liste, file, feuille de route.
-- [x] **P6** — rituel.
+- [x] **P1** — jeton, plan seul, verdict R15 consigné ici.
+- [ ] **P2** — l'éponge du mode linéaire ; critère 1.
+- [ ] **P3** — le fondu de composition dans le rendu de la porte D ; critère 2.
+- [ ] **P4** — la scène de la porte D, éponge et fondu, 12 s ; critère 3 ; images (critère 4).
+- [ ] **P5** — preuve ; R15 au registre des revues ; file, feuille de route.
+- [ ] **P6** — rituel ; arrêt pour le verdict.
 
 ### Notes de reprise
-- **P2, `A(ω)` et `B(ω)`** (pilonnement imposé 5 cm, placement 30/30, fenêtre de deux périodes après 3 s). À 25 cm :
-  ω = 3,0 → A 3 112 kg (0,97 m), B 7 104 N·s/m ; 3,5 → 2 808, 6 315 ; 4,0 → 2 886, 5 212 ; 4,5 → 3 030, 4 576. À
-  12,5 cm : 3,5 → **3 234, 5 866** ; 4,0 → **3 361, 4 760** — A +15 %, B −8 % en affinant (la résolution d'A317).
-  **Critère 1 manqué** sur le résidu : 5,2–6,8 % à 25 cm, 9,0–9,4 % à 12,5 cm, pour 5 % visés. Nature : des sauts
-  discrets quand le fond de la coque franchit une face — jusqu'à 505 N d'un pas à l'autre, 25 % de l'amplitude —
-  et une dérive lente ; `A` et `B` restent déterminés à ~10 % près. **Constantes retenues pour l'archétype** :
-  pulsation propre cohérente `ω' = √(K/(m + A))` ≈ 3,17 rad/s ; **A = 3 200 kg, B = 6 400 N·s/m** (12,5 cm
-  extrapolé), ± 10 % ; `ζ = B/(2√(K(m + A)))` ≈ 0,158 ; période propre 1,98 s au lieu de 1,40.
-- **P3, critère 2 tenu.** `radiation_damping` ; lâcher de 10 cm en eau calme, A = 3 200 kg, B = 6 400 N·s/m :
-  période 2,0056 s pour 2,0066, décrément 1,0038 pour 1,0033 (ζ = 0,1577) ; sans amortissement, crêtes 0,1000
-  puis 0,1000 m. S331–S333 inchangés.
-- **P3 bis, pourquoi.** La masse ajoutée de S331 agit sur l'accélération absolue — juste en eau calme, fausse
-  sur la houle : la force de l'eau accélérée sur la coque, `A·a_eau`, manque, et la coque surréagit —
-  `K·S/(K − (m + A)ω²)` au lieu de `(K·S − A·ω²)/(K − (m + A)ω²)`, 1,12·a au lieu de 1,05·a sur la houle de 6 s.
-  **Critère 2 bis** : avec A = 3 200 kg, pilonnement forcé sur les houles de 6 et 3 s à ± 1 % de
-  `(K·S − A·ω²)/(K − (m + A)ω²)` ; sans masse ajoutée, S333 inchangé au bit.
-- **P3 bis, critère 2 bis tenu.** `WaterQuery::acceleration`, analytique sur B (`acceleration_local`, mêmes
-  phases). A = 3 200 kg : houle 6 s → 1,05201·a pour 1,05191 (relatif ; l'absolu dirait 1,11312) ; 3 s →
-  1,15922·a pour 1,16055 (absolu : 1,54745). Cœur : 498 réussis, 0 avertissement ; S331–S333 inchangés.
-- **P4, critère 3 tenu — le bilan d'énergie.** Scène `--couvercle-partiel --archetype` : la coque dissipe
-  **352,99 J** par son amortissement, sa paroi fournit **344,88 J** à δ — rapport **0,977** (± 25 % visés).
-  Pilonnement relatif lâché à +0,10 m, éteint en 3–4 s ([−0,060 ; +0,100] sur la scène) ; δ culmine à 6,5 cm (13,2
-  sans amortissement), flancs 11,66 / 11,66 mm, décalage visuel 0,7 cm. Critère 3 de S333 au bit ; volume
-  1,75·10⁻⁹ m³ (plancher 1,1·10⁻⁵). Images `viewer/captures/s336` : scène / carte 2 s `0x5bcee0e39127e82e` /
-  `0xc58da8c8de0a6f8b` ; 4 s `0xe8d0b8ce46f12bd5` / `0x121fe7d4ecf5d125` ; 6 s `0xf6b2b7b279a1c2d8` /
-  `0xac468acaedd43afb` ; 8 s `0xc99b2d47947a0766` / `0xab83f1e8df945f07`.
-- **P5** : preuve [RAYONNEMENT-COQUE-S336](../docs/validation/RAYONNEMENT-COQUE-S336.md) ; liste 6.1 (amortissement
-  fait) ; ligne des lots 3–4 de la file ; chronologie de la feuille de route ; index.
+
