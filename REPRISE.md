@@ -15,7 +15,7 @@ Battement        : 2026-09-24 15:53 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : aucune
 Dernière session : S343 — **porte C, dix champs par face** au lieu de 26, au bit : pas de δ **3,68 ms, q99 3,73** (4,45 / 4,51 en S341) ; création du pas ramenée de 247 à 4,8 s ([preuve](docs/validation/COUT-DELTA3D-S341.md) §7)
-Session suivante : **porte C, la projection** (2,06 ms, 56 % du pas, 0,062 ms par cycle) — mesurer puis réduire : fusion des cinq dispatchs d'un cycle, multigrille ; ensuite la cadence découplée (I-05), à éprouver contre la référence. En attente : le terme de D2 (lot 5)
+Session suivante : **porte A** — §6.4 interdit une quatrième session consécutive sur la porte C sans critère franchi (S343 était déjà la troisième, erreur de parcours) : l'ordonnanceur sur des domaines δ 3D, un domaine qui **se déplace**, premier critère à éprouver. La projection de la porte C (2,06 ms, 56 % du pas) reprend ensuite. En attente : le terme de D2 (lot 5)
 Maillons        : 3 — S341–S343 sur la porte C, aucun critère franchi ; justifié au journal (S343)
 ```
 

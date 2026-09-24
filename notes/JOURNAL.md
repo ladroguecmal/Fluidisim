@@ -16722,5 +16722,6 @@ pèse 56 %.
 **Limites.** Il manque 1,73 ms au 99ᵉ centile ; aucun critère de porte franchi.
 **Rituel.** Maillons **3** — justification : la porte C est la porte en cours et ne se franchit que par la
 combinaison (ADR-131 D4) ; chaque session a livré une part mesurée et reçue au bit (−17 % en trois) ; la suite
-débloque encore la v1, qui l'exige. Suivant : **la projection** — fusion du cycle, puis multigrille ; puis la
-cadence découplée.
+débloque encore la v1, qui l'exige. **Erreur de parcours**, vue à la clôture : §6.4 interdisait déjà cette
+troisième session consécutive sur le même point ; la justification des maillons ne la lève pas. Suivant : **la
+porte A** ; la projection de la porte C reprend après.
