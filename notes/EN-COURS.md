@@ -88,7 +88,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le noyau de décalage, `Step3::shift`, l'origine du fond ; critère 1.
-- [ ] **P3** — le domaine qui suit la caméra ; critère 2.
+- [x] **P3** — le domaine qui suit la caméra ; critère 2.
 - [ ] **P4** — preuve, file, feuille de route ; critère 3.
 - [ ] **P5** — rituel.
 
@@ -99,4 +99,10 @@ Critères, écrits avant le code :
   décalage (+3, −2) : **0 valeur différente au bit** dans les recouvrements (363 440 faces `u`, 363 636 `v`, 373 230
   `w`, 12 870 colonnes, 360 360 mailles), entrants au repos ; origine (−15 ; 0) → (−14,25 ; −0,5). Empreintes du pas
   de S343 inchangées.
+- **P3, critère 2 tenu** (`--delta3d-suivi`, côte de S344, budget 5 ms, 1 200 images). **Un seul domaine** se décale
+  vers le point regardé : **480 décalages d'une maille** (120 m), un par image pendant les trajets ; part d'écran
+  **0,1629 constante** après 1 s — un domaine vu de face — ; **1 naissance (au départ), 0 extinction**, là où deux
+  domaines fixes en demandaient deux de chaque (S344) ; **aucune colonne hors bornes**. Décalage, temps réel de la
+  soumission à la fin sur la carte : **médiane 1,463 ms, max 4,872** — sept soumissions séparées ; les grouper en une,
+  avec sept uniformes, est la suite évidente. `diagnostics_now` et `wait` ajoutés pour le banc.
 

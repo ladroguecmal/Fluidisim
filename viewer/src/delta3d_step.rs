@@ -1006,6 +1006,31 @@ impl Step3 {
         Ok(())
     }
 
+    /// **Banc S349** : les diagnostics du dernier pas exécuté, relus tout de suite — colonnes hors bornes, divergence,
+    /// volume. Le chemin de production les relit en différé (ADR-175 D3) ; un banc qui mesure un pas horodaté n'a pas
+    /// d'anneau.
+    pub fn diagnostics_now(&self) -> Result<Diagnostics, String> {
+        let v = self.relire(&self.work, self.diag_offset, 5)?;
+        let sc = self.relire(&self.scalar, 0, 8)?;
+        let (residual, rhs) = (sc[1].max(0.).sqrt(), sc[4].max(0.).sqrt());
+        Ok(Diagnostics {
+            step: self.steps,
+            age: 0,
+            divergence_plain: v[1],
+            divergence_all: v[0],
+            velocity_max: v[2],
+            volume: v[3],
+            columns_outside: v[4] as u32,
+            residual_relative: if rhs > 0. { residual / rhs } else { 0. },
+        })
+    }
+
+    /// **Banc S349** : attend que la carte ait fini tout ce qui lui a été soumis.
+    pub fn wait(&self) -> Result<(), String> {
+        self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
     /// S349 : l'origine courante du domaine — son coin bas, local à l'ancre de B.
     pub fn origin(&self) -> [f32; 3] {
         self.origin.get()

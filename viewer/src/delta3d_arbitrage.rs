@@ -209,3 +209,101 @@ pub fn arbitrage() -> Result<(), String> {
     })
 }
 
+/// S349, **porte A, critère 2 — un domaine qui se déplace** au lieu d'être allumé ou éteint. La côte de S344, la même
+/// caméra, le même ordonnanceur et le même budget ; mais **un seul domaine**, qui se décale vers le point regardé —
+/// son centre sous l'œil en `x` —, au plus deux mailles par image. Publiés : naissances et extinctions, décalages,
+/// part d'écran, colonnes hors bornes, coût du pas et du décalage. `--delta3d-suivi`.
+pub fn suivi() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let config = domaines()[0];
+        let dx = config.domain.dx;
+        let mut carte = Step3::new(background, config.domain, config.origin, RHO, G).await?;
+        carte.set_step(config.step_us, config.rest, config.sponge)?;
+        let etat = config.initial_state();
+        carte.set_state(&etat.0, &etat.1, &etat.2, &etat.3)?;
+        let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 12);
+        let profil = Profile { cpu_sim_ms: BUDGET_MS, blocks: 1, on: ALLUMAGE, off: EXTINCTION };
+        let mut ordonnanceur = Scheduler::with_capacity(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, profil, 1)
+            .map_err(|e| format!("ordonnanceur : {e:?}"))?;
+        let largeur = config.domain.nx as f32 * dx;
+        println!("DELTA3D_SUIVI_S349 carte={:?} budget_ms={BUDGET_MS} allumage={ALLUMAGE} extinction={EXTINCTION} decalage_max_par_image=2", carte.adapter);
+        let mut couts: Vec<f64> = Vec::new();
+        let (mut vivant_avant, mut naissances, mut extinctions) = (false, 0usize, 0usize);
+        let (mut decalages, mut mailles, mut hors, mut part_min_regime) = (0usize, 0i64, 0u32, f32::INFINITY);
+        let mut duree_decalage: Vec<f64> = Vec::new();
+        let mut oubli_depuis: Option<u64> = None;
+        let images = (SECONDES * 1e6 / FRAME_US as f64) as u64;
+        for n in 0..=images {
+            let t = n as f64 * FRAME_US as f64 * 1e-6;
+            let cam = camera(t);
+            let vue = projection(&cam);
+            // Le décalage vers le point regardé : le centre du domaine sous l'œil, en mailles entières.
+            let o = carte.origin();
+            let cible = cam.eye[0] - largeur / 2.;
+            let di = (((cible - o[0]) / dx).round() as i32).clamp(-2, 2);
+            if di != 0 {
+                let debut = std::time::Instant::now();
+                carte.shift(di, 0)?;
+                carte.wait()?;
+                duree_decalage.push(debut.elapsed().as_secs_f64() * 1e3);
+                decalages += 1;
+                mailles += di.unsigned_abs() as i64;
+            }
+            let o = carte.origin();
+            let part = vue.screen_fraction([o[0], o[1]], [o[0] + largeur, o[1] + config.domain.ny as f32 * dx]);
+            if t > 1. {
+                part_min_regime = part_min_regime.min(part);
+            }
+            ordonnanceur.begin();
+            let cout = if couts.is_empty() { PREMIER_COUT_MS } else {
+                let mut w = couts.clone();
+                w.sort_by(|a, b| a.partial_cmp(b).unwrap());
+                w[w.len() / 2] as f32
+            };
+            ordonnanceur.submit(Bid { id: DomainId(0), gameplay: 1., perception: part, urgency: 1., cost_ms: cout, blocks: 1, regime: Regime::Perturbative })
+                .map_err(|e| format!("soumission : {e:?}"))?;
+            ordonnanceur.decide(SimTime(n * FRAME_US)).map_err(|e| format!("décision : {e:?}"))?;
+            ordonnanceur.allocate();
+            let vivant = ordonnanceur.is_active(DomainId(0));
+            let accorde = !ordonnanceur.grants().is_empty();
+            if vivant && !vivant_avant { naissances += 1; }
+            if !vivant && vivant_avant { extinctions += 1; }
+            vivant_avant = vivant;
+            let now = n * FRAME_US;
+            match oubli_depuis {
+                Some(depuis) if !accorde && now >= depuis => {
+                    let k = (((now - depuis) / FRAME_US) as usize).min(couts.len());
+                    couts.drain(..k);
+                    oubli_depuis = Some(depuis + ((now - depuis) / FRAME_US) * FRAME_US);
+                }
+                _ => oubli_depuis = Some(now),
+            }
+            if accorde {
+                carte.publish_time(background, SimTime(n * FRAME_US))?;
+                if let Some(ms) = carte.timed_step(config.cycles)? {
+                    couts.push(ms);
+                    if couts.len() > ECHANTILLONS { couts.remove(0); }
+                }
+                hors = hors.max(carte.diagnostics_now()?.columns_outside);
+            }
+            if n % 30 == 0 {
+                println!(
+                    "DELTA3D_SUIVI_S349 t={t:.2} oeil_x={:.2} origine_x={:.2} part={part:.4} vivant={vivant} accorde={accorde} decalages={decalages}",
+                    cam.eye[0], o[0]
+                );
+            }
+        }
+        duree_decalage.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let q = |v: &Vec<f64>, f: f64| if v.is_empty() { f64::NAN } else { v[(((v.len() - 1) as f64) * f).round() as usize] };
+        couts.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        println!(
+            "DELTA3D_SUIVI_S349 bilan images={} naissances={naissances} extinctions={extinctions} decalages={decalages} mailles_parcourues={mailles} part_min_apres_1s={part_min_regime:.4} hors_bornes_max={hors} decalage_mediane_ms={:.3} decalage_max_ms={:.3}",
+            images + 1, q(&duree_decalage, 0.5), q(&duree_decalage, 1.)
+        );
+        Ok(())
+    })
+}
+
