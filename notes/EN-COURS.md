@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S335 — **en cours**. **La vitesse de paroi au centroïde de la part couverte** — le remède nommé en
+Session : S335 — **terminée**. **La vitesse de paroi au centroïde de la part couverte** — le remède nommé en
 S332 —, puis le couvercle partiel d'A317 allumé par défaut ; chemin de la porte D
 ([ADR-189](../docs/adr/ADR-189-la-v1-d-abord.md)).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
@@ -98,7 +98,7 @@ Critères, écrits avant le code :
   critère 4 bis ; défaut allumé si tenu ; critère 4.
 - [x] **P5** — la scène de la porte D au nouveau défaut ; critère 5 ; images.
 - [x] **P6** — preuve (PORTE-D-S333 §7) ; A317 ; file, feuille de route, liste si un état change.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 **Amendement après P3, déclaré avant le code.** La vitesse au centroïde n'était pas la cause : les pointes
 viennent des colonnes ouvertes à moins de 10 %, où `1/a > 10` amplifie le reste de découpe d'une coque qui

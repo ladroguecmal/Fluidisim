@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 10:17 +02:00
+JETON            : libre
+Battement        : 2026-09-24 10:16 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S335 — la vitesse de paroi au centroïde de la part couverte ; le couvercle partiel par défaut
-Dernière session : S334 — **A317 attribué** : la colonne en partie couverte avait une surface `1/a` fois trop molle — défaut de structure, le couvercle de S332 ne converge pas (± 30–44 %) ; le **couvercle partiel** converge (1,8 % à 6,25 cm) et ramène la porte D de 3,42 à 1,22 entre flancs, mais reste **éteint** : il amplifie le résidu de rotation de S332 ([preuve](docs/validation/PORTE-D-S333.md) §6)
-Session suivante : **S335, la vitesse de paroi au centroïde de la part couverte** (remède nommé en S332), puis couvercle partiel allumé par défaut et scène de la porte D rejouée — chemin de la porte D. Le **verdict visuel** reste attendu (R15 : pas de référence trouvée)
-Maillons        : 1 — S334 : A317 attribué, remède construit mais éteint
+Session en cours : aucune
+Dernière session : S335 — **A317 corrigé** : le couvercle partiel est actif par défaut, avec un plancher d'ouverture de 10 % — la coque tenue sur la houle reste sous 0,56 m/s et la tranche converge encore (3,1 % à 6,25 cm) ; la porte D passe de 3,42 à 1,22 entre flancs. **Impasse publiée** : la vitesse de paroi au centroïde ne retirait pas les pointes ([preuve](docs/validation/PORTE-D-S333.md) §7)
+Session suivante : **S336, l'amortissement par rayonnement de la coque** — la coque du jeu pilonne sans fin pendant que δ rayonne : δ mesure hors ligne son coefficient, constant pour l'archétype (I-04), comme la masse ajoutée en S332 ; puis la scène de la porte D rejouée. Le **verdict visuel** reste attendu (R15)
+Maillons        : 0 — S335 : A317 corrigé par défaut, convergence éprouvée
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -95,8 +95,8 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 - **Porte D** — lots 3 et 4, la voie de la v1 — **ouverte**, **priorité** (ADR-189) : fond coupé et solide immergé
   quelconque, fixe ou en mouvement (S324–S330) ; corps rigide du jeu sur B + W, C10 tenu, qui pilote
   sa coque dans δ sans que δ le pilote (S331–S332) ; **la coque sur la houle de B**, δ relatif à l'eau
-  qui la porte — partie numérique faite, **verdict visuel attendu** (S333) ; A317 attribué, couvercle
-  partiel construit mais éteint (S334).
+  qui la porte — partie numérique faite, **verdict visuel attendu** (S333) ; A317 corrigé, couvercle
+  partiel actif par défaut (S334–S335).
   **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
 - Liste du projet fini : **3 validés, 54 partiels, 63 absents** sur 120.
 

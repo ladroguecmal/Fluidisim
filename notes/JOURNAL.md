@@ -16573,3 +16573,21 @@ pour ± 2 %) ; 3,125 cm : gradient conjugué non convergé.
 Suivant : **S335, la vitesse de paroi au centroïde** — troisième session sur ce fil, justifiée : elle seule
 allume le couvercle partiel, sans lequel une coque qui bouge dans δ rayonne selon sa maille. Verdict attendu.
 
+## S335 — 2026-09-24 — A317 corrigé : le couvercle partiel par défaut, et une impasse
+
+**Entrée.** *« Continue »* ; suite déclarée par S334 — troisième session sur ce fil, justifiée au journal S334.
+**Impasse, publiée** ([preuve](../docs/validation/PORTE-D-S333.md) §7). La vitesse de paroi au centroïde exact
+de la part couverte — le remède nommé en S332 — ne retire pas les pointes du couvercle partiel (5,46 m/s) ;
+elle divise par deux le résidu de la sphère qui tourne sur les faces ouvertes, mais le double sur les faces
+presque fermées, où le polyèdre discret pompe. Écartée ; le diagnostic de S334 était faux.
+**La cause, mesurée.** Les colonnes ouvertes à moins de 10 % : un plancher d'ouverture de 10 % ramène la coque
+tenue sur la houle à 0,55 m/s. La tranche converge encore : 42,8 → 10,6 → **3,1 %**, moyenne 20,51 mm.
+**Allumé par défaut.** 496 réussis ; trois valeurs S3xx changent, publiées. Porte D : 30/30 au bit de S334,
+8/52 à 1,22 entre flancs (S332 : 3,42).
+**Non fait.** La résolution près des coques — ± 43–49 % à 25 cm, ~25 mailles pour ± 3 %.
+**Méthode.** Un battement écrit avant de lire l'horloge (P6, deux minutes d'avance) : L237 rappelée.
+**Rituel.** Maillons **0** : ce qui devient possible — une coque dans δ qui rayonne sans dépendre de sa
+position sous la maille, à la résolution près ; le chemin — la porte D, un bateau qui bouge dans δ ; la
+preuve — §6–7, correction d'intégrité reproduite puis éprouvée. Suivant : **S336, l'amortissement par
+rayonnement de la coque**, mesuré par δ hors ligne ; verdict visuel toujours attendu (R15).
+
