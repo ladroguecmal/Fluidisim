@@ -16692,3 +16692,18 @@ bit. Puis la projection (multigrille, fusion), puis la cadence découplée (I-05
 **Limites.** Pas soumis seuls ; ni rendu concurrent ni recouvrement ; une seule scène.
 **Rituel.** Maillons **1** : une mesure, aucun critère franchi. Suivant : **le fond de δ factorisé et allégé**,
 reçu au bit. En attente : le terme de D2 (lot 5).
+
+## S342 — 2026-09-24 — porte C : le fond de δ factorisé
+
+**Entrée.** S341 : l'évaluation du fond de B, 1,53 ms des 4,45 du pas, premier levier désigné.
+**Fait** ([preuve](../docs/validation/COUT-DELTA3D-S341.md) §6). `sample_faces_tiled` : tuiles de 16 colonnes × 16
+couches, sinus et cosinus par colonne, atténuation par couche, en mémoire de groupe, même accumulation. **Au
+bit** : 29 871 296 valeurs du fond identiques à trois instants, 60 pas de production identiques. Par défaut
+jusqu'à 64 composantes.
+**Mesuré** (secteur, même session) : fond 1,527 → **1,237 ms**, pas 4,456 → **4,348 ms**, q99 4,501 → 4,405.
+**Ce que cela apprend.** Le calcul transcendant n'était pas l'essentiel du fond : restent l'accumulation des 26
+champs de chaque face et leur écriture, 120 Mo par pas, dont le pas ne lit qu'une dizaine selon l'axe.
+**Limites.** −0,11 ms au pas ; loin des 2 ms, comme attendu d'un levier seul (ADR-131 D4).
+**Rituel.** Maillons **2** : aucun critère de porte franchi depuis S340 ; la suite reste sur la porte C, qui ne se
+franchit que par la combinaison — justification : c'est la porte en cours, et chaque levier est mesuré. Suivant :
+**n'écrire que les champs lus**, reçu au bit.

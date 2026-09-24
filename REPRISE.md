@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 14:39 +02:00
+JETON            : libre
+Battement        : 2026-09-24 15:05 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S342 — **porte C, premier levier** : le fond de δ factorisé sur la carte — sinus, cosinus et atténuation par colonne et par couche, non par face — reçu au bit
-Dernière session : S341 — **porte C, la mesure** : pas de δ de 4,45 ms, 99ᵉ centile 4,5–4,65 sur la scène de B ; fond 1,53 ms, projection 2,06 (0,087 + 0,062 par cycle), fin 0,39 ([preuve](docs/validation/COUT-DELTA3D-S341.md))
-Session suivante : **porte C, premier levier** — l'évaluation du fond de δ sur la carte : phase par colonne, atténuation par couche, n'écrire que les champs lus ; reçu si la surface publiée reste identique au bit, coût publié. Puis la projection. En attente : le terme de D2 (lot 5)
-Maillons        : 1 — S341 : mesure de la porte C, aucun critère franchi
+Session en cours : aucune
+Dernière session : S342 — **porte C, le fond de δ factorisé** par colonne et par couche, au bit : fond 1,53 → 1,24 ms, pas 4,46 → 4,35 ms ([preuve](docs/validation/COUT-DELTA3D-S341.md) §6)
+Session suivante : **porte C, charge utile** — n'écrire, par face, que les champs que le pas lit (une dizaine sur 26 selon l'axe), reçu au bit sur la surface publiée ; puis la projection (multigrille, fusion), puis la cadence découplée. En attente : le terme de D2 (lot 5)
+Maillons        : 2 — S341 : mesure ; S342 : fond factorisé, aucun critère franchi (justifié au journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

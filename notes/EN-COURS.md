@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S342 — **en cours**. **Porte C, premier levier : le fond de δ factorisé** ; chemin de la v1.
+Session : S342 — **terminée**. **Porte C, premier levier : le fond de δ factorisé** ; chemin de la v1.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — S341 ([preuve](../docs/validation/COUT-DELTA3D-S341.md)) : l'évaluation du fond de B coûte **1,53 ms** des
 4,45 du pas. Le noyau `sample_faces` calcule, pour chacune des 1 148 896 faces et des 64 composantes, une phase,
@@ -87,7 +87,7 @@ Critères, écrits avant le code :
 - [x] **P2** — le noyau par tuiles et son branchement ; relecture des faces pour le banc.
 - [x] **P3** — l'identité au bit ; critère 1.
 - [x] **P4** — le coût ; critère 2 ; preuve, file ; critère 3.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2, fait.** `sample_faces_tiled` (`delta3d_background.wgsl`) : groupes de 256 fils, tuiles de 16 colonnes × 16
