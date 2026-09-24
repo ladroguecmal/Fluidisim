@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les murs après un décalage ; critère 1.
 - [x] **P3** — la forme courante dans `Step3` ; critère 2.
-- [ ] **P4** — `Step3::resize` en une soumission ; critère 3.
+- [x] **P4** — `Step3::resize` en une soumission ; critère 3.
 - [ ] **P5** — le coût selon l'emprise ; critère 4.
 - [ ] **P6** — preuve, file, feuille de route ; critère 5.
 - [ ] **P7** — rituel.
@@ -112,4 +112,12 @@ Critères, écrits avant le code :
   de faces, mailles, colonnes, débits, diagnostics et tuiles devenus des méthodes de la forme courante. Empreintes
   S343 **inchangées** : 60 pas 0x5efa267462dfa0ad / 0xc5c6a85d3d29f44b, 600 pas 0x9325cf58781f8b74 /
   0xea1bebe0ffabc19a ; décalage (+3, −2) toujours 0 différence.
+- **Reprise à chaud, 21:06.** Conversation coupée pendant P4 (battement 20:40, aucune autre session en ligne) ;
+  l'utilisateur demande la reprise. Diff de P4 lu, cohérent avec la thèse : **complété**, pas annulé.
+- **P4, critère 3 tenu** (`--delta3d-redimensionnement`, scène de la porte B après 30 pas). Rétréci 120×112 → 90×84
+  depuis (13, 17), puis élargi → 110×96 depuis (−6, −9) : (a) **0 différence** sur les sept tableaux, murs nuls
+  (4 704 `u` / 5 040 `v`, puis 5 376 / 6 160), entrant au repos (78 960 `u`, 3 000 colonnes) ; (b) domaine créé à la
+  forme et à l'origine, même état : **0 différence** sur 881 832 puis 1 230 728 valeurs après 60 pas, volumes égaux
+  (29,74 et 31,65 m³), surface jusqu'à 0,86 m ; (c) allocateur avant = après, **89 784 320 octets, 27 allocations**,
+  les deux fois. Rejoués : empreintes S343 inchangées, décalage (+3, −2) 0 différence.
 

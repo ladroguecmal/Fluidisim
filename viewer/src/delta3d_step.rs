@@ -46,6 +46,8 @@ const RING: usize = 3;
 const BG: [&str; 4] = ["sample_faces", "couple_columns", "couple_rhs", "sample_faces_tiled"];
 /// S343 : champs du fond par face dans le pas — la disposition compacte (`COMPACT` des noyaux du fond).
 pub const STEP_FIELDS: usize = 10;
+/// S350 : taille de l'uniforme `Shift` de `delta3d_shift.wgsl`, douze mots.
+const SHIFT_UNIFORM: u64 = 48;
 /// S342 : composantes au plus pour le noyau par tuiles (sa mémoire de groupe) ; au-delà, `sample_faces`.
 const TILE_COMPONENTS: usize = 64;
 
@@ -108,16 +110,22 @@ pub struct Step3 {
     bg: Vec<wgpu::ComputePipeline>,
     /// S342 : le fond par tuiles (vrai par défaut jusqu'à 64 composantes).
     tiled: std::cell::Cell<bool>,
-    /// S349 — le décalage de l'état (porte A) : noyau, uniforme, tampon de travail réservé à la configuration,
-    /// un groupe de liaison par tableau cible (vitesses, surface, pression, surface publiée) ; et l'origine
-    /// courante du domaine, que le fond lit.
+    /// S349 — le décalage de l'état (porte A) ; S350 — le redimensionnement, dont le décalage est le cas à forme
+    /// égale. Noyau, uniformes (un emplacement par tableau réécrit, `shift_stride` octets chacun), tampon de travail
+    /// qui reçoit tout l'ancien état, réservés à la configuration ; un groupe de liaison par tableau réécrit ; et
+    /// l'origine courante du domaine, que le fond lit.
     shift_pipeline: wgpu::ComputePipeline,
     shift_uniform: wgpu::Buffer,
+    shift_stride: u64,
     shift_scratch: wgpu::Buffer,
     shift_binds: Vec<wgpu::BindGroup>,
     origin: std::cell::Cell<[f32; 3]>,
+    /// S350 : la durée du pas et l'éponge, gardées pour réécrire l'uniforme du pas quand la forme change.
+    dt: std::cell::Cell<f64>,
+    sponge: std::cell::Cell<Sponge3>,
     // Projection (S299).
     cg_bind: wgpu::BindGroup,
+    cg_uniform: wgpu::Buffer,
     heights: wgpu::Buffer,
     state: wgpu::Buffer,
     scalar: wgpu::Buffer,
@@ -374,7 +382,7 @@ impl Step3 {
         let cg_uniform = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: None,
             contents: &cg_params,
-            usage: wgpu::BufferUsages::UNIFORM,
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
         let cg_layout = layout(&device, &['r', 'w', 'w', 'w', 'u']);
         let cg_bind = bind(&device, &cg_layout, &[&heights, &state, &partial, &scalar, &cg_uniform]);
@@ -411,15 +419,39 @@ impl Step3 {
         let query_resolve = buffer(&device, 48, wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC);
         let query_read = buffer(&device, 48, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
 
-        // S349 : le décalage. Tampon de travail à la taille du plus grand tableau décalé (une famille de faces).
-        let shift_scratch = buffer(&device, (faces.max(cells) * 4) as u64, storage);
-        let shift_uniform = buffer(&device, 48, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
+        // S349 : le décalage ; S350 : le redimensionnement, en une soumission. Le tampon de travail reçoit tout l'état
+        // de la forme courante — vitesses, surface, reste, pression, surface publiée — avant qu'un seul tableau soit
+        // réécrit : quand la forme change, les tableaux cibles recouvrent les sources.
+        let shift_scratch = buffer(&device, ((faces + 3 * columns + cells) * 4) as u64, storage);
+        let alignement = device.limits().min_uniform_buffer_offset_alignment as u64;
+        let shift_stride = SHIFT_UNIFORM.div_ceil(alignement) * alignement;
+        let shift_uniform = buffer(&device, 7 * shift_stride, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
         let shift_layout = layout(&device, &['r', 'w', 'u']);
         let shift_module = device.create_shader_module(wgpu::include_wgsl!("delta3d_shift.wgsl"));
         let shift_pipeline = pipelines(&device, &shift_layout, &shift_module, &["shift"]).remove(0);
-        let shift_binds = [&vel, &cells_in, &state, &published]
+        // Un groupe par tableau réécrit, dans l'ordre de `resize` : trois familles de faces, surface, reste,
+        // pression, surface publiée.
+        let shift_binds = [&vel, &vel, &vel, &cells_in, &cells_in, &state, &published]
             .iter()
-            .map(|cible| bind(&device, &shift_layout, &[&shift_scratch, cible, &shift_uniform]))
+            .enumerate()
+            .map(|(e, cible)| {
+                device.create_bind_group(&wgpu::BindGroupDescriptor {
+                    label: None,
+                    layout: &shift_layout,
+                    entries: &[
+                        wgpu::BindGroupEntry { binding: 0, resource: shift_scratch.as_entire_binding() },
+                        wgpu::BindGroupEntry { binding: 1, resource: cible.as_entire_binding() },
+                        wgpu::BindGroupEntry {
+                            binding: 2,
+                            resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                                buffer: &shift_uniform,
+                                offset: e as u64 * shift_stride,
+                                size: wgpu::BufferSize::new(SHIFT_UNIFORM),
+                            }),
+                        },
+                    ],
+                })
+            })
             .collect();
         let device_ring = device.clone();
         let this = Self {
@@ -440,10 +472,14 @@ impl Step3 {
             tiled: std::cell::Cell::new(count <= TILE_COMPONENTS),
             shift_pipeline,
             shift_uniform,
+            shift_stride,
             shift_scratch,
             shift_binds,
             origin: std::cell::Cell::new(origin),
+            dt: std::cell::Cell::new(0.),
+            sponge: std::cell::Cell::new(Sponge3::default()),
             cg_bind,
+            cg_uniform,
             heights,
             state,
             scalar,
@@ -527,6 +563,8 @@ impl Step3 {
         let scale = (-self.rho as f64 / dt) as f32;
         self.write_step_uniform(rest, dt, sponge);
         self.rest.set(rest);
+        self.dt.set(dt);
+        self.sponge.set(sponge);
         self.queue.write_buffer(&self.bg_uniform, 28, &rest.to_le_bytes());
         self.queue.write_buffer(&self.bg_uniform, 40, &scale.to_le_bytes());
         Ok(())
@@ -983,57 +1021,122 @@ impl Step3 {
     /// fond avance de `(di·dx, dj·dx)`. Ce qui entre naît au repos (δ = 0, I-12) ; ce qui sort est perdu. Un
     /// déplacement de données, au bit ; hors pas, entre deux pas. **S350** : les faces normales du nouveau bord
     /// restent des murs, nulles — S349 y recopiait des vitesses intérieures, figées ensuite (2,8 m³/s à travers le
-    /// bord après l'aller du banc de suivi).
+    /// bord après l'aller du banc de suivi) ; et le décalage est un redimensionnement à forme égale.
     pub fn shift(&self, di: i32, dj: i32) -> Result<(), String> {
-        let Domain3 { nx, ny, nz, dx } = self.shape.get();
+        let Domain3 { nx, ny, .. } = self.shape.get();
         if di.unsigned_abs() as usize >= nx || dj.unsigned_abs() as usize >= ny {
             return Err("décalage : plus grand que le domaine".into());
         }
+        self.resize(di, dj, nx, ny)
+    }
+
+    /// S350 — **redimensionne le domaine**, porte A : sa nouvelle forme `nx × ny` (au plus la capacité, `nz`
+    /// inchangé) commence à la maille `(di, dj)` de l'ancienne. L'état est réécrit dans la nouvelle disposition — au
+    /// bit dans le recouvrement, murs nuls, repos ailleurs (I-12) —, puis les uniformes du fond, de la projection et
+    /// du pas suivent la forme, et l'origine avance de `(di·dx, dj·dx)`. **Une seule soumission**, aucun tampon créé
+    /// (I-06) ; hors pas, entre deux pas. Refuse une forme hors de la capacité, ou trop étroite pour l'éponge.
+    pub fn resize(&self, di: i32, dj: i32, nx2: usize, ny2: usize) -> Result<(), String> {
+        let old = self.shape.get();
+        if nx2 == 0 || ny2 == 0 || nx2 > self.capacity.nx || ny2 > self.capacity.ny {
+            return Err("redimensionnement : forme hors de la capacité".into());
+        }
+        let Domain3 { nx, ny, nz, dx } = old;
+        let sponge = self.sponge.get();
+        if sponge.width_x > nx2 as f32 * dx * 0.5 || sponge.width_y > ny2 as f32 * dx * 0.5 {
+            return Err("redimensionnement : éponge plus large que la moitié de la forme".into());
+        }
+        let new = Domain3 { nx: nx2, ny: ny2, nz, dx };
+        let (f_old, c_old, n_old) = (face_total(old), old.columns(), old.cells());
         let (nu, nv) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz);
+        let (nu2, nv2) = ((nx2 + 1) * ny2 * nz, nx2 * (ny2 + 1) * nz);
+        // Le tampon de travail : [vitesses | surface | reste | pression | surface publiée], dans l'ancienne forme.
+        let (t_eta, t_reste, t_p, t_pub) = (f_old, f_old + c_old, f_old + 2 * c_old, f_old + 2 * c_old + n_old);
         let rest = self.rest.get();
-        // (tableau cible, décalage dans ce tableau, dimensions, valeur de repos, murs). S350 : les faces normales du
-        // bord de `u` (1) et de `v` (2) sont les murs de δ, nuls ; un décalage ne leur recopie rien.
-        let tableaux: [(usize, usize, [usize; 3], f32, u32); 7] = [
-            (0, 0, [nx + 1, ny, nz], 0., 1),
-            (0, nu, [nx, ny + 1, nz], 0., 2),
-            (0, nu + nv, [nx, ny, nz + 1], 0., 0),
-            (1, 0, [nx, ny, 1], rest, 0),
-            (1, self.columns() + self.cells(), [nx, ny, 1], 0., 0),
-            (2, 0, [nx, ny, nz], 0., 0),
-            (3, 0, [nx, ny, 1], 0., 0),
+        // (rang cible, dimensions cibles, dimensions sources, rang source, valeur de repos, murs), dans l'ordre des
+        // groupes de liaison.
+        let tableaux: [(usize, [usize; 3], [usize; 2], usize, f32, u32); 7] = [
+            (0, [nx2 + 1, ny2, nz], [nx + 1, ny], 0, 0., 1),
+            (nu2, [nx2, ny2 + 1, nz], [nx, ny + 1], nu, 0., 2),
+            (nu2 + nv2, [nx2, ny2, nz + 1], [nx, ny], nu + nv, 0., 0),
+            (0, [nx2, ny2, 1], [nx, ny], t_eta, rest, 0),
+            (new.columns() + new.cells(), [nx2, ny2, 1], [nx, ny], t_reste, 0., 0),
+            (0, [nx2, ny2, nz], [nx, ny], t_p, 0., 0),
+            (0, [nx2, ny2, 1], [nx, ny], t_pub, 0., 0),
         ];
-        let cibles = [&self.vel, &self.cells_in, &self.state, &self.published];
-        for (cible, decalage, dims, repos, mur) in tableaux {
-            let count = dims[0] * dims[1] * dims[2];
-            let mut u = Vec::with_capacity(48);
-            for v in [dims[0] as u32, dims[1] as u32, dims[2] as u32, count as u32] {
-                u.extend_from_slice(&v.to_le_bytes());
-            }
-            u.extend_from_slice(&di.to_le_bytes());
-            u.extend_from_slice(&dj.to_le_bytes());
-            u.extend_from_slice(&(decalage as u32).to_le_bytes());
-            u.extend_from_slice(&repos.to_le_bytes());
-            for v in [mur, 0, 0, 0] {
-                u.extend_from_slice(&v.to_le_bytes());
-            }
-            self.queue.write_buffer(&self.shift_uniform, 0, &u);
-            let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-            encoder.copy_buffer_to_buffer(cibles[cible], (decalage * 4) as u64, &self.shift_scratch, 0, (count * 4) as u64);
-            {
-                let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
-                pass.set_bind_group(0, &self.shift_binds[cible], &[]);
-                pass.set_pipeline(&self.shift_pipeline);
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        let octets = |n: usize| (n * 4) as u64;
+        encoder.copy_buffer_to_buffer(&self.vel, 0, &self.shift_scratch, 0, octets(f_old));
+        encoder.copy_buffer_to_buffer(&self.cells_in, 0, &self.shift_scratch, octets(t_eta), octets(c_old));
+        encoder.copy_buffer_to_buffer(&self.cells_in, octets(c_old + n_old), &self.shift_scratch, octets(t_reste), octets(c_old));
+        encoder.copy_buffer_to_buffer(&self.state, 0, &self.shift_scratch, octets(t_p), octets(n_old));
+        encoder.copy_buffer_to_buffer(&self.published, 0, &self.shift_scratch, octets(t_pub), octets(c_old));
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            pass.set_pipeline(&self.shift_pipeline);
+            for (e, (rang, dims, source, depuis, repos, mur)) in tableaux.into_iter().enumerate() {
+                let count = dims[0] * dims[1] * dims[2];
+                let mut u = Vec::with_capacity(SHIFT_UNIFORM as usize);
+                for v in [dims[0] as u32, dims[1] as u32, dims[2] as u32, count as u32] {
+                    u.extend_from_slice(&v.to_le_bytes());
+                }
+                u.extend_from_slice(&di.to_le_bytes());
+                u.extend_from_slice(&dj.to_le_bytes());
+                u.extend_from_slice(&(rang as u32).to_le_bytes());
+                u.extend_from_slice(&repos.to_le_bytes());
+                for v in [mur, source[0] as u32, source[1] as u32, depuis as u32] {
+                    u.extend_from_slice(&v.to_le_bytes());
+                }
+                self.queue.write_buffer(&self.shift_uniform, e as u64 * self.shift_stride, &u);
+                pass.set_bind_group(0, &self.shift_binds[e], &[]);
                 pass.dispatch_workgroups((count as u32).div_ceil(GROUP), 1, 1);
             }
-            self.queue.submit([encoder.finish()]);
         }
+        self.queue.submit([encoder.finish()]);
+        self.shape.set(new);
         let o = self.origin.get();
-        let neuve = [o[0] + di as f32 * dx, o[1] + dj as f32 * dx, o[2]];
-        self.origin.set(neuve);
-        let mut b = Vec::with_capacity(8);
-        b.extend_from_slice(&neuve[0].to_le_bytes());
-        b.extend_from_slice(&neuve[1].to_le_bytes());
-        self.queue.write_buffer(&self.bg_uniform, 48, &b);
+        self.origin.set([o[0] + di as f32 * dx, o[1] + dj as f32 * dx, o[2]]);
+        self.write_shape_uniforms();
+        Ok(())
+    }
+
+    /// S350 : ce que les uniformes disent de la forme et de l'origine — fond (faces, `nx`, `ny`, origine), projection
+    /// (`nx`, `ny`, `nz`, mailles, groupes), pas (tout, par `write_step_uniform`).
+    fn write_shape_uniforms(&self) {
+        let d = self.shape.get();
+        let o = self.origin.get();
+        let mut b = Vec::with_capacity(12);
+        for v in [self.face_total() as u32, d.nx as u32, d.ny as u32] {
+            b.extend_from_slice(&v.to_le_bytes());
+        }
+        self.queue.write_buffer(&self.bg_uniform, 4, &b);
+        self.queue.write_buffer(&self.bg_uniform, 48, &f32s(&[o[0], o[1]]));
+        let mut c = Vec::with_capacity(16);
+        for v in [d.nx as u32, d.ny as u32, d.nz as u32, d.cells() as u32] {
+            c.extend_from_slice(&v.to_le_bytes());
+        }
+        self.queue.write_buffer(&self.cg_uniform, 0, &c);
+        let groups = (d.cells() as u32).div_ceil(GROUP) as f32;
+        self.queue.write_buffer(&self.cg_uniform, 40, &groups.to_le_bytes());
+        self.write_step_uniform(self.rest.get(), self.dt.get(), self.sponge.get());
+    }
+
+    /// **Banc S350** : la capacité — la forme de création.
+    pub fn capacity(&self) -> Domain3 {
+        self.capacity
+    }
+
+    /// **Banc S350** : écrit tout l'état de la forme courante tel quel — vitesses courantes, surface, reste
+    /// compensé, pression de départ, surface publiée —, pour qu'un domaine neuf reprenne exactement celui d'un autre.
+    pub fn set_full_state(&self, vel: &[f32], eta: &[f32], reste: &[f32], pression: &[f32], publiee: &[f32]) -> Result<(), String> {
+        let (f, c, n) = (self.face_total(), self.columns(), self.cells());
+        if vel.len() != f || eta.len() != c || reste.len() != c || pression.len() != n || publiee.len() != c {
+            return Err("état complet : longueurs de la forme courante attendues".into());
+        }
+        self.queue.write_buffer(&self.vel, 0, bytemuck_cast(vel));
+        self.queue.write_buffer(&self.cells_in, 0, bytemuck_cast(eta));
+        self.queue.write_buffer(&self.cells_in, ((c + n) * 4) as u64, bytemuck_cast(reste));
+        self.queue.write_buffer(&self.state, 0, bytemuck_cast(pression));
+        self.queue.write_buffer(&self.published, 0, bytemuck_cast(publiee));
         Ok(())
     }
 
@@ -1145,10 +1248,15 @@ impl Step3 {
         &self.published
     }
 
-    // S321 : accesseur conservé, sans appelant aujourd'hui.
-    #[allow(dead_code)]
+    /// La forme courante (S350 : au plus la capacité).
     pub fn domain(&self) -> Domain3 {
         self.shape.get()
+    }
+
+    /// **Banc S350** : la mémoire de la carte selon son allocateur — octets alloués et allocations vivantes —, si le
+    /// backend sait la rendre. Pour constater qu'une opération ne crée aucun tampon (I-06).
+    pub fn memory(&self) -> Option<(u64, usize)> {
+        self.device.generate_allocator_report().map(|r| (r.total_allocated_bytes, r.allocations.len()))
     }
 
     /// **Banc** : surface absolue et reste de la somme compensée, par colonne.

@@ -2589,6 +2589,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-decalage") {
         return delta3d_scene::decalage_identite();
     }
+    if args.iter().any(|a| a == "--delta3d-redimensionnement") {
+        return delta3d_scene::redimensionnement_identite();
+    }
     if args.iter().any(|a| a == "--delta3d-deux-parts") {
         return delta3d_scene::deux_parts();
     }

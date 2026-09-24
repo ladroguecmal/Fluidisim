@@ -975,3 +975,119 @@ pub fn murs_effet() -> Result<(), String> {
     })
 }
 
+/// Les tableaux de l'état d'un domaine, tels que `lire_etat` les rend : (nom, tableau relu, rang, dimensions, repos,
+/// murs : 1 en x, 2 en y).
+fn tableaux_etat(d: Domain3, rest: f32) -> [(&'static str, usize, usize, [usize; 3], f32, u32); 7] {
+    let Domain3 { nx, ny, nz, .. } = d;
+    let (nu, nv) = ((nx + 1) * ny * nz, nx * (ny + 1) * nz);
+    [
+        ("u", 0, 0, [nx + 1, ny, nz], 0., 1),
+        ("v", 0, nu, [nx, ny + 1, nz], 0., 2),
+        ("w", 0, nu + nv, [nx, ny, nz + 1], 0., 0),
+        ("eta", 1, 0, [nx, ny, 1], rest, 0),
+        ("reste", 2, 0, [nx, ny, 1], 0., 0),
+        ("pression", 3, 0, [nx, ny, nz], 0., 0),
+        ("publiee", 4, 0, [nx, ny, 1], 0., 0),
+    ]
+}
+
+/// Tout l'état de la forme courante : vitesses, surface, reste compensé, pression de départ, surface publiée.
+fn lire_etat(c: &Step3) -> Result<Vec<Vec<f32>>, String> {
+    let (h, reste) = c.surface()?;
+    Ok(vec![c.velocities()?, h, reste, c.pressure()?, c.published()?])
+}
+
+/// S350, porte A, critère 3 — **le redimensionnement.** Scène de la porte B après 30 pas ; le même domaine rétrécit à
+/// 90 × 84 en commençant à la maille (13, 17), puis s'élargit à 110 × 96 en commençant à (−6, −9) de la forme
+/// rétrécie : ce qui entre naît au repos. Après chacun : (a) chaque tableau au bit dans le recouvrement, murs nuls,
+/// repos ailleurs ; (b) un domaine **créé** à la nouvelle forme et à la même origine reçoit le même état, puis les deux
+/// font 60 pas : identiques au bit — un domaine, pas une vue ; (c) la mémoire de la carte selon son allocateur, avant
+/// et après. `--delta3d-redimensionnement`.
+pub fn redimensionnement_identite() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let config = Config::review();
+        let (u, v, w, eta) = config.initial_state();
+        let mut carte = Step3::new(background, config.domain, config.origin, RHO, G).await?;
+        carte.set_step(config.step_us, config.rest, config.sponge)?;
+        carte.set_state(&u, &v, &w, &eta)?;
+        let mut n = 0u64;
+        for _ in 0..30 {
+            carte.step(background, water_core::SimTime(n * config.step_us), config.cycles)?;
+            n += 1;
+        }
+        let pas = 60;
+        for (di, dj, nx2, ny2) in [(13i32, 17i32, 90usize, 84usize), (-6, -9, 110, 96)] {
+            let ancienne = carte.domain();
+            let avant = lire_etat(&carte)?;
+            let (o0, memoire_avant) = (carte.origin(), carte.memory());
+            carte.resize(di, dj, nx2, ny2)?;
+            let apres = lire_etat(&carte)?;
+            let (o1, memoire_apres) = (carte.origin(), carte.memory());
+            let forme = carte.domain();
+            // (a) Chaque élément de la nouvelle forme : l'ancien `(i + di, j + dj, k)` s'il existe, le repos sinon ;
+            // les murs, nuls.
+            let mut faux_a = 0usize;
+            for (a, b) in tableaux_etat(ancienne, config.rest).into_iter().zip(tableaux_etat(forme, config.rest)) {
+                let (nom, t, rang_a, da, repos, mur) = a;
+                let (_, _, rang_b, db, _, _) = b;
+                if apres[t].len() < rang_b + db[0] * db[1] * db[2] {
+                    return Err(format!("redimensionnement : {nom} relu trop court"));
+                }
+                let (mut faux, mut dedans, mut dehors, mut murs) = (0usize, 0usize, 0usize, 0usize);
+                for k in 0..db[2] {
+                    for j in 0..db[1] {
+                        for i in 0..db[0] {
+                            let (si, sj) = (i as i32 + di, j as i32 + dj);
+                            let est_mur = (mur == 1 && (i == 0 || i + 1 == db[0])) || (mur == 2 && (j == 0 || j + 1 == db[1]));
+                            let attendu = if est_mur {
+                                murs += 1;
+                                repos
+                            } else if si >= 0 && (si as usize) < da[0] && sj >= 0 && (sj as usize) < da[1] {
+                                dedans += 1;
+                                avant[t][rang_a + (k * da[1] + sj as usize) * da[0] + si as usize]
+                            } else {
+                                dehors += 1;
+                                repos
+                            };
+                            if apres[t][rang_b + (k * db[1] + j) * db[0] + i].to_bits() != attendu.to_bits() {
+                                faux += 1;
+                            }
+                        }
+                    }
+                }
+                faux_a += faux;
+                println!(
+                    "DELTA3D_REDIM_S350 forme={}x{} tableau={nom} recouvrement={dedans} entrant={dehors} murs={murs} differents_au_bit={faux}",
+                    forme.nx, forme.ny
+                );
+            }
+            // (b) Un domaine créé à cette forme, à cette origine, avec cet état.
+            let mut neuve = Step3::new(background, forme, o1, RHO, G).await?;
+            neuve.set_step(config.step_us, config.rest, config.sponge)?;
+            neuve.set_full_state(&apres[0], &apres[1], &apres[2], &apres[3], &apres[4])?;
+            let depart = lire_etat(&neuve)?;
+            let faux_depart: usize =
+                depart.iter().zip(&apres).map(|(x, y)| x.iter().zip(y).filter(|(p, q)| p.to_bits() != q.to_bits()).count()).sum();
+            for _ in 0..pas {
+                let t = water_core::SimTime(n * config.step_us);
+                carte.step(background, t, config.cycles)?;
+                neuve.step(background, t, config.cycles)?;
+                n += 1;
+            }
+            let (x, y) = (lire_etat(&carte)?, lire_etat(&neuve)?);
+            let faux_b: usize = x.iter().zip(&y).map(|(p, q)| p.iter().zip(q).filter(|(a, b)| a.to_bits() != b.to_bits()).count()).sum();
+            let valeurs: usize = x.iter().map(|t| t.len()).sum();
+            let (da, db) = (carte.diagnostics_now()?, neuve.diagnostics_now()?);
+            let bouge = x[4].iter().fold(0f32, |m, h| m.max(h.abs()));
+            let cap = carte.capacity();
+            println!(
+                "DELTA3D_REDIM_S350 capacite={}x{} forme={}x{} depart=({di},{dj}) origine_avant={o0:?} origine_apres={o1:?} (a)_differents={faux_a} (b)_etat_recopie_differents={faux_depart} (b)_apres_{pas}_pas valeurs={valeurs} differentes_au_bit={faux_b} volume={:.6e}/{:.6e} hors_bornes={}/{} surface_publiee_max_m={bouge:.4e} (c)_memoire_avant={memoire_avant:?} apres={memoire_apres:?}",
+                cap.nx, cap.ny, forme.nx, forme.ny, da.volume, db.volume, da.columns_outside, db.columns_outside
+            );
+        }
+        Ok(())
+    })
+}
+
