@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les parts d'écran le long du trajet de caméra ; les seuils calibrés.
-- [ ] **P3** — le banc d'arbitrage, deux domaines 3D ; critères 1 à 4.
+- [x] **P3** — le banc d'arbitrage, deux domaines 3D ; critères 1 à 4.
 - [ ] **P4** — preuve, file, feuille de route, liste.
 - [ ] **P5** — rituel.
 
@@ -101,4 +101,13 @@ Critères, écrits avant le code :
   retenu** : l'œil longe la côte, devant A (0–5 s), vers B à 15 m/s (5–9 s), devant B (9–13 s), retour (13–17 s),
   devant A (17–20 s). Parts d'écran : de face **0,1629** ; à mi-chemin 0,0389 chacun ; loin 0. **Seuils calibrés**
   (ADR-171) sur la part de face : allumage **0,10** (0,61 ×), extinction **0,05** (0,31 ×).
+- **P3, critères 1 à 4 tenus** (`--delta3d-arbitrage`, deux pas de production, budget 5 ms, 1 200 images).
+  **Premier essai, sans l'oubli de S286** : le premier pas payé coûte **22,6 ms** — carte froide — ; le domaine
+  sort du budget et n'y revient jamais : **l'exclusion absorbante de S279 §4, reproduite en 3D**. Avec l'oubli (un
+  échantillon par image non servie, le plus ancien d'abord) : sur carte froide, 0,5 s d'alternance à ~12 ms le
+  pas, puis régime ; sur carte chaude, régime d'emblée. **Mesuré (carte chaude)** : accordé au pire **3,720 ms**
+  pour 5 ; B allumé à **7,767 s** (part 0,1006), A éteint à **7,867 s** — 1,000 s après son passage sous 0,05 ;
+  **6 images affamées** par bascule ; le plus visible non servi **0,700 s** deux fois — du croisement des parts
+  (7,0 et 15,0 s) à l'allumage, la bande d'hystérésis ; coûts médians **3,691 / 3,677 ms** (q99 3,734 / 3,711),
+  720 et 480 pas payés.
 

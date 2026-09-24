@@ -2574,6 +2574,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-trajectoire") {
         return delta3d_step::trajectoire();
     }
+    if args.iter().any(|a| a == "--delta3d-arbitrage") {
+        return delta3d_arbitrage::arbitrage();
+    }
     if args.iter().any(|a| a == "--delta3d-parts") {
         return delta3d_arbitrage::parts();
     }
