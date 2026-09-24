@@ -89,9 +89,14 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le banc d'empreinte ; l'empreinte de référence ; critère 1.
+- [x] **P2** — le banc d'empreinte ; l'empreinte de référence ; critère 1.
 - [ ] **P3** — la disposition compacte : noyaux, couplage, pas, tampon ; relectures de banc.
 - [ ] **P4** — l'identité, les bancs de S300, le coût ; critères 2 et 3.
 - [ ] **P5** — preuve, file ; rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** `--delta3d-empreinte`, commit `fc37f7b5` + banc, fond par tuiles, deux passages
+  identiques : **60 pas** surface `0x5efa267462dfa0ad`, vitesses `0xc5c6a85d3d29f44b` ; **600 pas** surface
+  `0x9325cf58781f8b74`, vitesses `0xea1bebe0ffabc19a` (h₀ 0,007277250 m). La carte est déterministe d'un passage à
+  l'autre.
+

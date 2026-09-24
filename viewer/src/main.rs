@@ -2573,6 +2573,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-trajectoire") {
         return delta3d_step::trajectoire();
     }
+    if args.iter().any(|a| a == "--delta3d-empreinte") {
+        return delta3d_scene::empreinte();
+    }
     if args.iter().any(|a| a == "--delta3d-fond-tuiles") {
         return delta3d_scene::identite_fond();
     }

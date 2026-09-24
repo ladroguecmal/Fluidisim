@@ -653,3 +653,35 @@ pub fn identite_fond() -> Result<(), String> {
     })
 }
 
+/// S343, porte C — **l'empreinte du pas de production** sur la scène de la porte B : après 60 et 600 pas, une
+/// empreinte FNV des bits de la surface publiée et des vitesses. Relevée avant un changement qui se veut
+/// « au bit », rejouée après : les deux doivent être égales. `--delta3d-empreinte`.
+pub fn empreinte() -> Result<(), String> {
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let config = Config::review();
+        let (u, v, w, eta) = config.initial_state();
+        let mut carte = Step3::new(background, config.domain, config.origin, RHO, G).await?;
+        carte.set_step(config.step_us, config.rest, config.sponge)?;
+        carte.set_state(&u, &v, &w, &eta)?;
+        let fnv = |valeurs: &[f32]| -> u64 {
+            valeurs.iter().fold(0xcbf2_9ce4_8422_2325u64, |h, x| {
+                x.to_bits().to_le_bytes().iter().fold(h, |h, b| (h ^ *b as u64).wrapping_mul(0x100_0000_01b3))
+            })
+        };
+        println!("DELTA3D_EMPREINTE_S343 carte={:?} fond_par_tuiles={}", carte.adapter, carte.tiled_background());
+        for n in 0..600u64 {
+            carte.step(background, water_core::SimTime(n * config.step_us), config.cycles)?;
+            if n + 1 == 60 || n + 1 == 600 {
+                let (h, vit) = (carte.published()?, carte.velocities()?);
+                println!(
+                    "DELTA3D_EMPREINTE_S343 pas={} surface=0x{:016x} vitesses=0x{:016x} h0={:.9} h_milieu={:.9}",
+                    n + 1, fnv(&h), fnv(&vit), h[0], h[h.len() / 2]
+                );
+            }
+        }
+        Ok(())
+    })
+}
+
