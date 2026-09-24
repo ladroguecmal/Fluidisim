@@ -62,52 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S344 — **terminée**. **Porte A, premier critère** ; chemin de la v1
-([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4). §6.4 interdit une quatrième session de suite sur
-la porte C (S343).
+Session : S345 — **en cours**. **Porte C, la cadence de δ** ; chemin de la v1. Porte en cours de §3 bis ; la série
+S341–S343 a été interrompue par S344 (§6.4).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
-Entrée — l'utilisateur : *« Continue »*, après le passage proposé à la porte A. Critères de la porte A (§3 bis) :
-**plusieurs candidats réels se disputent un budget** ; un domaine **se déplace et se redimensionne** ; la
-dégradation de rang 1 d'ADR-012 §4 existe. Sur des domaines 3D (ADR-175 D6). L'ordonnanceur (`scheduler.rs`, S278)
-sait arbitrer plusieurs candidats, mais n'a jamais servi qu'une bande δ 2D (S279–S286).
-
-**Ce que la session doit rendre possible.** Le premier critère, sur des domaines 3D réels : deux domaines δ de
-production (la scène de la porte B, `Config::review`), à 60 m l'un de l'autre ; une caméra qui passe de l'un à
-l'autre ; à chaque image, chacun soumissionne sa **part d'écran** (`screen_fraction`, ADR-012 §2) et son **coût
-mesuré** (médiane des huit derniers pas payés, horodatés) ; l'ordonnanceur décide et alloue sous **un budget de
-banc de 5 ms**, qui n'en tient qu'un (3,7 ms chacun, S343). Seuils d'allumage et d'extinction calibrés sur les parts
-d'écran mesurées, et écrits (ADR-171).
+Entrée — le pas coûte 3,68 ms (S343), dont 2,06 de projection, déjà bornée par la mémoire ; fusionner ses
+réductions au bit obligerait chacun des 5 880 groupes à relire 5 880 partiels, plus cher que le gain (lu en S345).
+**ADR-012 §7 a tranché l'architecture** : *« Tick de simulation fixe à 30 Hz, indépendant du taux d'images. Le rendu
+interpole »*, δ avec au plus une image de retard. Un pas de 3,7 ms étalé sur deux images de 60 Hz contribue
+≈ 1,85 ms par image — sous les 2 ms. **Condition physique, à éprouver d'abord** : un pas de 33,3 ms au lieu de 16,7.
 
 Critères, écrits avant le code :
-1. **Le budget n'est jamais dépassé** : la somme des budgets accordés ≤ 5 ms à chaque image.
-2. **Le domaine regardé est servi** : hors des transitions, le domaine accordé est celui qui occupe le plus
-   d'écran.
-3. **Les transitions suivent ADR-013 §5** : allumage sans délai au-dessus du seuil ; extinction après 1 s sous le
-   seuil bas ; l'état « vivant mais affamé » — l'ancien domaine, le temps de son délai — publié et borné.
-4. **Les coûts sont mesurés**, publiés par domaine ; un domaine rallumé est de nouveau servi (pas d'exclusion
-   absorbante, S279 §4).
+1. **La cuve de S305** (mode (1, 1), `nx` = 32, 64 cycles, 4,3 s — deux périodes) sur la carte à 1, 16,7 et
+   33,3 ms : période et amplitude du mode. À 33,3 ms, la période s'écarte de celle à 1 ms de **moins de 1 %**,
+   l'amplitude après deux périodes de **moins de 1 %** ; sinon l'écart est publié et la cadence n'est pas reçue.
+2. **La scène de B** à 30 Hz contre 60 Hz, 12 s, avec témoins : aucune colonne hors bornes ; l'onde isolée (avec
+   − témoin) — position de son maximum à **moins d'une maille** (25 cm), amplitude à **moins de 5 %** de celle à
+   60 Hz, chaque seconde.
+3. Si 1 et 2 tiennent : la cadence de 30 Hz est recevable pour la physique ; le découpage du pas sur deux images
+   et l'interpolation du rendu sont la suite. Preuve (§8 de COUT-DELTA3D-S341), file.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les parts d'écran le long du trajet de caméra ; les seuils calibrés.
-- [x] **P3** — le banc d'arbitrage, deux domaines 3D ; critères 1 à 4.
-- [x] **P4** — preuve, file, feuille de route, liste.
-- [x] **P5** — rituel.
+- [ ] **P2** — le banc de cadence : la cuve à trois pas de temps ; critère 1.
+- [ ] **P3** — la scène de B à 30 et 60 Hz ; critère 2.
+- [ ] **P4** — preuve, file ; critère 3.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2, fait** (`--delta3d-parts`). **Premier trajet écarté** : tourner seulement la tête vers B laisse B plus
-  petit que A à l'écran (0,013 contre 0,034, B à 68 m) — la surface décide, pas le regard (ADR-012 §2). **Trajet
-  retenu** : l'œil longe la côte, devant A (0–5 s), vers B à 15 m/s (5–9 s), devant B (9–13 s), retour (13–17 s),
-  devant A (17–20 s). Parts d'écran : de face **0,1629** ; à mi-chemin 0,0389 chacun ; loin 0. **Seuils calibrés**
-  (ADR-171) sur la part de face : allumage **0,10** (0,61 ×), extinction **0,05** (0,31 ×).
-- **P3, critères 1 à 4 tenus** (`--delta3d-arbitrage`, deux pas de production, budget 5 ms, 1 200 images).
-  **Premier essai, sans l'oubli de S286** : le premier pas payé coûte **22,6 ms** — carte froide — ; le domaine
-  sort du budget et n'y revient jamais : **l'exclusion absorbante de S279 §4, reproduite en 3D**. Avec l'oubli (un
-  échantillon par image non servie, le plus ancien d'abord) : sur carte froide, 0,5 s d'alternance à ~12 ms le
-  pas, puis régime ; sur carte chaude, régime d'emblée. **Mesuré (carte chaude)** : accordé au pire **3,720 ms**
-  pour 5 ; B allumé à **7,767 s** (part 0,1006), A éteint à **7,867 s** — 1,000 s après son passage sous 0,05 ;
-  **6 images affamées** par bascule ; le plus visible non servi **0,700 s** deux fois — du croisement des parts
-  (7,0 et 15,0 s) à l'allumage, la bande d'hystérésis ; coûts médians **3,691 / 3,677 ms** (q99 3,734 / 3,711),
-  720 et 480 pas payés.
-

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-24 18:51 +02:00
+JETON            : occupé
+Battement        : 2026-09-24 18:53 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : aucune
+Session en cours : S345 — **porte C, cadence de δ à 30 Hz** : le pas à 33,3 ms éprouvé contre 16,7 et 1 ms — cuve de S305 et scène de B — avant de l'étaler sur deux images (ADR-012 §7)
 Dernière session : S344 — **porte A, premier critère** : deux domaines δ 3D de production se disputent un budget de 5 ms, arbitrés par l'ordonnanceur sur leur part d'écran et leur coût mesuré ; l'exclusion absorbante reproduite en 3D, levée par l'oubli ([preuve](docs/validation/ARBITRAGE-3D-S344.md))
 Session suivante : **porte C, la projection** (2,06 ms, 56 % du pas) — l'écart de la surface publiée selon le nombre de cycles, contre la solution convergée, sur la scène de B ; puis la fusion des dispatchs d'un cycle, au bit. Porte A ensuite : déplacement, redimensionnement, rang 1. En attente : le terme de D2 (lot 5)
 Maillons        : 0 — S344 : premier critère de la porte A tenu au banc
