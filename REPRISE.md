@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-24 21:54 +02:00
+Battement        : 2026-09-24 21:56 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
 Session en cours : S351 — **porte A, la dégradation de rang 1** d'ADR-012 §4 : le focal entier, les non-focaux rétrécis au lieu d'affamés, sans pompage ; et la décision de l'utilisateur sur l'après-v1 — la liste du projet fini entière (ADR-190)
 Dernière session : S350 — **porte A, un domaine qui se redimensionne** : état réécrit au bit, pas identique à celui d'un domaine créé à sa forme, coût proportionnel à la surface ([preuve](docs/validation/ARBITRAGE-3D-S344.md) §6) ; et, à la demande de l'utilisateur, la [liste du projet fini](docs/LISTE-PROJET-FINI.md) actualisée sur S309–S350 (3 / 56 / 61)
@@ -80,7 +80,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
 
-État au 2026-09-24 (S338), en bref ; le détail par jalon et par porte est dans la
+État au 2026-09-24 (S351), en bref ; le détail par jalon et par porte est dans la
 [feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.
 
 - **Stratégie** : trois systèmes — A haute mer (B+W), B volumique 3D (δ), C couplage — et sept
@@ -98,8 +98,10 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   corps rigide du jeu sur B, C10 tenu, qui pilote sa coque dans δ sans que δ le pilote (S331–S333) ; A317
   corrigé (S335) ; rayonnement mesuré par δ (S336) ; bord de δ invisible (S337). Restent W derrière la requête
   du corps, la coque dans la production de δ. **Porte C reçue sur le banc** (S348, 1,92 ms au 99ᵉ centile par
-  image, 30 Hz). **La v1 demande encore la porte A.**
-  **V** : noyau reçu, sans articulation avec δ. Ordonnanceur : un domaine, pas plusieurs.
+  image, 30 Hz). **Porte A reçue sur le banc** (S351 : le rang 1, deux domaines servis ensemble). **Les quatre
+  portes sont reçues : la v1 au sens d'ADR-174 D4**, chacune sur son banc ou sa référence, pas encore réunies en une
+  scène vivante ([feuille de route](docs/FEUILLE-DE-ROUTE.md), « La v1 »). Depuis : la liste entière (ADR-190).
+  **V** : noyau reçu, sans articulation avec δ.
 - Liste du projet fini : **3 validés, 56 partiels, 61 absents** sur 120 — actualisée en entier en S350.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses

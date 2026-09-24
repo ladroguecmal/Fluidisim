@@ -65,8 +65,9 @@ pas recopiée ici (L137).
   domaines δ 3D réels** sous un budget, et l'exclusion absorbante, reproduite en 3D, est levée par
   l'oubli des coûts — dans chaque hôte, pas dans le cœur ([preuve](validation/ARBITRAGE-3D-S344.md)
   §3) ; **S349–S350** : un domaine **se déplace et se redimensionne**, au bit, décidé par l'hôte
-  (§5–6). Manquent le point d'entrée `WaterSystem` lui-même, la dégradation (ADR-012 §4), la forme
-  des domaines décidée par l'ordonnanceur, et l'oubli dans le cœur.
+  (§5–6) ; **S351** : le **rang 1** de la dégradation — l'ordonnanceur rend une échelle, l'hôte en fait
+  l'emprise (§7). Manquent le point d'entrée `WaterSystem` lui-même, les rangs 2 à 7, la position des
+  domaines décidée par l'ordonnanceur, l'oubli et l'estimateur de coût dans le cœur.
 - [ ] **1.5 Grille 3D de référence stable** : adressage, zones actives, échanges client/serveur —
   *absent*, conçu (ADR-006).
 - [ ] **1.6 Cellules, domaines et solveurs distincts, niveaux d'activité des cellules** — *absent*,
@@ -136,16 +137,18 @@ pas recopiée ici (L137).
   ([S305](validation/CUVE-GPU-S305.md)) ; la production sur les trois cas de cuve, et **la porte B reçue** (S340,
   [§9](validation/CUVE-GPU-S305.md)). **Manque le périmètre final** : la surface est un graphe,
   donc ni cavité, ni jet, ni déferlement (4.16) — seconde représentation, lot 5 d'ADR-178.
-- [ ] **4.2 Plusieurs domaines actifs simultanés** — *absent* : depuis S344, deux domaines δ 3D
-  existent et se disputent un budget, mais le budget de banc (5 ms) n'en tient **qu'un à la fois**,
-  chacun coûtant 3,7 ms ([preuve](validation/ARBITRAGE-3D-S344.md) §1).
+- [ ] **4.2 Plusieurs domaines actifs simultanés** — *partiel* **depuis S351** : deux domaines δ 3D de
+  production **servis ensemble** sous un budget de 5 ms qui n'en tient pas deux entiers — le focal entier,
+  l'autre rétréci au rang 1 —, 615 images de suite, au banc ([preuve](validation/ARBITRAGE-3D-S344.md) §7).
+  Manquent davantage de domaines, leurs interactions (4.9) et l'afficheur.
 - [ ] **4.3 Subdivision adaptative anisotrope, blocs épars** épousant la forme utile (B5) — *absent*.
 - [ ] **4.4 Profondeur adaptative**, domaine qui suit un objet qui coule — *absent*.
 - [ ] **4.5 Création, croissance, réduction et disparition visuellement gratuites** (I-12) —
   *partiel* : naissance à zéro reçue sous fond couplé (S251, S253) ; en 3D, un domaine qui renaît
   repart de δ = 0 (S344), et **ce qui entre dans un domaine qui se déplace naît au repos**, au bit
   (S349) ; **S350 : croissance et réduction** d'un domaine 3D, l'état gardé au bit dans le
-  recouvrement, ce qui entre au repos ([preuve](validation/ARBITRAGE-3D-S344.md) §5–6). Manquent une
+  recouvrement, ce qui entre au repos ([preuve](validation/ARBITRAGE-3D-S344.md) §5–6) ; **S351** : elles
+  servent le rang 1, et leur prix est mesuré — une réduction retire jusqu'à 11,3 cm de δ (§7). Manquent une
   disparition progressive et tout verdict visuel sur ces passages.
 - [ ] **4.6 Entrée des vagues de B/W dans le domaine** — *partiel* : source volumique, surface
   mobile couplée, fond B prolongé (ADR-149 à 154). Flux de bande aux frontières reçus
@@ -402,16 +405,20 @@ pas recopiée ici (L137).
   (S270 : 638 interruptions/reprises exactes). **L'ordonnanceur existe depuis S278** et est branché
   sur la bande δ (S279, ADR-171) ; **S344** : deux candidats réels — deux domaines δ 3D — se disputent
   un budget de banc, jamais dépassé (3,720 ms au pire pour 5,
-  [preuve](validation/ARBITRAGE-3D-S344.md) §2). Manquent la borne murale et la dégradation
-  d'ADR-012 §4 : sans elle, le domaine non servi est affamé (6 images par bascule, S344).
+  [preuve](validation/ARBITRAGE-3D-S344.md) §2) ; **S351** : le rang 1 donne une issue à la famine, et le
+  temps **mesuré** tient le budget au 99ᵉ centile quand le coût annoncé est le maximum des huit derniers pas
+  (4,983 ms pour 5 ; à la médiane, 20 images au-dessus, §7). Manquent la borne murale, cet estimateur dans
+  le cœur, et les rangs suivants.
 - [ ] **9.9 Dégradation contrôlée dans l'ordre prescrit** : taille, résolution, interactions
-  lointaines, fréquence, effets — *absent* au sens de cette liste : le **rétrécissement** d'un
-  domaine est construit (S283–S285) mais **non reçu** — dérive de 66,994 mm, A290
-  ([ATTRIBUTION-RETRECISSEMENT-S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md)). Construit et
-  non reçu ne vaut pas partiel (§ « Comment lire un point »). **S350** : en 3D, le redimensionnement
-  est reçu au bit et le coût suit la surface ([preuve](validation/ARBITRAGE-3D-S344.md) §6) — le
-  moyen de la dégradation de taille ; la dégradation elle-même, que l'ordonnanceur décide, n'est pas
-  écrite.
+  lointaines, fréquence, effets — *partiel* **depuis S351** : le **rang 1** — rétrécir les non-focaux, le
+  focal protégé, descente immédiate, remontée rampée (ADR-012 §4–5) — est dans l'ordonnanceur du cœur et
+  reçu au banc : aucune image affamée contre 612 ([preuve](validation/ARBITRAGE-3D-S344.md) §7). Manquent
+  les rangs 2 à 7, le régulateur PI, une bande morte de l'échelle et le **prix visuel** — une descente
+  coupe jusqu'à 11,3 cm de δ, sans verdict. En 2D, le rétrécissement construit en S283–S285 reste
+  **non reçu** — dérive de 66,994 mm, A290
+  ([ATTRIBUTION-RETRECISSEMENT-S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md)) : construit, non reçu,
+  il ne compte pas. **S350** : en 3D, le redimensionnement
+  est reçu au bit et le coût suit la surface (§6) — le moyen dont le rang 1 se sert.
 - [ ] **9.10 Profils de qualité, adaptation au matériel et à la charge** (I-16) — *absent*.
 - [ ] **9.11 60 images/s avec 2 ms pour l'eau sur une scène représentative** (ADR-125) — *partiel* :
   scène filtrée S267 : GPU eau médian ~1,74 ms en 1280×720, cuisson 0,574–0,585 ms,
@@ -499,17 +506,17 @@ pas recopiée ici (L137).
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 3 | 6 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
-| 4. Volumique (δ) | 21 | 0 | 10 | 11 |
+| 4. Volumique (δ) | 21 | 0 | 11 | 10 |
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 0 | 8 |
 | 8. Rendu | 10 | 0 | 7 | 3 |
-| 9. Activation et budget | 13 | 0 | 6 | 7 |
+| 9. Activation et budget | 13 | 0 | 7 | 6 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **56** | **61** |
+| **total** | **120** | **3** | **58** | **59** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
@@ -517,6 +524,8 @@ tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python 
 parois et corps mobiles dans δ depuis S330–S332, que la liste n'avait pas suivis — ; 4.15, 6.1, 6.3 et 6.5
 corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ; vingt et un points corrigés sans
 changer de case — dix-huit sur S309–S349 (actualisation complète, ci-dessous), trois sur S350 (4.19, 9.9, 9.12).
+*S351* : **4.2** et **9.9** passent à partiel — deux domaines servis ensemble, le rang 1 reçu au banc ; 1.4, 4.5 et
+9.8 corrigés.
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.

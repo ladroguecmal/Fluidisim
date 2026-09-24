@@ -193,3 +193,13 @@ valeurs déjà déclarées : elle se **calcule** à l'initialisation depuis le c
 (I-16). Voir [ADR-129](ADR-129-chemin-image-de-w-par-table-de-bessel.md) et
 [COUT-IMAGE-S206](../validation/COUT-IMAGE-S206.md). Le profil prévoyait aussi `gpu_sim_ms = 2,5` :
 aucun hôte du dépôt ne l'exerce, et c'est l'objet de l'arbitrage posé à l'utilisateur en S206.
+
+## Note datée du 2026-09-24 (S351) — le rang 1 construit
+
+Le rang 1 est écrit dans `scheduler.rs` et reçu au banc ([ARBITRAGE-3D-S344](../validation/ARBITRAGE-3D-S344.md) §7).
+Trois lectures de ce texte, faites pour l'écrire : **le focal** est la plus forte priorité parmi les vivants — le
+domaine qui porte l'acteur du joueur a `W_gameplay` = 1, qui domine le produit de §2 ; le seuil « X % de l'écran »
+n'est pas écrit — ; **l'emprise** se réduit par une **échelle commune** aux non-focaux qui l'ont déclaré, la plus
+grande que le budget tient ; **§5** se lit en temps — descente immédiate, remontée d'au plus 1 par seconde, décision
+engagée une seconde (30 images à 30 Hz). Le régulateur PI de §5 n'est pas écrit : l'échelle suit le budget annoncé,
+non le budget consommé filtré. Le prix d'une descente est mesuré, pas jugé : jusqu'à 11,3 cm de δ coupés.

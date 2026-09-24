@@ -158,3 +158,64 @@ moitié libère la moitié de son coût, à 0,09 ms près.
 dépasse pas sa capacité, fixée à la création, et `nz` ne change pas ; la bande qui naît au repos en s'élargissant
 n'a reçu aucun verdict visuel ; ce qui sort n'est pas rendu à W (A289).
 
+
+## 7. S351 — la dégradation de rang 1 : la famine a une issue
+
+2026-09-24. Troisième critère de la porte A : *la dégradation d'ADR-012 §4 rang 1 existe, donc la famine a une issue*.
+Au §2, le budget de 5 ms ne tenait qu'un domaine : l'autre, vivant, n'était pas servi.
+
+**Reproduire** : commit `1c1a32e2` ou plus récent.
+- `cargo test --manifest-path code/Cargo.toml -p water-core --release --offline scheduler` — 28 essais, dont dix
+  `_s351` ; `… --example ordonnanceur_s278` — empreinte **`6aebff024c734fc9`**, celle de S278.
+- `PRECHAUFFE=1 COUT=max cargo run --manifest-path viewer/Cargo.toml --release --offline -- --delta3d-rang1` — lignes
+  `DELTA3D_RANG1_S351`, une trentaine de secondes ; `RANG1=0` pour le témoin, `COUT=med` pour la médiane, sans
+  `PRECHAUFFE` pour la carte froide. Alimentation relevée avant et après (A270).
+
+**Le mécanisme, dans le cœur** (`scheduler.rs`). Un candidat **déclare** ce qu'il peut céder — `Shrink` : l'échelle
+minimale de sa surface et la part fixe de son coût, qui suit alors `fixe + (plein − fixe)·échelle` (§6). Si le sac à dos
+de S278 laisse un vivant sans budget, le **focal** — la plus forte priorité — est servi entier ; les autres, par `P/C`
+décroissant, à leur échelle minimale autant qu'il en tient ; puis une **échelle commune** monte au plus haut que le
+budget permet. ADR-012 §5 : descente immédiate, remontée d'au plus 1 par seconde et seulement une seconde après la
+dernière descente ; focal engagé une seconde. Sans aucune déclaration, la décision est **celle de S278 au bit** —
+l'empreinte de son exemple n'a pas bougé. Un substitutif ne peut pas déclarer : rétrécir son emprise n'est pas gratuit.
+
+**Le banc.** La côte de S344, deux domaines de production, 5 ms, mais **36 m d'écart** et une **pause de 8 s** où l'œil
+(x = 20 m) les voit tous deux au-dessus de leurs seuils — à 60 m, aucune pose ne les rend voulus ensemble. Chacun
+déclare pouvoir descendre jusqu'à ce que son éponge tienne (24 × 24 mailles, 4,3 % de la surface), part fixe 0,09 ms.
+L'hôte fait de l'échelle une emprise centrée, arrondie par défaut, par `Step3::resize` ; la part d'écran se mesure sur
+l'emprise **pleine** — ce que le domaine doit couvrir, sans quoi rétrécir le ferait mourir ; le coût mesuré est ramené
+à la pleine emprise.
+
+| carte préchauffée, 1 200 images | témoin | rang 1, médiane des 8 | **rang 1, maximum des 8** |
+|---|---:|---:|---:|
+| images « vivant mais affamé », A / B | 612 / 3 | 0 / 0 | **0 / 0** |
+| images où les deux domaines sont servis | 0 | 615 | **615** |
+| focal rétréci ; plus visible non servi | 0 ; 0 | 0 ; 0 | **0 ; 0** |
+| accordé au pire | 4,014 ms | 5,000 | 5,000 |
+| image mesurée après 1 s : médiane / q99 / max | 3,694 / 3,737 / 3,762 | 4,946 / 5,009 / 5,045 | 4,912 / **4,983** / 5,004 |
+| images mesurées au-dessus de 5 ms | 0 | 20, +0,045 ms au pire | **1, +0,004 ms** |
+| redimensionnements (descentes / montées de A) | 0 | 14 (7 / 5) | 19 (11 / 6) |
+
+Pendant la pause, A tourne à l'échelle 0,33–0,35 (69 × 64 mailles environ), B entier ; un redimensionnement coûte
+0,74 à 0,83 ms en temps mural.
+
+**Deux faits, publiés à part.** *La carte froide* : sans préchauffe, le premier pas d'une carte au repos coûte 22,4 ms ;
+le focal, seul, ne tient pas le budget, et l'oubli de S286 le rend affamé une image sur deux pendant 0,57 s — 17 images,
+16 au témoin. C'est le démarrage du §3, étranger au rang 1, et une carte qui rend chaque image n'est pas froide ; le
+critère « aucune image affamée », écrit avant la mesure, est donc **tenu carte chaude et manqué carte froide**, sur ce
+seul point. *L'estimateur* : le rang 1 remplit le budget jusqu'au coût annoncé ; annoncé à la médiane des huit derniers
+pas, le temps mesuré le dépasse une image sur cinquante-sept ; au maximum des huit — plus près du 99ᵉ centile qu'ADR-012
+§3 vise —, une sur 1 140, de 0,004 ms.
+
+**Le prix, sans seuil.** La première descente (120 × 112 → 69 × 65) retire **jusqu'à 11,3 cm** de δ — la correction
+couplée d'une mer de `Hs` 2,5 m, qui monte à 18,6 cm dans ce domaine — dans une bande **intérieure**, que le rendu
+pondérait entièrement. Les suivantes, d'une maille, tombent dans le fondu de 3 m : 0,3 à 10 cm coupés, médiane 3,5 cm,
+à faible poids. **Aucun verdict visuel** : qu'ADR-012 §4 ait raison de dire cette perte « quasi nulle » reste à juger.
+
+**La porte A.** Ses trois critères tiennent : plusieurs candidats réels (§2), un domaine qui se déplace et se
+redimensionne (§5–6), le rang 1 qui donne une issue à la famine (ici). **Porte A reçue sur le banc** (ADR-175 §4.4),
+comme la porte C.
+
+**Ce que cela ne dit pas** : l'échelle oscille d'une maille autour de sa cible, au rythme du bruit du coût — une bande
+morte reste à écrire ; l'estimateur au maximum vit dans l'hôte, comme l'oubli ; les rangs 2 à 7 et le régulateur PI
+d'ADR-012 §5 n'existent pas ; B8 non plus ; tout est au banc, sans rendu concurrent.

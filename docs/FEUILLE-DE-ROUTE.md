@@ -183,7 +183,8 @@ activées (S286). Preuves : [ORDONNANCEUR-S279](validation/ORDONNANCEUR-S279.md)
 domaines réels arbitrés (S344) ; un domaine qui se déplace (S349) et se redimensionne (S350), au bit,
 son coût proportionnel à sa surface ([preuve](validation/ARBITRAGE-3D-S344.md) §5–6).
 
-*Manque* : dégradation automatique (ADR-012 §4) — le rang 1, rétrécir un domaine non focal —,
+*Manque* : dégradation automatique (ADR-012 §4) au-delà du rang 1, reçu au banc en S351 — rangs 2 à 7, régulateur PI
+de §5, bande morte de l'échelle, prix visuel jugé —,
 régime substitutif et son critère `0,35·Hs_local` jamais calibré ; seuils sans banc B8 ; W derrière
 la requête du corps, la coque dans la production de δ.
 
@@ -228,10 +229,11 @@ système qu'on n'a pas éprouvé n'est pas construit : il est écrit.
 
 **Porte en cours, S294 (2026-09-19) : B**, avec **D en parallèle** par la scène-témoin de la v1.
 **S338 (2026-09-24) : D reçue** sur la référence CPU ; la v1 demande encore A, B et C (ADR-174 D4).
-**S340 (2026-09-24) : B reçue.** **S348 : C reçue sur le banc** — 30 Hz validé à l'œil (R17). **Porte en cours : A**,
-la dernière de la v1 : déplacement (S349) et redimensionnement (S350) reçus ; reste le rang 1. **Après la v1**
-(ADR-190, décision de l'utilisateur) : la [liste du projet fini](LISTE-PROJET-FINI.md) entière ; la première
-session qui suit la v1 range ici ses points restants par dépendance.
+**S340 (2026-09-24) : B reçue.** **S348 : C reçue sur le banc** — 30 Hz validé à l'œil (R17). **S351 : A reçue
+sur le banc** — le rang 1 ([preuve](validation/ARBITRAGE-3D-S344.md) §7). **Les quatre portes de la v1 sont reçues**,
+chacune sur son banc ou sa référence (§ « La v1 » ci-dessous). **Depuis la v1** (ADR-190, décision de l'utilisateur) :
+la [liste du projet fini](LISTE-PROJET-FINI.md) entière ; la session qui suit range ici ses points restants par
+dépendance.
 Dépendances qui fondent cet ordre (ADR-127 §6, L343) : la porte C se reçoit sur la scène de B ;
 les critères restants de A — plusieurs candidats, domaine qui se déplace et se redimensionne —
 portent sur les domaines 3D que B définit ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)
@@ -239,7 +241,7 @@ D6) ; D ne dépend que de B+W. Ordre accepté par l'utilisateur ([ADR-174](adr/A
 
 | porte | ce qu'on crée | ce qui l'éprouve | reçu si |
 |---|---|---|---|
-| **A — ce qui décide** *(ouverte ; **S344** : deux domaines δ 3D se disputent un budget ; **S349–S350** : un domaine se déplace et se redimensionne, au bit, son pas identique à celui d'un domaine créé à sa forme — [preuve](validation/ARBITRAGE-3D-S344.md) §5–6 ; reste le rang 1)* | l'ordonnanceur : quels domaines vivent, où, de quelle forme, et ce qu'on dégrade quand le budget manque | banc **B8** (seuils, inexistant) ; la bande δ de l'afficheur comme premier consommateur | plusieurs candidats réels se disputent un budget ; un domaine **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint ; la dégradation d'ADR-012 §4 rang 1 existe, donc la famine a une issue |
+| **A — ce qui décide** *(**reçue S351 sur le banc** — **S344** : deux domaines δ 3D se disputent un budget ; **S349–S350** : un domaine se déplace et se redimensionne, au bit ; **S351** : le rang 1, aucune image affamée contre 612, q99 mesuré 4,983 ms pour 5 — [preuve](validation/ARBITRAGE-3D-S344.md) §5–7)* | l'ordonnanceur : quels domaines vivent, où, de quelle forme, et ce qu'on dégrade quand le budget manque | banc **B8** (seuils, inexistant) ; la bande δ de l'afficheur comme premier consommateur | plusieurs candidats réels se disputent un budget ; un domaine **se déplace et se redimensionne** au lieu d'être seulement allumé ou éteint ; la dégradation d'ADR-012 §4 rang 1 existe, donc la famine a une issue |
 | **B — δ sur les deux dimensions horizontales** *(**reçue S340** — référence S297–S298, production S299–S305 et S340, scène S302 et S339, verdict R16 ; le coût à la porte C)* | le solveur volumique qui n'est plus une tranche : domaine 3D, mer étalée, interaction avec des vagues réelles ; représentation et critères posés par [ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) D5 et §4 | banc **B3** (technique δ), cas **C10**, **C11** ; revue visuelle de l'utilisateur | une onde traverse une mer **étalée** et s'y déforme, jugée convaincante par l'utilisateur ; les réceptions 2D (S253, S268–S274) tiennent encore à trois dimensions. **S305** : la production suit la référence à 3·10⁻⁷ m pour 3 mm exigés sur les cas de cuve, phase décroissante ([preuve](validation/CUVE-GPU-S305.md)) — le cas 3 ; **S340** : les cas 1 et 2 aussi, sous 10⁻⁴ m ([§9](validation/CUVE-GPU-S305.md)) ; **R16** : une onde née d'un point traverse la mer de R14 et s'y déforme, jugée convaincante ([S339](validation/SCENE-DELTA3D-S302.md) §8) — **reçue** |
 | **C — δ sous budget** *(**reçue S348 sur le banc** — 30 Hz, un pas pour deux images : 1,92 ms au 99ᵉ centile par image ; fond factorisé et compact, au bit ; [preuve](validation/COUT-DELTA3D-S341.md) §6–11)* | cadence découplée de l'image (I-05), δ sur GPU — **décidé S294** : pas résident à travail borné ([ADR-175](adr/ADR-175-architecture-d-execution-de-delta-en-3d.md)) —, multigrille hors repli | **B7** sur la machine de référence ([ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) D1), cartes de coût selon ADR-131 | le pas tient **δ ≤ 2 ms GPU** (ADR-174 D3) sur la scène de la porte B, au 99ᵉ centile, **techniques présentes et absentes publiées** |
 | **D — solides et flottabilité** *(**reçue S338** sur la référence CPU : partie numérique S333–S337, verdict R15 ; [preuve](validation/PORTE-D-S333.md) §9)* | corps flottants pris dans B+W+δ, forces rendues au jeu | **B6** (flottabilité), **B4** (forces et perception), cas **C10**, **C11**, **C23** *(C13 et C14, écrits ici en S281, sont les bulles et l'écume de J3 : corrigé S338)* | un bateau flotte et perturbe l'eau qui le porte, sans autorité de δ sur le gameplay (I-04) |
@@ -301,13 +303,20 @@ l'ambition complète reste celle d'ADR-127 §1, et aucune session ne la réduit.
 
 **Décision de l'utilisateur, 2026-09-19** ([ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md)
 D4) : la v1 est la porte D franchie. Proposée en S281, elle n'était pas une décision avant cette
-date. Profil de travail de la porte C : [ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) D3 —
+date.
+
+**Atteinte le 2026-09-24 (S351), au sens de D4** : les portes A, B, C et D sont reçues. **Chacune l'est sur son
+banc ou sa référence** — D sur la référence CPU (S338), B sur la production (S340), C et A au banc (S348, S351) — et
+elles ne sont **pas encore réunies en une scène vivante**. Ce qui sépare ces réceptions de la phrase ci-dessus —
+*quelqu'un navigue, l'eau réagit, et rien ne saccade* — est connu et appartient à la liste (ADR-190) : la coque dans
+la production de δ (6.4), l'ordonnanceur et le rang 1 dans l'afficheur, l'interpolation du rendu à 30 Hz (8.7), W
+derrière la requête du corps (6.1), le prix visuel du rang 1 (4.5, 9.9). Profil de travail de la porte C : [ADR-174](adr/ADR-174-arbitrages-du-2026-09-19.md) D3 —
 δ ≤ 2 ms GPU sur la machine de référence.
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 56 partiels,
-61 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4 et 4.13 passés à partiel entre les deux ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 58 partiels,
+59 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la

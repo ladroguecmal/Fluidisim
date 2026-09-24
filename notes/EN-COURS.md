@@ -101,7 +101,7 @@ Critères, écrits avant le code :
 - [x] **P3** — le rang 1 dans le cœur : `Shrink`, focal, échelle commune ; essais (critère 1 a, b, d, e).
 - [x] **P4** — l'anti-pompage : engagement et rampe ; essais (critère 1 c).
 - [x] **P5** — le banc de la côte avec rang 1, et son témoin ; critères 2 et 3.
-- [ ] **P6** — preuve, file, feuille de route, liste ; la porte A et la v1 si reçues ; critère 4.
+- [x] **P6** — preuve, file, feuille de route, liste ; la porte A et la v1 si reçues ; critère 4.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise

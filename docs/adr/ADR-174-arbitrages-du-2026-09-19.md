@@ -82,3 +82,10 @@ aucune configuration « dans le budget » : D3 est un critère, pas une récepti
 ADR-131 — un dépassement qualifie toujours une implémentation.
 
 Invariants relus : I-03, I-04, I-05, I-14 ; aucun amendé.
+
+## Note datée du 2026-09-24 (S351) — la v1 atteinte au sens de D4
+
+Les portes A, B, C et D de la feuille de route §3 bis sont reçues : D sur la référence CPU (S338), B sur la production
+(S340), C au banc (S348), A au banc (S351). La v1 est donc atteinte **au sens de D4** ; les quatre réceptions ne sont
+pas encore réunies en une scène vivante — ce qui les en sépare est écrit dans la feuille de route, § « La v1 », et
+appartient désormais à la liste du projet fini ([ADR-190](ADR-190-apres-la-v1-la-liste-entiere.md)).

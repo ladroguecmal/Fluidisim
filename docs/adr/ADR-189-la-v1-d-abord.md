@@ -70,3 +70,8 @@ l'écrivait depuis S305.
 L'utilisateur a répondu : *« Continue, après la V1 ton objectif seras de completer entièrement la to do liste »*.
 D2 se lit donc jusqu'à la **v1 entière** — les portes A, B, C et D ; le lot 5 reprend ensuite, comme partie de la
 liste du projet fini ([ADR-190](ADR-190-apres-la-v1-la-liste-entiere.md) D4).
+
+## Note datée du 2026-09-24 (S351) — D1 tenue jusqu'au bout
+
+La porte A est reçue au banc ; avec B, C et D, la v1 est atteinte au sens d'ADR-174 D4. Les sessions suivent
+désormais [ADR-190](ADR-190-apres-la-v1-la-liste-entiere.md) : la liste du projet fini entière, et le lot 5 reprend.
