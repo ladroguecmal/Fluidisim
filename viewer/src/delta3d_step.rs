@@ -42,7 +42,10 @@ const DIAGNOSE_FINISH: usize = 7;
 /// Emplacements de l'anneau de relecture différée des diagnostics (ADR-175 D3).
 const RING: usize = 3;
 /// Noyaux de `delta3d_background.wgsl`.
-const BG: [&str; 3] = ["sample_faces", "couple_columns", "couple_rhs"];
+/// S342 : `sample_faces_tiled`, le même champ factorisé par colonne et par couche, au bit.
+const BG: [&str; 4] = ["sample_faces", "couple_columns", "couple_rhs", "sample_faces_tiled"];
+/// S342 : composantes au plus pour le noyau par tuiles (sa mémoire de groupe) ; au-delà, `sample_faces`.
+const TILE_COMPONENTS: usize = 64;
 
 /// Jusqu'où encoder le pas — les bancs s'arrêtent à un étage pour le juger seul.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
@@ -97,6 +100,9 @@ pub struct Step3 {
     cells_out: wgpu::Buffer,
     faces: wgpu::Buffer,
     bg: Vec<wgpu::ComputePipeline>,
+    /// S342 : le fond par tuiles (vrai par défaut jusqu'à 64 composantes), et son nombre de groupes.
+    tiled: std::cell::Cell<bool>,
+    tile_groups: u32,
     // Projection (S299).
     cg_bind: wgpu::BindGroup,
     heights: wgpu::Buffer,
@@ -382,6 +388,13 @@ impl Step3 {
             cells_out,
             faces: faces_buf.clone(),
             bg,
+            tiled: std::cell::Cell::new(count <= TILE_COMPONENTS),
+            tile_groups: (0..3)
+                .map(|axis| {
+                    let (fx_, fy_, fz_) = (nx + usize::from(axis == 0), ny + usize::from(axis == 1), nz + usize::from(axis == 2));
+                    ((fx_ * fy_).div_ceil(16) * fz_.div_ceil(16)) as u32
+                })
+                .sum(),
             cg_bind,
             heights,
             state,
@@ -571,8 +584,13 @@ impl Step3 {
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(0) });
             pass.set_bind_group(0, &self.bg_bind, &[]);
-            pass.set_pipeline(&self.bg[0]);
-            pass.dispatch_workgroups(faces, 1, 1);
+            if self.tiled.get() {
+                pass.set_pipeline(&self.bg[3]);
+                pass.dispatch_workgroups(self.tile_groups, 1, 1);
+            } else {
+                pass.set_pipeline(&self.bg[0]);
+                pass.dispatch_workgroups(faces, 1, 1);
+            }
             pass.set_bind_group(0, &self.step_bind, &[]);
             pass.set_pipeline(&self.step[PREDICT]);
             pass.dispatch_workgroups(faces, 1, 1);
@@ -757,8 +775,13 @@ impl Step3 {
                 }),
             });
             pass.set_bind_group(0, &self.bg_bind, &[]);
-            pass.set_pipeline(&self.bg[0]);
-            pass.dispatch_workgroups(self.face_groups(), 1, 1);
+            if self.tiled.get() {
+                pass.set_pipeline(&self.bg[3]);
+                pass.dispatch_workgroups(self.tile_groups, 1, 1);
+            } else {
+                pass.set_pipeline(&self.bg[0]);
+                pass.dispatch_workgroups(self.face_groups(), 1, 1);
+            }
         }
         encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
         encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
@@ -788,6 +811,54 @@ impl Step3 {
         self.queue.submit([encoder.finish()]);
         self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
         Ok(())
+    }
+
+    /// **Banc S342** : choisit le noyau du fond — par tuiles ou face par face. Refuse les tuiles au-delà de
+    /// 64 composantes.
+    pub fn set_tiled_background(&self, on: bool) -> Result<(), String> {
+        if on && self.count > TILE_COMPONENTS {
+            return Err("fond par tuiles : au plus 64 composantes".into());
+        }
+        self.tiled.set(on);
+        Ok(())
+    }
+
+    /// **Banc S342** : le noyau du fond en service.
+    pub fn tiled_background(&self) -> bool {
+        self.tiled.get()
+    }
+
+    /// **Banc S342** : évalue le fond seul au dernier instant publié, sans rien d'autre.
+    pub fn run_background_for_bench(&self) -> Result<(), String> {
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            pass.set_bind_group(0, &self.bg_bind, &[]);
+            if self.tiled.get() {
+                pass.set_pipeline(&self.bg[3]);
+                pass.dispatch_workgroups(self.tile_groups, 1, 1);
+            } else {
+                pass.set_pipeline(&self.bg[0]);
+                pass.dispatch_workgroups(self.face_groups(), 1, 1);
+            }
+        }
+        self.queue.submit([encoder.finish()]);
+        self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+    /// **Banc S342** : tous les champs de toutes les faces, relus par morceaux.
+    pub fn faces_values(&self) -> Result<Vec<f32>, String> {
+        let total = self.face_total * crate::delta3d_background::FIELD_SLOTS;
+        let morceau = (self.read.size() / 4) as usize;
+        let mut out = Vec::with_capacity(total);
+        let mut debut = 0;
+        while debut < total {
+            let n = morceau.min(total - debut);
+            out.extend(self.relire(&self.faces, debut, n)?);
+            debut += n;
+        }
+        Ok(out)
     }
 
     fn faces_for_bench(&self) -> wgpu::Buffer {
