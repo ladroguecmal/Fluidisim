@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S341 — **en cours**. **Porte C, la mesure qui manque** ; chemin de la v1
+Session : S341 — **terminée**. **Porte C, la mesure qui manque** ; chemin de la v1
 ([ADR-174](../docs/adr/ADR-174-arbitrages-du-2026-09-19.md) D4), porte en cours de §3 bis depuis S340.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web.
 Entrée — l'utilisateur : *« Continue »*, après la porte B reçue (S340). Le terme de D2 (lot 5) reste sans réponse :
@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 - [x] **P2** — l'horodatage par passe ; critère 1.
 - [x] **P3** — le banc, le témoin, l'alimentation ; critères 2 et 3.
 - [x] **P4** — la preuve, le premier levier ; file, feuille de route ; critère 4.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** Six horodatages — début et fin des trois passes — et `timed_step_passes` ; `timed_step`

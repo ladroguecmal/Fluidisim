@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-24 14:29 +02:00
+JETON            : libre
+Battement        : 2026-09-24 14:37 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web)
-Session en cours : S341 — **porte C, la mesure qui manque** : le 99ᵉ centile du pas de δ sur la scène de la porte B, et sa décomposition par étage ; techniques présentes et absentes (ADR-131)
-Dernière session : S340 — **la porte B reçue** : verdict R16 (critère 3) ; la production suit la référence sur les trois cas de cuve — cas 2 à 1,0·10⁻⁶ m, cas 1 sur un fond de B sous 10⁻⁴ m ([preuve](docs/validation/CUVE-GPU-S305.md) §9) ; la v1 demande encore les portes C et A
-Session suivante : **porte C** (§3 bis) — δ ≤ 2 ms GPU au 99ᵉ centile sur la scène de la porte B, techniques présentes et absentes publiées (ADR-131, ADR-175 §4) : aujourd'hui 4,6 ms par pas, 32 cycles, 376 320 mailles ; piste déjà nommée, la charge utile par face (26 flottants). Puis la porte A. En attente : le terme de D2 (lot 5)
-Maillons        : 0 — S340 : porte B reçue
+Session en cours : aucune
+Dernière session : S341 — **porte C, la mesure** : pas de δ de 4,45 ms, 99ᵉ centile 4,5–4,65 sur la scène de B ; fond 1,53 ms, projection 2,06 (0,087 + 0,062 par cycle), fin 0,39 ([preuve](docs/validation/COUT-DELTA3D-S341.md))
+Session suivante : **porte C, premier levier** — l'évaluation du fond de δ sur la carte : phase par colonne, atténuation par couche, n'écrire que les champs lus ; reçu si la surface publiée reste identique au bit, coût publié. Puis la projection. En attente : le terme de D2 (lot 5)
+Maillons        : 1 — S341 : mesure de la porte C, aucun critère franchi
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

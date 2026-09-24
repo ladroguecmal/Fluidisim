@@ -16676,3 +16676,19 @@ maillages. **Porte B reçue** (critères 1 à 3 ; le coût à la porte C).
 attribuée ; A297 et A289 ouvertes ; coût 4,6 ms pour 2 ms.
 **Rituel.** Maillons **0** : ce qui devient possible — la porte C, qui se reçoit sur la scène de B ; le chemin —
 le coût de δ sur cette scène ; la preuve — §9. Suivant : **porte C**, puis A. En attente : le terme de D2.
+
+## S341 — 2026-09-24 — porte C : où vont les 4,5 ms
+
+**Entrée.** *« Continue »*, après la porte B reçue. Porte en cours : C — δ ≤ 2 ms GPU au 99ᵉ centile par image sur
+la scène de B. On savait 4,62 ms en médiane de banc ; ni le 99ᵉ centile, ni la part de chaque étage.
+**Fait** ([preuve](../docs/validation/COUT-DELTA3D-S341.md)). Horodatage des trois passes du pas, sans effet sur lui
+(surface identique au bit sur 60 pas). Sur secteur, témoin de S302 rejoué à 4,630 ms : **pas de 4,45 ms, 99ᵉ
+centile 4,5 à 4,65** ; l'évaluation du fond de B **seule 1,53 ms**, le reste de la première passe 0,46, la projection
+2,06 — **0,087 ms plus 0,062 par cycle** —, correction et transport 0,39. Le 99ᵉ centile suit la médiane à 1–4 % :
+la porte C est une affaire de moyenne. Techniques présentes et absentes publiées (ADR-131 D3).
+**Décidé sur la mesure.** Premier levier : l'évaluation du fond — factorisation de la phase par colonne et de
+l'atténuation par couche, et charge utile réduite (26 champs écrits, une dizaine lus), toutes deux recevables au
+bit. Puis la projection (multigrille, fusion), puis la cadence découplée (I-05).
+**Limites.** Pas soumis seuls ; ni rendu concurrent ni recouvrement ; une seule scène.
+**Rituel.** Maillons **1** : une mesure, aucun critère franchi. Suivant : **le fond de δ factorisé et allégé**,
+reçu au bit. En attente : le terme de D2 (lot 5).
