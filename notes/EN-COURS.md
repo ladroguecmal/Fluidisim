@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — R20 consigné ; recherches ; critère 1.
 - [x] **P3** — l'écume au déferlement, mesurée avant et après ; critère 2.
-- [ ] **P4** — le spectre fin dans le cœur, ses essais ; l'export des `h0` ; critère 3.
+- [x] **P4** — le spectre fin dans le cœur, ses essais ; l'export des `h0` ; critère 3.
 - [ ] **P5** — la FFT dans Godot et son contrôle ; critère 4.
 - [ ] **P6** — le nuanceur sur les cascades ; critère 5.
 - [ ] **P7** — les images de R21 ; critère 6.
@@ -126,3 +126,13 @@ Critères, écrits avant le code :
   un pixel) : les excursions naissantes au bord du seuil. « Plus aucune tache sous 0,5 m » : **manqué** à 40 m, tenu à
   12 m ; couverture tenue à 40 m, à 12 m quatre taches ne font pas une statistique. Contrôles de S359 inchangés.
   Export relancé depuis la racine : lancé depuis `viewer/`, il écrit sous `viewer/godot/` (fichier égaré supprimé).
+- **P4, critère 3 : deux tenus, un manqué.** Cœur : `equilibrium_tail_density` (variance par unité de `x`, niveau
+  de la bande) et `elfouhaily_delta` ; essais `continuous_tail_matches_equilibrium_cells_s360` — 60 et 64 cellules,
+  écart **3,98·10⁻⁷** et 3,92·10⁻⁷ — et `elfouhaily_spreading_on_the_tail_s360` — Δ contre la formule en f64 à
+  3,1·10⁻⁸ ; rapport des pentes au vent / en travers de la queue, repliée sous le vent, **1,228** (calculé en Python
+  avant le code, même valeur) pour **1,371** chez Cox et Munk : **−10,4 %, critère de ± 10 % manqué** de 0,4 point.
+  Sur la mer entière, bande comprise : 0,97 aujourd'hui (la queue actuelle, 0,88, est plus forte en travers), 1,27 avec
+  Elfouhaily. Afficheur : `Scene::tail_recipe`, `tail_bounds` (4 à 28,05 fp) ; `rendu_cretes::export_detail` →
+  `godot/donnees/detail_h0.bin` (1 Mo, dérivé), fragment `detail` du JSON. Cascade 0 : 32 m, k 1,789 à 12, **5 742**
+  composantes, mss 9,148·10⁻³ réalisée / 9,147·10⁻³ continue ; cascade 1 : 4 m, k 12 à 88,27, **4 870**, 2,567·10⁻² /
+  2,551·10⁻² ; total 0,0348 contre 0,0347 pour les 60 composantes de la queue.

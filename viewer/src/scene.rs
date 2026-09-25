@@ -47,6 +47,10 @@ pub struct Scene {
     pub tail_count_28: usize,
     /// S263 : `[U, Hs, Tp, coupure (fp), mss obtenue, mss de Cox–Munk]` sous vent de scène.
     pub wind_report: Option<[f32; 6]>,
+    /// S360 : la recette de la queue, et ses bornes en `f/fp` — du bord de bande à la dernière cellule gardée
+    /// (`tail_count_28`) : ce que le rendu par FFT réalise densément.
+    pub tail_recipe: background_spectrum::Recipe,
+    pub tail_bounds: [f32; 2],
     pub impact: RadialImpact<256>,
     pub step: f32,
     /// S214 : de quoi reconstruire l'impact **par le cœur**, depuis un journal d'événements.
@@ -190,12 +194,23 @@ impl Scene {
             },
         )
         .unwrap();
+        let tail_end = if wind.is_some() {
+            background_spectrum::capillary_ratio(recipe.sea.tp, 9.81).min(TAIL_RATIO)
+        } else {
+            TAIL_RATIO
+        };
+        let tail_bounds = [
+            recipe.max_ratio,
+            recipe.max_ratio * (tail_end / recipe.max_ratio).powf(tail_count_28 as f32 / TAIL_COMPONENTS as f32),
+        ];
         Self {
             background,
             split,
             tail,
             tail_count_28,
             wind_report,
+            tail_recipe: recipe,
+            tail_bounds,
             impact,
             step: wavelength_m / 16.,
             event,

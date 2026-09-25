@@ -113,6 +113,94 @@ fn echantillon(bande: &[Onde], queue: &[Onde], q: [f64; 2], t: f64, h: f32, m: f
     ((1.0 + gx) * (1.0 + gz) - gy * gy, var_b + energie * var_t)
 }
 
+/// **S360 — la queue de B réalisée densément, pour la FFT de Godot.** Deux cascades de 256 × 256 composantes, 32 m et
+/// 4 m de côté, se partagent la plage de la queue en `k` (coupure à `K_CASCADE`) : dans chaque case `k` de la grille,
+/// la densité continue du cœur (`equilibrium_tail_density`, la loi même dont la queue discrète intègre ses cellules),
+/// convertie en nombre d'onde (eau profonde, `x = √(gk)/(2π·fp)`), étalée par Elfouhaily et al. (1997) et **repliée
+/// sous le vent** — `(1/π)·[1 + Δ·cos 2φ]` pour `cos φ > 0` : mêmes moments d'ordre deux, des vagues qui courent avec
+/// le vent. `h0 = (ξ₁ + iξ₂)·√(F·Δk²/4)`, `ξ` gaussiens d'une graine fixe : `E|h̃|² = F·Δk²` pour le champ réel. Écrit
+/// les `h0` en f32 petit-boutiens, cascade par cascade, rangées `m` (y) puis `n` (x), ordre naturel de la FFT ; rend le
+/// fragment JSON qui les décrit. Rendu seulement (I-13) ; rien n'en sort vers le jeu.
+pub const K_CASCADE: f64 = 12.0;
+pub const N_DETAIL: usize = 256;
+
+pub fn export_detail(scene: &Scene, fichier: &std::path::Path) -> Result<String, String> {
+    use std::f64::consts::{PI, TAU};
+    use water_core::background_spectrum::{elfouhaily_delta, equilibrium_tail_density};
+    let r = scene.tail_recipe;
+    let (g, tp) = (r.gravity as f64, r.sea.tp as f64);
+    let fp = 1.0 / tp;
+    let u10 = scene.wind_report.map_or(u10_s201(), |w| w[0] as f64);
+    let cp = g * tp / TAU;
+    let k_de = |x: f64| (TAU * fp * x).powi(2) / g;
+    let (k_bas, k_haut) = (k_de(scene.tail_bounds[0] as f64), k_de(scene.tail_bounds[1] as f64));
+    let theta = r.sea.theta_turns as f64 * TAU;
+    let vent = [theta.cos(), theta.sin()];
+    let cascades = [(32.0f64, k_bas, K_CASCADE), (4.0f64, K_CASCADE, k_haut)];
+    let densite = |k: f64| -> Result<f64, String> {
+        let x = (g * k).sqrt() / (TAU * fp);
+        let e = equilibrium_tail_density(r, x as f32).map_err(|e| format!("densité de queue {e:?}"))? as f64;
+        Ok(e * (g / k).sqrt() / (2.0 * TAU * fp))
+    };
+    let hasard = |graine: u64| {
+        let mut z = graine.wrapping_add(0x9e37_79b9_7f4a_7c15);
+        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+        z ^ (z >> 31)
+    };
+    let mut octets: Vec<u8> = Vec::with_capacity(2 * N_DETAIL * N_DETAIL * 8);
+    let mut lignes = Vec::new();
+    for (c, &(cote, ka, kb)) in cascades.iter().enumerate() {
+        let dk = TAU / cote;
+        let (mut mss_realise, mut composantes) = (0f64, 0usize);
+        for m in 0..N_DETAIL {
+            for n in 0..N_DETAIL {
+                let signe = |i: usize| if i < N_DETAIL / 2 { i as f64 } else { i as f64 - N_DETAIL as f64 };
+                let (kx, ky) = (signe(n) * dk, signe(m) * dk);
+                let k = (kx * kx + ky * ky).sqrt();
+                let mut h = (0f64, 0f64);
+                if k >= ka && k < kb {
+                    let cos_phi = (kx * vent[0] + ky * vent[1]) / k;
+                    if cos_phi > 0.0 {
+                        let delta = elfouhaily_delta(k as f32, u10 as f32, cp as f32, g as f32) as f64;
+                        let f = densite(k)? * (1.0 + delta * (2.0 * cos_phi * cos_phi - 1.0)) / (PI * k);
+                        let echelle = (f * dk * dk / 4.0).sqrt();
+                        let graine = 0x5360_0000_0000_0000u64 ^ ((c as u64) << 40) ^ ((m as u64) << 20) ^ n as u64;
+                        let u1 = ((hasard(graine) >> 11) as f64 + 0.5) / (1u64 << 53) as f64;
+                        let u2 = ((hasard(graine ^ 0xa5a5_a5a5) >> 11) as f64 + 0.5) / (1u64 << 53) as f64;
+                        let rayon = (-2.0 * u1.ln()).sqrt();
+                        h = (rayon * (TAU * u2).cos() * echelle, rayon * (TAU * u2).sin() * echelle);
+                        mss_realise += 2.0 * k * k * (h.0 * h.0 + h.1 * h.1);
+                        composantes += 1;
+                    }
+                }
+                octets.extend_from_slice(&(h.0 as f32).to_le_bytes());
+                octets.extend_from_slice(&(h.1 as f32).to_le_bytes());
+            }
+        }
+        let pas = 8000;
+        let mut mss_continu = 0f64;
+        for i in 0..pas {
+            let k = ka * (kb / ka).powf((i as f64 + 0.5) / pas as f64);
+            mss_continu += k * k * densite(k)? * k * (kb / ka).ln() / pas as f64;
+        }
+        println!(
+            "EXPORT_DETAIL_S360 cascade={c} cote_m={cote} k=[{ka:.4},{kb:.4}] composantes={composantes} mss_realisee={mss_realise:.6e} mss_continue={mss_continu:.6e}"
+        );
+        lignes.push(format!("[{cote}, {ka:.9}, {kb:.9}, {mss_realise:.9e}, {mss_continu:.9e}]"));
+    }
+    if let Some(dossier) = fichier.parent() {
+        std::fs::create_dir_all(dossier).map_err(|e| e.to_string())?;
+    }
+    std::fs::write(fichier, octets).map_err(|e| e.to_string())?;
+    Ok(format!(
+        "{{\"fichier\": \"{}\", \"n\": {N_DETAIL}, \"gravite\": {g}, \"km\": 370.0, \"vent_turns\": {}, \"u10\": {u10:.6}, \"cascades\": [{}]}}",
+        fichier.file_name().and_then(|f| f.to_str()).unwrap_or("detail_h0.bin"),
+        r.sea.theta_turns,
+        lignes.join(", ")
+    ))
+}
+
 /// S356 P2 : le seuil de `s` dépend de l'empreinte — un seuil unique donnait 1,55 fois la couverture de Monahan à
 /// 10 cm et 2 fois à 8 m (la queue de la loi s'alourdit quand les ondes courtes tombent). Quatorze empreintes,
 /// `h_i = 2^(i−7)` m, de 7,8 mm — l'empreinte d'un pixel proche — à 64 m ; le nuanceur interpole en `log₂ h`.
@@ -323,6 +411,10 @@ pub fn export_godot(scene: &Scene, asym: Option<&Asymmetry>, m: f32, chemin: &st
     let seuils = mer.seuils(w, 0x5356_0001, 20_000);
     let seuils_deferlement = mer.seuils_deferlement(w, 0x5360_0001, 20_000);
     // Contrôle : η linéaire de la bande en cinq points, calculé par le cœur à t₀ + 3 s.
+    let detail = export_detail(
+        scene,
+        &std::path::Path::new(chemin).with_file_name("detail_h0.bin"),
+    )?;
     let t1 = SimTime(t0.0 + 3_000_000);
     let bande_t1 = lignes(&scene.background, usize::MAX, t1)?;
     let points = [[0.0f64, 0.0], [12.5, -7.0], [-40.0, 33.0], [250.0, 180.0], [-600.0, -410.0]];
@@ -360,6 +452,7 @@ pub fn export_godot(scene: &Scene, asym: Option<&Asymmetry>, m: f32, chemin: &st
   \"R0\": [0.00068, 0.00826, 0.08960],
   \"transmission_crete\": [0.5987, 0.9187, 0.9863],
   \"controle\": [{controle}],
+  \"detail\": {detail},
   \"bande\": [
     {bande}],
   \"queue\": [

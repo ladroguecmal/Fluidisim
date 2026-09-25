@@ -353,6 +353,43 @@ pub fn tail_count_for_mss(band: &[Component], tail: &[Component], target: f32) -
     (best, best_mss as f32)
 }
 
+/// S360 — **la densité continue de la queue d'équilibre** (ADR-157) : la variance par unité de `x = f/fp`, au niveau
+/// absolu de la bande que `bake` cuit, `Hs²·level·x⁻⁴/(16·∫_bande q)`, `level = q(b)·b⁴`. C'est la loi dont
+/// `bake_tail_equilibrium` intègre les cellules ; elle sert à une réalisation **dense** de la même queue — le rendu par
+/// FFT de S360, des milliers de composantes au lieu de soixante. `x` au-delà du bord de bande, sinon `Band`.
+pub fn equilibrium_tail_density(r: Recipe, x: f32) -> Result<f32, Error> {
+    if !r.sea.hs.is_finite() || r.sea.hs <= 0.0 || !r.gamma.is_finite() || r.gamma < 1.0 { return Err(Error::SeaState); }
+    if !x.is_finite() || x < r.max_ratio || r.max_ratio <= r.min_ratio { return Err(Error::Band); }
+    let lg = ln(r.gamma);
+    let b = r.max_ratio;
+    let level = shape(b, lg) * b * b * b * b;
+    let band = integral(r.min_ratio, r.max_ratio, lg, 0, 4096);
+    let density = r.sea.hs * r.sea.hs * level / (16.0 * band * x * x * x * x);
+    if !density.is_finite() { return Err(Error::NotRepresentable); }
+    Ok(density)
+}
+
+/// S360 — `Δ(k)` de l'**étalement directionnel d'Elfouhaily, Chapron, Katsaros et Vandemark** (1997, *A unified
+/// directional spectrum for long and short wind-driven waves*, JGR 102(C7), 15781–15796) :
+/// `Φ(k, φ) = (1/2π)·[1 + Δ(k)·cos 2φ]`, `φ` compté depuis le vent,
+/// `Δ = tanh(a₀ + a_p·(c/c_p)^2,5 + a_m·(c_m/c)^2,5)`, `a₀ = ln 2/4`, `a_p = 4`, `a_m = 0,13·u*/c_m`, `c_m = 0,23 m/s`,
+/// `c² = (g/k)·(1 + (k/k_m)²)`, `k_m = 370 rad/m`, `u* = √0,00144·U₁₀`. Calé par ses auteurs sur l'anisotropie des pentes
+/// de Cox et Munk ; symétrique en `φ → φ + π`, il ne dit pas dans quel sens la vague court. `k` en rad/m, `U₁₀` et `c_p`
+/// en m/s.
+pub fn elfouhaily_delta(k: f32, u10: f32, cp: f32, gravity: f32) -> f32 {
+    const KM: f32 = 370.0;
+    const CM: f32 = 0.23;
+    let a0 = 0.25 * core::f32::consts::LN_2;
+    let ustar = 0.037_947_33 * u10;
+    let am = 0.13 * ustar / CM;
+    let c = ((gravity / k) * (1.0 + (k / KM) * (k / KM))).sqrt();
+    let puissance = |v: f32| exp(2.5 * ln(v));
+    let z = a0 + 4.0 * puissance(c / cp) + am * puissance(CM / c);
+    // tanh par l'exponentielle du module : `z > 0` ici, et `exp(−2z)` reste dans le domaine de `decay`.
+    let e = exp(-2.0 * z);
+    (1.0 - e) / (1.0 + e)
+}
+
 /// Profil V1 : gamma1..7, N32..256 et bande dans [0.5,4] contenant fp.
 /// Ces bornes délimitent la cuisson reçue, pas les mers autorisées du jeu.
 /// Les refus ne mutent aucun pool ni allocateur ; le résultat entier est publié sur succès.

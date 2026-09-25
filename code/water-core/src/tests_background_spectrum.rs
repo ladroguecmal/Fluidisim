@@ -416,3 +416,65 @@ fn wind_sea_and_tail_cut_follow_observations_s263() {
         previous = n;
     }
 }
+
+/// S360 — la densité continue de la queue d'équilibre intègre, cellule à cellule, ce que la cuisson discrète porte : la
+/// recette de `--meilleur` (S201, Hs 1,5 m, Tp 6 s), queue de 64 cellules jusqu'à 32 fp ; les 60 premières (celles que
+/// la scène garde, jusqu'à 28 fp) et toutes. Écart relatif sous 1 %.
+#[test]
+fn continuous_tail_matches_equilibrium_cells_s360() {
+    use crate::background_spectrum::{bake_tail_equilibrium, equilibrium_tail_density};
+    let r = Recipe { sea: SeaState { hs: 1.5, tp: 6.0, theta_turns: 0.12, components: 32, graine: 201 },
+        gravity: 9.81, gamma: 3.3, min_ratio: 0.5, max_ratio: 4.0, spread_turns: 0.25 };
+    let tail = bake_tail_equilibrium(r, 10.0, 32.0, 64).unwrap();
+    for n in [60usize, 64] {
+        let discrete: f64 = tail.components()[..n].iter().map(|c| 0.5 * (c.amplitude as f64).powi(2)).sum();
+        let upper = 4.0 * 8f64.powf(n as f64 / 64.0);
+        let m = 8000;
+        let continuous: f64 = (0..m).map(|i| {
+            let x = 4.0 * (upper / 4.0).powf((i as f64 + 0.5) / m as f64);
+            let dx = x * (upper / 4.0).ln() / m as f64;
+            equilibrium_tail_density(r, x as f32).unwrap() as f64 * dx
+        }).sum();
+        let ecart = (continuous - discrete).abs() / discrete;
+        println!("S360 queue_continue cellules={n} discret={discrete:.6e} continu={continuous:.6e} ecart={ecart:.2e}");
+        assert!(ecart < 0.01, "{ecart}");
+    }
+    assert_eq!(equilibrium_tail_density(r, 3.9), Err(Error::Band));
+}
+
+/// S360 — l'étalement d'Elfouhaily : `Δ` dans ]0, 1[, et sa valeur sur la queue de `--meilleur` recalculée ici en f64
+/// depuis la formule publiée (U₁₀ = 7,787 m/s de S201, c_p = g·Tp/2π) ; puis le rapport des pentes au vent et en travers
+/// de cette queue, repliée sous le vent — `(1/2 + Δ/4)/(1/2 − Δ/4)` pondéré par `k²·E` —, publié : 1,228 pour 1,37 chez
+/// Cox et Munk (SPEC-001 §1 sexies) à ce vent.
+#[test]
+fn elfouhaily_spreading_on_the_tail_s360() {
+    use crate::background_spectrum::elfouhaily_delta;
+    let (g, tp, u10) = (9.81f64, 6.0f64, (1.5f64 * 9.81 / 0.21).sqrt() / 1.075);
+    let cp = g * tp / core::f64::consts::TAU;
+    let reference = |k: f64| {
+        let c = (g / k * (1.0 + (k / 370.0).powi(2))).sqrt();
+        let am = 0.13 * 0.00144f64.sqrt() * u10 / 0.23;
+        (0.25 * 2f64.ln() + 4.0 * (c / cp).powf(2.5) + am * (0.23 / c).powf(2.5)).tanh()
+    };
+    let mut pire = 0f64;
+    for k in [1.79f64, 3.0, 7.15, 12.0, 28.6, 50.0, 83.9] {
+        let d = elfouhaily_delta(k as f32, u10 as f32, cp as f32, g as f32) as f64;
+        assert!(d > 0.0 && d < 1.0);
+        pire = pire.max((d - reference(k)).abs());
+    }
+    assert!(pire < 1e-5, "{pire}");
+    let (xu, m) = (4.0 * 8f64.powf(60.0 / 64.0), 20_000);
+    let (mut su, mut sc) = (0f64, 0f64);
+    for i in 0..m {
+        let x = 4.0 * (xu / 4.0).powf((i as f64 + 0.5) / m as f64);
+        let dx = x * (xu / 4.0).ln() / m as f64;
+        let k = (core::f64::consts::TAU * x / tp).powi(2) / g;
+        let d = elfouhaily_delta(k as f32, u10 as f32, cp as f32, g as f32) as f64;
+        let poids = k * k * x.powi(-4) * dx;
+        su += poids * (0.5 + 0.25 * d);
+        sc += poids * (0.5 - 0.25 * d);
+    }
+    let rapport = su / sc;
+    println!("S360 elfouhaily pire_delta={pire:.2e} rapport_pentes_queue={rapport:.4} cox_munk={:.4}", 3.16e-3 * u10 / (0.003 + 1.92e-3 * u10));
+    assert!((rapport - 1.228).abs() < 0.002, "{rapport}");
+}
