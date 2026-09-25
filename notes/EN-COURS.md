@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — verdict R19 consigné ; diagnostic de l'horizon ; critères 1 et 5 (mesure).
+- [x] **P2** — verdict R19 consigné ; diagnostic de l'horizon ; critères 1 et 5 (mesure).
 - [ ] **P3** — le fond et ses poses ; critère 2.
 - [ ] **P4** — la profondeur reconstruite, le mode contrôle ; critère 3.
 - [ ] **P5** — l'optique de la colonne ; critère 4.
@@ -100,3 +100,11 @@ Critères, écrits avant le code :
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
+- **P2.** R19 consigné (REVUE-VISUELLE §24, file). `outils/horizon_mer.py` : horizon = plus forte chute de luminance
+  d'une rangée à la suivante ; bandes de 20 rangées à 3 de la ligne ; sRGB → linéaire, Rec. 709. Rapport mer/ciel —
+  Godot (R19) rasante **0,153**, proche **0,182** ; afficheur rasante **0,713**, proche **0,728**. Témoin
+  `RUGOSITE_MAX=0.05` (uniforme `rugosite_max`) : **0,414** et **0,482**. Reste attendu : `SPECULAR` 0,25 donne à Godot
+  F0 = 0,16·0,25² = 0,01 (l'eau : 0,020) ; et son approximation de l'environnement. L'afficheur, lui, calcule sa
+  réflexion (ciel clair, nuages, Fresnel, pente non résolue par quadrature de Gauss-Hermite, ADR-161) : c'est ce qui
+  se porte. **Critère de P6, écrit ici avant le code** : rapport mer/ciel de Godot à ± 15 % de celui de l'afficheur,
+  aux poses proche et rasante.

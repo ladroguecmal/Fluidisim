@@ -158,6 +158,10 @@ func uniformes_fixes() -> void:
 	var hauteur := get_viewport().get_visible_rect().size.y
 	materiau.set_shader_parameter("angle_pixel", 2.0 * tan(deg_to_rad(camera.fov) / 2.0) / hauteur)
 	materiau.set_shader_parameter("pas_radial", log(R_MAX / R_MIN) / float(RAYONS - 1))
+	# S359 : témoin du diagnostic de l'horizon, `RUGOSITE_MAX=0.05`.
+	var borne := OS.get_environment("RUGOSITE_MAX")
+	if borne != "":
+		materiau.set_shader_parameter("rugosite_max", float(borne))
 
 
 ## Les lignes `[a, kx, ky, φ(t)]` : la phase avance de `−ω·(t − t₀)`, repliée ici en double précision (I-08).

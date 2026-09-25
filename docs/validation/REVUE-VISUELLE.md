@@ -972,3 +972,11 @@ Godot 4.4.1 sur le dossier `godot` — touches 1 à 4 pour les poses, Échap pou
 
 Un mot par question suffit.
 
+**Verdict R19 — reçu le 2026-09-25 (S359)** : *« selon moi la mer n'est pas du tout crédible, mais c'est pas grave on
+continue, car je pense qu'il manque plein de chose avec la trnasparence en fonction de la prfondeur etc... »*. Lu sur
+les questions : ni l'afficheur ni Godot ne convainquent ; **on continue dans Godot** (ADR-192 inchangé) ; le manque
+nommé est l'**épaisseur de l'eau** — ce que la lumière y fait selon la profondeur. **Classe** : défaut de rendu,
+liste 8.5 (*absent*). **Mesure qu'il déclenche** (S359, `outils/horizon_mer.py`) : sous l'horizon, au rasant, la
+mer de Godot renvoie **0,15 à 0,18** de la luminance du ciel qui la surplombe, l'afficheur **0,71 à 0,73** ; bornée
+à 0,05, la rugosité confiée à Godot remonte ce rapport à 0,41–0,48 — elle en explique une grande part, pas tout.
+Suite : S359, la colonne d'eau et la réflexion portées dans le nuanceur.

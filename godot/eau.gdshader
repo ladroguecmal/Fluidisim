@@ -29,6 +29,8 @@ uniform vec3 R0 = vec3(0.00068, 0.00826, 0.08960);
 // Empreinte angulaire d'un pixel, `2·tan(fov/2)/hauteur`, et pas radial relatif de la grille polaire.
 uniform float angle_pixel = 0.0013;
 uniform float pas_radial = 0.03;
+// S359 — témoin du diagnostic de l'horizon : la rugosité confiée à Godot, bornée (1 : sans borne).
+uniform float rugosite_max = 1.0;
 
 varying vec2 lag;
 varying vec3 g_bande;
@@ -132,7 +134,7 @@ void fragment() {
     // Corps d'eau, écume ; la pente non résolue en rugosité GGX : α = √mss, rugosité de Godot = √α.
     ALBEDO = mix(0.54 * R0, vec3(reflectance_ecume), couverture);
     float rugosite = clamp(pow(max(energie * var_non, 1e-8), 0.25), 0.02, 1.0);
-    ROUGHNESS = mix(rugosite, 0.9, couverture);
+    ROUGHNESS = mix(min(rugosite, rugosite_max), 0.9, couverture);
     SPECULAR = mix(0.25, 0.1, couverture);
     METALLIC = 0.0;
     // La lumière des crêtes : transmise par ce qui se comprime, éclairée par Godot depuis l'arrière de la crête.
