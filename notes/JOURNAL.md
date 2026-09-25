@@ -17032,3 +17032,20 @@ loin. **Limites.** L'afficheur garde sa queue (divergence dite) ; cascades rép�
 **Rituel.** Maillons **1** : aucune case de la liste ne change (8.9 partiel, 8.4 absent jusqu'au verdict). Suivant :
 **R21 d'abord** ; les caustiques, demandées en R20, puis le ciel ; ensuite la physique par l'alternance (lot 5, la coque
 qui bouge). R18, R21 attendus.
+
+## S361 — 2026-09-25 — rendu 5 : les caustiques sur le fond
+
+**Entrée.** R20 : *« Tente les caustique »*. Surface de S360.
+**Fait** ([preuve](../docs/validation/CAUSTIQUES-S361.md)). La hessienne de η dans la FFT (3·10⁻⁵ de la somme directe).
+**Première méthode, à rebours** — du fond au point de surface par point fixe, `1/|det J|` : exacte à 2,4 % devant la
+focale sur une onde, mais **énergie 2,0 et 5,6** sur la scène : elle ne suit qu'un antécédent, et le fond de la scène
+est au-delà de la focale de la cascade de 32 m (≈ 13 m). **Seconde méthode, directe** (Wyman 2006) — la surface
+projetée sur le fond triangle par triangle dans une vue orthographique hors écran, rapports d'aire additionnés : exacte
+à **4,6 %** contre la solution indépendante dans les deux directions (témoin retourné : 49 %), plis au-delà de la focale
+additionnés, **énergie de la scène 1,008 et 1,002** ; le disque solaire borne les plis. Réseau d'un à deux mètres, sous
+l'eau un miroitement bleuté. **R22** préparée, images envoyées.
+**Limites.** Carte de 64 m devant la caméra ; cascade fine exclue (focale ≈ 0,8 m) ; ni objets immergés, ni rayons dans
+l'eau ; coût non mesuré.
+**Rituel.** Maillons **2** : 8.5 reste partiel. À deux maillons, la suite prend une capacité : **R21 et R22 d'abord** ;
+puis la physique — la coque qui bouge sur la carte (6.4, ADR-193 §3) ou le lot 5 (A316) — ; le ciel à la session de
+rendu suivante. R18, R21, R22 attendus.

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S361 — **en cours**. **Rendu 5 : les caustiques** — *« Tente les caustique »* (R20, question 3).
+Session : S361 — **terminée**. **Rendu 5 : les caustiques** — *« Tente les caustique »* (R20, question 3).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 Entrée — S360 a rendu la surface fine par FFT ; R21 attendu. **Physique** : le soleil réfracté par la surface éclaire le
 fond selon la projection `X_f = X_s + (H + η)·p(∇η(X_s))`, `p` la pente horizontale du rayon réfracté (Snell exact) ;
@@ -92,7 +92,7 @@ Critères, écrits avant le code :
   projetée sur le fond triangle par triangle, rapports d'aire additionnés dans une vue orthographique (Wyman) ; même
   contrôle analytique (critère 2), énergie de la scène à ± 10 % (critère 3) ; le fond la lit.
 - [x] **P6** — preuve, file, liste, index.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** Cinq champs complexes par cascade (`CHAMPS`), troisième image `(η_xx, η_yy, η_xy, η)` et ses

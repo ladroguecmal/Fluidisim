@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-25 10:26 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S361 — rendu 5 : les caustiques sur le fond (demandées en R20), optique géométrique, contre une solution exacte
-Dernière session : S360 — **rendu 4, la surface fine** : verdict R20 (couleur reçue ; topologie, ciel, écume, caustiques) ; la queue de B par FFT dans Godot, 10 612 composantes, étalement d'Elfouhaily ([ADR-195](docs/adr/ADR-195-la-queue-de-b-rendue-par-fft.md)) ; l'écume au déferlement des vagues dominantes ([preuve](docs/validation/SURFACE-FINE-S360.md)) ; R21 préparée
-Session suivante : **le verdict R21 d'abord** (REVUE-VISUELLE §26). Sinon : **les caustiques**, demandées en R20 (liste 8.5), puis **le ciel** ; ensuite la physique par l'alternance d'ADR-184 D1 — le lot 5 (A316), puis la coque qui bouge (ADR-193 §3). En attente : R18, R21
-Maillons        : 1 — S360 : aucune case de la liste ne change (journal)
+Session en cours : aucune
+Dernière session : S361 — **rendu 5, les caustiques** : méthode à rebours rejetée par la mesure (énergie 2 à 5,6), méthode directe (Wyman) retenue — exacte à 4,6 %, énergie de la scène à 1 % ([preuve](docs/validation/CAUSTIQUES-S361.md)) ; R22 préparée. Avant elle S360 : la surface fine par FFT, l'écume au déferlement (R21)
+Session suivante : **les verdicts R21 et R22 d'abord** (REVUE-VISUELLE §26–27). À deux maillons, une capacité : **la physique** — la coque qui bouge sur la carte (6.4, ADR-193 §3), ou le lot 5 (A316) par l'alternance d'ADR-184 ; **le ciel** (demandé en R20) à la session de rendu suivante. En attente : R18, R21, R22
+Maillons        : 2 — S360 et S361 : aucune case de la liste ne change (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
