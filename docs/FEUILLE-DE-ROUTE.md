@@ -361,7 +361,7 @@ d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photogr
 
 1. **La v1 en une scène vivante** — réunir ce que les portes ont reçu séparément : la coque dans la production de δ
    (6.4 — **S358** : le pas linéaire sur la carte, solide fixe ; reste la coque qui bouge, ADR-193), l'ordonnanceur et le rang 1 dans l'afficheur (4.2), l'interpolation du rendu à 30 Hz (4.19 — **faite en
-   S353**, verdict R18 attendu) ; puis la revue du prix du rang 1 (A319), que 4.5 et 9.9 attendent.
+   S353**, R18 reçu en S369) ; puis la revue du prix du rang 1 (A319), que 4.5 et 9.9 attendent.
 2. **Le lot 5, une session sur deux** (ADR-184 D1, ADR-190 D4) : 4.16, par A316 — 22 points en aval.
 3. **La bathymétrie** (2.7) — 20 points en aval ; **S362** : la référence ; **S364** : l'entrée dans B, isobathes droites
    (ADR-196) ; restent les chemins de B jusqu'à Godot, la 2D, la marée —, puis W
@@ -371,8 +371,9 @@ d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photogr
    11.2, 12.1, 13.1.
 
 **Fronts 1 à 5 — 42 points**, qui s'ouvrent à mesure ; le registre dit lesquels. **E — 41 points** attendent un fait
-ou une action de l'utilisateur, demandé au moment où le point bloque (ADR-190 D5) : le réseau (10.1) en commande 14 à
-lui seul, puis la météo, le verdict du rang 1 et la voie d'A289.
+ou une action de l'utilisateur, demandé au moment où le point bloque (ADR-190 D5) : la portée du réseau (10.1) en
+commande 14 à lui seul, puis la météo — à la fin —, le verdict du rang 1 et la voie d'A289, déléguée au projet en S369
+([ADR-197](adr/ADR-197-reponses-du-2026-09-26.md) : Godot moteur du jeu entier, 8.1 au front 0 ; 5.11 hors du périmètre).
 
 ## 4. Arbitrages explicites
 

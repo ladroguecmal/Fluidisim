@@ -945,6 +945,9 @@ l'anneau ; **`D`** montre la mer sans δ ; flèches pour bouger ; Échap pour qu
 
 Un mot par question suffit.
 
+**Verdict R18 — reçu S369, 2026-09-26** : *« Rendu convaincant »*. δ à 30 Hz, interpolé au rendu, jugé en direct : reçu
+([ADR-197](../adr/ADR-197-reponses-du-2026-09-26.md) D8) ; 8.7 n'attend plus que le verdict de sa frontière.
+
 ## 24. R19 — la mer de B dans Godot, contre l'afficheur, S357
 
 **[ADR-192](../adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md) D2, liste 8.1 et 8.4.** Le premier pas du rendu dans
@@ -1153,4 +1156,4 @@ dans toutes les directions. Calée sur la mesure : une lueur face au soleil, rie
 **La question :** la lueur face au soleil — juste, trop forte, gênante ? Un mot suffit ; sans réponse, elle reste.
 
 **Verdict R25 — reçu le 2026-09-25 (S367)** : *« Je valide les rendue sauf ecume »* — **la lueur face au soleil est validée**.
-**R18** (en direct, §23), que la demande de S366 ne rappelait pas, reste attendu.
+**R18** (en direct, §23), que la demande de S366 ne rappelait pas, reste attendu. *Reçu en S369 : voir §23.*

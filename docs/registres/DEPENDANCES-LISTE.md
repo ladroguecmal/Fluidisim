@@ -28,10 +28,13 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 - **Deux points commandent le plus**, en aval transitif : **4.16**, la surface non graphe — 22 points, dont 4.1,
   4.12, 4.13, 4.14, 7.2 et 7.4 — et **2.7**, la bathymétrie — 20 : lacs, rivières, réfraction, déferlement de W,
   tsunamis, plage. Suivent 10.1 (16), 7.4 (12), 3.6 et 1.5 (9 chacun).
-- **41 points attendent un fait extérieur, dont 22 directement.** Une cause en commande 14 : **le réseau** (10.1) —
-  transport, serveur, sauvegarde, et, par les échanges client/serveur de la grille de référence (1.5), la grille,
-  les blocs, la fusion et le régime substitutif. Puis la **météo** (2.8, quatre points), le **verdict** sur le prix
-  du rang 1 (9.9, trois), la **voie d'A289** (4.8, deux) ; les autres, un fait chacun.
+- **41 points attendent un fait extérieur ou une décision, dont 21 directement** (S369, après
+  [ADR-197](../adr/ADR-197-reponses-du-2026-09-26.md)). Une cause en commande 14 : **la portée du réseau** (10.1 :
+  aucun format n'existe ; multijoueur ou non, demandé) — transport, serveur, sauvegarde, et, par les échanges
+  client/serveur de la grille de référence (1.5), la grille, les blocs, la fusion et le régime substitutif. Puis la
+  **météo**, placée à la fin (2.8, quatre points), le **verdict** sur le prix du rang 1 (9.9, trois), la **voie
+  d'A289**, déléguée au projet (4.8, deux) ; les autres, un fait chacun. 5.11 n'attend plus rien : il est hors du
+  périmètre.
 - **Pour l'ordre** : commencer par ce qui débloque le plus sans rien demander — 4.16, déjà une session sur deux
   (ADR-184 D1, ADR-190 D4), et 2.7 — ; réunir les portes de la v1 en une scène vivante (6.4, 4.2, 4.19) ; poser
   chaque question E quand son point bloque, pas avant. L'ordre lui-même est dans la feuille de route, §3 ter.
@@ -42,41 +45,39 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 
 | front | points | lesquels |
 |---|---:|---|
-| **0** | 33 | 1.8, 2.6, 2.7, 3.9, 4.2, 4.7, 4.15, 4.16, 4.18, 4.19, 5.2, 5.4, 5.6, 5.7, 6.1, 6.3, 6.4, 6.5, 7.7, 8.2, 8.3, 8.5, 8.8, 8.9, 9.2, 9.3, 9.7, 9.8, 9.13, 10.8, 11.2, 12.1, 13.1 |
+| **0** | 34 | 1.8, 2.6, 2.7, 3.9, 4.2, 4.7, 4.15, 4.16, 4.18, 4.19, 5.2, 5.4, 5.6, 5.7, 6.1, 6.3, 6.4, 6.5, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.2, 9.3, 9.7, 9.8, 9.13, 10.8, 11.2, 12.1, 13.1 |
 | **1** | 25 | 1.3, 2.1, 2.3, 2.4, 2.9, 3.2, 3.6, 4.1, 4.4, 4.6, 4.13, 4.17, 4.20, 5.8, 5.10, 6.2, 7.2, 7.4, 7.6, 8.6, 9.6, 9.11, 11.1, 11.4, 12.5 |
-| **2** | 9 | 2.5, 3.3, 3.4, 3.5, 4.12, 5.3, 7.5, 9.5, 12.2 |
+| **2** | 10 | 2.5, 3.3, 3.4, 3.5, 4.12, 5.3, 6.7, 7.5, 9.5, 12.2 |
 | **3** | 5 | 3.1, 4.14, 5.9, 6.8, 7.3 |
 | **4** | 1 | 6.6 |
 | **5** | 1 | 11.3 |
-| **E** | 43 | 1.1, 1.4, 1.5, 1.6, 1.7, 2.2, 2.8, 3.7, 3.8, 4.3, 4.5, 4.8, 4.9, 4.10, 4.11, 4.21, 5.5, 5.11, 5.12, 6.7, 7.1, 7.8, 8.1, 8.4, 8.7, 8.10, 9.1, 9.4, 9.9, 9.10, 9.12, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.9, 11.5, 12.3, 12.4, 13.2, 13.3 |
+| **E** | 41 | 1.1, 1.4, 1.5, 1.6, 1.7, 2.2, 2.8, 3.7, 3.8, 4.3, 4.5, 4.8, 4.9, 4.10, 4.11, 4.21, 5.5, 5.11, 5.12, 7.1, 7.8, 8.4, 8.7, 8.10, 9.1, 9.4, 9.9, 9.10, 9.12, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.9, 11.5, 12.3, 12.4, 13.2, 13.3 |
 
 **Ce qu'on demandera à l'utilisateur**, au moment où le point bloque (ADR-190 D5) :
 
 | point | attente extérieure |
 |---|---|
-| **1.7** | une seconde cible matérielle (A98) |
-| **2.8** | une source météo : laquelle, sous quelle forme |
+| **1.7** | une seconde cible matérielle (A98) — pas encore (ADR-197 D7) |
+| **2.8** | la fin du projet : météo et son en dernier (ADR-197 D5) |
 | **3.8** | le mode de l'hôte autoritaire, intersection ou union (A271) |
 | **4.5** | un verdict visuel des passages (A319) |
 | **4.8** | la voie d'A289 : rappel lent, durée de vie bornée, ou dispersion dans B |
 | **4.21** | la voie d'A289 |
-| **5.11** | le terrain : un modèle de sol et de nappes existe-t-il ? |
-| **6.7** | les acteurs du jeu : leur forme, leur physique |
+| **5.11** | hors du périmètre par décision de l'utilisateur (ADR-197 D4) ; ne se rouvre que par lui |
 | **7.1** | des photographies qui renseignent forme, couleur et place de l'écume sur la vague (décision du 2026-09-26) |
-| **7.8** | un moteur audio pour en juger |
-| **8.1** | le moteur du jeu, pour l'intégration |
-| **8.7** | les verdicts : R18 (en direct), puis la frontière |
+| **7.8** | la fin du projet, par l'audio de Godot (ADR-197 D5) |
+| **8.7** | le verdict de la frontière (R18 reçu, ADR-197 D8) |
 | **8.10** | les verdicts de l'utilisateur : poses, animation, scénarios |
 | **9.1** | `W_gameplay`, qui vient du jeu |
 | **9.4** | les objets contrôlables du jeu et leurs paliers |
 | **9.9** | un verdict visuel du prix du rang 1 (A319) |
-| **9.10** | un second matériel, pour l'adaptation |
-| **10.1** | le réseau du jeu : un format existe-t-il ? |
-| **10.2** | un serveur réel |
-| **10.3** | une seconde cible (A98) |
+| **9.10** | un second matériel, pour l'adaptation — pas encore (ADR-197 D7) |
+| **10.1** | la portée de « pas de réseau » : multijoueur ou non (ADR-197 D1) |
+| **10.2** | un serveur réel — pas encore (ADR-197 D7) |
+| **10.3** | une seconde cible (A98) — pas encore (ADR-197 D7) |
 | **10.9** | un consommateur de jeu |
-| **11.5** | le matériel de livraison et une seconde cible |
-| **12.4** | l'outil de terrain du jeu |
+| **11.5** | le matériel de livraison et une seconde cible — pas encore (ADR-197 D7) |
+| **12.4** | l'outil de terrain du jeu, dans Godot (ADR-197 D2) : lequel |
 
 ### 1. Socle et architecture
 
@@ -87,7 +88,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **1.4** Point d'entrée unique, orchestrateur des régimes | H | `WaterSystem`, qui porte l'ordonnanceur, l'oubli et l'estimateur de coût | 1.6, 9.9 | 9.12 | **E**, par 9.9 |
 | **1.5** Grille 3D de référence stable | B | la grille de référence et ses zones actives (ADR-006) | 10.1 | 1.6, 4.9 | **E**, par 10.1 |
 | **1.6** Cellules, domaines et solveurs distincts, niveaux d'activité des cellules | B | — | 1.5 | 1.4, 4.3, 4.11 | **E**, par 1.5 |
-| **1.7** Horloge de simulation entière et phases déterministes | H | — | — | — | **E** — une seconde cible matérielle (A98) |
+| **1.7** Horloge de simulation entière et phases déterministes | H | — | — | — | **E** — une seconde cible matérielle (A98) — pas encore (ADR-197 D7) |
 | **1.8** Référentiels, précision f32 locale, `g_eff` injectée | H | les référentiels mobiles, puis la planète (ADR-002) | — | 4.17, 11.1 | **0** |
 
 ### 2. Grandes masses d'eau et fond (B)
@@ -101,7 +102,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **2.5** Canaux | A | — | 2.4 | — | **2** |
 | **2.6** Courants macroscopiques à niveau de détail propre | A | le courant macroscopique, du vecteur au champ (ADR-011) | — | 2.3, 2.4, 6.2 | **0** |
 | **2.7** Bathymétrie | A | l'entrée dans B, isobathes droites, faite (ADR-196, S364) ; les chemins de B et Godot, puis la 2D et la marée ; hauts-fonds isolés | — | 1.3, 2.3, 2.4, 2.8, 2.9, 3.1, 3.2, 3.4, 3.5, 3.6, 4.14 | **0** |
-| **2.8** Précalcul côtier et météo | A | — | 2.7, 3.6 | 2.2, 5.5, 12.3 | **E** — une source météo : laquelle, sous quelle forme |
+| **2.8** Précalcul côtier et météo | A | — | 2.7, 3.6 | 2.2, 5.5, 12.3 | **E** — la fin du projet : météo et son en dernier (ADR-197 D5) |
 | **2.9** Dérivées du fond pour les couches volumiques | A | — | 2.7 | — | **1** |
 
 ### 3. Ondes propagatives (W)
@@ -157,7 +158,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **5.8** Réseau fermé sous pression | H | — | 5.4 | — | **1** |
 | **5.9** Compartiments, brèches, inondation de navire, limitée par l'air | H | — | 5.2, 5.3, 7.5 | 6.6, 13.2 | **3** |
 | **5.10** Articulation V↔δ | H | — | 6.5 | 1.1, 5.3, 13.2 | **1** |
-| **5.11** Eaux souterraines | H | — | — | — | **E** — le terrain : un modèle de sol et de nappes existe-t-il ? |
+| **5.11** Eaux souterraines | H | — | — | — | **E** — hors du périmètre par décision de l'utilisateur (ADR-197 D4) ; ne se rouvre que par lui |
 | **5.12** Capture et restauration de V | H | le stockage durable | 10.1 | 10.6 | **E**, par 10.1 |
 
 ### 6. Solides et flottabilité
@@ -170,7 +171,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **6.4** Parois et corps mobiles dans δ | B | la coque dans la production GPU de δ ; C23 sur le système | — | 1.3, 4.13, 6.6 | **0** |
 | **6.5** Décor fixe comme frontière imposée | B | le décor dans la production GPU ; un décor qui perce la surface | — | 4.14, 5.10 | **0** |
 | **6.6** Grands navires | H | — | 3.2, 4.13, 5.9, 6.1, 6.4 | 11.3 | **4** |
-| **6.7** Acteur poussé, renversé ou déplacé par l'eau | B | — | 6.2 | — | **E** — les acteurs du jeu : leur forme, leur physique |
+| **6.7** Acteur poussé, renversé ou déplacé par l'eau | B | — | 6.2 | — | **2** |
 | **6.8** Impulsion d'entrée dans l'eau | H | — | 4.12, 6.1 | 13.2 | **3** |
 
 ### 7. Phénomènes secondaires
@@ -184,19 +185,19 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **7.5** Air comprimé, vide, eau dans le vide | B | — | 7.4 | 5.9 | **2** |
 | **7.6** Glace et vapeur | H | — | 6.1 | 13.2 | **1** |
 | **7.7** Danger et traversabilité | H | la publication par tuiles depuis B, W et V (ADR-018) | — | — | **0** |
-| **7.8** Audio de l'eau | H | les événements et paramètres publiés (ADR-016) | — | — | **E** — un moteur audio pour en juger |
+| **7.8** Audio de l'eau | H | les événements et paramètres publiés (ADR-016) | — | — | **E** — la fin du projet, par l'audio de Godot (ADR-197 D5) |
 
 ### 8. Rendu et niveaux de détail visuels
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **8.1** Rendu temps réel de la surface sur GPU | H | — | — | — | **E** — le moteur du jeu, pour l'intégration |
+| **8.1** Rendu temps réel de la surface sur GPU | H | le cœur branché dans Godot, moteur du jeu entier (GDExtension ; ADR-197 D2) | — | — | **0** |
 | **8.2** LOD de la géométrie de surface | H | le LOD du maillage ; déplacement ou normales selon la vue | — | — | **0** |
 | **8.3** LOD par source | H | le filtre des impacts ; le LOD temporel | — | 11.4 | **0** |
 | **8.4** Écume, spray, gouttes, bulles rendus, chacun avec son LOD | H | — | 7.1, 7.2, 7.3, 7.4 | — | **E**, par 7.1 |
 | **8.5** Transparence, réfraction, caustiques, particules sous-marines | H | particules, eaux chargées, caustiques sur les objets (transparence, réfraction : S359 ; caustiques du fond : S361) | — | 8.6 | **0** |
 | **8.6** Vue sous-marine et passage de la surface | H | la caméra à demi immergée (ADR-019 §6) ; bulles, rayons, turbidité ; le coût du profil immergé (B11) | 8.5 | 13.3 | **1** |
-| **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | une frontière sans fondu ; la tolérance de pente | — | — | **E** — les verdicts : R18 (en direct), puis la frontière |
+| **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | une frontière sans fondu ; la tolérance de pente | — | — | **E** — le verdict de la frontière (R18 reçu, ADR-197 D8) |
 | **8.8** Lointain et horizon sans artefact | H | un certificat d'absence d'alias | — | — | **0** |
 | **8.9** Détails artificiels bon marché | H | capillaires ; queue des perturbations W ; coût (la queue de B par FFT dans Godot : S360) | — | — | **0** |
 | **8.10** Crédibilité perçue validée par un regard humain | H | de nouvelles revues, préparées | — | — | **E** — les verdicts de l'utilisateur : poses, animation, scénarios |
@@ -214,7 +215,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **9.7** Hors caméra : quatre niveaux | H | la condensation hors caméra | — | — | **0** |
 | **9.8** Aucun solveur ne dépasse son budget | H | la borne murale ; l'estimateur dans le cœur | — | — | **0** |
 | **9.9** Dégradation contrôlée dans l'ordre prescrit | H | rangs 3, 6 et 7 ; régulateur PI ; bande morte de l'échelle | 4.3, 7.2 | 1.4 | **E** — un verdict visuel du prix du rang 1 (A319) |
-| **9.10** Profils de qualité, adaptation au matériel et à la charge | H | les profils de qualité (I-16) | — | — | **E** — un second matériel, pour l'adaptation |
+| **9.10** Profils de qualité, adaptation au matériel et à la charge | H | les profils de qualité (I-16) | — | — | **E** — un second matériel, pour l'adaptation — pas encore (ADR-197 D7) |
 | **9.11** 60 images/s avec 2 ms pour l'eau sur une scène représentative | H | la scène représentative réunie, mesurée | 4.19 | — | **1** |
 | **9.12** Aucune allocation à l'exécution | H | — | 1.4 | — | **E**, par 1.4 |
 | **9.13** Dépassement critique temporaire | H | la réserve d'événement d'ADR-012 §6 | — | — | **0** |
@@ -223,9 +224,9 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **10.1** Réplication des événements sources, jamais de l'état | H | un transport en boucle locale | — | 1.5, 3.7, 5.12, 10.4, 10.5, 10.6 | **E** — le réseau du jeu : un format existe-t-il ? |
-| **10.2** Le serveur n'exécute que V | H | un hôte serveur sans δ ni rendu (C18) | — | — | **E** — un serveur réel |
-| **10.3** Déterminisme bit à bit entre plateformes pour B, W répliqué et V | H | — | — | — | **E** — une seconde cible (A98) |
+| **10.1** Réplication des événements sources, jamais de l'état | H | un transport en boucle locale | — | 1.5, 3.7, 5.12, 10.4, 10.5, 10.6 | **E** — la portée de « pas de réseau » : multijoueur ou non (ADR-197 D1) |
+| **10.2** Le serveur n'exécute que V | H | un hôte serveur sans δ ni rendu (C18) | — | — | **E** — un serveur réel — pas encore (ADR-197 D7) |
+| **10.3** Déterminisme bit à bit entre plateformes pour B, W répliqué et V | H | — | — | — | **E** — une seconde cible (A98) — pas encore (ADR-197 D7) |
 | **10.4** δ sans autorité de jeu, aucun chemin d'énergie du client vers le monde, grandeurs
   dérivées autoritaires | H | — | 10.1 | — | **E**, par 10.1 |
 | **10.5** Grandes formes cohérentes entre clients, détails locaux libres | H | — | 10.1 | — | **E**, par 10.1 |
@@ -241,7 +242,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **11.2** Nombreuses régions de mer décrites par descripteur | A | le descripteur de région de mer (I-09) | — | 2.1 | **0** |
 | **11.3** Très grands événements | H | — | 3.4, 6.6 | — | **5** |
 | **11.4** Nombreuses sources simultanées à coût maîtrisé | H | la généralisation, le LOD temporel | 8.3 | — | **1** |
-| **11.5** Matériel cible de livraison et seconde cible | H | — | — | 13.3 | **E** — le matériel de livraison et une seconde cible |
+| **11.5** Matériel cible de livraison et seconde cible | H | — | — | 13.3 | **E** — le matériel de livraison et une seconde cible — pas encore (ADR-197 D7) |
 
 ### 12. Outillage auteur et données cuites
 
@@ -250,7 +251,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **12.1** Cuisson reproductible, empreintes, obsolescence détectée | H | la détection d'obsolescence | — | 12.5 | **0** |
 | **12.2** Éditeur de rivières | H | — | 2.4 | — | **2** |
 | **12.3** Précalcul côtier stocké | H | — | 2.8 | 4.11 | **E**, par 2.8 |
-| **12.4** Eau en amont du terrain, géoïde dans l'outil de terrain | H | — | — | — | **E** — l'outil de terrain du jeu |
+| **12.4** Eau en amont du terrain, géoïde dans l'outil de terrain | H | — | — | — | **E** — l'outil de terrain du jeu, dans Godot (ADR-197 D2) : lequel |
 | **12.5** Portée d'une modification bornée par partition | H | — | 12.1 | — | **1** |
 
 ### 13. Validation du système

@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les réponses : ADR-197 ; liste (6.7, 8.1, 5.11, 2.8, 7.8 ; 8.7 et R18), données des dépendances,
+- [x] **P2** — les réponses : ADR-197 ; liste (6.7, 8.1, 5.11, 2.8, 7.8 ; 8.7 et R18), données des dépendances,
   file (ligne des décisions), feuille de route, REVUE-VISUELLE §23 (verdict R18).
 - [ ] **P3** — `delta3d_coupling.rs` : le mode relatif à B (trois retraits, un drapeau par terme pour la mesure) ;
   E1 ; critère 1.

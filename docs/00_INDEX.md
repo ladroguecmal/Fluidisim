@@ -348,6 +348,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-194](adr/ADR-194-la-lumiere-de-l-eau-calculee-par-notre-nuanceur.md) | **La lumière de l'eau est calculée par notre nuanceur** — mesuré : l'éclairage de Godot renvoyait 0,11 du ciel sous l'horizon, l'afficheur 0,73 ; l'eau porte le modèle de l'afficheur (Fresnel, reflets filtrés, colonne d'eau), un seul ciel pour la scène et les reflets ; Godot garde brume, tonalité, halo |
 | [ADR-195](adr/ADR-195-la-queue-de-b-rendue-par-fft.md) | **La queue de B se rend par FFT** — 10 612 composantes du même spectre en deux cascades, étalement d'Elfouhaily replié sous le vent, calculées sur la carte dans Godot ; écume et lumière des crêtes tirées des vagues dominantes ; l'afficheur garde sa queue de 60 composantes |
 | [ADR-196](adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md) | **La bathymétrie entre dans B, composante par composante** — tables cuites (phase entière, levée et réfraction, vecteur d'onde, `coth kh`), interpolées en O(1), B au bit au large ; les tables commencent à λ₀, pas à λ₀/2 ; révise ADR-004 §2.1 et §5 (S364) |
+| [ADR-197](adr/ADR-197-reponses-du-2026-09-26.md) | **Réponses du 2026-09-26** — Godot moteur du jeu entier, intégration déléguée (godot-rust permis) ; tout corps flotte ou coule selon la physique ; eaux souterraines hors du périmètre (5.11) ; météo et son à la fin ; « pas de réseau » : portée demandée ; A289 déléguée sous trois critères ; seconde cible : pas encore ; R18 reçu (S369) |
 
 ## Travail et historique
 

@@ -107,7 +107,7 @@ pas recopiée ici (L137).
   tables cuites, η à 0,13 mm de la référence, B au bit au large, requête en O(1) (§5). Manquent la bathymétrie 2D et la
   diffraction des hauts-fonds isolés, la marée, la dissipation au déferlement, la non-linéarité peu profonde (A234), et
   les autres chemins de B jusqu'à la scène de Godot.
-- [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *absent*.
+- [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *absent* ; la météo **à la fin** (ADR-197 D5).
 - [ ] **2.9 Dérivées du fond pour les couches volumiques**, sous et au-dessus du plan moyen —
   *partiel* : B reçu en eau profonde uniforme (ADR-113, S177 ; ADR-154, S254). Manquent la
   profondeur finie et la bathymétrie.
@@ -295,7 +295,8 @@ pas recopiée ici (L137).
 - [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *absent*.
 - [ ] **5.10 Articulation V↔δ** : V expose sa surface, déclenche δ, garde la masse (C21, ADR-025) —
   *absent*, conçu : en contenant, δ s'asservit à V (ADR-185, S317) ; c'est la porte E.
-- [ ] **5.11 Eaux souterraines** — *absent*.
+- [ ] **5.11 Eaux souterraines** — *absent* ; **hors du périmètre** par décision de l'utilisateur (2026-09-26,
+  [ADR-197](adr/ADR-197-reponses-du-2026-09-26.md) D4 : pas de terrain réaliste à hydrologie) — gardé pour mémoire.
 - [ ] **5.12 Capture et restauration de V** — *partiel* : noyau restauré au bit (S229). Manquent le
   stockage durable et le réseau.
 
@@ -347,7 +348,7 @@ pas recopiée ici (L137).
 - [ ] **7.5 Air comprimé, vide, eau dans le vide** (ADR-015) — *absent*.
 - [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *absent*.
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *absent*.
-- [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent*.
+- [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin**, par l'audio de Godot (ADR-197 D5).
 
 ## 8. Rendu et niveaux de détail visuels
 
@@ -393,8 +394,8 @@ pas recopiée ici (L137).
   sur la mer de R14 ; R17 (S348), δ à 30 Hz validé à l'œil, sur images fixes
   ([revue](validation/REVUE-VISUELLE.md) §20–22). **S353** : l'interpolation du rendu qu'impose 30 Hz — plus
   aucune image immobile, chaque image varie comme à 60 Hz — et le budget mesuré en direct avec le rendu
-  ([preuve](validation/COUT-DELTA3D-S341.md) §12) ; verdict R18 attendu (§23). Manquent une frontière δ↔B sans
-  rupture autre qu'un fondu de rendu, une tolérance de pente d'image, et ce verdict.
+  ([preuve](validation/COUT-DELTA3D-S341.md) §12) ; **R18 reçu** le 2026-09-26, *« Rendu convaincant »* (§23,
+  ADR-197 D8). Manquent une frontière δ↔B sans rupture autre qu'un fondu de rendu, et une tolérance de pente d'image.
 - [ ] **8.8 Lointain et horizon sans artefact** — *partiel* : coupure spectrale B/sillage (S249) ;
   bande d'horizon mesurée (S247, S248) ; fin de grille à l'horizon géométrique sous le ciel clair
   (S262). Pas de certificat d'absence d'alias.
