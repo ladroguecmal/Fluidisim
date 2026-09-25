@@ -75,7 +75,7 @@ le jeton.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — note datée sur ADR-197 D1 ; 10.1 dans `outils/dependances_liste.py` et le registre ; file, feuille de route.
+- [x] **P2** — note datée sur ADR-197 D1 ; 10.1 dans `outils/dependances_liste.py` et le registre ; file, feuille de route.
 - [ ] **P3** — rituel.
 
 ### Notes de reprise

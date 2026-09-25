@@ -371,8 +371,8 @@ d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photogr
    11.2, 12.1, 13.1.
 
 **Fronts 1 à 5 — 43 points**, qui s'ouvrent à mesure ; le registre dit lesquels. **E — 38 points** attendent un fait
-ou une action de l'utilisateur, demandé au moment où le point bloque (ADR-190 D5) : la portée du réseau (10.1) en
-commande 14 à lui seul, puis la météo — à la fin —, le verdict du rang 1 ([ADR-197](adr/ADR-197-reponses-du-2026-09-26.md) : Godot moteur
+ou une action de l'utilisateur, demandé au moment où le point bloque (ADR-190 D5) : le réseau (10.1, *« pas encore »*,
+S370) en commande 14 à lui seul, puis la météo — à la fin —, le verdict du rang 1 ([ADR-197](adr/ADR-197-reponses-du-2026-09-26.md) : Godot moteur
 du jeu entier, 8.1 au front 0 ; 5.11 hors du périmètre ; la voie d'A289 tranchée, ADR-198 : 4.8 et 4.21 au front 0).
 
 ## 4. Arbitrages explicites

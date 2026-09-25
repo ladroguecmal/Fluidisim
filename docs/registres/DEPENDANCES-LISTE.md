@@ -29,8 +29,8 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
   4.12, 4.13, 4.14, 7.2 et 7.4 — et **2.7**, la bathymétrie — 20 : lacs, rivières, réfraction, déferlement de W,
   tsunamis, plage. Suivent 10.1 (16), 7.4 (12), 3.6 et 1.5 (9 chacun).
 - **38 points attendent un fait extérieur ou une décision, dont 19 directement** (S369, après
-  [ADR-197](../adr/ADR-197-reponses-du-2026-09-26.md) et [ADR-198](../adr/ADR-198-la-voie-d-a289.md)). Une cause en commande 14 : **la portée du réseau** (10.1 :
-  aucun format n'existe ; multijoueur ou non, demandé) — transport, serveur, sauvegarde, et, par les échanges
+  [ADR-197](../adr/ADR-197-reponses-du-2026-09-26.md) et [ADR-198](../adr/ADR-198-la-voie-d-a289.md)). Une cause en commande 14 : **le réseau** (10.1 : *« pas
+  encore »* — aucun format n'existe, le multijoueur reste) — transport, serveur, sauvegarde, et, par les échanges
   client/serveur de la grille de référence (1.5), la grille, les blocs, la fusion et le régime substitutif. Puis la
   **météo**, placée à la fin (2.8, quatre points), le **verdict** sur le prix du rang 1 (9.9, trois) ; les autres, un fait
   chacun ; la voie d'A289 est tranchée (4.8 et 4.21 au front 0). 5.11 n'attend plus rien : il est hors du
@@ -70,7 +70,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **9.4** | les objets contrôlables du jeu et leurs paliers |
 | **9.9** | un verdict visuel du prix du rang 1 (A319) |
 | **9.10** | un second matériel, pour l'adaptation — pas encore (ADR-197 D7) |
-| **10.1** | la portée de « pas de réseau » : multijoueur ou non (ADR-197 D1) |
+| **10.1** | le réseau : pas encore — le multijoueur reste (ADR-197 D1, note S370) |
 | **10.2** | un serveur réel — pas encore (ADR-197 D7) |
 | **10.3** | une seconde cible (A98) — pas encore (ADR-197 D7) |
 | **10.9** | un consommateur de jeu |
@@ -222,7 +222,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **10.1** Réplication des événements sources, jamais de l'état | H | un transport en boucle locale | — | 1.5, 3.7, 5.12, 10.4, 10.5, 10.6 | **E** — la portée de « pas de réseau » : multijoueur ou non (ADR-197 D1) |
+| **10.1** Réplication des événements sources, jamais de l'état | H | un transport en boucle locale | — | 1.5, 3.7, 5.12, 10.4, 10.5, 10.6 | **E** — le réseau : pas encore — le multijoueur reste (ADR-197 D1, note S370) |
 | **10.2** Le serveur n'exécute que V | H | un hôte serveur sans δ ni rendu (C18) | — | — | **E** — un serveur réel — pas encore (ADR-197 D7) |
 | **10.3** Déterminisme bit à bit entre plateformes pour B, W répliqué et V | H | — | — | — | **E** — une seconde cible (A98) — pas encore (ADR-197 D7) |
 | **10.4** δ sans autorité de jeu, aucun chemin d'énergie du client vers le monde, grandeurs

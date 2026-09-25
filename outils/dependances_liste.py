@@ -124,7 +124,7 @@ D = {
  "9.11": ("H", "la scène représentative réunie, mesurée", ["4.19"], None),
  "9.12": ("H", "—", ["1.4"], None),
  "9.13": ("H", "la réserve d'événement d'ADR-012 §6", [], None),
- "10.1": ("H", "un transport en boucle locale", [], "la portée de « pas de réseau » : multijoueur ou non (ADR-197 D1)"),
+ "10.1": ("H", "un transport en boucle locale", [], "le réseau : pas encore — le multijoueur reste (ADR-197 D1, note S370)"),
  "10.2": ("H", "un hôte serveur sans δ ni rendu (C18)", [], "un serveur réel — pas encore (ADR-197 D7)"),
  "10.3": ("H", "—", [], "une seconde cible (A98) — pas encore (ADR-197 D7)"),
  "10.4": ("H", "—", ["10.1"], None),

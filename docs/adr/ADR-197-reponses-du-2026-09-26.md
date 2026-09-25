@@ -72,3 +72,10 @@ l'utilisateur que le verdict de sa frontière.
 
 Elle ne retire que 5.11. Elle ne décide pas du multijoueur (D1), ne télécharge rien (D2), ne choisit pas la voie
 d'A289 sans mesure (D6), et ne rouvre ni ADR-027 ni le profil de temps d'ADR-174.
+
+## Note datée du 2026-09-26 (S370) — D1 précisé
+
+Question posée à la fin de S369 : « aucun format réseau n'existe encore, ou le jeu n'aura pas de multijoueur ? » Réponse
+de l'utilisateur : *« Pas de réseau = pas encore »*. **Le multijoueur reste dans l'ambition** (ADR-127) ; rien n'est
+retiré. Comme la seconde cible et le serveur (D7), le réseau attend un fait nouveau de l'utilisateur : 10.1 et son aval
+gardent leur attente, et aucun travail de réseau ne commence d'ici là.
