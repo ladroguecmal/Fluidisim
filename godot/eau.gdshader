@@ -16,6 +16,8 @@ shader_type spatial;
 render_mode cull_disabled, unshaded;
 
 #include "res://ciel.gdshaderinc"
+// S365 : R0, `gain_eau`, `kd`, l'atténuation du faisceau et le mode immergé — une source pour l'eau, le fond et le ciel.
+#include "res://optique_eau.gdshaderinc"
 
 // Composantes `[a, kx, ky, φ(t)]`, phases repliées par le script en double précision (I-08).
 uniform vec4 bande[64];
@@ -40,10 +42,8 @@ uniform vec3 transmission_crete = vec3(0.5987, 0.9187, 0.9863);
 uniform float force_cretes = 0.15;
 uniform float exposant_cretes = 4.0;
 // Couleur du corps d'eau : R(0⁻) de Pope & Fry et Morel (ADR-177) ; `gain_eau` tient lieu de `E/π` (ADR-177 D2), 2 comme
-// l'afficheur de R19. Le fond est éclairé par le même modèle (`sol.gdshader`) : fond et corps d'eau sont dans les mêmes
-// unités, ce que demande le mélange de Maritorena.
-uniform vec3 R0 = vec3(0.00068, 0.00826, 0.08960);
-uniform float gain_eau = 2.0;
+// l'afficheur de R19 — déclarés dans `optique_eau.gdshaderinc` depuis S365. Le fond est éclairé par le même modèle
+// (`sol.gdshader`) : fond et corps d'eau sont dans les mêmes unités, ce que demande le mélange de Maritorena.
 // Empreinte angulaire d'un pixel, `2·tan(fov/2)/hauteur`, et pas radial relatif de la grille polaire.
 uniform float angle_pixel = 0.0013;
 uniform float pas_radial = 0.03;
@@ -61,8 +61,8 @@ uniform sampler2D detail_b1 : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform vec2 detail_cotes = vec2(32.0, 4.0);
 uniform bool detail_actif = false;
 // L'atténuation diffuse `Kd = (a + b_b)/μ̄_d` des trois bandes (650, 550, 450 nm) : `a` de Pope & Fry, `b_b` de Morel,
-// ceux d'ADR-177 ; `μ̄_d` = 0,8 *à calibrer*. Calculée et donnée par `mer.gd`. Indice de l'eau de mer.
-uniform vec3 kd = vec3(0.4259, 0.0724, 0.0158);
+// ceux d'ADR-177 ; `μ̄_d` = 0,8 *à calibrer*. Calculée et donnée par `mer.gd` (`optique_eau.gdshaderinc`). Indice de
+// l'eau de mer.
 uniform float indice = 1.34;
 // Mode contrôle (S359) : 0 rendu ; 1 profondeur verticale du fond vu sans réfraction, `H/echelle_controle`, en sortie
 // directe — `mer.gd --controle-fond` la relit contre la bathymétrie ; 2 la transmission `T` de la colonne, par canal ;
@@ -136,6 +136,40 @@ vec3 lumiere(vec2 pente, vec3 rayon, vec3 fond_vu, vec3 t_colonne) {
     vec3 corps = R0 * gain_eau * (0.6 + 0.4 * max(dot(n, soleil), 0.0));
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2;
+}
+
+/// S365 — **la surface vue d'en dessous** (liste 8.6, ADR-019 §2). `rayon` monte vers la surface (B). Fresnel exact eau →
+/// air ; dans la **fenêtre de Snell**, le ciel réfracté, radiance multipliée par n² (`L/n²` se conserve à travers
+/// l'interface) ; au-delà de l'angle critique `arcsin(1/n)`, **réflexion totale** : l'eau elle-même, vue dans la direction
+/// réfléchie. Non portés : le fond ou un objet vus dans ce miroir, la face inférieure de l'écume.
+vec3 lumiere_dessous(vec2 pente, vec3 rayon) {
+    vec3 n = normalize(vec3(-pente, 1.0));
+    float f = fresnel(clamp(dot(rayon, n), 0.0, 1.0), 1.0 / indice);
+    vec3 eau = eau_infinie(reflect(rayon, n), 0.0);
+    if (f >= 1.0) { return eau; }
+    return (1.0 - f) * indice * indice * ciel_b(refract(rayon, -n, indice), 2) + f * eau;
+}
+
+/// La lumière intégrée sur la pente non résolue (ADR-161) : Cholesky de sa covariance `cv`, 3 × 3 nœuds de Gauss-Hermite ;
+/// vue d'en dessous ou d'au-dessus.
+vec3 integree(vec2 pente, vec3 rayon, vec3 cv, bool dessous, vec3 fond_vu, vec3 t_colonne) {
+    if (cv.x + cv.z <= 0.0) {
+        return dessous ? lumiere_dessous(pente, rayon) : lumiere(pente, rayon, fond_vu, t_colonne);
+    }
+    float l00 = sqrt(max(cv.x, 0.0));
+    float l10 = l00 > 0.0 ? cv.y / l00 : 0.0;
+    float l11 = sqrt(max(cv.z - l10 * l10, 0.0));
+    vec3 noeuds = vec3(-1.73205080757, 0.0, 1.73205080757);
+    vec3 poids_gh = vec3(0.166666666667, 0.666666666667, 0.166666666667);
+    vec3 couleur = vec3(0.0);
+    for (int j = 0; j < 3; j++) {
+        for (int i = 0; i < 3; i++) {
+            vec2 p = pente + vec2(l00 * noeuds[i], l10 * noeuds[i] + l11 * noeuds[j]);
+            couleur += poids_gh[i] * poids_gh[j]
+                * (dessous ? lumiere_dessous(p, rayon) : lumiere(p, rayon, fond_vu, t_colonne));
+        }
+    }
+    return couleur;
 }
 
 void vertex() {
@@ -246,6 +280,20 @@ void fragment() {
     // celle de `lumiere`. Non portés : la réduction de l'éclairement du fond par (1 − F) du soleil (≈ 2 %), la
     // focalisation par les vagues (caustiques).
     vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+    // S365 — vue d'en dessous, quand l'œil est dans l'eau (`sous_eau`, posé par `mer.gd`) : la surface, puis les `d`
+    // mètres d'eau jusqu'à l'œil, à leur profondeur moyenne. Pas `FRONT_FACING` : la grille polaire présente sa face
+    // avant par en dessous, et la bascule reste d'un bloc tant que la caméra à demi immergée n'est pas traitée.
+    if (sous_eau) {
+        vec3 vue_d = normalize(surface - CAMERA_POSITION_WORLD);
+        vec3 rayon_d = vec3(vue_d.x, -vue_d.z, vue_d.y);
+        vec3 lum = integree(pente, rayon_d, transport_covariance(energie * cov_q, g), true, vec3(0.0), vec3(0.0));
+        float d = length(surface - CAMERA_POSITION_WORLD);
+        ALBEDO = a_travers_l_eau(lum, d, rayon_d, max(-0.5 * (surface.y + CAMERA_POSITION_WORLD.y), 0.0));
+        if (controle == 4) {
+            // Contrôle S365 : le coefficient de Fresnel eau → air, sans la ligne de visée.
+            ALBEDO = vec3(fresnel(clamp(dot(rayon_d, normalize(vec3(-pente, 1.0))), 0.0, 1.0), 1.0 / indice));
+        }
+    } else {
     vec3 fond0 = scene_monde(SCREEN_UV, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
     float h0 = surface.y - fond0.y;
     vec3 vue = normalize(surface - CAMERA_POSITION_WORLD);
@@ -269,23 +317,7 @@ void fragment() {
     vec3 fond_vu = textureLod(ecran, uv_r, 0.0).rgb * t_colonne;
     // La lumière, pente non résolue intégrée (ADR-161) : Cholesky de sa covariance, 3 × 3 nœuds de Gauss-Hermite.
     vec3 rayon = vec3(vue.x, -vue.z, vue.y);
-    vec3 cv = transport_covariance(energie * cov_q, g);
-    vec3 couleur = vec3(0.0);
-    if (cv.x + cv.z <= 0.0) {
-        couleur = lumiere(pente, rayon, fond_vu, t_colonne);
-    } else {
-        float l00 = sqrt(max(cv.x, 0.0));
-        float l10 = l00 > 0.0 ? cv.y / l00 : 0.0;
-        float l11 = sqrt(max(cv.z - l10 * l10, 0.0));
-        vec3 noeuds = vec3(-1.73205080757, 0.0, 1.73205080757);
-        vec3 poids_gh = vec3(0.166666666667, 0.666666666667, 0.166666666667);
-        for (int j = 0; j < 3; j++) {
-            for (int i = 0; i < 3; i++) {
-                vec2 decalage = vec2(l00 * noeuds[i], l10 * noeuds[i] + l11 * noeuds[j]);
-                couleur += poids_gh[i] * poids_gh[j] * lumiere(pente + decalage, rayon, fond_vu, t_colonne);
-            }
-        }
-    }
+    vec3 couleur = integree(pente, rayon, transport_covariance(energie * cov_q, g), false, fond_vu, t_colonne);
     // Les crêtes (S356, `cretes_couleur`) : la lumière qui traverse ce qui se comprime, vue du côté du soleil ; l'écume.
     vec3 soleil = normalize(SOLEIL_B);
     float eclairage = gain_eau * (0.6 + 0.4 * max(dot(normalize(vec3(-pente, 1.0)), soleil), 0.0));
@@ -294,7 +326,8 @@ void fragment() {
     couleur += force_cretes * clamp(-0.5 * s_e, 0.0, 1.0) * avant * transmission_crete * eclairage;
     couleur = mix(couleur, vec3(reflectance_ecume * eclairage), couverture);
     ALBEDO = couleur;
-    if (controle > 0) {
+    if (controle > 0 && controle < 4) {
         ALBEDO = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : (controle == 2 ? t_colonne : vec3(couverture));
+    }
     }
 }

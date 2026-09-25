@@ -86,12 +86,21 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [>] **P2** — la surface vue d'en dessous (`eau.gdshader`, faces arrière) ; le mode immergé dans `mer.gd`, poses
+- [x] **P2** — la surface vue d'en dessous (`eau.gdshader`, faces arrière) ; le mode immergé dans `mer.gd`, poses
   sous l'eau, mer plate (`MER_PLATE=1`) ; critère 1.
-- [ ] **P3** — le milieu : le fond et le fond du ciel vus de l'eau (`sol.gdshader`, `ciel.gdshader`) ; contrôle de la
+- [>] **P3** — le milieu : le fond et le fond du ciel vus de l'eau (`sol.gdshader`, `ciel.gdshader`) ; contrôle de la
   transmission ; critère 2.
 - [ ] **P4** — images R24, REVUE-VISUELLE §29.
 - [ ] **P5** — preuve SOUS-MARIN-S365 ; liste 8.6, file, dépendances, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** `optique_eau.gdshaderinc` (R0, gain, Kd, `c = a + 2·b_b`, `sous_eau`, `eau_infinie`,
+  `a_travers_l_eau`) ; `eau.gdshader` : `lumiere_dessous` (Fresnel eau → air, ciel réfracté × n², réflexion totale),
+  quadrature commune `integree`, ligne de visée jusqu'à l'œil ; `mer.gd` : `immersion()` (bande de B sous la caméra), poses
+  `sous_eau_zenith`, `sous_eau`, `sous_eau_fond`, `FOV`, `MER_PLATE`, `CONTROLE_EAU`. **Impasse** : `FRONT_FACING` — la grille
+  polaire présente sa face avant **par en dessous** ; premier rendu, le ciel réfléchi d'en haut, gris uniforme. Remède : le
+  mode `sous_eau`, d'un bloc. **Mesure** (`outils/fenetre_snell.py`, mer plate, 5 m, champ 120°) : la plus forte chute se
+  trompe sur les bords de nuages tassés près de l'horizon réfracté (46,0 à 48,3°) ; deux directions sans nuage, 48,266° et
+  48,245°. **Contrôle de Fresnel** (`--fresnel`, premier pixel à R = 1), 16 directions : **48,254° en moyenne, 48,220 à
+  48,311, pire écart 0,048°** pour 48,268° (pixel 0,122°). Soleil dans la fenêtre à 88,8 px du centre, 89,5 attendus.

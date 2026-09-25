@@ -18,6 +18,11 @@ const POSES := {
 	"haute": [Vector3(0.0, 22.0, 34.0), -0.42],
 	## S359 : plongeante, pour voir le fond de la scène côtière à travers la surface.
 	"plongeante": [Vector3(0.0, 12.0, 30.0), -0.75],
+	## S365 — sous la surface (liste 8.6) : au zénith, à 5 m, pour la fenêtre de Snell ; à 3 m dans la scène côtière,
+	## visée horizontale, puis vers le fond (6,85 m de fond sous la caméra).
+	"sous_eau_zenith": [Vector3(0.0, -5.0, 0.0), PI / 2.0],
+	"sous_eau": [Vector3(0.0, -3.0, 20.0), 0.0],
+	"sous_eau_fond": [Vector3(0.0, -3.0, 20.0), -0.6],
 }
 ## S359 — la scène côtière (`--cote`) : un fond de sable sous la mer, pour voir l'eau selon la profondeur. Étendue
 ## et pas de la grille du fond, m.
@@ -42,6 +47,8 @@ var anime := true
 var detail: Node
 ## S361 : le matériau du fond, et la carte de caustiques — vue orthographique hors écran, grille dense de la surface.
 var materiau_sol: ShaderMaterial
+## S365 : le matériau du ciel, qui devient le fond de l'eau quand la caméra y est.
+var materiau_ciel: ShaderMaterial
 var vue_caustiques: SubViewport
 var materiau_caustiques: ShaderMaterial
 var maillage_caustiques: MeshInstance3D
@@ -71,6 +78,9 @@ func _ready() -> void:
 	environnement()
 	camera = Camera3D.new()
 	camera.fov = 50.0
+	# S365 : `FOV=120` — le champ vertical, en degrés (la fenêtre de Snell demande de voir au-delà de 48°).
+	if OS.get_environment("FOV") != "":
+		camera.fov = float(OS.get_environment("FOV"))
 	camera.near = 0.1
 	camera.far = 20000.0
 	add_child(camera)
@@ -96,7 +106,7 @@ func _ready() -> void:
 	if donnees.has("detail"):
 		detail = load("res://detail.gd").new()
 		add_child(detail)
-		if detail.charger(donnees["detail"]) and OS.get_environment("DETAIL") != "0":
+		if detail.charger(donnees["detail"]) and OS.get_environment("DETAIL") != "0" and OS.get_environment("MER_PLATE") != "1":
 			detail.calculer(temps)
 			# S360 : l'eau lit les deux cascades ; `DETAIL=0` garde la queue de 60 composantes, en témoin.
 			materiau.set_shader_parameter("detail_a0", detail.textures[0][0])
@@ -142,7 +152,7 @@ func environnement() -> void:
 	var env := Environment.new()
 	var ciel := Sky.new()
 	# S359 P6 : le ciel clair de l'afficheur (`ciel.gdshader`), celui que l'eau reflète — une seule source.
-	var materiau_ciel := ShaderMaterial.new()
+	materiau_ciel = ShaderMaterial.new()
 	materiau_ciel.shader = load("res://ciel.gdshader")
 	# S363 : le ciel calé sur la photographie ; `CIEL=clair` rend le ciel clair d'avant, pour le ciel et ses reflets.
 	materiau_ciel.set_shader_parameter("ciel_mesure", OS.get_environment("CIEL") != "clair")
@@ -396,7 +406,19 @@ func uniformes_fixes() -> void:
 	materiau.set_shader_parameter("ecume_seuils", PackedFloat32Array(donnees["ecume_seuils"]))
 	materiau.set_shader_parameter("ecume_seuils_deferlement", PackedFloat32Array(donnees["ecume_seuils_deferlement"]))
 	materiau.set_shader_parameter("ecume_empreinte_min", float(donnees["ecume_empreinte_min_m"]))
-	materiau.set_shader_parameter("kd", (ABSORPTION + RETRODIFFUSION) / MU_D)
+	# S365 : l'optique de l'eau (`optique_eau.gdshaderinc`) sur les trois matériaux qui la lisent — une seule source, ici.
+	for m in [materiau, materiau_sol, materiau_ciel]:
+		if m != null:
+			m.set_shader_parameter("kd", (ABSORPTION + RETRODIFFUSION) / MU_D)
+			m.set_shader_parameter("attenuation_c", ABSORPTION + 2.0 * RETRODIFFUSION)
+	# S365 : `CONTROLE_EAU=4` — la surface vue d'en dessous rend son coefficient de Fresnel eau → air (1 au-delà de l'angle
+	# critique), relu par `outils/fenetre_snell.py --fresnel`.
+	if OS.get_environment("CONTROLE_EAU") != "":
+		materiau.set_shader_parameter("controle", int(OS.get_environment("CONTROLE_EAU")))
+	# S365 : `MER_PLATE=1` — aucune vague, pour mesurer la fenêtre de Snell sous une surface plane.
+	if OS.get_environment("MER_PLATE") == "1":
+		materiau.set_shader_parameter("n_bande", 0)
+		materiau.set_shader_parameter("n_queue", 0)
 	var hauteur := get_viewport().get_visible_rect().size.y
 	materiau.set_shader_parameter("angle_pixel", 2.0 * tan(deg_to_rad(camera.fov) / 2.0) / hauteur)
 	materiau.set_shader_parameter("pas_radial", log(R_MAX / R_MIN) / float(RAYONS - 1))
@@ -414,7 +436,26 @@ func lignes(nom: String, t: float) -> PackedVector4Array:
 	return sortie
 
 
+## S365 — la hauteur de la bande de B sous la caméra, `Σ a·sin(k·q + φ)` au point `q` de la caméra (sans déplacement
+## horizontal, sans second ordre) : de quoi dire si l'œil est dans l'eau. La caméra à demi immergée (ADR-019 §6) n'est pas
+## traitée : tout le cadre bascule d'un bloc.
+func immersion(t: float) -> void:
+	if camera == null:
+		return
+	var q := Vector2(camera.global_position.x, -camera.global_position.z)
+	var eta := 0.0
+	if OS.get_environment("MER_PLATE") != "1":
+		for l in lignes("bande", t):
+			eta += l.x * sin(l.y * q.x + l.z * q.y + l.w)
+	var dedans := camera.global_position.y < eta
+	for m in [materiau, materiau_sol, materiau_ciel]:
+		if m != null:
+			m.set_shader_parameter("sous_eau", dedans)
+			m.set_shader_parameter("profondeur_camera", maxf(eta - camera.global_position.y, 0.0))
+
+
 func phases(t: float) -> void:
+	immersion(t)
 	var bande := lignes("bande", t)
 	materiau.set_shader_parameter("bande", bande)
 	materiau.set_shader_parameter("queue", lignes("queue", t))
@@ -465,6 +506,7 @@ func captures() -> void:
 	for nom in noms:
 		pose(nom)
 		mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
+		immersion(temps)
 		for _i in 12:
 			await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
