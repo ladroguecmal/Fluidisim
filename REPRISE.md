@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-25 10:11 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S360 — rendu 4 : verdict R20 ; la surface fine par FFT dans Godot (topologie), l'écume à l'échelle du déferlement
-Dernière session : S359 — **rendu 3, l'eau a une épaisseur** : verdict R19 (*« pas du tout crédible »*, manque la transparence selon la profondeur) ; dans Godot, la lumière de l'afficheur portée — la mer renvoie 0,71 du ciel sous l'horizon au lieu de 0,11 ([ADR-194](docs/adr/ADR-194-la-lumiere-de-l-eau-calculee-par-notre-nuanceur.md)) — et la colonne d'eau, réfraction et scène côtière ([preuve](docs/validation/EPAISSEUR-EAU-S359.md)) ; R20 préparée
-Session suivante : **le verdict R20 d'abord** (REVUE-VISUELLE §25) — selon lui, la suite du rendu (caustiques, eaux chargées, calibrage) ou l'intégration native. En attendant, la physique, par l'alternance d'ADR-184 D1 : **le lot 5, A316** — la densité tenue à la frontière (S354) ; puis la coque qui bouge sur la carte (ADR-193 §3). En attente : R18, R20
-Maillons        : 0 — S359 : 8.5 passe à partiel (journal)
+Session en cours : aucune
+Dernière session : S360 — **rendu 4, la surface fine** : verdict R20 (couleur reçue ; topologie, ciel, écume, caustiques) ; la queue de B par FFT dans Godot, 10 612 composantes, étalement d'Elfouhaily ([ADR-195](docs/adr/ADR-195-la-queue-de-b-rendue-par-fft.md)) ; l'écume au déferlement des vagues dominantes ([preuve](docs/validation/SURFACE-FINE-S360.md)) ; R21 préparée
+Session suivante : **le verdict R21 d'abord** (REVUE-VISUELLE §26). Sinon : **les caustiques**, demandées en R20 (liste 8.5), puis **le ciel** ; ensuite la physique par l'alternance d'ADR-184 D1 — le lot 5 (A316), puis la coque qui bouge (ADR-193 §3). En attente : R18, R21
+Maillons        : 1 — S360 : aucune case de la liste ne change (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S360 — **en cours**. **Rendu 4 : la surface fine** — la demande de l'utilisateur prime sur l'alternance.
+Session : S360 — **terminée**. **Rendu 4 : la surface fine** — la demande de l'utilisateur prime sur l'alternance.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 Entrée — **verdict R20** : (1) *« Tu as raison sur le ciel, il n'aide pas au reflets et limite la qualité du rendue
 final »* ; une capture de l'eau : *« ce rendue du point de vue topologie est pas réaliste »* ; (2) *« La couleur me
@@ -102,7 +102,7 @@ Critères, écrits avant le code :
 - [x] **P6** — le nuanceur sur les cascades ; critère 5.
 - [x] **P7** — les images de R21 ; critère 6.
 - [x] **P8** — preuve, ADR, file, liste, index ; critère 7.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 - **P2, recherches.** Beaufort 4 (5,5–7,9 m/s, OMM) : « petites vagues devenant plus longues ; moutons assez

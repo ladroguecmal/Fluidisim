@@ -17014,3 +17014,21 @@ calibrer ; une couture au centre du ciel de Godot, non attribuée ; coût non me
 profondeur, et une mer qui renvoie le ciel ; consommé par la revue R20 et la suite du rendu dans Godot ; preuve §1–3.
 Suivant : **R20 d'abord** ; la physique en attendant, par l'alternance — le lot 5 (A316), puis la coque qui bouge
 (ADR-193). R18, R20 attendus.
+
+## S360 — 2026-09-25 — rendu 4 : la surface fine par FFT, l'écume au déferlement
+
+**Entrée.** Verdict R20 : la couleur *« parfaite »* ; *« ce rendue du point de vue topologie est pas réaliste »* ; le
+ciel limite les reflets ; *« Tente les caustique »* ; l'écume seulement au déferlement des grandes vagues. Recherches :
+Beaufort 4, taille des moutons (Callaghan, Bondur–Sharkov), Elfouhaily 1997, Tessendorf 2001.
+**Fait** ([preuve](../docs/validation/SURFACE-FINE-S360.md), [ADR-195](../docs/adr/ADR-195-la-queue-de-b-rendue-par-fft.md)).
+**Mesuré** : la queue qui dessinait la surface fine, 60 ondes pour 5,5 octaves sur 360°, pentes plus fortes en
+travers (0,88 ; Cox–Munk 1,37 au vent). Le cœur donne sa densité continue (4·10⁻⁷ de la queue discrète) et l'étalement
+d'Elfouhaily ; l'afficheur exporte **10 612 composantes** ; Godot les évolue et les ramène par FFT sur la carte — à
+3·10⁻⁵ d'une somme directe —, et l'eau les lit à l'empreinte, variance non résolue par LEAN vers les reflets filtrés.
+**L'écume** tirée des vagues dominantes : au nadir, 4 652 taches de 4 cm deviennent des moutons de 1,3 à 3,8 m, à la
+couverture de Monahan. Contrôles de S359 et horizon inchangés. **R21** préparée, images envoyées.
+**Critères manqués, dits.** Anisotropie 1,23 pour 1,37 (−10,4 % pour ± 10 %) ; 8 taches d'écume sur 37 sous 0,5 m au
+loin. **Limites.** L'afficheur garde sa queue (divergence dite) ; cascades répétées, coût non mesuré ; écume lisse.
+**Rituel.** Maillons **1** : aucune case de la liste ne change (8.9 partiel, 8.4 absent jusqu'au verdict). Suivant :
+**R21 d'abord** ; les caustiques, demandées en R20, puis le ciel ; ensuite la physique par l'alternance (lot 5, la coque
+qui bouge). R18, R21 attendus.
