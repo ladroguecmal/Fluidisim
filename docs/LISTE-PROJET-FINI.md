@@ -365,7 +365,12 @@ pas recopiée ici (L137).
   ([preuve](validation/EPAISSEUR-EAU-S359.md), ADR-194) ; **S361** : les caustiques sur le fond, méthode directe, exactes
   à 5 % et l'énergie à 1 % ([preuve](validation/CAUSTIQUES-S361.md)). Manquent les particules, les eaux chargées, les
   caustiques sur les objets et dans l'eau, et les verdicts R21–R22.
-- [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *absent*.
+- [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *partiel* depuis S365 : dans Godot, la
+  caméra sous l'eau — la surface vue d'en dessous, **fenêtre de Snell** rendue à 0,05° de `arcsin(1/n)` et réflexion
+  totale au-delà ; le milieu, `exp(−c·d)` par canal à 0,004 près, la lumière de l'eau, le fond et ses caustiques
+  ([preuve](validation/SOUS-MARIN-S365.md)). Manquent la caméra à demi immergée (la ligne d'eau sur l'objectif, ADR-019
+  §6), le fond dans le miroir, bulles, écume vue d'en dessous, rayons, turbidité, le coût du profil immergé (B11) et le
+  verdict R24.
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *partiel* : **S275, ADR-168** —
   bande δ couplée sous houle à crêtes longues, précalculée hors budget et rejouée dans `viewer/`
   (touche D : B seul, B+δ 4 ms, B+δ au pas d'image), couche GPU à 7·10⁻⁸ m de sa lecture CPU,
@@ -535,13 +540,13 @@ pas recopiée ici (L137).
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 0 | 8 |
-| 8. Rendu | 10 | 0 | 8 | 2 |
+| 8. Rendu | 10 | 0 | 9 | 1 |
 | 9. Activation et budget | 13 | 0 | 7 | 6 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **60** | **57** |
+| **total** | **120** | **3** | **61** | **56** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
@@ -551,7 +556,7 @@ corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ;
 changer de case — dix-huit sur S309–S349 (actualisation complète, ci-dessous), trois sur S350 (4.19, 9.9, 9.12).
 *S351* : **4.2** et **9.9** passent à partiel — deux domaines servis ensemble, le rang 1 reçu au banc ; 1.4, 4.5 et
 9.8 corrigés. *S359* : **8.5** passe à partiel — la colonne d'eau et la réfraction dans Godot. *S362* : **2.7** passe à
-partiel — la référence de la houle qui sent le fond.
+partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau.
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.

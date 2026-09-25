@@ -128,3 +128,9 @@ scintille — défaut très visible et coûteux à corriger tard.
    correct ? Le décalage suffit probablement sauf à courte distance.
 4. Sous-marins profonds : au-delà de la visibilité, tout est noir et le rendu devient un problème
    d'éclairage porté, pas d'eau. Frontière à poser avec l'équipe rendu.
+
+> **Note du 2026-09-25 (S365).** Première réalisation, dans Godot ([SOUS-MARIN-S365](../validation/SOUS-MARIN-S365.md)) :
+> §2 — la fenêtre de Snell, rendue à 0,05° de `arcsin(1/n)`, et la réflexion totale au-delà ; §3 — l'atténuation du
+> faisceau `c = a + b` par canal, relue à 0,004 près. Pour §7.1, le prototype retient **l'extinction et une source de
+> diffusion proportionnelle à l'éclairement local**, intégrée exactement le long de la ligne de visée ; la diffusion
+> volumique complète reste ouverte. §6, la caméra à demi immergée, n'est pas traitée : le mode bascule d'un bloc.

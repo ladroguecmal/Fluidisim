@@ -106,7 +106,7 @@ D = {
  "8.3": ("H", "le filtre des impacts ; le LOD temporel", [], None),
  "8.4": ("H", "—", ["7.1", "7.2", "7.3", "7.4"], None),
  "8.5": ("H", "particules, eaux chargées, caustiques sur les objets (transparence, réfraction : S359 ; caustiques du fond : S361)", [], None),
- "8.6": ("H", "—", ["8.5"], None),
+ "8.6": ("H", "la caméra à demi immergée (ADR-019 §6) ; bulles, rayons, turbidité ; le coût du profil immergé (B11)", ["8.5"], None),
  "8.7": ("C", "une frontière sans fondu ; la tolérance de pente", [], "les verdicts : R18 (en direct), puis la frontière"),
  "8.8": ("H", "un certificat d'absence d'alias", [], None),
  "8.9": ("H", "capillaires ; queue des perturbations W ; coût (la queue de B par FFT dans Godot : S360)", [], None),

@@ -194,7 +194,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **8.3** LOD par source | H | le filtre des impacts ; le LOD temporel | — | 11.4 | **0** |
 | **8.4** Écume, spray, gouttes, bulles rendus, chacun avec son LOD | H | — | 7.1, 7.2, 7.3, 7.4 | — | **4** |
 | **8.5** Transparence, réfraction, caustiques, particules sous-marines | H | particules, eaux chargées, caustiques sur les objets (transparence, réfraction : S359 ; caustiques du fond : S361) | — | 8.6 | **0** |
-| **8.6** Vue sous-marine et passage de la surface | H | — | 8.5 | 13.3 | **1** |
+| **8.6** Vue sous-marine et passage de la surface | H | la caméra à demi immergée (ADR-019 §6) ; bulles, rayons, turbidité ; le coût du profil immergé (B11) | 8.5 | 13.3 | **1** |
 | **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | une frontière sans fondu ; la tolérance de pente | — | — | **E** — les verdicts : R18 (en direct), puis la frontière |
 | **8.8** Lointain et horizon sans artefact | H | un certificat d'absence d'alias | — | — | **0** |
 | **8.9** Détails artificiels bon marché | H | capillaires ; queue des perturbations W ; coût (la queue de B par FFT dans Godot : S360) | — | — | **0** |

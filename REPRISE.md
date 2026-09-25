@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 19:47 +02:00
+Battement        : 2026-09-25 19:49 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S365 — rendu 7 : sous la surface — la fenêtre de Snell, la réflexion totale, le milieu (8.6, ADR-019)
 Dernière session : S364 — **physique, la bathymétrie entre dans B** : chaque composante transformée par des tables cuites (phase entière, levée, réfraction), η à 0,13 mm de la référence, B au bit au large, requête en O(1) ; isobathes droites ([ADR-196](docs/adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md), [preuve](docs/validation/BATHYMETRIE-S362.md) §5)
@@ -102,7 +102,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   portes sont reçues : la v1 au sens d'ADR-174 D4**, chacune sur son banc ou sa référence, pas encore réunies en une
   scène vivante ([feuille de route](docs/FEUILLE-DE-ROUTE.md), « La v1 »). Depuis : la liste entière (ADR-190).
   **V** : noyau reçu, sans articulation avec δ.
-- Liste du projet fini : **3 validés, 60 partiels, 57 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362.
+- Liste du projet fini : **3 validés, 61 partiels, 56 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
 nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`
