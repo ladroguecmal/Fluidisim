@@ -90,8 +90,8 @@ Critères, écrits avant le code :
   sous l'eau, mer plate (`MER_PLATE=1`) ; critère 1.
 - [x] **P3** — le milieu : le fond et le fond du ciel vus de l'eau (`sol.gdshader`, `ciel.gdshader`) ; contrôle de la
   transmission ; critère 2.
-- [>] **P4** — images R24, REVUE-VISUELLE §29.
-- [ ] **P5** — preuve SOUS-MARIN-S365 ; liste 8.6, file, dépendances, feuille de route, index.
+- [x] **P4** — images R24, REVUE-VISUELLE §29.
+- [>] **P5** — preuve SOUS-MARIN-S365 ; liste 8.6, file, dépendances, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -113,3 +113,6 @@ Critères, écrits avant le code :
   diffusée prise à la profondeur **moyenne** du trajet ; remplacée par l'intégrale exacte du modèle sur une ligne en
   pente, `L∞(z0)·c·d·φ((c + Kd·g)·d)`. Vu : caustiques nettes au loin, faibles sous la caméra (6,85 m, avant la focale
   de S361, ≈ 13 m) — non examiné.
+- **P4.** Quatre images dans `viewer/captures/s365/` ; REVUE-VISUELLE §29, une référence sous l'eau demandée.
+  **Non-régression** au-dessus de l'eau, contre les rendus de S363 : proche et rasante identiques au bit ; référence,
+  3 pixels à un niveau près sur 921 600.

@@ -1094,3 +1094,28 @@ la teinte de ses creux ; AgX reste le défaut, sa couleur ayant été jugée « 
 3. **La suite** : les reflets du ciel dans l'eau, l'écume, autre chose ?
 
 Un mot par question suffit.
+
+## 29. R24 — sous la surface, S365
+
+**Liste 8.6** ([preuve](SOUS-MARIN-S365.md)). La caméra dans l'eau, pour la première fois. Au-dessus de la tête, tout
+le ciel tient dans un disque de 97° — la **fenêtre de Snell**, mesurée à 0,05° près — ; au-delà, la surface est un
+**miroir** (réflexion totale). Entre l'œil et ce qu'il voit, l'eau pure éteint le rouge en treize mètres, le vert en
+quatre-vingts, le bleu en trois cents, et ajoute sa propre lumière. Le fond, ses caustiques. **Pas encore** : la caméra
+qui traverse la surface (la ligne d'eau sur l'objectif), les bulles, l'écume vue d'en dessous, les rayons de lumière dans
+l'eau, le fond reflété dans le miroir.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s365/sous_eau_horizontal.png` | à 3 m sous la surface, visée horizontale : le miroir au-dessus, le fond qui se perd dans le bleu |
+| `viewer/captures/s365/sous_eau_zenith_houle.png` | au zénith, sous la houle : la fenêtre fragmentée, le soleil |
+| `viewer/captures/s365/sous_eau_vers_le_fond.png` | vers le fond : le sable et ses caustiques |
+| `viewer/captures/s365/fenetre_de_snell_mer_plate.png` | la même visée sous une mer plate : la fenêtre entière, témoin |
+
+**Les questions :**
+
+1. **Crédible ?** Qu'est-ce qui gêne d'abord — la couleur, la clarté de l'eau, le miroir, la lumière ?
+2. **Une référence** : une photographie sous l'eau que vous trouvez juste (eau claire, peu profonde, de jour) — elle
+   servirait de cible chiffrée, comme celle de R14.
+3. **La suite** : la caméra qui traverse la surface, les bulles, les rayons de lumière, autre chose ?
+
+Un mot par question suffit.
