@@ -42,13 +42,13 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 
 | front | points | lesquels |
 |---|---:|---|
-| **0** | 34 | 1.8, 2.6, 2.7, 3.9, 4.2, 4.7, 4.15, 4.16, 4.18, 4.19, 5.2, 5.4, 5.6, 5.7, 6.1, 6.3, 6.4, 6.5, 7.1, 7.7, 8.2, 8.3, 8.5, 8.8, 8.9, 9.2, 9.3, 9.7, 9.8, 9.13, 10.8, 11.2, 12.1, 13.1 |
+| **0** | 33 | 1.8, 2.6, 2.7, 3.9, 4.2, 4.7, 4.15, 4.16, 4.18, 4.19, 5.2, 5.4, 5.6, 5.7, 6.1, 6.3, 6.4, 6.5, 7.7, 8.2, 8.3, 8.5, 8.8, 8.9, 9.2, 9.3, 9.7, 9.8, 9.13, 10.8, 11.2, 12.1, 13.1 |
 | **1** | 25 | 1.3, 2.1, 2.3, 2.4, 2.9, 3.2, 3.6, 4.1, 4.4, 4.6, 4.13, 4.17, 4.20, 5.8, 5.10, 6.2, 7.2, 7.4, 7.6, 8.6, 9.6, 9.11, 11.1, 11.4, 12.5 |
 | **2** | 9 | 2.5, 3.3, 3.4, 3.5, 4.12, 5.3, 7.5, 9.5, 12.2 |
 | **3** | 5 | 3.1, 4.14, 5.9, 6.8, 7.3 |
-| **4** | 2 | 6.6, 8.4 |
+| **4** | 1 | 6.6 |
 | **5** | 1 | 11.3 |
-| **E** | 41 | 1.1, 1.4, 1.5, 1.6, 1.7, 2.2, 2.8, 3.7, 3.8, 4.3, 4.5, 4.8, 4.9, 4.10, 4.11, 4.21, 5.5, 5.11, 5.12, 6.7, 7.8, 8.1, 8.7, 8.10, 9.1, 9.4, 9.9, 9.10, 9.12, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.9, 11.5, 12.3, 12.4, 13.2, 13.3 |
+| **E** | 43 | 1.1, 1.4, 1.5, 1.6, 1.7, 2.2, 2.8, 3.7, 3.8, 4.3, 4.5, 4.8, 4.9, 4.10, 4.11, 4.21, 5.5, 5.11, 5.12, 6.7, 7.1, 7.8, 8.1, 8.4, 8.7, 8.10, 9.1, 9.4, 9.9, 9.10, 9.12, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.9, 11.5, 12.3, 12.4, 13.2, 13.3 |
 
 **Ce qu'on demandera à l'utilisateur**, au moment où le point bloque (ADR-190 D5) :
 
@@ -62,6 +62,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **4.21** | la voie d'A289 |
 | **5.11** | le terrain : un modèle de sol et de nappes existe-t-il ? |
 | **6.7** | les acteurs du jeu : leur forme, leur physique |
+| **7.1** | des photographies qui renseignent forme, couleur et place de l'écume sur la vague (décision du 2026-09-26) |
 | **7.8** | un moteur audio pour en juger |
 | **8.1** | le moteur du jeu, pour l'intégration |
 | **8.7** | les verdicts : R18 (en direct), puis la frontière |
@@ -176,7 +177,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **7.1** Écume et moutons | A | la production sur la carte (SPEC-006 §4) ; sources de W, δ, vent ; demi-vies et transfert (B9) | — | 8.4, 13.2, 13.3 | **0** |
+| **7.1** Écume et moutons | A | sources de W, δ, vent ; demi-vies et transfert (B9) | — | 8.4, 13.2, 13.3 | **E** — des photographies qui renseignent forme, couleur et place de l'écume sur la vague (décision du 2026-09-26) |
 | **7.2** Spray, embruns, gouttelettes | B | — | 4.16 | 8.4, 9.9 | **1** |
 | **7.3** Microbulles visuelles | B | — | 4.12 | 8.4 | **3** |
 | **7.4** Grosses bulles et poches d'air physiques | B | — | 4.16 | 3.3, 4.12, 7.5, 8.4, 13.2 | **1** |
@@ -192,7 +193,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **8.1** Rendu temps réel de la surface sur GPU | H | — | — | — | **E** — le moteur du jeu, pour l'intégration |
 | **8.2** LOD de la géométrie de surface | H | le LOD du maillage ; déplacement ou normales selon la vue | — | — | **0** |
 | **8.3** LOD par source | H | le filtre des impacts ; le LOD temporel | — | 11.4 | **0** |
-| **8.4** Écume, spray, gouttes, bulles rendus, chacun avec son LOD | H | — | 7.1, 7.2, 7.3, 7.4 | — | **4** |
+| **8.4** Écume, spray, gouttes, bulles rendus, chacun avec son LOD | H | — | 7.1, 7.2, 7.3, 7.4 | — | **E**, par 7.1 |
 | **8.5** Transparence, réfraction, caustiques, particules sous-marines | H | particules, eaux chargées, caustiques sur les objets (transparence, réfraction : S359 ; caustiques du fond : S361) | — | 8.6 | **0** |
 | **8.6** Vue sous-marine et passage de la surface | H | la caméra à demi immergée (ADR-019 §6) ; bulles, rayons, turbidité ; le coût du profil immergé (B11) | 8.5 | 13.3 | **1** |
 | **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | une frontière sans fondu ; la tolérance de pente | — | — | **E** — les verdicts : R18 (en direct), puis la frontière |
@@ -257,7 +258,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
 | **13.1** Harnais de validation | H | les étages manquants de SPEC-003 | — | — | **0** |
-| **13.2** Les 23 cas canoniques passent sur le système | H | chaque cas exécuté sur le système | 3.2, 4.7, 4.17, 4.18, 5.9, 5.10, 6.1, 6.8, 7.1, 7.4, 7.6, 10.6 | — | **E**, par 10.6 |
+| **13.2** Les 23 cas canoniques passent sur le système | H | chaque cas exécuté sur le système | 3.2, 4.7, 4.17, 4.18, 5.9, 5.10, 6.1, 6.8, 7.1, 7.4, 7.6, 10.6 | — | **E**, par 7.1 |
 | **13.3** Les onze bancs rendent leur verdict | H | chaque banc exécuté | 2.1, 4.3, 4.12, 6.1, 7.1, 8.6, 9.1, 11.5 | — | **E**, par 4.3 |
 
 <!-- fin des tables -->

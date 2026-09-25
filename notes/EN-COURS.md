@@ -89,8 +89,8 @@ Critères, écrits avant le code :
 - [x] **P2** — `ecume.comp`, `ecume.gd` : le champ sur la carte ; contrôles de décroissance et d'advection ; critère 1.
 - [x] **P3** — la couverture relue, κ recalé ; critère 2.
 - [x] **P4** — l'écume rendue depuis le champ (`eau.gdshader`) : actif et dentelle ; images R26 ; critère 3.
-- [>] **P5** — preuve ECUME-GODOT-S368 ; liste 8.4, file, dépendances, feuille de route, index.
-- [ ] **P6** — rituel.
+- [x] **P5** — preuve ECUME-GODOT-S368 ; liste 8.4, file, dépendances, feuille de route, index.
+- [>] **P6** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `ecume.comp` (le pas de S367, modes de contrôle 1 à 4), `ecume.gd` (deux images RGBA32F
@@ -108,3 +108,9 @@ Critères, écrits avant le code :
   (3) retenu : cellules déformées (±0,3 m), étirées 2,2 fois le long des vagues (direction Σ a²·k̂), rompues par un
   masque de 3,5 m, visibles où le résiduel dépasse 0,3–0,9, translucides (0,3). `SEQUENCE=n` : n images à 2 s
   d'intervalle. R26 : `viewer/captures/s368/` (avant / après, séquence). Avant : une tache ovale lisse.
+- **P5, et une décision en cours de session.** L'utilisateur, pendant P5 : *« Oublie l'ecume sauf si tu trouve des
+  photos qui informe de la forme et couleur et position dans la topologie »*. Cherchée aussitôt : la série Beaufort de la
+  NOAA (domaine public), force 4 = notre mer — 400 × 386 pixels, moutons à peine visibles : **ne renseigne pas**. L'écume
+  **s'arrête** : éteinte par défaut (`ecume_visible`, `ECUME=champ` ou `ancienne`) ; code et mesures conservés ; pas de
+  revue R26. Preuve ECUME-GODOT-S368 (§5, la décision) ; liste : 7.1 (production faite), **8.4 reste absent** ; file,
+  dépendances (7.1 attend désormais des photographies : front E), feuille de route, index.

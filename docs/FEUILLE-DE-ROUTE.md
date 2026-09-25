@@ -354,8 +354,8 @@ mêmes dépendances, en plus gros.
 le rendu de l'eau se fait dans Godot 4** — la mer de B rendue dans Godot (S357 ; R19 : *« pas du tout crédible »*) ; **S359** :
 la lumière de l'eau portée de l'afficheur et la colonne d'eau, 8.5 partiel (ADR-194) ; **S360** : la surface fine par FFT,
 l'écume au déferlement (ADR-195) ; **S361** : les caustiques ; **S363** : le ciel de la photographie, une courbe calée sur elle en option ; **S365** : sous la surface, 8.6
-partiel — fenêtre de Snell, milieu ; **S366** : R24 reçu, la lumière de l'eau calée sur Tyler (R21 à R23, R25 attendus) ;
-puis la caméra à demi immergée. L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
+partiel — fenêtre de Snell, milieu ; **S366** : R24 reçu, la lumière de l'eau calée sur Tyler ; **S367–S368** : l'écume, champ
+d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photographiques ; puis la caméra à demi immergée. L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
 
 **Front 0 — 34 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
 

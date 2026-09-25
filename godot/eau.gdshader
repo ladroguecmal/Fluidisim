@@ -42,6 +42,9 @@ uniform sampler2D ecume_champ : filter_linear, repeat_disable;
 uniform vec2 ecume_origine = vec2(0.0);
 uniform float ecume_cote = 256.0;
 uniform bool ecume_champ_actif = false;
+// **2026-09-26, décision de l'utilisateur** : *« Oublie l'écume sauf si tu trouve des photos qui informe de la forme et
+// couleur et position dans la topologie »* — l'écume est éteinte par défaut (`mer.gd`, `ECUME=champ` ou `ancienne`).
+uniform bool ecume_visible = true;
 // La direction dominante des vagues (B, unitaire) : la dentelle s'y étire, comme les traînées de S367.
 uniform vec2 ecume_direction = vec2(0.0, 1.0);
 // La lumière des crêtes (S356) : transmission de l'eau pure sur Hs ; force et exposant de sa diffusion vers l'avant,
@@ -387,6 +390,9 @@ void fragment() {
         dentelle = mix(dentelle, 0.08, fondu_dentelle);
         float residuel = smoothstep(0.3, 0.9, champ.y) * dentelle;
         couverture = max(actif, 0.3 * residuel);
+    }
+    if (!ecume_visible) {
+        couverture = 0.0;
     }
     couleur = mix(couleur, vec3(reflectance_ecume * eclairage), couverture);
     ALBEDO = couleur;

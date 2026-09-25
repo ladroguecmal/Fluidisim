@@ -337,9 +337,10 @@ pas recopiée ici (L137).
 - [ ] **7.1 Écume et moutons** (C14, B9, champ d'écume de SPEC-006 §4) — *partiel* depuis S367 : la **référence** du
   champ d'ADR-014 dans le cœur — deux canaux (actif 3 s, résiduel 30 s), advection orbitale, déferlement aux crêtes les
   plus accélérées ; couverture calée sur Monahan (le seuil physique ne déferle jamais : la bande de B est autosimilaire),
-  vérifiée à 6 % près de 7 à 13 m/s ; traînées le long du vent, Ly/Lx 5,3 ([preuve](validation/ECUME-S367.md)).
-  Manquent la production sur la carte (SPEC-006 §4), les sources de W, de δ et du vent, demi-vies et transfert calés
-  (B9), la zone de surf et le sillage (scénarios 2 et 3 de B9).
+  vérifiée à 6 % près de 7 à 13 m/s ; traînées le long du vent, Ly/Lx 5,3 ([preuve](validation/ECUME-S367.md)) ;
+  **S368**, produit sur la carte de Godot au même pas, décroissance à 10⁻⁵ ([preuve](validation/ECUME-GODOT-S368.md)).
+  Manquent les sources de W, de δ et du vent, demi-vies et transfert calés (B9), la zone de surf et le sillage
+  (scénarios 2 et 3 de B9) ; suspendu par l'utilisateur sauf références photographiques (2026-09-26).
 - [ ] **7.2 Spray, embruns, gouttelettes** — *absent*.
 - [ ] **7.3 Microbulles visuelles** — *absent*.
 - [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *absent*.
@@ -363,8 +364,10 @@ pas recopiée ici (L137).
 - [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent* : S356, l'écume des crêtes de B
   à la couverture de Monahan dans l'afficheur, non jugée, référence à porter dans Godot ([preuve](validation/RENDU-CRETES-S356.md)) ;
   R20 : *« uniquement sur des grandes vagues avec déferlement »* ; **S360** : dans Godot, tirée des vagues dominantes —
-  moutons d'un à quatre mètres ([preuve](validation/SURFACE-FINE-S360.md) §3) ; **R21 : l'écume refusée** (S367).
-  Manquent durée, texture, spray, bulles — le champ d'écume de 7.1 d'abord.
+  moutons d'un à quatre mètres ([preuve](validation/SURFACE-FINE-S360.md) §3) ; **R21 : l'écume refusée** (S367) ;
+  **S368** : le champ de 7.1 produit sur la carte et rendu — moutons qui pâlissent, dentelle résiduelle
+  ([preuve](validation/ECUME-GODOT-S368.md)) —, puis **suspendu par l'utilisateur** (2026-09-26) sauf photographies qui
+  renseignent forme, couleur et place sur la vague : éteint par défaut. Reste *absent* : rien de rendu n'est reçu.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *partiel* depuis S359 : dans Godot, la
   colonne d'eau — fond vu par réfraction de Snell en espace écran, absorbé et voilé selon la profondeur (Maritorena,
   eau pure de Pope & Fry), transmission à 0,005 du modèle —, et la réflexion de l'afficheur portée

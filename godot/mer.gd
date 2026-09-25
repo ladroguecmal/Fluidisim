@@ -60,8 +60,10 @@ var materiau_sol: ShaderMaterial
 var materiau_ciel: ShaderMaterial
 ## S366 : l'environnement, dont la brume — un phénomène de l'air — s'éteint quand la caméra est dans l'eau.
 var environnement_scene: Environment
-## S368 — le champ d'écume sur la carte (`ecume.gd`, production de la référence de S367) ; `ECUME=ancienne` garde
-## l'écume instantanée de S360. Centre courant du champ (axes de B), et 60 s de passé simulé à chaque recentrage.
+## S368 — le champ d'écume sur la carte (`ecume.gd`, production de la référence de S367). **Éteinte par défaut depuis le
+## 2026-09-26** (décision de l'utilisateur : l'écume attend des photographies qui en renseignent la forme, la couleur et
+## la place sur la vague) : `ECUME=champ` rend celle de S368, `ECUME=ancienne` celle de S360. Centre courant du champ
+## (axes de B), et 60 s de passé simulé à chaque recentrage.
 var ecume: Node
 var ecume_centre := Vector2(INF, INF)
 const ECUME_PASSE_S := 60.0
@@ -145,7 +147,8 @@ func _ready() -> void:
 				materiau_caustiques.set_shader_parameter("caustiques_detail", true)
 		elif not "--controle-fft" in args:
 			detail = null
-	if OS.get_environment("ECUME") != "ancienne":
+	materiau.set_shader_parameter("ecume_visible", OS.get_environment("ECUME") in ["champ", "ancienne"])
+	if OS.get_environment("ECUME") == "champ" or "--controle-ecume-champ" in args or "--controle-ecume-couverture" in args:
 		ecume = load("res://ecume.gd").new()
 		add_child(ecume)
 		var pulsations := PackedFloat32Array()
