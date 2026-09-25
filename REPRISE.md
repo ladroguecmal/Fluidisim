@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-25 19:49 +02:00
+JETON            : occupé
+Battement        : 2026-09-25 19:53 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S366 — rendu 8 : les références sous l'eau, trouvées et chiffrées ; f(ω) calibré sur la mesure (verdict R24)
 Dernière session : S365 — **rendu 7, sous la surface** : la caméra dans l'eau — fenêtre de Snell rendue à 0,05° de arcsin(1/n), réflexion totale, milieu `exp(−c·d)` à 0,004 près, fond et caustiques vus de l'eau ; **8.6 passe à partiel** ([preuve](docs/validation/SOUS-MARIN-S365.md))
 Session suivante : **les verdicts R21 à R24 d'abord** (REVUE-VISUELLE §26–29). Sinon, par l'alternance d'ADR-191 D3, une session de physique : les chemins de B lisent la côte jusqu'à Godot (ADR-196 §3), la coque qui bouge sur la carte (ADR-193 §3), ou le lot 5 (A316). Au rendu suivant : la caméra à demi immergée (ADR-019 §6). En attente : R18, R21, R22, R23, R24
 Maillons        : 0 — S365 : 8.6 passe à partiel (journal)

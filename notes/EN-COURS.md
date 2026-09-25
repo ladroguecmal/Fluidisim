@@ -62,60 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S365 — **terminée**. **Rendu 7 : sous la surface** — *« Continue »*, sans verdict R21 à R23 ; alternance
-d'ADR-191 D3 après S364 (physique). **À deux maillons**, un lot qui fait avancer une case : **8.6**, *absente* (vue
-sous-marine et passage de la surface, [ADR-019](../docs/adr/ADR-019-vue-sous-marine.md), banc B11), qui dépend de 8.5,
-partielle dans Godot depuis S359.
+Session : S366 — **en cours**. **Rendu 8 : les références sous l'eau** — verdict R24 : *« Pour les références trouve les
+sinon rien a redire cela me paraît good, continue »*. La demande de l'utilisateur prime sur l'alternance d'ADR-191 D3
+(la physique reprend à la session suivante). S365 a laissé **`f(ω)` à calibrer** (B11) — la lumière de l'eau selon la
+direction de visée — et aucune référence réelle.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Ce qui se construit.** Depuis l'eau : la **surface vue d'en dessous** — la fenêtre de Snell (le ciel réfracté,
-radiance × n²) et, au-delà de l'angle critique, la **réflexion totale** ; le **milieu** entre l'œil et ce qu'il voit —
-atténuation par canal `exp(−c·d)`, `c = a + b` de Pope & Fry et Morel (les constantes de S359, `b = 2·b_b`), et la
-radiance de l'eau elle-même ; le fond éclairé par `exp(−Kd·H)`, ses caustiques. **Hors session, nommé** : la caméra à
-demi immergée (ADR-019 §6), les bulles, l'écume vue d'en dessous, les rayons dans l'eau.
+**Deux sortes de références.** (a) **Mesurées** : la distribution de radiance sous l'eau publiée (Tyler 1960, lac Pend
+Oreille, ou d'autres) — ce que vaut la radiance horizontale devant la radiance montante, et la fenêtre devant le miroir ;
+c'est ce qui calibre `f(ω)`. (b) **Photographies** libres (Wikimedia Commons) d'eau claire peu profonde, de jour — fenêtre
+de Snell, fond de sable —, chiffrées sans téléchargement, dans le navigateur, sur des rapports que la balance des blancs
+et l'exposition ne changent pas. Sources et licences consignées ; aucune image n'entre dans le dépôt.
 
-Critères, écrits avant le code :
-1. **La fenêtre de Snell** : mer plate, caméra à 5 m sous la surface, visée au zénith, champ de 120° : le bord de la
-   fenêtre à **48,27°** (`arcsin(1/1,34)`) à **0,25°** près (deux pixels) ; au-delà, la réflexion totale.
-2. **Le milieu** : le fond vu de l'eau, transmission relue par un mode de contrôle contre `exp(−c·d)`, `d` recalculé par
-   le script sur la bathymétrie analytique, à **1 %** près par canal. Prédiction : le rouge meurt en 13 m (1 %), le vert
-   en 78 m, le bleu en 290 m.
-3. **R24** : images depuis l'eau (fenêtre sous la houle, visée horizontale, fond et caustiques) ; références réelles
-   demandées à l'utilisateur.
+Critères, écrits avant la mesure :
+1. **Au moins une** distribution de radiance mesurée, conditions dites, et **au moins deux** photographies libres.
+2. `f(ω)` contre la mesure : rapport horizontale / nadir montant ; au-delà de **30 %** d'écart, recalibrer, avant / après
+   publiés. **Prédiction** : la mesure donne 2 à 5 (le modèle, 3).
+3. Les photographies contre le rendu, sur des rapports sans unité (fenêtre / miroir voisin, gradient de l'horizontale) —
+   à titre indicatif : prise de vue inconnue.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la surface vue d'en dessous (`eau.gdshader`, faces arrière) ; le mode immergé dans `mer.gd`, poses
-  sous l'eau, mer plate (`MER_PLATE=1`) ; critère 1.
-- [x] **P3** — le milieu : le fond et le fond du ciel vus de l'eau (`sol.gdshader`, `ciel.gdshader`) ; contrôle de la
-  transmission ; critère 2.
-- [x] **P4** — images R24, REVUE-VISUELLE §29.
-- [x] **P5** — preuve SOUS-MARIN-S365 ; liste 8.6, file, dépendances, feuille de route, index.
-- [x] **P6** — rituel.
+- [>] **P2** — le verdict R24 consigné ; les références trouvées, sources et licences.
+- [ ] **P3** — les chiffrer : la distribution mesurée contre `f(ω)` et le rendu ; les photographies, rapports sans unité.
+- [ ] **P4** — calibrer ce que la mesure désigne ; avant / après ; images.
+- [ ] **P5** — preuve (SOUS-MARIN-S365, section datée S366), liste 8.6, file, index.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu.** `optique_eau.gdshaderinc` (R0, gain, Kd, `c = a + 2·b_b`, `sous_eau`, `eau_infinie`,
-  `a_travers_l_eau`) ; `eau.gdshader` : `lumiere_dessous` (Fresnel eau → air, ciel réfracté × n², réflexion totale),
-  quadrature commune `integree`, ligne de visée jusqu'à l'œil ; `mer.gd` : `immersion()` (bande de B sous la caméra), poses
-  `sous_eau_zenith`, `sous_eau`, `sous_eau_fond`, `FOV`, `MER_PLATE`, `CONTROLE_EAU`. **Impasse** : `FRONT_FACING` — la grille
-  polaire présente sa face avant **par en dessous** ; premier rendu, le ciel réfléchi d'en haut, gris uniforme. Remède : le
-  mode `sous_eau`, d'un bloc. **Mesure** (`outils/fenetre_snell.py`, mer plate, 5 m, champ 120°) : la plus forte chute se
-  trompe sur les bords de nuages tassés près de l'horizon réfracté (46,0 à 48,3°) ; deux directions sans nuage, 48,266° et
-  48,245°. **Contrôle de Fresnel** (`--fresnel`, premier pixel à R = 1), 16 directions : **48,254° en moyenne, 48,220 à
-  48,311, pire écart 0,048°** pour 48,268° (pixel 0,122°). Soleil dans la fenêtre à 88,8 px du centre, 89,5 attendus.
-- **P3, critère 2 tenu.** `sol.gdshader` vu de l'eau : `exp(−Kd·H)` puis la ligne de visée ; `ciel.gdshader` : l'œil
-  dans l'eau voit l'eau, ligne infinie. `--controle-sous-eau` (mode 3, rayon marché sur la bathymétrie analytique), deux
-  inclinaisons, dix pixels de 5,0 à 18,8 m : **pire |ΔT| = 0,0041** (critère 0,01) ; rouge 0,18 à 5 m, 0,0015 à 18,8 m —
-  1 % à 13,5 m, vert 77 m, bleu 286 m (`c = a + 2·b_b`). **Deux défauts vus sur les images, corrigés** : (a) pixels noirs
-  vers l'horizon de la surface vue d'en dessous — Fresnel à 0/0 sous incidence rasante ; garde : réflexion totale ;
-  921 600 pixels, 0 noir ; (b) une ligne à 5° sous l'horizon entre le fond lointain et le fond du ciel — la lumière
-  diffusée prise à la profondeur **moyenne** du trajet ; remplacée par l'intégrale exacte du modèle sur une ligne en
-  pente, `L∞(z0)·c·d·φ((c + Kd·g)·d)`. Vu : caustiques nettes au loin, faibles sous la caméra (6,85 m, avant la focale
-  de S361, ≈ 13 m) — non examiné.
-- **P4.** Quatre images dans `viewer/captures/s365/` ; REVUE-VISUELLE §29, une référence sous l'eau demandée.
-  **Non-régression** au-dessus de l'eau, contre les rendus de S363 : proche et rasante identiques au bit ; référence,
-  3 pixels à un niveau près sur 921 600.
-- **P5.** Preuve [SOUS-MARIN-S365](../docs/validation/SOUS-MARIN-S365.md) ; **8.6 passe à partiel** (3 / 61 / 56),
-  décompte de la liste, REPRISE §4, feuille de route ; dépendances (donnée de l'outil, table régénérée) ; file ; index ;
-  note datée dans ADR-019 (§2, §3 réalisés ; §7.1 : extinction + source proportionnelle à l'éclairement local).
