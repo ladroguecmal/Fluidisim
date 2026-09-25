@@ -3,10 +3,12 @@
 // S360 - LA SURFACE FINE PAR FFT (Tessendorf 2001, "Simulating Ocean Water") : la queue de B, realisee densement dans
 // deux cascades de 256 x 256 composantes (`rendu_cretes::export_detail`), evoluee dans le temps et ramenee en espace par
 // FFT inverse sur la carte. Un seul nuanceur de calcul, cinq modes :
-//   0 spectre - ht(k, t) = h0(k)*e^{-i*phi} + conj(h0(-k))*e^{+i*phi}, phi = omega_q*t, puis trois champs complexes :
-//     (deta/dx + i*deta/dy), (g_xx + i*g_yy), (g_xy + i*eta) - g le gradient du deplacement horizontal (CWM) ;
+//   0 spectre - ht(k, t) = h0(k)*e^{-i*phi} + conj(h0(-k))*e^{+i*phi}, phi = omega_q*t, puis cinq champs complexes :
+//     (deta/dx + i*deta/dy), (g_xx + i*g_yy), (g_xy + i*eta) - g le gradient du deplacement horizontal (CWM) -, et
+//     (S361, les caustiques) la hessienne de eta, (eta_xx + i*eta_yy), (eta_xy + i*0) ;
 //   1 FFT inverse le long des lignes, 2 le long des colonnes (radix 2, en memoire de groupe, sans normalisation) ;
-//   3 composition - deux images RGBA32F par cascade, (s_x, s_y, s_x2, s_y2) et (s_x*s_y, g_xx, g_yy, g_xy) ;
+//   3 composition - trois images RGBA32F par cascade, (s_x, s_y, s_x2, s_y2), (s_x*s_y, g_xx, g_yy, g_xy) et
+//     (eta_xx, eta_yy, eta_xy, eta) ;
 //   4 niveaux de detail - moyenne 2 x 2 : la moyenne des pentes et de leurs carres, d'ou la variance que le pixel ne
 //     resout pas (LEAN, Olano et Baker 2010).
 // I-08 : aucun temps en f32 - la pulsation est quantifiee sur la periode de repetition `periode` (Tessendorf 2001, animation en boucle), et
@@ -20,6 +22,10 @@ layout(set = 0, binding = 2, rgba32f) uniform restrict writeonly image2D sortie_
 layout(set = 0, binding = 3, rgba32f) uniform restrict writeonly image2D sortie_b;
 layout(set = 0, binding = 4, rgba32f) uniform restrict readonly image2D source_a;
 layout(set = 0, binding = 5, rgba32f) uniform restrict readonly image2D source_b;
+layout(set = 0, binding = 6, rgba32f) uniform restrict writeonly image2D sortie_c;
+layout(set = 0, binding = 7, rgba32f) uniform restrict readonly image2D source_c;
+
+const uint CHAMPS = 5u;
 
 layout(push_constant, std430) uniform Parametres {
     uint mode;
@@ -62,11 +68,13 @@ void spectre(uint idx) {
     float dk = TAU / p.cote;
     vec2 kv = vec2(signe_indice(col), signe_indice(row)) * dk;
     float k = length(kv);
-    uint base = p.cascade * 3u * nn;
+    uint base = p.cascade * CHAMPS * nn;
     if (k == 0.0) {
         champ[base + idx] = vec2(0.0);
         champ[base + nn + idx] = vec2(0.0);
         champ[base + 2u * nn + idx] = vec2(0.0);
+        champ[base + 3u * nn + idx] = vec2(0.0);
+        champ[base + 4u * nn + idx] = vec2(0.0);
         return;
     }
     uint miroir = ((p.n - row) % p.n) * p.n + (p.n - col) % p.n;
@@ -80,13 +88,15 @@ void spectre(uint idx) {
     champ[base + idx] = fois_i(kv.x * h) - kv.y * h;
     champ[base + nn + idx] = (-kv.x * kv.x / k) * h + fois_i((-kv.y * kv.y / k) * h);
     champ[base + 2u * nn + idx] = (-kv.x * kv.y / k) * h + fois_i(h);
+    champ[base + 3u * nn + idx] = (-kv.x * kv.x) * h + fois_i((-kv.y * kv.y) * h);
+    champ[base + 4u * nn + idx] = (-kv.x * kv.y) * h;
 }
 
 void fft(uint groupe, uint j, bool lignes) {
     uint nn = p.n * p.n;
     uint trait = groupe % p.n;
     uint champ_i = groupe / p.n;
-    uint base = p.cascade * 3u * nn + champ_i * nn;
+    uint base = p.cascade * CHAMPS * nn + champ_i * nn;
     uint pas = lignes ? 1u : p.n;
     uint origine = lignes ? trait * p.n : trait;
     if (j < p.n) { ligne[inverse_bits(j)] = champ[base + origine + j * pas]; }
@@ -110,13 +120,16 @@ void fft(uint groupe, uint j, bool lignes) {
 void composer(uint idx) {
     uint nn = p.n * p.n;
     if (idx >= nn) { return; }
-    uint base = p.cascade * 3u * nn;
+    uint base = p.cascade * CHAMPS * nn;
     vec2 pentes = champ[base + idx];
     vec2 gd = champ[base + nn + idx];
     vec2 gx = champ[base + 2u * nn + idx];
+    vec2 hd = champ[base + 3u * nn + idx];
+    vec2 hx = champ[base + 4u * nn + idx];
     ivec2 texel = ivec2(int(idx % p.n), int(idx / p.n));
     imageStore(sortie_a, texel, vec4(pentes.x, pentes.y, pentes.x * pentes.x, pentes.y * pentes.y));
     imageStore(sortie_b, texel, vec4(pentes.x * pentes.y, gd.x, gd.y, gx.x));
+    imageStore(sortie_c, texel, vec4(hd.x, hd.y, hx.x, gx.y));
 }
 
 void niveau(uint idx) {
@@ -128,8 +141,11 @@ void niveau(uint idx) {
         + imageLoad(source_a, s + ivec2(1, 1));
     vec4 b = imageLoad(source_b, s) + imageLoad(source_b, s + ivec2(1, 0)) + imageLoad(source_b, s + ivec2(0, 1))
         + imageLoad(source_b, s + ivec2(1, 1));
+    vec4 c = imageLoad(source_c, s) + imageLoad(source_c, s + ivec2(1, 0)) + imageLoad(source_c, s + ivec2(0, 1))
+        + imageLoad(source_c, s + ivec2(1, 1));
     imageStore(sortie_a, t, 0.25 * a);
     imageStore(sortie_b, t, 0.25 * b);
+    imageStore(sortie_c, t, 0.25 * c);
 }
 
 void main() {

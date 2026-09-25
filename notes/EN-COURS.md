@@ -84,7 +84,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la hessienne dans la FFT, son contrôle ; critère 1.
+- [x] **P2** — la hessienne dans la FFT, son contrôle ; critère 1.
 - [ ] **P3** — les caustiques dans le nuanceur du fond ; la bande et la cascade de 32 m données au fond.
 - [ ] **P4** — le contrôle contre la solution exacte ; critère 2.
 - [ ] **P5** — la scène, l'énergie ; images R22 ; critères 3 et 4.
@@ -92,3 +92,7 @@ Critères, écrits avant le code :
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** Cinq champs complexes par cascade (`CHAMPS`), troisième image `(η_xx, η_yy, η_xy, η)` et ses
+  niveaux. Contrôle (`--controle-fft`, η, ∂η/∂x, η_xx) : pire **1,85·10⁻⁵** et **3,27·10⁻⁵** du rms. Courbures : cascade
+  de 32 m, η_xx de 0,03 à 0,42 m⁻¹ (focale ≈ 1/((1 − 1/n)·0,3) ≈ 13 m, dans la scène) ; cascade de 4 m, 3 à 9 m⁻¹
+  (focale ≈ 0,8 m) — son exclusion des caustiques du fond de la scène (≥ 5 m) se tient.

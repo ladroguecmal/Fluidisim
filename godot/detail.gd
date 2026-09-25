@@ -2,13 +2,15 @@ extends Node
 ## S360 — **la surface fine** : la queue de B réalisée par FFT sur la carte (Tessendorf 2001), deux cascades de
 ## 256 × 256 composantes exportées par l'afficheur (`donnees/detail_h0.bin`, `rendu_cretes::export_detail`). Chaque
 ## image : `fft_detail.comp` — spectre à l'instant, FFT inverse, composition, niveaux de détail. Le nuanceur d'eau lit
-## les deux images par cascade, `textures[c][0|1]`. Rendu seulement (I-13) ; aucun état n'en sort vers le jeu (I-04).
+## les images par cascade, `textures[c][0|1]` ; le fond lit la troisième, la hessienne de η (S361, caustiques). Rendu seulement (I-13) ; aucun état n'en sort vers le jeu (I-04).
 ##
 ## Le calcul se fait sur le `RenderingDevice` principal, depuis le fil de rendu (`call_on_render_thread`) ; les images
 ## sont réservées une fois (I-06 lu pour l'hôte graphique, ADR-145). Le temps passe replié en double sur la période
 ## de répétition (I-08).
 
 const N := 256
+## Champs complexes par cascade : pentes, gradient du déplacement (deux), hessienne (deux, S361).
+const CHAMPS := 5
 const NIVEAUX := 9
 ## Période de répétition de l'animation, s : la pulsation de chaque case est arrondie au multiple de `2π/PERIODE` le plus
 ## proche (Tessendorf, § « looping »), soit au plus 3,1·10⁻³ rad/s d'écart ; seul `(t mod PERIODE)/PERIODE` va à la carte.
@@ -42,7 +44,7 @@ func charger(detail: Dictionary) -> bool:
 		cotes.append(float(c[0]))
 		mss_realisee.append(float(c[3]))
 	for c in 2:
-		textures.append([Texture2DRD.new(), Texture2DRD.new()])
+		textures.append([Texture2DRD.new(), Texture2DRD.new(), Texture2DRD.new()])
 	RenderingServer.call_on_render_thread(_initialiser)
 	return true
 
@@ -59,7 +61,7 @@ func _initialiser() -> void:
 	shader = rd.shader_create_from_spirv(spirv)
 	pipeline = rd.compute_pipeline_create(shader)
 	h0_buf = rd.storage_buffer_create(h0_octets.size(), h0_octets)
-	champ_buf = rd.storage_buffer_create(2 * 3 * N * N * 8)
+	champ_buf = rd.storage_buffer_create(2 * CHAMPS * N * N * 8)
 	var format := RDTextureFormat.new()
 	format.format = RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT
 	format.width = N
@@ -68,13 +70,15 @@ func _initialiser() -> void:
 	format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT \
 		| RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT
 	for c in 2:
-		var paire := [rd.texture_create(format, RDTextureView.new(), []), rd.texture_create(format, RDTextureView.new(), [])]
+		var paire := [rd.texture_create(format, RDTextureView.new(), []), rd.texture_create(format, RDTextureView.new(), []),
+			rd.texture_create(format, RDTextureView.new(), [])]
 		images.append(paire)
 		var vues := []
 		for niveau in NIVEAUX:
 			vues.append([
 				rd.texture_create_shared_from_slice(RDTextureView.new(), paire[0], 0, niveau, 1, RenderingDevice.TEXTURE_SLICE_2D),
 				rd.texture_create_shared_from_slice(RDTextureView.new(), paire[1], 0, niveau, 1, RenderingDevice.TEXTURE_SLICE_2D),
+				rd.texture_create_shared_from_slice(RDTextureView.new(), paire[2], 0, niveau, 1, RenderingDevice.TEXTURE_SLICE_2D),
 			])
 		var par_niveau := []
 		for niveau in NIVEAUX:
@@ -84,10 +88,12 @@ func _initialiser() -> void:
 				_tampon(0, h0_buf), _tampon(1, champ_buf),
 				_image(2, vues[niveau][0]), _image(3, vues[niveau][1]),
 				_image(4, src[0]), _image(5, src[1]),
+				_image(6, vues[niveau][2]), _image(7, src[2]),
 			], shader, 0))
 		ensembles.append(par_niveau)
 		textures[c][0].texture_rd_rid = paire[0]
 		textures[c][1].texture_rd_rid = paire[1]
+		textures[c][2].texture_rd_rid = paire[2]
 	pret = true
 
 
@@ -141,8 +147,8 @@ func _calculer(t_frac: float) -> void:
 			rd.compute_list_dispatch(liste, groupes, 1, 1)
 			rd.compute_list_add_barrier(liste)
 		passe.call(0, 0, N * N / 256)
-		passe.call(1, 0, 3 * N)
-		passe.call(2, 0, 3 * N)
+		passe.call(1, 0, CHAMPS * N)
+		passe.call(2, 0, CHAMPS * N)
 		passe.call(3, 0, N * N / 256)
 		for niveau in range(1, NIVEAUX):
 			var taille := N >> niveau
@@ -169,19 +175,24 @@ func _controler(t_frac: float, rappel: Callable) -> void:
 		var dk := TAU / float(cotes[c])
 		var somme_mss := 0.0
 		var somme_eta2 := 0.0
+		var somme_h2 := 0.0
 		for i in nn:
-			var sx := valeurs[2 * (c * 3 * nn + i)]
-			var sy := valeurs[2 * (c * 3 * nn + i) + 1]
-			var eta := valeurs[2 * (c * 3 * nn + 2 * nn + i) + 1]
+			var sx := valeurs[2 * (c * CHAMPS * nn + i)]
+			var sy := valeurs[2 * (c * CHAMPS * nn + i) + 1]
+			var eta := valeurs[2 * (c * CHAMPS * nn + 2 * nn + i) + 1]
+			var hxx := valeurs[2 * (c * CHAMPS * nn + 3 * nn + i)]
+			somme_h2 += hxx * hxx
 			somme_mss += sx * sx + sy * sy
 			somme_eta2 += eta * eta
 		var mss := somme_mss / nn
 		var rms_eta := sqrt(somme_eta2 / nn)
 		var rms_s := sqrt(mss / 2.0)
+		var rms_h := sqrt(somme_h2 / nn)
 		var pire := 0.0
 		for texel: Vector2i in [Vector2i(0, 0), Vector2i(17, 203), Vector2i(128, 77), Vector2i(250, 131)]:
 			var eta_d := 0.0
 			var sx_d := 0.0
+			var hxx_d := 0.0
 			for m in N:
 				for n in N:
 					var j := c * nn + m * N + n
@@ -202,13 +213,16 @@ func _controler(t_frac: float, rappel: Callable) -> void:
 					# 2·Re(h0·e^{i·arg}) et sa dérivée en x.
 					eta_d += 2.0 * (ar * cos(arg) - ai * sin(arg))
 					sx_d += 2.0 * kx * (-ar * sin(arg) - ai * cos(arg))
+					hxx_d += -2.0 * kx * kx * (ar * cos(arg) - ai * sin(arg))
 			var i_t: int = texel.y * N + texel.x
-			var eta_f := valeurs[2 * (c * 3 * nn + 2 * nn + i_t) + 1]
-			var sx_f := valeurs[2 * (c * 3 * nn + i_t)]
+			var eta_f := valeurs[2 * (c * CHAMPS * nn + 2 * nn + i_t) + 1]
+			var sx_f := valeurs[2 * (c * CHAMPS * nn + i_t)]
+			var hxx_f := valeurs[2 * (c * CHAMPS * nn + 3 * nn + i_t)]
 			var e1 := absf(eta_f - eta_d) / rms_eta
 			var e2 := absf(sx_f - sx_d) / rms_s
-			pire = maxf(pire, maxf(e1, e2))
-			print("CONTROLE_FFT_S360 cascade=%d texel=%s eta_fft=%s eta_direct=%s sx_fft=%s sx_direct=%s" % [c, texel, String.num_scientific(eta_f), String.num_scientific(eta_d), String.num_scientific(sx_f), String.num_scientific(sx_d)])
+			var e3 := absf(hxx_f - hxx_d) / rms_h
+			pire = maxf(pire, maxf(e1, maxf(e2, e3)))
+			print("CONTROLE_FFT_S360 cascade=%d texel=%s eta_fft=%s eta_direct=%s sx_fft=%s sx_direct=%s hxx_fft=%s hxx_direct=%s" % [c, texel, String.num_scientific(eta_f), String.num_scientific(eta_d), String.num_scientific(sx_f), String.num_scientific(sx_d), String.num_scientific(hxx_f), String.num_scientific(hxx_d)])
 		var ecart_mss := absf(mss - float(mss_realisee[c])) / float(mss_realisee[c])
 		print("CONTROLE_FFT_S360 cascade=%d rms_eta_m=%s mss_fft=%s mss_export=%s ecart_mss=%s pire_relatif=%s critere=%s" % [c, String.num_scientific(rms_eta), String.num_scientific(mss), String.num_scientific(float(mss_realisee[c])), String.num_scientific(ecart_mss), String.num_scientific(pire), "tenu" if pire <= 1e-4 and ecart_mss <= 0.01 else "manque"])
 		tout = tout and pire <= 1e-4 and ecart_mss <= 0.01

@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 10:13 +02:00
+Battement        : 2026-09-25 10:15 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S361 — rendu 5 : les caustiques sur le fond (demandées en R20), optique géométrique, contre une solution exacte
 Dernière session : S360 — **rendu 4, la surface fine** : verdict R20 (couleur reçue ; topologie, ciel, écume, caustiques) ; la queue de B par FFT dans Godot, 10 612 composantes, étalement d'Elfouhaily ([ADR-195](docs/adr/ADR-195-la-queue-de-b-rendue-par-fft.md)) ; l'écume au déferlement des vagues dominantes ([preuve](docs/validation/SURFACE-FINE-S360.md)) ; R21 préparée
