@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S367 — **en cours**. **Physique : le champ d'écume de B** (7.1) — verdict : *« Je valide les rendus sauf
+Session : S367 — **terminée**. **Physique : le champ d'écume de B** (7.1) — verdict : *« Je valide les rendus sauf
 ecume »*, lu sur toutes les revues en attente (R18, R21, R22, R23, R25), l'écume de R21 refusée. Alternance d'ADR-191 D3
 après deux sessions de rendu : la physique ; et 7.1, *absent*, conçu par [ADR-014](../docs/adr/ADR-014-mousse-spray-bulles.md),
 est la physique de l'écume refusée.
@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 - [x] **P4** — la couverture contre Monahan, trois vents ; critère 2.
 - [x] **P5** — les traînées de convergence ; critère 3.
 - [x] **P6** — preuve ECUME-S367 ; liste 7.1, file, dépendances, feuille de route, index.
-- [>] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - **P2.** Verdict consigné, lu sur la demande de S366 (R21, R22, R23, R25) : forme fine, caustiques, ciel, lueur face

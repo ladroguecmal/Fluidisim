@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-26 00:01 +02:00
+JETON            : libre
+Battement        : 2026-09-26 00:02 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S367 — physique : le champ d'écume de B (7.1, ADR-014) — deux canaux, advection orbitale, couverture contre Monahan ; verdicts consignés (tout validé sauf l'écume)
-Dernière session : S366 — **rendu 8, les références sous l'eau** (R24 : « good », « trouve les ») : Tyler 1960 et trois photographies libres, chiffrées ; la lumière de l'eau calée sur la mesure (lobe avant, résidu 0,36 → 0,12) ; la brume de Godot éteinte sous l'eau ([preuve](docs/validation/SOUS-MARIN-S365.md) §6)
-Session suivante : **les verdicts R21, R22, R23 et R25 d'abord** (REVUE-VISUELLE §26–28, §30). Sinon, par l'alternance d'ADR-191 D3, une session de physique : les chemins de B lisent la côte jusqu'à Godot (ADR-196 §3), la coque qui bouge sur la carte (ADR-193 §3), ou le lot 5 (A316). Au rendu suivant : la caméra à demi immergée (ADR-019 §6), l'échelle radiométrique du ciel et du soleil. En attente : R18, R21, R22, R23, R25
-Maillons        : 1 — S366 : 8.6 reste partiel (journal)
+Session en cours : aucune
+Dernière session : S367 — **physique, le champ d'écume de B** (verdict : « je valide les rendus sauf écume ») : la référence d'ADR-014 — deux canaux, advection orbitale, déferlement aux crêtes les plus accélérées ; couverture calée sur Monahan, vérifiée à 6 % près de 7 à 13 m/s ; traînées le long du vent ; **7.1 passe à partiel** ([preuve](docs/validation/ECUME-S367.md))
+Session suivante : par l'alternance d'ADR-191 D3, **une session de rendu : le champ d'écume porté sur la carte de Godot** (SPEC-006 §4, cascades RG16F) et l'écume rendue qui en naît — celle que R21 refusait (8.4) ; ensuite la physique : les chemins de B lisent la côte (ADR-196), la coque qui bouge, ou le lot 5. Au rendu, restent aussi la caméra à demi immergée et l'échelle radiométrique du ciel. En attente : R18
+Maillons        : 0 — S367 : 7.1 passe à partiel (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

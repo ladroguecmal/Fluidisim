@@ -17142,3 +17142,21 @@ rapports seulement. **R25** préparée, images envoyées (sans réponse, la lueu
 **Rituel.** Maillons **1** : 8.6 reste partiel. Suivant : **R21 à R23, R25** ; par l'alternance, la physique — les
 chemins de B lisent la côte (ADR-196), la coque qui bouge, ou le lot 5. Au rendu : la caméra à demi immergée, l'échelle
 radiométrique du ciel et du soleil.
+
+## S367 — 2026-09-25 — physique : le champ d'écume de B (7.1)
+
+**Entrée.** Verdict : *« Je valide les rendue sauf ecume »* — lu sur R21, R22, R23, R25 : forme fine, caustiques, ciel
+(AgX reste le défaut), lueur face au soleil validés ; **l'écume refusée** ; R18, en direct, toujours attendu. Alternance :
+la physique ; 7.1, absente, est la physique de l'écume refusée — celle-ci n'avait pas de mémoire.
+**Fait** ([preuve](../docs/validation/ECUME-S367.md)). `ecume.rs` : le champ d'ADR-014 — deux canaux (actif 3 s, résiduel
+30 s), advection semi-lagrangienne orbitale, décroissance exacte, déferlement par l'accélération des crêtes ; tenu à
+7,7·10⁻⁷, centre advecté à 10⁻⁵ m, déterministe. **Trouvé** : au seuil physique (0,45 g), la mer de B ne déferle jamais —
+sa bande est autosimilaire, `σ_a/g` = 0,0836 à tout vent, et aucun seuil fixe ne suit Monahan. Place du déferlement par
+la physique, quantité par Monahan : seuil `κ·σ_a` calé, **vérifié sur une autre graine à 1,02 / 1,06 / 0,94** (384 m ;
+le 0,51 d'un champ de 128 m était du bruit). **Traînées** : le résiduel advecté s'allonge le long du vent, Ly/Lx 5,3
+contre 1,8 ; ni bord d'entrée (domaine périodique), ni diffusion (croît quand le texel baisse). Cœur : 522 réussis.
+**Limites.** Référence CPU ; sources de B seules ; transfert 1 : 1 trop généreux (résiduel moyen 0,40) ; mer pleinement
+développée seulement ; Ly en butée du domaine.
+**Rituel.** Maillons **0** : 7.1 passe à partiel (3 / 62 / 55) ; devient possible, une écume qui dure et s'étire ;
+consommé par le rendu de Godot (8.4), au prochain rendu ; preuve §1–3. Suivant : **le champ porté sur la carte de Godot**
+et l'écume rendue qui en naît (8.4), par l'alternance ; R18 attendu.
