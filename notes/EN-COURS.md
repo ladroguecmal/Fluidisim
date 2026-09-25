@@ -90,8 +90,8 @@ Critères, écrits avant le code :
   interpolation ; critère 1, balayage du pas.
 - [x] **P3** — B sur la côte : l'évaluation côtière (phase entière, amplitude, pente, vitesses en profondeur finie) ;
   critères 2 et 3 ; η, pente et vitesse contre la référence.
-- [>] **P4** — coût et mémoire ; critères 4 et 5.
-- [ ] **P5** — ADR-196, l'entrée de la bathymétrie ; preuve (BATHYMETRIE-S362, section datée S364) ; liste 2.7, file,
+- [x] **P4** — coût et mémoire ; critères 4 et 5.
+- [>] **P5** — ADR-196, l'entrée de la bathymétrie ; preuve (BATHYMETRIE-S362, section datée S364) ; liste 2.7, file,
   dépendances, feuille de route, index.
 - [ ] **P6** — rituel.
 
@@ -110,3 +110,9 @@ Critères, écrits avant le code :
   évaluations identiques au bit à B.** Deux passes : même hash. Sur la plage, 711 points, trois instants : **η à
   0,133 mm** de la référence f64, pente à 1,4e-5 (max 0,086), vitesse horizontale à 2,7e-4 m/s (max 1,31) ; **marche au
   bord du large 0,0017 mm**. Essai rendu incrémental (50 s → 0,2 s en mode optimisé).
+- **P4, critères 4 et 5.** `examples/bathymetrie_cote_cout.rs`, méthode de `banc_b1` (4 096 points, 64 campagnes,
+  minimum). B, 32 composantes (B1), Tp 8 s : **33,1 ns par composante** groupés, 57,9 dispersés. Sur la côte : **52 ns**
+  (×1,58) groupés, **68 ns** (×1,18) dispersés — **identique aux pas de 1, 2 et 5 m** : O(1), la taille des tables
+  n'entre pas. Mémoire : **258 Ko par km de profil** au pas de 2 m (32 composantes, 16 octets par échantillon), 103 Ko à
+  5 m ; un profil vaut pour toute la longueur de côte à isobathes droites. En 2D, des tables régulières du même contenu :
+  128 Mo/km² à 2 m, 20,5 à 5 m, 5,1 à 10 m (arithmétique) — la 2D demandera un pas adapté ou un autre paramétrage.
