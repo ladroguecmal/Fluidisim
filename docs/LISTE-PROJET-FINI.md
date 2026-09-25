@@ -196,7 +196,8 @@ pas recopiée ici (L137).
   contrôle, identification, train orienté de W (S314) — et **S316 l'a qualifié** propriété par
   propriété : primitive exacte, raccord à un degré et 2 à 4 % de spectre près, le reste à δ
   ([ordre C](validation/ORDRE-C-S316.md)). Le volume net est reçu par une région locale (S317,
-  [ordre D](validation/RESTITUTION-S317.md)) — **en eau calme seulement** : sous une vraie mer, δ dérive (A289, S319). Manquent le couplage complet (ordre E), la production GPU et le sens W → δ. Lot 2 d'[ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7.
+  [ordre D](validation/RESTITUTION-S317.md)) — **en eau calme seulement** : sous une vraie mer, δ dérivait (A289, S319) ; **S369** : la dérive
+  retirée à sa source, δ relatif à B ([ADR-198](adr/ADR-198-la-voie-d-a289.md)) ; une perturbation croît encore sous houle raide (A320). Manquent le couplage complet (ordre E), la production GPU et le sens W → δ. Lot 2 d'[ADR-178](adr/ADR-178-strategie-en-trois-systemes-physiques.md) D7.
 - [ ] **4.9 Fusion et séparation de domaines** sans rupture — *absent*.
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
@@ -267,15 +268,17 @@ pas recopiée ici (L137).
   60 Hz ([preuve](validation/COUT-DELTA3D-S341.md) §12). Manquent d'autres scènes, plusieurs domaines en direct,
   un 99ᵉ centile en direct.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
-- [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *absent*.
+- [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *partiel* **depuis S369** :
+  δ relatif à la dynamique de B ([ADR-198](adr/ADR-198-la-voie-d-a289.md)) — sous B seul, δ nul reste nul **au bit**,
+  pas après pas : la phase du fond dans le domaine est celle de B, par construction ([preuve](validation/MER-S369.md)
+  §1). Manquent la production GPU dans ce mode, W, et une perturbation stable sous houle raide (A320).
   Besoin découvert S274 : B est linéaire, un δ fidèle dérive de la dispersion d'amplitude
   (0,85–0,87 fois Stokes mesuré). Sous `ak` = 0,06, environ 7 cm en une minute : surface rendue
   différente de la surface de jeu. Options et déclencheur : A289. **S319 : le déclencheur est
   atteint, plus fort que prévu** — sous une seule houle de B, δ nul au départ croît jusqu'à **trois
   fois l'amplitude de la mer** en deux minutes (≈ 0,04 s⁻¹ sous 2,5 cm, ≈ 0,10 sous 5 cm) ; **S322** :
   ce n'est pas le pas de temps, taux à 0,8 % près de 20 à 2,5 ms ([preuve](validation/MER-S319.md)
-  §4, §8). Il bloque l'ordre E de 4.8. Les trois voies — rappel lent, durée de vie bornée, dispersion
-  d'amplitude dans B — attendent l'utilisateur.
+  §4, §8). Il bloquait l'ordre E de 4.8 ; la voie est tranchée en S369 (ci-dessus).
 
 ## 5. Volumes finis et inondations (V)
 
@@ -548,7 +551,7 @@ pas recopiée ici (L137).
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 4 | 5 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
-| 4. Volumique (δ) | 21 | 0 | 11 | 10 |
+| 4. Volumique (δ) | 21 | 0 | 12 | 9 |
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 1 | 7 |
@@ -558,7 +561,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **62** | **55** |
+| **total** | **120** | **3** | **63** | **54** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

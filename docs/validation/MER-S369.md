@@ -69,7 +69,7 @@ Critères écrits avant : un germe de 1 mm ne croît pas (taux < 0,01 s⁻¹ sur
 | germe 1 mm, prolongé | 5 cm | 95 s | 12,7 mm | dès ≈ 50 s, **0,060 s⁻¹** |
 | E2, paquet 2 cm | 5 cm | 95 s | 14,8 cm | dès ≈ 35 s, **0,052 s⁻¹** ; reçu 1 620 fois le paquet |
 | E2, pas de 5 ms | 5 cm | 95 s | 14 cm | 0,051 s⁻¹ — le pas n'y est pour rien |
-| E2, maille 12,5 cm | 5 cm | 78 s | 10,3 cm | 0,033 s⁻¹ (40 → 78 s) — plus lente à maille fine |
+| E2, maille 12,5 cm | 5 cm | 86 s | 12,5 cm | 0,033 s⁻¹ (40 → 78 s), plus lente à maille fine ; le pas refuse à 86,6 s, une colonne hors du domaine |
 | E2 | 2,5 cm | 95 s | 2,17 cm (départ) | **aucune** ; reçu 21 fois le paquet (§4) |
 
 **Critère 3 manqué.** Le germe croît au même taux que le paquet : **une instabilité linéaire** de δ autour de B, que la

@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 01:32 +02:00
+Battement        : 2026-09-26 01:35 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S369 — les réponses du 2026-09-26 (ADR-197), puis la voie d’A289 (plan dans EN-COURS)
 Dernière session : S368 — **rendu 9, l'écume qui dure** : le champ de S367 sur la carte de Godot (décroissance à 10⁻⁵, couverture de Monahan à 4 %) et son rendu — puis **suspendue par l'utilisateur** sauf photographies qui en renseignent forme, couleur et place sur la vague : éteinte par défaut ([preuve](docs/validation/ECUME-GODOT-S368.md))
@@ -102,7 +102,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   portes sont reçues : la v1 au sens d'ADR-174 D4**, chacune sur son banc ou sa référence, pas encore réunies en une
   scène vivante ([feuille de route](docs/FEUILLE-DE-ROUTE.md), « La v1 »). Depuis : la liste entière (ADR-190).
   **V** : noyau reçu, sans articulation avec δ.
-- Liste du projet fini : **3 validés, 62 partiels, 55 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367.
+- Liste du projet fini : **3 validés, 63 partiels, 54 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367, 4.21 en S369.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
 nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`

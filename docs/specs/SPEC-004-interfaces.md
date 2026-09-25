@@ -136,6 +136,10 @@ struct WaterSample {
 > résidu continu S, à **soustraire**, en m/s² ; rho identique à l'échantillonnage,
 > nu cinématique uniforme. Hydrostatique et gravité déjà compensées. ADR-114 et
 > [SOURCE-B-S178](../validation/SOURCE-B-S178.md). B+W et fermeture δ restent ouverts.
+>
+> **Note datée du 2026-09-26 (S369).** Pour δ couplé, ce résidu — avec le transport de B jusqu'à sa propre surface
+> et son erreur de pression à cette surface — n'est **plus une source** : δ est relatif à la dynamique de B
+> ([ADR-198](../adr/ADR-198-la-voie-d-a289.md)). Le soustraire nourrissait la croissance d'A289.
 
 > **Implémentation partielle S177 — 2026-09-11.** `background::BackgroundSample` et
 > les méthodes `Background::differential*` existent pour B profond linéaire uniforme.

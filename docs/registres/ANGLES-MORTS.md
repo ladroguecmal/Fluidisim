@@ -4353,3 +4353,18 @@ correction couplée que δ porte monte à 18,6 cm, et une descente de 120 × 112
 fondu. Rien ne dit si cela se voit. Déclencheur : avant qu'un point de la liste ne s'appuie sur cette gratuité (4.5,
 9.9), une revue visuelle de la descente ; si elle se voit, un rétrécissement qui **amortit** avant de couper, comme
 ADR-012 §4 le décrit pour le rang 1 sous pression. [Preuve](../validation/ARBITRAGE-3D-S344.md) §7.
+
+**A289 — note datée du 2026-09-26 (S369) : résolue quant à sa cause, par ADR-198.** La croissance sous une houle B seule
+est **forcée** par trois termes du pas couplé qui ne dépendent que de B — son résidu de quantité de mouvement (l'essentiel),
+son transport jusqu'à sa propre surface, son erreur de pression à cette surface. Retirés (δ relatif à la dynamique de B),
+δ nul reste nul au bit sous la houle, 40 s ([preuve](../validation/MER-S369.md) §1). Voie choisie par le projet sous la
+délégation de l'utilisateur ([ADR-198](../adr/ADR-198-la-voie-d-a289.md)). Le blocage de l'ordre E passe à A320.
+
+**A320 — S369, 2026-09-26 (sévérité 3, ouverte). Sous une houle raide, une perturbation de δ croît.** En mode relatif,
+un germe de 1 mm comme un paquet de 2 cm croissent après 35 à 50 s : 0,052 à 0,060 s⁻¹ sous `ak` = 0,079, 0,115 sous
+0,118, rien de visible sous 0,039 en 95 s — ≈ `a²`, ≈ 4,5 fois Benjamin-Feir. **Convective** (×e tous les ≈ 18 m, le long
+de la houle), indépendante du pas de temps, **plus lente à maille fine** (0,033 à 12,5 cm). **Portée par le terme de
+cisaillement `u'·∇U`** : lui seul retiré, plus rien ([preuve](../validation/MER-S369.md) §3). **Bloque l'ordre E**
+(critère 3 manqué : 1 620 fois le paquet). Hypothèse : discrétisés séparément, `U·∇u'` et `u'·∇U` ne forment plus le
+gradient `∇(U·u')` qu'ils sont pour deux écoulements irrotationnels. Remède à éprouver d'abord : cette forme de
+Bernoulli. Déclencheur : la prochaine session du lot 2.

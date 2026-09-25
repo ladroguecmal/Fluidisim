@@ -22,18 +22,18 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 
 ## Ce que les fronts disent
 
-- **34 points au front 0** : une session peut les faire avancer tout de suite, sans décision ni fait extérieur ;
-  **25 au front 1**, 17 aux fronts 2 à 5. Le plus long chemin mène à 11.3, les très grands événements :
+- **36 points au front 0** : une session peut les faire avancer tout de suite, sans décision ni fait extérieur ;
+  **25 au front 1**, 18 aux fronts 2 à 5. Le plus long chemin mène à 11.3, les très grands événements :
   4.16 → 7.4 → 7.5 → 5.9 → 6.6 → 11.3.
 - **Deux points commandent le plus**, en aval transitif : **4.16**, la surface non graphe — 22 points, dont 4.1,
   4.12, 4.13, 4.14, 7.2 et 7.4 — et **2.7**, la bathymétrie — 20 : lacs, rivières, réfraction, déferlement de W,
   tsunamis, plage. Suivent 10.1 (16), 7.4 (12), 3.6 et 1.5 (9 chacun).
-- **41 points attendent un fait extérieur ou une décision, dont 21 directement** (S369, après
-  [ADR-197](../adr/ADR-197-reponses-du-2026-09-26.md)). Une cause en commande 14 : **la portée du réseau** (10.1 :
+- **38 points attendent un fait extérieur ou une décision, dont 19 directement** (S369, après
+  [ADR-197](../adr/ADR-197-reponses-du-2026-09-26.md) et [ADR-198](../adr/ADR-198-la-voie-d-a289.md)). Une cause en commande 14 : **la portée du réseau** (10.1 :
   aucun format n'existe ; multijoueur ou non, demandé) — transport, serveur, sauvegarde, et, par les échanges
   client/serveur de la grille de référence (1.5), la grille, les blocs, la fusion et le régime substitutif. Puis la
-  **météo**, placée à la fin (2.8, quatre points), le **verdict** sur le prix du rang 1 (9.9, trois), la **voie
-  d'A289**, déléguée au projet (4.8, deux) ; les autres, un fait chacun. 5.11 n'attend plus rien : il est hors du
+  **météo**, placée à la fin (2.8, quatre points), le **verdict** sur le prix du rang 1 (9.9, trois) ; les autres, un fait
+  chacun ; la voie d'A289 est tranchée (4.8 et 4.21 au front 0). 5.11 n'attend plus rien : il est hors du
   périmètre.
 - **Pour l'ordre** : commencer par ce qui débloque le plus sans rien demander — 4.16, déjà une session sur deux
   (ADR-184 D1, ADR-190 D4), et 2.7 — ; réunir les portes de la v1 en une scène vivante (6.4, 4.2, 4.19) ; poser
@@ -45,13 +45,13 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 
 | front | points | lesquels |
 |---|---:|---|
-| **0** | 34 | 1.8, 2.6, 2.7, 3.9, 4.2, 4.7, 4.15, 4.16, 4.18, 4.19, 5.2, 5.4, 5.6, 5.7, 6.1, 6.3, 6.4, 6.5, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.2, 9.3, 9.7, 9.8, 9.13, 10.8, 11.2, 12.1, 13.1 |
+| **0** | 36 | 1.8, 2.6, 2.7, 3.9, 4.2, 4.7, 4.8, 4.15, 4.16, 4.18, 4.19, 4.21, 5.2, 5.4, 5.6, 5.7, 6.1, 6.3, 6.4, 6.5, 7.7, 8.1, 8.2, 8.3, 8.5, 8.8, 8.9, 9.2, 9.3, 9.7, 9.8, 9.13, 10.8, 11.2, 12.1, 13.1 |
 | **1** | 25 | 1.3, 2.1, 2.3, 2.4, 2.9, 3.2, 3.6, 4.1, 4.4, 4.6, 4.13, 4.17, 4.20, 5.8, 5.10, 6.2, 7.2, 7.4, 7.6, 8.6, 9.6, 9.11, 11.1, 11.4, 12.5 |
-| **2** | 10 | 2.5, 3.3, 3.4, 3.5, 4.12, 5.3, 6.7, 7.5, 9.5, 12.2 |
+| **2** | 11 | 1.1, 2.5, 3.3, 3.4, 3.5, 4.12, 5.3, 6.7, 7.5, 9.5, 12.2 |
 | **3** | 5 | 3.1, 4.14, 5.9, 6.8, 7.3 |
 | **4** | 1 | 6.6 |
 | **5** | 1 | 11.3 |
-| **E** | 41 | 1.1, 1.4, 1.5, 1.6, 1.7, 2.2, 2.8, 3.7, 3.8, 4.3, 4.5, 4.8, 4.9, 4.10, 4.11, 4.21, 5.5, 5.11, 5.12, 7.1, 7.8, 8.4, 8.7, 8.10, 9.1, 9.4, 9.9, 9.10, 9.12, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.9, 11.5, 12.3, 12.4, 13.2, 13.3 |
+| **E** | 38 | 1.4, 1.5, 1.6, 1.7, 2.2, 2.8, 3.7, 3.8, 4.3, 4.5, 4.9, 4.10, 4.11, 5.5, 5.11, 5.12, 7.1, 7.8, 8.4, 8.7, 8.10, 9.1, 9.4, 9.9, 9.10, 9.12, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.9, 11.5, 12.3, 12.4, 13.2, 13.3 |
 
 **Ce qu'on demandera à l'utilisateur**, au moment où le point bloque (ADR-190 D5) :
 
@@ -61,8 +61,6 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **2.8** | la fin du projet : météo et son en dernier (ADR-197 D5) |
 | **3.8** | le mode de l'hôte autoritaire, intersection ou union (A271) |
 | **4.5** | un verdict visuel des passages (A319) |
-| **4.8** | la voie d'A289 : rappel lent, durée de vie bornée, ou dispersion dans B |
-| **4.21** | la voie d'A289 |
 | **5.11** | hors du périmètre par décision de l'utilisateur (ADR-197 D4) ; ne se rouvre que par lui |
 | **7.1** | des photographies qui renseignent forme, couleur et place de l'écume sur la vague (décision du 2026-09-26) |
 | **7.8** | la fin du projet, par l'audio de Godot (ADR-197 D5) |
@@ -83,7 +81,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **1.1** Eau = somme de quatre couches B, W, δ, V, dans le code | C | — | 3.9, 4.8, 5.10 | — | **E**, par 4.8 |
+| **1.1** Eau = somme de quatre couches B, W, δ, V, dans le code | C | — | 3.9, 4.8, 5.10 | — | **2** |
 | **1.3** Interfaces de SPEC-004 | H | l'interface des solides de SPEC-004 §7, sur la paroi de δ existante | 2.7, 6.4 | — | **1** |
 | **1.4** Point d'entrée unique, orchestrateur des régimes | H | `WaterSystem`, qui porte l'ordonnanceur, l'oubli et l'estimateur de coût | 1.6, 9.9 | 9.12 | **E**, par 9.9 |
 | **1.5** Grille 3D de référence stable | B | la grille de référence et ses zones actives (ADR-006) | 10.1 | 1.6, 4.9 | **E**, par 10.1 |
@@ -130,7 +128,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **4.5** Création, croissance, réduction et disparition visuellement gratuites | B | une disparition progressive | — | — | **E** — un verdict visuel des passages (A319) |
 | **4.6** Entrée des vagues de B/W dans le domaine | C | la houle progressive traversante sur une durée utile ; B4 | 3.9 | — | **1** |
 | **4.7** Frontière sans réflexion ni rupture visible | C | la réflexion d'un front oblique ; C05 | — | 13.2 | **0** |
-| **4.8** Sortie des perturbations vers W | C | — | — | 1.1 | **E** — la voie d'A289 : rappel lent, durée de vie bornée, ou dispersion dans B |
+| **4.8** Sortie des perturbations vers W | C | A320 (les termes croisés sous forme de Bernoulli), puis l'ordre E, critère refondu (ADR-198) | — | 1.1 | **0** |
 | **4.9** Fusion et séparation de domaines | B | — | 1.5, 4.2 | — | **E**, par 1.5 |
 | **4.10** Adaptation interne | B | — | 4.3 | — | **E**, par 4.3 |
 | **4.11** Régime substitutif | B | — | 1.6, 4.20, 12.3 | — | **E**, par 1.6 |
@@ -143,7 +141,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **4.18** Conservation de la masse et de l'énergie | C | le compteur sur la carte ; énergie et quantité de mouvement ; C09 | — | 13.2 | **0** |
 | **4.19** Coût de δ compatible avec le budget | B | d'autres scènes ; plusieurs domaines en direct ; un 99ᵉ centile en direct | — | 9.11 | **0** |
 | **4.20** Changement de solveur pendant une simulation | B | — | 4.16 | 4.11 | **1** |
-| **4.21** Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine | C | — | — | — | **E** — la voie d'A289 |
+| **4.21** Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine | C | le mode relatif dans la production GPU ; W ; A320 | — | — | **0** |
 
 ### 5. Volumes finis et inondations (V)
 

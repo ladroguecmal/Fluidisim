@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 - [x] **P3** — `delta3d_coupling.rs` : le mode relatif à B (trois retraits, un drapeau par terme pour la mesure) ;
   E1 ; critère 1.
 - [x] **P4** — germe et E2 ; critères 2 et 3.
-- [>] **P5** — ADR-198, la voie d'A289 ; preuve MER-S369 ; A289, lot 2 (4.8, 4.21), file, dépendances, feuille de route,
+- [x] **P5** — ADR-198, la voie d'A289 ; preuve MER-S369 ; A289, lot 2 (4.8, 4.21), file, dépendances, feuille de route,
   index.
 - [ ] **P6** — rituel.
 

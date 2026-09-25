@@ -133,12 +133,12 @@ multigrille, frontières (ADR-143 à 169) — [S253](validation/SURFACE-COUPLEE-
 ([S315](validation/ORACLE-ET-OBLIQUE-S315.md)) ; **ordre C**, six propriétés attribuées — primitive exacte à
 10⁻⁴, au raccord un degré de phase et 2 à 4 % de spectre, le reste à δ sauf une part non linéaire que
 W ne porte pas ([S316](validation/ORDRE-C-S316.md)) ; **ordre D**, un receveur local, attente
-exactement nulle ([S317](validation/RESTITUTION-S317.md)). **Ordre E bloqué** : sous une vraie mer, δ
-croît jusqu'à trois fois la houle (A289, [S319](validation/MER-S319.md)), indépendamment du pas de
-temps (S322).
+exactement nulle ([S317](validation/RESTITUTION-S317.md)). **Ordre E bloqué** : la dérive de S319
+retirée à sa source en S369 ([ADR-198](adr/ADR-198-la-voie-d-a289.md)) ; reste A320, une perturbation qui croît
+sous houle raide ([S369](validation/MER-S369.md)).
 
 *Manque* : cuve sur la production (§4.1) ; mouillure (A297) ; I-05 (A244) ; cavité dans δ (B10 reçu sur le banc 2D d'APIC, [S320](validation/B10-APIC-S320.md)) ; phase
-δ/B (A289) ; A274 ; A286 ; **compteur carte, énergie, quantité de mouvement, sens W → δ** (A302) ;
+δ/B (A289, tranchée S369 ; A320) ; A274 ; A286 ; **compteur carte, énergie, quantité de mouvement, sens W → δ** (A302) ;
 **résidu biaisé en cas ouvert** (A305).
 
 *Bancs* : **B3**, **B4**, **B5**, **B10**. *Cas* : C01, C03 à C06, C08, C09, C20, C22, C23.
@@ -316,8 +316,8 @@ derrière la requête du corps (6.1), le prix visuel du rang 1 (4.5, 9.9). Profi
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 62 partiels,
-55 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 63 partiels,
+54 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367), 4.21 (S369) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
@@ -357,7 +357,7 @@ l'écume au déferlement (ADR-195) ; **S361** : les caustiques ; **S363** : le c
 partiel — fenêtre de Snell, milieu ; **S366** : R24 reçu, la lumière de l'eau calée sur Tyler ; **S367–S368** : l'écume, champ
 d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photographiques ; puis la caméra à demi immergée. L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
 
-**Front 0 — 34 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
+**Front 0 — 36 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
 
 1. **La v1 en une scène vivante** — réunir ce que les portes ont reçu séparément : la coque dans la production de δ
    (6.4 — **S358** : le pas linéaire sur la carte, solide fixe ; reste la coque qui bouge, ADR-193), l'ordonnanceur et le rang 1 dans l'afficheur (4.2), l'interpolation du rendu à 30 Hz (4.19 — **faite en
@@ -366,14 +366,14 @@ d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photogr
 3. **La bathymétrie** (2.7) — 20 points en aval ; **S362** : la référence ; **S364** : l'entrée dans B, isobathes droites
    (ADR-196) ; restent les chemins de B jusqu'à Godot, la 2D, la marée —, puis W
    au-dessus du plan moyen (3.9) et les courants (2.6).
-4. **Le reste du front 0**, par système : couplage (4.7, 4.18), volumique (4.15, 6.5), V (5.2, 5.4, 5.6, 5.7),
-   solides (6.1, 6.3), rendu (8.2, 8.3, 8.5, 8.8, 8.9), budget (9.2, 9.3, 9.7, 9.8, 9.13), et 1.8, 7.1, 7.7, 10.8,
+4. **Le reste du front 0**, par système : couplage (4.7, 4.18 ; 4.8 et 4.21 par A320), volumique (4.15, 6.5), V (5.2, 5.4, 5.6, 5.7),
+   solides (6.1, 6.3), rendu (8.1 — le cœur dans Godot —, 8.2, 8.3, 8.5, 8.8, 8.9), budget (9.2, 9.3, 9.7, 9.8, 9.13), et 1.8, 7.1, 7.7, 10.8,
    11.2, 12.1, 13.1.
 
-**Fronts 1 à 5 — 42 points**, qui s'ouvrent à mesure ; le registre dit lesquels. **E — 41 points** attendent un fait
+**Fronts 1 à 5 — 43 points**, qui s'ouvrent à mesure ; le registre dit lesquels. **E — 38 points** attendent un fait
 ou une action de l'utilisateur, demandé au moment où le point bloque (ADR-190 D5) : la portée du réseau (10.1) en
-commande 14 à lui seul, puis la météo — à la fin —, le verdict du rang 1 et la voie d'A289, déléguée au projet en S369
-([ADR-197](adr/ADR-197-reponses-du-2026-09-26.md) : Godot moteur du jeu entier, 8.1 au front 0 ; 5.11 hors du périmètre).
+commande 14 à lui seul, puis la météo — à la fin —, le verdict du rang 1 ([ADR-197](adr/ADR-197-reponses-du-2026-09-26.md) : Godot moteur
+du jeu entier, 8.1 au front 0 ; 5.11 hors du périmètre ; la voie d'A289 tranchée, ADR-198 : 4.8 et 4.21 au front 0).
 
 ## 4. Arbitrages explicites
 
