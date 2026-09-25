@@ -62,57 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S366 — **terminée**. **Rendu 8 : les références sous l'eau** — verdict R24 : *« Pour les références trouve les
-sinon rien a redire cela me paraît good, continue »*. La demande de l'utilisateur prime sur l'alternance d'ADR-191 D3
-(la physique reprend à la session suivante). S365 a laissé **`f(ω)` à calibrer** (B11) — la lumière de l'eau selon la
-direction de visée — et aucune référence réelle.
+Session : S367 — **en cours**. **Physique : le champ d'écume de B** (7.1) — verdict : *« Je valide les rendus sauf
+ecume »*, lu sur toutes les revues en attente (R18, R21, R22, R23, R25), l'écume de R21 refusée. Alternance d'ADR-191 D3
+après deux sessions de rendu : la physique ; et 7.1, *absent*, conçu par [ADR-014](../docs/adr/ADR-014-mousse-spray-bulles.md),
+est la physique de l'écume refusée.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Deux sortes de références.** (a) **Mesurées** : la distribution de radiance sous l'eau publiée (Tyler 1960, lac Pend
-Oreille, ou d'autres) — ce que vaut la radiance horizontale devant la radiance montante, et la fenêtre devant le miroir ;
-c'est ce qui calibre `f(ω)`. (b) **Photographies** libres (Wikimedia Commons) d'eau claire peu profonde, de jour — fenêtre
-de Snell, fond de sable —, chiffrées sans téléchargement, dans le navigateur, sur des rapports que la balance des blancs
-et l'exposition ne changent pas. Sources et licences consignées ; aucune image n'entre dans le dépôt.
+**Ce qui manque à l'écume rendue** (S356, S360) : elle n'a **pas de mémoire** — une tache instantanée là où la crête
+dépasse un seuil, au bord lisse. ADR-014 a décidé un **champ** `F` à deux canaux — actif, demi-vie ≈ 3 s ; résiduel,
+≈ 30 s, nourri par l'actif —, **advecté par la vitesse orbitale complète** : c'est elle qui rassemble l'écume dans les
+zones de convergence en traînées alignées au vent. Banc B9 : la couverture contre Monahan, la persistance, les traînées.
+Ici, **la référence** dans le cœur ; la production sur la carte de Godot viendra au rendu (SPEC-006 §4, RG16F).
 
-Critères, écrits avant la mesure :
-1. **Au moins une** distribution de radiance mesurée, conditions dites, et **au moins deux** photographies libres.
-2. `f(ω)` contre la mesure : rapport horizontale / nadir montant ; au-delà de **30 %** d'écart, recalibrer, avant / après
-   publiés. **Prédiction** : la mesure donne 2 à 5 (le modèle, 3).
-3. Les photographies contre le rendu, sur des rapports sans unité (fenêtre / miroir voisin, gradient de l'horizontale) —
-   à titre indicatif : prise de vue inconnue.
+Critères, écrits avant le code :
+1. **Décroissance** : un champ uniforme sans source suit la solution exacte du système à deux canaux (actif → résiduel)
+   à 10⁻⁶ près ; **advection** : un motif translaté par une vitesse uniforme revient à sa place à l'erreur
+   d'interpolation près, bornée et publiée ; déterminisme au bit.
+2. **Couverture (B9, scénario 1)** : mer pleinement développée à `U10` = 7, 10, 13 m/s, sources d'ADR-014 §3.1 ; la
+   part de surface blanche au régime établi contre Monahan (`3,84·10⁻⁶·U10^3,41`). **Prédiction** : avec les seuils
+   physiques d'ADR-014 (cambrure 0,6/7, accélération 0,45 g) et une bande résolue, l'ordre de grandeur, pas mieux qu'un
+   facteur 3 — le seuil se cale alors sur Monahan, **dit**, jamais relevé en silence.
+3. **Traînées (B9)** : l'écume résiduelle advectée par la vitesse orbitale s'allonge le long du vent — rapport des
+   longueurs de corrélation le long / en travers, contre le témoin advecté par le seul courant moyen.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le verdict R24 consigné ; les références trouvées, sources et licences.
-- [x] **P3** — les chiffrer : la distribution mesurée contre `f(ω)` et le rendu ; les photographies, rapports sans unité.
-- [x] **P4** — calibrer ce que la mesure désigne ; avant / après ; images.
-- [x] **P5** — preuve (SOUS-MARIN-S365, section datée S366), liste 8.6, file, index.
-- [x] **P6** — rituel.
+- [>] **P2** — les verdicts consignés : revue (§23, §26–28, §30), décisions de la file, liste (8.4 à 8.10), dépendances.
+- [ ] **P3** — la référence du champ (`ecume.rs`) : grille ancrée, deux canaux, décroissance, advection semi-lagrangienne
+  par la vitesse de surface de B, sources de B ; critère 1.
+- [ ] **P4** — la couverture contre Monahan, trois vents ; critère 2.
+- [ ] **P5** — les traînées de convergence ; critère 3.
+- [ ] **P6** — preuve ECUME-S367 ; liste 7.1, file, dépendances, feuille de route, index.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-- **P2.** Verdict R24 consigné (REVUE §29, décisions de la file). **Références trouvées**, rien téléchargé, lues dans le
-  navigateur : (a) **mesurée** — Tyler (1960), lac Pend Oreille, radiance dans le plan du soleil à 4,2, 29 et 66 m,
-  reproduite par Mobley (*Ocean Optics Web Book*, « The Asymptotic Radiance Distribution », fig. 7 ; normalisée à 1 au
-  nadir à 4,2 m), numérisée ici par ses pixels : axe log, 32,75 px par décade ; (b) **photographies** Wikimedia Commons :
-  *Dharavandhoo Thila – Hanifaru Bay Sharks* (Shiyam ElkCloner, CC BY-SA 3.0, Maldives, contre-plongée en eau claire),
-  *Looking up (6158466637)* (Derek Keats, CC BY 2.0, récif vu d'en dessous), *Snell's window* (petebw, CC BY-SA 2.0,
-  piscine : la fenêtre, et le fond **dans le miroir**). Pose `sous_eau_oblique` (4 m, 30°) ajoutée pour le cadrage.
-- **P3, critère 2 : écart > 30 %, recalibrer.** Tyler à 4,2 m, numérisé par composantes connexes (18 points, deux
-  azimuts, 10° à 90° du nadir) : horizontale **2,46** à l'opposé du soleil, **8,71** côté soleil (moyenne des deux 5,6) ;
-  60° : 1,52 et 2,46. Le modèle de S365 (3 et 2) : +22 % à l'opposé, −66 % côté soleil ; résidu logarithmique **0,362**.
-  `outils/tyler_radiance.py` : lobe avant de Henyey-Greenstein autour du soleil réfracté, **β = 1,0031, K = 213,35,
-  g = 0,855** (a0 = 0,2045) : résidu **0,120** ; pires écarts, côté soleil près du nadir (+25 %) et à l'horizontale
-  (−21 %). Prédiction (2 à 5) : tenue à l'opposé, dépassée côté soleil. **Critère 3, indicatif**, photographie de Hanifaru
-  (tiers bas / tiers haut, luminance sRGB décodée) : eau B/G **4,07**, rendu 4,72 ; dynamique p90 haut / p50 bas **9,7**
-  (la photographie écrête sa fenêtre : borne basse), rendu **3,36** — notre fenêtre est terne devant l'eau.
-- **P4.** Le lobe dans `optique_eau.gdshaderinc` (`eau_infinie` ; `indice` y passe ; soleil réfracté par Snell) ;
-  `mer.gd` : `LOBE_TYLER`, `LOBE=0` rend S365 ; poses face au soleil et dos au soleil (lacet). **Contrôle** : tonalité
-  linéaire, juste sous l'horizon, rapport face / dos **2,23 (vert), 2,18 (bleu)** pour **2,215** prédits (notre soleil à
-  23,3° du zénith dans l'eau). **Défaut trouvé** : une bande sombre juste au-dessus de l'horizon, vue d'en dessous — la
-  **brume** de Godot (perspective aérienne) sur la surface lointaine ; éteinte quand l'œil est dans l'eau. Au-dessus de
-  l'eau, proche et rasante **identiques au bit**. Photographie, après : eau B/G 4,10 (4,07), dynamique 2,72 (≥ 9,7) — la
-  fenêtre reste terne : le ciel ne porte pas l'éclairement du soleil que reçoit l'eau (`gain_eau` = 2), à suivre.
-- **P5.** Preuve SOUS-MARIN-S365 §6 datée S366 (références, Tyler contre `f(ω)`, contrôle, photographie, brume) et
-  « Reproduire » ; REVUE-VISUELLE §30, R25 (une question, sans réponse la lueur reste) ; liste 8.6 (reste *partiel*),
-  file (ligne du rendu Godot : échelle radiométrique ciel / soleil ajoutée au déclencheur), feuille de route, index.
