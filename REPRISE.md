@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-25 09:30 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S359 — rendu 3 (ADR-191 D3) : verdict R19 ; la colonne d'eau dans Godot — fond, profondeur, absorption, réfraction (8.5)
-Dernière session : S358 — **la coque dans la production de δ, 1** : `Linear3`, le pas linéaire de la porte D sur la carte, à 1,3·10⁻⁵ m de `Volume3` autour d'une sphère fixe, 0,32 ms ([ADR-193](docs/adr/ADR-193-le-domaine-d-une-coque-est-lineaire-sur-la-carte.md)) ; la surface publiée de toute la production perdait son reste compensé — corrigé ([preuve](docs/validation/LINEAIRE-GPU-S358.md))
-Session suivante : **le verdict R19 d'abord** (REVUE-VISUELLE §24) — selon lui, calibrer l'environnement de Godot ou intégrer le cœur par GDExtension (accord de téléchargement nommé). En attendant, la physique, par l'alternance d'ADR-184 D1 : **le lot 5, A316** — la densité tenue à la frontière (S354) ; puis la coque qui bouge sur la carte (ADR-193 §3). En attente : R18, R19
-Maillons        : 0 — S358 : correction d'intégrité reproduite puis testée, et la coque dans δ sur la carte (journal)
+Session en cours : aucune
+Dernière session : S359 — **rendu 3, l'eau a une épaisseur** : verdict R19 (*« pas du tout crédible »*, manque la transparence selon la profondeur) ; dans Godot, la lumière de l'afficheur portée — la mer renvoie 0,71 du ciel sous l'horizon au lieu de 0,11 ([ADR-194](docs/adr/ADR-194-la-lumiere-de-l-eau-calculee-par-notre-nuanceur.md)) — et la colonne d'eau, réfraction et scène côtière ([preuve](docs/validation/EPAISSEUR-EAU-S359.md)) ; R20 préparée
+Session suivante : **le verdict R20 d'abord** (REVUE-VISUELLE §25) — selon lui, la suite du rendu (caustiques, eaux chargées, calibrage) ou l'intégration native. En attendant, la physique, par l'alternance d'ADR-184 D1 : **le lot 5, A316** — la densité tenue à la frontière (S354) ; puis la coque qui bouge sur la carte (ADR-193 §3). En attente : R18, R20
+Maillons        : 0 — S359 : 8.5 passe à partiel (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

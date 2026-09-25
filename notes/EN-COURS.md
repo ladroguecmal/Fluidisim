@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S359 — **en cours**. **Rendu 3 (ADR-191 D3) : l'eau a une épaisseur** — la colonne d'eau dans Godot.
+Session : S359 — **terminée**. **Rendu 3 (ADR-191 D3) : l'eau a une épaisseur** — la colonne d'eau dans Godot.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 Entrée — **verdict R19** de l'utilisateur : *« selon moi la mer n'est pas du tout crédible, mais c'est pas grave on
 continue, car je pense qu'il manque plein de chose avec la trnasparence en fonction de la prfondeur etc... »*. Relu sur
@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 - [x] **P6** — l'horizon, selon P2 ; critère 5.
 - [x] **P7** — les images de R20 ; critère 6.
 - [x] **P8** — preuve, file, liste, index ; critère 7.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 - **P2.** R19 consigné (REVUE-VISUELLE §24, file). `outils/horizon_mer.py` : horizon = plus forte chute de luminance

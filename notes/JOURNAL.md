@@ -16995,3 +16995,22 @@ la pente résiduelle de la cuve (≈ 8·10⁻⁹ m/s) n'est pas attribuée.
 production de δ dont la surface publiée est la hauteur vraie, et une coque dans δ sur la carte ; consommée par le rendu
 de δ (8.7) et la coque qui bouge (6.4) ; preuve §2 et §4. Suivant : **R19 d'abord** ; la physique en attendant, par
 l'alternance d'ADR-184 — le lot 5 (A316, la densité à la frontière) —, puis la coque qui bouge. R18, R19 attendus.
+
+## S359 — 2026-09-25 — rendu 3 : l'eau a une épaisseur
+
+**Entrée.** Verdict R19 : *« la mer n'est pas du tout crédible, mais c'est pas grave on continue, car je pense qu'il
+manque plein de chose avec la trnasparence en fonction de la prfondeur etc... »*. Relu : un aplat opaque, et un horizon
+qui s'assombrit. Session de rendu (ADR-191 D3).
+**Fait** ([preuve](../docs/validation/EPAISSEUR-EAU-S359.md)). **Mesuré d'abord** (`outils/horizon_mer.py`) : sous
+l'horizon, la mer de Godot renvoyait 0,11 du ciel, l'afficheur 0,73 ; la rugosité confiée à Godot en explique une part
+(témoin). **La lumière de l'afficheur portée** ([ADR-194](../docs/adr/ADR-194-la-lumiere-de-l-eau-calculee-par-notre-nuanceur.md)) :
+un seul ciel pour la scène et les reflets, Fresnel, pente non résolue intégrée — **0,71 et 0,68**, à 5 % de
+l'afficheur. **La colonne d'eau** : profondeur lue au tampon (3 à 5 cm de la bathymétrie), réfraction de Snell,
+Maritorena sur le trajet oblique avec l'eau pure d'ADR-177 — transmission à 0,005 du modèle. Une scène côtière
+(`--cote`) : sable de 6 à 40 m, puis le large. **R20** préparée, images envoyées.
+**Limites.** Ni caustiques ni particules ; les vagues ne sentent pas le fond (2.7) ; `μ̄_d` et l'albédo du sable à
+calibrer ; une couture au centre du ciel de Godot, non attribuée ; coût non mesuré.
+**Rituel.** Maillons **0** : 8.5 passe d'*absent* à *partiel* — devient possible, voir le fond à travers l'eau selon sa
+profondeur, et une mer qui renvoie le ciel ; consommé par la revue R20 et la suite du rendu dans Godot ; preuve §1–3.
+Suivant : **R20 d'abord** ; la physique en attendant, par l'alternance — le lot 5 (A316), puis la coque qui bouge
+(ADR-193). R18, R20 attendus.
