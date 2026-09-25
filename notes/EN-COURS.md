@@ -62,70 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S361 — **terminée**. **Rendu 5 : les caustiques** — *« Tente les caustique »* (R20, question 3).
+Session : S362 — **en cours**. **Physique : la bathymétrie, 1 — la référence** (liste 2.7).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
-Entrée — S360 a rendu la surface fine par FFT ; R21 attendu. **Physique** : le soleil réfracté par la surface éclaire le
-fond selon la projection `X_f = X_s + (H + η)·p(∇η(X_s))`, `p` la pente horizontale du rayon réfracté (Snell exact) ;
-l'éclairement direct est multiplié par `1/|det(I + (H + η)·∂p/∂s·Hess η)|` au point de départ (conservation de
-l'énergie, optique géométrique). Le point de départ se retrouve par **point fixe** depuis le point du fond. Surfaces
-prises : la bande (analytique) et la cascade de 32 m (λ ≥ 0,5 m) ; la cascade fine (λ < 0,5 m) est exclue et le dit —
-sa focale est de l'ordre du mètre, bien au-dessus du fond de la scène, et le disque du soleil l'estompe.
+Entrée — *« Continue »*, sans verdict R21/R22 (attendus). **Choix du lot, à deux maillons** (REPRISE §6) : la suite
+proposée — la coque qui bouge (6.4) ou le lot 5 — laisserait chaque point dans sa case ; **2.7, la bathymétrie**, est
+*absente*, vingt points en dépendent (registre), et le registre la dit faisable : « profondeur finie et fond variable, sur
+cas de référence publiés ». La scène côtière de S359 la montre manquer : B ne voit pas le fond. **Ce qui ne se tranche
+pas ici** : où la bathymétrie entre — ADR-004 §2.1 garde les composantes de B identiques partout et place réfraction et
+levée dans W (§5) ; ADR-054 et ADR-156 renvoient le choix à B2 et J5. Cette session construit la **référence** — la
+physique que tout candidat devra reproduire —, pas l'intégration.
 
-Critères, écrits avant le code :
-1. **La FFT porte la hessienne** de η (deux champs complexes de plus par cascade) ; contrôle contre la somme directe,
-   même tolérance que S360 (10⁻⁴ du rms).
-2. **Contre une solution exacte** : une seule onde (λ = 4 m), soleil au zénith, fond plat à la moitié de la focale
-   `H_f = 1/((1 − 1/n)·a·k²)` : l'éclairement rendu contre la somme exacte sur les antécédents (racines trouvées en
-   double) en 50 points d'une longueur d'onde — écart ≤ 5 % ; moyenne à 1 % de 1 (énergie).
-3. **Sur la scène** : moyenne de l'éclairement focalisé sur l'image du fond vu seul à ± 10 % de 1 ; plafond de
-   concentration `1/det_min`, `det_min` = 0,05 *à calibrer* — sa part de pixels publiée.
-4. **Images R22** ; preuve, liste 8.5, index.
+Critères, écrits avant le code (module `bathymetrie` du cœur, f64, référence et non chemin déterministe) :
+1. **Dispersion en profondeur finie** `ω² = g·k·tanh(k·h)` : résidu relatif ≤ 10⁻¹² ; limites profonde (`k = ω²/g`) et
+   peu profonde (`k = ω/√(gh)`) à 10⁻⁶ près dans leurs domaines ; écart à l'approximation explicite de **Fenton et McKee
+   (1990)** au plus **1,7 %** — la borne que ses auteurs publient.
+2. **Levée** `K_s = √(c_g0/c_g)` : son minimum, **0,913 vers k·h ≈ 1,2**, la valeur des manuels (Dean et Dalrymple).
+3. **Réfraction sur contours droits** (Snell, `k·sin θ` conservé) et **flux d'énergie** `a²·c_g·cos θ` constant à 10⁻¹⁰
+   près le long d'un profil de plage ; la phase `∫k_y dy` a pour dérivée `k_y` à 10⁻⁶ près.
+4. **Déferlement** borné par profondeur, `H ≤ 0,78·h` (McCowan 1894) ; la profondeur de déferlement d'une houle se
+   calcule et se publie.
+5. Preuve ouverte par « Reproduire » ; liste 2.7 (**absent → partiel** si 1 à 4 tiennent), registre, file, index.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la hessienne dans la FFT, son contrôle ; critère 1.
-- [x] **P3** — les caustiques dans le nuanceur du fond ; la bande et la cascade de 32 m données au fond.
-- [x] **P4** — le contrôle contre la solution exacte ; critère 2.
-- [x] **P5** — la scène, l'énergie ; images R22 ; critères 3 et 4.
-- [x] **P5 bis** *(ajoutée en cours, sur l'échec du critère 3)* — la carte de caustiques **directe** : la surface
-  projetée sur le fond triangle par triangle, rapports d'aire additionnés dans une vue orthographique (Wyman) ; même
-  contrôle analytique (critère 2), énergie de la scène à ± 10 % (critère 3) ; le fond la lit.
-- [x] **P6** — preuve, file, liste, index.
-- [x] **P7** — rituel.
+- [ ] **P2** — le module `bathymetrie` : dispersion, vitesse de groupe, levée, réfraction, phase, déferlement.
+- [ ] **P3** — ses essais contre les résultats publiés ; critères 1 à 4.
+- [ ] **P4** — preuve, liste, registre, file, index ; critère 5.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu.** Cinq champs complexes par cascade (`CHAMPS`), troisième image `(η_xx, η_yy, η_xy, η)` et ses
-  niveaux. Contrôle (`--controle-fft`, η, ∂η/∂x, η_xx) : pire **1,85·10⁻⁵** et **3,27·10⁻⁵** du rms. Courbures : cascade
-  de 32 m, η_xx de 0,03 à 0,42 m⁻¹ (focale ≈ 1/((1 − 1/n)·0,3) ≈ 13 m, dans la scène) ; cascade de 4 m, 3 à 9 m⁻¹
-  (focale ≈ 0,8 m) — son exclusion des caustiques du fond de la scène (≥ 5 m) se tient.
-- **P3.** `sol.gdshader` : `surface(x)` (bande analytique + cascade de 32 m : pente, η, hessienne), `rayon(s)` (Snell
-  exact, `refract` de GLSL), `focalisation` — point fixe à quatre itérations, `∂p/∂s` par différences centrées (10⁻³),
-  `J = I + p⊗∇η + (H + η)·(∂p/∂s)·Hess η`, `1/max(|det J|, det_min)` ; éclairement direct `0,4·n·soleil` multiplié.
-  `mer.gd` : la bande au fond à chaque image, la cascade 0 et sa hessienne ; `CAUSTIQUES=0` les éteint. **Vu, fond
-  seul** : un réseau de cellules d'un à deux mètres aux arêtes vives ; des boucles fines (replis) ; au loin un grain —
-  le réseau plus fin que le pixel.
-- **P4, critère 2 tenu.** `--controle-caustiques` : a = 5 cm, λ = 4 m, soleil au zénith, H_f = 31,946 m, H = 15,973 m ;
-  sortie rouge C/4 et vert fract(10·C). 50 points : pire **2,35 %**, moyenne rendue **1,0016** (exacte 0,9987 sur ces
-  points) ; crête 1,712 rendue contre 1,673 exacte à x = 0,80 m.
-- **P5, critère 3 manqué — mesuré.** `--controle-caustiques-scene` (mer complète, soleil de la scène, fond seul,
-  sortie rouge C/20, vert fract(C)) : plongeante, moyenne **2,029**, max 20,3, 2,7 % des pixels au plafond ; proche,
-  **5,553**, 1,4 % au plafond. Attendu : 1 (l'énergie se déplace). **Cause** : la méthode à rebours ne suit qu'un
-  antécédent ; elle ne vaut que devant la première focale — tenue à mi-focale (P4), elle sort de son domaine sur la scène,
-  où la cascade de 32 m a sa focale vers 13 m et le fond descend à 40 m. Remède : la méthode directe (P5 bis).
-- **P5 bis, critères 2 et 3 tenus.** `caustiques.gdshader` : grille de 1 024² sommets sur 100 m (`PlaneMesh`),
-  projetée vers le fond (Snell exact, trois passes pour la profondeur d'arrivée, bathymétrie en texture tirée de
-  `profondeur()` aux sommets du fond), `POSITION` en coordonnées d'écran d'une vue orthographique hors écran
-  (`SubViewport`, monde propre, fond noir, tonalité linéaire, HDR — format 14) ; rapport d'aire par `dFdx/dFdy` de la
-  source, mélange additif, écrit ÷ 32. Carte de 64 m, 1 024 texels, centrée 25 m devant la caméra, calée sur ses texels ;
-  source décalée du trajet réfracté moyen. Le fond lit la carte, **moyennée sur l'image du disque solaire**
-  (`H·3,47·10⁻³`, huit points et le centre) ; fondu vers 1 hors carte, au bord, et au-delà de deux texels par pixel.
-  Méthode à rebours retirée (rejouable à `c5faf558`). **Contrôle analytique** : selon x à mi-focale, pire **4,41 %**,
-  médiane 0,54 %, moyenne 1,0016 ; selon y, **4,57 %**, 0,78 %, 0,9945 ; témoin carte retournée, médiane 48,6 % ; à
-  1,5 focale (trois antécédents), médiane 0,93 %, pics singuliers 336 %. **Scène** : moyenne de la carte **1,0079**
-  (plongeante), **1,0022** (proche) ; max 192,5 avant le disque solaire ; 3,2 % des texels au-dessus de 5. **Vu** : un
-  réseau net sur le fond seul ; à travers l'eau, un miroitement bleuté ; la carte se lit en carré sur le fond seul.
-- **P6.** Preuve [CAUSTIQUES-S361](../docs/validation/CAUSTIQUES-S361.md) ; R22 (REVUE-VISUELLE §27), quatre images
-  envoyées — `viewer/captures/s361`, zoom `8abb8ddb…`, côte proche `63b9da05…`, plongeante `bbb3b1f4…`, fond seul
-  `7fe1f707…`. Liste 8.5 retouchée sans changer de case ; dépendances, file, feuille de route, index. `--check` propre.
-  Pas d'ADR : un choix de méthode de rendu, tranché par la mesure et dit dans la preuve.

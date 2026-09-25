@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-25 10:26 +02:00
+JETON            : occupé
+Battement        : 2026-09-25 13:23 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S362 — physique : la bathymétrie (2.7), la référence — profondeur finie, levée, réfraction, déferlement, contre des résultats publiés
 Dernière session : S361 — **rendu 5, les caustiques** : méthode à rebours rejetée par la mesure (énergie 2 à 5,6), méthode directe (Wyman) retenue — exacte à 4,6 %, énergie de la scène à 1 % ([preuve](docs/validation/CAUSTIQUES-S361.md)) ; R22 préparée. Avant elle S360 : la surface fine par FFT, l'écume au déferlement (R21)
 Session suivante : **les verdicts R21 et R22 d'abord** (REVUE-VISUELLE §26–27). À deux maillons, une capacité : **la physique** — la coque qui bouge sur la carte (6.4, ADR-193 §3), ou le lot 5 (A316) par l'alternance d'ADR-184 ; **le ciel** (demandé en R20) à la session de rendu suivante. En attente : R18, R21, R22
 Maillons        : 2 — S360 et S361 : aucune case de la liste ne change (journal)
