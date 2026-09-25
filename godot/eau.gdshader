@@ -3,10 +3,19 @@
 // Port de `viewer/src/water.wgsl` (bande CWM d'ADR-157, second ordre de Tayfun d'ADR-176, queue en pentes filtrées
 // d'ADR-155 et ADR-161, modulation d'ADR-158) et de `viewer/src/water_cretes.wgsl` (S356 : l'écume à la couverture de
 // Monahan, un seuil par empreinte ; la lumière des crêtes). Axes de B : x à l'est, y au nord, z en haut ; Godot :
-// x, y en haut, z au sud — un point (x, y) de B est (x, −z) dans Godot. Ce que ce nuanceur ne fait plus lui-même,
-// Godot le fait : ciel, soleil, reflets (GGX), tonalité, brume. La pente que la maille ne résout pas devient rugosité.
+// x, y en haut, z au sud — un point (x, y) de B est (x, −z) dans Godot.
+//
+// **S359 — la lumière de l'eau est calculée ici, plus par l'éclairage de Godot.** S357 confiait à Godot les reflets
+// (GGX) et convertissait la pente que la maille ne résout pas en rugosité : son approximation de l'environnement
+// éteint alors la réflexion rasante, et la mer ne renvoyait que 0,15 du ciel sous l'horizon, l'afficheur 0,71
+// (REVUE-VISUELLE §24). Ici, comme l'afficheur : le ciel clair (`ciel.gdshaderinc`, le même que celui de la scène),
+// Fresnel, et la pente non résolue **intégrée** par quadrature de Gauss-Hermite d'ordre 3 sur sa covariance transportée
+// par le jacobien (ADR-161) ; le soleil en éclat. Sous la surface : la colonne d'eau (liste 8.5). Godot garde la brume,
+// la tonalité, le halo et tout le reste de la scène.
 shader_type spatial;
-render_mode cull_disabled, specular_schlick_ggx, diffuse_lambert;
+render_mode cull_disabled, unshaded;
+
+#include "res://ciel.gdshaderinc"
 
 // Composantes `[a, kx, ky, φ(t)]`, phases repliées par le script en double précision (I-08).
 uniform vec4 bande[64];
@@ -21,16 +30,19 @@ uniform vec2 k_moyens = vec2(0.0);
 // L'écume (S356) : quatorze seuils de `s = (J − 1)/σ` aux empreintes 2^(i−7) m ; sa réflectance.
 uniform float ecume_seuils[14];
 uniform float reflectance_ecume = 0.55;
-// La lumière des crêtes (S356) : transmission de l'eau pure sur Hs ; force à calibrer (R19).
+// La lumière des crêtes (S356) : transmission de l'eau pure sur Hs ; force et exposant de sa diffusion vers l'avant,
+// ceux de l'afficheur, à calibrer.
 uniform vec3 transmission_crete = vec3(0.5987, 0.9187, 0.9863);
 uniform float force_cretes = 0.15;
-// Couleur du corps d'eau : R(0⁻) de Pope & Fry et Morel (ADR-177), en réflectance diffuse (t²/n²·π/Q ≈ 0,54, Q = π).
+uniform float exposant_cretes = 4.0;
+// Couleur du corps d'eau : R(0⁻) de Pope & Fry et Morel (ADR-177) ; `gain_eau` tient lieu de `E/π` (ADR-177 D2), 2 comme
+// l'afficheur de R19. Le fond est éclairé par le même modèle (`sol.gdshader`) : fond et corps d'eau sont dans les mêmes
+// unités, ce que demande le mélange de Maritorena.
 uniform vec3 R0 = vec3(0.00068, 0.00826, 0.08960);
+uniform float gain_eau = 2.0;
 // Empreinte angulaire d'un pixel, `2·tan(fov/2)/hauteur`, et pas radial relatif de la grille polaire.
 uniform float angle_pixel = 0.0013;
 uniform float pas_radial = 0.03;
-// S359 — témoin du diagnostic de l'horizon : la rugosité confiée à Godot, bornée (1 : sans borne).
-uniform float rugosite_max = 1.0;
 // S359 — la colonne d'eau : ce que Godot a rendu derrière la surface (fond, objets) et sa profondeur. La mer, qui les
 // lit, est dessinée après eux et n'entre pas dans le tampon de profondeur.
 uniform sampler2D ecran : hint_screen_texture, filter_linear_mipmap;
@@ -39,8 +51,8 @@ uniform sampler2D profondeur_ecran : hint_depth_texture, filter_nearest;
 // ceux d'ADR-177 ; `μ̄_d` = 0,8 *à calibrer*. Calculée et donnée par `mer.gd`. Indice de l'eau de mer.
 uniform vec3 kd = vec3(0.4259, 0.0724, 0.0158);
 uniform float indice = 1.34;
-// Mode contrôle (S359) : 0 rendu ; 1 profondeur verticale du fond vu sans réfraction, `H/echelle_controle`, en émission
-// seule — `mer.gd --controle-fond` la relit contre la bathymétrie ; 2 la transmission `T` de la colonne, par canal.
+// Mode contrôle (S359) : 0 rendu ; 1 profondeur verticale du fond vu sans réfraction, `H/echelle_controle`, en sortie
+// directe — `mer.gd --controle-fond` la relit contre la bathymétrie ; 2 la transmission `T` de la colonne, par canal.
 uniform int controle = 0;
 uniform float echelle_controle = 50.0;
 
@@ -77,6 +89,30 @@ float fresnel(float c, float n) {
     float rs = (c - n * ct) / (c + n * ct);
     float rp = (n * c - ct) / (n * c + ct);
     return 0.5 * (rs * rs + rp * rp);
+}
+
+/// ADR-161 : la covariance des pentes non résolues, transportée par le jacobien `J = I + g` du déplacement.
+vec3 transport_covariance(vec3 c, vec3 g) {
+    float det = (1.0 + g.x) * (1.0 + g.z) - g.y * g.y;
+    if (det < 0.1) { return c; }
+    float a = (1.0 + g.z) / det;
+    float b = -g.y / det;
+    float d = (1.0 + g.x) / det;
+    return vec3(a * a * c.x + 2.0 * a * b * c.y + b * b * c.z,
+        a * b * c.x + (a * d + b * b) * c.y + b * d * c.z, b * b * c.x + 2.0 * b * d * c.y + d * d * c.z);
+}
+
+/// `sample_light` de l'afficheur pour la pente `pente` (B) et le rayon `rayon` (B) : sous la surface, le corps d'eau et
+/// le fond vu ; au-dessus, le ciel réfléchi ; Fresnel exact entre les deux ; l'éclat du soleil.
+vec3 lumiere(vec2 pente, vec3 rayon, vec3 fond_vu, vec3 t_colonne) {
+    vec3 n = normalize(vec3(-pente, 1.0));
+    vec3 soleil = normalize(SOLEIL_B);
+    float f = fresnel(clamp(dot(-rayon, n), 0.0, 1.0), indice);
+    vec3 reflet = reflect(rayon, n);
+    float eclat = pow(max(dot(reflet, soleil), 0.0), 180.0);
+    vec3 corps = R0 * gain_eau * (0.6 + 0.4 * max(dot(n, soleil), 0.0));
+    vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
+    return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2;
 }
 
 void vertex() {
@@ -130,15 +166,16 @@ void vertex() {
 
 void fragment() {
     float h = max(length(dFdx(lag)), length(dFdy(lag)));
-    // La queue filtrée : pentes, gradient du déplacement, variance résolue, et variance que la maille ne résout pas.
+    // La queue filtrée : pentes, gradient du déplacement, variance résolue, et covariance que la maille ne résout pas.
     vec2 s_q = vec2(0.0);
     vec3 g_q = vec3(0.0);
-    float var_q = 0.0, var_non = 0.0;
+    vec3 cov_q = vec3(0.0);
+    float var_q = 0.0;
     for (int i = 0; i < n_queue; i++) {
         vec4 c = queue[i];
         float k = length(c.yz);
         float w = poids(k, h) * exp(-0.5 * k * k * h * h);
-        var_non += 0.5 * (c.x * k) * (c.x * k) * (1.0 - w * w);
+        cov_q += (0.5 * c.x * c.x * (1.0 - w * w)) * vec3(c.y * c.y, c.y * c.z, c.z * c.z);
         if (w > 0.0) {
             float phase = dot(c.yz, lag) + c.w;
             vec2 u = c.yz / k;
@@ -155,7 +192,6 @@ void fragment() {
     float det = jxx * jyy - jxy * jxy;
     vec2 pente = det >= 0.1 ? vec2((jyy * p_lag.x - jxy * p_lag.y) / det, (-jxy * p_lag.x + jxx * p_lag.y) / det) : p_lag;
     vec3 n_monde = normalize(vec3(-pente.x, 1.0, pente.y));
-    NORMAL = normalize((VIEW_MATRIX * vec4(n_monde, 0.0)).xyz);
     // L'écume (S356) : couverture antialiasée par la variation de `s` dans le pixel.
     float sigma = sqrt(max(sigma2_bande + energie * var_q, 0.0));
     float s = (det - 1.0) / max(sigma, 1e-6);
@@ -164,8 +200,9 @@ void fragment() {
     // où le rayon réfracté descend jusqu'à la profondeur vue sans réfraction, reprojeté à l'écran puis relu ; un objet
     // hors de l'eau à cet endroit garde le pixel lui-même. Puis Maritorena, Morel et Gentili (1994), généralisé au
     // trajet oblique : fond × T + corps d'eau × (1 − T), T = exp(−Kd·(H + L)) — la lumière descend H jusqu'au fond et
-    // remonte L jusqu'à la surface. Le fond, éclairé par Godot dans l'air, sort de l'eau par (1 − F)/n² (loi des
-    // radiances) ; l'éclairement qu'il reçoit n'est pas réduit de (1 − F) du soleil (≈ 2 %), ni focalisé (caustiques).
+    // remonte L jusqu'à la surface. Fond et corps d'eau dans les mêmes unités ; la sortie par la surface, (1 − F), est
+    // celle de `lumiere`. Non portés : la réduction de l'éclairement du fond par (1 − F) du soleil (≈ 2 %), la
+    // focalisation par les vagues (caustiques).
     vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
     vec3 fond0 = scene_monde(SCREEN_UV, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
     float h0 = surface.y - fond0.y;
@@ -187,22 +224,35 @@ void fragment() {
     }
     float h_fond = max(surface.y - fond.y, 0.0);
     vec3 t_colonne = exp(-kd * (h_fond + length(fond - surface)));
-    float f_vue = fresnel(clamp(dot(-vue, n_monde), 0.0, 1.0), indice);
-    vec3 fond_vu = textureLod(ecran, uv_r, 0.0).rgb * t_colonne * (1.0 - f_vue) / (indice * indice);
-    // Corps d'eau, écume ; la pente non résolue en rugosité GGX : α = √mss, rugosité de Godot = √α.
-    ALBEDO = mix(0.54 * R0 * (1.0 - t_colonne), vec3(reflectance_ecume), couverture);
-    EMISSION = fond_vu * (1.0 - couverture);
-    float rugosite = clamp(pow(max(energie * var_non, 1e-8), 0.25), 0.02, 1.0);
-    ROUGHNESS = mix(min(rugosite, rugosite_max), 0.9, couverture);
-    SPECULAR = mix(0.25, 0.1, couverture);
-    METALLIC = 0.0;
-    // La lumière des crêtes : transmise par ce qui se comprime, éclairée par Godot depuis l'arrière de la crête.
-    BACKLIGHT = force_cretes * clamp(-0.5 * s, 0.0, 1.0) * transmission_crete * (1.0 - couverture);
+    vec3 fond_vu = textureLod(ecran, uv_r, 0.0).rgb * t_colonne;
+    // La lumière, pente non résolue intégrée (ADR-161) : Cholesky de sa covariance, 3 × 3 nœuds de Gauss-Hermite.
+    vec3 rayon = vec3(vue.x, -vue.z, vue.y);
+    vec3 cv = transport_covariance(energie * cov_q, g);
+    vec3 couleur = vec3(0.0);
+    if (cv.x + cv.z <= 0.0) {
+        couleur = lumiere(pente, rayon, fond_vu, t_colonne);
+    } else {
+        float l00 = sqrt(max(cv.x, 0.0));
+        float l10 = l00 > 0.0 ? cv.y / l00 : 0.0;
+        float l11 = sqrt(max(cv.z - l10 * l10, 0.0));
+        vec3 noeuds = vec3(-1.73205080757, 0.0, 1.73205080757);
+        vec3 poids_gh = vec3(0.166666666667, 0.666666666667, 0.166666666667);
+        for (int j = 0; j < 3; j++) {
+            for (int i = 0; i < 3; i++) {
+                vec2 decalage = vec2(l00 * noeuds[i], l10 * noeuds[i] + l11 * noeuds[j]);
+                couleur += poids_gh[i] * poids_gh[j] * lumiere(pente + decalage, rayon, fond_vu, t_colonne);
+            }
+        }
+    }
+    // Les crêtes (S356, `cretes_couleur`) : la lumière qui traverse ce qui se comprime, vue du côté du soleil ; l'écume.
+    vec3 soleil = normalize(SOLEIL_B);
+    float eclairage = gain_eau * (0.6 + 0.4 * max(dot(normalize(vec3(-pente, 1.0)), soleil), 0.0));
+    vec2 horizontal = rayon.xy / max(length(rayon.xy), 1e-6);
+    float avant = pow(max(dot(horizontal, normalize(soleil.xy)), 0.0), exposant_cretes);
+    couleur += force_cretes * clamp(-0.5 * s, 0.0, 1.0) * avant * transmission_crete * eclairage;
+    couleur = mix(couleur, vec3(reflectance_ecume * eclairage), couverture);
+    ALBEDO = couleur;
     if (controle > 0) {
-        ALBEDO = vec3(0.0);
-        SPECULAR = 0.0;
-        ROUGHNESS = 1.0;
-        BACKLIGHT = vec3(0.0);
-        EMISSION = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : t_colonne;
+        ALBEDO = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : t_colonne;
     }
 }

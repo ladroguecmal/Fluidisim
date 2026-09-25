@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 - [x] **P3** — le fond et ses poses ; critère 2.
 - [x] **P4** — la profondeur reconstruite, le mode contrôle ; critère 3.
 - [x] **P5** — l'optique de la colonne ; critère 4.
-- [ ] **P6** — l'horizon, selon P2 ; critère 5.
+- [x] **P6** — l'horizon, selon P2 ; critère 5.
 - [ ] **P7** — les images de R20 ; critère 6.
 - [ ] **P8** — preuve, file, liste, index ; critère 7.
 - [ ] **P9** — rituel.
@@ -128,3 +128,12 @@ Critères, écrits avant le code :
   les grands écarts (jusqu'à 128) dans la seule bande de l'horizon — crêtes et écume lointaines, passe transparente
   soupçonnée, non démontrée. Côte : bleu clair sur le sable de 6 à 15 m, sombre après la cassure ; les rides ne se
   lisent pas à travers la houle.
+- **P6, critère 5 tenu.** La réflexion de l'afficheur portée : `ciel.gdshaderinc` (dégradé du ciel clair, nuages,
+  soleil — une source pour le ciel de Godot, `ciel.gdshader`, et pour les reflets) ; l'eau en `unshaded` — Fresnel
+  exact, covariance des pentes non résolues transportée par le jacobien, quadrature de Gauss-Hermite 3 × 3, éclat du
+  soleil, corps d'eau `R0·2·(0,6 + 0,4·n·soleil)`, crêtes et écume de `cretes_couleur` ; le sable éclairé par le même
+  modèle (mêmes unités que le corps d'eau, pour Maritorena) — le facteur 1/n² de P5 retiré avec la même raison.
+  `TONALITE=lineaire` (sans courbe ni halo, comme l'afficheur). Rapport mer/ciel sous l'horizon, linéaire : avant
+  **0,107 / 0,093**, après **0,710 / 0,676** (proche / rasante), afficheur 0,728 / 0,713 : −2,5 % et −5,2 %. Contrôles
+  de P4 et P5 inchangés. **Vu** : une couture verticale au centre du ciel de Godot, absente de l'afficheur — non
+  attribuée ; les nuages en blocs viennent du bruit de l'afficheur.

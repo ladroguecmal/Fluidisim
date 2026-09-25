@@ -83,30 +83,31 @@ func _ready() -> void:
 		controle_fond()
 
 
-## Le ciel de Godot aux couleurs du « ciel clair » de l'afficheur, relevées sur la photographie de référence de
-## l'utilisateur (S261, R14) — horizon et zénith linéaires `(0,694 ; 0,838 ; 0,930)` et `(0,015 ; 0,150 ; 0,600)`,
-## donnés ici en sRGB comme Godot les attend ; le soleil à la direction de la scène ; tonalité AgX, reflets à l'écran,
-## halo, perspective aérienne. S357 P3 : le ciel physique par défaut de Godot rendait un ciel gris de crépuscule.
+## Le ciel : depuis S359, celui de l'afficheur lui-même (`ciel.gdshaderinc` — dégradé du « ciel clair » relevé sur la
+## photographie de référence de l'utilisateur, S261 et R14, nuages, soleil), que l'eau reflète ; S357 en approchait les
+## couleurs par le ciel procédural de Godot. Le soleil à la direction de la scène ; tonalité AgX, halo, perspective
+## aérienne. S357 P3 : le ciel physique par défaut de Godot rendait un ciel gris de crépuscule.
 func environnement() -> void:
 	var env := Environment.new()
 	var ciel := Sky.new()
-	var procedural := ProceduralSkyMaterial.new()
-	procedural.sky_horizon_color = Color(0.694, 0.838, 0.930).linear_to_srgb()
-	procedural.sky_top_color = Color(0.015, 0.150, 0.600).linear_to_srgb()
-	# Le demi-ciel du bas n'est jamais vu : il ne sert qu'aux lobes rugueux des reflets rasants, qui voient en réalité
-	# l'horizon — pris à sa couleur.
-	procedural.ground_horizon_color = procedural.sky_horizon_color
-	procedural.ground_bottom_color = procedural.sky_horizon_color
-	ciel.sky_material = procedural
+	# S359 P6 : le ciel clair de l'afficheur (`ciel.gdshader`), celui que l'eau reflète — une seule source.
+	var materiau_ciel := ShaderMaterial.new()
+	materiau_ciel.shader = load("res://ciel.gdshader")
+	ciel.sky_material = materiau_ciel
 	env.background_mode = Environment.BG_SKY
 	env.sky = ciel
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_AGX
+	# S359 : `TONALITE=lineaire` — sans courbe ni halo, comme l'afficheur de `--meilleur` : les rapports de luminance
+	# mesurés sur l'image sont alors ceux des radiances rendues.
+	var lineaire := OS.get_environment("TONALITE") == "lineaire"
+	if lineaire:
+		env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	# S357 P3 : sans reflets à l'écran — en rasant, leurs rayons retombent sur l'eau elle-même et remplacent le ciel
 	# clair de l'horizon par sa propre couleur sombre. `REFLETS_ECRAN=1` les rallume, pour comparer.
 	env.ssr_enabled = OS.get_environment("REFLETS_ECRAN") == "1"
-	env.glow_enabled = true
+	env.glow_enabled = not lineaire
 	env.fog_enabled = true
 	env.fog_density = 0.00012
 	env.fog_aerial_perspective = 1.0
@@ -235,10 +236,6 @@ func uniformes_fixes() -> void:
 	var hauteur := get_viewport().get_visible_rect().size.y
 	materiau.set_shader_parameter("angle_pixel", 2.0 * tan(deg_to_rad(camera.fov) / 2.0) / hauteur)
 	materiau.set_shader_parameter("pas_radial", log(R_MAX / R_MIN) / float(RAYONS - 1))
-	# S359 : témoin du diagnostic de l'horizon, `RUGOSITE_MAX=0.05`.
-	var borne := OS.get_environment("RUGOSITE_MAX")
-	if borne != "":
-		materiau.set_shader_parameter("rugosite_max", float(borne))
 
 
 ## Les lignes `[a, kx, ky, φ(t)]` : la phase avance de `−ω·(t − t₀)`, repliée ici en double précision (I-08).
