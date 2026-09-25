@@ -316,8 +316,8 @@ derrière la requête du corps (6.1), le prix visuel du rang 1 (4.5, 9.9). Profi
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 59 partiels,
-58 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 60 partiels,
+57 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
@@ -361,7 +361,8 @@ l'écume au déferlement (ADR-195) ; **S361** : les caustiques (R21, R22 attendu
    (6.4 — **S358** : le pas linéaire sur la carte, solide fixe ; reste la coque qui bouge, ADR-193), l'ordonnanceur et le rang 1 dans l'afficheur (4.2), l'interpolation du rendu à 30 Hz (4.19 — **faite en
    S353**, verdict R18 attendu) ; puis la revue du prix du rang 1 (A319), que 4.5 et 9.9 attendent.
 2. **Le lot 5, une session sur deux** (ADR-184 D1, ADR-190 D4) : 4.16, par A316 — 22 points en aval.
-3. **La bathymétrie** (2.7) — 20 points en aval —, puis W au-dessus du plan moyen (3.9) et les courants (2.6).
+3. **La bathymétrie** (2.7) — 20 points en aval ; **S362** : la référence, 2.7 partiel ; reste son entrée dans B ou W —, puis W
+   au-dessus du plan moyen (3.9) et les courants (2.6).
 4. **Le reste du front 0**, par système : couplage (4.7, 4.18), volumique (4.15, 6.5), V (5.2, 5.4, 5.6, 5.7),
    solides (6.1, 6.3), rendu (8.2, 8.3, 8.5, 8.8, 8.9), budget (9.2, 9.3, 9.7, 9.8, 9.13), et 1.8, 7.1, 7.7, 10.8,
    11.2, 12.1, 13.1.

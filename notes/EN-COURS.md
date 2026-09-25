@@ -88,7 +88,7 @@ Critères, écrits avant le code (module `bathymetrie` du cœur, f64, référenc
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le module `bathymetrie` : dispersion, vitesse de groupe, levée, réfraction, phase, déferlement.
 - [x] **P3** — ses essais contre les résultats publiés ; critères 1 à 4.
-- [ ] **P4** — preuve, liste, registre, file, index ; critère 5.
+- [x] **P4** — preuve, liste, registre, file, index ; critère 5.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
@@ -104,3 +104,7 @@ Critères, écrits avant le code (module `bathymetrie` du cœur, f64, référenc
   (le seuil jamais) : la différence centrée tombait au coin du profil (2,45·10⁻³), puis, à ±0,5 m, sa troncature
   `k_y''·d²/(6·k_y)` ≈ 3·10⁻⁶ par 2 m de fond dépassait le critère (mesuré 3,11·10⁻⁶) ; à ±5 cm, 3·10⁻⁸ prévu, 3,27·10⁻⁸
   mesuré.
+- **P4, critère 5 tenu.** Preuve [BATHYMETRIE-S362](../docs/validation/BATHYMETRIE-S362.md) ; liste **2.7 absent →
+  partiel**, décompte 3 / 60 / 57 ; `dependances_liste.py` (2.7 : l'entrée dans B ou W par un ADR mesuré) et `--ecrire` ;
+  file (ligne Bathymétrie), feuille de route (front 0, décompte), REPRISE §4, index. `--check` propre. Pas d'ADR : la
+  référence ne décide rien ; la preuve dit ce qu'elle contredirait (ADR-004 §2.1).
