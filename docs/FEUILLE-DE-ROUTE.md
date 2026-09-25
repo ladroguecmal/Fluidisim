@@ -186,7 +186,8 @@ son coût proportionnel à sa surface ([preuve](validation/ARBITRAGE-3D-S344.md)
 *Manque* : dégradation automatique (ADR-012 §4) au-delà du rang 1, reçu au banc en S351 — rangs 2 à 7, régulateur PI
 de §5, bande morte de l'échelle, prix visuel jugé —,
 régime substitutif et son critère `0,35·Hs_local` jamais calibré ; seuils sans banc B8 ; W derrière
-la requête du corps, la coque dans la production de δ.
+la requête du corps, la coque qui bouge dans la production de δ — le pas linéaire y est depuis S358, solide fixe
+([preuve](validation/LINEAIRE-GPU-S358.md), ADR-193).
 
 *Bancs* : **B6** (flottabilité), **B8** (seuils d'activation), **B9** (écume), **B11** (rendu
 sous-marin), B4 forces et perception. *Cas* : C10, C11, C13, C14, C16, C23.
@@ -356,7 +357,7 @@ le rendu de l'eau se fait dans Godot 4** — premier pas, la mer de B rendue dan
 **Front 0 — 34 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
 
 1. **La v1 en une scène vivante** — réunir ce que les portes ont reçu séparément : la coque dans la production de δ
-   (6.4), l'ordonnanceur et le rang 1 dans l'afficheur (4.2), l'interpolation du rendu à 30 Hz (4.19 — **faite en
+   (6.4 — **S358** : le pas linéaire sur la carte, solide fixe ; reste la coque qui bouge, ADR-193), l'ordonnanceur et le rang 1 dans l'afficheur (4.2), l'interpolation du rendu à 30 Hz (4.19 — **faite en
    S353**, verdict R18 attendu) ; puis la revue du prix du rang 1 (A319), que 4.5 et 9.9 attendent.
 2. **Le lot 5, une session sur deux** (ADR-184 D1, ADR-190 D4) : 4.16, par A316 — 22 points en aval.
 3. **La bathymétrie** (2.7) — 20 points en aval —, puis W au-dessus du plan moyen (3.9) et les courants (2.6).

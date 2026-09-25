@@ -99,7 +99,7 @@ Critères, écrits avant le code :
   (`published`, `ghost_up`) : la dérive de la moyenne de S305 §7, mesurée avant et après sur la cuve.
 - [x] **P5** — le solide fixe immergé ; critère 2 bis.
 - [x] **P6** — le coût ; critère 3.
-- [ ] **P7** — ADR-193, preuve, file, feuille de route, liste ; critère 4.
+- [x] **P7** — ADR-193, preuve, file, feuille de route, liste ; critère 4.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
@@ -142,3 +142,7 @@ Critères, écrits avant le code :
   tenue : 16 cycles = 16 % du profil δ. Présentes : cycles fixes, départ chaud, Jacobi, produit scalaire replié dans
   l'opérateur, une seule passe. Absentes : multigrille, pavage en mémoire de groupe, fusion `update`/`direction`,
   sous-groupes, cadence de 30 Hz en deux parts, pas dans une image.
+- **P7.** [ADR-193](../docs/adr/ADR-193-le-domaine-d-une-coque-est-lineaire-sur-la-carte.md), preuve
+  [LINEAIRE-GPU-S358](../docs/validation/LINEAIRE-GPU-S358.md) (« Reproduire » en tête), note datée dans CUVE-GPU-S305
+  §7.3, file (porte D), feuille de route (J3, front 0), liste 6.4 et 6.5 (**partiels, inchangés en état**), index.
+  Essais de l'afficheur : 36 réussis, 1 ignoré ; zéro avertissement ; le cœur n'a pas bougé.

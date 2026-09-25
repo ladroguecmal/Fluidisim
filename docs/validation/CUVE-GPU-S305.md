@@ -144,6 +144,10 @@ divergence de phase sur 2,33 périodes.
    aucun usage ; cela dit seulement que la somme compensée de la carte (S301, `exact_difference`,
    L346) n'égale pas celle du cœur. Non poursuivi ici, et probablement la même cause que la pente
    séculaire de §6 — non démontré.
+   *Note du 2026-09-25 (S358)* : **cause trouvée et corrigée** — `(η − repos) − reste` était réassocié par le
+   compilateur, et le reste perdu dans la surface publiée, le fantôme du haut et le couvercle couplé. Après : écart à
+   la référence 2,4–2,6·10⁻⁸ m au lieu de 3,0–3,3·10⁻⁷, dérive au niveau du cœur (10⁻¹⁰ m), pente de §6 divisée par
+   ≈ 13 ([LINEAIRE-GPU-S358](LINEAIRE-GPU-S358.md) §4). Les chiffres de §4 à §6 sont ceux d'avant la correction.
 4. **Le coût n'est pas mesuré sur ce cas** : il relève de la porte C, et se mesure sur la scène de
    la porte B (§4 d'ADR-175), pas dans une cuve.
 5. **Rien de visuel.** Ce lot ne montre rien à l'utilisateur ; le critère 3 de la porte B — une mer

@@ -314,11 +314,13 @@ pas recopiée ici (L137).
 - [ ] **6.4 Parois et corps mobiles dans δ** (C23) — *partiel* depuis S330 : un **solide en mouvement
   imposé** dans la référence 3D, masse ajoutée d'une sphère à 1,6 % ([preuve](validation/FACES-COUPEES-3D-S324.md)
   §9) ; la **coque du corps rigide**, qui tourne et perce la surface, pilotée par le jeu (S332–S337,
-  [porte D](validation/PORTE-D-S333.md)). Manquent la production GPU et C23 sur le système — exécuté sur un
-  véhicule d'essai.
+  [porte D](validation/PORTE-D-S333.md)) ; **S358** : le pas linéaire sur la carte (`Linear3`, ADR-193), à
+  1,3·10⁻⁵ m de la référence, 0,32 ms ([preuve](validation/LINEAIRE-GPU-S358.md)). Manquent la coque **qui bouge**
+  sur la carte et C23 sur le système — exécuté sur un véhicule d'essai.
 - [ ] **6.5 Décor fixe comme frontière imposée** — *partiel* : fonds lisses coupés en 2D (S232) **et
   en 3D** depuis S324 ; **solide immergé quelconque** depuis S329, Archimède exact au niveau discret —
-  référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8). Manquent la production GPU et un décor
+  référence CPU ([preuve](validation/FACES-COUPEES-3D-S324.md) §8) ; **production GPU d'un solide fixe immergé**
+  depuis S358, découpe du cœur chargée telle quelle ([preuve](validation/LINEAIRE-GPU-S358.md) §2). Manque un décor
   qui perce la surface, éprouvé comme tel.
 - [ ] **6.6 Grands navires** — *absent*.
 - [ ] **6.7 Acteur poussé, renversé ou déplacé par l'eau** (vague, poche d'air) — *absent*.

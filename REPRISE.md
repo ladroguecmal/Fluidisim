@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 09:00 +02:00
+Battement        : 2026-09-25 09:03 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S358 — la physique (ADR-191 D3) : `Linear3`, le pas linéaire de la porte D sur la carte, contre `Volume3`
 Dernière session : S357 — **la mer de B dans Godot 4.4.1** (ADR-192 D2) : données exportées du cœur, hauteur retrouvée à 10⁻⁷ m, nuanceur porté (CWM, écume, crêtes), environnement de Godot ; **R19 préparée**, images envoyées ([preuve](docs/validation/PROTOTYPE-GODOT-S357.md))
