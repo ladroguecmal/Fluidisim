@@ -64,6 +64,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 Session : S363 — **en cours**. **Rendu 6 : le ciel** — *« Tu as raison sur le ciel, il n'aide pas au reflets et limite la
 qualité du rendue final »* (R20) ; alternance d'ADR-191 D3 après S362.
+**Coupée après P4** (13:36) ; **reprise à chaud à 18:34** sur *« Reprends le projet »* : arbre propre, une seule copie,
+rien à compléter ni à annuler ; P4 bis découpée en deux avant d'y toucher.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 Entrée — deux défauts vus en S359 : une **couture verticale au centre du ciel de Godot**, et des nuages en blocs. Et un
 fait de S308 : le « ciel clair » de `--meilleur` est **plat** (sommet à 0,81 de l'horizon, la photographie de
@@ -93,7 +95,14 @@ Critères, écrits avant le code :
 - [ ] **P4 bis** *(ajoutée en cours, sur la mesure de P2)* — la courbe de tonalité de Godot contre les quatre cibles de
   la photographie : balayage (courbe, exposition, blanc) à la pose proche, critère de S308 — le pire écart
   logarithmique ; la meilleure vérifiée aux poses rasante et référence ; **une option**, pas le défaut : la couleur a
-  été jugée « parfaite » en AgX (R20).
+  été jugée « parfaite » en AgX (R20). *Découpée à la reprise :*
+  - [>] **P4 bis a** — l'instrument. Godot rend la pose en HDR linéaire (`HDR=1` : tampon flottant, sans courbe ni
+    halo, fichier PFM hors dépôt) ; `outils/tonalite_godot.py` applique les cinq courbes de Godot 4.4.1, **recopiées de
+    sa source** (`tonemap.glsl`, exposition, blanc, écrêtage, sRGB sur huit bits), et mesure les quatre grandeurs.
+    **Reçu si** : sa mesure redonne celle de `cible_image.py` sur une même image (1e-4 relatif) ; et son modèle redonne
+    Godot lui-même, rendu sans halo en AgX et dans une seconde courbe, à **2 %** près sur les quatre grandeurs.
+  - [ ] **P4 bis b** — le balayage à la pose proche (courbe × exposition × blanc, pire écart logarithmique) ; la
+    meilleure rendue par Godot aux trois poses, halo compris ; l'option `TONALITE=photo`, pas le défaut.
 - [ ] **P5** — images R23, preuve, file, index ; critère 4.
 - [ ] **P6** — rituel.
 
