@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S358 — **en cours**. **La physique (ADR-191 D3) : la coque dans la production de δ, 1 — `Linear3`, le pas
+Session : S358 — **terminée**. **La physique (ADR-191 D3) : la coque dans la production de δ, 1 — `Linear3`, le pas
 linéaire de la porte D sur la carte.** Le plan de S355 (commit `a2c81dea`), reporté tel quel, plus le solide fixe.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 Entrée — *« Reprends le projet »*, sans verdict R19 : la physique en attendant (S357). Liste 6.4, *manque la production
@@ -100,7 +100,7 @@ Critères, écrits avant le code :
 - [x] **P5** — le solide fixe immergé ; critère 2 bis.
 - [x] **P6** — le coût ; critère 3.
 - [x] **P7** — ADR-193, preuve, file, feuille de route, liste ; critère 4.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 - **P2–P3.** `viewer/src/delta3d_linear.{wgsl,rs}` : quinze noyaux, un seul groupe de liaison (vitesses courantes et

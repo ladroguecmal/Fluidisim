@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-25 09:03 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S358 — la physique (ADR-191 D3) : `Linear3`, le pas linéaire de la porte D sur la carte, contre `Volume3`
-Dernière session : S357 — **la mer de B dans Godot 4.4.1** (ADR-192 D2) : données exportées du cœur, hauteur retrouvée à 10⁻⁷ m, nuanceur porté (CWM, écume, crêtes), environnement de Godot ; **R19 préparée**, images envoyées ([preuve](docs/validation/PROTOTYPE-GODOT-S357.md))
-Session suivante : **le verdict R19 d'abord** (REVUE-VISUELLE §24) — selon lui, calibrer l'environnement de Godot ou intégrer le cœur par GDExtension (accord de téléchargement nommé). En attendant, par l'alternance d'ADR-191 D3 : **la physique**, la coque sur la carte (`Linear3`, plan de S355 au commit `a2c81dea`). En attente : R18, R19
-Maillons        : 4 — S354 : attribution ; S355 : décision ; S356 : module non jugé et décision ; S357 : prototype non jugé (justifié au journal)
+Session en cours : aucune
+Dernière session : S358 — **la coque dans la production de δ, 1** : `Linear3`, le pas linéaire de la porte D sur la carte, à 1,3·10⁻⁵ m de `Volume3` autour d'une sphère fixe, 0,32 ms ([ADR-193](docs/adr/ADR-193-le-domaine-d-une-coque-est-lineaire-sur-la-carte.md)) ; la surface publiée de toute la production perdait son reste compensé — corrigé ([preuve](docs/validation/LINEAIRE-GPU-S358.md))
+Session suivante : **le verdict R19 d'abord** (REVUE-VISUELLE §24) — selon lui, calibrer l'environnement de Godot ou intégrer le cœur par GDExtension (accord de téléchargement nommé). En attendant, la physique, par l'alternance d'ADR-184 D1 : **le lot 5, A316** — la densité tenue à la frontière (S354) ; puis la coque qui bouge sur la carte (ADR-193 §3). En attente : R18, R19
+Maillons        : 0 — S358 : correction d'intégrité reproduite puis testée, et la coque dans δ sur la carte (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

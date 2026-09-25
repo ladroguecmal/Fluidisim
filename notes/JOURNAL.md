@@ -16976,3 +16976,22 @@ R14. Les reflets à l'écran assombrissaient la mer rasante — éteints. L'écu
 qu'il a choisi, et son verdict décide de la suite. Suivant : **R19 d'abord** ; la physique en attendant, par
 l'alternance — la coque sur la carte (plan de S355). R18 toujours attendu.
 
+## S358 — 2026-09-25 — la coque dans la production de δ, 1 : le pas linéaire sur la carte
+
+**Entrée.** *« Reprends le projet »*, sans verdict R19 : la physique (ADR-191 D3), le plan de S355 reporté — liste 6.4.
+**Fait** ([preuve](../docs/validation/LINEAIRE-GPU-S358.md)). `Linear3` : le pas linéaire de la porte D sur la carte,
+géométrie en donnée découpée par le cœur, Jacobi à cycles fixes et départ chaud. Contre `Volume3`, grille de la porte D :
+5,7·10⁻⁵ m à 8 cycles, **1,3·10⁻⁵ m à 16 autour d'une sphère fixe** (témoin sans découpe : 4,7 mm), l'ulp de 2 m à 64 ;
+16 cycles, **0,32 ms** au 99ᵉ centile. [ADR-193](../docs/adr/ADR-193-le-domaine-d-une-coque-est-lineaire-sur-la-carte.md) :
+le domaine d'une coque est linéaire, sur la carte ; le pas mobile couplé garde les autres.
+**Défaut trouvé et corrigé.** La surface publiée perdait son reste compensé : `(η − z₀) − reste` réassocié par le
+compilateur (L345). Instrument : l'avance rejouée au bit depuis les entrées de la carte ; somme vraie tenue à 10⁻⁹ m,
+somme publiée +3,4·10⁻⁵ m dès le pas 1. **Toute la production résidente l'avait** (publiée, fantôme du haut, couvercle
+couplé) : sur la cuve de S305, écart à la référence 3·10⁻⁷ → 2,4·10⁻⁸ m, dérive de la moyenne au niveau du cœur, pente
+séculaire divisée par 13 — S305 §7.3 attribuée.
+**Limites.** Ni coque qui bouge, ni couvercle partiel, ni scène, ni diagnostics différés ; 6.4 et 6.5 restent partiels ;
+la pente résiduelle de la cuve (≈ 8·10⁻⁹ m/s) n'est pas attribuée.
+**Rituel.** Maillons **0** : correction d'intégrité reproduite (S305 au chiffre près) puis testée. Devient possible : une
+production de δ dont la surface publiée est la hauteur vraie, et une coque dans δ sur la carte ; consommée par le rendu
+de δ (8.7) et la coque qui bouge (6.4) ; preuve §2 et §4. Suivant : **R19 d'abord** ; la physique en attendant, par
+l'alternance d'ADR-184 — le lot 5 (A316, la densité à la frontière) —, puis la coque qui bouge. R18, R19 attendus.
