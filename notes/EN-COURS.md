@@ -103,7 +103,10 @@ Critères, écrits avant le code :
     Godot lui-même, rendu sans halo en AgX et dans une seconde courbe, à **2 %** près sur les quatre grandeurs.
   - [x] **P4 bis b** — le balayage à la pose proche (courbe × exposition × blanc, pire écart logarithmique) ; la
     meilleure rendue par Godot aux trois poses, halo compris ; l'option `TONALITE=photo`, pas le défaut.
-- [>] **P5** — images R23, preuve, file, index ; critère 4.
+- [ ] **P5** — images R23, preuve, file, index ; critère 4. *Découpée :*
+  - [>] **P5 a** — les images de R23 (`viewer/captures/s363/`, locales) : la couture avant / après, le ciel avant / après,
+    AgX contre `TONALITE=photo` ; REVUE-VISUELLE §28, ses questions.
+  - [ ] **P5 b** — la preuve `CIEL-S363` ouverte par « Reproduire » ; file active, index, liste si un point bouge.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
