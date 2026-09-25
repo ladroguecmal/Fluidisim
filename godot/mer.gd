@@ -26,6 +26,9 @@ const POSES := {
 	## S366 : en contre-plongée à 4 m, le cadrage de la photographie de référence (Hanifaru, Maldives) : la surface en haut,
 	## l'eau en bas.
 	"sous_eau_oblique": [Vector3(0.0, -4.0, 0.0), 0.52],
+	## S366 : à l'horizontale, face au soleil (son azimut, (−0,4 ; 0,3) dans B) et dos à lui — le lobe avant.
+	"sous_eau_vers_soleil": [Vector3(0.0, -4.0, 0.0), 0.0, 0.9273],
+	"sous_eau_dos_soleil": [Vector3(0.0, -4.0, 0.0), 0.0, 0.9273 + PI],
 }
 ## S359 — la scène côtière (`--cote`) : un fond de sable sous la mer, pour voir l'eau selon la profondeur. Étendue
 ## et pas de la grille du fond, m.
@@ -38,6 +41,9 @@ const FOND_PAS := 4.0
 const ABSORPTION := Vector3(0.340, 0.0565, 0.00922)
 const RETRODIFFUSION := Vector3(0.00071, 0.00145, 0.00344)
 const MU_D := 0.8
+## S366 — le lobe avant de la lumière de l'eau (β, K, g), ajusté sur la radiance mesurée par Tyler (1960), lac Pend
+## Oreille, 4,2 m (`outils/tyler_radiance.py`) : résidu logarithmique 0,12. Eau de lac : lobe emprunté par notre eau pure.
+const LOBE_TYLER := Vector3(1.0031, 213.349, 0.855)
 
 var donnees: Dictionary
 var materiau: ShaderMaterial
@@ -52,6 +58,8 @@ var detail: Node
 var materiau_sol: ShaderMaterial
 ## S365 : le matériau du ciel, qui devient le fond de l'eau quand la caméra y est.
 var materiau_ciel: ShaderMaterial
+## S366 : l'environnement, dont la brume — un phénomène de l'air — s'éteint quand la caméra est dans l'eau.
+var environnement_scene: Environment
 var vue_caustiques: SubViewport
 var materiau_caustiques: ShaderMaterial
 var maillage_caustiques: MeshInstance3D
@@ -207,6 +215,7 @@ func environnement() -> void:
 	env.fog_density = 0.00012
 	env.fog_aerial_perspective = 1.0
 	env.fog_sky_affect = 0.0
+	environnement_scene = env
 	var monde := WorldEnvironment.new()
 	monde.environment = env
 	add_child(monde)
@@ -360,7 +369,7 @@ func suivre_carte(centre_force = null) -> void:
 func pose(nom: String) -> void:
 	var p: Array = POSES[nom]
 	camera.position = p[0]
-	camera.rotation = Vector3(float(p[1]), 0.0, 0.0)
+	camera.rotation = Vector3(float(p[1]), float(p[2]) if p.size() > 2 else 0.0, 0.0)
 
 
 func grille_polaire() -> ArrayMesh:
@@ -417,6 +426,7 @@ func uniformes_fixes() -> void:
 		if m != null:
 			m.set_shader_parameter("kd", (ABSORPTION + RETRODIFFUSION) / MU_D)
 			m.set_shader_parameter("attenuation_c", ABSORPTION + 2.0 * RETRODIFFUSION)
+			m.set_shader_parameter("lobe", LOBE_TYLER if OS.get_environment("LOBE") != "0" else Vector3(2.0, 0.0, 0.5))
 	# S365 : `CONTROLE_EAU=4` — la surface vue d'en dessous rend son coefficient de Fresnel eau → air (1 au-delà de l'angle
 	# critique), relu par `outils/fenetre_snell.py --fresnel`.
 	if OS.get_environment("CONTROLE_EAU") != "":
@@ -454,6 +464,10 @@ func immersion(t: float) -> void:
 		for l in lignes("bande", t):
 			eta += l.x * sin(l.y * q.x + l.z * q.y + l.w)
 	var dedans := camera.global_position.y < eta
+	# S366 : la brume de Godot (perspective aérienne) teintait la surface lointaine vue d'en dessous d'une bande sombre
+	# juste au-dessus de l'horizon ; sous l'eau, l'atténuation est celle d'`optique_eau.gdshaderinc`, seule.
+	if environnement_scene != null and not "--controle-fond" in OS.get_cmdline_user_args():
+		environnement_scene.fog_enabled = not dedans
 	for m in [materiau, materiau_sol, materiau_ciel]:
 		if m != null:
 			m.set_shader_parameter("sous_eau", dedans)

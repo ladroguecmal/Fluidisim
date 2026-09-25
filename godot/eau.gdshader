@@ -61,9 +61,8 @@ uniform sampler2D detail_b1 : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform vec2 detail_cotes = vec2(32.0, 4.0);
 uniform bool detail_actif = false;
 // L'atténuation diffuse `Kd = (a + b_b)/μ̄_d` des trois bandes (650, 550, 450 nm) : `a` de Pope & Fry, `b_b` de Morel,
-// ceux d'ADR-177 ; `μ̄_d` = 0,8 *à calibrer*. Calculée et donnée par `mer.gd` (`optique_eau.gdshaderinc`). Indice de
-// l'eau de mer.
-uniform float indice = 1.34;
+// ceux d'ADR-177 ; `μ̄_d` = 0,8 *à calibrer*. Calculée et donnée par `mer.gd` (`optique_eau.gdshaderinc`, qui porte aussi
+// l'indice de l'eau de mer depuis S366).
 // Mode contrôle (S359) : 0 rendu ; 1 profondeur verticale du fond vu sans réfraction, `H/echelle_controle`, en sortie
 // directe — `mer.gd --controle-fond` la relit contre la bathymétrie ; 2 la transmission `T` de la colonne, par canal ;
 // 3 (S360) la couverture d'écume, relue par `mer.gd --controle-ecume` et `outils/ecume_taches.py`.

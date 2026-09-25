@@ -86,8 +86,8 @@ Critères, écrits avant la mesure :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le verdict R24 consigné ; les références trouvées, sources et licences.
 - [x] **P3** — les chiffrer : la distribution mesurée contre `f(ω)` et le rendu ; les photographies, rapports sans unité.
-- [>] **P4** — calibrer ce que la mesure désigne ; avant / après ; images.
-- [ ] **P5** — preuve (SOUS-MARIN-S365, section datée S366), liste 8.6, file, index.
+- [x] **P4** — calibrer ce que la mesure désigne ; avant / après ; images.
+- [>] **P5** — preuve (SOUS-MARIN-S365, section datée S366), liste 8.6, file, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -106,3 +106,10 @@ Critères, écrits avant la mesure :
   (−21 %). Prédiction (2 à 5) : tenue à l'opposé, dépassée côté soleil. **Critère 3, indicatif**, photographie de Hanifaru
   (tiers bas / tiers haut, luminance sRGB décodée) : eau B/G **4,07**, rendu 4,72 ; dynamique p90 haut / p50 bas **9,7**
   (la photographie écrête sa fenêtre : borne basse), rendu **3,36** — notre fenêtre est terne devant l'eau.
+- **P4.** Le lobe dans `optique_eau.gdshaderinc` (`eau_infinie` ; `indice` y passe ; soleil réfracté par Snell) ;
+  `mer.gd` : `LOBE_TYLER`, `LOBE=0` rend S365 ; poses face au soleil et dos au soleil (lacet). **Contrôle** : tonalité
+  linéaire, juste sous l'horizon, rapport face / dos **2,23 (vert), 2,18 (bleu)** pour **2,215** prédits (notre soleil à
+  23,3° du zénith dans l'eau). **Défaut trouvé** : une bande sombre juste au-dessus de l'horizon, vue d'en dessous — la
+  **brume** de Godot (perspective aérienne) sur la surface lointaine ; éteinte quand l'œil est dans l'eau. Au-dessus de
+  l'eau, proche et rasante **identiques au bit**. Photographie, après : eau B/G 4,10 (4,07), dynamique 2,72 (≥ 9,7) — la
+  fenêtre reste terne : le ciel ne porte pas l'éclairement du soleil que reçoit l'eau (`gain_eau` = 2), à suivre.
