@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 - [x] **P2** — verdict R19 consigné ; diagnostic de l'horizon ; critères 1 et 5 (mesure).
 - [x] **P3** — le fond et ses poses ; critère 2.
 - [x] **P4** — la profondeur reconstruite, le mode contrôle ; critère 3.
-- [ ] **P5** — l'optique de la colonne ; critère 4.
+- [x] **P5** — l'optique de la colonne ; critère 4.
 - [ ] **P6** — l'horizon, selon P2 ; critère 5.
 - [ ] **P7** — les images de R20 ; critère 6.
 - [ ] **P8** — preuve, file, liste, index ; critère 7.
@@ -119,3 +119,12 @@ Critères, écrits avant le code :
   dichotomie). Cinq pixels : 8,413 / 8,443 ; 8,894 / 8,948 ; 9,560 / 9,592 ; 7,498 / 7,543 ; 7,796 / 7,824 m — écart
   −2,7 à −5,4 cm, pire 0,23 de la tolérance. Biais de signe constant : le pixel entier contre son centre, non poursuivi.
   *Battements de P2 et P3 écrits en avance d'une et deux minutes — corrigé ici.*
+- **P5, critère 4 tenu.** `Kd` = (0,4259 ; 0,0724 ; 0,0158) m⁻¹ calculé par `mer.gd` ; réfraction : le rayon
+  réfracté descendu à la profondeur vue sans réfraction, reprojeté, relu, gardé s'il reste sous la surface ; T =
+  exp(−Kd·(H + L)) ; fond × T × (1 − F)/n² en émission, corps d'eau × (1 − T) en albédo, écume intacte. Contrôle au nadir,
+  mer plate, caméra à 10 m : H = 6,205 / 14,954 / 29,355 m — rendu (0,0048 ; 0,4020 ; 0,8228) contre (0,0051 ; 0,4070 ;
+  0,8217), (0 ; 0,1144 ; 0,6240) contre (0 ; 0,1146 ; 0,6229), (0 ; 0,0144 ; 0,3968) contre (0 ; 0,0142 ; 0,3949) — pire
+  **0,0050**. Sans fond : écart moyen à R19 **0,21 / 0,33 niveau** sur 255 (proche / rasante) ; 13 % des pixels bougent,
+  les grands écarts (jusqu'à 128) dans la seule bande de l'horizon — crêtes et écume lointaines, passe transparente
+  soupçonnée, non démontrée. Côte : bleu clair sur le sable de 6 à 15 m, sombre après la cassure ; les rides ne se
+  lisent pas à travers la houle.

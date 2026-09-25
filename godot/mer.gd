@@ -24,6 +24,12 @@ const POSES := {
 const FOND_X := 1200.0
 const FOND_Y := [-200.0, 900.0]
 const FOND_PAS := 4.0
+## L'optique de la colonne (S359), bandes 650, 550 et 450 nm : absorption de l'eau pure `a` (Pope & Fry 1997) et
+## rétrodiffusion `b_b` (Morel 1974), celles d'ADR-177 ; cosinus moyen de la lumière descendante `μ̄_d` = 0,8, *à
+## calibrer* (Kirk 1994 : 0,7 à 0,9 selon le soleil). `Kd = (a + b_b)/μ̄_d`.
+const ABSORPTION := Vector3(0.340, 0.0565, 0.00922)
+const RETRODIFFUSION := Vector3(0.00071, 0.00145, 0.00344)
+const MU_D := 0.8
 
 var donnees: Dictionary
 var materiau: ShaderMaterial
@@ -225,6 +231,7 @@ func uniformes_fixes() -> void:
 		var k: Array = donnees["k_moyens"]
 		materiau.set_shader_parameter("k_moyens", Vector2(float(k[0]), float(k[1])))
 	materiau.set_shader_parameter("ecume_seuils", PackedFloat32Array(donnees["ecume_seuils"]))
+	materiau.set_shader_parameter("kd", (ABSORPTION + RETRODIFFUSION) / MU_D)
 	var hauteur := get_viewport().get_visible_rect().size.y
 	materiau.set_shader_parameter("angle_pixel", 2.0 * tan(deg_to_rad(camera.fov) / 2.0) / hauteur)
 	materiau.set_shader_parameter("pas_radial", log(R_MAX / R_MIN) / float(RAYONS - 1))
@@ -343,6 +350,25 @@ func controle_fond() -> void:
 		pire = maxf(pire, absf(rendu - attendu) / tolere)
 		print("CONTROLE_FOND_S359 mode=profondeur pixel=%s rendu_m=%.3f attendu_m=%.3f ecart_m=%.3f tolere_m=%.3f" % [px, rendu, attendu, rendu - attendu, tolere])
 	print("CONTROLE_FOND_S359 mode=profondeur pire_sur_tolere=%.3f critere=%s" % [pire, "tenu" if pire <= 1.0 else "manque"])
+	# Mode 2 : au nadir, trois profondeurs ; la transmission rendue contre exp(−2·Kd·H), H au centre de l'image.
+	materiau.set_shader_parameter("controle", 2)
+	var kd := (ABSORPTION + RETRODIFFUSION) / MU_D
+	var pire_t := 0.0
+	for y_b in [-30.0, 76.0, 252.0]:
+		camera.position = Vector3(0.0, 10.0, -y_b)
+		camera.rotation = Vector3(-PI / 2.0, 0.0, 0.0)
+		mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
+		for _i in 12:
+			await RenderingServer.frame_post_draw
+		image = get_viewport().get_texture().get_image()
+		var centre := Vector2i(taille.x / 2, taille.y / 2)
+		var c := image.get_pixel(centre.x, centre.y).srgb_to_linear()
+		var hc := profondeur_au_pixel(Vector2(centre))
+		var attendu := Vector3(exp(-2.0 * kd.x * hc), exp(-2.0 * kd.y * hc), exp(-2.0 * kd.z * hc))
+		var ecart := Vector3(c.r, c.g, c.b) - attendu
+		pire_t = maxf(pire_t, maxf(absf(ecart.x), maxf(absf(ecart.y), absf(ecart.z))))
+		print("CONTROLE_FOND_S359 mode=transmission H_m=%.3f rendu=(%.4f, %.4f, %.4f) attendu=(%.4f, %.4f, %.4f)" % [hc, c.r, c.g, c.b, attendu.x, attendu.y, attendu.z])
+	print("CONTROLE_FOND_S359 mode=transmission pire=%.4f critere=%s" % [pire_t, "tenu" if pire_t <= 0.01 else "manque"])
 	get_tree().quit()
 
 

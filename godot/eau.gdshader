@@ -35,8 +35,12 @@ uniform float rugosite_max = 1.0;
 // lit, est dessinée après eux et n'entre pas dans le tampon de profondeur.
 uniform sampler2D ecran : hint_screen_texture, filter_linear_mipmap;
 uniform sampler2D profondeur_ecran : hint_depth_texture, filter_nearest;
+// L'atténuation diffuse `Kd = (a + b_b)/μ̄_d` des trois bandes (650, 550, 450 nm) : `a` de Pope & Fry, `b_b` de Morel,
+// ceux d'ADR-177 ; `μ̄_d` = 0,8 *à calibrer*. Calculée et donnée par `mer.gd`. Indice de l'eau de mer.
+uniform vec3 kd = vec3(0.4259, 0.0724, 0.0158);
+uniform float indice = 1.34;
 // Mode contrôle (S359) : 0 rendu ; 1 profondeur verticale du fond vu sans réfraction, `H/echelle_controle`, en émission
-// seule — `mer.gd --controle-fond` la relit contre la bathymétrie.
+// seule — `mer.gd --controle-fond` la relit contre la bathymétrie ; 2 la transmission `T` de la colonne, par canal.
 uniform int controle = 0;
 uniform float echelle_controle = 50.0;
 
@@ -64,6 +68,15 @@ vec3 scene_monde(vec2 uv, mat4 inv_proj, mat4 inv_vue) {
     vec4 v = inv_proj * vec4(uv * 2.0 - 1.0, d, 1.0);
     v.xyz /= v.w;
     return (inv_vue * vec4(v.xyz, 1.0)).xyz;
+}
+
+/// Réflectance de Fresnel exacte, air → eau, lumière non polarisée ; `c` cosinus d'incidence.
+float fresnel(float c, float n) {
+    float st2 = (1.0 - c * c) / (n * n);
+    float ct = sqrt(max(1.0 - st2, 0.0));
+    float rs = (c - n * ct) / (c + n * ct);
+    float rp = (n * c - ct) / (n * c + ct);
+    return 0.5 * (rs * rs + rp * rp);
 }
 
 void vertex() {
@@ -147,23 +160,49 @@ void fragment() {
     float sigma = sqrt(max(sigma2_bande + energie * var_q, 0.0));
     float s = (det - 1.0) / max(sigma, 1e-6);
     float couverture = clamp((seuil_ecume(h) - s) / max(fwidth(s), 1e-4) + 0.5, 0.0, 1.0);
+    // S359 — la colonne d'eau (liste 8.5). Le fond vu à travers la surface, par réfraction de Snell : le point du fond
+    // où le rayon réfracté descend jusqu'à la profondeur vue sans réfraction, reprojeté à l'écran puis relu ; un objet
+    // hors de l'eau à cet endroit garde le pixel lui-même. Puis Maritorena, Morel et Gentili (1994), généralisé au
+    // trajet oblique : fond × T + corps d'eau × (1 − T), T = exp(−Kd·(H + L)) — la lumière descend H jusqu'au fond et
+    // remonte L jusqu'à la surface. Le fond, éclairé par Godot dans l'air, sort de l'eau par (1 − F)/n² (loi des
+    // radiances) ; l'éclairement qu'il reçoit n'est pas réduit de (1 − F) du soleil (≈ 2 %), ni focalisé (caustiques).
+    vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+    vec3 fond0 = scene_monde(SCREEN_UV, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
+    float h0 = surface.y - fond0.y;
+    vec3 vue = normalize(surface - CAMERA_POSITION_WORLD);
+    vec3 r = refract(vue, n_monde, 1.0 / indice);
+    vec2 uv_r = SCREEN_UV;
+    vec3 fond = fond0;
+    if (h0 > 0.0 && r.y < -0.05) {
+        vec3 point = surface + r * (h0 / -r.y);
+        vec4 clip = PROJECTION_MATRIX * (VIEW_MATRIX * vec4(point, 1.0));
+        vec2 uv = clip.xy / clip.w * 0.5 + 0.5;
+        if (uv.x > 0.0 && uv.x < 1.0 && uv.y > 0.0 && uv.y < 1.0) {
+            vec3 f1 = scene_monde(uv, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
+            if (f1.y < surface.y) {
+                uv_r = uv;
+                fond = f1;
+            }
+        }
+    }
+    float h_fond = max(surface.y - fond.y, 0.0);
+    vec3 t_colonne = exp(-kd * (h_fond + length(fond - surface)));
+    float f_vue = fresnel(clamp(dot(-vue, n_monde), 0.0, 1.0), indice);
+    vec3 fond_vu = textureLod(ecran, uv_r, 0.0).rgb * t_colonne * (1.0 - f_vue) / (indice * indice);
     // Corps d'eau, écume ; la pente non résolue en rugosité GGX : α = √mss, rugosité de Godot = √α.
-    ALBEDO = mix(0.54 * R0, vec3(reflectance_ecume), couverture);
+    ALBEDO = mix(0.54 * R0 * (1.0 - t_colonne), vec3(reflectance_ecume), couverture);
+    EMISSION = fond_vu * (1.0 - couverture);
     float rugosite = clamp(pow(max(energie * var_non, 1e-8), 0.25), 0.02, 1.0);
     ROUGHNESS = mix(min(rugosite, rugosite_max), 0.9, couverture);
     SPECULAR = mix(0.25, 0.1, couverture);
     METALLIC = 0.0;
     // La lumière des crêtes : transmise par ce qui se comprime, éclairée par Godot depuis l'arrière de la crête.
     BACKLIGHT = force_cretes * clamp(-0.5 * s, 0.0, 1.0) * transmission_crete * (1.0 - couverture);
-    // S359 — la colonne d'eau sous ce pixel : le point de la surface et le fond vu à travers, sans réfraction.
-    vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-    vec3 fond0 = scene_monde(SCREEN_UV, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
-    float h0 = surface.y - fond0.y;
-    if (controle == 1) {
+    if (controle > 0) {
         ALBEDO = vec3(0.0);
         SPECULAR = 0.0;
         ROUGHNESS = 1.0;
         BACKLIGHT = vec3(0.0);
-        EMISSION = vec3(clamp(h0 / echelle_controle, 0.0, 1.0));
+        EMISSION = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : t_colonne;
     }
 }
