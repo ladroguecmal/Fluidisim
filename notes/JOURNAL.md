@@ -17160,3 +17160,20 @@ développée seulement ; Ly en butée du domaine.
 **Rituel.** Maillons **0** : 7.1 passe à partiel (3 / 62 / 55) ; devient possible, une écume qui dure et s'étire ;
 consommé par le rendu de Godot (8.4), au prochain rendu ; preuve §1–3. Suivant : **le champ porté sur la carte de Godot**
 et l'écume rendue qui en naît (8.4), par l'alternance ; R18 attendu.
+
+## S368 — 2026-09-26 — rendu 9 : l'écume qui dure, puis suspendue
+
+**Entrée.** *« Continue »* ; alternance après S367. L'écume de S360, refusée en R21, n'avait pas de mémoire ; S367 avait
+posé la référence du champ d'ADR-014.
+**Fait** ([preuve](../docs/validation/ECUME-GODOT-S368.md)). `ecume.comp`, `ecume.gd` : le champ sur la carte, 1 024² texels
+de 0,25 m, le pas de S367 à l'identique, 60 s de passé rejouées à chaque recentrage. Advection à **0,47 mm** ; décroissance
+à **8,6·10⁻⁶** après un **défaut trouvé** — le transfert `e^(−λr·dt) − e^(−λa·dt)` s'annulait en f32 au pas de 1/60 s
+(2,5·10⁻⁵) : coefficients en double. Couverture : κ de S367 → 0,62 % ; **κ = 3,09**, prédit par sa pente → **0,405 %**
+pour 0,421 %. Rendu : moutons au bord irrégulier qui pâlissent en se trouant, dentelle résiduelle derrière eux — deux
+motifs rejetés sur image (labyrinthe du bruit de valeurs, résille de Worley).
+**Décision de l'utilisateur, pendant P5** : *« Oublie l'ecume sauf si tu trouve des photos qui informe de la forme et
+couleur et position dans la topologie »*. La série Beaufort de la NOAA (force 4, notre mer) : 400 × 386, ne renseigne pas.
+L'écume **s'arrête**, éteinte par défaut (`ECUME=champ` la rallume) ; code et mesures conservés ; pas de revue.
+**Rituel.** Maillons **1** : 8.4 reste absent (rien de rendu n'est reçu). Suivant : par l'alternance, **la physique** — les
+chemins de B lisent la côte (ADR-196), la coque qui bouge, ou le lot 5 ; au rendu, la caméra à demi immergée et
+l'échelle radiométrique du ciel. R18 attendu.

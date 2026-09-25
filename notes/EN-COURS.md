@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S368 — **en cours**. **Rendu 9 : l'écume qui dure** — *« Continue »* ; alternance d'ADR-191 D3 après S367
+Session : S368 — **terminée**. **Rendu 9 : l'écume qui dure** — *« Continue »* ; alternance d'ADR-191 D3 après S367
 (physique). L'écume rendue a été **refusée** (R21) : sans mémoire, des taches instantanées au bord lisse. S367 a
 construit la référence du champ d'ADR-014 ([ECUME-S367](../docs/validation/ECUME-S367.md)) ; ici sa **production sur la
 carte de Godot** (SPEC-006 §4) et l'écume rendue qui en naît (liste 8.4, absente).
@@ -90,7 +90,7 @@ Critères, écrits avant le code :
 - [x] **P3** — la couverture relue, κ recalé ; critère 2.
 - [x] **P4** — l'écume rendue depuis le champ (`eau.gdshader`) : actif et dentelle ; images R26 ; critère 3.
 - [x] **P5** — preuve ECUME-GODOT-S368 ; liste 8.4, file, dépendances, feuille de route, index.
-- [>] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `ecume.comp` (le pas de S367, modes de contrôle 1 à 4), `ecume.gd` (deux images RGBA32F
