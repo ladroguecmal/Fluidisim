@@ -67,7 +67,10 @@ var ecume_centre := Vector2(INF, INF)
 const ECUME_PASSE_S := 60.0
 const ECUME_PAS_S := 0.1
 ## κ du seuil de déferlement `κ·σ_a` : 0 = la relation de S367, `2,5 + ln(W/0,0226)/(−3,52)` ; sinon la valeur recalée.
-const KAPPA_ECUME := 0.0
+## **S368, recalé sur la carte** (`--controle-ecume-couverture`, 40 s au régime) : la relation de S367 donne κ = 2,978 et
+## 0,62 % pour 0,42 % visés — la bande de l'afficheur n'est pas celle du cœur ; κ = 3,09, prédit par la pente de S367,
+## donne 0,405 % (rapport 0,96) ; 3,00 → 1,36, 3,20 → 0,62.
+const KAPPA_ECUME := 3.09
 var vue_caustiques: SubViewport
 var materiau_caustiques: ShaderMaterial
 var maillage_caustiques: MeshInstance3D
@@ -153,6 +156,10 @@ func _ready() -> void:
 	if "--controle-ecume-champ" in args:
 		anime = false
 		controle_ecume_champ()
+		return
+	if "--controle-ecume-couverture" in args:
+		anime = false
+		controle_ecume_couverture()
 		return
 	if "--controle-fft" in args:
 		anime = false
@@ -999,3 +1006,36 @@ func _relire_ecume() -> PackedFloat32Array:
 	while boite[0] == null:
 		await get_tree().process_frame
 	return boite[0]
+
+
+## S368 — **la couverture du champ sur la carte** (critère 2) : recentré à la pose proche, 60 s de passé, puis 40 s de
+## mesure — la part où l'actif dépasse ½, relue chaque seconde — contre `couverture_monahan` de l'export. `KAPPA` règle le
+## seuil ; imprime κ et la couverture.
+func controle_ecume_couverture() -> void:
+	for _i in 4:
+		await RenderingServer.frame_post_draw
+	pose("proche")
+	ecume_centrer(temps)
+	var cible := float(donnees["couverture_monahan"])
+	var somme := 0.0
+	var n := 0
+	var t := temps
+	for s in 40:
+		var suite := []
+		for k in 11:
+			suite.append(lignes("bande", t + k * ECUME_PAS_S))
+		ecume.avancer(suite, ECUME_PAS_S, 0)
+		t += 10 * ECUME_PAS_S
+		var valeurs: PackedFloat32Array = await _relire_ecume()
+		var blanc := 0
+		for i in range(0, valeurs.size(), 4):
+			if valeurs[i] > 0.5:
+				blanc += 1
+		somme += float(blanc) / (valeurs.size() / 4)
+		n += 1
+	var v := 0.0
+	for r in donnees["bande"]:
+		v += 0.5 * pow(float(r[0]) * float(r[4]) * float(r[4]), 2.0)
+	var kappa: float = ecume.seuil / sqrt(v)
+	print("CONTROLE_ECUME_S368 couverture kappa=%.3f seuil_g=%.4f active=%.4f%% monahan=%.4f%% rapport=%.3f" % [kappa, ecume.seuil / 9.81, 100.0 * somme / n, 100.0 * cible, somme / n / cible])
+	get_tree().quit()
