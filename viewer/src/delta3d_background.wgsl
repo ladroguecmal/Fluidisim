@@ -794,11 +794,38 @@ fn couple_rhs(@builtin(global_invocation_id) id: vec3<u32>) {
         // de la somme compensée (S233) suit les mailles dans `cells_in` : nul tant que la surface
         // n'a pas avancé — les bancs de S300 ne l'écrivent pas —, porté par le pas depuis S301.
         let roundoff = cells_in[plane + cells() + col];
-        let value = params.rho * params.g_eff * ((cells_in[col] - params.rest) - roundoff)
+        let value = params.rho * params.g_eff * (difference(cells_in[col], params.rest) - roundoff)
             + cells_out[plane + col];
         b = b + value * a * inv;
     }
 
     cells_out[base_rhs + c] = b;
     if (diag > 0.0) { cells_out[base_prec + c] = 1.0 / (diag * inv); } else { cells_out[base_prec + c] = 0.0; }
+}
+
+/// S358 — `s − a` exacte, en entiers sur les bits IEEE : la fonction de `delta3d_step.wgsl` (S301), recopiée parce que
+/// les deux sources se compilent séparément. Pour `difference` ci-dessous.
+fn exact_difference(s: f32, a: f32) -> f32 {
+    let bs = bitcast<u32>(s);
+    let ba = bitcast<u32>(a);
+    let es = i32((bs >> 23u) & 0xffu);
+    let ea = i32((ba >> 23u) & 0xffu);
+    let ms = i32((bs & 0x7fffffu) | 0x800000u);
+    let ma = i32((ba & 0x7fffffu) | 0x800000u);
+    let e = min(es, ea);
+    let d = (ms << u32(es - e)) - (ma << u32(ea - e));
+    return f32(d) * bitcast<f32>(u32(e - 150 + 127) << 23u);
+}
+
+/// S358 — `x − a` exacte quand Sterbenz la garantit (deux flottants normaux positifs dont les exposants diffèrent d'un
+/// au plus, ce que tient une hauteur de colonne près de son repos), flottante sinon. `(η − repos) − reste` écrit en
+/// flottant est réassocié par le compilateur en `η − (repos + reste)`, où le reste se perd dans l'ulp du repos (L345) :
+/// mesuré en S358 sur le pas linéaire, la somme publiée dérivait de 3,4·10⁻⁵ m dès le premier pas.
+fn difference(x: f32, a: f32) -> f32 {
+    let ex = i32((bitcast<u32>(x) >> 23u) & 0xffu);
+    let ea = i32((bitcast<u32>(a) >> 23u) & 0xffu);
+    if (x > 0.0 && a > 0.0 && ex > 0 && ea > 0 && ex < 255 && ea < 255 && abs(ex - ea) <= 1) {
+        return exact_difference(x, a);
+    }
+    return x - a;
 }

@@ -273,7 +273,7 @@ fn ghost_up(i: u32, j: u32, k: u32) -> vec2<f32> {
     let col = j * s.nx + i;
     let theta = max((height(i, j) - (f32(k) + 0.5) * s.dx) / s.dx, s.theta_min);
     let roundoff = cells_in[columns() + cells() + col];
-    let value = s.rho * s.g_eff * ((cells_in[col] - s.rest) - roundoff) + cells_out[columns() + col];
+    let value = s.rho * s.g_eff * (difference(cells_in[col], s.rest) - roundoff) + cells_out[columns() + col];
     return vec2<f32>(1.0 / theta, value);
 }
 
@@ -378,6 +378,19 @@ fn exact_difference(s: f32, a: f32) -> f32 {
     return f32(d) * bitcast<f32>(u32(e - 150 + 127) << 23u);
 }
 
+/// S358 — `x − a` exacte quand Sterbenz la garantit (deux flottants normaux positifs dont les exposants diffèrent d'un
+/// au plus, ce que tient une hauteur de colonne près de son repos), flottante sinon. `(η − repos) − reste` écrit en
+/// flottant est réassocié par le compilateur en `η − (repos + reste)`, où le reste se perd dans l'ulp du repos (L345) :
+/// mesuré en S358 sur le pas linéaire, la somme publiée dérivait de 3,4·10⁻⁵ m dès le premier pas.
+fn difference(x: f32, a: f32) -> f32 {
+    let ex = i32((bitcast<u32>(x) >> 23u) & 0xffu);
+    let ea = i32((bitcast<u32>(a) >> 23u) & 0xffu);
+    if (x > 0.0 && a > 0.0 && ex > 0 && ea > 0 && ex < 255 && ea < 255 && abs(ex - ea) <= 1) {
+        return exact_difference(x, a);
+    }
+    return x - a;
+}
+
 fn x_faces() -> u32 { return (s.nx + 1u) * s.ny; }
 fn y_faces() -> u32 { return s.nx * (s.ny + 1u); }
 
@@ -468,7 +481,7 @@ fn advance(@builtin(global_invocation_id) id: vec3<u32>) {
     }
     cells_in[c] = eta;
     cells_in[r] = roundoff;
-    published[c] = (eta - s.rest) - roundoff;
+    published[c] = difference(eta, s.rest) - roundoff;
 }
 
 // ── Diagnostics D3 : qualité mesurée sur la carte, relue en différé ──────────────────────────

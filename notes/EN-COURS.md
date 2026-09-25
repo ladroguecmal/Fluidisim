@@ -95,7 +95,7 @@ Critères, écrits avant le code :
 - [x] **P2** — `delta3d_linear.wgsl` : les noyaux du pas et du gradient conjugué à ouvertures.
 - [x] **P3** — `delta3d_linear.rs` : `Linear3`, tampons, encodage du pas, relectures de banc ; critère 1.
 - [x] **P4** — le banc contre `Volume3`, bosse, avec et sans éponge, balayage des cycles ; critère 2.
-- [ ] **P4 bis** *(ajoutée en cours, après P3)* — le même défaut de publication dans la production `Step3`
+- [x] **P4 bis** *(ajoutée en cours, après P3)* — le même défaut de publication dans la production `Step3`
   (`published`, `ghost_up`) : la dérive de la moyenne de S305 §7, mesurée avant et après sur la cuve.
 - [x] **P5** — le solide fixe immergé ; critère 2 bis.
 - [ ] **P6** — le coût ; critère 3.
@@ -127,3 +127,11 @@ Critères, écrits avant le code :
   à vitesse nulle, exactement ; volume 0,283311980 contre 0,283312029. **Témoin privé de la découpe** (`--temoin` : la
   carte toutes ouvertes contre le cœur avec la sphère) : **4,68·10⁻³ m** — le banc voit le solide, vingt mille fois
   au-dessus de l'écart qu'il mesure avec. Prédiction « 32 cycles au plus » tenue : **16** pour les deux cas.
+- **P4 bis, la production corrigée.** Trois sites : `delta3d_step.wgsl` (`published`, `ghost_up`) et
+  `delta3d_background.wgsl` (couvercle du second membre couplé, qui reçoit `exact_difference` recopiée). Binaire
+  d'avant gardé hors dépôt pour rejouer. `--delta3d-cuve-trajectoire`, 1 000 pas, 64 / 128 cycles — **avant**
+  (S305 au chiffre près) : hauteur 3,00 / 3,05 / 3,26·10⁻⁷ m à `nx` 16 / 32 / 48, dérive de la moyenne 6,0 / 4,7 /
+  4,0·10⁻⁸ m ; **après** : **2,61 / 2,42 / 2,37·10⁻⁸ m**, dérive **2,1 / 1,3 / 0,77·10⁻¹⁰ m** (le cœur : 1,9 / 1,1 /
+  0,93·10⁻¹⁰), phase de la carte égale à la référence à 10⁻⁶ degré près (1,223193°, 0,248306°, 0,065155°).
+  `--delta3d-cuve-longue`, 5 s : pire par fenêtre 1,21 → **4,73·10⁻⁸ m** (avant 2,48 → 7,79·10⁻⁷) — la pente
+  séculaire de §6 **divisée par ≈ 13, pas annulée** (≈ 8·10⁻⁹ m/s). S305 §7.3 : cause trouvée.
