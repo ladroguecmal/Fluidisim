@@ -62,84 +62,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S359 — **terminée**. **Rendu 3 (ADR-191 D3) : l'eau a une épaisseur** — la colonne d'eau dans Godot.
+Session : S360 — **en cours**. **Rendu 4 : la surface fine** — la demande de l'utilisateur prime sur l'alternance.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
-Entrée — **verdict R19** de l'utilisateur : *« selon moi la mer n'est pas du tout crédible, mais c'est pas grave on
-continue, car je pense qu'il manque plein de chose avec la trnasparence en fonction de la prfondeur etc... »*. Relu sur
-les images : l'eau est un aplat opaque — ni lumière qui y entre, ni fond, ni réfraction — et **l'horizon s'assombrit**
-au lieu de refléter le ciel clair. Liste **8.5** (transparence, réfraction, caustiques) : *absent*.
+Entrée — **verdict R20** : (1) *« Tu as raison sur le ciel, il n'aide pas au reflets et limite la qualité du rendue
+final »* ; une capture de l'eau : *« ce rendue du point de vue topologie est pas réaliste »* ; (2) *« La couleur me
+paraît parfaite sincèrement »* ; (3) *« Tente les caustique, mais pour l'ecume […] l'ecume n'apparaît presque jamais
+sur le vaguelettes uniquement sur des grandes vagues avec déferlement mais très rare voir quasi impossible »* ; (4) pas
+de référence, *« tu peux faire tes recherches »*. **Mesuré avant le plan** : la queue qui dessine les petites vagues
+compte **60 ondes planes pour 5,5 octaves** (λ 7 cm à 3,4 m) réparties sur 360°, pentes isotropes (rapport 1,04 ;
+Cox et Munk : 1,37 à 7,8 m/s) — des taches sans direction ni crête. Ordre : la topologie d'abord (les caustiques
+projettent la forme de la surface) ; caustiques et ciel à la session suivante.
 
 Critères, écrits avant le code :
-1. **R19 consigné** tel quel (REVUE-VISUELLE §24, décisions de la file).
-2. **Le fond** : bathymétrie de démonstration — pente de sable de 6 m sous la caméra à 40 m vers 400 m, jamais sous
-   2·Hs (Hs ≈ 2,5 m), puis le large ; texture procédurale, albédo 0,3 *à calibrer* ; aucun téléchargement. **B ne voit
-   pas le fond** (2.7 absent) : déclaré, pas caché. Poses côtières ajoutées ; la scène du large reste.
-3. **La profondeur reconstruite** depuis le tampon de profondeur, en mode contrôle (mer plate, tonalité linéaire),
-   contre la bathymétrie connue en cinq points : écart ≤ 2 % + 5 cm.
-4. **L'optique** : Maritorena, Morel et Gentili (1994) sur le trajet oblique — fond × `exp(−Kd·(H + L))` + corps d'eau
-   × `(1 − exp(−Kd·(H + L)))`, `Kd = (a + b_b)/μ̄_d` des coefficients d'ADR-177, `μ̄_d` = 0,8 *à calibrer* ; réfraction
-   de Snell (n = 1,34) en espace écran ; transmission `1 − F` de Fresnel exact. Contrôle au nadir, mer plate : la
-   transmission rendue suit `exp(−2·Kd·H)` à trois profondeurs, à 0,01 près (8 bits). Sans fond, la mer du large ne
-   change pas de couleur (écart moyen < 1/255 sur les poses de R19).
-5. **L'horizon, diagnostic** : hypothèse — la rugosité confiée à Godot éteint sa réflexion rasante (approximation de
-   l'environnement) ; témoin : rugosité bornée ; mesure : luminance de la mer sous l'horizon rapportée au ciel dessus.
-   Selon le résultat, correction dans la session ou point de file.
-6. **Images R20** : poses côtières et du large, contre R19 ; questions et références demandées.
-7. Preuve, file, liste 8.5, index.
+1. **R20 consigné** tel quel ; **recherches sourcées** : Beaufort 4, taille des moutons, anisotropie de Cox et Munk,
+   étalement d'Elfouhaily et al. (1997), océan par FFT de Tessendorf (2001).
+2. **L'écume au déferlement** : tirée de la seule bande (les vagues dominantes), à une empreinte fixe ; couverture de
+   Monahan tenue à ± 25 % (mesurée au nadir, mode contrôle), **plus aucune tache sous 0,5 m** de diamètre équivalent.
+3. **Le spectre fin, dans le cœur** : densité continue de la queue d'équilibre de B (même niveau) avec l'étalement
+   d'Elfouhaily ; sa variance sur la plage de la queue égale celle de la queue discrète à 1 % ; son rapport de pentes
+   au vent / au travers à ± 10 % de Cox et Munk ; amplitudes de départ `h0` sur deux grilles 256² (32 m et 4 m), graine
+   fixe, exportées par l'afficheur.
+4. **La FFT dans Godot** (calcul de `RenderingDevice`, sans téléchargement) : pentes, gradient du déplacement,
+   hauteur ; temps replié en double sur une période de répétition, dispersion quantifiée (I-08) ; **contrôle** — le
+   champ de la FFT contre la somme directe des mêmes composantes en quatre points, écart ≤ 10⁻⁴ relatif ; pente
+   quadratique moyenne à 1 % de `Σ|h0|²k²`.
+5. **Le nuanceur** : la queue de 60 composantes remplacée par les deux cascades, pondérées par l'empreinte ; ce qu'elles
+   ne résolvent pas va à la covariance filtrée (ADR-161). Contrôles de S359 inchangés ; rapport mer/ciel sous l'horizon
+   à ± 15 % de l'afficheur.
+6. **Images R21** : les poses de R20 et la zone de la capture de l'utilisateur.
+7. Preuve, ADR, liste 8.9 et 8.4, index.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — verdict R19 consigné ; diagnostic de l'horizon ; critères 1 et 5 (mesure).
-- [x] **P3** — le fond et ses poses ; critère 2.
-- [x] **P4** — la profondeur reconstruite, le mode contrôle ; critère 3.
-- [x] **P5** — l'optique de la colonne ; critère 4.
-- [x] **P6** — l'horizon, selon P2 ; critère 5.
-- [x] **P7** — les images de R20 ; critère 6.
-- [x] **P8** — preuve, file, liste, index ; critère 7.
-- [x] **P9** — rituel.
+- [ ] **P2** — R20 consigné ; recherches ; critère 1.
+- [ ] **P3** — l'écume au déferlement, mesurée avant et après ; critère 2.
+- [ ] **P4** — le spectre fin dans le cœur, ses essais ; l'export des `h0` ; critère 3.
+- [ ] **P5** — la FFT dans Godot et son contrôle ; critère 4.
+- [ ] **P6** — le nuanceur sur les cascades ; critère 5.
+- [ ] **P7** — les images de R21 ; critère 6.
+- [ ] **P8** — preuve, ADR, file, liste, index ; critère 7.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
-- **P2.** R19 consigné (REVUE-VISUELLE §24, file). `outils/horizon_mer.py` : horizon = plus forte chute de luminance
-  d'une rangée à la suivante ; bandes de 20 rangées à 3 de la ligne ; sRGB → linéaire, Rec. 709. Rapport mer/ciel —
-  Godot (R19) rasante **0,153**, proche **0,182** ; afficheur rasante **0,713**, proche **0,728**. Témoin
-  `RUGOSITE_MAX=0.05` (uniforme `rugosite_max`) : **0,414** et **0,482**. Reste attendu : `SPECULAR` 0,25 donne à Godot
-  F0 = 0,16·0,25² = 0,01 (l'eau : 0,020) ; et son approximation de l'environnement. L'afficheur, lui, calcule sa
-  réflexion (ciel clair, nuages, Fresnel, pente non résolue par quadrature de Gauss-Hermite, ADR-161) : c'est ce qui
-  se porte. **Critère de P6, écrit ici avant le code** : rapport mer/ciel de Godot à ± 15 % de celui de l'afficheur,
-  aux poses proche et rasante.
-- **P3.** `godot/sol.gdshader` (sable procédural, albédo (0,34 ; 0,30 ; 0,24), rides de 0,7 m) ; `mer.gd` :
-  `--cote` ajoute le fond, `profondeur(x, y)` en coordonnées de B (6 m à y = −30, 40 m à y = 370, puis 300 m ; bancs
-  d'un mètre ; jamais sous 5 m), grille de 4 m sur 2 400 × 1 100 m ; pose `plongeante` (12 m, −0,75 rad), touche 5 ;
-  captures suffixées `_cote` ; `SANS_EAU=1` masque la mer (instrument). Fond vu seul : rides visibles, gris sous le ciel.
-- **P4, critère 3 tenu.** `scene_monde` : NDC `(uv·2 − 1, d)`, profondeur inversée de Godot 4.3+, puis
-  `INV_PROJECTION_MATRIX`, `INV_VIEW_MATRIX` ; la mer lit `hint_screen_texture` et `hint_depth_texture`. `mer.gd
-  --controle-fond` : mer plate, émission seule, lumières, ambiance, reflets, brume, halo éteints, tonalité linéaire ;
-  caméra à 15 m, −0,9 rad ; la profondeur attendue par le rayon du pixel contre `profondeur()` (pas de 5 cm, puis
-  dichotomie). Cinq pixels : 8,413 / 8,443 ; 8,894 / 8,948 ; 9,560 / 9,592 ; 7,498 / 7,543 ; 7,796 / 7,824 m — écart
-  −2,7 à −5,4 cm, pire 0,23 de la tolérance. Biais de signe constant : le pixel entier contre son centre, non poursuivi.
-  *Battements de P2 et P3 écrits en avance d'une et deux minutes — corrigé ici.*
-- **P5, critère 4 tenu.** `Kd` = (0,4259 ; 0,0724 ; 0,0158) m⁻¹ calculé par `mer.gd` ; réfraction : le rayon
-  réfracté descendu à la profondeur vue sans réfraction, reprojeté, relu, gardé s'il reste sous la surface ; T =
-  exp(−Kd·(H + L)) ; fond × T × (1 − F)/n² en émission, corps d'eau × (1 − T) en albédo, écume intacte. Contrôle au nadir,
-  mer plate, caméra à 10 m : H = 6,205 / 14,954 / 29,355 m — rendu (0,0048 ; 0,4020 ; 0,8228) contre (0,0051 ; 0,4070 ;
-  0,8217), (0 ; 0,1144 ; 0,6240) contre (0 ; 0,1146 ; 0,6229), (0 ; 0,0144 ; 0,3968) contre (0 ; 0,0142 ; 0,3949) — pire
-  **0,0050**. Sans fond : écart moyen à R19 **0,21 / 0,33 niveau** sur 255 (proche / rasante) ; 13 % des pixels bougent,
-  les grands écarts (jusqu'à 128) dans la seule bande de l'horizon — crêtes et écume lointaines, passe transparente
-  soupçonnée, non démontrée. Côte : bleu clair sur le sable de 6 à 15 m, sombre après la cassure ; les rides ne se
-  lisent pas à travers la houle.
-- **P6, critère 5 tenu.** La réflexion de l'afficheur portée : `ciel.gdshaderinc` (dégradé du ciel clair, nuages,
-  soleil — une source pour le ciel de Godot, `ciel.gdshader`, et pour les reflets) ; l'eau en `unshaded` — Fresnel
-  exact, covariance des pentes non résolues transportée par le jacobien, quadrature de Gauss-Hermite 3 × 3, éclat du
-  soleil, corps d'eau `R0·2·(0,6 + 0,4·n·soleil)`, crêtes et écume de `cretes_couleur` ; le sable éclairé par le même
-  modèle (mêmes unités que le corps d'eau, pour Maritorena) — le facteur 1/n² de P5 retiré avec la même raison.
-  `TONALITE=lineaire` (sans courbe ni halo, comme l'afficheur). Rapport mer/ciel sous l'horizon, linéaire : avant
-  **0,107 / 0,093**, après **0,710 / 0,676** (proche / rasante), afficheur 0,728 / 0,713 : −2,5 % et −5,2 %. Contrôles
-  de P4 et P5 inchangés. **Vu** : une couture verticale au centre du ciel de Godot, absente de l'afficheur — non
-  attribuée ; les nuages en blocs viennent du bruit de l'afficheur.
-- **P7.** R20 écrite (REVUE-VISUELLE §25), quatre images envoyées ; `viewer/captures/s359` (non versionné), SHA-256 :
-  large proche `ae2554e1…`, rasante `dda951be…` ; côte proche `01a40a51…`, plongeante `82b3cbf9…`, rasante `187f4dce…`.
-- **P8.** Preuve [EPAISSEUR-EAU-S359](../docs/validation/EPAISSEUR-EAU-S359.md) (« Reproduire » en tête),
-  [ADR-194](../docs/adr/ADR-194-la-lumiere-de-l-eau-calculee-par-notre-nuanceur.md) (la lumière de l'eau par notre
-  nuanceur, un seul ciel) ; liste **8.5 absent → partiel**, décompte 3 / 59 / 58 ; `dependances_liste.py` corrigé et
-  `--ecrire` ; file (rendu dans Godot), feuille de route (§3 ter, décompte), REPRISE §4, index. `--check` propre.
