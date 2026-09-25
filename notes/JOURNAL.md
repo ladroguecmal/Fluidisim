@@ -17105,3 +17105,22 @@ déferlement dissipé, ni diffraction ; déterminisme entre plateformes par cons
 scène côtière de Godot —, mais aucun chemin ne consomme encore la capacité (L258) et 2.7 reste partiel. Suivant :
 **R21 à R23 d'abord** ; sinon le rendu, et à deux maillons un lot qui fait avancer une case — 8.6, la vue sous-marine ;
 la côte de Godot vue par B consommerait ADR-196 sans changer de case. R18, R21, R22, R23 attendus.
+
+## S365 — 2026-09-25 — rendu 7 : sous la surface (8.6)
+
+**Entrée.** *« Continue »*, sans verdict R21 à R23 ; alternance d'ADR-191 D3 après S364. À deux maillons, un lot qui fait
+avancer une case : **8.6**, absente (ADR-019, B11), sur 8.5 partielle.
+**Fait** ([preuve](../docs/validation/SOUS-MARIN-S365.md)). `optique_eau.gdshaderinc`, une source pour la surface, le fond
+et le fond du ciel. **La surface vue d'en dessous** : Fresnel eau → air, ciel réfracté × n², réflexion totale au-delà de
+l'angle critique ; mer plate, zénith, 16 directions : bord de la **fenêtre de Snell à 48,254°** pour 48,268° (pire
+0,048°). **Le milieu** : `exp(−c·d)`, `c = a + 2·b_b` (Pope & Fry, Morel), et la lumière de l'eau intégrée exactement le
+long d'une ligne en pente ; transmission relue à **0,004** près de 5 à 19 m ; le fond et ses caustiques vus de l'eau.
+**Mode immergé** d'un bloc (`immersion()`), non-régression au-dessus de l'eau au bit (proche, rasante).
+**Impasses et défauts, dits.** `FRONT_FACING` : la grille présente sa face avant par en dessous. La plus forte chute de
+luminance se trompe sur les nuages tassés au bord de la fenêtre : mesure sur le coefficient de Fresnel. Fresnel à 0/0
+sous incidence rasante (pixels noirs) ; une ligne sous l'horizon (profondeur moyenne du trajet) — corrigés.
+**Limites.** Caméra à demi immergée non traitée (ADR-019 §6) ; fond absent du miroir ; ni bulles, ni rayons, ni
+turbidité ; `f(ω)` à calibrer ; coût non mesuré. **R24** préparée, images envoyées, une référence sous l'eau demandée.
+**Rituel.** Maillons **0** : 8.6 passe à partiel (3 / 61 / 56) ; devient possible, descendre la caméra sous l'eau ;
+consommé par le rendu de Godot (poses sous l'eau, scène côtière) ; preuve §1–2. Suivant : **R21 à R24 d'abord** ; par
+l'alternance, la physique — les chemins de B lisent la côte (ADR-196), la coque qui bouge, ou le lot 5 (A316).

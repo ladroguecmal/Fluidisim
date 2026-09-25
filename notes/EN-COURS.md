@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S365 — **en cours**. **Rendu 7 : sous la surface** — *« Continue »*, sans verdict R21 à R23 ; alternance
+Session : S365 — **terminée**. **Rendu 7 : sous la surface** — *« Continue »*, sans verdict R21 à R23 ; alternance
 d'ADR-191 D3 après S364 (physique). **À deux maillons**, un lot qui fait avancer une case : **8.6**, *absente* (vue
 sous-marine et passage de la surface, [ADR-019](../docs/adr/ADR-019-vue-sous-marine.md), banc B11), qui dépend de 8.5,
 partielle dans Godot depuis S359.
@@ -92,7 +92,7 @@ Critères, écrits avant le code :
   transmission ; critère 2.
 - [x] **P4** — images R24, REVUE-VISUELLE §29.
 - [x] **P5** — preuve SOUS-MARIN-S365 ; liste 8.6, file, dépendances, feuille de route, index.
-- [>] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `optique_eau.gdshaderinc` (R0, gain, Kd, `c = a + 2·b_b`, `sous_eau`, `eau_infinie`,
