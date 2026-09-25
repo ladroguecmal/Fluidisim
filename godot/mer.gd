@@ -81,6 +81,9 @@ func _ready() -> void:
 	if "--controle-fond" in args:
 		anime = false
 		controle_fond()
+	if "--controle-ecume" in args:
+		anime = false
+		controle_ecume()
 
 
 ## Le ciel : depuis S359, celui de l'afficheur lui-même (`ciel.gdshaderinc` — dégradé du « ciel clair » relevé sur la
@@ -232,6 +235,8 @@ func uniformes_fixes() -> void:
 		var k: Array = donnees["k_moyens"]
 		materiau.set_shader_parameter("k_moyens", Vector2(float(k[0]), float(k[1])))
 	materiau.set_shader_parameter("ecume_seuils", PackedFloat32Array(donnees["ecume_seuils"]))
+	materiau.set_shader_parameter("ecume_seuils_deferlement", PackedFloat32Array(donnees["ecume_seuils_deferlement"]))
+	materiau.set_shader_parameter("ecume_empreinte_min", float(donnees["ecume_empreinte_min_m"]))
 	materiau.set_shader_parameter("kd", (ABSORPTION + RETRODIFFUSION) / MU_D)
 	var hauteur := get_viewport().get_visible_rect().size.y
 	materiau.set_shader_parameter("angle_pixel", 2.0 * tan(deg_to_rad(camera.fov) / 2.0) / hauteur)
@@ -390,3 +395,28 @@ func profondeur_au_pixel(px: Vector2) -> float:
 			a = m
 	var p := o + d * b
 	return -p.y
+
+
+## S360 — **le contrôle de l'écume** : la couverture en sortie directe (mode 3), tonalité linéaire, sans brume ni halo,
+## au nadir à 12 et 40 m au-dessus de neuf positions espacées de 200 m, à 12 s. Les masques vont dans `captures/`, que
+## `outils/ecume_taches.py` relit : couverture, taches, diamètres.
+func controle_ecume() -> void:
+	var env: Environment = (get_children().filter(func(c): return c is WorldEnvironment)[0] as WorldEnvironment).environment
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	env.glow_enabled = false
+	env.fog_enabled = false
+	materiau.set_shader_parameter("controle", 3)
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures"))
+	for hauteur in [12.0, 40.0]:
+		for i in 9:
+			var x := 200.0 * float(i % 3 - 1)
+			var y := 200.0 * float(i / 3 - 1)
+			camera.position = Vector3(x, hauteur, -y)
+			camera.rotation = Vector3(-PI / 2.0, 0.0, 0.0)
+			mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
+			for _k in 12:
+				await RenderingServer.frame_post_draw
+			var chemin := ProjectSettings.globalize_path("res://captures/ecume_%d_%d.png" % [int(hauteur), i])
+			get_viewport().get_texture().get_image().save_png(chemin)
+	print("CONTROLE_ECUME_S360 masques=18 hauteurs=12,40")
+	get_tree().quit()

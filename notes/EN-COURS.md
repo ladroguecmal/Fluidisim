@@ -96,7 +96,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — R20 consigné ; recherches ; critère 1.
-- [ ] **P3** — l'écume au déferlement, mesurée avant et après ; critère 2.
+- [x] **P3** — l'écume au déferlement, mesurée avant et après ; critère 2.
 - [ ] **P4** — le spectre fin dans le cœur, ses essais ; l'export des `h0` ; critère 3.
 - [ ] **P5** — la FFT dans Godot et son contrôle ; critère 4.
 - [ ] **P6** — le nuanceur sur les cascades ; critère 5.
@@ -116,3 +116,13 @@ Critères, écrits avant le code :
   rapport **1,37**. Tessendorf (2001, *Simulating Ocean Water*, cours SIGGRAPH) : réalisation par FFT, `h(k,t) = h0(k)
   e^{iωt} + h0*(−k) e^{−iωt}`, boucle en temps par quantification de ω. Capture de l'utilisateur gardée en local
   (`viewer/captures/s359/r20_capture_utilisateur.jpg`, SHA-256 `8f755dc3…`).
+- **P3, critère 2 en partie manqué.** Instrument : mode contrôle 3 (couverture en sortie directe), `mer.gd
+  --controle-ecume` (nadir à 12 et 40 m, neuf positions espacées de 200 m, 12 s), `outils/ecume_taches.py`
+  (composantes 4-connexes, diamètre équivalent). **Avant** — 12 m : couverture 0,625 %, **4 652 taches**, diamètre
+  médian **4,3 cm**, max 45 cm, toutes sous 0,5 m ; 40 m : 0,615 %, 5 552 taches, médian 12 cm. **Après** (seuils de la
+  bande seule, `MerCretes::seuils_deferlement`, graine `0x5360_0001` ; empreinte d'au moins 1 m,
+  `EMPREINTE_DEFERLEMENT`, Callaghan 2012 et Bondur–Sharkov 1982) — 12 m : 0,737 %, **4 taches**, 1,34 à 3,07 m ; 40 m :
+  **0,420 %** (Monahan 0,42 %), 37 taches, médian **1,59 m**, max 3,79 m, mais **21,6 % sous 0,5 m** (8 taches, jusqu'à
+  un pixel) : les excursions naissantes au bord du seuil. « Plus aucune tache sous 0,5 m » : **manqué** à 40 m, tenu à
+  12 m ; couverture tenue à 40 m, à 12 m quatre taches ne font pas une statistique. Contrôles de S359 inchangés.
+  Export relancé depuis la racine : lancé depuis `viewer/`, il écrit sous `viewer/godot/` (fichier égaré supprimé).

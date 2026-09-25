@@ -118,6 +118,11 @@ fn echantillon(bande: &[Onde], queue: &[Onde], q: [f64; 2], t: f64, h: f32, m: f
 /// `h_i = 2^(i−7)` m, de 7,8 mm — l'empreinte d'un pixel proche — à 64 m ; le nuanceur interpole en `log₂ h`.
 pub const EMPREINTES: usize = 14;
 
+/// S360 — l'empreinte la plus fine à laquelle l'écume se tire : un mètre, l'échelle des plus petits moutons que les
+/// mesures résolvent (Callaghan et al. 2012 : taches d'écume surtout sous 10 m², au plus 26 m² ; Bondur et Sharkov
+/// 1982 : un pic entre 8 et 16 m²). En deçà, le jacobien porterait des ondes qui ne déferlent pas en moutons.
+pub const EMPREINTE_DEFERLEMENT: f32 = 1.0;
+
 pub fn empreinte(i: usize) -> f32 {
     2f32.powi(i as i32 - 7)
 }
@@ -161,6 +166,14 @@ impl MerCretes {
                 (j - 1.0) / var.max(f32::MIN_POSITIVE).sqrt()
             })
             .collect()
+    }
+
+    /// **S360 — les seuils du déferlement** : les mêmes, sur la **bande seule** — les vagues dominantes, celles qui
+    /// déferlent. Verdict R20 : l'écume n'apparaît que sur les grandes vagues ; tirée du jacobien complet, elle tombait
+    /// sur les vaguelettes du premier plan (4 652 taches de 4 cm de diamètre médian au nadir à 12 m).
+    pub fn seuils_deferlement(&self, w: f64, graine: u64, par_instant: usize) -> [f32; EMPREINTES] {
+        let bande = MerCretes { bande: self.bande.clone(), queue: Vec::new(), m: self.m, retard: self.retard };
+        bande.seuils(w, graine, par_instant)
     }
 
     /// **Les seuils d'écume**, un par empreinte : le quantile `w` de `s`, sur `8·par_instant` échantillons de `graine`.
@@ -306,7 +319,9 @@ pub fn export_godot(scene: &Scene, asym: Option<&Asymmetry>, m: f32, chemin: &st
     let queue = lignes(&scene.tail, scene.tail_count_28, t0)?;
     let lag = asym.map_or(0., |a| a.lag_turns);
     let w = couverture_monahan(u10_s201());
-    let seuils = MerCretes::de(scene, m, lag).seuils(w, 0x5356_0001, 20_000);
+    let mer = MerCretes::de(scene, m, lag);
+    let seuils = mer.seuils(w, 0x5356_0001, 20_000);
+    let seuils_deferlement = mer.seuils_deferlement(w, 0x5360_0001, 20_000);
     // Contrôle : η linéaire de la bande en cinq points, calculé par le cœur à t₀ + 3 s.
     let t1 = SimTime(t0.0 + 3_000_000);
     let bande_t1 = lignes(&scene.background, usize::MAX, t1)?;
@@ -339,6 +354,8 @@ pub fn export_godot(scene: &Scene, asym: Option<&Asymmetry>, m: f32, chemin: &st
   \"k_moyens\": [{k1}, {k2}],
   \"couverture_monahan\": {w:.6},
   \"ecume_seuils\": [{seuils}],
+  \"ecume_seuils_deferlement\": [{seuils_deferlement}],
+  \"ecume_empreinte_min_m\": {EMPREINTE_DEFERLEMENT},
   \"soleil\": [{s0:.6}, {s1:.6}, {s2:.6}],
   \"R0\": [0.00068, 0.00826, 0.08960],
   \"transmission_crete\": [0.5987, 0.9187, 0.9863],
@@ -354,6 +371,7 @@ pub fn export_godot(scene: &Scene, asym: Option<&Asymmetry>, m: f32, chemin: &st
         k1 = asym.map_or(0., |a| a.k_mean[0]),
         k2 = asym.map_or(0., |a| a.k_mean[1]),
         seuils = seuils.iter().map(|x| format!("{x:.6}")).collect::<Vec<_>>().join(", "),
+        seuils_deferlement = seuils_deferlement.iter().map(|x| format!("{x:.6}")).collect::<Vec<_>>().join(", "),
         s0 = soleil[0],
         s1 = soleil[1],
         s2 = soleil[2],

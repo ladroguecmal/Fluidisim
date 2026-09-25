@@ -30,6 +30,10 @@ uniform vec2 k_moyens = vec2(0.0);
 // L'écume (S356) : quatorze seuils de `s = (J − 1)/σ` aux empreintes 2^(i−7) m ; sa réflectance.
 uniform float ecume_seuils[14];
 uniform float reflectance_ecume = 0.55;
+// S360 — l'écume au déferlement : la bande seule (les vagues dominantes), à une empreinte d'au moins
+// `ecume_empreinte_min` ; ses seuils, calculés par l'afficheur comme les autres, pour la même couverture de Monahan.
+uniform float ecume_seuils_deferlement[14];
+uniform float ecume_empreinte_min = 1.0;
 // La lumière des crêtes (S356) : transmission de l'eau pure sur Hs ; force et exposant de sa diffusion vers l'avant,
 // ceux de l'afficheur, à calibrer.
 uniform vec3 transmission_crete = vec3(0.5987, 0.9187, 0.9863);
@@ -52,7 +56,8 @@ uniform sampler2D profondeur_ecran : hint_depth_texture, filter_nearest;
 uniform vec3 kd = vec3(0.4259, 0.0724, 0.0158);
 uniform float indice = 1.34;
 // Mode contrôle (S359) : 0 rendu ; 1 profondeur verticale du fond vu sans réfraction, `H/echelle_controle`, en sortie
-// directe — `mer.gd --controle-fond` la relit contre la bathymétrie ; 2 la transmission `T` de la colonne, par canal.
+// directe — `mer.gd --controle-fond` la relit contre la bathymétrie ; 2 la transmission `T` de la colonne, par canal ;
+// 3 (S360) la couverture d'écume, relue par `mer.gd --controle-ecume` et `outils/ecume_taches.py`.
 uniform int controle = 0;
 uniform float echelle_controle = 50.0;
 
@@ -61,6 +66,8 @@ varying vec3 g_bande;
 varying vec2 pente_bande;
 varying float eps;
 varying float sigma2_bande;
+varying vec3 g_ecume;
+varying float sigma2_ecume;
 
 float poids(float k, float h) {
     float t = clamp(2.0 * k * h / PI - 1.0, 0.0, 1.0);
@@ -72,6 +79,13 @@ float seuil_ecume(float h) {
     int i = min(int(floor(x)), 12);
     float f = x - float(i);
     return ecume_seuils[i] * (1.0 - f) + ecume_seuils[i + 1] * f;
+}
+
+float seuil_deferlement(float h) {
+    float x = clamp(log2(max(h, 0.0078125)) + 7.0, 0.0, 13.0);
+    int i = min(int(floor(x)), 12);
+    float f = x - float(i);
+    return ecume_seuils_deferlement[i] * (1.0 - f) + ecume_seuils_deferlement[i + 1] * f;
 }
 
 /// Le point de la scène vu au pixel `uv`, en coordonnées du monde (Godot 4.3+, profondeur inversée, NDC z dans [0, 1]).
@@ -126,6 +140,9 @@ void vertex() {
     float eta = 0.0, e = 0.0, eq = 0.0, v = 0.0;
     vec2 e2 = vec2(0.0), qd = vec2(0.0);
     vec4 sa = vec4(0.0), sq = vec4(0.0);
+    vec3 ge = vec3(0.0);
+    float ve = 0.0;
+    float h_ecume = max(h, ecume_empreinte_min);
     for (int i = 0; i < n_bande; i++) {
         vec4 c = bande[i];
         float k = length(c.yz);
@@ -142,6 +159,9 @@ void vertex() {
         s += a * cs * c.yz;
         g -= a * k * sn * vec3(u.x * u.x, u.x * u.y, u.y * u.y);
         v += 0.5 * (a * k) * (a * k);
+        float a_e = c.x * poids(k, h_ecume);
+        ge -= a_e * k * sn * vec3(u.x * u.x, u.x * u.y, u.y * u.y);
+        ve += 0.5 * (a_e * k) * (a_e * k);
         if (i < split) {
             e2.x += a * sn; qd.x += a * cs;
             sa.xy += a * cs * c.yz; sq.xy -= a * sn * c.yz;
@@ -162,6 +182,8 @@ void vertex() {
     pente_bande = s;
     eps = cos(angle) * e + sin(angle) * eq;
     sigma2_bande = v;
+    g_ecume = ge;
+    sigma2_ecume = ve;
 }
 
 void fragment() {
@@ -192,10 +214,14 @@ void fragment() {
     float det = jxx * jyy - jxy * jxy;
     vec2 pente = det >= 0.1 ? vec2((jyy * p_lag.x - jxy * p_lag.y) / det, (-jxy * p_lag.x + jxx * p_lag.y) / det) : p_lag;
     vec3 n_monde = normalize(vec3(-pente.x, 1.0, pente.y));
-    // L'écume (S356) : couverture antialiasée par la variation de `s` dans le pixel.
+    // La variable des crêtes (S356), `s = (J − 1)/σ` au filtrage du pixel : elle porte la lumière des crêtes.
     float sigma = sqrt(max(sigma2_bande + energie * var_q, 0.0));
     float s = (det - 1.0) / max(sigma, 1e-6);
-    float couverture = clamp((seuil_ecume(h) - s) / max(fwidth(s), 1e-4) + 0.5, 0.0, 1.0);
+    // S360 — l'écume au déferlement : la même variable sur la bande seule, à l'empreinte d'au moins un mètre ;
+    // couverture antialiasée par sa variation dans le pixel.
+    float det_e = (1.0 + g_ecume.x) * (1.0 + g_ecume.z) - g_ecume.y * g_ecume.y;
+    float s_e = (det_e - 1.0) / max(sqrt(max(sigma2_ecume, 0.0)), 1e-6);
+    float couverture = clamp((seuil_deferlement(max(h, ecume_empreinte_min)) - s_e) / max(fwidth(s_e), 1e-4) + 0.5, 0.0, 1.0);
     // S359 — la colonne d'eau (liste 8.5). Le fond vu à travers la surface, par réfraction de Snell : le point du fond
     // où le rayon réfracté descend jusqu'à la profondeur vue sans réfraction, reprojeté à l'écran puis relu ; un objet
     // hors de l'eau à cet endroit garde le pixel lui-même. Puis Maritorena, Morel et Gentili (1994), généralisé au
@@ -253,6 +279,6 @@ void fragment() {
     couleur = mix(couleur, vec3(reflectance_ecume * eclairage), couverture);
     ALBEDO = couleur;
     if (controle > 0) {
-        ALBEDO = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : t_colonne;
+        ALBEDO = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : (controle == 2 ? t_colonne : vec3(couverture));
     }
 }
