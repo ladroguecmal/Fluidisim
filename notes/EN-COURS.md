@@ -88,9 +88,9 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les tables d'une côte à isobathes droites (`bathymetrie_cote.rs`) : cuisson depuis la référence,
   interpolation ; critère 1, balayage du pas.
-- [>] **P3** — B sur la côte : l'évaluation côtière (phase entière, amplitude, pente, vitesses en profondeur finie) ;
+- [x] **P3** — B sur la côte : l'évaluation côtière (phase entière, amplitude, pente, vitesses en profondeur finie) ;
   critères 2 et 3 ; η, pente et vitesse contre la référence.
-- [ ] **P4** — coût et mémoire ; critères 4 et 5.
+- [>] **P4** — coût et mémoire ; critères 4 et 5.
 - [ ] **P5** — ADR-196, l'entrée de la bathymétrie ; preuve (BATHYMETRIE-S362, section datée S364) ; liste 2.7, file,
   dépendances, feuille de route, index.
 - [ ] **P6** — rituel.
@@ -104,3 +104,9 @@ Critères, écrits avant le code :
   de se sentir » des manuels et de SPEC-005 §8, le facteur vaut encore **0,990 : une marche de 5 mm** entre B et la côte.
   Prédiction écrite avant la mesure, tenue : à λ₀ (156 m), `K − 1` = **−4,15e-5** (prédit −4,4e-5), marche 0,02 mm. Le
   profil doit commencer à λ₀ de la plus longue composante, pas à λ₀/2. Déferlement de cette houle : 1,69 m.
+- **P3, critères 2 et 3 tenus.** `Cote::eval` : phase de B + correction entière, amplitude `a·K`, vecteur d'onde local
+  `k_x·t + k_y·n` (pente), vitesse horizontale `a·ω·coth(kh)`, verticale `a·ω`. Huit composantes de 6 à 10 s, ±30°,
+  Hs ≈ 1 m, plage 1/30 de 160 m (λ₀ de la plus longue) à 2 m, table au pas de 2 m (313 Ko). **Au large : 120
+  évaluations identiques au bit à B.** Deux passes : même hash. Sur la plage, 711 points, trois instants : **η à
+  0,133 mm** de la référence f64, pente à 1,4e-5 (max 0,086), vitesse horizontale à 2,7e-4 m/s (max 1,31) ; **marche au
+  bord du large 0,0017 mm**. Essai rendu incrémental (50 s → 0,2 s en mode optimisé).
