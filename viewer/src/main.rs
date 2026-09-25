@@ -12,6 +12,7 @@ mod delta3d;
 mod delta3d_projection;
 mod delta3d_background;
 mod delta3d_step;
+mod delta3d_linear;
 mod delta3d_scene;
 mod delta3d_arbitrage;
 mod rendu_cretes;
@@ -2729,6 +2730,29 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--delta3d-sensibilite") {
         return delta3d_step::sensibilite_reference();
+    }
+    if args.iter().any(|a| a == "--lineaire-cout") {
+        let cycles: Vec<u32> = args
+            .iter()
+            .find_map(|a| a.strip_prefix("--cycles="))
+            .map(|l| l.split(',').filter_map(|x| x.parse().ok()).collect())
+            .unwrap_or_else(|| vec![16, 32, 64]);
+        return delta3d_linear::mesurer_cout(&cycles);
+    }
+    if args.iter().any(|a| a == "--lineaire-avance") {
+        return delta3d_linear::rejouer_avance();
+    }
+    if args.iter().any(|a| a == "--lineaire-carte") {
+        let cycles: Vec<u32> = args
+            .iter()
+            .find_map(|a| a.strip_prefix("--cycles="))
+            .map(|l| l.split(',').filter_map(|x| x.parse().ok()).collect())
+            .unwrap_or_else(|| vec![8, 16, 32, 64]);
+        return delta3d_linear::recevoir(
+            args.iter().any(|a| a == "--solide"),
+            !args.iter().any(|a| a == "--sans-eponge"),
+            &cycles,
+        );
     }
     if args.iter().any(|a| a == "--delta3d-cuve") {
         return delta3d_step::recevoir_cuve();

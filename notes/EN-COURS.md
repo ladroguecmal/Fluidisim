@@ -92,12 +92,26 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `delta3d_linear.wgsl` : les noyaux du pas et du gradient conjugué à ouvertures.
-- [ ] **P3** — `delta3d_linear.rs` : `Linear3`, tampons, encodage du pas, relectures de banc ; critère 1.
+- [x] **P2** — `delta3d_linear.wgsl` : les noyaux du pas et du gradient conjugué à ouvertures.
+- [x] **P3** — `delta3d_linear.rs` : `Linear3`, tampons, encodage du pas, relectures de banc ; critère 1.
 - [ ] **P4** — le banc contre `Volume3`, bosse, avec et sans éponge, balayage des cycles ; critère 2.
+- [ ] **P4 bis** *(ajoutée en cours, après P3)* — le même défaut de publication dans la production `Step3`
+  (`published`, `ghost_up`) : la dérive de la moyenne de S305 §7, mesurée avant et après sur la cuve.
 - [ ] **P5** — le solide fixe immergé ; critère 2 bis.
 - [ ] **P6** — le coût ; critère 3.
 - [ ] **P7** — ADR-193, preuve, file, feuille de route, liste ; critère 4.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
+- **P2–P3.** `viewer/src/delta3d_linear.{wgsl,rs}` : quinze noyaux, un seul groupe de liaison (vitesses courantes et
+  prédites, géométrie `[ouvertures | fractions]`, colonnes `[η | reste | flux x | flux y | publiée]`, sept tranches du
+  gradient conjugué, partiels, scalaires, uniforme). `toutes_ouvertes` : murs et fond fermés, la convention de `Cut3`.
+  Couvercle partiellement fermé refusé à la création. Dispatchs : `10 + 5·cycles`, une passe. Bancs : `--lineaire-carte
+  [--solide] [--sans-eponge] [--cycles=…]`, `--lineaire-cout`, `--lineaire-avance` (instrument). Zéro avertissement.
+- **Défaut trouvé au premier passage, corrigé.** Sans éponge, volume publié de la carte **+4,6·10⁻⁵** en 200 pas, le
+  cœur **exact** (0,314159274 = v0 par `surface_roundoff_for_trials`). Instrument (`--lineaire-avance`) : l'avance
+  rejouée en f32 depuis les entrées de la carte — **hauteur au bit sur 9 216 colonnes**, reste = la version à produit
+  fusionné ; la somme vraie `Σ(η − z₀) − Σ reste` tient à 10⁻⁹ m, la **somme publiée** saute de 3,4·10⁻⁵ m dès le pas 1.
+  Cause : `(η − z₀) − reste` réassocié par le compilateur, le reste perdu dans l'ulp de `z₀` (famille L345). Remède :
+  `difference(η, z₀)` en entiers (Sterbenz), dans la publication **et le couvercle**. Après : dérive 6·10⁻¹⁰ à 4·10⁻⁹.
+  **La production `Step3` a le même motif** (`published`, `ghost_up`) — c'est la dérive de la moyenne de S305 §7.
