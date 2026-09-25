@@ -98,7 +98,7 @@ Critères, écrits avant le code :
 - [x] **P4 bis** *(ajoutée en cours, après P3)* — le même défaut de publication dans la production `Step3`
   (`published`, `ghost_up`) : la dérive de la moyenne de S305 §7, mesurée avant et après sur la cuve.
 - [x] **P5** — le solide fixe immergé ; critère 2 bis.
-- [ ] **P6** — le coût ; critère 3.
+- [x] **P6** — le coût ; critère 3.
 - [ ] **P7** — ADR-193, preuve, file, feuille de route, liste ; critère 4.
 - [ ] **P8** — rituel.
 
@@ -135,3 +135,10 @@ Critères, écrits avant le code :
   0,93·10⁻¹⁰), phase de la carte égale à la référence à 10⁻⁶ degré près (1,223193°, 0,248306°, 0,065155°).
   `--delta3d-cuve-longue`, 5 s : pire par fenêtre 1,21 → **4,73·10⁻⁸ m** (avant 2,48 → 7,79·10⁻⁷) — la pente
   séculaire de §6 **divisée par ≈ 13, pas annulée** (≈ 8·10⁻⁹ m/s). S305 §7.3 : cause trouvée.
+- **P6, critère 3.** `--lineaire-cout`, 199 pas horodatés seuls (attente entre deux), secteur avant et après
+  (`BatteryStatus` 2, `PowerOnline` True). p50 / p99 en ms — ouvert : 8 cycles 0,1685 / 0,1928 ; **16 cycles
+  0,2966 / 0,3060** ; 32 cycles 0,5512 / 0,5831 ; 64 cycles 1,0817 / 1,0930. Sphère : 0,1683 / 0,1909 ; **0,2967 /
+  0,3236** ; 0,5513 / 0,5876 ; 1,0829 / 1,0915. ≈ 16 µs par cycle, ≈ 40 µs hors cycles. Prédiction « sous 2 ms »
+  tenue : 16 cycles = 16 % du profil δ. Présentes : cycles fixes, départ chaud, Jacobi, produit scalaire replié dans
+  l'opérateur, une seule passe. Absentes : multigrille, pavage en mémoire de groupe, fusion `update`/`direction`,
+  sous-groupes, cadence de 30 Hz en deux parts, pas dans une image.
