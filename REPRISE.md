@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 10:09 +02:00
+Battement        : 2026-09-25 10:11 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S360 — rendu 4 : verdict R20 ; la surface fine par FFT dans Godot (topologie), l'écume à l'échelle du déferlement
 Dernière session : S359 — **rendu 3, l'eau a une épaisseur** : verdict R19 (*« pas du tout crédible »*, manque la transparence selon la profondeur) ; dans Godot, la lumière de l'afficheur portée — la mer renvoie 0,71 du ciel sous l'horizon au lieu de 0,11 ([ADR-194](docs/adr/ADR-194-la-lumiere-de-l-eau-calculee-par-notre-nuanceur.md)) — et la colonne d'eau, réfraction et scène côtière ([preuve](docs/validation/EPAISSEUR-EAU-S359.md)) ; R20 préparée

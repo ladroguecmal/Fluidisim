@@ -197,7 +197,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **8.6** Vue sous-marine et passage de la surface | H | — | 8.5 | 13.3 | **1** |
 | **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | une frontière sans fondu ; la tolérance de pente | — | — | **E** — les verdicts : R18 (en direct), puis la frontière |
 | **8.8** Lointain et horizon sans artefact | H | un certificat d'absence d'alias | — | — | **0** |
-| **8.9** Détails artificiels bon marché | H | capillaires ; queue des perturbations W ; LOD de la queue | — | — | **0** |
+| **8.9** Détails artificiels bon marché | H | capillaires ; queue des perturbations W ; coût (la queue de B par FFT dans Godot : S360) | — | — | **0** |
 | **8.10** Crédibilité perçue validée par un regard humain | H | de nouvelles revues, préparées | — | — | **E** — les verdicts de l'utilisateur : poses, animation, scénarios |
 
 ### 9. Activation, prédiction, budget et dégradation

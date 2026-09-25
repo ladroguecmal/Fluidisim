@@ -101,7 +101,7 @@ Critères, écrits avant le code :
 - [x] **P5** — la FFT dans Godot et son contrôle ; critère 4.
 - [x] **P6** — le nuanceur sur les cascades ; critère 5.
 - [x] **P7** — les images de R21 ; critère 6.
-- [ ] **P8** — preuve, ADR, file, liste, index ; critère 7.
+- [x] **P8** — preuve, ADR, file, liste, index ; critère 7.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
@@ -155,3 +155,7 @@ Critères, écrits avant le code :
 - **P7.** R21 écrite (REVUE-VISUELLE §26), quatre images envoyées. `viewer/captures/s360` (non versionné), SHA-256 :
   plongeante côte `accb1a1d…`, large proche `41ff26ab…`, côte proche `53cad509…`, large rasante `17851797…`, témoin 60
   composantes `f5c61aff…`, agrandissements `9921cfef…` (FFT), `714c06b2…` (témoin), `46bd872a…` (les deux).
+- **P8.** Preuve [SURFACE-FINE-S360](../docs/validation/SURFACE-FINE-S360.md), [ADR-195](../docs/adr/ADR-195-la-queue-de-b-rendue-par-fft.md)
+  (la queue par FFT, Elfouhaily replié, écume des vagues dominantes ; l'afficheur garde sa queue — divergence dite) ;
+  liste 8.9 et 8.4 **retouchées sans changer de case** ; `dependances_liste.py` (8.9) et `--ecrire` ; file, feuille de
+  route, index. `--check` propre. Suite du cœur : 512 réussis, 14 ignorés ; intégration 98 et 4 ignorés.

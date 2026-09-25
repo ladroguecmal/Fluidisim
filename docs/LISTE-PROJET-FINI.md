@@ -350,7 +350,9 @@ pas recopiée ici (L137).
   accélérée de 46 % au bit (S267). Manquent le filtre des impacts, la généralisation
   aux autres sources et le LOD temporel.
 - [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent* : S356, l'écume des crêtes de B
-  à la couverture de Monahan dans l'afficheur, non jugée, référence à porter dans Godot ([preuve](validation/RENDU-CRETES-S356.md)).
+  à la couverture de Monahan dans l'afficheur, non jugée, référence à porter dans Godot ([preuve](validation/RENDU-CRETES-S356.md)) ;
+  R20 : *« uniquement sur des grandes vagues avec déferlement »* ; **S360** : dans Godot, tirée des vagues dominantes —
+  moutons d'un à quatre mètres ([preuve](validation/SURFACE-FINE-S360.md) §3). Manquent durée, texture, spray, bulles.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *partiel* depuis S359 : dans Godot, la
   colonne d'eau — fond vu par réfraction de Snell en espace écran, absorbé et voilé selon la profondeur (Maritorena,
   eau pure de Pope & Fry), transmission à 0,005 du modèle —, et la réflexion de l'afficheur portée
@@ -375,8 +377,10 @@ pas recopiée ici (L137).
   bande d'horizon mesurée (S247, S248) ; fin de grille à l'horizon géométrique sous le ciel clair
   (S262). Pas de certificat d'absence d'alias.
 - [ ] **8.9 Détails artificiels bon marché** (micro-vagues, ondes courtes) ajoutés au rendu — *partiel* :
-  queue du spectre de B en pentes par pixel, filtrée par l'empreinte, +0,38 ms GPU (ADR-155, S256).
-  Manquent les capillaires, la queue des perturbations W et le LOD de la queue.
+  queue du spectre de B en pentes par pixel, filtrée par l'empreinte, +0,38 ms GPU (ADR-155, S256) ; **S360, dans
+  Godot** : la même queue réalisée par FFT, 10 612 composantes en deux cascades, étalement d'Elfouhaily, variance non
+  résolue par LEAN ([preuve](validation/SURFACE-FINE-S360.md), ADR-195). Manquent les capillaires, la queue des
+  perturbations W, le coût, et le verdict R21.
 - [ ] **8.10 Crédibilité perçue validée par un regard humain** — *partiel* : protocole de revue
   ([REVUE-VISUELLE](validation/REVUE-VISUELLE.md)). Premier verdict (R1, « trop lisse ») mesuré et
   traité ; **R7 accepté S266**, après lissage des reflets entre les crêtes (ADR-161).

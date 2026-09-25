@@ -109,7 +109,7 @@ D = {
  "8.6": ("H", "—", ["8.5"], None),
  "8.7": ("C", "une frontière sans fondu ; la tolérance de pente", [], "les verdicts : R18 (en direct), puis la frontière"),
  "8.8": ("H", "un certificat d'absence d'alias", [], None),
- "8.9": ("H", "capillaires ; queue des perturbations W ; LOD de la queue", [], None),
+ "8.9": ("H", "capillaires ; queue des perturbations W ; coût (la queue de B par FFT dans Godot : S360)", [], None),
  "8.10": ("H", "de nouvelles revues, préparées", [], "les verdicts de l'utilisateur : poses, animation, scénarios"),
  "9.1": ("H", "`W_urgence` ; le banc B8", [], "`W_gameplay`, qui vient du jeu"),
  "9.2": ("H", "le domaine qui précède la caméra : prédiction, orientation", [], None),
