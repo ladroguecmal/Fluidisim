@@ -62,87 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S358 — **terminée**. **La physique (ADR-191 D3) : la coque dans la production de δ, 1 — `Linear3`, le pas
-linéaire de la porte D sur la carte.** Le plan de S355 (commit `a2c81dea`), reporté tel quel, plus le solide fixe.
+Session : S359 — **en cours**. **Rendu 3 (ADR-191 D3) : l'eau a une épaisseur** — la colonne d'eau dans Godot.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
-Entrée — *« Reprends le projet »*, sans verdict R19 : la physique en attendant (S357). Liste 6.4, *manque la production
-GPU*. **Constat de S355** : la coque a été reçue dans le **mode linéaire** de δ (couvercle, faces coupées, couvercle
-partiel, S330–S337) ; la production est le pas **mobile couplé**, qui n'a de solide nulle part. **Chemin** (ADR à écrire
-sur les mesures) : le domaine δ d'une coque est un domaine **linéaire** porté sur la carte ; le pas mobile couplé garde
-les autres. Découpage : ici le pas à ouvertures, toutes ouvertes **puis celles d'un solide fixe** (6.5) ; ensuite la
-coque qui bouge et perce le couvercle ; puis la scène.
+Entrée — **verdict R19** de l'utilisateur : *« selon moi la mer n'est pas du tout crédible, mais c'est pas grave on
+continue, car je pense qu'il manque plein de chose avec la trnasparence en fonction de la prfondeur etc... »*. Relu sur
+les images : l'eau est un aplat opaque — ni lumière qui y entre, ni fond, ni réfraction — et **l'horizon s'assombrit**
+au lieu de refléter le ciel clair. Liste **8.5** (transparence, réfraction, caustiques) : *absent*.
 
 Critères, écrits avant le code :
-1. **`Linear3` sur la carte** : le pas de `Volume3::step_surface_linear` — prédit = courant, éponge sur les vitesses
-   prédites, divergence pondérée par les ouvertures, terme du couvercle, opérateur pondéré (couvercle à demi-maille),
-   gradient conjugué de Jacobi à **cycles fixes repartant du pas précédent**, correction entre mailles fluides, flux de
-   colonne pondérés, hauteur compensée (différence exacte de S301), rappel de l'éponge. Ouvertures et fractions
-   **réservées à la création** (I-06), toutes ouvertes ou données par le cœur ; aucune relecture dans le pas.
-2. **Contre la référence** : bosse gaussienne de 10 cm (σ = 1 m) au centre, grille de la porte D (96 × 96 × 8, 25 cm,
-   2 m), pas de 10 ms, 200 pas, éponge de 3 m à 2,5 /s : **|Δη| ≤ 10⁻⁴ m** sur toutes les colonnes, relevé tous les
-   vingt pas. Sans éponge, le volume de la carte ne dérive pas de plus de **10⁻⁶** du volume initial en 200 pas.
-   **2 bis — solide fixe** : sphère de 0,5 m centrée à 1 m de profondeur sous la bosse, découpe du cœur
-   (`configure_with_solid`) chargée telle quelle : même critère ; faces fermées à vitesse nulle, exactement.
-   **Prédiction** : 32 cycles au plus suffisent, départ chaud.
-3. **Le coût** sur cette grille : p50 et p99 du pas horodaté, au plus petit nombre de cycles qui tient 2 et 2 bis ;
-   alimentation relevée (A270) ; techniques présentes et absentes (ADR-131). Prédiction : sous 2 ms (ADR-174 D3).
-4. ADR-193 (le domaine d'une coque est linéaire, sur la carte), preuve ouverte par « Reproduire », file, feuille de
-   route, liste 6.4 et 6.5.
+1. **R19 consigné** tel quel (REVUE-VISUELLE §24, décisions de la file).
+2. **Le fond** : bathymétrie de démonstration — pente de sable de 6 m sous la caméra à 40 m vers 400 m, jamais sous
+   2·Hs (Hs ≈ 2,5 m), puis le large ; texture procédurale, albédo 0,3 *à calibrer* ; aucun téléchargement. **B ne voit
+   pas le fond** (2.7 absent) : déclaré, pas caché. Poses côtières ajoutées ; la scène du large reste.
+3. **La profondeur reconstruite** depuis le tampon de profondeur, en mode contrôle (mer plate, tonalité linéaire),
+   contre la bathymétrie connue en cinq points : écart ≤ 2 % + 5 cm.
+4. **L'optique** : Maritorena, Morel et Gentili (1994) sur le trajet oblique — fond × `exp(−Kd·(H + L))` + corps d'eau
+   × `(1 − exp(−Kd·(H + L)))`, `Kd = (a + b_b)/μ̄_d` des coefficients d'ADR-177, `μ̄_d` = 0,8 *à calibrer* ; réfraction
+   de Snell (n = 1,34) en espace écran ; transmission `1 − F` de Fresnel exact. Contrôle au nadir, mer plate : la
+   transmission rendue suit `exp(−2·Kd·H)` à trois profondeurs, à 0,01 près (8 bits). Sans fond, la mer du large ne
+   change pas de couleur (écart moyen < 1/255 sur les poses de R19).
+5. **L'horizon, diagnostic** : hypothèse — la rugosité confiée à Godot éteint sa réflexion rasante (approximation de
+   l'environnement) ; témoin : rugosité bornée ; mesure : luminance de la mer sous l'horizon rapportée au ciel dessus.
+   Selon le résultat, correction dans la session ou point de file.
+6. **Images R20** : poses côtières et du large, contre R19 ; questions et références demandées.
+7. Preuve, file, liste 8.5, index.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `delta3d_linear.wgsl` : les noyaux du pas et du gradient conjugué à ouvertures.
-- [x] **P3** — `delta3d_linear.rs` : `Linear3`, tampons, encodage du pas, relectures de banc ; critère 1.
-- [x] **P4** — le banc contre `Volume3`, bosse, avec et sans éponge, balayage des cycles ; critère 2.
-- [x] **P4 bis** *(ajoutée en cours, après P3)* — le même défaut de publication dans la production `Step3`
-  (`published`, `ghost_up`) : la dérive de la moyenne de S305 §7, mesurée avant et après sur la cuve.
-- [x] **P5** — le solide fixe immergé ; critère 2 bis.
-- [x] **P6** — le coût ; critère 3.
-- [x] **P7** — ADR-193, preuve, file, feuille de route, liste ; critère 4.
-- [x] **P8** — rituel.
+- [ ] **P2** — verdict R19 consigné ; diagnostic de l'horizon ; critères 1 et 5 (mesure).
+- [ ] **P3** — le fond et ses poses ; critère 2.
+- [ ] **P4** — la profondeur reconstruite, le mode contrôle ; critère 3.
+- [ ] **P5** — l'optique de la colonne ; critère 4.
+- [ ] **P6** — l'horizon, selon P2 ; critère 5.
+- [ ] **P7** — les images de R20 ; critère 6.
+- [ ] **P8** — preuve, file, liste, index ; critère 7.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
-- **P2–P3.** `viewer/src/delta3d_linear.{wgsl,rs}` : quinze noyaux, un seul groupe de liaison (vitesses courantes et
-  prédites, géométrie `[ouvertures | fractions]`, colonnes `[η | reste | flux x | flux y | publiée]`, sept tranches du
-  gradient conjugué, partiels, scalaires, uniforme). `toutes_ouvertes` : murs et fond fermés, la convention de `Cut3`.
-  Couvercle partiellement fermé refusé à la création. Dispatchs : `10 + 5·cycles`, une passe. Bancs : `--lineaire-carte
-  [--solide] [--sans-eponge] [--cycles=…]`, `--lineaire-cout`, `--lineaire-avance` (instrument). Zéro avertissement.
-- **Défaut trouvé au premier passage, corrigé.** Sans éponge, volume publié de la carte **+4,6·10⁻⁵** en 200 pas, le
-  cœur **exact** (0,314159274 = v0 par `surface_roundoff_for_trials`). Instrument (`--lineaire-avance`) : l'avance
-  rejouée en f32 depuis les entrées de la carte — **hauteur au bit sur 9 216 colonnes**, reste = la version à produit
-  fusionné ; la somme vraie `Σ(η − z₀) − Σ reste` tient à 10⁻⁹ m, la **somme publiée** saute de 3,4·10⁻⁵ m dès le pas 1.
-  Cause : `(η − z₀) − reste` réassocié par le compilateur, le reste perdu dans l'ulp de `z₀` (famille L345). Remède :
-  `difference(η, z₀)` en entiers (Sterbenz), dans la publication **et le couvercle**. Après : dérive 6·10⁻¹⁰ à 4·10⁻⁹.
-  **La production `Step3` a le même motif** (`published`, `ghost_up`) — c'est la dérive de la moyenne de S305 §7.
-- **P4, critère 2 tenu.** Cœur : 105,1 itérations de gradient conjugué par pas, départ froid, 17–18 s les 200 pas.
-  Éponge — pire |Δη| sur les dix relevés : **4 cycles 1,74·10⁻⁴ m (manqué)**, 8 cycles 5,67·10⁻⁵, 16 cycles 2,18·10⁻⁵,
-  32 cycles 7,2·10⁻⁷, 64 cycles 2,38·10⁻⁷ (l'ulp de 2 m) ; résidu relatif 4,2·10⁻³ à 8 cycles, 2,2·10⁻⁶ à 64 ; volume
-  final 0,282982947 m³ contre 0,282982986 au cœur (64 cycles). Sans éponge : mêmes écarts ; dérive du volume publié
-  **6·10⁻¹⁰ à 4·10⁻⁹** pour 10⁻⁶ exigé (après correction). Aucune face fermée non nulle. En usage : 5,7·10⁻⁵ m à 8
-  cycles, cinquante fois sous les 3 mm de l'image (S201).
-- **P5, critère 2 bis tenu.** Sphère de 0,5 m à 1 m sous le couvercle, découpe du cœur chargée telle quelle
-  (12 324 faces fermées contre 12 288) ; cœur 104,4 itérations (Jacobi), 40 s. Pire |Δη| : 4 cycles 2,33·10⁻⁴, **8
-  cycles 1,09·10⁻⁴ (manqué de peu)**, **16 cycles 1,26·10⁻⁵**, 32 cycles 1,07·10⁻⁶, 64 cycles 2,38·10⁻⁷ ; faces fermées
-  à vitesse nulle, exactement ; volume 0,283311980 contre 0,283312029. **Témoin privé de la découpe** (`--temoin` : la
-  carte toutes ouvertes contre le cœur avec la sphère) : **4,68·10⁻³ m** — le banc voit le solide, vingt mille fois
-  au-dessus de l'écart qu'il mesure avec. Prédiction « 32 cycles au plus » tenue : **16** pour les deux cas.
-- **P4 bis, la production corrigée.** Trois sites : `delta3d_step.wgsl` (`published`, `ghost_up`) et
-  `delta3d_background.wgsl` (couvercle du second membre couplé, qui reçoit `exact_difference` recopiée). Binaire
-  d'avant gardé hors dépôt pour rejouer. `--delta3d-cuve-trajectoire`, 1 000 pas, 64 / 128 cycles — **avant**
-  (S305 au chiffre près) : hauteur 3,00 / 3,05 / 3,26·10⁻⁷ m à `nx` 16 / 32 / 48, dérive de la moyenne 6,0 / 4,7 /
-  4,0·10⁻⁸ m ; **après** : **2,61 / 2,42 / 2,37·10⁻⁸ m**, dérive **2,1 / 1,3 / 0,77·10⁻¹⁰ m** (le cœur : 1,9 / 1,1 /
-  0,93·10⁻¹⁰), phase de la carte égale à la référence à 10⁻⁶ degré près (1,223193°, 0,248306°, 0,065155°).
-  `--delta3d-cuve-longue`, 5 s : pire par fenêtre 1,21 → **4,73·10⁻⁸ m** (avant 2,48 → 7,79·10⁻⁷) — la pente
-  séculaire de §6 **divisée par ≈ 13, pas annulée** (≈ 8·10⁻⁹ m/s). S305 §7.3 : cause trouvée.
-- **P6, critère 3.** `--lineaire-cout`, 199 pas horodatés seuls (attente entre deux), secteur avant et après
-  (`BatteryStatus` 2, `PowerOnline` True). p50 / p99 en ms — ouvert : 8 cycles 0,1685 / 0,1928 ; **16 cycles
-  0,2966 / 0,3060** ; 32 cycles 0,5512 / 0,5831 ; 64 cycles 1,0817 / 1,0930. Sphère : 0,1683 / 0,1909 ; **0,2967 /
-  0,3236** ; 0,5513 / 0,5876 ; 1,0829 / 1,0915. ≈ 16 µs par cycle, ≈ 40 µs hors cycles. Prédiction « sous 2 ms »
-  tenue : 16 cycles = 16 % du profil δ. Présentes : cycles fixes, départ chaud, Jacobi, produit scalaire replié dans
-  l'opérateur, une seule passe. Absentes : multigrille, pavage en mémoire de groupe, fusion `update`/`direction`,
-  sous-groupes, cadence de 30 Hz en deux parts, pas dans une image.
-- **P7.** [ADR-193](../docs/adr/ADR-193-le-domaine-d-une-coque-est-lineaire-sur-la-carte.md), preuve
-  [LINEAIRE-GPU-S358](../docs/validation/LINEAIRE-GPU-S358.md) (« Reproduire » en tête), note datée dans CUVE-GPU-S305
-  §7.3, file (porte D), feuille de route (J3, front 0), liste 6.4 et 6.5 (**partiels, inchangés en état**), index.
-  Essais de l'afficheur : 36 réussis, 1 ignoré ; zéro avertissement ; le cœur n'a pas bougé.
