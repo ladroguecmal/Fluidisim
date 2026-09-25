@@ -85,8 +85,8 @@ Critères, écrits avant la mesure :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le verdict R24 consigné ; les références trouvées, sources et licences.
-- [>] **P3** — les chiffrer : la distribution mesurée contre `f(ω)` et le rendu ; les photographies, rapports sans unité.
-- [ ] **P4** — calibrer ce que la mesure désigne ; avant / après ; images.
+- [x] **P3** — les chiffrer : la distribution mesurée contre `f(ω)` et le rendu ; les photographies, rapports sans unité.
+- [>] **P4** — calibrer ce que la mesure désigne ; avant / après ; images.
 - [ ] **P5** — preuve (SOUS-MARIN-S365, section datée S366), liste 8.6, file, index.
 - [ ] **P6** — rituel.
 
@@ -98,3 +98,11 @@ Critères, écrits avant la mesure :
   *Dharavandhoo Thila – Hanifaru Bay Sharks* (Shiyam ElkCloner, CC BY-SA 3.0, Maldives, contre-plongée en eau claire),
   *Looking up (6158466637)* (Derek Keats, CC BY 2.0, récif vu d'en dessous), *Snell's window* (petebw, CC BY-SA 2.0,
   piscine : la fenêtre, et le fond **dans le miroir**). Pose `sous_eau_oblique` (4 m, 30°) ajoutée pour le cadrage.
+- **P3, critère 2 : écart > 30 %, recalibrer.** Tyler à 4,2 m, numérisé par composantes connexes (18 points, deux
+  azimuts, 10° à 90° du nadir) : horizontale **2,46** à l'opposé du soleil, **8,71** côté soleil (moyenne des deux 5,6) ;
+  60° : 1,52 et 2,46. Le modèle de S365 (3 et 2) : +22 % à l'opposé, −66 % côté soleil ; résidu logarithmique **0,362**.
+  `outils/tyler_radiance.py` : lobe avant de Henyey-Greenstein autour du soleil réfracté, **β = 1,0031, K = 213,35,
+  g = 0,855** (a0 = 0,2045) : résidu **0,120** ; pires écarts, côté soleil près du nadir (+25 %) et à l'horizontale
+  (−21 %). Prédiction (2 à 5) : tenue à l'opposé, dépassée côté soleil. **Critère 3, indicatif**, photographie de Hanifaru
+  (tiers bas / tiers haut, luminance sRGB décodée) : eau B/G **4,07**, rendu 4,72 ; dynamique p90 haut / p50 bas **9,7**
+  (la photographie écrête sa fenêtre : borne basse), rendu **3,36** — notre fenêtre est terne devant l'eau.
