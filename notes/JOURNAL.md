@@ -17049,3 +17049,21 @@ l'eau ; coût non mesuré.
 **Rituel.** Maillons **2** : 8.5 reste partiel. À deux maillons, la suite prend une capacité : **R21 et R22 d'abord** ;
 puis la physique — la coque qui bouge sur la carte (6.4, ADR-193 §3) ou le lot 5 (A316) — ; le ciel à la session de
 rendu suivante. R18, R21, R22 attendus.
+
+## S362 — 2026-09-25 — physique : la houle qui sent le fond, la référence (2.7)
+
+**Entrée.** *« Continue »*, sans verdict R21/R22. À deux maillons, un lot qui fait avancer la liste : la suite proposée
+(la coque qui bouge, le lot 5) laissait chaque point dans sa case ; **2.7**, absente, vingt points en aval, et la scène
+côtière de S359 qui la montre manquer.
+**Fait** ([preuve](../docs/validation/BATHYMETRIE-S362.md)). `bathymetrie.rs`, une référence f64 : dispersion en
+profondeur finie, vitesse de groupe, levée, réfraction de Snell sur isobathes droites, phase intégrée, profondeur de
+déferlement (McCowan). Tenue contre les résultats publiés : **Fenton–McKee 1,63 %** (borne publiée 1,7 %), **levée
+minimale 0,91299 à kh = 1,1995** (0,913 des manuels), flux d'énergie à 5·10⁻¹⁶, phase à 3·10⁻⁸ ; une houle de 1 m et
+10 s déferle par **1,78 m** de fond. L'instrument de la phase corrigé deux fois (coin du profil, troncature), jamais le
+seuil. Cœur : 516 réussis, 14 ignorés.
+**Ce qui ne se tranche pas.** Où la bathymétrie entre : ADR-004 §2.1 garde les composantes de B identiques partout et
+place levée et réfraction dans W ; faire tourner les composantes avec le fond le contredirait — un ADR mesuré, à venir.
+**Limites.** Isobathes droites ; ni diffraction, ni réflexion, ni non-linéarité (A234) ; aucun consommateur encore.
+**Rituel.** Maillons **0** : 2.7 passe à partiel ; devient possible, recevoir tout candidat qui fera sentir le fond à la
+houle ; consommé par l'ADR d'entrée et la scène côtière ; preuve §2. Suivant : **R21 et R22 d'abord** ; par l'alternance,
+le rendu — **le ciel** (R20) — ; puis la physique : l'entrée de la bathymétrie, ou la coque qui bouge. R18, R21, R22.

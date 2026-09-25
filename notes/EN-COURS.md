@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S362 — **en cours**. **Physique : la bathymétrie, 1 — la référence** (liste 2.7).
+Session : S362 — **terminée**. **Physique : la bathymétrie, 1 — la référence** (liste 2.7).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 Entrée — *« Continue »*, sans verdict R21/R22 (attendus). **Choix du lot, à deux maillons** (REPRISE §6) : la suite
 proposée — la coque qui bouge (6.4) ou le lot 5 — laisserait chaque point dans sa case ; **2.7, la bathymétrie**, est
@@ -89,7 +89,7 @@ Critères, écrits avant le code (module `bathymetrie` du cœur, f64, référenc
 - [x] **P2** — le module `bathymetrie` : dispersion, vitesse de groupe, levée, réfraction, phase, déferlement.
 - [x] **P3** — ses essais contre les résultats publiés ; critères 1 à 4.
 - [x] **P4** — preuve, liste, registre, file, index ; critère 5.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2.** `code/water-core/src/bathymetrie.rs` (f64, référence) : `nombre_d_onde` (Eckart puis Newton),
@@ -108,3 +108,4 @@ Critères, écrits avant le code (module `bathymetrie` du cœur, f64, référenc
   partiel**, décompte 3 / 60 / 57 ; `dependances_liste.py` (2.7 : l'entrée dans B ou W par un ADR mesuré) et `--ecrire` ;
   file (ligne Bathymétrie), feuille de route (front 0, décompte), REPRISE §4, index. `--check` propre. Pas d'ADR : la
   référence ne décide rien ; la preuve dit ce qu'elle contredirait (ADR-004 §2.1).
+- **P5.** Suite du cœur : 516 réussis, 14 ignorés ; intégration 98 et 4 ignorés ; aucun avertissement.
