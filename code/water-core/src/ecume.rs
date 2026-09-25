@@ -46,6 +46,9 @@ pub struct ChampEcume {
     /// Demi-vies (s) et seuil de déferlement (fractions de g) : ceux d'ADR-014 par défaut.
     pub demi_vies: [f32; 2],
     pub seuil_g: f32,
+    /// Pour la mesure seulement (S367) : l'advection lit le champ **périodiquement** — ce qui sort par un bord rentre par
+    /// l'autre —, pour qu'aucun bord d'entrée vide ne fabrique de gradient. En production, ce qui sort est perdu.
+    pub periodique: bool,
 }
 
 /// Montée lisse de `bas` à `haut` (Hermite).
@@ -67,6 +70,7 @@ impl ChampEcume {
             tampon_r: vec![0.0; n * n],
             demi_vies: [DEMI_VIE_ACTIF_S, DEMI_VIE_RESIDUEL_S],
             seuil_g: SEUIL_DEFERLEMENT_G,
+            periodique: false,
         }
     }
 
@@ -89,7 +93,16 @@ impl ChampEcume {
         let (i0, j0) = (u.floor(), v.floor());
         let (fx, fy) = (u - i0, v - j0);
         let n = self.n as i64;
-        let texel = |i: i64, j: i64| if i < 0 || j < 0 || i >= n || j >= n { 0.0 } else { canal[(j * n + i) as usize] };
+        let periodique = self.periodique;
+        let texel = |i: i64, j: i64| {
+            if periodique {
+                canal[(j.rem_euclid(n) * n + i.rem_euclid(n)) as usize]
+            } else if i < 0 || j < 0 || i >= n || j >= n {
+                0.0
+            } else {
+                canal[(j * n + i) as usize]
+            }
+        };
         let (i, j) = (i0 as i64, j0 as i64);
         (texel(i, j) * (1.0 - fx) + texel(i + 1, j) * fx) * (1.0 - fy)
             + (texel(i, j + 1) * (1.0 - fx) + texel(i + 1, j + 1) * fx) * fy
@@ -164,6 +177,35 @@ impl ChampEcume {
     pub fn couverture(canal: &[f32], seuil: f32) -> f32 {
         canal.iter().filter(|v| **v > seuil).count() as f32 / canal.len() as f32
     }
+}
+
+/// Monahan et O'Muircheartaigh (1980) : la couverture de moutons pour un vent `u10` (m/s), en fraction (ADR-014 §3.1).
+pub fn monahan(u10: f32) -> f32 {
+    3.84e-6 * u10.powf(3.41)
+}
+
+/// L'écart-type de l'accélération verticale de la surface de B, rapporté à `g` : `σ_a² = Σ ½·(a·ω²)²`.
+pub fn sigma_acceleration_g(fond: &Background) -> f32 {
+    let v: f64 = fond
+        .components()
+        .iter()
+        .map(|c| {
+            let w = c.freq_q32 as f64 / 4_294_967_296.0 * core::f64::consts::TAU;
+            0.5 * (c.amplitude as f64 * w * w).powi(2)
+        })
+        .sum();
+    (v.sqrt() / fond.gravity() as f64) as f32
+}
+
+/// **S367 — le seuil qui donne la couverture `w`.** Mesuré : sur une mer pleinement développée, la bande de B est
+/// autosimilaire — `σ_a/g` = 0,0836 à 7, 10 et 13 m/s — et le seuil physique d'ADR-014 (0,45 g, soit 5,4 σ_a) n'y déferle
+/// jamais. La **place** du déferlement vient donc de la physique — les crêtes les plus accélérées —, sa **quantité** de
+/// l'observation — Monahan. La couverture active au régime, mise en commun sur les trois vents, suit
+/// `C(κ) ≈ 2,26 %·exp(−3,52·(κ − 2,5))` pour un seuil `κ·σ_a` (64 composantes, champ d'un mètre, demi-vies d'ADR-014 ;
+/// EN-COURS S367) ; son inverse donne `κ(w)`, valable de 0,3 à 3 % environ.
+pub fn seuil_pour_couverture(fond: &Background, w: f32) -> f32 {
+    let kappa = 2.5 + (w / 0.0226).ln() / -3.52;
+    kappa * sigma_acceleration_g(fond)
 }
 
 #[cfg(test)]

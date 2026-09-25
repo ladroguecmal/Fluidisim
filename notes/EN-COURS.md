@@ -91,9 +91,9 @@ Critères, écrits avant le code :
 - [x] **P2** — les verdicts consignés : revue (§23, §26–28, §30), décisions de la file, liste (8.4 à 8.10), dépendances.
 - [x] **P3** — la référence du champ (`ecume.rs`) : grille ancrée, deux canaux, décroissance, advection semi-lagrangienne
   par la vitesse de surface de B, sources de B ; critère 1.
-- [>] **P4** — la couverture contre Monahan, trois vents ; critère 2.
-- [ ] **P5** — les traînées de convergence ; critère 3.
-- [ ] **P6** — preuve ECUME-S367 ; liste 7.1, file, dépendances, feuille de route, index.
+- [x] **P4** — la couverture contre Monahan, trois vents ; critère 2.
+- [x] **P5** — les traînées de convergence ; critère 3.
+- [>] **P6** — preuve ECUME-S367 ; liste 7.1, file, dépendances, feuille de route, index.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -105,3 +105,17 @@ Critères, écrits avant le code :
   **7,7e-7** du fermé à 10 s ; advection d'une gaussienne, 100 pas : centre à **9,4e-6 m**, masse à 1,8e-6, sommet
   1 → 0,863 (diffusion de l'interpolation, publiée) ; onde seule : indicateur **0 / 0,5 / 1** à ak = 0,30 / 0,45 / 0,60
   (signe et échelle de l'accélération) ; déterminisme, même hash.
+- **P4, critère 2 : prédiction manquée, seuil calé et dit.** `examples/ecume_couverture.rs`. Au seuil physique
+  d'ADR-014, 0,45 g : **couverture nulle** aux trois vents. Mesuré : la bande de B est **autosimilaire**, `σ_a/g` =
+  **0,0836** à 7, 10 et 13 m/s (bande 0,099–0,770 Hz à 7 m/s, rapport 7,74) : 0,45 g = 5,4 σ, et aucun seuil fixe ne
+  suit `U10^3,41`. La place du déferlement vient de la physique (les crêtes les plus accélérées), la quantité de
+  Monahan : seuil `κ·σ_a`, balayage κ = 2 / 2,5 / 3 aux trois vents (active 10,0 / 2,46 / 0,43 % à 7 m/s ; 6,8 / 1,30 /
+  0,16 % à 10 ; 10,2 / 3,01 / 0,57 % à 13) — même courbe au bruit près, mise en commun : `C(κ) ≈ 2,26 %·exp(−3,52·(κ −
+  2,5))`, inversée dans `seuil_pour_couverture`. **Vérifié sur une autre graine** : champ de 128 m, 1,06 / 1,50 / **0,51**
+  (bruit de réalisation : une longueur d'onde de pic par champ à 13 m/s) ; **champ de 384 m, 40 s : 1,02 / 1,06 / 0,94**.
+- **P5, critère 3 tenu.** `examples/ecume_trainees.rs`, U10 = 10, 90 s, seuil calé. Premier passage : résiduel advecté
+  Ly/Lx ≥ 3,8 contre 1,8 sans advection — mais champ fixe à bord d'entrée vide, résiduel presque saturé, diffusion de
+  l'interpolation dans le sens de l'oscillation : trois artefacts possibles. **Domaine périodique** (mesure seulement) et
+  deux texels : 1 m, Lx 16,9 m, Ly ≥ 64 m (butée) ; **0,5 m, Lx 10,9 m, Ly 58,3 m, Ly/Lx 5,3** ; témoin 1,8 aux deux.
+  L'allongement **croît** quand le texel baisse : pas la diffusion ; il reste sans bord d'entrée. Résiduel moyen 0,40 : le
+  transfert 1 : 1 de l'actif est trop généreux — à caler (B9).
