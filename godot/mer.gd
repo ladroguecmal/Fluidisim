@@ -23,6 +23,9 @@ const POSES := {
 	"sous_eau_zenith": [Vector3(0.0, -5.0, 0.0), PI / 2.0],
 	"sous_eau": [Vector3(0.0, -3.0, 20.0), 0.0],
 	"sous_eau_fond": [Vector3(0.0, -3.0, 20.0), -0.6],
+	## S366 : en contre-plongée à 4 m, le cadrage de la photographie de référence (Hanifaru, Maldives) : la surface en haut,
+	## l'eau en bas.
+	"sous_eau_oblique": [Vector3(0.0, -4.0, 0.0), 0.52],
 }
 ## S359 — la scène côtière (`--cote`) : un fond de sable sous la mer, pour voir l'eau selon la profondeur. Étendue
 ## et pas de la grille du fond, m.

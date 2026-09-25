@@ -1119,3 +1119,10 @@ l'eau, le fond reflété dans le miroir.
 3. **La suite** : la caméra qui traverse la surface, les bulles, les rayons de lumière, autre chose ?
 
 Un mot par question suffit.
+
+**Verdict R24 — reçu le 2026-09-25 (S366)** : *« Pour les références trouve les sinon rien a redire cela me paraît
+good, continue »*. Lu sur les trois questions : (1) crédible, rien à redire ; (2) les références, à trouver par nous ;
+(3) aucune préférence de suite. **Ce qu'il déclenche** : S366 cherche des références réelles sous l'eau — une
+distribution de radiance mesurée, qui calibre `f(ω)` laissé à calibrer par S365, et des photographies libres —, et les
+chiffre. **Classe** : 8.6 jugée crédible sur quatre images fixes, à la pose de S365 ; ni animation, ni caméra qui traverse
+la surface.

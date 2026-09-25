@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 19:53 +02:00
+Battement        : 2026-09-25 20:04 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S366 — rendu 8 : les références sous l'eau, trouvées et chiffrées ; f(ω) calibré sur la mesure (verdict R24)
 Dernière session : S365 — **rendu 7, sous la surface** : la caméra dans l'eau — fenêtre de Snell rendue à 0,05° de arcsin(1/n), réflexion totale, milieu `exp(−c·d)` à 0,004 près, fond et caustiques vus de l'eau ; **8.6 passe à partiel** ([preuve](docs/validation/SOUS-MARIN-S365.md))

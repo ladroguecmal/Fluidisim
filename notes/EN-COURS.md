@@ -84,10 +84,17 @@ Critères, écrits avant la mesure :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [>] **P2** — le verdict R24 consigné ; les références trouvées, sources et licences.
-- [ ] **P3** — les chiffrer : la distribution mesurée contre `f(ω)` et le rendu ; les photographies, rapports sans unité.
+- [x] **P2** — le verdict R24 consigné ; les références trouvées, sources et licences.
+- [>] **P3** — les chiffrer : la distribution mesurée contre `f(ω)` et le rendu ; les photographies, rapports sans unité.
 - [ ] **P4** — calibrer ce que la mesure désigne ; avant / après ; images.
 - [ ] **P5** — preuve (SOUS-MARIN-S365, section datée S366), liste 8.6, file, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2.** Verdict R24 consigné (REVUE §29, décisions de la file). **Références trouvées**, rien téléchargé, lues dans le
+  navigateur : (a) **mesurée** — Tyler (1960), lac Pend Oreille, radiance dans le plan du soleil à 4,2, 29 et 66 m,
+  reproduite par Mobley (*Ocean Optics Web Book*, « The Asymptotic Radiance Distribution », fig. 7 ; normalisée à 1 au
+  nadir à 4,2 m), numérisée ici par ses pixels : axe log, 32,75 px par décade ; (b) **photographies** Wikimedia Commons :
+  *Dharavandhoo Thila – Hanifaru Bay Sharks* (Shiyam ElkCloner, CC BY-SA 3.0, Maldives, contre-plongée en eau claire),
+  *Looking up (6158466637)* (Derek Keats, CC BY 2.0, récif vu d'en dessous), *Snell's window* (petebw, CC BY-SA 2.0,
+  piscine : la fenêtre, et le fond **dans le miroir**). Pose `sous_eau_oblique` (4 m, 30°) ajoutée pour le cadrage.
