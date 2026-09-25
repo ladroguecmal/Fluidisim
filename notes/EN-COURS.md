@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — verdict R19 consigné ; diagnostic de l'horizon ; critères 1 et 5 (mesure).
-- [ ] **P3** — le fond et ses poses ; critère 2.
+- [x] **P3** — le fond et ses poses ; critère 2.
 - [ ] **P4** — la profondeur reconstruite, le mode contrôle ; critère 3.
 - [ ] **P5** — l'optique de la colonne ; critère 4.
 - [ ] **P6** — l'horizon, selon P2 ; critère 5.
@@ -108,3 +108,7 @@ Critères, écrits avant le code :
   réflexion (ciel clair, nuages, Fresnel, pente non résolue par quadrature de Gauss-Hermite, ADR-161) : c'est ce qui
   se porte. **Critère de P6, écrit ici avant le code** : rapport mer/ciel de Godot à ± 15 % de celui de l'afficheur,
   aux poses proche et rasante.
+- **P3.** `godot/sol.gdshader` (sable procédural, albédo (0,34 ; 0,30 ; 0,24), rides de 0,7 m) ; `mer.gd` :
+  `--cote` ajoute le fond, `profondeur(x, y)` en coordonnées de B (6 m à y = −30, 40 m à y = 370, puis 300 m ; bancs
+  d'un mètre ; jamais sous 5 m), grille de 4 m sur 2 400 × 1 100 m ; pose `plongeante` (12 m, −0,75 rad), touche 5 ;
+  captures suffixées `_cote` ; `SANS_EAU=1` masque la mer (instrument). Fond vu seul : rides visibles, gris sous le ciel.

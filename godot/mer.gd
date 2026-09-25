@@ -16,7 +16,14 @@ const POSES := {
 	"proche": [Vector3(0.0, 4.0, 7.0), -0.18],
 	"rasante": [Vector3(0.0, 2.0, 18.0), -0.05],
 	"haute": [Vector3(0.0, 22.0, 34.0), -0.42],
+	## S359 : plongeante, pour voir le fond de la scène côtière à travers la surface.
+	"plongeante": [Vector3(0.0, 12.0, 30.0), -0.75],
 }
+## S359 — la scène côtière (`--cote`) : un fond de sable sous la mer, pour voir l'eau selon la profondeur. Étendue
+## et pas de la grille du fond, m.
+const FOND_X := 1200.0
+const FOND_Y := [-200.0, 900.0]
+const FOND_PAS := 4.0
 
 var donnees: Dictionary
 var materiau: ShaderMaterial
@@ -56,6 +63,10 @@ func _ready() -> void:
 	mer.material_override = materiau
 	mer.custom_aabb = AABB(Vector3(-R_MAX, -100.0, -R_MAX), Vector3(2.0 * R_MAX, 200.0, 2.0 * R_MAX))
 	add_child(mer)
+	# S359 : `SANS_EAU=1` masque la mer, pour voir le fond seul.
+	mer.visible = OS.get_environment("SANS_EAU") != "1"
+	if "--cote" in args:
+		add_child(fond())
 	uniformes_fixes()
 	phases(temps)
 	if "--captures" in args:
@@ -100,6 +111,62 @@ func environnement() -> void:
 	add_child(soleil)
 	soleil.look_at_from_position(Vector3.ZERO, -vers_soleil, Vector3.UP)
 	soleil.light_energy = 1.0
+
+
+## La profondeur du fond sous le plan moyen, m, au point `(x, y)` de B : 6 m sous la caméra, 40 m à 400 m devant,
+## puis le large (300 m) ; bancs de sable d'un mètre. Jamais sous 5 m, deux fois Hs : le fond ne touche pas les vagues
+## — mais **B ne le voit pas** (liste 2.7) : ni réfraction, ni levée, ni déferlement. Démonstration optique seulement.
+static func profondeur(x: float, y: float) -> float:
+	var d := 6.0 + 0.085 * clampf(y + 30.0, 0.0, 400.0)
+	if y > 370.0:
+		d = minf(40.0 + 0.8 * (y - 370.0), 300.0)
+	d += 0.8 * sin(0.021 * x + 0.3) * sin(0.017 * y) + 0.4 * sin(0.047 * x - 0.031 * y)
+	return maxf(d, 5.0)
+
+
+## Le fond, une grille régulière en coordonnées du monde — il ne suit pas la caméra.
+func fond() -> MeshInstance3D:
+	var nx := int(2.0 * FOND_X / FOND_PAS) + 1
+	var ny := int((float(FOND_Y[1]) - float(FOND_Y[0])) / FOND_PAS) + 1
+	var sommets := PackedVector3Array()
+	var normales := PackedVector3Array()
+	sommets.resize(nx * ny)
+	normales.resize(nx * ny)
+	for j in ny:
+		var y := float(FOND_Y[0]) + FOND_PAS * j
+		for i in nx:
+			var x := -FOND_X + FOND_PAS * i
+			sommets[j * nx + i] = Vector3(x, -profondeur(x, y), -y)
+			var dx := (profondeur(x + 0.5, y) - profondeur(x - 0.5, y))
+			var dy := (profondeur(x, y + 0.5) - profondeur(x, y - 0.5))
+			# Hauteur du fond −d : pente (−∂d/∂x, −∂d/∂y) en B, soit la normale (∂d/∂x, 1, −∂d/∂y) dans Godot.
+			normales[j * nx + i] = Vector3(dx, 1.0, -dy).normalized()
+	var indices := PackedInt32Array()
+	indices.resize(6 * (nx - 1) * (ny - 1))
+	var n := 0
+	for j in ny - 1:
+		for i in nx - 1:
+			var a := j * nx + i
+			indices[n] = a
+			indices[n + 1] = a + nx
+			indices[n + 2] = a + 1
+			indices[n + 3] = a + 1
+			indices[n + 4] = a + nx
+			indices[n + 5] = a + nx + 1
+			n += 6
+	var tableaux := []
+	tableaux.resize(Mesh.ARRAY_MAX)
+	tableaux[Mesh.ARRAY_VERTEX] = sommets
+	tableaux[Mesh.ARRAY_NORMAL] = normales
+	tableaux[Mesh.ARRAY_INDEX] = indices
+	var m := ArrayMesh.new()
+	m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, tableaux)
+	var sol := ShaderMaterial.new()
+	sol.shader = load("res://sol.gdshader")
+	var instance := MeshInstance3D.new()
+	instance.mesh = m
+	instance.material_override = sol
+	return instance
 
 
 func pose(nom: String) -> void:
@@ -201,6 +268,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				pose("rasante")
 			KEY_4:
 				pose("haute")
+			KEY_5:
+				pose("plongeante")
 			KEY_ESCAPE:
 				get_tree().quit()
 
@@ -208,13 +277,14 @@ func _unhandled_input(event: InputEvent) -> void:
 ## Les quatre poses à 12 s, figées, capturées par Godot lui-même.
 func captures() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures"))
-	for nom in ["proche", "rasante", "reference", "haute"]:
+	for nom in ["proche", "rasante", "reference", "haute", "plongeante"]:
 		pose(nom)
 		mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
 		for _i in 12:
 			await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
-		var chemin := ProjectSettings.globalize_path("res://captures/godot_%s_12s.png" % nom)
+		var suffixe := "_cote" if "--cote" in OS.get_cmdline_user_args() else ""
+		var chemin := ProjectSettings.globalize_path("res://captures/godot_%s%s_12s.png" % [nom, suffixe])
 		image.save_png(chemin)
 		print("CAPTURE_GODOT_S357 pose=%s fichier=%s %dx%d" % [nom, chemin, image.get_width(), image.get_height()])
 	get_tree().quit()
