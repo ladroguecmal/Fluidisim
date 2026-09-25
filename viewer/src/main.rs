@@ -2752,6 +2752,7 @@ fn run() -> Result<(), String> {
             args.iter().any(|a| a == "--solide"),
             !args.iter().any(|a| a == "--sans-eponge"),
             &cycles,
+            args.iter().any(|a| a == "--temoin"),
         );
     }
     if args.iter().any(|a| a == "--delta3d-cuve") {

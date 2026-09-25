@@ -97,7 +97,7 @@ Critères, écrits avant le code :
 - [x] **P4** — le banc contre `Volume3`, bosse, avec et sans éponge, balayage des cycles ; critère 2.
 - [ ] **P4 bis** *(ajoutée en cours, après P3)* — le même défaut de publication dans la production `Step3`
   (`published`, `ghost_up`) : la dérive de la moyenne de S305 §7, mesurée avant et après sur la cuve.
-- [ ] **P5** — le solide fixe immergé ; critère 2 bis.
+- [x] **P5** — le solide fixe immergé ; critère 2 bis.
 - [ ] **P6** — le coût ; critère 3.
 - [ ] **P7** — ADR-193, preuve, file, feuille de route, liste ; critère 4.
 - [ ] **P8** — rituel.
@@ -121,3 +121,9 @@ Critères, écrits avant le code :
   final 0,282982947 m³ contre 0,282982986 au cœur (64 cycles). Sans éponge : mêmes écarts ; dérive du volume publié
   **6·10⁻¹⁰ à 4·10⁻⁹** pour 10⁻⁶ exigé (après correction). Aucune face fermée non nulle. En usage : 5,7·10⁻⁵ m à 8
   cycles, cinquante fois sous les 3 mm de l'image (S201).
+- **P5, critère 2 bis tenu.** Sphère de 0,5 m à 1 m sous le couvercle, découpe du cœur chargée telle quelle
+  (12 324 faces fermées contre 12 288) ; cœur 104,4 itérations (Jacobi), 40 s. Pire |Δη| : 4 cycles 2,33·10⁻⁴, **8
+  cycles 1,09·10⁻⁴ (manqué de peu)**, **16 cycles 1,26·10⁻⁵**, 32 cycles 1,07·10⁻⁶, 64 cycles 2,38·10⁻⁷ ; faces fermées
+  à vitesse nulle, exactement ; volume 0,283311980 contre 0,283312029. **Témoin privé de la découpe** (`--temoin` : la
+  carte toutes ouvertes contre le cœur avec la sphère) : **4,68·10⁻³ m** — le banc voit le solide, vingt mille fois
+  au-dessus de l'écart qu'il mesure avec. Prédiction « 32 cycles au plus » tenue : **16** pour les deux cas.

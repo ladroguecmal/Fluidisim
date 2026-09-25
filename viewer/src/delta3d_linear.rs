@@ -473,7 +473,7 @@ fn sphere(d: Domain3) -> Vec<f32> {
 /// **Banc S358, critères 2 et 2 bis** : `Linear3` contre `Volume3::step_surface_linear`. `--lineaire-carte`, avec
 /// `--solide` pour la sphère fixe, `--sans-eponge` pour les murs et le volume, `--cycles=a,b,…` pour le balayage.
 /// La référence tourne une fois et garde sa surface tous les vingt pas ; la carte rejoue pour chaque nombre de cycles.
-pub fn recevoir(solide: bool, eponge: bool, cycles: &[u32]) -> Result<(), String> {
+pub fn recevoir(solide: bool, eponge: bool, cycles: &[u32], temoin: bool) -> Result<(), String> {
     use crate::scene::host_impl;
     use water_core::delta3d::Volume3;
     use water_core::host::HostServices;
@@ -493,9 +493,10 @@ pub fn recevoir(solide: bool, eponge: bool, cycles: &[u32]) -> Result<(), String
         if eponge {
             coeur.set_linear_sponge(Some(EPONGE)).map_err(|e| format!("éponge {e:?}"))?;
         }
+        // `temoin` : la carte sans la découpe du cœur — ce que l'écart mesuré vaudrait si la carte ignorait le solide.
         let geo = match coeur.apertures() {
-            Some((u, v, w)) => decoupee(u, v, w, coeur.fluid_fraction().expect("fractions")),
-            None => toutes_ouvertes(d),
+            Some((u, v, w)) if !temoin => decoupee(u, v, w, coeur.fluid_fraction().expect("fractions")),
+            _ => toutes_ouvertes(d),
         };
         let fermees = geo[..face_total(d)].iter().filter(|a| **a == 0.).count();
         let eta0 = bosse(d);
@@ -505,7 +506,7 @@ pub fn recevoir(solide: bool, eponge: bool, cycles: &[u32]) -> Result<(), String
         };
         let v0 = volume(&eta0, &vec![0.; d.columns()]);
         println!(
-            "LINEAIRE_S358 cas={} eponge={eponge} nx={} ny={} nz={} dx={} mailles={} faces={} fermees={fermees} dt_us={DT_US} pas={PAS} bosse_m={BOSSE_A} sigma_m={BOSSE_SIGMA} volume0_m3={v0:.9}",
+            "LINEAIRE_S358 cas={} temoin_sans_decoupe={temoin} eponge={eponge} nx={} ny={} nz={} dx={} mailles={} faces={} fermees={fermees} dt_us={DT_US} pas={PAS} bosse_m={BOSSE_A} sigma_m={BOSSE_SIGMA} volume0_m3={v0:.9}",
             if solide { "sphere" } else { "ouvert" }, d.nx, d.ny, d.nz, d.dx, d.cells(), face_total(d)
         );
         let debut = std::time::Instant::now();
