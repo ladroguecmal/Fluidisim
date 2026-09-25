@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 01:43 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 01:58 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S371 — rendu 10 : la caméra à demi immergée (ADR-019 §6, liste 8.6)
 Dernière session : S370 — consignation : *« Pas de réseau = pas encore »* — le multijoueur reste dans l'ambition, 10.1 attend un fait nouveau (note datée sur [ADR-197](docs/adr/ADR-197-reponses-du-2026-09-26.md) D1). Avant : S369, la voie d'A289 ([ADR-198](docs/adr/ADR-198-la-voie-d-a289.md)) — δ relatif à B, A320 ouverte
 Session suivante : par l'alternance d'ADR-191 D3, **une session de rendu** : la caméra à demi immergée (ADR-019 §6), l'échelle radiométrique du ciel et du soleil. À la physique suivante : **A320** — les termes croisés sous forme de Bernoulli —, puis le critère de l'ordre E réécrit ; ou les chemins de B et la côte (ADR-196), la coque qui bouge, le lot 5. L'écume attend des photographies
 Maillons        : 1 — S370 : consignation, aucun point ne change d'état (journal)
