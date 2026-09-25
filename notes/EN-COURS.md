@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S366 — **en cours**. **Rendu 8 : les références sous l'eau** — verdict R24 : *« Pour les références trouve les
+Session : S366 — **terminée**. **Rendu 8 : les références sous l'eau** — verdict R24 : *« Pour les références trouve les
 sinon rien a redire cela me paraît good, continue »*. La demande de l'utilisateur prime sur l'alternance d'ADR-191 D3
 (la physique reprend à la session suivante). S365 a laissé **`f(ω)` à calibrer** (B11) — la lumière de l'eau selon la
 direction de visée — et aucune référence réelle.
@@ -88,7 +88,7 @@ Critères, écrits avant la mesure :
 - [x] **P3** — les chiffrer : la distribution mesurée contre `f(ω)` et le rendu ; les photographies, rapports sans unité.
 - [x] **P4** — calibrer ce que la mesure désigne ; avant / après ; images.
 - [x] **P5** — preuve (SOUS-MARIN-S365, section datée S366), liste 8.6, file, index.
-- [>] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2.** Verdict R24 consigné (REVUE §29, décisions de la file). **Références trouvées**, rien téléchargé, lues dans le

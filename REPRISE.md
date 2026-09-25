@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-25 23:21 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S366 — rendu 8 : les références sous l'eau, trouvées et chiffrées ; f(ω) calibré sur la mesure (verdict R24)
-Dernière session : S365 — **rendu 7, sous la surface** : la caméra dans l'eau — fenêtre de Snell rendue à 0,05° de arcsin(1/n), réflexion totale, milieu `exp(−c·d)` à 0,004 près, fond et caustiques vus de l'eau ; **8.6 passe à partiel** ([preuve](docs/validation/SOUS-MARIN-S365.md))
-Session suivante : **les verdicts R21 à R24 d'abord** (REVUE-VISUELLE §26–29). Sinon, par l'alternance d'ADR-191 D3, une session de physique : les chemins de B lisent la côte jusqu'à Godot (ADR-196 §3), la coque qui bouge sur la carte (ADR-193 §3), ou le lot 5 (A316). Au rendu suivant : la caméra à demi immergée (ADR-019 §6). En attente : R18, R21, R22, R23, R24
-Maillons        : 0 — S365 : 8.6 passe à partiel (journal)
+Session en cours : aucune
+Dernière session : S366 — **rendu 8, les références sous l'eau** (R24 : « good », « trouve les ») : Tyler 1960 et trois photographies libres, chiffrées ; la lumière de l'eau calée sur la mesure (lobe avant, résidu 0,36 → 0,12) ; la brume de Godot éteinte sous l'eau ([preuve](docs/validation/SOUS-MARIN-S365.md) §6)
+Session suivante : **les verdicts R21, R22, R23 et R25 d'abord** (REVUE-VISUELLE §26–28, §30). Sinon, par l'alternance d'ADR-191 D3, une session de physique : les chemins de B lisent la côte jusqu'à Godot (ADR-196 §3), la coque qui bouge sur la carte (ADR-193 §3), ou le lot 5 (A316). Au rendu suivant : la caméra à demi immergée (ADR-019 §6), l'échelle radiométrique du ciel et du soleil. En attente : R18, R21, R22, R23, R25
+Maillons        : 1 — S366 : 8.6 reste partiel (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

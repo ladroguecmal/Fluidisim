@@ -17124,3 +17124,21 @@ turbidité ; `f(ω)` à calibrer ; coût non mesuré. **R24** préparée, images
 **Rituel.** Maillons **0** : 8.6 passe à partiel (3 / 61 / 56) ; devient possible, descendre la caméra sous l'eau ;
 consommé par le rendu de Godot (poses sous l'eau, scène côtière) ; preuve §1–2. Suivant : **R21 à R24 d'abord** ; par
 l'alternance, la physique — les chemins de B lisent la côte (ADR-196), la coque qui bouge, ou le lot 5 (A316).
+
+## S366 — 2026-09-25 — rendu 8 : les références sous l'eau, la lumière de l'eau calée sur une mesure
+
+**Entrée.** Verdict R24 : *« Pour les références trouve les sinon rien a redire cela me paraît good, continue »* — la
+demande prime sur l'alternance. S365 avait laissé `f(ω)` à calibrer et aucune référence.
+**Fait** ([preuve](../docs/validation/SOUS-MARIN-S365.md) §6). **Références**, lues dans le navigateur, rien téléchargé :
+la radiance mesurée par Tyler (1960, lac Pend Oreille, via Mobley), numérisée par ses pixels ; trois photographies libres
+de Wikimedia Commons (Hanifaru, Maldives ; un récif ; une piscine, le fond dans le miroir). **Mesuré** : à l'horizontale,
+2,46 fois la radiance montante à l'opposé du soleil, **8,71 côté soleil** ; le modèle de S365, sans azimut, s'en écarte
+(résidu logarithmique 0,362). Critère dépassé : **lobe avant** de Henyey-Greenstein autour du soleil réfracté, g = 0,855,
+résidu **0,120** ; réalisé, rapport face / dos 2,18–2,23 pour 2,215 prédits. Photographie, indicatif : teinte de l'eau
+4,07 contre 4,10 ; **fenêtre trois fois trop terne** — le ciel ne porte pas l'éclairement du soleil que reçoit l'eau.
+**Défaut trouvé** : la brume de Godot assombrissait l'horizon vu d'en dessous — éteinte sous l'eau ; au-dessus, au bit.
+**Limites.** Une mesure, d'une eau de lac, un plan d'azimut : lobe emprunté par notre eau pure, dit ; photographies en
+rapports seulement. **R25** préparée, images envoyées (sans réponse, la lueur reste).
+**Rituel.** Maillons **1** : 8.6 reste partiel. Suivant : **R21 à R23, R25** ; par l'alternance, la physique — les
+chemins de B lisent la côte (ADR-196), la coque qui bouge, ou le lot 5. Au rendu : la caméra à demi immergée, l'échelle
+radiométrique du ciel et du soleil.
