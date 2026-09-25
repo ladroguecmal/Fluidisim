@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 09:19 +02:00
+Battement        : 2026-09-25 09:18 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S359 — rendu 3 (ADR-191 D3) : verdict R19 ; la colonne d'eau dans Godot — fond, profondeur, absorption, réfraction (8.5)
 Dernière session : S358 — **la coque dans la production de δ, 1** : `Linear3`, le pas linéaire de la porte D sur la carte, à 1,3·10⁻⁵ m de `Volume3` autour d'une sphère fixe, 0,32 ms ([ADR-193](docs/adr/ADR-193-le-domaine-d-une-coque-est-lineaire-sur-la-carte.md)) ; la surface publiée de toute la production perdait son reste compensé — corrigé ([preuve](docs/validation/LINEAIRE-GPU-S358.md))

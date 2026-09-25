@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — verdict R19 consigné ; diagnostic de l'horizon ; critères 1 et 5 (mesure).
 - [x] **P3** — le fond et ses poses ; critère 2.
-- [ ] **P4** — la profondeur reconstruite, le mode contrôle ; critère 3.
+- [x] **P4** — la profondeur reconstruite, le mode contrôle ; critère 3.
 - [ ] **P5** — l'optique de la colonne ; critère 4.
 - [ ] **P6** — l'horizon, selon P2 ; critère 5.
 - [ ] **P7** — les images de R20 ; critère 6.
@@ -112,3 +112,10 @@ Critères, écrits avant le code :
   `--cote` ajoute le fond, `profondeur(x, y)` en coordonnées de B (6 m à y = −30, 40 m à y = 370, puis 300 m ; bancs
   d'un mètre ; jamais sous 5 m), grille de 4 m sur 2 400 × 1 100 m ; pose `plongeante` (12 m, −0,75 rad), touche 5 ;
   captures suffixées `_cote` ; `SANS_EAU=1` masque la mer (instrument). Fond vu seul : rides visibles, gris sous le ciel.
+- **P4, critère 3 tenu.** `scene_monde` : NDC `(uv·2 − 1, d)`, profondeur inversée de Godot 4.3+, puis
+  `INV_PROJECTION_MATRIX`, `INV_VIEW_MATRIX` ; la mer lit `hint_screen_texture` et `hint_depth_texture`. `mer.gd
+  --controle-fond` : mer plate, émission seule, lumières, ambiance, reflets, brume, halo éteints, tonalité linéaire ;
+  caméra à 15 m, −0,9 rad ; la profondeur attendue par le rayon du pixel contre `profondeur()` (pas de 5 cm, puis
+  dichotomie). Cinq pixels : 8,413 / 8,443 ; 8,894 / 8,948 ; 9,560 / 9,592 ; 7,498 / 7,543 ; 7,796 / 7,824 m — écart
+  −2,7 à −5,4 cm, pire 0,23 de la tolérance. Biais de signe constant : le pixel entier contre son centre, non poursuivi.
+  *Battements de P2 et P3 écrits en avance d'une et deux minutes — corrigé ici.*

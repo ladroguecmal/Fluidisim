@@ -31,6 +31,14 @@ uniform float angle_pixel = 0.0013;
 uniform float pas_radial = 0.03;
 // S359 — témoin du diagnostic de l'horizon : la rugosité confiée à Godot, bornée (1 : sans borne).
 uniform float rugosite_max = 1.0;
+// S359 — la colonne d'eau : ce que Godot a rendu derrière la surface (fond, objets) et sa profondeur. La mer, qui les
+// lit, est dessinée après eux et n'entre pas dans le tampon de profondeur.
+uniform sampler2D ecran : hint_screen_texture, filter_linear_mipmap;
+uniform sampler2D profondeur_ecran : hint_depth_texture, filter_nearest;
+// Mode contrôle (S359) : 0 rendu ; 1 profondeur verticale du fond vu sans réfraction, `H/echelle_controle`, en émission
+// seule — `mer.gd --controle-fond` la relit contre la bathymétrie.
+uniform int controle = 0;
+uniform float echelle_controle = 50.0;
 
 varying vec2 lag;
 varying vec3 g_bande;
@@ -48,6 +56,14 @@ float seuil_ecume(float h) {
     int i = min(int(floor(x)), 12);
     float f = x - float(i);
     return ecume_seuils[i] * (1.0 - f) + ecume_seuils[i + 1] * f;
+}
+
+/// Le point de la scène vu au pixel `uv`, en coordonnées du monde (Godot 4.3+, profondeur inversée, NDC z dans [0, 1]).
+vec3 scene_monde(vec2 uv, mat4 inv_proj, mat4 inv_vue) {
+    float d = texture(profondeur_ecran, uv).r;
+    vec4 v = inv_proj * vec4(uv * 2.0 - 1.0, d, 1.0);
+    v.xyz /= v.w;
+    return (inv_vue * vec4(v.xyz, 1.0)).xyz;
 }
 
 void vertex() {
@@ -139,4 +155,15 @@ void fragment() {
     METALLIC = 0.0;
     // La lumière des crêtes : transmise par ce qui se comprime, éclairée par Godot depuis l'arrière de la crête.
     BACKLIGHT = force_cretes * clamp(-0.5 * s, 0.0, 1.0) * transmission_crete * (1.0 - couverture);
+    // S359 — la colonne d'eau sous ce pixel : le point de la surface et le fond vu à travers, sans réfraction.
+    vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+    vec3 fond0 = scene_monde(SCREEN_UV, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
+    float h0 = surface.y - fond0.y;
+    if (controle == 1) {
+        ALBEDO = vec3(0.0);
+        SPECULAR = 0.0;
+        ROUGHNESS = 1.0;
+        BACKLIGHT = vec3(0.0);
+        EMISSION = vec3(clamp(h0 / echelle_controle, 0.0, 1.0));
+    }
 }

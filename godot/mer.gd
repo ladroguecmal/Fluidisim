@@ -65,13 +65,16 @@ func _ready() -> void:
 	add_child(mer)
 	# S359 : `SANS_EAU=1` masque la mer, pour voir le fond seul.
 	mer.visible = OS.get_environment("SANS_EAU") != "1"
-	if "--cote" in args:
+	if "--cote" in args or "--controle-fond" in args:
 		add_child(fond())
 	uniformes_fixes()
 	phases(temps)
 	if "--captures" in args:
 		anime = false
 		captures()
+	if "--controle-fond" in args:
+		anime = false
+		controle_fond()
 
 
 ## Le ciel de Godot aux couleurs du « ciel clair » de l'afficheur, relevées sur la photographie de référence de
@@ -304,3 +307,63 @@ func controle() -> void:
 		pire = maxf(pire, ecart)
 		print("CONTROLE_GODOT_S357 x=%.1f y=%.1f eta_godot=%.9f eta_coeur=%.9f ecart=%s" % [x, y, eta, float(point[2]), String.num_scientific(ecart)])
 	print("CONTROLE_GODOT_S357 ecart_max=%s" % String.num_scientific(pire))
+
+
+## S359 — **le contrôle de la colonne d'eau**, mer plate, émission seule : lumières, ambiance, reflets, brume, halo
+## éteints, tonalité linéaire. Mode 1 : la profondeur verticale du fond que le nuanceur reconstruit depuis le tampon de
+## profondeur, relue en cinq pixels contre `profondeur()` au point où le rayon du pixel touche le fond.
+func controle_fond() -> void:
+	materiau.set_shader_parameter("n_bande", 0)
+	materiau.set_shader_parameter("n_queue", 0)
+	var env: Environment = (get_children().filter(func(c): return c is WorldEnvironment)[0] as WorldEnvironment).environment
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	env.glow_enabled = false
+	env.fog_enabled = false
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_DISABLED
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
+	for c in get_children():
+		if c is DirectionalLight3D:
+			c.light_energy = 0.0
+	var echelle := 50.0
+	materiau.set_shader_parameter("controle", 1)
+	materiau.set_shader_parameter("echelle_controle", echelle)
+	camera.position = Vector3(0.0, 15.0, 20.0)
+	camera.rotation = Vector3(-0.9, 0.0, 0.0)
+	mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
+	for _i in 12:
+		await RenderingServer.frame_post_draw
+	var image := get_viewport().get_texture().get_image()
+	var taille := image.get_size()
+	var pire := 0.0
+	for f in [Vector2(0.5, 0.5), Vector2(0.25, 0.28), Vector2(0.75, 0.28), Vector2(0.25, 0.83), Vector2(0.75, 0.83)]:
+		var px := Vector2i(int(f.x * taille.x), int(f.y * taille.y))
+		var rendu := image.get_pixel(px.x, px.y).srgb_to_linear().r * echelle
+		var attendu := profondeur_au_pixel(Vector2(px))
+		var tolere := 0.02 * attendu + 0.05
+		pire = maxf(pire, absf(rendu - attendu) / tolere)
+		print("CONTROLE_FOND_S359 mode=profondeur pixel=%s rendu_m=%.3f attendu_m=%.3f ecart_m=%.3f tolere_m=%.3f" % [px, rendu, attendu, rendu - attendu, tolere])
+	print("CONTROLE_FOND_S359 mode=profondeur pire_sur_tolere=%.3f critere=%s" % [pire, "tenu" if pire <= 1.0 else "manque"])
+	get_tree().quit()
+
+
+## La profondeur du fond sous la surface plate, le long du rayon du pixel : où il entre dans l'eau, puis où il touche
+## le fond `y = −profondeur(x, −z)`, par pas de 5 cm puis dichotomie.
+func profondeur_au_pixel(px: Vector2) -> float:
+	var o := camera.project_ray_origin(px)
+	var d := camera.project_ray_normal(px)
+	var t := -o.y / d.y
+	var sous := func(u: float) -> bool:
+		var p: Vector3 = o + d * u
+		return p.y < -profondeur(p.x, -p.z)
+	while not sous.call(t):
+		t += 0.05
+	var a := t - 0.05
+	var b := t
+	for _i in 40:
+		var m := 0.5 * (a + b)
+		if sous.call(m):
+			b = m
+		else:
+			a = m
+	var p := o + d * b
+	return -p.y
