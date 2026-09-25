@@ -62,63 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S367 — **terminée**. **Physique : le champ d'écume de B** (7.1) — verdict : *« Je valide les rendus sauf
-ecume »*, lu sur toutes les revues en attente (R18, R21, R22, R23, R25), l'écume de R21 refusée. Alternance d'ADR-191 D3
-après deux sessions de rendu : la physique ; et 7.1, *absent*, conçu par [ADR-014](../docs/adr/ADR-014-mousse-spray-bulles.md),
-est la physique de l'écume refusée.
+Session : S368 — **en cours**. **Rendu 9 : l'écume qui dure** — *« Continue »* ; alternance d'ADR-191 D3 après S367
+(physique). L'écume rendue a été **refusée** (R21) : sans mémoire, des taches instantanées au bord lisse. S367 a
+construit la référence du champ d'ADR-014 ([ECUME-S367](../docs/validation/ECUME-S367.md)) ; ici sa **production sur la
+carte de Godot** (SPEC-006 §4) et l'écume rendue qui en naît (liste 8.4, absente).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Ce qui manque à l'écume rendue** (S356, S360) : elle n'a **pas de mémoire** — une tache instantanée là où la crête
-dépasse un seuil, au bord lisse. ADR-014 a décidé un **champ** `F` à deux canaux — actif, demi-vie ≈ 3 s ; résiduel,
-≈ 30 s, nourri par l'actif —, **advecté par la vitesse orbitale complète** : c'est elle qui rassemble l'écume dans les
-zones de convergence en traînées alignées au vent. Banc B9 : la couverture contre Monahan, la persistance, les traînées.
-Ici, **la référence** dans le cœur ; la production sur la carte de Godot viendra au rendu (SPEC-006 §4, RG16F).
+**Ce qui se construit.** `ecume.comp` + `ecume.gd` : un champ de 1 024 × 1 024 texels de 0,25 m (256 m) autour de la
+caméra, deux canaux (actif, résiduel) en RGBA32F — l'état interne en f32 : la décroissance pas à pas ne tiendrait pas en
+demi-précision —, le pas de S367 à l'identique (advection semi-lagrangienne par la vitesse orbitale de la bande,
+décroissance exacte, sources aux crêtes les plus accélérées, seuil `κ·σ_a`). Mise en régime simulée avant la capture
+(60 s de passé : B est analytique). Au rendu : l'actif en écume blanche au bord irrégulier, le résiduel en dentelle.
 
 Critères, écrits avant le code :
-1. **Décroissance** : un champ uniforme sans source suit la solution exacte du système à deux canaux (actif → résiduel)
-   à 10⁻⁶ près ; **advection** : un motif translaté par une vitesse uniforme revient à sa place à l'erreur
-   d'interpolation près, bornée et publiée ; déterminisme au bit.
-2. **Couverture (B9, scénario 1)** : mer pleinement développée à `U10` = 7, 10, 13 m/s, sources d'ADR-014 §3.1 ; la
-   part de surface blanche au régime établi contre Monahan (`3,84·10⁻⁶·U10^3,41`). **Prédiction** : avec les seuils
-   physiques d'ADR-014 (cambrure 0,6/7, accélération 0,45 g) et une bande résolue, l'ordre de grandeur, pas mieux qu'un
-   facteur 3 — le seuil se cale alors sur Monahan, **dit**, jamais relevé en silence.
-3. **Traînées (B9)** : l'écume résiduelle advectée par la vitesse orbitale s'allonge le long du vent — rapport des
-   longueurs de corrélation le long / en travers, contre le témoin advecté par le seul courant moyen.
+1. **Le pas sur la carte = la référence** : décroissance d'un champ uniforme contre la solution fermée (10⁻⁵ relatif,
+   f32 sur 600 pas) ; advection d'une bosse par une vitesse uniforme (mode de contrôle), centre à 1 cm près.
+2. **La couverture** : la part où l'actif dépasse ½, relue sur la carte au régime, contre `couverture_monahan` de
+   l'export (0,42 %) ; κ recalé ici (la bande de l'afficheur n'est pas celle du cœur), **dit** ; prédiction de S367 :
+   κ ≈ 2,98.
+3. **R26** : l'écume d'avant contre celle-ci, plusieurs poses ; une séquence de trois images espacées de 2 s — la durée
+   se juge dans le temps.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les verdicts consignés : revue (§23, §26–28, §30), décisions de la file, liste (8.4 à 8.10), dépendances.
-- [x] **P3** — la référence du champ (`ecume.rs`) : grille ancrée, deux canaux, décroissance, advection semi-lagrangienne
-  par la vitesse de surface de B, sources de B ; critère 1.
-- [x] **P4** — la couverture contre Monahan, trois vents ; critère 2.
-- [x] **P5** — les traînées de convergence ; critère 3.
-- [x] **P6** — preuve ECUME-S367 ; liste 7.1, file, dépendances, feuille de route, index.
-- [x] **P7** — rituel.
+- [>] **P2** — `ecume.comp`, `ecume.gd` : le champ sur la carte ; contrôles de décroissance et d'advection ; critère 1.
+- [ ] **P3** — la couverture relue, κ recalé ; critère 2.
+- [ ] **P4** — l'écume rendue depuis le champ (`eau.gdshader`) : actif et dentelle ; images R26 ; critère 3.
+- [ ] **P5** — preuve ECUME-GODOT-S368 ; liste 8.4, file, dépendances, feuille de route, index.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2.** Verdict consigné, lu sur la demande de S366 (R21, R22, R23, R25) : forme fine, caustiques, ciel, lueur face
-  au soleil **validés** ; **l'écume refusée** ; tonalité sans choix — AgX reste le défaut ; **R18** (en direct, non
-  rappelé) toujours attendu. Liste : 8.4 (reste absent), 8.5, 8.9, 8.10 retouchés sans changer de case.
-- **P3, critère 1 tenu.** `ecume.rs` : `ChampEcume` (deux canaux, `advecter` semi-lagrangien bilinéaire, `decroitre`
-  exacte, `deferlement` — montée lisse de `−a_z/g` autour de 0,45 —, `pas_de_temps`, `couverture`). Décroissance :
-  **7,7e-7** du fermé à 10 s ; advection d'une gaussienne, 100 pas : centre à **9,4e-6 m**, masse à 1,8e-6, sommet
-  1 → 0,863 (diffusion de l'interpolation, publiée) ; onde seule : indicateur **0 / 0,5 / 1** à ak = 0,30 / 0,45 / 0,60
-  (signe et échelle de l'accélération) ; déterminisme, même hash.
-- **P4, critère 2 : prédiction manquée, seuil calé et dit.** `examples/ecume_couverture.rs`. Au seuil physique
-  d'ADR-014, 0,45 g : **couverture nulle** aux trois vents. Mesuré : la bande de B est **autosimilaire**, `σ_a/g` =
-  **0,0836** à 7, 10 et 13 m/s (bande 0,099–0,770 Hz à 7 m/s, rapport 7,74) : 0,45 g = 5,4 σ, et aucun seuil fixe ne
-  suit `U10^3,41`. La place du déferlement vient de la physique (les crêtes les plus accélérées), la quantité de
-  Monahan : seuil `κ·σ_a`, balayage κ = 2 / 2,5 / 3 aux trois vents (active 10,0 / 2,46 / 0,43 % à 7 m/s ; 6,8 / 1,30 /
-  0,16 % à 10 ; 10,2 / 3,01 / 0,57 % à 13) — même courbe au bruit près, mise en commun : `C(κ) ≈ 2,26 %·exp(−3,52·(κ −
-  2,5))`, inversée dans `seuil_pour_couverture`. **Vérifié sur une autre graine** : champ de 128 m, 1,06 / 1,50 / **0,51**
-  (bruit de réalisation : une longueur d'onde de pic par champ à 13 m/s) ; **champ de 384 m, 40 s : 1,02 / 1,06 / 0,94**.
-- **P5, critère 3 tenu.** `examples/ecume_trainees.rs`, U10 = 10, 90 s, seuil calé. Premier passage : résiduel advecté
-  Ly/Lx ≥ 3,8 contre 1,8 sans advection — mais champ fixe à bord d'entrée vide, résiduel presque saturé, diffusion de
-  l'interpolation dans le sens de l'oscillation : trois artefacts possibles. **Domaine périodique** (mesure seulement) et
-  deux texels : 1 m, Lx 16,9 m, Ly ≥ 64 m (butée) ; **0,5 m, Lx 10,9 m, Ly 58,3 m, Ly/Lx 5,3** ; témoin 1,8 aux deux.
-  L'allongement **croît** quand le texel baisse : pas la diffusion ; il reste sans bord d'entrée. Résiduel moyen 0,40 : le
-  transfert 1 : 1 de l'actif est trop généreux — à caler (B9).
-- **P6.** Preuve [ECUME-S367](../docs/validation/ECUME-S367.md) ; **7.1 passe à partiel** (3 / 62 / 55), décompte,
-  REPRISE §4, feuille de route ; dépendances (donnée, table régénérée) ; file (ligne de l'écume, état périmé de S308
-  remplacé) ; index. Cœur : **522 réussis, 14 ignorés**.

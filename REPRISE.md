@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 00:02 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 00:17 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S368 — rendu 9 : l'écume qui dure — le champ d'écume de S367 sur la carte de Godot, l'écume rendue qui en naît (8.4)
 Dernière session : S367 — **physique, le champ d'écume de B** (verdict : « je valide les rendus sauf écume ») : la référence d'ADR-014 — deux canaux, advection orbitale, déferlement aux crêtes les plus accélérées ; couverture calée sur Monahan, vérifiée à 6 % près de 7 à 13 m/s ; traînées le long du vent ; **7.1 passe à partiel** ([preuve](docs/validation/ECUME-S367.md))
 Session suivante : par l'alternance d'ADR-191 D3, **une session de rendu : le champ d'écume porté sur la carte de Godot** (SPEC-006 §4, cascades RG16F) et l'écume rendue qui en naît — celle que R21 refusait (8.4) ; ensuite la physique : les chemins de B lisent la côte (ADR-196), la coque qui bouge, ou le lot 5. Au rendu, restent aussi la caméra à demi immergée et l'échelle radiométrique du ciel. En attente : R18
 Maillons        : 0 — S367 : 7.1 passe à partiel (journal)
