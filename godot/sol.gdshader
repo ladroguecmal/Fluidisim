@@ -8,6 +8,11 @@
 // **Éclairé comme le corps d'eau** (S359 P6) — `gain·(0,6 + 0,4·max(n·soleil, 0))`, le modèle de l'afficheur — et non
 // par Godot : le mélange de Maritorena demande le fond et l'eau sous le même éclairement. Il n'est vu qu'à travers
 // l'eau.
+//
+// **S361 — les caustiques** : la part directe `0,4·n·soleil` est multipliée par la carte de caustiques
+// (`caustiques.gdshader`, méthode directe, énergie conservée), qui couvre `carte_cote` mètres autour de `carte_origine`.
+// Hors de la carte, et quand le pixel couvre plus de deux texels, la valeur tend vers 1 — sa moyenne : c'est un niveau de
+// détail, pas un réglage. La méthode à rebours de S361 P3 est retirée (commit `c5faf558` pour la rejouer).
 shader_type spatial;
 render_mode unshaded;
 
@@ -16,26 +21,19 @@ render_mode unshaded;
 uniform vec3 albedo_sable = vec3(0.34, 0.30, 0.24);
 uniform float gain_eau = 2.0;
 
-// S361 — **les caustiques** : le soleil réfracté par la surface éclaire le fond selon la projection
-// `X_f = X_s + (H + η)·p(∇η(X_s))`, `p` la pente horizontale du rayon réfracté (Snell exact) ; l'éclairement direct est
-// multiplié par `1/|det J|`, `J = I + p⊗∇η + (H + η)·(∂p/∂s)·Hess η`, au point de départ `X_s`, retrouvé par point fixe
-// depuis le point du fond (quatre itérations). Surface : la bande (analytique, mêmes composantes que l'eau) et la cascade
-// de 32 m de la surface fine (λ ≥ 0,5 m) ; la cascade de 4 m est exclue — sa focale est de l'ordre du mètre, bien
-// au-dessus de ce fond. `det_min` plafonne la concentration, *à calibrer* : le disque du soleil l'arrondit en vrai.
-uniform vec4 bande[64];
-uniform int n_bande = 0;
-uniform sampler2D detail_a0 : filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D detail_c0 : filter_linear_mipmap_anisotropic, repeat_enable;
-uniform float detail_cote0 = 32.0;
 uniform bool caustiques = false;
-uniform bool caustiques_detail = true;
-uniform float det_min = 0.05;
-uniform float indice = 1.34;
+uniform sampler2D carte_caustiques : filter_linear, repeat_disable;
+uniform vec2 carte_origine = vec2(0.0);
+uniform float carte_cote = 64.0;
+uniform float carte_texels = 1024.0;
+// La carte est écrite divisée par `carte_echelle`, pour tenir dans son format.
+uniform float carte_echelle = 32.0;
+// Sens de la carte en y (le repère d'écran de la vue orthographique), éprouvé par le contrôle à onde selon y.
+uniform bool carte_retournee = false;
 // Contrôle (S361) : 0 rendu ; 1 l'éclairement focalisé C en sortie directe — rouge C/4, vert fract(10·C), qui le
-// précise au-delà des 8 bits ; 2 la même sur la scène, rouge C/20, vert fract(C) ; `profondeur_controle` > 0 impose H,
-// `soleil_controle` non nul impose le soleil (coordonnées de B).
+// précise au-delà des 8 bits ; 2 la même sur la scène, rouge C/20, vert fract(C). `soleil_controle` non nul impose le
+// soleil (coordonnées de B).
 uniform int controle = 0;
-uniform float profondeur_controle = 0.0;
 uniform vec3 soleil_controle = vec3(0.0);
 
 varying vec2 plan;
@@ -58,55 +56,32 @@ void vertex() {
     profondeur_fond = -monde.y;
 }
 
-/// La surface en `x` (B) : pente, η, hessienne (xx, yy, xy) — la bande, puis la cascade de 32 m.
-void surface(vec2 x, out vec2 pente, out float eta, out vec3 hess) {
-    pente = vec2(0.0);
-    eta = 0.0;
-    hess = vec3(0.0);
-    for (int i = 0; i < n_bande; i++) {
-        vec4 c = bande[i];
-        float phase = dot(c.yz, x) + c.w;
-        float sn = sin(phase);
-        eta += c.x * sn;
-        pente += c.x * cos(phase) * c.yz;
-        hess -= c.x * sn * vec3(c.y * c.y, c.z * c.z, c.y * c.z);
-    }
-    if (caustiques_detail) {
-        vec2 uv = x / detail_cote0;
-        vec4 a = texture(detail_a0, uv);
-        vec4 h = texture(detail_c0, uv);
-        pente += a.xy;
-        eta += h.w;
-        hess += h.xyz;
-    }
+/// **Le disque du soleil** (S361) : 0,53° de diamètre apparent, soit un demi-angle de 4,65·10⁻³ rad dans l'air et
+/// 4,65·10⁻³/1,34 = 3,47·10⁻³ dans l'eau ; au fond, l'image d'un point de la surface est un disque de rayon `H·3,47·10⁻³`
+/// — ce qui borne la concentration d'un pli. Moyenne sur huit points du disque et son centre (énergie conservée).
+const float DEMI_ANGLE_SOLEIL_EAU = 3.47e-3;
+
+float lire_carte(vec2 uv) {
+    return carte_echelle * texture(carte_caustiques, vec2(uv.x, carte_retournee ? 1.0 - uv.y : uv.y)).r;
 }
 
-/// La pente horizontale du rayon de soleil réfracté par une facette de pente `s` : `r.xy/(−r.z)`.
-vec2 rayon(vec2 s, vec3 soleil) {
-    vec3 n = normalize(vec3(-s, 1.0));
-    vec3 r = refract(-soleil, n, 1.0 / indice);
-    return r.xy / max(-r.z, 1e-4);
-}
-
-/// L'éclairement direct focalisé au point du fond `xf`, à la profondeur `h` sous le plan moyen.
-float focalisation(vec2 xf, float h, vec3 soleil) {
-    vec2 xs = xf - h * rayon(vec2(0.0), soleil);
-    vec2 s;
-    float eta;
-    vec3 hess;
-    for (int i = 0; i < 4; i++) {
-        surface(xs, s, eta, hess);
-        xs = xf - (h + eta) * rayon(s, soleil);
+/// L'éclairement direct focalisé lu dans la carte, moyenné sur l'image du disque solaire ; 1 hors de la carte, et vers 1
+/// quand le pixel couvre plus de deux texels (fondu jusqu'à six) ou près du bord (le dernier dixième).
+float focalisation() {
+    vec2 uv = (plan - carte_origine) / carte_cote + 0.5;
+    if (uv.x <= 0.0 || uv.x >= 1.0 || uv.y <= 0.0 || uv.y >= 1.0) { return 1.0; }
+    float rayon_disque = max(profondeur_fond, 0.0) * DEMI_ANGLE_SOLEIL_EAU / carte_cote;
+    float c = lire_carte(uv) / 9.0;
+    for (int i = 0; i < 8; i++) {
+        float a = TAU * (float(i) + 0.5) / 8.0;
+        float r = rayon_disque * (i % 2 == 0 ? 0.55 : 0.95);
+        c += lire_carte(uv + r * vec2(cos(a), sin(a))) / 9.0;
     }
-    surface(xs, s, eta, hess);
-    vec2 p = rayon(s, soleil);
-    float d = 1e-3;
-    vec2 m0 = (rayon(s + vec2(d, 0.0), soleil) - rayon(s - vec2(d, 0.0), soleil)) / (2.0 * d);
-    vec2 m1 = (rayon(s + vec2(0.0, d), soleil) - rayon(s - vec2(0.0, d), soleil)) / (2.0 * d);
-    mat2 m = mat2(m0, m1);
-    mat2 hs = mat2(vec2(hess.x, hess.z), vec2(hess.z, hess.y));
-    mat2 j = mat2(1.0) + outerProduct(p, s) + (h + eta) * (m * hs);
-    return 1.0 / max(abs(determinant(j)), det_min);
+    float texel = carte_cote / carte_texels;
+    float empreinte = max(length(dFdx(plan)), length(dFdy(plan)));
+    float bord = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
+    float fondu = max(clamp((empreinte - 2.0 * texel) / (4.0 * texel), 0.0, 1.0), 1.0 - clamp(bord / 0.1, 0.0, 1.0));
+    return mix(c, 1.0, fondu);
 }
 
 void fragment() {
@@ -120,13 +95,11 @@ void fragment() {
     vec3 n_b = normalize(vec3(n_grille.x, -n_grille.z, n_grille.y) + vec3(-pente, 0.0));
     float variation = 0.85 + 0.3 * (0.6 * bruit(plan * 0.9) + 0.4 * bruit(plan * 3.7));
     vec3 soleil = dot(soleil_controle, soleil_controle) > 0.0 ? normalize(soleil_controle) : normalize(SOLEIL_B);
-    float h = profondeur_controle > 0.0 ? profondeur_controle : max(profondeur_fond, 0.0);
-    float c = caustiques ? focalisation(plan, h, soleil) : 1.0;
+    float c = caustiques ? focalisation() : 1.0;
     ALBEDO = albedo_sable * variation * gain_eau * (0.6 + 0.4 * max(dot(n_b, soleil), 0.0) * c);
     if (controle == 1) {
         ALBEDO = vec3(c / 4.0, fract(10.0 * c), 0.0);
     } else if (controle == 2) {
-        // La scène : C jusqu'au plafond 1/det_min ; rouge C/20, vert fract(C).
         ALBEDO = vec3(c / 20.0, fract(c), 0.0);
     }
 }

@@ -40,8 +40,18 @@ var temps := 12.0
 var anime := true
 ## S360 : la surface fine par FFT (`detail.gd`), si l'export la porte.
 var detail: Node
-## S361 : le matériau du fond, qui reçoit la bande et la cascade de 32 m pour ses caustiques.
+## S361 : le matériau du fond, et la carte de caustiques — vue orthographique hors écran, grille dense de la surface.
 var materiau_sol: ShaderMaterial
+var vue_caustiques: SubViewport
+var materiau_caustiques: ShaderMaterial
+var maillage_caustiques: MeshInstance3D
+## La carte : 64 m de côté, 1 024 texels (6,25 cm) ; la surface source, 100 m, 1 024 × 1 024 sommets (9,8 cm, cinq par
+## plus courte longueur d'onde de la cascade de 32 m). Écrite divisée par `CARTE_ECHELLE`.
+const CARTE_COTE := 64.0
+const CARTE_TEXELS := 1024
+const SOURCE_COTE := 100.0
+const SOURCE_DIVISIONS := 1023
+const CARTE_ECHELLE := 32.0
 
 
 func _ready() -> void:
@@ -77,6 +87,9 @@ func _ready() -> void:
 	mer.visible = OS.get_environment("SANS_EAU") != "1"
 	if "--cote" in args or "--controle-fond" in args or "--controle-caustiques" in args or "--controle-caustiques-scene" in args:
 		add_child(fond())
+		# S361 : les caustiques du fond, carte directe ; `CAUSTIQUES=0` les éteint.
+		if OS.get_environment("CAUSTIQUES") != "0":
+			carte_caustiques()
 	uniformes_fixes()
 	phases(temps)
 	if donnees.has("detail"):
@@ -91,13 +104,12 @@ func _ready() -> void:
 			materiau.set_shader_parameter("detail_b1", detail.textures[1][1])
 			materiau.set_shader_parameter("detail_cotes", Vector2(float(detail.cotes[0]), float(detail.cotes[1])))
 			materiau.set_shader_parameter("detail_actif", true)
-			# S361 : les caustiques du fond — la bande et la cascade de 32 m ; `CAUSTIQUES=0` les éteint.
-			if materiau_sol != null:
-				materiau_sol.set_shader_parameter("n_bande", donnees["bande"].size())
-				materiau_sol.set_shader_parameter("detail_a0", detail.textures[0][0])
-				materiau_sol.set_shader_parameter("detail_c0", detail.textures[0][2])
-				materiau_sol.set_shader_parameter("detail_cote0", float(detail.cotes[0]))
-				materiau_sol.set_shader_parameter("caustiques", OS.get_environment("CAUSTIQUES") != "0")
+			# S361 : la cascade de 32 m entre dans la carte de caustiques.
+			if materiau_caustiques != null:
+				materiau_caustiques.set_shader_parameter("detail_a0", detail.textures[0][0])
+				materiau_caustiques.set_shader_parameter("detail_c0", detail.textures[0][2])
+				materiau_caustiques.set_shader_parameter("detail_cote0", float(detail.cotes[0]))
+				materiau_caustiques.set_shader_parameter("caustiques_detail", true)
 		elif not "--controle-fft" in args:
 			detail = null
 	if "--controle-fft" in args:
@@ -218,6 +230,88 @@ func fond() -> MeshInstance3D:
 	return instance
 
 
+## S361 — la carte de caustiques : une vue orthographique hors écran, son propre monde, fond noir, tonalité linéaire,
+## tampon HDR ; une grille dense de la surface que `caustiques.gdshader` projette sur le fond ; la bathymétrie en
+## texture, tirée de `profondeur()` aux sommets mêmes de la grille du fond — une seule source.
+func carte_caustiques() -> void:
+	vue_caustiques = SubViewport.new()
+	vue_caustiques.size = Vector2i(CARTE_TEXELS, CARTE_TEXELS)
+	vue_caustiques.own_world_3d = true
+	vue_caustiques.use_hdr_2d = true
+	vue_caustiques.msaa_3d = Viewport.MSAA_DISABLED
+	vue_caustiques.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(vue_caustiques)
+	var noir := Environment.new()
+	noir.background_mode = Environment.BG_COLOR
+	noir.background_color = Color.BLACK
+	noir.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	var oeil := Camera3D.new()
+	oeil.environment = noir
+	oeil.projection = Camera3D.PROJECTION_ORTHOGONAL
+	oeil.size = 200.0
+	oeil.far = 2000.0
+	oeil.position = Vector3(0.0, 500.0, 0.0)
+	oeil.rotation = Vector3(-PI / 2.0, 0.0, 0.0)
+	vue_caustiques.add_child(oeil)
+	oeil.current = true
+	var grille := PlaneMesh.new()
+	grille.size = Vector2(SOURCE_COTE, SOURCE_COTE)
+	grille.subdivide_width = SOURCE_DIVISIONS
+	grille.subdivide_depth = SOURCE_DIVISIONS
+	maillage_caustiques = MeshInstance3D.new()
+	maillage_caustiques.mesh = grille
+	materiau_caustiques = ShaderMaterial.new()
+	materiau_caustiques.shader = load("res://caustiques.gdshader")
+	maillage_caustiques.material_override = materiau_caustiques
+	maillage_caustiques.custom_aabb = AABB(Vector3(-1e5, -1e4, -1e5), Vector3(2e5, 2e4, 2e5))
+	vue_caustiques.add_child(maillage_caustiques)
+	var nx := int(2.0 * FOND_X / FOND_PAS) + 1
+	var ny := int((float(FOND_Y[1]) - float(FOND_Y[0])) / FOND_PAS) + 1
+	var bathy := Image.create_empty(nx, ny, false, Image.FORMAT_RF)
+	for j in ny:
+		for i in nx:
+			bathy.set_pixel(i, j, Color(profondeur(-FOND_X + FOND_PAS * i, float(FOND_Y[0]) + FOND_PAS * j), 0.0, 0.0))
+	materiau_caustiques.set_shader_parameter("bathymetrie", ImageTexture.create_from_image(bathy))
+	# Centres des texels sur les sommets de la grille du fond.
+	materiau_caustiques.set_shader_parameter("fond_origine", Vector2(-FOND_X - 0.5 * FOND_PAS, float(FOND_Y[0]) - 0.5 * FOND_PAS))
+	materiau_caustiques.set_shader_parameter("fond_taille", Vector2(nx * FOND_PAS, ny * FOND_PAS))
+	materiau_caustiques.set_shader_parameter("n_bande", donnees["bande"].size())
+	materiau_caustiques.set_shader_parameter("caustiques_detail", false)
+	materiau_caustiques.set_shader_parameter("cote_carte", CARTE_COTE)
+	materiau_caustiques.set_shader_parameter("texels", float(CARTE_TEXELS))
+	materiau_caustiques.set_shader_parameter("carte_echelle", CARTE_ECHELLE)
+	materiau_sol.set_shader_parameter("carte_caustiques", vue_caustiques.get_texture())
+	materiau_sol.set_shader_parameter("carte_cote", CARTE_COTE)
+	materiau_sol.set_shader_parameter("carte_texels", float(CARTE_TEXELS))
+	materiau_sol.set_shader_parameter("carte_echelle", CARTE_ECHELLE)
+	materiau_sol.set_shader_parameter("carte_retournee", OS.get_environment("CARTE_RETOURNEE") == "1")
+	materiau_sol.set_shader_parameter("caustiques", true)
+
+
+## La carte suit la caméra : centrée 25 m devant elle au sol, calée sur ses texels ; la surface source, décalée du
+## trajet réfracté moyen (12 m de fond), calée sur les pas de sa grille — pas de scintillement à l'échantillonnage.
+func suivre_carte(centre_force = null) -> void:
+	if materiau_caustiques == null or camera == null:
+		return
+	var devant := -camera.global_transform.basis.z
+	devant.y = 0.0
+	var centre: Vector2
+	if centre_force != null:
+		centre = centre_force
+	else:
+		var sol := camera.global_position + 25.0 * (devant.normalized() if devant.length() > 1e-3 else Vector3.ZERO)
+		centre = Vector2(sol.x, -sol.z)
+	var texel := CARTE_COTE / CARTE_TEXELS
+	centre = (centre / texel).round() * texel
+	var p0 := Vector2(0.333, -0.250)
+	var source := centre - 12.0 * p0
+	var pas := SOURCE_COTE / (SOURCE_DIVISIONS + 1)
+	source = (source / pas).round() * pas
+	maillage_caustiques.position = Vector3(source.x, 0.0, -source.y)
+	materiau_caustiques.set_shader_parameter("origine", centre)
+	materiau_sol.set_shader_parameter("carte_origine", centre)
+
+
 func pose(nom: String) -> void:
 	var p: Array = POSES[nom]
 	camera.position = p[0]
@@ -295,8 +389,9 @@ func phases(t: float) -> void:
 	var bande := lignes("bande", t)
 	materiau.set_shader_parameter("bande", bande)
 	materiau.set_shader_parameter("queue", lignes("queue", t))
-	if materiau_sol != null:
-		materiau_sol.set_shader_parameter("bande", bande)
+	if materiau_caustiques != null:
+		materiau_caustiques.set_shader_parameter("bande", bande)
+		suivre_carte()
 
 
 func _process(delta: float) -> void:
@@ -478,10 +573,13 @@ func controle_fft() -> void:
 	detail.controler(t, func(tout: bool) -> void: get_tree().quit(0 if tout else 1))
 
 
-## S361 — **le contrôle des caustiques contre une solution exacte** : une seule onde, `η = a·sin(kx)`, λ = 4 m, a = 5 cm ;
-## soleil au zénith ; fond plat imposé à la moitié de la focale `H_f = 1/((1 − 1/n)·a·k²)` ; la mer masquée, le fond vu
-## au nadir. L'éclairement rendu en 50 points d'une longueur d'onde contre `Σ 1/|F'(x_s)|` sur les antécédents de
-## `F(x_s) = x_s + (H + η)·p(η'(x_s)) − x_f` — Snell exact, racines trouvées en double par balayage et dichotomie.
+## S361 — **le contrôle des caustiques contre une solution exacte** : une seule onde, `η = a·sin(k·x)`, λ = 4 m,
+## a = 5 cm ; soleil au zénith ; fond plat imposé à H ; la mer masquée, le fond vu au nadir. L'éclairement rendu en
+## 50 points d'une longueur d'onde contre `Σ 1/|F'(x_s)|` sur les antécédents de `F(x_s) = x_s + (H + η)·p(η'(x_s)) −
+## x_f` — Snell exact, racines trouvées en double par balayage et dichotomie ; points de −2 à +2 m du centre de
+## l'image. Trois cas : onde selon x à mi-focale (le
+## critère), onde selon y à mi-focale (le sens de la carte), onde selon x à 1,5 focale (au-delà du pli : trois
+## antécédents, ce que la méthode à rebours ne savait pas faire).
 func controle_caustiques() -> void:
 	var env: Environment = (get_children().filter(func(c): return c is WorldEnvironment)[0] as WorldEnvironment).environment
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
@@ -492,63 +590,73 @@ func controle_caustiques() -> void:
 	var k := TAU / 4.0
 	var n := 1.34
 	var h_f := 1.0 / ((1.0 - 1.0 / n) * a * k * k)
-	var h := 0.5 * h_f
-	materiau_sol.set_shader_parameter("bande", PackedVector4Array([Vector4(a, k, 0.0, 0.0)]))
-	materiau_sol.set_shader_parameter("n_bande", 1)
-	materiau_sol.set_shader_parameter("caustiques", true)
-	materiau_sol.set_shader_parameter("caustiques_detail", false)
-	materiau_sol.set_shader_parameter("det_min", 1e-3)
-	materiau_sol.set_shader_parameter("profondeur_controle", h)
+	materiau_caustiques.set_shader_parameter("n_bande", 1)
+	materiau_caustiques.set_shader_parameter("caustiques_detail", false)
+	materiau_caustiques.set_shader_parameter("soleil_controle", Vector3(0.0, 0.0, 1.0))
 	materiau_sol.set_shader_parameter("soleil_controle", Vector3(0.0, 0.0, 1.0))
 	materiau_sol.set_shader_parameter("controle", 1)
 	camera.position = Vector3(0.0, 2.0, 60.0)
 	camera.rotation = Vector3(-PI / 2.0, 0.0, 0.0)
-	for _i in 12:
-		await RenderingServer.frame_post_draw
-	var image := get_viewport().get_texture().get_image()
-	var taille := image.get_size()
-	# Les pixels de la rangée centrale qui couvrent une longueur d'onde, à partir du centre.
-	var o := camera.project_ray_origin(Vector2(taille.x / 2, taille.y / 2))
-	var pire := 0.0
-	var somme_r := 0.0
-	var somme_e := 0.0
-	var echantillons := 50
-	for i in echantillons:
-		var x_cible := 4.0 * float(i) / float(echantillons)
-		var px := camera.unproject_position(Vector3(o.x + x_cible, -profondeur(o.x + x_cible, -o.z), o.z))
-		var pixel := Vector2i(int(px.x), taille.y / 2)
-		var xf := profondeur_au_pixel_x(Vector2(pixel) + Vector2(0.5, 0.5))
-		var col := image.get_pixel(pixel.x, pixel.y).srgb_to_linear()
-		var grossier := 4.0 * col.r
-		var fin := col.g
-		var rendu := (roundf(10.0 * grossier - fin) + fin) / 10.0
-		var exact := eclairement_exact(xf, a, k, h, n)
-		pire = maxf(pire, absf(rendu - exact) / exact)
-		somme_r += rendu
-		somme_e += exact
-		print("CONTROLE_CAUSTIQUES_S361 x_m=%.4f rendu=%.4f exact=%.4f" % [xf, rendu, exact])
-	var moyenne := somme_r / echantillons
-	print("CONTROLE_CAUSTIQUES_S361 H_f_m=%.3f H_m=%.3f pire_relatif=%.4f moyenne_rendue=%.4f moyenne_exacte=%.4f critere=%s" % [h_f, h, pire, moyenne, somme_e / echantillons, "tenu" if pire <= 0.05 and absf(moyenne - 1.0) <= 0.01 else "manque"])
+	var tout := true
+	for cas in [["x", 0.5], ["y", 0.5], ["x", 1.5]]:
+		var selon_y: bool = cas[0] == "y"
+		var h: float = float(cas[1]) * h_f
+		materiau_caustiques.set_shader_parameter("profondeur_controle", h)
+		materiau_caustiques.set_shader_parameter("bande", PackedVector4Array([Vector4(a, 0.0 if selon_y else k, k if selon_y else 0.0, 0.0)]))
+		suivre_carte(Vector2(0.0, -60.0))
+		for _i in 12:
+			await RenderingServer.frame_post_draw
+		var image := get_viewport().get_texture().get_image()
+		var taille := image.get_size()
+		var pire := 0.0
+		var ecarts := []
+		var somme_r := 0.0
+		var somme_e := 0.0
+		var echantillons := 50
+		for i in echantillons:
+			var d := 4.0 * float(i) / float(echantillons) - 2.0
+			var cible := Vector3(d if not selon_y else 0.0, 0.0, -d if selon_y else 0.0) + Vector3(0.0, 0.0, 60.0)
+			cible.y = -profondeur(cible.x, -cible.z)
+			var px := camera.unproject_position(cible)
+			var pixel := Vector2i(int(px.x), int(px.y))
+			var q := point_du_fond(Vector2(pixel) + Vector2(0.5, 0.5))
+			var coordonnee: float = q.y if selon_y else q.x
+			var col := image.get_pixel(pixel.x, pixel.y).srgb_to_linear()
+			var rendu := (roundf(10.0 * 4.0 * col.r - col.g) + col.g) / 10.0
+			var exact := eclairement_exact(coordonnee, a, k, h, n)
+			var e := absf(rendu - exact) / exact
+			pire = maxf(pire, e)
+			ecarts.append(e)
+			somme_r += rendu
+			somme_e += exact
+		ecarts.sort()
+		var moyenne := somme_r / echantillons
+		var critere := pire <= 0.05 and absf(moyenne - 1.0) <= 0.01
+		if float(cas[1]) < 1.0:
+			tout = tout and critere
+		print("CONTROLE_CAUSTIQUES_S361 onde_selon=%s H_sur_Hf=%.1f H_m=%.3f pire_relatif=%.4f mediane_relative=%.4f moyenne_rendue=%.4f moyenne_exacte=%.4f critere=%s" % [cas[0], cas[1], h, pire, ecarts[echantillons / 2], moyenne, somme_e / echantillons, ("tenu" if critere else "manque") if float(cas[1]) < 1.0 else "indicatif"])
+	print("CONTROLE_CAUSTIQUES_S361 critere_global=%s" % ("tenu" if tout else "manque"))
 	get_tree().quit()
 
 
-## Le point du fond vu au pixel, en x de B : le rayon du pixel jusqu'au fond de `profondeur()`.
-func profondeur_au_pixel_x(px: Vector2) -> float:
+## Le point du fond vu au pixel, en (x, y) de B : le rayon du pixel jusqu'au fond de `profondeur()`.
+func point_du_fond(px: Vector2) -> Vector2:
 	var o := camera.project_ray_origin(px)
 	var d := camera.project_ray_normal(px)
 	var t := 0.0
 	while o.y + d.y * t > -profondeur(o.x + d.x * t, -(o.z + d.z * t)):
 		t += 0.02
-	var a := t - 0.02
-	var b := t
+	var lo := t - 0.02
+	var hi := t
 	for _i in 40:
-		var m := 0.5 * (a + b)
+		var m := 0.5 * (lo + hi)
 		var p := o + d * m
 		if p.y > -profondeur(p.x, -p.z):
-			a = m
+			lo = m
 		else:
-			b = m
-	return (o + d * b).x
+			hi = m
+	var f := o + d * hi
+	return Vector2(f.x, -f.z)
 
 
 ## La pente horizontale du rayon de soleil vertical réfracté par une facette de pente `s` (refract de GLSL, en double).
@@ -588,33 +696,28 @@ static func eclairement_exact(xf: float, a: float, k: float, h: float, n: float)
 	return total
 
 
-## S361 — **l'énergie des caustiques sur la scène** : la mer de `--meilleur` au complet, soleil de la scène, fond vu
-## seul (mer masquée) depuis la pose plongeante ; l'éclairement focalisé C décodé en chaque pixel du fond. Sa moyenne
-## doit rester près de 1 (l'énergie se déplace, elle ne se crée pas) ; la part de pixels au plafond `1/det_min` se publie.
+## S361 — **l'énergie des caustiques sur la scène** : la mer de `--meilleur` au complet, soleil de la scène ; la carte
+## elle-même, relue pour les poses plongeante et proche. Sa moyenne sur l'intérieur (les 80 % centraux) doit rester près
+## de 1 — l'énergie se déplace, elle ne se crée pas ; son maximum et la part au-dessus de 5 se publient.
 func controle_caustiques_scene() -> void:
-	var env: Environment = (get_children().filter(func(c): return c is WorldEnvironment)[0] as WorldEnvironment).environment
-	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
-	env.glow_enabled = false
-	env.fog_enabled = false
-	mer.visible = false
-	materiau_sol.set_shader_parameter("controle", 2)
 	for nom in ["plongeante", "proche"]:
 		pose(nom)
+		suivre_carte()
 		for _i in 12:
 			await RenderingServer.frame_post_draw
-		var image := get_viewport().get_texture().get_image()
+		var image := vue_caustiques.get_texture().get_image()
 		var somme := 0.0
-		var plafond := 0
 		var n := 0
 		var maximum := 0.0
-		for y in range(0, image.get_height(), 2):
-			for x in range(0, image.get_width(), 2):
-				var col := image.get_pixel(x, y).srgb_to_linear()
-				var c := roundf(20.0 * col.r - col.g) + col.g
+		var forts := 0
+		var marge := CARTE_TEXELS / 10
+		for y in range(marge, CARTE_TEXELS - marge, 2):
+			for x in range(marge, CARTE_TEXELS - marge, 2):
+				var c := CARTE_ECHELLE * image.get_pixel(x, y).r
 				somme += c
 				maximum = maxf(maximum, c)
-				if c >= 19.5:
-					plafond += 1
+				if c > 5.0:
+					forts += 1
 				n += 1
-		print("CONTROLE_CAUSTIQUES_SCENE_S361 pose=%s pixels=%d moyenne=%.4f max=%.2f part_au_plafond=%.5f critere=%s" % [nom, n, somme / n, maximum, float(plafond) / n, "tenu" if absf(somme / n - 1.0) <= 0.1 else "manque"])
+		print("CONTROLE_CAUSTIQUES_SCENE_S361 pose=%s format=%d texels=%d moyenne=%.4f max=%.2f part_au_dessus_de_5=%.5f critere=%s" % [nom, image.get_format(), n, somme / n, maximum, float(forts) / n, "tenu" if absf(somme / n - 1.0) <= 0.1 else "manque"])
 	get_tree().quit()

@@ -87,8 +87,8 @@ Critères, écrits avant le code :
 - [x] **P2** — la hessienne dans la FFT, son contrôle ; critère 1.
 - [x] **P3** — les caustiques dans le nuanceur du fond ; la bande et la cascade de 32 m données au fond.
 - [x] **P4** — le contrôle contre la solution exacte ; critère 2.
-- [>] **P5** — la scène, l'énergie ; images R22 ; critères 3 et 4.
-- [ ] **P5 bis** *(ajoutée en cours, sur l'échec du critère 3)* — la carte de caustiques **directe** : la surface
+- [x] **P5** — la scène, l'énergie ; images R22 ; critères 3 et 4.
+- [x] **P5 bis** *(ajoutée en cours, sur l'échec du critère 3)* — la carte de caustiques **directe** : la surface
   projetée sur le fond triangle par triangle, rapports d'aire additionnés dans une vue orthographique (Wyman) ; même
   contrôle analytique (critère 2), énergie de la scène à ± 10 % (critère 3) ; le fond la lit.
 - [ ] **P6** — preuve, file, liste, index.
@@ -113,3 +113,15 @@ Critères, écrits avant le code :
   **5,553**, 1,4 % au plafond. Attendu : 1 (l'énergie se déplace). **Cause** : la méthode à rebours ne suit qu'un
   antécédent ; elle ne vaut que devant la première focale — tenue à mi-focale (P4), elle sort de son domaine sur la scène,
   où la cascade de 32 m a sa focale vers 13 m et le fond descend à 40 m. Remède : la méthode directe (P5 bis).
+- **P5 bis, critères 2 et 3 tenus.** `caustiques.gdshader` : grille de 1 024² sommets sur 100 m (`PlaneMesh`),
+  projetée vers le fond (Snell exact, trois passes pour la profondeur d'arrivée, bathymétrie en texture tirée de
+  `profondeur()` aux sommets du fond), `POSITION` en coordonnées d'écran d'une vue orthographique hors écran
+  (`SubViewport`, monde propre, fond noir, tonalité linéaire, HDR — format 14) ; rapport d'aire par `dFdx/dFdy` de la
+  source, mélange additif, écrit ÷ 32. Carte de 64 m, 1 024 texels, centrée 25 m devant la caméra, calée sur ses texels ;
+  source décalée du trajet réfracté moyen. Le fond lit la carte, **moyennée sur l'image du disque solaire**
+  (`H·3,47·10⁻³`, huit points et le centre) ; fondu vers 1 hors carte, au bord, et au-delà de deux texels par pixel.
+  Méthode à rebours retirée (rejouable à `c5faf558`). **Contrôle analytique** : selon x à mi-focale, pire **4,41 %**,
+  médiane 0,54 %, moyenne 1,0016 ; selon y, **4,57 %**, 0,78 %, 0,9945 ; témoin carte retournée, médiane 48,6 % ; à
+  1,5 focale (trois antécédents), médiane 0,93 %, pics singuliers 336 %. **Scène** : moyenne de la carte **1,0079**
+  (plongeante), **1,0022** (proche) ; max 192,5 avant le disque solaire ; 3,2 % des texels au-dessus de 5. **Vu** : un
+  réseau net sur le fond seul ; à travers l'eau, un miroitement bleuté ; la carte se lit en carré sur le fond seul.
