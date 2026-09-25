@@ -1661,7 +1661,7 @@ fn the_linear_sponge_lets_the_waves_out_s337() {
 /// **S369, A289 — δ relatif à la dynamique de B.** Sous une houle B seule (une composante, 5 cm, λ = 4 m), δ nul au
 /// départ : avec les trois termes propres à B retirés, δ nul est un **point fixe** — hauteur, vitesses et pression
 /// nulles au bit, pas après pas ; avec le pas de S297, le même banc s'écarte (la source que S319 a mesurée). Un masque
-/// hors des trois bits est refusé.
+/// hors des sept bits (trois retraits, quatre essais) est refusé.
 #[test]
 fn zero_delta_stays_zero_under_b_alone_when_relative_s369() {
     use crate::{background::{Background, SeaState}, SimTime, WorldPos};
@@ -1678,7 +1678,7 @@ fn zero_delta_stays_zero_under_b_alone_when_relative_s369() {
         v.set_relative_background(terms).unwrap();
         v
     });
-    assert_eq!(volumes[0].set_relative_background(8), Err(Error::Domain));
+    assert_eq!(volumes[0].set_relative_background(128), Err(Error::Domain));
     let sponge = Sponge3 { width_x: 2., width_y: 0., rate_per_s: 2. };
     for n in 0..150u64 {
         let time = SimTime(n * 10_000);

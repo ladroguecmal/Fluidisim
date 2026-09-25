@@ -64,6 +64,13 @@ impl Volume3 {
     /// S369 : l'erreur de pression de B à sa propre surface, `ρ·g·η_B − p_B(repos + η_B)`, dans les fantômes.
     pub const RELATIVE_SURFACE: u8 = 4;
     pub const RELATIVE_ALL: u8 = 7;
+    /// **Essais seulement** (S369, instabilité du mode relatif) : retirer un terme **croisé**, pour nommer celui qui la
+    /// porte. 8 : B advecte δ, `U·∇u'` ; 16 : δ advecte B, `u'·∇U` ; 32 : la bande croisée ; 64 : la pression de B entre
+    /// sa surface et la surface totale. Aucun n'est une physique : chacun ampute le couplage.
+    pub const TRIAL_NO_CARRY: u8 = 8;
+    pub const TRIAL_NO_STRAIN: u8 = 16;
+    pub const TRIAL_NO_CROSS_BAND: u8 = 32;
+    pub const TRIAL_NO_CROSS_PRESSURE: u8 = 64;
 
     /// **S369, A289 — δ relatif à la dynamique de B.** B linéaire ne satisfait pas les équations complètes ; le pas
     /// de S297 donnait ses restes à δ comme sources — trois termes où δ ne figure pas. Chaque bit de `terms` en retire
@@ -72,7 +79,7 @@ impl Volume3 {
     /// fond plat et tant qu'aucune face latérale ne change de mouillure, au bit ; ailleurs, au reste de l'interpolation
     /// de l'erreur de surface entre deux colonnes. 0 (défaut) : le pas de S297, au bit.
     pub fn set_relative_background(&mut self, terms: u8) -> Result<(), Error> {
-        if terms > Self::RELATIVE_ALL {
+        if terms > 127 {
             return Err(Error::Domain);
         }
         self.relative_background = terms;
@@ -119,6 +126,9 @@ impl Volume3 {
                     }
                     self.ghost_bg_up[c] -= self.ghost_bg_error[c];
                 }
+                if self.relative_background & Self::TRIAL_NO_CROSS_PRESSURE != 0 {
+                    self.ghost_bg_up[c] = 0.;
+                }
             }
         }
         self.ghost_bg_x.fill(0.);
@@ -160,6 +170,9 @@ impl Volume3 {
                             };
                             let (ew, ed) = (self.ghost_bg_error[cw], self.ghost_bg_error[cd]);
                             value -= ew + theta * (ed - ew);
+                        }
+                        if self.relative_background & Self::TRIAL_NO_CROSS_PRESSURE != 0 {
+                            value = 0.;
                         }
                         if axis == 0 {
                             self.ghost_bg_x[f] = value;
@@ -235,11 +248,22 @@ fn extra3(
     dv: [f32; 3],
     rho: f32,
     residual: bool,
+    trials: u8,
 ) -> Result<f32, Error> {
     let mut r = s.momentum_residual(rho, 0.).map_err(|_| Error::NotFinite)?;
     if !residual {
         // S369 (A289) : le reste de B seul n'est plus une source de δ ; la validation ci-dessus est gardée.
         r = [0.; 3];
+    }
+    let (mut u, mut g) = (s.u, s.grad_u[axis]);
+    if trials & Volume3::TRIAL_NO_CARRY != 0 {
+        u = [0.; 3];
+    }
+    if trials & Volume3::TRIAL_NO_STRAIN != 0 {
+        g = [0.; 3];
+    }
+    if trials != 0 {
+        return Ok(u[0] * dv[0] + u[2] * dv[2] + v[0] * g[0] + v[2] * g[2] + r[axis] + u[1] * dv[1] + v[1] * g[1]);
     }
     // Ordre x/z de la 2D, contributions y ajoutées ensuite.
     Ok(s.u[0] * dv[0]
@@ -349,7 +373,8 @@ impl Volume3 {
                             _ => &bg.w[f],
                         };
                         let residual = self.relative_background & Self::RELATIVE_RESIDUAL == 0;
-                        let add = dt as f32 * extra3(sample, axis, vel, dv, self.rho, residual)?;
+                        let trials = self.relative_background & (Self::TRIAL_NO_CARRY | Self::TRIAL_NO_STRAIN);
+                        let add = dt as f32 * extra3(sample, axis, vel, dv, self.rho, residual, trials)?;
                         let x = (i as f32 + if axis == 0 { 0. } else { 0.5 }) * dx;
                         let y = (j as f32 + if axis == 1 { 0. } else { 0.5 }) * dx;
                         let factor = sponge.factor(x, y, self.domain, dt);
@@ -431,7 +456,8 @@ impl Volume3 {
                                 bord += v * dx * wet;
                             }
                         }
-                        if relative {
+                        if self.relative_background & Self::TRIAL_NO_CROSS_BAND != 0 {
+                        } else if relative {
                             band += band3(sample(k), axis, k, dx, self.rest, surface)
                                 - band3(sample(k), axis, k, dx, self.rest, own);
                         } else {

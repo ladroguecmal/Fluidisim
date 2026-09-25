@@ -96,8 +96,8 @@ Critères, écrits avant le code :
   file (ligne des décisions), feuille de route, REVUE-VISUELLE §23 (verdict R18).
 - [x] **P3** — `delta3d_coupling.rs` : le mode relatif à B (trois retraits, un drapeau par terme pour la mesure) ;
   E1 ; critère 1.
-- [>] **P4** — germe et E2 ; critères 2 et 3.
-- [ ] **P5** — ADR-198, la voie d'A289 ; preuve MER-S369 ; A289, lot 2 (4.8, 4.21), file, dépendances, feuille de route,
+- [x] **P4** — germe et E2 ; critères 2 et 3.
+- [>] **P5** — ADR-198, la voie d'A289 ; preuve MER-S369 ; A289, lot 2 (4.8, 4.21), file, dépendances, feuille de route,
   index.
 - [ ] **P6** — rituel.
 
@@ -116,3 +116,8 @@ Critères, écrits avant le code :
   masque 7 : manqué** — le paquet de 2 cm reste à 2 cm jusqu'à ≈ 31 s, puis croît : 2,5 cm à 39 s, 12,6 à 71 s,
   plateau ≈ 14 cm (taux ≈ 0,05 s⁻¹) ; reçu à droite 1 620 fois le paquet. Une instabilité des termes croisés, que la
   source retirée ne soigne pas. Diagnostics lancés : profil, pas de 5 ms, houle de 2,5 cm, germe sur 95 s.
+- **P4, fin.** Germe prolongé à 95 s : croît dès ≈ 50 s, 0,060 s⁻¹ — **instabilité linéaire**, convective (×e tous les
+  ≈ 18 m, pic à l'entrée de l'éponge de sortie). E2 : 0,052 (10 ms), 0,051 (5 ms), 0,033 à 12,5 cm ; houle 2,5 cm :
+  aucune croissance, mais reçu 21 fois le paquet (transport croisé, le critère de volume est mal posé). **Bisection à
+  7,5 cm** (bits d'essai 8–64, gardés dans le code, « essais seulement ») : sans `u'·∇U`, plus rien (−0,002) ; les autres
+  retraits la laissent. Preuve MER-S369 §1–§5.
