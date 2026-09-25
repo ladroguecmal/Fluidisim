@@ -96,12 +96,12 @@ Critères, écrits avant le code :
   la photographie : balayage (courbe, exposition, blanc) à la pose proche, critère de S308 — le pire écart
   logarithmique ; la meilleure vérifiée aux poses rasante et référence ; **une option**, pas le défaut : la couleur a
   été jugée « parfaite » en AgX (R20). *Découpée à la reprise :*
-  - [>] **P4 bis a** — l'instrument. Godot rend la pose en HDR linéaire (`HDR=1` : tampon flottant, sans courbe ni
+  - [x] **P4 bis a** — l'instrument. Godot rend la pose en HDR linéaire (`HDR=1` : tampon flottant, sans courbe ni
     halo, fichier PFM hors dépôt) ; `outils/tonalite_godot.py` applique les cinq courbes de Godot 4.4.1, **recopiées de
     sa source** (`tonemap.glsl`, exposition, blanc, écrêtage, sRGB sur huit bits), et mesure les quatre grandeurs.
     **Reçu si** : sa mesure redonne celle de `cible_image.py` sur une même image (1e-4 relatif) ; et son modèle redonne
     Godot lui-même, rendu sans halo en AgX et dans une seconde courbe, à **2 %** près sur les quatre grandeurs.
-  - [ ] **P4 bis b** — le balayage à la pose proche (courbe × exposition × blanc, pire écart logarithmique) ; la
+  - [>] **P4 bis b** — le balayage à la pose proche (courbe × exposition × blanc, pire écart logarithmique) ; la
     meilleure rendue par Godot aux trois poses, halo compris ; l'option `TONALITE=photo`, pas le défaut.
 - [ ] **P5** — images R23, preuve, file, index ; critère 4.
 - [ ] **P6** — rituel.
@@ -128,3 +128,11 @@ Critères, écrits avant le code :
   Linéaire : proche 0,2859 · 12,94 · 0,4464 · 0,0251 ; rasante 0,2591 · 9,38 · 0,4166 · 0 ; référence 0,2342 · 12,59 ·
   0,3442 · 0,0029. Contraste un peu plus bas qu'avec le ciel clair (0,365 → 0,344) ; horizon **0,692 / 0,661** (−3,8 %,
   −2,4 %). **Vu** : bleu profond au zénith, blanchi vers l'horizon, nuages naturels ; l'ancien était un aplat grisé.
+- **P4 bis a, tenu.** `HDR=1` : `use_hdr_2d` sur la fenêtre, image convertie en RGBF, PFM ; quatre secondes par rendu ;
+  proche : luminance de mer au plus 1,15, 1,1e-5 des pixels au-dessus de 1 — la capture n'écrête rien. `mer.gd` accepte
+  `TONALITE=reinhard|filmic|aces|agx`, `EXPOSITION`, `BLANC`, `HALO`, `POSES`. **`verifier`** : sur cinq rendus, les quatre
+  grandeurs **identiques à l'impression** de `cible_image.py` (2 à 5 décimales), horizon 223 partout. **`comparer`**, six
+  réglages rendus par Godot sans halo (linéaire ; AgX e = 1 et 2 ; Reinhard e = 2, w = 4 ; Filmic 1,5 / 6 ; ACES 0,8 / 2) :
+  **jamais plus d'un octet d'écart** (moyenne 0,028 à 0,033) ; trois grandeurs à **0,16 %** au pire ; fraction claire à
+  2 pixels près en AgX (142 / 140), 156 sur 108 590 en ACES. Premier regard : ACES 0,8 / 2 donne 0,2029 · 25,63 · 0,647 ·
+  0,172 — creux et dynamique à la photographie, contraste et fraction claire au-dessus.

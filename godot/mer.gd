@@ -157,10 +157,22 @@ func environnement() -> void:
 	var lineaire := OS.get_environment("TONALITE") == "lineaire"
 	if lineaire:
 		env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	# S363 : les autres courbes de Godot, pour les mesurer contre la photographie (`outils/tonalite_godot.py`) —
+	# `TONALITE=reinhard|filmic|aces|agx`, `EXPOSITION`, `BLANC` (AgX l'ignore en 4.4) ; `HALO=0|1` force le halo.
+	var courbes := {"reinhard": Environment.TONE_MAPPER_REINHARDT, "filmic": Environment.TONE_MAPPER_FILMIC,
+			"aces": Environment.TONE_MAPPER_ACES, "agx": Environment.TONE_MAPPER_AGX}
+	if courbes.has(OS.get_environment("TONALITE")):
+		env.tonemap_mode = courbes[OS.get_environment("TONALITE")]
+	if OS.get_environment("EXPOSITION") != "":
+		env.tonemap_exposure = float(OS.get_environment("EXPOSITION"))
+	if OS.get_environment("BLANC") != "":
+		env.tonemap_white = float(OS.get_environment("BLANC"))
 	# S357 P3 : sans reflets à l'écran — en rasant, leurs rayons retombent sur l'eau elle-même et remplacent le ciel
 	# clair de l'horizon par sa propre couleur sombre. `REFLETS_ECRAN=1` les rallume, pour comparer.
 	env.ssr_enabled = OS.get_environment("REFLETS_ECRAN") == "1"
 	env.glow_enabled = not lineaire
+	if OS.get_environment("HALO") != "":
+		env.glow_enabled = OS.get_environment("HALO") == "1"
 	env.fog_enabled = true
 	env.fog_density = 0.00012
 	env.fog_aerial_perspective = 1.0
@@ -425,18 +437,35 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_tree().quit()
 
 
-## Les quatre poses à 12 s, figées, capturées par Godot lui-même.
+## Les quatre poses à 12 s, figées, capturées par Godot lui-même. S363 : `POSES=proche,rasante` en restreint la liste ;
+## `HDR=1` rend dans un tampon flottant et écrit un PFM — linéaire, **non écrêté**, sans sRGB : avec `TONALITE=lineaire`,
+## les radiances mêmes de la scène, sur lesquelles `outils/tonalite_godot.py` rejoue les courbes de Godot.
 func captures() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures"))
-	for nom in ["proche", "rasante", "reference", "haute", "plongeante"]:
+	var hdr := OS.get_environment("HDR") == "1"
+	if hdr:
+		get_viewport().use_hdr_2d = true
+	var noms := ["proche", "rasante", "reference", "haute", "plongeante"]
+	if OS.get_environment("POSES") != "":
+		noms = Array(OS.get_environment("POSES").split(","))
+	for nom in noms:
 		pose(nom)
 		mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
 		for _i in 12:
 			await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
 		var suffixe := "_cote" if "--cote" in OS.get_cmdline_user_args() else ""
-		var chemin := ProjectSettings.globalize_path("res://captures/godot_%s%s_12s.png" % [nom, suffixe])
-		image.save_png(chemin)
+		var chemin := ProjectSettings.globalize_path("res://captures/godot_%s%s_12s.%s" % [nom, suffixe, "pfm" if hdr else "png"])
+		if hdr:
+			# PFM : en-tête texte, flottants de 32 bits petit-boutistes (échelle −1), rangées du bas vers le haut.
+			image.convert(Image.FORMAT_RGBF)
+			image.flip_y()
+			var f := FileAccess.open(chemin, FileAccess.WRITE)
+			f.store_buffer(("PF\n%d %d\n-1.0\n" % [image.get_width(), image.get_height()]).to_ascii_buffer())
+			f.store_buffer(image.get_data())
+			f.close()
+		else:
+			image.save_png(chemin)
 		print("CAPTURE_GODOT_S357 pose=%s fichier=%s %dx%d" % [nom, chemin, image.get_width(), image.get_height()])
 	get_tree().quit()
 
