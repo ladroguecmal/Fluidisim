@@ -42,6 +42,8 @@ pub mod background_spectrum;
 pub mod bathymetrie;
 /// S364, liste 2.7 : la bathymétrie entre dans B — les tables cuites d'une côte à isobathes droites, par composante.
 pub mod bathymetrie_cote;
+/// S367, liste 7.1 : le champ d'écume de B (ADR-014) — la référence : deux canaux, advection orbitale, déferlement.
+pub mod ecume;
 pub mod body;
 /// S331 : le corps rigide du jeu, poussé par B + W (lot 4, I-04).
 pub mod rigid_body;

@@ -89,9 +89,9 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les verdicts consignés : revue (§23, §26–28, §30), décisions de la file, liste (8.4 à 8.10), dépendances.
-- [>] **P3** — la référence du champ (`ecume.rs`) : grille ancrée, deux canaux, décroissance, advection semi-lagrangienne
+- [x] **P3** — la référence du champ (`ecume.rs`) : grille ancrée, deux canaux, décroissance, advection semi-lagrangienne
   par la vitesse de surface de B, sources de B ; critère 1.
-- [ ] **P4** — la couverture contre Monahan, trois vents ; critère 2.
+- [>] **P4** — la couverture contre Monahan, trois vents ; critère 2.
 - [ ] **P5** — les traînées de convergence ; critère 3.
 - [ ] **P6** — preuve ECUME-S367 ; liste 7.1, file, dépendances, feuille de route, index.
 - [ ] **P7** — rituel.
@@ -100,3 +100,8 @@ Critères, écrits avant le code :
 - **P2.** Verdict consigné, lu sur la demande de S366 (R21, R22, R23, R25) : forme fine, caustiques, ciel, lueur face
   au soleil **validés** ; **l'écume refusée** ; tonalité sans choix — AgX reste le défaut ; **R18** (en direct, non
   rappelé) toujours attendu. Liste : 8.4 (reste absent), 8.5, 8.9, 8.10 retouchés sans changer de case.
+- **P3, critère 1 tenu.** `ecume.rs` : `ChampEcume` (deux canaux, `advecter` semi-lagrangien bilinéaire, `decroitre`
+  exacte, `deferlement` — montée lisse de `−a_z/g` autour de 0,45 —, `pas_de_temps`, `couverture`). Décroissance :
+  **7,7e-7** du fermé à 10 s ; advection d'une gaussienne, 100 pas : centre à **9,4e-6 m**, masse à 1,8e-6, sommet
+  1 → 0,863 (diffusion de l'interpolation, publiée) ; onde seule : indicateur **0 / 0,5 / 1** à ak = 0,30 / 0,45 / 0,60
+  (signe et échelle de l'accélération) ; déterminisme, même hash.
