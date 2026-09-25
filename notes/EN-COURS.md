@@ -62,61 +62,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S364 — **terminée**. **Physique : la bathymétrie entre dans B** — *« Continue »*, sans verdict R21 à R23 ;
-alternance d'ADR-191 D3 après S363 (rendu). Suite de S362 : la référence existe, reste **l'entrée**, que S362 disait
-devoir être tranchée par un ADR **mesuré** (coût, requêtes de jeu, déterminisme) ; ADR-004 §2.1 et §5 à réviser.
+Session : S365 — **en cours**. **Rendu 7 : sous la surface** — *« Continue »*, sans verdict R21 à R23 ; alternance
+d'ADR-191 D3 après S364 (physique). **À deux maillons**, un lot qui fait avancer une case : **8.6**, *absente* (vue
+sous-marine et passage de la surface, [ADR-019](../docs/adr/ADR-019-vue-sous-marine.md), banc B11), qui dépend de 8.5,
+partielle dans Godot depuis S359.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**La voie à mesurer.** W naît d'événements et ne porte pas une mer permanente ; relayer B au large par W près des
-côtes mélangerait deux réalisations (ADR-004 §3). Candidat : **B transformé composante par composante** par des
-**tables cuites** le long du profil — correction de phase (entière, Q32), facteur d'amplitude `K_s·K_r`, nombre
-d'onde transversal, `coth kh` des vitesses —, tirées de la référence de S362 : le précalcul d'ADR-013, mais de
-**paramètres**, pas de réalisations. Au large, les tables valent zéro et un : **B inchangé au bit**. Premier cas : côte
-à isobathes droites (celui que la référence sait juger).
+**Ce qui se construit.** Depuis l'eau : la **surface vue d'en dessous** — la fenêtre de Snell (le ciel réfracté,
+radiance × n²) et, au-delà de l'angle critique, la **réflexion totale** ; le **milieu** entre l'œil et ce qu'il voit —
+atténuation par canal `exp(−c·d)`, `c = a + b` de Pope & Fry et Morel (les constantes de S359, `b = 2·b_b`), et la
+radiance de l'eau elle-même ; le fond éclairé par `exp(−Kd·H)`, ses caustiques. **Hors session, nommé** : la caméra à
+demi immergée (ADR-019 §6), les bulles, l'écume vue d'en dessous, les rayons dans l'eau.
 
 Critères, écrits avant le code :
-1. **Précision** contre la référence (f64), houle d'1 m, 10 s, 30°, plage 1/50, jusqu'au déferlement : phase × amplitude
-   ≤ **3 mm** (tolérance d'image, S201), facteur d'amplitude à 1 %. Balayage du pas des tables. **Prédiction** :
-   l'erreur d'interpolation de la phase vaut `Δ²/8·dk_y/dy` ; 2 m tiennent (≈ 0,4 mm), 5 m à la limite (≈ 2 mm).
-2. **Continuité** : au large du profil, l'évaluation côtière est **identique au bit** à celle de B.
-3. **Déterminisme** : phases en entiers, deux passes identiques au bit (hash).
-4. **Coût** par composante et par échantillon contre B (48 ns en B1) ; indépendant de la taille des tables.
-5. **Mémoire** par composante, par kilomètre de profil — et ce qu'en coûterait une bathymétrie 2D.
+1. **La fenêtre de Snell** : mer plate, caméra à 5 m sous la surface, visée au zénith, champ de 120° : le bord de la
+   fenêtre à **48,27°** (`arcsin(1/1,34)`) à **0,25°** près (deux pixels) ; au-delà, la réflexion totale.
+2. **Le milieu** : le fond vu de l'eau, transmission relue par un mode de contrôle contre `exp(−c·d)`, `d` recalculé par
+   le script sur la bathymétrie analytique, à **1 %** près par canal. Prédiction : le rouge meurt en 13 m (1 %), le vert
+   en 78 m, le bleu en 290 m.
+3. **R24** : images depuis l'eau (fenêtre sous la houle, visée horizontale, fond et caustiques) ; références réelles
+   demandées à l'utilisateur.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les tables d'une côte à isobathes droites (`bathymetrie_cote.rs`) : cuisson depuis la référence,
-  interpolation ; critère 1, balayage du pas.
-- [x] **P3** — B sur la côte : l'évaluation côtière (phase entière, amplitude, pente, vitesses en profondeur finie) ;
-  critères 2 et 3 ; η, pente et vitesse contre la référence.
-- [x] **P4** — coût et mémoire ; critères 4 et 5.
-- [x] **P5** — ADR-196, l'entrée de la bathymétrie ; preuve (BATHYMETRIE-S362, section datée S364) ; liste 2.7, file,
-  dépendances, feuille de route, index.
-- [x] **P6** — rituel.
+- [>] **P2** — la surface vue d'en dessous (`eau.gdshader`, faces arrière) ; le mode immergé dans `mer.gd`, poses
+  sous l'eau, mer plate (`MER_PLATE=1`) ; critère 1.
+- [ ] **P3** — le milieu : le fond et le fond du ciel vus de l'eau (`sol.gdshader`, `ciel.gdshader`) ; contrôle de la
+  transmission ; critère 2.
+- [ ] **P4** — images R24, REVUE-VISUELLE §29.
+- [ ] **P5** — preuve SOUS-MARIN-S365 ; liste 8.6, file, dépendances, feuille de route, index.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu.** `bathymetrie_cote.rs` : `Cote::cuire` (référence de S362 en f64, Simpson à huit
-  sous-intervalles par pas), tables de 16 octets par composante et par échantillon ; `interpoler` : phase entière (différence
-  des deux échantillons × fraction Q16), le reste linéaire en f32. Houle d'1 m, 10 s, 30°, plage 1/50 de 80 à 2 m, sondes
-  au quart et au milieu des pas : **pire hauteur 0,054 / 0,226 / 1,39 / 5,35 mm** aux pas de 1 / 2 / 5 / 10 m — en `Δ²`,
-  sous la prédiction (0,4 et 2 mm) ; facteur à 1,5e-5. **Trouvé : le bord du large.** À λ₀/2 (78 m), le « fond qui cesse
-  de se sentir » des manuels et de SPEC-005 §8, le facteur vaut encore **0,990 : une marche de 5 mm** entre B et la côte.
-  Prédiction écrite avant la mesure, tenue : à λ₀ (156 m), `K − 1` = **−4,15e-5** (prédit −4,4e-5), marche 0,02 mm. Le
-  profil doit commencer à λ₀ de la plus longue composante, pas à λ₀/2. Déferlement de cette houle : 1,69 m.
-- **P3, critères 2 et 3 tenus.** `Cote::eval` : phase de B + correction entière, amplitude `a·K`, vecteur d'onde local
-  `k_x·t + k_y·n` (pente), vitesse horizontale `a·ω·coth(kh)`, verticale `a·ω`. Huit composantes de 6 à 10 s, ±30°,
-  Hs ≈ 1 m, plage 1/30 de 160 m (λ₀ de la plus longue) à 2 m, table au pas de 2 m (313 Ko). **Au large : 120
-  évaluations identiques au bit à B.** Deux passes : même hash. Sur la plage, 711 points, trois instants : **η à
-  0,133 mm** de la référence f64, pente à 1,4e-5 (max 0,086), vitesse horizontale à 2,7e-4 m/s (max 1,31) ; **marche au
-  bord du large 0,0017 mm**. Essai rendu incrémental (50 s → 0,2 s en mode optimisé).
-- **P4, critères 4 et 5.** `examples/bathymetrie_cote_cout.rs`, méthode de `banc_b1` (4 096 points, 64 campagnes,
-  minimum). B, 32 composantes (B1), Tp 8 s : **33,1 ns par composante** groupés, 57,9 dispersés. Sur la côte : **52 ns**
-  (×1,58) groupés, **68 ns** (×1,18) dispersés — **identique aux pas de 1, 2 et 5 m** : O(1), la taille des tables
-  n'entre pas. Mémoire : **258 Ko par km de profil** au pas de 2 m (32 composantes, 16 octets par échantillon), 103 Ko à
-  5 m ; un profil vaut pour toute la longueur de côte à isobathes droites. En 2D, des tables régulières du même contenu :
-  128 Mo/km² à 2 m, 20,5 à 5 m, 5,1 à 10 m (arithmétique) — la 2D demandera un pas adapté ou un autre paramétrage.
-- **P5.** [ADR-196](../docs/adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md) actée (D1 B porte la bathymétrie
-  par composante ; D2 paramètres cuits, pas de 2 m ; D3 tables depuis λ₀ ; D4 requête O(1)) ; notes datées dans ADR-004 et
-  SPEC-005 §8 ; preuve BATHYMETRIE-S362 §5 et « Reproduire » ; liste 2.7 (reste *partiel*), file, dépendances (donnée de
-  l'outil, table régénérée), feuille de route, index. Cœur : **518 réussis, 14 ignorés**, zéro avertissement.

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-25 19:31 +02:00
+JETON            : occupé
+Battement        : 2026-09-25 19:37 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S365 — rendu 7 : sous la surface — la fenêtre de Snell, la réflexion totale, le milieu (8.6, ADR-019)
 Dernière session : S364 — **physique, la bathymétrie entre dans B** : chaque composante transformée par des tables cuites (phase entière, levée, réfraction), η à 0,13 mm de la référence, B au bit au large, requête en O(1) ; isobathes droites ([ADR-196](docs/adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md), [preuve](docs/validation/BATHYMETRIE-S362.md) §5)
 Session suivante : **les verdicts R21, R22 et R23 d'abord** (REVUE-VISUELLE §26–28). Sinon, par l'alternance d'ADR-191 D3, une session de rendu ; **à deux maillons**, un lot qui fait avancer une case de la liste — 8.6, la vue sous-marine et le passage de la surface ; la côte de Godot vue par B (premier consommateur d'ADR-196) ne change pas de case. En attente : R18, R21, R22, R23
 Maillons        : 2 — S363 : aucune case ne change ; S364 : 2.7 reste partiel, capacité sans consommateur encore (journal)
