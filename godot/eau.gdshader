@@ -36,6 +36,14 @@ uniform float reflectance_ecume = 0.55;
 // `ecume_empreinte_min` ; ses seuils, calculés par l'afficheur comme les autres, pour la même couverture de Monahan.
 uniform float ecume_seuils_deferlement[14];
 uniform float ecume_empreinte_min = 1.0;
+// S368 — **le champ d'écume** (`ecume.gd`, la référence de S367 sur la carte) : (actif, résiduel) sur `ecume_cote` mètres
+// à partir du coin `ecume_origine` (axes de B). Sans lui (`ECUME=ancienne`), l'écume instantanée de S360.
+uniform sampler2D ecume_champ : filter_linear, repeat_disable;
+uniform vec2 ecume_origine = vec2(0.0);
+uniform float ecume_cote = 256.0;
+uniform bool ecume_champ_actif = false;
+// La direction dominante des vagues (B, unitaire) : la dentelle s'y étire, comme les traînées de S367.
+uniform vec2 ecume_direction = vec2(0.0, 1.0);
 // La lumière des crêtes (S356) : transmission de l'eau pure sur Hs ; force et exposant de sa diffusion vers l'avant,
 // ceux de l'afficheur, à calibrer.
 uniform vec3 transmission_crete = vec3(0.5987, 0.9187, 0.9863);
@@ -135,6 +143,30 @@ vec3 lumiere(vec2 pente, vec3 rayon, vec3 fond_vu, vec3 t_colonne) {
     vec3 corps = R0 * gain_eau * (0.6 + 0.4 * max(dot(n, soleil), 0.0));
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2;
+}
+
+/// S368 — **les bords de cellules** (Worley 1996) : `F2 − F1` des distances aux deux points les plus proches d'un réseau
+/// jeté au hasard (un point par cellule, hachage entier du ciel) ; nul sur les frontières. L'écume résiduelle s'organise en
+/// réseau polygonal ; le bruit de valeurs, lui, trace des crêtes qui suivent sa grille (vu en S368 : un labyrinthe).
+float bords_cellules(vec2 q) {
+    vec2 c = floor(q);
+    vec2 f = q - c;
+    float d1 = 8.0;
+    float d2 = 8.0;
+    for (int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++) {
+            vec2 o = vec2(float(i), float(j));
+            vec2 pt = o + vec2(hachage_ciel(c + o), hachage_ciel(c + o + vec2(311.0, 113.0)));
+            float d = length(pt - f);
+            if (d < d1) {
+                d2 = d1;
+                d1 = d;
+            } else if (d < d2) {
+                d2 = d;
+            }
+        }
+    }
+    return d2 - d1;
 }
 
 /// S365 — **la surface vue d'en dessous** (liste 8.6, ADR-019 §2). `rayon` monte vers la surface (B). Fresnel exact eau →
@@ -327,6 +359,35 @@ void fragment() {
     vec2 horizontal = rayon.xy / max(length(rayon.xy), 1e-6);
     float avant = pow(max(dot(horizontal, normalize(soleil.xy)), 0.0), exposant_cretes);
     couleur += force_cretes * clamp(-0.5 * s_e, 0.0, 1.0) * avant * transmission_crete * eclairage;
+    if (ecume_champ_actif) {
+        // S368 — l'écume du champ, là où l'eau est dans le monde. **L'actif** : blanc, au bord irrégulier — le seuil ½ du
+        // champ bruité à l'échelle des bulles et des flocons (0,3 à 1,2 m). **Le résiduel** : une dentelle — les bords de
+        // cellules de 1,4 et 0,55 m, déformés par un bruit (±0,3 m), étirés 2,2 fois le long des vagues comme les
+        // traînées de S367, rompus par un masque de 3,5 m, et visibles là où le film est dense (montée de 0,3 à 0,9) ;
+        // translucides (0,3). Quand le pixel couvre le motif, il tend vers sa moyenne. Rendu à juger (R26).
+        vec2 qm = vec2(surface.x, -surface.z);
+        vec2 uv_e = (qm - ecume_origine) / ecume_cote;
+        float bord = clamp(min(min(uv_e.x, 1.0 - uv_e.x), min(uv_e.y, 1.0 - uv_e.y)) / 0.08, 0.0, 1.0);
+        vec2 champ = (uv_e.x > 0.0 && uv_e.x < 1.0 && uv_e.y > 0.0 && uv_e.y < 1.0)
+            ? texture(ecume_champ, uv_e).rg * bord : vec2(0.0);
+        float empreinte = max(h, 1e-3);
+        float fondu_bulles = clamp((empreinte - 0.15) / 0.45, 0.0, 1.0);
+        float bruit = 0.6 * bruit_ciel(qm / 0.3) + 0.4 * bruit_ciel(qm / 1.2 + 37.0) - 0.5;
+        // Une montée large (0,15 à 0,75) : le mouton pâlit en se trouant à mesure que l'actif décroît, au lieu de
+        // s'éteindre d'un coup au seuil ½ (vu en S368 sur la séquence) ; la mi-opacité reste au seuil ½ du champ.
+        float actif = smoothstep(0.15, 0.75, champ.x + 0.5 * bruit * (1.0 - fondu_bulles));
+        actif = mix(actif, smoothstep(0.15, 0.75, champ.x), fondu_bulles);
+        vec2 qw = qm + 0.6 * vec2(bruit_ciel(qm / 2.3 + 5.0), bruit_ciel(qm / 2.3 + 91.0)) - 0.3;
+        vec2 qa = vec2(dot(qw, vec2(-ecume_direction.y, ecume_direction.x)), 0.45 * dot(qw, ecume_direction));
+        float l1 = 1.0 - smoothstep(0.0, 0.06, bords_cellules(qa / 1.4));
+        float l2 = 1.0 - smoothstep(0.0, 0.08, bords_cellules(qa / 0.55 + 53.0));
+        float trous = smoothstep(0.35, 0.65, bruit_ciel(qm / 3.5 + 17.0));
+        float dentelle = max(l1, 0.6 * l2) * trous;
+        float fondu_dentelle = clamp((empreinte - 0.05) / 0.3, 0.0, 1.0);
+        dentelle = mix(dentelle, 0.08, fondu_dentelle);
+        float residuel = smoothstep(0.3, 0.9, champ.y) * dentelle;
+        couverture = max(actif, 0.3 * residuel);
+    }
     couleur = mix(couleur, vec3(reflectance_ecume * eclairage), couverture);
     ALBEDO = couleur;
     if (controle > 0 && controle < 4) {

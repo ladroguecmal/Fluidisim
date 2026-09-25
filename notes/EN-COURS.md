@@ -88,8 +88,8 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `ecume.comp`, `ecume.gd` : le champ sur la carte ; contrôles de décroissance et d'advection ; critère 1.
 - [x] **P3** — la couverture relue, κ recalé ; critère 2.
-- [>] **P4** — l'écume rendue depuis le champ (`eau.gdshader`) : actif et dentelle ; images R26 ; critère 3.
-- [ ] **P5** — preuve ECUME-GODOT-S368 ; liste 8.4, file, dépendances, feuille de route, index.
+- [x] **P4** — l'écume rendue depuis le champ (`eau.gdshader`) : actif et dentelle ; images R26 ; critère 3.
+- [>] **P5** — preuve ECUME-GODOT-S368 ; liste 8.4, file, dépendances, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -101,3 +101,10 @@ Critères, écrits avant le code :
 - **P3, critère 2 tenu.** `--controle-ecume-couverture` (pose proche, 60 s de passé, 40 s relus, 8 s de calcul) :
   κ = 2,978 (S367) → 0,622 % pour **0,421 %** (1,48) ; la pente de S367 prédit κ = 3,09 → **0,405 % (0,96)** ; 3,00 →
   1,36 ; 3,20 → 0,62. `KAPPA_ECUME` = 3,09, provenance dans `mer.gd`.
+- **P4.** `eau.gdshader` : le champ lu là où l'eau est dans le monde, fondu aux 8 % du bord. **Actif** : montée
+  0,15–0,75 du champ bruité (0,3 et 1,2 m) — le mouton pâlit en se trouant. **Résiduel** : dentelle. **Trois essais,
+  vus sur les images** : (1) crêtes d'un bruit de valeurs → un labyrinthe rectiligne (la grille du bruit), le résiduel
+  (moyen 0,40, S367) voilant la mer ; (2) bords de cellules de Worley → une résille de verre fêlé, régulière, partout ;
+  (3) retenu : cellules déformées (±0,3 m), étirées 2,2 fois le long des vagues (direction Σ a²·k̂), rompues par un
+  masque de 3,5 m, visibles où le résiduel dépasse 0,3–0,9, translucides (0,3). `SEQUENCE=n` : n images à 2 s
+  d'intervalle. R26 : `viewer/captures/s368/` (avant / après, séquence). Avant : une tache ovale lisse.

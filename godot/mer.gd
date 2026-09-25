@@ -153,6 +153,16 @@ func _ready() -> void:
 			pulsations.append(float(r[4]))
 		ecume.initialiser(pulsations, Vector2.ZERO, 9.81)
 		ecume.seuil = ecume_seuil()
+		materiau.set_shader_parameter("ecume_champ", ecume.texture)
+		materiau.set_shader_parameter("ecume_cote", ecume.N * ecume.PAS)
+		materiau.set_shader_parameter("ecume_champ_actif", true)
+		# La direction dominante des vagues de la bande, pondérée par l'énergie : Σ a²·k̂.
+		var d := Vector2.ZERO
+		for r in donnees["bande"]:
+			var k := Vector2(float(r[1]), float(r[2]))
+			if k.length() > 0.0:
+				d += float(r[0]) * float(r[0]) * k.normalized()
+		materiau.set_shader_parameter("ecume_direction", d.normalized())
 	if "--controle-ecume-champ" in args:
 		anime = false
 		controle_ecume_champ()
@@ -526,6 +536,7 @@ func ecume_centrer(t: float) -> void:
 	ecume_centre = c
 	var demi: float = 0.5 * ecume.N * ecume.PAS
 	ecume.origine = c - Vector2(demi, demi)
+	materiau.set_shader_parameter("ecume_origine", ecume.origine)
 	var l0 := lignes("bande", t - ECUME_PASSE_S)
 	ecume.avancer([l0, l0, l0], ECUME_PAS_S, 3)
 	var suite := []
@@ -602,6 +613,25 @@ func captures() -> void:
 		var image := get_viewport().get_texture().get_image()
 		var suffixe := "_cote" if "--cote" in OS.get_cmdline_user_args() else ""
 		var chemin := ProjectSettings.globalize_path("res://captures/godot_%s%s_12s.%s" % [nom, suffixe, "pfm" if hdr else "png"])
+		# S368 : `SEQUENCE=n` — n images de la même pose, espacées de 2 s ; l'écume avance entre elles (la durée se juge
+		# dans le temps). Les suivantes s'écrivent `_12s_2.png`, `_12s_4.png`…
+		var suite_n := int(OS.get_environment("SEQUENCE")) if OS.get_environment("SEQUENCE") != "" else 1
+		for rang in range(1, suite_n):
+			var image_r := get_viewport().get_texture().get_image()
+			if rang == 1:
+				image_r.save_png(ProjectSettings.globalize_path("res://captures/godot_%s%s_12s_0.png" % [nom, suffixe]))
+			var liste_s := []
+			for k in 21:
+				liste_s.append(lignes("bande", temps + k * ECUME_PAS_S))
+			if ecume != null:
+				ecume.avancer(liste_s, ECUME_PAS_S, 0)
+			temps += 2.0
+			phases(temps)
+			if detail != null:
+				detail.calculer(temps)
+			for _i in 6:
+				await RenderingServer.frame_post_draw
+			get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path("res://captures/godot_%s%s_12s_%d.png" % [nom, suffixe, 2 * rang]))
 		if hdr:
 			# PFM : en-tête texte, flottants de 32 bits petit-boutistes (échelle −1), rangées du bas vers le haut.
 			image.convert(Image.FORMAT_RGBF)
