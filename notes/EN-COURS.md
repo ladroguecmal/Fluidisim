@@ -62,50 +62,35 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S362 — **terminée**. **Physique : la bathymétrie, 1 — la référence** (liste 2.7).
+Session : S363 — **en cours**. **Rendu 6 : le ciel** — *« Tu as raison sur le ciel, il n'aide pas au reflets et limite la
+qualité du rendue final »* (R20) ; alternance d'ADR-191 D3 après S362.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
-Entrée — *« Continue »*, sans verdict R21/R22 (attendus). **Choix du lot, à deux maillons** (REPRISE §6) : la suite
-proposée — la coque qui bouge (6.4) ou le lot 5 — laisserait chaque point dans sa case ; **2.7, la bathymétrie**, est
-*absente*, vingt points en dépendent (registre), et le registre la dit faisable : « profondeur finie et fond variable, sur
-cas de référence publiés ». La scène côtière de S359 la montre manquer : B ne voit pas le fond. **Ce qui ne se tranche
-pas ici** : où la bathymétrie entre — ADR-004 §2.1 garde les composantes de B identiques partout et place réfraction et
-levée dans W (§5) ; ADR-054 et ADR-156 renvoient le choix à B2 et J5. Cette session construit la **référence** — la
-physique que tout candidat devra reproduire —, pas l'intégration.
+Entrée — deux défauts vus en S359 : une **couture verticale au centre du ciel de Godot**, et des nuages en blocs. Et un
+fait de S308 : le « ciel clair » de `--meilleur` est **plat** (sommet à 0,81 de l'horizon, la photographie de
+référence de l'utilisateur à 0,36) ; S308 en avait tiré un ciel calé sur elle (`ciel_mesure`, extinction par canal), jamais
+passé dans `--meilleur`. **La cible d'image** de S308 (`outils/cible_image.py`, valeurs de la photographie dans
+`outils/courbe_tonalite.py`) : p05/p50 0,1926 ; dynamique p95/p05 23,70 ; **contraste local 0,4549** ; fraction claire
+0,07415. L'afficheur plafonnait à 0,31–0,32 de contraste local, et S308 disait le manque « dans la mer ».
 
-Critères, écrits avant le code (module `bathymetrie` du cœur, f64, référence et non chemin déterministe) :
-1. **Dispersion en profondeur finie** `ω² = g·k·tanh(k·h)` : résidu relatif ≤ 10⁻¹² ; limites profonde (`k = ω²/g`) et
-   peu profonde (`k = ω/√(gh)`) à 10⁻⁶ près dans leurs domaines ; écart à l'approximation explicite de **Fenton et McKee
-   (1990)** au plus **1,7 %** — la borne que ses auteurs publient.
-2. **Levée** `K_s = √(c_g0/c_g)` : son minimum, **0,913 vers k·h ≈ 1,2**, la valeur des manuels (Dean et Dalrymple).
-3. **Réfraction sur contours droits** (Snell, `k·sin θ` conservé) et **flux d'énergie** `a²·c_g·cos θ` constant à 10⁻¹⁰
-   près le long d'un profil de plage ; la phase `∫k_y dy` a pour dérivée `k_y` à 10⁻⁶ près.
-4. **Déferlement** borné par profondeur, `H ≤ 0,78·h` (McCowan 1894) ; la profondeur de déferlement d'une houle se
-   calcule et se publie.
-5. Preuve ouverte par « Reproduire » ; liste 2.7 (**absent → partiel** si 1 à 4 tiennent), registre, file, index.
+Critères, écrits avant le code :
+1. **La mesure d'abord** : les quatre grandeurs comparables sur Godot tel qu'il est (poses de R14, S360–S361) et sur
+   l'afficheur de R19, contre la photographie ; **prédiction** — la surface fine de S360 relève le contraste local
+   au-dessus de celui de l'afficheur.
+2. **La couture** : hypothèse — le hachage `fract(sin(x)·43758)` avec x ≈ 10⁴ est hypersensible à l'arrondi, et Godot
+   compile `i + (1, 0)` autrement de part et d'autre de la colonne centrale. Remède : un hachage entier. Mesure : saut de
+   luminance du ciel entre les colonnes 639 et 640, rapporté aux sauts voisins ; après, du même ordre qu'eux (≤ 2 fois
+   leur médiane).
+3. **Le ciel calé** : `ciel_mesure` de S308 porté dans `ciel.gdshaderinc` (une source, ciel et reflets) ; les quatre
+   grandeurs remesurées ; ne pas dégrader le rapport mer / ciel sous l'horizon de plus de 15 % sans le dire.
+4. **Images R23** ; preuve ouverte par « Reproduire », file, index.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le module `bathymetrie` : dispersion, vitesse de groupe, levée, réfraction, phase, déferlement.
-- [x] **P3** — ses essais contre les résultats publiés ; critères 1 à 4.
-- [x] **P4** — preuve, liste, registre, file, index ; critère 5.
-- [x] **P5** — rituel.
+- [ ] **P2** — la mesure contre la photographie ; critère 1.
+- [ ] **P3** — la couture : diagnostic, hachage entier ; critère 2.
+- [ ] **P4** — le ciel calé sur la photographie ; critère 3.
+- [ ] **P5** — images R23, preuve, file, index ; critère 4.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2.** `code/water-core/src/bathymetrie.rs` (f64, référence) : `nombre_d_onde` (Eckart puis Newton),
-  `rapport_de_groupe`, `vitesse_de_groupe`, `coefficient_de_levee`, `transformer` (Snell, `K_s`, `K_r`),
-  `phase_transversale` (Simpson), `profondeur_de_deferlement` (McCowan 0,78, pas de 1 % puis dichotomie), `MCCOWAN`.
-  Calculé en Python avant l'essai : Fenton–McKee au pire 1,63 % à k₀h = 0,34 ; levée minimale 0,91299 à kh = 1,1997.
-- **P3, critères 1 à 4 tenus.** `tests_bathymetrie.rs`, `cargo test -p water-core --release --offline s362` :
-  résidu de dispersion **4,39·10⁻¹⁶** ; profond 0 ; peu profond (kh ≈ 2·10⁻³) 6,71·10⁻⁷ ; **Fenton–McKee 1,63 %** ≤ 1,7 % ;
-  **levée minimale 0,91299 à kh = 1,1995** (0,913 des manuels) ; plage 1/50, 8 s, 30° : Snell 1,1·10⁻¹⁶, flux
-  d'énergie 4,9·10⁻¹⁶, dérivée de la phase **3,27·10⁻⁸** ; 30° au large, **10° par 2 m de fond** ; déferlement d'une
-  houle de 1 m et 10 s : **h_b = 1,783 m**, H_b = 1,391 m (de face) ; 1,688 m à 30°. **L'instrument, deux fois corrigé**
-  (le seuil jamais) : la différence centrée tombait au coin du profil (2,45·10⁻³), puis, à ±0,5 m, sa troncature
-  `k_y''·d²/(6·k_y)` ≈ 3·10⁻⁶ par 2 m de fond dépassait le critère (mesuré 3,11·10⁻⁶) ; à ±5 cm, 3·10⁻⁸ prévu, 3,27·10⁻⁸
-  mesuré.
-- **P4, critère 5 tenu.** Preuve [BATHYMETRIE-S362](../docs/validation/BATHYMETRIE-S362.md) ; liste **2.7 absent →
-  partiel**, décompte 3 / 60 / 57 ; `dependances_liste.py` (2.7 : l'entrée dans B ou W par un ADR mesuré) et `--ecrire` ;
-  file (ligne Bathymétrie), feuille de route (front 0, décompte), REPRISE §4, index. `--check` propre. Pas d'ADR : la
-  référence ne décide rien ; la preuve dit ce qu'elle contredirait (ADR-004 §2.1).
-- **P5.** Suite du cœur : 516 réussis, 14 ignorés ; intégration 98 et 4 ignorés ; aucun avertissement.

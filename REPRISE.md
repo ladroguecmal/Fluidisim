@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-25 13:29 +02:00
+JETON            : occupé
+Battement        : 2026-09-25 13:32 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S363 — rendu 6 : le ciel (R20) — la couture, le ciel calé sur la photographie, mesurés contre la cible d'image de S308
 Dernière session : S362 — **physique, la houle qui sent le fond** : la référence de la bathymétrie dans le cœur — profondeur finie, levée, réfraction, déferlement —, tenue contre Fenton–McKee et la levée minimale des manuels ; **2.7 passe à partiel** ([preuve](docs/validation/BATHYMETRIE-S362.md))
 Session suivante : **les verdicts R21 et R22 d'abord** (REVUE-VISUELLE §26–27). Sinon, par l'alternance d'ADR-191 D3, une session de rendu : **le ciel** (demandé en R20 : couture, nuages en blocs, reflets). Puis la physique : l'entrée de la bathymétrie dans B ou W (un ADR mesuré, ADR-004 §2.1), ou la coque qui bouge sur la carte (ADR-193 §3). En attente : R18, R21, R22
 Maillons        : 0 — S362 : 2.7 passe à partiel (journal)
