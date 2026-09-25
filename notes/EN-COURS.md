@@ -88,9 +88,9 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la surface vue d'en dessous (`eau.gdshader`, faces arrière) ; le mode immergé dans `mer.gd`, poses
   sous l'eau, mer plate (`MER_PLATE=1`) ; critère 1.
-- [>] **P3** — le milieu : le fond et le fond du ciel vus de l'eau (`sol.gdshader`, `ciel.gdshader`) ; contrôle de la
+- [x] **P3** — le milieu : le fond et le fond du ciel vus de l'eau (`sol.gdshader`, `ciel.gdshader`) ; contrôle de la
   transmission ; critère 2.
-- [ ] **P4** — images R24, REVUE-VISUELLE §29.
+- [>] **P4** — images R24, REVUE-VISUELLE §29.
 - [ ] **P5** — preuve SOUS-MARIN-S365 ; liste 8.6, file, dépendances, feuille de route, index.
 - [ ] **P6** — rituel.
 
@@ -104,3 +104,12 @@ Critères, écrits avant le code :
   trompe sur les bords de nuages tassés près de l'horizon réfracté (46,0 à 48,3°) ; deux directions sans nuage, 48,266° et
   48,245°. **Contrôle de Fresnel** (`--fresnel`, premier pixel à R = 1), 16 directions : **48,254° en moyenne, 48,220 à
   48,311, pire écart 0,048°** pour 48,268° (pixel 0,122°). Soleil dans la fenêtre à 88,8 px du centre, 89,5 attendus.
+- **P3, critère 2 tenu.** `sol.gdshader` vu de l'eau : `exp(−Kd·H)` puis la ligne de visée ; `ciel.gdshader` : l'œil
+  dans l'eau voit l'eau, ligne infinie. `--controle-sous-eau` (mode 3, rayon marché sur la bathymétrie analytique), deux
+  inclinaisons, dix pixels de 5,0 à 18,8 m : **pire |ΔT| = 0,0041** (critère 0,01) ; rouge 0,18 à 5 m, 0,0015 à 18,8 m —
+  1 % à 13,5 m, vert 77 m, bleu 286 m (`c = a + 2·b_b`). **Deux défauts vus sur les images, corrigés** : (a) pixels noirs
+  vers l'horizon de la surface vue d'en dessous — Fresnel à 0/0 sous incidence rasante ; garde : réflexion totale ;
+  921 600 pixels, 0 noir ; (b) une ligne à 5° sous l'horizon entre le fond lointain et le fond du ciel — la lumière
+  diffusée prise à la profondeur **moyenne** du trajet ; remplacée par l'intégrale exacte du modèle sur une ligne en
+  pente, `L∞(z0)·c·d·φ((c + Kd·g)·d)`. Vu : caustiques nettes au loin, faibles sous la caméra (6,85 m, avant la focale
+  de S361, ≈ 13 m) — non examiné.

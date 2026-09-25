@@ -25,8 +25,17 @@ vec3 eau_infinie(vec3 omega, float z) {
     return R0 * gain_eau * exp(-kd * max(z, 0.0)) * f;
 }
 
-/// Ce qu'on voit à travers `d` mètres d'eau, dans la direction `omega` (B), à la profondeur moyenne `z`.
-vec3 a_travers_l_eau(vec3 couleur, float d, vec3 omega, float z) {
-    vec3 t = exp(-attenuation_c * max(d, 0.0));
-    return couleur * t + eau_infinie(omega, z) * (1.0 - t);
+/// Ce qu'on voit à travers `d` mètres d'eau depuis l'œil, à la profondeur `z0`, dans la direction `omega` (B). La lumière
+/// que la ligne diffuse vers l'œil suit l'éclairement local, `exp(−Kd·z)`, et la profondeur varie le long de la ligne,
+/// `z = z0 + g·s`, `g = −ω_z` : `∫₀^d L∞(z0)·e^(−Kd·g·s)·c·e^(−c·s) ds = L∞(z0)·c·d·φ((c + Kd·g)·d)`, `φ(x) = (1 − e^(−x))/x`
+/// — exact pour ce modèle. S365 P3 : la profondeur **moyenne** du trajet traçait une ligne entre le fond lointain et le
+/// fond du ciel ; la lumière diffusée vient du premier `1/c` mètres, pas du milieu du trajet.
+vec3 a_travers_l_eau(vec3 couleur, float d, vec3 omega, float z0) {
+    d = max(d, 0.0);
+    vec3 x = (attenuation_c + kd * (-omega.z)) * d;
+    vec3 phi = vec3(0.0);
+    for (int i = 0; i < 3; i++) {
+        phi[i] = abs(x[i]) < 1e-4 ? 1.0 - 0.5 * x[i] : (1.0 - exp(-x[i])) / x[i];
+    }
+    return couleur * exp(-attenuation_c * d) + eau_infinie(omega, z0) * attenuation_c * d * phi;
 }

@@ -144,7 +144,10 @@ vec3 lumiere(vec2 pente, vec3 rayon, vec3 fond_vu, vec3 t_colonne) {
 /// réfléchie. Non portés : le fond ou un objet vus dans ce miroir, la face inférieure de l'écume.
 vec3 lumiere_dessous(vec2 pente, vec3 rayon) {
     vec3 n = normalize(vec3(-pente, 1.0));
-    float f = fresnel(clamp(dot(rayon, n), 0.0, 1.0), 1.0 / indice);
+    float c = dot(rayon, n);
+    // Incidence rasante, ou facette vue par-derrière : réflexion totale. (Sans ce garde, Fresnel y vaut 0/0 : S365 P3,
+    // des pixels noirs vers l'horizon de la surface vue d'en dessous.)
+    float f = c > 1e-4 ? fresnel(min(c, 1.0), 1.0 / indice) : 1.0;
     vec3 eau = eau_infinie(reflect(rayon, n), 0.0);
     if (f >= 1.0) { return eau; }
     return (1.0 - f) * indice * indice * ciel_b(refract(rayon, -n, indice), 2) + f * eau;
@@ -281,17 +284,18 @@ void fragment() {
     // focalisation par les vagues (caustiques).
     vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
     // S365 — vue d'en dessous, quand l'œil est dans l'eau (`sous_eau`, posé par `mer.gd`) : la surface, puis les `d`
-    // mètres d'eau jusqu'à l'œil, à leur profondeur moyenne. Pas `FRONT_FACING` : la grille polaire présente sa face
+    // mètres d'eau jusqu'à l'œil (`a_travers_l_eau`). Pas `FRONT_FACING` : la grille polaire présente sa face
     // avant par en dessous, et la bascule reste d'un bloc tant que la caméra à demi immergée n'est pas traitée.
     if (sous_eau) {
         vec3 vue_d = normalize(surface - CAMERA_POSITION_WORLD);
         vec3 rayon_d = vec3(vue_d.x, -vue_d.z, vue_d.y);
         vec3 lum = integree(pente, rayon_d, transport_covariance(energie * cov_q, g), true, vec3(0.0), vec3(0.0));
         float d = length(surface - CAMERA_POSITION_WORLD);
-        ALBEDO = a_travers_l_eau(lum, d, rayon_d, max(-0.5 * (surface.y + CAMERA_POSITION_WORLD.y), 0.0));
+        ALBEDO = a_travers_l_eau(lum, d, rayon_d, profondeur_camera);
         if (controle == 4) {
             // Contrôle S365 : le coefficient de Fresnel eau → air, sans la ligne de visée.
-            ALBEDO = vec3(fresnel(clamp(dot(rayon_d, normalize(vec3(-pente, 1.0))), 0.0, 1.0), 1.0 / indice));
+            float c4 = dot(rayon_d, normalize(vec3(-pente, 1.0)));
+            ALBEDO = vec3(c4 > 1e-4 ? fresnel(min(c4, 1.0), 1.0 / indice) : 1.0);
         }
     } else {
     vec3 fond0 = scene_monde(SCREEN_UV, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);

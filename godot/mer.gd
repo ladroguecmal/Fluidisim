@@ -95,7 +95,7 @@ func _ready() -> void:
 	add_child(mer)
 	# S359 : `SANS_EAU=1` masque la mer, pour voir le fond seul.
 	mer.visible = OS.get_environment("SANS_EAU") != "1"
-	if "--cote" in args or "--controle-fond" in args or "--controle-caustiques" in args or "--controle-caustiques-scene" in args:
+	if "--cote" in args or "--controle-fond" in args or "--controle-caustiques" in args or "--controle-caustiques-scene" in args or "--controle-sous-eau" in args:
 		add_child(fond())
 		# S361 : les caustiques du fond, carte directe ; `CAUSTIQUES=0` les éteint.
 		if OS.get_environment("CAUSTIQUES") != "0":
@@ -142,6 +142,9 @@ func _ready() -> void:
 	if "--controle-caustiques-scene" in args:
 		anime = false
 		controle_caustiques_scene()
+	if "--controle-sous-eau" in args:
+		anime = false
+		controle_sous_eau()
 
 
 ## Le ciel : depuis S359, celui de l'afficheur lui-même (`ciel.gdshaderinc` — dégradé du « ciel clair » relevé sur la
@@ -596,6 +599,51 @@ func controle_fond() -> void:
 		pire_t = maxf(pire_t, maxf(absf(ecart.x), maxf(absf(ecart.y), absf(ecart.z))))
 		print("CONTROLE_FOND_S359 mode=transmission H_m=%.3f rendu=(%.4f, %.4f, %.4f) attendu=(%.4f, %.4f, %.4f)" % [hc, c.r, c.g, c.b, attendu.x, attendu.y, attendu.z])
 	print("CONTROLE_FOND_S359 mode=transmission pire=%.4f critere=%s" % [pire_t, "tenu" if pire_t <= 0.01 else "manque"])
+	get_tree().quit()
+
+
+## S365 — **le contrôle du milieu** (liste 8.6) : la caméra dans l'eau de la scène côtière, le fond rend la transmission
+## de sa ligne de visée (mode 3, tonalité linéaire, sans brume ni halo) ; la distance est recalculée ici, rayon marché sur
+## la bathymétrie analytique, et la transmission rendue comparée à `exp(−c·d)` par canal, à 0,01 près.
+func controle_sous_eau() -> void:
+	var env: Environment = (get_children().filter(func(c): return c is WorldEnvironment)[0] as WorldEnvironment).environment
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	env.glow_enabled = false
+	env.fog_enabled = false
+	materiau_sol.set_shader_parameter("controle", 3)
+	var c := ABSORPTION + 2.0 * RETRODIFFUSION
+	var pire := 0.0
+	for inclinaison in [-0.6, -0.25]:
+		camera.position = Vector3(0.0, -3.0, 20.0)
+		camera.rotation = Vector3(inclinaison, 0.0, 0.0)
+		mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
+		immersion(temps)
+		for _i in 12:
+			await RenderingServer.frame_post_draw
+		var image := get_viewport().get_texture().get_image()
+		var taille := image.get_size()
+		for f in [Vector2(0.5, 0.6), Vector2(0.2, 0.75), Vector2(0.8, 0.75), Vector2(0.5, 0.95), Vector2(0.3, 0.55)]:
+			var px := Vector2i(int(f.x * taille.x), int(f.y * taille.y))
+			var o := camera.project_ray_origin(Vector2(px) + Vector2(0.5, 0.5))
+			var dir := camera.project_ray_normal(Vector2(px) + Vector2(0.5, 0.5))
+			var t := 0.0
+			while o.y + dir.y * t > -profondeur(o.x + dir.x * t, -(o.z + dir.z * t)) and t < 2000.0:
+				t += 0.02
+			var lo := t - 0.02
+			var hi := t
+			for _i in 40:
+				var m := 0.5 * (lo + hi)
+				var p := o + dir * m
+				if p.y > -profondeur(p.x, -p.z):
+					lo = m
+				else:
+					hi = m
+			var attendu := Vector3(exp(-c.x * hi), exp(-c.y * hi), exp(-c.z * hi))
+			var rendu := image.get_pixel(px.x, px.y).srgb_to_linear()
+			var ecart := Vector3(rendu.r, rendu.g, rendu.b) - attendu
+			pire = maxf(pire, maxf(absf(ecart.x), maxf(absf(ecart.y), absf(ecart.z))))
+			print("CONTROLE_SOUS_EAU_S365 inclinaison=%.2f pixel=%s d_m=%.3f rendu=(%.4f, %.4f, %.4f) attendu=(%.4f, %.4f, %.4f)" % [inclinaison, px, hi, rendu.r, rendu.g, rendu.b, attendu.x, attendu.y, attendu.z])
+	print("CONTROLE_SOUS_EAU_S365 pire=%.4f critere=%s" % [pire, "tenu" if pire <= 0.01 else "manque"])
 	get_tree().quit()
 
 

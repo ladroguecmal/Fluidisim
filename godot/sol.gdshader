@@ -17,9 +17,10 @@ shader_type spatial;
 render_mode unshaded;
 
 #include "res://ciel.gdshaderinc"
+// S365 : `gain_eau`, `Kd`, l'atténuation du faisceau et le mode immergé (`optique_eau.gdshaderinc`).
+#include "res://optique_eau.gdshaderinc"
 
 uniform vec3 albedo_sable = vec3(0.34, 0.30, 0.24);
-uniform float gain_eau = 2.0;
 
 uniform bool caustiques = false;
 uniform sampler2D carte_caustiques : filter_linear, repeat_disable;
@@ -32,7 +33,7 @@ uniform float carte_echelle = 32.0;
 uniform bool carte_retournee = false;
 // Contrôle (S361) : 0 rendu ; 1 l'éclairement focalisé C en sortie directe — rouge C/4, vert fract(10·C), qui le
 // précise au-delà des 8 bits ; 2 la même sur la scène, rouge C/20, vert fract(C). `soleil_controle` non nul impose le
-// soleil (coordonnées de B).
+// soleil (coordonnées de B). S365 : 3, la caméra dans l'eau, la transmission de la ligne de visée `exp(−c·d)`.
 uniform int controle = 0;
 uniform vec3 soleil_controle = vec3(0.0);
 
@@ -98,7 +99,18 @@ void fragment() {
     vec3 soleil = dot(soleil_controle, soleil_controle) > 0.0 ? normalize(soleil_controle) : normalize(SOLEIL_B);
     float c = caustiques ? focalisation() : 1.0;
     ALBEDO = albedo_sable * variation * gain_eau * (0.6 + 0.4 * max(dot(n_b, soleil), 0.0) * c);
-    if (controle == 1) {
+    // S365 — **vu de l'eau** (liste 8.6) : l'éclairement descendu jusqu'au fond, `exp(−Kd·H)` — vu d'en haut, c'est
+    // `eau.gdshader` qui l'applique —, puis les `d` mètres d'eau jusqu'à l'œil (`a_travers_l_eau`).
+    vec3 monde = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+    float d = length(monde - CAMERA_POSITION_WORLD);
+    if (sous_eau) {
+        vec3 vue = normalize(monde - CAMERA_POSITION_WORLD);
+        vec3 omega = vec3(vue.x, -vue.z, vue.y);
+        ALBEDO = a_travers_l_eau(ALBEDO * exp(-kd * max(profondeur_fond, 0.0)), d, omega, profondeur_camera);
+    }
+    if (controle == 3) {
+        ALBEDO = exp(-attenuation_c * d);
+    } else if (controle == 1) {
         ALBEDO = vec3(c / 4.0, fract(10.0 * c), 0.0);
     } else if (controle == 2) {
         ALBEDO = vec3(c / 20.0, fract(c), 0.0);

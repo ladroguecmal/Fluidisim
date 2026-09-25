@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 19:41 +02:00
+Battement        : 2026-09-25 19:45 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S365 — rendu 7 : sous la surface — la fenêtre de Snell, la réflexion totale, le milieu (8.6, ADR-019)
 Dernière session : S364 — **physique, la bathymétrie entre dans B** : chaque composante transformée par des tables cuites (phase entière, levée, réfraction), η à 0,13 mm de la référence, B au bit au large, requête en O(1) ; isobathes droites ([ADR-196](docs/adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md), [preuve](docs/validation/BATHYMETRIE-S362.md) §5)
