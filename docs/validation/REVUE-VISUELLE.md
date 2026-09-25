@@ -1069,3 +1069,28 @@ par le disque du soleil. Exacte à 5 % près contre une solution calculée à pa
 3. **La suite** : le ciel, l'écume (texture, durée), autre chose ?
 
 Un mot par question suffit.
+
+## 28. R23 — le ciel, et la courbe calée sur la photographie, S363
+
+**Demandé en R20** ([preuve](CIEL-S363.md)) : *« il n'aide pas aux reflets et limite la qualité du rendu final »*.
+**Le ciel** : la couture verticale au centre et les nuages en blocs avaient une seule cause, un hachage qui perdait sa
+précision ; remplacé par un hachage entier, les deux disparaissent. Le ciel est désormais celui de **votre
+photographie de référence** (S308) : bleu profond au zénith, blanchi vers l'horizon — la mer le reflète. **La
+tonalité** : une option, `TONALITE=photo`, calée sur la même photographie — ses contrastes (creux, crêtes, dynamique) et
+la teinte de ses creux ; AgX reste le défaut, sa couleur ayant été jugée « parfaite » en R20.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s363/couture_avant_apres.png` | le haut du ciel au centre, agrandi trois fois : avant, la couture et les blocs ; après |
+| `viewer/captures/s363/ciel_avant_apres_proche.png` | la pose proche : le ciel clair d'avant, le ciel de la photographie |
+| `viewer/captures/s363/tonalite_agx_photo_proche.png` | AgX contre `TONALITE=photo`, pose proche (aussi `_rasante`, `_reference`) |
+| `viewer/captures/s363/godot_*_12s.png`, `godot_*_photo_12s.png` | les images entières, AgX et `photo` |
+
+**Les questions :**
+
+1. **Le ciel** : plus crédible ? Les nuages vous conviennent-ils ?
+2. **La tonalité** : AgX (à gauche) ou `photo` (à droite, premier plan plus profond, ciel plus pâle) — laquelle
+   ressemble le plus à la mer ?
+3. **La suite** : les reflets du ciel dans l'eau, l'écume, autre chose ?
+
+Un mot par question suffit.
