@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 13:23 +02:00
+Battement        : 2026-09-25 13:27 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S362 — physique : la bathymétrie (2.7), la référence — profondeur finie, levée, réfraction, déferlement, contre des résultats publiés
 Dernière session : S361 — **rendu 5, les caustiques** : méthode à rebours rejetée par la mesure (énergie 2 à 5,6), méthode directe (Wyman) retenue — exacte à 4,6 %, énergie de la scène à 1 % ([preuve](docs/validation/CAUSTIQUES-S361.md)) ; R22 préparée. Avant elle S360 : la surface fine par FFT, l'écume au déferlement (R21)

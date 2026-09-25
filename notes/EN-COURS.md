@@ -86,9 +86,21 @@ Critères, écrits avant le code (module `bathymetrie` du cœur, f64, référenc
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le module `bathymetrie` : dispersion, vitesse de groupe, levée, réfraction, phase, déferlement.
-- [ ] **P3** — ses essais contre les résultats publiés ; critères 1 à 4.
+- [x] **P2** — le module `bathymetrie` : dispersion, vitesse de groupe, levée, réfraction, phase, déferlement.
+- [x] **P3** — ses essais contre les résultats publiés ; critères 1 à 4.
 - [ ] **P4** — preuve, liste, registre, file, index ; critère 5.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2.** `code/water-core/src/bathymetrie.rs` (f64, référence) : `nombre_d_onde` (Eckart puis Newton),
+  `rapport_de_groupe`, `vitesse_de_groupe`, `coefficient_de_levee`, `transformer` (Snell, `K_s`, `K_r`),
+  `phase_transversale` (Simpson), `profondeur_de_deferlement` (McCowan 0,78, pas de 1 % puis dichotomie), `MCCOWAN`.
+  Calculé en Python avant l'essai : Fenton–McKee au pire 1,63 % à k₀h = 0,34 ; levée minimale 0,91299 à kh = 1,1997.
+- **P3, critères 1 à 4 tenus.** `tests_bathymetrie.rs`, `cargo test -p water-core --release --offline s362` :
+  résidu de dispersion **4,39·10⁻¹⁶** ; profond 0 ; peu profond (kh ≈ 2·10⁻³) 6,71·10⁻⁷ ; **Fenton–McKee 1,63 %** ≤ 1,7 % ;
+  **levée minimale 0,91299 à kh = 1,1995** (0,913 des manuels) ; plage 1/50, 8 s, 30° : Snell 1,1·10⁻¹⁶, flux
+  d'énergie 4,9·10⁻¹⁶, dérivée de la phase **3,27·10⁻⁸** ; 30° au large, **10° par 2 m de fond** ; déferlement d'une
+  houle de 1 m et 10 s : **h_b = 1,783 m**, H_b = 1,391 m (de face) ; 1,688 m à 30°. **L'instrument, deux fois corrigé**
+  (le seuil jamais) : la différence centrée tombait au coin du profil (2,45·10⁻³), puis, à ±0,5 m, sa troncature
+  `k_y''·d²/(6·k_y)` ≈ 3·10⁻⁶ par 2 m de fond dépassait le critère (mesuré 3,11·10⁻⁶) ; à ±5 cm, 3·10⁻⁸ prévu, 3,27·10⁻⁸
+  mesuré.

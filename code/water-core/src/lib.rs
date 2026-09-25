@@ -38,6 +38,8 @@ mod bessel_table;
 
 pub mod background;
 pub mod background_spectrum;
+/// S362, liste 2.7 : la référence de la houle qui sent le fond — profondeur finie, levée, réfraction, déferlement.
+pub mod bathymetrie;
 pub mod body;
 /// S331 : le corps rigide du jeu, poussé par B + W (lot 4, I-04).
 pub mod rigid_body;
