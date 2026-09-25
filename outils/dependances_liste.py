@@ -93,7 +93,7 @@ D = {
  "6.6": ("H", "—", ["6.1", "6.4", "4.13", "3.2", "5.9"], None),
  "6.7": ("B", "—", ["6.2"], "les acteurs du jeu : leur forme, leur physique"),
  "6.8": ("H", "—", ["4.12", "6.1"], None),
- "7.1": ("A", "le champ d'écume de B (ADR-014, B9)", [], None),
+ "7.1": ("A", "la production sur la carte (SPEC-006 §4) ; sources de W, δ, vent ; demi-vies et transfert (B9)", [], None),
  "7.2": ("B", "—", ["4.16"], None),
  "7.3": ("B", "—", ["4.12"], None),
  "7.4": ("B", "—", ["4.16"], None),

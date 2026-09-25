@@ -334,7 +334,12 @@ pas recopiée ici (L137).
 
 ## 7. Phénomènes secondaires
 
-- [ ] **7.1 Écume et moutons** (C14, B9, champ d'écume de SPEC-006 §4) — *absent*, conçu (ADR-014).
+- [ ] **7.1 Écume et moutons** (C14, B9, champ d'écume de SPEC-006 §4) — *partiel* depuis S367 : la **référence** du
+  champ d'ADR-014 dans le cœur — deux canaux (actif 3 s, résiduel 30 s), advection orbitale, déferlement aux crêtes les
+  plus accélérées ; couverture calée sur Monahan (le seuil physique ne déferle jamais : la bande de B est autosimilaire),
+  vérifiée à 6 % près de 7 à 13 m/s ; traînées le long du vent, Ly/Lx 5,3 ([preuve](validation/ECUME-S367.md)).
+  Manquent la production sur la carte (SPEC-006 §4), les sources de W, de δ et du vent, demi-vies et transfert calés
+  (B9), la zone de surf et le sillage (scénarios 2 et 3 de B9).
 - [ ] **7.2 Spray, embruns, gouttelettes** — *absent*.
 - [ ] **7.3 Microbulles visuelles** — *absent*.
 - [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *absent*.
@@ -542,14 +547,14 @@ pas recopiée ici (L137).
 | 4. Volumique (δ) | 21 | 0 | 11 | 10 |
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
 | 6. Solides | 8 | 0 | 5 | 3 |
-| 7. Secondaires | 8 | 0 | 0 | 8 |
+| 7. Secondaires | 8 | 0 | 1 | 7 |
 | 8. Rendu | 10 | 0 | 9 | 1 |
 | 9. Activation et budget | 13 | 0 | 7 | 6 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **61** | **56** |
+| **total** | **120** | **3** | **62** | **55** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
@@ -559,7 +564,7 @@ corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ;
 changer de case — dix-huit sur S309–S349 (actualisation complète, ci-dessous), trois sur S350 (4.19, 9.9, 9.12).
 *S351* : **4.2** et **9.9** passent à partiel — deux domaines servis ensemble, le rang 1 reçu au banc ; 1.4, 4.5 et
 9.8 corrigés. *S359* : **8.5** passe à partiel — la colonne d'eau et la réfraction dans Godot. *S362* : **2.7** passe à
-partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau.
+partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau. *S367* : **7.1** passe à partiel — le champ d'écume de B.
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.

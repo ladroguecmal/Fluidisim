@@ -176,7 +176,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 
 | point | sys. | maintenant | attend | débloque | front |
 |---|---|---|---|---|---|
-| **7.1** Écume et moutons | A | le champ d'écume de B (ADR-014, B9) | — | 8.4, 13.2, 13.3 | **0** |
+| **7.1** Écume et moutons | A | la production sur la carte (SPEC-006 §4) ; sources de W, δ, vent ; demi-vies et transfert (B9) | — | 8.4, 13.2, 13.3 | **0** |
 | **7.2** Spray, embruns, gouttelettes | B | — | 4.16 | 8.4, 9.9 | **1** |
 | **7.3** Microbulles visuelles | B | — | 4.12 | 8.4 | **3** |
 | **7.4** Grosses bulles et poches d'air physiques | B | — | 4.16 | 3.3, 4.12, 7.5, 8.4, 13.2 | **1** |

@@ -93,8 +93,8 @@ Critères, écrits avant le code :
   par la vitesse de surface de B, sources de B ; critère 1.
 - [x] **P4** — la couverture contre Monahan, trois vents ; critère 2.
 - [x] **P5** — les traînées de convergence ; critère 3.
-- [>] **P6** — preuve ECUME-S367 ; liste 7.1, file, dépendances, feuille de route, index.
-- [ ] **P7** — rituel.
+- [x] **P6** — preuve ECUME-S367 ; liste 7.1, file, dépendances, feuille de route, index.
+- [>] **P7** — rituel.
 
 ### Notes de reprise
 - **P2.** Verdict consigné, lu sur la demande de S366 (R21, R22, R23, R25) : forme fine, caustiques, ciel, lueur face
@@ -119,3 +119,6 @@ Critères, écrits avant le code :
   deux texels : 1 m, Lx 16,9 m, Ly ≥ 64 m (butée) ; **0,5 m, Lx 10,9 m, Ly 58,3 m, Ly/Lx 5,3** ; témoin 1,8 aux deux.
   L'allongement **croît** quand le texel baisse : pas la diffusion ; il reste sans bord d'entrée. Résiduel moyen 0,40 : le
   transfert 1 : 1 de l'actif est trop généreux — à caler (B9).
+- **P6.** Preuve [ECUME-S367](../docs/validation/ECUME-S367.md) ; **7.1 passe à partiel** (3 / 62 / 55), décompte,
+  REPRISE §4, feuille de route ; dépendances (donnée, table régénérée) ; file (ligne de l'écume, état périmé de S308
+  remplacé) ; index. Cœur : **522 réussis, 14 ignorés**.

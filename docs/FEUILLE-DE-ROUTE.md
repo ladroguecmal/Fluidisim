@@ -316,8 +316,8 @@ derrière la requête du corps (6.1), le prix visuel du rang 1 (4.5, 9.9). Profi
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 61 partiels,
-56 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 62 partiels,
+55 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
