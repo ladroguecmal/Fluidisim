@@ -80,9 +80,16 @@ func _ready() -> void:
 	if donnees.has("detail"):
 		detail = load("res://detail.gd").new()
 		add_child(detail)
-		if detail.charger(donnees["detail"]):
+		if detail.charger(donnees["detail"]) and OS.get_environment("DETAIL") != "0":
 			detail.calculer(temps)
-		else:
+			# S360 : l'eau lit les deux cascades ; `DETAIL=0` garde la queue de 60 composantes, en témoin.
+			materiau.set_shader_parameter("detail_a0", detail.textures[0][0])
+			materiau.set_shader_parameter("detail_b0", detail.textures[0][1])
+			materiau.set_shader_parameter("detail_a1", detail.textures[1][0])
+			materiau.set_shader_parameter("detail_b1", detail.textures[1][1])
+			materiau.set_shader_parameter("detail_cotes", Vector2(float(detail.cotes[0]), float(detail.cotes[1])))
+			materiau.set_shader_parameter("detail_actif", true)
+		elif not "--controle-fft" in args:
 			detail = null
 	if "--controle-fft" in args:
 		anime = false
@@ -339,6 +346,7 @@ func controle() -> void:
 func controle_fond() -> void:
 	materiau.set_shader_parameter("n_bande", 0)
 	materiau.set_shader_parameter("n_queue", 0)
+	materiau.set_shader_parameter("detail_actif", false)
 	var env: Environment = (get_children().filter(func(c): return c is WorldEnvironment)[0] as WorldEnvironment).environment
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.glow_enabled = false

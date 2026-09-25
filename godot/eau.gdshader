@@ -51,6 +51,15 @@ uniform float pas_radial = 0.03;
 // lit, est dessinée après eux et n'entre pas dans le tampon de profondeur.
 uniform sampler2D ecran : hint_screen_texture, filter_linear_mipmap;
 uniform sampler2D profondeur_ecran : hint_depth_texture, filter_nearest;
+// S360 — la surface fine : la queue de B réalisée par FFT (`detail.gd`), deux cascades de 32 m et 4 m ; par cascade,
+// (s_x, s_y, s_x², s_y²) et (s_x·s_y, g_xx, g_yy, g_xy), avec leurs niveaux de détail — la moyenne de l'empreinte, et la
+// variance qu'elle ne résout pas (LEAN, Olano et Baker 2010). Sans elle (`detail_actif` faux), la queue de 60 composantes.
+uniform sampler2D detail_a0 : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D detail_b0 : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D detail_a1 : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D detail_b1 : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform vec2 detail_cotes = vec2(32.0, 4.0);
+uniform bool detail_actif = false;
 // L'atténuation diffuse `Kd = (a + b_b)/μ̄_d` des trois bandes (650, 550, 450 nm) : `a` de Pope & Fry, `b_b` de Morel,
 // ceux d'ADR-177 ; `μ̄_d` = 0,8 *à calibrer*. Calculée et donnée par `mer.gd`. Indice de l'eau de mer.
 uniform vec3 kd = vec3(0.4259, 0.0724, 0.0158);
@@ -192,8 +201,18 @@ void fragment() {
     vec2 s_q = vec2(0.0);
     vec3 g_q = vec3(0.0);
     vec3 cov_q = vec3(0.0);
-    float var_q = 0.0;
-    for (int i = 0; i < n_queue; i++) {
+    if (detail_actif) {
+        // S360 : la queue dense, lue à l'empreinte du pixel ; la covariance non résolue, E[s·sᵀ] − E[s]·E[s]ᵀ.
+        vec4 a0 = texture(detail_a0, lag / detail_cotes.x);
+        vec4 b0 = texture(detail_b0, lag / detail_cotes.x);
+        vec4 a1 = texture(detail_a1, lag / detail_cotes.y);
+        vec4 b1 = texture(detail_b1, lag / detail_cotes.y);
+        s_q = a0.xy + a1.xy;
+        g_q = vec3(b0.y + b1.y, b0.w + b1.w, b0.z + b1.z);
+        cov_q = vec3(max(a0.z - a0.x * a0.x, 0.0), b0.x - a0.x * a0.y, max(a0.w - a0.y * a0.y, 0.0))
+            + vec3(max(a1.z - a1.x * a1.x, 0.0), b1.x - a1.x * a1.y, max(a1.w - a1.y * a1.y, 0.0));
+    }
+    for (int i = 0; i < (detail_actif ? 0 : n_queue); i++) {
         vec4 c = queue[i];
         float k = length(c.yz);
         float w = poids(k, h) * exp(-0.5 * k * k * h * h);
@@ -203,7 +222,6 @@ void fragment() {
             vec2 u = c.yz / k;
             s_q += w * c.x * cos(phase) * c.yz;
             g_q -= w * c.x * k * sin(phase) * vec3(u.x * u.x, u.x * u.y, u.y * u.y);
-            var_q += 0.5 * (w * c.x * k) * (w * c.x * k);
         }
     }
     float energie = max(0.0, 1.0 + modulation_M * eps);
@@ -214,11 +232,9 @@ void fragment() {
     float det = jxx * jyy - jxy * jxy;
     vec2 pente = det >= 0.1 ? vec2((jyy * p_lag.x - jxy * p_lag.y) / det, (-jxy * p_lag.x + jxx * p_lag.y) / det) : p_lag;
     vec3 n_monde = normalize(vec3(-pente.x, 1.0, pente.y));
-    // La variable des crêtes (S356), `s = (J − 1)/σ` au filtrage du pixel : elle porte la lumière des crêtes.
-    float sigma = sqrt(max(sigma2_bande + energie * var_q, 0.0));
-    float s = (det - 1.0) / max(sigma, 1e-6);
-    // S360 — l'écume au déferlement : la même variable sur la bande seule, à l'empreinte d'au moins un mètre ;
-    // couverture antialiasée par sa variation dans le pixel.
+    // S360 — la variable des crêtes, `s = (J − 1)/σ` (S356), sur la **bande seule**, à l'empreinte d'au moins un mètre :
+    // l'écume au déferlement des vagues dominantes, et la lumière qui traverse leurs crêtes ; couverture antialiasée par
+    // sa variation dans le pixel.
     float det_e = (1.0 + g_ecume.x) * (1.0 + g_ecume.z) - g_ecume.y * g_ecume.y;
     float s_e = (det_e - 1.0) / max(sqrt(max(sigma2_ecume, 0.0)), 1e-6);
     float couverture = clamp((seuil_deferlement(max(h, ecume_empreinte_min)) - s_e) / max(fwidth(s_e), 1e-4) + 0.5, 0.0, 1.0);
@@ -275,7 +291,7 @@ void fragment() {
     float eclairage = gain_eau * (0.6 + 0.4 * max(dot(normalize(vec3(-pente, 1.0)), soleil), 0.0));
     vec2 horizontal = rayon.xy / max(length(rayon.xy), 1e-6);
     float avant = pow(max(dot(horizontal, normalize(soleil.xy)), 0.0), exposant_cretes);
-    couleur += force_cretes * clamp(-0.5 * s, 0.0, 1.0) * avant * transmission_crete * eclairage;
+    couleur += force_cretes * clamp(-0.5 * s_e, 0.0, 1.0) * avant * transmission_crete * eclairage;
     couleur = mix(couleur, vec3(reflectance_ecume * eclairage), couverture);
     ALBEDO = couleur;
     if (controle > 0) {

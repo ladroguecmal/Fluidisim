@@ -99,7 +99,7 @@ Critères, écrits avant le code :
 - [x] **P3** — l'écume au déferlement, mesurée avant et après ; critère 2.
 - [x] **P4** — le spectre fin dans le cœur, ses essais ; l'export des `h0` ; critère 3.
 - [x] **P5** — la FFT dans Godot et son contrôle ; critère 4.
-- [ ] **P6** — le nuanceur sur les cascades ; critère 5.
+- [x] **P6** — le nuanceur sur les cascades ; critère 5.
 - [ ] **P7** — les images de R21 ; critère 6.
 - [ ] **P8** — preuve, ADR, file, liste, index ; critère 7.
 - [ ] **P9** — rituel.
@@ -144,3 +144,11 @@ Critères, écrits avant le code :
   double contre la FFT, quatre texels : cascade 0, pire **7,4·10⁻⁶** du rms ; cascade 1, **2,7·10⁻⁵** ; mss contre
   l'export (Parseval) **6,5·10⁻⁷** et **6,7·10⁻⁷**. rms de η : 2,35 cm et 0,57 cm. GDScript n'a pas `%e` :
   `String.num_scientific`.
+- **P6, critère 5 tenu.** `eau.gdshader` : les deux cascades lues à l'empreinte (`filter_linear_mipmap_anisotropic`),
+  pentes moyennes, gradient du déplacement, covariance non résolue `E[s·sᵀ] − E[s]·E[s]ᵀ` vers la quadrature d'ADR-161 ;
+  la boucle de 60 composantes reste en témoin (`DETAIL=0`). La lumière des crêtes prend la variable de la bande seule,
+  comme l'écume (`s` complet retiré). Contrôles : profondeur 0,234 ; transmission 0,0050 (le mode contrôle aplatit
+  aussi la surface fine — sans cela 0,0068) ; FFT 7,4·10⁻⁶ et 2,7·10⁻⁵ ; horizon linéaire **0,711 / 0,677** (afficheur
+  0,728 / 0,713). **Vu** : plongeante, une texture fine dense, orientée, un scintillement en éclats ; une seule tache
+  d'écume dans le cadre, **lisse et ovale** — un mouton réel est déchiqueté. La capture de l'utilisateur n'a pas pu être
+  située dans les images de R20 (corrélation 0,19).
