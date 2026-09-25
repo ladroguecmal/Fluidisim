@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S363 — **en cours**. **Rendu 6 : le ciel** — *« Tu as raison sur le ciel, il n'aide pas au reflets et limite la
+Session : S363 — **terminée**. **Rendu 6 : le ciel** — *« Tu as raison sur le ciel, il n'aide pas au reflets et limite la
 qualité du rendue final »* (R20) ; alternance d'ADR-191 D3 après S362.
 **Coupée après P4** (13:36) ; **reprise à chaud à 18:34** sur *« Reprends le projet »* : arbre propre, une seule copie,
 rien à compléter ni à annuler ; P4 bis découpée en deux avant d'y toucher.
@@ -107,7 +107,7 @@ Critères, écrits avant le code :
   - [x] **P5 a** — les images de R23 (`viewer/captures/s363/`, locales) : la couture avant / après, le ciel avant / après,
     AgX contre `TONALITE=photo` ; REVUE-VISUELLE §28, ses questions.
   - [x] **P5 b** — la preuve `CIEL-S363` ouverte par « Reproduire » ; file active, index, liste si un point bouge.
-- [>] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 : prédiction tenue en proche et rasante.** Captures converties en PPM (hors dépôt),

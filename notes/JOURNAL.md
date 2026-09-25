@@ -17067,3 +17067,22 @@ place levée et réfraction dans W ; faire tourner les composantes avec le fond 
 **Rituel.** Maillons **0** : 2.7 passe à partiel ; devient possible, recevoir tout candidat qui fera sentir le fond à la
 houle ; consommé par l'ADR d'entrée et la scène côtière ; preuve §2. Suivant : **R21 et R22 d'abord** ; par l'alternance,
 le rendu — **le ciel** (R20) — ; puis la physique : l'entrée de la bathymétrie, ou la coque qui bouge. R18, R21, R22.
+
+## S363 — 2026-09-25 — rendu 6 : le ciel, et la courbe calée sur la photographie
+
+**Entrée.** Alternance d'ADR-191 D3 ; R20 : le ciel *« n'aide pas aux reflets »* ; sans verdict R21/R22. Coupée après P4
+(13:36) ; **reprise à chaud à 18:34** sur *« Reprends le projet »* : arbre propre, une copie, rien à trancher.
+**Fait** ([preuve](../docs/validation/CIEL-S363.md)). **La mesure d'abord** : contre la photographie de R14, la surface
+fine de S360 relève le contraste local (0,27 → 0,36 ; 0,54 en linéaire pour 0,455) — le manque « spatial » de S308 est
+comblé dans Godot ; AgX écrase la dynamique et la fraction claire. **La couture** du ciel et les **nuages en blocs** :
+un hachage `fract(sin)` qui perdait sa précision ; un hachage entier — saut au centre 10,7 → 0,03 fois ses voisins.
+**Le ciel** de la photographie (`ciel_mesure` de S308), ciel et reflets. **La courbe** : Godot rend en HDR ;
+`tonalite_godot.py` rejoue ses courbes recopiées de `tonemap.glsl` 4.4.1, **jamais plus d'un octet** sur huit réglages ;
+1 772 essais : ACES tient la luminance (0,143 sans écrêtage) mais triple le bleu des creux, qu'AgX tient à 0,3 % ;
+luminance et teinte ensemble, **`TONALITE=photo`** (ACES, saturation 0,5) : **0,166 contre 5,8** pour AgX, en option.
+**Critères ajoutés en cours, dits** : l'écrêtage (le premier gagnant brûlait 18 % de la mer), la teinte des creux.
+**Limites.** Une pose, une photographie ; crêtes grises (B/G 1,2 pour 2,89) — les reflets, pas la courbe ; la
+saturation pâlit aussi le ciel ; coût non mesuré. **R23** préparée, images envoyées.
+**Rituel.** Maillons **1** : aucun point de la liste ne change d'état (8.10 reste partiel, son constat actualisé).
+Suivant : **R21 à R23 d'abord** ; par l'alternance, la physique — l'entrée de la bathymétrie (un ADR mesuré), ou la
+coque qui bouge. R18, R21, R22, R23 attendus.
