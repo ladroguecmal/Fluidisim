@@ -17086,3 +17086,22 @@ saturation pâlit aussi le ciel ; coût non mesuré. **R23** préparée, images 
 **Rituel.** Maillons **1** : aucun point de la liste ne change d'état (8.10 reste partiel, son constat actualisé).
 Suivant : **R21 à R23 d'abord** ; par l'alternance, la physique — l'entrée de la bathymétrie (un ADR mesuré), ou la
 coque qui bouge. R18, R21, R22, R23 attendus.
+
+## S364 — 2026-09-25 — physique : la bathymétrie entre dans B (2.7)
+
+**Entrée.** *« Continue »*, sans verdict R21 à R23 ; alternance d'ADR-191 D3 après S363. Suite de S362 : l'entrée, que
+S362 renvoyait à un ADR mesuré. W naît d'événements et le relais B → W mélangerait deux réalisations (ADR-004 §3).
+**Fait** ([ADR-196](../docs/adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md),
+[preuve](../docs/validation/BATHYMETRIE-S362.md) §5). `bathymetrie_cote.rs` : chaque composante de B reçoit des tables
+cuites depuis la référence — correction de phase **entière**, `K_s·K_r`, `k_y`, `coth kh` —, interpolées en O(1).
+**Mesuré** : 0,23 mm de la référence au pas de 2 m (en `Δ²`, prédit 0,4) ; sur huit composantes, η à 0,13 mm, pente et
+vitesse à 0,02 % ; **au large, B au bit** (120 évaluations) ; même hash sur deux passes ; requête ×1,2 à ×1,6 de B près
+des côtes, indépendante du pas ; 258 Ko par km de profil. **Trouvé** : à λ₀/2, le « fond qui cesse de se sentir » des
+manuels et de SPEC-005 §8, la levée vaut encore 0,990 — 5 mm de marche ; à λ₀, 4·10⁻⁵, prédit : les tables commencent
+à λ₀ (D3, note datée dans SPEC-005). ADR-004 §2.1 et §5 révisés, note datée. Cœur : 518 réussis, 14 ignorés.
+**Limites.** Isobathes droites ; ni 2D (128 Mo/km² en tables régulières : autre paramétrage à mesurer), ni marée, ni
+déferlement dissipé, ni diffraction ; déterminisme entre plateformes par construction, non mesuré (A98).
+**Rituel.** Maillons **2** : la décision lève le blocage de S362 et nomme le lot exécutable — les chemins de B jusqu'à la
+scène côtière de Godot —, mais aucun chemin ne consomme encore la capacité (L258) et 2.7 reste partiel. Suivant :
+**R21 à R23 d'abord** ; sinon le rendu, et à deux maillons un lot qui fait avancer une case — 8.6, la vue sous-marine ;
+la côte de Godot vue par B consommerait ADR-196 sans changer de case. R18, R21, R22, R23 attendus.

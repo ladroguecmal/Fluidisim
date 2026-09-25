@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S364 — **en cours**. **Physique : la bathymétrie entre dans B** — *« Continue »*, sans verdict R21 à R23 ;
+Session : S364 — **terminée**. **Physique : la bathymétrie entre dans B** — *« Continue »*, sans verdict R21 à R23 ;
 alternance d'ADR-191 D3 après S363 (rendu). Suite de S362 : la référence existe, reste **l'entrée**, que S362 disait
 devoir être tranchée par un ADR **mesuré** (coût, requêtes de jeu, déterminisme) ; ADR-004 §2.1 et §5 à réviser.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
@@ -93,7 +93,7 @@ Critères, écrits avant le code :
 - [x] **P4** — coût et mémoire ; critères 4 et 5.
 - [x] **P5** — ADR-196, l'entrée de la bathymétrie ; preuve (BATHYMETRIE-S362, section datée S364) ; liste 2.7, file,
   dépendances, feuille de route, index.
-- [>] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `bathymetrie_cote.rs` : `Cote::cuire` (référence de S362 en f64, Simpson à huit
