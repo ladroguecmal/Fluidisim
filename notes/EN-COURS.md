@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S370 — **en cours**. **« Pas de réseau = pas encore »** — la réponse de l'utilisateur à la question de fin de
+Session : S370 — **terminée**. **« Pas de réseau = pas encore »** — la réponse de l'utilisateur à la question de fin de
 S369 (ADR-197 D1 : aucun format réseau, ou pas de multijoueur ?). Session courte de consignation, sans code.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
@@ -76,6 +76,6 @@ le jeton.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — note datée sur ADR-197 D1 ; 10.1 dans `outils/dependances_liste.py` et le registre ; file, feuille de route.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise

@@ -17196,3 +17196,14 @@ portée par `u'·∇U` seul. Sous 2,5 cm, stable, mais le critère de volume est
 **Rituel.** Maillons **0** : 4.21 passe à partiel (3 / 63 / 54) — devient possible une mer de fond dans δ identique à B,
 au bit ; consommé par l'ordre E et la production ; preuve §1. A289 résolue à sa cause, **A320** ouverte (sévérité 3).
 Suivant : par l'alternance, **le rendu** (caméra à demi immergée) ; à la physique suivante, A320 par la forme de Bernoulli.
+
+## S370 — 2026-09-26 — consignation : « pas de réseau = pas encore »
+
+**Entrée.** Réponse de l'utilisateur à la question de fin de S369 (ADR-197 D1 : aucun format réseau, ou pas de
+multijoueur ?) : *« Pas de réseau = pas encore »*.
+**Fait.** Note datée sur [ADR-197](../docs/adr/ADR-197-reponses-du-2026-09-26.md) D1 : **le multijoueur reste dans
+l'ambition** (ADR-127), rien n'est retiré ; comme la seconde cible et le serveur (D7), 10.1 et ses quatorze points en aval
+attendent un fait nouveau de l'utilisateur, et aucun travail de réseau ne commence. Dépendances, file, feuille de route,
+index ; aucun code.
+**Rituel.** Maillons **1** : aucun point de la liste ne change d'état. Suivant : inchangé — par l'alternance, **le rendu**
+(caméra à demi immergée) ; à la physique suivante, A320 par la forme de Bernoulli.
