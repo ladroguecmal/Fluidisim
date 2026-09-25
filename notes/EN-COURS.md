@@ -91,9 +91,9 @@ Critères, écrits avant le code :
 - [x] **P3** — B sur la côte : l'évaluation côtière (phase entière, amplitude, pente, vitesses en profondeur finie) ;
   critères 2 et 3 ; η, pente et vitesse contre la référence.
 - [x] **P4** — coût et mémoire ; critères 4 et 5.
-- [>] **P5** — ADR-196, l'entrée de la bathymétrie ; preuve (BATHYMETRIE-S362, section datée S364) ; liste 2.7, file,
+- [x] **P5** — ADR-196, l'entrée de la bathymétrie ; preuve (BATHYMETRIE-S362, section datée S364) ; liste 2.7, file,
   dépendances, feuille de route, index.
-- [ ] **P6** — rituel.
+- [>] **P6** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 tenu.** `bathymetrie_cote.rs` : `Cote::cuire` (référence de S362 en f64, Simpson à huit
@@ -116,3 +116,7 @@ Critères, écrits avant le code :
   n'entre pas. Mémoire : **258 Ko par km de profil** au pas de 2 m (32 composantes, 16 octets par échantillon), 103 Ko à
   5 m ; un profil vaut pour toute la longueur de côte à isobathes droites. En 2D, des tables régulières du même contenu :
   128 Mo/km² à 2 m, 20,5 à 5 m, 5,1 à 10 m (arithmétique) — la 2D demandera un pas adapté ou un autre paramétrage.
+- **P5.** [ADR-196](../docs/adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md) actée (D1 B porte la bathymétrie
+  par composante ; D2 paramètres cuits, pas de 2 m ; D3 tables depuis λ₀ ; D4 requête O(1)) ; notes datées dans ADR-004 et
+  SPEC-005 §8 ; preuve BATHYMETRIE-S362 §5 et « Reproduire » ; liste 2.7 (reste *partiel*), file, dépendances (donnée de
+  l'outil, table régénérée), feuille de route, index. Cœur : **518 réussis, 14 ignorés**, zéro avertissement.

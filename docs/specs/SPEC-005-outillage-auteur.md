@@ -304,6 +304,11 @@ La dernière ligne est celle qu'on sous-estime. Une houle ne subit la bathymétr
 pente 1:200, elle se situe à **10 km au large**. Modifier un haut-fond invalide donc la réfraction
 sur une dizaine de kilomètres.
 
+> **Note du 2026-09-25 (S364, [ADR-196](../adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md) D3).** À la
+> tolérance d'image, la houle sent encore le fond à `λ/2` : le facteur de levée d'une houle de 10 s y vaut 0,990, une
+> marche de 5 mm sur une houle d'un mètre. Elle cesse de le sentir vers **`h = λ`** (4·10⁻⁵) : la portée ci-dessus
+> double — l'isobathe 100 m pour une houle de 100 m.
+
 **Conséquence sur le partitionnement** : les partitions de cuisson bathymétrique suivent les
 **isobathes**, pas une grille carrée. Une grille carrée découperait les dépendances au mauvais
 endroit et forcerait à recuire des cases entières sans rapport.

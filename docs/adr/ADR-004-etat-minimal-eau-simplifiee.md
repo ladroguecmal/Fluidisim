@@ -167,3 +167,8 @@ tenir un écoulement dirigé dans un modèle spectral, ce qui n'aurait pas fonct
    bathymétrie varie ; prévoir un raffinement côtier.
 4. Modèle de marée : global harmonique (quelques constituantes) vs table précalculée.
    → **S11 : ce point porte la question** ; ADR-011 §7.3 posait la même et y renvoie désormais.
+
+> **Note du 2026-09-25 (S364).** §2.1 — *« les composantes sont les mêmes partout sur la planète »* — et la ligne
+> « Côte / plage » de §5 — *« réfraction et levée calculées dans W »* — sont révisés par
+> [ADR-196](ADR-196-la-bathymetrie-entre-dans-b-par-composante.md) : près des côtes, chaque composante de B est
+> transformée par des tables cuites (phase, amplitude, vecteur d'onde), identiques à l'eau profonde au large.

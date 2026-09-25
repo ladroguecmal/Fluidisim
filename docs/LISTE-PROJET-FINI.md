@@ -102,8 +102,11 @@ pas recopiée ici (L137).
 - [ ] **2.7 Bathymétrie** : hauts-fonds, effet sur les vagues avant la zone physique — *partiel* depuis S362 : la
   **référence** linéaire dans le cœur — profondeur finie, levée, réfraction de Snell sur isobathes droites, phase
   intégrée, profondeur de déferlement (McCowan) —, tenue contre Fenton–McKee et la levée minimale des manuels
-  ([preuve](validation/BATHYMETRIE-S362.md)). Manquent l'entrée dans B ou W (ADR-004 §2.1 à réviser, B2, J5), la
-  diffraction des hauts-fonds isolés, la non-linéarité peu profonde (A234).
+  ([preuve](validation/BATHYMETRIE-S362.md)) ; **S364** : l'entrée **dans B**, par composante, décidée
+  ([ADR-196](adr/ADR-196-la-bathymetrie-entre-dans-b-par-composante.md)) et construite pour les isobathes droites —
+  tables cuites, η à 0,13 mm de la référence, B au bit au large, requête en O(1) (§5). Manquent la bathymétrie 2D et la
+  diffraction des hauts-fonds isolés, la marée, la dissipation au déferlement, la non-linéarité peu profonde (A234), et
+  les autres chemins de B jusqu'à la scène de Godot.
 - [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *absent*.
 - [ ] **2.9 Dérivées du fond pour les couches volumiques**, sous et au-dessus du plan moyen —
   *partiel* : B reçu en eau profonde uniforme (ADR-113, S177 ; ADR-154, S254). Manquent la

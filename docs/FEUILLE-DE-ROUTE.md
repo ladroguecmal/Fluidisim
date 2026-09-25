@@ -361,7 +361,8 @@ l'écume au déferlement (ADR-195) ; **S361** : les caustiques ; **S363** : le c
    (6.4 — **S358** : le pas linéaire sur la carte, solide fixe ; reste la coque qui bouge, ADR-193), l'ordonnanceur et le rang 1 dans l'afficheur (4.2), l'interpolation du rendu à 30 Hz (4.19 — **faite en
    S353**, verdict R18 attendu) ; puis la revue du prix du rang 1 (A319), que 4.5 et 9.9 attendent.
 2. **Le lot 5, une session sur deux** (ADR-184 D1, ADR-190 D4) : 4.16, par A316 — 22 points en aval.
-3. **La bathymétrie** (2.7) — 20 points en aval ; **S362** : la référence, 2.7 partiel ; reste son entrée dans B ou W —, puis W
+3. **La bathymétrie** (2.7) — 20 points en aval ; **S362** : la référence ; **S364** : l'entrée dans B, isobathes droites
+   (ADR-196) ; restent les chemins de B jusqu'à Godot, la 2D, la marée —, puis W
    au-dessus du plan moyen (3.9) et les courants (2.6).
 4. **Le reste du front 0**, par système : couplage (4.7, 4.18), volumique (4.15, 6.5), V (5.2, 5.4, 5.6, 5.7),
    solides (6.1, 6.3), rendu (8.2, 8.3, 8.5, 8.8, 8.9), budget (9.2, 9.3, 9.7, 9.8, 9.13), et 1.8, 7.1, 7.7, 10.8,

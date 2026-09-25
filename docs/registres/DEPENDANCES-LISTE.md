@@ -99,7 +99,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **2.4** Rivières | A | — | 2.6, 2.7 | 2.5, 12.2 | **1** |
 | **2.5** Canaux | A | — | 2.4 | — | **2** |
 | **2.6** Courants macroscopiques à niveau de détail propre | A | le courant macroscopique, du vecteur au champ (ADR-011) | — | 2.3, 2.4, 6.2 | **0** |
-| **2.7** Bathymétrie | A | l'entrée dans B ou W, par un ADR mesuré (la référence : S362) ; hauts-fonds isolés | — | 1.3, 2.3, 2.4, 2.8, 2.9, 3.1, 3.2, 3.4, 3.5, 3.6, 4.14 | **0** |
+| **2.7** Bathymétrie | A | l'entrée dans B, isobathes droites, faite (ADR-196, S364) ; les chemins de B et Godot, puis la 2D et la marée ; hauts-fonds isolés | — | 1.3, 2.3, 2.4, 2.8, 2.9, 3.1, 3.2, 3.4, 3.5, 3.6, 4.14 | **0** |
 | **2.8** Précalcul côtier et météo | A | — | 2.7, 3.6 | 2.2, 5.5, 12.3 | **E** — une source météo : laquelle, sous quelle forme |
 | **2.9** Dérivées du fond pour les couches volumiques | A | — | 2.7 | — | **1** |
 

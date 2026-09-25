@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 19:26 +02:00
+Battement        : 2026-09-25 19:30 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S364 — physique : la bathymétrie entre dans B — tables cuites composante par composante, côte à isobathes droites, mesurées contre la référence de S362 ; ADR-196
 Dernière session : S363 — **rendu 6, le ciel** : la couture et les nuages en blocs effacés (un hachage entier), le ciel de la photographie de référence ; une courbe de Godot calée sur elle, **`TONALITE=photo`** en option — pire écart 0,166 contre 5,8 pour AgX ([preuve](docs/validation/CIEL-S363.md))

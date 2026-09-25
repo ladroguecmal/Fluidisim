@@ -41,7 +41,7 @@ D = {
  "2.4": ("A", "—", ["2.6", "2.7"], None),
  "2.5": ("A", "—", ["2.4"], None),
  "2.6": ("A", "le courant macroscopique, du vecteur au champ (ADR-011)", [], None),
- "2.7": ("A", "l'entrée dans B ou W, par un ADR mesuré (la référence : S362) ; hauts-fonds isolés", [], None),
+ "2.7": ("A", "l'entrée dans B, isobathes droites, faite (ADR-196, S364) ; les chemins de B et Godot, puis la 2D et la marée ; hauts-fonds isolés", [], None),
  "2.8": ("A", "—", ["2.7", "3.6"], "une source météo : laquelle, sous quelle forme"),
  "2.9": ("A", "—", ["2.7"], None),
  "3.1": ("A", "—", ["2.7", "4.12"], None),
