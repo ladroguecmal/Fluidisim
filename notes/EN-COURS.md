@@ -87,7 +87,10 @@ Critères, écrits avant le code :
 - [x] **P2** — la hessienne dans la FFT, son contrôle ; critère 1.
 - [x] **P3** — les caustiques dans le nuanceur du fond ; la bande et la cascade de 32 m données au fond.
 - [x] **P4** — le contrôle contre la solution exacte ; critère 2.
-- [ ] **P5** — la scène, l'énergie ; images R22 ; critères 3 et 4.
+- [>] **P5** — la scène, l'énergie ; images R22 ; critères 3 et 4.
+- [ ] **P5 bis** *(ajoutée en cours, sur l'échec du critère 3)* — la carte de caustiques **directe** : la surface
+  projetée sur le fond triangle par triangle, rapports d'aire additionnés dans une vue orthographique (Wyman) ; même
+  contrôle analytique (critère 2), énergie de la scène à ± 10 % (critère 3) ; le fond la lit.
 - [ ] **P6** — preuve, file, liste, index.
 - [ ] **P7** — rituel.
 
@@ -105,3 +108,8 @@ Critères, écrits avant le code :
 - **P4, critère 2 tenu.** `--controle-caustiques` : a = 5 cm, λ = 4 m, soleil au zénith, H_f = 31,946 m, H = 15,973 m ;
   sortie rouge C/4 et vert fract(10·C). 50 points : pire **2,35 %**, moyenne rendue **1,0016** (exacte 0,9987 sur ces
   points) ; crête 1,712 rendue contre 1,673 exacte à x = 0,80 m.
+- **P5, critère 3 manqué — mesuré.** `--controle-caustiques-scene` (mer complète, soleil de la scène, fond seul,
+  sortie rouge C/20, vert fract(C)) : plongeante, moyenne **2,029**, max 20,3, 2,7 % des pixels au plafond ; proche,
+  **5,553**, 1,4 % au plafond. Attendu : 1 (l'énergie se déplace). **Cause** : la méthode à rebours ne suit qu'un
+  antécédent ; elle ne vaut que devant la première focale — tenue à mi-focale (P4), elle sort de son domaine sur la scène,
+  où la cascade de 32 m a sa focale vers 13 m et le fond descend à 40 m. Remède : la méthode directe (P5 bis).

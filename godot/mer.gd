@@ -75,7 +75,7 @@ func _ready() -> void:
 	add_child(mer)
 	# S359 : `SANS_EAU=1` masque la mer, pour voir le fond seul.
 	mer.visible = OS.get_environment("SANS_EAU") != "1"
-	if "--cote" in args or "--controle-fond" in args or "--controle-caustiques" in args:
+	if "--cote" in args or "--controle-fond" in args or "--controle-caustiques" in args or "--controle-caustiques-scene" in args:
 		add_child(fond())
 	uniformes_fixes()
 	phases(temps)
@@ -116,6 +116,9 @@ func _ready() -> void:
 	if "--controle-caustiques" in args:
 		anime = false
 		controle_caustiques()
+	if "--controle-caustiques-scene" in args:
+		anime = false
+		controle_caustiques_scene()
 
 
 ## Le ciel : depuis S359, celui de l'afficheur lui-même (`ciel.gdshaderinc` — dégradé du « ciel clair » relevé sur la
@@ -583,3 +586,35 @@ static func eclairement_exact(xf: float, a: float, k: float, h: float, n: float)
 		x += pas
 		fa = fb
 	return total
+
+
+## S361 — **l'énergie des caustiques sur la scène** : la mer de `--meilleur` au complet, soleil de la scène, fond vu
+## seul (mer masquée) depuis la pose plongeante ; l'éclairement focalisé C décodé en chaque pixel du fond. Sa moyenne
+## doit rester près de 1 (l'énergie se déplace, elle ne se crée pas) ; la part de pixels au plafond `1/det_min` se publie.
+func controle_caustiques_scene() -> void:
+	var env: Environment = (get_children().filter(func(c): return c is WorldEnvironment)[0] as WorldEnvironment).environment
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	env.glow_enabled = false
+	env.fog_enabled = false
+	mer.visible = false
+	materiau_sol.set_shader_parameter("controle", 2)
+	for nom in ["plongeante", "proche"]:
+		pose(nom)
+		for _i in 12:
+			await RenderingServer.frame_post_draw
+		var image := get_viewport().get_texture().get_image()
+		var somme := 0.0
+		var plafond := 0
+		var n := 0
+		var maximum := 0.0
+		for y in range(0, image.get_height(), 2):
+			for x in range(0, image.get_width(), 2):
+				var col := image.get_pixel(x, y).srgb_to_linear()
+				var c := roundf(20.0 * col.r - col.g) + col.g
+				somme += c
+				maximum = maxf(maximum, c)
+				if c >= 19.5:
+					plafond += 1
+				n += 1
+		print("CONTROLE_CAUSTIQUES_SCENE_S361 pose=%s pixels=%d moyenne=%.4f max=%.2f part_au_plafond=%.5f critere=%s" % [nom, n, somme / n, maximum, float(plafond) / n, "tenu" if absf(somme / n - 1.0) <= 0.1 else "manque"])
+	get_tree().quit()

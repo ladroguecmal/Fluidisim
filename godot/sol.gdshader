@@ -32,7 +32,7 @@ uniform bool caustiques_detail = true;
 uniform float det_min = 0.05;
 uniform float indice = 1.34;
 // Contrôle (S361) : 0 rendu ; 1 l'éclairement focalisé C en sortie directe — rouge C/4, vert fract(10·C), qui le
-// précise au-delà des 8 bits ; `profondeur_controle` > 0 impose H,
+// précise au-delà des 8 bits ; 2 la même sur la scène, rouge C/20, vert fract(C) ; `profondeur_controle` > 0 impose H,
 // `soleil_controle` non nul impose le soleil (coordonnées de B).
 uniform int controle = 0;
 uniform float profondeur_controle = 0.0;
@@ -125,5 +125,8 @@ void fragment() {
     ALBEDO = albedo_sable * variation * gain_eau * (0.6 + 0.4 * max(dot(n_b, soleil), 0.0) * c);
     if (controle == 1) {
         ALBEDO = vec3(c / 4.0, fract(10.0 * c), 0.0);
+    } else if (controle == 2) {
+        // La scène : C jusqu'au plafond 1/det_min ; rouge C/20, vert fract(C).
+        ALBEDO = vec3(c / 20.0, fract(c), 0.0);
     }
 }
