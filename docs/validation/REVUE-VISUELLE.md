@@ -1047,3 +1047,25 @@ Monahan (0,42 % à 7,8 m/s).
 3. **La suite** : les caustiques (demandées), puis le ciel ?
 
 Un mot par question suffit.
+
+## 27. R22 — les caustiques sur le fond, S361
+
+**Demandées en R20** ([preuve](CAUSTIQUES-S361.md)). La lumière du soleil réfractée par la surface — les vagues
+dominantes et la surface fine de 0,5 à 3,5 m — se concentre en un réseau sur le sable : chaque bout de surface est
+projeté sur le fond et y dépose sa lumière (optique géométrique, énergie conservée à 1 % près sur la scène), arrondie
+par le disque du soleil. Exacte à 5 % près contre une solution calculée à part. Couverture : 64 m devant la caméra.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s361/zoom_caustiques_sous_l_eau.png` | le premier plan de la vue côtière proche, agrandi : le réseau sous l'eau |
+| `viewer/captures/s361/godot_proche_cote_12s.png` | la vue côtière proche entière |
+| `viewer/captures/s361/godot_plongeante_cote_12s.png` | la vue plongeante |
+| `viewer/captures/s361/fond_seul_caustiques.png` | le fond seul, la mer masquée : le réseau, et le carré de la carte |
+
+**Les questions :**
+
+1. **Les caustiques** : crédibles ? Trop fortes, trop faibles, trop régulières ?
+2. **La taille des cellules** (un à deux mètres, les vagues de 0,5 à 3,5 m) : juste pour 6 à 15 m de fond ?
+3. **La suite** : le ciel, l'écume (texture, durée), autre chose ?
+
+Un mot par question suffit.

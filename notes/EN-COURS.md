@@ -91,7 +91,7 @@ Critères, écrits avant le code :
 - [x] **P5 bis** *(ajoutée en cours, sur l'échec du critère 3)* — la carte de caustiques **directe** : la surface
   projetée sur le fond triangle par triangle, rapports d'aire additionnés dans une vue orthographique (Wyman) ; même
   contrôle analytique (critère 2), énergie de la scène à ± 10 % (critère 3) ; le fond la lit.
-- [ ] **P6** — preuve, file, liste, index.
+- [x] **P6** — preuve, file, liste, index.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -125,3 +125,7 @@ Critères, écrits avant le code :
   1,5 focale (trois antécédents), médiane 0,93 %, pics singuliers 336 %. **Scène** : moyenne de la carte **1,0079**
   (plongeante), **1,0022** (proche) ; max 192,5 avant le disque solaire ; 3,2 % des texels au-dessus de 5. **Vu** : un
   réseau net sur le fond seul ; à travers l'eau, un miroitement bleuté ; la carte se lit en carré sur le fond seul.
+- **P6.** Preuve [CAUSTIQUES-S361](../docs/validation/CAUSTIQUES-S361.md) ; R22 (REVUE-VISUELLE §27), quatre images
+  envoyées — `viewer/captures/s361`, zoom `8abb8ddb…`, côte proche `63b9da05…`, plongeante `bbb3b1f4…`, fond seul
+  `7fe1f707…`. Liste 8.5 retouchée sans changer de case ; dépendances, file, feuille de route, index. `--check` propre.
+  Pas d'ADR : un choix de méthode de rendu, tranché par la mesure et dit dans la preuve.

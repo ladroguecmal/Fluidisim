@@ -356,8 +356,9 @@ pas recopiée ici (L137).
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *partiel* depuis S359 : dans Godot, la
   colonne d'eau — fond vu par réfraction de Snell en espace écran, absorbé et voilé selon la profondeur (Maritorena,
   eau pure de Pope & Fry), transmission à 0,005 du modèle —, et la réflexion de l'afficheur portée
-  ([preuve](validation/EPAISSEUR-EAU-S359.md), ADR-194). Manquent les caustiques, les particules, les eaux chargées,
-  et le verdict R20.
+  ([preuve](validation/EPAISSEUR-EAU-S359.md), ADR-194) ; **S361** : les caustiques sur le fond, méthode directe, exactes
+  à 5 % et l'énergie à 1 % ([preuve](validation/CAUSTIQUES-S361.md)). Manquent les particules, les eaux chargées, les
+  caustiques sur les objets et dans l'eau, et les verdicts R21–R22.
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *absent*.
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *partiel* : **S275, ADR-168** —
   bande δ couplée sous houle à crêtes longues, précalculée hors budget et rejouée dans `viewer/`
