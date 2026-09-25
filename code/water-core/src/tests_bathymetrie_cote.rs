@@ -1,0 +1,140 @@
+//! S364 — la bathymétrie entre dans B : les tables cuites contre la référence de S362 (critères écrits avant le code,
+//! EN-COURS S364).
+use super::*;
+use crate::background::Component;
+use crate::bathymetrie::{profondeur_de_deferlement, transformer};
+use crate::host::{AllocStats, Allocator, JobSystem, Sink};
+use crate::phase::freq_hz_to_q32;
+
+struct Hote;
+impl Allocator for Hote {
+    fn alloc_persistent(&mut self, _: usize) -> Result<usize, AllocError> { Ok(0) }
+    fn seal(&mut self) {}
+    fn is_sealed(&self) -> bool { false }
+    fn stats(&self) -> AllocStats { AllocStats::default() }
+}
+impl Sink for Hote {
+    fn warn(&self, _: &str) {}
+    fn metric(&self, _: &str, _: f64) {}
+}
+impl JobSystem for Hote {
+    fn worker_count(&self) -> u32 { 1 }
+    fn parallel_reduce_ordered_f64(&self, n: usize, _: usize, reduce: &dyn Fn(usize, usize) -> f64,
+        merge: &dyn Fn(f64, f64) -> f64, init: f64) -> f64 { merge(init, reduce(0, n)) }
+}
+
+const G: f64 = 9.81;
+/// La plage des critères : 1/50, de 80 m (la houle de 10 s n'y sent presque pas le fond) à 2 m (au large du
+/// déferlement de la houle d'un mètre, 1,69 m à 30° — S362).
+const LONGUEUR: f64 = 3900.0;
+fn plage(y: f64) -> f64 { 80.0 - y / 50.0 }
+
+/// Une composante : période `periode`, amplitude `a`, direction à `theta0` de la normale `+y` (vers la côte).
+fn composante(periode: f64, a: f32, theta0: f64, phase0: u32) -> Component {
+    let hz = 1.0 / periode;
+    let omega = core::f64::consts::TAU * hz;
+    let k = omega * omega / G;
+    Component {
+        amplitude: a,
+        k_turns_per_m: (k / core::f64::consts::TAU) as f32,
+        dir: [theta0.sin() as f32, theta0.cos() as f32],
+        freq_q32: freq_hz_to_q32(hz),
+        phase0: PhaseQ32(phase0),
+    }
+}
+
+fn fond(composantes: &[Component]) -> Background {
+    let mut alloc = Hote;
+    let services = Hote;
+    let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+    Background::from_components(&mut host, composantes, WorldPos::from_metres(0.0, 0.0, 0.0), G as f32).unwrap()
+}
+
+fn cuire(b: &Background, pas: f64) -> Cote {
+    let mut alloc = Hote;
+    let services = Hote;
+    let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+    Cote::cuire(&mut host, b, [0.0, 1.0], 0.0, LONGUEUR, pas, &plage).unwrap()
+}
+
+/// La référence de la correction de phase, rad, aux sondes `ys` croissantes : `∫₀^y (k_y − k_y0) dy'` par Simpson à
+/// seize sous-intervalles par mètre — indépendante du pas des tables.
+fn correction_reference(omega: f64, theta0: f64, ys: &[f64]) -> Vec<f64> {
+    let ky0 = omega * omega / G * theta0.cos();
+    let f = |y: f64| transformer(omega, theta0, 1.0, plage(y), G).unwrap().ky - ky0;
+    let mut sortie = Vec::with_capacity(ys.len());
+    let (mut y, mut s) = (0.0f64, 0.0f64);
+    for &cible in ys {
+        while y < cible {
+            let fin = (y + 1.0).min(cible);
+            let d = (fin - y) / 16.0;
+            let mut somme = 0.0;
+            for i in 0..=16 {
+                let poids = if i == 0 || i == 16 { 1.0 } else if i % 2 == 1 { 4.0 } else { 2.0 };
+                somme += poids * f(y + i as f64 * d);
+            }
+            s += somme * d / 3.0;
+            y = fin;
+        }
+        sortie.push(s);
+    }
+    sortie
+}
+
+/// **Critère 1** — les tables interpolées contre la référence, houle d'un mètre (a₀ = 0,5 m), 10 s, 30°, plage 1/50,
+/// jusqu'à 2 m de fond : erreur de hauteur `a₀·|ΔK| + a·|Δφ|` ≤ **3 mm** (tolérance d'image, S201) au pas de 2 m, facteur
+/// d'amplitude à 1 %. Sondes au quart et au milieu de chaque pas, là où l'interpolation se trompe le plus.
+/// **Prédiction** : `Δ²/8·dk_y/dy` — 0,4 mm à 2 m, 2 mm à 5 m.
+#[test]
+fn tables_contre_la_reference_s364() {
+    let (periode, a0, theta0) = (10.0, 0.5f32, 30f64.to_radians());
+    let b = fond(&[composante(periode, a0, theta0, 0)]);
+    let omega = core::f64::consts::TAU / periode;
+    // La composante est à −30° de la normale dans le repère de la côte (`t = (−1, 0)`) : même transformation.
+    let theta_cote = -theta0;
+    let mut au_pas_de_2 = f64::NAN;
+    for pas in [1.0, 2.0, 5.0, 10.0] {
+        let cote = cuire(&b, pas);
+        let n = cote.echantillons().0;
+        let ys: Vec<f64> = (0..n - 1).flat_map(|j| [(j as f64 + 0.25) * pas, (j as f64 + 0.5) * pas]).collect();
+        let reference = correction_reference(omega, theta_cote, &ys);
+        let (mut pire_h, mut pire_phase, mut pire_k) = (0f64, 0f64, 0f64);
+        for (y, s_ref) in ys.iter().zip(&reference) {
+            let (correction, facteur, _, _) = cote.interpoler(0, *y as f32).unwrap();
+            let e = transformer(omega, theta_cote, 1.0, plage(*y), G).unwrap();
+            let tours = correction.0 as f64 / 4_294_967_296.0;
+            let ref_tours = (s_ref / core::f64::consts::TAU).rem_euclid(1.0);
+            let mut dphi = (tours - ref_tours).abs();
+            dphi = dphi.min(1.0 - dphi) * core::f64::consts::TAU;
+            let dk = (facteur as f64 - e.amplitude).abs();
+            let h = a0 as f64 * dk + a0 as f64 * e.amplitude * dphi;
+            pire_h = pire_h.max(h);
+            pire_phase = pire_phase.max(dphi);
+            pire_k = pire_k.max(dk / e.amplitude);
+        }
+        let bord = cote.interpoler(0, 0.0).unwrap().1 - 1.0;
+        println!("S364 tables pas={pas} echantillons={n} octets={} pire_hauteur_mm={:.4} pire_phase_rad={:.2e} \
+            pire_facteur_rel={:.2e} facteur_au_large_moins_un={bord:.2e}", cote.octets(), pire_h * 1e3, pire_phase,
+            pire_k);
+        if pas == 2.0 {
+            au_pas_de_2 = pire_h;
+            assert!(pire_k <= 0.01, "{pire_k}");
+        }
+    }
+    // **Le bord du large.** La plage commence à λ₀/2 = 78 m — le « fond qui cesse de se sentir » des manuels et de
+    // SPEC-005 §8 — et le facteur y vaut déjà 0,991 : une marche de 4,5 mm sur cette houle, B non transformé au large.
+    // Prédiction, écrite avant la mesure : un bord à λ₀ (156 m) ramène la marche sous 10⁻⁴ (`K_s − 1 ≈ −4·10⁻⁵`).
+    let lambda0 = G * periode * periode / core::f64::consts::TAU;
+    for h0 in [0.5 * lambda0, lambda0] {
+        let e = transformer(omega, theta_cote, 1.0, h0, G).unwrap();
+        println!("S364 bord h0={h0:.1} facteur_moins_un={:.2e} marche_mm={:.3}", e.amplitude - 1.0,
+            (e.amplitude - 1.0).abs() * a0 as f64 * 1e3);
+        if h0 == lambda0 {
+            assert!((e.amplitude - 1.0).abs() <= 1e-4, "{}", e.amplitude);
+        }
+    }
+    let h_b = profondeur_de_deferlement(omega, theta_cote, 1.0, G, 80.0, 0.5).unwrap();
+    println!("S364 tables deferlement h_b={h_b:.3} (la plage s'arrête à 2 m)");
+    assert!(h_b < 2.0);
+    assert!(au_pas_de_2 <= 3e-3, "{au_pas_de_2}");
+}

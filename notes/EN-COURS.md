@@ -86,9 +86,9 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [>] **P2** — les tables d'une côte à isobathes droites (`bathymetrie_cote.rs`) : cuisson depuis la référence,
+- [x] **P2** — les tables d'une côte à isobathes droites (`bathymetrie_cote.rs`) : cuisson depuis la référence,
   interpolation ; critère 1, balayage du pas.
-- [ ] **P3** — B sur la côte : l'évaluation côtière (phase entière, amplitude, pente, vitesses en profondeur finie) ;
+- [>] **P3** — B sur la côte : l'évaluation côtière (phase entière, amplitude, pente, vitesses en profondeur finie) ;
   critères 2 et 3 ; η, pente et vitesse contre la référence.
 - [ ] **P4** — coût et mémoire ; critères 4 et 5.
 - [ ] **P5** — ADR-196, l'entrée de la bathymétrie ; preuve (BATHYMETRIE-S362, section datée S364) ; liste 2.7, file,
@@ -96,3 +96,11 @@ Critères, écrits avant le code :
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** `bathymetrie_cote.rs` : `Cote::cuire` (référence de S362 en f64, Simpson à huit
+  sous-intervalles par pas), tables de 16 octets par composante et par échantillon ; `interpoler` : phase entière (différence
+  des deux échantillons × fraction Q16), le reste linéaire en f32. Houle d'1 m, 10 s, 30°, plage 1/50 de 80 à 2 m, sondes
+  au quart et au milieu des pas : **pire hauteur 0,054 / 0,226 / 1,39 / 5,35 mm** aux pas de 1 / 2 / 5 / 10 m — en `Δ²`,
+  sous la prédiction (0,4 et 2 mm) ; facteur à 1,5e-5. **Trouvé : le bord du large.** À λ₀/2 (78 m), le « fond qui cesse
+  de se sentir » des manuels et de SPEC-005 §8, le facteur vaut encore **0,990 : une marche de 5 mm** entre B et la côte.
+  Prédiction écrite avant la mesure, tenue : à λ₀ (156 m), `K − 1` = **−4,15e-5** (prédit −4,4e-5), marche 0,02 mm. Le
+  profil doit commencer à λ₀ de la plus longue composante, pas à λ₀/2. Déferlement de cette houle : 1,69 m.
