@@ -92,7 +92,7 @@ Critères, écrits avant le code :
 - [x] **P2** — la mesure contre la photographie ; critère 1.
 - [x] **P3** — la couture : diagnostic, hachage entier ; critère 2.
 - [x] **P4** — le ciel calé sur la photographie ; critère 3.
-- [ ] **P4 bis** *(ajoutée en cours, sur la mesure de P2)* — la courbe de tonalité de Godot contre les quatre cibles de
+- [x] **P4 bis** *(ajoutée en cours, sur la mesure de P2)* — la courbe de tonalité de Godot contre les quatre cibles de
   la photographie : balayage (courbe, exposition, blanc) à la pose proche, critère de S308 — le pire écart
   logarithmique ; la meilleure vérifiée aux poses rasante et référence ; **une option**, pas le défaut : la couleur a
   été jugée « parfaite » en AgX (R20). *Découpée à la reprise :*
@@ -101,9 +101,9 @@ Critères, écrits avant le code :
     sa source** (`tonemap.glsl`, exposition, blanc, écrêtage, sRGB sur huit bits), et mesure les quatre grandeurs.
     **Reçu si** : sa mesure redonne celle de `cible_image.py` sur une même image (1e-4 relatif) ; et son modèle redonne
     Godot lui-même, rendu sans halo en AgX et dans une seconde courbe, à **2 %** près sur les quatre grandeurs.
-  - [>] **P4 bis b** — le balayage à la pose proche (courbe × exposition × blanc, pire écart logarithmique) ; la
+  - [x] **P4 bis b** — le balayage à la pose proche (courbe × exposition × blanc, pire écart logarithmique) ; la
     meilleure rendue par Godot aux trois poses, halo compris ; l'option `TONALITE=photo`, pas le défaut.
-- [ ] **P5** — images R23, preuve, file, index ; critère 4.
+- [>] **P5** — images R23, preuve, file, index ; critère 4.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -136,3 +136,19 @@ Critères, écrits avant le code :
   **jamais plus d'un octet d'écart** (moyenne 0,028 à 0,033) ; trois grandeurs à **0,16 %** au pire ; fraction claire à
   2 pixels près en AgX (142 / 140), 156 sur 108 590 en ACES. Premier regard : ACES 0,8 / 2 donne 0,2029 · 25,63 · 0,647 ·
   0,172 — creux et dynamique à la photographie, contraste et fraction claire au-dessus.
+- **P4 bis b, tenu, avec un critère ajouté et dit.** `balayer --horizon=223` (règle de S308, A301), 1 772 essais. Le
+  critère de S308 seul : **ACES** e = 1,10, w = 0,46, pire écart **0,133** — mais **27 % de la mer écrêtée**. Sous la
+  contrainte « ≤ 1 % écrêtée » (ajoutée après le premier balayage, où le gagnant en écrêtait 18 %) : ACES e = 1,151,
+  w = 5,19, **0,143** — l'écrêtage n'achetait presque rien. Meilleures des autres : AgX e = 0,244 **0,345** (la scène
+  entière assombrie), Reinhard 0,352, Filmic 0,383, linéaire 1,01. **La teinte contredit la luminance** : B/G des
+  creux (photographie 5,54, S308 P2) — AgX **5,56**, ACES **18,1** (3,3 fois trop bleu, le « bleu saturé » de R14) ;
+  crêtes 1,2 à 1,7 partout contre 2,89 (la scène, pas la courbe). Ajustements de Godot (`apply_bcs`, après le sRGB)
+  modélisés, **exacts à un octet** (AgX + contraste 1,4 + saturation 0,8 ; ACES + saturation 0,5). `compromis`, pire des
+  cinq (quatre de luminance + B/G des creux), 501 essais : **ACES e = 0,983, w = 4, saturation 0,5 — 0,166** (teinte
+  4,88, rien d'écrêté) ; AgX + contraste 1,1 + saturation 0,8 : 0,322. **`TONALITE=photo`** = ce réglage. **Godot, halo
+  compris** (le halo est inerte ici : seuil 1,0) — proche AgX / photo : 0,3100 → **0,1892** · 9,36 → **22,26** · 0,344
+  → **0,537** · 0,0002 → **0,0799** ; pire 5,81 → **0,166** ; B/G creux 5,56 → 4,90. Rasante : 0,283 → 0,153 · 6,93 →
+  15,49 · 0,324 → 0,444 · fraction claire 0 et 0 ; référence : 0,257 → 0,145 · 9,10 → 21,51 · 0,270 → 0,390 · 0,0007 →
+  0,0018. Hors de la pose calée, la fraction claire reste nulle : elle tient à la scène (soleil, ciel reflété), pas à
+  la courbe ; p05 y dépasse la cible (0,15 pour 0,19). **Vu** : premier plan plus profond, creux plus denses, ciel plus
+  pâle (la saturation baisse aussi le ciel). Un rendu Godot est resté bloqué une fois (fenêtre) : `timeout 90` depuis.

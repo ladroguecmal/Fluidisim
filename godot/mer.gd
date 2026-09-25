@@ -163,10 +163,24 @@ func environnement() -> void:
 			"aces": Environment.TONE_MAPPER_ACES, "agx": Environment.TONE_MAPPER_AGX}
 	if courbes.has(OS.get_environment("TONALITE")):
 		env.tonemap_mode = courbes[OS.get_environment("TONALITE")]
+	# S363 P4 bis — **`TONALITE=photo`**, une option, pas le défaut : la courbe calée sur la photographie de référence
+	# (S308) par `outils/tonalite_godot.py compromis` — les quatre grandeurs de luminance et la teinte des creux
+	# ensemble, pose proche : ACES, blanc 4 (rien d'écrêté), saturation 0,5 (ACES seul rend les creux 3,3 fois trop bleus).
+	if OS.get_environment("TONALITE") == "photo":
+		env.tonemap_mode = Environment.TONE_MAPPER_ACES
+		env.tonemap_exposure = 0.983
+		env.tonemap_white = 4.0
+		env.adjustment_enabled = true
+		env.adjustment_saturation = 0.5
 	if OS.get_environment("EXPOSITION") != "":
 		env.tonemap_exposure = float(OS.get_environment("EXPOSITION"))
 	if OS.get_environment("BLANC") != "":
 		env.tonemap_white = float(OS.get_environment("BLANC"))
+	# Et les ajustements, appliqués par Godot après le passage en sRGB : `CONTRASTE`, `SATURATION`.
+	if OS.get_environment("CONTRASTE") != "" or OS.get_environment("SATURATION") != "":
+		env.adjustment_enabled = true
+		env.adjustment_contrast = float(OS.get_environment("CONTRASTE")) if OS.get_environment("CONTRASTE") != "" else 1.0
+		env.adjustment_saturation = float(OS.get_environment("SATURATION")) if OS.get_environment("SATURATION") != "" else 1.0
 	# S357 P3 : sans reflets à l'écran — en rasant, leurs rayons retombent sur l'eau elle-même et remplacent le ciel
 	# clair de l'horizon par sa propre couleur sombre. `REFLETS_ECRAN=1` les rallume, pour comparer.
 	env.ssr_enabled = OS.get_environment("REFLETS_ECRAN") == "1"
