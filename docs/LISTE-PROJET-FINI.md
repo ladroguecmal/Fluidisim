@@ -391,9 +391,10 @@ pas recopiée ici (L137).
   Optimisations S266/S267 reçues. **R11 reçu S303** (δ sans artefact, raccord invisible) ;
   **R12/R13 annulées** — leurs images tournaient options acceptées éteintes (L349) ; **R14 reçu
   S308**, et sa troisième image devient la **référence interne provisoire** de l'océan (ADR-178
-  D2). L'écart à une photographie réelle est désormais **chiffré** (`outils/cible_image.py`) et ce
-  qu'il en reste est **spatial**, hors de portée de l'optique (L351,
-  [confrontation](registres/TROIS-SYSTEMES-S308.md) §1). **R15** (S333–S338) : le bateau qui se pose
+  D2). L'écart à une photographie réelle est désormais **chiffré** (`outils/cible_image.py`) ; dans l'afficheur, ce
+  qu'il en restait était **spatial** (L351, [confrontation](registres/TROIS-SYSTEMES-S308.md) §1) ; **S363, dans
+  Godot**, la surface fine de S360 le comble, et une courbe (`TONALITE=photo`) tient les quatre grandeurs et la teinte
+  des creux à 0,166 près en pose proche, contre 5,8 pour AgX ([preuve](validation/CIEL-S363.md)) ; verdict R23 attendu. **R15** (S333–S338) : le bateau qui se pose
   est juste, la coupure au bord de δ levée — sans référence réelle, aucune trouvée ; **R16** (S340) :
   « Tout parrait bon visuellement », une onde de δ sur la mer de R14 ; **R17** (S348) : « Continue je
   valide », δ à 30 Hz contre 60 Hz ([revue](validation/REVUE-VISUELLE.md) §20–22). Autres poses, animation et scénarios

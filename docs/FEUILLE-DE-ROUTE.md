@@ -353,7 +353,7 @@ mêmes dépendances, en plus gros.
 **Depuis S355 ([ADR-191](adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md), décision de l'utilisateur), une session de rendu alterne avec une session de physique** ; **depuis S356 ([ADR-192](adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md)),
 le rendu de l'eau se fait dans Godot 4** — la mer de B rendue dans Godot (S357 ; R19 : *« pas du tout crédible »*) ; **S359** :
 la lumière de l'eau portée de l'afficheur et la colonne d'eau, 8.5 partiel (ADR-194) ; **S360** : la surface fine par FFT,
-l'écume au déferlement (ADR-195) ; **S361** : les caustiques (R21, R22 attendus) ; puis le ciel, 8.6. L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
+l'écume au déferlement (ADR-195) ; **S361** : les caustiques ; **S363** : le ciel de la photographie, une courbe calée sur elle en option (R21 à R23 attendus) ; puis 8.6. L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
 
 **Front 0 — 34 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
 

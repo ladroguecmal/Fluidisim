@@ -103,11 +103,11 @@ Critères, écrits avant le code :
     Godot lui-même, rendu sans halo en AgX et dans une seconde courbe, à **2 %** près sur les quatre grandeurs.
   - [x] **P4 bis b** — le balayage à la pose proche (courbe × exposition × blanc, pire écart logarithmique) ; la
     meilleure rendue par Godot aux trois poses, halo compris ; l'option `TONALITE=photo`, pas le défaut.
-- [ ] **P5** — images R23, preuve, file, index ; critère 4. *Découpée :*
+- [x] **P5** — images R23, preuve, file, index ; critère 4. *Découpée :*
   - [x] **P5 a** — les images de R23 (`viewer/captures/s363/`, locales) : la couture avant / après, le ciel avant / après,
     AgX contre `TONALITE=photo` ; REVUE-VISUELLE §28, ses questions.
-  - [>] **P5 b** — la preuve `CIEL-S363` ouverte par « Reproduire » ; file active, index, liste si un point bouge.
-- [ ] **P6** — rituel.
+  - [x] **P5 b** — la preuve `CIEL-S363` ouverte par « Reproduire » ; file active, index, liste si un point bouge.
+- [>] **P6** — rituel.
 
 ### Notes de reprise
 - **P2, critère 1 : prédiction tenue en proche et rasante.** Captures converties en PPM (hors dépôt),
@@ -158,3 +158,5 @@ Critères, écrits avant le code :
 - **P5 a.** Onze images dans `viewer/captures/s363/` (composées hors dépôt). **Vu en composant** : l'agrandissement
   d'avant montre, en plus de la couture, des **marches rectangulaires dans les nuages** — les « nuages en blocs » de
   S359 ; entre les deux rendus seul le hachage change (`CIEL=clair` des deux côtés) : **même cause, même remède**.
+- **P5 b.** Preuve [CIEL-S363](../docs/validation/CIEL-S363.md) ; file (rendu Godot, A299), liste 8.10 (le constat « spatial »
+  de S308 dépassé dans Godot, reste *partiel*), feuille de route, index. Aucun point de la liste ne change d'état.
