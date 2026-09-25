@@ -62,101 +62,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S363 — **terminée**. **Rendu 6 : le ciel** — *« Tu as raison sur le ciel, il n'aide pas au reflets et limite la
-qualité du rendue final »* (R20) ; alternance d'ADR-191 D3 après S362.
-**Coupée après P4** (13:36) ; **reprise à chaud à 18:34** sur *« Reprends le projet »* : arbre propre, une seule copie,
-rien à compléter ni à annuler ; P4 bis découpée en deux avant d'y toucher.
+Session : S364 — **en cours**. **Physique : la bathymétrie entre dans B** — *« Continue »*, sans verdict R21 à R23 ;
+alternance d'ADR-191 D3 après S363 (rendu). Suite de S362 : la référence existe, reste **l'entrée**, que S362 disait
+devoir être tranchée par un ADR **mesuré** (coût, requêtes de jeu, déterminisme) ; ADR-004 §2.1 et §5 à réviser.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
-Entrée — deux défauts vus en S359 : une **couture verticale au centre du ciel de Godot**, et des nuages en blocs. Et un
-fait de S308 : le « ciel clair » de `--meilleur` est **plat** (sommet à 0,81 de l'horizon, la photographie de
-référence de l'utilisateur à 0,36) ; S308 en avait tiré un ciel calé sur elle (`ciel_mesure`, extinction par canal), jamais
-passé dans `--meilleur`. **La cible d'image** de S308 (`outils/cible_image.py`, valeurs de la photographie dans
-`outils/courbe_tonalite.py`) : p05/p50 0,1926 ; dynamique p95/p05 23,70 ; **contraste local 0,4549** ; fraction claire
-0,07415. L'afficheur plafonnait à 0,31–0,32 de contraste local, et S308 disait le manque « dans la mer ».
+
+**La voie à mesurer.** W naît d'événements et ne porte pas une mer permanente ; relayer B au large par W près des
+côtes mélangerait deux réalisations (ADR-004 §3). Candidat : **B transformé composante par composante** par des
+**tables cuites** le long du profil — correction de phase (entière, Q32), facteur d'amplitude `K_s·K_r`, nombre
+d'onde transversal, `coth kh` des vitesses —, tirées de la référence de S362 : le précalcul d'ADR-013, mais de
+**paramètres**, pas de réalisations. Au large, les tables valent zéro et un : **B inchangé au bit**. Premier cas : côte
+à isobathes droites (celui que la référence sait juger).
 
 Critères, écrits avant le code :
-1. **La mesure d'abord** : les quatre grandeurs comparables sur Godot tel qu'il est (poses de R14, S360–S361) et sur
-   l'afficheur de R19, contre la photographie ; **prédiction** — la surface fine de S360 relève le contraste local
-   au-dessus de celui de l'afficheur.
-2. **La couture** : hypothèse — le hachage `fract(sin(x)·43758)` avec x ≈ 10⁴ est hypersensible à l'arrondi, et Godot
-   compile `i + (1, 0)` autrement de part et d'autre de la colonne centrale. Remède : un hachage entier. Mesure : saut de
-   luminance du ciel entre les colonnes 639 et 640, rapporté aux sauts voisins ; après, du même ordre qu'eux (≤ 2 fois
-   leur médiane).
-3. **Le ciel calé** : `ciel_mesure` de S308 porté dans `ciel.gdshaderinc` (une source, ciel et reflets) ; les quatre
-   grandeurs remesurées ; ne pas dégrader le rapport mer / ciel sous l'horizon de plus de 15 % sans le dire.
-4. **Images R23** ; preuve ouverte par « Reproduire », file, index.
+1. **Précision** contre la référence (f64), houle d'1 m, 10 s, 30°, plage 1/50, jusqu'au déferlement : phase × amplitude
+   ≤ **3 mm** (tolérance d'image, S201), facteur d'amplitude à 1 %. Balayage du pas des tables. **Prédiction** :
+   l'erreur d'interpolation de la phase vaut `Δ²/8·dk_y/dy` ; 2 m tiennent (≈ 0,4 mm), 5 m à la limite (≈ 2 mm).
+2. **Continuité** : au large du profil, l'évaluation côtière est **identique au bit** à celle de B.
+3. **Déterminisme** : phases en entiers, deux passes identiques au bit (hash).
+4. **Coût** par composante et par échantillon contre B (48 ns en B1) ; indépendant de la taille des tables.
+5. **Mémoire** par composante, par kilomètre de profil — et ce qu'en coûterait une bathymétrie 2D.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la mesure contre la photographie ; critère 1.
-- [x] **P3** — la couture : diagnostic, hachage entier ; critère 2.
-- [x] **P4** — le ciel calé sur la photographie ; critère 3.
-- [x] **P4 bis** *(ajoutée en cours, sur la mesure de P2)* — la courbe de tonalité de Godot contre les quatre cibles de
-  la photographie : balayage (courbe, exposition, blanc) à la pose proche, critère de S308 — le pire écart
-  logarithmique ; la meilleure vérifiée aux poses rasante et référence ; **une option**, pas le défaut : la couleur a
-  été jugée « parfaite » en AgX (R20). *Découpée à la reprise :*
-  - [x] **P4 bis a** — l'instrument. Godot rend la pose en HDR linéaire (`HDR=1` : tampon flottant, sans courbe ni
-    halo, fichier PFM hors dépôt) ; `outils/tonalite_godot.py` applique les cinq courbes de Godot 4.4.1, **recopiées de
-    sa source** (`tonemap.glsl`, exposition, blanc, écrêtage, sRGB sur huit bits), et mesure les quatre grandeurs.
-    **Reçu si** : sa mesure redonne celle de `cible_image.py` sur une même image (1e-4 relatif) ; et son modèle redonne
-    Godot lui-même, rendu sans halo en AgX et dans une seconde courbe, à **2 %** près sur les quatre grandeurs.
-  - [x] **P4 bis b** — le balayage à la pose proche (courbe × exposition × blanc, pire écart logarithmique) ; la
-    meilleure rendue par Godot aux trois poses, halo compris ; l'option `TONALITE=photo`, pas le défaut.
-- [x] **P5** — images R23, preuve, file, index ; critère 4. *Découpée :*
-  - [x] **P5 a** — les images de R23 (`viewer/captures/s363/`, locales) : la couture avant / après, le ciel avant / après,
-    AgX contre `TONALITE=photo` ; REVUE-VISUELLE §28, ses questions.
-  - [x] **P5 b** — la preuve `CIEL-S363` ouverte par « Reproduire » ; file active, index, liste si un point bouge.
-- [x] **P6** — rituel.
+- [>] **P2** — les tables d'une côte à isobathes droites (`bathymetrie_cote.rs`) : cuisson depuis la référence,
+  interpolation ; critère 1, balayage du pas.
+- [ ] **P3** — B sur la côte : l'évaluation côtière (phase entière, amplitude, pente, vitesses en profondeur finie) ;
+  critères 2 et 3 ; η, pente et vitesse contre la référence.
+- [ ] **P4** — coût et mémoire ; critères 4 et 5.
+- [ ] **P5** — ADR-196, l'entrée de la bathymétrie ; preuve (BATHYMETRIE-S362, section datée S364) ; liste 2.7, file,
+  dépendances, feuille de route, index.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 : prédiction tenue en proche et rasante.** Captures converties en PPM (hors dépôt),
-  `outils/cible_image.py`. p05/p50 · dynamique p95/p05 · **contraste local** · fraction claire — photographie : 0,1926 ·
-  23,70 · **0,4549** · 0,07415. Afficheur (R19) proche 0,2735 · 13,98 · **0,2699** · 0,0366 ; rasante 0,2717 · 8,10 ·
-  **0,2473** · 0,0004. Godot AgX (tel qu'affiché) proche 0,3201 · 9,83 · **0,3647** · 0,0001 ; rasante 0,2907 · 7,01 ·
-  **0,3504** · 0 ; référence 0,2576 · 9,45 · **0,2722** · 0. Godot linéaire proche 0,3067 · 14,95 · **0,5388** · 0,0986 ;
-  rasante 0,2603 · 10,90 · 0,5078 · 0,0014 ; référence 0,2359 · 14,44 · 0,3919 · 0,0110. **Lecture** : la surface fine
-  relève le contraste local (0,27 → 0,36) ; ce qui s'écarte le plus est la **dynamique** et la **fraction claire** — AgX
-  écrase les hautes lumières que la photographie garde. Horizon bien détecté partout (chute faible en AgX, position
-  juste).
-- **P3, critère 2 tenu.** `outils/couture_ciel.py` (rangées 5 à 150, saut moyen de luminance entre colonnes voisines,
-  rapport à la médiane de 560 à 720). **Avant** : Godot linéaire proche, saut au centre **10,73** fois la médiane — le
-  plus grand de l'image, colonne 639 ; AgX 10,04 ; afficheur 0,09. Hachage entier PCG (Jarzynski et Olano 2020) dans
-  `ciel.gdshaderinc`, repris par le sable. **Après** : **0,03** (proche) et 0,04 (référence) ; le plus grand saut ailleurs
-  (colonnes 1 193, 1 184). Rapport mer / ciel sous l'horizon 0,719 (0,711 avant). Hypothèse de cause non démontrée au
-  niveau du binaire compilé ; le remède la supprime.
-- **P4, critère 3 tenu.** `ciel.gdshaderinc` : `ciel_mesure` (défaut vrai ; `CIEL=clair` rend l'ancien, ciel et
-  reflets ensemble), `H = (0,311 ; 0,554 ; 0,795)`, `F = (0,139 ; 0,327 ; 0,722)`, haut du cadre 25°. AgX : proche
-  0,3100 · 9,36 · **0,3438** · 0,0002 ; rasante 0,2832 · 6,93 · 0,3235 · 0 ; référence 0,2573 · 9,10 · 0,2697 · 0,0007.
-  Linéaire : proche 0,2859 · 12,94 · 0,4464 · 0,0251 ; rasante 0,2591 · 9,38 · 0,4166 · 0 ; référence 0,2342 · 12,59 ·
-  0,3442 · 0,0029. Contraste un peu plus bas qu'avec le ciel clair (0,365 → 0,344) ; horizon **0,692 / 0,661** (−3,8 %,
-  −2,4 %). **Vu** : bleu profond au zénith, blanchi vers l'horizon, nuages naturels ; l'ancien était un aplat grisé.
-- **P4 bis a, tenu.** `HDR=1` : `use_hdr_2d` sur la fenêtre, image convertie en RGBF, PFM ; quatre secondes par rendu ;
-  proche : luminance de mer au plus 1,15, 1,1e-5 des pixels au-dessus de 1 — la capture n'écrête rien. `mer.gd` accepte
-  `TONALITE=reinhard|filmic|aces|agx`, `EXPOSITION`, `BLANC`, `HALO`, `POSES`. **`verifier`** : sur cinq rendus, les quatre
-  grandeurs **identiques à l'impression** de `cible_image.py` (2 à 5 décimales), horizon 223 partout. **`comparer`**, six
-  réglages rendus par Godot sans halo (linéaire ; AgX e = 1 et 2 ; Reinhard e = 2, w = 4 ; Filmic 1,5 / 6 ; ACES 0,8 / 2) :
-  **jamais plus d'un octet d'écart** (moyenne 0,028 à 0,033) ; trois grandeurs à **0,16 %** au pire ; fraction claire à
-  2 pixels près en AgX (142 / 140), 156 sur 108 590 en ACES. Premier regard : ACES 0,8 / 2 donne 0,2029 · 25,63 · 0,647 ·
-  0,172 — creux et dynamique à la photographie, contraste et fraction claire au-dessus.
-- **P4 bis b, tenu, avec un critère ajouté et dit.** `balayer --horizon=223` (règle de S308, A301), 1 772 essais. Le
-  critère de S308 seul : **ACES** e = 1,10, w = 0,46, pire écart **0,133** — mais **27 % de la mer écrêtée**. Sous la
-  contrainte « ≤ 1 % écrêtée » (ajoutée après le premier balayage, où le gagnant en écrêtait 18 %) : ACES e = 1,151,
-  w = 5,19, **0,143** — l'écrêtage n'achetait presque rien. Meilleures des autres : AgX e = 0,244 **0,345** (la scène
-  entière assombrie), Reinhard 0,352, Filmic 0,383, linéaire 1,01. **La teinte contredit la luminance** : B/G des
-  creux (photographie 5,54, S308 P2) — AgX **5,56**, ACES **18,1** (3,3 fois trop bleu, le « bleu saturé » de R14) ;
-  crêtes 1,2 à 1,7 partout contre 2,89 (la scène, pas la courbe). Ajustements de Godot (`apply_bcs`, après le sRGB)
-  modélisés, **exacts à un octet** (AgX + contraste 1,4 + saturation 0,8 ; ACES + saturation 0,5). `compromis`, pire des
-  cinq (quatre de luminance + B/G des creux), 501 essais : **ACES e = 0,983, w = 4, saturation 0,5 — 0,166** (teinte
-  4,88, rien d'écrêté) ; AgX + contraste 1,1 + saturation 0,8 : 0,322. **`TONALITE=photo`** = ce réglage. **Godot, halo
-  compris** (le halo est inerte ici : seuil 1,0) — proche AgX / photo : 0,3100 → **0,1892** · 9,36 → **22,26** · 0,344
-  → **0,537** · 0,0002 → **0,0799** ; pire 5,81 → **0,166** ; B/G creux 5,56 → 4,90. Rasante : 0,283 → 0,153 · 6,93 →
-  15,49 · 0,324 → 0,444 · fraction claire 0 et 0 ; référence : 0,257 → 0,145 · 9,10 → 21,51 · 0,270 → 0,390 · 0,0007 →
-  0,0018. Hors de la pose calée, la fraction claire reste nulle : elle tient à la scène (soleil, ciel reflété), pas à
-  la courbe ; p05 y dépasse la cible (0,15 pour 0,19). **Vu** : premier plan plus profond, creux plus denses, ciel plus
-  pâle (la saturation baisse aussi le ciel). Un rendu Godot est resté bloqué une fois (fenêtre) : `timeout 90` depuis.
-- **P5 a.** Onze images dans `viewer/captures/s363/` (composées hors dépôt). **Vu en composant** : l'agrandissement
-  d'avant montre, en plus de la couture, des **marches rectangulaires dans les nuages** — les « nuages en blocs » de
-  S359 ; entre les deux rendus seul le hachage change (`CIEL=clair` des deux côtés) : **même cause, même remède**.
-- **P5 b.** Preuve [CIEL-S363](../docs/validation/CIEL-S363.md) ; file (rendu Godot, A299), liste 8.10 (le constat « spatial »
-  de S308 dépassé dans Godot, reste *partiel*), feuille de route, index. Aucun point de la liste ne change d'état.

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-25 19:10 +02:00
+JETON            : occupé
+Battement        : 2026-09-25 19:16 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S364 — physique : la bathymétrie entre dans B — tables cuites composante par composante, côte à isobathes droites, mesurées contre la référence de S362 ; ADR-196
 Dernière session : S363 — **rendu 6, le ciel** : la couture et les nuages en blocs effacés (un hachage entier), le ciel de la photographie de référence ; une courbe de Godot calée sur elle, **`TONALITE=photo`** en option — pire écart 0,166 contre 5,8 pour AgX ([preuve](docs/validation/CIEL-S363.md))
 Session suivante : **les verdicts R21, R22 et R23 d'abord** (REVUE-VISUELLE §26–28). Sinon, par l'alternance d'ADR-191 D3, une session de physique : l'entrée de la bathymétrie dans B ou W (un ADR mesuré, ADR-004 §2.1), ou la coque qui bouge sur la carte (ADR-193 §3). En attente : R18, R21, R22, R23
 Maillons        : 1 — S363 : aucun point de la liste ne change d'état (journal)
