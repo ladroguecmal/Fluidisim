@@ -98,7 +98,7 @@ Critères, écrits avant le code :
 - [x] **P2** — R20 consigné ; recherches ; critère 1.
 - [x] **P3** — l'écume au déferlement, mesurée avant et après ; critère 2.
 - [x] **P4** — le spectre fin dans le cœur, ses essais ; l'export des `h0` ; critère 3.
-- [ ] **P5** — la FFT dans Godot et son contrôle ; critère 4.
+- [x] **P5** — la FFT dans Godot et son contrôle ; critère 4.
 - [ ] **P6** — le nuanceur sur les cascades ; critère 5.
 - [ ] **P7** — les images de R21 ; critère 6.
 - [ ] **P8** — preuve, ADR, file, liste, index ; critère 7.
@@ -136,3 +136,11 @@ Critères, écrits avant le code :
   `godot/donnees/detail_h0.bin` (1 Mo, dérivé), fragment `detail` du JSON. Cascade 0 : 32 m, k 1,789 à 12, **5 742**
   composantes, mss 9,148·10⁻³ réalisée / 9,147·10⁻³ continue ; cascade 1 : 4 m, k 12 à 88,27, **4 870**, 2,567·10⁻² /
   2,551·10⁻² ; total 0,0348 contre 0,0347 pour les 60 composantes de la queue.
+- **P5, critère 4 tenu.** `godot/fft_detail.comp` (GLSL, compilé au lancement par `RDShaderSource` — pas d'import ;
+  **ASCII seulement**, glslang refuse le reste), cinq modes : spectre (pulsation gravité-capillarité, quantifiée sur
+  `PERIODE` = 1 000 s ; seule `(t mod T)/T` arrive à la carte), FFT inverse radix 2 en mémoire de groupe (lignes, puis
+  colonnes), composition (deux images RGBA32F à 9 niveaux par cascade), niveaux par moyenne 2 × 2 (LEAN). `detail.gd` :
+  `RenderingDevice` principal, fil de rendu, `Texture2DRD` ; `mer.gd --controle-fft` à t₀ + 3,7 s. Somme directe en
+  double contre la FFT, quatre texels : cascade 0, pire **7,4·10⁻⁶** du rms ; cascade 1, **2,7·10⁻⁵** ; mss contre
+  l'export (Parseval) **6,5·10⁻⁷** et **6,7·10⁻⁷**. rms de η : 2,35 cm et 0,57 cm. GDScript n'a pas `%e` :
+  `String.num_scientific`.

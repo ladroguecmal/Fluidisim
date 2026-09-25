@@ -1,0 +1,142 @@
+#version 450
+// ASCII seulement : le compilateur GLSL de Godot (glslang) refuse les caracteres au-dela.
+// S360 - LA SURFACE FINE PAR FFT (Tessendorf 2001, "Simulating Ocean Water") : la queue de B, realisee densement dans
+// deux cascades de 256 x 256 composantes (`rendu_cretes::export_detail`), evoluee dans le temps et ramenee en espace par
+// FFT inverse sur la carte. Un seul nuanceur de calcul, cinq modes :
+//   0 spectre - ht(k, t) = h0(k)*e^{-i*phi} + conj(h0(-k))*e^{+i*phi}, phi = omega_q*t, puis trois champs complexes :
+//     (deta/dx + i*deta/dy), (g_xx + i*g_yy), (g_xy + i*eta) - g le gradient du deplacement horizontal (CWM) ;
+//   1 FFT inverse le long des lignes, 2 le long des colonnes (radix 2, en memoire de groupe, sans normalisation) ;
+//   3 composition - deux images RGBA32F par cascade, (s_x, s_y, s_x2, s_y2) et (s_x*s_y, g_xx, g_yy, g_xy) ;
+//   4 niveaux de detail - moyenne 2 x 2 : la moyenne des pentes et de leurs carres, d'ou la variance que le pixel ne
+//     resout pas (LEAN, Olano et Baker 2010).
+// I-08 : aucun temps en f32 - la pulsation est quantifiee sur la periode de repetition `periode` (Tessendorf 2001, animation en boucle), et
+// seule la fraction `t_frac = (t mod T)/T`, repliee en double par le script, arrive ici.
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) restrict readonly buffer Depart { vec2 h0[]; };
+layout(set = 0, binding = 1, std430) restrict buffer Travail { vec2 champ[]; };
+layout(set = 0, binding = 2, rgba32f) uniform restrict writeonly image2D sortie_a;
+layout(set = 0, binding = 3, rgba32f) uniform restrict writeonly image2D sortie_b;
+layout(set = 0, binding = 4, rgba32f) uniform restrict readonly image2D source_a;
+layout(set = 0, binding = 5, rgba32f) uniform restrict readonly image2D source_b;
+
+layout(push_constant, std430) uniform Parametres {
+    uint mode;
+    uint cascade;
+    uint n;
+    uint niveau;
+    float cote;
+    float t_frac;
+    float periode;
+    float gravite;
+    float km;
+    float r0;
+    float r1;
+    float r2;
+} p;
+
+shared vec2 ligne[256];
+
+const float TAU = 6.28318530717958647;
+
+vec2 fois_i(vec2 z) { return vec2(-z.y, z.x); }
+vec2 produit(vec2 a, vec2 b) { return vec2(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x); }
+float signe_indice(uint i) { return i < p.n / 2u ? float(i) : float(i) - float(p.n); }
+
+uint inverse_bits(uint j) {
+    uint r = 0u;
+    uint bits = findMSB(p.n);
+    for (uint b = 0u; b < bits; b++) {
+        r = (r << 1u) | (j & 1u);
+        j >>= 1u;
+    }
+    return r;
+}
+
+void spectre(uint idx) {
+    uint nn = p.n * p.n;
+    if (idx >= nn) { return; }
+    uint col = idx % p.n;
+    uint row = idx / p.n;
+    float dk = TAU / p.cote;
+    vec2 kv = vec2(signe_indice(col), signe_indice(row)) * dk;
+    float k = length(kv);
+    uint base = p.cascade * 3u * nn;
+    if (k == 0.0) {
+        champ[base + idx] = vec2(0.0);
+        champ[base + nn + idx] = vec2(0.0);
+        champ[base + 2u * nn + idx] = vec2(0.0);
+        return;
+    }
+    uint miroir = ((p.n - row) % p.n) * p.n + (p.n - col) % p.n;
+    vec2 a = h0[p.cascade * nn + idx];
+    vec2 b = h0[p.cascade * nn + miroir];
+    float omega = sqrt(p.gravite * k * (1.0 + (k / p.km) * (k / p.km)));
+    float nq = round(omega * p.periode / TAU);
+    float phase = TAU * fract(nq * p.t_frac);
+    vec2 e = vec2(cos(phase), -sin(phase));
+    vec2 h = produit(a, e) + produit(vec2(b.x, -b.y), vec2(e.x, -e.y));
+    champ[base + idx] = fois_i(kv.x * h) - kv.y * h;
+    champ[base + nn + idx] = (-kv.x * kv.x / k) * h + fois_i((-kv.y * kv.y / k) * h);
+    champ[base + 2u * nn + idx] = (-kv.x * kv.y / k) * h + fois_i(h);
+}
+
+void fft(uint groupe, uint j, bool lignes) {
+    uint nn = p.n * p.n;
+    uint trait = groupe % p.n;
+    uint champ_i = groupe / p.n;
+    uint base = p.cascade * 3u * nn + champ_i * nn;
+    uint pas = lignes ? 1u : p.n;
+    uint origine = lignes ? trait * p.n : trait;
+    if (j < p.n) { ligne[inverse_bits(j)] = champ[base + origine + j * pas]; }
+    barrier();
+    for (uint demi = 1u; demi < p.n; demi <<= 1u) {
+        if (j < p.n / 2u) {
+            uint rang = j % demi;
+            uint pos = (j / demi) * 2u * demi + rang;
+            float angle = TAU * float(rang) / float(2u * demi);
+            vec2 w = vec2(cos(angle), sin(angle));
+            vec2 u = ligne[pos];
+            vec2 v = produit(ligne[pos + demi], w);
+            ligne[pos] = u + v;
+            ligne[pos + demi] = u - v;
+        }
+        barrier();
+    }
+    if (j < p.n) { champ[base + origine + j * pas] = ligne[j]; }
+}
+
+void composer(uint idx) {
+    uint nn = p.n * p.n;
+    if (idx >= nn) { return; }
+    uint base = p.cascade * 3u * nn;
+    vec2 pentes = champ[base + idx];
+    vec2 gd = champ[base + nn + idx];
+    vec2 gx = champ[base + 2u * nn + idx];
+    ivec2 texel = ivec2(int(idx % p.n), int(idx / p.n));
+    imageStore(sortie_a, texel, vec4(pentes.x, pentes.y, pentes.x * pentes.x, pentes.y * pentes.y));
+    imageStore(sortie_b, texel, vec4(pentes.x * pentes.y, gd.x, gd.y, gx.x));
+}
+
+void niveau(uint idx) {
+    uint taille = p.n >> p.niveau;
+    if (idx >= taille * taille) { return; }
+    ivec2 t = ivec2(int(idx % taille), int(idx / taille));
+    ivec2 s = 2 * t;
+    vec4 a = imageLoad(source_a, s) + imageLoad(source_a, s + ivec2(1, 0)) + imageLoad(source_a, s + ivec2(0, 1))
+        + imageLoad(source_a, s + ivec2(1, 1));
+    vec4 b = imageLoad(source_b, s) + imageLoad(source_b, s + ivec2(1, 0)) + imageLoad(source_b, s + ivec2(0, 1))
+        + imageLoad(source_b, s + ivec2(1, 1));
+    imageStore(sortie_a, t, 0.25 * a);
+    imageStore(sortie_b, t, 0.25 * b);
+}
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    if (p.mode == 0u) { spectre(idx); }
+    else if (p.mode == 1u) { fft(gl_WorkGroupID.x, gl_LocalInvocationID.x, true); }
+    else if (p.mode == 2u) { fft(gl_WorkGroupID.x, gl_LocalInvocationID.x, false); }
+    else if (p.mode == 3u) { composer(idx); }
+    else { niveau(idx); }
+}

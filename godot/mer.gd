@@ -38,6 +38,8 @@ var mer: MeshInstance3D
 var t0 := 12.0
 var temps := 12.0
 var anime := true
+## S360 : la surface fine par FFT (`detail.gd`), si l'export la porte.
+var detail: Node
 
 
 func _ready() -> void:
@@ -75,6 +77,17 @@ func _ready() -> void:
 		add_child(fond())
 	uniformes_fixes()
 	phases(temps)
+	if donnees.has("detail"):
+		detail = load("res://detail.gd").new()
+		add_child(detail)
+		if detail.charger(donnees["detail"]):
+			detail.calculer(temps)
+		else:
+			detail = null
+	if "--controle-fft" in args:
+		anime = false
+		controle_fft()
+		return
 	if "--captures" in args:
 		anime = false
 		captures()
@@ -267,6 +280,8 @@ func _process(delta: float) -> void:
 	if anime:
 		temps += delta
 		phases(temps)
+		if detail != null:
+			detail.calculer(temps)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -420,3 +435,17 @@ func controle_ecume() -> void:
 			get_viewport().get_texture().get_image().save_png(chemin)
 	print("CONTROLE_ECUME_S360 masques=18 hauteurs=12,40")
 	get_tree().quit()
+
+
+## S360 — **le contrôle de la FFT** : à `t₀ + 3,7 s`, le champ des deux cascades contre la somme directe de leurs
+## composantes, et la pente quadratique moyenne contre l'export (`detail.gd`).
+func controle_fft() -> void:
+	if detail == null:
+		push_error("pas de détail exporté")
+		get_tree().quit(1)
+		return
+	var t := t0 + 3.7
+	detail.calculer(t)
+	for _k in 6:
+		await RenderingServer.frame_post_draw
+	detail.controler(t, func(tout: bool) -> void: get_tree().quit(0 if tout else 1))
