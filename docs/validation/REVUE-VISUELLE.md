@@ -980,3 +980,32 @@ liste 8.5 (*absent*). **Mesure qu'il déclenche** (S359, `outils/horizon_mer.py`
 mer de Godot renvoie **0,15 à 0,18** de la luminance du ciel qui la surplombe, l'afficheur **0,71 à 0,73** ; bornée
 à 0,05, la rugosité confiée à Godot remonte ce rapport à 0,41–0,48 — elle en explique une grande part, pas tout.
 Suite : S359, la colonne d'eau et la réflexion portées dans le nuanceur.
+
+## 25. R20 — l'eau a une épaisseur, S359
+
+**Liste 8.5, après R19.** Dans Godot, trois changements ([preuve](EPAISSEUR-EAU-S359.md)) :
+**la réflexion** est celle de l'afficheur — son ciel clair avec nuages, Fresnel, la pente non résolue intégrée — : sous
+l'horizon la mer renvoie 0,71 du ciel au lieu de 0,11 ; **la colonne d'eau** — la lumière absorbée et diffusée selon la
+profondeur (Maritorena, eau pure de Pope & Fry) et le fond vu par réfraction ; **une scène côtière** — du sable de 6 m
+sous la caméra à 40 m, puis le large. Les vagues ne sentent pas le fond (liste 2.7) ; pas de caustiques.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s359/godot_proche_12s.png` | le large, pose proche de R19 — à comparer à `s357/godot_proche_12s.png` |
+| `viewer/captures/s359/godot_rasante_12s.png` | le large, rasant |
+| `viewer/captures/s359/godot_proche_cote_12s.png` | la côte, pose proche : le sable à 6–10 m sous la caméra, la cassure au loin |
+| `viewer/captures/s359/godot_plongeante_cote_12s.png` | la côte, vue plongeante de 12 m : 8 à 15 m d'eau |
+
+En mouvement : Godot 4.4.1 sur le dossier `godot`, `-- --cote` pour la côte ; touches 1 à 5.
+
+**Les questions :**
+
+1. **Le large** : plus crédible que R19 ? Qu'est-ce qui gêne encore le plus ?
+2. **La côte** : l'eau paraît-elle transparente, avec un fond dessous ? La couleur au-dessus du sable — trop bleue, pas
+   assez verte, juste ?
+3. **La suite** : les taches de lumière sur le fond (caustiques), les vagues qui sentent le fond et déferlent, l'écume,
+   autre chose ?
+4. **Des références**, si vous en avez : une photo d'eau claire au-dessus du sable, à quelques mètres de fond (heure,
+   profondeur si connue) ; une photo de mer du large prise d'un bateau, près de l'horizon.
+
+Un mot par question suffit.

@@ -95,7 +95,7 @@ Critères, écrits avant le code :
 - [x] **P4** — la profondeur reconstruite, le mode contrôle ; critère 3.
 - [x] **P5** — l'optique de la colonne ; critère 4.
 - [x] **P6** — l'horizon, selon P2 ; critère 5.
-- [ ] **P7** — les images de R20 ; critère 6.
+- [x] **P7** — les images de R20 ; critère 6.
 - [ ] **P8** — preuve, file, liste, index ; critère 7.
 - [ ] **P9** — rituel.
 
@@ -137,3 +137,5 @@ Critères, écrits avant le code :
   **0,107 / 0,093**, après **0,710 / 0,676** (proche / rasante), afficheur 0,728 / 0,713 : −2,5 % et −5,2 %. Contrôles
   de P4 et P5 inchangés. **Vu** : une couture verticale au centre du ciel de Godot, absente de l'afficheur — non
   attribuée ; les nuages en blocs viennent du bruit de l'afficheur.
+- **P7.** R20 écrite (REVUE-VISUELLE §25), quatre images envoyées ; `viewer/captures/s359` (non versionné), SHA-256 :
+  large proche `ae2554e1…`, rasante `dda951be…` ; côte proche `01a40a51…`, plongeante `82b3cbf9…`, rasante `187f4dce…`.
