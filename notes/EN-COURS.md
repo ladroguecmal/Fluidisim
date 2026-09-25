@@ -89,7 +89,11 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la mesure contre la photographie ; critère 1.
 - [x] **P3** — la couture : diagnostic, hachage entier ; critère 2.
-- [ ] **P4** — le ciel calé sur la photographie ; critère 3.
+- [x] **P4** — le ciel calé sur la photographie ; critère 3.
+- [ ] **P4 bis** *(ajoutée en cours, sur la mesure de P2)* — la courbe de tonalité de Godot contre les quatre cibles de
+  la photographie : balayage (courbe, exposition, blanc) à la pose proche, critère de S308 — le pire écart
+  logarithmique ; la meilleure vérifiée aux poses rasante et référence ; **une option**, pas le défaut : la couleur a
+  été jugée « parfaite » en AgX (R20).
 - [ ] **P5** — images R23, preuve, file, index ; critère 4.
 - [ ] **P6** — rituel.
 
@@ -109,3 +113,9 @@ Critères, écrits avant le code :
   `ciel.gdshaderinc`, repris par le sable. **Après** : **0,03** (proche) et 0,04 (référence) ; le plus grand saut ailleurs
   (colonnes 1 193, 1 184). Rapport mer / ciel sous l'horizon 0,719 (0,711 avant). Hypothèse de cause non démontrée au
   niveau du binaire compilé ; le remède la supprime.
+- **P4, critère 3 tenu.** `ciel.gdshaderinc` : `ciel_mesure` (défaut vrai ; `CIEL=clair` rend l'ancien, ciel et
+  reflets ensemble), `H = (0,311 ; 0,554 ; 0,795)`, `F = (0,139 ; 0,327 ; 0,722)`, haut du cadre 25°. AgX : proche
+  0,3100 · 9,36 · **0,3438** · 0,0002 ; rasante 0,2832 · 6,93 · 0,3235 · 0 ; référence 0,2573 · 9,10 · 0,2697 · 0,0007.
+  Linéaire : proche 0,2859 · 12,94 · 0,4464 · 0,0251 ; rasante 0,2591 · 9,38 · 0,4166 · 0 ; référence 0,2342 · 12,59 ·
+  0,3442 · 0,0029. Contraste un peu plus bas qu'avec le ciel clair (0,365 → 0,344) ; horizon **0,692 / 0,661** (−3,8 %,
+  −2,4 %). **Vu** : bleu profond au zénith, blanchi vers l'horizon, nuages naturels ; l'ancien était un aplat grisé.

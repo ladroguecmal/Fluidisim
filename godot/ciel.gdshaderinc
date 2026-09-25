@@ -9,6 +9,17 @@ const vec3 CIEL_HORIZON = vec3(0.694, 0.838, 0.930);
 const vec3 CIEL_ZENITH = vec3(0.015, 0.150, 0.600);
 const vec3 SOLEIL_B = vec3(-0.4, 0.3, 0.8);
 
+// S363 — **le ciel calé sur la photographie de référence de l'utilisateur** (S308, `ciel_mesure` de l'afficheur,
+// jamais passé dans `--meilleur`) : `ciel(s) = H·exp(−K·s)`, `s = sin(élévation)`, `K = −ln F / sin(haut du cadre)` — une
+// extinction par canal, la signature de Rayleigh : le rouge s'effondre vers le zénith, le bleu à peine. `H` et `F` sont
+// les valeurs linéaires mesurées de la photographie, de l'horizon au haut du cadre ; l'élévation du haut du cadre est
+// inconnue — 25°, un cadrage ordinaire, hypothèse déclarée. Le « ciel clair » d'avant est plat (sommet à 0,81 de
+// l'horizon, la photographie à 0,36) ; `ciel_mesure = false` le rend, en témoin.
+const vec3 CIEL_MESURE_HORIZON = vec3(0.311, 0.554, 0.795);
+const vec3 CIEL_MESURE_F = vec3(0.139, 0.327, 0.722);
+uniform bool ciel_mesure = true;
+uniform float ciel_mesure_haut_deg = 25.0;
+
 /// S363 — **un hachage entier** : PCG (O'Neill 2014), sous la forme de Jarzynski et Olano (2020, *Hash Functions for
 /// GPU Rendering*, JCGT 9(3)). L'ancien `fract(sin(x)·43758)`, avec `x` de l'ordre de 10⁴, changeait du tout au tout pour
 /// un ulp de `x` : Godot compilant `i + (1, 0)` autrement de part et d'autre de la colonne centrale, le ciel y avait une
@@ -53,8 +64,14 @@ float nuages(vec3 rayon, int octaves) {
 /// La radiance du ciel dans la direction `rayon` (B, normé), linéaire.
 vec3 ciel_b(vec3 rayon, int octaves) {
     vec3 soleil = normalize(SOLEIL_B);
-    float t = pow(clamp(rayon.z, 0.0, 1.0), 0.35);
-    vec3 c = mix(CIEL_HORIZON, CIEL_ZENITH, t);
+    vec3 c;
+    if (ciel_mesure) {
+        vec3 k = -log(CIEL_MESURE_F) / max(sin(radians(ciel_mesure_haut_deg)), 1e-3);
+        c = CIEL_MESURE_HORIZON * exp(-k * clamp(rayon.z, 0.0, 1.0));
+    } else {
+        float t = pow(clamp(rayon.z, 0.0, 1.0), 0.35);
+        c = mix(CIEL_HORIZON, CIEL_ZENITH, t);
+    }
     c = mix(c, vec3(0.92, 0.93, 0.95), nuages(rayon, octaves));
     float d = max(dot(rayon, soleil), 0.0);
     return c + vec3(1.0, 0.95, 0.85) * (pow(d, 1024.0) * 4.0 + pow(d, 32.0) * 0.15);

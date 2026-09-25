@@ -91,6 +91,7 @@ func _ready() -> void:
 		if OS.get_environment("CAUSTIQUES") != "0":
 			carte_caustiques()
 	uniformes_fixes()
+	materiau.set_shader_parameter("ciel_mesure", OS.get_environment("CIEL") != "clair")
 	phases(temps)
 	if donnees.has("detail"):
 		detail = load("res://detail.gd").new()
@@ -143,6 +144,8 @@ func environnement() -> void:
 	# S359 P6 : le ciel clair de l'afficheur (`ciel.gdshader`), celui que l'eau reflète — une seule source.
 	var materiau_ciel := ShaderMaterial.new()
 	materiau_ciel.shader = load("res://ciel.gdshader")
+	# S363 : le ciel calé sur la photographie ; `CIEL=clair` rend le ciel clair d'avant, pour le ciel et ses reflets.
+	materiau_ciel.set_shader_parameter("ciel_mesure", OS.get_environment("CIEL") != "clair")
 	ciel.sky_material = materiau_ciel
 	env.background_mode = Environment.BG_SKY
 	env.sky = ciel
