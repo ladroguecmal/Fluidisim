@@ -368,9 +368,10 @@ pas recopiée ici (L137).
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *partiel* depuis S365 : dans Godot, la
   caméra sous l'eau — la surface vue d'en dessous, **fenêtre de Snell** rendue à 0,05° de `arcsin(1/n)` et réflexion
   totale au-delà ; le milieu, `exp(−c·d)` par canal à 0,004 près, la lumière de l'eau, le fond et ses caustiques
-  ([preuve](validation/SOUS-MARIN-S365.md)). Manquent la caméra à demi immergée (la ligne d'eau sur l'objectif, ADR-019
-  §6), le fond dans le miroir, bulles, écume vue d'en dessous, rayons, turbidité, le coût du profil immergé (B11) et le
-  verdict R24.
+  ([preuve](validation/SOUS-MARIN-S365.md)) ; R24 *« good »* ; **S366**, la lumière de l'eau calée sur la radiance
+  mesurée par Tyler (1960), résidu 0,36 → 0,12 (§6). Manquent la caméra à demi immergée (la ligne d'eau sur l'objectif,
+  ADR-019 §6), le fond dans le miroir, bulles, écume vue d'en dessous, rayons, turbidité, l'échelle radiométrique du
+  ciel et du soleil (la fenêtre terne, §6), le coût du profil immergé (B11).
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *partiel* : **S275, ADR-168** —
   bande δ couplée sous houle à crêtes longues, précalculée hors budget et rejouée dans `viewer/`
   (touche D : B seul, B+δ 4 ms, B+δ au pas d'image), couche GPU à 7·10⁻⁸ m de sa lecture CPU,

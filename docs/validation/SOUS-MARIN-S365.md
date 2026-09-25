@@ -18,6 +18,11 @@ partielle dans Godot depuis [S359](EPAISSEUR-EAU-S359.md). Machine de référenc
   secondes : pire 0,0041.
 - **Les images de R24** : `POSES=sous_eau,sous_eau_fond <godot> --path godot -- --captures --cote` ; `FOV=100
   POSES=sous_eau_zenith … --cote` ; `MER_PLATE=1 FOV=120 POSES=sous_eau_zenith … --captures`.
+- **S366, la lumière de l'eau calée sur Tyler (1960)** (§6) — `python outils/tyler_radiance.py`, instantané : résidu
+  logarithmique 0,362 (S365) et 0,120 (S366), β = 1,0031, K = 213,35, g = 0,855. Contrôle : `TONALITE=lineaire
+  POSES=sous_eau_vers_soleil,sous_eau_dos_soleil <godot> --path godot -- --captures`, rangée 372, colonnes 600 à 680 :
+  rapport face / dos 2,23 (vert), 2,18 (bleu), prédit 2,215. `LOBE=0` rend la forme de S365. Images de R25 :
+  `viewer/captures/s366/`.
 
 ## En une phrase
 
@@ -99,3 +104,59 @@ de l'eau, contre les rendus de S363 : poses proche et rasante identiques au bit,
 ## 5. Revue
 
 R24 ([revue](REVUE-VISUELLE.md) §29).
+
+## 6. S366 — les références, et la lumière de l'eau calée sur une mesure
+
+Verdict R24 : *« Pour les références trouve les sinon rien a redire cela me paraît good »*. Cherchées, lues dans le
+navigateur, chiffrées sans téléchargement ; aucune image n'entre dans le dépôt.
+
+**Les références.**
+
+| référence | ce qu'elle apporte | source, licence |
+|---|---|---|
+| Tyler (1960), lac Pend Oreille : radiance dans le plan du soleil à 4,2, 29 et 66 m | la forme mesurée de la lumière de l'eau selon la direction — ce que `f(ω)` doit être | Bull. Scripps Inst. Oceanogr. 7, 363–411 ; reproduite par Mobley, *Ocean Optics Web Book*, « The Asymptotic Radiance Distribution », fig. 7 |
+| *Dharavandhoo Thila – Hanifaru Bay Sharks* | eau claire tropicale en contre-plongée : la mosaïque de la fenêtre, le bleu de l'eau | Shiyam ElkCloner, Wikimedia Commons, CC BY-SA 3.0 |
+| *Looking up (6158466637)* | un récif vu d'en dessous : le miroir sombre, des éclats de fenêtre | Derek Keats, Wikimedia Commons, CC BY 2.0 |
+| *Snell's window* | une piscine : la fenêtre entière, et **le fond dans le miroir** — ce que nous n'avons pas | petebw, Wikimedia Commons, CC BY-SA 2.0 |
+
+**Tyler contre `f(ω)`.** La figure numérisée par ses pixels (composantes connexes, axe logarithmique à 32,75 pixels par
+décade), à 4,2 m, normalisée au nadir, de 10° à 90° du nadir, deux azimuts. **Critère, écrit avant** : au-delà de 30 %
+d'écart sur l'horizontale, recalibrer ; prédiction, 2 à 5.
+
+| depuis le nadir | mesure, opposé au soleil | mesure, côté soleil | S365 | S366 |
+|---:|---:|---:|---:|---:|
+| 30° | 1,057 | 1,151 | 1,268 | 1,054 / 1,444 |
+| 60° | 1,517 | 2,457 | 2,000 | 1,497 / 2,732 |
+| 90° (horizontale) | **2,457** | **8,710** | 3,000 | 2,299 / 6,877 |
+
+S365 : +22 % à l'opposé, **−66 % côté soleil** ; résidu logarithmique 0,362 sur les 18 points. La forme de S365 n'a pas
+d'azimut ; la mesure en a un fort — la **diffusion vers l'avant** du soleil. **S366** : `f = a0 + β·(1 − cos θ) + K·HG(g,
+ω·s)`, Henyey-Greenstein autour du soleil réfracté, `f(nadir) = 1` ; β = 1,0031, K = 213,35, **g = 0,855** (un lobe de
+particules ordinaire) ; résidu **0,120**. **Domaine** : l'hémisphère bas et l'horizontale, où la mesure existe ; au-dessus,
+la valeur de l'horizontale. **Dit** : Tyler mesure une eau de lac, que ses particules font diffuser vers l'avant ; notre eau
+est pure (ADR-177) — son lobe est emprunté.
+
+**Contrôle de la réalisation.** Tonalité linéaire, à 4 m, juste sous l'horizon : rapport de la radiance face au soleil
+et dos au soleil **2,23** (vert) et **2,18** (bleu), pour **2,215** prédits avec notre soleil (23,3° du zénith dans
+l'eau).
+
+**La photographie contre le rendu, à titre indicatif** (prise de vue inconnue ; tiers bas et tiers haut, luminance sRGB
+décodée ; pose `sous_eau_oblique`, 4 m, 30°, pour que le bord de la fenêtre tombe au même endroit) :
+
+| | photographie | S365 | S366 |
+|---|---:|---:|---:|
+| B/G de l'eau (tiers bas) | 4,07 | 4,72 | 4,10 |
+| dynamique : p90 du haut / p50 du bas | **≥ 9,7** (fenêtre écrêtée) | 3,36 | 2,72 |
+
+La teinte de l'eau se rapproche — en partie par la courbe AgX, qui désature ce qui s'éclaire. **La fenêtre reste trois
+fois trop terne devant l'eau** : le ciel de la scène ne porte presque pas l'éclairement du soleil (son disque est un motif
+visuel), quand l'eau est éclairée par `E/π` = 2 (ADR-177 D2) — soleil compris. L'échelle radiométrique du ciel et du
+soleil est à reprendre ; non fait.
+
+**Défaut trouvé, corrigé** : une bande sombre juste au-dessus de l'horizon, vue d'en dessous — la **brume** de Godot
+(perspective aérienne), phénomène de l'air, sur la surface lointaine. Éteinte quand l'œil est dans l'eau ; au-dessus de
+l'eau, les poses proche et rasante restent **identiques au bit**.
+
+**Limites.** Une seule distribution mesurée, d'une eau de lac, dans un seul plan d'azimut ; la photographie ne se
+compare qu'en rapports, et sa fenêtre est écrêtée. R25 (revue §30).
+

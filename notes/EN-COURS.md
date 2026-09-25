@@ -87,8 +87,8 @@ Critères, écrits avant la mesure :
 - [x] **P2** — le verdict R24 consigné ; les références trouvées, sources et licences.
 - [x] **P3** — les chiffrer : la distribution mesurée contre `f(ω)` et le rendu ; les photographies, rapports sans unité.
 - [x] **P4** — calibrer ce que la mesure désigne ; avant / après ; images.
-- [>] **P5** — preuve (SOUS-MARIN-S365, section datée S366), liste 8.6, file, index.
-- [ ] **P6** — rituel.
+- [x] **P5** — preuve (SOUS-MARIN-S365, section datée S366), liste 8.6, file, index.
+- [>] **P6** — rituel.
 
 ### Notes de reprise
 - **P2.** Verdict R24 consigné (REVUE §29, décisions de la file). **Références trouvées**, rien téléchargé, lues dans le
@@ -113,3 +113,6 @@ Critères, écrits avant la mesure :
   **brume** de Godot (perspective aérienne) sur la surface lointaine ; éteinte quand l'œil est dans l'eau. Au-dessus de
   l'eau, proche et rasante **identiques au bit**. Photographie, après : eau B/G 4,10 (4,07), dynamique 2,72 (≥ 9,7) — la
   fenêtre reste terne : le ciel ne porte pas l'éclairement du soleil que reçoit l'eau (`gain_eau` = 2), à suivre.
+- **P5.** Preuve SOUS-MARIN-S365 §6 datée S366 (références, Tyler contre `f(ω)`, contrôle, photographie, brume) et
+  « Reproduire » ; REVUE-VISUELLE §30, R25 (une question, sans réponse la lueur reste) ; liste 8.6 (reste *partiel*),
+  file (ligne du rendu Godot : échelle radiométrique ciel / soleil ajoutée au déclencheur), feuille de route, index.

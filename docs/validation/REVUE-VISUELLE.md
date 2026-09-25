@@ -1126,3 +1126,18 @@ good, continue »*. Lu sur les trois questions : (1) crédible, rien à redire ;
 distribution de radiance mesurée, qui calibre `f(ω)` laissé à calibrer par S365, et des photographies libres —, et les
 chiffre. **Classe** : 8.6 jugée crédible sur quatre images fixes, à la pose de S365 ; ni animation, ni caméra qui traverse
 la surface.
+
+## 30. R25 — la lumière de l'eau calée sur une mesure, S366
+
+**Après R24** ([preuve](SOUS-MARIN-S365.md) §6). Les références trouvées : une **mesure** de la lumière sous l'eau
+selon la direction (Tyler 1960) et trois photographies libres. La mesure dit que l'eau est **bien plus claire face au
+soleil** qu'à l'opposé — 8,7 contre 2,5 fois la lumière qui monte du fond, à l'horizontale — ; notre eau était la même
+dans toutes les directions. Calée sur la mesure : une lueur face au soleil, rien de changé dos à lui.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s366/lobe_avant_apres.png` | à 4 m, visée horizontale : face au soleil et dos au soleil, avant et après |
+| `viewer/captures/s366/contre_plongee_avant.png`, `contre_plongee_apres.png` | en contre-plongée, le cadrage de la photographie de Hanifaru (Maldives) |
+
+**La question :** la lueur face au soleil — juste, trop forte, gênante ? Un mot suffit ; sans réponse, elle reste.
+
