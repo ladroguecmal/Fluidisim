@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 01:35 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S369 — les réponses du 2026-09-26 (ADR-197), puis la voie d’A289 (plan dans EN-COURS)
-Dernière session : S368 — **rendu 9, l'écume qui dure** : le champ de S367 sur la carte de Godot (décroissance à 10⁻⁵, couverture de Monahan à 4 %) et son rendu — puis **suspendue par l'utilisateur** sauf photographies qui en renseignent forme, couleur et place sur la vague : éteinte par défaut ([preuve](docs/validation/ECUME-GODOT-S368.md))
-Session suivante : par l'alternance d'ADR-191 D3, **une session de physique** : les chemins de B lisent la côte jusqu'à Godot (ADR-196 §3), la coque qui bouge sur la carte (ADR-193 §3), ou le lot 5 (A316). Au rendu suivant : la caméra à demi immergée (ADR-019 §6), l'échelle radiométrique du ciel et du soleil. **L'écume attend des photographies** (décision du 2026-09-26). En attente : R18
-Maillons        : 1 — S368 : 8.4 reste absent (journal)
+Session en cours : aucune
+Dernière session : S369 — **les réponses du 2026-09-26** ([ADR-197](docs/adr/ADR-197-reponses-du-2026-09-26.md) : Godot moteur du jeu entier, 5.11 hors du périmètre, météo et son à la fin, R18 reçu) **et la voie d'A289** ([ADR-198](docs/adr/ADR-198-la-voie-d-a289.md)) : δ relatif à la dynamique de B, nul au bit sous la houle ; derrière, A320 — une perturbation croît sous houle raide, par `u'·∇U` ([preuve](docs/validation/MER-S369.md))
+Session suivante : par l'alternance d'ADR-191 D3, **une session de rendu** : la caméra à demi immergée (ADR-019 §6), l'échelle radiométrique du ciel et du soleil. À la physique suivante : **A320** — les termes croisés sous forme de Bernoulli —, puis le critère de l'ordre E réécrit ; ou les chemins de B et la côte (ADR-196), la coque qui bouge, le lot 5. L'écume attend des photographies. **Question posée** : « pas de réseau » — multijoueur ou non (ADR-197 D1)
+Maillons        : 0 — S369 : 4.21 passe à partiel (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

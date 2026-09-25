@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S369 — **en cours**. **Les réponses du 2026-09-26, puis A289** — l'utilisateur a répondu aux quatre questions de
+Session : S369 — **terminée**. **Les réponses du 2026-09-26, puis A289** — l'utilisateur a répondu aux quatre questions de
 fin de S368 : *« Pas de réseau. Godot sera le moteur entier fais comme bon te semble. Tout flotte/coule des interactions
 physiques logique. Pas de terrain realiste avec hydrologie etc.... Pas de météo et son a faire à la fin »* ; A289 : *« Le
 choix le plus favorable au realisme ainsi que les performances, simple »* ; seconde cible et serveur : *« Pas encore »* ;
@@ -99,7 +99,7 @@ Critères, écrits avant le code :
 - [x] **P4** — germe et E2 ; critères 2 et 3.
 - [x] **P5** — ADR-198, la voie d'A289 ; preuve MER-S369 ; A289, lot 2 (4.8, 4.21), file, dépendances, feuille de route,
   index.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2.** ADR-197 ; « pas de réseau » lu comme « aucun format n'existe », la portée (multijoueur ?) à demander en une

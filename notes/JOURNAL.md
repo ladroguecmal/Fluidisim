@@ -17177,3 +17177,22 @@ L'écume **s'arrête**, éteinte par défaut (`ECUME=champ` la rallume) ; code e
 **Rituel.** Maillons **1** : 8.4 reste absent (rien de rendu n'est reçu). Suivant : par l'alternance, **la physique** — les
 chemins de B lisent la côte (ADR-196), la coque qui bouge, ou le lot 5 ; au rendu, la caméra à demi immergée et
 l'échelle radiométrique du ciel. R18 attendu.
+
+## S369 — 2026-09-26 — physique : les réponses du 2026-09-26, puis la voie d'A289
+
+**Entrée.** Réponses de l'utilisateur aux questions de S368 : Godot moteur du jeu entier, tout flotte ou coule, pas de
+terrain à hydrologie, météo et son à la fin, *« pas de réseau »* ; A289 déléguée — *« le plus favorable au réalisme ainsi
+que les performances, simple »* ; seconde cible : pas encore ; R18 *« Rendu convaincant »* ; photos d'écume : plus tard.
+**Décisions** ([ADR-197](../docs/adr/ADR-197-reponses-du-2026-09-26.md)) : 8.1 au front 0 ; 6.7 sans attente ; **5.11 hors du
+périmètre** ; « pas de réseau » lu « aucun format », la portée (multijoueur ?) demandée ; R18 reçu.
+**Fait** ([preuve](../docs/validation/MER-S369.md), [ADR-198](../docs/adr/ADR-198-la-voie-d-a289.md)). La croissance de
+S319 est **forcée** par trois termes du pas couplé qui ne dépendent que de B (résidu de quantité de mouvement, l'essentiel ;
+bande jusqu'à sa surface ; erreur de pression à sa surface). Retirés — δ relatif à B —, **δ nul reste nul au bit** sous
+la houle (E1 40 s, test), en un tiers du temps. Voie retenue sur les trois critères, contre les trois d'A289.
+**Mais** (critère 3 manqué) : un germe de 1 mm tient 40 s puis croît dès 50 s, 0,060 s⁻¹ ; le paquet d'E2 aussi (0,052,
+1 620 fois le volume) — instabilité convective, ≈ `a²`, indépendante du pas, plus lente à maille fine ; **bisection** :
+portée par `u'·∇U` seul. Sous 2,5 cm, stable, mais le critère de volume est mal posé (transport croisé, 21 fois).
+**Limites.** Une composante, tranche de deux rangées ; production GPU dans l'ancien mode ; forme de Bernoulli non essayée.
+**Rituel.** Maillons **0** : 4.21 passe à partiel (3 / 63 / 54) — devient possible une mer de fond dans δ identique à B,
+au bit ; consommé par l'ordre E et la production ; preuve §1. A289 résolue à sa cause, **A320** ouverte (sévérité 3).
+Suivant : par l'alternance, **le rendu** (caméra à demi immergée) ; à la physique suivante, A320 par la forme de Bernoulli.
