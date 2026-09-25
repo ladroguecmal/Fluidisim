@@ -57,6 +57,28 @@ impl Sponge3 {
 }
 
 impl Volume3 {
+    /// S369 (A289) : le résidu de quantité de mouvement de B, `U_t + (U·∇)U + ∇p/ρ` (SPEC-004 §6.1).
+    pub const RELATIVE_RESIDUAL: u8 = 1;
+    /// S369 : le transport de B entre le plan moyen et **sa propre** surface, dans la bande.
+    pub const RELATIVE_BAND: u8 = 2;
+    /// S369 : l'erreur de pression de B à sa propre surface, `ρ·g·η_B − p_B(repos + η_B)`, dans les fantômes.
+    pub const RELATIVE_SURFACE: u8 = 4;
+    pub const RELATIVE_ALL: u8 = 7;
+
+    /// **S369, A289 — δ relatif à la dynamique de B.** B linéaire ne satisfait pas les équations complètes ; le pas
+    /// de S297 donnait ses restes à δ comme sources — trois termes où δ ne figure pas. Chaque bit de `terms` en retire
+    /// un : il reste les termes croisés (B advecte δ, δ advecte B, la bande entre la surface de B et la surface totale,
+    /// la pression de B entre les deux) et ceux de δ seul. Tous retirés, **δ nul est un point fixe** sous B seul — sur
+    /// fond plat et tant qu'aucune face latérale ne change de mouillure, au bit ; ailleurs, au reste de l'interpolation
+    /// de l'erreur de surface entre deux colonnes. 0 (défaut) : le pas de S297, au bit.
+    pub fn set_relative_background(&mut self, terms: u8) -> Result<(), Error> {
+        if terms > Self::RELATIVE_ALL {
+            return Err(Error::Domain);
+        }
+        self.relative_background = terms;
+        Ok(())
+    }
+
     pub(super) fn prepare_background3(&mut self, bg: &BackgroundFaces3<'_>) -> Result<(), Error> {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         for j in 0..ny {
@@ -73,15 +95,29 @@ impl Volume3 {
         }
         self.check_edges3(bg)?;
         self.surface_coupled = true;
+        let surface = self.relative_background & Self::RELATIVE_SURFACE != 0;
         for j in 0..ny {
             for i in 0..nx {
                 let c = self.col(i, j);
                 self.ghost_bg_up[c] = 0.;
+                self.ghost_bg_error[c] = 0.;
                 if let Some(k) = (0..nz).rev().find(|&k| self.wet3(i, j, k)) {
                     let s = &bg.w[self.fw(i, j, k + 1)];
                     let dz = self.surface_total[c] - (k + 1) as f32 * dx;
                     self.ghost_bg_up[c] =
                         self.rho * self.g_eff * s.eta - (s.p_dyn + dz * s.grad_p_dyn[2]);
+                }
+                if surface {
+                    // S369 : la même expression, sur la surface de B seule ; à δ nul, les mêmes opérandes au bit.
+                    let own = self.rest + bg.w[self.fw(i, j, 0)].eta;
+                    let solid = |k| self.cut.as_ref().is_some_and(|g| g.frac[self.c(i, j, k)] == 0.);
+                    if let Some(k) = (0..nz).rev().find(|&k| !solid(k) && (k as f32 + 0.5) * dx < own) {
+                        let s = &bg.w[self.fw(i, j, k + 1)];
+                        let dz = own - (k + 1) as f32 * dx;
+                        self.ghost_bg_error[c] =
+                            self.rho * self.g_eff * s.eta - (s.p_dyn + dz * s.grad_p_dyn[2]);
+                    }
+                    self.ghost_bg_up[c] -= self.ghost_bg_error[c];
                 }
             }
         }
@@ -112,7 +148,19 @@ impl Volume3 {
                         };
                         let theta = ((wet - (k as f32 + 0.5) * dx) / (wet - dry))
                             .max(crate::delta_projection::SURFACE_THETA_MIN);
-                        let value = -(s.p_dyn + sign * (theta - 0.5) * dx * s.grad_p_dyn[axis]);
+                        let mut value = -(s.p_dyn + sign * (theta - 0.5) * dx * s.grad_p_dyn[axis]);
+                        if surface {
+                            // S369 : l'erreur de B au point de surface, interpolée entre la colonne mouillée et
+                            // l'autre à la même fraction θ — exacte au bit seulement là où la mouillure de B seul
+                            // est déjà celle-ci.
+                            let (cw, cd) = if left {
+                                (self.col(x, y), self.col(i, j))
+                            } else {
+                                (self.col(i, j), self.col(x, y))
+                            };
+                            let (ew, ed) = (self.ghost_bg_error[cw], self.ghost_bg_error[cd]);
+                            value -= ew + theta * (ed - ew);
+                        }
                         if axis == 0 {
                             self.ghost_bg_x[f] = value;
                         } else {
@@ -186,8 +234,13 @@ fn extra3(
     v: [f32; 3],
     dv: [f32; 3],
     rho: f32,
+    residual: bool,
 ) -> Result<f32, Error> {
-    let r = s.momentum_residual(rho, 0.).map_err(|_| Error::NotFinite)?;
+    let mut r = s.momentum_residual(rho, 0.).map_err(|_| Error::NotFinite)?;
+    if !residual {
+        // S369 (A289) : le reste de B seul n'est plus une source de δ ; la validation ci-dessus est gardée.
+        r = [0.; 3];
+    }
     // Ordre x/z de la 2D, contributions y ajoutées ensuite.
     Ok(s.u[0] * dv[0]
         + s.u[2] * dv[2]
@@ -295,7 +348,8 @@ impl Volume3 {
                             1 => &bg.v[f],
                             _ => &bg.w[f],
                         };
-                        let add = dt as f32 * extra3(sample, axis, vel, dv, self.rho)?;
+                        let residual = self.relative_background & Self::RELATIVE_RESIDUAL == 0;
+                        let add = dt as f32 * extra3(sample, axis, vel, dv, self.rho, residual)?;
                         let x = (i as f32 + if axis == 0 { 0. } else { 0.5 }) * dx;
                         let y = (j as f32 + if axis == 1 { 0. } else { 0.5 }) * dx;
                         let factor = sponge.factor(x, y, self.domain, dt);
@@ -353,6 +407,13 @@ impl Volume3 {
                     } else {
                         0.5 * (self.surface_total[col(a - 1)] + self.surface_total[col(a)])
                     };
+                    // S369 (A289) : la surface de B seule, formée comme la totale — à δ nul, au bit la même.
+                    let relative = self.relative_background & Self::RELATIVE_BAND != 0;
+                    let own = if a == 0 || a == n {
+                        self.rest + sample(0).eta
+                    } else {
+                        0.5 * ((self.rest + bg.w[col(a - 1)].eta) + (self.rest + bg.w[col(a)].eta))
+                    };
                     let (mut flux, mut band, mut bord) = (0f32, 0f32, 0f32);
                     for k in 0..nz {
                         let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
@@ -370,7 +431,12 @@ impl Volume3 {
                                 bord += v * dx * wet;
                             }
                         }
-                        band += band3(sample(k), axis, k, dx, self.rest, surface);
+                        if relative {
+                            band += band3(sample(k), axis, k, dx, self.rest, surface)
+                                - band3(sample(k), axis, k, dx, self.rest, own);
+                        } else {
+                            band += band3(sample(k), axis, k, dx, self.rest, surface);
+                        }
                     }
                     // Face basse : une vitesse positive **entre**. Face haute : elle **sort**.
                     if a == 0 {

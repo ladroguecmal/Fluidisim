@@ -1928,8 +1928,18 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     let mut grille = BackgroundGrid3::configure(&mut hote, domain, [0., 0., -h0], RHO)
         .map_err(|e| format!("grille {e:?}"))?;
     let mut v = Volume3::configure(&mut hote, domain, RHO, G).map_err(|e| format!("volume {e:?}"))?;
+    // `MER_RELATIF` (S369, A289) : masque des termes propres à B retirés du pas couplé — 1 le résidu de quantité de
+    // mouvement, 2 la bande jusqu'à la surface de B, 4 l'erreur de pression à cette surface ; 0 par défaut, S319.
+    let relatif: u8 = std::env::var("MER_RELATIF").ok().and_then(|v| v.parse().ok()).unwrap_or(0);
+    // `MER_GERME` (S369) : en E1, le paquet de l'ordre C réduit à cette amplitude, m — un germe, pour la stabilité.
+    let germe: Option<f32> = std::env::var("MER_GERME").ok().and_then(|v| v.parse().ok());
+    v.set_relative_background(relatif).map_err(|e| format!("relatif {e:?}"))?;
     if avec_paquet {
         pose_paquet(&mut v, domain, &c)?;
+    } else if let Some(a) = germe {
+        let mut petit = cas(dx, lambda, 1.5);
+        petit.a = a;
+        pose_paquet(&mut v, domain, &petit)?;
     } else {
         v.set_free_surface(&vec![h0; domain.columns()], h0).map_err(|e| format!("surface {e:?}"))?;
     }
@@ -1940,6 +1950,7 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     temoin
         .set_free_surface(&vec![h0; domain.columns()], h0)
         .map_err(|e| format!("témoin {e:?}"))?;
+    temoin.set_relative_background(relatif).map_err(|e| format!("relatif {e:?}"))?;
     let (mut region_dg, mut region_dd) = (region(x_g, -1., x_g)?, region(x_d, 1., longueur - x_d)?);
     let (mut registre_dg, mut registre_dd) = (Ledger3::default(), Ledger3::default());
     let sponge = Sponge3 { width_x: eponge, width_y: 0., rate_per_s: 10. * cg_pose / eponge };
@@ -2043,7 +2054,7 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         );
     }
     println!(
-        "MER_S319 dx={dx} dt_us={dt_us} paquet={avec_paquet} a_houle={a_houle} pas={pas} duree_s={duree:.1} duree_calcul_s={duree_calcul:.0} \
+        "MER_S319 dx={dx} dt_us={dt_us} relatif={relatif} germe={germe:?} paquet={avec_paquet} a_houle={a_houle} pas={pas} duree_s={duree:.1} duree_calcul_s={duree_calcul:.0} \
          houle_a_m={a_b:.4} houle_k={k_b:.4} houle_omega={omega_b:.4} largeur_m={largeur} \
          perturbation_max_m={perturbation_max:e} recu_gauche_m3={:e} recu_droite_m3={:e} \
          niveau_gauche_m={:e} niveau_droite_m={:e} flux_absolu_droite_m3={flux_abs_d:e} \

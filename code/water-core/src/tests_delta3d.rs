@@ -98,7 +98,8 @@ fn configuration_counts_every_buffer_it_holds_s295() {
         + v.prec.len() + v.p.len() + v.rhs.len() + v.res.len() + v.dir.len() + v.tmp.len() + v.saved_p.len()
         + v.eta.len() + v.eta_roundoff.len() + v.saved_eta.len() + v.saved_eta_roundoff.len()
         + v.flux_x.len() + v.flux_y.len() + v.band_x.len() + v.band_y.len()
-        + v.surface_total.len() + v.ghost_bg_up.len() + v.ghost_bg_x.len() + v.ghost_bg_y.len() + v.pressure_base.len();
+        + v.surface_total.len() + v.ghost_bg_up.len() + v.ghost_bg_x.len() + v.ghost_bg_y.len() + v.pressure_base.len()
+        + v.ghost_bg_error.len();
     assert_eq!(arena.stats.persistent_bytes, floats * 4);
     assert_eq!(arena.stats.persistent_calls, 1);
     assert!(v.surface().iter().all(|e| *e == 2.));
@@ -1657,3 +1658,40 @@ fn the_linear_sponge_lets_the_waves_out_s337() {
     assert!(volume <= plancher, "{volume} contre {plancher}");
 }
 
+/// **S369, A289 — δ relatif à la dynamique de B.** Sous une houle B seule (une composante, 5 cm, λ = 4 m), δ nul au
+/// départ : avec les trois termes propres à B retirés, δ nul est un **point fixe** — hauteur, vitesses et pression
+/// nulles au bit, pas après pas ; avec le pas de S297, le même banc s'écarte (la source que S319 a mesurée). Un masque
+/// hors des trois bits est refusé.
+#[test]
+fn zero_delta_stays_zero_under_b_alone_when_relative_s369() {
+    use crate::{background::{Background, SeaState}, SimTime, WorldPos};
+    let (dx, h0) = (0.25f32, 2.0f32);
+    let d = Domain3 { nx: 48, ny: 2, nz: (h0 / dx) as usize + 2, dx };
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    let sea = SeaState { hs: 0.05 * 2. * 2f32.sqrt(), tp: 3.2, theta_turns: 0., components: 1, graine: 7 };
+    let houle = Background::configure(&mut host, sea, WorldPos::from_units(0, 0, 0)).unwrap();
+    let mut grid = BackgroundGrid3::configure(&mut host, d, [0., 0., -h0], 1025.).unwrap();
+    let mut volumes = [0u8, Volume3::RELATIVE_ALL].map(|terms| {
+        let mut v = Volume3::configure(&mut host, d, 1025., houle.gravity()).unwrap();
+        v.set_free_surface(&vec![h0; d.columns()], h0).unwrap();
+        v.set_relative_background(terms).unwrap();
+        v
+    });
+    assert_eq!(volumes[0].set_relative_background(8), Err(Error::Domain));
+    let sponge = Sponge3 { width_x: 2., width_y: 0., rate_per_s: 2. };
+    for n in 0..150u64 {
+        let time = SimTime(n * 10_000);
+        grid.sample(&houle, time).unwrap();
+        let bg = grid.view().unwrap();
+        for v in &mut volumes {
+            v.step_perturbation_mobile(time, 10_000, 60_000, &bg, sponge, &Jobs).unwrap();
+        }
+        let v = &volumes[1];
+        assert!(v.eta.iter().all(|e| e.to_bits() == h0.to_bits()), "pas {n}");
+        assert!(v.u.iter().chain(&v.v).chain(&v.w).chain(&v.p).all(|x| *x == 0.), "pas {n}");
+    }
+    let ecart = volumes[0].eta.iter().fold(0f32, |m, e| m.max((e - h0).abs()));
+    println!("S369 : 1,5 s sous 5 cm de houle — pas de S297, δ jusqu'à {ecart:.3e} m ; relatif, nul au bit");
+    assert!(ecart > 1e-5, "{ecart}");
+}

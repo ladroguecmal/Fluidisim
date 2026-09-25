@@ -106,6 +106,10 @@ pub struct Volume3 {
     ghost_bg_up: Vec<f32>,
     ghost_bg_x: Vec<f32>,
     ghost_bg_y: Vec<f32>,
+    /// **S369, A289 : les termes propres à B retirés du pas couplé** — masque de `RELATIVE_*` ; 0, le pas de S297.
+    relative_background: u8,
+    /// L'erreur de pression de B à sa propre surface, par colonne (S369) : `ρ·g·η_B − p_B(repos + η_B)`.
+    ghost_bg_error: Vec<f32>,
     pressure_base: Vec<f32>,
     band_x: Vec<f32>,
     band_y: Vec<f32>,
@@ -199,11 +203,11 @@ impl Volume3 {
         let fx = (nx + 1).checked_mul(ny).ok_or(Error::Domain)?;
         let fy = (ny + 1).checked_mul(nx).ok_or(Error::Domain)?;
         // Trois jeux de faces ; huit champs de mailles (dont Jacobi et pression avant affinage),
-        // six de colonnes (hauteur/reste/sauvegardes, total, fantôme vertical), fantômes
+        // sept de colonnes (hauteur/reste/sauvegardes, total, fantôme vertical, erreur de B), fantômes
         // latéraux u/v, et deux jeux de flux (perturbation et bande) par axe horizontal.
         let floats = nu.checked_add(nv).and_then(|n| n.checked_add(nw)).and_then(|n| n.checked_mul(3))
             .and_then(|n| cells.checked_mul(8).and_then(|c| n.checked_add(c)))
-            .and_then(|n| cols.checked_mul(6).and_then(|c| n.checked_add(c)))
+            .and_then(|n| cols.checked_mul(7).and_then(|c| n.checked_add(c)))
             .and_then(|n| n.checked_add(nu)).and_then(|n| n.checked_add(nv))
             .and_then(|n| fx.checked_mul(2).and_then(|c| n.checked_add(c)))
             .and_then(|n| fy.checked_mul(2).and_then(|c| n.checked_add(c)))
@@ -228,6 +232,8 @@ impl Volume3 {
             ghost_bg_up: vec![0.; cols],
             ghost_bg_x: vec![0.; nu],
             ghost_bg_y: vec![0.; nv],
+            relative_background: 0,
+            ghost_bg_error: vec![0.; cols],
             pressure_base: vec![0.; cells],
             band_x: vec![0.; fx],
             band_y: vec![0.; fy],

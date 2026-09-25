@@ -94,11 +94,25 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les réponses : ADR-197 ; liste (6.7, 8.1, 5.11, 2.8, 7.8 ; 8.7 et R18), données des dépendances,
   file (ligne des décisions), feuille de route, REVUE-VISUELLE §23 (verdict R18).
-- [ ] **P3** — `delta3d_coupling.rs` : le mode relatif à B (trois retraits, un drapeau par terme pour la mesure) ;
+- [x] **P3** — `delta3d_coupling.rs` : le mode relatif à B (trois retraits, un drapeau par terme pour la mesure) ;
   E1 ; critère 1.
-- [ ] **P4** — germe et E2 ; critères 2 et 3.
+- [>] **P4** — germe et E2 ; critères 2 et 3.
 - [ ] **P5** — ADR-198, la voie d'A289 ; preuve MER-S369 ; A289, lot 2 (4.8, 4.21), file, dépendances, feuille de route,
   index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2.** ADR-197 ; « pas de réseau » lu comme « aucun format n'existe », la portée (multijoueur ?) à demander en une
+  ligne au message de fin ; 5.11 hors du périmètre (gardé, marqué) ; météo et son à la fin ; 8.1 au front 0.
+- **P3, critère 1 tenu.** `Volume3::set_relative_background(masque)` : 1 résidu de quantité de mouvement de B
+  (`extra3`), 2 la bande jusqu'à la surface de B (`transport_coupled3`, surface « propre » formée comme la totale),
+  4 l'erreur de pression de B à sa surface (`ghost_bg_error` par colonne, retirée du fantôme vertical, interpolée à θ
+  sur les latéraux). Test `zero_delta_stays_zero_under_b_alone_when_relative_s369` : 150 pas, nul au bit ; S297 :
+  3·10⁻³ m. Suite δ 3D : 74 réussis. **E1, 40 s, 25 cm, pas 10 ms** (`MER_RELATIF`), δ max à 40 s et taux 10→30 s :
+  0 (S322) 15,8 cm, 0,101 ; 1 : 3,06 cm, 0,074 ; 2 : 14,0, 0,099 ; 3 : 1,45, 0,047 ; 4 : 17,5, 0,095 ; 5 : 4,80,
+  0,066 ; 6 : 14,7, 0,108 ; **7 : 0 au bit** (51 s de calcul contre ≈ 170). Le résidu de quantité de mouvement porte
+  l'essentiel ; aucun terme seul ne suffit.
+- **P4, premiers chiffres.** Germe de 1 mm (`MER_GERME`), masque 7, 40 s : max 1,12 mm, ne croît pas. **E2 à 25 cm,
+  masque 7 : manqué** — le paquet de 2 cm reste à 2 cm jusqu'à ≈ 31 s, puis croît : 2,5 cm à 39 s, 12,6 à 71 s,
+  plateau ≈ 14 cm (taux ≈ 0,05 s⁻¹) ; reçu à droite 1 620 fois le paquet. Une instabilité des termes croisés, que la
+  source retirée ne soigne pas. Diagnostics lancés : profil, pas de 5 ms, houle de 2,5 cm, germe sur 95 s.
