@@ -85,8 +85,8 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la hessienne dans la FFT, son contrôle ; critère 1.
-- [ ] **P3** — les caustiques dans le nuanceur du fond ; la bande et la cascade de 32 m données au fond.
-- [ ] **P4** — le contrôle contre la solution exacte ; critère 2.
+- [x] **P3** — les caustiques dans le nuanceur du fond ; la bande et la cascade de 32 m données au fond.
+- [x] **P4** — le contrôle contre la solution exacte ; critère 2.
 - [ ] **P5** — la scène, l'énergie ; images R22 ; critères 3 et 4.
 - [ ] **P6** — preuve, file, liste, index.
 - [ ] **P7** — rituel.
@@ -96,3 +96,12 @@ Critères, écrits avant le code :
   niveaux. Contrôle (`--controle-fft`, η, ∂η/∂x, η_xx) : pire **1,85·10⁻⁵** et **3,27·10⁻⁵** du rms. Courbures : cascade
   de 32 m, η_xx de 0,03 à 0,42 m⁻¹ (focale ≈ 1/((1 − 1/n)·0,3) ≈ 13 m, dans la scène) ; cascade de 4 m, 3 à 9 m⁻¹
   (focale ≈ 0,8 m) — son exclusion des caustiques du fond de la scène (≥ 5 m) se tient.
+- **P3.** `sol.gdshader` : `surface(x)` (bande analytique + cascade de 32 m : pente, η, hessienne), `rayon(s)` (Snell
+  exact, `refract` de GLSL), `focalisation` — point fixe à quatre itérations, `∂p/∂s` par différences centrées (10⁻³),
+  `J = I + p⊗∇η + (H + η)·(∂p/∂s)·Hess η`, `1/max(|det J|, det_min)` ; éclairement direct `0,4·n·soleil` multiplié.
+  `mer.gd` : la bande au fond à chaque image, la cascade 0 et sa hessienne ; `CAUSTIQUES=0` les éteint. **Vu, fond
+  seul** : un réseau de cellules d'un à deux mètres aux arêtes vives ; des boucles fines (replis) ; au loin un grain —
+  le réseau plus fin que le pixel.
+- **P4, critère 2 tenu.** `--controle-caustiques` : a = 5 cm, λ = 4 m, soleil au zénith, H_f = 31,946 m, H = 15,973 m ;
+  sortie rouge C/4 et vert fract(10·C). 50 points : pire **2,35 %**, moyenne rendue **1,0016** (exacte 0,9987 sur ces
+  points) ; crête 1,712 rendue contre 1,673 exacte à x = 0,80 m.

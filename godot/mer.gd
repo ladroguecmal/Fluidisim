@@ -40,6 +40,8 @@ var temps := 12.0
 var anime := true
 ## S360 : la surface fine par FFT (`detail.gd`), si l'export la porte.
 var detail: Node
+## S361 : le matériau du fond, qui reçoit la bande et la cascade de 32 m pour ses caustiques.
+var materiau_sol: ShaderMaterial
 
 
 func _ready() -> void:
@@ -73,7 +75,7 @@ func _ready() -> void:
 	add_child(mer)
 	# S359 : `SANS_EAU=1` masque la mer, pour voir le fond seul.
 	mer.visible = OS.get_environment("SANS_EAU") != "1"
-	if "--cote" in args or "--controle-fond" in args:
+	if "--cote" in args or "--controle-fond" in args or "--controle-caustiques" in args:
 		add_child(fond())
 	uniformes_fixes()
 	phases(temps)
@@ -89,6 +91,13 @@ func _ready() -> void:
 			materiau.set_shader_parameter("detail_b1", detail.textures[1][1])
 			materiau.set_shader_parameter("detail_cotes", Vector2(float(detail.cotes[0]), float(detail.cotes[1])))
 			materiau.set_shader_parameter("detail_actif", true)
+			# S361 : les caustiques du fond — la bande et la cascade de 32 m ; `CAUSTIQUES=0` les éteint.
+			if materiau_sol != null:
+				materiau_sol.set_shader_parameter("n_bande", donnees["bande"].size())
+				materiau_sol.set_shader_parameter("detail_a0", detail.textures[0][0])
+				materiau_sol.set_shader_parameter("detail_c0", detail.textures[0][2])
+				materiau_sol.set_shader_parameter("detail_cote0", float(detail.cotes[0]))
+				materiau_sol.set_shader_parameter("caustiques", OS.get_environment("CAUSTIQUES") != "0")
 		elif not "--controle-fft" in args:
 			detail = null
 	if "--controle-fft" in args:
@@ -104,6 +113,9 @@ func _ready() -> void:
 	if "--controle-ecume" in args:
 		anime = false
 		controle_ecume()
+	if "--controle-caustiques" in args:
+		anime = false
+		controle_caustiques()
 
 
 ## Le ciel : depuis S359, celui de l'afficheur lui-même (`ciel.gdshaderinc` — dégradé du « ciel clair » relevé sur la
@@ -196,6 +208,7 @@ func fond() -> MeshInstance3D:
 	m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, tableaux)
 	var sol := ShaderMaterial.new()
 	sol.shader = load("res://sol.gdshader")
+	materiau_sol = sol
 	var instance := MeshInstance3D.new()
 	instance.mesh = m
 	instance.material_override = sol
@@ -276,8 +289,11 @@ func lignes(nom: String, t: float) -> PackedVector4Array:
 
 
 func phases(t: float) -> void:
-	materiau.set_shader_parameter("bande", lignes("bande", t))
+	var bande := lignes("bande", t)
+	materiau.set_shader_parameter("bande", bande)
 	materiau.set_shader_parameter("queue", lignes("queue", t))
+	if materiau_sol != null:
+		materiau_sol.set_shader_parameter("bande", bande)
 
 
 func _process(delta: float) -> void:
@@ -457,3 +473,113 @@ func controle_fft() -> void:
 	for _k in 6:
 		await RenderingServer.frame_post_draw
 	detail.controler(t, func(tout: bool) -> void: get_tree().quit(0 if tout else 1))
+
+
+## S361 — **le contrôle des caustiques contre une solution exacte** : une seule onde, `η = a·sin(kx)`, λ = 4 m, a = 5 cm ;
+## soleil au zénith ; fond plat imposé à la moitié de la focale `H_f = 1/((1 − 1/n)·a·k²)` ; la mer masquée, le fond vu
+## au nadir. L'éclairement rendu en 50 points d'une longueur d'onde contre `Σ 1/|F'(x_s)|` sur les antécédents de
+## `F(x_s) = x_s + (H + η)·p(η'(x_s)) − x_f` — Snell exact, racines trouvées en double par balayage et dichotomie.
+func controle_caustiques() -> void:
+	var env: Environment = (get_children().filter(func(c): return c is WorldEnvironment)[0] as WorldEnvironment).environment
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	env.glow_enabled = false
+	env.fog_enabled = false
+	mer.visible = false
+	var a := 0.05
+	var k := TAU / 4.0
+	var n := 1.34
+	var h_f := 1.0 / ((1.0 - 1.0 / n) * a * k * k)
+	var h := 0.5 * h_f
+	materiau_sol.set_shader_parameter("bande", PackedVector4Array([Vector4(a, k, 0.0, 0.0)]))
+	materiau_sol.set_shader_parameter("n_bande", 1)
+	materiau_sol.set_shader_parameter("caustiques", true)
+	materiau_sol.set_shader_parameter("caustiques_detail", false)
+	materiau_sol.set_shader_parameter("det_min", 1e-3)
+	materiau_sol.set_shader_parameter("profondeur_controle", h)
+	materiau_sol.set_shader_parameter("soleil_controle", Vector3(0.0, 0.0, 1.0))
+	materiau_sol.set_shader_parameter("controle", 1)
+	camera.position = Vector3(0.0, 2.0, 60.0)
+	camera.rotation = Vector3(-PI / 2.0, 0.0, 0.0)
+	for _i in 12:
+		await RenderingServer.frame_post_draw
+	var image := get_viewport().get_texture().get_image()
+	var taille := image.get_size()
+	# Les pixels de la rangée centrale qui couvrent une longueur d'onde, à partir du centre.
+	var o := camera.project_ray_origin(Vector2(taille.x / 2, taille.y / 2))
+	var pire := 0.0
+	var somme_r := 0.0
+	var somme_e := 0.0
+	var echantillons := 50
+	for i in echantillons:
+		var x_cible := 4.0 * float(i) / float(echantillons)
+		var px := camera.unproject_position(Vector3(o.x + x_cible, -profondeur(o.x + x_cible, -o.z), o.z))
+		var pixel := Vector2i(int(px.x), taille.y / 2)
+		var xf := profondeur_au_pixel_x(Vector2(pixel) + Vector2(0.5, 0.5))
+		var col := image.get_pixel(pixel.x, pixel.y).srgb_to_linear()
+		var grossier := 4.0 * col.r
+		var fin := col.g
+		var rendu := (roundf(10.0 * grossier - fin) + fin) / 10.0
+		var exact := eclairement_exact(xf, a, k, h, n)
+		pire = maxf(pire, absf(rendu - exact) / exact)
+		somme_r += rendu
+		somme_e += exact
+		print("CONTROLE_CAUSTIQUES_S361 x_m=%.4f rendu=%.4f exact=%.4f" % [xf, rendu, exact])
+	var moyenne := somme_r / echantillons
+	print("CONTROLE_CAUSTIQUES_S361 H_f_m=%.3f H_m=%.3f pire_relatif=%.4f moyenne_rendue=%.4f moyenne_exacte=%.4f critere=%s" % [h_f, h, pire, moyenne, somme_e / echantillons, "tenu" if pire <= 0.05 and absf(moyenne - 1.0) <= 0.01 else "manque"])
+	get_tree().quit()
+
+
+## Le point du fond vu au pixel, en x de B : le rayon du pixel jusqu'au fond de `profondeur()`.
+func profondeur_au_pixel_x(px: Vector2) -> float:
+	var o := camera.project_ray_origin(px)
+	var d := camera.project_ray_normal(px)
+	var t := 0.0
+	while o.y + d.y * t > -profondeur(o.x + d.x * t, -(o.z + d.z * t)):
+		t += 0.02
+	var a := t - 0.02
+	var b := t
+	for _i in 40:
+		var m := 0.5 * (a + b)
+		var p := o + d * m
+		if p.y > -profondeur(p.x, -p.z):
+			a = m
+		else:
+			b = m
+	return (o + d * b).x
+
+
+## La pente horizontale du rayon de soleil vertical réfracté par une facette de pente `s` (refract de GLSL, en double).
+static func pente_rayon(s: float, n: float) -> float:
+	var nv := Vector3(-s, 0.0, 1.0).normalized()
+	var i := Vector3(0.0, 0.0, -1.0)
+	var eta := 1.0 / n
+	var c := nv.dot(i)
+	var q := 1.0 - eta * eta * (1.0 - c * c)
+	var r := eta * i - (eta * c + sqrt(q)) * nv
+	return r.x / -r.z
+
+
+static func eclairement_exact(xf: float, a: float, k: float, h: float, n: float) -> float:
+	var f := func(xs: float) -> float:
+		return xs + (h + a * sin(k * xs)) * pente_rayon(a * k * cos(k * xs), n) - xf
+	var total := 0.0
+	var pas := 0.002
+	var x := xf - 3.0
+	var fa: float = f.call(x)
+	while x < xf + 3.0:
+		var fb: float = f.call(x + pas)
+		if fa == 0.0 or (fa < 0.0) != (fb < 0.0):
+			var lo := x
+			var hi := x + pas
+			for _i in 60:
+				var m := 0.5 * (lo + hi)
+				if (f.call(lo) < 0.0) != (f.call(m) < 0.0):
+					hi = m
+				else:
+					lo = m
+			var r := 0.5 * (lo + hi)
+			var d := 1e-6
+			total += 1.0 / absf((f.call(r + d) - f.call(r - d)) / (2.0 * d))
+		x += pas
+		fa = fb
+	return total
