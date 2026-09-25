@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-25 01:13 +02:00
+JETON            : occupé
+Battement        : 2026-09-25 08:30 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S358 — la physique (ADR-191 D3) : `Linear3`, le pas linéaire de la porte D sur la carte, contre `Volume3`
 Dernière session : S357 — **la mer de B dans Godot 4.4.1** (ADR-192 D2) : données exportées du cœur, hauteur retrouvée à 10⁻⁷ m, nuanceur porté (CWM, écume, crêtes), environnement de Godot ; **R19 préparée**, images envoyées ([preuve](docs/validation/PROTOTYPE-GODOT-S357.md))
 Session suivante : **le verdict R19 d'abord** (REVUE-VISUELLE §24) — selon lui, calibrer l'environnement de Godot ou intégrer le cœur par GDExtension (accord de téléchargement nommé). En attendant, par l'alternance d'ADR-191 D3 : **la physique**, la coque sur la carte (`Linear3`, plan de S355 au commit `a2c81dea`). En attente : R18, R19
 Maillons        : 4 — S354 : attribution ; S355 : décision ; S356 : module non jugé et décision ; S357 : prototype non jugé (justifié au journal)

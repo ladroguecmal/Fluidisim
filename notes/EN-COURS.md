@@ -62,50 +62,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S357 — **terminée**. **Rendu 2 (ADR-192 D2) : la mer de B dans Godot 4.4.1** — le prototype que l'utilisateur
-a choisi comme premier pas, jugé sur images avant tout portage.
+Session : S358 — **en cours**. **La physique (ADR-191 D3) : la coque dans la production de δ, 1 — `Linear3`, le pas
+linéaire de la porte D sur la carte.** Le plan de S355 (commit `a2c81dea`), reporté tel quel, plus le solide fixe.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
-Entrée — S356 : les crêtes de B dans l'afficheur, puis *« rendu toujours pas convaincant »* et le choix de Godot 4.
-**Ce que le prototype est** : un projet Godot dans `godot/`, **sans intégration native ni téléchargement** — les
-composantes de la mer de `--meilleur` exportées par l'afficheur en un fichier de données (dérivé, non versionné) ; un
-nuanceur d'eau dans le langage de Godot qui porte le CWM de la bande, la queue en pentes filtrées, l'écume et la
-lumière des crêtes de S356 ; l'environnement de Godot — ciel, soleil à la direction de la scène, tonalité, reflets à
-l'écran, brume. **Ce qu'il n'est pas** : ni W, ni δ, ni la requête de jeu ; une image à juger.
+Entrée — *« Reprends le projet »*, sans verdict R19 : la physique en attendant (S357). Liste 6.4, *manque la production
+GPU*. **Constat de S355** : la coque a été reçue dans le **mode linéaire** de δ (couvercle, faces coupées, couvercle
+partiel, S330–S337) ; la production est le pas **mobile couplé**, qui n'a de solide nulle part. **Chemin** (ADR à écrire
+sur les mesures) : le domaine δ d'une coque est un domaine **linéaire** porté sur la carte ; le pas mobile couplé garde
+les autres. Découpage : ici le pas à ouvertures, toutes ouvertes **puis celles d'un solide fixe** (6.5) ; ensuite la
+coque qui bouge et perce le couvercle ; puis la scène.
 
 Critères, écrits avant le code :
-1. **L'export** (`--export-godot`) : composantes de bande et de queue, `M`, retard, seuils de l'écume, gain ; le même
-   instant rejoué dans Godot rend la **même hauteur** que le cœur en quelques points (écart < 1 mm), lu par un script.
-2. **La scène Godot** : grille autour de la caméra, nuanceur, environnement ; phases temporelles repliées côté script en
-   double précision (I-08) ; lancée sans erreur de compilation du nuanceur.
-3. **Les images** : les poses de R14 (proche, rasante) à 12 s, capturées par Godot lui-même, et les mêmes poses de
-   l'afficheur à côté ; images pour la revue **R19**, questions et références demandées.
-4. Preuve, file, feuille de route, liste 8.1.
+1. **`Linear3` sur la carte** : le pas de `Volume3::step_surface_linear` — prédit = courant, éponge sur les vitesses
+   prédites, divergence pondérée par les ouvertures, terme du couvercle, opérateur pondéré (couvercle à demi-maille),
+   gradient conjugué de Jacobi à **cycles fixes repartant du pas précédent**, correction entre mailles fluides, flux de
+   colonne pondérés, hauteur compensée (différence exacte de S301), rappel de l'éponge. Ouvertures et fractions
+   **réservées à la création** (I-06), toutes ouvertes ou données par le cœur ; aucune relecture dans le pas.
+2. **Contre la référence** : bosse gaussienne de 10 cm (σ = 1 m) au centre, grille de la porte D (96 × 96 × 8, 25 cm,
+   2 m), pas de 10 ms, 200 pas, éponge de 3 m à 2,5 /s : **|Δη| ≤ 10⁻⁴ m** sur toutes les colonnes, relevé tous les
+   vingt pas. Sans éponge, le volume de la carte ne dérive pas de plus de **10⁻⁶** du volume initial en 200 pas.
+   **2 bis — solide fixe** : sphère de 0,5 m centrée à 1 m de profondeur sous la bosse, découpe du cœur
+   (`configure_with_solid`) chargée telle quelle : même critère ; faces fermées à vitesse nulle, exactement.
+   **Prédiction** : 32 cycles au plus suffisent, départ chaud.
+3. **Le coût** sur cette grille : p50 et p99 du pas horodaté, au plus petit nombre de cycles qui tient 2 et 2 bis ;
+   alimentation relevée (A270) ; techniques présentes et absentes (ADR-131). Prédiction : sous 2 ms (ADR-174 D3).
+4. ADR-193 (le domaine d'une coque est linéaire, sur la carte), preuve ouverte par « Reproduire », file, feuille de
+   route, liste 6.4 et 6.5.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'export depuis l'afficheur ; critère 1 (partie données).
-- [x] **P3** — le projet Godot : scène, nuanceur, environnement ; critère 2 et la hauteur du critère 1.
-- [x] **P4** — les captures et la revue R19 ; critère 3.
-- [x] **P5** — preuve, file, feuille de route, liste ; critère 4.
-- [x] **P6** — rituel.
+- [ ] **P2** — `delta3d_linear.wgsl` : les noyaux du pas et du gradient conjugué à ouvertures.
+- [ ] **P3** — `delta3d_linear.rs` : `Linear3`, tampons, encodage du pas, relectures de banc ; critère 1.
+- [ ] **P4** — le banc contre `Volume3`, bosse, avec et sans éponge, balayage des cycles ; critère 2.
+- [ ] **P5** — le solide fixe immergé ; critère 2 bis.
+- [ ] **P6** — le coût ; critère 3.
+- [ ] **P7** — ADR-193, preuve, file, feuille de route, liste ; critère 4.
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
-- **P2.** `--meilleur --export-godot[=fichier]` (`rendu_cretes::export_godot`) → `godot/donnees/mer_b.json`, dérivé et
-  ignoré par git : 64 lignes de bande, 60 de queue, `[a, kx, ky, φ, ω]` à l'origine et à 12 s ; `M` = 2, retard −0,2,
-  système 1 de 32 composantes, `k̄` 0,1742 et 0,0317 rad/m ; 14 seuils ; soleil (−0,424 ; 0,318 ; 0,848) ; cinq
-  points de contrôle, `η` linéaire de la bande à `t₀ + 3 s` calculé par le cœur (0,15376 m à l'origine).
-- **P3.** `godot/` : `project.godot` (Forward+, 1280 × 720, MSAA 2), `mer.tscn`, `mer.gd` (grille polaire 720 × 360
-  de 0,25 m à 12 km autour de la caméra, environnement, phases repliées en double, poses de R14, `--captures`,
-  `--controle`), `eau.gdshader` (bande CWM + Tayfun, queue filtrée, pente eulérienne, écume à seuils par empreinte,
-  crêtes en `BACKLIGHT`, pente non résolue en rugosité GGX `mss^(1/4)`, albédo `0,54·R(0⁻)`). **Contrôle** (`--headless
-  -- --controle`) : `η` de la bande recalculé par Godot contre le cœur à `t₀ + 3 s`, **1,0·10⁻⁷ m au pire** sur cinq
-  points (critère : 1 mm). Nuanceur compilé sans erreur (Vulkan 1.4, RTX 5070 Laptop). **Ce que les images ont dit** :
-  le ciel physique par défaut de Godot rend un **crépuscule gris** → ciel procédural aux couleurs du ciel clair de
-  l'afficheur (photo de R14) ; en rasant, **les reflets à l'écran remplaçaient le ciel par l'eau sombre** → éteints
-  (`REFLETS_ECRAN=1` les rallume) ; le demi-ciel bas pris à la couleur de l'horizon.
-- **P4.** Captures de Godot par lui-même (`-- --captures`, douze images d'attente par pose) et de l'afficheur
-  (`--meilleur --eau-physique=2 --ecume=0.55 --cretes --revue-mer=s357afficheur`), rassemblées dans
-  `viewer/captures/s357` (SHA-256 : afficheur proche `c9627a43…`, rasante `af2aaf00…` ; Godot proche `0bb2491f…`,
-  rasante `959024d0…`) ; **R19** écrite (REVUE-VISUELLE §24), images envoyées à l'utilisateur.
-
