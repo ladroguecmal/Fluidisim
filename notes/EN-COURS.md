@@ -94,7 +94,7 @@ Critères, écrits avant le code :
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `delta3d_linear.wgsl` : les noyaux du pas et du gradient conjugué à ouvertures.
 - [x] **P3** — `delta3d_linear.rs` : `Linear3`, tampons, encodage du pas, relectures de banc ; critère 1.
-- [ ] **P4** — le banc contre `Volume3`, bosse, avec et sans éponge, balayage des cycles ; critère 2.
+- [x] **P4** — le banc contre `Volume3`, bosse, avec et sans éponge, balayage des cycles ; critère 2.
 - [ ] **P4 bis** *(ajoutée en cours, après P3)* — le même défaut de publication dans la production `Step3`
   (`published`, `ghost_up`) : la dérive de la moyenne de S305 §7, mesurée avant et après sur la cuve.
 - [ ] **P5** — le solide fixe immergé ; critère 2 bis.
@@ -115,3 +115,9 @@ Critères, écrits avant le code :
   Cause : `(η − z₀) − reste` réassocié par le compilateur, le reste perdu dans l'ulp de `z₀` (famille L345). Remède :
   `difference(η, z₀)` en entiers (Sterbenz), dans la publication **et le couvercle**. Après : dérive 6·10⁻¹⁰ à 4·10⁻⁹.
   **La production `Step3` a le même motif** (`published`, `ghost_up`) — c'est la dérive de la moyenne de S305 §7.
+- **P4, critère 2 tenu.** Cœur : 105,1 itérations de gradient conjugué par pas, départ froid, 17–18 s les 200 pas.
+  Éponge — pire |Δη| sur les dix relevés : **4 cycles 1,74·10⁻⁴ m (manqué)**, 8 cycles 5,67·10⁻⁵, 16 cycles 2,18·10⁻⁵,
+  32 cycles 7,2·10⁻⁷, 64 cycles 2,38·10⁻⁷ (l'ulp de 2 m) ; résidu relatif 4,2·10⁻³ à 8 cycles, 2,2·10⁻⁶ à 64 ; volume
+  final 0,282982947 m³ contre 0,282982986 au cœur (64 cycles). Sans éponge : mêmes écarts ; dérive du volume publié
+  **6·10⁻¹⁰ à 4·10⁻⁹** pour 10⁻⁶ exigé (après correction). Aucune face fermée non nulle. En usage : 5,7·10⁻⁵ m à 8
+  cycles, cinquante fois sous les 3 mm de l'image (S201).
