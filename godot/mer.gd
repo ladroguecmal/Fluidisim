@@ -60,6 +60,14 @@ var materiau_sol: ShaderMaterial
 var materiau_ciel: ShaderMaterial
 ## S366 : l'environnement, dont la brume — un phénomène de l'air — s'éteint quand la caméra est dans l'eau.
 var environnement_scene: Environment
+## S368 — le champ d'écume sur la carte (`ecume.gd`, production de la référence de S367) ; `ECUME=ancienne` garde
+## l'écume instantanée de S360. Centre courant du champ (axes de B), et 60 s de passé simulé à chaque recentrage.
+var ecume: Node
+var ecume_centre := Vector2(INF, INF)
+const ECUME_PASSE_S := 60.0
+const ECUME_PAS_S := 0.1
+## κ du seuil de déferlement `κ·σ_a` : 0 = la relation de S367, `2,5 + ln(W/0,0226)/(−3,52)` ; sinon la valeur recalée.
+const KAPPA_ECUME := 0.0
 var vue_caustiques: SubViewport
 var materiau_caustiques: ShaderMaterial
 var maillage_caustiques: MeshInstance3D
@@ -134,6 +142,18 @@ func _ready() -> void:
 				materiau_caustiques.set_shader_parameter("caustiques_detail", true)
 		elif not "--controle-fft" in args:
 			detail = null
+	if OS.get_environment("ECUME") != "ancienne":
+		ecume = load("res://ecume.gd").new()
+		add_child(ecume)
+		var pulsations := PackedFloat32Array()
+		for r in donnees["bande"]:
+			pulsations.append(float(r[4]))
+		ecume.initialiser(pulsations, Vector2.ZERO, 9.81)
+		ecume.seuil = ecume_seuil()
+	if "--controle-ecume-champ" in args:
+		anime = false
+		controle_ecume_champ()
+		return
 	if "--controle-fft" in args:
 		anime = false
 		controle_fft()
@@ -474,6 +494,40 @@ func immersion(t: float) -> void:
 			m.set_shader_parameter("profondeur_camera", maxf(eta - camera.global_position.y, 0.0))
 
 
+## S368 — le seuil de déferlement du champ d'écume, m/s² : `κ·σ_a`, `σ_a² = Σ ½·(a·ω²)²` sur la bande, κ tel que la
+## couverture active vaille celle de Monahan exportée (S367 ; recalé ici si `KAPPA_ECUME` n'est pas nul).
+func ecume_seuil() -> float:
+	var v := 0.0
+	for r in donnees["bande"]:
+		var w := float(r[4])
+		v += 0.5 * pow(float(r[0]) * w * w, 2.0)
+	var kappa := KAPPA_ECUME
+	if kappa <= 0.0:
+		kappa = 2.5 + log(float(donnees["couverture_monahan"]) / 0.0226) / -3.52
+	if OS.get_environment("KAPPA") != "":
+		kappa = float(OS.get_environment("KAPPA"))
+	return kappa * sqrt(v)
+
+
+## S368 — recentrer le champ d'écume sur la caméra (au texel près), le vider, puis simuler `ECUME_PASSE_S` de passé au pas
+## de `ECUME_PAS_S` : B est analytique, le passé se rejoue ; l'écume de la capture est celle d'un régime établi.
+func ecume_centrer(t: float) -> void:
+	if ecume == null:
+		return
+	var c := Vector2(camera.global_position.x, -camera.global_position.z)
+	c = (c / ecume.PAS).round() * ecume.PAS
+	ecume_centre = c
+	var demi: float = 0.5 * ecume.N * ecume.PAS
+	ecume.origine = c - Vector2(demi, demi)
+	var l0 := lignes("bande", t - ECUME_PASSE_S)
+	ecume.avancer([l0, l0, l0], ECUME_PAS_S, 3)
+	var suite := []
+	var n := int(round(ECUME_PASSE_S / ECUME_PAS_S))
+	for k in n + 1:
+		suite.append(lignes("bande", t - ECUME_PASSE_S + k * ECUME_PAS_S))
+	ecume.avancer(suite, ECUME_PAS_S, 0)
+
+
 func phases(t: float) -> void:
 	immersion(t)
 	var bande := lignes("bande", t)
@@ -491,6 +545,14 @@ func _process(delta: float) -> void:
 	if anime:
 		temps += delta
 		phases(temps)
+		# S368 : l'écume suit le temps — deux demi-pas par image ; recentrée si la caméra s'éloigne de 32 m.
+		if ecume != null:
+			var cam := Vector2(camera.global_position.x, -camera.global_position.z)
+			if cam.distance_to(ecume_centre) > 32.0:
+				ecume_centrer(temps)
+			else:
+				ecume.avancer([lignes("bande", temps - delta), lignes("bande", temps - 0.5 * delta), lignes("bande", temps)],
+					0.5 * delta, 0)
 		if detail != null:
 			detail.calculer(temps)
 
@@ -527,6 +589,7 @@ func captures() -> void:
 		pose(nom)
 		mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
 		immersion(temps)
+		ecume_centrer(temps)
 		for _i in 12:
 			await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
@@ -874,3 +937,65 @@ func controle_caustiques_scene() -> void:
 				n += 1
 		print("CONTROLE_CAUSTIQUES_SCENE_S361 pose=%s format=%d texels=%d moyenne=%.4f max=%.2f part_au_dessus_de_5=%.5f critere=%s" % [nom, image.get_format(), n, somme / n, maximum, float(forts) / n, "tenu" if absf(somme / n - 1.0) <= 0.1 else "manque"])
 	get_tree().quit()
+
+
+## S368 — **le contrôle du champ d'écume sur la carte** (critère 1) : (a) décroissance — un champ uniforme (actif 1),
+## 600 pas de 1/60 s sans source ni advection, contre la solution fermée ; (b) advection — une bosse gaussienne
+## (σ = 2 m) translatée par (0,37 ; −0,21) m/s, cent pas de 0,1 s, centre de masse contre (3,7 ; −2,1) m.
+func controle_ecume_champ() -> void:
+	for _i in 4:
+		await RenderingServer.frame_post_draw
+	var l0 := lignes("bande", temps)
+	ecume.origine = Vector2(-128.0, -128.0)
+	ecume.avancer([l0, l0, l0], 1.0 / 60.0, 4, PackedFloat32Array([0.0, 0.0, 0.0, 0.0, 1e6]))
+	var suite := []
+	for _k in 601:
+		suite.append(l0)
+	ecume.avancer(suite, 1.0 / 60.0, 1)
+	var valeurs: PackedFloat32Array = await _relire_ecume()
+	var la := log(2.0) / 3.0
+	var lr := log(2.0) / 30.0
+	var t := 10.0
+	var a_att := exp(-la * t)
+	var r_att := la / (la - lr) * (exp(-lr * t) - exp(-la * t))
+	var pire := 0.0
+	for texel in [Vector2i(0, 0), Vector2i(511, 511), Vector2i(1023, 17)]:
+		var i: int = 4 * (texel.y * ecume.N + texel.x)
+		pire = maxf(pire, maxf(absf(valeurs[i] / a_att - 1.0), absf(valeurs[i + 1] / r_att - 1.0)))
+		print("CONTROLE_ECUME_S368 decroissance texel=%s actif=%.7f/%.7f residuel=%.7f/%.7f" % [texel, valeurs[i], a_att, valeurs[i + 1], r_att])
+	print("CONTROLE_ECUME_S368 decroissance pire_relatif=%s critere=%s" % [String.num_scientific(pire), "tenu" if pire <= 1e-5 else "manque"])
+	# (b) L'advection : une bosse au centre du champ, puis cent pas à vitesse uniforme.
+	var x0 := Vector2(-3.0, 4.0)
+	ecume.avancer([l0, l0, l0], 0.1, 4, PackedFloat32Array([0.0, 0.0, x0.x, x0.y, 2.0]))
+	suite = []
+	for _k in 101:
+		suite.append(l0)
+	ecume.avancer(suite, 0.1, 2, PackedFloat32Array([0.37, -0.21]))
+	valeurs = await _relire_ecume()
+	var masse := 0.0
+	var mx := 0.0
+	var my := 0.0
+	for j in ecume.N:
+		for i in ecume.N:
+			var v := valeurs[4 * (j * ecume.N + i)]
+			if v > 0.0:
+				var x: float = ecume.origine.x + (i + 0.5) * ecume.PAS
+				var y: float = ecume.origine.y + (j + 0.5) * ecume.PAS
+				masse += v
+				mx += v * x
+				my += v * y
+	var centre := Vector2(mx / masse, my / masse)
+	var attendu := x0 + Vector2(3.7, -2.1)
+	var ecart := centre.distance_to(attendu)
+	# La masse attendue, décroissance comprise : 2π·σ²/pas² texels de hauteur 1, fois e^(−λa·10 s).
+	var masse_att: float = TAU * 4.0 / (ecume.PAS * ecume.PAS) * exp(-la * 10.0)
+	print("CONTROLE_ECUME_S368 advection centre=%s attendu=%s ecart_m=%s masse_relative=%s critere=%s" % [centre, attendu, String.num_scientific(ecart), String.num_scientific(masse / masse_att - 1.0), "tenu" if ecart <= 0.01 else "manque"])
+	get_tree().quit()
+
+
+func _relire_ecume() -> PackedFloat32Array:
+	var boite := [null]
+	ecume.relire(func(v): boite[0] = v)
+	while boite[0] == null:
+		await get_tree().process_frame
+	return boite[0]

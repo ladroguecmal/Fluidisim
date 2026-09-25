@@ -86,10 +86,15 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [>] **P2** — `ecume.comp`, `ecume.gd` : le champ sur la carte ; contrôles de décroissance et d'advection ; critère 1.
-- [ ] **P3** — la couverture relue, κ recalé ; critère 2.
+- [x] **P2** — `ecume.comp`, `ecume.gd` : le champ sur la carte ; contrôles de décroissance et d'advection ; critère 1.
+- [>] **P3** — la couverture relue, κ recalé ; critère 2.
 - [ ] **P4** — l'écume rendue depuis le champ (`eau.gdshader`) : actif et dentelle ; images R26 ; critère 3.
 - [ ] **P5** — preuve ECUME-GODOT-S368 ; liste 8.4, file, dépendances, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 tenu.** `ecume.comp` (le pas de S367, modes de contrôle 1 à 4), `ecume.gd` (deux images RGBA32F
+  alternées, pas en nombre pair, relecture), `mer.gd` (seuil `κ·σ_a`, recentrage et 60 s de passé, deux demi-pas par
+  image ; `ECUME=ancienne`, `KAPPA`). `--controle-ecume-champ` : advection d'une bosse, centre à **0,47 mm**, masse
+  8e-7. **Décroissance, défaut trouvé** : 2,5e-5 sur le résiduel en 600 pas de 1/60 s — le transfert `e^(−λr·dt) −
+  e^(−λa·dt)` s'annule en f32 (3e-5 par pas) ; coefficients calculés en **double** par le script : **8,6e-6**.

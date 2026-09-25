@@ -1,0 +1,117 @@
+#version 450
+// ASCII seulement : le compilateur GLSL de Godot (glslang) refuse les caracteres au-dela.
+// S368 - LE CHAMP D'ECUME SUR LA CARTE (ADR-014, SPEC-006 section 4) : la production de la reference de S367
+// (`code/water-core/src/ecume.rs`, `ChampEcume::pas_de_temps`), a l'identique :
+//   advection semi-lagrangienne bilineaire par la vitesse orbitale horizontale de la bande de B a l'instant de depart
+//   (ce qui vient de hors du champ vaut zero, ADR-014 section 2.3) ;
+//   decroissance exacte a deux canaux, dFa/dt = -la*Fa, dFr/dt = la*Fa - lr*Fr (tout ce que l'actif perd devient
+//   residuel) ;
+//   sources a l'instant d'arrivee : Fa = max(Fa, montee lisse de l'acceleration verticale descendante autour du seuil).
+// Etat : RGBA32F (R actif, G residuel) en deux images alternees ; la decroissance pas a pas ne tiendrait pas en demi-
+// precision. Axes de B : x a l'est, y au nord ; le texel (i, j) a son centre en origine + (i + 1/2, j + 1/2) * pas.
+// Modes : 0 pas complet ; 1 decroissance seule ; 2 advection par la vitesse uniforme (vx, vy), puis decroissance ;
+// 3 remise a zero ; 4 une bosse gaussienne (bx, by, bs) dans l'actif.
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+// (a, kx, ky, phase) : les n_bande composantes a l'instant de depart, puis les memes a l'instant d'arrivee.
+layout(set = 0, binding = 0, std430) restrict readonly buffer Bande { vec4 c[]; } bande;
+layout(set = 0, binding = 1, std430) restrict readonly buffer Pulsations { float w[]; } puls;
+layout(set = 0, binding = 2, rgba32f) uniform restrict readonly image2D source;
+layout(set = 0, binding = 3, rgba32f) uniform restrict writeonly image2D sortie;
+
+layout(push_constant, std430) uniform Parametres {
+    vec2 origine;
+    float pas;
+    float dt;
+    uint n;
+    uint n_bande;
+    uint mode;
+    // Les coefficients du pas, calcules en double par le script (S368 : en f32 au pas de 1/60 s, e^(-lr*dt) - e^(-la*dt)
+    // soustrait deux nombres voisins de 1 - 3e-5 relatif a chaque pas, 2,5e-5 sur le residuel en 600 pas).
+    float ea;
+    float er;
+    float transfert;
+    float seuil;
+    float rampe;
+    float vx;
+    float vy;
+    float bx;
+    float by;
+    float bs;
+    float r0;
+    float r1;
+    float r2;
+} p;
+
+vec2 texel(ivec2 i) {
+    if (i.x < 0 || i.y < 0 || i.x >= int(p.n) || i.y >= int(p.n)) {
+        return vec2(0.0);
+    }
+    return imageLoad(source, i).rg;
+}
+
+// Lecture bilineaire au point q, en texels (centres en i + 1/2).
+vec2 lire(vec2 q) {
+    vec2 u = q - 0.5;
+    vec2 f0 = floor(u);
+    ivec2 i0 = ivec2(f0);
+    vec2 f = u - f0;
+    vec2 a = mix(texel(i0), texel(i0 + ivec2(1, 0)), f.x);
+    vec2 b = mix(texel(i0 + ivec2(0, 1)), texel(i0 + ivec2(1, 1)), f.x);
+    return mix(a, b, f.y);
+}
+
+// Vitesse orbitale horizontale de la bande, a l'instant de depart : somme de a*w*sin(phi) le long de k.
+vec2 vitesse(vec2 x) {
+    vec2 u = vec2(0.0);
+    for (uint i = 0u; i < p.n_bande; i++) {
+        vec4 c = bande.c[i];
+        float k = length(c.yz);
+        if (k == 0.0) {
+            continue;
+        }
+        u += c.x * puls.w[i] * sin(dot(c.yz, x) + c.w) * (c.yz / k);
+    }
+    return u;
+}
+
+// L'acceleration verticale descendante a l'instant d'arrivee, -a_z = somme de a*w^2*sin(phi), et sa montee lisse.
+float deferlement(vec2 x) {
+    float a = 0.0;
+    for (uint i = 0u; i < p.n_bande; i++) {
+        vec4 c = bande.c[p.n_bande + i];
+        float w = puls.w[i];
+        a += c.x * w * w * sin(dot(c.yz, x) + c.w);
+    }
+    return smoothstep(p.seuil - p.rampe, p.seuil + p.rampe, a);
+}
+
+void main() {
+    ivec2 ij = ivec2(gl_GlobalInvocationID.xy);
+    if (ij.x >= int(p.n) || ij.y >= int(p.n)) {
+        return;
+    }
+    vec2 x = p.origine + (vec2(ij) + 0.5) * p.pas;
+    if (p.mode == 3u) {
+        imageStore(sortie, ij, vec4(0.0));
+        return;
+    }
+    if (p.mode == 4u) {
+        vec2 d = x - vec2(p.bx, p.by);
+        imageStore(sortie, ij, vec4(exp(-0.5 * dot(d, d) / (p.bs * p.bs)), 0.0, 0.0, 0.0));
+        return;
+    }
+    vec2 F;
+    if (p.mode == 1u) {
+        F = imageLoad(source, ij).rg;
+    } else {
+        vec2 u = p.mode == 2u ? vec2(p.vx, p.vy) : vitesse(x);
+        F = lire((x - u * p.dt - p.origine) / p.pas);
+    }
+    F = vec2(F.x * p.ea, min(F.y * p.er + F.x * p.transfert, 1.0));
+    if (p.mode == 0u) {
+        F.x = max(F.x, deferlement(x));
+    }
+    imageStore(sortie, ij, vec4(F, 0.0, 0.0));
+}
