@@ -96,7 +96,7 @@ Critères, écrits avant le code :
 - [x] **P5** — l'optique de la colonne ; critère 4.
 - [x] **P6** — l'horizon, selon P2 ; critère 5.
 - [x] **P7** — les images de R20 ; critère 6.
-- [ ] **P8** — preuve, file, liste, index ; critère 7.
+- [x] **P8** — preuve, file, liste, index ; critère 7.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
@@ -139,3 +139,7 @@ Critères, écrits avant le code :
   attribuée ; les nuages en blocs viennent du bruit de l'afficheur.
 - **P7.** R20 écrite (REVUE-VISUELLE §25), quatre images envoyées ; `viewer/captures/s359` (non versionné), SHA-256 :
   large proche `ae2554e1…`, rasante `dda951be…` ; côte proche `01a40a51…`, plongeante `82b3cbf9…`, rasante `187f4dce…`.
+- **P8.** Preuve [EPAISSEUR-EAU-S359](../docs/validation/EPAISSEUR-EAU-S359.md) (« Reproduire » en tête),
+  [ADR-194](../docs/adr/ADR-194-la-lumiere-de-l-eau-calculee-par-notre-nuanceur.md) (la lumière de l'eau par notre
+  nuanceur, un seul ciel) ; liste **8.5 absent → partiel**, décompte 3 / 59 / 58 ; `dependances_liste.py` corrigé et
+  `--ecrire` ; file (rendu dans Godot), feuille de route (§3 ter, décompte), REPRISE §4, index. `--check` propre.

@@ -351,7 +351,11 @@ pas recopiée ici (L137).
   aux autres sources et le LOD temporel.
 - [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent* : S356, l'écume des crêtes de B
   à la couverture de Monahan dans l'afficheur, non jugée, référence à porter dans Godot ([preuve](validation/RENDU-CRETES-S356.md)).
-- [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *absent*.
+- [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *partiel* depuis S359 : dans Godot, la
+  colonne d'eau — fond vu par réfraction de Snell en espace écran, absorbé et voilé selon la profondeur (Maritorena,
+  eau pure de Pope & Fry), transmission à 0,005 du modèle —, et la réflexion de l'afficheur portée
+  ([preuve](validation/EPAISSEUR-EAU-S359.md), ADR-194). Manquent les caustiques, les particules, les eaux chargées,
+  et le verdict R20.
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *absent*.
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *partiel* : **S275, ADR-168** —
   bande δ couplée sous houle à crêtes longues, précalculée hors budget et rejouée dans `viewer/`
@@ -519,13 +523,13 @@ pas recopiée ici (L137).
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 0 | 8 |
-| 8. Rendu | 10 | 0 | 7 | 3 |
+| 8. Rendu | 10 | 0 | 8 | 2 |
 | 9. Activation et budget | 13 | 0 | 7 | 6 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **58** | **59** |
+| **total** | **120** | **3** | **59** | **58** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
@@ -534,7 +538,7 @@ parois et corps mobiles dans δ depuis S330–S332, que la liste n'avait pas sui
 corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ; vingt et un points corrigés sans
 changer de case — dix-huit sur S309–S349 (actualisation complète, ci-dessous), trois sur S350 (4.19, 9.9, 9.12).
 *S351* : **4.2** et **9.9** passent à partiel — deux domaines servis ensemble, le rang 1 reçu au banc ; 1.4, 4.5 et
-9.8 corrigés.
+9.8 corrigés. *S359* : **8.5** passe à partiel — la colonne d'eau et la réfraction dans Godot.
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.

@@ -316,8 +316,8 @@ derrière la requête du corps (6.1), le prix visuel du rang 1 (4.5, 9.9). Profi
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 58 partiels,
-59 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 59 partiels,
+58 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
@@ -351,8 +351,8 @@ tenu par `etat_projet.py --check`. Ici, l'ordre. Les jalons du §2 et les portes
 mêmes dépendances, en plus gros.
 
 **Depuis S355 ([ADR-191](adr/ADR-191-le-rendu-realiste-un-module-du-moteur.md), décision de l'utilisateur), une session de rendu alterne avec une session de physique** ; **depuis S356 ([ADR-192](adr/ADR-192-le-rendu-de-l-eau-dans-godot-4.md)),
-le rendu de l'eau se fait dans Godot 4** — premier pas, la mer de B rendue dans Godot (S357, verdict R19 attendu) ; puis 8.4, 8.5,
-8.6, 8.9. L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
+le rendu de l'eau se fait dans Godot 4** — la mer de B rendue dans Godot (S357 ; R19 : *« pas du tout crédible »*) ; **S359** :
+la lumière de l'eau portée de l'afficheur et la colonne d'eau, 8.5 partiel (ADR-194, R20 attendu) ; puis 8.4, 8.6, 8.9. L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
 
 **Front 0 — 34 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
 

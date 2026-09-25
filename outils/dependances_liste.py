@@ -105,7 +105,7 @@ D = {
  "8.2": ("H", "le LOD du maillage ; déplacement ou normales selon la vue", [], None),
  "8.3": ("H", "le filtre des impacts ; le LOD temporel", [], None),
  "8.4": ("H", "—", ["7.1", "7.2", "7.3", "7.4"], None),
- "8.5": ("H", "transparence, réfraction, caustiques", [], None),
+ "8.5": ("H", "caustiques, particules, eaux chargées (la transparence et la réfraction : S359)", [], None),
  "8.6": ("H", "—", ["8.5"], None),
  "8.7": ("C", "une frontière sans fondu ; la tolérance de pente", [], "les verdicts : R18 (en direct), puis la frontière"),
  "8.8": ("H", "un certificat d'absence d'alias", [], None),

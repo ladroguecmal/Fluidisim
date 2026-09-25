@@ -193,7 +193,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **8.2** LOD de la géométrie de surface | H | le LOD du maillage ; déplacement ou normales selon la vue | — | — | **0** |
 | **8.3** LOD par source | H | le filtre des impacts ; le LOD temporel | — | 11.4 | **0** |
 | **8.4** Écume, spray, gouttes, bulles rendus, chacun avec son LOD | H | — | 7.1, 7.2, 7.3, 7.4 | — | **4** |
-| **8.5** Transparence, réfraction, caustiques, particules sous-marines | H | transparence, réfraction, caustiques | — | 8.6 | **0** |
+| **8.5** Transparence, réfraction, caustiques, particules sous-marines | H | caustiques, particules, eaux chargées (la transparence et la réfraction : S359) | — | 8.6 | **0** |
 | **8.6** Vue sous-marine et passage de la surface | H | — | 8.5 | 13.3 | **1** |
 | **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | une frontière sans fondu ; la tolérance de pente | — | — | **E** — les verdicts : R18 (en direct), puis la frontière |
 | **8.8** Lointain et horizon sans artefact | H | un certificat d'absence d'alias | — | — | **0** |
