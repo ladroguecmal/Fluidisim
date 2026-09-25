@@ -95,7 +95,7 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — R20 consigné ; recherches ; critère 1.
+- [x] **P2** — R20 consigné ; recherches ; critère 1.
 - [ ] **P3** — l'écume au déferlement, mesurée avant et après ; critère 2.
 - [ ] **P4** — le spectre fin dans le cœur, ses essais ; l'export des `h0` ; critère 3.
 - [ ] **P5** — la FFT dans Godot et son contrôle ; critère 4.
@@ -105,3 +105,14 @@ Critères, écrits avant le code :
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
+- **P2, recherches.** Beaufort 4 (5,5–7,9 m/s, OMM) : « petites vagues devenant plus longues ; moutons assez
+  fréquents » (en.wikipedia.org/wiki/Beaufort_scale ; spc.noaa.gov/faq/tornado/beaufort.html). Taille des moutons :
+  Callaghan et al. (2012, JGR 117, C12015), la plupart des taches sous 10 m², au plus 26 m² ; Bondur et Sharkov (1982),
+  un pic entre 8 et 16 m² — des taches d'un à quelques mètres, pas de décimètres. Étalement d'Elfouhaily, Chapron,
+  Katsaros et Vandemark (1997, JGR 102(C7), 15781–15796), repris par l'Ocean Optics Web Book :
+  `Φ = (1/2π)[1 + Δ(k)·cos 2φ]`, `Δ = tanh(a₀ + a_p(c/c_p)^2,5 + a_m(c_m/c)^2,5)`, `a₀ = ln 2/4 = 0,1733`, `a_p = 4`,
+  `a_m = 0,13·u*/c_m`, `c_m = 0,23 m/s`, `k_m = 370 rad/m`, `c² = (g/k)(1 + (k/k_m)²)`, `u* = √(0,00144)·U₁₀`.
+  Cox et Munk : SPEC-001 §1 sexies — σu² = 3,16·10⁻³·W, σc² = 0,003 + 1,92·10⁻³·W ; à 7,79 m/s, 0,0246 et 0,0180,
+  rapport **1,37**. Tessendorf (2001, *Simulating Ocean Water*, cours SIGGRAPH) : réalisation par FFT, `h(k,t) = h0(k)
+  e^{iωt} + h0*(−k) e^{−iωt}`, boucle en temps par quantification de ω. Capture de l'utilisateur gardée en local
+  (`viewer/captures/s359/r20_capture_utilisateur.jpg`, SHA-256 `8f755dc3…`).

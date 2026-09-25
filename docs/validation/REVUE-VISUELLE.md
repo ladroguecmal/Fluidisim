@@ -1009,3 +1009,18 @@ En mouvement : Godot 4.4.1 sur le dossier `godot`, `-- --cote` pour la côte ; t
    profondeur si connue) ; une photo de mer du large prise d'un bateau, près de l'horizon.
 
 Un mot par question suffit.
+
+**Verdict R20 — reçu le 2026-09-25 (S360)**, question par question :
+1. *« Tu as raison sur le ciel, il n'aide pas au reflets et limite la qualité du rendue final »* ; et une capture d'une
+   partie de l'eau (`viewer/captures/s359/r20_capture_utilisateur.jpg`, locale) : *« je ne parviens pas avec les mots
+   mais ce rendue du point de vue topologie est pas réaliste »*.
+2. *« La couleur me paraît parfaite sincèrement »* — la couleur de l'eau (ADR-177, S359) est **reçue**.
+3. *« Tente les caustique, mais pour l'ecume je ne parviens pas a comprendre car l'ecume n'apparaît presque jamais sur
+   le vaguelettes uniquement sur des grandes vagues avec déferlement mais très rare voir quasi impossible »*.
+4. *« Je n'ai pas mais tu peux faire tes recherches »*.
+
+**Classe** : défauts de rendu — la forme fine de la surface (8.9), l'écume à la mauvaise échelle (8.4), le ciel (8.8) ;
+une demande — les caustiques (8.5). **Mesures qu'il déclenche** (S360) : la queue qui dessine la capture compte 60 ondes
+planes pour 5,5 octaves, sur 360°, pentes isotropes (1,04 contre 1,37 chez Cox et Munk) ; l'écume est tirée à
+l'empreinte du pixel, donc sur les vaguelettes au premier plan. Suite : S360, la surface fine par FFT et l'écume au
+déferlement ; puis les caustiques et le ciel.
