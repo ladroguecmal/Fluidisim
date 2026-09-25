@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-25 23:26 +02:00
+Battement        : 2026-09-25 23:27 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S367 — physique : le champ d'écume de B (7.1, ADR-014) — deux canaux, advection orbitale, couverture contre Monahan ; verdicts consignés (tout validé sauf l'écume)
 Dernière session : S366 — **rendu 8, les références sous l'eau** (R24 : « good », « trouve les ») : Tyler 1960 et trois photographies libres, chiffrées ; la lumière de l'eau calée sur la mesure (lobe avant, résidu 0,36 → 0,12) ; la brume de Godot éteinte sous l'eau ([preuve](docs/validation/SOUS-MARIN-S365.md) §6)

@@ -88,8 +88,8 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [>] **P2** — les verdicts consignés : revue (§23, §26–28, §30), décisions de la file, liste (8.4 à 8.10), dépendances.
-- [ ] **P3** — la référence du champ (`ecume.rs`) : grille ancrée, deux canaux, décroissance, advection semi-lagrangienne
+- [x] **P2** — les verdicts consignés : revue (§23, §26–28, §30), décisions de la file, liste (8.4 à 8.10), dépendances.
+- [>] **P3** — la référence du champ (`ecume.rs`) : grille ancrée, deux canaux, décroissance, advection semi-lagrangienne
   par la vitesse de surface de B, sources de B ; critère 1.
 - [ ] **P4** — la couverture contre Monahan, trois vents ; critère 2.
 - [ ] **P5** — les traînées de convergence ; critère 3.
@@ -97,3 +97,6 @@ Critères, écrits avant le code :
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+- **P2.** Verdict consigné, lu sur la demande de S366 (R21, R22, R23, R25) : forme fine, caustiques, ciel, lueur face
+  au soleil **validés** ; **l'écume refusée** ; tonalité sans choix — AgX reste le défaut ; **R18** (en direct, non
+  rappelé) toujours attendu. Liste : 8.4 (reste absent), 8.5, 8.9, 8.10 retouchés sans changer de case.

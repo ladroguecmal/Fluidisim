@@ -1048,6 +1048,11 @@ Monahan (0,42 % à 7,8 m/s).
 
 Un mot par question suffit.
 
+**Verdict R21 — reçu le 2026-09-25 (S367)**, avec R22, R23 et R25 : *« Je valide les rendue sauf ecume »*. **La forme fine
+par FFT est validée ; l'écume est refusée** — sans motif dit ; les taches instantanées au bord lisse et ovale que la
+question 2 décrivait sont le suspect. **Ce qu'il déclenche** : S367, le champ d'écume d'ADR-014 — deux canaux, mémoire,
+advection orbitale — en référence dans le cœur (liste 7.1), puis son rendu (8.4).
+
 ## 27. R22 — les caustiques sur le fond, S361
 
 **Demandées en R20** ([preuve](CAUSTIQUES-S361.md)). La lumière du soleil réfractée par la surface — les vagues
@@ -1069,6 +1074,9 @@ par le disque du soleil. Exacte à 5 % près contre une solution calculée à pa
 3. **La suite** : le ciel, l'écume (texture, durée), autre chose ?
 
 Un mot par question suffit.
+
+**Verdict R22 — reçu le 2026-09-25 (S367)** : *« Je valide les rendue sauf ecume »* — **les caustiques sont validées**, leur
+taille comprise.
 
 ## 28. R23 — le ciel, et la courbe calée sur la photographie, S363
 
@@ -1094,6 +1102,9 @@ la teinte de ses creux ; AgX reste le défaut, sa couleur ayant été jugée « 
 3. **La suite** : les reflets du ciel dans l'eau, l'écume, autre chose ?
 
 Un mot par question suffit.
+
+**Verdict R23 — reçu le 2026-09-25 (S367)** : *« Je valide les rendue sauf ecume »* — **le ciel est validé**, couture et nuages
+compris. Aucun choix de tonalité n'est exprimé : **AgX reste le défaut**, `TONALITE=photo` une option validée.
 
 ## 29. R24 — sous la surface, S365
 
@@ -1141,3 +1152,5 @@ dans toutes les directions. Calée sur la mesure : une lueur face au soleil, rie
 
 **La question :** la lueur face au soleil — juste, trop forte, gênante ? Un mot suffit ; sans réponse, elle reste.
 
+**Verdict R25 — reçu le 2026-09-25 (S367)** : *« Je valide les rendue sauf ecume »* — **la lueur face au soleil est validée**.
+**R18** (en direct, §23), que la demande de S366 ne rappelait pas, reste attendu.

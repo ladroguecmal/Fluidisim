@@ -358,13 +358,14 @@ pas recopiée ici (L137).
 - [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent* : S356, l'écume des crêtes de B
   à la couverture de Monahan dans l'afficheur, non jugée, référence à porter dans Godot ([preuve](validation/RENDU-CRETES-S356.md)) ;
   R20 : *« uniquement sur des grandes vagues avec déferlement »* ; **S360** : dans Godot, tirée des vagues dominantes —
-  moutons d'un à quatre mètres ([preuve](validation/SURFACE-FINE-S360.md) §3). Manquent durée, texture, spray, bulles.
+  moutons d'un à quatre mètres ([preuve](validation/SURFACE-FINE-S360.md) §3) ; **R21 : l'écume refusée** (S367).
+  Manquent durée, texture, spray, bulles — le champ d'écume de 7.1 d'abord.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *partiel* depuis S359 : dans Godot, la
   colonne d'eau — fond vu par réfraction de Snell en espace écran, absorbé et voilé selon la profondeur (Maritorena,
   eau pure de Pope & Fry), transmission à 0,005 du modèle —, et la réflexion de l'afficheur portée
   ([preuve](validation/EPAISSEUR-EAU-S359.md), ADR-194) ; **S361** : les caustiques sur le fond, méthode directe, exactes
-  à 5 % et l'énergie à 1 % ([preuve](validation/CAUSTIQUES-S361.md)). Manquent les particules, les eaux chargées, les
-  caustiques sur les objets et dans l'eau, et les verdicts R21–R22.
+  à 5 % et l'énergie à 1 % ([preuve](validation/CAUSTIQUES-S361.md)), **validées en R22** (S367). Manquent les
+  particules, les eaux chargées, les caustiques sur les objets et dans l'eau.
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *partiel* depuis S365 : dans Godot, la
   caméra sous l'eau — la surface vue d'en dessous, **fenêtre de Snell** rendue à 0,05° de `arcsin(1/n)` et réflexion
   totale au-delà ; le milieu, `exp(−c·d)` par canal à 0,004 près, la lumière de l'eau, le fond et ses caustiques
@@ -392,8 +393,8 @@ pas recopiée ici (L137).
 - [ ] **8.9 Détails artificiels bon marché** (micro-vagues, ondes courtes) ajoutés au rendu — *partiel* :
   queue du spectre de B en pentes par pixel, filtrée par l'empreinte, +0,38 ms GPU (ADR-155, S256) ; **S360, dans
   Godot** : la même queue réalisée par FFT, 10 612 composantes en deux cascades, étalement d'Elfouhaily, variance non
-  résolue par LEAN ([preuve](validation/SURFACE-FINE-S360.md), ADR-195). Manquent les capillaires, la queue des
-  perturbations W, le coût, et le verdict R21.
+  résolue par LEAN ([preuve](validation/SURFACE-FINE-S360.md), ADR-195), **validée en R21** (S367). Manquent les
+  capillaires, la queue des perturbations W, le coût.
 - [ ] **8.10 Crédibilité perçue validée par un regard humain** — *partiel* : protocole de revue
   ([REVUE-VISUELLE](validation/REVUE-VISUELLE.md)). Premier verdict (R1, « trop lisse ») mesuré et
   traité ; **R7 accepté S266**, après lissage des reflets entre les crêtes (ADR-161).
@@ -403,7 +404,8 @@ pas recopiée ici (L137).
   D2). L'écart à une photographie réelle est désormais **chiffré** (`outils/cible_image.py`) ; dans l'afficheur, ce
   qu'il en restait était **spatial** (L351, [confrontation](registres/TROIS-SYSTEMES-S308.md) §1) ; **S363, dans
   Godot**, la surface fine de S360 le comble, et une courbe (`TONALITE=photo`) tient les quatre grandeurs et la teinte
-  des creux à 0,166 près en pose proche, contre 5,8 pour AgX ([preuve](validation/CIEL-S363.md)) ; verdict R23 attendu. **R15** (S333–S338) : le bateau qui se pose
+  des creux à 0,166 près en pose proche, contre 5,8 pour AgX ([preuve](validation/CIEL-S363.md)) ; **S367** : R21 (la
+  surface fine), R22, R23, R25 validés, l'écume refusée. **R15** (S333–S338) : le bateau qui se pose
   est juste, la coupure au bord de δ levée — sans référence réelle, aucune trouvée ; **R16** (S340) :
   « Tout parrait bon visuellement », une onde de δ sur la mer de R14 ; **R17** (S348) : « Continue je
   valide », δ à 30 Hz contre 60 Hz ([revue](validation/REVUE-VISUELLE.md) §20–22). Autres poses, animation et scénarios
