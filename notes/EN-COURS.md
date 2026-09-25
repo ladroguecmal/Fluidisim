@@ -62,55 +62,43 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S368 — **terminée**. **Rendu 9 : l'écume qui dure** — *« Continue »* ; alternance d'ADR-191 D3 après S367
-(physique). L'écume rendue a été **refusée** (R21) : sans mémoire, des taches instantanées au bord lisse. S367 a
-construit la référence du champ d'ADR-014 ([ECUME-S367](../docs/validation/ECUME-S367.md)) ; ici sa **production sur la
-carte de Godot** (SPEC-006 §4) et l'écume rendue qui en naît (liste 8.4, absente).
+Session : S369 — **en cours**. **Les réponses du 2026-09-26, puis A289** — l'utilisateur a répondu aux quatre questions de
+fin de S368 : *« Pas de réseau. Godot sera le moteur entier fais comme bon te semble. Tout flotte/coule des interactions
+physiques logique. Pas de terrain realiste avec hydrologie etc.... Pas de météo et son a faire à la fin »* ; A289 : *« Le
+choix le plus favorable au realisme ainsi que les performances, simple »* ; seconde cible et serveur : *« Pas encore »* ;
+R18 : *« Rendu convaincant »* ; photos d'écume : *« Plus tard »*. Session de physique (alternance d'ADR-191 D3).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Ce qui se construit.** `ecume.comp` + `ecume.gd` : un champ de 1 024 × 1 024 texels de 0,25 m (256 m) autour de la
-caméra, deux canaux (actif, résiduel) en RGBA32F — l'état interne en f32 : la décroissance pas à pas ne tiendrait pas en
-demi-précision —, le pas de S367 à l'identique (advection semi-lagrangienne par la vitesse orbitale de la bande,
-décroissance exacte, sources aux crêtes les plus accélérées, seuil `κ·σ_a`). Mise en régime simulée avant la capture
-(60 s de passé : B est analytique). Au rendu : l'actif en écume blanche au bord irrégulier, le résiduel en dentelle.
+**Ce qui se décide.** (1) Les réponses deviennent des décisions écrites (ADR-197), et les attentes extérieures de la
+liste qu'elles lèvent sont levées ; ce qui reste ambigu (« pas de réseau » : aucun format existant, ou pas de
+multijoueur ?) reste en attente, sans réduire l'ambition (ADR-127). (2) **A289** : la voie, par les trois critères de
+l'utilisateur. Lecture du pas couplé (`delta3d_coupling.rs`) : δ reçoit comme **sources** trois termes qui ne dépendent
+que de B — le résidu de quantité de mouvement de B (`momentum_residual`, SPEC-004 §6.1), le transport de B entre le
+plan moyen et sa propre surface (la bande), l'erreur de pression de B à sa propre surface (les fantômes). B linéaire ne
+satisfait pas les équations complètes : ces restes nourrissent δ même quand rien ne le perturbe. **Voie examinée,
+quatrième** : les retirer — δ relatif à la dynamique de B, B tenu pour exact dans le domaine comme partout ailleurs ;
+seuls restent les termes où δ figure (croisés B·δ et propres à δ). Gratuite, locale, sans amortir aucune perturbation
+ni recréer de domaine. Elle se prend si la mesure la reçoit.
 
 Critères, écrits avant le code :
-1. **Le pas sur la carte = la référence** : décroissance d'un champ uniforme contre la solution fermée (10⁻⁵ relatif,
-   f32 sur 600 pas) ; advection d'une bosse par une vitesse uniforme (mode de contrôle), centre à 1 cm près.
-2. **La couverture** : la part où l'actif dépasse ½, relue sur la carte au régime, contre `couverture_monahan` de
-   l'export (0,42 %) ; κ recalé ici (la bande de l'afficheur n'est pas celle du cœur), **dit** ; prédiction de S367 :
-   κ ≈ 2,98.
-3. **R26** : l'écume d'avant contre celle-ci, plusieurs poses ; une séquence de trois images espacées de 2 s — la durée
-   se juge dans le temps.
+1. **E1** (houle 5 cm, λ = 4 m, maille 25 cm, 40 s) : avec les trois retraits, δ reste **nul au bit** (δ nul est un
+   point fixe discret) ; un retrait à la fois nomme la source de la croissance de S319.
+2. **Stabilité** : un germe de 1 mm posé dans la houle, 40 s — pas de croissance exponentielle (taux < 0,01 s⁻¹, contre
+   0,10 en S322) ; sinon, une instabilité des termes croisés, nommée, et la voie ne suffit pas.
+3. **E2** : le paquet de l'ordre C (2 cm) dans la houle, **sans témoin** — reçu à droite à 30 % près du paquet seul
+   (S317), le signe juste à gauche (critère de S319 §3, manqué alors d'un facteur 18).
+4. Aucun test existant ne bouge : le mode est une option, éteinte par défaut, jusqu'à la décision.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `ecume.comp`, `ecume.gd` : le champ sur la carte ; contrôles de décroissance et d'advection ; critère 1.
-- [x] **P3** — la couverture relue, κ recalé ; critère 2.
-- [x] **P4** — l'écume rendue depuis le champ (`eau.gdshader`) : actif et dentelle ; images R26 ; critère 3.
-- [x] **P5** — preuve ECUME-GODOT-S368 ; liste 8.4, file, dépendances, feuille de route, index.
-- [x] **P6** — rituel.
+- [ ] **P2** — les réponses : ADR-197 ; liste (6.7, 8.1, 5.11, 2.8, 7.8 ; 8.7 et R18), données des dépendances,
+  file (ligne des décisions), feuille de route, REVUE-VISUELLE §23 (verdict R18).
+- [ ] **P3** — `delta3d_coupling.rs` : le mode relatif à B (trois retraits, un drapeau par terme pour la mesure) ;
+  E1 ; critère 1.
+- [ ] **P4** — germe et E2 ; critères 2 et 3.
+- [ ] **P5** — ADR-198, la voie d'A289 ; preuve MER-S369 ; A289, lot 2 (4.8, 4.21), file, dépendances, feuille de route,
+  index.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2, critère 1 tenu.** `ecume.comp` (le pas de S367, modes de contrôle 1 à 4), `ecume.gd` (deux images RGBA32F
-  alternées, pas en nombre pair, relecture), `mer.gd` (seuil `κ·σ_a`, recentrage et 60 s de passé, deux demi-pas par
-  image ; `ECUME=ancienne`, `KAPPA`). `--controle-ecume-champ` : advection d'une bosse, centre à **0,47 mm**, masse
-  8e-7. **Décroissance, défaut trouvé** : 2,5e-5 sur le résiduel en 600 pas de 1/60 s — le transfert `e^(−λr·dt) −
-  e^(−λa·dt)` s'annule en f32 (3e-5 par pas) ; coefficients calculés en **double** par le script : **8,6e-6**.
-- **P3, critère 2 tenu.** `--controle-ecume-couverture` (pose proche, 60 s de passé, 40 s relus, 8 s de calcul) :
-  κ = 2,978 (S367) → 0,622 % pour **0,421 %** (1,48) ; la pente de S367 prédit κ = 3,09 → **0,405 % (0,96)** ; 3,00 →
-  1,36 ; 3,20 → 0,62. `KAPPA_ECUME` = 3,09, provenance dans `mer.gd`.
-- **P4.** `eau.gdshader` : le champ lu là où l'eau est dans le monde, fondu aux 8 % du bord. **Actif** : montée
-  0,15–0,75 du champ bruité (0,3 et 1,2 m) — le mouton pâlit en se trouant. **Résiduel** : dentelle. **Trois essais,
-  vus sur les images** : (1) crêtes d'un bruit de valeurs → un labyrinthe rectiligne (la grille du bruit), le résiduel
-  (moyen 0,40, S367) voilant la mer ; (2) bords de cellules de Worley → une résille de verre fêlé, régulière, partout ;
-  (3) retenu : cellules déformées (±0,3 m), étirées 2,2 fois le long des vagues (direction Σ a²·k̂), rompues par un
-  masque de 3,5 m, visibles où le résiduel dépasse 0,3–0,9, translucides (0,3). `SEQUENCE=n` : n images à 2 s
-  d'intervalle. R26 : `viewer/captures/s368/` (avant / après, séquence). Avant : une tache ovale lisse.
-- **P5, et une décision en cours de session.** L'utilisateur, pendant P5 : *« Oublie l'ecume sauf si tu trouve des
-  photos qui informe de la forme et couleur et position dans la topologie »*. Cherchée aussitôt : la série Beaufort de la
-  NOAA (domaine public), force 4 = notre mer — 400 × 386 pixels, moutons à peine visibles : **ne renseigne pas**. L'écume
-  **s'arrête** : éteinte par défaut (`ecume_visible`, `ECUME=champ` ou `ancienne`) ; code et mesures conservés ; pas de
-  revue R26. Preuve ECUME-GODOT-S368 (§5, la décision) ; liste : 7.1 (production faite), **8.4 reste absent** ; file,
-  dépendances (7.1 attend désormais des photographies : front E), feuille de route, index.

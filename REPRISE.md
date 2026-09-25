@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 00:36 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 00:54 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S369 — les réponses du 2026-09-26 (ADR-197), puis la voie d’A289 (plan dans EN-COURS)
 Dernière session : S368 — **rendu 9, l'écume qui dure** : le champ de S367 sur la carte de Godot (décroissance à 10⁻⁵, couverture de Monahan à 4 %) et son rendu — puis **suspendue par l'utilisateur** sauf photographies qui en renseignent forme, couleur et place sur la vague : éteinte par défaut ([preuve](docs/validation/ECUME-GODOT-S368.md))
 Session suivante : par l'alternance d'ADR-191 D3, **une session de physique** : les chemins de B lisent la côte jusqu'à Godot (ADR-196 §3), la coque qui bouge sur la carte (ADR-193 §3), ou le lot 5 (A316). Au rendu suivant : la caméra à demi immergée (ADR-019 §6), l'échelle radiométrique du ciel et du soleil. **L'écume attend des photographies** (décision du 2026-09-26). En attente : R18
 Maillons        : 1 — S368 : 8.4 reste absent (journal)
