@@ -9,9 +9,20 @@ const vec3 CIEL_HORIZON = vec3(0.694, 0.838, 0.930);
 const vec3 CIEL_ZENITH = vec3(0.015, 0.150, 0.600);
 const vec3 SOLEIL_B = vec3(-0.4, 0.3, 0.8);
 
+/// S363 — **un hachage entier** : PCG (O'Neill 2014), sous la forme de Jarzynski et Olano (2020, *Hash Functions for
+/// GPU Rendering*, JCGT 9(3)). L'ancien `fract(sin(x)·43758)`, avec `x` de l'ordre de 10⁴, changeait du tout au tout pour
+/// un ulp de `x` : Godot compilant `i + (1, 0)` autrement de part et d'autre de la colonne centrale, le ciel y avait une
+/// couture — mesurée, un saut 10,7 fois la médiane de ses voisins (`outils/couture_ciel.py`). En entiers, rien ne dépend
+/// de l'arrondi : `q` est déjà un nœud entier du réseau.
+uint pcg_hachage(uint v) {
+    uint etat = v * 747796405u + 2891336453u;
+    uint mot = ((etat >> ((etat >> 28u) + 4u)) ^ etat) * 277803737u;
+    return (mot >> 22u) ^ mot;
+}
+
 float hachage_ciel(vec2 q) {
-    float h = dot(q, vec2(127.1, 311.7));
-    return fract(sin(h) * 43758.5453);
+    ivec2 i = ivec2(floor(q + 0.5));
+    return float(pcg_hachage(uint(i.x) + pcg_hachage(uint(i.y)))) * (1.0 / 4294967295.0);
 }
 
 float bruit_ciel(vec2 q) {

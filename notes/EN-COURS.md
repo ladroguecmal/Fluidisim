@@ -88,7 +88,7 @@ Critères, écrits avant le code :
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la mesure contre la photographie ; critère 1.
-- [ ] **P3** — la couture : diagnostic, hachage entier ; critère 2.
+- [x] **P3** — la couture : diagnostic, hachage entier ; critère 2.
 - [ ] **P4** — le ciel calé sur la photographie ; critère 3.
 - [ ] **P5** — images R23, preuve, file, index ; critère 4.
 - [ ] **P6** — rituel.
@@ -103,3 +103,9 @@ Critères, écrits avant le code :
   relève le contraste local (0,27 → 0,36) ; ce qui s'écarte le plus est la **dynamique** et la **fraction claire** — AgX
   écrase les hautes lumières que la photographie garde. Horizon bien détecté partout (chute faible en AgX, position
   juste).
+- **P3, critère 2 tenu.** `outils/couture_ciel.py` (rangées 5 à 150, saut moyen de luminance entre colonnes voisines,
+  rapport à la médiane de 560 à 720). **Avant** : Godot linéaire proche, saut au centre **10,73** fois la médiane — le
+  plus grand de l'image, colonne 639 ; AgX 10,04 ; afficheur 0,09. Hachage entier PCG (Jarzynski et Olano 2020) dans
+  `ciel.gdshaderinc`, repris par le sable. **Après** : **0,03** (proche) et 0,04 (référence) ; le plus grand saut ailleurs
+  (colonnes 1 193, 1 184). Rapport mer / ciel sous l'horizon 0,719 (0,711 avant). Hypothèse de cause non démontrée au
+  niveau du binaire compilé ; le remède la supprime.

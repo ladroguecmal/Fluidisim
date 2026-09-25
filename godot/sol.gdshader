@@ -39,8 +39,9 @@ uniform vec3 soleil_controle = vec3(0.0);
 varying vec2 plan;
 varying float profondeur_fond;
 
+// S363 : le hachage entier du ciel (`ciel.gdshaderinc`), sans la sensibilité à l'arrondi de `fract(sin(x)·43758)`.
 float hachage(vec2 q) {
-    return fract(sin(dot(q, vec2(127.1, 311.7))) * 43758.5453);
+    return hachage_ciel(q);
 }
 
 float bruit(vec2 q) {
