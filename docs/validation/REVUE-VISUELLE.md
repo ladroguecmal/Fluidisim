@@ -1024,3 +1024,26 @@ une demande — les caustiques (8.5). **Mesures qu'il déclenche** (S360) : la q
 planes pour 5,5 octaves, sur 360°, pentes isotropes (1,04 contre 1,37 chez Cox et Munk) ; l'écume est tirée à
 l'empreinte du pixel, donc sur les vaguelettes au premier plan. Suite : S360, la surface fine par FFT et l'écume au
 déferlement ; puis les caustiques et le ciel.
+
+## 26. R21 — la surface fine par FFT, l'écume au déferlement, S360
+
+**Après R20** ([preuve](SURFACE-FINE-S360.md)). **La forme fine** : les petites vagues (7 cm à 3,5 m) ne sont plus 60
+ondes planes réparties sur 360°, mais **10 612 composantes** du même spectre, en deux cascades calculées par FFT sur la
+carte, étalées selon Elfouhaily et al. (1997) et courant avec le vent. **L'écume** : tirée des seules vagues dominantes,
+à l'échelle du mètre — au nadir, les 4 652 taches de 4 cm deviennent quelques taches de 1,3 à 3,8 m, à la couverture de
+Monahan (0,42 % à 7,8 m/s).
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s360/zoom_avant_apres.png` | la même zone, vue plongeante : en haut les 60 ondes (témoin), en bas la FFT |
+| `viewer/captures/s360/godot_plongeante_cote_12s.png` | la vue plongeante entière, une tache d'écume en bas à droite |
+| `viewer/captures/s360/godot_proche_12s.png` | le large, pose proche |
+| `viewer/captures/s360/godot_proche_cote_12s.png` | la côte, pose proche |
+
+**Les questions :**
+
+1. **La forme fine** (zoom, en bas contre en haut) : plus réaliste ? Qu'est-ce qui gêne encore ?
+2. **L'écume** : rare, en taches d'un à quatre mètres ; leur bord est lisse et ovale — gênant ?
+3. **La suite** : les caustiques (demandées), puis le ciel ?
+
+Un mot par question suffit.

@@ -100,7 +100,7 @@ Critères, écrits avant le code :
 - [x] **P4** — le spectre fin dans le cœur, ses essais ; l'export des `h0` ; critère 3.
 - [x] **P5** — la FFT dans Godot et son contrôle ; critère 4.
 - [x] **P6** — le nuanceur sur les cascades ; critère 5.
-- [ ] **P7** — les images de R21 ; critère 6.
+- [x] **P7** — les images de R21 ; critère 6.
 - [ ] **P8** — preuve, ADR, file, liste, index ; critère 7.
 - [ ] **P9** — rituel.
 
@@ -152,3 +152,6 @@ Critères, écrits avant le code :
   0,728 / 0,713). **Vu** : plongeante, une texture fine dense, orientée, un scintillement en éclats ; une seule tache
   d'écume dans le cadre, **lisse et ovale** — un mouton réel est déchiqueté. La capture de l'utilisateur n'a pas pu être
   située dans les images de R20 (corrélation 0,19).
+- **P7.** R21 écrite (REVUE-VISUELLE §26), quatre images envoyées. `viewer/captures/s360` (non versionné), SHA-256 :
+  plongeante côte `accb1a1d…`, large proche `41ff26ab…`, côte proche `53cad509…`, large rasante `17851797…`, témoin 60
+  composantes `f5c61aff…`, agrandissements `9921cfef…` (FFT), `714c06b2…` (témoin), `46bd872a…` (les deux).
