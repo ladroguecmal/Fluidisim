@@ -87,10 +87,19 @@ Critères, écrits avant le code :
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la mesure contre la photographie ; critère 1.
+- [x] **P2** — la mesure contre la photographie ; critère 1.
 - [ ] **P3** — la couture : diagnostic, hachage entier ; critère 2.
 - [ ] **P4** — le ciel calé sur la photographie ; critère 3.
 - [ ] **P5** — images R23, preuve, file, index ; critère 4.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2, critère 1 : prédiction tenue en proche et rasante.** Captures converties en PPM (hors dépôt),
+  `outils/cible_image.py`. p05/p50 · dynamique p95/p05 · **contraste local** · fraction claire — photographie : 0,1926 ·
+  23,70 · **0,4549** · 0,07415. Afficheur (R19) proche 0,2735 · 13,98 · **0,2699** · 0,0366 ; rasante 0,2717 · 8,10 ·
+  **0,2473** · 0,0004. Godot AgX (tel qu'affiché) proche 0,3201 · 9,83 · **0,3647** · 0,0001 ; rasante 0,2907 · 7,01 ·
+  **0,3504** · 0 ; référence 0,2576 · 9,45 · **0,2722** · 0. Godot linéaire proche 0,3067 · 14,95 · **0,5388** · 0,0986 ;
+  rasante 0,2603 · 10,90 · 0,5078 · 0,0014 ; référence 0,2359 · 14,44 · 0,3919 · 0,0110. **Lecture** : la surface fine
+  relève le contraste local (0,27 → 0,36) ; ce qui s'écarte le plus est la **dynamique** et la **fraction claire** — AgX
+  écrase les hautes lumières que la photographie garde. Horizon bien détecté partout (chute faible en AgX, position
+  juste).
