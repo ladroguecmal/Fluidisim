@@ -1436,6 +1436,12 @@ impl Step3 {
         self.relire(&self.state, section * n, n)
     }
 
+    /// **Banc S390** : lissages au plus grossier (huit par défaut, ceux du cœur).
+    pub fn mg_coarse_sweeps_for_bench(&self, sweeps: usize) -> Result<(), String> {
+        self.mg.as_ref().ok_or("multigrille non réservée")?.set_coarse_sweeps(sweeps);
+        Ok(())
+    }
+
     /// **Banc S390** : lissages après la prolongation sur les niveaux grossiers intermédiaires — deux par défaut ;
     /// zéro rend le cycle **asymétrique**, pour voir l'instrument échouer.
     pub fn mg_coarse_post_for_bench(&self, sweeps: usize) -> Result<(), String> {
@@ -2093,6 +2099,10 @@ pub fn cas2_production() -> Result<(), String> {
             .map_err(|e| format!("grille {e:?}"))?;
         let (u0, v0, w0) = (volume.velocity_u().to_vec(), volume.velocity_v().to_vec(), volume.velocity_w().to_vec());
         let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+        // S390 : `MULTIGRILLE=1` — le cycle en V (C3), à `CYCLES` cycles.
+        if !crate::delta3d_mg::cycles_du_banc().is_empty() {
+            println!("DELTA3D_CAS2_S340 multigrille niveaux={} dims={:?}", carte.enable_multigrid(), crate::delta3d_mg::levels_of(domain));
+        }
         carte.set_step(duration, rest, sponge)?;
         carte.set_state(&u0, &v0, &w0, &eta)?;
         println!(
@@ -2214,6 +2224,10 @@ pub fn cas1_production() -> Result<(), String> {
                     .map_err(|e| format!("grille {e:?}"))?;
                 let (u0, v0, w0) = (volume.velocity_u().to_vec(), volume.velocity_v().to_vec(), volume.velocity_w().to_vec());
                 let mut carte = Step3::new(&background, domain, origin, rho, g as f32).await?;
+                // S390 : `MULTIGRILLE=1` — le cycle en V (C3), à `CYCLES` cycles.
+                if !crate::delta3d_mg::cycles_du_banc().is_empty() {
+                    println!("DELTA3D_CAS1_S340 multigrille niveaux={} dims={:?}", carte.enable_multigrid(), crate::delta3d_mg::levels_of(domain));
+                }
                 let sponge = Sponge3::default();
                 carte.set_step(1000, rest, sponge)?;
                 carte.set_state(&u0, &v0, &w0, &eta)?;
@@ -3182,7 +3196,11 @@ pub fn trajectoire_cuve() -> Result<(), String> {
         let background = fond_nul(&mut alloc)?;
         let (rho, g) = (1025_f32, 9.81_f32);
         let (pas_us, pas) = (1_000u64, 1_000usize);
-        let profils = [64u32, 128];
+        // S390 : `MULTIGRILLE=8,16` ajoute des profils préconditionnés par le cycle en V (C3), à ces cycles.
+        let profils: Vec<(bool, u32)> = [(false, 64u32), (false, 128)]
+            .into_iter()
+            .chain(crate::delta3d_mg::cycles_du_banc().into_iter().map(|c| (true, c)))
+            .collect();
 
         for nx in [16usize, 32, 48] {
             let Cuve { domain, rest, eta, mode } = cuve(nx, g as f64);
@@ -3201,8 +3219,12 @@ pub fn trajectoire_cuve() -> Result<(), String> {
             let (nu, nv) = ((domain.nx + 1) * domain.ny * domain.nz, domain.nx * (domain.ny + 1) * domain.nz);
             let zeros = vec![0f32; total];
             let mut cartes = Vec::with_capacity(profils.len());
-            for _ in profils {
-                let carte = Step3::new(&background, domain, origin, rho, g).await?;
+            for (mg, _) in &profils {
+                let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+                if *mg {
+                    let niveaux = carte.enable_multigrid();
+                    println!("CUVE_S305 trajectoire nx={nx} multigrille niveaux={niveaux} dims={:?}", crate::delta3d_mg::levels_of(domain));
+                }
                 carte.set_step(pas_us, rest, Sponge3::default())?;
                 carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[..total - nu - nv], &eta)?;
                 cartes.push(carte);
@@ -3250,7 +3272,7 @@ pub fn trajectoire_cuve() -> Result<(), String> {
                 suivi_ref.observer(&coeur, t);
 
                 for (v, carte) in cartes.iter_mut().enumerate() {
-                    carte.step(&background, temps, profils[v])?;
+                    carte.step(&background, temps, profils[v].1)?;
                     let publiee = carte.published()?;
                     let pente_carte = pente(&publiee);
                     let (mut pire, mut somme) = (0f32, 0f64);
@@ -3278,7 +3300,8 @@ pub fn trajectoire_cuve() -> Result<(), String> {
                 "CUVE_S305 trajectoire nx={nx} schema=reference continu_pct={:.6} forme_pct={:.6} phase_deg={:.6} derive_m={:e}",
                 100. * suivi_ref.continu, 100. * suivi_ref.forme, suivi_ref.phase_deg(), suivi_ref.derive
             );
-            for (v, cycles) in profils.iter().enumerate() {
+            for (v, (mg, c)) in profils.iter().enumerate() {
+                let cycles = format!("{}{c}", if *mg { "mg" } else { "" });
                 println!(
                     "CUVE_S305 trajectoire nx={nx} cycles={cycles} hauteur_m={:e} sur_amplitude={:e} quadratique_m={:e} pente={:e} continu_pct={:.6} phase_deg={:.6} derive_m={:e}",
                     pires[v].0, pires[v].0 as f64 / CUVE_A, pires[v].1, pires[v].2,

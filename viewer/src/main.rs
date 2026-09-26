@@ -2687,6 +2687,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--delta3d-rang1") {
         return delta3d_arbitrage::rang1();
     }
+    if args.iter().any(|a| a == "--delta3d-mg-scene") {
+        return delta3d_mg::scene();
+    }
     if args.iter().any(|a| a == "--delta3d-mg-cycle") {
         return delta3d_mg::recevoir_cycle();
     }

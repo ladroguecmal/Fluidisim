@@ -86,6 +86,16 @@ pub fn projection_dispatches(cycles: u32, levels: usize) -> u32 {
     2 + levels as u32 + (1 + v + 2) + cycles * (3 + v + 2) + 2
 }
 
+/// **Bancs S390** : `MULTIGRILLE=` — une liste de cycles (`8,16`), ou `1` pour « activer, aux cycles du banc » ; vide si
+/// la variable est absente ou vaut `0`.
+pub fn cycles_du_banc() -> Vec<u32> {
+    std::env::var("MULTIGRILLE")
+        .ok()
+        .filter(|v| v != "0")
+        .map(|v| v.split(',').filter_map(|x| x.trim().parse().ok()).collect())
+        .unwrap_or_default()
+}
+
 pub struct Multigrid {
     pipelines: Vec<wgpu::ComputePipeline>,
     /// Un groupe de liaison par niveau grossier, `binds[l − 1]` pour le niveau `l`.
@@ -95,7 +105,9 @@ pub struct Multigrid {
     /// Mailles réservées par niveau, et décalages `[kind, x, r, t]` dans `buffer`.
     reserved: Vec<usize>,
     offsets: Vec<[usize; 4]>,
-    pub buffer: wgpu::Buffer,
+    /// La hiérarchie. Les liaisons la tiennent vivante ; gardée ici pour les relectures de banc à venir.
+    #[allow(dead_code)]
+    buffer: wgpu::Buffer,
     /// Flottants réservés, comptés (I-06).
     pub floats: usize,
     /// Niveaux de la forme courante.
@@ -104,6 +116,8 @@ pub struct Multigrid {
     /// Lissages après la prolongation, niveaux grossiers intermédiaires : `POST_SWEEPS`, sauf banc (pair : le
     /// résultat reste dans `x`).
     coarse_post: std::cell::Cell<usize>,
+    /// Lissages au plus grossier : `COARSE_SWEEPS`, sauf banc (`MG_GROSSIER=`).
+    coarse_sweeps: std::cell::Cell<usize>,
 }
 
 impl Multigrid {
@@ -177,6 +191,7 @@ impl Multigrid {
             levels: std::cell::Cell::new(0),
             dims: std::cell::RefCell::new(Vec::new()),
             coarse_post: std::cell::Cell::new(POST_SWEEPS),
+            coarse_sweeps: std::cell::Cell::new(COARSE_SWEEPS),
         }
     }
 
@@ -240,6 +255,12 @@ impl Multigrid {
         self.coarse_post.set(sweeps);
     }
 
+    /// **Banc** : lissages au plus grossier, ramenés au pair inférieur (deux au moins) — le premier écrit `t`, les
+    /// suivants alternent à partir de `t → x` : un nombre pair finit dans `x`, où la prolongation le lit.
+    pub fn set_coarse_sweeps(&self, sweeps: usize) {
+        self.coarse_sweeps.set(sweeps.max(2) & !1);
+    }
+
     /// Mailles d'un niveau grossier de la forme courante (`l` ≥ 1).
     fn cells(&self, l: usize) -> u32 {
         let d = self.dims.borrow()[l - 1];
@@ -261,7 +282,7 @@ impl Multigrid {
                 let g = self.cells(l).div_ceil(GROUP);
                 self.run(pass, RESTRICT, l, g);
                 self.run(pass, FIRST, l, g);
-                let sweeps = if l == levels { COARSE_SWEEPS } else { PRE_SWEEPS };
+                let sweeps = if l == levels { self.coarse_sweeps.get() } else { PRE_SWEEPS };
                 for s in 1..sweeps {
                     self.run(pass, if s % 2 == 1 { SWEEP_TX } else { SWEEP_XT }, l, g);
                 }
@@ -666,6 +687,185 @@ pub fn recevoir_cycle() -> Result<(), String> {
             "MG_CYCLE_S390 bilan ecart_max_relatif={pire:.3e} symetrie={sym:.3e} critere_2={}",
             if tenu { "tenu" } else { "manque" }
         );
+        Ok(())
+    })
+}
+
+// ── La scène de la porte B (S390, critères 3 et 4) ───────────────────────────────────────────────────────────────
+
+/// Médiane, 99ᵉ centile et maximum des valeurs **finies** ; `NaN` si aucune.
+fn quantiles(v: &mut Vec<f64>) -> (f64, f64, f64) {
+    v.retain(|x| x.is_finite());
+    if v.is_empty() {
+        return (f64::NAN, f64::NAN, f64::NAN);
+    }
+    v.sort_by(|a, b| a.total_cmp(b));
+    let q = |f: f64| v[(((v.len() - 1) as f64) * f).round() as usize];
+    (q(0.5), q(0.99), *v.last().unwrap())
+}
+
+/// Une variante de la projection : préconditionneur et cycles.
+#[derive(Clone, Copy)]
+struct Variante {
+    mg: bool,
+    cycles: u32,
+}
+
+impl Variante {
+    fn nom(self) -> String {
+        format!("{}{}", if self.mg { "mg" } else { "jacobi" }, self.cycles)
+    }
+}
+
+/// **S390, critère 3 — la convergence sur la scène de la porte B**, et **critère 4 — le coût.** `Config::review`, pas de
+/// `PAS_US=` (33 333 : la cadence de 30 Hz de la porte C), `PAS=` (300) pas depuis l'état initial, une carte neuve par
+/// variante. Chaque pas relu tout de suite : vrai résidu relatif, divergence franche, pas dégradés (ADR-144) ; toutes les
+/// 30 pas, la surface publiée, comparée à deux références convergées indépendantes — multigrille à 24 cycles et Jacobi à
+/// 512 — dont l'écart mutuel est le plancher. Puis le coût horodaté (200 pas après 20 de chauffe) : projection et pas
+/// entier ; et les deux parts à 30 Hz, `k` balayé. Lignes `MG_SCENE_S390`. `COUT=0` saute le coût.
+pub fn scene() -> Result<(), String> {
+    use crate::delta3d_step::{Step3, Upto};
+    use water_core::SimTime;
+    pollster::block_on(async {
+        let scene = crate::scene::Scene::build(true, false, None);
+        let background = &scene.background;
+        let mut config = crate::delta3d_scene::Config::review();
+        config.step_us = std::env::var("PAS_US").ok().and_then(|v| v.parse().ok()).unwrap_or(33_333);
+        let pas: u64 = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(300);
+        let (u, v, w, eta) = config.initial_state();
+        let tolerance = water_core::delta_projection::PROJECTION_DIVERGENCE_TOLERANCE;
+        // Une seule carte : `set_state` remet vitesses, surface, reste compensé et pression de départ à l'état initial,
+        // comme une carte neuve.
+        let mut carte =
+            Step3::new(background, config.domain, config.origin, crate::delta3d_scene::RHO, crate::delta3d_scene::G).await?;
+        carte.set_step(config.step_us, config.rest, config.sponge)?;
+        let niveaux = carte.enable_multigrid();
+        if let Some(g) = std::env::var("MG_GROSSIER").ok().and_then(|v| v.parse().ok()) {
+            carte.mg_coarse_sweeps_for_bench(g)?;
+            println!("MG_SCENE_S390 lissages_au_plus_grossier={g}");
+        }
+        println!(
+            "MG_SCENE_S390 domaine={}x{}x{} pas_us={} pas={pas} tolerance_divergence={tolerance:e}",
+            config.domain.nx, config.domain.ny, config.domain.nz, config.step_us
+        );
+        // Trajectoire d'une variante : surfaces aux points de contrôle, et les séries de qualité.
+        // Une trajectoire s'arrête au premier pas dont la surface publiée n'est pas finie : `explose` le dit.
+        type Trajet = (Vec<Vec<f32>>, Vec<f64>, Vec<f64>, usize, Option<u64>);
+        let trajectoire = |carte: &mut Step3, var: Variante| -> Result<Trajet, String> {
+            carte.set_state(&u, &v, &w, &eta)?;
+            carte.set_multigrid(var.mg)?;
+            let (mut surfaces, mut residus, mut divergences, mut degrades) = (Vec::new(), Vec::new(), Vec::new(), 0);
+            let mut explose = None;
+            for n in 0..pas {
+                carte.publish_time(background, SimTime(n * config.step_us))?;
+                carte.run_for_bench(var.cycles, Upto::Full)?;
+                let d = carte.diagnostics_now()?;
+                residus.push(d.residual_relative as f64);
+                divergences.push(d.divergence_plain as f64);
+                if d.degraded() {
+                    degrades += 1;
+                }
+                if (n + 1) % 30 == 0 {
+                    let h = carte.published()?;
+                    if h.iter().any(|x| !x.is_finite()) {
+                        explose = Some(n + 1);
+                        break;
+                    }
+                    surfaces.push(h);
+                }
+            }
+            Ok((surfaces, residus, divergences, degrades, explose))
+        };
+        // Écart de hauteur publiée, en millimètres, à chaque point de contrôle (1 s, 2 s, …) commun aux deux trajets.
+        let ecarts_mm = |a: &[Vec<f32>], b: &[Vec<f32>]| -> Vec<f64> {
+            a.iter()
+                .zip(b)
+                .map(|(x, y)| x.iter().zip(y).map(|(p, q)| (p - q).abs() as f64).fold(0., f64::max) * 1e3)
+                .collect()
+        };
+        let liste = |v: &[f64]| v.iter().map(|x| format!("{x:.3}")).collect::<Vec<_>>().join(",");
+        let mut references = Vec::new();
+        for var in [Variante { mg: true, cycles: 24 }, Variante { mg: false, cycles: 512 }] {
+            let (s, mut r, mut dv, deg, explose) = trajectoire(&mut carte, var)?;
+            let (rm, _, rx) = quantiles(&mut r);
+            let (dm, _, dx) = quantiles(&mut dv);
+            println!(
+                "MG_SCENE_S390 reference={} residu_mediane={rm:.3e} residu_max={rx:.3e} divergence_mediane={dm:.3e} divergence_max={dx:.3e} degrades={deg}/{pas} explose={explose:?}",
+                var.nom()
+            );
+            references.push(s);
+        }
+        println!("MG_SCENE_S390 plancher ecart_entre_references_mm_par_seconde={}", liste(&ecarts_mm(&references[0], &references[1])));
+        let variantes: Vec<Variante> = [8u32, 16, 32, 64, 128]
+            .iter()
+            .map(|&c| Variante { mg: false, cycles: c })
+            .chain([1u32, 2, 3, 4, 6, 8].iter().map(|&c| Variante { mg: true, cycles: c }))
+            .collect();
+        for var in &variantes {
+            let (s, mut r, mut dv, deg, explose) = trajectoire(&mut carte, *var)?;
+            let (rm, _, rx) = quantiles(&mut r);
+            let (dm, _, dx) = quantiles(&mut dv);
+            println!(
+                "MG_SCENE_S390 variante={} dispatchs={} residu_mediane={rm:.3e} residu_max={rx:.3e} divergence_mediane={dm:.3e} divergence_max={dx:.3e} degrades={deg}/{} explose={explose:?} ecart_ref_mg_mm_par_seconde={}",
+                var.nom(),
+                carte.dispatches_now(var.cycles, Upto::Full),
+                r.len(),
+                liste(&ecarts_mm(&s, &references[0]))
+            );
+        }
+        if std::env::var("COUT").is_ok_and(|v| v == "0") {
+            return Ok(());
+        }
+        // Le coût, horodaté : chaque pas soumis seul et attendu, sans rendu concurrent (domaine du chiffre de S341).
+        println!("MG_SCENE_S390 cout niveaux={niveaux}");
+        let mut n = 0u64;
+        for var in [8u32, 16, 32].iter().map(|&c| Variante { mg: false, cycles: c }).chain(
+            [1u32, 2, 3, 4, 6, 8].iter().map(|&c| Variante { mg: true, cycles: c }),
+        ) {
+            carte.set_state(&u, &v, &w, &eta)?;
+            carte.set_multigrid(var.mg)?;
+            let mut serie = Vec::new();
+            for m in 0..220 {
+                carte.publish_time(background, SimTime(n * config.step_us))?;
+                n += 1;
+                if let Some(t) = carte.timed_step_passes(var.cycles)? {
+                    if m >= 20 {
+                        serie.push(t);
+                    }
+                }
+            }
+            let mut proj: Vec<f64> = serie.iter().map(|t| t[2]).collect();
+            let mut total: Vec<f64> = serie.iter().map(|t| t[0]).collect();
+            let (pm, pq, _) = quantiles(&mut proj);
+            let (tm, tq, _) = quantiles(&mut total);
+            println!(
+                "MG_SCENE_S390 cout variante={} dispatchs={} projection_mediane_ms={pm:.3} projection_q99_ms={pq:.3} pas_mediane_ms={tm:.3} pas_q99_ms={tq:.3}",
+                var.nom(),
+                carte.dispatches_now(var.cycles, Upto::Full)
+            );
+        }
+        // Les deux parts à 30 Hz (S348) : `MG_CYCLES=` (4) cycles multigrille, `k` balayé.
+        let cycles: u32 = std::env::var("MG_CYCLES").ok().and_then(|v| v.parse().ok()).unwrap_or(4);
+        carte.set_multigrid(true)?;
+        for k in 0..=cycles {
+            carte.set_state(&u, &v, &w, &eta)?;
+            let (mut p0, mut p1) = (Vec::new(), Vec::new());
+            for m in 0..220 {
+                carte.publish_time(background, SimTime(n * config.step_us))?;
+                n += 1;
+                let a = carte.timed_part(cycles, k, 0)?;
+                let b = carte.timed_part(cycles, k, 1)?;
+                if m >= 20 {
+                    p0.extend(a);
+                    p1.extend(b);
+                }
+            }
+            let (m0, q0, x0) = quantiles(&mut p0);
+            let (m1, q1, x1) = quantiles(&mut p1);
+            println!(
+                "MG_SCENE_S390 deux_parts mg{cycles} k={k} partie_0 mediane_ms={m0:.3} q99_ms={q0:.3} max_ms={x0:.3} partie_1 mediane_ms={m1:.3} q99_ms={q1:.3} max_ms={x1:.3}"
+            );
+        }
         Ok(())
     })
 }

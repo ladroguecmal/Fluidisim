@@ -102,7 +102,7 @@ d'appel) ; il atteint le résidu de 32 cycles de Jacobi en 3 à 6 cycles. Le gai
 - [x] **P3** — le branchement dans `Step3` : tampons réservés à la configuration (I-06), multigrille éteinte par défaut, nombre de
   dispatchs du profil ; critère 1.
 - [x] **P4** — l'instrument : réplique `f64`, symétrie, positivité, vu échouer ; critère 2.
-- [ ] **P5** — convergence et coût sur la scène de la porte B, deux parts à 30 Hz ; critères 3 et 4.
+- [x] **P5** — convergence et coût sur la scène de la porte B, deux parts à 30 Hz ; critères 3 et 4.
 - [ ] **P6** — les trois cas de cuve avec la multigrille ; critère 5 ; activation par défaut décidée.
 - [ ] **P7** — critère 6 ; preuve (section datée de MULTIGRILLE-3D-S385) ; file, feuille de route, liste.
 - [ ] **P8** — rituel.
@@ -125,3 +125,31 @@ symétrie **1,8·10⁻⁷** (réplique `f64` 2,6·10⁻¹⁴) ; positivité. **V
 niveau intermédiaire) : symétrie **0,233**, sur la carte comme sur la réplique ; la réplique suit toujours la carte à
 3,6·10⁻⁷ — l'instrument distingue la recette, pas seulement l'implémentation. Un mot réservé du WGSL (`active`) a
 refusé la première compilation du nuanceur, à l'exécution : corrigé.
+
+**P5 — la scène de la porte B à 30 Hz** (`--delta3d-mg-scene`, pas de 33,333 ms, 300 pas, secteur 96 % avant et après) :
+
+| variante | résidu médian / max | div. franche médiane | dégradés | projection méd. / q99 | pas q99 |
+|---|---|---|---|---|---|
+| Jacobi 8 | 2,2·10⁻³ / 1,3·10⁻² | 6,9·10⁻² | 300/300 | 0,585 / 0,589 ms | 2,253 |
+| Jacobi 16 | — | — | — | 1,075 / 1,082 | 2,744 — **explose** au pas 270 |
+| **Jacobi 32** (production) | **7,1·10⁻⁵ / 1,3·10⁻³** | 1,7·10⁻³ | 300/300 | **2,078 / 2,088** | **3,765** |
+| Jacobi 64 | 7,4·10⁻⁶ / 1,3·10⁻⁴ | 1,3·10⁻⁴ | 300/300 | (4,06, S341) | — |
+| MG 1 ; MG 2 | — | — | — | 0,341 ; 0,519 | **explosent** aux pas 30 et 90 |
+| MG 3 | 7,9·10⁻⁴ / 1,4·10⁻² | 9,2·10⁻³ | 300/300 | 0,632 / 0,682 | 2,319 |
+| MG 4 | 2,0·10⁻⁴ / 2,8·10⁻³ | 4,5·10⁻³ | 300/300 | 0,784 / 0,793 | 2,405 |
+| **MG 6** | **4,9·10⁻⁵ / 3,6·10⁻⁴** | 8,0·10⁻⁴ | 300/300 | **1,077 / 1,094** | **2,751** |
+| MG 8 | 1,2·10⁻⁵ / 1,1·10⁻⁴ | 2,0·10⁻⁴ | 300/300 | 1,371 / 1,409 | 3,087 |
+| réf. MG 24 ; Jacobi 512 | 1,1·10⁻⁷ ; 2,7·10⁻⁷ | 8,9·10⁻⁷ ; 2,8·10⁻⁶ | 0 ; 1 | — | — |
+
+**Critère 3 tenu** : la multigrille atteint le résidu de Jacobi-32 en **6 cycles** (médiane 4,9 contre 7,1·10⁻⁵ ; maximum 3,6·10⁻⁴
+contre 1,3·10⁻³) — haut de la fourchette prédite (3 à 6) : ≈ 0,43 de réduction par cycle. **Critère 4 tenu** : un cycle coûte
+**0,147 ms** (2,4 cycles de Jacobi ; prédit 4 à 6) ; à résidu égal, projection **−48 %**, pas q99 **2,751 contre 3,765 ms**. Deux
+parts, MG 4 : `k` = 1 → 1,627 / 0,796 ms q99 ; MG 6 s'en déduit à ≈ 1,63 / 1,09 (non mesuré tel quel).
+
+**Ce que la scène dit aussi.** (1) Les deux références convergées s'écartent de **6 mm à 1 s, 102 mm à 8 s** : la scène
+amplifie tout écart minime (A297) ; l'écart de surface à une référence n'y juge donc pas la projection — le résidu et la
+divergence, si. (2) **Tout pas sous-convergé est dégradé** à 30 Hz, y compris la production (Jacobi 32) ; Jacobi 16, MG 1 et
+MG 2 **explosent** en 1 à 9 s. (3) **Attribution du taux** (témoin : plus de lissages au grossier, même scène, 150 pas) :
+32 lissages → 0,27 par cycle (MG 8 : 1,5·10⁻⁶), 128 → rien de plus ; mais 0,207 ms par cycle (0,45 à 128) : à la précision
+de Jacobi-32, la recette du cœur (8) reste la moins chère. Un dispatch minuscule coûte ≈ 2,5 µs. **Dit, pas retenu.**
+
