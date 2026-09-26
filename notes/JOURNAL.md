@@ -17354,3 +17354,19 @@ de 11:22), vu par `--check`, corrigé au commit suivant (L237). **Coût** (720p,
 scène. **Rituel.** Maillons **1** : 8.9 reste partiel, R28 posée (non reçue). Suivant : **la campagne du solveur
 volumique 3D temps réel, conception** (demande de l'utilisateur).
 **Verdict R28** (après le rituel) : *« Parfait »* — les rides reçues ; consigné dans REVUE-VISUELLE §33, la liste, la file.
+
+## S380 — 2026-09-26 — rendu : la pluie complète (ADR-205), d'abord dans l'air
+
+**Entrée.** *« Pas de solveur continue la pluie ajoute les manquants »* (après R28, *« Parfait »*) : la campagne du solveur
+attend. **Fait.** [ADR-205](../docs/adr/ADR-205-la-pluie-complete.md) : treize pièces (air, surfaces, V, coût), leur ordre,
+leurs sources, la frontière avec la météo. Pièces 1 et 2 ([preuve](../docs/validation/PLUIE-AIR-S380.md)) : les gouttes
+d'au moins 1 mm près de l'œil, au nombre de Marshall et Palmer, placées par hachage de l'indice (GPUParticles3D), vitesse
+d'Atlas, traînées de Garg et Nayar ; l'extinction `β = (π/2)·2·N0/Λ³` dans la brume. Quatre photographies (averse sur des
+piscines : voile gris, traînées faibles devant les fonds sombres). Sans pluie, 12 images au bit ; gouttes comptées par
+classe à 3 % près (2, 10, 50 mm/h) ; extinction égale à la loi et à l'intégration numérique (visibilité 2,5 km à 10 mm/h).
+**Erreurs dites** : le critère « ±5 % » oubliait le bruit de Poisson (30 gouttes attendues dans une classe à 2 mm/h) —
+jugé à 2 σ sous 2,5 % de bruit ; le contrôle comptait les margelles comme gouttes blanches. **Coût** des gouttes : +0,1 à
++1,2 ms. **Limites.** Ciel ensoleillé (le voile en prend le bleu), pas de rideau à moyenne distance, pas de vent.
+**Rituel.** Maillons **2** : 8.4 reste *absent* (R29 posée, non reçue), 8.8 reste partiel. À deux maillons, la suite doit
+faire avancer un point : **R29 reçue fait passer 8.4 à partiel**. Suivant : la pluie, pièce 3 — le ciel de pluie (CIE
+couvert) —, avec le verdict de R29.

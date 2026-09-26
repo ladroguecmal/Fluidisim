@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-26 11:35 +02:00
+JETON            : libre
+Battement        : 2026-09-26 11:52 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S380 — la pluie complétée (demande de l'utilisateur : « pas de solveur, continue la pluie, ajoute les manquants ») ; première pièce : la pluie dans l'air
-Dernière session : S379 — rendu : **les rides de la pluie, factices** (8.9 reste partiel, [preuve](docs/validation/RIDES-PLUIE-S379.md), **R28 reçue** : « Parfait ») — taux de Marshall et Palmer × Atlas compté sur les images, deux trains capillaires-gravité, fondus en rugosité au loin, bassin et mer ; sans pluie au bit. Avant : S378, la pluie dans V (5.5)
-Session suivante : **physique — la campagne du solveur volumique 3D temps réel** (demande de l'utilisateur, S379), **conception d'abord** : état de l'art, ce que δ 3D (S297–S348) et APIC (ADR-186) donnent, architecture (domaines, niveaux de détail d'ADR-202, prévision), cibles chiffrées, découpage en sessions. R28 attend le regard de l'utilisateur. δ sur GPU dans Godot : pas maintenant (R27)
-Maillons        : 1 — S379 : 8.9 reste partiel, R28 reçue (journal)
+Session en cours : —
+Dernière session : S380 — rendu : **la pluie complète** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), demande de l'utilisateur : « pas de solveur, continue la pluie, ajoute les manquants ») — pièces 1 et 2, les gouttes dans l'air et l'extinction ([preuve](docs/validation/PLUIE-AIR-S380.md), R29 posée). Avant : S379, les rides de pluie (R28 reçue)
+Session suivante : **la pluie, pièce 3 — le ciel de pluie** (ciel couvert de la CIE, soleil voilé ; ADR-205 D3), avec le verdict de R29 ; puis les gerbes (4), les surfaces mouillées (5), les bâches sur les rides (8), l'exposition calculée (10)… La campagne du solveur volumique attend (S380, l'utilisateur)
+Maillons        : 2 — S380 : 8.4 reste absent (R29 posée), 8.8 partiel ; R29 reçue fait passer 8.4 à partiel (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S380 — **en cours**. *« Pas de solveur continue la pluie ajoute les manquants »* (après R28, *« Parfait »*).
+Session : S380 — **terminée**. *« Pas de solveur continue la pluie ajoute les manquants »* (après R28, *« Parfait »*).
 La campagne du solveur volumique n'est **pas** la suite ; la pluie se complète. Agent : Claude Opus 5.5, application
 desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
@@ -94,7 +94,7 @@ jugement de l'utilisateur (R29).
 - [x] **P6** — l'extinction au loin (`β`, brume de la scène) ; critère 3.
 - [x] **P7** — contrôle du nombre et des tailles (critère 2) ; critère 1 ; coût.
 - [x] **P8** — images de R29 ; preuve `PLUIE-AIR-S380` ; liste, file, feuille de route, index.
-- [>] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 
