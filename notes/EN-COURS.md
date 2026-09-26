@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S399 — **en cours**. **C5b, deuxième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
+Session : S399 — **terminée**. **C5b, deuxième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
 [RACCORD-3D-S398](../docs/validation/RACCORD-3D-S398.md)) : **la bande de particules et l'échange**, dans une même projection.
 Demande de l'utilisateur (2026-09-27) : *« Continue »* (objectif : terminer le solveur). Agent : Claude Opus 5.5, session cloud
 Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Sert 4.16, 4.12, A316.
@@ -93,7 +93,7 @@ particules par maille occupée dans la dernière colonne de la bande ; saut de s
 - [x] **P3** — l'échange (flux de face, soldes, retrait, pose, absorption) ; critère 3 et le repos échangé ; critère 1.
 - [x] **P4** — l'exemple `apic3d_raccord` : 30 s, 5 et 2,5 cm, contre APIC seul ; critère 4.
 - [x] **P5** — suite ; preuve (§5 de RACCORD-3D-S398) ; A316, file, liste.
-- [>] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 **P2 — les particules virtuelles des colonnes** (`virtual_column_sums`) : pour une maille de la bande à portée de la zone,

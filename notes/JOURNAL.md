@@ -17669,3 +17669,19 @@ advection du premier ordre. **Rituel.** Maillons **2** : aucun point ne change d
 le solveur) ; la suite fait avancer une capacité — le raccord reçu. Suivant : dans le cloud, **C5b, deuxième part** — une bande
 de particules dans la zone de colonnes, l'échange à la frontière (flux de la face, retrait où les particules arrivent), les
 critères de S394 sur 30 s en 3D ; au poste, C3b puis la pluie, pièce 5b.
+
+## S399 — 2026-09-27 — physique : C5b, deuxième part — la bande et l'échange, presque reçus à la maille fine
+
+**Entrée.** *« Continue »* (objectif : terminer le solveur). **Fait** ([preuve](../docs/validation/RACCORD-3D-S398.md) §5) : dans
+APIC 3D, une bande de particules à côté de la zone des colonnes, une seule projection. La reconstruction **voit les colonnes**
+(particules virtuelles en rangées étirées sur `[0, η]`, l'idée du champ de densité) : surface lue contre la zone à 2,19 % de maille
+comme au milieu de la bande (14,7 % sans elles, vu échouer). **L'échange** par le flux de la face et des soldes `f64` —
+absorption, retrait où les particules arrivent, pose contre la face. **Tenus** : sans zone et toutes colonnes au bit ; volume total
+à 10⁻¹⁰ sur 30 s ; suite 697 réussis, zéro avertissement ; ballottement de 30 s, frontière au nœud, **à 2,5 cm** : masse de la bande
+à ±0,6 mm d'APIC seul (2D : +6 mm), saut 0,15 maille, période à 0,01 point, amortissement à 0,09 point. **Manqués** : la densité à
+2,5 cm (7,3 par maille pour 7,6) ; à 5 cm, +3,1 mm par un courant de surface (−7 mm/s) ; le repos, 1,007 cm/s. **Attribués, pas
+éprouvés** : la bande lit sa surface avec le biais de la reconstruction, les colonnes exactement (marche de 1,1 mm, seiche, courant) ;
+la séparation pousse à travers la frontière des particules absorbées. **Rituel.** Maillons **3**. **Justification** : la demande de
+l'utilisateur — terminer le solveur ; le raccord est le verrou de C6, C7 et C10, et il est à un critère d'être reçu à la maille fine,
+ce qui ferait avancer 4.12 et fermerait A316 ; sa suite débloque toujours l'usage visé. Suivant : **S400**, la zone qui lit sa
+surface comme la bande (`η + e(η)`) et la séparation tenue du côté de la bande, critères inchangés ; au poste, C3b puis la pluie 5b.
