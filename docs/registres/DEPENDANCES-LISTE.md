@@ -192,7 +192,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **8.1** Rendu temps réel de la surface sur GPU | H | le cœur branché dans Godot, moteur du jeu entier (GDExtension ; ADR-197 D2) | — | — | **0** |
 | **8.2** LOD de la géométrie de surface | H | le LOD du maillage ; déplacement ou normales selon la vue | — | — | **0** |
 | **8.3** LOD par source | H | le filtre des impacts ; le LOD temporel | — | 11.4 | **0** |
-| **8.4** Écume, spray, gouttes, bulles rendus, chacun avec son LOD | H | — | 7.1, 7.2, 7.3, 7.4 | — | **E**, par 7.1 |
+| **8.4** Écume, spray, gouttes, bulles rendus, chacun avec son LOD | H | l'écume (suspendue) ; le spray ; les bulles ; les gerbes de pluie (ADR-205, pièce 4) ; leurs niveaux de détail | 7.1, 7.2, 7.3, 7.4 | — | **E**, par 7.1 |
 | **8.5** Transparence, réfraction, caustiques, particules sous-marines | H | particules, eaux chargées, caustiques sur les objets (transparence, réfraction : S359 ; caustiques du fond : S361) | — | 8.6 | **0** |
 | **8.6** Vue sous-marine et passage de la surface | H | la caméra à demi immergée (ADR-019 §6) ; bulles, rayons, turbidité ; le coût du profil immergé (B11) | 8.5 | 13.3 | **1** |
 | **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | une frontière sans fondu ; la tolérance de pente | — | — | **E** — le verdict de la frontière (R18 reçu, ADR-197 D8) |

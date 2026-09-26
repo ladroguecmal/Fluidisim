@@ -316,8 +316,8 @@ derrière la requête du corps (6.1), le prix visuel du rang 1 (4.5, 9.9). Profi
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 66 partiels,
-51 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367), 4.21 (S369), 5.4 (S372), 5.10 (S375), 5.5 (S378) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 67 partiels,
+50 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367), 4.21 (S369), 5.4 (S372), 5.10 (S375), 5.5 (S378), 8.4 (S380) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
@@ -355,7 +355,7 @@ le rendu de l'eau se fait dans Godot 4** — la mer de B rendue dans Godot (S357
 la lumière de l'eau portée de l'afficheur et la colonne d'eau, 8.5 partiel (ADR-194) ; **S360** : la surface fine par FFT,
 l'écume au déferlement (ADR-195) ; **S361** : les caustiques ; **S363** : le ciel de la photographie, une courbe calée sur elle en option ; **S365** : sous la surface, 8.6
 partiel — fenêtre de Snell, milieu ; **S366** : R24 reçu, la lumière de l'eau calée sur Tyler ; **S367–S368** : l'écume, champ
-d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photographiques ; **S371** : la caméra à demi immergée, le milieu par pixel à l'objectif ; **S379** : les rides de la pluie, factices (8.9, R28 reçue) ; **S380** : la pluie complète ([ADR-205](adr/ADR-205-la-pluie-complete.md)), d'abord dans l'air — gouttes et extinction (R29 posée). L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
+d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photographiques ; **S371** : la caméra à demi immergée, le milieu par pixel à l'objectif ; **S379** : les rides de la pluie, factices (8.9, R28 reçue) ; **S380** : la pluie complète ([ADR-205](adr/ADR-205-la-pluie-complete.md)), d'abord dans l'air — gouttes et extinction (R29 reçue). L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
 
 **La prochaine session de physique — la campagne du solveur volumique 3D temps réel** (décision de l'utilisateur, S379 :
 *« une session du plus dur et complexe […] un solveur […] qui va s'occuper des simulations 3D volumétriques ultra réalistes

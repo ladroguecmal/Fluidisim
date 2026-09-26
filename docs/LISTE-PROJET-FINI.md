@@ -383,15 +383,15 @@ pas recopiée ici (L137).
   S235, S249) : filtre spectral reçu pour B et sillage ; cuisson des huit bandes
   accélérée de 46 % au bit (S267). Manquent le filtre des impacts, la généralisation
   aux autres sources et le LOD temporel.
-- [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent* : S356, l'écume des crêtes de B
+- [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *partiel* depuis S380 (les gouttes de pluie, R29) : S356, l'écume des crêtes de B
   à la couverture de Monahan dans l'afficheur, non jugée, référence à porter dans Godot ([preuve](validation/RENDU-CRETES-S356.md)) ;
   R20 : *« uniquement sur des grandes vagues avec déferlement »* ; **S360** : dans Godot, tirée des vagues dominantes —
   moutons d'un à quatre mètres ([preuve](validation/SURFACE-FINE-S360.md) §3) ; **R21 : l'écume refusée** (S367) ;
   **S368** : le champ de 7.1 produit sur la carte et rendu — moutons qui pâlissent, dentelle résiduelle
   ([preuve](validation/ECUME-GODOT-S368.md)) —, puis **suspendu par l'utilisateur** (2026-09-26) sauf photographies qui
   renseignent forme, couleur et place sur la vague : éteint par défaut. **S380** : les gouttes de pluie qui tombent, au
-  nombre de Marshall et Palmer, tracées selon Garg et Nayar ([preuve](validation/PLUIE-AIR-S380.md), R29 posée). Reste
-  *absent* : rien de rendu n'est reçu.
+  nombre de Marshall et Palmer, tracées selon Garg et Nayar ([preuve](validation/PLUIE-AIR-S380.md)), **reçues en R29** (*« Je valide »*). Manquent
+  l'écume (suspendue), le spray, les bulles, les gerbes de pluie (ADR-205, pièce 4), et leurs niveaux de détail.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *partiel* depuis S359 : dans Godot, la
   colonne d'eau — fond vu par réfraction de Snell en espace écran, absorbé et voilé selon la profondeur (Maritorena,
   eau pure de Pope & Fry), transmission à 0,005 du modèle —, et la réflexion de l'afficheur portée
@@ -582,13 +582,13 @@ pas recopiée ici (L137).
 | 5. Volumes finis (V) | 12 | 1 | 6 | 5 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 1 | 7 |
-| 8. Rendu | 10 | 0 | 9 | 1 |
+| 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 0 | 7 | 6 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **66** | **51** |
+| **total** | **120** | **3** | **67** | **50** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

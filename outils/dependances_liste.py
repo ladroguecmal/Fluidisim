@@ -104,7 +104,7 @@ D = {
  "8.1": ("H", "le cœur branché dans Godot, moteur du jeu entier (GDExtension ; ADR-197 D2)", [], None),
  "8.2": ("H", "le LOD du maillage ; déplacement ou normales selon la vue", [], None),
  "8.3": ("H", "le filtre des impacts ; le LOD temporel", [], None),
- "8.4": ("H", "—", ["7.1", "7.2", "7.3", "7.4"], None),
+ "8.4": ("H", "l'écume (suspendue) ; le spray ; les bulles ; les gerbes de pluie (ADR-205, pièce 4) ; leurs niveaux de détail", ["7.1", "7.2", "7.3", "7.4"], None),
  "8.5": ("H", "particules, eaux chargées, caustiques sur les objets (transparence, réfraction : S359 ; caustiques du fond : S361)", [], None),
  "8.6": ("H", "la caméra à demi immergée (ADR-019 §6) ; bulles, rayons, turbidité ; le coût du profil immergé (B11)", ["8.5"], None),
  "8.7": ("C", "une frontière sans fondu ; la tolérance de pente", [], "le verdict de la frontière (R18 reçu, ADR-197 D8)"),

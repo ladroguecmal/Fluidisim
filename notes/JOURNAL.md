@@ -17370,3 +17370,4 @@ jugé à 2 σ sous 2,5 % de bruit ; le contrôle comptait les margelles comme go
 **Rituel.** Maillons **2** : 8.4 reste *absent* (R29 posée, non reçue), 8.8 reste partiel. À deux maillons, la suite doit
 faire avancer un point : **R29 reçue fait passer 8.4 à partiel**. Suivant : la pluie, pièce 3 — le ciel de pluie (CIE
 couvert) —, avec le verdict de R29.
+**Verdict R29** (après le rituel) : *« Je valide »* — **8.4 passe à partiel** (3 / 67 / 50), maillons **0** : devient possible une scène sous la pluie où les gouttes tombent au nombre de la loi et voilent le lointain ; consommée par la piscine et la mer ; preuve §2.

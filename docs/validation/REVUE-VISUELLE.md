@@ -1256,3 +1256,6 @@ distance ; le vent.
 
 **La question :** la pluie qui tombe est-elle crédible — traînées, leur finesse, le voile ? Je propose d'enchaîner par le
 ciel de pluie, qui changera beaucoup l'ensemble.
+
+**Verdict R29 — reçu le 2026-09-26 (S380, après le rituel)** : *« Je valide »* — la pluie dans l'air (traînées, voile)
+reçue ; **8.4 passe à partiel**. Suite proposée et inscrite : le ciel de pluie (ADR-205, pièce 3).

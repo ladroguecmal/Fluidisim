@@ -11,12 +11,12 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : libre
-Battement        : 2026-09-26 11:52 +02:00
+Battement        : 2026-09-26 11:57 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : —
-Dernière session : S380 — rendu : **la pluie complète** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), demande de l'utilisateur : « pas de solveur, continue la pluie, ajoute les manquants ») — pièces 1 et 2, les gouttes dans l'air et l'extinction ([preuve](docs/validation/PLUIE-AIR-S380.md), R29 posée). Avant : S379, les rides de pluie (R28 reçue)
-Session suivante : **la pluie, pièce 3 — le ciel de pluie** (ciel couvert de la CIE, soleil voilé ; ADR-205 D3), avec le verdict de R29 ; puis les gerbes (4), les surfaces mouillées (5), les bâches sur les rides (8), l'exposition calculée (10)… La campagne du solveur volumique attend (S380, l'utilisateur)
-Maillons        : 2 — S380 : 8.4 reste absent (R29 posée), 8.8 partiel ; R29 reçue fait passer 8.4 à partiel (journal)
+Dernière session : S380 — rendu : **la pluie complète** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), demande de l'utilisateur : « pas de solveur, continue la pluie, ajoute les manquants ») — pièces 1 et 2, les gouttes dans l'air et l'extinction ([preuve](docs/validation/PLUIE-AIR-S380.md), **R29 reçue** : « Je valide » — 8.4 passe à partiel). Avant : S379, les rides de pluie (R28 reçue)
+Session suivante : **la pluie, pièce 3 — le ciel de pluie** (ciel couvert de la CIE, soleil voilé ; ADR-205 D3) ; puis les gerbes (4), les surfaces mouillées (5), les bâches sur les rides (8), l'exposition calculée (10)… La campagne du solveur volumique attend (S380, l'utilisateur)
+Maillons        : 0 — S380 : R29 reçue, 8.4 passe à partiel (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -102,7 +102,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   portes sont reçues : la v1 au sens d'ADR-174 D4**, chacune sur son banc ou sa référence, pas encore réunies en une
   scène vivante ([feuille de route](docs/FEUILLE-DE-ROUTE.md), « La v1 »). Depuis : la liste entière (ADR-190).
   **V** : noyau reçu, sans articulation avec δ.
-- Liste du projet fini : **3 validés, 66 partiels, 51 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367, 4.21 en S369, 5.4 en S372, 5.10 en S375, 5.5 en S378.
+- Liste du projet fini : **3 validés, 67 partiels, 50 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367, 4.21 en S369, 5.4 en S372, 5.10 en S375, 5.5 en S378, 8.4 en S380.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
 nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`

@@ -48,7 +48,7 @@ change au bit.
 | 1 — sans pluie, identique au bit | les 12 images de S379 | **12 / 12** |
 | 2 — nombre et tailles à ±5 % | points d'une tranche de 0,5 m, vue d'aplomb, dix instants, par classe [1 ; 1,5) / [1,5 ; 2) / [2 ; 3) / [3 ; 6] mm | 2 mm/h : −0,84 / +1,91 / +5,21 / +6,11 % ; **10 mm/h : −0,73 / +0,49 / −1,48 / +1,33 %** ; 50 mm/h : −2,95 / −2,09 / −2,15 / −2,64 % — tenu (voir l'erreur du critère) |
 | 3 — extinction égale à β, nulle par temps sec | brume posée dans la scène | 0 / 5,64335·10⁻⁴ / 1,55557·10⁻³ / 4,28785·10⁻³ m⁻¹ = la loi = l'intégration numérique indépendante ; visibilité 6,9 / 2,5 / 0,9 km |
-| 4 — photographies et jugement | quatre références ; R29 | posée ([§34](REVUE-VISUELLE.md)) |
+| 4 — photographies et jugement | quatre références ; R29 | **reçue** : *« Je valide »* ([§34](REVUE-VISUELLE.md)) |
 
 **Une erreur du critère écrit.** « ±5 % » oubliait le bruit de Poisson : à 2 mm/h, les deux grosses classes n'ont que
 1 014 et 30 gouttes attendues (écarts-types 3,1 % et 18 %) — un écart de 5 % n'y est pas mesurable. Chaque classe est
