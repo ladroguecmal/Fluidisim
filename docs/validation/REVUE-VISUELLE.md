@@ -1325,7 +1325,7 @@ ciel et les ombres portées reçues ; la pluie continue (pièce 4, les gerbes).
 
 ## 37. R32 — les gerbes de la pluie, S383
 
-**ADR-205, pièce 4.** À chaque goutte qui laisse un anneau — **la même** que celle des rides, à son instant (contrôlé :
+**ADR-205, pièce 4** ([preuve](GERBES-S383.md)). À chaque goutte qui laisse un anneau — **la même** que celle des rides, à son instant (contrôlé :
 961 gerbes, chacune au centre de son anneau à 0,8 mm près) —, une gerbe au-dessus de l'eau : la **couronne**, puis le
 **dôme** et le **jet** central. Sa forme et ses temps sont relevés sur une goutte de pluie réelle filmée (Murphy et al.
 2015 : 4,1 mm à 7,2 m/s — couronne de 19 mm à 12 ms, jet de 25 mm à 18 ms, retombée vers 80 ms), ramenés à chaque taille

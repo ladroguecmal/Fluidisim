@@ -390,8 +390,10 @@ pas recopiée ici (L137).
   **S368** : le champ de 7.1 produit sur la carte et rendu — moutons qui pâlissent, dentelle résiduelle
   ([preuve](validation/ECUME-GODOT-S368.md)) —, puis **suspendu par l'utilisateur** (2026-09-26) sauf photographies qui
   renseignent forme, couleur et place sur la vague : éteint par défaut. **S380** : les gouttes de pluie qui tombent, au
-  nombre de Marshall et Palmer, tracées selon Garg et Nayar ([preuve](validation/PLUIE-AIR-S380.md)), **reçues en R29** (*« Je valide »*). Manquent
-  l'écume (suspendue), le spray, les bulles, les gerbes de pluie (ADR-205, pièce 4), et leurs niveaux de détail.
+  nombre de Marshall et Palmer, tracées selon Garg et Nayar ([preuve](validation/PLUIE-AIR-S380.md)), **reçues en R29** (*« Je valide »*). **S383** : les
+  gerbes de pluie — couronne, dôme, jet relevés sur une goutte réelle (Murphy et al. 2015), aux impacts des rides, particules
+  près de l'œil et part d'aire au loin ([preuve](validation/GERBES-S383.md), R32 posée). Manquent l'écume (suspendue), le
+  spray, les bulles, les gouttelettes et les éclaboussures au sol, et leurs niveaux de détail.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *partiel* depuis S359 : dans Godot, la
   colonne d'eau — fond vu par réfraction de Snell en espace écran, absorbé et voilé selon la profondeur (Maritorena,
   eau pure de Pope & Fry), transmission à 0,005 du modèle —, et la réflexion de l'afficheur portée

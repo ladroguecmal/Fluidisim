@@ -96,7 +96,7 @@ réelles ; jugement de l'utilisateur (R32).
 - [x] **P6** — contrôles : critères 1, 3, 4, 5 ; coût.
 - [x] **P7** — les éclaboussures au sol (seuil de Mundo, Sommerfeld et Tropea) ou, faute de temps, leur déclencheur.
 - [x] **P8** — images de R32 ; REVUE-VISUELLE §37.
-- [ ] **P9** — preuve `GERBES-S383` ; liste, file, feuille de route, index.
+- [x] **P9** — preuve `GERBES-S383` ; liste, file, feuille de route, index.
 - [ ] **P10** — rituel.
 
 ### Notes de reprise
