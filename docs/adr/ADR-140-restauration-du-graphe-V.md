@@ -58,3 +58,10 @@ La comparaison bit à bit locale ne reçoit pas I-03 sur une seconde plateforme.
 Construit dans `hydro_network::snapshot`. [RESTAURATION-V-S229](../validation/RESTAURATION-V-S229.md)
 reçoit la continuation locale tabulée et orientée, les refus et l'absence d'allocation testée.
 Les exclusions ci-dessus restent explicites ; suite générale : 404 réussis, 5 ignorés.
+
+## Note datée S372 — 2026-09-26 : version 2
+
+La « version/migration explicite » annoncée pour les vannes et pompes est faite ([ADR-199](ADR-199-vannes-et-pompes-dans-v.md)
+D5) : WVST **version 2**, une troisième liste d'écarts pour les commandes d'arête, comptée dans les quatre octets
+réservés ; la version 1 est refusée, sans migration. Taille : `88 + 12 × (nœuds modifiés + restes non nuls + commandes
+changées)` octets.

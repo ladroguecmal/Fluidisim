@@ -204,3 +204,9 @@ encore le réseau pressurisé ni les grandes topologies. Les parcours restent en
 [ADR-139](ADR-139-volume-et-plan-oriente-des-contenants.md) remplace l'usage universel de la
 table horizontale du §2 : le plan orienté est désormais inversé depuis le volume de la géométrie.
 Les anciennes tables gardent leur seul domaine +Z. Lois de débit, autorité et état entier restent.
+
+## Note datée S372 — 2026-09-26 : vannes et pompes
+
+La vanne et la pompe du §1 sont construites en **réseau ouvert** ([ADR-199](ADR-199-vannes-et-pompes-dans-v.md),
+[preuve](../validation/VANNES-POMPES-S372.md)) : une commande entière par arête, la vanne comme ouverture commandée, la
+pompe par une courbe parabolique contre la hauteur statique. Le réseau fermé sous pression du §4 reste en v2.

@@ -290,7 +290,12 @@ pas recopiée ici (L137).
   courbes cuites depuis les assets.
 - [ ] **5.3 Fuites, transferts et débordements entre contenants** — *partiel* : orifices et
   déversoirs entre nœuds, arrivées collectives (S227). Manque le débordement vers l'extérieur.
-- [ ] **5.4 Vannes et pompes** — *absent*.
+- [ ] **5.4 Vannes et pompes** — *partiel* depuis S372 : une **commande** entière par arête, état répliqué et sauvegardé
+  (WVST v2) ; la vanne, section ou largeur commandée — C12 à demi-ouverture à −0,10 % de l'analytique ; la **pompe** en
+  réseau ouvert, courbe parabolique, clapet, à sec, similitude — à 0,025 % de l'intégrale analytique, barrage au
+  millilitre ; masse exacte, au bit à commande pleine ([preuve](validation/VANNES-POMPES-S372.md),
+  [ADR-199](adr/ADR-199-vannes-et-pompes-dans-v.md)). Manquent le `C_d` selon l'ouverture, pertes et énergie de la
+  pompe, un consommateur (hôte, serveur V), le réseau fermé (5.8).
 - [ ] **5.5 Pluie selon l'exposition au ciel, absorption par le sol** — *absent*.
 - [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *absent*.
 - [ ] **5.7 Plusieurs liquides** (`liquid_id`, A17) — *absent*.
@@ -554,7 +559,7 @@ pas recopiée ici (L137).
 | 2. Grandes masses (B) | 9 | 0 | 4 | 5 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 12 | 9 |
-| 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
+| 5. Volumes finis (V) | 12 | 1 | 4 | 7 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 1 | 7 |
 | 8. Rendu | 10 | 0 | 9 | 1 |
@@ -563,7 +568,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **63** | **54** |
+| **total** | **120** | **3** | **64** | **53** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

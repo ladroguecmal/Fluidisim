@@ -89,7 +89,7 @@ pas déterministe au bit, refus atomiques. (6) Instantané v2 : une commande cha
 - [x] **P3** — `control_pm` sur `Opening` ; la vanne ; critères 1 et 2.
 - [x] **P4** — la pompe ; critères 3 à 5.
 - [x] **P5** — l'instantané WVST v2 ; critère 6.
-- [ ] **P6** — preuve `VANNES-POMPES-S372`, liste 5.4, file, feuille de route, index, ADR-010 et ADR-140 notes datées.
+- [x] **P6** — preuve `VANNES-POMPES-S372`, liste 5.4, file, feuille de route, index, ADR-010 et ADR-140 notes datées.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise

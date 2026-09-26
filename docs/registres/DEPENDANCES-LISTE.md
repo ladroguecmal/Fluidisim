@@ -149,7 +149,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 |---|---|---|---|---|---|
 | **5.2** Géométrie réelle des contenants | H | la précision des grands volumes (A269) ; des formes courbes cuites | — | 5.9 | **0** |
 | **5.3** Fuites, transferts et débordements entre contenants | H | — | 5.10 | 5.9 | **2** |
-| **5.4** Vannes et pompes | H | vannes et pompes dans le noyau V | — | 5.8 | **0** |
+| **5.4** Vannes et pompes | H | le `C_d` selon l'ouverture ; pertes et énergie de la pompe ; un consommateur | — | 5.8 | **0** |
 | **5.5** Pluie selon l'exposition au ciel, absorption par le sol | H | — | 2.8 | — | **E**, par 2.8 |
 | **5.6** Seuil adaptatif à l'échelle du contenant | H | le seuil adaptatif | — | — | **0** |
 | **5.7** Plusieurs liquides | H | `liquid_id` (A17) | — | — | **0** |
