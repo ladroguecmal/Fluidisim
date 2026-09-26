@@ -91,8 +91,8 @@ particules par maille occupée dans la dernière colonne de la bande ; saut de s
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la reconstruction voit les colonnes (particules virtuelles) ; critère 2 (repos, surface lue).
 - [x] **P3** — l'échange (flux de face, soldes, retrait, pose, absorption) ; critère 3 et le repos échangé ; critère 1.
-- [>] **P4** — l'exemple `apic3d_raccord` : 30 s, 5 et 2,5 cm, contre APIC seul ; critère 4.
-- [ ] **P5** — suite ; preuve (§5 de RACCORD-3D-S398) ; A316, file, liste.
+- [x] **P4** — l'exemple `apic3d_raccord` : 30 s, 5 et 2,5 cm, contre APIC seul ; critère 4.
+- [>] **P5** — suite ; preuve (§5 de RACCORD-3D-S398) ; A316, file, liste.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -113,3 +113,24 @@ repos **1,007 cm/s** (4 s : 0,5 à 1,03 cm/s, sans décroître, aucune particule
 les colonnes (biais de lecture 2,19 % de maille contre une surface exacte) ; la marche excite une seiche d'un millimètre
 (`u ~ A·ω` ≈ 5 mm/s) que rien n'amortit. L'essai garde le volume ; sur la vitesse, une garde de non-régression à 1,2 cm/s,
 écrite comme telle.
+
+**P4 — `apic3d_raccord`, 30 s, (1, 0), frontière au nœud** (APIC seul : même cuve, mêmes relevés) :
+
+| critère (écart à APIC seul) | 5 cm | 2,5 cm |
+|---|---|---|
+| niveau de la bande, par 10 s (±2 mm) | +1,21 / **+2,47 / +3,14** | +0,21 / +0,63 / −0,04 |
+| particules par maille (8 ± 0,4) | 7,70 / 7,89 / 8,18 | **7,32 / 7,33 / 7,38** |
+| saut max (< 0,5 maille) | 0,105 (seul 0,093) | 0,154 (seul **0,785**) |
+| période (1 point) | +0,60 contre +0,98 % | +0,35 contre +0,36 % |
+| amortissement (1 point) | +0,35 contre +0,32 % | +0,17 contre +0,08 % |
+| courant moyen sur la face (≤ 5 mm/s) | ≤ 0,9 en profondeur, **−7,0 à la surface** | ≤ 0,9, −3,3 à la surface |
+| volume total | −2,5·10⁻¹⁰ | −1,5·10⁻¹⁰ |
+
+**Critère 4 : à 2,5 cm, tenu sauf la densité** (7,3 pour 7,6 au moins) ; **à 5 cm, manqués** la migration (+3,1 mm) et le
+courant de surface (−7 mm/s). **La migration de masse a disparu à la maille fine** (2D : +6 mm à 2,5 cm). Durées : 46 s et 7,5 min
+(raccord), 76 s et 11,7 min (seul).
+
+**Attributions proposées, à éprouver (S400)** : (E) à 5 cm, l'eau entre dans la bande par la surface parce que la bande lit sa
+surface sous celle, exacte, des colonnes (le biais du repos, P3) — la zone lirait comme la bande, `η + e(η)`, `e` le biais du
+réseau nominal (`lattice_read_error`) ; (F) à 2,5 cm, la dernière colonne de la bande est clairsemée — la séparation ne voit pas
+les colonnes et pousse des particules à travers la frontière, où elles sont absorbées ; la tenir du côté de la bande.

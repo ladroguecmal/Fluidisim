@@ -232,6 +232,10 @@ impl Apic3 {
     pub fn labels(&self) -> &[u8] {
         &self.label
     }
+    /// Les vitesses `u` de la grille, faces `(nx + 1) × ny × nz` (`x` le plus rapide) — pour la mesure (S399).
+    pub fn velocity_u(&self) -> &[f32] {
+        &self.u
+    }
     /// Distance signée reconstruite aux centres des mailles (`x` le plus rapide, puis `y`, puis `z`).
     pub fn distance(&self) -> &[f32] {
         &self.phi
