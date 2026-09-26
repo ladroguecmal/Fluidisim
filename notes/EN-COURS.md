@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S395 — **en cours**. **C5a, deuxième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
+Session : S395 — **terminée**. **C5a, deuxième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
 [B10-APIC-S320](../docs/validation/B10-APIC-S320.md) §14) : A316 en 2D — **où l'échange comprime**, puis un échange qui ne
 comprime pas. Demande de l'utilisateur (2026-09-26) : *« Continue »*. Agent : Claude Opus 5.5, session cloud Claude Code ;
 fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau. Sert 4.12, 4.16, A316.
@@ -89,7 +89,7 @@ correction (B) de S394 — son énergie ajoutée, qui devrait tomber près de z�
   APIC seul ; la prédiction.
 - [x] **P3** — (C), l'échange au sommet ; critères 1 à 6 ; avec (B), publié.
 - [x] **P4** — preuve (§15 de B10-APIC-S320) ; A316, file, liste.
-- [>] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 **P2 — le bilan par profondeur** (`RACCORD_BILAN=1`, paroi, 5 cm, 30 s ; sans la variable, au bit) :

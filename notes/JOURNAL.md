@@ -17607,3 +17607,19 @@ deux ; S354 mesurait −87 J/m sous l'échange — **l'échange comprime**, c'es
 (B) à facteur 1 et bande de 2, non réglés. **Rituel.** Maillons **1** : aucun point ne change (4.12, 4.16 partiels). Suivant :
 dans le cloud, **C5a, deuxième part** — mesurer où l'échange comprime, puis un échange qui voit la densité ; au poste, C3b
 puis la pluie, pièce 5b.
+
+## S395 — 2026-09-26 — physique : C5a, deuxième part — une circulation permanente à la frontière
+
+**Entrée.** *« Continue »* : où l'échange comprime (S394), puis un échange qui ne comprime pas. **Fait**
+([preuve](../docs/validation/B10-APIC-S320.md) §15) : un bilan par profondeur de la dernière colonne libre. **Prédiction
+contredite** : l'excès n'est pas où l'on insère — on insère en haut, on retire en bas, l'excès est au milieu (5,0 à 5,5 par
+maille). **(C)**, l'échange au sommet, déclaré avant : **pire** — le fond s'entasse (7,8 par maille), la correction de S394
+devrait y ajouter 457 J/m ; un échange doit retirer où les particules arrivent. **La source, mesurée** : sur la face de la
+frontière, une vitesse moyenne de **+21 mm/s en bas, −54 mm/s en haut**, tenue sur 30 s (APIC seul : moins de 2) — l'eau
+entre dans les colonnes par le bas et en ressort par le haut ; même chose sans paroi, avec la mémoire de vitesse, frontière
+déplacée : elle naît des colonnes. **Hypothèse non tranchée** : les colonnes, réensemencées à chaque pas, n'advectent pas la
+quantité de mouvement ; l'épreuve par l'amplitude est dégénérée à 1 cm (onde sous l'espacement des particules). Sans
+variable, tout au bit. **Rituel.** Maillons **2** : aucun point ne change. **Deuxième session de suite sur le raccord** : la
+troisième ne se prend pas sans critère de porte franchi (S294) ; comparé à la file, le lot qui fait avancer une capacité dans
+le cloud est **C8 en référence** — blocs épars, domaine qui suit la perturbation, fusion et séparation (4.9, absent). Suivant :
+C8 (référence) dans le cloud, puis le raccord (trancher l'advection des colonnes) ; au poste, C3b puis la pluie, pièce 5b.
