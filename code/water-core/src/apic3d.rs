@@ -578,6 +578,10 @@ impl Apic3 {
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..nx {
+                    // S398–S399 : une maille de la zone des colonnes prend `φ = z − η` (`columns_label`) ; rien à reconstruire.
+                    if self.columns.is_some() && self.column_of(i, j) {
+                        continue;
+                    }
                     let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
                     // S389 : les parois **reflètent** les particules — sans quoi, près d'une paroi latérale, le noyau n'en
                     // trouve que d'un côté, la moyenne se décale vers l'intérieur et la surface y paraît plus basse. Une image
@@ -630,6 +634,14 @@ impl Apic3 {
                                     }
                                 }
                             }
+                        }
+                    }
+                    // S399 : près de la zone, la reconstruction compte aussi les particules **virtuelles** des colonnes.
+                    if self.columns.is_some() {
+                        let (w, v) = self.virtual_column_sums(q, i, j, reach, radius, inv_r2, [images_x, [images_y[0], images_y[1], images_y[2]]], images_z);
+                        sw += w;
+                        for m in 0..3 {
+                            sx[m] += v[m];
                         }
                     }
                     let c = self.cell(i, j, k);

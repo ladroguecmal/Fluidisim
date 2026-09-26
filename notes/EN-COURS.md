@@ -88,12 +88,17 @@ particules par maille occupée dans la dernière colonne de la bande ; saut de s
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — la reconstruction voit les colonnes (particules virtuelles) ; critère 2 (repos, surface lue).
-- [ ] **P3** — l'échange (flux de face, soldes, retrait, pose, absorption) ; critère 3 et le repos échangé ; critère 1.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — la reconstruction voit les colonnes (particules virtuelles) ; critère 2 (repos, surface lue).
+- [>] **P3** — l'échange (flux de face, soldes, retrait, pose, absorption) ; critère 3 et le repos échangé ; critère 1.
 - [ ] **P4** — l'exemple `apic3d_raccord` : 30 s, 5 et 2,5 cm, contre APIC seul ; critère 4.
 - [ ] **P5** — suite ; preuve (§5 de RACCORD-3D-S398) ; A316, file, liste.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
-
+**P2 — les particules virtuelles des colonnes** (`virtual_column_sums`) : pour une maille de la bande à portée de la zone,
+chaque colonne compte `2 × 2` particules par rangée, `round(2η/dx)` rangées étirées sur `[0, η]`, images aux parois comprises ;
+les mailles de la zone ne sont plus reconstruites (leur `φ` est `z − η`). **Critère 2, première moitié, tenu** : au repos, la
+surface lue dans la dernière colonne de la bande se trompe de **2,19 %** de maille, comme au milieu de la bande ; **vu échouer**
+sans les virtuelles : **14,7 %** (la paroi vue d'un seul côté). **Le repos dynamique** demande l'échange : sans lui, 8,2 cm/s —
+la pression fait passer de l'eau par les faces de la frontière, que ni `η` ni les particules ne transportent. Jugé en P3.

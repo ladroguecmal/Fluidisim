@@ -324,3 +324,27 @@ fn a_column_bump_keeps_its_volume_s398() {
     assert!(drift.abs() <= 1e-6, "{drift}");
     assert!(spread < 0.05);
 }
+
+/// Une cuve de 1 × 0,4 × 1 m à 5 cm, 0,5 m d'eau : les dix premières colonnes en `x` portées par des particules (la bande), les
+/// dix suivantes par la zone des colonnes (S399).
+fn half_band() -> (Apic3, usize) {
+    let (nx, ny, nz) = (20, 8, 20);
+    let (mut a, mut arena) = apic(nx, ny, nz, 0.05, nx * ny * nz * 8);
+    let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx >= 10) as u8).collect();
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+    a.set_columns_surface(&vec![0.5; nx * ny]).unwrap();
+    let n = a.seed(&|p| p[2] < 0.5 && p[0] < 0.5).unwrap();
+    (a, n)
+}
+
+#[test]
+fn the_band_reads_its_rest_height_beside_the_columns_s399() {
+    // Critère 2 de S399, première moitié : au repos, la surface lue dans la dernière colonne de la bande à ≤ 5 % de maille du
+    // repos — le noyau y voit les particules virtuelles des colonnes. (Le repos dynamique demande l'échange : P3.)
+    let (mut a, _) = half_band();
+    a.reconstruct();
+    let worst = (0..8).map(|j| (read_height(&a, 9, j) - 0.5).abs()).fold(0f32, f32::max);
+    let inner = (0..8).map(|j| (read_height(&a, 5, j) - 0.5).abs()).fold(0f32, f32::max);
+    println!("S399 surface lue contre les colonnes : écart max {:.2} % de maille (au milieu de la bande : {:.2} %)", 100. * worst / 0.05, 100. * inner / 0.05);
+    assert!(worst <= 0.05 * 0.05, "{worst}");
+}
