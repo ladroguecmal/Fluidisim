@@ -62,41 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S384 — **terminée**. **Décision de l'utilisateur** (2026-09-26, S384, session cloud sans carte graphique ni
-Godot) : *« Solveur 3D ici »* — la campagne du solveur volumique 3D commence maintenant ; la pluie, pièce 5, et le verdict
-R32 se feront depuis le poste. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni
-carte graphique, ni Godot.
+Session : S385 — **en cours**. **C1** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5) :
+**la multigrille 3D de la référence**. Demande de l'utilisateur (2026-09-26) : *« Oui »* à C1 ; et le **verdict R32**, à
+consigner. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
 
-**Thèse.** La campagne du solveur volumique 3D temps réel (FEUILLE-DE-ROUTE §3 ter ; S379, R30) commence par sa
-**conception** : ce que le dépôt a déjà (δ 3D en colonnes, référence CPU et production GPU ; APIC sur banc 2D ; faces
-coupées ; ordonnanceur), l'état de l'art du volumique temps réel, l'architecture qui les réunit (domaines, niveaux de
-détail d'ADR-202, prévision d'ADR-013, représentations), des cibles chiffrées tirées des usages, et un découpage en
-sessions dont chacune a son critère « reçu si ». Livrables : `docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md` et un ADR qui
-acte ce qui relève de l'autonomie technique (S71) et nomme ce qui demande l'utilisateur.
+**Thèse.** Le pas mobile de la référence (`project_mobile3` : le pas couplé, la piscine, les solides) résout la pression par
+un gradient conjugué préconditionné par Jacobi, dont les itérations croissent avec la maille. Le cycle en V de S245
+(`delta_projection.rs`, 2D) porté en 3D — lissage de Jacobi amorti ω = 6/7 (dérivé pour sept points), restriction moyenne
+des huit filles, prolongation par injection, autant de lissages avant qu'après, niveaux grossiers rediscrétisés (ouvertures
+moyennées, maille active si une fille l'est, air si une fille l'est) — comme **préconditionneur** : il change le chemin,
+jamais le test d'acceptation (ADR-144). **Désactivé par défaut** : tout ce qui existe reste au bit.
 
-**Critères, écrits avant.** (1) Chaque capacité existante citée avec sa preuve (lien) et son chiffre mesuré ; aucune
-valeur sans provenance (I-14). (2) Chaque méthode de l'état de l'art avec une source identifiée (auteurs, année, lieu) ;
-ses chiffres marqués **publié**, **estimé** ou **non vérifié**. (3) Chaque cible chiffrée rattachée à un usage (point de
-la liste, tolérance d'image de 3 mm, δ ≤ 2 ms GPU d'ADR-174 D3, cadence d'ADR-012 §7). (4) Chaque session du découpage
-nomme sa porte ou son point de liste, son critère « reçu si », et **où** elle peut se faire (session cloud sans carte, ou
-poste avec carte et Godot). (5) `etat_projet.py --check` sans erreur. Aucun code du cœur changé : suite Rust inchangée
-(664 réussis, 18 ignorés, mesuré à l'ouverture sur `daf67e0c`).
+**Critères, écrits avant.** (1) Le cycle est **symétrique** (écart relatif ≤ 10⁻⁵ sur des vecteurs quelconques) et **défini
+positif**, sur une surface libre, sur fond plat et sur fond coupé. (2) Projection **acceptée** avec et sans, et surfaces à
+**10⁻⁶ m** l'une de l'autre après 20 pas mobiles. (3) **Itérations indépendantes de la maille** : à trois mailles d'un même
+domaine (`dx`, `dx/2`, `dx/4`), le nombre d'itérations avec la multigrille ne croît pas de plus de 50 % de la plus grossière
+à la plus fine, quand Jacobi croît au moins du double (L274 : trois points). (4) La bosse de S324 en mode mobile ne rampe
+pas (A315). (5) Désactivée : suite entière inchangée (664 réussis, 18 ignorés), zéro avertissement. (6) Coût par itération
+et temps total publiés, au même résidu.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — inventaire : δ 3D (référence, production, coût, limites A297, A298, A316, A320), APIC (B10, raccord),
-  faces coupées, ordonnanceur, piscine en δ ; lu dans les preuves, chiffres et liens.
-- [x] **P3** — état de l'art (1) : grilles hybrides temps réel (colonnes hautes, fonction hauteur + 3D + particules),
-  pression sur la carte (multigrille), grilles éparses.
-- [x] **P4** — état de l'art (2) : particules sur grille (FLIP, APIC, MPM) sur la carte ; SPH et PBF ; Boltzmann sur
-  réseau à surface libre ; coûts et qualités publiés.
-- [x] **P5** — cibles chiffrées : les usages volumiques de la liste, taille des domaines, mailles, cadence, budget.
-- [x] **P6** — l'architecture proposée, les alternatives écartées et leurs raisons.
-- [x] **P7** — le découpage en sessions : critères « reçu si », lieu (cloud ou poste).
-- [x] **P8** — ADR de la campagne ; liste, file, feuille de route, index.
-- [x] **P9** — rituel.
+- [ ] **P2** — verdict R32 consigné (REVUE-VISUELLE §37, file : les défauts nommés, déclencheur « peaufinage »).
+- [ ] **P3** — l'instrument d'abord : `examples/delta3d_multigrille.rs`, trois mailles, fond plat et bosse, itérations et
+  temps de Jacobi — la référence de mesure.
+- [ ] **P4a** — `delta3d_multigrid.rs` : niveaux 3D (géométrie, restriction, prolongation, opérateur, lissage) ; comptés
+  auprès de l'hôte (I-06) ; essais de forme.
+- [ ] **P4b** — le cycle en V et son branchement dans `project_mobile3` (`enable_multigrid`) ; critère 1.
+- [ ] **P5** — critères 2 à 4 : essais et banc.
+- [ ] **P6** — critère 5 (suite entière), critère 6 (coût) ; preuve `MULTIGRILLE-3D-S385` ; liste, file, feuille de route,
+  index.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
 
-Rien à reprendre : tout est dans la conception, ADR-207 et le journal. L'erreur de battement de P8 est dite au journal.
+*(vide)*
