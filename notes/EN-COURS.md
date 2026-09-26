@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S383 — **en cours**. Verdict R31 : *« Je valide R31, continue la pluie »*. Cette session : **la pluie, pièce 4
+Session : S383 — **terminée**. Verdict R31 : *« Je valide R31, continue la pluie »*. Cette session : **la pluie, pièce 4
 d'ADR-205 — les gerbes** (liste 8.4). Agent : Claude Opus 5.5, application desktop ; fichiers, git, carte réelle, accès
 web ; Godot 4.4.1 local.
 
@@ -97,7 +97,7 @@ réelles ; jugement de l'utilisateur (R32).
 - [x] **P7** — les éclaboussures au sol (seuil de Mundo, Sommerfeld et Tropea) ou, faute de temps, leur déclencheur.
 - [x] **P8** — images de R32 ; REVUE-VISUELLE §37.
 - [x] **P9** — preuve `GERBES-S383` ; liste, file, feuille de route, index.
-- [ ] **P10** — rituel.
+- [x] **P10** — rituel.
 
 ### Notes de reprise
 

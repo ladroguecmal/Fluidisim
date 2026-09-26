@@ -17411,3 +17411,20 @@ avant le solveur (« puis continue, et ensuite le plus important le solveur 3D �
 (les gerbes), puis la campagne du solveur volumique 3D.
 **Verdict R31** (après le rituel) : *« Je valide R31, continue la pluie »* — occultation et ombres reçues (8.10 reste partiel) ;
 suivant : la pluie, pièce 4, les gerbes (S383).
+
+## S383 — 2026-09-26 — rendu : les gerbes de la pluie (ADR-205, pièce 4)
+
+**Entrée.** R31 : *« Je valide R31, continue la pluie »*. **Fait** ([preuve](../docs/validation/GERBES-S383.md)). Sources :
+Murphy et al. (2015) repris par Wang et al. (2023) — goutte de 4,1 mm à 7,2 m/s, **relevée sur leur figure** (dôme 19,4 mm à
+12 ms, jet 24,7 mm à 18 ms) ; exposants de Watson et al. (2024) pour l'échelle `s(D)`. Le tirage des impacts sorti des rides
+(fonctions partagées : sous la pluie, 8 images au bit) ; particules aux mêmes impacts (piscine ; mer, posées sur la surface
+déplacée — `bande_b.gdshaderinc` sorti de `surface_b`) ; silhouette relevée, moyennée sur la pose de 1/60 s ; au loin, la
+part d'aire `M/tan ε`. Critères : sans pluie 12 au bit ; 961 gerbes au centre de leur anneau (0,76 mm) ; nombre à −2,8 %
+(Poisson 3,2 %) ; sommet à 0,04 mm des relevés ; coût +0,01 à +0,33 ms. **Défaut de S380 trouvé et corrigé** : dans les
+captures de la mer, la pluie ne suivait pas la pose — gouttes de la pose « référence » ≈ 11 m trop loin dans R29 et R30.
+**Impasses dites** : `return` interdit dans les particules ; particules recouvertes par l'eau (ordre des transparents) ;
+carré de contrôle mêlé par l'anticrénelage. **Limites** : silhouette simplifiée (ni doigts ni gouttelettes), une seule
+mesure, éclaboussures au sol différées à la pièce 5 (film mince, Cossali et al. 1997). **Rituel.** Maillons **3** — 8.4
+reste partiel, R32 posée ; **justifié** : la demande explicite de l'utilisateur (« continue la pluie ») prime sur la suite
+automatique, et aucune pièce de pluie ne change seule l'état d'un point (8.4 demande aussi écume, spray, bulles). Suivant :
+verdict R32, puis la pièce 5 (surfaces mouillées, éclaboussures au sol), ensuite la campagne du solveur volumique 3D.
