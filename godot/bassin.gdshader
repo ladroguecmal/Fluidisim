@@ -156,7 +156,10 @@ void fragment() {
     }
     // S382 : la lumière qui entre dans l'eau vient du ciel que la surface voit (`occultation.gdshaderinc`), normale au repos.
     vec2 vu_eau = ciel_vu_interpole(vu_sommet);
-    vec3 corps = R0 * gain_eau * eclairage_vu(nb, soleil, 1.0, vec3(vu_eau, 1.0));
+    // S382 P7 : l'ombre portée sur l'eau — la lumière qui y entre, et l'éclat du soleil.
+    float vs_eau = soleil_vu(surface, vec3(0.0, 1.0, 0.0), soleil_monde(), dFdx(surface), dFdy(surface));
+    eclat *= vs_eau;
+    vec3 corps = R0 * gain_eau * eclairage_vu(nb, soleil, 1.0, vec3(vu_eau, vs_eau));
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     if (variance_pluie > 0.0) {
         // La pente non résolue de la pluie, de covariance `cov_pluie` (x, z de Godot) : Fresnel et ciel intégrés par
@@ -179,7 +182,7 @@ void fragment() {
             }
         }
         float m_eff = 1.0 / (1.0 / 180.0 + 4.0 * sig * sig);
-        float eclat_pluie = (m_eff / 180.0) * pow(max(dot(reflet, soleil), 0.0), m_eff) * soleil_direct();
+        float eclat_pluie = (m_eff / 180.0) * pow(max(dot(reflet, soleil), 0.0), m_eff) * soleil_direct() * vs_eau;
         ALBEDO = somme + vec3(1.0, 0.95, 0.85) * eclat_pluie * 1.2;
     } else {
         ALBEDO = mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2;

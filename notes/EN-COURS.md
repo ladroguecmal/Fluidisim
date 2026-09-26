@@ -99,7 +99,7 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
 - [x] **P6c** — la part vue **cuite** aux sommets : une passe de rendu unique (points, `SubViewport` à mise à jour unique,
   refaite quand un occultant change), lue par `VERTEX_ID` ; sans occultation, géométrie d'avant ; critère 1 ; coût.
 - [x] **P6d** — faces graduées près des arêtes (≈ 1 cm au contact, croissant jusqu'à 10 cm) : critère 2 sous le débord.
-- [ ] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
+- [x] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
 - [ ] **P8** — photographies de temps couvert (pied des murs) ; images de R31 ; REVUE-VISUELLE §36.
 - [ ] **P9** — preuve `OCCULTATION-CIEL-S382` ; liste, file, feuille de route, index.
 - [ ] **P10** — rituel.
@@ -164,3 +164,14 @@ surfaces ne lisent plus depuis la cuisson (« avec = sans », vu) : il bascule `
 **0,0088** (eau à 10 cm du mur nord : l'interpolation entre colonnes de δ, 10 cm, non graduées) ; sous le débord −0,0047 ;
 sol à 25 cm −0,0028 ; lumière du sol 0,54040 pour 0,53998. **Coût par image** (couvert, sec) : 0,645 / 0,553 / 0,515 ms
 contre 0,540 / 0,492 / 0,457 sans — **+0,06 à +0,10 ms**. `OCCULTATION=0` : 12 / 12 au bit.
+
+**P7 — les ombres portées.** `soleil_vu` (par pixel) : quatre rayons, décalés de ±⅜ de pixel et visant le disque solaire
+(demi-angle 0,266°, rayon relatif 0,83), test de dalles 3D ; test précoce du rayon central contre les boîtes élargies
+(2 cm + ½ pixel) ; éteint sous le ciel couvert ou face à l'ombre (n·s ≤ 0). Parois ; eau (lumière entrante, éclat, éclat
+des rides). **Critère 4** (`--controle-ombre`, écrit avant la mesure : orthographique d'aplomb, 5 mm par pixel, arête haute
+et extérieure de la margelle sud, 2,85 m au-dessus du sol) : bord attendu z = 3,3687, **mesuré 3,3662 (−2,5 mm, ½ pixel)**,
+tenu ; hors de l'ombre, **539 819 pixels identiques** ombres allumées ou éteintes. **Impasse du contrôle** : le premier
+passage prenait pour bord la limite de l'eau du bassin (le contrôle de l'eau rend 0 en bleu) — recherche limitée au sol.
+**Limite** : pénombre rendue 10 mm pour 33 mm du disque entier (quatre rayons). **Coût** (ciel clair) : 0,805 / 0,820 /
+0,646 ms contre 0,539 / 0,490 / 0,457 sans occultation — +0,19 à +0,33 ms, dont 0,06 à 0,10 pour le ciel ; sans le test
+précoce, +0,20 à +0,49. `OCCULTATION=0` : 12 / 12 au bit.

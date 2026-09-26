@@ -138,6 +138,8 @@ func _ready() -> void:
 		controle_ciel()
 	elif "--controle-occultation" in args:
 		controle_occultation()
+	elif "--controle-ombre" in args:
+		controle_ombre()
 	elif "--captures" in args:
 		captures()
 
@@ -609,7 +611,7 @@ func appliquer(s: float) -> void:
 
 func _process(delta: float) -> void:
 	var args := OS.get_cmdline_user_args()
-	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args or "--controle-ciel" in args or "--controle-occultation" in args:
+	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args or "--controle-ciel" in args or "--controle-occultation" in args or "--controle-ombre" in args:
 		return
 	if not en_pause:
 		t = fmod(t + delta, float(pas.size() - 1) * dt)
@@ -1063,6 +1065,99 @@ func controle_occultation() -> void:
 				await RenderingServer.frame_post_draw
 			r.append(moyenne_centre(get_viewport().get_texture().get_image()).g)
 		print("CONTROLE_OCCULTATION_S382 lumiere point=%s avec=%.5f sans=%.5f rapport=%.5f" % [pt[0], r[0], r[1], r[0] / r[1]])
+	get_tree().quit()
+
+
+## S382 — **le critère 4** : l'ombre de l'arête haute et extérieure de la margelle sud (hauteur `H` au-dessus du sol) tombe
+## sur le sol à `z = z_arête + H·(−s_z)/s_y` (s, direction du soleil dans Godot), sur la ligne x = 0. Vue orthographique
+## d'aplomb, **5 mm par pixel** (720 pixels pour 3,6 m) ; la part du soleil rendue directement (bleu du contrôle), moyennée
+## sur les 9 colonnes du centre ; le bord est où elle passe ½ (interpolation linéaire). Puis la même vue éclairée, ombres
+## allumées et éteintes : les pixels où la part du soleil vaut 1 doivent être identiques.
+func controle_ombre() -> void:
+	get_viewport().use_hdr_2d = true
+	monde_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	monde_env.glow_enabled = false
+	monde_env.fog_enabled = false
+	texte.visible = false
+	pluie_air.configurer(0.0)
+	var s := Vector3(-0.4, 0.3, 0.8).normalized()
+	var s_monde := Vector3(s.x, s.z, -s.y)
+	var z_arete: float = float(geo["lz"]) + float(geo["e"]) + 0.1
+	var h: float = float(geo["haut"]) + 0.05 - float(geo["sol_y"])
+	var z_attendu := z_arete + h * (-s_monde.z) / s_monde.y
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.size = 3.6
+	camera.position = Vector3(0.0, float(geo["sol_y"]) + 10.0, z_attendu)
+	camera.look_at(Vector3(0.0, float(geo["sol_y"]), z_attendu), Vector3(0, 0, -1))
+	for m in materiaux_ciel:
+		m.set_shader_parameter("couvert", 0.0)
+		m.set_shader_parameter("controle_occultation", true)
+	for _k in 4:
+		await RenderingServer.frame_post_draw
+	var im := get_viewport().get_texture().get_image()
+	im.convert(Image.FORMAT_RGBF)
+	var w := im.get_width()
+	var hh := im.get_height()
+	var metres_par_pixel := 3.6 / hh
+	# L'image : le haut est vers −z (le nord) ; la ligne j est à z = z_attendu + (j + 0,5 − hh/2)·mpp.
+	var profil := []
+	for j in hh:
+		var somme := 0.0
+		for i in range(w / 2 - 4, w / 2 + 5):
+			somme += im.get_pixel(i, j).b
+		profil.append(somme / 9.0)
+	var z_mesure := NAN
+	for j in hh - 1:
+		# Le sol seulement : au-delà de l'arête (au nord, le bloc et l'eau).
+		if z_attendu + (j + 0.5 - 0.5 * hh) * metres_par_pixel < z_arete + 0.05:
+			continue
+		if profil[j] >= 0.5 and profil[j + 1] < 0.5 or profil[j] < 0.5 and profil[j + 1] >= 0.5:
+			var f: float = (0.5 - profil[j]) / (profil[j + 1] - profil[j])
+			z_mesure = z_attendu + (j + 0.5 + f - 0.5 * hh) * metres_par_pixel
+			break
+	var ecart_px := (z_mesure - z_attendu) / 0.005
+	print("CONTROLE_OMBRE_S382 critere=4 z_attendu=%.4f z_mesure=%.4f ecart=%.2f mm (%.2f pixel de 5 mm) %s" % [
+		z_attendu, z_mesure, 1000.0 * (z_mesure - z_attendu), ecart_px, "tenu" if absf(ecart_px) <= 1.0 else "manque"])
+	var largeur := 0
+	for j in hh:
+		var z := z_attendu + (j + 0.5 - 0.5 * hh) * metres_par_pixel
+		if z > z_arete + 0.05 and profil[j] > 0.02 and profil[j] < 0.98:
+			largeur += 1
+	# La pénombre attendue : le bord pour chaque direction du bord du disque solaire (demi-angle 0,266°).
+	var t1 := s_monde.cross(Vector3.UP).normalized()
+	var t2 := s_monde.cross(t1)
+	var zmin := INF
+	var zmax := -INF
+	for k in 360:
+		var a := deg_to_rad(float(k))
+		var sd := (s_monde + 0.00465 * (cos(a) * t1 + sin(a) * t2)).normalized()
+		var z := z_arete + h * (-sd.z) / sd.y
+		zmin = minf(zmin, z)
+		zmax = maxf(zmax, z)
+	print("CONTROLE_OMBRE_S382 penombre=%.1f mm (%d pixels entre 2 et 98 %%) ; disque entier %.1f mm" % [
+		largeur * metres_par_pixel * 1000.0, largeur, (zmax - zmin) * 1000.0])
+	# Hors de l'ombre, rien ne change : la vue éclairée, ombres allumées puis éteintes.
+	var masque_soleil := im
+	for m in materiaux_ciel:
+		m.set_shader_parameter("controle_occultation", false)
+	var images := []
+	for ombres in [true, false]:
+		for m in materiaux_ciel:
+			m.set_shader_parameter("ombres_soleil", ombres)
+		for _k in 4:
+			await RenderingServer.frame_post_draw
+		var e := get_viewport().get_texture().get_image()
+		e.convert(Image.FORMAT_RGBF)
+		images.append(e)
+	var eclaires := 0
+	var differents := 0
+	for j in hh:
+		for i in w:
+			if masque_soleil.get_pixel(i, j).b >= 1.0:
+				eclaires += 1
+				if images[0].get_pixel(i, j) != images[1].get_pixel(i, j):
+					differents += 1
+	print("CONTROLE_OMBRE_S382 hors_ombre pixels=%d differents=%d %s" % [eclaires, differents, "tenu" if differents == 0 else "manque"])
 	get_tree().quit()
 
 

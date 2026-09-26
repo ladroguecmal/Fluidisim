@@ -20,7 +20,8 @@ const float TAN_BANDE_0 = 0.0156269;
 uniform int occultants_n = 0;
 uniform vec3 occultants_min[OCCULTANTS_MAX];
 uniform vec3 occultants_max[OCCULTANTS_MAX];
-// Contrôle (S382, critère 2) : la surface rend (part du ciel uniforme, part du ciel de la CIE, 0) au lieu de sa couleur.
+// Contrôle (S382, critères 2 et 4) : la surface rend (part du ciel uniforme, part du ciel de la CIE, part du soleil) au lieu
+// de sa couleur.
 uniform bool controle_occultation = false;
 
 /// Le masque d'élévation d'une boîte dans l'azimut de direction horizontale `d` (x, z), vu de `q` ; 0 si elle n'y est pas.
@@ -157,6 +158,67 @@ vec2 ciel_vu_cuit(int sommet) {
     ivec2 taille = textureSize(vu_cuite, 0);
     int i = vu_decalage + sommet;
     return texelFetch(vu_cuite, ivec2(i % taille.x, i / taille.x), 0).rg;
+}
+
+// S382 P7 — **les ombres portées** (ADR-206 D3) : le soleil, une direction du même calcul, **à chaque pixel** (une ombre
+// a des bords nets, que l'interpolation entre sommets déplacerait). Quatre rayons : chacun décalé dans le pixel (±⅜ de
+// pixel, grille tournée) et visant un point du disque solaire (demi-angle 0,266°, rayon relatif 0,79) — la pénombre y
+// prend sa largeur physique, `distance × 0,0093`, et les bords sont lissés. Test de dalles 3D contre chaque boîte.
+uniform bool ombres_soleil = true;
+const float DEMI_ANGLE_SOLEIL = 4.65e-3;
+
+float soleil_vu(vec3 p, vec3 n, vec3 s, vec3 dpx, vec3 dpy) {
+    if (occultants_n <= 0 || !ombres_soleil || couvert >= 1.0 || dot(n, s) <= 0.0) {
+        return 1.0;
+    }
+    // Test précoce : le rayon central contre les boîtes élargies de ce dont les quatre rayons peuvent s'en écarter (le
+    // disque, ≈ 5 mm par mètre, jusqu'à 4 m ; ⅜ de pixel) — s'il les manque toutes, le point est entièrement au soleil.
+    vec3 q0 = p + 5e-4 * n;
+    vec3 marge = vec3(0.02 + 0.5 * (length(dpx) + length(dpy)));
+    bool proche = false;
+    for (int i = 0; i < min(occultants_n, OCCULTANTS_MAX); i++) {
+        vec3 ta = (occultants_min[i] - marge - q0) / s;
+        vec3 tb = (occultants_max[i] + marge - q0) / s;
+        vec3 tmn = min(ta, tb);
+        vec3 tmx = max(ta, tb);
+        if (min(min(tmx.x, tmx.y), tmx.z) > max(max(max(tmn.x, tmn.y), tmn.z), 0.0)) {
+            proche = true;
+            break;
+        }
+    }
+    if (!proche) {
+        return 1.0;
+    }
+    vec3 t1 = normalize(cross(s, abs(s.y) < 0.9 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
+    vec3 t2 = cross(s, t1);
+    float vu = 0.0;
+    for (int k = 0; k < 4; k++) {
+        float signe = k < 2 ? 1.0 : -1.0;
+        vec2 e = signe * (k % 2 == 0 ? vec2(0.25, 0.75) : vec2(0.75, 0.25));
+        vec3 q = p + 5e-4 * n + 0.5 * (e.x * dpx + e.y * dpy);
+        vec3 d = normalize(s + DEMI_ANGLE_SOLEIL * 1.05 * (e.y * t1 - e.x * t2));
+        bool bloque = false;
+        for (int i = 0; i < min(occultants_n, OCCULTANTS_MAX); i++) {
+            vec3 ta = (occultants_min[i] - q) / d;
+            vec3 tb = (occultants_max[i] - q) / d;
+            vec3 tmn = min(ta, tb);
+            vec3 tmx = max(ta, tb);
+            float t0 = max(max(tmn.x, tmn.y), tmn.z);
+            float t1b = min(min(tmx.x, tmx.y), tmx.z);
+            if (t1b > max(t0, 0.0)) {
+                bloque = true;
+                break;
+            }
+        }
+        vu += bloque ? 0.0 : 0.25;
+    }
+    return vu;
+}
+
+/// La direction du soleil dans le monde de Godot (`SOLEIL_B` : x, y, z de B → x, z, −y).
+vec3 soleil_monde() {
+    vec3 s = normalize(SOLEIL_B);
+    return vec3(s.x, s.z, -s.y);
 }
 
 /// S382 P6b — **la part vue, par sommet** : évaluée dans `vertex()` et interpolée (elle varie lentement ; à chaque pixel,
