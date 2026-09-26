@@ -88,8 +88,14 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
   `gain_eau` déplacé là (l'éclairement de la scène).
 - [x] **P4** — les nuanceurs : eau, bassin, parois, fond, caustiques, éclat ; critère 1.
 - [x] **P5** — les scènes : `couvert` par la pluie ou `COUVERT=` ; contrôles (critères 2 à 4).
-- [>] **P6** — images de R30 ; preuve `CIEL-PLUIE-S381` ; registres.
+- [>] **P6a** — images de R30 (piscine, mer, ciel clair contre ciel couvert) ; REVUE-VISUELLE §35.
+- [ ] **P6b** — preuve `CIEL-PLUIE-S381` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
+
+**Reprise à chaud, 12:19** (*« Reprends le projet »*) : jeton `occupé` à 12:08, dernier commit P5 à 12:14, arbre propre,
+aucun diff ; **aucun autre processus d'agent en vie** (seul celui de cette session ; aucune session de l'application en
+cours). P6 marqué `[>]` sans travail commencé : **rien à compléter ni à annuler** ; P6 découpé en P6a / P6b (plus d'un
+quart d'heure à lui seul).
 
 ### Notes de reprise
 
