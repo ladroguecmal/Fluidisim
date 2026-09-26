@@ -17260,3 +17260,19 @@ Godot (15 avant), côté eau au bit ; contrôle de la ligne inchangé.
 **Rituel.** Maillons **1** : aucun point ne change d'état. Suivant : **S374, la piscine de V visualisée** (demande de
 l'utilisateur) ; au rendu, l'échelle radiométrique, avec une mesure qui la fonde.
 
+## S374 — 2026-09-26 — la piscine de V dans Godot, puis la dynamique en 3D volumétrique
+
+**Entrée.** *« commence à permettre de visualiser le système de piscine avec déversoir et pompe »* ; pendant la session,
+*« La dynamique de fluide doit se faire en 3D volumétrique »*.
+**Fait** ([preuve](../docs/validation/PISCINE-V-S374.md)). `piscine_v.rs` : une piscine à débordement dans V — bassin
+8 × 4 m, déversoir de 4 m, bac tampon, pompe de 12 l/s ; volume exact sur 3 300 pas ; régime établi à −0,21 % (déversoir)
+et +0,001 % (pompe) du point de fonctionnement analytique. Godot la rejoue (`piscine.tscn`), surfaces à 3,6·10⁻⁸ m de
+celles que V publie ; `bassin.gdshader` et `paroi.gdshader` reprennent l'optique et l'éclairement de la mer.
+**Décision de l'utilisateur** ([ADR-200](../docs/adr/ADR-200-la-dynamique-des-contenants-en-3d-volumetrique.md)) : le
+mouvement de l'eau des contenants se calcule par δ en 3D, V garde la masse (ADR-025), les arêtes de V deviennent sources
+et puits ; la lame et le jet attendent APIC en 3D. L'habillage balistique préparé (P4) est écarté, non versé.
+**Limites.** Aucune dynamique encore ; rejeu d'un scénario, pas de commande en direct.
+**Rituel.** Maillons **2** : aucun point ne change d'état (5.4 gagne un consommateur, 5.10 une décision). Suivant :
+**S375, δ 3D dans le bassin** (ADR-200 D4) — domaine sur l'intérieur, masse asservie à V, source du jet, puits du seuil,
+surface rendue dans Godot ; à deux maillons, viser 5.10 absent → partiel.
+

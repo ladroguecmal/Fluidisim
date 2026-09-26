@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 03:34 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S374 — la piscine de V visualisée : bassin, déversoir, bac tampon, pompe (demande de l'utilisateur)
-Dernière session : S373 — rendu 11 : **la brume réglée par pixel** à demi immergée (variantes `_demi` de l'eau et du fond ; la brume réécrite partout manquait le critère 1 de 11 niveaux) ([preuve](docs/validation/DEMI-IMMERGEE-S371.md) §10). Avant : S372, vannes et pompes dans V
-Session suivante : **S374, demande de l'utilisateur** : *« commence à permettre de visualiser le système de piscine avec déversoir et pompe »* — une piscine de V (bassin, déversoir, bac tampon, pompe) calculée par le cœur, rendue dans Godot. Ensuite par l'alternance : A320 (4.8), la coque qui bouge (6.4), la côte (2.7) ; au rendu, l'échelle radiométrique
-Maillons        : 1 — S373 : aucun point ne change d'état (journal)
+Session en cours : aucune
+Dernière session : S374 — **la piscine de V dans Godot** (état de départ, [preuve](docs/validation/PISCINE-V-S374.md)), puis **décision de l'utilisateur** : la dynamique des contenants en 3D volumétrique ([ADR-200](docs/adr/ADR-200-la-dynamique-des-contenants-en-3d-volumetrique.md)). Avant : S373, la brume par pixel
+Session suivante : **S375, δ 3D dans le bassin** (ADR-200 D4, demande de l'utilisateur) : domaine δ 3D sur l'intérieur du bassin, masse asservie à V (ADR-025), source du jet de la pompe, puits au seuil du déversoir, surface publiée et rendue dans Godot ; viser 5.10 absent → partiel. Puis le bac tampon, puis APIC 3D (lame, jet)
+Maillons        : 2 — S373, S374 : aucun point ne change d'état (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

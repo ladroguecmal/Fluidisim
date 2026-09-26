@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S374 — **en cours**. Demande : *« commence à permettre de visualiser le système de piscine avec déversoir et
+Session : S374 — **terminée**. Demande : *« commence à permettre de visualiser le système de piscine avec déversoir et
 pompe »*. La demande prime sur l'alternance et sur le compteur de maillons (1).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
@@ -91,7 +91,7 @@ par V **au dixième de millimètre**. (4) Jugement de l'utilisateur (R27).
   session, *« La dynamique de fluide doit se faire en 3D volumétrique »* : ADR-200 (δ 3D dans les contenants, V garde la
   masse, APIC pour la lame et le jet) ; l'habillage balistique préparé n'entre pas dans le dépôt.
 - [x] **P5** — images de l'état de départ (sans revue : aucune dynamique à juger) ; preuve `PISCINE-V-S374`, liste (5.4, 5.10), file, feuille de route, index.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 
