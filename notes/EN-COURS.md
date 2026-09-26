@@ -87,8 +87,8 @@ jugement de l'utilisateur (R28).
 - [x] **P2** — références : photographies de pluie sur l'eau (libres, lues sans téléchargement) ; ce qu'elles montrent.
 - [x] **P3** — les rides dans `bassin.gdshader` (le taux, l'anneau, le fondu en variance) ; critère 1 sur le bassin.
 - [x] **P4** — les rides sur la mer (`eau.gdshaderinc`, pente et covariance de la queue) ; critère 1 sur la mer.
-- [>] **P5** — contrôle du taux (critère 2), du fondu (critère 3) ; images de R28.
-- [ ] **P6** — preuve `RIDES-PLUIE-S379`, liste (8.9 ou 8.4), file, feuille de route, index ; la campagne du solveur dans
+- [x] **P5** — contrôle du taux (critère 2), du fondu (critère 3) ; images de R28.
+- [>] **P6** — preuve `RIDES-PLUIE-S379`, liste (8.9 ou 8.4), file, feuille de route, index ; la campagne du solveur dans
   la feuille de route.
 - [ ] **P7** — rituel ; session suivante : **la campagne du solveur volumique 3D** (conception).
 
@@ -146,3 +146,19 @@ variante à demi immergée compile et rend.
   5 cm). **À faire** (inscrit) : le champ d'anneaux calculé **une fois par image** dans une texture à moments (pente et
   second moment, filtrée par mipmaps comme la queue FFT, S360) — coût indépendant de la résolution et de l'étendue d'eau.
 - Taux recompté après le hachage court : −4,16 % (1,5 σ) / −0,61 % / −1,66 % à 2 / 10 / 50 mm/h.
+
+**P5 — contrôles à l'état final** (bosse centrale éteinte de R/2 à R, 3 à 6 mm, au lieu du train court) :
+- **Critère 1** : les 12 images d'avant (7 du bassin, 5 de la mer) identiques au SHA-256.
+- **Critère 2** : 1 237 / 1 290,6 (−4,16 %, 1,5 σ) ; 8 532 / 8 584,2 (−0,61 %) ; 36 477 / 37 091,4 (−1,66 %, 3,2 σ — le
+  reste des fusions que l'arrondi de l'aire ne rattrape pas) — **tenu** (±10 %). Le taux de forme close vérifié par
+  intégration numérique indépendante (numpy, trapèzes sur [1,5 ; 30] mm) : 67,22 / 447,09 / 1 931,84.
+- **Critère 3, par le calcul** : crêtes éteintes à λ/2 — 8,6 mm pour λ 17,1 mm, 22 mm pour λ 44 mm ; bandes (supports 4 et
+  10 cm) passées à l'uniforme à 2 et 5 cm, quatre échantillons au moins par bande ; bosse (Ø ≈ 12 mm) éteinte à 6 mm ;
+  aucune boucle au-delà de 5 cm de plus petite empreinte. Aucun motif n'atteint le pixel sous sa longueur d'onde.
+- Variance lointaine : 5,6·10⁻⁴ / 2,75·10⁻³ / 1,25·10⁻² (pente RMS 0,024 / 0,053 / 0,11) à 2 / 10 / 50 mm/h — petites gouttes
+  97,7 / 290,9 / 660,3, anneaux 51,5 / 437,2 / 2 629,6 m⁻²·s⁻¹ (moments). Pour comparaison, Cox et Munk à 5 m/s : 0,029.
+- **R28** : quatre planches dans `viewer/captures/s379/` (locales, non versionnées, comme R27), REVUE-VISUELLE §33. Vu :
+  en rasant, les reflets nets des nuages font place à un voile mat dès 10 mm/h — posé comme question.
+- **Message de l'utilisateur en cours de session** : *« Dis-toi que les systèmes d'optimisation tels que les LOD vont
+  complètement bouleverser les performances »* — le coût de P4 (effet isolé, sans les niveaux de détail d'ADR-202) n'appelle
+  ni optimisation improvisée ni réduction : mesuré, publié, l'optimisation inscrite (texture à moments), on continue.

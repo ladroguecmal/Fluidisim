@@ -156,11 +156,12 @@ vec2 pluie_rides(vec2 p, float t, vec2 dpdx, vec2 dpdy, out vec3 cv, out float c
             pluie_train(x1, PLUIE_W1, PLUIE_L1, PLUIE_S1 * f, fr, dir, s, cv);
             pluie_train(x2, PLUIE_W2, PLUIE_L2, PLUIE_S2 * f, fr, dir, s, cv);
             if (dans_bosse) {
-                // Une bosse de Gauss de rayon `PLUIE_BOSSE_R` : ∇η pointe vers le centre ; pente de crête `PLUIE_BOSSE·f`,
-                // résolue comme le train court.
+                // Une bosse de Gauss de rayon `PLUIE_BOSSE_R` : ∇η pointe vers le centre ; pente de crête `PLUIE_BOSSE·f` ;
+                // éteinte quand l'empreinte passe de R/2 à R (deux échantillons par diamètre) — son énergie, négligeable,
+                // ne va pas à la variance.
                 float eb = 1.0 - age / PLUIE_BOSSE_VIE;
                 float r = dist / PLUIE_BOSSE_R;
-                float a = 1.0 - smoothstep(0.25 * PLUIE_L1, 0.5 * PLUIE_L1, fr);
+                float a = 1.0 - smoothstep(0.5 * PLUIE_BOSSE_R, PLUIE_BOSSE_R, fr);
                 s -= dir * (a * PLUIE_BOSSE * pow(taille / 2.0, 1.5) * eb * eb * 2.3316 * r * exp(-r * r));
             }
         }

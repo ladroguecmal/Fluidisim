@@ -1205,3 +1205,29 @@ n'est pas la suite ; suivi d'une précision de conception ([ADR-202](../adr/ADR-
 un contenant vu de loin reste V avec des effets factices, δ seulement près d'un perturbateur. **Classe** : l'invisibilité
 de la dynamique à 20 cm n'est pas un défaut à corriger maintenant.
 
+
+## 33. R28 — les rides de la pluie, S379
+
+**Liste 8.9** ([preuve](RIDES-PLUIE-S379.md)). La pluie sur l'eau, **factice** comme vous l'avez demandé (ADR-202 D3,
+ADR-203 D7) : aucun calcul de fluide, mais des nombres qui ont une provenance — le nombre de gouttes qui laissent un anneau
+(Marshall et Palmer, Atlas : 447 par m² et par seconde à 10 mm/h, compté sur les images à 0,6 % près), la vitesse et la
+longueur d'onde des anneaux (ondes capillaires-gravité : 1,7 cm à 0,23 m/s en tête, 4,4 cm à 0,18 m/s derrière), leur
+extinction en 0,6 s. Au loin, quand le pixel ne peut plus montrer un anneau, il en montre la rugosité : l'eau devient mate
+(pente quadratique moyenne 0,024 / 0,053 / 0,11 à 2 / 10 / 50 mm/h). Références : six photographies libres, lues sans
+téléchargement ([notes de S379](../../notes/EN-COURS.md) ; *Rain in a pond at Zoo Schönbrunn*, *Waterwaves raindrops on
+water surface*, *Rain on the River Pang*, *Rain falling into a swimming pool*…).
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s379/r28_bassin_10mmh.png` | le bassin à 10 mm/h : de près en oblique (1,8 m, 30°), d'aplomb, en rasant, d'ensemble (≈ 13 m, le joueur à l'abri qui regarde dehors) |
+| `viewer/captures/s379/r28_bassin_sec_10_50.png` | sec, 10 et 50 mm/h, de près et en rasant : les anneaux déforment le carrelage vu à travers l'eau ; en rasant, les reflets nets des nuages font place à un voile mat piqueté |
+| `viewer/captures/s379/r28_bassin_detail.png` | le détail (×3) : paquets de 2 à 3 crêtes, bosses centrales des impacts récents, anneaux lisibles surtout dans le reflet clair — comme la photographie *Waterwaves* |
+| `viewer/captures/s379/r28_mer_sec_10_50.png` | la mer, sec / 10 / 50 mm/h : à 4 m de haut, un piqueté fin, discret |
+
+**Ce qui n'y est pas** : les gerbes et gouttelettes rebondissantes (couronnes, éclats blancs), la pluie dans l'air, le ciel
+de pluie (la scène garde son soleil : la météo vient à la fin), les reflets des murs et des objets (seul le ciel se reflète :
+le voile mat en paraît moins marqué qu'avec des arbres ou une maison reflétés), les scintillements des anneaux au loin
+(rendus en rugosité moyenne).
+
+**La question :** ces rides sont-elles crédibles — de près, et vues de loin (la vue d'ensemble) ? Le voile mat à 10 mm/h,
+qui efface les reflets des nuages en vue rasante, vous paraît-il juste, trop fort, pas assez ?
