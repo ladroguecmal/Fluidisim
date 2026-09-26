@@ -19,6 +19,10 @@
 //! Témoins : `APIC3D_RAYON=plan` (le rayon de S318), `APIC3D_SANS_SEPARATION`, `APIC3D_NOYAU=1` (S389), `APIC3D_TRACE`.
 //! S389 : l'amortissement par période, régression de ln(pic) sur les demi-périodes — la mesure qui porte « l'énergie ne
 //! croît pas ».
+//!
+//! S398 : deux autres solveurs sur la même cuve et le même instrument (le moment, lu sur `η`) — `APIC3D_COLONNES=1`, APIC 3D
+//! **tout en colonnes** (sa zone de colonnes, sans particule) ; `APIC3D_DELTA=1`, δ (`Volume3`, pas mobile, 20 ms, Jacobi jusqu'à 200 000 itérations). Ligne
+//! `APIC3D_S398`.
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
@@ -26,7 +30,7 @@ mod host_impl;
 
 use std::time::Instant;
 use water_core::apic3d::Apic3;
-use water_core::delta3d::Domain3;
+use water_core::delta3d::{Domain3, Volume3};
 use water_core::host::HostServices;
 
 const G: f64 = 9.81;
@@ -52,6 +56,104 @@ fn main() {
     let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
     let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 31);
     let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
+    // S398 : les colonnes (APIC 3D sans particule) ou δ, sur la même cuve ; le moment se lit sur `η`.
+    let colonnes = std::env::var("APIC3D_COLONNES").is_ok();
+    let delta = std::env::var("APIC3D_DELTA").is_ok();
+    if colonnes || delta {
+        let domain = Domain3 { nx, ny, nz, dx: dx as f32 };
+        let eta: Vec<f32> = (0..nx * ny)
+            .map(|c| (H + profil(((c % nx) as f64 + 0.5) * dx, ((c / nx) as f64 + 0.5) * dx)) as f32)
+            .collect();
+        let moment_eta = |e: &[f32]| -> f64 {
+            e.iter()
+                .enumerate()
+                .map(|(c, h)| {
+                    let (x, y) = (((c % nx) as f64 + 0.5) * dx, ((c / nx) as f64 + 0.5) * dx);
+                    (*h as f64 - H) * if mode == "11" { (x - lx / 2.) * (y - ly / 2.) } else { x - lx / 2. }
+                })
+                .sum()
+        };
+        let mut apic_cols = None;
+        let mut vol = None;
+        if colonnes {
+            let mut a = Apic3::configure(&mut hote, domain, 1000., G as f32, 8).expect("configuration");
+            a.enable_columns(&mut hote, &vec![1u8; nx * ny]).expect("colonnes");
+            a.set_columns_surface(&eta).expect("surface");
+            apic_cols = Some(a);
+        } else {
+            let mut v = Volume3::configure(&mut hote, domain, 1000., G as f32).expect("δ");
+            v.set_free_surface(&eta, H as f32).expect("surface");
+            vol = Some(v);
+        }
+        let volume = |a: &Option<Apic3>, v: &Option<Volume3>| -> f64 {
+            match (a, v) {
+                (Some(a), _) => a.columns_volume(),
+                (_, Some(v)) => v.surface().iter().map(|e| *e as f64 * dx * dx).sum(),
+                _ => 0.,
+            }
+        };
+        let v0 = volume(&apic_cols, &vol);
+        let fin = (duree * 1e6) as u64;
+        let (mut t, mut pas, mut passages, mut pics, mut pic) = (0u64, 0u64, Vec::new(), Vec::new(), 0f64);
+        let mut precedent = (0f64, moment_eta(&eta));
+        let debut = Instant::now();
+        while t < fin {
+            let us = match &apic_cols {
+                Some(a) => a.stable_step_us(20_000),
+                None => 20_000,
+            }
+            .min(fin - t);
+            match (&mut apic_cols, &mut vol) {
+                (Some(a), _) => {
+                    a.step(us).expect("pas");
+                }
+                (_, Some(v)) => {
+                    // Le Jacobi de δ ne converge pas en 20 000 itérations sur la cuve (1, 0) à 2,5 cm ; la multigrille de S385
+                    // y refuse la cuve mince (4 et 8 mailles de large) — S398, observé, non étudié ici.
+                    v.step_surface_mobile(us, 200_000, &jobs).expect("pas δ");
+                }
+                _ => unreachable!(),
+            }
+            t += us;
+            pas += 1;
+            let e: &[f32] = match (&apic_cols, &vol) {
+                (Some(a), _) => a.columns_surface().unwrap(),
+                (_, Some(v)) => v.surface(),
+                _ => unreachable!(),
+            };
+            let (s, mo) = (t as f64 * 1e-6, moment_eta(e));
+            if precedent.1 != 0. && precedent.1.signum() != mo.signum() {
+                passages.push(precedent.0 + (s - precedent.0) * precedent.1 / (precedent.1 - mo));
+                if passages.len() >= 2 {
+                    pics.push(pic);
+                }
+                pic = 0.;
+            }
+            pic = pic.max(mo.abs());
+            precedent = (s, mo);
+        }
+        let periode = if passages.len() >= 3 { 2. * (passages[passages.len() - 1] - passages[0]) / (passages.len() - 1) as f64 } else { f64::NAN };
+        let amortissement = if pics.len() >= 3 {
+            let n = pics.len() as f64;
+            let (sx, sy): (f64, f64) = pics.iter().enumerate().map(|(i, p)| (i as f64, p.ln())).fold((0., 0.), |a, b| (a.0 + b.0, a.1 + b.1));
+            let (mx, my) = (sx / n, sy / n);
+            let (sxy, sxx): (f64, f64) = pics.iter().enumerate().map(|(i, p)| ((i as f64 - mx) * (p.ln() - my), (i as f64 - mx).powi(2))).fold((0., 0.), |a, b| (a.0 + b.0, a.1 + b.1));
+            1. - (2. * sxy / sxx).exp()
+        } else {
+            f64::NAN
+        };
+        println!(
+            "APIC3D_S398 solveur={} mode={mode} dx={dx} pas={pas} periode_s={periode:.4} periode_exacte_s={periode_exacte:.4} \
+             erreur={:+.2}% amortissement_par_periode={:+.2}% pics={} volume_relatif={:+.2e} calcul_s={:.0}",
+            if colonnes { "colonnes" } else { "delta" },
+            100. * (periode / periode_exacte - 1.),
+            100. * amortissement,
+            pics.len(),
+            volume(&apic_cols, &vol) / v0 - 1.,
+            debut.elapsed().as_secs_f64()
+        );
+        return;
+    }
     let mut a = Apic3::configure(&mut hote, Domain3 { nx, ny, nz, dx: dx as f32 }, 1000., G as f32, nx * ny * nz * 8)
         .expect("configuration");
     let n = a.seed(&|p| (p[2] as f64) < H + profil(p[0] as f64, p[1] as f64)).expect("ensemencement");

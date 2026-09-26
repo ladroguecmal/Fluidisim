@@ -89,8 +89,8 @@ publiés contre la période exacte.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `enable_columns` et le pas à colonnes dans `apic3d.rs` ; l'essai du repos ; critères 1 et 2.
-- [>] **P3** — les ballottements, toutes colonnes, contre δ (même instrument) ; critère 3.
-- [ ] **P4** — suite ; preuve `RACCORD-3D-S398` ; file, liste, feuille de route, index.
+- [x] **P3** — les ballottements, toutes colonnes, contre δ (même instrument) ; critère 3.
+- [>] **P4** — suite ; preuve `RACCORD-3D-S398` ; file, liste, feuille de route, index.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
@@ -101,3 +101,17 @@ colonnes, somme compensée, comme `transport_mobile3` de δ) ; pas stable et con
 `apic3d_ballottement 10 0.05` imprime la ligne de S389 au chiffre près. **Critère 2 tenu** : toutes colonnes, repos 2 s, vitesse
 max **2,4·10⁻⁵ m/s**, volume à 7·10⁻¹⁵ ; une bosse de 5 cm qui se déploie 1 s garde son volume à 2·10⁻¹¹. Trois essais (refus
 compris).
+
+**P3 — toutes colonnes contre δ** (`apic3d_ballottement`, `APIC3D_COLONNES=1` / `APIC3D_DELTA=1`, même moment lu sur `η`) :
+
+| cas | colonnes : erreur de période ; amortissement/période | δ (pas mobile) | écart |
+|---|---|---|---:|
+| (1, 0), 5 cm | +0,02 % ; +0,49 % | +0,02 % ; −0,02 % | 0,00 point |
+| (1, 0), 2,5 cm | −0,05 % ; +0,32 % | **refus `Convergence`** | exacte : −0,05 % |
+| (1, 1), 5 cm | +0,31 % ; +1,36 % | +0,33 % ; −0,04 % | 0,02 point |
+| (1, 1), 2,5 cm | +0,04 % ; +0,89 % | +0,07 % ; +0,08 % | 0,03 point |
+
+**Critère 3 tenu** sur les trois cas que δ calcule (≤ 0,03 point pour 1) ; amortissement ≥ 0 partout ; volume à 10⁻¹⁰.
+L'advection semi-lagrangienne dissipe davantage que l'advection centrée de δ (+0,3 à +1,4 % par période, contre ~0). **Observé
+sur δ** : sa projection mobile refuse la cuve mince (1, 0) à 2,5 cm (80 × 8 × 40) — Jacobi, même à 200 000 itérations ; la
+multigrille de S385 la refuse aussi, et à 5 cm (4 mailles de large) où Jacobi passe. Non étudié ici.
