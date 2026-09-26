@@ -17685,3 +17685,20 @@ la séparation pousse à travers la frontière des particules absorbées. **Ritu
 l'utilisateur — terminer le solveur ; le raccord est le verrou de C6, C7 et C10, et il est à un critère d'être reçu à la maille fine,
 ce qui ferait avancer 4.12 et fermerait A316 ; sa suite débloque toujours l'usage visé. Suivant : **S400**, la zone qui lit sa
 surface comme la bande (`η + e(η)`) et la séparation tenue du côté de la bande, critères inchangés ; au poste, C3b puis la pluie 5b.
+
+## S400 — 2026-09-27 — physique : C5b, troisième part — la zone lit comme la bande ; une référence de rendu rangée
+
+**Entrée.** *« https://scottiefox.github.io/caustic-volume/ […] les objectifs de cette référence ne sont pas les mêmes que mon projet.
+Continue »*. **Fait.** (1) La référence, lue à son dépôt (three.js, MIT), rangée aux [comparables](../docs/COMPARABLES-EXTERNES.md) :
+même méthode que nos caustiques (Wyman) ; elle montre ce qui nous manque — rayons et caustiques **dans** l'eau par un volume de
+tranches (8.5) — à juger par conservation et photographie, sans son gain artistique ; aucun de ses nombres comme seuil. (2) Le
+raccord ([preuve](../docs/validation/RACCORD-3D-S398.md) §6) : **la zone lit sa surface comme la bande** (`η + e(η)`, table du
+réseau nominal, seulement s'il y a une bande) ; la séparation tenue du côté de la bande. **Tenus** : repos **2·10⁻⁵ m/s** (S399 :
+1,007 cm/s ; vu échouer sans la table) ; migration à 5 cm +1,8 mm (±2) ; sans zone et toutes colonnes au bit ; suite 697 réussis.
+**Manqués** : densité (7,2 à 2,5 cm ; 7,54 à 5 cm) ; courant de surface à 5 cm (−6,7 mm/s). **Témoins** : la migration était la
+réponse d'équilibre au biais de lecture ; le courant n'est pas la lecture (aucune marche lue ; la zone seule n'en a pas) — il est
+au raccord ; la séparation ne change rien. **Rituel.** Maillons **4** : aucun point ne change d'état. **Justification** : la demande
+(terminer le solveur) ; deux des trois défauts levés, deux attributions réfutées et dites. **Règle de S294** : pas de quatrième
+session consécutive du raccord — il revient sous la condition d'A316 (un témoin court, 5 cm et 45 s, qui abaisse le courant sous
+5 mm/s par un geste attribué d'avance). Suivant : dans le cloud, **C8b**, le domaine épars ; au poste, C3b puis la pluie 5b.
+

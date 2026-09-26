@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S400 — **en cours**. Deux parts. Demande de l'utilisateur (2026-09-27) : *« https://scottiefox.github.io/caustic-volume/ Il
+Session : S400 — **terminée**. Deux parts. Demande de l'utilisateur (2026-09-27) : *« https://scottiefox.github.io/caustic-volume/ Il
 s'agit d'un projet sur tree.js mais peut être il serait intéressant à analyser du point de vue des rendus ou autres, il faut avoir
 en tête que les objectifs de cette référence ne sont pas les mêmes que mon projet. Continue »*. Agent : Claude Opus 5.5, session
 cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Le site est bloqué par le réseau ; le dépôt public
@@ -87,7 +87,7 @@ la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
 - [x] **P3** — (E) et (F) dans `apic3d_columns.rs` ; le repos (critère 2 de S399) ; sans zone et toutes colonnes au bit.
 - [x] **P4** — `apic3d_raccord`, 30 s, 5 et 2,5 cm ; critère 4 de S399 ; attribution si manqué.
 - [x] **P5** — suite ; preuve (§6 de RACCORD-3D-S398) ; liste, file, A316.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 
