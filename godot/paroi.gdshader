@@ -8,6 +8,8 @@ render_mode unshaded;
 
 #include "res://ciel.gdshaderinc"
 #include "res://occultation.gdshaderinc"
+// S392 : les surfaces mouillées (ADR-205, pièce 5a).
+#include "res://mouille.gdshaderinc"
 #include "res://optique_eau.gdshaderinc"
 
 uniform vec3 albedo = vec3(0.4);
@@ -40,6 +42,12 @@ void fragment() {
     // S382 P7 : l'ombre portée du soleil, à chaque pixel.
     float vs = soleil_vu(monde, n, soleil_monde(), dFdx(monde), dFdy(monde));
     ALBEDO = albedo * motif * gain_eau * eclairage_vu(nb, normalize(SOLEIL_B), 1.0, vec3(vu, vs));
+    // S392 : sous la pluie, le film d'eau — plus sombre, plus brillant ; sans pluie, rien ne change.
+    if (mouillure_active > 0.0 || controle_mouille != 0) {
+        float w = mouillure(monde, n, dFdx(monde), dFdy(monde));
+        vec3 vue = normalize(monde - CAMERA_POSITION_WORLD);
+        ALBEDO = controle_mouille == 1 ? vec3(w) : surface_mouillee(ALBEDO, albedo * motif, w, monde, n, vue);
+    }
     if (controle_occultation) {
         ALBEDO = vec3(vu, vs);
     }

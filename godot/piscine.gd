@@ -48,6 +48,10 @@ var geo := {}
 ## leur part du ciel vue (`cuisson_ciel.gdshader`). `OCCULTATION=0` : ni occultant, ni subdivision, ni cuisson — la
 ## géométrie et l'image d'avant.
 var occultation_active := OS.get_environment("OCCULTATION") != "0"
+## S392 — **les surfaces mouillées** (ADR-205, pièce 5a ; `mouille.gdshaderinc`) : sous la pluie, sol, margelles et pieds
+## de murs exposés prennent le film d'eau. `MOUILLE=0` les laisse sèches ; `ASSOMBRISSEMENT=` règle le second effet de
+## Lekner et Dorf (1 : non modélisé).
+var mouille_active := OS.get_environment("MOUILLE") != "0"
 var recepteurs := []
 var cuisson: SubViewport
 const CUISSON_LARGEUR := 1024
@@ -144,6 +148,8 @@ func _ready() -> void:
 		controle_ombre()
 	elif "--controle-gerbes" in args:
 		controle_gerbes()
+	elif "--controle-mouille" in args:
+		controle_mouille()
 	elif "--captures" in args:
 		captures()
 
@@ -168,6 +174,14 @@ func environnement() -> void:
 
 
 func vue(nom: String) -> void:
+	# S392 : à hauteur d'œil, vers le pied du mur ouest — le sec sous le débord de la margelle, les rejaillissements, le
+	# reflet du bloc dans le sol mouillé ; posée d'après les cotes de la construction.
+	if nom == "pied_mur" and not geo.is_empty():
+		var x_mur: float = -float(geo["lx"]) - float(geo["e"])
+		var sol: float = geo["sol_y"]
+		camera.position = Vector3(x_mur - 3.2, sol + 1.6, 2.4)
+		camera.look_at(Vector3(x_mur - 0.1, sol + 0.35, 0.2), Vector3.UP)
+		return
 	var v: Array = VUES[nom]
 	camera.position = v[0]
 	camera.look_at(v[1], Vector3.UP)
@@ -452,10 +466,11 @@ func construire() -> void:
 	boite(Vector3(lx - c, fb.y, -lz), Vector3(lx, seuil, lz), carrelage, 0.25)
 	boite(Vector3(-lx, fb.y, lz - c), Vector3(lx, haut, lz), carrelage, 0.25)
 	boite(Vector3(-lx, fb.y, -lz), Vector3(lx, haut, -lz + c), carrelage, 0.25)
-	# Les margelles, un peu plus larges, sur les trois murs hauts.
-	boite(Vector3(-lx - e - 0.1, haut, -lz - e - 0.1), Vector3(-lx, haut + 0.05, lz + e + 0.1), beton)
-	boite(Vector3(-lx, haut, lz), Vector3(lx + e, haut + 0.05, lz + e + 0.1), beton)
-	boite(Vector3(-lx, haut, -lz - e - 0.1), Vector3(lx + e, haut + 0.05, -lz), beton)
+	# Les margelles, un peu plus larges, sur les trois murs hauts. S392 : leurs nez ruissellent sous la pluie.
+	for mg in [boite(Vector3(-lx - e - 0.1, haut, -lz - e - 0.1), Vector3(-lx, haut + 0.05, lz + e + 0.1), beton),
+			boite(Vector3(-lx, haut, lz), Vector3(lx + e, haut + 0.05, lz + e + 0.1), beton),
+			boite(Vector3(-lx, haut, -lz - e - 0.1), Vector3(lx + e, haut + 0.05, -lz), beton)]:
+		(mg.material_override as ShaderMaterial).set_shader_parameter("ruissellement_haut", haut + 0.05)
 	# Le bac tampon : sa face ouest est le mur est du bassin ; murs nord, sud, est.
 	var ft := godot(tp["fond_m"])
 	var tt: Array = tp["taille_m"]
@@ -497,6 +512,18 @@ func construire() -> void:
 	gerbes.nappes = pluie_air.nappes
 	gerbes.fenetre = Vector4(minf(fb.x - lx, x0), minf(fb.z - lz, ft.z - tz), maxf(fb.x + lx, x1), maxf(fb.z + lz, ft.z + tz))
 	poser_occultants()
+	# S392 : le sol des rejaillissements, et les bacs, que la mouillure ne touche pas (leur eau a son propre nuanceur).
+	var emprises := [Vector4(fb.x - lx, fb.z - lz, fb.x + lx, fb.z + lz), Vector4(x0, ft.z - tz, x1, ft.z + tz)]
+	for r in recepteurs:
+		if r[2]:
+			continue  # les eaux : leur propre nuanceur
+		var mr: ShaderMaterial = r[1]
+		mr.set_shader_parameter("sol_mouille_y", sol_y)
+		mr.set_shader_parameter("bacs_n", 2)
+		mr.set_shader_parameter("bacs_emprise", emprises)
+		mr.set_shader_parameter("bacs_haut", PackedFloat32Array([haut, th]))
+		if OS.get_environment("ASSOMBRISSEMENT") != "":
+			mr.set_shader_parameter("assombrissement", float(OS.get_environment("ASSOMBRISSEMENT")))
 
 
 ## S375 — le maillage de la surface de δ : un sommet au centre de chaque colonne, et un anneau sur les murs qui prend la
@@ -596,6 +623,11 @@ func appliquer(s: float) -> void:
 	for m in materiaux_ciel:
 		m.set_shader_parameter("couvert", couvert)
 	pluie_air.couvert = couvert
+	# S392 : sous la pluie, les surfaces exposées sont mouillées (régime établi).
+	var mouillure := 1.0 if (pluie_mm_h > 0.0 and mouille_active) else 0.0
+	for r in recepteurs:
+		if not r[2]:
+			(r[1] as ShaderMaterial).set_shader_parameter("mouillure_active", mouillure)
 	pluie_air.configurer(pluie_mm_h)
 	pluie_air.suivre(camera, s)
 	gerbes.niveaux = pluie_air.niveaux
@@ -623,7 +655,7 @@ func appliquer(s: float) -> void:
 
 func _process(delta: float) -> void:
 	var args := OS.get_cmdline_user_args()
-	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args or "--controle-ciel" in args or "--controle-occultation" in args or "--controle-ombre" in args or "--controle-gerbes" in args:
+	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args or "--controle-ciel" in args or "--controle-occultation" in args or "--controle-ombre" in args or "--controle-gerbes" in args or "--controle-mouille" in args:
 		return
 	if not en_pause:
 		t = fmod(t + delta, float(pas.size() - 1) * dt)
@@ -668,6 +700,9 @@ func captures() -> void:
 			for _i in 8:
 				await RenderingServer.frame_post_draw
 			var suffixe := "_pluie%s" % mm_h(pluie_mm_h) if pluie_mm_h > 0.0 else ""
+			# S392 : sous la pluie, les surfaces laissées sèches (`MOUILLE=0`) se distinguent.
+			if pluie_mm_h > 0.0 and not mouille_active:
+				suffixe += "_sec"
 			var chemin := ProjectSettings.globalize_path("res://captures/piscine_%s%s_%03ds.png" % [nom, suffixe, int(s)])
 			get_viewport().get_texture().get_image().save_png(chemin)
 			print("CAPTURE_PISCINE_S374 vue=%s t=%.1f fichier=%s" % [nom, s, chemin])
@@ -814,7 +849,11 @@ func cout_pluie() -> void:
 	var vp := get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	texte.visible = false
-	for nom in ["pluie_proche", "pluie_aplomb", "rasante"]:
+	# S392 : `VUES=` remplace les trois vues (la vue d'ensemble montre le sol mouillé).
+	var vues := ["pluie_proche", "pluie_aplomb", "rasante"]
+	if OS.get_environment("VUES") != "":
+		vues = Array(OS.get_environment("VUES").split(","))
+	for nom in vues:
 		vue(nom)
 		var ligne_cout := "COUT_PLUIE_S379 vue=%s" % nom
 		for r in [0.0, 2.0, 10.0, 50.0]:
@@ -1078,6 +1117,117 @@ func controle_occultation() -> void:
 			r.append(moyenne_centre(get_viewport().get_texture().get_image()).g)
 		print("CONTROLE_OCCULTATION_S382 lumiere point=%s avec=%.5f sans=%.5f rapport=%.5f" % [pt[0], r[0], r[1], r[0] / r[1]])
 	get_tree().quit()
+
+
+## S392 — **les critères 3 et 4 des surfaces mouillées** (ADR-205, pièce 5a). Ciel couvert, tonalité linéaire, valeurs
+## brutes (comme S382). (3) Deux dalles exposées — le sol à 10 m au sud du bloc (albédo 0,19 en vert), le dessus de la
+## margelle ouest (0,41) —, vues d'aplomb et à 60° : la radiance sèche, le diffus mouillé seul et le reflet seul ; le
+## rapport diffus / sec contre `(1 − r̄ᵢ)/(1 − a·r̄ᵢ)·(1 − R(θ))`, le reflet contre `R(θ)·L_CIE(réfléchi)` — la caméra placée
+## pour que le rayon réfléchi parte vers le ciel libre. (4) Le bord sec sous le débord de la margelle ouest (0,1 m au-delà du
+## mur) : vue orthographique d'aplomb à 5 mm par pixel, de sous la margelle, la mouillure le long d'une ligne en x ; le
+## passage à 0,5 contre la verticale de l'arête.
+func controle_mouille() -> void:
+	get_viewport().use_hdr_2d = true
+	monde_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	monde_env.glow_enabled = false
+	monde_env.fog_enabled = false
+	texte.visible = false
+	pluie_air.configurer(0.0)
+	gerbes.configurer(0.0)
+	for m in materiaux_ciel:
+		m.set_shader_parameter("couvert", 1.0)
+	var lx: float = geo["lx"]
+	var lz: float = geo["lz"]
+	var e: float = geo["e"]
+	var sol_y: float = geo["sol_y"]
+	var haut: float = geo["haut"]
+	var s := Vector3(-0.4, 0.3, 0.8).normalized()
+	var lz_cie := (9.0 / 7.0) * 2.0 * (0.6 + 0.4 * s.z)
+	var r_i := 0.47459
+	var pire_d := 0.0
+	var pire_r := 0.0
+	# [nom, point, albédo vert, direction horizontale de la caméra (le reflet part à l'opposé)]
+	var dalles := [["sol_sud_10", Vector3(0.0, sol_y, lz + e + 10.0), 0.19, Vector3(0, 0, -1)],
+		["margelle_ouest", Vector3(-lx - 0.5 * e, haut + 0.05, 0.0), 0.41, Vector3(1, 0, 0)]]
+	for dl in dalles:
+		var p: Vector3 = dl[1]
+		var a: float = dl[2]
+		var hdir: Vector3 = dl[3]
+		for theta_deg in [0.0, 60.0]:
+			var th := deg_to_rad(theta_deg)
+			camera.position = p + 0.6 * (cos(th) * Vector3.UP + sin(th) * hdir)
+			camera.look_at(p, Vector3(0, 0, -1) if theta_deg == 0.0 else Vector3.UP)
+			var v := []
+			for mode in [[0.0, 0], [1.0, 2], [1.0, 3]]:
+				for rc in recepteurs:
+					if not rc[2]:
+						(rc[1] as ShaderMaterial).set_shader_parameter("mouillure_active", mode[0])
+						(rc[1] as ShaderMaterial).set_shader_parameter("controle_mouille", mode[1])
+				for _k in 4:
+					await RenderingServer.frame_post_draw
+				v.append(moyenne_centre(get_viewport().get_texture().get_image()).g)
+			var R := fresnel_eau(cos(th))
+			var attendu_d := (1.0 - r_i) / (1.0 - a * r_i) * (1.0 - R)
+			# Le rayon réfléchi : élévation 90° − θ ; la CIE, `Lz·(1 + 2·sin h)/3`.
+			var attendu_r := R * lz_cie * (1.0 + 2.0 * cos(th)) / 3.0
+			var ed: float = (v[1] / v[0]) / attendu_d - 1.0
+			var er: float = v[2] / attendu_r - 1.0
+			pire_d = maxf(pire_d, absf(ed))
+			pire_r = maxf(pire_r, absf(er))
+			print("CONTROLE_MOUILLE_S392 dalle=%s theta=%.0f sec=%.5f diffus=%.5f rapport=%.5f attendu=%.5f ecart=%+.3f%% reflet=%.5f attendu=%.5f ecart=%+.3f%%" % [
+				dl[0], theta_deg, v[0], v[1], v[1] / v[0], attendu_d, 100.0 * ed, v[2], attendu_r, 100.0 * er])
+	print("CONTROLE_MOUILLE_S392 critere=3 pire_diffus=%.3f%% pire_reflet=%.3f%% %s" % [100.0 * pire_d, 100.0 * pire_r,
+		"tenu" if pire_d <= 0.01 and pire_r <= 0.01 else "manque"])
+	# (4) Le bord de l'abri : sous la margelle ouest, dont l'arête est à x = −lx − e − 0,1.
+	var x_arete := -lx - e - 0.1
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.size = 3.6
+	camera.near = 0.01
+	camera.position = Vector3(x_arete, sol_y + 0.5, 0.0)
+	camera.look_at(Vector3(x_arete, sol_y, 0.0), Vector3(0, 0, -1))
+	for rc in recepteurs:
+		if not rc[2]:
+			(rc[1] as ShaderMaterial).set_shader_parameter("mouillure_active", 1.0)
+			(rc[1] as ShaderMaterial).set_shader_parameter("controle_mouille", 1)
+	for _k in 4:
+		await RenderingServer.frame_post_draw
+	var im := get_viewport().get_texture().get_image()
+	im.convert(Image.FORMAT_RGBF)
+	var w := im.get_width()
+	var hh := im.get_height()
+	var mpp := 3.6 / hh
+	var x_mesure := NAN
+	# Colonne i : x = x_arete + (i + 0,5 − w/2)·mpp ; de l'ouest (mouillé) vers le mur (sec), jusqu'à 1 cm du mur.
+	var profil := []
+	for i in w:
+		var somme := 0.0
+		for j in range(hh / 2 - 4, hh / 2 + 5):
+			somme += im.get_pixel(i, j).r
+		profil.append(somme / 9.0)
+	for i in w - 1:
+		var x := x_arete + (i + 0.5 - 0.5 * w) * mpp
+		if x > -lx - e - 0.01:
+			break
+		if (profil[i] >= 0.5) != (profil[i + 1] >= 0.5):
+			var f: float = (0.5 - profil[i]) / (profil[i + 1] - profil[i])
+			x_mesure = x_arete + (i + 0.5 + f - 0.5 * w) * mpp
+	var ecart_px := (x_mesure - x_arete) / 0.005
+	print("CONTROLE_MOUILLE_S392 critere=4 x_arete=%.4f x_mesure=%.4f ecart=%.2f mm (%.2f pixel de 5 mm) sec_sous_le_debord=%.3f mouille_dehors=%.3f %s" % [
+		x_arete, x_mesure, 1000.0 * (x_mesure - x_arete), ecart_px,
+		profil[int(0.5 * w + (-lx - e - 0.05 - x_arete) / mpp)], profil[int(0.5 * w - 0.2 / mpp)],
+		"tenu" if absf(ecart_px) <= 1.0 else "manque"])
+	get_tree().quit()
+
+
+## Fresnel non polarisé air → eau (n = 1,333), comme `mouille.gdshaderinc` et `outils/sol_mouille.py`.
+static func fresnel_eau(c: float) -> float:
+	var n := 1.333
+	c = clampf(c, 0.0, 1.0)
+	var st := sqrt(maxf(0.0, 1.0 - c * c)) / n
+	var ct := sqrt(maxf(0.0, 1.0 - st * st))
+	var rs := (c - n * ct) / (c + n * ct)
+	var rp := (ct - n * c) / (ct + n * c)
+	return 0.5 * (rs * rs + rp * rp)
 
 
 ## S383 — **les critères 3 à 5 des gerbes**. (3, 4) Vue orthographique d'aplomb d'une partie du bassin, 2 mm par pixel :

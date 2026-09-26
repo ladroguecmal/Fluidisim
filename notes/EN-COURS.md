@@ -94,9 +94,9 @@ trois vues de la piscine à 10 mm/h ; sans pluie, 0 ; revue **R33** de l'utilisa
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les nombres : `outils/sol_mouille.py` et ses essais ; critère 2. La photographie : recherche, mesure ; critère 5.
-- [ ] **P3** — les images de référence sans pluie ; le nuanceur : mouillure (verticale libre, orientation, rejaillissements,
+- [x] **P3** — les images de référence sans pluie ; le nuanceur : mouillure (verticale libre, orientation, rejaillissements,
   eaux), diffus mouillé, reflet du film (ciel et occultants) ; la scène (eaux déclarées).
-- [ ] **P4** — les contrôles : critère 1, critère 3 (rapport, reflet), critère 4 (le bord de l'abri) ; coût.
+- [x] **P4** — les contrôles : critère 1, critère 3 (rapport, reflet), critère 4 (le bord de l'abri) ; coût.
 - [ ] **P5** — images de revue R33, REVUE-VISUELLE ; preuve ; file, feuille de route, ADR-205 (note datée).
 - [ ] **P6** — rituel.
 
@@ -119,4 +119,20 @@ effet de Lekner et Dorf (pores remplis) non modélisé. Conséquence : la formul
 `assombrissement` (1 par défaut, le second effet) est exposé pour que R33 dise si le rendu est assez sombre. Les recherches
 sans résultat : Commons (« partially wet », « rain shadow », « dry patch »), Geograph (vérification anti-robot, non
 contournée).
+
+**P3–P4 en un commit** (le nuanceur s'est réglé sur ses contrôles). `godot/mouille.gdshaderinc` (inclus par `paroi.gdshader`) ;
+`piscine.gd` : `MOUILLE=0`, `ASSOMBRISSEMENT=`, bacs et sol déclarés, nez de margelle (`ruissellement_haut`), vue
+`pied_mur`, suffixe `_sec`, `VUES=` pour `--cout-pluie`, contrôle `--controle-mouille`. Godot 4.4.1 (celui des preuves).
+**Critère 1 tenu** : 7 images sans pluie (ensemble, rasante, buse à 6,5 et 200 s ; sans δ à 40 s) identiques au bit avant et
+après, deux fois. **Critère 3 tenu** : diffus / sec contre la formule, sol (0,19) et margelle (0,41), d'aplomb et à 60° —
+**0,029 %** au pire (sol d'aplomb 0,56573 pour 0,56572) ; reflet contre `R(θ)·L_CIE` — **0,29 %** au pire (le cône de rugosité).
+**Critère 4 tenu**, au second essai : le bord sec sous la margelle ouest à **0,00 mm** de la verticale de l'arête (x = −4,3000),
+sec 0,000 dessous, mouillé 1,000 dehors. **Vu en chemin** : le test de dalles avec un rayon vertical divise par zéro
+(composantes x et z nulles), indéfini sur la carte — la verticale sous le débord passait pour libre ; remplacé par un test
+exact (emprise et haut de la boîte), et les composantes nulles écartées de zéro dans le test général.
+**Critère 6, coût (10 mm/h, médiane de 240 images, sans → avec mouillure)** : ensemble 1,039 → **1,381 ms (+0,34)**, proche
+1,678 → 1,984 (+0,31), rasante 0,915 → 1,135 (+0,22) ; sans pluie 0. **Manqué de peu** sur la vue d'ensemble (seuil 0,3 ms ;
+bruit ±0,05 ms), publié tel quel. Chemin : +0,96 ms au premier jet ; tests précoces (verticale et reflet contre les boîtes
+élargies) et ciel couvert sans les nuages du ciel clair, +0,38 ; un seul rayon loin des occultants (moyenne exacte, CIE
+linéaire en `sin h`), +0,34.
 
