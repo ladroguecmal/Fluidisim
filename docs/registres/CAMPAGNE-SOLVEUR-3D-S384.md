@@ -168,6 +168,11 @@ d'environ **0,4 million de mailles** pour tous ses domaines.
 | colonnes hautes, **5 cm**, 20 couches (1 m) + 1 | 19 048 | **6,9 m** |
 | boîte dense, 5 cm, 7 × 7 × 2 m | — | 784 000 mailles, **deux fois le budget** |
 
+> **Correction du 2026-09-26 (S386)** : les deux lignes « colonnes hautes » ci-dessus sont **fausses** au critère d'usage de
+> C2 — une colonne haute unique demande dix-sept couches cubiques sur vingt-huit (÷1,47) ; la colonne graduée d'
+> [ADR-208](../adr/ADR-208-la-colonne-graduee.md) fait ÷2,55 à la porte B, moins en mode mobile. Le raisonnement qui suit
+> vaut, ses chiffres non.
+
 **Ce que le tableau décide.** (1) Les **colonnes hautes** sont la première marche : à la porte B, 9 mailles par colonne au
 lieu de 28, **3,1 fois moins** (*estimé*, à mesurer en C2) — et ce gain paie la maille fine. (2) Un domaine du joueur à
 5 cm tient en **7 m de côté** s'il est **seul** ; avec une coque en même temps, il faut aussi baisser le **coût par

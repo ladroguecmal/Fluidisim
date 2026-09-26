@@ -69,3 +69,10 @@ Invariants relus : I-04, I-05, I-06, I-07, I-12, I-13, I-14, I-16, I-17 ; aucun 
 
 La question du §3 est tranchée : *« Je suis d'accord avec toi pour le branchement à la fin »*. La production de δ se
 construit dans l'afficheur jusqu'à C10 ; **δ entre dans Godot en C11**, la scène reçue. Aucune autre décision n'est changée.
+
+## Note datée du 2026-09-26 (S386) — D2 remplacée par ADR-208
+
+Mesurée (`outils/colonnes_hautes.py`), une colonne haute unique à pression linéaire ne tient le critère d'usage qu'avec
+dix-sept couches cubiques sur vingt-huit (÷1,47) ; l'estimation du §1 (÷3,1) était fausse. **D2 est remplacée** par
+[ADR-208](ADR-208-la-colonne-graduee.md) : une pression linéaire par morceaux sur des nœuds étirés, ÷2,55 à la porte B,
+moins en mode mobile (D4 d'ADR-208).
