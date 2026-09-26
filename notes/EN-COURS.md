@@ -86,8 +86,8 @@ jugement de l'utilisateur (R29).
 
 - [x] **P1** — jeton, plan seul ; la décision de l'utilisateur consignée (file, feuille de route : pas de solveur).
 - [x] **P2** — ADR-205 : la pluie complète — inventaire des manquants, familles, ordre, sources, ce qui reste à la météo.
-- [>] **P3** — références : photographies de pluie qui tombe (traînées, rideau au loin) ; ce qu'elles montrent.
-- [ ] **P4** — les gouttes : `pluie_air.gd` (boîte autour de la caméra, nombre par classe de taille depuis `pluie.gd`),
+- [x] **P3** — références : photographies de pluie qui tombe (traînées, rideau au loin) ; ce qu'elles montrent.
+- [>] **P4** — les gouttes : `pluie_air.gd` (boîte autour de la caméra, nombre par classe de taille depuis `pluie.gd`),
   nuanceur de particules procédural (position, taille, vitesse par hachage de l'indice, repli dans la boîte, arrêt au sol
   et à l'eau).
 - [ ] **P5** — leur dessin : traînée alignée sur la chute, opacité et radiance de Garg et Nayar ; bassin et mer.
@@ -97,3 +97,17 @@ jugement de l'utilisateur (R29).
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
+
+**P3 — quatre photographies libres** (Wikimedia Commons, lues dans le navigateur, rien de téléchargé).
+
+| photographie | ce qu'elle montre |
+|---|---|
+| *Downpour (4390180547)* — averse tropicale sur des piscines, vue d'un balcon | un **voile gris** qui mange le lointain en quelques centaines de mètres (arbres et bâtiments à 100–200 m déjà délavés) ; de **fines traînées verticales**, visibles seulement devant les fonds sombres (les arbres), invisibles devant le ciel ; ciel couvert blanc-gris, sans ombre ; piscines bleues, mates, sans reflet net |
+| *Rain over the Sea, Mundesley* (geograph 6985351) | la pluie **au loin sur la mer** : un rideau de stries grises sous la base des nuages, horizon adouci ; ciel couvert |
+| *Rain in Malta 03* | rue inondée, pluie forte de jour : traînées **à peine perceptibles** à cette résolution ; eau de ruissellement piquetée, mate |
+| *Downpour in New York* | nuit : chaussée mouillée qui **reflète** les lumières (pièces 5, 6), éclats d'impacts sur l'asphalte (pièce 4) ; traînées courtes |
+
+Chiffré : la visibilité de l'averse tropicale (≈ 300 à 600 m) donne `β ≈ 3,9/V` ≈ 0,007 à 0,013 m⁻¹ ; la loi retenue
+(`β = (π/2)·2·N0/Λ³` = 6,9·10⁻³ m⁻¹ à 100 mm/h, V ≈ 570 m) la place à ≈ 100 mm/h, plausible pour une averse tropicale ; à
+10 mm/h, 1,55·10⁻³ (V ≈ 2,5 km). Les traînées sont **faibles** de jour — l'opacité de Garg et Nayar (quelques pour cent)
+est le bon ordre ; elles ne ressortent que devant un fond sombre.
