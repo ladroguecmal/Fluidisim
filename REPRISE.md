@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 03:00 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 03:05 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S373 — rendu 11 : notre perspective aérienne, la brume réglée par pixel ; puis S374, la piscine de V visualisée (demande de l'utilisateur)
 Dernière session : S372 — physique : **vannes et pompes dans V** (5.4 passe à partiel, [ADR-199](docs/adr/ADR-199-vannes-et-pompes-dans-v.md)) — commande par arête, vanne, pompe en réseau ouvert à 0,025 % de l'analytique, WVST v2 ; R26 reçu. Avant : S371, la caméra à demi immergée
 Session suivante : par l'alternance d'ADR-191 D3, **une session de rendu** : l'échelle radiométrique du ciel et du soleil (la fenêtre terne), notre perspective aérienne (la brume réglable par pixel). À la physique suivante : **A320** par la forme de Bernoulli (4.8), la coque qui bouge (6.4), les chemins de B et la côte (2.7). L'écume attend des photographies
 Maillons        : 0 — S372 : 5.4 passe à partiel (journal)

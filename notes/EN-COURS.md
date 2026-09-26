@@ -62,56 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S372 — **terminée**. Verdict **R26** : *« je valide continue »* — la caméra à demi immergée et son ménisque
-reçus. Par l'alternance d'ADR-191 D3, **la physique** ; à deux maillons (S370, S371), un lot qui **change l'état d'un
-point** : **5.4 vannes et pompes**, *absent*, au front 0, dans V (ADR-010 §1 les nomme parmi les arêtes ; noyau reçu,
-intact depuis S229). A320, la coque qui bouge ou la côte avancent sans changer d'état en une session.
+Session : S373 — **en cours**. Demande : *« Continue et ensuite commence à permettre de visualiser le système de piscine
+avec déversoir et pompe »* — d'abord la suite du jeton (le rendu), puis **S374** : la piscine de V dans Godot.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Thèse.** Une **commande** par arête, `control_pm` (0 à 1 000, entier, état répliqué, 1 000 par défaut) : un orifice
-commandé est une **vanne** (section × commande), un déversoir commandé une vanne de largeur, et une **pompe** est une
-loi nouvelle — réseau **ouvert** : courbe parabolique `H(Q) = H0·(1 − (Q/Qmax)²)`, point de fonctionnement contre la
-hauteur statique, clapet (pas de retour), prise dénoyée à sec, vitesse `n` par les lois de similitude (`Qmax·n`,
-`H0·n²`). Le réseau fermé sous pression reste en v2 (ADR-010 §4). L'instantané passe en version 2 : la commande est un
-état, pas une configuration (ADR-140).
+**Choix.** Des deux rendus proposés, **notre perspective aérienne** : bornée, mesurable, et elle lève la limite de S371
+(la brume éteinte sur toute l'image dès que la caméra est à demi immergée, 17 niveaux au pire côté air). L'échelle
+radiométrique du soleil reste dans la file : sa cible photographique est floue (le soleil hors cadre dans la pose de
+Hanifaru, la courbe AgX qui comprime la fenêtre) — à reprendre avec une mesure qui la fonde.
 
-**Critères, écrits avant.** (1) À commande 1 000, **tous les essais V existants inchangés au bit**. (2) Vanne à 500 : la
-vidange de C12 dure **2 × 728 s à ±3 %** (intégrale analytique) ; à 0, **aucun millilitre** ne passe. (3) Pompe qui
-vide A dans B à décharge libre : le temps jusqu'à la prise dénoyée contre l'intégrale analytique
-`t = 2·√H0·A·(√u0 − √u1)/Qmax` **à ±1 %** ; volume final à un pas près. (4) Pompe noyée : l'équilibre à la hauteur de
-barrage (`Δh = n²·H0`) **à ±1 %** ; vitesse ½ : débit à Δh nul = `½·Qmax` à ±1 %. (5) Masse conservée **exactement**,
-pas déterministe au bit, refus atomiques. (6) Instantané v2 : une commande changée survit à la restauration, au bit.
+**Thèse.** La brume de Godot (exponentielle, densité 0,00012, couleur prise au cube de radiance du ciel dans la direction
+de visée ; source 4.4-stable, `fog_process`) est réécrite dans nos nuanceurs par la sortie `FOG` : même quantité
+`1 − exp(−ρ·d)`, couleur `ciel_b` de la même direction — le ciel dont le cube est tiré —, **multipliée par la part d'air
+du pixel**. Sous l'eau et dans l'eau d'une image à demi immergée, aucune brume ; dans l'air, la même partout.
+
+**Critères, écrits avant.** (1) Poses au-dessus (proche, rasante, référence, haute, plongeante ; proche de la scène
+côtière) contre les rendus d'avant : **99,9ᵉ centile ≤ 2 niveaux, pire ≤ 8**. (2) Pose `demi` : côté air, l'écart à la brume
+de Godot tombe de 17 niveaux (S371 §5) à **≤ 8** ; côté eau, **identique au bit** au rendu de S371. (3) Sous l'eau :
+identique au bit.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul ; R26 consigné.
-- [x] **P2** — ADR-199 : vannes et pompes dans V (lois, commande, provenance, ce qui n'est pas fait).
-- [x] **P3** — `control_pm` sur `Opening` ; la vanne ; critères 1 et 2.
-- [x] **P4** — la pompe ; critères 3 à 5.
-- [x] **P5** — l'instantané WVST v2 ; critère 6.
-- [x] **P6** — preuve `VANNES-POMPES-S372`, liste 5.4, file, feuille de route, index, ADR-010 et ADR-140 notes datées.
-- [x] **P7** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — images témoins d'avant ; `brume_air` dans `optique_eau.gdshaderinc`, `FOG` dans l'eau et le fond.
+- [ ] **P3** — mesures des critères 1 à 3.
+- [ ] **P4** — preuve `BRUME-S373`, file, liste (8.6, 8.8), index.
+- [ ] **P5** — rituel ; puis S374.
 
 ### Notes de reprise
-
-**P3 — fait.** `Opening::control_pm` (`CONTROL_FULL` = 1 000, `Default` écrit à la main), refus hors de 0..=1 000 ;
-orifice et déversoir × `c/1 000`. **Critère 1** : empreinte des trajectoires de quatre montages (C12 2 000 pas, chaîne
-600, mixte 200, déversoir 1 000) relevée sur `c04b2974` **avant** la modification, `0xa02de06bc52bfd2e` — inchangée ;
-33 essais V passent. **Critère 2** : C12 à 1 000 / 500 / 250 : 727,4 / 1 455,1 / 2 910,6 s pour 728,3 / 1 456,5 /
-2 913,1 (−0,12 / −0,10 / −0,08 %) ; fermée 10 000 pas : 0 ml, reste intact ; fermée 60 s puis rouverte : +600 pas
-exactement ; déversoir à 250 : 0,249989. Littéraux `Opening` complétés dans les essais, l'exemple et `tests/`.
-
-**P4 — fait.** `Flow::Pump { max_flow_mlps, shutoff_head_um, outlet_um }` : prise = position de l'arête, refoulement
-libre ou noyé, clapet, à sec, similitude ; refus si `H0 ≤ 0` ou débit négatif ; empreinte de la base étendue (étiquette
-2). **Critère 3** : prise dénoyée à **207,3 s** pour 207,25 (+0,025 %), A garde 99 772 ml (228 ml sous la prise, un pas).
-**Critère 4** : barrage **249 999 / 750 001 ml** pour 250 000 / 750 000 ; similitude 4 999 et 2 499 ml/s pour 5 000 et
-2 500 ; à mi-vitesse 3 m ne se montent plus. **Critère 5** : réseau d'avarie (mer, deux compartiments, vanne, deux
-pompes, commandes changeantes, 6 000 pas) : masse exacte à chaque pas, bornes, deux exécutions au bit
-(`0xc0ee093528e34036`). Empreinte à commande pleine inchangée. Suite du cœur : 534 + 20 + 2 + 1 réussis, 14 ignorés.
-
-**P5 — fait.** WVST version 2 : troisième liste (commandes ≠ auteur), comptée aux octets 76..80 ; commande d'auteur dans
-l'empreinte de la base ; configuration comparée sans la commande ; v1 refusée (`Version`). L'essai d'en-tête existant
-attend désormais `WVST`. **Critère 6** : vanne à 300 et pompe à pleine vitesse capturées après 300 pas, restaurées
-dans une destination sale : suite de 1 000 pas **identique au bit** (`0x71b3c56c74d1912b`) ; témoin d'omission
-(commandes d'auteur) : diverge. Refus : commande égale à l'auteur, 1 001, −1, en-tête v1 ; sans écart, 88 octets comme
-en v1. Suite du cœur : 536 + 20 + 2 + 1, 14 ignorés ; espace de travail entier : 0 avertissement.
