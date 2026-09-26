@@ -84,9 +84,9 @@ jugement de l'utilisateur (R29).
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul ; la décision de l'utilisateur consignée (file, feuille de route : pas de solveur).
-- [ ] **P2** — ADR-205 : la pluie complète — inventaire des manquants, familles, ordre, sources, ce qui reste à la météo.
-- [ ] **P3** — références : photographies de pluie qui tombe (traînées, rideau au loin) ; ce qu'elles montrent.
+- [x] **P1** — jeton, plan seul ; la décision de l'utilisateur consignée (file, feuille de route : pas de solveur).
+- [x] **P2** — ADR-205 : la pluie complète — inventaire des manquants, familles, ordre, sources, ce qui reste à la météo.
+- [>] **P3** — références : photographies de pluie qui tombe (traînées, rideau au loin) ; ce qu'elles montrent.
 - [ ] **P4** — les gouttes : `pluie_air.gd` (boîte autour de la caméra, nombre par classe de taille depuis `pluie.gd`),
   nuanceur de particules procédural (position, taille, vitesse par hachage de l'indice, repli dans la boîte, arrêt au sol
   et à l'eau).
