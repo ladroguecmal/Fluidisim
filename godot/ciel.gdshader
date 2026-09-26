@@ -24,4 +24,7 @@ void sky() {
         dessus = ciel_b(dir, 4);
     }
     COLOR = milieu.x >= 1.0 ? dessous : (milieu.x <= 0.0 ? dessus : mix(dessus, dessous, milieu.x));
+    if (controle_milieu && !AT_CUBEMAP_PASS) {
+        COLOR = vec3(milieu.x, 0.0, 0.0);
+    }
 }

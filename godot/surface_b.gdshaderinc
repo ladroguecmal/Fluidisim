@@ -29,6 +29,16 @@ uniform float plan_proche = 0.1;
 uniform float pixel_proche = 1.3e-4;
 // La largeur de la transition, pixels.
 uniform float transition_px = 4.0;
+// Contrôle (S371, `mer.gd --controle-ligne-eau`) : l'eau, le fond et le ciel rendent la part d'eau du pixel, en rouge.
+uniform bool controle_milieu = false;
+// **La surface au plan proche, à l'ordre 2** (S371 P5) — calculée par `mer.gd` une fois par image, en double, au centre
+// du plan proche `c` : la hauteur de la surface moins celle de `c` (m), la pente et la hessienne eulériennes (xx, xy, yy),
+// en coordonnées de B. Le plan proche ne mesure que ±10 cm à 50° : le terme d'ordre 3, `Σ a·k³·r³/6`, y est borné par
+// 0,37 pixel. Newton par pixel (`surface_a_l_aplomb`) coûtait 4,7 ms GPU ; `milieu_exact` le garde, en témoin.
+uniform float ecart_centre = 0.0;
+uniform vec2 pente_centre = vec2(0.0);
+uniform vec3 courbure_centre = vec3(0.0);
+uniform bool milieu_exact = false;
 
 /// La bande au point lagrangien `q` (B), à empreinte nulle — toutes les composantes entières, comme `vertex()` d'`eau.gdshader`
 /// près de l'œil : le déplacement horizontal `d`, son gradient `g` = (g_xx, g_xy, g_yy), la hauteur `eta` avec le second
@@ -101,9 +111,21 @@ vec3 milieu_du_pixel(vec3 oeil, vec3 dir) {
     if (!demi_immergee) {
         return vec3(sous_eau ? 1.0 : 0.0, profondeur_camera, sous_eau ? -1e9 : 1e9);
     }
-    vec3 p = oeil + dir * (plan_proche / max(dot(dir, camera_avant), 1e-4));
-    vec3 surf = surface_a_l_aplomb(vec2(p.x, -p.z));
-    float s = p.y - surf.x;
+    float t_proche = plan_proche / max(dot(dir, camera_avant), 1e-4);
+    vec3 surf;
+    float s;
+    if (milieu_exact) {
+        vec3 p = oeil + dir * t_proche;
+        surf = surface_a_l_aplomb(vec2(p.x, -p.z));
+        s = p.y - surf.x;
+    } else {
+        // Relatif au centre du plan proche : `p − c = dir·t − near·avant`, aucun grand nombre en f32 (I-08).
+        vec3 r = dir * t_proche - plan_proche * camera_avant;
+        vec2 dq = vec2(r.x, -r.z);
+        vec2 hd = vec2(courbure_centre.x * dq.x + courbure_centre.y * dq.y, courbure_centre.y * dq.x + courbure_centre.z * dq.y);
+        surf = vec3(ecart_centre + dot(pente_centre, dq) + 0.5 * dot(dq, hd), pente_centre + hd);
+        s = r.y - surf.x;
+    }
     // ∇s dans le monde de Godot : un point (x, y) de B est (x, −z) ; s = y − η(x, −z).
     vec3 grad = vec3(-surf.y, 1.0, surf.z);
     float par_pixel = pixel_proche * length(vec2(dot(grad, camera_droite), dot(grad, camera_haut)));

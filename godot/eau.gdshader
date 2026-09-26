@@ -447,4 +447,7 @@ void fragment() {
     }
     }
     ALBEDO = milieu.x >= 1.0 ? vu_dessous : (milieu.x <= 0.0 ? vu_dessus : mix(vu_dessus, vu_dessous, milieu.x));
+    if (controle_milieu) {
+        ALBEDO = vec3(milieu.x, 0.0, 0.0);
+    }
 }

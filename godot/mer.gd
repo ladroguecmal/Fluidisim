@@ -139,7 +139,7 @@ func _ready() -> void:
 	add_child(mer)
 	# S359 : `SANS_EAU=1` masque la mer, pour voir le fond seul.
 	mer.visible = OS.get_environment("SANS_EAU") != "1"
-	if "--cote" in args or "--controle-fond" in args or "--controle-caustiques" in args or "--controle-caustiques-scene" in args or "--controle-sous-eau" in args:
+	if "--cote" in args or "--controle-fond" in args or "--controle-caustiques" in args or "--controle-caustiques-scene" in args or "--controle-sous-eau" in args or "--controle-ligne-eau" in args:
 		add_child(fond())
 		# S361 : les caustiques du fond, carte directe ; `CAUSTIQUES=0` les éteint.
 		if OS.get_environment("CAUSTIQUES") != "0":
@@ -217,6 +217,12 @@ func _ready() -> void:
 	if "--controle-sous-eau" in args:
 		anime = false
 		controle_sous_eau()
+	if "--controle-ligne-eau" in args:
+		anime = false
+		controle_ligne_eau()
+	if "--cout-demi" in args:
+		anime = false
+		cout_demi()
 
 
 ## Le ciel : depuis S359, celui de l'afficheur lui-même (`ciel.gdshaderinc` — dégradé du « ciel clair » relevé sur la
@@ -548,6 +554,131 @@ func borne_vagues() -> float:
 	return borne
 
 
+## S371 P5 — **la surface à l'aplomb de `x` (B) à l'ordre 2**, en double : [η, ∂η/∂x, ∂η/∂y, ∂²η/∂x², ∂²η/∂x∂y, ∂²η/∂y²],
+## eulériens. Le point lagrangien `q` par Newton, puis, en `q` : `s = ∇η`, `H = ∇²η` (premier ordre et second de Tayfun :
+## `k̄·(sa·saᵀ + e2·Hs − sq·sqᵀ − qd·Hc)` par système), `J = I + g`. Eulérien : `∇η_E = J⁻¹·s`, et
+## `∇²η_E = J⁻¹·(H − C)·J⁻¹`, `C = Σ_c n_c·∂²d_c/∂q∂q = −Σ a·k²·cos·(n·u)·u·uᵀ`, `n = ∇η_E` — la dérivée de `J⁻¹`.
+func surface_ordre2(x: Vector2, bande_t: PackedVector4Array) -> PackedFloat64Array:
+	var n := 0 if OS.get_environment("MER_PLATE") == "1" else bande_t.size()
+	var coupure := int(donnees["split"])
+	var km := Vector2.ZERO
+	if donnees["asymetries"]:
+		km = Vector2(float(donnees["k_moyens"][0]), float(donnees["k_moyens"][1]))
+	# Le point lagrangien, `q + d(q) = x`, par Newton jusqu'à 10⁻¹² m (quatre pas suffisent : S371 P4).
+	var q := x
+	for _it in 6:
+		var d := Vector2.ZERO
+		var jxx := 1.0
+		var jxy := 0.0
+		var jyy := 1.0
+		for i in n:
+			var c := bande_t[i]
+			var kv := Vector2(c.y, c.z)
+			var k := kv.length()
+			if k == 0.0:
+				continue
+			var u := kv / k
+			var ph := kv.dot(q) + c.w
+			d += c.x * cos(ph) * u
+			var sn := sin(ph)
+			jxx -= c.x * k * sn * u.x * u.x
+			jxy -= c.x * k * sn * u.x * u.y
+			jyy -= c.x * k * sn * u.y * u.y
+		var f := q + d - x
+		var det := jxx * jyy - jxy * jxy
+		q -= Vector2(jyy * f.x - jxy * f.y, -jxy * f.x + jxx * f.y) / det if det >= 0.1 else f
+		if f.length() < 1e-12:
+			break
+	# En q : g, s, H (premier ordre), sommes de Tayfun par système.
+	var gxx := 0.0
+	var gxy := 0.0
+	var gyy := 0.0
+	var eta := 0.0
+	var s := Vector2.ZERO
+	var hxx := 0.0
+	var hxy := 0.0
+	var hyy := 0.0
+	var e2 := [0.0, 0.0]
+	var qd := [0.0, 0.0]
+	var sa := [Vector2.ZERO, Vector2.ZERO]
+	var sq := [Vector2.ZERO, Vector2.ZERO]
+	var hs := [Vector3.ZERO, Vector3.ZERO]
+	var hc := [Vector3.ZERO, Vector3.ZERO]
+	var cosinus := PackedFloat64Array()
+	cosinus.resize(n)
+	for i in n:
+		var c := bande_t[i]
+		var kv := Vector2(c.y, c.z)
+		var k := kv.length()
+		if k == 0.0:
+			continue
+		var u := kv / k
+		var ph := kv.dot(q) + c.w
+		var cs := cos(ph)
+		var sn := sin(ph)
+		cosinus[i] = cs
+		eta += c.x * sn
+		gxx -= c.x * k * sn * u.x * u.x
+		gxy -= c.x * k * sn * u.x * u.y
+		gyy -= c.x * k * sn * u.y * u.y
+		s += c.x * cs * kv
+		hxx -= c.x * sn * kv.x * kv.x
+		hxy -= c.x * sn * kv.x * kv.y
+		hyy -= c.x * sn * kv.y * kv.y
+		var j := 0 if i < coupure else 1
+		e2[j] += c.x * sn
+		qd[j] += c.x * cs
+		sa[j] += c.x * cs * kv
+		sq[j] -= c.x * sn * kv
+		hs[j] -= c.x * sn * Vector3(kv.x * kv.x, kv.x * kv.y, kv.y * kv.y)
+		hc[j] -= c.x * cs * Vector3(kv.x * kv.x, kv.x * kv.y, kv.y * kv.y)
+	if km.x > 0.0:
+		for j in 2:
+			var kb: float = km[j]
+			var a2: Vector2 = sa[j]
+			var q2: Vector2 = sq[j]
+			var h2: Vector3 = float(e2[j]) * hs[j] - float(qd[j]) * hc[j]
+			eta += 0.5 * kb * (float(e2[j]) * float(e2[j]) - float(qd[j]) * float(qd[j]))
+			s += kb * (float(e2[j]) * a2 - float(qd[j]) * q2)
+			hxx += kb * (a2.x * a2.x - q2.x * q2.x + h2.x)
+			hxy += kb * (a2.x * a2.y - q2.x * q2.y + h2.y)
+			hyy += kb * (a2.y * a2.y - q2.y * q2.y + h2.z)
+	var jxx2 := 1.0 + gxx
+	var jxy2 := gxy
+	var jyy2 := 1.0 + gyy
+	var det2 := jxx2 * jyy2 - jxy2 * jxy2
+	# J⁻¹ (symétrique) et la pente eulérienne.
+	var ixx := jyy2 / det2
+	var ixy := -jxy2 / det2
+	var iyy := jxx2 / det2
+	var nx := ixx * s.x + ixy * s.y
+	var ny := ixy * s.x + iyy * s.y
+	# C = −Σ a·k²·cos·(n·u)·u·uᵀ.
+	var cxx := 0.0
+	var cxy := 0.0
+	var cyy := 0.0
+	for i in n:
+		var c := bande_t[i]
+		var kv := Vector2(c.y, c.z)
+		var k := kv.length()
+		if k == 0.0:
+			continue
+		var u := kv / k
+		var w := -c.x * k * k * cosinus[i] * (nx * u.x + ny * u.y)
+		cxx += w * u.x * u.x
+		cxy += w * u.x * u.y
+		cyy += w * u.y * u.y
+	var mxx := hxx - cxx
+	var mxy := hxy - cxy
+	var myy := hyy - cyy
+	# J⁻¹·M·J⁻¹.
+	var axx := ixx * mxx + ixy * mxy
+	var axy := ixx * mxy + ixy * myy
+	var ayx := ixy * mxx + iyy * mxy
+	var ayy := ixy * mxy + iyy * myy
+	return PackedFloat64Array([eta, nx, ny, axx * ixx + axy * ixy, axx * ixy + axy * iyy, ayx * ixy + ayy * iyy])
+
+
 ## S371 — la surface de B à l'aplomb du point horizontal `x` (B), en double : (hauteur, pente eulérienne). Le point
 ## lagrangien `q` tel que `q + d(q) = x` par Newton, quatre évaluations — le calcul de `surface_a_l_aplomb`
 ## (`surface_b.gdshaderinc`), ici en double précision : la référence du contrôle de la ligne d'eau.
@@ -668,7 +799,15 @@ func immersion(t: float) -> void:
 		var bas := -marge_vagues
 		var haut := marge_vagues
 		if borne_g < 1.0:
-			var eta_c := surface_exacte(Vector2(centre.x, -centre.z), lignes("bande", t)).x
+			# S371 P5 : la surface au centre du plan proche à l'ordre 2 — le nuanceur n'évalue plus que ce paraboloïde.
+			var o2 := surface_ordre2(Vector2(centre.x, -centre.z), lignes("bande", t))
+			var eta_c: float = o2[0]
+			for mat in [materiau, materiau_sol, materiau_ciel]:
+				if mat != null:
+					mat.set_shader_parameter("ecart_centre", eta_c - centre.y)
+					mat.set_shader_parameter("pente_centre", Vector2(o2[1], o2[2]))
+					mat.set_shader_parameter("courbure_centre", Vector3(o2[3], o2[4], o2[5]))
+					mat.set_shader_parameter("milieu_exact", OS.get_environment("MILIEU") == "exact")
 			var m := borne_pente * rayon / (1.0 - borne_g) + 1e-3
 			bas = maxf(bas, eta_c - m)
 			haut = minf(haut, eta_c + m)
@@ -682,9 +821,10 @@ func immersion(t: float) -> void:
 	demi_actif = demi
 	# S366 : la brume de Godot (perspective aérienne) teintait la surface lointaine vue d'en dessous d'une bande sombre
 	# juste au-dessus de l'horizon ; sous l'eau, l'atténuation est celle d'`optique_eau.gdshaderinc`, seule. S371 : elle
-	# lit le cube de radiance et ne se règle pas par pixel (S371 P2) — éteinte aussi quand la caméra est à demi immergée.
+	# lit le cube de radiance et ne se règle pas par pixel (S371 P2) — éteinte aussi quand la caméra est à demi immergée ;
+	# `BRUME=1` la garde, en témoin (ce qu'elle change au-dessus de l'eau à hauteur de vague : S371 P5).
 	if environnement_scene != null and not "--controle-fond" in OS.get_cmdline_user_args():
-		environnement_scene.fog_enabled = not dedans and not demi
+		environnement_scene.fog_enabled = not dedans and (not demi or OS.get_environment("BRUME") == "1")
 	var bande_t := lignes("bande", t) if demi else PackedVector4Array()
 	for m in [materiau, materiau_sol, materiau_ciel]:
 		if m != null:
@@ -951,6 +1091,201 @@ func controle_sous_eau() -> void:
 			print("CONTROLE_SOUS_EAU_S365 inclinaison=%.2f pixel=%s d_m=%.3f rendu=(%.4f, %.4f, %.4f) attendu=(%.4f, %.4f, %.4f)" % [inclinaison, px, hi, rendu.r, rendu.g, rendu.b, attendu.x, attendu.y, attendu.z])
 	print("CONTROLE_SOUS_EAU_S365 pire=%.4f critere=%s" % [pire, "tenu" if pire <= 0.01 else "manque"])
 	get_tree().quit()
+
+
+## S371 — **le contrôle de la ligne d'eau** (ADR-019 §6, liste 8.6). L'eau, le fond et le ciel rendent la part d'eau du
+## pixel (`controle_milieu`), tonalité linéaire, sans halo. **Critère 1** : sur 32 colonnes et quatre cas — la pose `demi`
+## à t₀ et à t₀ + 2,3 s, une autre position, visée oblique, à t₀ + 5,7 s, un roulis de 0,4 rad (la ligne en diagonale) —,
+## la ligne rendue (passage de la part d'eau à ½, interpolé entre deux rangées) contre l'intersection analytique de la
+## surface et du plan proche, recalculée ici en double (`surface_exacte`) : **≤ 1 pixel**. **Critère 2** : 60 images
+## consécutives à 1/60 s, pose `demi`, 16 colonnes : **aucun pixel dont le milieu rendu diffère du milieu analytique à
+## plus de 2 pixels de la ligne**.
+func controle_ligne_eau() -> void:
+	var env: Environment = (get_children().filter(func(c): return c is WorldEnvironment)[0] as WorldEnvironment).environment
+	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	env.glow_enabled = false
+	for m in [materiau, materiau_sol, materiau_ciel]:
+		m.set_shader_parameter("controle_milieu", true)
+	var cas := [["demi", 0.0, 0.0, Vector3.ZERO], ["demi", 2.3, 0.0, Vector3.ZERO],
+		["demi", 5.7, 0.0, Vector3(40.0, 0.0, -30.0)], ["demi", 1.1, 0.4, Vector3.ZERO]]
+	var pire := 0.0
+	for c in cas:
+		temps = t0 + float(c[1])
+		pose(String(c[0]))
+		camera.position += c[3]
+		if c[3] != Vector3.ZERO:
+			camera.rotation = Vector3(0.08, 1.2, 0.0)
+		camera.rotation.z = float(c[2])
+		recaler_sur_la_surface()
+		var image: Image = await image_au_temps(temps)
+		var e := ligne_contre_analytique(image, 32, "cas t=%.1f roulis=%.1f" % [float(c[1]), float(c[2])])
+		pire = maxf(pire, e.x)
+	print("CONTROLE_LIGNE_EAU_S371 critere=1 pire_px=%.3f %s" % [pire, "tenu" if pire <= 1.0 else "manque"])
+	# Critère 2 : 60 images consécutives, caméra fixe (la mer monte et descend de part et d'autre du plan proche, la ligne
+	# traverse le cadre), puis flottante (recalée sur la surface à chaque image, comme la tête d'un nageur : la ligne reste
+	# dans le cadre et s'y déplace).
+	var tout := true
+	for flottante in [false, true]:
+		pose("demi")
+		temps = t0
+		recaler_sur_la_surface()
+		var mal := 0
+		var pire2 := 0.0
+		var mouvement := 0.0
+		var visibles := 0
+		var precedente := -1.0
+		for k in 60:
+			temps = t0 + float(k) / 60.0
+			if flottante:
+				recaler_sur_la_surface()
+			var image: Image = await image_au_temps(temps)
+			var e := ligne_contre_analytique(image, 16, "")
+			pire2 = maxf(pire2, e.x)
+			mal += int(e.y)
+			if e.z >= 0.0:
+				visibles += 1
+				if precedente >= 0.0:
+					mouvement = maxf(mouvement, absf(e.z - precedente))
+			precedente = e.z
+		tout = tout and mal == 0 and pire2 <= 1.0
+		print("CONTROLE_LIGNE_EAU_S371 critere=2 camera=%s images=60 ligne_visible_au_milieu=%d pire_px=%.3f pixels_mal_classes_hors_2px=%d deplacement_max_px_par_image=%.1f %s" % ["flottante" if flottante else "fixe", visibles, pire2, mal, mouvement, "tenu" if mal == 0 and pire2 <= 1.0 else "manque"])
+	print("CONTROLE_LIGNE_EAU_S371 critere=2 %s" % ("tenu" if tout else "manque"))
+	get_tree().quit()
+
+
+## S371 — **le coût de la caméra à demi immergée** (métrique de B11) : le temps GPU du rendu entier, mesuré par Godot, en
+## médiane sur 240 images, pose `demi` puis `demi_dessous`, milieu par pixel puis d'un bloc (le même cadre, `demi_immergee`
+## forcé faux) ; la différence est le prix du milieu par pixel. Temps figé, fenêtre de 1 280 × 720.
+func cout_demi() -> void:
+	var vp := get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
+	for nom in ["demi", "demi_dessous"]:
+		var medianes := []
+		for par_pixel in [true, false]:
+			pose(nom)
+			mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
+			phases(temps)
+			if not par_pixel:
+				for m in [materiau, materiau_sol, materiau_ciel]:
+					if m != null:
+						m.set_shader_parameter("demi_immergee", false)
+			for _i in 30:
+				await RenderingServer.frame_post_draw
+			var t := []
+			for _i in 240:
+				await RenderingServer.frame_post_draw
+				t.append(RenderingServer.viewport_get_measured_render_time_gpu(vp))
+			t.sort()
+			medianes.append(float(t[120]))
+		print("COUT_DEMI_S371 pose=%s gpu_ms_par_pixel=%.3f gpu_ms_d_un_bloc=%.3f surcout_ms=%.3f" % [nom, medianes[0], medianes[1], medianes[0] - medianes[1]])
+	# Et le CPU : `immersion()` en mode demi (Newton, ordre 2, uniformes), GDScript, moyenne sur 200 appels.
+	pose("demi")
+	var debut := Time.get_ticks_usec()
+	for _i in 200:
+		immersion(temps)
+	print("COUT_DEMI_S371 cpu_immersion_ms=%.3f demi=%s" % [float(Time.get_ticks_usec() - debut) / 200000.0, str(demi_actif)])
+	get_tree().quit()
+
+
+## Remonte ou descend la caméra pour que le centre du plan proche soit sur la surface exacte (la ligne au centre de l'image).
+func recaler_sur_la_surface() -> void:
+	var centre := camera.position - camera.near * camera.transform.basis.z
+	camera.position.y += surface_exacte(Vector2(centre.x, -centre.z), lignes("bande", temps)).x - centre.y
+
+
+## L'image rendue au temps `t`, caméra et milieu à jour.
+func image_au_temps(t: float) -> Image:
+	mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
+	phases(t)
+	if detail != null:
+		detail.calculer(t)
+	for _i in 4:
+		await RenderingServer.frame_post_draw
+	return get_viewport().get_texture().get_image()
+
+
+## La hauteur de l'objectif au-dessus de la surface, pour le pixel `px` (coordonnées continues de l'image).
+func hauteur_objectif(px: Vector2, bande_t: PackedVector4Array) -> float:
+	var dir := camera.project_ray_normal(px)
+	var avant := -camera.global_transform.basis.z
+	var p := camera.global_position + dir * (camera.near / dir.dot(avant))
+	return p.y - surface_exacte(Vector2(p.x, -p.z), bande_t).x
+
+
+## Sur `n` colonnes : (pire écart de la ligne rendue à l'analytique, px ; pixels mal classés à plus de 2 px de la ligne ;
+## rangée de la ligne à la colonne du milieu). La ligne analytique : balayage de la colonne par pas de 4 px, puis
+## dichotomie à 10⁻³ px ; les rangées rendues, part d'eau lue au centre des pixels.
+func ligne_contre_analytique(image: Image, n: int, etiquette: String) -> Vector3:
+	var taille := image.get_size()
+	var bande_t := lignes("bande", temps)
+	var pire := 0.0
+	var mal := 0
+	var milieu_rangee := -1.0
+	for ci in n:
+		var x := int((float(ci) + 0.5) * float(taille.x) / float(n))
+		var cx := float(x) + 0.5
+		# Les passages analytiques.
+		var passages: Array = []
+		var y0 := 0.5
+		var s0 := hauteur_objectif(Vector2(cx, y0), bande_t)
+		var y := y0
+		while y < float(taille.y) - 0.5:
+			var y1 := minf(y + 4.0, float(taille.y) - 0.5)
+			var s1 := hauteur_objectif(Vector2(cx, y1), bande_t)
+			if (s0 > 0.0) != (s1 > 0.0):
+				var a := y
+				var b := y1
+				var sa := s0
+				for _k in 14:
+					var m := 0.5 * (a + b)
+					var sm := hauteur_objectif(Vector2(cx, m), bande_t)
+					if (sm > 0.0) == (sa > 0.0):
+						a = m
+						sa = sm
+					else:
+						b = m
+				passages.append(0.5 * (a + b))
+			y = y1
+			s0 = s1
+		# Les passages rendus, et les pixels mal classés loin de la ligne.
+		var haut_dans_l_eau := hauteur_objectif(Vector2(cx, 0.5), bande_t) < 0.0
+		var rendus: Array = []
+		var w_prec := image.get_pixel(x, 0).srgb_to_linear().r
+		for j in taille.y:
+			var w := image.get_pixel(x, j).srgb_to_linear().r
+			if j > 0 and (w_prec > 0.5) != (w > 0.5):
+				rendus.append(float(j - 1) + 0.5 + (w_prec - 0.5) / (w_prec - w))
+			w_prec = w
+			# Le milieu analytique de la rangée : celui du haut de la colonne, changé à chaque passage au-dessus d'elle.
+			var avant_j := 0
+			for v in passages:
+				if float(v) < float(j) + 0.5:
+					avant_j += 1
+			var dans_l_eau := haut_dans_l_eau != (avant_j % 2 == 1)
+			if (w > 0.5) != dans_l_eau and not _pres(passages, float(j) + 0.5, 2.0):
+				mal += 1
+		if rendus.size() != passages.size():
+			pire = maxf(pire, 99.0)
+			if etiquette != "":
+				print("CONTROLE_LIGNE_EAU_S371 %s colonne=%d passages_analytiques=%s rendus=%s" % [etiquette, x, str(passages), str(rendus)])
+			continue
+		for k in rendus.size():
+			var e := absf(float(rendus[k]) - float(passages[k]))
+			pire = maxf(pire, e)
+			if etiquette != "" and ci % 8 == 0:
+				print("CONTROLE_LIGNE_EAU_S371 %s colonne=%d rangee_analytique=%.3f rangee_rendue=%.3f ecart_px=%.3f" % [etiquette, x, float(passages[k]), float(rendus[k]), e])
+		if ci == n / 2 and passages.size() > 0:
+			milieu_rangee = float(passages[0])
+	if etiquette != "":
+		print("CONTROLE_LIGNE_EAU_S371 %s pire_px=%.3f mal_classes=%d" % [etiquette, pire, mal])
+	return Vector3(pire, mal, milieu_rangee)
+
+
+func _pres(liste: Array, y: float, d: float) -> bool:
+	for v in liste:
+		if absf(float(v) - y) <= d:
+			return true
+	return false
 
 
 ## La profondeur du fond sous la surface plate, le long du rayon du pixel : où il entre dans l'eau, puis où il touche

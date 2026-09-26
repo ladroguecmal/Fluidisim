@@ -90,7 +90,7 @@ cherchées par nous, avant d'être rendue ; jugée par l'utilisateur (R26).
   son aplomb, borne pour sortir tôt) ; la bande passée au fond et au ciel.
 - [x] **P4** — l'eau, le fond et le ciel lisent le milieu du pixel (profondeur d'origine par pixel, trajet dans l'eau
   depuis l'objectif) ; la brume de Godot sur les pixels vus de l'eau.
-- [ ] **P5** — `--controle-ligne-eau` : critère 1, puis critère 2 ; non-régression (critère 3).
+- [x] **P5** — `--controle-ligne-eau` : critère 1, puis critère 2 ; non-régression (critère 3).
 - [ ] **P6** — la ligne sur l'objectif (ménisque), d'après P2 ; les images de R26.
 - [ ] **P7** — preuve `DEMI-IMMERGEE-S371`, ADR-019 note datée, liste 8.6, file, feuille de route, index ; revue R26.
 - [ ] **P8** — rituel.
@@ -144,3 +144,16 @@ l'eau, où le centre est vu ; (b) **la cause réelle des facettes** : la cascade
 vu sur des dizaines de pixels — le bord de la fenêtre en escalier (`DETAIL=0` l'efface). Lecture **bicubique B-spline**
 au-delà d'un grossissement de 32 (fondu à 64). **Impasse** : au seuil 4, les poses validées changeaient (jusqu'à 69
 niveaux) — la cascade de 32 m y est déjà grossie de 5 à 15 fois, en bilinéaire ; ce régime-là reste à examiner (file).
+
+**P5 — fait.** `--controle-ligne-eau` (≈ 100 s ; `--cote` implicite) : l'eau, le fond et le ciel rendent la part d'eau
+(`controle_milieu`), la ligne rendue (passage à ½) contre l'intersection analytique en double. **Critère 1** : 32
+colonnes, quatre cas (t₀, t₀ + 2,3 s, autre position à t₀ + 5,7 s, roulis 0,4 rad) — Newton par pixel **0,020 px** au pire.
+**Critère 2** : 60 images à 1/60 s, caméra fixe (la ligne visible au milieu 42 fois, jusqu'à 60 px par image) et
+flottante (60 fois, 0,2 px) : **0 pixel mal classé** à plus de 2 px. **Mais le coût** (`--cout-demi`, médiane sur 240
+images) : **4,7 à 5,1 ms GPU** de plus — Newton, 4 × 64 composantes, jusqu'à trois fois par pixel. **Corrigé : la surface
+au plan proche à l'ordre 2**, calculée une fois par image par `surface_ordre2` (en double, hessienne eulérienne
+analytique) ; terme d'ordre 3 borné par `Σ a·k³·r³/6` = 0,37 px au coin du cadre à 50° (2,4 px à 100°, 5,1 à 120°).
+Mesuré : **0,078 px** au pire, 0 pixel mal classé ; **surcoût GPU −0,001 et 0,028 ms** ; CPU `immersion()` 0,47 ms en
+GDScript, en mode demi seulement. `MILIEU=exact` garde Newton : image contre ordre 2, écarts le long de la ligne seule.
+**Brume** (`BRUME=1` la garde, pose `demi`) : au-dessus de la ligne, 0,8 % des pixels, 17 niveaux au pire (p99,9 = 2) ;
+au-dessous, 12 % et **jusqu'à 48 niveaux** — le défaut de S366 évité. Témoins : identiques au bit (zénith : 33 px à ±1).

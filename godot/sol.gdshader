@@ -113,7 +113,9 @@ void fragment() {
         vec3 dessous = a_travers_l_eau(ALBEDO * exp(-kd * max(profondeur_fond, 0.0)), d, omega, milieu.y);
         ALBEDO = milieu.x >= 1.0 ? dessous : mix(ALBEDO, dessous, milieu.x);
     }
-    if (controle == 3) {
+    if (controle_milieu) {
+        ALBEDO = vec3(milieu.x, 0.0, 0.0);
+    } else if (controle == 3) {
         ALBEDO = exp(-attenuation_c * d);
     } else if (controle == 1) {
         ALBEDO = vec3(c / 4.0, fract(10.0 * c), 0.0);
