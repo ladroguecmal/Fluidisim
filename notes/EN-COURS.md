@@ -89,7 +89,7 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-206 : la visibilité du ciel par des occultants analytiques, pour le rendu et pour V.
-- [ ] **P3** — l'orientation exacte du ciel couvert (forme close, remplace l'interpolation de S381) ; critère 3 ; ciel
+- [x] **P3** — l'orientation exacte du ciel couvert (forme close, remplace l'interpolation de S381) ; critère 3 ; ciel
   clair au bit.
 - [ ] **P4** — `occultation.gdshaderinc` : la part du ciel vue (32 azimuts × 32 bandes), totaux exacts ; `eclairage_vu`.
 - [ ] **P5** — la scène : `boite()` inscrit ses occultants ; parois et bassin ; `OCCULTATION=0` ; critère 1.
@@ -101,3 +101,9 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
 
 ### Notes de reprise
 
+**P3 — la forme close.** `E(β)/Lz = [π(1 + cos β)/2 + (4/3)((π − β)cos β + sin β)]/3` (dérivée par le fuseau entre
+l'horizon et le plan de la face, axe commun horizontal : `∫ sin³θ = 4/3`, `∫₀^{π−β} sin ψ sin(ψ + β) dψ = ((π − β)cos β +
+sin β)/2`) ; contre l'intégrale numérique (3 000 × 6 000) de 0 à 180° par 15° : **4·10⁻⁸**. Verticale 0,396177.
+`ciel_uniforme_incline`, `ciel_couvert_incline` dans `ciel.gdshaderinc` ; `eclairage()` les emploie. Critère 1 : 12 / 12
+au bit. Contrôles de S381 : critères 2 et 3 inchangés ; 4 — sol 1,00000, mur ouest 0,6057 pour 0,6055 (attendu corrigé à
+la verticale exacte).

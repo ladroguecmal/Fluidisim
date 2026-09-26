@@ -46,17 +46,29 @@ vec3 ciel_couvert(vec3 rayon) {
     return vec3(lz * (1.0 + 2.0 * clamp(rayon.z, 0.0, 1.0)) / 3.0);
 }
 
+/// S382 — **Le ciel vu d'une face inclinée**, formes closes (`cos β = n_z`, ciel au-dessus de l'horizon seulement) : le
+/// ciel uniforme, `U(β) = ∫ max(n·ω, 0) dω = π(1 + cos β)/2` ; le ciel couvert de la CIE, en unités de `Lz`,
+/// `E(β) = [U(β) + (4/3)·((π − β)·cos β + sin β)]/3` — le second terme est `2·∫ sin h·max(n·ω, 0) dω`, intégré sur le
+/// fuseau que découpent l'horizon et le plan de la face. `E(0) = 7π/9`. Contrôlée contre l'intégrale numérique : 4·10⁻⁸.
+float ciel_uniforme_incline(float nz) {
+    return PI * 0.5 * (1.0 + clamp(nz, -1.0, 1.0));
+}
+float ciel_couvert_incline(float nz) {
+    float c = clamp(nz, -1.0, 1.0);
+    return (ciel_uniforme_incline(c) + (4.0 / 3.0) * ((PI - acos(c)) * c + sqrt(max(1.0 - c * c, 0.0)))) / 3.0;
+}
+
 /// **Le facteur d'éclairement** d'une surface de normale `n` (B, unitaire) : sous le ciel clair, le modèle de l'afficheur,
 /// `0,6 + 0,4·max(n·soleil, 0)·direct` (`direct` : les caustiques, ou 1) ; sous le ciel couvert, l'éclairement horizontal
-/// conservé, réparti par la CIE — une face tournée vers le ciel reçoit `0,396 + 0,604·n_z` de l'horizontale (0,396 à la
-/// verticale, le rapport du ciel couvert normalisé), une face tournée vers le sol `0,396·(1 + n_z)` —, plus la lumière
-/// renvoyée par le sol, `albédo·(1 − n_z)/2`. Mêlés par `couvert` ; ciel clair : l'expression d'avant, au bit.
+/// conservé, réparti par la CIE — une face inclinée en reçoit `E(β)/E(0)` (0,3962 à la verticale ; S382, forme close, au
+/// lieu de l'interpolation de S381, fausse de 4,3 % au pire) —, plus la lumière renvoyée par le sol, `albédo·(1 − n_z)/2`.
+/// Mêlés par `couvert` ; ciel clair : l'expression d'avant, au bit.
 float eclairage(vec3 n, vec3 soleil, float direct) {
     float clair = 0.6 + 0.4 * max(dot(n, soleil), 0.0) * direct;
     if (couvert <= 0.0) {
         return clair;
     }
-    float ciel = n.z >= 0.0 ? 0.396 + 0.604 * n.z : 0.396 * (1.0 + n.z);
+    float ciel = ciel_couvert_incline(n.z) / (7.0 * PI / 9.0);
     float sol = ALBEDO_SOL_COUVERT * 0.5 * (1.0 - n.z);
     return mix(clair, eclairement_horizontal_clair() * (ciel + sol), couvert);
 }

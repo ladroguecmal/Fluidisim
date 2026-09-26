@@ -755,7 +755,8 @@ func controle_ciel() -> void:
 	var r_mur: float = resultats[1][1].g / resultats[0][1].g
 	# Le mur ouest : normale (−1, 0, 0) dans Godot, (−1, 0, 0) dans B ; sous le ciel clair `0,6 + 0,4·max(n·s, 0)`.
 	var clair_mur := 0.6 + 0.4 * maxf(-soleil_b.x, 0.0)
-	var attendu_mur := (0.6 + 0.4 * soleil_b.z) * (0.396 + 0.2 * 0.5) / clair_mur
+	# S382 : la verticale exacte du ciel couvert de la CIE, (π/2 + 4/3)/(7π/3) = 0,39618.
+	var attendu_mur := (0.6 + 0.4 * soleil_b.z) * ((PI / 2.0 + 4.0 / 3.0) / (7.0 * PI / 3.0) + 0.2 * 0.5) / clair_mur
 	print("CONTROLE_CIEL_S381 critere=4 sol clair=%.4f couvert=%.4f rapport=%.5f %s ; mur_ouest rapport=%.4f attendu=%.4f" % [
 		resultats[0][0].g, resultats[1][0].g, r_sol, "tenu" if absf(r_sol - 1.0) <= 0.01 else "manque", r_mur, attendu_mur])
 	get_tree().quit()
