@@ -93,7 +93,7 @@ conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **l
   d'ADR-207 D2 ; ADR-207 (note datée), conception §3.3.
 - [x] **P5a** — `Volume3` : la **colonne graduée** du mode linéaire (variante N : restriction et prolongation linéaires par
   morceaux, gradient conjugué réduit) ; critère 3.
-- [ ] **P5b** — l'onde oblique à colonne graduée contre sa fréquence calculée ; critère 4 ; inconnues comptées.
+- [x] **P5b** — l'onde oblique à colonne graduée contre sa fréquence calculée ; critère 4 ; inconnues comptées.
 - [ ] **P6** — critère 5 ; preuve `COLONNES-HAUTES-S386` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
@@ -128,3 +128,9 @@ tolérance d'ADR-144 sur `Pᵀ·div u` rapportée au poids de chaque nœud ; ref
 `Pᵀ` transposée de `P` ; repos exact au bit ; volume gardé à 10⁻⁹ m³ sur 50 pas ; tous les nœuds = schéma fin à 10⁻⁶ m ;
 refus du pas mobile, surface rendue au bit. **Vu échouer** : la transposée faussée (nœud du haut à moitié) casse l'essai de
 symétrie.
+
+**P5b — critère 4 tenu** (`graded_oblique_wave_follows_its_own_dispersion_s386`) : le mode (1, 1) de S295 sur colonne
+graduée suit la fréquence calculée de son schéma à **0,0046 %** (n = 16, 5 nœuds sur 8 couches) et **0,0048 %** (n = 32,
+7 sur 16) — comme la grille fine de S295 (0,0046 / 0,0047 %). Ω_gradué/Ω_fin − 1 = 1,808·10⁻³ et 2,020·10⁻³, identiques à
+l'outil Python ; Ω_gradué/ω − 1 = −1,257·10⁻² et −1,670·10⁻³ (fin : −1,435·10⁻², −3,683·10⁻³). Inconnues par colonne :
+`pressure_unknowns_per_column` ; nœuds de la porte B : [0, 6, 11, 15, 18, 20, 22, 24, 25, 26, 27], 11 sur 28.

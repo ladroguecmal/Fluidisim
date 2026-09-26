@@ -1988,3 +1988,94 @@ fn graded_is_refused_by_the_mobile_step_s386() {
     assert_eq!(v.step_surface_mobile(1000, 4000, &Jobs).err(), Some(Error::Domain));
     assert!(v.eta.iter().map(|x| x.to_bits()).eq(before));
 }
+
+/// La fréquence du schéma **gradué** (ADR-208), comme `scheme_frequency` pour le schéma fin : le problème vertical fin,
+/// restreint par `P` (linéaire par morceaux entre `nodes`), résolu en f64 dense ; `s = Σ (P·φ̂)_k·dx`.
+fn graded_scheme_frequency(kx: f64, ky: f64, dx: f64, nz: usize, nodes: &[usize], g: f64, dt: f64) -> (f64, f64) {
+    let kappa2 = 4. / (dx * dx) * ((kx * dx / 2.).sin().powi(2) + (ky * dx / 2.).sin().powi(2));
+    let mut a = vec![vec![0f64; nz]; nz];
+    let mut d = vec![0f64; nz];
+    for k in 0..nz {
+        a[k][k] = kappa2 * dx * dx;
+        if k > 0 { a[k][k] += 1.; a[k][k - 1] = -1.; }
+        if k + 1 < nz { a[k][k] += 1.; a[k][k + 1] = -1.; } else { a[k][k] += 2.; d[k] = 2.; }
+    }
+    let r = nodes.len();
+    let mut p = vec![vec![0f64; r]; nz];
+    for s in 0..r - 1 {
+        let (lo, hi) = (nodes[s], nodes[s + 1]);
+        for k in lo..hi {
+            let t = (k - lo) as f64 / (hi - lo) as f64;
+            p[k][s] = 1. - t;
+            p[k][s + 1] = t;
+        }
+    }
+    p[nodes[r - 1]][r - 1] = 1.;
+    // Aᵣ = Pᵀ A P, bᵣ = Pᵀ d, puis Gauss avec pivot partiel.
+    let mut m = vec![vec![0f64; r + 1]; r];
+    for i in 0..r {
+        for j in 0..r {
+            let mut acc = 0.;
+            for k in 0..nz { for l in 0..nz { acc += p[k][i] * a[k][l] * p[l][j]; } }
+            m[i][j] = acc;
+        }
+        m[i][r] = (0..nz).map(|k| p[k][i] * d[k]).sum();
+    }
+    for col in 0..r {
+        let piv = (col..r).max_by(|x, y| m[*x][col].abs().total_cmp(&m[*y][col].abs())).unwrap();
+        m.swap(col, piv);
+        for row in col + 1..r {
+            let f = m[row][col] / m[col][col];
+            for c in col..=r { m[row][c] -= f * m[col][c]; }
+        }
+    }
+    let mut x = vec![0f64; r];
+    for row in (0..r).rev() {
+        x[row] = (m[row][r] - (row + 1..r).map(|c| m[row][c] * x[c]).sum::<f64>()) / m[row][row];
+    }
+    let s: f64 = (0..nz).map(|k| (0..r).map(|j| p[k][j] * x[j]).sum::<f64>() * dx).sum();
+    let ws2 = g * kappa2 * s;
+    let big_omega = (1. - ws2 * dt * dt / 2.).acos() / dt;
+    (big_omega, -ws2 * dt * dt / (2. * (big_omega * dt).sin()))
+}
+
+#[test]
+fn graded_oblique_wave_follows_its_own_dispersion_s386() {
+    // Le mode (1, 1) de S295 — cuve de 8 × 4 m, h = 4 m, A = 1 cm, 1 s —, sur une colonne graduée.
+    let (lx, ly, h, a, g) = (8f64, 4f64, 4f64, 0.01f64, 9.81f64);
+    let pi = std::f64::consts::PI;
+    let (kx, ky) = (pi / lx, pi / ly);
+    for (n, us, nodes) in [(16usize, 2000u64, vec![0usize, 3, 5, 6, 7]), (32, 1000, vec![0, 4, 8, 11, 13, 14, 15])] {
+        let dx = lx / n as f64;
+        let (nx, ny, nz) = (n, (ly / dx) as usize, (h / dx) as usize);
+        // La fonction des essais fins redonne le schéma fin quand chaque couche est un nœud.
+        let every: Vec<usize> = (0..nz).collect();
+        let (fine, _) = scheme_frequency(kx, ky, dx, nz, g, us as f64 * 1e-6);
+        let (again, _) = graded_scheme_frequency(kx, ky, dx, nz, &every, g, us as f64 * 1e-6);
+        assert!((again / fine - 1.).abs() < 1e-12, "{again} contre {fine}");
+        let (mut v, mut arena) = volume(nx, ny, nz, dx as f32, g as f32);
+        v.enable_graded(&mut host(&mut arena), &nodes).unwrap();
+        let mode = |i: usize, j: usize| (kx * (i as f64 + 0.5) * dx).cos() * (ky * (j as f64 + 0.5) * dx).cos();
+        let eta: Vec<f32> = (0..ny).flat_map(|j| (0..nx).map(move |i| (h + a * mode(i, j)) as f32)).collect();
+        v.set_surface(&eta).unwrap();
+        let (big_omega, beta) = graded_scheme_frequency(kx, ky, dx, nz, &nodes, g, us as f64 * 1e-6);
+        let mut e_scheme = 0f64;
+        for step in 1..=1_000_000 / us {
+            let r = v.step_surface_linear(us, 4000, &Jobs).unwrap();
+            assert!(!r.degraded);
+            let t = (step * us) as f64 * 1e-6;
+            let phase = big_omega * t;
+            for j in 0..ny {
+                for i in 0..nx {
+                    let h_num = v.eta[v.col(i, j)] as f64 - h;
+                    e_scheme = e_scheme.max((h_num - a * mode(i, j) * (phase.cos() + beta * phase.sin())).abs() / a);
+                }
+            }
+        }
+        let omega = (g * (kx * kx + ky * ky).sqrt() * ((kx * kx + ky * ky).sqrt() * h).tanh()).sqrt();
+        println!("S386 onde oblique (1,1) n={n} nœuds={} sur {nz} : erreur {:.4} % contre Ω du schéma gradué ; \
+                  Ω_gradué/Ω_fin − 1 = {:.3e}, Ω_gradué/ω − 1 = {:.3e}", nodes.len(), 100. * e_scheme,
+                 big_omega / fine - 1., big_omega / omega - 1.);
+        assert!(e_scheme < 1e-3, "n={n} : {e_scheme}");
+    }
+}
