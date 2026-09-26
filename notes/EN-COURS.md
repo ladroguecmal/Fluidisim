@@ -107,3 +107,18 @@ vitesses intactes, refus atomiques (`Shape`, `NotFinite`, `Domain`). **Critère 
   domaine à t = 7,4 s (2,4 s après le lancement) — courant accéléré sans fin (≈ 56 N sur quelques décilitres), énergie
   sans puits. **Panache à calibrer** : σ 20 cm, 60 cm de profondeur, verticale seule, horizontale dissipée ;
   amortissement 0,5 s dans le panache, 30 s partout.
+
+**P3 — interrompue par la limite d'usage (2026-09-26, ≈ 04:25), à reprendre à chaud.** Committé dans ce commit :
+- `Volume3::shift_rest` (le repos suit le niveau de V ; essai `shifting_rest_to_the_mean_level_changes_no_physics_s375`,
+  surfaces à un ulp, pression moyenne 78,4 → −2,0 Pa ; seuil écrit d'abord à 10⁻⁷ m, **sous la résolution f32** à 2 m,
+  réécrit en deux ulps et dit) ; `last_refused_report` (diagnostic). Cause du refus à t = 305,4 s : plancher f32 atteint,
+  divergence 1,06·10⁻⁵ pour 10⁻⁵ — le décalage de 8,5 mm au repos d'origine (83 Pa uniformes).
+- `examples/piscine_delta.rs` : **exécution complète** 330 s, 13 200 pas, 357 s, 27 ms/pas, 62 itérations en moyenne,
+  0 refus. **Critère 2 tenu** (≤ 0,0001 mm). **Critère 3 manqué** : 2,475 s pour 1,759 (+40,7 %) au seuil de 1 mm ;
+  diagnostic sur l'export (le critère reste manqué) : 0,3 mm → 1,70 s (−3 %) ; 0,1 mm → 1,50 s, précurseur incompressible
+  plus rapide que √(g·h). Amplitudes : écart-type 0,2–0,36 mm, pire 1,5–4,9 mm. Export 6 600 images, 10,6 Mo.
+- Godot : maillage de hauteur de δ (`piscine.gd`, `bassin.gdshader`) ; **critère 4 tenu** (460 hauteurs, 0 écart).
+  18 images faites (`godot/captures/piscine_*`), **pas encore regardées**.
+**Reste** : le contrôle S374 compare la cote du maillage à V — faux en mode δ (le maillage est au repos) : ne le faire
+qu'avec `DELTA=0` ; regarder les images ; suite complète du cœur (après `shift_rest`) ; P5 (preuve `PISCINE-DELTA-S375`,
+ADR-201 note sur `shift_rest`, liste 5.10, file, feuille de route, index, R27) ; P6 rituel.

@@ -10,7 +10,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : interrompu
 Battement        : 2026-09-26 03:57 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S375 — δ 3D dans le bassin de la piscine (ADR-200 D4, demande de l'utilisateur)

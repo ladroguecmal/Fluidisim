@@ -1752,3 +1752,34 @@ fn a_uniform_rise_is_a_state_without_motion_s375() {
         assert!(vmax < 1e-6 && hi - lo < 1e-7, "{vmax} {}", hi - lo);
     }
 }
+
+/// S375 — **déplacer le repos ne change pas la physique.** Deux domaines, la même onde stationnaire sur un niveau décalé
+/// de 8 mm du repos ; l'un garde son repos, l'autre le déplace sur le niveau moyen (`shift_rest`) : après 400 pas, les
+/// surfaces s'accordent **à deux ulps f32 près** (4,8·10⁻⁷ m à 2 m ; le premier seuil écrit, 10⁻⁷ m, était sous la
+/// résolution de la surface — un ulp y vaut 2,4·10⁻⁷ ; mesuré : un ulp), et la pression du second est la perturbation
+/// seule (sa moyenne tombe de `ρ·g·8 mm` à presque rien).
+#[test]
+fn shifting_rest_to_the_mean_level_changes_no_physics_s375() {
+    let (mut a, _) = volume(12, 7, 12, 0.25, 9.81);
+    let (mut b, _) = volume(12, 7, 12, 0.25, 9.81);
+    let eta: Vec<f32> = (0..84).map(|c| 2.008 + 0.02 * (std::f32::consts::PI * ((c % 12) as f32 + 0.5) / 12.).cos()).collect();
+    a.set_free_surface(&eta, 2.0).unwrap();
+    b.set_free_surface(&eta, 2.0).unwrap();
+    b.shift_rest(2.008).unwrap();
+    let mut pire = 0f32;
+    for _ in 0..400 {
+        a.step_surface_mobile(10_000, 4000, &Jobs).unwrap();
+        b.step_surface_mobile(10_000, 4000, &Jobs).unwrap();
+        for (x, y) in a.surface().iter().zip(b.surface()) {
+            pire = pire.max((x - y).abs());
+        }
+    }
+    let moyenne = |v: &Volume3| {
+        let n = v.pressure().iter().filter(|x| **x != 0.).count().max(1);
+        v.pressure().iter().map(|x| *x as f64).sum::<f64>() / n as f64
+    };
+    println!("S375 repos déplacé : écart de surface {pire:e} m ; pression moyenne {:.3} Pa contre {:.3} Pa", moyenne(&b), moyenne(&a));
+    assert!(pire <= 2.0 * f32::EPSILON * 2.0, "{pire}");
+    assert!(moyenne(&b).abs() < 0.1 * moyenne(&a).abs());
+}
+

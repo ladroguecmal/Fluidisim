@@ -51,6 +51,32 @@ impl Volume3 {
         Ok(())
     }
 
+    /// S375 — **le repos suit le niveau du contenant.** Déplace le niveau de repos de `rest` à `new_rest` sans toucher la
+    /// surface : la pression des mailles mouillées perd `ρ·g·Δ`, exactement ce que perd le fantôme de surface, donc le
+    /// départ chaud de la projection reste la solution. Un domaine dont V élève le niveau (ADR-025) garde ainsi une
+    /// pression de perturbation petite : au repos d'origine, un décalage de 8,5 mm portait ≈ 83 Pa uniformes, qui
+    /// consommaient la précision f32 et faisaient refuser un pas calme de justesse (divergence 1,06·10⁻⁵, S375). Refus
+    /// `NotFinite` ; sinon rien d'autre ne change.
+    pub fn shift_rest(&mut self, new_rest: f32) -> Result<(), Error> {
+        if !new_rest.is_finite() {
+            return Err(Error::NotFinite);
+        }
+        let d = self.rho * self.g_eff * (new_rest - self.rest);
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    if self.wet3(i, j, k) {
+                        let c = self.c(i, j, k);
+                        self.p[c] -= d;
+                    }
+                }
+            }
+        }
+        self.rest = new_rest;
+        Ok(())
+    }
+
     pub(super) fn height3(&self, i: usize, j: usize) -> f32 {
         let c = self.col(i,j);
         if self.surface_coupled { self.surface_total[c] } else { self.eta[c] }
@@ -797,6 +823,7 @@ impl Volume3 {
             self.advect_mobile3(advection);
             let report = self.project_mobile3(scale, correction, max_iters, jobs)?;
             if report.degraded {
+                self.refused_report = Some(report);
                 return Err(Error::Convergence);
             }
             self.extrapolate_mobile3();
@@ -912,6 +939,11 @@ impl Volume3 {
         rhs.copy_from_slice(&self.rhs);
         prec.copy_from_slice(&self.prec);
         Ok(())
+    }
+
+    /// S375 — le rapport de la dernière projection mobile refusée : itérations, résidu, divergences, plancher.
+    pub fn last_refused_report(&self) -> Option<Report> {
+        self.refused_report
     }
 
     pub fn wet_cells(&self) -> usize {

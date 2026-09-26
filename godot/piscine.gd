@@ -21,6 +21,17 @@ var eau_tampon: MeshInstance3D
 var materiau_bassin: ShaderMaterial
 var materiau_tampon: ShaderMaterial
 var texte: Label
+## S375 — la surface de δ 3D du bassin (ADR-200), si l'export existe (`examples/piscine_delta.rs`) : l'en-tête, les images
+## (entiers de 16 bits, dixièmes de millimètre autour du repos), les deux textures lues par `bassin.gdshader`.
+var champ: Dictionary
+var champ_octets: PackedByteArray
+var champ_images := 0
+var champ_image_s := 0.05
+var champ_nx := 0
+var champ_ny := 0
+var champ_index := [-1, -1]
+var hauteurs: Array[Image] = []
+var textures: Array[ImageTexture] = []
 
 ## Les vues : position de la caméra et point visé (Godot).
 const VUES := {
@@ -43,6 +54,17 @@ func _ready() -> void:
 	donnees = JSON.parse_string(f.get_as_text())
 	pas = donnees["pas"]
 	dt = float(donnees["pas_s"])
+	var fc := FileAccess.open("res://donnees/piscine_delta.json", FileAccess.READ)
+	if fc != null and OS.get_environment("DELTA") != "0":
+		champ = JSON.parse_string(fc.get_as_text())
+		champ_octets = FileAccess.get_file_as_bytes("res://donnees/piscine_delta.bin")
+		champ_nx = int(champ["nx"])
+		champ_ny = int(champ["ny"])
+		champ_images = int(champ["images"])
+		champ_image_s = float(champ["image_s"])
+		if champ_octets.size() != champ_images * champ_nx * champ_ny * 2:
+			push_error("piscine_delta.bin : taille inattendue")
+			champ = {}
 	environnement()
 	camera = Camera3D.new()
 	camera.fov = 50.0
@@ -171,8 +193,86 @@ func construire() -> void:
 	boite(Vector3(x0, sol_y, -tz - et), Vector3(x1, th, -tz), beton)
 	eau_bassin = eau(b)
 	eau_tampon = eau(tp)
+	if not champ.is_empty():
+		eau_bassin.mesh = maillage_champ()
+		eau_bassin.position.y = float(champ["repos_m"])
+		for i in 2:
+			var im := Image.create_empty(champ_nx, champ_ny, false, Image.FORMAT_RF)
+			hauteurs.append(im)
+			textures.append(ImageTexture.create_from_image(im))
+		var m: ShaderMaterial = eau_bassin.material_override
+		m.set_shader_parameter("champ_actif", true)
+		m.set_shader_parameter("hauteur_a", textures[0])
+		m.set_shader_parameter("hauteur_b", textures[1])
+		m.set_shader_parameter("champ_texel", Vector2(1.0 / champ_nx, 1.0 / champ_ny))
+		m.set_shader_parameter("champ_dx", float(champ["dx_m"]))
 	materiau_bassin = eau_bassin.material_override
 	materiau_tampon = eau_tampon.material_override
+
+
+## S375 — le maillage de la surface de δ : un sommet au centre de chaque colonne, et un anneau sur les murs qui prend la
+## hauteur de la colonne voisine ; UV = centre de la colonne dans les textures (lecture au plus proche, exacte).
+func maillage_champ() -> ArrayMesh:
+	var dxm := float(champ["dx_m"])
+	var o: Array = champ["origine_b_m"]
+	var xs := [float(o[0])]
+	for i in champ_nx:
+		xs.append(float(o[0]) + (i + 0.5) * dxm)
+	xs.append(float(o[0]) + champ_nx * dxm)
+	var ys := [float(o[1])]
+	for j in champ_ny:
+		ys.append(float(o[1]) + (j + 0.5) * dxm)
+	ys.append(float(o[1]) + champ_ny * dxm)
+	var sommets := PackedVector3Array()
+	var uv := PackedVector2Array()
+	var normales := PackedVector3Array()
+	for jj in ys.size():
+		for ii in xs.size():
+			sommets.append(Vector3(xs[ii], 0.0, -float(ys[jj])))
+			normales.append(Vector3.UP)
+			var ci := clampi(ii - 1, 0, champ_nx - 1)
+			var cj := clampi(jj - 1, 0, champ_ny - 1)
+			uv.append(Vector2((ci + 0.5) / champ_nx, (cj + 0.5) / champ_ny))
+	var indices := PackedInt32Array()
+	var w := xs.size()
+	for jj in ys.size() - 1:
+		for ii in w - 1:
+			var a := jj * w + ii
+			indices.append_array([a, a + 1, a + w, a + 1, a + w + 1, a + w])
+	var tableaux := []
+	tableaux.resize(Mesh.ARRAY_MAX)
+	tableaux[Mesh.ARRAY_VERTEX] = sommets
+	tableaux[Mesh.ARRAY_NORMAL] = normales
+	tableaux[Mesh.ARRAY_TEX_UV] = uv
+	tableaux[Mesh.ARRAY_INDEX] = indices
+	var m := ArrayMesh.new()
+	m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, tableaux)
+	m.custom_aabb = AABB(Vector3(-5, -1, -3), Vector3(10, 2, 6))
+	return m
+
+
+## L'image `k` de δ dans la texture `emplacement` (0 : avant, 1 : après) ; hauteurs en mètres au-dessus du repos.
+func charger_image(k: int, emplacement: int) -> void:
+	if champ_index[emplacement] == k:
+		return
+	var n := champ_nx * champ_ny
+	var valeurs := PackedFloat32Array()
+	valeurs.resize(n)
+	var base := k * n * 2
+	for c in n:
+		valeurs[c] = float(champ_octets.decode_s16(base + 2 * c)) * 1e-4
+	hauteurs[emplacement].set_data(champ_nx, champ_ny, false, Image.FORMAT_RF, valeurs.to_byte_array())
+	textures[emplacement].update(hauteurs[emplacement])
+	champ_index[emplacement] = k
+
+
+## Les deux images de δ qui encadrent le temps `s` (l'image `k` est celle de `(k + 1)·image_s`), et leur mélange.
+func poser_champ(s: float) -> void:
+	var x := clampf(s / champ_image_s - 1.0, 0.0, float(champ_images - 1))
+	var k := mini(int(floor(x)), champ_images - 2)
+	charger_image(k, 0)
+	charger_image(k + 1, 1)
+	materiau_bassin.set_shader_parameter("melange", x - float(k))
 
 
 ## La ligne interpolée du rejeu au temps `s` : les colonnes de l'export, linéaires entre deux pas de V.
@@ -191,7 +291,10 @@ func ligne(s: float) -> Array:
 ## Pose l'état du temps `s` : cotes des surfaces (celles de V, interpolées), agitation, indications.
 func appliquer(s: float) -> void:
 	var l := ligne(s)
-	eau_bassin.position.y = float(l[1])
+	if champ.is_empty():
+		eau_bassin.position.y = float(l[1])
+	else:
+		poser_champ(s)
 	eau_tampon.position.y = float(l[2])
 	for m in [materiau_bassin, materiau_tampon]:
 		m.set_shader_parameter("temps", s)
@@ -233,7 +336,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## arrêtée depuis 20 s.
 func captures() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures"))
-	var instants := [2.0, 40.0, 200.0, 260.0]
+	var instants := [2.0, 5.6, 6.5, 40.0, 200.0, 260.0]
 	if OS.get_environment("INSTANTS") != "":
 		instants = Array(OS.get_environment("INSTANTS").split(",")).map(func(x): return float(x))
 	var vues := ["ensemble", "deversoir", "buse"]
@@ -269,4 +372,19 @@ func controle() -> void:
 			pire = maxf(pire, e)
 			print("CONTROLE_PISCINE_S374 t=%.2f bac=%s rendu_m=%.7f v_m=%.7f ecart_m=%s" % [s, "bassin" if k == 1 else "tampon", rendu, attendu, String.num_scientific(e)])
 	print("CONTROLE_PISCINE_S374 critere=3 pire_m=%s %s" % [String.num_scientific(pire), "tenu" if pire <= 1e-4 else "manque"])
+	# S375, critère 4 : les hauteurs de δ chargées dans la texture sont celles du fichier, à l'arrondi f32 près (le nuanceur
+	# les lit au plus proche, aux centres des colonnes).
+	if not champ.is_empty():
+		var ecarts := 0
+		var lus := 0
+		for k in [0, 100, 1000, champ_images - 1]:
+			charger_image(k, 0)
+			for c in range(0, champ_nx * champ_ny, 7):
+				var attendu := float(champ_octets.decode_s16((k * champ_nx * champ_ny + c) * 2)) * 1e-4
+				var lu := hauteurs[0].get_pixel(c % champ_nx, c / champ_nx).r
+				lus += 1
+				# La texture est en f32 ; GDScript calcule en f64 : égal à l'arrondi f32 près (demi-ulp relatif, 6·10⁻⁸).
+				if absf(lu - attendu) > 6e-8 * absf(attendu):
+					ecarts += 1
+		print("CONTROLE_PISCINE_S375 critere=4 hauteurs_lues=%d ecarts=%d %s" % [lus, ecarts, "tenu" if ecarts == 0 else "manque"])
 	get_tree().quit()

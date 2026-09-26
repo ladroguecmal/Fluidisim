@@ -20,6 +20,32 @@ uniform vec3 foyer = vec3(0.0);
 uniform float foyer_rayon = 0.5;
 uniform float foyer_pente = 0.0;
 uniform float temps = 0.0;
+// S375 — **la surface de δ 3D** (ADR-200) : la hauteur de chaque colonne, au-dessus du repos, dans deux images (celle
+// d'avant et celle d'après, lues au plus proche aux centres des colonnes, UV du maillage), mélangées par `melange` ; la
+// pente, par différences centrées. Sans elle, la surface plane de V et ses rides d'habillage (S374).
+uniform bool champ_actif = false;
+uniform sampler2D hauteur_a : filter_nearest, repeat_disable;
+uniform sampler2D hauteur_b : filter_nearest, repeat_disable;
+uniform float melange = 0.0;
+uniform vec2 champ_texel = vec2(0.0125, 0.025);
+uniform float champ_dx = 0.1;
+varying vec2 pente_champ;
+
+float hauteur_champ(vec2 uv) {
+    return mix(texture(hauteur_a, uv).r, texture(hauteur_b, uv).r, melange);
+}
+
+void vertex() {
+    pente_champ = vec2(0.0);
+    if (champ_actif) {
+        VERTEX.y += hauteur_champ(UV);
+        vec2 du = vec2(champ_texel.x, 0.0);
+        vec2 dv = vec2(0.0, champ_texel.y);
+        // UV.y croît vers le nord (−z de Godot) : la pente en z de Godot est l'opposée de celle en y.
+        pente_champ = vec2((hauteur_champ(UV + du) - hauteur_champ(UV - du)) / (2.0 * champ_dx),
+            -(hauteur_champ(UV + dv) - hauteur_champ(UV - dv)) / (2.0 * champ_dx));
+    }
+}
 
 /// Le point de la scène vu au pixel `uv`, dans le monde (profondeur inversée de Godot 4.3+).
 vec3 scene_monde(vec2 uv, mat4 inv_proj, mat4 inv_vue) {
@@ -63,7 +89,7 @@ vec2 pente_rides(vec2 p) {
 void fragment() {
     vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
     vec3 vue = normalize(surface - CAMERA_POSITION_WORLD);
-    vec2 s = pente_rides(surface.xz);
+    vec2 s = champ_actif ? pente_champ : pente_rides(surface.xz);
     vec3 n = normalize(vec3(-s.x, 1.0, -s.y));
     // Le fond vu à travers : réfracté, relu à l'écran s'il est sous la surface.
     vec3 fond0 = scene_monde(SCREEN_UV, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);

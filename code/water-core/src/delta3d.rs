@@ -146,6 +146,9 @@ pub struct Volume3 {
     flux_y: Vec<f32>,
     /// S310 : bilan de masse du dernier pas couplé. Des `f64` : aucune allocation, aucun tampon.
     balance: Balance3,
+    /// S375 — le rapport de la dernière projection mobile **refusée** (`Convergence`), pour le diagnostic ; `None` tant
+    /// qu'aucun refus n'a eu lieu. Aucun état de δ, rien de sérialisé (I-17).
+    refused_report: Option<Report>,
     /// **S324 : la découpe du fond** — fractions et ouvertures, `None` pour le fond plat de S295,
     /// dont tous les chemins restent ceux d'avant, au bit. Mode linéaire seulement : les pas mobile
     /// et couplé la refusent tant qu'ils ne la portent pas.
@@ -265,6 +268,7 @@ impl Volume3 {
             flux_x: vec![0.; fx],
             flux_y: vec![0.; fy],
             balance: Balance3::default(),
+            refused_report: None,
             cut: None,
             precondition_cut: true,
             partial_lid: true,
