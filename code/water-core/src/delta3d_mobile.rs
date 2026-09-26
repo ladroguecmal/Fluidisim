@@ -13,6 +13,10 @@ impl Volume3 {
         if !rest.is_finite() || eta.iter().any(|x| !x.is_finite()) {
             return Err(Error::NotFinite);
         }
+        // S401 : hors de l'ensemble épars, le repos.
+        if !self.sparse_surface_ok(eta, rest) {
+            return Err(Error::Domain);
+        }
         self.eta.copy_from_slice(eta);
         self.eta_roundoff.fill(0.);
         self.p.fill(0.);
@@ -34,6 +38,12 @@ impl Volume3 {
         }
         if dh.iter().any(|x| !x.is_finite()) {
             return Err(Error::NotFinite);
+        }
+        // S401 : une source hors de l'ensemble épars est hors du domaine.
+        if let Some(active) = self.active_columns() {
+            if active.iter().zip(dh).any(|(a, d)| *a == 0 && *d != 0.) {
+                return Err(Error::Domain);
+            }
         }
         self.saved_eta.copy_from_slice(&self.eta);
         self.saved_eta_roundoff.copy_from_slice(&self.eta_roundoff);
@@ -74,6 +84,8 @@ impl Volume3 {
             }
         }
         self.rest = new_rest;
+        // S401 : hors de l'ensemble épars, la surface est le repos.
+        self.sparse_follow_rest(new_rest);
         Ok(())
     }
 
@@ -90,8 +102,12 @@ impl Volume3 {
         (k as f32 + 0.5) * self.domain.dx < self.height3(i,j)
     }
 
-    /// S328 : l'ouverture d'une face `u` (0), `v` (1) ou `w` (2) ; 1 sur un fond plat.
+    /// S328 : l'ouverture d'une face `u` (0), `v` (1) ou `w` (2) ; 1 sur un fond plat. S401 : nulle sur une face qui touche
+    /// une colonne hors de l'ensemble épars.
     pub(super) fn open3(&self, axis: usize, f: usize) -> f32 {
+        if self.sparse_closed3(axis, f) {
+            return 0.;
+        }
         match &self.cut {
             Some(g) => match axis {
                 0 => g.open_u[f],
@@ -102,9 +118,9 @@ impl Volume3 {
         }
     }
 
-    /// S328 : maille de fraction nulle — jamais sur un fond plat.
+    /// S328 : maille de fraction nulle — jamais sur un fond plat. S401 : toute maille d'une colonne hors de l'ensemble épars.
     pub(super) fn solid3(&self, c: usize) -> bool {
-        self.cut.as_ref().is_some_and(|g| g.frac[c] == 0.)
+        self.cut.as_ref().is_some_and(|g| g.frac[c] == 0.) || self.sparse_solid3(c)
     }
 
     fn ghost_up3(&self, i: usize, j: usize, k: usize) -> (f32, f32) {
@@ -644,8 +660,11 @@ impl Volume3 {
                                 + vertical(a, b, k)
                                 + vertical(a - 1, b, k + 1)
                                 + vertical(a, b, k + 1));
-                        let rt = if b + 1 < nb { val(a, b + 1, k) } else { uc };
-                        let lf = if b > 0 { val(a, b - 1, k) } else { uc };
+                        // S401 : au bord de l'ensemble épars comme au bord de la boîte — une face hors de la grille
+                        // de l'ensemble est lue comme la face elle-même.
+                        let at = |a: usize, b: usize| if axis == 0 { [a, b, k] } else { [b, a, k] };
+                        let rt = if b + 1 < nb && !self.sparse_outside3(axis, at(a, b + 1)) { val(a, b + 1, k) } else { uc };
+                        let lf = if b > 0 && !self.sparse_outside3(axis, at(a, b - 1)) { val(a, b - 1, k) } else { uc };
                         let uy = (rt - lf) * h;
                         let vc = 0.25
                             * (transverse(a - 1, b, k)
@@ -672,12 +691,13 @@ impl Volume3 {
                         continue;
                     }
                     let wc = self.w[f];
-                    let rt = if i + 1 < nx {
+                    // S401 : au bord de l'ensemble épars comme au bord de la boîte.
+                    let rt = if i + 1 < nx && !self.sparse_outside3(2, [i + 1, j, k]) {
                         self.w[self.fw(i + 1, j, k)]
                     } else {
                         wc
                     };
-                    let lf = if i > 0 {
+                    let lf = if i > 0 && !self.sparse_outside3(2, [i - 1, j, k]) {
                         self.w[self.fw(i - 1, j, k)]
                     } else {
                         wc
@@ -689,12 +709,12 @@ impl Volume3 {
                             + self.u[self.fu(i + 1, j, k - 1)]
                             + self.u[self.fu(i, j, k)]
                             + self.u[self.fu(i + 1, j, k)]);
-                    let bk = if j + 1 < ny {
+                    let bk = if j + 1 < ny && !self.sparse_outside3(2, [i, j + 1, k]) {
                         self.w[self.fw(i, j + 1, k)]
                     } else {
                         wc
                     };
-                    let fr = if j > 0 {
+                    let fr = if j > 0 && !self.sparse_outside3(2, [i, j - 1, k]) {
                         self.w[self.fw(i, j - 1, k)]
                     } else {
                         wc

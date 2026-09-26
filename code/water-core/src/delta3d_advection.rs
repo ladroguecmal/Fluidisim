@@ -63,11 +63,20 @@ impl Volume3 {
                             let r = [(p[0] as isize + q[0]) as usize, (p[1] as isize + q[1]) as usize, (p[2] as isize + q[2]) as usize];
                             self.velocity3(axis, r)
                         };
-                        let inside = |a: usize| p[a] > 0 && p[a] + 1 < end[a];
                         let unit = |a: usize, s: isize| {
                             let mut e = [0isize; 3];
                             e[a] = s;
                             e
+                        };
+                        // S401 : au bord de l'ensemble épars comme au bord de la boîte — une direction dont un voisin est
+                        // hors de la grille de l'ensemble est omise ; à un coin rentrant, un terme croisé dont un voisin en
+                        // diagonale l'est aussi.
+                        let shifted = |q: [isize; 3]| {
+                            [(p[0] as isize + q[0]) as usize, (p[1] as isize + q[1]) as usize, (p[2] as isize + q[2]) as usize]
+                        };
+                        let outside = |q: [isize; 3]| self.sparse_outside3(axis, shifted(q));
+                        let inside = |a: usize| {
+                            p[a] > 0 && p[a] + 1 < end[a] && !outside(unit(a, 1)) && !outside(unit(a, -1))
                         };
                         let add = |x: [isize; 3], y: [isize; 3]| [x[0] + y[0], x[1] + y[1], x[2] + y[2]];
                         let mut acc = 0f32;
@@ -78,6 +87,10 @@ impl Volume3 {
                             acc += v[a] * v[a] * (at(unit(a, 1)) - 2. * c + at(unit(a, -1)));
                             for b in a + 1..3 {
                                 if !inside(b) {
+                                    continue;
+                                }
+                                let corners = [(1, 1), (1, -1), (-1, 1), (-1, -1)];
+                                if corners.iter().any(|(sa, sb)| outside(add(unit(a, *sa), unit(b, *sb)))) {
                                     continue;
                                 }
                                 let cross = at(add(unit(a, 1), unit(b, 1))) - at(add(unit(a, 1), unit(b, -1)))

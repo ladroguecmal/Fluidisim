@@ -66,7 +66,8 @@ impl Volume3 {
         if nodes.first() != Some(&0) || nodes.last() != Some(&(nz - 1)) || nodes.windows(2).any(|w| w[1] <= w[0]) {
             return Err(Error::Shape);
         }
-        if self.cut.is_some() {
+        // S401 : ni découpe, ni ensemble épars.
+        if self.cut.is_some() || self.sparse.is_some() {
             return Err(Error::Domain);
         }
         let cols = nx * ny;

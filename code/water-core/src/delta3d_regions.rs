@@ -38,6 +38,10 @@ impl Volume3 {
             || self.g_eff.to_bits() != src.g_eff.to_bits()
             || self.cut.is_some()
             || src.cut.is_some()
+            // S401 : l'ensemble épars n'est pas porté — deux domaines d'une même fenêtre fusionnent par l'union de leurs
+            // ensembles, sans recopie.
+            || self.active_columns().is_some()
+            || src.active_columns().is_some()
         {
             return Err(Error::Domain);
         }

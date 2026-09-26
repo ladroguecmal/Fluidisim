@@ -636,6 +636,8 @@ impl Volume3 {
         jobs: &dyn JobSystem,
     ) -> Result<Report, Error> {
         self.refuse_cut()?;
+        // S401 : le pas couplé ne porte pas l'ensemble épars.
+        self.refuse_sparse()?;
         if duration_us == 0 || duration_us > 1u64 << 53 || time.0.checked_add(duration_us).is_none()
         {
             return Err(Error::NotFinite);

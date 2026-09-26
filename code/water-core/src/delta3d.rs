@@ -178,6 +178,9 @@ pub struct Volume3 {
     /// **S386 : la colonne graduée** (ADR-208) du pas linéaire ; `None` par défaut — toutes les couches, au bit.
     /// `enable_graded` la réserve auprès de l'hôte, avant `seal()`.
     graded: Option<graded::Graded3>,
+    /// **S401 : l'ensemble épars** (ADR-006 §3, C8b) — les colonnes du domaine dans la fenêtre ; `None` par défaut : la boîte
+    /// entière, chaque opérateur au bit. `enable_sparse` le réserve auprès de l'hôte, avant `seal()`.
+    sparse: Option<sparse::Sparse3>,
 }
 
 impl Volume3 {
@@ -286,6 +289,7 @@ impl Volume3 {
             sponge_removed: 0.,
             mg: None,
             graded: None,
+            sparse: None,
         })
     }
 
@@ -614,6 +618,10 @@ impl Volume3 {
         if eta.iter().any(|e| !e.is_finite()) {
             return Err(Error::NotFinite);
         }
+        // S401 : hors de l'ensemble épars, le repos.
+        if !self.sparse_surface_ok(eta, self.rest) {
+            return Err(Error::Domain);
+        }
         self.eta.copy_from_slice(eta);
         self.eta_roundoff.fill(0.);
         Ok(())
@@ -631,6 +639,8 @@ impl Volume3 {
         self.v.copy_from_slice(v);
         self.w.copy_from_slice(w);
         self.close_walls();
+        // S401 : les faces des colonnes hors de l'ensemble épars sont nulles, comme les murs.
+        self.close_sparse_walls();
         Ok(())
     }
 
@@ -1197,6 +1207,8 @@ impl Volume3 {
     /// **Refus atomique** : une pression non convergée rend `Convergence`, un champ non fini
     /// `NotFinite`, et `u`, `v`, `w`, `p`, `η` et son reste sont rendus au bit. Aucune allocation.
     pub fn step_surface_linear(&mut self, duration_us: u64, max_iters: u32, jobs: &dyn JobSystem) -> Result<Report, Error> {
+        // S401 : le pas linéaire ne porte pas l'ensemble épars.
+        self.refuse_sparse()?;
         if duration_us == 0 || duration_us > (1u64 << 53) {
             return Err(Error::NotFinite);
         }
@@ -1388,3 +1400,6 @@ mod regions;
 mod advection;
 #[path = "delta3d_graded.rs"]
 mod graded;
+#[path = "delta3d_sparse.rs"]
+mod sparse;
+pub use sparse::SparseChange;

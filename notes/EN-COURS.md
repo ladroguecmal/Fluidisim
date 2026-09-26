@@ -91,7 +91,7 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'ensemble épars dans `Volume3` (`delta3d_sparse.rs`) : réserve du masque, `set_active_columns`, `open3` et `solid3`
+- [x] **P2** — l'ensemble épars dans `Volume3` (`delta3d_sparse.rs`) : réserve du masque, `set_active_columns`, `open3` et `solid3`
   qui le voient, advection au bord de l'ensemble comme au bord de la boîte ; pas linéaire, couplé, gradué et `transplant`
   refusés ; critère 1.
 - [ ] **P3** — les oracles (a), (b), (c), et vu échouer ; critère 2.
@@ -105,3 +105,12 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
 
 ### Notes de reprise
 
+- **P2** — `delta3d_sparse.rs` : `Sparse3` (deux masques de colonnes, réservés avant `seal()`), `enable_sparse`,
+  `set_active_columns`, `set_active_blocks` (blocs du réseau commun coupés à la fenêtre), `SparseChange` publié (colonnes
+  entrées et sorties, volume et hauteur rendus au repos, plus grande vitesse effacée). `open3` nul sur une face qui touche une
+  colonne hors de l'ensemble ; `solid3` vrai dans ces colonnes — tout le pas mobile suit, multigrille comprise (`fine_kind3`,
+  `coarsen3`). **Le bord de l'ensemble comme celui de la boîte** : une face qui ne touche aucune colonne de l'ensemble est
+  « hors de la grille » (`sparse_outside3`) — l'advection y lit la face elle-même, le terme d'ADR-209 y omet la direction, et à
+  un coin rentrant le terme croisé dont une diagonale est dehors. Refus (`Domain`) : pas linéaire, pas couplé, colonne graduée,
+  `transplant`, surface écartée du repos ou source hors de l'ensemble ; `shift_rest` emmène les colonnes dehors. Critère 1 :
+  ensemble plein, 50 pas **au bit**, itérations égales, avec et sans le terme d'ADR-209.
