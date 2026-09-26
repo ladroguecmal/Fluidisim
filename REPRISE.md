@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 19:07 +02:00
-Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
-Session en cours : S387 — C2b : la colonne graduée au pas mobile ; la course de la surface mesurée (ADR-208 D4)
-Dernière session : S386 — physique : **C2, la colonne graduée** ([ADR-208](docs/adr/ADR-208-la-colonne-graduee.md), [preuve](docs/validation/COLONNES-HAUTES-S386.md)) — la colonne haute unique mesurée insuffisante (÷1,47), la pression linéaire par morceaux retenue (÷2,55 sur une colonne de 7 m ; la porte B n'en a que 3,5 — S387), construite au pas linéaire ; 4.3 partiel ; décision de l'utilisateur : δ dans Godot en C11. Avant : S385, la multigrille 3D (C1)
-Session suivante : **C2b — la colonne graduée au pas mobile** (course de la surface, ADR-208 D4), son stockage compact et la multigrille graduée ; faisable sans carte. Au poste, en alternance (ADR-191) : la pluie, pièce 5
-Maillons        : 0 — S386 : 4.3 passe à partiel (la colonne graduée reçue au pas linéaire) ; consommée par C2b puis C3
+Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; lecture des articles bloquée)
+Session en cours : aucune
+Dernière session : S387 — physique : **C2b, la colonne graduée au pas mobile** ([preuve](docs/validation/COLONNES-HAUTES-S386.md) §5) — la course de la surface sous la mer de la porte B mesurée (4,8 m) : la colonne graduée sert l'eau calme des contenants, pas la haute mer ; au pas mobile, elle suit sa dispersion (ballottement, rapport 0,84) ; deux défauts de S386 corrigés. Avant : S386, la colonne graduée au pas linéaire
+Session suivante : au poste, **C3** — la multigrille sur la carte, levier probable de la haute mer (ADR-207 D5) ; en alternance (ADR-191), la pluie, pièce 5. Dans une session cloud : **C4** — APIC en 3D dans le cœur
+Maillons        : 1 — S387 : aucun point ni critère de porte n'a changé d'état (4.3 déjà partiel)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -17481,3 +17481,19 @@ calculée à 0,0048 %, Rust = Python) ; suite 673 réussis, zéro avertissement.
 opérateur fins) ; ni pas mobile, ni fond coupé, ni carte. **Rituel.** 4.3 passe à **partiel** (3 / 68 / 49). Maillons
 **0** : devient possible une pression à 11 inconnues sur 28 ; chemin qui le consomme : C2b puis C3 ; preuve ci-dessus.
 Suivant : **C2b** — pas mobile, stockage compact, multigrille graduée.
+
+## S387 — 2026-09-26 — physique : C2b, la colonne graduée au pas mobile, et la course de la surface
+
+**Entrée.** *« Continue »*. **Correction d'abord** : le cas que S386 appelait « porte B » est une colonne de 7 m d'eau sous
+surface fixe ; la scène de la porte B a **3,5 m d'eau sous 3,5 m d'air** (notes correctives d'ADR-207 et ADR-208). **Fait**
+([preuve](../docs/validation/COLONNES-HAUTES-S386.md) §5). **La course de la surface**, mesurée sur B (mer `--houle`
+reconstruite, 840 points, 10 min) : **4,79 m** — 26 couches cubiques sur 28 avec le paquet : **la colonne graduée ne paie
+pas en haute mer** (÷1,27 au plus en suivant la moyenne de B) ; en eau calme, ÷2,14 à 10 cm, ÷2,50 à 5 cm — elle sert les
+contenants. **Construite au pas mobile** (garde de la course, départ chaud par injection, diagonale condensée) ; essais :
+tous les nœuds = pas fin à 10⁻⁶ m, volume 10⁻⁹ m³, refus rendu au bit ; **ballottement** : écart au pas fin 1,62·10⁻⁴ m pour
+1,92·10⁻⁴ prédits (rapport 0,84, critère 0,5–2 tenu). Suite 675 réussis, zéro avertissement. **Trois défauts corrigés** —
+l'opérateur linéaire appliqué au pas mobile (nouveau) ; et **deux de S386** : le « vrai résidu » jamais recalculé (taille lue
+sur un tampon emprunté), le résidu écrasé par la divergence ; chiffres de S386 inchangés. **Vu en passant** : le creux de B
+plus le paquet touche presque le fond de la scène de la porte B (0,11 m), à la file. **Rituel.** Maillons **1** : aucun point
+ni critère de porte ne change d'état. Suivant : **C3** au poste — la multigrille sur la carte, levier probable de la haute mer
+(la projection pèse 2,06 ms des 3,68) ; **C4** dans le cloud — APIC en 3D.

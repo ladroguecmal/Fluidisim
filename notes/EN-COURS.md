@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S387 — **en cours**. **C2b** de la campagne ([ADR-208](../docs/adr/ADR-208-la-colonne-graduee.md) D4, ADR-207 D5) :
+Session : S387 — **terminée**. **C2b** de la campagne ([ADR-208](../docs/adr/ADR-208-la-colonne-graduee.md) D4, ADR-207 D5) :
 **la colonne graduée au pas mobile**. Demande de l'utilisateur (2026-09-26) : *« Continue »*. Agent : Claude Opus 5.5, session
 cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
 
@@ -90,7 +90,7 @@ le pas fin à l'écart que la dispersion calculée prévoit. (4) Suite entière 
   nœuds, divergence restreinte ; essais (critère 3).
 - [x] **P5** — le ballottement gradué contre le fin ; critère 4.
 - [x] **P6** — preuve (section datée de COLONNES-HAUTES-S386) ; ADR-208 (note), liste, file, feuille de route.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 
