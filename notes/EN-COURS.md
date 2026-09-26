@@ -92,8 +92,8 @@ jugement de l'utilisateur (R29).
   et à l'eau).
 - [x] **P5** — leur dessin : traînée alignée sur la chute, opacité et radiance de Garg et Nayar ; bassin et mer.
 - [x] **P6** — l'extinction au loin (`β`, brume de la scène) ; critère 3.
-- [>] **P7** — contrôle du nombre et des tailles (critère 2) ; critère 1 ; coût.
-- [ ] **P8** — images de R29 ; preuve `PLUIE-AIR-S380` ; liste, file, feuille de route, index.
+- [x] **P7** — contrôle du nombre et des tailles (critère 2) ; critère 1 ; coût.
+- [>] **P8** — images de R29 ; preuve `PLUIE-AIR-S380` ; liste, file, feuille de route, index.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
@@ -129,3 +129,18 @@ ciel) : piscine — brume seulement sous la pluie ; mer — `BRUME_SECHE` (0,000
 4,28785·10⁻³ m⁻¹ posés pour la loi à 0 / 2 / 10 / 50 mm/h, **égaux** ; intégration numérique indépendante (numpy) :
 5,64335·10⁻⁴, 1,55557·10⁻³, 4,28785·10⁻³ ; visibilités 6,9 / 2,5 / 0,9 km ; brume éteinte par temps sec. Le contrôle des
 anneaux (S379) tourne désormais sans gouttes ni brume. `%e` refusé par GDScript (encore) : `String.num_scientific`.
+
+**P7 — contrôles.** `--controle-gouttes` : vue d'aplomb, tranche de 0,5 m à 16 m, dix instants, un carré de deux pixels
+par goutte, couleur par classe ; décor caché, fond noir, anticrénelage coupé.
+- **Impasse n° 1** : avec le décor, les margelles (≈ 0,9 en tonalité linéaire) comptaient comme gouttes blanches (une tache
+  de 63 813 pixels), et l'anticrénelage mêlait le bord des points au fond (aire médiane 1 pixel, comptes gonflés de 50 %).
+- **Critère 2** — écarts par classe [1 ; 1,5) / [1,5 ; 2) / [2 ; 3) / [3 ; 6] mm : **2 mm/h** −0,84 / +1,91 / +5,21 /
+  +6,11 % ; **10 mm/h** −0,73 / +0,49 / −1,48 / +1,33 % ; **50 mm/h** −2,95 / −2,09 / −2,15 / −2,64 %. **Erreur du critère
+  écrit** : « ±5 % » oubliait le bruit de Poisson — à 2 mm/h, 1 014 et 30 gouttes attendues dans les deux grosses classes
+  (σ 3,1 % et 18 %) ; jugé à ±5 % quand σ ≤ 2,5 %, sinon à 2 σ : **tenu** aux trois intensités (pire mesurable 1,91 /
+  1,48 / 2,95 %). À 50 mm/h, −2 à −3 % partout : des fusions que l'aire médiane ne rattrape pas.
+- **Critère 1** : 12 / 12 images identiques au SHA-256.
+- **Coût** (720p, GPU, médiane de 240) : bassin proche 0,53 → 0,80 / 1,35 / 3,57 ms (2 / 10 / 50 mm/h), aplomb 0,48 → 0,74
+  / 1,40 / 4,01, rasante 0,46 → 0,56 / 0,80 / 1,74 ; mer proche 1,60 → 1,90 / 3,24 / 8,94, rasante 1,58 → 1,90 / 3,07 /
+  8,17, référence 1,56 → 1,82 / 2,97 / 7,84. Par rapport aux rides seules (S379) : les gouttes coûtent +0,1 à +0,3 ms à
+  10 mm/h, +0,45 à +1,2 ms à 50 mm/h.

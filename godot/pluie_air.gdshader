@@ -27,6 +27,7 @@ uniform int n_nappes = 0;
 // Contrôle (critère 2 de S380) : seules les gouttes de la tranche [y0, y1] ; largeur de deux pixels, opacité pleine.
 uniform bool controle = false;
 uniform vec2 tranche = vec2(0.0, 0.5);
+uniform float taille_controle = 0.02;
 
 const float PLUIE_TAU = 1.0 / 60.0;
 
@@ -69,8 +70,8 @@ void process() {
     bool visible = p.y > sol;
     if (controle) {
         visible = visible && p.y >= tranche.x && p.y < tranche.y;
-        longueur = 2.0 * s;
-        largeur = 2.0 * s;
+        longueur = taille_controle;
+        largeur = taille_controle;
         opacite = 1.0;
     }
     vec3 vers_camera = camera - p;

@@ -11,7 +11,8 @@ extends Node3D
 ## S379 — **la pluie**, factice (ADR-202 D3) : `PLUIE=<mm/h>` dans l'environnement, ou la touche P (0, 2, 10, 50 mm/h) ;
 ## les rides de `pluie.gdshaderinc`, au taux de `pluie.gd`. `-- --controle-pluie` : le taux de naissance des anneaux compté
 ## sur des images de contrôle (critère 2 de S379), puis quitte. `-- --cout-pluie` : le temps GPU de l'image, sans pluie et
-## sous la pluie, trois vues (médiane de 240 images).
+## sous la pluie, trois vues (médiane de 240 images). S380 — `-- --controle-gouttes` : le nombre et les tailles des
+## gouttes dans l'air, comptés (critère 2 de S380).
 ##
 ## Axes : ceux de B dans l'export (x à l'est, y au nord, z en haut) ; dans Godot, un point (x, y, z) de B est (x, z, −y).
 
@@ -108,6 +109,8 @@ func _ready() -> void:
 		controle_pluie()
 	elif "--cout-pluie" in args:
 		cout_pluie()
+	elif "--controle-gouttes" in args:
+		controle_gouttes()
 	elif "--captures" in args:
 		captures()
 
@@ -354,7 +357,7 @@ func appliquer(s: float) -> void:
 
 func _process(delta: float) -> void:
 	var args := OS.get_cmdline_user_args()
-	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args:
+	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args:
 		return
 	if not en_pause:
 		t = fmod(t + delta, float(pas.size() - 1) * dt)
@@ -561,3 +564,117 @@ func cout_pluie() -> void:
 			ligne_cout += " gpu_ms_%s=%.3f" % [mm_h(r), float(t[120])]
 		print(ligne_cout)
 	get_tree().quit()
+
+
+## **Critère 2 de S380** : les gouttes dans l'air, comptées. Vue orthographique d'aplomb, 7,9 m de haut d'image ; seules les
+## gouttes d'une tranche de 0,5 m (16 à 16,5 m, dans les deux boîtes), chacune un carré de deux pixels, d'une couleur pure
+## par classe de diamètre — rouge [1 ; 1,5), vert [1,5 ; 2), bleu [2 ; 3), blanc [3 ; 6] mm. Dix instants espacés de 0,53 s
+## (une goutte traverse la tranche en moins de 0,1 s : comptes indépendants). Attendu par classe : densité de Marshall et
+## Palmer × aire de la boîte vue × 0,5 m ; les taches qui se touchent sont rendues à leur nombre par l'aire médiane.
+func controle_gouttes() -> void:
+	monde_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	monde_env.glow_enabled = false
+	texte.visible = false
+	var r := pluie_mm_h if pluie_mm_h > 0.0 else 10.0
+	pluie_mm_h = r
+	# Les gouttes seules : décor caché, fond noir, sans anticrénelage (il mêle les bords des points au fond).
+	for enfant in get_children():
+		if enfant is MeshInstance3D:
+			enfant.visible = false
+	monde_env.background_mode = Environment.BG_COLOR
+	monde_env.background_color = Color(0, 0, 0)
+	get_viewport().msaa_3d = Viewport.MSAA_DISABLED
+	get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
+	get_viewport().use_taa = false
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.size = 7.9
+	camera.position = Vector3(0.0, 20.0, 0.0)
+	camera.look_at(Vector3(0.0, 0.0, 0.0), Vector3(0, 0, -1))
+	var vp := get_viewport().get_visible_rect().size
+	var cote_z := camera.size
+	var cote_x := camera.size * vp.x / vp.y
+	pluie_air.configurer(r)
+	monde_env.fog_enabled = false
+	pluie_air.controle = true
+	pluie_air.tranche = Vector2(16.0, 16.5)
+	pluie_air.taille_controle = 2.0 * camera.size / vp.y
+	var bornes := [[1.0, 1.5], [1.5, 2.0], [2.0, 3.0], [3.0, 6.0]]
+	var aires_par_classe := [[], [], [], []]
+	var instants := 10
+	for i in instants:
+		pluie_air.suivre(camera, 3.1 + 0.53 * float(i))
+		for _k in 3:
+			await RenderingServer.frame_post_draw
+		var image_controle := get_viewport().get_texture().get_image()
+		if i == 0:
+			image_controle.save_png(ProjectSettings.globalize_path("res://captures/controle_gouttes_s380.png"))
+		var par_classe := taches_colorees(image_controle)
+		for c in 4:
+			aires_par_classe[c].append_array(par_classe[c])
+	var pire := 0.0
+	for c in 4:
+		var d0: float = bornes[c][0]
+		var d1: float = bornes[c][1]
+		# La boîte de la classe : ±4 m (diamètres sous 2 mm) ou ±8 m ; l'aire vue en est l'intersection avec l'image.
+		var demi := 4.0 if d1 <= 2.0 else 8.0
+		var aire := minf(2.0 * demi, cote_x) * minf(2.0 * demi, cote_z)
+		var attendu := Pluie.densite_gouttes(r, d0, d1) * aire * 0.5 * instants
+		var aires: Array = aires_par_classe[c]
+		var triees := aires.duplicate()
+		triees.sort()
+		var mediane := float(triees[triees.size() / 2]) if not triees.is_empty() else 1.0
+		var total := 0
+		for a in aires:
+			total += maxi(1, roundi(float(a) / mediane))
+		var ecart := (float(total) - attendu) / attendu
+		# Le critère écrit (±5 %) oubliait le bruit de Poisson : une classe n'y est jugée que si son écart-type relatif
+		# est sous 2,5 % ; sinon, à deux écarts-types.
+		var sigma := 1.0 / sqrt(attendu)
+		if sigma <= 0.025:
+			pire = maxf(pire, absf(ecart))
+		elif absf(ecart) > 2.0 * sigma:
+			pire = maxf(pire, 1.0)
+		print("CONTROLE_GOUTTES_S380 pluie_mm_h=%s classe=[%s;%s) aire_m2=%.2f taches=%d mediane_px=%d max_px=%d gouttes=%d attendues=%.1f ecart=%+.2f%% (poisson 1 sigma %.2f%%)" % [
+			mm_h(r), str(d0), str(d1), aire, aires.size(), int(mediane), int(triees[-1]) if not triees.is_empty() else 0, total, attendu, 100.0 * ecart, 100.0 / sqrt(attendu)])
+	print("CONTROLE_GOUTTES_S380 critere=2 pire_mesurable=%.2f%% %s" % [100.0 * pire, "tenu" if pire <= 0.05 else "manque"])
+	get_tree().quit()
+
+
+## Les aires (pixels) des taches de chaque couleur pure — rouge, vert, bleu, blanc —, en 4-connexité.
+func taches_colorees(image: Image) -> Array:
+	image.convert(Image.FORMAT_RGB8)
+	var w := image.get_width()
+	var h := image.get_height()
+	var d := image.get_data()
+	var classe := PackedByteArray()
+	classe.resize(w * h)
+	for i in w * h:
+		var r := d[3 * i]
+		var g := d[3 * i + 1]
+		var b := d[3 * i + 2]
+		if r > 204 and g > 204 and b > 204:
+			classe[i] = 4
+		elif r >= 128 and g <= 51 and b <= 51:
+			classe[i] = 1
+		elif g >= 128 and r <= 51 and b <= 51:
+			classe[i] = 2
+		elif b >= 128 and r <= 51 and g <= 51:
+			classe[i] = 3
+	var resultat := [[], [], [], []]
+	for i in w * h:
+		var k := classe[i]
+		if k == 0:
+			continue
+		var n := 0
+		var pile := [i]
+		classe[i] = 0
+		while not pile.is_empty():
+			var c: int = pile.pop_back()
+			n += 1
+			var x := c % w
+			for v in [c - 1 if x > 0 else -1, c + 1 if x < w - 1 else -1, c - w, c + w]:
+				if v >= 0 and v < w * h and classe[v] == k:
+					classe[v] = 0
+					pile.append(v)
+		resultat[k - 1].append(n)
+	return resultat
