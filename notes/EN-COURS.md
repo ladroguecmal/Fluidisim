@@ -85,7 +85,7 @@ et temps total publiés, au même résidu.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — verdict R32 consigné (REVUE-VISUELLE §37, file : les défauts nommés, déclencheur « peaufinage »).
-- [ ] **P3** — l'instrument d'abord : `examples/delta3d_multigrille.rs`, trois mailles, fond plat et bosse, itérations et
+- [x] **P3** — l'instrument d'abord : `examples/delta3d_multigrille.rs`, trois mailles, fond plat et bosse, itérations et
   temps de Jacobi — la référence de mesure.
 - [ ] **P4a** — `delta3d_multigrid.rs` : niveaux 3D (géométrie, restriction, prolongation, opérateur, lissage) ; comptés
   auprès de l'hôte (I-06) ; essais de forme.
@@ -97,4 +97,13 @@ et temps total publiés, au même résidu.
 
 ### Notes de reprise
 
-*(vide)*
+**P3 — la référence de mesure, Jacobi** (`delta3d_multigrille -- --fin`, cas mobile de S328, 8 × 4 × 6 m, surface à 4 m,
+sinusoïde de 1 cm ; premier pas depuis `p = 0`, puis dix pas chauds) :
+
+| fond | nx | mailles | it. premier | it. moyen chaud | durée premier / chaud |
+|---|---:|---:|---:|---:|---|
+| plat | 32 / 64 / 128 | 12 288 / 98 304 / 786 432 | 102 / 191 / **365** | 36,5 / 58,4 / 85,9 | 0,06 / 0,90 / 13,4 s ; 0,02 / 0,27 / 3,43 s |
+| bosse | 32 / 64 / 128 | idem | 117 / 219 / **444** | 36,0 / 58,8 / 86,3 | 0,08 / 0,88 / 16,3 s ; 0,02 / 0,26 / 3,65 s |
+
+Croissance de 32 à 128 : premier pas ×3,58 (plat), ×3,79 (bosse) ; chaud ×2,35, ×2,40 — Jacobi croît bien au moins du
+double (critère 3, partie Jacobi). Divergence max 9,5·10⁻⁶ (sous 10⁻⁵).
