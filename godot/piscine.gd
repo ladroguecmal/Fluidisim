@@ -38,6 +38,8 @@ const VUES := {
 	"ensemble": [Vector3(-9.5, 6.0, 10.0), Vector3(1.0, 0.3, 0.0)],
 	"deversoir": [Vector3(8.0, 3.0, 5.0), Vector3(4.6, -0.3, 0.0)],
 	"buse": [Vector3(-1.2, 3.2, 4.6), Vector3(-3.2, 1.3, 0.0)],
+	## S375 : au ras du bord sud, vers l'impact du jet — les reflets du ciel révèlent les pentes de quelques millièmes.
+	"rasante": [Vector3(-0.6, 1.62, 2.3), Vector3(-2.8, 1.40, -0.4)],
 }
 
 
@@ -259,8 +261,11 @@ func charger_image(k: int, emplacement: int) -> void:
 	var valeurs := PackedFloat32Array()
 	valeurs.resize(n)
 	var base := k * n * 2
+	# `EXAGERE=k` : témoin de débogage seulement (S375) — les hauteurs de δ multipliées par k, pour éprouver la chaîne de
+	# rendu (déplacement, pentes) ; jamais une image de revue.
+	var echelle := 1e-4 * (float(OS.get_environment("EXAGERE")) if OS.get_environment("EXAGERE") != "" else 1.0)
 	for c in n:
-		valeurs[c] = float(champ_octets.decode_s16(base + 2 * c)) * 1e-4
+		valeurs[c] = float(champ_octets.decode_s16(base + 2 * c)) * echelle
 	hauteurs[emplacement].set_data(champ_nx, champ_ny, false, Image.FORMAT_RF, valeurs.to_byte_array())
 	textures[emplacement].update(hauteurs[emplacement])
 	champ_index[emplacement] = k
@@ -304,7 +309,7 @@ func appliquer(s: float) -> void:
 	materiau_bassin.set_shader_parameter("agitation", 0.012)
 	materiau_tampon.set_shader_parameter("agitation", 0.012 + 0.006 * q_dev)
 	var seuil := float(donnees["deversoir"]["seuil_m"][2])
-	texte.text = "Piscine de V (S374) — rejeu du cœur, t = %.1f s\nBassin : surface %+.1f mm par rapport au seuil\nBac tampon : %.3f m d'eau\nDéversoir : %.2f l/s\nPompe : %s, %.2f l/s" % [
+	texte.text = "Piscine (V et δ 3D, S375) — rejeu du cœur, t = %.1f s\nBassin : surface %+.1f mm par rapport au seuil\nBac tampon : %.3f m d'eau\nDéversoir : %.2f l/s\nPompe : %s, %.2f l/s" % [
 		s, (float(l[1]) - seuil) * 1000.0, float(l[2]) - float(donnees["tampon"]["fond_m"][2]), q_dev,
 		"en marche" if float(l[7]) > 0.5 else "arrêtée", q_pompe]
 
@@ -326,6 +331,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				vue("deversoir")
 			KEY_3:
 				vue("buse")
+			KEY_4:
+				vue("rasante")
 			KEY_SPACE:
 				en_pause = not en_pause
 			KEY_ESCAPE:
@@ -359,13 +366,16 @@ func captures() -> void:
 ## publie, à des instants qui tombent sur un pas et entre deux pas ; au dixième de millimètre.
 func controle() -> void:
 	var pire := 0.0
+	# Le critère 3 de S374 lit la cote du maillage plan : avec la surface de δ (S375), le maillage est au repos et porte
+	# ses hauteurs dans le nuanceur — seul le bac tampon est alors plan. `DELTA=0` rend le contrôle de S374 entier.
+	var bacs := [1, 2] if champ.is_empty() else [2]
 	for s in [0.0, 37.3, 100.0, 199.95, 250.05, 329.9]:
 		t = s
 		appliquer(t)
 		await RenderingServer.frame_post_draw
 		var i: int = int(floor(float(s) / dt))
 		var u: float = float(s) / dt - float(i)
-		for k in [1, 2]:
+		for k in bacs:
 			var attendu := lerpf(float(pas[i][k]), float(pas[mini(i + 1, pas.size() - 1)][k]), u)
 			var rendu := (eau_bassin if k == 1 else eau_tampon).global_position.y
 			var e := absf(rendu - attendu)

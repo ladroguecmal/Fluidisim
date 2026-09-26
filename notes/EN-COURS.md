@@ -83,9 +83,9 @@ de 1 mm). (4) Dans Godot, la surface rendue est celle de δ, au bit du fichier ;
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `Volume3::add_column_volume` et ses essais ; critère 1.
-- [>] **P3** — `examples/piscine_delta.rs` : V et δ au pas, jet, puits, forçage ; coût mesuré ; export des surfaces ;
+- [x] **P3** — `examples/piscine_delta.rs` : V et δ au pas, jet, puits, forçage ; coût mesuré ; export des surfaces ;
   critères 2 et 3.
-- [ ] **P4** — Godot : la surface de δ en maillage de hauteur dans le bassin (`piscine.gd`), rejouée ; critère 4.
+- [x] **P4** — Godot : la surface de δ en maillage de hauteur dans le bassin (`piscine.gd`), rejouée ; critère 4.
 - [ ] **P5** — images de R27, preuve `PISCINE-DELTA-S375`, liste 5.10, file, feuille de route, index.
 - [ ] **P6** — rituel.
 
@@ -122,3 +122,11 @@ vitesses intactes, refus atomiques (`Shape`, `NotFinite`, `Domain`). **Critère 
 **Reste** : le contrôle S374 compare la cote du maillage à V — faux en mode δ (le maillage est au repos) : ne le faire
 qu'avec `DELTA=0` ; regarder les images ; suite complète du cœur (après `shift_rest`) ; P5 (preuve `PISCINE-DELTA-S375`,
 ADR-201 note sur `shift_rest`, liste 5.10, file, feuille de route, index, R27) ; P6 rituel.
+
+**Reprise à chaud (09:53)** : arbre propre, l'étape interrompue était committée ; complétée. Contrôle de S374 limité au bac
+tampon en mode δ (`DELTA=0` : entier) — les deux modes tenus. Suite du cœur : 539 réussis, 0 avertissement.
+**Les images** : à l'échelle réelle, **la surface de δ paraît plane** (vues ensemble, déversoir, buse, rasante) ; cartes de
+hauteur (données) : dôme à l'impact (5,3 s), creux (5,6 s, −4,7 mm), anneaux et réflexions (6,5–8 s), interférences
+(40 s), creux stable sous le jet (200 s), oscillations résiduelles (260 s) ; écart-type 0,2–0,46 mm. **Témoin
+`EXAGERE=100`** : creux et anneaux visibles — la chaîne de rendu est bonne ; l'amplitude physique (mm, maille de 20 cm,
+panache amorti) ne se voit pas. Suite : δ sur GPU dans Godot à 5–10 cm, panache calé sur une mesure, APIC pour le jet.
