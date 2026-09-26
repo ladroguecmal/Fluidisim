@@ -17391,3 +17391,21 @@ l'œil adapté ou une scène plus sombre ; l'occultation du ciel avant la suite.
 gerbes —, ou l'occultation du ciel si R30 la demande.
 **Verdict R30** (après le rituel) : *« Je valide, ajoute l'occultation du ciel puis continue, et ensuite le plus important le
 solveur 3D »* — le ciel de pluie reçu (8.10 reste partiel, maillons **1**) ; suivant : l'occultation du ciel (S382).
+
+## S382 — 2026-09-26 — rendu : l'occultation du ciel et les ombres portées (ADR-206)
+
+**Entrée.** Verdict R30 : *« Je valide, ajoute l'occultation du ciel puis continue, et ensuite le plus important le solveur
+3D »*. **Fait** ([preuve](../docs/validation/OCCULTATION-CIEL-S382.md), [ADR-206](../docs/adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md)).
+Chaque surface de la piscine reçoit le ciel qu'elle voit — occultants analytiques (16 boîtes), 32 azimuts × 32 bandes
+d'égal angle solide, quatre directions aux cellules de bord, total exact (forme close du ciel couvert incliné, 4·10⁻⁸,
+qui remplace l'interpolation de S381) ; cuite une fois aux sommets (passe de points, `VERTEX_ID`), faces graduées aux
+arêtes. Par ciel clair, le même calcul vers le soleil : les ombres portées, à chaque pixel. Critères : sans occultant, 12
+images au bit ; la part vue à **0,0088** d'une intégration indépendante (`outils/occultation_ciel.py`, 15 points) ; bord
+d'ombre à 2,5 mm (½ pixel de 5 mm), 539 819 pixels au soleil inchangés. **Échecs mesurés, dits** : 0,0147 d'abord (bouts
+de boîtes en azimut) ; coût **+8,6 ms** par pixel, puis +2,3 par sommet, puis **+0,1 à +0,3 ms** cuit ; l'interpolation
+manquait sous le débord (0,09) avant les faces graduées. **Erreurs** : deux battements écrits avant la lecture de l'horloge
+(12:48 pour 12:46, 13:22 pour 13:17 — L237), corrigés au commit suivant. **Limites** : pas d'interréflexion, pénombre
+étroite (10 pour 33 mm), fond immergé sans Snell, référence photographique qualitative (vignetage). **Rituel.** Maillons
+**2** : 8.10 reste partiel, R31 posée ; la suite suit la demande de l'utilisateur. **Arbitrage réel** : jusqu'où la pluie
+avant le solveur (« puis continue, et ensuite le plus important le solveur 3D »). Suivant : verdict R31, la pluie pièce 4
+(les gerbes), puis la campagne du solveur volumique 3D.

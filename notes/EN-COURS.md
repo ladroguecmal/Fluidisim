@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S382 — **en cours**. Verdict R30 : *« Je valide, ajoute l'occultation du ciel puis continue, et ensuite le plus
+Session : S382 — **terminée**. Verdict R30 : *« Je valide, ajoute l'occultation du ciel puis continue, et ensuite le plus
 important le solveur 3D »*. Cette session : **l'occultation du ciel**. Agent : Claude Opus 5.5, application desktop ;
 fichiers, git, carte réelle, accès web ; Godot 4.4.1 local.
 
@@ -102,7 +102,7 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
 - [x] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
 - [x] **P8** — photographies de temps couvert (pied des murs) ; images de R31 ; REVUE-VISUELLE §36.
 - [x] **P9** — preuve `OCCULTATION-CIEL-S382` ; liste, file, feuille de route, index.
-- [ ] **P10** — rituel.
+- [x] **P10** — rituel.
 
 ### Notes de reprise
 

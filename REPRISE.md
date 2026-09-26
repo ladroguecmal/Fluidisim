@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-26 13:38 +02:00
+JETON            : libre
+Battement        : 2026-09-26 13:39 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S382 — l'occultation du ciel (R30, l'utilisateur) : occultants analytiques, part du ciel vue, ombres portées
-Dernière session : S381 — rendu : **le ciel de pluie** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), pièce 3 ; [preuve](docs/validation/CIEL-PLUIE-S381.md)) — ciel couvert de la CIE, neutre, soleil éteint partout (disque, éclat, caustiques, crêtes), éclairement horizontal conservé (l'œil s'adapte) ; **R30 reçue** : « Je valide ». Coupée après P5, reprise à chaud. Avant : S380, la pluie dans l'air (R29 reçue)
-Session suivante : **l'occultation du ciel** (R30, l'utilisateur : « ajoute l'occultation du ciel puis continue, et ensuite le plus important le solveur 3D ») ; puis la pluie, pièce 4 — les gerbes (ADR-205 D3) ; ensuite **la campagne du solveur volumique 3D**, « le plus important »
-Maillons        : 1 — S381 : R30 reçue, aucun point de la liste ne change (journal)
+Session en cours : —
+Dernière session : S382 — rendu : **l'occultation du ciel et les ombres portées** ([ADR-206](docs/adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md), [preuve](docs/validation/OCCULTATION-CIEL-S382.md)) — demande de l'utilisateur (R30) ; part du ciel vue à 0,009 d'une intégration indépendante, cuite aux sommets, ombres à 2,5 mm, coût +0,1 à +0,3 ms ; **R31 posée**. Avant : S381, le ciel de pluie (R30 reçue)
+Session suivante : **le verdict de R31**, puis **la pluie, pièce 4 — les gerbes** (ADR-205 D3 ; « puis continue ») ; ensuite **la campagne du solveur volumique 3D**, « le plus important » (l'utilisateur, R30) — combien de pièces de pluie avant elle : à demander si R31 ne le dit pas
+Maillons        : 2 — S382 : 8.10 reste partiel, R31 posée non reçue ; la suite est celle de l'utilisateur (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
