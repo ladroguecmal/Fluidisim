@@ -87,9 +87,12 @@ avertissement.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'instrument : commutateurs de banc dans le pas (éteints : au bit), banc `--delta3d-a321` (croissance par
   seconde, échelle du mode, premier pas non fini) ; critère 1.
-- [ ] **P3** — l'attribution : pas de temps, témoins terme par terme ; critère 2 ; le correctif déclaré ici.
-- [ ] **P4** — le correctif dans la référence (cœur), ses essais.
-- [ ] **P5** — le même dans la production ; critère 3 (deux minutes, cuves, dispersion, empreintes).
+- [x] **P3** — l'attribution : pas de temps, témoins terme par terme ; critère 2 ; le correctif déclaré ici.
+- [ ] **P4** — le correctif dans la référence (cœur) : option `Volume3::enable_advection_correction`, éteinte par défaut
+  (aucune empreinte du cœur ne bouge) ; essai de von Neumann : sans elle un mode de quatre mailles croît, avec elle non (vu
+  échouer) ; [ADR-209](../docs/adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md).
+- [ ] **P5** — le même dans la production, **actif par défaut** ; critère 3 (deux minutes à 30 et 60 Hz, cuves avec la
+  référence corrigée, empreintes nouvelles expliquées) ; coût du pas et porte C remesurés (deux parts ≤ 2 ms).
 - [ ] **P6** — critère 4 ; preuve ; A321, file, feuille de route.
 - [ ] **P7** — rituel.
 
@@ -101,4 +104,22 @@ pipelines de production changeaient les empreintes (60 pas `0xf1d768aa…` au li
 compilateur réarrange l'arithmétique voisine (L345). Remède : constante `override BENCH_SWITCHES`, vraie seulement dans une
 seconde série de pipelines (`step_bench`), prise quand un commutateur est allumé ; empreintes d'avant retrouvées au bit.
 Le bit 32 prend les pipelines de banc sans rien éteindre : témoin du bruit d'arrondi, la scène amplifiant tout écart.
+
+**P3 — critère 2 tenu : l'hypothèse FTCS est confirmée.** Production à 30 Hz (`--delta3d-a321`) : la part de l'échelle
+de la maille dans les vitesses horizontales monte de 0,4 % (1 s) à 2 % (10 s), 8 % (30 s), 31 % (39 s), puis la vitesse
+saute de 1,4 à 11 m/s au point (52, 62, 11), juste sous la surface ; explose à 40 s. **Pas de temps** (prédiction 1) :
+explose à **72 s** à 16,7 ms, **33 s** à 25 ms, 23 à 40 s à 33,3 ms — à peu près `1/dt`. **Témoins à 30 Hz** (60 s) :
+pipelines de banc sans rien d'éteint 23 s (bruit : 23 contre 40 s) ; sans `u'·∇u'` tient 60 s, mais explose à **68 et 75 s**
+sur deux minutes (deux réalisations), la part de la maille montant encore à 15 % — l'auto-advection accélère la fin, elle
+n'est pas toute la cause ; sans `U·∇u'` 12 s ; sans `u'·∇U` 23 s ; sans le résidu 17 s ; sans la bande 27 s. **L'épreuve
+directe** (commutateur 64) : le terme que l'Euler explicite omet, `+(dt²/2)·Σ V_a·V_b·∂_a∂_b u`, `V = U + u'` — la scène
+**tient deux minutes à 30 Hz et à 60 Hz**, la part de la maille reste sous 1,2 % (u) et 3,2 % (w).
+
+**Le correctif, déclaré avant son code.** Ce terme, dans la prédiction, après l'advection de `u'` et avant les termes du fond
+et l'éponge ; mêmes faces que la prédiction ; une direction omise dès qu'un voisin sort de la grille de l'axe ; `V` = vitesse
+de B à la face plus `u'` interpolé (`collocated`) ; vitesses du début du pas. **Production : actif par défaut** (c'est elle
+qui explose). **Référence : option** `Volume3::enable_advection_correction`, éteinte par défaut — les réceptions du cœur
+restent au bit, le chemin corrigé s'y reçoit par un essai de von Neumann et par les cuves ; la migration du défaut du cœur
+attend son déclencheur (ADR-209). Écarté : l'amont du premier ordre (viscosité `|U|·dx/2` ≈ 0,25 m²/s, 3 %/s sur le paquet
+de 16 m), les Runge-Kutta (trois prédictions par pas), le semi-lagrangien (hors du schéma de référence).
 

@@ -202,6 +202,31 @@ fn extra_switched(f: u32, axis: u32, v0: f32, v1: f32, v2: f32, d0: f32, d1: f32
         + cr * residual;
 }
 
+/// S391 — **banc** (commutateur 64) : le terme qui manque à l'Euler explicite, `+ (dt²/2)·Σ V_a·V_b·∂_a∂_b u`, `V = U + u'`
+/// à la face. Il compense l'anti-diffusion du schéma centré (Lax-Wendroff à vitesse constante). Un terme dont un voisin
+/// sort de la grille de l'axe est omis.
+fn btd(axis: u32, p: vec3<u32>, f: u32, v0: f32, v1: f32, v2: f32) -> f32 {
+    let end = dims(axis);
+    var V = vec3<f32>(bg(f, 4u) + v0, bg(f, 5u) + v1, bg(f, 6u) + v2);
+    let c = cur(axis, p);
+    var acc = 0.0;
+    for (var a = 0u; a < 3u; a++) {
+        let pa = component(p, a);
+        if (pa == 0u || pa + 1u >= component(end, a)) { continue; }
+        let ea = unit(a);
+        let va = V[a];
+        acc += va * va * (cur(axis, p + ea) - 2.0 * c + cur(axis, p - ea));
+        for (var b = a + 1u; b < 3u; b++) {
+            let pb = component(p, b);
+            if (pb == 0u || pb + 1u >= component(end, b)) { continue; }
+            let eb = unit(b);
+            let cross = cur(axis, p + ea + eb) - cur(axis, p + ea - eb) - cur(axis, p - ea + eb) + cur(axis, p - ea - eb);
+            acc += 2.0 * va * V[b] * 0.25 * cross;
+        }
+    }
+    return 0.5 * s.dt * s.dt * acc / (s.dx * s.dx);
+}
+
 fn ramp(x: f32, n: u32, width: f32) -> f32 {
     if (width == 0.0) { return 0.0; }
     return max(1.0 - min(x, f32(n) * s.dx - x) / width, 0.0);
@@ -240,6 +265,7 @@ fn predict(@builtin(global_invocation_id) id: vec3<u32>) {
         let d2 = derivative(axis, 2u, p, end);
         var add = s.dt * extra(slot, axis, v0, v1, v2, d0, d1, d2);
         if (BENCH_SWITCHES != 0.0 && s.switches != 0u) { add = s.dt * extra_switched(slot, axis, v0, v1, v2, d0, d1, d2); }
+        if (switched(64u)) { value = value + btd(axis, p, slot, v0, v1, v2); }
         let x = (f32(p.x) + select(0.5, 0.0, axis == 0u)) * s.dx;
         let y = (f32(p.y) + select(0.5, 0.0, axis == 1u)) * s.dx;
         value = (value - add) * sponge(x, y);
