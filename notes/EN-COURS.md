@@ -94,8 +94,11 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
 - [x] **P4** — `occultation.gdshaderinc` : la part du ciel vue (32 azimuts × 32 bandes), totaux exacts ; `eclairage_vu`.
 - [x] **P5** — la scène : `boite()` inscrit ses occultants ; parois et bassin ; `OCCULTATION=0` ; critère 1.
 - [x] **P6** — `--controle-occultation` contre `outils/occultation_ciel.py` (intégration indépendante) ; critère 2 ; coût.
-- [ ] **P6b** — le coût (+8 à +9 ms par pixel, P6) : la part vue évaluée **par sommet** — boîtes et eaux subdivisées
+- [x] **P6b** — le coût (+8 à +9 ms par pixel, P6) : la part vue évaluée **par sommet** — boîtes et eaux subdivisées
   (≈ 10 cm), sol à maillage gradué jusqu'à la coupure (≈ 180 m), sol lointain à part ; critères 1 et 2 refaits ; coût.
+- [ ] **P6c** — la part vue **cuite** aux sommets : une passe de rendu unique (points, `SubViewport` à mise à jour unique,
+  refaite quand un occultant change), lue par `VERTEX_ID` ; sans occultation, géométrie d'avant ; critère 1 ; coût.
+- [ ] **P6d** — faces graduées près des arêtes (≈ 1 cm au contact, croissant jusqu'à 10 cm) : critère 2 sous le débord.
 - [ ] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
 - [ ] **P8** — photographies de temps couvert (pied des murs) ; images de R31 ; REVUE-VISUELLE §36.
 - [ ] **P9** — preuve `OCCULTATION-CIEL-S382` ; liste, file, feuille de route, index.
@@ -138,3 +141,11 @@ nuanceur** (deux passes : boîtes et bords, puis cellules) : **pire 0,0081** (so
 est au plus 2,4·10⁻⁴). Critère 1 : 12 / 12 au bit (`OCCULTATION=0`). **Coût, manqué** : vue proche 0,547 → **8,64 ms**,
 aplomb 0,505 → 9,91, rasante 0,461 → 2,61 (couvert, sec). Isolé : la somme pondérée ≈ 1,5 ms, les quatre directions aux
 bords ≈ 2 ms, le reste (≈ 4,3 ms) la boucle boîtes × cellules, évaluée à chaque pixel deux fois (fond, puis eau).
+
+**P6b — par sommet.** `ciel_vu` dans `vertex()` (parois : normale de la face ; bassin : surface au repos) ; `ciel_vu_interpole`
+ramène à 1 au-dessus de 1 − 10⁻⁵. Boîtes et eaux subdivisées à 10 cm ; le sol : maillage gradué (10 cm sur l'emprise
+élargie de 3 m, puis ×1,15 par pas jusqu'à 200 m, ≈ 45 000 sommets), sol lointain en quatre boîtes non occultantes.
+**Coût** : vue proche 0,632 → 2,919 ms (sans → avec), aplomb 0,543 → 2,712, rasante 0,500 → 3,042 — **+2,3 à +2,5 ms**,
+encore trop (≈ 110 000 sommets, deux passes : profondeur puis couleur). **Critère 2 : manqué sous le débord** —
+`mur_ouest_haut` (5 cm sous la margelle) 0,357 pour 0,448 : entre le sommet de l'arête (très masqué) et celui 10 cm plus
+bas, l'interpolation linéaire ne suit pas ; ailleurs ≤ 0,0075. Le sol à 25 cm : 0,5394 pour 0,5411.

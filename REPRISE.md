@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 13:10 +02:00
+Battement        : 2026-09-26 13:17 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S382 — l'occultation du ciel (R30, l'utilisateur) : occultants analytiques, part du ciel vue, ombres portées
 Dernière session : S381 — rendu : **le ciel de pluie** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), pièce 3 ; [preuve](docs/validation/CIEL-PLUIE-S381.md)) — ciel couvert de la CIE, neutre, soleil éteint partout (disque, éclat, caustiques, crêtes), éclairement horizontal conservé (l'œil s'adapte) ; **R30 reçue** : « Je valide ». Coupée après P5, reprise à chaud. Avant : S380, la pluie dans l'air (R29 reçue)

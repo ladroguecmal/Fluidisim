@@ -14,9 +14,12 @@ uniform vec3 albedo = vec3(0.4);
 uniform float joint = 0.0;
 
 varying vec3 monde;
+// S382 : la part du ciel vue, calculée au sommet (`occultation.gdshaderinc`).
+varying vec2 vu_sommet;
 
 void vertex() {
     monde = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+    vu_sommet = ciel_vu(monde, normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz));
 }
 
 void fragment() {
@@ -33,7 +36,7 @@ void fragment() {
     }
     // S381 : `eclairage` (`ciel.gdshaderinc`) — sous le ciel couvert, la répartition de la CIE. S382 : le ciel que la face
     // voit (`occultation.gdshaderinc`).
-    vec2 vu = ciel_vu(monde, n);
+    vec2 vu = ciel_vu_interpole(vu_sommet);
     ALBEDO = albedo * motif * gain_eau * eclairage_vu(nb, normalize(SOLEIL_B), 1.0, vec3(vu, 1.0));
     if (controle_occultation) {
         ALBEDO = vec3(vu, 0.0);

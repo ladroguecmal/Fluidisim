@@ -42,6 +42,9 @@ float hauteur_champ(vec2 uv) {
     return mix(texture(hauteur_a, uv).r, texture(hauteur_b, uv).r, melange);
 }
 
+// S382 : la part du ciel vue par la surface au repos (normale verticale), calculée au sommet.
+varying vec2 vu_sommet;
+
 void vertex() {
     pente_champ = vec2(0.0);
     if (champ_actif) {
@@ -52,6 +55,7 @@ void vertex() {
         pente_champ = vec2((hauteur_champ(UV + du) - hauteur_champ(UV - du)) / (2.0 * champ_dx),
             -(hauteur_champ(UV + dv) - hauteur_champ(UV - dv)) / (2.0 * champ_dx));
     }
+    vu_sommet = ciel_vu((MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz, vec3(0.0, 1.0, 0.0));
 }
 
 /// Le point de la scène vu au pixel `uv`, dans le monde (profondeur inversée de Godot 4.3+).
@@ -151,7 +155,7 @@ void fragment() {
         eclat *= soleil_direct();
     }
     // S382 : la lumière qui entre dans l'eau vient du ciel que la surface voit (`occultation.gdshaderinc`), normale au repos.
-    vec2 vu_eau = ciel_vu(surface, vec3(0.0, 1.0, 0.0));
+    vec2 vu_eau = ciel_vu_interpole(vu_sommet);
     vec3 corps = R0 * gain_eau * eclairage_vu(nb, soleil, 1.0, vec3(vu_eau, 1.0));
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     if (variance_pluie > 0.0) {

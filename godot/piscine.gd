@@ -161,10 +161,15 @@ func vue(nom: String) -> void:
 
 
 ## Une boîte entre deux coins (Godot), d'une paroi : `albedo`, joints de carrelage tous les `joint` m (0 : aucun).
-func boite(a: Vector3, b: Vector3, albedo: Color, joint := 0.0) -> MeshInstance3D:
+## S382 : `occultant`, elle masque le ciel des autres surfaces ; ses faces subdivisées tous les `PAS_SOMMETS` mètres au
+## plus, la part du ciel vue étant calculée aux sommets.
+func boite(a: Vector3, b: Vector3, albedo: Color, joint := 0.0, occultant := true) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
 	bm.size = (b - a).abs()
+	bm.subdivide_width = subdivisions(bm.size.x)
+	bm.subdivide_height = subdivisions(bm.size.y)
+	bm.subdivide_depth = subdivisions(bm.size.z)
 	mi.mesh = bm
 	mi.position = 0.5 * (a + b)
 	var m := ShaderMaterial.new()
@@ -174,11 +179,82 @@ func boite(a: Vector3, b: Vector3, albedo: Color, joint := 0.0) -> MeshInstance3
 	mi.material_override = m
 	materiaux_ciel.append(m)
 	add_child(mi)
-	# S382 : un occultant, sauf le sol (il ne masque le ciel de rien qui soit au-dessus de lui).
-	if (b - a).abs().x < 1000.0:
+	if occultant:
 		occultants_min.append(Vector3(minf(a.x, b.x), minf(a.y, b.y), minf(a.z, b.z)))
 		occultants_max.append(Vector3(maxf(a.x, b.x), maxf(a.y, b.y), maxf(a.z, b.z)))
 	return mi
+
+
+## S382 — le nombre de subdivisions d'une longueur pour que les sommets soient à `PAS_SOMMETS` au plus ; aucune au-delà
+## de 50 m (le sol lointain, où la part vue vaut 1).
+const PAS_SOMMETS := 0.1
+static func subdivisions(longueur: float) -> int:
+	return 0 if longueur > 50.0 else maxi(int(ceil(longueur / PAS_SOMMETS)) - 1, 0)
+
+
+## S382 — **le sol autour de la piscine**, un maillage gradué : pas de `PAS_SOMMETS` sur l'emprise élargie de 3 m (`a`,
+## `b`, coins opposés en x et z), puis croissant de 15 % par pas jusqu'à `rayon` du centre — assez loin pour que la part du
+## ciel vue y vaille 1 exactement (la coupure d'`occultation.gdshaderinc` est à ≈ 180 m pour 2,85 m de haut). Au-delà, le
+## sol lointain, quatre boîtes sans subdivision.
+func sol_gradue(y: float, a: Vector2, b: Vector2, rayon: float, albedo: Color) -> void:
+	var xs := coordonnees_graduees(a.x - 3.0, b.x + 3.0, rayon)
+	var zs := coordonnees_graduees(a.y - 3.0, b.y + 3.0, rayon)
+	var sommets := PackedVector3Array()
+	var normales := PackedVector3Array()
+	var indices := PackedInt32Array()
+	for z in zs:
+		for x in xs:
+			sommets.append(Vector3(x, y, z))
+			normales.append(Vector3.UP)
+	var nx := xs.size()
+	for j in zs.size() - 1:
+		for i in nx - 1:
+			var k := j * nx + i
+			indices.append_array([k, k + 1, k + nx, k + 1, k + nx + 1, k + nx])
+	var tableaux := []
+	tableaux.resize(Mesh.ARRAY_MAX)
+	tableaux[Mesh.ARRAY_VERTEX] = sommets
+	tableaux[Mesh.ARRAY_NORMAL] = normales
+	tableaux[Mesh.ARRAY_INDEX] = indices
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, tableaux)
+	var mi := MeshInstance3D.new()
+	mi.mesh = am
+	var m := ShaderMaterial.new()
+	m.shader = load("res://paroi.gdshader")
+	m.set_shader_parameter("albedo", Vector3(albedo.r, albedo.g, albedo.b))
+	mi.material_override = m
+	materiaux_ciel.append(m)
+	add_child(mi)
+	var r := rayon
+	boite(Vector3(-3000, y - 0.2, -3000), Vector3(-r, y, 3000), albedo, 0.0, false)
+	boite(Vector3(r, y - 0.2, -3000), Vector3(3000, y, 3000), albedo, 0.0, false)
+	boite(Vector3(-r, y - 0.2, -3000), Vector3(r, y, -r), albedo, 0.0, false)
+	boite(Vector3(-r, y - 0.2, r), Vector3(r, y, 3000), albedo, 0.0, false)
+
+
+## Les coordonnées d'un axe : pas de `PAS_SOMMETS` de `a` à `b`, puis croissant de 15 % par pas jusqu'à ±`rayon`.
+static func coordonnees_graduees(a: float, b: float, rayon: float) -> PackedFloat32Array:
+	var c := PackedFloat32Array()
+	var n := int(ceil((b - a) / PAS_SOMMETS))
+	for i in n + 1:
+		c.append(a + (b - a) * i / n)
+	var gauche := PackedFloat32Array()
+	var x := a
+	var h := PAS_SOMMETS
+	while x > -rayon:
+		h *= 1.15
+		x = maxf(x - h, -rayon)
+		gauche.append(x)
+	gauche.reverse()
+	gauche.append_array(c)
+	x = b
+	h = PAS_SOMMETS
+	while x < rayon:
+		h *= 1.15
+		x = minf(x + h, rayon)
+		gauche.append(x)
+	return gauche
 
 
 ## S382 — les occultants déclarés à tous les matériaux qui incluent `occultation.gdshaderinc` (parois, bassin).
@@ -196,6 +272,8 @@ func eau(bac: Dictionary) -> MeshInstance3D:
 	var pm := PlaneMesh.new()
 	var taille: Array = bac["taille_m"]
 	pm.size = Vector2(float(taille[0]), float(taille[1]))
+	pm.subdivide_width = subdivisions(pm.size.x)
+	pm.subdivide_depth = subdivisions(pm.size.y)
 	mi.mesh = pm
 	var c := godot(bac["fond_m"])
 	mi.position = Vector3(c.x, c.y, c.z)
@@ -224,8 +302,8 @@ func construire() -> void:
 	var carrelage := Color(0.52, 0.72, 0.80)
 	var c := 0.01
 	geo = {"lx": lx, "lz": lz, "e": e, "sol_y": sol_y, "fond_y": fb.y + c, "haut": haut}
-	# Le sol, au niveau du fond du bac tampon, jusqu'à l'horizon.
-	boite(Vector3(-3000, sol_y - 0.2, -3000), Vector3(3000, sol_y, 3000), Color(0.20, 0.19, 0.17))
+	# Le sol, au niveau du fond du bac tampon, jusqu'à l'horizon ; S382 : gradué autour de la piscine (voir `sol_gradue`,
+	# appelé en fin de construction, quand l'emprise est connue).
 	# Le bloc du bassin, en béton : dalle jusqu'au fond, murs ouest, nord, sud à 1,5 m, est au seuil.
 	boite(Vector3(-lx - e, sol_y, -lz - e), Vector3(lx + e, fb.y, lz + e), beton)
 	boite(Vector3(-lx - e, fb.y, -lz - e), Vector3(-lx, haut, lz + e), beton)
@@ -251,6 +329,8 @@ func construire() -> void:
 	var th := ft.y + float(tt[2])
 	var et := 0.15
 	boite(Vector3(x1, sol_y, -tz - et), Vector3(x1 + et, th, tz + et), beton)
+	sol_gradue(sol_y, Vector2(-lx - e - 0.1, -lz - e - 0.1), Vector2(maxf(x1 + et, lx + e + 0.1), lz + e + 0.1), 200.0,
+		Color(0.20, 0.19, 0.17))
 	boite(Vector3(x0, sol_y, tz), Vector3(x1, th, tz + et), beton)
 	boite(Vector3(x0, sol_y, -tz - et), Vector3(x1, th, -tz), beton)
 	eau_bassin = eau(b)

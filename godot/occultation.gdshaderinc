@@ -144,6 +144,13 @@ vec2 ciel_vu(vec3 p, vec3 n) {
                 total_c > 0.0 ? clamp(1.0 - bloque_c * cellule / total_c, 0.0, 1.0) : 1.0);
 }
 
+/// S382 P6b — **la part vue, par sommet** : évaluée dans `vertex()` et interpolée (elle varie lentement ; à chaque pixel,
+/// elle coûtait 8 à 9 ms dans les vues proches de la piscine). L'interpolation de sommets qui valent tous 1 peut rendre
+/// 0,99999994 : ramené à 1 au-dessus de 1 − 10⁻⁵, pour que l'image loin des occultants reste celle d'avant, au bit.
+vec2 ciel_vu_interpole(vec2 v) {
+    return mix(v, vec2(1.0), step(vec2(0.99999), v));
+}
+
 /// Le facteur d'éclairement d'`eclairage()` (`ciel.gdshaderinc`), le ciel masqué : `vu` = (part du ciel uniforme, part du
 /// ciel couvert de la CIE, part du soleil). Ciel clair : `0,6·vu.x + 0,4·max(n·s, 0)·direct·vu.z` ; couvert :
 /// `E_h·(E(β)/E(0)·vu.y + sol)` — la lumière renvoyée par le sol n'est pas masquée. `vu` = (1, 1, 1) : `eclairage()`, au bit.
