@@ -88,7 +88,7 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-206 : la visibilité du ciel par des occultants analytiques, pour le rendu et pour V.
+- [x] **P2** — ADR-206 : la visibilité du ciel par des occultants analytiques, pour le rendu et pour V.
 - [ ] **P3** — l'orientation exacte du ciel couvert (forme close, remplace l'interpolation de S381) ; critère 3 ; ciel
   clair au bit.
 - [ ] **P4** — `occultation.gdshaderinc` : la part du ciel vue (32 azimuts × 32 bandes), totaux exacts ; `eclairage_vu`.
