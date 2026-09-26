@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 12:35 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 12:43 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : —
+Session en cours : S382 — l'occultation du ciel (R30, l'utilisateur) : occultants analytiques, part du ciel vue, ombres portées
 Dernière session : S381 — rendu : **le ciel de pluie** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), pièce 3 ; [preuve](docs/validation/CIEL-PLUIE-S381.md)) — ciel couvert de la CIE, neutre, soleil éteint partout (disque, éclat, caustiques, crêtes), éclairement horizontal conservé (l'œil s'adapte) ; **R30 reçue** : « Je valide ». Coupée après P5, reprise à chaud. Avant : S380, la pluie dans l'air (R29 reçue)
 Session suivante : **l'occultation du ciel** (R30, l'utilisateur : « ajoute l'occultation du ciel puis continue, et ensuite le plus important le solveur 3D ») ; puis la pluie, pièce 4 — les gerbes (ADR-205 D3) ; ensuite **la campagne du solveur volumique 3D**, « le plus important »
 Maillons        : 1 — S381 : R30 reçue, aucun point de la liste ne change (journal)
