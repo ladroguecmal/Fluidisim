@@ -83,9 +83,9 @@ jugement de l'utilisateur (R28).
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul ; la campagne du solveur inscrite (file).
-- [ ] **P2** — références : photographies de pluie sur l'eau (libres, lues sans téléchargement) ; ce qu'elles montrent.
-- [ ] **P3** — les rides dans `bassin.gdshader` (le taux, l'anneau, le fondu en variance) ; critère 1 sur le bassin.
+- [x] **P1** — jeton, plan seul ; la campagne du solveur inscrite (file).
+- [x] **P2** — références : photographies de pluie sur l'eau (libres, lues sans téléchargement) ; ce qu'elles montrent.
+- [>] **P3** — les rides dans `bassin.gdshader` (le taux, l'anneau, le fondu en variance) ; critère 1 sur le bassin.
 - [ ] **P4** — les rides sur la mer (`eau.gdshaderinc`, pente et covariance de la queue) ; critère 1 sur la mer.
 - [ ] **P5** — contrôle du taux (critère 2), du fondu (critère 3) ; images de R28.
 - [ ] **P6** — preuve `RIDES-PLUIE-S379`, liste (8.9 ou 8.4), file, feuille de route, index ; la campagne du solveur dans
@@ -93,3 +93,17 @@ jugement de l'utilisateur (R28).
 - [ ] **P7** — rituel ; session suivante : **la campagne du solveur volumique 3D** (conception).
 
 ### Notes de reprise
+
+**P2 — six photographies libres, Wikimedia Commons, lues dans le navigateur, rien de téléchargé.**
+
+| photographie | vue | ce qu'elle montre |
+|---|---|---|
+| *Rain in a pond at Zoo Schönbrunn 2018* a et b | proche, oblique (≈ 30°), pluie faible à modérée | chaque impact = **un paquet de 2 à 5 crêtes** concentriques, pas un cercle seul ; rayons jusqu'à ≈ 15–25 cm avant l'extinction ; les jeunes impacts portent un **dôme ou une bulle** au centre ; recouvrements, interférences ; ellipses aplaties par l'obliquité |
+| *Waterwaves raindrops on water surface* | presque verticale | mêmes paquets (2 à 4 crêtes) ; **visibles là où le ciel clair se reflète, presque invisibles sur les reflets sombres** : l'anneau est une perturbation de la **normale**, pas une couleur |
+| *Rain on the river, Warwick* | lointaine, pluie faible | au loin, **les reflets restent nets** ; les anneaux ne se voient qu'au premier plan : la rugosité lointaine suit le taux, presque nulle en pluie faible |
+| *Rain on the River Pang, near Tidmarsh* | moyenne distance, rasante, crépuscule | les impacts deviennent de **petits éclats clairs**, ellipses très aplaties (tirets horizontaux) qui prennent le ciel sur un fond sombre ; les reflets des berges sont rompus, pas effacés |
+| *Rain falling into a swimming pool* | piscine à ≈ 10 m, pluie modérée à forte | plus d'anneau distinct : **un voile mat uniforme**, reflets brouillés — la variance, pas le motif |
+
+Conséquences pour P3–P4 : perturber la **normale** seulement (jamais d'albédo) ; un **paquet** de crêtes par anneau (≈ 3,
+enveloppe gaussienne), une petite bosse centrale au premier dixième de seconde ; au loin, la pente devient de la variance,
+**proportionnelle au taux** (pluie faible : presque rien).
