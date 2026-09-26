@@ -87,7 +87,7 @@ poste avec carte et Godot). (5) `etat_projet.py --check` sans erreur. Aucun code
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — inventaire : δ 3D (référence, production, coût, limites A297, A298, A316, A320), APIC (B10, raccord),
   faces coupées, ordonnanceur, piscine en δ ; lu dans les preuves, chiffres et liens.
-- [ ] **P3** — état de l'art (1) : grilles hybrides temps réel (colonnes hautes, fonction hauteur + 3D + particules),
+- [x] **P3** — état de l'art (1) : grilles hybrides temps réel (colonnes hautes, fonction hauteur + 3D + particules),
   pression sur la carte (multigrille), grilles éparses.
 - [ ] **P4** — état de l'art (2) : particules sur grille (FLIP, APIC, MPM) sur la carte ; SPH et PBF ; Boltzmann sur
   réseau à surface libre ; coûts et qualités publiés.

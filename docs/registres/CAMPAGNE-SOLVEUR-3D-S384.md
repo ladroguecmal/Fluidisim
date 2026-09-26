@@ -56,3 +56,43 @@ Particules sur la grille MAC de δ, la même pression ; surface reconstruite des
 | **pression sans multigrille en 3D** | 32 cycles de gradient conjugué, déjà déclarés dégradés ; la multigrille n'existe qu'en 2D mobile ([ADR-167](../adr/ADR-167-multigrille-du-mode-mobile.md)) | S341 §3 |
 | **une boîte dense par domaine** | 376 320 mailles pour 30 × 28 × 7 m ; aucune grille éparse (B5 non fait) | ADR-175 D6 |
 | **δ n'est pas dans Godot** | la production vit dans l'afficheur ; *« pas maintenant »* (R27) — c'était le 2026-09-26, avant R30 | ADR-202 |
+
+---
+
+## 2. L'état de l'art du volumique temps réel
+
+**Méthode de lecture.** Les sources ont été identifiées par recherche (auteurs, lieu, année, résumé) ; **le réseau de la
+session S384 ne permettait pas de lire les articles** (hôtes bloqués). Tout chiffre ci-dessous est donc celui d'un
+**résumé publié**, dit tel ; aucun chiffre des tableaux des articles n'est repris de mémoire (I-14). Relire les articles
+est une action de la file, au premier lot qui en dépend (§5).
+
+### 2.1 Grilles hybrides : colonnes hautes, fonction hauteur, 3D et particules
+
+| travail | idée | ce qui nous concerne |
+|---|---|---|
+| **Irving, Guendelman, Losasso et Fedkiw (2006)**, *Efficient simulation of large bodies of water by coupling two and three dimensional techniques*, ACM TOG 25(3), 805–811 | le gros du volume en **colonnes hautes** à profil de pression linéaire, comme une fonction hauteur ; tout le haut de l'eau en Navier-Stokes 3D à surface libre | la pression scindée `p_hydro + p_dyn` de δ en est l'esprit ; nos 28 couches de 25 cm, elles, sont toutes cubiques |
+| **Chentanez et Müller (2011)**, *Real-time Eulerian water simulation using a restricted tall cell grid*, ACM TOG 30(4), 82 (SIGGRAPH 2011) | **temps réel** : cellules cubiques au-dessus d'une couche de colonnes hautes, au-dessus d'un fond quelconque ; **multigrille spécialisée** pour Poisson ; pas de temps longs stabilisés | la voie directe pour descendre la maille de δ sans payer la profondeur : l'effort va **près de la surface**, là où il compte |
+| **Narita, Ochiai, Kanai et Ando (2025)**, *Quadtree Tall Cells for Eulerian Liquid Simulation*, SIGGRAPH 2025 Conference Papers | colonnes hautes sur un **quadtree** horizontal : la résolution horizontale s'adapte aussi | l'étape d'après ; à lire avant de choisir la forme des blocs (§5) |
+| **Chentanez, Müller et Kim (2014)**, *Coupling 3D Eulerian, Heightfield and Particle Methods for Interactive Simulation of Large Scale Liquid Phenomena*, SCA 2014, puis IEEE TVCG 21(10), 2015 | **interactif** : fonction hauteur (eaux peu profondes) hors du domaine 3D, grille 3D, et **particules pour le gros de l'eau près de la surface** là où il le faut, avec bascule de l'une à l'autre au cours du calcul ; raccord tel que les vagues traversent la frontière | **c'est notre architecture** — B+W dehors, δ 3D, APIC là où la surface n'est pas un graphe (ADR-186 D3). Leur raccord particules ↔ grille est exactement ce qui nous manque (A316) |
+| **Huang, Qu, Tan, Zhang, Michels et Jiang (2021)**, *Ships, Splashes, and Waves on a Vast Ocean*, ACM TOG 40(6) (SIGGRAPH Asia 2021) | **plusieurs domaines FLIP mobiles** près des navires, couplés dans les deux sens à un océan profond par éléments de frontière : FLIP corrige l'océan, l'océan donne à FLIP le flux ambiant | la même séparation que B+W (analytique, dispersion juste) et δ (volumique local) ; leurs domaines **mobiles** sont ceux de la porte A (S349–S350) |
+
+### 2.2 La pression sur la carte
+
+| travail | idée | ce qui nous concerne |
+|---|---|---|
+| **McAdams, Sifakis et Teran (2010)**, *A parallel multigrid Poisson solver for fluids simulation on large grids*, SCA 2010, 65–73 | un cycle **multigrille géométrique** comme **préconditionneur** du gradient conjugué (MGPCG), robuste sur domaines irréguliers, Neumann et Dirichlet mêlés ; *publié* : jusqu'à 768 × 768 × 1 152 voxels sous 16 Go | notre projection fait 32 itérations préconditionnées par **Jacobi**, déjà déclarées dégradées (S302) ; la multigrille n'existe qu'en 2D mobile (ADR-167) |
+| **Chentanez et Müller (2012)**, *A multigrid fluid pressure solver handling separating solid boundary conditions*, IEEE TVCG 18(8), 1191–1201 | la multigrille étendue au **problème de complémentarité** des parois qui se séparent | l'eau qui colle au solide qui s'en va — la coque qui sort de l'eau (porte D) |
+| **Weber, Mueller-Roemer, Stork et Fellner (2015)**, *A Cut-Cell Geometric Multigrid Poisson Solver for Fluid Simulation*, CGF (Eurographics 2015), 481–491 | multigrille géométrique sur **faces coupées**, systèmes compatibles à tous les niveaux ; *publié* : convergence meilleure que les méthodes antérieures | nos faces coupées (S232, S324) devront entrer dans la multigrille, sinon A315 revient (les petites cellules qui font ramper le solveur) |
+
+### 2.3 Les grilles éparses
+
+| travail | idée | ce qui nous concerne |
+|---|---|---|
+| **Museth (2013)**, *VDB: High-resolution sparse volumes with dynamic topology*, ACM TOG 32(3), 27 | arbre peu profond de blocs, topologie dynamique | le standard des volumes épars ; la forme, pas la bibliothèque (aucune dépendance, ADR-020) |
+| **Setaluri, Aanjaneya, Bauer et Sifakis (2014)**, *SPGrid: a sparse paged grid structure applied to adaptive smoke simulation*, ACM TOG 33(6), 205 | grille éparse par **pages**, adressage par la mémoire virtuelle | des blocs 8³ indexés : la forme d'ADR-006 §3 |
+| **Wu, Truong, Yuksel et Hoetzlein (2018)**, *Fast Fluid Simulations with Sparse Volumes on the GPU*, CGF 37(2), 157–167 | FLIP sur une hiérarchie éparse **construite et tenue sur la carte** au fil des particules ; gradient conjugué sans matrice ; *publié* : jusqu'à un ordre de grandeur plus vite que FLIP sur CPU | des blocs qui suivent la surface et les particules, sur la carte — ce qu'il faudra aux domaines qui bougent |
+
+**Ce que 2.1 à 2.3 disent ensemble.** Le temps réel volumique à grande échelle se fait, depuis 2011, en **mettant
+les mailles près de la surface** (colonnes hautes), en **résolvant la pression par multigrille**, et en **ne mettant de
+particules que là où la surface cesse d'être un graphe**. Le dépôt a le troisième choix (ADR-186 D3) et le cadre des
+deux autres (pression scindée, blocs 8³) ; il n'a ni colonnes hautes, ni multigrille 3D, ni blocs épars.
