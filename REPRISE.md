@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 22:02 +02:00
-Agent            : Claude Opus 5.5, Claude Code (application de bureau) au poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3 (preuves rendues avec 4.4.1)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-26 22:11 +02:00
+Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
+Session en cours : S393 — verdict R33 ; C4b, seconde part : B10 en 3D, une sphère qui entre dans l'eau (APIC 3D, corps cinématique)
 Dernière session : S392 — rendu : **la pluie, pièce 5a — les surfaces mouillées** ([preuve](docs/validation/SURFACES-MOUILLEES-S392.md)) — Ångström–Lekner–Dorf (béton à 64 % de sa radiance sèche), reflet du film, sec sous les débords ; formule sur l'image à 0,03 %, sans pluie au bit ; coût +0,34 ms ; **R33 posée**. Avant : S391, A321 corrigée
 Session suivante : **le verdict R33** d'abord ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique) ; dans le cloud, **C4b** — B10 en 3D (4.16) ; la pluie, pièce 5b (éclaboussures au sol), après R33
 Maillons        : 1 — S392 : 8.10 reste partiel (la revue R33 est posée, non reçue)

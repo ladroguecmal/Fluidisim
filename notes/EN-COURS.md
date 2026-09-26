@@ -62,82 +62,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S392 — **terminée**. **La pluie, pièce 5** d'[ADR-205](../docs/adr/ADR-205-la-pluie-complete.md) : les surfaces
-mouillées — sol, margelles, murs plus sombres et plus brillants. Demande de l'utilisateur (2026-09-26) : *« Continue avec la
-pluie, pièce 5 »* ; session de rendu (alternance d'ADR-191). Agent : Claude Opus 5.5, Claude Code (application de bureau) au
-poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3. Sert **8.10** (crédibilité perçue). **Découpage
-déclaré** : 5a, les surfaces mouillées (ici) ; 5b, les éclaboussures au sol (Cossali, Coghe et Marengo 1997), session suivante
-de la pièce.
+Session : S393 — **en cours**. D'abord le **verdict R33** ; puis **C4b**, seconde part : **B10 en 3D**, une sphère qui entre dans
+l'eau, sur APIC 3D ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ; [APIC3D-S388](../docs/validation/APIC3D-S388.md)).
+Demande de l'utilisateur (2026-09-26) : *« Reprends le projet, pour R33 je valide actuellement mais pour plus tard des
+sessions de peaufinage »*. Le travail du poste (S390–S392, branche `poste`) rejoint cette branche en avance rapide.
+Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles
+illisibles (réseau), recherche seulement. Sert **4.16** (surface non graphe) et 4.12.
 
-**Thèse, sources et prédictions.** Un matériau rugueux sous un film d'eau (Ångström 1925 ; Lekner et Dorf 1988, *Appl. Opt.*
-27, 1278 — lus par leurs résumés, sans téléchargement) : la lumière entre dans le film, se diffuse sur le matériau, et à
-chaque remontée une part `r̄ᵢ` est renvoyée vers le bas par l'interface eau–air (réflexion totale au-delà de 48,6°, partielle
-en deçà). Radiance diffuse mouillée, rebonds sommés et réfraction de sortie comprise : `L = (E/π)·a·(1 − r̄ᵢ)/(1 − a·r̄ᵢ)·(1 −
-R(θ))`, `R(θ)` le Fresnel du film vu de l'œil ; plus le **reflet du film**, `R(θ)·L_ciel(réfléchi)`. Pour l'eau (n = 1,333),
-calculés par deux intégrations indépendantes : `r̄ₑ` = 0,06641, `r̄ᵢ` = 0,47459 (= `1 − (1 − r̄ₑ)/n²`), `R(0)` = 0,02037.
-**Prédit** : béton (0,42) → 0,643 de sa radiance sèche vu d'aplomb ; sol (0,20) → 0,569. Non modélisé : le second effet de
-Lekner et Dorf (l'indice relatif qui baisse sous l'eau), propre au matériau — **la photographie dira s'il manque**. **Où** :
-la pluie tombe à la verticale (sans vent) ; une face tournée vers le ciel est mouillée si la verticale au-dessus d'elle est
-libre (les occultants de S382) ; abritée, elle reste sèche ; une face verticale ne l'est qu'au pied, dans la bande des
-rejaillissements, `exp(−h/0,1 m)` — **hypothèse déclarée**, à calibrer ; une face sous l'eau des bacs n'est pas touchée.
-Régime établi : sous toute pluie, les faces exposées sont mouillées (le séchage et le mouillage progressifs : la météo).
+**Thèse.** Le banc 2D de S320 faisait entrer un **cylindre** ; le cas 3D est une **sphère**, axisymétrique, que la littérature
+mesure : le pincement profond (*deep seal*) tombe à `t_p = β·√(R/g)`, presque indépendant de la vitesse, `β` de **1,72 à
+2,29** selon les auteurs (Glasheen et McMahon 1996 ; Duclaux et al. 2007 ; Aristoff et Bush 2009 — plage lue par la
+recherche, les textes sont bloqués par le réseau : dit, non vérifié ligne à ligne). Porter le corps **cinématique** du banc 2D
+dans `apic3d.rs` — mailles solides, faces à la vitesse du corps, paroi mobile pour la pression, particules repoussées —, et
+mesurer le pincement sur un **quart de domaine** (l'axe au coin : deux parois = deux plans de symétrie, les images de S389
+comprises), ce qui divise le coût par quatre.
 
-**Critères, écrits avant.** (1) **Sans pluie, identique au bit** : 12 images (méthode de S379), référence avant P3. (2) **Les
-nombres** : `r̄ₑ`, `r̄ᵢ` par deux intégrations et la réciprocité, à 10⁻⁴ ; un outil et ses essais. (3) **Sur l'image** : sur une
-dalle exposée, rapport mouillé / sec de la part diffuse contre la formule à l'angle du pixel, ≤ 1 % ; le reflet seul contre
-`R(θ)·L_ciel`, ≤ 1 %. (4) **L'abri** : vue d'aplomb à 5 mm/px, le bord sec sous le débord de la margelle à un pixel de sa
-place géométrique. (5) **Photographie réelle** : le rapport mouillé / sec d'un même matériau sous la même lumière, mesuré
-(pixels lus par un canevas, sans téléchargement), contre la formule — publié, l'écart attribué ou dit. (6) Coût ≤ +0,3 ms sur
-trois vues de la piscine à 10 mm/h ; sans pluie, 0 ; revue **R33** de l'utilisateur.
+**Mesures** (comme S320, en 3D) : air enfermé = mailles sans particule, hors du corps, sous le repos, au-dessus du corps, à moins
+d'un diamètre de l'axe, qu'un remplissage depuis le haut n'atteint pas ; **pincement** = premier pas où il dépasse `D³/32`
+(domaine entier) ; lu à chaque pas.
+
+**Critères, écrits avant.** (1) **Sans corps, rien ne change** : `apic3d_ballottement 10 0.05` imprime les chiffres de S389 P4.
+(2) **Corps au repos** à demi immergé : vitesse parasite ≤ 1 cm/s, masse exacte (essai). (3) **Quart contre domaine entier**
+(`D/dx` = 8, `Fr` = 2) : même pincement à un pas près. (4) **Convergence** : `Fr` = 2, `D/dx` = 8, 12, 16 — le pincement à
+12 et 16 à **5 %** l'un de l'autre. (5) **Mesure publiée** : à la maille la plus fine, `t_p/√(R/g)` dans **[1,72 ; 2,29]**.
+(6) Masse exacte partout ; suite, zéro avertissement. **Publiés** : `Fr` = 4 (8 et 12), la distance des parois, le coût.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — les nombres : `outils/sol_mouille.py` et ses essais ; critère 2. La photographie : recherche, mesure ; critère 5.
-- [x] **P3** — les images de référence sans pluie ; le nuanceur : mouillure (verticale libre, orientation, rejaillissements,
-  eaux), diffus mouillé, reflet du film (ciel et occultants) ; la scène (eaux déclarées).
-- [x] **P4** — les contrôles : critère 1, critère 3 (rapport, reflet), critère 4 (le bord de l'abri) ; coût.
-- [x] **P5** — images de revue R33, REVUE-VISUELLE ; preuve ; file, feuille de route, ADR-205 (note datée).
-- [x] **P6** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — verdict R33 consigné (revue, preuve, décisions, file).
+- [ ] **P3** — le corps cinématique dans `apic3d.rs` ; essais (repos à demi immergé, masse) ; critères 1 et 2.
+- [ ] **P4** — l'exemple `apic3d_b10` (quart ou entier, mesures) ; critère 3.
+- [ ] **P5** — la convergence, la plage publiée, `Fr` = 4, les parois ; critères 4 et 5.
+- [ ] **P6** — critère 6 ; preuve `B10-APIC3D-S393` ; liste, file, feuille de route, index.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-
-**P2 — critère 2 tenu.** `outils/sol_mouille.py` et `test_sol_mouille.py` (6 essais) : `r̄ₑ` = 0,06641 (vu de l'air),
-`r̄ᵢ` = 0,47459 (vu de l'eau, intégration directe) = réciprocité 0,47459 ; `R(0)` = 0,02037. Rapports mouillé / sec vus
-d'aplomb : 0,540 (a = 0,1), 0,569 (0,2), 0,600 (0,3), 0,643 (0,42), 0,720 (0,6), 0,899 (0,9).
-
-**P2 — critère 5 : mesuré, écart dit, non attribué.** La formule exacte de Lekner et Dorf n'est pas lisible sans télécharger
-(résumés d'Optica et de PubMed ; le PDF de Jensen, Legakis et Dorsey 1999, qui la reprend, part en téléchargement dans le
-navigateur : refusé, non retenté) ; la forme d'Ångström est reconstruite ci-dessus depuis ce que les résumés décrivent.
-**Référence** (Wikimedia Commons, lue par un canevas, sans téléchargement) : *From dry pavement to wet pavement, Pillmawr
-Road, Newport* (Jaggery, 7 août 2024, CC BY-SA 2.0, geograph 7844328), image de 960 × 1 280 : au premier plan, les
-premières gouttes sur l'asphalte sec — même matériau, même lumière, même angle. Zone (150–710, 950–1 280), aiguilles de pin
-écartées (R − B ≥ 30) : fond sec sRGB ≈ 88, taches ≈ 31 ; **rapport 0,08 en linéaire** (courbe sRGB supposée), 0,35 en valeurs
-de code ; **modèle** ≈ 0,53 pour un asphalte d'albédo 0,1, vu à ≈ 50°. Écart d'un facteur ≈ 6, **non attribué** : courbe de
-l'appareil inconnue (un téléphone écrase les ombres), reflet d'un environnement sombre (arbres, mur) dans les gouttes, second
-effet de Lekner et Dorf (pores remplis) non modélisé. Conséquence : la formule est gardée telle quelle ; un facteur de matériau
-`assombrissement` (1 par défaut, le second effet) est exposé pour que R33 dise si le rendu est assez sombre. Les recherches
-sans résultat : Commons (« partially wet », « rain shadow », « dry patch »), Geograph (vérification anti-robot, non
-contournée).
-
-**P3–P4 en un commit** (le nuanceur s'est réglé sur ses contrôles). `godot/mouille.gdshaderinc` (inclus par `paroi.gdshader`) ;
-`piscine.gd` : `MOUILLE=0`, `ASSOMBRISSEMENT=`, bacs et sol déclarés, nez de margelle (`ruissellement_haut`), vue
-`pied_mur`, suffixe `_sec`, `VUES=` pour `--cout-pluie`, contrôle `--controle-mouille`. Godot 4.4.1 (celui des preuves).
-**Critère 1 tenu** : 7 images sans pluie (ensemble, rasante, buse à 6,5 et 200 s ; sans δ à 40 s) identiques au bit avant et
-après, deux fois. **Critère 3 tenu** : diffus / sec contre la formule, sol (0,19) et margelle (0,41), d'aplomb et à 60° —
-**0,029 %** au pire (sol d'aplomb 0,56573 pour 0,56572) ; reflet contre `R(θ)·L_CIE` — **0,29 %** au pire (le cône de rugosité).
-**Critère 4 tenu**, au second essai : le bord sec sous la margelle ouest à **0,00 mm** de la verticale de l'arête (x = −4,3000),
-sec 0,000 dessous, mouillé 1,000 dehors. **Vu en chemin** : le test de dalles avec un rayon vertical divise par zéro
-(composantes x et z nulles), indéfini sur la carte — la verticale sous le débord passait pour libre ; remplacé par un test
-exact (emprise et haut de la boîte), et les composantes nulles écartées de zéro dans le test général.
-**Critère 6, coût (10 mm/h, médiane de 240 images, sans → avec mouillure)** : ensemble 1,039 → **1,381 ms (+0,34)**, proche
-1,678 → 1,984 (+0,31), rasante 0,915 → 1,135 (+0,22) ; sans pluie 0. **Manqué de peu** sur la vue d'ensemble (seuil 0,3 ms ;
-bruit ±0,05 ms), publié tel quel. Chemin : +0,96 ms au premier jet ; tests précoces (verticale et reflet contre les boîtes
-élargies) et ciel couvert sans les nuages du ciel clair, +0,38 ; un seul rayon loin des occultants (moyenne exacte, CIE
-linéaire en `sin h`), +0,34.
-
-**P5.** Images de R33 (`viewer/captures/s392/`, locales) : planche `r33_mouille.png` (10 mm/h, sec à gauche, mouillé à droite ;
-pied du mur ouest à hauteur d'œil, ensemble, proche) et les six images en pleine taille. REVUE-VISUELLE §38 ; preuve
-[SURFACES-MOUILLEES-S392](../docs/validation/SURFACES-MOUILLEES-S392.md) ; ADR-205 (note datée : 5a faite, 5b à suivre) ;
-file (ligne du rendu, aussi remise à trois colonnes), feuille de route (§3 ter), index.
 
