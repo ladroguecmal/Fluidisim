@@ -42,6 +42,13 @@ var occultants_min := PackedVector3Array()
 var occultants_max := PackedVector3Array()
 ## Les cotes de la construction, pour les points d'essai du contrôle de S382.
 var geo := {}
+## S382 P6c — les surfaces qui reçoivent le ciel ([instance, matériau, normale forcée vers le haut]) et la passe qui cuit
+## leur part du ciel vue (`cuisson_ciel.gdshader`). `OCCULTATION=0` : ni occultant, ni subdivision, ni cuisson — la
+## géométrie et l'image d'avant.
+var occultation_active := OS.get_environment("OCCULTATION") != "0"
+var recepteurs := []
+var cuisson: SubViewport
+const CUISSON_LARGEUR := 1024
 
 
 func couvert_voulu() -> float:
@@ -179,6 +186,7 @@ func boite(a: Vector3, b: Vector3, albedo: Color, joint := 0.0, occultant := tru
 	mi.material_override = m
 	materiaux_ciel.append(m)
 	add_child(mi)
+	recepteurs.append([mi, m, false])
 	if occultant:
 		occultants_min.append(Vector3(minf(a.x, b.x), minf(a.y, b.y), minf(a.z, b.z)))
 		occultants_max.append(Vector3(maxf(a.x, b.x), maxf(a.y, b.y), maxf(a.z, b.z)))
@@ -188,8 +196,10 @@ func boite(a: Vector3, b: Vector3, albedo: Color, joint := 0.0, occultant := tru
 ## S382 — le nombre de subdivisions d'une longueur pour que les sommets soient à `PAS_SOMMETS` au plus ; aucune au-delà
 ## de 50 m (le sol lointain, où la part vue vaut 1).
 const PAS_SOMMETS := 0.1
-static func subdivisions(longueur: float) -> int:
-	return 0 if longueur > 50.0 else maxi(int(ceil(longueur / PAS_SOMMETS)) - 1, 0)
+func subdivisions(longueur: float) -> int:
+	if not occultation_active or longueur > 50.0:
+		return 0
+	return maxi(int(ceil(longueur / PAS_SOMMETS)) - 1, 0)
 
 
 ## S382 — **le sol autour de la piscine**, un maillage gradué : pas de `PAS_SOMMETS` sur l'emprise élargie de 3 m (`a`,
@@ -197,6 +207,9 @@ static func subdivisions(longueur: float) -> int:
 ## ciel vue y vaille 1 exactement (la coupure d'`occultation.gdshaderinc` est à ≈ 180 m pour 2,85 m de haut). Au-delà, le
 ## sol lointain, quatre boîtes sans subdivision.
 func sol_gradue(y: float, a: Vector2, b: Vector2, rayon: float, albedo: Color) -> void:
+	if not occultation_active:
+		boite(Vector3(-3000, y - 0.2, -3000), Vector3(3000, y, 3000), albedo, 0.0, false)
+		return
 	var xs := coordonnees_graduees(a.x - 3.0, b.x + 3.0, rayon)
 	var zs := coordonnees_graduees(a.y - 3.0, b.y + 3.0, rayon)
 	var sommets := PackedVector3Array()
@@ -226,6 +239,7 @@ func sol_gradue(y: float, a: Vector2, b: Vector2, rayon: float, albedo: Color) -
 	mi.material_override = m
 	materiaux_ciel.append(m)
 	add_child(mi)
+	recepteurs.append([mi, m, false])
 	var r := rayon
 	boite(Vector3(-3000, y - 0.2, -3000), Vector3(-r, y, 3000), albedo, 0.0, false)
 	boite(Vector3(r, y - 0.2, -3000), Vector3(3000, y, 3000), albedo, 0.0, false)
@@ -259,11 +273,69 @@ static func coordonnees_graduees(a: float, b: float, rayon: float) -> PackedFloa
 
 ## S382 — les occultants déclarés à tous les matériaux qui incluent `occultation.gdshaderinc` (parois, bassin).
 func poser_occultants() -> void:
-	var n := 0 if OS.get_environment("OCCULTATION") == "0" else occultants_min.size()
+	var n := occultants_min.size() if occultation_active else 0
 	for m in materiaux_ciel:
 		m.set_shader_parameter("occultants_n", n)
 		m.set_shader_parameter("occultants_min", occultants_min)
 		m.set_shader_parameter("occultants_max", occultants_max)
+	if occultation_active:
+		cuire_ciel_vu()
+
+
+## S382 P6c — **la cuisson** : tous les sommets des récepteurs, en coordonnées du monde, deviennent les points d'un maillage
+## rendu une fois dans une `SubViewport` flottante à monde propre ; chaque point écrit sa part du ciel vue au texel de son
+## rang. Chaque récepteur reçoit la texture et le rang de son premier sommet. À refaire quand un occultant change.
+func cuire_ciel_vu() -> void:
+	var points := PackedVector3Array()
+	var normales := PackedVector3Array()
+	for r in recepteurs:
+		var mi: MeshInstance3D = r[0]
+		var tableaux := mi.mesh.surface_get_arrays(0)
+		var v: PackedVector3Array = tableaux[Mesh.ARRAY_VERTEX]
+		var nn = tableaux[Mesh.ARRAY_NORMAL]
+		var xf := mi.global_transform
+		(r[1] as ShaderMaterial).set_shader_parameter("vu_decalage", points.size())
+		for i in v.size():
+			points.append(xf * v[i])
+			normales.append(Vector3.UP if r[2] or nn == null else (xf.basis * (nn as PackedVector3Array)[i]).normalized())
+	var hauteur := int(ceil(float(points.size()) / CUISSON_LARGEUR))
+	if cuisson == null:
+		cuisson = SubViewport.new()
+		cuisson.own_world_3d = true
+		cuisson.use_hdr_2d = true
+		cuisson.transparent_bg = true
+		add_child(cuisson)
+		var cam := Camera3D.new()
+		cuisson.add_child(cam)
+		cam.current = true
+	cuisson.size = Vector2i(CUISSON_LARGEUR, hauteur)
+	for enfant in cuisson.get_children():
+		if enfant is MeshInstance3D:
+			enfant.queue_free()
+	var tableaux := []
+	tableaux.resize(Mesh.ARRAY_MAX)
+	tableaux[Mesh.ARRAY_VERTEX] = points
+	tableaux[Mesh.ARRAY_NORMAL] = normales
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_POINTS, tableaux)
+	var mi := MeshInstance3D.new()
+	mi.mesh = am
+	# Jamais écarté par le cadrage de la caméra : les points se placent eux-mêmes (`POSITION`).
+	mi.custom_aabb = AABB(Vector3(-1, -1, -3), Vector3(2, 2, 2))
+	var m := ShaderMaterial.new()
+	m.shader = load("res://cuisson_ciel.gdshader")
+	m.set_shader_parameter("largeur", CUISSON_LARGEUR)
+	m.set_shader_parameter("hauteur", hauteur)
+	m.set_shader_parameter("occultants_n", occultants_min.size())
+	m.set_shader_parameter("occultants_min", occultants_min)
+	m.set_shader_parameter("occultants_max", occultants_max)
+	mi.material_override = m
+	cuisson.add_child(mi)
+	cuisson.render_target_update_mode = SubViewport.UPDATE_ONCE
+	var texture := cuisson.get_texture()
+	for r in recepteurs:
+		(r[1] as ShaderMaterial).set_shader_parameter("vu_cuite", texture)
+	print("CUISSON_CIEL_S382 sommets=%d texture=%dx%d" % [points.size(), CUISSON_LARGEUR, hauteur])
 
 
 ## Une surface d'eau horizontale couvrant l'intérieur d'un bac (`fond_m`, `taille_m` de B).
@@ -282,6 +354,7 @@ func eau(bac: Dictionary) -> MeshInstance3D:
 	mi.material_override = m
 	materiaux_ciel.append(m)
 	add_child(mi)
+	recepteurs.append([mi, m, true])
 	return mi
 
 

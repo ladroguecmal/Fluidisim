@@ -96,7 +96,7 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
 - [x] **P6** — `--controle-occultation` contre `outils/occultation_ciel.py` (intégration indépendante) ; critère 2 ; coût.
 - [x] **P6b** — le coût (+8 à +9 ms par pixel, P6) : la part vue évaluée **par sommet** — boîtes et eaux subdivisées
   (≈ 10 cm), sol à maillage gradué jusqu'à la coupure (≈ 180 m), sol lointain à part ; critères 1 et 2 refaits ; coût.
-- [ ] **P6c** — la part vue **cuite** aux sommets : une passe de rendu unique (points, `SubViewport` à mise à jour unique,
+- [x] **P6c** — la part vue **cuite** aux sommets : une passe de rendu unique (points, `SubViewport` à mise à jour unique,
   refaite quand un occultant change), lue par `VERTEX_ID` ; sans occultation, géométrie d'avant ; critère 1 ; coût.
 - [ ] **P6d** — faces graduées près des arêtes (≈ 1 cm au contact, croissant jusqu'à 10 cm) : critère 2 sous le débord.
 - [ ] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
@@ -149,3 +149,11 @@ ramène à 1 au-dessus de 1 − 10⁻⁵. Boîtes et eaux subdivisées à 10 cm 
 encore trop (≈ 110 000 sommets, deux passes : profondeur puis couleur). **Critère 2 : manqué sous le débord** —
 `mur_ouest_haut` (5 cm sous la margelle) 0,357 pour 0,448 : entre le sommet de l'arête (très masqué) et celui 10 cm plus
 bas, l'interpolation linéaire ne suit pas ; ailleurs ≤ 0,0075. Le sol à 25 cm : 0,5394 pour 0,5411.
+
+**P6c — la cuisson.** `cuisson_ciel.gdshader` : chaque sommet des récepteurs (89 171 : boîtes, sol gradué, eaux) est un
+point d'un maillage en coordonnées du monde, rendu une fois (`SubViewport` à monde propre, flottante, `UPDATE_ONCE`) ; il
+écrit sa part vue au texel de son rang (texture 1 024 × 88) ; `ciel_vu_cuit(VERTEX_ID)` la relit. Orientation de la
+texture juste du premier coup ; valeurs égales au calcul par sommet à l'arrondi du demi-flottant près. **Coût par image** :
+proche 0,540 → 0,633 ms, aplomb 0,492 → 0,545, rasante 0,457 → 0,503 (sans → avec, couvert, sec) — **+0,05 à +0,09 ms**,
+les sommets en plus ; la cuisson, une image, une fois. `OCCULTATION=0` : géométrie d'avant (pas de subdivision, le sol
+d'une boîte), **12 / 12 au bit**. Critère 2 inchangé (sous le débord : P6d).

@@ -144,6 +144,20 @@ vec2 ciel_vu(vec3 p, vec3 n) {
                 total_c > 0.0 ? clamp(1.0 - bloque_c * cellule / total_c, 0.0, 1.0) : 1.0);
 }
 
+// S382 P6c — la part vue **cuite** (`cuisson_ciel.gdshader`) : le texel du rang `vu_decalage + VERTEX_ID` ; −1, pas de
+// cuisson (aucun occultant) : 1.
+uniform sampler2D vu_cuite : filter_nearest;
+uniform int vu_decalage = -1;
+
+vec2 ciel_vu_cuit(int sommet) {
+    if (vu_decalage < 0) {
+        return vec2(1.0);
+    }
+    ivec2 taille = textureSize(vu_cuite, 0);
+    int i = vu_decalage + sommet;
+    return texelFetch(vu_cuite, ivec2(i % taille.x, i / taille.x), 0).rg;
+}
+
 /// S382 P6b — **la part vue, par sommet** : évaluée dans `vertex()` et interpolée (elle varie lentement ; à chaque pixel,
 /// elle coûtait 8 à 9 ms dans les vues proches de la piscine). L'interpolation de sommets qui valent tous 1 peut rendre
 /// 0,99999994 : ramené à 1 au-dessus de 1 − 10⁻⁵, pour que l'image loin des occultants reste celle d'avant, au bit.

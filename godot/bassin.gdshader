@@ -42,7 +42,7 @@ float hauteur_champ(vec2 uv) {
     return mix(texture(hauteur_a, uv).r, texture(hauteur_b, uv).r, melange);
 }
 
-// S382 : la part du ciel vue par la surface au repos (normale verticale), calculée au sommet.
+// S382 : la part du ciel vue par la surface au repos (normale verticale), cuite aux sommets.
 varying vec2 vu_sommet;
 
 void vertex() {
@@ -55,7 +55,7 @@ void vertex() {
         pente_champ = vec2((hauteur_champ(UV + du) - hauteur_champ(UV - du)) / (2.0 * champ_dx),
             -(hauteur_champ(UV + dv) - hauteur_champ(UV - dv)) / (2.0 * champ_dx));
     }
-    vu_sommet = ciel_vu((MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz, vec3(0.0, 1.0, 0.0));
+    vu_sommet = ciel_vu_cuit(VERTEX_ID);
 }
 
 /// Le point de la scène vu au pixel `uv`, dans le monde (profondeur inversée de Godot 4.3+).

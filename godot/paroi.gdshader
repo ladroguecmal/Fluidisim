@@ -14,12 +14,12 @@ uniform vec3 albedo = vec3(0.4);
 uniform float joint = 0.0;
 
 varying vec3 monde;
-// S382 : la part du ciel vue, calculée au sommet (`occultation.gdshaderinc`).
+// S382 : la part du ciel vue, cuite aux sommets (`occultation.gdshaderinc`, `cuisson_ciel.gdshader`).
 varying vec2 vu_sommet;
 
 void vertex() {
     monde = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-    vu_sommet = ciel_vu(monde, normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz));
+    vu_sommet = ciel_vu_cuit(VERTEX_ID);
 }
 
 void fragment() {
