@@ -250,3 +250,57 @@ Godot) est une question à l'utilisateur (§6).
   sur le nouveau pas (C2, C3).
 - **A320** (perturbation qui croît sous houle raide) : relève du couplage à B (lot 2), pas de la structure du solveur ;
   inchangée.
+
+---
+
+## 5. Le découpage en sessions
+
+Chaque session a son critère **« reçu si »**, écrit ici avant elle, et son **lieu** : **cloud** — fichiers, git, cargo,
+Python, sans carte graphique ni Godot, comme S384 — ou **poste** — la machine de référence, carte et Godot. **Une seule
+session écrit à la fois**, où qu'elle tourne (AGENTS.md) ; l'alternance rendu / physique d'ADR-191 continue, et les
+sessions de rendu (la pluie, pièce 5 ; R32) se glissent entre celles-ci, au poste.
+
+| | session | lieu | point, porte | reçu si |
+|---|---|---|---|---|
+| **C1** | **multigrille 3D** dans la référence : le préconditionneur de S245 (2D, `delta_projection.rs`) porté au pas 3D, lissage de Jacobi amorti **dérivé** pour le stencil à sept points (ω = 6/7, facteur de lissage 5/7 : le calcul de S246 étendu à trois dimensions, modes (π/2, 0, 0) et (π, π, π)), faces coupées comprises | cloud | 4.19, 4.1 | mêmes solutions à la tolérance d'ADR-144 ; itérations **indépendantes de la maille** à trois mailles au moins (L274) ; la bosse de S324 sans ramper (A315) ; suite entière au bit hors du chemin préconditionné |
+| **C2** | **colonnes hautes** dans la référence : `k` couches cubiques sous la surface, une maille haute au fond ; la multigrille de C1 les porte | cloud | 4.1, 4.3 ; ADR-006 §6.4 | à `k` réduit, les réceptions tiennent : onde oblique de la cuve (dispersion), cas 2D contre HOS à `ny` = 1 (S253), cuve fermée (masse) ; mailles comptées : ≈ 3 fois moins à la porte B (*estimé* §3.3) ; `k` minimal consigné |
+| **C3** | multigrille et colonnes hautes **sur la carte** | poste | porte C, 4.19 | production à 3 mm de la référence sur les trois cas de cuve ; divergence publiée ; δ ≤ 2 ms au 99ᵉ centile sur la scène de la porte B, **puis à 10 cm** sur une scène de même surface ; A298 remesurée |
+| **C4** | **APIC 3D** dans le cœur, avec ses essais (METHODE : un banc qui entre au système y entre avec ses chiffres) : B10 en 3D, sphère qui entre dans l'eau | cloud | 4.12, 4.16 | masse exacte ; temps de pincement convergé à 5 % sur trois mailles ; comparé à une **mesure publiée** de cavité de sphère (*à trouver*, I-14) ; le banc 2D de S318 au bit |
+| **C5** | le **raccord** particules ↔ colonnes en 3D : A316, d'après Chentanez, Müller et Kim (2014), **lus d'abord** | cloud | 4.16, A316 | masse exacte ; surface continue à la frontière **sous 3 mm** ; le ballottement traversant la frontière à la période d'APIC seul (0,15 % à la maille fine, S318) sur **30 s** |
+| **C6** | le **critère de bascule** : où vivent les particules — pli de la surface prédit, cavité, jet, objet qui entre | cloud | 4.16, 4.10 | sur B10 et sur une vague qui déferle : particules seulement dans la bande, colonnes ailleurs ; aucune bascule qui oscille (hystérésis mesurée) ; coût compté |
+| **C7** | APIC **sur la carte** : transfert trié par bloc (Gao *et al.* 2018 ; Fei *et al.* 2021) | poste | 4.19 | B10 de la production à 3 mm de la référence ; coût par particule publié ; δ ≤ 2 ms avec la bande |
+| **C8** | **blocs épars** et domaine qui suit la perturbation ; niveaux de `dx` choisis par l'ordonnanceur (rang 4) ; prévision | poste (référence : cloud) | 4.3, 4.5, 4.9, 9.2 | un domaine suit un objet, change de niveau sans rupture visible (I-12) ; fusion et séparation par ensembles ; famine : issue déclarée |
+| **C9** | **particules diffuses** : embruns, écume, bulles émis par δ | poste | 7.x, 8.4 | rendu seulement (I-04) ; jugé contre des photographies réelles |
+| **C10** | **les scènes** : le joueur qui saute à 5 cm, la gerbe d'étrave, la lame du déversoir (ADR-202 D5) | poste | 4.12, 4.13, 5.10 | le critère d'arrêt du §3.4, revue de l'utilisateur comprise |
+| **C11** | δ **dans Godot** (nuanceurs de calcul), si l'utilisateur le décide (§6) | poste | 8.1, ADR-192 | la scène de C10 rendue dans Godot, identique à la production de l'afficheur à 3 mm |
+
+**L'ordre protège une dépendance chaque fois** (METHODE, L343) : C1 avant C2, parce que les colonnes hautes rendent le
+système de pression plus anisotrope et que le gradient conjugué seul y rampe déjà (A315) ; C2 avant C3, parce que la
+carte reproduit la référence et ne la définit pas (ADR-175 D1) ; C4 avant C5 et C6, parce qu'on ne raccorde pas ce qui
+n'existe pas en 3D ; C3 et C7 avant C10, parce que la scène se juge sous budget. **C1, C2, C4, C5 et C6 — cinq sessions —
+se font sans carte**, dans une session comme celle-ci.
+
+**Lectures à faire**, faute de réseau en S384 (§2) : Chentanez et Müller (2011) avant C2 ; Chentanez, Müller et Kim (2014)
+avant C5 ; Narita *et al.* (2025) avant C8 ; Gao *et al.* (2018) avant C7. Une session qui ne peut pas les lire le dit et
+avance sur ce qui ne dépend pas d'elles.
+
+---
+
+## 6. Ce qui demande l'utilisateur
+
+1. **Où vit δ à la fin.** Aujourd'hui, la production de δ est dans l'afficheur (le banc) ; le rendu final de l'eau est
+   dans Godot (ADR-192) ; δ dans Godot a reçu *« pas maintenant »* (R27). **Proposition** : la campagne construit la
+   production dans l'afficheur jusqu'à C10, où les dépendances sont autorisées et verrouillées ; δ entre dans Godot en
+   C11, quand la scène est reçue. *À savoir* : faut-il le faire plus tôt, pour juger les scènes directement dans Godot ?
+2. **Rien d'autre n'est demandé.** Mailles, colonnes hautes, multigrille, bascule et ordre relèvent de l'autonomie
+   technique (S71) et sont actés par l'ADR de la campagne. Les références visuelles, nous les trouvons (S366).
+
+---
+
+## En une phrase
+
+Le dépôt a déjà le **bon choix de représentation** — la grille pour la pression, APIC là où la surface n'est pas un
+graphe —, celui de la littérature du temps réel depuis 2014 ; il lui manque **l'exécution qui le rend abordable** : le
+domaine de la porte B consomme seul les 2 ms de δ, et la campagne les regagne par les **colonnes hautes** (÷ 3 mailles,
+*estimé*) et la **multigrille**, avant d'ajouter APIC en 3D, son raccord et les scènes — onze sessions, dont cinq sans
+carte graphique, la première étant la multigrille 3D de la référence.
