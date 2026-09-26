@@ -91,7 +91,7 @@ impl Volume3 {
     }
 
     /// S328 : l'ouverture d'une face `u` (0), `v` (1) ou `w` (2) ; 1 sur un fond plat.
-    fn open3(&self, axis: usize, f: usize) -> f32 {
+    pub(super) fn open3(&self, axis: usize, f: usize) -> f32 {
         match &self.cut {
             Some(g) => match axis {
                 0 => g.open_u[f],
@@ -103,7 +103,7 @@ impl Volume3 {
     }
 
     /// S328 : maille de fraction nulle — jamais sur un fond plat.
-    fn solid3(&self, c: usize) -> bool {
+    pub(super) fn solid3(&self, c: usize) -> bool {
         self.cut.as_ref().is_some_and(|g| g.frac[c] == 0.)
     }
 
@@ -457,6 +457,11 @@ impl Volume3 {
         self.divergence(&self.us, &self.vs, &self.ws, &mut rhs);
         self.rhs = rhs;
         self.rhs_mobile3(scale);
+        // S385 : la multigrille, si elle est réservée — sa géométrie suit la surface, figée pendant la projection.
+        let multigrid = self.mg.is_some();
+        if multigrid {
+            self.prepare_multigrid3();
+        }
         let b2 = self.norm2(&self.rhs, jobs)?;
         let Domain3 { nx, ny, nz, .. } = self.domain;
         for k in 0..nz {
@@ -489,7 +494,7 @@ impl Volume3 {
             let before = it;
             while b2 > 0. && (rr > tol * b2 || rr > physical_target) && it < max_iters {
                 if !primed {
-                    rz = self.prime_mobile3(0., jobs)?;
+                    rz = if multigrid { self.prime_multigrid3(0., jobs)? } else { self.prime_mobile3(0., jobs)? };
                     primed = true;
                 }
                 let mut tmp = core::mem::take(&mut self.tmp);
@@ -505,10 +510,16 @@ impl Volume3 {
                     self.res[c] -= alpha * self.tmp[c];
                 }
                 let rn = self.norm2(&self.res, jobs)?;
-                let zn = self.dot_prec3(jobs)?;
-                let beta = zn / rz;
-                self.prime_mobile3(beta, jobs)?;
-                rz = zn;
+                if multigrid {
+                    let zn = self.precondition_multigrid3(jobs)?;
+                    self.direction_multigrid3(zn / rz);
+                    rz = zn;
+                } else {
+                    let zn = self.dot_prec3(jobs)?;
+                    let beta = zn / rz;
+                    self.prime_mobile3(beta, jobs)?;
+                    rz = zn;
+                }
                 rr = rn;
                 it += 1;
             }
@@ -553,7 +564,7 @@ impl Volume3 {
                 since = 0;
             }
             rr = actual;
-            rz = self.prime_mobile3(0., jobs)?;
+            rz = if multigrid { self.prime_multigrid3(0., jobs)? } else { self.prime_mobile3(0., jobs)? };
         };
         let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
         let divergence = match settled {

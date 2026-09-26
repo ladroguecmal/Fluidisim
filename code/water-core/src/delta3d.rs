@@ -170,6 +170,9 @@ pub struct Volume3 {
     linear_sponge: Option<Sponge3>,
     /// Le volume que cette éponge a retiré depuis la configuration, m³ — ce que le bilan doit lui rendre.
     sponge_removed: f64,
+    /// **S385 : la multigrille 3D** (ADR-207 D3), préconditionneur du pas mobile ; `None` par défaut — le Jacobi de
+    /// S296, au bit. `enable_multigrid` la réserve auprès de l'hôte, avant `seal()`.
+    mg: Option<multigrid3::Multigrid3>,
 }
 
 impl Volume3 {
@@ -275,6 +278,7 @@ impl Volume3 {
             lid_floor: 1.,
             linear_sponge: None,
             sponge_removed: 0.,
+            mg: None,
         })
     }
 
@@ -1364,3 +1368,5 @@ mod closure;
 pub use closure::{Closure3, ClosureError};
 #[path = "delta3d_cut.rs"]
 mod cut;
+#[path = "delta3d_multigrid.rs"]
+mod multigrid3;

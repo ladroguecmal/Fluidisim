@@ -7,6 +7,9 @@
 //! **dix pas** à départ chaud, comme en usage. Le préconditionneur est celui du pas mobile — Jacobi, ou le cycle en V de
 //! S385 avec `--multigrille`.
 //!
+//! Deux divergences sont publiées : sur toutes les lignes (`divergence`) et sur les lignes franches seulement
+//! (`divergence_plain`), la seule que la tolérance d'ADR-144 juge.
+//!
 //! Critère 3 du plan de S385, écrit avant la mesure : avec la multigrille, les itérations ne croissent pas de plus de
 //! 50 % de la maille la plus grossière à la plus fine ; avec Jacobi, elles croissent au moins du double.
 //!
@@ -49,6 +52,7 @@ struct Mesure {
     duree_premier: f64,
     duree_moyenne: f64,
     divergence: f64,
+    divergence_franche: f64,
 }
 
 fn mesure(fond: fn(f32, f32) -> f32, coupe: bool, nx: usize, multigrille: bool) -> Mesure {
@@ -67,7 +71,7 @@ fn mesure(fond: fn(f32, f32) -> f32, coupe: bool, nx: usize, multigrille: bool) 
         Volume3::configure(&mut hote, domaine, RHO, G).expect("configuration")
     };
     if multigrille {
-        panic!("la multigrille 3D n'est pas encore construite (S385 P4b)");
+        v.enable_multigrid(&mut hote).expect("multigrille");
     }
     let eta: Vec<f32> = (0..ny)
         .flat_map(|_| (0..nx).map(move |i| LZ + A * (core::f32::consts::TAU * (i as f32 + 0.5) * dx / LX).sin()))
@@ -77,13 +81,14 @@ fn mesure(fond: fn(f32, f32) -> f32, coupe: bool, nx: usize, multigrille: bool) 
     let r = v.step_surface_mobile(DT_US, ITERATIONS_MAX, &jobs).expect("premier pas");
     let duree_premier = debut.elapsed().as_secs_f64();
     assert!(!r.degraded, "premier pas dégradé");
-    let (mut total, mut divergence) = (0u64, r.divergence);
+    let (mut total, mut divergence, mut franche) = (0u64, r.divergence, r.divergence_plain);
     let debut = Instant::now();
     for _ in 0..PAS_CHAUDS {
         let r = v.step_surface_mobile(DT_US, ITERATIONS_MAX, &jobs).expect("pas chaud");
         assert!(!r.degraded, "pas chaud dégradé");
         total += r.iterations as u64;
         divergence = divergence.max(r.divergence);
+        franche = franche.max(r.divergence_plain);
     }
     let duree_moyenne = debut.elapsed().as_secs_f64() / PAS_CHAUDS as f64;
     Mesure {
@@ -93,6 +98,7 @@ fn mesure(fond: fn(f32, f32) -> f32, coupe: bool, nx: usize, multigrille: bool) 
         duree_premier,
         duree_moyenne,
         divergence,
+        divergence_franche: franche,
     }
 }
 
@@ -108,8 +114,8 @@ fn main() {
             let m = mesure(fond, coupe, nx, multigrille);
             println!(
                 "MG3D_S385 fond={nom} methode={methode} nx={nx} mailles={} it_premier={} it_moyen={:.1} \
-                 duree_premier_s={:.3} duree_moyenne_s={:.3} divergence_max={:.3e}",
-                m.mailles, m.it_premier, m.it_moyen, m.duree_premier, m.duree_moyenne, m.divergence
+                 duree_premier_s={:.3} duree_moyenne_s={:.3} divergence_max={:.3e} divergence_franche_max={:.3e}",
+                m.mailles, m.it_premier, m.it_moyen, m.duree_premier, m.duree_moyenne, m.divergence, m.divergence_franche
             );
             premiers.push((m.it_premier as f64, m.it_moyen));
         }

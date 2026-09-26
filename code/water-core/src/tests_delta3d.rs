@@ -1783,3 +1783,114 @@ fn shifting_rest_to_the_mean_level_changes_no_physics_s375() {
     assert!(moyenne(&b).abs() < 0.1 * moyenne(&a).abs());
 }
 
+
+// ---------------------------------------------------------------- S385 : la multigrille 3D (C1, ADR-207 D3)
+
+fn volume_mg(nx: usize, ny: usize, nz: usize, dx: f32, bosse: bool) -> (Volume3, Arena) {
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let domain = Domain3 { nx, ny, nz, dx };
+    let v = {
+        let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+        if bosse {
+            let b: Vec<f32> = (0..ny).flat_map(|j| (0..nx).map(move |i| {
+                let (x, y) = ((i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx);
+                let (a, c) = ((x - 3.0) / 1.2, (y - 1.3) / 0.9);
+                0.4 + 0.6 * (-(a * a + c * c)).exp()
+            })).collect();
+            Volume3::configure_with_bottom(&mut host, domain, 1025., 9.81, &b).unwrap()
+        } else {
+            Volume3::configure(&mut host, domain, 1025., 9.81).unwrap()
+        }
+    };
+    (v, arena)
+}
+
+fn sine_surface(nx: usize, ny: usize, dx: f32) -> Vec<f32> {
+    (0..ny).flat_map(|_| (0..nx).map(move |i| 4. + 0.01 * (core::f32::consts::TAU * (i as f32 + 0.5) * dx / 8.).sin()))
+        .collect()
+}
+
+#[test]
+fn multigrid_hierarchy_is_counted_exactly_s385() {
+    assert_eq!(multigrid3::level_count3(32, 16, 24), 3);
+    assert_eq!(multigrid3::level_count3(7, 16, 24), 0);
+    assert_eq!(multigrid3::level_count3(120, 112, 28), 2);
+    for (nx, ny, nz) in [(32, 16, 24), (16, 8, 12), (7, 5, 3)] {
+        let mg = multigrid3::Multigrid3::new(nx, ny, nz, 0.25);
+        let mut held = mg.z.len() + mg.t.len();
+        for l in &mg.levels {
+            held += l.open_u.len() + l.open_v.len() + l.open_w.len() + l.kind.len() + l.diag.len() + l.x.len()
+                + l.r.len() + l.t.len();
+        }
+        assert_eq!(Some(held), multigrid3::hierarchy_floats3(nx, ny, nz));
+        let (mut v, mut arena) = volume(nx, ny, nz, 0.25, 9.81);
+        let before = arena.stats.persistent_bytes;
+        v.enable_multigrid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        assert_eq!(arena.stats.persistent_bytes - before, held * 4);
+        assert_eq!(v.multigrid_levels(), Some(multigrid3::level_count3(nx, ny, nz)));
+    }
+    // Après `seal()`, la réserve est refusée et rien ne change.
+    let (mut v, mut arena) = volume(16, 8, 12, 0.5, 9.81);
+    arena.sealed = true;
+    assert_eq!(v.enable_multigrid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }), Err(Error::Domain));
+    assert_eq!(v.multigrid_levels(), None);
+}
+
+#[test]
+fn multigrid_cycle_is_symmetric_and_positive_s385() {
+    for bosse in [false, true] {
+        let (nx, ny, nz, dx) = (32, 16, 24, 0.25);
+        let (mut v, mut arena) = volume_mg(nx, ny, nz, dx, bosse);
+        v.enable_multigrid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        v.set_free_surface(&sine_surface(nx, ny, dx), 4.).unwrap();
+        v.rhs.fill(0.);
+        v.rhs_mobile3(1.);
+        v.prepare_multigrid3();
+        let mut vectors = [noise(v.p.len(), 11), noise(v.p.len(), 13)];
+        for x in vectors.iter_mut() {
+            for c in 0..x.len() {
+                if v.prec[c] == 0. { x[c] = 0.; }
+            }
+        }
+        let mut images = Vec::new();
+        for x in &vectors {
+            v.res.copy_from_slice(x);
+            v.v_cycle3();
+            images.push(v.mg.as_ref().unwrap().z.clone());
+        }
+        let dot = |a: &[f32], b: &[f32]| a.iter().zip(b).map(|(x, y)| *x as f64 * *y as f64).sum::<f64>();
+        let (ab, ba) = (dot(&images[0], &vectors[1]), dot(&images[1], &vectors[0]));
+        let scale = (dot(&images[0], &images[0]) * dot(&vectors[1], &vectors[1])).sqrt();
+        assert!((ab - ba).abs() <= 1e-5 * scale, "bosse={bosse} : {ab} contre {ba}");
+        for (z, x) in images.iter().zip(&vectors) {
+            assert!(dot(z, x) > 0., "bosse={bosse}");
+            for c in 0..z.len() {
+                if v.prec[c] == 0. { assert_eq!(z[c], 0.); }
+            }
+        }
+    }
+}
+
+#[test]
+fn multigrid_reaches_the_same_surface_with_fewer_iterations_s385() {
+    for bosse in [false, true] {
+        let (nx, ny, nz, dx) = (32, 16, 24, 0.25);
+        let (mut a, _) = volume_mg(nx, ny, nz, dx, bosse);
+        let (mut b, mut arena) = volume_mg(nx, ny, nz, dx, bosse);
+        b.enable_multigrid(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }).unwrap();
+        for v in [&mut a, &mut b] {
+            v.set_free_surface(&sine_surface(nx, ny, dx), 4.).unwrap();
+        }
+        let (mut ia, mut ib) = (0u32, 0u32);
+        for _ in 0..20 {
+            let ra = a.step_surface_mobile(2000, 20_000, &Jobs).unwrap();
+            let rb = b.step_surface_mobile(2000, 20_000, &Jobs).unwrap();
+            assert!(!ra.degraded && !rb.degraded);
+            ia += ra.iterations;
+            ib += rb.iterations;
+        }
+        let worst = a.surface().iter().zip(b.surface()).fold(0f32, |m, (x, y)| m.max((x - y).abs()));
+        assert!(worst <= 1e-6, "bosse={bosse} : écart {worst} m");
+        assert!(2 * ib < ia, "bosse={bosse} : {ib} itérations contre {ia}");
+    }
+}

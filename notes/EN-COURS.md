@@ -87,9 +87,9 @@ et temps total publiés, au même résidu.
 - [x] **P2** — verdict R32 consigné (REVUE-VISUELLE §37, file : les défauts nommés, déclencheur « peaufinage »).
 - [x] **P3** — l'instrument d'abord : `examples/delta3d_multigrille.rs`, trois mailles, fond plat et bosse, itérations et
   temps de Jacobi — la référence de mesure.
-- [ ] **P4a** — `delta3d_multigrid.rs` : niveaux 3D (géométrie, restriction, prolongation, opérateur, lissage) ; comptés
+- [x] **P4a** — `delta3d_multigrid.rs` : niveaux 3D (géométrie, restriction, prolongation, opérateur, lissage) ; comptés
   auprès de l'hôte (I-06) ; essais de forme.
-- [ ] **P4b** — le cycle en V et son branchement dans `project_mobile3` (`enable_multigrid`) ; critère 1.
+- [x] **P4b** — le cycle en V et son branchement dans `project_mobile3` (`enable_multigrid`) ; critère 1.
 - [ ] **P5** — critères 2 à 4 : essais et banc.
 - [ ] **P6** — critère 5 (suite entière), critère 6 (coût) ; preuve `MULTIGRILLE-3D-S385` ; liste, file, feuille de route,
   index.
@@ -107,3 +107,11 @@ sinusoïde de 1 cm ; premier pas depuis `p = 0`, puis dix pas chauds) :
 
 Croissance de 32 à 128 : premier pas ×3,58 (plat), ×3,79 (bosse) ; chaud ×2,35, ×2,40 — Jacobi croît bien au moins du
 double (critère 3, partie Jacobi). Divergence max 9,5·10⁻⁶ (sous 10⁻⁵).
+
+**P4a–P4b — un seul commit** : P4a seul laissait le module inutilisé, donc des avertissements (critère 5). Construit :
+`delta3d_multigrid.rs` (niveaux, `coarsen3`, `row_sums`, `restrict3`, `prolong_add3`, `smooth3`, `coarse_cycle3` ;
+`enable_multigrid`, `prepare_multigrid3`, `v_cycle3`, `prime_multigrid3`, `precondition_multigrid3`) ; branché dans
+`project_mobile3` derrière `mg.is_some()` ; `open3` et `solid3` passés `pub(super)`. **Critère 1 tenu** : symétrie et
+positivité sur fond plat et sur la bosse (`multigrid_cycle_is_symmetric_and_positive_s385`) ; **vu échouer** sur un
+cycle rendu asymétrique (un lissage après au lieu de deux : 1,23 contre 1,13), puis rétabli. Critère 2 à 32 mailles :
+surfaces à 10⁻⁶ m après 20 pas, deux fois moins d'itérations au moins (`…_with_fewer_iterations_s385`).
