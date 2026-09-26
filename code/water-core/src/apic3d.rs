@@ -1163,4 +1163,4 @@ impl Apic3 {
 
 #[cfg(test)]
 #[path = "tests_apic3d.rs"]
-mod tests;
+pub(crate) mod tests;

@@ -99,6 +99,8 @@ pub mod pressure_journal;
 /// S278, ADR-012 : l'**ordonnanceur** — ce qui decide qu'une zone est simulee, analytique ou
 /// en transition. Concu depuis S01, ecrit a partir de S278.
 pub mod scheduler;
+/// S396 : les domaines comme ensembles de blocs — fusion et séparation (ADR-006 §3–4).
+pub mod domain_blocks;
 
 /// S143, A210 : les gardes du contrat de pente. Elles ne portent sur aucun module en
 /// particulier — c'est leur objet : ce qui est comparé à `max_slope`, **partout**.

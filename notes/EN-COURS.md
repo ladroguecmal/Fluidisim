@@ -87,14 +87,20 @@ départ **≤ 1 % de l'amplitude**. Publié : fusions plus tardives, et une sép
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — `domain_blocks.rs` : ensembles de blocs, dilatation, composantes, critères de fusion et de séparation avec leurs
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — `domain_blocks.rs` : ensembles de blocs, dilatation, composantes, critères de fusion et de séparation avec leurs
   délais ; essais ; critère 1.
-- [ ] **P3** — `Volume3::transplant` : l'état d'un domaine recopié dans un autre sur le réseau commun ; l'aller-retour ;
+- [>] **P3** — `Volume3::transplant` : l'état d'un domaine recopié dans un autre sur le réseau commun ; l'aller-retour ;
   critère 2.
 - [ ] **P4** — l'exemple `delta3d_fusion` : deux bosses, la fusion au critère, contre le domaine unique ; critère 3 ; publiés.
 - [ ] **P5** — critère 4 ; preuve `FUSION-S396` ; liste, file, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
-
+**P2 — `domain_blocks.rs`** : `Block`, `BlockSet` (trié, capacité réservée, `insert`, `union_with`, `bounds`, `touches`,
+`components` par union-find sans allocation), `SplitClock`. **Critère 1 tenu** : quatre essais — tri et capacité ; la fusion
+est l'union et la même relation sépare (écarts 4 à 7 blocs au rayon 2 : liés jusqu'à 5) ; composantes numérotées ; une
+seconde continue, un clignotement de 0,9 s / 0,1 s pendant 10 s ne sépare jamais. **Vu échouer** : liaison à `2r` au lieu
+de `2r + 1`, deux essais tombent. **Précision du plan** : la durée de vie minimale de 0,75 s (ADR-006 §4) règle
+l'**extinction**, qui est à l'ordonnanceur ; ici, une fusion fait naître un domaine dont l'horloge repart de zéro — il vit au
+moins 1,0 s avant de se séparer.
