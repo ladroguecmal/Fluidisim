@@ -2336,6 +2336,17 @@ struct Hybride {
     /// volume, à de l'eau ajoutée ou ôtée à la surface : le solde de l'échange tenu en un seul compte ; la particule la plus
     /// haute de la dernière colonne libre part quand une particule est due, la nouvelle se pose sur sa rangée du haut.
     sommet: bool,
+    /// **S397 : l'advection des colonnes** (`RACCORD_ADVECTION=1`, H1). Réensemencées sur des points fixes à la vitesse que
+    /// la grille a **en ces points**, les colonnes ne transportent pas la quantité de mouvement : `(u·∇)u` existe du côté des
+    /// particules, pas du leur. Ici chaque particule neuve prend la vitesse (et la matrice affine) de la grille **au pied de
+    /// sa caractéristique**, `x − dt·u(x)` : une advection semi-lagrangienne.
+    advection: bool,
+    /// Le pas qui vient d'être fait, s — celui de l'advection des colonnes.
+    dt_pas: f64,
+    /// **S397 (D) : la hauteur mouillée amont à la frontière** (`RACCORD_AMONT=1`). La face de la frontière prenait toujours
+    /// la hauteur des colonnes ; quand l'eau va des particules aux colonnes, l'amont est la dernière colonne libre — sa
+    /// hauteur géométrique, lue avant que les particules des colonnes ne partent.
+    amont: bool,
 }
 
 impl Hybride {
@@ -2381,6 +2392,9 @@ impl Hybride {
                 energie_densite: 0.0,
                 bilan: std::env::var("RACCORD_BILAN").is_ok_and(|v| v == "1").then(|| (vec![0; ny], vec![0; ny])),
                 sommet: std::env::var("RACCORD_SOMMET").is_ok_and(|v| v == "1"),
+                advection: std::env::var("RACCORD_ADVECTION").is_ok_and(|v| v == "1"),
+                dt_pas: 0.0,
+                amont: std::env::var("RACCORD_AMONT").is_ok_and(|v| v == "1"),
             };
         if ensemence == "hysterese" {
             hy.rangees = Some(hy.h.iter().map(|h| (2.0 * h / dx).round().max(0.0) as usize).collect());
@@ -2436,7 +2450,7 @@ impl Hybride {
                 for r in 0..rangees {
                     for cote in [0.25, 0.75] {
                         let p = [(i as f64 + cote) * dx, (r as f64 + 0.5) * pas];
-                        let (v, c) = self.apic.depuis_grille(p);
+                        let (v, c) = self.apic.depuis_grille(self.pied(p));
                         self.apic.x.push(p);
                         self.apic.v.push(v);
                         self.apic.c.push(c);
@@ -2447,12 +2461,21 @@ impl Hybride {
             let n = (4.0 * self.h[col] / dx).round().max(0.0) as usize;
             for m in 0..n {
                 let p = [(i as f64 + 0.25 + 0.5 * (m % 2) as f64) * dx, ((m / 2) as f64 + 0.5) * 0.5 * dx];
-                let (v, c) = self.apic.depuis_grille(p);
+                let (v, c) = self.apic.depuis_grille(self.pied(p));
                 self.apic.x.push(p);
                 self.apic.v.push(v);
                 self.apic.c.push(c);
             }
         }
+    }
+
+    /// S397 : le pied de la caractéristique d'un point des colonnes, `x − dt·u(x)` ; le point lui-même sans l'advection.
+    fn pied(&self, p: [f64; 2]) -> [f64; 2] {
+        if !self.advection || self.dt_pas == 0.0 {
+            return p;
+        }
+        let (u, v) = self.apic.mac.vitesse(p[0], p[1]);
+        [p[0] - self.dt_pas * u, p[1] - self.dt_pas * v]
     }
 
     /// **S394 : la bande.** La hauteur géométrique de la colonne `i_b − 1`, lue sur la surface reconstruite **avec** les
@@ -2603,6 +2626,9 @@ impl Candidat for Hybride {
         let area = 0.25 * dx * dx;
         let libres_avant: Vec<bool> = self.apic.x.iter().map(|p| p[0] < xb).collect();
         let dt = self.apic.pas(dt_max);
+        self.dt_pas = dt;
+        // S397 (D) : la hauteur géométrique de la dernière colonne libre, toutes les particules encore là.
+        let h_amont = if self.amont { self.apic.colonnes()[self.i_b - 1].map(|(_, g)| g) } else { None };
         if self.paroi {
             // S327 P5 : la frontière est une paroi pour les particules libres.
             let bord = xb - 1e-6 * dx;
@@ -2671,8 +2697,8 @@ impl Candidat for Hybride {
                 self.attente[k] += q;
                 sortie += q;
             } else if self.eulerien && u > 0.0 {
-                // S327 : l'entrée, par le même flux et la même hauteur mouillée que la sortie.
-                let q = u * mouille(self.h[0], k) * dx * dt;
+                // S327 : l'entrée, par le même flux et la même hauteur mouillée que la sortie ; S397 (D), l'amont.
+                let q = u * mouille(h_amont.unwrap_or(self.h[0]), k) * dx * dt;
                 if self.arrondi || self.solde {
                     // Le solde signé : l'attente devient négative quand les particules libres doivent.
                     self.attente[k] -= q;

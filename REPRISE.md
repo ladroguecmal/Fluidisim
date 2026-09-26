@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 23:47 +02:00
+Battement        : 2026-09-26 23:55 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
 Session en cours : S397 — C5a, troisième part : la circulation à la frontière du raccord — les colonnes transportent-elles la quantité de mouvement ?
 Dernière session : S396 — physique : **C8a, fusion et séparation de domaines en référence** ([preuve](docs/validation/FUSION-S396.md)) — les domaines comme ensembles de blocs (ADR-006 §3–4), l'état recopié au bit ; fusionnés au critère, 0,26 % de l'amplitude du domaine unique (3,4 à 8,5 % si trop tard) ; **4.9 partiel**. Avant : S395, la circulation permanente à la frontière du raccord

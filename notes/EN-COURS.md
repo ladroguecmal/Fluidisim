@@ -83,11 +83,43 @@ période et amortissement à 1 point d'APIC seul, à 5 et 2,5 cm ; repos < 1 cm/
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul ; la décision de l'utilisateur consignée.
-- [ ] **P2** — l'advection des colonnes (`RACCORD_ADVECTION=1`) ; le profil de la face ; critères 1 et 2.
-- [ ] **P3** — les critères de S394 avec l'advection, 5 et 2,5 cm, repos ; critère 3 ; attribution si manqué.
-- [ ] **P4** — preuve (§16 de B10-APIC-S320) ; A316, file, liste.
+- [x] **P1** — jeton, plan seul ; la décision de l'utilisateur consignée.
+- [x] **P2** — l'advection des colonnes (`RACCORD_ADVECTION=1`) ; le profil de la face ; critères 1 et 2.
+- [x] **P3** — les critères de S394 avec l'advection, 5 et 2,5 cm, repos ; critère 3 ; attribution si manqué.
+- [>] **P4** — preuve (§16 de B10-APIC-S320) ; A316, file, liste.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+**P2 — H1 confirmée, critères 1 et 2 tenus.** Sans variable, au bit (0,3893 ; 0,50098 / 0,50734 / 0,51211 ; 2,17339 s). Avec
+l'advection, paroi, 5 cm : vitesse moyenne sur la face **|ū| ≤ 4,1 mm/s** à toute profondeur (S395 : +21 / −54 ; APIC seul
+≤ 2,2) — **la circulation était le transport de quantité de mouvement manquant aux colonnes.**
 
+**P3 — critère 3, avec l'advection** (30 s ; écarts à APIC seul) :
+
+| montage | masse à gauche, par 10 s (m²) | densité | saut | période (points) | amortissement (points) |
+|---|---|---|---:|---:|---:|
+| paroi, 5 cm | +0,0006 / +0,0004 / **+0,0026** | **3,71 / 3,58 / 3,67** | 0,45 | **+3,0** | +0,4 |
+| paroi, 2,5 cm | +0,0012 / **+0,0035 / +0,0059** | 3,81 / 3,88 / 4,03 | **0,56** | +0,1 | −0,9 |
+| solde, 5 cm | +0,0003 / +0,0016 / +0,0012 | **3,72 / 3,74 / 3,75** | 0,24 | **+3,2** | +0,3 |
+| solde, 2,5 cm | +0,0008 / **+0,0032 / +0,0059** | **3,75** / 3,84 / 3,92 | **0,54** | −0,1 | **−1,1** |
+| eulérien, 5 cm | −0,0008 / −0,0015 / +0,0010 | **3,31 / 3,21 / 3,30** | **1,10** | **+2,0** | +0,2 |
+
+Repos, paroi et solde : 0,65 cm/s (tenu). Circulation du solde à 5 cm : |ū| < 1,1 mm/s. **Non tenu.** À 2,5 cm, la masse migre
+**autant qu'en S354** (+0,0058) : une seconde cause, que l'advection n'a pas touchée. Bilan à 2,5 cm (solde) : insertions
+réparties sur toute la profondeur (plus de recirculation) ; la rangée de surface a une vitesse moyenne de **+20 mm/s** sur la
+face (APIC seul +4), et la surface saute d'une demi-maille.
+
+**Candidat (D), déclaré avant sa mesure, critères inchangés** : le débit de la face de frontière prend toujours la hauteur
+mouillée **des colonnes** (`h[0]`) ; quand l'eau va des particules aux colonnes, la hauteur amont est celle des particules —
+si leur surface est plus haute, l'entrée est sous-comptée, l'eau s'accumule du côté des particules et la marche tient.
+**(D)** : pour `u > 0`, la hauteur géométrique de la dernière colonne libre, lue avant le retrait des particules des colonnes ;
+`h[0]` pour `u < 0` (`RACCORD_AMONT=1`, avec l'advection).
+
+**(D) réfuté** (avec l'advection, 30 s) : à 2,5 cm, masse à gauche +0,0007 / +0,0034 / **+0,0061** (solde), +0,0011 / +0,0039 /
+**+0,0059** (paroi) — la migration ne change pas ; à 5 cm, solde +0,0024 sur la dernière tranche (pire que sans (D)). La hauteur
+amont n'est pas la seconde cause. **Non attribuée.**
+
+**Ce que cela dit pour la 3D** : le pas mobile de `Volume3` **advecte** la quantité de mouvement (`advect_mobile3`, ADR-209) —
+les colonnes du raccord 3D ne sont pas celles du banc 2D. **La circulation de S395 était un défaut du modèle de colonnes du
+banc** (réensemencé sans advection), non du raccord. La migration à 2,5 cm, elle, reste à voir en 3D, où l'on porte : colonnes
+qui advectent, échange par le flux de la face, retrait là où les particules arrivent, instruments de S394–S397.
