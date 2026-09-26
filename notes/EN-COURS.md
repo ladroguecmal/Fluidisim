@@ -92,8 +92,8 @@ d'un diamètre de l'axe, qu'un remplissage depuis le haut n'atteint pas ; **pinc
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — verdict R33 consigné (revue, preuve, décisions, file).
 - [x] **P3** — le corps cinématique dans `apic3d.rs` ; essais (repos à demi immergé, masse) ; critères 1 et 2.
-- [>] **P4** — l'exemple `apic3d_b10` (quart ou entier, mesures) ; critère 3.
-- [ ] **P5** — la convergence, la plage publiée, `Fr` = 4, les parois ; critères 4 et 5.
+- [x] **P4** — l'exemple `apic3d_b10` (quart ou entier, mesures) ; critère 3.
+- [>] **P5** — la convergence, la plage publiée, `Fr` = 4, les parois ; critères 4 et 5.
 - [ ] **P6** — critère 6 ; preuve `B10-APIC3D-S393` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
@@ -118,3 +118,9 @@ Essais : refus (rayon nul, NaN), entrée de vingt pas (masse, aucune particule d
 Premier point, `Fr` = 2, `D/dx` = 8, quart, demi-largeur 2 D : pincement **1,507 √(D/g) = 2,131 √(R/g)**, pas de 0,027 √(D/g),
 base du corps à 3,01 D, cavité max 1,94 D, couronne 0,21 D, 71 pas, 40 s. Lancés : entier à 8 (critère 3), quart à 12 et 16
 (critère 4), `Fr` = 4 à 8 ; sorties dans le bloc-notes de la session.
+
+**P4 — critère 3 tenu, à la limite** : `Fr` = 2, `D/dx` = 8, domaine **entier** (86 016 mailles, 524 288 particules, 167 s) :
+pincement **1,4803** √(D/g) contre **1,5067** au quart — **un pas** d'écart (0,0264 pour un pas de 0,0266) ; profondeur 1,44
+contre 1,31 D, cavité 1,81 contre 1,94 D (une maille chacune). Le quart n'est pas le domaine entier au bit : près des parois,
+les poids trilinéaires se figent sur la rangée du bord (S388) et l'extrapolation s'y arrête — la symétrie est discrète, pas
+exacte.
