@@ -1,11 +1,16 @@
-//! WVST V1 : écarts à une base auteur immuable, ADR-140. Aucun stockage ni transport implicite.
-use super::{geometry, Error, Flow, HydroNode, Opening, Shapes};
+//! WVST V2 : écarts à une base auteur immuable, ADR-140. Aucun stockage ni transport implicite.
+//!
+//! **Version 2, S372** (ADR-199 D5) : la commande d'une arête est
+//! un état ; une troisième liste d'écarts porte les commandes différentes de celles de l'auteur, comptée dans les quatre
+//! octets que la version 1 réservait. La commande n'entre pas dans la configuration comparée à la base, mais la commande
+//! d'auteur entre dans son empreinte. Une sauvegarde version 1 est refusée (`Version`) : aucune migration.
+use super::{geometry, Error, Flow, HydroNode, Opening, Shapes, CONTROL_FULL};
 use crate::{hash::Hasher64, SimTime};
 
 pub const HEADER: usize = 80;
 const RECORD: usize = 12;
 const TRAILER: usize = 8;
-const VERSION: u16 = 1;
+const VERSION: u16 = 2;
 /// À incrémenter si le calcul de V change les bits de la continuation.
 const CALCULATION_VERSION: u32 = 1;
 
@@ -49,7 +54,7 @@ fn valid_edge(e: &Opening, nodes: usize) -> bool {
     };
     (e.from as usize) < nodes && e.to.map_or(true, |t| (t as usize) < nodes)
         && size >= 0 && e.discharge.is_finite() && e.discharge >= 0.0
-        && (0..1_000_000).contains(&e.residue_nl)
+        && (0..1_000_000).contains(&e.residue_nl) && (0..=CONTROL_FULL).contains(&e.control_pm)
 }
 fn same_node(a: &HydroNode, b: &HydroNode) -> bool {
     a.capacity_ml == b.capacity_ml && a.origin_um == b.origin_um && a.shape == b.shape
@@ -107,6 +112,7 @@ impl<'a> Baseline<'a> {
             }
             for x in e.position_um { h.write_u64(x as u64); }
             h.write_u32(e.discharge.to_bits());
+            h.write_u64(e.control_pm as u64);
         }
         h.write_u8(u8::from(shapes.table.is_empty()));
         h.write_u64(shapes.count() as u64);
@@ -138,11 +144,11 @@ impl<'a> Baseline<'a> {
         Ok(())
     }
 
-    fn counts(&self, nodes: &[HydroNode], edges: &[Opening]) -> Result<(usize, usize), SnapshotError> {
+    fn counts(&self, nodes: &[HydroNode], edges: &[Opening]) -> Result<(usize, usize, usize), SnapshotError> {
         if nodes.len() != self.nodes.len() || edges.len() != self.edges.len() {
             return Err(SnapshotError::Configuration);
         }
-        let (mut nc, mut ec) = (0, 0);
+        let (mut nc, mut ec, mut cc) = (0, 0, 0);
         for (n, base) in nodes.iter().zip(self.nodes) {
             if !same_node(n, base) { return Err(SnapshotError::Configuration); }
             if !(0..=n.capacity_ml).contains(&n.volume_ml) { return Err(SnapshotError::State(Error::Capacity)); }
@@ -151,14 +157,16 @@ impl<'a> Baseline<'a> {
         for (e, base) in edges.iter().zip(self.edges) {
             if !same_edge(e, base) { return Err(SnapshotError::Configuration); }
             if !(0..1_000_000).contains(&e.residue_nl) { return Err(SnapshotError::Record); }
+            if !(0..=CONTROL_FULL).contains(&e.control_pm) { return Err(SnapshotError::State(Error::Capacity)); }
             ec += usize::from(e.residue_nl != 0);
+            cc += usize::from(e.control_pm != base.control_pm);
         }
-        Ok((nc, ec))
+        Ok((nc, ec, cc))
     }
 
     pub fn snapshot_len(&self, nodes: &[HydroNode], edges: &[Opening]) -> Result<usize, SnapshotError> {
-        let (nc, ec) = self.counts(nodes, edges)?;
-        nc.checked_add(ec).and_then(|n| n.checked_mul(RECORD))
+        let (nc, ec, cc) = self.counts(nodes, edges)?;
+        nc.checked_add(ec).and_then(|n| n.checked_add(cc)).and_then(|n| n.checked_mul(RECORD))
             .and_then(|n| n.checked_add(HEADER + TRAILER)).ok_or(SnapshotError::Length)
     }
 
@@ -167,7 +175,7 @@ impl<'a> Baseline<'a> {
                          output: &mut [u8]) -> Result<usize, SnapshotError> {
         self.context(context)?;
         let len = self.snapshot_len(nodes, edges)?;
-        let (nc, ec) = self.counts(nodes, edges)?;
+        let (nc, ec, cc) = self.counts(nodes, edges)?;
         if output.len() < len { return Err(SnapshotError::Capacity); }
         let b = &mut output[..len];
         b[..HEADER].fill(0);
@@ -182,6 +190,7 @@ impl<'a> Baseline<'a> {
         for (i, g) in context.g_eff.iter().enumerate() { b[56+4*i..60+4*i].copy_from_slice(&g.to_bits().to_le_bytes()); }
         b[68..72].copy_from_slice(&(nc as u32).to_le_bytes());
         b[72..76].copy_from_slice(&(ec as u32).to_le_bytes());
+        b[76..80].copy_from_slice(&(cc as u32).to_le_bytes());
         let mut at = HEADER;
         let mut write = |index: usize, value: i64| {
             b[at..at+4].copy_from_slice(&(index as u32).to_le_bytes());
@@ -194,6 +203,9 @@ impl<'a> Baseline<'a> {
         for (i, e) in edges.iter().enumerate() {
             if e.residue_nl != 0 { write(i, e.residue_nl); }
         }
+        for (i, (e, base)) in edges.iter().zip(self.edges).enumerate() {
+            if e.control_pm != base.control_pm { write(i, e.control_pm); }
+        }
         let check = checksum(&b[..len-TRAILER]);
         b[len-TRAILER..].copy_from_slice(&check.to_le_bytes());
         Ok(len)
@@ -205,9 +217,9 @@ impl<'a> Baseline<'a> {
         -> Result<Context, SnapshotError> {
         if b.len() < HEADER + TRAILER { return Err(SnapshotError::Length); }
         if &b[..4] != b"WVST" || b[4..6] != VERSION.to_le_bytes() { return Err(SnapshotError::Version); }
-        if b[6..8] != [0; 2] || b[76..80] != [0; 4] { return Err(SnapshotError::Reserved); }
-        let (nc, ec) = (u32_at(b, 68) as usize, u32_at(b, 72) as usize);
-        let expected = nc.checked_add(ec).and_then(|n| n.checked_mul(RECORD))
+        if b[6..8] != [0; 2] { return Err(SnapshotError::Reserved); }
+        let (nc, ec, cc) = (u32_at(b, 68) as usize, u32_at(b, 72) as usize, u32_at(b, 76) as usize);
+        let expected = nc.checked_add(ec).and_then(|n| n.checked_add(cc)).and_then(|n| n.checked_mul(RECORD))
             .and_then(|n| n.checked_add(HEADER + TRAILER)).ok_or(SnapshotError::Length)?;
         if expected != b.len() || u64_at(b, 8) != b.len() as u64 { return Err(SnapshotError::Length); }
         if checksum(&b[..b.len()-TRAILER]) != u64_at(b, b.len()-TRAILER) { return Err(SnapshotError::Integrity); }
@@ -219,17 +231,21 @@ impl<'a> Baseline<'a> {
             g_eff: std::array::from_fn(|i| f32::from_bits(u32_at(b, 56+4*i))) };
         self.context(context)?;
         let mut at = HEADER;
-        for (count, is_node) in [(nc, true), (ec, false)] {
+        // Trois listes : volumes (0), restes (1), commandes (2).
+        for (count, list) in [(nc, 0), (ec, 1), (cc, 2)] {
             let mut previous = None;
             for _ in 0..count {
                 let index = u32_at(b, at) as usize;
                 let value = i64_at(b, at+4);
                 if previous.is_some_and(|old| old >= index) { return Err(SnapshotError::Record); }
-                if is_node {
+                if list == 0 {
                     let base = self.nodes.get(index).ok_or(SnapshotError::Record)?;
                     if !(0..=base.capacity_ml).contains(&value) || value == base.volume_ml { return Err(SnapshotError::Record); }
-                } else if index >= self.edges.len() || !(1..1_000_000).contains(&value) {
-                    return Err(SnapshotError::Record);
+                } else if list == 1 {
+                    if index >= self.edges.len() || !(1..1_000_000).contains(&value) { return Err(SnapshotError::Record); }
+                } else {
+                    let base = self.edges.get(index).ok_or(SnapshotError::Record)?;
+                    if !(0..=CONTROL_FULL).contains(&value) || value == base.control_pm { return Err(SnapshotError::Record); }
                 }
                 previous = Some(index);
                 at += RECORD;
@@ -245,6 +261,10 @@ impl<'a> Baseline<'a> {
         }
         for _ in 0..ec {
             edges[u32_at(b, at) as usize].residue_nl = i64_at(b, at+4);
+            at += RECORD;
+        }
+        for _ in 0..cc {
+            edges[u32_at(b, at) as usize].control_pm = i64_at(b, at+4);
             at += RECORD;
         }
         Ok(context)

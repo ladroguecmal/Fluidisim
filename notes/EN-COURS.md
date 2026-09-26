@@ -88,7 +88,7 @@ pas déterministe au bit, refus atomiques. (6) Instantané v2 : une commande cha
 - [x] **P2** — ADR-199 : vannes et pompes dans V (lois, commande, provenance, ce qui n'est pas fait).
 - [x] **P3** — `control_pm` sur `Opening` ; la vanne ; critères 1 et 2.
 - [x] **P4** — la pompe ; critères 3 à 5.
-- [ ] **P5** — l'instantané WVST v2 ; critère 6.
+- [x] **P5** — l'instantané WVST v2 ; critère 6.
 - [ ] **P6** — preuve `VANNES-POMPES-S372`, liste 5.4, file, feuille de route, index, ADR-010 et ADR-140 notes datées.
 - [ ] **P7** — rituel.
 
@@ -108,3 +108,10 @@ libre ou noyé, clapet, à sec, similitude ; refus si `H0 ≤ 0` ou débit néga
 2 500 ; à mi-vitesse 3 m ne se montent plus. **Critère 5** : réseau d'avarie (mer, deux compartiments, vanne, deux
 pompes, commandes changeantes, 6 000 pas) : masse exacte à chaque pas, bornes, deux exécutions au bit
 (`0xc0ee093528e34036`). Empreinte à commande pleine inchangée. Suite du cœur : 534 + 20 + 2 + 1 réussis, 14 ignorés.
+
+**P5 — fait.** WVST version 2 : troisième liste (commandes ≠ auteur), comptée aux octets 76..80 ; commande d'auteur dans
+l'empreinte de la base ; configuration comparée sans la commande ; v1 refusée (`Version`). L'essai d'en-tête existant
+attend désormais `WVST`. **Critère 6** : vanne à 300 et pompe à pleine vitesse capturées après 300 pas, restaurées
+dans une destination sale : suite de 1 000 pas **identique au bit** (`0x71b3c56c74d1912b`) ; témoin d'omission
+(commandes d'auteur) : diverge. Refus : commande égale à l'auteur, 1 001, −1, en-tête v1 ; sans écart, 88 octets comme
+en v1. Suite du cœur : 536 + 20 + 2 + 1, 14 ignorés ; espace de travail entier : 0 avertissement.

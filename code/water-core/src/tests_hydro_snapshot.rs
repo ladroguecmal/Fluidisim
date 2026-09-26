@@ -30,7 +30,8 @@ fn deltas_restore_from_author_base_and_preserve_context_bits() {
     let mut b = vec![0xaa; base.snapshot_len(&n, &e).unwrap() + 3];
     let len = base.snapshot_into(&n, &e, c, &mut b).unwrap();
     assert_eq!(len, 112); assert_eq!(&b[len..], &[0xaa; 3]);
-    assert_eq!(&b[..8], b"WVST\x01\0\0\0");
+    // S372 (ADR-199 D5) : version 2 — la commande des arêtes est un état ; la version 1 est refusée, sans migration.
+    assert_eq!(&b[..8], b"WVST\x02\0\0\0");
     assert_eq!(&b[40..48], &u64::MAX.to_le_bytes());
     assert_eq!(&b[80..84], &0u32.to_le_bytes());
     assert_eq!(&b[84..92], &749_900i64.to_le_bytes());

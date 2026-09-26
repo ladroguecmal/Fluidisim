@@ -342,3 +342,108 @@ fn an_unrepresentable_pump_is_refused_atomically_s372() {
         assert_eq!(nodes[0].volume_ml, 900_000);
     }
 }
+
+/// Le montage des essais d'instantané : une citerne qui se vide par une vanne dans une cale, et une pompe de cale qui
+/// rejette hors réseau.
+fn montage_commande() -> ([HydroNode; 2], [Opening; 2]) {
+    (
+        [node(800_000, 1_000_000, 1_000_000), node(100_000, 1_000_000, 0)],
+        [
+            orifice(0, Some(1), 2_000, [0, 0, 1_000_000]),
+            Opening { control_pm: 400, ..pump(1, None, 3_000, 6_000_000, [0, 0, 0], [0, 0, 2_000_000]) },
+        ],
+    )
+}
+
+/// **Critère 6** — WVST version 2 (ADR-199 D5). Des commandes changées en cours de partie — la vanne à 300, la pompe à
+/// pleine vitesse — traversent la capture et la restauration dans une destination sale ; la suite est **identique au
+/// bit** à celle du graphe jamais sauvegardé. Témoin d'omission : la même restauration, commandes remises à celles de
+/// l'auteur, diverge — ce que la version 1 aurait perdu.
+#[test]
+fn changed_controls_survive_the_snapshot_bit_for_bit_s372() {
+    use super::snapshot::{Baseline, Context};
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let (auteur_n, auteur_e) = montage_commande();
+    let base = Baseline::new(41, 2, &auteur_n, &auteur_e, &shapes).unwrap();
+    let (mut n, mut e) = montage_commande();
+    let mut scratch = [0i64; 2];
+    for k in 0..300 {
+        e[0].control_pm = if k < 150 { 1_000 } else { 300 };
+        e[1].control_pm = if k < 200 { 400 } else { 1_000 };
+        step(&mut n, &mut e, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+    }
+    let contexte = Context { time: SimTime(300 * STEP_US), dt: SimTime(STEP_US), g_eff: DOWN };
+    let mut tampon = vec![0u8; base.snapshot_len(&n, &e).unwrap()];
+    base.snapshot_into(&n, &e, contexte, &mut tampon).unwrap();
+    let mut rn = [node(7, 1_000_000, 0); 2];
+    let mut re = [Opening { control_pm: 13, residue_nl: 99, ..orifice(0, None, 1, [0; 3]) }; 2];
+    assert_eq!(base.restore_into(&tampon, &mut rn, &mut re).unwrap(), contexte);
+    assert_eq!(re.map(|x| x.control_pm), [300, 1_000], "commandes restaurées");
+    let suite = |mut n: [HydroNode; 2], mut e: [Opening; 2]| {
+        let mut h = Hasher64::new();
+        let mut scratch = [0i64; 2];
+        for _ in 0..1_000 {
+            step(&mut n, &mut e, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+            hash_state(&mut h, &n, &e);
+        }
+        h.finish()
+    };
+    let jamais = suite(n, e);
+    let restauree = suite(rn, re);
+    let mut omise = re;
+    omise[0].control_pm = auteur_e[0].control_pm;
+    omise[1].control_pm = auteur_e[1].control_pm;
+    let temoin = suite(rn, omise);
+    println!("INSTANTANE_S372 taille={} octets suite={jamais:#018x} restauree={restauree:#018x} temoin_omission={temoin:#018x}", tampon.len());
+    assert_eq!(restauree, jamais, "la suite restaurée diverge");
+    assert_ne!(temoin, jamais, "le témoin d'omission doit discriminer");
+    // Deux écarts de commande, deux de volume, restes : 88 + 12 × n.
+    assert_eq!((tampon.len() - 88) % 12, 0);
+}
+
+/// Refus de la version 2 : une commande égale à celle de l'auteur (non canonique), hors de 0..=1 000, ou un en-tête de
+/// version 1 ; aucune destination touchée. Sans commande changée, la taille est celle de la version 1.
+#[test]
+fn control_records_are_validated_and_version_one_is_refused_s372() {
+    use super::snapshot::{Baseline, Context, SnapshotError};
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let (auteur_n, auteur_e) = montage_commande();
+    let base = Baseline::new(41, 2, &auteur_n, &auteur_e, &shapes).unwrap();
+    let contexte = Context { time: SimTime(0), dt: SimTime(STEP_US), g_eff: DOWN };
+    // Sans écart : 88 octets, comme la version 1 le faisait.
+    assert_eq!(base.snapshot_len(&auteur_n, &auteur_e).unwrap(), 88);
+    let mut e = auteur_e;
+    e[1].control_pm = 900;
+    let mut bon = vec![0u8; base.snapshot_len(&auteur_n, &e).unwrap()];
+    base.snapshot_into(&auteur_n, &e, contexte, &mut bon).unwrap();
+    assert_eq!(bon.len(), 100);
+    let refait = |b: &mut Vec<u8>| {
+        let fin = b.len() - 8;
+        let mut h = Hasher64::new();
+        for &x in &b[..fin] { h.write_u8(x); }
+        let v = h.finish();
+        b[fin..].copy_from_slice(&v.to_le_bytes());
+    };
+    let refuse = |b: &[u8], attendu: SnapshotError| {
+        let mut dn = auteur_n;
+        let mut de = auteur_e;
+        assert_eq!(base.restore_into(b, &mut dn, &mut de), Err(attendu));
+        assert_eq!((dn, de.map(|x| x.control_pm)), (auteur_n, auteur_e.map(|x| x.control_pm)));
+    };
+    for (valeur, attendu) in [(400i64, SnapshotError::Record), (1_001, SnapshotError::Record), (-1, SnapshotError::Record)] {
+        let mut b = bon.clone();
+        b[84..92].copy_from_slice(&valeur.to_le_bytes());
+        refait(&mut b);
+        refuse(&b, attendu);
+    }
+    let mut v1 = bon.clone();
+    v1[4] = 1;
+    refait(&mut v1);
+    refuse(&v1, SnapshotError::Version);
+    // Et une commande hors bornes ne se capture pas.
+    let mut hors = auteur_e;
+    hors[0].control_pm = 1_001;
+    assert_eq!(base.snapshot_len(&auteur_n, &hors), Err(SnapshotError::State(Error::Capacity)));
+}
