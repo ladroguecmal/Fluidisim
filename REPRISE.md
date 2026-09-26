@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 21:00 +02:00
+Battement        : 2026-09-26 21:02 +02:00
 Agent            : Claude Opus 5.5, Claude Code (application de bureau) au poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3
 Session en cours : S390 — physique : **C3**, la multigrille sur la carte (demande de l'utilisateur, 2026-09-26)
 Dernière session : S389 — physique : **C4b, première part : la surface d'APIC** ([preuve](docs/validation/APIC3D-S388.md) §5) — noyau de deux mailles (lecture 2,46 % de maille sur toute position, contre 9,93 %) et parois qui reflètent les particules (repos 6,2 µm/s) ; ballottements (1, 0) +0,39 % et (1, 1) +1,01 % à 2,5 cm, critères de S388 tenus ; l'énergie ne croît pas. Avant : S388, APIC en 3D dans le cœur

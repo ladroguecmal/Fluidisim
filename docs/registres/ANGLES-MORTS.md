@@ -4368,3 +4368,13 @@ cisaillement `u'·∇U`** : lui seul retiré, plus rien ([preuve](../validation/
 (critère 3 manqué : 1 620 fois le paquet). Hypothèse : discrétisés séparément, `U·∇u'` et `u'·∇U` ne forment plus le
 gradient `∇(U·u')` qu'ils sont pour deux écoulements irrotationnels. Remède à éprouver d'abord : cette forme de
 Bernoulli. Déclencheur : la prochaine session du lot 2.
+
+**A321 — S390, 2026-09-26 (sévérité 3, ouverte). À 30 Hz, la scène de la porte B explose en 24 à 40 s, quel que soit le
+solveur de pression.** Pas de 33,333 ms, `Config::review`, 1 800 pas : la surface publiée cesse d'être finie au pas 930 avec
+Jacobi 512 et au pas 1 050 avec la multigrille à 24 cycles — deux projections **convergées** (résidu relatif ≈ 10⁻⁷) —, au
+pas 1 200 avec Jacobi 32, la production reçue par la porte C (S348, R17). **À 60 Hz, la minute tient** (références,
+Jacobi 16 à 128, multigrille 6 et 8) ([preuve](../validation/MULTIGRILLE-3D-S385.md) §5). La porte C a été reçue sur 1 000
+pas horodatés **depuis l'état initial**, les revues sur quelques secondes : aucune mesure ne portait la durée d'usage
+(L369). **Non attribué** ; la pression est hors de cause. Candidats : le transport et la hauteur explicites au double pas,
+le couplage et l'éponge de B, la bascule de mouillure (A297). Déclencheur : **avant tout usage vivant de 30 Hz au-delà de
+vingt secondes**, et au plus tard en C3b — témoin à 25 ms, termes éteints un à un (L136).

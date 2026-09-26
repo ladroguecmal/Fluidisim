@@ -104,7 +104,7 @@ d'appel) ; il atteint le résidu de 32 cycles de Jacobi en 3 à 6 cycles. Le gai
 - [x] **P4** — l'instrument : réplique `f64`, symétrie, positivité, vu échouer ; critère 2.
 - [x] **P5** — convergence et coût sur la scène de la porte B, deux parts à 30 Hz ; critères 3 et 4.
 - [x] **P6** — les trois cas de cuve avec la multigrille ; critère 5 ; activation par défaut décidée.
-- [ ] **P7** — critère 6 ; preuve (section datée de MULTIGRILLE-3D-S385) ; file, feuille de route, liste.
+- [x] **P7** — critère 6 ; preuve (section datée de MULTIGRILLE-3D-S385) ; file, feuille de route, liste.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
@@ -179,4 +179,9 @@ réécrites puis régénérées sans l'option ; instrument extrait (`mesurer_cyc
 `replica_vcycle_is_symmetric_and_seen_failing_s390` (CPU) et `card_vcycle_matches_the_replica_s390` (carte, ignoré par
 défaut), tous deux réussis. Essais de l'afficheur : 36 réussis, 1 ignoré, avant l'ajout ; suite du cœur 680 réussis,
 18 ignorés, inchangée (le cœur n'a pas changé).
+
+**P7 — critère 6 tenu** : afficheur 37 réussis, 2 ignorés (dont l'essai de la carte), zéro avertissement ; cœur 680 réussis,
+18 ignorés. Preuve : §5 de [MULTIGRILLE-3D-S385](../docs/validation/MULTIGRILLE-3D-S385.md). File (campagne ; A321, ligne
+nouvelle), feuille de route (§3 bis porte C, §3 ter campagne), liste 4.19 — les trois premières lignes committées dès P6.
+Angle mort **A321** (sévérité 3).
 
