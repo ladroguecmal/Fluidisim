@@ -1695,3 +1695,39 @@ fn zero_delta_stays_zero_under_b_alone_when_relative_s369() {
     println!("S369 : 1,5 s sous 5 cm de houle — pas de S297, δ jusqu'à {ecart:.3e} m ; relatif, nul au bit");
     assert!(ecart > 1e-5, "{ecart}");
 }
+
+/// S375 (ADR-200 D2) — **l'entrée de volume par colonne**. Le volume de perturbation change de `Σ dh·dx²` (critère 1 :
+/// ≤ 10⁻⁹ m³ par ajout, compensé) ; pression et vitesses intactes au bit ; sans ajout, un domaine au repos reste au repos
+/// au bit ; refus atomiques (longueur, non fini, surface hors bornes).
+#[test]
+fn column_volume_is_added_exactly_and_atomically_s375() {
+    let (mut v, _) = volume(12, 7, 12, 0.25, 9.81);
+    v.set_free_surface(&[2.0; 84], 2.0).unwrap();
+    for _ in 0..20 {
+        v.step_surface_mobile(1000, 4000, &Jobs).unwrap();
+    }
+    assert!(v.surface().iter().all(|x| *x == 2.0), "le repos doit rester le repos");
+    let mut pire = 0f64;
+    let dh: Vec<f32> = (0..84).map(|c| 1e-4 * ((c * 37 % 11) as f32 - 5.0)).collect();
+    for _ in 0..200 {
+        let avant = v.perturbation_volume();
+        let (p, u, w) = (v.pressure().to_vec(), v.velocity_u().to_vec(), v.velocity_w().to_vec());
+        v.add_column_volume(&dh).unwrap();
+        let attendu: f64 = dh.iter().map(|d| *d as f64).sum::<f64>() * 0.0625;
+        pire = pire.max((v.perturbation_volume() - avant - attendu).abs());
+        assert_eq!((p, u, w), (v.pressure().to_vec(), v.velocity_u().to_vec(), v.velocity_w().to_vec()));
+    }
+    println!("S375 ajout de volume : pire écart {pire:e} m³ par ajout");
+    assert!(pire <= 1e-9, "{pire}");
+    let mut w = v.surface().to_vec();
+    let bits = |x: &Volume3| x.surface().iter().map(|e| e.to_bits()).collect::<Vec<_>>();
+    let avant = bits(&v);
+    assert_eq!(v.add_column_volume(&[0.; 83]).err(), Some(Error::Shape));
+    w[3] = f32::NAN;
+    assert_eq!(v.add_column_volume(&w).err(), Some(Error::NotFinite));
+    let mut trop = vec![0.; 84];
+    trop[5] = 1.0;
+    assert_eq!(v.add_column_volume(&trop).err(), Some(Error::Domain));
+    assert_eq!(bits(&v), avant, "un refus a écrit");
+}
+

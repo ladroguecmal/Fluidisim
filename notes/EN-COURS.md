@@ -81,8 +81,8 @@ de 1 mm). (4) Dans Godot, la surface rendue est celle de δ, au bit du fichier ;
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — `Volume3::add_column_volume` et ses essais ; critère 1.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — `Volume3::add_column_volume` et ses essais ; critère 1.
 - [ ] **P3** — `examples/piscine_delta.rs` : V et δ au pas, jet, puits, forçage ; coût mesuré ; export des surfaces ;
   critères 2 et 3.
 - [ ] **P4** — Godot : la surface de δ en maillage de hauteur dans le bassin (`piscine.gd`), rejouée ; critère 4.
@@ -90,3 +90,7 @@ de 1 mm). (4) Dans Godot, la surface rendue est celle de δ, au bit du fichier ;
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+
+**P2 — fait.** `Volume3::add_column_volume(dh)` (`delta3d_mobile.rs`) : ajout compensé comme le transport, pression et
+vitesses intactes, refus atomiques (`Shape`, `NotFinite`, `Domain`). **Critère 1** : 200 ajouts, écart de volume **0**
+(au bit), repos au repos après 20 pas, refus sans écriture.

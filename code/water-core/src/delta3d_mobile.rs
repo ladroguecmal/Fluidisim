@@ -20,6 +20,37 @@ impl Volume3 {
         Ok(())
     }
 
+    /// S375 (ADR-200 D2) — **du volume
+    /// ajouté ou retiré par colonne**, entre deux pas : `dh[c]` mètres sur la colonne `c` (`dh·dx²` m³). C'est l'entrée des
+    /// arêtes de V dans le domaine d'un contenant — le refoulement d'une pompe, le seuil d'un déversoir — et du forçage vers
+    /// le volume de V (ADR-025). À la différence de `set_free_surface`, **ni la pression ni les vitesses ne sont
+    /// touchées** : le départ chaud de la projection reste valable. L'ajout est compensé comme le transport (le reste
+    /// d'arrondi de chaque colonne est porté), donc le volume de perturbation change de `Σ dh·dx²` à l'arrondi f64 près.
+    /// Refus atomique : longueur (`Shape`), valeur non finie (`NotFinite`), surface hors des bornes du pas mobile
+    /// (`Domain`) — rien n'est écrit.
+    pub fn add_column_volume(&mut self, dh: &[f32]) -> Result<(), Error> {
+        if dh.len() != self.eta.len() {
+            return Err(Error::Shape);
+        }
+        if dh.iter().any(|x| !x.is_finite()) {
+            return Err(Error::NotFinite);
+        }
+        self.saved_eta.copy_from_slice(&self.eta);
+        self.saved_eta_roundoff.copy_from_slice(&self.eta_roundoff);
+        for (c, d) in dh.iter().enumerate() {
+            let increment = *d - self.eta_roundoff[c];
+            let height = self.eta[c] + increment;
+            self.eta_roundoff[c] = (height - self.eta[c]) - increment;
+            self.eta[c] = height;
+        }
+        if !self.mobile_in_bounds() {
+            self.eta.copy_from_slice(&self.saved_eta);
+            self.eta_roundoff.copy_from_slice(&self.saved_eta_roundoff);
+            return Err(Error::Domain);
+        }
+        Ok(())
+    }
+
     pub(super) fn height3(&self, i: usize, j: usize) -> f32 {
         let c = self.col(i,j);
         if self.surface_coupled { self.surface_total[c] } else { self.eta[c] }
