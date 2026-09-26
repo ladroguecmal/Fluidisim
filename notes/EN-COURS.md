@@ -88,9 +88,12 @@ conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **l
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — décision de l'utilisateur consignée (δ dans Godot en C11) : file, ADR-207 (note datée), conception §6.
 - [x] **P3** — la dérivation, et `outils/colonnes_hautes.py` : la dispersion d'une colonne à colonne haute ; critère 1 ; essai.
-- [ ] **P4** — balayage : Ω/ω selon les couches cubiques gardées, porte B et S295 ; critère 2 ; `k` minimal consigné.
-- [ ] **P5a** — `Volume3` : colonnes hautes du mode linéaire (restriction et prolongation, gradient conjugué réduit) ; critère 3.
-- [ ] **P5b** — l'onde oblique à colonnes hautes contre sa fréquence calculée ; critère 4 ; inconnues comptées.
+- [x] **P4** — balayage : Ω/ω selon les couches cubiques gardées, porte B et S295 ; critère 2 ; `k` minimal consigné.
+- [ ] **P4b** — *ajoutée après P4* : [ADR-208], la colonne graduée (variante N) à la place de la colonne haute unique
+  d'ADR-207 D2 ; ADR-207 (note datée), conception §3.3.
+- [ ] **P5a** — `Volume3` : la **colonne graduée** du mode linéaire (variante N : restriction et prolongation linéaires par
+  morceaux, gradient conjugué réduit) ; critère 3.
+- [ ] **P5b** — l'onde oblique à colonne graduée contre sa fréquence calculée ; critère 4 ; inconnues comptées.
 - [ ] **P6** — critère 5 ; preuve `COLONNES-HAUTES-S386` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
@@ -101,3 +104,19 @@ une restriction de Galerkin `Aᵣ = (PᵀDQ)M̂⁻¹(PᵀDQ)ᵀ`. **Critère 1 t
 Propriétés vérifiées : `m = 1` et « un nœud par maille » redonnent le schéma fin ; Galerkin ne baisse jamais `s` (Ritz) ;
 opérateurs réduits symétriques. Variantes : **G** (colonne haute linéaire, vitesses libres), **Q** (vitesse verticale
 interne liée), **E** (grille étirée en volumes finis), **N** (Galerkin linéaire par morceaux, nœuds étirés).
+
+**P4 — le balayage** (`python outils/colonnes_hautes.py`, 42 s ; porte B : `h` = 7 m, `dx` = 25 cm, 28 couches, `dt` = 1/30 s ;
+λ de 1 à 14 m) — le moins d'inconnues par colonne qui tient le critère 2 :
+
+| variante | réglage | inconnues | division | rapport au critère | pire λ |
+|---|---|---:|---:|---:|---:|
+| G, colonne haute linéaire | 17 cubiques + 1 | 19 | ÷1,47 | 0,834 | 14 m |
+| Q, vitesse verticale liée | 16 + 1 | 18 | ÷1,56 | 0,629 | 14 m |
+| E, grille étirée (VF) | r = 1,2, 5 cubiques | 14 | ÷2,00 | 0,966 | 14 m |
+| **N, linéaire par morceaux** | **r = 1,25, 3 cubiques** | **11** | **÷2,55** | 0,923 | 14 m |
+
+Bassin de 3 m à 10 cm (30 couches) : N 14 inconnues (÷2,14 ; r = 1,25, 6 cubiques), G 22 (÷1,36). **Critère 2** : tenu par
+chaque variante à son réglage ; **l'estimation de S384 (÷3,1, huit couches cubiques et une colonne haute) est fausse** —
+avec huit couches cubiques, G ajoute jusqu'à 1,4·10⁻² d'erreur de fréquence à λ = 14 m (≈ 16 fois le permis). Le pire cas
+est toujours la plus longue vague, où le schéma fin est le plus juste (8,6·10⁻⁴). Conséquence : **ADR-207 D2 change** —
+P4b ajoutée ; P5 construit N.
