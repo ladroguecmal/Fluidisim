@@ -62,71 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S385 — **terminée**. **C1** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5) :
-**la multigrille 3D de la référence**. Demande de l'utilisateur (2026-09-26) : *« Oui »* à C1 ; et le **verdict R32**, à
-consigner. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
+Session : S386 — **en cours**. **C2** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D2,
+D5) : **les colonnes hautes dans la référence**. Demande de l'utilisateur (2026-09-26) : *« Réalise la suite »* ; et sa
+décision, à consigner : *« Je suis d'accord avec toi pour le branchement à la fin »* — δ dans Godot en C11. Agent : Claude
+Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
 
-**Thèse.** Le pas mobile de la référence (`project_mobile3` : le pas couplé, la piscine, les solides) résout la pression par
-un gradient conjugué préconditionné par Jacobi, dont les itérations croissent avec la maille. Le cycle en V de S245
-(`delta_projection.rs`, 2D) porté en 3D — lissage de Jacobi amorti ω = 6/7 (dérivé pour sept points), restriction moyenne
-des huit filles, prolongation par injection, autant de lissages avant qu'après, niveaux grossiers rediscrétisés (ouvertures
-moyennées, maille active si une fille l'est, air si une fille l'est) — comme **préconditionneur** : il change le chemin,
-jamais le test d'acceptation (ADR-144). **Désactivé par défaut** : tout ce qui existe reste au bit.
+**Thèse.** Une colonne haute est un **sous-espace** de la grille fine : sous les `n − m` couches cubiques du haut, les `m`
+couches du bas n'ont plus qu'une pression **linéaire** en `z` (deux inconnues par colonne au lieu de `m`). Écrite comme une
+**restriction de Galerkin** du schéma reçu (`Aᵣ = Pᵀ A P`), elle reste symétrique définie positive, conserve la masse de la
+colonne, et sa dispersion **se calcule** colonne par colonne comme `scheme_frequency` (S295) le fait pour la grille fine :
+on sait donc, **avant** de l'écrire en 3D, combien de couches cubiques il faut garder. Mode **linéaire** d'abord, là où vit
+la réception de dispersion ; le pas mobile et le stockage compact viennent ensuite (C2b).
 
-**Critères, écrits avant.** (1) Le cycle est **symétrique** (écart relatif ≤ 10⁻⁵ sur des vecteurs quelconques) et **défini
-positif**, sur une surface libre, sur fond plat et sur fond coupé. (2) Projection **acceptée** avec et sans, et surfaces à
-**10⁻⁶ m** l'une de l'autre après 20 pas mobiles. (3) **Itérations indépendantes de la maille** : à trois mailles d'un même
-domaine (`dx`, `dx/2`, `dx/4`), le nombre d'itérations avec la multigrille ne croît pas de plus de 50 % de la plus grossière
-à la plus fine, quand Jacobi croît au moins du double (L274 : trois points). (4) La bosse de S324 en mode mobile ne rampe
-pas (A315). (5) Désactivée : suite entière inchangée (664 réussis, 18 ignorés), zéro avertissement. (6) Coût par itération
-et temps total publiés, au même résidu.
+**Critères, écrits avant.** (1) Le calcul de dispersion redonne `scheme_frequency` à `m ≤ 1` (Ω/ω − 1 = −1,435·10⁻² et
+−3,683·10⁻³ pour les cas de S295). (2) **Précision rapportée à l'usage** : sur la configuration de la porte B (profondeur 7 m,
+`dx` 25 cm) et pour toute longueur d'onde de `4·dx` à `2·profondeur`, l'erreur de fréquence **ajoutée** par les colonnes
+hautes `|Ω_haut/Ω_fin − 1|` ne dépasse pas **max(|Ω_fin/ω − 1|, 10⁻⁴)** — pas plus que la maille n'en fait déjà, ou une phase
+de 10⁻⁴, soit ≈ 3 mm sur une vague de 0,5 m après une minute (METHODE : 3 mm) ; le plus petit nombre de couches cubiques qui
+le tient est **consigné**. (3) En 3D, mode linéaire : opérateur réduit symétrique (10⁻⁵) et positif ; repos exact ; volume
+conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **la fréquence calculée de son propre schéma** à
+10⁻³ près, comme S295 le fait pour la grille fine. (5) Sans colonnes hautes, suite entière inchangée, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — verdict R32 consigné (REVUE-VISUELLE §37, file : les défauts nommés, déclencheur « peaufinage »).
-- [x] **P3** — l'instrument d'abord : `examples/delta3d_multigrille.rs`, trois mailles, fond plat et bosse, itérations et
-  temps de Jacobi — la référence de mesure.
-- [x] **P4a** — `delta3d_multigrid.rs` : niveaux 3D (géométrie, restriction, prolongation, opérateur, lissage) ; comptés
-  auprès de l'hôte (I-06) ; essais de forme.
-- [x] **P4b** — le cycle en V et son branchement dans `project_mobile3` (`enable_multigrid`) ; critère 1.
-- [x] **P5** — critères 2 à 4 : essais et banc.
-- [x] **P6** — critère 5 (suite entière), critère 6 (coût) ; preuve `MULTIGRILLE-3D-S385` ; liste, file, feuille de route,
-  index.
-- [x] **P7** — rituel.
+- [ ] **P2** — décision de l'utilisateur consignée (δ dans Godot en C11) : file, ADR-207 (note datée), conception §6.
+- [ ] **P3** — la dérivation, et `outils/colonnes_hautes.py` : la dispersion d'une colonne à colonne haute ; critère 1 ; essai.
+- [ ] **P4** — balayage : Ω/ω selon les couches cubiques gardées, porte B et S295 ; critère 2 ; `k` minimal consigné.
+- [ ] **P5a** — `Volume3` : colonnes hautes du mode linéaire (restriction et prolongation, gradient conjugué réduit) ; critère 3.
+- [ ] **P5b** — l'onde oblique à colonnes hautes contre sa fréquence calculée ; critère 4 ; inconnues comptées.
+- [ ] **P6** — critère 5 ; preuve `COLONNES-HAUTES-S386` ; liste, file, feuille de route, index.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
 
-**P3 — la référence de mesure, Jacobi** (`delta3d_multigrille -- --fin`, cas mobile de S328, 8 × 4 × 6 m, surface à 4 m,
-sinusoïde de 1 cm ; premier pas depuis `p = 0`, puis dix pas chauds) :
-
-| fond | nx | mailles | it. premier | it. moyen chaud | durée premier / chaud |
-|---|---:|---:|---:|---:|---|
-| plat | 32 / 64 / 128 | 12 288 / 98 304 / 786 432 | 102 / 191 / **365** | 36,5 / 58,4 / 85,9 | 0,06 / 0,90 / 13,4 s ; 0,02 / 0,27 / 3,43 s |
-| bosse | 32 / 64 / 128 | idem | 117 / 219 / **444** | 36,0 / 58,8 / 86,3 | 0,08 / 0,88 / 16,3 s ; 0,02 / 0,26 / 3,65 s |
-
-Croissance de 32 à 128 : premier pas ×3,58 (plat), ×3,79 (bosse) ; chaud ×2,35, ×2,40 — Jacobi croît bien au moins du
-double (critère 3, partie Jacobi). Divergence max 9,5·10⁻⁶ (sous 10⁻⁵).
-
-**P4a–P4b — un seul commit** : P4a seul laissait le module inutilisé, donc des avertissements (critère 5). Construit :
-`delta3d_multigrid.rs` (niveaux, `coarsen3`, `row_sums`, `restrict3`, `prolong_add3`, `smooth3`, `coarse_cycle3` ;
-`enable_multigrid`, `prepare_multigrid3`, `v_cycle3`, `prime_multigrid3`, `precondition_multigrid3`) ; branché dans
-`project_mobile3` derrière `mg.is_some()` ; `open3` et `solid3` passés `pub(super)`. **Critère 1 tenu** : symétrie et
-positivité sur fond plat et sur la bosse (`multigrid_cycle_is_symmetric_and_positive_s385`) ; **vu échouer** sur un
-cycle rendu asymétrique (un lissage après au lieu de deux : 1,23 contre 1,13), puis rétabli. Critère 2 à 32 mailles :
-surfaces à 10⁻⁶ m après 20 pas, deux fois moins d'itérations au moins (`…_with_fewer_iterations_s385`).
-
-**P5 — critères 2 à 4** (banc rejoué deux fois, itérations identiques) :
-
-| fond | méthode | it. premier (32 / 64 / 128) | croissance | it. chaud | pas chaud à 128 | premier pas à 128 |
-|---|---|---|---:|---|---:|---:|
-| plat | Jacobi | 102 / 191 / 365 | ×3,58 | 36,5 / 58,4 / 85,9 | 3,24 s | 12,3 s |
-| plat | multigrille | **9 / 10 / 11** | **×1,22** | 3,2 / 3,7 / 4,0 | **1,32 s** | **2,89 s** |
-| bosse | Jacobi | 117 / 219 / 444 | ×3,79 | 36,0 / 58,8 / 86,3 | 3,54 s | 16,8 s |
-| bosse | multigrille | **9 / 10 / 11** | **×1,22** | 3,2 / 3,7 / 4,1 | **1,59 s** | **3,71 s** |
-
-Critère 3 tenu (≤ +50 % contre ≥ ×2) ; critère 4 tenu (la bosse comme le fond plat, A315 ne revient pas). Critère 2 : essai à
-32 mailles. **Divergence** : lignes franches ≤ 5,9·10⁻⁶ avec la multigrille (≤ 9,5·10⁻⁶ Jacobi) ; **sur toutes les lignes,
-1,41·10⁻⁵ au fond plat à 128** avec la multigrille (Jacobi 8,9·10⁻⁶) — les lignes de surface, qu'ADR-144 ne juge pas ; dit, pas
-expliqué. Une itération multigrille coûte ≈ 8,7 fois une de Jacobi (pas entier / itérations, à 128). **Critère 5** : suite
-entière 667 réussis (664 + 3), 18 ignorés, zéro avertissement.
+*(vide)*
