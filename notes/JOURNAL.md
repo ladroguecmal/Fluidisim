@@ -17531,3 +17531,18 @@ de l'utilisateur dans la campagne qu'il a choisie (ADR-207) ; la v1 est déjà r
 4.16 en est un point absent ; la suite, B10 en 3D, est la première épreuve d'une surface non graphe — elle fait passer 4.16 à
 partiel ou dit pourquoi non. Suivant : dans le cloud, **C4b** — B10 en 3D (une sphère qui entre dans l'eau) ; au poste, C3 et
 la pluie, pièce 5.
+
+## S390 — 2026-09-26 — physique : C3, première part — la multigrille sur la carte
+
+**Entrée.** *« Reprends le projet »*, puis, au poste, **C3** choisi par l'utilisateur (entre la pluie, pièce 5, et les gerbes).
+**Fait** ([preuve](../docs/validation/MULTIGRILLE-3D-S385.md) §5) : le cycle en V de S385 porté tel quel dans la production
+(`viewer/src/delta3d_mg.*`), préconditionneur du gradient conjugué résident, **éteint par défaut** (empreintes au bit),
+option vivante `--multigrille`. **Instrument** : carte contre réplique `f64` à 4,4·10⁻⁷, symétrie 1,8·10⁻⁷, vue échouer à
+0,233 ; deux essais. **Porte B à 30 Hz** : le résidu de Jacobi-32 en **6 cycles** ; un cycle 0,147 ms ; projection **1,08 ms
+contre 2,08**, pas q99 2,75 contre 3,77. **Cuves** : au plus 5,6·10⁻⁵ m (cas 1, sans niveau grossier ; 3,9·10⁻⁷ à 64
+cycles). **Trouvé** : la scène amplifie tout écart (deux références convergées à 6 mm dès 1 s) ; **sur une minute, à 30 Hz,
+tout explose en 24 à 40 s, références convergées comprises ; à 60 Hz, la minute tient** — **A321**, sévérité 3 : la porte C
+n'avait jamais été éprouvée sur sa durée d'usage. **Limites** : 10 cm et A298 (C3b) ; défaut non changé ; le plus grossier
+freine (0,43 par cycle ; 32 lissages : 0,27, plus cher). **Rituel.** Maillons **4** : 4.19 reste partiel. **Justification** :
+choix explicite de l'utilisateur ; A321 est un défaut bloquant pour tout usage vivant de 30 Hz. Suivant : au poste, **la pluie,
+pièce 5** (alternance d'ADR-191), puis **A321** avant C3b ; dans le cloud, **C4b** (B10 en 3D : 4.16 à partiel).

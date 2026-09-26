@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S390 — **en cours**. **C3**, première part : **la multigrille sur la carte** ([conception](../docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md)
+Session : S390 — **terminée**. **C3**, première part : **la multigrille sur la carte** ([conception](../docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md)
 §5, [ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md)). Demande de l'utilisateur (2026-09-26) : *« Reprends le
 projet »*, puis, entre la pluie (pièce 5), C3 et les gerbes, **C3**. Agent : Claude Opus 5.5, Claude Code (application de
 bureau) au poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3.
@@ -105,7 +105,7 @@ d'appel) ; il atteint le résidu de 32 cycles de Jacobi en 3 à 6 cycles. Le gai
 - [x] **P5** — convergence et coût sur la scène de la porte B, deux parts à 30 Hz ; critères 3 et 4.
 - [x] **P6** — les trois cas de cuve avec la multigrille ; critère 5 ; activation par défaut décidée.
 - [x] **P7** — critère 6 ; preuve (section datée de MULTIGRILLE-3D-S385) ; file, feuille de route, liste.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 
