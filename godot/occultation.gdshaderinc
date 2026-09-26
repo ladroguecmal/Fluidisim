@@ -20,6 +20,8 @@ const float TAN_BANDE_0 = 0.0156269;
 uniform int occultants_n = 0;
 uniform vec3 occultants_min[OCCULTANTS_MAX];
 uniform vec3 occultants_max[OCCULTANTS_MAX];
+// Contrôle (S382, critère 2) : la surface rend (part du ciel uniforme, part du ciel de la CIE, 0) au lieu de sa couleur.
+uniform bool controle_occultation = false;
 
 /// Le masque d'élévation d'une boîte dans l'azimut de direction horizontale `d` (x, z), vu de `q` ; 0 si elle n'y est pas.
 uint masque_boite(vec3 q, vec2 d, vec3 bmin, vec3 bmax) {
@@ -48,18 +50,24 @@ uint masque_boite(vec3 q, vec2 d, vec3 bmin, vec3 bmax) {
 
 /// **La part du ciel que voit** le point `p` (monde de Godot) de normale `n` (monde, unitaire) : x, ciel uniforme ; y, ciel
 /// couvert de la CIE. `vec2(1.0)` exactement quand aucun occultant n'atteint la première bande.
+///
+/// Deux passes. Les boîtes d'abord : celles qui atteignent la première bande, et les cellules d'azimut que couvre leur
+/// emprise vue du point (quatre coins autour du centre ; toutes si le point est dedans) ; les cellules qui contiennent un
+/// **bord** d'emprise sont marquées. Puis les cellules : une direction au centre, ou **quatre** dans une cellule marquée —
+/// là, l'occultation saute d'une valeur à zéro au bord de la boîte, et un seul azimut par cellule de 11,25° faussait la
+/// part vue de 1,5 % (contrôle de S382, P6). Dans chaque direction, le masque des bandes réuni sur les boîtes de la cellule.
 vec2 ciel_vu(vec3 p, vec3 n) {
     if (occultants_n <= 0) {
         return vec2(1.0);
     }
     // Hors de la face qui porte le point : 2 mm le long de la normale.
     vec3 q = p + 2e-3 * n;
-    uint masques[AZIMUTS_OCC];
-    for (int j = 0; j < AZIMUTS_OCC; j++) {
-        masques[j] = 0u;
-    }
-    bool touche = false;
     float dphi = TAU / float(AZIMUTS_OCC);
+    int proches[OCCULTANTS_MAX];
+    int debut_j[OCCULTANTS_MAX];
+    int etendue_j[OCCULTANTS_MAX];
+    int np = 0;
+    uint bords = 0u;
     for (int i = 0; i < min(occultants_n, OCCULTANTS_MAX); i++) {
         vec3 bmin = occultants_min[i];
         vec3 bmax = occultants_max[i];
@@ -72,10 +80,8 @@ vec2 ciel_vu(vec3 p, vec3 n) {
         if (dy_hi < TAN_BANDE_0 * dh) {
             continue;
         }
-        touche = true;
-        // Les azimuts que couvre l'emprise, vue de q (tous, si q est dedans) : ses quatre coins autour de son centre.
-        int j0 = 0;
-        int j1 = AZIMUTS_OCC - 1;
+        int ja = 0;
+        int etendue = AZIMUTS_OCC - 1;
         if (dh > 0.0) {
             vec2 c = 0.5 * (bmin.xz + bmax.xz) - q.xz;
             float phi_c = atan(c.y, c.x);
@@ -88,35 +94,47 @@ vec2 ciel_vu(vec3 p, vec3 n) {
                 dmin = min(dmin, dl);
                 dmax = max(dmax, dl);
             }
-            j0 = int(ceil((phi_c + dmin) / dphi - 0.5));
-            j1 = int(floor((phi_c + dmax) / dphi - 0.5));
+            ja = int(floor((phi_c + dmin) / dphi));
+            int jb = int(floor((phi_c + dmax) / dphi));
+            etendue = jb - ja;
+            ja = ja - AZIMUTS_OCC * int(floor(float(ja) / float(AZIMUTS_OCC)));
+            jb = jb - AZIMUTS_OCC * int(floor(float(jb) / float(AZIMUTS_OCC)));
+            bords |= (1u << uint(ja)) | (1u << uint(jb));
         }
-        for (int jj = j0; jj <= j1; jj++) {
-            int j = jj - AZIMUTS_OCC * int(floor(float(jj) / float(AZIMUTS_OCC)));
-            float phi = (float(j) + 0.5) * dphi;
-            masques[j] |= masque_boite(q, vec2(cos(phi), sin(phi)), bmin, bmax);
-        }
+        proches[np] = i;
+        debut_j[np] = ja;
+        etendue_j[np] = etendue;
+        np++;
     }
-    if (!touche) {
+    if (np == 0) {
         return vec2(1.0);
     }
     float bloque_u = 0.0;
     float bloque_c = 0.0;
     for (int j = 0; j < AZIMUTS_OCC; j++) {
-        uint m = masques[j];
-        if (m == 0u) {
-            continue;
-        }
-        float phi = (float(j) + 0.5) * dphi;
-        vec2 d = vec2(cos(phi), sin(phi));
-        while (m != 0u) {
-            int k = int(findLSB(m));
-            m &= m - 1u;
-            float u = (float(k) + 0.5) / float(BANDES_OCC);
-            float ch = sqrt(1.0 - u * u);
-            float c = max(dot(n, vec3(ch * d.x, u, ch * d.y)), 0.0);
-            bloque_u += c;
-            bloque_c += c * (1.0 + 2.0 * u) / 3.0;
+        int sous = ((bords >> uint(j)) & 1u) == 1u ? 4 : 1;
+        for (int s = 0; s < sous; s++) {
+            float phi = (float(j) + (float(s) + 0.5) / float(sous)) * dphi;
+            vec2 d = vec2(cos(phi), sin(phi));
+            uint m = 0u;
+            for (int b = 0; b < np; b++) {
+                int decale = j - debut_j[b];
+                decale = decale - AZIMUTS_OCC * int(floor(float(decale) / float(AZIMUTS_OCC)));
+                if (decale <= etendue_j[b]) {
+                    int i = proches[b];
+                    m |= masque_boite(q, d, occultants_min[i], occultants_max[i]);
+                }
+            }
+            float poids = 1.0 / float(sous);
+            while (m != 0u) {
+                int k = int(findLSB(m));
+                m &= m - 1u;
+                float u = (float(k) + 0.5) / float(BANDES_OCC);
+                float ch = sqrt(1.0 - u * u);
+                float c = max(dot(n, vec3(ch * d.x, u, ch * d.y)), 0.0) * poids;
+                bloque_u += c;
+                bloque_c += c * (1.0 + 2.0 * u) / 3.0;
+            }
         }
     }
     float cellule = dphi / float(BANDES_OCC);

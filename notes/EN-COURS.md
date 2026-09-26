@@ -93,7 +93,9 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
   clair au bit.
 - [x] **P4** — `occultation.gdshaderinc` : la part du ciel vue (32 azimuts × 32 bandes), totaux exacts ; `eclairage_vu`.
 - [x] **P5** — la scène : `boite()` inscrit ses occultants ; parois et bassin ; `OCCULTATION=0` ; critère 1.
-- [ ] **P6** — `--controle-occultation` contre `outils/occultation_ciel.py` (intégration indépendante) ; critère 2 ; coût.
+- [x] **P6** — `--controle-occultation` contre `outils/occultation_ciel.py` (intégration indépendante) ; critère 2 ; coût.
+- [ ] **P6b** — le coût (+8 à +9 ms par pixel, P6) : la part vue évaluée **par sommet** — boîtes et eaux subdivisées
+  (≈ 10 cm), sol à maillage gradué jusqu'à la coupure (≈ 180 m), sol lointain à part ; critères 1 et 2 refaits ; coût.
 - [ ] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
 - [ ] **P8** — photographies de temps couvert (pied des murs) ; images de R31 ; REVUE-VISUELLE §36.
 - [ ] **P9** — preuve `OCCULTATION-CIEL-S382` ; liste, file, feuille de route, index.
@@ -117,9 +119,22 @@ la face), bassin (surface au repos, normale verticale). `findLSB` rend un `uint`
 corrigée). Sans occultant déclaré : 12 / 12 au bit. **Erreur** : battement de P3 écrit 12:48 pour 12:46 (extrapolé, L237),
 corrigé ici par l'horloge lue (12:48).
 
-**P5 — la scène.** `boite()` inscrit chaque boîte sauf le sol (17 occultants) ; `poser_occultants()` les pose sur tous
+**P5 — la scène.** `boite()` inscrit chaque boîte sauf le sol (16 occultants) ; `poser_occultants()` les pose sur tous
 les matériaux de `materiaux_ciel` (un tableau plus court que 32 est accepté par Godot) ; `OCCULTATION=0` → aucun.
 **Critère 1** : 12 / 12 au bit avec `OCCULTATION=0` (la mer n'a pas d'occultant). Avec : 58,8 % des pixels de la vue
 d'ensemble changent (jusqu'à 48 niveaux par ciel clair, 73 couvert) — le sol à ≈ 10 m voit encore le bloc au-dessus de son
 horizon. **Vu** (couvert) : le bloc se détache du sol — assombrissement doux au pied des murs, fond et parois du bassin plus
 sombres vers le bas, le bac tampon marqué.
+
+**P6 — le contrôle.** `--controle-occultation` : la part vue rendue directement (`controle_occultation` : rouge uniforme,
+vert CIE), lue en 15 points ; `outils/occultation_ciel.py` la refait autrement (rayons 3D contre boîtes, 1 200 × 2 400
+directions en `u`, `φ`). **Premier passage : manqué**, pire écart **0,0147** (sol à 25 cm du mur ouest), seuil 0,01.
+Explication, publiée à part : l'occultation saute à zéro au bout de chaque boîte, et un azimut par cellule de 11,25° place
+ce saut à ±½ cellule — émulé en numpy (`emule.py`, `emule2.py` du bloc-notes) : 32 azimuts 0,0155 ; 64 : 0,0094 ; 128 :
+0,0075 ; 32 azimuts dont les cellules qui contiennent un bord de boîte prennent quatre directions : 0,0052. **Porté au
+nuanceur** (deux passes : boîtes et bords, puis cellules) : **pire 0,0081** (sous le débord de la margelle, le décalage de
+2 mm), tenu ; la lumière suit la part vue (sol à 25 cm : rapport 0,53765 pour 0,53760 ; mur : 0,99681 pour 0,99727).
+`sol_loin_150` rendu 0,99951 : le bloc y dépasse encore la première bande (coupure à ≈ 180 m ; au-delà, la part ignorée
+est au plus 2,4·10⁻⁴). Critère 1 : 12 / 12 au bit (`OCCULTATION=0`). **Coût, manqué** : vue proche 0,547 → **8,64 ms**,
+aplomb 0,505 → 9,91, rasante 0,461 → 2,61 (couvert, sec). Isolé : la somme pondérée ≈ 1,5 ms, les quatre directions aux
+bords ≈ 2 ms, le reste (≈ 4,3 ms) la boucle boîtes × cellules, évaluée à chaque pixel deux fois (fond, puis eau).

@@ -40,6 +40,8 @@ var materiaux_ciel: Array = []
 ## (`occultation.gdshaderinc`). `OCCULTATION=0` n'en déclare aucun : l'image d'avant, au bit.
 var occultants_min := PackedVector3Array()
 var occultants_max := PackedVector3Array()
+## Les cotes de la construction, pour les points d'essai du contrôle de S382.
+var geo := {}
 
 
 func couvert_voulu() -> float:
@@ -127,6 +129,8 @@ func _ready() -> void:
 		controle_gouttes()
 	elif "--controle-ciel" in args:
 		controle_ciel()
+	elif "--controle-occultation" in args:
+		controle_occultation()
 	elif "--captures" in args:
 		captures()
 
@@ -219,6 +223,7 @@ func construire() -> void:
 	var beton := Color(0.42, 0.41, 0.39)
 	var carrelage := Color(0.52, 0.72, 0.80)
 	var c := 0.01
+	geo = {"lx": lx, "lz": lz, "e": e, "sol_y": sol_y, "fond_y": fb.y + c, "haut": haut}
 	# Le sol, au niveau du fond du bac tampon, jusqu'à l'horizon.
 	boite(Vector3(-3000, sol_y - 0.2, -3000), Vector3(3000, sol_y, 3000), Color(0.20, 0.19, 0.17))
 	# Le bloc du bassin, en béton : dalle jusqu'au fond, murs ouest, nord, sud à 1,5 m, est au seuil.
@@ -394,7 +399,7 @@ func appliquer(s: float) -> void:
 
 func _process(delta: float) -> void:
 	var args := OS.get_cmdline_user_args()
-	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args or "--controle-ciel" in args:
+	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args or "--controle-ciel" in args or "--controle-occultation" in args:
 		return
 	if not en_pause:
 		t = fmod(t + delta, float(pas.size() - 1) * dt)
@@ -777,6 +782,74 @@ func controle_ciel() -> void:
 	var attendu_mur := (0.6 + 0.4 * soleil_b.z) * ((PI / 2.0 + 4.0 / 3.0) / (7.0 * PI / 3.0) + 0.2 * 0.5) / clair_mur
 	print("CONTROLE_CIEL_S381 critere=4 sol clair=%.4f couvert=%.4f rapport=%.5f %s ; mur_ouest rapport=%.4f attendu=%.4f" % [
 		resultats[0][0].g, resultats[1][0].g, r_sol, "tenu" if absf(r_sol - 1.0) <= 0.01 else "manque", r_mur, attendu_mur])
+	get_tree().quit()
+
+
+## S382 — **le critère 2** (ADR-206) : la part du ciel vue, rendue directement par les surfaces (`controle_occultation` :
+## rouge = ciel uniforme, vert = ciel couvert de la CIE), lue au centre de l'image en des points d'essai — caméra à 0,6 m le
+## long de la normale, visant le point. Les occultants et les points sont imprimés pour `outils/occultation_ciel.py`, qui
+## refait l'intégrale indépendamment (rayons 3D contre boîtes, grille fine). Puis la lumière elle-même, au sol et au mur :
+## radiance rendue avec et sans occultants sous le ciel couvert.
+func controle_occultation() -> void:
+	get_viewport().use_hdr_2d = true
+	monde_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	monde_env.glow_enabled = false
+	monde_env.fog_enabled = false
+	texte.visible = false
+	pluie_air.configurer(0.0)
+	var lx: float = geo["lx"]
+	var lz: float = geo["lz"]
+	var e: float = geo["e"]
+	var sol_y: float = geo["sol_y"]
+	var haut: float = geo["haut"]
+	var y_eau := eau_bassin.global_position.y
+	var points := []
+	for d in [0.05, 0.25, 0.5, 1.0, 2.0, 4.0]:
+		points.append(["sol_ouest_%.2f" % d, Vector3(-lx - e - d, sol_y, 0.0), Vector3.UP])
+	points.append(["sol_sud_10", Vector3(0.0, sol_y, lz + e + 10.0), Vector3.UP])
+	points.append(["sol_loin_150", Vector3(0.0, sol_y, lz + e + 150.0), Vector3.UP])
+	points.append(["mur_ouest_mi", Vector3(-lx - e, 0.5 * (sol_y + haut), 0.0), Vector3.LEFT])
+	points.append(["mur_ouest_haut", Vector3(-lx - e, haut - 0.05, 0.0), Vector3.LEFT])
+	points.append(["fond_coin_no", Vector3(-lx + 0.1, geo["fond_y"], -lz + 0.1), Vector3.UP])
+	points.append(["fond_centre", Vector3(0.0, geo["fond_y"], 0.0), Vector3.UP])
+	points.append(["carrelage_nord_mi", Vector3(0.0, 0.5 * (geo["fond_y"] + haut), -lz + 0.01), Vector3.BACK])
+	points.append(["eau_pres_nord", Vector3(0.0, y_eau, -lz + 0.1), Vector3.UP])
+	points.append(["margelle_ouest", Vector3(-lx - 0.5 * e, haut + 0.05, 0.0), Vector3.UP])
+	var boites := []
+	for i in occultants_min.size():
+		var a := occultants_min[i]
+		var b := occultants_max[i]
+		boites.append([a.x, a.y, a.z, b.x, b.y, b.z])
+	print("CONTROLE_OCCULTATION_S382 occultants=%s" % JSON.stringify(boites))
+	for m in materiaux_ciel:
+		m.set_shader_parameter("controle_occultation", true)
+	for pt in points:
+		var p: Vector3 = pt[1]
+		var n: Vector3 = pt[2]
+		camera.position = p + 0.6 * n
+		camera.look_at(p, Vector3(0, 0, -1) if absf(n.y) > 0.99 else Vector3.UP)
+		for _k in 4:
+			await RenderingServer.frame_post_draw
+		var v := moyenne_centre(get_viewport().get_texture().get_image())
+		print("CONTROLE_OCCULTATION_S382 point=%s p=[%.5f,%.5f,%.5f] n=[%.0f,%.0f,%.0f] vu_uniforme=%.5f vu_cie=%.5f" % [
+			pt[0], p.x, p.y, p.z, n.x, n.y, n.z, v.r, v.g])
+	for m in materiaux_ciel:
+		m.set_shader_parameter("controle_occultation", false)
+		m.set_shader_parameter("couvert", 1.0)
+	# La lumière : radiance du sol à 0,25 m et du mur ouest à mi-hauteur, avec et sans occultants (ciel couvert).
+	for pt in [points[1], points[8]]:
+		var r := []
+		for n_occ in [occultants_min.size(), 0]:
+			for m in materiaux_ciel:
+				m.set_shader_parameter("occultants_n", n_occ)
+			var p: Vector3 = pt[1]
+			var n: Vector3 = pt[2]
+			camera.position = p + 0.6 * n
+			camera.look_at(p, Vector3(0, 0, -1) if absf(n.y) > 0.99 else Vector3.UP)
+			for _k in 4:
+				await RenderingServer.frame_post_draw
+			r.append(moyenne_centre(get_viewport().get_texture().get_image()).g)
+		print("CONTROLE_OCCULTATION_S382 lumiere point=%s avec=%.5f sans=%.5f rapport=%.5f" % [pt[0], r[0], r[1], r[0] / r[1]])
 	get_tree().quit()
 
 

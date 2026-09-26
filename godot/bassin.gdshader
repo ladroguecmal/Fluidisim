@@ -151,7 +151,8 @@ void fragment() {
         eclat *= soleil_direct();
     }
     // S382 : la lumière qui entre dans l'eau vient du ciel que la surface voit (`occultation.gdshaderinc`), normale au repos.
-    vec3 corps = R0 * gain_eau * eclairage_vu(nb, soleil, 1.0, vec3(ciel_vu(surface, vec3(0.0, 1.0, 0.0)), 1.0));
+    vec2 vu_eau = ciel_vu(surface, vec3(0.0, 1.0, 0.0));
+    vec3 corps = R0 * gain_eau * eclairage_vu(nb, soleil, 1.0, vec3(vu_eau, 1.0));
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     if (variance_pluie > 0.0) {
         // La pente non résolue de la pluie, de covariance `cov_pluie` (x, z de Godot) : Fresnel et ciel intégrés par
@@ -182,5 +183,8 @@ void fragment() {
     // Contrôle du taux (critère 2 de S379) : rouge pur sur un cœur d'anneau jeune, noir ailleurs.
     if (controle_pluie && pluie.x > 0.0) {
         ALBEDO = vec3(coeur_pluie, 0.0, 0.0);
+    }
+    if (controle_occultation) {
+        ALBEDO = vec3(vu_eau, 0.0);
     }
 }

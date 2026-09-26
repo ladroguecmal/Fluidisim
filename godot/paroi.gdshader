@@ -33,5 +33,9 @@ void fragment() {
     }
     // S381 : `eclairage` (`ciel.gdshaderinc`) — sous le ciel couvert, la répartition de la CIE. S382 : le ciel que la face
     // voit (`occultation.gdshaderinc`).
-    ALBEDO = albedo * motif * gain_eau * eclairage_vu(nb, normalize(SOLEIL_B), 1.0, vec3(ciel_vu(monde, n), 1.0));
+    vec2 vu = ciel_vu(monde, n);
+    ALBEDO = albedo * motif * gain_eau * eclairage_vu(nb, normalize(SOLEIL_B), 1.0, vec3(vu, 1.0));
+    if (controle_occultation) {
+        ALBEDO = vec3(vu, 0.0);
+    }
 }
