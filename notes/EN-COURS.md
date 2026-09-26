@@ -93,8 +93,8 @@ d'un diamètre de l'axe, qu'un remplissage depuis le haut n'atteint pas ; **pinc
 - [x] **P2** — verdict R33 consigné (revue, preuve, décisions, file).
 - [x] **P3** — le corps cinématique dans `apic3d.rs` ; essais (repos à demi immergé, masse) ; critères 1 et 2.
 - [x] **P4** — l'exemple `apic3d_b10` (quart ou entier, mesures) ; critère 3.
-- [>] **P5** — la convergence, la plage publiée, `Fr` = 4, les parois ; critères 4 et 5.
-- [ ] **P6** — critère 6 ; preuve `B10-APIC3D-S393` ; liste, file, feuille de route, index.
+- [x] **P5** — la convergence, la plage publiée, `Fr` = 4, les parois ; critères 4 et 5.
+- [x] **P6** — critère 6 ; preuve `B10-APIC3D-S393` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -124,3 +124,10 @@ pincement **1,4803** √(D/g) contre **1,5067** au quart — **un pas** d'écart
 contre 1,31 D, cavité 1,81 contre 1,94 D (une maille chacune). Le quart n'est pas le domaine entier au bit : près des parois,
 les poids trilinéaires se figent sur la rangée du bord (S388) et l'extrapolation s'y arrête — la symétrie est discrète, pas
 exacte.
+
+**P5–P6 en un commit** (les mesures tournaient pendant que la preuve s'écrivait). `Fr` = 2, quart : pincement **1,5067 →
+1,4645 → 1,4738** √(D/g) à 8, 12, 16 mailles — **critère 4 tenu, 0,63 %** entre 12 et 16 (pas de 0,9 %) ; **critère 5 tenu** :
+**2,084** √(R/g) dans [1,72 ; 2,29]. Couronne 0,21 → 0,20 → 0,31 D : de maille. `Fr` = 4 : 1,986 (8), 2,023 (12) √(R/g) —
+−2,3 % contre `Fr` = 2 à 12 mailles. Parois à 3 D (8 mailles) : 1,4802, un pas avant 2 D. **Critère 6 tenu** : 684 réussis, 18
+ignorés, zéro avertissement ; masse exacte partout. Preuve [B10-APIC3D-S393](../docs/validation/B10-APIC3D-S393.md) ; **4.16
+passe à partiel** (la cavité 3D contre une mesure publiée) ; 4.12, file (C4 reçue, C5 ensuite), feuille de route, index.

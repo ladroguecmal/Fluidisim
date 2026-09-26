@@ -210,12 +210,13 @@ pas recopiée ici (L137).
 - [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *partiel* — **la cavité est portée sur le banc
   2D d'APIC** (S320, [B10](validation/B10-APIC-S320.md)) : pincement indépendant de l'échelle, masse
   exacte ; mais **son temps ne converge pas encore** à trois mailles (2,20 → 2,30 → 2,40 `√(D/g)`, S326),
-  et à maille fine la fermeture de la bulle sans pression emballe le calcul (A311).
+  et à maille fine la fermeture de la bulle sans pression emballe le calcul (A311). **En 3D (S393)**, la sphère :
+  pincement **convergé** (0,6 % entre 12 et 16 mailles), 2,08 √(R/g) dans la plage publiée ([preuve](validation/B10-APIC3D-S393.md)).
   Hors de δ : sa surface est une fonction hauteur (ADR-175 D5). Manquent
   la gerbe, qui suit la maille (A312), la bulle, qui n'est pas de l'air (A311), le raccord aux
   colonnes — **à masse exacte** dans les deux sens depuis S323–S325, sa frontière **non reçue** :
   S354, sur 30 s, elle ne tient pas la densité des particules, la masse migre et la période s'allonge
-  à 5 cm (A316 ; [§10–13](validation/B10-APIC-S320.md)) —, la 3D (APIC 3D dans le cœur depuis S388, B10 en 3D : C4b)
+  à 5 cm (A316 ; [§10–13](validation/B10-APIC-S320.md)) —, la 3D (APIC 3D dans le cœur depuis S388 ; B10 en 3D, S393 : la cavité, pas la gerbe)
   et C20. Lot 5 d'ADR-178, APIC retenue
   par l'utilisateur (ADR-186), repris après la v1 (ADR-190 D4).
 - [ ] **4.13 Proche-coque et gerbe d'étrave** — *partiel* **depuis S332–S338** (ADR-001 range le
@@ -236,17 +237,18 @@ pas recopiée ici (L137).
   à 1,6 % de la théorie ; **rotation et coque qui perce la surface** depuis S332
   ([preuve](validation/CORPS-RIGIDE-S331.md) §4), sous couvercle partiel depuis S335. Manquent le couplage à B/W
   sur fond coupé et la turbulence — **aucun modèle de turbulence n'existe nulle part dans le dépôt**. Lot 3 d'ADR-178.
-- [ ] **4.16 Surface non graphe** : déferlement, éclaboussures détachées — *absent* au sens de
-  cette liste. **C'est le point le plus lourd de la liste** : il demande un **second solveur**, pas
+- [ ] **4.16 Surface non graphe** : déferlement, éclaboussures détachées — *partiel* depuis S393 : la
+  cavité qui se referme sur l'air, reçue en 3D (ci-dessous) ; déferlement et éclaboussures détachées absents. **C'est le point le plus lourd de la liste** : il demande un **second solveur**, pas
   une extension du premier (ADR-175 D5). Ce solveur est **choisi et écrit sur un banc 2D, hors du
   cœur** : trois représentations comparées au même niveau — APIC garde la masse exactement et ne
   crée pas d'énergie ; rupture de barrage en accord à 1,6 % entre les trois, sans validation
   ([S318](validation/COMPARAISON-LOT5-S318.md)) —, **APIC retenue** par l'utilisateur (ADR-186).
   Rien du déferlement ni des éclaboussures n'est reçu : jet et couronne suivent la maille (A312).
   **S388** : APIC **entre dans le cœur en 3D** (`apic3d.rs`, [preuve](validation/APIC3D-S388.md)) — masse exacte, repos,
-  ballottements à +0,39 % (1, 0) et +1,01 % (1, 1) à 2,5 cm depuis S389 (noyau de deux mailles, parois reflétées) ; aucune
-  surface non graphe éprouvée encore (C4b).
-  Construit et non reçu ne vaut pas partiel. Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
+  ballottements à +0,39 % (1, 0) et +1,01 % (1, 1) à 2,5 cm depuis S389 (noyau de deux mailles, parois reflétées).
+  **S393** : la première surface non graphe reçue en 3D — une sphère cinématique ouvre une cavité qui se **pince à 2,08
+  √(R/g)**, dans la plage publiée (1,72 à 2,29), convergé à 0,6 % entre 12 et 16 mailles par diamètre, masse exacte
+  ([B10-APIC3D-S393](validation/B10-APIC3D-S393.md)) ; couronne et jet suivent encore la maille. Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *absent* sur le système ;
   C06 partiel sur un véhicule d'essai 1D.
 - [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et la masse est
@@ -594,7 +596,7 @@ pas recopiée ici (L137).
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 4 | 5 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
-| 4. Volumique (δ) | 21 | 0 | 13 | 8 |
+| 4. Volumique (δ) | 21 | 0 | 14 | 7 |
 | 5. Volumes finis (V) | 12 | 1 | 6 | 5 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 1 | 7 |
@@ -604,7 +606,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **68** | **49** |
+| **total** | **120** | **3** | **69** | **48** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
@@ -614,7 +616,7 @@ corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ;
 changer de case — dix-huit sur S309–S349 (actualisation complète, ci-dessous), trois sur S350 (4.19, 9.9, 9.12).
 *S351* : **4.2** et **9.9** passent à partiel — deux domaines servis ensemble, le rang 1 reçu au banc ; 1.4, 4.5 et
 9.8 corrigés. *S359* : **8.5** passe à partiel — la colonne d'eau et la réfraction dans Godot. *S362* : **2.7** passe à
-partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau. *S367* : **7.1** passe à partiel — le champ d'écume de B. *S386* : **4.3** passe à partiel — la colonne graduée.
+partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau. *S367* : **7.1** passe à partiel — le champ d'écume de B. *S386* : **4.3** passe à partiel — la colonne graduée. *S393* : **4.16** passe à partiel — la cavité 3D de la sphère, contre une mesure publiée.
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.
