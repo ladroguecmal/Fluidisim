@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S371 — **en cours**. **Rendu 10 : la caméra à demi immergée** (ADR-019 §6, liste 8.6), session de rendu de
+Session : S371 — **terminée**. **Rendu 10 : la caméra à demi immergée** (ADR-019 §6, liste 8.6), session de rendu de
 l'alternance d'ADR-191 D3, suite déclarée par S369 et S370. Aujourd'hui (S365) le mode immergé bascule **d'un bloc** sur
 la hauteur de la bande sous l'œil : quand la ligne d'eau traverse l'objectif, tout le cadre est faux d'un côté.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local
@@ -93,7 +93,7 @@ cherchées par nous, avant d'être rendue ; jugée par l'utilisateur (R26).
 - [x] **P5** — `--controle-ligne-eau` : critère 1, puis critère 2 ; non-régression (critère 3).
 - [x] **P6** — la ligne sur l'objectif (ménisque), d'après P2 ; les images de R26.
 - [x] **P7** — preuve `DEMI-IMMERGEE-S371`, ADR-019 note datée, liste 8.6, file, feuille de route, index ; revue R26.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 02:37 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S371 — rendu 10 : la caméra à demi immergée (ADR-019 §6, liste 8.6)
-Dernière session : S370 — consignation : *« Pas de réseau = pas encore »* — le multijoueur reste dans l'ambition, 10.1 attend un fait nouveau (note datée sur [ADR-197](docs/adr/ADR-197-reponses-du-2026-09-26.md) D1). Avant : S369, la voie d'A289 ([ADR-198](docs/adr/ADR-198-la-voie-d-a289.md)) — δ relatif à B, A320 ouverte
-Session suivante : par l'alternance d'ADR-191 D3, **une session de rendu** : la caméra à demi immergée (ADR-019 §6), l'échelle radiométrique du ciel et du soleil. À la physique suivante : **A320** — les termes croisés sous forme de Bernoulli —, puis le critère de l'ordre E réécrit ; ou les chemins de B et la côte (ADR-196), la coque qui bouge, le lot 5. L'écume attend des photographies
-Maillons        : 1 — S370 : consignation, aucun point ne change d'état (journal)
+Session en cours : aucune
+Dernière session : S371 — rendu 10 : **la caméra à demi immergée** (ADR-019 §6) — le milieu par pixel à l'objectif, la ligne à 0,08 px de l'intersection exacte, 0 pixel mal classé sur 60 images, ≤ 0,03 ms GPU (surface à l'ordre 2 au plan proche), ménisque calé sur une photographie ([preuve](docs/validation/DEMI-IMMERGEE-S371.md)) ; R26 envoyée
+Session suivante : par l'alternance d'ADR-191 D3, **une session de physique** ; à deux maillons, un lot qui change l'état d'un point de la liste : **A320** par la forme de Bernoulli (4.8), la coque qui bouge (6.4), ou les chemins de B et la côte (2.7, ADR-196). Au rendu suivant : l'échelle radiométrique du ciel et du soleil, notre perspective aérienne. R26 attendu ; l'écume attend des photographies
+Maillons        : 2 — S370 consignation, S371 : 8.6 avance mais reste partiel (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

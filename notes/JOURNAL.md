@@ -17207,3 +17207,23 @@ attendent un fait nouveau de l'utilisateur, et aucun travail de réseau ne comme
 index ; aucun code.
 **Rituel.** Maillons **1** : aucun point de la liste ne change d'état. Suivant : inchangé — par l'alternance, **le rendu**
 (caméra à demi immergée) ; à la physique suivante, A320 par la forme de Bernoulli.
+
+## S371 — 2026-09-26 — rendu 10 : la caméra à demi immergée
+
+**Entrée.** *« Reprends le projet »* ; par l'alternance, le rendu : la caméra à demi immergée (ADR-019 §6), que S365 faisait
+basculer d'un bloc — le ciel rendu comme de l'eau dès que la ligne traverse l'image.
+**Fait** ([preuve](../docs/validation/DEMI-IMMERGEE-S371.md)). Le milieu **par pixel, à l'objectif** — le point où le rayon
+traverse le plan proche, sous ou au-dessus de la surface de B (point lagrangien par Newton, Tayfun compris) —, pour
+l'eau, le fond et le ciel (`surface_b.gdshaderinc`). Contrôle contre l'intersection exacte en double : **0,078 px** au
+pire (quatre cas), **0 pixel mal classé** sur 60 images, caméra fixe et flottante. **Trouvé** : la borne de |η| (6,43 m)
+allumait le mode à 4 m — test rigoureux serré à 0,43 m ; Newton par pixel coûtait **4,7 ms GPU** — la surface à l'ordre 2
+au centre du plan proche, hessienne eulérienne analytique, ordre 3 borné à 0,37 px : **≤ 0,03 ms** ; le bord de la
+fenêtre en escalier vu de 4 cm venait de la FFT lue en bilinéaire — bicubique au-delà d'un grossissement de 32 (au seuil
+4, les poses validées changeaient). Brume éteinte en mode demi : 17 niveaux au-dessus, 48 évités au-dessous. Deux
+photographies libres chiffrées ; ménisque calé sur l'une. Témoins identiques au bit ; profondeur prise à l'objectif sur
+la surface exacte (≤ 1 niveau sous l'eau). **R26** préparée, images envoyées.
+**Limites.** Un état de mer ; champ large (2,4 px à 100°) ; brume non réglable par pixel ; ménisque d'une photographie.
+**Rituel.** Maillons **2** : 8.6 reste partiel. Suivant : par l'alternance, la physique — à deux maillons, un lot qui
+change l'état d'un point : A320 par la forme de Bernoulli (4.8), la coque qui bouge (6.4) ou les chemins de B et la côte
+(2.7). R26 attendu.
+
