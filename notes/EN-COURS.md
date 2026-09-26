@@ -89,7 +89,7 @@ poste avec carte et Godot). (5) `etat_projet.py --check` sans erreur. Aucun code
   faces coupées, ordonnanceur, piscine en δ ; lu dans les preuves, chiffres et liens.
 - [x] **P3** — état de l'art (1) : grilles hybrides temps réel (colonnes hautes, fonction hauteur + 3D + particules),
   pression sur la carte (multigrille), grilles éparses.
-- [ ] **P4** — état de l'art (2) : particules sur grille (FLIP, APIC, MPM) sur la carte ; SPH et PBF ; Boltzmann sur
+- [x] **P4** — état de l'art (2) : particules sur grille (FLIP, APIC, MPM) sur la carte ; SPH et PBF ; Boltzmann sur
   réseau à surface libre ; coûts et qualités publiés.
 - [ ] **P5** — cibles chiffrées : les usages volumiques de la liste, taille des domaines, mailles, cadence, budget.
 - [ ] **P6** — l'architecture proposée, les alternatives écartées et leurs raisons.

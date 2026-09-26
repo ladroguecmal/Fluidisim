@@ -96,3 +96,28 @@ est une action de la file, au premier lot qui en dépend (§5).
 les mailles près de la surface** (colonnes hautes), en **résolvant la pression par multigrille**, et en **ne mettant de
 particules que là où la surface cesse d'être un graphe**. Le dépôt a le troisième choix (ADR-186 D3) et le cadre des
 deux autres (pression scindée, blocs 8³) ; il n'a ni colonnes hautes, ni multigrille 3D, ni blocs épars.
+
+### 2.4 Particules sur grille : FLIP, APIC, MPM
+
+| travail | idée | ce qui nous concerne |
+|---|---|---|
+| **Jiang, Schroeder, Selle, Teran et Stomakhin (2015)**, *The affine particle-in-cell method*, ACM TOG 34(4), 51 | chaque particule porte une vitesse **affine** : ni la dissipation de PIC, ni le bruit ni l'instabilité de FLIP | la représentation retenue (ADR-186) |
+| **Ferstl, Ando, Wojtan, Westermann et Thuerey (2016)**, *Narrow Band FLIP for Liquid Simulations*, CGF 35(2), 225–232 | des particules **seulement dans une bande** sous la surface, le reste sur la grille ; *publié* : calculs hors pression plus de 6 fois plus rapides, 250 images de 4,4 h à 2 h, mémoire moitié | la bande est la forme naturelle de nos particules — « là où elles sont nécessaires » (ADR-186 D3) |
+| **Hu, Fang, Ge, Qu, Zhu, Pradhana et Jiang (2018)**, *A moving least squares material point method…* (MLS-MPM), ACM TOG 37(4), 150 | MPM plus rapide, couplage aux corps rigides dans les deux sens, découpe | la famille d'APIC ; son intérêt pour nous est **au-delà de l'eau** — neige, boue (ADR-203 D5) |
+| **Gao, Wang, Wu, Pradhana, Sifakis, Yuksel et Jiang (2018)**, *GPU optimization of material point methods*, ACM TOG 37(6), 254 ; **Fei, Huang et Gao (2021)**, *Principles towards Real-Time Simulation of Material Point Method on Modern GPUs*, arXiv 2111.00699 | le transfert particules ↔ grille **saturant la carte** : tri des particules par bloc, dispersion sans conflit | le coût d'APIC sur la carte se joue là : le transfert, pas la pression |
+
+### 2.5 Les autres familles
+
+| travail | idée | ce qui nous concerne |
+|---|---|---|
+| **Macklin, Müller et Bridson (2013)**, *Position based fluids*, ACM TOG 32(4) (SIGGRAPH 2013) | contraintes de densité dans la dynamique des positions : grands pas, **temps réel** | robuste et rapide, mais surface particulaire bruitée et compressibilité ; S318 a mesuré SPH faiblement compressible à **40 fois** le coût d'APIC ([S318](../validation/COMPARAISON-LOT5-S318.md)) |
+| **Bender et Koschier (2015)**, *Divergence-free smoothed particle hydrodynamics* (DFSPH), SCA 2015 | incompressibilité et divergence nulle résolues ensemble : moins d'itérations, pas plus grands | le meilleur SPH incompressible ; il resterait SPH : voisinages, surface implicite, aucun raccord aux colonnes |
+| **Lehmann** — *FluidX3D* (logiciel ; mémoire de master 2019, *High Performance Free Surface LBM on GPUs* ; thèse 2023) | **Boltzmann sur réseau**, surface libre par volume de fluide et PLIC, sur la carte | très rapide par maille, mais **un autre schéma entier** : aucune de nos réceptions (fluide fantôme, faces coupées, couplage à B/W) ne s'y transporte ; logiciel **non commercial** — seule la méthode serait reprise |
+| **Ihmsen, Akinci, Akinci et Teschner (2012)**, *Unified spray, foam and air bubbles for particle-based fluids*, The Visual Computer 28, 669–677 | embruns, écume et bulles comme **particules diffuses**, classées, en post-traitement de l'eau | les phénomènes secondaires (liste 8.4 : écume, spray, bulles ; SPEC-002) ; ils se branchent **sur** le solveur, ils n'en sont pas |
+
+**Ce que 2.4 et 2.5 disent.** Aucune famille ne remplace la grille pour le gros de l'eau d'un jeu : les particules seules
+(PBF, SPH) paient les voisinages et une surface bruitée, Boltzmann paie un autre schéma entier. Le choix que le dépôt a
+fait — la grille pour la pression, des particules APIC **dans une bande** là où la surface n'est pas un graphe, des
+particules diffuses **par-dessus** pour ce qui est plus petit que la maille — est celui de la littérature du temps réel
+depuis Chentanez, Müller et Kim (2014). **Ce qui reste à gagner est d'exécution** : colonnes hautes, multigrille,
+blocs épars, transfert sur la carte — et le raccord, qui n'est reçu nulle part dans le dépôt.
