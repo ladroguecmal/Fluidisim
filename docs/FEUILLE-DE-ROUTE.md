@@ -279,7 +279,8 @@ ajoutée et l'amortissement que δ lui mesure, et s'arrête ([preuve](validation
 **S338** : *« Plus de coupure »* — **porte D reçue** sur la référence CPU (§9) ; **S340** : **porte B reçue** —
 R16, et la production sur les trois cas de cuve ([§9](validation/CUVE-GPU-S305.md)) ; **S341–S348** : **porte C
 reçue sur le banc** — fond factorisé, dix champs par face, cadence de 30 Hz en deux parts ([§11](validation/COUT-DELTA3D-S341.md)) ;
-**S390** : à 30 Hz, la scène explose en 24 à 40 s quel que soit le solveur de pression, à 60 Hz la minute tient (**A321**).
+**S390** : à 30 Hz, la scène explosait en 24 à 40 s quel que soit le solveur de pression (**A321**) ; **S391** : cause —
+l'advection explicite centrée —, corrigée par un terme de second ordre ([ADR-209](adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md)) : deux minutes tenues à 30 et 60 Hz.
 **Le 2026-09-23** ([ADR-189](adr/ADR-189-la-v1-d-abord.md)), l'utilisateur demande la v1 d'abord : lots 3
 et 4 jusqu'à la porte D, l'alternance avec le lot 5 suspendue jusque-là. **S318** : comparaison
 chiffrée des trois représentations ([S318](validation/COMPARAISON-LOT5-S318.md)) ; **APIC retenue**

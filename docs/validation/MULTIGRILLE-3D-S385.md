@@ -203,3 +203,9 @@ binaire rend aujourd'hui 2,2 à 2,6·10⁻⁸ avec Jacobi.
   24 dispatchs d'un cycle sont les leviers suivants, mesurés ici, non construits.
 - Les durées sont celles d'une carte seule, chaque pas soumis et attendu (domaine du chiffre de S341) ; aucun rendu
   concurrent.
+
+*Note du 2026-09-26 (S391)* : **A321 est corrigée** — la cause était l'advection explicite centrée de la prédiction, non la
+pression ; un terme de second ordre fait tenir la scène deux minutes à 30 et 60 Hz
+([ADR-209](../adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md), [preuve](A321-S391.md)). Les chiffres de coût
+ci-dessus précèdent ce terme.
+

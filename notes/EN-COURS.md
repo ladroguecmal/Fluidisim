@@ -93,7 +93,7 @@ avertissement.
   échouer) ; [ADR-209](../docs/adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md).
 - [x] **P5** — le même dans la production, **actif par défaut** ; critère 3 (deux minutes à 30 et 60 Hz, cuves avec la
   référence corrigée, empreintes nouvelles expliquées) ; coût du pas et porte C remesurés (deux parts ≤ 2 ms).
-- [ ] **P6** — critère 4 ; preuve ; A321, file, feuille de route.
+- [x] **P6** — critère 4 ; preuve ; A321, file, feuille de route.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -139,4 +139,9 @@ minutes à 30 Hz** ; témoin sans le terme : 23 s. **Cuves** (Jacobi 64) : cas 3
 48). **Empreintes** 60 pas `0xacd172ae…` / `0x6d20e53d…`, 600 pas `0x28f35d9d…` / `0x5c25dd80…` (au centre, 5·10⁻⁵ m à 1 s).
 **Porte C** : 1,910 / 1,927 ms q99 (S348 : 1,848 / 1,918), secteur 96 %. Afficheur 37 réussis, 2 ignorés (l'essai de la
 carte lancé : réussi), zéro avertissement.
+
+**P6 — critère 4 tenu** : cœur 681 réussis, 18 ignorés ; afficheur 37 réussis, 2 ignorés ; zéro avertissement. Preuve
+[A321-S391](../docs/validation/A321-S391.md) ; A321 **corrigée** (angles morts, note datée) ; file : la ligne A321 remplacée par
+ADR-209 D3 (le défaut du cœur, avec son déclencheur) ; feuille de route (porte C) ; index (ADR-209, preuve) ; note datée dans
+MULTIGRILLE-3D-S385 §5.
 
