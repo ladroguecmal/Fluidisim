@@ -92,7 +92,7 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
 - [x] **P3** — l'orientation exacte du ciel couvert (forme close, remplace l'interpolation de S381) ; critère 3 ; ciel
   clair au bit.
 - [x] **P4** — `occultation.gdshaderinc` : la part du ciel vue (32 azimuts × 32 bandes), totaux exacts ; `eclairage_vu`.
-- [ ] **P5** — la scène : `boite()` inscrit ses occultants ; parois et bassin ; `OCCULTATION=0` ; critère 1.
+- [x] **P5** — la scène : `boite()` inscrit ses occultants ; parois et bassin ; `OCCULTATION=0` ; critère 1.
 - [ ] **P6** — `--controle-occultation` contre `outils/occultation_ciel.py` (intégration indépendante) ; critère 2 ; coût.
 - [ ] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
 - [ ] **P8** — photographies de temps couvert (pied des murs) ; images de R31 ; REVUE-VISUELLE §36.
@@ -116,3 +116,10 @@ lointaine et de l'arête haute la plus proche ; somme des cellules masquées (`d
 la face), bassin (surface au repos, normale verticale). `findLSB` rend un `uint` dans Godot (erreur de compilation vue,
 corrigée). Sans occultant déclaré : 12 / 12 au bit. **Erreur** : battement de P3 écrit 12:48 pour 12:46 (extrapolé, L237),
 corrigé ici par l'horloge lue (12:48).
+
+**P5 — la scène.** `boite()` inscrit chaque boîte sauf le sol (17 occultants) ; `poser_occultants()` les pose sur tous
+les matériaux de `materiaux_ciel` (un tableau plus court que 32 est accepté par Godot) ; `OCCULTATION=0` → aucun.
+**Critère 1** : 12 / 12 au bit avec `OCCULTATION=0` (la mer n'a pas d'occultant). Avec : 58,8 % des pixels de la vue
+d'ensemble changent (jusqu'à 48 niveaux par ciel clair, 73 couvert) — le sol à ≈ 10 m voit encore le bloc au-dessus de son
+horizon. **Vu** (couvert) : le bloc se détache du sol — assombrissement doux au pied des murs, fond et parois du bassin plus
+sombres vers le bas, le bac tampon marqué.

@@ -36,6 +36,10 @@ var pluie_air: Node3D
 ## S381 — le ciel de pluie (ADR-205, pièce 3) : tous les matériaux qui incluent `ciel.gdshaderinc`, et `COUVERT=` (0 à 1)
 ## qui force la couverture ; sinon, la pluie couvre le ciel.
 var materiaux_ciel: Array = []
+## S382 — **les occultants** (ADR-206) : chaque boîte de la scène, sauf le sol, masque le ciel des autres surfaces
+## (`occultation.gdshaderinc`). `OCCULTATION=0` n'en déclare aucun : l'image d'avant, au bit.
+var occultants_min := PackedVector3Array()
+var occultants_max := PackedVector3Array()
 
 
 func couvert_voulu() -> float:
@@ -166,7 +170,20 @@ func boite(a: Vector3, b: Vector3, albedo: Color, joint := 0.0) -> MeshInstance3
 	mi.material_override = m
 	materiaux_ciel.append(m)
 	add_child(mi)
+	# S382 : un occultant, sauf le sol (il ne masque le ciel de rien qui soit au-dessus de lui).
+	if (b - a).abs().x < 1000.0:
+		occultants_min.append(Vector3(minf(a.x, b.x), minf(a.y, b.y), minf(a.z, b.z)))
+		occultants_max.append(Vector3(maxf(a.x, b.x), maxf(a.y, b.y), maxf(a.z, b.z)))
 	return mi
+
+
+## S382 — les occultants déclarés à tous les matériaux qui incluent `occultation.gdshaderinc` (parois, bassin).
+func poser_occultants() -> void:
+	var n := 0 if OS.get_environment("OCCULTATION") == "0" else occultants_min.size()
+	for m in materiaux_ciel:
+		m.set_shader_parameter("occultants_n", n)
+		m.set_shader_parameter("occultants_min", occultants_min)
+		m.set_shader_parameter("occultants_max", occultants_max)
 
 
 ## Une surface d'eau horizontale couvrant l'intérieur d'un bac (`fond_m`, `taille_m` de B).
@@ -254,6 +271,7 @@ func construire() -> void:
 	pluie_air.plancher = sol_y
 	pluie_air.nappes = [Vector4(fb.x - lx, fb.z - lz, fb.x + lx, fb.z + lz),
 		Vector4(x0, ft.z - tz, x1, ft.z + tz)]
+	poser_occultants()
 
 
 ## S375 — le maillage de la surface de δ : un sommet au centre de chaque colonne, et un anneau sur les murs qui prend la
