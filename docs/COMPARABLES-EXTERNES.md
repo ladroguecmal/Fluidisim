@@ -151,3 +151,63 @@ praticable pour du volume épars sur GPU.
 3. **Aucune conclusion sur leur fidélité.** Leur documentation ne confronte leur simulation à aucune
    référence ; nous ignorons donc leur erreur, et c'est précisément l'asymétrie utile — la nôtre est
    mesurée contre HOS, f64 et Richardson.
+
+---
+
+## CAUSTIC//VOLUME — caustiques dans le navigateur, three.js (Scottie, 2026)
+
+*Lu le 2026-09-27 (S400), sur proposition de l'utilisateur : « les objectifs de cette référence ne sont pas les mêmes que mon
+projet ». Dépôt public [`scottiefox/caustic-volume`](https://github.com/scottiefox/caustic-volume), licence MIT, **code lu**
+(`sandbox/src/20_caustic.js`, `30_trace.js`, `55_resources.js`, `70_render.js`, `lite/index.html`) ; la démonstration
+([page](https://scottiefox.github.io/caustic-volume/)) est bloquée par le réseau de la session : **rien n'a été exécuté ni vu**.*
+
+### Ce que c'est
+
+Deux pages HTML autonomes sur three.js et WebGL 2 : **Lite** (990 lignes, une cuve, un canard, soleil ou lampe, repli CPU) et un
+**bac à sable** (7 500 lignes : océan FFT et ondulations iWave, objets flottants, créatures, encre, sable, lampes, laser,
+préréglages de qualité). But : un **jouet interactif** qui montre les caustiques et pousse une carte graphique — réglé à l'œil,
+sans validation publiée. Ce n'est ni un solveur de l'eau ni une référence physique.
+
+### Ce que le code fait (lu)
+
+| technique | statut | où |
+|---|---|---|
+| **Caustiques par la méthode directe** : un photon par sommet d'une grille sur la surface (320² en qualité moyenne), réfracté (Snell, n = 1,333), transmis selon Fresnel ; la grille projetée à l'arrivée, chaque fragment reçoit le **rapport des aires** avant/après (dérivées d'écran), plafonné à 24 — la méthode de Wyman (2006) | **documenté** (code, README) | `20_caustic.js` (`causVS`, `causFS`) |
+| **Pentes filtrées à l'espacement des photons** (moyenne 3 × 3 pondérée) contre le scintillement | **documenté** | `SH.photon` |
+| **Un « volume » de caustiques** : la même grille projetée sur **N plans horizontaux** (32 tranches de 256 texels en qualité moyenne), rangés dans un atlas 2D (les textures 3D posent problème sous ANGLE/D3D11), atténués `exp(−σ_t·d)` le long du photon | **documenté** | `70_render.js` (boucle sur `uSliceY`), `55_resources.js` |
+| **Rayons de lumière dans l'eau** : marche de rayon dans l'eau (40 pas), diffusion `σ_s · [0,35·HG(0,8) + 0,65·HG(0,35)] · E`, `E` lu dans le volume — **exagéré contre sa moyenne locale** (flou d'environ 12 cm) par un gain `godRays` = 1,7, « pour que les rayons ressortent sans voiler la cuve » : un **réglage artistique**, non physique | **documenté** | `30_trace.js` (`waterVolume`) |
+| **Dispersion** : trois passes de la grille au fond, indices 1,3310 / 1,3340 / 1,3380 pour R, G, B | **documenté** | `70_render.js` |
+| Photons **ombrés** par les objets flottants (côté air) et par l'écume (`× (1 − 0,85·écume)`) | **documenté** | `SH.photon` |
+| **Lampes** : photons divergents d'un point, cône, éclairement `cos/r²` | **documenté** | `SH.photon` |
+| **Particules en suspension** : une par cellule d'une grille, traversée par DDA, éclairée en HG(0,55) | **documenté** | `particles()` |
+| Eaux typées par `σ_a`, `σ_s` en RGB (« Clear pool » : `a` = 0,36 / 0,058 / 0,024 m⁻¹) | **documenté** | `WATER_TYPES` |
+| Fresnel diélectrique exact, fenêtre de Snell, réflexion totale ; anticrénelage temporel, bloom, profondeur de champ | **documenté** | `30_trace.js`, `40_post.js` |
+| Lite : 24 ondes progressives réparties à l'**angle d'or**, pour un réseau de caustiques en cellules plutôt qu'en bandes | **documenté** | `lite/index.html`, README |
+
+### Confrontation à ce que nous faisons — S400
+
+- **Les caustiques sur le fond : la même méthode**, déjà chez nous depuis S361 (Wyman 2006, [preuve](validation/CAUSTIQUES-S361.md)) —
+  validée contre une solution exacte (4,6 %), l'énergie à 1 % ; et **bornée par le disque solaire** (demi-angle 3,47·10⁻³ rad dans
+  l'eau), une borne physique là où la référence plafonne à 24 et filtre à l'espacement des photons. Rien à reprendre ici.
+- **Ce qui nous manque et qu'elle montre** — la liste le nomme déjà : **8.5** « caustiques sur les objets et dans l'eau »,
+  « particules », « eaux chargées » ; **8.6** « rayons », « turbidité ». **Le volume de caustiques par tranches** est le geste
+  utile : la grille de photons que nous projetons déjà sur le fond, projetée aussi sur quelques plans, donne l'éclairement **à
+  toute profondeur** — donc les **rayons** (diffusion le long de la vue, avec notre milieu mesuré de S365 et la fonction de phase
+  calée en S366 sur Tyler 1960) **et les caustiques sur un objet immergé** (lire le volume à sa position). Coût : la projection
+  refaite par tranche, un atlas, une marche de rayon.
+- **À prendre avec une vérification physique, non un réglage** : chez nous, les rayons se jugent sur une **conservation** — la
+  moyenne horizontale de chaque tranche égale l'éclairement plat atténué, `E₀·exp(−K_d·z)` — et sur une photographie, comme
+  toujours (REVUE-VISUELLE) ; **le gain `godRays` n'a pas de place** : il exagère les nappes contre leur moyenne, ce que notre
+  méthode refuse (une image se juge, elle ne se règle pas à l'œil).
+- **La dispersion** : les indices de la référence sont ceux de l'eau (≈ 1,331 au rouge, 1,333 au jaune, 1,337 au bleu) ; chez nous,
+  trois passes de la carte des caustiques, **si** une photographie montre des franges colorées à nos profondeurs — le disque
+  solaire les brouille peut-être (à calculer avant d'y toucher).
+- **L'ombre des corps flottants sur les caustiques** : nos occultants de S382 ombrent le ciel ; les photons qui touchent une coque
+  (porte D) ne sont pas encore retirés. À faire avec les rayons.
+
+### Ce que ce comparable n'autorise pas
+
+- **Aucun de ses nombres n'entre comme seuil** (règle 2) : ni ses coefficients d'eau, ni son gain, ni ses préréglages de qualité.
+- Il ne rouvre aucune ambition (règle 4) et ne dit rien du solveur : ses ondulations (iWave) et son océan FFT sont de l'image,
+  sans conservation ni couplage — nos couches B, W, δ, V répondent à d'autres exigences.
+- Rien n'a été **vu** : aucun jugement sur son rendu ne se porte ici.

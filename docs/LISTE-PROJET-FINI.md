@@ -420,7 +420,8 @@ pas recopiée ici (L137).
   eau pure de Pope & Fry), transmission à 0,005 du modèle —, et la réflexion de l'afficheur portée
   ([preuve](validation/EPAISSEUR-EAU-S359.md), ADR-194) ; **S361** : les caustiques sur le fond, méthode directe, exactes
   à 5 % et l'énergie à 1 % ([preuve](validation/CAUSTIQUES-S361.md)), **validées en R22** (S367). Manquent les
-  particules, les eaux chargées, les caustiques sur les objets et dans l'eau.
+  particules, les eaux chargées, les caustiques sur les objets et dans l'eau (piste : un volume de caustiques par
+  tranches, [comparable](COMPARABLES-EXTERNES.md) lu en S400).
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *partiel* depuis S365 : dans Godot, la
   caméra sous l'eau — la surface vue d'en dessous, **fenêtre de Snell** rendue à 0,05° de `arcsin(1/n)` et réflexion
   totale au-delà ; le milieu, `exp(−c·d)` par canal à 0,004 près, la lumière de l'eau, le fond et ses caustiques

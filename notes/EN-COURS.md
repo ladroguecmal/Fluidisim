@@ -82,12 +82,18 @@ la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — la référence : section des comparables ; pistes à la file (rendu, au poste).
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — la référence : section des comparables ; pistes à la file (rendu, au poste).
 - [ ] **P3** — (E) et (F) dans `apic3d_columns.rs` ; le repos (critère 2 de S399) ; sans zone et toutes colonnes au bit.
 - [ ] **P4** — `apic3d_raccord`, 30 s, 5 et 2,5 cm ; critère 4 de S399 ; attribution si manqué.
 - [ ] **P5** — suite ; preuve (§6 de RACCORD-3D-S398) ; liste, file, A316.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+
+- **P2** : section « CAUSTIC//VOLUME » des comparables (lu au dépôt, non exécuté). Même méthode que nos caustiques de S361 (Wyman,
+  rapport d'aires). Ce qui manque chez nous : rayons de lumière et caustiques **dans** l'eau et sur les objets par un volume de
+  tranches (8.5, 8.6) — à juger par un contrôle de conservation (moyenne d'une tranche = `E₀·exp(−K_d·z)`) et une photographie,
+  **sans le gain artistique** `godRays` ; dispersion seulement si une photographie montre des franges ; occultation des photons par
+  la coque. Pointeurs : file (rendu), liste 8.5.
 
