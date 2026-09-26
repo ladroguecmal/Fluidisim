@@ -196,3 +196,68 @@ fn a_tank_at_rest_stays_at_rest_s388() {
         assert!(worst <= 0.01, "{worst}");
     }
 }
+
+/// Une sphère de 0,4 m au coin d'un quart de cuve à 5 cm (`D/dx` = 8) : l'axe au coin, les deux parois sont deux plans de
+/// symétrie (S393).
+fn quarter_with_sphere(nz: usize, water: f32, center_z: f32, velocity: f32) -> (Apic3, usize) {
+    let (mut a, _) = apic(16, 16, nz, 0.05, 16 * 16 * nz * 8);
+    let body = Sphere3 { center: [0., 0., center_z], radius: 0.2, velocity: [0., 0., velocity] };
+    a.set_body(Some(body)).unwrap();
+    let n = a
+        .seed(&|p| p[2] < water && p[0] * p[0] + p[1] * p[1] + (p[2] - center_z) * (p[2] - center_z) >= 0.2 * 0.2)
+        .unwrap();
+    (a, n)
+}
+
+#[test]
+fn a_body_is_refused_when_not_finite_or_empty_s393() {
+    let (mut a, _) = apic(4, 4, 4, 0.1, 100);
+    let ok = Sphere3 { center: [0.2, 0.2, 0.2], radius: 0.1, velocity: [0.; 3] };
+    assert_eq!(a.set_body(Some(Sphere3 { radius: 0., ..ok })), Err(Error::Domain));
+    assert_eq!(a.set_body(Some(Sphere3 { center: [f32::NAN, 0., 0.], ..ok })), Err(Error::NotFinite));
+    assert_eq!(a.body(), None);
+    a.set_body(Some(ok)).unwrap();
+    assert_eq!(a.body(), Some(ok));
+}
+
+#[test]
+fn a_sphere_at_rest_half_immersed_stays_at_rest_s393() {
+    // Critère 2 de S393 : à demi immergée, au repos, 2 s ; masse exacte, vitesse parasite ≤ 1 cm/s (2D, S320 : 5,4 mm/s).
+    let (mut a, n) = quarter_with_sphere(16, 0.5, 0.5, 0.);
+    let (mut t, mut worst, mut steps) = (0u64, 0f32, 0);
+    let mut last = ApicReport::default();
+    while t < 2_000_000 {
+        let us = a.stable_step_us(20_000).min(2_000_000 - t);
+        last = a.step(us).unwrap();
+        worst = worst.max(last.max_speed);
+        t += us;
+        steps += 1;
+    }
+    let solids = a.labels().iter().filter(|l| **l == SOLID).count();
+    println!("S393 sphère au repos : {steps} pas, vitesse parasite max {:.3e} m/s, dernière {:.3e} ; itérations {} ; \
+              {solids} mailles solides", worst, last.max_speed, last.iterations);
+    assert_eq!(a.particle_count(), n);
+    assert!(solids > 0);
+    assert!(worst <= 0.01, "{worst}");
+}
+
+#[test]
+fn an_entering_sphere_keeps_mass_and_pushes_particles_out_s393() {
+    // `Fr` = 2 : la sphère part la base au ras de l'eau (0,8 m) et descend à 2·√(g·D) ; vingt pas.
+    let u = 2. * (9.81f32 * 0.4).sqrt();
+    let (mut a, n) = quarter_with_sphere(24, 0.8, 1.0, -u);
+    let mut max_speed = 0f32;
+    for _ in 0..20 {
+        let us = a.stable_step_us(20_000);
+        max_speed = max_speed.max(a.step(us).unwrap().max_speed);
+        let b = a.body().unwrap();
+        for p in a.particles() {
+            let d = ((p[0] - b.center[0]).powi(2) + (p[1] - b.center[1]).powi(2) + (p[2] - b.center[2]).powi(2)).sqrt();
+            assert!(d >= b.radius, "une particule dans le corps : {d}");
+        }
+    }
+    let b = a.body().unwrap();
+    println!("S393 entrée : centre {:.4} m après vingt pas, vitesse max {max_speed:.3} m/s", b.center[2]);
+    assert_eq!(a.particle_count(), n);
+    assert!(b.center[2] < 1.0 - 0.1);
+}

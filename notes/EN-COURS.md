@@ -91,8 +91,8 @@ d'un diamètre de l'axe, qu'un remplissage depuis le haut n'atteint pas ; **pinc
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — verdict R33 consigné (revue, preuve, décisions, file).
-- [>] **P3** — le corps cinématique dans `apic3d.rs` ; essais (repos à demi immergé, masse) ; critères 1 et 2.
-- [ ] **P4** — l'exemple `apic3d_b10` (quart ou entier, mesures) ; critère 3.
+- [x] **P3** — le corps cinématique dans `apic3d.rs` ; essais (repos à demi immergé, masse) ; critères 1 et 2.
+- [>] **P4** — l'exemple `apic3d_b10` (quart ou entier, mesures) ; critère 3.
 - [ ] **P5** — la convergence, la plage publiée, `Fr` = 4, les parois ; critères 4 et 5.
 - [ ] **P6** — critère 6 ; preuve `B10-APIC3D-S393` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
@@ -103,3 +103,13 @@ encore « R32 posée » (périmé depuis S385), corrigé ; 8.10 nomme S392. Aucu
 
 **Référence du critère 1** (avant P3, binaire gardé) : `apic3d_ballottement 10 0.05` → période 1,9964 s, **+1,01 %**, énergie
 +7,04 %, amortissement **+0,21 %**, 9 pics, 93,5 itérations moyennes, 500 pas.
+
+**P3 — le corps dans `apic3d.rs`** : `Sphere3`, `set_body`, mailles `SOLID` (centre dans la sphère), faces à la vitesse du corps
+après chaque écriture, paroi mobile pour la pression (ni coefficient ni correction vers un solide), particules repoussées à
+`R + 0,05·dx` avec une vitesse normale au moins celle du corps ; le corps avance de `v·dt`. **Trouvé en chemin** : au repos, à
+demi immergée, **9,4 cm/s** au premier passage, au ras de l'eau contre la sphère — le biais de paroi de S389, contre le corps :
+le noyau ne voit des particules que d'un côté, la surface y paraît plus basse, l'eau monte. **Remède, le même** : le corps
+reflète les particules dans la reconstruction (image radiale `c + (2R − d)·n`, près du corps seulement). **Critère 2 tenu, de
+justesse** : **9,6 mm/s** au pire (2 s, 100 pas), 0,77 mm/s à la fin ; masse exacte ; **vu échouer** sans mailles solides
+(27,6 cm/s). **Critère 1 tenu** : `apic3d_ballottement 10 0.05` imprime la même ligne qu'avant, au chiffre près (hors durée).
+Essais : refus (rayon nul, NaN), entrée de vingt pas (masse, aucune particule dans le corps).

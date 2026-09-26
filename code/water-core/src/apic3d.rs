@@ -17,6 +17,10 @@
 //! Huit particules par maille (2 × 2 × 2), `f32` local (I-08), `g_eff` injecté (I-07), tous les tampons réservés à la
 //! configuration auprès de l'hôte (I-06) : le pas n'alloue rien. Aucune grandeur de jeu n'en sort (I-04), rien n'est
 //! sérialisé (I-17). Le bord du domaine est une paroi.
+//!
+//! **S393** : un corps **cinématique** — une sphère dont l'hôte impose le mouvement, comme le cylindre du banc 2D de S320
+//! (B10) : ses mailles sont solides, les faces qui les touchent prennent sa vitesse, la pression y voit une paroi mobile, et
+//! les particules qu'il atteint sont repoussées à sa surface. Aucune force ne revient au corps.
 
 use crate::delta3d::Domain3;
 use crate::delta_projection::Error;
@@ -28,6 +32,16 @@ pub const PER_AXIS: usize = 2;
 /// Une maille d'eau, d'air ou de paroi.
 pub const AIR: u8 = 0;
 pub const WATER: u8 = 1;
+/// Une maille dont le centre est dans le corps (S393) : paroi mobile pour la pression, vitesse imposée sur ses faces.
+pub const SOLID: u8 = 2;
+
+/// Un corps **cinématique** (S393) : une sphère, son centre au début du pas et sa vitesse, imposés par l'hôte.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Sphere3 {
+    pub center: [f32; 3],
+    pub radius: f32,
+    pub velocity: [f32; 3],
+}
 
 /// La référence APIC 3D : grille MAC, particules et tampons de travail, tous réservés à la configuration.
 pub struct Apic3 {
@@ -75,6 +89,8 @@ pub struct Apic3 {
     pub(crate) separation: bool,
     /// Rayon du noyau de la reconstruction, en mailles (`KERNEL_CELLS` ; un autre sert à la mesure).
     pub(crate) kernel: f32,
+    /// Le corps cinématique, s'il y en a un (S393) ; le pas l'avance de `velocity·dt`.
+    pub(crate) body: Option<Sphere3>,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -151,6 +167,7 @@ impl Apic3 {
             iterations: 0,
             separation: true,
             kernel: KERNEL_CELLS,
+            body: None,
         })
     }
 
@@ -189,6 +206,28 @@ impl Apic3 {
     /// **Pour la mesure** : la séparation des particules (défaut : active).
     pub fn set_separation(&mut self, on: bool) {
         self.separation = on;
+    }
+    /// **Le corps cinématique** (S393) : sa position au début du prochain pas et sa vitesse, que l'hôte impose ; `None`
+    /// l'enlève. Refus `NotFinite` si une grandeur n'est pas finie, `Domain` si le rayon n'est pas positif.
+    pub fn set_body(&mut self, body: Option<Sphere3>) -> Result<(), Error> {
+        if let Some(b) = body {
+            if !b.center.iter().chain(b.velocity.iter()).chain([b.radius].iter()).all(|x| x.is_finite()) {
+                return Err(Error::NotFinite);
+            }
+            if b.radius <= 0. {
+                return Err(Error::Domain);
+            }
+        }
+        self.body = body;
+        Ok(())
+    }
+    /// Le corps, avancé à la fin du dernier pas.
+    pub fn body(&self) -> Option<Sphere3> {
+        self.body
+    }
+    /// Les étiquettes des mailles : `AIR`, `WATER` ou `SOLID` (même ordre que `distance`).
+    pub fn labels(&self) -> &[u8] {
+        &self.label
     }
     /// Distance signée reconstruite aux centres des mailles (`x` le plus rapide, puis `y`, puis `z`).
     pub fn distance(&self) -> &[f32] {
@@ -545,6 +584,12 @@ impl Apic3 {
                     let images_x = [Some(1f32), near[0].then_some(-1.), near[1].then_some(2.)];
                     let images_y = [Some(1f32), near[2].then_some(-1.), near[3].then_some(2.)];
                     let images_z = [Some(1f32), near[4].then_some(-1.)];
+                    // S393 : le corps **reflète** aussi, pour la même raison — sans quoi la surface paraît plus basse contre
+                    // lui et l'eau y monte (9,4 cm/s au repos). Image radiale, `c + (2R − d)·n`, cherchée seulement près du corps.
+                    let body = self.body.filter(|b| {
+                        let e = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
+                        (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt() < b.radius + radius
+                    });
                     let (mut sw, mut sx) = (0f32, [0f32; 3]);
                     for c in k.saturating_sub(reach)..(k + reach + 1).min(nz) {
                         for b in j.saturating_sub(reach)..(j + reach + 1).min(ny) {
@@ -558,12 +603,23 @@ impl Apic3 {
                                         for my in images_y.iter().flatten() {
                                             for mz in images_z.iter().flatten() {
                                                 let p = [mirror(p0[0], *mx, lx), mirror(p0[1], *my, ly), mirror(p0[2], *mz, 0.)];
-                                                let d = [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
-                                                let wt = kernel((d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) * inv_r2);
-                                                if wt > 0. {
-                                                    sw += wt;
-                                                    for m in 0..3 {
-                                                        sx[m] += wt * p[m];
+                                                let mut add = |p: [f32; 3]| {
+                                                    let d = [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
+                                                    let wt = kernel((d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) * inv_r2);
+                                                    if wt > 0. {
+                                                        sw += wt;
+                                                        for m in 0..3 {
+                                                            sx[m] += wt * p[m];
+                                                        }
+                                                    }
+                                                };
+                                                add(p);
+                                                if let Some(b) = body {
+                                                    let e = [p[0] - b.center[0], p[1] - b.center[1], p[2] - b.center[2]];
+                                                    let d = (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt();
+                                                    if d > 0. && d < 2. * b.radius {
+                                                        let f = (2. * b.radius - d) / d;
+                                                        add([b.center[0] + f * e[0], b.center[1] + f * e[1], b.center[2] + f * e[2]]);
                                                     }
                                                 }
                                             }
@@ -631,19 +687,23 @@ impl Apic3 {
         let dt = (duration_us as f64 * 1e-6) as f32;
         self.particles_to_grid();
         self.reconstruct();
+        self.label_body();
         let gdt = (self.g_eff as f64 * duration_us as f64 * 1e-6) as f32;
         for w in self.w.iter_mut() {
             *w -= gdt;
         }
         self.walls();
+        self.impose_body();
         let (iterations, residual) = self.project(dt);
         let divergence = self.divergence_metric();
         self.extrapolate();
+        self.impose_body();
         self.grid_to_particles();
         self.advect(dt);
         if self.separation {
             self.separate();
         }
+        self.move_body(dt);
         let mut max_speed = 0f32;
         for k in 0..self.n {
             let (p, v) = (self.x[k], self.vel[k]);
@@ -673,6 +733,85 @@ impl Apic3 {
             for i in 0..nx {
                 self.w[j * nx + i] = 0.;
                 self.w[(nz * ny + j) * nx + i] = 0.;
+            }
+        }
+    }
+
+    /// **Le corps dans la grille** (S393) : les mailles dont le centre est dans la sphère deviennent solides, par-dessus les
+    /// étiquettes de la surface reconstruite.
+    fn label_body(&mut self) {
+        let Some(b) = self.body else { return };
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let r2 = b.radius * b.radius;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
+                    let d = [q[0] - b.center[0], q[1] - b.center[1], q[2] - b.center[2]];
+                    if d[0] * d[0] + d[1] * d[1] + d[2] * d[2] < r2 {
+                        let c = self.cell(i, j, k);
+                        self.label[c] = SOLID;
+                    }
+                }
+            }
+        }
+    }
+
+    /// Toute face qui touche une maille solide prend la vitesse du corps. Appelé après chaque opération qui écrit les faces —
+    /// sans quoi une extrapolation réécrirait la paroi (S320).
+    fn impose_body(&mut self) {
+        let Some(b) = self.body else { return };
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        let solid = |a: usize, j: usize, k: usize| self.label[(k * ny + j) * nx + a] == SOLID;
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    if !solid(i, j, k) {
+                        continue;
+                    }
+                    self.u[(k * ny + j) * (nx + 1) + i] = b.velocity[0];
+                    self.u[(k * ny + j) * (nx + 1) + i + 1] = b.velocity[0];
+                    self.v[(k * (ny + 1) + j) * nx + i] = b.velocity[1];
+                    self.v[(k * (ny + 1) + j + 1) * nx + i] = b.velocity[1];
+                    self.w[(k * ny + j) * nx + i] = b.velocity[2];
+                    self.w[((k + 1) * ny + j) * nx + i] = b.velocity[2];
+                }
+            }
+        }
+        // Une face de corps sur le bord du domaine reste une paroi.
+        self.walls();
+    }
+
+    /// Le corps avance de `velocity·dt`, puis repousse à sa surface (plus 0,05 maille) les particules qu'il a atteintes, avec
+    /// une vitesse normale au moins égale à la sienne : elles ne rentrent plus (S320).
+    fn move_body(&mut self, dt: f32) {
+        let Some(mut b) = self.body else { return };
+        for a in 0..3 {
+            b.center[a] += b.velocity[a] * dt;
+        }
+        self.body = Some(b);
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let (lx, ly, lz) = (nx as f32 * dx, ny as f32 * dx, nz as f32 * dx);
+        let (reach, margin) = (b.radius + 0.05 * dx, 1e-3 * dx);
+        for k in 0..self.n {
+            let p = self.x[k];
+            let e = [p[0] - b.center[0], p[1] - b.center[1], p[2] - b.center[2]];
+            let d = (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]).sqrt();
+            if d >= reach {
+                continue;
+            }
+            let n = if d > 0. { [e[0] / d, e[1] / d, e[2] / d] } else { [0., 0., 1.] };
+            self.x[k] = [
+                (b.center[0] + n[0] * reach).clamp(margin, lx - margin),
+                (b.center[1] + n[1] * reach).clamp(margin, ly - margin),
+                (b.center[2] + n[2] * reach).clamp(margin, lz - margin),
+            ];
+            let v = &mut self.vel[k];
+            let (vn, wn) = (v[0] * n[0] + v[1] * n[1] + v[2] * n[2], b.velocity[0] * n[0] + b.velocity[1] * n[1] + b.velocity[2] * n[2]);
+            if vn < wn {
+                for a in 0..3 {
+                    v[a] += (wn - vn) * n[a];
+                }
             }
         }
     }
@@ -718,10 +857,11 @@ impl Apic3 {
                     }
                     let mut s = 0f32;
                     for (n, _, _) in self.neighbours(i, j, k).into_iter().flatten() {
-                        if self.label[n] == WATER {
-                            s += x[c] - x[n];
-                        } else {
-                            s += x[c] / self.theta(c, n);
+                        match self.label[n] {
+                            WATER => s += x[c] - x[n],
+                            AIR => s += x[c] / self.theta(c, n),
+                            // Le corps : paroi mobile, flux imposé, pas de pression.
+                            _ => {}
                         }
                     }
                     y[c] = s;
@@ -760,7 +900,11 @@ impl Apic3 {
                         };
                         div += sign * face;
                         if let Some((n, _, _)) = nb {
-                            diag += if self.label[n] == WATER { 1. } else { 1. / self.theta(c, n) };
+                            match self.label[n] {
+                                WATER => diag += 1.,
+                                AIR => diag += 1. / self.theta(c, n),
+                                _ => {}
+                            }
                         }
                     }
                     self.rhs[c] = scale * div / dx;
@@ -815,6 +959,9 @@ impl Apic3 {
                             continue;
                         }
                         let Some((n, f, axis)) = nb else { continue };
+                        if self.label[c] == SOLID || self.label[n] == SOLID {
+                            continue;
+                        }
                         let (wc, wn) = (self.label[c] == WATER, self.label[n] == WATER);
                         let grad = if wc && wn {
                             self.p[n] - self.p[c]
