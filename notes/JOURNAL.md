@@ -17561,3 +17561,18 @@ D3) ; autres scènes non éprouvées sur la durée. **Rituel.** Maillons **0** :
 testée — **devient possible** δ vivant à 30 Hz au-delà de vingt secondes, la cadence de la porte C sur sa durée d'usage ;
 **chemin** : la scène vivante (`--pas-delta=33333`), puis C3b et les scènes de C10 ; **preuve** : A321-S391. Suivant : au
 poste, **la pluie, pièce 5** (alternance d'ADR-191), puis C3b ; dans le cloud, **C4b**.
+
+## S392 — 2026-09-26 — rendu : la pluie, pièce 5a — les surfaces mouillées
+
+**Entrée.** *« Continue avec la pluie, pièce 5 »* ; découpage déclaré : 5a les surfaces mouillées, 5b les éclaboussures au
+sol. **Fait** ([preuve](../docs/validation/SURFACES-MOUILLEES-S392.md)) : `godot/mouille.gdshaderinc` — la forme d'Ångström
+avec la réflexion interne de Lekner et Dorf, `a·(1 − r̄ᵢ)/(1 − a·r̄ᵢ)·(1 − R(θ))`, `r̄ᵢ` = 0,47459 par deux intégrations
+(`outils/sol_mouille.py`) ; reflet du film (ciel couvert, occultants) ; mouillé si la verticale est libre, sec sous les
+débords, pieds de murs par rejaillissements (hypothèse), nez de margelle par ruissellement. **Tenus** : sans pluie 7 / 7 au
+bit ; formule sur l'image à 0,03 %, reflet à 0,3 % ; bord sec à 0,00 mm. **Manqué de peu** : coût +0,34 ms en vue
+d'ensemble (seuil 0,3). **Vu en chemin** : un rayon vertical dans le test de dalles divise par zéro — le dessous des débords
+passait pour mouillé. **Photographie** (premières gouttes sur l'asphalte, Newport) : taches 0,08 du sec en linéaire contre
+0,53 prédits — écart non attribué (courbe de l'appareil, reflets, second effet de Lekner et Dorf). **Limites** : film
+uniforme, régime établi, sans vent ; R33 dira s'il faut assombrir. **Rituel.** Maillons **1** : 8.10 reste partiel.
+Suivant : **R33** ; au poste, C3b (alternance : physique) ; dans le cloud, C4b ; la pièce 5b après R33.
+

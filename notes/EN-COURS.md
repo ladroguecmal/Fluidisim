@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S392 — **en cours**. **La pluie, pièce 5** d'[ADR-205](../docs/adr/ADR-205-la-pluie-complete.md) : les surfaces
+Session : S392 — **terminée**. **La pluie, pièce 5** d'[ADR-205](../docs/adr/ADR-205-la-pluie-complete.md) : les surfaces
 mouillées — sol, margelles, murs plus sombres et plus brillants. Demande de l'utilisateur (2026-09-26) : *« Continue avec la
 pluie, pièce 5 »* ; session de rendu (alternance d'ADR-191). Agent : Claude Opus 5.5, Claude Code (application de bureau) au
 poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3. Sert **8.10** (crédibilité perçue). **Découpage
@@ -98,7 +98,7 @@ trois vues de la piscine à 10 mm/h ; sans pluie, 0 ; revue **R33** de l'utilisa
   eaux), diffus mouillé, reflet du film (ciel et occultants) ; la scène (eaux déclarées).
 - [x] **P4** — les contrôles : critère 1, critère 3 (rapport, reflet), critère 4 (le bord de l'abri) ; coût.
 - [x] **P5** — images de revue R33, REVUE-VISUELLE ; preuve ; file, feuille de route, ADR-205 (note datée).
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 
