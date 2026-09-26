@@ -261,3 +261,66 @@ fn an_entering_sphere_keeps_mass_and_pushes_particles_out_s393() {
     assert_eq!(a.particle_count(), n);
     assert!(b.center[2] < 1.0 - 0.1);
 }
+
+/// Une cuve toute en colonnes (S398) : aucune particule, surface posée.
+fn all_columns(n: usize, eta: &dyn Fn(usize, usize) -> f32) -> Apic3 {
+    let (mut a, mut arena) = apic(n, n, n, 0.05, 8);
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &vec![1u8; n * n]).unwrap();
+    assert_eq!(arena.stats.persistent_bytes, reserved_bytes(a.domain(), 8).unwrap() + columns_reserved_bytes(a.domain()).unwrap());
+    let surface: Vec<f32> = (0..n * n).map(|c| eta(c % n, c / n)).collect();
+    a.set_columns_surface(&surface).unwrap();
+    a
+}
+
+#[test]
+fn a_column_zone_is_refused_twice_or_misshapen_s398() {
+    let (mut a, mut arena) = apic(4, 4, 4, 0.1, 8);
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    assert_eq!(a.enable_columns(&mut host, &[1; 15]), Err(Error::Shape));
+    assert_eq!(a.set_columns_surface(&[0.2; 16]), Err(Error::Domain));
+    a.enable_columns(&mut host, &[1; 16]).unwrap();
+    assert_eq!(a.enable_columns(&mut host, &[1; 16]), Err(Error::Domain));
+    assert_eq!(a.set_columns_surface(&[f32::NAN; 16]), Err(Error::NotFinite));
+    assert!(a.is_column(3, 3));
+}
+
+#[test]
+fn columns_at_rest_stay_at_rest_s398() {
+    // Critère 2 de S398 : toutes colonnes, 1 m de côté à 5 cm, 0,5 m d'eau, 2 s ; vitesse ≤ 1 mm/s, volume à 10⁻⁶.
+    let mut a = all_columns(20, &|_, _| 0.5);
+    let v0 = a.columns_volume();
+    let (mut t, mut worst, mut steps) = (0u64, 0f32, 0);
+    while t < 2_000_000 {
+        let us = a.stable_step_us(20_000).min(2_000_000 - t);
+        a.step(us).unwrap();
+        worst = worst.max(a.columns_max_speed());
+        t += us;
+        steps += 1;
+    }
+    let drift = a.columns_volume() / v0 - 1.;
+    println!("S398 colonnes au repos : {steps} pas, vitesse max {worst:.3e} m/s, volume {drift:+.2e}");
+    assert!(worst <= 1e-3, "{worst}");
+    assert!(drift.abs() <= 1e-6, "{drift}");
+}
+
+#[test]
+fn a_column_bump_keeps_its_volume_s398() {
+    // Une bosse de 5 cm se déploie une seconde : le transport par débits mouillés garde le volume, à l'arrondi près.
+    let mut a = all_columns(20, &|i, j| {
+        let (x, y) = (i as f32 - 9.5, j as f32 - 9.5);
+        0.5 + 0.05 * (-(x * x + y * y) / 8.).exp()
+    });
+    let v0 = a.columns_volume();
+    let mut t = 0u64;
+    while t < 1_000_000 {
+        let us = a.stable_step_us(20_000).min(1_000_000 - t);
+        a.step(us).unwrap();
+        t += us;
+    }
+    let drift = a.columns_volume() / v0 - 1.;
+    let eta = a.columns_surface().unwrap();
+    let spread = eta.iter().fold(0f32, |m, e| m.max((e - 0.5).abs()));
+    println!("S398 bosse en colonnes : volume {drift:+.2e}, écart max au repos {spread:.4} m (départ 0,05)");
+    assert!(drift.abs() <= 1e-6, "{drift}");
+    assert!(spread < 0.05);
+}

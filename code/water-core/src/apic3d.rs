@@ -91,6 +91,8 @@ pub struct Apic3 {
     pub(crate) kernel: f32,
     /// Le corps cinématique, s'il y en a un (S393) ; le pas l'avance de `velocity·dt`.
     pub(crate) body: Option<Sphere3>,
+    /// La zone des colonnes (S398), si elle est active : surface `η`, vitesse eulérienne advectée.
+    pub(crate) columns: Option<columns::Columns3>,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -168,6 +170,7 @@ impl Apic3 {
             separation: true,
             kernel: KERNEL_CELLS,
             body: None,
+            columns: None,
         })
     }
 
@@ -671,6 +674,8 @@ impl Apic3 {
     /// Le plus grand pas stable, µs, sous `max_us` : `0,5·dx / (max|v| + √(g·dx))`, comme en 2D.
     pub fn stable_step_us(&self, max_us: u64) -> u64 {
         let vmax = self.vel[..self.n].iter().fold(0f32, |m, v| m.max(v[0].abs()).max(v[1].abs()).max(v[2].abs()));
+        // S398 : la zone des colonnes n'a pas de particules ; sa vitesse est celle de la grille.
+        let vmax = vmax.max(self.columns_max_speed());
         let dx = self.domain.dx as f64;
         let dt = 0.5 * dx / (vmax as f64 + (self.g_eff.abs() as f64 * dx).sqrt());
         ((dt * 1e6) as u64).clamp(1, max_us)
@@ -685,8 +690,12 @@ impl Apic3 {
         }
         // Les coefficients dimensionnés se construisent en f64 et s'arrondissent en f32 (I-08, ADR-141).
         let dt = (duration_us as f64 * 1e-6) as f32;
+        // S398 : sans zone de colonnes, ces quatre appels ne font rien.
+        self.columns_begin();
         self.particles_to_grid();
+        self.columns_advect(dt);
         self.reconstruct();
+        self.columns_label();
         self.label_body();
         let gdt = (self.g_eff as f64 * duration_us as f64 * 1e-6) as f32;
         for w in self.w.iter_mut() {
@@ -698,6 +707,7 @@ impl Apic3 {
         let divergence = self.divergence_metric();
         self.extrapolate();
         self.impose_body();
+        self.columns_transport(dt);
         self.grid_to_particles();
         self.advect(dt);
         if self.separation {
@@ -711,6 +721,9 @@ impl Apic3 {
                 return Err(Error::NotFinite);
             }
             max_speed = max_speed.max((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt());
+        }
+        if !self.columns_finite() {
+            return Err(Error::NotFinite);
         }
         self.iterations = iterations;
         Ok(ApicReport { iterations, residual, divergence, max_speed })
@@ -1160,6 +1173,10 @@ impl Apic3 {
         }
     }
 }
+
+#[path = "apic3d_columns.rs"]
+mod columns;
+pub use columns::columns_reserved_bytes;
 
 #[cfg(test)]
 #[path = "tests_apic3d.rs"]

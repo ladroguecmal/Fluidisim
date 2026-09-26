@@ -87,11 +87,17 @@ publiés contre la période exacte.
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — `enable_columns` et le pas à colonnes dans `apic3d.rs` ; l'essai du repos ; critères 1 et 2.
-- [ ] **P3** — les ballottements, toutes colonnes, contre δ (même instrument) ; critère 3.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — `enable_columns` et le pas à colonnes dans `apic3d.rs` ; l'essai du repos ; critères 1 et 2.
+- [>] **P3** — les ballottements, toutes colonnes, contre δ (même instrument) ; critère 3.
 - [ ] **P4** — suite ; preuve `RACCORD-3D-S398` ; file, liste, feuille de route, index.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
-
+**P2 — `apic3d_columns.rs`** : `enable_columns` (masque, réserve comptée), `set_columns_surface`, `columns_volume` ; dans le pas,
+quatre crochets inertes sans masque — vitesse du pas précédent gardée, advectée au pied de la caractéristique sur les faces de
+la zone ; `φ = z − η` et étiquettes dans les colonnes ; transport de `η` par débits mouillés (hauteur moyenne des deux
+colonnes, somme compensée, comme `transport_mobile3` de δ) ; pas stable et contrôle de finitude étendus. **Critère 1 tenu** :
+`apic3d_ballottement 10 0.05` imprime la ligne de S389 au chiffre près. **Critère 2 tenu** : toutes colonnes, repos 2 s, vitesse
+max **2,4·10⁻⁵ m/s**, volume à 7·10⁻¹⁵ ; une bosse de 5 cm qui se déploie 1 s garde son volume à 2·10⁻¹¹. Trois essais (refus
+compris).
