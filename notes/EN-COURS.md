@@ -84,7 +84,7 @@ le pas fin à l'écart que la dispersion calculée prévoit. (4) Suite entière 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'étiquette corrigée (critère 1).
-- [ ] **P3** — la course de la surface sous la mer de la porte B : `examples/delta3d_course_surface.rs` (critère 2) ; les
+- [x] **P3** — la course de la surface sous la mer de la porte B : `examples/delta3d_course_surface.rs` (critère 2) ; les
   couches cubiques qu'elle impose, le gain qui reste (outil) ; le cas d'un bassin calme.
 - [ ] **P4** — la colonne graduée au pas mobile (`project_mobile3`) : garde de la course, départ chaud par injection aux
   nœuds, divergence restreinte ; essais (critère 3).
@@ -94,4 +94,20 @@ le pas fin à l'écart que la dispersion calculée prévoit. (4) Suite entière 
 
 ### Notes de reprise
 
-*(vide)*
+**P3 — la course de la surface** (`delta3d_course_surface`, 10 s ; mer `--houle` reconstruite, domaine de la porte B, 840
+points, 0,1 s, 600 s) :
+
+| lecture | min | max | course | 0,1 % / 99,9 % | couches cubiques, paquet compris |
+|---|---:|---:|---:|---|---:|
+| `B` | −2,487 m | +2,299 m | **4,79 m** | −1,89 / +1,83 | **26 sur 28** |
+| `B` moins sa moyenne sur le domaine | −1,674 | +1,716 | 3,39 m | −1,14 / +1,14 | 20 sur 28 |
+
+**La colonne graduée ne paie pas en haute mer** dans un repère fixe : 26 couches cubiques au moins, deux nœuds au mieux
+dessous — rien à gagner ; un repère qui suivrait la moyenne de `B` en laisserait 20 (÷1,27 au plus). **Fait vu en passant** :
+sur dix minutes, le creux de `B` (−2,49 m) plus le paquet (0,65 m) descend à 0,11 m du fond du domaine (3,5 m d'eau) — la
+scène de la porte B n'a été éprouvée que sur des durées courtes ; à consigner, pas à régler ici.
+
+**En eau calme** (bassin de 3 m, course supposée ±0,5 m — *hypothèse*, non mesurée) : la **dispersion** fixe les couches
+cubiques, pas la course — 10 cm : 14 inconnues sur 30 (÷2,14 ; `r` 1,25, 6 cubiques) ; 5 cm : **24 sur 60 (÷2,50** ; `r` 1,2,
+11 cubiques). La colonne graduée sert donc les **contenants** (ADR-200, ADR-202) — le pas mobile de la piscine —, pas la
+haute mer.
