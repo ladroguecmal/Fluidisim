@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 23:36 +02:00
+Battement        : 2026-09-26 23:41 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
 Session en cours : S396 — C8a en référence : la fusion et la séparation de domaines par ensembles de blocs (ADR-006 §3–4), 4.9
 Dernière session : S395 — physique : **C5a, deuxième part** ([preuve](docs/validation/B10-APIC-S320.md) §15) — l'échange au sommet manque (le fond s'entasse) ; la source d'A316 mesurée : une **circulation permanente** à la frontière (+21 mm/s en bas, −54 en haut ; APIC seul < 2), née des colonnes ; l'hypothèse (les colonnes n'advectent pas la quantité de mouvement) non tranchée. Avant : S394, l'échange comprime

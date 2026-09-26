@@ -92,8 +92,8 @@ départ **≤ 1 % de l'amplitude**. Publié : fusions plus tardives, et une sép
   délais ; essais ; critère 1.
 - [x] **P3** — `Volume3::transplant` : l'état d'un domaine recopié dans un autre sur le réseau commun ; l'aller-retour ;
   critère 2.
-- [>] **P4** — l'exemple `delta3d_fusion` : deux bosses, la fusion au critère, contre le domaine unique ; critère 3 ; publiés.
-- [ ] **P5** — critère 4 ; preuve `FUSION-S396` ; liste, file, feuille de route, index.
+- [x] **P4** — l'exemple `delta3d_fusion` : deux bosses, la fusion au critère, contre le domaine unique ; critère 3 ; publiés.
+- [>] **P5** — critère 4 ; preuve `FUSION-S396` ; liste, file, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -111,3 +111,12 @@ murs du receveur restent nuls (leçon de S350). **Critère 2 tenu** : 32 × 16 �
 hors de la coupure ; la coupure (x = 4 m) perd au plus **7,8 mm/s**, 0,058 m³/s — l'onde de la bosse l'a déjà atteinte en
 0,4 s. La coupure rendue, `C'` refait vingt pas **au bit** avec `C`, mêmes itérations : la recopie porte tout ce que le pas
 lit. **Vu échouer** sans la pression de départ (deux essais).
+
+**P4 — `delta3d_fusion`** (43 s par cas). **Fusion** (32 m, bosses de 5 cm à 5 et 27 m ; A sur [0, 14 m), B sur [18, 32 m)) :
+le critère fusionne à **0,94 s** ; écart au domaine unique avant la fusion 0,16 % de l'amplitude, à la fusion 0,19 %, sur les 5 s
+suivantes au plus **0,26 %** — **critère 3 tenu**. Témoins : fusion forcée à 0 s, **au bit** ; à 2 s, les ondes ayant frappé les
+murs de A et B, **3,4 %** ; à 3 s, **8,5 %** — l'instant du critère compte. **Séparation** (40 m, bosses à 5 et 31 m) : deux
+composantes, due à **1,00 s**, coupure à 18 m ; écart par seconde 0,00 / 0,03 / 0,32 / 1,45 / 2,61 % — rien ne saute à la
+coupure, puis les ondes se réfléchissent sur les nouveaux murs (la limite des murs, publiée). **Trouvé en chemin** : au premier
+passage, bosses à 5 et 35 m, l'écart était nul sur 5 s — symétriques autour de la coupure à 20 m, qui était un plan de
+symétrie où un mur ne change rien ; témoin sans valeur, remplacé par le cas asymétrique.
