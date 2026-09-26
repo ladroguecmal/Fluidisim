@@ -1185,3 +1185,18 @@ Un mot par question suffit ; sans réponse, il reste.
 ménisque reste. **Classe** : la caméra à demi immergée jugée sur six images fixes, à Hs 2,5 m ; ni animation, ni objet
 qui traverse la ligne.
 
+## 32. R27 — le bassin de la piscine en δ 3D, S375
+
+**Liste 5.10** ([preuve](PISCINE-DELTA-S375.md)). La piscine de S374, dont le bassin est désormais un domaine volumique 3D :
+le jet de la pompe y entre, le déversoir en retire, V garde la masse. **À l'échelle réelle, rien ne se voit** : à la maille
+de 20 cm que permet la référence CPU, la surface bouge de quelques millimètres.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s375/echelle_reelle_buse_6s5.png`, `…_rasante_6s5.png`, `…_ensemble_200s.png` | le rendu à l'échelle réelle, 1,5 s après le lancement du jet et en régime : la surface paraît plane |
+| `viewer/captures/s375/cartes_de_hauteur_delta.png` | les **données** (écart au niveau moyen, ±3 mm ; rouge au-dessus, bleu en dessous) à 5,3 / 5,6 / 6,0 / 6,5 s et 8 / 40 / 200 / 260 s : dôme, creux, anneaux, réflexions, creux stable sous le jet |
+| `viewer/captures/s375/debogage_hauteurs_x100_6s5.png` | **débogage**, hauteurs ×100 : la chaîne de rendu montre bien le creux et les anneaux |
+
+**La question :** la suite proposée — δ sur la carte graphique, dans Godot, à une maille de 5 à 10 cm et en temps réel,
+pour que le bouillonnement et les rides se voient — vous convient-elle ? Un mot suffit.
+

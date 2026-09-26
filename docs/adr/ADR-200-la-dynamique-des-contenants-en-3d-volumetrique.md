@@ -36,3 +36,9 @@ téléchargement de godot-rust.
 
 V reste le seul état autoritaire et répliqué des contenants (I-10 : le serveur exécute V, jamais δ) ; ADR-199 et la
 sauvegarde WVST v2 inchangés. La mer (B, W, δ de la haute mer) inchangée. Rien n'est retiré du périmètre.
+
+> **Note du 2026-09-26 (S375).** D4 (1) fait sur la référence CPU ([PISCINE-DELTA-S375](../validation/PISCINE-DELTA-S375.md)) :
+> le bassin en δ 3D, masse à V (0,1 µm), jet et seuil comme sources et puits, surface rendue dans Godot. À la maille de
+> 20 cm que la référence permet, la dynamique tient en quelques millimètres et ne se voit pas : la suite passe par δ sur
+> GPU (5 à 10 cm). Deux défauts de la référence mobile corrigés en chemin ([ADR-201](ADR-201-plancher-de-l-echelle-de-vitesse-de-la-projection.md), `shift_rest`).
+

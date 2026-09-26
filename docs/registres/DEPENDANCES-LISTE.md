@@ -155,7 +155,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **5.7** Plusieurs liquides | H | `liquid_id` (A17) | — | — | **0** |
 | **5.8** Réseau fermé sous pression | H | — | 5.4 | — | **1** |
 | **5.9** Compartiments, brèches, inondation de navire, limitée par l'air | H | — | 5.2, 5.3, 7.5 | 6.6, 13.2 | **3** |
-| **5.10** Articulation V↔δ | H | — | 6.5 | 1.1, 5.3, 13.2 | **1** |
+| **5.10** Articulation V↔δ | H | une dynamique visible (δ sur GPU, 5 à 10 cm) ; le bac tampon ; V qui déclenche δ | 6.5 | 1.1, 5.3, 13.2 | **1** |
 | **5.11** Eaux souterraines | H | — | — | — | **E** — hors du périmètre par décision de l'utilisateur (ADR-197 D4) ; ne se rouvre que par lui |
 | **5.12** Capture et restauration de V | H | le stockage durable | 10.1 | 10.6 | **E**, par 10.1 |
 

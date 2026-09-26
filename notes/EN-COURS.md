@@ -86,7 +86,7 @@ de 1 mm). (4) Dans Godot, la surface rendue est celle de δ, au bit du fichier ;
 - [x] **P3** — `examples/piscine_delta.rs` : V et δ au pas, jet, puits, forçage ; coût mesuré ; export des surfaces ;
   critères 2 et 3.
 - [x] **P4** — Godot : la surface de δ en maillage de hauteur dans le bassin (`piscine.gd`), rejouée ; critère 4.
-- [ ] **P5** — images de R27, preuve `PISCINE-DELTA-S375`, liste 5.10, file, feuille de route, index.
+- [x] **P5** — images de R27, preuve `PISCINE-DELTA-S375`, liste 5.10, file, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise

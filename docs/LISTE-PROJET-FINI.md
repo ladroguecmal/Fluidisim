@@ -303,7 +303,10 @@ pas recopiée ici (L137).
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
 - [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *absent*.
 - [ ] **5.10 Articulation V↔δ** : V expose sa surface, déclenche δ, garde la masse (C21, ADR-025) —
-  *absent*, conçu : en contenant, δ s'asservit à V (ADR-185, S317) ; c'est la porte E. **2026-09-26, décision de
+  *partiel* depuis S375 : le bassin de la piscine est un domaine δ 3D dont **V garde la masse** — niveau de δ à 0,1 µm de
+  celui de V sur 330 s, sources et puits aux arêtes de V (le jet, le seuil), repos qui suit V ; V jamais lu en retour
+  (C21 par construction) ; surface rendue dans Godot ([preuve](validation/PISCINE-DELTA-S375.md)). Manquent une dynamique
+  visible (maille de 5 à 10 cm : δ sur GPU), le panache calé, le bac tampon, V qui déclenche δ, la porte E ; c'est la porte E. **2026-09-26, décision de
   l'utilisateur** : la dynamique des contenants se calcule en 3D volumétrique ([ADR-200](adr/ADR-200-la-dynamique-des-contenants-en-3d-volumetrique.md)) —
   premier cas, la piscine de S374 ([état de départ](validation/PISCINE-V-S374.md)).
 - [ ] **5.11 Eaux souterraines** — *absent* ; **hors du périmètre** par décision de l'utilisateur (2026-09-26,
@@ -563,7 +566,7 @@ pas recopiée ici (L137).
 | 2. Grandes masses (B) | 9 | 0 | 4 | 5 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 12 | 9 |
-| 5. Volumes finis (V) | 12 | 1 | 4 | 7 |
+| 5. Volumes finis (V) | 12 | 1 | 5 | 6 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 1 | 7 |
 | 8. Rendu | 10 | 0 | 9 | 1 |
@@ -572,7 +575,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **64** | **53** |
+| **total** | **120** | **3** | **65** | **52** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

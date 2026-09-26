@@ -82,7 +82,7 @@ D = {
  "5.7": ("H", "`liquid_id` (A17)", [], None),
  "5.8": ("H", "—", ["5.4"], None),
  "5.9": ("H", "—", ["5.2", "5.3", "7.5"], None),
- "5.10": ("H", "—", ["6.5"], None),
+ "5.10": ("H", "une dynamique visible (δ sur GPU, 5 à 10 cm) ; le bac tampon ; V qui déclenche δ", ["6.5"], None),
  "5.11": ("H", "—", [], "hors du périmètre par décision de l'utilisateur (ADR-197 D4) ; ne se rouvre que par lui"),
  "5.12": ("H", "le stockage durable", ["10.1"], None),
  "6.1": ("H", "W derrière la requête ; les autres degrés de liberté ; C11 ; B6", [], None),
