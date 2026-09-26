@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 10:43 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 10:50 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S379 — rendu 12 : les rides de pluie factices (ADR-202 D3) ; la campagne du solveur volumique 3D inscrite (demande de l'utilisateur)
 Dernière session : S378 — physique : **la pluie dans V** (5.5 passe à partiel, [ADR-204](docs/adr/ADR-204-la-pluie-arete-de-v.md), [preuve](docs/validation/PLUIE-V-S378.md)) — arête du ciel, exposition commandée (bâche, demi-bâche), intensité en entrée du pas ; au millilitre sur une heure ; déversoir sous la pluie à 0,11 %. Avant : S377, les réponses aux zones d'ombre (ADR-203)
 Session suivante : par l'alternance d'ADR-191 D3, **une session de rendu** : les **rides de pluie factices** sur l'eau des contenants et de la mer, réglées par l'intensité et la distance (ADR-202 D3, ADR-203 D7) — ou l'échelle radiométrique du ciel et du soleil. À la physique suivante : A320 (4.8), la coque qui bouge (6.4), la côte (2.7), l'absorption par le sol (5.5). δ sur GPU dans Godot : pas maintenant (R27)
 Maillons        : 0 — S378 : 5.5 passe à partiel (journal)

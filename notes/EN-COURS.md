@@ -62,42 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S378 — **terminée**. *« Continue »* ; par l'alternance, la physique ; à deux maillons (S376, S377), un point qui
-change d'état : **5.5, la pluie selon l'exposition au ciel**, absente, décidée hier (ADR-203 D2 : bâche entière ou demi
-posée et retirée en temps réel). Ne construit pas la météo (à la fin, ADR-197 D5, ADR-203 D5) : l'entrée que V en
-recevra.
+Session : S379 — **en cours**. *« Continue mais il faudra prévoir une session du plus dur et complexe de la création d'un
+solveur […] 3D volumétrique ultra réaliste et performant en temps réel dynamiquement »*. Deux choses : **inscrire la
+campagne du solveur** comme prochaine session de physique (conception d'abord) ; **continuer** par la session de rendu
+prévue — **les rides de pluie factices** (ADR-202 D3, ADR-203 D7), sur le bassin et sur la mer.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Thèse.** Une **arête de pluie** (`Flow::Rain { catchment_mm2 }`), du ciel vers un nœud : débit `intensité × surface
-d'ouverture × exposition`, quantifié avec report de reste comme les autres, borné par la place libre. **L'exposition est la
-commande de l'arête** (ADR-199 : 0 à 1 000, état répliqué, sauvegardé en WVST v2) — une bâche entière la met à 0, une
-demi-bâche à 500. **L'intensité est une entrée météo** du pas (`step_meteo`, mm/h), fournie à l'identique à tous les
-participants ; `step` reste le pas sans pluie, **identique au bit**. **Surface d'ouverture** plutôt que surface libre
-(ADR-010 §5) : la pluie qui tombe dans l'ouverture d'un contenant finit dans son eau, parois intérieures comprises.
+**Thèse.** Un effet de rendu, **sans simulation**, mais dont les nombres ont une provenance : les gouttes qui laissent un
+anneau net (D ≥ 1,5 mm) arrivent au taux de **Marshall et Palmer** (1948 ; `N0` = 8 000 m⁻³·mm⁻¹, `Λ = 4,1·R^−0,21`) × vitesse
+terminale d'**Atlas** (1973) — **448 m⁻²·s⁻¹ à 10 mm/h** ; l'anneau s'étend à la vitesse minimale des ondes
+capillaires-gravité, **0,23 m/s** (λ ≈ 1,7 cm), et s'éteint en ≈ 0,6 s. Procédural (cellules, couches, âges), réglé par la
+distance : quand l'empreinte d'un pixel dépasse l'anneau, sa pente devient de la **rugosité** (la variance de LEAN, ADR-161)
+— la surface mate d'une eau sous la pluie.
 
-**Critères, écrits avant.** (1) Sans pluie, les trajectoires existantes **inchangées au bit** (l'empreinte de S372). (2)
-10 mm/h sur 32 m², une heure : **320 000 ml ± 1** ; demi-bâche : 160 000 ± 1 ; bâche : **0** ; bâche posée à 30 min :
-240 000 ± 1. (3) La piscine à débordement sous la pluie, pompe arrêtée : le déversoir débite la pluie, charge sur le seuil
-`(Q/k)^⅔` **à ±1 %**. (4) Bilan exact (pluie entrée = volume gagné + rejeté), refus atomiques, la commande sauvegardée.
+**Critères, écrits avant.** (1) Sans pluie, les rendus d'avant **identiques au bit** (mer et bassin). (2) Le taux de
+naissance des anneaux, compté sur des images de contrôle (cœurs d'anneaux de moins de 30 ms), **à ±10 %** de Marshall et
+Palmer à 10 mm/h. (3) Au loin, aucun motif : les anneaux cèdent à la variance avant que l'empreinte du pixel n'atteigne
+leur longueur d'onde (vérifié par le calcul de l'empreinte au seuil). (4) Photographies réelles cherchées et chiffrées ;
+jugement de l'utilisateur (R28).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-204 : la pluie, arête de V (surface d'ouverture, exposition = commande, intensité = entrée du pas).
-- [x] **P3** — `Flow::Rain`, `step_meteo`, `Meteo` ; critères 1, 2, 4.
-- [x] **P4** — la piscine à débordement sous la pluie ; critère 3.
-- [x] **P5** — preuve `PLUIE-V-S378`, liste 5.5, registre, file, feuille de route, index, ADR-010 note datée.
-- [x] **P6** — rituel.
+- [>] **P1** — jeton, plan seul ; la campagne du solveur inscrite (file).
+- [ ] **P2** — références : photographies de pluie sur l'eau (libres, lues sans téléchargement) ; ce qu'elles montrent.
+- [ ] **P3** — les rides dans `bassin.gdshader` (le taux, l'anneau, le fondu en variance) ; critère 1 sur le bassin.
+- [ ] **P4** — les rides sur la mer (`eau.gdshaderinc`, pente et covariance de la queue) ; critère 1 sur la mer.
+- [ ] **P5** — contrôle du taux (critère 2), du fondu (critère 3) ; images de R28.
+- [ ] **P6** — preuve `RIDES-PLUIE-S379`, liste (8.9 ou 8.4), file, feuille de route, index ; la campagne du solveur dans
+  la feuille de route.
+- [ ] **P7** — rituel ; session suivante : **la campagne du solveur volumique 3D** (conception).
 
 ### Notes de reprise
-
-**P3 — fait.** `Flow::Rain { catchment_mm2 }` (du ciel vers le nœud que `from` et `to` désignent), `Meteo`, `step_meteo` ;
-`step` = `step_meteo(Meteo::SEC)`. La pluie calculée en tête de boucle, ignorée par la normalisation amont, jamais
-retirée ; étiquette 3 dans l'empreinte de la base. **Critère 1** : empreinte de S372 inchangée, 45 essais V. **Critère
-2** : 319 999 / 159 999 / 0 / 159 999 / 239 999 ml pour 320 000 / 160 000 / 0 / 160 000 / 240 000 (troncature, ≤ 1 ml).
-**Erreur du critère écrit** : « bâche posée à 30 min : 240 000 » — c'est la valeur d'une demi-bâche ; bâche entière :
-160 000 ; les deux éprouvés, dit dans l'essai. **Critère 4** : contenant plein fermé à la pluie ; bilan exact à chaque
-pas (entré 62 221 ml, sorti 528 983) ; refus `Domain` (−1, NaN, ∞) et `Capacity` (`to ≠ from`) ; demi-bâche sauvegardée.
-
-**P4 — fait.** La piscine à débordement sous 20 mm/h, pompe arrêtée, deux heures depuis le seuil : déversoir
-**1,7778·10⁻⁴ m³/s = la pluie** ; charge **0,8560 mm pour 0,8569** (−0,11 %). Suite du cœur : 543 + 20 + 2 + 1, 0 avertissement.
