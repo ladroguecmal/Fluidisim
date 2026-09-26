@@ -93,7 +93,7 @@ trois vues de la piscine à 10 mm/h ; sans pluie, 0 ; revue **R33** de l'utilisa
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les nombres : `outils/sol_mouille.py` et ses essais ; critère 2. La photographie : recherche, mesure ; critère 5.
+- [x] **P2** — les nombres : `outils/sol_mouille.py` et ses essais ; critère 2. La photographie : recherche, mesure ; critère 5.
 - [ ] **P3** — les images de référence sans pluie ; le nuanceur : mouillure (verticale libre, orientation, rejaillissements,
   eaux), diffus mouillé, reflet du film (ciel et occultants) ; la scène (eaux déclarées).
 - [ ] **P4** — les contrôles : critère 1, critère 3 (rapport, reflet), critère 4 (le bord de l'abri) ; coût.
@@ -101,3 +101,22 @@ trois vues de la piscine à 10 mm/h ; sans pluie, 0 ; revue **R33** de l'utilisa
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+
+**P2 — critère 2 tenu.** `outils/sol_mouille.py` et `test_sol_mouille.py` (6 essais) : `r̄ₑ` = 0,06641 (vu de l'air),
+`r̄ᵢ` = 0,47459 (vu de l'eau, intégration directe) = réciprocité 0,47459 ; `R(0)` = 0,02037. Rapports mouillé / sec vus
+d'aplomb : 0,540 (a = 0,1), 0,569 (0,2), 0,600 (0,3), 0,643 (0,42), 0,720 (0,6), 0,899 (0,9).
+
+**P2 — critère 5 : mesuré, écart dit, non attribué.** La formule exacte de Lekner et Dorf n'est pas lisible sans télécharger
+(résumés d'Optica et de PubMed ; le PDF de Jensen, Legakis et Dorsey 1999, qui la reprend, part en téléchargement dans le
+navigateur : refusé, non retenté) ; la forme d'Ångström est reconstruite ci-dessus depuis ce que les résumés décrivent.
+**Référence** (Wikimedia Commons, lue par un canevas, sans téléchargement) : *From dry pavement to wet pavement, Pillmawr
+Road, Newport* (Jaggery, 7 août 2024, CC BY-SA 2.0, geograph 7844328), image de 960 × 1 280 : au premier plan, les
+premières gouttes sur l'asphalte sec — même matériau, même lumière, même angle. Zone (150–710, 950–1 280), aiguilles de pin
+écartées (R − B ≥ 30) : fond sec sRGB ≈ 88, taches ≈ 31 ; **rapport 0,08 en linéaire** (courbe sRGB supposée), 0,35 en valeurs
+de code ; **modèle** ≈ 0,53 pour un asphalte d'albédo 0,1, vu à ≈ 50°. Écart d'un facteur ≈ 6, **non attribué** : courbe de
+l'appareil inconnue (un téléphone écrase les ombres), reflet d'un environnement sombre (arbres, mur) dans les gouttes, second
+effet de Lekner et Dorf (pores remplis) non modélisé. Conséquence : la formule est gardée telle quelle ; un facteur de matériau
+`assombrissement` (1 par défaut, le second effet) est exposé pour que R33 dise si le rendu est assez sombre. Les recherches
+sans résultat : Commons (« partially wet », « rain shadow », « dry patch »), Geograph (vérification anti-robot, non
+contournée).
+
