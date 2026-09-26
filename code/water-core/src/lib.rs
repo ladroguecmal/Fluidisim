@@ -63,6 +63,8 @@ pub mod delta_projection;
 /// S295, ADR-175 : **référence tridimensionnelle de δ** — la porte B. Définie et reçue ici, sur
 /// CPU et sans dépendance ; hors de la boucle d'image, où la production sera résidente sur GPU.
 pub mod delta3d;
+/// S388 — APIC en trois dimensions, la seconde représentation de δ (ADR-186, ADR-207 C4).
+pub mod apic3d;
 
 pub use background::{Background, Component, SeaState};
 pub use body::{FloatingBox, Milieu};
