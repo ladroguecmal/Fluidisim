@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 22:37 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
-Session en cours : S393 — verdict R33 ; C4b, seconde part : B10 en 3D, une sphère qui entre dans l'eau (APIC 3D, corps cinématique)
-Dernière session : S392 — rendu : **la pluie, pièce 5a — les surfaces mouillées** ([preuve](docs/validation/SURFACES-MOUILLEES-S392.md)) — Ångström–Lekner–Dorf (béton à 64 % de sa radiance sèche), reflet du film, sec sous les débords ; formule sur l'image à 0,03 %, sans pluie au bit ; coût +0,34 ms ; **R33 posée**. Avant : S391, A321 corrigée
-Session suivante : **le verdict R33** d'abord ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique) ; dans le cloud, **C4b** — B10 en 3D (4.16) ; la pluie, pièce 5b (éclaboussures au sol), après R33
-Maillons        : 1 — S392 : 8.10 reste partiel (la revue R33 est posée, non reçue)
+Session en cours : aucune
+Dernière session : S393 — physique : verdict **R33** reçu pour l'instant ; **C4b, B10 en 3D** ([preuve](docs/validation/B10-APIC3D-S393.md)) — une sphère cinématique dans APIC 3D (le corps reflète les particules : repos à 9,6 mm/s) ; la cavité se pince à **2,084 √(R/g)**, dans la plage publiée (1,72 à 2,29), convergé à 0,63 % ; **4.16 partiel**. Avant : S392, les surfaces mouillées
+Session suivante : dans le cloud, **C5** — le raccord particules ↔ colonnes (la frontière de S325–S354 non reçue, A316) ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b (éclaboussures au sol) ; peaufinages R32 et R33 plus tard
+Maillons        : 0 — S393 : 4.16 passe à partiel (la cavité 3D contre une mesure publiée) ; chemin : C5, C6, C7
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

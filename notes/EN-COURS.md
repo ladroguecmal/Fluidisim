@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S393 — **en cours**. D'abord le **verdict R33** ; puis **C4b**, seconde part : **B10 en 3D**, une sphère qui entre dans
+Session : S393 — **terminée**. D'abord le **verdict R33** ; puis **C4b**, seconde part : **B10 en 3D**, une sphère qui entre dans
 l'eau, sur APIC 3D ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ; [APIC3D-S388](../docs/validation/APIC3D-S388.md)).
 Demande de l'utilisateur (2026-09-26) : *« Reprends le projet, pour R33 je valide actuellement mais pour plus tard des
 sessions de peaufinage »*. Le travail du poste (S390–S392, branche `poste`) rejoint cette branche en avance rapide.
@@ -95,7 +95,7 @@ d'un diamètre de l'axe, qu'un remplissage depuis le haut n'atteint pas ; **pinc
 - [x] **P4** — l'exemple `apic3d_b10` (quart ou entier, mesures) ; critère 3.
 - [x] **P5** — la convergence, la plage publiée, `Fr` = 4, les parois ; critères 4 et 5.
 - [x] **P6** — critère 6 ; preuve `B10-APIC3D-S393` ; liste, file, feuille de route, index.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 **P2** : R33 consigné — revue §38, preuve S392 (§ Verdict), décisions, file (rendu), feuille de route ; liste : 8.4 disait

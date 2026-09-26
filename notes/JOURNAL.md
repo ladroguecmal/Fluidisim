@@ -17576,3 +17576,18 @@ passait pour mouillé. **Photographie** (premières gouttes sur l'asphalte, Newp
 uniforme, régime établi, sans vent ; R33 dira s'il faut assombrir. **Rituel.** Maillons **1** : 8.10 reste partiel.
 Suivant : **R33** ; au poste, C3b (alternance : physique) ; dans le cloud, C4b ; la pièce 5b après R33.
 
+## S393 — 2026-09-26 — physique : verdict R33 ; C4b, B10 en 3D — une sphère entre dans l'eau
+
+**Entrée.** *« Reprends le projet, pour R33 je valide actuellement mais pour plus tard des sessions de peaufinage »*. Le travail
+du poste (S390–S392, branche `poste`, poussée à ma demande) rejoint la branche en avance rapide. **R33** reçu pour l'instant,
+peaufinage à venir sans défaut nommé ; la pièce 5b est libre ; liste 8.4 corrigée (« R32 posée », périmé). **Fait**
+([preuve](../docs/validation/B10-APIC3D-S393.md)) : un corps cinématique dans `apic3d.rs` — sphère, mailles solides, faces à sa
+vitesse, paroi mobile, particules repoussées ; sans corps, le ballottement de S389 au chiffre près. **Trouvé** : au repos, 9,4
+cm/s contre la sphère — le biais de paroi de S389 ; le corps reflète désormais les particules : 9,6 mm/s (critère 1 cm/s,
+de justesse ; vu échouer sans mailles solides). **B10** sur un quart de domaine (un pas d'écart au domaine entier) : `Fr` = 2,
+pincement **2,084 √(R/g)** à 16 mailles par diamètre, **dans la plage publiée** (1,72 à 2,29), **convergé à 0,63 %** entre 12
+et 16 ; `Fr` = 4 à −2,3 % ; suite 684 réussis, zéro avertissement. **Limites** : plage lue dans des résumés (articles bloqués
+par le réseau) ; couronne de maille (A312), bulle sans air (A311) ; parois à 2 D, effet d'un pas. **Rituel.** Maillons **0** :
+**4.16 passe à partiel** — **devient possible** une surface non graphe calculée dans le cœur en 3D, reçue contre une mesure ;
+**chemin** : C5 (le raccord aux colonnes), C6 (la bascule), C7 (la carte) ; **preuve** : B10-APIC3D-S393. Suivant : dans le
+cloud, **C5** ; au poste, **C3b** (alternance : physique), puis la pluie, pièce 5b.
