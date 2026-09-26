@@ -90,7 +90,7 @@ réelles ; jugement de l'utilisateur (R32).
 - [x] **P3** — le tirage partagé (`pluie_impact`) sorti des rides ; critère 2 (rides au bit).
 - [x] **P4** — les gerbes sur l'eau de la piscine : particules (fenêtre de mailles sur les eaux), géométrie par diamètre et
   âge (couronne, dôme, jet), radiance de l'eau comme les gouttes.
-- [ ] **P4b** — la mer : la gerbe posée sur la surface déplacée (la somme des ondes de la bande, évaluée au point d'impact
+- [x] **P4b** — la mer : la gerbe posée sur la surface déplacée (la somme des ondes de la bande, évaluée au point d'impact
   en coordonnées de Lagrange, comme les rides), fenêtre autour de la caméra.
 - [ ] **P5** — au loin : la part d'aire moyenne des gerbes dans les nuanceurs d'eau, fondue par l'empreinte.
 - [ ] **P6** — contrôles : critères 1, 3, 4, 5 ; coût.
@@ -139,3 +139,14 @@ opacités réglées 0,25 / 0,6 / 0,3 / 0,55 / 0,8). **Impasses** : `return` inte
 dans une fonction) ; **rien ne se dessinait** — même des carrés rouges forcés — : l'eau du bassin, transparente et qui lit
 l'écran, était dessinée après les particules et les recouvrait (tri par la distance du centre des boîtes) ; le dessin passe
 après elle (`render_priority` 1). **Vu** : de petites coupes blanches semées sur l'eau de près, des points clairs de loin.
+
+**P4b — la mer.** Fenêtre carrée de 12 m dans le plan de B, en coordonnées de Lagrange (celles des rides de la mer), à
+4,5 m devant la caméra ; la gerbe posée à `q + d(q)`, hauteur `η(q)` (`bande_au_point`). La bande et `bande_au_point`
+sorties de `surface_b.gdshaderinc` dans **`bande_b.gdshaderinc`** (que `surface_b` inclut) : `surface_b` dépend de
+`optique_eau` (`sous_eau`), illisible depuis un nuanceur de particules — une seule source gardée. **Défaut trouvé,
+antérieur (S380)** : les captures de la mer n'appelaient pas `phases()` après `pose()` — la boîte des gouttes restait devant
+la caméra de départ (« proche ») : **en pose « référence », les gouttes de R29 et R30 tombaient ≈ 11 m trop loin** ; les
+gerbes, de même (elles apparaissaient près de l'horizon). Corrigé : après chaque pose, la pluie suit. **Vu** au ras de l'eau
+(`demi_dessus`) : dômes et jets posés sur les vagues, une couronne ; en pose « référence », les traînées au premier plan.
+Contrôles : sans pluie **12 / 12 au bit** (référence fin de S382) ; sous la pluie sans gerbes **7 / 8 au bit**, la mer en
+pose « référence » change — la correction, voulue.

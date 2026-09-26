@@ -12,6 +12,8 @@ shader_type particles;
 render_mode disable_force, disable_velocity;
 
 #include "res://pluie.gdshaderinc"
+// S383 P4b : la mer — la bande de B (`bande`, `n_bande`, `split`, `k_moyens`) et `bande_au_point`.
+#include "res://bande_b.gdshaderinc"
 
 uniform float temps = 0.0;
 uniform vec3 camera = vec3(0.0);
@@ -22,6 +24,9 @@ uniform ivec2 n_mailles = ivec2(1, 1);
 uniform vec4 nappes[4];
 uniform float niveaux[4];
 uniform int n_nappes = 0;
+// S383 P4b — **sur la mer** : la fenêtre est dans le plan de B, en coordonnées de Lagrange (celles des rides de la mer) ; la
+// gerbe se pose au point déplacé `q + d(q)`, à la hauteur `η(q)` de la bande (`bande_b.gdshaderinc`).
+uniform bool sur_la_mer = false;
 // Contrôle (critères 3 et 4) : un carré de `taille_controle` posé à plat au centre de chaque gerbe de moins de
 // `vie_controle` secondes.
 uniform bool controle = false;
@@ -77,18 +82,28 @@ bool gerbe_placer(uint index, out mat4 xf, out vec4 donnees) {
     if (age < 0.0 || age >= vie + (controle ? 0.0 : PLUIE_POSE)) {
         return false;
     }
-    // Sur quelle eau, à quel niveau ; hors de l'eau, pas de gerbe (le sol : P7).
-    float niveau = -1e9;
-    for (int n = 0; n < n_nappes; n++) {
-        vec4 r = nappes[n];
-        if (centre.x > r.x && centre.x < r.z && centre.y > r.y && centre.y < r.w) {
-            niveau = niveaux[n];
+    vec3 base;
+    if (sur_la_mer) {
+        vec2 d;
+        vec3 g;
+        float eta;
+        vec2 pente;
+        bande_au_point(centre, d, g, eta, pente);
+        base = vec3(centre.x + d.x, eta, -(centre.y + d.y));
+    } else {
+        // Sur quelle eau, à quel niveau ; hors de l'eau, pas de gerbe (le sol : P7).
+        float niveau = -1e9;
+        for (int n = 0; n < n_nappes; n++) {
+            vec4 r = nappes[n];
+            if (centre.x > r.x && centre.x < r.z && centre.y > r.y && centre.y < r.w) {
+                niveau = niveaux[n];
+            }
         }
+        if (niveau < -1e8) {
+            return false;
+        }
+        base = vec3(centre.x, niveau, centre.y);
     }
-    if (niveau < -1e8) {
-        return false;
-    }
-    vec3 base = vec3(centre.x, niveau, centre.y);
     if (controle) {
         xf = mat4(vec4(taille_controle, 0.0, 0.0, 0.0), vec4(0.0, 0.0, -taille_controle, 0.0),
             vec4(0.0, 1.0, 0.0, 0.0), vec4(base + vec3(0.0, 0.002, 0.0), 1.0));

@@ -23,6 +23,10 @@ var controle := false
 var taille_controle := 0.02
 var vie_controle := 0.05
 var actif := OS.get_environment("GERBES") != "0"
+## S383 P4b — **sur la mer** : une fenêtre carrée de `COTE_MER` mètres, dans le plan de B, devant la caméra (les trois quarts
+## de son demi-côté), qui la suit ; la bande de B posée par la scène (`poser_bande`).
+var sur_la_mer := false
+const COTE_MER := 12.0
 
 
 ## Le nombre de particules à l'intensité `r`.
@@ -33,6 +37,8 @@ func nombre(r: float) -> int:
 
 
 func mailles() -> Vector2i:
+	if sur_la_mer:
+		return Vector2i(int(ceil(COTE_MER / MAILLE)) + 1, int(ceil(COTE_MER / MAILLE)) + 1)
 	return Vector2i(int(ceil((fenetre.z - fenetre.x) / MAILLE)) + 1, int(ceil((fenetre.w - fenetre.y) / MAILLE)) + 1)
 
 
@@ -57,6 +63,7 @@ func configurer(r: float) -> void:
 	materiau.shader = load("res://gerbe.gdshader")
 	materiau.set_shader_parameter("fenetre", fenetre)
 	materiau.set_shader_parameter("n_mailles", mailles())
+	materiau.set_shader_parameter("sur_la_mer", sur_la_mer)
 	systeme.process_material = materiau
 	var q := QuadMesh.new()
 	q.size = Vector2(1.0, 1.0)
@@ -69,10 +76,28 @@ func configurer(r: float) -> void:
 	add_child(systeme)
 
 
+## S383 P4b — la bande de B de la mer au temps courant (`lignes("bande", t)` de `mer.gd`) et ses constantes.
+func poser_bande(bande: Array, n: int, coupure: int, k_moyens: Vector2) -> void:
+	if systeme == null:
+		return
+	materiau.set_shader_parameter("bande", bande)
+	materiau.set_shader_parameter("n_bande", n)
+	materiau.set_shader_parameter("split", coupure)
+	materiau.set_shader_parameter("k_moyens", k_moyens)
+
+
 ## L'état du temps `t` (s), vu de `camera`.
 func suivre(camera: Camera3D, t: float) -> void:
 	if systeme == null:
 		return
+	if sur_la_mer:
+		var cam := camera.global_position
+		var avant := -camera.global_transform.basis.z
+		var horizontal := Vector2(avant.x, -avant.z)
+		horizontal = horizontal.normalized() if horizontal.length() > 1e-4 else Vector2.ZERO
+		var c := Vector2(cam.x, -cam.z) + horizontal * 0.375 * COTE_MER
+		fenetre = Vector4(c.x - 0.5 * COTE_MER, c.y - 0.5 * COTE_MER, c.x + 0.5 * COTE_MER, c.y + 0.5 * COTE_MER)
+		materiau.set_shader_parameter("fenetre", fenetre)
 	materiau.set_shader_parameter("pluie", Pluie.uniformes(r_mm_h))
 	materiau.set_shader_parameter("temps", t)
 	materiau.set_shader_parameter("camera", camera.global_position)

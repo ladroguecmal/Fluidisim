@@ -117,6 +117,8 @@ var pluie_mm_h := 0.0
 const BRUME_SECHE := 0.00012
 ## S380 — la pluie dans l'air (`pluie_air.gd`, ADR-205 pièce 1) ; les gouttes s'arrêtent au niveau moyen de la mer.
 var pluie_air: Node3D
+## S383 — les gerbes (`gerbes.gd`, ADR-205 pièce 4), posées sur la surface déplacée.
+var gerbes: Node3D
 
 
 ## S381 — le ciel de pluie (ADR-205, pièce 3) : `COUVERT=` (0 à 1) force la couverture ; sinon, la pluie couvre le ciel.
@@ -948,6 +950,17 @@ func phases(t: float) -> void:
 		pluie_air.couvert = couvert_voulu()
 		pluie_air.configurer(pluie_mm_h)
 		pluie_air.suivre(camera, fmod(t, 3600.0))
+		if gerbes == null:
+			gerbes = load("res://gerbes.gd").new()
+			gerbes.sur_la_mer = true
+			add_child(gerbes)
+		gerbes.couvert = couvert_voulu()
+		gerbes.configurer(pluie_mm_h)
+		var km := Vector2.ZERO
+		if donnees["asymetries"]:
+			km = Vector2(float(donnees["k_moyens"][0]), float(donnees["k_moyens"][1]))
+		gerbes.poser_bande(bande, donnees["bande"].size() if OS.get_environment("MER_PLATE") != "1" else 0, int(donnees["split"]), km)
+		gerbes.suivre(camera, fmod(t, 3600.0))
 	# S380 : l'extinction par les gouttes (`Pluie.extinction`), ajoutée à la brume sèche ; temps sec : la brume d'avant.
 	if environnement_scene != null and pluie_mm_h > 0.0:
 		environnement_scene.fog_density = BRUME_SECHE + Pluie.extinction(pluie_mm_h)
@@ -1016,6 +1029,12 @@ func captures() -> void:
 		mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
 		immersion(temps)
 		ecume_centrer(temps)
+		# S383 : la pluie suit la pose (jusque-là, la boîte des gouttes restait devant la caméra de départ, « proche » : en pose
+		# « référence », les gouttes de R29 et R30 tombaient ≈ 11 m trop loin) ; les gerbes, de même.
+		if pluie_air != null:
+			pluie_air.suivre(camera, fmod(temps, 3600.0))
+		if gerbes != null:
+			gerbes.suivre(camera, fmod(temps, 3600.0))
 		for _i in 12:
 			await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
