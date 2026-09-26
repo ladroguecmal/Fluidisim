@@ -351,10 +351,10 @@ fn the_band_reads_its_rest_height_beside_the_columns_s399() {
 
 #[test]
 fn band_and_columns_at_rest_stay_at_rest_and_keep_their_volume_s399() {
-    // Critère 3 de S399 : l'échange en marche, 2 s de repos, volume (particules + η + soldes) à 10⁻⁶. Le critère 2 (vitesse
-    // ≤ 1 cm/s) est **manqué** : 1,007 cm/s — la bande lit sa surface 1,1 mm sous les colonnes (biais de lecture de 2,19 % de
-    // maille contre une surface exacte), et cette marche excite une seiche d'un millimètre que rien n'amortit. La borne
-    // ci-dessous n'est pas le critère : une garde de non-régression, à 20 % au-dessus de la mesure.
+    // Critères 2 et 3 de S399 : l'échange en marche, 2 s de repos, vitesse ≤ 1 cm/s, volume (particules + η + soldes) à 10⁻⁶.
+    // Manqué en S399 (1,007 cm/s : la bande lisait sa surface 1,1 mm sous les colonnes, qui la lisaient exactement — une
+    // marche, et une seiche d'un millimètre) ; **tenu en S400** (2·10⁻⁵ m/s) : la zone lit `η + e(η)`, comme la bande
+    // (`columns_read`). Vu échouer : sans la table, 1,007 cm/s.
     let (mut a, _) = half_band();
     let v0 = a.total_volume();
     let (mut t, mut vmax) = (0u64, 0f32);
@@ -366,7 +366,7 @@ fn band_and_columns_at_rest_stay_at_rest_and_keep_their_volume_s399() {
     }
     let drift = a.total_volume() / v0 - 1.;
     println!("S399 repos bande + colonnes, échange : vitesse max {vmax:.3e} m/s, volume {drift:+.2e}, particules {}", a.particle_count());
-    assert!(vmax <= 0.012, "{vmax}");
+    assert!(vmax <= 0.01, "{vmax}");
     assert!(drift.abs() <= 1e-6, "{drift}");
 }
 

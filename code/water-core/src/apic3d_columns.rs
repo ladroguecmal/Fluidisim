@@ -35,7 +35,15 @@ pub(crate) struct Columns3 {
     pub(crate) solde_v: Vec<f64>,
     /// Particules que la capacité n'a pas permis de poser (le solde les garde).
     pub(crate) refused: u64,
+    /// **S400 — la lecture de la bande** : l'erreur de hauteur lue d'un réseau nominal (`lattice_read_error`, m) pour une
+    /// surface à `m/READ_TABLE` de maille au-dessus d'un centre, `m` de 0 à `READ_TABLE − 1` — périodique.
+    pub(crate) read_bias: Vec<f32>,
+    /// Une bande existe-t-elle (une colonne hors du masque) ? Sans bande, la zone lit `η` exactement.
+    pub(crate) band: bool,
 }
+
+/// **S400** — le nombre de positions de la surface, sur une maille, où la lecture de la bande est tabulée.
+pub const READ_TABLE: usize = 32;
 
 /// Octets réservés par `enable_columns` pour `domain`.
 pub fn columns_reserved_bytes(domain: Domain3) -> Option<usize> {
@@ -48,9 +56,9 @@ pub fn columns_reserved_bytes(domain: Domain3) -> Option<usize> {
     let nu = (nx + 1).checked_mul(ny)?.checked_mul(nz)?;
     let nv = nx.checked_mul(ny + 1)?.checked_mul(nz)?;
     // Masque (1 octet), surface et reste (4 + 4) par colonne ; trois copies de faces ; deux familles de débits ; les soldes de
-    // l'échange (S399), un `f64` par face `u` et `v`.
+    // l'échange (S399), un `f64` par face `u` et `v` ; la table de lecture (S400).
     columns.checked_mul(1 + 4 + 4)?.checked_add(faces.checked_mul(4)?)?.checked_add(flux.checked_mul(4)?)?
-        .checked_add(nu.checked_add(nv)?.checked_mul(8)?)
+        .checked_add(nu.checked_add(nv)?.checked_mul(8)?)?.checked_add(READ_TABLE * 4)
 }
 
 /// Vitesse d'un champ MAC en un point, trilinéaire par composante — celle de `grid_velocity`, sur des tableaux donnés.
@@ -98,8 +106,36 @@ impl Apic3 {
             solde_u: vec![0.; (nx + 1) * ny * nz],
             solde_v: vec![0.; nx * (ny + 1) * nz],
             refused: 0,
+            read_bias: vec![0.; READ_TABLE],
+            band: mask.iter().any(|m| *m == 0),
         });
+        self.columns_tabulate();
         Ok(())
+    }
+
+    /// **S400** — la table de lecture de la bande, pour le noyau et le rayon courants : calcul `f64` de quelques millisecondes,
+    /// à la configuration (et quand la mesure change le noyau ou le rayon), jamais dans le pas.
+    pub(crate) fn columns_tabulate(&mut self) {
+        let (dx, kernel, radius) = (self.domain.dx as f64, self.kernel as f64, self.radius as f64);
+        let Some(c) = self.columns.as_mut() else { return };
+        for (m, e) in c.read_bias.iter_mut().enumerate() {
+            let read = lattice_read_error(dx, kernel, radius, m as f64 / READ_TABLE as f64);
+            *e = if read.is_finite() { read as f32 } else { 0. };
+        }
+    }
+
+    /// **S400** — la hauteur que la pression voit dans une colonne de surface `eta` : `η + e(η)`, `e` l'erreur que la bande
+    /// ferait en lisant la même surface (interpolée dans la table, périodique sur une maille) ; `η` sans bande.
+    #[inline]
+    pub(crate) fn columns_read(c: &Columns3, eta: f32, dx: f32) -> f32 {
+        if !c.band {
+            return eta;
+        }
+        let o = (eta / dx - 0.5).rem_euclid(1.) * READ_TABLE as f32;
+        let m = (o.floor() as usize).min(READ_TABLE - 1);
+        let t = o - m as f32;
+        let (a, b) = (c.read_bias[m], c.read_bias[(m + 1) % READ_TABLE]);
+        eta + a + t * (b - a)
     }
 
     /// Pose la surface absolue des colonnes, m (une valeur par colonne). Refus `Domain` sans zone, `Shape` (longueur),
@@ -188,7 +224,8 @@ impl Apic3 {
         }
     }
 
-    /// Après la reconstruction : dans les colonnes, `φ = z − η` et l'eau sous `η`.
+    /// Après la reconstruction : dans les colonnes, `φ = z − η` et l'eau sous `η`. **S400** : avec une bande, `φ = z − (η +
+    /// e(η))` — la pression voit la surface comme la bande la lirait (`columns_read`) ; la masse, elle, reste `η`.
     pub(crate) fn columns_label(&mut self) {
         let Some(c) = self.columns.as_ref() else { return };
         let Domain3 { nx, ny, nz, dx } = self.domain;
@@ -198,9 +235,10 @@ impl Apic3 {
                 if c.mask[col] == 0 {
                     continue;
                 }
+                let surface = Self::columns_read(c, c.eta[col], dx);
                 for k in 0..nz {
                     let cell = (k * ny + j) * nx + i;
-                    let phi = (k as f32 + 0.5) * dx - c.eta[col];
+                    let phi = (k as f32 + 0.5) * dx - surface;
                     self.phi[cell] = phi;
                     self.label[cell] = if phi < 0. { WATER } else { AIR };
                 }

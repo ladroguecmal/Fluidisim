@@ -84,7 +84,7 @@ la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la référence : section des comparables ; pistes à la file (rendu, au poste).
-- [ ] **P3** — (E) et (F) dans `apic3d_columns.rs` ; le repos (critère 2 de S399) ; sans zone et toutes colonnes au bit.
+- [x] **P3** — (E) et (F) dans `apic3d_columns.rs` ; le repos (critère 2 de S399) ; sans zone et toutes colonnes au bit.
 - [ ] **P4** — `apic3d_raccord`, 30 s, 5 et 2,5 cm ; critère 4 de S399 ; attribution si manqué.
 - [ ] **P5** — suite ; preuve (§6 de RACCORD-3D-S398) ; liste, file, A316.
 - [ ] **P6** — rituel.
@@ -96,4 +96,9 @@ la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
   tranches (8.5, 8.6) — à juger par un contrôle de conservation (moyenne d'une tranche = `E₀·exp(−K_d·z)`) et une photographie,
   **sans le gain artistique** `godRays` ; dispersion seulement si une photographie montre des franges ; occultation des photons par
   la coque. Pointeurs : file (rendu), liste 8.5.
-
+- **P3** : (E) `columns_read` — table de 32 lectures du réseau nominal (`lattice_read_error`, noyau et rayon courants), faite à
+  `enable_columns` et quand la mesure change le noyau ou le rayon ; appliquée **seulement s'il y a une bande** (une colonne hors du
+  masque) : toutes colonnes, la zone lit `η` exactement. (F) dans `separate` : une particule poussée d'une colonne de la bande dans
+  une colonne de la zone garde `x, y`. **Repos (critère 2 de S399) tenu : 1,970·10⁻⁵ m/s** (S399 : 1,007·10⁻² m/s) ; vu échouer :
+  table coupée, 1,007·10⁻² m/s. Sans zone : ligne de S389 au chiffre près (1,9964 s, +1,01 %, +7,04 %, +0,21 %, 93,5) ; toutes
+  colonnes : ligne de S398 (+0,02 %, +0,49 %, volume +1,39·10⁻¹⁰). Garde du test ramenée au critère (0,01).

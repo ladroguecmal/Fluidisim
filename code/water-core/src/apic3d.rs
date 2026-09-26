@@ -199,12 +199,14 @@ impl Apic3 {
     /// **Pour la mesure** : le rayon de la reconstruction (défaut : `rest_radius`, le minimax de S388).
     pub fn set_reconstruction_radius(&mut self, r: f32) {
         self.radius = r;
+        self.columns_tabulate();
     }
     /// **Pour la mesure** : le noyau de la reconstruction, en mailles, et le rayon minimax qui lui répond (défaut :
     /// `KERNEL_CELLS`). Calcul `f64` de quelques millisecondes : hors du pas.
     pub fn set_reconstruction_kernel(&mut self, cells: f32) {
         self.kernel = cells;
         self.radius = minimax_radius(self.domain.dx as f64, cells as f64).0 as f32;
+        self.columns_tabulate();
     }
     /// **Pour la mesure** : la séparation des particules (défaut : active).
     pub fn set_separation(&mut self, on: bool) {
@@ -1182,11 +1184,21 @@ impl Apic3 {
             }
             for k in 0..self.n {
                 let (p, d) = (self.x[k], self.shift[k]);
-                self.x[k] = [
+                let mut q = [
                     (p[0] + d[0]).clamp(margin, lx - margin),
                     (p[1] + d[1]).clamp(margin, ly - margin),
                     (p[2] + d[2]).clamp(margin, lz - margin),
                 ];
+                // S400 : la séparation est tenue du côté de la bande — une particule qu'elle pousserait dans une colonne de la
+                // zone garde sa position horizontale (l'échange ne passe que par le flux de la face).
+                if self.columns.is_some() {
+                    let (a, b) = (self.cell_of(q), self.cell_of(p));
+                    if self.column_of(a.0, a.1) && !self.column_of(b.0, b.1) {
+                        q[0] = p[0];
+                        q[1] = p[1];
+                    }
+                }
+                self.x[k] = q;
             }
         }
     }
