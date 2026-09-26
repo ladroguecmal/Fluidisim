@@ -164,7 +164,7 @@ d'environ **0,4 million de mailles** pour tous ses domaines.
 |---|---:|---:|
 | boîte dense actuelle, 25 cm, 28 couches (la porte B, 30 × 28 m) | 13 440 | — |
 | **colonnes hautes**, 25 cm, 8 couches cubiques (2 m) + 1 haute | 44 444 | **53 m** |
-| colonnes hautes, 12,5 cm, 16 couches (2 m) + 1 | 23 529 | **19 m** |
+| colonnes hautes, 10 cm, 20 couches (2 m) + 1 | 19 048 | **14 m** |
 | colonnes hautes, **5 cm**, 20 couches (1 m) + 1 | 19 048 | **6,9 m** |
 | boîte dense, 5 cm, 7 × 7 × 2 m | — | 784 000 mailles, **deux fois le budget** |
 
@@ -182,3 +182,71 @@ La campagne est **finie** quand, sur la machine de référence, **dans la même 
 au 99ᵉ centile par image, la production à **3 mm** de la référence sur les cas de réception, la masse exacte, **et
 l'utilisateur juge le rendu convaincant** contre des références réelles (REVUE-VISUELLE). Les points 4.1, 4.3, 4.12, 4.16 et
 4.19 de la liste changent alors d'état ; aucun n'est déclaré validé hors de son périmètre final.
+
+*Les mailles de ce document sont des niveaux d'[ADR-006](../adr/ADR-006-cellules-domaines-solveurs.md) §3.2 — 5, 10 et
+25 cm parmi `{2 ; 5 ; 10 ; 25 ; 50 ; 100}` cm.*
+
+---
+
+## 4. L'architecture
+
+### 4.1 Cinq décisions de structure
+
+**A1 — Une grille, trois représentations superposées.** Dans un domaine : les **colonnes** (fonction hauteur) partout où
+la surface est un graphe ; des particules **APIC dans une bande** sous la surface, là où elle ne l'est plus ; des
+**particules diffuses** par-dessus, pour l'image seulement. C'est ADR-175 D5 et ADR-186 D1–D3, plus la troisième, que la
+littérature du temps réel pose depuis Chentanez, Müller et Kim (2014) et Ihmsen *et al.* (2012).
+
+**A2 — Des colonnes hautes dans chaque domaine.** Sous `k` couches cubiques qui suivent la surface, une **maille haute**
+jusqu'au fond, à profil de pression linéaire (Irving *et al.* 2006 ; Chentanez et Müller 2011). C'est la réponse à la
+question qu'[ADR-006](../adr/ADR-006-cellules-domaines-solveurs.md) §6.4 reportait « après B3 » — un `dx` plus fin en
+vertical près de la surface — et la suite naturelle de la pression scindée `p_hydro + p_dyn` d'ADR-175 D5. `k` est une
+**allocation** (mailles par colonne), donc un paramètre de profil admissible (I-16) ; sa valeur est *à calibrer* en C2
+contre les réceptions de dispersion.
+
+**A3 — La pression par gradient conjugué préconditionné par un cycle multigrille** (McAdams *et al.* 2010), sur les
+mailles cubiques **et** hautes (Chentanez et Müller 2011), les faces coupées **compatibles à tous les niveaux** (Weber
+*et al.* 2015 — sinon A315 revient), en **travail fixe** par pas : un nombre de cycles du profil, la divergence résiduelle
+mesurée et publiée, la dégradation déclarée (ADR-175 D2–D3). La multigrille 2D du mode mobile (ADR-167) est le point de
+départ du cœur.
+
+**A4 — Des domaines faits de blocs, un `dx` par domaine, choisi par l'ordonnanceur.** Un domaine est un ensemble épars
+de blocs de colonnes (ADR-006 §3 : fusion = union, séparation = partition), à un seul niveau de `dx`. Le **niveau de
+détail** est ce choix : V seul, effets factices, puis δ à 25, 10 ou 5 cm selon la distance et ce qui perturbe (ADR-202
+D1, ADR-203 D4 et D7), sous le budget commun et l'ordre de dégradation d'ADR-012 §4 (rang 4 : descendre d'un niveau).
+La **prévision** d'ADR-013 prépare le domaine avant l'arrivée du perturbateur (ADR-202 D2).
+
+**A5 — Deux implémentations, comme aujourd'hui** (ADR-175 D1). La **référence CPU** du cœur définit et reçoit chaque
+étage contre des oracles — elle se construit **sans carte graphique**, dans une session comme S384 ; la **production**
+sur la carte le reproduit à 3 mm, sous budget — elle demande le poste. Où vit la production à la fin (afficheur ou
+Godot) est une question à l'utilisateur (§6).
+
+### 4.2 Le pas, dans l'ordre
+
+1. **Fond et couplage** : B + W factorisés par colonne et par couche (S342), bandes de couplage, éponge — inchangés.
+2. **Transport** : colonnes comme aujourd'hui ; dans la bande, les particules APIC, puis leur transfert vers la grille.
+3. **Forces** : `g_eff` injecté (I-07), sources et puits de V (ADR-200 D2), solides par faces coupées.
+4. **Projection** (A3) sur toutes les mailles, fluide fantôme à la surface : `η` pour les colonnes, la surface
+   reconstruite des particules dans la bande (ADR-186 D1).
+5. **Retour** : vitesses aux particules, surface des colonnes transportée.
+6. **Bascule** colonnes ↔ particules, à masse exacte (S323), selon le critère de C7.
+7. **Publication** : surface immuable pour l'image (ADR-175 D7), diagnostics différés, émission des particules diffuses.
+
+### 4.3 Écartées, et pourquoi
+
+| alternative | raison | nature de la raison |
+|---|---|---|
+| boîte dense à 5 cm | 7 × 7 × 2 m = 784 000 mailles, deux fois le budget entier (§3.3) | *estimé* |
+| ensemble de niveaux comme représentation principale | volume ±7,6 %, énergie créée 8 % en écoulement violent | *mesuré*, [S318](../validation/COMPARAISON-LOT5-S318.md) |
+| SPH ou PBF comme représentation principale | SPH faiblement compressible : 40 fois le coût d'APIC ; surface particulaire ; aucun raccord aux colonnes | *mesuré* (S318) ; le reste, §2.5 |
+| Boltzmann sur réseau à surface libre | un autre schéma entier : aucune réception du dépôt ne s'y transporte ; pas explicite lié à la maille | §2.5 ; *non mesuré* ici |
+| octree ou quadtree adaptatif | ADR-006 §3.1 a choisi des blocs de taille fixe pour que fusion et séparation soient des opérations d'ensemble ; les colonnes hautes en quadtree (Narita *et al.* 2025) restent **à lire**, pas écartées | décision antérieure |
+
+### 4.4 Ce que l'architecture fait des limites connues
+
+- **A315** (petites cellules des faces coupées) : la multigrille compatible (A3) ; à vérifier en C1.
+- **A316** (densité à la frontière du raccord) : le raccord de Chentanez, Müller et Kim (2014), **à lire** avant C6.
+- **A297** (bascule de mouillure) et **A298** (écart séculaire de la carte) : non réglés par construction ; **remesurés**
+  sur le nouveau pas (C2, C3).
+- **A320** (perturbation qui croît sous houle raide) : relève du couplage à B (lot 2), pas de la structure du solveur ;
+  inchangée.
