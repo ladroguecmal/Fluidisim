@@ -17227,3 +17227,21 @@ la surface exacte (≤ 1 niveau sous l'eau). **R26** préparée, images envoyée
 change l'état d'un point : A320 par la forme de Bernoulli (4.8), la coque qui bouge (6.4) ou les chemins de B et la côte
 (2.7). R26 attendu.
 
+## S372 — 2026-09-26 — physique : vannes et pompes dans V (5.4)
+
+**Entrée.** Verdict **R26** : *« je valide continue »* — la caméra à demi immergée et son ménisque reçus. Par
+l'alternance, la physique ; à deux maillons, un lot qui change l'état d'un point : **5.4**, absent, au front 0, dans V.
+**Fait** ([preuve](../docs/validation/VANNES-POMPES-S372.md), [ADR-199](../docs/adr/ADR-199-vannes-et-pompes-dans-v.md)).
+Une **commande** entière par arête, état répliqué ; la **vanne** (section ou largeur commandée) ; la **pompe** en réseau
+ouvert — courbe parabolique contre la hauteur statique, clapet, prise à sec, similitude. À commande pleine, trajectoires
+de quatre montages **identiques au bit** (empreinte relevée avant la modification). C12 à demi-ouverture : −0,10 % de
+l'analytique ; fermée, 0 ml ; rouverte, +600 pas exactement. Pompe : prise dénoyée à +0,025 % de l'intégrale
+analytique, barrage à 1 ml près, mi-vitesse 2 499 ml/s pour 2 500. Réseau d'avarie (brèche, vanne, deux pompes, commandes
+changeantes) : masse exacte, reproduit au bit. **WVST v2** : les commandes changées sauvegardées, suite restaurée au bit,
+témoin d'omission discriminant ; v1 refusée. Cœur : 536 réussis, 0 avertissement.
+**Limites.** Réseau ouvert (le fermé reste 5.8) ; `C_d` fixe ; ni pertes, ni énergie ; aucun consommateur encore.
+**Rituel.** Maillons **0** : 5.4 passe à partiel (3 / 64 / 53) — devient possible une avarie commandée (fermer une vanne
+de coursive, lancer une pompe de cale), sauvegardée ; consommée par le pas V du serveur et de l'hôte, et par 5.8 et 5.9 ;
+preuve §2–4. Suivant : par l'alternance, **le rendu** — l'échelle radiométrique du ciel et du soleil, notre perspective
+aérienne.
+

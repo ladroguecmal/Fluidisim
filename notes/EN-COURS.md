@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S372 — **en cours**. Verdict **R26** : *« je valide continue »* — la caméra à demi immergée et son ménisque
+Session : S372 — **terminée**. Verdict **R26** : *« je valide continue »* — la caméra à demi immergée et son ménisque
 reçus. Par l'alternance d'ADR-191 D3, **la physique** ; à deux maillons (S370, S371), un lot qui **change l'état d'un
 point** : **5.4 vannes et pompes**, *absent*, au front 0, dans V (ADR-010 §1 les nomme parmi les arêtes ; noyau reçu,
 intact depuis S229). A320, la coque qui bouge ou la côte avancent sans changer d'état en une session.
@@ -90,7 +90,7 @@ pas déterministe au bit, refus atomiques. (6) Instantané v2 : une commande cha
 - [x] **P4** — la pompe ; critères 3 à 5.
 - [x] **P5** — l'instantané WVST v2 ; critère 6.
 - [x] **P6** — preuve `VANNES-POMPES-S372`, liste 5.4, file, feuille de route, index, ADR-010 et ADR-140 notes datées.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 
