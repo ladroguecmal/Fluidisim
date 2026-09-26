@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 23:44 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 23:47 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
-Session en cours : aucune
+Session en cours : S397 — C5a, troisième part : la circulation à la frontière du raccord — les colonnes transportent-elles la quantité de mouvement ?
 Dernière session : S396 — physique : **C8a, fusion et séparation de domaines en référence** ([preuve](docs/validation/FUSION-S396.md)) — les domaines comme ensembles de blocs (ADR-006 §3–4), l'état recopié au bit ; fusionnés au critère, 0,26 % de l'amplitude du domaine unique (3,4 à 8,5 % si trop tard) ; **4.9 partiel**. Avant : S395, la circulation permanente à la frontière du raccord
 Session suivante : dans le cloud, **le raccord** (C5a, troisième part : trancher l'advection de la quantité de mouvement dans les colonnes, puis un échange qui retire où les particules arrivent) ou **C8b** (un domaine qui grandit par blocs en suivant la perturbation) ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
 Maillons        : 0 — S396 : 4.9 passe à partiel (fusion et séparation en référence) ; chemin : C8b, puis la carte et le rang 4
