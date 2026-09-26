@@ -133,7 +133,7 @@ impl Volume3 {
     /// (voisin fluide, ouverture, coefficient fantôme, valeur imposée), dans l'ordre x−, x+, y−, y+,
     /// z−, z+. Un mur, une face fermée ou un voisin solide est (None, 0, 0, 0) ; S328 : l'ouverture
     /// pondère la face, et vaut 1 sur un fond plat. Pas de réserve ni d'allocation par ligne.
-    fn mobile_row(&self, i: usize, j: usize, k: usize) -> [(Option<usize>, f32, f32, f32); 6] {
+    pub(super) fn mobile_row(&self, i: usize, j: usize, k: usize) -> [(Option<usize>, f32, f32, f32); 6] {
         let Domain3 { nx, ny, nz, .. } = self.domain;
         let mut row = [(None, 0., 0., 0.); 6];
         let neighbors = [
@@ -453,9 +453,9 @@ impl Volume3 {
         max_iters: u32,
         jobs: &dyn JobSystem,
     ) -> Result<Report, Error> {
-        // S386 : la colonne graduée n'est éprouvée qu'au pas linéaire (ADR-208, C2b).
+        // S387 : la colonne graduée (ADR-208 D4) a sa propre projection, gardée par la course de la surface.
         if self.graded.is_some() {
-            return Err(Error::Domain);
+            return self.project_mobile3_graded(scale, k1, max_iters);
         }
         let mut rhs = core::mem::take(&mut self.rhs);
         self.divergence(&self.us, &self.vs, &self.ws, &mut rhs);

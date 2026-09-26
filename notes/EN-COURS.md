@@ -86,7 +86,7 @@ le pas fin à l'écart que la dispersion calculée prévoit. (4) Suite entière 
 - [x] **P2** — l'étiquette corrigée (critère 1).
 - [x] **P3** — la course de la surface sous la mer de la porte B : `examples/delta3d_course_surface.rs` (critère 2) ; les
   couches cubiques qu'elle impose, le gain qui reste (outil) ; le cas d'un bassin calme.
-- [ ] **P4** — la colonne graduée au pas mobile (`project_mobile3`) : garde de la course, départ chaud par injection aux
+- [x] **P4** — la colonne graduée au pas mobile (`project_mobile3`) : garde de la course, départ chaud par injection aux
   nœuds, divergence restreinte ; essais (critère 3).
 - [ ] **P5** — le ballottement gradué contre le fin ; critère 4.
 - [ ] **P6** — preuve (section datée de COLONNES-HAUTES-S386) ; ADR-208 (note), liste, file, feuille de route.
@@ -111,3 +111,17 @@ scène de la porte B n'a été éprouvée que sur des durées courtes ; à consi
 cubiques, pas la course — 10 cm : 14 inconnues sur 30 (÷2,14 ; `r` 1,25, 6 cubiques) ; 5 cm : **24 sur 60 (÷2,50** ; `r` 1,2,
 11 cubiques). La colonne graduée sert donc les **contenants** (ADR-200, ADR-202) — le pas mobile de la piscine —, pas la
 haute mer.
+
+**P4 — la colonne graduée au pas mobile** (`project_mobile3_graded`) : garde de la course (le plus bas nœud cubique et la
+maille au-dessus mouillés partout, sinon `Domain`), départ chaud par injection aux nœuds, gradient conjugué préconditionné
+par la diagonale condensée `Σ P²·A_kk`, divergence restreinte avec lignes franches. **Critère 3** (essais `s387`) : tous les
+nœuds = pas mobile fin à 10⁻⁶ m sur 20 pas ; volume gardé à 10⁻⁹ m³ sur 30 pas, divergence franche sous 10⁻⁵ ; surface à
+3,1 m sous des couches cubiques à partir de 3,125 m refusée, état rendu au bit. Itérations : ≈ 90 au premier pas, ≈ 30 ensuite.
+
+**Trois défauts trouvés en chemin, dont deux hérités de S386** — l'essai « tous les nœuds = pas fin » les a montrés (vu
+échouer : `Convergence` après 20 000 itérations) : (1) la projection mobile appliquait l'opérateur du pas **linéaire**
+(`apply`) au lieu de `apply_mobile3` — nouveau, corrigé ; (2) **S386** : `Graded3::len()` lisait la taille sur `x`, emprunté
+pendant le recalcul du vrai résidu — la boucle faisait zéro tour : **le « vrai résidu » annoncé par la preuve de S386 n'était
+jamais recalculé** ; (3) **S386** : la divergence restreinte écrasait le résidu `r`, qu'une relance réutilise. Corrigés
+(`len` sur `m`, divergence dans `z`). Les chiffres de S386 **ne changent pas** (0,0046 / 0,0048 %) : la récurrence du
+gradient conjugué restait juste — mais le contrôle annoncé n'avait pas lieu ; à dire dans la preuve.

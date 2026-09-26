@@ -1911,7 +1911,7 @@ fn graded_column_is_counted_and_validated_s386() {
     let before = arena.stats.persistent_bytes;
     let nodes = [0, 4, 7, 9, 10, 11];
     v.enable_graded(&mut host(&mut arena), &nodes).unwrap();
-    assert_eq!(arena.stats.persistent_bytes - before, (5 * 32 * 6 + 6) * 4 + 6 * core::mem::size_of::<usize>());
+    assert_eq!(arena.stats.persistent_bytes - before, (7 * 32 * 6 + 6) * 4 + 6 * core::mem::size_of::<usize>());
     assert_eq!(v.pressure_unknowns_per_column(), 6);
     let (mut c, mut arena) = volume_mg(16, 8, 12, 0.5, true);
     assert_eq!(c.enable_graded(&mut host(&mut arena), &[0, 6, 11]), Err(Error::Domain));
@@ -1925,8 +1925,8 @@ fn graded_operator_is_symmetric_and_positive_s386() {
     let n = g.x.len();
     let (x, y) = (noise(n, 21), noise(n, 23));
     let (mut ax, mut ay) = (vec![0f32; n], vec![0f32; n]);
-    v.graded_apply(&g, &x, &mut ax);
-    v.graded_apply(&g, &y, &mut ay);
+    v.graded_apply(&g, &x, &mut ax, false);
+    v.graded_apply(&g, &y, &mut ay, false);
     let dot = |a: &[f32], b: &[f32]| a.iter().zip(b).map(|(p, q)| *p as f64 * *q as f64).sum::<f64>();
     assert!((dot(&x, &ay) - dot(&y, &ax)).abs() < 1e-5 * (dot(&x, &x) * dot(&ay, &ay)).sqrt());
     assert!(dot(&x, &ax) > 0. && dot(&y, &ay) > 0.);
@@ -1978,6 +1978,8 @@ fn graded_with_every_layer_is_the_fine_scheme_s386() {
     assert!(worst < 1e-6, "{worst}");
 }
 
+/// S387 : le pas mobile porte la colonne graduée, mais refuse une surface qui descend sous son plus bas nœud cubique
+/// (ADR-208 D4) — ici 3 m pour des couches cubiques à partir de 3,25 m.
 #[test]
 fn graded_is_refused_by_the_mobile_step_s386() {
     let (mut v, mut arena) = volume(8, 4, 16, 0.25, 9.81);
@@ -2078,4 +2080,51 @@ fn graded_oblique_wave_follows_its_own_dispersion_s386() {
                  big_omega / fine - 1., big_omega / omega - 1.);
         assert!(e_scheme < 1e-3, "n={n} : {e_scheme}");
     }
+}
+
+// ---------------------------------------------------------------- S387 : la colonne graduée au pas mobile (C2b)
+
+/// Nœuds du pas mobile de ces essais : gradués sous 3 m, cubiques de la couche 12 (3 m) au haut (6 m).
+fn mobile_nodes() -> Vec<usize> {
+    let mut n = vec![0, 5, 9];
+    n.extend(12..24);
+    n
+}
+
+#[test]
+fn graded_mobile_with_every_layer_is_the_fine_mobile_step_s387() {
+    let (nx, ny, nz, dx) = (32, 16, 24, 0.25);
+    let (mut a, _) = volume(nx, ny, nz, dx, 9.81);
+    let (mut b, mut arena) = volume(nx, ny, nz, dx, 9.81);
+    b.enable_graded(&mut host(&mut arena), &(0..nz).collect::<Vec<_>>()).unwrap();
+    for v in [&mut a, &mut b] {
+        v.set_free_surface(&sine_surface(nx, ny, dx), 4.).unwrap();
+    }
+    for _ in 0..20 {
+        assert!(!a.step_surface_mobile(2000, 20_000, &Jobs).unwrap().degraded);
+        assert!(!b.step_surface_mobile(2000, 20_000, &Jobs).unwrap().degraded);
+    }
+    let worst = a.surface().iter().zip(b.surface()).fold(0f32, |m, (x, y)| m.max((x - y).abs()));
+    assert!(worst <= 1e-6, "{worst}");
+}
+
+#[test]
+fn graded_mobile_keeps_volume_and_refuses_a_surface_below_its_cubic_layers_s387() {
+    let (nx, ny, nz, dx) = (32, 16, 24, 0.25);
+    let (mut v, mut arena) = volume(nx, ny, nz, dx, 9.81);
+    v.enable_graded(&mut host(&mut arena), &mobile_nodes()).unwrap();
+    assert_eq!(v.pressure_unknowns_per_column(), 15);
+    v.set_free_surface(&sine_surface(nx, ny, dx), 4.).unwrap();
+    let start = v.perturbation_volume();
+    for _ in 0..30 {
+        let r = v.step_surface_mobile(2000, 20_000, &Jobs).unwrap();
+        assert!(!r.degraded && r.divergence_plain <= PROJECTION_DIVERGENCE_TOLERANCE, "{r:?}");
+    }
+    assert!((v.perturbation_volume() - start).abs() < 1e-9, "{} contre {start}", v.perturbation_volume());
+    // Une surface à 3,1 m : la couche 12 (centre à 3,125 m) est sèche — refus, état rendu au bit.
+    let low: Vec<f32> = vec![3.1; nx * ny];
+    v.set_free_surface(&low, 3.1).unwrap();
+    let before: Vec<u32> = v.u.iter().chain(&v.eta).map(|x| x.to_bits()).collect();
+    assert_eq!(v.step_surface_mobile(2000, 20_000, &Jobs).err(), Some(Error::Domain));
+    assert!(v.u.iter().chain(&v.eta).map(|x| x.to_bits()).eq(before));
 }

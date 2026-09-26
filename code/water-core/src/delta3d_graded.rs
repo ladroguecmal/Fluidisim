@@ -11,7 +11,13 @@
 //! par segment**, ce que teste `Pᵀ`. La tolérance d'ADR-144 s'applique donc à `Pᵀ·div(u)`, rapportée au poids de chaque
 //! nœud ; sur un nœud par maille (couches cubiques), c'est la mesure de S295.
 //!
-//! **Refusée** sur fond coupé et par le pas mobile (`Domain`) : ni l'un ni l'autre n'est encore éprouvé (C2b).
+//! **Refusée** sur fond coupé (`Domain`), qui n'est pas encore éprouvé.
+//!
+//! **S387 — le pas mobile** (ADR-208 D4). La surface doit rester dans les couches cubiques : la maille du plus bas nœud
+//! cubique et celle du dessus sont mouillées dans toutes les colonnes, sinon la projection refuse (`Domain`, et le pas rend
+//! l'état au bit). Départ chaud par **injection** : la pression fine aux nœuds redonne `p̂`, et `P·p̂` la pression fine d'où
+//! elle vient. Gradient conjugué préconditionné par la **diagonale condensée** `Σ_k P_kj²·A_kk` — positive, donc un
+//! préconditionneur valide ; sur les nœuds cubiques, c'est la diagonale exacte du Jacobi de S296.
 
 use super::*;
 
@@ -25,17 +31,22 @@ pub(super) struct Graded3 {
     pub d: Vec<f32>,
     pub q: Vec<f32>,
     pub b: Vec<f32>,
+    /// S387, pas mobile : la diagonale condensée (préconditionneur) et `z = M⁻¹·r`.
+    pub m: Vec<f32>,
+    pub z: Vec<f32>,
 }
 
 impl Graded3 {
+    /// La taille des vecteurs réduits, lue sur `m` — jamais emprunté pendant les boucles, contrairement à `x`, `q` ou `d`
+    /// (S387 : lue sur `x`, elle valait zéro pendant le recalcul du vrai résidu, qui n'avait donc pas lieu).
     fn len(&self) -> usize {
-        self.x.len()
+        self.m.len()
     }
 }
 
 /// Flottants que la colonne graduée demande pour `cols` colonnes et `nodes` nœuds ; `None` si le compte déborde.
 pub(super) fn graded_floats(cols: usize, nodes: usize) -> Option<usize> {
-    cols.checked_mul(nodes)?.checked_mul(5)?.checked_add(nodes)
+    cols.checked_mul(nodes)?.checked_mul(7)?.checked_add(nodes)
 }
 
 /// Les coefficients de la prolongation dans la maille `k` du segment `[a, b)` : `(1 − t, t)`, `t = (k − a)/(b − a)`.
@@ -84,6 +95,8 @@ impl Volume3 {
             d: vec![0.; n],
             q: vec![0.; n],
             b: vec![0.; n],
+            m: vec![0.; n],
+            z: vec![0.; n],
         });
         Ok(())
     }
@@ -133,12 +146,17 @@ impl Volume3 {
         }
     }
 
-    /// `out = Pᵀ·A·P·x̂`, par la grille fine (`tmp` et `dir` servent de tampons fins).
-    pub(super) fn graded_apply(&mut self, g: &Graded3, x: &[f32], out: &mut [f32]) {
+    /// `out = Pᵀ·A·P·x̂`, par la grille fine (`tmp` et `dir` servent de tampons fins). `A` : l'opérateur du pas linéaire
+    /// (`apply`, couvercle fixe), ou celui du pas mobile (`apply_mobile3`, surface libre) si `mobile`.
+    pub(super) fn graded_apply(&mut self, g: &Graded3, x: &[f32], out: &mut [f32], mobile: bool) {
         let mut fine = core::mem::take(&mut self.dir);
         let mut image = core::mem::take(&mut self.tmp);
         self.graded_expand(g, x, &mut fine);
-        self.apply(&fine, &mut image);
+        if mobile {
+            self.apply_mobile3(&fine, &mut image);
+        } else {
+            self.apply(&fine, &mut image);
+        }
         self.graded_restrict(g, &image, out);
         self.dir = fine;
         self.tmp = image;
@@ -155,13 +173,14 @@ impl Volume3 {
         let cols = nx * ny;
         let mut tmp = core::mem::take(&mut self.tmp);
         self.divergence(&self.u, &self.v, &self.w, &mut tmp);
-        let mut r = core::mem::take(&mut g.r);
+        // `z` sert de tampon : `r` porte le résidu, qu'une relance réutilise.
+        let mut r = core::mem::take(&mut g.z);
         self.graded_restrict(g, &tmp, &mut r);
         let mut dmax = 0f32;
         for (i, v) in r.iter().enumerate() {
             dmax = dmax.max(v.abs() / g.weight[i / cols]);
         }
-        g.r = r;
+        g.z = r;
         self.tmp = tmp;
         let umax = self.u.iter().chain(&self.v).chain(&self.w).fold(0f32, |m, x| m.max(x.abs()));
         let ratio = if umax > 0. { dx / umax } else { 0. };
@@ -206,7 +225,7 @@ impl Volume3 {
         loop {
             while b2 > 0. && rr > target && it < max_iters {
                 let (d, mut q) = (core::mem::take(&mut g.d), core::mem::take(&mut g.q));
-                self.graded_apply(&g, &d, &mut q);
+                self.graded_apply(&g, &d, &mut q, false);
                 let dq = Self::dot_f64(&d, &q);
                 g.d = d;
                 g.q = q;
@@ -228,7 +247,7 @@ impl Volume3 {
             }
             // Le vrai résidu décide, jamais la récurrence.
             let (x, mut q) = (core::mem::take(&mut g.x), core::mem::take(&mut g.q));
-            self.graded_apply(&g, &x, &mut q);
+            self.graded_apply(&g, &x, &mut q, false);
             for c in 0..g.len() {
                 g.r[c] = g.b[c] - q[c];
             }
@@ -275,5 +294,192 @@ impl Volume3 {
             backward_error: 0.,
             divergence_plain: divergence,
         })
+    }
+}
+
+impl Volume3 {
+    /// L'indice du plus bas nœud **cubique** : à partir de lui, les nœuds sont consécutifs jusqu'au haut.
+    fn cubic_node(g: &Graded3) -> usize {
+        let mut j = g.nodes.len() - 1;
+        while j > 0 && g.nodes[j - 1] + 1 == g.nodes[j] {
+            j -= 1;
+        }
+        j
+    }
+
+    /// **S387 — la projection du pas mobile sur la colonne graduée** (voir l'en-tête du module).
+    pub(super) fn project_mobile3_graded(&mut self, scale: f32, k1: f32, max_iters: u32) -> Result<Report, Error> {
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        let cols = nx * ny;
+        let mut g = self.graded.take().expect("colonne graduée réservée");
+        let j0 = Self::cubic_node(&g);
+        let k0 = g.nodes[j0];
+        // La garde de la course (ADR-208 D4) : la partie graduée et le plus bas nœud cubique restent loin de la surface.
+        let inside = k0 + 1 < nz && (0..ny).all(|j| (0..nx).all(|i| self.wet3(i, j, k0) && self.wet3(i, j, k0 + 1)));
+        if !inside {
+            self.graded = Some(g);
+            return Err(Error::Domain);
+        }
+        let mut rhs = core::mem::take(&mut self.rhs);
+        self.divergence(&self.us, &self.vs, &self.ws, &mut rhs);
+        self.rhs = rhs;
+        self.rhs_mobile3(scale);
+        let mut b = core::mem::take(&mut g.b);
+        self.graded_restrict(&g, &self.rhs, &mut b);
+        g.b = b;
+        // Diagonale condensée : `A_kk = 1/prec_k` sur une maille mouillée, zéro sur une sèche.
+        let mut diag = core::mem::take(&mut self.tmp);
+        for c in 0..diag.len() {
+            diag[c] = if self.prec[c] > 0. { 1. / self.prec[c] } else { 0. };
+        }
+        g.m.fill(0.);
+        for s in 0..g.nodes.len() - 1 {
+            let (a, bb) = (g.nodes[s], g.nodes[s + 1]);
+            for k in a..bb {
+                let (wa, wb) = weights(k, a, bb);
+                for c in 0..cols {
+                    g.m[s * cols + c] += wa * wa * diag[k * cols + c];
+                    g.m[(s + 1) * cols + c] += wb * wb * diag[k * cols + c];
+                }
+            }
+        }
+        let (top, last) = (g.nodes[g.nodes.len() - 1], g.nodes.len() - 1);
+        for c in 0..cols {
+            g.m[last * cols + c] += diag[top * cols + c];
+        }
+        self.tmp = diag;
+        // Départ chaud par injection ; une maille sèche part de zéro.
+        for (s, &k) in g.nodes.iter().enumerate() {
+            for c in 0..cols {
+                g.x[s * cols + c] = if g.m[s * cols + c] > 0. { self.p[k * cols + c] } else { 0. };
+            }
+        }
+        let b2 = Self::dot_f64(&g.b, &g.b);
+        let tol = 1e-12;
+        let mut target = tol * b2;
+        let mut it = 0u32;
+        let mut floor = false;
+        let (mut checkpoint, mut power, mut since): (Option<u64>, u32, u32) = (None, 1, 0);
+        let (mut rr, mut divergence);
+        loop {
+            // Le vrai résidu, puis le gradient conjugué préconditionné jusqu'à la cible.
+            let (x, mut q) = (core::mem::take(&mut g.x), core::mem::take(&mut g.q));
+            self.graded_apply(&g, &x, &mut q, true);
+            for c in 0..g.len() {
+                g.r[c] = g.b[c] - q[c];
+            }
+            g.x = x;
+            g.q = q;
+            rr = Self::dot_f64(&g.r, &g.r);
+            let mut rz = 0f64;
+            for c in 0..g.len() {
+                g.z[c] = if g.m[c] > 0. { g.r[c] / g.m[c] } else { 0. };
+                g.d[c] = g.z[c];
+            }
+            rz += Self::dot_f64(&g.r, &g.z);
+            while b2 > 0. && rr > target && it < max_iters {
+                let (d, mut q) = (core::mem::take(&mut g.d), core::mem::take(&mut g.q));
+                self.graded_apply(&g, &d, &mut q, true);
+                let dq = Self::dot_f64(&d, &q);
+                g.d = d;
+                g.q = q;
+                if !(dq > 0.) {
+                    break;
+                }
+                let alpha = (rz / dq) as f32;
+                for c in 0..g.len() {
+                    g.x[c] += alpha * g.d[c];
+                    g.r[c] -= alpha * g.q[c];
+                    g.z[c] = if g.m[c] > 0. { g.r[c] / g.m[c] } else { 0. };
+                }
+                let zn = Self::dot_f64(&g.r, &g.z);
+                let beta = (zn / rz) as f32;
+                for c in 0..g.len() {
+                    g.d[c] = g.z[c] + beta * g.d[c];
+                }
+                rz = zn;
+                rr = Self::dot_f64(&g.r, &g.r);
+                it += 1;
+            }
+            let (x, mut q) = (core::mem::take(&mut g.x), core::mem::take(&mut g.q));
+            self.graded_apply(&g, &x, &mut q, true);
+            for c in 0..g.len() {
+                g.r[c] = g.b[c] - q[c];
+            }
+            let mut p = core::mem::take(&mut self.p);
+            self.graded_expand(&g, &x, &mut p);
+            self.p = p;
+            g.x = x;
+            g.q = q;
+            rr = Self::dot_f64(&g.r, &g.r);
+            self.correct_mobile3(k1);
+            divergence = self.graded_divergence_mobile(&mut g, j0);
+            let converged = rr <= tol * b2;
+            if b2 == 0. || (converged && divergence.1 <= PROJECTION_DIVERGENCE_TOLERANCE) || it >= max_iters {
+                break;
+            }
+            let state = fingerprint(&g.x);
+            if checkpoint == Some(state) {
+                floor = true;
+                break;
+            }
+            since += 1;
+            if since == power {
+                checkpoint = Some(state);
+                power = power.saturating_mul(2);
+                since = 0;
+            }
+            target = if converged {
+                let ratio = PROJECTION_DIVERGENCE_TOLERANCE / divergence.1.max(f64::MIN_POSITIVE);
+                rr * ratio * ratio
+            } else {
+                tol * b2
+            };
+        }
+        let accepted = b2 == 0. || ((rr <= tol * b2 || floor) && divergence.1 <= PROJECTION_DIVERGENCE_TOLERANCE);
+        self.graded = Some(g);
+        Ok(Report {
+            refinements: 0,
+            iterations: it,
+            degraded: !accepted,
+            residual: if b2 > 0. { (rr / b2).sqrt() } else { 0. },
+            divergence: divergence.0,
+            floor,
+            backward_error: 0.,
+            divergence_plain: divergence.1,
+        })
+    }
+
+    /// La divergence du pas mobile, restreinte : `Pᵀ·div u` rapportée au poids de chaque nœud ; toutes les lignes
+    /// mouillées, et les **franches** — sans face fantôme —, que juge ADR-144. Les nœuds gradués et le plus bas nœud
+    /// cubique sont franches par la garde ; au-dessus, la classification de `divergence_mobile3`.
+    fn graded_divergence_mobile(&mut self, g: &mut Graded3, j0: usize) -> (f64, f64) {
+        let Domain3 { nx, ny, dx, .. } = self.domain;
+        let cols = nx * ny;
+        let mut tmp = core::mem::take(&mut self.tmp);
+        self.divergence(&self.u, &self.v, &self.w, &mut tmp);
+        // `z` sert de tampon : `r` porte le résidu, qu'une relance réutilise.
+        let mut r = core::mem::take(&mut g.z);
+        self.graded_restrict(g, &tmp, &mut r);
+        self.tmp = tmp;
+        let (mut all, mut plain) = (0f32, 0f32);
+        for (s, &k) in g.nodes.iter().enumerate() {
+            for c in 0..cols {
+                let (i, j) = (c % nx, c / nx);
+                if !self.wet3(i, j, k) {
+                    continue;
+                }
+                let d = r[s * cols + c].abs() / g.weight[s];
+                all = all.max(d);
+                let ghost = s > j0 && self.mobile_row(i, j, k).iter().any(|(n, a, _, _)| n.is_none() && *a > 0.);
+                if !ghost {
+                    plain = plain.max(d);
+                }
+            }
+        }
+        g.z = r;
+        let max = self.u.iter().chain(&self.v).chain(&self.w).fold(0f32, |m, x| m.max(x.abs()));
+        let ratio = if max > 0. { dx / max.max(PROJECTION_VELOCITY_FLOOR) } else { 0. };
+        ((all * ratio) as f64, (plain * ratio) as f64)
     }
 }
