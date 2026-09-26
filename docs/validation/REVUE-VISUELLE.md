@@ -1319,3 +1319,6 @@ des murs dans l'eau (pièce 6 de la pluie) ; la mer n'a pas d'objet à occulter.
 
 **La question :** l'occultation du ciel et les ombres rendent-elles la scène crédible — le bloc qui se détache du sol par
 temps couvert, les ombres par ciel clair ? Si oui, je reprends la pluie (les gerbes), puis la campagne du solveur.
+
+**Verdict R31 — reçu le 2026-09-26 (S382, après le rituel)** : *« Je valide R31, continue la pluie »* — l'occultation du
+ciel et les ombres portées reçues ; la pluie continue (pièce 4, les gerbes).

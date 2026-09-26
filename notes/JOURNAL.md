@@ -17409,3 +17409,5 @@ manquait sous le débord (0,09) avant les faces graduées. **Erreurs** : deux ba
 **2** : 8.10 reste partiel, R31 posée ; la suite suit la demande de l'utilisateur. **Arbitrage réel** : jusqu'où la pluie
 avant le solveur (« puis continue, et ensuite le plus important le solveur 3D »). Suivant : verdict R31, la pluie pièce 4
 (les gerbes), puis la campagne du solveur volumique 3D.
+**Verdict R31** (après le rituel) : *« Je valide R31, continue la pluie »* — occultation et ombres reçues (8.10 reste partiel) ;
+suivant : la pluie, pièce 4, les gerbes (S383).

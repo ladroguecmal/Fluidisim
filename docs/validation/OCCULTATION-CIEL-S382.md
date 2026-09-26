@@ -52,7 +52,7 @@ ses sommets, égale à une intégration indépendante à 0,009 près —, et par
 | 2 — la part vue à ±0,01 d'une intégration indépendante | 15 points (sol à 5 cm – 4 m du mur ouest, à 10 et 150 m, mur, sous le débord de la margelle, fond du bassin au coin et au centre, carrelage, eau près du mur, dessus de la margelle) ; rayons 3D, 1 200 × 2 400 directions | **pire 0,0088** (eau à 10 cm du mur nord) ; dessus de la margelle : 1 exactement |
 | 3 — forme close à 10⁻⁴ ; S381 tenu | contre l'intégrale ; contrôles de S381 | 4·10⁻⁸ ; sol 1,00000, mur 0,6057 pour 0,6055 |
 | 4 — bord d'ombre à un pixel ; rien d'autre ne change | arête haute de la margelle sud (2,85 m), vue d'aplomb à 5 mm par pixel | attendu z = 3,3687, **mesuré 3,3662** (−2,5 mm) ; **539 819** pixels au soleil identiques avec et sans ombres |
-| 5 — photographies ; jugement | une référence, qualitative ; R31 | **R31 posée** |
+| 5 — photographies ; jugement | une référence, qualitative ; R31 | **reçue** : *« Je valide R31 »* |
 
 La lumière suit la part vue : sol à 25 cm, rapport des radiances avec et sans 0,54040 pour une part vue de 0,53998.
 

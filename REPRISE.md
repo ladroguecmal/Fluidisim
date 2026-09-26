@@ -14,9 +14,9 @@ JETON            : libre
 Battement        : 2026-09-26 13:39 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : —
-Dernière session : S382 — rendu : **l'occultation du ciel et les ombres portées** ([ADR-206](docs/adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md), [preuve](docs/validation/OCCULTATION-CIEL-S382.md)) — demande de l'utilisateur (R30) ; part du ciel vue à 0,009 d'une intégration indépendante, cuite aux sommets, ombres à 2,5 mm, coût +0,1 à +0,3 ms ; **R31 posée**. Avant : S381, le ciel de pluie (R30 reçue)
-Session suivante : **le verdict de R31**, puis **la pluie, pièce 4 — les gerbes** (ADR-205 D3 ; « puis continue ») ; ensuite **la campagne du solveur volumique 3D**, « le plus important » (l'utilisateur, R30) — combien de pièces de pluie avant elle : à demander si R31 ne le dit pas
-Maillons        : 2 — S382 : 8.10 reste partiel, R31 posée non reçue ; la suite est celle de l'utilisateur (journal)
+Dernière session : S382 — rendu : **l'occultation du ciel et les ombres portées** ([ADR-206](docs/adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md), [preuve](docs/validation/OCCULTATION-CIEL-S382.md)) — demande de l'utilisateur (R30) ; part du ciel vue à 0,009 d'une intégration indépendante, cuite aux sommets, ombres à 2,5 mm, coût +0,1 à +0,3 ms ; **R31 reçue** : « Je valide R31, continue la pluie ». Avant : S381, le ciel de pluie (R30 reçue)
+Session suivante : **la pluie, pièce 4 — les gerbes** (ADR-205 D3 ; R31, l'utilisateur : « continue la pluie ») ; puis les surfaces mouillées (5), les bâches sur les rides (8), l'exposition calculée (10)… ; ensuite **la campagne du solveur volumique 3D**, « le plus important » (R30)
+Maillons        : 2 — S382 : R31 reçue, 8.10 reste partiel ; la suite est celle de l'utilisateur (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
