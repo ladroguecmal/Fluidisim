@@ -90,8 +90,8 @@ publiés contre la période exacte.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `enable_columns` et le pas à colonnes dans `apic3d.rs` ; l'essai du repos ; critères 1 et 2.
 - [x] **P3** — les ballottements, toutes colonnes, contre δ (même instrument) ; critère 3.
-- [>] **P4** — suite ; preuve `RACCORD-3D-S398` ; file, liste, feuille de route, index.
-- [ ] **P5** — rituel.
+- [x] **P4** — suite ; preuve `RACCORD-3D-S398` ; file, liste, feuille de route, index.
+- [>] **P5** — rituel.
 
 ### Notes de reprise
 **P2 — `apic3d_columns.rs`** : `enable_columns` (masque, réserve comptée), `set_columns_surface`, `columns_volume` ; dans le pas,
@@ -115,3 +115,6 @@ compris).
 L'advection semi-lagrangienne dissipe davantage que l'advection centrée de δ (+0,3 à +1,4 % par période, contre ~0). **Observé
 sur δ** : sa projection mobile refuse la cuve mince (1, 0) à 2,5 cm (80 × 8 × 40) — Jacobi, même à 200 000 itérations ; la
 multigrille de S385 la refuse aussi, et à 5 cm (4 mailles de large) où Jacobi passe. Non étudié ici.
+
+**P4** : suite 694 réussis, 18 ignorés, zéro avertissement. Preuve [RACCORD-3D-S398](../docs/validation/RACCORD-3D-S398.md) ; file
+(campagne), feuille de route, liste 4.16 (texte), index.

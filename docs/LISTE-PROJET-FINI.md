@@ -253,7 +253,8 @@ pas recopiée ici (L137).
   ballottements à +0,39 % (1, 0) et +1,01 % (1, 1) à 2,5 cm depuis S389 (noyau de deux mailles, parois reflétées).
   **S393** : la première surface non graphe reçue en 3D — une sphère cinématique ouvre une cavité qui se **pince à 2,08
   √(R/g)**, dans la plage publiée (1,72 à 2,29), convergé à 0,6 % entre 12 et 16 mailles par diamètre, masse exacte
-  ([B10-APIC3D-S393](validation/B10-APIC3D-S393.md)) ; couronne et jet suivent encore la maille. Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
+  ([B10-APIC3D-S393](validation/B10-APIC3D-S393.md)) ; couronne et jet suivent encore la maille. **S398** : APIC 3D reçoit une zone de
+  colonnes (surface `η`, une seule projection) pour le raccord ([preuve](validation/RACCORD-3D-S398.md)). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *absent* sur le système ;
   C06 partiel sur un véhicule d'essai 1D.
 - [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et la masse est

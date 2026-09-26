@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 00:14 +02:00
+Battement        : 2026-09-27 00:16 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
 Session en cours : S398 — C5b, première part : la zone des colonnes dans APIC 3D (surface η, vitesse eulérienne advectée), éprouvée seule contre δ
 Dernière session : S397 — physique : **C5a, troisième part** ([preuve](docs/validation/B10-APIC-S320.md) §16) — la circulation de la frontière du raccord était un défaut du banc 2D (ses colonnes n'advectaient pas ; avec l'advection, 54 → 4 mm/s) ; `Volume3` advecte ; reste une migration lente à 2,5 cm, non attribuée. Avant : S396, fusion et séparation (4.9 partiel)
