@@ -84,9 +84,17 @@ participants ; `step` reste le pas sans pluie, **identique au bit**. **Surface d
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-204 : la pluie, arête de V (surface d'ouverture, exposition = commande, intensité = entrée du pas).
-- [ ] **P3** — `Flow::Rain`, `step_meteo`, `Meteo` ; critères 1, 2, 4.
+- [x] **P3** — `Flow::Rain`, `step_meteo`, `Meteo` ; critères 1, 2, 4.
 - [ ] **P4** — la piscine à débordement sous la pluie ; critère 3.
 - [ ] **P5** — preuve `PLUIE-V-S378`, liste 5.5, registre, file, feuille de route, index, ADR-010 note datée.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+
+**P3 — fait.** `Flow::Rain { catchment_mm2 }` (du ciel vers le nœud que `from` et `to` désignent), `Meteo`, `step_meteo` ;
+`step` = `step_meteo(Meteo::SEC)`. La pluie calculée en tête de boucle, ignorée par la normalisation amont, jamais
+retirée ; étiquette 3 dans l'empreinte de la base. **Critère 1** : empreinte de S372 inchangée, 45 essais V. **Critère
+2** : 319 999 / 159 999 / 0 / 159 999 / 239 999 ml pour 320 000 / 160 000 / 0 / 160 000 / 240 000 (troncature, ≤ 1 ml).
+**Erreur du critère écrit** : « bâche posée à 30 min : 240 000 » — c'est la valeur d'une demi-bâche ; bâche entière :
+160 000 ; les deux éprouvés, dit dans l'essai. **Critère 4** : contenant plein fermé à la pluie ; bilan exact à chaque
+pas (entré 62 221 ml, sorti 528 983) ; refus `Domain` (−1, NaN, ∞) et `Capacity` (`to ≠ from`) ; demi-bâche sauvegardée.

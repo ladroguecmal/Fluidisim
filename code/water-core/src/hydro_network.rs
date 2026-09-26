@@ -25,6 +25,9 @@
 //! entre deux pas : un orifice ou un déversoir commandé est une **vanne** ; la **pompe** est une loi à part, en réseau
 //! ouvert.
 //!
+//! **ADR-204, S378** : la **pluie** est une arête du ciel vers un nœud (surface d'ouverture × exposition × intensité) ;
+//! l'exposition est sa commande (bâche, demi-bâche), l'intensité une entrée du pas (`step_meteo`, `Meteo`).
+//!
 //! **ADR-139, S228** : les formes géométriques fournissent un plan orienté conservant le volume.
 //! Les anciennes tables n'acceptent que leur orientation cuite +Z. Géométrie, précision et coût
 //! restent à recevoir dans le domaine de chaque nouvel usage ; le noyau n'est pas un solveur de
@@ -107,6 +110,23 @@ pub enum Flow {
     /// est sous la prise (à sec). Vitesse `n = commande/1 000`, lois de similitude. Débit maximal en millilitres par
     /// seconde, hauteur de barrage `H0` en micromètres ; données de l'auteur de l'arête.
     Pump { max_flow_mlps: i64, shutoff_head_um: i64, outlet_um: [i64; 3] },
+    /// **Pluie** (ADR-204) : du ciel vers le nœud que `from` et `to` désignent tous deux. Débit `intensité × surface
+    /// d'ouverture × exposition` — l'intensité vient du pas (`Meteo`), la surface d'ouverture est une donnée d'auteur (mm²,
+    /// horizontale : la pluie qui tombe dans l'ouverture d'un contenant finit dans son eau), l'exposition est la commande
+    /// de l'arête (bâche entière : 0 ; demi-bâche : 500). Ne vide aucun nœud ; bornée par la place libre du receveur.
+    Rain { catchment_mm2: i64 },
+}
+
+/// **La météo du pas** (ADR-204 D4) : une entrée, fournie à l'identique à tous les participants (I-03) ; qui la calcule
+/// relève de la météo (ADR-203 D1). Une valeur pour tout le réseau.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Meteo {
+    /// Intensité de la pluie, mm/h ; finie et positive.
+    pub pluie_mm_h: f32,
+}
+impl Meteo {
+    /// Temps sec : le pas de V d'avant la pluie, au bit.
+    pub const SEC: Meteo = Meteo { pluie_mm_h: 0.0 };
 }
 impl Default for Flow {
     fn default() -> Self {
@@ -277,6 +297,24 @@ pub fn step(
     dt: SimTime,
     scratch: &mut [i64],
 ) -> Result<(), Error> {
+    step_meteo(nodes, edges, shapes, g_eff, Meteo::SEC, dt, scratch)
+}
+
+/// Un pas de la couche V **sous une météo** (ADR-204) : `step` avec l'intensité de la pluie. Refus `Domain` si l'intensité
+/// n'est pas finie et positive ; une arête de pluie dont `from` et `to` ne désignent pas le même nœud est refusée
+/// (`Capacity`), comme toute arête mal formée.
+pub fn step_meteo(
+    nodes: &mut [HydroNode],
+    edges: &mut [Opening],
+    shapes: &Shapes<'_>,
+    g_eff: [f32; 3],
+    meteo: Meteo,
+    dt: SimTime,
+    scratch: &mut [i64],
+) -> Result<(), Error> {
+    if !(meteo.pluie_mm_h >= 0.0) || !meteo.pluie_mm_h.is_finite() {
+        return Err(Error::Domain);
+    }
     if scratch.len() < edges.len() {
         return Err(Error::Capacity);
     }
@@ -291,6 +329,10 @@ pub fn step(
             // Une pompe sans hauteur de barrage ne se représente pas (division par H0) : refusée comme une taille.
             Flow::Pump { max_flow_mlps, shutoff_head_um, .. } => {
                 if shutoff_head_um <= 0 { -1 } else { max_flow_mlps }
+            }
+            // La pluie tombe sur le nœud que `from` et `to` désignent tous deux.
+            Flow::Rain { catchment_mm2 } => {
+                if e.to != Some(e.from) { -1 } else { catchment_mm2 }
             }
         };
         if e.from as usize >= nodes.len()
@@ -311,6 +353,20 @@ pub fn step(
     // --- 2. Débit par arête, dans l'ordre du tableau (I-03).
     for (e, out) in edges.iter().zip(scratch.iter_mut()) {
         *out = 0;
+        // ADR-204 : la pluie, sans lecture de surface — intensité (mm/h → m/s) × ouverture (mm² → m²) × exposition.
+        if let Flow::Rain { catchment_mm2 } = e.flow {
+            if meteo.pluie_mm_h == 0.0 || e.control_pm == 0 {
+                continue;
+            }
+            let q_m3s = meteo.pluie_mm_h as f64 * (1e-3 / 3600.0) * (catchment_mm2 as f64 * 1e-6)
+                * (e.control_pm as f64 / CONTROL_FULL as f64);
+            let nl = q_m3s * dt_s * 1e12;
+            if !nl.is_finite() || nl.abs() >= i64::MAX as f64 {
+                return Err(Error::NonFinite);
+            }
+            *out = nl as i64;
+            continue;
+        }
         let src = nodes[e.from as usize];
         let h_up = shapes.surface_up(&src, up)?.offset_um;
         // Cote de l'ouverture au-dessus du point de référence amont, **le long de la verticale
@@ -376,7 +432,7 @@ pub fn step(
                     * head_m.powf(1.5)
                     * ouverture
             }
-            Flow::Pump { .. } => unreachable!("la pompe a son propre calcul, plus haut"),
+            Flow::Pump { .. } | Flow::Rain { .. } => unreachable!("pompe et pluie ont leur propre calcul, plus haut"),
         };
         if !q_m3s.is_finite() {
             return Err(Error::NonFinite);
@@ -426,7 +482,8 @@ pub fn step(
     for i in 0..nodes.len() {
         let mut asked: i128 = 0;
         for (e, ml) in edges.iter().zip(scratch.iter()) {
-            if e.from as usize == i {
+            // ADR-204 : une arête de pluie ne vide pas son nœud.
+            if e.from as usize == i && !matches!(e.flow, Flow::Rain { .. }) {
                 asked += *ml as i128;
             }
         }
@@ -436,7 +493,7 @@ pub fn step(
         }
         let (mut cum, mut cum_given) = (0i128, 0i128);
         for (e, ml) in edges.iter().zip(scratch.iter_mut()) {
-            if e.from as usize != i {
+            if e.from as usize != i || matches!(e.flow, Flow::Rain { .. }) {
                 continue;
             }
             cum += *ml as i128;
@@ -477,7 +534,10 @@ pub fn step(
         if *ml <= 0 {
             continue;
         }
-        nodes[e.from as usize].volume_ml -= *ml;
+        // ADR-204 : la pluie vient du ciel ; elle n'est retirée de rien.
+        if !matches!(e.flow, Flow::Rain { .. }) {
+            nodes[e.from as usize].volume_ml -= *ml;
+        }
         if let Some(t) = e.to {
             nodes[t as usize].volume_ml += *ml;
         }

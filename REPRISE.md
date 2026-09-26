@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 10:35 +02:00
+Battement        : 2026-09-26 10:39 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S378 — physique : la pluie dans V, exposition dynamique (liste 5.5)
 Dernière session : S377 — consignation : **les réponses aux zones d'ombre d'ADR-202** ([ADR-203](docs/adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md)) — météo aussi poussée que l'eau, bâches posées et retirées en temps réel, factice au loin, contenants en domaines, ordre des systèmes suivants. Avant : S376, le niveau de détail des contenants (ADR-202)

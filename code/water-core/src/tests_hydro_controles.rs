@@ -447,3 +447,110 @@ fn control_records_are_validated_and_version_one_is_refused_s372() {
     hors[0].control_pm = 1_001;
     assert_eq!(base.snapshot_len(&auteur_n, &hors), Err(SnapshotError::State(Error::Capacity)));
 }
+
+/// Une arête de pluie sur le nœud `n`, ouverture `catchment_mm2`, exposition `control_pm`.
+fn pluie(n: u16, catchment_mm2: i64, control_pm: i64) -> Opening {
+    Opening {
+        from: n, to: Some(n), flow: Flow::Rain { catchment_mm2 }, position_um: [0; 3],
+        discharge: 0.0, residue_nl: 0, control_pm
+    }
+}
+
+/// Une heure de pluie (36 000 pas) sur un bassin de 32 m² (prisme de 1,5 m, 48 m³, 40 m³ au départ) ; l'exposition peut
+/// changer au pas `bascule` (vers `apres`). Rend le volume gagné, en ml.
+fn une_heure_de_pluie(pluie_mm_h: f32, exposition: i64, bascule: u64, apres: i64) -> i64 {
+    let table = prism(1_500_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [node(40_000_000, 48_000_000, 0)];
+    let mut edges = [pluie(0, 32_000_000, exposition)];
+    let mut scratch = [0i64; 1];
+    for k in 0..36_000u64 {
+        if k == bascule {
+            edges[0].control_pm = apres;
+        }
+        step_meteo(&mut nodes, &mut edges, &shapes, DOWN, Meteo { pluie_mm_h }, SimTime(STEP_US), &mut scratch).unwrap();
+    }
+    nodes[0].volume_ml - 40_000_000
+}
+
+/// **Critère 2 de S378** (ADR-204) — 10 mm/h sur 32 m² pendant une heure : **320 000 ml** (0,32 m³) à 1 ml près ; sous une
+/// demi-bâche (exposition 500) : 160 000 ; sous une bâche entière : **0** ; bâche entière posée à 30 min : 160 000 ;
+/// demi-bâche posée à 30 min : 240 000. *Le critère écrit avant donnait 240 000 pour la bâche entière posée à 30 min :
+/// erreur d'arithmétique (c'est la valeur de la demi-bâche) ; les deux cas sont éprouvés.*
+#[test]
+fn an_hour_of_rain_fills_by_opening_times_exposure_s378() {
+    let cas = [
+        (1_000, u64::MAX, 1_000, 320_000),
+        (500, u64::MAX, 500, 160_000),
+        (0, u64::MAX, 0, 0),
+        (1_000, 18_000, 0, 160_000),
+        (1_000, 18_000, 500, 240_000),
+    ];
+    for (expo, bascule, apres, attendu) in cas {
+        let gagne = une_heure_de_pluie(10.0, expo, bascule, apres);
+        println!("PLUIE_S378 exposition={expo} bascule={bascule} gagne_ml={gagne} attendu_ml={attendu}");
+        assert!((gagne - attendu).abs() <= 1, "{gagne} contre {attendu}");
+    }
+    assert_eq!(une_heure_de_pluie(0.0, 1_000, u64::MAX, 1_000), 0, "temps sec");
+}
+
+/// **Critère 4 de S378** — un contenant plein ne reçoit plus rien par la pluie (la place libre la borne), et un réseau sous
+/// la pluie tient son bilan **exactement** : pluie entrée = volume gagné + rejeté hors réseau, à chaque pas.
+#[test]
+fn rain_respects_capacity_and_the_budget_closes_exactly_s378() {
+    let table = prism(1_500_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut plein = [node(48_000_000, 48_000_000, 0)];
+    let mut arete = [pluie(0, 32_000_000, 1_000)];
+    let mut scratch = [0i64; 4];
+    for _ in 0..1_000 {
+        step_meteo(&mut plein, &mut arete, &shapes, DOWN, Meteo { pluie_mm_h: 50.0 }, SimTime(STEP_US), &mut scratch[..1]).unwrap();
+    }
+    assert_eq!(plein[0].volume_ml, 48_000_000);
+    // Deux bacs sous la pluie, un orifice de l'un à l'autre, une fuite hors réseau ; bilan à chaque pas.
+    let mut nodes = [node(500_000, 1_000_000, 1_000_000), node(0, 1_000_000, 0)];
+    let mut edges = [
+        pluie(0, 1_000_000, 1_000),
+        orifice(0, Some(1), 500, [0, 0, 1_000_000]),
+        pluie(1, 1_000_000, 400),
+        orifice(1, None, 200, [0, 0, 0]),
+    ];
+    let depart: i64 = nodes.iter().map(|n| n.volume_ml).sum();
+    let (mut entre, mut sorti) = (0i64, 0i64);
+    for _ in 0..20_000 {
+        step_meteo(&mut nodes, &mut edges, &shapes, DOWN, Meteo { pluie_mm_h: 80.0 }, SimTime(STEP_US), &mut scratch).unwrap();
+        entre += scratch[0] + scratch[2];
+        sorti += scratch[3];
+        assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>(), depart + entre - sorti, "bilan");
+        assert!(nodes.iter().all(|n| (0..=n.capacity_ml).contains(&n.volume_ml)));
+    }
+    println!("PLUIE_S378 bilan : entre={entre} ml sorti={sorti} ml");
+    assert!(entre > 0 && sorti > 0);
+}
+
+/// Refus atomiques : une intensité négative ou non finie (`Domain`) ; une arête de pluie dont `from` et `to` diffèrent
+/// (`Capacity`). Et la base de sauvegarde accepte une arête de pluie, dont l'exposition changée survit à la restauration.
+#[test]
+fn rain_refusals_and_snapshot_s378() {
+    use super::snapshot::{Baseline, Context};
+    let table = prism(1_500_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [node(40_000_000, 48_000_000, 0), node(0, 48_000_000, 0)];
+    let mut edges = [pluie(0, 32_000_000, 1_000)];
+    let mut scratch = [0i64; 1];
+    for p in [-1.0f32, f32::NAN, f32::INFINITY] {
+        assert_eq!(step_meteo(&mut nodes, &mut edges, &shapes, DOWN, Meteo { pluie_mm_h: p }, SimTime(STEP_US), &mut scratch), Err(Error::Domain));
+    }
+    let mut mal = [Opening { to: Some(1), ..pluie(0, 32_000_000, 1_000) }];
+    assert_eq!(step_meteo(&mut nodes, &mut mal, &shapes, DOWN, Meteo { pluie_mm_h: 10.0 }, SimTime(STEP_US), &mut scratch), Err(Error::Capacity));
+    assert_eq!(nodes[0].volume_ml, 40_000_000);
+    let base = Baseline::new(7, 1, &nodes, &edges, &shapes).unwrap();
+    let mut e = edges;
+    e[0].control_pm = 500;
+    let ctx = Context { time: SimTime(0), dt: SimTime(STEP_US), g_eff: DOWN };
+    let mut tampon = vec![0u8; base.snapshot_len(&nodes, &e).unwrap()];
+    base.snapshot_into(&nodes, &e, ctx, &mut tampon).unwrap();
+    let (mut rn, mut re) = (nodes, edges);
+    base.restore_into(&tampon, &mut rn, &mut re).unwrap();
+    assert_eq!(re[0].control_pm, 500, "la demi-bâche survit à la sauvegarde");
+}
