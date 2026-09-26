@@ -17428,3 +17428,5 @@ mesure, éclaboussures au sol différées à la pièce 5 (film mince, Cossali et
 reste partiel, R32 posée ; **justifié** : la demande explicite de l'utilisateur (« continue la pluie ») prime sur la suite
 automatique, et aucune pièce de pluie ne change seule l'état d'un point (8.4 demande aussi écume, spray, bulles). Suivant :
 verdict R32, puis la pièce 5 (surfaces mouillées, éclaboussures au sol), ensuite la campagne du solveur volumique 3D.
+**Clôture** (14:42, session cloud, reprise à chaud) : l'utilisateur a mis le dépôt en ligne (GitHub, `ladroguecmal/Fluidisim`,
+branche `main`) pendant le rituel ; EN-COURS et le journal étaient écrits, le jeton non — **complété** : jeton libéré.

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-26 14:17 +02:00
-Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S383 — la pluie, pièce 4 : les gerbes (couronne, jet de Worthington, gouttelettes ; les mêmes impacts que les rides)
-Dernière session : S382 — rendu : **l'occultation du ciel et les ombres portées** ([ADR-206](docs/adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md), [preuve](docs/validation/OCCULTATION-CIEL-S382.md)) — demande de l'utilisateur (R30) ; part du ciel vue à 0,009 d'une intégration indépendante, cuite aux sommets, ombres à 2,5 mm, coût +0,1 à +0,3 ms ; **R31 reçue** : « Je valide R31, continue la pluie ». Avant : S381, le ciel de pluie (R30 reçue)
-Session suivante : **la pluie, pièce 4 — les gerbes** (ADR-205 D3 ; R31, l'utilisateur : « continue la pluie ») ; puis les surfaces mouillées (5), les bâches sur les rides (8), l'exposition calculée (10)… ; ensuite **la campagne du solveur volumique 3D**, « le plus important » (R30)
-Maillons        : 2 — S382 : R31 reçue, 8.10 reste partiel ; la suite est celle de l'utilisateur (journal)
+JETON            : libre
+Battement        : 2026-09-26 14:42 +02:00
+Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot) — rituel de S383 complété par reprise à chaud, après la mise en ligne du dépôt par l'utilisateur (GitHub, ladroguecmal/Fluidisim)
+Session en cours : aucune
+Dernière session : S383 — rendu : **les gerbes de la pluie** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md) pièce 4, [preuve](docs/validation/GERBES-S383.md)) — couronne, dôme et jet aux mêmes impacts que les rides, part d'aire au loin, défaut de S380 corrigé (la pluie suit la pose) ; **R32 posée** (REVUE-VISUELLE §37). Avant : S382, l'occultation du ciel (R31 reçue)
+Session suivante : **verdict R32**, puis la pluie, pièce 5 — les surfaces mouillées et les éclaboussures au sol (film mince, Cossali et al. 1997) ; ensuite **la campagne du solveur volumique 3D**, « le plus important » (R30)
+Maillons        : 3 — S383 : 8.4 reste partiel, R32 posée ; justifié au journal (la demande de l'utilisateur, « continue la pluie »)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
