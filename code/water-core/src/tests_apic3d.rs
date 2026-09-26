@@ -129,69 +129,70 @@ fn apic_transfers_keep_an_affine_field_s388() {
     assert!(checked > s.n / 3, "{checked}");
 }
 
-#[test]
-fn rest_surface_is_reconstructed_at_its_height_s388() {
-    // Critère 2 : une nappe plane à 0,5 m (cinq mailles de 10 cm) ; l'iso-zéro, interpolée sur la verticale des centres,
-    // dans les colonnes à plus d'une maille des parois.
-    let (mut a, _) = apic(8, 8, 10, 0.1, 8 * 8 * 8 * 10);
-    a.seed(&|p| p[2] < 0.5).unwrap();
-    a.reconstruct();
-    let mut worst = 0f32;
-    for j in 1..7 {
-        for i in 1..7 {
-            let f = |k: usize| a.phi[a.cell(i, j, k)];
-            let k = (0..9).find(|&k| f(k) < 0. && f(k + 1) >= 0.).expect("une surface");
-            let h = (k as f32 + 0.5) * 0.1 + 0.1 * f(k) / (f(k) - f(k + 1));
-            worst = worst.max((h - 0.5).abs());
-            assert!((0..k).all(|m| f(m) < 0.) && (k + 1..10).all(|m| f(m) >= 0.));
-        }
-    }
-    println!("S388 surface au repos : écart maximal {:.3e} m ({:.2} % de maille)", worst, 100. * worst / 0.1);
-    // Critère 2 tel qu'écrit (1 % de maille) : il ne tient qu'au rayon réglé sur les faces ; le rayon minimax lit une
-    // face à ±6 % — publié, non relevé (P4).
-    let (d_below, d_above) = rest_distances(0.1);
-    println!("S388 rayons : S318 (au plan) {:.5} m ; faces {:.5} m ; minimax {:.5} m ; d₋ {:.5}, d₊ {:.5}",
-        rest_radius_at_the_plane(0.1), rest_radius_at_the_faces(0.1), rest_radius(0.1), d_below, d_above);
-    assert!(worst <= 0.07 * 0.1, "{worst}");
+/// La hauteur que lit la pression dans la colonne `(i, j)` : l'iso-zéro interpolée entre deux centres.
+fn read_height(a: &Apic3, i: usize, j: usize) -> f32 {
+    let nz = a.domain().nz;
+    let f = |k: usize| a.phi[a.cell(i, j, k)];
+    let k = (0..nz - 1).find(|&k| f(k) < 0. && f(k + 1) >= 0.).expect("une surface");
+    let dx = a.domain().dx;
+    (k as f32 + 0.5) * dx + dx * f(k) / (f(k) - f(k + 1))
 }
 
 #[test]
-fn surfaces_between_centres_are_published_s388() {
-    // Hors du cas réglé. La hauteur **vraie** est celle que les particules portent (rangées de dx/2) : une face de maille
-    // (0,40 m) et un milieu de maille (0,45 m). Les deux réglages : aux centres (retenu) et au plan (S318).
-    for (nom, r) in [("faces", rest_radius_at_the_faces(0.1)), ("plan_S318", rest_radius_at_the_plane(0.1)), ("minimax", rest_radius(0.1))] {
-        for h in [0.40f32, 0.45] {
-            let (mut a, _) = apic(8, 8, 10, 0.1, 8 * 8 * 8 * 10);
-            let n = a.seed(&|p| p[2] < h).unwrap();
-            let vraie = n as f32 * 0.1 * 0.1 * 0.1 / 8. / (0.8 * 0.8);
-            assert!((vraie - h).abs() < 1e-6);
-            a.radius = r;
+fn surface_reading_follows_its_model_at_every_position_s389() {
+    // Critères 1 et 2 de S389 : la nappe entière glissée sur huit positions d'une maille ; la lecture 3D contre le modèle
+    // f64 à 0,1 % de maille, noyaux d'une et de deux mailles ; et, au noyau retenu, l'écart sous 2,5 % de maille partout.
+    let dx = 0.1f32;
+    for kernel in [1f32, KERNEL_CELLS] {
+        let r = minimax_radius(dx as f64, kernel as f64).0;
+        let mut worst = 0f32;
+        for m in 0..READ_POSITIONS {
+            let offset = (m as f32 + 0.5) / READ_POSITIONS as f32;
+            let (mut a, _) = apic(8, 8, 12, dx, 8 * 8 * 8 * 12);
+            a.seed(&|p| p[2] < 0.5).unwrap();
+            let shift = (offset - 0.5) * dx;
+            for k in 0..a.n {
+                a.x[k][2] = (a.x[k][2] + shift).max(1e-3);
+            }
+            a.set_reconstruction_kernel(kernel);
             a.reconstruct();
-            let f = |k: usize| a.phi[a.cell(4, 4, k)];
-            let k = (0..9).find(|&k| f(k) < 0. && f(k + 1) >= 0.).expect("une surface");
-            let lue = (k as f32 + 0.5) * 0.1 + 0.1 * f(k) / (f(k) - f(k + 1));
-            println!("S388 réglage={nom} hauteur_vraie={vraie:.3} m : iso-zéro lue {lue:.5} m, écart {:+.2} % de maille ; \
-                      calcul f64 {:+.2} %", 100. * (lue - vraie) / 0.1, 100. * read_error(0.1, r as f64, h == 0.40) / 0.1);
+            let surface = 0.5 + shift;
+            let lue = read_height(&a, 4, 4) - surface;
+            let modele = lattice_read_error(dx as f64, kernel as f64, r, offset as f64) as f32;
+            println!("S389 noyau={kernel} position={offset:.4} : lue {:+.3} %, modèle {:+.3} % de maille",
+                100. * lue / dx, 100. * modele / dx);
+            assert!((lue - modele).abs() <= 1e-3 * dx, "noyau {kernel}, position {offset} : {lue} contre {modele}");
+            worst = worst.max(lue.abs());
+        }
+        println!("S389 noyau={kernel} rayon={r:.5} m : pire lecture {:.2} % de maille", 100. * worst / dx);
+        if kernel == KERNEL_CELLS {
+            assert!(worst <= 0.025 * dx, "{worst}");
         }
     }
+    // Pour mémoire, le rayon de S318 (noyau d'une maille, au point de la surface).
+    println!("S389 rayon de S318 : {:.5} m ; retenu : {:.5} m", rest_radius_at_the_plane(dx), rest_radius(dx));
 }
 
 #[test]
 fn a_tank_at_rest_stays_at_rest_s388() {
-    // Critère 3 : cuve de 1 × 1 × 1 m à 5 cm, 0,5 m d'eau, 2 s ; masse exacte, vitesse parasite ≤ 1 cm/s (2D : 4,4 mm/s).
-    let (mut a, _) = apic(20, 20, 20, 0.05, 20 * 20 * 20 * 8);
-    let n = a.seed(&|p| p[2] < 0.5).unwrap();
-    let (mut t, mut worst, mut steps) = (0u64, 0f32, 0);
-    let mut last = ApicReport::default();
-    while t < 2_000_000 {
-        let us = a.stable_step_us(20_000).min(2_000_000 - t);
-        last = a.step(us).unwrap();
-        worst = worst.max(last.max_speed);
-        t += us;
-        steps += 1;
+    // Critère 3 de S388 (et de S389) : cuve de 1 × 1 × 1 m à 5 cm, 0,5 m d'eau, 2 s ; masse exacte, vitesse parasite ≤ 1 cm/s.
+    // S388, noyau d'une maille sans images aux parois : 5,6 mm/s. S389 : le témoin au noyau d'une maille, parois reflétées.
+    for kernel in [KERNEL_CELLS, 1.] {
+        let (mut a, _) = apic(20, 20, 20, 0.05, 20 * 20 * 20 * 8);
+        a.set_reconstruction_kernel(kernel);
+        let n = a.seed(&|p| p[2] < 0.5).unwrap();
+        let (mut t, mut worst, mut steps) = (0u64, 0f32, 0);
+        let mut last = ApicReport::default();
+        while t < 2_000_000 {
+            let us = a.stable_step_us(20_000).min(2_000_000 - t);
+            last = a.step(us).unwrap();
+            worst = worst.max(last.max_speed);
+            t += us;
+            steps += 1;
+        }
+        println!("S388 repos noyau={kernel} : {steps} pas, vitesse parasite max {:.3e} m/s, dernière {:.3e} ; itérations {} ; \
+                  résidu {:.1e} ; divergence {:.1e}", worst, last.max_speed, last.iterations, last.residual, last.divergence);
+        assert_eq!(a.particle_count(), n);
+        assert!(worst <= 0.01, "{worst}");
     }
-    println!("S388 repos : {steps} pas, vitesse parasite max {:.3e} m/s, dernière {:.3e} ; itérations {} ; résidu {:.1e} ; \
-              divergence {:.1e}", worst, last.max_speed, last.iterations, last.residual, last.divergence);
-    assert_eq!(a.particle_count(), n);
-    assert!(worst <= 0.01, "{worst}");
 }

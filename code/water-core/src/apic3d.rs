@@ -73,6 +73,8 @@ pub struct Apic3 {
     pub(crate) iterations: u32,
     /// Séparation des particules active (S320) ; la couper sert à la mesure.
     pub(crate) separation: bool,
+    /// Rayon du noyau de la reconstruction, en mailles (`KERNEL_CELLS` ; un autre sert à la mesure).
+    pub(crate) kernel: f32,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -148,6 +150,7 @@ impl Apic3 {
             radius: rest_radius(dx),
             iterations: 0,
             separation: true,
+            kernel: KERNEL_CELLS,
         })
     }
 
@@ -176,6 +179,12 @@ impl Apic3 {
     /// **Pour la mesure** : le rayon de la reconstruction (défaut : `rest_radius`, le minimax de S388).
     pub fn set_reconstruction_radius(&mut self, r: f32) {
         self.radius = r;
+    }
+    /// **Pour la mesure** : le noyau de la reconstruction, en mailles, et le rayon minimax qui lui répond (défaut :
+    /// `KERNEL_CELLS`). Calcul `f64` de quelques millisecondes : hors du pas.
+    pub fn set_reconstruction_kernel(&mut self, cells: f32) {
+        self.kernel = cells;
+        self.radius = minimax_radius(self.domain.dx as f64, cells as f64).0 as f32;
     }
     /// **Pour la mesure** : la séparation des particules (défaut : active).
     pub fn set_separation(&mut self, on: bool) {
@@ -282,39 +291,35 @@ pub(crate) fn kernel(s2_over_r2: f32) -> f32 {
     }
 }
 
-/// **Le rayon au repos**, réglé en S388 (P4) sur ce que la pression lit : l'iso-zéro **interpolée entre deux centres de
-/// maille**. Sur une nappe régulière de particules au quart de maille, la hauteur d'eau que les particules portent tombe
-/// soit sur une face de maille, soit sur un centre (rangées de `dx/2`). Un rayon unique ne met pas les deux à zéro :
-/// `r = d₀` (S318, la distance au point de la surface) lit un centre exactement et une face à −15 % de maille ; `r` réglé
-/// sur les centres lit une face exactement et un centre à +9,9 %. Le rayon retenu est le **minimax** : celui qui égalise
-/// les deux erreurs, de signes opposés, par dichotomie en `f64` ([preuve](../../docs/validation/APIC3D-S388.md)).
-pub fn rest_radius(dx: f32) -> f32 {
-    let dx = dx as f64;
-    let (face, centre) = (|r: f64| read_error(dx, r, true), |r: f64| read_error(dx, r, false));
-    let at = |z: f64| rest_mean_distance(dx, z).expect("une voisine");
-    let (mut lo, mut hi) = (at(0.), 0.5 * (at(-0.5 * dx) + at(0.5 * dx)));
-    for _ in 0..60 {
-        let mid = 0.5 * (lo + hi);
-        if face(mid) + centre(mid) < 0. { lo = mid; } else { hi = mid; }
-    }
-    (0.5 * (lo + hi)) as f32
-}
+/// Rayon du noyau de la reconstruction, en mailles. **S389 : deux** — calculée sur une surface qui parcourt continûment une
+/// maille, la lecture se trompe jusqu'à 9,9 % de maille avec un noyau d'une maille (S318–S388), 2,5 % avec deux ; le nombre
+/// de particules par maille n'y change presque rien ([preuve](../../docs/validation/APIC3D-S388.md) §5).
+pub const KERNEL_CELLS: f32 = 2.0;
 
-/// La distance d'un point de la verticale, à la hauteur `qz` au-dessus d'une nappe au repos de surface `z = 0`, à la moyenne
-/// pondérée de ses voisines — en `f64`, sur un réseau de huit particules par maille, latéralement au centre d'une maille ;
-/// `None` sans voisine à moins de `dx`.
-pub fn rest_mean_distance(dx: f64, qz: f64) -> Option<f64> {
+/// Positions de la surface, en fraction de maille au-dessus d'un centre, sur lesquelles le rayon est réglé et la lecture
+/// jugée : huit, au milieu de huitièmes.
+pub const READ_POSITIONS: usize = 8;
+
+/// La distance d'un point de la verticale, à la hauteur `qz`, à la moyenne pondérée d'une nappe au repos de surface
+/// `surface` (m), noyau de rayon `kernel·dx` — en `f64`, huit particules par maille, latéralement au centre d'une maille ;
+/// `None` sans voisine.
+pub fn lattice_mean_distance(dx: f64, kernel: f64, qz: f64, surface: f64) -> Option<f64> {
     let h = dx / PER_AXIS as f64;
+    let radius = kernel * dx;
+    let layers = ((radius + (qz - surface).abs() + dx) / h).ceil() as i32 + 2;
+    let lateral = (radius / h).ceil() as i32 + 1;
     let (mut sw, mut sz) = (0f64, 0f64);
-    for k in 0..8 {
-        for j in -8i32..8 {
-            for i in -8i32..8 {
-                let p = [(i as f64 + 0.5) * h, (j as f64 + 0.5) * h, -(k as f64 + 0.5) * h];
-                let s2 = (p[0] * p[0] + p[1] * p[1] + (p[2] - qz) * (p[2] - qz)) / (dx * dx);
+    for k in 0..layers {
+        let z = surface - (k as f64 + 0.5) * h;
+        for j in -lateral..lateral {
+            let y = (j as f64 + 0.5) * h;
+            for i in -lateral..lateral {
+                let x = (i as f64 + 0.5) * h;
+                let s2 = (x * x + y * y + (z - qz) * (z - qz)) / (radius * radius);
                 if s2 < 1. {
                     let w = (1. - s2).powi(3);
                     sw += w;
-                    sz += w * p[2];
+                    sz += w * z;
                 }
             }
         }
@@ -322,52 +327,59 @@ pub fn rest_mean_distance(dx: f64, qz: f64) -> Option<f64> {
     (sw > 0.).then(|| (qz - sz / sw).abs())
 }
 
-/// L'erreur de hauteur lue (m) pour un rayon `r` : surface sur une face (`face`, centres en `∓dx/2`) ou sur un centre.
-pub fn read_error(dx: f64, r: f64, face: bool) -> f64 {
-    // Comme `reconstruct` : `φ = dx` sans voisine (S388 : le modèle mettait d'abord `2·dx − r`, et lisait un centre à +4,5 %
-    // quand la reconstruction lisait +7,2 %).
-    let phi = |z: f64| rest_mean_distance(dx, z).map_or(dx, |d| d - r);
-    let centres: [f64; 4] = if face { [-1.5 * dx, -0.5 * dx, 0.5 * dx, 1.5 * dx] } else { [-dx, 0., dx, 2. * dx] };
-    for w in centres.windows(2) {
-        let (a, b) = (phi(w[0]), phi(w[1]));
+/// L'erreur de hauteur **lue** (m) pour un rayon `r` et un noyau de `kernel` mailles, la surface à `offset·dx` au-dessus d'un
+/// centre de maille (`0 ≤ offset < 1`) : l'iso-zéro interpolée entre deux centres, comme la lit la pression. `φ = dx` sans
+/// voisine, comme `reconstruct`.
+pub fn lattice_read_error(dx: f64, kernel: f64, r: f64, offset: f64) -> f64 {
+    let surface = offset * dx;
+    let phi = |z: f64| lattice_mean_distance(dx, kernel, z, surface).map_or(dx, |d| d - r);
+    let reach = kernel.ceil() as i32 + 2;
+    for m in -reach..reach {
+        let (za, zb) = (m as f64 * dx, (m + 1) as f64 * dx);
+        let (a, b) = (phi(za), phi(zb));
         if a < 0. && b >= 0. {
-            return w[0] + (w[1] - w[0]) * a / (a - b);
+            return za + dx * a / (a - b) - surface;
         }
     }
     f64::NAN
 }
 
-/// Les distances `(d₋, d₊)` des centres `z = −dx/2` et `z = +dx/2` à la moyenne pondérée d'une nappe au repos.
-pub fn rest_distances(dx: f64) -> (f64, f64) {
-    let at = |z: f64| rest_mean_distance(dx, z).expect("une voisine");
-    (at(-0.5 * dx), at(0.5 * dx))
+/// Le pire écart de lecture sur les `READ_POSITIONS` positions, pour un rayon et un noyau donnés.
+pub fn lattice_worst_read(dx: f64, kernel: f64, r: f64) -> f64 {
+    (0..READ_POSITIONS)
+        .map(|m| lattice_read_error(dx, kernel, r, (m as f64 + 0.5) / READ_POSITIONS as f64).abs())
+        .fold(0f64, |w, e| if e.is_nan() { f64::INFINITY } else { w.max(e) })
 }
 
-/// Le réglage sur les centres qui encadrent une surface posée sur une face : `(d₋ + d₊)/2`. Gardé pour la mesure.
-pub fn rest_radius_at_the_faces(dx: f32) -> f32 {
-    let (a, b) = rest_distances(dx as f64);
-    (0.5 * (a + b)) as f32
-}
-
-/// Le réglage de S318, `d₀` : la distance du point de la surface à la moyenne de ses voisines. Gardé pour la mesure.
-pub fn rest_radius_at_the_plane(dx: f32) -> f32 {
-    let dx = dx as f64;
-    let h = dx / PER_AXIS as f64;
-    let (mut sw, mut sz) = (0f64, 0f64);
-    for k in 0..8 {
-        for j in -8i32..8 {
-            for i in -8i32..8 {
-                let p = [(i as f64 + 0.5) * h, (j as f64 + 0.5) * h, -(k as f64 + 0.5) * h];
-                let s2 = (p[0] * p[0] + p[1] * p[1] + p[2] * p[2]) / (dx * dx);
-                if s2 < 1. {
-                    let w = (1. - s2).powi(3);
-                    sw += w;
-                    sz += w * p[2];
-                }
+/// **Le rayon minimax** d'un noyau : celui qui rend le plus petit le pire écart de lecture — recherche sur une grille de 21
+/// valeurs de `[0, 1,5·kernel·dx]`, affinée trois fois autour du meilleur. Rend (rayon, pire écart), m.
+pub fn minimax_radius(dx: f64, kernel: f64) -> (f64, f64) {
+    let (mut lo, mut hi) = (0f64, 1.5 * kernel * dx);
+    let mut best = (f64::INFINITY, 0f64);
+    for _ in 0..3 {
+        for t in 0..=20 {
+            let r = lo + (hi - lo) * t as f64 / 20.;
+            let w = lattice_worst_read(dx, kernel, r);
+            if w < best.0 {
+                best = (w, r);
             }
         }
+        let step = (hi - lo) / 20.;
+        lo = (best.1 - step).max(0.);
+        hi = best.1 + step;
     }
-    (-(sz / sw)) as f32
+    (best.1, best.0)
+}
+
+/// **Le rayon au repos** : le minimax du noyau retenu (`KERNEL_CELLS`), calculé en `f64` à la configuration (S389).
+pub fn rest_radius(dx: f32) -> f32 {
+    minimax_radius(dx as f64, KERNEL_CELLS as f64).0 as f32
+}
+
+/// Le réglage de S318, `d₀` : la distance du point de la surface à la moyenne de ses voisines, noyau d'une maille. Gardé
+/// pour la mesure.
+pub fn rest_radius_at_the_plane(dx: f32) -> f32 {
+    lattice_mean_distance(dx as f64, 1., 0., 0.).expect("une voisine") as f32
 }
 
 /// Les trois grilles décalées : origine du nœud `(0, 0, 0)` en mailles, et dimensions. `u` : `(0, ½, ½)`, `(nx+1, ny, nz)`.
@@ -513,29 +525,48 @@ impl Apic3 {
 
 impl Apic3 {
     /// **La surface reconstruite** (Zhu et Bridson 2005) : aux centres des mailles, `φ = |q − x̄| − r`, `x̄` la moyenne des
-    /// particules à moins d'une maille, pondérée par `(1 − s²/dx²)³` ; `φ = dx` sans voisine. Puis les étiquettes : eau où
-    /// `φ < 0`. Trie les particules d'abord ; aucune allocation.
+    /// particules à moins de `R = kernel·dx` (deux mailles depuis S389), pondérée par `(1 − s²/R²)³` ; `φ = dx` sans voisine.
+    /// Puis les étiquettes : eau où `φ < 0`. Trie les particules d'abord ; aucune allocation.
     pub(crate) fn reconstruct(&mut self) {
         self.bin();
         let Domain3 { nx, ny, nz, dx } = self.domain;
-        let inv_r2 = 1. / (dx * dx);
+        let radius = self.kernel * dx;
+        let inv_r2 = 1. / (radius * radius);
+        let reach = self.kernel.ceil() as usize;
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..nx {
                     let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
+                    // S389 : les parois **reflètent** les particules — sans quoi, près d'une paroi latérale, le noyau n'en
+                    // trouve que d'un côté, la moyenne se décale vers l'intérieur et la surface y paraît plus basse. Une image
+                    // n'est cherchée que si le centre est à moins d'un rayon de noyau de la paroi ; le couvercle n'en a pas.
+                    let (lx, ly) = (nx as f32 * dx, ny as f32 * dx);
+                    let near = [q[0] < radius, q[0] > lx - radius, q[1] < radius, q[1] > ly - radius, q[2] < radius];
+                    let images_x = [Some(1f32), near[0].then_some(-1.), near[1].then_some(2.)];
+                    let images_y = [Some(1f32), near[2].then_some(-1.), near[3].then_some(2.)];
+                    let images_z = [Some(1f32), near[4].then_some(-1.)];
                     let (mut sw, mut sx) = (0f32, [0f32; 3]);
-                    for c in k.saturating_sub(1)..(k + 2).min(nz) {
-                        for b in j.saturating_sub(1)..(j + 2).min(ny) {
-                            for a in i.saturating_sub(1)..(i + 2).min(nx) {
+                    for c in k.saturating_sub(reach)..(k + reach + 1).min(nz) {
+                        for b in j.saturating_sub(reach)..(j + reach + 1).min(ny) {
+                            for a in i.saturating_sub(reach)..(i + reach + 1).min(nx) {
                                 let cell = self.cell(a, b, c);
                                 for s in self.bin_start[cell]..self.bin_start[cell + 1] {
-                                    let p = self.x[self.order[s as usize] as usize];
-                                    let d = [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
-                                    let wt = kernel((d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) * inv_r2);
-                                    if wt > 0. {
-                                        sw += wt;
-                                        for m in 0..3 {
-                                            sx[m] += wt * p[m];
+                                    let p0 = self.x[self.order[s as usize] as usize];
+                                    // Image : 1 — la particule ; −1 — reflétée par la paroi basse ; 2 — par la paroi haute.
+                                    let mirror = |v: f32, m: f32, l: f32| if m == 1. { v } else if m == -1. { -v } else { 2. * l - v };
+                                    for mx in images_x.iter().flatten() {
+                                        for my in images_y.iter().flatten() {
+                                            for mz in images_z.iter().flatten() {
+                                                let p = [mirror(p0[0], *mx, lx), mirror(p0[1], *my, ly), mirror(p0[2], *mz, 0.)];
+                                                let d = [p[0] - q[0], p[1] - q[1], p[2] - q[2]];
+                                                let wt = kernel((d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) * inv_r2);
+                                                if wt > 0. {
+                                                    sw += wt;
+                                                    for m in 0..3 {
+                                                        sx[m] += wt * p[m];
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }

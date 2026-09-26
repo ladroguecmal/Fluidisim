@@ -83,13 +83,22 @@ inchangée, zéro avertissement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le modèle de lecture en `f64` dans le cœur, positions continues, rayon du noyau en paramètre ; rayon minimax ;
+- [x] **P2** — le modèle de lecture en `f64` dans le cœur, positions continues, rayon du noyau en paramètre ; rayon minimax ;
   critère 1.
-- [ ] **P3** — la reconstruction à deux mailles ; critères 2 et 3.
+- [x] **P3** — la reconstruction à deux mailles ; critères 2 et 3.
 - [ ] **P4** — les ballottements remesurés, l'amortissement par régression, l'attribution ; critères 4 à 6.
 - [ ] **P5** — critère 7 ; preuve (section datée d'APIC3D-S388) ; liste, file, feuille de route.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
 
-*(vide)*
+**P2–P3 en un commit** (le modèle et la reconstruction se règlent ensemble). `KERNEL_CELLS` = 2 ; modèle `f64`
+(`lattice_mean_distance`, `lattice_read_error`, `minimax_radius`) sur huit positions continues ; rayon minimax 0,05280 m à
+10 cm (noyau 1 : 0,03600 ; S318 : 0,02743). **Critère 1 tenu** : lecture 3D = modèle à 10⁻³ % près sur les huit positions,
+noyaux 1 et 2. **Critère 2 tenu** : noyau 2, pire lecture **2,46 %** de maille (noyau 1 : 9,93 %).
+
+**Trouvé en chemin — les parois** : au premier passage, le noyau de deux mailles faisait courir le repos à **15 cm/s**. Près
+d'une paroi, le noyau ne trouve des particules que d'un côté : la moyenne se décale vers l'intérieur, la surface y paraît plus
+basse. Les parois **reflètent** désormais les particules (images seulement pour les centres à moins d'un rayon de noyau d'une
+paroi latérale ou du fond). **Critère 3 tenu** : repos **6,2 µm/s** (noyau 2), témoin noyau 1 avec images **1,5 µm/s** — **les
+5,6 mm/s de S388 venaient des parois**, pas du noyau.
