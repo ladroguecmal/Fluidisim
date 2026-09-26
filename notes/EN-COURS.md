@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S394 — **en cours**. **C5a** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5) :
+Session : S394 — **terminée**. **C5a** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5) :
 **A316 d'abord en 2D** — tenir la densité des particules à la frontière du raccord particules ↔ colonnes. Demande de
 l'utilisateur (2026-09-26) : *« Continue »*. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo,
 Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau. Sert **4.16**, **4.12**, A316.
@@ -94,7 +94,7 @@ amortissement (régression) à 1 point d'APIC seul. (6) Repos à 5 cm : vitesse 
   critères 1 et 2.
 - [x] **P3** — 30 s à 5 et 2,5 cm, repos ; critères 3 à 6 ; attribution si manqué.
 - [x] **P4** — preuve (section datée de B10-APIC-S320, §14) ; A316, file, liste.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 **P2 — (A) manqué, attribué avant tout autre essai.** 30 s à 5 cm : la masse des particules **se vide** dans les colonnes

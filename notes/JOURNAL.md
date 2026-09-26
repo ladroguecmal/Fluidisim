@@ -17591,3 +17591,19 @@ par le réseau) ; couronne de maille (A312), bulle sans air (A311) ; parois à 2
 **4.16 passe à partiel** — **devient possible** une surface non graphe calculée dans le cœur en 3D, reçue contre une mesure ;
 **chemin** : C5 (le raccord aux colonnes), C6 (la bascule), C7 (la carte) ; **preuve** : B10-APIC3D-S393. Suivant : dans le
 cloud, **C5** ; au poste, **C3b** (alternance : physique), puis la pluie, pièce 5b.
+
+## S394 — 2026-09-26 — physique : C5a, A316 en 2D d'abord — l'échange comprime
+
+**Entrée.** *« Continue »* : C5, le raccord particules ↔ colonnes. Chentanez, Müller et Kim (2014), à lire d'abord, sont
+bloqués (quatre adresses) ; seul leur résumé est connu — un champ de densité commun. A316 se règle d'abord en 2D, où 30 s se
+rejouent en 16 s. **Fait** ([preuve](../docs/validation/B10-APIC-S320.md) §14) : la référence de S354 rejouée au chiffre près,
+puis trois candidats, critères écrits avant, chacun attribué avant le suivant. **(A)**, la bande de S354 réensemencée depuis sa
+hauteur géométrique : les particules se vident — elle cède à chaque pas le biais de reconstruction et l'arrondi des rangées.
+**(A')**, la bande gardant ses particules : elle les piège — un réensemencement par pas détruit le transport sous la maille.
+**(B)**, la densité corrigée en position (un champ dont la divergence vaut `n/4 − 1`, deux colonnes) : densité tenue (3,9 à
+4,0 contre 4,96), masse tenue à 5 cm (±0,0013 m² contre +0,0113), repos 0,65 cm/s — **mais l'onde croît** de 4 % par
+période, et à 2,5 cm la masse part dans l'autre sens. **Attribution** : la correction ajoute 102 J/m en 30 s, pour une onde de
+deux ; S354 mesurait −87 J/m sous l'échange — **l'échange comprime**, c'est la racine d'A316. **Limites** : article non lu ;
+(B) à facteur 1 et bande de 2, non réglés. **Rituel.** Maillons **1** : aucun point ne change (4.12, 4.16 partiels). Suivant :
+dans le cloud, **C5a, deuxième part** — mesurer où l'échange comprime, puis un échange qui voit la densité ; au poste, C3b
+puis la pluie, pièce 5b.

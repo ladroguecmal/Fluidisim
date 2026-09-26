@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-26 23:06 +02:00
+JETON            : libre
+Battement        : 2026-09-26 23:07 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
-Session en cours : S394 — C5a : A316 en 2D d'abord — la bande qui tient la densité des particules à la frontière du raccord
-Dernière session : S393 — physique : verdict **R33** reçu pour l'instant ; **C4b, B10 en 3D** ([preuve](docs/validation/B10-APIC3D-S393.md)) — une sphère cinématique dans APIC 3D (le corps reflète les particules : repos à 9,6 mm/s) ; la cavité se pince à **2,084 √(R/g)**, dans la plage publiée (1,72 à 2,29), convergé à 0,63 % ; **4.16 partiel**. Avant : S392, les surfaces mouillées
-Session suivante : dans le cloud, **C5** — le raccord particules ↔ colonnes (la frontière de S325–S354 non reçue, A316) ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b (éclaboussures au sol) ; peaufinages R32 et R33 plus tard
-Maillons        : 0 — S393 : 4.16 passe à partiel (la cavité 3D contre une mesure publiée) ; chemin : C5, C6, C7
+Session en cours : aucune
+Dernière session : S394 — physique : **C5a, A316 en 2D d'abord** ([preuve](docs/validation/B10-APIC-S320.md) §14) — trois candidats : la bande réensemencée vide puis piège les particules ; la densité corrigée en position la tient (3,9–4,0) mais l'onde croît : la correction rend 102 J/m que l'échange ôte — **l'échange comprime**, racine d'A316. Avant : S393, B10 en 3D (4.16 partiel)
+Session suivante : dans le cloud, **C5a, deuxième part** — mesurer où l'échange comprime (bilan par profondeur de la dernière colonne libre sur 30 s), puis un échange qui voit la densité ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
+Maillons        : 1 — S394 : aucun point ni critère de porte n'a changé (4.12 et 4.16 restent partiels ; A316 précisé)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
