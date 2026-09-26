@@ -99,7 +99,8 @@ void fragment() {
     float variation = 0.85 + 0.3 * (0.6 * bruit(plan * 0.9) + 0.4 * bruit(plan * 3.7));
     vec3 soleil = dot(soleil_controle, soleil_controle) > 0.0 ? normalize(soleil_controle) : normalize(SOLEIL_B);
     float c = caustiques ? focalisation() : 1.0;
-    ALBEDO = albedo_sable * variation * gain_eau * (0.6 + 0.4 * max(dot(n_b, soleil), 0.0) * c);
+    // S381 : `eclairage` (`ciel.gdshaderinc`) — sous le ciel couvert, plus de part directe, donc plus de caustiques.
+    ALBEDO = albedo_sable * variation * gain_eau * eclairage(n_b, soleil, c);
     // S365 — **vu de l'eau** (liste 8.6) : l'éclairement descendu jusqu'au fond, `exp(−Kd·H)` — vu d'en haut, c'est
     // `eau.gdshader` qui l'applique —, puis les `d` mètres d'eau jusqu'à l'œil (`a_travers_l_eau`).
     // S371 : le milieu du pixel, décidé à l'objectif (`surface_b.gdshaderinc`) ; dans la transition, les deux vues.

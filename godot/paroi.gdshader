@@ -30,5 +30,6 @@ void fragment() {
         float largeur = 0.004;
         motif = 1.0 - 0.35 * (1.0 - smoothstep(largeur, largeur + max(fwidth(q.x), 1e-4), min(f.x, f.y)));
     }
-    ALBEDO = albedo * motif * gain_eau * (0.6 + 0.4 * max(dot(nb, normalize(SOLEIL_B)), 0.0));
+    // S381 : `eclairage` (`ciel.gdshaderinc`) — sous le ciel couvert, la répartition de la CIE.
+    ALBEDO = albedo * motif * gain_eau * eclairage(nb, normalize(SOLEIL_B), 1.0);
 }

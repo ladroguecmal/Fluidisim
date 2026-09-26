@@ -15,7 +15,8 @@
 // Réflectance sous la surface R(0⁻) et `E/π` (ADR-177) ; atténuation diffuse `Kd = (a + b_b)/μ̄_d` ; atténuation du
 // faisceau `c = a + 2·b_b`.
 uniform vec3 R0 = vec3(0.00068, 0.00826, 0.08960);
-uniform float gain_eau = 2.0;
+// `gain_eau`, `E/π` : S381, déclaré dans `ciel.gdshaderinc` (l'éclairement de la scène ; le ciel couvert en tire sa
+// luminance) — toujours inclus avant ce fichier.
 uniform vec3 kd = vec3(0.4259, 0.0724, 0.0158);
 uniform vec3 attenuation_c = vec3(0.3414, 0.0594, 0.0161);
 // La caméra est-elle dans l'eau, et à quelle profondeur (m) : `mer.gd`, à chaque image, depuis la bande de B.

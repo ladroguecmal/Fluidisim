@@ -84,10 +84,10 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — références : ciels de pluie photographiés, neutralité et gradient mesurés.
-- [>] **P3** — `ciel.gdshaderinc` : `couvert`, la luminance de la CIE, le soleil éteint, `eclairage(n, soleil, direct)` ;
+- [x] **P3** — `ciel.gdshaderinc` : `couvert`, la luminance de la CIE, le soleil éteint, `eclairage(n, soleil, direct)` ;
   `gain_eau` déplacé là (l'éclairement de la scène).
-- [ ] **P4** — les nuanceurs : eau, bassin, parois, fond, caustiques, éclat ; critère 1.
-- [ ] **P5** — les scènes : `couvert` par la pluie ou `COUVERT=` ; contrôles (critères 2 à 4).
+- [x] **P4** — les nuanceurs : eau, bassin, parois, fond, caustiques, éclat ; critère 1.
+- [>] **P5** — les scènes : `couvert` par la pluie ou `COUVERT=` ; contrôles (critères 2 à 4).
 - [ ] **P6** — images de R30 ; preuve `CIEL-PLUIE-S381` ; registres.
 - [ ] **P7** — rituel.
 
@@ -101,3 +101,11 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
   de l'horizon (y ≈ 420) — presque neutre (bleu +7 % à l'horizon, +1 % en haut) ; rapport haut / horizon **1,72** en
   linéaire. Hypothèse déclarée : champ horizontal de 60° (1 280 px), soit le haut du cadre à ≈ 20° d'élévation, où la
   CIE couvert donne `1 + 2·sin 20°` = **1,68** — compatible (sans courbe d'appareil connue).
+
+**P3–P4** (un commit pour les deux, dit ici : l'include et ses usages ne se testent qu'ensemble). `ciel.gdshaderinc` :
+`gain_eau` déplacé là (tous les nuanceurs qui incluent `optique_eau` incluent `ciel` avant) ; `couvert` ;
+`ciel_couvert` (Lz = (9/7)·gain·0,939 = 2,414 avec gain 2) ; `eclairage(n, soleil, direct)` — l'expression d'avant au bit
+sous le ciel clair ; `soleil_direct()`. Branché : corps d'eau et éclat (mer, bassin), crêtes et écume (variable locale
+`eclairage` renommée `eclaire`, qui aurait masqué la fonction), parois, fond (les caustiques passent par la part directe).
+**Critère 1** : 12 / 12 au bit ; variante à demi immergée et scène côtière compilent. Non touché : le lobe solaire de la
+radiance sous l'eau (`optique_eau`, vue immergée) — limite.

@@ -20,6 +20,52 @@ const vec3 CIEL_MESURE_F = vec3(0.139, 0.327, 0.722);
 uniform bool ciel_mesure = true;
 uniform float ciel_mesure_haut_deg = 25.0;
 
+// S381 — **l'éclairement de la scène**, `E/π` (ADR-177 D2 : il tient lieu de l'éclairement de la surface ; 2 par défaut),
+// déclaré ici depuis S381 (auparavant dans `optique_eau.gdshaderinc`) : l'eau, le fond, les parois l'emploient, et le ciel
+// couvert en tire sa luminance.
+uniform float gain_eau = 2.0;
+
+// S381 — **LE CIEL DE PLUIE** (ADR-205, pièce 3). `couvert`, de 0 (ciel clair) à 1 (ciel couvert, nimbostratus) ; la
+// pluie le met à 1, la météo le commandera. Sous un ciel couvert d'épaisseur optique de quelques dizaines, le soleil direct
+// est nul (`e^(−τ/μ)`) : ni disque, ni éclat, ni caustiques, ni ombres. La luminance est celle du **ciel couvert normalisé
+// de la CIE** (Moon et Spencer 1942), `L(h) = Lz·(1 + 2·sin h)/3`, **neutre** (la lumière du jour D65, le blanc de sRGB ;
+// mesuré presque neutre sur les photographies de S381). L'éclairement horizontal qu'il donne, `(7π/9)·Lz`, est tenu égal
+// à celui du ciel clair de la scène — **l'œil s'adapte**, hypothèse déclarée : `Lz = (9/7)·gain·(0,6 + 0,4·sin h_soleil)`.
+uniform float couvert = 0.0;
+// L'albédo du sol qui renvoie la lumière du ciel couvert vers les faces tournées vers le bas (herbe, béton : ≈ 0,2).
+const float ALBEDO_SOL_COUVERT = 0.2;
+
+/// L'éclairement horizontal du ciel clair de la scène, rapporté à `gain` : `0,6 + 0,4·sin h_soleil` (0,939).
+float eclairement_horizontal_clair() {
+    return 0.6 + 0.4 * normalize(SOLEIL_B).z;
+}
+
+/// La luminance du ciel couvert de la CIE dans la direction `rayon` (B) ; sous l'horizon, celle de l'horizon.
+vec3 ciel_couvert(vec3 rayon) {
+    float lz = (9.0 / 7.0) * gain_eau * eclairement_horizontal_clair();
+    return vec3(lz * (1.0 + 2.0 * clamp(rayon.z, 0.0, 1.0)) / 3.0);
+}
+
+/// **Le facteur d'éclairement** d'une surface de normale `n` (B, unitaire) : sous le ciel clair, le modèle de l'afficheur,
+/// `0,6 + 0,4·max(n·soleil, 0)·direct` (`direct` : les caustiques, ou 1) ; sous le ciel couvert, l'éclairement horizontal
+/// conservé, réparti par la CIE — une face tournée vers le ciel reçoit `0,396 + 0,604·n_z` de l'horizontale (0,396 à la
+/// verticale, le rapport du ciel couvert normalisé), une face tournée vers le sol `0,396·(1 + n_z)` —, plus la lumière
+/// renvoyée par le sol, `albédo·(1 − n_z)/2`. Mêlés par `couvert` ; ciel clair : l'expression d'avant, au bit.
+float eclairage(vec3 n, vec3 soleil, float direct) {
+    float clair = 0.6 + 0.4 * max(dot(n, soleil), 0.0) * direct;
+    if (couvert <= 0.0) {
+        return clair;
+    }
+    float ciel = n.z >= 0.0 ? 0.396 + 0.604 * n.z : 0.396 * (1.0 + n.z);
+    float sol = ALBEDO_SOL_COUVERT * 0.5 * (1.0 - n.z);
+    return mix(clair, eclairement_horizontal_clair() * (ciel + sol), couvert);
+}
+
+/// La part du soleil direct qui passe : 1 sous le ciel clair, 0 sous le ciel couvert.
+float soleil_direct() {
+    return 1.0 - couvert;
+}
+
 /// S363 — **un hachage entier** : PCG (O'Neill 2014), sous la forme de Jarzynski et Olano (2020, *Hash Functions for
 /// GPU Rendering*, JCGT 9(3)). L'ancien `fract(sin(x)·43758)`, avec `x` de l'ordre de 10⁴, changeait du tout au tout pour
 /// un ulp de `x` : Godot compilant `i + (1, 0)` autrement de part et d'autre de la colonne centrale, le ciel y avait une
@@ -74,7 +120,12 @@ vec3 ciel_b(vec3 rayon, int octaves) {
     }
     c = mix(c, vec3(0.92, 0.93, 0.95), nuages(rayon, octaves));
     float d = max(dot(rayon, soleil), 0.0);
-    return c + vec3(1.0, 0.95, 0.85) * (pow(d, 1024.0) * 4.0 + pow(d, 32.0) * 0.15);
+    vec3 clair = c + vec3(1.0, 0.95, 0.85) * (pow(d, 1024.0) * 4.0 + pow(d, 32.0) * 0.15);
+    // S381 : le ciel de pluie ; ciel clair, la valeur d'avant.
+    if (couvert > 0.0) {
+        return mix(clair, ciel_couvert(rayon), couvert);
+    }
+    return clair;
 }
 
 /// S373 — **la perspective aérienne**, réécrite ici depuis celle de Godot (`fog_process`, `scene_forward_clustered.glsl`,

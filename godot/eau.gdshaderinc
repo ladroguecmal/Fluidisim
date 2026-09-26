@@ -182,7 +182,11 @@ vec3 lumiere(vec2 pente, vec3 rayon, vec3 fond_vu, vec3 t_colonne) {
     float f = fresnel(clamp(dot(-rayon, n), 0.0, 1.0), indice);
     vec3 reflet = reflect(rayon, n);
     float eclat = pow(max(dot(reflet, soleil), 0.0), 180.0);
-    vec3 corps = R0 * gain_eau * (0.6 + 0.4 * max(dot(n, soleil), 0.0));
+    // S381 : sous le ciel couvert, ni éclat ni lumière directe (`ciel.gdshaderinc`).
+    if (couvert > 0.0) {
+        eclat *= soleil_direct();
+    }
+    vec3 corps = R0 * gain_eau * eclairage(n, soleil, 1.0);
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2;
 }
@@ -425,10 +429,10 @@ void fragment() {
     vec3 couleur = integree(pente, rayon, transport_covariance(cov_t, g), false, fond_vu, t_colonne);
     // Les crêtes (S356, `cretes_couleur`) : la lumière qui traverse ce qui se comprime, vue du côté du soleil ; l'écume.
     vec3 soleil = normalize(SOLEIL_B);
-    float eclairage = gain_eau * (0.6 + 0.4 * max(dot(normalize(vec3(-pente, 1.0)), soleil), 0.0));
+    float eclaire = gain_eau * eclairage(normalize(vec3(-pente, 1.0)), soleil, 1.0);
     vec2 horizontal = rayon.xy / max(length(rayon.xy), 1e-6);
     float avant = pow(max(dot(horizontal, normalize(soleil.xy)), 0.0), exposant_cretes);
-    couleur += force_cretes * clamp(-0.5 * s_e, 0.0, 1.0) * avant * transmission_crete * eclairage;
+    couleur += force_cretes * clamp(-0.5 * s_e, 0.0, 1.0) * avant * transmission_crete * eclaire;
     if (ecume_champ_actif) {
         // S368 — l'écume du champ, là où l'eau est dans le monde. **L'actif** : blanc, au bord irrégulier — le seuil ½ du
         // champ bruité à l'échelle des bulles et des flocons (0,3 à 1,2 m). **Le résiduel** : une dentelle — les bords de
@@ -461,7 +465,7 @@ void fragment() {
     if (!ecume_visible) {
         couverture = 0.0;
     }
-    couleur = mix(couleur, vec3(reflectance_ecume * eclairage), couverture);
+    couleur = mix(couleur, vec3(reflectance_ecume * eclaire), couverture);
     vu_dessus = couleur;
     if (controle > 0 && controle < 4) {
         vu_dessus = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : (controle == 2 ? t_colonne : vec3(couverture));

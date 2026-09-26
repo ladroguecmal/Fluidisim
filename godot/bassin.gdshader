@@ -145,7 +145,11 @@ void fragment() {
     float f = fresnel(clamp(dot(-rayon, nb), 0.0, 1.0), indice);
     vec3 reflet = reflect(rayon, nb);
     float eclat = pow(max(dot(reflet, soleil), 0.0), 180.0);
-    vec3 corps = R0 * gain_eau * (0.6 + 0.4 * max(dot(nb, soleil), 0.0));
+    // S381 : sous le ciel couvert, ni éclat ni lumière directe (`ciel.gdshaderinc`).
+    if (couvert > 0.0) {
+        eclat *= soleil_direct();
+    }
+    vec3 corps = R0 * gain_eau * eclairage(nb, soleil, 1.0);
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     if (variance_pluie > 0.0) {
         // La pente non résolue de la pluie, de covariance `cov_pluie` (x, z de Godot) : Fresnel et ciel intégrés par
@@ -168,7 +172,7 @@ void fragment() {
             }
         }
         float m_eff = 1.0 / (1.0 / 180.0 + 4.0 * sig * sig);
-        float eclat_pluie = (m_eff / 180.0) * pow(max(dot(reflet, soleil), 0.0), m_eff);
+        float eclat_pluie = (m_eff / 180.0) * pow(max(dot(reflet, soleil), 0.0), m_eff) * soleil_direct();
         ALBEDO = somme + vec3(1.0, 0.95, 0.85) * eclat_pluie * 1.2;
     } else {
         ALBEDO = mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2;
