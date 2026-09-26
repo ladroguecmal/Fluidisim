@@ -85,7 +85,7 @@ réelles ; jugement de l'utilisateur (R32).
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — sources : couronne, cavité, jet de Worthington, gouttelettes des gouttes de pluie sur eau profonde (selon D,
+- [x] **P2** — sources : couronne, cavité, jet de Worthington, gouttelettes des gouttes de pluie sur eau profonde (selon D,
   à vitesse terminale) ; seuil sur surface sèche ; photographies ; chiffres retenus.
 - [ ] **P3** — le tirage partagé (`pluie_impact`) sorti des rides ; critère 2 (rides au bit).
 - [ ] **P4** — les gerbes sur l'eau : particules (fenêtre de mailles autour de la caméra), géométrie par diamètre et âge
@@ -99,3 +99,24 @@ réelles ; jugement de l'utilisateur (R32).
 
 ### Notes de reprise
 
+**P2 — les sources.**
+- **A — Wang, Liu, Bayeul-Lainé, Murphy, Katz, Coutier-Delgosha (2023)**, *Analysis of high-energy drop impact onto deep
+  liquid pool* (JFM ; arXiv 2302.02728), sur l'expérience de **Murphy et al. (2015, JFM 780)** : goutte de pluie de
+  **4,1 mm à 7,2 m/s** (81 % de sa vitesse terminale), We 2 893, Fr 1 322, sur eau profonde. Texte : couronne à son rayon
+  maximal (≈ 13 mm) vers 3 ms, à sa hauteur maximale vers 12 ms, quand son bord se referme (dôme, « bubble canopy ») ;
+  cavité la plus profonde vers 24 ms ; jet central (Worthington) vers 40 ms ; ≈ 2 000 microgouttelettes, tailles en deux
+  modes (50 et 225 µm), énergie au plus 8 % de celle de la goutte ; les petites partent en rasant dans la première
+  milliseconde, les grosses plus haut, des ligaments de la couronne.
+- **Mesuré sur leur figure 3** (500 × 321 px, lue par canevas ; barre 17 px = 10 mm, vérifiée par la goutte : 7 px =
+  4,1 mm) — sommet de la gerbe au-dessus de l'eau : **1 ms 5,9 mm ; 3 ms 11,2 ; 7 ms 17,1 ; 12 ms 19,4** (dôme fermé) ;
+  **18 ms 24,7** (jet central sur le dôme) ; **41 ms 23,5 ; 52 ms 21,8** (jet large). Largeur à la base : 14, 16, 21, 25, 26,
+  29 mm (1 à 41 ms).
+- **B — Watson et al. (2024, PNAS 121)**, gouttes de 4 mm à 2,2–6 m/s (Fr 127–850) : cratère `κ₁/D ∼ Fr^0,25`, premier
+  jet `δ₁/D ∼ Fr^0,27`, `δ₁ ∝ κ₁^1,03` (des exposants ; les valeurs absolues, dans leurs figures, non lues).
+- **C — Mundo, Sommerfeld et Tropea (1995)** : sur surface sèche, éclaboussure si `K = Oh·Re^1,25 > 57,7` ; une goutte de
+  2 mm à 6,55 m/s : Re ≈ 13 000, Oh ≈ 0,0026, **K ≈ 360** — toute goutte de pluie visible éclabousse sur le béton.
+- **Refusés ou non lus** : JPO 2018 (vent) et HAL (Michon, Josserand, Séon 2017) bloqués ; PDF de l'arXiv 2604.10491
+  illisible par l'outil. Résumés automatiques de PNAS contradictoires : écartés, seuls les exposants gardés.
+- **Le modèle retenu** (hypothèse dite) : la gerbe de A, à l'échelle `s(D) = (D/4,1 mm)·(Fr/1 322)^0,26` en longueur (B :
+  exposant moyen de κ₁ et δ₁), `√s` en temps (effondrement de cavité gouverné par la gravité aux grands Fr), `Fr = v²/(g·D)`,
+  `v` d'Atlas. Pour D = 1,5 / 2 / 4,1 mm à leur vitesse terminale : s ≈ 0,41 / 0,56 / 1,10 — dôme ≈ 8 / 11 / 21 mm.
