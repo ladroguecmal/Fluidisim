@@ -82,8 +82,8 @@ participants ; `step` reste le pas sans pluie, **identique au bit**. **Surface d
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-204 : la pluie, arête de V (surface d'ouverture, exposition = commande, intensité = entrée du pas).
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — ADR-204 : la pluie, arête de V (surface d'ouverture, exposition = commande, intensité = entrée du pas).
 - [ ] **P3** — `Flow::Rain`, `step_meteo`, `Meteo` ; critères 1, 2, 4.
 - [ ] **P4** — la piscine à débordement sous la pluie ; critère 3.
 - [ ] **P5** — preuve `PLUIE-V-S378`, liste 5.5, registre, file, feuille de route, index, ADR-010 note datée.
