@@ -89,7 +89,7 @@ le pas fin à l'écart que la dispersion calculée prévoit. (4) Suite entière 
 - [x] **P4** — la colonne graduée au pas mobile (`project_mobile3`) : garde de la course, départ chaud par injection aux
   nœuds, divergence restreinte ; essais (critère 3).
 - [x] **P5** — le ballottement gradué contre le fin ; critère 4.
-- [ ] **P6** — preuve (section datée de COLONNES-HAUTES-S386) ; ADR-208 (note), liste, file, feuille de route.
+- [x] **P6** — preuve (section datée de COLONNES-HAUTES-S386) ; ADR-208 (note), liste, file, feuille de route.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise

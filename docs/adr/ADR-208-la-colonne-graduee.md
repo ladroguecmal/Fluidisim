@@ -56,3 +56,12 @@ Le §1 et D3 appellent « configuration de la porte B » une colonne de **7 m d'
 de la porte B (`Config::review`) n'a que **3,5 m d'eau sous 3,5 m d'air**, sous une mer de `Hs` ≈ 2,5 m. Les chiffres du
 §1 (÷1,47, ÷2,00, ÷2,55) et le réglage `r` = 1,25, `K` = 3 valent pour la colonne de 7 m ; pour la scène de la porte B, c'est
 D4 qui décide, et la course de la surface y est mesurée en S387 ([preuve](../validation/COLONNES-HAUTES-S386.md) §5).
+
+## Note datée du 2026-09-26 (S387) — D4 mesuré
+
+La course de la surface sous la mer de la porte B, sur dix minutes : **4,79 m** (`B` seul) — avec le paquet de la scène, 26
+couches cubiques sur 28. **La colonne graduée ne paie pas en haute mer dans un repère fixe** ; même un repère qui suivrait
+la moyenne de `B` sur le domaine en laisserait 20 (÷1,27). Elle paie **en eau calme** — les contenants : ÷2,14 à 10 cm, ÷2,50
+à 5 cm sur un bassin de 3 m, où la dispersion fixe `K`, pas la course. Construite au pas mobile en S387, elle suit la
+dispersion calculée ([preuve](../validation/COLONNES-HAUTES-S386.md) §5). **Le levier de coût de la haute mer reste à
+trouver** : ce n'est pas celui-ci.

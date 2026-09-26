@@ -6,7 +6,7 @@ Session cloud, sans carte graphique. Liste **4.1**, **4.3** ; ADR-006 §6.4 (un 
 
 ## Reproduire
 
-- Commit `ca355677` (P5b de S386) ou plus récent ; Python 3, bibliothèque standard.
+- Commit `ca355677` (P5b de S386) ou plus récent ; Python 3, bibliothèque standard. **§5** : commit `f12636d7` (P5 de S387).
 - `python outils/colonnes_hautes.py` — 42 s ; lignes `COLONNES_HAUTES_S386` : le contrôle S295, puis, par variante, le
   moins d'inconnues qui tient le critère (valeurs attendues au §2). `--tout` imprime chaque réglage.
 - `python -m pytest -q outils/test_colonnes_hautes.py` — six essais, moins d'une seconde.
@@ -89,3 +89,48 @@ Refus `Domain` sur fond coupé et au pas mobile (C2b).
 - **Une configuration par critère** : porte B et un bassin ; le critère 2 est à recalculer pour chaque domaine (l'outil le
   fait en une minute).
 - **Rien sur la carte** : la production garde ses 28 couches (C3).
+
+## 5. S387 — le pas mobile, et la course de la surface
+
+2026-09-26. **Reproduire** : commit `f12636d7` ou plus récent.
+- `cargo run --manifest-path code/Cargo.toml -p water-core --release --offline --example delta3d_course_surface` — 10 s ;
+  lignes `COURSE_S387` (valeurs ci-dessous).
+- `cargo test … -p water-core s387` — deux essais, une seconde.
+- `cargo run … --example delta3d_ballottement_gradue` — deux minutes ; ligne `BALLOTTEMENT_S387`.
+
+**La course de la surface sous la mer de la porte B.** La mer `--houle` (vent `Hs` 1,5 m à 6 s, houle 2 m à 12 s, S259)
+reconstruite dans le cœur, évaluée sur le domaine de la porte B (30 × 28 m) — 840 points, toutes les 0,1 s, dix minutes :
+
+| lecture | min | max | course | 0,1 % / 99,9 % | couches cubiques (paquet de 0,65 m compris) |
+|---|---:|---:|---:|---|---:|
+| `B` | −2,487 m | +2,299 m | **4,79 m** | −1,89 / +1,83 | **26 sur 28** |
+| `B` moins sa moyenne sur le domaine | −1,674 | +1,716 | 3,39 m | −1,14 / +1,14 | 20 sur 28 |
+
+**Conséquence** : dans un repère fixe, **la colonne graduée ne paie pas en haute mer** — deux nœuds au mieux sous 26 couches
+cubiques ; un repère qui suivrait la hauteur moyenne de `B` sur le domaine laisserait 20 couches cubiques, ÷1,27 au plus.
+**Vu en passant** : sur dix minutes, le creux de `B` plus le paquet descend à 0,11 m du fond du domaine (3,5 m d'eau) — la
+scène n'avait été éprouvée que sur des durées courtes ([file](../registres/QUESTIONS-OUVERTES.md#file-active)).
+
+**En eau calme** — bassin de 3 m, course supposée de ±0,5 m (*hypothèse*) : la **dispersion** fixe les couches cubiques,
+pas la course ; 14 inconnues sur 30 à 10 cm (÷2,14), **24 sur 60 à 5 cm (÷2,50)**. La colonne graduée sert les
+**contenants** (ADR-200, ADR-202), dont le pas est le pas mobile.
+
+**La colonne graduée au pas mobile** (`project_mobile3_graded`) : garde de la course — le plus bas nœud cubique et la maille
+au-dessus mouillés dans toutes les colonnes, sinon `Domain`, l'état rendu au bit ; départ chaud par injection aux nœuds ;
+gradient conjugué préconditionné par la diagonale condensée `Σ_k P_kj²·A_kk` ; divergence restreinte, lignes franches
+distinguées comme au pas fin. Essais : tous les nœuds = pas mobile fin à 10⁻⁶ m ; volume à 10⁻⁹ m³ sur 30 pas ; surface
+sous les couches cubiques refusée.
+
+**Le ballottement** — bassin 8 × 4 m, 4 m d'eau sous 2 m d'air, mode fondamental, 1 cm, 5 s, 15 inconnues sur 24 : l'écart
+au pas fin **prédit** par la dispersion calculée, `a·|Ω_gradué − Ω_fin|·t` = 1,921·10⁻⁴ m ; **mesuré 1,619·10⁻⁴ m**, rapport
+**0,843** (critère écrit avant : 0,5 à 2). Itérations : 44,1 contre 47,7. Suite : 675 réussis, zéro avertissement.
+
+**Trois défauts corrigés, dont deux de S386.** (1) Nouveau : la projection mobile appliquait l'opérateur du pas linéaire.
+(2) **S386** : la taille des vecteurs réduits était lue sur `x`, emprunté pendant le recalcul du vrai résidu — **le « vrai
+résidu » annoncé au §3 n'était jamais recalculé** ; l'arrêt reposait sur la récurrence. (3) **S386** : la divergence
+restreinte écrasait le résidu qu'une relance réutilise. Les chiffres du §3 **ne changent pas** (0,0046 / 0,0048 %, rejoués) ;
+ce qui était faux, c'est le contrôle annoncé. L'essai « tous les nœuds = pas fin » les a montrés (`Convergence` après 20 000
+itérations).
+
+**Ce que cette section ne dit pas** : aucun gain de coût (opérateur et vitesses fins) ; ni fond coupé, ni carte ; la course
+d'un bassin où l'on nage n'est pas mesurée.

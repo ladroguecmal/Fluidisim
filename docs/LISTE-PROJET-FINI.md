@@ -152,8 +152,9 @@ pas recopiée ici (L137).
 - [ ] **4.3 Subdivision adaptative anisotrope, blocs épars** épousant la forme utile (B5) — *partiel* **depuis S386** : la
   **colonne graduée** ([ADR-208](adr/ADR-208-la-colonne-graduee.md)), subdivision anisotrope verticale de la référence, reçue au
   pas linéaire — 11 inconnues de pression sur 28 pour une colonne de 7 m à 25 cm, dispersion calculée et tenue
-  ([preuve](validation/COLONNES-HAUTES-S386.md)). Manquent l'adaptativité, les blocs épars (C8), le pas mobile et le
-  stockage compact (C2b), la carte (C3).
+  ([preuve](validation/COLONNES-HAUTES-S386.md)) ; **S387** : au pas mobile, gardée par la course de la surface, elle suit sa
+  dispersion calculée (§5) — elle sert l'eau calme des contenants, pas la haute mer (course de 4,8 m sous la mer de la porte B).
+  Manquent l'adaptativité, les blocs épars (C8), le stockage compact et le fond coupé, la carte (C3).
 - [ ] **4.4 Profondeur adaptative**, domaine qui suit un objet qui coule — *absent*.
 - [ ] **4.5 Création, croissance, réduction et disparition visuellement gratuites** (I-12) —
   *partiel* : naissance à zéro reçue sous fond couplé (S251, S253) ; en 3D, un domaine qui renaît
