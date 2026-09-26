@@ -1295,3 +1295,26 @@ bloc de la piscine qui disparaît : faut-il l'occultation du ciel avant de conti
 **Verdict R30 — reçu le 2026-09-26 (S381, après le rituel)** : *« Je valide, ajoute l'occultation du ciel puis continue,
 et ensuite le plus important le solveur 3D »* — le ciel de pluie reçu, l'œil adapté compris ; **l'occultation du ciel**
 demandée avant la suite de la pluie ; puis la campagne du solveur volumique 3D, dite *« le plus important »*.
+
+## 36. R31 — l'occultation du ciel, S382
+
+**Votre demande** (R30) : *« ajoute l'occultation du ciel »* ([ADR-206](../adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md)). Chaque surface reçoit maintenant **le ciel qu'elle voit** : le pied d'un mur, un angle,
+le fond du bassin voient moins de ciel et s'assombrissent — calculé sur les objets eux-mêmes, contre une intégration
+indépendante à moins de 0,009 près (15 points). Par ciel clair, le même calcul vers le soleil donne **les ombres portées**
+(bord à 2,5 mm de la géométrie). Coût : +0,1 à +0,3 ms (la part du ciel est cuite une fois aux sommets ; les ombres, à
+chaque pixel). Référence : *USVI IMG 5366* (piscine et dallage sous un ciel couvert d'orage) — pas d'ombre portée, faces
+verticales nettement plus sombres que le sol, dessous du pavillon couvert très sombre.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s382/r31_couvert.png` | ciel couvert, sec : sans occultation (R30) contre avec — ensemble, buse, de près |
+| `viewer/captures/s382/r31_clair.png` | ciel clair, sec : avant contre après (ciel occulté et ombres portées du soleil, à 58° au nord-ouest) |
+| `viewer/captures/s382/r31_pluie.png` | sous la pluie, ciel couvert : 10 mm/h de R30 contre 10 et 50 mm/h avec l'occultation |
+
+**Ce qui n'y est pas** : la lumière renvoyée par le sol et les murs (pas d'interréflexion : les ombres et les pieds de murs
+sont un peu trop sombres par rapport au réel, où le sol clair éclaire le mur) ; la pénombre du soleil rendue plus étroite
+que la vraie (10 mm pour 33 mm) ; la réfraction de la lumière qui descend au fond du bassin (fenêtre de Snell) ; les reflets
+des murs dans l'eau (pièce 6 de la pluie) ; la mer n'a pas d'objet à occulter.
+
+**La question :** l'occultation du ciel et les ombres rendent-elles la scène crédible — le bloc qui se détache du sol par
+temps couvert, les ombres par ciel clair ? Si oui, je reprends la pluie (les gerbes), puis la campagne du solveur.

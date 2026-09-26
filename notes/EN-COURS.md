@@ -100,7 +100,7 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
   refaite quand un occultant change), lue par `VERTEX_ID` ; sans occultation, géométrie d'avant ; critère 1 ; coût.
 - [x] **P6d** — faces graduées près des arêtes (≈ 1 cm au contact, croissant jusqu'à 10 cm) : critère 2 sous le débord.
 - [x] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
-- [ ] **P8** — photographies de temps couvert (pied des murs) ; images de R31 ; REVUE-VISUELLE §36.
+- [x] **P8** — photographies de temps couvert (pied des murs) ; images de R31 ; REVUE-VISUELLE §36.
 - [ ] **P9** — preuve `OCCULTATION-CIEL-S382` ; liste, file, feuille de route, index.
 - [ ] **P10** — rituel.
 
@@ -175,3 +175,11 @@ passage prenait pour bord la limite de l'eau du bassin (le contrôle de l'eau re
 **Limite** : pénombre rendue 10 mm pour 33 mm du disque entier (quatre rayons). **Coût** (ciel clair) : 0,805 / 0,820 /
 0,646 ms contre 0,539 / 0,490 / 0,457 sans occultation — +0,19 à +0,33 ms, dont 0,06 à 0,10 pour le ciel ; sans le test
 précoce, +0,20 à +0,49. `OCCULTATION=0` : 12 / 12 au bit.
+
+**P8 — références et R31.** Commons, lu sans téléchargement (pixels par canevas) : trois recherches sans résultat utile
+(« overcast concrete wall pavement », « snow building wall overcast » — images de 500 px —, « snow covered courtyard
+cloudy ») ; retenue **USVI IMG 5366** (piscine, dallage de pierre, ciel couvert d'orage) : aucune ombre portée ; face du
+muret 41,8 / 39,5 / 33,5, dallage 150 à 176 (sRGB), dessous du pavillon couvert 25,7 — **qualitatif seulement** : le
+vignetage du grand-angle assombrit tout le bord gauche, l'assombrissement du dallage au pied du muret (95,7 contre 151,8)
+n'en est pas séparable. Planches (`captures_r31.sh`, `planches_r31.py` du bloc-notes) : `viewer/captures/s382/`
+`r31_couvert.png`, `r31_clair.png`, `r31_pluie.png`. REVUE-VISUELLE §36 (lien vers la preuve ajouté en P9).
