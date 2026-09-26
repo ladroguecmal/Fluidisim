@@ -17245,3 +17245,18 @@ de coursive, lancer une pompe de cale), sauvegardée ; consommée par le pas V d
 preuve §2–4. Suivant : par l'alternance, **le rendu** — l'échelle radiométrique du ciel et du soleil, notre perspective
 aérienne.
 
+## S373 — 2026-09-26 — rendu 11 : la brume réglée par pixel
+
+**Entrée.** *« Continue et ensuite commence à permettre de visualiser le système de piscine avec déversoir et pompe »* —
+la suite du jeton, le rendu, puis S374. Des deux rendus proposés, la perspective aérienne : bornée, et elle lève la limite
+de S371 (brume éteinte sur toute l'image à demi immergée).
+**Fait** ([preuve](../docs/validation/DEMI-IMMERGEE-S371.md) §10). `brume_air` réécrit la brume de Godot — quantité
+exponentielle, couleur du ciel dans la direction — × la part d'air du pixel, par `FOG`. **Critère 1 manqué** partout
+(poses au-dessus : p99,9 jusqu'à 9, pire 11) : Godot lit son cube de radiance au niveau le plus flou, une moyenne
+diffuse. Seuil gardé ; **deux variantes** de l'eau et du fond (`#define`, corps en `.gdshaderinc`), la nôtre seulement à
+demi immergée : six poses au-dessus et deux sous l'eau **identiques au bit** ; à demi immergée, côté air à 7 niveaux de
+Godot (15 avant), côté eau au bit ; contrôle de la ligne inchangé.
+**Limites.** Changement de modèle de brume à l'entrée du mode (≤ 7 niveaux), compilation au premier passage.
+**Rituel.** Maillons **1** : aucun point ne change d'état. Suivant : **S374, la piscine de V visualisée** (demande de
+l'utilisateur) ; au rendu, l'échelle radiométrique, avec une mesure qui la fonde.
+

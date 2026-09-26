@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S373 — **en cours**. Demande : *« Continue et ensuite commence à permettre de visualiser le système de piscine
+Session : S373 — **terminée**. Demande : *« Continue et ensuite commence à permettre de visualiser le système de piscine
 avec déversoir et pompe »* — d'abord la suite du jeton (le rendu), puis **S374** : la piscine de V dans Godot.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
@@ -87,7 +87,7 @@ identique au bit.
 - [x] **P2** — images témoins d'avant ; `brume_air` dans `optique_eau.gdshaderinc`, `FOG` dans l'eau et le fond.
 - [x] **P3** — mesures des critères 1 à 3.
 - [x] **P4** — preuve : section §10 de `DEMI-IMMERGEE-S371` (un fil, une preuve), « Reproduire » corrigé ; file, liste 8.6.
-- [ ] **P5** — rituel ; puis S374.
+- [x] **P5** — rituel ; puis S374.
 
 ### Notes de reprise
 
