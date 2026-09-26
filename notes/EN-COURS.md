@@ -94,7 +94,7 @@ conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **l
 - [x] **P5a** — `Volume3` : la **colonne graduée** du mode linéaire (variante N : restriction et prolongation linéaires par
   morceaux, gradient conjugué réduit) ; critère 3.
 - [x] **P5b** — l'onde oblique à colonne graduée contre sa fréquence calculée ; critère 4 ; inconnues comptées.
-- [ ] **P6** — critère 5 ; preuve `COLONNES-HAUTES-S386` ; liste, file, feuille de route, index.
+- [x] **P6** — critère 5 ; preuve `COLONNES-HAUTES-S386` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise

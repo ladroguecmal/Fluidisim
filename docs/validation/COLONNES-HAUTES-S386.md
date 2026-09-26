@@ -6,10 +6,12 @@ Session cloud, sans carte graphique. Liste **4.1**, **4.3** ; ADR-006 §6.4 (un 
 
 ## Reproduire
 
-- Commit de P4b de S386 ou plus récent ; Python 3, bibliothèque standard.
+- Commit `ca355677` (P5b de S386) ou plus récent ; Python 3, bibliothèque standard.
 - `python outils/colonnes_hautes.py` — 42 s ; lignes `COLONNES_HAUTES_S386` : le contrôle S295, puis, par variante, le
   moins d'inconnues qui tient le critère (valeurs attendues au §2). `--tout` imprime chaque réglage.
 - `python -m pytest -q outils/test_colonnes_hautes.py` — six essais, moins d'une seconde.
+- `cargo test --manifest-path code/Cargo.toml --release --offline -p water-core s386 -- --nocapture` — six essais, trois
+  secondes ; lignes `S386 onde oblique` : 0,0046 % et 0,0048 % contre la fréquence du schéma gradué (§3).
 
 ## En une phrase
 
@@ -53,3 +55,33 @@ Pire cas, partout : **la plus longue vague** (λ = 2·h). Avec huit couches cubi
 ajoute 1,4·10⁻² d'erreur de fréquence à 14 m, environ seize fois le permis. Galerkin relève la fréquence (Ritz), la
 variante Q l'abaisse : le schéma fin étant trop lent, G et N rapprochent en partie de ω continue — un fait, pas un
 principe de conception.
+
+## 3. La colonne graduée dans la référence 3D — pas linéaire
+
+`code/water-core/src/delta3d_graded.rs` ([ADR-208](../adr/ADR-208-la-colonne-graduee.md) D1). `Volume3::enable_graded(hôte,
+nœuds)` réserve, avant `seal()`, cinq tampons de `colonnes × nœuds` flottants et les nœuds (I-06). La projection du pas
+linéaire devient un gradient conjugué sur `Pᵀ·A·P·p̂ = Pᵀ·b` : `P` prolonge les valeurs nodales aux mailles fines
+(linéaire entre deux nœuds), `Pᵀ` en est la transposée exacte — mêmes coefficients, mêmes arrondis —, et `A` est
+l'opérateur fin reçu (S295), couvercle compris. Les vitesses restent fines ; la correction est celle du schéma reçu. Arrêt :
+`‖r̂‖² ≤ 10⁻¹²·‖b̂‖²` sur le vrai résidu, puis la tolérance d'ADR-144 sur la **divergence restreinte** `Pᵀ·div u`, rapportée
+au poids de chaque nœud — le champ n'est à divergence nulle qu'en moyenne pondérée par segment dans la partie graduée.
+Refus `Domain` sur fond coupé et au pas mobile (C2b).
+
+| critère (écrit avant) | résultat |
+|---|---|
+| **1** — le calcul redonne S295 | **tenu** (§1) |
+| **2** — l'erreur ajoutée ≤ max(erreur du schéma fin, 10⁻⁴), λ de 1 à 14 m, porte B | **tenu** par chaque variante à son réglage (§2) ; **la colonne haute unique d'ADR-207 D2 ne le tient qu'à ÷1,47** ; ADR-208 retient la colonne graduée, ÷2,55 |
+| **3** — opérateur réduit symétrique et positif ; repos exact ; volume conservé | **tenu** : cinq essais `s386` — symétrie à 10⁻⁵ et `Pᵀ` transposée de `P` (**vu échouer** sur une transposée faussée) ; repos au bit ; volume à 10⁻⁹ m³ sur 50 pas ; tous les nœuds = schéma fin à 10⁻⁶ m ; comptage exact ; refus du pas mobile, surface rendue au bit |
+| **4** — l'onde oblique suit la fréquence de son propre schéma à 10⁻³ | **tenu** : **0,0046 %** (5 nœuds sur 8 couches) et **0,0048 %** (7 sur 16), comme la grille fine de S295 (0,0046 / 0,0047 %) ; Ω_gradué/Ω_fin − 1 = 1,808·10⁻³ et 2,020·10⁻³, identiques en Rust et en Python |
+| **5** — sans colonne graduée, suite inchangée ; zéro avertissement | **tenu** : 673 réussis (667 + 6), 18 ignorés |
+
+## 4. Ce que ce document ne dit pas
+
+- **Aucun gain de coût mesuré** : les vitesses et l'opérateur restent sur la grille fine ; seules les **inconnues de
+  pression** diminuent (11 sur 28 à la porte B). Le stockage compact exact (ADR-208 D2 : vitesse horizontale aux nœuds,
+  verticale par segment) est C2b, comme la multigrille graduée.
+- **Le pas mobile n'est pas éprouvé** : la surface y bouge, et les couches cubiques doivent contenir toute sa course
+  (ADR-208 D4) ; le gain y sera plus petit que ÷2,55.
+- **Une configuration par critère** : porte B et un bassin ; le critère 2 est à recalculer pour chaque domaine (l'outil le
+  fait en une minute).
+- **Rien sur la carte** : la production garde ses 28 couches (C3).

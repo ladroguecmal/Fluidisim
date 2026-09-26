@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 18:40 +02:00
+Battement        : 2026-09-26 18:43 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
 Session en cours : S386 — C2 : les colonnes hautes dans la référence (ADR-207) ; décision de l'utilisateur : δ dans Godot en C11
 Dernière session : S385 — physique : **C1, la multigrille 3D de la référence** ([preuve](docs/validation/MULTIGRILLE-3D-S385.md), [ADR-207](docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md)) — 9 à 11 itérations quelle que soit la maille contre 102 à 365 pour Jacobi, désactivée par défaut ; verdict **R32** reçu pour l'instant (trois défauts à la file). Avant : S384, la conception de la campagne
@@ -102,7 +102,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   portes sont reçues : la v1 au sens d'ADR-174 D4**, chacune sur son banc ou sa référence, pas encore réunies en une
   scène vivante ([feuille de route](docs/FEUILLE-DE-ROUTE.md), « La v1 »). Depuis : la liste entière (ADR-190).
   **V** : noyau reçu, sans articulation avec δ.
-- Liste du projet fini : **3 validés, 67 partiels, 50 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367, 4.21 en S369, 5.4 en S372, 5.10 en S375, 5.5 en S378, 8.4 en S380.
+- Liste du projet fini : **3 validés, 68 partiels, 49 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367, 4.21 en S369, 5.4 en S372, 5.10 en S375, 5.5 en S378, 8.4 en S380, 4.3 en S386.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
 nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`
