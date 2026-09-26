@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S389 — **en cours**. **C4b**, première part : **la surface d'APIC** ([APIC3D-S388](../docs/validation/APIC3D-S388.md) :
+Session : S389 — **terminée**. **C4b**, première part : **la surface d'APIC** ([APIC3D-S388](../docs/validation/APIC3D-S388.md) :
 la lecture de la surface commande la période). Demande de l'utilisateur (2026-09-26) : *« continue »* — troisième session du
 fil (C4) : la voie de la v1 a été proposée à l'utilisateur en fin de S388, qui a demandé la suite ; sa demande prime
 (REPRISE §6). Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
@@ -88,7 +88,7 @@ inchangée, zéro avertissement.
 - [x] **P3** — la reconstruction à deux mailles ; critères 2 et 3.
 - [x] **P4** — les ballottements remesurés, l'amortissement par régression, l'attribution ; critères 4 à 6.
 - [x] **P5** — critère 7 ; preuve (section datée d'APIC3D-S388) ; liste, file, feuille de route.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 

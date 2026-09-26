@@ -17513,3 +17513,21 @@ de la surface commande la période** ; la séparation n'y est pour rien. **Faute
 reconstruction ne mettait pas `dx` sans voisine. **Rituel.** Maillons **2** : aucun point ni critère de porte ne change (4.16
 reste absent, construit non reçu). Suivant : **C4b** — la surface d'abord (plus de particules par maille, ou un ensemble de
 niveaux, ADR-186 D4), puis B10 en 3D ; au poste, C3 et la pluie, pièce 5.
+
+## S389 — 2026-09-26 — physique : C4b, première part — la surface d'APIC
+
+**Entrée.** *« continue »* : la surface d'abord, que S388 désignait comme commandant la période. **Fait** ([preuve](../docs/validation/APIC3D-S388.md)
+§5) : la lecture de la surface jugée sur **huit** positions continues d'une maille, non deux — le noyau d'une maille se trompe
+jusqu'à 9,93 %, non 6,12 %. Calculé en `f64` avant d'être codé : **le rayon du noyau** commande l'erreur, pas le nombre de
+particules. **Retenu** : noyau de deux mailles, rayon minimax (lecture **2,46 %** ; modèle et 3D à 10⁻³ % près). **Trouvé en
+chemin** : le noyau large faisait courir le repos à 15 cm/s — près d'une paroi, il ne voit des particules que d'un côté ; les
+parois reflètent désormais les particules : repos **6,2 µm/s** ; les 5,6 mm/s de S388 venaient des parois. **Tenus** (critères
+de S388, inchangés) : ballottement (1, 0) **+0,39 %** et oblique (1, 1) **+1,01 %** à 2,5 cm ; amortissement par période
+positif partout (+0,10 à +0,78 %) — l'énergie ne croît pas. **Attribution** : les images aux parois corrigent (1, 0), le noyau
+large l'oblique et divise l'amortissement par 18. Suite 680 réussis, zéro avertissement. **Limites** : lecture à 2,46 %, au-dessus
+du 1 % de S388 (reste manqué) ; un noyau large lisse les nappes minces — non mesuré, et c'est ce que B10 éprouvera ; coût de
+reconstruction ×1,5. **Rituel.** Maillons **3** : 4.16 reste absent (construit, non reçu). **Justification** : demande explicite
+de l'utilisateur dans la campagne qu'il a choisie (ADR-207) ; la v1 est déjà reçue (§3 bis), la liste entière est la cible et
+4.16 en est un point absent ; la suite, B10 en 3D, est la première épreuve d'une surface non graphe — elle fait passer 4.16 à
+partiel ou dit pourquoi non. Suivant : dans le cloud, **C4b** — B10 en 3D (une sphère qui entre dans l'eau) ; au poste, C3 et
+la pluie, pièce 5.

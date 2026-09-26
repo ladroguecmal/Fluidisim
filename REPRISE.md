@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-26 19:57 +02:00
+JETON            : libre
+Battement        : 2026-09-26 19:58 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
-Session en cours : S389 — C4b, première part : la surface d'APIC (noyau de deux mailles), les ballottements remesurés
-Dernière session : S388 — physique : **C4a, APIC en 3D dans le cœur** ([preuve](docs/validation/APIC3D-S388.md)) — masse exacte, champ affine conservé, repos à 5,6 mm/s ; ballottement à +1,04 % (2,5 cm), oblique à +2,69 % ; la lecture de la surface depuis les particules commande la période (rayon de S318 : +7,87 %). Avant : S387, la colonne graduée au pas mobile
-Session suivante : dans le cloud, **C4b** — la surface d'APIC d'abord (plus de particules par maille, ou un ensemble de niveaux, ADR-186 D4), puis B10 en 3D ; au poste, **C3** (la multigrille sur la carte) et, en alternance (ADR-191), la pluie, pièce 5
-Maillons        : 2 — S388 : aucun point ni critère de porte n'a changé (4.16 reste absent : construit, non reçu) ; au prochain, comparer à la voie de la v1 (METHODE)
+Session en cours : aucune
+Dernière session : S389 — physique : **C4b, première part : la surface d'APIC** ([preuve](docs/validation/APIC3D-S388.md) §5) — noyau de deux mailles (lecture 2,46 % de maille sur toute position, contre 9,93 %) et parois qui reflètent les particules (repos 6,2 µm/s) ; ballottements (1, 0) +0,39 % et (1, 1) +1,01 % à 2,5 cm, critères de S388 tenus ; l'énergie ne croît pas. Avant : S388, APIC en 3D dans le cœur
+Session suivante : dans le cloud, **C4b** — B10 en 3D, une sphère qui entre dans l'eau (4.16 : première surface non graphe ; le lissage des nappes minces par le noyau large y sera mesuré) ; au poste, **C3** (la multigrille sur la carte) et, en alternance (ADR-191), la pluie, pièce 5
+Maillons        : 3 — S389 : 4.16 reste absent (construit, non reçu) ; justifié au journal (demande de l'utilisateur, campagne ADR-207) ; B10 en 3D doit faire passer 4.16 à partiel ou dire pourquoi non
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
