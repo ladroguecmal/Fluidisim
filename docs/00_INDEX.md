@@ -58,6 +58,7 @@ présent ; l'état lui-même est dans la [feuille de route](FEUILLE-DE-ROUTE.md)
 - [Le ciel de pluie](validation/CIEL-PLUIE-S381.md).
 - [L'occultation du ciel et les ombres portées](validation/OCCULTATION-CIEL-S382.md).
 - [Les gerbes de la pluie](validation/GERBES-S383.md).
+- [Les surfaces mouillées](validation/SURFACES-MOUILLEES-S392.md).
 - [Cadence de l’hôte](validation/CADENCE-HOTE-S225.md).
 - [LOD spatial du sillage : grille locale, reconstruction bicubique, coût](validation/LOD-SILLAGE-S234.md).
 - [Scène multi-sources : admission, pente réelle, visibilité et retour au bit](validation/SCENE-MULTI-S235.md).

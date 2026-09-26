@@ -97,7 +97,7 @@ trois vues de la piscine à 10 mm/h ; sans pluie, 0 ; revue **R33** de l'utilisa
 - [x] **P3** — les images de référence sans pluie ; le nuanceur : mouillure (verticale libre, orientation, rejaillissements,
   eaux), diffus mouillé, reflet du film (ciel et occultants) ; la scène (eaux déclarées).
 - [x] **P4** — les contrôles : critère 1, critère 3 (rapport, reflet), critère 4 (le bord de l'abri) ; coût.
-- [ ] **P5** — images de revue R33, REVUE-VISUELLE ; preuve ; file, feuille de route, ADR-205 (note datée).
+- [x] **P5** — images de revue R33, REVUE-VISUELLE ; preuve ; file, feuille de route, ADR-205 (note datée).
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -135,4 +135,9 @@ exact (emprise et haut de la boîte), et les composantes nulles écartées de z�
 bruit ±0,05 ms), publié tel quel. Chemin : +0,96 ms au premier jet ; tests précoces (verticale et reflet contre les boîtes
 élargies) et ciel couvert sans les nuages du ciel clair, +0,38 ; un seul rayon loin des occultants (moyenne exacte, CIE
 linéaire en `sin h`), +0,34.
+
+**P5.** Images de R33 (`viewer/captures/s392/`, locales) : planche `r33_mouille.png` (10 mm/h, sec à gauche, mouillé à droite ;
+pied du mur ouest à hauteur d'œil, ensemble, proche) et les six images en pleine taille. REVUE-VISUELLE §38 ; preuve
+[SURFACES-MOUILLEES-S392](../docs/validation/SURFACES-MOUILLEES-S392.md) ; ADR-205 (note datée : 5a faite, 5b à suivre) ;
+file (ligne du rendu, aussi remise à trois colonnes), feuille de route (§3 ter), index.
 

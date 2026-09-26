@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 21:59 +02:00
+Battement        : 2026-09-26 22:01 +02:00
 Agent            : Claude Opus 5.5, Claude Code (application de bureau) au poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3
 Session en cours : S392 — rendu : **la pluie, pièce 5** — les surfaces mouillées (demande de l'utilisateur : « Continue avec la pluie, pièce 5 »)
 Dernière session : S391 — physique : **A321 corrigée** ([preuve](docs/validation/A321-S391.md), [ADR-209](docs/adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md)) — l'advection explicite centrée (FTCS) de la prédiction ; le terme de Lax-Wendroff, actif par défaut dans la production, option du cœur ; la scène tient cinq minutes à 30 Hz, porte C 1,91 / 1,93 ms. Avant : S390, la multigrille sur la carte

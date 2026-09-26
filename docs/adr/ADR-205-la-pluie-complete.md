@@ -52,3 +52,8 @@ cherchées par nous, lues sans téléchargement, et le jugement de l'utilisateur
 - Les pièces 10 à 12 font avancer 5.5 ; 1 et 4, le point 8.4 (gouttes, spray), encore *absent* ; les autres, des points
   de rendu déjà partiels (8.5, 8.8, 8.9). Le ciel de pluie et les surfaces mouillées n'ont pas de point à eux dans la
   liste : ils servent 8.10 (la crédibilité perçue).
+
+*Note du 2026-09-26 (S392)* : la pièce **5** est découpée en **5a**, les surfaces mouillées — faite
+([preuve](../validation/SURFACES-MOUILLEES-S392.md), R33 posée) — et **5b**, les éclaboussures au sol (Cossali, Coghe et
+Marengo 1997), à suivre. La source de 5a est lue par les résumés (Lekner et Dorf, *Appl. Opt.* 27, 1278) ; la forme
+d'Ångström en est reconstruite, ses nombres calculés (`outils/sol_mouille.py`).

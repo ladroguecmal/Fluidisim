@@ -1355,3 +1355,27 @@ pas sur tous les impacts de pluie, elles peuvent tenir dans le vide, et sont vra
 valide pour l'instant, il s'agit de sessions de peaufinage externe. »* Image jointe : des gerbes blanches, en colonnes,
 au-dessus de l'eau à distance moyenne. **Reçu pour l'instant** ; les trois défauts vont à une session de peaufinage
 ([file](../registres/QUESTIONS-OUVERTES.md#file-active)) — ils sont constatés, pas encore expliqués.
+
+## 38. R33 — les surfaces mouillées, S392
+
+**ADR-205, pièce 5a** ([preuve](SURFACES-MOUILLEES-S392.md)). Sous la pluie, le sol, les margelles et le pied des murs de la
+piscine prennent un **film d'eau** : plus sombres — la lumière piégée dans le film par réflexion interne (Ångström, Lekner
+et Dorf 1988) : le béton à 64 % de sa radiance sèche vu d'aplomb, le sol sombre à 57 % — et **plus brillants** : le film
+reflète le ciel (le sol s'éclaircit vers l'horizon) et le bloc (reflet flou à son pied). Ce que la pluie n'atteint pas
+reste **sec** : la bande de 10 cm sous le débord des margelles, les dessous. Contrôlé sur l'image : la formule à 0,03 %, le
+bord sec au pixel près. Coût : 0,2 à 0,35 ms.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s392/r33_mouille.png` | 10 mm/h, à gauche sec (la pluie d'avant), à droite mouillé : pied du mur ouest à hauteur d'œil, ensemble, proche |
+| `viewer/captures/s392/r33_<vue>_sec.png`, `…_mouille.png` | les mêmes, en pleine taille |
+
+**Ce qui n'y est pas** : les **éclaboussures au sol** (5b, prochaine session de la pièce) ; les rides des gouttes sur le film ;
+les flaques (pièce 12) ; le mouillage progressif au début de l'averse et le séchage (la météo) ; le vent. **Mesuré, non
+expliqué** : sur une photographie réelle (premières gouttes sur un asphalte sec), les taches mouillées sont bien plus sombres
+que ne le prédit la formule (0,08 contre 0,53 en linéaire, courbe de l'appareil inconnue) — le rendu pourrait être trop
+clair.
+
+**La question :** les surfaces mouillées sont-elles crédibles — assez sombres ? le reflet du bloc dans le sol, trop net ou
+trop fort ? la bande sèche sous les margelles, juste ? Faut-il assombrir davantage (le second effet de Lekner et Dorf, par
+un facteur réglé sur une référence) avant de passer aux éclaboussures ?
