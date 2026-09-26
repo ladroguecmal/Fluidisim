@@ -83,7 +83,7 @@ le pas fin à l'écart que la dispersion calculée prévoit. (4) Suite entière 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'étiquette corrigée (critère 1).
+- [x] **P2** — l'étiquette corrigée (critère 1).
 - [ ] **P3** — la course de la surface sous la mer de la porte B : `examples/delta3d_course_surface.rs` (critère 2) ; les
   couches cubiques qu'elle impose, le gain qui reste (outil) ; le cas d'un bassin calme.
 - [ ] **P4** — la colonne graduée au pas mobile (`project_mobile3`) : garde de la course, départ chaud par injection aux

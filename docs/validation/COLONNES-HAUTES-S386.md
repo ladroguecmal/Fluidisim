@@ -17,7 +17,7 @@ Session cloud, sans carte graphique. Liste **4.1**, **4.3** ; ADR-006 §6.4 (un 
 
 La dispersion d'une colonne **se calcule** ; calculée, une colonne haute unique à pression linéaire ne garde la précision
 du schéma fin qu'en gardant dix-sept couches cubiques sur vingt-huit (÷1,47), quand une pression **linéaire par morceaux**
-sur des nœuds étirés divise les inconnues par 2,55 — l'estimation de ÷3,1 faite en S384 était fausse.
+sur des nœuds étirés divise les inconnues par 2,55 (colonne de 7 m d'eau à 25 cm) — l'estimation de ÷3,1 faite en S384 était fausse.
 
 ## 1. L'instrument
 
@@ -40,11 +40,15 @@ Galerkin ne baisse jamais `Σ φ·dx` (Ritz) ; opérateurs réduits symétriques
 
 ## 2. Ce qui est mesuré
 
+> **Correction du 2026-09-26 (S387).** Ce paragraphe et les suivants appelaient « porte B » une colonne de **7 m d'eau** à
+> 25 cm sous une surface fixe. La scène de la porte B n'a que **3,5 m d'eau sous 3,5 m d'air** (`Config::review`, repos à
+> 3,5 m), sous une mer de `Hs` ≈ 2,5 m : les chiffres valent pour la colonne de 7 m, pas pour cette scène (§5).
+
 **Critère 2** (écrit avant) : sur λ de `4·dx` à `2·h`, 25 longueurs d'onde, l'erreur ajoutée `|Ω_réduit/Ω_fin − 1|` ne
 dépasse pas `max(|Ω_fin/ω − 1|, 10⁻⁴)` — pas plus que la maille n'en fait déjà, ou une phase de 10⁻⁴ (≈ 3 mm sur une vague
 de 0,5 m après une minute). Le moins d'inconnues par colonne qui le tient :
 
-| variante | porte B : `h` 7 m, `dx` 25 cm, 28 couches | bassin : `h` 3 m, `dx` 10 cm, 30 couches |
+| variante | colonne de 7 m : `h` 7 m, `dx` 25 cm, 28 couches | bassin : `h` 3 m, `dx` 10 cm, 30 couches |
 |---|---|---|
 | G | 17 cubiques + 1 : **19**, ÷1,47 (rapport 0,834) | 20 + 1 : **22**, ÷1,36 |
 | Q | 16 + 1 : **18**, ÷1,56 (0,629) | — |
@@ -70,7 +74,7 @@ Refus `Domain` sur fond coupé et au pas mobile (C2b).
 | critère (écrit avant) | résultat |
 |---|---|
 | **1** — le calcul redonne S295 | **tenu** (§1) |
-| **2** — l'erreur ajoutée ≤ max(erreur du schéma fin, 10⁻⁴), λ de 1 à 14 m, porte B | **tenu** par chaque variante à son réglage (§2) ; **la colonne haute unique d'ADR-207 D2 ne le tient qu'à ÷1,47** ; ADR-208 retient la colonne graduée, ÷2,55 |
+| **2** — l'erreur ajoutée ≤ max(erreur du schéma fin, 10⁻⁴), λ de 1 à 14 m, colonne de 7 m | **tenu** par chaque variante à son réglage (§2) ; **la colonne haute unique d'ADR-207 D2 ne le tient qu'à ÷1,47** ; ADR-208 retient la colonne graduée, ÷2,55 |
 | **3** — opérateur réduit symétrique et positif ; repos exact ; volume conservé | **tenu** : cinq essais `s386` — symétrie à 10⁻⁵ et `Pᵀ` transposée de `P` (**vu échouer** sur une transposée faussée) ; repos au bit ; volume à 10⁻⁹ m³ sur 50 pas ; tous les nœuds = schéma fin à 10⁻⁶ m ; comptage exact ; refus du pas mobile, surface rendue au bit |
 | **4** — l'onde oblique suit la fréquence de son propre schéma à 10⁻³ | **tenu** : **0,0046 %** (5 nœuds sur 8 couches) et **0,0048 %** (7 sur 16), comme la grille fine de S295 (0,0046 / 0,0047 %) ; Ω_gradué/Ω_fin − 1 = 1,808·10⁻³ et 2,020·10⁻³, identiques en Rust et en Python |
 | **5** — sans colonne graduée, suite inchangée ; zéro avertissement | **tenu** : 673 réussis (667 + 6), 18 ignorés |
@@ -78,7 +82,7 @@ Refus `Domain` sur fond coupé et au pas mobile (C2b).
 ## 4. Ce que ce document ne dit pas
 
 - **Aucun gain de coût mesuré** : les vitesses et l'opérateur restent sur la grille fine ; seules les **inconnues de
-  pression** diminuent (11 sur 28 à la porte B). Le stockage compact exact (ADR-208 D2 : vitesse horizontale aux nœuds,
+  pression** diminuent (11 sur 28 pour la colonne de 7 m). Le stockage compact exact (ADR-208 D2 : vitesse horizontale aux nœuds,
   verticale par segment) est C2b, comme la multigrille graduée.
 - **Le pas mobile n'est pas éprouvé** : la surface y bouge, et les couches cubiques doivent contenir toute sa course
   (ADR-208 D4) ; le gain y sera plus petit que ÷2,55.

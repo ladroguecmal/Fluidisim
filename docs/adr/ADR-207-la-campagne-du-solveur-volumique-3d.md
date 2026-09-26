@@ -76,3 +76,8 @@ Mesurée (`outils/colonnes_hautes.py`), une colonne haute unique à pression lin
 dix-sept couches cubiques sur vingt-huit (÷1,47) ; l'estimation du §1 (÷3,1) était fausse. **D2 est remplacée** par
 [ADR-208](ADR-208-la-colonne-graduee.md) : une pression linéaire par morceaux sur des nœuds étirés, ÷2,55 à la porte B,
 moins en mode mobile (D4 d'ADR-208).
+
+## Note corrective datée du 2026-09-26 (S387)
+
+La note de S386 ci-dessus dit « ÷2,55 à la porte B » : c'est une colonne de 7 m d'eau à 25 cm, pas la scène de la porte B
+(3,5 m d'eau sous 3,5 m d'air) — voir la note corrective d'[ADR-208](ADR-208-la-colonne-graduee.md).

@@ -49,3 +49,10 @@ de C1 grossit une colonne graduée (fusion de nœuds : C2b). Elle ne touche ni a
 C1–C11, et ne retire rien du périmètre.
 
 Invariants relus : I-05, I-06, I-14, I-16 ; aucun amendé.
+
+## Note corrective datée du 2026-09-26 (S387)
+
+Le §1 et D3 appellent « configuration de la porte B » une colonne de **7 m d'eau** à 25 cm sous une surface fixe. La scène
+de la porte B (`Config::review`) n'a que **3,5 m d'eau sous 3,5 m d'air**, sous une mer de `Hs` ≈ 2,5 m. Les chiffres du
+§1 (÷1,47, ÷2,00, ÷2,55) et le réglage `r` = 1,25, `K` = 3 valent pour la colonne de 7 m ; pour la scène de la porte B, c'est
+D4 qui décide, et la course de la surface y est mesurée en S387 ([preuve](../validation/COLONNES-HAUTES-S386.md) §5).

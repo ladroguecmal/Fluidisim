@@ -170,7 +170,8 @@ d'environ **0,4 million de mailles** pour tous ses domaines.
 
 > **Correction du 2026-09-26 (S386)** : les deux lignes « colonnes hautes » ci-dessus sont **fausses** au critère d'usage de
 > C2 — une colonne haute unique demande dix-sept couches cubiques sur vingt-huit (÷1,47) ; la colonne graduée d'
-> [ADR-208](../adr/ADR-208-la-colonne-graduee.md) fait ÷2,55 à la porte B, moins en mode mobile. Le raisonnement qui suit
+> [ADR-208](../adr/ADR-208-la-colonne-graduee.md) fait ÷2,55 sur une colonne de 7 m d'eau, moins en mode mobile. *S387 :* la
+> scène de la porte B n'a que 3,5 m d'eau sous 3,5 m d'air, sous une mer de `Hs` 2,5 m. Le raisonnement qui suit
 > vaut, ses chiffres non.
 
 **Ce que le tableau décide.** (1) Les **colonnes hautes** sont la première marche : à la porte B, 9 mailles par colonne au
