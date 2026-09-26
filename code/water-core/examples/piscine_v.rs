@@ -15,45 +15,10 @@ use std::io::{BufWriter, Write};
 use std::path::Path;
 use water_core::hydro_network::*;
 use water_core::SimTime;
-
-const G: [f32; 3] = [0.0, 0.0, -9.81];
-
-/// Le bassin : 8 × 4 m au sol, 1,5 m de haut ; le fond au niveau 0.
-const BASSIN_TAILLE_M: [f64; 3] = [8.0, 4.0, 1.5];
-const BASSIN_FOND_M: [f64; 3] = [0.0, 0.0, 0.0];
-/// Le bac tampon : 1 × 4 m, 1,2 m de haut, contre la face extérieure du mur est (épais de 0,2 m), fond à −1,3 m.
-const TAMPON_TAILLE_M: [f64; 3] = [1.0, 4.0, 1.2];
-const TAMPON_FOND_M: [f64; 3] = [4.7, 0.0, -1.3];
-/// Le déversoir : toute la largeur du mur est, seuil à 1,40 m.
-const SEUIL_M: [f64; 3] = [4.0, 0.0, 1.4];
-const DEVERSOIR_LARGEUR_M: f64 = 4.0;
-/// La pompe : prise à 5 cm du fond du bac tampon, buse sur le mur ouest à 1,7 m ; 12 l/s, hauteur de barrage 8 m (données
-/// d'auteur, ADR-199 D3). La buse, 5 cm de diamètre, n'existe pas dans V : elle ne sert qu'au dessin du jet.
-const PRISE_M: [f64; 3] = [4.7, 0.0, -1.25];
-const SORTIE_M: [f64; 3] = [-4.0, 0.0, 1.7];
-const POMPE_QMAX_MLPS: i64 = 12_000;
-const POMPE_H0_M: f64 = 8.0;
-const BUSE_DIAMETRE_M: f64 = 0.05;
-/// Niveaux de départ : le bassin 5 mm sous le seuil, le bac tampon à 0,80 m.
-const BASSIN_DEPART_M: f64 = 1.395;
-const TAMPON_DEPART_M: f64 = 0.80;
-const POMPE_MARCHE_S: f64 = 5.0;
-const POMPE_ARRET_S: f64 = 240.0;
-const DUREE_S: f64 = 330.0;
-
-fn um(m: f64) -> i64 {
-    (m * 1e6).round() as i64
-}
-fn um3(p: [f64; 3]) -> [i64; 3] {
-    p.map(um)
-}
-fn prisme(hauteur_um: i64) -> [i64; SHAPE_ENTRIES] {
-    let mut t = [0i64; SHAPE_ENTRIES];
-    for (i, v) in t.iter_mut().enumerate() {
-        *v = hauteur_um * i as i64 / (SHAPE_ENTRIES - 1) as i64;
-    }
-    t
-}
+// S375 : la définition de la piscine vit dans `support/piscine.rs`, partagée avec `piscine_delta`.
+#[path = "support/piscine.rs"]
+mod piscine;
+use piscine::*;
 
 /// Le point de fonctionnement du régime établi, analytique : la charge `H` sur le seuil telle que le déversoir débite ce
 /// que la pompe refoule, le volume total fixant le niveau du bac tampon. Point fixe sur `H`, en double.
@@ -75,45 +40,8 @@ fn regime_analytique(volume_total_m3: f64) -> (f64, f64, f64) {
 
 fn main() -> std::io::Result<()> {
     let sortie = std::env::args().nth(1).unwrap_or_else(|| "godot/donnees/piscine_v.json".into());
-    let tables = [prisme(um(BASSIN_TAILLE_M[2])), prisme(um(TAMPON_TAILLE_M[2]))].concat();
+    let (tables, mut nodes, mut edges) = construire();
     let shapes = Shapes::new(&tables).expect("tables");
-    let aire_b = BASSIN_TAILLE_M[0] * BASSIN_TAILLE_M[1];
-    let aire_t = TAMPON_TAILLE_M[0] * TAMPON_TAILLE_M[1];
-    let ml = |m3: f64| (m3 * 1e6).round() as i64;
-    let mut nodes = [
-        HydroNode {
-            volume_ml: ml(aire_b * BASSIN_DEPART_M),
-            capacity_ml: ml(aire_b * BASSIN_TAILLE_M[2]),
-            origin_um: um3(BASSIN_FOND_M),
-            shape: 0,
-        },
-        HydroNode {
-            volume_ml: ml(aire_t * TAMPON_DEPART_M),
-            capacity_ml: ml(aire_t * TAMPON_TAILLE_M[2]),
-            origin_um: um3(TAMPON_FOND_M),
-            shape: 1,
-        },
-    ];
-    let mut edges = [
-        Opening {
-            from: 0,
-            to: Some(1),
-            flow: Flow::Weir { width_mm: (DEVERSOIR_LARGEUR_M * 1e3).round() as i64 },
-            position_um: um3(SEUIL_M),
-            discharge: WEIR_DISCHARGE,
-            residue_nl: 0,
-            control_pm: CONTROL_FULL,
-        },
-        Opening {
-            from: 1,
-            to: Some(0),
-            flow: Flow::Pump { max_flow_mlps: POMPE_QMAX_MLPS, shutoff_head_um: um(POMPE_H0_M), outlet_um: um3(SORTIE_M) },
-            position_um: um3(PRISE_M),
-            discharge: 0.0,
-            residue_nl: 0,
-            control_pm: 0,
-        },
-    ];
     let total: i64 = nodes.iter().map(|n| n.volume_ml).sum();
     let mut scratch = [0i64; 2];
     let dt_s = STEP_US as f64 * 1e-6;
@@ -138,7 +66,7 @@ fn main() -> std::io::Result<()> {
     let mut regime = (0.0f64, 0.0f64, 0usize, 0.0f64);
     for k in 0..pas {
         let t = k as f64 * dt_s;
-        edges[1].control_pm = if (POMPE_MARCHE_S..POMPE_ARRET_S).contains(&t) { CONTROL_FULL } else { 0 };
+        edges[1].control_pm = commande_pompe(t);
         step(&mut nodes, &mut edges, &shapes, G, SimTime(STEP_US), &mut scratch).expect("pas de V");
         ecart_max = ecart_max.max((nodes.iter().map(|n| n.volume_ml).sum::<i64>() - total).abs());
         // Le régime établi : la dernière minute avant l'arrêt de la pompe, débits moyens.

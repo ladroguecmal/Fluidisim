@@ -83,7 +83,7 @@ de 1 mm). (4) Dans Godot, la surface rendue est celle de δ, au bit du fichier ;
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `Volume3::add_column_volume` et ses essais ; critère 1.
-- [ ] **P3** — `examples/piscine_delta.rs` : V et δ au pas, jet, puits, forçage ; coût mesuré ; export des surfaces ;
+- [>] **P3** — `examples/piscine_delta.rs` : V et δ au pas, jet, puits, forçage ; coût mesuré ; export des surfaces ;
   critères 2 et 3.
 - [ ] **P4** — Godot : la surface de δ en maillage de hauteur dans le bassin (`piscine.gd`), rejouée ; critère 4.
 - [ ] **P5** — images de R27, preuve `PISCINE-DELTA-S375`, liste 5.10, file, feuille de route, index.
@@ -94,3 +94,16 @@ de 1 mm). (4) Dans Godot, la surface rendue est celle de δ, au bit du fichier ;
 **P2 — fait.** `Volume3::add_column_volume(dh)` (`delta3d_mobile.rs`) : ajout compensé comme le transport, pression et
 vitesses intactes, refus atomiques (`Shape`, `NotFinite`, `Domain`). **Critère 1** : 200 ajouts, écart de volume **0**
 (au bit), repos au repos après 20 pas, refus sans écriture.
+
+**P3 — en cours, trouvé en chemin.**
+- `support/piscine.rs` : la piscine définie une fois ; `piscine_v` rebranché, **export identique au bit**.
+- **Défaut de la référence mobile 3D** : toute surface décalée uniformément du repos (≥ 1 µm) est refusée
+  (`Convergence`) sur tout domaine — le gradient conjugué converge (36–46 itérations), mais le critère de divergence
+  divise deux arrondis (vitesses 10⁻¹⁰ m/s) : 2 à 4. C'est le cas même d'ADR-025 (V élève le niveau d'un bloc).
+  **ADR-201** : plancher de l'échelle de vitesse, 10⁻⁴ m/s ; 76 essais δ 3D inchangés ; essai
+  `a_uniform_rise_is_a_state_without_motion_s375` (vitesses 1,5·10⁻¹⁰ et 1,2·10⁻⁹ m/s, surface uniforme au bit).
+- **Coût à 10 cm** (80 × 40 × 16) : ≈ 100 itérations, ≈ 0,5 s par pas sur la référence séquentielle — deux heures ; 20 cm.
+- **Premier essai du jet** (quantité de mouvement entière dans les 30 cm du haut, sans dissipation) : la surface sort du
+  domaine à t = 7,4 s (2,4 s après le lancement) — courant accéléré sans fin (≈ 56 N sur quelques décilitres), énergie
+  sans puits. **Panache à calibrer** : σ 20 cm, 60 cm de profondeur, verticale seule, horizontale dissipée ;
+  amortissement 0,5 s dans le panache, 30 s partout.

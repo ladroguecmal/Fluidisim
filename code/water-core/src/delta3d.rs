@@ -34,6 +34,12 @@ use crate::host::{AllocError, HostServices, JobSystem};
 /// reste dans la hauteur de remplissage que `1/a` changerait en pointe — 5,5 m/s sous 10 %, 0,55 m/s à 10 %.
 pub const PARTIAL_LID_MIN_APERTURE: f32 = 0.1;
 
+/// S375, ADR-201 — **le plancher de
+/// l'échelle de vitesse** du critère de divergence du pas mobile 3D (ADR-143 : `max|div u|·dx/max|u|` ≤ 10⁻⁵), m/s. Sous
+/// 0,1 mm/s, le critère devient absolu : `max|div u|·dx` ≤ 10⁻⁹ m/s, une dérive de surface de l'ordre de 50 µm par heure
+/// sur 1,4 m d'eau — bien sous la tolérance d'image (3 mm). Au-dessus, le critère d'ADR-143, au bit.
+pub const PROJECTION_VELOCITY_FLOOR: f32 = 1e-4;
+
 /// Domaine local, cellules cubiques de côté `dx`. `z₀ = nz·dx` est le couvercle.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Domain3 {

@@ -383,7 +383,10 @@ impl Volume3 {
             .chain(&self.v)
             .chain(&self.w)
             .fold(0f32, |m, x| m.max(x.abs()));
-        let ratio = if max > 0. { dx / max } else { 0. };
+        // S375, ADR-201 : l'échelle de vitesse a un plancher. Sans mouvement — un contenant dont V élève le niveau d'un
+        // bloc (ADR-025) —, `max|u|` est un arrondi et le rapport de deux arrondis valait 2 à 4 : le pas était refusé.
+        let echelle = max.max(PROJECTION_VELOCITY_FLOOR);
+        let ratio = if max > 0. { dx / echelle } else { 0. };
         ((all * ratio) as f64, (plain * ratio) as f64)
     }
 

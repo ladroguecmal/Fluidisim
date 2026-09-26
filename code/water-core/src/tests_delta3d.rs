@@ -1731,3 +1731,24 @@ fn column_volume_is_added_exactly_and_atomically_s375() {
     assert_eq!(bits(&v), avant, "un refus a écrit");
 }
 
+
+/// S375, ADR-201 — **une élévation uniforme est un état sans mouvement, et le pas mobile l'accepte.** Avant le plancher
+/// de l'échelle de vitesse, le critère de divergence divisait deux arrondis (2 à 4) et refusait le pas — sur tout domaine,
+/// dès 1 µm d'écart au repos. Maintenant : le pas passe, et rien ne bouge (vitesses sous 10⁻⁶ m/s, surface uniforme au
+/// dixième de micromètre, sur 40 pas).
+#[test]
+fn a_uniform_rise_is_a_state_without_motion_s375() {
+    for (nx, ny, nz, dx) in [(12usize, 7usize, 12usize, 0.25f32), (40, 20, 8, 0.2)] {
+        let (mut v, _) = volume(nx, ny, nz, dx, 9.81);
+        let h = 0.6 * nz as f32 * dx;
+        v.set_free_surface(&vec![h; nx * ny], h).unwrap();
+        v.add_column_volume(&vec![1e-4; nx * ny]).unwrap();
+        for _ in 0..40 {
+            v.step_surface_mobile(25_000, 4000, &Jobs).unwrap();
+        }
+        let vmax = v.velocity_u().iter().chain(v.velocity_v()).chain(v.velocity_w()).fold(0f32, |m, x| m.max(x.abs()));
+        let (lo, hi) = v.surface().iter().fold((f32::MAX, f32::MIN), |(a, b), x| (a.min(*x), b.max(*x)));
+        println!("S375 élévation uniforme {nx}x{ny}x{nz} : vitesse max {vmax:e} m/s, étendue de surface {:e} m", hi - lo);
+        assert!(vmax < 1e-6 && hi - lo < 1e-7, "{vmax} {}", hi - lo);
+    }
+}
