@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 12:25 +02:00
+Battement        : 2026-09-26 12:27 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local) — reprise à chaud à 12:19 (S381 coupée après P5, aucun autre agent en vie)
 Session en cours : S381 — la pluie, pièce 3 : le ciel de pluie (CIE couvert, soleil éteint, éclairement conservé)
 Dernière session : S380 — rendu : **la pluie complète** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), demande de l'utilisateur : « pas de solveur, continue la pluie, ajoute les manquants ») — pièces 1 et 2, les gouttes dans l'air et l'extinction ([preuve](docs/validation/PLUIE-AIR-S380.md), **R29 reçue** : « Je valide » — 8.4 passe à partiel). Avant : S379, les rides de pluie (R28 reçue)

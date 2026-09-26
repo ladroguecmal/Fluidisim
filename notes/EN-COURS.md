@@ -88,7 +88,7 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
   `gain_eau` déplacé là (l'éclairement de la scène).
 - [x] **P4** — les nuanceurs : eau, bassin, parois, fond, caustiques, éclat ; critère 1.
 - [x] **P5** — les scènes : `couvert` par la pluie ou `COUVERT=` ; contrôles (critères 2 à 4).
-- [>] **P6a** — correction vue sur les premières images de R30 : **la lumière des crêtes** (S356, soleil qui traverse les
+- [x] **P6a** — correction vue sur les premières images de R30 : **la lumière des crêtes** (S356, soleil qui traverse les
   crêtes, pondéré vers l'azimut du soleil) restait allumée sous le ciel couvert — taches claires sur la mer, aux mêmes
   places que par ciel clair ; éteinte comme l'éclat (`soleil_direct()`) ; critère 1 (12 images au bit).
 - [ ] **P6b** — images de R30 (piscine, mer, ciel clair contre ciel couvert) ; REVUE-VISUELLE §35.
@@ -130,3 +130,16 @@ tampon flottant, tonalité linéaire, sans brume) :
 - **Critère 1** : 12 / 12 au bit après le branchement des scènes.
 - Vu : la mer sous le ciel couvert, grise et mate sous un ciel neutre (comme *Mundesley*) ; la piscine sans ombres, murs
   et sol presque confondus (mur vertical à 0,47 de l'horizontale : cohérent), traînées nettes sur le fond gris.
+
+**P6a — la lumière des crêtes, restée solaire** (reprise à chaud). Captures de R30 dans le bloc-notes de la session
+(`captures.sh` : cinq variantes — clair sec, couvert sec, clair 10, couvert 10, couvert 50 mm/h —, piscine buse / ensemble
+/ pluie_proche à 200 s, mer proche / référence / rasante / haute). Sur la mer couverte, **des taches claires de 2 à 5 m**, à
+gauche (vers l'azimut du soleil), aux mêmes places que par ciel clair : pas des reflets de nuages (le ciel couvert est
+uniforme) mais le terme des crêtes de S356 (`avant` = cos⁴ de l'écart à l'azimut du soleil), oublié par P3–P4. Éteint par
+`soleil_direct()` sous le ciel couvert, comme l'éclat. **Mesuré** (pose haute, couvert, sec) : 25 % des pixels changent,
+jusqu'à 46 niveaux ; bas gauche 124,5 → 118,0 (écart-type 19,4 → 18,0) ; taches disparues à l'œil. **Critère 1** : 12 / 12
+au bit (SHA-256, avant et après). Non porté : la lumière diffuse du ciel qui traverse les crêtes (faible).
+- **Vu, à dire dans R30** : le bloc de la piscine **se confond avec le sol** sous le ciel couvert (vue d'ensemble) — murs
+  béton 0,42 × 0,466 = 0,196, sol 0,20 × 0,939 = 0,188 : la répartition de la CIE et les albédos le donnent ; ce qui manque
+  est **l'occultation du ciel** (pied des murs, angles), le seul modelé réel par temps couvert — absente de la scène (pas
+  plus d'ombres portées par ciel clair).

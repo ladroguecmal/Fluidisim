@@ -432,6 +432,12 @@ void fragment() {
     float eclaire = gain_eau * eclairage(normalize(vec3(-pente, 1.0)), soleil, 1.0);
     vec2 horizontal = rayon.xy / max(length(rayon.xy), 1e-6);
     float avant = pow(max(dot(horizontal, normalize(soleil.xy)), 0.0), exposant_cretes);
+    // S381 : cette lumière est celle du soleil direct, pondérée vers son azimut ; sous le ciel couvert, elle s'éteint comme
+    // l'éclat (vue sur les images de R30 : des taches claires, aux places qu'elles ont par ciel clair). La lumière diffuse du
+    // ciel qui traverse les crêtes n'est pas portée.
+    if (couvert > 0.0) {
+        avant *= soleil_direct();
+    }
     couleur += force_cretes * clamp(-0.5 * s_e, 0.0, 1.0) * avant * transmission_crete * eclaire;
     if (ecume_champ_actif) {
         // S368 — l'écume du champ, là où l'eau est dans le monde. **L'actif** : blanc, au bord irrégulier — le seuil ½ du
