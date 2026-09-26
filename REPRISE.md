@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 23:03 +02:00
+Battement        : 2026-09-26 23:06 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
 Session en cours : S394 — C5a : A316 en 2D d'abord — la bande qui tient la densité des particules à la frontière du raccord
 Dernière session : S393 — physique : verdict **R33** reçu pour l'instant ; **C4b, B10 en 3D** ([preuve](docs/validation/B10-APIC3D-S393.md)) — une sphère cinématique dans APIC 3D (le corps reflète les particules : repos à 9,6 mm/s) ; la cavité se pince à **2,084 √(R/g)**, dans la plage publiée (1,72 à 2,29), convergé à 0,63 % ; **4.16 partiel**. Avant : S392, les surfaces mouillées

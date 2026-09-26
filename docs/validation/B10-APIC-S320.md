@@ -598,3 +598,70 @@ réensemencée depuis sa hauteur géométrique, la différence de masse passée 
 recouvrement, sous sa forme la plus simple. Critère : masse à gauche de la frontière à l'écart d'APIC seul sur 30 s,
 densité à 4 ± 0,2, puis les critères de S327 sur 30 s.
 
+---
+
+## 14. S394 — tenir la densité à la frontière : trois candidats, la racine désignée
+
+2026-09-26. **C5a** de la campagne du solveur volumique 3D ([ADR-207](../adr/ADR-207-la-campagne-du-solveur-volumique-3d.md)
+D5) : A316 réglé d'abord en 2D, où 30 s se rejouent en 16 s. Chentanez, Müller et Kim (2014), que la campagne voulait lus
+d'abord, sont bloqués par le réseau de la session (quatre adresses) ; leur **résumé** seul est connu — la surface suivie par
+un **champ de densité**, somme de celle des particules et de celle de la grille. Session cloud, un fil par essai.
+
+### Reproduire
+
+- Commit `2661131c` ou plus récent. Le meilleur montage de S327 plus une variable :
+  `LOT5_T_FIN=30 RACCORD_ENSEMENCE=continu RACCORD_JAUGE=hauteurs RACCORD_ECHANGE=paroi <variable> cargo run
+  --manifest-path code/Cargo.toml -p water-core --release --offline --example lot5_comparaison -- raccord_dyn
+  <ballottement|repos> <0.05|0.025>` — `RACCORD_BANDE=1` (A), `RACCORD_BANDE=masse` (A'), `RACCORD_DENSITE=1` (B) ; témoin
+  `RACCORD_BANDE_BIAIS=0.0073` avec (A) ; `RACCORD_SERIE=1` pour la série. Lignes `RACCORD_S354`, `RACCORD_S394` (énergie
+  ajoutée par (B)), `LOT5_S354`.
+- **Sans variable, tout est au bit** (critère 1) : masse 0,50098 / 0,50734 / 0,51211 m², 4,017 / 4,846 / 4,960 particules par
+  maille, saut 0,3893, période aux zéros 2,17339 s à 5 cm ; à 2,5 cm, 0,50086 / 0,50290 / 0,50583, saut 1,00.
+- Durées : 16 s à 5 cm, 2 à 3 min à 2,5 cm ; (A) et son témoin divergent (plusieurs minutes, arrêtés).
+
+### Les candidats, et ce qui les défait
+
+**(A) — la bande de S354** : à chaque pas, la dernière colonne de mailles libre réensemencée depuis sa **hauteur
+géométrique**, la différence de masse versée à la première colonne. **La masse des particules se vide** dans les colonnes
+(0,422 m² sur les dix premières secondes, puis 0,001), et tout diverge. Au repos, la série le dit : APIC seul lit 0,4927 m de
+surface pour 0,5000 m de masse (le biais de S323, −0,146 maille), la bande est reposée à `round(2g/dx)` rangées — 0,475 m.
+Réensemencée à **chaque pas**, elle cède à chaque pas le biais et l'arrondi. Le témoin (biais ajouté à la hauteur lue)
+diverge aussi : le biais n'est pas la seule perte.
+
+**(A') — la même bande, gardant ses particules**, replacées au pas nominal depuis le fond, sans échange de masse. **Elle
+piège** : replacée sur le réseau à chaque pas, une particule n'en sort qu'en la traversant d'un pas — plus de 12 mm, pour
+0,3 mm par pas ; la masse s'y entasse (0,74 m à 1,6 s, pour 0,50) et tout diverge. **Défaut de structure, commun à (A) et
+(A')** : un réensemencement à chaque pas détruit le transport des particules sous la maille ; seules des colonnes, qui
+transportent par flux, le supportent.
+
+**(B) — le champ de densité, en position** : rien n'est réensemencé. En fin de pas, dans les **deux colonnes** devant la
+frontière, sur les mailles d'eau **intérieures**, la cible `n/4 − 1` ; la projection du banc (fluide fantôme compris), sur un
+champ nul, rend un déplacement dont la divergence vaut la cible ; les particules libres le suivent, **en position
+seulement**. Facteur 1, bande de 2 : fixés avant la mesure.
+
+| (B), 30 s | 5 cm | 2,5 cm | critère |
+|---|---|---|---|
+| masse | 7·10⁻¹⁶ | 9·10⁻¹⁶ | exacte — **tenu** |
+| masse à gauche, écart à APIC seul, par 10 s (m²) | +0,0011 / −0,0003 / −0,0013 (S354 : +0,0113) | +0,0005 / −0,0017 / **−0,0054** | ±0,002 — **tenu à 5 cm, manqué à 2,5** |
+| particules par maille avant la frontière | 3,99 / 3,98 / 3,88 (S354 : 4,96) | 4,03 / 4,03 / 3,92 | 4 ± 0,2 — **tenu** |
+| saut à la frontière, mailles | 0,649 (S354 : 0,389) | 0,856 (S354 : 1,00) | < 0,5 — **manqué** |
+| période aux zéros — APIC seul | +1,07 % — +7,31 % | −1,07 % — +1,60 % | à 1 point — **manqué** |
+| amortissement par période (régression) — APIC seul | **−4,06 %** — +1,18 % | **−3,90 %** — +2,15 % | à 1 point — **manqué** : l'onde croît |
+| énergie ajoutée par la correction, 30 s | **102 J/m** | 49 J/m | — |
+| repos, 5 cm : vitesse maximale | 0,65 cm/s | — | < 1 cm/s — **tenu** |
+
+**(B) tient la densité et, à 5 cm, la masse — et fait croître l'onde.** La correction ajoute 102 J/m d'énergie potentielle
+en 30 s, pour une onde qui en porte deux ; S354 mesurait l'inverse, les particules perdant 87 J/m sous l'échange. **La
+correction rend ce que l'échange ôte** : c'est l'**échange** qui comprime, pas sa densité non corrigée. Rendre le tassement
+visible en fait une pompe dès qu'elle est en phase avec l'onde.
+
+### Verdict
+
+**Non reçu.** Critères 1, 2, 4 et 6 tenus ; 3 tenu à 5 cm seulement ; 5 manqué. A316 change encore de nature : ce n'est
+plus « la densité n'est pas tenue » — (B) la tient — mais **l'échange comprime les particules**, à un débit d'énergie
+cinquante fois celui de l'onde ; toute correction qui le compense sans le supprimer injecte ce débit.
+
+**Suite (C5a, deuxième part).** Mesurer **où** l'échange comprime — bilan, par profondeur et sur 30 s, de ce que la dernière
+colonne libre reçoit par insertion, perd par retrait et échange par advection, contre le flux eulérien de la face — puis un
+échange qui **voit la densité** : insérer où elle manque, retirer où elle excède. (B) resterait le garde-fou, son énergie
+ajoutée le critère : proche de zéro.

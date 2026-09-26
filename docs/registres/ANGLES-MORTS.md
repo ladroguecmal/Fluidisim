@@ -4292,6 +4292,13 @@ dissipent pas plus qu'APIC seul. Ce que 30 s montrent : **la densité des partic
 30 s à 5 cm, et la période s'allonge de 2,65 points. **Reste ouvert.** Déclencheur : la prochaine session du lot 5.
 Remède à éprouver : la dernière colonne de cellules réensemencée depuis sa hauteur géométrique.
 
+**A316 — note datée du 2026-09-26 (S394). La racine désignée : l'échange comprime** ([preuve](../validation/B10-APIC-S320.md)
+§14). Le remède de S354 — la dernière colonne réensemencée depuis sa hauteur géométrique — vide les particules (il cède à
+chaque pas le biais de reconstruction et l'arrondi des rangées) ; gardant ses particules, il les piège. Une correction de
+densité **en position** (champ dont la divergence vaut `n/4 − 1`, deux colonnes) **tient la densité** (3,9 à 4,0) et, à 5 cm,
+la masse (±0,0013 m²) — mais l'onde croît de 4 % par période : elle rend 102 J/m en 30 s, ce que l'échange ôte. **Reste
+ouvert**, précisé : l'échange lui-même. Déclencheur : la prochaine session du raccord (C5a, deuxième part).
+
 **A315 — note datée du 2026-09-23 (S326) : résolu.** Un Jacobi sur le chemin coupé — celui du mode mobile
 3D — ramène la bosse à 128 de 16 029 à **425 itérations** (5,7 s au lieu de 708), débits inchangés à
 2,4·10⁻⁶ près ; à `ny` = 1, identité 2D gardée ([preuve](../validation/FACES-COUPEES-3D-S324.md) §6).

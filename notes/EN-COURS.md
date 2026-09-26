@@ -92,8 +92,8 @@ amortissement (régression) à 1 point d'APIC seul. (6) Repos à 5 cm : vitesse 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la bande (`RACCORD_BANDE=1`) dans `lot5_comparaison.rs`, la densité lue sur la dernière colonne libre ;
   critères 1 et 2.
-- [>] **P3** — 30 s à 5 et 2,5 cm, repos ; critères 3 à 6 ; attribution si manqué.
-- [ ] **P4** — preuve (section datée de B10-APIC-S320, §14) ; A316, file, liste.
+- [x] **P3** — 30 s à 5 et 2,5 cm, repos ; critères 3 à 6 ; attribution si manqué.
+- [x] **P4** — preuve (section datée de B10-APIC-S320, §14) ; A316, file, liste.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
@@ -129,3 +129,8 @@ correction ajoute **102 J/m** d'énergie potentielle en 30 s, pour une onde de ~
 particules sous l'échange. La correction rend ce que l'échange ôte : **l'échange comprime** — la racine d'A316 — et la
 correction, qui rend le tassement visible, en fait une pompe dès qu'elle est en phase avec l'onde. Critères 1 (sans variable,
 au bit, rejoué après chaque ajout) et 2 (masse) tenus partout.
+
+**P3–P4 en un commit.** (B) à 2,5 cm, 30 s : masse à gauche +0,0005 / −0,0017 / **−0,0054** m² (manqué, dans l'autre sens),
+densité 4,03 / 4,03 / 3,92 (tenu), saut 0,856, période −1,07 % contre +1,60, amortissement **−3,90 %** (croît), 49 J/m
+ajoutés ; repos 5 cm : 0,65 cm/s (tenu). La référence S354 à 2,5 cm rejouée au chiffre près (0,50086 / 0,50290 / 0,50583 ;
+3,882 / 4,267 / 4,192 ; saut 1,00). **Non reçu.** Preuve : B10-APIC-S320 §14 ; A316 (note), file (lot 5, campagne), liste 4.12.
