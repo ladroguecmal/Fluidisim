@@ -62,104 +62,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S371 — **terminée**. **Rendu 10 : la caméra à demi immergée** (ADR-019 §6, liste 8.6), session de rendu de
-l'alternance d'ADR-191 D3, suite déclarée par S369 et S370. Aujourd'hui (S365) le mode immergé bascule **d'un bloc** sur
-la hauteur de la bande sous l'œil : quand la ligne d'eau traverse l'objectif, tout le cadre est faux d'un côté.
-Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local
-(`~/Downloads/Godot_v4.4.1-stable_win64.exe/Godot_v4.4.1-stable_win64_console.exe`).
+Session : S372 — **en cours**. Verdict **R26** : *« je valide continue »* — la caméra à demi immergée et son ménisque
+reçus. Par l'alternance d'ADR-191 D3, **la physique** ; à deux maillons (S370, S371), un lot qui **change l'état d'un
+point** : **5.4 vannes et pompes**, *absent*, au front 0, dans V (ADR-010 §1 les nomme parmi les arêtes ; noyau reçu,
+intact depuis S229). A320, la coque qui bouge ou la côte avancent sans changer d'état en une session.
+Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Thèse.** Le milieu se décide **par pixel**, au point où le rayon du pixel traverse le plan proche — l'objectif : sous la
-surface de B à son aplomb (déplacement horizontal inversé par point fixe), le pixel est vu de l'eau, sinon de l'air. Une
-seule fonction, dans `optique_eau.gdshaderinc`, lue par l'eau, le fond et le ciel ; analytique, donc sans le scintillement
-d'une ligne émergée du maillage (ADR-019 §6). Hors de la bande des vagues, le résultat est celui du drapeau global.
-L'audio (deux mixages) est hors session : à la fin (ADR-197 D5).
+**Thèse.** Une **commande** par arête, `control_pm` (0 à 1 000, entier, état répliqué, 1 000 par défaut) : un orifice
+commandé est une **vanne** (section × commande), un déversoir commandé une vanne de largeur, et une **pompe** est une
+loi nouvelle — réseau **ouvert** : courbe parabolique `H(Q) = H0·(1 − (Q/Qmax)²)`, point de fonctionnement contre la
+hauteur statique, clapet (pas de retour), prise dénoyée à sec, vitesse `n` par les lois de similitude (`Qmax·n`,
+`H0·n²`). Le réseau fermé sous pression reste en v2 (ADR-010 §4). L'instantané passe en version 2 : la commande est un
+état, pas une configuration (ADR-140).
 
-**Critères, écrits avant.** (1) La ligne d'eau rendue contre l'intersection analytique de la surface et du plan proche,
-recalculée en double dans `mer.gd`, sur au moins 16 colonnes et trois états de mer : **≤ 1 pixel**. (2) Scintillement :
-sur 60 images consécutives à 1/60 s, caméra fixe dans la houle, **aucun pixel ne change de milieu à plus de 2 pixels de
-la ligne analytique**. (3) Non-régression : les poses au-dessus (proche, rasante) et sous l'eau (sous_eau, zénith)
-**identiques au bit** au rendu d'avant. (4) La ligne sur l'objectif (ménisque) décrite d'après des photographies réelles
-cherchées par nous, avant d'être rendue ; jugée par l'utilisateur (R26).
+**Critères, écrits avant.** (1) À commande 1 000, **tous les essais V existants inchangés au bit**. (2) Vanne à 500 : la
+vidange de C12 dure **2 × 728 s à ±3 %** (intégrale analytique) ; à 0, **aucun millilitre** ne passe. (3) Pompe qui
+vide A dans B à décharge libre : le temps jusqu'à la prise dénoyée contre l'intégrale analytique
+`t = 2·√H0·A·(√u0 − √u1)/Qmax` **à ±1 %** ; volume final à un pas près. (4) Pompe noyée : l'équilibre à la hauteur de
+barrage (`Δh = n²·H0`) **à ±1 %** ; vitesse ½ : débit à Δh nul = `½·Qmax` à ±1 %. (5) Masse conservée **exactement**,
+pas déterministe au bit, refus atomiques. (6) Instantané v2 : une commande changée survit à la restauration, au bit.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — les images témoins d'avant (quatre poses, commit de départ) ; références réelles de la ligne d'eau
-  (photographies « dessus-dessous » libres, lues sans téléchargement) : ce qu'elles montrent, consigné ici.
-- [x] **P3** — la classification par pixel dans `optique_eau.gdshaderinc` (point du plan proche, hauteur de la bande à
-  son aplomb, borne pour sortir tôt) ; la bande passée au fond et au ciel.
-- [x] **P4** — l'eau, le fond et le ciel lisent le milieu du pixel (profondeur d'origine par pixel, trajet dans l'eau
-  depuis l'objectif) ; la brume de Godot sur les pixels vus de l'eau.
-- [x] **P5** — `--controle-ligne-eau` : critère 1, puis critère 2 ; non-régression (critère 3).
-- [x] **P6** — la ligne sur l'objectif (ménisque), d'après P2 ; les images de R26.
-- [x] **P7** — preuve `DEMI-IMMERGEE-S371`, ADR-019 note datée, liste 8.6, file, feuille de route, index ; revue R26.
-- [x] **P8** — rituel.
+- [>] **P1** — jeton, plan seul ; R26 consigné.
+- [ ] **P2** — ADR-199 : vannes et pompes dans V (lois, commande, provenance, ce qui n'est pas fait).
+- [ ] **P3** — `control_pm` sur `Opening` ; la vanne ; critères 1 et 2.
+- [ ] **P4** — la pompe ; critères 3 à 5.
+- [ ] **P5** — l'instantané WVST v2 ; critère 6.
+- [ ] **P6** — preuve `VANNES-POMPES-S372`, liste 5.4, file, feuille de route, index, ADR-010 et ADR-140 notes datées.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-
-**P2 — images témoins d'avant** (commit `d66ac1f1`, scratchpad `avant/`) : `godot_proche_12s`, `godot_rasante_12s`
-(sans `--cote`), `godot_sous_eau_cote_12s`, `godot_sous_eau_zenith_cote_12s`, `godot_proche_cote_12s`.
-
-**P2 — références réelles de la ligne d'eau**, lues dans le navigateur, chiffrées par un canevas (luminance sRGB décodée,
-moyenne sur 7 à 41 colonnes), rien téléchargé :
-
-- **A** — *Reef Scenic Split Shot in the Bird's Head Seascape* (Jones/Shimlock, Secret Sea Visions ; Wikimedia Commons,
-  CC BY-SA 4.0) ; 1 000 × 670, hublot en dôme (ligne légèrement courbée), récif peu profond, soleil. De haut en bas, à
-  trois colonnes : la surface vue d'au-dessus, en rasant, tassée sur ≈ 12 px, qui reflète la rive (0,44 ; 0,43 ; 0,15) ;
-  **un trait sombre de 1 à 2 px** (0,12) ; **une bande claire de 5 à 7 px** (0,61 ; 0,62 ; 0,37), la plus lumineuse de la
-  région ; **passage à l'eau en ≈ 3 px** (le rouge tombe de 0,26 à 0,01) ; l'eau, uniforme (0,00 ; 0,19 ; 0,21). Ligne
-  entière ≈ 10 px, **1,5 % de la hauteur** ; côté eau ≈ 0,5 fois la surface vue d'au-dessus.
-- **B** — *Over-under with flippers* (Gerry Thomasen ; Commons, CC BY 2.0) ; 2 592 × 1 944, compact (hublot plan
-  probable), rivière à l'ombre, eau verte. **Passage continu, sans bande claire**, sur ≈ 24 px, **1,2 % de la hauteur** ;
-  côté eau 40 fois plus sombre que la roche au-dessus (exposition faite pour l'air).
-- Commun : une ligne **continue et lisse**, jamais crénelée ; une transition d'environ **1 % de la hauteur d'image** (le
-  hublot est au foyer nul : la surface qui le touche est floue) ; le côté eau plus sombre. La bande claire tient au dôme
-  au soleil (A), pas à B. **Choix déclaré** : hublot en dôme — pas de grossissement de la moitié immergée, les objets
-  restent continus à travers la ligne.
-
-**P2 — la brume de Godot** (source 4.4-stable, `scene_forward_clustered.glsl`, `fog_process`) : écrire `FOG` dans un
-nuanceur supprime entièrement la brume du moteur pour ce matériau (`CUSTOM_FOG_USED`), et la brume lit le cube de
-radiance, inaccessible au code utilisateur : pas de brume par pixel au bit. **Décision** : la brume s'éteint quand un
-pixel au moins est vu de l'eau (la zone des vagues au plan proche), comme sous l'eau ; à hauteur d'œil de vague, la mer
-vue d'au-dessus est rasante et reflète l'horizon, que la brume ne change presque pas — **à mesurer** (P5).
-
-**P3 — fait.** `surface_b.gdshaderinc` : la bande (déclarations déplacées d'`eau.gdshader`), `surface_a_l_aplomb` (Newton,
-quatre évaluations, résidu corrigé au premier ordre), `milieu_du_pixel` (part d'eau, profondeur de l'objectif, distance
-signée en pixels) ; inclus par l'eau, le fond, le ciel — pas encore lu. `mer.gd` : la bande et la base de la caméra sur
-les trois matériaux, `surface_exacte` (le même calcul en double), le mode `demi_immergee`. **Trouvé** : la borne de |η|
-(`Σ|a|` + Tayfun) vaut **6,43 m** pour Hs 2,5 m — la pose proche (4 m) passait en mode demi, brume éteinte (jusqu'à 13
-niveaux d'écart). **Test serré, rigoureux** : `η` exact au centre du plan proche, plus `pente·R/(1 − G)` sur l'étendue
-`R` du plan (G = Σ a·k = 0,726 ; pente bornée 1,238 ; R = 0,095 m à 50° : **0,43 m**). Ensuite : **les cinq poses
-témoins identiques au bit**.
-
-**P4 — fait.** L'eau, le fond et le ciel lisent `milieu_du_pixel` ; transition mélangée ; le fond relu par réfraction
-n'est pris que s'il a été vu de l'air (sinon le fond non réfracté du pixel) ; le ciel prend la position de la caméra en
-uniforme (lire `POSITION` passerait le ciel en mise à jour continue). **Le milieu d'un bloc et la profondeur se prennent
-désormais à l'objectif, sur la surface exacte** (S365 : l'œil, la bande sans déplacement ni second ordre) —
-`PROFONDEUR=s365` la garde : alors les cinq poses témoins **identiques au bit** ; sans elle, sous l'eau, ≤ 1 niveau sur 5 à
-9 % des pixels (2,949 m contre 2,969 m ; 4,115 contre 4,233 au zénith). Poses `demi`, `demi_soleil`, `demi_dessus`,
-`demi_dessous`, hauteur relative à la surface exacte. **Deux défauts vus et corrigés** : (a) l'éventail central de 0,25 m —
-cent anneaux ajoutés sous R_MIN au même pas (1,2 cm), les anneaux existants inchangés ; 33 pixels à ±1 au zénith sous
-l'eau, où le centre est vu ; (b) **la cause réelle des facettes** : la cascade de 4 m lue en bilinéaire, un texel de 1,6 cm
-vu sur des dizaines de pixels — le bord de la fenêtre en escalier (`DETAIL=0` l'efface). Lecture **bicubique B-spline**
-au-delà d'un grossissement de 32 (fondu à 64). **Impasse** : au seuil 4, les poses validées changeaient (jusqu'à 69
-niveaux) — la cascade de 32 m y est déjà grossie de 5 à 15 fois, en bilinéaire ; ce régime-là reste à examiner (file).
-
-**P5 — fait.** `--controle-ligne-eau` (≈ 100 s ; `--cote` implicite) : l'eau, le fond et le ciel rendent la part d'eau
-(`controle_milieu`), la ligne rendue (passage à ½) contre l'intersection analytique en double. **Critère 1** : 32
-colonnes, quatre cas (t₀, t₀ + 2,3 s, autre position à t₀ + 5,7 s, roulis 0,4 rad) — Newton par pixel **0,020 px** au pire.
-**Critère 2** : 60 images à 1/60 s, caméra fixe (la ligne visible au milieu 42 fois, jusqu'à 60 px par image) et
-flottante (60 fois, 0,2 px) : **0 pixel mal classé** à plus de 2 px. **Mais le coût** (`--cout-demi`, médiane sur 240
-images) : **4,7 à 5,1 ms GPU** de plus — Newton, 4 × 64 composantes, jusqu'à trois fois par pixel. **Corrigé : la surface
-au plan proche à l'ordre 2**, calculée une fois par image par `surface_ordre2` (en double, hessienne eulérienne
-analytique) ; terme d'ordre 3 borné par `Σ a·k³·r³/6` = 0,37 px au coin du cadre à 50° (2,4 px à 100°, 5,1 à 120°).
-Mesuré : **0,078 px** au pire, 0 pixel mal classé ; **surcoût GPU −0,001 et 0,028 ms** ; CPU `immersion()` 0,47 ms en
-GDScript, en mode demi seulement. `MILIEU=exact` garde Newton : image contre ordre 2, écarts le long de la ligne seule.
-**Brume** (`BRUME=1` la garde, pose `demi`) : au-dessus de la ligne, 0,8 % des pixels, 17 niveaux au pire (p99,9 = 2) ;
-au-dessous, 12 % et **jusqu'à 48 niveaux** — le défaut de S366 évité. Témoins : identiques au bit (zénith : 33 px à ±1).
-
-**P6 — fait.** Le ménisque sur le hublot (`menisque`, `surface_b.gdshaderinc`), côté air de la ligne, sur l'eau et le ciel
-(le fond n'y est vu qu'à travers la surface) : bande claire ×1,38 sur 0,9 % de la hauteur, trait sombre ×0,27 sur 0,25 %,
-calés sur la photographie A ; `MENISQUE=0` l'éteint (B n'en montre pas). Témoins inchangés. Images de R26 :
-`viewer/captures/s371/` — `demi_vers_le_large`, `demi_face_au_soleil`, `demi_au_dessus`, `demi_au_dessous`,
-`demi_sans_menisque`, `avant_d_un_bloc` (`DEMI=0` : tout le cadre sous l'eau, ciel compris).

@@ -1181,3 +1181,7 @@ photographie « dessus-dessous » de Raja Ampat : un trait sombre, une bande cla
 
 Un mot par question suffit ; sans réponse, il reste.
 
+**Verdict R26 — reçu le 2026-09-26 (S372)** : *« je valide continue »*. Lu sur les deux questions : (1) crédible ; (2) le
+ménisque reste. **Classe** : la caméra à demi immergée jugée sur six images fixes, à Hs 2,5 m ; ni animation, ni objet
+qui traverse la ligne.
+
