@@ -17464,3 +17464,20 @@ une itération coûte ≈ 8,7 Jacobi (coefficients fantômes recalculés) ; divi
 ni pas couplé mesuré. **Rituel.** Maillons **5** : aucun critère de porte ni état de point n'a changé (4.19 reste partiel) ;
 **justifié** — la campagne est la demande explicite de l'utilisateur, et C1 tient le critère qu'ADR-207 lui a écrit. Suivant :
 **C2**, les colonnes hautes (sans carte) ; au poste, la pluie, pièce 5 ; question ouverte : δ dans Godot, quand.
+
+## S386 — 2026-09-26 — physique : C2, les colonnes hautes mesurées avant d'être construites
+
+**Entrée.** *« Je suis d'accord avec toi pour le branchement à la fin »* — δ dans Godot en C11 (ADR-207, note) ; *« Réalise
+la suite »* : C2. **Fait** ([preuve](../docs/validation/COLONNES-HAUTES-S386.md)). La dispersion d'une colonne **se
+calcule** (`scheme_frequency`, S295) : une colonne haute est une restriction de Galerkin du schéma fin, calculée avant
+d'être écrite (`outils/colonnes_hautes.py`, six essais ; S295 redonné). **Critère d'usage** écrit avant : l'erreur de
+fréquence ajoutée ≤ max(celle du schéma fin, 10⁻⁴), λ de 1 à 14 m, porte B. **Mesuré** : une colonne haute unique
+linéaire ne le tient qu'à 17 couches cubiques sur 28 (÷1,47) — **l'estimation ÷3,1 de S384 était fausse** (seize fois le
+permis à 14 m) ; grille étirée ÷2,0 ; **pression linéaire par morceaux sur nœuds étirés ÷2,55** (bassin 3 m : ÷2,14).
+**ADR-208** remplace ADR-207 D2 : la colonne graduée ; en mode mobile, les couches cubiques doivent contenir la course de la
+surface (D4). **Construit** au pas linéaire (`delta3d_graded.rs`, `enable_graded`) : `Pᵀ·A·P`, divergence restreinte ; six
+essais (symétrie vue échouer sur une transposée faussée ; repos au bit ; volume 10⁻⁹ m³ ; l'onde oblique suit sa fréquence
+calculée à 0,0048 %, Rust = Python) ; suite 673 réussis, zéro avertissement. **Limites** : aucun coût gagné (vitesses et
+opérateur fins) ; ni pas mobile, ni fond coupé, ni carte. **Rituel.** 4.3 passe à **partiel** (3 / 68 / 49). Maillons
+**0** : devient possible une pression à 11 inconnues sur 28 ; chemin qui le consomme : C2b puis C3 ; preuve ci-dessus.
+Suivant : **C2b** — pas mobile, stockage compact, multigrille graduée.

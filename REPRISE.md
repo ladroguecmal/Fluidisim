@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 18:43 +02:00
-Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
-Session en cours : S386 — C2 : les colonnes hautes dans la référence (ADR-207) ; décision de l'utilisateur : δ dans Godot en C11
-Dernière session : S385 — physique : **C1, la multigrille 3D de la référence** ([preuve](docs/validation/MULTIGRILLE-3D-S385.md), [ADR-207](docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md)) — 9 à 11 itérations quelle que soit la maille contre 102 à 365 pour Jacobi, désactivée par défaut ; verdict **R32** reçu pour l'instant (trois défauts à la file). Avant : S384, la conception de la campagne
-Session suivante : **C2 — les colonnes hautes dans la référence** (ADR-207 D2, D5 ; faisable sans carte) ; au poste, en alternance (ADR-191) : la pluie, pièce 5 — surfaces mouillées et éclaboussures au sol
-Maillons        : 5 — S385 : C1 tenue, aucun critère de porte ni état de point changé ; justifié au journal (campagne demandée par l'utilisateur)
+Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; lecture des articles bloquée)
+Session en cours : aucune
+Dernière session : S386 — physique : **C2, la colonne graduée** ([ADR-208](docs/adr/ADR-208-la-colonne-graduee.md), [preuve](docs/validation/COLONNES-HAUTES-S386.md)) — la colonne haute unique mesurée insuffisante (÷1,47), la pression linéaire par morceaux retenue (÷2,55 à la porte B), construite au pas linéaire ; 4.3 partiel ; décision de l'utilisateur : δ dans Godot en C11. Avant : S385, la multigrille 3D (C1)
+Session suivante : **C2b — la colonne graduée au pas mobile** (course de la surface, ADR-208 D4), son stockage compact et la multigrille graduée ; faisable sans carte. Au poste, en alternance (ADR-191) : la pluie, pièce 5
+Maillons        : 0 — S386 : 4.3 passe à partiel (la colonne graduée reçue au pas linéaire) ; consommée par C2b puis C3
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

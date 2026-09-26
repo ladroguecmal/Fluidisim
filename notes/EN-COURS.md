@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S386 — **en cours**. **C2** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D2,
+Session : S386 — **terminée**. **C2** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D2,
 D5) : **les colonnes hautes dans la référence**. Demande de l'utilisateur (2026-09-26) : *« Réalise la suite »* ; et sa
 décision, à consigner : *« Je suis d'accord avec toi pour le branchement à la fin »* — δ dans Godot en C11. Agent : Claude
 Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
@@ -95,7 +95,7 @@ conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **l
   morceaux, gradient conjugué réduit) ; critère 3.
 - [x] **P5b** — l'onde oblique à colonne graduée contre sa fréquence calculée ; critère 4 ; inconnues comptées.
 - [x] **P6** — critère 5 ; preuve `COLONNES-HAUTES-S386` ; liste, file, feuille de route, index.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 
