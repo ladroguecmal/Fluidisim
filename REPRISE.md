@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 23:56 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
-Session en cours : S397 — C5a, troisième part : la circulation à la frontière du raccord — les colonnes transportent-elles la quantité de mouvement ?
-Dernière session : S396 — physique : **C8a, fusion et séparation de domaines en référence** ([preuve](docs/validation/FUSION-S396.md)) — les domaines comme ensembles de blocs (ADR-006 §3–4), l'état recopié au bit ; fusionnés au critère, 0,26 % de l'amplitude du domaine unique (3,4 à 8,5 % si trop tard) ; **4.9 partiel**. Avant : S395, la circulation permanente à la frontière du raccord
-Session suivante : dans le cloud, **le raccord** (C5a, troisième part : trancher l'advection de la quantité de mouvement dans les colonnes, puis un échange qui retire où les particules arrivent) ou **C8b** (un domaine qui grandit par blocs en suivant la perturbation) ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
-Maillons        : 0 — S396 : 4.9 passe à partiel (fusion et séparation en référence) ; chemin : C8b, puis la carte et le rang 4
+Session en cours : aucune
+Dernière session : S397 — physique : **C5a, troisième part** ([preuve](docs/validation/B10-APIC-S320.md) §16) — la circulation de la frontière du raccord était un défaut du banc 2D (ses colonnes n'advectaient pas ; avec l'advection, 54 → 4 mm/s) ; `Volume3` advecte ; reste une migration lente à 2,5 cm, non attribuée. Avant : S396, fusion et séparation (4.9 partiel)
+Session suivante : dans le cloud, **C5b** — le raccord particules ↔ colonnes **en 3D** (APIC 3D ↔ `Volume3` : colonnes qui advectent, échange par le flux de la face, retrait où les particules arrivent ; masse de chaque côté, densité, profil de la face, période sur 30 s) ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
+Maillons        : 1 — S397 : aucun point ni critère de porte n'a changé (A316 scindé : la circulation, un défaut du banc)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

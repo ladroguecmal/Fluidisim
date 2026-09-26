@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S397 — **en cours**. **C5a, troisième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
+Session : S397 — **terminée**. **C5a, troisième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
 [B10-APIC-S320](../docs/validation/B10-APIC-S320.md) §15) : trancher la source de la circulation permanente à la frontière du
 raccord. Demande de l'utilisateur (2026-09-26) : *« Continue, l'objectif est de peaufiner et terminer le solveur »* — le
 raccord (C5) est le verrou de la campagne : il porte C6 (la bascule), puis C7 et C10. Agent : Claude Opus 5.5, session cloud
@@ -87,7 +87,7 @@ période et amortissement à 1 point d'APIC seul, à 5 et 2,5 cm ; repos < 1 cm/
 - [x] **P2** — l'advection des colonnes (`RACCORD_ADVECTION=1`) ; le profil de la face ; critères 1 et 2.
 - [x] **P3** — les critères de S394 avec l'advection, 5 et 2,5 cm, repos ; critère 3 ; attribution si manqué.
 - [x] **P4** — preuve (§16 de B10-APIC-S320) ; A316, file, liste.
-- [>] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 **P2 — H1 confirmée, critères 1 et 2 tenus.** Sans variable, au bit (0,3893 ; 0,50098 / 0,50734 / 0,51211 ; 2,17339 s). Avec

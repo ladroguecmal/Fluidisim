@@ -17640,3 +17640,17 @@ blocs épars stockés ; des murs ; pas de croissance. **Rituel.** Maillons **0**
 de fusionner et de séparer des domaines de δ sans rupture, par leurs ensembles de blocs ; **chemin** : la croissance d'un
 domaine qui suit la perturbation (C8b), puis la carte et l'ordonnanceur (rang 4) ; **preuve** : FUSION-S396. Suivant : dans le
 cloud, le raccord (trancher l'advection des colonnes) ou C8b ; au poste, C3b puis la pluie, pièce 5b.
+
+## S397 — 2026-09-26 — physique : C5a, troisième part — la circulation était un défaut du banc
+
+**Entrée.** *« Continue, l'objectif est de peaufiner et terminer le solveur »* (décision consignée) : le raccord (C5), verrou de
+C6, C7 et C10, d'abord. **Fait** ([preuve](../docs/validation/B10-APIC-S320.md) §16) : H1 de S395 éprouvée directement — les
+colonnes du banc, réensemencées à la vitesse de la grille en des points fixes, n'advectaient pas la quantité de mouvement ;
+avec une advection semi-lagrangienne au réensemencement, la vitesse moyenne sur la face de la frontière passe de +21 / −54 à
+**4 mm/s** (critère 2 tenu ; sans variable, au bit). **Décisif pour la 3D** : le pas mobile de `Volume3` advecte (ADR-209) —
+la circulation, la compression de S354 et la pompe de S394 étaient un défaut du **modèle de colonnes du banc**. **Critère 3
+non tenu** : à 5 cm (solde) la masse tient mais densité 3,7 et période +3 points ; à 2,5 cm la période tient mais la masse
+migre encore de +0,006 m² en 30 s, comme en S354. (D), la hauteur mouillée amont à la frontière, déclaré avant : **réfuté**.
+**Limites** : la seconde cause non attribuée ; un banc 2D. **Rituel.** Maillons **1** : aucun point ne change (A316 scindé).
+Suivant : dans le cloud, **C5b** — le raccord en 3D, APIC 3D et `Volume3`, avec les instruments de S394–S397 ; au poste, C3b
+puis la pluie, pièce 5b.
