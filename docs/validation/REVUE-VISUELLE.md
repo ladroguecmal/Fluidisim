@@ -1349,3 +1349,9 @@ surfaces mouillées (pièce 5), le sol étant alors un film d'eau ; le vent.
 
 **La question :** les gerbes sont-elles crédibles — leur nombre, leur taille, leur forme de près au ras de l'eau (dôme et
 jet) ? La silhouette simplifiée suffit-elle, ou faut-il la couronne à doigts et les gouttelettes avant de continuer ?
+
+**Verdict R32 — reçu le 2026-09-26 (S385)** : *« Verdict R32 n'est pas valide pour plusieurs raisons : les gerbes n'apparaissent
+pas sur tous les impacts de pluie, elles peuvent tenir dans le vide, et sont vraiment moches vues de près. Mais on laisse
+valide pour l'instant, il s'agit de sessions de peaufinage externe. »* Image jointe : des gerbes blanches, en colonnes,
+au-dessus de l'eau à distance moyenne. **Reçu pour l'instant** ; les trois défauts vont à une session de peaufinage
+([file](../registres/QUESTIONS-OUVERTES.md#file-active)) — ils sont constatés, pas encore expliqués.

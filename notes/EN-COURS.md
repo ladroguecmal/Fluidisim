@@ -84,7 +84,7 @@ et temps total publiés, au même résidu.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — verdict R32 consigné (REVUE-VISUELLE §37, file : les défauts nommés, déclencheur « peaufinage »).
+- [x] **P2** — verdict R32 consigné (REVUE-VISUELLE §37, file : les défauts nommés, déclencheur « peaufinage »).
 - [ ] **P3** — l'instrument d'abord : `examples/delta3d_multigrille.rs`, trois mailles, fond plat et bosse, itérations et
   temps de Jacobi — la référence de mesure.
 - [ ] **P4a** — `delta3d_multigrid.rs` : niveaux 3D (géométrie, restriction, prolongation, opérateur, lissage) ; comptés

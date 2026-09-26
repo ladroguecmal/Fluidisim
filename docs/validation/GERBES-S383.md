@@ -84,3 +84,11 @@ devant la caméra de départ, « proche ». **En pose « référence », les gou
   Marengo 1997 — avec la pièce 5) ; pas de vent ; les gerbes ne portent ni ombre ni occultation.
 - Fenêtre de 12 m sur la mer (au-delà, le terme moyen) ; vérifié sur cette machine seulement ; images de R32 locales
   (`viewer/captures/s383/`).
+
+## Verdict R32 — 2026-09-26 (S385)
+
+**Reçu pour l'instant**, avec trois défauts vus par l'utilisateur ([REVUE-VISUELLE](REVUE-VISUELLE.md) §37) : des impacts
+**sans gerbe** ; des gerbes qui **tiennent dans le vide** ; une silhouette **laide de près**. Le premier contredit en
+apparence le critère 3 (« aucun disque sans gerbe ») : celui-ci n'a été compté que sur la piscine, vue d'aplomb, pour les
+gerbes de moins de 30 ms. Aucune explication n'est avancée ici (L177) : la session de peaufinage reproduit d'abord chaque
+défaut sur image.
