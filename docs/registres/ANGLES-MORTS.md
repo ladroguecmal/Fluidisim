@@ -4306,6 +4306,12 @@ mémoire de vitesse, frontière déplacée : elle naît des colonnes. L'échange
 particules par maille). **Reste ouvert.** Hypothèse à trancher : les colonnes, réensemencées à chaque pas, n'advectent pas la
 quantité de mouvement.
 
+**A316 — note datée du 2026-09-26 (S397). Scindé : la circulation était un défaut du banc** ([preuve](../validation/B10-APIC-S320.md)
+§16). Les colonnes du banc 2D, réensemencées à la vitesse de la grille en des points fixes, ne transportaient pas la quantité
+de mouvement ; avec une advection semi-lagrangienne, la circulation tombe de 54 à 4 mm/s. Le pas mobile de `Volume3`, lui,
+advecte : le raccord 3D n'a pas ce défaut. **Reste ouvert** : une migration lente de la masse vers les particules à 2,5 cm
+(+6 mm en 30 s), non attribuée — la hauteur amont est réfutée. Déclencheur : C5b, le raccord en 3D, où elle sera mesurée.
+
 **A315 — note datée du 2026-09-23 (S326) : résolu.** Un Jacobi sur le chemin coupé — celui du mode mobile
 3D — ramène la bosse à 128 de 16 029 à **425 itérations** (5,7 s au lieu de 708), débits inchangés à
 2,4·10⁻⁶ près ; à `ny` = 1, identité 2D gardée ([preuve](../validation/FACES-COUPEES-3D-S324.md) §6).

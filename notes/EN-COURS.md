@@ -86,8 +86,8 @@ période et amortissement à 1 point d'APIC seul, à 5 et 2,5 cm ; repos < 1 cm/
 - [x] **P1** — jeton, plan seul ; la décision de l'utilisateur consignée.
 - [x] **P2** — l'advection des colonnes (`RACCORD_ADVECTION=1`) ; le profil de la face ; critères 1 et 2.
 - [x] **P3** — les critères de S394 avec l'advection, 5 et 2,5 cm, repos ; critère 3 ; attribution si manqué.
-- [>] **P4** — preuve (§16 de B10-APIC-S320) ; A316, file, liste.
-- [ ] **P5** — rituel.
+- [x] **P4** — preuve (§16 de B10-APIC-S320) ; A316, file, liste.
+- [>] **P5** — rituel.
 
 ### Notes de reprise
 **P2 — H1 confirmée, critères 1 et 2 tenus.** Sans variable, au bit (0,3893 ; 0,50098 / 0,50734 / 0,51211 ; 2,17339 s). Avec
@@ -123,3 +123,5 @@ amont n'est pas la seconde cause. **Non attribuée.**
 les colonnes du raccord 3D ne sont pas celles du banc 2D. **La circulation de S395 était un défaut du modèle de colonnes du
 banc** (réensemencé sans advection), non du raccord. La migration à 2,5 cm, elle, reste à voir en 3D, où l'on porte : colonnes
 qui advectent, échange par le flux de la face, retrait là où les particules arrivent, instruments de S394–S397.
+
+**P4** : preuve B10-APIC-S320 §16 ; A316 (note : scindé) ; file (lot 5, campagne : C5b en 3D), liste 4.12, feuille de route.

@@ -725,3 +725,55 @@ colonnes impose à la frontière. **Suite** : l'éprouver directement — donner
 mouvement (leurs particules gardées lagrangiennes pendant le pas, réensemencées aux positions advectées), ou mesurer la même
 face dans une eau **toute** en colonnes, sans frontière ; puis, l'hypothèse tranchée, un échange qui retire là où les
 particules arrivent.
+
+---
+
+## 16. S397 — la circulation attribuée : les colonnes du banc ne transportaient pas la quantité de mouvement
+
+2026-09-26. **C5a, troisième part** ; A316. Demande de l'utilisateur : *« l'objectif est de peaufiner et terminer le solveur »*.
+Critères écrits avant, dans le plan de la session.
+
+### Reproduire
+
+- Commit `8304cf7c` ou plus récent ; le montage de §14–15 plus `RACCORD_ADVECTION=1` (H1) et `RACCORD_AMONT=1` (D) ;
+  `RACCORD_ECHANGE=paroi|solde|eulerien` ; `RACCORD_BILAN=1` pour le profil de la face.
+- Sans variable nouvelle, tout est au bit (§14). Durées : 16 s à 5 cm, 2 à 3 min à 2,5 cm.
+
+### H1 confirmée
+
+Dans la zone des colonnes du banc, les particules sont réensemencées à chaque pas sur des points fixes, à la vitesse que la
+grille a en ces points : le terme `(u·∇)u` n'y existe pas, alors qu'il existe du côté des particules. **Épreuve** : chaque
+particule neuve des colonnes prend la vitesse et la matrice affine de la grille **au pied de sa caractéristique**, `x − dt·u(x)`
+— une advection semi-lagrangienne. **Prédiction tenue** : la vitesse moyenne sur la face de la frontière, 30 s, paroi, 5 cm,
+passe de +21 / −54 mm/s à **|ū| ≤ 4,1 mm/s** à toute profondeur (APIC seul : ≤ 2,2) ; avec l'échange « solde », sous
+1,1 mm/s. **La circulation de §15 était le transport de quantité de mouvement qui manquait aux colonnes.**
+
+**Pour la 3D, c'est décisif** : le pas mobile de `Volume3` advecte la quantité de mouvement (`advect_mobile3`, ADR-209) — les
+colonnes du raccord 3D ne sont pas celles du banc. La circulation, et la compression qu'elle faisait (S354), étaient un défaut
+du **modèle de colonnes du banc**, non du raccord.
+
+### Les critères de S394, avec l'advection
+
+| montage (30 s ; écarts à APIC seul) | masse à gauche, par 10 s (m²) | densité | saut | période (points) | amortissement (points) |
+|---|---|---|---:|---:|---:|
+| paroi, 5 cm | +0,0006 / +0,0004 / **+0,0026** | **3,71 / 3,58 / 3,67** | 0,45 | **+3,0** | +0,4 |
+| paroi, 2,5 cm | +0,0012 / **+0,0035 / +0,0059** | 3,81 / 3,88 / 4,03 | **0,56** | +0,1 | −0,9 |
+| solde, 5 cm | +0,0003 / +0,0016 / +0,0012 | **3,72 / 3,74 / 3,75** | 0,24 | **+3,2** | +0,3 |
+| solde, 2,5 cm | +0,0008 / **+0,0032 / +0,0059** | **3,75** / 3,84 / 3,92 | **0,54** | −0,1 | **−1,1** |
+| eulérien, 5 cm | −0,0008 / −0,0015 / +0,0010 | **3,31 / 3,21 / 3,30** | **1,10** | **+2,0** | +0,2 |
+
+Critères : ±0,002 m² ; 4 ± 0,2 ; < 0,5 maille ; 1 point ; 1 point. Repos, paroi et solde : 0,65 cm/s. **Non tenu.** À 5 cm, la
+masse tient (solde) mais la densité reste basse et la période s'allonge de 3 points ; à 2,5 cm, la période tient mais **la
+masse migre autant qu'en S354** (+0,006 m², +6 mm de niveau en 30 s) : une seconde cause, que l'advection ne touche pas.
+
+**(D), réfuté.** La face de la frontière prenait toujours la hauteur mouillée des colonnes ; prise en amont — la hauteur
+géométrique de la dernière colonne libre quand l'eau va vers les colonnes —, la migration à 2,5 cm est la même (+0,0061,
++0,0059). **La seconde cause n'est pas attribuée.**
+
+### Verdict et suite
+
+**Non reçu en 2D ; A316 scindé.** Sa part principale — la circulation, la compression, la pompe d'énergie de §14 — était un
+défaut du banc, levé par l'advection, et que les colonnes de δ n'ont pas. Reste une migration lente à 2,5 cm, non attribuée.
+**Suite (C5b)** : le raccord **en 3D**, entre APIC 3D et `Volume3` — colonnes qui advectent, échange par le flux de la face,
+retrait là où les particules arrivent — avec les instruments de §14–16 (masse de chaque côté, densité, profil de la face,
+période sur 30 s) ; la migration y sera mesurée, pas supposée.
