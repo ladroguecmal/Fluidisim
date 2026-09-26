@@ -84,8 +84,8 @@ pas déterministe au bit, refus atomiques. (6) Instantané v2 : une commande cha
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul ; R26 consigné.
-- [ ] **P2** — ADR-199 : vannes et pompes dans V (lois, commande, provenance, ce qui n'est pas fait).
+- [x] **P1** — jeton, plan seul ; R26 consigné.
+- [x] **P2** — ADR-199 : vannes et pompes dans V (lois, commande, provenance, ce qui n'est pas fait).
 - [ ] **P3** — `control_pm` sur `Opening` ; la vanne ; critères 1 et 2.
 - [ ] **P4** — la pompe ; critères 3 à 5.
 - [ ] **P5** — l'instantané WVST v2 ; critère 6.
