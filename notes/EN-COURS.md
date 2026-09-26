@@ -62,66 +62,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S397 — **terminée**. **C5a, troisième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
-[B10-APIC-S320](../docs/validation/B10-APIC-S320.md) §15) : trancher la source de la circulation permanente à la frontière du
-raccord. Demande de l'utilisateur (2026-09-26) : *« Continue, l'objectif est de peaufiner et terminer le solveur »* — le
-raccord (C5) est le verrou de la campagne : il porte C6 (la bascule), puis C7 et C10. Agent : Claude Opus 5.5, session cloud
-Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Sert 4.12, 4.16, A316.
+Session : S398 — **en cours**. **C5b, première part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
+conception §4.1 A1, §4.2) : **la zone des colonnes dans APIC 3D**. Demande de l'utilisateur (2026-09-27) : *« Continue »*
+(objectif consigné en S397 : terminer le solveur). Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo,
+Python ; ni carte graphique, ni Godot. Sert 4.16, 4.12, A316.
 
-**Thèse (H1, de S395).** Dans la zone des colonnes, les particules sont réensemencées à chaque pas sur des points fixes, à la
-vitesse que la grille a **en ces points** : la quantité de mouvement n'y est jamais transportée — le terme `(u·∇)u` existe du
-côté des particules, pas de l'autre. Pour une onde stationnaire, sa moyenne (une contrainte de Reynolds, `ρ⟨u²⟩`) n'est
-équilibrée que d'un côté de la frontière : le reste y entretient une circulation moyenne. **Épreuve directe** : réensemencer
-les colonnes avec la vitesse de la grille **au pied de la caractéristique** — au point `x − dt·u(x)` —, une advection
-semi-lagrangienne de la quantité de mouvement (`RACCORD_ADVECTION=1`). **Prédiction** : la circulation tombe au niveau d'APIC
-seul.
+**Pourquoi là, et pas dans `Volume3`.** Le raccord demande **une seule projection** pour les deux représentations (§4.2 :
+colonnes où la surface est un graphe, particules dans une bande, fluide fantôme sur `η` ou sur la surface reconstruite).
+`Apic3` a déjà la projection à fluide fantôme, la reconstruction, les transferts, les parois et le corps ; `Volume3` porte des
+modes nombreux (fond coupé, colonne graduée, couplage à B) qu'une bande heurterait. La référence la plus simple d'abord ; la
+production (C7) aura son propre portage.
 
-**Critères, écrits avant** (paroi, 30 s ; ceux de S394–S395). (1) Sans variable, au bit. (2) **H1** : avec l'advection, 5 cm, la
-vitesse moyenne sur la face, |ū| ≤ **5 mm/s** à toute profondeur (S395 : 54 ; APIC seul : 1,9) — sinon H1 est **réfutée**, et
-publiée comme telle. (3) Si H1 tient : masse à gauche ±0,002 m² d'APIC seul par tranche, densité 4 ± 0,2, saut < 0,5 maille,
-période et amortissement à 1 point d'APIC seul, à 5 et 2,5 cm ; repos < 1 cm/s.
+**Thèse.** Une **zone de colonnes** dans `Apic3`, activée par un masque de colonnes (`enable_columns`, réservée à la
+configuration) : surface **`η` par colonne** — `φ = z − η`, sans reconstruction ni son biais (S323 : le biais dépend de
+l'arrangement des particules, cause candidate de la migration de S397) ; vitesse **eulérienne**, gardée sur la grille d'un pas à
+l'autre et **advectée** (semi-lagrangienne, la leçon de S397) ; `η` transporté par les débits mouillés, pris en amont, comme δ.
+Sans masque, `Apic3` au bit. **Cette session : toutes colonnes, sans bande** — la machinerie éprouvée seule contre δ (`Volume3`,
+pas mobile) sur la même cuve et le même instrument ; la bande et l'échange viendront ensuite (C5b, deuxième part).
+
+**Critères, écrits avant.** (1) Sans masque, au bit : `apic3d_ballottement 10 0.05` imprime la ligne de S389 ; suite. (2) Toutes
+colonnes, repos 2 s : vitesse ≤ 1 mm/s ; volume `Σ η·dx²` constant à 10⁻⁶ relatif. (3) Toutes colonnes, ballottements (1, 0)
+(10 s) et (1, 1) (5 s) à 5 et 2,5 cm : période à **1 point** de celle de δ sur la même cuve ; amortissement par période ≥ 0 ;
+publiés contre la période exacte.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul ; la décision de l'utilisateur consignée.
-- [x] **P2** — l'advection des colonnes (`RACCORD_ADVECTION=1`) ; le profil de la face ; critères 1 et 2.
-- [x] **P3** — les critères de S394 avec l'advection, 5 et 2,5 cm, repos ; critère 3 ; attribution si manqué.
-- [x] **P4** — preuve (§16 de B10-APIC-S320) ; A316, file, liste.
-- [x] **P5** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — `enable_columns` et le pas à colonnes dans `apic3d.rs` ; l'essai du repos ; critères 1 et 2.
+- [ ] **P3** — les ballottements, toutes colonnes, contre δ (même instrument) ; critère 3.
+- [ ] **P4** — suite ; preuve `RACCORD-3D-S398` ; file, liste, feuille de route, index.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-**P2 — H1 confirmée, critères 1 et 2 tenus.** Sans variable, au bit (0,3893 ; 0,50098 / 0,50734 / 0,51211 ; 2,17339 s). Avec
-l'advection, paroi, 5 cm : vitesse moyenne sur la face **|ū| ≤ 4,1 mm/s** à toute profondeur (S395 : +21 / −54 ; APIC seul
-≤ 2,2) — **la circulation était le transport de quantité de mouvement manquant aux colonnes.**
 
-**P3 — critère 3, avec l'advection** (30 s ; écarts à APIC seul) :
-
-| montage | masse à gauche, par 10 s (m²) | densité | saut | période (points) | amortissement (points) |
-|---|---|---|---:|---:|---:|
-| paroi, 5 cm | +0,0006 / +0,0004 / **+0,0026** | **3,71 / 3,58 / 3,67** | 0,45 | **+3,0** | +0,4 |
-| paroi, 2,5 cm | +0,0012 / **+0,0035 / +0,0059** | 3,81 / 3,88 / 4,03 | **0,56** | +0,1 | −0,9 |
-| solde, 5 cm | +0,0003 / +0,0016 / +0,0012 | **3,72 / 3,74 / 3,75** | 0,24 | **+3,2** | +0,3 |
-| solde, 2,5 cm | +0,0008 / **+0,0032 / +0,0059** | **3,75** / 3,84 / 3,92 | **0,54** | −0,1 | **−1,1** |
-| eulérien, 5 cm | −0,0008 / −0,0015 / +0,0010 | **3,31 / 3,21 / 3,30** | **1,10** | **+2,0** | +0,2 |
-
-Repos, paroi et solde : 0,65 cm/s (tenu). Circulation du solde à 5 cm : |ū| < 1,1 mm/s. **Non tenu.** À 2,5 cm, la masse migre
-**autant qu'en S354** (+0,0058) : une seconde cause, que l'advection n'a pas touchée. Bilan à 2,5 cm (solde) : insertions
-réparties sur toute la profondeur (plus de recirculation) ; la rangée de surface a une vitesse moyenne de **+20 mm/s** sur la
-face (APIC seul +4), et la surface saute d'une demi-maille.
-
-**Candidat (D), déclaré avant sa mesure, critères inchangés** : le débit de la face de frontière prend toujours la hauteur
-mouillée **des colonnes** (`h[0]`) ; quand l'eau va des particules aux colonnes, la hauteur amont est celle des particules —
-si leur surface est plus haute, l'entrée est sous-comptée, l'eau s'accumule du côté des particules et la marche tient.
-**(D)** : pour `u > 0`, la hauteur géométrique de la dernière colonne libre, lue avant le retrait des particules des colonnes ;
-`h[0]` pour `u < 0` (`RACCORD_AMONT=1`, avec l'advection).
-
-**(D) réfuté** (avec l'advection, 30 s) : à 2,5 cm, masse à gauche +0,0007 / +0,0034 / **+0,0061** (solde), +0,0011 / +0,0039 /
-**+0,0059** (paroi) — la migration ne change pas ; à 5 cm, solde +0,0024 sur la dernière tranche (pire que sans (D)). La hauteur
-amont n'est pas la seconde cause. **Non attribuée.**
-
-**Ce que cela dit pour la 3D** : le pas mobile de `Volume3` **advecte** la quantité de mouvement (`advect_mobile3`, ADR-209) —
-les colonnes du raccord 3D ne sont pas celles du banc 2D. **La circulation de S395 était un défaut du modèle de colonnes du
-banc** (réensemencé sans advection), non du raccord. La migration à 2,5 cm, elle, reste à voir en 3D, où l'on porte : colonnes
-qui advectent, échange par le flux de la face, retrait là où les particules arrivent, instruments de S394–S397.
-
-**P4** : preuve B10-APIC-S320 §16 ; A316 (note : scindé) ; file (lot 5, campagne : C5b en 3D), liste 4.12, feuille de route.
