@@ -87,7 +87,7 @@ réelles ; jugement de l'utilisateur (R32).
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — sources : couronne, cavité, jet de Worthington, gouttelettes des gouttes de pluie sur eau profonde (selon D,
   à vitesse terminale) ; seuil sur surface sèche ; photographies ; chiffres retenus.
-- [ ] **P3** — le tirage partagé (`pluie_impact`) sorti des rides ; critère 2 (rides au bit).
+- [x] **P3** — le tirage partagé (`pluie_impact`) sorti des rides ; critère 2 (rides au bit).
 - [ ] **P4** — les gerbes sur l'eau : particules (fenêtre de mailles autour de la caméra), géométrie par diamètre et âge
   (couronne, jet, gouttelettes), radiance de l'eau comme les gouttes ; piscine et mer.
 - [ ] **P5** — au loin : la part d'aire moyenne des gerbes dans les nuanceurs d'eau, fondue par l'empreinte.
@@ -120,3 +120,11 @@ réelles ; jugement de l'utilisateur (R32).
 - **Le modèle retenu** (hypothèse dite) : la gerbe de A, à l'échelle `s(D) = (D/4,1 mm)·(Fr/1 322)^0,26` en longueur (B :
   exposant moyen de κ₁ et δ₁), `√s` en temps (effondrement de cavité gouverné par la gravité aux grands Fr), `Fr = v²/(g·D)`,
   `v` d'Atlas. Pour D = 1,5 / 2 / 4,1 mm à leur vitesse terminale : s ≈ 0,41 / 0,56 / 1,10 — dôme ≈ 8 / 11 / 21 mm.
+- Auteurs de B vérifiés (écrits d'abord sans lecture, puis contrôlés) : Daren A. Watson, M. R. Thornton, H. A. Khan,
+  R. C. Diamco, D. Yilmaz-Aydin, A. K. Dickerson, PNAS 121 (5), e2315667121.
+
+**P3 — le tirage partagé.** `pluie_phase(j)`, `pluie_graine(j, k)`, `pluie_decalage(hk)`, `pluie_impact(...)` (naissance,
+centre, diamètre) dans `pluie.gdshaderinc` ; les rides les appellent. **Critère 2** : 8 images sous la pluie (piscine 10 et
+50 mm/h, trois vues ; mer 10 mm/h, deux poses ; `pluie8.sh`) — d'abord rendues deux fois au commit d'avant : **identiques
+entre elles** (la pluie est déterministe, contrairement à ce que S380 n'exigeait pas) ; après le découpage : **8 / 8 au
+bit**. **Critère 1** : nouvelle référence, la fin de S382 (occultation comprise) : 12 / 12 au bit.

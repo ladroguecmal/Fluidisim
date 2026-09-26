@@ -73,6 +73,37 @@ float pluie_u01(uint h) {
     return float(h >> 8u) * (1.0 / 16777216.0);
 }
 
+/// S383 — **le tirage des impacts**, partagé par les rides et les gerbes (`gerbe.gdshader`) : les mêmes gouttes. La couche
+/// `j` : sa phase (le décalage de ses périodes). La période `k` : la graine de la couche, et le décalage de sa grille.
+float pluie_phase(int j) {
+    return pluie_u01(pluie_hash(uint(j) * 0x9e3779b9u + 0x2545f491u)) * PLUIE_VIE;
+}
+
+uint pluie_graine(int j, int k) {
+    return pluie_hash(uint(j) * 0x85ebca6bu ^ uint(k) * 0xc2b2ae35u ^ 0x51ed2701u);
+}
+
+vec2 pluie_decalage(uint hk) {
+    return vec2(float(hk >> 16u), float(hk & 0xffffu)) * (PLUIE_MAILLE / 65536.0);
+}
+
+/// La goutte de la maille `m` (indices de la grille décalée de `decal`), couche `j`, période `k`, graine `hk` : faux si la
+/// dernière couche, partielle (`presence`), n'en porte pas ; sinon son instant de naissance, son centre, son diamètre (mm).
+bool pluie_impact(int j, int k, vec2 m, uint hk, vec2 decal, float presence, float phase, out float naissance,
+        out vec2 centre, out float taille) {
+    uvec4 h = pluie_pcg4d(uvec4(uvec2(ivec2(m)), hk, uint(j)));
+    naissance = 0.0;
+    centre = vec2(0.0);
+    taille = 0.0;
+    if (float(h.w & 0xffffu) * (1.0 / 65536.0) >= presence) {
+        return false;
+    }
+    naissance = float(k) * PLUIE_VIE - phase + pluie_u01(h.z) * PLUIE_VIE;
+    centre = (m + 0.5) * PLUIE_MAILLE - decal + (vec2(pluie_u01(h.x), pluie_u01(h.y)) * 2.0 - 1.0) * PLUIE_JEU;
+    taille = min(1.5 - log(1.0 - pluie_u01(h.w)) / max(pluie.y, 1e-3), 6.0);
+    return true;
+}
+
 /// L'empreinte du pixel dans la direction `d` (unitaire) : `|Mᵀ·d|`, `M = [dpdx | dpdy]`.
 float pluie_empreinte(vec2 dpdx, vec2 dpdy, vec2 d) {
     return length(vec2(dot(dpdx, d), dot(dpdy, d)));
@@ -120,23 +151,24 @@ vec2 pluie_rides(vec2 p, float t, vec2 dpdx, vec2 dpdy, out vec3 cv, out float c
     vec2 s = vec2(0.0);
     for (int j = 0; j < nc; j++) {
         float presence = clamp(couches - float(j), 0.0, 1.0);
-        float phase = pluie_u01(pluie_hash(uint(j) * 0x9e3779b9u + 0x2545f491u)) * PLUIE_VIE;
+        float phase = pluie_phase(j);
         float kf = floor((t + phase) / PLUIE_VIE);
         for (int q = 0; q < 2; q++) {
             int k = int(kf) - q;
             // Le décalage de la couche pour cette période : 16 bits par axe d'un hachage court ; la graine de la maille.
-            uint hk = pluie_hash(uint(j) * 0x85ebca6bu ^ uint(k) * 0xc2b2ae35u ^ 0x51ed2701u);
-            vec2 decal = vec2(float(hk >> 16u), float(hk & 0xffffu)) * (PLUIE_MAILLE / 65536.0);
+            uint hk = pluie_graine(j, k);
+            vec2 decal = pluie_decalage(hk);
             vec2 m = floor((p + decal) / PLUIE_MAILLE);
-            uvec4 h = pluie_pcg4d(uvec4(uvec2(ivec2(m)), hk, uint(j)));
-            if (float(h.w & 0xffffu) * (1.0 / 65536.0) >= presence) {
+            float naissance;
+            vec2 centre;
+            float taille;
+            if (!pluie_impact(j, k, m, hk, decal, presence, phase, naissance, centre, taille)) {
                 continue;
             }
-            float age = t - (float(k) * PLUIE_VIE - phase + pluie_u01(h.z) * PLUIE_VIE);
+            float age = t - naissance;
             if (age < 0.0 || age >= PLUIE_VIE) {
                 continue;
             }
-            vec2 centre = (m + 0.5) * PLUIE_MAILLE - decal + (vec2(pluie_u01(h.x), pluie_u01(h.y)) * 2.0 - 1.0) * PLUIE_JEU;
             vec2 d = p - centre;
             float dist = length(d);
             if (age < 0.03 && dist < 0.01) {
@@ -148,7 +180,6 @@ vec2 pluie_rides(vec2 p, float t, vec2 dpdx, vec2 dpdy, out vec3 cv, out float c
             if (abs(x1) >= 2.0 * PLUIE_W1 && abs(x2) >= 2.0 * PLUIE_W2 && !dans_bosse) {
                 continue;
             }
-            float taille = min(1.5 - log(1.0 - pluie_u01(h.w)) / max(pluie.y, 1e-3), 6.0);
             float e = 1.0 - age / PLUIE_VIE;
             float f = pow(taille / 2.0, 1.5) * e * e;
             vec2 dir = d / max(dist, 1e-5);
