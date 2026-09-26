@@ -62,65 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S395 — **terminée**. **C5a, deuxième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
-[B10-APIC-S320](../docs/validation/B10-APIC-S320.md) §14) : A316 en 2D — **où l'échange comprime**, puis un échange qui ne
-comprime pas. Demande de l'utilisateur (2026-09-26) : *« Continue »*. Agent : Claude Opus 5.5, session cloud Claude Code ;
-fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau. Sert 4.12, 4.16, A316.
+Session : S396 — **en cours**. **C8a** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5),
+en référence : **la fusion et la séparation de domaines**, par ensembles de blocs ([ADR-006](../docs/adr/ADR-006-cellules-domaines-solveurs.md)
+§3–4). Demande de l'utilisateur (2026-09-26) : *« continue »* ; S395 a désigné C8 (S294 : pas de troisième session de suite
+sur le raccord). Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni
+Godot. Sert **4.9** (absent), 1.5, 1.6.
 
-**Thèse.** L'échange du montage paroi passe l'eau **profondeur par profondeur** : ce qui sort des colonnes à la profondeur `k`
-devient une particule posée à la profondeur `k`, dans une eau déjà pleine — rien n'est poussé au-dessus, la densité monte,
-la surface ne monte pas, et la pression, qui voit la surface, ne s'y oppose pas ; un retrait à la profondeur `k` creuse sans
-que la surface baisse. Côté colonnes, la même eau change `h`, donc la surface. Un fluide incompressible, lui, pousse ce qui
-est au-dessus : **l'eau échangée à la profondeur `k` équivaut, en volume, à de l'eau ajoutée ou ôtée à la surface.**
-**Prédiction** (P2) : l'excès de densité de S354 se loge sous la surface, aux profondeurs où l'on insère ; le bilan par
-profondeur de la dernière colonne libre le montre. **Remède (C)** : insérer et retirer **au sommet** de la dernière colonne
-libre — la particule la plus haute part ; la nouvelle se pose sur la rangée du haut —, le solde de l'échange tenu en un seul
-compte ; le reste du montage paroi inchangé.
+**Thèse.** ADR-006 §3 : un domaine est un **ensemble de blocs** d'un réseau commun ; **fusion = union, séparation =
+partition**, sans remaillage ni interpolation, si `dx` et le repère coïncident. §4 : fusion quand les ensembles dilatés du
+rayon de couplage `r_c = λ_cut` (4 m, ADR-005 : deux blocs de 8 mailles à 25 cm) se touchent ; séparation quand la partition
+en composantes connexes des blocs dilatés en compte plusieurs **pendant plus de 1,0 s** ; durée de vie minimale 0,75 s.
+**Simplification déclarée** : les domaines de δ couvrent toute la profondeur (ADR-175) — un bloc est une colonne de 8 × 8
+mailles. Dans la référence CPU, l'état d'un domaine vit dans la boîte qui l'enveloppe ; **l'état de l'union est celui des
+parties, recopié au bit, le reste au repos** ; une séparation pose des murs sur la coupure — ce qu'elle perd est le débit à
+travers la coupure, mesurable. Aucune rupture si la fusion survient avant que les ondes n'atteignent les murs des parties.
 
-**Critères, écrits avant** (paroi, 30 s, 5 et 2,5 cm ; ceux de S394). (1) Sans variable, au bit. (2) Masse exacte. (3) Masse à
-gauche de la frontière à ±0,002 m² d'APIC seul par tranche de 10 s. (4) Densité 4 ± 0,2 en `i_b − 1`. (5) Saut < 0,5 maille ;
-période aux zéros et amortissement (régression) à 1 point d'APIC seul. (6) Repos à 5 cm < 1 cm/s. Publié : (C) avec la
-correction (B) de S394 — son énergie ajoutée, qui devrait tomber près de zéro si (C) ne comprime plus.
+**Critères, écrits avant.** (1) **Ensembles** (essais) : union ; deux blocs connexes si leurs dilatations se touchent
+(Chebyshev ≤ `2r + 1`) — la même relation pour fusionner et pour séparer, sans quoi une fusion se déferait aussitôt ; une
+séparation seulement après 1,0 s continue à deux composantes, jamais avant 0,75 s de vie ; une composante qui clignote à
+moins d'une seconde ne sépare jamais. (2) **L'état** : aller-retour `C → (A, B) → C'` **au bit** partout sauf les faces de
+la coupure ; leur débit perdu publié. (3) **Sans rupture** : deux bosses, deux domaines ; la fusion à l'instant où leurs
+ensembles actifs (colonnes à plus de 1 mm) dilatés se touchent ; puis 5 s ; écart de surface au domaine unique tenu depuis le
+départ **≤ 1 % de l'amplitude**. Publié : fusions plus tardives, et une séparation. (4) Suite, zéro avertissement.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'instrument : bilan par profondeur de la dernière colonne libre (insertions, retraits, densité), 30 s, contre
-  APIC seul ; la prédiction.
-- [x] **P3** — (C), l'échange au sommet ; critères 1 à 6 ; avec (B), publié.
-- [x] **P4** — preuve (§15 de B10-APIC-S320) ; A316, file, liste.
-- [x] **P5** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — `domain_blocks.rs` : ensembles de blocs, dilatation, composantes, critères de fusion et de séparation avec leurs
+  délais ; essais ; critère 1.
+- [ ] **P3** — `Volume3::transplant` : l'état d'un domaine recopié dans un autre sur le réseau commun ; l'aller-retour ;
+  critère 2.
+- [ ] **P4** — l'exemple `delta3d_fusion` : deux bosses, la fusion au critère, contre le domaine unique ; critère 3 ; publiés.
+- [ ] **P5** — critère 4 ; preuve `FUSION-S396` ; liste, file, feuille de route, index.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-**P2 — le bilan par profondeur** (`RACCORD_BILAN=1`, paroi, 5 cm, 30 s ; sans la variable, au bit) :
 
-| rangée (y) | 0 (2,5 cm) | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 (47,5 cm) |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| insertions | 24 | 22 | 27 | 27 | 34 | 46 | 65 | 92 | 119 | 129 |
-| retraits | 76 | 73 | 77 | 71 | 67 | 60 | 50 | 42 | 30 | 23 |
-| particules par maille (APIC seul) | 4,44 (4,15) | 4,83 (4,15) | 4,40 (4,13) | **5,02** (3,99) | **5,47** (3,99) | **5,44** (3,99) | **5,13** (4,03) | 4,49 (4,00) | 3,99 (3,96) | 3,10 (3,96) |
-
-**La prédiction est contredite** : l'excès n'est pas là où l'on insère — on insère surtout en haut (rangées 7–9), où la densité
-est normale ou basse ; il est au milieu (rangées 3–6, 5,0 à 5,5). **Ce que le bilan montre** : les totaux s'équilibrent (581
-insertions, 569 retraits), mais l'échange fait tourner une **recirculation** à la frontière — l'eau passe aux colonnes par le
-bas, revient aux particules par le haut. (C) reste le candidat déclaré : au sommet, l'échange n'a plus de structure par
-profondeur du côté des particules, recirculation comprise.
-
-**P3 — (C) manqué, attribué.** 5 cm, 30 s : masse à gauche +0,0131 / +0,0229 / +0,0241 m² (S354 : +0,0113), densité 5,41 /
-5,26 / 4,53, saut 1,27, amortissement 14 %/période, vitesse 1,75 m/s ; 2,5 cm : diverge (arrêté après 10 min) ; repos :
-0,65 cm/s (tenu) ; avec (B), la correction ajoute **457 J/m** (102 sans (C)) — (C) comprime davantage. **Attribution** (bilan) :
-l'échange a lieu au sommet, mais le **fond s'entasse** — 7,76 / 6,53 / 5,91 particules par maille aux rangées 0–2 (APIC seul
-4,13) : les particules que l'écoulement pousse vers la frontière en profondeur y sont arrêtées et ne sont plus retirées là où
-elles arrivent. **L'échange doit retirer où les particules arrivent.**
-
-**La source : une circulation permanente à travers la frontière.** Vitesse horizontale moyenne sur la face, 30 s (mm/s),
-rangées 0 → 9 : hybride **+21,4 +21,2 +20,5 +18,2 +13,6 +5,7 −6,3 −21,1 −37,4 −54,0** ; APIC seul, même face, de +0,7 à −1,9.
-L'eau entre dans les colonnes par le bas et en ressort par le haut, en permanence, à une vitesse de l'ordre de la moitié de
-celle de l'onde. **Témoins** : sans paroi (échange eulérien) +22,6 / −68,8 ; avec la mémoire de vitesse des colonnes
-+25,6 / −60,5 ; frontière aux trois quarts +20,1 / −43,1 — ni la paroi, ni l'aller-retour de vitesse, ni la place de la
-frontière : **elle naît des colonnes**. Hypothèse, non tranchée : réensemencées à chaque pas sur des points fixes, les
-colonnes n'advectent pas la quantité de mouvement ; le terme non linéaire manque d'un côté, pas de l'autre. Épreuve par
-l'amplitude (`LOT5_AMPLITUDE`) : à 1 cm, rien ne bouge (l'onde est sous l'espacement des particules à 5 cm — témoin
-dégénéré) ; à 4 cm, ×2,65 en bas, ×1,3 en haut — ni A ni A² : **non tranché**.
-
-**P4** : preuve B10-APIC-S320 §15 ; A316 (note : localisé) ; file (lot 5, campagne) ; liste 4.12.

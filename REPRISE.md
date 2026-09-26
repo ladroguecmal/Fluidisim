@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 23:27 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 23:31 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
-Session en cours : aucune
+Session en cours : S396 — C8a en référence : la fusion et la séparation de domaines par ensembles de blocs (ADR-006 §3–4), 4.9
 Dernière session : S395 — physique : **C5a, deuxième part** ([preuve](docs/validation/B10-APIC-S320.md) §15) — l'échange au sommet manque (le fond s'entasse) ; la source d'A316 mesurée : une **circulation permanente** à la frontière (+21 mm/s en bas, −54 en haut ; APIC seul < 2), née des colonnes ; l'hypothèse (les colonnes n'advectent pas la quantité de mouvement) non tranchée. Avant : S394, l'échange comprime
 Session suivante : dans le cloud, **C8 en référence** — blocs épars, domaine qui suit la perturbation, fusion et séparation par ensembles (4.9, 4.5, 4.3) ; le raccord reprend ensuite (trancher l'advection des colonnes : S294 interdit une troisième session de suite) ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
 Maillons        : 2 — S395 : aucun point ni critère de porte n'a changé (A316 localisé) ; au prochain, un lot qui avance une capacité (C8)
