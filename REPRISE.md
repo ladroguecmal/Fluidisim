@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 21:03 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 21:05 +02:00
 Agent            : Claude Opus 5.5, Claude Code (application de bureau) au poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3
-Session en cours : aucune
+Session en cours : S391 — physique : **A321**, la scène qui explose à 30 Hz (demande de l'utilisateur : « Corrige A321 d'abord »)
 Dernière session : S390 — physique : **C3a, la multigrille sur la carte** ([preuve](docs/validation/MULTIGRILLE-3D-S385.md) §5) — éteinte par défaut, option `--multigrille` ; à la porte B, le résidu de Jacobi-32 en 6 cycles, projection 1,08 ms contre 2,08 ; cuves à 3 mm. **Trouvé : A321** — à 30 Hz la scène explose en 24 à 40 s, références convergées comprises ; à 60 Hz la minute tient. Avant : S389, la surface d'APIC
 Session suivante : au poste, **la pluie, pièce 5** (alternance d'ADR-191), puis **A321** (sévérité 3, avant tout usage vivant de 30 Hz au-delà de vingt secondes) et C3b (10 cm, A298) ; dans le cloud, **C4b** — B10 en 3D (4.16 à partiel ou dire pourquoi non)
 Maillons        : 4 — S390 : 4.19 reste partiel ; justifié au journal (choix de l'utilisateur ; A321 bloquant pour 30 Hz) ; la suite doit changer l'état d'un point (C4b : 4.16)
