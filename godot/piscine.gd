@@ -8,6 +8,11 @@ extends Node3D
 ## quitter. `-- --captures` : les images de revue (`captures/piscine_<vue>_<t>s.png`), puis quitte. `-- --controle-piscine` :
 ## la surface rendue de chaque bac contre celle que V publie (critère 3 de S374), puis quitte.
 ##
+## S379 — **la pluie**, factice (ADR-202 D3) : `PLUIE=<mm/h>` dans l'environnement, ou la touche P (0, 2, 10, 50 mm/h) ;
+## les rides de `pluie.gdshaderinc`, au taux de `pluie.gd`. `-- --controle-pluie` : le taux de naissance des anneaux compté
+## sur des images de contrôle (critère 2 de S379), puis quitte. `-- --cout-pluie` : le temps GPU de l'image, sans pluie et
+## sous la pluie, trois vues (médiane de 240 images).
+##
 ## Axes : ceux de B dans l'export (x à l'est, y au nord, z en haut) ; dans Godot, un point (x, y, z) de B est (x, z, −y).
 
 var donnees: Dictionary
@@ -21,6 +26,9 @@ var eau_tampon: MeshInstance3D
 var materiau_bassin: ShaderMaterial
 var materiau_tampon: ShaderMaterial
 var texte: Label
+var monde_env: Environment
+const Pluie = preload("res://pluie.gd")
+var pluie_mm_h := 0.0
 ## S375 — la surface de δ 3D du bassin (ADR-200), si l'export existe (`examples/piscine_delta.rs`) : l'en-tête, les images
 ## (entiers de 16 bits, dixièmes de millimètre autour du repos), les deux textures lues par `bassin.gdshader`.
 var champ: Dictionary
@@ -40,6 +48,9 @@ const VUES := {
 	"buse": [Vector3(-1.2, 3.2, 4.6), Vector3(-3.2, 1.3, 0.0)],
 	## S375 : au ras du bord sud, vers l'impact du jet — les reflets du ciel révèlent les pentes de quelques millièmes.
 	"rasante": [Vector3(-0.6, 1.62, 2.3), Vector3(-2.8, 1.40, -0.4)],
+	## S379 : de près, en oblique, comme les photographies de pluie (à 1,8 m de l'eau, 30° sous l'horizontale) ; et d'aplomb.
+	"pluie_proche": [Vector3(-3.0, 2.3, 2.0), Vector3(-3.0, 1.4, 0.45)],
+	"pluie_aplomb": [Vector3(-1.5, 3.2, 0.3), Vector3(-1.5, 1.4, 0.0)],
 }
 
 
@@ -67,6 +78,8 @@ func _ready() -> void:
 		if champ_octets.size() != champ_images * champ_nx * champ_ny * 2:
 			push_error("piscine_delta.bin : taille inattendue")
 			champ = {}
+	if OS.get_environment("PLUIE") != "":
+		pluie_mm_h = float(OS.get_environment("PLUIE"))
 	environnement()
 	camera = Camera3D.new()
 	camera.fov = 50.0
@@ -89,6 +102,10 @@ func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	if "--controle-piscine" in args:
 		controle()
+	elif "--controle-pluie" in args:
+		controle_pluie()
+	elif "--cout-pluie" in args:
+		cout_pluie()
 	elif "--captures" in args:
 		captures()
 
@@ -107,6 +124,7 @@ func environnement() -> void:
 	env.glow_enabled = true
 	var monde := WorldEnvironment.new()
 	monde.environment = env
+	monde_env = env
 	add_child(monde)
 
 
@@ -303,19 +321,21 @@ func appliquer(s: float) -> void:
 	eau_tampon.position.y = float(l[2])
 	for m in [materiau_bassin, materiau_tampon]:
 		m.set_shader_parameter("temps", s)
+		m.set_shader_parameter("pluie", Pluie.uniformes(pluie_mm_h))
 	var q_dev := float(l[5])
 	var q_pompe := float(l[6])
 	# L'agitation d'habillage : une ride de fond, plus là où l'eau tombe.
 	materiau_bassin.set_shader_parameter("agitation", 0.012)
 	materiau_tampon.set_shader_parameter("agitation", 0.012 + 0.006 * q_dev)
 	var seuil := float(donnees["deversoir"]["seuil_m"][2])
-	texte.text = "Piscine (V et δ 3D, S375) — rejeu du cœur, t = %.1f s\nBassin : surface %+.1f mm par rapport au seuil\nBac tampon : %.3f m d'eau\nDéversoir : %.2f l/s\nPompe : %s, %.2f l/s" % [
+	texte.text = ("Pluie %s mm/h (touche P) — " % mm_h(pluie_mm_h) if pluie_mm_h > 0.0 else "") + "Piscine (V et δ 3D, S375) — rejeu du cœur, t = %.1f s\nBassin : surface %+.1f mm par rapport au seuil\nBac tampon : %.3f m d'eau\nDéversoir : %.2f l/s\nPompe : %s, %.2f l/s" % [
 		s, (float(l[1]) - seuil) * 1000.0, float(l[2]) - float(donnees["tampon"]["fond_m"][2]), q_dev,
 		"en marche" if float(l[7]) > 0.5 else "arrêtée", q_pompe]
 
 
 func _process(delta: float) -> void:
-	if pas.is_empty() or "--captures" in OS.get_cmdline_user_args() or "--controle-piscine" in OS.get_cmdline_user_args():
+	var args := OS.get_cmdline_user_args()
+	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args:
 		return
 	if not en_pause:
 		t = fmod(t + delta, float(pas.size() - 1) * dt)
@@ -335,6 +355,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				vue("rasante")
 			KEY_SPACE:
 				en_pause = not en_pause
+			KEY_P:
+				var suite := {0.0: 2.0, 2.0: 10.0, 10.0: 50.0}
+				pluie_mm_h = suite.get(pluie_mm_h, 0.0)
 			KEY_ESCAPE:
 				get_tree().quit()
 
@@ -356,7 +379,8 @@ func captures() -> void:
 			appliquer(t)
 			for _i in 8:
 				await RenderingServer.frame_post_draw
-			var chemin := ProjectSettings.globalize_path("res://captures/piscine_%s_%03ds.png" % [nom, int(s)])
+			var suffixe := "_pluie%s" % mm_h(pluie_mm_h) if pluie_mm_h > 0.0 else ""
+			var chemin := ProjectSettings.globalize_path("res://captures/piscine_%s%s_%03ds.png" % [nom, suffixe, int(s)])
 			get_viewport().get_texture().get_image().save_png(chemin)
 			print("CAPTURE_PISCINE_S374 vue=%s t=%.1f fichier=%s" % [nom, s, chemin])
 	get_tree().quit()
@@ -397,4 +421,112 @@ func controle() -> void:
 				if absf(lu - attendu) > 6e-8 * absf(attendu):
 					ecarts += 1
 		print("CONTROLE_PISCINE_S375 critere=4 hauteurs_lues=%d ecarts=%d %s" % [lus, ecarts, "tenu" if ecarts == 0 else "manque"])
+	get_tree().quit()
+
+
+## **Critère 2 de S379** : le taux de naissance des anneaux, compté. Vue orthographique d'aplomb sur le bassin, le nuanceur
+## en mode contrôle (rouge pur : un cœur d'anneau — rayon 1 cm — de moins de 30 ms ; noir ailleurs), tonalité linéaire et
+## sans halo ; à chaque instant, les taches rouges sont relevées (4-connexité) et comparées à `taux × aire × 0,03 s`. Deux
+## cœurs qui se touchent font une seule tache (à 50 mm/h, 58 cœurs jeunes par m² : une fusion pour huit) : chaque tache
+## compte pour `max(1, arrondi(aire / aire médiane))` cœurs, et le compte brut est donné à côté. Les instants sont
+## espacés de plus d'une vie d'anneau : les comptes sont indépendants. Intensités : `PLUIE` ou 2, 10, 50.
+func controle_pluie() -> void:
+	monde_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	monde_env.glow_enabled = false
+	texte.visible = false
+	var b: Dictionary = donnees["bassin"]
+	var tb: Array = b["taille_m"]
+	var aire := float(tb[0]) * float(tb[1])
+	var centre := godot(b["fond_m"])
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.size = float(tb[1]) + 0.6
+	camera.position = Vector3(centre.x, 20.0, centre.z)
+	camera.look_at(Vector3(centre.x, 0.0, centre.z), Vector3(0, 0, -1))
+	materiau_tampon.set_shader_parameter("pluie", Vector4.ZERO)
+	var intensites := [pluie_mm_h] if pluie_mm_h > 0.0 else [2.0, 10.0, 50.0]
+	for r in intensites:
+		var u: Vector4 = Pluie.uniformes(r)
+		var aires: Array[int] = []
+		var instants := 20
+		for i in instants:
+			var s := 3.1 + 1.37 * float(i)
+			materiau_bassin.set_shader_parameter("temps", s)
+			materiau_bassin.set_shader_parameter("pluie", u)
+			materiau_bassin.set_shader_parameter("controle_pluie", true)
+			for _k in 3:
+				await RenderingServer.frame_post_draw
+			var image := get_viewport().get_texture().get_image()
+			aires.append_array(taches_rouges(image))
+		var triees := aires.duplicate()
+		triees.sort()
+		var mediane := float(triees[triees.size() / 2]) if not triees.is_empty() else 1.0
+		var total := 0
+		for a in aires:
+			total += maxi(1, roundi(float(a) / mediane))
+		var attendu := u.x * aire * 0.03 * instants
+		var ecart := (float(total) - attendu) / attendu
+		var sigma := 1.0 / sqrt(attendu)
+		print("CONTROLE_PLUIE_S379 pluie_mm_h=%s taux=%.1f aire_m2=%.1f instants=%d taches=%d aire_mediane_px=%d coeurs=%d attendus=%.1f ecart=%+.2f%% (poisson 1 sigma %.2f%%) %s" % [
+			mm_h(r), u.x, aire, instants, aires.size(), int(mediane), total, attendu, 100.0 * ecart, 100.0 * sigma, "tenu" if absf(ecart) <= 0.10 else "manque"])
+	get_tree().quit()
+
+
+## Une intensité de pluie pour l'affichage et les noms de fichiers : `10`, `2.5`.
+static func mm_h(r: float) -> String:
+	return str(int(r)) if r == floorf(r) else str(r)
+
+
+## Les aires (pixels) des taches rouges d'une image de contrôle (rouge > 0,5, vert et bleu < 0,2), en 4-connexité.
+func taches_rouges(image: Image) -> Array[int]:
+	image.convert(Image.FORMAT_RGB8)
+	var w := image.get_width()
+	var h := image.get_height()
+	var d := image.get_data()
+	var vu := PackedByteArray()
+	vu.resize(w * h)
+	var aires: Array[int] = []
+	for i in w * h:
+		if vu[i] != 0 or d[3 * i] < 128 or d[3 * i + 1] > 51 or d[3 * i + 2] > 51:
+			continue
+		var n := 0
+		var pile := [i]
+		vu[i] = 1
+		while not pile.is_empty():
+			var c: int = pile.pop_back()
+			n += 1
+			var x := c % w
+			var voisins := []
+			if x > 0: voisins.append(c - 1)
+			if x < w - 1: voisins.append(c + 1)
+			if c >= w: voisins.append(c - w)
+			if c < w * (h - 1): voisins.append(c + w)
+			for v in voisins:
+				if vu[v] == 0 and d[3 * v] >= 128 and d[3 * v + 1] <= 51 and d[3 * v + 2] <= 51:
+					vu[v] = 1
+					pile.append(v)
+		aires.append(n)
+	return aires
+
+
+## Le coût de la pluie : temps GPU de l'image entière (médiane de 240 images après 30 de mise en route), à 0, 2, 10 et
+## 50 mm/h, pour trois vues au temps 200 s.
+func cout_pluie() -> void:
+	var vp := get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
+	texte.visible = false
+	for nom in ["pluie_proche", "pluie_aplomb", "rasante"]:
+		vue(nom)
+		var ligne_cout := "COUT_PLUIE_S379 vue=%s" % nom
+		for r in [0.0, 2.0, 10.0, 50.0]:
+			pluie_mm_h = r
+			appliquer(200.0)
+			for _i in 30:
+				await RenderingServer.frame_post_draw
+			var t := []
+			for _i in 240:
+				await RenderingServer.frame_post_draw
+				t.append(RenderingServer.viewport_get_measured_render_time_gpu(vp))
+			t.sort()
+			ligne_cout += " gpu_ms_%s=%.3f" % [mm_h(r), float(t[120])]
+		print(ligne_cout)
 	get_tree().quit()

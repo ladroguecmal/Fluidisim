@@ -85,8 +85,8 @@ jugement de l'utilisateur (R28).
 
 - [x] **P1** — jeton, plan seul ; la campagne du solveur inscrite (file).
 - [x] **P2** — références : photographies de pluie sur l'eau (libres, lues sans téléchargement) ; ce qu'elles montrent.
-- [>] **P3** — les rides dans `bassin.gdshader` (le taux, l'anneau, le fondu en variance) ; critère 1 sur le bassin.
-- [ ] **P4** — les rides sur la mer (`eau.gdshaderinc`, pente et covariance de la queue) ; critère 1 sur la mer.
+- [x] **P3** — les rides dans `bassin.gdshader` (le taux, l'anneau, le fondu en variance) ; critère 1 sur le bassin.
+- [>] **P4** — les rides sur la mer (`eau.gdshaderinc`, pente et covariance de la queue) ; critère 1 sur la mer.
 - [ ] **P5** — contrôle du taux (critère 2), du fondu (critère 3) ; images de R28.
 - [ ] **P6** — preuve `RIDES-PLUIE-S379`, liste (8.9 ou 8.4), file, feuille de route, index ; la campagne du solveur dans
   la feuille de route.
@@ -107,3 +107,23 @@ jugement de l'utilisateur (R28).
 Conséquences pour P3–P4 : perturber la **normale** seulement (jamais d'albédo) ; un **paquet** de crêtes par anneau (≈ 3,
 enveloppe gaussienne), une petite bosse centrale au premier dixième de seconde ; au loin, la pente devient de la variance,
 **proportionnelle au taux** (pluie faible : presque rien).
+
+**P3 — le bassin.** `pluie.gd` (statistiques : taux, Λ, moments) + `pluie.gdshaderinc` (géométrie, tirage, niveau de
+détail) + `bassin.gdshader` (pente, variance intégrée au reflet par 3 × 3 Gauss-Hermite, éclat élargi en forme close, fond
+flouté par la chaîne de l'écran). Chiffres :
+- **Critère 1 (bassin)** : sept images d'avant (ensemble, rasante, buse à 6,5 et 200 s ; sans δ à 40 s), **identiques au
+  SHA-256** après ; empreintes d'avant dans le bloc-notes de la session (`avant.sha`), déterministes (deux passes égales).
+- **Critère 2, déjà mesuré** (`--controle-pluie`, 20 instants, 32 m²) : 2 mm/h : 1 275 cœurs pour 1 290,6 (**−1,21 %**) ;
+  10 mm/h : 8 529 pour 8 584,2 (**−0,64 %**) ; 50 mm/h : 36 646 pour 37 091,4 (**−1,20 %**). Le compte brut des taches
+  perdait 5,2 % à 50 mm/h (fusions de cœurs voisins, 58 cœurs jeunes par m²) : chaque tache compte `arrondi(aire/médiane)`.
+  Le taux de forme close est 447,1 m⁻²·s⁻¹ à 10 mm/h (le plan disait 448 : mon arrondi de tête).
+- **Impasse** : le niveau de détail à l'empreinte **isotrope** (la plus grande) et au seuil λ/6–λ/3 effaçait tout au-delà
+  de 1 à 2 m en 720p — aucune ride visible dans les vues de S374. Corrigé : empreinte **dans la direction du rayon** de
+  chaque anneau (`|Mᵀ·dir|`), fondu λ/4–λ/2 (Nyquist, toujours sous λ : critère 3), et la variance floute aussi le fond
+  vu (sans quoi l'eau vue à travers ne montre rien).
+- **Coût GPU** (`--cout-pluie`, 1280 × 720, médiane de 240 images) : proche 0,53 → 0,76 / 1,27 / 3,24 ms à 2 / 10 / 50
+  mm/h ; aplomb 0,48 → 0,71 / 1,35 / 3,85 ; rasante 0,46 → 0,52 / 0,66 / 1,20. Cinq hachages pcg4d par couche : une
+  table des décalages par couche, calculée par l'hôte, en retirerait trois (optimisation possible, non faite).
+- Vues ajoutées : `pluie_proche` (1,8 m, 30°), `pluie_aplomb`. À l'œil : paquets de 2–3 crêtes, bosses centrales,
+  anneaux lisibles surtout dans le reflet clair — comme *Waterwaves raindrops* ; le ciel de la scène reste ensoleillé
+  (la météo n'est pas faite).
