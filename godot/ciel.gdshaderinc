@@ -76,3 +76,16 @@ vec3 ciel_b(vec3 rayon, int octaves) {
     float d = max(dot(rayon, soleil), 0.0);
     return c + vec3(1.0, 0.95, 0.85) * (pow(d, 1024.0) * 4.0 + pow(d, 32.0) * 0.15);
 }
+
+/// S373 — **la perspective aérienne**, réécrite ici depuis celle de Godot (`fog_process`, `scene_forward_clustered.glsl`,
+/// 4.4-stable) pour se régler **par pixel** : quantité `1 − exp(−ρ·d)` sur la distance `d` de l'œil au fragment ; couleur,
+/// la radiance du ciel dans la direction de visée (`rayon`, B) — le ciel dont Godot tire le cube de radiance qu'il lit
+/// là (`ciel.gdshader`, quatre octaves), sans le flou de ses niveaux. `part_air` : 1 vu de l'air, 0 vu de l'eau
+/// (`milieu_du_pixel`) ; S366 et S371 l'éteignaient d'un bloc. Rendue par la sortie `FOG` du nuanceur : la brume du moteur
+/// ne touche plus ce matériau. `brume_densite` : celle de l'environnement (`mer.gd`), 0 dans les contrôles.
+uniform float brume_densite = 0.00012;
+
+vec4 brume_air(vec3 rayon, float distance, float part_air) {
+    float quantite = 1.0 - exp(min(0.0, -distance * brume_densite));
+    return vec4(ciel_b(rayon, 4), quantite * part_air);
+}

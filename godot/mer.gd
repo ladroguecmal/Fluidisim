@@ -135,7 +135,7 @@ func _ready() -> void:
 	camera.current = true
 	pose("proche")
 	materiau = ShaderMaterial.new()
-	materiau.shader = load("res://eau.gdshader")
+	materiau.shader = nuanceur_eau
 	mer = MeshInstance3D.new()
 	mer.mesh = grille_polaire()
 	mer.material_override = materiau
@@ -347,7 +347,7 @@ func fond() -> MeshInstance3D:
 	var m := ArrayMesh.new()
 	m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, tableaux)
 	var sol := ShaderMaterial.new()
-	sol.shader = load("res://sol.gdshader")
+	sol.shader = nuanceur_sol
 	materiau_sol = sol
 	var instance := MeshInstance3D.new()
 	instance.mesh = m
@@ -537,6 +537,23 @@ func uniformes_fixes() -> void:
 			m.set_shader_parameter("menisque_px", MENISQUE_BANDE * hauteur)
 			m.set_shader_parameter("trait_px", MENISQUE_TRAIT * hauteur)
 			m.set_shader_parameter("menisque_actif", OS.get_environment("MENISQUE") != "0")
+
+
+## S373 — la densité de la perspective aérienne de nos nuanceurs : celle de l'environnement, sauf contrôle (`brume_voulue`
+## faux) ou `BRUME=0`.
+var brume_voulue := true
+## Les deux variantes de l'eau et du fond : la brume du moteur hors de la zone des vagues, la nôtre à demi immergée.
+var nuanceur_eau: Shader = load("res://eau.gdshader")
+var nuanceur_eau_demi: Shader = load("res://eau_demi.gdshader")
+var nuanceur_sol: Shader = load("res://sol.gdshader")
+var nuanceur_sol_demi: Shader = load("res://sol_demi.gdshader")
+
+
+func brume() -> void:
+	var d := environnement_scene.fog_density if environnement_scene != null and brume_voulue and OS.get_environment("BRUME") != "0" else 0.0
+	for m in [materiau, materiau_sol]:
+		if m != null:
+			m.set_shader_parameter("brume_densite", d)
 
 
 ## S371 — la borne de |η| de la bande : `Σ|a|`, et le second ordre de Tayfun, `½·k̄·(Σ|a|)²` par système (ADR-176 D1).
@@ -833,6 +850,15 @@ func immersion(t: float) -> void:
 	# `BRUME=1` la garde, en témoin (ce qu'elle change au-dessus de l'eau à hauteur de vague : S371 P5).
 	if environnement_scene != null and not "--controle-fond" in OS.get_cmdline_user_args():
 		environnement_scene.fog_enabled = not dedans and (not demi or OS.get_environment("BRUME") == "1")
+	# S373 : à demi immergée, l'eau et le fond passent à la variante qui écrit sa propre brume (`brume_air`), pondérée par
+	# la part d'air de chaque pixel ; hors de la zone, la brume du moteur, comme avant. `BRUME=0` éteint la nôtre.
+	brume()
+	var eau_voulue := nuanceur_eau_demi if demi else nuanceur_eau
+	if materiau != null and materiau.shader != eau_voulue:
+		materiau.shader = eau_voulue
+	var sol_voulu := nuanceur_sol_demi if demi else nuanceur_sol
+	if materiau_sol != null and materiau_sol.shader != sol_voulu:
+		materiau_sol.shader = sol_voulu
 	var bande_t := lignes("bande", t) if demi else PackedVector4Array()
 	for m in [materiau, materiau_sol, materiau_ciel]:
 		if m != null:
@@ -1010,6 +1036,8 @@ func controle_fond() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.glow_enabled = false
 	env.fog_enabled = false
+	brume_voulue = false
+	brume()
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_DISABLED
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
 	for c in get_children():
@@ -1064,6 +1092,8 @@ func controle_sous_eau() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.glow_enabled = false
 	env.fog_enabled = false
+	brume_voulue = false
+	brume()
 	materiau_sol.set_shader_parameter("controle", 3)
 	var c := ABSORPTION + 2.0 * RETRODIFFUSION
 	var pire := 0.0
@@ -1327,6 +1357,8 @@ func controle_ecume() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.glow_enabled = false
 	env.fog_enabled = false
+	brume_voulue = false
+	brume()
 	materiau.set_shader_parameter("controle", 3)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures"))
 	for hauteur in [12.0, 40.0]:
@@ -1370,6 +1402,8 @@ func controle_caustiques() -> void:
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.glow_enabled = false
 	env.fog_enabled = false
+	brume_voulue = false
+	brume()
 	mer.visible = false
 	var a := 0.05
 	var k := TAU / 4.0

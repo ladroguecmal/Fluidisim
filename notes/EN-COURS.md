@@ -83,10 +83,20 @@ identique au bit.
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — images témoins d'avant ; `brume_air` dans `optique_eau.gdshaderinc`, `FOG` dans l'eau et le fond.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — images témoins d'avant ; `brume_air` dans `optique_eau.gdshaderinc`, `FOG` dans l'eau et le fond.
 - [ ] **P3** — mesures des critères 1 à 3.
 - [ ] **P4** — preuve `BRUME-S373`, file, liste (8.6, 8.8), index.
 - [ ] **P5** — rituel ; puis S374.
 
 ### Notes de reprise
+
+**P2 — fait.** `brume_air` (`ciel.gdshaderinc`) : `1 − exp(−ρ·d)`, couleur `ciel_b(direction, 4)`, × part d'air ; `FOG`
+dans l'eau et le fond (nul en contrôle) ; `brume_densite` posée par `mer.gd` (`brume()`, 0 dans les contrôles et avec
+`BRUME=0`). **Premier essai — la brume réécrite partout — critère 1 manqué** : proche p99,9 6 / max 10, rasante 5 / 8,
+référence 6 / 11, **haute 9 / 10 (72 % des pixels)**, plongeante 2 / 2, côtière 6 / 10. Cause relue dans `fog_process` :
+`mip_level = mix(1/MAX, 1, 1 − (|z| − near)/(far − near))` — loin du plan lointain (20 km), Godot lit son cube de radiance
+au **niveau le plus flou** (rugosité 1), une moyenne diffuse du ciel ; la nôtre prend l'horizon dans la direction. Le
+seuil ne se relève pas : **deux variantes** (`eau.gdshader` / `eau_demi.gdshader`, `sol` de même, corps commun dans
+`*.gdshaderinc`, `#define BRUME_PAR_PIXEL`), échangées par `mer.gd` quand le mode demi change ; la brume du moteur
+partout où elle peut servir.
