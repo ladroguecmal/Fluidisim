@@ -4319,6 +4319,15 @@ colonnes, échange par le flux de la face — tient à 2,5 cm la masse de la ban
 attribué au biais de lecture de la bande face à la surface exacte des colonnes ; à 2,5 cm, une dernière colonne de bande
 clairsemée (7,3 par maille). Déclencheur : S400.
 
+**A316 — note datée du 2026-09-27 (S400). La migration était la lecture ; reste un courant au raccord** ([preuve](../validation/RACCORD-3D-S398.md)
+§6). La zone lit sa surface comme la bande (`η + e(η)`, le biais du réseau nominal) : le repos tombe de 1 cm/s à 2·10⁻⁵ m/s, la
+migration à 5 cm de +3,1 à +1,8 mm (critère ±2 mm) — sans ce geste, la bande se remplissait jusqu'à lire comme la zone. **Réfuté** :
+le courant de surface (−6,7 mm/s à 5 cm, −1,8 à 2,5 cm) ne vient pas de la lecture, aucune marche lue ne le porte, la zone seule
+n'en a pas ; la séparation tenue du côté de la bande ne change rien à la densité (7,2 à 2,5 cm). **Reste ouvert** : ce courant et
+le déficit de densité des deux rangées du haut contre la face. **Condition d'une quatrième session** (règle de S294) : un témoin
+court, 5 cm et 45 s, qui abaisse le courant sous 5 mm/s par un geste attribué d'avance — suspects : la face de frontière vue d'un
+seul côté par le transfert, la rangée du haut mouillée à la hauteur de la colonne, la quantité de mouvement des particules absorbées.
+
 **A315 — note datée du 2026-09-23 (S326) : résolu.** Un Jacobi sur le chemin coupé — celui du mode mobile
 3D — ramène la bosse à 128 de 16 029 à **425 itérations** (5,7 s au lieu de 708), débits inchangés à
 2,4·10⁻⁶ près ; à `ny` = 1, identité 2D gardée ([preuve](../validation/FACES-COUPEES-3D-S324.md) §6).

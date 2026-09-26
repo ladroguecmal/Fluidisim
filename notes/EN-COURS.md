@@ -86,7 +86,7 @@ la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
 - [x] **P2** — la référence : section des comparables ; pistes à la file (rendu, au poste).
 - [x] **P3** — (E) et (F) dans `apic3d_columns.rs` ; le repos (critère 2 de S399) ; sans zone et toutes colonnes au bit.
 - [x] **P4** — `apic3d_raccord`, 30 s, 5 et 2,5 cm ; critère 4 de S399 ; attribution si manqué.
-- [ ] **P5** — suite ; preuve (§6 de RACCORD-3D-S398) ; liste, file, A316.
+- [x] **P5** — suite ; preuve (§6 de RACCORD-3D-S398) ; liste, file, A316.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -122,3 +122,7 @@ la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
   (5 cm, E + F) : 7,7 à 8,1 en profondeur, **7,32 et 7,02 dans les deux rangées du haut** — le déficit est à la surface, contre la
   face, là où passe le courant. **Attributions** : (E) **confirmée pour la migration** (dans le critère) ; **réfutée pour le
   courant** ; (F) **sans effet** à 5 cm. Le courant et le déficit de surface : non attribués.
+- **P5** — témoin sans (F) à 2,5 cm : niveau brut +0,07 / +0,34 / +0,02 mm, densité 7,29 / 7,18 / 7,13, courant −1,5, marche lue
+  +0,005 mm ; par rangée 7,37 au fond à 6,78 en haut. (F) réfutée aux deux mailles. Preuve §6, file (deux lignes), liste 4.12,
+  feuille de route, A316 (condition d'une quatrième session : un témoin court qui abaisse le courant sous 5 mm/s). Suite :
+  **697 réussis**, 18 ignorés, zéro avertissement.

@@ -221,8 +221,8 @@ pas recopiée ici (L137).
   colonnes — **à masse exacte** dans les deux sens depuis S323–S325, sa frontière **non reçue** :
   S354, sur 30 s, elle ne tient pas la densité des particules, la masse migre et la période s'allonge
   à 5 cm (A316 ; [§10–13](validation/B10-APIC-S320.md)) ; S394–S397 : la circulation de la frontière était un défaut du
-  banc, ses colonnes n'advectant pas ; **S399, en 3D** : à 2,5 cm, masse à ±0,6 mm sur 30 s, période à 0,01 point, reste la
-  densité ([RACCORD-3D](validation/RACCORD-3D-S398.md) §5) —, la 3D (APIC 3D dans le cœur depuis S388 ; B10 en 3D, S393 : la cavité, pas la gerbe)
+  banc, ses colonnes n'advectant pas ; **S399–S400, en 3D** : repos à 2·10⁻⁵ m/s, masse à ±2 mm sur 30 s aux deux mailles, période à
+  0,2 point ; restent la densité et un courant de surface au raccord ([RACCORD-3D](validation/RACCORD-3D-S398.md) §5–6) —, la 3D (APIC 3D dans le cœur depuis S388 ; B10 en 3D, S393 : la cavité, pas la gerbe)
   et C20. Lot 5 d'ADR-178, APIC retenue
   par l'utilisateur (ADR-186), repris après la v1 (ADR-190 D4).
 - [ ] **4.13 Proche-coque et gerbe d'étrave** — *partiel* **depuis S332–S338** (ADR-001 range le

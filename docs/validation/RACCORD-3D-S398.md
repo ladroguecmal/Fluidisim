@@ -123,3 +123,61 @@ voisines. **Ce qui manque**, attribué mais pas encore éprouvé :
 
 **Ce que la section ne dit pas** : une seule géométrie (frontière droite, au nœud) ; ni cavité ni gerbe à la frontière ; les
 particules virtuelles coûtent un balayage de plus près de la zone ; rien sur la carte.
+
+## 6. S400 — la zone lit comme la bande : le repos et la migration reçus, la densité et le courant non
+
+2026-09-27. **C5b, troisième session.** Les deux remèdes attribués au §5, critères de S399 **inchangés**.
+
+**Reproduire** : commit `f01e5cf7` ou plus récent ; `cargo test … -p water-core s399 -- --nocapture` (le repos, ligne `S399 repos`) ;
+`cargo run … --example apic3d_raccord -- <0.05|0.025> <seul|raccord|colonnes> [durée]` — ligne `APIC3D_RACCORD_S399`, qui porte
+désormais la **marche lue** signée moyenne (`marche_lue_mm`, bande − zone, sur `φ` des deux côtés) et les **particules par
+rangée** de la dernière colonne de la bande ; `colonnes` est le témoin tout en colonnes. 45 s à 11,6 min.
+
+**Deux gestes.** (E) **La zone lit sa surface comme la bande la lirait** : `φ = z − (η + e(η))`, `e` l'erreur de lecture d'un
+réseau nominal à la même position dans la maille (`lattice_read_error` de S389, tabulée sur 32 positions à la configuration, pour
+le noyau et le rayon courants) ; la masse reste `η`. Seulement **s'il y a une bande** : toute en colonnes, la zone n'a rien à
+imiter et lit `η`. (F) **La séparation tenue du côté de la bande** : une particule qu'elle pousserait dans une colonne de la zone
+garde sa position horizontale.
+
+| critère (S399) | résultat |
+|---|---|
+| **1** — sans zone, au bit ; toutes colonnes, les chiffres de S398 | **tenu** : les deux lignes au chiffre près ; suite **697 réussis**, 18 ignorés, zéro avertissement |
+| **2** — repos, moitié particules moitié colonnes : vitesse ≤ 1 cm/s | **tenu** : **2,0·10⁻⁵ m/s** (S399 : 1,007·10⁻² m/s) ; **vu échouer** sans la table, 1,007·10⁻² m/s |
+| **3** — volume à 10⁻⁶ sur 30 s | **tenu** : 6,4·10⁻¹⁰ (5 cm), 9,2·10⁻¹⁰ (2,5 cm) |
+| **4** — ballottement (1, 0), 30 s, contre APIC seul | **manqué** : la densité aux deux mailles, le courant de surface à 5 cm (tableau) |
+
+| critère 4 (écart à APIC seul) | 5 cm | 2,5 cm |
+|---|---|---|
+| niveau de la bande, par 10 s (±2 mm) | +0,51 / +1,44 / +1,83 (S399 : +1,21 / **+2,47 / +3,14**) | +0,12 / +0,34 / −0,45 |
+| particules par maille (8 ± 0,4) | **7,54** / 7,77 / 7,95 (S399 : 7,70 / 7,89 / 8,18) | **7,28 / 7,20 / 7,18** (APIC seul : 8,00 / 7,94 / 7,62) |
+| saut max (< 0,5 maille) | 0,101 (seul 0,093) | 0,170 (seul 0,785) |
+| période (1 point) | +0,77 contre +0,98 % | +0,27 contre +0,36 % |
+| amortissement (1 point) | +0,39 contre +0,32 % | +0,23 contre +0,08 % |
+| courant moyen sur la face (≤ 5 mm/s) | +0,8 en profondeur, **−6,7 à la surface** (seul : −0,5) | +0,9, −1,8 |
+
+**Les témoins** (5 cm, 30 s) :
+
+| montage | niveau (mm, écart à APIC seul) | densité | courant de surface | marche lue |
+|---|---|---|---|---|
+| (E) + (F) | +0,51 / +1,44 / +1,83 | 7,54 / 7,77 / 7,95 | −6,7 | +0,07 mm |
+| sans (E) | +1,21 / +2,48 / +3,07 | 7,70 / 7,89 / 8,15 | −7,0 | +0,02 mm |
+| sans (F) | +0,52 / +1,46 / +1,80 | 7,54 / 7,77 / 7,95 | −6,8 | +0,07 mm |
+| toutes colonnes | — | — | **+0,5**, uniforme sur la profondeur | — |
+
+**Ce que les témoins disent.** (1) **La migration était bien la lecture** : sans (E), la marche lue moyenne est déjà nulle
+(+0,02 mm) — la pression égalise ce qu'elle voit, et la bande, qui lit 1,1 mm sous sa surface, se remplit jusqu'à lire comme
+la zone ; avec (E), elle n'a plus à le faire, et la migration rentre dans le critère. (2) **Le courant n'est pas la lecture** :
+il reste à −6,7 mm/s sans marche lue ; la zone seule n'en a pas (+0,5 uniforme) ; **il est au raccord**. Une circulation fermée
+— l'eau entre dans la bande par la rangée du haut, en ressort par-dessous (+0,8 sur neuf rangées) — qui divise par 3,7 quand la
+maille divise par deux (−6,7 puis −1,8). (3) **(F) ne change rien**, ni à 5 cm ni à 2,5 cm (sans elle : densité 7,29 / 7,18 /
+7,13, courant −1,5) ; la densité ne vient pas de là. Par rangée, la dernière colonne de la bande compte, à 5 cm, 7,7 à 8,1
+particules par maille en profondeur et **7,32 et 7,02 dans les deux rangées du haut** ; à 2,5 cm, 7,4 au fond, **6,8 en haut** :
+le déficit est **le plus fort à la surface, contre la face**, là où passe le courant — et, à la maille fine, s'étend à toute la
+profondeur, sans que la masse de la bande bouge.
+
+**Ce qui reste**, non attribué : le courant de surface et le déficit de densité qui l'accompagne. Suspects, à éprouver par un
+témoin court (5 cm, 45 s) avant tout calcul long : la face de frontière, dont la vitesse vient du transfert des seules
+particules de la bande (un seul côté) ; le transport de la rangée du haut, mouillée à la hauteur de la colonne quand les
+particules qui la traversent suivent la surface de la bande ; la quantité de mouvement des particules absorbées, perdue.
+
+**Ce que la section ne dit pas** : toujours une seule géométrie (frontière droite, au nœud) ; rien sur la carte.
