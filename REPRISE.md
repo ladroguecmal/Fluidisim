@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 03:14 +02:00
+Battement        : 2026-09-26 03:30 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S374 — la piscine de V visualisée : bassin, déversoir, bac tampon, pompe (demande de l'utilisateur)
 Dernière session : S373 — rendu 11 : **la brume réglée par pixel** à demi immergée (variantes `_demi` de l'eau et du fond ; la brume réécrite partout manquait le critère 1 de 11 niveaux) ([preuve](docs/validation/DEMI-IMMERGEE-S371.md) §10). Avant : S372, vannes et pompes dans V

@@ -85,7 +85,7 @@ par V **au dixième de millimètre**. (4) Jugement de l'utilisateur (R27).
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `examples/piscine_v.rs` : la piscine dans V, le scénario, l'export (`godot/donnees/piscine_v.json`) ;
   critères 1 et 2.
-- [ ] **P3** — `godot/piscine.tscn`, `piscine.gd` : les bacs, les murs, l'eau (`bassin.gdshader`, l'optique de
+- [x] **P3** — `godot/piscine.tscn`, `piscine.gd` : les bacs, les murs, l'eau (`bassin.gdshader`, l'optique de
   `optique_eau`), le rejeu ; critère 3.
 - [ ] **P4** — la lame du déversoir, le jet de la buse, les indications à l'écran.
 - [ ] **P5** — images de R27 ; preuve `PISCINE-V-S374`, liste, file, index.
@@ -99,3 +99,12 @@ par V **au dixième de millimètre**. (4) Jugement de l'utilisateur (R27).
 (moyennes de 180 à 240 s, point fixe analytique) : déversoir **10,0717 l/s**, pompe **10,0926**, analytique **10,0924**
 (−0,205 % / +0,001 %) ; charge **12,65 mm** pour 12,66 (−0,04 %) ; bac tampon analytique 0,659 m. Export 3 301 lignes,
 218 Ko, `godot/donnees/` (dérivé, non versionné).
+
+**P3 — fait.** `piscine.tscn`, `piscine.gd` (rejeu interpolé, trois vues, pause, indications, `--captures`,
+`--controle-piscine`) ; `bassin.gdshader` (l'optique de la mer ramenée au bac : Fresnel, ciel, éclat, fond réfracté,
+colonne de Maritorena ; rides d'habillage) ; `paroi.gdshader` (le modèle d'éclairement du sable de S359 : parois et eau
+dans les mêmes unités ; joints de carrelage). **Critère 3** : six instants, sur un pas et entre deux, **3,6·10⁻⁸ m** au
+pire (arrondi f32). **Impasses** : `%e` n'existe pas dans le formatage de GDScript (lignes brutes) ; une erreur d'analyse
+laisse Godot ouvert à vide — `--quit-after` désormais sur chaque lancement de la piscine. Défauts de mise en scène vus et
+corrigés : murs extérieurs carrelés (coque en béton, carrelage intérieur de 1 cm), sol trop petit (son bord à
+l'horizon ; 6 km), vue du déversoir trop basse (le mur du bac cachait son eau).
