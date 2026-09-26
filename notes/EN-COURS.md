@@ -85,7 +85,7 @@ la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la référence : section des comparables ; pistes à la file (rendu, au poste).
 - [x] **P3** — (E) et (F) dans `apic3d_columns.rs` ; le repos (critère 2 de S399) ; sans zone et toutes colonnes au bit.
-- [ ] **P4** — `apic3d_raccord`, 30 s, 5 et 2,5 cm ; critère 4 de S399 ; attribution si manqué.
+- [x] **P4** — `apic3d_raccord`, 30 s, 5 et 2,5 cm ; critère 4 de S399 ; attribution si manqué.
 - [ ] **P5** — suite ; preuve (§6 de RACCORD-3D-S398) ; liste, file, A316.
 - [ ] **P6** — rituel.
 
@@ -102,3 +102,23 @@ la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
   une colonne de la zone garde `x, y`. **Repos (critère 2 de S399) tenu : 1,970·10⁻⁵ m/s** (S399 : 1,007·10⁻² m/s) ; vu échouer :
   table coupée, 1,007·10⁻² m/s. Sans zone : ligne de S389 au chiffre près (1,9964 s, +1,01 %, +7,04 %, +0,21 %, 93,5) ; toutes
   colonnes : ligne de S398 (+0,02 %, +0,49 %, volume +1,39·10⁻¹⁰). Garde du test ramenée au critère (0,01).
+- **P4** — `apic3d_raccord`, 30 s, (E) + (F). Écarts à APIC seul :
+
+  | critère 4 de S399 | 5 cm | 2,5 cm |
+  |---|---|---|
+  | niveau de la bande, par 10 s (±2 mm) | +0,51 / +1,44 / +1,83 (S399 : +1,21 / +2,47 / +3,14) | +0,12 / +0,34 / −0,45 |
+  | particules par maille (8 ± 0,4) | **7,54** / 7,77 / 7,95 | **7,28 / 7,20 / 7,18** (seul : 8,00 / 7,94 / 7,62) |
+  | saut max (< 0,5) | 0,101 (seul 0,093) | 0,170 (seul 0,785) |
+  | période (1 point) | +0,77 contre +0,98 % | +0,27 contre +0,36 % |
+  | amortissement (1 point) | +0,39 contre +0,32 % | +0,23 contre +0,08 % |
+  | courant sur la face (≤ 5 mm/s) | +0,8 en profondeur, **−6,7 à la surface** (seul −0,5) | +0,9, −1,8 |
+  | volume | −6,4·10⁻¹⁰ | +9,2·10⁻¹⁰ |
+
+  **Témoins** (5 cm) : toutes colonnes, courant **+0,5 uniforme** — pas de circulation : elle est au raccord, pas à la zone ;
+  marche lue signée moyenne (bande − zone, sur `φ`) **+0,07 mm** avec (E), +0,02 mm sans — la pression ne voit **aucune** marche
+  moyenne : sans (E), la bande se remplit jusqu'à lire comme la zone (la migration est la réponse d'équilibre au biais) ; avec
+  (E), elle n'a plus à le faire. Sans (E) : niveau +1,21 / +2,48 / +3,07, courant −7,0, densité 7,70 / 7,89 / 8,15 (= S399). Sans
+  (F) : au chiffre près de (E) + (F) (niveau +0,91 / +2,01 / +2,23 brut, courant −6,8, densité 7,54 / 7,77 / 7,95). Par rangée
+  (5 cm, E + F) : 7,7 à 8,1 en profondeur, **7,32 et 7,02 dans les deux rangées du haut** — le déficit est à la surface, contre la
+  face, là où passe le courant. **Attributions** : (E) **confirmée pour la migration** (dans le critère) ; **réfutée pour le
+  courant** ; (F) **sans effet** à 5 cm. Le courant et le déficit de surface : non attribués.

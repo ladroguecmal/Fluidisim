@@ -12,7 +12,10 @@
 //! de la frontière, par profondeur. La **période** et l'**amortissement** sur le moment de volume `Σ (x − L/2)·V`, passages par
 //! zéro et régression sur les pics (S389).
 //!
-//!     cargo run -p water-core --release --offline --example apic3d_raccord -- <dx> <seul|raccord> [durée_s]
+//! **S400 — `colonnes`**, le témoin : toute la cuve en colonnes, aucune particule — seuls la période, l'amortissement et le courant
+//! sur la face ont un sens (le niveau et la densité de la bande, sans bande, n'en ont pas).
+//!
+//!     cargo run -p water-core --release --offline --example apic3d_raccord -- <dx> <seul|raccord|colonnes> [durée_s]
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
@@ -43,6 +46,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let dx: f64 = args.get(1).and_then(|v| v.parse().ok()).unwrap_or(0.05);
     let raccord = args.get(2).map(String::as_str) != Some("seul");
+    let colonnes = args.get(2).map(String::as_str) == Some("colonnes");
     let duree: f64 = args.get(3).and_then(|v| v.parse().ok()).unwrap_or(30.);
     let (nx, ny, nz) = ((LX / dx).round() as usize, (LY / dx).round() as usize, (LZ / dx).round() as usize);
     let ib = nx / 2;
@@ -55,12 +59,12 @@ fn main() {
     let mut a = Apic3::configure(&mut hote, Domain3 { nx, ny, nz, dx: dx as f32 }, 1000., G as f32, nx * ny * nz * 8)
         .expect("configuration");
     if raccord {
-        let masque: Vec<u8> = (0..nx * ny).map(|c| (c % nx >= ib) as u8).collect();
+        let masque: Vec<u8> = (0..nx * ny).map(|c| (colonnes || c % nx >= ib) as u8).collect();
         a.enable_columns(&mut hote, &masque).expect("colonnes");
         let eta: Vec<f32> = (0..nx * ny).map(|c| profil(((c % nx) as f64 + 0.5) * dx) as f32).collect();
         a.set_columns_surface(&eta).expect("surface");
     }
-    a.seed(&|p| (p[2] as f64) < profil(p[0] as f64) && (!raccord || (p[0] as f64) < ib as f64 * dx)).expect("ensemencement");
+    a.seed(&|p| !colonnes && (p[2] as f64) < profil(p[0] as f64) && (!raccord || (p[0] as f64) < ib as f64 * dx)).expect("ensemencement");
     let vp = dx * dx * dx / 8.;
     let xb = ib as f64 * dx;
     let v0 = a.total_volume();
@@ -81,6 +85,10 @@ fn main() {
     let mut precedent = (0f64, moment(&a));
     let (mut niveaux, mut densites, mut releves) = (vec![0f64; 3], vec![0f64; 3], vec![0usize; 3]);
     let (mut saut_max, mut u_face, mut duree_u) = (0f64, vec![0f64; nz], 0f64);
+    // S400 : la marche **signée** que voit la pression, hauteur lue sur `φ` des deux côtés (la zone lit `η + e(η)`), en moyenne.
+    let (mut marche, mut marches) = (0f64, 0usize);
+    // S400 : les particules par maille de la dernière colonne de la bande, **par rangée** (somme sur `j`, moyenne sur les relevés).
+    let mut par_rangee = vec![0f64; nz];
     let mut prochain = 100_000u64;
     let debut = Instant::now();
     while t < fin {
@@ -120,6 +128,9 @@ fn main() {
                     occ[kk * ny + j] += 1;
                 }
             }
+            for kk in 0..nz {
+                par_rangee[kk] += (0..ny).map(|j| occ[kk * ny + j] as f64).sum::<f64>() / ny as f64;
+            }
             let pleines: Vec<u32> = occ.into_iter().filter(|n| *n > 0).collect();
             densites[tranche] += pleines.iter().sum::<u32>() as f64 / pleines.len().max(1) as f64;
             releves[tranche] += 1;
@@ -133,6 +144,10 @@ fn main() {
             for j in 0..ny {
                 if let (Some(g), Some(d)) = (lue(&a, ib - 1, j), droite[j]) {
                     saut_max = saut_max.max((d - g).abs() / dx);
+                }
+                if let (Some(g), Some(d)) = (lue(&a, ib - 1, j), lue(&a, ib, j)) {
+                    marche += g - d;
+                    marches += 1;
                 }
             }
         }
@@ -151,8 +166,8 @@ fn main() {
     println!(
         "APIC3D_RACCORD_S399 montage={} dx={dx} particules={} pas={pas} volume_relatif={:+.2e} refusees={} niveau_gauche_mm={} \
          particules_par_maille={} saut_max_mailles={saut_max:.3} periode_s={periode:.4} erreur={:+.2}% amortissement_par_periode={:+.2}% \
-         pics={} u_face_mm_s={} calcul_s={:.0}",
-        if raccord { "raccord" } else { "seul" },
+         pics={} u_face_mm_s={} marche_lue_mm={:+.3} particules_par_rangee={} calcul_s={:.0}",
+        if colonnes { "colonnes" } else if raccord { "raccord" } else { "seul" },
         a.particle_count(),
         a.total_volume() / v0 - 1.,
         a.columns_refused(),
@@ -162,6 +177,8 @@ fn main() {
         100. * amortissement,
         pics.len(),
         u_face.iter().map(|x| format!("{:+.1}", 1e3 * x / duree_u)).collect::<Vec<_>>().join(","),
+        1e3 * marche / marches.max(1) as f64,
+        par_rangee.iter().map(|x| format!("{:.2}", x / releves.iter().sum::<usize>().max(1) as f64)).collect::<Vec<_>>().join(","),
         debut.elapsed().as_secs_f64()
     );
 }
