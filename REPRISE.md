@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 19:07 +02:00
-Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; lecture des articles bloquée)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-26 19:10 +02:00
+Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
+Session en cours : S388 — C4a : APIC en 3D dans le cœur (repos, ballottement) ; C4b ensuite (B10 en 3D)
 Dernière session : S387 — physique : **C2b, la colonne graduée au pas mobile** ([preuve](docs/validation/COLONNES-HAUTES-S386.md) §5) — la course de la surface sous la mer de la porte B mesurée (4,8 m) : la colonne graduée sert l'eau calme des contenants, pas la haute mer ; au pas mobile, elle suit sa dispersion (ballottement, rapport 0,84) ; deux défauts de S386 corrigés. Avant : S386, la colonne graduée au pas linéaire
 Session suivante : au poste, **C3** — la multigrille sur la carte, levier probable de la haute mer (ADR-207 D5) ; en alternance (ADR-191), la pluie, pièce 5. Dans une session cloud : **C4** — APIC en 3D dans le cœur
 Maillons        : 1 — S387 : aucun point ni critère de porte n'a changé d'état (4.3 déjà partiel)

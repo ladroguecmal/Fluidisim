@@ -62,72 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S387 — **terminée**. **C2b** de la campagne ([ADR-208](../docs/adr/ADR-208-la-colonne-graduee.md) D4, ADR-207 D5) :
-**la colonne graduée au pas mobile**. Demande de l'utilisateur (2026-09-26) : *« Continue »*. Agent : Claude Opus 5.5, session
-cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
+Session : S388 — **en cours**. **C4a** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5,
+[ADR-186](../docs/adr/ADR-186-apic-seconde-representation.md)) : **APIC en 3D dans le cœur**, avec ses essais (METHODE : un banc
+qui entre au système y entre avec ses chiffres). C4 est découpée : **C4a** ici — le solveur, le repos, le ballottement ;
+**C4b** ensuite — B10 en 3D, une sphère qui entre dans l'eau. Demande de l'utilisateur (2026-09-26) : *« Continue »*. Agent :
+Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
 
-**Thèse.** Au pas mobile, les couches cubiques doivent contenir **toute la course de la surface** (ADR-208 D4). Or la scène de
-la porte B n'a que **3,5 m d'eau sous 3,5 m d'air** (28 couches de 25 cm) sous une mer de `Hs` ≈ 2,5 m (`--houle` : vent 1,5 m
-à 6 s, houle 2 m à 12 s) : **le balayage de S386, étiqueté « porte B », supposait 7 m d'eau sous une surface fixe** — une
-erreur d'étiquette à corriger d'abord. Ensuite, **mesurer** la course réelle de la surface dans cette scène (B évalué sur le
-domaine), et en tirer où la colonne graduée paie : la haute mer, ou l'eau calme des contenants. Puis la construire au pas
-mobile, sur la grille fine, comme au pas linéaire.
+**Thèse.** Le candidat 2D de S318–S320 (`examples/lot5_comparaison.rs`) porté aux trois dimensions dans `water-core`, **avec
+ses leçons** : surface reconstruite des particules (Zhu et Bridson 2005) et fluide fantôme à la fraction de maille ; faces
+d'air extrapolées sur trois couches puis remises à zéro, les faces alimentées par des particules gardées ; séparation des
+particules (0,4 maille, deux passes) ; transferts APIC trilinéaires (Jiang et al. 2015) ; advection RK2. Huit particules par
+maille (2 × 2 × 2), `f32` (I-08), `g_eff` injecté (I-07), tous les tampons réservés à la configuration (I-06).
 
-**Critères, écrits avant.** (1) L'étiquette corrigée partout où « porte B » désigne le cas de 7 m (preuve, ADR-208, liste,
-file, feuille de route). (2) La course de la surface mesurée sur la scène de la porte B — `B` seul sur dix minutes, puis
-avec un repère qui suit la moyenne de `B` sur le domaine — et le nombre de couches cubiques qu'elle impose, **publiés avec
-le gain qui en reste**. (3) Au pas mobile, colonne graduée : tous les nœuds redonnent le pas mobile fin à 10⁻⁶ m ; volume
-conservé à l'arrondi ; une surface qui entre dans la partie graduée est **refusée**, état rendu au bit ; un ballottement suit
-le pas fin à l'écart que la dispersion calculée prévoit. (4) Suite entière inchangée sans colonne graduée, zéro avertissement.
+**Critères, écrits avant.** (1) **APIC conserve un champ affine** : particules à `v = a + B·x`, `C = B`, grille couverte →
+après transfert vers la grille et retour, `v` et `C` rendus à 10⁻⁵ près (relatif). (2) **La surface au repos** : l'iso-zéro
+reconstruite d'une nappe plane tombe à sa hauteur à 1 % de maille près. (3) **Le repos** : une cuve au repos, 2 s — masse
+exacte (nombre de particules constant), vitesse parasite ≤ 1 cm/s à 5 cm (2D : 4,4 mm/s). (4) **Le ballottement** du mode
+(1, 0) d'une cuve de 2 m, 0,5 m d'eau, 2 cm (le cas de S318, invariant en `y`) : erreur de période ≤ 7 % à 5 cm et ≤ 1 % à
+2,5 cm, décroissante (2D : +5,9 % et −0,15 %) ; énergie jamais créée au-delà de 1 %. (5) **Un mode oblique** (1, 1) d'une
+cuve carrée : erreur de période ≤ 2 % à la maille la plus fine mesurée — la troisième dimension éprouvée pour elle-même.
+(6) Suite entière inchangée, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'étiquette corrigée (critère 1).
-- [x] **P3** — la course de la surface sous la mer de la porte B : `examples/delta3d_course_surface.rs` (critère 2) ; les
-  couches cubiques qu'elle impose, le gain qui reste (outil) ; le cas d'un bassin calme.
-- [x] **P4** — la colonne graduée au pas mobile (`project_mobile3`) : garde de la course, départ chaud par injection aux
-  nœuds, divergence restreinte ; essais (critère 3).
-- [x] **P5** — le ballottement gradué contre le fin ; critère 4.
-- [x] **P6** — preuve (section datée de COLONNES-HAUTES-S386) ; ADR-208 (note), liste, file, feuille de route.
-- [x] **P7** — rituel.
+- [ ] **P2** — `apic3d.rs` : configuration et réserve (I-06), grille MAC, particules, ensemencement, tri par maille.
+- [ ] **P3** — transferts APIC trilinéaires (particules → grille, grille → particules) ; critère 1.
+- [ ] **P4** — surface reconstruite (rayon au repos calculé), étiquettes ; critère 2.
+- [ ] **P5** — gravité, projection à fluide fantôme (gradient conjugué, Jacobi), extrapolation, advection, séparation : le pas.
+- [ ] **P6** — le repos ; critère 3.
+- [ ] **P7** — banc `apic3d_ballottement` : modes (1, 0) et (1, 1) ; critères 4 et 5.
+- [ ] **P8** — critère 6 ; preuve `APIC3D-S388` ; liste, file, feuille de route, index.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
 
-**P3 — la course de la surface** (`delta3d_course_surface`, 10 s ; mer `--houle` reconstruite, domaine de la porte B, 840
-points, 0,1 s, 600 s) :
-
-| lecture | min | max | course | 0,1 % / 99,9 % | couches cubiques, paquet compris |
-|---|---:|---:|---:|---|---:|
-| `B` | −2,487 m | +2,299 m | **4,79 m** | −1,89 / +1,83 | **26 sur 28** |
-| `B` moins sa moyenne sur le domaine | −1,674 | +1,716 | 3,39 m | −1,14 / +1,14 | 20 sur 28 |
-
-**La colonne graduée ne paie pas en haute mer** dans un repère fixe : 26 couches cubiques au moins, deux nœuds au mieux
-dessous — rien à gagner ; un repère qui suivrait la moyenne de `B` en laisserait 20 (÷1,27 au plus). **Fait vu en passant** :
-sur dix minutes, le creux de `B` (−2,49 m) plus le paquet (0,65 m) descend à 0,11 m du fond du domaine (3,5 m d'eau) — la
-scène de la porte B n'a été éprouvée que sur des durées courtes ; à consigner, pas à régler ici.
-
-**En eau calme** (bassin de 3 m, course supposée ±0,5 m — *hypothèse*, non mesurée) : la **dispersion** fixe les couches
-cubiques, pas la course — 10 cm : 14 inconnues sur 30 (÷2,14 ; `r` 1,25, 6 cubiques) ; 5 cm : **24 sur 60 (÷2,50** ; `r` 1,2,
-11 cubiques). La colonne graduée sert donc les **contenants** (ADR-200, ADR-202) — le pas mobile de la piscine —, pas la
-haute mer.
-
-**P4 — la colonne graduée au pas mobile** (`project_mobile3_graded`) : garde de la course (le plus bas nœud cubique et la
-maille au-dessus mouillés partout, sinon `Domain`), départ chaud par injection aux nœuds, gradient conjugué préconditionné
-par la diagonale condensée `Σ P²·A_kk`, divergence restreinte avec lignes franches. **Critère 3** (essais `s387`) : tous les
-nœuds = pas mobile fin à 10⁻⁶ m sur 20 pas ; volume gardé à 10⁻⁹ m³ sur 30 pas, divergence franche sous 10⁻⁵ ; surface à
-3,1 m sous des couches cubiques à partir de 3,125 m refusée, état rendu au bit. Itérations : ≈ 90 au premier pas, ≈ 30 ensuite.
-
-**Trois défauts trouvés en chemin, dont deux hérités de S386** — l'essai « tous les nœuds = pas fin » les a montrés (vu
-échouer : `Convergence` après 20 000 itérations) : (1) la projection mobile appliquait l'opérateur du pas **linéaire**
-(`apply`) au lieu de `apply_mobile3` — nouveau, corrigé ; (2) **S386** : `Graded3::len()` lisait la taille sur `x`, emprunté
-pendant le recalcul du vrai résidu — la boucle faisait zéro tour : **le « vrai résidu » annoncé par la preuve de S386 n'était
-jamais recalculé** ; (3) **S386** : la divergence restreinte écrasait le résidu `r`, qu'une relance réutilise. Corrigés
-(`len` sur `m`, divergence dans `z`). Les chiffres de S386 **ne changent pas** (0,0046 / 0,0048 %) : la récurrence du
-gradient conjugué restait juste — mais le contrôle annoncé n'avait pas lieu ; à dire dans la preuve.
-
-**P5 — le ballottement** (`delta3d_ballottement_gradue`, 2 min) : bassin 8 × 4 m, 4 m d'eau sous 2 m d'air, mode fondamental,
-`a` = 1 cm, 5 s au pas mobile, fin contre gradué (15 inconnues sur 24). Prédit par la dispersion calculée : Ω_gradué/Ω_fin − 1 =
-+2,046·10⁻³, écart `a·ΔΩ·t` = **1,921·10⁻⁴ m** ; mesuré : **1,619·10⁻⁴ m**, rapport **0,843** — **critère tenu** (0,5 à 2).
-Itérations moyennes : fin 47,7, gradué 44,1. **Critère 4** : suite Rust 675 réussis (673 + 2), 18 ignorés, zéro avertissement ;
-outils Python 32 réussis.
+*(vide)*
