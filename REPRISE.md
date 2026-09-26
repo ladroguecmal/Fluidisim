@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-27 00:16 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
-Session en cours : S398 — C5b, première part : la zone des colonnes dans APIC 3D (surface η, vitesse eulérienne advectée), éprouvée seule contre δ
-Dernière session : S397 — physique : **C5a, troisième part** ([preuve](docs/validation/B10-APIC-S320.md) §16) — la circulation de la frontière du raccord était un défaut du banc 2D (ses colonnes n'advectaient pas ; avec l'advection, 54 → 4 mm/s) ; `Volume3` advecte ; reste une migration lente à 2,5 cm, non attribuée. Avant : S396, fusion et séparation (4.9 partiel)
-Session suivante : dans le cloud, **C5b** — le raccord particules ↔ colonnes **en 3D** (APIC 3D ↔ `Volume3` : colonnes qui advectent, échange par le flux de la face, retrait où les particules arrivent ; masse de chaque côté, densité, profil de la face, période sur 30 s) ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
-Maillons        : 1 — S397 : aucun point ni critère de porte n'a changé (A316 scindé : la circulation, un défaut du banc)
+Session en cours : aucune
+Dernière session : S398 — physique : **C5b, première part** ([preuve](docs/validation/RACCORD-3D-S398.md)) — la zone des colonnes dans APIC 3D (surface `η`, vitesse advectée, une seule projection) : seule, elle ballotte à ≤ 0,03 point de δ ; sans masque, au bit ; δ refuse la cuve mince à 2,5 cm (observé). Avant : S397, la circulation du raccord 2D était un défaut du banc
+Session suivante : dans le cloud, **C5b, deuxième part** — une bande de particules dans la zone de colonnes, l'échange à la frontière (flux de la face, retrait où les particules arrivent), les critères de S394 sur 30 s en 3D ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
+Maillons        : 2 — S398 : aucun point ni critère de porte n'a changé (la zone des colonnes construite, le raccord pas encore) ; la demande de l'utilisateur prime : terminer le solveur
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

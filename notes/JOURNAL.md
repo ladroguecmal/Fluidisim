@@ -17654,3 +17654,18 @@ migre encore de +0,006 m² en 30 s, comme en S354. (D), la hauteur mouillée amo
 **Limites** : la seconde cause non attribuée ; un banc 2D. **Rituel.** Maillons **1** : aucun point ne change (A316 scindé).
 Suivant : dans le cloud, **C5b** — le raccord en 3D, APIC 3D et `Volume3`, avec les instruments de S394–S397 ; au poste, C3b
 puis la pluie, pièce 5b.
+
+## S398 — 2026-09-27 — physique : C5b, première part — la zone des colonnes dans APIC 3D
+
+**Entrée.** *« Continue »* (objectif : terminer le solveur) ; le raccord en 3D. **Fait** ([preuve](../docs/validation/RACCORD-3D-S398.md)) :
+le raccord demande une seule projection pour colonnes et particules ; `Apic3` reçoit une **zone de colonnes** (`apic3d_columns.rs`),
+masque réservé à la configuration — surface `η` par colonne (`φ = z − η`, sans reconstruction ni son biais), vitesse eulérienne
+advectée au pied de la caractéristique (la leçon de S397), `η` par débits mouillés comme δ ; quatre crochets inertes sans masque.
+**Tenus** : sans masque, le ballottement de S389 au chiffre près, suite 694 réussis, zéro avertissement ; toutes colonnes, repos
+2,4·10⁻⁵ m/s, volume à 10⁻¹¹ ; ballottements **à ≤ 0,03 point de δ** sur les trois cas qu'il calcule, amortissement ≥ 0
+(+0,3 à +1,4 % par période : l'advection semi-lagrangienne dissipe plus que celle de δ). **Observé sur δ** : sa projection
+mobile refuse la cuve mince (1, 0) à 2,5 cm, Jacobi comme multigrille — non étudié. **Limites** : ni bande ni échange encore ;
+advection du premier ordre. **Rituel.** Maillons **2** : aucun point ne change d'état. La demande de l'utilisateur prime (terminer
+le solveur) ; la suite fait avancer une capacité — le raccord reçu. Suivant : dans le cloud, **C5b, deuxième part** — une bande
+de particules dans la zone de colonnes, l'échange à la frontière (flux de la face, retrait où les particules arrivent), les
+critères de S394 sur 30 s en 3D ; au poste, C3b puis la pluie, pièce 5b.

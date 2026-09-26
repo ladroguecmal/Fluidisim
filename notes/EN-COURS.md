@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S398 — **en cours**. **C5b, première part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
+Session : S398 — **terminée**. **C5b, première part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
 conception §4.1 A1, §4.2) : **la zone des colonnes dans APIC 3D**. Demande de l'utilisateur (2026-09-27) : *« Continue »*
 (objectif consigné en S397 : terminer le solveur). Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo,
 Python ; ni carte graphique, ni Godot. Sert 4.16, 4.12, A316.
@@ -91,7 +91,7 @@ publiés contre la période exacte.
 - [x] **P2** — `enable_columns` et le pas à colonnes dans `apic3d.rs` ; l'essai du repos ; critères 1 et 2.
 - [x] **P3** — les ballottements, toutes colonnes, contre δ (même instrument) ; critère 3.
 - [x] **P4** — suite ; preuve `RACCORD-3D-S398` ; file, liste, feuille de route, index.
-- [>] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 **P2 — `apic3d_columns.rs`** : `enable_columns` (masque, réserve comptée), `set_columns_surface`, `columns_volume` ; dans le pas,
