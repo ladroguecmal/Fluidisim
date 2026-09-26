@@ -87,11 +87,11 @@ jugement de l'utilisateur (R29).
 - [x] **P1** — jeton, plan seul ; la décision de l'utilisateur consignée (file, feuille de route : pas de solveur).
 - [x] **P2** — ADR-205 : la pluie complète — inventaire des manquants, familles, ordre, sources, ce qui reste à la météo.
 - [x] **P3** — références : photographies de pluie qui tombe (traînées, rideau au loin) ; ce qu'elles montrent.
-- [>] **P4** — les gouttes : `pluie_air.gd` (boîte autour de la caméra, nombre par classe de taille depuis `pluie.gd`),
+- [x] **P4** — les gouttes : `pluie_air.gd` (boîte autour de la caméra, nombre par classe de taille depuis `pluie.gd`),
   nuanceur de particules procédural (position, taille, vitesse par hachage de l'indice, repli dans la boîte, arrêt au sol
   et à l'eau).
-- [ ] **P5** — leur dessin : traînée alignée sur la chute, opacité et radiance de Garg et Nayar ; bassin et mer.
-- [ ] **P6** — l'extinction au loin (`β`, brume de la scène) ; critère 3.
+- [x] **P5** — leur dessin : traînée alignée sur la chute, opacité et radiance de Garg et Nayar ; bassin et mer.
+- [>] **P6** — l'extinction au loin (`β`, brume de la scène) ; critère 3.
 - [ ] **P7** — contrôle du nombre et des tailles (critère 2) ; critère 1 ; coût.
 - [ ] **P8** — images de R29 ; preuve `PLUIE-AIR-S380` ; liste, file, feuille de route, index.
 - [ ] **P9** — rituel.
@@ -111,3 +111,14 @@ Chiffré : la visibilité de l'averse tropicale (≈ 300 à 600 m) donne `β ≈
 (`β = (π/2)·2·N0/Λ³` = 6,9·10⁻³ m⁻¹ à 100 mm/h, V ≈ 570 m) la place à ≈ 100 mm/h, plausible pour une averse tropicale ; à
 10 mm/h, 1,55·10⁻³ (V ≈ 2,5 km). Les traînées sont **faibles** de jour — l'opacité de Garg et Nayar (quelques pour cent)
 est le bon ordre ; elles ne ressortent que devant un fond sombre.
+
+**P4–P5 — les gouttes et leur dessin** (faits ensemble : le dessin est la moitié du même nuanceur ; un commit pour les
+deux, dit ici). `pluie_air.gd` : deux classes, [1 ; 2) mm dans une boîte de ±4 m × 6 m (384 m³) et [2 ; 6] mm dans ±8 m ×
+10 m (2 560 m³), placées aux trois quarts de leur demi-côté devant la caméra ; à 10 mm/h, 232 et 20 gouttes par m³, soit
+≈ 89 000 et 51 000 particules. `pluie_air.gdshader` : tout par hachage de l'indice (position, diamètre par inversion de
+l'exponentielle tronquée, vitesse d'Atlas), repli autour du centre, arrêt au sol et à l'eau des deux bacs (niveaux du
+moment), traînée `v·τ + D` (τ = 1/60 s), largeur au moins un pixel, opacité de Garg et Nayar. `goutte.gdshader` : radiance
+0,94 × moyenne de l'environnement (ciel à 30°, 60°, zénith ; sol à 0,2 × zénith) — **approchée**. Vu : bassin (buse) à
+10 mm/h, traînées fines et faibles visibles contre le sol ; mer, presque invisibles contre le ciel — comme les photos.
+Écarts d'image moyens : 4,9 (bassin, buse), 4,5 (mer, proche). Un `Array[Vector4]` typé refusait un tableau littéral :
+tableaux non typés.

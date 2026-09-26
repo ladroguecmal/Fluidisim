@@ -113,6 +113,8 @@ const CARTE_ECHELLE := 32.0
 
 const Pluie = preload("res://pluie.gd")
 var pluie_mm_h := 0.0
+## S380 — la pluie dans l'air (`pluie_air.gd`, ADR-205 pièce 1) ; les gouttes s'arrêtent au niveau moyen de la mer.
+var pluie_air: Node3D
 
 
 func _ready() -> void:
@@ -927,6 +929,12 @@ func phases(t: float) -> void:
 	# S379 : l'horloge des rides repliée sur l'heure (I-08 : le nuanceur ne voit qu'un flottant borné).
 	materiau.set_shader_parameter("pluie", Pluie.uniformes(pluie_mm_h))
 	materiau.set_shader_parameter("temps_pluie", fmod(t, 3600.0))
+	if camera != null:
+		if pluie_air == null:
+			pluie_air = load("res://pluie_air.gd").new()
+			add_child(pluie_air)
+		pluie_air.configurer(pluie_mm_h)
+		pluie_air.suivre(camera, fmod(t, 3600.0))
 	if materiau_caustiques != null:
 		materiau_caustiques.set_shader_parameter("bande", bande)
 		suivre_carte()

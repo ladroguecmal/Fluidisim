@@ -29,6 +29,8 @@ var texte: Label
 var monde_env: Environment
 const Pluie = preload("res://pluie.gd")
 var pluie_mm_h := 0.0
+## S380 — la pluie dans l'air (`pluie_air.gd`, ADR-205 pièce 1).
+var pluie_air: Node3D
 ## S375 — la surface de δ 3D du bassin (ADR-200), si l'export existe (`examples/piscine_delta.rs`) : l'en-tête, les images
 ## (entiers de 16 bits, dixièmes de millimètre autour du repos), les deux textures lues par `bassin.gdshader`.
 var champ: Dictionary
@@ -228,6 +230,12 @@ func construire() -> void:
 		m.set_shader_parameter("champ_dx", float(champ["dx_m"]))
 	materiau_bassin = eau_bassin.material_override
 	materiau_tampon = eau_tampon.material_override
+	# S380 : les gouttes s'arrêtent au sol et à l'eau des deux bacs.
+	pluie_air = load("res://pluie_air.gd").new()
+	add_child(pluie_air)
+	pluie_air.plancher = sol_y
+	pluie_air.nappes = [Vector4(fb.x - lx, fb.z - lz, fb.x + lx, fb.z + lz),
+		Vector4(x0, ft.z - tz, x1, ft.z + tz)]
 
 
 ## S375 — le maillage de la surface de δ : un sommet au centre de chaque colonne, et un anneau sur les murs qui prend la
@@ -322,6 +330,9 @@ func appliquer(s: float) -> void:
 	for m in [materiau_bassin, materiau_tampon]:
 		m.set_shader_parameter("temps", s)
 		m.set_shader_parameter("pluie", Pluie.uniformes(pluie_mm_h))
+	pluie_air.niveaux = [eau_bassin.global_position.y, eau_tampon.global_position.y]
+	pluie_air.configurer(pluie_mm_h)
+	pluie_air.suivre(camera, s)
 	var q_dev := float(l[5])
 	var q_pompe := float(l[6])
 	# L'agitation d'habillage : une ride de fond, plus là où l'eau tombe.

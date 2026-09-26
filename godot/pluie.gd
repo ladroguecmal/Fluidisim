@@ -64,3 +64,22 @@ static func uniformes(r_mm_h: float) -> Vector4:
 	moment += exp(-l * (D_MAX - D_MIN)) * pow(facteur(D_MAX), 2.0)
 	var n := taux_anneaux(r_mm_h)
 	return Vector4(n, l, petites, n * moment)
+
+
+## S380 — **les gouttes dans l'air** (ADR-205, pièce 1) : leur nombre par m³ entre `d0` et `d1` mm,
+## `∫ N0·e^(−Λ·D) dD = (N0/Λ)·(e^(−Λ·d0) − e^(−Λ·d1))`.
+static func densite_gouttes(r_mm_h: float, d0: float, d1: float) -> float:
+	if r_mm_h <= 0.0:
+		return 0.0
+	var l := lambda_mp(r_mm_h)
+	return N0 / l * (exp(-l * d0) - exp(-l * d1))
+
+
+## S380 — **l'extinction** par la pluie (ADR-205, pièce 2), m⁻¹ : efficacité d'extinction 2 (gouttes grandes devant la
+## longueur d'onde) sur la section géométrique, `β = 2·(π/4)·∫N(D)·D² dD = (π/2)·2·N0/Λ³`, D en mm → m² : ×10⁻⁶.
+## 1,55·10⁻³ m⁻¹ à 10 mm/h, soit une visibilité `3,9/β` de 2,5 km.
+static func extinction(r_mm_h: float) -> float:
+	if r_mm_h <= 0.0:
+		return 0.0
+	var l := lambda_mp(r_mm_h)
+	return PI / 2.0 * 2.0 * N0 / (l * l * l) * 1e-6
