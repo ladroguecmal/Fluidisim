@@ -87,8 +87,10 @@ par V **au dixième de millimètre**. (4) Jugement de l'utilisateur (R27).
   critères 1 et 2.
 - [x] **P3** — `godot/piscine.tscn`, `piscine.gd` : les bacs, les murs, l'eau (`bassin.gdshader`, l'optique de
   `optique_eau`), le rejeu ; critère 3.
-- [ ] **P4** — la lame du déversoir, le jet de la buse, les indications à l'écran.
-- [ ] **P5** — images de R27 ; preuve `PISCINE-V-S374`, liste, file, index.
+- [x] **P4** — ~~la lame du déversoir, le jet de la buse~~ **écartés** par la décision de l'utilisateur reçue pendant la
+  session, *« La dynamique de fluide doit se faire en 3D volumétrique »* : ADR-200 (δ 3D dans les contenants, V garde la
+  masse, APIC pour la lame et le jet) ; l'habillage balistique préparé n'entre pas dans le dépôt.
+- [x] **P5** — images de l'état de départ (sans revue : aucune dynamique à juger) ; preuve `PISCINE-V-S374`, liste (5.4, 5.10), file, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise

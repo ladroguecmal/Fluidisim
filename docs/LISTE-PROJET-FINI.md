@@ -295,14 +295,17 @@ pas recopiée ici (L137).
   réseau ouvert, courbe parabolique, clapet, à sec, similitude — à 0,025 % de l'intégrale analytique, barrage au
   millilitre ; masse exacte, au bit à commande pleine ([preuve](validation/VANNES-POMPES-S372.md),
   [ADR-199](adr/ADR-199-vannes-et-pompes-dans-v.md)). Manquent le `C_d` selon l'ouverture, pertes et énergie de la
-  pompe, un consommateur (hôte, serveur V), le réseau fermé (5.8).
+  pompe, le réseau fermé (5.8). **S374** : un premier consommateur, la piscine rejouée dans Godot
+  ([preuve](validation/PISCINE-V-S374.md)).
 - [ ] **5.5 Pluie selon l'exposition au ciel, absorption par le sol** — *absent*.
 - [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *absent*.
 - [ ] **5.7 Plusieurs liquides** (`liquid_id`, A17) — *absent*.
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
 - [ ] **5.9 Compartiments, brèches, inondation de navire, limitée par l'air** (C17, ADR-015) — *absent*.
 - [ ] **5.10 Articulation V↔δ** : V expose sa surface, déclenche δ, garde la masse (C21, ADR-025) —
-  *absent*, conçu : en contenant, δ s'asservit à V (ADR-185, S317) ; c'est la porte E.
+  *absent*, conçu : en contenant, δ s'asservit à V (ADR-185, S317) ; c'est la porte E. **2026-09-26, décision de
+  l'utilisateur** : la dynamique des contenants se calcule en 3D volumétrique ([ADR-200](adr/ADR-200-la-dynamique-des-contenants-en-3d-volumetrique.md)) —
+  premier cas, la piscine de S374 ([état de départ](validation/PISCINE-V-S374.md)).
 - [ ] **5.11 Eaux souterraines** — *absent* ; **hors du périmètre** par décision de l'utilisateur (2026-09-26,
   [ADR-197](adr/ADR-197-reponses-du-2026-09-26.md) D4 : pas de terrain réaliste à hydrologie) — gardé pour mémoire.
 - [ ] **5.12 Capture et restauration de V** — *partiel* : noyau restauré au bit (S229). Manquent le
