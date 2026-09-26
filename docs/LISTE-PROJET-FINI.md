@@ -447,7 +447,8 @@ pas recopiée ici (L137).
   surface fine), R22, R23, R25 validés, l'écume refusée. **R15** (S333–S338) : le bateau qui se pose
   est juste, la coupure au bord de δ levée — sans référence réelle, aucune trouvée ; **R16** (S340) :
   « Tout parrait bon visuellement », une onde de δ sur la mer de R14 ; **R17** (S348) : « Continue je
-  valide », δ à 30 Hz contre 60 Hz ([revue](validation/REVUE-VISUELLE.md) §20–22). Autres poses, animation et scénarios
+  valide », δ à 30 Hz contre 60 Hz ([revue](validation/REVUE-VISUELLE.md) §20–22). **S381** : le ciel de pluie (ADR-205,
+  pièce 3 ; [preuve](validation/CIEL-PLUIE-S381.md), R30 posée). Autres poses, animation et scénarios
   restent à valider perceptivement. Ce verdict local ne clôt pas la crédibilité du système, et
   **une validation visuelle ne remplace pas une validation numérique** (ADR-178 D3).
 

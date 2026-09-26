@@ -1262,7 +1262,7 @@ reçue ; **8.4 passe à partiel**. Suite proposée et inscrite : le ciel de plui
 
 ## 35. R30 — le ciel de pluie, S381
 
-**ADR-205, pièce 3.** Quand il pleut, le ciel est couvert : le soleil disparaît — ni disque, ni éclat sur l'eau, ni
+**ADR-205, pièce 3** ([preuve](CIEL-PLUIE-S381.md)). Quand il pleut, le ciel est couvert : le soleil disparaît — ni disque, ni éclat sur l'eau, ni
 caustiques, ni lumière à travers les crêtes des vagues — et la lumière vient de tout le ciel, **neutre** (gris, comme sur
 les photographies de pluie mesurées : bleu à +1,5 % près dans *Downpour*, +1 à +7 % dans *Rain over the Sea, Mundesley*),
 trois fois plus claire au zénith qu'à l'horizon (le ciel couvert normalisé de la CIE, Moon et Spencer 1942 ; rendu à

@@ -92,7 +92,7 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
   crêtes, pondéré vers l'azimut du soleil) restait allumée sous le ciel couvert — taches claires sur la mer, aux mêmes
   places que par ciel clair ; éteinte comme l'éclat (`soleil_direct()`) ; critère 1 (12 images au bit).
 - [x] **P6b** — images de R30 (piscine, mer, ciel clair contre ciel couvert) ; REVUE-VISUELLE §35.
-- [ ] **P6c** — preuve `CIEL-PLUIE-S381` ; liste, file, feuille de route, index.
+- [x] **P6c** — preuve `CIEL-PLUIE-S381` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
 **Reprise à chaud, 12:19** (*« Reprends le projet »*) : jeton `occupé` à 12:08, dernier commit P5 à 12:14, arbre propre,
@@ -150,3 +150,8 @@ au bit (SHA-256, avant et après). Non porté : la lumière diffuse du ciel qui 
 (sRGB moyen) : ciel couvert en haut 208,5 / 208,6 / 208,6 (neutre), horizon 188,6 ; mer couverte au premier plan 109,5 /
 117,0 / 143,4 (gris-bleu, R < V < B) contre 37,6 / 77,8 / 132,4 par ciel clair. Captures de travail de `godot/captures/`
 remises au ciel clair (les passes couvertes les avaient écrasées : mêmes noms).
+
+**P6c — preuve et registres.** Contrôles relancés après P6a : lignes identiques à P5. Coût (`COUVERT=0` contre `1`,
+`--cout-pluie`) : +0 à +0,03 ms ; mer à 50 mm/h −0,06 à −0,21 ms (bruit, un passage). L'interpolation d'orientation
+d'`eclairage()` contre l'intégrale exacte de la CIE (numpy, ciel seul) : exacte à 0 / 90 / 180°, +4,3 % au pire (60°) vers
+le ciel, ≤ 2,9 % de l'horizontale vers le sol — dit en limite. File : ligne du rendu raccourcie (95 → ≤ 90 mots).
