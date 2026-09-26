@@ -82,8 +82,8 @@ par V **au dixième de millimètre**. (4) Jugement de l'utilisateur (R27).
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — `examples/piscine_v.rs` : la piscine dans V, le scénario, l'export (`godot/donnees/piscine_v.json`) ;
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — `examples/piscine_v.rs` : la piscine dans V, le scénario, l'export (`godot/donnees/piscine_v.json`) ;
   critères 1 et 2.
 - [ ] **P3** — `godot/piscine.tscn`, `piscine.gd` : les bacs, les murs, l'eau (`bassin.gdshader`, l'optique de
   `optique_eau`), le rejeu ; critère 3.
@@ -92,3 +92,10 @@ par V **au dixième de millimètre**. (4) Jugement de l'utilisateur (R27).
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+
+**P2 — fait.** `examples/piscine_v.rs` : bassin 8 × 4 × 1,5 m (48 m³), déversoir de 4 m à 1,40 m, bac tampon 1 × 4 × 1,2 m
+(fond à −1,3 m), pompe 12 l/s, `H0` 8 m, prise à 5 cm du fond du bac, buse à 1,7 m sur le mur ouest ; départ bassin à
+1,395 m, bac à 0,80 m ; pompe de 5 à 240 s, 330 s. **Critère 1** : 3 300 pas, écart de volume **0 ml**. **Critère 2**
+(moyennes de 180 à 240 s, point fixe analytique) : déversoir **10,0717 l/s**, pompe **10,0926**, analytique **10,0924**
+(−0,205 % / +0,001 %) ; charge **12,65 mm** pour 12,66 (−0,04 %) ; bac tampon analytique 0,659 m. Export 3 301 lignes,
+218 Ko, `godot/donnees/` (dérivé, non versionné).
