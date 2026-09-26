@@ -389,7 +389,9 @@ pas recopiée ici (L137).
   moutons d'un à quatre mètres ([preuve](validation/SURFACE-FINE-S360.md) §3) ; **R21 : l'écume refusée** (S367) ;
   **S368** : le champ de 7.1 produit sur la carte et rendu — moutons qui pâlissent, dentelle résiduelle
   ([preuve](validation/ECUME-GODOT-S368.md)) —, puis **suspendu par l'utilisateur** (2026-09-26) sauf photographies qui
-  renseignent forme, couleur et place sur la vague : éteint par défaut. Reste *absent* : rien de rendu n'est reçu.
+  renseignent forme, couleur et place sur la vague : éteint par défaut. **S380** : les gouttes de pluie qui tombent, au
+  nombre de Marshall et Palmer, tracées selon Garg et Nayar ([preuve](validation/PLUIE-AIR-S380.md), R29 posée). Reste
+  *absent* : rien de rendu n'est reçu.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *partiel* depuis S359 : dans Godot, la
   colonne d'eau — fond vu par réfraction de Snell en espace écran, absorbé et voilé selon la profondeur (Maritorena,
   eau pure de Pope & Fry), transmission à 0,005 du modèle —, et la réflexion de l'afficheur portée
@@ -422,7 +424,8 @@ pas recopiée ici (L137).
   ADR-197 D8). Manquent une frontière δ↔B sans rupture autre qu'un fondu de rendu, et une tolérance de pente d'image.
 - [ ] **8.8 Lointain et horizon sans artefact** — *partiel* : coupure spectrale B/sillage (S249) ;
   bande d'horizon mesurée (S247, S248) ; fin de grille à l'horizon géométrique sous le ciel clair
-  (S262). Pas de certificat d'absence d'alias.
+  (S262). **S380** : l'extinction par la pluie, `β` de Marshall et Palmer ([preuve](validation/PLUIE-AIR-S380.md)). Pas de
+  certificat d'absence d'alias.
 - [ ] **8.9 Détails artificiels bon marché** (micro-vagues, ondes courtes) ajoutés au rendu — *partiel* :
   queue du spectre de B en pentes par pixel, filtrée par l'empreinte, +0,38 ms GPU (ADR-155, S256) ; **S360, dans
   Godot** : la même queue réalisée par FFT, 10 612 composantes en deux cascades, étalement d'Elfouhaily, variance non

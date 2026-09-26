@@ -93,8 +93,8 @@ jugement de l'utilisateur (R29).
 - [x] **P5** — leur dessin : traînée alignée sur la chute, opacité et radiance de Garg et Nayar ; bassin et mer.
 - [x] **P6** — l'extinction au loin (`β`, brume de la scène) ; critère 3.
 - [x] **P7** — contrôle du nombre et des tailles (critère 2) ; critère 1 ; coût.
-- [>] **P8** — images de R29 ; preuve `PLUIE-AIR-S380` ; liste, file, feuille de route, index.
-- [ ] **P9** — rituel.
+- [x] **P8** — images de R29 ; preuve `PLUIE-AIR-S380` ; liste, file, feuille de route, index.
+- [>] **P9** — rituel.
 
 ### Notes de reprise
 

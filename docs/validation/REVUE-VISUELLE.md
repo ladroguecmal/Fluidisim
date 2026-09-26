@@ -1235,3 +1235,24 @@ qui efface les reflets des nuages en vue rasante, vous paraît-il juste, trop fo
 **Verdict R28 — reçu le 2026-09-26 (S379, après le rituel)** : *« Parfait »* — les rides de la pluie et le voile mat à
 10 mm/h reçus tels quels, de près comme de loin. **Classe** : rendu validé ; restent hors de ce jugement les gerbes, la pluie
 dans l'air et le ciel de pluie (la météo), le reflet des objets.
+
+## 34. R29 — la pluie dans l'air, S380
+
+**ADR-205, pièces 1 et 2** ([preuve](PLUIE-AIR-S380.md)) — votre demande : *« continue la pluie, ajoute les manquants »*.
+La pluie **tombe** : près de l'œil, chaque goutte d'au moins 1 mm, au nombre de Marshall et Palmer (compté sur les images à
+3 % près), à sa vitesse de chute, dessinée comme la voit une caméra (Garg et Nayar : une traînée fine et **faible**, qui ne
+se détache que devant un fond sombre — ce que montrent les photographies d'averse) ; au loin, le **voile** que font les
+gouttes, calculé de leur nombre et de leur taille : 2,5 km de visibilité à 10 mm/h, 0,9 km à 50.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s380/r29_bassin.png` | la piscine, sec / 10 / 50 mm/h, vue de la buse et d'ensemble : traînées sur le sol, voile |
+| `viewer/captures/s380/r29_detail.png` | le détail à 50 mm/h (×3) : les traînées ; de près, les rides et les traînées ensemble |
+| `viewer/captures/s380/r29_mer.png` | la mer, sec / 10 / 50 mm/h, deux poses : l'horizon voilé |
+
+**Ce qui n'y est pas encore** : le **ciel de pluie** (pièce 3, la suivante) — le ciel reste ensoleillé, et le voile en
+prend la couleur bleu pâle au lieu du gris des photographies ; les gerbes (pièce 4) ; un rideau de traînées à moyenne
+distance ; le vent.
+
+**La question :** la pluie qui tombe est-elle crédible — traînées, leur finesse, le voile ? Je propose d'enchaîner par le
+ciel de pluie, qui changera beaucoup l'ensemble.
