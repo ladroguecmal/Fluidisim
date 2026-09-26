@@ -554,3 +554,36 @@ fn rain_refusals_and_snapshot_s378() {
     base.restore_into(&tampon, &mut rn, &mut re).unwrap();
     assert_eq!(re[0].control_pm, 500, "la demi-bâche survit à la sauvegarde");
 }
+
+/// **Critère 3 de S378** — la piscine à débordement de S374 sous la pluie, pompe arrêtée : bassin 8 × 4 m (prisme de
+/// 1,5 m), déversoir de 4 m au seuil de 1,40 m vers un bac en contrebas, 20 mm/h sur l'ouverture du bassin (32 m²), deux
+/// heures depuis le seuil. En régime, le déversoir débite la pluie : `Q = 20 mm/h × 32 m²` = 1,78·10⁻⁴ m³/s, et la charge
+/// sur le seuil vaut `(Q/k)^⅔`, `k = ⅔·C_d·b·√(2g)` — **0,857 mm, à ±1 %**. La constante de temps `A/(dQ/dH)` ≈ 110 s :
+/// deux heures en font plus de soixante.
+#[test]
+fn the_overflow_pool_under_rain_spills_the_rain_s378() {
+    let table = prism(1_500_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [node(44_800_000, 48_000_000, 0), node(0, 4_800_000, -1_300_000)];
+    let mut edges = [pluie(0, 32_000_000, 1_000), weir(0, Some(1), 4_000, [4_000_000, 0, 1_400_000])];
+    let mut scratch = [0i64; 2];
+    let mut deverse = 0i64;
+    for k in 0..72_000u64 {
+        step_meteo(&mut nodes, &mut edges, &shapes, DOWN, Meteo { pluie_mm_h: 20.0 }, SimTime(STEP_US), &mut scratch).unwrap();
+        if k >= 72_000 - 6_000 {
+            deverse += scratch[1];
+        }
+    }
+    let q = 20e-3 / 3600.0 * 32.0;
+    let k = (2.0 / 3.0) * WEIR_DISCHARGE as f64 * 4.0 * (2.0f64 * 9.81).sqrt();
+    let h_attendu = (q / k).powf(2.0 / 3.0);
+    let surface = shapes.surface_plane(&nodes[0], DOWN).unwrap().offset_um * 1e-6;
+    let h = surface - 1.4;
+    let q_mesure = deverse as f64 * 1e-6 / 600.0;
+    println!(
+        "PLUIE_S378 debordement charge_mm={:.4} attendue_mm={:.4} ecart={:.2}% debit_deversoir={:.4e} pluie={:.4e} m3/s",
+        h * 1e3, h_attendu * 1e3, (h - h_attendu) / h_attendu * 100.0, q_mesure, q
+    );
+    assert!(((h - h_attendu) / h_attendu).abs() < 0.01, "charge {h} contre {h_attendu}");
+    assert!(((q_mesure - q) / q).abs() < 0.01, "débit {q_mesure} contre {q}");
+}

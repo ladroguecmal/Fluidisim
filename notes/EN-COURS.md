@@ -85,7 +85,7 @@ participants ; `step` reste le pas sans pluie, **identique au bit**. **Surface d
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-204 : la pluie, arête de V (surface d'ouverture, exposition = commande, intensité = entrée du pas).
 - [x] **P3** — `Flow::Rain`, `step_meteo`, `Meteo` ; critères 1, 2, 4.
-- [ ] **P4** — la piscine à débordement sous la pluie ; critère 3.
+- [x] **P4** — la piscine à débordement sous la pluie ; critère 3.
 - [ ] **P5** — preuve `PLUIE-V-S378`, liste 5.5, registre, file, feuille de route, index, ADR-010 note datée.
 - [ ] **P6** — rituel.
 
@@ -98,3 +98,6 @@ retirée ; étiquette 3 dans l'empreinte de la base. **Critère 1** : empreinte 
 **Erreur du critère écrit** : « bâche posée à 30 min : 240 000 » — c'est la valeur d'une demi-bâche ; bâche entière :
 160 000 ; les deux éprouvés, dit dans l'essai. **Critère 4** : contenant plein fermé à la pluie ; bilan exact à chaque
 pas (entré 62 221 ml, sorti 528 983) ; refus `Domain` (−1, NaN, ∞) et `Capacity` (`to ≠ from`) ; demi-bâche sauvegardée.
+
+**P4 — fait.** La piscine à débordement sous 20 mm/h, pompe arrêtée, deux heures depuis le seuil : déversoir
+**1,7778·10⁻⁴ m³/s = la pluie** ; charge **0,8560 mm pour 0,8569** (−0,11 %). Suite du cœur : 543 + 20 + 2 + 1, 0 avertissement.
