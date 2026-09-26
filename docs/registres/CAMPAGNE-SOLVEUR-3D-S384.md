@@ -121,3 +121,64 @@ fait — la grille pour la pression, des particules APIC **dans une bande** là 
 particules diffuses **par-dessus** pour ce qui est plus petit que la maille — est celui de la littérature du temps réel
 depuis Chentanez, Müller et Kim (2014). **Ce qui reste à gagner est d'exécution** : colonnes hautes, multigrille,
 blocs épars, transfert sur la carte — et le raccord, qui n'est reçu nulle part dans le dépôt.
+
+---
+
+## 3. Les cibles chiffrées
+
+### 3.1 Les usages — ce que le solveur doit porter
+
+Tirés de la [liste du projet fini](../LISTE-PROJET-FINI.md) §4 à §7 et des décisions de l'utilisateur ; chacun dit la
+maille qu'il demande et **d'où vient ce chiffre**.
+
+| usage | points | maille | provenance de la maille |
+|---|---|---|---|
+| **le joueur dans l'eau** : nage, saut, objet qui tombe — cavité, couronne, jet | 4.12, 4.16, 5.10 | **5 cm** | la piscine : une dynamique visible demande 5 à 10 cm ([S375](../validation/PISCINE-DELTA-S375.md) §6) ; une onde sous la demi-maille n'existe pas pour des particules ([S318](../validation/COMPARAISON-LOT5-S318.md) §2, faute 2) : 5 cm portent 2,5 cm |
+| **la coque** : proche-coque, gerbe d'étrave, sillage près du joueur | 4.13, 6.x | **10 à 25 cm** | 25 cm : la scène reçue des portes B à D ([S302](../validation/SCENE-DELTA3D-S302.md), [S333](../validation/PORTE-D-S333.md)) ; la gerbe d'étrave, plus fine : *à calibrer* sur sa scène (C10) |
+| **la surface qui cesse d'être un graphe** : déferlement, lame du déversoir, jet de pompe | 4.16, ADR-202 D5 | celle du domaine hôte | APIC dans le domaine, pas un domaine à part (ADR-186 D2) |
+| **la plage, les rochers** : rouleau, mouillage, obstacles | 4.14, 4.15 | **10 à 25 cm** | *à calibrer* ; C04 et les faces coupées fixent la géométrie |
+| **l'inondation** : l'eau entre dans un navire, un bâtiment ; V garde la masse | porte E, 5.x | **10 à 25 cm** | *à calibrer* ; le critère est la masse identique avec et sans δ (C21) |
+| **embruns, écume, bulles** | 7.x, 8.4 | sous la maille | particules diffuses **par-dessus** δ (§2.5), rendu seulement (I-04) |
+
+### 3.2 Les contraintes qui ne se négocient pas
+
+| cible | valeur | provenance |
+|---|---|---|
+| **budget GPU de δ**, tous domaines ensemble | **≤ 2 ms par image**, 99ᵉ centile, dans un profil d'eau de 4 ms | [ADR-174](../adr/ADR-174-arbitrages-du-2026-09-19.md) D3, machine de référence D1 |
+| **cadence** | pas à **30 Hz**, étalé sur deux images de 60 Hz, rendu interpolé | [ADR-012](../adr/ADR-012-ordonnanceur-budget-degradation.md) §7 ; R17 ; S348, S353 |
+| **travail borné par pas** | aucune boucle jusqu'à convergence dans l'image ; qualité mesurée, dégradation déclarée | [ADR-175](../adr/ADR-175-architecture-d-execution-de-delta-en-3d.md) D2–D3, I-05 |
+| **production contre référence** | **≤ 3 mm** de hauteur, pente et phase publiées | ADR-175 D4 ; METHODE (S201) |
+| **masse** | exacte au compteur ; V autoritaire dans les contenants | [S310](../validation/BILAN-MASSE-S310.md) ; ADR-025, ADR-200 D2 |
+| **durée** | un comportement s'éprouve sur sa durée d'usage : **une minute** au moins, cinq pour un contenant | METHODE (L369) ; la piscine, 330 s ([S375](../validation/PISCINE-DELTA-S375.md)) |
+| **aucune autorité, aucune sérialisation, aucune allocation** | I-04, I-17, I-06 | invariants |
+
+### 3.3 Le budget en mailles — ce que 2 ms achètent aujourd'hui
+
+*Estimé*, du coût mesuré : le pas de la porte B coûte **3,68 ms** pour **376 320 mailles** à 32 cycles
+([file](QUESTIONS-OUVERTES.md#file-active), porte C, leviers S342–S343), soit **≈ 9,8 ns par maille et par pas** ; étalé sur
+deux images, **1,92 ms** au pire centile par image ([S341](../validation/COUT-DELTA3D-S341.md) §11). **Le domaine de la
+porte B consomme donc seul le budget de δ, à 4 % près.** Sans rien changer au coût par maille, la campagne dispose
+d'environ **0,4 million de mailles** pour tous ses domaines.
+
+| forme, sur ces 0,4 M mailles (*estimé*) | colonnes | côté d'un domaine carré |
+|---|---:|---:|
+| boîte dense actuelle, 25 cm, 28 couches (la porte B, 30 × 28 m) | 13 440 | — |
+| **colonnes hautes**, 25 cm, 8 couches cubiques (2 m) + 1 haute | 44 444 | **53 m** |
+| colonnes hautes, 12,5 cm, 16 couches (2 m) + 1 | 23 529 | **19 m** |
+| colonnes hautes, **5 cm**, 20 couches (1 m) + 1 | 19 048 | **6,9 m** |
+| boîte dense, 5 cm, 7 × 7 × 2 m | — | 784 000 mailles, **deux fois le budget** |
+
+**Ce que le tableau décide.** (1) Les **colonnes hautes** sont la première marche : à la porte B, 9 mailles par colonne au
+lieu de 28, **3,1 fois moins** (*estimé*, à mesurer en C2) — et ce gain paie la maille fine. (2) Un domaine du joueur à
+5 cm tient en **7 m de côté** s'il est **seul** ; avec une coque en même temps, il faut aussi baisser le **coût par
+maille** : cible **÷ 2**, *à calibrer* en C3 (multigrille à résidu égal, fusion des noyaux, précision mixte — S341 §3,
+techniques absentes). (3) Les **blocs épars** (4.3) ne rendent rien sur une boîte pleine d'eau ; ils rendent sur un
+domaine qui suit une perturbation ou une surface découpée — ils viennent après (C9).
+
+### 3.4 Le critère d'arrêt de la campagne
+
+La campagne est **finie** quand, sur la machine de référence, **dans la même scène vivante** : un joueur saute dans l'eau
+(5 cm) pendant qu'une coque passe (≤ 25 cm) — cavité, couronne, jet, gerbe d'étrave portés par δ et APIC —, **δ ≤ 2 ms**
+au 99ᵉ centile par image, la production à **3 mm** de la référence sur les cas de réception, la masse exacte, **et
+l'utilisateur juge le rendu convaincant** contre des références réelles (REVUE-VISUELLE). Les points 4.1, 4.3, 4.12, 4.16 et
+4.19 de la liste changent alors d'état ; aucun n'est déclaré validé hors de son périmètre final.

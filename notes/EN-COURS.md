@@ -91,7 +91,7 @@ poste avec carte et Godot). (5) `etat_projet.py --check` sans erreur. Aucun code
   pression sur la carte (multigrille), grilles éparses.
 - [x] **P4** — état de l'art (2) : particules sur grille (FLIP, APIC, MPM) sur la carte ; SPH et PBF ; Boltzmann sur
   réseau à surface libre ; coûts et qualités publiés.
-- [ ] **P5** — cibles chiffrées : les usages volumiques de la liste, taille des domaines, mailles, cadence, budget.
+- [x] **P5** — cibles chiffrées : les usages volumiques de la liste, taille des domaines, mailles, cadence, budget.
 - [ ] **P6** — l'architecture proposée, les alternatives écartées et leurs raisons.
 - [ ] **P7** — le découpage en sessions : critères « reçu si », lieu (cloud ou poste).
 - [ ] **P8** — ADR de la campagne ; liste, file, feuille de route, index.
