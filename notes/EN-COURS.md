@@ -62,17 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S377 — **terminée**. Les réponses de l'utilisateur aux sept zones d'ombre d'ADR-202 §3. Sans code.
+Session : S378 — **en cours**. *« Continue »* ; par l'alternance, la physique ; à deux maillons (S376, S377), un point qui
+change d'état : **5.5, la pluie selon l'exposition au ciel**, absente, décidée hier (ADR-203 D2 : bâche entière ou demi
+posée et retirée en temps réel). Ne construit pas la météo (à la fin, ADR-197 D5, ADR-203 D5) : l'entrée que V en
+recevra.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Ce qui se décide.** ADR-203 consigne les réponses (un ADR n'est pas réécrit) ; ADR-202 reçoit une note datée ; la file
-(décisions), la liste (5.5 : couvertures mobiles, demi-bâche ; 2.8 : météo aussi poussée que l'eau, système suivant),
-la feuille de route et l'index suivent.
+**Thèse.** Une **arête de pluie** (`Flow::Rain { catchment_mm2 }`), du ciel vers un nœud : débit `intensité × surface
+d'ouverture × exposition`, quantifié avec report de reste comme les autres, borné par la place libre. **L'exposition est la
+commande de l'arête** (ADR-199 : 0 à 1 000, état répliqué, sauvegardé en WVST v2) — une bâche entière la met à 0, une
+demi-bâche à 500. **L'intensité est une entrée météo** du pas (`step_meteo`, mm/h), fournie à l'identique à tous les
+participants ; `step` reste le pas sans pluie, **identique au bit**. **Surface d'ouverture** plutôt que surface libre
+(ADR-010 §5) : la pluie qui tombe dans l'ouverture d'un contenant finit dans son eau, parois intérieures comprises.
+
+**Critères, écrits avant.** (1) Sans pluie, les trajectoires existantes **inchangées au bit** (l'empreinte de S372). (2)
+10 mm/h sur 32 m², une heure : **320 000 ml ± 1** ; demi-bâche : 160 000 ± 1 ; bâche : **0** ; bâche posée à 30 min :
+240 000 ± 1. (3) La piscine à débordement sous la pluie, pompe arrêtée : le déversoir débite la pluie, charge sur le seuil
+`(Q/k)^⅔` **à ±1 %**. (4) Bilan exact (pluie entrée = volume gagné + rejeté), refus atomiques, la commande sauvegardée.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-203 ; note d'ADR-202 ; file, liste, feuille de route, index.
-- [x] **P3** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — ADR-204 : la pluie, arête de V (surface d'ouverture, exposition = commande, intensité = entrée du pas).
+- [ ] **P3** — `Flow::Rain`, `step_meteo`, `Meteo` ; critères 1, 2, 4.
+- [ ] **P4** — la piscine à débordement sous la pluie ; critère 3.
+- [ ] **P5** — preuve `PLUIE-V-S378`, liste 5.5, registre, file, feuille de route, index, ADR-010 note datée.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
