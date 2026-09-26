@@ -24,6 +24,11 @@
 #include "res://pluie.gdshaderinc"
 // L'horloge des rides, repliée par le script (`mer.gd`, sur l'heure).
 uniform float temps_pluie = 0.0;
+// S383 — **les gerbes au loin** : hors de la fenêtre des particules (`gerbes_fenetre`, plan de B, coordonnées de Lagrange ;
+// fondu sur son dernier mètre, où les particules s'effacent d'autant), la part du pixel couverte par les gerbes, en moyenne,
+// `M/tan ε` (`pluie.gd`, `moment_gerbes`), ε l'élévation du rayon au-dessus de l'eau ; leur radiance, celle des gouttes.
+uniform float gerbes_moment = 0.0;
+uniform vec4 gerbes_fenetre = vec4(0.0);
 
 // La queue `[a, kx, ky, φ(t)]`, phases repliées par le script en double précision (I-08).
 uniform vec4 queue[60];
@@ -473,6 +478,19 @@ void fragment() {
     }
     couleur = mix(couleur, vec3(reflectance_ecume * eclaire), couverture);
     vu_dessus = couleur;
+    if (gerbes_moment > 0.0) {
+        vec2 dedans = min(lag - gerbes_fenetre.xy, gerbes_fenetre.zw - lag);
+        float particules = smoothstep(0.0, 1.0, min(dedans.x, dedans.y));
+        float tan_e = max(-vue.y, 1e-3) / max(length(vue.xz), 1e-3);
+        float part = min(1.0, gerbes_moment / tan_e) * (1.0 - particules);
+        if (part > 0.0) {
+            vec3 horizontale = normalize(vec3(vue.x, 0.0, vue.z) + vec3(1e-6, 0.0, 0.0));
+            vec3 h_b = vec3(horizontale.x, -horizontale.z, 0.0);
+            vec3 env = (ciel_b(normalize(h_b + vec3(0.0, 0.0, 0.577)), 2) + ciel_b(normalize(h_b + vec3(0.0, 0.0, 1.732)), 2)
+                + ciel_b(vec3(0.0, 0.0, 1.0), 2)) / 3.0;
+            vu_dessus = mix(vu_dessus, 0.94 * 0.5 * (env + 0.2 * ciel_b(vec3(0.0, 0.0, 1.0), 2)), part);
+        }
+    }
     if (controle > 0 && controle < 4) {
         vu_dessus = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : (controle == 2 ? t_colonne : vec3(couverture));
     }

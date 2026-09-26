@@ -961,6 +961,8 @@ func phases(t: float) -> void:
 			km = Vector2(float(donnees["k_moyens"][0]), float(donnees["k_moyens"][1]))
 		gerbes.poser_bande(bande, donnees["bande"].size() if OS.get_environment("MER_PLATE") != "1" else 0, int(donnees["split"]), km)
 		gerbes.suivre(camera, fmod(t, 3600.0))
+		materiau.set_shader_parameter("gerbes_moment", Pluie.moment_gerbes(pluie_mm_h) if gerbes.actif else 0.0)
+		materiau.set_shader_parameter("gerbes_fenetre", gerbes.fenetre)
 	# S380 : l'extinction par les gouttes (`Pluie.extinction`), ajoutée à la brume sèche ; temps sec : la brume d'avant.
 	if environnement_scene != null and pluie_mm_h > 0.0:
 		environnement_scene.fog_density = BRUME_SECHE + Pluie.extinction(pluie_mm_h)
@@ -1035,6 +1037,7 @@ func captures() -> void:
 			pluie_air.suivre(camera, fmod(temps, 3600.0))
 		if gerbes != null:
 			gerbes.suivre(camera, fmod(temps, 3600.0))
+			materiau.set_shader_parameter("gerbes_fenetre", gerbes.fenetre)
 		for _i in 12:
 			await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()

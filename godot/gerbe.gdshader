@@ -123,7 +123,14 @@ bool gerbe_placer(uint index, out mat4 xf, out vec4 donnees) {
     xf = mat4(vec4(droite * largeur * agrandi, 0.0), vec4(haut * hauteur * agrandi, 0.0), vec4(face, 0.0),
         vec4(base + 0.5 * hauteur * agrandi * haut, 1.0));
     // x : âge (s) ; y : diamètre (mm) ; z : échelle s ; w : l'agrandissement (le dessin en tire la part couverte).
-    donnees = vec4(age, taille, s, agrandi);
+    // Sur la mer, les particules s'effacent sur le dernier mètre de la fenêtre, où le terme au loin prend le relais : leur
+    // opacité est divisée par `agrandi²` dans le dessin — le fondu y passe par `agrandi/√f`.
+    float fondu = 1.0;
+    if (sur_la_mer) {
+        vec2 dedans = min(centre - fenetre.xy, fenetre.zw - centre);
+        fondu = smoothstep(0.0, 1.0, min(dedans.x, dedans.y));
+    }
+    donnees = vec4(age, taille, s, agrandi / sqrt(max(fondu, 1e-4)));
     return true;
 }
 

@@ -66,6 +66,32 @@ static func uniformes(r_mm_h: float) -> Vector4:
 	return Vector4(n, l, petites, n * moment)
 
 
+## S383 — **les gerbes au loin** (ADR-205, pièce 4) : l'aire de profil d'une gerbe, intégrée sur sa vie, à l'échelle de la
+## référence (`gerbe_dessin.gdshader` : silhouette relevée, opacités comprises) — 7 168 mm²·ms, intégrée numériquement en
+## S383 (grille de 0,05 mm, pas de 0,1 ms) ; une gerbe d'échelle `s` en a `s^2,5` (aire `s²`, durée `√s`).
+const GERBE_AIRE_VIE := 7.1682e-6
+
+
+## L'échelle d'une gerbe (S383) : `s = (D/4,1 mm)·(Fr/1 322)^0,26`, `Fr = v²/(g·D)`.
+static func echelle_gerbe(d_mm: float) -> float:
+	var v := vitesse_atlas(d_mm)
+	return d_mm / 4.1 * pow(v * v / (9.81 * d_mm * 1e-3) / 1322.0, 0.26)
+
+
+## S383 — le moment des gerbes, m²·s par m² et par s, sans dimension : `M = Σ flux(D)·A·s(D)^2,5` sur les gouttes qui laissent
+## un anneau (D ≥ `D_MIN`). Vue sous l'élévation ε, la part d'un pixel d'eau que couvrent les gerbes vaut `M/tan ε`.
+static func moment_gerbes(r_mm_h: float) -> float:
+	if r_mm_h <= 0.0:
+		return 0.0
+	var l := lambda_mp(r_mm_h)
+	var m := 0.0
+	var d := D_MIN + 0.5 * PAS_D
+	while d < D_MAX:
+		m += N0 * exp(-l * d) * vitesse_atlas(d) * pow(echelle_gerbe(d), 2.5) * PAS_D
+		d += PAS_D
+	return m * GERBE_AIRE_VIE
+
+
 ## S380 — **les gouttes dans l'air** (ADR-205, pièce 1) : leur nombre par m³ entre `d0` et `d1` mm,
 ## `∫ N0·e^(−Λ·D) dD = (N0/Λ)·(e^(−Λ·d0) − e^(−Λ·d1))`.
 static func densite_gouttes(r_mm_h: float, d0: float, d1: float) -> float:

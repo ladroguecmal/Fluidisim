@@ -92,7 +92,7 @@ réelles ; jugement de l'utilisateur (R32).
   âge (couronne, dôme, jet), radiance de l'eau comme les gouttes.
 - [x] **P4b** — la mer : la gerbe posée sur la surface déplacée (la somme des ondes de la bande, évaluée au point d'impact
   en coordonnées de Lagrange, comme les rides), fenêtre autour de la caméra.
-- [ ] **P5** — au loin : la part d'aire moyenne des gerbes dans les nuanceurs d'eau, fondue par l'empreinte.
+- [x] **P5** — au loin : la part d'aire moyenne des gerbes dans les nuanceurs d'eau, fondue par l'empreinte.
 - [ ] **P6** — contrôles : critères 1, 3, 4, 5 ; coût.
 - [ ] **P7** — les éclaboussures au sol (seuil de Mundo, Sommerfeld et Tropea) ou, faute de temps, leur déclencheur.
 - [ ] **P8** — images de R32 ; REVUE-VISUELLE §37.
@@ -150,3 +150,11 @@ gerbes, de même (elles apparaissaient près de l'horizon). Corrigé : après ch
 (`demi_dessus`) : dômes et jets posés sur les vagues, une couronne ; en pose « référence », les traînées au premier plan.
 Contrôles : sans pluie **12 / 12 au bit** (référence fin de S382) ; sous la pluie sans gerbes **7 / 8 au bit**, la mer en
 pose « référence » change — la correction, voulue.
+
+**P5 — au loin.** Une gerbe est un objet vertical : vue sous l'élévation ε, la part d'un pixel d'eau qu'elles couvrent vaut
+`M/tan ε`, `M = Σ flux(D)·A·s(D)^2,5`, `A` l'aire de profil de la silhouette de référence intégrée sur sa vie — **7 168
+mm²·ms** (intégration numérique de la fonction du nuanceur, opacités comprises). `M` = 8,9·10⁻⁵ / 7,4·10⁻⁴ / 4,2·10⁻³ à 2 / 10
+/ 50 mm/h ; couverture à 2° : 0,3 / 2,1 / **11,9 %**. `pluie.gd` (`moment_gerbes`, `echelle_gerbe`) ; mer seulement (les
+particules couvrent toute la piscine) : hors de la fenêtre, fondu sur son dernier mètre, les particules s'y effaçant d'autant
+(`agrandi/√f`). Mesuré (pose rasante, 50 mm/h, avec contre sans gerbes) : +3,5 / +2,6 / +2,1 / +1,8 niveaux de l'horizon au
+premier plan.
