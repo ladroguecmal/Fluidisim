@@ -7,6 +7,7 @@ shader_type spatial;
 render_mode unshaded;
 
 #include "res://ciel.gdshaderinc"
+#include "res://occultation.gdshaderinc"
 #include "res://optique_eau.gdshaderinc"
 
 uniform vec3 albedo = vec3(0.4);
@@ -30,6 +31,7 @@ void fragment() {
         float largeur = 0.004;
         motif = 1.0 - 0.35 * (1.0 - smoothstep(largeur, largeur + max(fwidth(q.x), 1e-4), min(f.x, f.y)));
     }
-    // S381 : `eclairage` (`ciel.gdshaderinc`) — sous le ciel couvert, la répartition de la CIE.
-    ALBEDO = albedo * motif * gain_eau * eclairage(nb, normalize(SOLEIL_B), 1.0);
+    // S381 : `eclairage` (`ciel.gdshaderinc`) — sous le ciel couvert, la répartition de la CIE. S382 : le ciel que la face
+    // voit (`occultation.gdshaderinc`).
+    ALBEDO = albedo * motif * gain_eau * eclairage_vu(nb, normalize(SOLEIL_B), 1.0, vec3(ciel_vu(monde, n), 1.0));
 }

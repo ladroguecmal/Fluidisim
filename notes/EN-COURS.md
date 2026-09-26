@@ -91,7 +91,7 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
 - [x] **P2** — ADR-206 : la visibilité du ciel par des occultants analytiques, pour le rendu et pour V.
 - [x] **P3** — l'orientation exacte du ciel couvert (forme close, remplace l'interpolation de S381) ; critère 3 ; ciel
   clair au bit.
-- [ ] **P4** — `occultation.gdshaderinc` : la part du ciel vue (32 azimuts × 32 bandes), totaux exacts ; `eclairage_vu`.
+- [x] **P4** — `occultation.gdshaderinc` : la part du ciel vue (32 azimuts × 32 bandes), totaux exacts ; `eclairage_vu`.
 - [ ] **P5** — la scène : `boite()` inscrit ses occultants ; parois et bassin ; `OCCULTATION=0` ; critère 1.
 - [ ] **P6** — `--controle-occultation` contre `outils/occultation_ciel.py` (intégration indépendante) ; critère 2 ; coût.
 - [ ] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
@@ -107,3 +107,12 @@ sin β)/2`) ; contre l'intégrale numérique (3 000 × 6 000) de 0 à 180° par 
 `ciel_uniforme_incline`, `ciel_couvert_incline` dans `ciel.gdshaderinc` ; `eclairage()` les emploie. Critère 1 : 12 / 12
 au bit. Contrôles de S381 : critères 2 et 3 inchangés ; 4 — sol 1,00000, mur ouest 0,6057 pour 0,6055 (attendu corrigé à
 la verticale exacte).
+
+**P4 — `occultation.gdshaderinc`.** `ciel_vu(p, n)` : pour chaque boîte assez haute (arête haute au-dessus du centre de la
+première bande, sinon écartée), les azimuts que couvre son emprise (quatre coins autour du centre ; tous si le point est
+dedans), un test de dalles 2D par azimut, le masque des bandes dont le centre est entre `sin h` de l'arête basse la plus
+lointaine et de l'arête haute la plus proche ; somme des cellules masquées (`dω = du·dφ`), pondérées `max(n·ω, 0)` et
+`(1 + 2u)/3`, contre les totaux exacts. `eclairage_vu` : `eclairage` au bit si tout est vu. Branché : parois (normale de
+la face), bassin (surface au repos, normale verticale). `findLSB` rend un `uint` dans Godot (erreur de compilation vue,
+corrigée). Sans occultant déclaré : 12 / 12 au bit. **Erreur** : battement de P3 écrit 12:48 pour 12:46 (extrapolé, L237),
+corrigé ici par l'horloge lue (12:48).

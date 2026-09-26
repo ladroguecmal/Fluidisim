@@ -14,6 +14,7 @@ shader_type spatial;
 render_mode cull_disabled, unshaded;
 
 #include "res://ciel.gdshaderinc"
+#include "res://occultation.gdshaderinc"
 #include "res://optique_eau.gdshaderinc"
 #include "res://pluie.gdshaderinc"
 
@@ -149,7 +150,8 @@ void fragment() {
     if (couvert > 0.0) {
         eclat *= soleil_direct();
     }
-    vec3 corps = R0 * gain_eau * eclairage(nb, soleil, 1.0);
+    // S382 : la lumière qui entre dans l'eau vient du ciel que la surface voit (`occultation.gdshaderinc`), normale au repos.
+    vec3 corps = R0 * gain_eau * eclairage_vu(nb, soleil, 1.0, vec3(ciel_vu(surface, vec3(0.0, 1.0, 0.0)), 1.0));
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     if (variance_pluie > 0.0) {
         // La pente non résolue de la pluie, de covariance `cov_pluie` (x, z de Godot) : Fresnel et ciel intégrés par
