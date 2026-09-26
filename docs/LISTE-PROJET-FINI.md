@@ -426,8 +426,11 @@ pas recopiée ici (L137).
 - [ ] **8.9 Détails artificiels bon marché** (micro-vagues, ondes courtes) ajoutés au rendu — *partiel* :
   queue du spectre de B en pentes par pixel, filtrée par l'empreinte, +0,38 ms GPU (ADR-155, S256) ; **S360, dans
   Godot** : la même queue réalisée par FFT, 10 612 composantes en deux cascades, étalement d'Elfouhaily, variance non
-  résolue par LEAN ([preuve](validation/SURFACE-FINE-S360.md), ADR-195), **validée en R21** (S367). Manquent les
-  capillaires, la queue des perturbations W, le coût.
+  résolue par LEAN ([preuve](validation/SURFACE-FINE-S360.md), ADR-195), **validée en R21** (S367). **S379** : les rides
+  de la pluie, factices (ADR-202 D3) — taux de Marshall et Palmer × Atlas compté sur les images, deux trains
+  capillaires-gravité, fondus en rugosité au loin, sur le bassin et la mer ([preuve](validation/RIDES-PLUIE-S379.md), R28
+  posée). Manquent les capillaires du vent, la queue des perturbations W, le coût (celui des rides : une texture à
+  moments).
 - [ ] **8.10 Crédibilité perçue validée par un regard humain** — *partiel* : protocole de revue
   ([REVUE-VISUELLE](validation/REVUE-VISUELLE.md)). Premier verdict (R1, « trop lisse ») mesuré et
   traité ; **R7 accepté S266**, après lissage des reflets entre les crêtes (ADR-161).

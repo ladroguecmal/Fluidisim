@@ -88,9 +88,9 @@ jugement de l'utilisateur (R28).
 - [x] **P3** — les rides dans `bassin.gdshader` (le taux, l'anneau, le fondu en variance) ; critère 1 sur le bassin.
 - [x] **P4** — les rides sur la mer (`eau.gdshaderinc`, pente et covariance de la queue) ; critère 1 sur la mer.
 - [x] **P5** — contrôle du taux (critère 2), du fondu (critère 3) ; images de R28.
-- [>] **P6** — preuve `RIDES-PLUIE-S379`, liste (8.9 ou 8.4), file, feuille de route, index ; la campagne du solveur dans
+- [x] **P6** — preuve `RIDES-PLUIE-S379`, liste (8.9 ou 8.4), file, feuille de route, index ; la campagne du solveur dans
   la feuille de route.
-- [ ] **P7** — rituel ; session suivante : **la campagne du solveur volumique 3D** (conception).
+- [>] **P7** — rituel ; session suivante : **la campagne du solveur volumique 3D** (conception).
 
 ### Notes de reprise
 

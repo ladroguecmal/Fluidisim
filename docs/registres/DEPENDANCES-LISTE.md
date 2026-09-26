@@ -197,7 +197,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 | **8.6** Vue sous-marine et passage de la surface | H | la caméra à demi immergée (ADR-019 §6) ; bulles, rayons, turbidité ; le coût du profil immergé (B11) | 8.5 | 13.3 | **1** |
 | **8.7** Rendu de δ raccordé à B+W sans rupture visible | C | une frontière sans fondu ; la tolérance de pente | — | — | **E** — le verdict de la frontière (R18 reçu, ADR-197 D8) |
 | **8.8** Lointain et horizon sans artefact | H | un certificat d'absence d'alias | — | — | **0** |
-| **8.9** Détails artificiels bon marché | H | capillaires ; queue des perturbations W ; coût (la queue de B par FFT dans Godot : S360) | — | — | **0** |
+| **8.9** Détails artificiels bon marché | H | capillaires du vent ; queue des perturbations W ; coût (la queue de B par FFT dans Godot : S360 ; les rides de pluie, S379 : une texture à moments) | — | — | **0** |
 | **8.10** Crédibilité perçue validée par un regard humain | H | de nouvelles revues, préparées | — | — | **E** — les verdicts de l'utilisateur : poses, animation, scénarios |
 
 ### 9. Activation, prédiction, budget et dégradation

@@ -109,7 +109,7 @@ D = {
  "8.6": ("H", "la caméra à demi immergée (ADR-019 §6) ; bulles, rayons, turbidité ; le coût du profil immergé (B11)", ["8.5"], None),
  "8.7": ("C", "une frontière sans fondu ; la tolérance de pente", [], "le verdict de la frontière (R18 reçu, ADR-197 D8)"),
  "8.8": ("H", "un certificat d'absence d'alias", [], None),
- "8.9": ("H", "capillaires ; queue des perturbations W ; coût (la queue de B par FFT dans Godot : S360)", [], None),
+ "8.9": ("H", "capillaires du vent ; queue des perturbations W ; coût (la queue de B par FFT dans Godot : S360 ; les rides de pluie, S379 : une texture à moments)", [], None),
  "8.10": ("H", "de nouvelles revues, préparées", [], "les verdicts de l'utilisateur : poses, animation, scénarios"),
  "9.1": ("H", "`W_urgence` ; le banc B8", [], "`W_gameplay`, qui vient du jeu"),
  "9.2": ("H", "le domaine qui précède la caméra : prédiction, orientation", [], None),
