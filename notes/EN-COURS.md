@@ -87,7 +87,7 @@ conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **l
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — décision de l'utilisateur consignée (δ dans Godot en C11) : file, ADR-207 (note datée), conception §6.
-- [ ] **P3** — la dérivation, et `outils/colonnes_hautes.py` : la dispersion d'une colonne à colonne haute ; critère 1 ; essai.
+- [x] **P3** — la dérivation, et `outils/colonnes_hautes.py` : la dispersion d'une colonne à colonne haute ; critère 1 ; essai.
 - [ ] **P4** — balayage : Ω/ω selon les couches cubiques gardées, porte B et S295 ; critère 2 ; `k` minimal consigné.
 - [ ] **P5a** — `Volume3` : colonnes hautes du mode linéaire (restriction et prolongation, gradient conjugué réduit) ; critère 3.
 - [ ] **P5b** — l'onde oblique à colonnes hautes contre sa fréquence calculée ; critère 4 ; inconnues comptées.
@@ -96,4 +96,8 @@ conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **l
 
 ### Notes de reprise
 
-*(vide)*
+**P3 — l'outil** `outils/colonnes_hautes.py` (+ `test_colonnes_hautes.py`, six essais) : la dispersion d'une colonne sous
+une restriction de Galerkin `Aᵣ = (PᵀDQ)M̂⁻¹(PᵀDQ)ᵀ`. **Critère 1 tenu** : le schéma fin redonne S295 (−1,4355·10⁻², −3,6827·10⁻³).
+Propriétés vérifiées : `m = 1` et « un nœud par maille » redonnent le schéma fin ; Galerkin ne baisse jamais `s` (Ritz) ;
+opérateurs réduits symétriques. Variantes : **G** (colonne haute linéaire, vitesses libres), **Q** (vitesse verticale
+interne liée), **E** (grille étirée en volumes finis), **N** (Galerkin linéaire par morceaux, nœuds étirés).
