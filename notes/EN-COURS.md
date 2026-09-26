@@ -62,22 +62,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S376 — **terminée**. Réponse de l'utilisateur à R27 et précision de conception : δ sur GPU dans Godot, **pas
-maintenant** ; les contenants suivent le principe de la haute mer — V par défaut, effets factices au loin (les rides de la
-pluie), δ 3D **seulement** près d'un joueur ou d'un perturbateur, en zones selon la taille du contenant ; prévision et
-niveaux de détail comme pour l'océan ; la météo précalculée en amont donne à V les litres de pluie, que des éléments
-bloquants peuvent empêcher ; les impacts de pluie restent factices ; le débordement vu par le joueur est une vraie
-simulation qui réagit aux obstacles. *« Si tu as des zones d'ombre cites les moi et on en discute. »* Sans code.
+Session : S377 — **en cours**. Les réponses de l'utilisateur aux sept zones d'ombre d'ADR-202 §3. Sans code.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Ce qui se décide.** ADR-202 consigne ces règles ; **il corrige ADR-200 D1** (« un contenant qu'on voit » → δ), que
-S374 avait écrit trop large. ADR-200 reçoit une note datée. R27 reçu. Les zones d'ombre sont posées à l'utilisateur, dans
-l'ADR, avec une proposition pour chacune.
+**Ce qui se décide.** ADR-203 consigne les réponses (un ADR n'est pas réécrit) ; ADR-202 reçoit une note datée ; la file
+(décisions), la liste (5.5 : couvertures mobiles, demi-bâche ; 2.8 : météo aussi poussée que l'eau, système suivant),
+la feuille de route et l'index suivent.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-202 ; note datée d'ADR-200 ; R27 ; décision dans la file ; feuille de route ; index.
-- [x] **P3** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — ADR-203 ; note d'ADR-202 ; file, liste, feuille de route, index.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
