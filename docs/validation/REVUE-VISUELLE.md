@@ -1379,3 +1379,8 @@ clair.
 **La question :** les surfaces mouillées sont-elles crédibles — assez sombres ? le reflet du bloc dans le sol, trop net ou
 trop fort ? la bande sèche sous les margelles, juste ? Faut-il assombrir davantage (le second effet de Lekner et Dorf, par
 un facteur réglé sur une référence) avant de passer aux éclaboussures ?
+
+**Verdict R33 — reçu le 2026-09-26 (S393)** : *« pour R33 je valide actuellement mais pour plus tard des sessions de
+peaufinage »*. **Reçu pour l'instant** ; aucun défaut nommé — le peaufinage reprendra les questions laissées ouvertes ci-dessus
+(assez sombre ? le reflet du bloc ? la bande sèche ?) et l'écart à la photographie, dans une session de rendu au poste
+([file](../registres/QUESTIONS-OUVERTES.md#file-active)). La pièce 5b (les éclaboussures au sol) n'attend plus R33.

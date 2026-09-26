@@ -89,13 +89,17 @@ d'un diamètre de l'axe, qu'un remplissage depuis le haut n'atteint pas ; **pinc
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — verdict R33 consigné (revue, preuve, décisions, file).
-- [ ] **P3** — le corps cinématique dans `apic3d.rs` ; essais (repos à demi immergé, masse) ; critères 1 et 2.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — verdict R33 consigné (revue, preuve, décisions, file).
+- [>] **P3** — le corps cinématique dans `apic3d.rs` ; essais (repos à demi immergé, masse) ; critères 1 et 2.
 - [ ] **P4** — l'exemple `apic3d_b10` (quart ou entier, mesures) ; critère 3.
 - [ ] **P5** — la convergence, la plage publiée, `Fr` = 4, les parois ; critères 4 et 5.
 - [ ] **P6** — critère 6 ; preuve `B10-APIC3D-S393` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+**P2** : R33 consigné — revue §38, preuve S392 (§ Verdict), décisions, file (rendu), feuille de route ; liste : 8.4 disait
+encore « R32 posée » (périmé depuis S385), corrigé ; 8.10 nomme S392. Aucun défaut nommé : rien à expliquer.
 
+**Référence du critère 1** (avant P3, binaire gardé) : `apic3d_ballottement 10 0.05` → période 1,9964 s, **+1,01 %**, énergie
++7,04 %, amortissement **+0,21 %**, 9 pics, 93,5 itérations moyennes, 500 pas.

@@ -404,7 +404,7 @@ pas recopiée ici (L137).
   renseignent forme, couleur et place sur la vague : éteint par défaut. **S380** : les gouttes de pluie qui tombent, au
   nombre de Marshall et Palmer, tracées selon Garg et Nayar ([preuve](validation/PLUIE-AIR-S380.md)), **reçues en R29** (*« Je valide »*). **S383** : les
   gerbes de pluie — couronne, dôme, jet relevés sur une goutte réelle (Murphy et al. 2015), aux impacts des rides, particules
-  près de l'œil et part d'aire au loin ([preuve](validation/GERBES-S383.md), R32 posée). Manquent l'écume (suspendue), le
+  près de l'œil et part d'aire au loin ([preuve](validation/GERBES-S383.md), R32 reçue pour l'instant, trois défauts au peaufinage). Manquent l'écume (suspendue), le
   spray, les bulles, les gouttelettes et les éclaboussures au sol, et leurs niveaux de détail.
 - [ ] **8.5 Transparence, réfraction, caustiques, particules sous-marines** — *partiel* depuis S359 : dans Godot, la
   colonne d'eau — fond vu par réfraction de Snell en espace écran, absorbé et voilé selon la profondeur (Maritorena,
@@ -463,7 +463,7 @@ pas recopiée ici (L137).
   « Tout parrait bon visuellement », une onde de δ sur la mer de R14 ; **R17** (S348) : « Continue je
   valide », δ à 30 Hz contre 60 Hz ([revue](validation/REVUE-VISUELLE.md) §20–22). **S381** : le ciel de pluie (ADR-205,
   pièce 3 ; [preuve](validation/CIEL-PLUIE-S381.md), R30 reçue) ; **S382** : l'occultation du ciel et les ombres portées
-  ([ADR-206](adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md), [preuve](validation/OCCULTATION-CIEL-S382.md), R31 reçue). Autres poses, animation et scénarios
+  ([ADR-206](adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md), [preuve](validation/OCCULTATION-CIEL-S382.md), R31 reçue) ; **S392** : les surfaces mouillées (ADR-205, pièce 5a ; [preuve](validation/SURFACES-MOUILLEES-S392.md), R33 reçue pour l'instant, peaufinage à venir). Autres poses, animation et scénarios
   restent à valider perceptivement. Ce verdict local ne clôt pas la crédibilité du système, et
   **une validation visuelle ne remplace pas une validation numérique** (ADR-178 D3).
 

@@ -101,3 +101,10 @@ Sans pluie : 0,731 / 0,819–0,838 / 0,650, inchangé.
 - **Les occultants dans le reflet** rendus comme du béton sec ; ni interréflexion, ni les eaux des bacs reflétées.
 - La mer n'a pas de surface solide émergée ; vérifié sur cette machine seulement ; images de R33 locales
   (`viewer/captures/s392/`).
+
+## Verdict R33 — 2026-09-26 (S393)
+
+**Reçu pour l'instant** ([REVUE-VISUELLE](REVUE-VISUELLE.md) §38) : *« je valide actuellement mais pour plus tard des sessions de
+peaufinage »*. Aucun défaut n'est nommé ; l'assombrissement (le second effet de Lekner et Dorf, `ASSOMBRISSEMENT`) reste à
+régler sur une référence à courbe connue, au peaufinage — l'écart à la photographie (0,08 contre 0,53) n'est pas levé par ce
+verdict.
