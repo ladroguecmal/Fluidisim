@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 10:43 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S378 — physique : la pluie dans V, exposition dynamique (liste 5.5)
-Dernière session : S377 — consignation : **les réponses aux zones d'ombre d'ADR-202** ([ADR-203](docs/adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md)) — météo aussi poussée que l'eau, bâches posées et retirées en temps réel, factice au loin, contenants en domaines, ordre des systèmes suivants. Avant : S376, le niveau de détail des contenants (ADR-202)
-Session suivante : par l'alternance d'ADR-191 D3, **la physique** ; à deux maillons, un point qui change d'état : A320 par la forme de Bernoulli (4.8), la coque qui bouge (6.4), les chemins de B et la côte (2.7), ou la pluie dans V avec l'exposition dynamique (5.5, ADR-203 D2). Au rendu suivant : l'échelle radiométrique. δ sur GPU dans Godot : pas maintenant (R27)
-Maillons        : 2 — S376, S377 : consignations, aucun point ne change d'état (journal)
+Session en cours : aucune
+Dernière session : S378 — physique : **la pluie dans V** (5.5 passe à partiel, [ADR-204](docs/adr/ADR-204-la-pluie-arete-de-v.md), [preuve](docs/validation/PLUIE-V-S378.md)) — arête du ciel, exposition commandée (bâche, demi-bâche), intensité en entrée du pas ; au millilitre sur une heure ; déversoir sous la pluie à 0,11 %. Avant : S377, les réponses aux zones d'ombre (ADR-203)
+Session suivante : par l'alternance d'ADR-191 D3, **une session de rendu** : les **rides de pluie factices** sur l'eau des contenants et de la mer, réglées par l'intensité et la distance (ADR-202 D3, ADR-203 D7) — ou l'échelle radiométrique du ciel et du soleil. À la physique suivante : A320 (4.8), la coque qui bouge (6.4), la côte (2.7), l'absorption par le sol (5.5). δ sur GPU dans Godot : pas maintenant (R27)
+Maillons        : 0 — S378 : 5.5 passe à partiel (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

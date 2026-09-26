@@ -17320,3 +17320,20 @@ loin, la lame et ses obstacles sont factices ; les contenants se divisent en dom
 **Rituel.** Maillons **2** : aucun point ne change d'état. Suivant : par l'alternance, **la physique**, et à deux maillons
 un point qui change d'état — A320 (4.8), la coque qui bouge (6.4), la côte (2.7), ou l'exposition dynamique de 5.5.
 
+## S378 — 2026-09-26 — physique : la pluie dans V, bâches comprises (5.5)
+
+**Entrée.** *« Continue »* ; par l'alternance, la physique ; à deux maillons, un point qui change d'état : 5.5, décidée la
+veille (ADR-203 D2 : bâche entière ou demi posée et retirée en temps réel). La météo n'est pas construite (à la fin).
+**Fait** ([preuve](../docs/validation/PLUIE-V-S378.md), [ADR-204](../docs/adr/ADR-204-la-pluie-arete-de-v.md)). Une arête
+de pluie du ciel vers un contenant : surface d'ouverture (et non surface libre, ADR-010 §5) × exposition — **la commande
+de l'arête**, bâche 0, demi-bâche 500, sauvegardée par WVST v2 — × intensité, entrée du pas (`step_meteo`, `Meteo`) ;
+`step` reste sans pluie, **au bit**. Une heure à 10 mm/h sur 32 m² : 319 999 ml pour 320 000 ; demi-bâche, bâche, bâches
+posées en cours de pluie, à 1 ml. La piscine à débordement sous 20 mm/h : le déversoir débite exactement la pluie, charge
+0,8560 mm pour 0,8569 (−0,11 %). Bilan exact, refus atomiques. Cœur : 543 réussis, 0 avertissement. **Erreur du critère
+écrit** (240 000 ml pour la bâche entière posée à 30 min : c'est la demi-bâche) — dite, les deux cas éprouvés.
+**Limites.** Ni absorption par le sol ni pluie hors contenant ; une intensité par réseau ; l'exposition calculée depuis
+les objets posés n'est pas faite ; aucun consommateur.
+**Rituel.** Maillons **0** : 5.5 passe à partiel (3 / 66 / 51) — devient possible une cuve qui se remplit sous la pluie
+selon sa couverture, bâches posées ou retirées en jeu, sauvegardée ; consommée par l'hôte et, à la fin, par la météo ;
+preuve §2. Suivant : par l'alternance, **le rendu** — l'échelle radiométrique, ou les rides de pluie factices (ADR-202 D3).
+

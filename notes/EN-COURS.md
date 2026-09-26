@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S378 — **en cours**. *« Continue »* ; par l'alternance, la physique ; à deux maillons (S376, S377), un point qui
+Session : S378 — **terminée**. *« Continue »* ; par l'alternance, la physique ; à deux maillons (S376, S377), un point qui
 change d'état : **5.5, la pluie selon l'exposition au ciel**, absente, décidée hier (ADR-203 D2 : bâche entière ou demi
 posée et retirée en temps réel). Ne construit pas la météo (à la fin, ADR-197 D5, ADR-203 D5) : l'entrée que V en
 recevra.
@@ -87,7 +87,7 @@ participants ; `step` reste le pas sans pluie, **identique au bit**. **Surface d
 - [x] **P3** — `Flow::Rain`, `step_meteo`, `Meteo` ; critères 1, 2, 4.
 - [x] **P4** — la piscine à débordement sous la pluie ; critère 3.
 - [x] **P5** — preuve `PLUIE-V-S378`, liste 5.5, registre, file, feuille de route, index, ADR-010 note datée.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 
