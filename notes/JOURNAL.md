@@ -17337,3 +17337,19 @@ les objets posés n'est pas faite ; aucun consommateur.
 selon sa couverture, bâches posées ou retirées en jeu, sauvegardée ; consommée par l'hôte et, à la fin, par la météo ;
 preuve §2. Suivant : par l'alternance, **le rendu** — l'échelle radiométrique, ou les rides de pluie factices (ADR-202 D3).
 
+## S379 — 2026-09-26 — rendu : les rides de la pluie, factices (8.9) ; la campagne du solveur inscrite
+
+**Entrée.** *« Continue mais il faudra prévoir une session du plus dur et complexe […] un solveur […] 3D volumétrique ultra
+réaliste et performant en temps réel »* : la campagne inscrite en tête des sessions de physique (conception d'abord) ; par
+l'alternance, le rendu — les rides de pluie factices (ADR-202 D3, ADR-203 D7). **Fait** ([preuve](../docs/validation/RIDES-PLUIE-S379.md)).
+Six photographies libres lues sans téléchargement. `pluie.gd` (Marshall et Palmer × Atlas : 447 anneaux/m²/s à 10 mm/h),
+`pluie.gdshaderinc` (deux trains capillaires-gravité, 1,71 cm à 0,231 m/s et 4,4 cm à 0,178 m/s ; couches de mailles au
+taux exact ; niveau de détail le long du rayon de chaque anneau, crêtes → bande anisotrope → rugosité), bassin et mer (en
+coordonnées de Lagrange). Sans pluie, 12 images au bit ; taux compté à −4,2 / −0,6 / −1,7 % (2 / 10 / 50 mm/h) ; crêtes
+éteintes à λ/2. **Deux impasses** dites : l'empreinte isotrope effaçait tout au-delà de 1 à 2 m ; la mer ne bougeait pas
+(crêtes sous le pixel) — d'où le second train et la bande anisotrope. **Erreur** : un battement extrapolé (11:55 au lieu
+de 11:22), vu par `--check`, corrigé au commit suivant (L237). **Coût** (720p, effet isolé) : mer +1,1 / +6,2 ms à 10 /
+50 mm/h ; l'utilisateur : *« les LOD vont complètement bouleverser les performances »* — mesuré, texture à moments inscrite.
+**Limites.** Pentes réglées sur les photos ; ni gerbes ni pluie dans l'air ; seul le ciel se reflète ; une intensité par
+scène. **Rituel.** Maillons **1** : 8.9 reste partiel, R28 posée (non reçue). Suivant : **la campagne du solveur
+volumique 3D temps réel, conception** (demande de l'utilisateur).

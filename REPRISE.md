@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-26 11:26 +02:00
+JETON            : libre
+Battement        : 2026-09-26 11:29 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S379 — rendu 12 : les rides de pluie factices (ADR-202 D3) ; la campagne du solveur volumique 3D inscrite (demande de l'utilisateur)
-Dernière session : S378 — physique : **la pluie dans V** (5.5 passe à partiel, [ADR-204](docs/adr/ADR-204-la-pluie-arete-de-v.md), [preuve](docs/validation/PLUIE-V-S378.md)) — arête du ciel, exposition commandée (bâche, demi-bâche), intensité en entrée du pas ; au millilitre sur une heure ; déversoir sous la pluie à 0,11 %. Avant : S377, les réponses aux zones d'ombre (ADR-203)
-Session suivante : par l'alternance d'ADR-191 D3, **une session de rendu** : les **rides de pluie factices** sur l'eau des contenants et de la mer, réglées par l'intensité et la distance (ADR-202 D3, ADR-203 D7) — ou l'échelle radiométrique du ciel et du soleil. À la physique suivante : A320 (4.8), la coque qui bouge (6.4), la côte (2.7), l'absorption par le sol (5.5). δ sur GPU dans Godot : pas maintenant (R27)
-Maillons        : 0 — S378 : 5.5 passe à partiel (journal)
+Session en cours : —
+Dernière session : S379 — rendu : **les rides de la pluie, factices** (8.9 reste partiel, [preuve](docs/validation/RIDES-PLUIE-S379.md), R28 posée) — taux de Marshall et Palmer × Atlas compté sur les images, deux trains capillaires-gravité, fondus en rugosité au loin, bassin et mer ; sans pluie au bit. Avant : S378, la pluie dans V (5.5)
+Session suivante : **physique — la campagne du solveur volumique 3D temps réel** (demande de l'utilisateur, S379), **conception d'abord** : état de l'art, ce que δ 3D (S297–S348) et APIC (ADR-186) donnent, architecture (domaines, niveaux de détail d'ADR-202, prévision), cibles chiffrées, découpage en sessions. R28 attend le regard de l'utilisateur. δ sur GPU dans Godot : pas maintenant (R27)
+Maillons        : 1 — S379 : 8.9 reste partiel, R28 posée (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

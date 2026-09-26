@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S379 — **en cours**. *« Continue mais il faudra prévoir une session du plus dur et complexe de la création d'un
+Session : S379 — **terminée**. *« Continue mais il faudra prévoir une session du plus dur et complexe de la création d'un
 solveur […] 3D volumétrique ultra réaliste et performant en temps réel dynamiquement »*. Deux choses : **inscrire la
 campagne du solveur** comme prochaine session de physique (conception d'abord) ; **continuer** par la session de rendu
 prévue — **les rides de pluie factices** (ADR-202 D3, ADR-203 D7), sur le bassin et sur la mer.
@@ -90,7 +90,7 @@ jugement de l'utilisateur (R28).
 - [x] **P5** — contrôle du taux (critère 2), du fondu (critère 3) ; images de R28.
 - [x] **P6** — preuve `RIDES-PLUIE-S379`, liste (8.9 ou 8.4), file, feuille de route, index ; la campagne du solveur dans
   la feuille de route.
-- [>] **P7** — rituel ; session suivante : **la campagne du solveur volumique 3D** (conception).
+- [x] **P7** — rituel ; session suivante : **la campagne du solveur volumique 3D** (conception).
 
 ### Notes de reprise
 
