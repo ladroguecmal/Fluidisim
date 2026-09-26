@@ -17546,3 +17546,18 @@ n'avait jamais été éprouvée sur sa durée d'usage. **Limites** : 10 cm et A2
 freine (0,43 par cycle ; 32 lissages : 0,27, plus cher). **Rituel.** Maillons **4** : 4.19 reste partiel. **Justification** :
 choix explicite de l'utilisateur ; A321 est un défaut bloquant pour tout usage vivant de 30 Hz. Suivant : au poste, **la pluie,
 pièce 5** (alternance d'ADR-191), puis **A321** avant C3b ; dans le cloud, **C4b** (B10 en 3D : 4.16 à partiel).
+
+## S391 — 2026-09-26 — physique : A321 corrigée — l'advection de δ au second ordre en temps
+
+**Entrée.** *« Corrige A321 d'abord »*. **Fait** ([preuve](../docs/validation/A321-S391.md), [ADR-209](../docs/adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md)) :
+banc `--delta3d-a321`, commutateurs compilés dans des pipelines de banc à part (dans ceux de la production, ils en changeaient
+les empreintes). **Cause** : la prédiction avance les vitesses de δ par Euler explicite et différences centrées (FTCS),
+instable pour tout pas — explosion en ~`1/dt` (72 s à 60 Hz, 33 s à 25 ms, 23 à 40 s à 30 Hz), mode à l'échelle de la maille
+(0,4 % → 31 %) ; aucun terme éteint seul ne sauve la scène. **Remède** : le terme que l'Euler omet, `+(dt²/2)·V_a·V_b·∂_a∂_b u`
+(Lax-Wendroff) — actif par défaut dans la production, option du cœur (681 réussis, au bit). Essai de von Neumann : FTCS ×7,55,
+corrigé ×0,134, comme prédit. **Tenu** : deux minutes à 30, 25 et 16,7 ms, **cinq minutes à 30 Hz** ; cuves au plus
+2,5·10⁻⁵ m ; dispersion inchangée à 10⁻⁵ point ; porte C 1,910 / 1,927 ms. **Limites** : défaut du cœur non migré (ADR-209
+D3) ; autres scènes non éprouvées sur la durée. **Rituel.** Maillons **0** : une correction d'intégrité reproduite puis
+testée — **devient possible** δ vivant à 30 Hz au-delà de vingt secondes, la cadence de la porte C sur sa durée d'usage ;
+**chemin** : la scène vivante (`--pas-delta=33333`), puis C3b et les scènes de C10 ; **preuve** : A321-S391. Suivant : au
+poste, **la pluie, pièce 5** (alternance d'ADR-191), puis C3b ; dans le cloud, **C4b**.

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S391 — **en cours**. **A321** : à 30 Hz, la scène de la porte B explose en 24 à 40 s, quel que soit le solveur de
+Session : S391 — **terminée**. **A321** : à 30 Hz, la scène de la porte B explose en 24 à 40 s, quel que soit le solveur de
 pression ; à 60 Hz la minute tient ([angle mort](../docs/registres/ANGLES-MORTS.md), [preuve](../docs/validation/MULTIGRILLE-3D-S385.md)
 §5). Demande de l'utilisateur (2026-09-26) : *« Corrige A321 d'abord »* — avant la pluie, pièce 5, et C3b. Agent : Claude
 Opus 5.5, Claude Code (application de bureau) au poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3.
@@ -94,7 +94,7 @@ avertissement.
 - [x] **P5** — le même dans la production, **actif par défaut** ; critère 3 (deux minutes à 30 et 60 Hz, cuves avec la
   référence corrigée, empreintes nouvelles expliquées) ; coût du pas et porte C remesurés (deux parts ≤ 2 ms).
 - [x] **P6** — critère 4 ; preuve ; A321, file, feuille de route.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 
