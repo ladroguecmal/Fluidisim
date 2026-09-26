@@ -17623,3 +17623,20 @@ variable, tout au bit. **Rituel.** Maillons **2** : aucun point ne change. **Deu
 troisième ne se prend pas sans critère de porte franchi (S294) ; comparé à la file, le lot qui fait avancer une capacité dans
 le cloud est **C8 en référence** — blocs épars, domaine qui suit la perturbation, fusion et séparation (4.9, absent). Suivant :
 C8 (référence) dans le cloud, puis le raccord (trancher l'advection des colonnes) ; au poste, C3b puis la pluie, pièce 5b.
+
+## S396 — 2026-09-26 — physique : C8a, la fusion et la séparation de domaines, en référence
+
+**Entrée.** *« continue »* ; S395 désignait C8 (S294 : pas de troisième session de suite sur le raccord). **Fait**
+([preuve](../docs/validation/FUSION-S396.md)) : ADR-006 §3–4 écrit pour la première fois. `domain_blocks.rs` — un domaine est un
+ensemble de blocs (colonnes de 8 × 8, toute la profondeur), fusion = union, séparation = partition, **une seule relation** pour
+les deux (dilatations de 4 m qui se touchent), séparation après une seconde continue ; capacité réservée, sans allocation.
+`Volume3::transplant` — l'état recopié au bit sur le réseau commun, les murs du receveur nuls, refus hors réseau. **Tenus** :
+ensembles (quatre essais, vu échouer) ; aller-retour `C → (A, B) → C'` au bit hors de la coupure, et la coupure rendue le pas
+suit au bit (vu échouer sans la pression de départ) ; **fusion au critère (0,94 s) à 0,26 % de l'amplitude** du domaine unique
+sur 5 s — forcée après que les ondes ont frappé les murs, 3,4 puis 8,5 % ; suite 691 réussis, zéro avertissement. Publié : une
+séparation ne saute pas, puis ses murs réfléchissent (2,6 % à 5 s). **Trouvé** : un premier témoin de séparation était
+symétrique autour de la coupure — un plan de symétrie, où un mur ne change rien ; remplacé. **Limites** : des boîtes, pas de
+blocs épars stockés ; des murs ; pas de croissance. **Rituel.** Maillons **0** : **4.9 passe à partiel** — **devient possible**
+de fusionner et de séparer des domaines de δ sans rupture, par leurs ensembles de blocs ; **chemin** : la croissance d'un
+domaine qui suit la perturbation (C8b), puis la carte et l'ordonnanceur (rang 4) ; **preuve** : FUSION-S396. Suivant : dans le
+cloud, le raccord (trancher l'advection des colonnes) ou C8b ; au poste, C3b puis la pluie, pièce 5b.

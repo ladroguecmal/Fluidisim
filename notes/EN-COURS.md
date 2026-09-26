@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S396 — **en cours**. **C8a** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5),
+Session : S396 — **terminée**. **C8a** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5),
 en référence : **la fusion et la séparation de domaines**, par ensembles de blocs ([ADR-006](../docs/adr/ADR-006-cellules-domaines-solveurs.md)
 §3–4). Demande de l'utilisateur (2026-09-26) : *« continue »* ; S395 a désigné C8 (S294 : pas de troisième session de suite
 sur le raccord). Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni
@@ -94,7 +94,7 @@ départ **≤ 1 % de l'amplitude**. Publié : fusions plus tardives, et une sép
   critère 2.
 - [x] **P4** — l'exemple `delta3d_fusion` : deux bosses, la fusion au critère, contre le domaine unique ; critère 3 ; publiés.
 - [x] **P5** — critère 4 ; preuve `FUSION-S396` ; liste, file, feuille de route, index.
-- [>] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 **P2 — `domain_blocks.rs`** : `Block`, `BlockSet` (trié, capacité réservée, `insert`, `union_with`, `bounds`, `touches`,
