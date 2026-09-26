@@ -292,6 +292,7 @@ avance sur ce qui ne dépend pas d'elles.
    dans Godot (ADR-192) ; δ dans Godot a reçu *« pas maintenant »* (R27). **Proposition** : la campagne construit la
    production dans l'afficheur jusqu'à C10, où les dépendances sont autorisées et verrouillées ; δ entre dans Godot en
    C11, quand la scène est reçue. *À savoir* : faut-il le faire plus tôt, pour juger les scènes directement dans Godot ?
+   **Tranché le 2026-09-26 (S386)** : *« Je suis d'accord avec toi pour le branchement à la fin »* — C11.
 2. **Rien d'autre n'est demandé.** Mailles, colonnes hautes, multigrille, bascule et ordre relèvent de l'autonomie
    technique (S71) et sont actés par l'ADR de la campagne. Les références visuelles, nous les trouvons (S366).
 

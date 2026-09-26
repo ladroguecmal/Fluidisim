@@ -86,7 +86,7 @@ conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **l
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — décision de l'utilisateur consignée (δ dans Godot en C11) : file, ADR-207 (note datée), conception §6.
+- [x] **P2** — décision de l'utilisateur consignée (δ dans Godot en C11) : file, ADR-207 (note datée), conception §6.
 - [ ] **P3** — la dérivation, et `outils/colonnes_hautes.py` : la dispersion d'une colonne à colonne haute ; critère 1 ; essai.
 - [ ] **P4** — balayage : Ω/ω selon les couches cubiques gardées, porte B et S295 ; critère 2 ; `k` minimal consigné.
 - [ ] **P5a** — `Volume3` : colonnes hautes du mode linéaire (restriction et prolongation, gradient conjugué réduit) ; critère 3.

@@ -64,3 +64,8 @@ d'être un graphe (C6). **Et « campagne » ne veut pas dire « ordre figé »**
 conception rouvre l'ordre, par une note datée ici ou un nouvel ADR.
 
 Invariants relus : I-04, I-05, I-06, I-07, I-12, I-13, I-14, I-16, I-17 ; aucun amendé.
+
+## Note datée du 2026-09-26 (S386) — où vit δ à la fin : tranché par l'utilisateur
+
+La question du §3 est tranchée : *« Je suis d'accord avec toi pour le branchement à la fin »*. La production de δ se
+construit dans l'afficheur jusqu'à C10 ; **δ entre dans Godot en C11**, la scène reçue. Aucune autre décision n'est changée.
