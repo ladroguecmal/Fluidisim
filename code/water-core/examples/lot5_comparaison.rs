@@ -2311,6 +2311,24 @@ struct Hybride {
     /// une onde de 2 cm. Ici, la zone des colonnes compte par sa hauteur `h`, exacte ; les particules libres, comme
     /// avant.
     jauge_hauteurs: bool,
+    /// **S394 : la bande** (`RACCORD_BANDE=1`, A316). S354 : les échanges convertissent un débit de la grille en
+    /// particules à densité nominale sans voir la densité locale ; les particules libres se tassent contre la frontière
+    /// (5 par maille au lieu de 4) et la masse migre. Ici, à chaque pas, la dernière colonne de mailles du côté des
+    /// particules est **réensemencée depuis sa hauteur géométrique** — rangées continues, comme les colonnes —, et la
+    /// différence de masse est versée à la première colonne : la densité y revient au nominal, la masse suit la géométrie.
+    bande: bool,
+    /// **S394 (A')** : `RACCORD_BANDE=masse` — la bande garde ses particules et les **replace au pas nominal** depuis le
+    /// fond ; aucune masse ne passe. (A) cédait à chaque pas le biais de la reconstruction et l'arrondi des rangées.
+    bande_masse: bool,
+    /// Témoin d'attribution de (A) : `RACCORD_BANDE_BIAIS=<m>`, ajouté à la hauteur géométrique lue.
+    bande_biais: f64,
+    /// **S394 (B) : le champ de densité** (`RACCORD_DENSITE=1`). (A) et (A') réensemençaient la bande à chaque pas, ce qui
+    /// détruit le transport des particules sous la maille : la bande piégeait. Ici rien n'est réensemencé : dans les deux
+    /// colonnes devant la frontière, sur les mailles d'eau intérieures, la projection du banc donne un déplacement dont la
+    /// divergence vaut l'excès de densité `n/4 − 1`, et les particules libres le suivent, en position seulement.
+    densite: bool,
+    /// Énergie potentielle que la correction de densité ajoute, J par mètre de largeur (attribution de (B)).
+    energie_densite: f64,
 }
 
 impl Hybride {
@@ -2349,6 +2367,11 @@ impl Hybride {
                 insertion: std::env::var("RACCORD_INSERTION").is_ok_and(|v| v == "reseau").then(|| vec![0; ny]),
                 memoire: std::env::var("RACCORD_MEMOIRE").is_ok_and(|v| v == "grille"),
                 jauge_hauteurs: std::env::var("RACCORD_JAUGE").is_ok_and(|v| v == "hauteurs"),
+                bande: std::env::var("RACCORD_BANDE").is_ok_and(|v| v == "1" || v == "masse"),
+                bande_masse: std::env::var("RACCORD_BANDE").is_ok_and(|v| v == "masse"),
+                bande_biais: std::env::var("RACCORD_BANDE_BIAIS").ok().and_then(|v| v.parse().ok()).unwrap_or(0.0),
+                densite: std::env::var("RACCORD_DENSITE").is_ok_and(|v| v == "1"),
+                energie_densite: 0.0,
             };
         if ensemence == "hysterese" {
             hy.rangees = Some(hy.h.iter().map(|h| (2.0 * h / dx).round().max(0.0) as usize).collect());
@@ -2421,6 +2444,106 @@ impl Hybride {
                 self.apic.c.push(c);
             }
         }
+    }
+
+    /// **S394 : la bande.** La hauteur géométrique de la colonne `i_b − 1`, lue sur la surface reconstruite **avec** les
+    /// particules des colonnes (ensemencées juste avant) ; ses particules libres retirées et remplacées par `round(2g/dx)`
+    /// rangées de deux, étirées sur `[0, g]`, à la vitesse de la grille ; la différence de masse va à la première colonne,
+    /// dont les particules sont ensuite réensemencées. Rien si la colonne n'est pas un graphe posé sur le fond.
+    fn reensemence_bande(&mut self) {
+        let dx = self.apic.mac.dx;
+        let (xb, x0) = (self.i_b as f64 * dx, (self.i_b - 1) as f64 * dx);
+        let Some((_, g)) = self.apic.colonnes()[self.i_b - 1] else { return };
+        let g = g + self.bande_biais;
+        let area = 0.25 * dx * dx;
+        let dans = |p: &[f64; 2]| p[0] >= x0 && p[0] < xb;
+        let avant = self.apic.x.iter().filter(|p| dans(p)).count();
+        if self.bande_masse {
+            // (A') : les mêmes particules, replacées au pas nominal depuis le fond ; la masse ne bouge pas.
+            let garde: Vec<bool> = self.apic.x.iter().map(|p| !dans(p)).collect();
+            self.retire(&garde);
+            for m in 0..avant {
+                let (r, seule) = (m / 2, m + 1 == avant && avant % 2 == 1);
+                let cote = if seule { 0.5 } else { 0.25 + 0.5 * (m % 2) as f64 };
+                let p = [x0 + cote * dx, (r as f64 + 0.5) * 0.5 * dx];
+                let (v, c) = self.apic.depuis_grille(p);
+                self.apic.x.push(p);
+                self.apic.v.push(v);
+                self.apic.c.push(c);
+            }
+            return;
+        }
+        // Les particules de la bande et celles des colonnes partent ; les colonnes reviendront avec leur hauteur corrigée.
+        let garde: Vec<bool> = self.apic.x.iter().map(|p| p[0] < x0).collect();
+        self.retire(&garde);
+        let rangees = (2.0 * g / dx).round().max(0.0) as usize;
+        let pas = g / rangees.max(1) as f64;
+        for r in 0..rangees {
+            for cote in [0.25, 0.75] {
+                let p = [x0 + cote * dx, (r as f64 + 0.5) * pas];
+                let (v, c) = self.apic.depuis_grille(p);
+                self.apic.x.push(p);
+                self.apic.v.push(v);
+                self.apic.c.push(c);
+            }
+        }
+        self.h[0] += (avant as f64 - 2.0 * rangees as f64) * area / dx;
+        self.ensemence_colonnes();
+    }
+
+    /// **S394 (B) : la densité corrigée en position**, dans les deux colonnes devant la frontière. Étiquettes refaites sur
+    /// l'état de fin de pas ; cible `n/4 − 1` sur les mailles d'eau dont les quatre voisines sont d'eau ; la projection
+    /// (`dt` = 1 s, champ de départ nul) rend un déplacement, en mètres, de divergence égale à la cible ; les particules
+    /// libres le suivent, tenues à gauche de la frontière. La vitesse de la grille est rendue telle quelle.
+    fn corrige_densite(&mut self) {
+        const BANDE: usize = 2;
+        let (nx, ny, dx) = (self.apic.mac.nx, self.apic.mac.ny, self.apic.mac.dx);
+        let xb = self.i_b as f64 * dx;
+        self.apic.reconstruit();
+        for (e, f) in self.apic.mac.etiquette.iter_mut().zip(&self.apic.phi) {
+            *e = if *f < 0.0 { EAU } else { AIR };
+        }
+        let n = self.apic.occupation();
+        let mut cible = vec![0.0; nx * ny];
+        let mac = &self.apic.mac;
+        for j in 0..ny {
+            for i in self.i_b - BANDE..self.i_b {
+                let (a, b) = (i as isize, j as isize);
+                let interieur = mac.eau(a, b) && mac.eau(a - 1, b) && mac.eau(a + 1, b) && mac.eau(a, b - 1) && mac.eau(a, b + 1);
+                if interieur {
+                    cible[j * nx + i] = n[j * nx + i] as f64 / 4.0 - 1.0;
+                }
+            }
+        }
+        if cible.iter().all(|c| *c == 0.0) {
+            return;
+        }
+        let (u0, v0) = (self.apic.mac.u.clone(), self.apic.mac.v.clone());
+        self.apic.mac.u.fill(0.0);
+        self.apic.mac.v.fill(0.0);
+        let phi = self.apic.phi.clone();
+        let theta = |i: usize, j: usize, a: isize, b: isize| {
+            let (fi, fa) = (phi[j * nx + i], phi[b as usize * nx + a as usize]);
+            fi / (fi - fa)
+        };
+        let iterations = self.apic.mac.iterations;
+        self.apic.mac.projette_vers(1.0, &theta, Some(&cible));
+        self.apic.mac.iterations = iterations;
+        let bord = xb - 1e-6 * dx;
+        let deplacements: Vec<(f64, f64)> =
+            self.apic.x.iter().map(|p| if p[0] < xb { self.apic.mac.vitesse(p[0], p[1]) } else { (0.0, 0.0) }).collect();
+        let hauteur = ny as f64 * dx;
+        let masse = RHO * 0.25 * dx * dx;
+        for (p, d) in self.apic.x.iter_mut().zip(&deplacements) {
+            if p[0] < xb {
+                let y0 = p[1];
+                p[0] = (p[0] + d.0).clamp(1e-3 * dx, bord);
+                p[1] = (p[1] + d.1).clamp(1e-3 * dx, hauteur - 1e-3 * dx);
+                self.energie_densite += masse * G * (p[1] - y0);
+            }
+        }
+        self.apic.mac.u = u0;
+        self.apic.mac.v = v0;
     }
 
     /// **S354 : la jauge du ballottement**, lue sur ce que chaque représentation porte vraiment : les particules
@@ -2669,6 +2792,12 @@ impl Candidat for Hybride {
             }
         }
         self.ensemence_colonnes();
+        if self.bande && self.i_b >= 1 {
+            self.reensemence_bande();
+        }
+        if self.densite && self.i_b >= 2 {
+            self.corrige_densite();
+        }
         if self.memoire {
             let (u, v) = (&self.apic.mac.u, &self.apic.mac.v);
             let fu = (0..u.len()).map(|f| (f % (nx + 1) > self.i_b).then(|| u[f])).collect();
@@ -2755,12 +2884,14 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
             if tasse.len() <= tranche {
                 tasse.resize(tranche + 1, (0.0, 0.0));
             }
-            if i_b >= 1 {
+            // S394 : avec la bande, la dernière colonne libre est `i_b − 2` — `i_b − 1` est réensemencée à chaque pas.
+            let i_d = if hy.bande { i_b.saturating_sub(1) } else { i_b };
+            if i_d >= 1 {
                 let densite = |a: &Apic| {
                     let (n, nx) = (a.occupation(), a.mac.nx);
                     let (mut particules, mut cellules) = (0u32, 0u32);
                     for j in 0..a.mac.ny {
-                        let c = n[j * nx + i_b - 1];
+                        let c = n[j * nx + i_d - 1];
                         if c > 0 {
                             particules += c;
                             cellules += 1;
@@ -2820,6 +2951,9 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
         .map(|(k, ((h, a), (_, _, n)))| format!("{}-{}s:{:.3}/{:.3}", 10 * k, 10 * (k + 1), h / *n as f64, a / *n as f64))
         .collect();
     println!("RACCORD_S354 particules_par_cellule_avant_la_frontiere_hybride/apic_seul {}", ligne.join(" "));
+    if hy.densite {
+        println!("RACCORD_S394 energie_ajoutee_par_la_correction_j_par_m={:.4}", hy.energie_densite);
+    }
     execute(scene, &mut Apic::new(scene));
     execute(scene, &mut Hybride::new(scene));
 }

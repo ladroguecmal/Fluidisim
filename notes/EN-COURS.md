@@ -89,12 +89,43 @@ amortissement (régression) à 1 point d'APIC seul. (6) Repos à 5 cm : vitesse 
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — la bande (`RACCORD_BANDE=1`) dans `lot5_comparaison.rs`, la densité lue sur la dernière colonne libre ;
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — la bande (`RACCORD_BANDE=1`) dans `lot5_comparaison.rs`, la densité lue sur la dernière colonne libre ;
   critères 1 et 2.
-- [ ] **P3** — 30 s à 5 et 2,5 cm, repos ; critères 3 à 6 ; attribution si manqué.
+- [>] **P3** — 30 s à 5 et 2,5 cm, repos ; critères 3 à 6 ; attribution si manqué.
 - [ ] **P4** — preuve (section datée de B10-APIC-S320, §14) ; A316, file, liste.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+**P2 — (A) manqué, attribué avant tout autre essai.** 30 s à 5 cm : la masse des particules **se vide** dans les colonnes
+(0,422 m² sur 0–10 s, 0,001 ensuite), puis tout explose. Au repos (1 s, série) : APIC seul lit **0,4927 m** de surface pour
+0,5000 m de masse (le biais de S323, −0,146 maille) ; la bande est reposée à `round(2g/dx)` rangées — **0,475 m** de masse
+pour 0,4856 lu. **Deux pertes à chaque pas** : le biais de la reconstruction (la bande reposée sous sa masse) et l'arrondi
+des rangées ; réensemencée à chaque pas, la bande les cède chaque fois aux colonnes.
 
+**Candidat (A'), déclaré avant sa mesure, critères inchangés** — la forme la plus simple du champ de densité de Chentanez,
+Müller et Kim (résumé) : la bande **garde ses particules** et les **replace au pas nominal** (rangées de deux à `dx/2`,
+depuis le fond, la dernière seule au milieu si leur nombre est impair) ; aucune masse ne passe. Un tassement devient
+**hauteur**, que la pression voit et repousse — ce qui manquait en S354 (*« la pression voit la surface géométrique, pas la
+masse »*). **Témoin** d'attribution de (A) : `RACCORD_BANDE_BIAIS=0.0073` ajoute le biais de repos à la hauteur lue.
+**(A') manqué, attribué.** 3 s à 5 cm (série) : la bande **piège** — replacées sur le réseau à chaque pas, ses particules ne la
+quittent qu'en la traversant en un pas (> 12 mm, pour 0,3 mm par pas) ; la masse s'y entasse, 0,74 m au lieu de 0,50 à 1,6 s,
+puis tout diverge. **Défaut de structure, commun à (A) et (A')** : un réensemencement à chaque pas détruit le transport
+lagrangien sous la maille ; seules les colonnes, qui transportent par flux, le supportent. Le témoin de (A) (biais ajouté)
+diverge aussi (> 10 min pour 30 s, arrêté) : le biais n'est pas la seule perte.
+
+**Candidat (B), déclaré avant sa mesure, critères inchangés** — le champ de densité, sans réensemencement : à la fin de chaque
+pas, dans une **bande de deux colonnes** devant la frontière, sur les mailles d'eau **intérieures** (quatre voisines d'eau),
+`cible = n/4 − 1` ; la projection du banc (`projette_vers`, la même que la pression, fluide fantôme compris) sur un champ
+nul donne un déplacement `d` dont la divergence vaut la cible ; les particules **libres** sont déplacées de `d`, **en position
+seulement** (vitesses intactes), puis tenues du côté libre de la frontière. Un tassement s'étale donc en hauteur, que la
+pression voit. Facteur 1, bande de 2 : fixés ici, non réglés. `RACCORD_DENSITE=1`. Densité lue en `i_b − 1`, comme S354.
+
+**P2 — (B) à 5 cm, 30 s** : masse exacte (7·10⁻¹⁶) ; **masse à gauche** 0,50098 / 0,50111 / 0,49954 m² contre APIC seul
+0,49993 / 0,50144 / 0,50082 — écarts +0,0011, −0,0003, −0,0013 : **critère 3 tenu** (S354 : +0,0113) ; **densité** 3,985 /
+3,980 / 3,875 : **critère 4 tenu** (S354 : 4,96). **Manqués** : saut 0,649 maille (S354 : 0,389) ; l'onde **croît** —
+régression −4,06 %/période (APIC seul +1,18) ; période aux zéros +1,07 % contre +7,31 (APIC seul). **Attribution** : la
+correction ajoute **102 J/m** d'énergie potentielle en 30 s, pour une onde de ~2 J/m ; S354 mesurait l'inverse, −87 J/m des
+particules sous l'échange. La correction rend ce que l'échange ôte : **l'échange comprime** — la racine d'A316 — et la
+correction, qui rend le tassement visible, en fait une pompe dès qu'elle est en phase avec l'onde. Critères 1 (sans variable,
+au bit, rejoué après chaque ajout) et 2 (masse) tenus partout.
