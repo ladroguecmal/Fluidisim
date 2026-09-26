@@ -77,7 +77,7 @@ D = {
  "5.2": ("H", "la précision des grands volumes (A269) ; des formes courbes cuites", [], None),
  "5.3": ("H", "—", ["5.10"], None),
  "5.4": ("H", "le `C_d` selon l'ouverture ; pertes et énergie de la pompe", [], None),
- "5.5": ("H", "—", ["2.8"], None),
+ "5.5": ("H", "l'absorption par le sol ; la pluie hors contenant ; l'exposition calculée depuis les objets posés", ["2.8"], None),
  "5.6": ("H", "le seuil adaptatif", [], None),
  "5.7": ("H", "`liquid_id` (A17)", [], None),
  "5.8": ("H", "—", ["5.4"], None),

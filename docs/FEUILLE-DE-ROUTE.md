@@ -316,8 +316,8 @@ derrière la requête du corps (6.1), le prix visuel du rang 1 (4.5, 9.9). Profi
 
 ### Ce que l'état réel dit de la distance
 
-[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 65 partiels,
-52 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367), 4.21 (S369), 5.4 (S372), 5.10 (S375) passés à partiel ;
+[La liste du projet fini](LISTE-PROJET-FINI.md) compte **3 points validés sur 120**, 66 partiels,
+51 absents — **recalculé point par point en S309 puis en S350**, 4.8, 4.12, 6.2, 6.4, 4.13, puis 4.2 et 9.9 (S351), 8.5 (S359), 2.7 (S362), 8.6 (S365), 7.1 (S367), 4.21 (S369), 5.4 (S372), 5.10 (S375), 5.5 (S378) passés à partiel ;
 le décompte est vérifié par l'outil depuis S321. Ce
 chiffre ne mesure pas l'avancement : beaucoup de partiels portent l'essentiel de leur difficulté.
 Il mesure autre chose, qu'il vaut mieux regarder en face : **presque rien n'est allé jusqu'à la
@@ -366,7 +366,7 @@ d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photogr
 3. **La bathymétrie** (2.7) — 20 points en aval ; **S362** : la référence ; **S364** : l'entrée dans B, isobathes droites
    (ADR-196) ; restent les chemins de B jusqu'à Godot, la 2D, la marée —, puis W
    au-dessus du plan moyen (3.9) et les courants (2.6).
-4. **Le reste du front 0**, par système : couplage (4.7, 4.18 ; 4.8 et 4.21 par A320), volumique (4.15, 6.5), V (5.2, 5.4 — **S372** : vannes et pompes, [ADR-199](adr/ADR-199-vannes-et-pompes-dans-v.md) ; **S374** : la piscine rejouée dans Godot, et la décision de l'utilisateur, la dynamique des contenants en 3D volumétrique, [ADR-200](adr/ADR-200-la-dynamique-des-contenants-en-3d-volumetrique.md) : porte E, 5.10 ; **S375** : le bassin en δ 3D, invisible à 20 cm ; **S376** : le niveau de détail des contenants, [ADR-202](adr/ADR-202-niveau-de-detail-des-contenants.md) ; **S377** : ses zones d'ombre, [ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) —, 5.6, 5.7),
+4. **Le reste du front 0**, par système : couplage (4.7, 4.18 ; 4.8 et 4.21 par A320), volumique (4.15, 6.5), V (5.2, 5.4 — **S372** : vannes et pompes, [ADR-199](adr/ADR-199-vannes-et-pompes-dans-v.md) ; **S374** : la piscine rejouée dans Godot, et la décision de l'utilisateur, la dynamique des contenants en 3D volumétrique, [ADR-200](adr/ADR-200-la-dynamique-des-contenants-en-3d-volumetrique.md) : porte E, 5.10 ; **S375** : le bassin en δ 3D, invisible à 20 cm ; **S376** : le niveau de détail des contenants, [ADR-202](adr/ADR-202-niveau-de-detail-des-contenants.md) ; **S377** : ses zones d'ombre, [ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) ; **S378** : la pluie dans V, bâches comprises, [ADR-204](adr/ADR-204-la-pluie-arete-de-v.md) —, 5.6, 5.7),
    solides (6.1, 6.3), rendu (8.1 — le cœur dans Godot —, 8.2, 8.3, 8.5, 8.8, 8.9), budget (9.2, 9.3, 9.7, 9.8, 9.13), et 1.8, 7.1, 7.7, 10.8,
    11.2, 12.1, 13.1.
 

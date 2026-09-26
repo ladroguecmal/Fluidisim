@@ -210,3 +210,10 @@ Les anciennes tables gardent leur seul domaine +Z. Lois de débit, autorité et 
 La vanne et la pompe du §1 sont construites en **réseau ouvert** ([ADR-199](ADR-199-vannes-et-pompes-dans-v.md),
 [preuve](../validation/VANNES-POMPES-S372.md)) : une commande entière par arête, la vanne comme ouverture commandée, la
 pompe par une courbe parabolique contre la hauteur statique. Le réseau fermé sous pression du §4 reste en v2.
+
+## Note datée S378 — 2026-09-26 : la pluie
+
+La pluie du §5 est construite ([ADR-204](ADR-204-la-pluie-arete-de-v.md), [preuve](../validation/PLUIE-V-S378.md)) : une
+arête du ciel vers le contenant, sur sa **surface d'ouverture** et non sa surface libre (la pluie qui frappe les parois
+intérieures finit dans l'eau ; les deux coïncident pour un prisme) ; `sky_exposure` est la commande de l'arête, dynamique
+(bâches, ADR-203 D2). L'absorption et la création de flaques restent à faire.

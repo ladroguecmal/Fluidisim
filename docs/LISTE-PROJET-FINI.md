@@ -298,8 +298,12 @@ pas recopiée ici (L137).
   [ADR-199](adr/ADR-199-vannes-et-pompes-dans-v.md)). Manquent le `C_d` selon l'ouverture, pertes et énergie de la
   pompe, le réseau fermé (5.8). **S374** : un premier consommateur, la piscine rejouée dans Godot
   ([preuve](validation/PISCINE-V-S374.md)).
-- [ ] **5.5 Pluie selon l'exposition au ciel, absorption par le sol** — *absent*. L'exposition est **dynamique et
-  fractionnaire** : bâche entière ou demi-bâche posée et retirée en temps réel ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D2).
+- [ ] **5.5 Pluie selon l'exposition au ciel, absorption par le sol** — *partiel* depuis S378 : la **pluie**, arête de V
+  du ciel vers un contenant — surface d'ouverture × exposition × intensité (ADR-204) ; l'exposition **dynamique et
+  fractionnaire** est la commande de l'arête, bâche entière ou demi-bâche posée et retirée en temps réel
+  ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D2), sauvegardée ; une heure au millilitre, déversoir
+  sous la pluie à 0,11 % de l'analytique ([preuve](validation/PLUIE-V-S378.md)). Manquent l'absorption par le sol, la pluie
+  hors contenant, le calcul de l'exposition depuis les objets posés, la météo (à la fin).
 - [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *absent*.
 - [ ] **5.7 Plusieurs liquides** (`liquid_id`, A17) — *absent*.
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
@@ -569,7 +573,7 @@ pas recopiée ici (L137).
 | 2. Grandes masses (B) | 9 | 0 | 4 | 5 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 21 | 0 | 12 | 9 |
-| 5. Volumes finis (V) | 12 | 1 | 5 | 6 |
+| 5. Volumes finis (V) | 12 | 1 | 6 | 5 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 1 | 7 |
 | 8. Rendu | 10 | 0 | 9 | 1 |
@@ -578,7 +582,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **65** | **52** |
+| **total** | **120** | **3** | **66** | **51** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
