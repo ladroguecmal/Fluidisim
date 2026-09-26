@@ -85,7 +85,7 @@ identique au bit.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — images témoins d'avant ; `brume_air` dans `optique_eau.gdshaderinc`, `FOG` dans l'eau et le fond.
-- [ ] **P3** — mesures des critères 1 à 3.
+- [x] **P3** — mesures des critères 1 à 3.
 - [ ] **P4** — preuve `BRUME-S373`, file, liste (8.6, 8.8), index.
 - [ ] **P5** — rituel ; puis S374.
 
@@ -100,3 +100,8 @@ au **niveau le plus flou** (rugosité 1), une moyenne diffuse du ciel ; la nôtr
 seuil ne se relève pas : **deux variantes** (`eau.gdshader` / `eau_demi.gdshader`, `sol` de même, corps commun dans
 `*.gdshaderinc`, `#define BRUME_PAR_PIXEL`), échangées par `mer.gd` quand le mode demi change ; la brume du moteur
 partout où elle peut servir.
+
+**P3 — fait.** Avec les variantes : **critère 1** — proche, rasante, référence, haute, plongeante, côtière **identiques au
+bit** (la brume du moteur, inchangée). **Critère 2** — pose `demi`, côté air : **7 niveaux** au plus de la brume de Godot
+(p99,9 = 3 ; S371 : 15, sur ce côté à 3 px de la ligne) ; côté eau : **identique au bit** à S371. **Critère 3** — sous
+l'eau (`sous_eau`, zénith) : identiques au bit. `--controle-ligne-eau` inchangé (0,078 px, 0 mal classé).
