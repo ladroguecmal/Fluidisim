@@ -2332,6 +2332,10 @@ struct Hybride {
     /// **S395 : le bilan par profondeur** (`RACCORD_BILAN=1`) : particules insérées et retirées par l'échange, par rangée de
     /// mailles — où l'échange pose et ôte l'eau.
     bilan: Option<(Vec<u64>, Vec<u64>)>,
+    /// **S395 (C) : l'échange au sommet** (`RACCORD_SOMMET=1`, avec la paroi). L'eau échangée à une profondeur équivaut, en
+    /// volume, à de l'eau ajoutée ou ôtée à la surface : le solde de l'échange tenu en un seul compte ; la particule la plus
+    /// haute de la dernière colonne libre part quand une particule est due, la nouvelle se pose sur sa rangée du haut.
+    sommet: bool,
 }
 
 impl Hybride {
@@ -2376,6 +2380,7 @@ impl Hybride {
                 densite: std::env::var("RACCORD_DENSITE").is_ok_and(|v| v == "1"),
                 energie_densite: 0.0,
                 bilan: std::env::var("RACCORD_BILAN").is_ok_and(|v| v == "1").then(|| (vec![0; ny], vec![0; ny])),
+                sommet: std::env::var("RACCORD_SOMMET").is_ok_and(|v| v == "1"),
             };
         if ensemence == "hysterese" {
             hy.rangees = Some(hy.h.iter().map(|h| (2.0 * h / dx).round().max(0.0) as usize).collect());
@@ -2682,7 +2687,29 @@ impl Candidat for Hybride {
         self.h[0] += (entree - sortie) / dx;
         self.sorti += sortie;
         self.entre += entree;
-        if self.arrondi || self.solde {
+        if self.sommet {
+            // S395 (C) : un seul compte ; on retire au sommet de la dernière colonne libre.
+            let solde: f64 = self.attente.iter().sum::<f64>() - self.dette.iter().sum::<f64>();
+            self.attente.fill(0.0);
+            self.dette.fill(0.0);
+            self.attente[0] = solde;
+            let mut garde = vec![true; self.apic.x.len()];
+            let mut colonne: Vec<(f64, usize)> =
+                self.apic.x.iter().enumerate().filter(|(_, p)| p[0] < xb && p[0] >= xb - dx).map(|(n, p)| (p[1], n)).collect();
+            colonne.sort_by(|a, b| b.0.total_cmp(&a.0));
+            let mut haut = colonne.into_iter();
+            while self.attente[0] <= -area {
+                let Some((y, n)) = haut.next() else { break };
+                garde[n] = false;
+                self.attente[0] += area;
+                if let Some((_, retraits)) = self.bilan.as_mut() {
+                    retraits[((y / dx).max(0.0) as usize).min(ny - 1)] += 1;
+                }
+            }
+            if garde.contains(&false) {
+                self.retire(&garde);
+            }
+        } else if self.arrondi || self.solde {
             // Le solde se règle à la frontière : on retire dès qu'une particule — une demie en arrondi — est due.
             let seuil = if self.arrondi { 0.5 * area } else { area };
             let mut proches: Vec<Vec<(f64, usize)>> = vec![Vec::new(); ny];
@@ -2779,6 +2806,33 @@ impl Candidat for Hybride {
         }
         // ── L'attente devient particules libres, juste à gauche de la frontière, à sa profondeur.
         let seuil = if self.arrondi { 0.5 * area } else { area };
+        if self.sommet {
+            // S395 (C) : la nouvelle particule se pose sur la rangée du haut de la dernière colonne libre — à côté de la plus
+            // haute si celle-ci est seule sur sa rangée, sinon une demi-maille au-dessus.
+            while self.attente[0] >= area {
+                self.attente[0] -= area;
+                let colonne: Vec<[f64; 2]> = self.apic.x.iter().filter(|p| p[0] < xb && p[0] >= xb - dx).copied().collect();
+                let p = match colonne.iter().max_by(|a, b| a[1].total_cmp(&b[1])) {
+                    None => [xb - 0.75 * dx, 0.25 * dx],
+                    Some(top) => {
+                        let rangee: Vec<&[f64; 2]> = colonne.iter().filter(|q| q[1] >= top[1] - 0.25 * dx).collect();
+                        if rangee.len() == 1 {
+                            let x = if top[0] < xb - 0.5 * dx { xb - 0.25 * dx } else { xb - 0.75 * dx };
+                            [x, top[1]]
+                        } else {
+                            [xb - 0.75 * dx, top[1] + 0.5 * dx]
+                        }
+                    }
+                };
+                if let Some((insertions, _)) = self.bilan.as_mut() {
+                    insertions[((p[1] / dx).max(0.0) as usize).min(ny - 1)] += 1;
+                }
+                let (v, c) = self.apic.depuis_grille(p);
+                self.apic.x.push(p);
+                self.apic.v.push(v);
+                self.apic.c.push(c);
+            }
+        }
         for k in 0..ny {
             let mut alterne = 0usize;
             while self.attente[k] >= seuil {
@@ -2850,6 +2904,10 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
     if let Some(v) = std::env::var("LOT5_T_FIN").ok().and_then(|v| v.parse().ok()) {
         scene.t_fin = v;
     }
+    // S395 : `LOT5_AMPLITUDE` — la circulation à la frontière, en A ou en A² ?
+    if let Some(v) = std::env::var("LOT5_AMPLITUDE").ok().and_then(|v| v.parse().ok()) {
+        scene.amplitude = v;
+    }
     let mut seul = Apic::new(scene);
     let mut hy = Hybride::new(scene);
     let i_b = hy.i_b;
@@ -2874,6 +2932,8 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
     // S395 : la densité par rangée dans la dernière colonne libre, hybride et APIC seul, moyennée sur les relevés.
     let ny = hy.apic.mac.ny;
     let (mut profil_hy, mut profil_seul, mut relevés) = (vec![0.0; ny], vec![0.0; ny], 0usize);
+    // Et la vitesse horizontale moyenne à travers la face de la frontière, par rangée, à chaque pas pondéré par sa durée.
+    let (mut u_hy, mut u_seul, mut duree) = (vec![0.0; ny], vec![0.0; ny], 0.0);
     while t < scene.t_fin - 1e-12 {
         let dt = hy.pas((prochain - t).max(1e-9));
         let mut ts = t;
@@ -2881,6 +2941,14 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
             ts += seul.pas((t + dt - ts).max(1e-9));
         }
         t += dt;
+        if hy.bilan.is_some() {
+            let nx = hy.apic.mac.nx;
+            for j in 0..ny {
+                u_hy[j] += hy.apic.mac.u[j * (nx + 1) + i_b] * dt;
+                u_seul[j] += seul.mac.u[j * (nx + 1) + i_b] * dt;
+            }
+            duree += dt;
+        }
         let (l, c, a) = hy.masses();
         pire_masse = pire_masse.max(((l + c + a) / m0 - 1.0).abs());
         v_max = v_max.max(hy.apic.v.iter().fold(0f64, |m, v| m.max((v[0] * v[0] + v[1] * v[1]).sqrt())));
@@ -2981,8 +3049,9 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
             let (a, b) = (profil_hy[j] / relevés.max(1) as f64, profil_seul[j] / relevés.max(1) as f64);
             if insertions[j] + retraits[j] > 0 || a > 0.0 || b > 0.0 {
                 println!(
-                    "RACCORD_S395 rangee={j} y_m={:.3} insertions={} retraits={} particules_par_maille_hybride={a:.3} apic_seul={b:.3}",
-                    (j as f64 + 0.5) * dx, insertions[j], retraits[j]
+                    "RACCORD_S395 rangee={j} y_m={:.3} insertions={} retraits={} particules_par_maille_hybride={a:.3} apic_seul={b:.3} \
+                     u_moyen_face_mm_s_hybride={:+.3} apic_seul={:+.3}",
+                    (j as f64 + 0.5) * dx, insertions[j], retraits[j], 1e3 * u_hy[j] / duree, 1e3 * u_seul[j] / duree
                 );
             }
         }
