@@ -62,60 +62,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S389 — **terminée**. **C4b**, première part : **la surface d'APIC** ([APIC3D-S388](../docs/validation/APIC3D-S388.md) :
-la lecture de la surface commande la période). Demande de l'utilisateur (2026-09-26) : *« continue »* — troisième session du
-fil (C4) : la voie de la v1 a été proposée à l'utilisateur en fin de S388, qui a demandé la suite ; sa demande prime
-(REPRISE §6). Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
+Session : S390 — **en cours**. **C3**, première part : **la multigrille sur la carte** ([conception](../docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md)
+§5, [ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md)). Demande de l'utilisateur (2026-09-26) : *« Reprends le
+projet »*, puis, entre la pluie (pièce 5), C3 et les gerbes, **C3**. Agent : Claude Opus 5.5, Claude Code (application de
+bureau) au poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3.
 
-**Thèse.** Calculée sur un réseau en `f64` pour une surface qui parcourt **continûment** une maille (huit positions), la lecture
-de S388 — noyau d'une maille — se trompe jusqu'à **9,9 %** de maille (S388 n'avait regardé que deux positions, ±6,1 %). Le
-**rayon du noyau** commande cette erreur, pas le nombre de particules : 3,6 % à 1,5 maille, **2,5 % à 2 mailles** ; 27
-particules par maille n'y changent presque rien (2,4 %). Retenir un noyau de deux mailles, rayon au repos minimax sur les
-positions continues ; puis remesurer les ballottements, dont la période devrait suivre.
+**Maillons à 3** : ce fil (la campagne) n'a pas encore changé l'état d'un point ; C3 vise le coût de δ (4.19) et la maille fine
+de la haute mer. Choisi par l'utilisateur ; la colonne graduée sur la carte n'en fait pas partie (S387 : elle sert l'eau calme,
+pas la haute mer) — reportée à l'usage qui la consomme, les contenants.
 
-**Critères, écrits avant.** (1) Le modèle `f64` et la reconstruction 3D lisent la même hauteur à 0,1 % de maille près, sur les
-huit positions. (2) Lecture ≤ 2,5 % de maille sur toute position (critère 2 de S388, 1 %, reste manqué ; ce qui change est
-publié). (3) Repos : ≤ 1 cm/s à 5 cm, masse exacte. (4) Les critères de S388, **inchangés** : (1, 0) ≤ 1 % à 2,5 cm, (1, 1) ≤ 2 %.
-(5) **L'énergie, sur une mesure qui la porte** : l'amplitude du moment ne croît jamais — amortissement par période ≥ 0 par
-régression sur les extremums (S354) ; publié. (6) Attribution : noyau d'une maille contre deux, même cas. (7) Suite
-inchangée, zéro avertissement.
+**Thèse.** La production (afficheur, `Step3`) résout la pression par **32 cycles** de gradient conjugué préconditionné par
+Jacobi : 2,06 ms des 3,68 du pas, 0,062 ms par cycle (S341), et des pas **déclarés dégradés** (S302). La référence a reçu en S385
+un cycle en V qui fait 9 à 11 itérations quelle que soit la maille. **Le porter tel quel sur la carte** — Jacobi amorti ω = 6/7,
+deux lissages avant, deux après, huit au plus grossier, restriction par moyenne, prolongation par injection, niveaux grossiers
+rediscrétisés depuis la surface à chaque projection — comme préconditionneur du même gradient conjugué, à travail fixe.
+**Prédiction** (*estimée*, avant mesure) : sur la scène de la porte B (120 × 112 × 28, deux niveaux grossiers), un cycle
+multigrille coûte 4 à 6 cycles de Jacobi (six passes fines contre une, plus les niveaux grossiers, où domine le coût
+d'appel) ; il atteint le résidu de 32 cycles de Jacobi en 3 à 6 cycles. Le gain à 25 cm serait donc modeste (projection
+≈ 1,2 à 1,6 ms) ; il grandit avec la maille, là où Jacobi rampe — la maille de 10 cm est C3b.
+
+**Critères, écrits avant.**
+1. **Éteinte par défaut** : surface publiée identique au bit (empreintes de `--delta3d-empreinte`), dispatchs inchangés.
+2. **L'instrument** : sur la géométrie de la scène après chauffe, le cycle en V de la carte contre une réplique CPU en `f64`,
+   même résidu d'entrée — écart ≤ 10⁻⁵ du maximum ; symétrie `⟨u, M⁻¹v⟩` contre `⟨M⁻¹u, v⟩` ≤ 10⁻⁵ relatif, positivité ;
+   l'essai **vu échouer** sur un cycle rendu asymétrique (un lissage après au lieu de deux).
+3. **La convergence** sur la scène de la porte B : vrai résidu relatif et divergence franche contre les cycles, Jacobi 8 à 64,
+   multigrille 1 à 8 ; **la multigrille atteint le résidu de 32 cycles de Jacobi en 8 cycles au plus**.
+4. **Le coût** : cycle multigrille publié ; à résidu égal, pas entier ≤ celui de Jacobi à 32 cycles ; la porte C tient (deux
+   parts ≤ 2 ms au 99ᵉ centile).
+5. **La référence** : production multigrille à **3 mm** de la référence sur les trois cas de cuve ; divergence publiée.
+6. Suite inchangée, zéro avertissement. **Non visé ici** : 10 cm (C3b), A298 remesurée (C3b, sur le pas retenu), activation
+   par défaut dans la scène vivante (décidée en P6 sur les chiffres, empreintes nouvelles expliquées si oui).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le modèle de lecture en `f64` dans le cœur, positions continues, rayon du noyau en paramètre ; rayon minimax ;
-  critère 1.
-- [x] **P3** — la reconstruction à deux mailles ; critères 2 et 3.
-- [x] **P4** — les ballottements remesurés, l'amortissement par régression, l'attribution ; critères 4 à 6.
-- [x] **P5** — critère 7 ; preuve (section datée d'APIC3D-S388) ; liste, file, feuille de route.
-- [x] **P6** — rituel.
+- [ ] **P2** — les noyaux WGSL : lissages fins et grossiers, résidu restreint, prolongation, géométrie des niveaux ; les
+  variantes du gradient conjugué (mise à jour sans `z`, produit `r·z`, première direction).
+- [ ] **P3** — le branchement dans `Step3` : tampons réservés à la configuration (I-06), multigrille éteinte par défaut, nombre de
+  dispatchs du profil ; critère 1.
+- [ ] **P4** — l'instrument : réplique `f64`, symétrie, positivité, vu échouer ; critère 2.
+- [ ] **P5** — convergence et coût sur la scène de la porte B, deux parts à 30 Hz ; critères 3 et 4.
+- [ ] **P6** — les trois cas de cuve avec la multigrille ; critère 5 ; activation par défaut décidée.
+- [ ] **P7** — critère 6 ; preuve (section datée de MULTIGRILLE-3D-S385) ; file, feuille de route, liste.
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
-
-**P2–P3 en un commit** (le modèle et la reconstruction se règlent ensemble). `KERNEL_CELLS` = 2 ; modèle `f64`
-(`lattice_mean_distance`, `lattice_read_error`, `minimax_radius`) sur huit positions continues ; rayon minimax 0,05280 m à
-10 cm (noyau 1 : 0,03600 ; S318 : 0,02743). **Critère 1 tenu** : lecture 3D = modèle à 10⁻³ % près sur les huit positions,
-noyaux 1 et 2. **Critère 2 tenu** : noyau 2, pire lecture **2,46 %** de maille (noyau 1 : 9,93 %).
-
-**Trouvé en chemin — les parois** : au premier passage, le noyau de deux mailles faisait courir le repos à **15 cm/s**. Près
-d'une paroi, le noyau ne trouve des particules que d'un côté : la moyenne se décale vers l'intérieur, la surface y paraît plus
-basse. Les parois **reflètent** désormais les particules (images seulement pour les centres à moins d'un rayon de noyau d'une
-paroi latérale ou du fond). **Critère 3 tenu** : repos **6,2 µm/s** (noyau 2), témoin noyau 1 avec images **1,5 µm/s** — **les
-5,6 mm/s de S388 venaient des parois**, pas du noyau.
-
-**P4 — les ballottements remesurés** (noyau 2, parois reflétées ; `apic3d_ballottement`, amortissement par régression) :
-
-| cas | 5 cm | 2,5 cm | critère |
-|---|---|---|---|
-| (1, 0) | +1,01 % (S388 +2,05) | **+0,39 %** (S388 +1,04) | ≤ 1 % **tenu** |
-| (1, 1) | +2,63 % (S388 +7,64) | **+1,01 %** (S388 +2,69) | ≤ 2 % **tenu** |
-| amortissement par période | +0,21 % ; (1, 1) +0,63 % | +0,10 % ; +0,78 % | ≥ 0 **tenu** |
-| énergie « créée » (oscillation, % de l'onde analytique) | +7,0 % ; +3,6 % | +3,3 % ; +5,3 % | publiée |
-| calcul | 24 s ; 29 s | 224 s ; 274 s | — |
-
-**Attribution** (5 cm) : noyau 1, parois reflétées — (1, 0) **+0,54 %**, amortissement 3,78 %/période ; (1, 1) **+5,57 %**,
-2,33 %/période. S388 (noyau 1, sans images) : +2,05 % et +7,64 %. **Les images aux parois** corrigent surtout (1, 0) ; **le
-noyau large** corrige l'oblique et divise l'amortissement par 18. Critères 4 à 6 tenus.
-
-**P5 — critère 7 tenu** : suite Rust 680 réussis, 18 ignorés, zéro avertissement ; outils Python 32 réussis. Preuve :
-§5 d'[APIC3D-S388](../docs/validation/APIC3D-S388.md) ; liste 4.16, file de la campagne, feuille de route.
