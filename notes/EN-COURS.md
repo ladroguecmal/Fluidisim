@@ -90,7 +90,7 @@ et temps total publiés, au même résidu.
 - [x] **P4a** — `delta3d_multigrid.rs` : niveaux 3D (géométrie, restriction, prolongation, opérateur, lissage) ; comptés
   auprès de l'hôte (I-06) ; essais de forme.
 - [x] **P4b** — le cycle en V et son branchement dans `project_mobile3` (`enable_multigrid`) ; critère 1.
-- [ ] **P5** — critères 2 à 4 : essais et banc.
+- [x] **P5** — critères 2 à 4 : essais et banc.
 - [ ] **P6** — critère 5 (suite entière), critère 6 (coût) ; preuve `MULTIGRILLE-3D-S385` ; liste, file, feuille de route,
   index.
 - [ ] **P7** — rituel.
@@ -115,3 +115,18 @@ double (critère 3, partie Jacobi). Divergence max 9,5·10⁻⁶ (sous 10⁻⁵)
 positivité sur fond plat et sur la bosse (`multigrid_cycle_is_symmetric_and_positive_s385`) ; **vu échouer** sur un
 cycle rendu asymétrique (un lissage après au lieu de deux : 1,23 contre 1,13), puis rétabli. Critère 2 à 32 mailles :
 surfaces à 10⁻⁶ m après 20 pas, deux fois moins d'itérations au moins (`…_with_fewer_iterations_s385`).
+
+**P5 — critères 2 à 4** (banc rejoué deux fois, itérations identiques) :
+
+| fond | méthode | it. premier (32 / 64 / 128) | croissance | it. chaud | pas chaud à 128 | premier pas à 128 |
+|---|---|---|---:|---|---:|---:|
+| plat | Jacobi | 102 / 191 / 365 | ×3,58 | 36,5 / 58,4 / 85,9 | 3,24 s | 12,3 s |
+| plat | multigrille | **9 / 10 / 11** | **×1,22** | 3,2 / 3,7 / 4,0 | **1,32 s** | **2,89 s** |
+| bosse | Jacobi | 117 / 219 / 444 | ×3,79 | 36,0 / 58,8 / 86,3 | 3,54 s | 16,8 s |
+| bosse | multigrille | **9 / 10 / 11** | **×1,22** | 3,2 / 3,7 / 4,1 | **1,59 s** | **3,71 s** |
+
+Critère 3 tenu (≤ +50 % contre ≥ ×2) ; critère 4 tenu (la bosse comme le fond plat, A315 ne revient pas). Critère 2 : essai à
+32 mailles. **Divergence** : lignes franches ≤ 5,9·10⁻⁶ avec la multigrille (≤ 9,5·10⁻⁶ Jacobi) ; **sur toutes les lignes,
+1,41·10⁻⁵ au fond plat à 128** avec la multigrille (Jacobi 8,9·10⁻⁶) — les lignes de surface, qu'ADR-144 ne juge pas ; dit, pas
+expliqué. Une itération multigrille coûte ≈ 8,7 fois une de Jacobi (pas entier / itérations, à 128). **Critère 5** : suite
+entière 667 réussis (664 + 3), 18 ignorés, zéro avertissement.
