@@ -33,6 +33,8 @@ const Pluie = preload("res://pluie.gd")
 var pluie_mm_h := 0.0
 ## S380 — la pluie dans l'air (`pluie_air.gd`, ADR-205 pièce 1).
 var pluie_air: Node3D
+## S383 — les gerbes (`gerbes.gd`, ADR-205 pièce 4).
+var gerbes: Node3D
 ## S381 — le ciel de pluie (ADR-205, pièce 3) : tous les matériaux qui incluent `ciel.gdshaderinc`, et `COUVERT=` (0 à 1)
 ## qui force la couverture ; sinon, la pluie couvre le ciel.
 var materiaux_ciel: Array = []
@@ -488,6 +490,10 @@ func construire() -> void:
 	pluie_air.plancher = sol_y
 	pluie_air.nappes = [Vector4(fb.x - lx, fb.z - lz, fb.x + lx, fb.z + lz),
 		Vector4(x0, ft.z - tz, x1, ft.z + tz)]
+	gerbes = load("res://gerbes.gd").new()
+	add_child(gerbes)
+	gerbes.nappes = pluie_air.nappes
+	gerbes.fenetre = Vector4(minf(fb.x - lx, x0), minf(fb.z - lz, ft.z - tz), maxf(fb.x + lx, x1), maxf(fb.z + lz, ft.z + tz))
 	poser_occultants()
 
 
@@ -590,6 +596,10 @@ func appliquer(s: float) -> void:
 	pluie_air.couvert = couvert
 	pluie_air.configurer(pluie_mm_h)
 	pluie_air.suivre(camera, s)
+	gerbes.niveaux = pluie_air.niveaux
+	gerbes.couvert = couvert
+	gerbes.configurer(pluie_mm_h)
+	gerbes.suivre(camera, s)
 	# S380 : l'extinction par les gouttes (ADR-205, pièce 2) — la brume de Godot, `1 − e^(−β·d)`, couleur du ciel ; par
 	# temps sec, pas de brume, comme avant.
 	var beta := Pluie.extinction(pluie_mm_h)

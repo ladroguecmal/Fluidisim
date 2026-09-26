@@ -88,8 +88,10 @@ réelles ; jugement de l'utilisateur (R32).
 - [x] **P2** — sources : couronne, cavité, jet de Worthington, gouttelettes des gouttes de pluie sur eau profonde (selon D,
   à vitesse terminale) ; seuil sur surface sèche ; photographies ; chiffres retenus.
 - [x] **P3** — le tirage partagé (`pluie_impact`) sorti des rides ; critère 2 (rides au bit).
-- [ ] **P4** — les gerbes sur l'eau : particules (fenêtre de mailles autour de la caméra), géométrie par diamètre et âge
-  (couronne, jet, gouttelettes), radiance de l'eau comme les gouttes ; piscine et mer.
+- [x] **P4** — les gerbes sur l'eau de la piscine : particules (fenêtre de mailles sur les eaux), géométrie par diamètre et
+  âge (couronne, dôme, jet), radiance de l'eau comme les gouttes.
+- [ ] **P4b** — la mer : la gerbe posée sur la surface déplacée (la somme des ondes de la bande, évaluée au point d'impact
+  en coordonnées de Lagrange, comme les rides), fenêtre autour de la caméra.
 - [ ] **P5** — au loin : la part d'aire moyenne des gerbes dans les nuanceurs d'eau, fondue par l'empreinte.
 - [ ] **P6** — contrôles : critères 1, 3, 4, 5 ; coût.
 - [ ] **P7** — les éclaboussures au sol (seuil de Mundo, Sommerfeld et Tropea) ou, faute de temps, leur déclencheur.
@@ -128,3 +130,12 @@ centre, diamètre) dans `pluie.gdshaderinc` ; les rides les appellent. **Critèr
 50 mm/h, trois vues ; mer 10 mm/h, deux poses ; `pluie8.sh`) — d'abord rendues deux fois au commit d'avant : **identiques
 entre elles** (la pluie est déterministe, contrairement à ce que S380 n'exigeait pas) ; après le découpage : **8 / 8 au
 bit**. **Critère 1** : nouvelle référence, la fin de S382 (occultation comprise) : 12 / 12 au bit.
+
+**P4 — les gerbes de la piscine.** `gerbes.gd` (un `GPUParticles3D` : couches × 2 périodes × mailles d'une fenêtre qui couvre
+les deux eaux — 26 × 12 mailles, 24 336 particules à 10 mm/h), `gerbe.gdshader` (le tirage des rides, `pluie_impact` ;
+vie `0,08·√s` s plus une pose ; hors de l'eau, rien), `gerbe_dessin.gdshader` (relevés de P2 interpolés ; coupe jusqu'à
+10 ms, puis dôme et jet de 4 mm à tête de 2,5 mm ; moyenne sur quatre instants de la pose de 1/60 s ; radiance des gouttes ;
+opacités réglées 0,25 / 0,6 / 0,3 / 0,55 / 0,8). **Impasses** : `return` interdit dans `process()` des particules (tout
+dans une fonction) ; **rien ne se dessinait** — même des carrés rouges forcés — : l'eau du bassin, transparente et qui lit
+l'écran, était dessinée après les particules et les recouvrait (tri par la distance du centre des boîtes) ; le dessin passe
+après elle (`render_priority` 1). **Vu** : de petites coupes blanches semées sur l'eau de près, des points clairs de loin.
