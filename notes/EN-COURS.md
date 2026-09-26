@@ -88,7 +88,7 @@ le pas fin à l'écart que la dispersion calculée prévoit. (4) Suite entière 
   couches cubiques qu'elle impose, le gain qui reste (outil) ; le cas d'un bassin calme.
 - [x] **P4** — la colonne graduée au pas mobile (`project_mobile3`) : garde de la course, départ chaud par injection aux
   nœuds, divergence restreinte ; essais (critère 3).
-- [ ] **P5** — le ballottement gradué contre le fin ; critère 4.
+- [x] **P5** — le ballottement gradué contre le fin ; critère 4.
 - [ ] **P6** — preuve (section datée de COLONNES-HAUTES-S386) ; ADR-208 (note), liste, file, feuille de route.
 - [ ] **P7** — rituel.
 
@@ -125,3 +125,9 @@ pendant le recalcul du vrai résidu — la boucle faisait zéro tour : **le « v
 jamais recalculé** ; (3) **S386** : la divergence restreinte écrasait le résidu `r`, qu'une relance réutilise. Corrigés
 (`len` sur `m`, divergence dans `z`). Les chiffres de S386 **ne changent pas** (0,0046 / 0,0048 %) : la récurrence du
 gradient conjugué restait juste — mais le contrôle annoncé n'avait pas lieu ; à dire dans la preuve.
+
+**P5 — le ballottement** (`delta3d_ballottement_gradue`, 2 min) : bassin 8 × 4 m, 4 m d'eau sous 2 m d'air, mode fondamental,
+`a` = 1 cm, 5 s au pas mobile, fin contre gradué (15 inconnues sur 24). Prédit par la dispersion calculée : Ω_gradué/Ω_fin − 1 =
++2,046·10⁻³, écart `a·ΔΩ·t` = **1,921·10⁻⁴ m** ; mesuré : **1,619·10⁻⁴ m**, rapport **0,843** — **critère tenu** (0,5 à 2).
+Itérations moyennes : fin 47,7, gradué 44,1. **Critère 4** : suite Rust 675 réussis (673 + 2), 18 ignorés, zéro avertissement ;
+outils Python 32 réussis.
