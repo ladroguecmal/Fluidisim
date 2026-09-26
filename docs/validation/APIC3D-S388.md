@@ -6,16 +6,19 @@ carte graphique : les durées sont celles de ce conteneur. Liste **4.16** (surfa
 
 ## Reproduire
 
-- Commit de P7 de S388 ou plus récent.
-- `cargo test --manifest-path code/Cargo.toml --release --offline -p water-core s388 -- --nocapture` — sept essais, dix
+- Commit `897a9ee4` (P7 de S388) ou plus récent.
+- `cargo test --manifest-path code/Cargo.toml --release --offline -p water-core s388 -- --nocapture` — six essais, dix
   secondes ; lignes `S388` (rayons, surfaces lues, repos).
 - `cargo run --manifest-path code/Cargo.toml -p water-core --release --offline --example apic3d_ballottement -- <10|11> <dx>`
-  — ligne `APIC3D_S388` ; `APIC3D_TRACE=1` imprime l'énergie toutes les 25 pas. Durées : (1, 0) à 5 cm, 15 s ; à 2,5 cm et
-  (1, 1), quelques minutes (§3).
+  — ligne `APIC3D_S388` ; `APIC3D_TRACE=1` imprime l'énergie toutes les 25 pas ; témoins `APIC3D_RAYON=plan` et
+  `APIC3D_SANS_SEPARATION`. Durées : (1, 0) 15 s à 5 cm, 153 s à 2,5 cm ; (1, 1) 18 s et 174 s. Valeurs attendues : §3.
 
 ## En une phrase
 
-REMPLACER
+APIC entre dans le cœur en trois dimensions : il garde la masse exactement, conserve un champ affine, tient le repos à
+5,6 mm/s, et fait ballotter une cuve à **+2,05 % puis +1,04 %** de la période exacte (5 et 2,5 cm) — mieux qu'en 2D à 5 cm,
+moins bien à 2,5 cm — et un mode oblique à +2,69 % ; trois critères sont manqués (la surface à 1 %, le ballottement à 1 %,
+l'énergie à 1 %), et la mesure dit pourquoi : **la lecture de la surface depuis les particules commande la période**.
 
 ## 1. La construction
 
@@ -51,3 +54,41 @@ que l'espacement des particules n'existe pas). L'affirmation de S318 — « l'is
 sa hauteur » — n'est vraie que pour une surface qui passe par un centre. **Faute d'instrument corrigée en chemin** : le
 modèle f64 mettait `2·dx − r` là où la reconstruction met `dx` sans voisine, et lisait un centre à +4,5 % quand la
 reconstruction lisait +7,2 %.
+
+## 3. Les ballottements
+
+`examples/apic3d_ballottement.rs`. Mode (1, 0) de S318 — cuve de 2 m, 0,5 m d'eau, 2 cm, invariant en `y` (0,2 m de large),
+10 s — et mode **oblique** (1, 1) d'une cuve carrée de 1 m, 5 s. Période lue sur un **moment** de la masse (lisse), passages
+par zéro interpolés.
+
+| cas | 5 cm | 2,5 cm | critère (écrit avant) |
+|---|---|---|---|
+| (1, 0) — exacte 1,9765 s | **+2,05 %** (2D : +5,9 %) | **+1,04 %** (2D : −0,15 %) | ≤ 7 % **tenu** ; ≤ 1 % **manqué de 0,04 point** ; décroissante **tenu** |
+| (1, 1) — exacte 0,9630 s | +7,64 % | **+2,69 %** | ≤ 2 % **manqué** |
+| énergie créée, % de l'onde analytique | +22,4 % ; (1, 1) +26,9 % | +7,0 % ; (1, 1) +12,7 % | ≤ 1 % **manqué** |
+| masse | exacte | exacte | — |
+| itérations moyennes ; calcul | 93 ; 15 s | 189 ; 153 s | — |
+
+À 10 cm, l'amplitude de 2 cm est sous l'espacement des particules (5 cm) : l'onde n'existe pas, la « période » lue est du
+bruit (−80 %) — non retenu, comme en S318.
+
+**L'énergie.** Elle **oscille** dans chaque période — de +0,15 à −0,56 fois l'énergie analytique de l'onde à 5 cm — et
+**décroît** sur la durée : rien ne croît. L'onde que portent les particules, posées en rangées de 2,5 cm, a 1,64 fois
+l'énergie analytique (énergie cinétique de pointe ; S318 : 2,66 cm représentés pour 2 cm posés). Et 1 % de l'énergie de
+l'onde vaut quelques micromètres de centre de masse, sous ce que la position des particules sait dire : le critère était
+plus fin que sa mesure. Il reste **manqué** ; il est à réécrire sur une mesure qui le porte (l'amortissement par période,
+comme S354).
+
+**Attribution** (témoins, (1, 0) à 5 cm) : avec le rayon de S318, **+7,87 %** au lieu de +2,05 % ; sans séparation, +2,29 %,
+énergie +22,3 %. **La lecture de la surface commande la période** ; la séparation n'y est presque pour rien, et ni l'une ni
+l'autre n'explique l'énergie.
+
+## 4. Ce que ce document ne dit pas
+
+- **Rien du déferlement, des gerbes ni de la cavité** : aucune surface non graphe n'est éprouvée ici (4.16 reste absent).
+  B10 en 3D — une sphère qui entre dans l'eau — est **C4b**.
+- **Aucun raccord aux colonnes** (C5) ni critère de bascule (C6) : APIC tient seul le domaine.
+- **La piste d'amélioration**, mesurée mais non faite : la surface — plus de particules par maille, ou la surface portée
+  par un ensemble de niveaux (ADR-186 D4).
+- Largeur de 0,2 m pour (1, 0) : les parois en `y` sont proches ; le mode ne dépend pas de `y`, mais leur effet n'est pas
+  mesuré. Rien sur la carte ; durées d'un conteneur cloud.

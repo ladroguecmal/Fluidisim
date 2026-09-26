@@ -92,7 +92,7 @@ cuve carrée : erreur de période ≤ 2 % à la maille la plus fine mesurée —
 - [x] **P5** — gravité, projection à fluide fantôme (gradient conjugué, Jacobi), extrapolation, advection, séparation : le pas.
 - [x] **P6** — le repos ; critère 3.
 - [x] **P7** — banc `apic3d_ballottement` : modes (1, 0) et (1, 1) ; critères 4 et 5.
-- [ ] **P8** — critère 6 ; preuve `APIC3D-S388` ; liste, file, feuille de route, index.
+- [x] **P8** — critère 6 ; preuve `APIC3D-S388` ; liste, file, feuille de route, index.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
@@ -127,3 +127,6 @@ de 2,5 cm, S318 : 2,66 cm représentés pour 2) ; 1 % de l'onde vaut quelques mi
 plus fin que la mesure, il reste « manqué ». **Attribution** (témoins à 5 cm, (1, 0)) : rayon de S318 → **+7,87 %** (minimax
 +2,05) ; sans séparation → +2,29 %, énergie +22,3. **L'erreur de période vient de la lecture de la surface**, pas de la
 séparation ; la piste : plus de particules par maille, ou la surface portée par un ensemble de niveaux (ADR-186 D4).
+
+**P8 — critère 6 tenu** : suite Rust 681 réussis (675 + 6), 18 ignorés, zéro avertissement. Preuve `APIC3D-S388` ; liste 4.12 et 4.16
+(texte, sans changer de case : construit et non reçu ne vaut pas partiel), file, feuille de route, index.
