@@ -82,9 +82,9 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — références : ciels de pluie photographiés, neutralité et gradient mesurés.
-- [ ] **P3** — `ciel.gdshaderinc` : `couvert`, la luminance de la CIE, le soleil éteint, `eclairage(n, soleil, direct)` ;
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — références : ciels de pluie photographiés, neutralité et gradient mesurés.
+- [>] **P3** — `ciel.gdshaderinc` : `couvert`, la luminance de la CIE, le soleil éteint, `eclairage(n, soleil, direct)` ;
   `gain_eau` déplacé là (l'éclairement de la scène).
 - [ ] **P4** — les nuanceurs : eau, bassin, parois, fond, caustiques, éclat ; critère 1.
 - [ ] **P5** — les scènes : `couvert` par la pluie ou `COUVERT=` ; contrôles (critères 2 à 4).
@@ -92,3 +92,12 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+
+**P2 — le ciel de pluie mesuré** (pixels lus dans le navigateur par un canevas, rien de téléchargé ; moyennes de bandes).
+- *Downpour (4390180547)*, bandes de 30 px du haut vers la cime des arbres : sRGB 230,3 / 230,6 / 233,9 → 209,1 / 209,7 /
+  212,4 — **neutre** (bleu +1,5 %), plus clair vers le haut (1,24 en linéaire sur le cadre, élévations inconnues, voile
+  d'averse devant).
+- *Rain over the Sea, Mundesley*, bandes de 40 px : 219,4 / 219,3 / 220,8 en haut → 171,8 / 179,4 / 186,7 juste au-dessus
+  de l'horizon (y ≈ 420) — presque neutre (bleu +7 % à l'horizon, +1 % en haut) ; rapport haut / horizon **1,72** en
+  linéaire. Hypothèse déclarée : champ horizontal de 60° (1 280 px), soit le haut du cadre à ≈ 20° d'élévation, où la
+  CIE couvert donne `1 + 2·sin 20°` = **1,68** — compatible (sans courbe d'appareil connue).
