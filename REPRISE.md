@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-27 00:47 +02:00
+JETON            : occupé
+Battement        : 2026-09-27 00:49 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
-Session en cours : aucune
+Session en cours : S400 — la référence CAUSTIC//VOLUME rangée comme comparable ; recevoir le raccord (lecture assortie, séparation tenue)
 Dernière session : S399 — physique : **C5b, deuxième part** ([preuve](docs/validation/RACCORD-3D-S398.md) §5) — la bande de particules et l'échange dans APIC 3D : à 2,5 cm sur 30 s, masse à ±0,6 mm, saut 0,15 maille, période à 0,01 point d'APIC seul, reste la densité (7,3) ; à 5 cm, +3,1 mm par la lecture biaisée de la bande. Avant : S398, la zone des colonnes
 Session suivante : dans le cloud, **S400 — recevoir le raccord** : la zone lit sa surface comme la bande (`η + e(η)`, `lattice_read_error`), la séparation tenue du côté de la bande ; critères de S399 inchangés ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
 Maillons        : 3 — S399 : aucun point ne change d'état ; justifié au journal (demande de l'utilisateur ; le raccord, verrou de C6–C10, à un critère d'être reçu à la maille fine)

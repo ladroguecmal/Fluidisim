@@ -62,78 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S399 — **terminée**. **C5b, deuxième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
-[RACCORD-3D-S398](../docs/validation/RACCORD-3D-S398.md)) : **la bande de particules et l'échange**, dans une même projection.
-Demande de l'utilisateur (2026-09-27) : *« Continue »* (objectif : terminer le solveur). Agent : Claude Opus 5.5, session cloud
-Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Sert 4.16, 4.12, A316.
+Session : S400 — **en cours**. Deux parts. Demande de l'utilisateur (2026-09-27) : *« https://scottiefox.github.io/caustic-volume/ Il
+s'agit d'un projet sur tree.js mais peut être il serait intéressant à analyser du point de vue des rendus ou autres, il faut avoir
+en tête que les objectifs de cette référence ne sont pas les mêmes que mon projet. Continue »*. Agent : Claude Opus 5.5, session
+cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Le site est bloqué par le réseau ; le dépôt public
+(`scottiefox/caustic-volume`, MIT) est lu par git.
 
-**Thèse.** Dans `Apic3`, une colonne est soit de la zone (surface `η`), soit de la **bande** (particules). Deux gestes, les
-leçons de 2D portées :
-- **La reconstruction voit les colonnes** — l'idée de Chentanez, Müller et Kim (le champ de densité de la grille ajouté à celui
-  des particules) : près de la zone, la reconstruction compte des **particules virtuelles** des colonnes, rangées étirées sur
-  `[0, η]` (S327 : pas de marche d'un quart de maille), images aux parois comprises — sans quoi la frontière serait une paroi
-  vue d'un seul côté (le biais de S389 et de S393).
-- **L'échange par le flux de la face** (le « solde » de S327, le meilleur montage après S397) : sur chaque face de frontière et à
-  chaque profondeur, le volume `u·mouillé·dx²·dt` passe à `η` de la colonne ; le solde de la face-maille le doit aux particules,
-  ou le leur doit ; une particule entière due est **retirée là où elle arrive** (la plus proche de la face, dans sa maille), une
-  particule entière reçue est **posée contre la face**, au sous-réseau le plus libre ; une particule qui franchit la frontière est
-  absorbée et paie d'avance le solde. Masse : particules + `Σ η·dx²` + soldes.
+**Première part — la référence, rangée comme comparable** (`docs/COMPARABLES-EXTERNES.md`, une section datée) : ce que c'est, ce
+que le code fait (lu, non exécuté), ce que nous faisons déjà, ce qui manque chez nous et qu'elle montre (8.5 : rayons de lumière
+dans l'eau, particules), et ce qu'elle n'autorise pas — ses buts ne sont pas les nôtres : un jouet interactif réglé à l'œil, pas
+une référence validée ; **aucun de ses nombres n'entre comme seuil**. Les pistes vont à la file, avec leur déclencheur.
 
-**Critères, écrits avant.** (1) Sans zone, au bit (la ligne de S389) ; toutes colonnes, les chiffres de S398 (+0,02 %, +0,49 %).
-(2) Repos, moitié particules moitié colonnes, 2 s : vitesse ≤ 1 cm/s ; la surface lue dans la dernière colonne de particules à
-≤ 5 % de maille du repos. (3) Masse (particules + `η` + soldes) à 10⁻⁶ relatif sur 30 s. (4) Ballottement (1, 0), frontière au
-nœud, 30 s, 5 et 2,5 cm, contre APIC seul : niveau d'eau équivalent de la bande à ±2 mm par tranche de 10 s ; densité 8 ± 0,4
-particules par maille occupée dans la dernière colonne de la bande ; saut de surface < 0,5 maille ; période et amortissement
-à 1 point ; circulation sur la face |ū| ≤ 5 mm/s.
+**Seconde part — recevoir le raccord (C5b)** : les deux remèdes attribués en S399, critères de S399 **inchangés**. (E) **la zone
+lit sa surface comme la bande** : `φ = z − (η + e(η))`, `e` le biais de lecture d'un réseau nominal au même niveau
+(`lattice_read_error`, table calculée à la configuration) — la masse (`η`) reste exacte, la pression voit ce que la bande verrait ;
+(F) **la séparation tenue du côté de la bande** : une particule que la séparation pousserait dans une colonne de la zone reste
+dans sa colonne. **Prédictions** : (E) — repos ≤ 1 cm/s, et à 5 cm plus de migration ni de courant de surface ; (F) — la densité de
+la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — la reconstruction voit les colonnes (particules virtuelles) ; critère 2 (repos, surface lue).
-- [x] **P3** — l'échange (flux de face, soldes, retrait, pose, absorption) ; critère 3 et le repos échangé ; critère 1.
-- [x] **P4** — l'exemple `apic3d_raccord` : 30 s, 5 et 2,5 cm, contre APIC seul ; critère 4.
-- [x] **P5** — suite ; preuve (§5 de RACCORD-3D-S398) ; A316, file, liste.
-- [x] **P6** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — la référence : section des comparables ; pistes à la file (rendu, au poste).
+- [ ] **P3** — (E) et (F) dans `apic3d_columns.rs` ; le repos (critère 2 de S399) ; sans zone et toutes colonnes au bit.
+- [ ] **P4** — `apic3d_raccord`, 30 s, 5 et 2,5 cm ; critère 4 de S399 ; attribution si manqué.
+- [ ] **P5** — suite ; preuve (§6 de RACCORD-3D-S398) ; liste, file, A316.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-**P2 — les particules virtuelles des colonnes** (`virtual_column_sums`) : pour une maille de la bande à portée de la zone,
-chaque colonne compte `2 × 2` particules par rangée, `round(2η/dx)` rangées étirées sur `[0, η]`, images aux parois comprises ;
-les mailles de la zone ne sont plus reconstruites (leur `φ` est `z − η`). **Critère 2, première moitié, tenu** : au repos, la
-surface lue dans la dernière colonne de la bande se trompe de **2,19 %** de maille, comme au milieu de la bande ; **vu échouer**
-sans les virtuelles : **14,7 %** (la paroi vue d'un seul côté). **Le repos dynamique** demande l'échange : sans lui, 8,2 cm/s —
-la pression fait passer de l'eau par les faces de la frontière, que ni `η` ni les particules ne transportent. Jugé en P3.
 
-**P3 — l'échange** (`columns_transport`, `columns_exchange`) : une face bande | zone est une frontière — hauteur mouillée de la
-colonne, le volume passé porté au solde de la face-maille (`f64`) ; après l'advection, absorption des particules entrées dans la
-zone (solde payé d'avance), retrait de la plus proche de la face (profondeurs voisines ensuite), pose contre la face au
-sous-réseau le plus libre ; tri par maille, retraits marqués puis compactés. **Critère 3 tenu (sur 2 s)** : volume total
-(particules + `η` + soldes) à **1,7·10⁻¹¹** au repos, **2,9·10⁻¹⁰** sous une onde qui traverse (6 576 → 6 304 particules, aucun
-refus). **Critère 1 tenu** : sans zone, la ligne de S389 ; toutes colonnes, celle de S398. **Critère 2, seconde moitié, manqué** :
-repos **1,007 cm/s** (4 s : 0,5 à 1,03 cm/s, sans décroître, aucune particule échangée) — la bande lit sa surface 1,1 mm sous
-les colonnes (biais de lecture 2,19 % de maille contre une surface exacte) ; la marche excite une seiche d'un millimètre
-(`u ~ A·ω` ≈ 5 mm/s) que rien n'amortit. L'essai garde le volume ; sur la vitesse, une garde de non-régression à 1,2 cm/s,
-écrite comme telle.
-
-**P4 — `apic3d_raccord`, 30 s, (1, 0), frontière au nœud** (APIC seul : même cuve, mêmes relevés) :
-
-| critère (écart à APIC seul) | 5 cm | 2,5 cm |
-|---|---|---|
-| niveau de la bande, par 10 s (±2 mm) | +1,21 / **+2,47 / +3,14** | +0,21 / +0,63 / −0,04 |
-| particules par maille (8 ± 0,4) | 7,70 / 7,89 / 8,18 | **7,32 / 7,33 / 7,38** |
-| saut max (< 0,5 maille) | 0,105 (seul 0,093) | 0,154 (seul **0,785**) |
-| période (1 point) | +0,60 contre +0,98 % | +0,35 contre +0,36 % |
-| amortissement (1 point) | +0,35 contre +0,32 % | +0,17 contre +0,08 % |
-| courant moyen sur la face (≤ 5 mm/s) | ≤ 0,9 en profondeur, **−7,0 à la surface** | ≤ 0,9, −3,3 à la surface |
-| volume total | −2,5·10⁻¹⁰ | −1,5·10⁻¹⁰ |
-
-**Critère 4 : à 2,5 cm, tenu sauf la densité** (7,3 pour 7,6 au moins) ; **à 5 cm, manqués** la migration (+3,1 mm) et le
-courant de surface (−7 mm/s). **La migration de masse a disparu à la maille fine** (2D : +6 mm à 2,5 cm). Durées : 46 s et 7,5 min
-(raccord), 76 s et 11,7 min (seul).
-
-**Attributions proposées, à éprouver (S400)** : (E) à 5 cm, l'eau entre dans la bande par la surface parce que la bande lit sa
-surface sous celle, exacte, des colonnes (le biais du repos, P3) — la zone lirait comme la bande, `η + e(η)`, `e` le biais du
-réseau nominal (`lattice_read_error`) ; (F) à 2,5 cm, la dernière colonne de la bande est clairsemée — la séparation ne voit pas
-les colonnes et pousse des particules à travers la frontière, où elles sont absorbées ; la tenir du côté de la bande.
-
-**P5** : suite 697 réussis, 18 ignorés, zéro avertissement. Preuve RACCORD-3D-S398 §5 ; A316 (note : la migration disparaît à la
-maille fine en 3D) ; file, liste 4.12, feuille de route.
