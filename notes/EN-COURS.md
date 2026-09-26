@@ -86,7 +86,7 @@ cherchées par nous, avant d'être rendue ; jugée par l'utilisateur (R26).
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les images témoins d'avant (quatre poses, commit de départ) ; références réelles de la ligne d'eau
   (photographies « dessus-dessous » libres, lues sans téléchargement) : ce qu'elles montrent, consigné ici.
-- [ ] **P3** — la classification par pixel dans `optique_eau.gdshaderinc` (point du plan proche, hauteur de la bande à
+- [x] **P3** — la classification par pixel dans `optique_eau.gdshaderinc` (point du plan proche, hauteur de la bande à
   son aplomb, borne pour sortir tôt) ; la bande passée au fond et au ciel.
 - [ ] **P4** — l'eau, le fond et le ciel lisent le milieu du pixel (profondeur d'origine par pixel, trajet dans l'eau
   depuis l'objectif) ; la brume de Godot sur les pixels vus de l'eau.
@@ -122,3 +122,12 @@ nuanceur supprime entièrement la brume du moteur pour ce matériau (`CUSTOM_FOG
 radiance, inaccessible au code utilisateur : pas de brume par pixel au bit. **Décision** : la brume s'éteint quand un
 pixel au moins est vu de l'eau (la zone des vagues au plan proche), comme sous l'eau ; à hauteur d'œil de vague, la mer
 vue d'au-dessus est rasante et reflète l'horizon, que la brume ne change presque pas — **à mesurer** (P5).
+
+**P3 — fait.** `surface_b.gdshaderinc` : la bande (déclarations déplacées d'`eau.gdshader`), `surface_a_l_aplomb` (Newton,
+quatre évaluations, résidu corrigé au premier ordre), `milieu_du_pixel` (part d'eau, profondeur de l'objectif, distance
+signée en pixels) ; inclus par l'eau, le fond, le ciel — pas encore lu. `mer.gd` : la bande et la base de la caméra sur
+les trois matériaux, `surface_exacte` (le même calcul en double), le mode `demi_immergee`. **Trouvé** : la borne de |η|
+(`Σ|a|` + Tayfun) vaut **6,43 m** pour Hs 2,5 m — la pose proche (4 m) passait en mode demi, brume éteinte (jusqu'à 13
+niveaux d'écart). **Test serré, rigoureux** : `η` exact au centre du plan proche, plus `pente·R/(1 − G)` sur l'étendue
+`R` du plan (G = Σ a·k = 0,726 ; pente bornée 1,238 ; R = 0,095 m à 50° : **0,43 m**). Ensuite : **les cinq poses
+témoins identiques au bit**.

@@ -5,6 +5,8 @@ shader_type sky;
 // S365 : l'œil dans l'eau ne voit pas le ciel au-delà de ce que la scène couvre, mais l'eau elle-même, sur une ligne
 // infinie (`optique_eau.gdshaderinc`).
 #include "res://optique_eau.gdshaderinc"
+// S371 : la bande de B et le milieu du pixel — la caméra à demi immergée (`surface_b.gdshaderinc`).
+#include "res://surface_b.gdshaderinc"
 
 void sky() {
     vec3 dir = vec3(EYEDIR.x, -EYEDIR.z, EYEDIR.y);

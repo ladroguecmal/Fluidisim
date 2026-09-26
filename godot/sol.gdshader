@@ -19,6 +19,8 @@ render_mode unshaded;
 #include "res://ciel.gdshaderinc"
 // S365 : `gain_eau`, `Kd`, l'atténuation du faisceau et le mode immergé (`optique_eau.gdshaderinc`).
 #include "res://optique_eau.gdshaderinc"
+// S371 : la bande de B et le milieu du pixel — la caméra à demi immergée (`surface_b.gdshaderinc`).
+#include "res://surface_b.gdshaderinc"
 
 uniform vec3 albedo_sable = vec3(0.34, 0.30, 0.24);
 

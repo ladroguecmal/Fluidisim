@@ -73,6 +73,15 @@ const ECUME_PAS_S := 0.1
 ## 0,62 % pour 0,42 % visés — la bande de l'afficheur n'est pas celle du cœur ; κ = 3,09, prédit par la pente de S367,
 ## donne 0,405 % (rapport 0,96) ; 3,00 → 1,36, 3,20 → 0,62.
 const KAPPA_ECUME := 3.09
+## S371 — la caméra à demi immergée (ADR-019 §6) : le plan proche coupe-t-il la surface ? Alors le milieu se décide par
+## pixel (`surface_b.gdshaderinc`). Bornes de la bande : |η| (`Σ|a|` et le second ordre de Tayfun, `½·k̄·(Σ|a|)²` par
+## système), la pente lagrangienne (`Σ a·k` et `2·k̄·Σ|a|·Σ a·k`), le gradient du déplacement (`G = Σ a·k`).
+var marge_vagues := 0.0
+var borne_pente := 0.0
+var borne_g := 0.0
+var demi_actif := false
+## La transition de la ligne d'eau, en fraction de la hauteur d'image (S371 P2 : ≈ 1 % sur les photographies de référence).
+const TRANSITION_LIGNE := 0.006
 var vue_caustiques: SubViewport
 var materiau_caustiques: ShaderMaterial
 var maillage_caustiques: MeshInstance3D
@@ -450,14 +459,19 @@ func grille_polaire() -> ArrayMesh:
 
 
 func uniformes_fixes() -> void:
-	materiau.set_shader_parameter("n_bande", donnees["bande"].size())
 	materiau.set_shader_parameter("n_queue", donnees["queue"].size())
 	materiau.set_shader_parameter("modulation_M", float(donnees["modulation_M"]))
 	materiau.set_shader_parameter("retard_tours", float(donnees["retard_tours"]))
-	materiau.set_shader_parameter("split", int(donnees["split"]))
-	if donnees["asymetries"]:
-		var k: Array = donnees["k_moyens"]
-		materiau.set_shader_parameter("k_moyens", Vector2(float(k[0]), float(k[1])))
+	# S371 : la bande, sa coupure entre systèmes et ses asymétries (`surface_b.gdshaderinc`) sur l'eau, le fond et le ciel —
+	# le milieu du pixel se décide partout sur la même surface.
+	for m in [materiau, materiau_sol, materiau_ciel]:
+		if m != null:
+			m.set_shader_parameter("n_bande", donnees["bande"].size())
+			m.set_shader_parameter("split", int(donnees["split"]))
+			if donnees["asymetries"]:
+				var k: Array = donnees["k_moyens"]
+				m.set_shader_parameter("k_moyens", Vector2(float(k[0]), float(k[1])))
+	marge_vagues = borne_vagues()
 	materiau.set_shader_parameter("ecume_seuils", PackedFloat32Array(donnees["ecume_seuils"]))
 	materiau.set_shader_parameter("ecume_seuils_deferlement", PackedFloat32Array(donnees["ecume_seuils_deferlement"]))
 	materiau.set_shader_parameter("ecume_empreinte_min", float(donnees["ecume_empreinte_min_m"]))
@@ -473,11 +487,116 @@ func uniformes_fixes() -> void:
 		materiau.set_shader_parameter("controle", int(OS.get_environment("CONTROLE_EAU")))
 	# S365 : `MER_PLATE=1` — aucune vague, pour mesurer la fenêtre de Snell sous une surface plane.
 	if OS.get_environment("MER_PLATE") == "1":
-		materiau.set_shader_parameter("n_bande", 0)
+		for m in [materiau, materiau_sol, materiau_ciel]:
+			if m != null:
+				m.set_shader_parameter("n_bande", 0)
 		materiau.set_shader_parameter("n_queue", 0)
+		marge_vagues = 0.0
 	var hauteur := get_viewport().get_visible_rect().size.y
 	materiau.set_shader_parameter("angle_pixel", 2.0 * tan(deg_to_rad(camera.fov) / 2.0) / hauteur)
 	materiau.set_shader_parameter("pas_radial", log(R_MAX / R_MIN) / float(RAYONS - 1))
+	# S371 : le plan proche, la taille d'un pixel sur lui, la transition de la ligne d'eau (`TRANSITION_PX` la force).
+	var transition := TRANSITION_LIGNE * hauteur
+	if OS.get_environment("TRANSITION_PX") != "":
+		transition = float(OS.get_environment("TRANSITION_PX"))
+	for m in [materiau, materiau_sol, materiau_ciel]:
+		if m != null:
+			m.set_shader_parameter("plan_proche", camera.near)
+			m.set_shader_parameter("pixel_proche", 2.0 * camera.near * tan(deg_to_rad(camera.fov) / 2.0) / hauteur)
+			m.set_shader_parameter("transition_px", transition)
+
+
+## S371 — la borne de |η| de la bande : `Σ|a|`, et le second ordre de Tayfun, `½·k̄·(Σ|a|)²` par système (ADR-176 D1).
+func borne_vagues() -> float:
+	var somme := [0.0, 0.0]
+	var coupure := int(donnees["split"])
+	var i := 0
+	for r in donnees["bande"]:
+		somme[0 if i < coupure else 1] += absf(float(r[0]))
+		i += 1
+	var borne: float = somme[0] + somme[1]
+	var pentes := [0.0, 0.0]
+	i = 0
+	for r in donnees["bande"]:
+		pentes[0 if i < coupure else 1] += absf(float(r[0])) * Vector2(float(r[1]), float(r[2])).length()
+		i += 1
+	borne_g = pentes[0] + pentes[1]
+	borne_pente = borne_g
+	if donnees["asymetries"]:
+		var k: Array = donnees["k_moyens"]
+		borne += 0.5 * float(k[0]) * somme[0] * somme[0] + 0.5 * float(k[1]) * somme[1] * somme[1]
+		borne_pente += 2.0 * float(k[0]) * somme[0] * pentes[0] + 2.0 * float(k[1]) * somme[1] * pentes[1]
+	return borne
+
+
+## S371 — la surface de B à l'aplomb du point horizontal `x` (B), en double : (hauteur, pente eulérienne). Le point
+## lagrangien `q` tel que `q + d(q) = x` par Newton, quatre évaluations — le calcul de `surface_a_l_aplomb`
+## (`surface_b.gdshaderinc`), ici en double précision : la référence du contrôle de la ligne d'eau.
+func surface_exacte(x: Vector2, bande_t: PackedVector4Array) -> Vector3:
+	var n := 0 if OS.get_environment("MER_PLATE") == "1" else bande_t.size()
+	var coupure := int(donnees["split"])
+	var km := Vector2.ZERO
+	if donnees["asymetries"]:
+		km = Vector2(float(donnees["k_moyens"][0]), float(donnees["k_moyens"][1]))
+	var q := x
+	var eta := 0.0
+	var s := Vector2.ZERO
+	var f := Vector2.ZERO
+	var jxx := 1.0
+	var jxy := 0.0
+	var jyy := 1.0
+	var det := 1.0
+	for it in 4:
+		var d := Vector2.ZERO
+		var gxx := 0.0
+		var gxy := 0.0
+		var gyy := 0.0
+		eta = 0.0
+		s = Vector2.ZERO
+		var e2 := Vector2.ZERO
+		var qd := Vector2.ZERO
+		var sa1 := Vector2.ZERO
+		var sq1 := Vector2.ZERO
+		var sa2 := Vector2.ZERO
+		var sq2 := Vector2.ZERO
+		for i in n:
+			var c := bande_t[i]
+			var kv := Vector2(c.y, c.z)
+			var k := kv.length()
+			if k == 0.0:
+				continue
+			var u := kv / k
+			var phase := kv.dot(q) + c.w
+			var cs := cos(phase)
+			var sn := sin(phase)
+			d += c.x * cs * u
+			eta += c.x * sn
+			s += c.x * cs * kv
+			gxx -= c.x * k * sn * u.x * u.x
+			gxy -= c.x * k * sn * u.x * u.y
+			gyy -= c.x * k * sn * u.y * u.y
+			if i < coupure:
+				e2.x += c.x * sn
+				qd.x += c.x * cs
+				sa1 += c.x * cs * kv
+				sq1 -= c.x * sn * kv
+			else:
+				e2.y += c.x * sn
+				qd.y += c.x * cs
+				sa2 += c.x * cs * kv
+				sq2 -= c.x * sn * kv
+		if km.x > 0.0:
+			eta += 0.5 * km.x * (e2.x * e2.x - qd.x * qd.x) + 0.5 * km.y * (e2.y * e2.y - qd.y * qd.y)
+			s += km.x * (e2.x * sa1 - qd.x * sq1) + km.y * (e2.y * sa2 - qd.y * sq2)
+		f = q + d - x
+		jxx = 1.0 + gxx
+		jxy = gxy
+		jyy = 1.0 + gyy
+		det = jxx * jyy - jxy * jxy
+		if it < 3:
+			q -= Vector2(jyy * f.x - jxy * f.y, -jxy * f.x + jxx * f.y) / det if det >= 0.1 else f
+	var pente := Vector2((jyy * s.x - jxy * s.y) / det, (-jxy * s.x + jxx * s.y) / det) if det >= 0.1 else s
+	return Vector3(eta - pente.dot(f), pente.x, pente.y)
 
 
 ## Les lignes `[a, kx, ky, φ(t)]` : la phase avance de `−ω·(t − t₀)`, repliée ici en double précision (I-08).
@@ -493,8 +612,8 @@ func lignes(nom: String, t: float) -> PackedVector4Array:
 
 
 ## S365 — la hauteur de la bande de B sous la caméra, `Σ a·sin(k·q + φ)` au point `q` de la caméra (sans déplacement
-## horizontal, sans second ordre) : de quoi dire si l'œil est dans l'eau. La caméra à demi immergée (ADR-019 §6) n'est pas
-## traitée : tout le cadre bascule d'un bloc.
+## horizontal, sans second ordre) : de quoi dire si l'œil est dans l'eau. S371 : quand le plan proche coupe la zone des
+## vagues, la caméra est **à demi immergée** et le milieu se décide par pixel (ADR-019 §6).
 func immersion(t: float) -> void:
 	if camera == null:
 		return
@@ -504,14 +623,54 @@ func immersion(t: float) -> void:
 		for l in lignes("bande", t):
 			eta += l.x * sin(l.y * q.x + l.z * q.y + l.w)
 	var dedans := camera.global_position.y < eta
+	# S371 — **la caméra à demi immergée** (ADR-019 §6) : si le plan proche peut couper la surface, le milieu se décide par
+	# pixel (`surface_b.gdshaderinc`) ; sinon d'un bloc, par `dedans`, comme depuis S365. Le test est rigoureux : la
+	# surface exacte au centre du plan proche, `η_c`, et sa variation sur l'étendue horizontale `R` du plan, bornée par
+	# `pente·R/(1 − G)` (le point lagrangien bouge au plus de `R/(1 − G)` si `G < 1`) ; à défaut, la borne de |η|.
+	# `DEMI=0` garde la bascule d'un bloc, en témoin.
+	var base := camera.global_transform.basis
+	var demi := false
+	if OS.get_environment("DEMI") != "0":
+		var th := tan(deg_to_rad(camera.fov) / 2.0)
+		var taille := get_viewport().get_visible_rect().size
+		var aspect := taille.x / taille.y
+		var centre: Vector3 = camera.global_position - camera.near * base.z
+		var ymin := INF
+		var ymax := -INF
+		var rayon := 0.0
+		for sx in [-1.0, 1.0]:
+			for sy in [-1.0, 1.0]:
+				var coin: Vector3 = centre + camera.near * (sx * th * aspect * base.x + sy * th * base.y)
+				ymin = minf(ymin, coin.y)
+				ymax = maxf(ymax, coin.y)
+				rayon = maxf(rayon, Vector2(coin.x - centre.x, coin.z - centre.z).length())
+		var bas := -marge_vagues
+		var haut := marge_vagues
+		if borne_g < 1.0:
+			var eta_c := surface_exacte(Vector2(centre.x, -centre.z), lignes("bande", t)).x
+			var m := borne_pente * rayon / (1.0 - borne_g) + 1e-3
+			bas = maxf(bas, eta_c - m)
+			haut = minf(haut, eta_c + m)
+		demi = ymin <= haut and ymax >= bas
+	demi_actif = demi
 	# S366 : la brume de Godot (perspective aérienne) teintait la surface lointaine vue d'en dessous d'une bande sombre
-	# juste au-dessus de l'horizon ; sous l'eau, l'atténuation est celle d'`optique_eau.gdshaderinc`, seule.
+	# juste au-dessus de l'horizon ; sous l'eau, l'atténuation est celle d'`optique_eau.gdshaderinc`, seule. S371 : elle
+	# lit le cube de radiance et ne se règle pas par pixel (S371 P2) — éteinte aussi quand la caméra est à demi immergée.
 	if environnement_scene != null and not "--controle-fond" in OS.get_cmdline_user_args():
-		environnement_scene.fog_enabled = not dedans
+		environnement_scene.fog_enabled = not dedans and not demi
+	var bande_t := lignes("bande", t) if demi else PackedVector4Array()
 	for m in [materiau, materiau_sol, materiau_ciel]:
 		if m != null:
 			m.set_shader_parameter("sous_eau", dedans)
 			m.set_shader_parameter("profondeur_camera", maxf(eta - camera.global_position.y, 0.0))
+			m.set_shader_parameter("demi_immergee", demi)
+			if demi:
+				m.set_shader_parameter("camera_position", camera.global_position)
+				m.set_shader_parameter("camera_avant", -base.z)
+				m.set_shader_parameter("camera_droite", base.x)
+				m.set_shader_parameter("camera_haut", base.y)
+				if m != materiau:
+					m.set_shader_parameter("bande", bande_t)
 
 
 ## S368 — le seuil de déferlement du champ d'écume, m/s² : `κ·σ_a`, `σ_a² = Σ ½·(a·ω²)²` sur la bande, κ tel que la

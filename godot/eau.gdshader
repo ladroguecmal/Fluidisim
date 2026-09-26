@@ -18,17 +18,17 @@ render_mode cull_disabled, unshaded;
 #include "res://ciel.gdshaderinc"
 // S365 : R0, `gain_eau`, `kd`, l'atténuation du faisceau et le mode immergé — une source pour l'eau, le fond et le ciel.
 #include "res://optique_eau.gdshaderinc"
+// S371 : la bande de B (`bande`, `n_bande`, `split`, `k_moyens`, déclarés là depuis) et le milieu du pixel — la caméra à
+// demi immergée.
+#include "res://surface_b.gdshaderinc"
 
-// Composantes `[a, kx, ky, φ(t)]`, phases repliées par le script en double précision (I-08).
-uniform vec4 bande[64];
-uniform int n_bande = 0;
+// La queue `[a, kx, ky, φ(t)]`, phases repliées par le script en double précision (I-08).
 uniform vec4 queue[60];
 uniform int n_queue = 0;
-// Modulation de la queue par la bande (ADR-158), retard d'ADR-176 en tours, asymétries (k̄ des deux systèmes).
+// Modulation de la queue par la bande (ADR-158), retard d'ADR-176 en tours ; les asymétries (k̄ des deux systèmes) et la
+// coupure entre eux : `surface_b.gdshaderinc`.
 uniform float modulation_M = 0.0;
 uniform float retard_tours = 0.0;
-uniform int split = 64;
-uniform vec2 k_moyens = vec2(0.0);
 // L'écume (S356) : quatorze seuils de `s = (J − 1)/σ` aux empreintes 2^(i−7) m ; sa réflectance.
 uniform float ecume_seuils[14];
 uniform float reflectance_ecume = 0.55;
