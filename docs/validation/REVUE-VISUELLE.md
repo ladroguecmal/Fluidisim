@@ -1322,3 +1322,30 @@ temps couvert, les ombres par ciel clair ? Si oui, je reprends la pluie (les ger
 
 **Verdict R31 — reçu le 2026-09-26 (S382, après le rituel)** : *« Je valide R31, continue la pluie »* — l'occultation du
 ciel et les ombres portées reçues ; la pluie continue (pièce 4, les gerbes).
+
+## 37. R32 — les gerbes de la pluie, S383
+
+**ADR-205, pièce 4.** À chaque goutte qui laisse un anneau — **la même** que celle des rides, à son instant (contrôlé :
+961 gerbes, chacune au centre de son anneau à 0,8 mm près) —, une gerbe au-dessus de l'eau : la **couronne**, puis le
+**dôme** et le **jet** central. Sa forme et ses temps sont relevés sur une goutte de pluie réelle filmée (Murphy et al.
+2015 : 4,1 mm à 7,2 m/s — couronne de 19 mm à 12 ms, jet de 25 mm à 18 ms, retombée vers 80 ms), ramenés à chaque taille
+de goutte ; comme une caméra, l'image moyenne les 16,7 ms de la pose (la couronne, qui dure 10 ms, n'est vue que floue).
+Sur la mer, les gerbes sont posées sur les vagues ; au loin, où elles tiennent sous le pixel, elles éclaircissent la mer
+près de l'horizon (12 % de la surface à 2° sous 50 mm/h). Coût : 0,01 à 0,3 ms.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s383/r32_piscine.png` | la piscine, 10 mm/h sans gerbes (R31) contre avec, et 50 mm/h — de près et de la buse |
+| `viewer/captures/s383/r32_mer.png` | la mer, mêmes colonnes : au ras de l'eau (4 cm), proche (4 m), rasante (2 m) |
+| `viewer/captures/s383/r32_detail.png` | la gerbe de référence de profil à 1, 3, 7, 12, 18, 41, 52 ms, et des gerbes dans les scènes (×3) |
+
+**Corrigé en chemin** (S380) : dans les images de la mer, la pluie ne suivait pas la pose de la caméra — en pose
+« référence », les gouttes de R29 et R30 tombaient environ 11 m trop loin ; elles sont maintenant au premier plan.
+
+**Ce qui n'y est pas** : les **doigts** de la couronne et les **gouttelettes** qui en partent (≈ 2 000 de 0,05 à 0,2 mm par
+goutte, sous le pixel une à une) ; la silhouette est simplifiée (coupe, dôme, jet), ses opacités réglées à l'œil ; les
+gerbes des petites gouttes (sous 1,5 mm) ; les éclaboussures **sur le sol** et les margelles — elles viennent avec les
+surfaces mouillées (pièce 5), le sol étant alors un film d'eau ; le vent.
+
+**La question :** les gerbes sont-elles crédibles — leur nombre, leur taille, leur forme de près au ras de l'eau (dôme et
+jet) ? La silhouette simplifiée suffit-elle, ou faut-il la couronne à doigts et les gouttelettes avant de continuer ?

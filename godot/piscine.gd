@@ -1142,6 +1142,7 @@ func controle_gerbes() -> void:
 		for _k in 3:
 			await RenderingServer.frame_post_draw
 		var im := get_viewport().get_texture().get_image()
+		im.save_png(ProjectSettings.globalize_path("res://captures/controle_gerbe_seule_%02dms.png" % int(t_ms)))
 		im.convert(Image.FORMAT_RGBF)
 		var w := im.get_width()
 		var hh := im.get_height()

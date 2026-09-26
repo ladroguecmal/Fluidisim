@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 14:12 +02:00
+Battement        : 2026-09-26 14:15 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S383 — la pluie, pièce 4 : les gerbes (couronne, jet de Worthington, gouttelettes ; les mêmes impacts que les rides)
 Dernière session : S382 — rendu : **l'occultation du ciel et les ombres portées** ([ADR-206](docs/adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md), [preuve](docs/validation/OCCULTATION-CIEL-S382.md)) — demande de l'utilisateur (R30) ; part du ciel vue à 0,009 d'une intégration indépendante, cuite aux sommets, ombres à 2,5 mm, coût +0,1 à +0,3 ms ; **R31 reçue** : « Je valide R31, continue la pluie ». Avant : S381, le ciel de pluie (R30 reçue)

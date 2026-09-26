@@ -94,8 +94,8 @@ réelles ; jugement de l'utilisateur (R32).
   en coordonnées de Lagrange, comme les rides), fenêtre autour de la caméra.
 - [x] **P5** — au loin : la part d'aire moyenne des gerbes dans les nuanceurs d'eau, fondue par l'empreinte.
 - [x] **P6** — contrôles : critères 1, 3, 4, 5 ; coût.
-- [ ] **P7** — les éclaboussures au sol (seuil de Mundo, Sommerfeld et Tropea) ou, faute de temps, leur déclencheur.
-- [ ] **P8** — images de R32 ; REVUE-VISUELLE §37.
+- [x] **P7** — les éclaboussures au sol (seuil de Mundo, Sommerfeld et Tropea) ou, faute de temps, leur déclencheur.
+- [x] **P8** — images de R32 ; REVUE-VISUELLE §37.
 - [ ] **P9** — preuve `GERBES-S383` ; liste, file, feuille de route, index.
 - [ ] **P10** — rituel.
 
@@ -168,3 +168,15 @@ son canal. **Critère 4 tenu** : 961 pour 988,9 attendues, **−2,82 %** (1 σ d
 de référence seule, de profil à 0,05 mm/px, sommet à 1 / 3 / 7 / 12 / 18 / 41 / 52 ms = le plus haut des relevés sur la
 pose à **0,04 mm** près (tolérance 0,59). **Critère 1** : 12 / 12 au bit (référence fin de S382). **Coût** (`GERBES=0`
 contre 1) : piscine +0,004 à +0,015 ms à 10 mm/h, +0,05 à +0,23 à 50 ; mer +0,09 à +0,12 à 10, +0,29 à +0,33 à 50.
+
+**P7 — différé, avec sa raison.** Sous la pluie, le sol est mouillé en quelques secondes : le seuil de Mundo, Sommerfeld et
+Tropea vaut pour une surface **sèche** ; sur sol mouillé, c'est un impact sur film mince (Cossali, Coghe et Marengo 1997 :
+`K = We·Oh^−0,4 > 2 100 + 5 880·δ^1,44`, δ l'épaisseur relative du film) — le film que donnent les surfaces mouillées
+(pièce 5). Déclencheur : la pièce 5. Inscrit dans la file.
+
+**P8 — R32.** `captures_r32.sh` (bloc-notes) : avec et sans gerbes, 10 et 50 mm/h, piscine (de près, buse), mer (au ras de
+l'eau, proche, rasante) ; la gerbe de référence du contrôle, de profil. Planches `viewer/captures/s383/` `r32_piscine.png`,
+`r32_mer.png`, `r32_detail.png`. **Vu sur le détail** : silhouettes géométriques (coupe, dôme, jet) — de près au ras de
+l'eau, un air de « champignon » ; à 1 ms rien (la pose moyenne sur les 16,7 ms d'avant). Référence : *Rain falling into a
+swimming pool* (Commons, lue sans téléchargement) — à ≈ 10 m, gerbes non distinctes une à une, l'eau piquetée, le dallage
+mouillé brillant. REVUE-VISUELLE §37.
