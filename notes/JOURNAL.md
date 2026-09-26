@@ -17430,3 +17430,21 @@ automatique, et aucune pièce de pluie ne change seule l'état d'un point (8.4 d
 verdict R32, puis la pièce 5 (surfaces mouillées, éclaboussures au sol), ensuite la campagne du solveur volumique 3D.
 **Clôture** (14:42, session cloud, reprise à chaud) : l'utilisateur a mis le dépôt en ligne (GitHub, `ladroguecmal/Fluidisim`,
 branche `main`) pendant le rituel ; EN-COURS et le journal étaient écrits, le jeton non — **complété** : jeton libéré.
+
+## S384 — 2026-09-26 — physique : la campagne du solveur volumique 3D, sa conception
+
+**Entrée.** Session cloud (sans carte ni Godot), après la mise en ligne du dépôt par l'utilisateur ; S383 close (jeton
+libéré). **Décision de l'utilisateur** : *« Solveur 3D ici »*. **Fait** : la conception demandée par la feuille de route
+§3 ter ([CAMPAGNE-SOLVEUR-3D-S384](../docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md)) et
+[ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md). Inventaire tiré des preuves ; état de l'art identifié
+par recherche — colonnes hautes (Irving 2006, Chentanez et Müller 2011), hybride fonction hauteur + 3D + particules
+(Chentanez, Müller et Kim 2014), multigrille (McAdams 2010, faces coupées Weber 2015), APIC, FLIP en bande, MPM, PBF,
+DFSPH, Boltzmann, particules diffuses. **Constat** : le domaine de la porte B consomme seul les 2 ms de δ (1,92 ms,
+S348) ; ≈ 0,4 M mailles au coût actuel (*estimé*) ; 5 cm près du joueur demandent des **colonnes hautes** (÷ 3,1 à la
+porte B, *estimé*) et un coût par maille ÷ 2 (*à calibrer*). **Découpage** : C1 à C11, critères « reçu si » écrits, cinq
+sans carte. **Limites** : aucun article lu en entier (hôtes bloqués) — chiffres de résumés seulement, lectures rangées
+avant C2, C5, C7, C8 ; gains estimés, non mesurés ; suite Rust inchangée (664 réussis, 18 ignorés). **Erreur dite** : le
+battement du commit de P8 porte 15:01 pour une horloge à 14:59 (deux appels lancés ensemble, L237) ; corrigé au rituel.
+**Rituel.** Maillons **4** : aucune capacité reçue ; **justifié** — la conception est le préalable déclaré de la campagne
+(§3 ter) et la demande explicite de l'utilisateur ; C1 est du code à critère mesurable. **Question** : δ dans Godot en C11
+ou plus tôt (conception §6). Suivant : **C1**, la multigrille 3D de la référence ; au poste, verdict R32 et la pluie, pièce 5.

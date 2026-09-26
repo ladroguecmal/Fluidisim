@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S384 — **en cours**. **Décision de l'utilisateur** (2026-09-26, S384, session cloud sans carte graphique ni
+Session : S384 — **terminée**. **Décision de l'utilisateur** (2026-09-26, S384, session cloud sans carte graphique ni
 Godot) : *« Solveur 3D ici »* — la campagne du solveur volumique 3D commence maintenant ; la pluie, pièce 5, et le verdict
 R32 se feront depuis le poste. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni
 carte graphique, ni Godot.
@@ -95,8 +95,8 @@ poste avec carte et Godot). (5) `etat_projet.py --check` sans erreur. Aucun code
 - [x] **P6** — l'architecture proposée, les alternatives écartées et leurs raisons.
 - [x] **P7** — le découpage en sessions : critères « reçu si », lieu (cloud ou poste).
 - [x] **P8** — ADR de la campagne ; liste, file, feuille de route, index.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 
-*(vide)*
+Rien à reprendre : tout est dans la conception, ADR-207 et le journal. L'erreur de battement de P8 est dite au journal.
