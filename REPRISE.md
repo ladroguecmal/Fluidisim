@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 10:32 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S377 — consignation : les réponses aux zones d'ombre d'ADR-202
-Dernière session : S376 — consignation : **le niveau de détail des contenants** ([ADR-202](docs/adr/ADR-202-niveau-de-detail-des-contenants.md), décision de l'utilisateur, corrige ADR-200 D1) ; R27 reçu (δ sur GPU dans Godot : pas maintenant) ; sept zones d'ombre posées. Avant : S375, le bassin en δ 3D
-Session suivante : **les réponses aux zones d'ombre d'ADR-202 §3**, à consigner d'abord ; sinon, par l'alternance d'ADR-191 D3, **la physique** : A320 par la forme de Bernoulli (4.8), la coque qui bouge (6.4), ou les chemins de B et la côte (2.7). Au rendu suivant : l'échelle radiométrique. δ sur GPU dans Godot : pas maintenant (R27)
-Maillons        : 1 — S376 : consignation, aucun point ne change d'état (journal)
+Session en cours : aucune
+Dernière session : S377 — consignation : **les réponses aux zones d'ombre d'ADR-202** ([ADR-203](docs/adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md)) — météo aussi poussée que l'eau, bâches posées et retirées en temps réel, factice au loin, contenants en domaines, ordre des systèmes suivants. Avant : S376, le niveau de détail des contenants (ADR-202)
+Session suivante : par l'alternance d'ADR-191 D3, **la physique** ; à deux maillons, un point qui change d'état : A320 par la forme de Bernoulli (4.8), la coque qui bouge (6.4), les chemins de B et la côte (2.7), ou la pluie dans V avec l'exposition dynamique (5.5, ADR-203 D2). Au rendu suivant : l'échelle radiométrique. δ sur GPU dans Godot : pas maintenant (R27)
+Maillons        : 2 — S376, S377 : consignations, aucun point ne change d'état (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

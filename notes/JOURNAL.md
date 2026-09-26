@@ -17308,3 +17308,15 @@ seuil contenant entier / zone ; nuages et éclairs ; chaleur, évaporation, gel 
 **Rituel.** Maillons **1** : aucun point ne change d'état. Suivant : les réponses aux zones d'ombre ; sinon, par
 l'alternance, la physique — A320 (4.8), la coque qui bouge (6.4), la côte (2.7).
 
+## S377 — 2026-09-26 — consignation : les réponses aux zones d'ombre d'ADR-202
+
+**Entrée.** Les réponses de l'utilisateur aux sept questions d'ADR-202 §3.
+**Fait.** [ADR-203](../docs/adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) : la météo *« aussi poussée que l'eau »*,
+réaliste et performante, son autorité déléguée au projet à sa conception (V recevra les mêmes litres partout) ; le joueur
+**pose et retire une bâche entière ou une demi-bâche à tout moment** — exposition au ciel dynamique et fractionnaire ; de
+loin, la lame et ses obstacles sont factices ; les contenants se divisent en domaines comme la mer, sans seuil unique ;
+**après l'eau** : la météo, la topologie d'un territoire, le feu, la neige (5.11 non rouvert) ; la chaleur agit par V
+(évaporation, gel) ; tout ce qui est lointain et sans conséquence est factice. Liste 5.5, 2.8, 7.6 ; aucun code.
+**Rituel.** Maillons **2** : aucun point ne change d'état. Suivant : par l'alternance, **la physique**, et à deux maillons
+un point qui change d'état — A320 (4.8), la coque qui bouge (6.4), la côte (2.7), ou l'exposition dynamique de 5.5.
+

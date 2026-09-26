@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S377 — **en cours**. Les réponses de l'utilisateur aux sept zones d'ombre d'ADR-202 §3. Sans code.
+Session : S377 — **terminée**. Les réponses de l'utilisateur aux sept zones d'ombre d'ADR-202 §3. Sans code.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
 **Ce qui se décide.** ADR-203 consigne les réponses (un ADR n'est pas réécrit) ; ADR-202 reçoit une note datée ; la file
@@ -73,6 +73,6 @@ la feuille de route et l'index suivent.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-203 ; note d'ADR-202 ; file, liste, feuille de route, index.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise
