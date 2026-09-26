@@ -87,8 +87,8 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
 - [x] **P3** — `ciel.gdshaderinc` : `couvert`, la luminance de la CIE, le soleil éteint, `eclairage(n, soleil, direct)` ;
   `gain_eau` déplacé là (l'éclairement de la scène).
 - [x] **P4** — les nuanceurs : eau, bassin, parois, fond, caustiques, éclat ; critère 1.
-- [>] **P5** — les scènes : `couvert` par la pluie ou `COUVERT=` ; contrôles (critères 2 à 4).
-- [ ] **P6** — images de R30 ; preuve `CIEL-PLUIE-S381` ; registres.
+- [x] **P5** — les scènes : `couvert` par la pluie ou `COUVERT=` ; contrôles (critères 2 à 4).
+- [>] **P6** — images de R30 ; preuve `CIEL-PLUIE-S381` ; registres.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -109,3 +109,15 @@ sous le ciel clair ; `soleil_direct()`. Branché : corps d'eau et éclat (mer, b
 `eclairage` renommée `eclaire`, qui aurait masqué la fonction), parois, fond (les caustiques passent par la part directe).
 **Critère 1** : 12 / 12 au bit ; variante à demi immergée et scène côtière compilent. Non touché : le lobe solaire de la
 radiance sous l'eau (`optique_eau`, vue immergée) — limite.
+
+**P5 — les scènes et les contrôles.** `couvert_voulu()` (piscine, mer) : `COUVERT=` sinon 1 sous la pluie ; posé sur
+tous les matériaux qui incluent `ciel.gdshaderinc` (ciel, eau, bassin, parois, fond, gouttes). `--controle-ciel` (piscine,
+tampon flottant, tonalité linéaire, sans brume) :
+- **Critère 2** : 0,8319 / 1,2203 / 1,6087 / 2,1977 / 2,4141 à 1 / 15 / 30 / 60 / 89,5° contre 0,8331 / 1,2217 / 1,6101 /
+  2,1994 / 2,4150 — pire −0,151 % ; canaux égaux (0,000 %). L'écart systématique négatif (−0,04 à −0,15 %) est de l'ordre
+  de l'arrondi du tampon flottant de 16 bits.
+- **Critère 3** : vers le soleil (58°), ciel clair 3,9554 (le disque), couvert 2,1688, CIE 2,1704 (−0,070 %).
+- **Critère 4** : sol vu d'aplomb 0,3567 sous les deux ciels, rapport **1,00000** ; mur ouest 0,6053 pour 0,6053 attendu.
+- **Critère 1** : 12 / 12 au bit après le branchement des scènes.
+- Vu : la mer sous le ciel couvert, grise et mate sous un ciel neutre (comme *Mundesley*) ; la piscine sans ombres, murs
+  et sol presque confondus (mur vertical à 0,47 de l'horizontale : cohérent), traînées nettes sur le fond gris.

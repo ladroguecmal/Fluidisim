@@ -12,7 +12,8 @@ extends Node3D
 ## les rides de `pluie.gdshaderinc`, au taux de `pluie.gd`. `-- --controle-pluie` : le taux de naissance des anneaux compté
 ## sur des images de contrôle (critère 2 de S379), puis quitte. `-- --cout-pluie` : le temps GPU de l'image, sans pluie et
 ## sous la pluie, trois vues (médiane de 240 images). S380 — `-- --controle-gouttes` : le nombre et les tailles des
-## gouttes dans l'air, comptés (critère 2 de S380).
+## gouttes dans l'air, comptés (critère 2 de S380). S381 — `-- --controle-ciel` : le ciel couvert mesuré (critères 2 à 4
+## de S381).
 ##
 ## Axes : ceux de B dans l'export (x à l'est, y au nord, z en haut) ; dans Godot, un point (x, y, z) de B est (x, z, −y).
 
@@ -32,6 +33,15 @@ const Pluie = preload("res://pluie.gd")
 var pluie_mm_h := 0.0
 ## S380 — la pluie dans l'air (`pluie_air.gd`, ADR-205 pièce 1).
 var pluie_air: Node3D
+## S381 — le ciel de pluie (ADR-205, pièce 3) : tous les matériaux qui incluent `ciel.gdshaderinc`, et `COUVERT=` (0 à 1)
+## qui force la couverture ; sinon, la pluie couvre le ciel.
+var materiaux_ciel: Array = []
+
+
+func couvert_voulu() -> float:
+	if OS.get_environment("COUVERT") != "":
+		return clampf(float(OS.get_environment("COUVERT")), 0.0, 1.0)
+	return 1.0 if pluie_mm_h > 0.0 else 0.0
 ## S375 — la surface de δ 3D du bassin (ADR-200), si l'export existe (`examples/piscine_delta.rs`) : l'en-tête, les images
 ## (entiers de 16 bits, dixièmes de millimètre autour du repos), les deux textures lues par `bassin.gdshader`.
 var champ: Dictionary
@@ -111,6 +121,8 @@ func _ready() -> void:
 		cout_pluie()
 	elif "--controle-gouttes" in args:
 		controle_gouttes()
+	elif "--controle-ciel" in args:
+		controle_ciel()
 	elif "--captures" in args:
 		captures()
 
@@ -122,6 +134,7 @@ func environnement() -> void:
 	var m := ShaderMaterial.new()
 	m.shader = load("res://ciel.gdshader")
 	ciel.sky_material = m
+	materiaux_ciel.append(m)
 	env.background_mode = Environment.BG_SKY
 	env.sky = ciel
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
@@ -151,6 +164,7 @@ func boite(a: Vector3, b: Vector3, albedo: Color, joint := 0.0) -> MeshInstance3
 	m.set_shader_parameter("albedo", Vector3(albedo.r, albedo.g, albedo.b))
 	m.set_shader_parameter("joint", joint)
 	mi.material_override = m
+	materiaux_ciel.append(m)
 	add_child(mi)
 	return mi
 
@@ -167,6 +181,7 @@ func eau(bac: Dictionary) -> MeshInstance3D:
 	var m := ShaderMaterial.new()
 	m.shader = load("res://bassin.gdshader")
 	mi.material_override = m
+	materiaux_ciel.append(m)
 	add_child(mi)
 	return mi
 
@@ -334,6 +349,10 @@ func appliquer(s: float) -> void:
 		m.set_shader_parameter("temps", s)
 		m.set_shader_parameter("pluie", Pluie.uniformes(pluie_mm_h))
 	pluie_air.niveaux = [eau_bassin.global_position.y, eau_tampon.global_position.y]
+	var couvert := couvert_voulu()
+	for m in materiaux_ciel:
+		m.set_shader_parameter("couvert", couvert)
+	pluie_air.couvert = couvert
 	pluie_air.configurer(pluie_mm_h)
 	pluie_air.suivre(camera, s)
 	# S380 : l'extinction par les gouttes (ADR-205, pièce 2) — la brume de Godot, `1 − e^(−β·d)`, couleur du ciel ; par
@@ -357,7 +376,7 @@ func appliquer(s: float) -> void:
 
 func _process(delta: float) -> void:
 	var args := OS.get_cmdline_user_args()
-	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args:
+	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args or "--controle-ciel" in args:
 		return
 	if not en_pause:
 		t = fmod(t + delta, float(pas.size() - 1) * dt)
@@ -678,3 +697,91 @@ func taches_colorees(image: Image) -> Array:
 					pile.append(v)
 		resultat[k - 1].append(n)
 	return resultat
+
+
+## **Critères 2 à 4 de S381** — le ciel de pluie, relu dans un tampon flottant, tonalité linéaire, sans brume ni halo.
+## (2) la radiance du ciel couvert au centre de l'image, visée à 1, 15, 30, 60 et 89,5° d'élévation, dos au soleil,
+## contre `Lz·(1 + 2·sin h)/3` ; ses trois canaux ; (3) visée vers le soleil (58° d'élévation) : la radiance du ciel clair
+## (disque compris) et celle du ciel couvert, contre la CIE ; (4) le sol, face horizontale mate, vu d'aplomb sous le ciel
+## clair et sous le ciel couvert : même radiance ; une face verticale, le rapport attendu.
+func controle_ciel() -> void:
+	get_viewport().use_hdr_2d = true
+	monde_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	monde_env.glow_enabled = false
+	monde_env.fog_enabled = false
+	texte.visible = false
+	pluie_air.configurer(0.0)
+	var soleil_b := Vector3(-0.4, 0.3, 0.8).normalized()
+	var h_soleil := asin(soleil_b.z)
+	var lz := (9.0 / 7.0) * 2.0 * (0.6 + 0.4 * soleil_b.z)
+	var az_soleil := atan2(soleil_b.x, soleil_b.y)
+	var pire := 0.0
+	var ecart_canaux := 0.0
+	for m in materiaux_ciel:
+		m.set_shader_parameter("couvert", 1.0)
+	for h_deg in [1.0, 15.0, 30.0, 60.0, 89.5]:
+		var c := await radiance_centre(az_soleil + PI, deg_to_rad(h_deg))
+		var attendu := lz * (1.0 + 2.0 * sin(deg_to_rad(h_deg))) / 3.0
+		var e := (c.g - attendu) / attendu
+		pire = maxf(pire, absf(e))
+		ecart_canaux = maxf(ecart_canaux, (maxf(c.r, maxf(c.g, c.b)) - minf(c.r, minf(c.g, c.b))) / c.g)
+		print("CONTROLE_CIEL_S381 critere=2 h=%.1f rendu=(%.4f, %.4f, %.4f) cie=%.4f ecart=%+.3f%%" % [h_deg, c.r, c.g, c.b, attendu, 100.0 * e])
+	print("CONTROLE_CIEL_S381 critere=2 pire=%.3f%% canaux=%.3f%% %s" % [100.0 * pire, 100.0 * ecart_canaux, "tenu" if pire <= 0.01 and ecart_canaux <= 0.01 else "manque"])
+	var couvert_soleil := await radiance_centre(az_soleil, h_soleil)
+	for m in materiaux_ciel:
+		m.set_shader_parameter("couvert", 0.0)
+	var clair_soleil := await radiance_centre(az_soleil, h_soleil)
+	var attendu_s := lz * (1.0 + 2.0 * sin(h_soleil)) / 3.0
+	var e_s := (couvert_soleil.g - attendu_s) / attendu_s
+	print("CONTROLE_CIEL_S381 critere=3 vers_le_soleil clair=%.4f couvert=%.4f cie=%.4f ecart=%+.3f%% %s" % [clair_soleil.g, couvert_soleil.g, attendu_s, 100.0 * e_s, "tenu" if absf(e_s) <= 0.01 else "manque"])
+	# (4) Le sol vu d'aplomb, loin du bassin ; une face verticale : le mur ouest du bloc, vu de l'ouest.
+	var resultats := []
+	for couvert in [0.0, 1.0]:
+		for m in materiaux_ciel:
+			m.set_shader_parameter("couvert", couvert)
+		camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+		camera.position = Vector3(-12.0, 6.0, 0.0)
+		camera.look_at(Vector3(-12.0, 0.0, -0.01), Vector3.UP)
+		for _k in 4:
+			await RenderingServer.frame_post_draw
+		var sol := moyenne_centre(get_viewport().get_texture().get_image())
+		camera.position = Vector3(-10.0, 1.0, 0.0)
+		camera.look_at(Vector3(0.0, 1.0, 0.0), Vector3.UP)
+		for _k in 4:
+			await RenderingServer.frame_post_draw
+		var mur := moyenne_centre(get_viewport().get_texture().get_image())
+		resultats.append([sol, mur])
+	var r_sol: float = resultats[1][0].g / resultats[0][0].g
+	var r_mur: float = resultats[1][1].g / resultats[0][1].g
+	# Le mur ouest : normale (−1, 0, 0) dans Godot, (−1, 0, 0) dans B ; sous le ciel clair `0,6 + 0,4·max(n·s, 0)`.
+	var clair_mur := 0.6 + 0.4 * maxf(-soleil_b.x, 0.0)
+	var attendu_mur := (0.6 + 0.4 * soleil_b.z) * (0.396 + 0.2 * 0.5) / clair_mur
+	print("CONTROLE_CIEL_S381 critere=4 sol clair=%.4f couvert=%.4f rapport=%.5f %s ; mur_ouest rapport=%.4f attendu=%.4f" % [
+		resultats[0][0].g, resultats[1][0].g, r_sol, "tenu" if absf(r_sol - 1.0) <= 0.01 else "manque", r_mur, attendu_mur])
+	get_tree().quit()
+
+
+## La radiance (linéaire) au centre de l'image, caméra au-dessus du bassin visant l'azimut `az` (B : 0 au nord, sens
+## horaire vers l'est) et l'élévation `h`.
+func radiance_centre(az: float, h: float) -> Color:
+	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+	camera.position = Vector3(0.0, 3.0, 0.0)
+	var d_b := Vector3(sin(az) * cos(h), cos(az) * cos(h), sin(h))
+	var d := Vector3(d_b.x, d_b.z, -d_b.y)
+	var haut := Vector3.UP if absf(d.y) < 0.99 else Vector3(0, 0, -1)
+	camera.look_at(camera.position + d, haut)
+	for _k in 4:
+		await RenderingServer.frame_post_draw
+	return moyenne_centre(get_viewport().get_texture().get_image())
+
+
+## La moyenne linéaire d'un carré de 9 × 9 pixels au centre d'une image flottante.
+func moyenne_centre(image: Image) -> Color:
+	image.convert(Image.FORMAT_RGBF)
+	var cx := image.get_width() / 2
+	var cy := image.get_height() / 2
+	var somme := Color(0, 0, 0)
+	for j in range(-4, 5):
+		for i in range(-4, 5):
+			somme += image.get_pixel(cx + i, cy + j)
+	return somme / 81.0

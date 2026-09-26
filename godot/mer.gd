@@ -119,6 +119,13 @@ const BRUME_SECHE := 0.00012
 var pluie_air: Node3D
 
 
+## S381 — le ciel de pluie (ADR-205, pièce 3) : `COUVERT=` (0 à 1) force la couverture ; sinon, la pluie couvre le ciel.
+func couvert_voulu() -> float:
+	if OS.get_environment("COUVERT") != "":
+		return clampf(float(OS.get_environment("COUVERT")), 0.0, 1.0)
+	return 1.0 if pluie_mm_h > 0.0 else 0.0
+
+
 func _ready() -> void:
 	if OS.get_environment("PLUIE") != "":
 		pluie_mm_h = float(OS.get_environment("PLUIE"))
@@ -931,10 +938,14 @@ func phases(t: float) -> void:
 	# S379 : l'horloge des rides repliée sur l'heure (I-08 : le nuanceur ne voit qu'un flottant borné).
 	materiau.set_shader_parameter("pluie", Pluie.uniformes(pluie_mm_h))
 	materiau.set_shader_parameter("temps_pluie", fmod(t, 3600.0))
+	for m in [materiau, materiau_sol, materiau_ciel]:
+		if m != null:
+			m.set_shader_parameter("couvert", couvert_voulu())
 	if camera != null:
 		if pluie_air == null:
 			pluie_air = load("res://pluie_air.gd").new()
 			add_child(pluie_air)
+		pluie_air.couvert = couvert_voulu()
 		pluie_air.configurer(pluie_mm_h)
 		pluie_air.suivre(camera, fmod(t, 3600.0))
 	# S380 : l'extinction par les gouttes (`Pluie.extinction`), ajoutée à la brume sèche ; temps sec : la brume d'avant.

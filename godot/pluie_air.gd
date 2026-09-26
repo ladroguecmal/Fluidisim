@@ -22,6 +22,8 @@ var niveaux: Array = []
 var controle := false
 var tranche := Vector2(0.0, 0.5)
 var taille_controle := 0.02
+## S381 — le ciel couvert (`ciel.gdshaderinc`), pour la radiance des gouttes.
+var couvert := 0.0
 
 
 ## Le nombre de gouttes d'une classe à l'intensité `r` : densité × volume de sa boîte.
@@ -104,3 +106,4 @@ func suivre(camera: Camera3D, t: float) -> void:
 		m.set_shader_parameter("tranche", tranche)
 		m.set_shader_parameter("taille_controle", taille_controle)
 		dessins[k].set_shader_parameter("controle", controle)
+		dessins[k].set_shader_parameter("couvert", couvert)
