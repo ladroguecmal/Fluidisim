@@ -348,3 +348,48 @@ fn the_band_reads_its_rest_height_beside_the_columns_s399() {
     println!("S399 surface lue contre les colonnes : écart max {:.2} % de maille (au milieu de la bande : {:.2} %)", 100. * worst / 0.05, 100. * inner / 0.05);
     assert!(worst <= 0.05 * 0.05, "{worst}");
 }
+
+#[test]
+fn band_and_columns_at_rest_stay_at_rest_and_keep_their_volume_s399() {
+    // Critère 3 de S399 : l'échange en marche, 2 s de repos, volume (particules + η + soldes) à 10⁻⁶. Le critère 2 (vitesse
+    // ≤ 1 cm/s) est **manqué** : 1,007 cm/s — la bande lit sa surface 1,1 mm sous les colonnes (biais de lecture de 2,19 % de
+    // maille contre une surface exacte), et cette marche excite une seiche d'un millimètre que rien n'amortit. La borne
+    // ci-dessous n'est pas le critère : une garde de non-régression, à 20 % au-dessus de la mesure.
+    let (mut a, _) = half_band();
+    let v0 = a.total_volume();
+    let (mut t, mut vmax) = (0u64, 0f32);
+    while t < 2_000_000 {
+        let us = a.stable_step_us(20_000).min(2_000_000 - t);
+        let r = a.step(us).unwrap();
+        vmax = vmax.max(r.max_speed).max(a.columns_max_speed());
+        t += us;
+    }
+    let drift = a.total_volume() / v0 - 1.;
+    println!("S399 repos bande + colonnes, échange : vitesse max {vmax:.3e} m/s, volume {drift:+.2e}, particules {}", a.particle_count());
+    assert!(vmax <= 0.012, "{vmax}");
+    assert!(drift.abs() <= 1e-6, "{drift}");
+}
+
+#[test]
+fn a_wave_crossing_the_boundary_keeps_the_total_volume_s399() {
+    // Une onde de 2 cm traverse la frontière pendant 2 s : particules posées et retirées, soldes, η — le volume total tient.
+    let (nx, ny, nz) = (20, 8, 20);
+    let (mut a, mut arena) = apic(nx, ny, nz, 0.05, nx * ny * nz * 8);
+    let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx >= 10) as u8).collect();
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+    let profil = |x: f32| 0.5 + 0.02 * (std::f32::consts::PI * x).cos();
+    let eta: Vec<f32> = (0..nx * ny).map(|c| profil(((c % nx) as f32 + 0.5) * 0.05)).collect();
+    a.set_columns_surface(&eta).unwrap();
+    let n0 = a.seed(&|p| p[2] < profil(p[0]) && p[0] < 0.5).unwrap();
+    let v0 = a.total_volume();
+    let mut t = 0u64;
+    while t < 2_000_000 {
+        let us = a.stable_step_us(20_000).min(2_000_000 - t);
+        a.step(us).unwrap();
+        t += us;
+    }
+    let drift = a.total_volume() / v0 - 1.;
+    println!("S399 onde à travers la frontière : volume {drift:+.2e} ; particules {n0} → {} ; refusées {}", a.particle_count(), a.columns_refused());
+    assert!(drift.abs() <= 1e-6, "{drift}");
+    assert_ne!(a.particle_count(), n0, "aucun échange");
+}

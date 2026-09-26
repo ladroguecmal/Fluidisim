@@ -29,6 +29,12 @@ pub(crate) struct Columns3 {
     /// Débits par unité de largeur à travers les faces de colonnes `x` et `y`, m²/s.
     pub(crate) flux_x: Vec<f32>,
     pub(crate) flux_y: Vec<f32>,
+    /// **S399 — les soldes de l'échange**, m³, par face-maille de frontière (indexés comme les faces `u` et `v`) : positif, la
+    /// bande doit recevoir des particules ; négatif, elle en doit. `f64`, pour que la masse se compte au bit.
+    pub(crate) solde_u: Vec<f64>,
+    pub(crate) solde_v: Vec<f64>,
+    /// Particules que la capacité n'a pas permis de poser (le solde les garde).
+    pub(crate) refused: u64,
 }
 
 /// Octets réservés par `enable_columns` pour `domain`.
@@ -39,8 +45,12 @@ pub fn columns_reserved_bytes(domain: Domain3) -> Option<usize> {
         .checked_add(nx.checked_mul(ny + 1)?.checked_mul(nz)?)?
         .checked_add(columns.checked_mul(nz + 1)?)?;
     let flux = (nx + 1).checked_mul(ny)?.checked_add(nx.checked_mul(ny + 1)?)?;
-    // Masque (1 octet), surface et reste (4 + 4) par colonne ; trois copies de faces ; deux familles de débits.
-    columns.checked_mul(1 + 4 + 4)?.checked_add(faces.checked_mul(4)?)?.checked_add(flux.checked_mul(4)?)
+    let nu = (nx + 1).checked_mul(ny)?.checked_mul(nz)?;
+    let nv = nx.checked_mul(ny + 1)?.checked_mul(nz)?;
+    // Masque (1 octet), surface et reste (4 + 4) par colonne ; trois copies de faces ; deux familles de débits ; les soldes de
+    // l'échange (S399), un `f64` par face `u` et `v`.
+    columns.checked_mul(1 + 4 + 4)?.checked_add(faces.checked_mul(4)?)?.checked_add(flux.checked_mul(4)?)?
+        .checked_add(nu.checked_add(nv)?.checked_mul(8)?)
 }
 
 /// Vitesse d'un champ MAC en un point, trilinéaire par composante — celle de `grid_velocity`, sur des tableaux donnés.
@@ -85,6 +95,9 @@ impl Apic3 {
             prev_w: vec![0.; nx * ny * (nz + 1)],
             flux_x: vec![0.; (nx + 1) * ny],
             flux_y: vec![0.; nx * (ny + 1)],
+            solde_u: vec![0.; (nx + 1) * ny * nz],
+            solde_v: vec![0.; nx * (ny + 1) * nz],
+            refused: 0,
         });
         Ok(())
     }
@@ -212,18 +225,36 @@ impl Apic3 {
                         continue;
                     }
                     let (x, y) = if axis == 0 { (i - 1, j) } else { (i, j - 1) };
-                    if c.mask[y * nx + x] == 0 || c.mask[j * nx + i] == 0 {
+                    let (low, high) = (c.mask[y * nx + x] != 0, c.mask[j * nx + i] != 0);
+                    if !low && !high {
                         continue;
                     }
-                    let surface = 0.5 * (c.eta[y * nx + x] + c.eta[j * nx + i]);
+                    // S399 : une face entre la bande et la zone est une **frontière** : la hauteur mouillée est celle de la
+                    // colonne, et le volume qui passe est porté au solde de la face-maille, dû par la bande ou à elle.
+                    let boundary = low != high;
+                    let surface = if !boundary {
+                        0.5 * (c.eta[y * nx + x] + c.eta[j * nx + i])
+                    } else if low {
+                        c.eta[y * nx + x]
+                    } else {
+                        c.eta[j * nx + i]
+                    };
                     let mut q = 0f32;
                     for k in 0..nz {
                         let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
                         if wet == 0. {
                             break;
                         }
-                        let vel = if axis == 0 { u[(k * ny + j) * (nx + 1) + i] } else { v[(k * (ny + 1) + j) * nx + i] };
+                        let face = if axis == 0 { (k * ny + j) * (nx + 1) + i } else { (k * (ny + 1) + j) * nx + i };
+                        let vel = if axis == 0 { u[face] } else { v[face] };
                         q += vel * dx * wet;
+                        if boundary {
+                            // Volume vers les `+`, m³ ; vers la zone s'il va de la bande (côté bas) à la colonne (côté haut).
+                            let volume = (vel * dx * wet) as f64 * dx as f64 * dt as f64;
+                            let into_zone = if high { volume } else { -volume };
+                            let solde = if axis == 0 { &mut c.solde_u[face] } else { &mut c.solde_v[face] };
+                            *solde -= into_zone;
+                        }
                     }
                     if axis == 0 {
                         c.flux_x[j * (nx + 1) + i] = q;
@@ -312,6 +343,213 @@ impl Apic3 {
             }
         }
         (sw, sx)
+    }
+
+    /// **S399 — le volume total** : particules, colonnes et soldes, m³ (`f64`).
+    pub fn total_volume(&self) -> f64 {
+        let vp = (self.domain.dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        let soldes = self.columns.as_ref().map_or(0., |c| c.solde_u.iter().chain(&c.solde_v).sum::<f64>());
+        self.n as f64 * vp + self.columns_volume() + soldes
+    }
+    /// Particules que la capacité n'a pas laissé poser depuis la configuration.
+    pub fn columns_refused(&self) -> u64 {
+        self.columns.as_ref().map_or(0, |c| c.refused)
+    }
+
+    /// La vitesse et la matrice affine que la grille donne en un point — le transfert grille → particule d'APIC.
+    pub(crate) fn grid_affine(&self, p: [f32; 3]) -> ([f32; 3], [[f32; 3]; 3]) {
+        let dx = self.domain.dx;
+        let (mut v, mut c) = ([0f32; 3], [[0f32; 3]; 3]);
+        for axis in 0..3 {
+            let (origin, dims) = staggered(self.domain, axis);
+            let field = match axis {
+                0 => &self.u,
+                1 => &self.v,
+                _ => &self.w,
+            };
+            for (idx, wt, g) in weights(p, dx, origin, dims) {
+                let f = field[idx];
+                v[axis] += wt * f;
+                for b in 0..3 {
+                    c[axis][b] += g[b] * f;
+                }
+            }
+        }
+        (v, c)
+    }
+
+    fn remove_particle(&mut self, k: usize) {
+        let last = self.n - 1;
+        self.x[k] = self.x[last];
+        self.vel[k] = self.vel[last];
+        self.c[k] = self.c[last];
+        self.n = last;
+    }
+
+    /// **S399 — l'échange à la frontière**, après l'advection des particules. (1) Une particule entrée dans une colonne de la
+    /// zone est **absorbée** : son volume est déjà passé par le flux de la face, elle paie d'avance le solde de la face-maille
+    /// la plus proche. (2) Un solde dû d'une particule entière retire la particule de la bande **la plus proche de la face**, dans
+    /// sa maille, sinon dans la plus proche de sa colonne. (3) Un solde reçu d'une particule entière en **pose** une contre la
+    /// face, au sous-réseau le plus libre de sa maille, à la vitesse de la grille. Chaque geste change un solde de `dx³/8`
+    /// exactement : la masse se compte au bit.
+    pub(crate) fn columns_exchange(&mut self) {
+        if self.columns.is_none() {
+            return;
+        }
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let vp = (dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        let cell_of = |p: [f32; 3]| {
+            let f = |x: f32, n: usize| ((x / dx).max(0.) as usize).min(n - 1);
+            (f(p[0], nx), f(p[1], ny), f(p[2], nz))
+        };
+        // (1) L'absorption.
+        let mut k = 0;
+        while k < self.n {
+            let p = self.x[k];
+            let (i, j, l) = cell_of(p);
+            if !self.column_of(i, j) {
+                k += 1;
+                continue;
+            }
+            // La face de frontière la plus proche parmi les quatre de la colonne.
+            let mut best: Option<(f32, usize, usize)> = None; // (distance, axe, face)
+            for (di, dj, axis) in [(-1isize, 0isize, 0usize), (1, 0, 0), (0, -1, 1), (0, 1, 1)] {
+                let (a, b) = (i as isize + di, j as isize + dj);
+                if a < 0 || b < 0 || a as usize >= nx || b as usize >= ny || self.column_of(a as usize, b as usize) {
+                    continue;
+                }
+                let (fi, fj) = (i + (di > 0) as usize, j + (dj > 0) as usize);
+                let d = if axis == 0 { (p[0] - fi as f32 * dx).abs() } else { (p[1] - fj as f32 * dx).abs() };
+                let face = if axis == 0 { (l * ny + j) * (nx + 1) + fi } else { (l * (ny + 1) + fj) * nx + i };
+                if best.is_none_or(|b| d < b.0) {
+                    best = Some((d, axis, face));
+                }
+            }
+            let cols = self.columns.as_mut().unwrap();
+            match best {
+                Some((_, 0, face)) => cols.solde_u[face] += vp,
+                Some((_, _, face)) => cols.solde_v[face] += vp,
+                // Au cœur de la zone, loin de toute bande : le volume va à la surface de sa colonne.
+                None => cols.eta[j * nx + i] += (vp / (dx as f64 * dx as f64)) as f32,
+            }
+            self.remove_particle(k);
+        }
+        // (2) et (3) : chaque face-maille de frontière règle son solde. Les particules sont triées par maille ; un retrait est
+        // **marqué** (`shift` sert de marque, NaN) et la bande compactée à la fin ; une pose est ajoutée en fin de tableau.
+        self.bin();
+        let first_new = self.n;
+        for s in self.shift[..self.n].iter_mut() {
+            *s = [0.; 3];
+        }
+        for axis in 0..2 {
+            let (fx, fy) = if axis == 0 { (nx + 1, ny) } else { (nx, ny + 1) };
+            for l in 0..nz {
+                for fj in 0..fy {
+                    for fi in 0..fx {
+                        let (lo, hi) = if axis == 0 {
+                            if fi == 0 || fi == nx { continue; }
+                            ((fi - 1, fj), (fi, fj))
+                        } else {
+                            if fj == 0 || fj == ny { continue; }
+                            ((fi, fj - 1), (fi, fj))
+                        };
+                        let (zl, zh) = (self.column_of(lo.0, lo.1), self.column_of(hi.0, hi.1));
+                        if zl == zh {
+                            continue;
+                        }
+                        let face = if axis == 0 { (l * ny + fj) * (nx + 1) + fi } else { (l * (ny + 1) + fj) * nx + fi };
+                        let band = if zl { hi } else { lo };
+                        let plane = if axis == 0 { fi as f32 * dx } else { fj as f32 * dx };
+                        let side = if zl { 1f32 } else { -1. };
+                        let solde = |s: &Apic3| {
+                            let c = s.columns.as_ref().unwrap();
+                            if axis == 0 { c.solde_u[face] } else { c.solde_v[face] }
+                        };
+                        // (2) Retirer ce qui est dû : la particule de la bande la plus proche de la face, à cette profondeur
+                        // d'abord, puis aux profondeurs voisines.
+                        while solde(self) <= -vp {
+                            let mut pick: Option<(usize, f32, usize)> = None; // (écart de profondeur, distance, indice)
+                            'depths: for dk in 0..nz {
+                                for k in [l as isize - dk as isize, l as isize + dk as isize] {
+                                    if k < 0 || k as usize >= nz || (dk == 0 && k != l as isize) {
+                                        continue;
+                                    }
+                                    let cell = self.cell(band.0, band.1, k as usize);
+                                    for s in self.bin_start[cell]..self.bin_start[cell + 1] {
+                                        let m = self.order[s as usize] as usize;
+                                        if self.shift[m][0].is_nan() {
+                                            continue;
+                                        }
+                                        let p = self.x[m];
+                                        let d = (if axis == 0 { p[0] } else { p[1] } - plane).abs();
+                                        if pick.is_none_or(|b| (dk, d) < (b.0, b.1)) {
+                                            pick = Some((dk, d, m));
+                                        }
+                                    }
+                                }
+                                if pick.is_some() {
+                                    break 'depths;
+                                }
+                            }
+                            let Some((_, _, m)) = pick else { break };
+                            self.shift[m] = [f32::NAN; 3];
+                            let c = self.columns.as_mut().unwrap();
+                            if axis == 0 { c.solde_u[face] += vp } else { c.solde_v[face] += vp }
+                        }
+                        // (3) Poser ce qui est reçu : contre la face, au sous-réseau le plus libre de la maille.
+                        while solde(self) >= vp {
+                            if self.n == self.x.len() {
+                                self.columns.as_mut().unwrap().refused += 1;
+                                break;
+                            }
+                            let offset = plane + side * 0.25 * dx;
+                            let cell = self.cell(band.0, band.1, l);
+                            let mut best: Option<(f32, [f32; 3])> = None;
+                            for (a, b) in [(0.25f32, 0.25f32), (0.75, 0.25), (0.25, 0.75), (0.75, 0.75)] {
+                                let p = if axis == 0 {
+                                    [offset, (band.1 as f32 + a) * dx, (l as f32 + b) * dx]
+                                } else {
+                                    [(band.0 as f32 + a) * dx, offset, (l as f32 + b) * dx]
+                                };
+                                let dist = |q: &[f32; 3]| {
+                                    let d = [q[0] - p[0], q[1] - p[1], q[2] - p[2]];
+                                    d[0] * d[0] + d[1] * d[1] + d[2] * d[2]
+                                };
+                                let mut near = f32::MAX;
+                                for s in self.bin_start[cell]..self.bin_start[cell + 1] {
+                                    let m = self.order[s as usize] as usize;
+                                    if !self.shift[m][0].is_nan() {
+                                        near = near.min(dist(&self.x[m]));
+                                    }
+                                }
+                                for q in &self.x[first_new..self.n] {
+                                    near = near.min(dist(q));
+                                }
+                                if best.is_none_or(|b| near > b.0) {
+                                    best = Some((near, p));
+                                }
+                            }
+                            let p = best.unwrap().1;
+                            let (v, c) = self.grid_affine(p);
+                            let m = self.n;
+                            self.x[m] = p;
+                            self.vel[m] = v;
+                            self.c[m] = c;
+                            self.shift[m] = [0.; 3];
+                            self.n += 1;
+                            let cols = self.columns.as_mut().unwrap();
+                            if axis == 0 { cols.solde_u[face] -= vp } else { cols.solde_v[face] -= vp }
+                        }
+                    }
+                }
+            }
+        }
+        // Le compactage : du plus grand indice marqué au plus petit, pour qu'un échange ne déplace jamais une marque.
+        for m in (0..first_new).rev() {
+            if self.shift[m][0].is_nan() {
+                self.remove_particle(m);
+            }
+        }
     }
 
     /// Une colonne de la zone ? (pour les essais et le banc)

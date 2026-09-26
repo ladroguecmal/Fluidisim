@@ -726,6 +726,8 @@ impl Apic3 {
             self.separate();
         }
         self.move_body(dt);
+        // S399 : l'échange à la frontière de la zone des colonnes (rien sans zone).
+        self.columns_exchange();
         let mut max_speed = 0f32;
         for k in 0..self.n {
             let (p, v) = (self.x[k], self.vel[k]);

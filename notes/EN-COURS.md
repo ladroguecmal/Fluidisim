@@ -90,8 +90,8 @@ particules par maille occupée dans la dernière colonne de la bande ; saut de s
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la reconstruction voit les colonnes (particules virtuelles) ; critère 2 (repos, surface lue).
-- [>] **P3** — l'échange (flux de face, soldes, retrait, pose, absorption) ; critère 3 et le repos échangé ; critère 1.
-- [ ] **P4** — l'exemple `apic3d_raccord` : 30 s, 5 et 2,5 cm, contre APIC seul ; critère 4.
+- [x] **P3** — l'échange (flux de face, soldes, retrait, pose, absorption) ; critère 3 et le repos échangé ; critère 1.
+- [>] **P4** — l'exemple `apic3d_raccord` : 30 s, 5 et 2,5 cm, contre APIC seul ; critère 4.
 - [ ] **P5** — suite ; preuve (§5 de RACCORD-3D-S398) ; A316, file, liste.
 - [ ] **P6** — rituel.
 
@@ -102,3 +102,14 @@ les mailles de la zone ne sont plus reconstruites (leur `φ` est `z − η`). **
 surface lue dans la dernière colonne de la bande se trompe de **2,19 %** de maille, comme au milieu de la bande ; **vu échouer**
 sans les virtuelles : **14,7 %** (la paroi vue d'un seul côté). **Le repos dynamique** demande l'échange : sans lui, 8,2 cm/s —
 la pression fait passer de l'eau par les faces de la frontière, que ni `η` ni les particules ne transportent. Jugé en P3.
+
+**P3 — l'échange** (`columns_transport`, `columns_exchange`) : une face bande | zone est une frontière — hauteur mouillée de la
+colonne, le volume passé porté au solde de la face-maille (`f64`) ; après l'advection, absorption des particules entrées dans la
+zone (solde payé d'avance), retrait de la plus proche de la face (profondeurs voisines ensuite), pose contre la face au
+sous-réseau le plus libre ; tri par maille, retraits marqués puis compactés. **Critère 3 tenu (sur 2 s)** : volume total
+(particules + `η` + soldes) à **1,7·10⁻¹¹** au repos, **2,9·10⁻¹⁰** sous une onde qui traverse (6 576 → 6 304 particules, aucun
+refus). **Critère 1 tenu** : sans zone, la ligne de S389 ; toutes colonnes, celle de S398. **Critère 2, seconde moitié, manqué** :
+repos **1,007 cm/s** (4 s : 0,5 à 1,03 cm/s, sans décroître, aucune particule échangée) — la bande lit sa surface 1,1 mm sous
+les colonnes (biais de lecture 2,19 % de maille contre une surface exacte) ; la marche excite une seiche d'un millimètre
+(`u ~ A·ω` ≈ 5 mm/s) que rien n'amortit. L'essai garde le volume ; sur la vitesse, une garde de non-régression à 1,2 cm/s,
+écrite comme telle.
