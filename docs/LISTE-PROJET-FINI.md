@@ -428,8 +428,8 @@ pas recopiée ici (L137).
   Godot** : la même queue réalisée par FFT, 10 612 composantes en deux cascades, étalement d'Elfouhaily, variance non
   résolue par LEAN ([preuve](validation/SURFACE-FINE-S360.md), ADR-195), **validée en R21** (S367). **S379** : les rides
   de la pluie, factices (ADR-202 D3) — taux de Marshall et Palmer × Atlas compté sur les images, deux trains
-  capillaires-gravité, fondus en rugosité au loin, sur le bassin et la mer ([preuve](validation/RIDES-PLUIE-S379.md), R28
-  posée). Manquent les capillaires du vent, la queue des perturbations W, le coût (celui des rides : une texture à
+  capillaires-gravité, fondus en rugosité au loin, sur le bassin et la mer ([preuve](validation/RIDES-PLUIE-S379.md), **validée
+  en R28**). Manquent les capillaires du vent, la queue des perturbations W, le coût (celui des rides : une texture à
   moments).
 - [ ] **8.10 Crédibilité perçue validée par un regard humain** — *partiel* : protocole de revue
   ([REVUE-VISUELLE](validation/REVUE-VISUELLE.md)). Premier verdict (R1, « trop lisse ») mesuré et

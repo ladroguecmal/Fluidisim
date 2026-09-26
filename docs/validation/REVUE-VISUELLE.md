@@ -1231,3 +1231,7 @@ le voile mat en paraît moins marqué qu'avec des arbres ou une maison reflété
 
 **La question :** ces rides sont-elles crédibles — de près, et vues de loin (la vue d'ensemble) ? Le voile mat à 10 mm/h,
 qui efface les reflets des nuages en vue rasante, vous paraît-il juste, trop fort, pas assez ?
+
+**Verdict R28 — reçu le 2026-09-26 (S379, après le rituel)** : *« Parfait »* — les rides de la pluie et le voile mat à
+10 mm/h reçus tels quels, de près comme de loin. **Classe** : rendu validé ; restent hors de ce jugement les gerbes, la pluie
+dans l'air et le ciel de pluie (la météo), le reflet des objets.

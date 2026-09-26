@@ -55,7 +55,7 @@ montrer, deviennent la **rugosité** qu'ils sont en moyenne ; sans pluie, les im
 | 1 — sans pluie, identique au bit | 7 images du bassin (ensemble, rasante, buse à 6,5 et 200 s ; sans δ à 40 s), 5 poses de la mer | **12 / 12 identiques** (SHA-256 ; deux passes d'avant égales) |
 | 2 — taux de naissance à ±10 % | cœurs d'anneaux de moins de 30 ms comptés sur 20 images d'aplomb, 32 m² | **−4,16 %** (1 237 / 1 290,6), **−0,61 %** (8 532 / 8 584,2), **−1,66 %** (36 477 / 37 091,4) à 2 / 10 / 50 mm/h — tenu |
 | 3 — au loin, aucun motif | empreinte au seuil | crêtes éteintes à λ/2 (8,6 mm pour 17,1 ; 22 mm pour 44) ; bandes de 4 et 10 cm passées à l'uniforme à 2 et 5 cm ; bosse de ≈ 12 mm éteinte à 6 mm — tenu |
-| 4 — photographies et jugement | six références ; R28 | posée ([§33](REVUE-VISUELLE.md)) |
+| 4 — photographies et jugement | six références ; R28 | **reçue** : *« Parfait »* ([§33](REVUE-VISUELLE.md)) |
 
 **Le compte du critère 2.** Deux cœurs voisins font une seule tache : à 50 mm/h (58 cœurs jeunes par m²), le compte brut
 perdait 5,2 %. Chaque tache compte pour `arrondi(aire / aire médiane)` ; il reste −1,66 % à 50 mm/h (3,2 σ), les fusions

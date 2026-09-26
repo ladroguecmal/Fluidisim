@@ -17353,3 +17353,4 @@ de 11:22), vu par `--check`, corrigé au commit suivant (L237). **Coût** (720p,
 **Limites.** Pentes réglées sur les photos ; ni gerbes ni pluie dans l'air ; seul le ciel se reflète ; une intensité par
 scène. **Rituel.** Maillons **1** : 8.9 reste partiel, R28 posée (non reçue). Suivant : **la campagne du solveur
 volumique 3D temps réel, conception** (demande de l'utilisateur).
+**Verdict R28** (après le rituel) : *« Parfait »* — les rides reçues ; consigné dans REVUE-VISUELLE §33, la liste, la file.
