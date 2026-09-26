@@ -71,6 +71,9 @@ uniform sampler2D detail_a1 : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D detail_b1 : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform vec2 detail_cotes = vec2(32.0, 4.0);
 uniform bool detail_actif = false;
+// S371 — texels par côté des cascades (`detail.gd`, N) : au-delà d'un grossissement de 32 (texel vu sur plus de 32 pixels),
+// la lecture passe en bicubique (`lire_detail`).
+uniform float detail_texels = 256.0;
 // L'atténuation diffuse `Kd = (a + b_b)/μ̄_d` des trois bandes (650, 550, 450 nm) : `a` de Pope & Fry, `b_b` de Morel,
 // ceux d'ADR-177 ; `μ̄_d` = 0,8 *à calibrer*. Calculée et donnée par `mer.gd` (`optique_eau.gdshaderinc`, qui porte aussi
 // l'indice de l'eau de mer depuis S366).
@@ -105,6 +108,39 @@ float seuil_deferlement(float h) {
     int i = min(int(floor(x)), 12);
     float f = x - float(i);
     return ecume_seuils_deferlement[i] * (1.0 - f) + ecume_seuils_deferlement[i + 1] * f;
+}
+
+/// S371 — **une cascade lue en B-spline bicubique** (Sigg et Hadwiger 2005, *GPU Gems 2* ch. 20 : quatre lectures
+/// bilinéaires) : pentes et moments continus jusqu'à la dérivée seconde. Vue à quelques centimètres — caméra au ras de
+/// l'eau —, un texel de la cascade de 4 m (1,6 cm) couvre des dizaines de pixels, et la lecture bilinéaire, continue mais
+/// anguleuse, dessinait le bord de la fenêtre de Snell en escalier. Le champ n'a rien sous deux texels : le lisser est
+/// ce qu'il sait.
+vec4 bicubique(sampler2D t, vec2 uv) {
+    vec2 st = uv * detail_texels - 0.5;
+    vec2 i = floor(st);
+    vec2 f = st - i;
+    vec2 f2 = f * f;
+    vec2 f3 = f2 * f;
+    vec2 w0 = (-f3 + 3.0 * f2 - 3.0 * f + 1.0) / 6.0;
+    vec2 w1 = (3.0 * f3 - 6.0 * f2 + 4.0) / 6.0;
+    vec2 w2 = (-3.0 * f3 + 3.0 * f2 + 3.0 * f + 1.0) / 6.0;
+    vec2 w3 = f3 / 6.0;
+    vec2 g0 = w0 + w1;
+    vec2 g1 = w2 + w3;
+    vec2 p0 = (i - 1.0 + w1 / g0 + 0.5) / detail_texels;
+    vec2 p1 = (i + 1.0 + w3 / g1 + 0.5) / detail_texels;
+    return g0.y * (g0.x * textureLod(t, vec2(p0.x, p0.y), 0.0) + g1.x * textureLod(t, vec2(p1.x, p0.y), 0.0))
+        + g1.y * (g0.x * textureLod(t, vec2(p0.x, p1.y), 0.0) + g1.x * textureLod(t, vec2(p1.x, p1.y), 0.0));
+}
+
+/// Une cascade au point `uv` (en côtés) pour l'empreinte `h` (m) d'un pixel et le côté `cote` : la lecture filtrée de
+/// S360, et, au-delà d'un grossissement de 32, vers le bicubique (entier à 64) — la surface à moins de ≈ 3 m de l'œil pour
+/// la cascade de 32 m, ≈ 0,4 m pour celle de 4 m : caméra au ras de l'eau. Un seuil de 4 changeait les poses validées
+/// (R21), où la cascade de 32 m est déjà grossie de 5 à 15 fois ; ce régime-là reste en bilinéaire, à examiner.
+vec4 lire_detail(sampler2D t, vec2 uv, float h, float cote) {
+    vec4 v = texture(t, uv);
+    float grossi = smoothstep(32.0, 64.0, cote / detail_texels / max(h, 1e-9));
+    return grossi > 0.0 ? mix(v, bicubique(t, uv), grossi) : v;
 }
 
 /// Le point de la scène vu au pixel `uv`, en coordonnées du monde (Godot 4.3+, profondeur inversée, NDC z dans [0, 1]).
@@ -274,10 +310,10 @@ void fragment() {
     vec3 cov_q = vec3(0.0);
     if (detail_actif) {
         // S360 : la queue dense, lue à l'empreinte du pixel ; la covariance non résolue, E[s·sᵀ] − E[s]·E[s]ᵀ.
-        vec4 a0 = texture(detail_a0, lag / detail_cotes.x);
-        vec4 b0 = texture(detail_b0, lag / detail_cotes.x);
-        vec4 a1 = texture(detail_a1, lag / detail_cotes.y);
-        vec4 b1 = texture(detail_b1, lag / detail_cotes.y);
+        vec4 a0 = lire_detail(detail_a0, lag / detail_cotes.x, h, detail_cotes.x);
+        vec4 b0 = lire_detail(detail_b0, lag / detail_cotes.x, h, detail_cotes.x);
+        vec4 a1 = lire_detail(detail_a1, lag / detail_cotes.y, h, detail_cotes.y);
+        vec4 b1 = lire_detail(detail_b1, lag / detail_cotes.y, h, detail_cotes.y);
         s_q = a0.xy + a1.xy;
         g_q = vec3(b0.y + b1.y, b0.w + b1.w, b0.z + b1.z);
         cov_q = vec3(max(a0.z - a0.x * a0.x, 0.0), b0.x - a0.x * a0.y, max(a0.w - a0.y * a0.y, 0.0))
@@ -317,21 +353,27 @@ void fragment() {
     // celle de `lumiere`. Non portés : la réduction de l'éclairement du fond par (1 − F) du soleil (≈ 2 %), la
     // focalisation par les vagues (caustiques).
     vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
-    // S365 — vue d'en dessous, quand l'œil est dans l'eau (`sous_eau`, posé par `mer.gd`) : la surface, puis les `d`
-    // mètres d'eau jusqu'à l'œil (`a_travers_l_eau`). Pas `FRONT_FACING` : la grille polaire présente sa face
-    // avant par en dessous, et la bascule reste d'un bloc tant que la caméra à demi immergée n'est pas traitée.
-    if (sous_eau) {
+    // S371 — **le milieu du pixel** (`surface_b.gdshaderinc`) : décidé à l'objectif, là où le rayon traverse le plan
+    // proche — part d'eau `milieu.x`, profondeur de l'objectif `milieu.y`. Hors de la zone des vagues, celui de l'œil,
+    // d'un bloc (S365). Dans la transition, les deux vues se mélangent.
+    vec3 milieu = milieu_du_pixel(CAMERA_POSITION_WORLD, normalize(surface - CAMERA_POSITION_WORLD));
+    vec3 vu_dessous = vec3(0.0);
+    vec3 vu_dessus = vec3(0.0);
+    // S365 — vue d'en dessous : la surface, puis les `d` mètres d'eau jusqu'à l'œil (`a_travers_l_eau`). Pas
+    // `FRONT_FACING` : la grille polaire présente sa face avant par en dessous.
+    if (milieu.x > 0.0) {
         vec3 vue_d = normalize(surface - CAMERA_POSITION_WORLD);
         vec3 rayon_d = vec3(vue_d.x, -vue_d.z, vue_d.y);
         vec3 lum = integree(pente, rayon_d, transport_covariance(energie * cov_q, g), true, vec3(0.0), vec3(0.0));
         float d = length(surface - CAMERA_POSITION_WORLD);
-        ALBEDO = a_travers_l_eau(lum, d, rayon_d, profondeur_camera);
+        vu_dessous = a_travers_l_eau(lum, d, rayon_d, milieu.y);
         if (controle == 4) {
             // Contrôle S365 : le coefficient de Fresnel eau → air, sans la ligne de visée.
             float c4 = dot(rayon_d, normalize(vec3(-pente, 1.0)));
-            ALBEDO = vec3(c4 > 1e-4 ? fresnel(min(c4, 1.0), 1.0 / indice) : 1.0);
+            vu_dessous = vec3(c4 > 1e-4 ? fresnel(min(c4, 1.0), 1.0 / indice) : 1.0);
         }
-    } else {
+    }
+    if (milieu.x < 1.0) {
     vec3 fond0 = scene_monde(SCREEN_UV, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
     float h0 = surface.y - fond0.y;
     vec3 vue = normalize(surface - CAMERA_POSITION_WORLD);
@@ -342,7 +384,11 @@ void fragment() {
         vec3 point = surface + r * (h0 / -r.y);
         vec4 clip = PROJECTION_MATRIX * (VIEW_MATRIX * vec4(point, 1.0));
         vec2 uv = clip.xy / clip.w * 0.5 + 0.5;
-        if (uv.x > 0.0 && uv.x < 1.0 && uv.y > 0.0 && uv.y < 1.0) {
+        // S371 : à demi immergée, le fond relu là doit avoir été vu de l'air — sinon il porte déjà la colonne d'eau vue de
+        // l'objectif (`sol.gdshader`), et on garde le fond non réfracté de ce pixel-ci.
+        bool relu_dans_l_air = !demi_immergee
+            || milieu_du_pixel(CAMERA_POSITION_WORLD, normalize(point - CAMERA_POSITION_WORLD)).x <= 0.0;
+        if (relu_dans_l_air && uv.x > 0.0 && uv.x < 1.0 && uv.y > 0.0 && uv.y < 1.0) {
             vec3 f1 = scene_monde(uv, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
             if (f1.y < surface.y) {
                 uv_r = uv;
@@ -395,9 +441,10 @@ void fragment() {
         couverture = 0.0;
     }
     couleur = mix(couleur, vec3(reflectance_ecume * eclairage), couverture);
-    ALBEDO = couleur;
+    vu_dessus = couleur;
     if (controle > 0 && controle < 4) {
-        ALBEDO = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : (controle == 2 ? t_colonne : vec3(couverture));
+        vu_dessus = controle == 1 ? vec3(clamp(h0 / echelle_controle, 0.0, 1.0)) : (controle == 2 ? t_colonne : vec3(couverture));
     }
     }
+    ALBEDO = milieu.x >= 1.0 ? vu_dessous : (milieu.x <= 0.0 ? vu_dessus : mix(vu_dessus, vu_dessous, milieu.x));
 }

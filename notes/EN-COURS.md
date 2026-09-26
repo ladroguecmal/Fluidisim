@@ -88,7 +88,7 @@ cherchées par nous, avant d'être rendue ; jugée par l'utilisateur (R26).
   (photographies « dessus-dessous » libres, lues sans téléchargement) : ce qu'elles montrent, consigné ici.
 - [x] **P3** — la classification par pixel dans `optique_eau.gdshaderinc` (point du plan proche, hauteur de la bande à
   son aplomb, borne pour sortir tôt) ; la bande passée au fond et au ciel.
-- [ ] **P4** — l'eau, le fond et le ciel lisent le milieu du pixel (profondeur d'origine par pixel, trajet dans l'eau
+- [x] **P4** — l'eau, le fond et le ciel lisent le milieu du pixel (profondeur d'origine par pixel, trajet dans l'eau
   depuis l'objectif) ; la brume de Godot sur les pixels vus de l'eau.
 - [ ] **P5** — `--controle-ligne-eau` : critère 1, puis critère 2 ; non-régression (critère 3).
 - [ ] **P6** — la ligne sur l'objectif (ménisque), d'après P2 ; les images de R26.
@@ -131,3 +131,16 @@ les trois matériaux, `surface_exacte` (le même calcul en double), le mode `dem
 niveaux d'écart). **Test serré, rigoureux** : `η` exact au centre du plan proche, plus `pente·R/(1 − G)` sur l'étendue
 `R` du plan (G = Σ a·k = 0,726 ; pente bornée 1,238 ; R = 0,095 m à 50° : **0,43 m**). Ensuite : **les cinq poses
 témoins identiques au bit**.
+
+**P4 — fait.** L'eau, le fond et le ciel lisent `milieu_du_pixel` ; transition mélangée ; le fond relu par réfraction
+n'est pris que s'il a été vu de l'air (sinon le fond non réfracté du pixel) ; le ciel prend la position de la caméra en
+uniforme (lire `POSITION` passerait le ciel en mise à jour continue). **Le milieu d'un bloc et la profondeur se prennent
+désormais à l'objectif, sur la surface exacte** (S365 : l'œil, la bande sans déplacement ni second ordre) —
+`PROFONDEUR=s365` la garde : alors les cinq poses témoins **identiques au bit** ; sans elle, sous l'eau, ≤ 1 niveau sur 5 à
+9 % des pixels (2,949 m contre 2,969 m ; 4,115 contre 4,233 au zénith). Poses `demi`, `demi_soleil`, `demi_dessus`,
+`demi_dessous`, hauteur relative à la surface exacte. **Deux défauts vus et corrigés** : (a) l'éventail central de 0,25 m —
+cent anneaux ajoutés sous R_MIN au même pas (1,2 cm), les anneaux existants inchangés ; 33 pixels à ±1 au zénith sous
+l'eau, où le centre est vu ; (b) **la cause réelle des facettes** : la cascade de 4 m lue en bilinéaire, un texel de 1,6 cm
+vu sur des dizaines de pixels — le bord de la fenêtre en escalier (`DETAIL=0` l'efface). Lecture **bicubique B-spline**
+au-delà d'un grossissement de 32 (fondu à 64). **Impasse** : au seuil 4, les poses validées changeaient (jusqu'à 69
+niveaux) — la cascade de 32 m y est déjà grossie de 5 à 15 fois, en bilinéaire ; ce régime-là reste à examiner (file).

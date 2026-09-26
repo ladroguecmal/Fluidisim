@@ -10,6 +10,10 @@ const ANGLES := 720
 const RAYONS := 360
 const R_MIN := 0.25
 const R_MAX := 12000.0
+## S371 — des anneaux **sous R_MIN**, au même pas logarithmique (3 % du rayon), jusqu'à 1,2 cm : vu de 4 cm, l'éventail
+## central de 0,25 m montrait ses facettes (pentes interpolées sur un seul triangle). Les anneaux de R_MIN à R_MAX sont
+## inchangés ; les nouveaux ne sont vus que caméra au ras de l'eau.
+const ANNEAUX_INTERIEURS := 100
 ## Les poses de R14 : position dans Godot (x, hauteur, −y de B) et tangage (rad).
 const POSES := {
 	"reference": [Vector3(0.0, 7.0, 18.0), -0.13135],
@@ -29,6 +33,13 @@ const POSES := {
 	## S366 : à l'horizontale, face au soleil (son azimut, (−0,4 ; 0,3) dans B) et dos à lui — le lobe avant.
 	"sous_eau_vers_soleil": [Vector3(0.0, -4.0, 0.0), 0.0, 0.9273],
 	"sous_eau_dos_soleil": [Vector3(0.0, -4.0, 0.0), 0.0, 0.9273 + PI],
+	## S371 — **à demi immergée** (ADR-019 §6) : la hauteur est **relative à la surface exacte** au centre du plan proche
+	## (`pose()`), la ligne d'eau passe donc au centre de l'image à 0. Visée horizontale vers le large ; face au soleil ;
+	## un peu au-dessus, plongeante ; un peu en dessous, en contre-plongée.
+	"demi": [Vector3(0.0, 0.0, 20.0), 0.0],
+	"demi_soleil": [Vector3(0.0, 0.0, 20.0), 0.0, 0.9273],
+	"demi_dessus": [Vector3(0.0, 0.04, 20.0), -0.12],
+	"demi_dessous": [Vector3(0.0, -0.04, 20.0), 0.12],
 }
 ## S359 — la scène côtière (`--cote`) : un fond de sable sous la mer, pour voir l'eau selon la profondeur. Étendue
 ## et pas de la grille du fond, m.
@@ -147,6 +158,7 @@ func _ready() -> void:
 			materiau.set_shader_parameter("detail_a1", detail.textures[1][0])
 			materiau.set_shader_parameter("detail_b1", detail.textures[1][1])
 			materiau.set_shader_parameter("detail_cotes", Vector2(float(detail.cotes[0]), float(detail.cotes[1])))
+			materiau.set_shader_parameter("detail_texels", float(detail.N))
 			materiau.set_shader_parameter("detail_actif", true)
 			# S361 : la cascade de 32 m entre dans la carte de caustiques.
 			if materiau_caustiques != null:
@@ -419,26 +431,33 @@ func pose(nom: String) -> void:
 	var p: Array = POSES[nom]
 	camera.position = p[0]
 	camera.rotation = Vector3(float(p[1]), float(p[2]) if p.size() > 2 else 0.0, 0.0)
+	if nom.begins_with("demi"):
+		# S371 : hauteur relative à la surface exacte à l'objectif — le centre du plan proche, dont la position horizontale
+		# ne dépend pas de la hauteur.
+		var centre := camera.position - camera.near * camera.transform.basis.z
+		var eta_c := surface_exacte(Vector2(centre.x, -centre.z), lignes("bande", temps)).x
+		camera.position.y = eta_c + float(p[0].y) + (camera.position.y - centre.y)
 
 
 func grille_polaire() -> ArrayMesh:
 	var sommets := PackedVector3Array()
-	sommets.resize(1 + ANGLES * RAYONS)
+	var anneaux := RAYONS + ANNEAUX_INTERIEURS
+	sommets.resize(1 + ANGLES * anneaux)
 	var q := log(R_MAX / R_MIN) / float(RAYONS - 1)
-	for j in RAYONS:
-		var r := R_MIN * exp(q * j)
+	for j in anneaux:
+		var r := R_MIN * exp(q * (j - ANNEAUX_INTERIEURS))
 		for i in ANGLES:
 			var a := TAU * float(i) / float(ANGLES)
 			sommets[1 + j * ANGLES + i] = Vector3(r * cos(a), 0.0, r * sin(a))
 	var indices := PackedInt32Array()
-	indices.resize(3 * ANGLES + 6 * ANGLES * (RAYONS - 1))
+	indices.resize(3 * ANGLES + 6 * ANGLES * (anneaux - 1))
 	var n := 0
 	for i in ANGLES:
 		indices[n] = 0
 		indices[n + 1] = 1 + (i + 1) % ANGLES
 		indices[n + 2] = 1 + i
 		n += 3
-	for j in RAYONS - 1:
+	for j in anneaux - 1:
 		for i in ANGLES:
 			var a := 1 + j * ANGLES + i
 			var b := 1 + j * ANGLES + (i + 1) % ANGLES
@@ -644,6 +663,8 @@ func immersion(t: float) -> void:
 				ymin = minf(ymin, coin.y)
 				ymax = maxf(ymax, coin.y)
 				rayon = maxf(rayon, Vector2(coin.x - centre.x, coin.z - centre.z).length())
+		# L'œil lui-même est dans ce voisinage : à `near` du centre.
+		rayon = maxf(rayon, camera.near)
 		var bas := -marge_vagues
 		var haut := marge_vagues
 		if borne_g < 1.0:
@@ -651,6 +672,12 @@ func immersion(t: float) -> void:
 			var m := borne_pente * rayon / (1.0 - borne_g) + 1e-3
 			bas = maxf(bas, eta_c - m)
 			haut = minf(haut, eta_c + m)
+			# S371 — le milieu d'un bloc, et la profondeur, se prennent aussi à l'objectif et sur la surface exacte : hors du
+			# mode demi, le plan proche entier est d'un côté de la surface. S365 prenait l'œil et la bande sans déplacement
+			# ni second ordre (erreur de l'ordre de la pente × le déplacement) ; `PROFONDEUR=s365` la garde, en témoin.
+			if OS.get_environment("PROFONDEUR") != "s365":
+				dedans = centre.y < eta_c
+				eta = eta_c + (camera.global_position.y - centre.y)
 		demi = ymin <= haut and ymax >= bas
 	demi_actif = demi
 	# S366 : la brume de Godot (perspective aérienne) teintait la surface lointaine vue d'en dessous d'une bande sombre

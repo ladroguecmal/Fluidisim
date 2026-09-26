@@ -103,12 +103,15 @@ void fragment() {
     ALBEDO = albedo_sable * variation * gain_eau * (0.6 + 0.4 * max(dot(n_b, soleil), 0.0) * c);
     // S365 — **vu de l'eau** (liste 8.6) : l'éclairement descendu jusqu'au fond, `exp(−Kd·H)` — vu d'en haut, c'est
     // `eau.gdshader` qui l'applique —, puis les `d` mètres d'eau jusqu'à l'œil (`a_travers_l_eau`).
+    // S371 : le milieu du pixel, décidé à l'objectif (`surface_b.gdshaderinc`) ; dans la transition, les deux vues.
     vec3 monde = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
     float d = length(monde - CAMERA_POSITION_WORLD);
-    if (sous_eau) {
+    vec3 milieu = milieu_du_pixel(CAMERA_POSITION_WORLD, normalize(monde - CAMERA_POSITION_WORLD));
+    if (milieu.x > 0.0) {
         vec3 vue = normalize(monde - CAMERA_POSITION_WORLD);
         vec3 omega = vec3(vue.x, -vue.z, vue.y);
-        ALBEDO = a_travers_l_eau(ALBEDO * exp(-kd * max(profondeur_fond, 0.0)), d, omega, profondeur_camera);
+        vec3 dessous = a_travers_l_eau(ALBEDO * exp(-kd * max(profondeur_fond, 0.0)), d, omega, milieu.y);
+        ALBEDO = milieu.x >= 1.0 ? dessous : mix(ALBEDO, dessous, milieu.x);
     }
     if (controle == 3) {
         ALBEDO = exp(-attenuation_c * d);
