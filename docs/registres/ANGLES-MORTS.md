@@ -4312,6 +4312,13 @@ de mouvement ; avec une advection semi-lagrangienne, la circulation tombe de 54 
 advecte : le raccord 3D n'a pas ce défaut. **Reste ouvert** : une migration lente de la masse vers les particules à 2,5 cm
 (+6 mm en 30 s), non attribuée — la hauteur amont est réfutée. Déclencheur : C5b, le raccord en 3D, où elle sera mesurée.
 
+**A316 — note datée du 2026-09-27 (S399). En 3D, la migration disparaît à la maille fine** ([preuve](../validation/RACCORD-3D-S398.md)
+§5). Le raccord dans APIC 3D — colonnes à surface exacte et vitesse advectée, bande de particules, reconstruction qui voit les
+colonnes, échange par le flux de la face — tient à 2,5 cm la masse de la bande à ±0,6 mm sur 30 s (2D : +6 mm), le saut à
+0,15 maille, la période à 0,01 point d'APIC seul. **Reste ouvert** : à 5 cm, +3,1 mm par un courant de surface vers la bande,
+attribué au biais de lecture de la bande face à la surface exacte des colonnes ; à 2,5 cm, une dernière colonne de bande
+clairsemée (7,3 par maille). Déclencheur : S400.
+
 **A315 — note datée du 2026-09-23 (S326) : résolu.** Un Jacobi sur le chemin coupé — celui du mode mobile
 3D — ramène la bosse à 128 de 16 029 à **425 itérations** (5,7 s au lieu de 708), débits inchangés à
 2,4·10⁻⁶ près ; à `ny` = 1, identité 2D gardée ([preuve](../validation/FACES-COUPEES-3D-S324.md) §6).

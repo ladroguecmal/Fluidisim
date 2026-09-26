@@ -76,3 +76,50 @@ que Jacobi accepte.
 - **La dissipation** de l'advection semi-lagrangienne : une advection d'ordre plus élevé (MacCormack, ou celle de δ avec le
   terme de Lax-Wendroff, ADR-209) l'abaisserait ; elle n'est pas faite.
 - Le refus de δ sur la cuve mince, ni sa cause ; rien sur la carte.
+
+## 5. S399 — la bande et l'échange : le raccord presque reçu à la maille fine
+
+2026-09-27. **C5b, deuxième part.** Critères écrits avant, dans le plan de la session.
+
+**Reproduire** : commit `aa7644d1` ou plus récent ; `cargo test … -p water-core s399 -- --nocapture` (trois essais : surface lue
+contre la zone, repos échangé et volume, onde qui traverse) ; `cargo run … --example apic3d_raccord -- <0.05|0.025>
+<seul|raccord> [durée]` — ligne `APIC3D_RACCORD_S399`, 30 s par défaut ; 46 s à 11,7 min.
+
+**Deux gestes**, les leçons de 2D portées. (1) **La reconstruction voit les colonnes** : pour une maille de la bande à portée
+de la zone, chaque colonne compte `2 × 2` particules **virtuelles** par rangée, `round(2η/dx)` rangées étirées sur `[0, η]`,
+images aux parois comprises — l'idée du champ de densité de Chentanez, Müller et Kim (la grille ajoute sa part à celle des
+particules) ; sans elles, la frontière serait une paroi vue d'un seul côté. (2) **L'échange par le flux de la face** : une face
+bande | zone est une frontière — hauteur mouillée de la colonne, le volume passé porté au **solde** de la face-maille (`f64`) ;
+après l'advection, une particule entrée dans la zone est absorbée (le solde payé d'avance), un solde dû retire la particule de
+la bande **la plus proche de la face**, un solde reçu en **pose** une contre la face, au sous-réseau le plus libre de sa maille.
+
+| critère | résultat |
+|---|---|
+| **1** — sans zone, au bit ; toutes colonnes, les chiffres de S398 | **tenu** : les deux lignes au chiffre près ; suite **697 réussis**, 18 ignorés, zéro avertissement |
+| **2** — repos, moitié particules moitié colonnes : surface lue ≤ 5 % de maille ; vitesse ≤ 1 cm/s | **surface tenue** : **2,19 %** contre la zone comme au milieu de la bande (**14,7 %** sans les virtuelles, vu échouer) ; **vitesse manquée** : **1,007 cm/s** (§ ci-dessous) |
+| **3** — volume (particules + `η` + soldes) à 10⁻⁶ sur 30 s | **tenu** : 2,5·10⁻¹⁰ (5 cm), 1,5·10⁻¹⁰ (2,5 cm) |
+| **4** — ballottement (1, 0), frontière au nœud, 30 s, contre APIC seul | **tenu à 2,5 cm sauf la densité** ; **à 5 cm, migration et courant de surface manqués** (tableau) |
+
+| critère 4 (écart à APIC seul) | 5 cm | 2,5 cm |
+|---|---|---|
+| niveau équivalent de la bande, par 10 s (±2 mm) | +1,21 / **+2,47 / +3,14** | +0,21 / +0,63 / −0,04 |
+| particules par maille, dernière colonne de la bande (8 ± 0,4) | 7,70 / 7,89 / 8,18 | **7,32 / 7,33 / 7,38** |
+| saut de surface max (< 0,5 maille) | 0,105 (APIC seul 0,093) | 0,154 (APIC seul **0,785**) |
+| période (1 point) | +0,60 contre +0,98 % | +0,35 contre +0,36 % |
+| amortissement (1 point) | +0,35 contre +0,32 % | +0,17 contre +0,08 % |
+| courant moyen sur la face (≤ 5 mm/s) | ≤ 0,9 en profondeur, **−7,0 à la surface** | ≤ 0,9, −3,3 à la surface |
+
+**À la maille fine, la migration de masse a disparu** — elle valait +6 mm en 30 s dans le banc 2D (§16 de B10-APIC-S320) —, la
+période est à 0,01 point d'APIC seul et le saut à la frontière est **plus petit** que celui qu'APIC seul a entre deux colonnes
+voisines. **Ce qui manque**, attribué mais pas encore éprouvé :
+
+- **Le repos et la migration à 5 cm.** La bande lit sa surface avec le biais de la reconstruction (−2,19 % de maille à 0,5 m,
+  S389), les colonnes la leur exactement : au repos, une marche de 1,1 mm, qui excite une seiche d'un millimètre (0,5 à
+  1 cm/s sur 4 s, sans décroître, aucune particule échangée) ; en mouvement, un courant moyen de surface vers la bande (−7 mm/s),
+  qui la remplit. Remède proposé : que la zone lise sa surface comme la bande la lirait, `η + e(η)`, `e` le biais du réseau
+  nominal (`lattice_read_error`, S389) — la masse restant exacte.
+- **La densité à 2,5 cm** (7,3 par maille). Suspect : la séparation des particules ne voit pas les colonnes, et pousse à travers
+  la frontière des particules que l'échange absorbe ; la tenir du côté de la bande.
+
+**Ce que la section ne dit pas** : une seule géométrie (frontière droite, au nœud) ; ni cavité ni gerbe à la frontière ; les
+particules virtuelles coûtent un balayage de plus près de la zone ; rien sur la carte.

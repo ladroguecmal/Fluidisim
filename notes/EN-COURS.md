@@ -92,8 +92,8 @@ particules par maille occupée dans la dernière colonne de la bande ; saut de s
 - [x] **P2** — la reconstruction voit les colonnes (particules virtuelles) ; critère 2 (repos, surface lue).
 - [x] **P3** — l'échange (flux de face, soldes, retrait, pose, absorption) ; critère 3 et le repos échangé ; critère 1.
 - [x] **P4** — l'exemple `apic3d_raccord` : 30 s, 5 et 2,5 cm, contre APIC seul ; critère 4.
-- [>] **P5** — suite ; preuve (§5 de RACCORD-3D-S398) ; A316, file, liste.
-- [ ] **P6** — rituel.
+- [x] **P5** — suite ; preuve (§5 de RACCORD-3D-S398) ; A316, file, liste.
+- [>] **P6** — rituel.
 
 ### Notes de reprise
 **P2 — les particules virtuelles des colonnes** (`virtual_column_sums`) : pour une maille de la bande à portée de la zone,
@@ -134,3 +134,6 @@ courant de surface (−7 mm/s). **La migration de masse a disparu à la maille f
 surface sous celle, exacte, des colonnes (le biais du repos, P3) — la zone lirait comme la bande, `η + e(η)`, `e` le biais du
 réseau nominal (`lattice_read_error`) ; (F) à 2,5 cm, la dernière colonne de la bande est clairsemée — la séparation ne voit pas
 les colonnes et pousse des particules à travers la frontière, où elles sont absorbées ; la tenir du côté de la bande.
+
+**P5** : suite 697 réussis, 18 ignorés, zéro avertissement. Preuve RACCORD-3D-S398 §5 ; A316 (note : la migration disparaît à la
+maille fine en 3D) ; file, liste 4.12, feuille de route.

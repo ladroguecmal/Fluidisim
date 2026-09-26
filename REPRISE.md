@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 00:44 +02:00
+Battement        : 2026-09-27 00:47 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
 Session en cours : S399 — C5b, deuxième part : la bande de particules et l'échange à la frontière, dans une même projection (APIC 3D)
 Dernière session : S398 — physique : **C5b, première part** ([preuve](docs/validation/RACCORD-3D-S398.md)) — la zone des colonnes dans APIC 3D (surface `η`, vitesse advectée, une seule projection) : seule, elle ballotte à ≤ 0,03 point de δ ; sans masque, au bit ; δ refuse la cuve mince à 2,5 cm (observé). Avant : S397, la circulation du raccord 2D était un défaut du banc
