@@ -53,7 +53,7 @@ fn oriented_planes_and_real_steps_do_not_allocate_s228() {
         volume_ml, capacity_ml: 8_000_000, origin_um: [0; 3], shape: 0,
     });
     let mut edges = [Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 1_000 },
-        position_um: [0; 3], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 }];
+        position_um: [0; 3], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0, control_pm: CONTROL_FULL }];
     let (result, calls) = measured(|| {
         for g in [[0., 0., -9.81], [2.943, 0., -9.81], [9.81, 0., 0.],
                   [0., 0., 9.81], [3., -2., -9.]] {
@@ -96,7 +96,7 @@ fn c19_oriented_snapshot_continues_real_network_without_allocation_s229() {
         volume_ml, capacity_ml: 8_000_000, origin_um: [0; 3], shape: 0,
     });
     let opening = Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 1 },
-        position_um: [0; 3], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 };
+        position_um: [0; 3], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0, control_pm: CONTROL_FULL };
     let initial_edges = [opening,
         Opening { to: Some(2), flow: Flow::Weir { width_mm: 1 }, ..opening },
         Opening { from: 1, to: Some(2), ..opening },

@@ -33,6 +33,7 @@ fn main() {
             flow: Flow::Orifice { area_mm2: 1_000 },
             position_um: if topology == "ring" { nodes[from].origin_um } else { [2_000_000, 0, 1_200_000] },
             discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0,
+            control_pm: CONTROL_FULL,
         }).collect();
         let mut scratch = vec![0; n];
         let g = black_box([2.943, 0., -9.81]);

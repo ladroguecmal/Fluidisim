@@ -86,10 +86,17 @@ pas déterministe au bit, refus atomiques. (6) Instantané v2 : une commande cha
 
 - [x] **P1** — jeton, plan seul ; R26 consigné.
 - [x] **P2** — ADR-199 : vannes et pompes dans V (lois, commande, provenance, ce qui n'est pas fait).
-- [ ] **P3** — `control_pm` sur `Opening` ; la vanne ; critères 1 et 2.
+- [x] **P3** — `control_pm` sur `Opening` ; la vanne ; critères 1 et 2.
 - [ ] **P4** — la pompe ; critères 3 à 5.
 - [ ] **P5** — l'instantané WVST v2 ; critère 6.
 - [ ] **P6** — preuve `VANNES-POMPES-S372`, liste 5.4, file, feuille de route, index, ADR-010 et ADR-140 notes datées.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+
+**P3 — fait.** `Opening::control_pm` (`CONTROL_FULL` = 1 000, `Default` écrit à la main), refus hors de 0..=1 000 ;
+orifice et déversoir × `c/1 000`. **Critère 1** : empreinte des trajectoires de quatre montages (C12 2 000 pas, chaîne
+600, mixte 200, déversoir 1 000) relevée sur `c04b2974` **avant** la modification, `0xa02de06bc52bfd2e` — inchangée ;
+33 essais V passent. **Critère 2** : C12 à 1 000 / 500 / 250 : 727,4 / 1 455,1 / 2 910,6 s pour 728,3 / 1 456,5 /
+2 913,1 (−0,12 / −0,10 / −0,08 %) ; fermée 10 000 pas : 0 ml, reste intact ; fermée 60 s puis rouverte : +600 pas
+exactement ; déversoir à 250 : 0,249989. Littéraux `Opening` complétés dans les essais, l'exemple et `tests/`.

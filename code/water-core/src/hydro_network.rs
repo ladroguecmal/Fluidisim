@@ -19,7 +19,11 @@
 //!   défaut qu'I-07 qualifie de bloquant.
 //!
 //! Ce que ce module ne fait pas : ni réseau fermé sous pression (ADR-010 §4 le reporte
-//! explicitement en v2), ni pompe, ni matériau poreux, ni pluie, ni absorption.
+//! explicitement en v2), ni matériau poreux, ni pluie, ni absorption.
+//!
+//! **ADR-199, S372** : chaque arête porte une **commande** (`control_pm`, 0 à 1 000), état répliqué posé par l'hôte
+//! entre deux pas : un orifice ou un déversoir commandé est une **vanne** ; la **pompe** est une loi à part, en réseau
+//! ouvert.
 //!
 //! **ADR-139, S228** : les formes géométriques fournissent un plan orienté conservant le volume.
 //! Les anciennes tables n'acceptent que leur orientation cuite +Z. Géométrie, précision et coût
@@ -47,6 +51,10 @@ pub const SHARP_EDGE_DISCHARGE: f32 = 0.62;
 /// Coefficient de débit d'un déversoir rectangulaire (ADR-010 §3). Même statut que le précédent :
 /// il vient de l'ADR, et l'hôte peut le remplacer par arête.
 pub const WEIR_DISCHARGE: f32 = 0.60;
+
+/// Commande pleine d'une arête (ADR-199 D1) : vanne ouverte, pompe à sa vitesse nominale. À cette valeur, les lois sont
+/// celles d'avant la commande, au bit.
+pub const CONTROL_FULL: i64 = 1_000;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
@@ -99,7 +107,7 @@ impl Default for Flow {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug)]
 pub struct Opening {
     pub from: u16,
     /// `None` : rejet hors réseau. Le volume sort du bilan, et c'est voulu.
@@ -112,6 +120,23 @@ pub struct Opening {
     pub discharge: f32,
     /// Reste fractionnaire, en nanolitres (10⁻⁶ ml). Entretenu par `step`.
     pub residue_nl: i64,
+    /// **Commande**, en pour mille (ADR-199 D1) : ouverture d'une vanne, vitesse d'une pompe. Un **état**, comme le
+    /// volume d'un nœud : posé par l'hôte entre deux pas, depuis un événement de jeu répliqué ; V ne la décide jamais.
+    /// `CONTROL_FULL` par défaut ; hors de 0..=1 000, le pas est refusé.
+    pub control_pm: i64,
+}
+impl Default for Opening {
+    fn default() -> Self {
+        Self {
+            from: 0,
+            to: None,
+            flow: Flow::default(),
+            position_um: [0; 3],
+            discharge: 0.0,
+            residue_nl: 0,
+            control_pm: CONTROL_FULL,
+        }
+    }
 }
 
 /// Formes empruntées à l'hôte : géométrie orientable (ADR-139) ou anciennes tables +Z.
@@ -260,6 +285,7 @@ pub fn step(
         if e.from as usize >= nodes.len()
             || e.to.is_some_and(|t| t as usize >= nodes.len())
             || size < 0
+            || !(0..=CONTROL_FULL).contains(&e.control_pm)
             || !(e.discharge >= 0.0)
             || !e.discharge.is_finite()
         {
@@ -291,15 +317,18 @@ pub fn step(
             }
             None => sill,
         };
-        if h_up <= downstream {
+        if h_up <= downstream || e.control_pm == 0 {
             continue;
         }
+        // La vanne (ADR-199 D2) : la section ou la largeur réduite dans le rapport de la commande. À commande pleine le
+        // facteur vaut exactement 1, et le débit est celui d'avant, au bit.
+        let ouverture = e.control_pm as f64 / CONTROL_FULL as f64;
         let head_m = (h_up - downstream) * 1e-6;
         let g = 2.0 * magnitude;
         let q_m3s = match e.flow {
             // Torricelli, ADR-010 §3. Section en mm² → m² : 1e-6.
             Flow::Orifice { area_mm2 } => {
-                e.discharge as f64 * (area_mm2 as f64 * 1e-6) * (g * head_m).sqrt()
+                e.discharge as f64 * (area_mm2 as f64 * 1e-6) * (g * head_m).sqrt() * ouverture
             }
             // Déversoir rectangulaire, ADR-010 §3. Largeur en mm → m : 1e-3. La charge est comptée
             // au-dessus du **seuil** ; `head_m` la porte déjà, le seuil entrant dans `downstream`.
@@ -307,6 +336,7 @@ pub fn step(
                 (2.0 / 3.0) * e.discharge as f64 * (width_mm as f64 * 1e-3)
                     * g.sqrt()
                     * head_m.powf(1.5)
+                    * ouverture
             }
         };
         if !q_m3s.is_finite() {
@@ -419,3 +449,7 @@ pub fn step(
 #[cfg(test)]
 #[path = "tests_hydro_network.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "tests_hydro_controles.rs"]
+mod tests_controles;

@@ -33,6 +33,7 @@ fn c12() -> ([HydroNode; 1], [Opening; 1], [i64; SHAPE_ENTRIES]) {
         position_um: [0, 0, 0],
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
+        control_pm: CONTROL_FULL,
     };
     ([node], [edge], table)
 }
@@ -98,6 +99,7 @@ fn closed_network_conserves_volume_exactly_s224() {
         position_um: [0, 0, 500_000],
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
+        control_pm: CONTROL_FULL,
     }];
     let mut scratch = [0i64; 1];
     let total = nodes[0].volume_ml + nodes[1].volume_ml;
@@ -156,6 +158,7 @@ fn three_leaks_on_a_nearly_empty_node_stay_non_negative_s224() {
         position_um: [0, 0, 1_000_000],
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
+        control_pm: CONTROL_FULL,
     });
     let mut scratch = [0i64; 3];
     let total: i64 = nodes.iter().map(|n| n.volume_ml).sum();
@@ -195,6 +198,7 @@ fn downstream_capacity_is_never_exceeded_s224() {
         position_um: [0, 0, 2_000_000],
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
+        control_pm: CONTROL_FULL,
     }];
     let mut scratch = [0i64; 1];
     for _ in 0..50 {
@@ -316,6 +320,7 @@ fn the_weir_follows_the_three_halves_law_s224() {
             position_um: [0, 0, 0],
             discharge: WEIR_DISCHARGE,
             residue_nl: 0,
+            control_pm: CONTROL_FULL,
         }];
         let mut scratch = [0i64; 1];
         step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
@@ -351,8 +356,8 @@ fn an_open_chain_tracks_a_hundredfold_finer_step_s224() {
                 HydroNode { volume_ml: 0, capacity_ml: 1_000_000, origin_um: [0, 0, 0], shape: 0 },
             ],
             [
-                Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 2_000 }, position_um: [0, 0, 2_000_000], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 },
-                Opening { from: 1, to: Some(2), flow: Flow::Orifice { area_mm2: 2_000 }, position_um: [0, 0, 1_000_000], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 },
+                Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 2_000 }, position_um: [0, 0, 2_000_000], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0, control_pm: CONTROL_FULL },
+                Opening { from: 1, to: Some(2), flow: Flow::Orifice { area_mm2: 2_000 }, position_um: [0, 0, 1_000_000], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0, control_pm: CONTROL_FULL },
             ],
         )
     };
@@ -400,6 +405,7 @@ fn hull(position_um: [i64; 3]) -> ([HydroNode; 1], [Opening; 1], [i64; SHAPE_ENT
         position_um,
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
+        control_pm: CONTROL_FULL,
     };
     ([node], [edge], table)
 }
@@ -548,6 +554,7 @@ fn confluence_never_overfills_the_receiver_s227() {
             from, to: Some(3), flow: Flow::Orifice { area_mm2: 100_000 },
             position_um: [0, 0, 2_000_000], discharge: SHARP_EDGE_DISCHARGE,
             residue_nl: 0,
+            control_pm: CONTROL_FULL,
         });
         let mut scratch = [0; 3];
         for tick in 0..4 {
@@ -583,6 +590,7 @@ fn extreme_coordinates_preserve_vertical_transfers_s227() {
             from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 1_000 },
             position_um: [x_to, 0, 2_000_000], discharge: SHARP_EDGE_DISCHARGE,
             residue_nl: 0,
+            control_pm: CONTROL_FULL,
         }];
         let mut scratch = [0];
         step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
@@ -612,6 +620,7 @@ fn mixed_network_keeps_bounds_and_accounts_for_external_loss_s227() {
                 from, to, flow: Flow::Orifice { area_mm2: 100_000 },
                 position_um: nodes[from as usize].origin_um,
                 discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0,
+                control_pm: CONTROL_FULL,
             });
         if reverse { edges.reverse(); }
         let mut scratch = [0; 4];
@@ -672,6 +681,7 @@ fn receiving_surface_and_large_origin_use_the_same_plane_s228() {
         let mut edges = [Opening {
             from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 1_000 },
             position_um: origin_um, discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0,
+            control_pm: CONTROL_FULL,
         }];
         step(&mut nodes, &mut edges, &shapes, TILTED, SimTime(STEP_US), &mut [0]).unwrap();
         assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>(), 8_080_000);
@@ -699,7 +709,7 @@ fn a_real_hull_does_not_leak_above_its_volume_surface_s228() {
         let mut nodes = [HydroNode { volume_ml: 1_000_000, capacity_ml: 4_000_000,
                                     origin_um: [0; 3], shape: 0 }];
         let mut edges = [Opening { from: 0, to: None, flow: Flow::Orifice { area_mm2: 1_000 },
-            position_um: [0, 0, z], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 }];
+            position_um: [0, 0, z], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0, control_pm: CONTROL_FULL }];
         for _ in 0..10 {
             step(&mut nodes, &mut edges, &shapes, TILTED, SimTime(STEP_US), &mut [0]).unwrap();
         }

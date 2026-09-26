@@ -7,7 +7,7 @@ fn node(volume_ml: i64) -> HydroNode {
 }
 fn edge() -> Opening {
     Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 1 },
-        position_um: [0; 3], discharge: 0.62, residue_nl: 0 }
+        position_um: [0; 3], discharge: 0.62, residue_nl: 0, control_pm: crate::hydro_network::CONTROL_FULL }
 }
 fn context() -> Context { Context { time: SimTime(0), dt: SimTime(STEP_US), g_eff: [-0., 0., -9.81] } }
 fn refresh(b: &mut [u8]) {
