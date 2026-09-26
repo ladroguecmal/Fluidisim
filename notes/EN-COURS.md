@@ -62,67 +62,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S400 — **terminée**. Deux parts. Demande de l'utilisateur (2026-09-27) : *« https://scottiefox.github.io/caustic-volume/ Il
-s'agit d'un projet sur tree.js mais peut être il serait intéressant à analyser du point de vue des rendus ou autres, il faut avoir
-en tête que les objectifs de cette référence ne sont pas les mêmes que mon projet. Continue »*. Agent : Claude Opus 5.5, session
-cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Le site est bloqué par le réseau ; le dépôt public
-(`scottiefox/caustic-volume`, MIT) est lu par git.
+Session : S401 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Reprends le projet »*. Suite déclarée par S400 : dans le
+cloud, **C8b, le domaine épars** ; décision de S397 : *« terminer le solveur »*. Agent : Claude Opus 5.5, session cloud Claude
+Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, partie de `main` (S383) et
+avancée par avance rapide jusqu'à `claude/blissful-pasteur-m4j5rn` (S400, jeton libre) : aucun fork, une seule lignée. Suite de
+départ : 697 réussis, 18 ignorés, zéro avertissement.
 
-**Première part — la référence, rangée comme comparable** (`docs/COMPARABLES-EXTERNES.md`, une section datée) : ce que c'est, ce
-que le code fait (lu, non exécuté), ce que nous faisons déjà, ce qui manque chez nous et qu'elle montre (8.5 : rayons de lumière
-dans l'eau, particules), et ce qu'elle n'autorise pas — ses buts ne sont pas les nôtres : un jouet interactif réglé à l'œil, pas
-une référence validée ; **aucun de ses nombres n'entre comme seuil**. Les pistes vont à la file, avec leur déclencheur.
+**Thèse.** Un domaine δ est un **ensemble de blocs** (ADR-006 §3 ; colonnes de 8 × 8, toute la profondeur, S396) dans une
+**fenêtre** du réseau commun. Une colonne hors de l'ensemble est **hors du domaine** : les faces qui la bordent sont des murs, ses
+mailles sortent de tous les opérateurs — par le chemin que la découpe prend déjà (`open3`, `solid3`, S328), et le bord de
+l'ensemble se comporte **comme le bord de la boîte** (l'advection y lit la face elle-même, pas un zéro). L'ensemble **suit la
+perturbation** : il contient les blocs à moins de `r_c` = 4 m d'un bloc actif (`|η − repos|` > 1 mm, S396) et de l'**enveloppe
+prévue** d'un objet — `p + V·t`, élargie de `½·a_max·t²`, jusqu'à l'horizon `√(2R/a_max)` (ADR-013 §2) ; un bloc que rien ne
+requiert depuis 0,25 s (ADR-006 §4) est rendu au repos, et ce qu'il portait est publié. **Ce que la session ne fait pas** : le
+stockage par blocs et son pool (la mémoire reste la fenêtre ; c'est la forme de la production, C8 au poste), les niveaux de `dx`
+(rang 4), le bord non réfléchissant d'une partie.
 
-**Seconde part — recevoir le raccord (C5b)** : les deux remèdes attribués en S399, critères de S399 **inchangés**. (E) **la zone
-lit sa surface comme la bande** : `φ = z − (η + e(η))`, `e` le biais de lecture d'un réseau nominal au même niveau
-(`lattice_read_error`, table calculée à la configuration) — la masse (`η`) reste exacte, la pression voit ce que la bande verrait ;
-(F) **la séparation tenue du côté de la bande** : une particule que la séparation pousserait dans une colonne de la zone reste
-dans sa colonne. **Prédictions** : (E) — repos ≤ 1 cm/s, et à 5 cm plus de migration ni de courant de surface ; (F) — la densité de
-la dernière colonne de la bande à 8 ± 0,4 à 2,5 cm.
+**Critères, écrits avant.** (1) Sans ensemble, la suite **au bit** ; ensemble plein, 50 pas mobiles au bit du pas sans ensemble.
+(2) Oracles indépendants — (a) un rectangle dans une fenêtre plus grande contre un domaine dense de ce rectangle, (b) deux
+rectangles disjoints contre deux domaines denses : écart de surface **≤ 10 µm** sur 5 s pour une bosse de 5 cm (prédiction : à
+l'arrondi du solveur, ≤ 1 µm) ; (c) un L : volume conservé au plancher de la cuve dense ; **vu échouer** avec une face du bord
+laissée ouverte. (3) Une source mobile traverse un bassin ; le domaine épars qui la suit, contre le domaine entier : écart de
+surface **≤ 3 mm** partout et à tout instant (tolérance d'image, I-12 ; prédiction : ≤ 1 mm, le seuil d'activité) ; la source
+toujours dans l'ensemble. (4) Publiés : part des mailles de l'ensemble, volume rendu au repos, itérations, durée d'un pas. (5) La
+prévision : pour des manœuvres tirées avec `|a|` ≤ `a_max`, la position à `t` ≤ `H` reste dans l'ensemble prévu, **100 %** ; au
+banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la référence : section des comparables ; pistes à la file (rendu, au poste).
-- [x] **P3** — (E) et (F) dans `apic3d_columns.rs` ; le repos (critère 2 de S399) ; sans zone et toutes colonnes au bit.
-- [x] **P4** — `apic3d_raccord`, 30 s, 5 et 2,5 cm ; critère 4 de S399 ; attribution si manqué.
-- [x] **P5** — suite ; preuve (§6 de RACCORD-3D-S398) ; liste, file, A316.
-- [x] **P6** — rituel.
+- [ ] **P2** — l'ensemble épars dans `Volume3` (`delta3d_sparse.rs`) : réserve du masque, `set_active_columns`, `open3` et `solid3`
+  qui le voient, advection au bord de l'ensemble comme au bord de la boîte ; pas linéaire, couplé, gradué et `transplant`
+  refusés ; critère 1.
+- [ ] **P3** — les oracles (a), (b), (c), et vu échouer ; critère 2.
+- [ ] **P4** — le suivi et la prévision (`domain_blocks.rs`) : blocs actifs, dilatation, enveloppe d'ADR-013 §2, libération après
+  0,25 s ; sans allocation ; critère 5 (propriété de l'enveloppe).
+- [ ] **P5** — le banc `delta3d_epars` : une source mobile (dipôle de volume), droite puis qui tourne ; domaine entier contre
+  domaine épars ; critères 3, 4 et 5 (banc).
+- [ ] **P6** — les chiffres de réception en essais ; suite entière, zéro avertissement ; critère 6.
+- [ ] **P7** — preuve `DOMAINE-EPARS-S401` ; liste (4.3, 4.9, 9.2), file, feuille de route, index.
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
 
-- **P2** : section « CAUSTIC//VOLUME » des comparables (lu au dépôt, non exécuté). Même méthode que nos caustiques de S361 (Wyman,
-  rapport d'aires). Ce qui manque chez nous : rayons de lumière et caustiques **dans** l'eau et sur les objets par un volume de
-  tranches (8.5, 8.6) — à juger par un contrôle de conservation (moyenne d'une tranche = `E₀·exp(−K_d·z)`) et une photographie,
-  **sans le gain artistique** `godRays` ; dispersion seulement si une photographie montre des franges ; occultation des photons par
-  la coque. Pointeurs : file (rendu), liste 8.5.
-- **P3** : (E) `columns_read` — table de 32 lectures du réseau nominal (`lattice_read_error`, noyau et rayon courants), faite à
-  `enable_columns` et quand la mesure change le noyau ou le rayon ; appliquée **seulement s'il y a une bande** (une colonne hors du
-  masque) : toutes colonnes, la zone lit `η` exactement. (F) dans `separate` : une particule poussée d'une colonne de la bande dans
-  une colonne de la zone garde `x, y`. **Repos (critère 2 de S399) tenu : 1,970·10⁻⁵ m/s** (S399 : 1,007·10⁻² m/s) ; vu échouer :
-  table coupée, 1,007·10⁻² m/s. Sans zone : ligne de S389 au chiffre près (1,9964 s, +1,01 %, +7,04 %, +0,21 %, 93,5) ; toutes
-  colonnes : ligne de S398 (+0,02 %, +0,49 %, volume +1,39·10⁻¹⁰). Garde du test ramenée au critère (0,01).
-- **P4** — `apic3d_raccord`, 30 s, (E) + (F). Écarts à APIC seul :
-
-  | critère 4 de S399 | 5 cm | 2,5 cm |
-  |---|---|---|
-  | niveau de la bande, par 10 s (±2 mm) | +0,51 / +1,44 / +1,83 (S399 : +1,21 / +2,47 / +3,14) | +0,12 / +0,34 / −0,45 |
-  | particules par maille (8 ± 0,4) | **7,54** / 7,77 / 7,95 | **7,28 / 7,20 / 7,18** (seul : 8,00 / 7,94 / 7,62) |
-  | saut max (< 0,5) | 0,101 (seul 0,093) | 0,170 (seul 0,785) |
-  | période (1 point) | +0,77 contre +0,98 % | +0,27 contre +0,36 % |
-  | amortissement (1 point) | +0,39 contre +0,32 % | +0,23 contre +0,08 % |
-  | courant sur la face (≤ 5 mm/s) | +0,8 en profondeur, **−6,7 à la surface** (seul −0,5) | +0,9, −1,8 |
-  | volume | −6,4·10⁻¹⁰ | +9,2·10⁻¹⁰ |
-
-  **Témoins** (5 cm) : toutes colonnes, courant **+0,5 uniforme** — pas de circulation : elle est au raccord, pas à la zone ;
-  marche lue signée moyenne (bande − zone, sur `φ`) **+0,07 mm** avec (E), +0,02 mm sans — la pression ne voit **aucune** marche
-  moyenne : sans (E), la bande se remplit jusqu'à lire comme la zone (la migration est la réponse d'équilibre au biais) ; avec
-  (E), elle n'a plus à le faire. Sans (E) : niveau +1,21 / +2,48 / +3,07, courant −7,0, densité 7,70 / 7,89 / 8,15 (= S399). Sans
-  (F) : au chiffre près de (E) + (F) (niveau +0,91 / +2,01 / +2,23 brut, courant −6,8, densité 7,54 / 7,77 / 7,95). Par rangée
-  (5 cm, E + F) : 7,7 à 8,1 en profondeur, **7,32 et 7,02 dans les deux rangées du haut** — le déficit est à la surface, contre la
-  face, là où passe le courant. **Attributions** : (E) **confirmée pour la migration** (dans le critère) ; **réfutée pour le
-  courant** ; (F) **sans effet** à 5 cm. Le courant et le déficit de surface : non attribués.
-- **P5** — témoin sans (F) à 2,5 cm : niveau brut +0,07 / +0,34 / +0,02 mm, densité 7,29 / 7,18 / 7,13, courant −1,5, marche lue
-  +0,005 mm ; par rangée 7,37 au fond à 6,78 en haut. (F) réfutée aux deux mailles. Preuve §6, file (deux lignes), liste 4.12,
-  feuille de route, A316 (condition d'une quatrième session : un témoin court qui abaisse le courant sous 5 mm/s). Suite :
-  **697 réussis**, 18 ignorés, zéro avertissement.
