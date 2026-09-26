@@ -92,7 +92,7 @@ cherchées par nous, avant d'être rendue ; jugée par l'utilisateur (R26).
   depuis l'objectif) ; la brume de Godot sur les pixels vus de l'eau.
 - [x] **P5** — `--controle-ligne-eau` : critère 1, puis critère 2 ; non-régression (critère 3).
 - [x] **P6** — la ligne sur l'objectif (ménisque), d'après P2 ; les images de R26.
-- [ ] **P7** — preuve `DEMI-IMMERGEE-S371`, ADR-019 note datée, liste 8.6, file, feuille de route, index ; revue R26.
+- [x] **P7** — preuve `DEMI-IMMERGEE-S371`, ADR-019 note datée, liste 8.6, file, feuille de route, index ; revue R26.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise

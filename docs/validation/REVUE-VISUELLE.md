@@ -1157,3 +1157,27 @@ dans toutes les directions. Calée sur la mesure : une lueur face au soleil, rie
 
 **Verdict R25 — reçu le 2026-09-25 (S367)** : *« Je valide les rendue sauf ecume »* — **la lueur face au soleil est validée**.
 **R18** (en direct, §23), que la demande de S366 ne rappelait pas, reste attendu. *Reçu en S369 : voir §23.*
+
+## 31. R26 — la caméra à demi immergée, S371
+
+**Liste 8.6** ([preuve](DEMI-IMMERGEE-S371.md)). La caméra au ras de l'eau : la ligne d'eau traverse l'image. Chaque pixel
+est vu de l'eau ou de l'air selon l'endroit où son rayon traverse l'objectif ; la ligne suit la vague, à 0,08 pixel près
+du calcul exact, sans scintiller. Sur la ligne, un **ménisque** — l'eau qui monte sur le hublot —, calé sur une
+photographie « dessus-dessous » de Raja Ampat : un trait sombre, une bande claire.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s371/demi_vers_le_large.png` | au niveau de l'eau, vers le large : la ligne inclinée par la pente de la vague, le dessous de la surface, le fond et ses caustiques |
+| `viewer/captures/s371/demi_au_dessous.png` | 4 cm sous la surface, en contre-plongée : le ciel en haut, la surface vue d'en dessous, un morceau de fenêtre de Snell |
+| `viewer/captures/s371/demi_au_dessus.png` | 4 cm au-dessus, plongeante : la mer, et l'eau qui coupe le bas de l'image |
+| `viewer/captures/s371/demi_face_au_soleil.png` | face au soleil |
+| `viewer/captures/s371/demi_sans_menisque.png` | la première, sans le ménisque |
+| `viewer/captures/s371/avant_d_un_bloc.png` | la première, comme avant S371 : tout le cadre basculait d'un bloc — le ciel rendu comme de l'eau |
+
+**Les questions :**
+
+1. **Crédible ?** Qu'est-ce qui gêne d'abord ?
+2. **Le ménisque** (trait sombre et bande claire sur la ligne) : le garder, l'enlever ?
+
+Un mot par question suffit ; sans réponse, il reste.
+

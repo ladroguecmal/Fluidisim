@@ -134,3 +134,10 @@ scintille — défaut très visible et coûteux à corriger tard.
 > faisceau `c = a + b` par canal, relue à 0,004 près. Pour §7.1, le prototype retient **l'extinction et une source de
 > diffusion proportionnelle à l'éclairement local**, intégrée exactement le long de la ligne de visée ; la diffusion
 > volumique complète reste ouverte. §6, la caméra à demi immergée, n'est pas traitée : le mode bascule d'un bloc.
+
+> **Note du 2026-09-26 (S371).** §6 traité, dans Godot ([DEMI-IMMERGEE-S371](../validation/DEMI-IMMERGEE-S371.md)) : le
+> milieu se décide **par pixel**, là où le rayon traverse le plan proche, sur la surface de B à l'ordre 2 autour du
+> centre de ce plan (déplacement et second ordre compris) ; la ligne rendue tombe à 0,08 pixel de l'intersection exacte,
+> sans pixel mal classé sur soixante images, pour 0,03 ms GPU. Un ménisque calé sur une photographie la souligne. Les deux
+> mixages audio restent à faire, avec le son (ADR-197 D5). §2 : le bord de la fenêtre de Snell vu de tout près exigeait
+> une lecture bicubique de la surface fine (même preuve, §4).
