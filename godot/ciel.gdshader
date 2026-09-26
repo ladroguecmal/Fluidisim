@@ -24,6 +24,10 @@ void sky() {
         dessus = ciel_b(dir, 4);
     }
     COLOR = milieu.x >= 1.0 ? dessous : (milieu.x <= 0.0 ? dessus : mix(dessus, dessous, milieu.x));
+    // S371 P6 : le ménisque sur le hublot, côté air.
+    if (!AT_CUBEMAP_PASS) {
+        COLOR = menisque(COLOR, milieu.z);
+    }
     if (controle_milieu && !AT_CUBEMAP_PASS) {
         COLOR = vec3(milieu.x, 0.0, 0.0);
     }

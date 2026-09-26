@@ -93,6 +93,10 @@ var borne_g := 0.0
 var demi_actif := false
 ## La transition de la ligne d'eau, en fraction de la hauteur d'image (S371 P2 : ≈ 1 % sur les photographies de référence).
 const TRANSITION_LIGNE := 0.006
+## S371 P6 — le ménisque sur le hublot : bande claire et trait sombre, en fraction de la hauteur d'image (photographie A
+## de S371 P2 : 6 et 1,5 pixels sur 670).
+const MENISQUE_BANDE := 0.009
+const MENISQUE_TRAIT := 0.0025
 var vue_caustiques: SubViewport
 var materiau_caustiques: ShaderMaterial
 var maillage_caustiques: MeshInstance3D
@@ -529,6 +533,10 @@ func uniformes_fixes() -> void:
 			m.set_shader_parameter("plan_proche", camera.near)
 			m.set_shader_parameter("pixel_proche", 2.0 * camera.near * tan(deg_to_rad(camera.fov) / 2.0) / hauteur)
 			m.set_shader_parameter("transition_px", transition)
+			# S371 P6 : le ménisque, en fraction de la hauteur d'image (photographie A) ; `MENISQUE=0` l'éteint.
+			m.set_shader_parameter("menisque_px", MENISQUE_BANDE * hauteur)
+			m.set_shader_parameter("trait_px", MENISQUE_TRAIT * hauteur)
+			m.set_shader_parameter("menisque_actif", OS.get_environment("MENISQUE") != "0")
 
 
 ## S371 — la borne de |η| de la bande : `Σ|a|`, et le second ordre de Tayfun, `½·k̄·(Σ|a|)²` par système (ADR-176 D1).

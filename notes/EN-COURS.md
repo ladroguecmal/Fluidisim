@@ -91,7 +91,7 @@ cherchées par nous, avant d'être rendue ; jugée par l'utilisateur (R26).
 - [x] **P4** — l'eau, le fond et le ciel lisent le milieu du pixel (profondeur d'origine par pixel, trajet dans l'eau
   depuis l'objectif) ; la brume de Godot sur les pixels vus de l'eau.
 - [x] **P5** — `--controle-ligne-eau` : critère 1, puis critère 2 ; non-régression (critère 3).
-- [ ] **P6** — la ligne sur l'objectif (ménisque), d'après P2 ; les images de R26.
+- [x] **P6** — la ligne sur l'objectif (ménisque), d'après P2 ; les images de R26.
 - [ ] **P7** — preuve `DEMI-IMMERGEE-S371`, ADR-019 note datée, liste 8.6, file, feuille de route, index ; revue R26.
 - [ ] **P8** — rituel.
 
@@ -157,3 +157,9 @@ Mesuré : **0,078 px** au pire, 0 pixel mal classé ; **surcoût GPU −0,001 et
 GDScript, en mode demi seulement. `MILIEU=exact` garde Newton : image contre ordre 2, écarts le long de la ligne seule.
 **Brume** (`BRUME=1` la garde, pose `demi`) : au-dessus de la ligne, 0,8 % des pixels, 17 niveaux au pire (p99,9 = 2) ;
 au-dessous, 12 % et **jusqu'à 48 niveaux** — le défaut de S366 évité. Témoins : identiques au bit (zénith : 33 px à ±1).
+
+**P6 — fait.** Le ménisque sur le hublot (`menisque`, `surface_b.gdshaderinc`), côté air de la ligne, sur l'eau et le ciel
+(le fond n'y est vu qu'à travers la surface) : bande claire ×1,38 sur 0,9 % de la hauteur, trait sombre ×0,27 sur 0,25 %,
+calés sur la photographie A ; `MENISQUE=0` l'éteint (B n'en montre pas). Témoins inchangés. Images de R26 :
+`viewer/captures/s371/` — `demi_vers_le_large`, `demi_face_au_soleil`, `demi_au_dessus`, `demi_au_dessous`,
+`demi_sans_menisque`, `avant_d_un_bloc` (`DEMI=0` : tout le cadre sous l'eau, ciel compris).

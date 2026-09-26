@@ -39,6 +39,14 @@ uniform float ecart_centre = 0.0;
 uniform vec2 pente_centre = vec2(0.0);
 uniform vec3 courbure_centre = vec3(0.0);
 uniform bool milieu_exact = false;
+// **Le ménisque sur le hublot** (S371 P6) : l'eau mouille le hublot et y monte au-dessus de son niveau — côté air de la
+// ligne. Calé sur la photographie A de S371 P2 (dôme, soleil, Raja Ampat ; prise de vue inconnue) : de l'air vers l'eau,
+// un trait sombre (0,27 fois ses voisins, 0,25 % de la hauteur d'image), une bande claire (1,38 fois l'air qui la
+// précède, 0,9 %), puis le passage à l'eau. La photographie B (compact, à l'ombre) n'en montre pas : sans soleil ni
+// dôme, `MENISQUE=0`. Largeurs en pixels, données par `mer.gd`.
+uniform bool menisque_actif = true;
+uniform float menisque_px = 6.5;
+uniform float trait_px = 1.8;
 
 /// La bande au point lagrangien `q` (B), à empreinte nulle — toutes les composantes entières, comme `vertex()` d'`eau.gdshader`
 /// près de l'œil : le déplacement horizontal `d`, son gradient `g` = (g_xx, g_xy, g_yy), la hauteur `eta` avec le second
@@ -101,6 +109,19 @@ vec3 surface_a_l_aplomb(vec2 x) {
     }
     vec2 pente = det >= 0.1 ? vec2((jyy * s.x - jxy * s.y) / det, (-jxy * s.x + jxx * s.y) / det) : s;
     return vec3(eta - dot(pente, f), pente);
+}
+
+/// Le ménisque appliqué à la couleur finale `c` d'un pixel à la distance signée `dist` de la ligne (pixels, positive dans
+/// l'air) : la bande claire juste au-dessus de la transition, le trait sombre au-dessus d'elle ; bords d'un pixel.
+vec3 menisque(vec3 c, float dist) {
+    if (!demi_immergee || !menisque_actif) {
+        return c;
+    }
+    float a = dist - 0.5 * max(transition_px, 1e-3);
+    float clair = smoothstep(-0.5, 0.5, a) * (1.0 - smoothstep(menisque_px - 0.5, menisque_px + 0.5, a));
+    float trait = smoothstep(menisque_px - 0.5, menisque_px + 0.5, a)
+        * (1.0 - smoothstep(menisque_px + trait_px - 0.5, menisque_px + trait_px + 0.5, a));
+    return c * (1.0 + 0.38 * clair) * (1.0 - 0.73 * trait);
 }
 
 /// Le milieu du pixel dont le rayon part de `oeil` dans la direction `dir` (monde de Godot, unitaire) : x, la part d'eau,

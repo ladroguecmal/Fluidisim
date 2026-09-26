@@ -447,6 +447,9 @@ void fragment() {
     }
     }
     ALBEDO = milieu.x >= 1.0 ? vu_dessous : (milieu.x <= 0.0 ? vu_dessus : mix(vu_dessus, vu_dessous, milieu.x));
+    // S371 P6 : le ménisque sur le hublot (`surface_b.gdshaderinc`), côté air ; pas sur le fond, qui n'y est vu qu'à travers
+    // cette surface.
+    ALBEDO = menisque(ALBEDO, milieu.z);
     if (controle_milieu) {
         ALBEDO = vec3(milieu.x, 0.0, 0.0);
     }
