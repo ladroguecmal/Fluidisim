@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S385 — **en cours**. **C1** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5) :
+Session : S385 — **terminée**. **C1** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5) :
 **la multigrille 3D de la référence**. Demande de l'utilisateur (2026-09-26) : *« Oui »* à C1 ; et le **verdict R32**, à
 consigner. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
 
@@ -93,7 +93,7 @@ et temps total publiés, au même résidu.
 - [x] **P5** — critères 2 à 4 : essais et banc.
 - [x] **P6** — critère 5 (suite entière), critère 6 (coût) ; preuve `MULTIGRILLE-3D-S385` ; liste, file, feuille de route,
   index.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 

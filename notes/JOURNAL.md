@@ -17448,3 +17448,19 @@ battement du commit de P8 porte 15:01 pour une horloge à 14:59 (deux appels lan
 **Rituel.** Maillons **4** : aucune capacité reçue ; **justifié** — la conception est le préalable déclaré de la campagne
 (§3 ter) et la demande explicite de l'utilisateur ; C1 est du code à critère mesurable. **Question** : δ dans Godot en C11
 ou plus tôt (conception §6). Suivant : **C1**, la multigrille 3D de la référence ; au poste, verdict R32 et la pluie, pièce 5.
+
+## S385 — 2026-09-26 — physique : C1, la multigrille 3D de la référence
+
+**Entrée.** Verdict **R32** : *« n'est pas valide […] les gerbes n'apparaissent pas sur tous les impacts, elles peuvent tenir
+dans le vide, et sont vraiment moches vues de près. Mais on laisse valide pour l'instant »* — reçu pour l'instant, trois
+défauts à la file (peaufinage, non expliqués) ; *« Oui »* à C1. **Fait** ([preuve](../docs/validation/MULTIGRILLE-3D-S385.md)) :
+le cycle en V de S245 porté en 3D (`delta3d_multigrid.rs` ; Jacobi ω = 6/7 dérivé pour sept points, restriction moyenne,
+injection, niveaux rediscrétisés depuis la surface), préconditionneur du pas mobile derrière `enable_multigrid`, **désactivé
+par défaut**. **Critères 1 à 6 tenus** : cycle symétrique défini positif (essai **vu échouer** sur un cycle asymétrique) ;
+mêmes surfaces à 10⁻⁶ m ; **9 / 10 / 11 itérations** de 12 288 à 786 432 mailles contre 102 / 191 / 365 pour Jacobi, bosse
+de même ; à 128, premier pas ÷ 4,3 à 4,5, pas chaud ÷ 2,2 à 2,5 ; suite 667 réussis, zéro avertissement. **Limites** :
+durées d'un conteneur ; divergence sur toutes les lignes 1,41·10⁻⁵ à 128 (lignes franches 5,9·10⁻⁶), dite, non expliquée ;
+une itération coûte ≈ 8,7 Jacobi (coefficients fantômes recalculés) ; division stricte (porte B : deux niveaux) ; ni carte,
+ni pas couplé mesuré. **Rituel.** Maillons **5** : aucun critère de porte ni état de point n'a changé (4.19 reste partiel) ;
+**justifié** — la campagne est la demande explicite de l'utilisateur, et C1 tient le critère qu'ADR-207 lui a écrit. Suivant :
+**C2**, les colonnes hautes (sans carte) ; au poste, la pluie, pièce 5 ; question ouverte : δ dans Godot, quand.

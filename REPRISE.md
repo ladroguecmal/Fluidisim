@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 18:19 +02:00
-Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
-Session en cours : S385 — C1 : la multigrille 3D de la référence (ADR-207) ; verdict R32 consigné
-Dernière session : S384 — physique : **la campagne du solveur volumique 3D, sa conception** ([conception](docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md), [ADR-207](docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md)) — décision de l'utilisateur : « Solveur 3D ici » ; le domaine de la porte B consomme seul les 2 ms de δ ; colonnes hautes, multigrille, APIC en bande ; sessions C1 à C11. Avant : S383, les gerbes (R32 posée)
-Session suivante : **C1 — la multigrille 3D de la référence** (ADR-207 D5 ; faisable sans carte) ; au poste, en alternance (ADR-191) : **verdict R32**, puis la pluie, pièce 5 — surfaces mouillées et éclaboussures au sol
-Maillons        : 4 — S384 : conception, aucune capacité reçue ; justifié au journal (préalable déclaré de la campagne, demande de l'utilisateur) ; C1 a un critère mesurable
+Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; lecture des articles bloquée)
+Session en cours : aucune
+Dernière session : S385 — physique : **C1, la multigrille 3D de la référence** ([preuve](docs/validation/MULTIGRILLE-3D-S385.md), [ADR-207](docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md)) — 9 à 11 itérations quelle que soit la maille contre 102 à 365 pour Jacobi, désactivée par défaut ; verdict **R32** reçu pour l'instant (trois défauts à la file). Avant : S384, la conception de la campagne
+Session suivante : **C2 — les colonnes hautes dans la référence** (ADR-207 D2, D5 ; faisable sans carte) ; au poste, en alternance (ADR-191) : la pluie, pièce 5 — surfaces mouillées et éclaboussures au sol
+Maillons        : 5 — S385 : C1 tenue, aucun critère de porte ni état de point changé ; justifié au journal (campagne demandée par l'utilisateur)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
