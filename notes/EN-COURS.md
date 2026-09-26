@@ -84,12 +84,24 @@ correction (B) de S394 — son énergie ajoutée, qui devrait tomber près de z�
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — l'instrument : bilan par profondeur de la dernière colonne libre (insertions, retraits, densité), 30 s, contre
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — l'instrument : bilan par profondeur de la dernière colonne libre (insertions, retraits, densité), 30 s, contre
   APIC seul ; la prédiction.
-- [ ] **P3** — (C), l'échange au sommet ; critères 1 à 6 ; avec (B), publié.
+- [>] **P3** — (C), l'échange au sommet ; critères 1 à 6 ; avec (B), publié.
 - [ ] **P4** — preuve (§15 de B10-APIC-S320) ; A316, file, liste.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+**P2 — le bilan par profondeur** (`RACCORD_BILAN=1`, paroi, 5 cm, 30 s ; sans la variable, au bit) :
 
+| rangée (y) | 0 (2,5 cm) | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 (47,5 cm) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| insertions | 24 | 22 | 27 | 27 | 34 | 46 | 65 | 92 | 119 | 129 |
+| retraits | 76 | 73 | 77 | 71 | 67 | 60 | 50 | 42 | 30 | 23 |
+| particules par maille (APIC seul) | 4,44 (4,15) | 4,83 (4,15) | 4,40 (4,13) | **5,02** (3,99) | **5,47** (3,99) | **5,44** (3,99) | **5,13** (4,03) | 4,49 (4,00) | 3,99 (3,96) | 3,10 (3,96) |
+
+**La prédiction est contredite** : l'excès n'est pas là où l'on insère — on insère surtout en haut (rangées 7–9), où la densité
+est normale ou basse ; il est au milieu (rangées 3–6, 5,0 à 5,5). **Ce que le bilan montre** : les totaux s'équilibrent (581
+insertions, 569 retraits), mais l'échange fait tourner une **recirculation** à la frontière — l'eau passe aux colonnes par le
+bas, revient aux particules par le haut. (C) reste le candidat déclaré : au sommet, l'échange n'a plus de structure par
+profondeur du côté des particules, recirculation comprise.

@@ -2329,6 +2329,9 @@ struct Hybride {
     densite: bool,
     /// Énergie potentielle que la correction de densité ajoute, J par mètre de largeur (attribution de (B)).
     energie_densite: f64,
+    /// **S395 : le bilan par profondeur** (`RACCORD_BILAN=1`) : particules insérées et retirées par l'échange, par rangée de
+    /// mailles — où l'échange pose et ôte l'eau.
+    bilan: Option<(Vec<u64>, Vec<u64>)>,
 }
 
 impl Hybride {
@@ -2372,6 +2375,7 @@ impl Hybride {
                 bande_biais: std::env::var("RACCORD_BANDE_BIAIS").ok().and_then(|v| v.parse().ok()).unwrap_or(0.0),
                 densite: std::env::var("RACCORD_DENSITE").is_ok_and(|v| v == "1"),
                 energie_densite: 0.0,
+                bilan: std::env::var("RACCORD_BILAN").is_ok_and(|v| v == "1").then(|| (vec![0; ny], vec![0; ny])),
             };
         if ensemence == "hysterese" {
             hy.rangees = Some(hy.h.iter().map(|h| (2.0 * h / dx).round().max(0.0) as usize).collect());
@@ -2753,6 +2757,9 @@ impl Candidat for Hybride {
                         let (_, n) = proches[j].remove(0);
                         garde[n] = false;
                         self.dette[k] -= area;
+                        if let Some((_, retraits)) = self.bilan.as_mut() {
+                            retraits[j] += 1;
+                        }
                     }
                     continue;
                 }
@@ -2784,6 +2791,9 @@ impl Candidat for Hybride {
                     let mouillee = (self.h[0] - k as f64 * dx).clamp(0.0, dx);
                     let y = if mouillee < dx { k as f64 * dx + 0.5 * mouillee } else { (k as f64 + 0.25 + 0.5 * (s / 2) as f64) * dx };
                     p = [xb - (0.25 + 0.5 * (s % 2) as f64) * dx, y];
+                }
+                if let Some((insertions, _)) = self.bilan.as_mut() {
+                    insertions[((p[1] / dx).max(0.0) as usize).min(ny - 1)] += 1;
                 }
                 let (v, c) = self.apic.depuis_grille(p);
                 self.apic.x.push(p);
@@ -2861,6 +2871,9 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
     // libres en `i_b−1` et des deux premières colonnes, les mêmes grandeurs pour APIC seul, la vitesse
     // moyenne sur la face de la frontière et les échanges cumulés.
     let serie = std::env::var("RACCORD_SERIE").is_ok();
+    // S395 : la densité par rangée dans la dernière colonne libre, hybride et APIC seul, moyennée sur les relevés.
+    let ny = hy.apic.mac.ny;
+    let (mut profil_hy, mut profil_seul, mut relevés) = (vec![0.0; ny], vec![0.0; ny], 0usize);
     while t < scene.t_fin - 1e-12 {
         let dt = hy.pas((prochain - t).max(1e-9));
         let mut ts = t;
@@ -2901,6 +2914,15 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
                 };
                 tasse[tranche].0 += densite(&hy.apic);
                 tasse[tranche].1 += densite(&seul);
+            }
+            if hy.bilan.is_some() && i_b >= 1 {
+                let nx = hy.apic.mac.nx;
+                let (nh, ns) = (hy.apic.occupation(), seul.occupation());
+                for j in 0..ny {
+                    profil_hy[j] += nh[j * nx + i_b - 1] as f64;
+                    profil_seul[j] += ns[j * nx + i_b - 1] as f64;
+                }
+                relevés += 1;
             }
             if let Some(e) = ecart_frontiere(&hy.apic, i_b) {
                 pire_ecart = pire_ecart.max(e.abs());
@@ -2953,6 +2975,17 @@ fn epreuve_hybride(cas: Cas, dx: f64) {
     println!("RACCORD_S354 particules_par_cellule_avant_la_frontiere_hybride/apic_seul {}", ligne.join(" "));
     if hy.densite {
         println!("RACCORD_S394 energie_ajoutee_par_la_correction_j_par_m={:.4}", hy.energie_densite);
+    }
+    if let Some((insertions, retraits)) = &hy.bilan {
+        for j in 0..ny {
+            let (a, b) = (profil_hy[j] / relevés.max(1) as f64, profil_seul[j] / relevés.max(1) as f64);
+            if insertions[j] + retraits[j] > 0 || a > 0.0 || b > 0.0 {
+                println!(
+                    "RACCORD_S395 rangee={j} y_m={:.3} insertions={} retraits={} particules_par_maille_hybride={a:.3} apic_seul={b:.3}",
+                    (j as f64 + 0.5) * dx, insertions[j], retraits[j]
+                );
+            }
+        }
     }
     execute(scene, &mut Apic::new(scene));
     execute(scene, &mut Hybride::new(scene));
