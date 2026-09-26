@@ -86,8 +86,8 @@ jugement de l'utilisateur (R28).
 - [x] **P1** — jeton, plan seul ; la campagne du solveur inscrite (file).
 - [x] **P2** — références : photographies de pluie sur l'eau (libres, lues sans téléchargement) ; ce qu'elles montrent.
 - [x] **P3** — les rides dans `bassin.gdshader` (le taux, l'anneau, le fondu en variance) ; critère 1 sur le bassin.
-- [>] **P4** — les rides sur la mer (`eau.gdshaderinc`, pente et covariance de la queue) ; critère 1 sur la mer.
-- [ ] **P5** — contrôle du taux (critère 2), du fondu (critère 3) ; images de R28.
+- [x] **P4** — les rides sur la mer (`eau.gdshaderinc`, pente et covariance de la queue) ; critère 1 sur la mer.
+- [>] **P5** — contrôle du taux (critère 2), du fondu (critère 3) ; images de R28.
 - [ ] **P6** — preuve `RIDES-PLUIE-S379`, liste (8.9 ou 8.4), file, feuille de route, index ; la campagne du solveur dans
   la feuille de route.
 - [ ] **P7** — rituel ; session suivante : **la campagne du solveur volumique 3D** (conception).
@@ -127,3 +127,22 @@ flouté par la chaîne de l'écran). Chiffres :
 - Vues ajoutées : `pluie_proche` (1,8 m, 30°), `pluie_aplomb`. À l'œil : paquets de 2–3 crêtes, bosses centrales,
   anneaux lisibles surtout dans le reflet clair — comme *Waterwaves raindrops* ; le ciel de la scène reste ensoleillé
   (la météo n'est pas faite).
+
+**P4 — la mer, et ce qu'elle a appris au bassin.** Les rides entrent dans `eau.gdshaderinc` en coordonnées de **Lagrange**
+(elles suivent le mouvement orbital) : pente ajoutée avant le passage en Euler, covariance avant son transport ; l'horloge
+`temps_pluie` repliée sur l'heure par `mer.gd`. **Critère 1 (mer)** : les cinq poses d'avant identiques au SHA-256 ; la
+variante à demi immergée compile et rend.
+- **Impasse n° 2** : à 10 mm/h la mer changeait de 2 à 4 niveaux sur 765 en moyenne, rien à l'œil — à 4 m de haut, les
+  crêtes de 1,7 cm sont sous le pixel partout. Deux enrichissements **fondés**, pas un gain arbitraire : (a) un **second
+  train** par anneau, λ 4,4 cm à la vitesse de groupe minimale 0,178 m/s (les crêtes d'espacement croissant des photos),
+  pente 0,08 — résolu 2,6 fois plus loin ; il tient dans la même maille (0,178·0,6 + 0,05 = 0,157 m) ; (b) la variance de
+  bande **anisotrope**, le long du rayon (covariance xx, xy, yy), comme la pente qu'elle remplace ; le bassin l'intègre par
+  Cholesky comme la mer. Après : mer à 50 mm/h, écart moyen 8,8 niveaux, p99 72 — des éclats fins, discrets ; bassin rasant
+  piqueté, carrelage déformé.
+- **Coût GPU** après (1280 × 720) : bassin proche 0,53 → 0,78 / 1,34 / 3,52 ms (2 / 10 / 50 mm/h), aplomb 0,48 → 0,72 /
+  1,43 / 4,20, rasante 0,46 → 0,53 / 0,68 / 1,29 ; **mer** proche 1,60 → 1,84 / 2,94 / 7,76, rasante 1,58 → 1,84 / 2,85 /
+  7,00, référence 1,56 → 1,75 / 2,68 / 6,45. Hachage court par couche (lowbias32) au lieu de deux pcg4d : −8 % seulement ;
+  le coût est le **nombre d'itérations** (2 × 167 couches à 50 mm/h, sur tout pixel dont la plus petite empreinte est sous
+  5 cm). **À faire** (inscrit) : le champ d'anneaux calculé **une fois par image** dans une texture à moments (pente et
+  second moment, filtrée par mipmaps comme la queue FFT, S360) — coût indépendant de la résolution et de l'étendue d'eau.
+- Taux recompté après le hachage court : −4,16 % (1,5 σ) / −0,61 % / −1,66 % à 2 / 10 / 50 mm/h.

@@ -4,6 +4,8 @@ extends Node3D
 ## Lancer : `Godot --path godot` — vue animée ; touches 1 à 4 : poses de R14 (référence, proche, rasante, haute) ;
 ## Échap : quitter. `Godot --path godot -- --captures` : les quatre poses à 12 s, en PNG dans `captures/`, puis quitte.
 ## `Godot --headless --path godot -- --controle` : la hauteur de la bande recalculée ici contre le cœur, puis quitte.
+## S379 — la pluie, factice (ADR-202 D3) : `PLUIE=<mm/h>`, ou la touche P (0, 2, 10, 50 mm/h) ; `pluie.gd`,
+## `pluie.gdshaderinc`, comme la piscine. Sans pluie, l'image d'avant au bit. `-- --cout-pluie` : son temps GPU.
 
 ## La grille polaire autour de la caméra : dense près de l'œil, lâche au loin, sans couture.
 const ANGLES := 720
@@ -109,7 +111,13 @@ const SOURCE_DIVISIONS := 1023
 const CARTE_ECHELLE := 32.0
 
 
+const Pluie = preload("res://pluie.gd")
+var pluie_mm_h := 0.0
+
+
 func _ready() -> void:
+	if OS.get_environment("PLUIE") != "":
+		pluie_mm_h = float(OS.get_environment("PLUIE"))
 	var fichier := FileAccess.open("res://donnees/mer_b.json", FileAccess.READ)
 	if fichier == null:
 		push_error("donnees/mer_b.json absent : lancer l'afficheur avec --meilleur --export-godot")
@@ -224,6 +232,8 @@ func _ready() -> void:
 	if "--controle-ligne-eau" in args:
 		anime = false
 		controle_ligne_eau()
+	if "--cout-pluie" in args:
+		cout_pluie()
 	if "--cout-demi" in args:
 		anime = false
 		cout_demi()
@@ -914,6 +924,9 @@ func phases(t: float) -> void:
 	var bande := lignes("bande", t)
 	materiau.set_shader_parameter("bande", bande)
 	materiau.set_shader_parameter("queue", lignes("queue", t))
+	# S379 : l'horloge des rides repliée sur l'heure (I-08 : le nuanceur ne voit qu'un flottant borné).
+	materiau.set_shader_parameter("pluie", Pluie.uniformes(pluie_mm_h))
+	materiau.set_shader_parameter("temps_pluie", fmod(t, 3600.0))
 	if materiau_caustiques != null:
 		materiau_caustiques.set_shader_parameter("bande", bande)
 		suivre_carte()
@@ -951,6 +964,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				pose("haute")
 			KEY_5:
 				pose("plongeante")
+			KEY_P:
+				var suite := {0.0: 2.0, 2.0: 10.0, 10.0: 50.0}
+				pluie_mm_h = suite.get(pluie_mm_h, 0.0)
+				phases(temps)
 			KEY_ESCAPE:
 				get_tree().quit()
 
@@ -975,6 +992,8 @@ func captures() -> void:
 			await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
 		var suffixe := "_cote" if "--cote" in OS.get_cmdline_user_args() else ""
+		if pluie_mm_h > 0.0:
+			suffixe += "_pluie%d" % int(pluie_mm_h)
 		var chemin := ProjectSettings.globalize_path("res://captures/godot_%s%s_12s.%s" % [nom, suffixe, "pfm" if hdr else "png"])
 		# S368 : `SEQUENCE=n` — n images de la même pose, espacées de 2 s ; l'écume avance entre elles (la durée se juge
 		# dans le temps). Les suivantes s'écrivent `_12s_2.png`, `_12s_4.png`…
@@ -1194,6 +1213,30 @@ func controle_ligne_eau() -> void:
 ## S371 — **le coût de la caméra à demi immergée** (métrique de B11) : le temps GPU du rendu entier, mesuré par Godot, en
 ## médiane sur 240 images, pose `demi` puis `demi_dessous`, milieu par pixel puis d'un bloc (le même cadre, `demi_immergee`
 ## forcé faux) ; la différence est le prix du milieu par pixel. Temps figé, fenêtre de 1 280 × 720.
+## S379 — le coût de la pluie sur la mer : temps GPU de l'image (médiane de 240 après 30), à 0, 2, 10 et 50 mm/h, poses
+## proche, rasante et référence à 12 s.
+func cout_pluie() -> void:
+	var vp := get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
+	for nom in ["proche", "rasante", "reference"]:
+		pose(nom)
+		mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
+		var ligne_cout := "COUT_PLUIE_S379 mer pose=%s" % nom
+		for r in [0.0, 2.0, 10.0, 50.0]:
+			pluie_mm_h = r
+			phases(temps)
+			for _i in 30:
+				await RenderingServer.frame_post_draw
+			var t := []
+			for _i in 240:
+				await RenderingServer.frame_post_draw
+				t.append(RenderingServer.viewport_get_measured_render_time_gpu(vp))
+			t.sort()
+			ligne_cout += " gpu_ms_%d=%.3f" % [int(r), float(t[120])]
+		print(ligne_cout)
+	get_tree().quit()
+
+
 func cout_demi() -> void:
 	var vp := get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)

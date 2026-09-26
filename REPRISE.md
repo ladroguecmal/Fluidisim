@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 10:50 +02:00
+Battement        : 2026-09-26 11:55 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S379 — rendu 12 : les rides de pluie factices (ADR-202 D3) ; la campagne du solveur volumique 3D inscrite (demande de l'utilisateur)
 Dernière session : S378 — physique : **la pluie dans V** (5.5 passe à partiel, [ADR-204](docs/adr/ADR-204-la-pluie-arete-de-v.md), [preuve](docs/validation/PLUIE-V-S378.md)) — arête du ciel, exposition commandée (bâche, demi-bâche), intensité en entrée du pas ; au millilitre sur une heure ; déversoir sous la pluie à 0,11 %. Avant : S377, les réponses aux zones d'ombre (ADR-203)

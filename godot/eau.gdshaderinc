@@ -20,6 +20,10 @@
 // S371 : la bande de B (`bande`, `n_bande`, `split`, `k_moyens`, déclarés là depuis) et le milieu du pixel — la caméra à
 // demi immergée.
 #include "res://surface_b.gdshaderinc"
+// S379 : les rides de la pluie, factices (ADR-202 D3) — les mêmes que sur le bassin.
+#include "res://pluie.gdshaderinc"
+// L'horloge des rides, repliée par le script (`mer.gd`, sur l'heure).
+uniform float temps_pluie = 0.0;
 
 // La queue `[a, kx, ky, φ(t)]`, phases repliées par le script en double précision (I-08).
 uniform vec4 queue[60];
@@ -333,6 +337,18 @@ void fragment() {
     float energie = max(0.0, 1.0 + modulation_M * eps);
     vec3 g = g_bande + sqrt(energie) * g_q;
     vec2 p_lag = pente_bande + sqrt(energie) * s_q;
+    vec3 cov_t = energie * cov_q;
+    // S379 — **les rides de la pluie** (`pluie.gdshaderinc`), en coordonnées de Lagrange : elles suivent l'eau dans son
+    // mouvement orbital, comme la queue ; leur pente s'ajoute à celle de Lagrange avant le passage en Euler, leur covariance
+    // à la covariance non résolue avant son transport. Temps sec : rien, au bit.
+    float variance_pluie = 0.0;
+    if (pluie.x > 0.0) {
+        float coeur_pluie;
+        vec3 cov_pluie;
+        p_lag += pluie_rides(lag, temps_pluie, dFdx(lag), dFdy(lag), cov_pluie, coeur_pluie);
+        variance_pluie = cov_pluie.x + cov_pluie.z;
+        cov_t += cov_pluie;
+    }
     // Pente eulérienne J⁻ᵀ·∇η ; repli (det < 0,1) : pente de Lagrange, comme l'afficheur.
     float jxx = 1.0 + g.x, jxy = g.y, jyy = 1.0 + g.z;
     float det = jxx * jyy - jxy * jxy;
@@ -363,7 +379,7 @@ void fragment() {
     if (milieu.x > 0.0) {
         vec3 vue_d = normalize(surface - CAMERA_POSITION_WORLD);
         vec3 rayon_d = vec3(vue_d.x, -vue_d.z, vue_d.y);
-        vec3 lum = integree(pente, rayon_d, transport_covariance(energie * cov_q, g), true, vec3(0.0), vec3(0.0));
+        vec3 lum = integree(pente, rayon_d, transport_covariance(cov_t, g), true, vec3(0.0), vec3(0.0));
         float d = length(surface - CAMERA_POSITION_WORLD);
         vu_dessous = a_travers_l_eau(lum, d, rayon_d, milieu.y);
         if (controle == 4) {
@@ -397,10 +413,16 @@ void fragment() {
     }
     float h_fond = max(surface.y - fond.y, 0.0);
     vec3 t_colonne = exp(-kd * (h_fond + length(fond - surface)));
-    vec3 fond_vu = textureLod(ecran, uv_r, 0.0).rgb * t_colonne;
+    // S379 : la variance de la pluie étale le fond vu, comme au bassin (`bassin.gdshader`).
+    float lod_pluie = 0.0;
+    if (variance_pluie > 0.0) {
+        float etal = (1.0 - 1.0 / indice) * sqrt(0.5 * variance_pluie) * length(fond - surface);
+        lod_pluie = log2(1.0 + etal / max(h, 1e-5));
+    }
+    vec3 fond_vu = textureLod(ecran, uv_r, lod_pluie).rgb * t_colonne;
     // La lumière, pente non résolue intégrée (ADR-161) : Cholesky de sa covariance, 3 × 3 nœuds de Gauss-Hermite.
     vec3 rayon = vec3(vue.x, -vue.z, vue.y);
-    vec3 couleur = integree(pente, rayon, transport_covariance(energie * cov_q, g), false, fond_vu, t_colonne);
+    vec3 couleur = integree(pente, rayon, transport_covariance(cov_t, g), false, fond_vu, t_colonne);
     // Les crêtes (S356, `cretes_couleur`) : la lumière qui traverse ce qui se comprime, vue du côté du soleil ; l'écume.
     vec3 soleil = normalize(SOLEIL_B);
     float eclairage = gain_eau * (0.6 + 0.4 * max(dot(normalize(vec3(-pente, 1.0)), soleil), 0.0));

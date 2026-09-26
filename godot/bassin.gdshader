@@ -96,6 +96,7 @@ void fragment() {
     vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
     vec3 vue = normalize(surface - CAMERA_POSITION_WORLD);
     vec2 s = champ_actif ? pente_champ : pente_rides(surface.xz);
+    vec3 cov_pluie = vec3(0.0);
     float variance_pluie = 0.0;
     float coeur_pluie = 0.0;
     float empreinte_pluie = 1.0;
@@ -104,10 +105,9 @@ void fragment() {
         vec2 q = surface.xz;
         empreinte_pluie = sqrt(length(dFdx(q)) * length(dFdy(q)));
         float coeur;
-        vec3 r = pluie_rides(q, temps, dFdx(q), dFdy(q), coeur);
+        s += pluie_rides(q, temps, dFdx(q), dFdy(q), cov_pluie, coeur);
         coeur_pluie = coeur;
-        s += r.xy;
-        variance_pluie = r.z;
+        variance_pluie = cov_pluie.x + cov_pluie.z;
     }
     vec3 n = normalize(vec3(-s.x, 1.0, -s.y));
     // Le fond vu à travers : réfracté, relu à l'écran s'il est sous la surface.
@@ -148,15 +148,19 @@ void fragment() {
     vec3 corps = R0 * gain_eau * (0.6 + 0.4 * max(dot(nb, soleil), 0.0));
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     if (variance_pluie > 0.0) {
-        // La pente non résolue de la pluie, isotrope (σ² = variance/2 par composante) : Fresnel et ciel intégrés par
-        // 3 × 3 nœuds de Gauss-Hermite (±√3·σ, poids 1/6, 2/3, 1/6) ; l'éclat, lobe `cos^m ≈ e^(−m·θ²/2)` convolé par
-        // l'écart du reflet (deux fois celui de la normale) : exposant `1/(1/m + 4σ²)`, pic réduit d'autant.
+        // La pente non résolue de la pluie, de covariance `cov_pluie` (x, z de Godot) : Fresnel et ciel intégrés par
+        // 3 × 3 nœuds de Gauss-Hermite sur sa décomposition de Cholesky (±√3, poids 1/6, 2/3, 1/6), comme la mer
+        // (`integree`) ; l'éclat, lobe `cos^m ≈ e^(−m·θ²/2)` convolé par l'écart du reflet (deux fois celui de la
+        // normale, moyenne des deux axes) : exposant `1/(1/m + 2·trace)`, pic réduit d'autant.
         float sig = sqrt(0.5 * variance_pluie);
+        float l00 = sqrt(max(cov_pluie.x, 0.0));
+        float l10 = l00 > 0.0 ? cov_pluie.y / l00 : 0.0;
+        float l11 = sqrt(max(cov_pluie.z - l10 * l10, 0.0));
         vec3 somme = vec3(0.0);
         for (int i = -1; i <= 1; i++) {
             for (int k = -1; k <= 1; k++) {
                 float w = (i == 0 ? 2.0 / 3.0 : 1.0 / 6.0) * (k == 0 ? 2.0 / 3.0 : 1.0 / 6.0);
-                vec2 si = s + sig * 1.7320508 * vec2(float(i), float(k));
+                vec2 si = s + 1.7320508 * vec2(l00 * float(i), l10 * float(i) + l11 * float(k));
                 vec3 ni = normalize(vec3(-si.x, 1.0, -si.y));
                 vec3 nbi = vec3(ni.x, -ni.z, ni.y);
                 float fi = fresnel(clamp(dot(-rayon, nbi), 0.0, 1.0), indice);
