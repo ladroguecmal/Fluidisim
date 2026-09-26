@@ -282,14 +282,14 @@ fn band3(s: &BackgroundSample, axis: usize, k: usize, dx: f32, rest: f32, surfac
 }
 
 impl Volume3 {
-    fn face_index3(&self, axis: usize, p: [usize; 3]) -> usize {
+    pub(super) fn face_index3(&self, axis: usize, p: [usize; 3]) -> usize {
         match axis {
             0 => self.fu(p[0], p[1], p[2]),
             1 => self.fv(p[0], p[1], p[2]),
             _ => self.fw(p[0], p[1], p[2]),
         }
     }
-    fn velocity3(&self, axis: usize, p: [usize; 3]) -> f32 {
+    pub(super) fn velocity3(&self, axis: usize, p: [usize; 3]) -> f32 {
         let f = self.face_index3(axis, p);
         match axis {
             0 => self.u[f],
@@ -299,7 +299,7 @@ impl Volume3 {
     }
     /// Interpolation MAC de la composante a au centre d'une face axis. Quatre voisins,
     /// ordre z/y/x ; au sommet w, deux voisins de la dernière couche.
-    fn collocated3(&self, axis: usize, a: usize, p: [usize; 3]) -> f32 {
+    pub(super) fn collocated3(&self, axis: usize, a: usize, p: [usize; 3]) -> f32 {
         if a == axis {
             return self.velocity3(a, p);
         }
@@ -327,6 +327,8 @@ impl Volume3 {
         sponge: Sponge3,
     ) -> Result<(), Error> {
         self.advect_mobile3(dt as f32);
+        // S391 (A321, ADR-209) : le terme de second ordre, s'il est allumé, avant les termes du fond et l'éponge.
+        self.correct_advection3(Some(bg), dt as f32);
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let dims = [nx, ny, nz];
         for axis in 0..3 {

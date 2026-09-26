@@ -88,7 +88,7 @@ avertissement.
 - [x] **P2** — l'instrument : commutateurs de banc dans le pas (éteints : au bit), banc `--delta3d-a321` (croissance par
   seconde, échelle du mode, premier pas non fini) ; critère 1.
 - [x] **P3** — l'attribution : pas de temps, témoins terme par terme ; critère 2 ; le correctif déclaré ici.
-- [ ] **P4** — le correctif dans la référence (cœur) : option `Volume3::enable_advection_correction`, éteinte par défaut
+- [x] **P4** — le correctif dans la référence (cœur) : option `Volume3::enable_advection_correction`, éteinte par défaut
   (aucune empreinte du cœur ne bouge) ; essai de von Neumann : sans elle un mode de quatre mailles croît, avec elle non (vu
   échouer) ; [ADR-209](../docs/adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md).
 - [ ] **P5** — le même dans la production, **actif par défaut** ; critère 3 (deux minutes à 30 et 60 Hz, cuves avec la
@@ -122,4 +122,13 @@ qui explose). **Référence : option** `Volume3::enable_advection_correction`, �
 restent au bit, le chemin corrigé s'y reçoit par un essai de von Neumann et par les cuves ; la migration du défaut du cœur
 attend son déclencheur (ADR-209). Écarté : l'amont du premier ordre (viscosité `|U|·dx/2` ≈ 0,25 m²/s, 3 %/s sur le paquet
 de 16 m), les Runge-Kutta (trois prédictions par pas), le semi-lagrangien (hors du schéma de référence).
+
+**P4 — la référence.** `code/water-core/src/delta3d_advection.rs` : option `enable_advection_correction`, terme
+`correct_advection3` appelé après `advect_mobile3` dans le pas mobile (`None`) et le pas couplé (échantillons de B) ;
+`face_index3`, `velocity3`, `collocated3` passés `pub(super)`. **Essai** `second_order_advection_stops_the_ftcs_growth_s391`
+: courant de 2 m/s, Courant 0,264, différence de deux passages (avec et sans le mode) pour écarter ce que les murs font au
+courant — **FTCS ×7,547 en 60 pas (×7,4 prédits), corrigé ×0,1339 (×0,134 prédits)**. Premier essai sans la différence :
+×18 et ×10, les murs dominaient. Suite du cœur **681 réussis**, 0 échec, 18 ignorés, zéro avertissement — l'option éteinte ne
+change rien. [ADR-209](../docs/adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md) ; preuve ouverte,
+[A321-S391](../docs/validation/A321-S391.md).
 

@@ -2128,3 +2128,66 @@ fn graded_mobile_keeps_volume_and_refuses_a_surface_below_its_cubic_layers_s387(
     assert_eq!(v.step_surface_mobile(2000, 20_000, &Jobs).err(), Some(Error::Domain));
     assert!(v.u.iter().chain(&v.eta).map(|x| x.to_bits()).eq(before));
 }
+
+// ── S391 : l'advection au second ordre en temps (A321, ADR-209) ──────────────────────────────────────────────────────
+
+/// Advection seule, sans projection, d'un courant de 2 m/s (Courant 0,264), avec ou sans un mode de quatre mailles de
+/// 1 mm/s ; rend `u` après `pas` pas.
+fn advection_seule_s391(corrected: bool, amplitude: f32, pas: usize) -> (Volume3, Vec<f32>) {
+    let (mut v, _arena) = volume(128, 4, 6, 0.25, 9.81);
+    if corrected {
+        v.enable_advection_correction();
+    }
+    let d = v.domain;
+    let mut u = vec![0f32; v.u.len()];
+    for k in 0..d.nz {
+        for j in 0..d.ny {
+            for i in 1..d.nx {
+                u[v.fu(i, j, k)] = 2. + amplitude * (core::f32::consts::FRAC_PI_2 * i as f32).sin();
+            }
+        }
+    }
+    let (vv, ww) = (vec![0f32; v.v.len()], vec![0f32; v.w.len()]);
+    v.set_velocity(&u, &vv, &ww).expect("vitesses");
+    for _ in 0..pas {
+        v.advect_mobile3(0.033);
+        v.correct_advection3(None, 0.033);
+        v.u.copy_from_slice(&v.us);
+        v.v.copy_from_slice(&v.vs);
+        v.w.copy_from_slice(&v.ws);
+    }
+    let u = v.u.clone();
+    (v, u)
+}
+
+/// Croissance du mode de quatre mailles sur `pas` pas : la **différence** de deux passages, avec et sans le mode, isole la
+/// perturbation de ce que les murs font au courant ; amplitude lue au milieu du domaine, en `sin`/`cos(π·i/2)`.
+fn croissance_s391(corrected: bool, pas: usize) -> f64 {
+    let (v, avec) = advection_seule_s391(corrected, 1e-3, pas);
+    let (_, sans) = advection_seule_s391(corrected, 0., pas);
+    let Domain3 { nx, ny, .. } = v.domain;
+    let (j, k) = (ny / 2, 2);
+    let (mut s, mut c) = (0f64, 0f64);
+    for i in 3 * nx / 8..5 * nx / 8 {
+        let f = v.fu(i, j, k);
+        let x = (avec[f] - sans[f]) as f64;
+        let ph = core::f64::consts::FRAC_PI_2 * i as f64;
+        s += x * ph.sin();
+        c += x * ph.cos();
+    }
+    // Amplitude initiale : 1e-3 sur nx/4 faces, projection sur sin → 1e-3·(nx/4)/2.
+    (s * s + c * c).sqrt() / (1e-3 * (nx / 4) as f64 / 2.)
+}
+
+/// **S391, A321** : le schéma centré à pas explicite fait croître un mode de quatre mailles (Courant 0,264 : `|G|` =
+/// 1,034 par pas, ×7,4 en 60 pas) — vu échouer ; avec le terme de second ordre il ne croît plus (`|G|² = 1 − C² + C⁴`,
+/// ×0,13 en 60 pas au mode de quatre mailles). Éteint par défaut : le pas d'avant.
+#[test]
+fn second_order_advection_stops_the_ftcs_growth_s391() {
+    let ftcs = croissance_s391(false, 60);
+    let corrected = croissance_s391(true, 60);
+    eprintln!("S391 mode de quatre mailles, 60 pas : FTCS ×{ftcs:.3}, corrigé ×{corrected:.4}");
+    assert!(ftcs > 5. && ftcs < 10., "FTCS : ×{ftcs}, ×7,4 attendus");
+    assert!(corrected < 0.5, "le mode croît encore : ×{corrected}");
+    assert!(!volume(8, 4, 6, 0.25, 9.81).0.advection_correction());
+}

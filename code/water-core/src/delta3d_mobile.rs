@@ -836,6 +836,8 @@ impl Volume3 {
         let volume_before = self.perturbation_volume();
         let result = (|| {
             self.advect_mobile3(advection);
+            // S391 (A321, ADR-209) : le terme de second ordre, s'il est allumé.
+            self.correct_advection3(None, advection);
             let report = self.project_mobile3(scale, correction, max_iters, jobs)?;
             if report.degraded {
                 self.refused_report = Some(report);

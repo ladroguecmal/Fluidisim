@@ -114,6 +114,8 @@ pub struct Volume3 {
     ghost_bg_y: Vec<f32>,
     /// **S369, A289 : les termes propres à B retirés du pas couplé** — masque de `RELATIVE_*` ; 0, le pas de S297.
     relative_background: u8,
+    /// **S391, A321 — le terme de second ordre de l'advection** (ADR-209), éteint par défaut : le pas d'avant au bit.
+    advection_correction: bool,
     /// L'erreur de pression de B à sa propre surface, par colonne (S369) : `ρ·g·η_B − p_B(repos + η_B)`.
     ghost_bg_error: Vec<f32>,
     pressure_base: Vec<f32>,
@@ -248,6 +250,7 @@ impl Volume3 {
             ghost_bg_x: vec![0.; nu],
             ghost_bg_y: vec![0.; nv],
             relative_background: 0,
+            advection_correction: false,
             ghost_bg_error: vec![0.; cols],
             pressure_base: vec![0.; cells],
             band_x: vec![0.; fx],
@@ -1379,5 +1382,7 @@ pub use closure::{Closure3, ClosureError};
 mod cut;
 #[path = "delta3d_multigrid.rs"]
 mod multigrid3;
+#[path = "delta3d_advection.rs"]
+mod advection;
 #[path = "delta3d_graded.rs"]
 mod graded;
