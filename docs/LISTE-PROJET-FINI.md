@@ -107,7 +107,8 @@ pas recopiée ici (L137).
   tables cuites, η à 0,13 mm de la référence, B au bit au large, requête en O(1) (§5). Manquent la bathymétrie 2D et la
   diffraction des hauts-fonds isolés, la marée, la dissipation au déferlement, la non-linéarité peu profonde (A234), et
   les autres chemins de B jusqu'à la scène de Godot.
-- [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *absent* ; la météo **à la fin** (ADR-197 D5).
+- [ ] **2.8 Précalcul côtier et météo** (SPEC-005 §6) — *absent* ; la météo **à la fin** (ADR-197 D5), un système
+  complet, aussi poussé que l'eau, le premier après elle ; l'eau en consomme les entrées ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D1, D5).
 - [ ] **2.9 Dérivées du fond pour les couches volumiques**, sous et au-dessus du plan moyen —
   *partiel* : B reçu en eau profonde uniforme (ADR-113, S177 ; ADR-154, S254). Manquent la
   profondeur finie et la bathymétrie.
@@ -297,7 +298,8 @@ pas recopiée ici (L137).
   [ADR-199](adr/ADR-199-vannes-et-pompes-dans-v.md)). Manquent le `C_d` selon l'ouverture, pertes et énergie de la
   pompe, le réseau fermé (5.8). **S374** : un premier consommateur, la piscine rejouée dans Godot
   ([preuve](validation/PISCINE-V-S374.md)).
-- [ ] **5.5 Pluie selon l'exposition au ciel, absorption par le sol** — *absent*.
+- [ ] **5.5 Pluie selon l'exposition au ciel, absorption par le sol** — *absent*. L'exposition est **dynamique et
+  fractionnaire** : bâche entière ou demi-bâche posée et retirée en temps réel ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D2).
 - [ ] **5.6 Seuil adaptatif à l'échelle du contenant** — *absent*.
 - [ ] **5.7 Plusieurs liquides** (`liquid_id`, A17) — *absent*.
 - [ ] **5.8 Réseau fermé sous pression** — *absent*, reporté en v2 par ADR-010.
@@ -360,7 +362,8 @@ pas recopiée ici (L137).
 - [ ] **7.3 Microbulles visuelles** — *absent*.
 - [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *absent*.
 - [ ] **7.5 Air comprimé, vide, eau dans le vide** (ADR-015) — *absent*.
-- [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *absent*.
+- [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *absent*. L'évaporation et le gel des contenants, par V
+  ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *absent*.
 - [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin**, par l'audio de Godot (ADR-197 D5).
 

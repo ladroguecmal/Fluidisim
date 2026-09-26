@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 10:31 +02:00
+Battement        : 2026-09-26 10:32 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S377 — consignation : les réponses aux zones d'ombre d'ADR-202
 Dernière session : S376 — consignation : **le niveau de détail des contenants** ([ADR-202](docs/adr/ADR-202-niveau-de-detail-des-contenants.md), décision de l'utilisateur, corrige ADR-200 D1) ; R27 reçu (δ sur GPU dans Godot : pas maintenant) ; sept zones d'ombre posées. Avant : S375, le bassin en δ 3D

@@ -71,8 +71,8 @@ la feuille de route et l'index suivent.
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-203 ; note d'ADR-202 ; file, liste, feuille de route, index.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — ADR-203 ; note d'ADR-202 ; file, liste, feuille de route, index.
 - [ ] **P3** — rituel.
 
 ### Notes de reprise

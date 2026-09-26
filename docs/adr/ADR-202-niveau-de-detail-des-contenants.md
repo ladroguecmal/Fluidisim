@@ -80,3 +80,10 @@ arêtes de V (ADR-199) —, la piscine se remplit sous la pluie ou garde son niv
 
 V autoritaire et répliqué ; le serveur n'exécute que V (I-10) ; δ n'a jamais d'autorité (I-04) ; la mer inchangée ; rien
 n'est retiré du périmètre ; la météo et le son restent à la fin (ADR-197 D5).
+
+> **Note du 2026-09-26 (S377).** Les sept zones d'ombre du §3 ont reçu leurs réponses :
+> [ADR-203](ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) — météo aussi poussée que l'eau, son autorité déléguée sous
+> « réaliste et performant » ; couvertures (bâche entière ou demi) posées et retirées en temps réel ; lame et obstacles
+> factices de loin ; contenants divisés en domaines, sans seuil unique ; ordre des systèmes suivants (météo, topologie
+> d'un territoire, feu, neige) ; chaleur et gel par V ; le factice pour tout ce qui est sans conséquence et lointain.
+
