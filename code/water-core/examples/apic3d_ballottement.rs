@@ -16,7 +16,9 @@
 //!
 //!     cargo run -p water-core --release --offline --example apic3d_ballottement -- <10|11> <dx>
 //!
-//! Témoins : `APIC3D_RAYON=plan` (le rayon de S318), `APIC3D_SANS_SEPARATION`, `APIC3D_TRACE`.
+//! Témoins : `APIC3D_RAYON=plan` (le rayon de S318), `APIC3D_SANS_SEPARATION`, `APIC3D_NOYAU=1` (S389), `APIC3D_TRACE`.
+//! S389 : l'amortissement par période, régression de ln(pic) sur les demi-périodes — la mesure qui porte « l'énergie ne
+//! croît pas ».
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
@@ -60,6 +62,10 @@ fn main() {
     if std::env::var("APIC3D_SANS_SEPARATION").is_ok() {
         a.set_separation(false);
     }
+    // S389 : le témoin au noyau d'une maille (`APIC3D_NOYAU=1`) ; défaut, deux mailles.
+    if let Some(k) = std::env::var("APIC3D_NOYAU").ok().and_then(|v| v.parse::<f32>().ok()) {
+        a.set_reconstruction_kernel(k);
+    }
     let m = a.particle_mass() as f64;
     let moment = |a: &Apic3| -> f64 {
         a.particles()
@@ -80,6 +86,8 @@ fn main() {
     let e_onde = 0.5 * 1000. * G * A * A * lx * ly * facteur * 2.;
     let e0 = energie(&a);
     let (mut t, mut e_max, mut passages, mut precedent, mut iterations, mut pas) = (0u64, f64::MIN, Vec::new(), (0f64, moment(&a)), 0u64, 0u64);
+    // S389 : les pics du moment, un par demi-période (le plus grand |moment| entre deux passages), pour l'amortissement.
+    let (mut pics, mut pic_courant) = (Vec::new(), 0f64);
     let fin = (duree * 1e6) as u64;
     let debut = Instant::now();
     while t < fin {
@@ -91,7 +99,12 @@ fn main() {
         let (s, mo) = (t as f64 * 1e-6, moment(&a));
         if precedent.1 != 0. && precedent.1.signum() != mo.signum() {
             passages.push(precedent.0 + (s - precedent.0) * precedent.1 / (precedent.1 - mo));
+            if passages.len() >= 2 {
+                pics.push(pic_courant);
+            }
+            pic_courant = 0.;
         }
+        pic_courant = pic_courant.max(mo.abs());
         precedent = (s, mo);
         e_max = e_max.max(energie(&a) - e0);
         if std::env::var("APIC3D_TRACE").is_ok() && pas % 25 == 0 {
@@ -106,14 +119,26 @@ fn main() {
         f64::NAN
     };
     let erreur = periode / periode_exacte - 1.;
+    // Amortissement par période : régression de ln(pic) sur l'indice de demi-période ; positif, l'onde s'éteint.
+    let amortissement = if pics.len() >= 3 {
+        let n = pics.len() as f64;
+        let (sx, sy): (f64, f64) = pics.iter().enumerate().map(|(i, p)| (i as f64, p.ln())).fold((0., 0.), |a, b| (a.0 + b.0, a.1 + b.1));
+        let (mx, my) = (sx / n, sy / n);
+        let (sxy, sxx): (f64, f64) = pics.iter().enumerate().map(|(i, p)| ((i as f64 - mx) * (p.ln() - my), (i as f64 - mx).powi(2))).fold((0., 0.), |a, b| (a.0 + b.0, a.1 + b.1));
+        1. - (2. * sxy / sxx).exp()
+    } else {
+        f64::NAN
+    };
     println!(
         "APIC3D_S388 mode={mode} dx={dx} mailles={} particules={n} duree_s={duree} pas={pas} periode_s={periode:.4} \
-         periode_exacte_s={periode_exacte:.4} erreur={:+.2}% passages={} energie_creee_max={:+.2}% iterations_moyennes={:.1} \
-         calcul_s={:.0}",
+         periode_exacte_s={periode_exacte:.4} erreur={:+.2}% passages={} energie_creee_max={:+.2}% \
+         amortissement_par_periode={:+.2}% pics={} iterations_moyennes={:.1} calcul_s={:.0}",
         nx * ny * nz,
         100. * erreur,
         passages.len(),
         100. * e_max / e_onde,
+        100. * amortissement,
+        pics.len(),
         iterations as f64 / pas as f64,
         debut.elapsed().as_secs_f64()
     );

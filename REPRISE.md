@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 19:43 +02:00
+Battement        : 2026-09-26 19:53 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
 Session en cours : S389 — C4b, première part : la surface d'APIC (noyau de deux mailles), les ballottements remesurés
 Dernière session : S388 — physique : **C4a, APIC en 3D dans le cœur** ([preuve](docs/validation/APIC3D-S388.md)) — masse exacte, champ affine conservé, repos à 5,6 mm/s ; ballottement à +1,04 % (2,5 cm), oblique à +2,69 % ; la lecture de la surface depuis les particules commande la période (rayon de S318 : +7,87 %). Avant : S387, la colonne graduée au pas mobile

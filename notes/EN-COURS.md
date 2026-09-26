@@ -86,7 +86,7 @@ inchangée, zéro avertissement.
 - [x] **P2** — le modèle de lecture en `f64` dans le cœur, positions continues, rayon du noyau en paramètre ; rayon minimax ;
   critère 1.
 - [x] **P3** — la reconstruction à deux mailles ; critères 2 et 3.
-- [ ] **P4** — les ballottements remesurés, l'amortissement par régression, l'attribution ; critères 4 à 6.
+- [x] **P4** — les ballottements remesurés, l'amortissement par régression, l'attribution ; critères 4 à 6.
 - [ ] **P5** — critère 7 ; preuve (section datée d'APIC3D-S388) ; liste, file, feuille de route.
 - [ ] **P6** — rituel.
 
@@ -102,3 +102,17 @@ d'une paroi, le noyau ne trouve des particules que d'un côté : la moyenne se d
 basse. Les parois **reflètent** désormais les particules (images seulement pour les centres à moins d'un rayon de noyau d'une
 paroi latérale ou du fond). **Critère 3 tenu** : repos **6,2 µm/s** (noyau 2), témoin noyau 1 avec images **1,5 µm/s** — **les
 5,6 mm/s de S388 venaient des parois**, pas du noyau.
+
+**P4 — les ballottements remesurés** (noyau 2, parois reflétées ; `apic3d_ballottement`, amortissement par régression) :
+
+| cas | 5 cm | 2,5 cm | critère |
+|---|---|---|---|
+| (1, 0) | +1,01 % (S388 +2,05) | **+0,39 %** (S388 +1,04) | ≤ 1 % **tenu** |
+| (1, 1) | +2,63 % (S388 +7,64) | **+1,01 %** (S388 +2,69) | ≤ 2 % **tenu** |
+| amortissement par période | +0,21 % ; (1, 1) +0,63 % | +0,10 % ; +0,78 % | ≥ 0 **tenu** |
+| énergie « créée » (oscillation, % de l'onde analytique) | +7,0 % ; +3,6 % | +3,3 % ; +5,3 % | publiée |
+| calcul | 24 s ; 29 s | 224 s ; 274 s | — |
+
+**Attribution** (5 cm) : noyau 1, parois reflétées — (1, 0) **+0,54 %**, amortissement 3,78 %/période ; (1, 1) **+5,57 %**,
+2,33 %/période. S388 (noyau 1, sans images) : +2,05 % et +7,64 %. **Les images aux parois** corrigent surtout (1, 0) ; **le
+noyau large** corrige l'oblique et divise l'amortissement par 18. Critères 4 à 6 tenus.
