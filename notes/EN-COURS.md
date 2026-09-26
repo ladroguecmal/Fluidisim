@@ -62,75 +62,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S386 — **terminée**. **C2** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D2,
-D5) : **les colonnes hautes dans la référence**. Demande de l'utilisateur (2026-09-26) : *« Réalise la suite »* ; et sa
-décision, à consigner : *« Je suis d'accord avec toi pour le branchement à la fin »* — δ dans Godot en C11. Agent : Claude
-Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
+Session : S387 — **en cours**. **C2b** de la campagne ([ADR-208](../docs/adr/ADR-208-la-colonne-graduee.md) D4, ADR-207 D5) :
+**la colonne graduée au pas mobile**. Demande de l'utilisateur (2026-09-26) : *« Continue »*. Agent : Claude Opus 5.5, session
+cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot.
 
-**Thèse.** Une colonne haute est un **sous-espace** de la grille fine : sous les `n − m` couches cubiques du haut, les `m`
-couches du bas n'ont plus qu'une pression **linéaire** en `z` (deux inconnues par colonne au lieu de `m`). Écrite comme une
-**restriction de Galerkin** du schéma reçu (`Aᵣ = Pᵀ A P`), elle reste symétrique définie positive, conserve la masse de la
-colonne, et sa dispersion **se calcule** colonne par colonne comme `scheme_frequency` (S295) le fait pour la grille fine :
-on sait donc, **avant** de l'écrire en 3D, combien de couches cubiques il faut garder. Mode **linéaire** d'abord, là où vit
-la réception de dispersion ; le pas mobile et le stockage compact viennent ensuite (C2b).
+**Thèse.** Au pas mobile, les couches cubiques doivent contenir **toute la course de la surface** (ADR-208 D4). Or la scène de
+la porte B n'a que **3,5 m d'eau sous 3,5 m d'air** (28 couches de 25 cm) sous une mer de `Hs` ≈ 2,5 m (`--houle` : vent 1,5 m
+à 6 s, houle 2 m à 12 s) : **le balayage de S386, étiqueté « porte B », supposait 7 m d'eau sous une surface fixe** — une
+erreur d'étiquette à corriger d'abord. Ensuite, **mesurer** la course réelle de la surface dans cette scène (B évalué sur le
+domaine), et en tirer où la colonne graduée paie : la haute mer, ou l'eau calme des contenants. Puis la construire au pas
+mobile, sur la grille fine, comme au pas linéaire.
 
-**Critères, écrits avant.** (1) Le calcul de dispersion redonne `scheme_frequency` à `m ≤ 1` (Ω/ω − 1 = −1,435·10⁻² et
-−3,683·10⁻³ pour les cas de S295). (2) **Précision rapportée à l'usage** : sur la configuration de la porte B (profondeur 7 m,
-`dx` 25 cm) et pour toute longueur d'onde de `4·dx` à `2·profondeur`, l'erreur de fréquence **ajoutée** par les colonnes
-hautes `|Ω_haut/Ω_fin − 1|` ne dépasse pas **max(|Ω_fin/ω − 1|, 10⁻⁴)** — pas plus que la maille n'en fait déjà, ou une phase
-de 10⁻⁴, soit ≈ 3 mm sur une vague de 0,5 m après une minute (METHODE : 3 mm) ; le plus petit nombre de couches cubiques qui
-le tient est **consigné**. (3) En 3D, mode linéaire : opérateur réduit symétrique (10⁻⁵) et positif ; repos exact ; volume
-conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **la fréquence calculée de son propre schéma** à
-10⁻³ près, comme S295 le fait pour la grille fine. (5) Sans colonnes hautes, suite entière inchangée, zéro avertissement.
+**Critères, écrits avant.** (1) L'étiquette corrigée partout où « porte B » désigne le cas de 7 m (preuve, ADR-208, liste,
+file, feuille de route). (2) La course de la surface mesurée sur la scène de la porte B — `B` seul sur dix minutes, puis
+avec un repère qui suit la moyenne de `B` sur le domaine — et le nombre de couches cubiques qu'elle impose, **publiés avec
+le gain qui en reste**. (3) Au pas mobile, colonne graduée : tous les nœuds redonnent le pas mobile fin à 10⁻⁶ m ; volume
+conservé à l'arrondi ; une surface qui entre dans la partie graduée est **refusée**, état rendu au bit ; un ballottement suit
+le pas fin à l'écart que la dispersion calculée prévoit. (4) Suite entière inchangée sans colonne graduée, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — décision de l'utilisateur consignée (δ dans Godot en C11) : file, ADR-207 (note datée), conception §6.
-- [x] **P3** — la dérivation, et `outils/colonnes_hautes.py` : la dispersion d'une colonne à colonne haute ; critère 1 ; essai.
-- [x] **P4** — balayage : Ω/ω selon les couches cubiques gardées, porte B et S295 ; critère 2 ; `k` minimal consigné.
-- [x] **P4b** — *ajoutée après P4* : [ADR-208], la colonne graduée (variante N) à la place de la colonne haute unique
-  d'ADR-207 D2 ; ADR-207 (note datée), conception §3.3.
-- [x] **P5a** — `Volume3` : la **colonne graduée** du mode linéaire (variante N : restriction et prolongation linéaires par
-  morceaux, gradient conjugué réduit) ; critère 3.
-- [x] **P5b** — l'onde oblique à colonne graduée contre sa fréquence calculée ; critère 4 ; inconnues comptées.
-- [x] **P6** — critère 5 ; preuve `COLONNES-HAUTES-S386` ; liste, file, feuille de route, index.
-- [x] **P7** — rituel.
+- [ ] **P2** — l'étiquette corrigée (critère 1).
+- [ ] **P3** — la course de la surface sous la mer de la porte B : `examples/delta3d_course_surface.rs` (critère 2) ; les
+  couches cubiques qu'elle impose, le gain qui reste (outil) ; le cas d'un bassin calme.
+- [ ] **P4** — la colonne graduée au pas mobile (`project_mobile3`) : garde de la course, départ chaud par injection aux
+  nœuds, divergence restreinte ; essais (critère 3).
+- [ ] **P5** — le ballottement gradué contre le fin ; critère 4.
+- [ ] **P6** — preuve (section datée de COLONNES-HAUTES-S386) ; ADR-208 (note), liste, file, feuille de route.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
 
-**P3 — l'outil** `outils/colonnes_hautes.py` (+ `test_colonnes_hautes.py`, six essais) : la dispersion d'une colonne sous
-une restriction de Galerkin `Aᵣ = (PᵀDQ)M̂⁻¹(PᵀDQ)ᵀ`. **Critère 1 tenu** : le schéma fin redonne S295 (−1,4355·10⁻², −3,6827·10⁻³).
-Propriétés vérifiées : `m = 1` et « un nœud par maille » redonnent le schéma fin ; Galerkin ne baisse jamais `s` (Ritz) ;
-opérateurs réduits symétriques. Variantes : **G** (colonne haute linéaire, vitesses libres), **Q** (vitesse verticale
-interne liée), **E** (grille étirée en volumes finis), **N** (Galerkin linéaire par morceaux, nœuds étirés).
-
-**P4 — le balayage** (`python outils/colonnes_hautes.py`, 42 s ; porte B : `h` = 7 m, `dx` = 25 cm, 28 couches, `dt` = 1/30 s ;
-λ de 1 à 14 m) — le moins d'inconnues par colonne qui tient le critère 2 :
-
-| variante | réglage | inconnues | division | rapport au critère | pire λ |
-|---|---|---:|---:|---:|---:|
-| G, colonne haute linéaire | 17 cubiques + 1 | 19 | ÷1,47 | 0,834 | 14 m |
-| Q, vitesse verticale liée | 16 + 1 | 18 | ÷1,56 | 0,629 | 14 m |
-| E, grille étirée (VF) | r = 1,2, 5 cubiques | 14 | ÷2,00 | 0,966 | 14 m |
-| **N, linéaire par morceaux** | **r = 1,25, 3 cubiques** | **11** | **÷2,55** | 0,923 | 14 m |
-
-Bassin de 3 m à 10 cm (30 couches) : N 14 inconnues (÷2,14 ; r = 1,25, 6 cubiques), G 22 (÷1,36). **Critère 2** : tenu par
-chaque variante à son réglage ; **l'estimation de S384 (÷3,1, huit couches cubiques et une colonne haute) est fausse** —
-avec huit couches cubiques, G ajoute jusqu'à 1,4·10⁻² d'erreur de fréquence à λ = 14 m (≈ 16 fois le permis). Le pire cas
-est toujours la plus longue vague, où le schéma fin est le plus juste (8,6·10⁻⁴). Conséquence : **ADR-207 D2 change** —
-P4b ajoutée ; P5 construit N.
-
-**P5a — la colonne graduée en 3D, mode linéaire** (`delta3d_graded.rs`) : `enable_graded(host, nœuds)`, prolongation `P`
-et transposée exacte `Pᵀ` (mêmes coefficients), gradient conjugué réduit sur `Pᵀ·A·P` par la grille fine, arrêt 10⁻¹² puis
-tolérance d'ADR-144 sur `Pᵀ·div u` rapportée au poids de chaque nœud ; refus `Domain` sur fond coupé et au pas mobile.
-**Critère 3 tenu** (cinq essais `s386`) : comptage exact, nœuds invalides refusés ; opérateur réduit symétrique et positif,
-`Pᵀ` transposée de `P` ; repos exact au bit ; volume gardé à 10⁻⁹ m³ sur 50 pas ; tous les nœuds = schéma fin à 10⁻⁶ m ;
-refus du pas mobile, surface rendue au bit. **Vu échouer** : la transposée faussée (nœud du haut à moitié) casse l'essai de
-symétrie.
-
-**P5b — critère 4 tenu** (`graded_oblique_wave_follows_its_own_dispersion_s386`) : le mode (1, 1) de S295 sur colonne
-graduée suit la fréquence calculée de son schéma à **0,0046 %** (n = 16, 5 nœuds sur 8 couches) et **0,0048 %** (n = 32,
-7 sur 16) — comme la grille fine de S295 (0,0046 / 0,0047 %). Ω_gradué/Ω_fin − 1 = 1,808·10⁻³ et 2,020·10⁻³, identiques à
-l'outil Python ; Ω_gradué/ω − 1 = −1,257·10⁻² et −1,670·10⁻³ (fin : −1,435·10⁻², −3,683·10⁻³). Inconnues par colonne :
-`pressure_unknowns_per_column` ; nœuds de la porte B : [0, 6, 11, 15, 18, 20, 22, 24, 25, 26, 27], 11 sur 28.
+*(vide)*

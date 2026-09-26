@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 18:43 +02:00
-Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; lecture des articles bloquée)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-26 18:49 +02:00
+Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
+Session en cours : S387 — C2b : la colonne graduée au pas mobile ; la course de la surface mesurée (ADR-208 D4)
 Dernière session : S386 — physique : **C2, la colonne graduée** ([ADR-208](docs/adr/ADR-208-la-colonne-graduee.md), [preuve](docs/validation/COLONNES-HAUTES-S386.md)) — la colonne haute unique mesurée insuffisante (÷1,47), la pression linéaire par morceaux retenue (÷2,55 à la porte B), construite au pas linéaire ; 4.3 partiel ; décision de l'utilisateur : δ dans Godot en C11. Avant : S385, la multigrille 3D (C1)
 Session suivante : **C2b — la colonne graduée au pas mobile** (course de la surface, ADR-208 D4), son stockage compact et la multigrille graduée ; faisable sans carte. Au poste, en alternance (ADR-191) : la pluie, pièce 5
 Maillons        : 0 — S386 : 4.3 passe à partiel (la colonne graduée reçue au pas linéaire) ; consommée par C2b puis C3
