@@ -97,14 +97,31 @@ d'appel) ; il atteint le résidu de 32 cycles de Jacobi en 3 à 6 cycles. Le gai
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les noyaux WGSL : lissages fins et grossiers, résidu restreint, prolongation, géométrie des niveaux ; les
+- [x] **P2** — les noyaux WGSL : lissages fins et grossiers, résidu restreint, prolongation, géométrie des niveaux ; les
   variantes du gradient conjugué (mise à jour sans `z`, produit `r·z`, première direction).
-- [ ] **P3** — le branchement dans `Step3` : tampons réservés à la configuration (I-06), multigrille éteinte par défaut, nombre de
+- [x] **P3** — le branchement dans `Step3` : tampons réservés à la configuration (I-06), multigrille éteinte par défaut, nombre de
   dispatchs du profil ; critère 1.
-- [ ] **P4** — l'instrument : réplique `f64`, symétrie, positivité, vu échouer ; critère 2.
+- [x] **P4** — l'instrument : réplique `f64`, symétrie, positivité, vu échouer ; critère 2.
 - [ ] **P5** — convergence et coût sur la scène de la porte B, deux parts à 30 Hz ; critères 3 et 4.
 - [ ] **P6** — les trois cas de cuve avec la multigrille ; critère 5 ; activation par défaut décidée.
 - [ ] **P7** — critère 6 ; preuve (section datée de MULTIGRILLE-3D-S385) ; file, feuille de route, liste.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
+
+**P2–P4 en un commit** (noyaux, branchement et instrument se règlent ensemble). `viewer/src/delta3d_mg.wgsl` (compilé à la
+suite de `delta3d_cg.wgsl`), `viewer/src/delta3d_mg.rs` (réserve, séquences, réplique, banc `--delta3d-mg-cycle`).
+`Step3::enable_multigrid` réserve à la configuration ; **211 680 flottants** (0,85 Mo) pour la porte B ; deux niveaux,
+60 × 56 × 14 et 30 × 28 × 7. Premier lissage fusionné à la mise à jour ; `q` sert de tampon de lissage ; `r·z` replié
+dans le dernier lissage. **24 dispatchs par cycle** (5 pour Jacobi). Quatre avertissements « jamais employé » restent
+jusqu'à P5 (compte de dispatchs, bascule) — à zéro au commit de P5.
+
+**Critère 1 tenu** : `--delta3d-empreinte` identique avant et après — 60 pas `0x6e90a7ae36e713e5` / `0x0ac01c724307b1ac`,
+600 pas `0x8687dbea5acaab0f` / `0xde9ce81588ac0609`, précédente = publiée d'avant.
+
+**Critère 2 tenu** (après 30 pas de Jacobi, 190 644 mailles mouillées) : `M` = 1/diagonale à 1,4·10⁻⁷, mouillage
+cohérent ; carte contre réplique `f64` **4,4·10⁻⁷** du maximum (aléatoires 7,3 et 7,4·10⁻⁸, second membre 4,4·10⁻⁷) ;
+symétrie **1,8·10⁻⁷** (réplique `f64` 2,6·10⁻¹⁴) ; positivité. **Vu échouer** (`ASYMETRIQUE=1`, zéro lissage après au
+niveau intermédiaire) : symétrie **0,233**, sur la carte comme sur la réplique ; la réplique suit toujours la carte à
+3,6·10⁻⁷ — l'instrument distingue la recette, pas seulement l'implémentation. Un mot réservé du WGSL (`active`) a
+refusé la première compilation du nuanceur, à l'exécution : corrigé.

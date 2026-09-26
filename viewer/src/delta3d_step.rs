@@ -130,6 +130,12 @@ pub struct Step3 {
     state: wgpu::Buffer,
     scalar: wgpu::Buffer,
     cg: Vec<wgpu::ComputePipeline>,
+    /// S390 — les partiels des réductions, gardés pour lier la multigrille.
+    partial: wgpu::Buffer,
+    /// S390 / C3 — la multigrille de la référence comme préconditionneur (`delta3d_mg`) : réservée par
+    /// `enable_multigrid`, à la configuration ; **absente par défaut**, et le pas est alors celui d'avant, au bit.
+    mg: Option<crate::delta3d_mg::Multigrid>,
+    mg_on: std::cell::Cell<bool>,
     // Étages du pas (S301).
     step_bind: wgpu::BindGroup,
     step_uniform: wgpu::Buffer,
@@ -159,7 +165,7 @@ pub fn face_total(d: Domain3) -> usize {
     (d.nx + 1) * d.ny * d.nz + d.nx * (d.ny + 1) * d.nz + d.nx * d.ny * (d.nz + 1)
 }
 
-fn layout(device: &wgpu::Device, kinds: &[char]) -> wgpu::BindGroupLayout {
+pub(crate) fn layout(device: &wgpu::Device, kinds: &[char]) -> wgpu::BindGroupLayout {
     // 'r' stockage en lecture, 'w' stockage en écriture, 'u' uniforme.
     let entries: Vec<_> = kinds
         .iter()
@@ -191,7 +197,7 @@ fn bind(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, buffers: &[&wgpu:
     device.create_bind_group(&wgpu::BindGroupDescriptor { label: None, layout, entries: &entries })
 }
 
-fn pipelines(
+pub(crate) fn pipelines(
     device: &wgpu::Device,
     layout: &wgpu::BindGroupLayout,
     module: &wgpu::ShaderModule,
@@ -488,6 +494,9 @@ impl Step3 {
             state,
             scalar,
             cg,
+            partial,
+            mg: None,
+            mg_on: std::cell::Cell::new(false),
             step_bind,
             step_uniform,
             vel,
@@ -684,6 +693,54 @@ impl Step3 {
         correction + 2 + 2
     }
 
+    /// S390 — comme `dispatches`, pour le préconditionneur **courant** : Jacobi, ou la multigrille active et ses niveaux
+    /// pour la forme courante. Ne dépend que du profil et de la forme, jamais de la donnée.
+    pub fn dispatches_now(&self, cycles: u32, upto: Upto) -> u32 {
+        let base = Self::dispatches(cycles, upto);
+        match (&self.mg, self.mg_on.get(), upto) {
+            (Some(mg), true, Upto::Projection | Upto::Correction | Upto::Full) => {
+                let jacobi = 2 + 2 + 5 * cycles + 2;
+                base - jacobi + crate::delta3d_mg::projection_dispatches(cycles, mg.levels())
+            }
+            _ => base,
+        }
+    }
+
+    /// **S390 — réserve la multigrille** et l'active : hiérarchie et uniformes pour la capacité, pipelines du module
+    /// combiné. **À la configuration** (I-06, lecture d'ADR-145 pour l'hôte) ; idempotente. Rend le nombre de niveaux
+    /// grossiers de la forme courante (zéro : le cycle se réduit aux lissages fins).
+    pub fn enable_multigrid(&mut self) -> usize {
+        if self.mg.is_none() {
+            let mg = crate::delta3d_mg::Multigrid::new(
+                &self.device,
+                self.capacity,
+                &self.heights,
+                &self.state,
+                &self.partial,
+                &self.scalar,
+                &self.cg_uniform,
+            );
+            mg.write_shape(&self.queue, self.shape.get());
+            self.mg = Some(mg);
+        }
+        self.mg_on.set(true);
+        self.mg.as_ref().map_or(0, |m| m.levels())
+    }
+
+    /// S390 — bascule entre la multigrille réservée et Jacobi, entre deux pas. Refus si elle n'est pas réservée.
+    pub fn set_multigrid(&self, on: bool) -> Result<(), String> {
+        if on && self.mg.is_none() {
+            return Err("multigrille non réservée".into());
+        }
+        self.mg_on.set(on);
+        Ok(())
+    }
+
+    /// Niveaux grossiers employés si la multigrille est active, `None` sinon ; et ses flottants réservés.
+    pub fn multigrid(&self) -> Option<(usize, usize)> {
+        self.mg.as_ref().filter(|_| self.mg_on.get()).map(|m| (m.levels(), m.floats))
+    }
+
     /// Enregistre le pas jusqu'à `upto`. Aucune lecture, aucune décision CPU entre deux
     /// dispatchs : les passages d'un étage à l'autre sont des copies **sur la carte**.
     pub fn encode(&self, encoder: &mut wgpu::CommandEncoder, cycles: u32, upto: Upto) {
@@ -755,25 +812,41 @@ impl Step3 {
         }
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(1) });
-            pass.set_bind_group(0, &self.cg_bind, &[]);
-            let mut run = |index: usize, groups: u32| {
-                pass.set_pipeline(&self.cg[index]);
-                pass.dispatch_workgroups(groups, 1, 1);
-            };
-            if partie != Some(1) {
-                run(CG_BNORM[0], cells);
-                run(CG_BNORM[1], 1);
-                run(CG_INIT_WARM, cells);
-                run(CG_FINISH_RZ, 1);
-            }
-            for _ in premier..dernier {
-                for (n, index) in CG_CYCLE.iter().enumerate() {
-                    run(*index, if n % 2 == 1 { 1 } else { cells });
+            match self.mg.as_ref().filter(|_| self.mg_on.get()) {
+                // S390 : le même gradient conjugué, préconditionné par le cycle en V ; mêmes parts, même résidu.
+                Some(mg) => {
+                    if partie != Some(1) {
+                        mg.encode_start(&mut pass, cells);
+                    }
+                    for _ in premier..dernier {
+                        mg.encode_cycle(&mut pass, cells);
+                    }
+                    if partie != Some(0) {
+                        mg.encode_residual(&mut pass, cells);
+                    }
                 }
-            }
-            if partie != Some(0) {
-                run(CG_RESIDUAL[0], cells);
-                run(CG_RESIDUAL[1], 1);
+                None => {
+                    pass.set_bind_group(0, &self.cg_bind, &[]);
+                    let mut run = |index: usize, groups: u32| {
+                        pass.set_pipeline(&self.cg[index]);
+                        pass.dispatch_workgroups(groups, 1, 1);
+                    };
+                    if partie != Some(1) {
+                        run(CG_BNORM[0], cells);
+                        run(CG_BNORM[1], 1);
+                        run(CG_INIT_WARM, cells);
+                        run(CG_FINISH_RZ, 1);
+                    }
+                    for _ in premier..dernier {
+                        for (n, index) in CG_CYCLE.iter().enumerate() {
+                            run(*index, if n % 2 == 1 { 1 } else { cells });
+                        }
+                    }
+                    if partie != Some(0) {
+                        run(CG_RESIDUAL[0], cells);
+                        run(CG_RESIDUAL[1], 1);
+                    }
+                }
             }
         }
         if upto == Upto::Projection || partie == Some(0) {
@@ -1019,7 +1092,7 @@ impl Step3 {
     }
 
     /// **Banc** : exécute le pas jusqu'à `upto` et attend la carte.
-    fn run_for_bench(&self, cycles: u32, upto: Upto) -> Result<(), String> {
+    pub(crate) fn run_for_bench(&self, cycles: u32, upto: Upto) -> Result<(), String> {
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         self.encode(&mut encoder, cycles, upto);
         self.queue.submit([encoder.finish()]);
@@ -1132,6 +1205,9 @@ impl Step3 {
         let groups = (d.cells() as u32).div_ceil(GROUP) as f32;
         self.queue.write_buffer(&self.cg_uniform, 40, &groups.to_le_bytes());
         self.write_step_uniform(self.rest.get(), self.dt.get(), self.sponge.get());
+        if let Some(mg) = &self.mg {
+            mg.write_shape(&self.queue, d);
+        }
     }
 
     /// **Banc S350** : la capacité — la forme de création.
@@ -1330,6 +1406,41 @@ impl Step3 {
         }
         self.read.unmap();
         Ok(out)
+    }
+
+    /// **Banc S390** : le cycle en V seul, sur `r` (forme courante, tranche `R`), avec la géométrie du **dernier pas**
+    /// (hauteurs, tranche `M`) ; rend `z`, les hauteurs et `M`. Écrit `R`, `Q` et `Z`, que le départ du pas suivant
+    /// recalcule depuis `x` et `b` : entre deux pas seulement.
+    pub fn mg_vcycle_for_bench(&self, r: &[f32]) -> Result<(Vec<f32>, Vec<f32>, Vec<f32>), String> {
+        let mg = self.mg.as_ref().ok_or("multigrille non réservée")?;
+        let n = self.cells();
+        if r.len() != n {
+            return Err("cycle en V : longueur de la forme courante attendue".into());
+        }
+        self.queue.write_buffer(&self.state, (n * 4) as u64, bytemuck_cast(r));
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            mg.encode_vcycle_only(&mut pass, (n as u32).div_ceil(GROUP));
+        }
+        self.queue.submit([encoder.finish()]);
+        let z = self.relire(&self.state, 2 * n, n)?;
+        let h = self.relire(&self.heights, 0, self.columns())?;
+        let m = self.relire(&self.state, 5 * n, n)?;
+        Ok((z, h, m))
+    }
+
+    /// **Banc S390** : une tranche de la projection (`x, r, z, d, q, m, b` : 0 à 6), forme courante.
+    pub fn state_slice_for_bench(&self, section: usize) -> Result<Vec<f32>, String> {
+        let n = self.cells();
+        self.relire(&self.state, section * n, n)
+    }
+
+    /// **Banc S390** : lissages après la prolongation sur les niveaux grossiers intermédiaires — deux par défaut ;
+    /// zéro rend le cycle **asymétrique**, pour voir l'instrument échouer.
+    pub fn mg_coarse_post_for_bench(&self, sweeps: usize) -> Result<(), String> {
+        self.mg.as_ref().ok_or("multigrille non réservée")?.set_coarse_post(sweeps);
+        Ok(())
     }
 
     /// **Banc P2** : échantillonne le fond aux faces puis prédit ; rend `[us | vs | ws]`.

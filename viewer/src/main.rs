@@ -12,6 +12,7 @@ mod delta3d;
 mod delta3d_projection;
 mod delta3d_background;
 mod delta3d_step;
+mod delta3d_mg;
 mod delta3d_linear;
 mod delta3d_scene;
 mod delta3d_arbitrage;
@@ -2685,6 +2686,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--delta3d-rang1") {
         return delta3d_arbitrage::rang1();
+    }
+    if args.iter().any(|a| a == "--delta3d-mg-cycle") {
+        return delta3d_mg::recevoir_cycle();
     }
     if args.iter().any(|a| a == "--delta3d-deux-parts") {
         return delta3d_scene::deux_parts();
