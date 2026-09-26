@@ -71,6 +71,8 @@ pub struct Apic3 {
     pub(crate) radius: f32,
     /// Itérations du dernier gradient conjugué.
     pub(crate) iterations: u32,
+    /// Séparation des particules active (S320) ; la couper sert à la mesure.
+    pub(crate) separation: bool,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -145,6 +147,7 @@ impl Apic3 {
             shift: vec![[0.; 3]; capacity],
             radius: rest_radius(dx),
             iterations: 0,
+            separation: true,
         })
     }
 
@@ -169,6 +172,14 @@ impl Apic3 {
     /// Itérations du dernier gradient conjugué.
     pub fn iterations(&self) -> u32 {
         self.iterations
+    }
+    /// **Pour la mesure** : le rayon de la reconstruction (défaut : `rest_radius`, le minimax de S388).
+    pub fn set_reconstruction_radius(&mut self, r: f32) {
+        self.radius = r;
+    }
+    /// **Pour la mesure** : la séparation des particules (défaut : active).
+    pub fn set_separation(&mut self, on: bool) {
+        self.separation = on;
     }
     /// Distance signée reconstruite aux centres des mailles (`x` le plus rapide, puis `y`, puis `z`).
     pub fn distance(&self) -> &[f32] {
@@ -599,7 +610,9 @@ impl Apic3 {
         self.extrapolate();
         self.grid_to_particles();
         self.advect(dt);
-        self.separate();
+        if self.separation {
+            self.separate();
+        }
         let mut max_speed = 0f32;
         for k in 0..self.n {
             let (p, v) = (self.x[k], self.vel[k]);

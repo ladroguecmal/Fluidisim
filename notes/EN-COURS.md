@@ -91,7 +91,7 @@ cuve carrée : erreur de période ≤ 2 % à la maille la plus fine mesurée —
 - [x] **P4** — surface reconstruite (rayon au repos calculé), étiquettes ; critère 2.
 - [x] **P5** — gravité, projection à fluide fantôme (gradient conjugué, Jacobi), extrapolation, advection, séparation : le pas.
 - [x] **P6** — le repos ; critère 3.
-- [ ] **P7** — banc `apic3d_ballottement` : modes (1, 0) et (1, 1) ; critères 4 et 5.
+- [x] **P7** — banc `apic3d_ballottement` : modes (1, 0) et (1, 1) ; critères 4 et 5.
 - [ ] **P8** — critère 6 ; preuve `APIC3D-S388` ; liste, file, feuille de route, index.
 - [ ] **P9** — rituel.
 
@@ -111,3 +111,19 @@ couches avec les faces alimentées gardées, RK2, séparation). Essais `s388` (s
   plafond de 7 % comme régression ; le verdict reste « manqué ».
 - **Critère 3 tenu** : cuve de 1 m à 5 cm, 0,5 m d'eau, 2 s, 100 pas — masse exacte, vitesse parasite **5,6 mm/s** au pire,
   1,2 mm/s à la fin (2D : 4,4 mm/s) ; 57 itérations, résidu 9,7·10⁻⁷.
+
+**P7 — les ballottements** (`apic3d_ballottement`) :
+
+| cas | 5 cm | 2,5 cm | critère |
+|---|---|---|---|
+| (1, 0), période (exacte 1,9765 s) | **+2,05 %** (2D : +5,9 %) | **+1,04 %** (2D : −0,15 %) | ≤ 7 % tenu ; ≤ 1 % **manqué de 0,04 point** ; décroissante tenu |
+| (1, 1), période (exacte 0,9630 s) | +7,64 % | **+2,69 %** | ≤ 2 % **manqué** |
+| énergie créée, en % de l'onde analytique | +22,4 % / (1,1) +26,9 % | +7,0 % / (1,1) +12,7 % | ≤ 1 % **manqué** |
+
+À 10 cm, l'amplitude de 2 cm est sous l'espacement des particules (5 cm) : l'onde n'existe pas (S318, faute 2) — non retenu.
+Durées : 15 s, 153 s ; (1, 1) 18 s, 174 s ; 256 000 particules au plus. **L'énergie** oscille dans chaque période (de +0,15 à
+−0,56 fois l'énergie de l'onde) et **décroît** sur la durée ; l'onde représentée porte 1,64 fois l'énergie analytique (rangées
+de 2,5 cm, S318 : 2,66 cm représentés pour 2) ; 1 % de l'onde vaut quelques micromètres de centre de masse — le critère était
+plus fin que la mesure, il reste « manqué ». **Attribution** (témoins à 5 cm, (1, 0)) : rayon de S318 → **+7,87 %** (minimax
++2,05) ; sans séparation → +2,29 %, énergie +22,3. **L'erreur de période vient de la lecture de la surface**, pas de la
+séparation ; la piste : plus de particules par maille, ou la surface portée par un ensemble de niveaux (ADR-186 D4).
