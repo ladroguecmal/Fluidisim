@@ -1382,6 +1382,8 @@ pub use closure::{Closure3, ClosureError};
 mod cut;
 #[path = "delta3d_multigrid.rs"]
 mod multigrid3;
+#[path = "delta3d_regions.rs"]
+mod regions;
 #[path = "delta3d_advection.rs"]
 mod advection;
 #[path = "delta3d_graded.rs"]

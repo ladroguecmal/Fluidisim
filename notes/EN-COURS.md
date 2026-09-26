@@ -90,9 +90,9 @@ départ **≤ 1 % de l'amplitude**. Publié : fusions plus tardives, et une sép
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `domain_blocks.rs` : ensembles de blocs, dilatation, composantes, critères de fusion et de séparation avec leurs
   délais ; essais ; critère 1.
-- [>] **P3** — `Volume3::transplant` : l'état d'un domaine recopié dans un autre sur le réseau commun ; l'aller-retour ;
+- [x] **P3** — `Volume3::transplant` : l'état d'un domaine recopié dans un autre sur le réseau commun ; l'aller-retour ;
   critère 2.
-- [ ] **P4** — l'exemple `delta3d_fusion` : deux bosses, la fusion au critère, contre le domaine unique ; critère 3 ; publiés.
+- [>] **P4** — l'exemple `delta3d_fusion` : deux bosses, la fusion au critère, contre le domaine unique ; critère 3 ; publiés.
 - [ ] **P5** — critère 4 ; preuve `FUSION-S396` ; liste, file, feuille de route, index.
 - [ ] **P6** — rituel.
 
@@ -104,3 +104,10 @@ seconde continue, un clignotement de 0,9 s / 0,1 s pendant 10 s ne sépare jamai
 de `2r + 1`, deux essais tombent. **Précision du plan** : la durée de vie minimale de 0,75 s (ADR-006 §4) règle
 l'**extinction**, qui est à l'ordonnanceur ; ici, une fusion fait naître un domaine dont l'horloge repart de zéro — il vit au
 moins 1,0 s avant de se séparer.
+
+**P3 — `delta3d_regions.rs`** : `Volume3::clear_to_rest`, `Volume3::transplant(src, offset)` — surface, reste compensé, trois
+vitesses, pression de départ ; refus `Domain` hors du réseau commun (dx, nz, repos, densité, gravité) ou avec découpe ; les
+murs du receveur restent nuls (leçon de S350). **Critère 2 tenu** : 32 × 16 à 25 cm après 20 pas, `C → (A, B) → C'` **au bit**
+hors de la coupure ; la coupure (x = 4 m) perd au plus **7,8 mm/s**, 0,058 m³/s — l'onde de la bosse l'a déjà atteinte en
+0,4 s. La coupure rendue, `C'` refait vingt pas **au bit** avec `C`, mêmes itérations : la recopie porte tout ce que le pas
+lit. **Vu échouer** sans la pression de départ (deux essais).
