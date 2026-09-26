@@ -188,3 +188,157 @@ fn an_out_of_range_control_is_refused_atomically_s372() {
         assert_eq!((nodes, edges.map(|e| e.residue_nl)), avant);
     }
 }
+
+fn pump(from: u16, to: Option<u16>, max_flow_mlps: i64, shutoff_head_um: i64, intake_um: [i64; 3], outlet_um: [i64; 3]) -> Opening {
+    Opening {
+        from, to, flow: Flow::Pump { max_flow_mlps, shutoff_head_um, outlet_um }, position_um: intake_um,
+        discharge: 0.0, residue_nl: 0, ..Default::default()
+    }
+}
+
+/// **Critère 3** — une pompe vide A (1 m², 1 m d'eau) vers B, **refoulement libre** à 3 m (au-dessus de B) ; prise à
+/// 0,1 m. `Qmax` = 5 l/s, `H0` = 10 m. Avec `u = H0 − z_ref + h`, `du/dt = −(Qmax/(A·√H0))·√u` : la prise se dénoie à
+/// `t = 2·A·√H0·(√u0 − √u1)/Qmax`, `u0` = 8 m, `u1` = 7,1 m — **207,2 s**, à ±1 %. Puis plus rien ne passe : la cuve
+/// garde ses 10 cm, à un pas de débit près.
+#[test]
+fn a_pump_empties_to_its_intake_on_the_analytic_curve_s372() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [node(1_000_000, 1_000_000, 0), node(0, 1_000_000, 2_000_000)];
+    let mut edges = [pump(0, Some(1), 5_000, 10_000_000, [0, 0, 100_000], [0, 0, 3_000_000])];
+    let mut scratch = [0i64; 1];
+    let mut steps = 0u64;
+    let mut dernier = 0u64;
+    while steps < 10_000 {
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+        steps += 1;
+        if scratch[0] > 0 {
+            dernier = steps;
+        }
+    }
+    let (a, h0, qmax) = (1.0f64, 10.0f64, 0.005f64);
+    let attendu = 2.0 * a * h0.sqrt() * (8.0f64.sqrt() - 7.1f64.sqrt()) / qmax;
+    let t = dernier as f64 * STEP_US as f64 * 1e-6;
+    let ecart = (t - attendu) / attendu;
+    println!("POMPE_S372 a_sec t={t:.1} s attendu={attendu:.2} s ecart={:.3} % reste_A={} ml B={} ml", ecart * 100.0, nodes[0].volume_ml, nodes[1].volume_ml);
+    assert!(ecart.abs() < 0.01, "la prise se dénoie à {t} s contre {attendu} s");
+    assert!((99_000..=100_000).contains(&nodes[0].volume_ml), "A garde {} ml sous sa prise", nodes[0].volume_ml);
+    assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml, 1_000_000, "masse");
+}
+
+/// **Critère 4** — la pompe **noyée** : refoulement au fond de B, dont le fond est à 2 m ; `H0` = 2,5 m. La hauteur
+/// statique `2 + h_B − h_A` monte jusqu'à la hauteur de barrage : l'équilibre est `h_B − h_A = 0,5 m` avec
+/// `h_A + h_B = 1 m`, soit **A à 25 cm, B à 75 cm**, à ±1 %.
+#[test]
+fn a_drowned_pump_stops_at_its_shutoff_head_s372() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [node(1_000_000, 1_000_000, 0), node(0, 1_000_000, 2_000_000)];
+    let mut edges = [pump(0, Some(1), 5_000, 2_500_000, [0, 0, 0], [0, 0, 2_000_000])];
+    let mut scratch = [0i64; 1];
+    for _ in 0..20_000 {
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+    }
+    println!("POMPE_S372 barrage A={} ml B={} ml (250 000 / 750 000 attendus)", nodes[0].volume_ml, nodes[1].volume_ml);
+    assert!((nodes[0].volume_ml - 250_000).abs() <= 2_500, "A = {}", nodes[0].volume_ml);
+    assert_eq!(nodes[0].volume_ml + nodes[1].volume_ml, 1_000_000, "masse");
+}
+
+/// **Critère 4, vitesse** — lois de similitude : à hauteur statique nulle, le débit vaut `n·Qmax` (5 l/s à pleine
+/// vitesse, **2,5 l/s à mi-vitesse**, à ±1 % sur une seconde) ; et à mi-vitesse la hauteur de barrage tombe au quart —
+/// `H0` = 10 m ne monte plus 3 m (`n²·H0` = 2,5 m), quand la pleine vitesse le fait.
+#[test]
+fn pump_speed_follows_the_affinity_laws_s372() {
+    let table = prism(1_000_000);
+    // A : 10 m² sur 1 m (capacité 10 m³), pleine ; refoulement hors réseau à sa surface — Δh ≈ 0 pendant une seconde.
+    let shapes = Shapes::new(&table).unwrap();
+    let debit = |c: i64, sortie_z: i64| {
+        let mut nodes = [node(10_000_000, 10_000_000, 0)];
+        let mut edges = [Opening { control_pm: c, ..pump(0, None, 5_000, 10_000_000, [0, 0, 0], [0, 0, sortie_z]) }];
+        let mut scratch = [0i64; 1];
+        for _ in 0..10 {
+            step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+        }
+        (10_000_000 - nodes[0].volume_ml) as f64
+    };
+    let plein = debit(CONTROL_FULL, 1_000_000);
+    let moitie = debit(500, 1_000_000);
+    println!("POMPE_S372 similitude plein={plein} ml/s moitie={moitie} ml/s");
+    assert!((plein - 5_000.0).abs() / 5_000.0 < 0.01, "pleine vitesse : {plein}");
+    assert!((moitie - 2_500.0).abs() / 2_500.0 < 0.01, "mi-vitesse : {moitie}");
+    assert!(debit(CONTROL_FULL, 4_000_000) > 0.0, "à pleine vitesse, 3 m se montent");
+    assert_eq!(debit(500, 4_000_000), 0.0, "à mi-vitesse, 3 m dépassent n²·H0 = 2,5 m");
+    assert_eq!(debit(0, 1_000_000), 0.0, "arrêtée");
+}
+
+/// À sec : une prise au-dessus de la surface ne débite rien, quelle que soit la vitesse.
+#[test]
+fn a_pump_above_the_surface_runs_dry_s372() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut nodes = [node(400_000, 1_000_000, 0)];
+    let mut edges = [pump(0, None, 5_000, 10_000_000, [0, 0, 500_000], [0, 0, 0])];
+    let mut scratch = [0i64; 1];
+    for _ in 0..1_000 {
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+    }
+    assert_eq!(nodes[0].volume_ml, 400_000);
+}
+
+/// **Critère 5** — un réseau d'avarie : un compartiment inondé par un orifice depuis la mer (un grand nœud), une vanne
+/// vers le compartiment voisin, une pompe de cale qui rejette par-dessus bord, une seconde qui refoule dans une citerne
+/// sur le pont ; les commandes changent en cours de route. La masse est **exacte** à chaque pas (rejet compté), les
+/// volumes bornés, et deux exécutions donnent **la même trajectoire au bit**.
+#[test]
+fn a_damage_network_with_valves_and_pumps_conserves_and_repeats_s372() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let run = || {
+        let mut nodes = [
+            node(90_000_000, 100_000_000, -500_000), // la mer, 100 m² sur 1 m
+            node(0, 4_000_000, -2_000_000),          // compartiment inondé, 4 m²
+            node(0, 4_000_000, -2_000_000),          // compartiment voisin
+            node(200_000, 1_000_000, 1_000_000),     // citerne sur le pont, 1 m²
+        ];
+        let mut edges = [
+            orifice(0, Some(1), 20_000, [0, 0, -1_500_000]),
+            Opening { control_pm: 0, ..orifice(1, Some(2), 50_000, [0, 0, -2_000_000]) },
+            pump(1, None, 20_000, 8_000_000, [0, 0, -2_000_000], [0, 0, 1_000_000]),
+            pump(2, Some(3), 3_000, 6_000_000, [0, 0, -2_000_000], [0, 0, 1_000_000]),
+        ];
+        let mut scratch = [0i64; 4];
+        let total: i64 = nodes.iter().map(|n| n.volume_ml).sum();
+        let mut rejete = 0i64;
+        let mut h = Hasher64::new();
+        for k in 0..6_000u64 {
+            edges[1].control_pm = if k >= 1_500 { 700 } else { 0 };
+            edges[2].control_pm = if (2_000..4_000).contains(&k) { 1_000 } else { 400 };
+            edges[0].control_pm = if k >= 5_000 { 0 } else { 1_000 };
+            step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+            rejete += edges.iter().zip(scratch).filter(|(e, _)| e.to.is_none()).map(|(_, ml)| ml).sum::<i64>();
+            assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>() + rejete, total, "masse au pas {k}");
+            assert!(nodes.iter().all(|n| (0..=n.capacity_ml).contains(&n.volume_ml)), "bornes au pas {k}");
+            hash_state(&mut h, &nodes, &edges);
+        }
+        (h.finish(), nodes.map(|n| n.volume_ml), rejete)
+    };
+    let (a, fin, rejete) = run();
+    let (b, _, _) = run();
+    println!("POMPE_S372 avarie fin={fin:?} rejete={rejete} ml empreinte={a:#018x}");
+    assert_eq!(a, b, "deux exécutions divergent");
+    assert!(rejete > 0 && fin[2] > 0 && fin[3] > 200_000, "chaque arête doit avoir servi : {fin:?}, {rejete}");
+}
+
+/// Une pompe sans hauteur de barrage, ou de débit négatif, est refusée atomiquement.
+#[test]
+fn an_unrepresentable_pump_is_refused_atomically_s372() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    for (q, h0) in [(5_000, 0), (5_000, -1), (-1, 10_000_000)] {
+        let mut nodes = [node(900_000, 1_000_000, 0)];
+        let mut edges = [pump(0, None, q, h0, [0, 0, 0], [0, 0, 2_000_000])];
+        let mut scratch = [0i64; 1];
+        assert_eq!(step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch), Err(Error::Capacity));
+        assert_eq!(nodes[0].volume_ml, 900_000);
+    }
+}

@@ -100,6 +100,13 @@ pub enum Flow {
     /// cette loi de la précédente : un orifice garde sa section quand la charge monte, un
     /// déversoir élargit sa lame.
     Weir { width_mm: i64 },
+    /// **Pompe centrifuge en réseau ouvert** (ADR-199 D3). La prise est la position de l'arête, dans le nœud amont ; le
+    /// refoulement, `outlet_um`. Courbe parabolique `H(Q) = H0·(1 − (Q/Qmax)²)`, point de fonctionnement contre la
+    /// hauteur statique `Δh` = cote de refoulement (la sortie, ou la surface du receveur si elle la noie) − surface amont :
+    /// `Q = Qmax·√(n² − Δh/H0)`, zéro si le radical ne l'est pas (clapet : jamais de retour) et zéro si la surface amont
+    /// est sous la prise (à sec). Vitesse `n = commande/1 000`, lois de similitude. Débit maximal en millilitres par
+    /// seconde, hauteur de barrage `H0` en micromètres ; données de l'auteur de l'arête.
+    Pump { max_flow_mlps: i64, shutoff_head_um: i64, outlet_um: [i64; 3] },
 }
 impl Default for Flow {
     fn default() -> Self {
@@ -281,6 +288,10 @@ pub fn step(
         let size = match e.flow {
             Flow::Orifice { area_mm2 } => area_mm2,
             Flow::Weir { width_mm } => width_mm,
+            // Une pompe sans hauteur de barrage ne se représente pas (division par H0) : refusée comme une taille.
+            Flow::Pump { max_flow_mlps, shutoff_head_um, .. } => {
+                if shutoff_head_um <= 0 { -1 } else { max_flow_mlps }
+            }
         };
         if e.from as usize >= nodes.len()
             || e.to.is_some_and(|t| t as usize >= nodes.len())
@@ -305,6 +316,33 @@ pub fn step(
         // Cote de l'ouverture au-dessus du point de référence amont, **le long de la verticale
         // locale** : c'est la « distance signée au plan de surface » d'ADR-010 §2.
         let sill = along(sub(e.position_um, src.origin_um), up);
+        if let Flow::Pump { max_flow_mlps, shutoff_head_um, outlet_um } = e.flow {
+            // ADR-199 D3. À sec si la surface amont n'atteint pas la prise ; arrêtée à commande nulle.
+            if h_up <= sill || e.control_pm == 0 {
+                continue;
+            }
+            let outlet = along(sub(outlet_um, src.origin_um), up);
+            let delivery = match e.to {
+                Some(t) => {
+                    let dn = nodes[t as usize];
+                    let h_dn = shapes.surface_up(&dn, up)?.offset_um;
+                    (along(sub(dn.origin_um, src.origin_um), up) + h_dn).max(outlet)
+                }
+                None => outlet,
+            };
+            let n = e.control_pm as f64 / CONTROL_FULL as f64;
+            let radical = n * n - (delivery - h_up) / shutoff_head_um as f64;
+            if !(radical > 0.0) {
+                continue;
+            }
+            let q_m3s = max_flow_mlps as f64 * 1e-6 * radical.sqrt();
+            let nl = q_m3s * dt_s * 1e12;
+            if !nl.is_finite() || nl.abs() >= i64::MAX as f64 {
+                return Err(Error::NonFinite);
+            }
+            *out = nl as i64;
+            continue;
+        }
         // Charge en aval : la surface du receveur ramenée au même repère, ou le seuil si l'arête
         // rejette hors réseau. Le maximum interdit une charge négative — une ouverture au-dessus
         // de la surface aval ne débite pas plus qu'à l'air libre.
@@ -338,6 +376,7 @@ pub fn step(
                     * head_m.powf(1.5)
                     * ouverture
             }
+            Flow::Pump { .. } => unreachable!("la pompe a son propre calcul, plus haut"),
         };
         if !q_m3s.is_finite() {
             return Err(Error::NonFinite);

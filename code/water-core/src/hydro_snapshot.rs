@@ -42,7 +42,11 @@ pub struct Baseline<'a> {
 }
 
 fn valid_edge(e: &Opening, nodes: usize) -> bool {
-    let size = match e.flow { Flow::Orifice { area_mm2 } => area_mm2, Flow::Weir { width_mm } => width_mm };
+    let size = match e.flow {
+        Flow::Orifice { area_mm2 } => area_mm2,
+        Flow::Weir { width_mm } => width_mm,
+        Flow::Pump { max_flow_mlps, shutoff_head_um, .. } => if shutoff_head_um <= 0 { -1 } else { max_flow_mlps },
+    };
     (e.from as usize) < nodes && e.to.map_or(true, |t| (t as usize) < nodes)
         && size >= 0 && e.discharge.is_finite() && e.discharge >= 0.0
         && (0..1_000_000).contains(&e.residue_nl)
@@ -94,6 +98,12 @@ impl<'a> Baseline<'a> {
             match e.flow {
                 Flow::Orifice { area_mm2 } => { h.write_u8(0); h.write_u64(area_mm2 as u64); }
                 Flow::Weir { width_mm } => { h.write_u8(1); h.write_u64(width_mm as u64); }
+                Flow::Pump { max_flow_mlps, shutoff_head_um, outlet_um } => {
+                    h.write_u8(2);
+                    h.write_u64(max_flow_mlps as u64);
+                    h.write_u64(shutoff_head_um as u64);
+                    for x in outlet_um { h.write_u64(x as u64); }
+                }
             }
             for x in e.position_um { h.write_u64(x as u64); }
             h.write_u32(e.discharge.to_bits());

@@ -87,7 +87,7 @@ pas déterministe au bit, refus atomiques. (6) Instantané v2 : une commande cha
 - [x] **P1** — jeton, plan seul ; R26 consigné.
 - [x] **P2** — ADR-199 : vannes et pompes dans V (lois, commande, provenance, ce qui n'est pas fait).
 - [x] **P3** — `control_pm` sur `Opening` ; la vanne ; critères 1 et 2.
-- [ ] **P4** — la pompe ; critères 3 à 5.
+- [x] **P4** — la pompe ; critères 3 à 5.
 - [ ] **P5** — l'instantané WVST v2 ; critère 6.
 - [ ] **P6** — preuve `VANNES-POMPES-S372`, liste 5.4, file, feuille de route, index, ADR-010 et ADR-140 notes datées.
 - [ ] **P7** — rituel.
@@ -100,3 +100,11 @@ orifice et déversoir × `c/1 000`. **Critère 1** : empreinte des trajectoires 
 33 essais V passent. **Critère 2** : C12 à 1 000 / 500 / 250 : 727,4 / 1 455,1 / 2 910,6 s pour 728,3 / 1 456,5 /
 2 913,1 (−0,12 / −0,10 / −0,08 %) ; fermée 10 000 pas : 0 ml, reste intact ; fermée 60 s puis rouverte : +600 pas
 exactement ; déversoir à 250 : 0,249989. Littéraux `Opening` complétés dans les essais, l'exemple et `tests/`.
+
+**P4 — fait.** `Flow::Pump { max_flow_mlps, shutoff_head_um, outlet_um }` : prise = position de l'arête, refoulement
+libre ou noyé, clapet, à sec, similitude ; refus si `H0 ≤ 0` ou débit négatif ; empreinte de la base étendue (étiquette
+2). **Critère 3** : prise dénoyée à **207,3 s** pour 207,25 (+0,025 %), A garde 99 772 ml (228 ml sous la prise, un pas).
+**Critère 4** : barrage **249 999 / 750 001 ml** pour 250 000 / 750 000 ; similitude 4 999 et 2 499 ml/s pour 5 000 et
+2 500 ; à mi-vitesse 3 m ne se montent plus. **Critère 5** : réseau d'avarie (mer, deux compartiments, vanne, deux
+pompes, commandes changeantes, 6 000 pas) : masse exacte à chaque pas, bornes, deux exécutions au bit
+(`0xc0ee093528e34036`). Empreinte à commande pleine inchangée. Suite du cœur : 534 + 20 + 2 + 1 réussis, 14 ignorés.
