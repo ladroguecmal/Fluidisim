@@ -62,71 +62,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S375 — **terminée**. **δ 3D dans le bassin** de la piscine de S374 : *« La dynamique de fluide doit se faire
-en 3D volumétrique »* (ADR-200). À deux maillons : viser **5.10** (articulation V↔δ), absent → partiel.
+Session : S376 — **en cours**. Réponse de l'utilisateur à R27 et précision de conception : δ sur GPU dans Godot, **pas
+maintenant** ; les contenants suivent le principe de la haute mer — V par défaut, effets factices au loin (les rides de la
+pluie), δ 3D **seulement** près d'un joueur ou d'un perturbateur, en zones selon la taille du contenant ; prévision et
+niveaux de détail comme pour l'océan ; la météo précalculée en amont donne à V les litres de pluie, que des éléments
+bloquants peuvent empêcher ; les impacts de pluie restent factices ; le débordement vu par le joueur est une vraie
+simulation qui réagit aux obstacles. *« Si tu as des zones d'ombre cites les moi et on en discute. »* Sans code.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Thèse.** Le pas à surface mobile de `Volume3` (S296 ; murs sur les six côtés, fond plat) porte l'intérieur du bassin.
-Il lui manque **une entrée de volume par colonne** qui ne remette pas la pression à zéro (`set_free_surface` le fait) :
-`add_column_volume`, avec la compensation d'arrondi du transport. Par elle passent, à chaque pas de δ : le **jet** de la
-pompe (volume sur la colonne d'impact, et sa quantité de mouvement dans les mailles sous l'impact), le **puits** du
-déversoir (la bande de colonnes contre le mur est), et le **forçage vers V** (ADR-025 : `(M_V − M_δ)·dt/τ`, τ = 1 s,
-uniforme). V garde la masse ; δ fait le mouvement. La lame et le jet dans l'air restent pour APIC (ADR-200 D3).
-
-**Critères, écrits avant.** (1) `add_column_volume` : le volume de δ change **exactement** de `Σ dh·dx²` (à l'arrondi
-f32 compensé, ≤ 10⁻⁹ m³ par pas) ; refus atomique hors bornes ; sans entrée, δ au repos reste au repos (au bit). (2)
-Dans la piscine : le niveau moyen de δ suit celui de V à **1 mm** près au-delà de 5 τ. (3) Physique : le front de l'onde
-née de l'impact atteint le mur opposé au temps des ondes longues, `d/√(g·h)`, **à ±15 %** (repéré au premier dépassement
-de 1 mm). (4) Dans Godot, la surface rendue est celle de δ, au bit du fichier ; jugement de l'utilisateur (R27).
+**Ce qui se décide.** ADR-202 consigne ces règles ; **il corrige ADR-200 D1** (« un contenant qu'on voit » → δ), que
+S374 avait écrit trop large. ADR-200 reçoit une note datée. R27 reçu. Les zones d'ombre sont posées à l'utilisateur, dans
+l'ADR, avec une proposition pour chacune.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — `Volume3::add_column_volume` et ses essais ; critère 1.
-- [x] **P3** — `examples/piscine_delta.rs` : V et δ au pas, jet, puits, forçage ; coût mesuré ; export des surfaces ;
-  critères 2 et 3.
-- [x] **P4** — Godot : la surface de δ en maillage de hauteur dans le bassin (`piscine.gd`), rejouée ; critère 4.
-- [x] **P5** — images de R27, preuve `PISCINE-DELTA-S375`, liste 5.10, file, feuille de route, index.
-- [x] **P6** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — ADR-202 ; note datée d'ADR-200 ; R27 ; décision dans la file ; feuille de route ; index.
+- [ ] **P3** — rituel.
 
 ### Notes de reprise
-
-**P2 — fait.** `Volume3::add_column_volume(dh)` (`delta3d_mobile.rs`) : ajout compensé comme le transport, pression et
-vitesses intactes, refus atomiques (`Shape`, `NotFinite`, `Domain`). **Critère 1** : 200 ajouts, écart de volume **0**
-(au bit), repos au repos après 20 pas, refus sans écriture.
-
-**P3 — en cours, trouvé en chemin.**
-- `support/piscine.rs` : la piscine définie une fois ; `piscine_v` rebranché, **export identique au bit**.
-- **Défaut de la référence mobile 3D** : toute surface décalée uniformément du repos (≥ 1 µm) est refusée
-  (`Convergence`) sur tout domaine — le gradient conjugué converge (36–46 itérations), mais le critère de divergence
-  divise deux arrondis (vitesses 10⁻¹⁰ m/s) : 2 à 4. C'est le cas même d'ADR-025 (V élève le niveau d'un bloc).
-  **ADR-201** : plancher de l'échelle de vitesse, 10⁻⁴ m/s ; 76 essais δ 3D inchangés ; essai
-  `a_uniform_rise_is_a_state_without_motion_s375` (vitesses 1,5·10⁻¹⁰ et 1,2·10⁻⁹ m/s, surface uniforme au bit).
-- **Coût à 10 cm** (80 × 40 × 16) : ≈ 100 itérations, ≈ 0,5 s par pas sur la référence séquentielle — deux heures ; 20 cm.
-- **Premier essai du jet** (quantité de mouvement entière dans les 30 cm du haut, sans dissipation) : la surface sort du
-  domaine à t = 7,4 s (2,4 s après le lancement) — courant accéléré sans fin (≈ 56 N sur quelques décilitres), énergie
-  sans puits. **Panache à calibrer** : σ 20 cm, 60 cm de profondeur, verticale seule, horizontale dissipée ;
-  amortissement 0,5 s dans le panache, 30 s partout.
-
-**P3 — interrompue par la limite d'usage (2026-09-26, ≈ 04:25), à reprendre à chaud.** Committé dans ce commit :
-- `Volume3::shift_rest` (le repos suit le niveau de V ; essai `shifting_rest_to_the_mean_level_changes_no_physics_s375`,
-  surfaces à un ulp, pression moyenne 78,4 → −2,0 Pa ; seuil écrit d'abord à 10⁻⁷ m, **sous la résolution f32** à 2 m,
-  réécrit en deux ulps et dit) ; `last_refused_report` (diagnostic). Cause du refus à t = 305,4 s : plancher f32 atteint,
-  divergence 1,06·10⁻⁵ pour 10⁻⁵ — le décalage de 8,5 mm au repos d'origine (83 Pa uniformes).
-- `examples/piscine_delta.rs` : **exécution complète** 330 s, 13 200 pas, 357 s, 27 ms/pas, 62 itérations en moyenne,
-  0 refus. **Critère 2 tenu** (≤ 0,0001 mm). **Critère 3 manqué** : 2,475 s pour 1,759 (+40,7 %) au seuil de 1 mm ;
-  diagnostic sur l'export (le critère reste manqué) : 0,3 mm → 1,70 s (−3 %) ; 0,1 mm → 1,50 s, précurseur incompressible
-  plus rapide que √(g·h). Amplitudes : écart-type 0,2–0,36 mm, pire 1,5–4,9 mm. Export 6 600 images, 10,6 Mo.
-- Godot : maillage de hauteur de δ (`piscine.gd`, `bassin.gdshader`) ; **critère 4 tenu** (460 hauteurs, 0 écart).
-  18 images faites (`godot/captures/piscine_*`), **pas encore regardées**.
-**Reste** : le contrôle S374 compare la cote du maillage à V — faux en mode δ (le maillage est au repos) : ne le faire
-qu'avec `DELTA=0` ; regarder les images ; suite complète du cœur (après `shift_rest`) ; P5 (preuve `PISCINE-DELTA-S375`,
-ADR-201 note sur `shift_rest`, liste 5.10, file, feuille de route, index, R27) ; P6 rituel.
-
-**Reprise à chaud (09:53)** : arbre propre, l'étape interrompue était committée ; complétée. Contrôle de S374 limité au bac
-tampon en mode δ (`DELTA=0` : entier) — les deux modes tenus. Suite du cœur : 539 réussis, 0 avertissement.
-**Les images** : à l'échelle réelle, **la surface de δ paraît plane** (vues ensemble, déversoir, buse, rasante) ; cartes de
-hauteur (données) : dôme à l'impact (5,3 s), creux (5,6 s, −4,7 mm), anneaux et réflexions (6,5–8 s), interférences
-(40 s), creux stable sous le jet (200 s), oscillations résiduelles (260 s) ; écart-type 0,2–0,46 mm. **Témoin
-`EXAGERE=100`** : creux et anneaux visibles — la chaîne de rendu est bonne ; l'amplitude physique (mm, maille de 20 cm,
-panache amorti) ne se voit pas. Suite : δ sur GPU dans Godot à 5–10 cm, panache calé sur une mesure, APIC pour le jet.
