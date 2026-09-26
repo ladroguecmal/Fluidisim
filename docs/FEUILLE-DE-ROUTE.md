@@ -357,11 +357,7 @@ l'écume au déferlement (ADR-195) ; **S361** : les caustiques ; **S363** : le c
 partiel — fenêtre de Snell, milieu ; **S366** : R24 reçu, la lumière de l'eau calée sur Tyler ; **S367–S368** : l'écume, champ
 d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photographiques ; **S371** : la caméra à demi immergée, le milieu par pixel à l'objectif ; **S379** : les rides de la pluie, factices (8.9, R28 reçue) ; **S380** : la pluie complète ([ADR-205](adr/ADR-205-la-pluie-complete.md)), d'abord dans l'air — gouttes et extinction (R29 reçue) ; **S381** : le ciel de pluie, couvert de la CIE, sans soleil (R30 reçue) ; **S382** : l'occultation du ciel et les ombres portées (ADR-206, R31 reçue) ; **S383** : les gerbes (R32 posée). L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
 
-**La prochaine session de physique — la campagne du solveur volumique 3D temps réel** (décision de l'utilisateur, S379 :
-*« une session du plus dur et complexe […] un solveur […] qui va s'occuper des simulations 3D volumétriques ultra réalistes
-et performantes en temps réel dynamiquement »*). **Conception d'abord** : état de l'art, ce que δ 3D (S297–S348) et
-APIC (ADR-186) donnent déjà, l'architecture (domaines, niveaux de détail d'ADR-202, prévision), les cibles chiffrées, le
-découpage en sessions. **S380, l'utilisateur** : *« Pas de solveur continue la pluie ajoute les manquants »* — elle attend ; la pluie se complète d'abord (ADR-205). **S381, l'utilisateur** : *« ajoute l'occultation du ciel puis continue, et ensuite le plus important le solveur 3D »*.
+**La campagne du solveur volumique 3D temps réel** (décision de l'utilisateur, S379 : *« une session du plus dur et complexe […] un solveur […] qui va s'occuper des simulations 3D volumétriques ultra réalistes et performantes en temps réel dynamiquement »* ; R30 : *« le plus important »*). **Conçue en S384** ([conception](registres/CAMPAGNE-SOLVEUR-3D-S384.md), [ADR-207](adr/ADR-207-la-campagne-du-solveur-volumique-3d.md)) : le domaine de la porte B consomme seul les 2 ms de δ ; colonnes hautes, pression par multigrille, APIC en bande, puis les scènes — onze sessions **C1 à C11**, dont cinq sans carte graphique. **Suivante : C1**, la multigrille 3D de la référence. **S384, l'utilisateur** : *« Solveur 3D ici »* — la campagne dans la session cloud ; la pluie (pièce 5, R32) au poste.
 
 **Front 0 — 36 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
 

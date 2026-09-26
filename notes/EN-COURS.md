@@ -94,7 +94,7 @@ poste avec carte et Godot). (5) `etat_projet.py --check` sans erreur. Aucun code
 - [x] **P5** — cibles chiffrées : les usages volumiques de la liste, taille des domaines, mailles, cadence, budget.
 - [x] **P6** — l'architecture proposée, les alternatives écartées et leurs raisons.
 - [x] **P7** — le découpage en sessions : critères « reçu si », lieu (cloud ou poste).
-- [ ] **P8** — ADR de la campagne ; liste, file, feuille de route, index.
+- [x] **P8** — ADR de la campagne ; liste, file, feuille de route, index.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise

@@ -149,7 +149,8 @@ pas recopiée ici (L137).
   production **servis ensemble** sous un budget de 5 ms qui n'en tient pas deux entiers — le focal entier,
   l'autre rétréci au rang 1 —, 615 images de suite, au banc ([preuve](validation/ARBITRAGE-3D-S344.md) §7).
   Manquent davantage de domaines, leurs interactions (4.9) et l'afficheur.
-- [ ] **4.3 Subdivision adaptative anisotrope, blocs épars** épousant la forme utile (B5) — *absent*.
+- [ ] **4.3 Subdivision adaptative anisotrope, blocs épars** épousant la forme utile (B5) — *absent*, **conçu en S384** :
+  colonnes hautes et blocs épars ([ADR-207](adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D2, D4 ; sessions C2 et C8).
 - [ ] **4.4 Profondeur adaptative**, domaine qui suit un objet qui coule — *absent*.
 - [ ] **4.5 Création, croissance, réduction et disparition visuellement gratuites** (I-12) —
   *partiel* : naissance à zéro reçue sous fond couplé (S251, S253) ; en 3D, un domaine qui renaît

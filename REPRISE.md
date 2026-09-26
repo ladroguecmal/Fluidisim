@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 14:58 +02:00
+Battement        : 2026-09-26 15:01 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
 Session en cours : S384 — la campagne du solveur volumique 3D, sa conception (décision de l'utilisateur : « Solveur 3D ici »)
 Dernière session : S383 — rendu : **les gerbes de la pluie** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md) pièce 4, [preuve](docs/validation/GERBES-S383.md)) — couronne, dôme et jet aux mêmes impacts que les rides, part d'aire au loin, défaut de S380 corrigé (la pluie suit la pose) ; **R32 posée** (REVUE-VISUELLE §37). Avant : S382, l'occultation du ciel (R31 reçue)

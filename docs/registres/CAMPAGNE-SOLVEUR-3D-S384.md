@@ -9,7 +9,7 @@ chiffrées, le découpage en sessions.
 Ce document est une **conception**, pas une preuve : il ne mesure rien de neuf. Chaque chiffre renvoie à la preuve qui
 l'a mesuré ou à la publication qui l'annonce, marqué **publié** (annoncé par ses auteurs, non reproduit ici), **mesuré**
 (par ce dépôt, lien) ou **estimé** (calcul de ce document, dit). Ce qui s'y décide est acté par
-l'ADR de la campagne ; ce qui demande l'utilisateur est au §6.
+[ADR-207](../adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) ; ce qui demande l'utilisateur est au §6.
 
 ---
 
