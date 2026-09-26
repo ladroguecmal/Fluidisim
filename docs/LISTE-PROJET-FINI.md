@@ -244,7 +244,8 @@ pas recopiée ici (L137).
   ([S318](validation/COMPARAISON-LOT5-S318.md)) —, **APIC retenue** par l'utilisateur (ADR-186).
   Rien du déferlement ni des éclaboussures n'est reçu : jet et couronne suivent la maille (A312).
   **S388** : APIC **entre dans le cœur en 3D** (`apic3d.rs`, [preuve](validation/APIC3D-S388.md)) — masse exacte, repos,
-  ballottements à +1,04 % (1, 0) et +2,69 % (1, 1) à 2,5 cm ; aucune surface non graphe éprouvée encore (C4b).
+  ballottements à +0,39 % (1, 0) et +1,01 % (1, 1) à 2,5 cm depuis S389 (noyau de deux mailles, parois reflétées) ; aucune
+  surface non graphe éprouvée encore (C4b).
   Construit et non reçu ne vaut pas partiel. Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *absent* sur le système ;
   C06 partiel sur un véhicule d'essai 1D.

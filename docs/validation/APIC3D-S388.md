@@ -6,7 +6,8 @@ carte graphique : les durées sont celles de ce conteneur. Liste **4.16** (surfa
 
 ## Reproduire
 
-- Commit `897a9ee4` (P7 de S388) ou plus récent.
+- Commit `897a9ee4` (P7 de S388) ou plus récent ; **§5** : commit `4e25e1a9` (P4 de S389) — la reconstruction a changé :
+  les chiffres des §2 et §3 se rejouent avec `APIC3D_NOYAU=1` et sans les images aux parois, qui n'ont plus d'interrupteur.
 - `cargo test --manifest-path code/Cargo.toml --release --offline -p water-core s388 -- --nocapture` — six essais, dix
   secondes ; lignes `S388` (rayons, surfaces lues, repos).
 - `cargo run --manifest-path code/Cargo.toml -p water-core --release --offline --example apic3d_ballottement -- <10|11> <dx>`
@@ -92,3 +93,39 @@ l'autre n'explique l'énergie.
   par un ensemble de niveaux (ADR-186 D4).
 - Largeur de 0,2 m pour (1, 0) : les parois en `y` sont proches ; le mode ne dépend pas de `y`, mais leur effet n'est pas
   mesuré. Rien sur la carte ; durées d'un conteneur cloud.
+
+## 5. S389 — la surface lue sur toute une maille, et les parois
+
+2026-09-26. **Reproduire** : commit `4e25e1a9` ou plus récent ; `cargo test … -p water-core s389 -- --nocapture` (huit positions,
+noyaux 1 et 2) ; `… s388 -- --nocapture` (le repos, noyaux 2 et 1) ; `… --example apic3d_ballottement -- <10|11> <dx>`,
+`APIC3D_NOYAU=1` pour le témoin — lignes `APIC3D_S388`, avec `amortissement_par_periode`. Durées : 24 à 274 s.
+
+**Ce que S388 n'avait pas vu.** La lecture de la surface avait été jugée sur **deux** positions (une face, un centre).
+Calculée sur **huit** positions continues d'une maille, avec le noyau d'une maille, elle se trompe jusqu'à **9,93 %** de
+maille, non 6,12 %. Calculé avant d'être codé (modèle `f64`, `lattice_read_error`) : **le rayon du noyau** commande cette
+erreur, pas le nombre de particules — 3,65 % à 1,5 maille, **2,46 % à deux mailles** ; 27 particules par maille : 2,40 %.
+**Retenu : un noyau de deux mailles** (`KERNEL_CELLS`), rayon minimax sur les huit positions (0,05280 m à 10 cm). Le modèle
+et la reconstruction 3D lisent la même hauteur à 10⁻³ % de maille près, sur les huit positions et les deux noyaux.
+
+**Les parois.** Au premier passage, le noyau de deux mailles faisait courir le repos à **15 cm/s** : près d'une paroi, le
+noyau ne trouve des particules que d'un côté, la moyenne se décale vers l'intérieur et la surface paraît plus basse. Les
+parois **reflètent** désormais les particules dans la reconstruction (les centres à moins d'un rayon de noyau d'une paroi
+latérale ou du fond). Repos : **6,2 µm/s** (noyau 2) ; témoin noyau 1 avec images, **1,5 µm/s**. **Les 5,6 mm/s du §2
+venaient des parois**, pas du noyau.
+
+**Les ballottements** (critères de S388, inchangés ; l'énergie, désormais sur l'**amortissement par période**, régression de
+`ln` des pics du moment — positif, l'onde s'éteint) :
+
+| cas | 5 cm | 2,5 cm | critère |
+|---|---|---|---|
+| (1, 0) | +1,01 % (S388 +2,05) | **+0,39 %** (S388 +1,04) | ≤ 1 % **tenu** |
+| (1, 1) | +2,63 % (S388 +7,64) | **+1,01 %** (S388 +2,69) | ≤ 2 % **tenu** |
+| amortissement par période, (1, 0) ; (1, 1) | +0,21 % ; +0,63 % | +0,10 % ; +0,78 % | ≥ 0 **tenu** |
+| oscillation de l'énergie totale, % de l'onde | +7,0 ; +3,6 | +3,3 ; +5,3 | publiée |
+
+**Attribution** (5 cm) : noyau 1 avec images — (1, 0) +0,54 %, amortissement 3,78 %/période ; (1, 1) +5,57 %, 2,33 %/période.
+**Les images aux parois** corrigent surtout le mode (1, 0) ; **le noyau large** corrige l'oblique et divise l'amortissement
+par dix-huit. Coût : la reconstruction balaie 5³ mailles au lieu de 3³ — (1, 0) à 2,5 cm, 224 s au lieu de 153.
+
+**Ce que la section ne dit pas.** Un noyau large lisse les nappes plus minces que son rayon — ce qui compte pour les
+gerbes et les lames (C4b, B10) — et ce n'est pas mesuré ; la lecture reste à 2,46 % de maille, au-dessus du 1 % de S388.

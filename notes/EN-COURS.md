@@ -87,7 +87,7 @@ inchangée, zéro avertissement.
   critère 1.
 - [x] **P3** — la reconstruction à deux mailles ; critères 2 et 3.
 - [x] **P4** — les ballottements remesurés, l'amortissement par régression, l'attribution ; critères 4 à 6.
-- [ ] **P5** — critère 7 ; preuve (section datée d'APIC3D-S388) ; liste, file, feuille de route.
+- [x] **P5** — critère 7 ; preuve (section datée d'APIC3D-S388) ; liste, file, feuille de route.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
@@ -116,3 +116,6 @@ paroi latérale ou du fond). **Critère 3 tenu** : repos **6,2 µm/s** (noyau 2)
 **Attribution** (5 cm) : noyau 1, parois reflétées — (1, 0) **+0,54 %**, amortissement 3,78 %/période ; (1, 1) **+5,57 %**,
 2,33 %/période. S388 (noyau 1, sans images) : +2,05 % et +7,64 %. **Les images aux parois** corrigent surtout (1, 0) ; **le
 noyau large** corrige l'oblique et divise l'amortissement par 18. Critères 4 à 6 tenus.
+
+**P5 — critère 7 tenu** : suite Rust 680 réussis, 18 ignorés, zéro avertissement ; outils Python 32 réussis. Preuve :
+§5 d'[APIC3D-S388](../docs/validation/APIC3D-S388.md) ; liste 4.16, file de la campagne, feuille de route.
