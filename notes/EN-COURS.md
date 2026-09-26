@@ -88,8 +88,11 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
   `gain_eau` déplacé là (l'éclairement de la scène).
 - [x] **P4** — les nuanceurs : eau, bassin, parois, fond, caustiques, éclat ; critère 1.
 - [x] **P5** — les scènes : `couvert` par la pluie ou `COUVERT=` ; contrôles (critères 2 à 4).
-- [>] **P6a** — images de R30 (piscine, mer, ciel clair contre ciel couvert) ; REVUE-VISUELLE §35.
-- [ ] **P6b** — preuve `CIEL-PLUIE-S381` ; liste, file, feuille de route, index.
+- [>] **P6a** — correction vue sur les premières images de R30 : **la lumière des crêtes** (S356, soleil qui traverse les
+  crêtes, pondéré vers l'azimut du soleil) restait allumée sous le ciel couvert — taches claires sur la mer, aux mêmes
+  places que par ciel clair ; éteinte comme l'éclat (`soleil_direct()`) ; critère 1 (12 images au bit).
+- [ ] **P6b** — images de R30 (piscine, mer, ciel clair contre ciel couvert) ; REVUE-VISUELLE §35.
+- [ ] **P6c** — preuve `CIEL-PLUIE-S381` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
 **Reprise à chaud, 12:19** (*« Reprends le projet »*) : jeton `occupé` à 12:08, dernier commit P5 à 12:14, arbre propre,
