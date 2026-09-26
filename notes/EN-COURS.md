@@ -62,121 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S383 — **terminée**. Verdict R31 : *« Je valide R31, continue la pluie »*. Cette session : **la pluie, pièce 4
-d'ADR-205 — les gerbes** (liste 8.4). Agent : Claude Opus 5.5, application desktop ; fichiers, git, carte réelle, accès
-web ; Godot 4.4.1 local.
+Session : S384 — **en cours**. **Décision de l'utilisateur** (2026-09-26, S384, session cloud sans carte graphique ni
+Godot) : *« Solveur 3D ici »* — la campagne du solveur volumique 3D commence maintenant ; la pluie, pièce 5, et le verdict
+R32 se feront depuis le poste. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni
+carte graphique, ni Godot.
 
-**Thèse.** À chaque impact qui laisse un anneau (D ≥ 1,5 mm, au taux de Marshall et Palmer × Atlas), une **gerbe**
-au-dessus de l'eau : la couronne, puis le jet de Worthington et ses gouttelettes — hauteurs, durées et tailles tirées des
-mesures publiées pour des gouttes de pluie à leur vitesse terminale sur eau profonde, selon le diamètre. **Les mêmes
-impacts que les rides** : le tirage (couche, période, maille → instant, centre, diamètre) sort du nuanceur des rides en une
-fonction partagée, que lit un système de particules (une particule par couche, maille et période, dans une fenêtre autour
-de la caméra). Au loin, où une gerbe tient sous le pixel, sa **part d'aire moyenne** (taux × aire × durée) éclaire la
-surface de l'eau, fondue avec les particules par l'empreinte du pixel. Sur le sol et les margelles, les éclaboussures au
-seuil de Mundo, Sommerfeld et Tropea (1995), si le temps le permet.
+**Thèse.** La campagne du solveur volumique 3D temps réel (FEUILLE-DE-ROUTE §3 ter ; S379, R30) commence par sa
+**conception** : ce que le dépôt a déjà (δ 3D en colonnes, référence CPU et production GPU ; APIC sur banc 2D ; faces
+coupées ; ordonnanceur), l'état de l'art du volumique temps réel, l'architecture qui les réunit (domaines, niveaux de
+détail d'ADR-202, prévision d'ADR-013, représentations), des cibles chiffrées tirées des usages, et un découpage en
+sessions dont chacune a son critère « reçu si ». Livrables : `docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md` et un ADR qui
+acte ce qui relève de l'autonomie technique (S71) et nomme ce qui demande l'utilisateur.
 
-**Critères, écrits avant.** (1) Sans pluie : les 12 images **identiques au bit**. (2) Sous la pluie, gerbes éteintes : les
-images de la pluie de S382 **identiques au bit** (le tirage partagé ne change pas les rides). (3) Chaque gerbe naît au
-centre d'un anneau et à son instant — compté sur une image de contrôle : **100 %** à moins d'1 mm. (4) Le nombre de gerbes
-vivantes par m² égal à **taux × durée de vie à ±5 %** (ou deux écarts-types de Poisson). (5) Hauteurs et durées de la
-couronne et du jet **dans l'intervalle des mesures publiées** pour chaque diamètre. (6) Coût mesuré ; photographies
-réelles ; jugement de l'utilisateur (R32).
+**Critères, écrits avant.** (1) Chaque capacité existante citée avec sa preuve (lien) et son chiffre mesuré ; aucune
+valeur sans provenance (I-14). (2) Chaque méthode de l'état de l'art avec une source identifiée (auteurs, année, lieu) ;
+ses chiffres marqués **publié**, **estimé** ou **non vérifié**. (3) Chaque cible chiffrée rattachée à un usage (point de
+la liste, tolérance d'image de 3 mm, δ ≤ 2 ms GPU d'ADR-174 D3, cadence d'ADR-012 §7). (4) Chaque session du découpage
+nomme sa porte ou son point de liste, son critère « reçu si », et **où** elle peut se faire (session cloud sans carte, ou
+poste avec carte et Godot). (5) `etat_projet.py --check` sans erreur. Aucun code du cœur changé : suite Rust inchangée
+(664 réussis, 18 ignorés, mesuré à l'ouverture sur `daf67e0c`).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — sources : couronne, cavité, jet de Worthington, gouttelettes des gouttes de pluie sur eau profonde (selon D,
-  à vitesse terminale) ; seuil sur surface sèche ; photographies ; chiffres retenus.
-- [x] **P3** — le tirage partagé (`pluie_impact`) sorti des rides ; critère 2 (rides au bit).
-- [x] **P4** — les gerbes sur l'eau de la piscine : particules (fenêtre de mailles sur les eaux), géométrie par diamètre et
-  âge (couronne, dôme, jet), radiance de l'eau comme les gouttes.
-- [x] **P4b** — la mer : la gerbe posée sur la surface déplacée (la somme des ondes de la bande, évaluée au point d'impact
-  en coordonnées de Lagrange, comme les rides), fenêtre autour de la caméra.
-- [x] **P5** — au loin : la part d'aire moyenne des gerbes dans les nuanceurs d'eau, fondue par l'empreinte.
-- [x] **P6** — contrôles : critères 1, 3, 4, 5 ; coût.
-- [x] **P7** — les éclaboussures au sol (seuil de Mundo, Sommerfeld et Tropea) ou, faute de temps, leur déclencheur.
-- [x] **P8** — images de R32 ; REVUE-VISUELLE §37.
-- [x] **P9** — preuve `GERBES-S383` ; liste, file, feuille de route, index.
-- [x] **P10** — rituel.
+- [ ] **P2** — inventaire : δ 3D (référence, production, coût, limites A297, A298, A316, A320), APIC (B10, raccord),
+  faces coupées, ordonnanceur, piscine en δ ; lu dans les preuves, chiffres et liens.
+- [ ] **P3** — état de l'art (1) : grilles hybrides temps réel (colonnes hautes, fonction hauteur + 3D + particules),
+  pression sur la carte (multigrille), grilles éparses.
+- [ ] **P4** — état de l'art (2) : particules sur grille (FLIP, APIC, MPM) sur la carte ; SPH et PBF ; Boltzmann sur
+  réseau à surface libre ; coûts et qualités publiés.
+- [ ] **P5** — cibles chiffrées : les usages volumiques de la liste, taille des domaines, mailles, cadence, budget.
+- [ ] **P6** — l'architecture proposée, les alternatives écartées et leurs raisons.
+- [ ] **P7** — le découpage en sessions : critères « reçu si », lieu (cloud ou poste).
+- [ ] **P8** — ADR de la campagne ; liste, file, feuille de route, index.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
 
-**P2 — les sources.**
-- **A — Wang, Liu, Bayeul-Lainé, Murphy, Katz, Coutier-Delgosha (2023)**, *Analysis of high-energy drop impact onto deep
-  liquid pool* (JFM ; arXiv 2302.02728), sur l'expérience de **Murphy et al. (2015, JFM 780)** : goutte de pluie de
-  **4,1 mm à 7,2 m/s** (81 % de sa vitesse terminale), We 2 893, Fr 1 322, sur eau profonde. Texte : couronne à son rayon
-  maximal (≈ 13 mm) vers 3 ms, à sa hauteur maximale vers 12 ms, quand son bord se referme (dôme, « bubble canopy ») ;
-  cavité la plus profonde vers 24 ms ; jet central (Worthington) vers 40 ms ; ≈ 2 000 microgouttelettes, tailles en deux
-  modes (50 et 225 µm), énergie au plus 8 % de celle de la goutte ; les petites partent en rasant dans la première
-  milliseconde, les grosses plus haut, des ligaments de la couronne.
-- **Mesuré sur leur figure 3** (500 × 321 px, lue par canevas ; barre 17 px = 10 mm, vérifiée par la goutte : 7 px =
-  4,1 mm) — sommet de la gerbe au-dessus de l'eau : **1 ms 5,9 mm ; 3 ms 11,2 ; 7 ms 17,1 ; 12 ms 19,4** (dôme fermé) ;
-  **18 ms 24,7** (jet central sur le dôme) ; **41 ms 23,5 ; 52 ms 21,8** (jet large). Largeur à la base : 14, 16, 21, 25, 26,
-  29 mm (1 à 41 ms).
-- **B — Watson et al. (2024, PNAS 121)**, gouttes de 4 mm à 2,2–6 m/s (Fr 127–850) : cratère `κ₁/D ∼ Fr^0,25`, premier
-  jet `δ₁/D ∼ Fr^0,27`, `δ₁ ∝ κ₁^1,03` (des exposants ; les valeurs absolues, dans leurs figures, non lues).
-- **C — Mundo, Sommerfeld et Tropea (1995)** : sur surface sèche, éclaboussure si `K = Oh·Re^1,25 > 57,7` ; une goutte de
-  2 mm à 6,55 m/s : Re ≈ 13 000, Oh ≈ 0,0026, **K ≈ 360** — toute goutte de pluie visible éclabousse sur le béton.
-- **Refusés ou non lus** : JPO 2018 (vent) et HAL (Michon, Josserand, Séon 2017) bloqués ; PDF de l'arXiv 2604.10491
-  illisible par l'outil. Résumés automatiques de PNAS contradictoires : écartés, seuls les exposants gardés.
-- **Le modèle retenu** (hypothèse dite) : la gerbe de A, à l'échelle `s(D) = (D/4,1 mm)·(Fr/1 322)^0,26` en longueur (B :
-  exposant moyen de κ₁ et δ₁), `√s` en temps (effondrement de cavité gouverné par la gravité aux grands Fr), `Fr = v²/(g·D)`,
-  `v` d'Atlas. Pour D = 1,5 / 2 / 4,1 mm à leur vitesse terminale : s ≈ 0,41 / 0,56 / 1,10 — dôme ≈ 8 / 11 / 21 mm.
-- Auteurs de B vérifiés (écrits d'abord sans lecture, puis contrôlés) : Daren A. Watson, M. R. Thornton, H. A. Khan,
-  R. C. Diamco, D. Yilmaz-Aydin, A. K. Dickerson, PNAS 121 (5), e2315667121.
-
-**P3 — le tirage partagé.** `pluie_phase(j)`, `pluie_graine(j, k)`, `pluie_decalage(hk)`, `pluie_impact(...)` (naissance,
-centre, diamètre) dans `pluie.gdshaderinc` ; les rides les appellent. **Critère 2** : 8 images sous la pluie (piscine 10 et
-50 mm/h, trois vues ; mer 10 mm/h, deux poses ; `pluie8.sh`) — d'abord rendues deux fois au commit d'avant : **identiques
-entre elles** (la pluie est déterministe, contrairement à ce que S380 n'exigeait pas) ; après le découpage : **8 / 8 au
-bit**. **Critère 1** : nouvelle référence, la fin de S382 (occultation comprise) : 12 / 12 au bit.
-
-**P4 — les gerbes de la piscine.** `gerbes.gd` (un `GPUParticles3D` : couches × 2 périodes × mailles d'une fenêtre qui couvre
-les deux eaux — 26 × 12 mailles, 24 336 particules à 10 mm/h), `gerbe.gdshader` (le tirage des rides, `pluie_impact` ;
-vie `0,08·√s` s plus une pose ; hors de l'eau, rien), `gerbe_dessin.gdshader` (relevés de P2 interpolés ; coupe jusqu'à
-10 ms, puis dôme et jet de 4 mm à tête de 2,5 mm ; moyenne sur quatre instants de la pose de 1/60 s ; radiance des gouttes ;
-opacités réglées 0,25 / 0,6 / 0,3 / 0,55 / 0,8). **Impasses** : `return` interdit dans `process()` des particules (tout
-dans une fonction) ; **rien ne se dessinait** — même des carrés rouges forcés — : l'eau du bassin, transparente et qui lit
-l'écran, était dessinée après les particules et les recouvrait (tri par la distance du centre des boîtes) ; le dessin passe
-après elle (`render_priority` 1). **Vu** : de petites coupes blanches semées sur l'eau de près, des points clairs de loin.
-
-**P4b — la mer.** Fenêtre carrée de 12 m dans le plan de B, en coordonnées de Lagrange (celles des rides de la mer), à
-4,5 m devant la caméra ; la gerbe posée à `q + d(q)`, hauteur `η(q)` (`bande_au_point`). La bande et `bande_au_point`
-sorties de `surface_b.gdshaderinc` dans **`bande_b.gdshaderinc`** (que `surface_b` inclut) : `surface_b` dépend de
-`optique_eau` (`sous_eau`), illisible depuis un nuanceur de particules — une seule source gardée. **Défaut trouvé,
-antérieur (S380)** : les captures de la mer n'appelaient pas `phases()` après `pose()` — la boîte des gouttes restait devant
-la caméra de départ (« proche ») : **en pose « référence », les gouttes de R29 et R30 tombaient ≈ 11 m trop loin** ; les
-gerbes, de même (elles apparaissaient près de l'horizon). Corrigé : après chaque pose, la pluie suit. **Vu** au ras de l'eau
-(`demi_dessus`) : dômes et jets posés sur les vagues, une couronne ; en pose « référence », les traînées au premier plan.
-Contrôles : sans pluie **12 / 12 au bit** (référence fin de S382) ; sous la pluie sans gerbes **7 / 8 au bit**, la mer en
-pose « référence » change — la correction, voulue.
-
-**P5 — au loin.** Une gerbe est un objet vertical : vue sous l'élévation ε, la part d'un pixel d'eau qu'elles couvrent vaut
-`M/tan ε`, `M = Σ flux(D)·A·s(D)^2,5`, `A` l'aire de profil de la silhouette de référence intégrée sur sa vie — **7 168
-mm²·ms** (intégration numérique de la fonction du nuanceur, opacités comprises). `M` = 8,9·10⁻⁵ / 7,4·10⁻⁴ / 4,2·10⁻³ à 2 / 10
-/ 50 mm/h ; couverture à 2° : 0,3 / 2,1 / **11,9 %**. `pluie.gd` (`moment_gerbes`, `echelle_gerbe`) ; mer seulement (les
-particules couvrent toute la piscine) : hors de la fenêtre, fondu sur son dernier mètre, les particules s'y effaçant d'autant
-(`agrandi/√f`). Mesuré (pose rasante, 50 mm/h, avec contre sans gerbes) : +3,5 / +2,6 / +2,1 / +1,8 niveaux de l'horizon au
-premier plan.
-
-**P6 — contrôles.** `--controle-gerbes` (piscine) et `outils/controle_gerbes.py`. Vue d'aplomb à 2 mm/px (3,686 m²),
-vingt instants : cœurs d'anneaux de moins de 30 ms en rouge (contrôle de S379), carré vert d'1 cm au centre de chaque gerbe
-de moins de 30 ms. **Critère 3 tenu** : 961 gerbes, centre à **0,76 mm** au plus du disque, **aucun disque sans gerbe** (33
-coupés par le bord de l'image, écartés, comptés). **Impasse du contrôle** : un carré de 4 mm (2 px), mêlé au rouge par
-l'anticrénelage (olive), passait sous les seuils — 560 « disques sans gerbe » au premier passage ; carré d'1 cm, vert lu à
-son canal. **Critère 4 tenu** : 961 pour 988,9 attendues, **−2,82 %** (1 σ de Poisson 3,18 %). **Critère 5 tenu** : la gerbe
-de référence seule, de profil à 0,05 mm/px, sommet à 1 / 3 / 7 / 12 / 18 / 41 / 52 ms = le plus haut des relevés sur la
-pose à **0,04 mm** près (tolérance 0,59). **Critère 1** : 12 / 12 au bit (référence fin de S382). **Coût** (`GERBES=0`
-contre 1) : piscine +0,004 à +0,015 ms à 10 mm/h, +0,05 à +0,23 à 50 ; mer +0,09 à +0,12 à 10, +0,29 à +0,33 à 50.
-
-**P7 — différé, avec sa raison.** Sous la pluie, le sol est mouillé en quelques secondes : le seuil de Mundo, Sommerfeld et
-Tropea vaut pour une surface **sèche** ; sur sol mouillé, c'est un impact sur film mince (Cossali, Coghe et Marengo 1997 :
-`K = We·Oh^−0,4 > 2 100 + 5 880·δ^1,44`, δ l'épaisseur relative du film) — le film que donnent les surfaces mouillées
-(pièce 5). Déclencheur : la pièce 5. Inscrit dans la file.
-
-**P8 — R32.** `captures_r32.sh` (bloc-notes) : avec et sans gerbes, 10 et 50 mm/h, piscine (de près, buse), mer (au ras de
-l'eau, proche, rasante) ; la gerbe de référence du contrôle, de profil. Planches `viewer/captures/s383/` `r32_piscine.png`,
-`r32_mer.png`, `r32_detail.png`. **Vu sur le détail** : silhouettes géométriques (coupe, dôme, jet) — de près au ras de
-l'eau, un air de « champignon » ; à 1 ms rien (la pose moyenne sur les 16,7 ms d'avant). Référence : *Rain falling into a
-swimming pool* (Commons, lue sans téléchargement) — à ≈ 10 m, gerbes non distinctes une à une, l'eau piquetée, le dallage
-mouillé brillant. REVUE-VISUELLE §37.
+*(vide)*

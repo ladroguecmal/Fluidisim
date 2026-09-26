@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 14:42 +02:00
-Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot) — rituel de S383 complété par reprise à chaud, après la mise en ligne du dépôt par l'utilisateur (GitHub, ladroguecmal/Fluidisim)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-26 14:48 +02:00
+Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
+Session en cours : S384 — la campagne du solveur volumique 3D, sa conception (décision de l'utilisateur : « Solveur 3D ici »)
 Dernière session : S383 — rendu : **les gerbes de la pluie** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md) pièce 4, [preuve](docs/validation/GERBES-S383.md)) — couronne, dôme et jet aux mêmes impacts que les rides, part d'aire au loin, défaut de S380 corrigé (la pluie suit la pose) ; **R32 posée** (REVUE-VISUELLE §37). Avant : S382, l'occultation du ciel (R31 reçue)
 Session suivante : **verdict R32**, puis la pluie, pièce 5 — les surfaces mouillées et les éclaboussures au sol (film mince, Cossali et al. 1997) ; ensuite **la campagne du solveur volumique 3D**, « le plus important » (R30)
 Maillons        : 3 — S383 : 8.4 reste partiel, R32 posée ; justifié au journal (la demande de l'utilisateur, « continue la pluie »)
