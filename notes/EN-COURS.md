@@ -93,8 +93,8 @@ départ **≤ 1 % de l'amplitude**. Publié : fusions plus tardives, et une sép
 - [x] **P3** — `Volume3::transplant` : l'état d'un domaine recopié dans un autre sur le réseau commun ; l'aller-retour ;
   critère 2.
 - [x] **P4** — l'exemple `delta3d_fusion` : deux bosses, la fusion au critère, contre le domaine unique ; critère 3 ; publiés.
-- [>] **P5** — critère 4 ; preuve `FUSION-S396` ; liste, file, feuille de route, index.
-- [ ] **P6** — rituel.
+- [x] **P5** — critère 4 ; preuve `FUSION-S396` ; liste, file, feuille de route, index.
+- [>] **P6** — rituel.
 
 ### Notes de reprise
 **P2 — `domain_blocks.rs`** : `Block`, `BlockSet` (trié, capacité réservée, `insert`, `union_with`, `bounds`, `touches`,
@@ -120,3 +120,7 @@ composantes, due à **1,00 s**, coupure à 18 m ; écart par seconde 0,00 / 0,03
 coupure, puis les ondes se réfléchissent sur les nouveaux murs (la limite des murs, publiée). **Trouvé en chemin** : au premier
 passage, bosses à 5 et 35 m, l'écart était nul sur 5 s — symétriques autour de la coupure à 20 m, qui était un plan de
 symétrie où un mur ne change rien ; témoin sans valeur, remplacé par le cas asymétrique.
+
+**P5 — critère 4 tenu** : 691 réussis, 18 ignorés, zéro avertissement. Preuve [FUSION-S396](../docs/validation/FUSION-S396.md) ;
+**4.9 passe à partiel** (décompte 3 / 70 / 47) ; 4.2 ; ADR-006 (note datée : trois lectures de §3–4) ; file, feuille de route
+(S394–S396), index.

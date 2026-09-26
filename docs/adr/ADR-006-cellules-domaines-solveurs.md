@@ -175,3 +175,12 @@ Ce que le rendu *peut* faire : **demander** un raffinement physique via une requ
    la fois avec la mémoire et avec le budget de temps.
 4. Faut-il un `dx` anisotrope (par exemple plus fin en vertical près de la surface) ? Physiquement
    justifié, mais complique les blocs. Reporté après B3.
+
+---
+
+**Note du 2026-09-26 (S396) — première écriture de §3–4, en référence** ([preuve](../validation/FUSION-S396.md)). Trois
+lectures de ce texte, faites en l'écrivant : (1) les domaines de δ couvrant toute la profondeur (ADR-175), un bloc y est une
+**colonne** de 8 × 8 mailles ; (2) « enveloppes dilatées qui s'intersectent » et « composantes connexes des blocs dilatés »
+reçoivent **une seule relation** — deux blocs liés si leurs dilatations de `r_c` se touchent, Chebyshev ≤ `2r + 1` —, sans
+quoi une fusion pourrait se défaire au pas suivant ; (3) la durée de vie minimale de 0,75 s règle l'extinction, à
+l'ordonnanceur ; une fusion fait naître un domaine dont l'horloge de séparation repart de zéro. La décision ne change pas.
