@@ -17371,3 +17371,21 @@ jugé à 2 σ sous 2,5 % de bruit ; le contrôle comptait les margelles comme go
 faire avancer un point : **R29 reçue fait passer 8.4 à partiel**. Suivant : la pluie, pièce 3 — le ciel de pluie (CIE
 couvert) —, avec le verdict de R29.
 **Verdict R29** (après le rituel) : *« Je valide »* — **8.4 passe à partiel** (3 / 67 / 50), maillons **0** : devient possible une scène sous la pluie où les gouttes tombent au nombre de la loi et voilent le lointain ; consommée par la piscine et la mer ; preuve §2.
+
+## S381 — 2026-09-26 — rendu : le ciel de pluie (ADR-205, pièce 3)
+
+**Entrée.** *« Continue »* après R29 : la pièce 3 d'ADR-205. Coupée après P5 (12:14) ; **reprise à chaud** à 12:19 sur
+*« Reprends le projet »* — jeton `occupé` depuis 12:08, mais aucun processus d'agent en vie hors le nouveau, aucune
+session de l'application en cours, arbre propre : rien à compléter ni à annuler (P6, marqué, pas commencé).
+**Fait** ([preuve](../docs/validation/CIEL-PLUIE-S381.md)). Deux ciels de pluie photographiés, mesurés : neutres (bleu
++1,5 à +7 %), rapport haut / horizon 1,72 contre 1,68 pour la CIE (champ supposé). `ciel.gdshaderinc` : `couvert`, le
+ciel couvert normalisé de la CIE, neutre, `Lz` tenu pour que l'éclairement horizontal reste celui du ciel clair (l'œil
+s'adapte, hypothèse dite) ; `eclairage()` partagé (orientation, sol renvoyé) ; `soleil_direct()` éteint disque, éclat,
+caustiques, crêtes. La pluie couvre, `COUVERT=` force. Ciel clair : 12 images au bit ; couvert à 0,15 % de la CIE,
+neutre ; vers le soleil −0,07 % ; sol mat, rapport 1,00000 ; coût +0 à +0,03 ms. **Erreur dite** : la lumière des
+crêtes (S356), solaire, oubliée par P3–P4 — taches claires sur la mer couverte, vues sur les images de R30 ; éteinte
+(P6a). **Limites.** Pas d'occultation du ciel : le bloc de la piscine se confond avec le sol (0,196 contre 0,188, par
+les albédos) ; ciel sans texture ; lobe solaire sous l'eau ; orientation interpolée (+4,3 % au pire). **Rituel.**
+Maillons **1** : aucun point de la liste ne change (le ciel sert 8.10 ; R30 posée, non reçue). **Arbitrage réel** (R30) :
+l'œil adapté ou une scène plus sombre ; l'occultation du ciel avant la suite. Suivant : la pluie, pièce 4 — les
+gerbes —, ou l'occultation du ciel si R30 la demande.

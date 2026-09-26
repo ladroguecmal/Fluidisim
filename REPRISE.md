@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-26 12:34 +02:00
-Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local) — reprise à chaud à 12:19 (S381 coupée après P5, aucun autre agent en vie)
-Session en cours : S381 — la pluie, pièce 3 : le ciel de pluie (CIE couvert, soleil éteint, éclairement conservé)
-Dernière session : S380 — rendu : **la pluie complète** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), demande de l'utilisateur : « pas de solveur, continue la pluie, ajoute les manquants ») — pièces 1 et 2, les gouttes dans l'air et l'extinction ([preuve](docs/validation/PLUIE-AIR-S380.md), **R29 reçue** : « Je valide » — 8.4 passe à partiel). Avant : S379, les rides de pluie (R28 reçue)
-Session suivante : **la pluie, pièce 3 — le ciel de pluie** (ciel couvert de la CIE, soleil voilé ; ADR-205 D3) ; puis les gerbes (4), les surfaces mouillées (5), les bâches sur les rides (8), l'exposition calculée (10)… La campagne du solveur volumique attend (S380, l'utilisateur)
-Maillons        : 0 — S380 : R29 reçue, 8.4 passe à partiel (journal)
+JETON            : libre
+Battement        : 2026-09-26 12:35 +02:00
+Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
+Session en cours : —
+Dernière session : S381 — rendu : **le ciel de pluie** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), pièce 3 ; [preuve](docs/validation/CIEL-PLUIE-S381.md)) — ciel couvert de la CIE, neutre, soleil éteint partout (disque, éclat, caustiques, crêtes), éclairement horizontal conservé (l'œil s'adapte) ; **R30 posée**. Coupée après P5, reprise à chaud. Avant : S380, la pluie dans l'air (R29 reçue)
+Session suivante : **le verdict de R30**, puis **la pluie, pièce 4 — les gerbes** (ADR-205 D3) — ou d'abord l'occultation du ciel si R30 la demande (le bloc de la piscine se confond avec le sol) ; puis les surfaces mouillées (5), les bâches sur les rides (8), l'exposition calculée (10)… La campagne du solveur volumique attend (S380, l'utilisateur)
+Maillons        : 1 — S381 : aucun point de la liste ne change, R30 posée non reçue (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

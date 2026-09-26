@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S381 — **en cours**. *« Continue »* après R29 (*« Je valide »*) : la pluie, **pièce 3 d'ADR-205 — le ciel de
+Session : S381 — **terminée** (coupée après P5, reprise à chaud à 12:19, close à 12:35). *« Continue »* après R29 (*« Je valide »*) : la pluie, **pièce 3 d'ADR-205 — le ciel de
 pluie**. Agent : Claude Opus 5.5, application desktop ; fichiers, git, carte réelle, accès web ; Godot 4.4.1 local.
 
 **Thèse.** Quand il pleut, le ciel est couvert (nimbostratus, épaisseur optique de plusieurs dizaines) : **aucun soleil
@@ -93,7 +93,7 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
   places que par ciel clair ; éteinte comme l'éclat (`soleil_direct()`) ; critère 1 (12 images au bit).
 - [x] **P6b** — images de R30 (piscine, mer, ciel clair contre ciel couvert) ; REVUE-VISUELLE §35.
 - [x] **P6c** — preuve `CIEL-PLUIE-S381` ; liste, file, feuille de route, index.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 **Reprise à chaud, 12:19** (*« Reprends le projet »*) : jeton `occupé` à 12:08, dernier commit P5 à 12:14, arbre propre,
 aucun diff ; **aucun autre processus d'agent en vie** (seul celui de cette session ; aucune session de l'application en
