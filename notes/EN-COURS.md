@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S388 — **en cours**. **C4a** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5,
+Session : S388 — **terminée**. **C4a** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5,
 [ADR-186](../docs/adr/ADR-186-apic-seconde-representation.md)) : **APIC en 3D dans le cœur**, avec ses essais (METHODE : un banc
 qui entre au système y entre avec ses chiffres). C4 est découpée : **C4a** ici — le solveur, le repos, le ballottement ;
 **C4b** ensuite — B10 en 3D, une sphère qui entre dans l'eau. Demande de l'utilisateur (2026-09-26) : *« Continue »*. Agent :
@@ -93,7 +93,7 @@ cuve carrée : erreur de période ≤ 2 % à la maille la plus fine mesurée —
 - [x] **P6** — le repos ; critère 3.
 - [x] **P7** — banc `apic3d_ballottement` : modes (1, 0) et (1, 1) ; critères 4 et 5.
 - [x] **P8** — critère 6 ; preuve `APIC3D-S388` ; liste, file, feuille de route, index.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 

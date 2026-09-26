@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 19:35 +02:00
-Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
-Session en cours : S388 — C4a : APIC en 3D dans le cœur (repos, ballottement) ; C4b ensuite (B10 en 3D)
-Dernière session : S387 — physique : **C2b, la colonne graduée au pas mobile** ([preuve](docs/validation/COLONNES-HAUTES-S386.md) §5) — la course de la surface sous la mer de la porte B mesurée (4,8 m) : la colonne graduée sert l'eau calme des contenants, pas la haute mer ; au pas mobile, elle suit sa dispersion (ballottement, rapport 0,84) ; deux défauts de S386 corrigés. Avant : S386, la colonne graduée au pas linéaire
-Session suivante : au poste, **C3** — la multigrille sur la carte, levier probable de la haute mer (ADR-207 D5) ; en alternance (ADR-191), la pluie, pièce 5. Dans une session cloud : **C4** — APIC en 3D dans le cœur
-Maillons        : 1 — S387 : aucun point ni critère de porte n'a changé d'état (4.3 déjà partiel)
+Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; lecture des articles bloquée)
+Session en cours : aucune
+Dernière session : S388 — physique : **C4a, APIC en 3D dans le cœur** ([preuve](docs/validation/APIC3D-S388.md)) — masse exacte, champ affine conservé, repos à 5,6 mm/s ; ballottement à +1,04 % (2,5 cm), oblique à +2,69 % ; la lecture de la surface depuis les particules commande la période (rayon de S318 : +7,87 %). Avant : S387, la colonne graduée au pas mobile
+Session suivante : dans le cloud, **C4b** — la surface d'APIC d'abord (plus de particules par maille, ou un ensemble de niveaux, ADR-186 D4), puis B10 en 3D ; au poste, **C3** (la multigrille sur la carte) et, en alternance (ADR-191), la pluie, pièce 5
+Maillons        : 2 — S388 : aucun point ni critère de porte n'a changé (4.16 reste absent : construit, non reçu) ; au prochain, comparer à la voie de la v1 (METHODE)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

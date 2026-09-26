@@ -17497,3 +17497,19 @@ sur un tampon emprunté), le résidu écrasé par la divergence ; chiffres de S3
 plus le paquet touche presque le fond de la scène de la porte B (0,11 m), à la file. **Rituel.** Maillons **1** : aucun point
 ni critère de porte ne change d'état. Suivant : **C3** au poste — la multigrille sur la carte, levier probable de la haute mer
 (la projection pèse 2,06 ms des 3,68) ; **C4** dans le cloud — APIC en 3D.
+
+## S388 — 2026-09-26 — physique : C4a, APIC en 3D dans le cœur
+
+**Entrée.** *« Continue »* : C4, découpée — C4a ici (le solveur, le repos, le ballottement), C4b ensuite (B10 en 3D). **Fait**
+([preuve](../docs/validation/APIC3D-S388.md)) : `apic3d.rs`, le candidat 2D de S318–S320 porté en 3D **dans le cœur**, avec ses
+leçons — surface reconstruite et fluide fantôme, extrapolation qui garde les faces alimentées, séparation, huit particules par
+maille, `f32`, mémoire réservée et comptée. **Tenus** : un champ affine traverse les transferts (vu échouer sans le terme
+affine) ; repos à 5,6 mm/s, masse exacte ; suite 681 réussis, zéro avertissement. **Manqués, mesurés** : la surface lue à 1 %
+de maille — le rayon de S318 lit une face à −15 %, aucun rayon ne tient partout, le minimax retenu lit ±6,1 % (deux rangées de
+particules par maille) ; le ballottement (1, 0) à **+2,05 % puis +1,04 %** (5 et 2,5 cm ; 2D : +5,9 et −0,15 %), manqué de
+0,04 point à 1 % ; l'oblique (1, 1) à +2,69 % pour 2 % ; l'énergie « créée » oscille de +0,15 à −0,56 fois l'onde et décroît —
+le critère de 1 % était plus fin que sa mesure. **Attribution** : le rayon de S318 fait +7,87 % au lieu de +2,05 % — **la lecture
+de la surface commande la période** ; la séparation n'y est pour rien. **Faute d'instrument** corrigée : le modèle f64 de la
+reconstruction ne mettait pas `dx` sans voisine. **Rituel.** Maillons **2** : aucun point ni critère de porte ne change (4.16
+reste absent, construit non reçu). Suivant : **C4b** — la surface d'abord (plus de particules par maille, ou un ensemble de
+niveaux, ADR-186 D4), puis B10 en 3D ; au poste, C3 et la pluie, pièce 5.
