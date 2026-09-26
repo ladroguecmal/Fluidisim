@@ -449,7 +449,7 @@ void fragment() {
 #ifdef BRUME_PAR_PIXEL
     // S373 : la perspective aérienne, sur la part d'air du pixel seulement (`brume_air`, `ciel.gdshaderinc`) — variante
     // `eau_demi.gdshader`, caméra à demi immergée. Partout ailleurs, la brume du moteur (critère 1 de S373 manqué par la
-    // brume réécrite : 11 niveaux au pire, BRUME-S373).
+    // brume réécrite : 11 niveaux au pire, DEMI-IMMERGEE-S371 §10).
     vec3 vue_b = normalize(surface - CAMERA_POSITION_WORLD);
     FOG = (controle == 0 && !controle_milieu)
         ? brume_air(vec3(vue_b.x, -vue_b.z, vue_b.y), length(VERTEX), 1.0 - milieu.x) : vec4(0.0);

@@ -20,7 +20,9 @@ passage de la surface), partielle depuis [S365](SOUS-MARIN-S365.md) ; [ADR-019](
   `MENISQUE=0` et `DEMI=0` (la bascule d'un bloc de S365) pour les témoins. Copies : `viewer/captures/s371/`.
 - **Non-régression** : `PROFONDEUR=s365 POSES=sous_eau,sous_eau_zenith,proche <godot> --path godot -- --captures --cote`
   et `POSES=proche,rasante <godot> --path godot -- --captures`, contre les mêmes rendus au commit `d66ac1f1` : identiques
-  au bit, sauf 33 pixels à ±1 au zénith sous l'eau (§4). **La brume** : `BRUME=1` la garde en mode demi (§5).
+  au bit, sauf 33 pixels à ±1 au zénith sous l'eau (§4). **La brume** : jusqu'au commit `2bb37060`, `BRUME=1` la garde en
+  mode demi (§5) ; **depuis S373**, l'eau et le fond y passent à leur variante `_demi`, qui écrit sa propre brume :
+  `BRUME=1` ne rend plus la mesure du §5 (la rejouer à `2bb37060`) ; voir §10.
 
 ## En une phrase
 
@@ -161,7 +163,7 @@ horizontal, pouvait se tromper de côté à moins d'un mètre de la surface.
 - **Champ large** : l'ordre 2 est borné par 2,4 pixels à 100° et 5,1 à 120° (au coin, dans le pire alignement) ;
   `MILIEU=exact` reste exact partout, à 5 ms.
 - La brume est éteinte **au-dessus** de la ligne aussi quand la caméra est à demi immergée (17 niveaux au pire) : une
-  perspective aérienne calculée par nos nuanceurs la rendrait réglable par pixel.
+  perspective aérienne calculée par nos nuanceurs la rendrait réglable par pixel. *Levée en S373 (§10).*
 - Le maillage près de l'objectif interpole la surface ; la ligne, elle, est analytique : un pixel peut voir un fragment de
   surface qui n'est pas exactement celui du milieu décidé, dans la transition.
 - Le ménisque est calé sur **une** photographie, prise de vue inconnue ; ni gouttes sur la partie émergée du hublot, ni
@@ -172,3 +174,46 @@ horizontal, pouvait se tromper de côté à moins d'un mètre de la surface.
 ## 9. Revue
 
 R26 ([revue](REVUE-VISUELLE.md) §31).
+
+## 10. S373 — la brume réglée par pixel
+
+**Reproduire** : commit de P3 de S373 (`6d095280`) ou plus récent ; `POSES=proche,rasante,reference,haute,plongeante,demi
+<godot> --path godot -- --captures` et `POSES=proche,sous_eau,sous_eau_zenith,demi … --captures --cote`, contre les mêmes
+rendus au commit `2bb37060` ; la brume de Godot en mode demi, pour comparer : `BRUME=1 POSES=demi` à `2bb37060`.
+
+**Ce qui est fait.** `brume_air` (`ciel.gdshaderinc`) réécrit la perspective aérienne de Godot (`fog_process`,
+4.4-stable) : quantité `1 − exp(−ρ·d)`, ρ = 0,00012, `d` la distance de l'œil au fragment ; couleur, la radiance du ciel
+dans la direction de visée ; **multipliée par la part d'air du pixel** (`milieu_du_pixel`), rendue par la sortie `FOG`.
+
+**Critères, écrits avant** : (1) poses au-dessus contre les rendus d'avant, p99,9 ≤ 2 niveaux et pire ≤ 8 ; (2) pose
+`demi`, côté air ≤ 8 niveaux de la brume de Godot, côté eau au bit ; (3) sous l'eau, au bit.
+
+**Critère 1 manqué par la brume réécrite partout** :
+
+| pose | p99,9 | pire | pixels touchés |
+|---|---:|---:|---:|
+| proche | 6 | 10 | 22 % |
+| rasante | 5 | 8 | 12 % |
+| référence | 6 | 11 | 30 % |
+| haute | 9 | 10 | 72 % |
+| plongeante | 2 | 2 | 37 % |
+
+La cause, relue : Godot lit son cube de radiance au niveau `mip = mix(1/MAX, 1, 1 − (|z| − near)/(far − near))` — pour
+tout fragment bien plus proche que le plan lointain (20 km), **le niveau le plus flou**, une moyenne diffuse du ciel ; la
+nôtre prend la radiance de l'horizon dans la direction. Le seuil ne se relève pas. **Retenu** : deux variantes de l'eau
+et du fond (`eau.gdshader`, `eau_demi.gdshader` ; `sol` de même ; corps commun dans `*.gdshaderinc`, `#define
+BRUME_PAR_PIXEL`), que `mer.gd` échange quand le mode demi change. **La brume du moteur partout où elle peut servir ; la
+nôtre seulement à demi immergée**, où celle du moteur ne peut pas se régler par pixel.
+
+| critère | mesure | |
+|---|---|---|
+| 1 | six poses au-dessus (dont la côtière) | **identiques au bit** |
+| 2 | `demi`, côté air, contre la brume de Godot | **7 niveaux** au pire (p99,9 = 3) ; S371 : 15 |
+| 2 | `demi`, côté eau, contre S371 | **identique au bit** |
+| 3 | `sous_eau`, `sous_eau_zenith` | **identiques au bit** |
+
+`--controle-ligne-eau` inchangé. **Limites** : à l'entrée du mode demi, la brume de l'air change de modèle — jusqu'à 7
+niveaux sur l'horizon lointain — et la variante se compile au premier passage (un à-coup possible, non mesuré) ; la brume
+réécrite n'est pas celle de Godot — la remplacer partout serait un choix visuel à soumettre (elle est plus bleue : la
+radiance de l'horizon plutôt qu'une moyenne diffuse).
+

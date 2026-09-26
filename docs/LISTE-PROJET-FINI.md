@@ -389,7 +389,8 @@ pas recopiée ici (L137).
   ([preuve](validation/SOUS-MARIN-S365.md)) ; R24 *« good »* ; **S366**, la lumière de l'eau calée sur la radiance
   mesurée par Tyler (1960), résidu 0,36 → 0,12 (§6). **S371** : la caméra à demi immergée (ADR-019 §6) — le milieu par
   pixel à l'objectif, la ligne à 0,08 pixel de l'intersection exacte, aucun pixel mal classé sur 60 images, 0,03 ms GPU ;
-  un ménisque calé sur une photographie ([preuve](validation/DEMI-IMMERGEE-S371.md)). Manquent le fond dans le miroir,
+  un ménisque calé sur une photographie ([preuve](validation/DEMI-IMMERGEE-S371.md)) ; **S373** : la brume de l'air réglée
+  par pixel à demi immergée (§10). Manquent le fond dans le miroir,
   bulles, écume vue d'en dessous, rayons, turbidité, gouttes sur le hublot, l'échelle radiométrique du ciel et du soleil
   (la fenêtre terne, §6), le coût du profil immergé entier (B11), les deux mixages audio (à la fin).
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *partiel* : **S275, ADR-168** —

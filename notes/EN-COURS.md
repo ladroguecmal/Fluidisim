@@ -86,7 +86,7 @@ identique au bit.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — images témoins d'avant ; `brume_air` dans `optique_eau.gdshaderinc`, `FOG` dans l'eau et le fond.
 - [x] **P3** — mesures des critères 1 à 3.
-- [ ] **P4** — preuve `BRUME-S373`, file, liste (8.6, 8.8), index.
+- [x] **P4** — preuve : section §10 de `DEMI-IMMERGEE-S371` (un fil, une preuve), « Reproduire » corrigé ; file, liste 8.6.
 - [ ] **P5** — rituel ; puis S374.
 
 ### Notes de reprise

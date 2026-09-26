@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 03:11 +02:00
+Battement        : 2026-09-26 03:12 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S373 — rendu 11 : notre perspective aérienne, la brume réglée par pixel ; puis S374, la piscine de V visualisée (demande de l'utilisateur)
 Dernière session : S372 — physique : **vannes et pompes dans V** (5.4 passe à partiel, [ADR-199](docs/adr/ADR-199-vannes-et-pompes-dans-v.md)) — commande par arête, vanne, pompe en réseau ouvert à 0,025 % de l'analytique, WVST v2 ; R26 reçu. Avant : S371, la caméra à demi immergée
