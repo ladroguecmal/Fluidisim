@@ -216,8 +216,8 @@ pas recopiée ici (L137).
   la gerbe, qui suit la maille (A312), la bulle, qui n'est pas de l'air (A311), le raccord aux
   colonnes — **à masse exacte** dans les deux sens depuis S323–S325, sa frontière **non reçue** :
   S354, sur 30 s, elle ne tient pas la densité des particules, la masse migre et la période s'allonge
-  à 5 cm (A316 ; [§10–13](validation/B10-APIC-S320.md)) ; S394, la densité tenue en position, l'onde croît : **l'échange
-  comprime** ([§14](validation/B10-APIC-S320.md)) —, la 3D (APIC 3D dans le cœur depuis S388 ; B10 en 3D, S393 : la cavité, pas la gerbe)
+  à 5 cm (A316 ; [§10–13](validation/B10-APIC-S320.md)) ; S394–S395, la densité tenue en position, l'onde croît ; la source :
+  une **circulation permanente** à la frontière ([§14–15](validation/B10-APIC-S320.md)) —, la 3D (APIC 3D dans le cœur depuis S388 ; B10 en 3D, S393 : la cavité, pas la gerbe)
   et C20. Lot 5 d'ADR-178, APIC retenue
   par l'utilisateur (ADR-186), repris après la v1 (ADR-190 D4).
 - [ ] **4.13 Proche-coque et gerbe d'étrave** — *partiel* **depuis S332–S338** (ADR-001 range le

@@ -665,3 +665,63 @@ cinquante fois celui de l'onde ; toute correction qui le compense sans le suppri
 colonne libre reçoit par insertion, perd par retrait et échange par advection, contre le flux eulérien de la face — puis un
 échange qui **voit la densité** : insérer où elle manque, retirer où elle excède. (B) resterait le garde-fou, son énergie
 ajoutée le critère : proche de zéro.
+
+---
+
+## 15. S395 — l'échange au sommet manque ; une circulation permanente à la frontière
+
+2026-09-26. **C5a, deuxième part** ([ADR-207](../adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5) ; A316. Session cloud,
+un fil par essai. Critères de S394, écrits avant, inchangés.
+
+### Reproduire
+
+- Commit `1c36a58d` ou plus récent ; le montage de §14 plus : `RACCORD_BILAN=1` (bilan par rangée de la dernière colonne
+  libre — insertions, retraits, particules par maille — et vitesse horizontale moyenne sur la face de la frontière, hybride
+  et APIC seul ; lignes `RACCORD_S395`) ; `RACCORD_SOMMET=1` (C) ; `LOT5_AMPLITUDE=<m>`. Témoins : `RACCORD_ECHANGE=eulerien`,
+  `RACCORD_MEMOIRE=grille`, `RACCORD_ZONE=0.25`.
+- Sans variable nouvelle, tout est au bit (valeurs de §14). Durées : 16 s à 5 cm ; (C) à 2,5 cm diverge (arrêté).
+
+### Le bilan par profondeur — la prédiction contredite
+
+La thèse : l'échange pose l'eau en profondeur, dans une eau pleine, sans pousser ce qui est au-dessus ; l'excès se logerait
+où l'on insère. **Mesuré** (paroi, 5 cm, 30 s) : on insère surtout **en haut** (rangées 7 à 9 : 92, 119, 129 particules), on
+retire surtout **en bas** (rangées 0 à 2 : 76, 73, 77), et l'excès est **au milieu** (rangées 3 à 6 : 5,0 à 5,5 particules par
+maille, APIC seul 4,0) ; la rangée du haut est creuse (3,1). Les totaux s'équilibrent (581 insertions, 569 retraits) : l'échange
+fait tourner une **recirculation** — l'eau passe aux colonnes par le bas, revient par le haut.
+
+### (C) — l'échange au sommet
+
+Le solde de l'échange tenu en un seul compte ; la particule la plus haute de la dernière colonne libre part quand une
+particule est due ; la nouvelle se pose sur sa rangée du haut. **Manqué, et pire** : masse à gauche +0,0131 / +0,0229 /
++0,0241 m² (S354 : +0,0113), densité 5,4 / 5,3 / 4,5, saut 1,27 maille, amortissement 14 % par période ; à 2,5 cm, divergence ;
+repos 0,65 cm/s. Avec la correction (B), celle-ci doit ajouter **457 J/m** en 30 s, contre 102 : (C) comprime davantage.
+**Attribution** : le fond s'entasse — 7,8 / 6,5 / 5,9 particules par maille aux rangées 0 à 2. Les particules que
+l'écoulement pousse vers la frontière en profondeur y sont arrêtées et ne sont plus retirées là où elles arrivent : **un
+échange doit retirer où les particules arrivent.**
+
+### La source : une circulation permanente à travers la frontière
+
+| vitesse horizontale moyenne sur la face, 30 s, mm/s | rangée 0 | 2 | 4 | 5 | 6 | 7 | 8 | 9 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| APIC seul | +0,7 | +0,7 | +0,8 | +0,8 | +0,7 | +0,3 | −0,4 | −1,9 |
+| hybride, paroi | **+21,4** | +20,5 | +13,6 | +5,7 | −6,3 | −21,1 | −37,4 | **−54,0** |
+| témoin : échange eulérien, sans paroi | +22,6 | +24,0 | +17,1 | +9,5 | −3,2 | −20,6 | −41,1 | −68,8 |
+| témoin : mémoire de vitesse des colonnes | +25,6 | +23,6 | +12,7 | +2,1 | −11,4 | −25,1 | −35,7 | −60,5 |
+| témoin : frontière aux trois quarts | +20,1 | +19,1 | +12,2 | +6,3 | −2,9 | −16,1 | −35,5 | −43,1 |
+| amplitude 4 cm au lieu de 2 | +56,8 | +51,1 | +14,8 | −10,6 | −36,4 | −58,5 | −78,1 | −66,4 |
+
+**L'eau entre dans les colonnes par le bas et en ressort par le haut, en permanence**, à une vitesse de l'ordre de la moitié
+de celle de l'onde ; APIC seul, au même endroit, n'a presque rien. Elle ne vient **ni de la paroi, ni de l'aller-retour de
+vitesse, ni de la place de la frontière** : elle naît du côté des colonnes. C'est elle qui entasse les particules (S354) et
+que la correction de §14 compensait en pompant de l'énergie. **Hypothèse, non tranchée** : réensemencées à chaque pas sur des
+points fixes à la vitesse de la grille, les colonnes n'advectent pas la quantité de mouvement — le terme non linéaire existe
+d'un côté de la frontière, pas de l'autre. L'épreuve par l'amplitude ne tranche pas : à 1 cm, l'onde est sous l'espacement
+des particules à 5 cm et rien ne bouge (témoin dégénéré) ; à 4 cm, la circulation croît de ×2,65 en bas, ×1,3 en haut.
+
+### Verdict et suite
+
+**Non reçu.** Critères 1, 2 et 6 tenus ; 3, 4, 5 manqués. **A316 est localisé** : une circulation moyenne que la zone des
+colonnes impose à la frontière. **Suite** : l'éprouver directement — donner aux colonnes l'advection de la quantité de
+mouvement (leurs particules gardées lagrangiennes pendant le pas, réensemencées aux positions advectées), ou mesurer la même
+face dans une eau **toute** en colonnes, sans frontière ; puis, l'hypothèse tranchée, un échange qui retire là où les
+particules arrivent.

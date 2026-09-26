@@ -88,8 +88,8 @@ correction (B) de S394 — son énergie ajoutée, qui devrait tomber près de z�
 - [x] **P2** — l'instrument : bilan par profondeur de la dernière colonne libre (insertions, retraits, densité), 30 s, contre
   APIC seul ; la prédiction.
 - [x] **P3** — (C), l'échange au sommet ; critères 1 à 6 ; avec (B), publié.
-- [>] **P4** — preuve (§15 de B10-APIC-S320) ; A316, file, liste.
-- [ ] **P5** — rituel.
+- [x] **P4** — preuve (§15 de B10-APIC-S320) ; A316, file, liste.
+- [>] **P5** — rituel.
 
 ### Notes de reprise
 **P2 — le bilan par profondeur** (`RACCORD_BILAN=1`, paroi, 5 cm, 30 s ; sans la variable, au bit) :
@@ -122,3 +122,5 @@ frontière : **elle naît des colonnes**. Hypothèse, non tranchée : réensemen
 colonnes n'advectent pas la quantité de mouvement ; le terme non linéaire manque d'un côté, pas de l'autre. Épreuve par
 l'amplitude (`LOT5_AMPLITUDE`) : à 1 cm, rien ne bouge (l'onde est sous l'espacement des particules à 5 cm — témoin
 dégénéré) ; à 4 cm, ×2,65 en bas, ×1,3 en haut — ni A ni A² : **non tranché**.
+
+**P4** : preuve B10-APIC-S320 §15 ; A316 (note : localisé) ; file (lot 5, campagne) ; liste 4.12.

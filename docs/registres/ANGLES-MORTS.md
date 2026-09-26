@@ -4299,6 +4299,13 @@ densité **en position** (champ dont la divergence vaut `n/4 − 1`, deux colonn
 la masse (±0,0013 m²) — mais l'onde croît de 4 % par période : elle rend 102 J/m en 30 s, ce que l'échange ôte. **Reste
 ouvert**, précisé : l'échange lui-même. Déclencheur : la prochaine session du raccord (C5a, deuxième part).
 
+**A316 — note datée du 2026-09-26 (S395). Localisé : une circulation permanente à la frontière** ([preuve](../validation/B10-APIC-S320.md)
+§15). La vitesse horizontale moyenne sur la face du raccord vaut +21 mm/s en bas et −54 mm/s en haut sur 30 s (APIC seul, même
+face : moins de 2 mm/s) — l'eau entre dans les colonnes par le bas et en ressort par le haut ; même chose sans paroi, avec la
+mémoire de vitesse, frontière déplacée : elle naît des colonnes. L'échange au sommet l'aggrave (le fond s'entasse, 7,8
+particules par maille). **Reste ouvert.** Hypothèse à trancher : les colonnes, réensemencées à chaque pas, n'advectent pas la
+quantité de mouvement.
+
 **A315 — note datée du 2026-09-23 (S326) : résolu.** Un Jacobi sur le chemin coupé — celui du mode mobile
 3D — ramène la bosse à 128 de 16 029 à **425 itérations** (5,7 s au lieu de 708), débits inchangés à
 2,4·10⁻⁶ près ; à `ny` = 1, identité 2D gardée ([preuve](../validation/FACES-COUPEES-3D-S324.md) §6).
