@@ -1259,3 +1259,35 @@ ciel de pluie, qui changera beaucoup l'ensemble.
 
 **Verdict R29 — reçu le 2026-09-26 (S380, après le rituel)** : *« Je valide »* — la pluie dans l'air (traînées, voile)
 reçue ; **8.4 passe à partiel**. Suite proposée et inscrite : le ciel de pluie (ADR-205, pièce 3).
+
+## 35. R30 — le ciel de pluie, S381
+
+**ADR-205, pièce 3.** Quand il pleut, le ciel est couvert : le soleil disparaît — ni disque, ni éclat sur l'eau, ni
+caustiques, ni lumière à travers les crêtes des vagues — et la lumière vient de tout le ciel, **neutre** (gris, comme sur
+les photographies de pluie mesurées : bleu à +1,5 % près dans *Downpour*, +1 à +7 % dans *Rain over the Sea, Mundesley*),
+trois fois plus claire au zénith qu'à l'horizon (le ciel couvert normalisé de la CIE, Moon et Spencer 1942 ; rendu à
+0,15 % près). **L'œil s'adapte** (hypothèse déclarée) : une surface horizontale mate garde exactement sa luminosité d'avant ;
+un mur reçoit 40 % de ce que reçoit le sol, plus ce que le sol lui renvoie. La pluie couvre le ciel ; la météo le
+commandera.
+
+| image | ce qu'elle montre |
+|---|---|
+| `viewer/captures/s381/r30_ciel_seul.png` | temps sec, ciel clair (avant) contre ciel couvert : piscine (ensemble, buse), mer (référence, haute) — le soleil éteint, la lumière diffuse, sans pluie |
+| `viewer/captures/s381/r30_bassin.png` | la piscine sous la pluie : 10 mm/h sous le soleil (R29) contre 10 et 50 mm/h sous le ciel couvert ; buse, ensemble, de près |
+| `viewer/captures/s381/r30_mer.png` | la mer, mêmes colonnes : proche (4 m), référence (7 m), rasante (2 m) — grise, mate, l'horizon voilé |
+
+**Ce qui se voit, et d'où cela vient.** Vue d'ensemble de la piscine : le bloc **se confond avec le sol**. Ce n'est pas
+une erreur de calcul : béton d'albédo 0,42 sur un mur qui reçoit 0,47, sol d'albédo 0,20 qui reçoit 0,94 — 0,196 contre
+0,188. Ce qui, dans la réalité, dessine encore les volumes par temps couvert — **l'occultation du ciel** : le pied des
+murs et les angles voient moins de ciel et s'assombrissent — **manque à la scène**, comme les ombres portées par ciel clair.
+Corrigé en préparant ces images : la lumière du soleil à travers les crêtes restait allumée sous le ciel couvert (taches
+claires sur la mer).
+
+**Ce qui n'y est pas** : l'occultation du ciel ; un ciel couvert **sans texture** (la base d'un nimbostratus a des
+nuances, et au loin des rideaux de pluie sous les nuages, comme à *Mundesley*) ; sous l'eau, le lobe du soleil reste
+allumé ; les gerbes (pièce 4) et les **surfaces mouillées** (pièce 5 : sol et margelles plus sombres et brillants), qui
+changeront beaucoup l'image de la piscine.
+
+**La question :** le ciel de pluie est-il crédible — gris neutre, sans soleil, lumière diffuse ? La luminosité d'ensemble
+(l'œil adapté : le sol aussi clair qu'au soleil) vous paraît-elle juste, ou la scène devrait-elle être plus sombre ? Le
+bloc de la piscine qui disparaît : faut-il l'occultation du ciel avant de continuer la pluie (gerbes, surfaces mouillées) ?

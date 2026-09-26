@@ -91,7 +91,7 @@ ciel couvert, à 1 %. (5) Photographies de ciel de pluie chiffrées (neutralité
 - [x] **P6a** — correction vue sur les premières images de R30 : **la lumière des crêtes** (S356, soleil qui traverse les
   crêtes, pondéré vers l'azimut du soleil) restait allumée sous le ciel couvert — taches claires sur la mer, aux mêmes
   places que par ciel clair ; éteinte comme l'éclat (`soleil_direct()`) ; critère 1 (12 images au bit).
-- [ ] **P6b** — images de R30 (piscine, mer, ciel clair contre ciel couvert) ; REVUE-VISUELLE §35.
+- [x] **P6b** — images de R30 (piscine, mer, ciel clair contre ciel couvert) ; REVUE-VISUELLE §35.
 - [ ] **P6c** — preuve `CIEL-PLUIE-S381` ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
@@ -143,3 +143,10 @@ au bit (SHA-256, avant et après). Non porté : la lumière diffuse du ciel qui 
   béton 0,42 × 0,466 = 0,196, sol 0,20 × 0,939 = 0,188 : la répartition de la CIE et les albédos le donnent ; ce qui manque
   est **l'occultation du ciel** (pied des murs, angles), le seul modelé réel par temps couvert — absente de la scène (pas
   plus d'ombres portées par ciel clair).
+
+**P6b — les planches de R30** (`planches.py` du bloc-notes, PIL ; cellules 640 × 360) : `viewer/captures/s381/`
+`r30_ciel_seul.png` (sec : clair / couvert × piscine ensemble, buse, mer référence, haute), `r30_bassin.png` et
+`r30_mer.png` (10 mm/h soleil — l'image de R29 — / 10 couvert / 50 couvert). Mer recapturée après P6a. Couleurs lues
+(sRGB moyen) : ciel couvert en haut 208,5 / 208,6 / 208,6 (neutre), horizon 188,6 ; mer couverte au premier plan 109,5 /
+117,0 / 143,4 (gris-bleu, R < V < B) contre 37,6 / 77,8 / 132,4 par ciel clair. Captures de travail de `godot/captures/`
+remises au ciel clair (les passes couvertes les avaient écrasées : mêmes noms).
