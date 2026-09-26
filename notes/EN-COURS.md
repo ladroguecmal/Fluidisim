@@ -62,51 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S374 — **terminée**. Demande : *« commence à permettre de visualiser le système de piscine avec déversoir et
-pompe »*. La demande prime sur l'alternance et sur le compteur de maillons (1).
+Session : S375 — **en cours**. **δ 3D dans le bassin** de la piscine de S374 : *« La dynamique de fluide doit se faire
+en 3D volumétrique »* (ADR-200). À deux maillons : viser **5.10** (articulation V↔δ), absent → partiel.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Thèse.** Une **piscine à débordement** : un bassin de 8 × 4 m, un déversoir de 4 m sur un petit côté, qui tombe dans
-un bac tampon plus bas, et une pompe qui rend l'eau au bassin par une buse. **V la calcule, Godot la montre** — V reste la
-seule source : le cœur (exemple `piscine_v`) joue un scénario (pompe arrêtée, lancée, arrêtée) et publie chaque pas —
-volumes, surfaces par `Shapes::surface_plane` (I-01 : le consommateur ne reconstruit rien), débits d'arête, commandes ;
-Godot le rejoue, interpolé à l'image. **Premier pas, pas l'intégration** : l'intégration native (godot-rust, accord de
-téléchargement) ou un lien local en direct viendront ensuite ; la commande en direct (touche pour la pompe) en dépend.
-La lame du déversoir et le jet de la buse sont de l'habillage tiré des débits de V (hauteur critique `(q²/g)^⅓`,
-trajectoires balistiques) ; la buse n'existe pas dans V.
+**Thèse.** Le pas à surface mobile de `Volume3` (S296 ; murs sur les six côtés, fond plat) porte l'intérieur du bassin.
+Il lui manque **une entrée de volume par colonne** qui ne remette pas la pression à zéro (`set_free_surface` le fait) :
+`add_column_volume`, avec la compensation d'arrondi du transport. Par elle passent, à chaque pas de δ : le **jet** de la
+pompe (volume sur la colonne d'impact, et sa quantité de mouvement dans les mailles sous l'impact), le **puits** du
+déversoir (la bande de colonnes contre le mur est), et le **forçage vers V** (ADR-025 : `(M_V − M_δ)·dt/τ`, τ = 1 s,
+uniforme). V garde la masse ; δ fait le mouvement. La lame et le jet dans l'air restent pour APIC (ADR-200 D3).
 
-**Critères, écrits avant.** (1) Le scénario fermé conserve le volume **exactement** à chaque pas. (2) Régime établi :
-débit du déversoir = débit de la pompe au point de fonctionnement **analytique** (charge sur le seuil par la loi des
-trois demis, hauteur statique de la pompe) **à ±1 %**. (3) Dans Godot, la surface rendue de chaque bac est celle publiée
-par V **au dixième de millimètre**. (4) Jugement de l'utilisateur (R27).
+**Critères, écrits avant.** (1) `add_column_volume` : le volume de δ change **exactement** de `Σ dh·dx²` (à l'arrondi
+f32 compensé, ≤ 10⁻⁹ m³ par pas) ; refus atomique hors bornes ; sans entrée, δ au repos reste au repos (au bit). (2)
+Dans la piscine : le niveau moyen de δ suit celui de V à **1 mm** près au-delà de 5 τ. (3) Physique : le front de l'onde
+née de l'impact atteint le mur opposé au temps des ondes longues, `d/√(g·h)`, **à ±15 %** (repéré au premier dépassement
+de 1 mm). (4) Dans Godot, la surface rendue est celle de δ, au bit du fichier ; jugement de l'utilisateur (R27).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — `examples/piscine_v.rs` : la piscine dans V, le scénario, l'export (`godot/donnees/piscine_v.json`) ;
-  critères 1 et 2.
-- [x] **P3** — `godot/piscine.tscn`, `piscine.gd` : les bacs, les murs, l'eau (`bassin.gdshader`, l'optique de
-  `optique_eau`), le rejeu ; critère 3.
-- [x] **P4** — ~~la lame du déversoir, le jet de la buse~~ **écartés** par la décision de l'utilisateur reçue pendant la
-  session, *« La dynamique de fluide doit se faire en 3D volumétrique »* : ADR-200 (δ 3D dans les contenants, V garde la
-  masse, APIC pour la lame et le jet) ; l'habillage balistique préparé n'entre pas dans le dépôt.
-- [x] **P5** — images de l'état de départ (sans revue : aucune dynamique à juger) ; preuve `PISCINE-V-S374`, liste (5.4, 5.10), file, feuille de route, index.
-- [x] **P6** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — `Volume3::add_column_volume` et ses essais ; critère 1.
+- [ ] **P3** — `examples/piscine_delta.rs` : V et δ au pas, jet, puits, forçage ; coût mesuré ; export des surfaces ;
+  critères 2 et 3.
+- [ ] **P4** — Godot : la surface de δ en maillage de hauteur dans le bassin (`piscine.gd`), rejouée ; critère 4.
+- [ ] **P5** — images de R27, preuve `PISCINE-DELTA-S375`, liste 5.10, file, feuille de route, index.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-
-**P2 — fait.** `examples/piscine_v.rs` : bassin 8 × 4 × 1,5 m (48 m³), déversoir de 4 m à 1,40 m, bac tampon 1 × 4 × 1,2 m
-(fond à −1,3 m), pompe 12 l/s, `H0` 8 m, prise à 5 cm du fond du bac, buse à 1,7 m sur le mur ouest ; départ bassin à
-1,395 m, bac à 0,80 m ; pompe de 5 à 240 s, 330 s. **Critère 1** : 3 300 pas, écart de volume **0 ml**. **Critère 2**
-(moyennes de 180 à 240 s, point fixe analytique) : déversoir **10,0717 l/s**, pompe **10,0926**, analytique **10,0924**
-(−0,205 % / +0,001 %) ; charge **12,65 mm** pour 12,66 (−0,04 %) ; bac tampon analytique 0,659 m. Export 3 301 lignes,
-218 Ko, `godot/donnees/` (dérivé, non versionné).
-
-**P3 — fait.** `piscine.tscn`, `piscine.gd` (rejeu interpolé, trois vues, pause, indications, `--captures`,
-`--controle-piscine`) ; `bassin.gdshader` (l'optique de la mer ramenée au bac : Fresnel, ciel, éclat, fond réfracté,
-colonne de Maritorena ; rides d'habillage) ; `paroi.gdshader` (le modèle d'éclairement du sable de S359 : parois et eau
-dans les mêmes unités ; joints de carrelage). **Critère 3** : six instants, sur un pas et entre deux, **3,6·10⁻⁸ m** au
-pire (arrondi f32). **Impasses** : `%e` n'existe pas dans le formatage de GDScript (lignes brutes) ; une erreur d'analyse
-laisse Godot ouvert à vide — `--quit-after` désormais sur chaque lancement de la piscine. Défauts de mise en scène vus et
-corrigés : murs extérieurs carrelés (coque en béton, carrelage intérieur de 1 cm), sol trop petit (son bord à
-l'horizon ; 6 km), vue du déversoir trop basse (le mur du bac cachait son eau).

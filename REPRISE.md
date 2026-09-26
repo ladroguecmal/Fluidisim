@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 03:34 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 03:36 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : aucune
+Session en cours : S375 — δ 3D dans le bassin de la piscine (ADR-200 D4, demande de l'utilisateur)
 Dernière session : S374 — **la piscine de V dans Godot** (état de départ, [preuve](docs/validation/PISCINE-V-S374.md)), puis **décision de l'utilisateur** : la dynamique des contenants en 3D volumétrique ([ADR-200](docs/adr/ADR-200-la-dynamique-des-contenants-en-3d-volumetrique.md)). Avant : S373, la brume par pixel
 Session suivante : **S375, δ 3D dans le bassin** (ADR-200 D4, demande de l'utilisateur) : domaine δ 3D sur l'intérieur du bassin, masse asservie à V (ADR-025), source du jet de la pompe, puits au seuil du déversoir, surface publiée et rendue dans Godot ; viser 5.10 absent → partiel. Puis le bac tampon, puis APIC 3D (lame, jet)
 Maillons        : 2 — S373, S374 : aucun point ne change d'état (journal)
