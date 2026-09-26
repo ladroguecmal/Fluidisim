@@ -93,7 +93,7 @@ réelles ; jugement de l'utilisateur (R32).
 - [x] **P4b** — la mer : la gerbe posée sur la surface déplacée (la somme des ondes de la bande, évaluée au point d'impact
   en coordonnées de Lagrange, comme les rides), fenêtre autour de la caméra.
 - [x] **P5** — au loin : la part d'aire moyenne des gerbes dans les nuanceurs d'eau, fondue par l'empreinte.
-- [ ] **P6** — contrôles : critères 1, 3, 4, 5 ; coût.
+- [x] **P6** — contrôles : critères 1, 3, 4, 5 ; coût.
 - [ ] **P7** — les éclaboussures au sol (seuil de Mundo, Sommerfeld et Tropea) ou, faute de temps, leur déclencheur.
 - [ ] **P8** — images de R32 ; REVUE-VISUELLE §37.
 - [ ] **P9** — preuve `GERBES-S383` ; liste, file, feuille de route, index.
@@ -158,3 +158,13 @@ mm²·ms** (intégration numérique de la fonction du nuanceur, opacités compri
 particules couvrent toute la piscine) : hors de la fenêtre, fondu sur son dernier mètre, les particules s'y effaçant d'autant
 (`agrandi/√f`). Mesuré (pose rasante, 50 mm/h, avec contre sans gerbes) : +3,5 / +2,6 / +2,1 / +1,8 niveaux de l'horizon au
 premier plan.
+
+**P6 — contrôles.** `--controle-gerbes` (piscine) et `outils/controle_gerbes.py`. Vue d'aplomb à 2 mm/px (3,686 m²),
+vingt instants : cœurs d'anneaux de moins de 30 ms en rouge (contrôle de S379), carré vert d'1 cm au centre de chaque gerbe
+de moins de 30 ms. **Critère 3 tenu** : 961 gerbes, centre à **0,76 mm** au plus du disque, **aucun disque sans gerbe** (33
+coupés par le bord de l'image, écartés, comptés). **Impasse du contrôle** : un carré de 4 mm (2 px), mêlé au rouge par
+l'anticrénelage (olive), passait sous les seuils — 560 « disques sans gerbe » au premier passage ; carré d'1 cm, vert lu à
+son canal. **Critère 4 tenu** : 961 pour 988,9 attendues, **−2,82 %** (1 σ de Poisson 3,18 %). **Critère 5 tenu** : la gerbe
+de référence seule, de profil à 0,05 mm/px, sommet à 1 / 3 / 7 / 12 / 18 / 41 / 52 ms = le plus haut des relevés sur la
+pose à **0,04 mm** près (tolérance 0,59). **Critère 1** : 12 / 12 au bit (référence fin de S382). **Coût** (`GERBES=0`
+contre 1) : piscine +0,004 à +0,015 ms à 10 mm/h, +0,05 à +0,23 à 50 ; mer +0,09 à +0,12 à 10, +0,29 à +0,33 à 50.

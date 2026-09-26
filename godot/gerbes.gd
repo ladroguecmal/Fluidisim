@@ -22,6 +22,8 @@ var couvert := 0.0
 var controle := false
 var taille_controle := 0.02
 var vie_controle := 0.05
+var seule := false
+var gerbe_seule := Vector4.ZERO
 var actif := OS.get_environment("GERBES") != "0"
 ## S383 P4b — **sur la mer** : une fenêtre carrée de `COTE_MER` mètres, dans le plan de B, devant la caméra (les trois quarts
 ## de son demi-côté), qui la suit ; la bande de B posée par la scène (`poser_bande`).
@@ -113,5 +115,7 @@ func suivre(camera: Camera3D, t: float) -> void:
 	materiau.set_shader_parameter("controle", controle)
 	materiau.set_shader_parameter("taille_controle", taille_controle)
 	materiau.set_shader_parameter("vie_controle", vie_controle)
+	materiau.set_shader_parameter("seule", seule)
+	materiau.set_shader_parameter("gerbe_seule", gerbe_seule)
 	dessin.set_shader_parameter("controle", controle)
 	dessin.set_shader_parameter("couvert", couvert)

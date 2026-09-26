@@ -142,6 +142,8 @@ func _ready() -> void:
 		controle_occultation()
 	elif "--controle-ombre" in args:
 		controle_ombre()
+	elif "--controle-gerbes" in args:
+		controle_gerbes()
 	elif "--captures" in args:
 		captures()
 
@@ -621,7 +623,7 @@ func appliquer(s: float) -> void:
 
 func _process(delta: float) -> void:
 	var args := OS.get_cmdline_user_args()
-	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args or "--controle-ciel" in args or "--controle-occultation" in args or "--controle-ombre" in args:
+	if pas.is_empty() or "--captures" in args or "--controle-piscine" in args or "--controle-pluie" in args or "--cout-pluie" in args or "--controle-gouttes" in args or "--controle-ciel" in args or "--controle-occultation" in args or "--controle-ombre" in args or "--controle-gerbes" in args:
 		return
 	if not en_pause:
 		t = fmod(t + delta, float(pas.size() - 1) * dt)
@@ -1075,6 +1077,89 @@ func controle_occultation() -> void:
 				await RenderingServer.frame_post_draw
 			r.append(moyenne_centre(get_viewport().get_texture().get_image()).g)
 		print("CONTROLE_OCCULTATION_S382 lumiere point=%s avec=%.5f sans=%.5f rapport=%.5f" % [pt[0], r[0], r[1], r[0] / r[1]])
+	get_tree().quit()
+
+
+## S383 — **les critères 3 à 5 des gerbes**. (3, 4) Vue orthographique d'aplomb d'une partie du bassin, 2 mm par pixel :
+## les cœurs d'anneaux de moins de 30 ms en rouge (contrôle de S379, disques d'1 cm de rayon) et, par-dessus, un carré vert d'1
+## cm au centre de chaque gerbe de moins de 30 ms ; vingt instants, images écrites dans `captures/controle_gerbes_*.png`,
+## lues par `outils/controle_gerbes.py` (chaque vert au centre d'un rouge ; nombre contre `taux × 0,03 s × aire`). (5) La
+## gerbe de référence (s = 1) seule, vue de profil sur fond noir, 0,05 mm par pixel, à 1, 3, 7, 12, 18, 41 et 52 ms : la
+## hauteur de son sommet (pixel le plus haut dont la radiance dépasse 2 % de celle du dessin), contre les relevés de P2.
+func controle_gerbes() -> void:
+	monde_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	monde_env.glow_enabled = false
+	monde_env.fog_enabled = false
+	texte.visible = false
+	pluie_air.configurer(0.0)
+	var r := pluie_mm_h if pluie_mm_h > 0.0 else 10.0
+	pluie_mm_h = r
+	var u: Vector4 = Pluie.uniformes(r)
+	var centre := godot(donnees["bassin"]["fond_m"])
+	var y_eau := eau_bassin.global_position.y
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.size = 1.44
+	camera.position = Vector3(centre.x - 1.0, y_eau + 5.0, centre.z)
+	camera.look_at(Vector3(centre.x - 1.0, y_eau, centre.z), Vector3(0, 0, -1))
+	materiau_tampon.set_shader_parameter("pluie", Vector4.ZERO)
+	gerbes.niveaux = [y_eau, eau_tampon.global_position.y]
+	gerbes.configurer(r)
+	gerbes.controle = true
+	gerbes.taille_controle = 0.01
+	gerbes.vie_controle = 0.03
+	var largeur := 1.44 * 1280.0 / 720.0
+	print("CONTROLE_GERBES_S383 pluie_mm_h=%s taux=%.2f aire_m2=%.4f m_par_px=%.6f" % [mm_h(r), u.x, largeur * 1.44, 1.44 / 720.0])
+	for i in 20:
+		var s := 3.1 + 1.37 * float(i)
+		materiau_bassin.set_shader_parameter("temps", s)
+		materiau_bassin.set_shader_parameter("pluie", u)
+		materiau_bassin.set_shader_parameter("controle_pluie", true)
+		gerbes.suivre(camera, s)
+		for _k in 3:
+			await RenderingServer.frame_post_draw
+		var chemin := ProjectSettings.globalize_path("res://captures/controle_gerbes_%02d.png" % i)
+		get_viewport().get_texture().get_image().save_png(chemin)
+	print("CONTROLE_GERBES_S383 images=20 fichiers=captures/controle_gerbes_*.png")
+	# (5) La gerbe seule, de profil.
+	materiau_bassin.set_shader_parameter("controle_pluie", false)
+	gerbes.controle = false
+	gerbes.seule = true
+	for enfant in get_children():
+		if enfant is MeshInstance3D:
+			enfant.visible = false
+	monde_env.background_mode = Environment.BG_COLOR
+	monde_env.background_color = Color(0, 0, 0)
+	get_viewport().use_hdr_2d = true
+	var base := Vector3(0.0, 0.0, 0.0)
+	camera.size = 0.036
+	camera.position = base + Vector3(0.0, 0.016, 1.0)
+	camera.look_at(base + Vector3(0.0, 0.016, 0.0), Vector3.UP)
+	for t_ms in [1.0, 3.0, 7.0, 12.0, 18.0, 41.0, 52.0]:
+		# L'âge rendu est la fin de la pose : la silhouette y est la moyenne des 16,7 ms d'avant ; `outils/controle_gerbes.py`
+		# compare donc le sommet au plus haut des relevés sur les quatre instants de cette pose.
+		gerbes.gerbe_seule = Vector4(base.x, base.y, base.z, t_ms / 1000.0)
+		gerbes.suivre(camera, 0.0)
+		for _k in 3:
+			await RenderingServer.frame_post_draw
+		var im := get_viewport().get_texture().get_image()
+		im.convert(Image.FORMAT_RGBF)
+		var w := im.get_width()
+		var hh := im.get_height()
+		var ref := 0.0
+		for j in hh:
+			for i in range(w / 2 - 40, w / 2 + 40):
+				ref = maxf(ref, im.get_pixel(i, j).g)
+		var haut := -1
+		for j in hh:
+			for i in range(0, w, 2):
+				if im.get_pixel(i, j).g > 0.02 * ref:
+					haut = j
+					break
+			if haut >= 0:
+				break
+		# La rangée j est à y = 0,016 + (hh/2 − j − 0,5)·(0,036/hh) au-dessus de l'eau.
+		var y_haut := 0.016 + (0.5 * hh - float(haut) - 0.5) * (0.036 / hh) if haut >= 0 else 0.0
+		print("CONTROLE_GERBES_S383 critere=5 t_ms=%.0f sommet_mm=%.2f" % [t_ms, 1000.0 * y_haut])
 	get_tree().quit()
 
 

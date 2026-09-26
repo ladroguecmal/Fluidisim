@@ -32,6 +32,9 @@ uniform bool sur_la_mer = false;
 uniform bool controle = false;
 uniform float taille_controle = 0.02;
 uniform float vie_controle = 0.05;
+// Contrôle (critère 5) : la particule 0 seule, gerbe de référence (s = 1) posée en `gerbe_seule.xyz`, à l'âge `gerbe_seule.w`.
+uniform bool seule = false;
+uniform vec4 gerbe_seule = vec4(0.0);
 
 // La gerbe de référence (s = 1) : hauteur et largeur maximales (m), durée (s).
 const float GERBE_H = 0.0247;
@@ -49,6 +52,17 @@ float gerbe_echelle(float d_mm) {
 bool gerbe_placer(uint index, out mat4 xf, out vec4 donnees) {
     xf = mat4(vec4(0.0), vec4(0.0), vec4(0.0, 0.0, 1.0, 0.0), vec4(0.0, -1000.0, 0.0, 1.0));
     donnees = vec4(0.0);
+    if (seule) {
+        if (index != 0u) {
+            return false;
+        }
+        vec3 face = normalize(vec3(camera.x - gerbe_seule.x, 0.0, camera.z - gerbe_seule.z) + vec3(1e-6, 0.0, 0.0));
+        vec3 droite = normalize(cross(vec3(0.0, 1.0, 0.0), face));
+        xf = mat4(vec4(droite * GERBE_L, 0.0), vec4(0.0, GERBE_H, 0.0, 0.0), vec4(face, 0.0),
+            vec4(gerbe_seule.xyz + vec3(0.0, 0.5 * GERBE_H, 0.0), 1.0));
+        donnees = vec4(gerbe_seule.w, 4.1, 1.0, 1.0);
+        return true;
+    }
     if (pluie.x <= 0.0) {
         return false;
     }
