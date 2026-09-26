@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 23:07 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 23:09 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau)
-Session en cours : aucune
+Session en cours : S395 — C5a, deuxième part : où l'échange comprime, puis l'échange au sommet de la dernière colonne libre
 Dernière session : S394 — physique : **C5a, A316 en 2D d'abord** ([preuve](docs/validation/B10-APIC-S320.md) §14) — trois candidats : la bande réensemencée vide puis piège les particules ; la densité corrigée en position la tient (3,9–4,0) mais l'onde croît : la correction rend 102 J/m que l'échange ôte — **l'échange comprime**, racine d'A316. Avant : S393, B10 en 3D (4.16 partiel)
 Session suivante : dans le cloud, **C5a, deuxième part** — mesurer où l'échange comprime (bilan par profondeur de la dernière colonne libre sur 30 s), puis un échange qui voit la densité ; au poste, **C3b** (10 cm, A298 ; alternance d'ADR-191 : physique), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
 Maillons        : 1 — S394 : aucun point ni critère de porte n'a changé (4.12 et 4.16 restent partiels ; A316 précisé)
