@@ -1298,7 +1298,8 @@ demandée avant la suite de la pluie ; puis la campagne du solveur volumique 3D,
 
 ## 36. R31 — l'occultation du ciel, S382
 
-**Votre demande** (R30) : *« ajoute l'occultation du ciel »* ([ADR-206](../adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md)). Chaque surface reçoit maintenant **le ciel qu'elle voit** : le pied d'un mur, un angle,
+**Votre demande** (R30) : *« ajoute l'occultation du ciel »* ([ADR-206](../adr/ADR-206-la-visibilite-du-ciel-par-des-occultants-analytiques.md),
+[preuve](OCCULTATION-CIEL-S382.md)). Chaque surface reçoit maintenant **le ciel qu'elle voit** : le pied d'un mur, un angle,
 le fond du bassin voient moins de ciel et s'assombrissent — calculé sur les objets eux-mêmes, contre une intégration
 indépendante à moins de 0,009 près (15 points). Par ciel clair, le même calcul vers le soleil donne **les ombres portées**
 (bord à 2,5 mm de la géométrie). Coût : +0,1 à +0,3 ms (la part du ciel est cuite une fois aux sommets ; les ombres, à
