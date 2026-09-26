@@ -91,7 +91,7 @@ et temps total publiés, au même résidu.
   auprès de l'hôte (I-06) ; essais de forme.
 - [x] **P4b** — le cycle en V et son branchement dans `project_mobile3` (`enable_multigrid`) ; critère 1.
 - [x] **P5** — critères 2 à 4 : essais et banc.
-- [ ] **P6** — critère 5 (suite entière), critère 6 (coût) ; preuve `MULTIGRILLE-3D-S385` ; liste, file, feuille de route,
+- [x] **P6** — critère 5 (suite entière), critère 6 (coût) ; preuve `MULTIGRILLE-3D-S385` ; liste, file, feuille de route,
   index.
 - [ ] **P7** — rituel.
 

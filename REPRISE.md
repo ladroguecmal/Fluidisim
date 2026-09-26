@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 18:18 +02:00
+Battement        : 2026-09-26 18:19 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot)
 Session en cours : S385 — C1 : la multigrille 3D de la référence (ADR-207) ; verdict R32 consigné
 Dernière session : S384 — physique : **la campagne du solveur volumique 3D, sa conception** ([conception](docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md), [ADR-207](docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md)) — décision de l'utilisateur : « Solveur 3D ici » ; le domaine de la porte B consomme seul les 2 ms de δ ; colonnes hautes, multigrille, APIC en bande ; sessions C1 à C11. Avant : S383, les gerbes (R32 posée)

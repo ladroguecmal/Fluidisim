@@ -267,8 +267,9 @@ pas recopiée ici (L137).
   sur le banc ([preuve](validation/COUT-DELTA3D-S341.md) §11) ; **S350** : le coût suit l'emprise d'un domaine
   redimensionné, 0,09 ms + 3,57 ms × surface ([preuve](validation/ARBITRAGE-3D-S344.md) §6) ; **S353** :
   interpolé au rendu et **mesuré en direct**, rendu concurrent — 1,49 ms de δ par image à 30 Hz contre 3,31 à
-  60 Hz ([preuve](validation/COUT-DELTA3D-S341.md) §12). Manquent d'autres scènes, plusieurs domaines en direct,
-  un 99ᵉ centile en direct.
+  60 Hz ([preuve](validation/COUT-DELTA3D-S341.md) §12). **S385** : la **multigrille 3D** de la référence, préconditionneur du
+  pas mobile — 9 à 11 itérations de 12 288 à 786 432 mailles contre 102 à 365 ([preuve](validation/MULTIGRILLE-3D-S385.md)) ;
+  pas encore sur la carte (C3). Manquent d'autres scènes, plusieurs domaines en direct, un 99ᵉ centile en direct.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *partiel* **depuis S369** :
   δ relatif à la dynamique de B ([ADR-198](adr/ADR-198-la-voie-d-a289.md)) — sous B seul, δ nul reste nul **au bit**,
