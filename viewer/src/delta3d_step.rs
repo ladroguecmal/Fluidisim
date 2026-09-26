@@ -136,6 +136,8 @@ pub struct Step3 {
     /// `enable_multigrid`, à la configuration ; **absente par défaut**, et le pas est alors celui d'avant, au bit.
     mg: Option<crate::delta3d_mg::Multigrid>,
     mg_on: std::cell::Cell<bool>,
+    /// S391 — commutateurs de banc du pas (A321) ; zéro hors banc.
+    switches: std::cell::Cell<u32>,
     // Étages du pas (S301).
     step_bind: wgpu::BindGroup,
     step_uniform: wgpu::Buffer,
@@ -145,6 +147,7 @@ pub struct Step3 {
     /// ce que le rendu mélange à la courante quand δ tourne à 30 Hz dans une image à 60 (ADR-012 §7).
     published_prev: wgpu::Buffer,
     step: Vec<wgpu::ComputePipeline>,
+    step_bench: Vec<wgpu::ComputePipeline>,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
     query_resolve: wgpu::Buffer,
@@ -247,6 +250,35 @@ fn pipelines_with(
                 // S343 : sans mise à zéro de la mémoire de groupe — seul `sample_faces_tiled` en a, et il
                 // l'écrit entière avant de la lire. Avec, le compilateur Dx12 mettait 247 s à créer le pas.
                 compilation_options: wgpu::PipelineCompilationOptions { constants, zero_initialize_workgroup_memory: false },
+                cache: None,
+            })
+        })
+        .collect()
+}
+
+/// S391 : comme `pipelines_with`, mémoire de groupe mise à zéro comme `pipelines` — pour des variantes d'un module dont les
+/// pipelines ordinaires sont créés par `pipelines`.
+fn pipelines_zeroed(
+    device: &wgpu::Device,
+    layout: &wgpu::BindGroupLayout,
+    module: &wgpu::ShaderModule,
+    names: &[&str],
+    constants: &[(&str, f64)],
+) -> Vec<wgpu::ComputePipeline> {
+    let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        label: None,
+        bind_group_layouts: &[Some(layout)],
+        immediate_size: 0,
+    });
+    names
+        .iter()
+        .map(|entry| {
+            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some(entry),
+                layout: Some(&pipeline_layout),
+                module,
+                entry_point: Some(entry),
+                compilation_options: wgpu::PipelineCompilationOptions { constants, zero_initialize_workgroup_memory: true },
                 cache: None,
             })
         })
@@ -415,6 +447,8 @@ impl Step3 {
         );
         let step_module = device.create_shader_module(wgpu::include_wgsl!("delta3d_step.wgsl"));
         let step = pipelines(&device, &step_layout, &step_module, &STEP);
+        // S391 : les mêmes étages avec les commutateurs de banc (A321), pris seulement quand un banc en allume un.
+        let step_bench = pipelines_zeroed(&device, &step_layout, &step_module, &STEP, &[("BENCH_SWITCHES", 1.0)]);
 
         let largest = [2 * faces, 7 * cells, 2 * columns + 2 * cells, 2 * fx + 2 * fy]
             .into_iter()
@@ -497,12 +531,14 @@ impl Step3 {
             partial,
             mg: None,
             mg_on: std::cell::Cell::new(false),
+            switches: std::cell::Cell::new(0),
             step_bind,
             step_uniform,
             vel,
             published,
             published_prev,
             step,
+            step_bench,
             read,
             query,
             query_resolve,
@@ -544,7 +580,8 @@ impl Step3 {
             sponge.width_x,
             sponge.width_y,
             sponge.rate_per_s,
-            0.,
+            // S391 : les commutateurs de banc, zéro en production — le mot de remplissage d'avant, au bit.
+            f32::from_bits(self.switches.get()),
         ]));
         self.queue.write_buffer(&self.step_uniform, 0, &bytes);
     }
@@ -789,12 +826,12 @@ impl Step3 {
                 pass.dispatch_workgroups(faces, 1, 1);
             }
             pass.set_bind_group(0, &self.step_bind, &[]);
-            pass.set_pipeline(&self.step[PREDICT]);
+            pass.set_pipeline(&self.step_pipes()[PREDICT]);
             pass.dispatch_workgroups(faces, 1, 1);
             if upto == Upto::Prediction {
                 return;
             }
-            pass.set_pipeline(&self.step[DIVERGENCE]);
+            pass.set_pipeline(&self.step_pipes()[DIVERGENCE]);
             pass.dispatch_workgroups(cells, 1, 1);
             pass.set_bind_group(0, &self.bg_bind, &[]);
             pass.set_pipeline(&self.bg[1]);
@@ -860,20 +897,20 @@ impl Step3 {
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(2) });
             pass.set_bind_group(0, &self.step_bind, &[]);
-            pass.set_pipeline(&self.step[CORRECT]);
+            pass.set_pipeline(&self.step_pipes()[CORRECT]);
             pass.dispatch_workgroups(faces, 1, 1);
-            pass.set_pipeline(&self.step[EXTRAPOLATE]);
+            pass.set_pipeline(&self.step_pipes()[EXTRAPOLATE]);
             pass.dispatch_workgroups(columns, 1, 1);
             if upto == Upto::Correction {
                 return;
             }
-            pass.set_pipeline(&self.step[FLUXES]);
+            pass.set_pipeline(&self.step_pipes()[FLUXES]);
             pass.dispatch_workgroups((self.column_faces() as u32).div_ceil(GROUP), 1, 1);
-            pass.set_pipeline(&self.step[ADVANCE]);
+            pass.set_pipeline(&self.step_pipes()[ADVANCE]);
             pass.dispatch_workgroups(columns, 1, 1);
-            pass.set_pipeline(&self.step[DIAGNOSE]);
+            pass.set_pipeline(&self.step_pipes()[DIAGNOSE]);
             pass.dispatch_workgroups(self.diag_groups(), 1, 1);
-            pass.set_pipeline(&self.step[DIAGNOSE_FINISH]);
+            pass.set_pipeline(&self.step_pipes()[DIAGNOSE_FINISH]);
             pass.dispatch_workgroups(1, 1, 1);
         }
     }
@@ -1428,6 +1465,17 @@ impl Step3 {
         let h = self.relire(&self.heights, 0, self.columns())?;
         let m = self.relire(&self.state, 5 * n, n)?;
         Ok((z, h, m))
+    }
+
+    /// **Banc S391** : les commutateurs du pas (`delta3d_step.wgsl`, `Step::switches`) — éteignent un terme pour l'attribuer.
+    pub fn set_switches_for_bench(&self, bits: u32) {
+        self.switches.set(bits);
+        self.write_step_uniform(self.rest.get(), self.dt.get(), self.sponge.get());
+    }
+
+    /// S391 : les étages du pas — ceux de banc quand un commutateur est allumé, ceux de production sinon.
+    fn step_pipes(&self) -> &[wgpu::ComputePipeline] {
+        if self.switches.get() != 0 { &self.step_bench } else { &self.step }
     }
 
     /// **Banc S390** : une tranche de la projection (`x, r, z, d, q, m, b` : 0 à 6), forme courante.

@@ -25,8 +25,16 @@ struct Step {
     sponge_x: f32,
     sponge_y: f32,
     sponge_rate: f32,
-    _pad: f32,
+    /// S391 — **commutateurs de banc** (A321), zéro en production : 1 éteint `u'·∇u'`, 2 `U·∇u'`, 4 `u'·∇U`, 8 le résidu
+    /// de quantité de mouvement du fond, 16 la bande de B dans le transport de la hauteur. Lus seulement par les
+    /// pipelines de banc, compilés avec `BENCH_SWITCHES` = 1 : la production garde son code d'avant.
+    switches: u32,
 };
+
+/// S391 — vrai seulement dans les pipelines de banc : les branches des commutateurs disparaissent de la production, dont
+/// l'arithmétique reste celle d'avant (vu en S391 : compilées sans elle, les branches changeaient les empreintes).
+override BENCH_SWITCHES: f32 = 0.0;
+fn switched(bit: u32) -> bool { return BENCH_SWITCHES != 0.0 && (s.switches & bit) != 0u; }
 
 // Vitesses aux faces : [u | v | w] courantes, puis [u | v | w] prédites, même rangement que le
 // cœur. L'indice d'une face est aussi celui de son échantillon de fond dans `faces`.
@@ -181,6 +189,19 @@ fn extra(f: u32, axis: u32, v0: f32, v1: f32, v2: f32, d0: f32, d1: f32, d2: f32
         + bg(f, 5u) * d1 + v1 * bg(f, g + 1u);
 }
 
+/// S391 — **banc** : `extra` terme par terme, selon `s.switches`. Le chemin de production garde `extra` tel quel.
+fn extra_switched(f: u32, axis: u32, v0: f32, v1: f32, v2: f32, d0: f32, d1: f32, d2: f32) -> f32 {
+    let g = 10u + 3u * axis;
+    let cu = select(1.0, 0.0, (s.switches & 2u) != 0u);
+    let cv = select(1.0, 0.0, (s.switches & 4u) != 0u);
+    let cr = select(1.0, 0.0, (s.switches & 8u) != 0u);
+    let advection = (bg(f, 4u) * bg(f, g) + bg(f, 5u) * bg(f, g + 1u)) + bg(f, 6u) * bg(f, g + 2u);
+    let residual = (bg(f, 7u + axis) + bg(f, 20u + axis) / s.rho) + advection;
+    return cu * (bg(f, 4u) * d0 + bg(f, 6u) * d2 + bg(f, 5u) * d1)
+        + cv * (v0 * bg(f, g) + v2 * bg(f, g + 2u) + v1 * bg(f, g + 1u))
+        + cr * residual;
+}
+
 fn ramp(x: f32, n: u32, width: f32) -> f32 {
     if (width == 0.0) { return 0.0; }
     return max(1.0 - min(x, f32(n) * s.dx - x) / width, 0.0);
@@ -206,6 +227,7 @@ fn predict(@builtin(global_invocation_id) id: vec3<u32>) {
     let axis = q.w;
     let p = q.xyz;
     var value = advect(axis, p.x, p.y, p.z);
+    if (switched(1u)) { value = cur(axis, p); }
     let end = dims(axis);
     let pa = component(p, axis);
     // Le cœur saute la face 0 et, en x et y, la face `n` — pas `n + 1`, qui n'existe pas.
@@ -216,7 +238,8 @@ fn predict(@builtin(global_invocation_id) id: vec3<u32>) {
         let d0 = derivative(axis, 0u, p, end);
         let d1 = derivative(axis, 1u, p, end);
         let d2 = derivative(axis, 2u, p, end);
-        let add = s.dt * extra(slot, axis, v0, v1, v2, d0, d1, d2);
+        var add = s.dt * extra(slot, axis, v0, v1, v2, d0, d1, d2);
+        if (BENCH_SWITCHES != 0.0 && s.switches != 0u) { add = s.dt * extra_switched(slot, axis, v0, v1, v2, d0, d1, d2); }
         let x = (f32(p.x) + select(0.5, 0.0, axis == 0u)) * s.dx;
         let y = (f32(p.y) + select(0.5, 0.0, axis == 1u)) * s.dx;
         value = (value - add) * sponge(x, y);
@@ -444,7 +467,7 @@ fn fluxes(@builtin(global_invocation_id) id: vec3<u32>) {
             let wet_part = clamp((surface - f32(k) * s.dx) / s.dx, 0.0, 1.0);
             if (wet_part > 0.0) { flux = flux + vel[f] * s.dx * wet_part; }
         }
-        total_band = total_band + band(f, axis, k, surface);
+        if (!switched(16u)) { total_band = total_band + band(f, axis, k, surface); }
     }
     let base = select(0u, 2u * x_faces(), axis == 1u);
     let span = select(x_faces(), y_faces(), axis == 1u);

@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 21:05 +02:00
+Battement        : 2026-09-26 21:09 +02:00
 Agent            : Claude Opus 5.5, Claude Code (application de bureau) au poste — fichiers, git, cargo, Python, RTX 5070 Laptop, Godot 4.6.3
 Session en cours : S391 — physique : **A321**, la scène qui explose à 30 Hz (demande de l'utilisateur : « Corrige A321 d'abord »)
 Dernière session : S390 — physique : **C3a, la multigrille sur la carte** ([preuve](docs/validation/MULTIGRILLE-3D-S385.md) §5) — éteinte par défaut, option `--multigrille` ; à la porte B, le résidu de Jacobi-32 en 6 cycles, projection 1,08 ms contre 2,08 ; cuves à 3 mm. **Trouvé : A321** — à 30 Hz la scène explose en 24 à 40 s, références convergées comprises ; à 60 Hz la minute tient. Avant : S389, la surface d'APIC

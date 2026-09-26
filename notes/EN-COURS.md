@@ -85,7 +85,7 @@ avertissement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'instrument : commutateurs de banc dans le pas (éteints : au bit), banc `--delta3d-a321` (croissance par
+- [x] **P2** — l'instrument : commutateurs de banc dans le pas (éteints : au bit), banc `--delta3d-a321` (croissance par
   seconde, échelle du mode, premier pas non fini) ; critère 1.
 - [ ] **P3** — l'attribution : pas de temps, témoins terme par terme ; critère 2 ; le correctif déclaré ici.
 - [ ] **P4** — le correctif dans la référence (cœur), ses essais.
@@ -94,3 +94,11 @@ avertissement.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+
+**P2 — critère 1 tenu**, au second essai. Commutateurs dans `Step::switches` (l'ancien mot de remplissage) ; banc
+`viewer/src/delta3d_a321.rs`, `--delta3d-a321`. **Vu en chemin** : des branches `if (switches…)` compilées dans les
+pipelines de production changeaient les empreintes (60 pas `0xf1d768aa…` au lieu de `0x6e90a7ae…`), commutateurs à zéro — le
+compilateur réarrange l'arithmétique voisine (L345). Remède : constante `override BENCH_SWITCHES`, vraie seulement dans une
+seconde série de pipelines (`step_bench`), prise quand un commutateur est allumé ; empreintes d'avant retrouvées au bit.
+Le bit 32 prend les pipelines de banc sans rien éteindre : témoin du bruit d'arrondi, la scène amplifiant tout écart.
+
