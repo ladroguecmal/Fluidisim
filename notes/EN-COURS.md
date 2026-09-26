@@ -113,3 +113,8 @@ reflète les particules dans la reconstruction (image radiale `c + (2R − d)·n
 justesse** : **9,6 mm/s** au pire (2 s, 100 pas), 0,77 mm/s à la fin ; masse exacte ; **vu échouer** sans mailles solides
 (27,6 cm/s). **Critère 1 tenu** : `apic3d_ballottement 10 0.05` imprime la même ligne qu'avant, au chiffre près (hors durée).
 Essais : refus (rayon nul, NaN), entrée de vingt pas (masse, aucune particule dans le corps).
+
+**P4, en cours — l'exemple `apic3d_b10` est écrit et committé à part** (les mesures du critère 3 tournent ; la case reste `[>]`).
+Premier point, `Fr` = 2, `D/dx` = 8, quart, demi-largeur 2 D : pincement **1,507 √(D/g) = 2,131 √(R/g)**, pas de 0,027 √(D/g),
+base du corps à 3,01 D, cavité max 1,94 D, couronne 0,21 D, 71 pas, 40 s. Lancés : entier à 8 (critère 3), quart à 12 et 16
+(critère 4), `Fr` = 4 à 8 ; sorties dans le bloc-notes de la session.
