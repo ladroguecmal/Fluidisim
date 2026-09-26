@@ -42,3 +42,8 @@ sauvegarde WVST v2 inchangés. La mer (B, W, δ de la haute mer) inchangée. Rie
 > 20 cm que la référence permet, la dynamique tient en quelques millimètres et ne se voit pas : la suite passe par δ sur
 > GPU (5 à 10 cm). Deux défauts de la référence mobile corrigés en chemin ([ADR-201](ADR-201-plancher-de-l-echelle-de-vitesse-de-la-projection.md), `shift_rest`).
 
+> **Note du 2026-09-26 (S376).** D1 est **corrigé** par [ADR-202](ADR-202-niveau-de-detail-des-contenants.md), décision de
+> l'utilisateur : un contenant **vu de loin** n'est pas calculé par δ — V et des effets factices ; δ seulement près d'un
+> joueur ou d'un perturbateur (ou prévu), en zones selon la taille du contenant. D4 n'est plus pressé : δ sur GPU dans
+> Godot, *« pas maintenant »* (R27).
+

@@ -1200,3 +1200,8 @@ de 20 cm que permet la référence CPU, la surface bouge de quelques millimètre
 **La question :** la suite proposée — δ sur la carte graphique, dans Godot, à une maille de 5 à 10 cm et en temps réel,
 pour que le bouillonnement et les rides se voient — vous convient-elle ? Un mot suffit.
 
+**Verdict R27 — reçu le 2026-09-26 (S376)** : *« je ne pense pas qu'il faut le faire maintenant »* — δ sur GPU dans Godot
+n'est pas la suite ; suivi d'une précision de conception ([ADR-202](../adr/ADR-202-niveau-de-detail-des-contenants.md)) :
+un contenant vu de loin reste V avec des effets factices, δ seulement près d'un perturbateur. **Classe** : l'invisibilité
+de la dynamique à 20 cm n'est pas un défaut à corriger maintenant.
+

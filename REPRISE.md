@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-26 10:16 +02:00
+Battement        : 2026-09-26 10:19 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : S376 — consignation : le niveau de détail des contenants (V, effets factices, δ à proximité), R27, les zones d'ombre
 Dernière session : S375 — **le bassin de la piscine en δ 3D** (5.10 passe à partiel, [preuve](docs/validation/PISCINE-DELTA-S375.md)) : masse à V, jet et seuil comme sources et puits, surface rendue dans Godot — mais de quelques millimètres à 20 cm, **invisible** à l'échelle réelle ; ADR-201 ; R27 envoyée. Avant : S374, la piscine de V et ADR-200

@@ -76,8 +76,8 @@ l'ADR, avec une proposition pour chacune.
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-202 ; note datée d'ADR-200 ; R27 ; décision dans la file ; feuille de route ; index.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — ADR-202 ; note datée d'ADR-200 ; R27 ; décision dans la file ; feuille de route ; index.
 - [ ] **P3** — rituel.
 
 ### Notes de reprise
