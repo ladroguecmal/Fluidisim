@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-26 11:32 +02:00
+JETON            : occupé
+Battement        : 2026-09-26 11:35 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : —
+Session en cours : S380 — la pluie complétée (demande de l'utilisateur : « pas de solveur, continue la pluie, ajoute les manquants ») ; première pièce : la pluie dans l'air
 Dernière session : S379 — rendu : **les rides de la pluie, factices** (8.9 reste partiel, [preuve](docs/validation/RIDES-PLUIE-S379.md), **R28 reçue** : « Parfait ») — taux de Marshall et Palmer × Atlas compté sur les images, deux trains capillaires-gravité, fondus en rugosité au loin, bassin et mer ; sans pluie au bit. Avant : S378, la pluie dans V (5.5)
 Session suivante : **physique — la campagne du solveur volumique 3D temps réel** (demande de l'utilisateur, S379), **conception d'abord** : état de l'art, ce que δ 3D (S297–S348) et APIC (ADR-186) donnent, architecture (domaines, niveaux de détail d'ADR-202, prévision), cibles chiffrées, découpage en sessions. R28 attend le regard de l'utilisateur. δ sur GPU dans Godot : pas maintenant (R27)
 Maillons        : 1 — S379 : 8.9 reste partiel, R28 reçue (journal)

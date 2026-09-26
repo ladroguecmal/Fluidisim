@@ -361,7 +361,7 @@ d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photogr
 *« une session du plus dur et complexe […] un solveur […] qui va s'occuper des simulations 3D volumétriques ultra réalistes
 et performantes en temps réel dynamiquement »*). **Conception d'abord** : état de l'art, ce que δ 3D (S297–S348) et
 APIC (ADR-186) donnent déjà, l'architecture (domaines, niveaux de détail d'ADR-202, prévision), les cibles chiffrées, le
-découpage en sessions. Elle passe devant le front 0 ci-dessous pour les sessions de physique.
+découpage en sessions. **S380, l'utilisateur** : *« Pas de solveur continue la pluie ajoute les manquants »* — elle attend ; la pluie se complète d'abord (ADR-205).
 
 **Front 0 — 36 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
 
