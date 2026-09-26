@@ -60,8 +60,9 @@ vec2 ciel_vu(vec3 p, vec3 n) {
     if (occultants_n <= 0) {
         return vec2(1.0);
     }
-    // Hors de la face qui porte le point : 2 mm le long de la normale.
-    vec3 q = p + 2e-3 * n;
+    // Hors de la face qui porte le point : 0,5 mm le long de la normale (S382 P6d : les sommets cuits sont exacts ; 2 mm
+    // faussaient de 0,008 la part vue à 5 cm sous un débord de 10 cm).
+    vec3 q = p + 5e-4 * n;
     float dphi = TAU / float(AZIMUTS_OCC);
     int proches[OCCULTANTS_MAX];
     int debut_j[OCCULTANTS_MAX];

@@ -98,7 +98,7 @@ rien ne change. (5) Coût mesuré ; photographies réelles ; jugement de l'utili
   (≈ 10 cm), sol à maillage gradué jusqu'à la coupure (≈ 180 m), sol lointain à part ; critères 1 et 2 refaits ; coût.
 - [x] **P6c** — la part vue **cuite** aux sommets : une passe de rendu unique (points, `SubViewport` à mise à jour unique,
   refaite quand un occultant change), lue par `VERTEX_ID` ; sans occultation, géométrie d'avant ; critère 1 ; coût.
-- [ ] **P6d** — faces graduées près des arêtes (≈ 1 cm au contact, croissant jusqu'à 10 cm) : critère 2 sous le débord.
+- [x] **P6d** — faces graduées près des arêtes (≈ 1 cm au contact, croissant jusqu'à 10 cm) : critère 2 sous le débord.
 - [ ] **P7** — le soleil occulté : les ombres portées (une direction, quatre sous-échantillons) ; critère 4.
 - [ ] **P8** — photographies de temps couvert (pied des murs) ; images de R31 ; REVUE-VISUELLE §36.
 - [ ] **P9** — preuve `OCCULTATION-CIEL-S382` ; liste, file, feuille de route, index.
@@ -157,3 +157,10 @@ texture juste du premier coup ; valeurs égales au calcul par sommet à l'arrond
 proche 0,540 → 0,633 ms, aplomb 0,492 → 0,545, rasante 0,457 → 0,503 (sans → avec, couvert, sec) — **+0,05 à +0,09 ms**,
 les sommets en plus ; la cuisson, une image, une fois. `OCCULTATION=0` : géométrie d'avant (pas de subdivision, le sol
 d'une boîte), **12 / 12 au bit**. Critère 2 inchangé (sous le débord : P6d).
+
+**P6d — faces graduées.** `maillage_boite` : chaque axe à 1 cm aux bords, ×1,3 par pas, 10 cm au plus (131 401 sommets
+cuits). Décalage ramené de 2 à 0,5 mm (sommets exacts). Le contrôle de la lumière basculait `occultants_n`, que les
+surfaces ne lisent plus depuis la cuisson (« avec = sans », vu) : il bascule `vu_decalage`. **Critère 2 tenu** : pire
+**0,0088** (eau à 10 cm du mur nord : l'interpolation entre colonnes de δ, 10 cm, non graduées) ; sous le débord −0,0047 ;
+sol à 25 cm −0,0028 ; lumière du sol 0,54040 pour 0,53998. **Coût par image** (couvert, sec) : 0,645 / 0,553 / 0,515 ms
+contre 0,540 / 0,492 / 0,457 sans — **+0,06 à +0,10 ms**. `OCCULTATION=0` : 12 / 12 au bit.

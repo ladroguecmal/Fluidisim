@@ -172,12 +172,13 @@ func vue(nom: String) -> void:
 ## plus, la part du ciel vue étant calculée aux sommets.
 func boite(a: Vector3, b: Vector3, albedo: Color, joint := 0.0, occultant := true) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
-	var bm := BoxMesh.new()
-	bm.size = (b - a).abs()
-	bm.subdivide_width = subdivisions(bm.size.x)
-	bm.subdivide_height = subdivisions(bm.size.y)
-	bm.subdivide_depth = subdivisions(bm.size.z)
-	mi.mesh = bm
+	var taille := (b - a).abs()
+	if occultation_active and taille.x < 1000.0 and taille.z < 1000.0:
+		mi.mesh = maillage_boite(taille)
+	else:
+		var bm := BoxMesh.new()
+		bm.size = taille
+		mi.mesh = bm
 	mi.position = 0.5 * (a + b)
 	var m := ShaderMaterial.new()
 	m.shader = load("res://paroi.gdshader")
@@ -191,6 +192,62 @@ func boite(a: Vector3, b: Vector3, albedo: Color, joint := 0.0, occultant := tru
 		occultants_min.append(Vector3(minf(a.x, b.x), minf(a.y, b.y), minf(a.z, b.z)))
 		occultants_max.append(Vector3(maxf(a.x, b.x), maxf(a.y, b.y), maxf(a.z, b.z)))
 	return mi
+
+
+## S382 P6d — **une boîte à faces graduées** : près de chaque arête, là où une autre surface peut toucher (pied de mur,
+## dessous d'un débord), la part du ciel vue varie vite ; l'interpolation entre sommets espacés de 10 cm la manquait (0,36
+## pour 0,45 à 5 cm sous la margelle, P6b). Coordonnées de chaque axe : 1 cm au bord, ×1,3 par pas, 10 cm au plus.
+## Faces orientées comme Godot les attend (sens horaire vu de devant : u × v = −n).
+func maillage_boite(taille: Vector3) -> ArrayMesh:
+	var axes := [coordonnees_bords(taille.x), coordonnees_bords(taille.y), coordonnees_bords(taille.z)]
+	var sommets := PackedVector3Array()
+	var normales := PackedVector3Array()
+	var indices := PackedInt32Array()
+	# (axe de la normale, signe, axe u, axe v), u × v = −n.
+	for f in [[0, 1, 2, 1], [0, -1, 1, 2], [1, 1, 0, 2], [1, -1, 2, 0], [2, 1, 1, 0], [2, -1, 0, 1]]:
+		var n := Vector3.ZERO
+		n[f[0]] = f[1]
+		var cu: PackedFloat32Array = axes[f[2]]
+		var cv: PackedFloat32Array = axes[f[3]]
+		var base := sommets.size()
+		for j in cv.size():
+			for i in cu.size():
+				var s := Vector3.ZERO
+				s[f[0]] = 0.5 * taille[f[0]] * f[1]
+				s[f[2]] = cu[i]
+				s[f[3]] = cv[j]
+				sommets.append(s)
+				normales.append(n)
+		var nu := cu.size()
+		for j in cv.size() - 1:
+			for i in nu - 1:
+				var k := base + j * nu + i
+				indices.append_array([k, k + 1, k + nu, k + 1, k + nu + 1, k + nu])
+	var tableaux := []
+	tableaux.resize(Mesh.ARRAY_MAX)
+	tableaux[Mesh.ARRAY_VERTEX] = sommets
+	tableaux[Mesh.ARRAY_NORMAL] = normales
+	tableaux[Mesh.ARRAY_INDEX] = indices
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, tableaux)
+	return am
+
+
+## Les coordonnées d'un axe de longueur `l`, centrées : 1 cm aux deux bords, ×1,3 par pas, `PAS_SOMMETS` au plus.
+static func coordonnees_bords(l: float) -> PackedFloat32Array:
+	var demi := PackedFloat32Array([0.0])
+	var x := 0.0
+	var h := 0.01
+	while x + h < 0.5 * l - 0.5 * h:
+		x += h
+		demi.append(x)
+		h = minf(h * 1.3, PAS_SOMMETS)
+	var c := PackedFloat32Array()
+	for v in demi:
+		c.append(-0.5 * l + v)
+	for i in range(demi.size() - 1, -1, -1):
+		c.append(0.5 * l - demi[i])
+	return c
 
 
 ## S382 — le nombre de subdivisions d'une longueur pour que les sommets soient à `PAS_SOMMETS` au plus ; aucune au-delà
@@ -990,11 +1047,14 @@ func controle_occultation() -> void:
 		m.set_shader_parameter("controle_occultation", false)
 		m.set_shader_parameter("couvert", 1.0)
 	# La lumière : radiance du sol à 0,25 m et du mur ouest à mi-hauteur, avec et sans occultants (ciel couvert).
+	var decalages := []
+	for rc in recepteurs:
+		decalages.append((rc[1] as ShaderMaterial).get_shader_parameter("vu_decalage"))
 	for pt in [points[1], points[8]]:
 		var r := []
-		for n_occ in [occultants_min.size(), 0]:
-			for m in materiaux_ciel:
-				m.set_shader_parameter("occultants_n", n_occ)
+		for avec in [true, false]:
+			for k in recepteurs.size():
+				(recepteurs[k][1] as ShaderMaterial).set_shader_parameter("vu_decalage", decalages[k] if avec else -1)
 			var p: Vector3 = pt[1]
 			var n: Vector3 = pt[2]
 			camera.position = p + 0.6 * n
