@@ -62,72 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S393 — **terminée**. D'abord le **verdict R33** ; puis **C4b**, seconde part : **B10 en 3D**, une sphère qui entre dans
-l'eau, sur APIC 3D ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ; [APIC3D-S388](../docs/validation/APIC3D-S388.md)).
-Demande de l'utilisateur (2026-09-26) : *« Reprends le projet, pour R33 je valide actuellement mais pour plus tard des
-sessions de peaufinage »*. Le travail du poste (S390–S392, branche `poste`) rejoint cette branche en avance rapide.
-Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; articles
-illisibles (réseau), recherche seulement. Sert **4.16** (surface non graphe) et 4.12.
+Session : S394 — **en cours**. **C5a** de la campagne ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5) :
+**A316 d'abord en 2D** — tenir la densité des particules à la frontière du raccord particules ↔ colonnes. Demande de
+l'utilisateur (2026-09-26) : *« Continue »*. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo,
+Python ; ni carte graphique, ni Godot ; articles bloqués par le réseau. Sert **4.16**, **4.12**, A316.
 
-**Thèse.** Le banc 2D de S320 faisait entrer un **cylindre** ; le cas 3D est une **sphère**, axisymétrique, que la littérature
-mesure : le pincement profond (*deep seal*) tombe à `t_p = β·√(R/g)`, presque indépendant de la vitesse, `β` de **1,72 à
-2,29** selon les auteurs (Glasheen et McMahon 1996 ; Duclaux et al. 2007 ; Aristoff et Bush 2009 — plage lue par la
-recherche, les textes sont bloqués par le réseau : dit, non vérifié ligne à ligne). Porter le corps **cinématique** du banc 2D
-dans `apic3d.rs` — mailles solides, faces à la vitesse du corps, paroi mobile pour la pression, particules repoussées —, et
-mesurer le pincement sur un **quart de domaine** (l'axe au coin : deux parois = deux plans de symétrie, les images de S389
-comprises), ce qui divise le coût par quatre.
+**Pourquoi en 2D, et ce qui n'a pas été lu.** C5 demandait de lire d'abord Chentanez, Müller et Kim (2014) : tous ses sites
+sont bloqués ; le résumé seul est connu — la surface suivie par un **champ de densité**, somme de celle des particules et de
+celle de la grille. La campagne le prévoit : *une session qui ne peut pas les lire le dit et avance sur ce qui n'en dépend
+pas*. Le défaut à lever, A316, est connu en 2D (S354 : la frontière convertit un débit en particules à densité nominale,
+les particules s'y tassent — 5 par maille au lieu de 4 — et la masse migre, +12 mm en 30 s à 5 cm). Le banc 2D rejoue 30 s
+en 16 s ; le même essai en 3D coûterait des heures. **Le mécanisme se règle en 2D, puis se porte en 3D (C5b).**
 
-**Mesures** (comme S320, en 3D) : air enfermé = mailles sans particule, hors du corps, sous le repos, au-dessus du corps, à moins
-d'un diamètre de l'axe, qu'un remplissage depuis le haut n'atteint pas ; **pincement** = premier pas où il dépasse `D³/32`
-(domaine entier) ; lu à chaque pas.
+**Thèse (A), la suite que S354 a déclarée.** Une **bande** : à chaque pas, la dernière colonne de mailles du côté des
+particules est **réensemencée depuis sa hauteur géométrique** (rangées continues, comme les colonnes de S327), la différence
+de masse versée à la première colonne. La densité y est remise au nominal à chaque pas, la masse suit la géométrie. Si (A)
+manque, l'attribuer avant tout autre essai ; la voie du champ de densité (une cible de divergence tirée de la densité, en
+position) viendrait ensuite.
 
-**Critères, écrits avant.** (1) **Sans corps, rien ne change** : `apic3d_ballottement 10 0.05` imprime les chiffres de S389 P4.
-(2) **Corps au repos** à demi immergé : vitesse parasite ≤ 1 cm/s, masse exacte (essai). (3) **Quart contre domaine entier**
-(`D/dx` = 8, `Fr` = 2) : même pincement à un pas près. (4) **Convergence** : `Fr` = 2, `D/dx` = 8, 12, 16 — le pincement à
-12 et 16 à **5 %** l'un de l'autre. (5) **Mesure publiée** : à la maille la plus fine, `t_p/√(R/g)` dans **[1,72 ; 2,29]**.
-(6) Masse exacte partout ; suite, zéro avertissement. **Publiés** : `Fr` = 4 (8 et 12), la distance des parois, le coût.
+**Critères, écrits avant** (montage paroi de S327, 30 s, 5 et 2,5 cm). (1) **Sans la bande, au bit** : S354 rejoué (masse
+0,50098 / 0,50734 / 0,51211 m², 4,017 / 4,846 / 4,960 particules par maille, saut 0,3893, période +9,96 %) — **fait avant le
+plan**. (2) Masse exacte. (3) **Masse à gauche de la frontière** à ±0,002 m² d'APIC seul sur chaque tranche de 10 s (S354 :
++0,0113). (4) **Densité** : 4 ± 0,2 particules par maille occupée dans la dernière colonne **libre** (non réensemencée), sur
+chaque tranche. (5) Les critères de S327 sur 30 s : saut < 0,5 maille ; période aux zéros à 1 point d'APIC seul ;
+amortissement (régression) à 1 point d'APIC seul. (6) Repos à 5 cm : vitesse < 1 cm/s.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — verdict R33 consigné (revue, preuve, décisions, file).
-- [x] **P3** — le corps cinématique dans `apic3d.rs` ; essais (repos à demi immergé, masse) ; critères 1 et 2.
-- [x] **P4** — l'exemple `apic3d_b10` (quart ou entier, mesures) ; critère 3.
-- [x] **P5** — la convergence, la plage publiée, `Fr` = 4, les parois ; critères 4 et 5.
-- [x] **P6** — critère 6 ; preuve `B10-APIC3D-S393` ; liste, file, feuille de route, index.
-- [x] **P7** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — la bande (`RACCORD_BANDE=1`) dans `lot5_comparaison.rs`, la densité lue sur la dernière colonne libre ;
+  critères 1 et 2.
+- [ ] **P3** — 30 s à 5 et 2,5 cm, repos ; critères 3 à 6 ; attribution si manqué.
+- [ ] **P4** — preuve (section datée de B10-APIC-S320, §14) ; A316, file, liste.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-**P2** : R33 consigné — revue §38, preuve S392 (§ Verdict), décisions, file (rendu), feuille de route ; liste : 8.4 disait
-encore « R32 posée » (périmé depuis S385), corrigé ; 8.10 nomme S392. Aucun défaut nommé : rien à expliquer.
 
-**Référence du critère 1** (avant P3, binaire gardé) : `apic3d_ballottement 10 0.05` → période 1,9964 s, **+1,01 %**, énergie
-+7,04 %, amortissement **+0,21 %**, 9 pics, 93,5 itérations moyennes, 500 pas.
-
-**P3 — le corps dans `apic3d.rs`** : `Sphere3`, `set_body`, mailles `SOLID` (centre dans la sphère), faces à la vitesse du corps
-après chaque écriture, paroi mobile pour la pression (ni coefficient ni correction vers un solide), particules repoussées à
-`R + 0,05·dx` avec une vitesse normale au moins celle du corps ; le corps avance de `v·dt`. **Trouvé en chemin** : au repos, à
-demi immergée, **9,4 cm/s** au premier passage, au ras de l'eau contre la sphère — le biais de paroi de S389, contre le corps :
-le noyau ne voit des particules que d'un côté, la surface y paraît plus basse, l'eau monte. **Remède, le même** : le corps
-reflète les particules dans la reconstruction (image radiale `c + (2R − d)·n`, près du corps seulement). **Critère 2 tenu, de
-justesse** : **9,6 mm/s** au pire (2 s, 100 pas), 0,77 mm/s à la fin ; masse exacte ; **vu échouer** sans mailles solides
-(27,6 cm/s). **Critère 1 tenu** : `apic3d_ballottement 10 0.05` imprime la même ligne qu'avant, au chiffre près (hors durée).
-Essais : refus (rayon nul, NaN), entrée de vingt pas (masse, aucune particule dans le corps).
-
-**P4, en cours — l'exemple `apic3d_b10` est écrit et committé à part** (les mesures du critère 3 tournent ; la case reste `[>]`).
-Premier point, `Fr` = 2, `D/dx` = 8, quart, demi-largeur 2 D : pincement **1,507 √(D/g) = 2,131 √(R/g)**, pas de 0,027 √(D/g),
-base du corps à 3,01 D, cavité max 1,94 D, couronne 0,21 D, 71 pas, 40 s. Lancés : entier à 8 (critère 3), quart à 12 et 16
-(critère 4), `Fr` = 4 à 8 ; sorties dans le bloc-notes de la session.
-
-**P4 — critère 3 tenu, à la limite** : `Fr` = 2, `D/dx` = 8, domaine **entier** (86 016 mailles, 524 288 particules, 167 s) :
-pincement **1,4803** √(D/g) contre **1,5067** au quart — **un pas** d'écart (0,0264 pour un pas de 0,0266) ; profondeur 1,44
-contre 1,31 D, cavité 1,81 contre 1,94 D (une maille chacune). Le quart n'est pas le domaine entier au bit : près des parois,
-les poids trilinéaires se figent sur la rangée du bord (S388) et l'extrapolation s'y arrête — la symétrie est discrète, pas
-exacte.
-
-**P5–P6 en un commit** (les mesures tournaient pendant que la preuve s'écrivait). `Fr` = 2, quart : pincement **1,5067 →
-1,4645 → 1,4738** √(D/g) à 8, 12, 16 mailles — **critère 4 tenu, 0,63 %** entre 12 et 16 (pas de 0,9 %) ; **critère 5 tenu** :
-**2,084** √(R/g) dans [1,72 ; 2,29]. Couronne 0,21 → 0,20 → 0,31 D : de maille. `Fr` = 4 : 1,986 (8), 2,023 (12) √(R/g) —
-−2,3 % contre `Fr` = 2 à 12 mailles. Parois à 3 D (8 mailles) : 1,4802, un pas avant 2 D. **Critère 6 tenu** : 684 réussis, 18
-ignorés, zéro avertissement ; masse exacte partout. Preuve [B10-APIC3D-S393](../docs/validation/B10-APIC3D-S393.md) ; **4.16
-passe à partiel** (la cavité 3D contre une mesure publiée) ; 4.12, file (C4 reçue, C5 ensuite), feuille de route, index.
