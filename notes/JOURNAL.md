@@ -17276,3 +17276,20 @@ et puits ; la lame et le jet attendent APIC en 3D. L'habillage balistique prépa
 **S375, δ 3D dans le bassin** (ADR-200 D4) — domaine sur l'intérieur, masse asservie à V, source du jet, puits du seuil,
 surface rendue dans Godot ; à deux maillons, viser 5.10 absent → partiel.
 
+## S375 — 2026-09-26 — le bassin de la piscine en δ 3D (5.10)
+
+**Entrée.** ADR-200 D4 (1), décision de l'utilisateur : la dynamique des contenants en 3D volumétrique. Interrompue par la
+limite d'usage à P3 (commit `948f55de`), reprise à chaud à 09:53 (*« Réessayer »*), sans perte.
+**Fait** ([preuve](../docs/validation/PISCINE-DELTA-S375.md)). `add_column_volume` (volume exact au bit), `shift_rest` (le
+repos suit V), `last_refused_report`. `piscine_delta.rs` : le bassin en δ 3D à 20 cm, jet (volume et quantité de mouvement
+verticale dans un panache), puits du seuil, forçage vers V ; 330 s, 13 200 pas, 27 ms/pas, 0 refus ; niveau de V à
+0,1 µm (critère 2). **Deux défauts de la référence mobile** : une élévation uniforme refusée (ADR-201, plancher de
+vitesse) ; un pas calme refusé de justesse (repos resté 8,5 mm sous V : `shift_rest`). Premier jet sans dissipation : sortie
+du domaine à 7,4 s — panache amorti, à calibrer. **Critère 3 manqué** (front à +41 % au seuil de 1 mm ; −3 % à 0,3 mm,
+relu). Godot : maillage de hauteur, hauteurs au bit (critère 4).
+**Limites.** **La dynamique ne se voit pas** à l'échelle réelle (mm à 20 cm ; témoin ×100 : la chaîne de rendu est bonne) ;
+panache sans mesure ; bac tampon plan ; lame et jet pour APIC.
+**Rituel.** Maillons **0** : 5.10 passe à partiel (3 / 65 / 52) — devient possible un contenant de V dont δ fait le
+mouvement et V garde la masse ; consommé par le rendu de Godot et par la porte E ; preuve §1–5. **R27** envoyée. Suivant :
+**δ sur GPU dans Godot** (nuanceur de calcul, 5 à 10 cm, temps réel), si R27 le confirme.
+

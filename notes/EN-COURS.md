@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S375 — **en cours**. **δ 3D dans le bassin** de la piscine de S374 : *« La dynamique de fluide doit se faire
+Session : S375 — **terminée**. **δ 3D dans le bassin** de la piscine de S374 : *« La dynamique de fluide doit se faire
 en 3D volumétrique »* (ADR-200). À deux maillons : viser **5.10** (articulation V↔δ), absent → partiel.
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
@@ -87,7 +87,7 @@ de 1 mm). (4) Dans Godot, la surface rendue est celle de δ, au bit du fichier ;
   critères 2 et 3.
 - [x] **P4** — Godot : la surface de δ en maillage de hauteur dans le bassin (`piscine.gd`), rejouée ; critère 4.
 - [x] **P5** — images de R27, preuve `PISCINE-DELTA-S375`, liste 5.10, file, feuille de route, index.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 
