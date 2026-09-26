@@ -17389,3 +17389,5 @@ les albédos) ; ciel sans texture ; lobe solaire sous l'eau ; orientation interp
 Maillons **1** : aucun point de la liste ne change (le ciel sert 8.10 ; R30 posée, non reçue). **Arbitrage réel** (R30) :
 l'œil adapté ou une scène plus sombre ; l'occultation du ciel avant la suite. Suivant : la pluie, pièce 4 — les
 gerbes —, ou l'occultation du ciel si R30 la demande.
+**Verdict R30** (après le rituel) : *« Je valide, ajoute l'occultation du ciel puis continue, et ensuite le plus important le
+solveur 3D »* — le ciel de pluie reçu (8.10 reste partiel, maillons **1**) ; suivant : l'occultation du ciel (S382).

@@ -55,7 +55,7 @@ bit.
 | 2 — ciel couvert rendu `(1 + 2·sin h)/3` à ±1 %, neutre | radiance au centre de l'image, dos au soleil, h = 1 / 15 / 30 / 60 / 89,5° | 0,8319 / 1,2203 / 1,6087 / 2,1977 / 2,4141 pour 0,8331 / 1,2217 / 1,6101 / 2,1994 / 2,4150 — pire **−0,151 %** ; canaux égaux (0,000 %) |
 | 3 — aucun soleil, ni éclat ni caustiques | vers le soleil (58°) | ciel clair 3,9554 (le disque) ; couvert **2,1688** pour 2,1704 de la CIE (−0,070 %) ; éclat, caustiques et crêtes éteints par `soleil_direct()` |
 | 4 — éclairement horizontal conservé | sol mat vu d'aplomb, sous les deux ciels ; mur ouest | sol 0,3567 et 0,3567, rapport **1,00000** ; mur ouest 0,6053 pour 0,6053 attendu |
-| 5 — photographies et jugement | deux ciels de pluie mesurés (§1) ; R30 | neutres à 1,5–7 % près ; gradient compatible ; **R30 posée** ([§35](REVUE-VISUELLE.md)) |
+| 5 — photographies et jugement | deux ciels de pluie mesurés (§1) ; R30 | neutres à 1,5–7 % près ; gradient compatible ; **reçue** : *« Je valide »* ([§35](REVUE-VISUELLE.md)) |
 
 L'écart systématique négatif du critère 2 (−0,04 à −0,15 %) est de l'ordre de l'arrondi du tampon flottant de 16 bits.
 

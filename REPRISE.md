@@ -14,9 +14,9 @@ JETON            : libre
 Battement        : 2026-09-26 12:35 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
 Session en cours : —
-Dernière session : S381 — rendu : **le ciel de pluie** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), pièce 3 ; [preuve](docs/validation/CIEL-PLUIE-S381.md)) — ciel couvert de la CIE, neutre, soleil éteint partout (disque, éclat, caustiques, crêtes), éclairement horizontal conservé (l'œil s'adapte) ; **R30 posée**. Coupée après P5, reprise à chaud. Avant : S380, la pluie dans l'air (R29 reçue)
-Session suivante : **le verdict de R30**, puis **la pluie, pièce 4 — les gerbes** (ADR-205 D3) — ou d'abord l'occultation du ciel si R30 la demande (le bloc de la piscine se confond avec le sol) ; puis les surfaces mouillées (5), les bâches sur les rides (8), l'exposition calculée (10)… La campagne du solveur volumique attend (S380, l'utilisateur)
-Maillons        : 1 — S381 : aucun point de la liste ne change, R30 posée non reçue (journal)
+Dernière session : S381 — rendu : **le ciel de pluie** ([ADR-205](docs/adr/ADR-205-la-pluie-complete.md), pièce 3 ; [preuve](docs/validation/CIEL-PLUIE-S381.md)) — ciel couvert de la CIE, neutre, soleil éteint partout (disque, éclat, caustiques, crêtes), éclairement horizontal conservé (l'œil s'adapte) ; **R30 reçue** : « Je valide ». Coupée après P5, reprise à chaud. Avant : S380, la pluie dans l'air (R29 reçue)
+Session suivante : **l'occultation du ciel** (R30, l'utilisateur : « ajoute l'occultation du ciel puis continue, et ensuite le plus important le solveur 3D ») ; puis la pluie, pièce 4 — les gerbes (ADR-205 D3) ; ensuite **la campagne du solveur volumique 3D**, « le plus important »
+Maillons        : 1 — S381 : R30 reçue, aucun point de la liste ne change (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

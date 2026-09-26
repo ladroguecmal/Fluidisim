@@ -1291,3 +1291,7 @@ changeront beaucoup l'image de la piscine.
 **La question :** le ciel de pluie est-il crédible — gris neutre, sans soleil, lumière diffuse ? La luminosité d'ensemble
 (l'œil adapté : le sol aussi clair qu'au soleil) vous paraît-elle juste, ou la scène devrait-elle être plus sombre ? Le
 bloc de la piscine qui disparaît : faut-il l'occultation du ciel avant de continuer la pluie (gerbes, surfaces mouillées) ?
+
+**Verdict R30 — reçu le 2026-09-26 (S381, après le rituel)** : *« Je valide, ajoute l'occultation du ciel puis continue,
+et ensuite le plus important le solveur 3D »* — le ciel de pluie reçu, l'œil adapté compris ; **l'occultation du ciel**
+demandée avant la suite de la pluie ; puis la campagne du solveur volumique 3D, dite *« le plus important »*.

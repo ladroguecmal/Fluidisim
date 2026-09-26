@@ -355,13 +355,13 @@ le rendu de l'eau se fait dans Godot 4** — la mer de B rendue dans Godot (S357
 la lumière de l'eau portée de l'afficheur et la colonne d'eau, 8.5 partiel (ADR-194) ; **S360** : la surface fine par FFT,
 l'écume au déferlement (ADR-195) ; **S361** : les caustiques ; **S363** : le ciel de la photographie, une courbe calée sur elle en option ; **S365** : sous la surface, 8.6
 partiel — fenêtre de Snell, milieu ; **S366** : R24 reçu, la lumière de l'eau calée sur Tyler ; **S367–S368** : l'écume, champ
-d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photographiques ; **S371** : la caméra à demi immergée, le milieu par pixel à l'objectif ; **S379** : les rides de la pluie, factices (8.9, R28 reçue) ; **S380** : la pluie complète ([ADR-205](adr/ADR-205-la-pluie-complete.md)), d'abord dans l'air — gouttes et extinction (R29 reçue) ; **S381** : le ciel de pluie, couvert de la CIE, sans soleil (R30 posée). L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
+d'ADR-014 et son rendu — suspendue par l'utilisateur sauf références photographiques ; **S371** : la caméra à demi immergée, le milieu par pixel à l'objectif ; **S379** : les rides de la pluie, factices (8.9, R28 reçue) ; **S380** : la pluie complète ([ADR-205](adr/ADR-205-la-pluie-complete.md)), d'abord dans l'air — gouttes et extinction (R29 reçue) ; **S381** : le ciel de pluie, couvert de la CIE, sans soleil (R30 reçue). L'afficheur reste le banc. La physique garde l'ordre ci-dessous.
 
 **La prochaine session de physique — la campagne du solveur volumique 3D temps réel** (décision de l'utilisateur, S379 :
 *« une session du plus dur et complexe […] un solveur […] qui va s'occuper des simulations 3D volumétriques ultra réalistes
 et performantes en temps réel dynamiquement »*). **Conception d'abord** : état de l'art, ce que δ 3D (S297–S348) et
 APIC (ADR-186) donnent déjà, l'architecture (domaines, niveaux de détail d'ADR-202, prévision), les cibles chiffrées, le
-découpage en sessions. **S380, l'utilisateur** : *« Pas de solveur continue la pluie ajoute les manquants »* — elle attend ; la pluie se complète d'abord (ADR-205).
+découpage en sessions. **S380, l'utilisateur** : *« Pas de solveur continue la pluie ajoute les manquants »* — elle attend ; la pluie se complète d'abord (ADR-205). **S381, l'utilisateur** : *« ajoute l'occultation du ciel puis continue, et ensuite le plus important le solveur 3D »*.
 
 **Front 0 — 36 points qu'une session peut faire avancer sans rien attendre.** Proposé, dans cet ordre :
 
