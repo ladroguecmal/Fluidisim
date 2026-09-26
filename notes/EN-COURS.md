@@ -83,8 +83,8 @@ cherchées par nous, avant d'être rendue ; jugée par l'utilisateur (R26).
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — les images témoins d'avant (quatre poses, commit de départ) ; références réelles de la ligne d'eau
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — les images témoins d'avant (quatre poses, commit de départ) ; références réelles de la ligne d'eau
   (photographies « dessus-dessous » libres, lues sans téléchargement) : ce qu'elles montrent, consigné ici.
 - [ ] **P3** — la classification par pixel dans `optique_eau.gdshaderinc` (point du plan proche, hauteur de la bande à
   son aplomb, borne pour sortir tôt) ; la bande passée au fond et au ciel.
@@ -96,3 +96,29 @@ cherchées par nous, avant d'être rendue ; jugée par l'utilisateur (R26).
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
+
+**P2 — images témoins d'avant** (commit `d66ac1f1`, scratchpad `avant/`) : `godot_proche_12s`, `godot_rasante_12s`
+(sans `--cote`), `godot_sous_eau_cote_12s`, `godot_sous_eau_zenith_cote_12s`, `godot_proche_cote_12s`.
+
+**P2 — références réelles de la ligne d'eau**, lues dans le navigateur, chiffrées par un canevas (luminance sRGB décodée,
+moyenne sur 7 à 41 colonnes), rien téléchargé :
+
+- **A** — *Reef Scenic Split Shot in the Bird's Head Seascape* (Jones/Shimlock, Secret Sea Visions ; Wikimedia Commons,
+  CC BY-SA 4.0) ; 1 000 × 670, hublot en dôme (ligne légèrement courbée), récif peu profond, soleil. De haut en bas, à
+  trois colonnes : la surface vue d'au-dessus, en rasant, tassée sur ≈ 12 px, qui reflète la rive (0,44 ; 0,43 ; 0,15) ;
+  **un trait sombre de 1 à 2 px** (0,12) ; **une bande claire de 5 à 7 px** (0,61 ; 0,62 ; 0,37), la plus lumineuse de la
+  région ; **passage à l'eau en ≈ 3 px** (le rouge tombe de 0,26 à 0,01) ; l'eau, uniforme (0,00 ; 0,19 ; 0,21). Ligne
+  entière ≈ 10 px, **1,5 % de la hauteur** ; côté eau ≈ 0,5 fois la surface vue d'au-dessus.
+- **B** — *Over-under with flippers* (Gerry Thomasen ; Commons, CC BY 2.0) ; 2 592 × 1 944, compact (hublot plan
+  probable), rivière à l'ombre, eau verte. **Passage continu, sans bande claire**, sur ≈ 24 px, **1,2 % de la hauteur** ;
+  côté eau 40 fois plus sombre que la roche au-dessus (exposition faite pour l'air).
+- Commun : une ligne **continue et lisse**, jamais crénelée ; une transition d'environ **1 % de la hauteur d'image** (le
+  hublot est au foyer nul : la surface qui le touche est floue) ; le côté eau plus sombre. La bande claire tient au dôme
+  au soleil (A), pas à B. **Choix déclaré** : hublot en dôme — pas de grossissement de la moitié immergée, les objets
+  restent continus à travers la ligne.
+
+**P2 — la brume de Godot** (source 4.4-stable, `scene_forward_clustered.glsl`, `fog_process`) : écrire `FOG` dans un
+nuanceur supprime entièrement la brume du moteur pour ce matériau (`CUSTOM_FOG_USED`), et la brume lit le cube de
+radiance, inaccessible au code utilisateur : pas de brume par pixel au bit. **Décision** : la brume s'éteint quand un
+pixel au moins est vu de l'eau (la zone des vagues au plan proche), comme sous l'eau ; à hauteur d'œil de vague, la mer
+vue d'au-dessus est rasante et reflète l'horizon, que la brume ne change presque pas — **à mesurer** (P5).
