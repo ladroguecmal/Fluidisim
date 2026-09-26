@@ -91,7 +91,7 @@ conservé à l'arrondi. (4) L'onde oblique de S295 avec colonnes hautes suit **l
 - [x] **P4** — balayage : Ω/ω selon les couches cubiques gardées, porte B et S295 ; critère 2 ; `k` minimal consigné.
 - [x] **P4b** — *ajoutée après P4* : [ADR-208], la colonne graduée (variante N) à la place de la colonne haute unique
   d'ADR-207 D2 ; ADR-207 (note datée), conception §3.3.
-- [ ] **P5a** — `Volume3` : la **colonne graduée** du mode linéaire (variante N : restriction et prolongation linéaires par
+- [x] **P5a** — `Volume3` : la **colonne graduée** du mode linéaire (variante N : restriction et prolongation linéaires par
   morceaux, gradient conjugué réduit) ; critère 3.
 - [ ] **P5b** — l'onde oblique à colonne graduée contre sa fréquence calculée ; critère 4 ; inconnues comptées.
 - [ ] **P6** — critère 5 ; preuve `COLONNES-HAUTES-S386` ; liste, file, feuille de route, index.
@@ -120,3 +120,11 @@ chaque variante à son réglage ; **l'estimation de S384 (÷3,1, huit couches cu
 avec huit couches cubiques, G ajoute jusqu'à 1,4·10⁻² d'erreur de fréquence à λ = 14 m (≈ 16 fois le permis). Le pire cas
 est toujours la plus longue vague, où le schéma fin est le plus juste (8,6·10⁻⁴). Conséquence : **ADR-207 D2 change** —
 P4b ajoutée ; P5 construit N.
+
+**P5a — la colonne graduée en 3D, mode linéaire** (`delta3d_graded.rs`) : `enable_graded(host, nœuds)`, prolongation `P`
+et transposée exacte `Pᵀ` (mêmes coefficients), gradient conjugué réduit sur `Pᵀ·A·P` par la grille fine, arrêt 10⁻¹² puis
+tolérance d'ADR-144 sur `Pᵀ·div u` rapportée au poids de chaque nœud ; refus `Domain` sur fond coupé et au pas mobile.
+**Critère 3 tenu** (cinq essais `s386`) : comptage exact, nœuds invalides refusés ; opérateur réduit symétrique et positif,
+`Pᵀ` transposée de `P` ; repos exact au bit ; volume gardé à 10⁻⁹ m³ sur 50 pas ; tous les nœuds = schéma fin à 10⁻⁶ m ;
+refus du pas mobile, surface rendue au bit. **Vu échouer** : la transposée faussée (nœud du haut à moitié) casse l'essai de
+symétrie.

@@ -173,6 +173,9 @@ pub struct Volume3 {
     /// **S385 : la multigrille 3D** (ADR-207 D3), préconditionneur du pas mobile ; `None` par défaut — le Jacobi de
     /// S296, au bit. `enable_multigrid` la réserve auprès de l'hôte, avant `seal()`.
     mg: Option<multigrid3::Multigrid3>,
+    /// **S386 : la colonne graduée** (ADR-208) du pas linéaire ; `None` par défaut — toutes les couches, au bit.
+    /// `enable_graded` la réserve auprès de l'hôte, avant `seal()`.
+    graded: Option<graded::Graded3>,
 }
 
 impl Volume3 {
@@ -279,6 +282,7 @@ impl Volume3 {
             linear_sponge: None,
             sponge_removed: 0.,
             mg: None,
+            graded: None,
         })
     }
 
@@ -1278,7 +1282,12 @@ impl Volume3 {
                 }
             }
         }
-        let report = self.project(scale, correction, max_iters, jobs)?;
+        // S386 : la colonne graduée, si elle est réservée (ADR-208).
+        let report = if self.graded.is_some() {
+            self.project_graded(scale, correction, max_iters)?
+        } else {
+            self.project(scale, correction, max_iters, jobs)?
+        };
         if report.degraded {
             return Err(Error::Convergence);
         }
@@ -1370,3 +1379,5 @@ pub use closure::{Closure3, ClosureError};
 mod cut;
 #[path = "delta3d_multigrid.rs"]
 mod multigrid3;
+#[path = "delta3d_graded.rs"]
+mod graded;

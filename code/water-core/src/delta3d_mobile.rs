@@ -453,6 +453,10 @@ impl Volume3 {
         max_iters: u32,
         jobs: &dyn JobSystem,
     ) -> Result<Report, Error> {
+        // S386 : la colonne graduée n'est éprouvée qu'au pas linéaire (ADR-208, C2b).
+        if self.graded.is_some() {
+            return Err(Error::Domain);
+        }
         let mut rhs = core::mem::take(&mut self.rhs);
         self.divergence(&self.us, &self.vs, &self.ws, &mut rhs);
         self.rhs = rhs;

@@ -1894,3 +1894,97 @@ fn multigrid_reaches_the_same_surface_with_fewer_iterations_s385() {
         assert!(2 * ib < ia, "bosse={bosse} : {ib} itérations contre {ia}");
     }
 }
+
+// ---------------------------------------------------------------- S386 : la colonne graduée (C2, ADR-208)
+
+fn host(arena: &mut Arena) -> HostServices<'_> {
+    HostServices { alloc: arena, jobs: &Jobs, sink: &Jobs }
+}
+
+#[test]
+fn graded_column_is_counted_and_validated_s386() {
+    let (mut v, mut arena) = volume(8, 4, 12, 0.5, 9.81);
+    assert_eq!(v.enable_graded(&mut host(&mut arena), &[1, 5, 11]), Err(Error::Shape));
+    assert_eq!(v.enable_graded(&mut host(&mut arena), &[0, 5, 10]), Err(Error::Shape));
+    assert_eq!(v.enable_graded(&mut host(&mut arena), &[0, 5, 5, 11]), Err(Error::Shape));
+    assert_eq!(v.pressure_unknowns_per_column(), 12);
+    let before = arena.stats.persistent_bytes;
+    let nodes = [0, 4, 7, 9, 10, 11];
+    v.enable_graded(&mut host(&mut arena), &nodes).unwrap();
+    assert_eq!(arena.stats.persistent_bytes - before, (5 * 32 * 6 + 6) * 4 + 6 * core::mem::size_of::<usize>());
+    assert_eq!(v.pressure_unknowns_per_column(), 6);
+    let (mut c, mut arena) = volume_mg(16, 8, 12, 0.5, true);
+    assert_eq!(c.enable_graded(&mut host(&mut arena), &[0, 6, 11]), Err(Error::Domain));
+}
+
+#[test]
+fn graded_operator_is_symmetric_and_positive_s386() {
+    let (mut v, mut arena) = volume(8, 4, 16, 0.25, 9.81);
+    v.enable_graded(&mut host(&mut arena), &[0, 3, 7, 10, 12, 13, 14, 15]).unwrap();
+    let g = v.graded.take().unwrap();
+    let n = g.x.len();
+    let (x, y) = (noise(n, 21), noise(n, 23));
+    let (mut ax, mut ay) = (vec![0f32; n], vec![0f32; n]);
+    v.graded_apply(&g, &x, &mut ax);
+    v.graded_apply(&g, &y, &mut ay);
+    let dot = |a: &[f32], b: &[f32]| a.iter().zip(b).map(|(p, q)| *p as f64 * *q as f64).sum::<f64>();
+    assert!((dot(&x, &ay) - dot(&y, &ax)).abs() < 1e-5 * (dot(&x, &x) * dot(&ay, &ay)).sqrt());
+    assert!(dot(&x, &ax) > 0. && dot(&y, &ay) > 0.);
+    // `Pᵀ` est la transposée exacte de `P`.
+    let mut fine = vec![0f32; v.p.len()];
+    let f = noise(v.p.len(), 29);
+    let mut rf = vec![0f32; n];
+    v.graded_expand(&g, &x, &mut fine);
+    v.graded_restrict(&g, &f, &mut rf);
+    assert!((dot(&fine, &f) - dot(&x, &rf)).abs() < 1e-5 * (dot(&fine, &fine) * dot(&f, &f)).sqrt());
+}
+
+#[test]
+fn graded_rest_is_exact_and_volume_is_kept_s386() {
+    let (mut v, mut arena) = volume(16, 8, 8, 0.5, 9.81);
+    v.enable_graded(&mut host(&mut arena), &[0, 3, 5, 6, 7]).unwrap();
+    let z0 = v.domain().z0();
+    let r = v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+    assert_eq!(r.iterations, 0);
+    assert!(v.eta.iter().all(|e| e.to_bits() == z0.to_bits()));
+    let eta: Vec<f32> = (0..8).flat_map(|j| (0..16).map(move |i| {
+        let (x, y) = ((i as f32 + 0.5) * 0.5 - 4., (j as f32 + 0.5) * 0.5 - 2.);
+        z0 + 0.02 * (-(x * x + y * y)).exp()
+    })).collect();
+    v.set_surface(&eta).unwrap();
+    let volume = |v: &Volume3| v.eta.iter().zip(&v.eta_roundoff).map(|(e, r)| (*e as f64 - z0 as f64) - *r as f64).sum::<f64>();
+    let start = volume(&v);
+    for _ in 0..50 {
+        let r = v.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        assert!(!r.degraded, "{r:?}");
+    }
+    assert!((volume(&v) - start).abs() < 1e-9, "{} contre {}", volume(&v), start);
+}
+
+#[test]
+fn graded_with_every_layer_is_the_fine_scheme_s386() {
+    let (mut a, _) = volume(16, 8, 8, 0.5, 9.81);
+    let (mut b, mut arena) = volume(16, 8, 8, 0.5, 9.81);
+    b.enable_graded(&mut host(&mut arena), &(0..8).collect::<Vec<_>>()).unwrap();
+    let z0 = a.domain().z0();
+    let eta: Vec<f32> = (0..8).flat_map(|_| (0..16).map(move |i| z0 + 0.01 * ((i as f32 + 0.5) * 0.4).cos())).collect();
+    a.set_surface(&eta).unwrap();
+    b.set_surface(&eta).unwrap();
+    for _ in 0..20 {
+        a.step_surface_linear(2000, 4000, &Jobs).unwrap();
+        b.step_surface_linear(2000, 4000, &Jobs).unwrap();
+    }
+    let worst = a.eta.iter().zip(&b.eta).fold(0f32, |m, (x, y)| m.max((x - y).abs()));
+    assert!(worst < 1e-6, "{worst}");
+}
+
+#[test]
+fn graded_is_refused_by_the_mobile_step_s386() {
+    let (mut v, mut arena) = volume(8, 4, 16, 0.25, 9.81);
+    v.enable_graded(&mut host(&mut arena), &[0, 4, 8, 11, 13, 14, 15]).unwrap();
+    let eta: Vec<f32> = (0..32).map(|c| 3. + 0.01 * (c as f32).sin()).collect();
+    v.set_free_surface(&eta, 3.).unwrap();
+    let before: Vec<u32> = v.eta.iter().map(|x| x.to_bits()).collect();
+    assert_eq!(v.step_surface_mobile(1000, 4000, &Jobs).err(), Some(Error::Domain));
+    assert!(v.eta.iter().map(|x| x.to_bits()).eq(before));
+}
