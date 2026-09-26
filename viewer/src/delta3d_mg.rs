@@ -599,11 +599,22 @@ fn aleas(n: usize, graine: u64) -> Vec<f32> {
 /// puis la symétrie `⟨u, M⁻¹v⟩ = ⟨M⁻¹u, v⟩` et la positivité, sur la carte. `ASYMETRIQUE=1` retire les lissages après
 /// des niveaux intermédiaires : l'essai doit alors échouer. Lignes `MG_CYCLE_S390`.
 pub fn recevoir_cycle() -> Result<(), String> {
+    let chauffe: u64 = std::env::var("CHAUFFE").ok().and_then(|v| v.parse().ok()).unwrap_or(30);
+    let asym = std::env::var("ASYMETRIQUE").is_ok_and(|v| v == "1");
+    mesurer_cycle(None, chauffe, if asym { 0 } else { POST_SWEEPS }).map(|_| ())
+}
+
+/// L'instrument, réutilisable : `domaine` remplace celui de `Config::review` s'il est donné ; rend l'écart relatif
+/// maximal carte / réplique, la symétrie relative et la plus petite des deux positivités.
+pub fn mesurer_cycle(domaine: Option<Domain3>, chauffe: u64, post: usize) -> Result<(f64, f64, f64), String> {
     use water_core::SimTime;
     pollster::block_on(async {
         let scene = crate::scene::Scene::build(true, false, None);
         let background = &scene.background;
-        let config = crate::delta3d_scene::Config::review();
+        let mut config = crate::delta3d_scene::Config::review();
+        if let Some(d) = domaine {
+            config.domain = d;
+        }
         let (u, v, w, eta) = config.initial_state();
         let mut carte = crate::delta3d_step::Step3::new(
             background,
@@ -615,14 +626,11 @@ pub fn recevoir_cycle() -> Result<(), String> {
         .await?;
         carte.set_step(config.step_us, config.rest, config.sponge)?;
         carte.set_state(&u, &v, &w, &eta)?;
-        let chauffe: u64 = std::env::var("CHAUFFE").ok().and_then(|v| v.parse().ok()).unwrap_or(30);
         for n in 0..chauffe {
             carte.publish_time(background, SimTime(n * config.step_us))?;
             carte.run_for_bench(config.cycles, crate::delta3d_step::Upto::Full)?;
         }
         let levels = carte.enable_multigrid();
-        let asym = std::env::var("ASYMETRIQUE").is_ok_and(|v| v == "1");
-        let post = if asym { 0 } else { POST_SWEEPS };
         carte.mg_coarse_post_for_bench(post)?;
         let d = config.domain;
         let n = d.cells();
@@ -687,8 +695,71 @@ pub fn recevoir_cycle() -> Result<(), String> {
             "MG_CYCLE_S390 bilan ecart_max_relatif={pire:.3e} symetrie={sym:.3e} critere_2={}",
             if tenu { "tenu" } else { "manque" }
         );
-        Ok(())
+        Ok((pire, sym, pos_u.min(pos_v)))
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Une géométrie de cuve sans carte : surface ondulée, donc des fantômes de surface sur les côtés et en haut.
+    fn replique_de_cuve() -> (Replica, Domain3) {
+        let d = Domain3 { nx: 16, ny: 16, nz: 12, dx: 0.25 };
+        let heights: Vec<f32> = (0..d.columns())
+            .map(|c| {
+                let (i, j) = ((c % d.nx) as f32, (c / d.nx) as f32);
+                1.9 + 0.3 * (0.7 * i).sin() * (0.45 * j).cos()
+            })
+            .collect();
+        let brute = Replica::new(d, &heights, &vec![0.; d.cells()]);
+        let zero = vec![0f64; d.cells()];
+        let m: Vec<f32> = (0..d.cells())
+            .map(|c| {
+                let dg = brute.apply(&zero, c).1;
+                if dg > 0. { (1. / dg) as f32 } else { 0. }
+            })
+            .collect();
+        (Replica::new(d, &heights, &m), d)
+    }
+
+    /// **S390** : la recette de la carte, écrite en `f64`, est symétrique définie positive — et l'essai voit l'erreur
+    /// qu'il garde : sans lissage après au niveau intermédiaire, la symétrie tombe.
+    #[test]
+    fn replica_vcycle_is_symmetric_and_seen_failing_s390() {
+        let (rep, d) = replique_de_cuve();
+        let levels = levels_of(d).len();
+        assert_eq!(levels, 2);
+        let masque = |x: Vec<f32>| -> Vec<f64> {
+            x.iter().enumerate().map(|(c, &v)| if rep.wet(c) { v as f64 } else { 0. }).collect()
+        };
+        let (u, v) = (masque(aleas(d.cells(), 1)), masque(aleas(d.cells(), 2)));
+        let dot = |a: &[f64], b: &[f64]| a.iter().zip(b).map(|(x, y)| x * y).sum::<f64>();
+        for (post, symetrique) in [(POST_SWEEPS, true), (0, false)] {
+            let (mu, mv) = (rep.vcycle(&u, levels, post), rep.vcycle(&v, levels, post));
+            let (s1, s2) = (dot(&u, &mv), dot(&mu, &v));
+            let sym = (s1 - s2).abs() / s1.abs().max(s2.abs());
+            if symetrique {
+                assert!(sym < 1e-12, "symétrie {sym:e}");
+                assert!(dot(&u, &mu) > 0. && dot(&v, &mv) > 0.);
+            } else {
+                assert!(sym > 1e-3, "l'asymétrie n'est pas vue : {sym:e}");
+            }
+        }
+    }
+
+    /// **S390, critère 2, sur la carte** : le cycle en V de la carte contre la réplique à 10⁻⁵, symétrique à 10⁻⁵,
+    /// positif ; asymétrique, vu échouer. Demande une carte : ignoré par défaut
+    /// (`cargo test --manifest-path viewer/Cargo.toml --release -- --ignored card_vcycle`).
+    #[test]
+    #[ignore]
+    fn card_vcycle_matches_the_replica_s390() {
+        let d = Domain3 { nx: 32, ny: 32, nz: 28, dx: 0.25 };
+        let (pire, sym, pos) = mesurer_cycle(Some(d), 10, POST_SWEEPS).expect("carte");
+        assert!(pire <= 1e-5 && sym <= 1e-5 && pos > 0., "écart {pire:e}, symétrie {sym:e}, positivité {pos:e}");
+        let (_, sym, _) = mesurer_cycle(Some(d), 10, 0).expect("carte");
+        assert!(sym > 1e-2, "l'asymétrie n'est pas vue sur la carte : {sym:e}");
+    }
 }
 
 // ── La scène de la porte B (S390, critères 3 et 4) ───────────────────────────────────────────────────────────────
@@ -784,8 +855,14 @@ pub fn scene() -> Result<(), String> {
                 .collect()
         };
         let liste = |v: &[f64]| v.iter().map(|x| format!("{x:.3}")).collect::<Vec<_>>().join(",");
-        let mut references = Vec::new();
-        for var in [Variante { mg: true, cycles: 24 }, Variante { mg: false, cycles: 512 }] {
+        // `VARIANTES=jacobi32,mg6` restreint les variantes ; `REFERENCES=0` saute les références (écarts vides).
+        let filtre: Option<Vec<String>> = std::env::var("VARIANTES").ok().map(|v| v.split(',').map(|x| x.trim().to_string()).collect());
+        let avec_references = !std::env::var("REFERENCES").is_ok_and(|v| v == "0");
+        let mut references = vec![Vec::new(), Vec::new()];
+        for (ir, var) in [Variante { mg: true, cycles: 24 }, Variante { mg: false, cycles: 512 }].into_iter().enumerate() {
+            if !avec_references {
+                break;
+            }
             let (s, mut r, mut dv, deg, explose) = trajectoire(&mut carte, var)?;
             let (rm, _, rx) = quantiles(&mut r);
             let (dm, _, dx) = quantiles(&mut dv);
@@ -793,7 +870,7 @@ pub fn scene() -> Result<(), String> {
                 "MG_SCENE_S390 reference={} residu_mediane={rm:.3e} residu_max={rx:.3e} divergence_mediane={dm:.3e} divergence_max={dx:.3e} degrades={deg}/{pas} explose={explose:?}",
                 var.nom()
             );
-            references.push(s);
+            references[ir] = s;
         }
         println!("MG_SCENE_S390 plancher ecart_entre_references_mm_par_seconde={}", liste(&ecarts_mm(&references[0], &references[1])));
         let variantes: Vec<Variante> = [8u32, 16, 32, 64, 128]
@@ -801,7 +878,7 @@ pub fn scene() -> Result<(), String> {
             .map(|&c| Variante { mg: false, cycles: c })
             .chain([1u32, 2, 3, 4, 6, 8].iter().map(|&c| Variante { mg: true, cycles: c }))
             .collect();
-        for var in &variantes {
+        for var in variantes.iter().filter(|v| filtre.as_ref().is_none_or(|f| f.contains(&v.nom()))) {
             let (s, mut r, mut dv, deg, explose) = trajectoire(&mut carte, *var)?;
             let (rm, _, rx) = quantiles(&mut r);
             let (dm, _, dx) = quantiles(&mut dv);

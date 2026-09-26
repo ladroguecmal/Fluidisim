@@ -2920,6 +2920,14 @@ fn run() -> Result<(), String> {
         if let Some(p) = pas_delta {
             c.step_us = p;
         }
+        // S390 / C3 : `--multigrille[=<cycles>]` — la projection préconditionnée par le cycle en V, six cycles par
+        // défaut (le résidu de Jacobi-32 à moitié prix, MULTIGRILLE-3D-S385 §5). Sans elle, Jacobi-32 au bit.
+        if let Some(n) = args.iter().find_map(|a| {
+            (a == "--multigrille").then_some(6).or_else(|| a.strip_prefix("--multigrille=").and_then(|v| v.parse().ok()))
+        }) {
+            c.multigrid = true;
+            c.cycles = n;
+        }
         c
     });
     // S277 — `--delta-hs=<m>` / `--delta-tp=<s>` : la houle de la scène δ, pour voir l'onde se

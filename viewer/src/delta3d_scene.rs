@@ -33,6 +33,9 @@ pub struct Config {
     pub impact: Option<Impact>,
     /// S339 P4 bis : l'anneau, s'il y en a un — hauteur et vitesses sortantes.
     pub ring: Option<Ring>,
+    /// S390 / C3 — la projection préconditionnée par le cycle en V (`cycles` sont alors des cycles multigrille).
+    /// Faux par défaut : le pas de S302 au bit.
+    pub multigrid: bool,
 }
 
 /// Paquet linéaire : `η = a·cos(k·d·x)·G`, vitesses de la théorie en eau profonde, `G`
@@ -177,6 +180,7 @@ impl Config {
             },
             impact: None,
             ring: None,
+            multigrid: false,
         }
     }
 
@@ -322,6 +326,9 @@ impl Config {
 /// S353 : les cycles de projection de la première part du pas à 30 Hz — l'équilibre des deux parts mesuré en S348
 /// ([preuve](../../docs/validation/COUT-DELTA3D-S341.md) §11).
 pub const K_DEUX_PARTS: u32 = 7;
+/// S390 : la même chose avec la multigrille — un cycle dans la première part équilibre les deux (mesuré sur quatre
+/// cycles, [preuve](../../docs/validation/MULTIGRILLE-3D-S385.md) §5).
+pub const K_DEUX_PARTS_MG: u32 = 1;
 
 /// Le domaine δ vivant d'une scène : le pas de production et son horloge entière.
 pub struct Live {
@@ -344,8 +351,11 @@ pub struct Live {
 }
 
 impl Live {
-    pub fn new(step: Step3, config: Config, start_us: u64) -> Result<Self, String> {
+    pub fn new(mut step: Step3, config: Config, start_us: u64) -> Result<Self, String> {
         step.set_step(config.step_us, config.rest, config.sponge)?;
+        if config.multigrid {
+            step.enable_multigrid();
+        }
         let deux_parts = config.step_us == 33_333;
         let mut live = Live { step, config, steps: 0, start_us, last: None, deux_parts, partie: 0, interpolation: true, blend: 0. };
         live.inject(start_us)?;
@@ -383,7 +393,8 @@ impl Live {
         let time = water_core::SimTime(self.start_us + demi + self.steps * self.config.step_us);
         {
             let partie = self.partie;
-            self.step.step_part(background, time, self.config.cycles, K_DEUX_PARTS, partie)?;
+            let k = if self.config.multigrid { K_DEUX_PARTS_MG } else { K_DEUX_PARTS };
+            self.step.step_part(background, time, self.config.cycles, k, partie)?;
             if partie == 1 {
                 self.steps += 1;
             }

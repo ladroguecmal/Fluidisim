@@ -103,7 +103,7 @@ d'appel) ; il atteint le résidu de 32 cycles de Jacobi en 3 à 6 cycles. Le gai
   dispatchs du profil ; critère 1.
 - [x] **P4** — l'instrument : réplique `f64`, symétrie, positivité, vu échouer ; critère 2.
 - [x] **P5** — convergence et coût sur la scène de la porte B, deux parts à 30 Hz ; critères 3 et 4.
-- [ ] **P6** — les trois cas de cuve avec la multigrille ; critère 5 ; activation par défaut décidée.
+- [x] **P6** — les trois cas de cuve avec la multigrille ; critère 5 ; activation par défaut décidée.
 - [ ] **P7** — critère 6 ; preuve (section datée de MULTIGRILLE-3D-S385) ; file, feuille de route, liste.
 - [ ] **P8** — rituel.
 
@@ -152,4 +152,31 @@ divergence, si. (2) **Tout pas sous-convergé est dégradé** à 30 Hz, y compri
 MG 2 **explosent** en 1 à 9 s. (3) **Attribution du taux** (témoin : plus de lissages au grossier, même scène, 150 pas) :
 32 lissages → 0,27 par cycle (MG 8 : 1,5·10⁻⁶), 128 → rien de plus ; mais 0,207 ms par cycle (0,45 à 128) : à la précision
 de Jacobi-32, la recette du cœur (8) reste la moins chère. Un dispatch minuscule coûte ≈ 2,5 µs. **Dit, pas retenu.**
+
+**P6 — les trois cas de cuve** (`MULTIGRILLE=`, écart de hauteur publiée au cœur, m) :
+
+| cas | Jacobi, même binaire | multigrille 8 | multigrille 16 | niveaux |
+|---|---|---|---|---|
+| 3, `nx` 16 / 32 / 48 (1 s) | 64 : 2,6 / 2,4 / 2,4·10⁻⁸ ; 128 : 2,2 / 2,2 / 2,5·10⁻⁸ | 2,2 / 3,0 / 3,0·10⁻⁸ | 2,6 / 2,6 / 2,5·10⁻⁸ | 1 |
+| 2, houle 5 cm (2 s) | 64 (S340) : 1,0·10⁻⁶ | 1,6·10⁻⁷ | 6,1·10⁻⁸ | 2 |
+| 1, 5 cm, `nx` 32 / 64 | 64 (S340) : 3,9·10⁻⁷ / 1,3·10⁻⁶ | 2,5·10⁻⁷ / 1,2·10⁻⁶ | 1,1 / 3,4·10⁻⁷ | 0 |
+| 1, 10 cm, `nx` 32 / 64 | 64 : 1,8·10⁻⁵ (S340) / **1,25·10⁻⁶** | 1,5·10⁻⁵ / **5,0·10⁻⁵** | 1,2·10⁻⁶ / **5,6·10⁻⁵** | 0 |
+
+**Critère 5 tenu** : au plus **5,6·10⁻⁵ m**, pour 3 mm. Le pire, cas 1 à 10 cm et 64 mailles, est 40 fois le témoin : `ny` = 1,
+**aucun niveau grossier**, le préconditionneur n'est que quatre lissages de Jacobi ; **64 cycles le ramènent à 3,9·10⁻⁷**
+— une sous-convergence de ce cas, pas un défaut du cycle. Les 3·10⁻⁷ publiés en S305 pour le cas 3 datent d'avant
+S342–S343 : le même binaire rend aujourd'hui 2,2 à 2,6·10⁻⁸ avec Jacobi.
+
+**Épreuve d'une minute** (L369 ; Jacobi 16 explosait à 9 s). **À 30 Hz, tout explose en 24 à 40 s**, références
+convergées comprises (multigrille 24 au pas 1 050, Jacobi 512 au pas 930 ; Jacobi 32, la production, au pas 1 200 ;
+multigrille 6 au pas 720, 8 au pas 930). **À 60 Hz, la minute tient** pour les références, Jacobi 16 à 128, multigrille 6 et
+8 ; explosent Jacobi 8 (32 s), multigrille 1 à 4 (0,5 à 58 s). **La cadence de 30 Hz de la porte C n'est pas stable sur une
+minute dans cette scène, quel que soit le solveur de pression** : nouvel angle mort (P7), non attribué.
+
+**Construit en P6** : option vivante `--multigrille[=n]` (6 par défaut ; `K_DEUX_PARTS_MG` = 1), éprouvée par
+`--captures` à 30 Hz (divergence franche 4,3·10⁻⁴ au pas 63 contre 9,8·10⁻⁴) — les captures locales `s347` ont été
+réécrites puis régénérées sans l'option ; instrument extrait (`mesurer_cycle`) ; deux essais —
+`replica_vcycle_is_symmetric_and_seen_failing_s390` (CPU) et `card_vcycle_matches_the_replica_s390` (carte, ignoré par
+défaut), tous deux réussis. Essais de l'afficheur : 36 réussis, 1 ignoré, avant l'ajout ; suite du cœur 680 réussis,
+18 ignorés, inchangée (le cœur n'a pas changé).
 
