@@ -62,59 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S398 — **terminée**. **C5b, première part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
-conception §4.1 A1, §4.2) : **la zone des colonnes dans APIC 3D**. Demande de l'utilisateur (2026-09-27) : *« Continue »*
-(objectif consigné en S397 : terminer le solveur). Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo,
-Python ; ni carte graphique, ni Godot. Sert 4.16, 4.12, A316.
+Session : S399 — **en cours**. **C5b, deuxième part** ([ADR-207](../docs/adr/ADR-207-la-campagne-du-solveur-volumique-3d.md) D5 ;
+[RACCORD-3D-S398](../docs/validation/RACCORD-3D-S398.md)) : **la bande de particules et l'échange**, dans une même projection.
+Demande de l'utilisateur (2026-09-27) : *« Continue »* (objectif : terminer le solveur). Agent : Claude Opus 5.5, session cloud
+Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Sert 4.16, 4.12, A316.
 
-**Pourquoi là, et pas dans `Volume3`.** Le raccord demande **une seule projection** pour les deux représentations (§4.2 :
-colonnes où la surface est un graphe, particules dans une bande, fluide fantôme sur `η` ou sur la surface reconstruite).
-`Apic3` a déjà la projection à fluide fantôme, la reconstruction, les transferts, les parois et le corps ; `Volume3` porte des
-modes nombreux (fond coupé, colonne graduée, couplage à B) qu'une bande heurterait. La référence la plus simple d'abord ; la
-production (C7) aura son propre portage.
+**Thèse.** Dans `Apic3`, une colonne est soit de la zone (surface `η`), soit de la **bande** (particules). Deux gestes, les
+leçons de 2D portées :
+- **La reconstruction voit les colonnes** — l'idée de Chentanez, Müller et Kim (le champ de densité de la grille ajouté à celui
+  des particules) : près de la zone, la reconstruction compte des **particules virtuelles** des colonnes, rangées étirées sur
+  `[0, η]` (S327 : pas de marche d'un quart de maille), images aux parois comprises — sans quoi la frontière serait une paroi
+  vue d'un seul côté (le biais de S389 et de S393).
+- **L'échange par le flux de la face** (le « solde » de S327, le meilleur montage après S397) : sur chaque face de frontière et à
+  chaque profondeur, le volume `u·mouillé·dx²·dt` passe à `η` de la colonne ; le solde de la face-maille le doit aux particules,
+  ou le leur doit ; une particule entière due est **retirée là où elle arrive** (la plus proche de la face, dans sa maille), une
+  particule entière reçue est **posée contre la face**, au sous-réseau le plus libre ; une particule qui franchit la frontière est
+  absorbée et paie d'avance le solde. Masse : particules + `Σ η·dx²` + soldes.
 
-**Thèse.** Une **zone de colonnes** dans `Apic3`, activée par un masque de colonnes (`enable_columns`, réservée à la
-configuration) : surface **`η` par colonne** — `φ = z − η`, sans reconstruction ni son biais (S323 : le biais dépend de
-l'arrangement des particules, cause candidate de la migration de S397) ; vitesse **eulérienne**, gardée sur la grille d'un pas à
-l'autre et **advectée** (semi-lagrangienne, la leçon de S397) ; `η` transporté par les débits mouillés, pris en amont, comme δ.
-Sans masque, `Apic3` au bit. **Cette session : toutes colonnes, sans bande** — la machinerie éprouvée seule contre δ (`Volume3`,
-pas mobile) sur la même cuve et le même instrument ; la bande et l'échange viendront ensuite (C5b, deuxième part).
-
-**Critères, écrits avant.** (1) Sans masque, au bit : `apic3d_ballottement 10 0.05` imprime la ligne de S389 ; suite. (2) Toutes
-colonnes, repos 2 s : vitesse ≤ 1 mm/s ; volume `Σ η·dx²` constant à 10⁻⁶ relatif. (3) Toutes colonnes, ballottements (1, 0)
-(10 s) et (1, 1) (5 s) à 5 et 2,5 cm : période à **1 point** de celle de δ sur la même cuve ; amortissement par période ≥ 0 ;
-publiés contre la période exacte.
+**Critères, écrits avant.** (1) Sans zone, au bit (la ligne de S389) ; toutes colonnes, les chiffres de S398 (+0,02 %, +0,49 %).
+(2) Repos, moitié particules moitié colonnes, 2 s : vitesse ≤ 1 cm/s ; la surface lue dans la dernière colonne de particules à
+≤ 5 % de maille du repos. (3) Masse (particules + `η` + soldes) à 10⁻⁶ relatif sur 30 s. (4) Ballottement (1, 0), frontière au
+nœud, 30 s, 5 et 2,5 cm, contre APIC seul : niveau d'eau équivalent de la bande à ±2 mm par tranche de 10 s ; densité 8 ± 0,4
+particules par maille occupée dans la dernière colonne de la bande ; saut de surface < 0,5 maille ; période et amortissement
+à 1 point ; circulation sur la face |ū| ≤ 5 mm/s.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — `enable_columns` et le pas à colonnes dans `apic3d.rs` ; l'essai du repos ; critères 1 et 2.
-- [x] **P3** — les ballottements, toutes colonnes, contre δ (même instrument) ; critère 3.
-- [x] **P4** — suite ; preuve `RACCORD-3D-S398` ; file, liste, feuille de route, index.
-- [x] **P5** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — la reconstruction voit les colonnes (particules virtuelles) ; critère 2 (repos, surface lue).
+- [ ] **P3** — l'échange (flux de face, soldes, retrait, pose, absorption) ; critère 3 et le repos échangé ; critère 1.
+- [ ] **P4** — l'exemple `apic3d_raccord` : 30 s, 5 et 2,5 cm, contre APIC seul ; critère 4.
+- [ ] **P5** — suite ; preuve (§5 de RACCORD-3D-S398) ; A316, file, liste.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-**P2 — `apic3d_columns.rs`** : `enable_columns` (masque, réserve comptée), `set_columns_surface`, `columns_volume` ; dans le pas,
-quatre crochets inertes sans masque — vitesse du pas précédent gardée, advectée au pied de la caractéristique sur les faces de
-la zone ; `φ = z − η` et étiquettes dans les colonnes ; transport de `η` par débits mouillés (hauteur moyenne des deux
-colonnes, somme compensée, comme `transport_mobile3` de δ) ; pas stable et contrôle de finitude étendus. **Critère 1 tenu** :
-`apic3d_ballottement 10 0.05` imprime la ligne de S389 au chiffre près. **Critère 2 tenu** : toutes colonnes, repos 2 s, vitesse
-max **2,4·10⁻⁵ m/s**, volume à 7·10⁻¹⁵ ; une bosse de 5 cm qui se déploie 1 s garde son volume à 2·10⁻¹¹. Trois essais (refus
-compris).
 
-**P3 — toutes colonnes contre δ** (`apic3d_ballottement`, `APIC3D_COLONNES=1` / `APIC3D_DELTA=1`, même moment lu sur `η`) :
-
-| cas | colonnes : erreur de période ; amortissement/période | δ (pas mobile) | écart |
-|---|---|---|---:|
-| (1, 0), 5 cm | +0,02 % ; +0,49 % | +0,02 % ; −0,02 % | 0,00 point |
-| (1, 0), 2,5 cm | −0,05 % ; +0,32 % | **refus `Convergence`** | exacte : −0,05 % |
-| (1, 1), 5 cm | +0,31 % ; +1,36 % | +0,33 % ; −0,04 % | 0,02 point |
-| (1, 1), 2,5 cm | +0,04 % ; +0,89 % | +0,07 % ; +0,08 % | 0,03 point |
-
-**Critère 3 tenu** sur les trois cas que δ calcule (≤ 0,03 point pour 1) ; amortissement ≥ 0 partout ; volume à 10⁻¹⁰.
-L'advection semi-lagrangienne dissipe davantage que l'advection centrée de δ (+0,3 à +1,4 % par période, contre ~0). **Observé
-sur δ** : sa projection mobile refuse la cuve mince (1, 0) à 2,5 cm (80 × 8 × 40) — Jacobi, même à 200 000 itérations ; la
-multigrille de S385 la refuse aussi, et à 5 cm (4 mailles de large) où Jacobi passe. Non étudié ici.
-
-**P4** : suite 694 réussis, 18 ignorés, zéro avertissement. Preuve [RACCORD-3D-S398](../docs/validation/RACCORD-3D-S398.md) ; file
-(campagne), feuille de route, liste 4.16 (texte), index.
