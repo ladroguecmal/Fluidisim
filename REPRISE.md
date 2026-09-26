@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-26 10:19 +02:00
 Agent            : Claude Opus 5.5, application desktop (fichiers, git, cargo, outils locaux, carte réelle RTX 5070 Laptop, accès web, Godot 4.4.1 local)
-Session en cours : S376 — consignation : le niveau de détail des contenants (V, effets factices, δ à proximité), R27, les zones d'ombre
-Dernière session : S375 — **le bassin de la piscine en δ 3D** (5.10 passe à partiel, [preuve](docs/validation/PISCINE-DELTA-S375.md)) : masse à V, jet et seuil comme sources et puits, surface rendue dans Godot — mais de quelques millimètres à 20 cm, **invisible** à l'échelle réelle ; ADR-201 ; R27 envoyée. Avant : S374, la piscine de V et ADR-200
-Session suivante : **R27 attendu** ; la suite proposée, **δ sur GPU dans Godot** — la production de δ 3D (afficheur, porte C) portée en nuanceur de calcul, maille de 5 à 10 cm, temps réel, pour que le bassin bouge visiblement ; puis le panache calé sur une mesure, le bac tampon, APIC 3D (lame, jet). Hors piscine, par l'alternance : A320 (4.8), la coque qui bouge (6.4), la côte (2.7)
-Maillons        : 0 — S375 : 5.10 passe à partiel (journal)
+Session en cours : aucune
+Dernière session : S376 — consignation : **le niveau de détail des contenants** ([ADR-202](docs/adr/ADR-202-niveau-de-detail-des-contenants.md), décision de l'utilisateur, corrige ADR-200 D1) ; R27 reçu (δ sur GPU dans Godot : pas maintenant) ; sept zones d'ombre posées. Avant : S375, le bassin en δ 3D
+Session suivante : **les réponses aux zones d'ombre d'ADR-202 §3**, à consigner d'abord ; sinon, par l'alternance d'ADR-191 D3, **la physique** : A320 par la forme de Bernoulli (4.8), la coque qui bouge (6.4), ou les chemins de B et la côte (2.7). Au rendu suivant : l'échelle radiométrique. δ sur GPU dans Godot : pas maintenant (R27)
+Maillons        : 1 — S376 : consignation, aucun point ne change d'état (journal)
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

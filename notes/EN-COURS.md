@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S376 — **en cours**. Réponse de l'utilisateur à R27 et précision de conception : δ sur GPU dans Godot, **pas
+Session : S376 — **terminée**. Réponse de l'utilisateur à R27 et précision de conception : δ sur GPU dans Godot, **pas
 maintenant** ; les contenants suivent le principe de la haute mer — V par défaut, effets factices au loin (les rides de la
 pluie), δ 3D **seulement** près d'un joueur ou d'un perturbateur, en zones selon la taille du contenant ; prévision et
 niveaux de détail comme pour l'océan ; la météo précalculée en amont donne à V les litres de pluie, que des éléments
@@ -78,6 +78,6 @@ l'ADR, avec une proposition pour chacune.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-202 ; note datée d'ADR-200 ; R27 ; décision dans la file ; feuille de route ; index.
-- [ ] **P3** — rituel.
+- [x] **P3** — rituel.
 
 ### Notes de reprise

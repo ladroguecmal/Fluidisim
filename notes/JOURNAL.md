@@ -17293,3 +17293,18 @@ panache sans mesure ; bac tampon plan ; lame et jet pour APIC.
 mouvement et V garde la masse ; consommé par le rendu de Godot et par la porte E ; preuve §1–5. **R27** envoyée. Suivant :
 **δ sur GPU dans Godot** (nuanceur de calcul, 5 à 10 cm, temps réel), si R27 le confirme.
 
+## S376 — 2026-09-26 — consignation : le niveau de détail des contenants
+
+**Entrée.** Réponse à R27 : δ sur GPU dans Godot, *« je ne pense pas qu'il faut le faire maintenant »* ; puis la règle :
+les contenants suivent le principe de la haute mer — V par défaut, effets factices au loin, δ 3D près d'un joueur ou d'un
+perturbateur, en zones selon la taille ; prévision et niveaux de détail ; météo précalculée en amont qui donne les litres
+à V, des éléments bloquants qui l'empêchent ; impacts de pluie factices ; débordement vu simulé. *« Si tu as des zones
+d'ombre cites les moi. »*
+**Fait.** [ADR-202](../docs/adr/ADR-202-niveau-de-detail-des-contenants.md) consigne ces règles et **corrige ADR-200 D1**
+(S374 l'avait écrit trop large : tout contenant *vu* → δ). Presque tout était déjà écrit (sources §2.1–2.2, ADR-010 §5–6,
+ADR-012, ADR-013, ADR-025, ADR-197 D5). **Sept zones d'ombre** posées, une proposition chacune (§3) : qui calcule la
+météo et comment V reçoit la même pluie partout ; les éléments bloquants qui changent en jeu ; la lame vue de loin ; le
+seuil contenant entier / zone ; nuages et éclairs ; chaleur, évaporation, gel ; jusqu'où les effets factices. R27 reçu.
+**Rituel.** Maillons **1** : aucun point ne change d'état. Suivant : les réponses aux zones d'ombre ; sinon, par
+l'alternance, la physique — A320 (4.8), la coque qui bouge (6.4), la côte (2.7).
+
