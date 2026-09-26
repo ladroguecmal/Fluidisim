@@ -91,8 +91,8 @@ jugement de l'utilisateur (R29).
   nuanceur de particules procédural (position, taille, vitesse par hachage de l'indice, repli dans la boîte, arrêt au sol
   et à l'eau).
 - [x] **P5** — leur dessin : traînée alignée sur la chute, opacité et radiance de Garg et Nayar ; bassin et mer.
-- [>] **P6** — l'extinction au loin (`β`, brume de la scène) ; critère 3.
-- [ ] **P7** — contrôle du nombre et des tailles (critère 2) ; critère 1 ; coût.
+- [x] **P6** — l'extinction au loin (`β`, brume de la scène) ; critère 3.
+- [>] **P7** — contrôle du nombre et des tailles (critère 2) ; critère 1 ; coût.
 - [ ] **P8** — images de R29 ; preuve `PLUIE-AIR-S380` ; liste, file, feuille de route, index.
 - [ ] **P9** — rituel.
 
@@ -122,3 +122,10 @@ moment), traînée `v·τ + D` (τ = 1/60 s), largeur au moins un pixel, opacit�
 10 mm/h, traînées fines et faibles visibles contre le sol ; mer, presque invisibles contre le ciel — comme les photos.
 Écarts d'image moyens : 4,9 (bassin, buse), 4,5 (mer, proche). Un `Array[Vector4]` typé refusait un tableau littéral :
 tableaux non typés.
+
+**P6 — l'extinction.** `Pluie.extinction` = (π/2)·2·N0/Λ³·10⁻⁶ ; posée comme brume de Godot (`1 − e^(−β·d)`, couleur du
+ciel) : piscine — brume seulement sous la pluie ; mer — `BRUME_SECHE` (0,00012) + β, propagée à notre brume par pixel
+(`brume()`). **Critère 3** (`--controle-pluie`, lignes `CONTROLE_PLUIE_S380`) : 0 / 5,64335·10⁻⁴ / 1,55557·10⁻³ /
+4,28785·10⁻³ m⁻¹ posés pour la loi à 0 / 2 / 10 / 50 mm/h, **égaux** ; intégration numérique indépendante (numpy) :
+5,64335·10⁻⁴, 1,55557·10⁻³, 4,28785·10⁻³ ; visibilités 6,9 / 2,5 / 0,9 km ; brume éteinte par temps sec. Le contrôle des
+anneaux (S379) tourne désormais sans gouttes ni brume. `%e` refusé par GDScript (encore) : `String.num_scientific`.

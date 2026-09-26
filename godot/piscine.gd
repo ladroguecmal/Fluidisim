@@ -333,6 +333,14 @@ func appliquer(s: float) -> void:
 	pluie_air.niveaux = [eau_bassin.global_position.y, eau_tampon.global_position.y]
 	pluie_air.configurer(pluie_mm_h)
 	pluie_air.suivre(camera, s)
+	# S380 : l'extinction par les gouttes (ADR-205, pièce 2) — la brume de Godot, `1 − e^(−β·d)`, couleur du ciel ; par
+	# temps sec, pas de brume, comme avant.
+	var beta := Pluie.extinction(pluie_mm_h)
+	monde_env.fog_enabled = beta > 0.0
+	if beta > 0.0:
+		monde_env.fog_density = beta
+		monde_env.fog_aerial_perspective = 1.0
+		monde_env.fog_sky_affect = 0.0
 	var q_dev := float(l[5])
 	var q_pompe := float(l[6])
 	# L'agitation d'habillage : une ride de fond, plus là où l'eau tombe.
@@ -445,6 +453,9 @@ func controle_pluie() -> void:
 	monde_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	monde_env.glow_enabled = false
 	texte.visible = false
+	# Les anneaux seuls : ni gouttes dans l'air ni brume (S380) sur les images de contrôle.
+	pluie_air.configurer(0.0)
+	monde_env.fog_enabled = false
 	var b: Dictionary = donnees["bassin"]
 	var tb: Array = b["taille_m"]
 	var aire := float(tb[0]) * float(tb[1])
@@ -479,6 +490,15 @@ func controle_pluie() -> void:
 		var sigma := 1.0 / sqrt(attendu)
 		print("CONTROLE_PLUIE_S379 pluie_mm_h=%s taux=%.1f aire_m2=%.1f instants=%d taches=%d aire_mediane_px=%d coeurs=%d attendus=%.1f ecart=%+.2f%% (poisson 1 sigma %.2f%%) %s" % [
 			mm_h(r), u.x, aire, instants, aires.size(), int(mediane), total, attendu, 100.0 * ecart, 100.0 * sigma, "tenu" if absf(ecart) <= 0.10 else "manque"])
+	# S380, critère 3 : l'extinction posée dans la scène contre celle de la loi ; par temps sec, pas de brume.
+	for r in [0.0, 2.0, 10.0, 50.0]:
+		pluie_mm_h = r
+		appliquer(3.1)
+		var loi := Pluie.extinction(r)
+		print("CONTROLE_PLUIE_S380 pluie_mm_h=%s extinction_loi=%s brume_active=%s brume_scene=%s visibilite_m=%s" % [
+			mm_h(r), String.num_scientific(loi), str(monde_env.fog_enabled),
+			String.num_scientific(monde_env.fog_density if monde_env.fog_enabled else 0.0),
+			"%.0f" % (3.912 / loi) if loi > 0.0 else "infinie"])
 	get_tree().quit()
 
 

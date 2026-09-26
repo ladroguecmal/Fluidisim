@@ -113,6 +113,8 @@ const CARTE_ECHELLE := 32.0
 
 const Pluie = preload("res://pluie.gd")
 var pluie_mm_h := 0.0
+## La densité de la brume par temps sec (m⁻¹) ; S380 : la pluie y ajoute son extinction (ADR-205, pièce 2).
+const BRUME_SECHE := 0.00012
 ## S380 — la pluie dans l'air (`pluie_air.gd`, ADR-205 pièce 1) ; les gouttes s'arrêtent au niveau moyen de la mer.
 var pluie_air: Node3D
 
@@ -295,7 +297,7 @@ func environnement() -> void:
 	if OS.get_environment("HALO") != "":
 		env.glow_enabled = OS.get_environment("HALO") == "1"
 	env.fog_enabled = true
-	env.fog_density = 0.00012
+	env.fog_density = BRUME_SECHE
 	env.fog_aerial_perspective = 1.0
 	env.fog_sky_affect = 0.0
 	environnement_scene = env
@@ -935,6 +937,13 @@ func phases(t: float) -> void:
 			add_child(pluie_air)
 		pluie_air.configurer(pluie_mm_h)
 		pluie_air.suivre(camera, fmod(t, 3600.0))
+	# S380 : l'extinction par les gouttes (`Pluie.extinction`), ajoutée à la brume sèche ; temps sec : la brume d'avant.
+	if environnement_scene != null and pluie_mm_h > 0.0:
+		environnement_scene.fog_density = BRUME_SECHE + Pluie.extinction(pluie_mm_h)
+		brume()
+	elif environnement_scene != null and environnement_scene.fog_density != BRUME_SECHE:
+		environnement_scene.fog_density = BRUME_SECHE
+		brume()
 	if materiau_caustiques != null:
 		materiau_caustiques.set_shader_parameter("bande", bande)
 		suivre_carte()
