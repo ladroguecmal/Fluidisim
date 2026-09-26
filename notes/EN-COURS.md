@@ -62,46 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S373 — **terminée**. Demande : *« Continue et ensuite commence à permettre de visualiser le système de piscine
-avec déversoir et pompe »* — d'abord la suite du jeton (le rendu), puis **S374** : la piscine de V dans Godot.
+Session : S374 — **en cours**. Demande : *« commence à permettre de visualiser le système de piscine avec déversoir et
+pompe »*. La demande prime sur l'alternance et sur le compteur de maillons (1).
 Agent : Claude Opus 5.5, application desktop ; fichiers, git, cargo, carte réelle, accès web ; Godot 4.4.1 local.
 
-**Choix.** Des deux rendus proposés, **notre perspective aérienne** : bornée, mesurable, et elle lève la limite de S371
-(la brume éteinte sur toute l'image dès que la caméra est à demi immergée, 17 niveaux au pire côté air). L'échelle
-radiométrique du soleil reste dans la file : sa cible photographique est floue (le soleil hors cadre dans la pose de
-Hanifaru, la courbe AgX qui comprime la fenêtre) — à reprendre avec une mesure qui la fonde.
+**Thèse.** Une **piscine à débordement** : un bassin de 8 × 4 m, un déversoir de 4 m sur un petit côté, qui tombe dans
+un bac tampon plus bas, et une pompe qui rend l'eau au bassin par une buse. **V la calcule, Godot la montre** — V reste la
+seule source : le cœur (exemple `piscine_v`) joue un scénario (pompe arrêtée, lancée, arrêtée) et publie chaque pas —
+volumes, surfaces par `Shapes::surface_plane` (I-01 : le consommateur ne reconstruit rien), débits d'arête, commandes ;
+Godot le rejoue, interpolé à l'image. **Premier pas, pas l'intégration** : l'intégration native (godot-rust, accord de
+téléchargement) ou un lien local en direct viendront ensuite ; la commande en direct (touche pour la pompe) en dépend.
+La lame du déversoir et le jet de la buse sont de l'habillage tiré des débits de V (hauteur critique `(q²/g)^⅓`,
+trajectoires balistiques) ; la buse n'existe pas dans V.
 
-**Thèse.** La brume de Godot (exponentielle, densité 0,00012, couleur prise au cube de radiance du ciel dans la direction
-de visée ; source 4.4-stable, `fog_process`) est réécrite dans nos nuanceurs par la sortie `FOG` : même quantité
-`1 − exp(−ρ·d)`, couleur `ciel_b` de la même direction — le ciel dont le cube est tiré —, **multipliée par la part d'air
-du pixel**. Sous l'eau et dans l'eau d'une image à demi immergée, aucune brume ; dans l'air, la même partout.
-
-**Critères, écrits avant.** (1) Poses au-dessus (proche, rasante, référence, haute, plongeante ; proche de la scène
-côtière) contre les rendus d'avant : **99,9ᵉ centile ≤ 2 niveaux, pire ≤ 8**. (2) Pose `demi` : côté air, l'écart à la brume
-de Godot tombe de 17 niveaux (S371 §5) à **≤ 8** ; côté eau, **identique au bit** au rendu de S371. (3) Sous l'eau :
-identique au bit.
+**Critères, écrits avant.** (1) Le scénario fermé conserve le volume **exactement** à chaque pas. (2) Régime établi :
+débit du déversoir = débit de la pompe au point de fonctionnement **analytique** (charge sur le seuil par la loi des
+trois demis, hauteur statique de la pompe) **à ±1 %**. (3) Dans Godot, la surface rendue de chaque bac est celle publiée
+par V **au dixième de millimètre**. (4) Jugement de l'utilisateur (R27).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — images témoins d'avant ; `brume_air` dans `optique_eau.gdshaderinc`, `FOG` dans l'eau et le fond.
-- [x] **P3** — mesures des critères 1 à 3.
-- [x] **P4** — preuve : section §10 de `DEMI-IMMERGEE-S371` (un fil, une preuve), « Reproduire » corrigé ; file, liste 8.6.
-- [x] **P5** — rituel ; puis S374.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — `examples/piscine_v.rs` : la piscine dans V, le scénario, l'export (`godot/donnees/piscine_v.json`) ;
+  critères 1 et 2.
+- [ ] **P3** — `godot/piscine.tscn`, `piscine.gd` : les bacs, les murs, l'eau (`bassin.gdshader`, l'optique de
+  `optique_eau`), le rejeu ; critère 3.
+- [ ] **P4** — la lame du déversoir, le jet de la buse, les indications à l'écran.
+- [ ] **P5** — images de R27 ; preuve `PISCINE-V-S374`, liste, file, index.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-
-**P2 — fait.** `brume_air` (`ciel.gdshaderinc`) : `1 − exp(−ρ·d)`, couleur `ciel_b(direction, 4)`, × part d'air ; `FOG`
-dans l'eau et le fond (nul en contrôle) ; `brume_densite` posée par `mer.gd` (`brume()`, 0 dans les contrôles et avec
-`BRUME=0`). **Premier essai — la brume réécrite partout — critère 1 manqué** : proche p99,9 6 / max 10, rasante 5 / 8,
-référence 6 / 11, **haute 9 / 10 (72 % des pixels)**, plongeante 2 / 2, côtière 6 / 10. Cause relue dans `fog_process` :
-`mip_level = mix(1/MAX, 1, 1 − (|z| − near)/(far − near))` — loin du plan lointain (20 km), Godot lit son cube de radiance
-au **niveau le plus flou** (rugosité 1), une moyenne diffuse du ciel ; la nôtre prend l'horizon dans la direction. Le
-seuil ne se relève pas : **deux variantes** (`eau.gdshader` / `eau_demi.gdshader`, `sol` de même, corps commun dans
-`*.gdshaderinc`, `#define BRUME_PAR_PIXEL`), échangées par `mer.gd` quand le mode demi change ; la brume du moteur
-partout où elle peut servir.
-
-**P3 — fait.** Avec les variantes : **critère 1** — proche, rasante, référence, haute, plongeante, côtière **identiques au
-bit** (la brume du moteur, inchangée). **Critère 2** — pose `demi`, côté air : **7 niveaux** au plus de la brume de Godot
-(p99,9 = 3 ; S371 : 15, sur ce côté à 3 px de la ligne) ; côté eau : **identique au bit** à S371. **Critère 3** — sous
-l'eau (`sous_eau`, zénith) : identiques au bit. `--controle-ligne-eau` inchangé (0,078 px, 0 mal classé).
