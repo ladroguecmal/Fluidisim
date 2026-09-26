@@ -2,7 +2,7 @@
 //!
 //! Le banc de l'attribution : la scène de `Config::review`, un pas `PAS_US=` (33 333), `SECONDES=` (60), `CYCLES=` (32,
 //! Jacobi) ; `COMMUTATEURS=` éteint des termes du pas (`Step::switches` : 1 `u'·∇u'`, 2 `U·∇u'`, 4 `u'·∇U`, 8 le résidu du
-//! fond, 16 la bande de B) ; `EPONGE=0` retire l'éponge ; `PAQUET=0` le paquet. Chaque seconde : la plus grande hauteur
+//! fond, 16 la bande de B, 64 le terme de second ordre d'ADR-209, 32 rien) ; `EPONGE=0` retire l'éponge ; `PAQUET=0` le paquet. Chaque seconde : la plus grande hauteur
 //! publiée et sa colonne, la plus grande vitesse de δ et sa face, et la **part de l'échelle de la maille** dans les
 //! vitesses — `Σ(Δ²u)² / (16·Σu²)` selon chaque axe, 1 pour un damier pur, ≈ 0 pour un champ lisse. Lignes `A321_S391`.
 use crate::delta3d_step::{face_total, Step3, Upto};

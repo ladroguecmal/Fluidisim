@@ -91,7 +91,7 @@ avertissement.
 - [x] **P4** — le correctif dans la référence (cœur) : option `Volume3::enable_advection_correction`, éteinte par défaut
   (aucune empreinte du cœur ne bouge) ; essai de von Neumann : sans elle un mode de quatre mailles croît, avec elle non (vu
   échouer) ; [ADR-209](../docs/adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md).
-- [ ] **P5** — le même dans la production, **actif par défaut** ; critère 3 (deux minutes à 30 et 60 Hz, cuves avec la
+- [x] **P5** — le même dans la production, **actif par défaut** ; critère 3 (deux minutes à 30 et 60 Hz, cuves avec la
   référence corrigée, empreintes nouvelles expliquées) ; coût du pas et porte C remesurés (deux parts ≤ 2 ms).
 - [ ] **P6** — critère 4 ; preuve ; A321, file, feuille de route.
 - [ ] **P7** — rituel.
@@ -131,4 +131,12 @@ courant — **FTCS ×7,547 en 60 pas (×7,4 prédits), corrigé ×0,1339 (×0,13
 ×18 et ×10, les murs dominaient. Suite du cœur **681 réussis**, 0 échec, 18 ignorés, zéro avertissement — l'option éteinte ne
 change rien. [ADR-209](../docs/adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md) ; preuve ouverte,
 [A321-S391](../docs/validation/A321-S391.md).
+
+**P5 — critère 3 tenu.** `btd` actif par défaut dans `predict` (commutateur 64 : le retirer) ; les 14 `Volume3` des bancs de
+`delta3d_step.rs` allument l'option. **Durée** : deux minutes tenues à 33,3, 25 et 16,7 ms et en multigrille 6 ; **cinq
+minutes à 30 Hz** ; témoin sans le terme : 23 s. **Cuves** (Jacobi 64) : cas 3 2,6 / 1,9 / 2,4·10⁻⁸ m ; cas 2 7,1·10⁻⁷ ; cas 1
+2,4·10⁻⁸ / 3,2·10⁻⁷ (5 cm), 1,8 / 2,5·10⁻⁵ (10 cm). **Dispersion** du cas 3 inchangée à la sixième décimale (+2·10⁻⁵ point à
+48). **Empreintes** 60 pas `0xacd172ae…` / `0x6d20e53d…`, 600 pas `0x28f35d9d…` / `0x5c25dd80…` (au centre, 5·10⁻⁵ m à 1 s).
+**Porte C** : 1,910 / 1,927 ms q99 (S348 : 1,848 / 1,918), secteur 96 %. Afficheur 37 réussis, 2 ignorés (l'essai de la
+carte lancé : réussi), zéro avertissement.
 

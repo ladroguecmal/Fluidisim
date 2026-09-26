@@ -1567,6 +1567,8 @@ pub fn recevoir_prediction() -> Result<(), String> {
 
         let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
             .map_err(|e| format!("volume {e:?}"))?;
+        // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+        volume.enable_advection_correction();
         volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
         // Vitesses déterministes d'ordre 0,2 m/s ; le cœur ferme les murs, on relit ce qu'il garde.
         let champ = |n: usize, graine: f32| -> Vec<f32> {
@@ -1682,6 +1684,8 @@ pub fn recevoir_pression() -> Result<(), String> {
             let time = water_core::SimTime(micros);
             let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
                 .map_err(|e| format!("volume {e:?}"))?;
+            // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+            volume.enable_advection_correction();
             volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
             volume.set_velocity(&champ(nu, 0.1), &champ(nv, 1.7), &champ(total - nu - nv, 2.9))
                 .map_err(|e| format!("vitesses {e:?}"))?;
@@ -1767,6 +1771,8 @@ pub fn recevoir_correction() -> Result<(), String> {
             let time = water_core::SimTime(micros);
             let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
                 .map_err(|e| format!("volume {e:?}"))?;
+            // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+            volume.enable_advection_correction();
             volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
             volume.set_velocity(&champ(nu, 0.1), &champ(nv, 1.7), &champ(total - nu - nv, 2.9))
                 .map_err(|e| format!("vitesses {e:?}"))?;
@@ -1837,6 +1843,8 @@ pub fn recevoir_pas() -> Result<(), String> {
             let time = water_core::SimTime(micros);
             let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
                 .map_err(|e| format!("volume {e:?}"))?;
+            // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+            volume.enable_advection_correction();
             volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
             volume.set_velocity(&champ(nu, 0.1), &champ(nv, 1.7), &champ(total - nu - nv, 2.9))
                 .map_err(|e| format!("vitesses {e:?}"))?;
@@ -1957,6 +1965,8 @@ pub fn trajectoire() -> Result<(), String> {
         }
         let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
             .map_err(|e| format!("volume {e:?}"))?;
+        // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+        volume.enable_advection_correction();
         volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
         let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
             .map_err(|e| format!("grille {e:?}"))?;
@@ -2142,6 +2152,8 @@ pub fn cas2_production() -> Result<(), String> {
         }
         let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
             .map_err(|e| format!("volume {e:?}"))?;
+        // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+        volume.enable_advection_correction();
         volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
         let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
             .map_err(|e| format!("grille {e:?}"))?;
@@ -2267,6 +2279,8 @@ pub fn cas1_production() -> Result<(), String> {
                 let eta = vec![rest; nx];
                 let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g as f32)
                     .map_err(|e| format!("volume {e:?}"))?;
+                // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+                volume.enable_advection_correction();
                 volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
                 let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
                     .map_err(|e| format!("grille {e:?}"))?;
@@ -2725,6 +2739,8 @@ pub fn recevoir_diagnostics() -> Result<(), String> {
             let time = water_core::SimTime(micros);
             let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
                 .map_err(|e| format!("volume {e:?}"))?;
+            // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+            volume.enable_advection_correction();
             volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
             volume.set_velocity(&champ(nu, 0.1), &champ(nv, 1.7), &champ(total - nu - nv, 2.9))
                 .map_err(|e| format!("vitesses {e:?}"))?;
@@ -2876,8 +2892,12 @@ pub fn sensibilite_reference() -> Result<(), String> {
         .collect();
     let mut a = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
         .map_err(|e| format!("volume {e:?}"))?;
+    // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+    a.enable_advection_correction();
     let mut b = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
         .map_err(|e| format!("volume {e:?}"))?;
+    // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+    b.enable_advection_correction();
     a.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
     b.set_free_surface(&perturbe, rest).map_err(|e| format!("surface {e:?}"))?;
     let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
@@ -3175,10 +3195,14 @@ pub fn chainon_cuve() -> Result<(), String> {
             &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g,
         )
         .map_err(|e| format!("volume {e:?}"))?;
+        // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+        totale.enable_advection_correction();
         let mut couplee = Volume3::configure(
             &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g,
         )
         .map_err(|e| format!("volume {e:?}"))?;
+        // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+        couplee.enable_advection_correction();
         totale.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
         couplee.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
 
@@ -3261,6 +3285,8 @@ pub fn trajectoire_cuve() -> Result<(), String> {
                 &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g,
             )
             .map_err(|e| format!("volume {e:?}"))?;
+            // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+            volume.enable_advection_correction();
             volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
 
             let total = face_total(domain);
@@ -3387,6 +3413,8 @@ pub fn longue_cuve() -> Result<(), String> {
             &mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g,
         )
         .map_err(|e| format!("volume {e:?}"))?;
+        // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
+        volume.enable_advection_correction();
         volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
 
         let total = face_total(domain);

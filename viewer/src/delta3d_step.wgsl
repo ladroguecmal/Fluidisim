@@ -26,7 +26,8 @@ struct Step {
     sponge_y: f32,
     sponge_rate: f32,
     /// S391 — **commutateurs de banc** (A321), zéro en production : 1 éteint `u'·∇u'`, 2 `U·∇u'`, 4 `u'·∇U`, 8 le résidu
-    /// de quantité de mouvement du fond, 16 la bande de B dans le transport de la hauteur. Lus seulement par les
+    /// de quantité de mouvement du fond, 16 la bande de B dans le transport de la hauteur, 64 le terme de second ordre
+    /// d'ADR-209 (le schéma d'avant) ; 32 ne fait que prendre les pipelines de banc. Lus seulement par les
     /// pipelines de banc, compilés avec `BENCH_SWITCHES` = 1 : la production garde son code d'avant.
     switches: u32,
 };
@@ -202,9 +203,9 @@ fn extra_switched(f: u32, axis: u32, v0: f32, v1: f32, v2: f32, d0: f32, d1: f32
         + cr * residual;
 }
 
-/// S391 — **banc** (commutateur 64) : le terme qui manque à l'Euler explicite, `+ (dt²/2)·Σ V_a·V_b·∂_a∂_b u`, `V = U + u'`
-/// à la face. Il compense l'anti-diffusion du schéma centré (Lax-Wendroff à vitesse constante). Un terme dont un voisin
-/// sort de la grille de l'axe est omis.
+/// S391 (A321, ADR-209) — le terme qui manque à l'Euler explicite, `+ (dt²/2)·Σ V_a·V_b·∂_a∂_b u`, `V = U + u'` à la face.
+/// Il compense l'anti-diffusion du schéma centré (Lax-Wendroff à vitesse constante). Une direction dont un voisin sort de
+/// la grille de l'axe est omise. Même formule que `correct_advection3` du cœur.
 fn btd(axis: u32, p: vec3<u32>, f: u32, v0: f32, v1: f32, v2: f32) -> f32 {
     let end = dims(axis);
     var V = vec3<f32>(bg(f, 4u) + v0, bg(f, 5u) + v1, bg(f, 6u) + v2);
@@ -265,7 +266,9 @@ fn predict(@builtin(global_invocation_id) id: vec3<u32>) {
         let d2 = derivative(axis, 2u, p, end);
         var add = s.dt * extra(slot, axis, v0, v1, v2, d0, d1, d2);
         if (BENCH_SWITCHES != 0.0 && s.switches != 0u) { add = s.dt * extra_switched(slot, axis, v0, v1, v2, d0, d1, d2); }
-        if (switched(64u)) { value = value + btd(axis, p, slot, v0, v1, v2); }
+        // S391 (A321, ADR-209) : le terme de second ordre de l'advection, que l'Euler explicite omet. Le commutateur de banc
+        // 64 le retire : le schéma d'avant, pour les témoins.
+        if (!switched(64u)) { value = value + btd(axis, p, slot, v0, v1, v2); }
         let x = (f32(p.x) + select(0.5, 0.0, axis == 0u)) * s.dx;
         let y = (f32(p.y) + select(0.5, 0.0, axis == 1u)) * s.dx;
         value = (value - add) * sponge(x, y);
