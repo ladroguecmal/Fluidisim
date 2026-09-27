@@ -199,6 +199,186 @@ impl SplitClock {
     }
 }
 
+/// **S401 — l'horizon utile d'une prévision** ([ADR-013](../../docs/adr/ADR-013-prediction-activation-precalcul.md) §2) : un
+/// objet de capacité de manœuvre `a_max` déplace son point d'arrivée de `½·a_max·t²` en `t` secondes ; préparer n'a de sens
+/// que tant que cet écart tient dans le domaine qu'on allait construire, `R` : `t ≤ √(2R/a_max)`. Un objet sans manœuvre
+/// (`a_max` nul, balistique) n'a pas de borne propre : `cap`, en secondes, la donne.
+pub fn useful_horizon(r_domain: f32, a_max: f32, cap: f32) -> f32 {
+    if a_max > 0. {
+        (2. * r_domain / a_max).sqrt().min(cap)
+    } else {
+        cap
+    }
+}
+
+/// **S401 — un objet que le domaine suit**, et sa prévision : dans le plan de la fenêtre, en mètres depuis son coin.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Tracked {
+    /// Position, m.
+    pub position: [f32; 2],
+    /// Vitesse, m/s.
+    pub velocity: [f32; 2],
+    /// Capacité de manœuvre, m/s² (ADR-013 §2).
+    pub a_max: f32,
+    /// Horizon de la prévision, s — `useful_horizon` ; zéro : l'objet là où il est, sans prévision.
+    pub horizon: f32,
+    /// Rayon de l'objet, m.
+    pub radius: f32,
+}
+
+/// **S401 — le domaine qui suit la perturbation** (C8b ; [ADR-006](../../docs/adr/ADR-006-cellules-domaines-solveurs.md)
+/// §4, ADR-013 §2) : quels blocs d'une fenêtre sont du domaine.
+///
+/// Un bloc est **requis** s'il est à moins de `radius` blocs (Chebyshev, la dilatation de S396) d'un bloc **marqué** : un bloc
+/// dont une colonne s'écarte du repos de plus de `threshold`, ou que touche l'**enveloppe prévue** d'un objet —
+/// les disques de centre `p + V·t` et de rayon `r + ½·a_max·t²`, pour `t` de 0 à l'horizon : tout ce que l'objet peut
+/// atteindre s'il n'accélère pas au-delà de `a_max`. Un bloc que rien ne requiert depuis `release_after_us` sort du domaine
+/// (ADR-006 §4 : 0,25 s pour un bloc) — ce délai est aussi sa durée de vie minimale et l'anti-battement.
+///
+/// Capacité réservée auprès de l'hôte à la configuration (I-06) : la mise à jour n'alloue rien.
+pub struct Follow {
+    nbx: usize,
+    nby: usize,
+    /// Côté d'une maille, m.
+    dx: f32,
+    /// Rayon de couplage `r_c`, en blocs (ADR-006 §4).
+    pub radius: i32,
+    /// Seuil d'activité, `|η − repos|`, m.
+    pub threshold: f32,
+    /// Délai de libération d'un bloc que rien ne requiert, µs.
+    pub release_after_us: u64,
+    /// Par bloc, le dernier instant où il était requis ; `u64::MAX`, jamais.
+    required_at: Vec<u64>,
+    /// Par bloc : marqué, puis requis — tampon de la dilatation.
+    mark: Vec<u8>,
+    /// Par bloc : 1, du domaine.
+    set: Vec<u8>,
+}
+
+impl Follow {
+    /// Octets réservés pour une fenêtre de `nbx × nby` blocs : un instant et deux octets par bloc.
+    pub fn reserved_bytes(nbx: usize, nby: usize) -> Option<usize> {
+        nbx.checked_mul(nby)?.checked_mul(8 + 2)
+    }
+
+    /// Une fenêtre de `nx × ny` colonnes de côté `dx`, soit `⌈nx/BLOCK⌉ × ⌈ny/BLOCK⌉` blocs ; réservée **avant `seal()`**.
+    pub fn with_capacity(host: &mut HostServices, nx: usize, ny: usize, dx: f32, radius: i32, threshold: f32,
+        release_after_us: u64) -> Result<Self, BlockError> {
+        let (nbx, nby) = (nx.div_ceil(BLOCK), ny.div_ceil(BLOCK));
+        let bytes = Self::reserved_bytes(nbx, nby).ok_or(BlockError::Capacity)?;
+        host.alloc.alloc_persistent(bytes).map_err(|e| match e {
+            AllocError::Sealed | AllocError::OutOfArena => BlockError::Host,
+        })?;
+        let n = nbx * nby;
+        Ok(Follow { nbx, nby, dx, radius, threshold, release_after_us, required_at: vec![u64::MAX; n], mark: vec![0; n],
+            set: vec![0; n] })
+    }
+
+    /// Les dimensions de la fenêtre, en blocs.
+    pub fn blocks(&self) -> (usize, usize) {
+        (self.nbx, self.nby)
+    }
+
+    /// Le domaine courant, un octet par bloc (`bj·nbx + bi`) : 1, du domaine.
+    pub fn set(&self) -> &[u8] {
+        &self.set
+    }
+
+    /// **La mise à jour** à l'instant `now_us` : l'activité lue sur la surface `eta` (`nx` colonnes par rangée, repos
+    /// `rest`), l'enveloppe de chaque objet, la dilatation, puis la libération. Rend le domaine. Aucune allocation.
+    pub fn update(&mut self, now_us: u64, eta: &[f32], rest: f32, nx: usize, tracked: &[Tracked]) -> &[u8] {
+        self.mark.fill(0);
+        for (c, e) in eta.iter().enumerate() {
+            if (e - rest).abs() > self.threshold {
+                let (bi, bj) = ((c % nx) / BLOCK, (c / nx) / BLOCK);
+                self.mark[bj * self.nbx + bi] = 1;
+            }
+        }
+        for t in tracked {
+            self.mark_envelope(t);
+        }
+        self.dilate();
+        for b in 0..self.mark.len() {
+            if self.mark[b] != 0 {
+                self.required_at[b] = now_us;
+            }
+            let at = self.required_at[b];
+            self.set[b] = u8::from(at != u64::MAX && now_us.saturating_sub(at) < self.release_after_us);
+        }
+        &self.set
+    }
+
+    /// Le domaine en colonnes : `out[j·nx + i]` vaut 1 si la colonne est dans un bloc du domaine.
+    pub fn columns(&self, nx: usize, ny: usize, out: &mut [u8]) {
+        for j in 0..ny {
+            for i in 0..nx {
+                out[j * nx + i] = self.set[(j / BLOCK) * self.nbx + i / BLOCK];
+            }
+        }
+    }
+
+    /// Marque les blocs que touche l'enveloppe de `t` : sur chaque intervalle de temps, le disque qui contient la part de
+    /// l'enveloppe qu'il couvre — centre au milieu du trajet, rayon du bout de l'intervalle plus la moitié du trajet —, les
+    /// intervalles assez courts pour que le centre ne parcoure pas plus d'un demi-bloc.
+    fn mark_envelope(&mut self, t: &Tracked) {
+        let speed = (t.velocity[0] * t.velocity[0] + t.velocity[1] * t.velocity[1]).sqrt();
+        let side = BLOCK as f32 * self.dx;
+        let horizon = t.horizon.max(0.);
+        let steps = ((speed * horizon / (0.5 * side)).ceil() as usize).clamp(1, 1024);
+        let dt = horizon / steps as f32;
+        for k in 0..steps {
+            let mid = (k as f32 + 0.5) * dt;
+            let end = (k + 1) as f32 * dt;
+            let centre = [t.position[0] + t.velocity[0] * mid, t.position[1] + t.velocity[1] * mid];
+            let reach = t.radius + 0.5 * t.a_max.max(0.) * end * end + 0.5 * speed * dt;
+            self.mark_disk(centre, reach);
+        }
+    }
+
+    /// Marque les blocs dont le carré touche le disque.
+    fn mark_disk(&mut self, centre: [f32; 2], reach: f32) {
+        let side = BLOCK as f32 * self.dx;
+        // Les blocs que recouvre le carré englobant le disque, coupés à la fenêtre ; `None` s'il en est dehors.
+        let range = |c: f32, n: usize| -> Option<(usize, usize)> {
+            let (lo, hi) = (((c - reach) / side).floor(), ((c + reach) / side).floor());
+            if !(hi >= 0.) || lo >= n as f32 {
+                return None;
+            }
+            Some((lo.max(0.) as usize, (hi as usize).min(n - 1)))
+        };
+        let (Some((i0, i1)), Some((j0, j1))) = (range(centre[0], self.nbx), range(centre[1], self.nby)) else {
+            return;
+        };
+        for bj in j0..=j1 {
+            for bi in i0..=i1 {
+                let (x0, y0) = (bi as f32 * side, bj as f32 * side);
+                let dxp = (x0 - centre[0]).max(0.).max(centre[0] - (x0 + side));
+                let dyp = (y0 - centre[1]).max(0.).max(centre[1] - (y0 + side));
+                if dxp * dxp + dyp * dyp <= reach * reach {
+                    self.mark[bj * self.nbx + bi] = 1;
+                }
+            }
+        }
+    }
+
+    /// La dilatation de Chebyshev de `radius` blocs, séparable : en `x` vers `set` (tampon), puis en `y` vers `mark`.
+    fn dilate(&mut self) {
+        let (nbx, nby, r) = (self.nbx as isize, self.nby as isize, self.radius.max(0) as isize);
+        for bj in 0..nby {
+            for bi in 0..nbx {
+                let any = (bi - r..=bi + r).any(|x| x >= 0 && x < nbx && self.mark[(bj * nbx + x) as usize] != 0);
+                self.set[(bj * nbx + bi) as usize] = u8::from(any);
+            }
+        }
+        for bj in 0..nby {
+            for bi in 0..nbx {
+                let any = (bj - r..=bj + r).any(|y| y >= 0 && y < nby && self.set[(y * nbx + bi) as usize] != 0);
+                self.mark[(bj * nbx + bi) as usize] = u8::from(any);
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 #[path = "tests_domain_blocks.rs"]
 mod tests;

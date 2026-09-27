@@ -95,7 +95,7 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
   qui le voient, advection au bord de l'ensemble comme au bord de la boîte ; pas linéaire, couplé, gradué et `transplant`
   refusés ; critère 1.
 - [x] **P3** — les oracles (a), (b), (c), et vu échouer ; critère 2.
-- [ ] **P4** — le suivi et la prévision (`domain_blocks.rs`) : blocs actifs, dilatation, enveloppe d'ADR-013 §2, libération après
+- [x] **P4** — le suivi et la prévision (`domain_blocks.rs`) : blocs actifs, dilatation, enveloppe d'ADR-013 §2, libération après
   0,25 s ; sans allocation ; critère 5 (propriété de l'enveloppe).
 - [ ] **P5** — le banc `delta3d_epars` : une source mobile (dipôle de volume), droite puis qui tourne ; domaine entier contre
   domaine épars ; critères 3, 4 et 5 (banc).
@@ -123,3 +123,11 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
   passe d'un rectangle à l'autre par l'écart (repos cassé, essais (b) et de sortie), (a) tient — cul-de-sac, aucun débit — mais
   les itérations passent de 13 209 à 20 703 ; défaut 3, bord de l'advection lu à zéro au lieu de la face elle-même : (a)
   **1,36·10⁻⁴ m**, (b) **9,8·10⁻⁵ m** — au-dessus du critère : la règle du bord compte au dixième de millimètre en 5 s.
+- **P4** — `domain_blocks.rs` : `useful_horizon` (ADR-013 §2, `√(2R/a_max)`, borné ; sa table retrouvée : 1,41 / 3,65 / 4,90 s),
+  `Tracked` (position, vitesse, `a_max`, horizon, rayon), `Follow` (réservé avant `seal()` : un instant et deux octets par
+  bloc). Mise à jour : blocs **marqués** — une colonne à plus de 1 mm du repos, ou touchée par l'enveloppe (disques de centre
+  `p + V·t` et de rayon `r + ½·a_max·t²`, intervalles d'un demi-bloc de trajet, chaque disque élargi du demi-trajet) —, dilatés
+  de `r_c` = 2 blocs (Chebyshev, séparable), **requis** ; un bloc que rien ne requiert depuis 0,25 s sort. **Critère 5 tenu** :
+  300 manœuvres tirées (`a_max` 0,5 / 2 / 5 m/s², vitesse jusqu'à 10 m/s, horizon `√(2·4 m/a_max)` borné à 5 s, accélération
+  constante par 0,1 s), **1 764 931 blocs vérifiés, 100 %** dans le domaine prévu, marge de `r_c` comprise ; 114 blocs par objet
+  en moyenne (sur 1 024). **Vu échouer** sans le terme `½·a_max·t²` : essai 22, `t` = 1,76 s, bloc hors du domaine.

@@ -81,3 +81,111 @@ fn separation_waits_one_continuous_second_and_never_follows_a_flicker_s396() {
         assert_eq!(f.split_for_us(), 0);
     }
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// S401 — le domaine qui suit la perturbation, et sa prévision (C8b).
+
+fn follow(nx: usize, ny: usize) -> Follow {
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let f = Follow::with_capacity(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, nx, ny, 0.25, 2, 1e-3,
+        250_000)
+    .unwrap();
+    let (nbx, nby) = f.blocks();
+    assert_eq!(arena.stats.persistent_bytes, Follow::reserved_bytes(nbx, nby).unwrap());
+    f
+}
+
+#[test]
+fn the_useful_horizon_is_that_of_adr_013_s401() {
+    // ADR-013 §2 : avion de chasse (20 m/s², 20 m) 1,4 s ; en perte de contrôle (3 m/s²) 3,7 s ; vaisseau lourd (5 m/s², 60 m)
+    // 4,9 s ; balistique : la borne donnée.
+    assert!((useful_horizon(20., 20., 10.) - 1.4142).abs() < 1e-3);
+    assert!((useful_horizon(20., 3., 10.) - 3.6515).abs() < 1e-3);
+    assert!((useful_horizon(60., 5., 10.) - 4.8990).abs() < 1e-3);
+    assert_eq!(useful_horizon(20., 0., 2.5), 2.5);
+    assert_eq!(useful_horizon(20., 1., 2.5), 2.5);
+}
+
+#[test]
+fn activity_is_dilated_by_the_coupling_radius_then_released_after_a_quarter_second_s401() {
+    let (nx, ny) = (64, 64);
+    let mut f = follow(nx, ny);
+    let mut eta = vec![2f32; nx * ny];
+    eta[20 * nx + 20] = 2.0011; // bloc (2, 2), au-dessus du seuil de 1 mm
+    eta[50 * nx + 50] = 2.0009; // sous le seuil
+    let set = f.update(0, &eta, 2., nx, &[]).to_vec();
+    let (nbx, _) = f.blocks();
+    for bj in 0..8 {
+        for bi in 0..8 {
+            assert_eq!(set[bj * nbx + bi] != 0, bi <= 4 && bj <= 4, "bloc ({bi}, {bj})");
+        }
+    }
+    // Plus rien ne le requiert : il reste 0,25 s, pas davantage — la durée de vie minimale d'un bloc (ADR-006 §4).
+    let rest = vec![2f32; nx * ny];
+    assert_eq!(f.update(249_999, &rest, 2., nx, &[]).iter().filter(|b| **b != 0).count(), 25);
+    assert_eq!(f.update(250_000, &rest, 2., nx, &[]).iter().filter(|b| **b != 0).count(), 0);
+    // Les colonnes suivent leurs blocs.
+    f.update(300_000, &eta, 2., nx, &[]);
+    let mut cols = vec![0u8; nx * ny];
+    f.columns(nx, ny, &mut cols);
+    assert_eq!(cols.iter().filter(|c| **c != 0).count(), 40 * 40);
+    assert_eq!((cols[39 * nx + 39], cols[40 * nx + 39]), (1, 0));
+}
+
+/// Un générateur congruentiel, pour des tirages reproductibles.
+struct Lcg(u64);
+impl Lcg {
+    fn unit(&mut self) -> f64 {
+        self.0 = self.0.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        (self.0 >> 11) as f64 / (1u64 << 53) as f64
+    }
+}
+
+#[test]
+fn every_bounded_maneuver_stays_in_the_predicted_set_s401() {
+    // Critère 5 : pour des manœuvres tirées — accélération constante par dixième de seconde, `|a| ≤ a_max` —, la position à
+    // tout instant jusqu'à l'horizon est dans un bloc du domaine prévu, et ses voisins à `r_c` aussi : 100 %.
+    let (nx, ny) = (256, 256); // 64 m, 32 × 32 blocs
+    let side = 2.0f64;
+    let mut rng = Lcg(401);
+    let (mut checked, mut blocks_used) = (0usize, 0usize);
+    for trial in 0..300 {
+        let mut f = follow(nx, ny);
+        let a_max = [0.5f32, 2., 5.][trial % 3];
+        let speed = 10. * rng.unit();
+        let heading = std::f64::consts::TAU * rng.unit();
+        let p = [16. + 32. * rng.unit(), 16. + 32. * rng.unit()];
+        let v = [speed * heading.cos(), speed * heading.sin()];
+        let horizon = useful_horizon(4., a_max, 5.);
+        let t = Tracked { position: [p[0] as f32, p[1] as f32], velocity: [v[0] as f32, v[1] as f32], a_max, horizon,
+            radius: 0.5 };
+        let rest = vec![2f32; nx * ny];
+        let set = f.update(0, &rest, 2., nx, &[t]).to_vec();
+        blocks_used += set.iter().filter(|b| **b != 0).count();
+        let (nbx, nby) = f.blocks();
+        let (mut x, mut u, mut a) = (p, v, [0f64; 2]);
+        let dt = 0.01;
+        let mut time = 0.;
+        while time < horizon as f64 {
+            if (time / 0.1).fract() < 1e-9 || (time / 0.1).fract() > 1. - 1e-9 {
+                let (m, th) = (a_max as f64 * rng.unit().sqrt(), std::f64::consts::TAU * rng.unit());
+                a = [m * th.cos(), m * th.sin()];
+            }
+            for d in 0..2 {
+                x[d] += u[d] * dt + 0.5 * a[d] * dt * dt;
+                u[d] += a[d] * dt;
+            }
+            time += dt;
+            let (bi, bj) = ((x[0] / side).floor() as isize, (x[1] / side).floor() as isize);
+            for (di, dj) in (-2..=2).flat_map(|di| (-2..=2).map(move |dj| (di, dj))) {
+                let (qi, qj) = (bi + di, bj + dj);
+                if qi >= 0 && qj >= 0 && (qi as usize) < nbx && (qj as usize) < nby {
+                    assert_eq!(set[qj as usize * nbx + qi as usize], 1, "essai {trial}, t = {time:.2} s, bloc ({qi}, {qj})");
+                    checked += 1;
+                }
+            }
+        }
+    }
+    println!("S401 enveloppe : {checked} blocs vérifiés, 100 % dans le domaine prévu ; {:.1} blocs par objet en moyenne",
+        blocks_used as f64 / 300.);
+}
