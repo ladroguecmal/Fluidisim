@@ -94,7 +94,7 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
   au banc ; critère 1.
 - [>] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
 - [x] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.
-- [ ] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
+- [>] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
 - [ ] **P6** — suite entière, zéro avertissement.
 - [ ] **P7** — preuve (RACCORD-3D-S398 §8) ; A316 ; liste 4.16, file, feuille de route.
 - [ ] **P8** — rituel.
@@ -120,3 +120,8 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
   +1,76) ; courant ≤ 0,2 mm/s ; saut 0,113 ; période +0,59 contre +0,98 % (0,39 point) ; amortissement +0,43 contre +0,32 % (0,11) ;
   volume −1,2·10⁻⁹. **Critère 3 tenu.** Prédiction « dernière colonne ≥ 7,8 » : tenue aux deux dernières tranches, à 0,015 près
   à la première (7,785) ; « avant-dernière ≤ 8,2 » tenue (≤ 8,05).
+- **P5** (en cours) — le défaut : **la pose à la face** (`dx/16`) ; `TRIAL_POSE_QUARTER` (16) rend la pose de S399–S406,
+  `TRIAL_S400` l'implique. Essai neuf `_s407` (6 s, 16 s de calcul) : à la face, dernière colonne 7,842, avant-dernière 7,990,
+  absorbées / retirées / posées 1 833 / 104 / 1 936 ; à `dx/4`, 7,958 / 8,101 et **380 / 1 305** / 1 693 — en 6 s le dipôle ne
+  s'est pas encore formé, mais le mécanisme se lit : à un quart de maille, les retraits l'emportent. Lancés : 2,5 cm au défaut ;
+  à 5 cm, le défaut, `APIC3D_ESSAI=16` (S406) et `=1` (S400), pour le critère 1.

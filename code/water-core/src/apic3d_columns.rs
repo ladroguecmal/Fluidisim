@@ -16,7 +16,10 @@
 //!
 //! **S406** : la face de frontière bande | zone **appartient à la zone** — sa vitesse avant projection est advectée comme celle
 //! des autres faces de la zone, et non plus prise au seul transfert des particules de la bande ; une particule absorbée rend sa
-//! quantité de mouvement aux faces de la zone. Le courant de surface de S400 disparaît ; la densité au raccord reste manquée.
+//! quantité de mouvement aux faces de la zone. Le courant de surface de S400 disparaît.
+//!
+//! **S407** : une particule posée pour un solde reçu l'est **à la face**, au centre de la tranche d'eau entrée (`dx/16`), et non à
+//! `dx/4` : la densité au raccord est reçue, les particules traversent à nouveau la face au lieu d'être retirées avant.
 use super::*;
 
 /// La zone des colonnes : masque, surface, copies du pas précédent, débits. Réservée à la configuration (I-06).
@@ -136,9 +139,9 @@ impl Apic3 {
     /// **S406, essais seulement** — un solde dû retire dans la maille **la plus pleine** des deux dernières colonnes de la bande à
     /// cette profondeur, au lieu de la seule maille contre la face (témoin de densité).
     pub const TRIAL_SPREAD_REMOVAL: u8 = 8;
-    /// **S407, essais seulement** — la pose **à la face** : une particule posée pour un solde reçu l'est au centre de la tranche
-    /// d'eau entrée, `dx/16` de la face (une particule vaut une tranche de `dx/8` sur la face-maille), et non à `dx/4`.
-    pub const TRIAL_POSE_AT_FACE: u8 = 16;
+    /// **S407, essais seulement** — la pose de S399 à S406, à `dx/4` de la face dans la maille ; le défaut pose à la face, au
+    /// centre de la tranche entrée, `dx/16`. `TRIAL_S400` l'implique.
+    pub const TRIAL_POSE_QUARTER: u8 = 16;
 
     /// **S406, essais seulement** : les gestes de la frontière à éprouver, somme de `TRIAL_…` ; zéro, ceux de S406. Refus
     /// `Domain` sans zone ou hors des cinq bits.
@@ -638,9 +641,12 @@ impl Apic3 {
                             c.counts[1] += 1;
                             if axis == 0 { c.solde_u[face] += vp } else { c.solde_v[face] += vp }
                         }
-                        // (3) Poser ce qui est reçu : contre la face, au sous-réseau le plus libre de la maille. S407, essai : au
-                        // centre de la tranche entrée, `dx/16`, au lieu de `dx/4`.
-                        let depth = if self.columns.as_ref().unwrap().trials & Self::TRIAL_POSE_AT_FACE != 0 { dx / 16. } else { 0.25 * dx };
+                        // (3) Poser ce qui est reçu : **à la face** (S407), au sous-réseau le plus libre de la maille — au centre de
+                        // la tranche d'eau entrée, `dx/16` : une particule vaut une tranche de `dx/8` sur la face-maille. Posée à `dx/4`
+                        // (S399–S406), chaque volume entré l'était un quart de maille trop loin, et l'aller-retour de l'écoulement
+                        // l'amassait dans l'avant-dernière colonne : 7,6 particules par maille contre la face, 8,5 à côté.
+                        let quarter = self.columns.as_ref().unwrap().trials & (Self::TRIAL_POSE_QUARTER | Self::TRIAL_S400) != 0;
+                        let depth = if quarter { 0.25 * dx } else { dx / 16. };
                         while solde(self) >= vp {
                             if self.n == self.x.len() {
                                 self.columns.as_mut().unwrap().refused += 1;

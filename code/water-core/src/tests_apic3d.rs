@@ -432,3 +432,60 @@ fn the_boundary_face_belongs_to_the_zone_and_the_surface_current_goes_s406() {
     let (mut plain, _) = apic(4, 4, 4, 0.05, 64);
     assert_eq!(plain.set_columns_trials(1).unwrap_err(), Error::Domain);
 }
+
+#[test]
+fn a_particle_posed_at_the_face_keeps_the_density_at_the_boundary_s407() {
+    // S407 : la pose **à la face** (le défaut, `dx/16`) contre celle de S399–S406 (`TRIAL_POSE_QUARTER`, `dx/4`) : le ballottement
+    // de l'essai de S406, 6 s. Posées à un quart de maille, les particules sont retirées avant de traverser — les retraits
+    // l'emportent sur les absorptions — et la dernière colonne de la bande se creuse au profit de l'avant-dernière ; posées à la
+    // face, elles traversent (au banc de 30 s : 1 700 absorptions par tranche, retraits ≈ 0 ; densité 7,79 contre 7,59). Ici :
+    // absorptions plus de cinq fois les retraits, et la dernière colonne à 7,6 particules par maille au moins, au défaut ;
+    // retraits plus nombreux que les absorptions, à un quart de maille ; le volume au plancher dans les deux cas.
+    let run = |trials: u8| {
+        let (nx, ny, nz) = (20, 8, 20);
+        let (mut a, mut arena) = apic(nx, ny, nz, 0.05, nx * ny * nz * 8);
+        let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx >= 10) as u8).collect();
+        a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+        a.set_columns_trials(trials).unwrap();
+        let profil = |x: f32| 0.5 + 0.02 * (std::f32::consts::PI * x).cos();
+        let eta: Vec<f32> = (0..nx * ny).map(|c| profil(((c % nx) as f32 + 0.5) * 0.05)).collect();
+        a.set_columns_surface(&eta).unwrap();
+        a.seed(&|p| p[2] < profil(p[0]) && p[0] < 0.5).unwrap();
+        let v0 = a.total_volume();
+        let (mut t, mut next, mut density, mut samples) = (0u64, 100_000u64, [0f64; 2], 0usize);
+        while t < 6_000_000 {
+            let us = a.stable_step_us(20_000).min(6_000_000 - t);
+            a.step(us).unwrap();
+            t += us;
+            if t >= next {
+                next += 100_000;
+                // Particules par maille occupée, dernière (i = 9) et avant-dernière (i = 8) colonnes de la bande.
+                let mut occ = [vec![0u32; ny * nz], vec![0u32; ny * nz]];
+                for p in a.particles() {
+                    let i = (p[0] / 0.05) as usize;
+                    if i == 8 || i == 9 {
+                        let (j, k) = (((p[1] / 0.05) as usize).min(ny - 1), ((p[2] / 0.05) as usize).min(nz - 1));
+                        occ[9 - i][k * ny + j] += 1;
+                    }
+                }
+                for (m, o) in occ.iter().enumerate() {
+                    let full: Vec<u32> = o.iter().copied().filter(|n| *n > 0).collect();
+                    density[m] += full.iter().sum::<u32>() as f64 / full.len().max(1) as f64;
+                }
+                samples += 1;
+            }
+        }
+        let n = samples.max(1) as f64;
+        (density[0] / n, density[1] / n, a.columns_exchange_counts(), a.total_volume() / v0 - 1.)
+    };
+    let (last, second, counts, drift) = run(0);
+    let (last_q, second_q, counts_q, drift_q) = run(Apic3::TRIAL_POSE_QUARTER);
+    println!(
+        "S407 pose à la face : dernière colonne {last:.3}, avant-dernière {second:.3}, absorbées/retirées/posées {counts:?} ; \
+         à dx/4 : {last_q:.3}, {second_q:.3}, {counts_q:?} ; volume {drift:+.1e} / {drift_q:+.1e}"
+    );
+    assert!(counts[0] > 5 * counts[1], "{counts:?}");
+    assert!(counts_q[1] > counts_q[0], "{counts_q:?}");
+    assert!(last >= 7.6, "{last}");
+    assert!(drift.abs() <= 1e-6 && drift_q.abs() <= 1e-6);
+}
