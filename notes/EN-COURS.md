@@ -62,97 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S401 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Reprends le projet »*. Suite déclarée par S400 : dans le
-cloud, **C8b, le domaine épars** ; décision de S397 : *« terminer le solveur »*. Agent : Claude Opus 5.5, session cloud Claude
-Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, partie de `main` (S383) et
-avancée par avance rapide jusqu'à `claude/blissful-pasteur-m4j5rn` (S400, jeton libre) : aucun fork, une seule lignée. Suite de
-départ : 697 réussis, 18 ignorés, zéro avertissement.
+Session : S402 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S401 : **C8c**, les niveaux
+de `dx` et la famine. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni
+Godot. Branche `claude/eager-volta-lf0kw3` (S401), la plus avancée ; aucune autre copie.
 
-**Thèse.** Un domaine δ est un **ensemble de blocs** (ADR-006 §3 ; colonnes de 8 × 8, toute la profondeur, S396) dans une
-**fenêtre** du réseau commun. Une colonne hors de l'ensemble est **hors du domaine** : les faces qui la bordent sont des murs, ses
-mailles sortent de tous les opérateurs — par le chemin que la découpe prend déjà (`open3`, `solid3`, S328), et le bord de
-l'ensemble se comporte **comme le bord de la boîte** (l'advection y lit la face elle-même, pas un zéro). L'ensemble **suit la
-perturbation** : il contient les blocs à moins de `r_c` = 4 m d'un bloc actif (`|η − repos|` > 1 mm, S396) et de l'**enveloppe
-prévue** d'un objet — `p + V·t`, élargie de `½·a_max·t²`, jusqu'à l'horizon `√(2R/a_max)` (ADR-013 §2) ; un bloc que rien ne
-requiert depuis 0,25 s (ADR-006 §4) est rendu au repos, et ce qu'il portait est publié. **Ce que la session ne fait pas** : le
-stockage par blocs et son pool (la mémoire reste la fenêtre ; c'est la forme de la production, C8 au poste), les niveaux de `dx`
-(rang 4), le bord non réfléchissant d'une partie.
+**Trouvé en lisant le lot.** ADR-006 §3.2 dit qu'un changement de niveau est « une destruction/création de domaine, gratuite
+visuellement (ADR-005 §5) » ; I-12 et ADR-012 §4 renvoient au même §5. **Ce paragraphe n'existe plus dans le fichier** : le commit
+de S35 (`c2eb75ba`) a remplacé ADR-005 entier par la note qu'il devait lui ajouter (−202 lignes), celui de S39 (`16e48d60`) a fait de
+même avec la sienne. Aucun autre ADR ni aucune spécification n'a perdu de lignes (audit par `git log --numstat`). Le fichier juste
+est : le corps et les notes jusqu'à S16 (`c0df00f7`), puis la note B-S26 (S35), puis la note B-S27 (S39), qui dit rétracter « la note
+de B-S26 qui la précède immédiatement ».
 
-**Critères, écrits avant.** (1) Sans ensemble, la suite **au bit** ; ensemble plein, 50 pas mobiles au bit du pas sans ensemble.
-(2) Oracles indépendants — (a) un rectangle dans une fenêtre plus grande contre un domaine dense de ce rectangle, (b) deux
-rectangles disjoints contre deux domaines denses : écart de surface **≤ 10 µm** sur 5 s pour une bosse de 5 cm (prédiction : à
-l'arrondi du solveur, ≤ 1 µm) ; (c) un L : volume conservé au plancher de la cuve dense ; **vu échouer** avec une face du bord
-laissée ouverte. (3) Une source mobile traverse un bassin ; le domaine épars qui la suit, contre le domaine entier : écart de
-surface **≤ 3 mm** partout et à tout instant (tolérance d'image, I-12 ; prédiction : ≤ 1 mm, le seuil d'activité) ; la source
-toujours dans l'ensemble. (4) Publiés : part des mailles de l'ensemble, volume rendu au repos, itérations, durée d'un pas. (5) La
-prévision : pour des manœuvres tirées avec `|a|` ≤ `a_max`, la position à `t` ≤ `H` reste dans l'ensemble prévu, **100 %** ; au
-banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
+**Thèse (C8c, première part).** ADR-005 §5 fait détruire l'ancien domaine (transduction, puis amortissement sur τ ≈ 0,5 à 1,5 s) et
+naître le nouveau à δ = 0 : **tout ce que le domaine contient est perdu**, et seul ce qui sort par son bord passe à W. Un
+**transfert d'état** d'un niveau à l'autre — surface par recouvrement, reconstruction linéaire conservative, volume exact ; vitesses
+interpolées ; pression remise à zéro — garde ce que le niveau d'arrivée sait porter. Les deux se mesurent sur les mêmes cas, contre
+le domaine fin tenu tout du long : le rang 4 d'ADR-012 (25 → 50 cm), puis le retour.
+
+**Critères, écrits avant.** **A1** — ADR-005 : chaque part restaurée identique au bit à sa source, dans l'ordre ; une note datée dit
+ce qui s'est passé. **A2** — un contrôle de l'outil : chaque ADR commence par son titre `# ADR-NNN` ; **vu échouer** sur les versions
+de S35 et S39, tenu sur tous les ADR restaurés. **T1** — un état uniforme traverse 25 → 50 → 25 cm inchangé (au bit ou à un ulp).
+**T2** — volume de perturbation conservé à l'arrondi f64. **T3** — aller-retour d'une surface sinusoïdale de 8 m (16 mailles
+grossières) : erreur **≤ 1 %** de l'amplitude (prédiction : 0,3 %, calculée en 1D) ; **vu échouer** sans pente (prédiction : ≈ 10 %).
+**T4** — refus : fenêtre, repos, densité, gravité différents ; ensemble épars ou découpe. **B1** — banc, bosse de 5 cm et σ = 1 m :
+le saut d'image au passage 25 → 50 cm **≤ 3 mm** (tolérance d'image, I-12 ; prédiction ≈ 1 mm). **B2** — au retour 50 → 25 cm, le
+saut **≤ 3 mm** de l'image grossière d'avant. **B3** — publiés : l'écart pendant la période grossière (le prix du rang 4, « visible
+de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, écart de l'ordre de l'amplitude) ; la source mobile de S401.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'ensemble épars dans `Volume3` (`delta3d_sparse.rs`) : réserve du masque, `set_active_columns`, `open3` et `solid3`
-  qui le voient, advection au bord de l'ensemble comme au bord de la boîte ; pas linéaire, couplé, gradué et `transplant`
-  refusés ; critère 1.
-- [x] **P3** — les oracles (a), (b), (c), et vu échouer ; critère 2.
-- [x] **P4** — le suivi et la prévision (`domain_blocks.rs`) : blocs actifs, dilatation, enveloppe d'ADR-013 §2, libération après
-  0,25 s ; sans allocation ; critère 5 (propriété de l'enveloppe).
-- [x] **P5** — le banc `delta3d_epars` : une source mobile (dipôle de volume), droite puis qui tourne ; domaine entier contre
-  domaine épars ; critères 3, 4 et 5 (banc).
-- [x] **P6** — les chiffres de réception en essais ; suite entière, zéro avertissement ; critère 6.
-- [x] **P7** — preuve `DOMAINE-EPARS-S401` ; liste (4.3, 4.9, 9.2), file, feuille de route, index.
-- [x] **P8** — rituel.
+- [ ] **P2** — ADR-005 restauré, note datée ; critère A1.
+- [ ] **P3** — le contrôle dans `etat_projet.py` (vu échouer sur S35 et S39) ; protection de METHODE, leçon ; critère A2.
+- [ ] **P4** — `delta3d_levels.rs` : le transfert d'état entre niveaux ; essais T1 à T4, vu échouer sans pente.
+- [ ] **P5** — le banc `delta3d_niveaux` : bosse et source mobile, 25 → 50 cm à 2 s, retour à 5 s, contre le domaine fin ; ADR-005 §5
+  (fondu de 0,5 s, naissance à zéro) ; critères B1 à B3.
+- [ ] **P6** — suite entière, zéro avertissement.
+- [ ] **P7** — preuve `NIVEAUX-S402` ; un ADR si la mesure tranche le mécanisme du rang 4 ; liste (4.5, 9.9), file, feuille de route,
+  index.
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
 
-- **P2** — `delta3d_sparse.rs` : `Sparse3` (deux masques de colonnes, réservés avant `seal()`), `enable_sparse`,
-  `set_active_columns`, `set_active_blocks` (blocs du réseau commun coupés à la fenêtre), `SparseChange` publié (colonnes
-  entrées et sorties, volume et hauteur rendus au repos, plus grande vitesse effacée). `open3` nul sur une face qui touche une
-  colonne hors de l'ensemble ; `solid3` vrai dans ces colonnes — tout le pas mobile suit, multigrille comprise (`fine_kind3`,
-  `coarsen3`). **Le bord de l'ensemble comme celui de la boîte** : une face qui ne touche aucune colonne de l'ensemble est
-  « hors de la grille » (`sparse_outside3`) — l'advection y lit la face elle-même, le terme d'ADR-209 y omet la direction, et à
-  un coin rentrant le terme croisé dont une diagonale est dehors. Refus (`Domain`) : pas linéaire, pas couplé, colonne graduée,
-  `transplant`, surface écartée du repos ou source hors de l'ensemble ; `shift_rest` emmène les colonnes dehors. Critère 1 :
-  ensemble plein, 50 pas **au bit**, itérations égales, avec et sans le terme d'ADR-209.
-- **P3** — oracles (`tests_delta3d_sparse.rs`), bosse de 5 cm, 5 s à 20 ms : (a) rectangle 16 × 8 dans une fenêtre 32 × 24
-  contre le dense 16 × 8 : **2,384·10⁻⁷ m** (un ulp de f32 à 2 m), Jacobi (13 203 itérations contre 13 209) et multigrille
-  (1 539 contre 1 538) ; (b) deux rectangles 16 × 16 séparés de 8 colonnes, contre deux denses : **2,384·10⁻⁷ m**, l'écart au
-  repos au bit ; (c) un L de blocs : dérive du volume **3,8·10⁻¹⁰ m³** (cuve dense 24 × 24 : 2,3·10⁻¹⁰). **Vu échouer** —
-  défaut 1, faces `x` du bord laissées ouvertes : **aucun effet** (la colonne dehors est aussi solide : pression, correction et
-  extrapolation l'ignorent — le mécanisme est doublé) ; défaut 2, faces `x` ouvertes **et** colonnes dehors non solides : l'eau
-  passe d'un rectangle à l'autre par l'écart (repos cassé, essais (b) et de sortie), (a) tient — cul-de-sac, aucun débit — mais
-  les itérations passent de 13 209 à 20 703 ; défaut 3, bord de l'advection lu à zéro au lieu de la face elle-même : (a)
-  **1,36·10⁻⁴ m**, (b) **9,8·10⁻⁵ m** — au-dessus du critère : la règle du bord compte au dixième de millimètre en 5 s.
-- **P4** — `domain_blocks.rs` : `useful_horizon` (ADR-013 §2, `√(2R/a_max)`, borné ; sa table retrouvée : 1,41 / 3,65 / 4,90 s),
-  `Tracked` (position, vitesse, `a_max`, horizon, rayon), `Follow` (réservé avant `seal()` : un instant et deux octets par
-  bloc). Mise à jour : blocs **marqués** — une colonne à plus de 1 mm du repos, ou touchée par l'enveloppe (disques de centre
-  `p + V·t` et de rayon `r + ½·a_max·t²`, intervalles d'un demi-bloc de trajet, chaque disque élargi du demi-trajet) —, dilatés
-  de `r_c` = 2 blocs (Chebyshev, séparable), **requis** ; un bloc que rien ne requiert depuis 0,25 s sort. **Critère 5 tenu** :
-  300 manœuvres tirées (`a_max` 0,5 / 2 / 5 m/s², vitesse jusqu'à 10 m/s, horizon `√(2·4 m/a_max)` borné à 5 s, accélération
-  constante par 0,1 s), **1 764 931 blocs vérifiés, 100 %** dans le domaine prévu, marge de `r_c` comprise ; 114 blocs par objet
-  en moyenne (sur 1 024). **Vu échouer** sans le terme `½·a_max·t²` : essai 22, `t` = 1,76 s, bloc hors du domaine.
-- **P5** — `examples/delta3d_epars.rs` : bassin 40 × 20 m à 25 cm, 2 m d'eau, 20 ms, multigrille ; source = dipôle de volume
-  (0,05 m³/s, ±0,5 m, gaussiennes σ 0,5 m tronquées à 1,5 m, débit monté en 1 s) ; domaine entier contre domaine épars
-  (`Follow` : 4 m, 1 mm, 0,25 s ; enveloppe `a_max`, horizon `√(2·4/a_max)` ≤ 5 s). Quatre calculs en parallèle (durées
-  indicatives). Résultats (écart max partout ; amplitude ; part des mailles moy / max ; rendu au repos ; pas entier / épars) :
-  droite 2 m/s 10 s, prévision 2,83 s : **0,26 mm** ; 24,2 mm ; 0,713 / 0,880 ; −3,1·10⁻³ m³, 0,23 mm ; 387 / 409 ms. Sans
-  prévision : **0,56 mm** ; 0,416 / 0,635 ; 389 / 261 ms. Virage (0,5 m/s², `a_max` 1) 8 s : **0,63 mm** ; 24,7 mm ; 0,533 /
-  0,605 ; 0,72 mm rendus. Rapide 10 m/s 3 s, cadence 0,5 s, prévision 2 s : **0,66 mm** ; **2,6 mm** d'amplitude (25 %) ;
-  0,675 / 0,870 ; 601 / 626 ms. **Témoin sans prévision : la source ne sort pas** — 0,66 mm aussi, 0,257 / 0,300, 488 / 218
-  ms : à 10 m/s et 0,5 s, la marge de la dilatation (≥ 6 m devant le centre) suffit ; l'enveloppe coûte 2,6 fois les mailles
-  sans rien changer à l'écart. **À 1 s de cadence** (`EPARS_CADENCE_S=1`) : **sans prévision, la source sort de l'ensemble à
-  0,62 s** (vu échouer) ; avec, elle reste dedans 3 s — **0,63 mm**, 0,713 / 0,830, 466 / 486 ms. Critère 3 tenu dans tous les
-  cas où la source reste dedans ; critère 5 au banc tenu (virage ; rapide à 1 s). **Constat** : l'enveloppe ne sert que si
-  `V·cadence` dépasse la marge de la dilatation (≈ 6 m) ; sinon elle coûte des mailles calculées sans gain — ADR-013 §2 la
-  range au palier T2 (blocs réservés, δ à 0), pas au calcul (T1) : à séparer (file). Petit essai (ignoré, 32 × 8 m, 3 s,
-  balistique, horizon 1 s) : 4,2·10⁻⁵ m, 20 mm, part 0,47.
-- **P6** — les chiffres de réception sont des assertions : critère 1 (ensemble plein au bit), oracles (a), (b), (c) (10 µm, volume
-  au plancher dense), enveloppe (100 %), refus et comptes de sortie ; le suivi en petit (≤ 3 mm, part < 0,9) **ignoré par
-  défaut**, 43 s. **Suite : 707 réussis, 19 ignorés, zéro avertissement** (697 + 10, 18 + 1). `cargo clippy` : une erreur neuve
-  corrigée (`1,4142` pris pour √2 : la constante `SQRT_2`, exacte ici) ; reste une erreur antérieure (`tests_delta_coupling.rs`,
-  `2./2.`) et les avertissements du crate — clippy n'est pas un portail du dépôt.
-- **P7** — preuve `docs/validation/DOMAINE-EPARS-S401.md` (Reproduire au commit `963b1484`) ; liste : 4.3 et 4.9 complétés,
-  **9.2 passe à partiel**, décompte 3 / 71 / 46 (le tableau disait 70 / 47 ; REPRISE §4 et la feuille de route disaient encore
-  68 / 49, sans 4.16 ni 4.9 : corrigés) ; file : la ligne de la campagne resserrée (85 mots), une ligne neuve « le domaine épars —
-  ce que S401 laisse » (seuil relatif, réservation T2, pas couplé et corps sous l'ensemble) ; feuille de route §3 ter ; index
-  (carte B, liste des preuves) ; notes datées d'ADR-006 (quatre lectures) et d'ADR-013 (l'enveloppe mesurée, T2).
