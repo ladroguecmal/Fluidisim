@@ -242,8 +242,9 @@ impl Apic3 {
     }
 
     /// **S413 — pose le fond de la bande** (C6c-1, [ADR-212](../../docs/adr/ADR-212-la-bande-etroite-en-profondeur.md)) : pour
-    /// chaque colonne de particules, la hauteur `floor[c]` sous laquelle l'eau passe à la grille ; ignorée, et remise à zéro, pour
-    /// une colonne de la zone. À poser **avant d'ensemencer au-dessus** : l'eau sous le fond y est comptée pleine. Refus `Domain`
+    /// chaque colonne de particules, la hauteur `floor[c]` sous laquelle l'eau passe à la grille, **arrondie à une face de
+    /// maille** — la part eulérienne est faite de mailles pleines, un contenant rigide dont les débits chargent le solde vertical ;
+    /// ignorée, et remise à zéro, pour une colonne de la zone. À poser **avant d'ensemencer au-dessus** : l'eau sous le fond y est comptée pleine. Refus `Domain`
     /// sans zone ou si une particule est sous le fond de sa colonne ; `Shape` (longueur) ; `NotFinite` (valeur non finie, négative
     /// ou au-dessus du domaine). Rien n'est changé en cas de refus.
     pub fn set_band_floor(&mut self, floor: &[f32]) -> Result<(), Error> {
@@ -256,15 +257,16 @@ impl Apic3 {
             return Err(Error::NotFinite);
         }
         let f = |x: f32, n: usize| ((x / dx).max(0.) as usize).min(n - 1);
+        let snap = |h: f32| (h / dx).round() * dx;
         for p in &self.x[..self.n] {
             let col = f(p[1], ny) * nx + f(p[0], nx);
-            if c.mask[col] == 0 && p[2] < floor[col] {
+            if c.mask[col] == 0 && p[2] < snap(floor[col]) {
                 return Err(Error::Domain);
             }
         }
         let c = self.columns.as_mut().unwrap();
         for col in 0..nx * ny {
-            c.floor[col] = if c.mask[col] == 0 { floor[col] } else { 0. };
+            c.floor[col] = if c.mask[col] == 0 { snap(floor[col]) } else { 0. };
         }
         c.floor_roundoff.fill(0.);
         c.solde_w.fill(0.);
@@ -487,14 +489,61 @@ impl Apic3 {
                         if boundary {
                             // Vers la zone s'il va de la bande (côté bas) à la colonne (côté haut).
                             let into_zone = if high { volume } else { -volume };
-                            let solde = if axis == 0 { &mut c.solde_u[face] } else { &mut c.solde_v[face] };
-                            *solde -= into_zone;
+                            // S413 : une rangée sous le fond de la bande va de contenant à contenant : le solde vertical de la
+                            // colonne de la bande, qui a donné `into_zone`, le lui doit — et non la frontière latérale.
+                            let band_col = if low { j * nx + i } else { y * nx + x };
+                            if c.floors && (k as f32 + 0.5) * dx < c.floor[band_col] {
+                                c.solde_w[band_col] -= into_zone;
+                            } else {
+                                let solde = if axis == 0 { &mut c.solde_u[face] } else { &mut c.solde_v[face] };
+                                *solde -= into_zone;
+                            }
                         }
                     }
                     if axis == 0 {
                         c.flux_x[j * (nx + 1) + i] = q;
                     } else {
                         c.flux_y[j * nx + i] = q;
+                    }
+                }
+            }
+        }
+        // S413 : entre deux colonnes de la bande, une rangée sous le fond des deux va de contenant à contenant (les deux soldes
+        // verticaux) ; sous le fond d'une seule, d'un contenant aux particules de l'autre (son solde vertical et le solde latéral de
+        // la face-maille, que la bande règle). Mailles pleines : la face-maille entière.
+        if c.floors {
+            for j in 0..ny {
+                for i in 0..nx {
+                    for axis in 0..2 {
+                        if (axis == 0 && i == 0) || (axis == 1 && j == 0) {
+                            continue;
+                        }
+                        let (x, y) = if axis == 0 { (i - 1, j) } else { (i, j - 1) };
+                        let (lo, hi) = (y * nx + x, j * nx + i);
+                        if c.mask[lo] != 0 || c.mask[hi] != 0 || (c.floor[lo] == 0. && c.floor[hi] == 0.) {
+                            continue;
+                        }
+                        for k in 0..nz {
+                            let z = (k as f32 + 0.5) * dx;
+                            let (gl, gh) = (z < c.floor[lo], z < c.floor[hi]);
+                            if !gl && !gh {
+                                break;
+                            }
+                            let face = if axis == 0 { (k * ny + j) * (nx + 1) + i } else { (k * (ny + 1) + j) * nx + i };
+                            let vel = if axis == 0 { u[face] } else { v[face] };
+                            // Volume vers les `+`, m³.
+                            let volume = (vel * dx) as f64 * dx as f64 * dt as f64;
+                            if gl {
+                                c.solde_w[lo] -= volume;
+                            }
+                            if gh {
+                                c.solde_w[hi] += volume;
+                            }
+                            if gl != gh {
+                                let solde = if axis == 0 { &mut c.solde_u[face] } else { &mut c.solde_v[face] };
+                                *solde += if gl { volume } else { -volume };
+                            }
+                        }
                     }
                 }
             }

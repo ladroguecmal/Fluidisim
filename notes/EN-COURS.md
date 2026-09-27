@@ -88,8 +88,8 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - [x] **P2** — `β` : état (`floor`, reste, `solde_w`), `set_band_floor`, volume total, finitude ; essai de refus et de volume ; critère 1 (essais).
 - [x] **P3** — étiquettes et reconstruction : mailles sous `β` à la grille, particules virtuelles jusqu'à `β`.
 - [x] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
-- [>] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
-- [ ] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
+- [x] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
+- [>] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
 - [ ] **P7** — essais du repos et du volume ; critère 2.
 - [ ] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
 - [ ] **P9** — suite entière ; critère 4.
@@ -108,3 +108,9 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - **P4** — `columns_advect` : une face-maille `u`, `v` est à la grille si l'une de ses deux mailles l'est (la zone, ou sous le
   fond) — la règle de S406 maille par maille ; une face `w` si la maille au-dessous est sous le fond (la face au-dessus de la
   dernière comprise). Sans fond, au bit : 25 essais d'APIC 3D tenus.
+- **P5** — **choix d'implémentation** (à noter dans ADR-212) : le fond **arrondi à une face de maille** (`set_band_floor`) ; la
+  part eulérienne est un contenant de mailles pleines, **fixe** en C6c-1 ; tout débit qui y entre ou en sort charge le **solde
+  vertical** de sa colonne — pas de flux vertical à estimer, pas de maille mixte ; la masse reste au bit (chaque volume compté des
+  deux côtés). `columns_transport` : une rangée d'une frontière zone | bande sous le fond de la bande va au solde vertical (et non
+  au solde latéral) ; entre deux colonnes de la bande, une rangée sous les deux fonds, aux deux soldes verticaux ; sous un seul,
+  au solde vertical du contenant et au solde latéral de la face-maille (réglé côté particules). 25 essais tenus, au bit.
