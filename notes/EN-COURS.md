@@ -116,3 +116,9 @@ ne rien rendre défaut, et le dire.
   mais niveau, écart à APIC seul, +0,63/+1,34/**+2,07 mm** (±2 : juste au-delà) et densité **7,577/7,579**/7,812 (≥ 7,6 : juste
   en deçà), rangée du haut 6,56. Attribution : **la vitesse de la face de frontière prise au transfert de la bande porte le
   courant**. Lancés : 8 + (b), 8 + (c), 8 + (b) + (c) à 5 cm ; 8 à 2,5 cm (≈ 12 min).
+- **P3** (suite) — 5 cm, écarts à APIC seul : **8 + (b)** (10) : courant −0,4 au plus, niveau +0,62/+1,25/+1,85, densité
+  7,589/7,623/7,728 ; **8 + (c)** (12) : courant −0,6 au plus, niveau +0,62/+1,22/**+1,76**, densité **7,593**/7,617/7,685,
+  période +0,70 %, amortissement +0,52 % ; 8 + (b) + (c) (14) : niveau +1,85, densité 7,586. **Le courant est porté par la face de
+  frontière** (toute combinaison avec 8 l'efface) ; (c) rend la migration au critère ; la densité de la dernière colonne reste à
+  7,59 (≥ 7,6) — l'échange retire toujours dans la maille contre la face, celle que la mesure compte. Lancés à 2,5 cm : 8, 12,
+  APIC seul.
