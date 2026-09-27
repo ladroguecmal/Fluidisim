@@ -91,3 +91,14 @@ ne rien rendre défaut qui ne soit éprouvé.
 - Le coût de la projection ne baisse pas : toutes les mailles restent dans une seule projection ; ce sont les **particules** qui
   diminuent (÷ 4 à 10, estimé, [TRUCAGES-TEMPS-REEL-S411](../registres/TRUCAGES-TEMPS-REEL-S411.md) §3). Les mailles hautes sous
   la bande ([ADR-208](ADR-208-la-colonne-graduee.md)) sont une étape ultérieure, non décidée ici.
+
+## Note datée du 2026-09-27 (S413) — l'implémentation de D2 et D3
+
+D2 disait « `β` se transporte par les débits mouillés jusqu'à `β`, en `f64` » et D3 « le volume qui traverse [la face à `β`]
+charge un solde vertical ». **Construit autrement, plus simple, à masse toujours exacte** : `β` est **arrondi à une face de
+maille** (`set_band_floor`) et **ne bouge pas** entre deux placements ; la part eulérienne est un **contenant de mailles pleines**
+— tout débit qui y entre ou en sort (d'une part eulérienne voisine, d'une colonne de la zone, ou des particules d'à côté) charge
+le **solde vertical** de sa colonne, réglé par des particules posées ou retirées juste au-dessus de `β`. Aucun flux vertical n'est
+estimé, aucune maille n'est mixte ; chaque volume est compté des deux côtés. Pour un écoulement à divergence nulle, c'est ce que
+ferait la vitesse verticale à la face : le solde en est la version exacte. C6c-2 déplacera `β` d'une maille entière à la fois.
+[Preuve](../validation/BANDE-ETROITE-S413.md).

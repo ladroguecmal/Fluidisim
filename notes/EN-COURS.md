@@ -91,8 +91,8 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - [x] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
 - [x] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
 - [x] **P7** — essais du repos et du volume ; critère 2.
-- [>] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
-- [ ] **P9** — suite entière ; critère 4.
+- [x] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
+- [>] **P9** — suite entière ; critère 4.
 - [ ] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
 - [ ] **P11** — rituel.
 
@@ -123,3 +123,14 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
   (la bande pleine en aurait 12 800 : **÷ 2,5**). Mi-zone mi-bande : **2,1·10⁻⁵ m/s**, volume 1,3·10⁻¹⁵, densité 8,000. L'onde de
   S399 (2 cm) sur la bande étroite : volume **−4,4·10⁻¹⁶**, densité **7,733** (contre le fond 8,000), 2 736 → 2 456 particules
   (l'eau passée aux colonnes), vitesse max 0,18 m/s.
+- **P8** — `apic3d_raccord` : `APIC3D_FOND=<k>` (fond à `k` mailles sous le creux, arrondi ; `seul` + fond = cuve toute en bande
+  à fond), niveau et moment comptent l'eau sous le fond ; le saut ne lit `η` que d'une colonne de la zone (instrument : 10 mailles
+  lues sans colonnes). **Critère 3 tenu** (30 s ; écart de période au mode exact / amortissement par période ; APIC seul en
+  témoin) — 5 cm : seul +0,98 / +0,32 %, 12 800 particules, 105 s ; raccord plein +0,61 / +0,45, 6 571, 68 s ; **raccord à fond
+  (0,30 m) +0,75 / +0,32**, **2 707**, 42 s, densité 7,700 / 7,983 / 8,265, saut 0,114, niveau −1,0 / −0,29 / −0,23 mm, volume
+  −1,6·10⁻¹⁵ ; seul à fond +1,12 / +0,79, 5 089, 60 s. 2,5 cm : seul +0,36 / +0,08, 102 400, 931 s ; raccord plein +0,34 / +0,14
+  (S408 au caractère près), 51 584, 658 s ; **raccord à fond (0,375 m) +0,34 / +0,20**, **13 303**, 394 s, densité 7,814 / 7,948
+  / 8,137, saut 0,158, niveau −0,71 / −0,67 / −1,16 mm ; seul à fond +0,42 / +0,30, 25 411, 485 s, densité **7,974 / 7,998 /
+  7,136** (APIC seul : 7,619 — la dérive de densité d'APIC, plus forte au milieu de la cuve à fond ; à surveiller). **Critère 1
+  tenu** : B10 (défauts) pincement 1,4797, part 0,225, 29 120, 1,09·10⁻¹² — S408 ; la vague (défauts) — S410 ; le raccord plein
+  aux deux mailles — S408. Temps en fournée de cinq, indicatifs. ADR-212 : note datée (le fond sur une face, contenant fixe).

@@ -24,6 +24,10 @@
 //! `APIC3D_ESSAI=<bits>` éprouve d'autres gestes : `Apic3::TRIAL_S400` = 1 (la frontière de S400), `TRIAL_FACE_BOTH_SIDES` = 2,
 //! `TRIAL_MEAN_HEIGHT` = 4, `TRIAL_SPREAD_REMOVAL` = 8 ; S407 : la pose à la face est le défaut, `TRIAL_POSE_QUARTER` = 16 rend
 //! celle de S399–S406 (à `dx/4`) — `APIC3D_ESSAI=16` rend S406, `APIC3D_ESSAI=1` S400.
+//!
+//! **S413 — la bande étroite** (C6c-1, ADR-212) : `APIC3D_FOND=<k>` pose le fond de la bande à `k` mailles sous le creux du
+//! mode (`H − A − k·dx`, arrondi à une face de maille) ; sous lui, l'eau est à la grille. Avec `seul`, la cuve entière est une bande
+//! à fond, sans colonnes. Le niveau, le moment et le volume comptent l'eau sous le fond et le solde vertical.
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
@@ -66,6 +70,13 @@ fn main() {
     let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
     let mut a = Apic3::configure(&mut hote, Domain3 { nx, ny, nz, dx: dx as f32 }, 1000., G as f32, nx * ny * nz * 8)
         .expect("configuration");
+    // S413 : le fond de la bande, en mailles sous le creux ; `seul` avec un fond devient une bande à fond sans colonnes.
+    let fond_k: Option<f64> = std::env::var("APIC3D_FOND").ok().and_then(|v| v.parse().ok());
+    let fond = fond_k.map_or(0., |k| ((H - A - k * dx) / dx).round() * dx);
+    let seul_a_fond = !raccord && fond_k.is_some();
+    if seul_a_fond {
+        a.enable_columns(&mut hote, &vec![0u8; nx * ny]).expect("zone");
+    }
     if raccord {
         let masque: Vec<u8> = (0..nx * ny).map(|c| (colonnes || c % nx >= ib) as u8).collect();
         a.enable_columns(&mut hote, &masque).expect("colonnes");
@@ -76,7 +87,10 @@ fn main() {
             a.set_columns_trials(bits).expect("essai");
         }
     }
-    a.seed(&|p| !colonnes && (p[2] as f64) < profil(p[0] as f64) && (!raccord || (p[0] as f64) < ib as f64 * dx)).expect("ensemencement");
+    if fond_k.is_some() {
+        a.set_band_floor(&vec![fond as f32; nx * ny]).expect("fond");
+    }
+    a.seed(&|p| !colonnes && (p[2] as f64) >= fond && (p[2] as f64) < profil(p[0] as f64) && (!raccord || (p[0] as f64) < ib as f64 * dx)).expect("ensemencement");
     let vp = dx * dx * dx / 8.;
     let xb = ib as f64 * dx;
     let v0 = a.total_volume();
@@ -87,6 +101,12 @@ fn main() {
                 if a.is_column(c % nx, c / nx) {
                     m += (((c % nx) as f64 + 0.5) * dx - LX / 2.) * (*e as f64) * dx * dx;
                 }
+            }
+        }
+        // S413 : l'eau sous le fond de la bande.
+        if let Some(f) = a.band_floor() {
+            for (c, h) in f.iter().enumerate() {
+                m += (((c % nx) as f64 + 0.5) * dx - LX / 2.) * (*h as f64) * dx * dx;
             }
         }
         m
@@ -132,7 +152,7 @@ fn main() {
         if t >= prochain {
             prochain += 100_000;
             let tranche = ((s / 10.) as usize).min(2);
-            let gauche = a.particles().iter().filter(|p| (p[0] as f64) < xb).count() as f64 * vp;
+            let gauche = a.particles().iter().filter(|p| (p[0] as f64) < xb).count() as f64 * vp + fond * xb * LY;
             niveaux[tranche] += gauche / (xb * LY) - H;
             // Particules par maille occupée dans la dernière colonne de mailles avant la frontière.
             let mut occ = vec![0u32; ny * nz];
@@ -170,8 +190,9 @@ fn main() {
             // Le saut : hauteur lue de la dernière colonne de la bande contre celle de la première colonne suivante.
             let droite: Vec<Option<f64>> = (0..ny)
                 .map(|j| match a.columns_surface() {
-                    Some(eta) => Some(eta[j * nx + ib] as f64),
-                    None => lue(&a, ib, j),
+                    // S413 : seulement si la colonne est de la zone — une bande à fond n'a pas de `η` à lire.
+                    Some(eta) if a.is_column(ib, j) => Some(eta[j * nx + ib] as f64),
+                    _ => lue(&a, ib, j),
                 })
                 .collect();
             for j in 0..ny {
@@ -200,7 +221,13 @@ fn main() {
         "APIC3D_RACCORD_S399 montage={} dx={dx} particules={} pas={pas} volume_relatif={:+.2e} refusees={} niveau_gauche_mm={} \
          particules_par_maille={} saut_max_mailles={saut_max:.3} periode_s={periode:.4} erreur={:+.2}% amortissement_par_periode={:+.2}% \
          pics={} u_face_mm_s={} marche_lue_mm={:+.3} particules_par_rangee={} quatre_colonnes={} echange_abs_ret_pos={} calcul_s={:.0}",
-        if colonnes { "colonnes" } else if raccord { "raccord" } else { "seul" },
+        match (colonnes, raccord, fond_k.is_some()) {
+            (true, ..) => "colonnes".to_string(),
+            (_, true, false) => "raccord".to_string(),
+            (_, true, true) => format!("raccord_fond_{fond:.3}"),
+            (_, false, true) => format!("seul_fond_{fond:.3}"),
+            _ => "seul".to_string(),
+        },
         a.particle_count(),
         a.total_volume() / v0 - 1.,
         a.columns_refused(),
