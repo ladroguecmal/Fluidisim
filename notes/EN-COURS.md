@@ -77,8 +77,8 @@ de file. (2) La **conception de C6c** — structure, masse exacte, critères « 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-211, les décisions du 2026-09-27 ; notes datées (trucages §8, campagne) ; file, feuille de route.
 - [x] **P3** — lecture du code de la zone : vitesses eulériennes, transferts aux faces de frontière, `φ`, échange, bascule.
-- [>] **P4** — ADR-212, la bande étroite en profondeur : structure, masse, critères, découpage ; index.
-- [ ] **P5** — rituel.
+- [x] **P4** — ADR-212, la bande étroite en profondeur : structure, masse, critères, découpage ; index.
+- [>] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — [ADR-211](../docs/adr/ADR-211-les-trucages-retenus.md) (D1 à D4 ; D4, première analyse : un niveau « cuit » entre le
@@ -93,3 +93,7 @@ de file. (2) La **conception de C6c** — structure, masse exacte, critères « 
   hauteur eulérienne `β` n'est plus la surface libre mais **le fond de la bande**, des particules au-dessus ; tout le mécanisme se
   réemploie, tourné à la verticale — la face `w` à `β` est une frontière (solde vertical, absorption, pose à la face). Un seul
   paramètre par colonne : `β` = surface (colonne), `β` = 0 (les colonnes entières de S408), entre les deux (la bande étroite).
+- **P4** — [ADR-212](../docs/adr/ADR-212-la-bande-etroite-en-profondeur.md) : `β` par colonne (colonne : `β` = `η` ; bande étroite ;
+  bande pleine : `β` = 0, S398–S410 au bit) ; sous `β` la machinerie de la zone ; la face à `β`, frontière à solde vertical ; le
+  critère place `β` à `k` mailles sous la surface la plus basse, hystérésis `h` (prédiction `k` = 4, `h` = 2) ; six critères ;
+  C6c-1 (`β` fixe) puis C6c-2 (`β` placé). Index. `--check` : 0.
