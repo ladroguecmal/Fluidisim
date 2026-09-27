@@ -98,7 +98,8 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
   impact à la pente de celui de R16 et à l'échelle de l'emprise ; sans variable, la scène de S390 au bit ; critère 1.
 - [x] **P3** — qualité à 10 cm : Jacobi 32/64/128 contre multigrille 4/6/8, deux emprises (300 pas) ; critère 2.
 - [x] **P4** — coût à 10 cm, pas entier et deux parts ; l'emprise la plus grande sous 2 ms ; critères 3 et 5.
-- [ ] **P5** — deux minutes à 10 cm, 30 Hz puis 60 Hz si besoin ; critère 4.
+- [x] **P5** — deux minutes à 10 cm, 30 Hz puis 60 Hz si besoin ; critère 4.
+- [>] **P5b** — *ajoutée* : 30 Hz explose à 10 cm quel que soit le solveur ; attribution sur le banc d'A321 (`MAILLE=`, `EMPRISE=`), termes éteints un à un (L136).
 - [ ] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
 - [ ] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
 - [ ] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
@@ -153,3 +154,9 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
   moins bon) et 128 (6,4·10⁻⁶) : projection **1,73 contre 4,84 ms** (÷ 2,8) au moins, ≈ ÷ 4,2 contre Jacobi ≈ 96 interpolé —
   plus que ÷ 1,9 à 25 cm (*prédit > 1,9 : tenu*) ; pas 3,81 contre 6,90. Même contre Jacobi-32, la production, 11 fois moins
   précise : 1,73 contre 2,48.
+- **P5** — 8 m à 10 cm, `PAS=3600 COUT=0 REFERENCES=0`. **30 Hz : Jacobi-32, mg 6 et mg 8 explosent tous trois entre les pas
+  1 831 et 1 860** (≈ 61–62 s ; contrôle toutes les 30 pas) — résidus médians 2,3·10⁻⁴, 1,2·10⁻⁴, 2,2·10⁻⁵ : **la pression
+  n'est pas en cause**, le motif d'A321 avant ADR-209. **60 Hz** (`PAS_US=16667 PAS=7200`), mg 8 : **deux minutes tenues**,
+  résidu médian 1,4·10⁻⁵, divergence franche médiane 2,1·10⁻⁴. Critère 4 : **tenu à 60 Hz, manqué à 30 Hz**. Hypothèse avant
+  mesure : le terme de second ordre (Lax-Wendroff, `V = U + u'`) a une limite de Courant ; à 10 cm, `V·dt/dx` est 2,5 fois
+  celui de 25 cm (≈ 0,5 par axe sous la houle de `Hs` 2,5 m à 30 Hz). À éprouver : témoin, termes éteints un à un, 25 ms.
