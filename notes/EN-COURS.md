@@ -99,7 +99,7 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   intouchées ; éponge depuis le bord de l'ensemble (étendues par colonne, réservées) ; bilan aux murs.
 - [x] **P3** — essais du pas couplé : critère 1, oracles (a) (b) (c) sous la houle, refus ; vu échouer (trois défauts injectés).
 - [x] **P4** — le transfert de niveau porte l'ensemble (`delta3d_levels.rs`) ; `Follow::require_cover` ; essais du critère 3.
-- [ ] **P5** — le banc `delta3d_mer_epars` : cas `suivi`, `murs` (témoin), `long`, `niveaux` ; lancés en arrière-plan.
+- [x] **P5** — le banc `delta3d_mer_epars` : cas `suivi`, `murs` (témoin), `long`, `niveaux` ; lancés en arrière-plan.
 - [ ] **P6** — les calculs du banc ; critères 4 et 5.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 6.
 - [ ] **P8** — preuve `MER-EPARS-S404` ; liste (4.3, 4.7), file, feuille de route, index ; notes datées d'ADR-006 et d'ADR-210.
@@ -132,3 +132,9 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   dense reçoit tout d'un épars. **Trouvé par l'essai** : une colonne de départ dehors ne doit pas « ne rien porter » mais porter
   le **repos** — la reconstruction est en hauteur absolue ; sans cela, un dense recevait −79,9 m³. L'essai S402 qui refusait un
   ensemble ne le refuse plus (son commentaire le dit) ; les chiffres de S402 inchangés (0,304 %).
+- **P5** — `examples/delta3d_mer_epars.rs` : fenêtre 32 × 16 m à 25 cm (128 × 64 × 12 ; 64 × 32 × 6 à 50 cm), houle de S369
+  oblique, relatif, éponge 2 m à 4 s⁻¹ (`10·c_g/largeur`, S315), dipôle de S401, `Follow` (4 m, 1 mm, 0,25 s, prévision
+  `a_max` 1). Cas `suivi`, `murs`, `long` (0,8 m/s, 30 s), `niveaux` (3 s / 6 s) ; `MER_DUREE_S` pour la fumée. Fumée : 0,4 s de
+  `suivi`, écart nul, ≈ 330 ms par pas ; 3,2 s de `niveaux` : saut au passage 2,04 mm (entier et épars), épars contre entier
+  0,12 mm, volumes exacts. Lancés à 10:04 en parallèle (quatre cœurs), journaux `mer_<cas>.log` dans le brouillon ; durée
+  attendue ≈ 10 min (`suivi`, `murs`, `niveaux`), ≈ 25 min (`long`).
