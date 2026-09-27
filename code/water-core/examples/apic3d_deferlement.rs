@@ -124,9 +124,15 @@ fn main() {
     let mut part_au_retournement = f64::NAN;
     let t_max = 2.5 * tau;
     let trace = std::env::var("APIC3D_TRACE").is_ok();
+    // `APIC3D_PAS=` multiplie le pas stable : la sensibilité au chemin numérique (L371), autre que celle aux données.
+    let facteur_pas: f64 = std::env::var("APIC3D_PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(1.);
+    // `APIC3D_IMAGES=<dossier>` : une coupe de la rangée `ny/4` à chacun de ces instants (t/τ), en PPM (ADR-124) — la revue.
+    let images = std::env::var("APIC3D_IMAGES").ok();
+    let instants_images = [0.3, 0.6, 0.8, 1.0, 1.2, 1.4];
+    let mut prochaine_image = 0usize;
     let debut = Instant::now();
     while (t_us as f64) * 1e-6 < t_max {
-        let us = a.stable_step_us(20_000);
+        let us = ((a.stable_step_us(20_000) as f64 * facteur_pas) as u64).max(1);
         let rep = a.step(us).expect("pas");
         t_us += us;
         pas += 1;
@@ -292,8 +298,16 @@ fn main() {
                 t / tau, us as f64 * 1e-3, rep.iterations, rep.max_speed, a.particle_count(), bande.join(" ")
             );
         }
+        if let Some(dossier) = &images {
+            if prochaine_image < instants_images.len() && t / tau >= instants_images[prochaine_image] {
+                let nom = format!("{dossier}/{}_t{:.1}.ppm", if bascule.is_some() { "bande" } else { "seul" }, instants_images[prochaine_image]);
+                coupe(&a, ny / 4, &nom).expect("image");
+                prochaine_image += 1;
+            }
+        }
+        let fini_images = images.is_none() || prochaine_image >= instants_images.len();
         if let Some((ti, ..)) = impact {
-            if t > ti + 0.3 * tau {
+            if t > ti + 0.3 * tau && fini_images {
                 break;
             }
         }
@@ -348,4 +362,54 @@ fn main() {
         }
         assert!(ecart_volume <= 1e-9, "volume : {ecart_volume:e}");
     }
+}
+
+/// **La coupe de la revue** : x de 2 à 6 m, z de 0,6 à 1,5 m, 200 pixels par mètre. Blanc l'air ; bleu clair l'eau d'une colonne
+/// de la zone (sous `η`) ; bleu foncé les particules de la rangée `j` ; une réglette orange au bas des colonnes de la bande.
+fn coupe(a: &Apic3, j: usize, chemin: &str) -> std::io::Result<()> {
+    let (x0, x1, z0, z1, ppm) = (2f64, 6f64, 0.6f64, 1.5f64, 200f64);
+    let (w, h) = (((x1 - x0) * ppm) as usize, ((z1 - z0) * ppm) as usize);
+    let mut rgb = vec![255u8; w * h * 3];
+    let dom = a.domain();
+    let dx = dom.dx as f64;
+    let mut pose = |px: i64, py: i64, c: [u8; 3]| {
+        if px >= 0 && py >= 0 && (px as usize) < w && (py as usize) < h {
+            let k = (py as usize * w + px as usize) * 3;
+            rgb[k..k + 3].copy_from_slice(&c);
+        }
+    };
+    if let Some(eta) = a.columns_surface() {
+        for px in 0..w {
+            let x = x0 + (px as f64 + 0.5) / ppm;
+            let i = ((x / dx) as usize).min(dom.nx - 1);
+            if a.is_column(i, j) {
+                let e = eta[j * dom.nx + i] as f64;
+                for py in 0..h {
+                    let z = z1 - (py as f64 + 0.5) / ppm;
+                    if z < e {
+                        pose(px as i64, py as i64, [150, 200, 240]);
+                    }
+                }
+            } else {
+                for py in h - 6..h {
+                    pose(px as i64, py as i64, [240, 150, 40]);
+                }
+            }
+        }
+    }
+    for p in a.particles() {
+        if ((p[1] as f64 / dx) as usize) != j {
+            continue;
+        }
+        let (px, py) = (((p[0] as f64 - x0) * ppm) as i64, ((z1 - p[2] as f64) * ppm) as i64);
+        for (ox, oy) in [(0, 0), (1, 0), (0, 1), (1, 1), (-1, 0), (0, -1)] {
+            pose(px + ox, py + oy, [20, 60, 150]);
+        }
+    }
+    let mut octets = format!("P6
+{w} {h}
+255
+").into_bytes();
+    octets.extend_from_slice(&rgb);
+    std::fs::write(chemin, octets)
 }

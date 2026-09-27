@@ -99,8 +99,8 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 - [x] **P4** — APIC seul ; critère 1.
 - [x] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
 - [x] **P5b** — *ajoutée* : le maintien balayé (0,1 ; 0,2 ; 0,3 s), le réglage retenu, son coût dans la même fournée qu'APIC seul.
-- [>] **P6** — la crête courte ; critère 6.
-- [ ] **P7** — suite entière, zéro avertissement ; critère 7.
+- [x] **P6** — la crête courte ; critère 6. *Élargie* : la planche de revue R34 (demande de l'utilisateur, ci-dessous).
+- [>] **P7** — suite entière, zéro avertissement ; critère 7.
 - [ ] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
 - [ ] **P9** — rituel.
 
@@ -162,3 +162,21 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
   seul bouge de 0,05 % sous une perturbation minime, celui de la bande de 3 à 30 % selon le réglage — **chaque conversion au
   sommet de la crête perturbe le déferlement** (voie mixte, ensemencement quantifié) ; moins il y en a (maintien ≥ 0,3 s), plus
   la bande suit APIC seul. **Retenu pour la suite de la mesure : maintien 0,3 s** (aucun retour rapide, impact +2,7 %, bande 52 %).
+- **Témoins de P6** : zone active **toute en bande** (`pente=0`, aucune colonne) — 120 pas contre 115, retournement 0,6651 à
+  3,425, impact **1,2886 (+1,4 %)** : sans une colonne, la suite des pas change (la vitesse de la grille entre dans le pas stable)
+  et le déferlement avec — l'incertitude du chemin numérique dépasse celle des données (ε ± 10⁻⁴ : 0,05 %). Le « +3 % » de la
+  bande en est proche. `APIC3D_PAS=` ajouté (multiplie le pas stable), non lancé : voir la consigne.
+- **P6, crête courte** (160 × 32 × 32, 819 120 particules ; trois calculs ensemble) : APIC seul 0,6934 / impact 1,2936 à 4,044,
+  623 s ; défauts : retournement 0,5737, impact 1,3511 (+4,4 %), part 0,449, bascules 3, **bord : 860 colonnes sur 1 280** au plus
+  (à 1,656 τ), 225 retours rapides, 559 s ; maintien 0,3 s : impact 1,3605, part 0,399, bord 829 (1,664 τ), 37 retours, 542 s.
+  Volume 1,4·10⁻¹¹. **Critère 6 manqué tel qu'écrit** : la bande atteint le huitième extérieur (ε < 0,32) — tard, après l'impact
+  (l'instant de la première arrivée n'est pas mesuré). Coût : **−10 à −13 %** seulement.
+- **Message de l'utilisateur (14:3x)** : *« J'apprécie ta précision et ton exigence mais je souhaite ton avis il serait pas
+  préférable de faire des modifications grâce à des revenus [revues] car peut-être niveau des chiffres il y a des incohérences
+  mais visuellement c'est validé »*. **Avis rendu** : oui pour les écarts sous le visible (l'impact +3 % = 18 ms et 7 cm) — la
+  consigne « précision rapportée à l'usage » le disait, la session s'en était écartée ; mais rien de C6b n'avait été vu ; les
+  chiffres restent pour ce que l'œil ne voit pas (masse, coût, durée). **Fait** : `APIC3D_IMAGES=<dossier>` — coupes PPM de la
+  rangée `ny/4` à t/τ = 0,3 ; 0,6 ; 0,8 ; 1,0 ; 1,2 ; 1,4 (x 2–6 m, z 0,6–1,5 m, 200 px/m) ; planche
+  `captures/s410/planche_R34.png` (APIC seul | bande 0,3 s | bande 0,05 s), **envoyée, R34 posée**. **Ce que la planche montre
+  et que les chiffres ne voyaient pas** : à 0,05 s, le **sommet de la crête repasse en colonnes** — une bosse lisse et trop haute
+  derrière une lèvre de particules, alors que l'impact n'y était qu'à +3,6 % ; à 0,3 s, le déferlement ressemble à APIC seul.
