@@ -17720,3 +17720,21 @@ ce que ses opérateurs sautent ; bassin fermé ; ni pas couplé, ni corps sous l
 partiel** — **devient possible** un domaine δ qui suit sa perturbation sur un ensemble épars et s'étend devant l'objet, sans
 rupture visible ; **chemin** : le pool de blocs sur la carte (C8, poste), l'ordonnanceur (rang 4), la scène C10 ; **preuve** :
 DOMAINE-EPARS-S401. Suivant : dans le cloud, **C8c** — niveaux de `dx` et famine ; au poste, C3b puis la pluie 5b.
+
+## S402 — 2026-09-27 — physique : ADR-005 restauré ; C8c, changer un domaine de niveau par transfert d'état
+
+**Entrée.** *« Continue »* ; S401 proposait C8c. **Trouvé en lisant le lot** : I-12, ADR-006 §3.2 et ADR-012 §4 renvoient au §5
+d'ADR-005, que le fichier n'avait plus — S35 (`c2eb75ba`) avait écrit à sa place la note qu'il devait lui ajouter (−202 lignes),
+S39 de même ; aucun autre ADR ni spécification atteint (audit `--numstat`). **Fait** ([preuve](../docs/validation/NIVEAUX-S402.md)).
+(1) ADR-005 restauré au bit (texte de S16, notes B-S26 et B-S27, note datée) ; un contrôle de l'outil — un ADR commence par son
+titre — vu échouer sur les versions de S35 et S39 ; METHODE, L373. (2) `resample_from` : surface par recouvrement d'une
+reconstruction bilinéaire conservative, vitesses interpolées et moyennées. **Tenus** : état uniforme au bit ; volume exact à
+25 ↔ 50 cm ; aller-retour d'une onde de seize mailles **0,304 %** (manqué d'abord, 1,03 % : le terme croisé manquait) ; vu échouer
+sans pente, 10,2 %. (3) Au banc, 25 → 50 cm à 2 s et retour à 5 s : **sauts de 0,1 à 2 mm** par les deux mécanismes ; sur une
+bosse, le transfert reste à 1,8 mm du domaine fin, **ADR-005 §5 la perd (10,2 mm)** ; une source d'une maille grossière coûte 15 à
+17 mm aux deux. **ADR-210** actée : le changement de niveau par transfert d'état. Suite **712 réussis**, zéro avertissement.
+**Limites** : quand descendre (famine, contenu) non écrit ; rapport 2,5 non éprouvé au banc ; ni pas couplé ni carte.
+**Rituel.** Maillons **0** : **correction d'intégrité** — **devient possible** de lire le cycle de vie qu'I-12 et trois ADR
+invoquent, et un ADR réécrit se voit au contrôle ; **chemin** : C8c l'a consommé (ADR-210) ; **preuve** : le contrôle sur les
+versions de S35 et S39, NIVEAUX-S402 §1. Suivant : dans le cloud, **C8d**, la décision du rang 4 et la famine ; au poste, C3b
+puis la pluie 5b.

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-27 02:49 +02:00
+JETON            : libre
+Battement        : 2026-09-27 02:50 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
-Session en cours : S402 — ADR-005 restauré (son corps effacé en S35) et son contrôle ; C8c, première part : changer un domaine de niveau de `dx` (ADR-006 §3.2, rang 4 d'ADR-012), par transfert d'état contre le cycle de vie d'ADR-005 §5
-Dernière session : S401 — physique : **C8b, le domaine épars** ([preuve](docs/validation/DOMAINE-EPARS-S401.md)) — un ensemble de blocs dans une fenêtre, le bord de l'ensemble comme celui de la boîte (un rectangle à un ulp du dense) ; il suit une source mobile à 0,26–0,66 mm du domaine entier et prévoit l'objet (ADR-013 §2) ; 9.2 partiel. Avant : S400, la zone lit comme la bande
-Session suivante : dans le cloud, **S402 — C8c, les niveaux de `dx` et la famine** (rang 4, en référence : changer de niveau sans rupture visible, I-12) ; la réservation T2 et le seuil relatif avec le pool de blocs (file) ; le raccord attend la condition d'A316 ; au poste, **C3b** (10 cm, A298), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
-Maillons        : 0 — S401 : 9.2 passe à partiel (le domaine épars qui s'étend devant l'objet, en référence) ; journal
+Session en cours : aucune
+Dernière session : S402 — physique : **ADR-005 restauré** (son corps manquait depuis S35 ; un contrôle de l'outil le garde désormais) ; **C8c** ([preuve](docs/validation/NIVEAUX-S402.md)) — changer un domaine de niveau par transfert d'état ([ADR-210](docs/adr/ADR-210-changer-de-niveau-par-transfert-d-etat.md)) : sauts de 0,1 à 2 mm, une bosse gardée à 1,8 mm quand ADR-005 §5 la perd. Avant : S401, le domaine épars
+Session suivante : dans le cloud, **S403 — C8d, la décision du rang 4 et la famine** (quel domaine descendre, selon ce qu'il contient ; ADR-210 D2) ; le raccord attend la condition d'A316 ; au poste, **C3b** (10 cm, A298), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
+Maillons        : 0 — S402 : correction d'intégrité (ADR-005 restauré, contrôle vu échouer) ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

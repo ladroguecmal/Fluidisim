@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S402 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S401 : **C8c**, les niveaux
+Session : S402 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S401 : **C8c**, les niveaux
 de `dx` et la famine. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni
 Godot. Branche `claude/eager-volta-lf0kw3` (S401), la plus avancée ; aucune autre copie.
 
@@ -100,7 +100,7 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
 - [x] **P6** — suite entière, zéro avertissement.
 - [x] **P7** — preuve `NIVEAUX-S402` ; un ADR si la mesure tranche le mécanisme du rang 4 ; liste (4.5, 9.9), file, feuille de route,
   index.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 
