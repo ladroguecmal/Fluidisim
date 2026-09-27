@@ -905,9 +905,16 @@ pub fn scene() -> Result<(), String> {
         // Le coût, horodaté : chaque pas soumis seul et attendu, sans rendu concurrent (domaine du chiffre de S341).
         println!("MG_SCENE_S390 cout niveaux={niveaux}");
         let mut n = 0u64;
-        for var in [8u32, 16, 32].iter().map(|&c| Variante { mg: false, cycles: c }).chain(
-            [1u32, 2, 3, 4, 6, 8].iter().map(|&c| Variante { mg: true, cycles: c }),
-        ) {
+        // S409 : avec `VARIANTES=`, le coût suit le même filtre, Jacobi 64 et 128 compris ; sans, la liste de S390.
+        let couts: Vec<Variante> = match &filtre {
+            Some(f) => variantes.iter().filter(|v| f.contains(&v.nom())).copied().collect(),
+            None => [8u32, 16, 32]
+                .iter()
+                .map(|&c| Variante { mg: false, cycles: c })
+                .chain([1u32, 2, 3, 4, 6, 8].iter().map(|&c| Variante { mg: true, cycles: c }))
+                .collect(),
+        };
+        for var in couts {
             carte.set_state(&u, &v, &w, &eta)?;
             carte.set_multigrid(var.mg)?;
             let mut serie = Vec::new();

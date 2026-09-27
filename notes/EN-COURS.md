@@ -97,7 +97,7 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 - [x] **P2** — la scène à une maille et une emprise données (`MAILLE=`, `EMPRISE=`) : boîte de 7,2 m, éponge en mailles, un
   impact à la pente de celui de R16 et à l'échelle de l'emprise ; sans variable, la scène de S390 au bit ; critère 1.
 - [x] **P3** — qualité à 10 cm : Jacobi 32/64/128 contre multigrille 4/6/8, deux emprises (300 pas) ; critère 2.
-- [ ] **P4** — coût à 10 cm, pas entier et deux parts ; l'emprise la plus grande sous 2 ms ; critères 3 et 5.
+- [x] **P4** — coût à 10 cm, pas entier et deux parts ; l'emprise la plus grande sous 2 ms ; critères 3 et 5.
 - [ ] **P5** — deux minutes à 10 cm, 30 Hz puis 60 Hz si besoin ; critère 4.
 - [ ] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
 - [ ] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
@@ -134,3 +134,22 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
   cycle** de la multigrille ne bouge pas (≈ 0,45 : 5,0 → 1,1 → 0,22·10⁻⁴ à 10 cm ; 1,3 → 0,20 → 0,042·10⁻⁴ à 25 cm) — c'est son
   **point de départ** qui est ≈ 5 fois plus haut ; celui de Jacobi, lui, se dégrade (×0,23 par 32 itérations contre ×0,09). À
   résidu égal : Jacobi 64 (337 dispatchs) ≈ mg 7 ; Jacobi 128 (657) < mg 8 (286). Le coût, en P4, tranche.
+- **P4** — `MAILLE=0.1 EMPRISE=n,n PAS=30 REFERENCES=0 VARIANTES=jacobi32,jacobi64,jacobi128,mg6,mg8 MG_CYCLES=8` ; le banc
+  de coût suit désormais `VARIANTES=` quand elle est donnée (sans elle, la liste de S390). Chaque pas soumis seul et attendu,
+  200 pas horodatés, secteur. **q99, ms** — projection / pas entier :
+
+  | emprise (mailles) | Jacobi 32 | Jacobi 64 | Jacobi 128 | mg 6 | **mg 8** | deux parts mg 8, meilleur `k` |
+  |---|---|---|---|---|---|---|
+  | 6,4 m (294 912) | 1,62 / 2,96 | 3,17 / 4,51 | 6,28 / 7,60 | 1,01 / 2,32 | 1,30 / **2,62** | `k`=1 : 1,39 / 1,28 |
+  | **8 m (460 800)** | 2,48 / 4,57 | 4,84 / 6,90 | 9,60 / 11,67 | 1,34 / 3,41 | 1,73 / **3,81** | **`k`=0 : 1,89 / 1,96** |
+  | 9,6 m (663 552) | 3,47 / 6,43 | 6,77 / 9,71 | 13,47 / 16,43 | 1,73 / 4,67 | 2,23 / **5,18** | `k`=0 : 2,70 / 2,55 |
+  | 11,2 m (903 168) | 4,73 / 8,73 | 9,23 / 13,22 | 18,35 / 22,37 | 2,28 / 6,29 | 2,93 / **6,94** | `k`=0 : 3,64 / 3,33 |
+
+  **Loi** (mg 8, pas entier q99) : **0,53 ms + 7,1 ns par maille** (6,4 et 11,2 m ; 8 et 9,6 m à 0,06 ms). Un cycle mg ≈ 0,19 ms à
+  8 m = 2,5 itérations de Jacobi (0,074) — le rapport de S390. **Critère 5 tenu** : **8 m × 8 m**, 460 800 mailles, deux parts
+  **1,89 / 1,96 ms** (`k` = 0 : à 10 cm, fond, prédiction et correction pèsent ≈ 2,1 ms, toute la projection va dans la seconde
+  part) — à 2 % de la limite ; 9,6 m la dépasse (2,70). *Prédiction ≈ 0,45 M mailles, ≈ 8 m : tenue.* 8,8 m (88, trois niveaux) :
+  ≈ 2,25 ms par part par la loi, non mesuré. **Critère 3 tenu** : à 8 m, mg 8 (2,2·10⁻⁵) est encadrée par Jacobi 64 (5,5·10⁻⁵,
+  moins bon) et 128 (6,4·10⁻⁶) : projection **1,73 contre 4,84 ms** (÷ 2,8) au moins, ≈ ÷ 4,2 contre Jacobi ≈ 96 interpolé —
+  plus que ÷ 1,9 à 25 cm (*prédit > 1,9 : tenu*) ; pas 3,81 contre 6,90. Même contre Jacobi-32, la production, 11 fois moins
+  précise : 1,73 contre 2,48.
