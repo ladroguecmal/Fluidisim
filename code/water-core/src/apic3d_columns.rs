@@ -136,12 +136,15 @@ impl Apic3 {
     /// **S406, essais seulement** — un solde dû retire dans la maille **la plus pleine** des deux dernières colonnes de la bande à
     /// cette profondeur, au lieu de la seule maille contre la face (témoin de densité).
     pub const TRIAL_SPREAD_REMOVAL: u8 = 8;
+    /// **S407, essais seulement** — la pose **à la face** : une particule posée pour un solde reçu l'est au centre de la tranche
+    /// d'eau entrée, `dx/16` de la face (une particule vaut une tranche de `dx/8` sur la face-maille), et non à `dx/4`.
+    pub const TRIAL_POSE_AT_FACE: u8 = 16;
 
     /// **S406, essais seulement** : les gestes de la frontière à éprouver, somme de `TRIAL_…` ; zéro, ceux de S406. Refus
-    /// `Domain` sans zone ou hors des quatre bits.
+    /// `Domain` sans zone ou hors des cinq bits.
     pub fn set_columns_trials(&mut self, bits: u8) -> Result<(), Error> {
         let Some(c) = self.columns.as_mut() else { return Err(Error::Domain) };
-        if bits > 15 {
+        if bits > 31 {
             return Err(Error::Domain);
         }
         c.trials = bits;
@@ -635,13 +638,15 @@ impl Apic3 {
                             c.counts[1] += 1;
                             if axis == 0 { c.solde_u[face] += vp } else { c.solde_v[face] += vp }
                         }
-                        // (3) Poser ce qui est reçu : contre la face, au sous-réseau le plus libre de la maille.
+                        // (3) Poser ce qui est reçu : contre la face, au sous-réseau le plus libre de la maille. S407, essai : au
+                        // centre de la tranche entrée, `dx/16`, au lieu de `dx/4`.
+                        let depth = if self.columns.as_ref().unwrap().trials & Self::TRIAL_POSE_AT_FACE != 0 { dx / 16. } else { 0.25 * dx };
                         while solde(self) >= vp {
                             if self.n == self.x.len() {
                                 self.columns.as_mut().unwrap().refused += 1;
                                 break;
                             }
-                            let offset = plane + side * 0.25 * dx;
+                            let offset = plane + side * depth;
                             let cell = self.cell(band.0, band.1, l);
                             let mut best: Option<(f32, [f32; 3])> = None;
                             for (a, b) in [(0.25f32, 0.25f32), (0.75, 0.25), (0.25, 0.75), (0.75, 0.75)] {

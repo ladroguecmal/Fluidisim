@@ -22,7 +22,7 @@
 //!
 //! **S406** — la face de frontière appartient à la zone, la quantité de mouvement absorbée est rendue (le défaut) ;
 //! `APIC3D_ESSAI=<bits>` éprouve d'autres gestes : `Apic3::TRIAL_S400` = 1 (la frontière de S400), `TRIAL_FACE_BOTH_SIDES` = 2,
-//! `TRIAL_MEAN_HEIGHT` = 4, `TRIAL_SPREAD_REMOVAL` = 8.
+//! `TRIAL_MEAN_HEIGHT` = 4, `TRIAL_SPREAD_REMOVAL` = 8 ; S407 : `TRIAL_POSE_AT_FACE` = 16.
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
