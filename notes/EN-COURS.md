@@ -90,7 +90,7 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le rang 4 dans `scheduler.rs` : `Coarsen`, `declare_coarsen`, niveau des vivants, choix par la perte, remontée,
   affamés déclarés ; essais des critères 1 à 5.
-- [ ] **P3** — le banc `delta3d_famine` : trois domaines, budget en quatre phases, transferts d'ADR-210 aux passages ; témoin sans
+- [x] **P3** — le banc `delta3d_famine` : trois domaines, budget en quatre phases, transferts d'ADR-210 aux passages ; témoin sans
   pertes déclarées.
 - [ ] **P4** — les calculs du banc ; critère 6.
 - [ ] **P5** — suite entière, zéro avertissement ; critère 7.
@@ -107,3 +107,8 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
   (un littéral de `Grant` complété de `level: 0`), empreinte S278 **`6aebff024c734fc9`**. Critères 2 à 5 : six essais `_s403`
   (le rang 1 suffit : personne ne descend ; la bosse descend, pertes échangées la source ; famine à 0,6 ms : un affamé déclaré ;
   remontée à 1 s puis 2 s, la plus forte perte d'abord ; descente immédiate ; qui ne déclare plus remonte ; refus). 34 tenus.
+- **P3** — `examples/delta3d_famine.rs` : trois sites de 16 × 12 m (64 × 48 × 12 à 25 cm, jumeau 32 × 24 × 6 à 50 cm), F (0) focal
+  source, B (1) source, A (2) bosse ; référence à 25 cm sans famine ; coûts par la loi de production ramenée à la maille (0,440 /
+  0,134 ms) ; budget 2 / 1,05 / 0,6 / 2 ms (0–2, 2–4, 4–5,5, 5,5–8 s) ; perte déclarée = écart d'un aller-retour de la surface
+  présente ; l'hôte : transfert d'ADR-210 aux changements de niveau, rang 5 (image effacée en 0,5 s, renaissance au repos) pour un
+  affamé ; `TEMOIN=1`, pertes nulles. ≈ 34 s de calcul par seconde simulée, deux calculs en parallèle.

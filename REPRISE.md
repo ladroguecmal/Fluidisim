@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 02:59 +02:00
+Battement        : 2026-09-27 03:05 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
 Session en cours : S403 — C8d, le rang 4 dans l'ordonnanceur et l'issue de la famine : descendre d'un niveau le non-focal qui perd le moins (ADR-210 D2), déclarer ce qui reste affamé ; un banc de trois domaines δ réels
 Dernière session : S402 — physique : **ADR-005 restauré** (son corps manquait depuis S35 ; un contrôle de l'outil le garde désormais) ; **C8c** ([preuve](docs/validation/NIVEAUX-S402.md)) — changer un domaine de niveau par transfert d'état ([ADR-210](docs/adr/ADR-210-changer-de-niveau-par-transfert-d-etat.md)) : sauts de 0,1 à 2 mm, une bosse gardée à 1,8 mm quand ADR-005 §5 la perd. Avant : S401, le domaine épars
