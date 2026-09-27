@@ -88,8 +88,8 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — verdict R35 consigné (revue, file, preuve) ; le réglage retenu (maintien 0,3 s, fond 4, prédiction à horizon court) inscrit, défauts inchangés jusqu'à C7.
-- [>] **P3** — la vorticité de la grille aux centres des mailles ; essai (rotation solide, uniforme) ; critère 2.
-- [ ] **P4** — `ColumnsSwitch::floor_vorticity` : la colonne requise et le fond sous la maille tourbillonnaire la plus basse ; essai.
+- [x] **P3** — la vorticité de la grille aux centres des mailles ; essai (rotation solide, uniforme) ; critère 2.
+- [>] **P4** — `ColumnsSwitch::floor_vorticity` : la colonne requise et le fond sous la maille tourbillonnaire la plus basse ; essai.
 - [ ] **P5** — le banc du tourbillon enfoui ; les trois montages ; critère 3.
 - [ ] **P6** — la vague de Chen avec le seuil ; critère 4.
 - [ ] **P7** — suite entière ; critère 5.
@@ -99,3 +99,6 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 ### Notes de reprise
 - **P2** — R35 : REVUE-VISUELLE §40 (verdict), BANDE-ETROITE-S413 §5.5, file (décision en tête ; campagne). Réglage retenu pour
   la suite ; défauts du code inchangés jusqu'à C7 (les « Reproduire » de S408–S414 les citent).
+- **P3** — `Apic3::vorticity(i, j, k)` : `|∇ × u|` au centre de la maille, vitesses ramenées aux centres, différences centrées
+  (décentrées au bord). Essai `_s415` : rotation solide d'axe `y`, Ω = 1,5 s⁻¹ — **3,000** partout (critère 2 tenu, au bit à
+  l'arrondi) ; uniforme : 0.

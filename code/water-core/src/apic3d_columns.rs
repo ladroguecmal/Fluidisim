@@ -1437,6 +1437,29 @@ impl Apic3 {
         }
     }
 
+    /// **S415 — la vorticité de la grille** au centre de la maille `(i, j, k)`, `|∇ × u|` en s⁻¹ : les vitesses ramenées aux centres
+    /// (moyenne des deux faces), puis différences centrées (décentrées au bord). Ce que l'advection de la grille lisse et que les
+    /// particules gardent — le critère du fond qui suit l'écoulement (C6c-3).
+    pub(crate) fn vorticity(&self, i: usize, j: usize, k: usize) -> f32 {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let uc = |i: usize, j: usize, k: usize| 0.5 * (self.u[(k * ny + j) * (nx + 1) + i] + self.u[(k * ny + j) * (nx + 1) + i + 1]);
+        let vc = |i: usize, j: usize, k: usize| 0.5 * (self.v[(k * (ny + 1) + j) * nx + i] + self.v[(k * (ny + 1) + j + 1) * nx + i]);
+        let wc = |i: usize, j: usize, k: usize| 0.5 * (self.w[(k * ny + j) * nx + i] + self.w[((k + 1) * ny + j) * nx + i]);
+        // Dérivée le long d'un axe : centrée, décentrée au bord.
+        let d = |f: &dyn Fn(usize) -> f32, x: usize, n: usize| {
+            let (lo, hi) = (x.saturating_sub(1), (x + 1).min(n - 1));
+            if hi == lo { 0. } else { (f(hi) - f(lo)) / ((hi - lo) as f32 * dx) }
+        };
+        let dw_dy = d(&|y| wc(i, y, k), j, ny);
+        let dv_dz = d(&|z| vc(i, j, z), k, nz);
+        let du_dz = d(&|z| uc(i, j, z), k, nz);
+        let dw_dx = d(&|x| wc(x, j, k), i, nx);
+        let dv_dx = d(&|x| vc(x, j, k), i, nx);
+        let du_dy = d(&|y| uc(i, y, k), j, ny);
+        let (a, b, c) = (dw_dy - dv_dz, du_dz - dw_dx, dv_dx - du_dy);
+        (a * a + b * b + c * c).sqrt()
+    }
+
     /// Une colonne de la zone ? (pour les essais et le banc)
     pub fn is_column(&self, i: usize, j: usize) -> bool {
         self.column_of(i, j)

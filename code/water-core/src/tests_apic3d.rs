@@ -999,3 +999,34 @@ fn the_switch_places_the_band_floor_s414() {
     assert_eq!(s.max_floor_moves(), 0);
     assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
 }
+
+/// **S415, critère 2** — la vorticité de la grille : une rotation solide d'axe `y` rend `2Ω` au cœur à 10⁻⁵ près ; un écoulement
+/// uniforme, zéro.
+#[test]
+fn the_grid_vorticity_reads_a_solid_rotation_s415() {
+    let (n, dx, omega) = (8usize, 0.1f32, 1.5f32);
+    let (mut a, _) = apic(n, n, n, dx, 64);
+    let (x0, z0) = (0.4f32, 0.4f32);
+    for k in 0..n {
+        for j in 0..n {
+            for i in 0..=n {
+                a.u[(k * n + j) * (n + 1) + i] = -omega * ((k as f32 + 0.5) * dx - z0);
+            }
+        }
+    }
+    for k in 0..=n {
+        for j in 0..n {
+            for i in 0..n {
+                a.w[(k * n + j) * n + i] = omega * ((i as f32 + 0.5) * dx - x0);
+            }
+        }
+    }
+    let lu = a.vorticity(3, 4, 4);
+    println!("S415 vorticité d'une rotation solide : {lu} pour {}", 2. * omega);
+    for (i, j, k) in [(3, 4, 4), (1, 1, 1), (6, 2, 5)] {
+        assert!((a.vorticity(i, j, k) / (2. * omega) - 1.).abs() < 1e-5, "{i} {j} {k} : {}", a.vorticity(i, j, k));
+    }
+    a.u.fill(1.);
+    a.w.fill(0.);
+    assert_eq!(a.vorticity(3, 4, 4), 0.);
+}
