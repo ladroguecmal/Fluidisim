@@ -1403,3 +1403,6 @@ mod graded;
 #[path = "delta3d_sparse.rs"]
 mod sparse;
 pub use sparse::SparseChange;
+#[path = "delta3d_levels.rs"]
+mod levels;
+pub use levels::LevelChange;

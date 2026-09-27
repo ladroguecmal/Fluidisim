@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 02:34 +02:00
+Battement        : 2026-09-27 02:41 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
 Session en cours : S402 — ADR-005 restauré (son corps effacé en S35) et son contrôle ; C8c, première part : changer un domaine de niveau de `dx` (ADR-006 §3.2, rang 4 d'ADR-012), par transfert d'état contre le cycle de vie d'ADR-005 §5
 Dernière session : S401 — physique : **C8b, le domaine épars** ([preuve](docs/validation/DOMAINE-EPARS-S401.md)) — un ensemble de blocs dans une fenêtre, le bord de l'ensemble comme celui de la boîte (un rectangle à un ulp du dense) ; il suit une source mobile à 0,26–0,66 mm du domaine entier et prévoit l'objet (ADR-013 §2) ; 9.2 partiel. Avant : S400, la zone lit comme la bande

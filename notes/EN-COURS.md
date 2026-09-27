@@ -94,7 +94,7 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-005 restauré, note datée ; critère A1.
 - [x] **P3** — le contrôle dans `etat_projet.py` (vu échouer sur S35 et S39) ; protection de METHODE, leçon ; critère A2.
-- [ ] **P4** — `delta3d_levels.rs` : le transfert d'état entre niveaux ; essais T1 à T4, vu échouer sans pente.
+- [x] **P4** — `delta3d_levels.rs` : le transfert d'état entre niveaux ; essais T1 à T4, vu échouer sans pente.
 - [ ] **P5** — le banc `delta3d_niveaux` : bosse et source mobile, 25 → 50 cm à 2 s, retour à 5 s, contre le domaine fin ; ADR-005 §5
   (fondu de 0,5 s, naissance à zéro) ; critères B1 à B3.
 - [ ] **P6** — suite entière, zéro avertissement.
@@ -113,3 +113,14 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
   sur les versions réelles : `c2eb75ba` (S35) et `16e48d60` (S39), une anomalie chacune ; `c0df00f7` (S16) et la restaurée, aucune ;
   tous les ADR du dépôt passent. Essai `test_an_adr_begins_with_its_title_s402` (17 essais de l'outil). METHODE : une ligne « en
   écrivant » (dix-huit protections) ; leçon **L373**.
+- **P4** — `delta3d_levels.rs`, `Volume3::resample_from` (+ `LevelChange`) : surface par recouvrement d'une reconstruction
+  **bilinéaire** (pentes centrées, décentrées au bord, et terme croisé `∂²h/∂x∂y`), positions rapportées à la fenêtre d'arrivée ;
+  vitesses trilinéaires aux centres des faces, moyennées sur `n × n` sous-faces quand l'arrivée est plus grossière (rapport 2 :
+  exactement les faces couvertes) ; pression à zéro ; murs refermés. **T1 tenu** (surface uniforme au bit, vitesse uniforme au bit
+  loin des murs). **T2** : 25 ↔ 50 cm, **écart 0,0** ; 10 → 25 cm, **−1,1·10⁻⁸ m³** = l'écart d'aire des fenêtres (0,1 m non
+  exact en f32 : 3·10⁻⁸) — la **hauteur moyenne** conservée au bit près (1,191245712·10⁻² m). **T3** : **manqué d'abord, 1,031 %**
+  — la reconstruction plane oubliait le terme croisé, 0,96 % calculé en 2D (`sin²(θ/4)`) ; avec lui, **0,304 %** (prédiction 2D :
+  0,3 %) ; λ = 16 m, 0,037 % : **ordre trois** sur cette mesure (rapport 8,2 ; le terme d'ordre deux s'annule aux demi-mailles) —
+  ma prédiction « ordre deux » était fausse, l'essai tient désormais « au moins l'ordre deux ». **Vu échouer sans pente : 10,20 %**
+  (prédiction ≈ 10 %), ordre un (5,02 % à 16 m). **T4 tenu** (étendue, repos, gravité, ensemble épars ; rien d'écrit). Un état
+  transféré repart : dix pas grossiers, volume gardé.
