@@ -88,7 +88,7 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le rang 4 dans `scheduler.rs` : `Coarsen`, `declare_coarsen`, niveau des vivants, choix par la perte, remontée,
+- [x] **P2** — le rang 4 dans `scheduler.rs` : `Coarsen`, `declare_coarsen`, niveau des vivants, choix par la perte, remontée,
   affamés déclarés ; essais des critères 1 à 5.
 - [ ] **P3** — le banc `delta3d_famine` : trois domaines, budget en quatre phases, transferts d'ADR-210 aux passages ; témoin sans
   pertes déclarées.
@@ -98,4 +98,12 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
-
+- **P2** — `scheduler.rs` : `Coarsen { cost_ms, loss_m }`, `declare_coarsen` (refus `Error::Coarsen`), `Grant::level`, `starved()` ;
+  vivants avec niveau et instant de descente ; `update_levels` avant le rang 1 : un descendu qui ne déclare plus remonte, le focal
+  jamais descendu ; **descente** tant que le rang 1 à son minimum affame, le déclaré de moindre perte par ms rendue d'abord (en
+  croix, égalité par identité) ; **remontée** une par seconde, une seconde au moins après la descente, la plus forte perte d'abord,
+  seulement si personne n'est affamé. Coûts au niveau : la loi du rang 1 sur le coût déclaré (`scaled_cost` = `cost_for` au bit à
+  son niveau). `Bid` inchangé (l'hôte `viewer/` le construit, et ne se compile pas ici). **Critère 1 tenu** : les 28 essais d'avant
+  (un littéral de `Grant` complété de `level: 0`), empreinte S278 **`6aebff024c734fc9`**. Critères 2 à 5 : six essais `_s403`
+  (le rang 1 suffit : personne ne descend ; la bosse descend, pertes échangées la source ; famine à 0,6 ms : un affamé déclaré ;
+  remontée à 1 s puis 2 s, la plus forte perte d'abord ; descente immédiate ; qui ne déclare plus remonte ; refus). 34 tenus.

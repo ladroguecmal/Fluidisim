@@ -28,6 +28,12 @@
 //! **focal** est servi entier et les autres **rétrécissent** au lieu d'être affamés — s'ils l'ont
 //! déclaré (`Shrink`). L'ordonnanceur rend une **échelle** ; l'hôte en fait une emprise.
 //!
+//! **S403 — le rang 4** : si le rang 1, à son minimum, laisse encore un vivant sans budget, un non-focal
+//! qui l'a déclaré (`declare_coarsen`) **descend `dx` d'un niveau** — le transfert d'état d'ADR-210 —,
+//! d'abord celui qui **perd le moins par milliseconde rendue** (ADR-210 D2). Ce que ni le rang 1 ni le
+//! rang 4 ne servent est **déclaré affamé** (`starved`) : l'issue est le rang 5, le repli sur W, à
+//! l'hôte. Les rangs 2 et 3 n'existent pas ; le rang 4 suit donc le rang 1.
+//!
 //! # Ce que l'hôte fournit, et qu'on ne calcule pas ici
 //!
 //! `W_gameplay` vient du jeu, `W_perception` du rendu — **surface à l'écran**, jamais distance
@@ -82,6 +88,18 @@ pub struct Shrink {
     pub min_scale: f32,
     /// La part du coût, ms, qui ne suit pas la surface — dans `[0, cost_ms]`.
     pub fixed_ms: f32,
+}
+
+/// S403, ADR-012 §4 rang 4 — ce qu'un candidat accepte de céder après le rang 1 : **descendre `dx` d'un niveau**, par le
+/// transfert d'état d'[ADR-210](../../../docs/adr/ADR-210-changer-de-niveau-par-transfert-d-etat.md). L'hôte le déclare à chaque
+/// pas où il l'accepte (`Scheduler::declare_coarsen`) ; un domaine descendu qui ne le déclare plus remonte.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Coarsen {
+    /// Le coût du pas un niveau plus bas, ms, à pleine emprise — sous la même loi de rétrécissement que le coût entier.
+    pub cost_ms: f32,
+    /// Ce que l'image perdrait à ce niveau, m : l'écart d'un aller-retour du contenu présent (ADR-210 D2). Il ordonne la
+    /// descente — la moindre perte par milliseconde rendue d'abord — et la remontée — la plus forte d'abord.
+    pub loss_m: f32,
 }
 
 /// Ce qu'un candidat soumissionne à chaque pas — domaine déjà vivant ou simple prétendant.
@@ -150,6 +168,28 @@ pub const ENGAGE_US: u64 = 1_000_000;
 /// plus 1 par seconde. La descente, elle, est immédiate — elle protège la fréquence d'images.
 pub const RAMP_PER_S: f32 = 1.;
 
+/// S403 : le coût entier de `bid` à son niveau — le coût déclaré un niveau plus bas s'il y est descendu (vivant descendu
+/// et déclarant), le sien sinon.
+fn level_base(bid: &Bid, live: &[Live], coarsen: &[(DomainId, Coarsen)]) -> f32 {
+    let descendu = live.iter().any(|l| l.id == bid.id && l.active && l.coarse);
+    match coarsen.iter().find(|(d, _)| *d == bid.id) {
+        Some((_, c)) if descendu => c.cost_ms,
+        _ => bid.cost_ms,
+    }
+}
+
+/// S403 : la loi du rang 1 sur le coût `base` d'un niveau — `fixe + (base − fixe)·échelle`, la part fixe bornée par `base`.
+/// À son propre niveau, `Bid::cost_for` au bit.
+fn scaled_cost(bid: &Bid, q: f32, base: f32) -> f32 {
+    match bid.shrink {
+        Some(s) => {
+            let fixe = s.fixed_ms.min(base);
+            fixe + (base - fixe) * bid.scale_for(q)
+        }
+        None => base,
+    }
+}
+
 /// L'état d'un domaine d'un pas à l'autre. C'est la seule mémoire de l'ordonnanceur : sans elle,
 /// l'hystérésis n'existe pas, puisqu'elle porte sur la décision précédente.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -160,6 +200,9 @@ struct Live {
     born_us: u64,
     /// Depuis quand le score est continûment sous `OFF`. `None` dès qu'il repasse au-dessus.
     below_since_us: Option<u64>,
+    /// S403 — descendu d'un niveau (rang 4), et depuis quand.
+    coarse: bool,
+    coarse_since_us: u64,
 }
 
 /// Ce qu'un domaine retenu reçoit : le droit de vivre ce pas, et son budget.
@@ -170,6 +213,8 @@ pub struct Grant {
     /// S351 : la fraction de sa surface accordée — 1, entier ; moins, rétréci au rang 1. Le budget est le coût
     /// à cette échelle.
     pub scale: f32,
+    /// S403 : le niveau accordé — 0, le sien ; 1, un niveau plus bas (rang 4, ADR-210). L'hôte transfère l'état quand il change.
+    pub level: u8,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -186,6 +231,9 @@ pub enum Error {
     /// S351 : déclaration de rétrécissement invalide — échelle minimale hors de `]0, 1]`, part fixe hors de
     /// `[0, coût]`, ou domaine substitutif.
     Shrink,
+    /// S403 : déclaration de rang 4 invalide — coût ou perte non finis ou négatifs, candidat non soumis à ce pas ou
+    /// substitutif, déclaration en double.
+    Coarsen,
 }
 
 /// L'ordonnanceur. Sa capacité est fixée à la construction et sa mémoire demandée à l'hôte :
@@ -203,6 +251,9 @@ pub struct Scheduler {
     scale: f32,
     scale_down_us: Option<u64>,
     scale_us: Option<u64>,
+    /// S403 — le rang 4 : les déclarations du pas, et l'instant de la dernière remontée (une par seconde, ADR-012 §5).
+    coarsen: Vec<(DomainId, Coarsen)>,
+    refine_us: Option<u64>,
 }
 
 impl Scheduler {
@@ -220,7 +271,8 @@ impl Scheduler {
             return Err(Error::NotFinite);
         }
         let bytes = capacity
-            * (core::mem::size_of::<Bid>() + core::mem::size_of::<Grant>() + core::mem::size_of::<Live>());
+            * (core::mem::size_of::<Bid>() + core::mem::size_of::<Grant>() + core::mem::size_of::<Live>()
+                + core::mem::size_of::<(DomainId, Coarsen)>());
         host.alloc.alloc_persistent(bytes).map_err(|_| Error::Capacity)?;
         Ok(Self {
             profile,
@@ -233,6 +285,8 @@ impl Scheduler {
             scale: 1.,
             scale_down_us: None,
             scale_us: None,
+            coarsen: Vec::with_capacity(capacity),
+            refine_us: None,
         })
     }
 
@@ -262,6 +316,7 @@ impl Scheduler {
     pub fn begin(&mut self) {
         self.bids.clear();
         self.grants.clear();
+        self.coarsen.clear();
     }
 
     /// Soumissionne. Refuse tout poids non fini ou négatif : un `NaN` qui remonterait jusqu'au tri
@@ -290,6 +345,28 @@ impl Scheduler {
             return Err(Error::Capacity);
         }
         self.bids.push(bid);
+        Ok(())
+    }
+
+    /// **S403 — le rang 4 déclaré** : le candidat `id`, soumis à ce pas, accepte de descendre `dx` d'un niveau, au coût et à
+    /// la perte qu'il donne. Une déclaration par candidat et par pas. Refus `Coarsen` : coût ou perte non finis ou négatifs,
+    /// candidat absent de ce pas ou substitutif — le transfert d'ADR-210 ne vaut que pour un perturbatif —, ou en double.
+    pub fn declare_coarsen(&mut self, id: DomainId, coarsen: Coarsen) -> Result<(), Error> {
+        let fini = |v: f32| v.is_finite() && v >= 0.;
+        if !(fini(coarsen.cost_ms) && fini(coarsen.loss_m)) {
+            return Err(Error::Coarsen);
+        }
+        match self.bids.iter().find(|b| b.id == id) {
+            Some(b) if b.regime == Regime::Perturbative => {}
+            _ => return Err(Error::Coarsen),
+        }
+        if self.coarsen.iter().any(|(d, _)| *d == id) {
+            return Err(Error::Coarsen);
+        }
+        if self.coarsen.len() == self.coarsen.capacity() {
+            return Err(Error::Capacity);
+        }
+        self.coarsen.push((id, coarsen));
         Ok(())
     }
 
@@ -331,7 +408,8 @@ impl Scheduler {
         for b in &self.bids {
             // Inconnu : il n'entre dans la mémoire que s'il franchit le seuil d'allumage.
             if b.priority() > self.profile.on && !self.live.iter().any(|l| l.id == b.id) {
-                self.live.push(Live { id: b.id, active: true, born_us: now.0, below_since_us: None });
+                self.live.push(Live { id: b.id, active: true, born_us: now.0, below_since_us: None, coarse: false,
+                    coarse_since_us: 0 });
             }
         }
         self.live.retain(|l| l.active);
@@ -368,11 +446,15 @@ impl Scheduler {
         let affame = self.fund(1., false);
         let now = self.last_us.unwrap_or(0);
         self.update_focal(now);
+        // S403 — le rang 4 : les niveaux se décident ici, sur le sac à dos du rang 1 à son minimum ; sans aucune
+        // déclaration ni domaine descendu, rien ne change et la suite est celle de S351, au bit.
+        let rang4 = self.update_levels(now);
+        let affame = if rang4 { self.fund(1., false) } else { affame };
         let focal = self.focal;
         let declarent = self.bids.iter().any(|b| {
             b.shrink.is_some() && Some(b.id) != focal && self.live.iter().any(|l| l.id == b.id && l.active)
         });
-        if !declarent {
+        if !declarent && !rang4 {
             self.scale = 1.;
             return;
         }
@@ -396,7 +478,7 @@ impl Scheduler {
             }
             if let Some(b) = self.bids.iter().find(|b| b.id == g.id) {
                 g.scale = b.scale_for(q);
-                g.budget_ms = b.cost_for(q);
+                g.budget_ms = scaled_cost(b, q, level_base(b, &self.live, &self.coarsen));
             }
         }
     }
@@ -414,14 +496,16 @@ impl Scheduler {
                 if (passe == 0) != est_focal || !self.live.iter().any(|l| l.id == bid.id && l.active) {
                     continue;
                 }
-                let (echelle, cout) = if rang1 && !est_focal { (bid.scale_for(q), bid.cost_for(q)) } else { (1., bid.cost_ms) };
+                let (echelle, cout) =
+                    if rang1 && !est_focal { (bid.scale_for(q), self.scaled_cost(bid, q)) } else { (1., self.level_cost(bid)) };
                 if ms + cout > self.profile.cpu_sim_ms || blocks + bid.blocks > self.profile.blocks {
                     affame = true;
                     continue;
                 }
                 ms += cout;
                 blocks += bid.blocks;
-                self.grants.push(Grant { id: bid.id, budget_ms: cout, scale: echelle });
+                let level = u8::from(self.is_coarse(bid.id));
+                self.grants.push(Grant { id: bid.id, budget_ms: cout, scale: echelle, level });
             }
         }
         affame
@@ -463,7 +547,7 @@ impl Scheduler {
             self.grants
                 .iter()
                 .filter_map(|g| self.bids.iter().find(|b| b.id == g.id))
-                .map(|b| if Some(b.id) == focal { b.cost_ms } else { b.cost_for(q) })
+                .map(|b| if Some(b.id) == focal { self.level_cost(b) } else { self.scaled_cost(b, q) })
                 .sum()
         };
         let budget = self.profile.cpu_sim_ms;
@@ -500,6 +584,107 @@ impl Scheduler {
         nouveau
     }
 
+    /// S403 : le candidat `id` est-il descendu d'un niveau ? Un vivant descendu, et qui le déclare encore à ce pas.
+    fn is_coarse(&self, id: DomainId) -> bool {
+        self.live.iter().any(|l| l.id == id && l.active && l.coarse) && self.coarsen.iter().any(|(d, _)| *d == id)
+    }
+
+    /// S403 : le coût entier d'un candidat à son niveau — celui qu'il a déclaré un niveau plus bas s'il y est descendu.
+    fn level_cost(&self, bid: &Bid) -> f32 {
+        level_base(bid, &self.live, &self.coarsen)
+    }
+
+    /// S403 : le coût à l'échelle commune `q`, à son niveau — la loi du rang 1 sur le coût de ce niveau.
+    fn scaled_cost(&self, bid: &Bid, q: f32) -> f32 {
+        scaled_cost(bid, q, self.level_cost(bid))
+    }
+
+    /// **S403 — les niveaux de ce pas** (ADR-012 §4 rang 4, §5). Un vivant descendu qui ne déclare plus remonte ; le focal
+    /// n'est jamais descendu. Puis, **tant que le rang 1 à son minimum laisse un vivant sans budget**, le non-focal déclaré
+    /// qui perd le moins par milliseconde rendue descend, immédiatement. Sinon, une **remontée** au plus par seconde : le
+    /// descendu qui perd le plus, une seconde au moins après sa descente, s'il tient sans affamer personne. Rend faux quand le
+    /// rang 4 n'est pas en jeu — ni déclaration, ni domaine descendu.
+    fn update_levels(&mut self, now: u64) -> bool {
+        let focal = self.focal;
+        let declared: &[(DomainId, Coarsen)] = &self.coarsen;
+        for l in self.live.iter_mut() {
+            if l.coarse && (Some(l.id) == focal || !declared.iter().any(|(d, _)| *d == l.id)) {
+                l.coarse = false;
+            }
+        }
+        let vivant = |id: DomainId, live: &[Live]| live.iter().any(|l| l.id == id && l.active);
+        let en_jeu = self.coarsen.iter().any(|(d, _)| Some(*d) != focal && vivant(*d, &self.live))
+            || self.live.iter().any(|l| l.active && l.coarse);
+        if !en_jeu {
+            return false;
+        }
+        let mut descendu = false;
+        while self.fund(0., true) {
+            let Some(id) = self.coarsen_candidate() else { break };
+            if let Some(l) = self.live.iter_mut().find(|l| l.id == id) {
+                l.coarse = true;
+                l.coarse_since_us = now;
+            }
+            descendu = true;
+        }
+        if !descendu && !self.fund(0., true) {
+            if let Some(id) = self.refine_candidate(now) {
+                self.set_coarse(id, false);
+                if self.fund(0., true) {
+                    self.set_coarse(id, true);
+                } else {
+                    self.refine_us = Some(now);
+                }
+            }
+        }
+        true
+    }
+
+    fn set_coarse(&mut self, id: DomainId, coarse: bool) {
+        if let Some(l) = self.live.iter_mut().find(|l| l.id == id) {
+            l.coarse = coarse;
+        }
+    }
+
+    /// S403 : le prochain à descendre — vivant, non focal, déclaré, pas encore descendu, et qui rend du temps : la moindre
+    /// perte par milliseconde rendue, comparée en croix ; l'égalité se départage par identité.
+    fn coarsen_candidate(&self) -> Option<DomainId> {
+        let focal = self.focal;
+        self.coarsen
+            .iter()
+            .filter_map(|(id, c)| {
+                let bid = self.bids.iter().find(|b| b.id == *id)?;
+                let vivant = self.live.iter().any(|l| l.id == *id && l.active && !l.coarse);
+                let rendu = bid.cost_ms - c.cost_ms;
+                (vivant && Some(*id) != focal && rendu > 0.).then_some((*id, c.loss_m, rendu))
+            })
+            .min_by(|a, b| (a.1 * b.2).total_cmp(&(b.1 * a.2)).then(a.0.cmp(&b.0)))
+            .map(|(id, _, _)| id)
+    }
+
+    /// S403 : le prochain à remonter — descendu depuis une seconde au moins, une seconde au moins après la dernière
+    /// remontée : la plus forte perte déclarée d'abord ; l'égalité se départage par identité.
+    fn refine_candidate(&self, now: u64) -> Option<DomainId> {
+        if self.refine_us.is_some_and(|t| now.saturating_sub(t) < ENGAGE_US) {
+            return None;
+        }
+        self.live
+            .iter()
+            .filter(|l| l.active && l.coarse && now.saturating_sub(l.coarse_since_us) >= ENGAGE_US)
+            .filter_map(|l| self.coarsen.iter().find(|(d, _)| *d == l.id).map(|(d, c)| (*d, c.loss_m)))
+            .max_by(|a, b| a.1.total_cmp(&b.1).then(b.0.cmp(&a.0)))
+            .map(|(id, _)| id)
+    }
+
+    /// **S403 — l'issue de la famine, déclarée** : les vivants que ce pas ne sert pas, ni entiers, ni rétrécis (rang 1), ni
+    /// descendus (rang 4). Pour l'hôte, le rang 5 : détruire le perturbatif et laisser la haute mer (W) le remplacer.
+    pub fn starved(&self) -> impl Iterator<Item = DomainId> + '_ {
+        self.live
+            .iter()
+            .filter(|l| l.active && !self.grants.iter().any(|g| g.id == l.id))
+            .map(|l| l.id)
+    }
+
     /// S351 : le domaine focal du dernier `allocate`, protégé du rang 1.
     pub fn focal(&self) -> Option<DomainId> {
         self.focal
@@ -528,6 +713,8 @@ impl Scheduler {
         self.scale = 1.;
         self.scale_down_us = None;
         self.scale_us = None;
+        self.coarsen.clear();
+        self.refine_us = None;
     }
 
     /// Les domaines que la décision laisse vivants, dans l'ordre où ils se sont allumés.
@@ -682,7 +869,7 @@ mod tests {
     fn sans_declaration_la_decision_de_s278_s351() {
         let mut s = profil(5.);
         servir(&mut s, 0, &[bid(1, 0.12, 1., 1., 3.7), bid(2, 0.11, 1., 1., 3.7)]);
-        assert_eq!(s.grants(), &[Grant { id: DomainId(1), budget_ms: 3.7, scale: 1. }]);
+        assert_eq!(s.grants(), &[Grant { id: DomainId(1), budget_ms: 3.7, scale: 1., level: 0 }]);
         assert_eq!(s.scale(), 1.);
     }
 
@@ -1090,5 +1277,129 @@ mod tests {
         s.begin();
         assert!(s.submit(bid(7, 1., 1., 1., 1.)).is_ok());
         assert_eq!(s.submit(bid(7, 0.9, 1., 1., 1.)), Err(Error::Duplicate));
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // S403 — le rang 4 : descendre `dx` d'un niveau (ADR-210), après le rang 1 ; l'issue de la famine, déclarée.
+
+    /// Un pas complet avec des déclarations de rang 4 : `(identité, coût un niveau plus bas, perte)`.
+    fn servir4(s: &mut Scheduler, t_us: u64, bids: &[Bid], decl: &[(u32, f32, f32)]) {
+        s.begin();
+        for b in bids {
+            s.submit(*b).unwrap();
+        }
+        for (id, cost, loss) in decl {
+            s.declare_coarsen(DomainId(*id), Coarsen { cost_ms: *cost, loss_m: *loss }).unwrap();
+        }
+        s.decide(SimTime(t_us)).unwrap();
+        s.allocate();
+    }
+
+    /// Le banc de S403 en miniature : un focal (0,9) et deux non-focaux égaux (0,5), 0,44 ms chacun à 25 cm, 0,134 ms à 50 cm.
+    fn trois() -> [Bid; 3] {
+        [bid(0, 1., 0.9, 1., 0.44), bid(1, 1., 0.5, 1., 0.44), bid(2, 1., 0.5, 1., 0.44)]
+    }
+
+    fn niveau(s: &Scheduler, id: u32) -> Option<u8> {
+        accorde(s, id).map(|g| g.level)
+    }
+
+    /// Critère 2 : le rang 4 ne sert qu'après le rang 1 à son minimum — là où le rang 1 suffit (le cas de S351), personne ne
+    /// descend, et la décision est celle de S351.
+    #[test]
+    fn le_rang_4_n_agit_pas_quand_le_rang_1_suffit_s403() {
+        let mut s = profil(5.);
+        servir4(&mut s, 0, &[bid3(1, 0.12, 0.05), bid3(2, 0.11, 0.05)], &[(2, 0.5, 0.001)]);
+        let (a, b) = (accorde(&s, 1).unwrap(), accorde(&s, 2).unwrap());
+        assert_eq!((a.level, b.level), (0, 0));
+        let attendu = (5. - 3.7 - 0.09) / 3.61;
+        assert!((b.scale - attendu).abs() < 1e-5, "échelle {} pour {attendu}", b.scale);
+        assert_eq!(s.starved().count(), 0);
+    }
+
+    /// Critère 3 : il descend le non-focal qui perd le moins par milliseconde rendue — la bosse, pas la source ; échangées, les
+    /// pertes échangent le choix ; le focal n'est jamais descendu, même déclaré ; le budget n'est jamais dépassé.
+    #[test]
+    fn le_rang_4_descend_celui_qui_perd_le_moins_s403() {
+        for (perte1, perte2, attendu) in [(0.0003f32, 0.015f32, 1u32), (0.015, 0.0003, 2)] {
+            let mut s = profil(1.05);
+            servir4(&mut s, 0, &trois(), &[(0, 0.134, 0.), (1, 0.134, perte1), (2, 0.134, perte2)]);
+            assert_eq!(s.focal(), Some(DomainId(0)));
+            assert_eq!(niveau(&s, 0), Some(0), "le focal n'est jamais descendu");
+            let autre = 3 - attendu;
+            assert_eq!((niveau(&s, attendu), niveau(&s, autre)), (Some(1), Some(0)), "pertes {perte1} / {perte2}");
+            assert!((accorde(&s, attendu).unwrap().budget_ms - 0.134).abs() < 1e-6);
+            assert!(s.granted_ms() <= 1.05, "{} ms", s.granted_ms());
+            assert_eq!(s.starved().count(), 0);
+        }
+    }
+
+    /// Critère 4 : la famine a une issue déclarée — à 0,6 ms, le focal et une descente seulement ; l'autre est rendu affamé.
+    #[test]
+    fn la_famine_a_une_issue_declaree_s403() {
+        let mut s = profil(0.6);
+        servir4(&mut s, 0, &trois(), &[(1, 0.134, 0.0003), (2, 0.134, 0.015)]);
+        assert_eq!((niveau(&s, 0), niveau(&s, 1)), (Some(0), Some(1)));
+        assert_eq!(s.starved().collect::<Vec<_>>(), vec![DomainId(2)]);
+        assert!(s.granted_ms() <= 0.6, "{} ms", s.granted_ms());
+        // Sans déclaration, S278 : affamé aussi, et dit de même.
+        let mut t = profil(0.6);
+        servir4(&mut t, 0, &trois(), &[]);
+        assert_eq!(t.starved().count(), 2);
+    }
+
+    /// Critère 5 : descente immédiate ; remontée engagée une seconde après la descente, un domaine par seconde, la plus forte
+    /// perte d'abord ; une nouvelle famine redescend aussitôt.
+    #[test]
+    fn la_remontee_est_engagee_une_seconde_et_une_par_seconde_s403() {
+        let decl = [(1, 0.134, 0.0003), (2, 0.134, 0.015)];
+        let mut s = profil(0.75);
+        s.set_profile(Profile { cpu_sim_ms: 0.75, blocks: 64, on: 0.1, off: 0.05 }).unwrap();
+        servir4(&mut s, 0, &trois(), &decl);
+        assert_eq!((niveau(&s, 1), niveau(&s, 2)), (Some(1), Some(1)), "0,44 + 0,134 + 0,134 : les deux descendent");
+        // Le budget revient : rien ne remonte avant une seconde.
+        s.set_profile(Profile { cpu_sim_ms: 2., blocks: 64, on: 0.1, off: 0.05 }).unwrap();
+        servir4(&mut s, 999_999, &trois(), &decl);
+        assert_eq!((niveau(&s, 1), niveau(&s, 2)), (Some(1), Some(1)));
+        // À une seconde, la plus forte perte remonte d'abord ; l'autre attend la seconde suivante.
+        servir4(&mut s, 1_000_000, &trois(), &decl);
+        assert_eq!((niveau(&s, 1), niveau(&s, 2)), (Some(1), Some(0)));
+        servir4(&mut s, 1_999_999, &trois(), &decl);
+        assert_eq!(niveau(&s, 1), Some(1));
+        servir4(&mut s, 2_000_000, &trois(), &decl);
+        assert_eq!((niveau(&s, 1), niveau(&s, 2)), (Some(0), Some(0)));
+        // Nouvelle famine : la descente est immédiate.
+        s.set_profile(Profile { cpu_sim_ms: 1.05, blocks: 64, on: 0.1, off: 0.05 }).unwrap();
+        servir4(&mut s, 2_000_001, &trois(), &decl);
+        assert_eq!((niveau(&s, 1), niveau(&s, 2)), (Some(1), Some(0)));
+        assert!(s.granted_ms() <= 1.05);
+    }
+
+    /// Un descendu qui ne déclare plus remonte à son niveau — l'hôte l'a décidé ; s'il n'y tient pas, il est affamé et le dit.
+    #[test]
+    fn un_descendu_qui_ne_declare_plus_remonte_s403() {
+        let mut s = profil(1.05);
+        servir4(&mut s, 0, &trois(), &[(1, 0.134, 0.0003), (2, 0.134, 0.015)]);
+        assert_eq!(niveau(&s, 1), Some(1));
+        servir4(&mut s, 20_000, &trois(), &[(2, 0.134, 0.015)]);
+        assert_eq!(niveau(&s, 1), Some(0), "1 ne déclare plus : il remonte");
+        assert_eq!(niveau(&s, 2), Some(1), "et 2 descend à sa place");
+    }
+
+    /// Une déclaration de rang 4 invalide est refusée : coût ou perte non finis ou négatifs, candidat absent ou substitutif,
+    /// déclaration en double.
+    #[test]
+    fn une_declaration_de_rang_4_invalide_est_refusee_s403() {
+        let mut s = profil(1.);
+        s.begin();
+        s.submit(bid(1, 1., 0.5, 1., 0.44)).unwrap();
+        s.submit(Bid { regime: Regime::Substitutive, ..bid(2, 1., 0.5, 1., 0.44) }).unwrap();
+        let c = |cost: f32, loss: f32| Coarsen { cost_ms: cost, loss_m: loss };
+        assert_eq!(s.declare_coarsen(DomainId(1), c(f32::NAN, 0.)), Err(Error::Coarsen));
+        assert_eq!(s.declare_coarsen(DomainId(1), c(0.1, -1e-3)), Err(Error::Coarsen));
+        assert_eq!(s.declare_coarsen(DomainId(3), c(0.1, 0.)), Err(Error::Coarsen));
+        assert_eq!(s.declare_coarsen(DomainId(2), c(0.1, 0.)), Err(Error::Coarsen));
+        s.declare_coarsen(DomainId(1), c(0.1, 0.)).unwrap();
+        assert_eq!(s.declare_coarsen(DomainId(1), c(0.1, 0.)), Err(Error::Coarsen));
     }
 }
