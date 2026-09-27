@@ -62,77 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S405 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« continue »*. Suite proposée par S404 : deux maillons, un
-lot qui fait changer de case un point de la liste — **9.3**, la prédiction balistique, à comparer au raccord C5. **Choix** : 9.3.
-Il est au front 0 (rien à attendre), il débloque 9.4 et 9.6, et il sert la scène de C10 — le saut ; C5 reste sous la condition
-d'A316, et un changement de case n'y est pas en vue (4.16 est déjà partiel). Agent : Claude, session cloud Claude Code ; fichiers,
+Session : S406 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue, je confirmes »* — la priorité du solveur passe
+avant la règle des maillons (file, décisions) ; suite : le raccord **C5**. Agent : Claude, session cloud Claude Code ; fichiers,
 git, cargo, Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, la plus avancée.
 
-**Thèse.** La source (§8.2) : pour un objet balistique — un véhicule qui quitte un pont —, estimer **point d'impact, vitesse,
-orientation, rotation, région de simulation utile** ; le temps de vol devient la fenêtre qui prépare le domaine d'eau. ADR-013 §2
-en donne les paliers (T4 veille, T3 réservation à `t < 8 s`, T2 construction quand `½·a_max·t² ≤ R`, T1 actif à `t < 0,3 s`) :
-un objet balistique (`a_max` = 0) passe en T2 dès qu'il est à moins de 8 s de l'eau. Rien de cela n'existe dans le code : `Follow`
-(S401) prolonge la vitesse **horizontale** d'un objet, sans chute ni surface. S405 écrit le prédicteur dans le cœur — translation
-sous gravité et traînée quadratique (RK4), rotation libre d'un corps rigide (équations d'Euler), contact de sa sphère englobante
-avec une **surface mouvante** (la houle de B), affinage de l'instant — ; la **région utile** couvre l'incertitude de traînée ; le
-**palier** suit ADR-013 §2. Le consommateur : le domaine épars en mer, dont l'ensemble est préparé au point d'impact prévu.
+**Où en est C5** ([RACCORD-3D-S398](../docs/validation/RACCORD-3D-S398.md) §5–6). La zone des colonnes dans APIC 3D ballotte à
+0,03 point de δ ; la bande et l'échange tiennent la masse au bit ; S400 a reçu le repos (2·10⁻⁵ m/s) et la migration. **Manqué**
+au critère 4 de S399 (ballottement (1, 0) de 30 s, frontière au nœud, contre APIC seul) : le **courant moyen de surface** sur la
+face de frontière, −6,7 mm/s à 5 cm (≤ 5 demandé ; APIC seul −0,5 ; la zone seule +0,5), −1,8 à 2,5 cm — une circulation fermée,
+l'eau entrant dans la bande par la rangée du haut —, et la **densité** de la dernière colonne de la bande, 7,54 à 5 cm et 7,2 à
+2,5 cm (8 ± 0,4), le déficit le plus fort en haut, contre la face. S400 laisse trois suspects, à éprouver par des témoins courts.
 
-**Critères, écrits avant.** (1) Vide, surface plane : instant et point d'impact exacts à 10⁻⁹ s et 10⁻⁸ m (RK4 est exact sur une
-parabole) ; pas d'impact dans l'horizon, ou objet déjà sous la surface : `None`. (2) Chute verticale avec traînée quadratique
-contre la solution analytique : ordre 4 lu sur trois pas (rapport 16 à 20 % près) ; ≤ 10⁻⁶ s à 10 ms. (3) Rotation libre : toupie
-symétrique contre sa précession analytique, rotation autour d'un axe principal contre l'orientation exacte, ≤ 10⁻⁸ à 1 ms sur 2 s.
-(4) Surface mouvante (houle de 5 cm) : l'instant de contact à ≤ 1 ms d'une référence à 0,1 ms ; publié : l'erreur d'une prédiction
-qui ignorerait la houle (prédiction : quelques ms, quelques cm). (5) Paliers d'ADR-013 §2 aux frontières. (6) Région : une traînée
-connue à ±30 % près — les trois prédictions dans la région. (7) Banc en mer : un objet de 0,25 m lancé à 12 m/s de 6 m, l'ensemble
-revu toutes les 0,5 s ; **avec prédiction**, la région d'impact dans l'ensemble ≥ 0,5 s avant l'impact, la source d'entrée (le
-volume déplacé) toujours dedans, l'écart au domaine entier ≤ 3 mm (prédiction ≤ 1 mm) ; **le témoin** — l'objet suivi là où il est —
-voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro avertissement.
+**Thèse.** Trois gestes de la frontière traitent la face bande | zone d'un seul côté : (a) sa vitesse avant projection vient du
+transfert des seules particules de la bande ; (b) son débit, rangée par rangée, est mouillé à la hauteur de la **colonne**, alors
+que les particules de la bande suivent leur propre surface — l'échange retire ou pose alors, dans la rangée du haut, ce que la
+bande n'y porte pas ; (c) la quantité de mouvement d'une particule absorbée est perdue. Chacun reçoit une option d'essai (sans
+effet par défaut, au bit) ; le banc de S399, 30 s à 5 cm (≈ 45 s de calcul), désigne celui qui porte le courant ; le remède
+devient le défaut, et le critère 4 se rejoue aux deux mailles.
+
+**Critères, écrits avant** — ceux de S399, **inchangés**. (1) Sans zone, au bit ; toutes colonnes, les chiffres de S398 ; les
+options d'essai éteintes, S400 au chiffre près. (2) Repos moitié-moitié ≤ 1 cm/s. (3) Volume à 10⁻⁶ sur 30 s. (4) Ballottement
+(1, 0), 30 s, contre APIC seul : niveau ±2 mm par 10 s ; densité 8 ± 0,4 ; saut < 0,5 maille ; période et amortissement à
+1 point ; **courant moyen sur la face ≤ 5 mm/s**. **Prédiction** : le suspect (b) porte l'essentiel du courant (déficit en haut,
+contre la face, là où passe le courant) ; son remède ramène le courant sous 5 mm/s à 5 cm et relève la densité du haut. (5) Suite
+entière, zéro avertissement. **Arrêt** : si aucun témoin ne déplace le courant de plus d'un tiers, publier l'attribution manquée,
+ne rien rendre défaut, et le dire.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — `ballistic.rs` : état, prédiction (RK4, traînée, Euler, contact, affinage), région, palier.
-- [x] **P3** — essais des critères 1 à 6.
-- [x] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
-- [x] **P5** — les calculs du banc ; critère 7.
-- [x] **P6** — suite entière, zéro avertissement ; critère 8.
-- [x] **P7** — preuve `IMPACT-PREVU-S405` ; liste (9.3, 9.2), file, feuille de route, index ; note datée d'ADR-013.
-- [x] **P8** — rituel.
+- [x] **P1** — jeton, décision de l'utilisateur à la file, plan seul.
+- [ ] **P2** — options d'essai de la frontière dans `Apic3` (a, b, c) et leur passage au banc `apic3d_raccord` ; critère 1.
+- [ ] **P3** — témoins courts, 5 cm, 30 s : chaque option seule, puis la combinaison ; attribution.
+- [ ] **P4** — le remède attribué devient le défaut ; essais ; critères 1 à 3.
+- [ ] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
+- [ ] **P6** — suite entière, zéro avertissement.
+- [ ] **P7** — preuve (RACCORD-3D-S398 §7) ; liste 4.16, file (campagne, lot 5), A316 (note datée), feuille de route, index.
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
-- **P2** — `code/water-core/src/ballistic.rs` (module public `ballistic`) : `Ballistic` (position, vitesse, quaternion, ω du corps,
-  inertie principale, traînée `k`, rayon englobant), `predict` (RK4 sur translation et rotation, orientation renormalisée ; contact
-  du point le plus bas avec `surface(p, t)` ; bisection sur un pas partant du début du pas, 10⁻¹² s), `predict_region` (région :
-  rayon + plus grand écart horizontal aux impacts des bornes de traînée), `tier` (ADR-013 §2 ; T2 exige aussi `t < 8 s`).
-  Aucune allocation. Essais dans `tests_ballistic.rs` (P3).
-- **P3** — six essais `_s405`. **Critère 1 tenu** : parabole à **5,4·10⁻¹³ s**, 6,5·10⁻¹² m ; `None` hors horizon, au contact,
-  paramètres invalides. **Critère 2 tenu** : chute avec traînée (`v_t` = 14 m/s, 20 m) — écarts 2,51·10⁻⁶ / 1,74·10⁻⁷ /
-  1,12·10⁻⁸ s à 0,2 / 0,1 / 0,05 s, rapports **14,4 et 15,6** (ordre 4) ; 1,9·10⁻¹¹ s à 10 ms. **Critère 3 tenu** : toupie
-  symétrique 7,3·10⁻¹⁴ rad/s, axe principal 4,1·10⁻¹⁴ sur 2,02 s. **Critère 4 tenu** : houle de 5 cm, contact à 1,105745 s,
-  pas de 10 ms à 2·10⁻¹² s de la référence ; **ignorer la houle coûte +2,10 ms et +2,2 cm**. **Critère 5 tenu** : paliers aux
-  frontières (dont l'avion de chasse : T2 jusqu'à √2 s). **Critère 6 tenu** : ±30 % de traînée, région 0,753 m ; la plus éloignée
-  de 21 traînées à 0,503 m du nominal.
-- **P4** — `examples/delta3d_impact_prevu.rs` : la mer de S404 (32 × 16 m à 25 cm, houle de S369, relatif, éponge 2 m) ; une
-  sphère de 0,25 m lancée de (3, 8, 6) m à 12 m/s, traînée vraie 0,012, nominale 0,01 ± 30 % ; impact vrai (pas de 1 ms, sur la
-  houle) à **1,1135 s en (15,334 ; 8,000) m**, vitesse (10,15 ; 0 ; −10,03) m/s ; entrée : le volume de la calotte immergée, en
-  gaussienne de 0,5 m ; ensemble revu toutes les 0,5 s. `ballistic::advance` ajouté (le même intégrateur, sans contact), vérifié
-  dans l'essai de la parabole. Cas `prevu` et `temoin` lancés à 10:32.
-- **P5** (en cours) — phase 0 (revues à 0 ; 0,5 ; 1,0 s) : **`prevu`** — prédictions T2 à 0 s (erreur 0,099 m, région 0,401 m,
-  instant −5,6 ms), T2 à 0,5 s (0,017 / 0,276 m, −3,1 ms), T1 à 1,0 s (0,000 m, −0,2 ms) ; la région d'impact dans l'ensemble
-  **1,11 s** avant l'impact ; source jamais dehors ; écart 0,595 mm ; part moyenne 0,468. **`temoin`** — la région dans l'ensemble
-  0,11 s avant, **source pas refusée** : la dernière revue tombe 0,11 s avant l'impact, l'objet n'est plus qu'à 1,2 m de son point
-  d'impact. **La prédiction du critère 7 (témoin refusé) manquée à cette phase.** Ce qui sépare la dernière revue de l'impact
-  décide : `IMPACT_PHASE_S` décale les revues ; balayage 0,1 à 0,4 s des deux cas, lancé à 10:38.
-- **P5** (fin) — balayage de la phase des revues, 0 à 0,4 s. **`prevu`**, cinq phases : région dans l'ensemble **1,11 s** avant
-  l'impact, source **jamais** dehors, écart **0,594–0,595 mm** ; à chaque revue l'erreur du point décroît (0,099 → 0,000 m), toujours
-  dans la région (0,401 → 0,250 m), l'instant de −5,6 à 0 ms ; part moyenne 0,468–0,480. **`temoin`** : dernière revue 0,11 / 0,01 /
-  0,41 / 0,31 / 0,21 s avant l'impact (phases 0 / 0,1 / 0,2 / 0,3 / 0,4) — **refusé à la phase 0,2** (source dehors à 1,10 s : la
-  gaussienne d'entrée, 1,5 m, dépasse l'ensemble centré sur l'objet 0,41 s plus tôt), dedans aux quatre autres (écart 0,59–0,93
-  mm) ; part moyenne 0,407–0,433. **Critère 7** : la part prédiction tenue (1,11 s ≥ 0,5 s ; jamais dehors ; 0,595 mm ≤ 1 mm) ; la
-  prédiction « témoin refusé » manquée à la phase prévue, vérifiée à une phase sur cinq. La prédiction coûte 10 à 15 % de mailles
-  (la région calculée à δ = 0 avant l'impact).
-- **P6** — suite entière : **732 réussis**, 19 ignorés, zéro échec, zéro avertissement (726 + 6 essais `_s405`).
-- **P7** — preuve `docs/validation/IMPACT-PREVU-S405.md` (Reproduire au commit `ea9c123c`) ; **9.3 absent → partiel** (liste,
-  décompte 3 / 72 / 45, section 9 : 9 partiels et 4 absents ; REPRISE §4, feuille de route §3 et §3 ter) ; registre des
-  dépendances réécrit (9.3 : « un corps quelconque, le vent, l'entrée orientée ») ; index ; note datée d'ADR-013 (le palier lu :
-  T2 exige aussi `t < 8 s`).
