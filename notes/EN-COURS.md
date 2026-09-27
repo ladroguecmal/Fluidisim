@@ -62,144 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S409 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Reprends le projet »* ; au poste. Suite désignée
-au poste par S408 : **C3b** (conception S384 §5, C3 : « δ ≤ 2 ms au 99ᵉ centile sur la scène de la porte B, **puis à 10 cm**
-sur une scène de même surface ; A298 remesurée »). Agent : Claude Code (Opus 5.5), application de bureau, **au poste** — fichiers,
-git, cargo, Python, **RTX 5070 Laptop** ; Godot non utilisé. Branche `poste` (= `main` = `claude/eager-volta-lf0kw3`).
+Session : S410 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Réalise C6b »*. Conception S384 §5, C6 : reçu si,
+« sur B10 **et sur une vague qui déferle** : particules seulement dans la bande, colonnes ailleurs ; aucune bascule qui oscille
+(hystérésis mesurée) ; coût compté ». C6a (S408, [BASCULE-S408](../docs/validation/BASCULE-S408.md)) l'a éprouvé sur un corps qui
+entre ; **le pli prédit par la pente n'a rien déclenché qui compte** (§5). Agent : Claude Code (Opus 5.5), application de bureau,
+au poste — fichiers, git, cargo, Python, RTX 5070 (non utilisée : C6b est de la référence CPU). Branche `poste`.
 
-**Ce que « même surface » ne peut pas vouloir dire** (calcul, avant toute mesure) : la scène de la porte B (30 × 28 m, boîte de
-7 m) à 10 cm, c'est 300 × 280 × 70 = **5,9 M mailles**, 17,8 M faces — le tampon des faces (10 flottants) passe la liaison de
-128 Mio vers 3,4 M faces (≈ 1,1 M mailles), et le coût par maille de S350 (3,57 ms pour 376 320) donnerait ≈ 56 ms par pas.
-Le critère de S384 reposait sur les colonnes hautes (14 m de côté à 10 cm), que S386–S387 ont réservées à l'eau calme. **Lu
-ici** : la même mer, la même boîte verticale, une perturbation à la même pente, sur l'**emprise que le budget permet** ; la
-mesure dit laquelle.
+**Le cas.** Chen, Kharif, Zaleski et Li (1999, *Phys. Fluids* 11, 121) : une houle de Stokes d'ordre 3 en profondeur infinie,
+`ε = ka = 0,55`, `η = (λ/2π)[(ε + ε³/8) cos θ + ½ε² cos 2θ + ⅜ε³ cos 3θ]` — le jet se forme à `t₁ = 0,72` et touche la face
+avant à `t₂ = 1,56`, en unités `√(λ/g)` (VOF, 256 mailles par longueur d'onde, périodique ; lu sur arXiv comp-gas/9605002).
+Ici : `λ` = 2 m, 5 cm (40 mailles par longueur d'onde), 1 m d'eau (`kd` = π), **un bassin de quatre longueurs d'onde à parois**
+— la phase posée pour que `u` = 0 aux parois à `t` = 0 (deux crêtes du milieu, à 2,5 et 4,5 m, loin des réflexions pendant la
+seconde utile) ; vitesses de la théorie à l'ordre 3 (`u = aω e^{kz} cos θ`, `w = aω e^{kz} sin θ`, `ω = √(gk)(1 + ε²/2)`), la
+matrice affine `C = ∇u`. APIC seul d'abord, puis la bande dynamique, la zone posée après le premier pas.
 
-**Thèse.** À 10 cm, Jacobi rampe (son taux par itération se dégrade avec `N`) et la multigrille, indépendante de la maille (C1),
-doit payer davantage qu'à 25 cm (projection ÷ 1,9 en S390). Une scène à 10 cm tient-elle deux minutes (L369), à 30 Hz, avec le
-terme de second ordre d'ADR-209 — dont le nombre de Courant, lui, croît de 2,5 ?
+**Thèse.** Le critère de S408 — non convertible, pente > 1, dilatation, maintien — tient les particules aux crêtes qui se raidissent
+**avant** qu'elles se retournent, les colonnes dans les creux ; le déferlement de la bande suit celui d'APIC seul.
 
-**Critères, écrits avant.** (1) Sans les variables nouvelles, au bit : `--delta3d-empreinte` inchangé (60 et 600 pas). (2) À
-10 cm, boîte de 7,2 m (`nz` = 72 : trois niveaux grossiers), deux emprises au moins : la multigrille atteint le **résidu médian
-de Jacobi-32 à 25 cm** (7,1·10⁻⁵) en **≤ 8 cycles** ; *prédiction* : Jacobi-32 y est ≥ 5 fois moins bon qu'à 25 cm, la
-multigrille aux mêmes cycles qu'à 25 cm. (3) À résidu égal, pas multigrille ≤ Jacobi, gain de projection **> 1,9** (*prédit*).
-(4) Durée d'usage : la scène à 10 cm tient **deux minutes** à 30 Hz avec la multigrille retenue — sinon à 60 Hz, et l'on
-nomme ce qui casse (témoin, termes éteints un à un, L136). (5) Budget : l'**emprise carrée la plus grande** à 10 cm dont les
-deux parts de 30 Hz tiennent **≤ 2 ms au 99ᵉ centile**, publiée avec la loi coût/emprise ; *prédiction* ≈ 0,45 M mailles,
-≈ 8 m de côté. (6) **A298** sur le pas retenu (multigrille, terme d'ADR-209 ; cuve fermée) : l'écart carte/référence au pas
-d'usage (33,333 ms) sur **deux minutes**, et au pas de S305 (1 ms, 5 s) pour comparaison ; **close** si l'écart à deux
-minutes ≤ 3 mm **et** la pente extrapolée franchit 3 mm après plus d'une heure ; sinon ouverte, pente publiée. (7) Suite de
-l'afficheur, zéro avertissement. **Arrêt** : si la scène à 10 cm explose aux deux cadences, publier et ne rien changer aux
-défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si elle y est nécessaire.
+**Critères, écrits avant.** (1) **APIC seul déferle** dans la fenêtre des deux crêtes du milieu : **retournement** (une verticale
+eau / air / eau au-dessus du niveau moyen, deux particules par maille au moins) puis **impact** (air enfermé > `(dx)³·8` au-dessous
+du jet) avant `t` = 2,5 ; *comparé à Chen, non exigé* — prédiction : retournement dans [0,6 ; 1,1], impact dans [1,3 ; 1,9]. (2) **La
+bande** (défauts) : retournement et impact **à 3 %** du temps d'APIC seul, abscisse du jet à l'impact à deux mailles ; volume
+relatif ≤ 10⁻⁹. (3) **Le pli prédit** : à la première verticale retournée de la bande, sa colonne était en particules **au moins un
+pas avant**. (4) **Hystérésis** : au plus **deux** bascules par colonne, aux défauts et au maintien court (0,05 s). (5) **Coût**
+: part moyenne de la bande (*prédiction* ≤ 40 %), part au retournement, particules et temps de calcul contre APIC seul. (6)
+**La crête courte**, si le temps le permet : amplitude modulée le long de la crête (`ε` de 0,55 au milieu à 0,275 aux parois,
+sous le seuil) — aucune colonne de la bande dans le quart extérieur de la largeur. (7) Suite entière, zéro avertissement.
+**Arrêt** : si APIC seul ne déferle pas avant `t` = 2,5, publier et chercher pourquoi, sans changer le cas pour faire passer.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — la scène à une maille et une emprise données (`MAILLE=`, `EMPRISE=`) : boîte de 7,2 m, éponge en mailles, un
-  impact à la pente de celui de R16 et à l'échelle de l'emprise ; sans variable, la scène de S390 au bit ; critère 1.
-- [x] **P3** — qualité à 10 cm : Jacobi 32/64/128 contre multigrille 4/6/8, deux emprises (300 pas) ; critère 2.
-- [x] **P4** — coût à 10 cm, pas entier et deux parts ; l'emprise la plus grande sous 2 ms ; critères 3 et 5.
-- [x] **P5** — deux minutes à 10 cm, 30 Hz puis 60 Hz si besoin ; critère 4.
-- [x] **P5b** — *ajoutée* : 30 Hz explose à 10 cm quel que soit le solveur ; attribution sur le banc d'A321 (`MAILLE=`, `EMPRISE=`), termes éteints un à un (L136).
-- [x] **P5c** — *ajoutée* : à cadence stable (60 Hz, un pas par image), l'emprise à 10 cm sous 2 ms ; deux minutes.
-- [x] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
-- [x] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
-- [x] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
-- [x] **P9** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — `Apic3::set_particle_velocities` (vitesse et `C` d'un champ donné) ; essai : un champ affine passe à la grille exactement.
+- [ ] **P3** — le banc `apic3d_deferlement` : la houle de Chen, les mesures (retournement, impact, abscisse du jet, crête), la
+  bande (`APIC3D_BASCULE`, comme B10), la crête courte en option.
+- [ ] **P4** — APIC seul ; critère 1.
+- [ ] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
+- [ ] **P6** — la crête courte ; critère 6.
+- [ ] **P7** — suite entière, zéro avertissement ; critère 7.
+- [ ] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
-- **P2** — `Config::at_mesh(dx, nx, ny)` (`delta3d_scene.rs`) : la scène de R11 à l'échelle `s = nx·dx / 30 m` — paquet
-  (amplitude, longueur, écarts, place ; cambrure gardée), éponge ; boîte `nz` = arrondi de 7 m / `dx` au multiple de 4 (72 à
-  10 cm : trois niveaux grossiers) ; repos à 3,5 m. **Écart au plan** : le **paquet** mis à l'échelle et non un impact — S390
-  a mesuré la multigrille sur le paquet de `review`, la comparaison reste à scène égale. `review_from_env` : `MAILLE=`,
-  `EMPRISE=nx,ny`, refus au-delà de 128 Mio de faces ; branché sur `--delta3d-mg-scene` (ligne `MG_SCENE_S409`). Essai
-  `_s409` : `at_mesh(0,25, 120, 112)` = `review` ; à 10 cm, 72 couches, trois niveaux, cambrure à 10⁻⁶. **Critère 1 tenu** :
-  `--delta3d-empreinte` avant (tête `0194a572`) et après, identiques (60 pas : surface `0xacd172ae252fe5a6` ; 600 :
-  `0x28f35d9d7580ffed`). Essai à 10 cm, 64 × 64 (6,4 m, 294 912 mailles), 60 pas : Jacobi-32 résidu médian 3,9·10⁻⁴,
-  multigrille 6 : 1,4·10⁻⁴ ; rien n'explose.
-- **P3** — `MAILLE=0.1 EMPRISE=n,n COUT=0 … --delta3d-mg-scene`, 300 pas à 30 Hz ; témoin à scène égale : 25 cm sur 8 m
-  (32 × 32 × 28). Résidu relatif **médian** (max) :
-
-  | variante | 6,4 m (294 912) | 8 m (460 800) | 9,6 m (663 552) | 8 m à 25 cm | S390, 30 × 28 m à 25 cm |
-  |---|---|---|---|---|---|
-  | Jacobi 32 | 3,06·10⁻⁴ | 2,41·10⁻⁴ | 2,15·10⁻⁴ | 9,9·10⁻⁵ | 7,1·10⁻⁵ |
-  | Jacobi 64 | 6,7·10⁻⁵ | 5,5·10⁻⁵ | 5,1·10⁻⁵ | 8,9·10⁻⁶ | 7,4·10⁻⁶ |
-  | Jacobi 128 | 8,5·10⁻⁶ | 6,4·10⁻⁶ | 6,3·10⁻⁶ | 2,7·10⁻⁷ (plancher) | — |
-  | mg 4 | 4,3·10⁻⁴ | 5,0·10⁻⁴ | 4,6·10⁻⁴ | 1,3·10⁻⁴ | 2,0·10⁻⁴ |
-  | mg 6 | 1,29·10⁻⁴ | 1,13·10⁻⁴ | 1,08·10⁻⁴ | 2,0·10⁻⁵ | 4,9·10⁻⁵ |
-  | **mg 8** | **2,3·10⁻⁵** | **2,2·10⁻⁵** | **2,4·10⁻⁵** | 4,2·10⁻⁶ | 1,2·10⁻⁵ |
-
-  mg 1 et 2 explosent avant le pas 30 à 10 cm (mg 2 au pas 300 à 6,4 m) ; mg 3 et plus, Jacobi 8 et plus : 300 pas tenus.
-  Écart entre les deux références (mg 24, Jacobi 512) : 0,7 à 44 mm aux points de contrôle — A297, la surface ne juge rien.
-  **Critère 2 tenu à 8 cycles** (≤ 8) : 2,2 à 2,4·10⁻⁵ pour 7,1·10⁻⁵, **indépendant de l'emprise** ; mg 6 ne suffit plus
-  (1,1·10⁻⁴). **Prédictions manquées, les deux** : Jacobi-32 est 3,0 à 4,3 fois moins bon qu'à 25 cm (S390), pas ≥ 5 — 2,4 fois
-  à scène égale ; la multigrille demande **deux cycles de plus** qu'à 25 cm. **Lecture** (à scène égale, 8 m) : le **taux par
-  cycle** de la multigrille ne bouge pas (≈ 0,45 : 5,0 → 1,1 → 0,22·10⁻⁴ à 10 cm ; 1,3 → 0,20 → 0,042·10⁻⁴ à 25 cm) — c'est son
-  **point de départ** qui est ≈ 5 fois plus haut ; celui de Jacobi, lui, se dégrade (×0,23 par 32 itérations contre ×0,09). À
-  résidu égal : Jacobi 64 (337 dispatchs) ≈ mg 7 ; Jacobi 128 (657) < mg 8 (286). Le coût, en P4, tranche.
-- **P4** — `MAILLE=0.1 EMPRISE=n,n PAS=30 REFERENCES=0 VARIANTES=jacobi32,jacobi64,jacobi128,mg6,mg8 MG_CYCLES=8` ; le banc
-  de coût suit désormais `VARIANTES=` quand elle est donnée (sans elle, la liste de S390). Chaque pas soumis seul et attendu,
-  200 pas horodatés, secteur. **q99, ms** — projection / pas entier :
-
-  | emprise (mailles) | Jacobi 32 | Jacobi 64 | Jacobi 128 | mg 6 | **mg 8** | deux parts mg 8, meilleur `k` |
-  |---|---|---|---|---|---|---|
-  | 6,4 m (294 912) | 1,62 / 2,96 | 3,17 / 4,51 | 6,28 / 7,60 | 1,01 / 2,32 | 1,30 / **2,62** | `k`=1 : 1,39 / 1,28 |
-  | **8 m (460 800)** | 2,48 / 4,57 | 4,84 / 6,90 | 9,60 / 11,67 | 1,34 / 3,41 | 1,73 / **3,81** | **`k`=0 : 1,89 / 1,96** |
-  | 9,6 m (663 552) | 3,47 / 6,43 | 6,77 / 9,71 | 13,47 / 16,43 | 1,73 / 4,67 | 2,23 / **5,18** | `k`=0 : 2,70 / 2,55 |
-  | 11,2 m (903 168) | 4,73 / 8,73 | 9,23 / 13,22 | 18,35 / 22,37 | 2,28 / 6,29 | 2,93 / **6,94** | `k`=0 : 3,64 / 3,33 |
-
-  **Loi** (mg 8, pas entier q99) : **0,53 ms + 7,1 ns par maille** (6,4 et 11,2 m ; 8 et 9,6 m à 0,06 ms). Un cycle mg ≈ 0,19 ms à
-  8 m = 2,5 itérations de Jacobi (0,074) — le rapport de S390. **Critère 5 tenu** : **8 m × 8 m**, 460 800 mailles, deux parts
-  **1,89 / 1,96 ms** (`k` = 0 : à 10 cm, fond, prédiction et correction pèsent ≈ 2,1 ms, toute la projection va dans la seconde
-  part) — à 2 % de la limite ; 9,6 m la dépasse (2,70). *Prédiction ≈ 0,45 M mailles, ≈ 8 m : tenue.* 8,8 m (88, trois niveaux) :
-  ≈ 2,25 ms par part par la loi, non mesuré. **Critère 3 tenu** : à 8 m, mg 8 (2,2·10⁻⁵) est encadrée par Jacobi 64 (5,5·10⁻⁵,
-  moins bon) et 128 (6,4·10⁻⁶) : projection **1,73 contre 4,84 ms** (÷ 2,8) au moins, ≈ ÷ 4,2 contre Jacobi ≈ 96 interpolé —
-  plus que ÷ 1,9 à 25 cm (*prédit > 1,9 : tenu*) ; pas 3,81 contre 6,90. Même contre Jacobi-32, la production, 11 fois moins
-  précise : 1,73 contre 2,48.
-- **P5** — 8 m à 10 cm, `PAS=3600 COUT=0 REFERENCES=0`. **30 Hz : Jacobi-32, mg 6 et mg 8 explosent tous trois entre les pas
-  1 831 et 1 860** (≈ 61–62 s ; contrôle toutes les 30 pas) — résidus médians 2,3·10⁻⁴, 1,2·10⁻⁴, 2,2·10⁻⁵ : **la pression
-  n'est pas en cause**, le motif d'A321 avant ADR-209. **60 Hz** (`PAS_US=16667 PAS=7200`), mg 8 : **deux minutes tenues**,
-  résidu médian 1,4·10⁻⁵, divergence franche médiane 2,1·10⁻⁴. Critère 4 : **tenu à 60 Hz, manqué à 30 Hz**. Hypothèse avant
-  mesure : le terme de second ordre (Lax-Wendroff, `V = U + u'`) a une limite de Courant ; à 10 cm, `V·dt/dx` est 2,5 fois
-  celui de 25 cm (≈ 0,5 par axe sous la houle de `Hs` 2,5 m à 30 Hz). À éprouver : témoin, termes éteints un à un, 25 ms.
-- **P5b** — `--delta3d-a321` branché sur `review_from_env` (`MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8 SECONDES=90`),
-  30 Hz. Explosion (non fini) ou tenue :
-
-  | variante | issue | | variante | issue |
-  |---|---|---|---|---|
-  | témoin | **62 s** (pas 1 860) | | sans éponge | 44 s |
-  | sans terme d'ADR-209 (64) | **7 s** | | sans bande de B (16) | 82 s |
-  | sans `u'·∇u'` (1) | **tient 90 s** | | sans paquet | **62 s, même pas** |
-  | sans `U·∇u'` (2) ; sans `u'·∇U` (4) | 62 s, même pas | | sans résidu du fond (8) | **tient 90 s** |
-  | pas de **25 ms** | **tient 90 s** | | pas de 16,7 ms (P5, `mg-scene`) | tient 120 s |
-
-  **Faits** : l'explosion est brutale (témoin : `max_u` 1,16 m/s à 60 s, 8,3 à 61 s ; part de l'échelle de la maille de `w`
-  0,03 → 0,18) ; ni la pression, ni le paquet, ni `U·∇u'`, ni `u'·∇U` n'en changent l'instant ; le schéma d'avant ADR-209 explose
-  en 7 s ; deux termes la suppriment chacun — l'auto-advection de δ et le résidu de quantité de mouvement du fond qui la
-  nourrit ; la cadence la supprime dès 25 ms. δ porte 1 à 2 m/s par endroits (échantillons à la seconde ; témoin : 1,92 avant
-  55 s). **Explication — hypothèse, non démontrée** : la limite de Courant du terme de second ordre, `V = U + u'` — à 10 cm et
-  33 ms, 1 m/s vaut déjà 0,33 maille par pas ; « sans résidu du fond » tient pourtant avec des échantillons à 2,7 m/s : la
-  vitesse seule ne suffit pas à l'expliquer. **Angle mort nouveau** (sévérité 2) : à 10 cm, 30 Hz n'est pas stable sur la
-  minute. Piège de banc : `sans_uu`, `sans_Uu`, `sans_uU` — un seul fichier sous Windows ; relancés sous `c1`, `c2`, `c4`.
-- **P5c** — 60 Hz, un pas par image : `MAILLE=0.1 EMPRISE=n,n PAS_US=16667 PAS=7200 REFERENCES=0 VARIANTES=mg6,mg8`. Deux
-  minutes **tenues** aux deux emprises, aux deux variantes. **4,8 m** (165 888 mailles) : mg 6 résidu médian 5,2·10⁻⁵, pas q99
-  **1,56 ms** ; mg 8 : 9,1·10⁻⁶, 1,79 ms. **5,6 m** (225 792) : mg 6 5,5·10⁻⁵, **1,94 ms** ; mg 8 1,1·10⁻⁵, 2,20 ms. **À 60 Hz, mg 6
-  suffit** au résidu de Jacobi-32 à 25 cm (le point de départ est plus bas à pas court). **Critère 5 à cadence stable** : **5,6 m ×
-  5,6 m** à 10 cm, mg 6, 1,94 ms par image — à 3 % de la limite ; 8 m seulement à 30 Hz, qui n'est pas stable (P5).
-- **P6** — `longue_cuve` : `PAS_US=`, `PAS=`, `FENETRE=`, `CYCLES=`, `NX=`, `MULTIGRILLE=1`, `SANS_SECOND_ORDRE=1` (témoin
-  d'ADR-209 : ni la référence ni la carte, commutateur 64) ; sans variable, le banc de S305. Cuve `nx` = 32 (25 cm), pire écart
-  par fenêtre : **1 ms, Jacobi 64** (le défaut) 1,1 → 4,8·10⁻⁸ m en 5 s — S358 à l'identique ; **1 ms, mg 8** 1,3 → 4,8·10⁻⁸ ;
-  **33 ms, Jacobi-32** 9,3·10⁻⁵ (10 s) → **1,42·10⁻³ m (2 min)**, linéaire, 1,2·10⁻⁵ m/s — 3 mm vers 4 min ; **33 ms, mg 8**
-  4,8·10⁻⁶ → **2,67·10⁻⁵** (2,0·10⁻⁷ m/s, 3 mm vers 4 h) ; **sans ADR-209** : 2,68·10⁻⁵, identique ; **16,7 ms, mg 8, 60 s** :
-  3,3·10⁻⁶. **Critère 6 tenu sur le pas retenu (mg)** ; au défaut Jacobi-32, la sous-convergence (seul le préconditionneur
-  diffère : ÷ 53). **Fait nouveau** : la référence **gagne de l'énergie** à pas long dans la cuve fermée — 33 ms : 100,6 →
-  141,9 J en 2 min (+41 %), **+45 % sans ADR-209** ; 16,7 ms : +15,8 % en 60 s ; 1 ms : −0,47 % en 5 s (durée non comparable) ;
-  amplitude modale 5,32·10⁻² à 100 s pour 5·10⁻² : réel, non un artefact de mesure. Non attribué (A323). **Cuve à 10 cm**
-  (`NX=80`, 134 400 mailles, 33 ms, 10 s seulement : la référence coûte 2,7 s par pas) : `nz` = 42 → **un seul** niveau
-  grossier ; écart 0,44–0,60 mm, la troncature, pas A298 ; −3,8 % d'énergie en 10 s. La cuve à 10 cm sur deux minutes :
-  arrêtée (≈ 2 h 45).
-- **P7** — afficheur : **38 réussis** (S390 : 37, plus l'essai `_s409`), 2 ignorés, aucun échec, zéro avertissement. Le cœur
-  n'est pas touché (dernier décompte, S408 : 739 réussis, 19 ignorés). Critère 7 tenu.
-- **P8** — preuve [MULTIGRILLE-3D-S385](../docs/validation/MULTIGRILLE-3D-S385.md) §6 (Reproduire à `355c4fec`) ; §5 renvoie
-  à §6 ; liste 4.19 (reste partiel : S409, manque 30 Hz stable à 10 cm) ; file : campagne (C3), A298 refermée, A322 et A323
-  ajoutées ; feuille de route §3 ter (S409, suivantes) ; index (carte par système, ligne B) ; angles morts : A298 refermée,
-  **A322**, **A323** (sévérité 2). `--check` : 0.

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-27 13:59 +02:00
+JETON            : occupé
+Battement        : 2026-09-27 14:04 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S410 — physique : **C6b**, la vague qui déferle — la houle de Chen et al. (1999), APIC seul contre la bande dynamique ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S409 — physique : **C3b** ([preuve](docs/validation/MULTIGRILLE-3D-S385.md) §6) — la maille de 10 cm sur la carte : multigrille nécessaire (8 cycles), 8 m sous 2 ms à 30 Hz qui y explose en 62 s (A322), 5,6 m à 60 Hz stable ; A298 refermée (sous-convergence, pas biais) ; la cuve fermée qui gagne de l'énergie au pas long (A323). Avant : S408, C6a, la frontière qui bouge
 Session suivante : **S410**, au choix de l'utilisateur : au poste, **C7** (APIC sur la carte) ; ou **C6b**, la vague qui déferle (sans carte) ; **A322 avant toute scène à 10 cm** (C10) ; la pluie 5b et les peaufinages R32, R33 plus tard
 Maillons        : 1 — S409 : aucun point de liste ni critère de porte n'avance (4.19 reste partiel) ; la priorité du solveur passe avant la règle (S406) ; preuve MULTIGRILLE-3D-S385 §6 ; journal
