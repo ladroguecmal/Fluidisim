@@ -62,79 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S413 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »* — la suite déclarée : **C6c-1**
-([ADR-212](../docs/adr/ADR-212-la-bande-etroite-en-profondeur.md) §4). Agent : Claude Code (Opus 5.5), au poste ; référence CPU.
+Session : S414 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Tu peux commit tout, les pousses. Pour le fond
+automatique il serait intéréssant que les systèmes de prédictions permettent de jouer sur la position du fond, exemple si un
+évènements va aller en profondeur mettre le fond a bonne distance etc.... Mais sans prédictions comme tu le pensais cela me
+convient. »* — `main` et `poste` poussés (`617ea1b4..a554f0cb`). Suite : **C6c-2** (ADR-212 §4 et D4). Agent : Claude Code
+(Opus 5.5), au poste ; référence CPU.
 
-**Thèse** (ADR-212 D1–D3). Une hauteur `β` (« fond de la bande ») par colonne de la bande ; `β` = 0, la bande pleine de
-S398–S410, **au bit**. Une maille dont le centre est sous `β` est **à la grille** (comme une maille de la zone) : `φ = z − β`, eau,
-faces advectées ; la face `w` au-dessus de la dernière lui appartient. **Les soldes** : les débits entre parts eulériennes
-(mouillés jusqu'au plus bas des deux `β`, ou de `β` et `η`) transportent `β` en `f64` ; la part d'une face entre une maille à la
-grille et une maille de particules charge le **solde latéral** de la face-maille (la frontière de S399, généralisée maille par
-maille : « à la grille » d'un côté, particules de l'autre) ; la face `w` au-dessus de `β` charge un **solde vertical** par colonne.
-**L'échange** : une particule sous `β` est absorbée et paie le solde vertical ; un solde vertical dû retire la particule la plus
-proche au-dessus de `β`, reçu en pose une à `β + dx/16`. Particules virtuelles de la part eulérienne (la sienne, les voisines)
-dans la reconstruction. La bascule (S408) refuse, dans cette part, une colonne dont `β` > 0 (C6c-2 la placera).
+**Thèse.** Le critère de S408 place aussi le **fond** : dans chaque colonne de la bande, `k` mailles sous la **première maille
+non-eau depuis le bas** (la surface, le fond d'une cavité, le dessous d'une lèvre, le corps), avec une hystérésis `h` — descendre
+dès que la cible passe sous le fond, remonter seulement au-delà de `h` mailles. **Option, l'idée de l'utilisateur** : dans
+l'empreinte prévue du corps (l'horizon de S408), la cible descend sous le point le plus bas qu'il atteindra. Descendre ensemence
+la tranche au réseau nominal (exact) ; remonter absorbe les particules de la tranche, l'écart de volume au solde vertical (exact).
+Bande → colonne : l'eau sous le fond et le solde vertical comptent dans la masse ; les mailles à la grille sont « occupées ».
+Sans `fond` réglé : S408 au bit.
 
-**Critères, écrits avant** (ADR-212 §3). (1) `β` = 0 : les essais S398–S410 tels quels ; B10 à bande dynamique (S408, défauts)
-et la vague de S410 (défauts) au caractère près. (2) **Repos** : un bassin tout en bande, `β` à quatre mailles sous la surface,
-et un bassin mi-zone mi-bande : vitesses sous les seuils de l'essai de repos de S398–S399, volume ≤ 10⁻⁹, densité au-dessus de
-`β` dans 8 ± 0,4 particules par maille. (3) **Ballottement** (le banc du raccord, S399) avec `β` : période et amortissement à un
-point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande pleine. (4) Suite entière, zéro avertissement.
-**Arrêt** : si la densité au-dessus de `β` dérive (le risque d'A316), la publier et ne rien rendre défaut.
+**Critères, écrits avant** (ADR-212 §3). (1) Sans fond : les essais de S398 à S413, B10 et la vague au caractère près. (2) Aller et
+retour du fond (descente puis remontée, dix fois, sur un état réel) : volume ≤ 10⁻⁹. (3) **B10** (`Fr` = 2, `D/dx` = 8, quart,
+maintien 0,3 s — R34), `fond` = 4 : pincement **à un pas d'APIC seul** (1,5067 √(D/g)) ; particules **÷ 3 au moins** contre S408
+(29 120) ; volume ≤ 10⁻⁹ ; mouvements du fond comptés — sans et avec la prédiction. (4) **La vague de Chen** (maintien 0,3 s),
+`fond` = 4 : planche R35 (APIC seul | bande pleine | bande étroite) — **jugée par l'utilisateur** ; particules, calcul, retours
+rapides publiés. (5) Suite entière, zéro avertissement. **Arrêt** : si le pincement s'écarte de plus d'un pas, publier ce qui le
+porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — `β` : état (`floor`, reste, `solde_w`), `set_band_floor`, volume total, finitude ; essai de refus et de volume ; critère 1 (essais).
-- [x] **P3** — étiquettes et reconstruction : mailles sous `β` à la grille, particules virtuelles jusqu'à `β`.
-- [x] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
-- [x] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
-- [x] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
-- [x] **P7** — essais du repos et du volume ; critère 2.
-- [x] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
-- [x] **P9** — suite entière ; critère 4.
-- [x] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
-- [x] **P11** — rituel.
+- [>] **P1** — jeton, plan seul ; l'idée de l'utilisateur au plan (option mesurée).
+- [ ] **P2** — bande → colonne avec fond : occupation, masse (fond, solde vertical) ; la bascule n'en refuse plus ; essai.
+- [ ] **P3** — `apply_band_floor` : descente (ensemencement), remontée (absorption, écart au solde vertical) ; essai d'allers-retours ; critère 2.
+- [ ] **P4** — `ColumnsSwitch` : cible du fond (`floor_cells`, `floor_hysteresis`, `floor_prediction`), appliquée après le masque ; essais.
+- [ ] **P5** — B10 avec fond, sans et avec prédiction ; critère 3.
+- [ ] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
+- [ ] **P7** — suite entière ; critère 5.
+- [ ] **P8** — preuve BANDE-ETROITE-S413 §5 (un fil, une preuve) ; liste, file, feuille de route, index ; revue R35.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
-- **P2** — `Columns3` : `floor`, `floor_roundoff`, `solde_w`, `floors` (réservés : 16 octets de plus par colonne) ;
-  `set_band_floor` (refus `Domain`/`Shape`/`NotFinite`, particule sous le fond refusée ; zone remise à zéro), `band_floor`,
-  `band_floor_volume` ; `total_volume` + fond + soldes verticaux (rien sans fond) ; `floor_of`, `grid_cell` (utilisés en P3).
-  Essai `_s413` ; les 23 essais d'APIC 3D tenus (24 avec lui).
-- **P3** — `reconstruct` saute les mailles à la grille (`grid_cell`) ; `columns_label` : sous le fond, `φ = z − fond`, eau ;
-  `virtual_column_sums` : une colonne de la bande à fond compte ses particules virtuelles jusqu'à son fond, la sienne comprise.
-  Essai `_s413` : une seule traversée de `φ` par colonne ; hauteur lue **identique au bit** à la bande pleine (0,3989 m ; les
-  virtuelles tombent sur le réseau nominal).
-- **P4** — `columns_advect` : une face-maille `u`, `v` est à la grille si l'une de ses deux mailles l'est (la zone, ou sous le
-  fond) — la règle de S406 maille par maille ; une face `w` si la maille au-dessous est sous le fond (la face au-dessus de la
-  dernière comprise). Sans fond, au bit : 25 essais d'APIC 3D tenus.
-- **P5** — **choix d'implémentation** (à noter dans ADR-212) : le fond **arrondi à une face de maille** (`set_band_floor`) ; la
-  part eulérienne est un contenant de mailles pleines, **fixe** en C6c-1 ; tout débit qui y entre ou en sort charge le **solde
-  vertical** de sa colonne — pas de flux vertical à estimer, pas de maille mixte ; la masse reste au bit (chaque volume compté des
-  deux côtés). `columns_transport` : une rangée d'une frontière zone | bande sous le fond de la bande va au solde vertical (et non
-  au solde latéral) ; entre deux colonnes de la bande, une rangée sous les deux fonds, aux deux soldes verticaux ; sous un seul,
-  au solde vertical du contenant et au solde latéral de la face-maille (réglé côté particules). 25 essais tenus, au bit.
-- **P6** — `columns_exchange` : (1) une particule sous le fond est **absorbée**, paie le solde vertical, sa quantité de mouvement
-  aux faces à la grille (`floor_face`) ; (2)(3) la frontière latérale se lit **maille par maille** (`grid_cell`) ; (4) **le solde
-  vertical** réglé par colonne — dû : la particule la plus basse au-dessus du fond retirée ; reçu : posée à `fond + dx/16`, au
-  sous-réseau le plus libre, vitesse de la grille. La bascule refuse une colonne à fond (C6c-2). 25 essais tenus, au bit.
-- **P7** — trois essais `_s413` (20 × 8 × 20 à 5 cm, 0,5 m d'eau, fond à 0,3 m = quatre mailles sous la surface, 2 s). **Critère 2
-  tenu.** Bande étroite seule : **8,7·10⁻⁶ m/s**, volume **0**, densité **8,000** (contre le fond 8,000), 5 120 particules → 5 120
-  (la bande pleine en aurait 12 800 : **÷ 2,5**). Mi-zone mi-bande : **2,1·10⁻⁵ m/s**, volume 1,3·10⁻¹⁵, densité 8,000. L'onde de
-  S399 (2 cm) sur la bande étroite : volume **−4,4·10⁻¹⁶**, densité **7,733** (contre le fond 8,000), 2 736 → 2 456 particules
-  (l'eau passée aux colonnes), vitesse max 0,18 m/s.
-- **P8** — `apic3d_raccord` : `APIC3D_FOND=<k>` (fond à `k` mailles sous le creux, arrondi ; `seul` + fond = cuve toute en bande
-  à fond), niveau et moment comptent l'eau sous le fond ; le saut ne lit `η` que d'une colonne de la zone (instrument : 10 mailles
-  lues sans colonnes). **Critère 3 tenu** (30 s ; écart de période au mode exact / amortissement par période ; APIC seul en
-  témoin) — 5 cm : seul +0,98 / +0,32 %, 12 800 particules, 105 s ; raccord plein +0,61 / +0,45, 6 571, 68 s ; **raccord à fond
-  (0,30 m) +0,75 / +0,32**, **2 707**, 42 s, densité 7,700 / 7,983 / 8,265, saut 0,114, niveau −1,0 / −0,29 / −0,23 mm, volume
-  −1,6·10⁻¹⁵ ; seul à fond +1,12 / +0,79, 5 089, 60 s. 2,5 cm : seul +0,36 / +0,08, 102 400, 931 s ; raccord plein +0,34 / +0,14
-  (S408 au caractère près), 51 584, 658 s ; **raccord à fond (0,375 m) +0,34 / +0,20**, **13 303**, 394 s, densité 7,814 / 7,948
-  / 8,137, saut 0,158, niveau −0,71 / −0,67 / −1,16 mm ; seul à fond +0,42 / +0,30, 25 411, 485 s, densité **7,974 / 7,998 /
-  7,136** (APIC seul : 7,619 — la dérive de densité d'APIC, plus forte au milieu de la cuve à fond ; à surveiller). **Critère 1
-  tenu** : B10 (défauts) pincement 1,4797, part 0,225, 29 120, 1,09·10⁻¹² — S408 ; la vague (défauts) — S410 ; le raccord plein
-  aux deux mailles — S408. Temps en fournée de cinq, indicatifs. ADR-212 : note datée (le fond sur une face, contenant fixe).
-- **P9** — suite entière : **745 réussis** (741 + quatre essais `_s413`), 19 ignorés, zéro avertissement. Critère 4.
-- **P10** — preuve [BANDE-ETROITE-S413](../docs/validation/BANDE-ETROITE-S413.md) (Reproduire à `610ddc48`) ; liste 4.16 (S413 ;
-  reste partiel), file (campagne : C6c-1 fait, C6c-2 ensuite), feuille de route §3 ter, index (liste des preuves, ligne B).
-  `--check` : 0. *Le battement de P9 (15:55) écrit avant lecture — lu 15:54 (L237).*
