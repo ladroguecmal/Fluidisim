@@ -17839,5 +17839,5 @@ une maille ; le maintien par défaut plus long que B10 ; la vague qui déferle a
 partiel — devient possible une bande de particules qui suit la surface à masse exacte ; la consomment C6b puis les scènes de C10 ;
 preuve BASCULE-S408. Suivant : dans le cloud, **C6b**, la vague qui déferle ; au poste, C3b puis C7.
 **Clôture** (12:39) : *« je vais continuer sur mon pc »* — `main` et `poste` avancés en avance rapide jusqu'à cette tête ;
-`claude/blissful-pasteur-m4j5rn` (S393–S400, entièrement contenue) **reste** : sa suppression est refusée depuis le cloud (le
-commit `fecde440` la disait faite) — à supprimer depuis le poste ou GitHub ; la suite au poste, C3b ou C6b.
+`claude/blissful-pasteur-m4j5rn` (S393–S400, entièrement contenue) : suppression refusée depuis le cloud (le commit `fecde440`
+la disait faite), **faite depuis le poste** par l'utilisateur ; la suite au poste, C3b ou C6b.
