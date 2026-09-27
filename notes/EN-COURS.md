@@ -99,7 +99,8 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 - [x] **P3** — qualité à 10 cm : Jacobi 32/64/128 contre multigrille 4/6/8, deux emprises (300 pas) ; critère 2.
 - [x] **P4** — coût à 10 cm, pas entier et deux parts ; l'emprise la plus grande sous 2 ms ; critères 3 et 5.
 - [x] **P5** — deux minutes à 10 cm, 30 Hz puis 60 Hz si besoin ; critère 4.
-- [>] **P5b** — *ajoutée* : 30 Hz explose à 10 cm quel que soit le solveur ; attribution sur le banc d'A321 (`MAILLE=`, `EMPRISE=`), termes éteints un à un (L136).
+- [x] **P5b** — *ajoutée* : 30 Hz explose à 10 cm quel que soit le solveur ; attribution sur le banc d'A321 (`MAILLE=`, `EMPRISE=`), termes éteints un à un (L136).
+- [>] **P5c** — *ajoutée* : à cadence stable (60 Hz, un pas par image), l'emprise à 10 cm sous 2 ms ; deux minutes.
 - [ ] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
 - [ ] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
 - [ ] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
@@ -160,3 +161,22 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
   résidu médian 1,4·10⁻⁵, divergence franche médiane 2,1·10⁻⁴. Critère 4 : **tenu à 60 Hz, manqué à 30 Hz**. Hypothèse avant
   mesure : le terme de second ordre (Lax-Wendroff, `V = U + u'`) a une limite de Courant ; à 10 cm, `V·dt/dx` est 2,5 fois
   celui de 25 cm (≈ 0,5 par axe sous la houle de `Hs` 2,5 m à 30 Hz). À éprouver : témoin, termes éteints un à un, 25 ms.
+- **P5b** — `--delta3d-a321` branché sur `review_from_env` (`MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8 SECONDES=90`),
+  30 Hz. Explosion (non fini) ou tenue :
+
+  | variante | issue | | variante | issue |
+  |---|---|---|---|---|
+  | témoin | **62 s** (pas 1 860) | | sans éponge | 44 s |
+  | sans terme d'ADR-209 (64) | **7 s** | | sans bande de B (16) | 82 s |
+  | sans `u'·∇u'` (1) | **tient 90 s** | | sans paquet | **62 s, même pas** |
+  | sans `U·∇u'` (2) ; sans `u'·∇U` (4) | 62 s, même pas | | sans résidu du fond (8) | **tient 90 s** |
+  | pas de **25 ms** | **tient 90 s** | | pas de 16,7 ms (P5, `mg-scene`) | tient 120 s |
+
+  **Faits** : l'explosion est brutale (témoin : `max_u` 1,16 m/s à 60 s, 8,3 à 61 s ; part de l'échelle de la maille de `w`
+  0,03 → 0,18) ; ni la pression, ni le paquet, ni `U·∇u'`, ni `u'·∇U` n'en changent l'instant ; le schéma d'avant ADR-209 explose
+  en 7 s ; deux termes la suppriment chacun — l'auto-advection de δ et le résidu de quantité de mouvement du fond qui la
+  nourrit ; la cadence la supprime dès 25 ms. δ porte 1 à 2 m/s par endroits (échantillons à la seconde ; témoin : 1,92 avant
+  55 s). **Explication — hypothèse, non démontrée** : la limite de Courant du terme de second ordre, `V = U + u'` — à 10 cm et
+  33 ms, 1 m/s vaut déjà 0,33 maille par pas ; « sans résidu du fond » tient pourtant avec des échantillons à 2,7 m/s : la
+  vitesse seule ne suffit pas à l'expliquer. **Angle mort nouveau** (sévérité 2) : à 10 cm, 30 Hz n'est pas stable sur la
+  minute. Piège de banc : `sans_uu`, `sans_Uu`, `sans_uU` — un seul fichier sous Windows ; relancés sous `c1`, `c2`, `c4`.

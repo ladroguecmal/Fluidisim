@@ -41,7 +41,8 @@ pub fn banc() -> Result<(), String> {
     pollster::block_on(async {
         let scene = crate::scene::Scene::build(true, false, None);
         let background = &scene.background;
-        let mut config = crate::delta3d_scene::Config::review();
+        // S409 / C3b : `MAILLE=` et `EMPRISE=`, la même scène à une autre maille (`Config::at_mesh`).
+        let mut config = crate::delta3d_scene::Config::review_from_env()?;
         config.step_us = pas_us;
         if let Some(c) = env("CYCLES").and_then(|v| v.parse().ok()) {
             config.cycles = c;
