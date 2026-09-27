@@ -91,8 +91,8 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 - [x] **P3** — la vorticité de la grille aux centres des mailles ; essai (rotation solide, uniforme) ; critère 2.
 - [x] **P4** — `ColumnsSwitch::floor_vorticity` : la colonne requise et le fond sous la maille tourbillonnaire la plus basse ; essai.
 - [x] **P5** — le banc du tourbillon enfoui ; les trois montages ; critère 3.
-- [>] **P6** — la vague de Chen avec le seuil ; critère 4.
-- [ ] **P7** — suite entière ; critère 5.
+- [x] **P6** — la vague de Chen avec le seuil ; critère 4.
+- [>] **P7** — suite entière ; critère 5.
 - [ ] **P8** — preuve (BANDE-ETROITE-S413 §6), ADR-212 note (C6c-3), liste, file, feuille de route, index.
 - [ ] **P9** — rituel.
 
@@ -126,3 +126,16 @@ avertissement. **Arrêt** : ne rien rendre défaut.
   à tous les seuils (vorticité max à 2 % d'APIC seul). **Compris** : l'énergie d'un tourbillon est surtout dans son écoulement
   extérieur, **irrotationnel** — la vorticité le laisse à la grille, qui le lisse ; **la vitesse** (l'idée de l'utilisateur à la
   lettre) le prend : avec elle, l'énergie de la bande égale celle d'APIC seul, 2,3 à 2,8 fois moins de particules.
+- **P6** — la vague de Chen (maintien 0,3 s, fond 4 ; trois à la fois) : C6c-2 — part 0,50, 12 262 particules, 33 s ; **vorticité
+  1 s⁻¹ — part 0,998**, 31 292, 50 s, 13 retours rapides, « retournement » à 0,449 (une maille vide) ; vorticité + vitesse 0,2 m/s
+  — part 1,000, 59 544, 82 s. **Le seuil absolu de vorticité n'est pas à l'échelle** : sous une houle raide de 2 m, la
+  déformation de la grille (1 à 3 s⁻¹) fausse sa vorticité ; la vitesse prend toute la houle. **Ajouté : la part de rotation**
+  (`rotation_share`, le critère Q sans dimension, `|Ω|²/(|Ω|²+|S|²)`, avec un gradient plancher de 0,5 s⁻¹ ; `floor_rotation`) ;
+  essai `_s415` (rotation solide 1, déformation pure 0). Rotation 0,6 : vague — part 0,577, 17 024 particules, retournement
+  0,7021 (C6c-2 : 0,7021), impact 1,3088, **28 retours rapides** ; tourbillon à 5 cm — énergie 0,51, vorticité max 4,28 (le cœur
+  moins bien gardé que par la vorticité simple) ; rotation + vitesse 0,2 — 0,765, 9 000–10 600 particules. Tourbillon à 2,5 cm,
+  vorticité 1 + vitesse 0,2 : **0,800** (APIC seul 0,806), vorticité max 7,00, 66 000–84 000 particules, 360 s. **Critère 4** :
+  la vorticité absolue manqué (la bande prend tout) ; la rotation tient le retournement mais ajoute 39 % de particules et hésite.
+  **Conclusion** : aucun critère ne fait les deux — gratuit sous une houle, complet sur un tourbillon. **La voie** : la vitesse
+  **propre de δ**, relative à B (ADR-198) — la houle est à B, un seuil sur l'écart ne coûte rien sous elle et prend courants,
+  sillages, jets ; elle demande la production relative à B (C7, C10). Essai du jet corrigé (5 s⁻¹ aux bords, pas 2,5).

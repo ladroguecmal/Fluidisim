@@ -1073,3 +1073,64 @@ fn the_switch_follows_a_buried_shear_s415() {
     }
     assert!(!band.contains(&0) && !band.contains(&15));
 }
+
+/// **S415** — le seuil de vitesse : un jet enfoui, uniforme sur ses trois rangées (aucune vorticité en son milieu), est pris par
+/// la vitesse, non par la vorticité seule à un seuil au-dessus de celle de ses bords.
+#[test]
+fn a_buried_jet_is_taken_by_the_speed_threshold_s415() {
+    let run = |vorticity: Option<f32>, speed: Option<f32>| {
+        let (nx, ny, nz, dx) = (16, 4, 16, 0.05f32);
+        let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+        a.enable_columns(&mut host, &vec![0u8; nx * ny]).unwrap();
+        a.seed(&|p| p[2] < 0.5).unwrap();
+        for k in 2..5 {
+            for j in 0..ny {
+                for i in 0..=nx {
+                    a.u[(k * ny + j) * (nx + 1) + i] = 0.5;
+                }
+            }
+        }
+        let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+        s.floor_cells = Some(4);
+        s.floor_vorticity = vorticity;
+        s.floor_speed = speed;
+        s.switch(0, &mut a).unwrap();
+        (0..nx).filter(|&i| !a.is_column(i, 1)).count()
+    };
+    // Aux bords du jet, `∂u/∂z` ≈ 0,5 / (2·dx) = 5 s⁻¹ (différence centrée) : au-dessus de 6 s⁻¹, la vorticité ne voit rien.
+    assert_eq!(run(Some(6.), None), 0);
+    assert_eq!(run(None, Some(0.3)), 16, "la vitesse prend toute la largeur du jet");
+    assert_eq!(run(None, None), 0);
+}
+
+/// **S415** — la part de rotation : 1 pour une rotation solide, 0 pour une déformation pure (`u = γz`, `w = γx` : symétrique),
+/// le gradient à l'échelle de la vorticité pour la rotation (2Ω).
+#[test]
+fn the_rotation_share_tells_a_vortex_from_a_strain_s415() {
+    let (n, dx) = (8usize, 0.1f32);
+    let (mut a, _) = apic(n, n, n, dx, 64);
+    let set = |a: &mut Apic3, su: f32, sw: f32| {
+        for k in 0..n {
+            for j in 0..n {
+                for i in 0..=n {
+                    a.u[(k * n + j) * (n + 1) + i] = su * ((k as f32 + 0.5) * dx - 0.4);
+                }
+            }
+        }
+        for k in 0..=n {
+            for j in 0..n {
+                for i in 0..n {
+                    a.w[(k * n + j) * n + i] = sw * ((i as f32 + 0.5) * dx - 0.4);
+                }
+            }
+        }
+    };
+    set(&mut a, -1.5, 1.5);
+    let (share, gradient) = a.rotation_share(3, 4, 4);
+    println!("S415 part de rotation : rotation solide {share:.4} (gradient {gradient:.3}) ; ");
+    assert!((share - 1.).abs() < 1e-5 && (gradient - 3.).abs() < 1e-4, "{share} {gradient}");
+    set(&mut a, 1.5, 1.5);
+    let (share, _) = a.rotation_share(3, 4, 4);
+    assert!(share.abs() < 1e-5, "{share}");
+}

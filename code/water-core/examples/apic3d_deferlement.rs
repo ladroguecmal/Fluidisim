@@ -100,6 +100,11 @@ fn main() {
                 // S414 : la bande étroite (C6c-2).
                 "fond" => s.floor_cells = Some(x as usize),
                 "fond_h" => s.floor_hysteresis = x as usize,
+                // S415 : le fond qui suit l'écoulement (C6c-3).
+                "vorticite" => s.floor_vorticity = Some(x as f32),
+                "vitesse" => s.floor_speed = Some(x as f32),
+                "rotation" => s.floor_rotation = Some(x as f32),
+                "rotation_gradient" => s.floor_rotation_gradient = x as f32,
                 _ => panic!("clé inconnue : {cle}"),
             }
         }

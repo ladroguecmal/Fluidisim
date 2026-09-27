@@ -1460,6 +1460,35 @@ impl Apic3 {
         (a * a + b * b + c * c).sqrt()
     }
 
+    /// **S415 — la part de rotation** au centre de la maille : `|Ω|² / (|Ω|² + |S|²)`, `Ω` et `S` les parties antisymétrique et
+    /// symétrique du gradient de vitesse (le critère Q de Hunt, Wray et Moin, 1988, sans dimension : au-dessus de ½, la rotation
+    /// l'emporte). Une houle déforme sans tourner (0), un cœur de tourbillon tourne (1). Avec le gradient, sa norme `|∇u|`, s⁻¹.
+    pub(crate) fn rotation_share(&self, i: usize, j: usize, k: usize) -> (f32, f32) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let uc = |i: usize, j: usize, k: usize| 0.5 * (self.u[(k * ny + j) * (nx + 1) + i] + self.u[(k * ny + j) * (nx + 1) + i + 1]);
+        let vc = |i: usize, j: usize, k: usize| 0.5 * (self.v[(k * (ny + 1) + j) * nx + i] + self.v[(k * (ny + 1) + j + 1) * nx + i]);
+        let wc = |i: usize, j: usize, k: usize| 0.5 * (self.w[(k * ny + j) * nx + i] + self.w[((k + 1) * ny + j) * nx + i]);
+        let d = |f: &dyn Fn(usize) -> f32, x: usize, n: usize| {
+            let (lo, hi) = (x.saturating_sub(1), (x + 1).min(n - 1));
+            if hi == lo { 0. } else { (f(hi) - f(lo)) / ((hi - lo) as f32 * dx) }
+        };
+        let g = [
+            [d(&|x| uc(x, j, k), i, nx), d(&|y| uc(i, y, k), j, ny), d(&|z| uc(i, j, z), k, nz)],
+            [d(&|x| vc(x, j, k), i, nx), d(&|y| vc(i, y, k), j, ny), d(&|z| vc(i, j, z), k, nz)],
+            [d(&|x| wc(x, j, k), i, nx), d(&|y| wc(i, y, k), j, ny), d(&|z| wc(i, j, z), k, nz)],
+        ];
+        let (mut s2, mut o2) = (0f32, 0f32);
+        for a in 0..3 {
+            for b in 0..3 {
+                let (s, o) = (0.5 * (g[a][b] + g[b][a]), 0.5 * (g[a][b] - g[b][a]));
+                s2 += s * s;
+                o2 += o * o;
+            }
+        }
+        let norm = (s2 + o2).sqrt();
+        (if s2 + o2 > 0. { o2 / (s2 + o2) } else { 0. }, norm * std::f32::consts::SQRT_2)
+    }
+
     /// **S415** — la vitesse de la grille au centre d'une maille, m/s (moyenne des deux faces de chaque axe).
     pub(crate) fn cell_speed(&self, i: usize, j: usize, k: usize) -> f32 {
         let Domain3 { nx, ny, .. } = self.domain;
@@ -1518,6 +1547,14 @@ pub struct ColumnsSwitch {
     /// rapide sans tourbillon (l'extérieur d'un tourbillon, un courant) — que la grille lisse aussi, mais qu'un courant uniforme ne
     /// demande pas. `None`, le défaut.
     pub floor_speed: Option<f32>,
+    /// **S415 — la rotation, sans échelle** : `Some(r)` — une maille dont la part de rotation (`rotation_share`, le critère Q
+    /// rendu sans dimension) dépasse `r` alors que son gradient dépasse `floor_rotation_gradient` s⁻¹. Un seuil absolu de
+    /// vorticité prenait toute une houle raide (sa déformation, 1 à 3 s⁻¹, fausse la vorticité de la grille) ; la part de
+    /// rotation la laisse à la grille. `None`, le défaut.
+    pub floor_rotation: Option<f32>,
+    /// Le gradient en dessous duquel la part de rotation ne compte pas (l'eau immobile, où `Ω` et `S` sont tous deux du bruit) ;
+    /// défaut 0,5 s⁻¹, *à calibrer*.
+    pub floor_rotation_gradient: f32,
     domain: Domain3,
     required_at: Vec<u64>,
     need: Vec<u8>,
@@ -1558,6 +1595,8 @@ impl ColumnsSwitch {
             floor_prediction: false,
             floor_vorticity: None,
             floor_speed: None,
+            floor_rotation: None,
+            floor_rotation_gradient: 0.5,
             domain,
             required_at: vec![u64::MAX; cols],
             need: vec![0; cols],
@@ -1620,7 +1659,13 @@ impl ColumnsSwitch {
         if self.floor_vorticity.is_some_and(|limit| a.vorticity(i, j, k) > limit) {
             return true;
         }
-        self.floor_speed.is_some_and(|limit| a.cell_speed(i, j, k) > limit)
+        if self.floor_speed.is_some_and(|limit| a.cell_speed(i, j, k) > limit) {
+            return true;
+        }
+        self.floor_rotation.is_some_and(|limit| {
+            let (share, gradient) = a.rotation_share(i, j, k);
+            share > limit && gradient > self.floor_rotation_gradient
+        })
     }
 
     /// **S414** — le plus grand nombre de déplacements du fond d'une colonne (l'hystérésis du fond).
@@ -1648,7 +1693,7 @@ impl ColumnsSwitch {
                 let low = (0..nz).find(|&l| a.label[a.cell(i, j, l)] != WATER).unwrap_or(nz);
                 let mut target = low.saturating_sub(k);
                 // S415 : sous la plus basse maille d'eau qui tourbillonne, ou qui va vite.
-                if self.floor_vorticity.is_some() || self.floor_speed.is_some() {
+                if self.floor_vorticity.is_some() || self.floor_speed.is_some() || self.floor_rotation.is_some() {
                     if let Some(l) = (0..nz).find(|&l| self.flow_needs(a, i, j, l)) {
                         target = target.min(l.saturating_sub(k));
                     }
@@ -1763,7 +1808,7 @@ impl ColumnsSwitch {
             }
         }
         // (3b) S415 : l'eau qui tourbillonne, ou qui va vite, demande des particules.
-        if self.floor_vorticity.is_some() || self.floor_speed.is_some() {
+        if self.floor_vorticity.is_some() || self.floor_speed.is_some() || self.floor_rotation.is_some() {
             for j in 0..ny {
                 for i in 0..nx {
                     let col = j * nx + i;

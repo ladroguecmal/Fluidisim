@@ -88,6 +88,8 @@ fn main() {
                 "fond_h" => s.floor_hysteresis = x as usize,
                 "vorticite" => s.floor_vorticity = Some(x as f32),
                 "vitesse" => s.floor_speed = Some(x as f32),
+                "rotation" => s.floor_rotation = Some(x as f32),
+                "rotation_gradient" => s.floor_rotation_gradient = x as f32,
                 _ => panic!("clé inconnue : {cle}"),
             }
         }
