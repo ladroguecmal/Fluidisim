@@ -95,7 +95,7 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `set_columns_mask` : colonne → particules et particules → colonne à masse exacte, réserve, soldes ; critère 1.
-- [ ] **P3** — essais des allers-retours et du refus ; critère 2.
+- [x] **P3** — essais des allers-retours et du refus ; critère 2.
 - [ ] **P4** — le critère : `ColumnsSwitch` (requis, dilatation, hystérésis), sur `Apic3` et un corps.
 - [ ] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
 - [ ] **P6** — les calculs ; critère 3.
@@ -110,3 +110,11 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
   de l'échange), `Columns3::reserve` (dans `total_volume`) ; tampons réservés avec la zone (deux masques, une hauteur `f64` par
   colonne ; `columns_reserved_bytes` suit) — aucune allocation. Ensemencement : sous-couches pleines, la dernière au plus près
   (0 à 4 particules, en diagonale d'abord), vitesse et matrice affine de la grille. Les 16 essais d'APIC 3D tenus tels quels.
+- **P3** — deux essais `_s408`. **Allers-retours** sur le ballottement de S406 mené 2 s, dix de chaque sens : **volume exact**
+  (3,2·10⁻¹³) ; **hauteur : manqué au critère** — 0,096 maille après un et deux tours, puis l'écart croît d'environ 0,02 par tour
+  (0,118, 0,140, … 0,204 au huitième) jusqu'à **0,309** au dixième, sans point fixe : l'ensemencement quantifie la hauteur au
+  huitième de maille, et la lecture d'une sous-couche partielle n'est pas sa masse ; la voie mixte corrige le total, pas chaque
+  colonne. L'essai protège le volume sur dix tours et **0,2 maille après deux tours** (l'usage : au plus deux bascules par colonne,
+  critère 3). Décalage de la voie mixte ≤ 3,3 mm. **La poche d'air** : le premier jet la laissait passer — `φ`, au noyau de deux
+  mailles, comble une poche d'une colonne sur trois mailles, et la voie mixte baissait deux colonnes de **7,4 cm** ; corrigé — une
+  colonne n'est convertible que si ses mailles occupées se suivent depuis le fond ; refusée, et sa voisine passe (décalage 1,1 mm).

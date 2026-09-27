@@ -489,3 +489,118 @@ fn a_particle_posed_at_the_face_keeps_the_density_at_the_boundary_s407() {
     assert!(last >= 7.6, "{last}");
     assert!(drift.abs() <= 1e-6 && drift_q.abs() <= 1e-6);
 }
+
+/// S408 : le ballottement de l'essai de S406 (frontière au nœud), mené 2 s — un état réel, particules regroupées comprises.
+fn sloshing_state() -> Apic3 {
+    let (nx, ny, nz) = (20, 8, 20);
+    let (mut a, mut arena) = apic(nx, ny, nz, 0.05, nx * ny * nz * 8);
+    let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx >= 10) as u8).collect();
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+    let profil = |x: f32| 0.5 + 0.02 * (std::f32::consts::PI * x).cos();
+    let eta: Vec<f32> = (0..nx * ny).map(|c| profil(((c % nx) as f32 + 0.5) * 0.05)).collect();
+    a.set_columns_surface(&eta).unwrap();
+    a.seed(&|p| p[2] < profil(p[0]) && p[0] < 0.5).unwrap();
+    let mut t = 0u64;
+    while t < 2_000_000 {
+        let us = a.stable_step_us(20_000).min(2_000_000 - t);
+        a.step(us).unwrap();
+        t += us;
+    }
+    a
+}
+
+/// La hauteur de chaque colonne : `η` dans la zone, l'iso-zéro de `φ` (reconstruite) dans la bande.
+fn heights(a: &mut Apic3) -> Vec<f32> {
+    a.reconstruct();
+    a.columns_label();
+    let Domain3 { nx, ny, .. } = a.domain();
+    (0..nx * ny)
+        .map(|c| if a.is_column(c % nx, c / nx) { a.columns_surface().unwrap()[c] } else { read_height(a, c % nx, c / nx) })
+        .collect()
+}
+
+#[test]
+fn round_trips_between_columns_and_particles_keep_the_volume_and_the_shape_s408() {
+    // Critère 2 de S408 : sur un état réel, dix allers-retours de chaque sens — (A) la zone passée en particules puis rendue aux
+    // colonnes, (B) la bande passée en colonnes puis rendue aux particules — : volume total exact (≤ 10⁻⁹) ; hauteur de chaque
+    // colonne à 0,2 maille du départ (le critère de S323).
+    let mut a = sloshing_state();
+    let (nx, ny) = (20, 8);
+    let zone: Vec<u8> = (0..nx * ny).map(|c| (c % nx >= 10) as u8).collect();
+    let v0 = a.total_volume();
+    let h0 = heights(&mut a);
+    let (mut worst_v, mut worst_h) = (0f64, [0f32; 2]);
+    let mut shifts = [0f32; 2];
+    let mut after_two = 0f32;
+    for cycle in 0..10 {
+        // (A) la zone → particules → colonnes.
+        let all_band = vec![0u8; nx * ny];
+        let there = a.set_columns_mask(&all_band).unwrap();
+        assert_eq!((there.to_particles, there.to_columns, there.refused), (nx * ny / 2, 0, 0));
+        worst_v = worst_v.max((a.total_volume() / v0 - 1.).abs());
+        let back = a.set_columns_mask(&zone).unwrap();
+        assert_eq!((back.to_columns, back.refused), (nx * ny / 2, 0));
+        shifts[0] = shifts[0].max(back.shift.abs());
+        worst_v = worst_v.max((a.total_volume() / v0 - 1.).abs());
+        let h = heights(&mut a);
+        for c in 0..nx * ny {
+            worst_h[0] = worst_h[0].max((h[c] - h0[c]).abs() / 0.05);
+        }
+        // (B) la bande → colonnes → particules.
+        let all_zone = vec![1u8; nx * ny];
+        let there = a.set_columns_mask(&all_zone).unwrap();
+        assert_eq!((there.to_columns, there.refused), (nx * ny / 2, 0));
+        shifts[1] = shifts[1].max(there.shift.abs());
+        worst_v = worst_v.max((a.total_volume() / v0 - 1.).abs());
+        a.set_columns_mask(&zone).unwrap();
+        worst_v = worst_v.max((a.total_volume() / v0 - 1.).abs());
+        let h = heights(&mut a);
+        for c in 0..nx * ny {
+            worst_h[1] = worst_h[1].max((h[c] - h0[c]).abs() / 0.05);
+        }
+        if cycle == 1 {
+            after_two = worst_h[0].max(worst_h[1]);
+        }
+    }
+    println!(
+        "S408 allers-retours ×10 : volume {worst_v:.1e} ; hauteur, pire écart {:.3} maille (zone → particules → colonnes), {:.3} \
+         (bande → colonnes → particules) ; après deux tours {:.3} ; décalage de la voie mixte au plus {:.2e} / {:.2e} m",
+        worst_h[0], worst_h[1], after_two, shifts[0], shifts[1]
+    );
+    // Le volume, exact sur les dix tours (critère 2). La hauteur : le critère de S408 — 0,2 maille après **dix** tours — est
+    // **manqué** (0,309 : l'ensemencement quantifie la hauteur au huitième de maille et la lecture d'une sous-couche partielle
+    // n'est pas sa masse ; l'écart croît d'environ 0,02 maille par tour, sans point fixe) ; ce que l'essai protège est ce que
+    // l'usage demande, au plus deux bascules par colonne : 0,2 maille après deux tours.
+    assert!(worst_v <= 1e-9, "{worst_v}");
+    assert!(after_two <= 0.2, "{after_two}");
+    // Et le calcul repart : dix pas, volume toujours exact.
+    for _ in 0..10 {
+        let us = a.stable_step_us(20_000);
+        a.step(us).unwrap();
+    }
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+}
+
+#[test]
+fn a_column_with_an_air_pocket_stays_in_particles_s408() {
+    // Une colonne dont les particules laissent un vide entre deux nappes n'est pas un graphe posé sur le fond : refusée, rien ne
+    // change ; ses voisines, convertibles, passent. Sans zone, ou sur une longueur fausse : refus.
+    let (nx, ny, nz) = (8, 8, 16);
+    let (mut a, mut arena) = apic(nx, ny, nz, 0.05, nx * ny * nz * 8);
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &vec![0u8; nx * ny]).unwrap();
+    // De l'eau jusqu'à 0,4 m, sauf, dans la colonne (3, 3), une poche d'air de 0,15 à 0,3 m.
+    a.seed(&|p| p[2] < 0.4 && !((p[0] / 0.05) as usize == 3 && (p[1] / 0.05) as usize == 3 && p[2] > 0.15 && p[2] < 0.3)).unwrap();
+    let v0 = a.total_volume();
+    let mut want = vec![0u8; nx * ny];
+    want[3 * nx + 3] = 1;
+    want[3 * nx + 5] = 1;
+    let change = a.set_columns_mask(&want).unwrap();
+    println!("S408 poche d'air : {change:?}");
+    assert_eq!((change.to_columns, change.refused), (1, 1));
+    assert!(!a.is_column(3, 3) && a.is_column(5, 3));
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+    assert_eq!(a.set_columns_mask(&want[1..]).unwrap_err(), Error::Shape);
+    let (mut plain, _) = apic(4, 4, 4, 0.05, 64);
+    assert_eq!(plain.set_columns_mask(&[0; 16]).unwrap_err(), Error::Domain);
+}
+

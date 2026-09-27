@@ -735,11 +735,22 @@ impl Apic3 {
     }
 
     /// **S408 — la hauteur d'une colonne de particules**, lue sur `φ` comme la pression la voit (l'iso-zéro entre deux centres),
-    /// **si elle est convertible** : un seul segment d'eau posé sur le fond, aucune maille solide. `None` sinon.
+    /// **si elle est convertible** : un seul segment d'eau posé sur le fond, aucune maille solide, et **ses mailles occupées
+    /// d'un seul tenant depuis le fond** — une poche d'air plus étroite que le noyau, que `φ` comble, laisse des mailles vides
+    /// (vu : une poche d'une colonne sur trois mailles passait, et la voie mixte baissait deux colonnes de 7,4 cm). `None` sinon.
+    /// Les particules doivent être triées (`bin`).
     fn convertible_height(&self, i: usize, j: usize) -> Option<f64> {
         let Domain3 { nz, dx, .. } = self.domain;
         let phi = |k: usize| self.phi[self.cell(i, j, k)];
         if (0..nz).any(|k| self.label[self.cell(i, j, k)] == SOLID) || !(phi(0) < 0.) {
+            return None;
+        }
+        let occupied = |k: usize| {
+            let cell = self.cell(i, j, k);
+            self.bin_start[cell + 1] > self.bin_start[cell]
+        };
+        let filled = (0..nz).take_while(|&k| occupied(k)).count();
+        if filled == 0 || (filled..nz).any(occupied) {
             return None;
         }
         let top = (0..nz).take_while(|&k| phi(k) < 0.).count() - 1;
