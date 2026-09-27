@@ -95,7 +95,7 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
 - [x] **P3** — essais des critères 1 à 6.
 - [x] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
 - [x] **P5** — les calculs du banc ; critère 7.
-- [ ] **P6** — suite entière, zéro avertissement ; critère 8.
+- [x] **P6** — suite entière, zéro avertissement ; critère 8.
 - [ ] **P7** — preuve `IMPACT-PREVU-S405` ; liste (9.3, 9.2), file, feuille de route, index ; note datée d'ADR-013.
 - [ ] **P8** — rituel.
 
@@ -131,3 +131,4 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
   mm) ; part moyenne 0,407–0,433. **Critère 7** : la part prédiction tenue (1,11 s ≥ 0,5 s ; jamais dehors ; 0,595 mm ≤ 1 mm) ; la
   prédiction « témoin refusé » manquée à la phase prévue, vérifiée à une phase sur cinq. La prédiction coûte 10 à 15 % de mailles
   (la région calculée à δ = 0 avant l'impact).
+- **P6** — suite entière : **732 réussis**, 19 ignorés, zéro échec, zéro avertissement (726 + 6 essais `_s405`).
