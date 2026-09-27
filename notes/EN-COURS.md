@@ -62,99 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S404 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S403 : **C8e**, l'épars et
-les niveaux sous le pas couplé ; file, « Le domaine épars — ce que S401 laisse » : *le pas couplé sous l'ensemble : avant C10*.
-Agent : Claude, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Branche
-`claude/eager-volta-lf0kw3`, la plus avancée (`main`, `poste` et `claude/blissful-pasteur-m4j5rn` en sont ancêtres).
+Session : S405 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« continue »*. Suite proposée par S404 : deux maillons, un
+lot qui fait changer de case un point de la liste — **9.3**, la prédiction balistique, à comparer au raccord C5. **Choix** : 9.3.
+Il est au front 0 (rien à attendre), il débloque 9.4 et 9.6, et il sert la scène de C10 — le saut ; C5 reste sous la condition
+d'A316, et un changement de case n'y est pas en vue (4.16 est déjà partiel). Agent : Claude, session cloud Claude Code ; fichiers,
+git, cargo, Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, la plus avancée.
 
-**Thèse.** La scène de C10 — le joueur qui saute, la gerbe d'étrave — est δ **sous B + W** : son domaine doit suivre l'objet en
-ensemble épars et changer de niveau au rang 4. S401 (l'ensemble) et S402 (le transfert) refusent le pas couplé. Au pas couplé, le
-bord de la boîte n'est pas qu'un mur : B y est prescrit, sa bande y passe, et l'éponge d'ADR-164 y absorbe δ. « Le bord de
-l'ensemble se comporte comme le bord de la boîte » veut donc dire : δ fermé aux murs de l'ensemble, la bande de B comptée aux murs
-comme au bord, l'éponge mesurée depuis le bord de l'ensemble — qui devient **absorbant** (S401 : « les murs de l'ensemble
-réfléchissent »). Hors de l'ensemble, δ nul est le point fixe du pas **relatif** (ADR-198 D1, le mode de la production) ; le pas
-de S297 donne à δ les restes de B partout, ce qu'un ensemble ne peut pas porter : refusé. Le transfert de niveau porte l'ensemble
-de la même façon : le bord de l'ensemble de départ comme le bord de la boîte, rien dehors, les murs d'arrivée fermés ; le volume
-exact quand l'arrivée couvre le départ, publié sinon. B seul au banc ; W s'y somme de la même façon (`BackgroundFaces3`).
+**Thèse.** La source (§8.2) : pour un objet balistique — un véhicule qui quitte un pont —, estimer **point d'impact, vitesse,
+orientation, rotation, région de simulation utile** ; le temps de vol devient la fenêtre qui prépare le domaine d'eau. ADR-013 §2
+en donne les paliers (T4 veille, T3 réservation à `t < 8 s`, T2 construction quand `½·a_max·t² ≤ R`, T1 actif à `t < 0,3 s`) :
+un objet balistique (`a_max` = 0) passe en T2 dès qu'il est à moins de 8 s de l'eau. Rien de cela n'existe dans le code : `Follow`
+(S401) prolonge la vitesse **horizontale** d'un objet, sans chute ni surface. S405 écrit le prédicteur dans le cœur — translation
+sous gravité et traînée quadratique (RK4), rotation libre d'un corps rigide (équations d'Euler), contact de sa sphère englobante
+avec une **surface mouvante** (la houle de B), affinage de l'instant — ; la **région utile** couvre l'incertitude de traînée ; le
+**palier** suit ADR-013 §2. Le consommateur : le domaine épars en mer, dont l'ensemble est préparé au point d'impact prévu.
 
-**Critères, écrits avant.** (1) Sans ensemble, la suite au bit ; ensemble plein sous le pas couplé relatif, 50 pas au bit du pas
-sans ensemble, avec et sans le terme d'ADR-209. (2) Sous une houle réelle (B, relatif) : (a) un rectangle dans une fenêtre contre
-le dense de ce rectangle, mêmes échantillons de B, éponge sur les deux axes, ≤ 10 µm sur 5 s (prédiction ≤ 1 µm : l'ordre des
-sommes) ; (b) deux rectangles séparés contre deux denses, l'écart au repos au bit ; (c) le bilan fermé au plancher du dense, les
-murs comptés au bord ; vu échouer : la bande des murs en face intérieure, l'éponge depuis le bord de la boîte, les faces fermées
-prédites ; refus du pas de S297 avec un ensemble. (3) Transfert d'un rectangle 25 → 50 → 25 cm contre le dense du rectangle :
-≤ 1 µm (prédiction : la surface au bit, `dx` dyadiques) ; volume exact au plancher quand l'arrivée couvre, la perte publiée sinon.
-(4) Banc en mer (houle de 5 cm, λ ≈ 16 m) : une source à 2 m/s, l'épars qui suit (`Follow` de S401) à ≤ 3 mm du domaine entier
-partout et toujours (prédiction ≤ 1 mm), la source dedans ; la part des mailles au cours du temps — prédiction : l'ensemble se
-vide derrière l'objet, part finale ≤ 0,6 (S401, bassin fermé : 0,85) ; témoin aux murs réfléchissants (éponge au seul bord de la
-boîte) pour l'attribuer ; un cas long, 30 s (L369). (5) Niveaux sous la houle : l'épars qui suit passe 25 → 50 cm à 3 s et revient
-à 6 s, contre le dense qui fait les mêmes passages : ≤ 3 mm (prédiction ≤ 1 mm) ; sauts aux passages ≤ 3 mm ; volume des
-transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-210 D2). (6) Suite entière, zéro avertissement.
+**Critères, écrits avant.** (1) Vide, surface plane : instant et point d'impact exacts à 10⁻⁹ s et 10⁻⁸ m (RK4 est exact sur une
+parabole) ; pas d'impact dans l'horizon, ou objet déjà sous la surface : `None`. (2) Chute verticale avec traînée quadratique
+contre la solution analytique : ordre 4 lu sur trois pas (rapport 16 à 20 % près) ; ≤ 10⁻⁶ s à 10 ms. (3) Rotation libre : toupie
+symétrique contre sa précession analytique, rotation autour d'un axe principal contre l'orientation exacte, ≤ 10⁻⁸ à 1 ms sur 2 s.
+(4) Surface mouvante (houle de 5 cm) : l'instant de contact à ≤ 1 ms d'une référence à 0,1 ms ; publié : l'erreur d'une prédiction
+qui ignorerait la houle (prédiction : quelques ms, quelques cm). (5) Paliers d'ADR-013 §2 aux frontières. (6) Région : une traînée
+connue à ±30 % près — les trois prédictions dans la région. (7) Banc en mer : un objet de 0,25 m lancé à 12 m/s de 6 m, l'ensemble
+revu toutes les 0,5 s ; **avec prédiction**, la région d'impact dans l'ensemble ≥ 0,5 s avant l'impact, la source d'entrée (le
+volume déplacé) toujours dedans, l'écart au domaine entier ≤ 3 mm (prédiction ≤ 1 mm) ; **le témoin** — l'objet suivi là où il est —
+voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le pas couplé porte l'ensemble (`delta3d_coupling.rs`, `delta3d_sparse.rs`) : mode relatif exigé ; faces fermées non
-  prédites, gradients au bord de l'ensemble comme au bord de la boîte ; bande de B aux murs comme au bord, colonnes dehors
-  intouchées ; éponge depuis le bord de l'ensemble (étendues par colonne, réservées) ; bilan aux murs.
-- [x] **P3** — essais du pas couplé : critère 1, oracles (a) (b) (c) sous la houle, refus ; vu échouer (trois défauts injectés).
-- [x] **P4** — le transfert de niveau porte l'ensemble (`delta3d_levels.rs`) ; `Follow::require_cover` ; essais du critère 3.
-- [x] **P5** — le banc `delta3d_mer_epars` : cas `suivi`, `murs` (témoin), `long`, `niveaux` ; lancés en arrière-plan.
-- [x] **P6** — les calculs du banc ; critères 4 et 5.
-- [x] **P7** — suite entière, zéro avertissement ; critère 6.
-- [x] **P8** — preuve `MER-EPARS-S404` ; liste (4.3, 4.7), file, feuille de route, index ; notes datées d'ADR-006 et d'ADR-210.
-- [x] **P9** — rituel.
+- [ ] **P2** — `ballistic.rs` : état, prédiction (RK4, traînée, Euler, contact, affinage), région, palier.
+- [ ] **P3** — essais des critères 1 à 6.
+- [ ] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
+- [ ] **P5** — les calculs du banc ; critère 7.
+- [ ] **P6** — suite entière, zéro avertissement ; critère 8.
+- [ ] **P7** — preuve `IMPACT-PREVU-S405` ; liste (9.3, 9.2), file, feuille de route, index ; note datée d'ADR-013.
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
-- **P2** — `delta3d_coupling.rs` : faces fermées par l'ensemble non prédites ; gradients de la prédiction, voisin hors de la grille
-  de l'ensemble lu comme la face (règle d'advection de S401) ; transport : un mur lu comme le bord de la boîte du côté de sa
-  colonne (surface de la colonne + η de B à la face, surface de B `repos + η`), colonnes dehors intouchées ; éponge
-  `sponge_factor3` : rampes mesurées dans l'**étendue** de la colonne (`Sparse3::extent`, `[i0, i1, j0, j1]`, réservée,
-  recalculée à chaque changement), la plus forte des deux colonnes d'une face ; `Sponge3::ramp`/`from_ramps` extraits de `factor`
-  au bit ; bilan : les murs au bord, signés vers l'ensemble. Refus : ensemble sans les trois bits relatifs. Témoin d'essai
-  `set_sparse_edge_sponge_for_trials(false)` : l'éponge au seul bord de la boîte. **104 essais delta3d tenus** tels quels (S297 à
-  S402), zéro avertissement.
-- **P3** — `tests_delta3d_sparse_mer.rs`, cinq essais `_s404`, houle de S369 oblique (36°), relatif, éponge 1 × 0,5 m à 2 s⁻¹,
-  bosse de 5 cm, 5 s. **Critère 1 tenu** : ensemble plein, 50 pas au bit, avec et sans ADR-209, bilans égaux. **Critère 2 tenu** :
-  (a) rectangle 16 × 8 dans 32 × 24 contre le dense (B échantillonnée aux mêmes points, au bit) : **2,384·10⁻⁷ m**, un ulp à 2 m,
-  Jacobi et multigrille ; (c) bilan, résidu/échelle 9,0·10⁻⁸ (épars) contre 7,7·10⁻⁸ (dense), 6,1 contre 6,4·10⁻⁸ en multigrille ;
-  bandes entrées à 1,3–1,7·10⁻⁷ relatif ; δ ne traverse rien (`perturbation_in` nul) ; dehors au repos au bit ; (b) deux
-  rectangles : 2,384·10⁻⁷ m ; refus : pas de S297, deux bits sur trois. **Vu échouer** : (1) bande des murs en face intérieure :
-  **8,4·10⁻⁴ m**, bandes à 10,7 % ; (2) témoin, éponge au seul bord de la boîte : **3,2·10⁻² m** (l'éponge du dense couvre une
-  bonne part du rectangle) ; (3) faces fermées prédites : **2,6·10⁻⁴ m**, et le dehors n'est plus au repos ; (4) gradients qui
-  lisent le dehors à zéro : **2,8·10⁻⁴ m**. Tous retirés.
-- **P4** — `delta3d_levels.rs` : les refus d'ensemble levés (la découpe reste refusée) ; départ : une colonne dehors porte le
-  repos, sans pente ; pente décentrée et terme croisé nul au bord de l'ensemble ; vitesses : un coin hors de la grille de
-  l'ensemble prend, axe par axe, la valeur de son voisin dedans (`staggered_in_set`, la borne de la boîte) ; arrivée : colonnes
-  dehors au repos, murs fermés. `Follow::require_cover` (`domain_blocks.rs`) : les blocs qui couvrent l'ensemble d'un autre niveau,
-  requis à l'instant. **Critère 3 tenu** : un rectangle 25 → 50 → 25 cm contre son dense, surface et vitesses **au bit** (0,000),
-  volumes exacts ; une arrivée qui ne couvre que la moitié perd exactement ce que portait l'autre (1,039676·10⁻² m³), publié ; un
-  dense reçoit tout d'un épars. **Trouvé par l'essai** : une colonne de départ dehors ne doit pas « ne rien porter » mais porter
-  le **repos** — la reconstruction est en hauteur absolue ; sans cela, un dense recevait −79,9 m³. L'essai S402 qui refusait un
-  ensemble ne le refuse plus (son commentaire le dit) ; les chiffres de S402 inchangés (0,304 %).
-- **P5** — `examples/delta3d_mer_epars.rs` : fenêtre 32 × 16 m à 25 cm (128 × 64 × 12 ; 64 × 32 × 6 à 50 cm), houle de S369
-  oblique, relatif, éponge 2 m à 4 s⁻¹ (`10·c_g/largeur`, S315), dipôle de S401, `Follow` (4 m, 1 mm, 0,25 s, prévision
-  `a_max` 1). Cas `suivi`, `murs`, `long` (0,8 m/s, 30 s), `niveaux` (3 s / 6 s) ; `MER_DUREE_S` pour la fumée. Fumée : 0,4 s de
-  `suivi`, écart nul, ≈ 330 ms par pas ; 3,2 s de `niveaux` : saut au passage 2,04 mm (entier et épars), épars contre entier
-  0,12 mm, volumes exacts. Lancés à 10:04 en parallèle (quatre cœurs), journaux `mer_<cas>.log` dans le brouillon ; durée
-  attendue ≈ 10 min (`suivi`, `murs`, `niveaux`), ≈ 25 min (`long`).
-- **P6** (en cours) — `suivi` : écart max **0,138 mm** (dans l'ensemble 0,108), amplitude 25,9 mm, source dedans ; part moyenne
-  0,830, max 0,875, toutes les 2 s 0,734/0,852/0,875/0,875/0,812 ; rendu au repos −7,7·10⁻⁴ m³, 0,12 mm au plus ; 6,6
-  itérations ; 325/356 ms par pas. `murs` (témoin) : écart **0,210 mm**, part **identique** au millième, rendu 0,29 mm au plus.
-  **Critère 4** : écart tenu (prédiction ≤ 1 mm tenue) ; la prédiction « part finale ≤ 0,6 » **manquée** (0,812) — et le témoin
-  dit que le bord absorbant n'y change rien : il ôte un tiers de l'écart (0,21 → 0,14 mm), pas des mailles.
-- **P6** (suite) — `niveaux` : l'épars qui suit **contre l'entier qui fait les mêmes passages : 0,138 mm** (critère 5 tenu,
-  prédiction ≤ 1 mm tenue) ; sauts au passage 2,04 mm, au retour 1,52 mm, **les mêmes** pour l'entier et l'épars ; volumes des
-  quatre transferts exacts ; le prix du niveau (l'entier contre la référence à 25 cm) : 0 / **17,8** / **18,3 mm** avant, pendant,
-  après — la source d'une maille grossière, comme S402 (15,7 / 16,7 mm) ; part de l'épars 1,000 pendant les 50 cm (la couverture
-  en blocs de 4 m prend toute la fenêtre de 16 m), 0,875–0,922 après.
-- **P6** (fin) — `long`, 0,8 m/s, 30 s : écart max **0,433 mm** (dans l'ensemble 0,370), amplitude 7,1 mm, source dedans ; l'écart
-  croît lentement — 0,01 mm à 3 s, 0,24 à 18–24 s, 0,27 à 27 s, 0,43 à 30 s, quand la source approche du bord de la fenêtre
-  (x = 28 m) — sans atteindre le millimètre ; part moyenne 0,686, **0,78 à 18 s puis 0,55 à 30 s** : ici l'ensemble se vide derrière
-  l'objet (la prédiction ≤ 0,6 tenue en fin de cas long, manquée à 10 s du cas `suivi`) ; rendu au repos +4,5·10⁻⁴ m³, 0,12 mm au
-  plus ; 338/314 ms par pas. **Critères 4 et 5** : écarts tenus partout (≤ 0,43 mm), la part manquée à 10 s, tenue à 30 s.
-- **P7** — suite entière : **726 réussis**, 19 ignorés, zéro échec, zéro avertissement (718 + 8 essais `_s404`).
-- **P8** — preuve `docs/validation/MER-EPARS-S404.md` (Reproduire au commit `0c42be3f`) ; liste 4.3, 4.5, 4.7, 9.2 complétées
-  (aucun point ne change de case) ; file : la campagne (C8e) et « Le domaine épars — ce que S401 et S404 laissent » ; feuille de
-  route §3 ter (S404 ; suivantes : C3b au poste, C5 puis C6 sous A316, le pool au poste) ; index (carte B, liste des preuves) ;
-  notes datées d'ADR-006 et d'ADR-210.
