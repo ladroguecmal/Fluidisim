@@ -15,7 +15,7 @@ Battement        : 2026-09-27 12:39 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
 Session en cours : aucune
 Dernière session : S408 — physique : **C6a** ([preuve](docs/validation/BASCULE-S408.md)) — la frontière qui bouge : la bascule colonnes ↔ particules à masse exacte et son critère ; B10 à un pas d'APIC seul avec 22 % des colonnes en particules ; deux pertes de masse du pas de S399 corrigées ; 4.10 partiel. Avant : S407, le critère du raccord tenu aux deux mailles
-Session suivante : **au poste** — l'utilisateur y continue (2026-09-27) ; `main`, `poste` et `claude/eager-volta-lf0kw3` à la même tête, une seule lignée. **S409**, au choix de l'utilisateur : **C3b** (10 cm, A298 ; la carte) puis C7, ou **C6b**, la vague qui déferle (sans carte) ; la pluie 5b et les peaufinages R32, R33 plus tard
+Session suivante : **au poste** — l'utilisateur y continue (2026-09-27) ; `main`, `poste` et `claude/eager-volta-lf0kw3` à la même tête, une seule lignée (`claude/blissful-pasteur-m4j5rn`, S400, entièrement contenue, à supprimer). **S409**, au choix de l'utilisateur : **C3b** (10 cm, A298 ; la carte) puis C7, ou **C6b**, la vague qui déferle (sans carte) ; la pluie 5b et les peaufinages R32, R33 plus tard
 Maillons        : 0 — S408 : 4.10 passe à partiel ; devient possible une bande de particules qui suit la surface à masse exacte, consommée par C6b puis les scènes de C10 ; preuve BASCULE-S408 ; journal
 ```
 
