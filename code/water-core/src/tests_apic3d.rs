@@ -843,3 +843,67 @@ fn the_floor_is_water_and_not_a_surface_s413() {
     println!("S413 fond : hauteur lue {:.4} sans fond, {:.4} avec ; écart max {pire:.2e} m", sans[27], avec[27]);
     assert!(pire < 0.1 * dx, "{pire}");
 }
+
+/// **S413** — un bassin au repos, 0,5 m d'eau à 5 cm, la bande à fond (0,3 m : quatre mailles sous la surface), toute la
+/// largeur (`zone` faux) ou la moitié à côté de colonnes (`zone` vrai). Rend `(vitesse max, dérive relative du volume, densité
+/// moyenne des quatre rangées au-dessus du fond, densité de la rangée contre le fond, particules au départ, à la fin)`.
+fn floor_at_rest(zone: bool, seconds: f64, wave: bool) -> (f32, f64, f64, f64, usize, usize) {
+    let (nx, ny, nz, dx) = (20, 8, 20, 0.05f32);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let mask: Vec<u8> = (0..nx * ny).map(|c| u8::from(zone && c % nx >= 10)).collect();
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+    let profil = |x: f32| if wave { 0.5 + 0.02 * (std::f32::consts::PI * x).cos() } else { 0.5 };
+    let eta: Vec<f32> = (0..nx * ny).map(|c| profil(((c % nx) as f32 + 0.5) * dx)).collect();
+    a.set_columns_surface(&eta).unwrap();
+    a.set_band_floor(&vec![0.3; nx * ny]).unwrap();
+    let n0 = a.seed(&|p| p[2] >= 0.3 && p[2] < profil(p[0]) && (!zone || p[0] < 0.5)).unwrap();
+    let v0 = a.total_volume();
+    let (mut t, mut vmax, end) = (0u64, 0f32, (seconds * 1e6) as u64);
+    while t < end {
+        let us = a.stable_step_us(20_000).min(end - t);
+        let r = a.step(us).unwrap();
+        vmax = vmax.max(r.max_speed).max(a.columns_max_speed());
+        t += us;
+    }
+    let band = |i: usize| !zone || i < 10;
+    let mut occ = vec![0u32; nx * ny * nz];
+    for p in a.particles() {
+        let f = |x: f32, m: usize| ((x / dx).max(0.) as usize).min(m - 1);
+        occ[(f(p[2], nz) * ny + f(p[1], ny)) * nx + f(p[0], nx)] += 1;
+    }
+    let mean = |rows: std::ops::Range<usize>| {
+        let (mut s, mut n) = (0u64, 0u64);
+        for k in rows {
+            for j in 0..ny {
+                for i in (0..nx).filter(|&i| band(i)) {
+                    s += occ[(k * ny + j) * nx + i] as u64;
+                    n += 1;
+                }
+            }
+        }
+        s as f64 / n as f64
+    };
+    (vmax, a.total_volume() / v0 - 1., mean(6..9), mean(6..7), n0, a.particle_count())
+}
+
+/// **S413, critère 2** — la bande étroite au repos : toute la largeur, puis mi-zone mi-bande ; 2 s ; vitesse ≤ 1 cm/s (l'essai de
+/// S399), volume à 10⁻⁹, densité des trois rangées pleines au-dessus du fond à 8 ± 0,4 particules par maille.
+#[test]
+fn a_narrow_band_at_rest_stays_at_rest_s413() {
+    for zone in [false, true] {
+        let (vmax, drift, dense, contre, n0, n1) = floor_at_rest(zone, 2., false);
+        println!("S413 repos, zone {zone} : vitesse max {vmax:.2e} m/s, volume {drift:+.2e}, densité {dense:.3} (contre le fond {contre:.3}), particules {n0} → {n1}");
+        assert!(vmax <= 0.01, "{vmax}");
+        assert!(drift.abs() <= 1e-9, "{drift}");
+        assert!((dense - 8.).abs() <= 0.4 && (contre - 8.).abs() <= 0.4, "{dense} {contre}");
+    }
+}
+
+/// **S413** — l'onde de S399 (2 cm, 2 s) sur la bande étroite, mi-zone mi-bande : le volume au bit du compte, l'échange en marche.
+#[test]
+fn a_wave_over_a_narrow_band_keeps_the_volume_s413() {
+    let (vmax, drift, dense, contre, n0, n1) = floor_at_rest(true, 2., true);
+    println!("S413 onde sur la bande étroite : vitesse max {vmax:.2e} m/s, volume {drift:+.2e}, densité {dense:.3} (contre le fond {contre:.3}), particules {n0} → {n1}");
+    assert!(drift.abs() <= 1e-9, "{drift}");
+    assert!((dense - 8.).abs() <= 0.4, "{dense}");
+}

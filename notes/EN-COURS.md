@@ -90,8 +90,8 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - [x] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
 - [x] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
 - [x] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
-- [>] **P7** — essais du repos et du volume ; critère 2.
-- [ ] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
+- [x] **P7** — essais du repos et du volume ; critère 2.
+- [>] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
 - [ ] **P9** — suite entière ; critère 4.
 - [ ] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
 - [ ] **P11** — rituel.
@@ -118,3 +118,8 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
   aux faces à la grille (`floor_face`) ; (2)(3) la frontière latérale se lit **maille par maille** (`grid_cell`) ; (4) **le solde
   vertical** réglé par colonne — dû : la particule la plus basse au-dessus du fond retirée ; reçu : posée à `fond + dx/16`, au
   sous-réseau le plus libre, vitesse de la grille. La bascule refuse une colonne à fond (C6c-2). 25 essais tenus, au bit.
+- **P7** — trois essais `_s413` (20 × 8 × 20 à 5 cm, 0,5 m d'eau, fond à 0,3 m = quatre mailles sous la surface, 2 s). **Critère 2
+  tenu.** Bande étroite seule : **8,7·10⁻⁶ m/s**, volume **0**, densité **8,000** (contre le fond 8,000), 5 120 particules → 5 120
+  (la bande pleine en aurait 12 800 : **÷ 2,5**). Mi-zone mi-bande : **2,1·10⁻⁵ m/s**, volume 1,3·10⁻¹⁵, densité 8,000. L'onde de
+  S399 (2 cm) sur la bande étroite : volume **−4,4·10⁻¹⁶**, densité **7,733** (contre le fond 8,000), 2 736 → 2 456 particules
+  (l'eau passée aux colonnes), vitesse max 0,18 m/s.
