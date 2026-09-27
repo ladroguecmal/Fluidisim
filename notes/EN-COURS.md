@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S404 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S403 : **C8e**, l'épars et
+Session : S404 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S403 : **C8e**, l'épars et
 les niveaux sous le pas couplé ; file, « Le domaine épars — ce que S401 laisse » : *le pas couplé sous l'ensemble : avant C10*.
 Agent : Claude, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Branche
 `claude/eager-volta-lf0kw3`, la plus avancée (`main`, `poste` et `claude/blissful-pasteur-m4j5rn` en sont ancêtres).
@@ -103,7 +103,7 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
 - [x] **P6** — les calculs du banc ; critères 4 et 5.
 - [x] **P7** — suite entière, zéro avertissement ; critère 6.
 - [x] **P8** — preuve `MER-EPARS-S404` ; liste (4.3, 4.7), file, feuille de route, index ; notes datées d'ADR-006 et d'ADR-210.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 - **P2** — `delta3d_coupling.rs` : faces fermées par l'ensemble non prédites ; gradients de la prédiction, voisin hors de la grille

@@ -17754,3 +17754,21 @@ n'y met pas fin change seulement qui est nourri ; un domaine détruit ne retrouv
 6, 7 et régulateur PI absents ; coûts déclarés par une loi ; ni carte ni hôte. **Rituel.** Maillons **1** : aucun point ne change de
 case (9.8 et 9.9 restent partiels). Suivant : dans le cloud, **C8e** — l'épars et les niveaux sous le pas couplé (δ sous B + W) ;
 le raccord, puis C6, sous la condition d'A316 ; au poste, C3b puis la pluie 5b.
+
+## S404 — 2026-09-27 — physique : C8e, l'épars et les niveaux sous le pas couplé
+
+**Entrée.** *« Continue »* ; S403 proposait C8e (file : « le pas couplé sous l'ensemble : avant C10 »). **Fait**
+([preuve](../docs/validation/MER-EPARS-S404.md)). Au pas couplé, le bord de la boîte fait plus que fermer δ : la bande de B le
+traverse, l'éponge y absorbe. Le bord de l'ensemble épars fait désormais de même — faces fermées non prédites, bande aux murs
+comme au bord, éponge mesurée dans l'étendue de chaque colonne : il devient **absorbant** ; en mode relatif seulement (ADR-198 D1),
+le pas de S297 le refuse. Le transfert de niveau porte l'ensemble (dehors au repos ; `Follow::require_cover`). **Tenus** : plein au
+bit ; sous une houle réelle, un rectangle à **un ulp** de son dense (Jacobi et multigrille), deux rectangles de même, bilan au
+plancher ; vu échouer quatre fois (0,26 à 32 mm) ; un rectangle 25 → 50 → 25 cm **au bit** de son dense, volume exact, perte
+publiée ; au banc en mer, l'épars qui suit à **0,14 mm** du domaine entier (témoin aux murs réfléchissants 0,21), **0,43 mm** sur
+30 s, et à 0,14 mm de l'entier à travers un changement de niveau (sauts ≤ 2,04 mm) ; suite **726 réussis**, zéro avertissement.
+**Trouvé** : une colonne dehors porte le repos, pas rien (sinon −79,9 m³). **Manqué** : l'ensemble ne se vide pas en 10 s (0,81 des
+mailles ; enveloppe et dilatation couvrent la moitié de cette fenêtre, calculé), seulement en 30 s (0,55). **Limites** : B seul,
+houle douce (A320 intouchée), le bord absorbant efface (4.8), 25 ↔ 50 cm seulement, ni corps ni carte. **Rituel.** Maillons **2** :
+aucun point ne change de case (4.3, 4.5, 4.7, 9.2 restent partiels). Suivant : dans le cloud, un lot qui fait changer de case un
+point — proposé **9.3**, la prédiction balistique consommée par le suivi (le saut de C10), à comparer au raccord C5 (S397, A316) ;
+au poste, C3b puis la pluie 5b.
