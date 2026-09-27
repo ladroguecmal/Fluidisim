@@ -785,3 +785,33 @@ fn a_band_column_is_released_below_its_own_slope_s410() {
     assert_eq!(s.switch(2, &mut a).unwrap(), ColumnsChange::default());
     assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
 }
+
+/// **S413** : le fond de la bande — refus (sans zone, longueur, valeur, particule dessous) sans effet ; ignoré dans la zone ;
+/// l'eau sous lui comptée dans le volume total.
+#[test]
+fn the_band_floor_is_refused_ignored_in_the_zone_and_counted_s413() {
+    let (nx, ny, nz, dx) = (8, 4, 16, 0.05f32);
+    let (mut plain, _) = apic(nx, ny, nz, dx, 64);
+    assert_eq!(plain.set_band_floor(&[0.; 32]), Err(Error::Domain));
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let mask: Vec<u8> = (0..nx * ny).map(|c| u8::from(c % nx < 4)).collect();
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+    assert_eq!(a.set_band_floor(&[0.2; 31]), Err(Error::Shape));
+    for bad in [f32::NAN, -0.1, 0.81] {
+        assert_eq!(a.set_band_floor(&[bad; 32]), Err(Error::NotFinite));
+    }
+    a.seed(&|p| p[2] < 0.4 && p[0] >= 0.2).unwrap();
+    assert_eq!(a.set_band_floor(&[0.2; 32]), Err(Error::Domain), "une particule sous le fond");
+    assert!(a.band_floor().unwrap().iter().all(|f| *f == 0.));
+    a.seed(&|p| p[2] < 0.4 && p[2] >= 0.2 && p[0] >= 0.2).unwrap();
+    a.set_band_floor(&[0.2; 32]).unwrap();
+    a.set_columns_surface(&[0.4; 32]).unwrap();
+    for c in 0..nx * ny {
+        assert_eq!(a.band_floor().unwrap()[c], if c % nx < 4 { 0. } else { 0.2 });
+    }
+    let expected = (nx * ny) as f64 * 0.4 * (dx as f64).powi(2);
+    let total = a.total_volume();
+    println!("S413 fond : particules {}, volume {total} pour {expected}", a.particle_count());
+    assert!((total / expected - 1.).abs() < 1e-6, "{total} contre {expected}");
+    assert!((a.band_floor_volume() - 16. * 0.2 * (dx as f64).powi(2)).abs() < 1e-9);
+}

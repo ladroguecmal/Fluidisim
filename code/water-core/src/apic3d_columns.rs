@@ -62,6 +62,16 @@ pub(crate) struct Columns3 {
     pub(crate) old_mask: Vec<u8>,
     pub(crate) new_mask: Vec<u8>,
     pub(crate) geo: Vec<f64>,
+    /// **S413 — le fond de la bande** (C6c, [ADR-212](../../docs/adr/ADR-212-la-bande-etroite-en-profondeur.md)), m, par colonne
+    /// de particules : sous lui, l'eau est **à la grille** — mailles pleines, vitesses advectées comme celles de la zone, volume
+    /// `floor·dx²` ; au-dessus, les particules. Zéro, la bande pleine de S398–S410. Transporté par les débits, reste compris.
+    pub(crate) floor: Vec<f32>,
+    pub(crate) floor_roundoff: Vec<f32>,
+    /// **S413 — le solde vertical**, m³, par colonne : le volume passé de la part eulérienne à la bande par la face au-dessus du
+    /// fond ; positif, la bande doit recevoir des particules. `f64`, pour que la masse se compte au bit.
+    pub(crate) solde_w: Vec<f64>,
+    /// Une colonne a-t-elle un fond ? Sans, rien de S413 ne s'exécute : S398–S410 au bit.
+    pub(crate) floors: bool,
 }
 
 /// **S408 — ce qu'une bascule a fait**, publié.
@@ -97,8 +107,8 @@ pub fn columns_reserved_bytes(domain: Domain3) -> Option<usize> {
     let nv = nx.checked_mul(ny + 1)?.checked_mul(nz)?;
     // Masque (1 octet), surface et reste (4 + 4) par colonne ; trois copies de faces ; deux familles de débits ; les soldes de
     // l'échange (S399), un `f64` par face `u` et `v` ; la table de lecture (S400) ; les tampons de la bascule (S408), deux masques
-    // et une hauteur `f64` par colonne.
-    columns.checked_mul(1 + 4 + 4 + 1 + 1 + 8)?.checked_add(faces.checked_mul(4)?)?.checked_add(flux.checked_mul(8)?)?
+    // et une hauteur `f64` par colonne ; le fond de la bande (S413), son reste et son solde vertical.
+    columns.checked_mul(1 + 4 + 4 + 1 + 1 + 8 + 4 + 4 + 8)?.checked_add(faces.checked_mul(4)?)?.checked_add(flux.checked_mul(8)?)?
         .checked_add(nu.checked_add(nv)?.checked_mul(8)?)?.checked_add(READ_TABLE * 4)
 }
 
@@ -155,6 +165,10 @@ impl Apic3 {
             old_mask: vec![0; nx * ny],
             new_mask: vec![0; nx * ny],
             geo: vec![f64::NAN; nx * ny],
+            floor: vec![0.; nx * ny],
+            floor_roundoff: vec![0.; nx * ny],
+            solde_w: vec![0.; nx * ny],
+            floors: false,
         });
         self.columns_tabulate();
         Ok(())
@@ -225,6 +239,67 @@ impl Apic3 {
         cols.eta.copy_from_slice(eta);
         cols.eta_roundoff.fill(0.);
         Ok(())
+    }
+
+    /// **S413 — pose le fond de la bande** (C6c-1, [ADR-212](../../docs/adr/ADR-212-la-bande-etroite-en-profondeur.md)) : pour
+    /// chaque colonne de particules, la hauteur `floor[c]` sous laquelle l'eau passe à la grille ; ignorée, et remise à zéro, pour
+    /// une colonne de la zone. À poser **avant d'ensemencer au-dessus** : l'eau sous le fond y est comptée pleine. Refus `Domain`
+    /// sans zone ou si une particule est sous le fond de sa colonne ; `Shape` (longueur) ; `NotFinite` (valeur non finie, négative
+    /// ou au-dessus du domaine). Rien n'est changé en cas de refus.
+    pub fn set_band_floor(&mut self, floor: &[f32]) -> Result<(), Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Some(c) = self.columns.as_ref() else { return Err(Error::Domain) };
+        if floor.len() != nx * ny {
+            return Err(Error::Shape);
+        }
+        if floor.iter().any(|f| !f.is_finite() || *f < 0. || *f > nz as f32 * dx) {
+            return Err(Error::NotFinite);
+        }
+        let f = |x: f32, n: usize| ((x / dx).max(0.) as usize).min(n - 1);
+        for p in &self.x[..self.n] {
+            let col = f(p[1], ny) * nx + f(p[0], nx);
+            if c.mask[col] == 0 && p[2] < floor[col] {
+                return Err(Error::Domain);
+            }
+        }
+        let c = self.columns.as_mut().unwrap();
+        for col in 0..nx * ny {
+            c.floor[col] = if c.mask[col] == 0 { floor[col] } else { 0. };
+        }
+        c.floor_roundoff.fill(0.);
+        c.solde_w.fill(0.);
+        c.floors = c.floor.iter().any(|f| *f > 0.);
+        Ok(())
+    }
+
+    /// **S413** — le fond de la bande, s'il y a une zone (zéro dans les colonnes de la zone).
+    pub fn band_floor(&self) -> Option<&[f32]> {
+        self.columns.as_ref().map(|c| &c.floor[..])
+    }
+
+    /// **S413** — l'eau sous le fond de la bande, m³ (`Σ floor·dx²`, reste compris), en `f64`.
+    pub fn band_floor_volume(&self) -> f64 {
+        let Some(c) = &self.columns else { return 0. };
+        if !c.floors {
+            return 0.;
+        }
+        let a = (self.domain.dx as f64).powi(2);
+        c.mask.iter().zip(c.floor.iter().zip(&c.floor_roundoff)).filter(|(m, _)| **m == 0).map(|(_, (f, r))| (*f as f64 - *r as f64) * a).sum()
+    }
+
+    /// **S413** — la hauteur à la grille d'une colonne de particules (son fond), zéro dans la zone ou sans fond.
+    #[inline]
+    pub(crate) fn floor_of(&self, i: usize, j: usize) -> f32 {
+        self.columns.as_ref().map_or(0., |c| {
+            let col = j * self.domain.nx + i;
+            if c.floors && c.mask[col] == 0 { c.floor[col] } else { 0. }
+        })
+    }
+
+    /// **S413** — une maille est-elle **à la grille** : dans une colonne de la zone, ou sous le fond de la bande (son centre) ?
+    #[inline]
+    pub(crate) fn grid_cell(&self, i: usize, j: usize, k: usize) -> bool {
+        self.column_of(i, j) || ((k as f32 + 0.5) * self.domain.dx) < self.floor_of(i, j)
     }
 
     /// La surface des colonnes, s'il y a une zone.
@@ -427,7 +502,7 @@ impl Apic3 {
 
     /// La zone est-elle finie ?
     pub(crate) fn columns_finite(&self) -> bool {
-        self.columns.as_ref().map_or(true, |c| c.eta.iter().chain(&c.eta_roundoff).all(|x| x.is_finite()))
+        self.columns.as_ref().map_or(true, |c| c.eta.iter().chain(&c.eta_roundoff).chain(&c.floor).chain(&c.floor_roundoff).all(|x| x.is_finite()))
             && (self.columns.is_none() || self.u.iter().chain(&self.v).chain(&self.w).all(|x| x.is_finite()))
     }
 
@@ -486,7 +561,9 @@ impl Apic3 {
     pub fn total_volume(&self) -> f64 {
         let vp = (self.domain.dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
         let soldes = self.columns.as_ref().map_or(0., |c| c.solde_u.iter().chain(&c.solde_v).sum::<f64>() + c.reserve);
-        self.n as f64 * vp + self.columns_volume() + soldes
+        // S413 : l'eau sous le fond de la bande et le solde vertical — rien sans fond, au bit.
+        let fond = self.columns.as_ref().filter(|c| c.floors).map_or(0., |c| self.band_floor_volume() + c.solde_w.iter().sum::<f64>());
+        self.n as f64 * vp + self.columns_volume() + soldes + fond
     }
     /// **S407** — les gestes de l'échange depuis la configuration : `[absorbées, retirées, posées]` ; zéros sans zone.
     pub fn columns_exchange_counts(&self) -> [u64; 3] {

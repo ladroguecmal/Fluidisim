@@ -84,9 +84,9 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — `β` : état (`floor`, reste, `solde_w`), `set_band_floor`, volume total, finitude ; essai de refus et de volume ; critère 1 (essais).
-- [ ] **P3** — étiquettes et reconstruction : mailles sous `β` à la grille, particules virtuelles jusqu'à `β`.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — `β` : état (`floor`, reste, `solde_w`), `set_band_floor`, volume total, finitude ; essai de refus et de volume ; critère 1 (essais).
+- [>] **P3** — étiquettes et reconstruction : mailles sous `β` à la grille, particules virtuelles jusqu'à `β`.
 - [ ] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
 - [ ] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
 - [ ] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
@@ -97,3 +97,7 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - [ ] **P11** — rituel.
 
 ### Notes de reprise
+- **P2** — `Columns3` : `floor`, `floor_roundoff`, `solde_w`, `floors` (réservés : 16 octets de plus par colonne) ;
+  `set_band_floor` (refus `Domain`/`Shape`/`NotFinite`, particule sous le fond refusée ; zone remise à zéro), `band_floor`,
+  `band_floor_volume` ; `total_volume` + fond + soldes verticaux (rien sans fond) ; `floor_of`, `grid_cell` (utilisés en P3).
+  Essai `_s413` ; les 23 essais d'APIC 3D tenus (24 avec lui).
