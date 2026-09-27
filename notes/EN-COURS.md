@@ -122,3 +122,10 @@ ne rien rendre défaut, et le dire.
   frontière** (toute combinaison avec 8 l'efface) ; (c) rend la migration au critère ; la densité de la dernière colonne reste à
   7,59 (≥ 7,6) — l'échange retire toujours dans la maille contre la face, celle que la mesure compte. Lancés à 2,5 cm : 8, 12,
   APIC seul.
+- **P3** (2,5 cm, écarts à APIC seul — seul : niveau −0,079/−0,058/−0,047 mm, densité 8,002/7,935/7,619, saut 0,785, période
+  +0,36 %, amortissement +0,08 %, courant ≤ 0,8) : **8** — courant **−1,2** (S400 −1,8), niveau +0,12/+0,40/+0,21, densité
+  **7,255/7,248/7,328**, saut 0,171, période +0,24 %, amortissement +0,17 % ; **12** — courant **−1,1**, niveau +0,14/+0,38/+0,45,
+  densité **7,261/7,237/7,313**, saut 0,123, période +0,22 %, amortissement +0,19 %. **Le courant est tenu aux deux mailles ; la
+  densité ne l'est à aucune** — à 2,5 cm le déficit prend toute la profondeur de la dernière colonne (7,2 à 7,5 par rangée), sans
+  que la masse de la bande bouge. Témoin de densité : l'échange retire toujours dans la dernière colonne ; essai 16 — retirer
+  dans la maille la plus pleine des deux dernières colonnes.

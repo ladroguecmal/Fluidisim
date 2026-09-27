@@ -127,12 +127,15 @@ impl Apic3 {
     pub const TRIAL_KEEP_MOMENTUM: u8 = 4;
     /// **S406, essais seulement** — variante de (a) : la face de frontière prend la seule vitesse advectée de la zone.
     pub const TRIAL_FACE_ZONE_ONLY: u8 = 8;
+    /// **S406, essais seulement** — la densité : un solde dû retire dans la maille **la plus pleine** des deux dernières colonnes
+    /// de la bande à cette profondeur (la plus proche de la face à égalité), au lieu de la seule maille contre la face.
+    pub const TRIAL_SPREAD_REMOVAL: u8 = 16;
 
     /// **S406, essais seulement** : les gestes de la frontière à éprouver, somme de `TRIAL_…` ; zéro rend ceux de S400. Refus
     /// `Domain` sans zone ou hors des quatre bits.
     pub fn set_columns_trials(&mut self, bits: u8) -> Result<(), Error> {
         let Some(c) = self.columns.as_mut() else { return Err(Error::Domain) };
-        if bits > 15 {
+        if bits > 31 {
             return Err(Error::Domain);
         }
         c.trials = bits;
@@ -572,6 +575,13 @@ impl Apic3 {
                         };
                         // (2) Retirer ce qui est dû : la particule de la bande la plus proche de la face, à cette profondeur
                         // d'abord, puis aux profondeurs voisines.
+                        let spread = self.columns.as_ref().unwrap().trials & Self::TRIAL_SPREAD_REMOVAL != 0;
+                        // S406, essai 16 : la colonne de la bande d'à côté, en s'éloignant de la face.
+                        let beyond = {
+                            let (bi, bj) = (band.0 as isize + side as isize * (axis == 0) as isize, band.1 as isize + side as isize * (axis == 1) as isize);
+                            (spread && bi >= 0 && bj >= 0 && (bi as usize) < nx && (bj as usize) < ny && !self.column_of(bi as usize, bj as usize))
+                                .then_some((bi as usize, bj as usize))
+                        };
                         while solde(self) <= -vp {
                             let mut pick: Option<(usize, f32, usize)> = None; // (écart de profondeur, distance, indice)
                             'depths: for dk in 0..nz {
@@ -579,7 +589,16 @@ impl Apic3 {
                                     if k < 0 || k as usize >= nz || (dk == 0 && k != l as isize) {
                                         continue;
                                     }
-                                    let cell = self.cell(band.0, band.1, k as usize);
+                                    let alive = |s: &Apic3, cell: usize| {
+                                        (s.bin_start[cell]..s.bin_start[cell + 1]).filter(|&q| !s.shift[s.order[q as usize] as usize][0].is_nan()).count()
+                                    };
+                                    let mut cell = self.cell(band.0, band.1, k as usize);
+                                    if let Some(b2) = beyond {
+                                        let other = self.cell(b2.0, b2.1, k as usize);
+                                        if alive(self, other) > alive(self, cell) {
+                                            cell = other;
+                                        }
+                                    }
                                     for s in self.bin_start[cell]..self.bin_start[cell + 1] {
                                         let m = self.order[s as usize] as usize;
                                         if self.shift[m][0].is_nan() {
