@@ -343,3 +343,7 @@ impl Volume3 {
 #[cfg(test)]
 #[path = "tests_delta3d_sparse.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "tests_delta3d_sparse_mer.rs"]
+mod tests_mer;

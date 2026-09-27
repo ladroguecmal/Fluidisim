@@ -97,7 +97,7 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
 - [x] **P2** — le pas couplé porte l'ensemble (`delta3d_coupling.rs`, `delta3d_sparse.rs`) : mode relatif exigé ; faces fermées non
   prédites, gradients au bord de l'ensemble comme au bord de la boîte ; bande de B aux murs comme au bord, colonnes dehors
   intouchées ; éponge depuis le bord de l'ensemble (étendues par colonne, réservées) ; bilan aux murs.
-- [ ] **P3** — essais du pas couplé : critère 1, oracles (a) (b) (c) sous la houle, refus ; vu échouer (trois défauts injectés).
+- [x] **P3** — essais du pas couplé : critère 1, oracles (a) (b) (c) sous la houle, refus ; vu échouer (trois défauts injectés).
 - [ ] **P4** — le transfert de niveau porte l'ensemble (`delta3d_levels.rs`) ; `Follow::require_cover` ; essais du critère 3.
 - [ ] **P5** — le banc `delta3d_mer_epars` : cas `suivi`, `murs` (témoin), `long`, `niveaux` ; lancés en arrière-plan.
 - [ ] **P6** — les calculs du banc ; critères 4 et 5.
@@ -114,3 +114,12 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   au bit ; bilan : les murs au bord, signés vers l'ensemble. Refus : ensemble sans les trois bits relatifs. Témoin d'essai
   `set_sparse_edge_sponge_for_trials(false)` : l'éponge au seul bord de la boîte. **104 essais delta3d tenus** tels quels (S297 à
   S402), zéro avertissement.
+- **P3** — `tests_delta3d_sparse_mer.rs`, cinq essais `_s404`, houle de S369 oblique (36°), relatif, éponge 1 × 0,5 m à 2 s⁻¹,
+  bosse de 5 cm, 5 s. **Critère 1 tenu** : ensemble plein, 50 pas au bit, avec et sans ADR-209, bilans égaux. **Critère 2 tenu** :
+  (a) rectangle 16 × 8 dans 32 × 24 contre le dense (B échantillonnée aux mêmes points, au bit) : **2,384·10⁻⁷ m**, un ulp à 2 m,
+  Jacobi et multigrille ; (c) bilan, résidu/échelle 9,0·10⁻⁸ (épars) contre 7,7·10⁻⁸ (dense), 6,1 contre 6,4·10⁻⁸ en multigrille ;
+  bandes entrées à 1,3–1,7·10⁻⁷ relatif ; δ ne traverse rien (`perturbation_in` nul) ; dehors au repos au bit ; (b) deux
+  rectangles : 2,384·10⁻⁷ m ; refus : pas de S297, deux bits sur trois. **Vu échouer** : (1) bande des murs en face intérieure :
+  **8,4·10⁻⁴ m**, bandes à 10,7 % ; (2) témoin, éponge au seul bord de la boîte : **3,2·10⁻² m** (l'éponge du dense couvre une
+  bonne part du rectangle) ; (3) faces fermées prédites : **2,6·10⁻⁴ m**, et le dehors n'est plus au repos ; (4) gradients qui
+  lisent le dehors à zéro : **2,8·10⁻⁴ m**. Tous retirés.
