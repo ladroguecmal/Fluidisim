@@ -92,8 +92,8 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - [x] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
 - [x] **P7** — essais du repos et du volume ; critère 2.
 - [x] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
-- [>] **P9** — suite entière ; critère 4.
-- [ ] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
+- [x] **P9** — suite entière ; critère 4.
+- [>] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
 - [ ] **P11** — rituel.
 
 ### Notes de reprise
@@ -134,3 +134,4 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
   7,136** (APIC seul : 7,619 — la dérive de densité d'APIC, plus forte au milieu de la cuve à fond ; à surveiller). **Critère 1
   tenu** : B10 (défauts) pincement 1,4797, part 0,225, 29 120, 1,09·10⁻¹² — S408 ; la vague (défauts) — S410 ; le raccord plein
   aux deux mailles — S408. Temps en fournée de cinq, indicatifs. ADR-212 : note datée (le fond sur une face, contenant fixe).
+- **P9** — suite entière : **745 réussis** (741 + quatre essais `_s413`), 19 ignorés, zéro avertissement. Critère 4.
