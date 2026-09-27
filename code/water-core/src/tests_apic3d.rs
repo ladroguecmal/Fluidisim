@@ -129,6 +129,43 @@ fn apic_transfers_keep_an_affine_field_s388() {
     assert!(checked > s.n / 3, "{checked}");
 }
 
+/// **S410** : `set_particle_velocities` pose la vitesse et `C` d'un champ, un champ affine fait l'aller et retour de S388 ; une
+/// valeur non finie est refusée et rien ne change.
+#[test]
+fn particle_velocities_follow_a_field_and_refuse_the_non_finite_s410() {
+    let (mut s, _) = apic(8, 7, 6, 0.1, 8 * 8 * 7 * 6);
+    s.seed(&|_| true).unwrap();
+    let a0 = [0.3f32, -0.2, 0.1];
+    let b = [[0.5f32, -1.0, 0.25], [0.75, 0.2, -0.6], [-0.4, 0.9, 0.1]];
+    let affine = |p: [f32; 3]| {
+        let v = [0, 1, 2].map(|r| a0[r] + b[r][0] * p[0] + b[r][1] * p[1] + b[r][2] * p[2]);
+        (v, b)
+    };
+    s.set_particle_velocities(&affine).unwrap();
+    for k in 0..s.n {
+        assert_eq!((s.vel[k], s.c[k]), affine(s.x[k]));
+    }
+    let before: Vec<_> = s.vel[..s.n].to_vec();
+    let refus = s.set_particle_velocities(&|p| if p[0] > 0.4 { ([f32::NAN, 0., 0.], b) } else { affine(p) });
+    assert_eq!(refus, Err(Error::NotFinite));
+    assert_eq!(&s.vel[..s.n], &before[..]);
+    s.particles_to_grid();
+    s.grid_to_particles();
+    let (dx, l) = (0.1f32, [0.8f32, 0.7, 0.6]);
+    let mut checked = 0;
+    for k in 0..s.n {
+        let p = s.x[k];
+        if (0..3).any(|r| p[r] < 0.5 * dx || p[r] > l[r] - 0.5 * dx) {
+            continue;
+        }
+        checked += 1;
+        for r in 0..3 {
+            assert!((s.vel[k][r] - before[k][r]).abs() <= 1e-5 * (1. + before[k][r].abs()));
+        }
+    }
+    assert!(checked > s.n / 3, "{checked}");
+}
+
 /// La hauteur que lit la pression dans la colonne `(i, j)` : l'iso-zéro interpolée entre deux centres.
 fn read_height(a: &Apic3, i: usize, j: usize) -> f32 {
     let nz = a.domain().nz;

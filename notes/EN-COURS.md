@@ -92,8 +92,8 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — `Apic3::set_particle_velocities` (vitesse et `C` d'un champ donné) ; essai : un champ affine passe à la grille exactement.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — `Apic3::set_particle_velocities` (vitesse et `C` d'un champ donné) ; essai : un champ affine passe à la grille exactement.
 - [ ] **P3** — le banc `apic3d_deferlement` : la houle de Chen, les mesures (retournement, impact, abscisse du jet, crête), la
   bande (`APIC3D_BASCULE`, comme B10), la crête courte en option.
 - [ ] **P4** — APIC seul ; critère 1.
@@ -104,3 +104,6 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
+- **P2** — `Apic3::set_particle_velocities(field)` (`apic3d.rs`) : vitesse et `C = ∇v` de chaque particule active ; refus
+  `NotFinite` sans rien changer. Essai `_s410` : le champ posé exactement, le refus sans effet, l'aller et retour affine de S388
+  (1e-5). Réussi.

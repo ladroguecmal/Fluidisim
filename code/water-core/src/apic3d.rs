@@ -302,6 +302,25 @@ impl Apic3 {
         Ok(m)
     }
 
+    /// **S410 — la vitesse des particules**, celle d'un champ donné : `field(x)` rend la vitesse et son gradient,
+    /// `C_ab = ∂_b v_a` (APIC, Jiang et al. 2015 : un champ affine passe à la grille exactement). Pour poser un état initial en
+    /// mouvement — la houle de C6b — ; `seed` laisse les particules au repos. Refus `NotFinite` si une valeur n'est pas finie :
+    /// rien n'est alors changé.
+    pub fn set_particle_velocities(&mut self, field: &dyn Fn([f32; 3]) -> ([f32; 3], [[f32; 3]; 3])) -> Result<(), Error> {
+        for k in 0..self.n {
+            let (v, c) = field(self.x[k]);
+            if !v.iter().chain(c.iter().flatten()).all(|x| x.is_finite()) {
+                return Err(Error::NotFinite);
+            }
+        }
+        for k in 0..self.n {
+            let (v, c) = field(self.x[k]);
+            self.vel[k] = v;
+            self.c[k] = c;
+        }
+        Ok(())
+    }
+
     /// **Tri des particules par maille** (comptage) : `bin_start[c]..bin_start[c + 1]` indexe `order`. Aucune allocation.
     pub(crate) fn bin(&mut self) {
         self.bin_count.fill(0);
