@@ -17873,3 +17873,17 @@ repasse en colonnes, une bosse lisse que les chiffres ne voyaient pas ; à 0,3 s
 **741 réussis**, zéro avertissement. **Limites** : 40 mailles par longueur d'onde, crête uniforme ; la crête courte : la bande
 atteint les bords après l'impact. **Rituel.** Maillons **2** (aucun état de la liste ne change ; la priorité du solveur passe
 avant la règle, S406). Suivant : **R34**, puis C6c (une bande qui suit la crête) ou C7 au poste ; A322 avant C10.
+
+## S411 — 2026-09-27 — conception : les trucages d'une eau de qualité cinéma, en temps réel
+
+**Entrée.** Verdict **R34** : *« 2D et bille, encore loin du finale […] mais le maintien de 0.3s parait bien, la formation de la
+vague est visible »* ; puis trois réflexions de l'utilisateur — ne pas simuler l'eau profonde en particules, une qualité digne
+des logiciels spécialisés en temps réel par des trucages, des courants à niveaux de détail — et une précision : *« Houdini était
+une référence pas forcément le choix adpaté »*. **Fait** : R34 consigné (maintien 0,3 s retenu pour C6c, défaut inchangé d'ici
+là) ; [TRUCAGES-TEMPS-REEL-S411](../docs/registres/TRUCAGES-TEMPS-REEL-S411.md) — la qualité d'image pour cible, pas la méthode ;
+huit trucages rapportés aux couches et à l'état du dépôt. **Trouvé** : la conception de la campagne voulait déjà la bande **sous
+la surface** (A1), l'implémentation l'a faite pleine hauteur — c'est le Narrow Band FLIP (Ferstl et al. 2016), proposé comme
+**C6c** avant C7 (particules ÷ 4 à 10 sur nos bancs, estimé) ; les courants à niveaux de détail sont **conçus depuis S01**
+(ADR-011, C0 à C3), jamais construits (2.6). **Non fait** : aucun code ; aucun ADR avant la réponse de l'utilisateur (§8, quatre
+questions). **Rituel.** Maillons **3** — justifié : session de conception demandée par l'utilisateur, dont la réponse rend C6c
+exécutable. Suivant : les réponses du §8, puis **C6c**, la bande étroite en profondeur.

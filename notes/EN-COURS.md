@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S411 — **en cours**. Conception, au poste, sans code. Demande de l'utilisateur (2026-09-27), verdict R34 et réflexion :
+Session : S411 — **terminée**. Conception, au poste, sans code. Demande de l'utilisateur (2026-09-27), verdict R34 et réflexion :
 *« Il s'agit de 2D et de bille, encore loin du finale, qui est en 3D et une topology sans interstice visible dans l'eau sauf pour
 les jets. Donc difficile de réaliser un retour, mais le maintien de 0.3s parait bien, la formation de la vague est visible. Point
 de réflexion est il intéréssant de simuler les billes en dessous en profondeur, car on ne les voit pas et ne sont pas en grand
@@ -86,7 +86,7 @@ pour la campagne ; les questions qui demandent l'utilisateur. Aucun ADR avant sa
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — verdict R34 consigné (REVUE-VISUELLE, file, preuve §6.4) ; maintien 0,3 s retenu pour C6c, défaut inchangé d'ici là.
 - [x] **P3** — le document `docs/registres/TRUCAGES-TEMPS-REEL-S411.md` ; index, file.
-- [>] **P4** — rituel.
+- [x] **P4** — rituel.
 
 ### Notes de reprise
 - **P2** — R34 consigné : REVUE-VISUELLE §39 (verdict), BASCULE-S408 §6.4, file (décision en tête ; ligne de la campagne : C6c =

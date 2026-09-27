@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-27 14:59 +02:00
+JETON            : libre
+Battement        : 2026-09-27 15:03 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S411 — conception : **les trucages** d'une eau de logiciel spécialisé en temps réel (verdict R34, bande étroite en profondeur, courants à niveaux de détail) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S410 — physique : **C6b** ([preuve](docs/validation/BASCULE-S408.md) §6) — la vague qui déferle (Chen et al. 1999) : APIC 3D se retourne comme Chen ; la bande prévoit le pli sept pas avant, masse exacte, mais traîne ou hésite ; jugée à l'image à la demande de l'utilisateur — **R34 posée** (planche `captures/s410/planche_R34.png`). Avant : S409, C3b
-Session suivante : **S411** — d'abord le verdict **R34** ; puis **C6c** (une bande qui suit la crête sans traîner) ou **C7** (APIC sur la carte) au poste ; **A322 avant toute scène à 10 cm** (C10) ; la pluie 5b et les peaufinages R32, R33 plus tard
-Maillons        : 2 — S410 : aucun point de liste ne change d'état (4.10, 4.16 partiels) ; la priorité du solveur passe avant la règle (S406) ; preuve BASCULE-S408 §6 ; journal
+Session en cours : aucune
+Dernière session : S411 — conception : [les trucages d'une eau de qualité cinéma en temps réel](docs/registres/TRUCAGES-TEMPS-REEL-S411.md) — R34 reçu (maintien 0,3 s retenu) ; la bande étroite en profondeur proposée comme C6c ; les courants d'ADR-011 ; quatre questions à l'utilisateur (§8). Avant : S410, C6b
+Session suivante : **S412** — les réponses de l'utilisateur au §8 des trucages, puis **C6c** (la bande étroite en profondeur, le critère qui suit la crête, maintien 0,3 s) ; ensuite C7 au poste ; **A322 avant toute scène à 10 cm** (C10) ; la pluie 5b et les peaufinages R32, R33 plus tard
+Maillons        : 3 — justifié : S411, conception demandée par l'utilisateur ; sa réponse rend C6c exécutable ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
