@@ -92,7 +92,7 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
   affamés déclarés ; essais des critères 1 à 5.
 - [x] **P3** — le banc `delta3d_famine` : trois domaines, budget en quatre phases, transferts d'ADR-210 aux passages ; témoin sans
   pertes déclarées.
-- [ ] **P4** — les calculs du banc ; critère 6.
+- [x] **P4** — les calculs du banc ; critère 6.
 - [ ] **P5** — suite entière, zéro avertissement ; critère 7.
 - [ ] **P6** — preuve `FAMINE-S403` ; liste (9.8, 9.9), file, feuille de route, index ; note datée d'ADR-012.
 - [ ] **P7** — rituel.
@@ -112,3 +112,11 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
   0,134 ms) ; budget 2 / 1,05 / 0,6 / 2 ms (0–2, 2–4, 4–5,5, 5,5–8 s) ; perte déclarée = écart d'un aller-retour de la surface
   présente ; l'hôte : transfert d'ADR-210 aux changements de niveau, rang 5 (image effacée en 0,5 s, renaissance au repos) pour un
   affamé ; `TEMOIN=1`, pertes nulles. ≈ 34 s de calcul par seconde simulée, deux calculs en parallèle.
+- **P4** — résultats (écart max de l'image à la référence par phase : large / famine 1,05 / sévère 0,6 / retour) : **ordonnanceur**
+  — A, la bosse, **descendue en famine : 1,36 mm**, puis affamée (rang 5, 75 pas) 17,8 mm, renaît au repos 20,5 mm ; B, la source :
+  0 / 0 / 13,2 (descendue en sévère) / 15,0 mm (remontée) ; F : 0 partout. **Témoin** (pertes nulles, l'identité départage) — B
+  **descendue en famine : 14,0 mm**, 16,4 / 17,0 ; A : 0 / 0 / 17,8 / 20,5. **Critère 6 tenu** : le contenu divise par dix l'écart de
+  la phase où le rang 4 décide (prédiction ≈ 2 contre ≈ 15 mm) ; sauts ≤ 2,48 mm ; accordé ≤ 0,965 du budget ; focal intact.
+  **Constats** : (1) en famine sévère, la victime du rang 5 suit l'ordre du sac à dos (`P/C`, puis l'identité) — ici A, la bosse —,
+  pas le contenu ; (2) la descente de B y est inutile (A et B descendus dépassent 0,6 ms) et change seulement qui est nourri ; (3) un
+  domaine détruit ne retrouve pas son contenu (A : 20,5 mm après le retour) — le prix du rang 5, publié.
