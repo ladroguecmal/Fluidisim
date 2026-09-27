@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S414 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Tu peux commit tout, les pousses. Pour le fond
+Session : S414 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Tu peux commit tout, les pousses. Pour le fond
 automatique il serait intéréssant que les systèmes de prédictions permettent de jouer sur la position du fond, exemple si un
 évènements va aller en profondeur mettre le fond a bonne distance etc.... Mais sans prédictions comme tu le pensais cela me
 convient. »* — `main` et `poste` poussés (`617ea1b4..a554f0cb`). Suite : **C6c-2** (ADR-212 §4 et D4). Agent : Claude Code
@@ -94,7 +94,7 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
 - [x] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
 - [x] **P7** — suite entière ; critère 5.
 - [x] **P8** — preuve BANDE-ETROITE-S413 §5 (un fil, une preuve) ; liste, file, feuille de route, index ; revue R35.
-- [>] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 - **P2** — `convertible_height` : une maille à la grille est « occupée » ; `apply_columns_mask` : l'eau sous le fond et le solde

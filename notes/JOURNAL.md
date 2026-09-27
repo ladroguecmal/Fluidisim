@@ -17916,3 +17916,19 @@ fois plus court ; masse à 10⁻¹⁵. Suite **745 réussis**, zéro avertisseme
 débits au solde vertical (note datée). **Limites** : le fond posé à la main ; la cuve toute en bande étroite à 2,5 cm, densité 7,14
 au milieu en fin de calcul (APIC seul 7,62) — à surveiller. **Rituel.** Maillons **1** (4.16 reste partiel ; la priorité du solveur
 passe avant la règle, S406). Suivant : **C6c-2**, le fond placé par le critère — B10 et la vague de Chen, jugée sur planche.
+
+## S414 — 2026-09-27 — physique : C6c-2, le fond de la bande placé par le critère
+
+**Entrée.** *« Tu peux commit tout, les pousses. Pour le fond automatique il serait intéréssant que les systèmes de prédictions
+permettent de jouer sur la position du fond […] Mais sans prédictions comme tu le pensais cela me convient. »* — poussé
+(`617ea1b4..a554f0cb`). **Fait** ([preuve](../docs/validation/BANDE-ETROITE-S413.md) §5) : `move_band_floor` — descente par
+ensemencement, remontée par absorption, l'écart au solde vertical ; bande → colonne avec l'eau sous le fond ; le critère place le
+fond à `k` mailles sous la première maille non-eau, hystérésis, et **en option la prédiction du corps** (l'idée de l'utilisateur).
+**Corrigé** : le volume sous le fond compté en `f32` perdait 7,4·10⁻⁹ par déplacement — désormais en mailles entières. **Mesuré** :
+dix allers-retours du fond à 1,3·10⁻¹⁵ ; **B10** — la cavité d'APIC seul au chiffre près (1,937 D, 0,078 D³), pincement à un pas,
+**4 122 particules** (÷ 7 contre la bande pleine, ÷ 32 contre APIC seul) ; la prédiction au **pas même** d'APIC seul à horizon
+court (0,05 s), deux pas trop tôt à 0,2 s ; **la vague de Chen** ÷ 6 et deux fois plus vite, **R35 posée**. Suite **748 réussis**.
+**L'utilisateur, ensuite** : *« le mesh du fond malaxable en fonction du courant, les particules peuvent naitres et disparaitre en
+fonction de leurs vitesse »* — c'est l'Extended Narrow Band FLIP (Sato et al. 2018) : **C6c-3** proposée. **Limites** : aucun défaut
+changé ; crête courte non rejouée. **Rituel.** Maillons **2** (4.16 reste partiel ; la priorité du solveur passe avant la règle,
+S406). Suivant : R35, puis C6c-3 ou C7.
