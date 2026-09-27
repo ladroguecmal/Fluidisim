@@ -907,3 +907,23 @@ fn a_wave_over_a_narrow_band_keeps_the_volume_s413() {
     assert!(drift.abs() <= 1e-9, "{drift}");
     assert!((dense - 8.).abs() <= 0.4, "{dense}");
 }
+
+/// **S414** : une colonne de la bande à fond passe aux colonnes — l'eau sous le fond et le solde vertical comptent dans sa masse ;
+/// le fond s'efface ; volume exact, surface au repos.
+#[test]
+fn a_floored_band_column_converts_to_a_column_with_its_deep_water_s414() {
+    let (nx, ny, nz, dx) = (8, 4, 16, 0.05f32);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    a.enable_columns(&mut host, &vec![0u8; nx * ny]).unwrap();
+    a.set_band_floor(&vec![0.3; nx * ny]).unwrap();
+    a.seed(&|p| p[2] >= 0.3 && p[2] < 0.5).unwrap();
+    let v0 = a.total_volume();
+    let change = a.set_columns_mask(&vec![1u8; nx * ny]).unwrap();
+    println!("S414 bande à fond → colonnes : {change:?}");
+    assert_eq!((change.to_columns, change.refused), (nx * ny, 0));
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9, "{}", a.total_volume() / v0 - 1.);
+    assert!(a.band_floor().unwrap().iter().all(|f| *f == 0.));
+    let eta = a.columns_surface().unwrap();
+    assert!(eta.iter().all(|e| (e - 0.5).abs() < 0.25 * dx), "{:?}", &eta[..4]);
+}

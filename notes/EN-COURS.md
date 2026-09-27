@@ -86,9 +86,9 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul ; l'idée de l'utilisateur au plan (option mesurée).
-- [ ] **P2** — bande → colonne avec fond : occupation, masse (fond, solde vertical) ; la bascule n'en refuse plus ; essai.
-- [ ] **P3** — `apply_band_floor` : descente (ensemencement), remontée (absorption, écart au solde vertical) ; essai d'allers-retours ; critère 2.
+- [x] **P1** — jeton, plan seul ; l'idée de l'utilisateur au plan (option mesurée).
+- [x] **P2** — bande → colonne avec fond : occupation, masse (fond, solde vertical) ; la bascule n'en refuse plus ; essai.
+- [>] **P3** — `apply_band_floor` : descente (ensemencement), remontée (absorption, écart au solde vertical) ; essai d'allers-retours ; critère 2.
 - [ ] **P4** — `ColumnsSwitch` : cible du fond (`floor_cells`, `floor_hysteresis`, `floor_prediction`), appliquée après le masque ; essais.
 - [ ] **P5** — B10 avec fond, sans et avec prédiction ; critère 3.
 - [ ] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
@@ -97,3 +97,6 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
+- **P2** — `convertible_height` : une maille à la grille est « occupée » ; `apply_columns_mask` : l'eau sous le fond et le solde
+  vertical d'une colonne convertie s'ajoutent à la masse de la voie mixte, le fond s'efface ; le refus de S413 levé. Essai `_s414` :
+  32 colonnes à fond → colonnes, volume exact, surface à 0,5 m (décalage 1,1 mm). 28 essais d'APIC 3D tenus.

@@ -1011,9 +1011,10 @@ impl Apic3 {
         if (0..nz).any(|k| self.label[self.cell(i, j, k)] == SOLID) || !(phi(0) < 0.) {
             return None;
         }
+        // S414 : une maille sous le fond de la bande est pleine — à la grille.
         let occupied = |k: usize| {
             let cell = self.cell(i, j, k);
-            self.bin_start[cell + 1] > self.bin_start[cell]
+            self.bin_start[cell + 1] > self.bin_start[cell] || self.grid_cell(i, j, k)
         };
         let filled = (0..nz).take_while(|&k| occupied(k)).count();
         if filled == 0 || (filled..nz).any(occupied) {
@@ -1108,11 +1109,6 @@ impl Apic3 {
             for i in 0..nx {
                 let col = j * nx + i;
                 if old_mask[col] == 0 && mask[col] != 0 {
-                    // S413 : une colonne à fond reste aux particules — C6c-2 placera le fond (ADR-212 D4).
-                    if self.floor_of(i, j) > 0. {
-                        change.refused += 1;
-                        continue;
-                    }
                     match self.convertible_height(i, j) {
                         Some(h) => geo[col] = h,
                         None => change.refused += 1,
@@ -1139,6 +1135,21 @@ impl Apic3 {
                 change.removed += 1;
             } else {
                 k += 1;
+            }
+        }
+        // S414 : l'eau sous le fond et le solde vertical des colonnes converties comptent avec leurs particules ; le fond s'efface.
+        {
+            let c = self.columns.as_mut().unwrap();
+            if c.floors {
+                for col in 0..nx * ny {
+                    if geo[col].is_finite() && c.floor[col] > 0. {
+                        removed_volume += (c.floor[col] as f64 - c.floor_roundoff[col] as f64) * area + c.solde_w[col];
+                        c.floor[col] = 0.;
+                        c.floor_roundoff[col] = 0.;
+                        c.solde_w[col] = 0.;
+                    }
+                }
+                c.floors = c.floor.iter().any(|f| *f > 0.);
             }
         }
         let converted = geo.iter().filter(|h| h.is_finite()).count();
