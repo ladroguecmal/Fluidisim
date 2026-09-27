@@ -1466,6 +1466,15 @@ pub struct ColumnsSwitch {
     pub dilation: usize,
     /// Durée sans être requise avant de repasser aux colonnes, µs ; défaut 0,5 s.
     pub hold_us: u64,
+    /// **S414 — le fond de la bande** (C6c-2, ADR-212 D4) : `Some(k)` place le fond de chaque colonne de la bande à `k` mailles sous
+    /// sa **première maille non-eau depuis le bas** (la surface, le fond d'une cavité, le dessous d'une lèvre, le corps) ; `None`,
+    /// le défaut : la bande pleine de S408, au bit.
+    pub floor_cells: Option<usize>,
+    /// L'hystérésis du fond, en mailles : il descend dès que la cible passe dessous, ne remonte qu'au-delà ; défaut 2.
+    pub floor_hysteresis: usize,
+    /// **L'idée de l'utilisateur** (S414) : dans l'empreinte prévue du corps (`body_horizon`, `body_margin`), la cible descend aussi
+    /// sous le point le plus bas qu'il atteindra — le fond est déjà loin quand l'objet arrive. Défaut : non.
+    pub floor_prediction: bool,
     domain: Domain3,
     required_at: Vec<u64>,
     need: Vec<u8>,
@@ -1478,12 +1487,15 @@ pub struct ColumnsSwitch {
     switches: Vec<u16>,
     band_sum: f64,
     calls: u64,
+    /// S414 : le fond demandé par colonne, m ; ses déplacements effectifs comptés par colonne.
+    floor_target: Vec<f32>,
+    floor_moves: Vec<u16>,
 }
 
 impl ColumnsSwitch {
     /// Octets réservés pour un domaine.
     pub fn reserved_bytes(domain: Domain3) -> Option<usize> {
-        domain.nx.checked_mul(domain.ny)?.checked_mul(8 + 1 + 1 + 1 + 1 + 1 + 4 + 2)
+        domain.nx.checked_mul(domain.ny)?.checked_mul(8 + 1 + 1 + 1 + 1 + 1 + 4 + 2 + 4 + 2)
     }
 
     /// Le critère d'un domaine, aux valeurs par défaut, réservé auprès de l'hôte. Refus `Domain` si l'hôte refuse.
@@ -1498,6 +1510,9 @@ impl ColumnsSwitch {
             body_horizon: 0.2,
             dilation: 2,
             hold_us: 500_000,
+            floor_cells: None,
+            floor_hysteresis: 2,
+            floor_prediction: false,
             domain,
             required_at: vec![u64::MAX; cols],
             need: vec![0; cols],
@@ -1509,6 +1524,8 @@ impl ColumnsSwitch {
             switches: vec![0; cols],
             band_sum: 0.,
             calls: 0,
+            floor_target: vec![0.; cols],
+            floor_moves: vec![0; cols],
         })
     }
 
@@ -1536,12 +1553,65 @@ impl ColumnsSwitch {
         }
         self.band_sum += band as f64 / mask.len() as f64;
         self.calls += 1;
+        // S414 : le fond, sur les étiquettes de la surface fraîche (celles d'avant la bascule), après le masque.
+        if let Some(k) = self.floor_cells {
+            self.place_floor(a, k);
+            let c = a.columns.as_ref().unwrap();
+            for col in 0..c.floor.len() {
+                if c.floor[col] != self.floor_target[col] {
+                    self.floor_moves[col] = self.floor_moves[col].saturating_add(1);
+                }
+            }
+            a.move_band_floor(&self.floor_target)?;
+        }
         Ok(change)
+    }
+
+    /// **S414** — le plus grand nombre de déplacements du fond d'une colonne (l'hystérésis du fond).
+    pub fn max_floor_moves(&self) -> u16 {
+        self.floor_moves.iter().copied().max().unwrap_or(0)
+    }
+
+    /// **S414** — la cible du fond de chaque colonne de la bande, en mailles, avec son hystérésis : `k` sous la première maille
+    /// non-eau depuis le bas (étiquettes de `refresh_surface`) ; avec la prédiction, sous le point le plus bas que le corps atteindra
+    /// sur l'horizon, dans son empreinte élargie de la marge.
+    fn place_floor(&mut self, a: &Apic3, k: usize) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let c = a.columns.as_ref().unwrap();
+        let body = a.body.filter(|_| self.floor_prediction).map(|b| {
+            let d = [b.velocity[0] * self.body_horizon, b.velocity[1] * self.body_horizon, b.velocity[2] * self.body_horizon];
+            (b, d, b.center[2].min(b.center[2] + d[2]) - b.radius)
+        });
+        for j in 0..ny {
+            for i in 0..nx {
+                let col = j * nx + i;
+                if c.mask[col] != 0 {
+                    self.floor_target[col] = 0.;
+                    continue;
+                }
+                let low = (0..nz).find(|&l| a.label[a.cell(i, j, l)] != WATER).unwrap_or(nz);
+                let mut target = low.saturating_sub(k);
+                if let Some((b, d, lowest)) = body {
+                    let reach = b.radius + self.body_margin;
+                    let (x, y) = ((i as f32 + 0.5) * dx - b.center[0], (j as f32 + 0.5) * dx - b.center[1]);
+                    let len2 = d[0] * d[0] + d[1] * d[1];
+                    let s = if len2 > 0. { ((x * d[0] + y * d[1]) / len2).clamp(0., 1.) } else { 0. };
+                    let (ex, ey) = (x - s * d[0], y - s * d[1]);
+                    if ex * ex + ey * ey <= reach * reach {
+                        target = target.min(((lowest / dx).floor().max(0.) as usize).saturating_sub(k));
+                    }
+                }
+                let now = (c.floor[col] / dx).round() as usize;
+                let next = if target < now || target > now + self.floor_hysteresis { target } else { now };
+                self.floor_target[col] = next as f32 * dx;
+            }
+        }
     }
 
     /// Remet à zéro les bascules comptées et la part moyenne — après la bascule qui pose la zone initiale.
     pub fn clear_counts(&mut self) {
         self.switches.fill(0);
+        self.floor_moves.fill(0);
         self.band_sum = 0.;
         self.calls = 0;
     }

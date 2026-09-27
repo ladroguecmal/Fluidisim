@@ -969,3 +969,33 @@ fn the_band_floor_moves_down_and_up_at_exact_mass_s414() {
         }
     }
 }
+
+/// **S414** : le critère place le fond — la marche de S408 (0,3 m puis 0,5 m) passe en bande autour de sa pente ; chaque colonne
+/// de la bande a son fond à quatre mailles sous sa surface (0,1 m et 0,3 m) ; au second appel, rien ne bouge (hystérésis).
+#[test]
+fn the_switch_places_the_band_floor_s414() {
+    let (nx, ny, nz, dx) = (16, 8, 16, 0.05f32);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    a.enable_columns(&mut host, &vec![0u8; nx * ny]).unwrap();
+    a.seed(&|p| p[2] < if p[0] < 0.4 { 0.3 } else { 0.5 }).unwrap();
+    let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+    s.floor_cells = Some(4);
+    // Parti d'un fond nul, monter de deux mailles n'excède pas l'hystérésis par défaut (deux) : une seule ici.
+    s.floor_hysteresis = 1;
+    let v0 = a.total_volume();
+    s.switch(0, &mut a).unwrap();
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+    let floor = a.band_floor().unwrap().to_vec();
+    let band: Vec<usize> = (0..nx).filter(|&i| !a.is_column(i, 0)).collect();
+    println!("S414 fond placé : bande {band:?}, fonds {:?}", band.iter().map(|&i| floor[i]).collect::<Vec<_>>());
+    assert!(band.contains(&7) && band.contains(&8));
+    for &i in &band {
+        let expected = if i < 8 { 0.1 } else { 0.3 };
+        assert!((floor[i] - expected).abs() < 1e-6, "colonne {i} : {}", floor[i]);
+    }
+    s.clear_counts();
+    s.switch(1, &mut a).unwrap();
+    assert_eq!(s.max_floor_moves(), 0);
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+}

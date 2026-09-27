@@ -89,8 +89,8 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
 - [x] **P1** — jeton, plan seul ; l'idée de l'utilisateur au plan (option mesurée).
 - [x] **P2** — bande → colonne avec fond : occupation, masse (fond, solde vertical) ; la bascule n'en refuse plus ; essai.
 - [x] **P3** — `apply_band_floor` : descente (ensemencement), remontée (absorption, écart au solde vertical) ; essai d'allers-retours ; critère 2.
-- [>] **P4** — `ColumnsSwitch` : cible du fond (`floor_cells`, `floor_hysteresis`, `floor_prediction`), appliquée après le masque ; essais.
-- [ ] **P5** — B10 avec fond, sans et avec prédiction ; critère 3.
+- [x] **P4** — `ColumnsSwitch` : cible du fond (`floor_cells`, `floor_hysteresis`, `floor_prediction`), appliquée après le masque ; essais.
+- [>] **P5** — B10 avec fond, sans et avec prédiction ; critère 3.
 - [ ] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
 - [ ] **P7** — suite entière ; critère 5.
 - [ ] **P8** — preuve BANDE-ETROITE-S413 §5 (un fil, une preuve) ; liste, file, feuille de route, index ; revue R35.
@@ -106,3 +106,8 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
   **7,4·10⁻⁹** à chaque déplacement — compté désormais en mailles entières, `K·dx³` en `f64` (`band_floor_volume`, la conversion
   de P2). **Critère 2 tenu** : dix allers-retours (0,3 ↔ 0,1 m) sur le ballottement mi-zone, 0,25 s entre chaque : volume
   **1,3·10⁻¹⁵** ; la dernière remontée absorbe 2 592 particules pour 2 560 places (la densité au-dessus du fond, un peu haute).
+- **P4** — `ColumnsSwitch` : `floor_cells` (défaut `None`, S408 au bit), `floor_hysteresis` (2), `floor_prediction` (non) ;
+  `place_floor` après le masque, sur les étiquettes de la surface fraîche — `k` sous la première maille non-eau (air ou corps)
+  depuis le bas ; avec la prédiction, sous le point le plus bas du corps sur l'horizon, dans son empreinte élargie de la marge ;
+  `move_band_floor` ; `max_floor_moves`. Essai `_s414` : la marche de S408 — bande 5 à 10, fonds 0,1 et 0,3 m (`h` = 1 : parti
+  d'un fond nul, deux mailles n'excèdent pas `h` = 2) ; second appel, aucun déplacement ; volume exact. 30 essais d'APIC 3D tenus.
