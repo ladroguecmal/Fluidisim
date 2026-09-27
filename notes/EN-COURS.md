@@ -92,9 +92,9 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
 - [x] **P4** — `ColumnsSwitch` : cible du fond (`floor_cells`, `floor_hysteresis`, `floor_prediction`), appliquée après le masque ; essais.
 - [x] **P5** — B10 avec fond, sans et avec prédiction ; critère 3.
 - [x] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
-- [>] **P7** — suite entière ; critère 5.
-- [ ] **P8** — preuve BANDE-ETROITE-S413 §5 (un fil, une preuve) ; liste, file, feuille de route, index ; revue R35.
-- [ ] **P9** — rituel.
+- [x] **P7** — suite entière ; critère 5.
+- [x] **P8** — preuve BANDE-ETROITE-S413 §5 (un fil, une preuve) ; liste, file, feuille de route, index ; revue R35.
+- [>] **P9** — rituel.
 
 ### Notes de reprise
 - **P2** — `convertible_height` : une maille à la grille est « occupée » ; `apply_columns_mask` : l'eau sous le fond et le solde
@@ -144,3 +144,7 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
   le passage particules ↔ grille « en n'importe quel endroit », les particules là où elles servent ; le critère exact de l'article
   non lu). Proposé comme **C6c-3** ; indicateur candidat : l'écart entre la vitesse des particules et celle de la grille (ce que
   les particules savent et que la grille perdrait), ou la vorticité.
+- **P7** — suite entière : **748 réussis** (745 + trois `_s414`), 19 ignorés, zéro avertissement. Critère 5.
+- **P8** — preuve [BANDE-ETROITE-S413](../docs/validation/BANDE-ETROITE-S413.md) §5 (Reproduire à `253b90a8`) ; REVUE-VISUELLE §40,
+  **R35 posée** ; liste 4.16 ; file (décisions S414 en tête ; campagne : R35 attendue, C6c-3) ; feuille de route ; index ; ADR-212
+  note datée (D4 construit ; la prédiction ; le fond qui suit l'écoulement proposé). `--check` : 0.
