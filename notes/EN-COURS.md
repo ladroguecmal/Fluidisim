@@ -89,8 +89,8 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - [x] **P3** — étiquettes et reconstruction : mailles sous `β` à la grille, particules virtuelles jusqu'à `β`.
 - [x] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
 - [x] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
-- [>] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
-- [ ] **P7** — essais du repos et du volume ; critère 2.
+- [x] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
+- [>] **P7** — essais du repos et du volume ; critère 2.
 - [ ] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
 - [ ] **P9** — suite entière ; critère 4.
 - [ ] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
@@ -114,3 +114,7 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
   deux côtés). `columns_transport` : une rangée d'une frontière zone | bande sous le fond de la bande va au solde vertical (et non
   au solde latéral) ; entre deux colonnes de la bande, une rangée sous les deux fonds, aux deux soldes verticaux ; sous un seul,
   au solde vertical du contenant et au solde latéral de la face-maille (réglé côté particules). 25 essais tenus, au bit.
+- **P6** — `columns_exchange` : (1) une particule sous le fond est **absorbée**, paie le solde vertical, sa quantité de mouvement
+  aux faces à la grille (`floor_face`) ; (2)(3) la frontière latérale se lit **maille par maille** (`grid_cell`) ; (4) **le solde
+  vertical** réglé par colonne — dû : la particule la plus basse au-dessus du fond retirée ; reçu : posée à `fond + dx/16`, au
+  sous-réseau le plus libre, vitesse de la grille. La bascule refuse une colonne à fond (C6c-2). 25 essais tenus, au bit.

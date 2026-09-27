@@ -704,6 +704,31 @@ impl Apic3 {
             let p = self.x[k];
             let (i, j, l) = cell_of(p);
             if !self.column_of(i, j) {
+                // S413 : sous le fond de la bande, la particule entre dans le contenant plein : absorbée, elle paie le solde
+                // vertical de sa colonne ; sa quantité de mouvement va aux faces à la grille qui l'entourent (S406).
+                let fond = self.floor_of(i, j);
+                if fond > 0. && p[2] < fond {
+                    let v = self.vel[k];
+                    for axis in 0..3 {
+                        let (origin, dims) = staggered(self.domain, axis);
+                        for (idx, wt, _) in weights(p, dx, origin, dims) {
+                            if wt == 0. || !self.floor_face(axis, idx) {
+                                continue;
+                            }
+                            let field = match axis {
+                                0 => &mut self.u,
+                                1 => &mut self.v,
+                                _ => &mut self.w,
+                            };
+                            field[idx] += wt * (v[axis] - field[idx]) / 8.;
+                        }
+                    }
+                    let cols = self.columns.as_mut().unwrap();
+                    cols.solde_w[j * nx + i] += vp;
+                    cols.counts[0] += 1;
+                    self.remove_particle(k);
+                    continue;
+                }
                 k += 1;
                 continue;
             }
@@ -777,7 +802,9 @@ impl Apic3 {
                             if fj == 0 || fj == ny { continue; }
                             ((fi, fj - 1), (fi, fj))
                         };
-                        let (zl, zh) = (self.column_of(lo.0, lo.1), self.column_of(hi.0, hi.1));
+                        // S413 : la frontière se lit maille par maille — à la grille (la zone, ou sous le fond) d'un côté, des
+                        // particules de l'autre ; sans fond, la colonne de la zone.
+                        let (zl, zh) = (self.grid_cell(lo.0, lo.1, l), self.grid_cell(hi.0, hi.1, l));
                         if zl == zh {
                             continue;
                         }
@@ -887,6 +914,80 @@ impl Apic3 {
                             cols.counts[2] += 1;
                             if axis == 0 { cols.solde_u[face] -= vp } else { cols.solde_v[face] -= vp }
                         }
+                    }
+                }
+            }
+        }
+        // (4) S413 — **le solde vertical** de chaque colonne à fond : dû, la particule la plus proche au-dessus du fond est retirée ;
+        // reçu, une particule est posée **à la face** du fond, au centre de la tranche entrée (`dx/16`), au sous-réseau le plus libre.
+        if self.columns.as_ref().unwrap().floors {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let col = j * nx + i;
+                    let fond = self.floor_of(i, j);
+                    if fond <= 0. {
+                        continue;
+                    }
+                    let kf = ((fond / dx).round() as usize).min(nz - 1);
+                    while self.columns.as_ref().unwrap().solde_w[col] <= -vp {
+                        let mut pick: Option<(f32, usize)> = None;
+                        for l in kf..nz {
+                            let cell = self.cell(i, j, l);
+                            for s in self.bin_start[cell]..self.bin_start[cell + 1] {
+                                let m = self.order[s as usize] as usize;
+                                if !self.shift[m][0].is_nan() && pick.is_none_or(|b| self.x[m][2] < b.0) {
+                                    pick = Some((self.x[m][2], m));
+                                }
+                            }
+                            if pick.is_some() {
+                                break;
+                            }
+                        }
+                        let Some((_, m)) = pick else { break };
+                        self.shift[m] = [f32::NAN; 3];
+                        let c = self.columns.as_mut().unwrap();
+                        c.counts[1] += 1;
+                        c.solde_w[col] += vp;
+                    }
+                    while self.columns.as_ref().unwrap().solde_w[col] >= vp {
+                        if self.n == self.x.len() {
+                            self.columns.as_mut().unwrap().refused += 1;
+                            break;
+                        }
+                        let z = fond + dx / 16.;
+                        let cell = self.cell(i, j, kf);
+                        let mut best: Option<(f32, [f32; 3])> = None;
+                        for (a, b) in [(0.25f32, 0.25f32), (0.75, 0.25), (0.25, 0.75), (0.75, 0.75)] {
+                            let q = [(i as f32 + a) * dx, (j as f32 + b) * dx, z];
+                            let dist = |r: &[f32; 3]| {
+                                let d = [r[0] - q[0], r[1] - q[1], r[2] - q[2]];
+                                d[0] * d[0] + d[1] * d[1] + d[2] * d[2]
+                            };
+                            let mut near = f32::MAX;
+                            for s in self.bin_start[cell]..self.bin_start[cell + 1] {
+                                let m = self.order[s as usize] as usize;
+                                if !self.shift[m][0].is_nan() {
+                                    near = near.min(dist(&self.x[m]));
+                                }
+                            }
+                            for r in &self.x[first_new..self.n] {
+                                near = near.min(dist(r));
+                            }
+                            if best.is_none_or(|b| near > b.0) {
+                                best = Some((near, q));
+                            }
+                        }
+                        let q = best.unwrap().1;
+                        let (v, cm) = self.grid_affine(q);
+                        let m = self.n;
+                        self.x[m] = q;
+                        self.vel[m] = v;
+                        self.c[m] = cm;
+                        self.shift[m] = [0.; 3];
+                        self.n += 1;
+                        let c = self.columns.as_mut().unwrap();
+                        c.counts[2] += 1;
+                        c.solde_w[col] -= vp;
                     }
                 }
             }
@@ -1007,6 +1108,11 @@ impl Apic3 {
             for i in 0..nx {
                 let col = j * nx + i;
                 if old_mask[col] == 0 && mask[col] != 0 {
+                    // S413 : une colonne à fond reste aux particules — C6c-2 placera le fond (ADR-212 D4).
+                    if self.floor_of(i, j) > 0. {
+                        change.refused += 1;
+                        continue;
+                    }
                     match self.convertible_height(i, j) {
                         Some(h) => geo[col] = h,
                         None => change.refused += 1,
@@ -1193,6 +1299,27 @@ impl Apic3 {
                 (a || j == 0) && (b || j == ny as isize) && (a || b)
             }
             _ => zone((idx % nx) as isize, ((idx / nx) % ny) as isize),
+        }
+    }
+
+    /// **S413** — une face à la grille autour d'une particule absorbée sous le fond : une face `u` ou `v` dont l'une des deux
+    /// mailles est à la grille, une face `w` au-dessus d'une maille à la grille (la règle de l'advection).
+    fn floor_face(&self, axis: usize, idx: usize) -> bool {
+        let Domain3 { nx, ny, .. } = self.domain;
+        let grid = |i: isize, j: isize, k: usize| i >= 0 && j >= 0 && (i as usize) < nx && (j as usize) < ny && self.grid_cell(i as usize, j as usize, k);
+        match axis {
+            0 => {
+                let (i, j, k) = ((idx % (nx + 1)) as isize, ((idx / (nx + 1)) % ny) as isize, idx / ((nx + 1) * ny));
+                grid(i - 1, j, k) || grid(i, j, k)
+            }
+            1 => {
+                let (i, j, k) = ((idx % nx) as isize, ((idx / nx) % (ny + 1)) as isize, idx / (nx * (ny + 1)));
+                grid(i, j - 1, k) || grid(i, j, k)
+            }
+            _ => {
+                let (i, j, k) = ((idx % nx) as isize, ((idx / nx) % ny) as isize, idx / (nx * ny));
+                self.column_of(i as usize, j as usize) || (k >= 1 && grid(i, j, k - 1))
+            }
         }
     }
 
