@@ -92,7 +92,7 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `ballistic.rs` : état, prédiction (RK4, traînée, Euler, contact, affinage), région, palier.
-- [ ] **P3** — essais des critères 1 à 6.
+- [x] **P3** — essais des critères 1 à 6.
 - [ ] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
 - [ ] **P5** — les calculs du banc ; critère 7.
 - [ ] **P6** — suite entière, zéro avertissement ; critère 8.
@@ -105,3 +105,10 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
   du point le plus bas avec `surface(p, t)` ; bisection sur un pas partant du début du pas, 10⁻¹² s), `predict_region` (région :
   rayon + plus grand écart horizontal aux impacts des bornes de traînée), `tier` (ADR-013 §2 ; T2 exige aussi `t < 8 s`).
   Aucune allocation. Essais dans `tests_ballistic.rs` (P3).
+- **P3** — six essais `_s405`. **Critère 1 tenu** : parabole à **5,4·10⁻¹³ s**, 6,5·10⁻¹² m ; `None` hors horizon, au contact,
+  paramètres invalides. **Critère 2 tenu** : chute avec traînée (`v_t` = 14 m/s, 20 m) — écarts 2,51·10⁻⁶ / 1,74·10⁻⁷ /
+  1,12·10⁻⁸ s à 0,2 / 0,1 / 0,05 s, rapports **14,4 et 15,6** (ordre 4) ; 1,9·10⁻¹¹ s à 10 ms. **Critère 3 tenu** : toupie
+  symétrique 7,3·10⁻¹⁴ rad/s, axe principal 4,1·10⁻¹⁴ sur 2,02 s. **Critère 4 tenu** : houle de 5 cm, contact à 1,105745 s,
+  pas de 10 ms à 2·10⁻¹² s de la référence ; **ignorer la houle coûte +2,10 ms et +2,2 cm**. **Critère 5 tenu** : paliers aux
+  frontières (dont l'avion de chasse : T2 jusqu'à √2 s). **Critère 6 tenu** : ±30 % de traînée, région 0,753 m ; la plus éloignée
+  de 21 traînées à 0,503 m du nominal.
