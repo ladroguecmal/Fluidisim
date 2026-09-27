@@ -17702,3 +17702,21 @@ au raccord ; la séparation ne change rien. **Rituel.** Maillons **4** : aucun p
 session consécutive du raccord — il revient sous la condition d'A316 (un témoin court, 5 cm et 45 s, qui abaisse le courant sous
 5 mm/s par un geste attribué d'avance). Suivant : dans le cloud, **C8b**, le domaine épars ; au poste, C3b puis la pluie 5b.
 
+## S401 — 2026-09-27 — physique : C8b, le domaine épars qui suit la perturbation, en référence
+
+**Entrée.** *« Reprends le projet »*, session cloud neuve partie de `main` (S383) : la lignée vivante était
+`claude/blissful-pasteur-m4j5rn` (S400, jeton libre, après `poste`, S392) — avance rapide, aucun fork ; suite de S400 : **C8b**.
+**Fait** ([preuve](../docs/validation/DOMAINE-EPARS-S401.md)). `delta3d_sparse.rs` — un domaine est un **ensemble de blocs** dans une
+fenêtre : les colonnes dehors, solides et fermées (le chemin de la découpe de S328, multigrille comprise), au repos ; le bord de
+l'ensemble lu **comme celui de la boîte** ; ce qu'une colonne libérée portait, publié. `Follow` — un bloc requis à moins de 4 m
+d'un bloc actif (1 mm) ou de l'**enveloppe** d'ADR-013 §2 (`p + V·t`, élargie de `½·a_max·t²`), libéré 0,25 s après. **Tenus** :
+ensemble plein au bit sur 50 pas ; un rectangle et deux parties à **un ulp** du dense (0,14 mm si l'advection lit le bord à zéro :
+vu échouer) ; 100 % de 300 manœuvres bornées dans l'enveloppe ; une source mobile suivie à **0,26–0,66 mm** du domaine entier
+(critère 3 mm), 26 à 71 % des mailles ; revu chaque seconde, la source sort à 0,62 s sans prévision, reste dedans avec ; suite
+**707 réussis**, zéro avertissement. **Trouvé** : à cadence fine, l'enveloppe coûte 1,7 à 2,6 fois les mailles sans gain — sa place
+est T2 (ADR-013) ; le seuil absolu fait 25 % d'une amplitude de 2,6 mm ; un premier essai de suivi, dont l'ensemble couvrait la
+fenêtre, ne mesurait rien — agrandi. **Limites** : pas de pool de blocs (la mémoire reste la fenêtre) ; la référence ne gagne que
+ce que ses opérateurs sautent ; bassin fermé ; ni pas couplé, ni corps sous l'ensemble. **Rituel.** Maillons **0** : **9.2 passe à
+partiel** — **devient possible** un domaine δ qui suit sa perturbation sur un ensemble épars et s'étend devant l'objet, sans
+rupture visible ; **chemin** : le pool de blocs sur la carte (C8, poste), l'ordonnanceur (rang 4), la scène C10 ; **preuve** :
+DOMAINE-EPARS-S401. Suivant : dans le cloud, **C8c** — niveaux de `dx` et famine ; au poste, C3b puis la pluie 5b.

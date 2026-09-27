@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S401 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Reprends le projet »*. Suite déclarée par S400 : dans le
+Session : S401 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Reprends le projet »*. Suite déclarée par S400 : dans le
 cloud, **C8b, le domaine épars** ; décision de S397 : *« terminer le solveur »*. Agent : Claude Opus 5.5, session cloud Claude
 Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, partie de `main` (S383) et
 avancée par avance rapide jusqu'à `claude/blissful-pasteur-m4j5rn` (S400, jeton libre) : aucun fork, une seule lignée. Suite de
@@ -101,7 +101,7 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
   domaine épars ; critères 3, 4 et 5 (banc).
 - [x] **P6** — les chiffres de réception en essais ; suite entière, zéro avertissement ; critère 6.
 - [x] **P7** — preuve `DOMAINE-EPARS-S401` ; liste (4.3, 4.9, 9.2), file, feuille de route, index.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 
