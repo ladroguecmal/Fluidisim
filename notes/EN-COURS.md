@@ -94,7 +94,7 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
 - [x] **P2** — l'ensemble épars dans `Volume3` (`delta3d_sparse.rs`) : réserve du masque, `set_active_columns`, `open3` et `solid3`
   qui le voient, advection au bord de l'ensemble comme au bord de la boîte ; pas linéaire, couplé, gradué et `transplant`
   refusés ; critère 1.
-- [ ] **P3** — les oracles (a), (b), (c), et vu échouer ; critère 2.
+- [x] **P3** — les oracles (a), (b), (c), et vu échouer ; critère 2.
 - [ ] **P4** — le suivi et la prévision (`domain_blocks.rs`) : blocs actifs, dilatation, enveloppe d'ADR-013 §2, libération après
   0,25 s ; sans allocation ; critère 5 (propriété de l'enveloppe).
 - [ ] **P5** — le banc `delta3d_epars` : une source mobile (dipôle de volume), droite puis qui tourne ; domaine entier contre
@@ -114,3 +114,12 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
   un coin rentrant le terme croisé dont une diagonale est dehors. Refus (`Domain`) : pas linéaire, pas couplé, colonne graduée,
   `transplant`, surface écartée du repos ou source hors de l'ensemble ; `shift_rest` emmène les colonnes dehors. Critère 1 :
   ensemble plein, 50 pas **au bit**, itérations égales, avec et sans le terme d'ADR-209.
+- **P3** — oracles (`tests_delta3d_sparse.rs`), bosse de 5 cm, 5 s à 20 ms : (a) rectangle 16 × 8 dans une fenêtre 32 × 24
+  contre le dense 16 × 8 : **2,384·10⁻⁷ m** (un ulp de f32 à 2 m), Jacobi (13 203 itérations contre 13 209) et multigrille
+  (1 539 contre 1 538) ; (b) deux rectangles 16 × 16 séparés de 8 colonnes, contre deux denses : **2,384·10⁻⁷ m**, l'écart au
+  repos au bit ; (c) un L de blocs : dérive du volume **3,8·10⁻¹⁰ m³** (cuve dense 24 × 24 : 2,3·10⁻¹⁰). **Vu échouer** —
+  défaut 1, faces `x` du bord laissées ouvertes : **aucun effet** (la colonne dehors est aussi solide : pression, correction et
+  extrapolation l'ignorent — le mécanisme est doublé) ; défaut 2, faces `x` ouvertes **et** colonnes dehors non solides : l'eau
+  passe d'un rectangle à l'autre par l'écart (repos cassé, essais (b) et de sortie), (a) tient — cul-de-sac, aucun débit — mais
+  les itérations passent de 13 209 à 20 703 ; défaut 3, bord de l'advection lu à zéro au lieu de la face elle-même : (a)
+  **1,36·10⁻⁴ m**, (b) **9,8·10⁻⁵ m** — au-dessus du critère : la règle du bord compte au dixième de millimètre en 5 s.

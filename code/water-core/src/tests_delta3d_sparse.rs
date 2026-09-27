@@ -178,3 +178,136 @@ fn blocks_cover_their_columns_clipped_to_the_window_s401() {
     }
     assert_eq!(change.active_columns, 8 * 8 + 4 * 8 + 8 * 4);
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Critère 2 : des oracles indépendants — le bord de la boîte d'un domaine dense contre le bord de l'ensemble.
+
+/// Un domaine de `nx × ny`, avec la multigrille si `mg`, l'ensemble réservé si `sparse`.
+fn configured(nx: usize, ny: usize, sparse: bool, mg: bool) -> Volume3 {
+    let mut arena = host_arena();
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    let mut v = Volume3::configure(&mut host, Domain3 { nx, ny, nz: NZ, dx: DX }, 1000., 9.81).unwrap();
+    v.clear_to_rest(REST).unwrap();
+    if mg {
+        v.enable_multigrid(&mut host).unwrap();
+    }
+    if sparse {
+        v.enable_sparse(&mut host).unwrap();
+    }
+    v
+}
+
+/// Le rectangle `[i0, i1) × [j0, j1)` d'une fenêtre de `nx` colonnes.
+fn rect_mask(nx: usize, ny: usize, rects: &[[usize; 4]]) -> Vec<u8> {
+    (0..nx * ny)
+        .map(|c| {
+            let (i, j) = (c % nx, c / nx);
+            u8::from(rects.iter().any(|r| i >= r[0] && i < r[1] && j >= r[2] && j < r[3]))
+        })
+        .collect()
+}
+
+/// La surface d'une fenêtre, bosses données dans ses colonnes, au repos hors de l'ensemble.
+fn bumps_in(nx: usize, ny: usize, mask: &[u8], centres: &[(f32, f32)]) -> Vec<f32> {
+    (0..nx * ny)
+        .map(|c| {
+            if mask[c] == 0 {
+                return REST;
+            }
+            let (i, j) = (c % nx, c / nx);
+            REST + centres
+                .iter()
+                .map(|(cx, cy)| {
+                    let (x, y) = (i as f32 + 0.5 - cx, j as f32 + 0.5 - cy);
+                    0.05 * (-(x * x + y * y) / 8.).exp()
+                })
+                .sum::<f32>()
+        })
+        .collect()
+}
+
+/// Le plus grand écart de surface entre la fenêtre (colonnes `[i0, i0 + n.nx) × [j0, j0 + n.ny)`) et un domaine dense.
+fn gap(window: &Volume3, dense: &Volume3, i0: usize, j0: usize) -> f32 {
+    let (wn, d) = (window.domain().nx, dense.domain());
+    let mut worst = 0f32;
+    for j in 0..d.ny {
+        for i in 0..d.nx {
+            worst = worst.max((window.eta[(j0 + j) * wn + i0 + i] - dense.eta[j * d.nx + i]).abs());
+        }
+    }
+    worst
+}
+
+#[test]
+fn a_rectangle_of_the_set_is_the_dense_rectangle_s401() {
+    // (a) Un rectangle de 16 × 8 colonnes dans une fenêtre de 32 × 24, contre le domaine dense de 16 × 8 : bosse de 5 cm, 5 s.
+    // Critère : ≤ 10 µm ; prédiction : à l'arrondi du solveur, ≤ 1 µm. Avec et sans la multigrille.
+    for mg in [false, true] {
+        let (nx, ny) = (32, 24);
+        let mask = rect_mask(nx, ny, &[[8, 24, 8, 16]]);
+        let mut window = configured(nx, ny, true, mg);
+        window.set_active_columns(&mask).unwrap();
+        window.set_free_surface(&bumps_in(nx, ny, &mask, &[(14., 11.)]), REST).unwrap();
+        let mut dense = configured(16, 8, false, mg);
+        dense.set_free_surface(&bumps_in(16, 8, &[1; 128], &[(6., 3.)]), REST).unwrap();
+        let (mut worst, mut its) = (0f32, (0u32, 0u32));
+        for _ in 0..250 {
+            its.0 += window.step_surface_mobile(DT_US, 20_000, &Jobs).unwrap().iterations;
+            its.1 += dense.step_surface_mobile(DT_US, 20_000, &Jobs).unwrap().iterations;
+            worst = worst.max(gap(&window, &dense, 8, 8));
+        }
+        println!("S401 oracle (a) rectangle, multigrille {mg} : écart max {worst:.3e} m sur 5 s ; itérations {} contre {}", its.0, its.1);
+        assert!(worst <= 1e-5, "écart {worst}");
+    }
+}
+
+#[test]
+fn two_disjoint_rectangles_are_two_dense_domains_s401() {
+    // (b) Deux rectangles de 16 × 16 séparés de 8 colonnes hors de l'ensemble, contre deux domaines denses : l'ensemble les
+    // sépare sans recopie (la partition d'ADR-006 §3). Critère : ≤ 10 µm sur 5 s.
+    let (nx, ny) = (40, 16);
+    let mask = rect_mask(nx, ny, &[[0, 16, 0, 16], [24, 40, 0, 16]]);
+    let mut window = configured(nx, ny, true, false);
+    window.set_active_columns(&mask).unwrap();
+    window.set_free_surface(&bumps_in(nx, ny, &mask, &[(12., 6.), (29., 9.)]), REST).unwrap();
+    let (mut a, mut b) = (configured(16, 16, false, false), configured(16, 16, false, false));
+    a.set_free_surface(&bumps_in(16, 16, &[1; 256], &[(12., 6.)]), REST).unwrap();
+    b.set_free_surface(&bumps_in(16, 16, &[1; 256], &[(5., 9.)]), REST).unwrap();
+    let mut worst = 0f32;
+    for _ in 0..250 {
+        window.step_surface_mobile(DT_US, 20_000, &Jobs).unwrap();
+        a.step_surface_mobile(DT_US, 20_000, &Jobs).unwrap();
+        b.step_surface_mobile(DT_US, 20_000, &Jobs).unwrap();
+        worst = worst.max(gap(&window, &a, 0, 0)).max(gap(&window, &b, 24, 0));
+    }
+    // L'écart entre les deux : le repos au bit.
+    for j in 0..ny {
+        for i in 16..24 {
+            assert_eq!(window.eta[j * nx + i].to_bits(), REST.to_bits());
+        }
+    }
+    println!("S401 oracle (b) deux rectangles : écart max {worst:.3e} m sur 5 s");
+    assert!(worst <= 1e-5, "écart {worst}");
+}
+
+#[test]
+fn an_l_shaped_set_keeps_its_volume_s401() {
+    // (c) Un L de blocs (un coin rentrant) : le volume de perturbation, au plancher de la cuve dense de même fenêtre.
+    let (nx, ny) = (24, 24);
+    let mask = rect_mask(nx, ny, &[[0, 24, 0, 8], [0, 8, 8, 24]]);
+    let mut l = configured(nx, ny, true, false);
+    l.set_active_columns(&mask).unwrap();
+    l.set_free_surface(&bumps_in(nx, ny, &mask, &[(6., 6.)]), REST).unwrap();
+    let mut dense = configured(nx, ny, false, false);
+    dense.set_free_surface(&bumps_in(nx, ny, &[1; 576], &[(6., 6.)]), REST).unwrap();
+    let (v0, d0) = (l.perturbation_volume(), dense.perturbation_volume());
+    let (mut drift, mut floor) = (0f64, 0f64);
+    for _ in 0..250 {
+        l.step_surface_mobile(DT_US, 20_000, &Jobs).unwrap();
+        dense.step_surface_mobile(DT_US, 20_000, &Jobs).unwrap();
+        drift = drift.max((l.perturbation_volume() - v0).abs());
+        floor = floor.max((dense.perturbation_volume() - d0).abs());
+    }
+    println!("S401 oracle (c) L : dérive du volume {drift:.3e} m³ (cuve dense : {floor:.3e}) sur 5 s, volume {v0:.4e} m³");
+    assert!(drift <= 10. * floor.max(1e-15), "dérive {drift} contre {floor}");
+}
