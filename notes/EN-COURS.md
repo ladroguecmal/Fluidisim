@@ -76,11 +76,20 @@ de file. (2) La **conception de C6c** — structure, masse exacte, critères « 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-211, les décisions du 2026-09-27 ; notes datées (trucages §8, campagne) ; file, feuille de route.
-- [>] **P3** — lecture du code de la zone : vitesses eulériennes, transferts aux faces de frontière, `φ`, échange, bascule.
-- [ ] **P4** — ADR-212, la bande étroite en profondeur : structure, masse, critères, découpage ; index.
+- [x] **P3** — lecture du code de la zone : vitesses eulériennes, transferts aux faces de frontière, `φ`, échange, bascule.
+- [>] **P4** — ADR-212, la bande étroite en profondeur : structure, masse, critères, découpage ; index.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — [ADR-211](../docs/adr/ADR-211-les-trucages-retenus.md) (D1 à D4 ; D4, première analyse : un niveau « cuit » entre le
   factice et δ vivant, passage par transfert d'état, I-17 par la graine) ; notes datées : trucages, campagne, ADR-207 ; file
   (décision en tête, point D4 avec déclencheur) ; feuille de route ; index (ligne B). Lien vers ADR-212 posé d'avance (P4).
+- **P3** — lu (`apic3d.rs` `step`, `reconstruct` ; `apic3d_columns.rs` `columns_begin/advect/label/transport/exchange`,
+  `virtual_column_sums`, `apply_columns_mask`). Le pas : P2G → **advection des faces de la zone** (semi-lagrangienne, la face
+  de frontière lui appartient, S406) → reconstruction (la zone saute, **particules virtuelles** des colonnes voisines, S399) →
+  étiquettes de la zone (`φ = z − η`) → gravité, projection unique → **transport de `η`** par les débits mouillés, les faces de
+  frontière chargeant un **solde** → G2P, advection → **échange** : absorption (paie le solde de la face la plus proche ; au cœur,
+  `η` en `f64`), retrait, pose à la face. **Conséquence pour C6c** : une colonne de la bande est une colonne de la zone dont la
+  hauteur eulérienne `β` n'est plus la surface libre mais **le fond de la bande**, des particules au-dessus ; tout le mécanisme se
+  réemploie, tourné à la verticale — la face `w` à `β` est une frontière (solde vertical, absorption, pose à la face). Un seul
+  paramètre par colonne : `β` = surface (colonne), `β` = 0 (les colonnes entières de S408), entre les deux (la bande étroite).
