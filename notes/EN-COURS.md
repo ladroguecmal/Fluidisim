@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S412 — **en cours**. Conception, au poste. Réponses de l'utilisateur (2026-09-27) au §8 de
+Session : S412 — **terminée**. Conception, au poste. Réponses de l'utilisateur (2026-09-27) au §8 de
 [TRUCAGES-TEMPS-REEL-S411](../docs/registres/TRUCAGES-TEMPS-REEL-S411.md) : *« 1. Je valides ton choix 2. Je valides ton choix 3.
 Ok 4. cela dépends une simulation d'un joueur de 15m peut être calculé a l'avance et plus le joueur se rapproche de la
 simulation et peux intérargir et simule en temps réel, a réfléchir »*. Agent : Claude Code (Opus 5.5), au poste.
@@ -78,7 +78,7 @@ de file. (2) La **conception de C6c** — structure, masse exacte, critères « 
 - [x] **P2** — ADR-211, les décisions du 2026-09-27 ; notes datées (trucages §8, campagne) ; file, feuille de route.
 - [x] **P3** — lecture du code de la zone : vitesses eulériennes, transferts aux faces de frontière, `φ`, échange, bascule.
 - [x] **P4** — ADR-212, la bande étroite en profondeur : structure, masse, critères, découpage ; index.
-- [>] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — [ADR-211](../docs/adr/ADR-211-les-trucages-retenus.md) (D1 à D4 ; D4, première analyse : un niveau « cuit » entre le

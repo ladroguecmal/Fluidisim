@@ -17887,3 +17887,18 @@ la surface** (A1), l'implémentation l'a faite pleine hauteur — c'est le Narro
 (ADR-011, C0 à C3), jamais construits (2.6). **Non fait** : aucun code ; aucun ADR avant la réponse de l'utilisateur (§8, quatre
 questions). **Rituel.** Maillons **3** — justifié : session de conception demandée par l'utilisateur, dont la réponse rend C6c
 exécutable. Suivant : les réponses du §8, puis **C6c**, la bande étroite en profondeur.
+
+## S412 — 2026-09-27 — conception : les trucages retenus, et la bande étroite en profondeur
+
+**Entrée.** Réponses de l'utilisateur au §8 des trucages : *« 1. Je valides ton choix 2. Je valides ton choix 3. Ok 4. cela
+dépends une simulation d'un joueur de 15m peut être calculé a l'avance et plus le joueur se rapproche de la simulation et peux
+intérargir et simule en temps réel, a réfléchir »*. **Fait** : [ADR-211](../docs/adr/ADR-211-les-trucages-retenus.md) — C6c = la
+bande étroite en profondeur, avant C7 ; la surface continue avant C10 ; les courants (ADR-011) après la campagne ; au loin le
+calcul d'avance, de près le vivant — première analyse : un niveau « cuit » entre le factice et δ, passage par transfert d'état
+(ADR-210), I-17 par la graine (ADR-022), point de file. Lecture du code de la zone, puis
+[ADR-212](../docs/adr/ADR-212-la-bande-etroite-en-profondeur.md) : **une hauteur eulérienne `β` par colonne** sous les particules
+— colonne (`β` = `η`), bande étroite, bande pleine (`β` = 0, S398–S410 au bit) ; sous `β` la machinerie de la zone ; la face à
+`β`, frontière à solde vertical, masse au bit ; `β` à `k` mailles sous la surface la plus basse (prédiction `k` = 4, `h` = 2) ;
+six critères ; C6c-1 puis C6c-2. **Non fait** : aucun code. **Rituel.** Maillons **0** : une décision de l'utilisateur lève le
+choix de C6c et nomme le lot exécutable — **devient possible** C6c-1 (`β` fixe), **le chemin** C6c-2 puis C7 et les scènes,
+**la preuve** ADR-211 et ADR-212. Suivant : **C6c-1**.

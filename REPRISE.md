@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-27 15:09 +02:00
+JETON            : libre
+Battement        : 2026-09-27 15:13 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S412 — conception : les décisions sur les trucages (ADR-211) et la conception de **C6c**, la bande étroite en profondeur (ADR-212) ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S411 — conception : [les trucages d'une eau de qualité cinéma en temps réel](docs/registres/TRUCAGES-TEMPS-REEL-S411.md) — R34 reçu (maintien 0,3 s retenu) ; la bande étroite en profondeur proposée comme C6c ; les courants d'ADR-011 ; quatre questions à l'utilisateur (§8). Avant : S410, C6b
-Session suivante : **S412** — les réponses de l'utilisateur au §8 des trucages, puis **C6c** (la bande étroite en profondeur, le critère qui suit la crête, maintien 0,3 s) ; ensuite C7 au poste ; **A322 avant toute scène à 10 cm** (C10) ; la pluie 5b et les peaufinages R32, R33 plus tard
-Maillons        : 3 — justifié : S411, conception demandée par l'utilisateur ; sa réponse rend C6c exécutable ; journal
+Session en cours : aucune
+Dernière session : S412 — conception : [ADR-211](docs/adr/ADR-211-les-trucages-retenus.md), les trucages retenus par l'utilisateur ; [ADR-212](docs/adr/ADR-212-la-bande-etroite-en-profondeur.md), la bande étroite en profondeur — une hauteur eulérienne `β` par colonne sous les particules. Avant : S411, les trucages
+Session suivante : **S413 — C6c-1** (ADR-212 §4) : `β` fixe par colonne — étiquettes, faces advectées sous `β`, transport de `β`, particules virtuelles jusqu'à `β`, solde vertical, absorption et pose à la face ; critères 1 à 3. Puis C6c-2, C7 au poste ; **A322 avant toute scène à 10 cm** (C10) ; la pluie 5b et les peaufinages R32, R33 plus tard
+Maillons        : 0 — S412 : la décision de l'utilisateur (ADR-211) et ADR-212 rendent C6c-1 exécutable ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
