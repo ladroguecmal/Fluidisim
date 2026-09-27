@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-27 22:39 +02:00
+JETON            : occupé
+Battement        : 2026-09-27 22:42 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S415 — physique : **C6c-3**, le fond qui suit l'écoulement — la vorticité de la grille place la bande et son fond ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S414 — physique : **C6c-2** ([preuve](docs/validation/BANDE-ETROITE-S413.md) §5) — le fond placé par le critère : B10 à la cavité d'APIC seul avec 7 fois moins de particules que la bande pleine ; la prédiction du corps (idée de l'utilisateur) au pas même d'APIC seul à horizon court ; la vague de Chen ÷ 6, deux fois plus vite — **R35 posée** (`captures/s414/planche_R35.png`). Avant : S413, C6c-1
 Session suivante : **S415** — d'abord le verdict **R35** ; puis **C6c-3**, le fond qui suit l'écoulement (idée de l'utilisateur ; Extended Narrow Band FLIP, Sato et al. 2018 — conception d'abord), ou **C7** (APIC sur la carte, version étroite) ; **A322 avant toute scène à 10 cm** (C10)
 Maillons        : 2 — S414 : 4.16 reste partiel ; la priorité du solveur passe avant la règle (S406) ; preuve BANDE-ETROITE-S413 §5 ; journal

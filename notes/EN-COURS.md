@@ -62,89 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S414 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Tu peux commit tout, les pousses. Pour le fond
-automatique il serait intéréssant que les systèmes de prédictions permettent de jouer sur la position du fond, exemple si un
-évènements va aller en profondeur mettre le fond a bonne distance etc.... Mais sans prédictions comme tu le pensais cela me
-convient. »* — `main` et `poste` poussés (`617ea1b4..a554f0cb`). Suite : **C6c-2** (ADR-212 §4 et D4). Agent : Claude Code
-(Opus 5.5), au poste ; référence CPU.
+Session : S415 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Je valides R35, continue avec ta recomandation »* — la
+recommandation : **C6c-3**, le fond qui suit l'écoulement (*« le mesh du fond malaxable en fonction du courant, les particules
+peuvent naitres et disparaitre en fonction de leurs vitesse »*), conception d'abord. Agent : Claude Code (Opus 5.5), au poste ;
+référence CPU.
 
-**Thèse.** Le critère de S408 place aussi le **fond** : dans chaque colonne de la bande, `k` mailles sous la **première maille
-non-eau depuis le bas** (la surface, le fond d'une cavité, le dessous d'une lèvre, le corps), avec une hystérésis `h` — descendre
-dès que la cible passe sous le fond, remonter seulement au-delà de `h` mailles. **Option, l'idée de l'utilisateur** : dans
-l'empreinte prévue du corps (l'horizon de S408), la cible descend sous le point le plus bas qu'il atteindra. Descendre ensemence
-la tranche au réseau nominal (exact) ; remonter absorbe les particules de la tranche, l'écart de volume au solde vertical (exact).
-Bande → colonne : l'eau sous le fond et le solde vertical comptent dans la masse ; les mailles à la grille sont « occupées ».
-Sans `fond` réglé : S408 au bit.
+**La conception, en une idée.** Ce que la grille perd n'est pas la vitesse — un courant uniforme, même rapide, elle le porte sans
+perte —, c'est **ce qui varie** : tourbillons et cisaillements, que son advection semi-lagrangienne lisse, et que les particules
+d'APIC gardent. Le critère suit donc la **vorticité** `|ω| = |∇ × u|`, lue sur la grille après le pas : une colonne dont l'eau
+tourbillonne au-delà d'un seuil passe en bande (dilatée, avec le maintien), et son fond descend à `k` mailles **sous la maille
+tourbillonnaire la plus basse** — les particules naissent là où l'eau tourne, disparaissent (le fond remonte) là où elle redevient
+régulière. Sous une houle — irrotationnelle —, rien ne change. C'est l'esprit de l'Extended Narrow Band FLIP (Sato et al. 2018 : le
+passage particules ↔ grille « en n'importe quel endroit »), dont le critère exact n'est pas lu.
 
-**Critères, écrits avant** (ADR-212 §3). (1) Sans fond : les essais de S398 à S413, B10 et la vague au caractère près. (2) Aller et
-retour du fond (descente puis remontée, dix fois, sur un état réel) : volume ≤ 10⁻⁹. (3) **B10** (`Fr` = 2, `D/dx` = 8, quart,
-maintien 0,3 s — R34), `fond` = 4 : pincement **à un pas d'APIC seul** (1,5067 √(D/g)) ; particules **÷ 3 au moins** contre S408
-(29 120) ; volume ≤ 10⁻⁹ ; mouvements du fond comptés — sans et avec la prédiction. (4) **La vague de Chen** (maintien 0,3 s),
-`fond` = 4 : planche R35 (APIC seul | bande pleine | bande étroite) — **jugée par l'utilisateur** ; particules, calcul, retours
-rapides publiés. (5) Suite entière, zéro avertissement. **Arrêt** : si le pincement s'écarte de plus d'un pas, publier ce qui le
-porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
+**Critères, écrits avant.** (1) Sans seuil (`None`, le défaut), au bit : essais S398–S414, B10 et la vague. (2) La vorticité de la
+grille : une rotation solide rend `2Ω` à 10⁻⁵ près au cœur, un écoulement uniforme 0. (3) **Le tourbillon enfoui** (nouveau banc) :
+un tourbillon de Lamb–Oseen d'axe horizontal, à 0,5 m sous une surface calme, 5 s — APIC seul, la bande de C6c-2 (tout passe aux
+colonnes : le tourbillon à la grille), la bande à vorticité ; **prédiction** : l'énergie cinétique perdue à la grille est au moins
+**deux fois** celle d'APIC seul, celle de la bande à vorticité à **20 %** d'APIC seul ; particules comptées. Si la grille garde le
+tourbillon aussi bien qu'APIC, le publier : le critère ne sert pas ici. (4) **La vague de Chen** avec le seuil : particules et
+temps publiés, pas plus d'un pas d'écart au retournement de C6c-2 ; la planche si la forme change. (5) Suite entière, zéro
+avertissement. **Arrêt** : ne rien rendre défaut.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul ; l'idée de l'utilisateur au plan (option mesurée).
-- [x] **P2** — bande → colonne avec fond : occupation, masse (fond, solde vertical) ; la bascule n'en refuse plus ; essai.
-- [x] **P3** — `apply_band_floor` : descente (ensemencement), remontée (absorption, écart au solde vertical) ; essai d'allers-retours ; critère 2.
-- [x] **P4** — `ColumnsSwitch` : cible du fond (`floor_cells`, `floor_hysteresis`, `floor_prediction`), appliquée après le masque ; essais.
-- [x] **P5** — B10 avec fond, sans et avec prédiction ; critère 3.
-- [x] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
-- [x] **P7** — suite entière ; critère 5.
-- [x] **P8** — preuve BANDE-ETROITE-S413 §5 (un fil, une preuve) ; liste, file, feuille de route, index ; revue R35.
-- [x] **P9** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — verdict R35 consigné (revue, file, preuve) ; le réglage retenu (maintien 0,3 s, fond 4, prédiction à horizon court) inscrit, défauts inchangés jusqu'à C7.
+- [ ] **P3** — la vorticité de la grille aux centres des mailles ; essai (rotation solide, uniforme) ; critère 2.
+- [ ] **P4** — `ColumnsSwitch::floor_vorticity` : la colonne requise et le fond sous la maille tourbillonnaire la plus basse ; essai.
+- [ ] **P5** — le banc du tourbillon enfoui ; les trois montages ; critère 3.
+- [ ] **P6** — la vague de Chen avec le seuil ; critère 4.
+- [ ] **P7** — suite entière ; critère 5.
+- [ ] **P8** — preuve (BANDE-ETROITE-S413 §6), ADR-212 note (C6c-3), liste, file, feuille de route, index.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
-- **P2** — `convertible_height` : une maille à la grille est « occupée » ; `apply_columns_mask` : l'eau sous le fond et le solde
-  vertical d'une colonne convertie s'ajoutent à la masse de la voie mixte, le fond s'efface ; le refus de S413 levé. Essai `_s414` :
-  32 colonnes à fond → colonnes, volume exact, surface à 0,5 m (décalage 1,1 mm). 28 essais d'APIC 3D tenus.
-- **P3** — `Apic3::move_band_floor` (et `FloorChange`) : descente — les mailles libérées ensemencées à huit particules (`dx³`
-  exactement), vitesse de la grille ; remontée — les particules sous le nouveau fond absorbées, l'écart au volume des mailles
-  pleines au solde vertical ; refus sans effet. **Trouvé et corrigé** : le volume sous le fond compté en `f32` (0,3 ≠ 6·dx) perdait
-  **7,4·10⁻⁹** à chaque déplacement — compté désormais en mailles entières, `K·dx³` en `f64` (`band_floor_volume`, la conversion
-  de P2). **Critère 2 tenu** : dix allers-retours (0,3 ↔ 0,1 m) sur le ballottement mi-zone, 0,25 s entre chaque : volume
-  **1,3·10⁻¹⁵** ; la dernière remontée absorbe 2 592 particules pour 2 560 places (la densité au-dessus du fond, un peu haute).
-- **P4** — `ColumnsSwitch` : `floor_cells` (défaut `None`, S408 au bit), `floor_hysteresis` (2), `floor_prediction` (non) ;
-  `place_floor` après le masque, sur les étiquettes de la surface fraîche — `k` sous la première maille non-eau (air ou corps)
-  depuis le bas ; avec la prédiction, sous le point le plus bas du corps sur l'horizon, dans son empreinte élargie de la marge ;
-  `move_band_floor` ; `max_floor_moves`. Essai `_s414` : la marche de S408 — bande 5 à 10, fonds 0,1 et 0,3 m (`h` = 1 : parti
-  d'un fond nul, deux mailles n'excèdent pas `h` = 2) ; second appel, aucun déplacement ; volume exact. 30 essais d'APIC 3D tenus.
-- **P5** — `apic3d_b10` : clés `fond`, `fond_h`, `fond_pred` ; l'eau sous le fond est de l'eau pour les mesures. B10, `Fr` = 2,
-  `D/dx` = 8, quart ; quatre calculs ensemble (temps indicatifs) :
-
-  | réglage | pincement √(D/g) | cavité max / couronne (D) | air enfermé (D³) | particules | fond, dépl. max | calcul |
-  |---|---|---|---|---|---|---|
-  | APIC seul | **1,5067** (pas 0,0266) | 1,937 / 0,205 | 0,0781 | 131 072 | — | 53 s |
-  | bande pleine, maintien 0,3 s | 1,4797 (−1 pas) | 1,813 / 0,203 | 0,1250 | 29 120 | — | 31 s |
-  | **fond 4** | **1,5327 (+1 pas)** | **1,937** / 0,199 | **0,0781** | **4 122** (÷ 7,1) | 29 | 19 s |
-  | fond 4, prédiction, horizon 0,2 s | 1,4532 (**−2 pas**) | 1,813 / 0,203 | 0,0469 | 10 961 | 28 | 22 s |
-  | **fond 4, prédiction, horizon 0,05 s** | **1,5063 (le pas d'APIC seul)** | **1,937** / 0,203 | **0,0781** | 8 496 (÷ 3,4) | 29 | 20 s |
-  | fond 4, horizon 0,05 s, sans prédiction | 1,5327 | 1,937 / 0,199 | 0,0781 | 4 122 | 29 | 19 s |
-  | fond 4, `fond_h` 4 | 1,5327 | 1,937 / 0,199 | 0,0781 | 4 122 | 29 | 18 s |
-  | fond 6 | 1,5063 (le pas) | 1,937 / 0,202 | 0,1016 | 4 933 (÷ 5,9) | 29 | 20 s |
-
-  **Critère 3 tenu** (un pas, ÷ 3, volume 1,09·10⁻¹²) sans prédiction et avec prédiction à horizon court. **La bande étroite
-  rend la cavité d'APIC seul** — profondeur 1,937 D et air enfermé 0,078 D³ identiques —, là où la bande pleine s'en écartait
-  (1,813 ; 0,125). **L'idée de l'utilisateur** : à l'horizon du critère (0,2 s = 80 cm à 4 m/s), le fond descend trop tôt et
-  trop bas — deux pas d'avance, 2,7 fois plus de particules ; **à 0,05 s** (quatre pas), le pincement tombe **au pas même d'APIC
-  seul**. `body_horizon` sert aussi l'empreinte de la bande (sans effet ici entre 0,05 et 0,2 s). Le fond suit la cavité : 29
-  déplacements au plus, l'hystérésis 2 ou 4 sans effet.
-- **P6** — `apic3d_deferlement` : clés `fond`, `fond_h` ; l'eau sous le fond, de l'eau pour les mesures et **vert d'eau** dans les
-  coupes ; `deplacements_du_fond_max`. La vague de Chen, 40 mailles par `λ`, trois calculs ensemble : APIC seul — retournement
-  0,7055, impact 1,2711 à 4,150, 73 s ; bande pleine (0,3 s) — 0,7020, 1,3056 à 4,225, part 0,520, 74 534 particules, 76 s ;
-  **bande étroite** (0,3 s, fond 4) — **0,7021, 1,2244 à 4,092**, part 0,501, **12 262 particules** (÷ 6,1), **34 s**, fond
-  déplacé 11 fois au plus, **aucun retour rapide**, volume 1,4·10⁻¹². Planche `captures/s414/planche_R35.png` **envoyée, R35
-  posée**. Sur la planche : le fond suit la surface à quatre mailles ; sous le jet, il descend dans les colonnes où de l'air
-  est enfermé (fines colonnes de particules vers 1,2–1,4 τ). **Critère 4** : au verdict.
-- **Message de l'utilisateur (22:3x)** : *« Peut être que si le mesh du fond est malaxable en fonction du courant, les particules
-  peuvent naitres et disparaitre en fonction de leurs vitesse et toiut à réfléchir »* — le fond placé aussi par l'**écoulement**,
-  pas seulement par la forme. C'est l'**Extended Narrow Band FLIP** (Sato, Wojtan, Thuerey, Igarashi, Ando, *CGF* 37(2), 2018 :
-  le passage particules ↔ grille « en n'importe quel endroit », les particules là où elles servent ; le critère exact de l'article
-  non lu). Proposé comme **C6c-3** ; indicateur candidat : l'écart entre la vitesse des particules et celle de la grille (ce que
-  les particules savent et que la grille perdrait), ou la vorticité.
-- **P7** — suite entière : **748 réussis** (745 + trois `_s414`), 19 ignorés, zéro avertissement. Critère 5.
-- **P8** — preuve [BANDE-ETROITE-S413](../docs/validation/BANDE-ETROITE-S413.md) §5 (Reproduire à `253b90a8`) ; REVUE-VISUELLE §40,
-  **R35 posée** ; liste 4.16 ; file (décisions S414 en tête ; campagne : R35 attendue, C6c-3) ; feuille de route ; index ; ADR-212
-  note datée (D4 construit ; la prédiction ; le fond qui suit l'écoulement proposé). `--check` : 0.
