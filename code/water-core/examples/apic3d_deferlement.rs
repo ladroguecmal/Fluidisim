@@ -97,6 +97,9 @@ fn main() {
                 "relache" => s.slope_release = Some(x as f32),
                 "dilatation" => s.dilation = x as usize,
                 "maintien" => s.hold_us = (x * 1e6).round() as u64,
+                // S414 : la bande étroite (C6c-2).
+                "fond" => s.floor_cells = Some(x as usize),
+                "fond_h" => s.floor_hysteresis = x as usize,
                 _ => panic!("clé inconnue : {cle}"),
             }
         }
@@ -171,8 +174,11 @@ fn main() {
             occupation[(f(p[2], nz) * ny + f(p[1], ny)) * nx + f(p[0], nx)] += 1;
         }
         let surface = a.columns_surface();
+        let fonds = a.band_floor();
+        // L'eau d'une colonne de la zone (sous `η`) et, S414, celle sous le fond de la bande.
         let colonne = |i: usize, j: usize, k: usize| {
             surface.is_some_and(|e| a.is_column(i, j) && centre(k) < e[j * nx + i] as f64)
+                || fonds.is_some_and(|f| centre(k) < f[j * nx + i] as f64)
         };
         let eau = |i: usize, j: usize, k: usize| occupation[(k * ny + j) * nx + i] >= 2 || colonne(i, j, k);
         let air = |i: usize, j: usize, k: usize| occupation[(k * ny + j) * nx + i] == 0 && !colonne(i, j, k);
@@ -333,9 +339,9 @@ fn main() {
             "APIC3D_DEFERLEMENT_BASCULE cles={} pente={} relache={} dilatation={} maintien_s={} part_bande_moy={:.3} \
              part_au_retournement={part_au_retournement:.3} avance_bande_sur_retournement_s={avance:.4} \
              avance_sur_tau={:.3} bascules_max={} volume_relatif_max={ecart_volume:.2e} particules_fin={} \
-             particules_max={particules_max} poses_refusees={} bord_bande_max={bord_max} bord_t_sur_tau={bord_t:.3}              colonnes_du_bord={}",
+             particules_max={particules_max} poses_refusees={} bord_bande_max={bord_max} bord_t_sur_tau={bord_t:.3}              colonnes_du_bord={} deplacements_du_fond_max={}",
             cles.as_deref().unwrap_or(""), s.slope_max, s.slope_release.unwrap_or(s.slope_max), s.dilation, s.hold_us as f64 * 1e-6, s.mean_band_fraction(),
-            avance / tau, s.max_switches(), a.particle_count(), a.columns_refused(), nx * (ny / 8) * 2
+            avance / tau, s.max_switches(), a.particle_count(), a.columns_refused(), nx * (ny / 8) * 2, s.max_floor_moves()
         );
         // Les colonnes qui basculent le plus : abscisse, puis instants (t/τ, P : vers les particules, C : vers les colonnes).
         let mut ordre: Vec<usize> = (0..nx * ny).filter(|&c| c / nx == ny / 2).collect();
@@ -365,7 +371,8 @@ fn main() {
 }
 
 /// **La coupe de la revue** : x de 2 à 6 m, z de 0,6 à 1,5 m, 200 pixels par mètre. Blanc l'air ; bleu clair l'eau d'une colonne
-/// de la zone (sous `η`) ; bleu foncé les particules de la rangée `j` ; une réglette orange au bas des colonnes de la bande.
+/// de la zone (sous `η`) ; vert d'eau, S414, l'eau sous le fond de la bande ; bleu foncé les particules de la rangée `j` ; une
+/// réglette orange au bas des colonnes de la bande.
 fn coupe(a: &Apic3, j: usize, chemin: &str) -> std::io::Result<()> {
     let (x0, x1, z0, z1, ppm) = (2f64, 6f64, 0.6f64, 1.5f64, 200f64);
     let (w, h) = (((x1 - x0) * ppm) as usize, ((z1 - z0) * ppm) as usize);
@@ -391,6 +398,14 @@ fn coupe(a: &Apic3, j: usize, chemin: &str) -> std::io::Result<()> {
                     }
                 }
             } else {
+                // S414 : sous le fond de la bande, l'eau à la grille — une teinte à part.
+                let fond = a.band_floor().map_or(0., |f| f[j * dom.nx + i] as f64);
+                for py in 0..h {
+                    let z = z1 - (py as f64 + 0.5) / ppm;
+                    if z < fond {
+                        pose(px as i64, py as i64, [175, 225, 205]);
+                    }
+                }
                 for py in h - 6..h {
                     pose(px as i64, py as i64, [240, 150, 40]);
                 }

@@ -91,8 +91,8 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
 - [x] **P3** — `apply_band_floor` : descente (ensemencement), remontée (absorption, écart au solde vertical) ; essai d'allers-retours ; critère 2.
 - [x] **P4** — `ColumnsSwitch` : cible du fond (`floor_cells`, `floor_hysteresis`, `floor_prediction`), appliquée après le masque ; essais.
 - [x] **P5** — B10 avec fond, sans et avec prédiction ; critère 3.
-- [>] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
-- [ ] **P7** — suite entière ; critère 5.
+- [x] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
+- [>] **P7** — suite entière ; critère 5.
 - [ ] **P8** — preuve BANDE-ETROITE-S413 §5 (un fil, une preuve) ; liste, file, feuille de route, index ; revue R35.
 - [ ] **P9** — rituel.
 
@@ -131,3 +131,16 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
   trop bas — deux pas d'avance, 2,7 fois plus de particules ; **à 0,05 s** (quatre pas), le pincement tombe **au pas même d'APIC
   seul**. `body_horizon` sert aussi l'empreinte de la bande (sans effet ici entre 0,05 et 0,2 s). Le fond suit la cavité : 29
   déplacements au plus, l'hystérésis 2 ou 4 sans effet.
+- **P6** — `apic3d_deferlement` : clés `fond`, `fond_h` ; l'eau sous le fond, de l'eau pour les mesures et **vert d'eau** dans les
+  coupes ; `deplacements_du_fond_max`. La vague de Chen, 40 mailles par `λ`, trois calculs ensemble : APIC seul — retournement
+  0,7055, impact 1,2711 à 4,150, 73 s ; bande pleine (0,3 s) — 0,7020, 1,3056 à 4,225, part 0,520, 74 534 particules, 76 s ;
+  **bande étroite** (0,3 s, fond 4) — **0,7021, 1,2244 à 4,092**, part 0,501, **12 262 particules** (÷ 6,1), **34 s**, fond
+  déplacé 11 fois au plus, **aucun retour rapide**, volume 1,4·10⁻¹². Planche `captures/s414/planche_R35.png` **envoyée, R35
+  posée**. Sur la planche : le fond suit la surface à quatre mailles ; sous le jet, il descend dans les colonnes où de l'air
+  est enfermé (fines colonnes de particules vers 1,2–1,4 τ). **Critère 4** : au verdict.
+- **Message de l'utilisateur (22:3x)** : *« Peut être que si le mesh du fond est malaxable en fonction du courant, les particules
+  peuvent naitres et disparaitre en fonction de leurs vitesse et toiut à réfléchir »* — le fond placé aussi par l'**écoulement**,
+  pas seulement par la forme. C'est l'**Extended Narrow Band FLIP** (Sato, Wojtan, Thuerey, Igarashi, Ando, *CGF* 37(2), 2018 :
+  le passage particules ↔ grille « en n'importe quel endroit », les particules là où elles servent ; le critère exact de l'article
+  non lu). Proposé comme **C6c-3** ; indicateur candidat : l'écart entre la vitesse des particules et celle de la grille (ce que
+  les particules savent et que la grille perdrait), ou la vorticité.
