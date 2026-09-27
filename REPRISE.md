@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 10:30 +02:00
+Battement        : 2026-09-27 10:33 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
 Session en cours : S405 — physique : **9.3**, la prédiction balistique consommée par le suivi — plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S404 — physique : **C8e** ([preuve](docs/validation/MER-EPARS-S404.md)) — l'épars et les niveaux sous le pas couplé, en mer : le bord de l'ensemble absorbe comme celui de la boîte (un rectangle à un ulp de son dense sous la houle, au bit à travers un changement de niveau) ; l'épars qui suit à 0,14 mm du domaine entier, 0,43 mm sur 30 s ; il ne se vide pas en 10 s. Avant : S403, le rang 4 dans l'ordonnanceur et l'issue de la famine

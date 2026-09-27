@@ -190,6 +190,19 @@ pub fn predict(obj: &Ballistic, gravity: f64, step: f64, horizon: f64, surface: 
     None
 }
 
+/// **L'état après `duration` secondes** de vol, par pas de `step` au plus — le même intégrateur que `predict`, sans contact :
+/// ce que la physique de l'hôte ferait de l'objet, pour un banc.
+pub fn advance(obj: &Ballistic, gravity: f64, duration: f64, step: f64) -> Ballistic {
+    let mut s = State { x: obj.position, v: obj.velocity, q: obj.orientation, w: obj.omega };
+    let mut t = 0.;
+    while t < duration {
+        let h = step.min(duration - t);
+        s = rk4(&s, h, gravity, obj.drag, obj.inertia);
+        t += h;
+    }
+    Ballistic { position: s.x, velocity: s.v, orientation: s.q, omega: s.w, ..*obj }
+}
+
 /// **L'impact et sa région utile** quand la traînée n'est connue qu'entre `drag_bounds` : l'impact de la traînée nominale de
 /// `obj`, sa région élargie de la plus grande distance horizontale aux impacts des deux bornes. `None` si l'un des trois n'a pas
 /// lieu dans l'horizon.

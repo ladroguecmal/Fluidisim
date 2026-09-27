@@ -93,7 +93,7 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `ballistic.rs` : état, prédiction (RK4, traînée, Euler, contact, affinage), région, palier.
 - [x] **P3** — essais des critères 1 à 6.
-- [ ] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
+- [x] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
 - [ ] **P5** — les calculs du banc ; critère 7.
 - [ ] **P6** — suite entière, zéro avertissement ; critère 8.
 - [ ] **P7** — preuve `IMPACT-PREVU-S405` ; liste (9.3, 9.2), file, feuille de route, index ; note datée d'ADR-013.
@@ -112,3 +112,8 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
   pas de 10 ms à 2·10⁻¹² s de la référence ; **ignorer la houle coûte +2,10 ms et +2,2 cm**. **Critère 5 tenu** : paliers aux
   frontières (dont l'avion de chasse : T2 jusqu'à √2 s). **Critère 6 tenu** : ±30 % de traînée, région 0,753 m ; la plus éloignée
   de 21 traînées à 0,503 m du nominal.
+- **P4** — `examples/delta3d_impact_prevu.rs` : la mer de S404 (32 × 16 m à 25 cm, houle de S369, relatif, éponge 2 m) ; une
+  sphère de 0,25 m lancée de (3, 8, 6) m à 12 m/s, traînée vraie 0,012, nominale 0,01 ± 30 % ; impact vrai (pas de 1 ms, sur la
+  houle) à **1,1135 s en (15,334 ; 8,000) m**, vitesse (10,15 ; 0 ; −10,03) m/s ; entrée : le volume de la calotte immergée, en
+  gaussienne de 0,5 m ; ensemble revu toutes les 0,5 s. `ballistic::advance` ajouté (le même intégrateur, sans contact), vérifié
+  dans l'essai de la parabole. Cas `prevu` et `temoin` lancés à 10:32.

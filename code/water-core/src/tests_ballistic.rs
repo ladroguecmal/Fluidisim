@@ -19,6 +19,9 @@ fn in_vacuum_over_a_plane_the_impact_is_the_parabola_s405() {
     assert!(dt.abs() <= 1e-9 && dx.abs() <= 1e-8 && dy.abs() <= 1e-8);
     assert!((imp.position[2] - 0.25).abs() <= 1e-8 && (imp.velocity[2] - (2. - G * t)).abs() <= 1e-8);
     assert_eq!(imp.region, 0.25);
+    // `advance` est le même intégrateur : à l'instant de l'impact, le même centre.
+    let there = advance(&obj, G, imp.time, 0.01);
+    assert!((0..3).all(|i| (there.position[i] - imp.position[i]).abs() <= 1e-9), "{there:?}");
     // Pas de contact dans l'horizon ; objet déjà au contact ; paramètres invalides.
     assert!(predict(&obj, G, 0.01, 0.5, |_, _| 0.).is_none());
     assert!(predict(&thrown([0., 0., 0.2], [1., 0., 0.], 0., 0.25), G, 0.01, 10., |_, _| 0.).is_none());
