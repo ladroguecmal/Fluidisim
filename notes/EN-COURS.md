@@ -94,9 +94,9 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `Apic3::set_particle_velocities` (vitesse et `C` d'un champ donné) ; essai : un champ affine passe à la grille exactement.
-- [ ] **P3** — le banc `apic3d_deferlement` : la houle de Chen, les mesures (retournement, impact, abscisse du jet, crête), la
+- [x] **P3** — le banc `apic3d_deferlement` : la houle de Chen, les mesures (retournement, impact, abscisse du jet, crête), la
   bande (`APIC3D_BASCULE`, comme B10), la crête courte en option.
-- [ ] **P4** — APIC seul ; critère 1.
+- [>] **P4** — APIC seul ; critère 1.
 - [ ] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
 - [ ] **P6** — la crête courte ; critère 6.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 7.
@@ -107,3 +107,8 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 - **P2** — `Apic3::set_particle_velocities(field)` (`apic3d.rs`) : vitesse et `C = ∇v` de chaque particule active ; refus
   `NotFinite` sans rien changer. Essai `_s410` : le champ posé exactement, le refus sans effet, l'aller et retour affine de S388
   (1e-5). Réussi.
+- **P3** — `examples/apic3d_deferlement.rs` : `[mailles_par_lambda=40] [ny=4] [courte]` ; 160 × 4 × 32 à 5 cm. Mesures sur
+  l'occupation (eau : ≥ 2 particules ou sous `η` d'une colonne ; air : aucune) dans la fenêtre [2 ; 6,5] m : crête, retournement
+  (eau / air / eau), impact (air enfermé > 8 mailles, abscisse moyenne). Bande : `APIC3D_BASCULE` (`pente`, `dilatation`,
+  `maintien`), zone posée après le premier pas (`clear_counts` ensuite), avance de la bande sur le retournement à sa colonne ;
+  `APIC3D_TRACE=1` : intervalles de la bande sur la rangée du milieu. Construit sans avertissement.
