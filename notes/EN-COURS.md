@@ -92,7 +92,7 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-005 restauré, note datée ; critère A1.
+- [x] **P2** — ADR-005 restauré, note datée ; critère A1.
 - [ ] **P3** — le contrôle dans `etat_projet.py` (vu échouer sur S35 et S39) ; protection de METHODE, leçon ; critère A2.
 - [ ] **P4** — `delta3d_levels.rs` : le transfert d'état entre niveaux ; essais T1 à T4, vu échouer sans pente.
 - [ ] **P5** — le banc `delta3d_niveaux` : bosse et source mobile, 25 → 50 cm à 2 s, retour à 5 s, contre le domaine fin ; ADR-005 §5
@@ -104,3 +104,7 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
 
 ### Notes de reprise
 
+- **P2** — ADR-005 restauré : le texte de S16 (`c0df00f7`, 9 791 premiers octets), la note B-S26 (S35), la note B-S27 (S39), chacun
+  au bit et dans l'ordre (vérifié par position), puis une note datée de S402. 285 lignes ; titre, §1 à §6 retrouvés. **§5, le
+  cycle de vie** : création et croissance à δ = 0 (coût nul) ; rétrécissement, « transduction δ→W puis amortissement sur τ ≈ 0,3 s » ;
+  destruction, « idem, τ ≈ 0,5–1,5 s selon l'énergie résiduelle » (négligeable) ; bascules perturbatif ↔ substitutif continues.
