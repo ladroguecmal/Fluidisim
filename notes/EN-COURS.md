@@ -85,9 +85,14 @@ pour la campagne ; les questions qui demandent l'utilisateur. Aucun ADR avant sa
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — verdict R34 consigné (REVUE-VISUELLE, file, preuve §6.4) ; maintien 0,3 s retenu pour C6c, défaut inchangé d'ici là.
-- [>] **P3** — le document `docs/registres/TRUCAGES-TEMPS-REEL-S411.md` ; index, file.
-- [ ] **P4** — rituel.
+- [x] **P3** — le document `docs/registres/TRUCAGES-TEMPS-REEL-S411.md` ; index, file.
+- [>] **P4** — rituel.
 
 ### Notes de reprise
 - **P2** — R34 consigné : REVUE-VISUELLE §39 (verdict), BASCULE-S408 §6.4, file (décision en tête ; ligne de la campagne : C6c =
   bande étroite + critère qui suit la crête). Le lien vers le document de P3 est posé d'avance (navigation vérifiée au rituel).
+- **P3** — précision de l'utilisateur pendant l'écriture : *« Houdini était une référence pas forcément le choix adpaté »* — la
+  qualité d'image est la cible, pas la méthode ; le document est cadré ainsi (§1). [TRUCAGES-TEMPS-REEL-S411](../docs/registres/TRUCAGES-TEMPS-REEL-S411.md) :
+  T1 à T8 ; T1, la bande étroite en profondeur (Ferstl et al. 2016, lu en session), proposée comme C6c avant C7 — particules ÷ 4
+  à 10 sur nos bancs (estimé) ; T3 la surface continue (trois voies) ; T4 particules diffuses ; T5 détail synthétisé ; T7 les
+  courants = ADR-011, conçus en S01, non construits ; quatre questions (§8). Index (liste et carte, ligne B). `--check` : 0.
