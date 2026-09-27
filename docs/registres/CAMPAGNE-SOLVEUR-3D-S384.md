@@ -311,3 +311,8 @@ graphe —, celui de la littérature du temps réel depuis 2014 ; il lui manque 
 domaine de la porte B consomme seul les 2 ms de δ, et la campagne les regagne par les **colonnes hautes** (÷ 3 mailles,
 *estimé*) et la **multigrille**, avant d'ajouter APIC en 3D, son raccord et les scènes — onze sessions, dont cinq sans
 carte graphique, la première étant la multigrille 3D de la référence.
+
+> **Note datée du 2026-09-27 (S412)** — [ADR-211](../adr/ADR-211-les-trucages-retenus.md), décision de l'utilisateur : **C6c**, la
+> bande étroite en profondeur ([ADR-212](../adr/ADR-212-la-bande-etroite-en-profondeur.md)), s'insère **avant C7**, qui porte sur la
+> carte la version étroite ; la **surface continue** (afficheur) avant **C10**, que l'utilisateur juge sur elle. Le §5 garde son
+> tableau d'origine ; l'ordre en vigueur est celui-ci.

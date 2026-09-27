@@ -143,3 +143,7 @@ l'utilisateur juge l'image finale et non l'instrument (R34).
   TOG* 32(1) (2013) ; W. J. van der Laan, S. Green, M. Sainz, « Screen space fluid rendering with curvature flow », I3D 2009 ;
   T. Kim, J. Tessendorf, N. Thuerey, « Closest point turbulence for liquid surfaces », *ACM TOG* 32(2) (2013) ; Y. Zhu,
   R. Bridson, « Animating sand as a fluid », SIGGRAPH 2005.
+
+*Note datée du 2026-09-27 (S412)* : **réponses de l'utilisateur** — 1 et 2 validés, 3 « Ok », 4 *« cela dépends une simulation
+d'un joueur de 15m peut être calculé a l'avance et plus le joueur se rapproche de la simulation et peux intérargir et simule en
+temps réel, a réfléchir »*. Décisions et première analyse du point 4 : [ADR-211](../adr/ADR-211-les-trucages-retenus.md).

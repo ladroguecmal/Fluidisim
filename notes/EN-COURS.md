@@ -74,10 +74,13 @@ de file. (2) La **conception de C6c** — structure, masse exacte, critères « 
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-211, les décisions du 2026-09-27 ; notes datées (trucages §8, campagne) ; file, feuille de route.
-- [ ] **P3** — lecture du code de la zone : vitesses eulériennes, transferts aux faces de frontière, `φ`, échange, bascule.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — ADR-211, les décisions du 2026-09-27 ; notes datées (trucages §8, campagne) ; file, feuille de route.
+- [>] **P3** — lecture du code de la zone : vitesses eulériennes, transferts aux faces de frontière, `φ`, échange, bascule.
 - [ ] **P4** — ADR-212, la bande étroite en profondeur : structure, masse, critères, découpage ; index.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — [ADR-211](../docs/adr/ADR-211-les-trucages-retenus.md) (D1 à D4 ; D4, première analyse : un niveau « cuit » entre le
+  factice et δ vivant, passage par transfert d'état, I-17 par la graine) ; notes datées : trucages, campagne, ADR-207 ; file
+  (décision en tête, point D4 avec déclencheur) ; feuille de route ; index (ligne B). Lien vers ADR-212 posé d'avance (P4).

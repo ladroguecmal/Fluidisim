@@ -81,3 +81,6 @@ moins en mode mobile (D4 d'ADR-208).
 
 La note de S386 ci-dessus dit « ÷2,55 à la porte B » : c'est une colonne de 7 m d'eau à 25 cm, pas la scène de la porte B
 (3,5 m d'eau sous 3,5 m d'air) — voir la note corrective d'[ADR-208](ADR-208-la-colonne-graduee.md).
+
+*Note datée du 2026-09-27 (S412)* : l'ordre des sessions change par [ADR-211](ADR-211-les-trucages-retenus.md) — C6c (la bande
+étroite en profondeur, [ADR-212](ADR-212-la-bande-etroite-en-profondeur.md)) avant C7 ; la surface continue avant C10.
