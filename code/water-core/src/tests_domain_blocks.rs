@@ -189,3 +189,24 @@ fn every_bounded_maneuver_stays_in_the_predicted_set_s401() {
     println!("S401 enveloppe : {checked} blocs vérifiés, 100 % dans le domaine prévu ; {:.1} blocs par objet en moyenne",
         blocks_used as f64 / 300.);
 }
+
+#[test]
+fn a_level_change_requires_the_blocks_that_cover_the_set_s404() {
+    // S404 : un domaine qui passe de 25 à 50 cm hérite de son ensemble. Fenêtre de 8 × 6 m : 32 × 24 colonnes à 25 cm, 16 × 12 à
+    // 50 cm, soit 2 × 2 blocs de 4 m. L'ensemble de départ, les colonnes [8, 24) × [8, 16) — x de 2 à 6 m, y de 2 à 4 m —, est
+    // couvert par les blocs (0, 0) et (1, 0) ; une colonne qui touche le bord d'un bloc (x = 2 m) n'y met pas le voisin.
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut f = Follow::with_capacity(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, 16, 12, 0.5, 1, 1e-3,
+        250_000)
+    .unwrap();
+    let mask: Vec<u8> = (0..32 * 24).map(|c| u8::from((8..24).contains(&(c % 32)) && (8..16).contains(&(c / 32)))).collect();
+    f.require_cover(1_000_000, &mask, 32, 24, 0.25);
+    assert_eq!(f.set(), &[1, 1, 0, 0]);
+    let mut cols = vec![0u8; 16 * 12];
+    f.columns(16, 12, &mut cols);
+    assert_eq!(cols.iter().filter(|c| **c != 0).count(), 16 * 8);
+    // Puis il suit sa perturbation : rien ne le requiert plus, il sort après le délai, pas avant.
+    let rest = vec![2f32; 16 * 12];
+    assert_eq!(f.update(1_249_999, &rest, 2., 16, &[]), &[1, 1, 0, 0]);
+    assert_eq!(f.update(1_250_000, &rest, 2., 16, &[]), &[0, 0, 0, 0]);
+}

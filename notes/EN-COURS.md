@@ -98,7 +98,7 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   prédites, gradients au bord de l'ensemble comme au bord de la boîte ; bande de B aux murs comme au bord, colonnes dehors
   intouchées ; éponge depuis le bord de l'ensemble (étendues par colonne, réservées) ; bilan aux murs.
 - [x] **P3** — essais du pas couplé : critère 1, oracles (a) (b) (c) sous la houle, refus ; vu échouer (trois défauts injectés).
-- [ ] **P4** — le transfert de niveau porte l'ensemble (`delta3d_levels.rs`) ; `Follow::require_cover` ; essais du critère 3.
+- [x] **P4** — le transfert de niveau porte l'ensemble (`delta3d_levels.rs`) ; `Follow::require_cover` ; essais du critère 3.
 - [ ] **P5** — le banc `delta3d_mer_epars` : cas `suivi`, `murs` (témoin), `long`, `niveaux` ; lancés en arrière-plan.
 - [ ] **P6** — les calculs du banc ; critères 4 et 5.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 6.
@@ -123,3 +123,12 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   **8,4·10⁻⁴ m**, bandes à 10,7 % ; (2) témoin, éponge au seul bord de la boîte : **3,2·10⁻² m** (l'éponge du dense couvre une
   bonne part du rectangle) ; (3) faces fermées prédites : **2,6·10⁻⁴ m**, et le dehors n'est plus au repos ; (4) gradients qui
   lisent le dehors à zéro : **2,8·10⁻⁴ m**. Tous retirés.
+- **P4** — `delta3d_levels.rs` : les refus d'ensemble levés (la découpe reste refusée) ; départ : une colonne dehors porte le
+  repos, sans pente ; pente décentrée et terme croisé nul au bord de l'ensemble ; vitesses : un coin hors de la grille de
+  l'ensemble prend, axe par axe, la valeur de son voisin dedans (`staggered_in_set`, la borne de la boîte) ; arrivée : colonnes
+  dehors au repos, murs fermés. `Follow::require_cover` (`domain_blocks.rs`) : les blocs qui couvrent l'ensemble d'un autre niveau,
+  requis à l'instant. **Critère 3 tenu** : un rectangle 25 → 50 → 25 cm contre son dense, surface et vitesses **au bit** (0,000),
+  volumes exacts ; une arrivée qui ne couvre que la moitié perd exactement ce que portait l'autre (1,039676·10⁻² m³), publié ; un
+  dense reçoit tout d'un épars. **Trouvé par l'essai** : une colonne de départ dehors ne doit pas « ne rien porter » mais porter
+  le **repos** — la reconstruction est en hauteur absolue ; sans cela, un dense recevait −79,9 m³. L'essai S402 qui refusait un
+  ensemble ne le refuse plus (son commentaire le dit) ; les chiffres de S402 inchangés (0,304 %).

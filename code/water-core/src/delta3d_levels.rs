@@ -16,7 +16,13 @@
 //! - **La pression de départ** repart de zéro : elle ne sert qu'à démarrer la projection.
 //!
 //! Même fenêtre, même repère (ADR-006 §3.1 : un domaine ne se compose qu'avec son référentiel) : étendue, repos, densité et
-//! gravité égaux ; ni découpe ni ensemble épars, qui ne sont pas portés.
+//! gravité égaux ; pas de découpe, qui n'est pas portée.
+//!
+//! **S404 — l'ensemble épars** (C8e). Le bord de l'ensemble de départ se lit comme le bord de la boîte : une colonne dehors ne
+//! porte rien, une pente s'y décentre, le terme croisé s'y annule ; une vitesse dehors se lit comme la face de l'ensemble la plus
+//! proche, comme la boîte borne ses indices. À l'arrivée, les colonnes hors de l'ensemble restent au repos et ses murs se
+//! ferment : le volume est exact quand l'ensemble d'arrivée couvre celui de départ ; sinon, ce qu'il ne couvre pas est perdu,
+//! et `LevelChange` le dit.
 use super::*;
 
 /// Ce qu'un transfert a fait, publié.
@@ -24,15 +30,16 @@ use super::*;
 pub struct LevelChange {
     /// Volume de perturbation du domaine de départ, m³.
     pub volume_before: f64,
-    /// Volume de perturbation du domaine d'arrivée, m³ — égal à l'arrondi près.
+    /// Volume de perturbation du domaine d'arrivée, m³ — égal à l'arrondi près ; S404 : moins ce que l'ensemble d'arrivée ne
+    /// couvre pas de celui de départ.
     pub volume_after: f64,
 }
 
 impl Volume3 {
     /// **Reçoit l'état de `src`**, qui couvre la même fenêtre à un autre `dx` (le rang 4 d'ADR-012, ou le retour) : surface
     /// par recouvrement et reconstruction linéaire conservative, vitesses interpolées aux faces, pression de départ nulle.
-    /// Refus `Domain`, rien n'est écrit : étendue, repos, densité ou gravité différents, découpe ou ensemble épars de l'un
-    /// des deux. Aucune allocation.
+    /// S404 : l'un et l'autre peuvent être épars — l'état n'est reçu que dans l'ensemble d'arrivée. Refus `Domain`, rien n'est
+    /// écrit : étendue, repos, densité ou gravité différents, découpe de l'un des deux. Aucune allocation.
     pub fn resample_from(&mut self, src: &Volume3) -> Result<LevelChange, Error> {
         let (d, s) = (self.domain, src.domain);
         let extent = |n: usize, dx: f32| n as f64 * dx as f64;
@@ -45,8 +52,6 @@ impl Volume3 {
             || self.g_eff.to_bits() != src.g_eff.to_bits()
             || self.cut.is_some()
             || src.cut.is_some()
-            || self.sparse.is_some()
-            || src.sparse.is_some()
         {
             return Err(Error::Domain);
         }
@@ -55,6 +60,7 @@ impl Volume3 {
         self.resample_faces(src);
         self.p.fill(0.);
         self.close_walls();
+        self.close_sparse_walls();
         Ok(LevelChange { volume_after: self.perturbation_volume(), ..change })
     }
 
@@ -72,7 +78,13 @@ impl Volume3 {
             return 0.;
         }
         let at = |m: usize| if axis == 0 { self.compensated(m, j) } else { self.compensated(i, m) };
-        let (lo, hi) = (k.saturating_sub(1), (k + 1).min(n - 1));
+        // S404 : un voisin hors de l'ensemble épars n'est pas lu — la pente s'y décentre, comme au bord de la boîte.
+        let inside = |m: usize| if axis == 0 { self.column_active(m, j) } else { self.column_active(i, m) };
+        let lo = if k > 0 && inside(k - 1) { k - 1 } else { k };
+        let hi = if k + 1 < n && inside(k + 1) { k + 1 } else { k };
+        if hi == lo {
+            return 0.;
+        }
         (at(hi) - at(lo)) / ((hi - lo) as f64 * self.domain.dx as f64)
     }
 
@@ -82,6 +94,10 @@ impl Volume3 {
     fn surface_twist(&self, i: usize, j: usize) -> f64 {
         let Domain3 { nx, ny, dx, .. } = self.domain;
         if i == 0 || j == 0 || i + 1 >= nx || j + 1 >= ny {
+            return 0.;
+        }
+        // S404 : de même au bord de l'ensemble épars — un coin dehors, et le terme s'annule.
+        if [(i - 1, j - 1), (i + 1, j - 1), (i - 1, j + 1), (i + 1, j + 1)].iter().any(|&(a, b)| !self.column_active(a, b)) {
             return 0.;
         }
         let h = |a: usize, b: usize| self.compensated(a, b);
@@ -105,6 +121,13 @@ impl Volume3 {
                 let mut total = 0f64;
                 let (i0, i1) = ((x0 / sx).floor() as usize, ((x1 / sx).ceil() as usize).min(s.nx));
                 let (j0, j1) = ((y0 / sy).floor() as usize, ((y1 / sy).ceil() as usize).min(s.ny));
+                let c = self.col(i, j);
+                // S404 : une colonne d'arrivée hors de l'ensemble reste au repos.
+                if !self.column_active(i, j) {
+                    self.eta[c] = self.rest;
+                    self.eta_roundoff[c] = 0.;
+                    continue;
+                }
                 for sj in j0..j1 {
                     let (ya, yb) = (y0.max(sj as f64 * sy), y1.min((sj + 1) as f64 * sy));
                     if yb <= ya {
@@ -117,15 +140,19 @@ impl Volume3 {
                         }
                         let area = (xb - xa) * (yb - ya);
                         let (cx, cy) = (0.5 * (xa + xb) - (si as f64 + 0.5) * sx, 0.5 * (ya + yb) - (sj as f64 + 0.5) * sy);
-                        let h = src.compensated(si, sj)
-                            + src.surface_slope(si, sj, 0) * cx
-                            + src.surface_slope(si, sj, 1) * cy
-                            + src.surface_twist(si, sj) * cx * cy;
+                        // S404 : une colonne de départ hors de l'ensemble ne porte rien — le repos, sans pente.
+                        let h = if src.column_active(si, sj) {
+                            src.compensated(si, sj)
+                                + src.surface_slope(si, sj, 0) * cx
+                                + src.surface_slope(si, sj, 1) * cy
+                                + src.surface_twist(si, sj) * cx * cy
+                        } else {
+                            src.rest as f64
+                        };
                         total += area * h;
                     }
                 }
                 let h = total / (dd * dd);
-                let c = self.col(i, j);
                 self.eta[c] = h as f32;
                 self.eta_roundoff[c] = (self.eta[c] as f64 - h) as f32;
             }
@@ -151,6 +178,9 @@ impl Volume3 {
             frac[a] = if dims[a] < 2 { 0. } else { f - b as f64 };
         }
         let value = |p: [usize; 3]| self.velocity3(axis, p) as f64;
+        if self.sparse.is_some() {
+            return self.staggered_in_set(axis, base, frac, dims) as f32;
+        }
         let mut acc = 0f64;
         for corner in 0..8usize {
             let mut p = base;
@@ -175,6 +205,53 @@ impl Volume3 {
             }
         }
         acc as f32
+    }
+
+    /// S404 : l'interpolation de `staggered_at` dans un domaine épars — un coin hors de la grille de l'ensemble prend, axe par
+    /// axe, la valeur de son voisin dans l'ensemble, comme la boîte borne ses indices : constante au-delà du bord.
+    fn staggered_in_set(&self, axis: usize, base: [usize; 3], frac: [f64; 3], dims: [usize; 3]) -> f64 {
+        let (mut values, mut outside) = ([0f64; 8], [false; 8]);
+        for corner in 0..8usize {
+            let mut p = base;
+            for a in 0..3 {
+                if (corner >> a) & 1 == 1 && dims[a] >= 2 {
+                    p[a] += 1;
+                }
+            }
+            values[corner] = self.velocity3(axis, p) as f64;
+            outside[corner] = self.sparse_outside3(axis, p);
+        }
+        for a in 0..3 {
+            if dims[a] < 2 {
+                continue;
+            }
+            for corner in (0..8usize).filter(|c| (c >> a) & 1 == 0) {
+                let up = corner | (1 << a);
+                if outside[corner] && !outside[up] {
+                    (values[corner], outside[corner]) = (values[up], false);
+                } else if outside[up] && !outside[corner] {
+                    (values[up], outside[up]) = (values[corner], false);
+                }
+            }
+        }
+        let mut acc = 0f64;
+        for (corner, v) in values.iter().enumerate() {
+            let mut weight = 1f64;
+            for a in 0..3 {
+                let up = (corner >> a) & 1 == 1;
+                if dims[a] < 2 {
+                    if up {
+                        weight = 0.;
+                    }
+                    continue;
+                }
+                weight *= if up { frac[a] } else { 1. - frac[a] };
+            }
+            if weight != 0. {
+                acc += weight * v;
+            }
+        }
+        acc
     }
 
     /// Les faces par interpolation ; une face d'arrivée plus grande que celles de départ est moyennée sur `n × n` sous-faces,

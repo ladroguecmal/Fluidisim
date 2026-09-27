@@ -308,6 +308,32 @@ impl Follow {
         &self.set
     }
 
+    /// **S404 — un changement de niveau** (ADR-210) : les blocs de cette fenêtre qui recouvrent une colonne non nulle de `mask` —
+    /// la même fenêtre à un autre niveau, `nx × ny` colonnes de côté `dx` — sont requis à `now_us`. Le domaine d'arrivée couvre
+    /// ainsi celui de départ, et le transfert d'état ne perd rien ; il suit ensuite sa perturbation, et ce que plus rien ne
+    /// requiert sort après le délai. Aucune allocation.
+    pub fn require_cover(&mut self, now_us: u64, mask: &[u8], nx: usize, ny: usize, dx: f32) {
+        let side = BLOCK as f64 * self.dx as f64;
+        let span = |k: usize, n: usize| {
+            let (a, b) = (k as f64 * dx as f64, (k + 1) as f64 * dx as f64);
+            ((a / side).floor() as usize, ((b / side).ceil() as usize).min(n))
+        };
+        for j in 0..ny {
+            for i in 0..nx {
+                if mask[j * nx + i] == 0 {
+                    continue;
+                }
+                let ((bi0, bi1), (bj0, bj1)) = (span(i, self.nbx), span(j, self.nby));
+                for bj in bj0..bj1 {
+                    for bi in bi0..bi1 {
+                        self.required_at[bj * self.nbx + bi] = now_us;
+                        self.set[bj * self.nbx + bi] = 1;
+                    }
+                }
+            }
+        }
+    }
+
     /// Le domaine en colonnes : `out[j·nx + i]` vaut 1 si la colonne est dans un bloc du domaine.
     pub fn columns(&self, nx: usize, ny: usize, out: &mut [u8]) {
         for j in 0..ny {
