@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S415 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Je valides R35, continue avec ta recomandation »* — la
+Session : S415 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Je valides R35, continue avec ta recomandation »* — la
 recommandation : **C6c-3**, le fond qui suit l'écoulement (*« le mesh du fond malaxable en fonction du courant, les particules
 peuvent naitres et disparaitre en fonction de leurs vitesse »*), conception d'abord. Agent : Claude Code (Opus 5.5), au poste ;
 référence CPU.
@@ -94,7 +94,7 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 - [x] **P6** — la vague de Chen avec le seuil ; critère 4.
 - [x] **P7** — suite entière ; critère 5.
 - [x] **P8** — preuve (BANDE-ETROITE-S413 §6), ADR-212 note (C6c-3), liste, file, feuille de route, index.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 - **P2** — R35 : REVUE-VISUELLE §40 (verdict), BANDE-ETROITE-S413 §5.5, file (décision en tête ; campagne). Réglage retenu pour

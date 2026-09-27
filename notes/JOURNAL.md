@@ -17932,3 +17932,17 @@ court (0,05 s), deux pas trop tôt à 0,2 s ; **la vague de Chen** ÷ 6 et deux 
 fonction de leurs vitesse »* — c'est l'Extended Narrow Band FLIP (Sato et al. 2018) : **C6c-3** proposée. **Limites** : aucun défaut
 changé ; crête courte non rejouée. **Rituel.** Maillons **2** (4.16 reste partiel ; la priorité du solveur passe avant la règle,
 S406). Suivant : R35, puis C6c-3 ou C7.
+
+## S415 — 2026-09-27 — physique : C6c-3, le fond qui suit l'écoulement
+
+**Entrée.** *« Je valides R35, continue avec ta recomandation »* — R35 reçu ; la recommandation : C6c-3, l'idée de l'utilisateur
+(*« le mesh du fond malaxable en fonction du courant, les particules peuvent naitres et disparaitre en fonction de leurs vitesse »*).
+**Fait** ([preuve](../docs/validation/BANDE-ETROITE-S413.md) §6) : trois critères d'écoulement dans `ColumnsSwitch`, éteints par
+défaut — vorticité de la grille, vitesse, part de rotation (critère Q sans dimension) — qui rendent une colonne requise et descendent
+son fond sous l'eau concernée ; banc `apic3d_tourbillon` (Lamb–Oseen enfoui). **Mesuré** : la grille perd 2,5 fois l'énergie
+qu'APIC perd ; la vorticité garde le cœur (à 1 %) mais pas l'énergie de l'écoulement extérieur, irrotationnel ; **la vitesse** — les
+mots de l'utilisateur — rend l'énergie d'APIC seul (0,800 contre 0,806 à 2,5 cm) avec 2,4 à 3 fois moins de particules. **Mais** sous
+la vague de Chen, vorticité absolue (la déformation fausse la vorticité de la grille) et vitesse prennent toute la houle ; la part de
+rotation ne prend que le déferlement, et y hésite. **La voie** : la vitesse propre de δ, relative à B (ADR-198), gratuite sous la
+houle — avec C7. Suite **752 réussis**, zéro avertissement. **Rituel.** Maillons **3** — justifié : la demande de l'utilisateur, et
+la priorité du solveur (S406). Suivant : **C7** au poste, APIC sur la carte dans sa version étroite.
