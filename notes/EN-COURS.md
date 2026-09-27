@@ -143,3 +143,9 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   itérations ; 325/356 ms par pas. `murs` (témoin) : écart **0,210 mm**, part **identique** au millième, rendu 0,29 mm au plus.
   **Critère 4** : écart tenu (prédiction ≤ 1 mm tenue) ; la prédiction « part finale ≤ 0,6 » **manquée** (0,812) — et le témoin
   dit que le bord absorbant n'y change rien : il ôte un tiers de l'écart (0,21 → 0,14 mm), pas des mailles.
+- **P6** (suite) — `niveaux` : l'épars qui suit **contre l'entier qui fait les mêmes passages : 0,138 mm** (critère 5 tenu,
+  prédiction ≤ 1 mm tenue) ; sauts au passage 2,04 mm, au retour 1,52 mm, **les mêmes** pour l'entier et l'épars ; volumes des
+  quatre transferts exacts ; le prix du niveau (l'entier contre la référence à 25 cm) : 0 / **17,8** / **18,3 mm** avant, pendant,
+  après — la source d'une maille grossière, comme S402 (15,7 / 16,7 mm) ; part de l'épars 1,000 pendant les 50 cm (la couverture
+  en blocs de 4 m prend toute la fenêtre de 16 m), 0,875–0,922 après.
+- **P7** (fait pendant P6) — suite entière : **726 réussis**, 19 ignorés, zéro échec, zéro avertissement (718 + 8 essais `_s404`).
