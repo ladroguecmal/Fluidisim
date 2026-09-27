@@ -13,6 +13,10 @@
 //!
 //! Sans masque, rien ne change : `Apic3` au bit. **Cette part** : la zone éprouvée seule ; une face entre une colonne et une
 //! colonne de particules n'échange encore rien (C5b, deuxième part).
+//!
+//! **S406** : la face de frontière bande | zone **appartient à la zone** — sa vitesse avant projection est advectée comme celle
+//! des autres faces de la zone, et non plus prise au seul transfert des particules de la bande ; une particule absorbée rend sa
+//! quantité de mouvement aux faces de la zone. Le courant de surface de S400 disparaît ; la densité au raccord reste manquée.
 use super::*;
 
 /// La zone des colonnes : masque, surface, copies du pas précédent, débits. Réservée à la configuration (I-06).
@@ -40,7 +44,7 @@ pub(crate) struct Columns3 {
     pub(crate) read_bias: Vec<f32>,
     /// Une bande existe-t-elle (une colonne hors du masque) ? Sans bande, la zone lit `η` exactement.
     pub(crate) band: bool,
-    /// **S406, essais seulement** : les gestes de la frontière, un à un (`Apic3::TRIAL_…`) ; zéro, ceux de S400.
+    /// **S406, essais seulement** : les gestes de la frontière, un à un (`Apic3::TRIAL_…`) ; zéro, ceux de S406.
     pub(crate) trials: u8,
 }
 
@@ -116,26 +120,24 @@ impl Apic3 {
         Ok(())
     }
 
-    /// **S406, essais seulement** — la face de frontière bande | zone prend, avant la projection, la **moyenne** du transfert des
-    /// particules de la bande et de la vitesse advectée de la zone, au lieu du seul transfert (suspect (a) de S400).
-    pub const TRIAL_FACE_BOTH_SIDES: u8 = 1;
+    /// **S406, essais seulement** — la frontière de S400 : la face bande | zone prend, avant la projection, le seul transfert des
+    /// particules de la bande, et la quantité de mouvement d'une particule absorbée est perdue. Reproduit S400.
+    pub const TRIAL_S400: u8 = 1;
+    /// **S406, essais seulement** — la face de frontière prend la **moyenne** du transfert de la bande et de la vitesse advectée
+    /// de la zone (suspect (a), première forme).
+    pub const TRIAL_FACE_BOTH_SIDES: u8 = 2;
     /// **S406, essais seulement** — le débit de la face de frontière est mouillé, rangée par rangée, à la hauteur **moyenne** de la
-    /// colonne et de la bande (lue sur `φ`), comme une face intérieure, au lieu de la seule colonne (suspect (b)).
-    pub const TRIAL_MEAN_HEIGHT: u8 = 2;
-    /// **S406, essais seulement** — une particule absorbée rend sa quantité de mouvement aux faces de la zone qui l'entourent,
-    /// au poids d'une particule sur une maille (suspect (c)).
-    pub const TRIAL_KEEP_MOMENTUM: u8 = 4;
-    /// **S406, essais seulement** — variante de (a) : la face de frontière prend la seule vitesse advectée de la zone.
-    pub const TRIAL_FACE_ZONE_ONLY: u8 = 8;
-    /// **S406, essais seulement** — la densité : un solde dû retire dans la maille **la plus pleine** des deux dernières colonnes
-    /// de la bande à cette profondeur (la plus proche de la face à égalité), au lieu de la seule maille contre la face.
-    pub const TRIAL_SPREAD_REMOVAL: u8 = 16;
+    /// colonne et de la bande (lue sur `φ`), comme une face intérieure (suspect (b)).
+    pub const TRIAL_MEAN_HEIGHT: u8 = 4;
+    /// **S406, essais seulement** — un solde dû retire dans la maille **la plus pleine** des deux dernières colonnes de la bande à
+    /// cette profondeur, au lieu de la seule maille contre la face (témoin de densité).
+    pub const TRIAL_SPREAD_REMOVAL: u8 = 8;
 
-    /// **S406, essais seulement** : les gestes de la frontière à éprouver, somme de `TRIAL_…` ; zéro rend ceux de S400. Refus
+    /// **S406, essais seulement** : les gestes de la frontière à éprouver, somme de `TRIAL_…` ; zéro, ceux de S406. Refus
     /// `Domain` sans zone ou hors des quatre bits.
     pub fn set_columns_trials(&mut self, bits: u8) -> Result<(), Error> {
         let Some(c) = self.columns.as_mut() else { return Err(Error::Domain) };
-        if bits > 31 {
+        if bits > 15 {
             return Err(Error::Domain);
         }
         c.trials = bits;
@@ -221,9 +223,11 @@ impl Apic3 {
             let foot = [x[0] - dt * v[0], x[1] - dt * v[1], x[2] - dt * v[2]];
             sample(domain, pu, pv, pw, foot)[axis]
         };
-        // S406, essai (a) : une face de frontière prend la moyenne du transfert de la bande et de la vitesse advectée de la zone.
-        let both = c.trials & (Self::TRIAL_FACE_BOTH_SIDES | Self::TRIAL_FACE_ZONE_ONLY) != 0;
-        let only = c.trials & Self::TRIAL_FACE_ZONE_ONLY != 0;
+        // **S406 — la face de frontière appartient à la zone** : sa vitesse avant projection est celle de la zone, advectée comme
+        // ses autres faces — le seul transfert de la bande, d'un côté, entretenait un courant de surface (−6,7 mm/s à 5 cm,
+        // RACCORD-3D-S398 §7). Essais : la frontière de S400, ou la moyenne des deux.
+        let owned = c.trials & Self::TRIAL_S400 == 0;
+        let average = c.trials & Self::TRIAL_FACE_BOTH_SIDES != 0;
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..=nx {
@@ -232,10 +236,10 @@ impl Apic3 {
                     if (a || i == 0) && (b || i == nx) && (a || b) {
                         let x = [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
                         self.u[f] = advected(x, 0);
-                    } else if both && a != b && i > 0 && i < nx {
+                    } else if owned && a != b && i > 0 && i < nx {
                         let x = [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
                         let zone = advected(x, 0);
-                        self.u[f] = if self.wu[f] > 0. && !only { 0.5 * (self.u[f] + zone) } else { zone };
+                        self.u[f] = if average && self.wu[f] > 0. { 0.5 * (self.u[f] + zone) } else { zone };
                     }
                 }
             }
@@ -246,10 +250,10 @@ impl Apic3 {
                     if (a || j == 0) && (b || j == ny) && (a || b) {
                         let x = [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx];
                         self.v[f] = advected(x, 1);
-                    } else if both && a != b && j > 0 && j < ny {
+                    } else if owned && a != b && j > 0 && j < ny {
                         let x = [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx];
                         let zone = advected(x, 1);
-                        self.v[f] = if self.wv[f] > 0. && !only { 0.5 * (self.v[f] + zone) } else { zone };
+                        self.v[f] = if average && self.wv[f] > 0. { 0.5 * (self.v[f] + zone) } else { zone };
                     }
                 }
             }
@@ -514,9 +518,9 @@ impl Apic3 {
                     best = Some((d, axis, face));
                 }
             }
-            // S406, essai (c) : la quantité de mouvement de la particule rendue aux faces de la zone qui l'entourent, au poids
-            // d'une particule sur une maille (1/8), réparti comme le transfert.
-            if self.columns.as_ref().unwrap().trials & Self::TRIAL_KEEP_MOMENTUM != 0 {
+            // **S406** : la quantité de mouvement de la particule absorbée rendue aux faces de la zone qui l'entourent, au poids
+            // d'une particule sur une maille (1/8), réparti comme le transfert — elle n'est plus perdue (essai : S400).
+            if self.columns.as_ref().unwrap().trials & Self::TRIAL_S400 == 0 {
                 let v = self.vel[k];
                 for axis in 0..3 {
                     let (origin, dims) = staggered(self.domain, axis);

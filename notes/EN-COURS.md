@@ -93,7 +93,7 @@ ne rien rendre défaut, et le dire.
 - [x] **P1** — jeton, décision de l'utilisateur à la file, plan seul.
 - [x] **P2** — options d'essai de la frontière dans `Apic3` (a, b, c) et leur passage au banc `apic3d_raccord` ; critère 1.
 - [x] **P3** — témoins courts, 5 cm, 30 s : chaque option seule, puis la combinaison ; attribution.
-- [ ] **P4** — le remède attribué devient le défaut ; essais ; critères 1 à 3.
+- [x] **P4** — le remède attribué devient le défaut ; essais ; critères 1 à 3.
 - [ ] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
 - [ ] **P6** — suite entière, zéro avertissement.
 - [ ] **P7** — preuve (RACCORD-3D-S398 §7) ; liste 4.16, file (campagne, lot 5), A316 (note datée), feuille de route, index.
@@ -135,3 +135,11 @@ ne rien rendre défaut, et le dire.
   prise au seul transfert de la bande — remède : la face prise à la zone ; la quantité de mouvement rendue ramène la migration au
   critère ; la **densité** reste **non attribuée** (ni (a), ni (b), ni (c), ni le lieu du retrait). Remède retenu : **12** (face à
   la zone + quantité de mouvement).
+- **P4** — le défaut : **la face de frontière appartient à la zone** (vitesse avant projection advectée comme ses autres faces)
+  et **la quantité de mouvement d'une particule absorbée est rendue** aux faces de la zone (1/8, réparti comme le transfert).
+  Essais renumérotés : `TRIAL_S400` = 1 (la frontière de S400), `TRIAL_FACE_BOTH_SIDES` = 2 (moyenne), `TRIAL_MEAN_HEIGHT` = 4,
+  `TRIAL_SPREAD_REMOVAL` = 8. **Critère 1 tenu** : `APIC3D_ESSAI=1` rend S400 au chiffre près (courant −6,7, densité
+  7,542/7,767/7,951, période +0,77 %) ; le défaut rend l'essai « 12 » au chiffre près (courant −0,6, niveau +1,007/+1,772/+2,181,
+  densité 7,593/7,617/7,685) — le calcul à 2,5 cm de l'essai « 12 » vaut donc pour le défaut. **Critères 2 et 3 tenus** : repos
+  2,0·10⁻⁵ m/s, volume au plancher (essais s398–s400). Essai neuf `_s406` (6 s, 16 s de calcul) : courant de la rangée du haut
+  **−0,78 mm/s** contre **−4,78** en S400. (Le calcul « 28 » à 2,5 cm, inutile après le témoin à 5 cm, arrêté.)

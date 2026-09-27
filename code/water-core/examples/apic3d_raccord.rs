@@ -17,8 +17,9 @@
 //!
 //!     cargo run -p water-core --release --offline --example apic3d_raccord -- <dx> <seul|raccord|colonnes> [durée_s]
 //!
-//! **S406** — `APIC3D_ESSAI=<bits>` éprouve les gestes de la frontière (`Apic3::TRIAL_FACE_BOTH_SIDES` = 1,
-//! `TRIAL_MEAN_HEIGHT` = 2, `TRIAL_KEEP_MOMENTUM` = 4).
+//! **S406** — la face de frontière appartient à la zone, la quantité de mouvement absorbée est rendue (le défaut) ;
+//! `APIC3D_ESSAI=<bits>` éprouve d'autres gestes : `Apic3::TRIAL_S400` = 1 (la frontière de S400), `TRIAL_FACE_BOTH_SIDES` = 2,
+//! `TRIAL_MEAN_HEIGHT` = 4, `TRIAL_SPREAD_REMOVAL` = 8.
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]

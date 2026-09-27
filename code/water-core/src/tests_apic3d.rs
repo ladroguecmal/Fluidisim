@@ -393,3 +393,42 @@ fn a_wave_crossing_the_boundary_keeps_the_total_volume_s399() {
     assert!(drift.abs() <= 1e-6, "{drift}");
     assert_ne!(a.particle_count(), n0, "aucun échange");
 }
+
+#[test]
+fn the_boundary_face_belongs_to_the_zone_and_the_surface_current_goes_s406() {
+    // S406 : la face de frontière prise à la zone (le défaut) contre celle de S400 (`TRIAL_S400`, prise au seul transfert de la
+    // bande) : le ballottement de l'essai précédent, frontière au nœud, 6 s ; le courant moyen sur la face, rangée du haut. Au
+    // banc de 30 s (RACCORD-3D-S398 §7) : −6,7 mm/s en S400, −0,6 avec la face à la zone. Ici : le défaut sous 5 mm/s, et moins
+    // de la moitié de S400 ; le volume au plancher dans les deux cas.
+    let run = |trials: u8| {
+        let (nx, ny, nz) = (20, 8, 20);
+        let (mut a, mut arena) = apic(nx, ny, nz, 0.05, nx * ny * nz * 8);
+        let mask: Vec<u8> = (0..nx * ny).map(|c| (c % nx >= 10) as u8).collect();
+        a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+        a.set_columns_trials(trials).unwrap();
+        let profil = |x: f32| 0.5 + 0.02 * (std::f32::consts::PI * x).cos();
+        let eta: Vec<f32> = (0..nx * ny).map(|c| profil(((c % nx) as f32 + 0.5) * 0.05)).collect();
+        a.set_columns_surface(&eta).unwrap();
+        a.seed(&|p| p[2] < profil(p[0]) && p[0] < 0.5).unwrap();
+        let v0 = a.total_volume();
+        let (mut t, mut top, mut time) = (0u64, 0f64, 0f64);
+        while t < 6_000_000 {
+            let us = a.stable_step_us(20_000).min(6_000_000 - t);
+            a.step(us).unwrap();
+            t += us;
+            let u = a.velocity_u();
+            let s: f64 = (0..ny).map(|j| u[(9 * ny + j) * (nx + 1) + 10] as f64).sum();
+            top += s / ny as f64 * us as f64 * 1e-6;
+            time += us as f64 * 1e-6;
+        }
+        (top / time, a.total_volume() / v0 - 1.)
+    };
+    let (now, drift) = run(0);
+    let (s400, drift400) = run(Apic3::TRIAL_S400);
+    println!("S406 courant de la rangée du haut sur la face, 6 s : {:+.2} mm/s (S400 : {:+.2}) ; volume {drift:+.1e} / {drift400:+.1e}", 1e3 * now, 1e3 * s400);
+    assert!(now.abs() <= 5e-3 && now.abs() <= 0.5 * s400.abs(), "{now} {s400}");
+    assert!(drift.abs() <= 1e-6 && drift400.abs() <= 1e-6);
+    // Les essais : sans zone, ou hors des quatre bits, refusés.
+    let (mut plain, _) = apic(4, 4, 4, 0.05, 64);
+    assert_eq!(plain.set_columns_trials(1).unwrap_err(), Error::Domain);
+}
