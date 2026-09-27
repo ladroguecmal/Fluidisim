@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 02:20 +02:00
+Battement        : 2026-09-27 02:23 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`, avancée depuis `claude/blissful-pasteur-m4j5rn` (S400)
 Session en cours : S401 — C8b, le domaine épars qui suit la perturbation, en référence : un ensemble de blocs dans une fenêtre, la projection sur l'ensemble, le suivi et la prévision (ADR-006 §3–4, ADR-013 §2)
 Dernière session : S400 — physique : **C5b, troisième part** ([preuve](docs/validation/RACCORD-3D-S398.md) §6) — la zone lit sa surface comme la bande : repos à 2·10⁻⁵ m/s, migration dans le critère ; restent la densité et un courant de surface au raccord, non attribués ; la référence CAUSTIC//VOLUME rangée aux comparables (rayons et caustiques dans l'eau, 8.5). Avant : S399, la bande et l'échange
@@ -102,7 +102,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   portes sont reçues : la v1 au sens d'ADR-174 D4**, chacune sur son banc ou sa référence, pas encore réunies en une
   scène vivante ([feuille de route](docs/FEUILLE-DE-ROUTE.md), « La v1 »). Depuis : la liste entière (ADR-190).
   **V** : noyau reçu, sans articulation avec δ.
-- Liste du projet fini : **3 validés, 68 partiels, 49 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367, 4.21 en S369, 5.4 en S372, 5.10 en S375, 5.5 en S378, 8.4 en S380, 4.3 en S386.
+- Liste du projet fini : **3 validés, 71 partiels, 46 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367, 4.21 en S369, 5.4 en S372, 5.10 en S375, 5.5 en S378, 8.4 en S380, 4.3 en S386, 4.16 en S393, 4.9 en S396, 9.2 en S401.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
 nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`

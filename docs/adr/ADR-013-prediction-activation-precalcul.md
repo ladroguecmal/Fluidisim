@@ -164,3 +164,11 @@ le risque, très réel, d'un budget consommé par des zones que personne ne rega
    site est un **terme stationnaire dérivé**, re-calculé à la demande et jamais répliqué, publié
    comme `BreakerVertex` sur le canal existant de SPEC-006 §6. Sa liste se dérive de
    `h < 1,28·H_local` (McCowan) ; la marée l'allume et l'éteint sans réglage.
+
+**Note du 2026-09-27 (S401) — l'enveloppe du §2 construite, en référence** ([preuve](../validation/DOMAINE-EPARS-S401.md) §5).
+`useful_horizon` et `Follow` (`domain_blocks.rs`) : les blocs à moins de `r_c` des disques de centre `p + V·t` et de rayon
+`r + ½·a_max·t²`, jusqu'à l'horizon `√(2R/a_max)` ; 100 % de 300 manœuvres bornées dedans. **Mesuré au banc** : revu à chaque pas
+ou toutes les 0,5 s à 10 m/s, l'ensemble garde la source par la seule dilatation de l'activité, et l'enveloppe multiplie ses
+mailles calculées par 1,7 à 2,6 sans changer l'écart ; revu chaque seconde, la source en sort à 0,62 s sans elle. La référence met
+l'enveloppe dans l'ensemble **calculé** ; le §2 la range au palier **T2** — blocs alloués, δ à 0 —, ce que les mesures appuient.
+La décision ne change pas ; la séparation T2 / T1 est à la file.

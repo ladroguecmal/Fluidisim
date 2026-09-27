@@ -100,7 +100,7 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
 - [x] **P5** — le banc `delta3d_epars` : une source mobile (dipôle de volume), droite puis qui tourne ; domaine entier contre
   domaine épars ; critères 3, 4 et 5 (banc).
 - [x] **P6** — les chiffres de réception en essais ; suite entière, zéro avertissement ; critère 6.
-- [ ] **P7** — preuve `DOMAINE-EPARS-S401` ; liste (4.3, 4.9, 9.2), file, feuille de route, index.
+- [x] **P7** — preuve `DOMAINE-EPARS-S401` ; liste (4.3, 4.9, 9.2), file, feuille de route, index.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
@@ -151,3 +151,8 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
   défaut**, 43 s. **Suite : 707 réussis, 19 ignorés, zéro avertissement** (697 + 10, 18 + 1). `cargo clippy` : une erreur neuve
   corrigée (`1,4142` pris pour √2 : la constante `SQRT_2`, exacte ici) ; reste une erreur antérieure (`tests_delta_coupling.rs`,
   `2./2.`) et les avertissements du crate — clippy n'est pas un portail du dépôt.
+- **P7** — preuve `docs/validation/DOMAINE-EPARS-S401.md` (Reproduire au commit `963b1484`) ; liste : 4.3 et 4.9 complétés,
+  **9.2 passe à partiel**, décompte 3 / 71 / 46 (le tableau disait 70 / 47 ; REPRISE §4 et la feuille de route disaient encore
+  68 / 49, sans 4.16 ni 4.9 : corrigés) ; file : la ligne de la campagne resserrée (85 mots), une ligne neuve « le domaine épars —
+  ce que S401 laisse » (seuil relatif, réservation T2, pas couplé et corps sous l'ensemble) ; feuille de route §3 ter ; index
+  (carte B, liste des preuves) ; notes datées d'ADR-006 (quatre lectures) et d'ADR-013 (l'enveloppe mesurée, T2).

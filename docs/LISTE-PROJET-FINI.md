@@ -154,7 +154,10 @@ pas recopiée ici (L137).
   pas linéaire — 11 inconnues de pression sur 28 pour une colonne de 7 m à 25 cm, dispersion calculée et tenue
   ([preuve](validation/COLONNES-HAUTES-S386.md)) ; **S387** : au pas mobile, gardée par la course de la surface, elle suit sa
   dispersion calculée (§5) — elle sert l'eau calme des contenants, pas la haute mer (course de 4,8 m sous la mer de la porte B).
-  Manquent l'adaptativité, les blocs épars (C8), le stockage compact et le fond coupé, la carte (C3).
+  **S401** : les **blocs épars** en référence — un domaine est un ensemble de blocs dans une fenêtre, le pas mobile sur
+  l'ensemble, dont le bord se comporte comme celui de la boîte (un rectangle à un ulp du dense) ; l'ensemble suit sa
+  perturbation, à 0,26–0,66 mm du domaine entier ([preuve](validation/DOMAINE-EPARS-S401.md)). Manquent le stockage compact
+  (pool de blocs), le fond coupé et le pas couplé sous l'ensemble, la carte (C3, C8).
 - [ ] **4.4 Profondeur adaptative**, domaine qui suit un objet qui coule — *absent*.
 - [ ] **4.5 Création, croissance, réduction et disparition visuellement gratuites** (I-12) —
   *partiel* : naissance à zéro reçue sous fond couplé (S251, S253) ; en 3D, un domaine qui renaît
@@ -207,8 +210,10 @@ pas recopiée ici (L137).
 - [ ] **4.9 Fusion et séparation de domaines** sans rupture — *partiel* **depuis S396**, en référence : les domaines comme
   ensembles de blocs, fusion = union, séparation = partition, critères et délai d'ADR-006 §4 ; l'état recopié au bit ; fusionnés
   au critère, deux domaines restent à 0,26 % de l'amplitude du domaine unique ; une séparation ne saute pas, puis ses murs
-  réfléchissent ([preuve](validation/FUSION-S396.md)). Manquent le stockage par blocs épars et son pool, la croissance d'un
-  domaine qui suit la perturbation, les bords non réfléchissants d'une partie, la carte.
+  réfléchissent ([preuve](validation/FUSION-S396.md)). **S401** : deux parties d'une même fenêtre évoluent séparées **sans
+  recopie**, à un ulp de deux domaines, et un domaine **croît et décroît** en suivant sa perturbation, à 0,26–0,66 mm du domaine
+  entier ([preuve](validation/DOMAINE-EPARS-S401.md)). Manquent le stockage par blocs et son pool, les bords non réfléchissants
+  d'une partie, la carte.
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
 - [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *partiel* — **la cavité est portée sur le banc
@@ -486,9 +491,12 @@ pas recopiée ici (L137).
   d'écran — pour la bande δ (S279) puis **deux domaines δ 3D** qui se disputent un budget (S344,
   [preuve](validation/ARBITRAGE-3D-S344.md)). Manquent `W_gameplay`, qui vient du jeu, `W_urgence`, et un banc B8
   qui fixe les seuils ; ils sont calibrés par hôte (ADR-171).
-- [ ] **9.2 Domaine prédictif orienté devant le joueur** — *absent* : depuis S349, un domaine δ 3D
-  **suit la caméra** — 480 décalages sur 120 m, aucune extinction
-  ([preuve](validation/ARBITRAGE-3D-S344.md) §5) —, sans prédiction ni orientation : l'hôte le déplace.
+- [ ] **9.2 Domaine prédictif orienté devant le joueur** — *partiel* **depuis S401**, en référence : le domaine épars s'étend
+  **devant** un objet, le long de sa vitesse, sur l'horizon d'ADR-013 §2, élargi de `½·a_max·t²` — 100 % de 300 manœuvres
+  bornées dans l'ensemble prévu ; revu chaque seconde, une source à 10 m/s y reste, et en sort à 0,62 s sans prévision
+  ([preuve](validation/DOMAINE-EPARS-S401.md) §5). Depuis S349, un domaine δ 3D suit aussi la caméra
+  ([S344](validation/ARBITRAGE-3D-S344.md) §5). Manquent le joueur réel — vitesse et intentions viennent du jeu (9.3, 9.4) —,
+  l'enveloppe **réservée** (T2) plutôt que calculée, la carte et l'ordonnanceur.
 - [ ] **9.3 Prédiction d'objets balistiques** : point, vitesse, orientation, région utile — *absent*.
 - [ ] **9.4 Objets contrôlables : paliers de confiance** ; confiance réduite par le jeu — *absent*.
 - [ ] **9.5 Événement prédit, confirmé ou rétracté**, sans retour arrière du temps — *partiel* :
@@ -609,12 +617,12 @@ pas recopiée ici (L137).
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 1 | 7 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
-| 9. Activation et budget | 13 | 0 | 7 | 6 |
+| 9. Activation et budget | 13 | 0 | 8 | 5 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **70** | **47** |
+| **total** | **120** | **3** | **71** | **46** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
@@ -624,7 +632,7 @@ corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ;
 changer de case — dix-huit sur S309–S349 (actualisation complète, ci-dessous), trois sur S350 (4.19, 9.9, 9.12).
 *S351* : **4.2** et **9.9** passent à partiel — deux domaines servis ensemble, le rang 1 reçu au banc ; 1.4, 4.5 et
 9.8 corrigés. *S359* : **8.5** passe à partiel — la colonne d'eau et la réfraction dans Godot. *S362* : **2.7** passe à
-partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau. *S367* : **7.1** passe à partiel — le champ d'écume de B. *S386* : **4.3** passe à partiel — la colonne graduée. *S393* : **4.16** passe à partiel — la cavité 3D de la sphère, contre une mesure publiée. *S396* : **4.9** passe à partiel — fusion et séparation en référence.
+partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau. *S367* : **7.1** passe à partiel — le champ d'écume de B. *S386* : **4.3** passe à partiel — la colonne graduée. *S393* : **4.16** passe à partiel — la cavité 3D de la sphère, contre une mesure publiée. *S396* : **4.9** passe à partiel — fusion et séparation en référence. *S401* : **9.2** passe à partiel — le domaine épars qui s'étend devant l'objet, en référence.
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.

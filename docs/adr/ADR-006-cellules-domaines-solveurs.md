@@ -184,3 +184,10 @@ lectures de ce texte, faites en l'écrivant : (1) les domaines de δ couvrant to
 reçoivent **une seule relation** — deux blocs liés si leurs dilatations de `r_c` se touchent, Chebyshev ≤ `2r + 1` —, sans
 quoi une fusion pourrait se défaire au pas suivant ; (3) la durée de vie minimale de 0,75 s règle l'extinction, à
 l'ordonnanceur ; une fusion fait naître un domaine dont l'horloge de séparation repart de zéro. La décision ne change pas.
+
+**Note du 2026-09-27 (S401) — §3 et §4 en référence, le domaine épars** ([preuve](../validation/DOMAINE-EPARS-S401.md)). Lectures
+faites en l'écrivant : (1) la référence porte l'ensemble dans une **fenêtre** — la mémoire reste la fenêtre ; le pool de §4, point 3,
+est la forme de la production ; (2) **le bord de l'ensemble se comporte comme le bord de la boîte**, ce qui fait d'un rectangle de
+l'ensemble le domaine dense de ce rectangle, à un ulp ; (3) la durée de vie minimale d'un bloc (0,25 s) est lue comme un **délai
+continu** : un bloc sort 0,25 s après la dernière fois qu'il était requis ; (4) la relation de fusion de §4 — dilatations de `r_c`
+— sert aussi à la croissance : un bloc est requis à moins de `r_c` d'un bloc actif. La décision ne change pas.
