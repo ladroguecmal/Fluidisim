@@ -927,3 +927,45 @@ fn a_floored_band_column_converts_to_a_column_with_its_deep_water_s414() {
     let eta = a.columns_surface().unwrap();
     assert!(eta.iter().all(|e| (e - 0.5).abs() < 0.25 * dx), "{:?}", &eta[..4]);
 }
+
+/// **S414, critère 2** — le fond descend et remonte dix fois sur un ballottement réel (mi-zone, onde de 2 cm menée 0,5 s entre
+/// chaque déplacement) : volume à 10⁻⁹ ; la descente ensemence huit particules par maille ; refus sans effet.
+#[test]
+fn the_band_floor_moves_down_and_up_at_exact_mass_s414() {
+    let (nx, ny, nz, dx) = (20, 8, 20, 0.05f32);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let mask: Vec<u8> = (0..nx * ny).map(|c| u8::from(c % nx >= 10)).collect();
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &mask).unwrap();
+    let profil = |x: f32| 0.5 + 0.02 * (std::f32::consts::PI * x).cos();
+    let eta: Vec<f32> = (0..nx * ny).map(|c| profil(((c % nx) as f32 + 0.5) * dx)).collect();
+    a.set_columns_surface(&eta).unwrap();
+    a.set_band_floor(&vec![0.3; nx * ny]).unwrap();
+    a.seed(&|p| p[2] >= 0.3 && p[2] < profil(p[0]) && p[0] < 0.5).unwrap();
+    let v0 = a.total_volume();
+    assert_eq!(a.move_band_floor(&vec![0.3; nx * ny - 1]), Err(Error::Shape));
+    let mut t = 0u64;
+    for cycle in 0..10 {
+        for target in [0.1f32, 0.3] {
+            let n = a.particle_count();
+            let change = a.move_band_floor(&vec![target; nx * ny]).unwrap();
+            let apres = a.total_volume() / v0 - 1.;
+            assert!(apres.abs() <= 1e-12, "déplacement, cycle {cycle}, fond {target} : {apres}");
+            if target < 0.3 {
+                assert_eq!((change.lowered, change.seeded, a.particle_count()), (80, 80 * 4 * 8, n + 80 * 4 * 8));
+            } else {
+                assert_eq!(change.raised, 80);
+            }
+            let end = t + 250_000;
+            while t < end {
+                let us = a.stable_step_us(20_000).min(end - t);
+                a.step(us).unwrap();
+                t += us;
+            }
+            let drift = a.total_volume() / v0 - 1.;
+            if cycle == 9 {
+                println!("S414 fond qui bouge, dix allers-retours : volume {drift:+.2e}, particules {} ; dernier : {change:?}", a.particle_count());
+            }
+            assert!(drift.abs() <= 1e-9, "cycle {cycle}, fond {target} : {drift}");
+        }
+    }
+}

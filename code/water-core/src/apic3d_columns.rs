@@ -92,6 +92,17 @@ pub struct ColumnsChange {
     pub excess: f32,
 }
 
+/// **S414 — ce qu'un déplacement du fond a fait**, publié.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct FloorChange {
+    /// Colonnes dont le fond est descendu, et particules ensemencées dans les tranches libérées.
+    pub lowered: usize,
+    pub seeded: usize,
+    /// Colonnes dont le fond est remonté, et particules absorbées dans les tranches prises.
+    pub raised: usize,
+    pub absorbed: usize,
+}
+
 /// **S400** — le nombre de positions de la surface, sur une maille, où la lecture de la bande est tabulée.
 pub const READ_TABLE: usize = 32;
 
@@ -274,19 +285,111 @@ impl Apic3 {
         Ok(())
     }
 
+    /// **S414 — déplace le fond de la bande**, entre deux pas, à masse exacte (C6c-2, ADR-212 D4). `floor[c]`, arrondi à une face de
+    /// maille, pour chaque colonne de particules (ignoré dans la zone). **Descendre** ensemence les mailles libérées au réseau
+    /// nominal — huit particules par maille, `dx³` exactement, à la vitesse de la grille ; **remonter** absorbe les particules des
+    /// mailles prises, et l'écart entre leur volume et celui des mailles pleines va au **solde vertical**, que l'échange règle.
+    /// Refus : `Domain` sans zone ou si la capacité ne suffit pas à ensemencer ; `Shape` ; `NotFinite`. Rien n'est changé en cas de
+    /// refus. Aucune allocation.
+    pub fn move_band_floor(&mut self, floor: &[f32]) -> Result<FloorChange, Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Some(c) = self.columns.as_ref() else { return Err(Error::Domain) };
+        if floor.len() != nx * ny {
+            return Err(Error::Shape);
+        }
+        if floor.iter().any(|f| !f.is_finite() || *f < 0. || *f > nz as f32 * dx) {
+            return Err(Error::NotFinite);
+        }
+        let cells = |h: f32| ((h / dx).round() as usize).min(nz);
+        let mut needed = 0usize;
+        for col in 0..nx * ny {
+            if c.mask[col] == 0 {
+                let (from, to) = (cells(c.floor[col]), cells(floor[col]));
+                needed += from.saturating_sub(to) * PER_AXIS * PER_AXIS * PER_AXIS;
+            }
+        }
+        if self.n + needed > self.x.len() {
+            return Err(Error::Domain);
+        }
+        let vp = (dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        let mut change = FloorChange::default();
+        // Remonter : les particules sous le nouveau fond d'une colonne qui monte, absorbées.
+        let mut k = 0;
+        while k < self.n {
+            let (i, j, _) = self.cell_of(self.x[k]);
+            let col = j * nx + i;
+            let c = self.columns.as_mut().unwrap();
+            let to = cells(floor[col]);
+            if c.mask[col] == 0 && to > cells(c.floor[col]) && self.x[k][2] < to as f32 * dx {
+                c.solde_w[col] += vp;
+                change.absorbed += 1;
+                self.remove_particle(k);
+            } else {
+                k += 1;
+            }
+        }
+        for j in 0..ny {
+            for i in 0..nx {
+                let col = j * nx + i;
+                let (mask, from) = {
+                    let c = self.columns.as_ref().unwrap();
+                    (c.mask[col], cells(c.floor[col]))
+                };
+                if mask != 0 {
+                    continue;
+                }
+                let to = cells(floor[col]);
+                if to > from {
+                    // Les mailles prises au fond : pleines — l'écart au volume absorbé, au solde vertical.
+                    let c = self.columns.as_mut().unwrap();
+                    c.solde_w[col] -= (to - from) as f64 * (dx as f64).powi(3);
+                    change.raised += 1;
+                } else if to < from {
+                    // Descendre : les mailles libérées, ensemencées au réseau nominal.
+                    for l in to..from {
+                        for a in 0..PER_AXIS * PER_AXIS * PER_AXIS {
+                            let (ax, ay, az) = (a % PER_AXIS, (a / PER_AXIS) % PER_AXIS, a / (PER_AXIS * PER_AXIS));
+                            let step = 1. / PER_AXIS as f32;
+                            let q = [
+                                (i as f32 + (ax as f32 + 0.5) * step) * dx,
+                                (j as f32 + (ay as f32 + 0.5) * step) * dx,
+                                (l as f32 + (az as f32 + 0.5) * step) * dx,
+                            ];
+                            let (v, cm) = self.grid_affine(q);
+                            let m = self.n;
+                            self.x[m] = q;
+                            self.vel[m] = v;
+                            self.c[m] = cm;
+                            self.n += 1;
+                            change.seeded += 1;
+                        }
+                    }
+                    change.lowered += 1;
+                }
+                let c = self.columns.as_mut().unwrap();
+                c.floor[col] = to as f32 * dx;
+                c.floor_roundoff[col] = 0.;
+            }
+        }
+        let c = self.columns.as_mut().unwrap();
+        c.floors = c.floor.iter().any(|f| *f > 0.);
+        Ok(change)
+    }
+
     /// **S413** — le fond de la bande, s'il y a une zone (zéro dans les colonnes de la zone).
     pub fn band_floor(&self) -> Option<&[f32]> {
         self.columns.as_ref().map(|c| &c.floor[..])
     }
 
-    /// **S413** — l'eau sous le fond de la bande, m³ (`Σ floor·dx²`, reste compris), en `f64`.
+    /// **S413** — l'eau sous le fond de la bande, m³, en `f64`. **S414** : comptée en **mailles entières**, `K·dx³` — le fond est
+    /// sur une face de maille, et sa hauteur en `f32` (0,3 n'est pas 6·dx exactement) perdait 7·10⁻⁹ du volume à chaque déplacement.
     pub fn band_floor_volume(&self) -> f64 {
         let Some(c) = &self.columns else { return 0. };
         if !c.floors {
             return 0.;
         }
-        let a = (self.domain.dx as f64).powi(2);
-        c.mask.iter().zip(c.floor.iter().zip(&c.floor_roundoff)).filter(|(m, _)| **m == 0).map(|(_, (f, r))| (*f as f64 - *r as f64) * a).sum()
+        let dx = self.domain.dx as f64;
+        c.mask.iter().zip(&c.floor).filter(|(m, _)| **m == 0).map(|(_, f)| (*f as f64 / dx).round() * dx * dx * dx).sum()
     }
 
     /// **S413** — la hauteur à la grille d'une colonne de particules (son fond), zéro dans la zone ou sans fond.
@@ -1143,7 +1246,7 @@ impl Apic3 {
             if c.floors {
                 for col in 0..nx * ny {
                     if geo[col].is_finite() && c.floor[col] > 0. {
-                        removed_volume += (c.floor[col] as f64 - c.floor_roundoff[col] as f64) * area + c.solde_w[col];
+                        removed_volume += (c.floor[col] as f64 / dx as f64).round() * dx as f64 * area + c.solde_w[col];
                         c.floor[col] = 0.;
                         c.floor_roundoff[col] = 0.;
                         c.solde_w[col] = 0.;
