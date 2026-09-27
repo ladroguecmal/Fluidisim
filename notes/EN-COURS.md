@@ -96,7 +96,7 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la scène à une maille et une emprise données (`MAILLE=`, `EMPRISE=`) : boîte de 7,2 m, éponge en mailles, un
   impact à la pente de celui de R16 et à l'échelle de l'emprise ; sans variable, la scène de S390 au bit ; critère 1.
-- [ ] **P3** — qualité à 10 cm : Jacobi 32/64/128 contre multigrille 4/6/8, deux emprises (300 pas) ; critère 2.
+- [x] **P3** — qualité à 10 cm : Jacobi 32/64/128 contre multigrille 4/6/8, deux emprises (300 pas) ; critère 2.
 - [ ] **P4** — coût à 10 cm, pas entier et deux parts ; l'emprise la plus grande sous 2 ms ; critères 3 et 5.
 - [ ] **P5** — deux minutes à 10 cm, 30 Hz puis 60 Hz si besoin ; critère 4.
 - [ ] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
@@ -114,3 +114,23 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
   `--delta3d-empreinte` avant (tête `0194a572`) et après, identiques (60 pas : surface `0xacd172ae252fe5a6` ; 600 :
   `0x28f35d9d7580ffed`). Essai à 10 cm, 64 × 64 (6,4 m, 294 912 mailles), 60 pas : Jacobi-32 résidu médian 3,9·10⁻⁴,
   multigrille 6 : 1,4·10⁻⁴ ; rien n'explose.
+- **P3** — `MAILLE=0.1 EMPRISE=n,n COUT=0 … --delta3d-mg-scene`, 300 pas à 30 Hz ; témoin à scène égale : 25 cm sur 8 m
+  (32 × 32 × 28). Résidu relatif **médian** (max) :
+
+  | variante | 6,4 m (294 912) | 8 m (460 800) | 9,6 m (663 552) | 8 m à 25 cm | S390, 30 × 28 m à 25 cm |
+  |---|---|---|---|---|---|
+  | Jacobi 32 | 3,06·10⁻⁴ | 2,41·10⁻⁴ | 2,15·10⁻⁴ | 9,9·10⁻⁵ | 7,1·10⁻⁵ |
+  | Jacobi 64 | 6,7·10⁻⁵ | 5,5·10⁻⁵ | 5,1·10⁻⁵ | 8,9·10⁻⁶ | 7,4·10⁻⁶ |
+  | Jacobi 128 | 8,5·10⁻⁶ | 6,4·10⁻⁶ | 6,3·10⁻⁶ | 2,7·10⁻⁷ (plancher) | — |
+  | mg 4 | 4,3·10⁻⁴ | 5,0·10⁻⁴ | 4,6·10⁻⁴ | 1,3·10⁻⁴ | 2,0·10⁻⁴ |
+  | mg 6 | 1,29·10⁻⁴ | 1,13·10⁻⁴ | 1,08·10⁻⁴ | 2,0·10⁻⁵ | 4,9·10⁻⁵ |
+  | **mg 8** | **2,3·10⁻⁵** | **2,2·10⁻⁵** | **2,4·10⁻⁵** | 4,2·10⁻⁶ | 1,2·10⁻⁵ |
+
+  mg 1 et 2 explosent avant le pas 30 à 10 cm (mg 2 au pas 300 à 6,4 m) ; mg 3 et plus, Jacobi 8 et plus : 300 pas tenus.
+  Écart entre les deux références (mg 24, Jacobi 512) : 0,7 à 44 mm aux points de contrôle — A297, la surface ne juge rien.
+  **Critère 2 tenu à 8 cycles** (≤ 8) : 2,2 à 2,4·10⁻⁵ pour 7,1·10⁻⁵, **indépendant de l'emprise** ; mg 6 ne suffit plus
+  (1,1·10⁻⁴). **Prédictions manquées, les deux** : Jacobi-32 est 3,0 à 4,3 fois moins bon qu'à 25 cm (S390), pas ≥ 5 — 2,4 fois
+  à scène égale ; la multigrille demande **deux cycles de plus** qu'à 25 cm. **Lecture** (à scène égale, 8 m) : le **taux par
+  cycle** de la multigrille ne bouge pas (≈ 0,45 : 5,0 → 1,1 → 0,22·10⁻⁴ à 10 cm ; 1,3 → 0,20 → 0,042·10⁻⁴ à 25 cm) — c'est son
+  **point de départ** qui est ≈ 5 fois plus haut ; celui de Jacobi, lui, se dégrade (×0,23 par 32 itérations contre ×0,09). À
+  résidu égal : Jacobi 64 (337 dispatchs) ≈ mg 7 ; Jacobi 128 (657) < mg 8 (286). Le coût, en P4, tranche.
