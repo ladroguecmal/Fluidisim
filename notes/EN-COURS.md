@@ -96,7 +96,7 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `set_columns_mask` : colonne → particules et particules → colonne à masse exacte, réserve, soldes ; critère 1.
 - [x] **P3** — essais des allers-retours et du refus ; critère 2.
-- [ ] **P4** — le critère : `ColumnsSwitch` (requis, dilatation, hystérésis), sur `Apic3` et un corps.
+- [x] **P4** — le critère : `ColumnsSwitch` (requis, dilatation, hystérésis), sur `Apic3` et un corps.
 - [ ] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
 - [ ] **P6** — les calculs ; critère 3.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 4.
@@ -118,3 +118,12 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
   critère 3). Décalage de la voie mixte ≤ 3,3 mm. **La poche d'air** : le premier jet la laissait passer — `φ`, au noyau de deux
   mailles, comble une poche d'une colonne sur trois mailles, et la voie mixte baissait deux colonnes de **7,4 cm** ; corrigé — une
   colonne n'est convertible que si ses mailles occupées se suivent depuis le fond ; refusée, et sa voisine passe (décalage 1,1 mm).
+- **P4** — `ColumnsSwitch` (`apic3d_columns.rs`) : `switch(now_us, &mut Apic3)` reconstruit la surface **une fois**
+  (`refresh_surface`), décide, applique par `apply_columns_mask` (le cœur de `set_columns_mask`, sans seconde reconstruction) et
+  compte les bascules **effectives** par colonne (une conversion refusée n'en est pas une). Requis : non convertible (la même
+  lecture que la bascule, `convertible_height`) ; le corps — empreinte du segment parcouru pendant l'horizon, élargie de la marge,
+  dès que son bas descend à la marge de la surface ; la pente (différences centrées, décentrées à côté d'une hauteur inconnue).
+  Dilatation de Chebyshev séparable ; hystérésis par l'instant de la dernière demande. Défauts : pente 1, marge 2 mailles, horizon
+  0,2 s, dilatation 2, maintien 0,5 s — **non calibrés**. `clear_counts` après la bascule qui pose la zone initiale. Deux essais :
+  le corps (132 colonnes, l'empreinte dilatée exacte ; tenue 0,5 s ; deux bascules), la marche et la poche (requises, dilatées).
+  20 essais d'APIC 3D tenus.

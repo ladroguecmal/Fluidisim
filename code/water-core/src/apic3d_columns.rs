@@ -776,15 +776,26 @@ impl Apic3 {
     /// Refus, rien n'est changé : `Domain` sans zone ou si la capacité ne suffit pas à l'ensemencement, `Shape` sur la longueur.
     /// Aucune allocation.
     pub fn set_columns_mask(&mut self, mask: &[u8]) -> Result<ColumnsChange, Error> {
-        let Domain3 { nx, ny, nz, dx } = self.domain;
         let Some(c) = self.columns.as_ref() else { return Err(Error::Domain) };
         if mask.len() != c.mask.len() {
             return Err(Error::Shape);
         }
         // Une surface fraîche : la convertibilité se lit sur l'état présent.
+        self.refresh_surface();
+        self.apply_columns_mask(mask)
+    }
+
+    /// La surface reconstruite sur l'état présent — `φ`, étiquettes, corps — et les particules triées : ce que lisent
+    /// `convertible_height` et le critère.
+    pub(crate) fn refresh_surface(&mut self) {
         self.reconstruct();
         self.columns_label();
         self.label_body();
+    }
+
+    /// `set_columns_mask` sur une surface déjà fraîche (`refresh_surface`), le masque déjà vérifié.
+    fn apply_columns_mask(&mut self, mask: &[u8]) -> Result<ColumnsChange, Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
         let vp = (dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
         let area = dx as f64 * dx as f64;
         let half = 0.5 * dx as f64;
@@ -1016,5 +1027,203 @@ impl Apic3 {
     /// Une colonne de la zone ? (pour les essais et le banc)
     pub fn is_column(&self, i: usize, j: usize) -> bool {
         self.column_of(i, j)
+    }
+}
+
+/// **S408 — le critère de bascule** (C6a) : quelles colonnes d'un `Apic3` sont portées par les particules. Une colonne de la
+/// bande est **requise** en particules si elle n'est pas convertible (`convertible_height` : la même lecture que la bascule —
+/// plusieurs segments d'eau, mailles occupées discontinues, corps) ; toute colonne l'est si le corps l'atteint — l'empreinte
+/// horizontale du segment qu'il parcourt pendant `body_horizon`, élargie de `body_margin`, dès que son bas y descend à
+/// `body_margin` de la surface (l'objet qui entre) —, ou si la pente de sa surface dépasse `slope_max` (le pli prédit). La bande
+/// est la dilatation de ce qui est requis, de `dilation` colonnes (Chebyshev) ; une colonne ne repasse aux colonnes qu'après
+/// `hold_us` sans être requise (hystérésis), et seulement si elle est convertible. Réservé avant `seal()` (I-06) ; `switch`
+/// n'alloue rien.
+pub struct ColumnsSwitch {
+    /// Pente de surface au-delà de laquelle une colonne est requise ; défaut 1.
+    pub slope_max: f32,
+    /// Marge autour du corps, m ; défaut deux mailles.
+    pub body_margin: f32,
+    /// Horizon de la vitesse du corps, s ; défaut 0,2 s.
+    pub body_horizon: f32,
+    /// Dilatation de ce qui est requis, en colonnes ; défaut 2.
+    pub dilation: usize,
+    /// Durée sans être requise avant de repasser aux colonnes, µs ; défaut 0,5 s.
+    pub hold_us: u64,
+    domain: Domain3,
+    required_at: Vec<u64>,
+    need: Vec<u8>,
+    spread: Vec<u8>,
+    request: Vec<u8>,
+    before: Vec<u8>,
+    height: Vec<f32>,
+    switches: Vec<u16>,
+    band_sum: f64,
+    calls: u64,
+}
+
+impl ColumnsSwitch {
+    /// Octets réservés pour un domaine.
+    pub fn reserved_bytes(domain: Domain3) -> Option<usize> {
+        domain.nx.checked_mul(domain.ny)?.checked_mul(8 + 1 + 1 + 1 + 1 + 4 + 2)
+    }
+
+    /// Le critère d'un domaine, aux valeurs par défaut, réservé auprès de l'hôte. Refus `Domain` si l'hôte refuse.
+    pub fn with_capacity(host: &mut HostServices, domain: Domain3) -> Result<Self, Error> {
+        let bytes = Self::reserved_bytes(domain).ok_or(Error::Domain)?;
+        host.alloc.alloc_persistent(bytes).map_err(|_| Error::Domain)?;
+        let cols = domain.nx * domain.ny;
+        Ok(ColumnsSwitch {
+            slope_max: 1.,
+            body_margin: 2. * domain.dx,
+            body_horizon: 0.2,
+            dilation: 2,
+            hold_us: 500_000,
+            domain,
+            required_at: vec![u64::MAX; cols],
+            need: vec![0; cols],
+            spread: vec![0; cols],
+            request: vec![0; cols],
+            before: vec![0; cols],
+            height: vec![0.; cols],
+            switches: vec![0; cols],
+            band_sum: 0.,
+            calls: 0,
+        })
+    }
+
+    /// **La bascule selon le critère**, à l'instant `now_us` (croissant), entre deux pas de `a` : la surface reconstruite une
+    /// fois, le masque demandé, `set_columns_mask` sans seconde reconstruction ; les bascules effectives comptées par colonne.
+    /// Refus : `Domain` sans zone (ou capacité, comme `set_columns_mask`), `Shape` si `a` n'est pas du domaine du critère.
+    pub fn switch(&mut self, now_us: u64, a: &mut Apic3) -> Result<ColumnsChange, Error> {
+        if a.columns.is_none() {
+            return Err(Error::Domain);
+        }
+        if a.domain != self.domain {
+            return Err(Error::Shape);
+        }
+        a.refresh_surface();
+        self.decide(now_us, a);
+        self.before.copy_from_slice(&a.columns.as_ref().unwrap().mask);
+        let change = a.apply_columns_mask(&self.request)?;
+        let mask = &a.columns.as_ref().unwrap().mask;
+        let mut band = 0usize;
+        for (col, m) in mask.iter().enumerate() {
+            if *m != self.before[col] {
+                self.switches[col] = self.switches[col].saturating_add(1);
+            }
+            band += usize::from(*m == 0);
+        }
+        self.band_sum += band as f64 / mask.len() as f64;
+        self.calls += 1;
+        Ok(change)
+    }
+
+    /// Remet à zéro les bascules comptées et la part moyenne — après la bascule qui pose la zone initiale.
+    pub fn clear_counts(&mut self) {
+        self.switches.fill(0);
+        self.band_sum = 0.;
+        self.calls = 0;
+    }
+
+    /// Le masque demandé au dernier `switch` (1 : colonnes ; 0 : particules).
+    pub fn requested(&self) -> &[u8] {
+        &self.request
+    }
+
+    /// Le plus grand nombre de bascules effectives d'une colonne — l'instrument de l'hystérésis.
+    pub fn max_switches(&self) -> u16 {
+        self.switches.iter().copied().max().unwrap_or(0)
+    }
+
+    /// La part des colonnes en particules après chaque `switch`, moyennée ; zéro avant le premier.
+    pub fn mean_band_fraction(&self) -> f64 {
+        if self.calls == 0 { 0. } else { self.band_sum / self.calls as f64 }
+    }
+
+    /// Le masque demandé, sur la surface fraîche de `a`.
+    fn decide(&mut self, now_us: u64, a: &Apic3) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let c = a.columns.as_ref().unwrap();
+        // (1) Les hauteurs, et les colonnes de la bande qui ne sont pas convertibles.
+        for j in 0..ny {
+            for i in 0..nx {
+                let col = j * nx + i;
+                if c.mask[col] != 0 {
+                    self.need[col] = 0;
+                    self.height[col] = c.eta[col];
+                } else if let Some(h) = a.convertible_height(i, j) {
+                    self.need[col] = 0;
+                    self.height[col] = h as f32;
+                } else {
+                    self.need[col] = 1;
+                    self.height[col] = f32::NAN;
+                }
+            }
+        }
+        // (2) Le corps : le segment qu'il parcourt pendant l'horizon, élargi de la marge, dès que son bas approche de la surface.
+        if let Some(b) = a.body {
+            let p0 = b.center;
+            let d = [b.velocity[0] * self.body_horizon, b.velocity[1] * self.body_horizon, b.velocity[2] * self.body_horizon];
+            let reach = b.radius + self.body_margin;
+            let low = p0[2].min(p0[2] + d[2]) - b.radius;
+            let len2 = d[0] * d[0] + d[1] * d[1];
+            for j in 0..ny {
+                for i in 0..nx {
+                    let col = j * nx + i;
+                    let (x, y) = ((i as f32 + 0.5) * dx - p0[0], (j as f32 + 0.5) * dx - p0[1]);
+                    let s = if len2 > 0. { ((x * d[0] + y * d[1]) / len2).clamp(0., 1.) } else { 0. };
+                    let (ex, ey) = (x - s * d[0], y - s * d[1]);
+                    let surface = if self.height[col].is_finite() { self.height[col] } else { nz as f32 * dx };
+                    if ex * ex + ey * ey <= reach * reach && low <= surface + self.body_margin {
+                        self.need[col] = 1;
+                    }
+                }
+            }
+        }
+        // (3) La pente : différences centrées sur les hauteurs connues, décentrées à côté d'une hauteur inconnue.
+        for j in 0..ny {
+            for i in 0..nx {
+                let col = j * nx + i;
+                let here = self.height[col];
+                if self.need[col] != 0 || !here.is_finite() {
+                    continue;
+                }
+                let at = |x: Option<usize>, y: Option<usize>| match (x, y) {
+                    (Some(x), Some(y)) if x < nx && y < ny => Some(self.height[y * nx + x]).filter(|h| h.is_finite()),
+                    _ => None,
+                };
+                let slope = |lo: Option<f32>, hi: Option<f32>| match (lo, hi) {
+                    (Some(l), Some(h)) => (h - l) / (2. * dx),
+                    (Some(l), None) => (here - l) / dx,
+                    (None, Some(h)) => (h - here) / dx,
+                    (None, None) => 0.,
+                };
+                let sx = slope(at(i.checked_sub(1), Some(j)), at(Some(i + 1), Some(j)));
+                let sy = slope(at(Some(i), j.checked_sub(1)), at(Some(i), Some(j + 1)));
+                if sx * sx + sy * sy > self.slope_max * self.slope_max {
+                    self.need[col] = 1;
+                }
+            }
+        }
+        // (4) La dilatation de Chebyshev, séparable ; puis l'hystérésis.
+        let r = self.dilation;
+        for j in 0..ny {
+            for i in 0..nx {
+                let row = &self.need[j * nx..(j + 1) * nx];
+                self.spread[j * nx + i] = u8::from(row[i.saturating_sub(r)..(i + r + 1).min(nx)].iter().any(|n| *n != 0));
+            }
+        }
+        for j in 0..ny {
+            for i in 0..nx {
+                let col = j * nx + i;
+                let required = (j.saturating_sub(r)..(j + r + 1).min(ny)).any(|y| self.spread[y * nx + i] != 0);
+                if required {
+                    self.required_at[col] = now_us;
+                }
+                let at = self.required_at[col];
+                let band = required || (at != u64::MAX && now_us.saturating_sub(at) < self.hold_us);
+                self.request[col] = u8::from(!band);
+            }
+        }
     }
 }

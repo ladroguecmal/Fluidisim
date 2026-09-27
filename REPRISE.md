@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 11:57 +02:00
+Battement        : 2026-09-27 12:06 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
 Session en cours : S408 — physique : **C6a**, la bascule colonnes ↔ particules en 3D et son critère — plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S407 — physique : **C5d** ([preuve](docs/validation/RACCORD-3D-S398.md) §8) — la densité au raccord : une pose trop loin de la face ; posée à la face, **tout le critère du raccord tenu aux deux mailles** (frontière droite et fixe). Avant : S406, le courant de surface levé

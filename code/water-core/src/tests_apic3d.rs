@@ -604,3 +604,80 @@ fn a_column_with_an_air_pocket_stays_in_particles_s408() {
     assert_eq!(plain.set_columns_mask(&[0; 16]).unwrap_err(), Error::Domain);
 }
 
+#[test]
+fn the_switch_follows_the_body_and_holds_the_band_s408() {
+    // Un bassin plat passe tout entier en colonnes ; un corps qui descend vers la surface demande en particules son empreinte
+    // (rayon et marge), dilatée de deux colonnes ; parti, la bande tient 0,5 s puis rend ses colonnes : deux bascules au plus.
+    let (n, nz, dx) = (16, 16, 0.05f32);
+    let (mut a, mut arena) = apic(n, n, nz, dx, n * n * nz * 8);
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    a.enable_columns(&mut host, &vec![0u8; n * n]).unwrap();
+    a.seed(&|p| p[2] < 0.4).unwrap();
+    let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+    let v0 = a.total_volume();
+    let exact = |a: &Apic3| (a.total_volume() / v0 - 1.).abs() <= 1e-9;
+    let change = s.switch(0, &mut a).unwrap();
+    assert_eq!((change.to_columns, change.refused), (n * n, 0));
+    assert!(exact(&a));
+    s.clear_counts();
+    // Le corps, à 5 cm au-dessus de la surface, descend à 1 m/s : son bas y sera avant l'horizon (0,2 s).
+    a.set_body(Some(Sphere3 { center: [0.4, 0.4, 0.55], radius: 0.1, velocity: [0., 0., -1.] })).unwrap();
+    let core = |i: usize, j: usize| {
+        let (x, y) = ((i as f32 + 0.5) * dx - 0.4, (j as f32 + 0.5) * dx - 0.4);
+        x * x + y * y <= 0.2 * 0.2
+    };
+    let band = |i: usize, j: usize| (i.saturating_sub(2)..=(i + 2).min(n - 1)).any(|x| (j.saturating_sub(2)..=(j + 2).min(n - 1)).any(|y| core(x, y)));
+    let expected = (0..n * n).filter(|c| band(c % n, c / n)).count();
+    let change = s.switch(100_000, &mut a).unwrap();
+    println!("S408 critère, corps : {change:?}, bande {expected} colonnes");
+    assert_eq!(change.to_particles, expected);
+    for c in 0..n * n {
+        assert_eq!(a.is_column(c % n, c / n), !band(c % n, c / n), "colonne {c}");
+    }
+    assert!(exact(&a));
+    // Parti : la bande tient jusqu'à 0,5 s après la dernière demande, puis passe.
+    a.set_body(None).unwrap();
+    for t in [200_000, 599_999] {
+        assert_eq!(s.switch(t, &mut a).unwrap(), ColumnsChange::default(), "t = {t} µs");
+    }
+    let change = s.switch(600_000, &mut a).unwrap();
+    assert_eq!((change.to_columns, change.refused), (expected, 0));
+    assert!(exact(&a));
+    assert_eq!(s.max_switches(), 2);
+    let fraction = s.mean_band_fraction();
+    assert!((fraction - 3. * expected as f64 / (4. * (n * n) as f64)).abs() < 1e-12, "{fraction}");
+}
+
+#[test]
+fn the_switch_takes_the_steep_and_the_folded_to_particles_s408() {
+    // Une marche de 0,2 m dans la surface (pente 2 à ses deux colonnes) et une poche d'air (mailles occupées discontinues) sont
+    // requises en particules, dilatées de deux colonnes ; le reste passe en colonnes. Refus : sans zone, domaine étranger.
+    let (nx, ny, nz, dx) = (16, 8, 16, 0.05f32);
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    a.enable_columns(&mut host, &vec![0u8; nx * ny]).unwrap();
+    a.seed(&|p| {
+        let pocket = (p[0] / dx) as usize == 2 && (p[1] / dx) as usize == 3 && p[2] > 0.1 && p[2] < 0.2;
+        p[2] < if p[0] < 0.4 { 0.3 } else { 0.5 } && !pocket
+    })
+    .unwrap();
+    let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+    let v0 = a.total_volume();
+    let change = s.switch(0, &mut a).unwrap();
+    println!("S408 critère, marche et poche : {change:?}");
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+    for j in 0..ny {
+        for i in [7, 8] {
+            assert!(!a.is_column(i, j), "marche ({i}, {j})");
+        }
+        for i in (0..=3).chain(12..nx) {
+            let pocket = i <= 4 && (1..=5).contains(&j);
+            assert_eq!(a.is_column(i, j), !pocket, "({i}, {j})");
+        }
+    }
+    assert_eq!(s.requested().len(), nx * ny);
+    let (mut plain, mut other) = (apic(nx, ny, nz, dx, 64).0, apic(8, 8, nz, dx, 64).0);
+    assert_eq!(s.switch(1, &mut plain).unwrap_err(), Error::Domain);
+    other.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &[0; 64]).unwrap();
+    assert_eq!(s.switch(1, &mut other).unwrap_err(), Error::Shape);
+}
