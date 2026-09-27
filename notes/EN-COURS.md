@@ -100,8 +100,8 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 - [x] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
 - [x] **P5b** — *ajoutée* : le maintien balayé (0,1 ; 0,2 ; 0,3 s), le réglage retenu, son coût dans la même fournée qu'APIC seul.
 - [x] **P6** — la crête courte ; critère 6. *Élargie* : la planche de revue R34 (demande de l'utilisateur, ci-dessous).
-- [>] **P7** — suite entière, zéro avertissement ; critère 7.
-- [ ] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
+- [x] **P7** — suite entière, zéro avertissement ; critère 7.
+- [>] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
@@ -180,3 +180,4 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
   `captures/s410/planche_R34.png` (APIC seul | bande 0,3 s | bande 0,05 s), **envoyée, R34 posée**. **Ce que la planche montre
   et que les chiffres ne voyaient pas** : à 0,05 s, le **sommet de la crête repasse en colonnes** — une bosse lisse et trop haute
   derrière une lèvre de particules, alors que l'impact n'y était qu'à +3,6 % ; à 0,3 s, le déferlement ressemble à APIC seul.
+- **P7** — suite entière : **741 réussis** (739 + deux essais `_s410`), 19 ignorés, aucun échec, zéro avertissement. Critère 7.
