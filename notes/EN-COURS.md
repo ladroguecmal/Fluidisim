@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S403 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S402 : **C8d**, la décision
+Session : S403 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S402 : **C8d**, la décision
 du rang 4 et la famine. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni
 Godot. Branche `claude/eager-volta-lf0kw3` (S402), la plus avancée.
 
@@ -95,7 +95,7 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
 - [x] **P4** — les calculs du banc ; critère 6.
 - [x] **P5** — suite entière, zéro avertissement ; critère 7.
 - [x] **P6** — preuve `FAMINE-S403` ; liste (9.8, 9.9), file, feuille de route, index ; note datée d'ADR-012.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - **P2** — `scheduler.rs` : `Coarsen { cost_ms, loss_m }`, `declare_coarsen` (refus `Error::Coarsen`), `Grant::level`, `starved()` ;

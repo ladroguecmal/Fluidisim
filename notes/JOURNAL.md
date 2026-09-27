@@ -17738,3 +17738,19 @@ bosse, le transfert reste à 1,8 mm du domaine fin, **ADR-005 §5 la perd (10,2 
 invoquent, et un ADR réécrit se voit au contrôle ; **chemin** : C8c l'a consommé (ADR-210) ; **preuve** : le contrôle sur les
 versions de S35 et S39, NIVEAUX-S402 §1. Suivant : dans le cloud, **C8d**, la décision du rang 4 et la famine ; au poste, C3b
 puis la pluie 5b.
+
+## S403 — 2026-09-27 — physique : C8d, le rang 4 dans l'ordonnanceur et l'issue de la famine
+
+**Entrée.** *« Continue »* ; S402 proposait C8d. **Fait** ([preuve](../docs/validation/FAMINE-S403.md)). Dans `scheduler.rs` : un
+non-focal **déclare** (`declare_coarsen`) son coût un niveau plus bas et ce que son image y perdrait — l'écart d'un aller-retour
+de son contenu (ADR-210 D2) ; quand le rang 1, à son minimum, affame encore, celui qui **perd le moins par milliseconde rendue**
+descend, immédiatement ; remontée une par seconde, la plus forte perte d'abord ; le focal jamais ; ce qui reste sans budget est
+**déclaré** (`starved`) — le rang 5, à l'hôte. `Bid` inchangé : l'hôte `viewer/` le construit et ne se compile pas ici. **Tenus** :
+sans déclaration, S351 au bit (28 essais, empreinte S278 `6aebff024c734fc9`) ; six essais neufs ; au banc, trois domaines δ réels
+(un focal, une source, une bosse) sous un budget en quatre phases — en famine, la bosse descend : **1,4 mm**, quand un témoin qui
+ignore le contenu descend la source : **14,0 mm** ; sauts ≤ 2,5 mm ; budget jamais dépassé ; suite **718 réussis**, zéro
+avertissement. **Trouvé** : en famine sévère, la victime du rang 5 suit l'ordre du sac à dos, pas le contenu, et une descente qui
+n'y met pas fin change seulement qui est nourri ; un domaine détruit ne retrouve pas son contenu (20,5 mm). **Limites** : rangs 2, 3,
+6, 7 et régulateur PI absents ; coûts déclarés par une loi ; ni carte ni hôte. **Rituel.** Maillons **1** : aucun point ne change de
+case (9.8 et 9.9 restent partiels). Suivant : dans le cloud, **C8e** — l'épars et les niveaux sous le pas couplé (δ sous B + W) ;
+le raccord, puis C6, sous la condition d'A316 ; au poste, C3b puis la pluie 5b.

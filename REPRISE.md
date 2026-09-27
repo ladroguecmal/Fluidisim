@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-27 03:09 +02:00
+JETON            : libre
+Battement        : 2026-09-27 03:10 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
-Session en cours : S403 — C8d, le rang 4 dans l'ordonnanceur et l'issue de la famine : descendre d'un niveau le non-focal qui perd le moins (ADR-210 D2), déclarer ce qui reste affamé ; un banc de trois domaines δ réels
-Dernière session : S402 — physique : **ADR-005 restauré** (son corps manquait depuis S35 ; un contrôle de l'outil le garde désormais) ; **C8c** ([preuve](docs/validation/NIVEAUX-S402.md)) — changer un domaine de niveau par transfert d'état ([ADR-210](docs/adr/ADR-210-changer-de-niveau-par-transfert-d-etat.md)) : sauts de 0,1 à 2 mm, une bosse gardée à 1,8 mm quand ADR-005 §5 la perd. Avant : S401, le domaine épars
-Session suivante : dans le cloud, **S403 — C8d, la décision du rang 4 et la famine** (quel domaine descendre, selon ce qu'il contient ; ADR-210 D2) ; le raccord attend la condition d'A316 ; au poste, **C3b** (10 cm, A298), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
-Maillons        : 0 — S402 : correction d'intégrité (ADR-005 restauré, contrôle vu échouer) ; journal
+Session en cours : aucune
+Dernière session : S403 — physique : **C8d** ([preuve](docs/validation/FAMINE-S403.md)) — le rang 4 dans l'ordonnanceur : le non-focal qui perd le moins descend (1,4 mm contre 14 mm au témoin qui ignore le contenu), l'issue de la famine déclarée (rang 5, à l'hôte) ; S351 au bit sans déclaration. Avant : S402, ADR-005 restauré et le transfert de niveau (ADR-210)
+Session suivante : dans le cloud, **S404 — C8e, l'épars et les niveaux sous le pas couplé** (δ sous B + W : ce que la scène de C10 demande, et que S401–S402 refusent) ; le raccord (C5), puis C6, sous la condition d'A316 ; au poste, **C3b** (10 cm, A298), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
+Maillons        : 1 — S403 : aucun point ne change de case (9.8, 9.9 partiels) ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
