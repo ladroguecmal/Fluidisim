@@ -95,7 +95,7 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
 - [x] **P2** — ADR-005 restauré, note datée ; critère A1.
 - [x] **P3** — le contrôle dans `etat_projet.py` (vu échouer sur S35 et S39) ; protection de METHODE, leçon ; critère A2.
 - [x] **P4** — `delta3d_levels.rs` : le transfert d'état entre niveaux ; essais T1 à T4, vu échouer sans pente.
-- [ ] **P5** — le banc `delta3d_niveaux` : bosse et source mobile, 25 → 50 cm à 2 s, retour à 5 s, contre le domaine fin ; ADR-005 §5
+- [x] **P5** — le banc `delta3d_niveaux` : bosse et source mobile, 25 → 50 cm à 2 s, retour à 5 s, contre le domaine fin ; ADR-005 §5
   (fondu de 0,5 s, naissance à zéro) ; critères B1 à B3.
 - [ ] **P6** — suite entière, zéro avertissement.
 - [ ] **P7** — preuve `NIVEAUX-S402` ; un ADR si la mesure tranche le mécanisme du rang 4 ; liste (4.5, 9.9), file, feuille de route,
@@ -124,3 +124,13 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
   ma prédiction « ordre deux » était fausse, l'essai tient désormais « au moins l'ordre deux ». **Vu échouer sans pente : 10,20 %**
   (prédiction ≈ 10 %), ordre un (5,02 % à 16 m). **T4 tenu** (étendue, repos, gravité, ensemble épars ; rien d'écrit). Un état
   transféré repart : dix pas grossiers, volume gardé.
+- **P5** — `examples/delta3d_niveaux.rs` : bassin 24 × 16 m, 25 cm (96 × 64 × 12) ; passage à 50 cm à 2 s, retour à 5 s, fin à
+  7 s ; référence à 25 cm tout du long ; image sur la grille fine (le grossier reconstruit par le même transfert) ; saut = variation
+  de l'image sur le pas du passage moins celle de la référence ; ADR-005 §5 : nouveau domaine au repos, l'ancien continue sans
+  la source et s'efface linéairement en 0,5 s (pas de transduction en référence). Quatre calculs en parallèle, ≈ 6 min chacun.
+  **Bosse** (5 cm, σ = 1 m) — transfert : saut **0,24 mm** au passage, **0,13 mm** au retour, autres pas ≤ 0,18 mm ; écart
+  **1,82 mm** pendant la période à 50 cm, 2,32 mm après ; ADR-005 §5 : sauts 0,36 / 0,49 mm (le fondu, 0,65 mm par pas), écart
+  **10,2 mm**, 12,8 mm après. **Source** (dipôle de S401, 24 mm) — transfert : sauts 1,95 / 1,32 mm, écart 15,7 mm, 16,7 après ;
+  ADR-005 §5 : 0,68 / 1,01 mm (2,28 par pas), écart 17,0 mm, 23,6 après. **B1, B2 tenus** partout (≤ 3 mm ; prédiction ≈ 1 mm
+  sur la bosse : 0,24). **B3** : le transfert garde le contenu résolu (1,8 mm, sous la tolérance d'image) ; ADR-005 §5 le perd ;
+  la source, sous-résolue à 50 cm (σ = une maille), coûte 15 à 17 mm aux deux — le « visible de près » d'ADR-012 §4.
