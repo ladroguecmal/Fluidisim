@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S405 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« continue »*. Suite proposée par S404 : deux maillons, un
+Session : S405 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« continue »*. Suite proposée par S404 : deux maillons, un
 lot qui fait changer de case un point de la liste — **9.3**, la prédiction balistique, à comparer au raccord C5. **Choix** : 9.3.
 Il est au front 0 (rien à attendre), il débloque 9.4 et 9.6, et il sert la scène de C10 — le saut ; C5 reste sous la condition
 d'A316, et un changement de case n'y est pas en vue (4.16 est déjà partiel). Agent : Claude, session cloud Claude Code ; fichiers,
@@ -97,7 +97,7 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
 - [x] **P5** — les calculs du banc ; critère 7.
 - [x] **P6** — suite entière, zéro avertissement ; critère 8.
 - [x] **P7** — preuve `IMPACT-PREVU-S405` ; liste (9.3, 9.2), file, feuille de route, index ; note datée d'ADR-013.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 - **P2** — `code/water-core/src/ballistic.rs` (module public `ballistic`) : `Ballistic` (position, vitesse, quaternion, ω du corps,

@@ -17772,3 +17772,20 @@ houle douce (A320 intouchée), le bord absorbant efface (4.8), 25 ↔ 50 cm seul
 aucun point ne change de case (4.3, 4.5, 4.7, 9.2 restent partiels). Suivant : dans le cloud, un lot qui fait changer de case un
 point — proposé **9.3**, la prédiction balistique consommée par le suivi (le saut de C10), à comparer au raccord C5 (S397, A316) ;
 au poste, C3b puis la pluie 5b.
+
+## S405 — 2026-09-27 — physique : 9.3, la prédiction balistique consommée par le domaine épars
+
+**Entrée.** *« continue »* ; S404, à deux maillons, proposait un lot qui fait changer de case un point : **9.3** (front 0, débloque
+9.4 et 9.6, sert le saut de C10), préféré au raccord C5, où aucun changement de case n'est en vue. **Fait**
+([preuve](../docs/validation/IMPACT-PREVU-S405.md)). `ballistic` (cœur) : gravité et traînée quadratique, rotation libre (Euler),
+contact de la sphère englobante avec la houle telle qu'elle sera, instant affiné à 10⁻¹² s ; région utile sous une traînée bornée ;
+paliers d'ADR-013 §2. **Tenus** : parabole à 5·10⁻¹³ s ; traînée d'ordre 4 (rapports 14,4 et 15,6) ; toupie symétrique à 10⁻¹³ ;
+houle rencontrée où elle est (l'ignorer : +2,1 ms, +2,2 cm) ; ±30 % de traînée dans la région. Au banc en mer, une sphère lancée à
+12 m/s de 6 m, l'ensemble revu toutes les 0,5 s : avec la prédiction, la région d'impact prête **1,11 s** avant, la source jamais
+dehors, 0,59 mm du domaine entier, à toutes les phases de revue ; le témoin (l'objet suivi là où il est) prête 0,01 à 0,41 s avant
+et laisse la source **dehors une fois sur cinq** — la prédiction « témoin refusé » manquée à la phase prévue ; prix : 10 à 15 % de
+mailles. Suite **732 réussis**, zéro avertissement. **Limites** : sphère englobante, ni vent ni portance, entrée par volume
+déplacé, orientation non consommée, région calculée et non réservée. **Rituel.** Maillons **0** — **devient possible** : préparer
+le domaine d'eau pendant le vol d'un objet, quelle que soit la cadence de revue ; **chemin** : le domaine épars en mer (`Follow`,
+pas couplé) le consomme ; **preuve** : IMPACT-PREVU-S405 §3 ; **9.3 absent → partiel**. Suivant : dans le cloud, le raccord C5
+(A316), priorité de l'utilisateur (S397) ; sinon 9.6, le précalcul avant l'impact ; au poste, C3b puis la pluie 5b.
