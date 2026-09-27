@@ -17789,3 +17789,19 @@ déplacé, orientation non consommée, région calculée et non réservée. **Ri
 le domaine d'eau pendant le vol d'un objet, quelle que soit la cadence de revue ; **chemin** : le domaine épars en mer (`Follow`,
 pas couplé) le consomme ; **preuve** : IMPACT-PREVU-S405 §3 ; **9.3 absent → partiel**. Suivant : dans le cloud, le raccord C5
 (A316), priorité de l'utilisateur (S397) ; sinon 9.6, le précalcul avant l'impact ; au poste, C3b puis la pluie 5b.
+
+## S406 — 2026-09-27 — physique : C5c, le courant de surface au raccord levé
+
+**Entrée.** *« Continue, je confirmes »* — décision de l'utilisateur, à la file : la priorité du solveur passe avant la règle des
+maillons (S405 avait quitté la campagne pour 9.3) ; suite : le raccord C5, A316. **Fait**
+([preuve](../docs/validation/RACCORD-3D-S398.md) §7). Les trois suspects de S400 en options d'essai de `Apic3`, éprouvés par des
+témoins courts (5 cm, 30 s, 1 min) : **le courant est porté par la face de frontière**, dont la vitesse venait du seul transfert
+des particules de la bande — prise pour moitié à la zone, −6,7 → −3,6 mm/s ; prise à la zone, −0,4 (APIC seul −0,5). La prédiction
+écrite avant désignait le débit de la rangée du haut : **manquée**, il aggrave. Défaut : la face appartient à la zone, la quantité
+de mouvement absorbée est rendue (la migration revient au critère) ; `TRIAL_S400` rend S400 au chiffre près. **Tenus**, critère 4
+de S399 aux deux mailles : niveau, saut, période, amortissement, **courant ≤ 0,6 et ≤ 1,1 mm/s** ; suite **733 réussis**, zéro
+avertissement. **Manqué** : la **densité** de la dernière colonne de la bande, 7,59 à 5 cm, 7,24–7,31 à 2,5 cm (8 ± 0,4) — ni la
+face, ni le débit, ni la quantité de mouvement, ni le lieu du retrait. **Rituel.** Maillons **1** : aucun point ne change de case
+(4.16 partiel). Suivant : dans le cloud, **C5d, la densité au raccord** — condition d'une cinquième session sur A316 : un témoin
+court (5 cm) qui relève la densité à 7,6 au moins par un geste nommé d'avance (la pose contre la face à la vitesse de la grille ;
+la séparation près des particules virtuelles) ; sinon C6 sur la frontière telle qu'elle est ; au poste, C3b puis C7.

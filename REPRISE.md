@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-27 11:14 +02:00
+JETON            : libre
+Battement        : 2026-09-27 11:15 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
-Session en cours : S406 — physique : **C5c**, le raccord particules ↔ colonnes (A316 : le courant de surface et la densité) — plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S405 — physique : **9.3** ([preuve](docs/validation/IMPACT-PREVU-S405.md)) — la prédiction balistique dans le cœur (`ballistic` : point, instant, vitesse, orientation, rotation, région utile, paliers d'ADR-013 §2), consommée par le domaine épars en mer : la région d'impact prête 1,11 s avant l'impact quelle que soit la cadence de revue ; 9.3 absent → partiel. Avant : S404, l'épars et les niveaux sous le pas couplé
-Session suivante : dans le cloud, **S406 — le raccord C5** (A316 : densité et courant de surface au raccord, [RACCORD-3D-S398](docs/validation/RACCORD-3D-S398.md) §6), priorité de l'utilisateur (S397) ; sinon **9.6**, le précalcul avant l'impact ; au poste, **C3b** (10 cm, A298), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
-Maillons        : 0 — S405 : 9.3 absent → partiel (devient possible : préparer le domaine pendant le vol ; chemin : le domaine épars en mer ; preuve : IMPACT-PREVU-S405 §3)
+Session en cours : aucune
+Dernière session : S406 — physique : **C5c** ([preuve](docs/validation/RACCORD-3D-S398.md) §7) — le courant de surface au raccord attribué à la face de frontière, vue d'un seul côté, et levé (≤ 0,6 et ≤ 1,1 mm/s aux deux mailles) ; reste la densité (7,2–7,6 pour 8). Décision de l'utilisateur : la priorité du solveur passe avant la règle des maillons. Avant : S405, 9.3
+Session suivante : dans le cloud, **S407 — C5d, la densité au raccord** (A316 ; condition : un témoin court qui la relève à 7,6 par un geste nommé d'avance — la pose contre la face, la séparation près des particules virtuelles), sinon C6 sur la frontière telle qu'elle est ; au poste, **C3b** (10 cm, A298) puis C7 ; la pluie 5b et les peaufinages R32, R33 plus tard
+Maillons        : 1 — S406 : aucun point ne change de case (4.16 partiel) ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

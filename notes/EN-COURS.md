@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S406 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue, je confirmes »* — la priorité du solveur passe
+Session : S406 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue, je confirmes »* — la priorité du solveur passe
 avant la règle des maillons (file, décisions) ; suite : le raccord **C5**. Agent : Claude, session cloud Claude Code ; fichiers,
 git, cargo, Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, la plus avancée.
 
@@ -97,7 +97,7 @@ ne rien rendre défaut, et le dire.
 - [x] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
 - [x] **P6** — suite entière, zéro avertissement.
 - [x] **P7** — preuve (RACCORD-3D-S398 §7) ; liste 4.16, file (campagne, lot 5), A316 (note datée), feuille de route, index.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 - **P2** — `apic3d_columns.rs` : `Apic3::TRIAL_FACE_BOTH_SIDES` (1 : face de frontière = moyenne du transfert de la bande et de
