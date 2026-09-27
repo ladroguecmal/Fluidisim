@@ -167,7 +167,7 @@ montre le fond qui suit la surface à quatre mailles, et qui descend, sous le je
 ### 5.5 Ce que cette section ne dit pas
 
 - **Aucun défaut changé** : `floor_cells` reste `None` ; la proposition — fond 4, prédiction à horizon court, maintien 0,3 s —
-  attend R35.
+  attendait R35. *R35 reçu (S415) : retenue pour la suite, défauts inchangés jusqu'à C7.*
 - **Le fond suit la forme, pas l'écoulement** : l'idée de l'utilisateur (S414, *« le mesh du fond malaxable en fonction du courant,
   les particules peuvent naître et disparaître en fonction de leur vitesse »*) est la suite, C6c-3 — l'Extended Narrow Band FLIP
   (Sato et al. 2018) fait passer particules et grille « en n'importe quel endroit ».

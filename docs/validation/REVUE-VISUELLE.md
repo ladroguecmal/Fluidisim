@@ -1423,3 +1423,7 @@ pleine et calcule deux fois plus vite. Comme R34 : un instrument en 2D, pas le r
 | `captures/s414/planche_R35.png` | six instants × APIC seul, bande pleine, bande étroite |
 
 **La question :** la bande étroite déferle-t-elle comme les deux autres — la forme de la crête, le jet, sa retombée ?
+
+**Verdict R35 — reçu le 2026-09-27 (S415)** : *« Je valides R35, continue avec ta recomandation »*. **Reçu** : la bande étroite
+déferle comme APIC seul et la bande pleine. Le réglage retenu — maintien 0,3 s, fond à quatre mailles, prédiction du corps à
+horizon court — devient celui de la suite (C6c-3, C7) ; les défauts du code restent ceux de S408 jusqu'à ce que C7 les porte.

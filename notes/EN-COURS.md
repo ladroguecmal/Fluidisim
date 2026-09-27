@@ -86,9 +86,9 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — verdict R35 consigné (revue, file, preuve) ; le réglage retenu (maintien 0,3 s, fond 4, prédiction à horizon court) inscrit, défauts inchangés jusqu'à C7.
-- [ ] **P3** — la vorticité de la grille aux centres des mailles ; essai (rotation solide, uniforme) ; critère 2.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — verdict R35 consigné (revue, file, preuve) ; le réglage retenu (maintien 0,3 s, fond 4, prédiction à horizon court) inscrit, défauts inchangés jusqu'à C7.
+- [>] **P3** — la vorticité de la grille aux centres des mailles ; essai (rotation solide, uniforme) ; critère 2.
 - [ ] **P4** — `ColumnsSwitch::floor_vorticity` : la colonne requise et le fond sous la maille tourbillonnaire la plus basse ; essai.
 - [ ] **P5** — le banc du tourbillon enfoui ; les trois montages ; critère 3.
 - [ ] **P6** — la vague de Chen avec le seuil ; critère 4.
@@ -97,3 +97,5 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
+- **P2** — R35 : REVUE-VISUELLE §40 (verdict), BANDE-ETROITE-S413 §5.5, file (décision en tête ; campagne). Réglage retenu pour
+  la suite ; défauts du code inchangés jusqu'à C7 (les « Reproduire » de S408–S414 les citent).
