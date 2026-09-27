@@ -93,8 +93,8 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — le pas couplé porte l'ensemble (`delta3d_coupling.rs`, `delta3d_sparse.rs`) : mode relatif exigé ; faces fermées non
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — le pas couplé porte l'ensemble (`delta3d_coupling.rs`, `delta3d_sparse.rs`) : mode relatif exigé ; faces fermées non
   prédites, gradients au bord de l'ensemble comme au bord de la boîte ; bande de B aux murs comme au bord, colonnes dehors
   intouchées ; éponge depuis le bord de l'ensemble (étendues par colonne, réservées) ; bilan aux murs.
 - [ ] **P3** — essais du pas couplé : critère 1, oracles (a) (b) (c) sous la houle, refus ; vu échouer (trois défauts injectés).
@@ -106,3 +106,11 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
+- **P2** — `delta3d_coupling.rs` : faces fermées par l'ensemble non prédites ; gradients de la prédiction, voisin hors de la grille
+  de l'ensemble lu comme la face (règle d'advection de S401) ; transport : un mur lu comme le bord de la boîte du côté de sa
+  colonne (surface de la colonne + η de B à la face, surface de B `repos + η`), colonnes dehors intouchées ; éponge
+  `sponge_factor3` : rampes mesurées dans l'**étendue** de la colonne (`Sparse3::extent`, `[i0, i1, j0, j1]`, réservée,
+  recalculée à chaque changement), la plus forte des deux colonnes d'une face ; `Sponge3::ramp`/`from_ramps` extraits de `factor`
+  au bit ; bilan : les murs au bord, signés vers l'ensemble. Refus : ensemble sans les trois bits relatifs. Témoin d'essai
+  `set_sparse_edge_sponge_for_trials(false)` : l'éponge au seul bord de la boîte. **104 essais delta3d tenus** tels quels (S297 à
+  S402), zéro avertissement.

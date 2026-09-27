@@ -13,9 +13,15 @@
 //! l'ensemble est un **mur**, nul, comme le mur de la boîte. Un rectangle de l'ensemble dans une fenêtre plus grande est donc
 //! le domaine dense de ce rectangle — à l'ordre des sommes du solveur près (S401, critère 2).
 //!
+//! **S404 — sous le pas couplé** (C8e). Au bord de la boîte, le pas couplé fait plus que fermer δ : la bande de B y passe, et
+//! l'éponge d'ADR-164 y absorbe δ. Au bord de l'ensemble, de même : un mur lit la surface de sa seule colonne et laisse passer
+//! la bande de B comme le bord de la boîte, et l'éponge se mesure dans l'**étendue** de chaque colonne — la rangée et la
+//! colonne de colonnes de l'ensemble qui la contiennent : le bord de l'ensemble devient absorbant. Le pas couplé ne porte
+//! l'ensemble qu'en mode relatif (ADR-198 D1) : hors de l'ensemble, δ nul est son point fixe.
+//!
 //! **Ce que ce module ne fait pas** : le stockage par blocs — la mémoire reste la fenêtre ; un pool de blocs et sa table
-//! d'indirection sont la forme de la production (C8, au poste). Seul le pas mobile porte l'ensemble : le pas linéaire, le pas
-//! couplé, la colonne graduée et `transplant` le refusent (`Domain`).
+//! d'indirection sont la forme de la production (C8, au poste). Le pas mobile et le pas couplé relatif portent l'ensemble : le
+//! pas linéaire, le pas couplé de S297, la colonne graduée et `transplant` le refusent (`Domain`).
 use super::*;
 use crate::domain_blocks::{Block, BLOCK};
 
@@ -24,6 +30,53 @@ pub(super) struct Sparse3 {
     pub active: Vec<u8>,
     /// Le masque demandé, avant qu'il ne remplace `active` ; réservé avec lui, aucun changement n'alloue.
     next: Vec<u8>,
+    /// S404 : par colonne de l'ensemble, son **étendue** `[i0, i1, j0, j1]` — la rangée `[i0, i1)` et la colonne `[j0, j1)` de
+    /// colonnes de l'ensemble qui la contiennent. L'éponge du pas couplé s'y mesure comme dans la boîte. Réservée avec les
+    /// masques, recalculée à chaque changement.
+    pub extent: Vec<[u32; 4]>,
+    /// S404, **essais seulement** : l'éponge mesurée depuis le bord de l'ensemble (vrai, défaut) ou depuis celui de la boîte
+    /// seul — les murs de l'ensemble réfléchissent alors, comme au pas mobile : le témoin qui en est privé.
+    pub edge_sponge: bool,
+}
+
+impl Sparse3 {
+    /// Les étendues de toutes les colonnes de l'ensemble, depuis `active`.
+    fn refresh_extents(&mut self, nx: usize, ny: usize) {
+        for j in 0..ny {
+            let mut i = 0;
+            while i < nx {
+                if self.active[j * nx + i] == 0 {
+                    i += 1;
+                    continue;
+                }
+                let i0 = i;
+                while i < nx && self.active[j * nx + i] != 0 {
+                    i += 1;
+                }
+                for x in i0..i {
+                    self.extent[j * nx + x][0] = i0 as u32;
+                    self.extent[j * nx + x][1] = i as u32;
+                }
+            }
+        }
+        for i in 0..nx {
+            let mut j = 0;
+            while j < ny {
+                if self.active[j * nx + i] == 0 {
+                    j += 1;
+                    continue;
+                }
+                let j0 = j;
+                while j < ny && self.active[j * nx + i] != 0 {
+                    j += 1;
+                }
+                for y in j0..j {
+                    self.extent[y * nx + i][2] = j0 as u32;
+                    self.extent[y * nx + i][3] = j as u32;
+                }
+            }
+        }
+    }
 }
 
 /// Ce qu'un changement d'ensemble a fait. **Publié, jamais caché** : une colonne rendue au repos perd ce qu'elle portait, et
@@ -46,17 +99,29 @@ pub struct SparseChange {
 }
 
 impl Volume3 {
-    /// **Réserve l'ensemble épars** — deux masques de colonnes — auprès de l'hôte, **avant `seal()`** (I-06). Toutes les
-    /// colonnes y sont d'abord : chaque opérateur reste celui de la boîte. Refus `Domain` : déjà réservé, ou colonne graduée
-    /// (ADR-208), dont la projection ne le porte pas.
+    /// **Réserve l'ensemble épars** — deux masques de colonnes et leurs étendues (S404) — auprès de l'hôte, **avant `seal()`**
+    /// (I-06). Toutes les colonnes y sont d'abord : chaque opérateur reste celui de la boîte. Refus `Domain` : déjà réservé, ou
+    /// colonne graduée (ADR-208), dont la projection ne le porte pas.
     pub fn enable_sparse(&mut self, host: &mut HostServices) -> Result<(), Error> {
         if self.sparse.is_some() || self.graded.is_some() {
             return Err(Error::Domain);
         }
+        let Domain3 { nx, ny, .. } = self.domain;
         let cols = self.domain.columns();
-        let bytes = cols.checked_mul(2).ok_or(Error::Domain)?;
+        let bytes = cols.checked_mul(2 + core::mem::size_of::<[u32; 4]>()).ok_or(Error::Domain)?;
         host.alloc.alloc_persistent(bytes).map_err(|_| Error::Domain)?;
-        self.sparse = Some(Sparse3 { active: vec![1; cols], next: vec![1; cols] });
+        let mut s = Sparse3 { active: vec![1; cols], next: vec![1; cols], extent: vec![[0; 4]; cols], edge_sponge: true };
+        s.refresh_extents(nx, ny);
+        self.sparse = Some(s);
+        Ok(())
+    }
+
+    /// S404, **essais seulement** : l'éponge du pas couplé mesurée depuis le bord de l'ensemble (`true`, le défaut) ou depuis le
+    /// seul bord de la boîte — les murs de l'ensemble réfléchissent alors : le témoin d'un bord absorbant. Refus `Domain` sans
+    /// ensemble.
+    pub fn set_sparse_edge_sponge_for_trials(&mut self, on: bool) -> Result<(), Error> {
+        let Some(s) = self.sparse.as_mut() else { return Err(Error::Domain) };
+        s.edge_sponge = on;
         Ok(())
     }
 
@@ -140,6 +205,7 @@ impl Volume3 {
             }
         }
         core::mem::swap(&mut s.active, &mut s.next);
+        s.refresh_extents(nx, ny);
         change.active_columns = s.active.iter().filter(|a| **a != 0).count();
         self.sparse = Some(s);
         Ok(change)
@@ -188,6 +254,15 @@ impl Volume3 {
     pub(super) fn column_active(&self, i: usize, j: usize) -> bool {
         match &self.sparse {
             Some(s) => s.active[j * self.domain.nx + i] != 0,
+            None => true,
+        }
+    }
+
+    /// La colonne d'indice `c` (`j·nx + i`) est-elle du domaine ? Toujours, sans ensemble épars.
+    #[inline]
+    pub(super) fn column_active_at(&self, c: usize) -> bool {
+        match &self.sparse {
+            Some(s) => s.active[c] != 0,
             None => true,
         }
     }

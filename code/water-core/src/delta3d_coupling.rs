@@ -43,15 +43,21 @@ impl Sponge3 {
         if self.rate_per_s == 0. {
             return 1.;
         }
-        let ramp = |x: f32, n: usize, w: f32| {
-            if w == 0. {
-                0.
-            } else {
-                (1. - x.min(n as f32 * d.dx - x) / w).max(0.)
-            }
-        };
-        let rx = ramp(x, d.nx, self.width_x) as f64;
-        let ry = ramp(y, d.ny, self.width_y) as f64;
+        self.from_ramps(self.ramp(0, x, d.nx, d.dx), self.ramp(1, y, d.ny, d.dx), dt)
+    }
+    /// La rampe de l'axe `axis` (0 : x, 1 : y) au point `x` d'une étendue de `n` mailles — la boîte, ou, S404, l'étendue d'une
+    /// colonne de l'ensemble épars.
+    pub(super) fn ramp(self, axis: usize, x: f32, n: usize, dx: f32) -> f32 {
+        let w = if axis == 0 { self.width_x } else { self.width_y };
+        if w == 0. {
+            0.
+        } else {
+            (1. - x.min(n as f32 * dx - x) / w).max(0.)
+        }
+    }
+    /// Le facteur de deux rampes, sur `dt`.
+    pub(super) fn from_ramps(self, rx: f32, ry: f32, dt: f64) -> f32 {
+        let (rx, ry) = (rx as f64, ry as f64);
         (-(self.rate_per_s as f64) * dt * (rx * rx + ry * ry)).exp() as f32
     }
 }
@@ -320,6 +326,40 @@ impl Volume3 {
             + self.velocity3(a, c)
             + self.velocity3(a, r))
     }
+    /// Le facteur d'éponge de la face de l'axe `axis` en `p` — axe 2 : la colonne `(p[0], p[1])`, pour la hauteur aussi. Sans
+    /// ensemble épars, celui de la boîte. **S404** : avec, mesuré dans l'étendue de l'ensemble — le bord de l'ensemble absorbe
+    /// comme le bord de la boîte ; une face entre deux colonnes prend, par axe, la plus forte des rampes des deux, les mêmes
+    /// dans un rectangle, qui retrouve ainsi l'éponge de son domaine dense.
+    pub(super) fn sponge_factor3(&self, sponge: Sponge3, axis: usize, p: [usize; 3], dt: f64) -> f32 {
+        let dx = self.domain.dx;
+        let x = (p[0] as f32 + if axis == 0 { 0. } else { 0.5 }) * dx;
+        let y = (p[1] as f32 + if axis == 1 { 0. } else { 0.5 }) * dx;
+        let Some(s) = self.sparse.as_ref().filter(|s| s.edge_sponge) else {
+            return sponge.factor(x, y, self.domain, dt);
+        };
+        if sponge.rate_per_s == 0. {
+            return 1.;
+        }
+        let nx = self.domain.nx;
+        let [i, j, _] = p;
+        let touched = match axis {
+            0 => [(i - 1, j), (i, j)],
+            1 => [(i, j - 1), (i, j)],
+            _ => [(i, j), (i, j)],
+        };
+        let mut r = [0f32; 2];
+        for (a, ra) in r.iter_mut().enumerate() {
+            let offset = if a == axis { 0. } else { 0.5 };
+            for (ci, cj) in touched {
+                let e = s.extent[cj * nx + ci];
+                let (lo, hi) = (e[2 * a] as usize, e[2 * a + 1] as usize);
+                let q = ((p[a] - lo) as f32 + offset) * dx;
+                *ra = ra.max(sponge.ramp(a, q, hi - lo, dx));
+            }
+        }
+        sponge.from_ramps(r[0], r[1], dt)
+    }
+
     fn predict_coupled3(
         &mut self,
         bg: &BackgroundFaces3<'_>,
@@ -345,6 +385,11 @@ impl Volume3 {
                             continue;
                         }
                         let f = self.face_index3(axis, p);
+                        // S404 : une face que l'ensemble épars ferme n'est pas prédite — le mur de la boîte ne l'est pas ;
+                        // elle garde sa vitesse nulle.
+                        if self.sparse_closed3(axis, f) {
+                            continue;
+                        }
                         let center = self.velocity3(axis, p);
                         let mut dv = [0.; 3];
                         let mut vel = [0.; 3];
@@ -352,14 +397,20 @@ impl Volume3 {
                             vel[a] = self.collocated3(axis, a, p);
                             let mut low = p;
                             let mut high = p;
-                            let below = if p[a] > 0 {
+                            // S404 : un voisin hors de la grille de l'ensemble est lu comme la face elle-même, comme au-delà
+                            // du bord de la boîte (S401, l'advection).
+                            if p[a] > 0 {
                                 low[a] -= 1;
+                            }
+                            if p[a] + 1 < end[a] {
+                                high[a] += 1;
+                            }
+                            let below = if p[a] > 0 && !self.sparse_outside3(axis, low) {
                                 self.velocity3(axis, low)
                             } else {
                                 center
                             };
-                            let above = if p[a] + 1 < end[a] {
-                                high[a] += 1;
+                            let above = if p[a] + 1 < end[a] && !self.sparse_outside3(axis, high) {
                                 self.velocity3(axis, high)
                             } else {
                                 center
@@ -377,9 +428,7 @@ impl Volume3 {
                         let residual = self.relative_background & Self::RELATIVE_RESIDUAL == 0;
                         let trials = self.relative_background & (Self::TRIAL_NO_CARRY | Self::TRIAL_NO_STRAIN);
                         let add = dt as f32 * extra3(sample, axis, vel, dv, self.rho, residual, trials)?;
-                        let x = (i as f32 + if axis == 0 { 0. } else { 0.5 }) * dx;
-                        let y = (j as f32 + if axis == 1 { 0. } else { 0.5 }) * dx;
-                        let factor = sponge.factor(x, y, self.domain, dt);
+                        let factor = self.sponge_factor3(sponge, axis, p, dt);
                         let out = match axis {
                             0 => &mut self.us,
                             1 => &mut self.vs,
@@ -427,16 +476,30 @@ impl Volume3 {
                             self.col(b, a)
                         }
                     };
+                    // S404 : un **mur de l'ensemble épars** — une face intérieure qui ne touche qu'une colonne de l'ensemble
+                    // — se lit comme le bord de la boîte, du côté de cette colonne : sa surface seule, la bande de B y
+                    // passe, δ non.
+                    let wall = if a > 0 && a < n {
+                        match (self.column_active_at(col(a - 1)), self.column_active_at(col(a))) {
+                            (true, false) => Some(a - 1),
+                            (false, true) => Some(a),
+                            _ => None,
+                        }
+                    } else {
+                        None
+                    };
                     let surface = if a == 0 {
                         self.eta[col(0)] + sample(0).eta
                     } else if a == n {
                         self.eta[col(n - 1)] + sample(0).eta
+                    } else if let Some(w) = wall {
+                        self.eta[col(w)] + sample(0).eta
                     } else {
                         0.5 * (self.surface_total[col(a - 1)] + self.surface_total[col(a)])
                     };
                     // S369 (A289) : la surface de B seule, formée comme la totale — à δ nul, au bit la même.
                     let relative = self.relative_background & Self::RELATIVE_BAND != 0;
-                    let own = if a == 0 || a == n {
+                    let own = if a == 0 || a == n || wall.is_some() {
                         self.rest + sample(0).eta
                     } else {
                         0.5 * ((self.rest + bg.w[col(a - 1)].eta) + (self.rest + bg.w[col(a)].eta))
@@ -452,7 +515,7 @@ impl Volume3 {
                         if wet > 0. {
                             // La garde d'origine : au bord, le transport ne prend rien. S311 met
                             // la même quantité de côté au lieu de ne pas la calculer.
-                            if a > 0 && a < n {
+                            if a > 0 && a < n && wall.is_none() {
                                 flux += v * dx * wet;
                             } else {
                                 bord += v * dx * wet;
@@ -484,6 +547,10 @@ impl Volume3 {
         }
         for j in 0..ny {
             for i in 0..nx {
+                // S404 : une colonne hors de l'ensemble reste au repos ; la bande d'un mur n'entre que dans sa colonne.
+                if !self.column_active(i, j) {
+                    continue;
+                }
                 let c = self.col(i, j);
                 let l = j * (nx + 1) + i;
                 let f = j * nx + i;
@@ -507,12 +574,11 @@ impl Volume3 {
         let mut removed = 0f64;
         for j in 0..ny {
             for i in 0..nx {
-                let factor = sponge.factor(
-                    (i as f32 + 0.5) * dx,
-                    (j as f32 + 0.5) * dx,
-                    self.domain,
-                    dt,
-                );
+                // S404 : hors de l'ensemble, rien à relaxer ; dedans, l'éponge de son étendue.
+                if !self.column_active(i, j) {
+                    continue;
+                }
+                let factor = self.sponge_factor3(sponge, 2, [i, j, 0], dt);
                 if factor == 1. {
                     continue;
                 }
@@ -556,6 +622,31 @@ impl Volume3 {
             let (low, high) = (i, ny * nx + i);
             band += self.band_y[low] as f64 - self.band_y[high] as f64;
             perturbation += self.flux_y[low] as f64 - self.flux_y[high] as f64;
+        }
+        // S404 : les murs de l'ensemble épars sont du bord — positif vers la colonne de l'ensemble. Les faces du bord de la boîte
+        // qui ne touchent aucune colonne de l'ensemble ne portent rien : ni δ, ni bande (au pas relatif, surface et surface de B
+        // y sont les mêmes opérandes).
+        if let Some(s) = &self.sparse {
+            for j in 0..ny {
+                for i in 1..nx {
+                    let (l, r) = (s.active[j * nx + i - 1] != 0, s.active[j * nx + i] != 0);
+                    if l != r {
+                        let (sign, f) = (if r { 1. } else { -1. }, j * (nx + 1) + i);
+                        band += sign * self.band_x[f] as f64;
+                        perturbation += sign * self.flux_x[f] as f64;
+                    }
+                }
+            }
+            for j in 1..ny {
+                for i in 0..nx {
+                    let (l, r) = (s.active[(j - 1) * nx + i] != 0, s.active[j * nx + i] != 0);
+                    if l != r {
+                        let (sign, f) = (if r { 1. } else { -1. }, j * nx + i);
+                        band += sign * self.band_y[f] as f64;
+                        perturbation += sign * self.flux_y[f] as f64;
+                    }
+                }
+            }
         }
         let factor = dt * dx as f64;
         (band * factor, perturbation * factor)
@@ -636,8 +727,11 @@ impl Volume3 {
         jobs: &dyn JobSystem,
     ) -> Result<Report, Error> {
         self.refuse_cut()?;
-        // S401 : le pas couplé ne porte pas l'ensemble épars.
-        self.refuse_sparse()?;
+        // S404 : le pas couplé porte l'ensemble épars en mode relatif seulement (ADR-198 D1) — hors de l'ensemble, δ nul est
+        // son point fixe ; le pas de S297 donne à δ les restes de B partout, ce qu'un ensemble ne peut pas porter.
+        if self.sparse.is_some() && self.relative_background & Self::RELATIVE_ALL != Self::RELATIVE_ALL {
+            return Err(Error::Domain);
+        }
         if duration_us == 0 || duration_us > 1u64 << 53 || time.0.checked_add(duration_us).is_none()
         {
             return Err(Error::NotFinite);
