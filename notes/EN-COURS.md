@@ -93,7 +93,7 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
 - [x] **P3** — le banc `delta3d_famine` : trois domaines, budget en quatre phases, transferts d'ADR-210 aux passages ; témoin sans
   pertes déclarées.
 - [x] **P4** — les calculs du banc ; critère 6.
-- [ ] **P5** — suite entière, zéro avertissement ; critère 7.
+- [x] **P5** — suite entière, zéro avertissement ; critère 7.
 - [ ] **P6** — preuve `FAMINE-S403` ; liste (9.8, 9.9), file, feuille de route, index ; note datée d'ADR-012.
 - [ ] **P7** — rituel.
 
@@ -120,3 +120,4 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
   **Constats** : (1) en famine sévère, la victime du rang 5 suit l'ordre du sac à dos (`P/C`, puis l'identité) — ici A, la bosse —,
   pas le contenu ; (2) la descente de B y est inutile (A et B descendus dépassent 0,6 ms) et change seulement qui est nourri ; (3) un
   domaine détruit ne retrouve pas son contenu (A : 20,5 mm après le retour) — le prix du rang 5, publié.
+- **P5** — suite entière : **718 réussis**, 19 ignorés, zéro avertissement (712 + 6 essais `_s403`).
