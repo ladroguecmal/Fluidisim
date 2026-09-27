@@ -62,84 +62,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S407 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S406 : **C5d**, la densité
-au raccord, sous la condition d'une cinquième session sur A316 — un témoin court (5 cm) qui la relève à 7,6 au moins par un geste
-nommé d'avance ; sinon C6 sur la frontière telle qu'elle est. Agent : Claude, session cloud Claude Code ; fichiers, git, cargo,
-Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, la plus avancée.
+Session : S408 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« continue »*. Suite proposée par S407 : **C6**, le critère
+de bascule (conception S384 §4.2, étape 6 : « bascule colonnes ↔ particules, à masse exacte (S323), selon le critère »). Agent :
+Claude, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Branche
+`claude/eager-volta-lf0kw3`, la plus avancée.
 
-**Où en est la densité** ([RACCORD-3D-S398](../docs/validation/RACCORD-3D-S398.md) §7). Particules par maille occupée de la dernière
-colonne de la bande, contre APIC seul (8,01 à 5 cm) : 7,59 / 7,62 / 7,69 à 5 cm, 7,26 / 7,24 / 7,31 à 2,5 cm (critère 8 ± 0,4), sur
-toute la profondeur à 2,5 cm ; la masse de la bande, elle, est juste (niveau à 0,5 mm près à 2,5 cm). Écartés en S406 : la face,
-le débit mouillé, la quantité de mouvement absorbée, le lieu du retrait. **Ce qui n'a pas été regardé** : si le déficit est
-**local** à la dernière colonne ou réparti ; et **ce que fait l'échange** — combien de particules sont absorbées, retirées, posées.
+**Où en est le raccord** (RACCORD-3D-S398 §5–8) : dans `Apic3`, une zone de colonnes et une bande de particules sous une même
+projection, l'échange à masse exacte ; le critère de S399 tenu aux deux mailles — mais sur un **masque fixe**, posé à la
+configuration. **C6 demande qu'il bouge** : des particules seulement là où la surface n'est pas un graphe (pli, cavité, jet, objet
+qui entre), des colonnes ailleurs ; aucune bascule qui oscille (hystérésis) ; le coût compté — reçu sur B10 et sur une vague qui
+déferle. **Cette session, C6a** : la bascule elle-même en 3D et un premier critère, éprouvés sur **B10** ; la vague qui déferle,
+C6b.
 
-**Thèse.** Une masse juste et une dernière colonne creuse, c'est des particules déplacées de la dernière colonne vers l'intérieur
-de la bande — par l'échange (retraits contre la face plus nombreux que les poses, ou poses qui repartent) ou par le mouvement des
-particules près d'une frontière qui n'a pas de particules réelles de l'autre côté (la séparation, le transport). **D'abord le
-diagnostic** : compteurs de l'échange et densité des quatre dernières colonnes, sans rien changer au calcul ; **puis un geste
-nommé d'avance**, dans les notes avant le calcul, éprouvé par un témoin court.
+**Thèse.** Les deux gestes de S323 (2D), portés en 3D sur la zone de S398 : **colonne → particules** — ensemencer sous `η` sur le
+réseau nominal (2 × 2 × 2 par maille), la maille du haut au plus près de son volume, le reste à une **réserve** de volume (`f64`)
+que l'échange règle aux faces de frontière mouillées ; **particules → colonne** — seulement si la surface reconstruite y forme un
+seul segment d'eau posé sur le fond, sans corps ; la hauteur par la **voie mixte** de S323 (la forme par `φ`, le niveau par la
+masse, un décalage uniforme sur l'ensemble converti) ; les soldes d'une face qui cesse d'être frontière vont à la réserve. **Le
+critère** : une colonne est **requise** en particules si elle n'est pas convertible, si le corps l'atteint (rayon, marge, et sa
+vitesse sur un horizon — l'objet qui entre), ou si la pente de sa surface dépasse un seuil (le pli prédit) ; la bande est la
+dilatation de ce qui est requis ; une colonne ne repasse aux colonnes qu'après une durée sans être requise (hystérésis).
 
-**Critères, écrits avant.** (1) L'instrument ne change rien : la ligne du banc à 5 cm au chiffre près de S406. (2) Le diagnostic
-publié : absorptions, retraits, poses par tranche de 10 s ; densité des quatre dernières colonnes, raccord contre APIC seul.
-**Prédiction** : le déficit est **local** — deux colonnes plus loin, ≥ 7,9 — et les retraits dépassent les poses d'au moins 10 %.
-(3) Le geste, nommé d'avance, éprouvé à 5 cm (30 s) : densité ≥ 7,6 dans les trois tranches, le reste du critère 4 de S399 tenu
-(courant ≤ 5 mm/s, niveau ±2 mm, saut < 0,5 maille, période et amortissement à 1 point). (4) S'il tient à 5 cm : à 2,5 cm, densité
-≥ 7,6. (5) Suite entière, zéro avertissement. **Arrêt** : si le geste ne relève pas la densité à 7,6 à 5 cm, rien ne devient
-défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
+**Critères, écrits avant.** (1) Sans bascule appelée, au bit : les essais de S398–S407, le banc du raccord au chiffre près (S407).
+(2) Allers-retours sur des états réels (le ballottement de S399 après 2 s ; la zone entière passée en particules puis rendue), dix
+de suite : volume total exact (≤ 10⁻⁹) ; hauteur de chaque colonne à 0,2 maille du départ (S323) ; une colonne à poche d'air
+refusée. (3) B10, `Fr` = 2, `D/dx` = 8, quart : la bande dynamique contre APIC seul — **pincement à un pas près** (1,5067 √(D/g),
+pas 0,027) ; volume exact ; **au plus deux bascules par colonne** (aucune oscillation) ; part moyenne des colonnes en particules
+publiée (prédiction : ≤ 50 %, le coût). (4) Suite entière, zéro avertissement. **Arrêt** : si le pincement s'écarte de plus d'un
+pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit éprouvé.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'instrument : compteurs de l'échange dans `Apic3` (sans effet sur le calcul), densité des quatre dernières colonnes
-  au banc ; critère 1.
-- [x] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
-- [x] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.
-- [x] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
-- [x] **P6** — suite entière, zéro avertissement.
-- [x] **P7** — preuve (RACCORD-3D-S398 §8) ; A316 ; liste 4.16, file, feuille de route.
-- [x] **P8** — rituel.
+- [ ] **P2** — `set_columns_mask` : colonne → particules et particules → colonne à masse exacte, réserve, soldes ; critère 1.
+- [ ] **P3** — essais des allers-retours et du refus ; critère 2.
+- [ ] **P4** — le critère : `ColumnsSwitch` (requis, dilatation, hystérésis), sur `Apic3` et un corps.
+- [ ] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
+- [ ] **P6** — les calculs ; critère 3.
+- [ ] **P7** — suite entière, zéro avertissement ; critère 4.
+- [ ] **P8** — preuve `BASCULE-S408` ; liste (4.16, 4.10), file, feuille de route, index ; A316.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
-- **P2** — `Columns3::counts` (absorbées, retirées, posées ; `columns_exchange_counts`), sans effet sur le calcul ; au banc,
-  `quatre_colonnes` (densité des quatre dernières colonnes de la bande, de la frontière vers l'intérieur) et `echange_abs_ret_pos`
-  par tranche. **Critère 1 tenu** : la ligne à 5 cm au chiffre près de S406 (densité 7,593/7,617/7,685, niveau
-  +1,007/+1,772/+2,181, période +0,70 %, amortissement +0,52 %).
-- **P3** (5 cm) — **la densité n'est pas perdue, elle est déplacée d'une colonne** : dernière colonne 7,59 / 7,62 / 7,69, **l'avant-
-  dernière 8,45 / 8,65 / 8,66**, puis 8,02 / 8,01 / 8,08 et 8,01 / 8,00 / 8,00 (APIC seul : 8,0 partout) ; la somme des deux premières
-  vaut 16. **L'échange** : absorbées 377 / 1 / 14, retirées 1 398 / 1 591 / 1 531, posées 1 785 / 1 569 / 1 559 — passé les dix
-  premières secondes, **aucune particule ne traverse la face** : tout passe par le retrait (la plus proche de la face, celle qui
-  allait traverser) et la pose. Prédictions : déficit local, **tenue** (8,02 deux colonnes plus loin) ; retraits > poses de 10 %,
-  **manquée** (égaux). **Le geste, nommé avant le calcul** : la pose se fait **à la face**, au centre de la tranche d'eau entrée —
-  une particule vaut une tranche de `dx/8` sur la face-maille, son centre à `dx/16` de la face — et non à `dx/4`, dans la maille :
-  la pose à `dx/4` porte chaque volume entré un quart de maille trop loin, et le mouvement d'aller-retour (±½ maille au nœud)
-  l'amasse dans l'avant-dernière colonne. **Prédiction** : à 5 cm, dernière colonne ≥ 7,8, avant-dernière ≤ 8,2.
-- **P4** — témoin à 5 cm, 30 s, la pose à la face (`TRIAL_POSE_AT_FACE`) : **densité 7,785 / 7,847 / 8,002** (≥ 7,6 dans les trois
-  tranches) ; les quatre colonnes 7,79:8,01:8,01:8,00 / 7,85:7,98:7,91:7,99 / 8,00:8,05:8,02:8,02 — **le dipôle a disparu** ;
-  l'échange redevient naturel : absorbées **1 810 / 1 726 / 1 714**, retirées 108 / 1 / 0, posées 1 922 / 1 715 / 1 703 — les
-  particules traversent la face au lieu d'être retirées avant ; niveau, écart à APIC seul, **−0,15 / −0,02 / +0,46 mm** (S406 :
-  +1,76) ; courant ≤ 0,2 mm/s ; saut 0,113 ; période +0,59 contre +0,98 % (0,39 point) ; amortissement +0,43 contre +0,32 % (0,11) ;
-  volume −1,2·10⁻⁹. **Critère 3 tenu.** Prédiction « dernière colonne ≥ 7,8 » : tenue aux deux dernières tranches, à 0,015 près
-  à la première (7,785) ; « avant-dernière ≤ 8,2 » tenue (≤ 8,05).
-- **P5** (en cours) — le défaut : **la pose à la face** (`dx/16`) ; `TRIAL_POSE_QUARTER` (16) rend la pose de S399–S406,
-  `TRIAL_S400` l'implique. Essai neuf `_s407` (6 s, 16 s de calcul) : à la face, dernière colonne 7,842, avant-dernière 7,990,
-  absorbées / retirées / posées 1 833 / 104 / 1 936 ; à `dx/4`, 7,958 / 8,101 et **380 / 1 305** / 1 693 — en 6 s le dipôle ne
-  s'est pas encore formé, mais le mécanisme se lit : à un quart de maille, les retraits l'emportent. Lancés : 2,5 cm au défaut ;
-  à 5 cm, le défaut, `APIC3D_ESSAI=16` (S406) et `=1` (S400), pour le critère 1.
-- **P5** (critère 1 du changement de défaut, 5 cm) — le défaut rend le témoin au chiffre près (7,785 / 7,847 / 8,002) ;
-  `APIC3D_ESSAI=16` rend **S406** au chiffre près (7,593 / 7,617 / 7,685, niveau +1,007 / +1,772 / +2,181) ; `=1` rend **S400** au
-  chiffre près (7,542 / 7,767 / 7,951 ; son échange aussi dominé par les retraits : 357 absorbées pour 1 399 retraits). Attente :
-  les trois calculs à 2,5 cm (le diagnostic de S406, APIC seul, le défaut).
-- **P3** (2,5 cm, S406) — le même diagnostic : dernière colonne 7,26 / 7,24 / 7,31, **avant-dernière 8,44 / 8,51 / 8,55**, puis
-  8,20–8,36 et 7,97–8,04 ; absorbées 2 957 / 366 / 469, **retirées 10 174 / 12 021 / 12 324**, posées 13 042 / 12 433 / 12 304.
-  **Critère 2 tenu aux deux mailles.** APIC seul : 8,00 / 7,94 / 7,62 (la dernière tranche baisse sur toute la bande : 7,62 à 7,88).
-- **P5** (2,5 cm, le défaut) — **densité 7,775 / 7,825 / 7,831** ; quatre colonnes 7,78:7,90:7,98:8,00 / 7,82:7,88:8,01:8,00 /
-  7,83:7,94:7,94:7,93 ; absorbées **13 487 / 12 776 / 13 360**, retirées 712 / 16 / 237 ; niveau, écart à APIC seul, −0,29 / −0,09 /
-  −0,82 mm ; saut 0,134 maille (seul 0,785) ; période +0,27 contre +0,36 % (0,09 point) ; amortissement +0,18 contre +0,08 % (0,10) ;
-  courant ≤ 0,7 mm/s, −0,3 à la rangée du haut ; volume −5,1·10⁻¹⁰. **Critère 4 tenu : tout le critère 4 de S399 est tenu aux deux
-  mailles, pour la première fois.** Au critère de la campagne (C5 : masse exacte, surface continue sous 3 mm, période d'APIC seul à
-  la maille fine, 30 s) : masse et période tenues ; le saut max vaut **3,35 mm** à 2,5 cm (5,65 mm à 5 cm) — au-dessus de 3 mm,
-  quand APIC seul a **19,6 mm** entre deux colonnes voisines (4,65 à 5 cm).
-- **P6** — suite entière : **734 réussis**, 19 ignorés, zéro échec, zéro avertissement (733 + l'essai `_s407`).
-- **P7** — preuve : RACCORD-3D-S398 **§8** (Reproduire au commit `fcc7919a`) ; le Reproduire du §7 corrigé (`APIC3D_ESSAI=16`) ;
-  A316, note datée (levée sur son banc ; restent la géométrie et le saut sous 3 mm ; déclencheur C6) ; liste 4.16 (reste partiel) ;
-  file (campagne — ramenée à 90 mots —, lot 5) ; feuille de route §3 ter (S407 ; suivante : C6).

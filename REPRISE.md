@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-27 11:43 +02:00
+JETON            : occupé
+Battement        : 2026-09-27 11:48 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
-Session en cours : aucune
+Session en cours : S408 — physique : **C6a**, la bascule colonnes ↔ particules en 3D et son critère — plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S407 — physique : **C5d** ([preuve](docs/validation/RACCORD-3D-S398.md) §8) — la densité au raccord : une pose trop loin de la face ; posée à la face, **tout le critère du raccord tenu aux deux mailles** (frontière droite et fixe). Avant : S406, le courant de surface levé
 Session suivante : dans le cloud, **S408 — C6, le critère de bascule** (où vivent les particules : pli prédit, cavité, jet, objet qui entre ; la frontière qui bouge, où A316 se rejoue) ; au poste, **C3b** (10 cm, A298) puis C7 ; la pluie 5b et les peaufinages R32, R33 plus tard
 Maillons        : 2 — S406, S407 : aucun point ne change de case (4.16 partiel) ; la campagne continue par décision de l'utilisateur (S406) ; journal
