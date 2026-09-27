@@ -4379,6 +4379,14 @@ densité, saut, période, amortissement, courant ; de S325 : sauts de 1,8 à 2,8
 vitesses parasites. **Reste** : une seule géométrie (frontière droite, fixe, au nœud) ; au critère de la campagne, le saut max à
 2,5 cm vaut 3,35 mm pour 3 (APIC seul : 19,6 mm entre voisines). **Déclencheur** : C6, où la frontière bouge.
 
+**A316 — note datée du 2026-09-27 (S408). La frontière bouge ; la masse du pas n'était pas exacte**
+([preuve](../validation/BASCULE-S408.md)). La bascule colonnes ↔ particules (C6a) déplace la frontière entre deux pas à 4·10⁻¹⁶
+près ; sur B10, la bande suit le corps et la cavité, et le pincement tombe un pas plus tôt qu'APIC seul. Le banc a trouvé deux
+pertes **du pas de S399** : une particule absorbée au cœur de la zone ajoutait à `η` en `f32` sans reste, et `η` avançait d'un
+débit `f32` quand le solde de la même face prenait un volume `f64` — 1,2·10⁻⁹ sur B10 ; corrigées : 10⁻¹². Les bits de la zone
+changent : au raccord de S407, le critère de S399 reste tenu aux deux mailles, le saut max à 2,5 cm passe de 3,35 à 3,85 mm. La
+densité le long d'une frontière qui bouge n'est pas mesurée. **Déclencheur** : C6b, la vague qui déferle.
+
 **A318 — S345, 2026-09-24 (sévérité 2, ouverte). À 30 Hz, l'onde de δ sur une vraie mer garde jusqu'à 6 % de plus
 d'amplitude qu'à 60 Hz.** La cadence d'ADR-012 §7 est la voie de la porte C : un pas de 3,7 ms étalé sur deux
 images. Sur la cuve de S305, le pas de temps ne pèse rien (0,04 % de période, 0,013 % d'amplitude à 33,3 ms) ; sur

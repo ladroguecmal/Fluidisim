@@ -100,7 +100,7 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
 - [x] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
 - [x] **P6** — les calculs ; critère 3.
 - [x] **P7** — suite entière, zéro avertissement ; critère 4.
-- [ ] **P8** — preuve `BASCULE-S408` ; liste (4.16, 4.10), file, feuille de route, index ; A316.
+- [x] **P8** — preuve `BASCULE-S408` ; liste (4.16, 4.10), file, feuille de route, index ; A316.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
@@ -160,7 +160,11 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
   +0,43 %, saut 0,113 — S407 ; son volume : **−1,19·10⁻⁹**). Les deux corrections de masse changent les bits de la zone : 5 cm —
   volume **0**, densité 7,790 / 7,868 / 8,090, niveau −0,15 / +0,01 / +0,50 mm d'APIC seul, saut 0,113, période +0,61 %,
   amortissement +0,45 % ; 2,5 cm — volume 4·10⁻¹⁶, densité 7,776 / 7,824 / 7,805 (S407 : 7,775 / 7,825 / 7,831), saut **0,154**
-  (0,134 ; 3,85 mm au lieu de 3,35), période +0,34 % (+0,27), amortissement +0,14 % (+0,18) ; APIC seul à 2,5 cm relancé pour
-  l'écart de niveau.
+  (0,134 ; 3,85 mm au lieu de 3,35), période +0,34 % (+0,27), amortissement +0,14 % (+0,18) ; niveau −0,34 / −0,20 / **−1,52**
+  mm d'APIC seul (S407 : −0,29 / −0,09 / −0,82 ; APIC seul relancé, inchangé : −0,079 / −0,058 / −0,047 mm, 8,002 / 7,935 /
+  7,619). Critère 4 de S399 tenu aux deux mailles ; la marge du niveau se resserre.
 - **P7** — suite entière : **739 réussis** (S407 : 734, plus les cinq essais `_s408`), 19 ignorés, aucun échec ; toutes les
   cibles construites sans avertissement. Critère 4 tenu.
+- **P8** — preuve [BASCULE-S408](../docs/validation/BASCULE-S408.md) ; liste : **4.10 partiel** (la représentation s'adapte ; la
+  subdivision de la maille absente), 4.16 (S408), décomptes 3 / 73 / 44 ; file (campagne, lot 5), feuille de route §3 et
+  décompte, index (ligne B et liste des preuves), A316 (note S408 : la masse du pas n'était pas exacte). `--check` : 0.

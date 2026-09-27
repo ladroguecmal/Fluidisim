@@ -221,7 +221,11 @@ pas recopiée ici (L137).
   recopie**, à un ulp de deux domaines, et un domaine **croît et décroît** en suivant sa perturbation, à 0,26–0,66 mm du domaine
   entier ([preuve](validation/DOMAINE-EPARS-S401.md)). Manquent le stockage par blocs et son pool, les bords non réfléchissants
   d'une partie, la carte.
-- [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *absent*.
+- [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *partiel* depuis S408 : la
+  **représentation** s'adapte — dans `Apic3`, une colonne passe aux particules là où la surface n'est pas un graphe, où le corps
+  arrive, où la pente dépasse un seuil, et revient aux colonnes au repos après un maintien, à masse exacte ; sur B10 3D, 22 % des
+  colonnes en particules, le pincement d'APIC seul à un pas près ([preuve](validation/BASCULE-S408.md)). La subdivision de la
+  maille elle-même est absente.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
 - [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *partiel* — **la cavité est portée sur le banc
   2D d'APIC** (S320, [B10](validation/B10-APIC-S320.md)) : pincement indépendant de l'échelle, masse
@@ -270,8 +274,10 @@ pas recopiée ici (L137).
   colonnes (surface `η`, une seule projection) pour le raccord ([preuve](validation/RACCORD-3D-S398.md)) ; **S399–S406** : la bande et
   l'échange à masse exacte ; **S407** : **tout le critère du raccord tenu aux deux mailles** — repos, migration, densité (la pose à
   la face, §8), saut, période, amortissement, courant de surface (la face de frontière appartient à la zone, §7) —, sur une frontière
-  droite et fixe ; restent la frontière qui bouge (C6) et le saut max sous 3 mm (3,35 à 2,5 cm). Lot 5 d'ADR-178 ; commande aussi
-  4.12, 4.13, 4.14 et 7.2.
+  droite et fixe. **S408** : **la frontière bouge** (C6a) — la bascule colonnes ↔ particules à masse exacte et un critère avec
+  hystérésis ; sur B10, 22 % des colonnes en particules, pincement un pas plus tôt qu'APIC seul, 19 s contre 36
+  ([preuve](validation/BASCULE-S408.md)) ; restent la vague qui déferle (C6b) et le saut max sous 3 mm (3,85 à 2,5 cm). Lot 5
+  d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *absent* sur le système ;
   C06 partiel sur un véhicule d'essai 1D.
 - [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et la masse est
@@ -634,7 +640,7 @@ pas recopiée ici (L137).
 | 1. Socle | 8 | 1 | 5 | 2 |
 | 2. Grandes masses (B) | 9 | 0 | 4 | 5 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
-| 4. Volumique (δ) | 21 | 0 | 15 | 6 |
+| 4. Volumique (δ) | 21 | 0 | 16 | 5 |
 | 5. Volumes finis (V) | 12 | 1 | 6 | 5 |
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 1 | 7 |
@@ -644,7 +650,7 @@ pas recopiée ici (L137).
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **72** | **45** |
+| **total** | **120** | **3** | **73** | **44** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
@@ -654,7 +660,7 @@ corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ;
 changer de case — dix-huit sur S309–S349 (actualisation complète, ci-dessous), trois sur S350 (4.19, 9.9, 9.12).
 *S351* : **4.2** et **9.9** passent à partiel — deux domaines servis ensemble, le rang 1 reçu au banc ; 1.4, 4.5 et
 9.8 corrigés. *S359* : **8.5** passe à partiel — la colonne d'eau et la réfraction dans Godot. *S362* : **2.7** passe à
-partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau. *S367* : **7.1** passe à partiel — le champ d'écume de B. *S386* : **4.3** passe à partiel — la colonne graduée. *S393* : **4.16** passe à partiel — la cavité 3D de la sphère, contre une mesure publiée. *S396* : **4.9** passe à partiel — fusion et séparation en référence. *S401* : **9.2** passe à partiel — le domaine épars qui s'étend devant l'objet, en référence. *S405* : **9.3** passe à partiel — la prédiction balistique, consommée par le domaine épars en mer.
+partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau. *S367* : **7.1** passe à partiel — le champ d'écume de B. *S386* : **4.3** passe à partiel — la colonne graduée. *S393* : **4.16** passe à partiel — la cavité 3D de la sphère, contre une mesure publiée. *S396* : **4.9** passe à partiel — fusion et séparation en référence. *S401* : **9.2** passe à partiel — le domaine épars qui s'étend devant l'objet, en référence. *S405* : **9.3** passe à partiel — la prédiction balistique, consommée par le domaine épars en mer. *S408* : **4.10** passe à partiel — la bande de particules qui suit la surface, rendue aux colonnes au repos.
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.
