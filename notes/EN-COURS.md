@@ -86,8 +86,8 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `β` : état (`floor`, reste, `solde_w`), `set_band_floor`, volume total, finitude ; essai de refus et de volume ; critère 1 (essais).
-- [>] **P3** — étiquettes et reconstruction : mailles sous `β` à la grille, particules virtuelles jusqu'à `β`.
-- [ ] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
+- [x] **P3** — étiquettes et reconstruction : mailles sous `β` à la grille, particules virtuelles jusqu'à `β`.
+- [>] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
 - [ ] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
 - [ ] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
 - [ ] **P7** — essais du repos et du volume ; critère 2.
@@ -101,3 +101,7 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
   `set_band_floor` (refus `Domain`/`Shape`/`NotFinite`, particule sous le fond refusée ; zone remise à zéro), `band_floor`,
   `band_floor_volume` ; `total_volume` + fond + soldes verticaux (rien sans fond) ; `floor_of`, `grid_cell` (utilisés en P3).
   Essai `_s413` ; les 23 essais d'APIC 3D tenus (24 avec lui).
+- **P3** — `reconstruct` saute les mailles à la grille (`grid_cell`) ; `columns_label` : sous le fond, `φ = z − fond`, eau ;
+  `virtual_column_sums` : une colonne de la bande à fond compte ses particules virtuelles jusqu'à son fond, la sienne comprise.
+  Essai `_s413` : une seule traversée de `φ` par colonne ; hauteur lue **identique au bit** à la bande pleine (0,3989 m ; les
+  virtuelles tombent sur le réseau nominal).

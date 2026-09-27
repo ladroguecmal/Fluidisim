@@ -604,7 +604,8 @@ impl Apic3 {
             for j in 0..ny {
                 for i in 0..nx {
                     // S398–S399 : une maille de la zone des colonnes prend `φ = z − η` (`columns_label`) ; rien à reconstruire.
-                    if self.columns.is_some() && self.column_of(i, j) {
+                    // S413 : ni une maille sous le fond de la bande, à la grille (`φ = z − fond`).
+                    if self.columns.is_some() && self.grid_cell(i, j, k) {
                         continue;
                     }
                     let q = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];

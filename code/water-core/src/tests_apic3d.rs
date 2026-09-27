@@ -815,3 +815,31 @@ fn the_band_floor_is_refused_ignored_in_the_zone_and_counted_s413() {
     assert!((total / expected - 1.).abs() < 1e-6, "{total} contre {expected}");
     assert!((a.band_floor_volume() - 16. * 0.2 * (dx as f64).powi(2)).abs() < 1e-9);
 }
+
+/// **S413** : sous le fond, l'eau est à la grille ; le bas de la bande n'est pas lu comme une surface — `φ` ne s'annule qu'une
+/// fois par colonne, à la surface des particules, lue comme sans fond à un dixième de maille près.
+#[test]
+fn the_floor_is_water_and_not_a_surface_s413() {
+    let (nx, ny, nz, dx) = (8, 8, 16, 0.05f32);
+    let heights = |floor: f32| {
+        let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &vec![0u8; nx * ny]).unwrap();
+        a.seed(&|p| p[2] < 0.4 && p[2] >= floor).unwrap();
+        a.set_band_floor(&vec![floor; nx * ny]).unwrap();
+        a.refresh_surface();
+        let mut out = Vec::new();
+        for j in 0..ny {
+            for i in 0..nx {
+                let crossings = (0..nz - 1).filter(|&k| (a.phi[a.cell(i, j, k)] < 0.) != (a.phi[a.cell(i, j, k + 1)] < 0.)).count();
+                assert_eq!(crossings, 1, "colonne ({i}, {j}), fond {floor}");
+                assert!((0..8).all(|k| a.label[a.cell(i, j, k)] == WATER));
+                out.push(read_height(&a, i, j));
+            }
+        }
+        out
+    };
+    let (sans, avec) = (heights(0.), heights(0.2));
+    let pire = sans.iter().zip(&avec).map(|(s, a)| (s - a).abs()).fold(0f32, f32::max);
+    println!("S413 fond : hauteur lue {:.4} sans fond, {:.4} avec ; écart max {pire:.2e} m", sans[27], avec[27]);
+    assert!(pire < 0.1 * dx, "{pire}");
+}

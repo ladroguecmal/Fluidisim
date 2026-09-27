@@ -397,6 +397,19 @@ impl Apic3 {
             for i in 0..nx {
                 let col = j * nx + i;
                 if c.mask[col] == 0 {
+                    // S413 : sous le fond de la bande, l'eau est à la grille — `φ = z − fond`, la surface qu'on y lirait si
+                    // aucune particule n'était au-dessus ; au-dessus, la reconstruction.
+                    if c.floors && c.floor[col] > 0. {
+                        for k in 0..nz {
+                            let z = (k as f32 + 0.5) * dx;
+                            if z >= c.floor[col] {
+                                break;
+                            }
+                            let cell = (k * ny + j) * nx + i;
+                            self.phi[cell] = z - c.floor[col];
+                            self.label[cell] = WATER;
+                        }
+                    }
                     continue;
                 }
                 let surface = Self::columns_read(c, c.eta[col], dx);
@@ -522,10 +535,15 @@ impl Apic3 {
         for b in j.saturating_sub(reach)..(j + reach + 1).min(ny) {
             for a in i.saturating_sub(reach)..(i + reach + 1).min(nx) {
                 let col = b * nx + a;
-                if c.mask[col] == 0 {
+                // S413 : une colonne de la bande à fond compte aussi, ses particules virtuelles jusqu'à son fond — la sienne
+                // comprise : le bas de la bande n'est pas lu comme une surface.
+                let eta = if c.mask[col] != 0 {
+                    c.eta[col].max(0.)
+                } else if c.floors && c.floor[col] > 0. {
+                    c.floor[col]
+                } else {
                     continue;
-                }
-                let eta = c.eta[col].max(0.);
+                };
                 let rows = ((2. * eta / dx).round() as usize).max(1);
                 let pitch = eta / rows as f32;
                 // Les rangées à portée verticale du noyau (images au fond comprises : |z| suffit).
