@@ -96,7 +96,7 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
 - [x] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.
 - [x] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
 - [x] **P6** — suite entière, zéro avertissement.
-- [ ] **P7** — preuve (RACCORD-3D-S398 §8) ; A316 ; liste 4.16, file, feuille de route.
+- [x] **P7** — preuve (RACCORD-3D-S398 §8) ; A316 ; liste 4.16, file, feuille de route.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
@@ -140,3 +140,6 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
   la maille fine, 30 s) : masse et période tenues ; le saut max vaut **3,35 mm** à 2,5 cm (5,65 mm à 5 cm) — au-dessus de 3 mm,
   quand APIC seul a **19,6 mm** entre deux colonnes voisines (4,65 à 5 cm).
 - **P6** — suite entière : **734 réussis**, 19 ignorés, zéro échec, zéro avertissement (733 + l'essai `_s407`).
+- **P7** — preuve : RACCORD-3D-S398 **§8** (Reproduire au commit `fcc7919a`) ; le Reproduire du §7 corrigé (`APIC3D_ESSAI=16`) ;
+  A316, note datée (levée sur son banc ; restent la géométrie et le saut sous 3 mm ; déclencheur C6) ; liste 4.16 (reste partiel) ;
+  file (campagne — ramenée à 90 mots —, lot 5) ; feuille de route §3 ter (S407 ; suivante : C6).

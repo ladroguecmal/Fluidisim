@@ -189,7 +189,8 @@ particules qui la traversent suivent la surface de la bande ; la quantité de mo
 30 s, ≈ 1 min) avant tout calcul long ; critères de S399 **inchangés** ; décision de l'utilisateur du jour : la priorité du
 solveur passe avant la règle des maillons.
 
-**Reproduire** : commit `2056e410` ou plus récent ; `cargo test … -p water-core s406 -- --nocapture` (ligne `S406 courant`, 16 s) ;
+**Reproduire** : commit `2056e410` ou plus récent — **depuis S407, avec `APIC3D_ESSAI=16`** (`TRIAL_POSE_QUARTER`, la pose de
+cette section) ; `cargo test … -p water-core s406 -- --nocapture` (ligne `S406 courant`, 16 s) ;
 `cargo run … --example apic3d_raccord -- <0.05|0.025> <seul|raccord> 30` — ligne `APIC3D_RACCORD_S399` ; `APIC3D_ESSAI=1`, la
 frontière de S400 (§6, au chiffre près) ; 1 min à 5 cm, 7 à 10 min à 2,5 cm.
 
@@ -233,3 +234,56 @@ volume au plancher) ; suite **733 réussis**, zéro avertissement ; essai `_s406
 **Ce que la section ne dit pas** : d'où vient la densité — les quatre suspects sont écartés ; restent, à éprouver : la pose, contre
 la face, à la vitesse de la grille, et la séparation des particules de la dernière colonne, que les particules virtuelles des
 colonnes repoussent ; une seule géométrie (frontière droite, au nœud) ; rien sur la carte.
+
+## 8. S407 — la pose à la face : la densité reçue, le critère de S399 tenu aux deux mailles
+
+2026-09-27. **C5d.** Condition d'une cinquième session sur A316 (§7) : un témoin court qui relève la densité à 7,6 par un geste
+nommé d'avance. **D'abord le diagnostic**, sans rien changer au calcul ; **puis le geste**, écrit dans les notes avant le calcul.
+
+**Reproduire** : commit `fcc7919a` ou plus récent ; `cargo test … -p water-core s407 -- --nocapture` (ligne `S407 pose à la face`,
+16 s) ; `cargo run … --example apic3d_raccord -- <0.05|0.025> <seul|raccord> 30` — ligne `APIC3D_RACCORD_S399`, qui porte
+désormais `quatre_colonnes` (densité des quatre dernières colonnes de la bande, de la frontière vers l'intérieur) et
+`echange_abs_ret_pos` (particules absorbées, retirées, posées, par tranche de 10 s) ; `APIC3D_ESSAI=16` rend le §7, `=1` le §6,
+au chiffre près ; 1 min à 5 cm, 7 à 11 min à 2,5 cm.
+
+**Le diagnostic** (frontière du §7, 30 s ; APIC seul : 8,0 partout, aucun échange) :
+
+| | 5 cm | 2,5 cm |
+|---|---|---|
+| densité des quatre dernières colonnes, dernière tranche | 7,69 : **8,66** : 8,08 : 8,00 | 7,31 : **8,55** : 8,36 : 7,97 |
+| absorbées / retirées / posées, par tranche | 377 / 1 398 / 1 785 ; 1 / 1 591 / 1 569 ; 14 / 1 531 / 1 559 | 2 957 / 10 174 / 13 042 ; 366 / 12 021 / 12 433 ; 469 / 12 324 / 12 304 |
+
+**La densité n'est pas perdue, elle est déplacée** : ce qui manque à la dernière colonne est dans l'avant-dernière (7,59 + 8,45 ≈ 16
+à 5 cm). Et **aucune particule ne traverse la face** : tout passe par des retraits — la particule la plus proche de la face, celle
+qui allait traverser — et des poses. Prédictions écrites avant : le déficit local, **tenue** ; les retraits au-dessus des poses de
+10 %, **manquée** (égaux).
+
+**Le geste, nommé avant le calcul** : la pose se fait **à la face**. Une particule posée pour un solde reçu vaut une tranche d'eau
+de `dx/8` sur la face-maille ; l'eau entrée est contre la face, son centre à `dx/16`. Posée à `dx/4` (S399–S406), chaque volume entré
+l'était un quart de maille trop loin : les particules posées n'étaient jamais les plus proches de la face, le reflux suivant
+retirait les anciennes, et l'aller-retour de l'écoulement au nœud (±½ maille) amassait l'eau dans l'avant-dernière colonne.
+
+| critère 4 (écart à APIC seul, 30 s), la pose à la face | 5 cm | 2,5 cm |
+|---|---|---|
+| niveau de la bande, par 10 s (±2 mm) | −0,15 / −0,02 / +0,46 (§7 : +1,76) | −0,29 / −0,09 / −0,82 |
+| **particules par maille (8 ± 0,4)** | **7,785 / 7,847 / 8,002** (§7 : 7,59) | **7,775 / 7,825 / 7,831** (§7 : 7,24–7,31) |
+| les quatre dernières colonnes, dernière tranche | 8,00 : 8,05 : 8,02 : 8,02 | 7,83 : 7,94 : 7,94 : 7,93 |
+| absorbées / retirées, par tranche | 1 810 / 108 ; 1 726 / 1 ; 1 714 / 0 | 13 487 / 712 ; 12 776 / 16 ; 13 360 / 237 |
+| saut max (< 0,5 maille) | 0,113 (seul 0,093) | 0,134 (seul 0,785) |
+| période (1 point) | +0,59 contre +0,98 % | +0,27 contre +0,36 % |
+| amortissement (1 point) | +0,43 contre +0,32 % | +0,18 contre +0,08 % |
+| courant moyen sur la face (≤ 5 mm/s) | ≤ 0,2 | ≤ 0,7 |
+
+**Tout le critère 4 de S399 est tenu, aux deux mailles, pour la première fois** ; les particules traversent de nouveau la face (plus
+de 13 000 absorptions par tranche à 2,5 cm, presque aucun retrait) ; la migration tombe sous le demi-millimètre. Critères 1 à 3
+tenus (volume à 10⁻⁹, repos) ; la pose à la face est le défaut ; suite **734 réussis**, zéro avertissement ; essai `_s407` (6 s) : à
+la face, 1 833 absorptions pour 104 retraits ; à `dx/4`, 380 pour 1 305.
+
+**Au critère de la campagne** (C5 : masse exacte, surface continue à la frontière sous 3 mm, le ballottement à la période d'APIC
+seul à la maille fine, 30 s) : la masse et la période tiennent (0,09 point à 2,5 cm) ; **le saut max vaut 3,35 mm à 2,5 cm** (5,65 à
+5 cm) — le plus grand écart, sur 30 s, entre la hauteur que lit la bande et celle de la colonne voisine —, au-dessus des 3 mm, quand
+**APIC seul a 19,6 mm entre deux colonnes voisines** (4,65 à 5 cm) : la frontière est plus lisse que la bande elle-même.
+
+**Ce que la section ne dit pas** : une seule géométrie — frontière droite, fixe, au nœud ; ni frontière qui bouge (C6), ni cavité ou
+gerbe à la frontière ; la baisse de densité d'APIC seul à 2,5 cm dans la dernière tranche (7,62, toute la bande), sans raccord ;
+rien sur la carte.

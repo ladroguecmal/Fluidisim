@@ -4370,6 +4370,15 @@ zone, −6,7 → −0,4 mm/s. Devenu le défaut, avec la quantité de mouvement 
 7,59 à 5 cm et 7,24 à 7,31 à 2,5 cm (8 ± 0,4), que ni la face, ni le débit, ni la quantité de mouvement, ni le lieu du retrait
 ne portent.
 
+**A316 — note datée du 2026-09-27 (S407). Levée sur son banc : la densité était une pose trop loin**
+([preuve](../validation/RACCORD-3D-S398.md) §8). Le diagnostic, sans rien changer : la densité manquante de la dernière colonne est
+dans l'avant-dernière (8,5 à 8,7), et aucune particule ne traversait la face — tout passait par des retraits et des poses. Nommé
+d'avance : poser **à la face** (`dx/16`, le centre de la tranche entrée) et non à `dx/4`. Densité 7,79 à 8,00 à 5 cm, 7,78 à 7,83
+à 2,5 cm ; les particules traversent de nouveau. **Tout le critère de S399 est tenu aux deux mailles** — masse, repos, migration,
+densité, saut, période, amortissement, courant ; de S325 : sauts de 1,8 à 2,8 mailles, 16 % d'amortissement par période, 0,5 m/s de
+vitesses parasites. **Reste** : une seule géométrie (frontière droite, fixe, au nœud) ; au critère de la campagne, le saut max à
+2,5 cm vaut 3,35 mm pour 3 (APIC seul : 19,6 mm entre voisines). **Déclencheur** : C6, où la frontière bouge.
+
 **A318 — S345, 2026-09-24 (sévérité 2, ouverte). À 30 Hz, l'onde de δ sur une vraie mer garde jusqu'à 6 % de plus
 d'amplitude qu'à 60 Hz.** La cadence d'ADR-012 §7 est la voie de la porte C : un pas de 3,7 ms étalé sur deux
 images. Sur la cuve de S305, le pas de temps ne pèse rien (0,04 % de période, 0,013 % d'amplitude à 33,3 ms) ; sur
