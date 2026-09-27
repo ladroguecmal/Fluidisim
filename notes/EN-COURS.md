@@ -62,81 +62,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S402 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S401 : **C8c**, les niveaux
-de `dx` et la famine. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni
-Godot. Branche `claude/eager-volta-lf0kw3` (S401), la plus avancée ; aucune autre copie.
+Session : S403 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S402 : **C8d**, la décision
+du rang 4 et la famine. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni
+Godot. Branche `claude/eager-volta-lf0kw3` (S402), la plus avancée.
 
-**Trouvé en lisant le lot.** ADR-006 §3.2 dit qu'un changement de niveau est « une destruction/création de domaine, gratuite
-visuellement (ADR-005 §5) » ; I-12 et ADR-012 §4 renvoient au même §5. **Ce paragraphe n'existe plus dans le fichier** : le commit
-de S35 (`c2eb75ba`) a remplacé ADR-005 entier par la note qu'il devait lui ajouter (−202 lignes), celui de S39 (`16e48d60`) a fait de
-même avec la sienne. Aucun autre ADR ni aucune spécification n'a perdu de lignes (audit par `git log --numstat`). Le fichier juste
-est : le corps et les notes jusqu'à S16 (`c0df00f7`), puis la note B-S26 (S35), puis la note B-S27 (S39), qui dit rétracter « la note
-de B-S26 qui la précède immédiatement ».
+**Thèse.** L'ordonnanceur (`scheduler.rs`) connaît le rang 1 (S351) : quand le budget ne tient pas tous les vivants, le focal est
+servi entier et les autres rétrécissent ; ce que le rang 1 ne sauve pas reste **affamé sans le dire**. Le rang 4 d'ADR-012 §4 vient
+après : un non-focal qui l'a **déclaré** — son coût un niveau plus bas, et ce que son image y perdrait (l'écart d'un aller-retour
+de son contenu, ADR-210 D2) — descend d'un niveau (le transfert d'ADR-210) ; l'ordonnanceur descend d'abord celui qui **perd le
+moins par milliseconde rendue**, un à la fois, jusqu'à ce que la famine cesse. Ce qui reste affamé est **déclaré** : l'issue est
+le rang 5, le repli sur W, à l'hôte. Descente immédiate ; remontée engagée une seconde, un domaine par seconde, celui qui perd le
+plus d'abord (ADR-012 §5). Les rangs 2 (pas d'embruns dans δ) et 3 (la fréquence) n'existent pas : le rang 4 suit le rang 1.
+**L'API** : `Bid` ne change pas — l'hôte `viewer/` le construit en quatre endroits, et ce conteneur ne peut pas le compiler ; la
+déclaration passe par `declare_coarsen`, et `Grant` dit le niveau accordé.
 
-**Thèse (C8c, première part).** ADR-005 §5 fait détruire l'ancien domaine (transduction, puis amortissement sur τ ≈ 0,5 à 1,5 s) et
-naître le nouveau à δ = 0 : **tout ce que le domaine contient est perdu**, et seul ce qui sort par son bord passe à W. Un
-**transfert d'état** d'un niveau à l'autre — surface par recouvrement, reconstruction linéaire conservative, volume exact ; vitesses
-interpolées ; pression remise à zéro — garde ce que le niveau d'arrivée sait porter. Les deux se mesurent sur les mêmes cas, contre
-le domaine fin tenu tout du long : le rang 4 d'ADR-012 (25 → 50 cm), puis le retour.
-
-**Critères, écrits avant.** **A1** — ADR-005 : chaque part restaurée identique au bit à sa source, dans l'ordre ; une note datée dit
-ce qui s'est passé. **A2** — un contrôle de l'outil : chaque ADR commence par son titre `# ADR-NNN` ; **vu échouer** sur les versions
-de S35 et S39, tenu sur tous les ADR restaurés. **T1** — un état uniforme traverse 25 → 50 → 25 cm inchangé (au bit ou à un ulp).
-**T2** — volume de perturbation conservé à l'arrondi f64. **T3** — aller-retour d'une surface sinusoïdale de 8 m (16 mailles
-grossières) : erreur **≤ 1 %** de l'amplitude (prédiction : 0,3 %, calculée en 1D) ; **vu échouer** sans pente (prédiction : ≈ 10 %).
-**T4** — refus : fenêtre, repos, densité, gravité différents ; ensemble épars ou découpe. **B1** — banc, bosse de 5 cm et σ = 1 m :
-le saut d'image au passage 25 → 50 cm **≤ 3 mm** (tolérance d'image, I-12 ; prédiction ≈ 1 mm). **B2** — au retour 50 → 25 cm, le
-saut **≤ 3 mm** de l'image grossière d'avant. **B3** — publiés : l'écart pendant la période grossière (le prix du rang 4, « visible
-de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, écart de l'ordre de l'amplitude) ; la source mobile de S401.
+**Critères, écrits avant.** (1) Sans déclaration de rang 4, l'ordonnanceur de S351 **au bit** : ses essais, et l'empreinte
+`6aebff024c734fc9` de l'exemple S278. (2) Le rang 4 ne sert qu'après le rang 1 à son minimum : un cas que le rang 1 résout ne
+descend personne. (3) Il descend le non-focal qui perd le moins par milliseconde rendue ; jamais le focal ; budget jamais dépassé.
+(4) La famine a une **issue déclarée** : ce que ni le rang 1 ni le rang 4 ne servent est rendu comme affamé. (5) Descente
+immédiate ; remontée au plus un domaine par seconde, une seconde au moins après sa descente, le plus coûteux en perte d'abord.
+(6) Banc : trois domaines δ réels — un focal, une bosse, une source — sous un budget qui se resserre puis revient ; budget tenu à
+chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel publié contre un témoin qui ignore le contenu
+(prédiction, d'après S402 : ≈ 2 mm contre ≈ 15 mm) ; sauts ≤ 3 mm aux passages. (7) Suite entière, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-005 restauré, note datée ; critère A1.
-- [x] **P3** — le contrôle dans `etat_projet.py` (vu échouer sur S35 et S39) ; protection de METHODE, leçon ; critère A2.
-- [x] **P4** — `delta3d_levels.rs` : le transfert d'état entre niveaux ; essais T1 à T4, vu échouer sans pente.
-- [x] **P5** — le banc `delta3d_niveaux` : bosse et source mobile, 25 → 50 cm à 2 s, retour à 5 s, contre le domaine fin ; ADR-005 §5
-  (fondu de 0,5 s, naissance à zéro) ; critères B1 à B3.
-- [x] **P6** — suite entière, zéro avertissement.
-- [x] **P7** — preuve `NIVEAUX-S402` ; un ADR si la mesure tranche le mécanisme du rang 4 ; liste (4.5, 9.9), file, feuille de route,
-  index.
-- [x] **P8** — rituel.
+- [ ] **P2** — le rang 4 dans `scheduler.rs` : `Coarsen`, `declare_coarsen`, niveau des vivants, choix par la perte, remontée,
+  affamés déclarés ; essais des critères 1 à 5.
+- [ ] **P3** — le banc `delta3d_famine` : trois domaines, budget en quatre phases, transferts d'ADR-210 aux passages ; témoin sans
+  pertes déclarées.
+- [ ] **P4** — les calculs du banc ; critère 6.
+- [ ] **P5** — suite entière, zéro avertissement ; critère 7.
+- [ ] **P6** — preuve `FAMINE-S403` ; liste (9.8, 9.9), file, feuille de route, index ; note datée d'ADR-012.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
 
-- **P2** — ADR-005 restauré : le texte de S16 (`c0df00f7`, 9 791 premiers octets), la note B-S26 (S35), la note B-S27 (S39), chacun
-  au bit et dans l'ordre (vérifié par position), puis une note datée de S402. 285 lignes ; titre, §1 à §6 retrouvés. **§5, le
-  cycle de vie** : création et croissance à δ = 0 (coût nul) ; rétrécissement, « transduction δ→W puis amortissement sur τ ≈ 0,3 s » ;
-  destruction, « idem, τ ≈ 0,5–1,5 s selon l'énergie résiduelle » (négligeable) ; bascules perturbatif ↔ substitutif continues.
-- **P3** — `adr_heads` dans `outils/etat_projet.py` : un ADR commence par son titre `# ADR-NNN` de son fichier (des lignes vides
-  avant sont admises : neuf ADR intacts — 092 à 099, 111 — en ont une ; le premier jet, trop strict, les refusait). **Vu échouer**
-  sur les versions réelles : `c2eb75ba` (S35) et `16e48d60` (S39), une anomalie chacune ; `c0df00f7` (S16) et la restaurée, aucune ;
-  tous les ADR du dépôt passent. Essai `test_an_adr_begins_with_its_title_s402` (17 essais de l'outil). METHODE : une ligne « en
-  écrivant » (dix-huit protections) ; leçon **L373**.
-- **P4** — `delta3d_levels.rs`, `Volume3::resample_from` (+ `LevelChange`) : surface par recouvrement d'une reconstruction
-  **bilinéaire** (pentes centrées, décentrées au bord, et terme croisé `∂²h/∂x∂y`), positions rapportées à la fenêtre d'arrivée ;
-  vitesses trilinéaires aux centres des faces, moyennées sur `n × n` sous-faces quand l'arrivée est plus grossière (rapport 2 :
-  exactement les faces couvertes) ; pression à zéro ; murs refermés. **T1 tenu** (surface uniforme au bit, vitesse uniforme au bit
-  loin des murs). **T2** : 25 ↔ 50 cm, **écart 0,0** ; 10 → 25 cm, **−1,1·10⁻⁸ m³** = l'écart d'aire des fenêtres (0,1 m non
-  exact en f32 : 3·10⁻⁸) — la **hauteur moyenne** conservée au bit près (1,191245712·10⁻² m). **T3** : **manqué d'abord, 1,031 %**
-  — la reconstruction plane oubliait le terme croisé, 0,96 % calculé en 2D (`sin²(θ/4)`) ; avec lui, **0,304 %** (prédiction 2D :
-  0,3 %) ; λ = 16 m, 0,037 % : **ordre trois** sur cette mesure (rapport 8,2 ; le terme d'ordre deux s'annule aux demi-mailles) —
-  ma prédiction « ordre deux » était fausse, l'essai tient désormais « au moins l'ordre deux ». **Vu échouer sans pente : 10,20 %**
-  (prédiction ≈ 10 %), ordre un (5,02 % à 16 m). **T4 tenu** (étendue, repos, gravité, ensemble épars ; rien d'écrit). Un état
-  transféré repart : dix pas grossiers, volume gardé.
-- **P5** — `examples/delta3d_niveaux.rs` : bassin 24 × 16 m, 25 cm (96 × 64 × 12) ; passage à 50 cm à 2 s, retour à 5 s, fin à
-  7 s ; référence à 25 cm tout du long ; image sur la grille fine (le grossier reconstruit par le même transfert) ; saut = variation
-  de l'image sur le pas du passage moins celle de la référence ; ADR-005 §5 : nouveau domaine au repos, l'ancien continue sans
-  la source et s'efface linéairement en 0,5 s (pas de transduction en référence). Quatre calculs en parallèle, ≈ 6 min chacun.
-  **Bosse** (5 cm, σ = 1 m) — transfert : saut **0,24 mm** au passage, **0,13 mm** au retour, autres pas ≤ 0,18 mm ; écart
-  **1,82 mm** pendant la période à 50 cm, 2,32 mm après ; ADR-005 §5 : sauts 0,36 / 0,49 mm (le fondu, 0,65 mm par pas), écart
-  **10,2 mm**, 12,8 mm après. **Source** (dipôle de S401, 24 mm) — transfert : sauts 1,95 / 1,32 mm, écart 15,7 mm, 16,7 après ;
-  ADR-005 §5 : 0,68 / 1,01 mm (2,28 par pas), écart 17,0 mm, 23,6 après. **B1, B2 tenus** partout (≤ 3 mm ; prédiction ≈ 1 mm
-  sur la bosse : 0,24). **B3** : le transfert garde le contenu résolu (1,8 mm, sous la tolérance d'image) ; ADR-005 §5 le perd ;
-  la source, sous-résolue à 50 cm (σ = une maille), coûte 15 à 17 mm aux deux — le « visible de près » d'ADR-012 §4.
-- **P6** — suite entière : **712 réussis**, 19 ignorés, zéro avertissement (707 + 5 essais S402) ; essais de l'outil : 17, tenus.
-- **P7** — preuve `docs/validation/NIVEAUX-S402.md` (Reproduire au commit `8630e9a0`) ; **ADR-210** actée — le changement de niveau
-  par transfert d'état, remplaçant pour lui seul le mécanisme d'ADR-006 §3.2 (D1 : transfert, les deux domaines réservés ; D2 :
-  le prix du rang 4 est celui du contenu, et se publie ; D3 : la production le reproduit) ; notes datées d'ADR-006 et d'ADR-012 ;
-  liste 4.5 et 9.9 complétées (aucun point ne change de case) ; file (ligne de la campagne, 79 mots) ; feuille de route §3 ter
-  (S402, suivantes : C8d) ; index (carte B : ADR-210 et la preuve ; liste des preuves).
