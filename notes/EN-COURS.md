@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S407 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S406 : **C5d**, la densité
+Session : S407 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S406 : **C5d**, la densité
 au raccord, sous la condition d'une cinquième session sur A316 — un témoin court (5 cm) qui la relève à 7,6 au moins par un geste
 nommé d'avance ; sinon C6 sur la frontière telle qu'elle est. Agent : Claude, session cloud Claude Code ; fichiers, git, cargo,
 Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, la plus avancée.
@@ -97,7 +97,7 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
 - [x] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
 - [x] **P6** — suite entière, zéro avertissement.
 - [x] **P7** — preuve (RACCORD-3D-S398 §8) ; A316 ; liste 4.16, file, feuille de route.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 - **P2** — `Columns3::counts` (absorbées, retirées, posées ; `columns_exchange_counts`), sans effet sur le calcul ; au banc,

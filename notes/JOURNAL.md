@@ -17805,3 +17805,19 @@ face, ni le débit, ni la quantité de mouvement, ni le lieu du retrait. **Ritue
 (4.16 partiel). Suivant : dans le cloud, **C5d, la densité au raccord** — condition d'une cinquième session sur A316 : un témoin
 court (5 cm) qui relève la densité à 7,6 au moins par un geste nommé d'avance (la pose contre la face à la vitesse de la grille ;
 la séparation près des particules virtuelles) ; sinon C6 sur la frontière telle qu'elle est ; au poste, C3b puis C7.
+
+## S407 — 2026-09-27 — physique : C5d, la densité au raccord — le critère du raccord tenu aux deux mailles
+
+**Entrée.** *« Continue »* ; S406 proposait C5d, sous condition : un témoin court qui relève la densité à 7,6 par un geste nommé
+d'avance. **Fait** ([preuve](../docs/validation/RACCORD-3D-S398.md) §8). **D'abord le diagnostic**, sans rien changer au calcul
+(compteurs de l'échange, densité des quatre dernières colonnes ; S406 au chiffre près) : **la densité n'est pas perdue, elle est
+déplacée** — la dernière colonne à 7,6 et 7,3, l'avant-dernière à 8,5 et 8,6 — et **aucune particule ne traverse la face** : tout
+passe par des retraits (la plus proche de la face, celle qui allait traverser) et des poses. **Le geste, nommé avant le calcul** :
+poser **à la face**, au centre de la tranche entrée (`dx/16`), et non à `dx/4` — un quart de maille trop loin, que l'aller-retour du
+nœud amassait à côté. **Tenus** : densité 7,79 / 7,85 / 8,00 à 5 cm, 7,78 / 7,83 / 7,83 à 2,5 cm ; les particules traversent de
+nouveau (13 000 absorptions par tranche, presque aucun retrait) ; migration sous le demi-millimètre ; **tout le critère de S399 tenu
+aux deux mailles**, pour la première fois ; `APIC3D_ESSAI=16` et `=1` rendent S406 et S400 au chiffre près ; suite **734 réussis**,
+zéro avertissement. **Limites** : une frontière droite, fixe, au nœud ; au critère de la campagne, le saut max vaut 3,35 mm à
+2,5 cm pour 3 (APIC seul : 19,6 mm entre voisines). **Rituel.** Maillons **2** : aucun point ne change de case (4.16 partiel) ; la
+campagne continue par décision de l'utilisateur (S406). Suivant : dans le cloud, **C6**, le critère de bascule — la frontière qui
+bouge, où A316 se rejoue ; au poste, C3b puis C7.

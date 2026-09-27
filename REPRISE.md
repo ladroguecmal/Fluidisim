@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-27 11:43 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
-Session en cours : S407 — physique : **C5d**, la densité au raccord (A316) — plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S406 — physique : **C5c** ([preuve](docs/validation/RACCORD-3D-S398.md) §7) — le courant de surface au raccord attribué à la face de frontière, vue d'un seul côté, et levé (≤ 0,6 et ≤ 1,1 mm/s aux deux mailles) ; reste la densité (7,2–7,6 pour 8). Décision de l'utilisateur : la priorité du solveur passe avant la règle des maillons. Avant : S405, 9.3
-Session suivante : dans le cloud, **S407 — C5d, la densité au raccord** (A316 ; condition : un témoin court qui la relève à 7,6 par un geste nommé d'avance — la pose contre la face, la séparation près des particules virtuelles), sinon C6 sur la frontière telle qu'elle est ; au poste, **C3b** (10 cm, A298) puis C7 ; la pluie 5b et les peaufinages R32, R33 plus tard
-Maillons        : 1 — S406 : aucun point ne change de case (4.16 partiel) ; journal
+Session en cours : aucune
+Dernière session : S407 — physique : **C5d** ([preuve](docs/validation/RACCORD-3D-S398.md) §8) — la densité au raccord : une pose trop loin de la face ; posée à la face, **tout le critère du raccord tenu aux deux mailles** (frontière droite et fixe). Avant : S406, le courant de surface levé
+Session suivante : dans le cloud, **S408 — C6, le critère de bascule** (où vivent les particules : pli prédit, cavité, jet, objet qui entre ; la frontière qui bouge, où A316 se rejoue) ; au poste, **C3b** (10 cm, A298) puis C7 ; la pluie 5b et les peaufinages R32, R33 plus tard
+Maillons        : 2 — S406, S407 : aucun point ne change de case (4.16 partiel) ; la campagne continue par décision de l'utilisateur (S406) ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
