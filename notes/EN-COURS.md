@@ -94,7 +94,7 @@ ne rien rendre défaut, et le dire.
 - [x] **P2** — options d'essai de la frontière dans `Apic3` (a, b, c) et leur passage au banc `apic3d_raccord` ; critère 1.
 - [x] **P3** — témoins courts, 5 cm, 30 s : chaque option seule, puis la combinaison ; attribution.
 - [x] **P4** — le remède attribué devient le défaut ; essais ; critères 1 à 3.
-- [ ] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
+- [x] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
 - [ ] **P6** — suite entière, zéro avertissement.
 - [ ] **P7** — preuve (RACCORD-3D-S398 §7) ; liste 4.16, file (campagne, lot 5), A316 (note datée), feuille de route, index.
 - [ ] **P8** — rituel.
@@ -143,3 +143,8 @@ ne rien rendre défaut, et le dire.
   densité 7,593/7,617/7,685) — le calcul à 2,5 cm de l'essai « 12 » vaut donc pour le défaut. **Critères 2 et 3 tenus** : repos
   2,0·10⁻⁵ m/s, volume au plancher (essais s398–s400). Essai neuf `_s406` (6 s, 16 s de calcul) : courant de la rangée du haut
   **−0,78 mm/s** contre **−4,78** en S400. (Le calcul « 28 » à 2,5 cm, inutile après le témoin à 5 cm, arrêté.)
+- **P5** — critère 4, le défaut contre APIC seul, 30 s (écarts) : **5 cm** — niveau +0,62/+1,22/+1,76 mm ✓ ; densité
+  **7,593**/7,617/7,685 (✗ la première tranche, de 0,007) ; saut 0,103 ✓ ; période +0,70 contre +0,98 % (0,28 point) ✓ ;
+  amortissement +0,52 contre +0,32 % (0,20) ✓ ; **courant ≤ 0,6 mm/s** ✓ (S400 : −6,7). **2,5 cm** — niveau +0,14/+0,38/+0,45 ✓ ;
+  densité **7,26/7,24/7,31** ✗ (APIC seul 8,00/7,94/7,62) ; saut 0,123 ✓ (seul 0,785) ; période 0,14 point ✓ ; amortissement
+  0,11 ✓ ; **courant ≤ 1,1 mm/s** ✓ (S400 : −1,8). **Tout le critère 4 tenu aux deux mailles, sauf la densité.**
