@@ -95,7 +95,7 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
 - [x] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
 - [x] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.
 - [x] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
-- [ ] **P6** — suite entière, zéro avertissement.
+- [x] **P6** — suite entière, zéro avertissement.
 - [ ] **P7** — preuve (RACCORD-3D-S398 §8) ; A316 ; liste 4.16, file, feuille de route.
 - [ ] **P8** — rituel.
 
@@ -139,3 +139,4 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
   mailles, pour la première fois.** Au critère de la campagne (C5 : masse exacte, surface continue sous 3 mm, période d'APIC seul à
   la maille fine, 30 s) : masse et période tenues ; le saut max vaut **3,35 mm** à 2,5 cm (5,65 mm à 5 cm) — au-dessus de 3 mm,
   quand APIC seul a **19,6 mm** entre deux colonnes voisines (4,65 à 5 cm).
+- **P6** — suite entière : **734 réussis**, 19 ignorés, zéro échec, zéro avertissement (733 + l'essai `_s407`).

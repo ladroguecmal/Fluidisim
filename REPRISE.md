@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 11:40 +02:00
+Battement        : 2026-09-27 11:42 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
 Session en cours : S407 — physique : **C5d**, la densité au raccord (A316) — plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S406 — physique : **C5c** ([preuve](docs/validation/RACCORD-3D-S398.md) §7) — le courant de surface au raccord attribué à la face de frontière, vue d'un seul côté, et levé (≤ 0,6 et ≤ 1,1 mm/s aux deux mailles) ; reste la densité (7,2–7,6 pour 8). Décision de l'utilisateur : la priorité du solveur passe avant la règle des maillons. Avant : S405, 9.3
