@@ -94,7 +94,7 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
   pertes déclarées.
 - [x] **P4** — les calculs du banc ; critère 6.
 - [x] **P5** — suite entière, zéro avertissement ; critère 7.
-- [ ] **P6** — preuve `FAMINE-S403` ; liste (9.8, 9.9), file, feuille de route, index ; note datée d'ADR-012.
+- [x] **P6** — preuve `FAMINE-S403` ; liste (9.8, 9.9), file, feuille de route, index ; note datée d'ADR-012.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -121,3 +121,7 @@ chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel pub
   pas le contenu ; (2) la descente de B y est inutile (A et B descendus dépassent 0,6 ms) et change seulement qui est nourri ; (3) un
   domaine détruit ne retrouve pas son contenu (A : 20,5 mm après le retour) — le prix du rang 5, publié.
 - **P5** — suite entière : **718 réussis**, 19 ignorés, zéro avertissement (712 + 6 essais `_s403`).
+- **P6** — preuve `docs/validation/FAMINE-S403.md` (Reproduire au commit `342bdac1`) ; liste 9.8 et 9.9 complétées (aucun point ne
+  change de case) ; file (campagne, 84 mots : C8 rang 4 et famine ; reste le pool sur la carte et la victime du rang 5 par le
+  contenu) ; feuille de route §3 ter (S403 ; suivante dans le cloud : **C8e**, l'épars et les niveaux sous le pas couplé — C6 attend
+  le raccord) ; index (carte B, liste des preuves) ; note datée d'ADR-012 (quatre lectures).

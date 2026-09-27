@@ -210,3 +210,12 @@ Le rang 4 descend un domaine d'un niveau par transfert d'état ([ADR-210](ADR-21
 passage ne se voit pas (0,1 à 2 mm) ; ce qui se voit est le niveau d'arrivée — 1,8 mm sur une bosse qu'il résout, 15 à 17 mm près
 d'une source large d'une maille grossière ([preuve](../validation/NIVEAUX-S402.md)), le « visible de près » du tableau. La décision
 de descendre — quel domaine, selon ce qu'il contient — n'est pas écrite.
+
+## Note datée du 2026-09-27 (S403) — la décision du rang 4, et l'issue de la famine
+
+Écrites dans `scheduler.rs` ([preuve](../validation/FAMINE-S403.md)). Lectures faites pour les écrire : **le rang 4 suit le rang 1**
+— les rangs 2 (pas d'embruns dans δ) et 3 (la fréquence) n'existent pas — et ne sert que si le rang 1, à son minimum, affame
+encore ; **quel domaine** : le non-focal qui perd le moins par milliseconde rendue, sa perte déclarée par l'hôte (ADR-210 D2) ;
+**§5 pour un niveau** : descente immédiate, remontée d'un domaine par seconde, une seconde au moins après sa descente, la plus forte
+perte d'abord ; **le rang 5** n'est pas décidé ici : ce qui reste sans budget est déclaré (`starved`), et l'hôte le détruit. Sa
+victime suit l'ordre du sac à dos, pas le contenu — mesuré, à la file.

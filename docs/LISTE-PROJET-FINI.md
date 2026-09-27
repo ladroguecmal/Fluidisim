@@ -515,16 +515,19 @@ pas recopiée ici (L137).
   un budget de banc, jamais dépassé (3,720 ms au pire pour 5,
   [preuve](validation/ARBITRAGE-3D-S344.md) §2) ; **S351** : le rang 1 donne une issue à la famine, et le
   temps **mesuré** tient le budget au 99ᵉ centile quand le coût annoncé est le maximum des huit derniers pas
-  (4,983 ms pour 5 ; à la médiane, 20 images au-dessus, §7). Manquent la borne murale, cet estimateur dans
-  le cœur, et les rangs suivants.
+  (4,983 ms pour 5 ; à la médiane, 20 images au-dessus, §7). **S403** : le rang 4 et l'issue déclarée dans l'ordonnanceur
+  du cœur — trois domaines réels, le budget jamais dépassé, au plus 0,965 ([preuve](validation/FAMINE-S403.md)). Manquent la
+  borne murale, cet estimateur dans le cœur, et les rangs 2, 3, 6 et 7.
 - [ ] **9.9 Dégradation contrôlée dans l'ordre prescrit** : taille, résolution, interactions
   lointaines, fréquence, effets — *partiel* **depuis S351** : le **rang 1** — rétrécir les non-focaux, le
   focal protégé, descente immédiate, remontée rampée (ADR-012 §4–5) — est dans l'ordonnanceur du cœur et
   reçu au banc : aucune image affamée contre 612 ([preuve](validation/ARBITRAGE-3D-S344.md) §7). **S402** : le **rang 4** en
   référence — le changement de niveau par transfert d'état ([ADR-210](adr/ADR-210-changer-de-niveau-par-transfert-d-etat.md)) ; son
-  prix, 1,8 mm sur ce que 50 cm résout, 15 à 17 mm près d'une source d'une maille ([preuve](validation/NIVEAUX-S402.md)). Manquent
-  les rangs 2, 3, 5 à 7, la décision du rang 4, le régulateur PI, une bande morte de l'échelle et le **prix visuel** — une
-  descente coupe jusqu'à 11,3 cm de δ, sans verdict. En 2D, le rétrécissement construit en S283–S285 reste
+  prix, 1,8 mm sur ce que 50 cm résout, 15 à 17 mm près d'une source d'une maille ([preuve](validation/NIVEAUX-S402.md)). **S403** :
+  la **décision** du rang 4 dans l'ordonnanceur — le non-focal qui perd le moins descend (1,4 mm contre 14 mm au témoin qui ignore
+  le contenu), remontée une par seconde —, et le rang 5 **déclaré** (`starved`), appliqué par l'hôte
+  ([preuve](validation/FAMINE-S403.md)). Manquent les rangs 2, 3, 6 et 7, la victime du rang 5 choisie par le contenu, le
+  régulateur PI, une bande morte de l'échelle et le **prix visuel** — une descente coupe jusqu'à 11,3 cm de δ, sans verdict. En 2D, le rétrécissement construit en S283–S285 reste
   **non reçu** — dérive de 66,994 mm, A290
   ([ATTRIBUTION-RETRECISSEMENT-S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md)) : construit, non reçu,
   il ne compte pas. **S350** : en 3D, le redimensionnement
