@@ -102,7 +102,7 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 - [x] **P5b** — *ajoutée* : 30 Hz explose à 10 cm quel que soit le solveur ; attribution sur le banc d'A321 (`MAILLE=`, `EMPRISE=`), termes éteints un à un (L136).
 - [x] **P5c** — *ajoutée* : à cadence stable (60 Hz, un pas par image), l'emprise à 10 cm sous 2 ms ; deux minutes.
 - [x] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
-- [ ] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
+- [x] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
 - [ ] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
 - [ ] **P9** — rituel.
 
@@ -197,3 +197,5 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
   (`NX=80`, 134 400 mailles, 33 ms, 10 s seulement : la référence coûte 2,7 s par pas) : `nz` = 42 → **un seul** niveau
   grossier ; écart 0,44–0,60 mm, la troncature, pas A298 ; −3,8 % d'énergie en 10 s. La cuve à 10 cm sur deux minutes :
   arrêtée (≈ 2 h 45).
+- **P7** — afficheur : **38 réussis** (S390 : 37, plus l'essai `_s409`), 2 ignorés, aucun échec, zéro avertissement. Le cœur
+  n'est pas touché (dernier décompte, S408 : 739 réussis, 19 ignorés). Critère 7 tenu.
