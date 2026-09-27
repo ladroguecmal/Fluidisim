@@ -99,7 +99,7 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
 - [x] **P4** — le critère : `ColumnsSwitch` (requis, dilatation, hystérésis), sur `Apic3` et un corps.
 - [x] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
 - [x] **P6** — les calculs ; critère 3.
-- [ ] **P7** — suite entière, zéro avertissement ; critère 4.
+- [x] **P7** — suite entière, zéro avertissement ; critère 4.
 - [ ] **P8** — preuve `BASCULE-S408` ; liste (4.16, 4.10), file, feuille de route, index ; A316.
 - [ ] **P9** — rituel.
 
@@ -162,3 +162,5 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
   amortissement +0,45 % ; 2,5 cm — volume 4·10⁻¹⁶, densité 7,776 / 7,824 / 7,805 (S407 : 7,775 / 7,825 / 7,831), saut **0,154**
   (0,134 ; 3,85 mm au lieu de 3,35), période +0,34 % (+0,27), amortissement +0,14 % (+0,18) ; APIC seul à 2,5 cm relancé pour
   l'écart de niveau.
+- **P7** — suite entière : **739 réussis** (S407 : 734, plus les cinq essais `_s408`), 19 ignorés, aucun échec ; toutes les
+  cibles construites sans avertissement. Critère 4 tenu.
