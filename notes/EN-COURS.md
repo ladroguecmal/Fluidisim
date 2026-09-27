@@ -94,7 +94,7 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
 - [x] **P2** — `ballistic.rs` : état, prédiction (RK4, traînée, Euler, contact, affinage), région, palier.
 - [x] **P3** — essais des critères 1 à 6.
 - [x] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
-- [>] **P5** — les calculs du banc ; critère 7.
+- [x] **P5** — les calculs du banc ; critère 7.
 - [ ] **P6** — suite entière, zéro avertissement ; critère 8.
 - [ ] **P7** — preuve `IMPACT-PREVU-S405` ; liste (9.3, 9.2), file, feuille de route, index ; note datée d'ADR-013.
 - [ ] **P8** — rituel.
@@ -123,3 +123,11 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
   0,11 s avant, **source pas refusée** : la dernière revue tombe 0,11 s avant l'impact, l'objet n'est plus qu'à 1,2 m de son point
   d'impact. **La prédiction du critère 7 (témoin refusé) manquée à cette phase.** Ce qui sépare la dernière revue de l'impact
   décide : `IMPACT_PHASE_S` décale les revues ; balayage 0,1 à 0,4 s des deux cas, lancé à 10:38.
+- **P5** (fin) — balayage de la phase des revues, 0 à 0,4 s. **`prevu`**, cinq phases : région dans l'ensemble **1,11 s** avant
+  l'impact, source **jamais** dehors, écart **0,594–0,595 mm** ; à chaque revue l'erreur du point décroît (0,099 → 0,000 m), toujours
+  dans la région (0,401 → 0,250 m), l'instant de −5,6 à 0 ms ; part moyenne 0,468–0,480. **`temoin`** : dernière revue 0,11 / 0,01 /
+  0,41 / 0,31 / 0,21 s avant l'impact (phases 0 / 0,1 / 0,2 / 0,3 / 0,4) — **refusé à la phase 0,2** (source dehors à 1,10 s : la
+  gaussienne d'entrée, 1,5 m, dépasse l'ensemble centré sur l'objet 0,41 s plus tôt), dedans aux quatre autres (écart 0,59–0,93
+  mm) ; part moyenne 0,407–0,433. **Critère 7** : la part prédiction tenue (1,11 s ≥ 0,5 s ; jamais dehors ; 0,595 mm ≤ 1 mm) ; la
+  prédiction « témoin refusé » manquée à la phase prévue, vérifiée à une phase sur cinq. La prédiction coûte 10 à 15 % de mailles
+  (la région calculée à δ = 0 avant l'impact).
