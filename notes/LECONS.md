@@ -6469,3 +6469,15 @@ complet ne servait d'ailleurs pas : les grandeurs utiles se lisaient avant le pi
 
 **La règle.** Un calcul long écrit sa progression. Au double de sa durée annoncée, on le diagnostique ;
 on ne le reporte pas. Et avant de l'attendre, on se demande quelle part de lui sert.
+
+## L373 — Une note ajoutée en réécrivant le fichier efface l'ADR
+
+S402. En S35, une note corrective de la lignée B devait **s'ajouter** à ADR-005 ; le fichier a été écrit avec la seule note —
+202 lignes effacées, le titre compris. En S39, la note suivante a remplacé la précédente de la même façon. De S35 à S401 —
+366 sessions —, I-12, ADR-006 §3.2 et ADR-012 §4 ont renvoyé au « §5 » d'un ADR qui n'en avait plus : le cycle de vie des domaines
+n'existait que dans Git. Rien ne l'a vu, parce qu'aucun contrôle ne regardait la forme d'un ADR, et qu'une note ajoutée et une
+note substituée ont le même message de commit.
+
+**La règle.** Un ajout à un document qui ne se réécrit pas se fait par ajout, jamais par écriture du fichier entier ; et un
+contrôle tient la forme : un ADR commence par son titre (`etat_projet.py --check`, S402).
+

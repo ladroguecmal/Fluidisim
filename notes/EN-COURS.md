@@ -93,7 +93,7 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-005 restauré, note datée ; critère A1.
-- [ ] **P3** — le contrôle dans `etat_projet.py` (vu échouer sur S35 et S39) ; protection de METHODE, leçon ; critère A2.
+- [x] **P3** — le contrôle dans `etat_projet.py` (vu échouer sur S35 et S39) ; protection de METHODE, leçon ; critère A2.
 - [ ] **P4** — `delta3d_levels.rs` : le transfert d'état entre niveaux ; essais T1 à T4, vu échouer sans pente.
 - [ ] **P5** — le banc `delta3d_niveaux` : bosse et source mobile, 25 → 50 cm à 2 s, retour à 5 s, contre le domaine fin ; ADR-005 §5
   (fondu de 0,5 s, naissance à zéro) ; critères B1 à B3.
@@ -108,3 +108,8 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
   au bit et dans l'ordre (vérifié par position), puis une note datée de S402. 285 lignes ; titre, §1 à §6 retrouvés. **§5, le
   cycle de vie** : création et croissance à δ = 0 (coût nul) ; rétrécissement, « transduction δ→W puis amortissement sur τ ≈ 0,3 s » ;
   destruction, « idem, τ ≈ 0,5–1,5 s selon l'énergie résiduelle » (négligeable) ; bascules perturbatif ↔ substitutif continues.
+- **P3** — `adr_heads` dans `outils/etat_projet.py` : un ADR commence par son titre `# ADR-NNN` de son fichier (des lignes vides
+  avant sont admises : neuf ADR intacts — 092 à 099, 111 — en ont une ; le premier jet, trop strict, les refusait). **Vu échouer**
+  sur les versions réelles : `c2eb75ba` (S35) et `16e48d60` (S39), une anomalie chacune ; `c0df00f7` (S16) et la restaurée, aucune ;
+  tous les ADR du dépôt passent. Essai `test_an_adr_begins_with_its_title_s402` (17 essais de l'outil). METHODE : une ligne « en
+  écrivant » (dix-huit protections) ; leçon **L373**.

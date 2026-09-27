@@ -3,7 +3,7 @@ import unittest
 from datetime import datetime, timezone
 
 from etat_projet import (EN_COURS_LINES, JOURNAL_ENTRY_LINES, MILESTONE_WORDS, QUEUE_ROW_WORDS,
-                         activity, category, checklist, en_cours, encoding, first_sessions,
+                         activity, adr_heads, category, checklist, en_cours, encoding, first_sessions,
                          heartbeat, history, journal, layer, oversized, produced, reproduce)
 
 
@@ -130,6 +130,22 @@ class ControlesS321Tests(unittest.TestCase):
                    dict(session=300, changes=[(1, 0, "a.md")])]
         self.assertEqual(first_sessions(commits, ["a.md", "b.md", "c.md", "neuf.md"], 321),
                          {"a.md": 300, "b.md": 321, "c.md": 0, "neuf.md": 321})
+
+
+class AdrTests(unittest.TestCase):
+    def test_an_adr_begins_with_its_title_s402(self):
+        # Les versions réelles d'ADR-005 : celle que S35 a écrite (une note à la place du fichier), celle de S39, et la
+        # restaurée ; un ADR d'un autre numéro sous ce nom de fichier est aussi refusé.
+        path = "docs/adr/ADR-005-zone-de-transition.md"
+        s35 = "\n\n---\n\n## Note corrective — B-S26 : le §2 est mesuré, et son réglage est remplacé\n"
+        s39 = "\n\n---\n\n## Note corrective — B-S27 : la largeur, et enfin quel `c`\n"
+        restored = "# ADR-005 — Zone de transition : éponge perturbative et transduction δ → W\n\n- **Statut** : proposée\n"
+        self.assertEqual(len(adr_heads({path: s35})), 1)
+        self.assertEqual(len(adr_heads({path: s39})), 1)
+        self.assertEqual(adr_heads({path: restored}), [])
+        self.assertEqual(adr_heads({path: "\n" + restored}), [])  # une ligne vide avant le titre, comme ADR-092
+        self.assertEqual(len(adr_heads({path: restored.replace("ADR-005", "ADR-050")})), 1)
+        self.assertEqual(adr_heads({"docs/validation/NOTE.md": s35}), [])
 
 
 if __name__ == "__main__":

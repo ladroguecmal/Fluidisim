@@ -8,7 +8,7 @@ elles se chargent, et qu'un outil tient celles qu'on oubliait.
 
 ## Protections actives — à charger au moment qu'elles nomment
 
-Dix-sept, tirées des erreurs qui se sont **répétées** ; chacune renvoie à sa leçon, et au contrôle
+Dix-huit, tirées des erreurs qui se sont **répétées** ; chacune renvoie à sa leçon, et au contrôle
 qui la tient quand il existe. [LECONS](LECONS.md) est leur archive : on y cherche, on ne la relit
 pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de cette table.
 
@@ -29,6 +29,7 @@ pas. Une leçon nouvelle ne s'écrit que si elle crée ou change une ligne de ce
 | **en écrivant** | Une règle ou un fait vit à un seul endroit ; ailleurs, un renvoi | L137 | — |
 | | L'horloge se lit dans un appel séparé, à chaque commit d'étape | L237 | battement |
 | | Jamais `Get-Content` ni `Set-Content` de Windows PowerShell sur un fichier du dépôt — il lit en ANSI ; l'outil d'édition, ou Python en UTF-8 | S301 | encodage |
+| | Une note à un ADR s'**ajoute** ; écrire le fichier entier avec la seule note l'efface (ADR-005, de S35 à S401) | L373 | un ADR commence par son titre |
 | | Une liste qu'il faut penser à tenir se confie à un outil : décomptes, plafonds, fichiers produits | L349 | décompte, plafonds, fichiers produits |
 | **en choisissant la suite** | Un blocage hérité se vérifie dans le code avant d'être contourné ou tranché ; un ordre nomme la dépendance qu'il protège | L176, L243, L343 | — |
 

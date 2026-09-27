@@ -267,6 +267,22 @@ def journal(text: str) -> list[str]:
     return found
 
 
+def adr_heads(texts: dict[str, str]) -> list[str]:
+    """Un ADR commence par son titre, `# ADR-NNN`, du numéro de son fichier ; un ADR ne se réécrit jamais.
+
+    Contre-exemple réel : S35 (`c2eb75ba`) puis S39 (`16e48d60`) ont écrit leur note corrective **à la place** d'ADR-005 —
+    202 lignes effacées, le titre compris ; de S35 à S401, I-12, ADR-006 §3.2 et ADR-012 §4 renvoyaient à un §5 absent. Le
+    fichier commençait par deux lignes vides et un filet : ce contrôle l'aurait vu au commit (S402). Des lignes vides avant le
+    titre sont admises — neuf ADR intacts (092 à 099, 111) en ont une.
+    """
+    found = []
+    for path, text in sorted(texts.items()):
+        number = re.fullmatch(r"docs/adr/ADR-(\d+)[^/]*\.md", path)
+        if number and not text.lstrip().startswith(f"# ADR-{number[1]} "):
+            found.append(f"{path} : un ADR commence par son titre « # ADR-{number[1]} » (S402 : ADR-005 réécrit)")
+    return found
+
+
 def first_sessions(commits: list[dict], paths: list[str], latest: int) -> dict[str, int]:
     """Session du premier commit qui touche chaque fichier ; un fichier pas encore committé est de
     la session en cours."""
@@ -316,7 +332,8 @@ def inspect(since: int | None) -> dict:
                 + dependances_liste.ecarts(texts["docs/LISTE-PROJET-FINI.md"],
                                            texts.get(dependances_liste.REGISTRE, ""))
                 + reproduce(first_sessions(commits, paths, latest), texts)
-                + journal(texts["notes/JOURNAL.md"]))
+                + journal(texts["notes/JOURNAL.md"])
+                + adr_heads(texts))
     return dict(head=git("rev-parse", "--short", "HEAD").strip(),
                 note="Fichiers suivis présents ; lignes brutes, tests/commentaires inclus. "
                      "Ajouts Git sans renommages ; ni temps, ni productivité, ni capacités. "
@@ -364,7 +381,7 @@ def main() -> int:
         print(f"Battement du jeton : {len(result['battement'])} anomalie(s)")
         for anomaly in result["battement"]:
             print(anomaly)
-        print(f"Contrôles (EN-COURS, encodage, fichiers produits, liste, dépendances, preuves, journal) : "
+        print(f"Contrôles (EN-COURS, encodage, fichiers produits, liste, dépendances, preuves, journal, ADR) : "
               f"{len(result['controles'])} anomalie(s)")
         for anomaly in result["controles"]:
             print(anomaly)
