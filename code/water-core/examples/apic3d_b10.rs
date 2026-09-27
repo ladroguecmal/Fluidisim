@@ -101,6 +101,9 @@ fn main() {
         s
     });
     let (mut t_us, mut ecart_volume, mut particules_max) = (0u64, (a.total_volume() / v0 - 1.).abs(), a.particle_count());
+    // Ce que le pas et la bascule changent au volume total, relativement, sommé en valeur absolue.
+    let (mut derive_pas, mut derive_bascule) = (0f64, 0f64);
+    let mut derniere = None;
     let quarts = if quart { 4. } else { 1. };
     let seuil = D * D * D / 32.;
     let (mut t, mut pas, mut iterations, mut vmax) = (0f64, 0u64, 0u64, 0f32);
@@ -114,10 +117,14 @@ fn main() {
     while t < t_max {
         a.set_body(Some(sphere(t))).expect("corps");
         let us = a.stable_step_us(20_000);
+        let avant = a.total_volume();
         let rep = a.step(us).expect("pas");
         t_us += us;
         if let Some(s) = bascule.as_mut() {
-            s.switch(t_us, &mut a).expect("bascule");
+            let apres_pas = a.total_volume();
+            derniere = Some(s.switch(t_us, &mut a).expect("bascule"));
+            derive_pas += ((apres_pas - avant) / v0).abs();
+            derive_bascule += ((a.total_volume() - apres_pas) / v0).abs();
             ecart_volume = ecart_volume.max((a.total_volume() / v0 - 1.).abs());
             particules_max = particules_max.max(a.particle_count());
         }
@@ -206,7 +213,15 @@ fn main() {
             println!(
                 "APIC3D_B10_TRACE t_sur_rac_d_g={:.4} base_sur_d={:.3} cavite_sur_d={:.3} air_enferme_sur_d3={:.4} iterations={} vmax={:.2}{}",
                 t / echelle, (h - (cz - r)) / D, cavite / D, enferme / (D * D * D), rep.iterations, rep.max_speed,
-                if bascule.is_some() { format!(" bande={bande:.3} particules={}", a.particle_count()) } else { String::new() }
+                if bascule.is_some() {
+                    let haut = a.particles().iter().fold(f64::MIN, |m, p| m.max(p[2] as f64));
+                    let eta = a.columns_surface().unwrap();
+                    let (col, eta_max) = (0..nx * ny).filter(|c| a.is_column(c % nx, c / nx)).fold((0, f32::MIN), |m, c| if eta[c] > m.1 { (c, eta[c]) } else { m });
+                    format!(" bande={bande:.3} particules={} haut_sur_d={:.3} eta_max_sur_d={:.3} en={},{} bascule={:?}", a.particle_count(),
+                        (haut - h) / D, (eta_max as f64 - h) / D, col % nx, col / nx, derniere)
+                } else {
+                    String::new()
+                }
             );
         }
         if let Some((tp, ..)) = pincement {
@@ -242,7 +257,8 @@ fn main() {
         println!(
             "APIC3D_B10_BASCULE cles={} pente={} marge_m={} horizon_s={} dilatation={} maintien_s={} part_bande_moy={:.3} \
              bascules_max={} volume_relatif_max={ecart_volume:.2e} particules_fin={} particules_max={particules_max} \
-             echange_abs_ret_pos={absorbees}:{retirees}:{posees} poses_refusees={}",
+             echange_abs_ret_pos={absorbees}:{retirees}:{posees} poses_refusees={} derive_pas={derive_pas:.2e} \
+             derive_bascule={derive_bascule:.2e}",
             cles.as_deref().unwrap_or(""), s.slope_max, s.body_margin, s.body_horizon, s.dilation, s.hold_us as f64 * 1e-6,
             s.mean_band_fraction(), s.max_switches(), a.particle_count(), a.columns_refused()
         );

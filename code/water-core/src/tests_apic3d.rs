@@ -605,6 +605,34 @@ fn a_column_with_an_air_pocket_stays_in_particles_s408() {
 }
 
 #[test]
+fn a_compressed_column_leaves_its_excess_to_the_reserve_s408() {
+    // Les particules de la colonne (3, 4) poussées dans (3, 3) : seize par maille, sa masse dit 0,8 m, sa forme 0,4. Convertie
+    // seule, elle ne monte que d'un quart de maille au-dessus de sa forme (la borne de la voie mixte) ; le reste va à la réserve,
+    // la masse exacte.
+    let (n, nz, dx) = (8, 32, 0.05f32);
+    let (mut a, mut arena) = apic(n, n, nz, dx, n * n * nz * 8);
+    a.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &vec![0u8; n * n]).unwrap();
+    a.seed(&|p| p[2] < 0.4).unwrap();
+    for p in a.x[..a.n].iter_mut() {
+        if (p[0] / dx) as usize == 3 && (p[1] / dx) as usize == 4 {
+            p[1] -= dx;
+        }
+    }
+    let v0 = a.total_volume();
+    let mut want = vec![0u8; n * n];
+    want[3 * n + 3] = 1;
+    let change = a.set_columns_mask(&want).unwrap();
+    let eta = a.columns_surface().unwrap()[3 * n + 3];
+    println!("S408 colonne comprimée : {change:?}, η = {eta}");
+    assert_eq!((change.to_columns, change.removed), (1, 2 * 8 * 8));
+    assert!((change.shift - 0.25 * dx).abs() < 1e-7, "{}", change.shift);
+    // Ce que la forme ne dit pas, au-delà du quart de maille : près de 0,4 m sur la colonne.
+    assert!(change.excess > 0.3 * dx * dx && change.excess < 0.45 * dx * dx, "{}", change.excess);
+    assert!(eta > 0.35 && eta < 0.45, "{eta}");
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+}
+
+#[test]
 fn the_switch_follows_the_body_and_holds_the_band_s408() {
     // Un bassin plat passe tout entier en colonnes ; un corps qui descend vers la surface demande en particules son empreinte
     // (rayon et marge), dilatée de deux colonnes ; parti, la bande tient 0,5 s puis rend ses colonnes : deux bascules au plus.

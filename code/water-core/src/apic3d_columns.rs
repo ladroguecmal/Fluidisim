@@ -33,9 +33,11 @@ pub(crate) struct Columns3 {
     pub(crate) prev_u: Vec<f32>,
     pub(crate) prev_v: Vec<f32>,
     pub(crate) prev_w: Vec<f32>,
-    /// Débits par unité de largeur à travers les faces de colonnes `x` et `y`, m²/s.
-    pub(crate) flux_x: Vec<f32>,
-    pub(crate) flux_y: Vec<f32>,
+    /// Volumes passés pendant le pas à travers les faces de colonnes `x` et `y`, m³ — **`f64` depuis S408** : le même nombre
+    /// que le solde d'une face de frontière. En `f32` (un débit fois `dt/dx`), `η` et le solde divergeaient au dix-millionième
+    /// du volume passé (B10 : 3·10⁻¹⁰ du volume total en 72 pas).
+    pub(crate) flux_x: Vec<f64>,
+    pub(crate) flux_y: Vec<f64>,
     /// **S399 — les soldes de l'échange**, m³, par face-maille de frontière (indexés comme les faces `u` et `v`) : positif, la
     /// bande doit recevoir des particules ; négatif, elle en doit. `f64`, pour que la masse se compte au bit.
     pub(crate) solde_u: Vec<f64>,
@@ -74,8 +76,10 @@ pub struct ColumnsChange {
     /// Colonnes demandées en colonnes mais **non convertibles** — plusieurs segments d'eau, poche d'air, corps : restées aux
     /// particules.
     pub refused: usize,
-    /// Le décalage uniforme de la voie mixte, m (la forme par `φ`, le niveau par la masse).
+    /// Le décalage uniforme de la voie mixte, m (la forme par `φ`, le niveau par la masse), borné à un quart de maille.
     pub shift: f32,
+    /// Ce que la borne du décalage a laissé à la réserve, m³.
+    pub excess: f32,
 }
 
 /// **S400** — le nombre de positions de la surface, sur une maille, où la lecture de la bande est tabulée.
@@ -94,7 +98,7 @@ pub fn columns_reserved_bytes(domain: Domain3) -> Option<usize> {
     // Masque (1 octet), surface et reste (4 + 4) par colonne ; trois copies de faces ; deux familles de débits ; les soldes de
     // l'échange (S399), un `f64` par face `u` et `v` ; la table de lecture (S400) ; les tampons de la bascule (S408), deux masques
     // et une hauteur `f64` par colonne.
-    columns.checked_mul(1 + 4 + 4 + 1 + 1 + 8)?.checked_add(faces.checked_mul(4)?)?.checked_add(flux.checked_mul(4)?)?
+    columns.checked_mul(1 + 4 + 4 + 1 + 1 + 8)?.checked_add(faces.checked_mul(4)?)?.checked_add(flux.checked_mul(8)?)?
         .checked_add(nu.checked_add(nv)?.checked_mul(8)?)?.checked_add(READ_TABLE * 4)
 }
 
@@ -336,7 +340,7 @@ impl Apic3 {
     /// un mur, ne porte rien (cette part).
     pub(crate) fn columns_transport(&mut self, dt: f32) {
         let Domain3 { nx, ny, nz, dx } = self.domain;
-        let transport = (dt as f64 / dx as f64) as f32;
+        let area = dx as f64 * dx as f64;
         let (u, v, phi) = (&self.u, &self.v, &self.phi);
         let Some(c) = self.columns.as_mut() else { return };
         // S406, essai (b) : la hauteur de la bande, lue sur `φ` comme le banc la lit — l'iso-zéro entre deux centres.
@@ -371,7 +375,7 @@ impl Apic3 {
                             _ => zone,
                         }
                     };
-                    let mut q = 0f32;
+                    let mut q = 0f64;
                     for k in 0..nz {
                         let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
                         if wet == 0. {
@@ -379,10 +383,11 @@ impl Apic3 {
                         }
                         let face = if axis == 0 { (k * ny + j) * (nx + 1) + i } else { (k * (ny + 1) + j) * nx + i };
                         let vel = if axis == 0 { u[face] } else { v[face] };
-                        q += vel * dx * wet;
+                        // Volume vers les `+`, m³.
+                        let volume = (vel * dx * wet) as f64 * dx as f64 * dt as f64;
+                        q += volume;
                         if boundary {
-                            // Volume vers les `+`, m³ ; vers la zone s'il va de la bande (côté bas) à la colonne (côté haut).
-                            let volume = (vel * dx * wet) as f64 * dx as f64 * dt as f64;
+                            // Vers la zone s'il va de la bande (côté bas) à la colonne (côté haut).
                             let into_zone = if high { volume } else { -volume };
                             let solde = if axis == 0 { &mut c.solde_u[face] } else { &mut c.solde_v[face] };
                             *solde -= into_zone;
@@ -404,10 +409,10 @@ impl Apic3 {
                 }
                 let x = c.flux_x[j * (nx + 1) + i + 1] - c.flux_x[j * (nx + 1) + i];
                 let y = c.flux_y[(j + 1) * nx + i] - c.flux_y[j * nx + i];
-                let increment = -transport * (x + y) - c.eta_roundoff[col];
-                let height = c.eta[col] + increment;
-                c.eta_roundoff[col] = (height - c.eta[col]) - increment;
-                c.eta[col] = height;
+                // S408 : la hauteur vraie, `η − reste`, avancée en `f64`, puis rangée en `f32` avec son nouveau reste.
+                let height = c.eta[col] as f64 - c.eta_roundoff[col] as f64 - (x + y) / area;
+                c.eta[col] = height as f32;
+                c.eta_roundoff[col] = (c.eta[col] as f64 - height) as f32;
             }
         }
     }
@@ -585,8 +590,14 @@ impl Apic3 {
             match best {
                 Some((_, 0, face)) => cols.solde_u[face] += vp,
                 Some((_, _, face)) => cols.solde_v[face] += vp,
-                // Au cœur de la zone, loin de toute bande : le volume va à la surface de sa colonne.
-                None => cols.eta[j * nx + i] += (vp / (dx as f64 * dx as f64)) as f32,
+                // Au cœur de la zone, loin de toute bande : le volume va à la surface de sa colonne — en `f64`, reste compris
+                // (S408 : en `f32` seul, chaque particule perdait jusqu'au demi-ulp de `η`, 3·10⁻¹⁰ m³ à 3 m de fond).
+                None => {
+                    let col = j * nx + i;
+                    let height = cols.eta[col] as f64 - cols.eta_roundoff[col] as f64 + vp / (dx as f64 * dx as f64);
+                    cols.eta[col] = height as f32;
+                    cols.eta_roundoff[col] = (cols.eta[col] as f64 - height) as f32;
+                }
             }
             cols.counts[0] += 1;
             self.remove_particle(k);
@@ -874,9 +885,16 @@ impl Apic3 {
         change.to_columns = converted;
         if converted > 0 {
             let geo_volume: f64 = geo.iter().filter(|h| h.is_finite()).map(|h| h * area).sum();
-            let shift = (removed_volume - geo_volume) / (converted as f64 * area);
+            // Le niveau par la masse, **à un quart de maille au plus** : au-delà, l'écart est celui d'une eau comprimée ou
+            // détendue (APIC ne tient pas la densité), et le reporter sur le peu de colonnes converties les décalerait d'autant
+            // (vu sur B10, maintien court : deux colonnes à 5,5 % de trop, 12,8 cm) ; il va à la réserve.
+            let wanted = (removed_volume - geo_volume) / (converted as f64 * area);
+            let limit = 0.25 * dx as f64;
+            let shift = wanted.clamp(-limit, limit);
             change.shift = shift as f32;
+            change.excess = ((wanted - shift) * converted as f64 * area) as f32;
             let c = self.columns.as_mut().unwrap();
+            c.reserve += (wanted - shift) * converted as f64 * area;
             for col in 0..nx * ny {
                 if geo[col].is_finite() {
                     let h = geo[col] + shift;

@@ -98,7 +98,7 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
 - [x] **P3** — essais des allers-retours et du refus ; critère 2.
 - [x] **P4** — le critère : `ColumnsSwitch` (requis, dilatation, hystérésis), sur `Apic3` et un corps.
 - [x] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
-- [ ] **P6** — les calculs ; critère 3.
+- [x] **P6** — les calculs ; critère 3.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 4.
 - [ ] **P8** — preuve `BASCULE-S408` ; liste (4.16, 4.10), file, feuille de route, index ; A316.
 - [ ] **P9** — rituel.
@@ -133,3 +133,32 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
   maximal publié et exigé ≤ 10⁻⁹) ; capacité d'une couche de plus. Sans la variable, le banc est celui de S393 au caractère près
   (même capacité, même ligne). Lancés : référence ; défauts ; `maintien=0.05` (le maintien par défaut, 0,5 s, dépasse la durée du
   calcul, ~0,36 s : il ne peut rien rendre — l'hystérésis ne s'éprouve qu'avec un maintien court).
+- **P6, premier calcul** (B10, `Fr` = 2, `D/dx` = 8, quart ; APIC seul sur la même machine : pincement **1,5067**, pas 0,0266,
+  71 pas, 36 s) — défauts : pincement **1,4797**, soit **le pas d'avant** (la grille de temps passe par 1,4797 puis 1,5063 ; APIC
+  seul détecte à 1,5067) ; part de la bande 0,225 ; une bascule par colonne au plus (le maintien dépasse le calcul) ; 29 120
+  particules contre 131 072 ; 19 s contre 36. **Volume : 1,20·10⁻⁹, manqué** — dérive **du pas** (1,84·10⁻⁹ sommés), la bascule
+  exacte (4·10⁻¹⁶). Deux causes, isolées une à une : **l'absorption au cœur de la zone** (`None` : une particule loin de toute
+  bande, `η += dx/8` en `f32` sans reste — un demi-ulp de `η` à 3 m de fond, 3·10⁻¹⁰ m³ par particule), seule corrigée :
+  2,83·10⁻¹⁰ ; **le transport en `f32`** (le débit fois `dt/dx` pour `η`, les volumes `f64` pour le solde : deux nombres pour
+  le même volume), corrigé en plus : **1,09·10⁻¹²** (dérive du pas 2,5·10⁻¹⁴). Les deux gardés : `η` avancé en `f64`, reste
+  compris ; débits de face devenus volumes `f64` (`columns_reserved_bytes` suit). Le critère 1 n'est donc plus « au bit » pour la
+  zone : 20 essais d'APIC 3D tenus ; banc du raccord relancé (5 et 2,5 cm, 30 s) pour le « au chiffre près ».
+- **Maintien court** (`maintien=0.05`, premier calcul) : pincement 1,4797 aussi ; **trois bascules** pour une colonne au moins ;
+  part 0,291 ; couronne **0,406 D** contre 0,20. **Compris** : à 1,24 √(D/g), deux colonnes repassent en colonnes avec un
+  décalage de voie mixte de **12,8 cm** — leurs particules à 5,5 % au-dessus de la densité nominale (APIC ne tient pas la
+  densité ; la masse, sur deux colonnes seulement, porte tout l'écart) — puis, requises au pas suivant, sont ensemencées jusque-là.
+  **Impasse** : exiger la masse à un quart de maille de la forme pour être convertible — sur 3,2 m de fond, quelques pour mille
+  de dérive de densité suffisent : la bande couvre 82 % du domaine, 131 105 particules. **Retenu** : le décalage borné à un quart
+  de maille, l'excès à la réserve (`ColumnsChange::excess`) ; essai `_s408` de la colonne à seize particules par maille. Après
+  la borne : **deux bascules au plus**, couronne 0,203 D, part 0,221, pincement 1,4797.
+- **Critère 3, code final** (B10, `Fr` = 2, `D/dx` = 8, quart) : défauts — pincement **1,4797, un pas plus tôt, à la limite** ;
+  volume **1,09·10⁻¹²** ; une bascule au plus ; part **0,225** (prédiction ≤ 50 % tenue) ; 29 120 particules contre 131 072 ;
+  19 s contre 36 dans la même fournée. Sensibilité : `dilatation=4` (part 0,366), `marge=0.3` (0,480) — pincement **1,4797**
+  encore : l'écart d'un pas ne vient pas de l'étendue de la bande mais de la zone elle-même (sa vitesse advectée aux faces).
+  Cavité max 1,813 D contre 1,937 ; air enfermé à la détection 0,125 D³ contre 0,078 ; couronne 0,203 contre 0,205.
+- **Critère 1 après P6** : au caractère près jusqu'à P5 (tête `e7b354a8`, raccord 5 cm : 7,785 / 7,847 / 8,002, +0,59 %,
+  +0,43 %, saut 0,113 — S407 ; son volume : **−1,19·10⁻⁹**). Les deux corrections de masse changent les bits de la zone : 5 cm —
+  volume **0**, densité 7,790 / 7,868 / 8,090, niveau −0,15 / +0,01 / +0,50 mm d'APIC seul, saut 0,113, période +0,61 %,
+  amortissement +0,45 % ; 2,5 cm — volume 4·10⁻¹⁶, densité 7,776 / 7,824 / 7,805 (S407 : 7,775 / 7,825 / 7,831), saut **0,154**
+  (0,134 ; 3,85 mm au lieu de 3,35), période +0,34 % (+0,27), amortissement +0,14 % (+0,18) ; APIC seul à 2,5 cm relancé pour
+  l'écart de niveau.
