@@ -97,7 +97,7 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
 - [x] **P2** — `set_columns_mask` : colonne → particules et particules → colonne à masse exacte, réserve, soldes ; critère 1.
 - [x] **P3** — essais des allers-retours et du refus ; critère 2.
 - [x] **P4** — le critère : `ColumnsSwitch` (requis, dilatation, hystérésis), sur `Apic3` et un corps.
-- [ ] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
+- [x] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
 - [ ] **P6** — les calculs ; critère 3.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 4.
 - [ ] **P8** — preuve `BASCULE-S408` ; liste (4.16, 4.10), file, feuille de route, index ; A316.
@@ -127,3 +127,9 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
   0,2 s, dilatation 2, maintien 0,5 s — **non calibrés**. `clear_counts` après la bascule qui pose la zone initiale. Deux essais :
   le corps (132 colonnes, l'empreinte dilatée exacte ; tenue 0,5 s ; deux bascules), la marche et la poche (requises, dilatées).
   20 essais d'APIC 3D tenus.
+- **P5** — `examples/apic3d_b10.rs` : `APIC3D_BASCULE` (clés `pente`, `marge`, `horizon`, `dilatation`, `maintien` ; vide : les
+  défauts) — zone entière en bande à la configuration, `switch(0)` pose la zone initiale (`clear_counts` ensuite), un `switch`
+  après chaque pas ; l'air des mesures exclut l'eau sous `η` des colonnes de la zone ; la masse sur `total_volume` (écart relatif
+  maximal publié et exigé ≤ 10⁻⁹) ; capacité d'une couche de plus. Sans la variable, le banc est celui de S393 au caractère près
+  (même capacité, même ligne). Lancés : référence ; défauts ; `maintien=0.05` (le maintien par défaut, 0,5 s, dépasse la durée du
+  calcul, ~0,36 s : il ne peut rien rendre — l'hystérésis ne s'éprouve qu'avec un maintien court).
