@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-27 15:13 +02:00
+JETON            : occupé
+Battement        : 2026-09-27 15:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S413 — physique : **C6c-1**, la hauteur eulérienne `β` fixe sous les particules (ADR-212) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S412 — conception : [ADR-211](docs/adr/ADR-211-les-trucages-retenus.md), les trucages retenus par l'utilisateur ; [ADR-212](docs/adr/ADR-212-la-bande-etroite-en-profondeur.md), la bande étroite en profondeur — une hauteur eulérienne `β` par colonne sous les particules. Avant : S411, les trucages
 Session suivante : **S413 — C6c-1** (ADR-212 §4) : `β` fixe par colonne — étiquettes, faces advectées sous `β`, transport de `β`, particules virtuelles jusqu'à `β`, solde vertical, absorption et pose à la face ; critères 1 à 3. Puis C6c-2, C7 au poste ; **A322 avant toute scène à 10 cm** (C10) ; la pluie 5b et les peaufinages R32, R33 plus tard
 Maillons        : 0 — S412 : la décision de l'utilisateur (ADR-211) et ADR-212 rendent C6c-1 exécutable ; journal

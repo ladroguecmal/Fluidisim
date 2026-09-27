@@ -62,38 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S412 — **terminée**. Conception, au poste. Réponses de l'utilisateur (2026-09-27) au §8 de
-[TRUCAGES-TEMPS-REEL-S411](../docs/registres/TRUCAGES-TEMPS-REEL-S411.md) : *« 1. Je valides ton choix 2. Je valides ton choix 3.
-Ok 4. cela dépends une simulation d'un joueur de 15m peut être calculé a l'avance et plus le joueur se rapproche de la
-simulation et peux intérargir et simule en temps réel, a réfléchir »*. Agent : Claude Code (Opus 5.5), au poste.
+Session : S413 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »* — la suite déclarée : **C6c-1**
+([ADR-212](../docs/adr/ADR-212-la-bande-etroite-en-profondeur.md) §4). Agent : Claude Code (Opus 5.5), au poste ; référence CPU.
 
-**Livrables.** (1) Un ADR des décisions : la bande étroite en profondeur est C6c, avant C7 ; la surface continue avant C10 ; les
-courants après la campagne ; le calcul d'avance au loin, la simulation vivante de près — à réfléchir, première analyse et point
-de file. (2) La **conception de C6c** — structure, masse exacte, critères « reçu si », découpage —, lue sur le code de la zone
-(S398–S410) avant d'être écrite. Le code de C6c commence à la session suivante.
+**Thèse** (ADR-212 D1–D3). Une hauteur `β` (« fond de la bande ») par colonne de la bande ; `β` = 0, la bande pleine de
+S398–S410, **au bit**. Une maille dont le centre est sous `β` est **à la grille** (comme une maille de la zone) : `φ = z − β`, eau,
+faces advectées ; la face `w` au-dessus de la dernière lui appartient. **Les soldes** : les débits entre parts eulériennes
+(mouillés jusqu'au plus bas des deux `β`, ou de `β` et `η`) transportent `β` en `f64` ; la part d'une face entre une maille à la
+grille et une maille de particules charge le **solde latéral** de la face-maille (la frontière de S399, généralisée maille par
+maille : « à la grille » d'un côté, particules de l'autre) ; la face `w` au-dessus de `β` charge un **solde vertical** par colonne.
+**L'échange** : une particule sous `β` est absorbée et paie le solde vertical ; un solde vertical dû retire la particule la plus
+proche au-dessus de `β`, reçu en pose une à `β + dx/16`. Particules virtuelles de la part eulérienne (la sienne, les voisines)
+dans la reconstruction. La bascule (S408) refuse, dans cette part, une colonne dont `β` > 0 (C6c-2 la placera).
+
+**Critères, écrits avant** (ADR-212 §3). (1) `β` = 0 : les essais S398–S410 tels quels ; B10 à bande dynamique (S408, défauts)
+et la vague de S410 (défauts) au caractère près. (2) **Repos** : un bassin tout en bande, `β` à quatre mailles sous la surface,
+et un bassin mi-zone mi-bande : vitesses sous les seuils de l'essai de repos de S398–S399, volume ≤ 10⁻⁹, densité au-dessus de
+`β` dans 8 ± 0,4 particules par maille. (3) **Ballottement** (le banc du raccord, S399) avec `β` : période et amortissement à un
+point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande pleine. (4) Suite entière, zéro avertissement.
+**Arrêt** : si la densité au-dessus de `β` dérive (le risque d'A316), la publier et ne rien rendre défaut.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-211, les décisions du 2026-09-27 ; notes datées (trucages §8, campagne) ; file, feuille de route.
-- [x] **P3** — lecture du code de la zone : vitesses eulériennes, transferts aux faces de frontière, `φ`, échange, bascule.
-- [x] **P4** — ADR-212, la bande étroite en profondeur : structure, masse, critères, découpage ; index.
-- [x] **P5** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — `β` : état (`floor`, reste, `solde_w`), `set_band_floor`, volume total, finitude ; essai de refus et de volume ; critère 1 (essais).
+- [ ] **P3** — étiquettes et reconstruction : mailles sous `β` à la grille, particules virtuelles jusqu'à `β`.
+- [ ] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
+- [ ] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
+- [ ] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
+- [ ] **P7** — essais du repos et du volume ; critère 2.
+- [ ] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
+- [ ] **P9** — suite entière ; critère 4.
+- [ ] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
+- [ ] **P11** — rituel.
 
 ### Notes de reprise
-- **P2** — [ADR-211](../docs/adr/ADR-211-les-trucages-retenus.md) (D1 à D4 ; D4, première analyse : un niveau « cuit » entre le
-  factice et δ vivant, passage par transfert d'état, I-17 par la graine) ; notes datées : trucages, campagne, ADR-207 ; file
-  (décision en tête, point D4 avec déclencheur) ; feuille de route ; index (ligne B). Lien vers ADR-212 posé d'avance (P4).
-- **P3** — lu (`apic3d.rs` `step`, `reconstruct` ; `apic3d_columns.rs` `columns_begin/advect/label/transport/exchange`,
-  `virtual_column_sums`, `apply_columns_mask`). Le pas : P2G → **advection des faces de la zone** (semi-lagrangienne, la face
-  de frontière lui appartient, S406) → reconstruction (la zone saute, **particules virtuelles** des colonnes voisines, S399) →
-  étiquettes de la zone (`φ = z − η`) → gravité, projection unique → **transport de `η`** par les débits mouillés, les faces de
-  frontière chargeant un **solde** → G2P, advection → **échange** : absorption (paie le solde de la face la plus proche ; au cœur,
-  `η` en `f64`), retrait, pose à la face. **Conséquence pour C6c** : une colonne de la bande est une colonne de la zone dont la
-  hauteur eulérienne `β` n'est plus la surface libre mais **le fond de la bande**, des particules au-dessus ; tout le mécanisme se
-  réemploie, tourné à la verticale — la face `w` à `β` est une frontière (solde vertical, absorption, pose à la face). Un seul
-  paramètre par colonne : `β` = surface (colonne), `β` = 0 (les colonnes entières de S408), entre les deux (la bande étroite).
-- **P4** — [ADR-212](../docs/adr/ADR-212-la-bande-etroite-en-profondeur.md) : `β` par colonne (colonne : `β` = `η` ; bande étroite ;
-  bande pleine : `β` = 0, S398–S410 au bit) ; sous `β` la machinerie de la zone ; la face à `β`, frontière à solde vertical ; le
-  critère place `β` à `k` mailles sous la surface la plus basse, hystérésis `h` (prédiction `k` = 4, `h` = 2) ; six critères ;
-  C6c-1 (`β` fixe) puis C6c-2 (`β` placé). Index. `--check` : 0.
