@@ -1404,3 +1404,9 @@ une vue 3D, la crête courte, le rendu de l'eau (Godot) ; la maille est six fois
 
 **La question :** au maintien de 0,3 s, le déferlement de la bande est-il assez proche de celui d'APIC seul pour être retenu ?
 Le défaut du maintien court (la bosse en colonnes) est-il bien celui que tu vois ?
+
+**Verdict R34 — reçu le 2026-09-27 (S411)** : *« Il s'agit de 2D et de bille, encore loin du finale, qui est en 3D et une topology sans interstice visible dans l'eau sauf pour les jets. Donc difficile de réaliser un retour, mais le maintien de 0.3s parait bien, la formation de la vague est visible. »* **Reçu pour la direction** : le maintien de 0,3 s est retenu pour la suite (C6c),
+le défaut du critère restant celui de S408 jusque-là ; la planche n'est pas un rendu — l'image finale est en 3D, **une surface
+continue sans interstice**, seuls les jets s'en détachent. La même réponse ouvre une réflexion de conception — ne pas simuler
+l'eau profonde en particules, les trucages d'un logiciel spécialisé en temps réel, les courants à niveaux de détail :
+[TRUCAGES-TEMPS-REEL-S411](../registres/TRUCAGES-TEMPS-REEL-S411.md).

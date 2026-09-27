@@ -232,7 +232,8 @@ cessé de poursuivre l'écart de l'impact — 3 %, soit 18 ms et 7 cm sur une va
 ([REVUE-VISUELLE](REVUE-VISUELLE.md) §39). La planche dit en une fois ce que les chiffres ne voyaient pas : **au maintien court,
 le sommet de la crête repasse en colonnes** — une bosse lisse, trop haute, derrière une lèvre de particules, qui ne peut pas se
 retourner —, alors que son impact n'était qu'à +3,6 % ; **au maintien de 0,3 s, le déferlement ressemble à celui d'APIC seul**.
-Verdict attendu.
+*Verdict R34, 2026-09-27 (S411)* : le maintien de 0,3 s « paraît bien, la formation de la vague est visible » — retenu pour
+C6c ; la planche, en 2D et en billes, reste loin de l'image finale (3D, surface continue).
 
 ### 6.5 Ce que cette section ne dit pas
 

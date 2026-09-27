@@ -83,9 +83,11 @@ pour la campagne ; les questions qui demandent l'utilisateur. Aucun ADR avant sa
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — verdict R34 consigné (REVUE-VISUELLE, file, preuve §6.4) ; maintien 0,3 s retenu pour C6c, défaut inchangé d'ici là.
-- [ ] **P3** — le document `docs/registres/TRUCAGES-TEMPS-REEL-S411.md` ; index, file.
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — verdict R34 consigné (REVUE-VISUELLE, file, preuve §6.4) ; maintien 0,3 s retenu pour C6c, défaut inchangé d'ici là.
+- [>] **P3** — le document `docs/registres/TRUCAGES-TEMPS-REEL-S411.md` ; index, file.
 - [ ] **P4** — rituel.
 
 ### Notes de reprise
+- **P2** — R34 consigné : REVUE-VISUELLE §39 (verdict), BASCULE-S408 §6.4, file (décision en tête ; ligne de la campagne : C6c =
+  bande étroite + critère qui suit la crête). Le lien vers le document de P3 est posé d'avance (navigation vérifiée au rituel).
