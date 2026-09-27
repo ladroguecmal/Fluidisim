@@ -62,93 +62,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S406 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue, je confirmes »* — la priorité du solveur passe
-avant la règle des maillons (file, décisions) ; suite : le raccord **C5**. Agent : Claude, session cloud Claude Code ; fichiers,
-git, cargo, Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, la plus avancée.
+Session : S407 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S406 : **C5d**, la densité
+au raccord, sous la condition d'une cinquième session sur A316 — un témoin court (5 cm) qui la relève à 7,6 au moins par un geste
+nommé d'avance ; sinon C6 sur la frontière telle qu'elle est. Agent : Claude, session cloud Claude Code ; fichiers, git, cargo,
+Python ; ni carte graphique, ni Godot. Branche `claude/eager-volta-lf0kw3`, la plus avancée.
 
-**Où en est C5** ([RACCORD-3D-S398](../docs/validation/RACCORD-3D-S398.md) §5–6). La zone des colonnes dans APIC 3D ballotte à
-0,03 point de δ ; la bande et l'échange tiennent la masse au bit ; S400 a reçu le repos (2·10⁻⁵ m/s) et la migration. **Manqué**
-au critère 4 de S399 (ballottement (1, 0) de 30 s, frontière au nœud, contre APIC seul) : le **courant moyen de surface** sur la
-face de frontière, −6,7 mm/s à 5 cm (≤ 5 demandé ; APIC seul −0,5 ; la zone seule +0,5), −1,8 à 2,5 cm — une circulation fermée,
-l'eau entrant dans la bande par la rangée du haut —, et la **densité** de la dernière colonne de la bande, 7,54 à 5 cm et 7,2 à
-2,5 cm (8 ± 0,4), le déficit le plus fort en haut, contre la face. S400 laisse trois suspects, à éprouver par des témoins courts.
+**Où en est la densité** ([RACCORD-3D-S398](../docs/validation/RACCORD-3D-S398.md) §7). Particules par maille occupée de la dernière
+colonne de la bande, contre APIC seul (8,01 à 5 cm) : 7,59 / 7,62 / 7,69 à 5 cm, 7,26 / 7,24 / 7,31 à 2,5 cm (critère 8 ± 0,4), sur
+toute la profondeur à 2,5 cm ; la masse de la bande, elle, est juste (niveau à 0,5 mm près à 2,5 cm). Écartés en S406 : la face,
+le débit mouillé, la quantité de mouvement absorbée, le lieu du retrait. **Ce qui n'a pas été regardé** : si le déficit est
+**local** à la dernière colonne ou réparti ; et **ce que fait l'échange** — combien de particules sont absorbées, retirées, posées.
 
-**Thèse.** Trois gestes de la frontière traitent la face bande | zone d'un seul côté : (a) sa vitesse avant projection vient du
-transfert des seules particules de la bande ; (b) son débit, rangée par rangée, est mouillé à la hauteur de la **colonne**, alors
-que les particules de la bande suivent leur propre surface — l'échange retire ou pose alors, dans la rangée du haut, ce que la
-bande n'y porte pas ; (c) la quantité de mouvement d'une particule absorbée est perdue. Chacun reçoit une option d'essai (sans
-effet par défaut, au bit) ; le banc de S399, 30 s à 5 cm (≈ 45 s de calcul), désigne celui qui porte le courant ; le remède
-devient le défaut, et le critère 4 se rejoue aux deux mailles.
+**Thèse.** Une masse juste et une dernière colonne creuse, c'est des particules déplacées de la dernière colonne vers l'intérieur
+de la bande — par l'échange (retraits contre la face plus nombreux que les poses, ou poses qui repartent) ou par le mouvement des
+particules près d'une frontière qui n'a pas de particules réelles de l'autre côté (la séparation, le transport). **D'abord le
+diagnostic** : compteurs de l'échange et densité des quatre dernières colonnes, sans rien changer au calcul ; **puis un geste
+nommé d'avance**, dans les notes avant le calcul, éprouvé par un témoin court.
 
-**Critères, écrits avant** — ceux de S399, **inchangés**. (1) Sans zone, au bit ; toutes colonnes, les chiffres de S398 ; les
-options d'essai éteintes, S400 au chiffre près. (2) Repos moitié-moitié ≤ 1 cm/s. (3) Volume à 10⁻⁶ sur 30 s. (4) Ballottement
-(1, 0), 30 s, contre APIC seul : niveau ±2 mm par 10 s ; densité 8 ± 0,4 ; saut < 0,5 maille ; période et amortissement à
-1 point ; **courant moyen sur la face ≤ 5 mm/s**. **Prédiction** : le suspect (b) porte l'essentiel du courant (déficit en haut,
-contre la face, là où passe le courant) ; son remède ramène le courant sous 5 mm/s à 5 cm et relève la densité du haut. (5) Suite
-entière, zéro avertissement. **Arrêt** : si aucun témoin ne déplace le courant de plus d'un tiers, publier l'attribution manquée,
-ne rien rendre défaut, et le dire.
+**Critères, écrits avant.** (1) L'instrument ne change rien : la ligne du banc à 5 cm au chiffre près de S406. (2) Le diagnostic
+publié : absorptions, retraits, poses par tranche de 10 s ; densité des quatre dernières colonnes, raccord contre APIC seul.
+**Prédiction** : le déficit est **local** — deux colonnes plus loin, ≥ 7,9 — et les retraits dépassent les poses d'au moins 10 %.
+(3) Le geste, nommé d'avance, éprouvé à 5 cm (30 s) : densité ≥ 7,6 dans les trois tranches, le reste du critère 4 de S399 tenu
+(courant ≤ 5 mm/s, niveau ±2 mm, saut < 0,5 maille, période et amortissement à 1 point). (4) S'il tient à 5 cm : à 2,5 cm, densité
+≥ 7,6. (5) Suite entière, zéro avertissement. **Arrêt** : si le geste ne relève pas la densité à 7,6 à 5 cm, rien ne devient
+défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
 
 ### Plan
 
-- [x] **P1** — jeton, décision de l'utilisateur à la file, plan seul.
-- [x] **P2** — options d'essai de la frontière dans `Apic3` (a, b, c) et leur passage au banc `apic3d_raccord` ; critère 1.
-- [x] **P3** — témoins courts, 5 cm, 30 s : chaque option seule, puis la combinaison ; attribution.
-- [x] **P4** — le remède attribué devient le défaut ; essais ; critères 1 à 3.
-- [x] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
-- [x] **P6** — suite entière, zéro avertissement.
-- [x] **P7** — preuve (RACCORD-3D-S398 §7) ; liste 4.16, file (campagne, lot 5), A316 (note datée), feuille de route, index.
-- [x] **P8** — rituel.
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — l'instrument : compteurs de l'échange dans `Apic3` (sans effet sur le calcul), densité des quatre dernières colonnes
+  au banc ; critère 1.
+- [ ] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
+- [ ] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.
+- [ ] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
+- [ ] **P6** — suite entière, zéro avertissement.
+- [ ] **P7** — preuve (RACCORD-3D-S398 §8) ; A316 ; liste 4.16, file, feuille de route.
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
-- **P2** — `apic3d_columns.rs` : `Apic3::TRIAL_FACE_BOTH_SIDES` (1 : face de frontière = moyenne du transfert de la bande et de
-  la vitesse advectée de la zone, ou la seule zone sans poids), `TRIAL_MEAN_HEIGHT` (2 : débit mouillé à la moyenne de `η` et de
-  la hauteur de la bande lue sur `φ`), `TRIAL_KEEP_MOMENTUM` (4 : une particule absorbée rend sa quantité de mouvement aux faces
-  de la zone, poids 1/8 réparti comme le transfert) ; `set_columns_trials` ; banc : `APIC3D_ESSAI=<bits>`. Essais s398–s400
-  tenus tels quels (6).
-- **P3** (en cours) — 5 cm, 30 s, rangée du haut mouillée (k = 9) : **base** (options éteintes) — S400 au chiffre près (densité
-  7,542/7,767/7,951, saut 0,101, période +0,77 %, amortissement +0,39 %, courant **−6,7**, marche +0,069 mm ; le niveau imprimé est
-  absolu, S400 publiait l'écart à APIC seul) ; **(a) face des deux côtés : −3,6 mm/s** (46 % ôtés), densité du haut 7,62/7,01 ;
-  **(b) hauteur moyenne : −7,2** (pire) ; **(c) quantité de mouvement : −6,3**. Prédiction (b) **manquée** ; (a) porte près de la
-  moitié. Lancés : (a)+(b), (a)+(c), variante « zone seule » (8), APIC seul.
-- **P3** (suite) — APIC seul, 5 cm : niveau +0,391/+0,556/+0,425 mm, densité 8,01/8,02/8,03, courant −0,5, période +0,98 %,
-  amortissement +0,32 %. (a)+(b) : −3,8 ; (a)+(c) : −3,2. **Variante « zone seule » (8) : courant −0,4 mm/s à la rangée du haut**
-  (−0,9 au plus, rangée 8) — **le courant disparaît** ; période +0,74 % (0,24 point), amortissement +0,45 % (0,13), saut 0,104 ;
-  mais niveau, écart à APIC seul, +0,63/+1,34/**+2,07 mm** (±2 : juste au-delà) et densité **7,577/7,579**/7,812 (≥ 7,6 : juste
-  en deçà), rangée du haut 6,56. Attribution : **la vitesse de la face de frontière prise au transfert de la bande porte le
-  courant**. Lancés : 8 + (b), 8 + (c), 8 + (b) + (c) à 5 cm ; 8 à 2,5 cm (≈ 12 min).
-- **P3** (suite) — 5 cm, écarts à APIC seul : **8 + (b)** (10) : courant −0,4 au plus, niveau +0,62/+1,25/+1,85, densité
-  7,589/7,623/7,728 ; **8 + (c)** (12) : courant −0,6 au plus, niveau +0,62/+1,22/**+1,76**, densité **7,593**/7,617/7,685,
-  période +0,70 %, amortissement +0,52 % ; 8 + (b) + (c) (14) : niveau +1,85, densité 7,586. **Le courant est porté par la face de
-  frontière** (toute combinaison avec 8 l'efface) ; (c) rend la migration au critère ; la densité de la dernière colonne reste à
-  7,59 (≥ 7,6) — l'échange retire toujours dans la maille contre la face, celle que la mesure compte. Lancés à 2,5 cm : 8, 12,
-  APIC seul.
-- **P3** (2,5 cm, écarts à APIC seul — seul : niveau −0,079/−0,058/−0,047 mm, densité 8,002/7,935/7,619, saut 0,785, période
-  +0,36 %, amortissement +0,08 %, courant ≤ 0,8) : **8** — courant **−1,2** (S400 −1,8), niveau +0,12/+0,40/+0,21, densité
-  **7,255/7,248/7,328**, saut 0,171, période +0,24 %, amortissement +0,17 % ; **12** — courant **−1,1**, niveau +0,14/+0,38/+0,45,
-  densité **7,261/7,237/7,313**, saut 0,123, période +0,22 %, amortissement +0,19 %. **Le courant est tenu aux deux mailles ; la
-  densité ne l'est à aucune** — à 2,5 cm le déficit prend toute la profondeur de la dernière colonne (7,2 à 7,5 par rangée), sans
-  que la masse de la bande bouge. Témoin de densité : l'échange retire toujours dans la dernière colonne ; essai 16 — retirer
-  dans la maille la plus pleine des deux dernières colonnes.
-- **P3** (fin) — témoin de densité, 5 cm : **16** (retrait dans la plus pleine des deux dernières colonnes, face de S400) : densité
-  7,511/7,688/7,907 ; **28** (16 + face à la zone + quantité de mouvement) : 7,519/7,668/7,850, niveau +0,12/+0,58/+0,88, courant
-  +1,2 au plus. **La densité ne vient pas du lieu du retrait.** **Attribution** : le **courant** est porté par la face de frontière
-  prise au seul transfert de la bande — remède : la face prise à la zone ; la quantité de mouvement rendue ramène la migration au
-  critère ; la **densité** reste **non attribuée** (ni (a), ni (b), ni (c), ni le lieu du retrait). Remède retenu : **12** (face à
-  la zone + quantité de mouvement).
-- **P4** — le défaut : **la face de frontière appartient à la zone** (vitesse avant projection advectée comme ses autres faces)
-  et **la quantité de mouvement d'une particule absorbée est rendue** aux faces de la zone (1/8, réparti comme le transfert).
-  Essais renumérotés : `TRIAL_S400` = 1 (la frontière de S400), `TRIAL_FACE_BOTH_SIDES` = 2 (moyenne), `TRIAL_MEAN_HEIGHT` = 4,
-  `TRIAL_SPREAD_REMOVAL` = 8. **Critère 1 tenu** : `APIC3D_ESSAI=1` rend S400 au chiffre près (courant −6,7, densité
-  7,542/7,767/7,951, période +0,77 %) ; le défaut rend l'essai « 12 » au chiffre près (courant −0,6, niveau +1,007/+1,772/+2,181,
-  densité 7,593/7,617/7,685) — le calcul à 2,5 cm de l'essai « 12 » vaut donc pour le défaut. **Critères 2 et 3 tenus** : repos
-  2,0·10⁻⁵ m/s, volume au plancher (essais s398–s400). Essai neuf `_s406` (6 s, 16 s de calcul) : courant de la rangée du haut
-  **−0,78 mm/s** contre **−4,78** en S400. (Le calcul « 28 » à 2,5 cm, inutile après le témoin à 5 cm, arrêté.)
-- **P5** — critère 4, le défaut contre APIC seul, 30 s (écarts) : **5 cm** — niveau +0,62/+1,22/+1,76 mm ✓ ; densité
-  **7,593**/7,617/7,685 (✗ la première tranche, de 0,007) ; saut 0,103 ✓ ; période +0,70 contre +0,98 % (0,28 point) ✓ ;
-  amortissement +0,52 contre +0,32 % (0,20) ✓ ; **courant ≤ 0,6 mm/s** ✓ (S400 : −6,7). **2,5 cm** — niveau +0,14/+0,38/+0,45 ✓ ;
-  densité **7,26/7,24/7,31** ✗ (APIC seul 8,00/7,94/7,62) ; saut 0,123 ✓ (seul 0,785) ; période 0,14 point ✓ ; amortissement
-  0,11 ✓ ; **courant ≤ 1,1 mm/s** ✓ (S400 : −1,8). **Tout le critère 4 tenu aux deux mailles, sauf la densité.**
-- **P6** — suite entière : **733 réussis**, 19 ignorés, zéro échec, zéro avertissement (732 + l'essai `_s406`).
-- **P7** — preuve : RACCORD-3D-S398 **§7** (Reproduire au commit `2056e410`) et le Reproduire du §6 corrigé (`APIC3D_ESSAI=1`) ;
-  A316, note datée (le courant levé, la densité ouverte) ; liste 4.16 (reste partiel) ; file (campagne, lot 5 — ramenée à 90 mots) ;
-  feuille de route §3 ter.
