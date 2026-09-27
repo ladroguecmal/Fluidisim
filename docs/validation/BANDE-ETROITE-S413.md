@@ -172,3 +172,74 @@ montre le fond qui suit la surface à quatre mailles, et qui descend, sous le je
   les particules peuvent naître et disparaître en fonction de leur vitesse »*) est la suite, C6c-3 — l'Extended Narrow Band FLIP
   (Sato et al. 2018) fait passer particules et grille « en n'importe quel endroit ».
 - La crête courte et la vague 3D : non rejouées sur la bande étroite.
+
+## 6. S415 — le fond qui suit l'écoulement (C6c-3)
+
+2026-09-27, au poste. L'idée de l'utilisateur (S414) : *« si le mesh du fond est malaxable en fonction du courant, les particules
+peuvent naitres et disparaitre en fonction de leurs vitesse »* — l'esprit de l'**Extended Narrow Band FLIP** (Sato, Wojtan, Thuerey,
+Igarashi, Ando, *CGF* 37(2), 2018 : particules et grille « en n'importe quel endroit » ; son critère exact non lu).
+
+### Reproduire
+
+- Commit `c499c95c` ou plus récent. Essais : `cargo test … -p water-core --lib _s415` (quatre, instantanés).
+- Le tourbillon : `APIC3D_BASCULE=maintien=0.3,fond=4[,vorticite=<s⁻¹>][,vitesse=<m/s>][,rotation=<part>] cargo run
+  --manifest-path code/Cargo.toml -p water-core --release --offline --example apic3d_tourbillon -- <0.05|0.025> 5` — 15 à 40 s à
+  5 cm, 5 à 9 min à 2,5 cm ; sans la variable, APIC seul.
+- La vague : les mêmes clés sur `apic3d_deferlement -- 40 4`.
+
+### 6.1 La construction
+
+Trois critères d'écoulement dans `ColumnsSwitch`, tous **éteints par défaut** (S414 au bit) : une maille d'eau qui les dépasse
+rend sa colonne requise en particules, et le fond descend à `floor_cells` mailles sous la plus basse d'entre elles (`flow_needs`).
+
+- **`floor_vorticity`** (s⁻¹) sur `|∇ × u|` de la grille (`vorticity` : vitesses aux centres, différences centrées) — ce que
+  l'advection de la grille lisse ; une rotation solide rend 2Ω exactement.
+- **`floor_speed`** (m/s) sur la vitesse — les mots de l'utilisateur à la lettre.
+- **`floor_rotation`** (sans dimension) sur la **part de rotation** `|Ω|²/(|Ω|² + |S|²)` — le critère Q de Hunt, Wray et Moin
+  (1988) rendu sans échelle, avec un gradient plancher (0,5 s⁻¹, *à calibrer*) ; 1 pour une rotation solide, 0 pour une
+  déformation pure.
+
+### 6.2 Le tourbillon enfoui
+
+Nouveau banc `apic3d_tourbillon` : Lamb–Oseen d'axe `y`, `r_c` 0,1 m, 0,5 m/s au plus (Γ = 0,492 m²/s), à mi-profondeur d'un
+bassin de 2 × 0,2 m et 1 m d'eau sous une surface calme ; 5 s. Énergie cinétique restante et vorticité maximale, lues sur la grille
+de la même façon pour tous. Sous une surface calme, la bande de S414 rend tout aux colonnes : **le tourbillon est à la grille**.
+
+| montage (maintien 0,3 s, fond 4) | 5 cm : énergie / ω max / particules | 2,5 cm : énergie / ω max / particules / calcul |
+|---|---|---|
+| APIC seul | 0,750 / 5,24 / 25 600 | 0,806 / 6,98 / 204 800 / 511 s |
+| S414 — tout à la grille | 0,403 / 2,34 / 0 | 0,518 / 3,79 / 0 / 143 s |
+| vorticité 1 s⁻¹ | 0,625 / 5,15 / 3 700–6 150 | 0,709 / **7,02** / 25 800–47 000 / 289 s |
+| vorticité 0,3 s⁻¹ | 0,705 / 5,23 / 5 150–11 360 | 0,750 / 7,01 / 34 500–56 600 / 331 s |
+| **vorticité 1 + vitesse 0,2 m/s** | **0,765** / 5,20 / 9 070–11 260 | **0,800** / 7,00 / 66 200–83 900 / 360 s |
+| vitesse 0,1 m/s | 0,789 / 5,21 / 13 500–18 500 | — |
+| rotation 0,6 | 0,510 / 4,28 / 2 500–3 500 | — |
+| rotation 0,6 + vitesse 0,2 | 0,765 / 5,22 / 9 070–10 570 | — |
+
+- **La grille perd 2,4 à 2,5 fois l'énergie qu'APIC perd** (prédiction : au moins deux fois — tenue).
+- **La vorticité garde le cœur** (vorticité max à 1 % d'APIC seul) mais pas l'énergie : l'énergie d'un tourbillon est surtout dans
+  son **écoulement extérieur, irrotationnel** (`u_θ ∝ 1/r`), qu'elle laisse à la grille ; perte 1,5 fois celle d'APIC à 1 s⁻¹
+  (prédiction « à 20 % » manquée), 1,18 fois à 0,3 s⁻¹ et 5 cm, 1,29 fois à 2,5 cm.
+- **La vitesse** — l'idée de l'utilisateur à la lettre — prend cet écoulement extérieur : avec elle, **l'énergie de la bande égale
+  celle d'APIC seul** (0,800 contre 0,806 à 2,5 cm) avec 2,4 à 3 fois moins de particules et un calcul 1,4 fois plus court.
+
+### 6.3 La vague de Chen avec ces critères
+
+| critère (maintien 0,3 s, fond 4) | part de la bande | particules | calcul | retours rapides |
+|---|---:|---:|---:|---:|
+| S414 (la forme seule) | 0,50 | 12 262 | 33 s | 0 |
+| vorticité 1 s⁻¹ | **0,998** | 31 292 | 50 s | 13 |
+| vorticité 1 + vitesse 0,2 m/s | **1,000** | 59 544 | 82 s | 0 |
+| rotation 0,6 | 0,58 | 17 024 | 39 s | **28** |
+
+Sans seuil, S414 au chiffre près. **Le seuil absolu de vorticité n'est pas à l'échelle** : sous une houle raide de 2 m, la
+déformation de la grille (1 à 3 s⁻¹) fausse sa vorticité, et la bande prend tout. **La vitesse** prend toute la houle, qui va vite
+sans tourbillonner. **La part de rotation** ne prend que les zones déferlantes — la bonne idée — mais y hésite.
+
+### 6.4 Ce que cela dit
+
+**Aucun critère ne fait encore les deux** — ne rien coûter sous une houle, garder tout un tourbillon. La voie : **la vitesse propre
+de δ**. En production, δ est relatif à B ([ADR-198](../adr/ADR-198-la-voie-d-a289.md)) : la vitesse orbitale de la houle est à B,
+non à δ ; un seuil sur la vitesse de δ ne coûte rien sous la houle et prend courants, sillages, jets — ce que la vitesse fait ici
+sur le tourbillon. Il demande la bande sur la production relative à B (C7, C10) ; la part de rotation, elle, demande une hystérésis
+pour ne plus hésiter. **Aucun défaut n'est changé.**

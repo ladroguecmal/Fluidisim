@@ -110,3 +110,11 @@ maille non-eau depuis le bas. **La prédiction du corps**, demandée par l'utili
 mettre le fond a bonne distance »*), est une option (`floor_prediction`) : à horizon court (0,05 s), B10 se pince au pas même
 d'APIC seul ; à 0,2 s, deux pas trop tôt. **Le fond qui suit l'écoulement** (*« malaxable en fonction du courant, les particules
 peuvent naitres et disparaitre en fonction de leurs vitesse »*) est proposé comme C6c-3, non décidé ici.
+
+## Note datée du 2026-09-27 (S415) — le fond qui suit l'écoulement (C6c-3)
+
+Construit, éteint par défaut ([preuve](../validation/BANDE-ETROITE-S413.md) §6) : la vorticité, la vitesse, la part de rotation
+(critère Q sans dimension) placent aussi la bande et son fond. Mesuré : sur un tourbillon enfoui, la grille perd 2,5 fois l'énergie
+d'APIC ; la vorticité garde le cœur ; **la vitesse** — l'idée de l'utilisateur — rend l'énergie d'APIC seul avec 2,4 à 3 fois moins
+de particules ; mais sous une houle raide, vorticité absolue et vitesse prennent tout. **La voie retenue pour la suite** : la vitesse
+**propre de δ, relative à B** (ADR-198), gratuite sous la houle — à construire avec la bande sur la production (C7, C10).
