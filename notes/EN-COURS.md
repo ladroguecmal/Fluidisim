@@ -110,3 +110,9 @@ ne rien rendre défaut, et le dire.
   absolu, S400 publiait l'écart à APIC seul) ; **(a) face des deux côtés : −3,6 mm/s** (46 % ôtés), densité du haut 7,62/7,01 ;
   **(b) hauteur moyenne : −7,2** (pire) ; **(c) quantité de mouvement : −6,3**. Prédiction (b) **manquée** ; (a) porte près de la
   moitié. Lancés : (a)+(b), (a)+(c), variante « zone seule » (8), APIC seul.
+- **P3** (suite) — APIC seul, 5 cm : niveau +0,391/+0,556/+0,425 mm, densité 8,01/8,02/8,03, courant −0,5, période +0,98 %,
+  amortissement +0,32 %. (a)+(b) : −3,8 ; (a)+(c) : −3,2. **Variante « zone seule » (8) : courant −0,4 mm/s à la rangée du haut**
+  (−0,9 au plus, rangée 8) — **le courant disparaît** ; période +0,74 % (0,24 point), amortissement +0,45 % (0,13), saut 0,104 ;
+  mais niveau, écart à APIC seul, +0,63/+1,34/**+2,07 mm** (±2 : juste au-delà) et densité **7,577/7,579**/7,812 (≥ 7,6 : juste
+  en deçà), rangée du haut 6,56. Attribution : **la vitesse de la face de frontière prise au transfert de la bande porte le
+  courant**. Lancés : 8 + (b), 8 + (c), 8 + (b) + (c) à 5 cm ; 8 à 2,5 cm (≈ 12 min).
