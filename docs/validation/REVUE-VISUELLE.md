@@ -1384,3 +1384,23 @@ un facteur réglé sur une référence) avant de passer aux éclaboussures ?
 peaufinage »*. **Reçu pour l'instant** ; aucun défaut nommé — le peaufinage reprendra les questions laissées ouvertes ci-dessus
 (assez sombre ? le reflet du bloc ? la bande sèche ?) et l'écart à la photographie, dans une session de rendu au poste
 ([file](../registres/QUESTIONS-OUVERTES.md#file-active)). La pièce 5b (les éclaboussures au sol) n'attend plus R33.
+
+## 39. R34 — la vague qui déferle, colonnes et particules, S410
+
+**C6b de la campagne du solveur 3D** ([preuve](BASCULE-S408.md) §6). Une houle de Stokes raide (`ka` = 0,55, le cas de Chen et
+al. 1999) déferle dans APIC 3D, référence CPU, 5 cm, vue en coupe de 2 à 6 m, à six instants (0,3 à 1,4 `√(λ/g)`, `λ` = 2 m).
+Points bleu foncé : les particules ; bleu clair : l'eau portée par les **colonnes** (la surface en hauteur) ; trait orange : la
+**bande** de particules. À gauche, APIC seul — tout en particules, la référence ; au milieu et à droite, la bande dynamique de
+S408, deux durées de maintien. Ce n'est pas un rendu de l'eau : un instrument, pour juger la forme du déferlement.
+
+| image | ce qu'elle montre |
+|---|---|
+| `captures/s410/planche_R34.png` | six instants × APIC seul, bande (maintien 0,3 s), bande (maintien 0,05 s) |
+| `captures/s410/<seul, m03, court>/*_t<instant>.ppm` | les coupes une à une |
+
+**Ce que la session y voit** : à 0,05 s, le **sommet de la crête repasse en colonnes** — une bosse lisse et trop haute derrière
+une lèvre de particules ; à 0,3 s, la bande couvre la crête et le déferlement ressemble à APIC seul. **Ce qui n'y est pas** :
+une vue 3D, la crête courte, le rendu de l'eau (Godot) ; la maille est six fois plus grossière que celle de Chen.
+
+**La question :** au maintien de 0,3 s, le déferlement de la bande est-il assez proche de celui d'APIC seul pour être retenu ?
+Le défaut du maintien court (la bosse en colonnes) est-il bien celui que tu vois ?

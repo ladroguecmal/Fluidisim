@@ -151,10 +151,96 @@ saut max à 2,5 cm passe de 3,35 à 3,85 mm — un maximum sur 30 s d'une grande
 ## 5. Ce que ce document ne dit pas
 
 - **La vague qui déferle** (C6b) : le critère n'est éprouvé que sur un corps qui entre ; le pli prédit par la pente n'a rien
-  déclenché qui compte ici — les défauts ne sont pas calibrés.
+  déclenché qui compte ici — les défauts ne sont pas calibrés. *S410 : §6.*
 - **L'hystérésis sous un maintien réaliste** : au maintien par défaut, rien ne revient pendant B10 ; seul le maintien court
   l'éprouve (deux bascules).
 - **La hauteur après dix allers-retours** (critère 2, manqué) : sans point fixe ; une colonne qui bascule souvent dérive.
 - **L'écart d'un pas** du pincement : attribué à la zone, non expliqué ; une seule maille (`D/dx` = 8), un seul `Fr`.
 - **La densité** : APIC ne la tient pas ; la borne de la voie mixte en limite l'effet à la bascule, pas la cause.
 - La bascule coûte une reconstruction par appel ; la projection garde toutes les mailles. Aucun verdict visuel ; rien sur la carte.
+
+## 6. S410 — la vague qui déferle (C6b)
+
+2026-09-27, au poste (référence CPU ; la carte n'a pas servi). La conception demandait le critère « sur B10 **et sur une
+vague qui déferle** ». Cette section l'éprouve sur le cas de **Chen, Kharif, Zaleski et Li** (1999, *Phys. Fluids* 11, 121 ;
+lu sur arXiv comp-gas/9605002) : une houle de Stokes d'ordre 3 en profondeur infinie, **`ε = ka = 0,55`**, dont le jet se forme
+à `t₁ = 0,72` et touche la face avant à `t₂ = 1,56` (unités `τ = √(λ/g)` ; VOF, 256 mailles par longueur d'onde, périodique).
+
+### Reproduire
+
+- Commit `480dce60` ou plus récent. `cargo run --manifest-path code/Cargo.toml -p water-core --release --offline --example
+  apic3d_deferlement -- 40 4` — APIC seul, ≈ 70 s ; ligne `APIC3D_DEFERLEMENT` (retournement 0,7055, impact 1,2711 à 4,150 m).
+- `APIC3D_BASCULE=<clés>` devant : la bande — `pente`, `relache`, `dilatation`, `maintien` ; vide, les défauts ; lignes
+  `APIC3D_DEFERLEMENT_BASCULE`, `_RETOURS`, `_OSCILLE`. `APIC3D_TRACE=1` : une ligne par pas. `APIC3D_EPS=`, `APIC3D_PAS=` : la
+  sensibilité. `… -- 40 32 courte` : la crête courte, ≈ 10 min.
+- **La planche R34** : `APIC3D_IMAGES=captures/s410/<dossier>` (le dossier existant) — six coupes PPM (ADR-124) ; la planche
+  `captures/s410/planche_R34.png` les juxtapose (APIC seul, `maintien=0.3`, `maintien=0.05` ; assemblage PIL de la session, non
+  versionné).
+- Essais : `cargo test --manifest-path code/Cargo.toml --release --offline -p water-core --lib _s410` (deux, 4 s).
+
+### 6.1 Le banc
+
+`examples/apic3d_deferlement.rs`. `λ` = 2 m à 5 cm (40 mailles par longueur d'onde), 1 m d'eau (`kd` = π), 0,6 m d'air, **un
+bassin de quatre longueurs d'onde à parois** — la phase `θ = kx − π/2` annule `u` aux parois à `t` = 0 ; `ny` = 4 (la crête
+uniforme). L'élévation est celle de Chen, les vitesses de la théorie (`u = aω e^{kζ} cos θ`, `w = aω e^{kζ} sin θ`,
+`ω = √(gk)(1 + ε²/2)`), posées par **`Apic3::set_particle_velocities`** (nouveau : la vitesse et `C = ∇v` d'un champ ; essai
+`_s410`). Mesures sur l'occupation des mailles, dans la **fenêtre d'une crête** ([2,5 ; 5] m — sur une fenêtre de deux crêtes,
+qui se retournent au même instant, l'« impact » moyennait deux tubes d'air) : **retournement**, une verticale eau / air /
+eau ; **impact**, plus de huit mailles d'air que le remplissage depuis le haut n'atteint pas. La bande est posée après le
+premier pas (les colonnes prennent la vitesse de la grille, nulle avant).
+
+### 6.2 Critères écrits avant
+
+| critère | résultat |
+|---|---|
+| **1** — APIC seul déferle avant 2,5 τ ; *prédit* : retournement dans [0,6 ; 1,1], impact dans [1,3 ; 1,9] | **tenu** : retournement **0,7055** (Chen : 0,72), impact **1,2711** (Chen : 1,56) — **prédiction de l'impact manquée** de 2 % |
+| **2** — la bande (défauts) : retournement et impact à 3 % d'APIC seul, abscisse du jet à deux mailles ; volume ≤ 10⁻⁹ | retournement **tenu** (−0,5 %) ; impact **manqué** : +3,2 % (x : 1,5 maille, tenu) ; volume **1,4·10⁻¹²** |
+| **3** — la bande précède le retournement | **tenu** : **0,128 τ**, sept pas, avant la verticale retournée — la pente a prévu le pli |
+| **4** — au plus deux bascules par colonne, défauts et maintien court | **manqué** : 3 aux défauts (le ressaut de la crête précédente arrive juste après la libération), **7** au maintien court |
+| **5** — part moyenne de la bande (*prédiction* ≤ 40 %), coût | défauts : **68 %**, **plus cher** qu'APIC seul (93 s contre 74) ; maintien 0,05 s : 26 %, 53 s |
+| **6** — la crête courte : aucune colonne de la bande dans le huitième extérieur (`ε` < 0,32) | **manqué** : jusqu'à 860 sur 1 280, **après l'impact** (1,66 τ) ; coût −10 à −13 % |
+| **7** — suite entière, zéro avertissement | **tenu** : 741 réussis, 19 ignorés |
+
+### 6.3 Ce que les mesures disent
+
+| réglage | retournement | impact ; x | part moy. | bascules max | retours rapides¹ |
+|---|---|---|---|---|---|
+| APIC seul | 0,7055 | 1,2711 ; 4,150 | — | — | — |
+| défauts (maintien 0,5 s) | 0,7020 | 1,3124 ; 4,225 | 0,682 | 3 | 45 |
+| maintien 0,3 s | 0,7020 | 1,3056 ; 4,225 | 0,520 | 3 | **0** |
+| maintien 0,2 s ; 0,1 s | 0,7020 ; 0,7021 | 1,3127 ; 1,3324 | 0,432 ; 0,309 | 3 ; 3 | 8 ; 12 |
+| maintien 0,05 s | 0,7024 | 1,3172 ; 4,275 | 0,259 | 7 | 95 |
+| hystérésis de la pente (`relache` 0,3 à 0,7) | 0,63 à 0,75 | **1,30 à 1,68** ; 3,1 à 4,3 | 0,31 à 0,59 | 3 à 7 | 36 à 190 |
+
+¹ une colonne rendue aux colonnes puis redemandée moins de 0,25 τ après.
+
+- **La bande naît au front de chaque crête** avant le pli ; **son arrière traîne** d'une durée de maintien — à 1,8 m/s de
+  vitesse de crête, 0,5 s font 0,9 m, et la bande couvre le domaine vers 1,3 τ. Au maintien court, elle suit la crête, mais la
+  pente **hésite autour du seuil** à son passage : particules, colonnes, particules… toutes les ≈ 0,15 τ.
+- **L'hystérésis de la pente est une impasse**, deux fois. Premier jet : une colonne gardée par le seuil bas devenait source de
+  la dilatation et redemandait ses voisines à peine libérées ; corrigé (**gardée sans dilater**, `slope_release`, défaut au bit
+  de S408, essai `_s410`) — l'oscillation reste, et le déferlement se disperse.
+- **Le fait qui commande** : sous une perturbation minime (`ε` ± 10⁻⁴), l'impact d'APIC seul bouge de **0,05 %** ; sans une
+  seule colonne (zone active toute en bande), de **1,4 %** — la suite des pas change ; avec la bande, de **3 à 30 %** selon le
+  réglage. **Chaque conversion au sommet de la crête perturbe le déferlement** (voie mixte, ensemencement quantifié) : moins il y
+  en a, plus la bande suit APIC seul.
+
+### 6.4 Ce que l'image a montré — R34
+
+À la demande de l'utilisateur (*« ne serait-il pas préférable de faire les modifications grâce à des revues »*), la session a
+cessé de poursuivre l'écart de l'impact — 3 %, soit 18 ms et 7 cm sur une vague de 2 m, sous le visible — et a montré la vague
+([REVUE-VISUELLE](REVUE-VISUELLE.md) §39). La planche dit en une fois ce que les chiffres ne voyaient pas : **au maintien court,
+le sommet de la crête repasse en colonnes** — une bosse lisse, trop haute, derrière une lèvre de particules, qui ne peut pas se
+retourner —, alors que son impact n'était qu'à +3,6 % ; **au maintien de 0,3 s, le déferlement ressemble à celui d'APIC seul**.
+Verdict attendu.
+
+### 6.5 Ce que cette section ne dit pas
+
+- **Aucun défaut changé** : maintien 0,5 s, pente 1, dilatation 2 restent ceux de S408 ; 0,3 s est **proposé**, sous réserve
+  de R34 et de B10 relancé.
+- **Le critère qui manque** : suivre une crête qui avance sans traîner (le maintien en temps traîne, la pente hésite) — une
+  bande **advectée** avec la surface, comme l'horizon du corps, est la voie suivante (C6c), non éprouvée.
+- Une seule maille (40 par longueur d'onde, six fois moins que Chen), crête uniforme sauf la crête courte ; bassin à parois,
+  non périodique ; l'instrument du retournement est à la maille près (une maille vide sous la lèvre).
+- Le coût : la bande à 0,3 s garde 52 % des colonnes en particules — **le gain de coût sur une houle qui déferle partout est
+  faible** ; il viendra des domaines où seule une crête déferle.

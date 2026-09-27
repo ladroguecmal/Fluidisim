@@ -224,8 +224,9 @@ pas recopiée ici (L137).
 - [ ] **4.10 Adaptation interne** : subdivision locale dans le chaos, fusion au repos — *partiel* depuis S408 : la
   **représentation** s'adapte — dans `Apic3`, une colonne passe aux particules là où la surface n'est pas un graphe, où le corps
   arrive, où la pente dépasse un seuil, et revient aux colonnes au repos après un maintien, à masse exacte ; sur B10 3D, 22 % des
-  colonnes en particules, le pincement d'APIC seul à un pas près ([preuve](validation/BASCULE-S408.md)). La subdivision de la
-  maille elle-même est absente.
+  colonnes en particules, le pincement d'APIC seul à un pas près ([preuve](validation/BASCULE-S408.md)). **S410**, sur une vague
+  qui déferle : la bande naît au front des crêtes avant le pli, mais traîne ou hésite ; son critère doit suivre la crête (§6). La
+  subdivision de la maille elle-même est absente.
 - [ ] **4.11 Régime substitutif** quand δ n'est plus petit, restauré depuis graine (I-17) — *absent*.
 - [ ] **4.12 Cavité et gerbe d'impact** (C20, B10) — *partiel* — **la cavité est portée sur le banc
   2D d'APIC** (S320, [B10](validation/B10-APIC-S320.md)) : pincement indépendant de l'échelle, masse
@@ -260,7 +261,7 @@ pas recopiée ici (L137).
   ([preuve](validation/CORPS-RIGIDE-S331.md) §4), sous couvercle partiel depuis S335. Manquent le couplage à B/W
   sur fond coupé et la turbulence — **aucun modèle de turbulence n'existe nulle part dans le dépôt**. Lot 3 d'ADR-178.
 - [ ] **4.16 Surface non graphe** : déferlement, éclaboussures détachées — *partiel* depuis S393 : la
-  cavité qui se referme sur l'air, reçue en 3D (ci-dessous) ; déferlement et éclaboussures détachées absents. **C'est le point le plus lourd de la liste** : il demande un **second solveur**, pas
+  cavité qui se referme sur l'air, reçue en 3D (ci-dessous) ; le déferlement porté sur un banc (S410) ; éclaboussures détachées absentes. **C'est le point le plus lourd de la liste** : il demande un **second solveur**, pas
   une extension du premier (ADR-175 D5). Ce solveur est **choisi et écrit sur un banc 2D, hors du
   cœur** : trois représentations comparées au même niveau — APIC garde la masse exactement et ne
   crée pas d'énergie ; rupture de barrage en accord à 1,6 % entre les trois, sans validation
@@ -276,8 +277,11 @@ pas recopiée ici (L137).
   la face, §8), saut, période, amortissement, courant de surface (la face de frontière appartient à la zone, §7) —, sur une frontière
   droite et fixe. **S408** : **la frontière bouge** (C6a) — la bascule colonnes ↔ particules à masse exacte et un critère avec
   hystérésis ; sur B10, 22 % des colonnes en particules, pincement un pas plus tôt qu'APIC seul, 19 s contre 36
-  ([preuve](validation/BASCULE-S408.md)) ; restent la vague qui déferle (C6b) et le saut max sous 3 mm (3,85 à 2,5 cm). Lot 5
-  d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
+  ([preuve](validation/BASCULE-S408.md)) ; **S410** : **le déferlement** d'une houle de Stokes (Chen et al. 1999, `ka` = 0,55)
+  dans APIC 3D — retournement à 0,706 √(λ/g) (Chen : 0,72), jet qui retombe à 1,27 (1,56) ; la bande le prévoit sept pas avant, à
+  masse exacte, mais son maintien traîne (52 à 68 % des colonnes) ou hésite, et chaque conversion au sommet de la crête le
+  perturbe ; R34 posée ([§6](validation/BASCULE-S408.md)). Restent un critère qui suit la crête (C6c), les éclaboussures
+  détachées et le saut max sous 3 mm (3,85 à 2,5 cm). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *absent* sur le système ;
   C06 partiel sur un véhicule d'essai 1D.
 - [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et la masse est

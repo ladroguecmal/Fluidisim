@@ -101,8 +101,8 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 - [x] **P5b** — *ajoutée* : le maintien balayé (0,1 ; 0,2 ; 0,3 s), le réglage retenu, son coût dans la même fournée qu'APIC seul.
 - [x] **P6** — la crête courte ; critère 6. *Élargie* : la planche de revue R34 (demande de l'utilisateur, ci-dessous).
 - [x] **P7** — suite entière, zéro avertissement ; critère 7.
-- [>] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
-- [ ] **P9** — rituel.
+- [x] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
+- [>] **P9** — rituel.
 
 ### Notes de reprise
 - **P2** — `Apic3::set_particle_velocities(field)` (`apic3d.rs`) : vitesse et `C = ∇v` de chaque particule active ; refus
@@ -181,3 +181,7 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
   et que les chiffres ne voyaient pas** : à 0,05 s, le **sommet de la crête repasse en colonnes** — une bosse lisse et trop haute
   derrière une lèvre de particules, alors que l'impact n'y était qu'à +3,6 % ; à 0,3 s, le déferlement ressemble à APIC seul.
 - **P7** — suite entière : **741 réussis** (739 + deux essais `_s410`), 19 ignorés, aucun échec, zéro avertissement. Critère 7.
+- **P8** — preuve [BASCULE-S408](../docs/validation/BASCULE-S408.md) §6 (Reproduire à `480dce60`), §5 renvoie ; REVUE-VISUELLE
+  §39, **R34 posée** ; liste 4.10, 4.16 (le déferlement porté sur un banc ; reste partiel) ; file : décision S410 en tête, ligne
+  de la campagne ; feuille de route §3 ter ; index. `--check` : 0. *Le battement de P7 (14:48) a été écrit sans lecture — lue
+  ensuite : 14:46 (L237).*
