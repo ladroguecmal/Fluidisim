@@ -17,6 +17,8 @@
 //! avec laquelle la région d'impact est dans l'ensemble, si la source d'entrée en est jamais sortie, l'écart au domaine entier.
 //!
 //!     cargo run -p water-core --release --offline --example delta3d_impact_prevu -- <prevu|temoin>
+//!
+//! `IMPACT_PHASE_S=<s>` décale les revues : ce qui sépare la dernière revue de l'impact en dépend.
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
@@ -132,11 +134,15 @@ fn main() {
     let mut reviews: Vec<String> = Vec::new();
     let (mut obj, mut submerged) = (start, 0f64);
     let (mut stopped, mut in_water) = (false, false);
+    // `IMPACT_PHASE_S=<s>` : les revues décalées de cette durée — la dernière revue avant l'impact en dépend (la première, à
+    // l'instant zéro, reste).
+    let phase = std::env::var("IMPACT_PHASE_S").ok().and_then(|v| v.parse::<f64>().ok()).unwrap_or(0.);
+    let phase_steps = (phase / dt).round() as u64;
     for n in 0..steps {
         let t = n as f64 * dt;
         let now_us = n * DT_US;
         // La revue de l'ensemble, toutes les 0,5 s : l'objet là où il est ; en `prevu`, la région de l'impact prédit.
-        if n % REVIEW_STEPS == 0 {
+        if n == 0 || (n >= phase_steps && (n - phase_steps) % REVIEW_STEPS == 0) {
             let mut tracked = vec![Tracked {
                 position: [obj.position[0] as f32, obj.position[1] as f32],
                 velocity: [0., 0.],
@@ -224,7 +230,7 @@ fn main() {
     }
     let done = outside.map_or(steps, |t| (t / dt) as u64).max(1);
     println!(
-        "IMPACT_S405 cas={name} impact_vrai_s={:.4} point_vrai_m={:.3}/{:.3} revues={} region_dans_ensemble_avant_impact_s={} \
+        "IMPACT_S405 cas={name} phase_s={phase:.2} impact_vrai_s={:.4} point_vrai_m={:.3}/{:.3} revues={} region_dans_ensemble_avant_impact_s={} \
          source_dehors={} ecart_max_m={gap:.3e} amplitude_m={amplitude:.4} critere_3mm={} part_moy={:.3} part_max={:.3} \
          volume_entre_m3={submerged:.4}",
         truth.time,

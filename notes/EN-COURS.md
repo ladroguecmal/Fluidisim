@@ -94,7 +94,7 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
 - [x] **P2** — `ballistic.rs` : état, prédiction (RK4, traînée, Euler, contact, affinage), région, palier.
 - [x] **P3** — essais des critères 1 à 6.
 - [x] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
-- [ ] **P5** — les calculs du banc ; critère 7.
+- [>] **P5** — les calculs du banc ; critère 7.
 - [ ] **P6** — suite entière, zéro avertissement ; critère 8.
 - [ ] **P7** — preuve `IMPACT-PREVU-S405` ; liste (9.3, 9.2), file, feuille de route, index ; note datée d'ADR-013.
 - [ ] **P8** — rituel.
@@ -117,3 +117,9 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
   houle) à **1,1135 s en (15,334 ; 8,000) m**, vitesse (10,15 ; 0 ; −10,03) m/s ; entrée : le volume de la calotte immergée, en
   gaussienne de 0,5 m ; ensemble revu toutes les 0,5 s. `ballistic::advance` ajouté (le même intégrateur, sans contact), vérifié
   dans l'essai de la parabole. Cas `prevu` et `temoin` lancés à 10:32.
+- **P5** (en cours) — phase 0 (revues à 0 ; 0,5 ; 1,0 s) : **`prevu`** — prédictions T2 à 0 s (erreur 0,099 m, région 0,401 m,
+  instant −5,6 ms), T2 à 0,5 s (0,017 / 0,276 m, −3,1 ms), T1 à 1,0 s (0,000 m, −0,2 ms) ; la région d'impact dans l'ensemble
+  **1,11 s** avant l'impact ; source jamais dehors ; écart 0,595 mm ; part moyenne 0,468. **`temoin`** — la région dans l'ensemble
+  0,11 s avant, **source pas refusée** : la dernière revue tombe 0,11 s avant l'impact, l'objet n'est plus qu'à 1,2 m de son point
+  d'impact. **La prédiction du critère 7 (témoin refusé) manquée à cette phase.** Ce qui sépare la dernière revue de l'impact
+  décide : `IMPACT_PHASE_S` décale les revues ; balayage 0,1 à 0,4 s des deux cas, lancé à 10:38.
