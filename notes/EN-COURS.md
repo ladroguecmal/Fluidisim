@@ -102,7 +102,7 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
 - [x] **P5** — le banc `delta3d_mer_epars` : cas `suivi`, `murs` (témoin), `long`, `niveaux` ; lancés en arrière-plan.
 - [x] **P6** — les calculs du banc ; critères 4 et 5.
 - [x] **P7** — suite entière, zéro avertissement ; critère 6.
-- [ ] **P8** — preuve `MER-EPARS-S404` ; liste (4.3, 4.7), file, feuille de route, index ; notes datées d'ADR-006 et d'ADR-210.
+- [x] **P8** — preuve `MER-EPARS-S404` ; liste (4.3, 4.7), file, feuille de route, index ; notes datées d'ADR-006 et d'ADR-210.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
@@ -154,3 +154,7 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   l'objet (la prédiction ≤ 0,6 tenue en fin de cas long, manquée à 10 s du cas `suivi`) ; rendu au repos +4,5·10⁻⁴ m³, 0,12 mm au
   plus ; 338/314 ms par pas. **Critères 4 et 5** : écarts tenus partout (≤ 0,43 mm), la part manquée à 10 s, tenue à 30 s.
 - **P7** — suite entière : **726 réussis**, 19 ignorés, zéro échec, zéro avertissement (718 + 8 essais `_s404`).
+- **P8** — preuve `docs/validation/MER-EPARS-S404.md` (Reproduire au commit `0c42be3f`) ; liste 4.3, 4.5, 4.7, 9.2 complétées
+  (aucun point ne change de case) ; file : la campagne (C8e) et « Le domaine épars — ce que S401 et S404 laissent » ; feuille de
+  route §3 ter (S404 ; suivantes : C3b au poste, C5 puis C6 sous A316, le pool au poste) ; index (carte B, liste des preuves) ;
+  notes datées d'ADR-006 et d'ADR-210.

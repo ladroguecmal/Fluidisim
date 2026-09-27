@@ -196,3 +196,9 @@ continu** : un bloc sort 0,25 s après la dernière fois qu'il était requis ; (
 [ADR-210](ADR-210-changer-de-niveau-par-transfert-d-etat.md) : un transfert d'état, et non une destruction suivie d'une création.
 Mesuré contre ADR-005 §5 ([preuve](../validation/NIVEAUX-S402.md)) : les deux passent sans saut, mais la destruction perd tout ce
 que le domaine contient. Les six niveaux et leur série ne changent pas.
+
+**Note du 2026-09-27 (S404) — §3 sous le pas couplé** ([preuve](../validation/MER-EPARS-S404.md)). Le domaine épars de la note S401
+porte désormais le pas couplé — δ sous B + W —, **en mode relatif seulement** (ADR-198 D1) : hors de l'ensemble, δ nul n'est le
+point fixe que de ce pas. Le bord de l'ensemble y fait ce que fait le bord de la boîte : δ fermé, la bande de B qui le traverse,
+l'éponge d'ADR-164 mesurée depuis lui — il devient **absorbant** ; un rectangle de l'ensemble est à un ulp de son domaine dense
+sous une houle réelle. La décision ne change pas.

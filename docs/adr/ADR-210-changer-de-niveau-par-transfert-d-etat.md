@@ -46,3 +46,10 @@ la conservation (la hauteur moyenne, au bit près), pas au banc ; rien sur la ca
 ni au cycle de vie d'ADR-005 §5 pour un domaine qui naît, grandit, rétrécit ou cesse, ni aux six niveaux d'ADR-006 §3.2.
 Invariants relus : **I-12** — le passage n'est pas visible, et un domaine perturbatif qui change de niveau ne perd plus son
 contenu ; I-04, I-06, I-17 ; aucun amendé.
+
+**Note du 2026-09-27 (S404) — un domaine épars, en mer** ([preuve](../validation/MER-EPARS-S404.md) §4–5). Le transfert porte
+l'ensemble épars : au départ, le bord de l'ensemble se lit comme le bord de la boîte, et une colonne dehors porte le repos ; à
+l'arrivée, les colonnes dehors restent au repos. Le volume est exact quand l'ensemble d'arrivée couvre celui de départ
+(`Follow::require_cover`), la perte publiée sinon ; un rectangle passe 25 → 50 → 25 cm au bit de son dense. Sous le pas couplé, en
+mer, l'épars qui suit reste à 0,14 mm de l'entier qui fait les mêmes passages : l'ensemble n'ajoute rien au prix du niveau, qui
+reste celui du contenu (D2). La décision ne change pas.

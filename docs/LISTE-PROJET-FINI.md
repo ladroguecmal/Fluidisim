@@ -156,8 +156,10 @@ pas recopiée ici (L137).
   dispersion calculée (§5) — elle sert l'eau calme des contenants, pas la haute mer (course de 4,8 m sous la mer de la porte B).
   **S401** : les **blocs épars** en référence — un domaine est un ensemble de blocs dans une fenêtre, le pas mobile sur
   l'ensemble, dont le bord se comporte comme celui de la boîte (un rectangle à un ulp du dense) ; l'ensemble suit sa
-  perturbation, à 0,26–0,66 mm du domaine entier ([preuve](validation/DOMAINE-EPARS-S401.md)). Manquent le stockage compact
-  (pool de blocs), le fond coupé et le pas couplé sous l'ensemble, la carte (C3, C8).
+  perturbation, à 0,26–0,66 mm du domaine entier ([preuve](validation/DOMAINE-EPARS-S401.md)). **S404** : le **pas couplé**
+  sous l'ensemble, en mer — un rectangle à un ulp de son dense sous la houle, l'épars qui suit à 0,14 mm du domaine entier
+  ([preuve](validation/MER-EPARS-S404.md)). Manquent le stockage compact (pool de blocs), le fond coupé sous l'ensemble, la carte
+  (C3, C8).
 - [ ] **4.4 Profondeur adaptative**, domaine qui suit un objet qui coule — *absent*.
 - [ ] **4.5 Création, croissance, réduction et disparition visuellement gratuites** (I-12) —
   *partiel* : naissance à zéro reçue sous fond couplé (S251, S253) ; en 3D, un domaine qui renaît
@@ -167,7 +169,9 @@ pas recopiée ici (L137).
   servent le rang 1, et leur prix est mesuré — une réduction retire jusqu'à 11,3 cm de δ (§7). **S402** : un **changement de
   niveau** sans saut — 0,1 à 2 mm d'un pas à l'autre — par transfert d'état ([ADR-210](adr/ADR-210-changer-de-niveau-par-transfert-d-etat.md)) ;
   la disparition progressive d'ADR-005 §5 mesurée — fondu de 0,5 s, sans saut, mais le contenu perdu
-  ([preuve](validation/NIVEAUX-S402.md)). Manquent la transduction de la disparition vers W et tout verdict visuel sur ces passages.
+  ([preuve](validation/NIVEAUX-S402.md)). **S404** : le changement de niveau d'un domaine **épars**, en mer — au bit de son dense ;
+  l'ensemble n'ajoute rien au prix du niveau ([preuve](validation/MER-EPARS-S404.md)). Manquent la transduction de la disparition
+  vers W et tout verdict visuel sur ces passages.
 - [ ] **4.6 Entrée des vagues de B/W dans le domaine** — *partiel* : source volumique, surface
   mobile couplée, fond B prolongé (ADR-149 à 154). Flux de bande aux frontières reçus
   sur courant/niveau uniformes (S270, [preuve](validation/FOND-TRAVERSANT-S270.md), ADR-165).
@@ -200,8 +204,9 @@ pas recopiée ici (L137).
   en S316, sur un cas contrôlé unidirectionnel ([preuve](validation/SORTIE-DELTA-S311.md)). Mais le
   bord de δ est une **paroi** et l'éponge **efface** ce qu'elle absorbe — 10,2 % du contenu
   perturbatif par seconde sur une scène couplée ([S310](validation/BILAN-MASSE-S310.md)) ; hors du
-  transfert d'essai de 4.8, rien n'en revient dans W. En 3D manque la réflexion d'un front oblique
-  ou d'une scène quelconque.
+  transfert d'essai de 4.8, rien n'en revient dans W. **S404** : le bord d'un **ensemble épars** absorbe comme celui de la boîte —
+  l'éponge mesurée depuis lui ; sans elle, l'épars qui suit s'écarte du domaine entier de 0,21 mm au lieu de 0,14
+  ([preuve](validation/MER-EPARS-S404.md)). En 3D manque la réflexion d'un front oblique ou d'une scène quelconque.
 - [ ] **4.8 Sortie des perturbations vers W** (transduction δ→W, W local cosmétique ; coupure W–δ
   et `λ_cut` de B2) — *partiel* : le chemin existe depuis S312 sur la référence CPU — ligne de
   contrôle, identification, train orienté de W (S314) — et **S316 l'a qualifié** propriété par
@@ -496,7 +501,8 @@ pas recopiée ici (L137).
 - [ ] **9.2 Domaine prédictif orienté devant le joueur** — *partiel* **depuis S401**, en référence : le domaine épars s'étend
   **devant** un objet, le long de sa vitesse, sur l'horizon d'ADR-013 §2, élargi de `½·a_max·t²` — 100 % de 300 manœuvres
   bornées dans l'ensemble prévu ; revu chaque seconde, une source à 10 m/s y reste, et en sort à 0,62 s sans prévision
-  ([preuve](validation/DOMAINE-EPARS-S401.md) §5). Depuis S349, un domaine δ 3D suit aussi la caméra
+  ([preuve](validation/DOMAINE-EPARS-S401.md) §5) ; **S404** : en mer, sous le pas couplé, à 0,14 mm du domaine entier, 0,43 mm
+  sur 30 s ([preuve](validation/MER-EPARS-S404.md)). Depuis S349, un domaine δ 3D suit aussi la caméra
   ([S344](validation/ARBITRAGE-3D-S344.md) §5). Manquent le joueur réel — vitesse et intentions viennent du jeu (9.3, 9.4) —,
   l'enveloppe **réservée** (T2) plutôt que calculée, la carte et l'ordonnanceur.
 - [ ] **9.3 Prédiction d'objets balistiques** : point, vitesse, orientation, région utile — *absent*.
