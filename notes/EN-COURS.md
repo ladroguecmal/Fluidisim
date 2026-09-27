@@ -62,126 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S410 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Réalise C6b »*. Conception S384 §5, C6 : reçu si,
-« sur B10 **et sur une vague qui déferle** : particules seulement dans la bande, colonnes ailleurs ; aucune bascule qui oscille
-(hystérésis mesurée) ; coût compté ». C6a (S408, [BASCULE-S408](../docs/validation/BASCULE-S408.md)) l'a éprouvé sur un corps qui
-entre ; **le pli prédit par la pente n'a rien déclenché qui compte** (§5). Agent : Claude Code (Opus 5.5), application de bureau,
-au poste — fichiers, git, cargo, Python, RTX 5070 (non utilisée : C6b est de la référence CPU). Branche `poste`.
+Session : S411 — **en cours**. Conception, au poste, sans code. Demande de l'utilisateur (2026-09-27), verdict R34 et réflexion :
+*« Il s'agit de 2D et de bille, encore loin du finale, qui est en 3D et une topology sans interstice visible dans l'eau sauf pour
+les jets. Donc difficile de réaliser un retour, mais le maintien de 0.3s parait bien, la formation de la vague est visible. Point
+de réflexion est il intéréssant de simuler les billes en dessous en profondeur, car on ne les voit pas et ne sont pas en grand
+mouvement ou possibilités d'être arraché. Il faut réfléchir a comment pouvoir avoir une simulation digne des logiciels 3D comme
+HOUDINI ou autres spécialisé tout en étant en temps réel et dynamique. Je pense qu'il faut réfléchir a des astuces, trucages pour
+réussir. C'est comme pour le courant, peut être avoir un système de LOD pour le courant et avoir des courants plus généraux en
+profondeur et des courants détaillé en zone mouvementé, proche du joueur etc.... »* Agent : Claude Code (Opus 5.5), au poste.
 
-**Le cas.** Chen, Kharif, Zaleski et Li (1999, *Phys. Fluids* 11, 121) : une houle de Stokes d'ordre 3 en profondeur infinie,
-`ε = ka = 0,55`, `η = (λ/2π)[(ε + ε³/8) cos θ + ½ε² cos 2θ + ⅜ε³ cos 3θ]` — le jet se forme à `t₁ = 0,72` et touche la face
-avant à `t₂ = 1,56`, en unités `√(λ/g)` (VOF, 256 mailles par longueur d'onde, périodique ; lu sur arXiv comp-gas/9605002).
-Ici : `λ` = 2 m, 5 cm (40 mailles par longueur d'onde), 1 m d'eau (`kd` = π), **un bassin de quatre longueurs d'onde à parois**
-— la phase posée pour que `u` = 0 aux parois à `t` = 0 (deux crêtes du milieu, à 2,5 et 4,5 m, loin des réflexions pendant la
-seconde utile) ; vitesses de la théorie à l'ordre 3 (`u = aω e^{kz} cos θ`, `w = aω e^{kz} sin θ`, `ω = √(gk)(1 + ε²/2)`), la
-matrice affine `C = ∇u`. APIC seul d'abord, puis la bande dynamique, la zone posée après le premier pas.
+**Ce que l'existant dit déjà** : la conception de la campagne (S384 §4.1, A1) voulait « des particules APIC dans une bande **sous
+la surface** » — l'implémentation (S398–S410) a mis en particules des colonnes **entières**, du fond à la surface ; c'est le
+**Narrow Band FLIP** de Ferstl, Ando, Wojtan, Westermann et Thuerey (Eurographics 2016), repris dans Houdini 16.5 ; les courants
+à niveaux de détail sont conçus depuis S01 ([ADR-011](../docs/adr/ADR-011-courants-et-ecoulements-diriges.md) : C0 à C3), jamais
+construits (2.6 absent).
 
-**Thèse.** Le critère de S408 — non convertible, pente > 1, dilatation, maintien — tient les particules aux crêtes qui se raidissent
-**avant** qu'elles se retournent, les colonnes dans les creux ; le déferlement de la bande suit celui d'APIC seul.
-
-**Critères, écrits avant.** (1) **APIC seul déferle** dans la fenêtre des deux crêtes du milieu : **retournement** (une verticale
-eau / air / eau au-dessus du niveau moyen, deux particules par maille au moins) puis **impact** (air enfermé > `(dx)³·8` au-dessous
-du jet) avant `t` = 2,5 ; *comparé à Chen, non exigé* — prédiction : retournement dans [0,6 ; 1,1], impact dans [1,3 ; 1,9]. (2) **La
-bande** (défauts) : retournement et impact **à 3 %** du temps d'APIC seul, abscisse du jet à l'impact à deux mailles ; volume
-relatif ≤ 10⁻⁹. (3) **Le pli prédit** : à la première verticale retournée de la bande, sa colonne était en particules **au moins un
-pas avant**. (4) **Hystérésis** : au plus **deux** bascules par colonne, aux défauts et au maintien court (0,05 s). (5) **Coût**
-: part moyenne de la bande (*prédiction* ≤ 40 %), part au retournement, particules et temps de calcul contre APIC seul. (6)
-**La crête courte**, si le temps le permet : amplitude modulée le long de la crête (`ε` de 0,55 au milieu à 0,275 aux parois,
-sous le seuil) — aucune colonne de la bande dans le quart extérieur de la largeur. (7) Suite entière, zéro avertissement.
-**Arrêt** : si APIC seul ne déferle pas avant `t` = 2,5, publier et chercher pourquoi, sans changer le cas pour faire passer.
+**Livrable.** Un document de conception : ce qui fait la qualité d'un logiciel spécialisé, et **les trucages** qui la rendent
+possible en temps réel, chacun rapporté à nos couches (B, W, δ, V), à son état dans le dépôt et à son coût ; l'ordre proposé
+pour la campagne ; les questions qui demandent l'utilisateur. Aucun ADR avant sa réponse.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — `Apic3::set_particle_velocities` (vitesse et `C` d'un champ donné) ; essai : un champ affine passe à la grille exactement.
-- [x] **P3** — le banc `apic3d_deferlement` : la houle de Chen, les mesures (retournement, impact, abscisse du jet, crête), la
-  bande (`APIC3D_BASCULE`, comme B10), la crête courte en option.
-- [x] **P4** — APIC seul ; critère 1.
-- [x] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
-- [x] **P5b** — *ajoutée* : le maintien balayé (0,1 ; 0,2 ; 0,3 s), le réglage retenu, son coût dans la même fournée qu'APIC seul.
-- [x] **P6** — la crête courte ; critère 6. *Élargie* : la planche de revue R34 (demande de l'utilisateur, ci-dessous).
-- [x] **P7** — suite entière, zéro avertissement ; critère 7.
-- [x] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
-- [x] **P9** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — verdict R34 consigné (REVUE-VISUELLE, file, preuve §6.4) ; maintien 0,3 s retenu pour C6c, défaut inchangé d'ici là.
+- [ ] **P3** — le document `docs/registres/TRUCAGES-TEMPS-REEL-S411.md` ; index, file.
+- [ ] **P4** — rituel.
 
 ### Notes de reprise
-- **P2** — `Apic3::set_particle_velocities(field)` (`apic3d.rs`) : vitesse et `C = ∇v` de chaque particule active ; refus
-  `NotFinite` sans rien changer. Essai `_s410` : le champ posé exactement, le refus sans effet, l'aller et retour affine de S388
-  (1e-5). Réussi.
-- **P3** — `examples/apic3d_deferlement.rs` : `[mailles_par_lambda=40] [ny=4] [courte]` ; 160 × 4 × 32 à 5 cm. Mesures sur
-  l'occupation (eau : ≥ 2 particules ou sous `η` d'une colonne ; air : aucune) dans la fenêtre [2 ; 6,5] m : crête, retournement
-  (eau / air / eau), impact (air enfermé > 8 mailles, abscisse moyenne). Bande : `APIC3D_BASCULE` (`pente`, `dilatation`,
-  `maintien`), zone posée après le premier pas (`clear_counts` ensuite), avance de la bande sur le retournement à sa colonne ;
-  `APIC3D_TRACE=1` : intervalles de la bande sur la rangée du milieu. Construit sans avertissement.
-- **P4** — APIC seul, 40 mailles par `λ`, 160 × 4 × 32, 102 464 particules, 115 pas, 67 s. **Instrument corrigé deux fois**
-  (avant tout calcul de la bande) : la trace porte désormais à chaque pas les verticales retournées et l'air enfermé ; puis la
-  **fenêtre** réduite à [2,5 ; 5] m — sur [2 ; 6,5], les crêtes de 2,5 et 4,5 m se retournaient au même pas (3,475 et 5,475 m)
-  et l'« impact » moyennait leurs deux tubes (x = 4,6). **Critère 1 tenu** : **retournement t = 0,7055** à x = 3,475 m (Chen :
-  0,72 ; prédiction [0,6 ; 1,1] tenue) ; **impact t = 1,2711** à x = 4,150 m, 16 mailles (Chen : 1,56 ; **prédiction [1,3 ;
-  1,9] manquée**, 2 % sous sa borne) ; crête 0,175 `λ` à x = 3,125 ; vitesse max 5,96 m/s. L'air enfermé **clignote** à la
-  maille : 8 mailles à 1,2008 et 1,2232, 0 entre, puis 8 à 16 de 1,27 à 1,53 — le tube a deux mailles de section ; le
-  seuil (> 8) le prend à sa première section de trois. 240 itérations de pression par pas.
-- **P5** — même fournée (trois calculs ensemble), 40 mailles par `λ` :
-
-  | réglage | retournement t/τ, x | impact t/τ, x | part moy. / au retournement | bascules max | particules fin | calcul |
-  |---|---|---|---|---|---|---|
-  | APIC seul | 0,7055 ; 3,475 | 1,2711 ; 4,150 | 1 | — | 102 464 | 74 s |
-  | défauts (maintien 0,5 s) | 0,7020 ; 3,475 | **1,3124 (+3,2 %)** ; 4,225 | **0,682** / 0,550 | 3 | 92 104 | **93 s** |
-  | maintien 0,05 s | 0,7024 ; 3,475 | 1,3172 (+3,6 %) ; 4,275 | 0,259 / 0,217 | **7** | 45 718 | 53 s |
-
-  Volume 1,4·10⁻¹² ; **la bande précède le retournement de 0,128 τ** (7 pas) à sa colonne. **Sensibilité d'APIC seul** (L371),
-  `APIC3D_EPS` = 0,5501 / 0,5499 : retournement 0,7055 / 0,7054, impact 1,2710 / 1,2703, x 4,125 / 4,150 — **le retard de la bande
-  (+3,2 %) est 60 fois l'incertitude** : réel. **Ce que la trace montre** : aux défauts, la bande naît au front de chaque crête
-  (0,70–1,05 m à 0,17 τ) mais son arrière n'est libéré qu'après 0,5 s — elle traîne de `c`·0,5 s ≈ 0,9 m et couvre le domaine
-  vers 1,3 τ ; au maintien court, elle suit la crête (0,45–0,6 m), mais la pente **hésite autour de 1** au passage de la crête
-  (P 0,113, C 0,268, P 0,306, C 0,454, P 0,471, C 0,590 à x = 2,725). **Essayé : l'hystérésis de la pente** (`slope_release`,
-  dans le cœur ; défaut = `slope_max`, S408 au bit ; essai `_s410`) — **impasse** : `relache` 0,5 retarde la libération (part
-  0,50 à 0,90), n'arrête pas l'oscillation (5 à 8 bascules, 100 à 241 retours rapides) et **avance le retournement de 12 %**
-  (0,6178 à x = 3,375). Instrument ajouté : **retours rapides** (C puis P en moins de 0,25 τ) ; aux défauts, ses 45 sont l'arrivée du
-  ressaut de la crête précédente juste après la libération (1,36–1,47 τ), pas une hésitation. Critères : 2 manqué (impact
-  +3,2 %), 3 tenu (7 pas), 4 manqué tel qu'écrit, 5 : défauts plus chers qu'APIC seul.
-- **P5b** — balayage (six calculs ensemble ; temps non comparables) :
-
-  | réglage | retournement t/τ | impact t/τ ; x | part moy. | bascules max | retours rapides |
-  |---|---|---|---|---|---|
-  | maintien 0,1 s | 0,7021 | 1,3324 ; 4,225 | 0,309 | 3 | 12 |
-  | maintien 0,2 s | 0,7020 | 1,3127 ; 4,225 | 0,432 | 3 | 8 |
-  | **maintien 0,3 s** | 0,7020 | **1,3056** ; 4,225 | **0,520** | 3 | **0** |
-  | dilatation 4, 0,2 s | 0,6237 | 1,3110 ; 4,215 | 0,509 | 3 | 12 |
-  | dilatation 8, 0,2 s | 0,7034 | 1,3153 ; 4,230 | 0,659 | 3 | 92 |
-  | dilatation 4, 0,05 s | 0,6239 | 1,5260 ; 2,607 | 0,370 | 4 | 8 |
-
-  **Le retard de l'impact ne dépend ni du maintien ni de la largeur** (+2,7 à +4,8 % dès que le déferlement reste le même) :
-  ce n'est pas le jet qui retombe hors de la bande (dilatation 8, 0,4 m de part et d'autre : encore +3,5 %). **Le retournement
-  à 0,62** (dilatation 4, `relache`) : même signature qu'APIC seul à 0,7055 (profil imprimé : une maille vide sous la lèvre de
-  la crête, 2 puis 0 puis 4 particules) — l'instrument est à la limite de la maille, pas faux ; la lèvre se sépare plus tôt.
-  **L'hystérésis de la pente, corrigée** : le premier jet faisait d'une colonne gardée une **source de la dilatation**, qui
-  redemandait ses voisines à peine libérées ; désormais **gardée sans dilater** (`keep`, un octet par colonne de plus ; essai
-  `_s410` : 48 colonnes rendues au lieu de 32). **Toujours une impasse** : `relache` 0,3 à 0,7 × maintien 0,05 à 0,2 s — 36 à
-  190 retours rapides, et **l'impact dispersé de 1,30 à 1,68 τ**, jusqu'à x = 3,12. **Le fait qui commande** : l'impact d'APIC
-  seul bouge de 0,05 % sous une perturbation minime, celui de la bande de 3 à 30 % selon le réglage — **chaque conversion au
-  sommet de la crête perturbe le déferlement** (voie mixte, ensemencement quantifié) ; moins il y en a (maintien ≥ 0,3 s), plus
-  la bande suit APIC seul. **Retenu pour la suite de la mesure : maintien 0,3 s** (aucun retour rapide, impact +2,7 %, bande 52 %).
-- **Témoins de P6** : zone active **toute en bande** (`pente=0`, aucune colonne) — 120 pas contre 115, retournement 0,6651 à
-  3,425, impact **1,2886 (+1,4 %)** : sans une colonne, la suite des pas change (la vitesse de la grille entre dans le pas stable)
-  et le déferlement avec — l'incertitude du chemin numérique dépasse celle des données (ε ± 10⁻⁴ : 0,05 %). Le « +3 % » de la
-  bande en est proche. `APIC3D_PAS=` ajouté (multiplie le pas stable), non lancé : voir la consigne.
-- **P6, crête courte** (160 × 32 × 32, 819 120 particules ; trois calculs ensemble) : APIC seul 0,6934 / impact 1,2936 à 4,044,
-  623 s ; défauts : retournement 0,5737, impact 1,3511 (+4,4 %), part 0,449, bascules 3, **bord : 860 colonnes sur 1 280** au plus
-  (à 1,656 τ), 225 retours rapides, 559 s ; maintien 0,3 s : impact 1,3605, part 0,399, bord 829 (1,664 τ), 37 retours, 542 s.
-  Volume 1,4·10⁻¹¹. **Critère 6 manqué tel qu'écrit** : la bande atteint le huitième extérieur (ε < 0,32) — tard, après l'impact
-  (l'instant de la première arrivée n'est pas mesuré). Coût : **−10 à −13 %** seulement.
-- **Message de l'utilisateur (14:3x)** : *« J'apprécie ta précision et ton exigence mais je souhaite ton avis il serait pas
-  préférable de faire des modifications grâce à des revenus [revues] car peut-être niveau des chiffres il y a des incohérences
-  mais visuellement c'est validé »*. **Avis rendu** : oui pour les écarts sous le visible (l'impact +3 % = 18 ms et 7 cm) — la
-  consigne « précision rapportée à l'usage » le disait, la session s'en était écartée ; mais rien de C6b n'avait été vu ; les
-  chiffres restent pour ce que l'œil ne voit pas (masse, coût, durée). **Fait** : `APIC3D_IMAGES=<dossier>` — coupes PPM de la
-  rangée `ny/4` à t/τ = 0,3 ; 0,6 ; 0,8 ; 1,0 ; 1,2 ; 1,4 (x 2–6 m, z 0,6–1,5 m, 200 px/m) ; planche
-  `captures/s410/planche_R34.png` (APIC seul | bande 0,3 s | bande 0,05 s), **envoyée, R34 posée**. **Ce que la planche montre
-  et que les chiffres ne voyaient pas** : à 0,05 s, le **sommet de la crête repasse en colonnes** — une bosse lisse et trop haute
-  derrière une lèvre de particules, alors que l'impact n'y était qu'à +3,6 % ; à 0,3 s, le déferlement ressemble à APIC seul.
-- **P7** — suite entière : **741 réussis** (739 + deux essais `_s410`), 19 ignorés, aucun échec, zéro avertissement. Critère 7.
-- **P8** — preuve [BASCULE-S408](../docs/validation/BASCULE-S408.md) §6 (Reproduire à `480dce60`), §5 renvoie ; REVUE-VISUELLE
-  §39, **R34 posée** ; liste 4.10, 4.16 (le déferlement porté sur un banc ; reste partiel) ; file : décision S410 en tête, ligne
-  de la campagne ; feuille de route §3 ter ; index. `--check` : 0. *Le battement de P7 (14:48) a été écrit sans lecture — lue
-  ensuite : 14:46 (L237).*

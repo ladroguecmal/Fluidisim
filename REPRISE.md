@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-27 14:49 +02:00
+JETON            : occupé
+Battement        : 2026-09-27 14:59 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S411 — conception : **les trucages** d'une eau de logiciel spécialisé en temps réel (verdict R34, bande étroite en profondeur, courants à niveaux de détail) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S410 — physique : **C6b** ([preuve](docs/validation/BASCULE-S408.md) §6) — la vague qui déferle (Chen et al. 1999) : APIC 3D se retourne comme Chen ; la bande prévoit le pli sept pas avant, masse exacte, mais traîne ou hésite ; jugée à l'image à la demande de l'utilisateur — **R34 posée** (planche `captures/s410/planche_R34.png`). Avant : S409, C3b
 Session suivante : **S411** — d'abord le verdict **R34** ; puis **C6c** (une bande qui suit la crête sans traîner) ou **C7** (APIC sur la carte) au poste ; **A322 avant toute scène à 10 cm** (C10) ; la pluie 5b et les peaufinages R32, R33 plus tard
 Maillons        : 2 — S410 : aucun point de liste ne change d'état (4.10, 4.16 partiels) ; la priorité du solveur passe avant la règle (S406) ; preuve BASCULE-S408 §6 ; journal
