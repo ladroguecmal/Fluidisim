@@ -17902,3 +17902,17 @@ calcul d'avance, de près le vivant — première analyse : un niveau « cuit »
 six critères ; C6c-1 puis C6c-2. **Non fait** : aucun code. **Rituel.** Maillons **0** : une décision de l'utilisateur lève le
 choix de C6c et nomme le lot exécutable — **devient possible** C6c-1 (`β` fixe), **le chemin** C6c-2 puis C7 et les scènes,
 **la preuve** ADR-211 et ADR-212. Suivant : **C6c-1**.
+
+## S413 — 2026-09-27 — physique : C6c-1, la bande étroite en profondeur, le fond fixe
+
+**Entrée.** *« Continue »* ; suite déclarée : C6c-1 (ADR-212 §4). **Fait** ([preuve](../docs/validation/BANDE-ETROITE-S413.md)) : un
+**fond** par colonne de la bande (`set_band_floor`, arrondi à une face de maille) sous lequel l'eau est **à la grille** — étiquettes
+`φ = z − fond`, particules virtuelles jusqu'au fond, faces advectées maille par maille, la face du fond comprise ; la part
+eulérienne est un **contenant plein** dont chaque débit charge un **solde vertical**, réglé par des particules posées ou retirées
+au-dessus du fond ; absorption sous le fond ; la frontière latérale lue maille par maille. **Mesuré** : sans fond, tout au bit
+(25 essais, B10, la vague, le raccord aux deux mailles) ; **repos** 8,7·10⁻⁶ m/s, volume 0, densité 8,000 ; **ballottement de
+30 s** à 0,2 point d'APIC seul en période et amortissement aux deux mailles, **4,7 à 7,7 fois moins de particules**, calcul 2,4
+fois plus court ; masse à 10⁻¹⁵. Suite **745 réussis**, zéro avertissement. **Écart à ADR-212** : le fond fixe sur une face, les
+débits au solde vertical (note datée). **Limites** : le fond posé à la main ; la cuve toute en bande étroite à 2,5 cm, densité 7,14
+au milieu en fin de calcul (APIC seul 7,62) — à surveiller. **Rituel.** Maillons **1** (4.16 reste partiel ; la priorité du solveur
+passe avant la règle, S406). Suivant : **C6c-2**, le fond placé par le critère — B10 et la vague de Chen, jugée sur planche.

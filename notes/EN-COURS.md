@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S413 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »* — la suite déclarée : **C6c-1**
+Session : S413 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »* — la suite déclarée : **C6c-1**
 ([ADR-212](../docs/adr/ADR-212-la-bande-etroite-en-profondeur.md) §4). Agent : Claude Code (Opus 5.5), au poste ; référence CPU.
 
 **Thèse** (ADR-212 D1–D3). Une hauteur `β` (« fond de la bande ») par colonne de la bande ; `β` = 0, la bande pleine de
@@ -94,7 +94,7 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - [x] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
 - [x] **P9** — suite entière ; critère 4.
 - [x] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
-- [>] **P11** — rituel.
+- [x] **P11** — rituel.
 
 ### Notes de reprise
 - **P2** — `Columns3` : `floor`, `floor_roundoff`, `solde_w`, `floors` (réservés : 16 octets de plus par colonne) ;
