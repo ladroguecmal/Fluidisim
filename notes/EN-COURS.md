@@ -100,8 +100,8 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 - [x] **P4** — coût à 10 cm, pas entier et deux parts ; l'emprise la plus grande sous 2 ms ; critères 3 et 5.
 - [x] **P5** — deux minutes à 10 cm, 30 Hz puis 60 Hz si besoin ; critère 4.
 - [x] **P5b** — *ajoutée* : 30 Hz explose à 10 cm quel que soit le solveur ; attribution sur le banc d'A321 (`MAILLE=`, `EMPRISE=`), termes éteints un à un (L136).
-- [>] **P5c** — *ajoutée* : à cadence stable (60 Hz, un pas par image), l'emprise à 10 cm sous 2 ms ; deux minutes.
-- [ ] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
+- [x] **P5c** — *ajoutée* : à cadence stable (60 Hz, un pas par image), l'emprise à 10 cm sous 2 ms ; deux minutes.
+- [>] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
 - [ ] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
 - [ ] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
 - [ ] **P9** — rituel.
@@ -180,3 +180,8 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
   33 ms, 1 m/s vaut déjà 0,33 maille par pas ; « sans résidu du fond » tient pourtant avec des échantillons à 2,7 m/s : la
   vitesse seule ne suffit pas à l'expliquer. **Angle mort nouveau** (sévérité 2) : à 10 cm, 30 Hz n'est pas stable sur la
   minute. Piège de banc : `sans_uu`, `sans_Uu`, `sans_uU` — un seul fichier sous Windows ; relancés sous `c1`, `c2`, `c4`.
+- **P5c** — 60 Hz, un pas par image : `MAILLE=0.1 EMPRISE=n,n PAS_US=16667 PAS=7200 REFERENCES=0 VARIANTES=mg6,mg8`. Deux
+  minutes **tenues** aux deux emprises, aux deux variantes. **4,8 m** (165 888 mailles) : mg 6 résidu médian 5,2·10⁻⁵, pas q99
+  **1,56 ms** ; mg 8 : 9,1·10⁻⁶, 1,79 ms. **5,6 m** (225 792) : mg 6 5,5·10⁻⁵, **1,94 ms** ; mg 8 1,1·10⁻⁵, 2,20 ms. **À 60 Hz, mg 6
+  suffit** au résidu de Jacobi-32 à 25 cm (le point de départ est plus bas à pas court). **Critère 5 à cadence stable** : **5,6 m ×
+  5,6 m** à 10 cm, mg 6, 1,94 ms par image — à 3 % de la limite ; 8 m seulement à 30 Hz, qui n'est pas stable (P5).
