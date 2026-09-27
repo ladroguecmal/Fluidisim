@@ -125,3 +125,7 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
   absorbées / retirées / posées 1 833 / 104 / 1 936 ; à `dx/4`, 7,958 / 8,101 et **380 / 1 305** / 1 693 — en 6 s le dipôle ne
   s'est pas encore formé, mais le mécanisme se lit : à un quart de maille, les retraits l'emportent. Lancés : 2,5 cm au défaut ;
   à 5 cm, le défaut, `APIC3D_ESSAI=16` (S406) et `=1` (S400), pour le critère 1.
+- **P5** (critère 1 du changement de défaut, 5 cm) — le défaut rend le témoin au chiffre près (7,785 / 7,847 / 8,002) ;
+  `APIC3D_ESSAI=16` rend **S406** au chiffre près (7,593 / 7,617 / 7,685, niveau +1,007 / +1,772 / +2,181) ; `=1` rend **S400** au
+  chiffre près (7,542 / 7,767 / 7,951 ; son échange aussi dominé par les retraits : 357 absorbées pour 1 399 retraits). Attente :
+  les trois calculs à 2,5 cm (le diagnostic de S406, APIC seul, le défaut).
