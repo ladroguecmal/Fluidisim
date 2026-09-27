@@ -102,3 +102,11 @@ le **solde vertical** de sa colonne, réglé par des particules posées ou retir
 estimé, aucune maille n'est mixte ; chaque volume est compté des deux côtés. Pour un écoulement à divergence nulle, c'est ce que
 ferait la vitesse verticale à la face : le solde en est la version exacte. C6c-2 déplacera `β` d'une maille entière à la fois.
 [Preuve](../validation/BANDE-ETROITE-S413.md).
+
+## Note datée du 2026-09-27 (S414) — D4 construit, et deux idées de l'utilisateur
+
+D4 est construit ([preuve](../validation/BANDE-ETROITE-S413.md) §5) : `floor_cells`, `floor_hysteresis`, la cible sous la première
+maille non-eau depuis le bas. **La prédiction du corps**, demandée par l'utilisateur (*« si un évènement va aller en profondeur
+mettre le fond a bonne distance »*), est une option (`floor_prediction`) : à horizon court (0,05 s), B10 se pince au pas même
+d'APIC seul ; à 0,2 s, deux pas trop tôt. **Le fond qui suit l'écoulement** (*« malaxable en fonction du courant, les particules
+peuvent naitres et disparaitre en fonction de leurs vitesse »*) est proposé comme C6c-3, non décidé ici.

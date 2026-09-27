@@ -282,8 +282,10 @@ pas recopiée ici (L137).
   masse exacte, mais son maintien traîne (52 à 68 % des colonnes) ou hésite, et chaque conversion au sommet de la crête le
   perturbe ; R34 posée ([§6](validation/BASCULE-S408.md)). **S413** : **la bande étroite en profondeur** (C6c-1, ADR-212) — l'eau profonde sur la grille sous un
   fond, les particules au-dessus seulement : au repos, 8,7·10⁻⁶ m/s ; sur 30 s de ballottement, à 0,2 point d'APIC seul, 4,7 à 7,7 fois
-  moins de particules, masse au bit ([preuve](validation/BANDE-ETROITE-S413.md)). Restent le fond placé par le critère (C6c-2), un
-  critère qui suit la crête, les éclaboussures détachées et le saut max sous 3 mm (3,85 à 2,5 cm). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
+  moins de particules, masse au bit ([preuve](validation/BANDE-ETROITE-S413.md)). **S414** : le fond **placé par le critère** (C6c-2) — sur B10, la
+  cavité d'APIC seul au chiffre près avec 4 122 particules (÷ 7 contre la bande pleine), la prédiction du corps à horizon court au
+  pas même d'APIC seul ; sur la vague de Chen, ÷ 6 et deux fois plus vite, R35 posée ([§5](validation/BANDE-ETROITE-S413.md)).
+  Restent le fond qui suit l'écoulement (C6c-3), les éclaboussures détachées et le saut max sous 3 mm (3,85 à 2,5 cm). Lot 5 d'ADR-178 ; commande aussi 4.12, 4.13, 4.14 et 7.2.
 - [ ] **4.17 Référentiel accéléré et invariance galiléenne** (C16, C06) — *absent* sur le système ;
   C06 partiel sur un véhicule d'essai 1D.
 - [ ] **4.18 Conservation de la masse et de l'énergie** (C09) — *partiel*, **et la masse est

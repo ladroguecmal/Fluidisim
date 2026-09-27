@@ -95,3 +95,80 @@ APIC seul :
 - **La projection garde toutes les mailles** : le gain est en particules et en temps de particules, pas en pression.
 - Un fond sous la surface d'une colonne voisine de la zone plus haute que cette surface (une frontière très raide) n'est pas traité
   finement : ces rangées-là n'échangent rien.
+
+## 5. S414 — le fond placé par le critère (C6c-2)
+
+2026-09-27, au poste. Le fond ne se pose plus à la main : **le critère de S408 le place** (ADR-212 D4).
+
+### Reproduire
+
+- Commit `253b90a8` ou plus récent. Essais : `cargo test --manifest-path code/Cargo.toml --release --offline -p water-core --lib _s414
+  -- --nocapture` (trois, 7 s).
+- B10 : `APIC3D_BASCULE=maintien=0.3,fond=4 cargo run --manifest-path code/Cargo.toml -p water-core --release --offline --example
+  apic3d_b10 -- 2 8` (20 s) ; `…,fond_pred=1,horizon=0.05` : la prédiction ; `…,fond=6`.
+- La vague : `APIC3D_BASCULE=maintien=0.3,fond=4 … --example apic3d_deferlement -- 40 4` (35 s) ; `APIC3D_IMAGES=captures/s414/etroite`
+  pour les coupes ; la planche R35 juxtapose `captures/s414/{seul,pleine,etroite}` (assemblage PIL de la session).
+
+### 5.1 La construction
+
+- **`Apic3::move_band_floor`** : descendre ensemence les mailles libérées au réseau nominal — huit particules, `dx³` exactement,
+  à la vitesse de la grille ; remonter absorbe les particules des mailles prises, et l'écart entre leur volume et celui des mailles
+  pleines va au **solde vertical**. **Corrigé en chemin** : le volume sous le fond, compté sur sa hauteur en `f32` (0,3 n'est pas
+  6·dx), perdait **7,4·10⁻⁹** à chaque déplacement ; il se compte désormais en mailles entières, `K·dx³` en `f64`.
+- **Bande → colonne** : l'eau sous le fond et le solde vertical entrent dans la masse de la voie mixte ; les mailles à la grille
+  sont « occupées » pour la convertibilité ; le fond s'efface.
+- **`ColumnsSwitch`** : `floor_cells` (`k`), `floor_hysteresis` (`h`, 2), `floor_prediction` — après le masque, la cible est `k`
+  mailles sous la **première maille non-eau depuis le bas** (surface, cavité, poche, corps) ; le fond descend dès que la cible
+  passe dessous, ne remonte qu'au-delà de `h`. **La prédiction** (l'idée de l'utilisateur, S414 : *« si un évènement va aller en
+  profondeur mettre le fond a bonne distance »*) : dans l'empreinte prévue du corps, la cible descend aussi sous le point le plus
+  bas qu'il atteindra sur l'horizon. Défaut : aucun fond — S408 au bit.
+
+### 5.2 Critères (ADR-212 §3, écrits avant)
+
+| critère | résultat |
+|---|---|
+| **1** — sans fond, au bit | **tenu** : les essais de S398 à S413 ; B10 et la vague à bande pleine (maintien 0,3 s) rendent S408 et S410 au chiffre près |
+| **2** — le fond descend et remonte dix fois sur un ballottement réel ; volume ≤ 10⁻⁹ | **tenu** : **1,3·10⁻¹⁵** (après la correction ci-dessus) |
+| **3** — B10 : pincement à un pas d'APIC seul ; particules ÷ 3 au moins contre S408 ; volume exact | **tenu** : ci-dessous |
+| **4** — la vague de Chen : jugée sur planche (R35) | **au verdict** ; chiffres ci-dessous |
+| **5** — suite entière, zéro avertissement | **tenu** : 748 réussis, 19 ignorés |
+
+### 5.3 B10 — la sphère qui entre, `Fr` = 2, `D/dx` = 8, quart
+
+| réglage (maintien 0,3 s) | pincement √(D/g) | cavité max (D) | air enfermé (D³) | particules | calcul¹ |
+|---|---|---|---|---|---|
+| APIC seul | **1,5067** (pas 0,0266) | 1,937 | 0,0781 | 131 072 | 53 s |
+| bande pleine | 1,4797 (−1 pas) | 1,813 | 0,1250 | 29 120 | 31 s |
+| **bande étroite, fond 4** | 1,5327 (+1 pas) | **1,937** | **0,0781** | **4 122** | **19 s** |
+| fond 4, prédiction, horizon 0,2 s | 1,4532 (−2 pas) | 1,813 | 0,0469 | 10 961 | 22 s |
+| **fond 4, prédiction, horizon 0,05 s** | **1,5063 (le pas même)** | **1,937** | **0,0781** | 8 496 | 20 s |
+| fond 6 | 1,5063 (le pas même) | 1,937 | 0,1016 | 4 933 | 20 s |
+
+¹ quatre calculs ensemble, indicatifs.
+
+- **La bande étroite rend la cavité d'APIC seul** — sa profondeur et l'air qu'elle enferme, au chiffre près —, là où la bande
+  pleine s'en écartait ; avec **7 fois moins de particules** que la bande pleine, **32 fois moins** qu'APIC seul. Le fond suit la
+  cavité (29 déplacements au plus ; l'hystérésis de 2 à 4 mailles n'y change rien).
+- **La prédiction** : à l'horizon du critère (0,2 s : 80 cm à 4 m/s), le fond descend trop tôt et trop bas — deux pas d'avance,
+  2,7 fois plus de particules ; **à 0,05 s** (quatre pas), le pincement tombe au **pas même** d'APIC seul. L'idée tient, à
+  horizon court ; l'horizon du fond et celui de l'empreinte de la bande partagent aujourd'hui `body_horizon`.
+
+### 5.4 La vague de Chen
+
+| réglage (maintien 0,3 s) | retournement | impact ; x | particules | calcul¹ |
+|---|---|---|---|---|
+| APIC seul | 0,7055 | 1,2711 ; 4,150 | 102 464 | 73 s |
+| bande pleine | 0,7020 | 1,3056 ; 4,225 | 74 534 | 76 s |
+| **bande étroite, fond 4** | **0,7021** | 1,2244 ; 4,092 | **12 262** | **34 s** |
+
+Aucun retour rapide, le fond déplacé onze fois au plus, volume 1,4·10⁻¹². La planche R35 ([REVUE-VISUELLE](REVUE-VISUELLE.md) §40)
+montre le fond qui suit la surface à quatre mailles, et qui descend, sous le jet, dans les colonnes où de l'air est enfermé.
+
+### 5.5 Ce que cette section ne dit pas
+
+- **Aucun défaut changé** : `floor_cells` reste `None` ; la proposition — fond 4, prédiction à horizon court, maintien 0,3 s —
+  attend R35.
+- **Le fond suit la forme, pas l'écoulement** : l'idée de l'utilisateur (S414, *« le mesh du fond malaxable en fonction du courant,
+  les particules peuvent naître et disparaître en fonction de leur vitesse »*) est la suite, C6c-3 — l'Extended Narrow Band FLIP
+  (Sato et al. 2018) fait passer particules et grille « en n'importe quel endroit ».
+- La crête courte et la vague 3D : non rejouées sur la bande étroite.

@@ -1410,3 +1410,16 @@ le défaut du critère restant celui de S408 jusque-là ; la planche n'est pas u
 continue sans interstice**, seuls les jets s'en détachent. La même réponse ouvre une réflexion de conception — ne pas simuler
 l'eau profonde en particules, les trucages d'un logiciel spécialisé en temps réel, les courants à niveaux de détail :
 [TRUCAGES-TEMPS-REEL-S411](../registres/TRUCAGES-TEMPS-REEL-S411.md).
+
+## 40. R35 — la vague qui déferle sur la bande étroite, S414
+
+**C6c-2** ([preuve](BANDE-ETROITE-S413.md) §5). La vague de R34, même coupe, mêmes instants ; à droite, **la bande étroite** : les
+particules seulement à quatre mailles sous la surface, l'eau dessous portée par la grille (**vert d'eau**). Au milieu, la bande
+pleine retenue par R34 (maintien 0,3 s) ; à gauche, APIC seul. La bande étroite porte **six fois moins de particules** que la bande
+pleine et calcule deux fois plus vite. Comme R34 : un instrument en 2D, pas le rendu final (une surface continue en 3D).
+
+| image | ce qu'elle montre |
+|---|---|
+| `captures/s414/planche_R35.png` | six instants × APIC seul, bande pleine, bande étroite |
+
+**La question :** la bande étroite déferle-t-elle comme les deux autres — la forme de la crête, le jet, sa retombée ?
