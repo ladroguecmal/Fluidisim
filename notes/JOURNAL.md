@@ -17821,3 +17821,20 @@ zéro avertissement. **Limites** : une frontière droite, fixe, au nœud ; au cr
 2,5 cm pour 3 (APIC seul : 19,6 mm entre voisines). **Rituel.** Maillons **2** : aucun point ne change de case (4.16 partiel) ; la
 campagne continue par décision de l'utilisateur (S406). Suivant : dans le cloud, **C6**, le critère de bascule — la frontière qui
 bouge, où A316 se rejoue ; au poste, C3b puis C7.
+
+## S408 — 2026-09-27 — physique : C6a, la frontière qui bouge — la bascule colonnes ↔ particules en 3D et son critère
+
+**Entrée.** *« continue »* ; S407 proposait C6, le critère de bascule. **Fait** ([preuve](../docs/validation/BASCULE-S408.md)) :
+`set_columns_mask` bascule une colonne d'`Apic3` aux particules (ensemencée sous `η`) et retour (si convertible : un seul segment,
+mailles occupées d'un seul tenant, sans corps ; voie mixte de S323), à masse exacte, réserve et soldes, sans allocation ;
+`ColumnsSwitch` requiert en particules le non convertible, l'empreinte du corps sur son horizon, la pente > 1 ; dilatation,
+hystérésis. **B10** (`Fr` = 2, `D/dx` = 8) : pincement **un pas plus tôt** qu'APIC seul (1,4797 contre 1,5067 — à la limite du
+critère, et dans les cinq réglages : c'est la zone, pas l'étendue de la bande), **22 %** des colonnes en particules, 29 000
+particules contre 131 000, 19 s contre 36, volume 10⁻¹². **Ce que la mesure a corrigé** : deux pertes de masse **du pas de S399**
+(absorption au cœur en `f32` sans reste ; débits `f32` contre soldes `f64` — 1,2·10⁻⁹ → 10⁻¹²), qui rompent à dessein le « au bit »
+du critère 1 (raccord : critère de S399 tenu, saut à 2,5 cm 3,35 → 3,85 mm) ; la voie mixte bornée à un quart de maille (deux
+colonnes comprimées décalées de 12,8 cm ; impasse : exiger la densité nominale, 82 % de bande). **Manqué** : la hauteur après dix
+allers-retours (0,31 maille pour 0,2 ; 0,10 après deux). Suite **739 réussis**, zéro avertissement. **Limites** : un seul corps,
+une maille ; le maintien par défaut plus long que B10 ; la vague qui déferle absente. **Rituel.** Maillons **0** : 4.10 passe à
+partiel — devient possible une bande de particules qui suit la surface à masse exacte ; la consomment C6b puis les scènes de C10 ;
+preuve BASCULE-S408. Suivant : dans le cloud, **C6b**, la vague qui déferle ; au poste, C3b puis C7.

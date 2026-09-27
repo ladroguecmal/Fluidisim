@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-27 12:34 +02:00
+JETON            : libre
+Battement        : 2026-09-27 12:35 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
-Session en cours : S408 — physique : **C6a**, la bascule colonnes ↔ particules en 3D et son critère — plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S407 — physique : **C5d** ([preuve](docs/validation/RACCORD-3D-S398.md) §8) — la densité au raccord : une pose trop loin de la face ; posée à la face, **tout le critère du raccord tenu aux deux mailles** (frontière droite et fixe). Avant : S406, le courant de surface levé
-Session suivante : dans le cloud, **S408 — C6, le critère de bascule** (où vivent les particules : pli prédit, cavité, jet, objet qui entre ; la frontière qui bouge, où A316 se rejoue) ; au poste, **C3b** (10 cm, A298) puis C7 ; la pluie 5b et les peaufinages R32, R33 plus tard
-Maillons        : 2 — S406, S407 : aucun point ne change de case (4.16 partiel) ; la campagne continue par décision de l'utilisateur (S406) ; journal
+Session en cours : aucune
+Dernière session : S408 — physique : **C6a** ([preuve](docs/validation/BASCULE-S408.md)) — la frontière qui bouge : la bascule colonnes ↔ particules à masse exacte et son critère ; B10 à un pas d'APIC seul avec 22 % des colonnes en particules ; deux pertes de masse du pas de S399 corrigées ; 4.10 partiel. Avant : S407, le critère du raccord tenu aux deux mailles
+Session suivante : dans le cloud, **S409 — C6b, la vague qui déferle** (le critère de pente éprouvé, le maintien calibré ; où A316 se rejoue sur une frontière qui bouge) ; au poste, **C3b** (10 cm, A298) puis C7 ; la pluie 5b et les peaufinages R32, R33 plus tard
+Maillons        : 0 — S408 : 4.10 passe à partiel ; devient possible une bande de particules qui suit la surface à masse exacte, consommée par C6b puis les scènes de C10 ; preuve BASCULE-S408 ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

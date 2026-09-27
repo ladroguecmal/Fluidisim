@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S408 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« continue »*. Suite proposée par S407 : **C6**, le critère
+Session : S408 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« continue »*. Suite proposée par S407 : **C6**, le critère
 de bascule (conception S384 §4.2, étape 6 : « bascule colonnes ↔ particules, à masse exacte (S323), selon le critère »). Agent :
 Claude, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Branche
 `claude/eager-volta-lf0kw3`, la plus avancée.
@@ -101,7 +101,7 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
 - [x] **P6** — les calculs ; critère 3.
 - [x] **P7** — suite entière, zéro avertissement ; critère 4.
 - [x] **P8** — preuve `BASCULE-S408` ; liste (4.16, 4.10), file, feuille de route, index ; A316.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 - **P2** — `apic3d_columns.rs` : `set_columns_mask` (→ `ColumnsChange` : colonnes et particules passées dans chaque sens,
