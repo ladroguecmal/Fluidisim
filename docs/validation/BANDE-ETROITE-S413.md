@@ -6,12 +6,12 @@ dessous en profondeur, car on ne les voit pas »*). Référence CPU (`apic3d.rs`
 
 ## Reproduire
 
-- Commit `@P8@` ou plus récent.
+- Commit `610ddc48` ou plus récent.
 - Essais : `cargo test --manifest-path code/Cargo.toml --release --offline -p water-core --lib _s413 -- --nocapture` — cinq
   essais, 5 s ; lignes `S413 …` : §2.
 - Le ballottement : `APIC3D_FOND=4 cargo run --manifest-path code/Cargo.toml -p water-core --release --offline --example
   apic3d_raccord -- <0.05|0.025> <raccord|seul> 30` — ligne `APIC3D_RACCORD_S399` ; sans la variable, S408 au caractère près ;
-  40 s à 5 cm, @DUREE25@ à 2,5 cm : §3.
+  40 à 60 s à 5 cm, 6 à 8 min à 2,5 cm (APIC seul : 15 min) : §3.
 - Sans fond, au caractère près : `APIC3D_BASCULE= … --example apic3d_b10 -- 2 8` (BASCULE-S408 §3.1) et `APIC3D_BASCULE= …
   --example apic3d_deferlement -- 40 4` (BASCULE-S408 §6) : §1.
 
@@ -66,7 +66,27 @@ Le banc du raccord (S399) : cuve de 2 × 0,2 m, 0,5 m d'eau, mode (1, 0) de 2 cm
 pose le fond à quatre mailles sous le creux (0,30 m à 5 cm). Écart de période au mode exact et amortissement par période, contre
 APIC seul :
 
-@TABLE3@
+| montage | maille | période | amortissement | particules | calcul¹ | densité à la frontière, par 10 s |
+|---|---|---:|---:|---:|---:|---|
+| APIC seul | 5 cm | +0,98 % | +0,32 % | 12 800 | 105 s | 8,012 / 8,018 / 8,034 |
+| raccord, bande pleine (S408) | 5 cm | +0,61 % | +0,45 % | 6 571 | 68 s | 7,790 / 7,868 / 8,090 |
+| **raccord, bande étroite** | 5 cm | **+0,75 %** | **+0,32 %** | **2 707** | **42 s** | 7,700 / 7,983 / 8,265 |
+| bande étroite seule | 5 cm | +1,12 % | +0,79 % | 5 089 | 60 s | 8,051 / 8,008 / 7,743 |
+| APIC seul | 2,5 cm | +0,36 % | +0,08 % | 102 400 | 931 s | 8,002 / 7,935 / 7,619 |
+| raccord, bande pleine (S408) | 2,5 cm | +0,34 % | +0,14 % | 51 584 | 658 s | 7,776 / 7,824 / 7,805 |
+| **raccord, bande étroite** | 2,5 cm | **+0,34 %** | **+0,20 %** | **13 303** | **394 s** | 7,814 / 7,948 / 8,137 |
+| bande étroite seule | 2,5 cm | +0,42 % | +0,30 % | 25 411 | 485 s | 7,974 / 7,998 / **7,136** |
+
+¹ cinq calculs ensemble, indicatifs.
+
+- **Critère 3 tenu aux deux mailles** : la bande étroite est à **0,2 point** au plus d'APIC seul en période et en amortissement
+  (seuil : un point) ; volume à 10⁻¹⁵ ; niveau de la bande dans ±2 mm (5 cm : −1,0 / −0,29 / −0,23 mm ; 2,5 cm : −0,71 / −0,67 /
+  −1,16) ; saut de surface à la frontière 0,114 et 0,158 maille, ceux de la bande pleine.
+- **Ce qu'elle rapporte** : **4,7 à 7,7 fois moins de particules** qu'APIC seul, **2,4 à 3,9 fois moins** que la bande pleine ; le
+  calcul **2,4 fois plus court** qu'APIC seul — la projection, elle, garde toutes ses mailles.
+- **À surveiller** : la cuve **toute** en bande étroite, à 2,5 cm, voit sa densité tomber à **7,14** au milieu dans les dix
+  dernières secondes (APIC seul : 7,62) — la dérive de densité connue d'APIC (A316), plus marquée ici ; avec la zone (le montage
+  d'usage), elle tient (8,14).
 
 ## 4. Ce que ce document ne dit pas
 

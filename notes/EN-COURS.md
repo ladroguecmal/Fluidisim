@@ -93,8 +93,8 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - [x] **P7** — essais du repos et du volume ; critère 2.
 - [x] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
 - [x] **P9** — suite entière ; critère 4.
-- [>] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
-- [ ] **P11** — rituel.
+- [x] **P10** — preuve `BANDE-ETROITE-S413` ; liste (4.16), file, feuille de route, index.
+- [>] **P11** — rituel.
 
 ### Notes de reprise
 - **P2** — `Columns3` : `floor`, `floor_roundoff`, `solde_w`, `floors` (réservés : 16 octets de plus par colonne) ;
@@ -135,3 +135,6 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
   tenu** : B10 (défauts) pincement 1,4797, part 0,225, 29 120, 1,09·10⁻¹² — S408 ; la vague (défauts) — S410 ; le raccord plein
   aux deux mailles — S408. Temps en fournée de cinq, indicatifs. ADR-212 : note datée (le fond sur une face, contenant fixe).
 - **P9** — suite entière : **745 réussis** (741 + quatre essais `_s413`), 19 ignorés, zéro avertissement. Critère 4.
+- **P10** — preuve [BANDE-ETROITE-S413](../docs/validation/BANDE-ETROITE-S413.md) (Reproduire à `610ddc48`) ; liste 4.16 (S413 ;
+  reste partiel), file (campagne : C6c-1 fait, C6c-2 ensuite), feuille de route §3 ter, index (liste des preuves, ligne B).
+  `--check` : 0. *Le battement de P9 (15:55) écrit avant lecture — lu 15:54 (L237).*
