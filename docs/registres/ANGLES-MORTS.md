@@ -4362,6 +4362,14 @@ plancher d'ouverture de 10 %, la coque tenue sur la houle reste sous 0,56 m/s, l
 **Reste ouvert** : la dépendance au placement à maille grossière — ± 43–49 % à 6,4 mailles de largeur de coque,
 ~25 mailles pour ± 3 % ; **déclencheur** : une coque dans la production, ou une maille locale autour d'elle.
 
+**A316 — note datée du 2026-09-27 (S406). Le courant attribué et levé : la face de frontière vue d'un seul côté**
+([preuve](../validation/RACCORD-3D-S398.md) §7). La condition de S400 est remplie : un témoin court de 5 cm (30 s) abaisse le courant
+sous 5 mm/s par un geste nommé d'avance — la face de frontière, dont la vitesse venait du seul transfert de la bande : prise à la
+zone, −6,7 → −0,4 mm/s. Devenu le défaut, avec la quantité de mouvement absorbée rendue : courant ≤ 0,6 mm/s à 5 cm, ≤ 1,1 à
+2,5 cm, niveau, saut, période et amortissement au critère. **Reste ouvert** : la **densité** de la dernière colonne de la bande,
+7,59 à 5 cm et 7,24 à 7,31 à 2,5 cm (8 ± 0,4), que ni la face, ni le débit, ni la quantité de mouvement, ni le lieu du retrait
+ne portent.
+
 **A318 — S345, 2026-09-24 (sévérité 2, ouverte). À 30 Hz, l'onde de δ sur une vraie mer garde jusqu'à 6 % de plus
 d'amplitude qu'à 60 Hz.** La cadence d'ADR-012 §7 est la voie de la porte C : un pas de 3,7 ms étalé sur deux
 images. Sur la cuve de S305, le pas de temps ne pèse rien (0,04 % de période, 0,013 % d'amplitude à 33,3 ms) ; sur

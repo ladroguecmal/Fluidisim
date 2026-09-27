@@ -96,7 +96,7 @@ ne rien rendre défaut, et le dire.
 - [x] **P4** — le remède attribué devient le défaut ; essais ; critères 1 à 3.
 - [x] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
 - [x] **P6** — suite entière, zéro avertissement.
-- [ ] **P7** — preuve (RACCORD-3D-S398 §7) ; liste 4.16, file (campagne, lot 5), A316 (note datée), feuille de route, index.
+- [x] **P7** — preuve (RACCORD-3D-S398 §7) ; liste 4.16, file (campagne, lot 5), A316 (note datée), feuille de route, index.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
@@ -149,3 +149,6 @@ ne rien rendre défaut, et le dire.
   densité **7,26/7,24/7,31** ✗ (APIC seul 8,00/7,94/7,62) ; saut 0,123 ✓ (seul 0,785) ; période 0,14 point ✓ ; amortissement
   0,11 ✓ ; **courant ≤ 1,1 mm/s** ✓ (S400 : −1,8). **Tout le critère 4 tenu aux deux mailles, sauf la densité.**
 - **P6** — suite entière : **733 réussis**, 19 ignorés, zéro échec, zéro avertissement (732 + l'essai `_s406`).
+- **P7** — preuve : RACCORD-3D-S398 **§7** (Reproduire au commit `2056e410`) et le Reproduire du §6 corrigé (`APIC3D_ESSAI=1`) ;
+  A316, note datée (le courant levé, la densité ouverte) ; liste 4.16 (reste partiel) ; file (campagne, lot 5 — ramenée à 90 mots) ;
+  feuille de route §3 ter.

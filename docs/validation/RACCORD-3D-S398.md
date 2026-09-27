@@ -128,7 +128,8 @@ particules virtuelles coûtent un balayage de plus près de la zone ; rien sur l
 
 2026-09-27. **C5b, troisième session.** Les deux remèdes attribués au §5, critères de S399 **inchangés**.
 
-**Reproduire** : commit `f01e5cf7` ou plus récent ; `cargo test … -p water-core s399 -- --nocapture` (le repos, ligne `S399 repos`) ;
+**Reproduire** : commit `f01e5cf7` ou plus récent — **depuis S406, avec `APIC3D_ESSAI=1`** (`Apic3::TRIAL_S400`), la frontière de
+cette section ; sans lui, celle du §7 ; `cargo test … -p water-core s399 -- --nocapture` (le repos, ligne `S399 repos`) ;
 `cargo run … --example apic3d_raccord -- <0.05|0.025> <seul|raccord|colonnes> [durée]` — ligne `APIC3D_RACCORD_S399`, qui porte
 désormais la **marche lue** signée moyenne (`marche_lue_mm`, bande − zone, sur `φ` des deux côtés) et les **particules par
 rangée** de la dernière colonne de la bande ; `colonnes` est le témoin tout en colonnes. 45 s à 11,6 min.
@@ -181,3 +182,54 @@ particules de la bande (un seul côté) ; le transport de la rangée du haut, mo
 particules qui la traversent suivent la surface de la bande ; la quantité de mouvement des particules absorbées, perdue.
 
 **Ce que la section ne dit pas** : toujours une seule géométrie (frontière droite, au nœud) ; rien sur la carte.
+
+## 7. S406 — la face de frontière appartient à la zone : le courant de surface reçu, la densité non
+
+2026-09-27. **C5c.** Les trois suspects du §6, chacun une option d'essai (`Apic3::TRIAL_…`), éprouvés par des témoins courts (5 cm,
+30 s, ≈ 1 min) avant tout calcul long ; critères de S399 **inchangés** ; décision de l'utilisateur du jour : la priorité du
+solveur passe avant la règle des maillons.
+
+**Reproduire** : commit `2056e410` ou plus récent ; `cargo test … -p water-core s406 -- --nocapture` (ligne `S406 courant`, 16 s) ;
+`cargo run … --example apic3d_raccord -- <0.05|0.025> <seul|raccord> 30` — ligne `APIC3D_RACCORD_S399` ; `APIC3D_ESSAI=1`, la
+frontière de S400 (§6, au chiffre près) ; 1 min à 5 cm, 7 à 10 min à 2,5 cm.
+
+**Les témoins** (5 cm, 30 s ; courant moyen sur la face, rangée du haut mouillée ; S400 : −6,7 mm/s ; APIC seul : −0,5) :
+
+| geste éprouvé | courant | densité de la dernière colonne | niveau, écart à APIC seul |
+|---|---:|---|---|
+| aucun (S400) | −6,7 | 7,542 / 7,767 / 7,951 | +0,51 / +1,44 / +1,83 |
+| (a) la face prend la **moyenne** du transfert de la bande et de la vitesse advectée de la zone | −3,6 | 7,577 / 7,766 / 8,081 | +0,60 / +1,47 / +2,25 |
+| (b) le débit de la face mouillé à la hauteur **moyenne** de la colonne et de la bande | −7,2 | 7,544 / 7,702 / 7,890 | +0,52 / +1,27 / +1,74 |
+| (c) la quantité de mouvement d'une particule absorbée **rendue** aux faces de la zone | −6,3 | 7,555 / 7,726 / 7,900 | +0,55 / +1,37 / +1,70 |
+| **(a′) la face prend la seule vitesse advectée de la zone** | **−0,4** | 7,577 / 7,579 / 7,812 | +0,63 / +1,34 / +2,07 |
+| (a′) + (b) | −0,4 | 7,589 / 7,623 / 7,728 | +0,62 / +1,25 / +1,85 |
+| **(a′) + (c)** | **−0,6** | 7,593 / 7,617 / 7,685 | +0,62 / +1,22 / **+1,76** |
+| retrait dans la plus pleine des deux dernières colonnes, avec (a′) + (c) | +1,2 | 7,519 / 7,668 / 7,850 | +0,12 / +0,58 / +0,88 |
+
+**Ce que les témoins disent.** (1) **Le courant est porté par la face de frontière** : prise au seul transfert des particules de la
+bande — un seul côté —, elle entretient la circulation ; prise pour moitié à la zone, le courant tombe de moitié ; prise à la zone,
+il disparaît (−0,4 mm/s, le niveau d'APIC seul). La prédiction écrite avant désignait (b) : **manquée** — (b) aggrave. (2) Rendre la
+quantité de mouvement absorbée ramène la migration au critère (+1,76 mm au lieu de +2,07). (3) **La densité ne vient d'aucun des
+quatre** — ni de la face, ni du débit, ni de la quantité de mouvement, ni du lieu du retrait.
+
+**Le défaut** (`apic3d_columns.rs`) : la face de frontière **appartient à la zone** — sa vitesse avant projection est advectée
+comme ses autres faces — et une particule absorbée rend sa quantité de mouvement aux faces de la zone (1/8, réparti comme le
+transfert). `TRIAL_S400` rend le §6 au chiffre près ; le défaut, l'essai (a′) + (c) au chiffre près.
+
+| critère 4 (écart à APIC seul, 30 s) | 5 cm | 2,5 cm |
+|---|---|---|
+| niveau de la bande, par 10 s (±2 mm) | +0,62 / +1,22 / +1,76 | +0,14 / +0,38 / +0,45 |
+| particules par maille (8 ± 0,4) | **7,593** / 7,617 / 7,685 | **7,26 / 7,24 / 7,31** (APIC seul 8,00 / 7,94 / 7,62) |
+| saut max (< 0,5 maille) | 0,103 (seul 0,093) | 0,123 (seul 0,785) |
+| période (1 point) | +0,70 contre +0,98 % | +0,22 contre +0,36 % |
+| amortissement (1 point) | +0,52 contre +0,32 % | +0,19 contre +0,08 % |
+| **courant moyen sur la face (≤ 5 mm/s)** | **≤ 0,6** (S400 : −6,7) | **≤ 1,1** (S400 : −1,8) |
+
+**Tout le critère 4 est tenu aux deux mailles, sauf la densité** : 7,59 à 5 cm (la première tranche, de 0,007) et 7,24 à 7,31 à
+2,5 cm, sur toute la profondeur de la dernière colonne, sans que la masse de la bande bouge. Critères 1 à 3 tenus (repos 2·10⁻⁵ m/s,
+volume au plancher) ; suite **733 réussis**, zéro avertissement ; essai `_s406` : courant de la rangée du haut −0,78 mm/s contre
+−4,78 avec la frontière de S400 (6 s).
+
+**Ce que la section ne dit pas** : d'où vient la densité — les quatre suspects sont écartés ; restent, à éprouver : la pose, contre
+la face, à la vitesse de la grille, et la séparation des particules de la dernière colonne, que les particules virtuelles des
+colonnes repoussent ; une seule géométrie (frontière droite, au nœud) ; rien sur la carte.
