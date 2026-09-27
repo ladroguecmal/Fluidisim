@@ -90,9 +90,9 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [>] **P2** — l'instrument : compteurs de l'échange dans `Apic3` (sans effet sur le calcul), densité des quatre dernières colonnes
+- [x] **P2** — l'instrument : compteurs de l'échange dans `Apic3` (sans effet sur le calcul), densité des quatre dernières colonnes
   au banc ; critère 1.
-- [ ] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
+- [>] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
 - [ ] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.
 - [ ] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
 - [ ] **P6** — suite entière, zéro avertissement.
@@ -100,3 +100,16 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
+- **P2** — `Columns3::counts` (absorbées, retirées, posées ; `columns_exchange_counts`), sans effet sur le calcul ; au banc,
+  `quatre_colonnes` (densité des quatre dernières colonnes de la bande, de la frontière vers l'intérieur) et `echange_abs_ret_pos`
+  par tranche. **Critère 1 tenu** : la ligne à 5 cm au chiffre près de S406 (densité 7,593/7,617/7,685, niveau
+  +1,007/+1,772/+2,181, période +0,70 %, amortissement +0,52 %).
+- **P3** (5 cm) — **la densité n'est pas perdue, elle est déplacée d'une colonne** : dernière colonne 7,59 / 7,62 / 7,69, **l'avant-
+  dernière 8,45 / 8,65 / 8,66**, puis 8,02 / 8,01 / 8,08 et 8,01 / 8,00 / 8,00 (APIC seul : 8,0 partout) ; la somme des deux premières
+  vaut 16. **L'échange** : absorbées 377 / 1 / 14, retirées 1 398 / 1 591 / 1 531, posées 1 785 / 1 569 / 1 559 — passé les dix
+  premières secondes, **aucune particule ne traverse la face** : tout passe par le retrait (la plus proche de la face, celle qui
+  allait traverser) et la pose. Prédictions : déficit local, **tenue** (8,02 deux colonnes plus loin) ; retraits > poses de 10 %,
+  **manquée** (égaux). **Le geste, nommé avant le calcul** : la pose se fait **à la face**, au centre de la tranche d'eau entrée —
+  une particule vaut une tranche de `dx/8` sur la face-maille, son centre à `dx/16` de la face — et non à `dx/4`, dans la maille :
+  la pose à `dx/4` porte chaque volume entré un quart de maille trop loin, et le mouvement d'aller-retour (±½ maille au nœud)
+  l'amasse dans l'avant-dernière colonne. **Prédiction** : à 5 cm, dernière colonne ≥ 7,8, avant-dernière ≤ 8,2.
