@@ -1498,6 +1498,12 @@ pub struct ColumnsSwitch {
     /// **L'idée de l'utilisateur** (S414) : dans l'empreinte prévue du corps (`body_horizon`, `body_margin`), la cible descend aussi
     /// sous le point le plus bas qu'il atteindra — le fond est déjà loin quand l'objet arrive. Défaut : non.
     pub floor_prediction: bool,
+    /// **S415 — le fond qui suit l'écoulement** (C6c-3 ; l'idée de l'utilisateur : *« les particules peuvent naître et disparaître
+    /// en fonction de leur vitesse »*) : `Some(ω)`, s⁻¹ — une colonne dont une maille d'eau tourbillonne au-delà de `ω`
+    /// (`Apic3::vorticity`) est requise en particules, et son fond descend à `floor_cells` mailles sous la plus basse de ces
+    /// mailles. Ce que la grille lisse — tourbillons, cisaillements — reste aux particules ; une houle, irrotationnelle, n'y
+    /// touche pas. `None`, le défaut : le critère de S414.
+    pub floor_vorticity: Option<f32>,
     domain: Domain3,
     required_at: Vec<u64>,
     need: Vec<u8>,
@@ -1536,6 +1542,7 @@ impl ColumnsSwitch {
             floor_cells: None,
             floor_hysteresis: 2,
             floor_prediction: false,
+            floor_vorticity: None,
             domain,
             required_at: vec![u64::MAX; cols],
             need: vec![0; cols],
@@ -1614,6 +1621,12 @@ impl ColumnsSwitch {
                 }
                 let low = (0..nz).find(|&l| a.label[a.cell(i, j, l)] != WATER).unwrap_or(nz);
                 let mut target = low.saturating_sub(k);
+                // S415 : sous la plus basse maille d'eau qui tourbillonne.
+                if let Some(limit) = self.floor_vorticity {
+                    if let Some(l) = (0..nz).find(|&l| a.label[a.cell(i, j, l)] == WATER && a.vorticity(i, j, l) > limit) {
+                        target = target.min(l.saturating_sub(k));
+                    }
+                }
                 if let Some((b, d, lowest)) = body {
                     let reach = b.radius + self.body_margin;
                     let (x, y) = ((i as f32 + 0.5) * dx - b.center[0], (j as f32 + 0.5) * dx - b.center[1]);
@@ -1720,6 +1733,17 @@ impl ColumnsSwitch {
                     self.need[col] = 1;
                 } else if c.mask[col] == 0 && self.slope_release.is_some_and(|r| s2 > r * r) {
                     self.keep[col] = 1;
+                }
+            }
+        }
+        // (3b) S415 : l'eau qui tourbillonne demande des particules.
+        if let Some(limit) = self.floor_vorticity {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let col = j * nx + i;
+                    if self.need[col] == 0 && (0..nz).any(|k| a.label[a.cell(i, j, k)] == WATER && a.vorticity(i, j, k) > limit) {
+                        self.need[col] = 1;
+                    }
                 }
             }
         }

@@ -89,8 +89,8 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — verdict R35 consigné (revue, file, preuve) ; le réglage retenu (maintien 0,3 s, fond 4, prédiction à horizon court) inscrit, défauts inchangés jusqu'à C7.
 - [x] **P3** — la vorticité de la grille aux centres des mailles ; essai (rotation solide, uniforme) ; critère 2.
-- [>] **P4** — `ColumnsSwitch::floor_vorticity` : la colonne requise et le fond sous la maille tourbillonnaire la plus basse ; essai.
-- [ ] **P5** — le banc du tourbillon enfoui ; les trois montages ; critère 3.
+- [x] **P4** — `ColumnsSwitch::floor_vorticity` : la colonne requise et le fond sous la maille tourbillonnaire la plus basse ; essai.
+- [>] **P5** — le banc du tourbillon enfoui ; les trois montages ; critère 3.
 - [ ] **P6** — la vague de Chen avec le seuil ; critère 4.
 - [ ] **P7** — suite entière ; critère 5.
 - [ ] **P8** — preuve (BANDE-ETROITE-S413 §6), ADR-212 note (C6c-3), liste, file, feuille de route, index.
@@ -102,3 +102,7 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 - **P3** — `Apic3::vorticity(i, j, k)` : `|∇ × u|` au centre de la maille, vitesses ramenées aux centres, différences centrées
   (décentrées au bord). Essai `_s415` : rotation solide d'axe `y`, Ω = 1,5 s⁻¹ — **3,000** partout (critère 2 tenu, au bit à
   l'arrondi) ; uniforme : 0.
+- **P4** — `ColumnsSwitch::floor_vorticity` (défaut `None`, S414 au bit) : (3b) de `decide`, une colonne dont une maille d'eau
+  tourbillonne au-delà du seuil est requise ; `place_floor`, le fond à `k` sous la plus basse de ces mailles. Essai `_s415` :
+  cisaillement enfoui (rangées 2 à 4, colonnes 6 à 10) — sans seuil tout passe aux colonnes ; à 2 s⁻¹, bande 3 à 12, fond **0**
+  sous le cisaillement, 0,3 m à côté ; volume exact. 32 essais d'APIC 3D tenus.

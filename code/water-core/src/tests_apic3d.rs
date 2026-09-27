@@ -1030,3 +1030,46 @@ fn the_grid_vorticity_reads_a_solid_rotation_s415() {
     a.w.fill(0.);
     assert_eq!(a.vorticity(3, 4, 4), 0.);
 }
+
+/// **S415** — le critère suit l'écoulement : un bassin calme passe tout entier en colonnes ; avec un cisaillement enfoui (trois
+/// rangées au fond de quatre colonnes) et un seuil de vorticité, ces colonnes — dilatées — restent en bande et leur fond descend
+/// sous le cisaillement ; sans seuil, rien ne le voit.
+#[test]
+fn the_switch_follows_a_buried_shear_s415() {
+    let run = |limit: Option<f32>| {
+        let (nx, ny, nz, dx) = (16, 4, 16, 0.05f32);
+        let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+        a.enable_columns(&mut host, &vec![0u8; nx * ny]).unwrap();
+        a.seed(&|p| p[2] < 0.5).unwrap();
+        for k in 2..5 {
+            for j in 0..ny {
+                for i in 6..=10 {
+                    a.u[(k * ny + j) * (nx + 1) + i] = if k % 2 == 0 { 0.5 } else { -0.5 };
+                }
+            }
+        }
+        let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+        s.floor_cells = Some(4);
+        s.floor_vorticity = limit;
+        let v0 = a.total_volume();
+        s.switch(0, &mut a).unwrap();
+        assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+        let band: Vec<usize> = (0..nx).filter(|&i| !a.is_column(i, 1)).collect();
+        let floors: Vec<f32> = band.iter().map(|&i| a.band_floor().unwrap()[nx + i]).collect();
+        (band, floors)
+    };
+    let (sans, _) = run(None);
+    assert!(sans.is_empty(), "sans seuil : {sans:?}");
+    let (band, floors) = run(Some(2.));
+    println!("S415 cisaillement enfoui : bande {band:?}, fonds {floors:?}");
+    for i in 6..10 {
+        assert!(band.contains(&i), "colonne {i}");
+    }
+    for (b, f) in band.iter().zip(&floors) {
+        if (6..10).contains(b) {
+            assert_eq!(*f, 0., "colonne {b} : le fond sous le cisaillement");
+        }
+    }
+    assert!(!band.contains(&0) && !band.contains(&15));
+}
