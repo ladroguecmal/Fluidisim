@@ -62,37 +62,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S411 — **terminée**. Conception, au poste, sans code. Demande de l'utilisateur (2026-09-27), verdict R34 et réflexion :
-*« Il s'agit de 2D et de bille, encore loin du finale, qui est en 3D et une topology sans interstice visible dans l'eau sauf pour
-les jets. Donc difficile de réaliser un retour, mais le maintien de 0.3s parait bien, la formation de la vague est visible. Point
-de réflexion est il intéréssant de simuler les billes en dessous en profondeur, car on ne les voit pas et ne sont pas en grand
-mouvement ou possibilités d'être arraché. Il faut réfléchir a comment pouvoir avoir une simulation digne des logiciels 3D comme
-HOUDINI ou autres spécialisé tout en étant en temps réel et dynamique. Je pense qu'il faut réfléchir a des astuces, trucages pour
-réussir. C'est comme pour le courant, peut être avoir un système de LOD pour le courant et avoir des courants plus généraux en
-profondeur et des courants détaillé en zone mouvementé, proche du joueur etc.... »* Agent : Claude Code (Opus 5.5), au poste.
+Session : S412 — **en cours**. Conception, au poste. Réponses de l'utilisateur (2026-09-27) au §8 de
+[TRUCAGES-TEMPS-REEL-S411](../docs/registres/TRUCAGES-TEMPS-REEL-S411.md) : *« 1. Je valides ton choix 2. Je valides ton choix 3.
+Ok 4. cela dépends une simulation d'un joueur de 15m peut être calculé a l'avance et plus le joueur se rapproche de la
+simulation et peux intérargir et simule en temps réel, a réfléchir »*. Agent : Claude Code (Opus 5.5), au poste.
 
-**Ce que l'existant dit déjà** : la conception de la campagne (S384 §4.1, A1) voulait « des particules APIC dans une bande **sous
-la surface** » — l'implémentation (S398–S410) a mis en particules des colonnes **entières**, du fond à la surface ; c'est le
-**Narrow Band FLIP** de Ferstl, Ando, Wojtan, Westermann et Thuerey (Eurographics 2016), repris dans Houdini 16.5 ; les courants
-à niveaux de détail sont conçus depuis S01 ([ADR-011](../docs/adr/ADR-011-courants-et-ecoulements-diriges.md) : C0 à C3), jamais
-construits (2.6 absent).
-
-**Livrable.** Un document de conception : ce qui fait la qualité d'un logiciel spécialisé, et **les trucages** qui la rendent
-possible en temps réel, chacun rapporté à nos couches (B, W, δ, V), à son état dans le dépôt et à son coût ; l'ordre proposé
-pour la campagne ; les questions qui demandent l'utilisateur. Aucun ADR avant sa réponse.
+**Livrables.** (1) Un ADR des décisions : la bande étroite en profondeur est C6c, avant C7 ; la surface continue avant C10 ; les
+courants après la campagne ; le calcul d'avance au loin, la simulation vivante de près — à réfléchir, première analyse et point
+de file. (2) La **conception de C6c** — structure, masse exacte, critères « reçu si », découpage —, lue sur le code de la zone
+(S398–S410) avant d'être écrite. Le code de C6c commence à la session suivante.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — verdict R34 consigné (REVUE-VISUELLE, file, preuve §6.4) ; maintien 0,3 s retenu pour C6c, défaut inchangé d'ici là.
-- [x] **P3** — le document `docs/registres/TRUCAGES-TEMPS-REEL-S411.md` ; index, file.
-- [x] **P4** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — ADR-211, les décisions du 2026-09-27 ; notes datées (trucages §8, campagne) ; file, feuille de route.
+- [ ] **P3** — lecture du code de la zone : vitesses eulériennes, transferts aux faces de frontière, `φ`, échange, bascule.
+- [ ] **P4** — ADR-212, la bande étroite en profondeur : structure, masse, critères, découpage ; index.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2** — R34 consigné : REVUE-VISUELLE §39 (verdict), BASCULE-S408 §6.4, file (décision en tête ; ligne de la campagne : C6c =
-  bande étroite + critère qui suit la crête). Le lien vers le document de P3 est posé d'avance (navigation vérifiée au rituel).
-- **P3** — précision de l'utilisateur pendant l'écriture : *« Houdini était une référence pas forcément le choix adpaté »* — la
-  qualité d'image est la cible, pas la méthode ; le document est cadré ainsi (§1). [TRUCAGES-TEMPS-REEL-S411](../docs/registres/TRUCAGES-TEMPS-REEL-S411.md) :
-  T1 à T8 ; T1, la bande étroite en profondeur (Ferstl et al. 2016, lu en session), proposée comme C6c avant C7 — particules ÷ 4
-  à 10 sur nos bancs (estimé) ; T3 la surface continue (trois voies) ; T4 particules diffuses ; T5 détail synthétisé ; T7 les
-  courants = ADR-011, conçus en S01, non construits ; quatre questions (§8). Index (liste et carte, ligne B). `--check` : 0.

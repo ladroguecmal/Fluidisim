@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-27 15:03 +02:00
+JETON            : occupé
+Battement        : 2026-09-27 15:09 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : S412 — conception : les décisions sur les trucages (ADR-211) et la conception de **C6c**, la bande étroite en profondeur (ADR-212) ; plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S411 — conception : [les trucages d'une eau de qualité cinéma en temps réel](docs/registres/TRUCAGES-TEMPS-REEL-S411.md) — R34 reçu (maintien 0,3 s retenu) ; la bande étroite en profondeur proposée comme C6c ; les courants d'ADR-011 ; quatre questions à l'utilisateur (§8). Avant : S410, C6b
 Session suivante : **S412** — les réponses de l'utilisateur au §8 des trucages, puis **C6c** (la bande étroite en profondeur, le critère qui suit la crête, maintien 0,3 s) ; ensuite C7 au poste ; **A322 avant toute scène à 10 cm** (C10) ; la pluie 5b et les peaufinages R32, R33 plus tard
 Maillons        : 3 — justifié : S411, conception demandée par l'utilisateur ; sa réponse rend C6c exécutable ; journal
