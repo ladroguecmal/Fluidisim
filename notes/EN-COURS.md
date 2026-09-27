@@ -93,7 +93,7 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
 - [x] **P2** — l'instrument : compteurs de l'échange dans `Apic3` (sans effet sur le calcul), densité des quatre dernières colonnes
   au banc ; critère 1.
 - [>] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
-- [ ] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.
+- [x] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.
 - [ ] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
 - [ ] **P6** — suite entière, zéro avertissement.
 - [ ] **P7** — preuve (RACCORD-3D-S398 §8) ; A316 ; liste 4.16, file, feuille de route.
@@ -113,3 +113,10 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
   une particule vaut une tranche de `dx/8` sur la face-maille, son centre à `dx/16` de la face — et non à `dx/4`, dans la maille :
   la pose à `dx/4` porte chaque volume entré un quart de maille trop loin, et le mouvement d'aller-retour (±½ maille au nœud)
   l'amasse dans l'avant-dernière colonne. **Prédiction** : à 5 cm, dernière colonne ≥ 7,8, avant-dernière ≤ 8,2.
+- **P4** — témoin à 5 cm, 30 s, la pose à la face (`TRIAL_POSE_AT_FACE`) : **densité 7,785 / 7,847 / 8,002** (≥ 7,6 dans les trois
+  tranches) ; les quatre colonnes 7,79:8,01:8,01:8,00 / 7,85:7,98:7,91:7,99 / 8,00:8,05:8,02:8,02 — **le dipôle a disparu** ;
+  l'échange redevient naturel : absorbées **1 810 / 1 726 / 1 714**, retirées 108 / 1 / 0, posées 1 922 / 1 715 / 1 703 — les
+  particules traversent la face au lieu d'être retirées avant ; niveau, écart à APIC seul, **−0,15 / −0,02 / +0,46 mm** (S406 :
+  +1,76) ; courant ≤ 0,2 mm/s ; saut 0,113 ; période +0,59 contre +0,98 % (0,39 point) ; amortissement +0,43 contre +0,32 % (0,11) ;
+  volume −1,2·10⁻⁹. **Critère 3 tenu.** Prédiction « dernière colonne ≥ 7,8 » : tenue aux deux dernières tranches, à 0,015 près
+  à la première (7,785) ; « avant-dernière ≤ 8,2 » tenue (≤ 8,05).
