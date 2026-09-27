@@ -101,7 +101,7 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
 - [x] **P4** — le transfert de niveau porte l'ensemble (`delta3d_levels.rs`) ; `Follow::require_cover` ; essais du critère 3.
 - [x] **P5** — le banc `delta3d_mer_epars` : cas `suivi`, `murs` (témoin), `long`, `niveaux` ; lancés en arrière-plan.
 - [x] **P6** — les calculs du banc ; critères 4 et 5.
-- [ ] **P7** — suite entière, zéro avertissement ; critère 6.
+- [x] **P7** — suite entière, zéro avertissement ; critère 6.
 - [ ] **P8** — preuve `MER-EPARS-S404` ; liste (4.3, 4.7), file, feuille de route, index ; notes datées d'ADR-006 et d'ADR-210.
 - [ ] **P9** — rituel.
 
@@ -153,4 +153,4 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   (x = 28 m) — sans atteindre le millimètre ; part moyenne 0,686, **0,78 à 18 s puis 0,55 à 30 s** : ici l'ensemble se vide derrière
   l'objet (la prédiction ≤ 0,6 tenue en fin de cas long, manquée à 10 s du cas `suivi`) ; rendu au repos +4,5·10⁻⁴ m³, 0,12 mm au
   plus ; 338/314 ms par pas. **Critères 4 et 5** : écarts tenus partout (≤ 0,43 mm), la part manquée à 10 s, tenue à 30 s.
-- **P7** (fait pendant P6) — suite entière : **726 réussis**, 19 ignorés, zéro échec, zéro avertissement (718 + 8 essais `_s404`).
+- **P7** — suite entière : **726 réussis**, 19 ignorés, zéro échec, zéro avertissement (718 + 8 essais `_s404`).
