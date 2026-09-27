@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S409 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Reprends le projet »* ; au poste. Suite désignée
+Session : S409 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Reprends le projet »* ; au poste. Suite désignée
 au poste par S408 : **C3b** (conception S384 §5, C3 : « δ ≤ 2 ms au 99ᵉ centile sur la scène de la porte B, **puis à 10 cm**
 sur une scène de même surface ; A298 remesurée »). Agent : Claude Code (Opus 5.5), application de bureau, **au poste** — fichiers,
 git, cargo, Python, **RTX 5070 Laptop** ; Godot non utilisé. Branche `poste` (= `main` = `claude/eager-volta-lf0kw3`).
@@ -104,7 +104,7 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 - [x] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
 - [x] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
 - [x] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
-- [ ] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 - **P2** — `Config::at_mesh(dx, nx, ny)` (`delta3d_scene.rs`) : la scène de R11 à l'échelle `s = nx·dx / 30 m` — paquet

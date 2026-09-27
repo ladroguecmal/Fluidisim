@@ -17841,3 +17841,19 @@ preuve BASCULE-S408. Suivant : dans le cloud, **C6b**, la vague qui déferle ; a
 **Clôture** (12:39) : *« je vais continuer sur mon pc »* — `main` et `poste` avancés en avance rapide jusqu'à cette tête ;
 `claude/blissful-pasteur-m4j5rn` (S393–S400, entièrement contenue) : suppression refusée depuis le cloud (le commit `fecde440`
 la disait faite), **faite depuis le poste** par l'utilisateur ; la suite au poste, C3b ou C6b.
+
+## S409 — 2026-09-27 — physique : C3b, la maille de 10 cm sur la carte — et A298 refermée
+
+**Entrée.** *« Reprends le projet »*, au poste ; suite désignée par S408 : C3b. **Fait** ([preuve](../docs/validation/MULTIGRILLE-3D-S385.md)
+§6) : « à 10 cm sur une scène de même surface » était impossible — 5,9 M mailles, au-delà d'une liaison de 128 Mio et ≈ 56 ms
+par pas — ; lu comme la même mer et la même boîte sur l'emprise que le budget permet (`Config::at_mesh`, `MAILLE=`, `EMPRISE=`).
+**Qualité** : la multigrille garde son taux par cycle (≈ 0,45) mais part cinq fois plus haut — **8 cycles** pour le résidu de
+Jacobi-32 à 25 cm, quelle que soit l'emprise ; deux prédictions manquées, publiées. **Coût** : 0,53 ms + 7,1 ns par maille ;
+projection ÷ 2,8 au moins à résidu égal ; **8 m × 8 m** sous 2 ms par part à 30 Hz. **Mais à 10 cm, 30 Hz explose à 62 s**,
+quel que soit le solveur, sans paquet aussi (**A322**) : `u'·∇u'` ou le résidu du fond éteints, ou 25 ms, la font tenir ;
+hypothèse, le Courant de l'advection. À 60 Hz, stable : **5,6 m × 5,6 m** en mg 6, 1,94 ms. **A298 refermée** : au pas
+d'usage, 27 µm en deux minutes avec la multigrille contre 1,4 mm avec Jacobi-32 — la sous-convergence, pas un biais. **Trouvé
+en plus** : la référence **gagne de l'énergie** au pas long dans la cuve fermée, +41 % en 2 min, sans ADR-209 aussi (**A323**).
+Afficheur 38 réussis, zéro avertissement ; aucun défaut changé. **Limites** : un domaine, une mer, sans rendu concurrent ;
+la cuve à 10 cm sur 10 s seulement (hiérarchie tronquée). **Rituel.** Maillons **1** : 4.19 reste partiel ; la priorité du
+solveur passe avant la règle (S406). Suivant : C7 au poste ou C6b ; A322 avant toute scène à 10 cm (C10).

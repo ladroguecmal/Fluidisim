@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-27 12:50 +02:00
+JETON            : libre
+Battement        : 2026-09-27 13:59 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : S409 — physique : **C3b**, la maille de 10 cm sur la carte (multigrille contre Jacobi, δ ≤ 2 ms, deux minutes) et A298 remesurée ; plan dans [EN-COURS](notes/EN-COURS.md)
-Dernière session : S408 — physique : **C6a** ([preuve](docs/validation/BASCULE-S408.md)) — la frontière qui bouge : la bascule colonnes ↔ particules à masse exacte et son critère ; B10 à un pas d'APIC seul avec 22 % des colonnes en particules ; deux pertes de masse du pas de S399 corrigées ; 4.10 partiel. Avant : S407, le critère du raccord tenu aux deux mailles
-Session suivante : **au poste** — l'utilisateur y continue (2026-09-27) ; `main`, `poste` et `claude/eager-volta-lf0kw3` à la même tête, une seule lignée (l'ancienne `claude/blissful-pasteur-m4j5rn` supprimée depuis le poste). **S409**, au choix de l'utilisateur : **C3b** (10 cm, A298 ; la carte) puis C7, ou **C6b**, la vague qui déferle (sans carte) ; la pluie 5b et les peaufinages R32, R33 plus tard
-Maillons        : 0 — S408 : 4.10 passe à partiel ; devient possible une bande de particules qui suit la surface à masse exacte, consommée par C6b puis les scènes de C10 ; preuve BASCULE-S408 ; journal
+Session en cours : aucune
+Dernière session : S409 — physique : **C3b** ([preuve](docs/validation/MULTIGRILLE-3D-S385.md) §6) — la maille de 10 cm sur la carte : multigrille nécessaire (8 cycles), 8 m sous 2 ms à 30 Hz qui y explose en 62 s (A322), 5,6 m à 60 Hz stable ; A298 refermée (sous-convergence, pas biais) ; la cuve fermée qui gagne de l'énergie au pas long (A323). Avant : S408, C6a, la frontière qui bouge
+Session suivante : **S410**, au choix de l'utilisateur : au poste, **C7** (APIC sur la carte) ; ou **C6b**, la vague qui déferle (sans carte) ; **A322 avant toute scène à 10 cm** (C10) ; la pluie 5b et les peaufinages R32, R33 plus tard
+Maillons        : 1 — S409 : aucun point de liste ni critère de porte n'avance (4.19 reste partiel) ; la priorité du solveur passe avant la règle (S406) ; preuve MULTIGRILLE-3D-S385 §6 ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
