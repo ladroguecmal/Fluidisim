@@ -90,8 +90,8 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 - [x] **P2** — verdict R35 consigné (revue, file, preuve) ; le réglage retenu (maintien 0,3 s, fond 4, prédiction à horizon court) inscrit, défauts inchangés jusqu'à C7.
 - [x] **P3** — la vorticité de la grille aux centres des mailles ; essai (rotation solide, uniforme) ; critère 2.
 - [x] **P4** — `ColumnsSwitch::floor_vorticity` : la colonne requise et le fond sous la maille tourbillonnaire la plus basse ; essai.
-- [>] **P5** — le banc du tourbillon enfoui ; les trois montages ; critère 3.
-- [ ] **P6** — la vague de Chen avec le seuil ; critère 4.
+- [x] **P5** — le banc du tourbillon enfoui ; les trois montages ; critère 3.
+- [>] **P6** — la vague de Chen avec le seuil ; critère 4.
 - [ ] **P7** — suite entière ; critère 5.
 - [ ] **P8** — preuve (BANDE-ETROITE-S413 §6), ADR-212 note (C6c-3), liste, file, feuille de route, index.
 - [ ] **P9** — rituel.
@@ -106,3 +106,23 @@ avertissement. **Arrêt** : ne rien rendre défaut.
   tourbillonne au-delà du seuil est requise ; `place_floor`, le fond à `k` sous la plus basse de ces mailles. Essai `_s415` :
   cisaillement enfoui (rangées 2 à 4, colonnes 6 à 10) — sans seuil tout passe aux colonnes ; à 2 s⁻¹, bande 3 à 12, fond **0**
   sous le cisaillement, 0,3 m à côté ; volume exact. 32 essais d'APIC 3D tenus.
+- **P5** — `examples/apic3d_tourbillon.rs` : Lamb–Oseen d'axe `y`, `r_c` 0,1 m, 0,5 m/s au plus, à mi-profondeur d'un bassin de
+  2 × 0,2 m et 1 m d'eau, 5 s ; énergie cinétique et vorticité max sur la grille (mêmes lectures pour tous) ; accesseurs
+  `velocity_v`, `velocity_w`, `grid_vorticity`. **Et, ajouté** : `floor_speed` (la vitesse, les mots de l'utilisateur) à côté de
+  `floor_vorticity`, `cell_speed`. Énergie restante à 5 s / vorticité max / particules :
+
+  | montage | 5 cm | 2,5 cm |
+  |---|---|---|
+  | APIC seul | 0,750 / 5,24 / 25 600 | 0,806 / 6,98 / 204 800 (511 s) |
+  | bande de C6c-2 : tout à la grille | 0,403 / 2,34 / 0 | 0,518 / 3,79 / 0 |
+  | vorticité 1 s⁻¹ | 0,625 / 5,15 / 3 700–6 150 | 0,709 / 7,02 / 25 800–47 000 (289 s) |
+  | vorticité 0,3 s⁻¹ | 0,705 / 5,23 / 5 150–11 360 | 0,750 / 7,01 / 34 500–56 600 (331 s) |
+  | **vorticité 1 + vitesse 0,2 m/s** | **0,765** / 5,20 / 9 070–11 260 | au calcul |
+  | vitesse 0,1 m/s | 0,789 / 5,21 / 13 500–18 500 | — |
+  | vorticité 0,3 + vitesse 0,2 | 0,773 / 5,21 / 9 250–12 860 | — |
+
+  Critère 3 : **prédiction 1 tenue** (la grille perd 2,4 à 2,5 fois l'énergie qu'APIC perd) ; **prédiction 2** (à 20 % de la perte
+  d'APIC) **manquée à 1 s⁻¹** (1,5 fois), tenue à 0,3 s⁻¹ à 5 cm (1,18), manquée à 2,5 cm (1,29) ; **le cœur du tourbillon est gardé**
+  à tous les seuils (vorticité max à 2 % d'APIC seul). **Compris** : l'énergie d'un tourbillon est surtout dans son écoulement
+  extérieur, **irrotationnel** — la vorticité le laisse à la grille, qui le lisse ; **la vitesse** (l'idée de l'utilisateur à la
+  lettre) le prend : avec elle, l'énergie de la bande égale celle d'APIC seul, 2,3 à 2,8 fois moins de particules.

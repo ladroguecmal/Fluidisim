@@ -238,6 +238,19 @@ impl Apic3 {
     pub fn velocity_u(&self) -> &[f32] {
         &self.u
     }
+
+    /// S415 — les vitesses `v` et `w` de la grille, aux faces (pour les bancs).
+    pub fn velocity_v(&self) -> &[f32] {
+        &self.v
+    }
+    pub fn velocity_w(&self) -> &[f32] {
+        &self.w
+    }
+
+    /// **S415** — la vorticité de la grille au centre d'une maille, s⁻¹ (`vorticity`, pour les bancs).
+    pub fn grid_vorticity(&self, i: usize, j: usize, k: usize) -> f32 {
+        self.vorticity(i, j, k)
+    }
     /// Distance signée reconstruite aux centres des mailles (`x` le plus rapide, puis `y`, puis `z`).
     pub fn distance(&self) -> &[f32] {
         &self.phi
