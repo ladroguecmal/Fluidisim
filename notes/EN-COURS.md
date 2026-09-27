@@ -90,7 +90,7 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'instrument : compteurs de l'échange dans `Apic3` (sans effet sur le calcul), densité des quatre dernières colonnes
+- [>] **P2** — l'instrument : compteurs de l'échange dans `Apic3` (sans effet sur le calcul), densité des quatre dernières colonnes
   au banc ; critère 1.
 - [ ] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
 - [ ] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.

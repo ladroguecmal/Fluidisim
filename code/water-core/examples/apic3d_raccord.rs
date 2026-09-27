@@ -17,6 +17,9 @@
 //!
 //!     cargo run -p water-core --release --offline --example apic3d_raccord -- <dx> <seul|raccord|colonnes> [durée_s]
 //!
+//! **S407** — `quatre_colonnes` : la densité des quatre dernières colonnes de la bande par tranche (de la frontière vers
+//! l'intérieur) ; `echange_abs_ret_pos` : particules absorbées, retirées, posées par tranche.
+//!
 //! **S406** — la face de frontière appartient à la zone, la quantité de mouvement absorbée est rendue (le défaut) ;
 //! `APIC3D_ESSAI=<bits>` éprouve d'autres gestes : `Apic3::TRIAL_S400` = 1 (la frontière de S400), `TRIAL_FACE_BOTH_SIDES` = 2,
 //! `TRIAL_MEAN_HEIGHT` = 4, `TRIAL_SPREAD_REMOVAL` = 8.
@@ -97,6 +100,9 @@ fn main() {
     let (mut marche, mut marches) = (0f64, 0usize);
     // S400 : les particules par maille de la dernière colonne de la bande, **par rangée** (somme sur `j`, moyenne sur les relevés).
     let mut par_rangee = vec![0f64; nz];
+    // S407 : la densité des quatre dernières colonnes de la bande (`ib − 1` à `ib − 4`) par tranche, et les gestes de l'échange
+    // par tranche (absorbées, retirées, posées).
+    let (mut quatre, mut gestes, mut vus) = (vec![[0f64; 4]; 3], vec![[0u64; 3]; 3], [0u64; 3]);
     let mut prochain = 100_000u64;
     let debut = Instant::now();
     while t < fin {
@@ -141,6 +147,24 @@ fn main() {
             }
             let pleines: Vec<u32> = occ.into_iter().filter(|n| *n > 0).collect();
             densites[tranche] += pleines.iter().sum::<u32>() as f64 / pleines.len().max(1) as f64;
+            // S407 : les quatre dernières colonnes.
+            let mut occ4 = vec![vec![0u32; ny * nz]; 4];
+            for p in a.particles() {
+                let i = ((p[0] as f64 / dx) as usize).min(nx - 1);
+                if i + 4 >= ib && i < ib {
+                    let (j, kk) = (((p[1] as f64 / dx) as usize).min(ny - 1), ((p[2] as f64 / dx) as usize).min(nz - 1));
+                    occ4[ib - 1 - i][kk * ny + j] += 1;
+                }
+            }
+            for (m, o) in occ4.iter().enumerate() {
+                let pleines: Vec<u32> = o.iter().copied().filter(|n| *n > 0).collect();
+                quatre[tranche][m] += pleines.iter().sum::<u32>() as f64 / pleines.len().max(1) as f64;
+            }
+            let compte = a.columns_exchange_counts();
+            for g in 0..3 {
+                gestes[tranche][g] += compte[g] - vus[g];
+            }
+            vus = compte;
             releves[tranche] += 1;
             // Le saut : hauteur lue de la dernière colonne de la bande contre celle de la première colonne suivante.
             let droite: Vec<Option<f64>> = (0..ny)
@@ -174,7 +198,7 @@ fn main() {
     println!(
         "APIC3D_RACCORD_S399 montage={} dx={dx} particules={} pas={pas} volume_relatif={:+.2e} refusees={} niveau_gauche_mm={} \
          particules_par_maille={} saut_max_mailles={saut_max:.3} periode_s={periode:.4} erreur={:+.2}% amortissement_par_periode={:+.2}% \
-         pics={} u_face_mm_s={} marche_lue_mm={:+.3} particules_par_rangee={} calcul_s={:.0}",
+         pics={} u_face_mm_s={} marche_lue_mm={:+.3} particules_par_rangee={} quatre_colonnes={} echange_abs_ret_pos={} calcul_s={:.0}",
         if colonnes { "colonnes" } else if raccord { "raccord" } else { "seul" },
         a.particle_count(),
         a.total_volume() / v0 - 1.,
@@ -187,6 +211,8 @@ fn main() {
         u_face.iter().map(|x| format!("{:+.1}", 1e3 * x / duree_u)).collect::<Vec<_>>().join(","),
         1e3 * marche / marches.max(1) as f64,
         par_rangee.iter().map(|x| format!("{:.2}", x / releves.iter().sum::<usize>().max(1) as f64)).collect::<Vec<_>>().join(","),
+        (0..3).map(|t| (0..4).map(|m| format!("{:.2}", quatre[t][m] / releves[t].max(1) as f64)).collect::<Vec<_>>().join(":")).collect::<Vec<_>>().join("/"),
+        (0..3).map(|t| format!("{}:{}:{}", gestes[t][0], gestes[t][1], gestes[t][2])).collect::<Vec<_>>().join("/"),
         debut.elapsed().as_secs_f64()
     );
 }

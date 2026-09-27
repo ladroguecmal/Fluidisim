@@ -46,6 +46,9 @@ pub(crate) struct Columns3 {
     pub(crate) band: bool,
     /// **S406, essais seulement** : les gestes de la frontière, un à un (`Apic3::TRIAL_…`) ; zéro, ceux de S406.
     pub(crate) trials: u8,
+    /// **S407 — l'instrument de l'échange**, depuis la configuration : particules absorbées, retirées pour un solde dû, posées
+    /// pour un solde reçu. Aucun effet sur le calcul.
+    pub(crate) counts: [u64; 3],
 }
 
 /// **S400** — le nombre de positions de la surface, sur une maille, où la lecture de la bande est tabulée.
@@ -115,6 +118,7 @@ impl Apic3 {
             read_bias: vec![0.; READ_TABLE],
             band: mask.iter().any(|m| *m == 0),
             trials: 0,
+            counts: [0; 3],
         });
         self.columns_tabulate();
         Ok(())
@@ -444,6 +448,11 @@ impl Apic3 {
         let soldes = self.columns.as_ref().map_or(0., |c| c.solde_u.iter().chain(&c.solde_v).sum::<f64>());
         self.n as f64 * vp + self.columns_volume() + soldes
     }
+    /// **S407** — les gestes de l'échange depuis la configuration : `[absorbées, retirées, posées]` ; zéros sans zone.
+    pub fn columns_exchange_counts(&self) -> [u64; 3] {
+        self.columns.as_ref().map_or([0; 3], |c| c.counts)
+    }
+
     /// Particules que la capacité n'a pas laissé poser depuis la configuration.
     pub fn columns_refused(&self) -> u64 {
         self.columns.as_ref().map_or(0, |c| c.refused)
@@ -544,6 +553,7 @@ impl Apic3 {
                 // Au cœur de la zone, loin de toute bande : le volume va à la surface de sa colonne.
                 None => cols.eta[j * nx + i] += (vp / (dx as f64 * dx as f64)) as f32,
             }
+            cols.counts[0] += 1;
             self.remove_particle(k);
         }
         // (2) et (3) : chaque face-maille de frontière règle son solde. Les particules sont triées par maille ; un retrait est
@@ -622,6 +632,7 @@ impl Apic3 {
                             let Some((_, _, m)) = pick else { break };
                             self.shift[m] = [f32::NAN; 3];
                             let c = self.columns.as_mut().unwrap();
+                            c.counts[1] += 1;
                             if axis == 0 { c.solde_u[face] += vp } else { c.solde_v[face] += vp }
                         }
                         // (3) Poser ce qui est reçu : contre la face, au sous-réseau le plus libre de la maille.
@@ -666,6 +677,7 @@ impl Apic3 {
                             self.shift[m] = [0.; 3];
                             self.n += 1;
                             let cols = self.columns.as_mut().unwrap();
+                            cols.counts[2] += 1;
                             if axis == 0 { cols.solde_u[face] -= vp } else { cols.solde_v[face] -= vp }
                         }
                     }
