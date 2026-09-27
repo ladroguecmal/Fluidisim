@@ -92,7 +92,7 @@ ne rien rendre défaut, et le dire.
 
 - [x] **P1** — jeton, décision de l'utilisateur à la file, plan seul.
 - [x] **P2** — options d'essai de la frontière dans `Apic3` (a, b, c) et leur passage au banc `apic3d_raccord` ; critère 1.
-- [>] **P3** — témoins courts, 5 cm, 30 s : chaque option seule, puis la combinaison ; attribution.
+- [x] **P3** — témoins courts, 5 cm, 30 s : chaque option seule, puis la combinaison ; attribution.
 - [ ] **P4** — le remède attribué devient le défaut ; essais ; critères 1 à 3.
 - [ ] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
 - [ ] **P6** — suite entière, zéro avertissement.
@@ -129,3 +129,9 @@ ne rien rendre défaut, et le dire.
   densité ne l'est à aucune** — à 2,5 cm le déficit prend toute la profondeur de la dernière colonne (7,2 à 7,5 par rangée), sans
   que la masse de la bande bouge. Témoin de densité : l'échange retire toujours dans la dernière colonne ; essai 16 — retirer
   dans la maille la plus pleine des deux dernières colonnes.
+- **P3** (fin) — témoin de densité, 5 cm : **16** (retrait dans la plus pleine des deux dernières colonnes, face de S400) : densité
+  7,511/7,688/7,907 ; **28** (16 + face à la zone + quantité de mouvement) : 7,519/7,668/7,850, niveau +0,12/+0,58/+0,88, courant
+  +1,2 au plus. **La densité ne vient pas du lieu du retrait.** **Attribution** : le **courant** est porté par la face de frontière
+  prise au seul transfert de la bande — remède : la face prise à la zone ; la quantité de mouvement rendue ramène la migration au
+  critère ; la **densité** reste **non attribuée** (ni (a), ni (b), ni (c), ni le lieu du retrait). Remède retenu : **12** (face à
+  la zone + quantité de mouvement).
