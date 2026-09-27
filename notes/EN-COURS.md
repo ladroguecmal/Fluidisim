@@ -98,8 +98,8 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
   bande (`APIC3D_BASCULE`, comme B10), la crête courte en option.
 - [x] **P4** — APIC seul ; critère 1.
 - [x] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
-- [>] **P5b** — *ajoutée* : le maintien balayé (0,1 ; 0,2 ; 0,3 s), le réglage retenu, son coût dans la même fournée qu'APIC seul.
-- [ ] **P6** — la crête courte ; critère 6.
+- [x] **P5b** — *ajoutée* : le maintien balayé (0,1 ; 0,2 ; 0,3 s), le réglage retenu, son coût dans la même fournée qu'APIC seul.
+- [>] **P6** — la crête courte ; critère 6.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 7.
 - [ ] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
 - [ ] **P9** — rituel.
@@ -140,3 +140,25 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
   (0,6178 à x = 3,375). Instrument ajouté : **retours rapides** (C puis P en moins de 0,25 τ) ; aux défauts, ses 45 sont l'arrivée du
   ressaut de la crête précédente juste après la libération (1,36–1,47 τ), pas une hésitation. Critères : 2 manqué (impact
   +3,2 %), 3 tenu (7 pas), 4 manqué tel qu'écrit, 5 : défauts plus chers qu'APIC seul.
+- **P5b** — balayage (six calculs ensemble ; temps non comparables) :
+
+  | réglage | retournement t/τ | impact t/τ ; x | part moy. | bascules max | retours rapides |
+  |---|---|---|---|---|---|
+  | maintien 0,1 s | 0,7021 | 1,3324 ; 4,225 | 0,309 | 3 | 12 |
+  | maintien 0,2 s | 0,7020 | 1,3127 ; 4,225 | 0,432 | 3 | 8 |
+  | **maintien 0,3 s** | 0,7020 | **1,3056** ; 4,225 | **0,520** | 3 | **0** |
+  | dilatation 4, 0,2 s | 0,6237 | 1,3110 ; 4,215 | 0,509 | 3 | 12 |
+  | dilatation 8, 0,2 s | 0,7034 | 1,3153 ; 4,230 | 0,659 | 3 | 92 |
+  | dilatation 4, 0,05 s | 0,6239 | 1,5260 ; 2,607 | 0,370 | 4 | 8 |
+
+  **Le retard de l'impact ne dépend ni du maintien ni de la largeur** (+2,7 à +4,8 % dès que le déferlement reste le même) :
+  ce n'est pas le jet qui retombe hors de la bande (dilatation 8, 0,4 m de part et d'autre : encore +3,5 %). **Le retournement
+  à 0,62** (dilatation 4, `relache`) : même signature qu'APIC seul à 0,7055 (profil imprimé : une maille vide sous la lèvre de
+  la crête, 2 puis 0 puis 4 particules) — l'instrument est à la limite de la maille, pas faux ; la lèvre se sépare plus tôt.
+  **L'hystérésis de la pente, corrigée** : le premier jet faisait d'une colonne gardée une **source de la dilatation**, qui
+  redemandait ses voisines à peine libérées ; désormais **gardée sans dilater** (`keep`, un octet par colonne de plus ; essai
+  `_s410` : 48 colonnes rendues au lieu de 32). **Toujours une impasse** : `relache` 0,3 à 0,7 × maintien 0,05 à 0,2 s — 36 à
+  190 retours rapides, et **l'impact dispersé de 1,30 à 1,68 τ**, jusqu'à x = 3,12. **Le fait qui commande** : l'impact d'APIC
+  seul bouge de 0,05 % sous une perturbation minime, celui de la bande de 3 à 30 % selon le réglage — **chaque conversion au
+  sommet de la crête perturbe le déferlement** (voie mixte, ensemencement quantifié) ; moins il y en a (maintien ≥ 0,3 s), plus
+  la bande suit APIC seul. **Retenu pour la suite de la mesure : maintien 0,3 s** (aucun retour rapide, impact +2,7 %, bande 52 %).

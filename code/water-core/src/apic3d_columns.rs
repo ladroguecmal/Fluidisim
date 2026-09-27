@@ -1059,9 +1059,9 @@ impl Apic3 {
 pub struct ColumnsSwitch {
     /// Pente de surface au-delà de laquelle une colonne est requise ; défaut 1.
     pub slope_max: f32,
-    /// **S410 — l'hystérésis de la pente** : une colonne **déjà en particules** reste requise tant que sa pente dépasse ce seuil
-    /// (plus bas que `slope_max`). `None`, le défaut : `slope_max`, le critère de S408. Sur une crête qui passe, la pente hésite
-    /// autour d'un seuil unique, et une colonne basculait jusqu'à sept fois (S410).
+    /// **S410 — l'hystérésis de la pente** : une colonne **déjà en particules** est **gardée** tant que sa pente dépasse ce
+    /// seuil (plus bas que `slope_max`) — gardée, pas requise : elle n'étend pas la bande par la dilatation, sans quoi elle
+    /// redemande ses voisines à peine libérées (S410, premier jet). `None`, le défaut : `slope_max`, le critère de S408.
     pub slope_release: Option<f32>,
     /// Marge autour du corps, m ; défaut deux mailles.
     pub body_margin: f32,
@@ -1076,6 +1076,8 @@ pub struct ColumnsSwitch {
     need: Vec<u8>,
     spread: Vec<u8>,
     request: Vec<u8>,
+    /// S410 : gardée par l'hystérésis de la pente.
+    keep: Vec<u8>,
     before: Vec<u8>,
     height: Vec<f32>,
     switches: Vec<u16>,
@@ -1086,7 +1088,7 @@ pub struct ColumnsSwitch {
 impl ColumnsSwitch {
     /// Octets réservés pour un domaine.
     pub fn reserved_bytes(domain: Domain3) -> Option<usize> {
-        domain.nx.checked_mul(domain.ny)?.checked_mul(8 + 1 + 1 + 1 + 1 + 4 + 2)
+        domain.nx.checked_mul(domain.ny)?.checked_mul(8 + 1 + 1 + 1 + 1 + 1 + 4 + 2)
     }
 
     /// Le critère d'un domaine, aux valeurs par défaut, réservé auprès de l'hôte. Refus `Domain` si l'hôte refuse.
@@ -1106,6 +1108,7 @@ impl ColumnsSwitch {
             need: vec![0; cols],
             spread: vec![0; cols],
             request: vec![0; cols],
+            keep: vec![0; cols],
             before: vec![0; cols],
             height: vec![0.; cols],
             switches: vec![0; cols],
@@ -1167,6 +1170,7 @@ impl ColumnsSwitch {
     fn decide(&mut self, now_us: u64, a: &Apic3) {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let c = a.columns.as_ref().unwrap();
+        self.keep.fill(0);
         // (1) Les hauteurs, et les colonnes de la bande qui ne sont pas convertibles.
         for j in 0..ny {
             for i in 0..nx {
@@ -1223,9 +1227,11 @@ impl ColumnsSwitch {
                 };
                 let sx = slope(at(i.checked_sub(1), Some(j)), at(Some(i + 1), Some(j)));
                 let sy = slope(at(Some(i), j.checked_sub(1)), at(Some(i), Some(j + 1)));
-                let seuil = if c.mask[col] == 0 { self.slope_release.unwrap_or(self.slope_max) } else { self.slope_max };
-                if sx * sx + sy * sy > seuil * seuil {
+                let s2 = sx * sx + sy * sy;
+                if s2 > self.slope_max * self.slope_max {
                     self.need[col] = 1;
+                } else if c.mask[col] == 0 && self.slope_release.is_some_and(|r| s2 > r * r) {
+                    self.keep[col] = 1;
                 }
             }
         }
@@ -1240,7 +1246,8 @@ impl ColumnsSwitch {
         for j in 0..ny {
             for i in 0..nx {
                 let col = j * nx + i;
-                let required = (j.saturating_sub(r)..(j + r + 1).min(ny)).any(|y| self.spread[y * nx + i] != 0);
+                let required =
+                    (j.saturating_sub(r)..(j + r + 1).min(ny)).any(|y| self.spread[y * nx + i] != 0) || self.keep[col] != 0;
                 if required {
                     self.required_at[col] = now_us;
                 }

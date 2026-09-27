@@ -112,6 +112,9 @@ fn main() {
     let mut depuis = vec![0u64; nx * ny];
     // Les instants des bascules de chaque colonne après la zone initiale, pour trouver celles qui oscillent (instrument).
     let mut instants: Vec<Vec<(f64, bool)>> = vec![Vec::new(); nx * ny];
+    // Crête courte : les colonnes de la bande dans le huitième extérieur de chaque côté (`ε` < 0,32, sous le seuil) — au plus.
+    let (mut bord_max, mut bord_t) = (0usize, f64::NAN);
+    let bord = |j: usize| j < ny / 8 || j >= ny - ny / 8;
     let (mut t_us, mut pas, mut iterations, mut vmax) = (0u64, 0u64, 0u64, 0f32);
     let (mut ecart_volume, mut particules_max) = (0f64, a.particle_count());
     let (mut crete, mut crete_x) = (f64::MIN, f64::NAN);
@@ -137,6 +140,12 @@ fn main() {
             }
             ecart_volume = ecart_volume.max((a.total_volume() / v0 - 1.).abs());
             particules_max = particules_max.max(a.particle_count());
+            if pas > 1 {
+                let n_bord = (0..nx * ny).filter(|&c| bord(c / nx) && !a.is_column(c % nx, c / nx)).count();
+                if n_bord > bord_max {
+                    (bord_max, bord_t) = (n_bord, t_us as f64 * 1e-6 / tau);
+                }
+            }
             for c in 0..nx * ny {
                 let particules = !a.is_column(c % nx, c / nx);
                 if pas > 1 && particules != (depuis[c] != u64::MAX) {
@@ -193,6 +202,12 @@ fn main() {
                     ret_min = ret_min.min(centre(i));
                     ret_max = ret_max.max(centre(i));
                     if retournement.is_none() {
+                        // Le profil de la verticale, de bas en haut : particules par maille, `c` sous `η` d'une colonne.
+                        let profil: Vec<String> = (0..nz)
+                            .map(|kk| if colonne(i, j, kk) { "c".to_string() } else { occupation[(kk * ny + j) * nx + i].to_string() })
+                            .collect();
+                        println!("APIC3D_DEFERLEMENT_PROFIL t_sur_tau={:.4} x={:.3} j={j} colonne={} [{}]", t / tau, centre(i),
+                            a.is_column(i, j), profil.join(" "));
                         let c = j * nx + i;
                         let avance = if bascule.is_some() { t - depuis[c] as f64 * 1e-6 } else { f64::NAN };
                         let part = (0..nx * ny).filter(|&c| !a.is_column(c % nx, c / nx)).count() as f64 / (nx * ny) as f64;
@@ -304,9 +319,9 @@ fn main() {
             "APIC3D_DEFERLEMENT_BASCULE cles={} pente={} relache={} dilatation={} maintien_s={} part_bande_moy={:.3} \
              part_au_retournement={part_au_retournement:.3} avance_bande_sur_retournement_s={avance:.4} \
              avance_sur_tau={:.3} bascules_max={} volume_relatif_max={ecart_volume:.2e} particules_fin={} \
-             particules_max={particules_max} poses_refusees={}",
+             particules_max={particules_max} poses_refusees={} bord_bande_max={bord_max} bord_t_sur_tau={bord_t:.3}              colonnes_du_bord={}",
             cles.as_deref().unwrap_or(""), s.slope_max, s.slope_release.unwrap_or(s.slope_max), s.dilation, s.hold_us as f64 * 1e-6, s.mean_band_fraction(),
-            avance / tau, s.max_switches(), a.particle_count(), a.columns_refused()
+            avance / tau, s.max_switches(), a.particle_count(), a.columns_refused(), nx * (ny / 8) * 2
         );
         // Les colonnes qui basculent le plus : abscisse, puis instants (t/τ, P : vers les particules, C : vers les colonnes).
         let mut ordre: Vec<usize> = (0..nx * ny).filter(|&c| c / nx == ny / 2).collect();
