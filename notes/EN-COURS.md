@@ -103,7 +103,7 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 - [x] **P5c** — *ajoutée* : à cadence stable (60 Hz, un pas par image), l'emprise à 10 cm sous 2 ms ; deux minutes.
 - [x] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
 - [x] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
-- [ ] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
+- [x] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
@@ -199,3 +199,7 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
   arrêtée (≈ 2 h 45).
 - **P7** — afficheur : **38 réussis** (S390 : 37, plus l'essai `_s409`), 2 ignorés, aucun échec, zéro avertissement. Le cœur
   n'est pas touché (dernier décompte, S408 : 739 réussis, 19 ignorés). Critère 7 tenu.
+- **P8** — preuve [MULTIGRILLE-3D-S385](../docs/validation/MULTIGRILLE-3D-S385.md) §6 (Reproduire à `355c4fec`) ; §5 renvoie
+  à §6 ; liste 4.19 (reste partiel : S409, manque 30 Hz stable à 10 cm) ; file : campagne (C3), A298 refermée, A322 et A323
+  ajoutées ; feuille de route §3 ter (S409, suivantes) ; index (carte par système, ligne B) ; angles morts : A298 refermée,
+  **A322**, **A323** (sévérité 2). `--check` : 0.

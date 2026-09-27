@@ -309,8 +309,10 @@ pas recopiée ici (L137).
   60 Hz ([preuve](validation/COUT-DELTA3D-S341.md) §12). **S385** : la **multigrille 3D** de la référence, préconditionneur du
   pas mobile — 9 à 11 itérations de 12 288 à 786 432 mailles contre 102 à 365 ([preuve](validation/MULTIGRILLE-3D-S385.md)) ;
   **S390** : **sur la carte**, éteinte par défaut — à la porte B, le résidu de Jacobi-32 en 6 cycles, projection 1,08 ms
-  contre 2,08, pas 2,75 ms au 99ᵉ centile contre 3,77 ([preuve](validation/MULTIGRILLE-3D-S385.md) §5). Manquent la
-  maille de 10 cm (C3b), d'autres scènes, plusieurs domaines en direct, un 99ᵉ centile en direct.
+  contre 2,08, pas 2,75 ms au 99ᵉ centile contre 3,77 ([preuve](validation/MULTIGRILLE-3D-S385.md) §5). **S409** : **à 10
+  cm**, la multigrille y est nécessaire (8 cycles ; projection ÷ 2,8 au moins à résidu égal) ; sous 2 ms par image, **8 m ×
+  8 m** à 30 Hz — qui y explose en 62 s (A322) — et **5,6 m × 5,6 m** à 60 Hz, stable ([§6](validation/MULTIGRILLE-3D-S385.md)).
+  Manquent 30 Hz stable à 10 cm, d'autres scènes, plusieurs domaines en direct, un 99ᵉ centile en direct.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *partiel* **depuis S369** :
   δ relatif à la dynamique de B ([ADR-198](adr/ADR-198-la-voie-d-a289.md)) — sous B seul, δ nul reste nul **au bit**,

@@ -193,8 +193,8 @@ binaire rend aujourd'hui 2,2 à 2,6·10⁻⁸ avec Jacobi.
 
 ### Ce que cette section ne dit pas
 
-- **Rien à 10 cm** : c'est là que Jacobi rampe et que la multigrille doit payer (C3b), sur une scène de même surface.
-- **A298 non remesurée** : elle se remesure sur le pas retenu, en C3b.
+- **Rien à 10 cm** : c'est là que Jacobi rampe et que la multigrille doit payer (C3b), sur une scène de même surface. *S409 : §6.*
+- **A298 non remesurée** : elle se remesure sur le pas retenu, en C3b. *S409 : §6.5.*
 - **Pas activée par défaut** dans la scène vivante : la scène amplifie tout écart, ses images changeraient toutes, et
   les revues R16 à R18 ont jugé Jacobi-32 ; le gain à 25 cm est de la marge, et la cadence où elle compte (30 Hz) est
   instable sur la minute (A321). L'option `--multigrille` la rend visible (captures à 30 Hz : divergence franche
@@ -209,3 +209,136 @@ pression ; un terme de second ordre fait tenir la scène deux minutes à 30 et 6
 ([ADR-209](../adr/ADR-209-l-advection-de-delta-au-second-ordre-en-temps.md), [preuve](A321-S391.md)). Les chiffres de coût
 ci-dessus précèdent ce terme.
 
+## 6. S409 — la maille de 10 cm sur la carte (C3, seconde part) et A298
+
+2026-09-27, **au poste** (RTX 5070 Laptop, Dx12, secteur). La même production qu'au §5 — rien n'y change par défaut —, sur la
+scène de la porte B **mise à l'échelle** d'une emprise : `Config::at_mesh` (`viewer/src/delta3d_scene.rs`) garde la mer, le
+fond à 3,5 m, une boîte d'au moins 7 m (72 couches à 10 cm : trois niveaux grossiers) et met à l'échelle de l'emprise le
+paquet — cambrure `ak` = 0,26 gardée —, sa place et l'éponge ; à 25 cm sur 120 × 112, c'est `review` (essai `_s409`).
+
+### Reproduire
+
+- Commit `355c4fec` (P6 de S409) ou plus récent ; machine de référence. `cargo run --manifest-path viewer/Cargo.toml --release
+  --offline -- <option>`, variables devant.
+- **Essai** : `cargo test --manifest-path viewer/Cargo.toml --release --offline s409` (instantané).
+- **Qualité** (§6.2) : `MAILLE=0.1 EMPRISE=80,80 COUT=0` puis `64,64` et `96,96`, témoin `MAILLE=0.25 EMPRISE=32,32` —
+  `--delta3d-mg-scene`, 300 pas, ≈ 50 s chacun ; lignes `MG_SCENE_S409` (la forme) et `MG_SCENE_S390`.
+- **Coût** (§6.3) : `MAILLE=0.1 EMPRISE=n,n PAS=30 REFERENCES=0 VARIANTES=jacobi32,jacobi64,jacobi128,mg6,mg8 MG_CYCLES=8`
+  (≈ 40 s ; `VARIANTES=` règle désormais aussi le coût) ; à 60 Hz, `PAS_US=16667 PAS=7200 REFERENCES=0 VARIANTES=mg6,mg8` sur
+  `48,48` et `56,56` (≈ 2 min).
+- **Durée** (§6.4) : `MAILLE=0.1 EMPRISE=80,80 PAS=3600 COUT=0 REFERENCES=0 VARIANTES=jacobi32,mg6,mg8` — **explose au pas
+  1 860** ; `PAS_US=16667 PAS=7200 … VARIANTES=mg8` — tient. Attribution : `MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8
+  SECONDES=90` et `COMMUTATEURS=1|2|4|8|16|64`, `EPONGE=0`, `PAQUET=0`, `PAS_US=25000` — `--delta3d-a321`, 10 à 40 s chacun.
+  *Piège* : sous Windows, des fichiers de sortie qui ne diffèrent que par la casse n'en font qu'un.
+- **A298** (§6.5) : `--delta3d-cuve-longue` sans variable (le banc de S305 : 1 ms, 5 s, Jacobi 64 ; cinq minutes) ;
+  `PAS_US=33333 PAS=3600 FENETRE=300 CYCLES=32`, puis `MULTIGRILLE=1 CYCLES=8`, puis `… SANS_SECOND_ORDRE=1` (cinq minutes
+  chacun, la référence CPU domine) ; `PAS_US=16667 PAS=3600 FENETRE=600 MULTIGRILLE=1 CYCLES=8`.
+
+### 6.1 Ce que « même surface » ne pouvait pas vouloir dire — un calcul, avant toute mesure
+
+La conception (S384 §5, C3) demandait δ ≤ 2 ms « à 10 cm sur une scène de même surface ». Les 30 × 28 m de la porte B à 10 cm,
+boîte de 7 m, font **5,9 M mailles** et 17,8 M faces : le tampon des faces du pas (dix flottants) dépasse une liaison de 128
+Mio vers 3,4 M faces (≈ 1,1 M mailles), et le coût par maille de S350 donnerait ≈ 56 ms par pas. Le critère supposait les
+colonnes hautes (14 m de côté à 10 cm, S384 §3.3), que S386–S387 ont réservées à l'eau calme. **Lu ici** : la même mer, la
+même boîte, une perturbation à la même pente, sur l'emprise que le budget permet — la mesure dit laquelle.
+
+### 6.2 La qualité à 10 cm — critères écrits avant
+
+| critère | résultat |
+|---|---|
+| **1** — sans `MAILLE=`, le pas au bit | **tenu** : `--delta3d-empreinte` avant et après, 60 et 600 pas, mêmes empreintes |
+| **2** — la multigrille atteint le résidu médian de Jacobi-32 à 25 cm (7,1·10⁻⁵, §5) en ≤ 8 cycles, quelle que soit l'emprise | **tenu à 8 cycles** : 2,2 à 2,4·10⁻⁵ sur trois emprises ; **6 ne suffisent plus** (1,1·10⁻⁴) |
+| *prédictions* : Jacobi-32 ≥ 5 fois moins bon qu'à 25 cm ; la multigrille aux mêmes cycles | **manquées, les deux** : 3,0 à 4,3 fois (2,4 à scène égale) ; deux cycles de plus |
+
+Résidu relatif **médian**, 300 pas à 30 Hz (maximum publié dans les lignes) :
+
+| variante | 6,4 m — 294 912 | 8 m — 460 800 | 9,6 m — 663 552 | 8 m à 25 cm — 28 672 | §5, 30 × 28 m à 25 cm |
+|---|---|---|---|---|---|
+| Jacobi 32 | 3,06·10⁻⁴ | 2,41·10⁻⁴ | 2,15·10⁻⁴ | 9,9·10⁻⁵ | 7,1·10⁻⁵ |
+| Jacobi 64 | 6,7·10⁻⁵ | 5,5·10⁻⁵ | 5,1·10⁻⁵ | 8,9·10⁻⁶ | 7,4·10⁻⁶ |
+| Jacobi 128 | 8,5·10⁻⁶ | 6,4·10⁻⁶ | 6,3·10⁻⁶ | 2,7·10⁻⁷ (plancher) | — |
+| mg 4 | 4,3·10⁻⁴ | 5,0·10⁻⁴ | 4,6·10⁻⁴ | 1,3·10⁻⁴ | 2,0·10⁻⁴ |
+| mg 6 | 1,29·10⁻⁴ | 1,13·10⁻⁴ | 1,08·10⁻⁴ | 2,0·10⁻⁵ | 4,9·10⁻⁵ |
+| **mg 8** | **2,3·10⁻⁵** | **2,2·10⁻⁵** | **2,4·10⁻⁵** | 4,2·10⁻⁶ | 1,2·10⁻⁵ |
+
+mg 1 et 2 explosent avant le pas 30 à 10 cm ; tout le reste tient les 300 pas. **Ce que la table dit** (à scène égale, 8 m) :
+le **taux par cycle** de la multigrille ne bouge pas avec la maille (≈ 0,45) — c'est son **point de départ**, le résidu que
+laisse le pas précédent, qui est cinq fois plus haut à 10 cm ; le taux de Jacobi, lui, se dégrade (×0,23 par 32 itérations
+contre ×0,09 à 25 cm). L'écart entre les deux références convergées (mg 24, Jacobi 512) vaut 0,7 à 44 mm aux points de
+contrôle : A297, comme au §5 — la surface de cette scène ne juge pas la projection.
+
+### 6.3 Le coût à 10 cm
+
+Chaque pas soumis seul et attendu, 200 pas horodatés, **q99 en ms** — projection / pas entier :
+
+| emprise | Jacobi 32 | Jacobi 64 | Jacobi 128 | mg 6 | **mg 8** | deux parts, mg 8, meilleur `k` |
+|---|---|---|---|---|---|---|
+| 6,4 m | 1,62 / 2,96 | 3,17 / 4,51 | 6,28 / 7,60 | 1,01 / 2,32 | 1,30 / **2,62** | `k` = 1 : 1,39 / 1,28 |
+| **8 m** | 2,48 / 4,57 | 4,84 / 6,90 | 9,60 / 11,67 | 1,34 / 3,41 | 1,73 / **3,81** | **`k` = 0 : 1,89 / 1,96** |
+| 9,6 m | 3,47 / 6,43 | 6,77 / 9,71 | 13,47 / 16,43 | 1,73 / 4,67 | 2,23 / **5,18** | `k` = 0 : 2,70 / 2,55 |
+| 11,2 m | 4,73 / 8,73 | 9,23 / 13,22 | 18,35 / 22,37 | 2,28 / 6,29 | 2,93 / **6,94** | `k` = 0 : 3,64 / 3,33 |
+
+- **Loi**, mg 8, pas entier : **0,53 ms + 7,1 ns par maille**, à 0,06 ms près sur les quatre emprises. Un cycle ≈ 2,5
+  itérations de Jacobi, le rapport du §5.
+- **Critère 3 tenu** — à résidu égal, la multigrille paie davantage qu'à 25 cm : mg 8 (2,2·10⁻⁵) est encadrée par Jacobi 64
+  (5,5·10⁻⁵) et 128 (6,4·10⁻⁶) ; projection **1,73 ms contre 4,84** au moins (÷ 2,8 ; ≈ ÷ 4,2 contre Jacobi ≈ 96 interpolé),
+  contre ÷ 1,9 à 25 cm. Même Jacobi-32, onze fois moins précis, coûte plus (2,48 ms).
+- **Critère 5, à 30 Hz** : l'emprise la plus grande dont les deux parts tiennent 2 ms au 99ᵉ centile est **8 m × 8 m** (460 800
+  mailles ; 1,89 / 1,96 ms, à 2 % de la limite) — la prédiction (≈ 0,45 M mailles, ≈ 8 m) tenait. Mais **30 Hz n'est pas stable
+  à 10 cm** (§6.4).
+- **À 60 Hz**, un pas par image, deux minutes tenues : **5,6 m × 5,6 m** (225 792 mailles) en **mg 6, 1,94 ms** (résidu médian
+  5,5·10⁻⁵ : au pas court, 6 cycles suffisent) ; 4,8 m : 1,56 ms (mg 8 : 1,79). **C'est l'emprise d'un domaine de 10 cm sous
+  budget à cadence stable.**
+
+### 6.4 La durée — à 10 cm, 30 Hz explose
+
+Sur 8 m, 30 Hz : **Jacobi-32, mg 6 et mg 8 explosent au même pas** (entre 1 831 et 1 860, ≈ 62 s) — la pression n'y est pour
+rien. 60 Hz (mg 8) : deux minutes tenues. Attribution sur le banc d'A321 (L136), mg 8, 90 s :
+
+| variante | issue | variante | issue |
+|---|---|---|---|
+| témoin | 62 s (pas 1 860) | sans éponge | 44 s |
+| sans le terme d'ADR-209 (64) | **7 s** | sans la bande de B (16) | 82 s |
+| sans `u'·∇u'` (1) | **tient** | sans le paquet | **62 s, même pas** |
+| sans `U·∇u'` (2), sans `u'·∇U` (4) | 62 s, même pas | sans le résidu du fond (8) | **tient** |
+| pas de 25 ms | **tient** | pas de 16,7 ms (`mg-scene`) | tient 120 s |
+
+**Faits.** L'explosion est brutale (témoin : `max_u` de δ 1,16 m/s à 60 s, 8,3 à 61 s ; part de l'échelle de la maille de `w`
+0,03 → 0,18). Ni la pression, ni le paquet, ni les deux termes croisés n'en changent l'instant : c'est **la mer seule**, par le
+résidu de quantité de mouvement de B qui nourrit δ, et **l'auto-advection de δ** — chacun, retiré, suffit à la supprimer. Le
+terme d'ADR-209 la **retarde** (7 s sans lui). δ porte 1 à 2 m/s par endroits (échantillons à la seconde). **Explication —
+hypothèse, non démontrée** : une limite de Courant du schéma d'advection, `V = U + u'` — à 10 cm et 33 ms, 1 m/s vaut déjà 0,33
+maille par pas, 2,5 fois plus qu'à 25 cm, où 30 Hz tient deux minutes (S391). « Sans résidu du fond » tient pourtant avec des
+échantillons à 2,7 m/s : la vitesse seule n'explique pas tout. Angle mort **A322**.
+
+### 6.5 A298 — l'écart séculaire, remesuré sur le pas retenu
+
+Cuve fermée de S305 (`nx` = 32, 25 cm, mode (1, 1), 5 cm), la référence CPU contre la carte ; pire écart de hauteur par fenêtre :
+
+| pas, projection de la carte | durée | écart au début | écart à la fin | pente | 3 mm franchis vers |
+|---|---|---|---|---|---|
+| 1 ms, Jacobi 64 (S305, S358) | 5 s | 1,1·10⁻⁸ m | 4,8·10⁻⁸ m | 7,5·10⁻⁹ m/s | 110 h |
+| 1 ms, mg 8 | 5 s | 1,3·10⁻⁸ | 4,8·10⁻⁸ | 7,8·10⁻⁹ m/s | 110 h |
+| **33,333 ms, Jacobi 32** — la production | 2 min | 9,3·10⁻⁵ | **1,42·10⁻³** | 1,2·10⁻⁵ m/s | **≈ 4 min** |
+| **33,333 ms, mg 8** | 2 min | 4,8·10⁻⁶ | **2,67·10⁻⁵** | 2,0·10⁻⁷ m/s | **≈ 4 h** |
+| 33,333 ms, mg 8, sans le terme d'ADR-209 | 2 min | 5,0·10⁻⁶ | 2,68·10⁻⁵ | 2,0·10⁻⁷ m/s | ≈ 4 h |
+
+**Critère 6 tenu sur le pas retenu** (mg 8) : 27 µm à deux minutes, 3 mm vers quatre heures. **A298 se referme ainsi** : au pas
+d'usage, l'écart carte/référence n'est **pas un biais séculaire** mais la **sous-convergence de la pression** — seul le
+préconditionneur diffère entre les lignes 3 et 4, et l'écart tombe de 53 fois. **Au pas par défaut** (Jacobi-32), la carte
+s'écarte de 1,4 mm en deux minutes sur ce cas ; la scène de la porte B ne le voit pas, A297 y amplifiant tout (§5).
+
+**Ce que la cuve a montré en plus** : **au pas de 33 ms, la référence gagne de l'énergie** dans une cuve fermée — **+41 % en
+deux minutes** (100,6 → 141,9 J ; +0,34 %/s), **+45 % sans le terme d'ADR-209** : ce n'est pas lui ; à 1 ms elle en **perd**
+0,47 % en 5 s. La carte suit la référence (27 µm) : c'est une propriété **du schéma** au pas long, pas de la carte.
+À 16,7 ms (mg 8, 60 s) : +15,8 % (100,6 → 116,4 J), écart carte/référence 3,3 µm ; en taux composé, ≈ 0,25 %/s contre 0,29 %/s à 33 ms — le gain dépend peu du pas ; les 5 s à 1 ms ne sont pas une durée comparable. L'amplitude modale en témoigne (5,32·10⁻² à 100 s pour 5·10⁻² au départ) : ce n'est pas un artefact du bilan. **Non attribué.** Angle mort **A323**.
+
+### Ce que cette section ne dit pas
+
+- **Aucun défaut changé** : la multigrille reste une option (`--multigrille`) et 30 Hz la cadence de la porte C à 25 cm. À 10
+  cm, la multigrille est **nécessaire** — elle coûte moins que Jacobi à résidu égal —, et la cadence doit être d'au moins
+  40 Hz (25 ms tient 90 s) : la scène à 10 cm, quand elle entrera dans l'afficheur, les portera.
+- **La cuve à 10 cm** : `NX=80` (134 400 mailles), 33 ms, mg 8, **10 s seulement** — la référence CPU y coûte 2,7 s par pas (823 s pour 300) ; deux minutes auraient demandé ≈ 2 h 45. Sa hauteur (`nz` = 42) n'a qu'**un** niveau grossier (21, impair) : l'écart, 0,44 à 0,60 mm, mesure cette troncature, **pas A298 à 10 cm** ; elle y perd 3,8 % d'énergie en 10 s.
+- **Un seul domaine, une seule mer**, sans rendu concurrent (chaque pas soumis et attendu, domaine du chiffre de S341) ; pas
+  de coque, pas d'APIC (C7).
+- L'**explication** d'A322 et d'A323 : deux hypothèses, aucune démontrée.

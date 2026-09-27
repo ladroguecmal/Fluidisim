@@ -3910,7 +3910,7 @@ la revue (critère 3), et la porte C sur cette scène. Pic d'amorçage observé 
 pas d'un domaine de 131 072 mailles (famille A294), non attribué.
 [Preuve](../validation/DELTA3D-PAS-GPU-S301.md).
 
-**A298 — S305, 2026-09-20 (sévérité 1, ouverte).** **L'écart entre le pas de production et la
+**A298 — S305, 2026-09-20 (sévérité 1, **refermée S409**).** **L'écart entre le pas de production et la
 référence croît avec le temps, à pente mesurée.** Sur le cas de cuve — fond nul, murs, régime
 linéaire, aucun déclenchement d'A297 — l'écart de hauteur passe de 2,5·10⁻⁷ à 7,8·10⁻⁷ m entre
 t = 0,5 s et t = 5 s, soit **≈ 1,2·10⁻⁷ m par seconde**, à peu près linéairement. Dans le même
@@ -3923,6 +3923,12 @@ un critère d'écart ponctuel se lit avec sa durée, y compris hors d'A297 ; les
 seraient franchis vers sept heures de temps simulé. Déclencheur : premier domaine δ appelé à vivre
 plus de quelques minutes, ou premier lot de précision sur la production.
 [Preuve](../validation/CUVE-GPU-S305.md) §6 et §7.
+
+*Refermée le 2026-09-27, S409* ([preuve](../validation/MULTIGRILLE-3D-S385.md) §6.5). S358 avait divisé la pente par ≈ 13
+(le reste perdu par réassociation). Au **pas d'usage** (33 ms), sur deux minutes : avec la multigrille à 8 cycles, l'écart
+atteint **2,67·10⁻⁵ m** — 3 mm vers quatre heures ; avec Jacobi-32, le défaut, **1,42·10⁻³ m** — 3 mm vers quatre minutes.
+Seul le préconditionneur diffère : **la sous-convergence de la pression, pas un biais séculaire**. Reste vrai : au défaut
+Jacobi-32, un domaine fermé à 33 ms s'écarte de sa référence d'environ 0,7 mm par minute.
 
 *S305, 2026-09-20 — suivi A295, ouverte.* Le critère 2 de la porte B est désormais mesuré sur
 **deux** familles de cas et non une : le cas S298 (fond spectral, éponge) et les cas de cuve
@@ -4446,3 +4452,21 @@ centrées (FTCS), instable pour tout pas — explosion en ~`1/dt` (72 s à 60 Hz
 le terme de second ordre `+(dt²/2)·V_a·V_b·∂_a∂_b u` (Lax-Wendroff), actif par défaut dans la production, en option dans la
 référence ; la scène tient deux minutes à 30, 25 et 16,7 ms. Reste la migration du défaut du cœur (ADR-209 D3).
 
+**A322 — S409, 2026-09-27 (sévérité 2, ouverte). À 10 cm, 30 Hz n'est pas stable sur la minute.** Sur la scène de la porte
+B mise à l'échelle de 8 m (`Config::at_mesh`), à 33,333 ms, la surface cesse d'être finie au pas 1 860 (≈ 62 s) avec
+Jacobi-32 comme avec la multigrille à 6 et 8 cycles — **la pression hors de cause** — et, sans le paquet, au même pas : **la
+mer seule** suffit. Éteindre l'auto-advection de δ (`u'·∇u'`) ou le résidu de quantité de mouvement du fond, ou passer à
+25 ms, la supprime (90 s) ; 16,7 ms tient deux minutes ; sans le terme d'ADR-209, 7 s. **Hypothèse, non démontrée** : une
+limite de Courant du schéma d'advection, `V = U + u'` — 2,5 fois celle de 25 cm, où 30 Hz tient. **Conséquence** : un domaine
+de 10 cm sous 2 ms par image tient 5,6 m de côté à 60 Hz, contre 8 m à 30 Hz. Déclencheur : **avant toute scène vivante à
+10 cm** (C10), et avant de régler la cadence d'un domaine par sa maille. Remèdes à éprouver : un sous-pas quand le nombre de
+Courant dépasse un seuil, un limiteur sur le terme de second ordre. [Preuve](../validation/MULTIGRILLE-3D-S385.md) §6.4.
+
+**A323 — S409, 2026-09-27 (sévérité 2, ouverte). Au pas long, la cuve fermée gagne de l'énergie.** Cuve de S305 (`nx` = 32,
+25 cm, mode (1, 1) de 5 cm, murs, sans éponge), référence CPU : **+41 % en deux minutes à 33 ms** (100,6 → 141,9 J), **+45 %
+sans le terme d'ADR-209**, +15,8 % en 60 s à 16,7 ms ; l'amplitude modale le confirme (5,32 cm à 100 s pour 5). À 1 ms, la
+même cuve **perd** 0,47 % en 5 s (durée non comparable) ; à 10 cm et 33 ms, elle perd 3,8 % en 10 s. La carte suit la
+référence à 27 µm : c'est **le schéma**, pas la carte. Non attribué. Conséquence : un contenant fermé en δ (ADR-200) à 30 Hz
+verrait ses ballottements croître d'environ 19 % d'amplitude en deux minutes. Déclencheur : **avant tout contenant δ fermé
+à pas long** (C10, la lame du déversoir) et tout critère de dissipation lu sur une cuve. Témoins à faire : 1 ms sur la même
+durée, termes du pas éteints un à un. [Preuve](../validation/MULTIGRILLE-3D-S385.md) §6.5.
