@@ -800,9 +800,18 @@ pub fn scene() -> Result<(), String> {
     pollster::block_on(async {
         let scene = crate::scene::Scene::build(true, false, None);
         let background = &scene.background;
-        let mut config = crate::delta3d_scene::Config::review();
+        // S409 / C3b : `MAILLE=` et `EMPRISE=` — la même scène à une autre maille ; sans elles, celle de S390.
+        let mut config = crate::delta3d_scene::Config::review_from_env()?;
         config.step_us = std::env::var("PAS_US").ok().and_then(|v| v.parse().ok()).unwrap_or(33_333);
         let pas: u64 = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(300);
+        if std::env::var("MAILLE").is_ok() {
+            let d = config.domain;
+            println!(
+                "MG_SCENE_S409 maille_m={} emprise_m={:.2}x{:.2} boite_m={:.2} mailles={} niveaux_grossiers={:?} paquet_longueur_m={:.3} paquet_amplitude_m={:.3} eponge_m={:.3}",
+                d.dx, d.nx as f32 * d.dx, d.ny as f32 * d.dx, d.nz as f32 * d.dx, d.cells(), levels_of(d),
+                config.packet.wavelength, config.packet.amplitude, config.sponge.width_x
+            );
+        }
         let (u, v, w, eta) = config.initial_state();
         let tolerance = water_core::delta_projection::PROJECTION_DIVERGENCE_TOLERANCE;
         // Une seule carte : `set_state` remet vitesses, surface, reste compensé et pression de départ à l'état initial,

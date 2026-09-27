@@ -214,6 +214,56 @@ impl Config {
         c
     }
 
+    /// S409 / C3b — **la scène de R11 à une autre maille** : la même mer et le même fond (repos à 3,5 m) ; une boîte d'au
+    /// moins 7 m dont le nombre de couches est un multiple de quatre (72 à 10 cm : trois niveaux grossiers pour la
+    /// multigrille) ; et, à l'échelle de l'emprise `nx·dx` rapportée aux 30 m de R11, le paquet, sa place et l'éponge — la
+    /// cambrure `ak` = 0,26 est gardée. À 25 cm sur 120 × 112, c'est `review` (essai `_s409`).
+    pub fn at_mesh(dx: f32, nx: usize, ny: usize) -> Self {
+        let r = Self::review();
+        let s = nx as f32 * dx / (r.domain.nx as f32 * r.domain.dx);
+        let s_y = ny as f32 * dx / (r.domain.ny as f32 * r.domain.dx);
+        let box_height = r.domain.nz as f32 * r.domain.dx;
+        let nz = ((box_height / dx).round() as usize).div_ceil(4) * 4;
+        Config {
+            domain: Domain3 { nx, ny, nz, dx },
+            origin: [-(nx as f32 * dx) / 2., 0., -r.rest],
+            sponge: Sponge3 { width_x: r.sponge.width_x * s, width_y: r.sponge.width_y * s, ..r.sponge },
+            packet: Packet {
+                amplitude: r.packet.amplitude * s,
+                wavelength: r.packet.wavelength * s,
+                center: [r.packet.center[0] * s, r.packet.center[1] * s_y],
+                sigma_long: r.packet.sigma_long * s,
+                sigma_crest: r.packet.sigma_crest * s,
+                ..r.packet
+            },
+            ..r
+        }
+    }
+
+    /// S409 : `MAILLE=<m>` et `EMPRISE=<nx>,<ny>` choisissent `at_mesh` ; sans `MAILLE`, `review`, au bit. Refuse une
+    /// emprise dont le tampon des faces du pas (dix flottants par face) dépasse une liaison de stockage de 128 Mio.
+    pub fn review_from_env() -> Result<Self, String> {
+        let Some(dx) = std::env::var("MAILLE").ok().and_then(|v| v.parse::<f32>().ok()) else {
+            return Ok(Self::review());
+        };
+        let (nx, ny) = std::env::var("EMPRISE")
+            .ok()
+            .and_then(|v| {
+                let mut it = v.split(',').filter_map(|x| x.trim().parse::<usize>().ok());
+                Some((it.next()?, it.next()?))
+            })
+            .ok_or("MAILLE demande EMPRISE=<nx>,<ny>")?;
+        let c = Self::at_mesh(dx, nx, ny);
+        let octets = face_total(c.domain) * crate::delta3d_step::STEP_FIELDS * 4;
+        if octets > 128 << 20 {
+            return Err(format!(
+                "emprise {nx}x{ny}x{} à {dx} m : {octets} octets de faces, plus qu'une liaison de 128 Mio",
+                c.domain.nz
+            ));
+        }
+        Ok(c)
+    }
+
     /// État initial : vitesses aux faces et surface absolue par colonne, dans le repère du domaine.
     /// Sans paquet (`amplitude = 0`), la mer seule : surface au repos, vitesses nulles — δ ne
     /// portera que la correction couplée de B.
@@ -1222,3 +1272,22 @@ pub fn redimensionnement_identite() -> Result<(), String> {
     })
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// **S409** : la scène à une autre maille est celle de R11 quand on lui rend sa maille et son emprise — même domaine,
+    /// même place, même paquet, même éponge ; et à 10 cm, la boîte monte à 72 couches (trois niveaux grossiers), le paquet
+    /// garde sa cambrure.
+    #[test]
+    fn at_mesh_gives_back_the_review_scene_s409() {
+        assert_eq!(format!("{:?}", Config::at_mesh(0.25, 120, 112)), format!("{:?}", Config::review()));
+        let c = Config::at_mesh(0.1, 96, 96);
+        assert_eq!((c.domain.nz, crate::delta3d_mg::levels_of(c.domain).len()), (72, 3));
+        let (r, p) = (Config::review().packet, c.packet);
+        let cambrure = |q: Packet| q.amplitude * std::f32::consts::TAU / q.wavelength;
+        assert!((cambrure(p) - cambrure(r)).abs() < 1e-6, "cambrure {} contre {}", cambrure(p), cambrure(r));
+        assert!((c.origin[0] + 4.8).abs() < 1e-6 && c.origin[2] == -3.5);
+    }
+}

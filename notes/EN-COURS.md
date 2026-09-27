@@ -93,8 +93,8 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 
 ### Plan
 
-- [>] **P1** — jeton, plan seul.
-- [ ] **P2** — la scène à une maille et une emprise données (`MAILLE=`, `EMPRISE=`) : boîte de 7,2 m, éponge en mailles, un
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — la scène à une maille et une emprise données (`MAILLE=`, `EMPRISE=`) : boîte de 7,2 m, éponge en mailles, un
   impact à la pente de celui de R16 et à l'échelle de l'emprise ; sans variable, la scène de S390 au bit ; critère 1.
 - [ ] **P3** — qualité à 10 cm : Jacobi 32/64/128 contre multigrille 4/6/8, deux emprises (300 pas) ; critère 2.
 - [ ] **P4** — coût à 10 cm, pas entier et deux parts ; l'emprise la plus grande sous 2 ms ; critères 3 et 5.
@@ -105,3 +105,12 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
+- **P2** — `Config::at_mesh(dx, nx, ny)` (`delta3d_scene.rs`) : la scène de R11 à l'échelle `s = nx·dx / 30 m` — paquet
+  (amplitude, longueur, écarts, place ; cambrure gardée), éponge ; boîte `nz` = arrondi de 7 m / `dx` au multiple de 4 (72 à
+  10 cm : trois niveaux grossiers) ; repos à 3,5 m. **Écart au plan** : le **paquet** mis à l'échelle et non un impact — S390
+  a mesuré la multigrille sur le paquet de `review`, la comparaison reste à scène égale. `review_from_env` : `MAILLE=`,
+  `EMPRISE=nx,ny`, refus au-delà de 128 Mio de faces ; branché sur `--delta3d-mg-scene` (ligne `MG_SCENE_S409`). Essai
+  `_s409` : `at_mesh(0,25, 120, 112)` = `review` ; à 10 cm, 72 couches, trois niveaux, cambrure à 10⁻⁶. **Critère 1 tenu** :
+  `--delta3d-empreinte` avant (tête `0194a572`) et après, identiques (60 pas : surface `0xacd172ae252fe5a6` ; 600 :
+  `0x28f35d9d7580ffed`). Essai à 10 cm, 64 × 64 (6,4 m, 294 912 mailles), 60 pas : Jacobi-32 résidu médian 3,9·10⁻⁴,
+  multigrille 6 : 1,4·10⁻⁴ ; rien n'explose.
