@@ -17857,3 +17857,19 @@ en plus** : la référence **gagne de l'énergie** au pas long dans la cuve ferm
 Afficheur 38 réussis, zéro avertissement ; aucun défaut changé. **Limites** : un domaine, une mer, sans rendu concurrent ;
 la cuve à 10 cm sur 10 s seulement (hiérarchie tronquée). **Rituel.** Maillons **1** : 4.19 reste partiel ; la priorité du
 solveur passe avant la règle (S406). Suivant : C7 au poste ou C6b ; A322 avant toute scène à 10 cm (C10).
+
+## S410 — 2026-09-27 — physique : C6b, la vague qui déferle — et R34, jugée à l'image
+
+**Entrée.** *« Réalise C6b »*. **Fait** ([preuve](../docs/validation/BASCULE-S408.md) §6) : le cas de Chen et al. (1999), une houle de
+Stokes d'ordre 3, `ka` = 0,55, dans un bassin de quatre longueurs d'onde (`apic3d_deferlement`, vitesses posées par
+`Apic3::set_particle_velocities`). **APIC 3D déferle** : retournement à **0,706 √(λ/g)** (Chen : 0,72), jet qui retombe à 1,27 (1,56).
+**La bande de S408** naît au front des crêtes **sept pas avant le pli**, masse à 10⁻¹² ; mais au maintien de 0,5 s elle **traîne**
+(68 % des colonnes, plus chère qu'APIC seul), au maintien court elle **hésite** (7 bascules) ; l'hystérésis de la pente, essayée
+deux fois (la seconde : gardée sans dilater, `slope_release`, défaut au bit), est une impasse. **Le fait** : APIC seul perturbé
+bouge de 0,05 %, la bande de 3 à 30 % selon le réglage — **chaque conversion au sommet de la crête perturbe le déferlement**.
+**Demande de l'utilisateur en cours de session** : juger plutôt à l'image que poursuivre des écarts sous le visible — avis rendu
+(oui ; les chiffres pour masse, coût, durée) ; **planche R34** (`APIC3D_IMAGES`) : au maintien court, le sommet de la crête
+repasse en colonnes, une bosse lisse que les chiffres ne voyaient pas ; à 0,3 s, le déferlement ressemble à APIC seul. Suite
+**741 réussis**, zéro avertissement. **Limites** : 40 mailles par longueur d'onde, crête uniforme ; la crête courte : la bande
+atteint les bords après l'impact. **Rituel.** Maillons **2** (aucun état de la liste ne change ; la priorité du solveur passe
+avant la règle, S406). Suivant : **R34**, puis C6c (une bande qui suit la crête) ou C7 au poste ; A322 avant C10.

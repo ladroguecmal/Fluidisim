@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S410 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Réalise C6b »*. Conception S384 §5, C6 : reçu si,
+Session : S410 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Réalise C6b »*. Conception S384 §5, C6 : reçu si,
 « sur B10 **et sur une vague qui déferle** : particules seulement dans la bande, colonnes ailleurs ; aucune bascule qui oscille
 (hystérésis mesurée) ; coût compté ». C6a (S408, [BASCULE-S408](../docs/validation/BASCULE-S408.md)) l'a éprouvé sur un corps qui
 entre ; **le pli prédit par la pente n'a rien déclenché qui compte** (§5). Agent : Claude Code (Opus 5.5), application de bureau,
@@ -102,7 +102,7 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 - [x] **P6** — la crête courte ; critère 6. *Élargie* : la planche de revue R34 (demande de l'utilisateur, ci-dessous).
 - [x] **P7** — suite entière, zéro avertissement ; critère 7.
 - [x] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
-- [>] **P9** — rituel.
+- [x] **P9** — rituel.
 
 ### Notes de reprise
 - **P2** — `Apic3::set_particle_velocities(field)` (`apic3d.rs`) : vitesse et `C = ∇v` de chaque particule active ; refus
