@@ -17,8 +17,8 @@
 //! l'air de la fenêtre qu'un remplissage depuis la rangée du haut n'atteint pas dépasse huit mailles ; son abscisse moyenne ;
 //! la crête la plus haute avant le retournement.
 //!
-//! **La bande** (`APIC3D_BASCULE`, comme `apic3d_b10`) : clés `pente`, `dilatation` (colonnes), `maintien` (s) ; vide, les
-//! défauts. La zone entière est en bande pendant le premier pas — les colonnes prennent la vitesse de la grille, nulle avant —,
+//! **La bande** (`APIC3D_BASCULE`, comme `apic3d_b10`) : clés `pente`, `relache` (le seuil de sortie de la pente, S410),
+//! `dilatation` (colonnes), `maintien` (s) ; vide, les défauts. La zone entière est en bande pendant le premier pas — les colonnes prennent la vitesse de la grille, nulle avant —,
 //! puis `ColumnsSwitch` après chaque pas. **La crête courte** (`courte`) : `ε` modulé le long de la crête, de 0,55 au milieu à
 //! 0,275 aux parois (sous le seuil de déferlement).
 //!
@@ -36,6 +36,7 @@ use water_core::host::HostServices;
 
 const G: f64 = 9.81;
 const LAMBDA: f64 = 2.;
+/// La cambrure de Chen et al. ; `APIC3D_EPS=` la perturbe, pour la sensibilité (L371).
 const EPS: f64 = 0.55;
 const PROFONDEUR: f64 = 1.;
 const AIR: f64 = 0.6;
@@ -53,10 +54,11 @@ fn main() {
     let dx = LAMBDA / par_lambda as f64;
     let (nx, nz) = ((ONDES * LAMBDA / dx).round() as usize, ((PROFONDEUR + AIR) / dx).round() as usize);
     let ly = ny as f64 * dx;
+    let eps0: f64 = std::env::var("APIC3D_EPS").ok().and_then(|v| v.parse().ok()).unwrap_or(EPS);
     let k = std::f64::consts::TAU / LAMBDA;
     let tau = (LAMBDA / G).sqrt();
     // La cambrure le long de la crête : uniforme, ou de ε au milieu à ε/2 aux parois.
-    let eps = |y: f64| if courte { EPS * (0.75 - 0.25 * (std::f64::consts::TAU * y / ly).cos()) } else { EPS };
+    let eps = |y: f64| if courte { eps0 * (0.75 - 0.25 * (std::f64::consts::TAU * y / ly).cos()) } else { eps0 };
     let theta = |x: f64| k * x - std::f64::consts::FRAC_PI_2;
     let eta = |x: f64, y: f64| {
         let (e, t) = (eps(y), theta(x));
@@ -77,7 +79,7 @@ fn main() {
     let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 33);
     let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
     let cles = std::env::var("APIC3D_BASCULE").ok();
-    let haut = PROFONDEUR + (EPS + EPS * EPS * EPS / 8. + 0.5 * EPS * EPS + 0.375 * EPS * EPS * EPS) / k;
+    let haut = PROFONDEUR + (eps0 + eps0 * eps0 * eps0 / 8. + 0.5 * eps0 * eps0 + 0.375 * eps0 * eps0 * eps0) / k;
     let capacite = nx * ny * ((haut / dx).ceil() as usize) * 8 + if cles.is_some() { nx * ny * 8 } else { 0 };
     let mut a = Apic3::configure(&mut hote, Domain3 { nx, ny, nz, dx: dx as f32 }, 1000., G as f32, capacite)
         .expect("configuration");
@@ -92,6 +94,7 @@ fn main() {
             let x: f64 = v.parse().expect("valeur");
             match cle {
                 "pente" => s.slope_max = x as f32,
+                "relache" => s.slope_release = Some(x as f32),
                 "dilatation" => s.dilation = x as usize,
                 "maintien" => s.hold_us = (x * 1e6).round() as u64,
                 _ => panic!("clé inconnue : {cle}"),
@@ -107,6 +110,8 @@ fn main() {
     let mut pile = Vec::new();
     // Depuis quand chaque colonne est en particules (µs) ; `u64::MAX` : en colonnes.
     let mut depuis = vec![0u64; nx * ny];
+    // Les instants des bascules de chaque colonne après la zone initiale, pour trouver celles qui oscillent (instrument).
+    let mut instants: Vec<Vec<(f64, bool)>> = vec![Vec::new(); nx * ny];
     let (mut t_us, mut pas, mut iterations, mut vmax) = (0u64, 0u64, 0u64, 0f32);
     let (mut ecart_volume, mut particules_max) = (0f64, a.particle_count());
     let (mut crete, mut crete_x) = (f64::MIN, f64::NAN);
@@ -134,6 +139,9 @@ fn main() {
             particules_max = particules_max.max(a.particle_count());
             for c in 0..nx * ny {
                 let particules = !a.is_column(c % nx, c / nx);
+                if pas > 1 && particules != (depuis[c] != u64::MAX) {
+                    instants[c].push((t_us as f64 * 1e-6 / tau, particules));
+                }
                 depuis[c] = match (particules, depuis[c]) {
                     (false, _) => u64::MAX,
                     (true, u64::MAX) => t_us,
@@ -281,7 +289,7 @@ fn main() {
     let (to, xo, avance, _) = retournement.unwrap_or((f64::NAN, f64::NAN, f64::NAN, f64::NAN));
     let (ti, xi, vi) = impact.unwrap_or((f64::NAN, f64::NAN, f64::NAN));
     println!(
-        "APIC3D_DEFERLEMENT mailles_par_lambda={par_lambda} dx={dx} domaine={nx}x{ny}x{nz} courte={courte} particules={n} \
+        "APIC3D_DEFERLEMENT mailles_par_lambda={par_lambda} dx={dx} domaine={nx}x{ny}x{nz} courte={courte} eps={eps0} particules={n} \
          pas={pas} retournement_t_sur_tau={:.4} retournement_x={xo:.3} impact_t_sur_tau={:.4} impact_x={xi:.3} \
          air_enferme_m3={vi:.2e} crete_sur_lambda={:.4} crete_x={crete_x:.3} vitesse_max={vmax:.2} \
          iterations_moyennes={:.1} calcul_s={:.0} chen_t1=0.72 chen_t2=1.56",
@@ -293,13 +301,36 @@ fn main() {
     );
     if let Some(s) = &bascule {
         println!(
-            "APIC3D_DEFERLEMENT_BASCULE cles={} pente={} dilatation={} maintien_s={} part_bande_moy={:.3} \
+            "APIC3D_DEFERLEMENT_BASCULE cles={} pente={} relache={} dilatation={} maintien_s={} part_bande_moy={:.3} \
              part_au_retournement={part_au_retournement:.3} avance_bande_sur_retournement_s={avance:.4} \
              avance_sur_tau={:.3} bascules_max={} volume_relatif_max={ecart_volume:.2e} particules_fin={} \
              particules_max={particules_max} poses_refusees={}",
-            cles.as_deref().unwrap_or(""), s.slope_max, s.dilation, s.hold_us as f64 * 1e-6, s.mean_band_fraction(),
+            cles.as_deref().unwrap_or(""), s.slope_max, s.slope_release.unwrap_or(s.slope_max), s.dilation, s.hold_us as f64 * 1e-6, s.mean_band_fraction(),
             avance / tau, s.max_switches(), a.particle_count(), a.columns_refused()
         );
+        // Les colonnes qui basculent le plus : abscisse, puis instants (t/τ, P : vers les particules, C : vers les colonnes).
+        let mut ordre: Vec<usize> = (0..nx * ny).filter(|&c| c / nx == ny / 2).collect();
+        ordre.sort_by_key(|&c| std::cmp::Reverse(instants[c].len()));
+        // Un **retour rapide** : une colonne rendue aux colonnes puis redemandée moins de 0,25 τ après — l'oscillation, et non le
+        // passage d'une autre crête.
+        let rapides: Vec<f64> = instants
+            .iter()
+            .flat_map(|v| v.windows(2).filter(|w| !w[0].1 && w[1].1).map(|w| w[1].0 - w[0].0).filter(|d| *d < 0.25).collect::<Vec<_>>())
+            .collect();
+        let colonnes_rapides = instants
+            .iter()
+            .filter(|v| v.windows(2).any(|w| !w[0].1 && w[1].1 && w[1].0 - w[0].0 < 0.25))
+            .count();
+        println!(
+            "APIC3D_DEFERLEMENT_RETOURS retours_rapides={} colonnes={colonnes_rapides} plus_court_sur_tau={:.3}",
+            rapides.len(),
+            rapides.iter().copied().fold(f64::NAN, f64::min)
+        );
+        for &c in ordre.iter().take(6) {
+            let liste: Vec<String> =
+                instants[c].iter().map(|(t, p)| format!("{t:.3}{}", if *p { "P" } else { "C" })).collect();
+            println!("APIC3D_DEFERLEMENT_OSCILLE x={:.3} bascules={} [{}]", centre(c % nx), instants[c].len(), liste.join(" "));
+        }
         assert!(ecart_volume <= 1e-9, "volume : {ecart_volume:e}");
     }
 }

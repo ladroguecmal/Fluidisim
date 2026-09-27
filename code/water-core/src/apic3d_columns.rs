@@ -1059,6 +1059,10 @@ impl Apic3 {
 pub struct ColumnsSwitch {
     /// Pente de surface au-delà de laquelle une colonne est requise ; défaut 1.
     pub slope_max: f32,
+    /// **S410 — l'hystérésis de la pente** : une colonne **déjà en particules** reste requise tant que sa pente dépasse ce seuil
+    /// (plus bas que `slope_max`). `None`, le défaut : `slope_max`, le critère de S408. Sur une crête qui passe, la pente hésite
+    /// autour d'un seuil unique, et une colonne basculait jusqu'à sept fois (S410).
+    pub slope_release: Option<f32>,
     /// Marge autour du corps, m ; défaut deux mailles.
     pub body_margin: f32,
     /// Horizon de la vitesse du corps, s ; défaut 0,2 s.
@@ -1092,6 +1096,7 @@ impl ColumnsSwitch {
         let cols = domain.nx * domain.ny;
         Ok(ColumnsSwitch {
             slope_max: 1.,
+            slope_release: None,
             body_margin: 2. * domain.dx,
             body_horizon: 0.2,
             dilation: 2,
@@ -1218,7 +1223,8 @@ impl ColumnsSwitch {
                 };
                 let sx = slope(at(i.checked_sub(1), Some(j)), at(Some(i + 1), Some(j)));
                 let sy = slope(at(Some(i), j.checked_sub(1)), at(Some(i), Some(j + 1)));
-                if sx * sx + sy * sy > self.slope_max * self.slope_max {
+                let seuil = if c.mask[col] == 0 { self.slope_release.unwrap_or(self.slope_max) } else { self.slope_max };
+                if sx * sx + sy * sy > seuil * seuil {
                     self.need[col] = 1;
                 }
             }

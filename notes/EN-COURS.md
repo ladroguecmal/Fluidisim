@@ -97,7 +97,8 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 - [x] **P3** — le banc `apic3d_deferlement` : la houle de Chen, les mesures (retournement, impact, abscisse du jet, crête), la
   bande (`APIC3D_BASCULE`, comme B10), la crête courte en option.
 - [x] **P4** — APIC seul ; critère 1.
-- [>] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
+- [x] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
+- [>] **P5b** — *ajoutée* : le maintien balayé (0,1 ; 0,2 ; 0,3 s), le réglage retenu, son coût dans la même fournée qu'APIC seul.
 - [ ] **P6** — la crête courte ; critère 6.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 7.
 - [ ] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
@@ -120,3 +121,22 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
   1,9] manquée**, 2 % sous sa borne) ; crête 0,175 `λ` à x = 3,125 ; vitesse max 5,96 m/s. L'air enfermé **clignote** à la
   maille : 8 mailles à 1,2008 et 1,2232, 0 entre, puis 8 à 16 de 1,27 à 1,53 — le tube a deux mailles de section ; le
   seuil (> 8) le prend à sa première section de trois. 240 itérations de pression par pas.
+- **P5** — même fournée (trois calculs ensemble), 40 mailles par `λ` :
+
+  | réglage | retournement t/τ, x | impact t/τ, x | part moy. / au retournement | bascules max | particules fin | calcul |
+  |---|---|---|---|---|---|---|
+  | APIC seul | 0,7055 ; 3,475 | 1,2711 ; 4,150 | 1 | — | 102 464 | 74 s |
+  | défauts (maintien 0,5 s) | 0,7020 ; 3,475 | **1,3124 (+3,2 %)** ; 4,225 | **0,682** / 0,550 | 3 | 92 104 | **93 s** |
+  | maintien 0,05 s | 0,7024 ; 3,475 | 1,3172 (+3,6 %) ; 4,275 | 0,259 / 0,217 | **7** | 45 718 | 53 s |
+
+  Volume 1,4·10⁻¹² ; **la bande précède le retournement de 0,128 τ** (7 pas) à sa colonne. **Sensibilité d'APIC seul** (L371),
+  `APIC3D_EPS` = 0,5501 / 0,5499 : retournement 0,7055 / 0,7054, impact 1,2710 / 1,2703, x 4,125 / 4,150 — **le retard de la bande
+  (+3,2 %) est 60 fois l'incertitude** : réel. **Ce que la trace montre** : aux défauts, la bande naît au front de chaque crête
+  (0,70–1,05 m à 0,17 τ) mais son arrière n'est libéré qu'après 0,5 s — elle traîne de `c`·0,5 s ≈ 0,9 m et couvre le domaine
+  vers 1,3 τ ; au maintien court, elle suit la crête (0,45–0,6 m), mais la pente **hésite autour de 1** au passage de la crête
+  (P 0,113, C 0,268, P 0,306, C 0,454, P 0,471, C 0,590 à x = 2,725). **Essayé : l'hystérésis de la pente** (`slope_release`,
+  dans le cœur ; défaut = `slope_max`, S408 au bit ; essai `_s410`) — **impasse** : `relache` 0,5 retarde la libération (part
+  0,50 à 0,90), n'arrête pas l'oscillation (5 à 8 bascules, 100 à 241 retours rapides) et **avance le retournement de 12 %**
+  (0,6178 à x = 3,375). Instrument ajouté : **retours rapides** (C puis P en moins de 0,25 τ) ; aux défauts, ses 45 sont l'arrivée du
+  ressaut de la crête précédente juste après la libération (1,36–1,47 τ), pas une hésitation. Critères : 2 manqué (impact
+  +3,2 %), 3 tenu (7 pas), 4 manqué tel qu'écrit, 5 : défauts plus chers qu'APIC seul.

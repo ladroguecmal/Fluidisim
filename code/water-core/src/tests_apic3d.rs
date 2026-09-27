@@ -746,3 +746,42 @@ fn the_switch_takes_the_steep_and_the_folded_to_particles_s408() {
     other.enable_columns(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, &[0; 64]).unwrap();
     assert_eq!(s.switch(1, &mut other).unwrap_err(), Error::Shape);
 }
+
+/// **S410** : l'hystérésis de la pente — une rampe de pente 0,7, sous le seuil d'entrée (1), reste en particules si le seuil de
+/// sortie est 0,5, passe en colonnes sans lui ; une fois en colonnes, elle n'est pas redemandée.
+#[test]
+fn a_band_column_is_released_below_its_own_slope_s410() {
+    let (nx, ny, nz, dx) = (16, 4, 16, 0.05f32);
+    let ramp = |x: f32| 0.3 + 0.7 * (x - 0.3).clamp(0., 0.2);
+    let setup = |release: Option<f32>| {
+        let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+        a.enable_columns(&mut host, &vec![0u8; nx * ny]).unwrap();
+        a.seed(&|p| p[2] < ramp(p[0])).unwrap();
+        let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+        s.slope_release = release;
+        s.hold_us = 0;
+        (a, s)
+    };
+    let (mut a, mut s) = setup(None);
+    let change = s.switch(0, &mut a).unwrap();
+    assert_eq!((change.to_columns, change.refused), (nx * ny, 0), "sans seuil de sortie : {change:?}");
+    let (mut a, mut s) = setup(Some(0.5));
+    let v0 = a.total_volume();
+    let change = s.switch(0, &mut a).unwrap();
+    println!("S410 relâche 0,5 : {change:?}");
+    for j in 0..ny {
+        for i in 7..=8 {
+            assert!(!a.is_column(i, j), "rampe ({i}, {j})");
+        }
+        assert!(a.is_column(0, j) && a.is_column(nx - 1, j), "loin de la rampe, {j}");
+    }
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+    // Le seuil de sortie levé, la rampe passe ; remis, elle n'est pas redemandée : une colonne ne voit que le seuil d'entrée.
+    s.slope_release = None;
+    s.switch(1, &mut a).unwrap();
+    assert!((0..nx * ny).all(|c| a.is_column(c % nx, c / nx)));
+    s.slope_release = Some(0.5);
+    assert_eq!(s.switch(2, &mut a).unwrap(), ColumnsChange::default());
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+}
