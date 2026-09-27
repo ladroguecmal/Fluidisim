@@ -62,109 +62,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S408 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« continue »*. Suite proposée par S407 : **C6**, le critère
-de bascule (conception S384 §4.2, étape 6 : « bascule colonnes ↔ particules, à masse exacte (S323), selon le critère »). Agent :
-Claude, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Branche
-`claude/eager-volta-lf0kw3`, la plus avancée.
+Session : S409 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Reprends le projet »* ; au poste. Suite désignée
+au poste par S408 : **C3b** (conception S384 §5, C3 : « δ ≤ 2 ms au 99ᵉ centile sur la scène de la porte B, **puis à 10 cm**
+sur une scène de même surface ; A298 remesurée »). Agent : Claude Code (Opus 5.5), application de bureau, **au poste** — fichiers,
+git, cargo, Python, **RTX 5070 Laptop** ; Godot non utilisé. Branche `poste` (= `main` = `claude/eager-volta-lf0kw3`).
 
-**Où en est le raccord** (RACCORD-3D-S398 §5–8) : dans `Apic3`, une zone de colonnes et une bande de particules sous une même
-projection, l'échange à masse exacte ; le critère de S399 tenu aux deux mailles — mais sur un **masque fixe**, posé à la
-configuration. **C6 demande qu'il bouge** : des particules seulement là où la surface n'est pas un graphe (pli, cavité, jet, objet
-qui entre), des colonnes ailleurs ; aucune bascule qui oscille (hystérésis) ; le coût compté — reçu sur B10 et sur une vague qui
-déferle. **Cette session, C6a** : la bascule elle-même en 3D et un premier critère, éprouvés sur **B10** ; la vague qui déferle,
-C6b.
+**Ce que « même surface » ne peut pas vouloir dire** (calcul, avant toute mesure) : la scène de la porte B (30 × 28 m, boîte de
+7 m) à 10 cm, c'est 300 × 280 × 70 = **5,9 M mailles**, 17,8 M faces — le tampon des faces (10 flottants) passe la liaison de
+128 Mio vers 3,4 M faces (≈ 1,1 M mailles), et le coût par maille de S350 (3,57 ms pour 376 320) donnerait ≈ 56 ms par pas.
+Le critère de S384 reposait sur les colonnes hautes (14 m de côté à 10 cm), que S386–S387 ont réservées à l'eau calme. **Lu
+ici** : la même mer, la même boîte verticale, une perturbation à la même pente, sur l'**emprise que le budget permet** ; la
+mesure dit laquelle.
 
-**Thèse.** Les deux gestes de S323 (2D), portés en 3D sur la zone de S398 : **colonne → particules** — ensemencer sous `η` sur le
-réseau nominal (2 × 2 × 2 par maille), la maille du haut au plus près de son volume, le reste à une **réserve** de volume (`f64`)
-que l'échange règle aux faces de frontière mouillées ; **particules → colonne** — seulement si la surface reconstruite y forme un
-seul segment d'eau posé sur le fond, sans corps ; la hauteur par la **voie mixte** de S323 (la forme par `φ`, le niveau par la
-masse, un décalage uniforme sur l'ensemble converti) ; les soldes d'une face qui cesse d'être frontière vont à la réserve. **Le
-critère** : une colonne est **requise** en particules si elle n'est pas convertible, si le corps l'atteint (rayon, marge, et sa
-vitesse sur un horizon — l'objet qui entre), ou si la pente de sa surface dépasse un seuil (le pli prédit) ; la bande est la
-dilatation de ce qui est requis ; une colonne ne repasse aux colonnes qu'après une durée sans être requise (hystérésis).
+**Thèse.** À 10 cm, Jacobi rampe (son taux par itération se dégrade avec `N`) et la multigrille, indépendante de la maille (C1),
+doit payer davantage qu'à 25 cm (projection ÷ 1,9 en S390). Une scène à 10 cm tient-elle deux minutes (L369), à 30 Hz, avec le
+terme de second ordre d'ADR-209 — dont le nombre de Courant, lui, croît de 2,5 ?
 
-**Critères, écrits avant.** (1) Sans bascule appelée, au bit : les essais de S398–S407, le banc du raccord au chiffre près (S407).
-(2) Allers-retours sur des états réels (le ballottement de S399 après 2 s ; la zone entière passée en particules puis rendue), dix
-de suite : volume total exact (≤ 10⁻⁹) ; hauteur de chaque colonne à 0,2 maille du départ (S323) ; une colonne à poche d'air
-refusée. (3) B10, `Fr` = 2, `D/dx` = 8, quart : la bande dynamique contre APIC seul — **pincement à un pas près** (1,5067 √(D/g),
-pas 0,027) ; volume exact ; **au plus deux bascules par colonne** (aucune oscillation) ; part moyenne des colonnes en particules
-publiée (prédiction : ≤ 50 %, le coût). (4) Suite entière, zéro avertissement. **Arrêt** : si le pincement s'écarte de plus d'un
-pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit éprouvé.
+**Critères, écrits avant.** (1) Sans les variables nouvelles, au bit : `--delta3d-empreinte` inchangé (60 et 600 pas). (2) À
+10 cm, boîte de 7,2 m (`nz` = 72 : trois niveaux grossiers), deux emprises au moins : la multigrille atteint le **résidu médian
+de Jacobi-32 à 25 cm** (7,1·10⁻⁵) en **≤ 8 cycles** ; *prédiction* : Jacobi-32 y est ≥ 5 fois moins bon qu'à 25 cm, la
+multigrille aux mêmes cycles qu'à 25 cm. (3) À résidu égal, pas multigrille ≤ Jacobi, gain de projection **> 1,9** (*prédit*).
+(4) Durée d'usage : la scène à 10 cm tient **deux minutes** à 30 Hz avec la multigrille retenue — sinon à 60 Hz, et l'on
+nomme ce qui casse (témoin, termes éteints un à un, L136). (5) Budget : l'**emprise carrée la plus grande** à 10 cm dont les
+deux parts de 30 Hz tiennent **≤ 2 ms au 99ᵉ centile**, publiée avec la loi coût/emprise ; *prédiction* ≈ 0,45 M mailles,
+≈ 8 m de côté. (6) **A298** sur le pas retenu (multigrille, terme d'ADR-209 ; cuve fermée) : l'écart carte/référence au pas
+d'usage (33,333 ms) sur **deux minutes**, et au pas de S305 (1 ms, 5 s) pour comparaison ; **close** si l'écart à deux
+minutes ≤ 3 mm **et** la pente extrapolée franchit 3 mm après plus d'une heure ; sinon ouverte, pente publiée. (7) Suite de
+l'afficheur, zéro avertissement. **Arrêt** : si la scène à 10 cm explose aux deux cadences, publier et ne rien changer aux
+défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si elle y est nécessaire.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — `set_columns_mask` : colonne → particules et particules → colonne à masse exacte, réserve, soldes ; critère 1.
-- [x] **P3** — essais des allers-retours et du refus ; critère 2.
-- [x] **P4** — le critère : `ColumnsSwitch` (requis, dilatation, hystérésis), sur `Apic3` et un corps.
-- [x] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
-- [x] **P6** — les calculs ; critère 3.
-- [x] **P7** — suite entière, zéro avertissement ; critère 4.
-- [x] **P8** — preuve `BASCULE-S408` ; liste (4.16, 4.10), file, feuille de route, index ; A316.
-- [x] **P9** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — la scène à une maille et une emprise données (`MAILLE=`, `EMPRISE=`) : boîte de 7,2 m, éponge en mailles, un
+  impact à la pente de celui de R16 et à l'échelle de l'emprise ; sans variable, la scène de S390 au bit ; critère 1.
+- [ ] **P3** — qualité à 10 cm : Jacobi 32/64/128 contre multigrille 4/6/8, deux emprises (300 pas) ; critère 2.
+- [ ] **P4** — coût à 10 cm, pas entier et deux parts ; l'emprise la plus grande sous 2 ms ; critères 3 et 5.
+- [ ] **P5** — deux minutes à 10 cm, 30 Hz puis 60 Hz si besoin ; critère 4.
+- [ ] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
+- [ ] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
+- [ ] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
-- **P2** — `apic3d_columns.rs` : `set_columns_mask` (→ `ColumnsChange` : colonnes et particules passées dans chaque sens,
-  refusées, décalage de la voie mixte), `convertible_height` (un seul segment d'eau posé sur le fond, sans maille solide ;
-  l'iso-zéro de `φ`), `columns_settle_reserve` (la réserve à parts égales sur les faces-mailles de frontière mouillées, au début
-  de l'échange), `Columns3::reserve` (dans `total_volume`) ; tampons réservés avec la zone (deux masques, une hauteur `f64` par
-  colonne ; `columns_reserved_bytes` suit) — aucune allocation. Ensemencement : sous-couches pleines, la dernière au plus près
-  (0 à 4 particules, en diagonale d'abord), vitesse et matrice affine de la grille. Les 16 essais d'APIC 3D tenus tels quels.
-- **P3** — deux essais `_s408`. **Allers-retours** sur le ballottement de S406 mené 2 s, dix de chaque sens : **volume exact**
-  (3,2·10⁻¹³) ; **hauteur : manqué au critère** — 0,096 maille après un et deux tours, puis l'écart croît d'environ 0,02 par tour
-  (0,118, 0,140, … 0,204 au huitième) jusqu'à **0,309** au dixième, sans point fixe : l'ensemencement quantifie la hauteur au
-  huitième de maille, et la lecture d'une sous-couche partielle n'est pas sa masse ; la voie mixte corrige le total, pas chaque
-  colonne. L'essai protège le volume sur dix tours et **0,2 maille après deux tours** (l'usage : au plus deux bascules par colonne,
-  critère 3). Décalage de la voie mixte ≤ 3,3 mm. **La poche d'air** : le premier jet la laissait passer — `φ`, au noyau de deux
-  mailles, comble une poche d'une colonne sur trois mailles, et la voie mixte baissait deux colonnes de **7,4 cm** ; corrigé — une
-  colonne n'est convertible que si ses mailles occupées se suivent depuis le fond ; refusée, et sa voisine passe (décalage 1,1 mm).
-- **P4** — `ColumnsSwitch` (`apic3d_columns.rs`) : `switch(now_us, &mut Apic3)` reconstruit la surface **une fois**
-  (`refresh_surface`), décide, applique par `apply_columns_mask` (le cœur de `set_columns_mask`, sans seconde reconstruction) et
-  compte les bascules **effectives** par colonne (une conversion refusée n'en est pas une). Requis : non convertible (la même
-  lecture que la bascule, `convertible_height`) ; le corps — empreinte du segment parcouru pendant l'horizon, élargie de la marge,
-  dès que son bas descend à la marge de la surface ; la pente (différences centrées, décentrées à côté d'une hauteur inconnue).
-  Dilatation de Chebyshev séparable ; hystérésis par l'instant de la dernière demande. Défauts : pente 1, marge 2 mailles, horizon
-  0,2 s, dilatation 2, maintien 0,5 s — **non calibrés**. `clear_counts` après la bascule qui pose la zone initiale. Deux essais :
-  le corps (132 colonnes, l'empreinte dilatée exacte ; tenue 0,5 s ; deux bascules), la marche et la poche (requises, dilatées).
-  20 essais d'APIC 3D tenus.
-- **P5** — `examples/apic3d_b10.rs` : `APIC3D_BASCULE` (clés `pente`, `marge`, `horizon`, `dilatation`, `maintien` ; vide : les
-  défauts) — zone entière en bande à la configuration, `switch(0)` pose la zone initiale (`clear_counts` ensuite), un `switch`
-  après chaque pas ; l'air des mesures exclut l'eau sous `η` des colonnes de la zone ; la masse sur `total_volume` (écart relatif
-  maximal publié et exigé ≤ 10⁻⁹) ; capacité d'une couche de plus. Sans la variable, le banc est celui de S393 au caractère près
-  (même capacité, même ligne). Lancés : référence ; défauts ; `maintien=0.05` (le maintien par défaut, 0,5 s, dépasse la durée du
-  calcul, ~0,36 s : il ne peut rien rendre — l'hystérésis ne s'éprouve qu'avec un maintien court).
-- **P6, premier calcul** (B10, `Fr` = 2, `D/dx` = 8, quart ; APIC seul sur la même machine : pincement **1,5067**, pas 0,0266,
-  71 pas, 36 s) — défauts : pincement **1,4797**, soit **le pas d'avant** (la grille de temps passe par 1,4797 puis 1,5063 ; APIC
-  seul détecte à 1,5067) ; part de la bande 0,225 ; une bascule par colonne au plus (le maintien dépasse le calcul) ; 29 120
-  particules contre 131 072 ; 19 s contre 36. **Volume : 1,20·10⁻⁹, manqué** — dérive **du pas** (1,84·10⁻⁹ sommés), la bascule
-  exacte (4·10⁻¹⁶). Deux causes, isolées une à une : **l'absorption au cœur de la zone** (`None` : une particule loin de toute
-  bande, `η += dx/8` en `f32` sans reste — un demi-ulp de `η` à 3 m de fond, 3·10⁻¹⁰ m³ par particule), seule corrigée :
-  2,83·10⁻¹⁰ ; **le transport en `f32`** (le débit fois `dt/dx` pour `η`, les volumes `f64` pour le solde : deux nombres pour
-  le même volume), corrigé en plus : **1,09·10⁻¹²** (dérive du pas 2,5·10⁻¹⁴). Les deux gardés : `η` avancé en `f64`, reste
-  compris ; débits de face devenus volumes `f64` (`columns_reserved_bytes` suit). Le critère 1 n'est donc plus « au bit » pour la
-  zone : 20 essais d'APIC 3D tenus ; banc du raccord relancé (5 et 2,5 cm, 30 s) pour le « au chiffre près ».
-- **Maintien court** (`maintien=0.05`, premier calcul) : pincement 1,4797 aussi ; **trois bascules** pour une colonne au moins ;
-  part 0,291 ; couronne **0,406 D** contre 0,20. **Compris** : à 1,24 √(D/g), deux colonnes repassent en colonnes avec un
-  décalage de voie mixte de **12,8 cm** — leurs particules à 5,5 % au-dessus de la densité nominale (APIC ne tient pas la
-  densité ; la masse, sur deux colonnes seulement, porte tout l'écart) — puis, requises au pas suivant, sont ensemencées jusque-là.
-  **Impasse** : exiger la masse à un quart de maille de la forme pour être convertible — sur 3,2 m de fond, quelques pour mille
-  de dérive de densité suffisent : la bande couvre 82 % du domaine, 131 105 particules. **Retenu** : le décalage borné à un quart
-  de maille, l'excès à la réserve (`ColumnsChange::excess`) ; essai `_s408` de la colonne à seize particules par maille. Après
-  la borne : **deux bascules au plus**, couronne 0,203 D, part 0,221, pincement 1,4797.
-- **Critère 3, code final** (B10, `Fr` = 2, `D/dx` = 8, quart) : défauts — pincement **1,4797, un pas plus tôt, à la limite** ;
-  volume **1,09·10⁻¹²** ; une bascule au plus ; part **0,225** (prédiction ≤ 50 % tenue) ; 29 120 particules contre 131 072 ;
-  19 s contre 36 dans la même fournée. Sensibilité : `dilatation=4` (part 0,366), `marge=0.3` (0,480) — pincement **1,4797**
-  encore : l'écart d'un pas ne vient pas de l'étendue de la bande mais de la zone elle-même (sa vitesse advectée aux faces).
-  Cavité max 1,813 D contre 1,937 ; air enfermé à la détection 0,125 D³ contre 0,078 ; couronne 0,203 contre 0,205.
-- **Critère 1 après P6** : au caractère près jusqu'à P5 (tête `e7b354a8`, raccord 5 cm : 7,785 / 7,847 / 8,002, +0,59 %,
-  +0,43 %, saut 0,113 — S407 ; son volume : **−1,19·10⁻⁹**). Les deux corrections de masse changent les bits de la zone : 5 cm —
-  volume **0**, densité 7,790 / 7,868 / 8,090, niveau −0,15 / +0,01 / +0,50 mm d'APIC seul, saut 0,113, période +0,61 %,
-  amortissement +0,45 % ; 2,5 cm — volume 4·10⁻¹⁶, densité 7,776 / 7,824 / 7,805 (S407 : 7,775 / 7,825 / 7,831), saut **0,154**
-  (0,134 ; 3,85 mm au lieu de 3,35), période +0,34 % (+0,27), amortissement +0,14 % (+0,18) ; niveau −0,34 / −0,20 / **−1,52**
-  mm d'APIC seul (S407 : −0,29 / −0,09 / −0,82 ; APIC seul relancé, inchangé : −0,079 / −0,058 / −0,047 mm, 8,002 / 7,935 /
-  7,619). Critère 4 de S399 tenu aux deux mailles ; la marge du niveau se resserre.
-- **P7** — suite entière : **739 réussis** (S407 : 734, plus les cinq essais `_s408`), 19 ignorés, aucun échec ; toutes les
-  cibles construites sans avertissement. Critère 4 tenu.
-- **P8** — preuve [BASCULE-S408](../docs/validation/BASCULE-S408.md) ; liste : **4.10 partiel** (la représentation s'adapte ; la
-  subdivision de la maille absente), 4.16 (S408), décomptes 3 / 73 / 44 ; file (campagne, lot 5), feuille de route §3 et
-  décompte, index (ligne B et liste des preuves), A316 (note S408 : la masse du pas n'était pas exacte). `--check` : 0.
