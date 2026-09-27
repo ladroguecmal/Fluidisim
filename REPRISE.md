@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-27 03:10 +02:00
-Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-27 09:41 +02:00
+Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
+Session en cours : S404 — physique : **C8e**, l'épars et les niveaux sous le pas couplé (δ sous B + W) — plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S403 — physique : **C8d** ([preuve](docs/validation/FAMINE-S403.md)) — le rang 4 dans l'ordonnanceur : le non-focal qui perd le moins descend (1,4 mm contre 14 mm au témoin qui ignore le contenu), l'issue de la famine déclarée (rang 5, à l'hôte) ; S351 au bit sans déclaration. Avant : S402, ADR-005 restauré et le transfert de niveau (ADR-210)
 Session suivante : dans le cloud, **S404 — C8e, l'épars et les niveaux sous le pas couplé** (δ sous B + W : ce que la scène de C10 demande, et que S401–S402 refusent) ; le raccord (C5), puis C6, sous la condition d'A316 ; au poste, **C3b** (10 cm, A298), puis la pluie, pièce 5b ; peaufinages R32 et R33 plus tard
 Maillons        : 1 — S403 : aucun point ne change de case (9.8, 9.9 partiels) ; journal

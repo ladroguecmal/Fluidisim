@@ -62,66 +62,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S403 — **terminée**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S402 : **C8d**, la décision
-du rang 4 et la famine. Agent : Claude Opus 5.5, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni
-Godot. Branche `claude/eager-volta-lf0kw3` (S402), la plus avancée.
+Session : S404 — **en cours**. Demande de l'utilisateur (2026-09-27) : *« Continue »*. Suite proposée par S403 : **C8e**, l'épars et
+les niveaux sous le pas couplé ; file, « Le domaine épars — ce que S401 laisse » : *le pas couplé sous l'ensemble : avant C10*.
+Agent : Claude, session cloud Claude Code ; fichiers, git, cargo, Python ; ni carte graphique, ni Godot. Branche
+`claude/eager-volta-lf0kw3`, la plus avancée (`main`, `poste` et `claude/blissful-pasteur-m4j5rn` en sont ancêtres).
 
-**Thèse.** L'ordonnanceur (`scheduler.rs`) connaît le rang 1 (S351) : quand le budget ne tient pas tous les vivants, le focal est
-servi entier et les autres rétrécissent ; ce que le rang 1 ne sauve pas reste **affamé sans le dire**. Le rang 4 d'ADR-012 §4 vient
-après : un non-focal qui l'a **déclaré** — son coût un niveau plus bas, et ce que son image y perdrait (l'écart d'un aller-retour
-de son contenu, ADR-210 D2) — descend d'un niveau (le transfert d'ADR-210) ; l'ordonnanceur descend d'abord celui qui **perd le
-moins par milliseconde rendue**, un à la fois, jusqu'à ce que la famine cesse. Ce qui reste affamé est **déclaré** : l'issue est
-le rang 5, le repli sur W, à l'hôte. Descente immédiate ; remontée engagée une seconde, un domaine par seconde, celui qui perd le
-plus d'abord (ADR-012 §5). Les rangs 2 (pas d'embruns dans δ) et 3 (la fréquence) n'existent pas : le rang 4 suit le rang 1.
-**L'API** : `Bid` ne change pas — l'hôte `viewer/` le construit en quatre endroits, et ce conteneur ne peut pas le compiler ; la
-déclaration passe par `declare_coarsen`, et `Grant` dit le niveau accordé.
+**Thèse.** La scène de C10 — le joueur qui saute, la gerbe d'étrave — est δ **sous B + W** : son domaine doit suivre l'objet en
+ensemble épars et changer de niveau au rang 4. S401 (l'ensemble) et S402 (le transfert) refusent le pas couplé. Au pas couplé, le
+bord de la boîte n'est pas qu'un mur : B y est prescrit, sa bande y passe, et l'éponge d'ADR-164 y absorbe δ. « Le bord de
+l'ensemble se comporte comme le bord de la boîte » veut donc dire : δ fermé aux murs de l'ensemble, la bande de B comptée aux murs
+comme au bord, l'éponge mesurée depuis le bord de l'ensemble — qui devient **absorbant** (S401 : « les murs de l'ensemble
+réfléchissent »). Hors de l'ensemble, δ nul est le point fixe du pas **relatif** (ADR-198 D1, le mode de la production) ; le pas
+de S297 donne à δ les restes de B partout, ce qu'un ensemble ne peut pas porter : refusé. Le transfert de niveau porte l'ensemble
+de la même façon : le bord de l'ensemble de départ comme le bord de la boîte, rien dehors, les murs d'arrivée fermés ; le volume
+exact quand l'arrivée couvre le départ, publié sinon. B seul au banc ; W s'y somme de la même façon (`BackgroundFaces3`).
 
-**Critères, écrits avant.** (1) Sans déclaration de rang 4, l'ordonnanceur de S351 **au bit** : ses essais, et l'empreinte
-`6aebff024c734fc9` de l'exemple S278. (2) Le rang 4 ne sert qu'après le rang 1 à son minimum : un cas que le rang 1 résout ne
-descend personne. (3) Il descend le non-focal qui perd le moins par milliseconde rendue ; jamais le focal ; budget jamais dépassé.
-(4) La famine a une **issue déclarée** : ce que ni le rang 1 ni le rang 4 ne servent est rendu comme affamé. (5) Descente
-immédiate ; remontée au plus un domaine par seconde, une seconde au moins après sa descente, le plus coûteux en perte d'abord.
-(6) Banc : trois domaines δ réels — un focal, une bosse, une source — sous un budget qui se resserre puis revient ; budget tenu à
-chaque pas ; l'ordonnanceur descend la bosse, pas la source ; le prix visuel publié contre un témoin qui ignore le contenu
-(prédiction, d'après S402 : ≈ 2 mm contre ≈ 15 mm) ; sauts ≤ 3 mm aux passages. (7) Suite entière, zéro avertissement.
+**Critères, écrits avant.** (1) Sans ensemble, la suite au bit ; ensemble plein sous le pas couplé relatif, 50 pas au bit du pas
+sans ensemble, avec et sans le terme d'ADR-209. (2) Sous une houle réelle (B, relatif) : (a) un rectangle dans une fenêtre contre
+le dense de ce rectangle, mêmes échantillons de B, éponge sur les deux axes, ≤ 10 µm sur 5 s (prédiction ≤ 1 µm : l'ordre des
+sommes) ; (b) deux rectangles séparés contre deux denses, l'écart au repos au bit ; (c) le bilan fermé au plancher du dense, les
+murs comptés au bord ; vu échouer : la bande des murs en face intérieure, l'éponge depuis le bord de la boîte, les faces fermées
+prédites ; refus du pas de S297 avec un ensemble. (3) Transfert d'un rectangle 25 → 50 → 25 cm contre le dense du rectangle :
+≤ 1 µm (prédiction : la surface au bit, `dx` dyadiques) ; volume exact au plancher quand l'arrivée couvre, la perte publiée sinon.
+(4) Banc en mer (houle de 5 cm, λ ≈ 16 m) : une source à 2 m/s, l'épars qui suit (`Follow` de S401) à ≤ 3 mm du domaine entier
+partout et toujours (prédiction ≤ 1 mm), la source dedans ; la part des mailles au cours du temps — prédiction : l'ensemble se
+vide derrière l'objet, part finale ≤ 0,6 (S401, bassin fermé : 0,85) ; témoin aux murs réfléchissants (éponge au seul bord de la
+boîte) pour l'attribuer ; un cas long, 30 s (L369). (5) Niveaux sous la houle : l'épars qui suit passe 25 → 50 cm à 3 s et revient
+à 6 s, contre le dense qui fait les mêmes passages : ≤ 3 mm (prédiction ≤ 1 mm) ; sauts aux passages ≤ 3 mm ; volume des
+transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-210 D2). (6) Suite entière, zéro avertissement.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — le rang 4 dans `scheduler.rs` : `Coarsen`, `declare_coarsen`, niveau des vivants, choix par la perte, remontée,
-  affamés déclarés ; essais des critères 1 à 5.
-- [x] **P3** — le banc `delta3d_famine` : trois domaines, budget en quatre phases, transferts d'ADR-210 aux passages ; témoin sans
-  pertes déclarées.
-- [x] **P4** — les calculs du banc ; critère 6.
-- [x] **P5** — suite entière, zéro avertissement ; critère 7.
-- [x] **P6** — preuve `FAMINE-S403` ; liste (9.8, 9.9), file, feuille de route, index ; note datée d'ADR-012.
-- [x] **P7** — rituel.
+- [>] **P1** — jeton, plan seul.
+- [ ] **P2** — le pas couplé porte l'ensemble (`delta3d_coupling.rs`, `delta3d_sparse.rs`) : mode relatif exigé ; faces fermées non
+  prédites, gradients au bord de l'ensemble comme au bord de la boîte ; bande de B aux murs comme au bord, colonnes dehors
+  intouchées ; éponge depuis le bord de l'ensemble (étendues par colonne, réservées) ; bilan aux murs.
+- [ ] **P3** — essais du pas couplé : critère 1, oracles (a) (b) (c) sous la houle, refus ; vu échouer (trois défauts injectés).
+- [ ] **P4** — le transfert de niveau porte l'ensemble (`delta3d_levels.rs`) ; `Follow::require_cover` ; essais du critère 3.
+- [ ] **P5** — le banc `delta3d_mer_epars` : cas `suivi`, `murs` (témoin), `long`, `niveaux` ; lancés en arrière-plan.
+- [ ] **P6** — les calculs du banc ; critères 4 et 5.
+- [ ] **P7** — suite entière, zéro avertissement ; critère 6.
+- [ ] **P8** — preuve `MER-EPARS-S404` ; liste (4.3, 4.7), file, feuille de route, index ; notes datées d'ADR-006 et d'ADR-210.
+- [ ] **P9** — rituel.
 
 ### Notes de reprise
-- **P2** — `scheduler.rs` : `Coarsen { cost_ms, loss_m }`, `declare_coarsen` (refus `Error::Coarsen`), `Grant::level`, `starved()` ;
-  vivants avec niveau et instant de descente ; `update_levels` avant le rang 1 : un descendu qui ne déclare plus remonte, le focal
-  jamais descendu ; **descente** tant que le rang 1 à son minimum affame, le déclaré de moindre perte par ms rendue d'abord (en
-  croix, égalité par identité) ; **remontée** une par seconde, une seconde au moins après la descente, la plus forte perte d'abord,
-  seulement si personne n'est affamé. Coûts au niveau : la loi du rang 1 sur le coût déclaré (`scaled_cost` = `cost_for` au bit à
-  son niveau). `Bid` inchangé (l'hôte `viewer/` le construit, et ne se compile pas ici). **Critère 1 tenu** : les 28 essais d'avant
-  (un littéral de `Grant` complété de `level: 0`), empreinte S278 **`6aebff024c734fc9`**. Critères 2 à 5 : six essais `_s403`
-  (le rang 1 suffit : personne ne descend ; la bosse descend, pertes échangées la source ; famine à 0,6 ms : un affamé déclaré ;
-  remontée à 1 s puis 2 s, la plus forte perte d'abord ; descente immédiate ; qui ne déclare plus remonte ; refus). 34 tenus.
-- **P3** — `examples/delta3d_famine.rs` : trois sites de 16 × 12 m (64 × 48 × 12 à 25 cm, jumeau 32 × 24 × 6 à 50 cm), F (0) focal
-  source, B (1) source, A (2) bosse ; référence à 25 cm sans famine ; coûts par la loi de production ramenée à la maille (0,440 /
-  0,134 ms) ; budget 2 / 1,05 / 0,6 / 2 ms (0–2, 2–4, 4–5,5, 5,5–8 s) ; perte déclarée = écart d'un aller-retour de la surface
-  présente ; l'hôte : transfert d'ADR-210 aux changements de niveau, rang 5 (image effacée en 0,5 s, renaissance au repos) pour un
-  affamé ; `TEMOIN=1`, pertes nulles. ≈ 34 s de calcul par seconde simulée, deux calculs en parallèle.
-- **P4** — résultats (écart max de l'image à la référence par phase : large / famine 1,05 / sévère 0,6 / retour) : **ordonnanceur**
-  — A, la bosse, **descendue en famine : 1,36 mm**, puis affamée (rang 5, 75 pas) 17,8 mm, renaît au repos 20,5 mm ; B, la source :
-  0 / 0 / 13,2 (descendue en sévère) / 15,0 mm (remontée) ; F : 0 partout. **Témoin** (pertes nulles, l'identité départage) — B
-  **descendue en famine : 14,0 mm**, 16,4 / 17,0 ; A : 0 / 0 / 17,8 / 20,5. **Critère 6 tenu** : le contenu divise par dix l'écart de
-  la phase où le rang 4 décide (prédiction ≈ 2 contre ≈ 15 mm) ; sauts ≤ 2,48 mm ; accordé ≤ 0,965 du budget ; focal intact.
-  **Constats** : (1) en famine sévère, la victime du rang 5 suit l'ordre du sac à dos (`P/C`, puis l'identité) — ici A, la bosse —,
-  pas le contenu ; (2) la descente de B y est inutile (A et B descendus dépassent 0,6 ms) et change seulement qui est nourri ; (3) un
-  domaine détruit ne retrouve pas son contenu (A : 20,5 mm après le retour) — le prix du rang 5, publié.
-- **P5** — suite entière : **718 réussis**, 19 ignorés, zéro avertissement (712 + 6 essais `_s403`).
-- **P6** — preuve `docs/validation/FAMINE-S403.md` (Reproduire au commit `342bdac1`) ; liste 9.8 et 9.9 complétées (aucun point ne
-  change de case) ; file (campagne, 84 mots : C8 rang 4 et famine ; reste le pool sur la carte et la victime du rang 5 par le
-  contenu) ; feuille de route §3 ter (S403 ; suivante dans le cloud : **C8e**, l'épars et les niveaux sous le pas couplé — C6 attend
-  le raccord) ; index (carte B, liste des preuves) ; note datée d'ADR-012 (quatre lectures).
