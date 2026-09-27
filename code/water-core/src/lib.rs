@@ -101,6 +101,8 @@ pub mod pressure_journal;
 pub mod scheduler;
 /// S396 : les domaines comme ensembles de blocs — fusion et séparation (ADR-006 §3–4).
 pub mod domain_blocks;
+/// S405 : la prédiction d'un objet balistique — point, vitesse, orientation, rotation, région utile ; paliers d'ADR-013 §2.
+pub mod ballistic;
 
 /// S143, A210 : les gardes du contrat de pente. Elles ne portent sur aucun module en
 /// particulier — c'est leur objet : ce qui est comparé à `max_slope`, **partout**.

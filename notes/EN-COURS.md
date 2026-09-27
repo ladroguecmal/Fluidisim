@@ -91,7 +91,7 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `ballistic.rs` : état, prédiction (RK4, traînée, Euler, contact, affinage), région, palier.
+- [x] **P2** — `ballistic.rs` : état, prédiction (RK4, traînée, Euler, contact, affinage), région, palier.
 - [ ] **P3** — essais des critères 1 à 6.
 - [ ] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
 - [ ] **P5** — les calculs du banc ; critère 7.
@@ -100,3 +100,8 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
+- **P2** — `code/water-core/src/ballistic.rs` (module public `ballistic`) : `Ballistic` (position, vitesse, quaternion, ω du corps,
+  inertie principale, traînée `k`, rayon englobant), `predict` (RK4 sur translation et rotation, orientation renormalisée ; contact
+  du point le plus bas avec `surface(p, t)` ; bisection sur un pas partant du début du pas, 10⁻¹² s), `predict_region` (région :
+  rayon + plus grand écart horizontal aux impacts des bornes de traînée), `tier` (ADR-013 §2 ; T2 exige aussi `t < 8 s`).
+  Aucune allocation. Essais dans `tests_ballistic.rs` (P3).
