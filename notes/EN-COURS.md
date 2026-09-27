@@ -101,7 +101,7 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
 - [x] **P5** — deux minutes à 10 cm, 30 Hz puis 60 Hz si besoin ; critère 4.
 - [x] **P5b** — *ajoutée* : 30 Hz explose à 10 cm quel que soit le solveur ; attribution sur le banc d'A321 (`MAILLE=`, `EMPRISE=`), termes éteints un à un (L136).
 - [x] **P5c** — *ajoutée* : à cadence stable (60 Hz, un pas par image), l'emprise à 10 cm sous 2 ms ; deux minutes.
-- [>] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
+- [x] **P6** — A298 : `longue_cuve` paramétrée (`PAS_US`, `PAS`, `MULTIGRILLE`) ; 1 ms × 5 000 et 33,333 ms × 3 600 ; critère 6.
 - [ ] **P7** — suite de l'afficheur (et du cœur si touché), zéro avertissement ; critère 7.
 - [ ] **P8** — preuve : MULTIGRILLE-3D-S385 §6 (un fil, une preuve) ; liste 4.19, file, feuille de route, index ; A298.
 - [ ] **P9** — rituel.
@@ -185,3 +185,15 @@ défauts ; la multigrille ne devient défaut que pour la scène à 10 cm, si ell
   **1,56 ms** ; mg 8 : 9,1·10⁻⁶, 1,79 ms. **5,6 m** (225 792) : mg 6 5,5·10⁻⁵, **1,94 ms** ; mg 8 1,1·10⁻⁵, 2,20 ms. **À 60 Hz, mg 6
   suffit** au résidu de Jacobi-32 à 25 cm (le point de départ est plus bas à pas court). **Critère 5 à cadence stable** : **5,6 m ×
   5,6 m** à 10 cm, mg 6, 1,94 ms par image — à 3 % de la limite ; 8 m seulement à 30 Hz, qui n'est pas stable (P5).
+- **P6** — `longue_cuve` : `PAS_US=`, `PAS=`, `FENETRE=`, `CYCLES=`, `NX=`, `MULTIGRILLE=1`, `SANS_SECOND_ORDRE=1` (témoin
+  d'ADR-209 : ni la référence ni la carte, commutateur 64) ; sans variable, le banc de S305. Cuve `nx` = 32 (25 cm), pire écart
+  par fenêtre : **1 ms, Jacobi 64** (le défaut) 1,1 → 4,8·10⁻⁸ m en 5 s — S358 à l'identique ; **1 ms, mg 8** 1,3 → 4,8·10⁻⁸ ;
+  **33 ms, Jacobi-32** 9,3·10⁻⁵ (10 s) → **1,42·10⁻³ m (2 min)**, linéaire, 1,2·10⁻⁵ m/s — 3 mm vers 4 min ; **33 ms, mg 8**
+  4,8·10⁻⁶ → **2,67·10⁻⁵** (2,0·10⁻⁷ m/s, 3 mm vers 4 h) ; **sans ADR-209** : 2,68·10⁻⁵, identique ; **16,7 ms, mg 8, 60 s** :
+  3,3·10⁻⁶. **Critère 6 tenu sur le pas retenu (mg)** ; au défaut Jacobi-32, la sous-convergence (seul le préconditionneur
+  diffère : ÷ 53). **Fait nouveau** : la référence **gagne de l'énergie** à pas long dans la cuve fermée — 33 ms : 100,6 →
+  141,9 J en 2 min (+41 %), **+45 % sans ADR-209** ; 16,7 ms : +15,8 % en 60 s ; 1 ms : −0,47 % en 5 s (durée non comparable) ;
+  amplitude modale 5,32·10⁻² à 100 s pour 5·10⁻² : réel, non un artefact de mesure. Non attribué (A323). **Cuve à 10 cm**
+  (`NX=80`, 134 400 mailles, 33 ms, 10 s seulement : la référence coûte 2,7 s par pas) : `nz` = 42 → **un seul** niveau
+  grossier ; écart 0,44–0,60 mm, la troncature, pas A298 ; −3,8 % d'énergie en 10 s. La cuve à 10 cm sur deux minutes :
+  arrêtée (≈ 2 h 45).

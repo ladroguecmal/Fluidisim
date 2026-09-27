@@ -3402,9 +3402,16 @@ pub fn longue_cuve() -> Result<(), String> {
         let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 29);
         let background = fond_nul(&mut alloc)?;
         let (rho, g) = (1025_f32, 9.81_f32);
-        let (pas_us, pas, fenetre, cycles) = (1_000u64, 5_000usize, 500usize, 64u32);
+        // S409 / C3b (A298) : `PAS_US=`, `PAS=`, `FENETRE=`, `CYCLES=`, `NX=` ; `MULTIGRILLE=1` préconditionne la carte par
+        // le cycle en V (les cycles sont alors des cycles multigrille). Sans elles, le banc de S305.
+        let lire = |nom: &str, defaut: u64| std::env::var(nom).ok().and_then(|v| v.parse().ok()).unwrap_or(defaut);
+        let (pas_us, pas, fenetre, cycles) =
+            (lire("PAS_US", 1_000), lire("PAS", 5_000) as usize, lire("FENETRE", 500) as usize, lire("CYCLES", 64) as u32);
+        let multigrille = std::env::var("MULTIGRILLE").is_ok_and(|v| v == "1");
+        // `SANS_SECOND_ORDRE=1` : le témoin d'ADR-209 — ni la référence ni la carte ne portent le terme de second ordre.
+        let second_ordre = !std::env::var("SANS_SECOND_ORDRE").is_ok_and(|v| v == "1");
 
-        let Cuve { domain, rest, eta, mode } = cuve(32, g as f64);
+        let Cuve { domain, rest, eta, mode } = cuve(lire("NX", 32) as usize, g as f64);
         let (kx, ky, _k, omega) = mode;
         let colonnes = domain.columns();
         let depart = std::time::Instant::now();
@@ -3414,13 +3421,23 @@ pub fn longue_cuve() -> Result<(), String> {
         )
         .map_err(|e| format!("volume {e:?}"))?;
         // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
-        volume.enable_advection_correction();
+        if second_ordre {
+            volume.enable_advection_correction();
+        }
         volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
 
         let total = face_total(domain);
         let (nu, nv) = ((domain.nx + 1) * domain.ny * domain.nz, domain.nx * (domain.ny + 1) * domain.nz);
         let zeros = vec![0f32; total];
         let mut carte = Step3::new(&background, domain, [0., 0., -rest], rho, g).await?;
+        if !second_ordre {
+            carte.set_switches_for_bench(64);
+            println!("CUVE_S409 longue sans_second_ordre");
+        }
+        if multigrille {
+            let niveaux = carte.enable_multigrid();
+            println!("CUVE_S409 longue multigrille niveaux={niveaux} dims={:?}", crate::delta3d_mg::levels_of(domain));
+        }
         carte.set_step(pas_us, rest, Sponge3::default())?;
         carte.set_state(&zeros[..nu], &zeros[..nv], &zeros[..total - nu - nv], &eta)?;
 
