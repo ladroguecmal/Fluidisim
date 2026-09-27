@@ -100,7 +100,7 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
 - [x] **P3** — essais du pas couplé : critère 1, oracles (a) (b) (c) sous la houle, refus ; vu échouer (trois défauts injectés).
 - [x] **P4** — le transfert de niveau porte l'ensemble (`delta3d_levels.rs`) ; `Follow::require_cover` ; essais du critère 3.
 - [x] **P5** — le banc `delta3d_mer_epars` : cas `suivi`, `murs` (témoin), `long`, `niveaux` ; lancés en arrière-plan.
-- [>] **P6** — les calculs du banc ; critères 4 et 5.
+- [x] **P6** — les calculs du banc ; critères 4 et 5.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 6.
 - [ ] **P8** — preuve `MER-EPARS-S404` ; liste (4.3, 4.7), file, feuille de route, index ; notes datées d'ADR-006 et d'ADR-210.
 - [ ] **P9** — rituel.
@@ -148,4 +148,9 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   quatre transferts exacts ; le prix du niveau (l'entier contre la référence à 25 cm) : 0 / **17,8** / **18,3 mm** avant, pendant,
   après — la source d'une maille grossière, comme S402 (15,7 / 16,7 mm) ; part de l'épars 1,000 pendant les 50 cm (la couverture
   en blocs de 4 m prend toute la fenêtre de 16 m), 0,875–0,922 après.
+- **P6** (fin) — `long`, 0,8 m/s, 30 s : écart max **0,433 mm** (dans l'ensemble 0,370), amplitude 7,1 mm, source dedans ; l'écart
+  croît lentement — 0,01 mm à 3 s, 0,24 à 18–24 s, 0,27 à 27 s, 0,43 à 30 s, quand la source approche du bord de la fenêtre
+  (x = 28 m) — sans atteindre le millimètre ; part moyenne 0,686, **0,78 à 18 s puis 0,55 à 30 s** : ici l'ensemble se vide derrière
+  l'objet (la prédiction ≤ 0,6 tenue en fin de cas long, manquée à 10 s du cas `suivi`) ; rendu au repos +4,5·10⁻⁴ m³, 0,12 mm au
+  plus ; 338/314 ms par pas. **Critères 4 et 5** : écarts tenus partout (≤ 0,43 mm), la part manquée à 10 s, tenue à 30 s.
 - **P7** (fait pendant P6) — suite entière : **726 réussis**, 19 ignorés, zéro échec, zéro avertissement (718 + 8 essais `_s404`).
