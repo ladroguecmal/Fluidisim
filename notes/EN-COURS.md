@@ -90,8 +90,8 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
 - [x] **P2** — bande → colonne avec fond : occupation, masse (fond, solde vertical) ; la bascule n'en refuse plus ; essai.
 - [x] **P3** — `apply_band_floor` : descente (ensemencement), remontée (absorption, écart au solde vertical) ; essai d'allers-retours ; critère 2.
 - [x] **P4** — `ColumnsSwitch` : cible du fond (`floor_cells`, `floor_hysteresis`, `floor_prediction`), appliquée après le masque ; essais.
-- [>] **P5** — B10 avec fond, sans et avec prédiction ; critère 3.
-- [ ] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
+- [x] **P5** — B10 avec fond, sans et avec prédiction ; critère 3.
+- [>] **P6** — la vague de Chen avec fond ; planche R35 ; critère 4.
 - [ ] **P7** — suite entière ; critère 5.
 - [ ] **P8** — preuve BANDE-ETROITE-S413 §5 (un fil, une preuve) ; liste, file, feuille de route, index ; revue R35.
 - [ ] **P9** — rituel.
@@ -111,3 +111,23 @@ porte (le fond trop haut au passage de la cavité ?) ; ne rien rendre défaut.
   depuis le bas ; avec la prédiction, sous le point le plus bas du corps sur l'horizon, dans son empreinte élargie de la marge ;
   `move_band_floor` ; `max_floor_moves`. Essai `_s414` : la marche de S408 — bande 5 à 10, fonds 0,1 et 0,3 m (`h` = 1 : parti
   d'un fond nul, deux mailles n'excèdent pas `h` = 2) ; second appel, aucun déplacement ; volume exact. 30 essais d'APIC 3D tenus.
+- **P5** — `apic3d_b10` : clés `fond`, `fond_h`, `fond_pred` ; l'eau sous le fond est de l'eau pour les mesures. B10, `Fr` = 2,
+  `D/dx` = 8, quart ; quatre calculs ensemble (temps indicatifs) :
+
+  | réglage | pincement √(D/g) | cavité max / couronne (D) | air enfermé (D³) | particules | fond, dépl. max | calcul |
+  |---|---|---|---|---|---|---|
+  | APIC seul | **1,5067** (pas 0,0266) | 1,937 / 0,205 | 0,0781 | 131 072 | — | 53 s |
+  | bande pleine, maintien 0,3 s | 1,4797 (−1 pas) | 1,813 / 0,203 | 0,1250 | 29 120 | — | 31 s |
+  | **fond 4** | **1,5327 (+1 pas)** | **1,937** / 0,199 | **0,0781** | **4 122** (÷ 7,1) | 29 | 19 s |
+  | fond 4, prédiction, horizon 0,2 s | 1,4532 (**−2 pas**) | 1,813 / 0,203 | 0,0469 | 10 961 | 28 | 22 s |
+  | **fond 4, prédiction, horizon 0,05 s** | **1,5063 (le pas d'APIC seul)** | **1,937** / 0,203 | **0,0781** | 8 496 (÷ 3,4) | 29 | 20 s |
+  | fond 4, horizon 0,05 s, sans prédiction | 1,5327 | 1,937 / 0,199 | 0,0781 | 4 122 | 29 | 19 s |
+  | fond 4, `fond_h` 4 | 1,5327 | 1,937 / 0,199 | 0,0781 | 4 122 | 29 | 18 s |
+  | fond 6 | 1,5063 (le pas) | 1,937 / 0,202 | 0,1016 | 4 933 (÷ 5,9) | 29 | 20 s |
+
+  **Critère 3 tenu** (un pas, ÷ 3, volume 1,09·10⁻¹²) sans prédiction et avec prédiction à horizon court. **La bande étroite
+  rend la cavité d'APIC seul** — profondeur 1,937 D et air enfermé 0,078 D³ identiques —, là où la bande pleine s'en écartait
+  (1,813 ; 0,125). **L'idée de l'utilisateur** : à l'horizon du critère (0,2 s = 80 cm à 4 m/s), le fond descend trop tôt et
+  trop bas — deux pas d'avance, 2,7 fois plus de particules ; **à 0,05 s** (quatre pas), le pincement tombe **au pas même d'APIC
+  seul**. `body_horizon` sert aussi l'empreinte de la bande (sans effet ici entre 0,05 et 0,2 s). Le fond suit la cavité : 29
+  déplacements au plus, l'hystérésis 2 ou 4 sans effet.

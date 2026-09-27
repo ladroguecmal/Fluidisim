@@ -23,6 +23,9 @@
 //!
 //!     cargo run -p water-core --release --offline --example apic3d_b10 -- <Fr> <D/dx> [quart|entier] [demi_largeur]
 //!     APIC3D_BASCULE="maintien=0.05" cargo run -p water-core --release --offline --example apic3d_b10 -- 2 8
+//!
+//! **S414 — la bande étroite** (C6c-2, ADR-212) : clés `fond` (mailles sous la première maille non-eau), `fond_h` (hystérésis),
+//! `fond_pred=1` (le fond sous le point le plus bas prévu du corps). L'eau sous le fond est de l'eau pour les mesures.
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
@@ -92,6 +95,9 @@ fn main() {
                 "horizon" => s.body_horizon = x as f32,
                 "dilatation" => s.dilation = x as usize,
                 "maintien" => s.hold_us = (x * 1e6).round() as u64,
+                "fond" => s.floor_cells = Some(x as usize),
+                "fond_h" => s.floor_hysteresis = x as usize,
+                "fond_pred" => s.floor_prediction = x != 0.,
                 _ => panic!("clé inconnue : {k}"),
             }
         }
@@ -148,7 +154,11 @@ fn main() {
         };
         // S408 : dans une colonne de la zone, l'eau est sous `η`.
         let surface = a.columns_surface();
-        let colonne = |i: usize, j: usize, k: usize| surface.is_some_and(|eta| a.is_column(i, j) && centre(k) < eta[j * nx + i] as f64);
+        let fonds = a.band_floor();
+        let colonne = |i: usize, j: usize, k: usize| {
+            surface.is_some_and(|eta| a.is_column(i, j) && centre(k) < eta[j * nx + i] as f64)
+                || fonds.is_some_and(|f| centre(k) < f[j * nx + i] as f64)
+        };
         let air = |i: usize, j: usize, k: usize| occupation[(k * ny + j) * nx + i] == 0 && !solide(i, j, k) && !colonne(i, j, k);
         atteint.fill(false);
         pile.clear();
@@ -258,9 +268,10 @@ fn main() {
             "APIC3D_B10_BASCULE cles={} pente={} marge_m={} horizon_s={} dilatation={} maintien_s={} part_bande_moy={:.3} \
              bascules_max={} volume_relatif_max={ecart_volume:.2e} particules_fin={} particules_max={particules_max} \
              echange_abs_ret_pos={absorbees}:{retirees}:{posees} poses_refusees={} derive_pas={derive_pas:.2e} \
-             derive_bascule={derive_bascule:.2e}",
+             derive_bascule={derive_bascule:.2e} fond={:?} fond_h={} fond_pred={} deplacements_du_fond_max={}",
             cles.as_deref().unwrap_or(""), s.slope_max, s.body_margin, s.body_horizon, s.dilation, s.hold_us as f64 * 1e-6,
-            s.mean_band_fraction(), s.max_switches(), a.particle_count(), a.columns_refused()
+            s.mean_band_fraction(), s.max_switches(), a.particle_count(), a.columns_refused(), s.floor_cells, s.floor_hysteresis,
+            s.floor_prediction, s.max_floor_moves()
         );
         assert!(ecart_volume <= 1e-9, "volume : {ecart_volume:e}");
     }
