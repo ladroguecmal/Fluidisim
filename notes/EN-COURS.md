@@ -92,8 +92,8 @@ avertissement. **Arrêt** : ne rien rendre défaut.
 - [x] **P4** — `ColumnsSwitch::floor_vorticity` : la colonne requise et le fond sous la maille tourbillonnaire la plus basse ; essai.
 - [x] **P5** — le banc du tourbillon enfoui ; les trois montages ; critère 3.
 - [x] **P6** — la vague de Chen avec le seuil ; critère 4.
-- [>] **P7** — suite entière ; critère 5.
-- [ ] **P8** — preuve (BANDE-ETROITE-S413 §6), ADR-212 note (C6c-3), liste, file, feuille de route, index.
+- [x] **P7** — suite entière ; critère 5.
+- [>] **P8** — preuve (BANDE-ETROITE-S413 §6), ADR-212 note (C6c-3), liste, file, feuille de route, index.
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
@@ -139,3 +139,4 @@ avertissement. **Arrêt** : ne rien rendre défaut.
   **Conclusion** : aucun critère ne fait les deux — gratuit sous une houle, complet sur un tourbillon. **La voie** : la vitesse
   **propre de δ**, relative à B (ADR-198) — la houle est à B, un seuil sur l'écart ne coûte rien sous elle et prend courants,
   sillages, jets ; elle demande la production relative à B (C7, C10). Essai du jet corrigé (5 s⁻¹ aux bords, pas 2,5).
+- **P7** — suite entière : **752 réussis** (748 + quatre `_s415`), 19 ignorés, zéro avertissement. Critère 5.
