@@ -191,3 +191,8 @@ est la forme de la production ; (2) **le bord de l'ensemble se comporte comme le
 l'ensemble le domaine dense de ce rectangle, à un ulp ; (3) la durée de vie minimale d'un bloc (0,25 s) est lue comme un **délai
 continu** : un bloc sort 0,25 s après la dernière fois qu'il était requis ; (4) la relation de fusion de §4 — dilatations de `r_c`
 — sert aussi à la croissance : un bloc est requis à moins de `r_c` d'un bloc actif. La décision ne change pas.
+
+**Note du 2026-09-27 (S402) — §3.2, le mécanisme du changement de niveau remplacé** par
+[ADR-210](ADR-210-changer-de-niveau-par-transfert-d-etat.md) : un transfert d'état, et non une destruction suivie d'une création.
+Mesuré contre ADR-005 §5 ([preuve](../validation/NIVEAUX-S402.md)) : les deux passent sans saut, mais la destruction perd tout ce
+que le domaine contient. Les six niveaux et leur série ne changent pas.

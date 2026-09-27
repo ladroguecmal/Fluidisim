@@ -203,3 +203,10 @@ n'est pas écrit — ; **l'emprise** se réduit par une **échelle commune** aux
 grande que le budget tient ; **§5** se lit en temps — descente immédiate, remontée d'au plus 1 par seconde, décision
 engagée une seconde (30 images à 30 Hz). Le régulateur PI de §5 n'est pas écrit : l'échelle suit le budget annoncé,
 non le budget consommé filtré. Le prix d'une descente est mesuré, pas jugé : jusqu'à 11,3 cm de δ coupés.
+
+## Note datée du 2026-09-27 (S402) — le rang 4, son mécanisme et son prix en référence
+
+Le rang 4 descend un domaine d'un niveau par transfert d'état ([ADR-210](ADR-210-changer-de-niveau-par-transfert-d-etat.md)) : le
+passage ne se voit pas (0,1 à 2 mm) ; ce qui se voit est le niveau d'arrivée — 1,8 mm sur une bosse qu'il résout, 15 à 17 mm près
+d'une source large d'une maille grossière ([preuve](../validation/NIVEAUX-S402.md)), le « visible de près » du tableau. La décision
+de descendre — quel domaine, selon ce qu'il contient — n'est pas écrite.

@@ -164,8 +164,10 @@ pas recopiée ici (L137).
   repart de δ = 0 (S344), et **ce qui entre dans un domaine qui se déplace naît au repos**, au bit
   (S349) ; **S350 : croissance et réduction** d'un domaine 3D, l'état gardé au bit dans le
   recouvrement, ce qui entre au repos ([preuve](validation/ARBITRAGE-3D-S344.md) §5–6) ; **S351** : elles
-  servent le rang 1, et leur prix est mesuré — une réduction retire jusqu'à 11,3 cm de δ (§7). Manquent une
-  disparition progressive et tout verdict visuel sur ces passages.
+  servent le rang 1, et leur prix est mesuré — une réduction retire jusqu'à 11,3 cm de δ (§7). **S402** : un **changement de
+  niveau** sans saut — 0,1 à 2 mm d'un pas à l'autre — par transfert d'état ([ADR-210](adr/ADR-210-changer-de-niveau-par-transfert-d-etat.md)) ;
+  la disparition progressive d'ADR-005 §5 mesurée — fondu de 0,5 s, sans saut, mais le contenu perdu
+  ([preuve](validation/NIVEAUX-S402.md)). Manquent la transduction de la disparition vers W et tout verdict visuel sur ces passages.
 - [ ] **4.6 Entrée des vagues de B/W dans le domaine** — *partiel* : source volumique, surface
   mobile couplée, fond B prolongé (ADR-149 à 154). Flux de bande aux frontières reçus
   sur courant/niveau uniformes (S270, [preuve](validation/FOND-TRAVERSANT-S270.md), ADR-165).
@@ -518,9 +520,11 @@ pas recopiée ici (L137).
 - [ ] **9.9 Dégradation contrôlée dans l'ordre prescrit** : taille, résolution, interactions
   lointaines, fréquence, effets — *partiel* **depuis S351** : le **rang 1** — rétrécir les non-focaux, le
   focal protégé, descente immédiate, remontée rampée (ADR-012 §4–5) — est dans l'ordonnanceur du cœur et
-  reçu au banc : aucune image affamée contre 612 ([preuve](validation/ARBITRAGE-3D-S344.md) §7). Manquent
-  les rangs 2 à 7, le régulateur PI, une bande morte de l'échelle et le **prix visuel** — une descente
-  coupe jusqu'à 11,3 cm de δ, sans verdict. En 2D, le rétrécissement construit en S283–S285 reste
+  reçu au banc : aucune image affamée contre 612 ([preuve](validation/ARBITRAGE-3D-S344.md) §7). **S402** : le **rang 4** en
+  référence — le changement de niveau par transfert d'état ([ADR-210](adr/ADR-210-changer-de-niveau-par-transfert-d-etat.md)) ; son
+  prix, 1,8 mm sur ce que 50 cm résout, 15 à 17 mm près d'une source d'une maille ([preuve](validation/NIVEAUX-S402.md)). Manquent
+  les rangs 2, 3, 5 à 7, la décision du rang 4, le régulateur PI, une bande morte de l'échelle et le **prix visuel** — une
+  descente coupe jusqu'à 11,3 cm de δ, sans verdict. En 2D, le rétrécissement construit en S283–S285 reste
   **non reçu** — dérive de 66,994 mm, A290
   ([ATTRIBUTION-RETRECISSEMENT-S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md)) : construit, non reçu,
   il ne compte pas. **S350** : en 3D, le redimensionnement

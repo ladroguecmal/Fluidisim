@@ -98,7 +98,7 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
 - [x] **P5** — le banc `delta3d_niveaux` : bosse et source mobile, 25 → 50 cm à 2 s, retour à 5 s, contre le domaine fin ; ADR-005 §5
   (fondu de 0,5 s, naissance à zéro) ; critères B1 à B3.
 - [x] **P6** — suite entière, zéro avertissement.
-- [ ] **P7** — preuve `NIVEAUX-S402` ; un ADR si la mesure tranche le mécanisme du rang 4 ; liste (4.5, 9.9), file, feuille de route,
+- [x] **P7** — preuve `NIVEAUX-S402` ; un ADR si la mesure tranche le mécanisme du rang 4 ; liste (4.5, 9.9), file, feuille de route,
   index.
 - [ ] **P8** — rituel.
 
@@ -135,3 +135,8 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
   sur la bosse : 0,24). **B3** : le transfert garde le contenu résolu (1,8 mm, sous la tolérance d'image) ; ADR-005 §5 le perd ;
   la source, sous-résolue à 50 cm (σ = une maille), coûte 15 à 17 mm aux deux — le « visible de près » d'ADR-012 §4.
 - **P6** — suite entière : **712 réussis**, 19 ignorés, zéro avertissement (707 + 5 essais S402) ; essais de l'outil : 17, tenus.
+- **P7** — preuve `docs/validation/NIVEAUX-S402.md` (Reproduire au commit `8630e9a0`) ; **ADR-210** actée — le changement de niveau
+  par transfert d'état, remplaçant pour lui seul le mécanisme d'ADR-006 §3.2 (D1 : transfert, les deux domaines réservés ; D2 :
+  le prix du rang 4 est celui du contenu, et se publie ; D3 : la production le reproduit) ; notes datées d'ADR-006 et d'ADR-012 ;
+  liste 4.5 et 9.9 complétées (aucun point ne change de case) ; file (ligne de la campagne, 79 mots) ; feuille de route §3 ter
+  (S402, suivantes : C8d) ; index (carte B : ADR-210 et la preuve ; liste des preuves).
