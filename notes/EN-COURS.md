@@ -97,7 +97,7 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
 - [x] **P4** — `delta3d_levels.rs` : le transfert d'état entre niveaux ; essais T1 à T4, vu échouer sans pente.
 - [x] **P5** — le banc `delta3d_niveaux` : bosse et source mobile, 25 → 50 cm à 2 s, retour à 5 s, contre le domaine fin ; ADR-005 §5
   (fondu de 0,5 s, naissance à zéro) ; critères B1 à B3.
-- [ ] **P6** — suite entière, zéro avertissement.
+- [x] **P6** — suite entière, zéro avertissement.
 - [ ] **P7** — preuve `NIVEAUX-S402` ; un ADR si la mesure tranche le mécanisme du rang 4 ; liste (4.5, 9.9), file, feuille de route,
   index.
 - [ ] **P8** — rituel.
@@ -134,3 +134,4 @@ de près ») ; le même cas selon ADR-005 §5 (prédiction : la bosse perdue, é
   ADR-005 §5 : 0,68 / 1,01 mm (2,28 par pas), écart 17,0 mm, 23,6 après. **B1, B2 tenus** partout (≤ 3 mm ; prédiction ≈ 1 mm
   sur la bosse : 0,24). **B3** : le transfert garde le contenu résolu (1,8 mm, sous la tolérance d'image) ; ADR-005 §5 le perd ;
   la source, sous-résolue à 50 cm (σ = une maille), coûte 15 à 17 mm aux deux — le « visible de près » d'ADR-012 §4.
+- **P6** — suite entière : **712 réussis**, 19 ignorés, zéro avertissement (707 + 5 essais S402) ; essais de l'outil : 17, tenus.
