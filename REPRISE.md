@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 10:48 +02:00
+Battement        : 2026-09-27 10:51 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
 Session en cours : S406 — physique : **C5c**, le raccord particules ↔ colonnes (A316 : le courant de surface et la densité) — plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S405 — physique : **9.3** ([preuve](docs/validation/IMPACT-PREVU-S405.md)) — la prédiction balistique dans le cœur (`ballistic` : point, instant, vitesse, orientation, rotation, région utile, paliers d'ADR-013 §2), consommée par le domaine épars en mer : la région d'impact prête 1,11 s avant l'impact quelle que soit la cadence de revue ; 9.3 absent → partiel. Avant : S404, l'épars et les niveaux sous le pas couplé

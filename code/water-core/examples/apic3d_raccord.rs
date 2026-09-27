@@ -16,6 +16,9 @@
 //! sur la face ont un sens (le niveau et la densité de la bande, sans bande, n'en ont pas).
 //!
 //!     cargo run -p water-core --release --offline --example apic3d_raccord -- <dx> <seul|raccord|colonnes> [durée_s]
+//!
+//! **S406** — `APIC3D_ESSAI=<bits>` éprouve les gestes de la frontière (`Apic3::TRIAL_FACE_BOTH_SIDES` = 1,
+//! `TRIAL_MEAN_HEIGHT` = 2, `TRIAL_KEEP_MOMENTUM` = 4).
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
@@ -63,6 +66,10 @@ fn main() {
         a.enable_columns(&mut hote, &masque).expect("colonnes");
         let eta: Vec<f32> = (0..nx * ny).map(|c| profil(((c % nx) as f64 + 0.5) * dx) as f32).collect();
         a.set_columns_surface(&eta).expect("surface");
+        // S406 : `APIC3D_ESSAI=<bits>`, les gestes de la frontière à éprouver (`Apic3::TRIAL_…`).
+        if let Some(bits) = std::env::var("APIC3D_ESSAI").ok().and_then(|v| v.parse::<u8>().ok()) {
+            a.set_columns_trials(bits).expect("essai");
+        }
     }
     a.seed(&|p| !colonnes && (p[2] as f64) < profil(p[0] as f64) && (!raccord || (p[0] as f64) < ib as f64 * dx)).expect("ensemencement");
     let vp = dx * dx * dx / 8.;

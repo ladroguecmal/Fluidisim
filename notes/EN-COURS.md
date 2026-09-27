@@ -91,7 +91,7 @@ ne rien rendre défaut, et le dire.
 ### Plan
 
 - [x] **P1** — jeton, décision de l'utilisateur à la file, plan seul.
-- [ ] **P2** — options d'essai de la frontière dans `Apic3` (a, b, c) et leur passage au banc `apic3d_raccord` ; critère 1.
+- [x] **P2** — options d'essai de la frontière dans `Apic3` (a, b, c) et leur passage au banc `apic3d_raccord` ; critère 1.
 - [ ] **P3** — témoins courts, 5 cm, 30 s : chaque option seule, puis la combinaison ; attribution.
 - [ ] **P4** — le remède attribué devient le défaut ; essais ; critères 1 à 3.
 - [ ] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
@@ -100,3 +100,8 @@ ne rien rendre défaut, et le dire.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
+- **P2** — `apic3d_columns.rs` : `Apic3::TRIAL_FACE_BOTH_SIDES` (1 : face de frontière = moyenne du transfert de la bande et de
+  la vitesse advectée de la zone, ou la seule zone sans poids), `TRIAL_MEAN_HEIGHT` (2 : débit mouillé à la moyenne de `η` et de
+  la hauteur de la bande lue sur `φ`), `TRIAL_KEEP_MOMENTUM` (4 : une particule absorbée rend sa quantité de mouvement aux faces
+  de la zone, poids 1/8 réparti comme le transfert) ; `set_columns_trials` ; banc : `APIC3D_ESSAI=<bits>`. Essais s398–s400
+  tenus tels quels (6).

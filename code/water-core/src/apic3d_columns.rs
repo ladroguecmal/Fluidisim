@@ -40,6 +40,8 @@ pub(crate) struct Columns3 {
     pub(crate) read_bias: Vec<f32>,
     /// Une bande existe-t-elle (une colonne hors du masque) ? Sans bande, la zone lit `η` exactement.
     pub(crate) band: bool,
+    /// **S406, essais seulement** : les gestes de la frontière, un à un (`Apic3::TRIAL_…`) ; zéro, ceux de S400.
+    pub(crate) trials: u8,
 }
 
 /// **S400** — le nombre de positions de la surface, sur une maille, où la lecture de la bande est tabulée.
@@ -108,8 +110,30 @@ impl Apic3 {
             refused: 0,
             read_bias: vec![0.; READ_TABLE],
             band: mask.iter().any(|m| *m == 0),
+            trials: 0,
         });
         self.columns_tabulate();
+        Ok(())
+    }
+
+    /// **S406, essais seulement** — la face de frontière bande | zone prend, avant la projection, la **moyenne** du transfert des
+    /// particules de la bande et de la vitesse advectée de la zone, au lieu du seul transfert (suspect (a) de S400).
+    pub const TRIAL_FACE_BOTH_SIDES: u8 = 1;
+    /// **S406, essais seulement** — le débit de la face de frontière est mouillé, rangée par rangée, à la hauteur **moyenne** de la
+    /// colonne et de la bande (lue sur `φ`), comme une face intérieure, au lieu de la seule colonne (suspect (b)).
+    pub const TRIAL_MEAN_HEIGHT: u8 = 2;
+    /// **S406, essais seulement** — une particule absorbée rend sa quantité de mouvement aux faces de la zone qui l'entourent,
+    /// au poids d'une particule sur une maille (suspect (c)).
+    pub const TRIAL_KEEP_MOMENTUM: u8 = 4;
+
+    /// **S406, essais seulement** : les gestes de la frontière à éprouver, somme de `TRIAL_…` ; zéro rend ceux de S400. Refus
+    /// `Domain` sans zone ou hors des trois bits.
+    pub fn set_columns_trials(&mut self, bits: u8) -> Result<(), Error> {
+        let Some(c) = self.columns.as_mut() else { return Err(Error::Domain) };
+        if bits > 7 {
+            return Err(Error::Domain);
+        }
+        c.trials = bits;
         Ok(())
     }
 
@@ -192,22 +216,34 @@ impl Apic3 {
             let foot = [x[0] - dt * v[0], x[1] - dt * v[1], x[2] - dt * v[2]];
             sample(domain, pu, pv, pw, foot)[axis]
         };
+        // S406, essai (a) : une face de frontière prend la moyenne du transfert de la bande et de la vitesse advectée de la zone.
+        let both = c.trials & Self::TRIAL_FACE_BOTH_SIDES != 0;
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..=nx {
                     let (a, b) = (inside(i as isize - 1, j as isize), inside(i as isize, j as isize));
+                    let f = (k * ny + j) * (nx + 1) + i;
                     if (a || i == 0) && (b || i == nx) && (a || b) {
                         let x = [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
-                        self.u[(k * ny + j) * (nx + 1) + i] = advected(x, 0);
+                        self.u[f] = advected(x, 0);
+                    } else if both && a != b && i > 0 && i < nx {
+                        let x = [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
+                        let zone = advected(x, 0);
+                        self.u[f] = if self.wu[f] > 0. { 0.5 * (self.u[f] + zone) } else { zone };
                     }
                 }
             }
             for j in 0..=ny {
                 for i in 0..nx {
                     let (a, b) = (inside(i as isize, j as isize - 1), inside(i as isize, j as isize));
+                    let f = (k * (ny + 1) + j) * nx + i;
                     if (a || j == 0) && (b || j == ny) && (a || b) {
                         let x = [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx];
-                        self.v[(k * (ny + 1) + j) * nx + i] = advected(x, 1);
+                        self.v[f] = advected(x, 1);
+                    } else if both && a != b && j > 0 && j < ny {
+                        let x = [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx];
+                        let zone = advected(x, 1);
+                        self.v[f] = if self.wv[f] > 0. { 0.5 * (self.v[f] + zone) } else { zone };
                     }
                 }
             }
@@ -252,8 +288,15 @@ impl Apic3 {
     pub(crate) fn columns_transport(&mut self, dt: f32) {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let transport = (dt as f64 / dx as f64) as f32;
-        let (u, v) = (&self.u, &self.v);
+        let (u, v, phi) = (&self.u, &self.v, &self.phi);
         let Some(c) = self.columns.as_mut() else { return };
+        // S406, essai (b) : la hauteur de la bande, lue sur `φ` comme le banc la lit — l'iso-zéro entre deux centres.
+        let mean = c.trials & Self::TRIAL_MEAN_HEIGHT != 0;
+        let band_height = |i: usize, j: usize| -> Option<f32> {
+            let f = |k: usize| phi[(k * ny + j) * nx + i];
+            let k = (0..nz - 1).find(|&k| f(k) < 0. && f(k + 1) >= 0.)?;
+            Some((k as f32 + 0.5) * dx + dx * f(k) / (f(k) - f(k + 1)))
+        };
         c.flux_x.fill(0.);
         c.flux_y.fill(0.);
         for j in 0..ny {
@@ -272,10 +315,12 @@ impl Apic3 {
                     let boundary = low != high;
                     let surface = if !boundary {
                         0.5 * (c.eta[y * nx + x] + c.eta[j * nx + i])
-                    } else if low {
-                        c.eta[y * nx + x]
                     } else {
-                        c.eta[j * nx + i]
+                        let (zone, band) = if low { (c.eta[y * nx + x], (i, j)) } else { (c.eta[j * nx + i], (x, y)) };
+                        match (mean, band_height(band.0, band.1)) {
+                            (true, Some(h)) => 0.5 * (zone + h),
+                            _ => zone,
+                        }
                     };
                     let mut q = 0f32;
                     for k in 0..nz {
@@ -463,6 +508,25 @@ impl Apic3 {
                     best = Some((d, axis, face));
                 }
             }
+            // S406, essai (c) : la quantité de mouvement de la particule rendue aux faces de la zone qui l'entourent, au poids
+            // d'une particule sur une maille (1/8), réparti comme le transfert.
+            if self.columns.as_ref().unwrap().trials & Self::TRIAL_KEEP_MOMENTUM != 0 {
+                let v = self.vel[k];
+                for axis in 0..3 {
+                    let (origin, dims) = staggered(self.domain, axis);
+                    for (idx, wt, _) in weights(p, dx, origin, dims) {
+                        if wt == 0. || !self.zone_face(axis, idx) {
+                            continue;
+                        }
+                        let field = match axis {
+                            0 => &mut self.u,
+                            1 => &mut self.v,
+                            _ => &mut self.w,
+                        };
+                        field[idx] += wt * (v[axis] - field[idx]) / 8.;
+                    }
+                }
+            }
             let cols = self.columns.as_mut().unwrap();
             match best {
                 Some((_, 0, face)) => cols.solde_u[face] += vp,
@@ -587,6 +651,26 @@ impl Apic3 {
             if self.shift[m][0].is_nan() {
                 self.remove_particle(m);
             }
+        }
+    }
+
+    /// S406 : la face `idx` de l'axe `axis` est-elle une face de la zone — ses deux colonnes dans la zone (sa seule, au bord ou
+    /// pour une face `w`) ?
+    fn zone_face(&self, axis: usize, idx: usize) -> bool {
+        let Domain3 { nx, ny, .. } = self.domain;
+        let zone = |i: isize, j: isize| i >= 0 && j >= 0 && (i as usize) < nx && (j as usize) < ny && self.column_of(i as usize, j as usize);
+        match axis {
+            0 => {
+                let (i, j) = ((idx % (nx + 1)) as isize, ((idx / (nx + 1)) % ny) as isize);
+                let (a, b) = (zone(i - 1, j), zone(i, j));
+                (a || i == 0) && (b || i == nx as isize) && (a || b)
+            }
+            1 => {
+                let (i, j) = ((idx % nx) as isize, ((idx / nx) % (ny + 1)) as isize);
+                let (a, b) = (zone(i, j - 1), zone(i, j));
+                (a || j == 0) && (b || j == ny as isize) && (a || b)
+            }
+            _ => zone((idx % nx) as isize, ((idx / nx) % ny) as isize),
         }
     }
 
