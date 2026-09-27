@@ -92,9 +92,9 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'instrument : compteurs de l'échange dans `Apic3` (sans effet sur le calcul), densité des quatre dernières colonnes
   au banc ; critère 1.
-- [>] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
+- [x] **P3** — le diagnostic, 5 cm et 2,5 cm, raccord et APIC seul ; critère 2 ; le geste nommé dans les notes.
 - [x] **P4** — le geste en option d'essai ; témoin à 5 cm ; critère 3.
-- [>] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
+- [x] **P5** — s'il tient : le défaut, 2,5 cm ; critère 4. Sinon : rien ne change, publié.
 - [ ] **P6** — suite entière, zéro avertissement.
 - [ ] **P7** — preuve (RACCORD-3D-S398 §8) ; A316 ; liste 4.16, file, feuille de route.
 - [ ] **P8** — rituel.
@@ -129,3 +129,13 @@ défaut ; publié ; la suite est C6 sur la frontière telle qu'elle est.
   `APIC3D_ESSAI=16` rend **S406** au chiffre près (7,593 / 7,617 / 7,685, niveau +1,007 / +1,772 / +2,181) ; `=1` rend **S400** au
   chiffre près (7,542 / 7,767 / 7,951 ; son échange aussi dominé par les retraits : 357 absorbées pour 1 399 retraits). Attente :
   les trois calculs à 2,5 cm (le diagnostic de S406, APIC seul, le défaut).
+- **P3** (2,5 cm, S406) — le même diagnostic : dernière colonne 7,26 / 7,24 / 7,31, **avant-dernière 8,44 / 8,51 / 8,55**, puis
+  8,20–8,36 et 7,97–8,04 ; absorbées 2 957 / 366 / 469, **retirées 10 174 / 12 021 / 12 324**, posées 13 042 / 12 433 / 12 304.
+  **Critère 2 tenu aux deux mailles.** APIC seul : 8,00 / 7,94 / 7,62 (la dernière tranche baisse sur toute la bande : 7,62 à 7,88).
+- **P5** (2,5 cm, le défaut) — **densité 7,775 / 7,825 / 7,831** ; quatre colonnes 7,78:7,90:7,98:8,00 / 7,82:7,88:8,01:8,00 /
+  7,83:7,94:7,94:7,93 ; absorbées **13 487 / 12 776 / 13 360**, retirées 712 / 16 / 237 ; niveau, écart à APIC seul, −0,29 / −0,09 /
+  −0,82 mm ; saut 0,134 maille (seul 0,785) ; période +0,27 contre +0,36 % (0,09 point) ; amortissement +0,18 contre +0,08 % (0,10) ;
+  courant ≤ 0,7 mm/s, −0,3 à la rangée du haut ; volume −5,1·10⁻¹⁰. **Critère 4 tenu : tout le critère 4 de S399 est tenu aux deux
+  mailles, pour la première fois.** Au critère de la campagne (C5 : masse exacte, surface continue sous 3 mm, période d'APIC seul à
+  la maille fine, 30 s) : masse et période tenues ; le saut max vaut **3,35 mm** à 2,5 cm (5,65 mm à 5 cm) — au-dessus de 3 mm,
+  quand APIC seul a **19,6 mm** entre deux colonnes voisines (4,65 à 5 cm).
