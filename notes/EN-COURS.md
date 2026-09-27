@@ -92,7 +92,7 @@ ne rien rendre défaut, et le dire.
 
 - [x] **P1** — jeton, décision de l'utilisateur à la file, plan seul.
 - [x] **P2** — options d'essai de la frontière dans `Apic3` (a, b, c) et leur passage au banc `apic3d_raccord` ; critère 1.
-- [ ] **P3** — témoins courts, 5 cm, 30 s : chaque option seule, puis la combinaison ; attribution.
+- [>] **P3** — témoins courts, 5 cm, 30 s : chaque option seule, puis la combinaison ; attribution.
 - [ ] **P4** — le remède attribué devient le défaut ; essais ; critères 1 à 3.
 - [ ] **P5** — le critère 4 aux deux mailles (5 cm, 2,5 cm ; ≈ 12 min), contre APIC seul.
 - [ ] **P6** — suite entière, zéro avertissement.
@@ -105,3 +105,8 @@ ne rien rendre défaut, et le dire.
   la hauteur de la bande lue sur `φ`), `TRIAL_KEEP_MOMENTUM` (4 : une particule absorbée rend sa quantité de mouvement aux faces
   de la zone, poids 1/8 réparti comme le transfert) ; `set_columns_trials` ; banc : `APIC3D_ESSAI=<bits>`. Essais s398–s400
   tenus tels quels (6).
+- **P3** (en cours) — 5 cm, 30 s, rangée du haut mouillée (k = 9) : **base** (options éteintes) — S400 au chiffre près (densité
+  7,542/7,767/7,951, saut 0,101, période +0,77 %, amortissement +0,39 %, courant **−6,7**, marche +0,069 mm ; le niveau imprimé est
+  absolu, S400 publiait l'écart à APIC seul) ; **(a) face des deux côtés : −3,6 mm/s** (46 % ôtés), densité du haut 7,62/7,01 ;
+  **(b) hauteur moyenne : −7,2** (pire) ; **(c) quantité de mouvement : −6,3**. Prédiction (b) **manquée** ; (a) porte près de la
+  moitié. Lancés : (a)+(b), (a)+(c), variante « zone seule » (8), APIC seul.

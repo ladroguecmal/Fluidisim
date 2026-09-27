@@ -125,12 +125,14 @@ impl Apic3 {
     /// **S406, essais seulement** — une particule absorbée rend sa quantité de mouvement aux faces de la zone qui l'entourent,
     /// au poids d'une particule sur une maille (suspect (c)).
     pub const TRIAL_KEEP_MOMENTUM: u8 = 4;
+    /// **S406, essais seulement** — variante de (a) : la face de frontière prend la seule vitesse advectée de la zone.
+    pub const TRIAL_FACE_ZONE_ONLY: u8 = 8;
 
     /// **S406, essais seulement** : les gestes de la frontière à éprouver, somme de `TRIAL_…` ; zéro rend ceux de S400. Refus
-    /// `Domain` sans zone ou hors des trois bits.
+    /// `Domain` sans zone ou hors des quatre bits.
     pub fn set_columns_trials(&mut self, bits: u8) -> Result<(), Error> {
         let Some(c) = self.columns.as_mut() else { return Err(Error::Domain) };
-        if bits > 7 {
+        if bits > 15 {
             return Err(Error::Domain);
         }
         c.trials = bits;
@@ -217,7 +219,8 @@ impl Apic3 {
             sample(domain, pu, pv, pw, foot)[axis]
         };
         // S406, essai (a) : une face de frontière prend la moyenne du transfert de la bande et de la vitesse advectée de la zone.
-        let both = c.trials & Self::TRIAL_FACE_BOTH_SIDES != 0;
+        let both = c.trials & (Self::TRIAL_FACE_BOTH_SIDES | Self::TRIAL_FACE_ZONE_ONLY) != 0;
+        let only = c.trials & Self::TRIAL_FACE_ZONE_ONLY != 0;
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..=nx {
@@ -229,7 +232,7 @@ impl Apic3 {
                     } else if both && a != b && i > 0 && i < nx {
                         let x = [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
                         let zone = advected(x, 0);
-                        self.u[f] = if self.wu[f] > 0. { 0.5 * (self.u[f] + zone) } else { zone };
+                        self.u[f] = if self.wu[f] > 0. && !only { 0.5 * (self.u[f] + zone) } else { zone };
                     }
                 }
             }
@@ -243,7 +246,7 @@ impl Apic3 {
                     } else if both && a != b && j > 0 && j < ny {
                         let x = [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx];
                         let zone = advected(x, 1);
-                        self.v[f] = if self.wv[f] > 0. { 0.5 * (self.v[f] + zone) } else { zone };
+                        self.v[f] = if self.wv[f] > 0. && !only { 0.5 * (self.v[f] + zone) } else { zone };
                     }
                 }
             }
