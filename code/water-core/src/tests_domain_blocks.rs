@@ -99,7 +99,7 @@ fn follow(nx: usize, ny: usize) -> Follow {
 fn the_useful_horizon_is_that_of_adr_013_s401() {
     // ADR-013 §2 : avion de chasse (20 m/s², 20 m) 1,4 s ; en perte de contrôle (3 m/s²) 3,7 s ; vaisseau lourd (5 m/s², 60 m)
     // 4,9 s ; balistique : la borne donnée.
-    assert!((useful_horizon(20., 20., 10.) - 1.4142).abs() < 1e-3);
+    assert!((useful_horizon(20., 20., 10.) - std::f32::consts::SQRT_2).abs() < 1e-6);
     assert!((useful_horizon(20., 3., 10.) - 3.6515).abs() < 1e-3);
     assert!((useful_horizon(60., 5., 10.) - 4.8990).abs() < 1e-3);
     assert_eq!(useful_horizon(20., 0., 2.5), 2.5);

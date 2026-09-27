@@ -99,7 +99,7 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
   0,25 s ; sans allocation ; critère 5 (propriété de l'enveloppe).
 - [x] **P5** — le banc `delta3d_epars` : une source mobile (dipôle de volume), droite puis qui tourne ; domaine entier contre
   domaine épars ; critères 3, 4 et 5 (banc).
-- [ ] **P6** — les chiffres de réception en essais ; suite entière, zéro avertissement ; critère 6.
+- [x] **P6** — les chiffres de réception en essais ; suite entière, zéro avertissement ; critère 6.
 - [ ] **P7** — preuve `DOMAINE-EPARS-S401` ; liste (4.3, 4.9, 9.2), file, feuille de route, index.
 - [ ] **P8** — rituel.
 
@@ -146,3 +146,8 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
   `V·cadence` dépasse la marge de la dilatation (≈ 6 m) ; sinon elle coûte des mailles calculées sans gain — ADR-013 §2 la
   range au palier T2 (blocs réservés, δ à 0), pas au calcul (T1) : à séparer (file). Petit essai (ignoré, 32 × 8 m, 3 s,
   balistique, horizon 1 s) : 4,2·10⁻⁵ m, 20 mm, part 0,47.
+- **P6** — les chiffres de réception sont des assertions : critère 1 (ensemble plein au bit), oracles (a), (b), (c) (10 µm, volume
+  au plancher dense), enveloppe (100 %), refus et comptes de sortie ; le suivi en petit (≤ 3 mm, part < 0,9) **ignoré par
+  défaut**, 43 s. **Suite : 707 réussis, 19 ignorés, zéro avertissement** (697 + 10, 18 + 1). `cargo clippy` : une erreur neuve
+  corrigée (`1,4142` pris pour √2 : la constante `SQRT_2`, exacte ici) ; reste une erreur antérieure (`tests_delta_coupling.rs`,
+  `2./2.`) et les avertissements du crate — clippy n'est pas un portail du dépôt.

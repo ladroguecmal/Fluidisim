@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 02:17 +02:00
+Battement        : 2026-09-27 02:20 +02:00
 Agent            : Claude Opus 5.5, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`, avancée depuis `claude/blissful-pasteur-m4j5rn` (S400)
 Session en cours : S401 — C8b, le domaine épars qui suit la perturbation, en référence : un ensemble de blocs dans une fenêtre, la projection sur l'ensemble, le suivi et la prévision (ADR-006 §3–4, ADR-013 §2)
 Dernière session : S400 — physique : **C5b, troisième part** ([preuve](docs/validation/RACCORD-3D-S398.md) §6) — la zone lit sa surface comme la bande : repos à 2·10⁻⁵ m/s, migration dans le critère ; restent la densité et un courant de surface au raccord, non attribués ; la référence CAUSTIC//VOLUME rangée aux comparables (rayons et caustiques dans l'eau, 8.5). Avant : S399, la bande et l'échange
