@@ -138,3 +138,8 @@ transferts publié ; l'écart au domaine fin publié (le prix du contenu, ADR-21
   `suivi`, écart nul, ≈ 330 ms par pas ; 3,2 s de `niveaux` : saut au passage 2,04 mm (entier et épars), épars contre entier
   0,12 mm, volumes exacts. Lancés à 10:04 en parallèle (quatre cœurs), journaux `mer_<cas>.log` dans le brouillon ; durée
   attendue ≈ 10 min (`suivi`, `murs`, `niveaux`), ≈ 25 min (`long`).
+- **P6** (en cours) — `suivi` : écart max **0,138 mm** (dans l'ensemble 0,108), amplitude 25,9 mm, source dedans ; part moyenne
+  0,830, max 0,875, toutes les 2 s 0,734/0,852/0,875/0,875/0,812 ; rendu au repos −7,7·10⁻⁴ m³, 0,12 mm au plus ; 6,6
+  itérations ; 325/356 ms par pas. `murs` (témoin) : écart **0,210 mm**, part **identique** au millième, rendu 0,29 mm au plus.
+  **Critère 4** : écart tenu (prédiction ≤ 1 mm tenue) ; la prédiction « part finale ≤ 0,6 » **manquée** (0,812) — et le témoin
+  dit que le bord absorbant n'y change rien : il ôte un tiers de l'écart (0,21 → 0,14 mm), pas des mailles.
