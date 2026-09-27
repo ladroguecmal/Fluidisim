@@ -96,7 +96,7 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
 - [x] **P4** — le banc `delta3d_impact_prevu` : prédiction contre témoin, en mer ; lancé.
 - [x] **P5** — les calculs du banc ; critère 7.
 - [x] **P6** — suite entière, zéro avertissement ; critère 8.
-- [ ] **P7** — preuve `IMPACT-PREVU-S405` ; liste (9.3, 9.2), file, feuille de route, index ; note datée d'ADR-013.
+- [x] **P7** — preuve `IMPACT-PREVU-S405` ; liste (9.3, 9.2), file, feuille de route, index ; note datée d'ADR-013.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
@@ -132,3 +132,7 @@ voit sa source refusée à l'impact (prédiction). (8) Suite entière, zéro ave
   prédiction « témoin refusé » manquée à la phase prévue, vérifiée à une phase sur cinq. La prédiction coûte 10 à 15 % de mailles
   (la région calculée à δ = 0 avant l'impact).
 - **P6** — suite entière : **732 réussis**, 19 ignorés, zéro échec, zéro avertissement (726 + 6 essais `_s405`).
+- **P7** — preuve `docs/validation/IMPACT-PREVU-S405.md` (Reproduire au commit `ea9c123c`) ; **9.3 absent → partiel** (liste,
+  décompte 3 / 72 / 45, section 9 : 9 partiels et 4 absents ; REPRISE §4, feuille de route §3 et §3 ter) ; registre des
+  dépendances réécrit (9.3 : « un corps quelconque, le vent, l'entrée orientée ») ; index ; note datée d'ADR-013 (le palier lu :
+  T2 exige aussi `t < 8 s`).

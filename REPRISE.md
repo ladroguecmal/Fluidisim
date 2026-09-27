@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-27 10:40 +02:00
+Battement        : 2026-09-27 10:42 +02:00
 Agent            : Claude, session cloud Claude Code (fichiers, git, cargo, Python ; ni carte graphique, ni Godot ; réseau par mandataire) — branche `claude/eager-volta-lf0kw3`
 Session en cours : S405 — physique : **9.3**, la prédiction balistique consommée par le suivi — plan dans [EN-COURS](notes/EN-COURS.md)
 Dernière session : S404 — physique : **C8e** ([preuve](docs/validation/MER-EPARS-S404.md)) — l'épars et les niveaux sous le pas couplé, en mer : le bord de l'ensemble absorbe comme celui de la boîte (un rectangle à un ulp de son dense sous la houle, au bit à travers un changement de niveau) ; l'épars qui suit à 0,14 mm du domaine entier, 0,43 mm sur 30 s ; il ne se vide pas en 10 s. Avant : S403, le rang 4 dans l'ordonnanceur et l'issue de la famine
@@ -102,7 +102,7 @@ reprise à chaud suit uniquement EN-COURS et le diff.
   portes sont reçues : la v1 au sens d'ADR-174 D4**, chacune sur son banc ou sa référence, pas encore réunies en une
   scène vivante ([feuille de route](docs/FEUILLE-DE-ROUTE.md), « La v1 »). Depuis : la liste entière (ADR-190).
   **V** : noyau reçu, sans articulation avec δ.
-- Liste du projet fini : **3 validés, 71 partiels, 46 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367, 4.21 en S369, 5.4 en S372, 5.10 en S375, 5.5 en S378, 8.4 en S380, 4.3 en S386, 4.16 en S393, 4.9 en S396, 9.2 en S401.
+- Liste du projet fini : **3 validés, 72 partiels, 45 absents** sur 120 — actualisée en entier en S350, 8.5 en S359, 2.7 en S362, 8.6 en S365, 7.1 en S367, 4.21 en S369, 5.4 en S372, 5.10 en S375, 5.5 en S378, 8.4 en S380, 4.3 en S386, 4.16 en S393, 4.9 en S396, 9.2 en S401, 9.3 en S405.
 
 L'inventaire se recalcule : `python outils/etat_projet.py` (Python standard, sans réseau). Ses
 nombres mesurent des fichiers et des modifications, **pas du temps ni des capacités**. `--check`

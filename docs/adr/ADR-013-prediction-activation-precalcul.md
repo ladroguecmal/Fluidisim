@@ -172,3 +172,10 @@ ou toutes les 0,5 s à 10 m/s, l'ensemble garde la source par la seule dilatatio
 mailles calculées par 1,7 à 2,6 sans changer l'écart ; revu chaque seconde, la source en sort à 0,62 s sans elle. La référence met
 l'enveloppe dans l'ensemble **calculé** ; le §2 la range au palier **T2** — blocs alloués, δ à 0 —, ce que les mesures appuient.
 La décision ne change pas ; la séparation T2 / T1 est à la file.
+
+**Note du 2026-09-27 (S405) — l'objet balistique du §2, prédit** ([preuve](../validation/IMPACT-PREVU-S405.md)). `ballistic`
+(cœur) : point, instant, vitesse, orientation et rotation à l'impact d'un objet sous gravité et traînée quadratique, en rotation
+libre, contre la houle telle qu'elle sera ; la région utile couvre une traînée bornée ; `tier` rend le palier du §2 — lu ainsi :
+T2 exige aussi `t < 8 s`, et un objet balistique y entre dès lors. Consommé par le domaine épars en mer, le temps de vol devient
+la fenêtre de préparation que la source (§8.2) attend : 1,11 s d'avance, quand le suivi sans prédiction dépend de la cadence de
+revue. La décision ne change pas ; la région reste calculée en référence, non réservée (T2 contre T1, note S401).

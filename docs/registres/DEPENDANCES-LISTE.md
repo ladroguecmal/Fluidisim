@@ -206,7 +206,7 @@ débloque** ; la [feuille de route](../FEUILLE-DE-ROUTE.md) en tire **l'ordre**.
 |---|---|---|---|---|---|
 | **9.1** Activation multicritère | H | `W_urgence` ; le banc B8 | — | 13.3 | **E** — `W_gameplay`, qui vient du jeu |
 | **9.2** Domaine prédictif orienté devant le joueur | H | le domaine qui précède la caméra : prédiction, orientation | — | — | **0** |
-| **9.3** Prédiction d'objets balistiques | H | la prédiction balistique | — | 9.4, 9.6 | **0** |
+| **9.3** Prédiction d'objets balistiques | H | un corps quelconque, le vent, l'entrée orientée consommée par δ | — | 9.4, 9.6 | **0** |
 | **9.4** Objets contrôlables : paliers de confiance | H | — | 9.3 | — | **E** — les objets contrôlables du jeu et leurs paliers |
 | **9.5** Événement prédit, confirmé ou rétracté | H | — | 9.6 | — | **2** |
 | **9.6** Précalcul avant l'impact | H | — | 9.3 | 9.5 | **1** |

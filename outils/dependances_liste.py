@@ -113,7 +113,7 @@ D = {
  "8.10": ("H", "de nouvelles revues, préparées", [], "les verdicts de l'utilisateur : poses, animation, scénarios"),
  "9.1": ("H", "`W_urgence` ; le banc B8", [], "`W_gameplay`, qui vient du jeu"),
  "9.2": ("H", "le domaine qui précède la caméra : prédiction, orientation", [], None),
- "9.3": ("H", "la prédiction balistique", [], None),
+ "9.3": ("H", "un corps quelconque, le vent, l'entrée orientée consommée par δ", [], None),
  "9.4": ("H", "—", ["9.3"], "les objets contrôlables du jeu et leurs paliers"),
  "9.5": ("H", "—", ["9.6"], None),
  "9.6": ("H", "—", ["9.3"], None),

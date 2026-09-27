@@ -505,7 +505,12 @@ pas recopiée ici (L137).
   sur 30 s ([preuve](validation/MER-EPARS-S404.md)). Depuis S349, un domaine δ 3D suit aussi la caméra
   ([S344](validation/ARBITRAGE-3D-S344.md) §5). Manquent le joueur réel — vitesse et intentions viennent du jeu (9.3, 9.4) —,
   l'enveloppe **réservée** (T2) plutôt que calculée, la carte et l'ordonnanceur.
-- [ ] **9.3 Prédiction d'objets balistiques** : point, vitesse, orientation, région utile — *absent*.
+- [ ] **9.3 Prédiction d'objets balistiques** : point, vitesse, orientation, région utile — *partiel* **depuis S405** : le
+  prédicteur du cœur (`ballistic`) — gravité et traînée quadratique, rotation libre, contact avec la houle telle qu'elle sera,
+  instant exact à 10⁻¹² s dans le vide, d'ordre 4 sous traînée ; région utile sous une traînée connue à ±30 % ; paliers d'ADR-013
+  §2 —, **consommé** par le domaine épars en mer : la région d'impact prête 1,11 s avant l'impact quelle que soit la cadence de
+  revue, quand le suivi sans prédiction la laisse hors de l'ensemble une fois sur cinq ([preuve](validation/IMPACT-PREVU-S405.md)).
+  Manquent un corps quelconque (la sphère englobante seule), le vent, l'entrée orientée consommée par δ.
 - [ ] **9.4 Objets contrôlables : paliers de confiance** ; confiance réduite par le jeu — *absent*.
 - [ ] **9.5 Événement prédit, confirmé ou rétracté**, sans retour arrière du temps — *partiel* :
   cause et confirmation des impacts dans le journal (ADR-056). Manque le consommateur.
@@ -630,12 +635,12 @@ pas recopiée ici (L137).
 | 6. Solides | 8 | 0 | 5 | 3 |
 | 7. Secondaires | 8 | 0 | 1 | 7 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
-| 9. Activation et budget | 13 | 0 | 8 | 5 |
+| 9. Activation et budget | 13 | 0 | 9 | 4 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **71** | **46** |
+| **total** | **120** | **3** | **72** | **45** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py
@@ -645,7 +650,7 @@ corrigés sans changer de case. *S350, 2026-09-24* : **4.13** passe à partiel ;
 changer de case — dix-huit sur S309–S349 (actualisation complète, ci-dessous), trois sur S350 (4.19, 9.9, 9.12).
 *S351* : **4.2** et **9.9** passent à partiel — deux domaines servis ensemble, le rang 1 reçu au banc ; 1.4, 4.5 et
 9.8 corrigés. *S359* : **8.5** passe à partiel — la colonne d'eau et la réfraction dans Godot. *S362* : **2.7** passe à
-partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau. *S367* : **7.1** passe à partiel — le champ d'écume de B. *S386* : **4.3** passe à partiel — la colonne graduée. *S393* : **4.16** passe à partiel — la cavité 3D de la sphère, contre une mesure publiée. *S396* : **4.9** passe à partiel — fusion et séparation en référence. *S401* : **9.2** passe à partiel — le domaine épars qui s'étend devant l'objet, en référence.
+partiel — la référence de la houle qui sent le fond. *S365* : **8.6** passe à partiel — la caméra sous l'eau. *S367* : **7.1** passe à partiel — le champ d'écume de B. *S386* : **4.3** passe à partiel — la colonne graduée. *S393* : **4.16** passe à partiel — la cavité 3D de la sphère, contre une mesure publiée. *S396* : **4.9** passe à partiel — fusion et séparation en référence. *S401* : **9.2** passe à partiel — le domaine épars qui s'étend devant l'objet, en référence. *S405* : **9.3** passe à partiel — la prédiction balistique, consommée par le domaine épars en mer.
 
 Trois points validés sur 120. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.
