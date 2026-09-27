@@ -97,7 +97,7 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
 - [x] **P3** — les oracles (a), (b), (c), et vu échouer ; critère 2.
 - [x] **P4** — le suivi et la prévision (`domain_blocks.rs`) : blocs actifs, dilatation, enveloppe d'ADR-013 §2, libération après
   0,25 s ; sans allocation ; critère 5 (propriété de l'enveloppe).
-- [ ] **P5** — le banc `delta3d_epars` : une source mobile (dipôle de volume), droite puis qui tourne ; domaine entier contre
+- [x] **P5** — le banc `delta3d_epars` : une source mobile (dipôle de volume), droite puis qui tourne ; domaine entier contre
   domaine épars ; critères 3, 4 et 5 (banc).
 - [ ] **P6** — les chiffres de réception en essais ; suite entière, zéro avertissement ; critère 6.
 - [ ] **P7** — preuve `DOMAINE-EPARS-S401` ; liste (4.3, 4.9, 9.2), file, feuille de route, index.
@@ -131,3 +131,18 @@ banc, une source qui tourne y reste. (6) Suite entière, zéro avertissement.
   300 manœuvres tirées (`a_max` 0,5 / 2 / 5 m/s², vitesse jusqu'à 10 m/s, horizon `√(2·4 m/a_max)` borné à 5 s, accélération
   constante par 0,1 s), **1 764 931 blocs vérifiés, 100 %** dans le domaine prévu, marge de `r_c` comprise ; 114 blocs par objet
   en moyenne (sur 1 024). **Vu échouer** sans le terme `½·a_max·t²` : essai 22, `t` = 1,76 s, bloc hors du domaine.
+- **P5** — `examples/delta3d_epars.rs` : bassin 40 × 20 m à 25 cm, 2 m d'eau, 20 ms, multigrille ; source = dipôle de volume
+  (0,05 m³/s, ±0,5 m, gaussiennes σ 0,5 m tronquées à 1,5 m, débit monté en 1 s) ; domaine entier contre domaine épars
+  (`Follow` : 4 m, 1 mm, 0,25 s ; enveloppe `a_max`, horizon `√(2·4/a_max)` ≤ 5 s). Quatre calculs en parallèle (durées
+  indicatives). Résultats (écart max partout ; amplitude ; part des mailles moy / max ; rendu au repos ; pas entier / épars) :
+  droite 2 m/s 10 s, prévision 2,83 s : **0,26 mm** ; 24,2 mm ; 0,713 / 0,880 ; −3,1·10⁻³ m³, 0,23 mm ; 387 / 409 ms. Sans
+  prévision : **0,56 mm** ; 0,416 / 0,635 ; 389 / 261 ms. Virage (0,5 m/s², `a_max` 1) 8 s : **0,63 mm** ; 24,7 mm ; 0,533 /
+  0,605 ; 0,72 mm rendus. Rapide 10 m/s 3 s, cadence 0,5 s, prévision 2 s : **0,66 mm** ; **2,6 mm** d'amplitude (25 %) ;
+  0,675 / 0,870 ; 601 / 626 ms. **Témoin sans prévision : la source ne sort pas** — 0,66 mm aussi, 0,257 / 0,300, 488 / 218
+  ms : à 10 m/s et 0,5 s, la marge de la dilatation (≥ 6 m devant le centre) suffit ; l'enveloppe coûte 2,6 fois les mailles
+  sans rien changer à l'écart. **À 1 s de cadence** (`EPARS_CADENCE_S=1`) : **sans prévision, la source sort de l'ensemble à
+  0,62 s** (vu échouer) ; avec, elle reste dedans 3 s — **0,63 mm**, 0,713 / 0,830, 466 / 486 ms. Critère 3 tenu dans tous les
+  cas où la source reste dedans ; critère 5 au banc tenu (virage ; rapide à 1 s). **Constat** : l'enveloppe ne sert que si
+  `V·cadence` dépasse la marge de la dilatation (≈ 6 m) ; sinon elle coûte des mailles calculées sans gain — ADR-013 §2 la
+  range au palier T2 (blocs réservés, δ à 0), pas au calcul (T1) : à séparer (file). Petit essai (ignoré, 32 × 8 m, 3 s,
+  balistique, horizon 1 s) : 4,2·10⁻⁵ m, 20 mm, part 0,47.

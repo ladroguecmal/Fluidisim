@@ -311,3 +311,78 @@ fn an_l_shaped_set_keeps_its_volume_s401() {
     println!("S401 oracle (c) L : dérive du volume {drift:.3e} m³ (cuve dense : {floor:.3e}) sur 5 s, volume {v0:.4e} m³");
     assert!(drift <= 10. * floor.max(1e-15), "dérive {drift} contre {floor}");
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Critère 3, en petit : le domaine qui suit une source mobile, contre le domaine entier (le banc `delta3d_epars` en grand).
+
+/// La gaussienne tronquée à 1,5 m, d'écart type 0,5 m, normalisée sur la grille : `Σ g·dx²` = 1.
+fn gaussian(nx: usize, ny: usize, c: [f32; 2], out: &mut [f32]) {
+    out.fill(0.);
+    let mut sum = 0f64;
+    for j in 0..ny {
+        for i in 0..nx {
+            let (x, y) = ((i as f32 + 0.5) * DX - c[0], (j as f32 + 0.5) * DX - c[1]);
+            if x * x + y * y <= 1.5 * 1.5 {
+                let g = (-(x * x + y * y) / 0.5).exp();
+                out[j * nx + i] = g;
+                sum += g as f64;
+            }
+        }
+    }
+    let norm = (1. / (sum * (DX as f64).powi(2))) as f32;
+    out.iter_mut().for_each(|g| *g *= norm);
+}
+
+#[test]
+#[ignore = "lent (≈ 30 s) : le banc delta3d_epars le mesure en grand"]
+fn a_domain_that_follows_a_moving_source_stays_within_the_image_tolerance_s401() {
+    use crate::domain_blocks::{useful_horizon, Follow, Tracked};
+    // 32 × 8 m, une source dipôle (0,05 m³/s, 1 m) qui avance à 2 m/s pendant 3 s, balistique (`a_max` nul, horizon 1 s) ; le
+    // domaine épars la suit — 4 m autour de l'activité et de l'enveloppe, libération après 0,25 s. Critère 3 : ≤ 3 mm du
+    // domaine entier, la source toujours dedans, et l'ensemble plus petit que la fenêtre.
+    let (nx, ny) = (128, 32);
+    let mut full = configured(nx, ny, false, true);
+    let mut sparse = configured(nx, ny, true, true);
+    let mut arena = host_arena();
+    let mut follow = Follow::with_capacity(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs }, nx, ny, DX, 2,
+        1e-3, 250_000)
+    .unwrap();
+    let track = |t: f64| Tracked {
+        position: [3. + 2. * t as f32, 4.],
+        velocity: [2., 0.],
+        a_max: 0.,
+        horizon: useful_horizon(4., 0., 1.),
+        radius: 2.,
+    };
+    let (mut front, mut back, mut dh, mut mask) = (vec![0f32; nx * ny], vec![0f32; nx * ny], vec![0f32; nx * ny], vec![0u8; nx * ny]);
+    follow.update(0, sparse.surface(), REST, nx, &[track(0.)]);
+    follow.columns(nx, ny, &mut mask);
+    sparse.set_active_columns(&mask).unwrap();
+    let (mut gap, mut part, mut amplitude) = (0f32, 0f64, 0f32);
+    for s in 0..150u64 {
+        let t = s as f64 * 0.02;
+        let x = 3. + 2. * (t + 0.01) as f32;
+        gaussian(nx, ny, [x + 0.5, 4.], &mut front);
+        gaussian(nx, ny, [x - 0.5, 4.], &mut back);
+        let ramp = t.min(1.);
+        let q = 0.05 * (ramp * ramp * (3. - 2. * ramp)) as f32 * 0.02;
+        for c in 0..nx * ny {
+            dh[c] = q * (front[c] - back[c]);
+        }
+        full.add_column_volume(&dh).unwrap();
+        sparse.add_column_volume(&dh).expect("la source hors du domaine épars");
+        full.step_surface_mobile(DT_US, 20_000, &Jobs).unwrap();
+        sparse.step_surface_mobile(DT_US, 20_000, &Jobs).unwrap();
+        follow.update((s + 1) * DT_US, sparse.surface(), REST, nx, &[track((s + 1) as f64 * 0.02)]);
+        follow.columns(nx, ny, &mut mask);
+        sparse.set_active_columns(&mask).unwrap();
+        for (a, b) in full.surface().iter().zip(sparse.surface()) {
+            gap = gap.max((a - b).abs());
+            amplitude = amplitude.max((a - REST).abs());
+        }
+        part += sparse.sparse_cells() as f64 / full.domain().cells() as f64;
+    }
+    println!("S401 suivi (essai) : écart {gap:.3e} m, amplitude {amplitude:.4} m, part moyenne des mailles {:.3}", part / 150.);
+    assert!(gap <= 3e-3, "écart {gap}");
+    assert!(part / 150. < 0.9, "part {}", part / 150.);
+}
