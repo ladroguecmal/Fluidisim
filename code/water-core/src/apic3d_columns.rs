@@ -335,6 +335,14 @@ impl Apic3 {
         let domain = self.domain;
         let Domain3 { nx, ny, nz, dx } = domain;
         let inside = |i: isize, j: isize| i >= 0 && j >= 0 && (i as usize) < nx && (j as usize) < ny && c.mask[j as usize * nx + i as usize] != 0;
+        // S413 : une maille sous le fond de la bande est à la grille, comme une maille de la zone ; sans fond, rien.
+        let below = |i: isize, j: isize, k: usize| {
+            c.floors && i >= 0 && j >= 0 && (i as usize) < nx && (j as usize) < ny && {
+                let col = j as usize * nx + i as usize;
+                c.mask[col] == 0 && (k as f32 + 0.5) * dx < c.floor[col]
+            }
+        };
+        let grid = |i: isize, j: isize, k: usize| inside(i, j) || below(i, j, k);
         let (pu, pv, pw) = (&c.prev_u[..], &c.prev_v[..], &c.prev_w[..]);
         let advected = |x: [f32; 3], axis: usize| {
             let v = sample(domain, pu, pv, pw, x);
@@ -349,7 +357,7 @@ impl Apic3 {
         for k in 0..nz {
             for j in 0..ny {
                 for i in 0..=nx {
-                    let (a, b) = (inside(i as isize - 1, j as isize), inside(i as isize, j as isize));
+                    let (a, b) = (grid(i as isize - 1, j as isize, k), grid(i as isize, j as isize, k));
                     let f = (k * ny + j) * (nx + 1) + i;
                     if (a || i == 0) && (b || i == nx) && (a || b) {
                         let x = [i as f32 * dx, (j as f32 + 0.5) * dx, (k as f32 + 0.5) * dx];
@@ -363,7 +371,7 @@ impl Apic3 {
             }
             for j in 0..=ny {
                 for i in 0..nx {
-                    let (a, b) = (inside(i as isize, j as isize - 1), inside(i as isize, j as isize));
+                    let (a, b) = (grid(i as isize, j as isize - 1, k), grid(i as isize, j as isize, k));
                     let f = (k * (ny + 1) + j) * nx + i;
                     if (a || j == 0) && (b || j == ny) && (a || b) {
                         let x = [(i as f32 + 0.5) * dx, j as f32 * dx, (k as f32 + 0.5) * dx];
@@ -379,7 +387,9 @@ impl Apic3 {
         for k in 0..=nz {
             for j in 0..ny {
                 for i in 0..nx {
-                    if inside(i as isize, j as isize) {
+                    // S413 : la face au-dessus d'une maille sous le fond lui appartient — la dernière comprise (ADR-212 D3).
+                    let owned = below(i as isize, j as isize, k.saturating_sub(1));
+                    if inside(i as isize, j as isize) || owned {
                         let x = [(i as f32 + 0.5) * dx, (j as f32 + 0.5) * dx, k as f32 * dx];
                         self.w[(k * ny + j) * nx + i] = advected(x, 2);
                     }

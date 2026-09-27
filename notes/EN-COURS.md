@@ -87,8 +87,8 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `β` : état (`floor`, reste, `solde_w`), `set_band_floor`, volume total, finitude ; essai de refus et de volume ; critère 1 (essais).
 - [x] **P3** — étiquettes et reconstruction : mailles sous `β` à la grille, particules virtuelles jusqu'à `β`.
-- [>] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
-- [ ] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
+- [x] **P4** — advection : les faces d'une maille à la grille, la face au-dessus de `β`.
+- [>] **P5** — transport : `β` par les débits ; soldes latéraux maille par maille ; solde vertical.
 - [ ] **P6** — échange : absorption sous `β`, règlement du solde vertical, règlement latéral généralisé ; la bascule refuse `β` > 0.
 - [ ] **P7** — essais du repos et du volume ; critère 2.
 - [ ] **P8** — le banc du raccord avec `β` ; critère 3 ; bancs B10 et vague au caractère près (critère 1).
@@ -105,3 +105,6 @@ point d'APIC seul sur 30 s, volume exact ; particules comptées contre la bande 
   `virtual_column_sums` : une colonne de la bande à fond compte ses particules virtuelles jusqu'à son fond, la sienne comprise.
   Essai `_s413` : une seule traversée de `φ` par colonne ; hauteur lue **identique au bit** à la bande pleine (0,3989 m ; les
   virtuelles tombent sur le réseau nominal).
+- **P4** — `columns_advect` : une face-maille `u`, `v` est à la grille si l'une de ses deux mailles l'est (la zone, ou sous le
+  fond) — la règle de S406 maille par maille ; une face `w` si la maille au-dessous est sous le fond (la face au-dessus de la
+  dernière comprise). Sans fond, au bit : 25 essais d'APIC 3D tenus.
