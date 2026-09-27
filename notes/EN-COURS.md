@@ -96,8 +96,8 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
 - [x] **P2** — `Apic3::set_particle_velocities` (vitesse et `C` d'un champ donné) ; essai : un champ affine passe à la grille exactement.
 - [x] **P3** — le banc `apic3d_deferlement` : la houle de Chen, les mesures (retournement, impact, abscisse du jet, crête), la
   bande (`APIC3D_BASCULE`, comme B10), la crête courte en option.
-- [>] **P4** — APIC seul ; critère 1.
-- [ ] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
+- [x] **P4** — APIC seul ; critère 1.
+- [>] **P5** — la bande : défauts et maintien court ; critères 2 à 5.
 - [ ] **P6** — la crête courte ; critère 6.
 - [ ] **P7** — suite entière, zéro avertissement ; critère 7.
 - [ ] **P8** — preuve : BASCULE-S408 §6 (un fil, une preuve) ; liste (4.10, 4.16), file, feuille de route, index.
@@ -112,3 +112,11 @@ sous le seuil) — aucune colonne de la bande dans le quart extérieur de la lar
   (eau / air / eau), impact (air enfermé > 8 mailles, abscisse moyenne). Bande : `APIC3D_BASCULE` (`pente`, `dilatation`,
   `maintien`), zone posée après le premier pas (`clear_counts` ensuite), avance de la bande sur le retournement à sa colonne ;
   `APIC3D_TRACE=1` : intervalles de la bande sur la rangée du milieu. Construit sans avertissement.
+- **P4** — APIC seul, 40 mailles par `λ`, 160 × 4 × 32, 102 464 particules, 115 pas, 67 s. **Instrument corrigé deux fois**
+  (avant tout calcul de la bande) : la trace porte désormais à chaque pas les verticales retournées et l'air enfermé ; puis la
+  **fenêtre** réduite à [2,5 ; 5] m — sur [2 ; 6,5], les crêtes de 2,5 et 4,5 m se retournaient au même pas (3,475 et 5,475 m)
+  et l'« impact » moyennait leurs deux tubes (x = 4,6). **Critère 1 tenu** : **retournement t = 0,7055** à x = 3,475 m (Chen :
+  0,72 ; prédiction [0,6 ; 1,1] tenue) ; **impact t = 1,2711** à x = 4,150 m, 16 mailles (Chen : 1,56 ; **prédiction [1,3 ;
+  1,9] manquée**, 2 % sous sa borne) ; crête 0,175 `λ` à x = 3,125 ; vitesse max 5,96 m/s. L'air enfermé **clignote** à la
+  maille : 8 mailles à 1,2008 et 1,2232, 0 entre, puis 8 à 16 de 1,27 à 1,53 — le tube a deux mailles de section ; le
+  seuil (> 8) le prend à sa première section de trois. 240 itérations de pression par pas.

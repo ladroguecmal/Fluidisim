@@ -9,8 +9,8 @@
 //! `t₁ = 0,72` et touche la face avant à `t₂ = 1,56`, en unités `τ = √(λ/g)` (VOF, 256 mailles par longueur d'onde,
 //! périodique). Ici `λ` = 2 m, 1 m d'eau (`kd` = π), 0,6 m d'air, **un bassin de quatre longueurs d'onde à parois** : la phase
 //! `θ = kx − π/2` annule `u` aux deux parois à `t` = 0 ; les crêtes partent de 0,5, 2,5, 4,5 et 6,5 m, et les mesures ne
-//! regardent que la **fenêtre** [2 ; 6,5] m, que traversent les deux crêtes du milieu, loin des réflexions pendant la
-//! seconde utile.
+//! regardent que la **fenêtre** [2,5 ; 5] m, que traverse la crête partie de 2,5 m, loin des réflexions pendant la seconde
+//! utile.
 //!
 //! **Mesures**, sur l'occupation des mailles (l'eau d'une colonne de la zone est sous `η`) : **retournement** — une verticale
 //! de la fenêtre qui porte, de bas en haut, de l'eau (deux particules au moins), de l'air (aucune), puis de l'eau ; **impact** —
@@ -41,8 +41,9 @@ const PROFONDEUR: f64 = 1.;
 const AIR: f64 = 0.6;
 /// Longueurs d'onde dans le bassin.
 const ONDES: f64 = 4.;
-/// La fenêtre des mesures, m.
-const FENETRE: [f64; 2] = [2., 6.5];
+/// La fenêtre des mesures, m : **une** crête, celle qui part de 2,5 m — la suivante (4,5 m) se retourne au même instant vers
+/// 5,5 m, et un air enfermé moyenné sur deux tubes n'a pas d'abscisse (S410 P4).
+const FENETRE: [f64; 2] = [2.5, 5.];
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -166,32 +167,36 @@ fn main() {
                 }
             }
         }
-        // Le retournement : eau, air, eau sur une verticale de la fenêtre.
-        if retournement.is_none() {
-            'cherche: for j in 0..ny {
-                for i in i0..i1 {
-                    let mut etat = 0;
-                    for kk in 0..nz {
-                        etat = match (etat, eau(i, j, kk), air(i, j, kk)) {
-                            (0, true, _) => 1,
-                            (1, _, true) => 2,
-                            (2, true, _) => 3,
-                            (e, _, _) => e,
-                        };
-                    }
-                    if etat == 3 {
+        // Le retournement : eau, air, eau sur une verticale de la fenêtre. Toutes les verticales, pour la trace.
+        let (mut retournees, mut ret_min, mut ret_max) = (0usize, f64::NAN, f64::NAN);
+        for j in 0..ny {
+            for i in i0..i1 {
+                let mut etat = 0;
+                for kk in 0..nz {
+                    etat = match (etat, eau(i, j, kk), air(i, j, kk)) {
+                        (0, true, _) => 1,
+                        (1, _, true) => 2,
+                        (2, true, _) => 3,
+                        (e, _, _) => e,
+                    };
+                }
+                if etat == 3 {
+                    retournees += 1;
+                    ret_min = ret_min.min(centre(i));
+                    ret_max = ret_max.max(centre(i));
+                    if retournement.is_none() {
                         let c = j * nx + i;
                         let avance = if bascule.is_some() { t - depuis[c] as f64 * 1e-6 } else { f64::NAN };
                         let part = (0..nx * ny).filter(|&c| !a.is_column(c % nx, c / nx)).count() as f64 / (nx * ny) as f64;
                         retournement = Some((t, centre(i), avance, part));
                         part_au_retournement = part;
-                        break 'cherche;
                     }
                 }
             }
         }
         // L'impact : de l'air de la fenêtre que le remplissage depuis le haut n'atteint pas.
-        if impact.is_none() {
+        let (mut enfermees, mut enfermees_x) = (0usize, f64::NAN);
+        if impact.is_none() || trace {
             atteint.fill(false);
             pile.clear();
             for j in 0..ny {
@@ -232,7 +237,9 @@ fn main() {
                     }
                 }
             }
-            if mailles > 8 {
+            enfermees = mailles;
+            enfermees_x = somme_x / mailles as f64;
+            if mailles > 8 && impact.is_none() {
                 impact = Some((t, somme_x / mailles as f64, mailles as f64 * dx * dx * dx));
             }
         }
@@ -258,7 +265,7 @@ fn main() {
                 Vec::new()
             };
             println!(
-                "APIC3D_DEFERLEMENT_TRACE t_sur_tau={:.4} dt_ms={:.2} iterations={} vmax={:.2} particules={} bande_milieu=[{}]",
+                "APIC3D_DEFERLEMENT_TRACE t_sur_tau={:.4} dt_ms={:.2} iterations={} vmax={:.2} particules={}                  retournees={retournees} entre={ret_min:.3}-{ret_max:.3} enfermees={enfermees} enfermees_x={enfermees_x:.3}                  bande_milieu=[{}]",
                 t / tau, us as f64 * 1e-3, rep.iterations, rep.max_speed, a.particle_count(), bande.join(" ")
             );
         }
