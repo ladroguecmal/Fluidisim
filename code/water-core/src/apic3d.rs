@@ -1206,7 +1206,7 @@ impl Apic3 {
 
 #[path = "apic3d_columns.rs"]
 mod columns;
-pub use columns::columns_reserved_bytes;
+pub use columns::{columns_reserved_bytes, ColumnsChange};
 
 #[cfg(test)]
 #[path = "tests_apic3d.rs"]

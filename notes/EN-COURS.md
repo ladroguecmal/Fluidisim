@@ -94,7 +94,7 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `set_columns_mask` : colonne → particules et particules → colonne à masse exacte, réserve, soldes ; critère 1.
+- [x] **P2** — `set_columns_mask` : colonne → particules et particules → colonne à masse exacte, réserve, soldes ; critère 1.
 - [ ] **P3** — essais des allers-retours et du refus ; critère 2.
 - [ ] **P4** — le critère : `ColumnsSwitch` (requis, dilatation, hystérésis), sur `Apic3` et un corps.
 - [ ] **P5** — le banc B10 à bande dynamique (mesures qui lisent l'eau des colonnes) ; lancé.
@@ -104,3 +104,9 @@ pas, publier l'écart et ce qui le porte, ne rien rendre défaut qui ne soit ép
 - [ ] **P9** — rituel.
 
 ### Notes de reprise
+- **P2** — `apic3d_columns.rs` : `set_columns_mask` (→ `ColumnsChange` : colonnes et particules passées dans chaque sens,
+  refusées, décalage de la voie mixte), `convertible_height` (un seul segment d'eau posé sur le fond, sans maille solide ;
+  l'iso-zéro de `φ`), `columns_settle_reserve` (la réserve à parts égales sur les faces-mailles de frontière mouillées, au début
+  de l'échange), `Columns3::reserve` (dans `total_volume`) ; tampons réservés avec la zone (deux masques, une hauteur `f64` par
+  colonne ; `columns_reserved_bytes` suit) — aucune allocation. Ensemencement : sous-couches pleines, la dernière au plus près
+  (0 à 4 particules, en diagonale d'abord), vitesse et matrice affine de la grille. Les 16 essais d'APIC 3D tenus tels quels.

@@ -52,6 +52,30 @@ pub(crate) struct Columns3 {
     /// **S407 — l'instrument de l'échange**, depuis la configuration : particules absorbées, retirées pour un solde dû, posées
     /// pour un solde reçu. Aucun effet sur le calcul.
     pub(crate) counts: [u64; 3],
+    /// **S408 — la réserve de la bascule**, m³ (`f64`) : ce qu'un ensemencement n'a pas pu poser en particules entières, et les
+    /// soldes des faces qui cessent d'être frontière. L'échange la règle aux faces de frontière mouillées.
+    pub(crate) reserve: f64,
+    /// **S408 — tampons de la bascule**, réservés avec la zone : l'ancien masque, le nouveau, la hauteur géométrique des colonnes
+    /// converties (NaN ailleurs).
+    pub(crate) old_mask: Vec<u8>,
+    pub(crate) new_mask: Vec<u8>,
+    pub(crate) geo: Vec<f64>,
+}
+
+/// **S408 — ce qu'une bascule a fait**, publié.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct ColumnsChange {
+    /// Colonnes passées aux particules, et particules ensemencées.
+    pub to_particles: usize,
+    pub seeded: usize,
+    /// Colonnes passées aux colonnes, et particules retirées.
+    pub to_columns: usize,
+    pub removed: usize,
+    /// Colonnes demandées en colonnes mais **non convertibles** — plusieurs segments d'eau, poche d'air, corps : restées aux
+    /// particules.
+    pub refused: usize,
+    /// Le décalage uniforme de la voie mixte, m (la forme par `φ`, le niveau par la masse).
+    pub shift: f32,
 }
 
 /// **S400** — le nombre de positions de la surface, sur une maille, où la lecture de la bande est tabulée.
@@ -68,8 +92,9 @@ pub fn columns_reserved_bytes(domain: Domain3) -> Option<usize> {
     let nu = (nx + 1).checked_mul(ny)?.checked_mul(nz)?;
     let nv = nx.checked_mul(ny + 1)?.checked_mul(nz)?;
     // Masque (1 octet), surface et reste (4 + 4) par colonne ; trois copies de faces ; deux familles de débits ; les soldes de
-    // l'échange (S399), un `f64` par face `u` et `v` ; la table de lecture (S400).
-    columns.checked_mul(1 + 4 + 4)?.checked_add(faces.checked_mul(4)?)?.checked_add(flux.checked_mul(4)?)?
+    // l'échange (S399), un `f64` par face `u` et `v` ; la table de lecture (S400) ; les tampons de la bascule (S408), deux masques
+    // et une hauteur `f64` par colonne.
+    columns.checked_mul(1 + 4 + 4 + 1 + 1 + 8)?.checked_add(faces.checked_mul(4)?)?.checked_add(flux.checked_mul(4)?)?
         .checked_add(nu.checked_add(nv)?.checked_mul(8)?)?.checked_add(READ_TABLE * 4)
 }
 
@@ -122,6 +147,10 @@ impl Apic3 {
             band: mask.iter().any(|m| *m == 0),
             trials: 0,
             counts: [0; 3],
+            reserve: 0.,
+            old_mask: vec![0; nx * ny],
+            new_mask: vec![0; nx * ny],
+            geo: vec![f64::NAN; nx * ny],
         });
         self.columns_tabulate();
         Ok(())
@@ -451,7 +480,7 @@ impl Apic3 {
     /// **S399 — le volume total** : particules, colonnes et soldes, m³ (`f64`).
     pub fn total_volume(&self) -> f64 {
         let vp = (self.domain.dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
-        let soldes = self.columns.as_ref().map_or(0., |c| c.solde_u.iter().chain(&c.solde_v).sum::<f64>());
+        let soldes = self.columns.as_ref().map_or(0., |c| c.solde_u.iter().chain(&c.solde_v).sum::<f64>() + c.reserve);
         self.n as f64 * vp + self.columns_volume() + soldes
     }
     /// **S407** — les gestes de l'échange depuis la configuration : `[absorbées, retirées, posées]` ; zéros sans zone.
@@ -562,6 +591,8 @@ impl Apic3 {
             cols.counts[0] += 1;
             self.remove_particle(k);
         }
+        // S408 : la réserve de la bascule, répartie sur les faces de frontière mouillées.
+        self.columns_settle_reserve();
         // (2) et (3) : chaque face-maille de frontière règle son solde. Les particules sont triées par maille ; un retrait est
         // **marqué** (`shift` sert de marque, NaN) et la bande compactée à la fin ; une pose est ajoutée en fin de tableau.
         self.bin();
@@ -701,6 +732,254 @@ impl Apic3 {
                 self.remove_particle(m);
             }
         }
+    }
+
+    /// **S408 — la hauteur d'une colonne de particules**, lue sur `φ` comme la pression la voit (l'iso-zéro entre deux centres),
+    /// **si elle est convertible** : un seul segment d'eau posé sur le fond, aucune maille solide. `None` sinon.
+    fn convertible_height(&self, i: usize, j: usize) -> Option<f64> {
+        let Domain3 { nz, dx, .. } = self.domain;
+        let phi = |k: usize| self.phi[self.cell(i, j, k)];
+        if (0..nz).any(|k| self.label[self.cell(i, j, k)] == SOLID) || !(phi(0) < 0.) {
+            return None;
+        }
+        let top = (0..nz).take_while(|&k| phi(k) < 0.).count() - 1;
+        if (top + 1..nz).any(|k| phi(k) < 0.) || top + 1 >= nz {
+            return None;
+        }
+        let (a, b) = (phi(top) as f64, phi(top + 1) as f64);
+        Some((top as f64 + 0.5) * dx as f64 + dx as f64 * a / (a - b))
+    }
+
+    /// **S408 — la bascule** colonnes ↔ particules, entre deux pas, à masse exacte. `mask[c]` non nul demande la colonne `c`
+    /// (`j·nx + i`) en colonnes ; nul, en particules.
+    ///
+    /// - **Colonne → particules** : ensemencée sous sa hauteur sur le réseau nominal (2 × 2 × 2 par maille) — les sous-couches
+    ///   pleines, puis la dernière au plus près de son volume (0 à 4 particules) —, à la vitesse et à la matrice affine de la
+    ///   grille ; ce qui reste, moins d'une demi-particule, va à la réserve.
+    /// - **Particules → colonne** : seulement si la surface reconstruite y forme **un seul segment d'eau posé sur le fond**, sans
+    ///   corps ; sinon la colonne reste aux particules et `refused` la compte. La hauteur par la **voie mixte** de S323 : la forme
+    ///   par `φ`, le niveau par la masse — un décalage uniforme sur l'ensemble converti rend exacte la masse de ses particules.
+    /// - **Les soldes** d'une face qui cesse d'être frontière vont à la réserve ; l'échange règle la réserve aux faces de
+    ///   frontière mouillées.
+    ///
+    /// Refus, rien n'est changé : `Domain` sans zone ou si la capacité ne suffit pas à l'ensemencement, `Shape` sur la longueur.
+    /// Aucune allocation.
+    pub fn set_columns_mask(&mut self, mask: &[u8]) -> Result<ColumnsChange, Error> {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Some(c) = self.columns.as_ref() else { return Err(Error::Domain) };
+        if mask.len() != c.mask.len() {
+            return Err(Error::Shape);
+        }
+        // Une surface fraîche : la convertibilité se lit sur l'état présent.
+        self.reconstruct();
+        self.columns_label();
+        self.label_body();
+        let vp = (dx as f64).powi(3) / (PER_AXIS * PER_AXIS * PER_AXIS) as f64;
+        let area = dx as f64 * dx as f64;
+        let half = 0.5 * dx as f64;
+        // Ce qu'ensemence une colonne de hauteur compensée `h` : sous-couches pleines, puis la dernière au plus près.
+        let plan = |h: f64| -> (usize, usize) {
+            let full = ((h / half).floor().max(0.) as usize).min(2 * nz);
+            let rest = h - full as f64 * half;
+            let last = if full < 2 * nz { ((rest / half * 4.).round().clamp(0., 4.)) as usize } else { 0 };
+            (full, last)
+        };
+        // (0) Le compte d'avance : capacité.
+        let mut needed = 0usize;
+        {
+            let c = self.columns.as_ref().unwrap();
+            for col in 0..nx * ny {
+                if c.mask[col] != 0 && mask[col] == 0 {
+                    let h = c.eta[col] as f64 - c.eta_roundoff[col] as f64;
+                    let (full, last) = plan(h);
+                    needed += 4 * full + last;
+                }
+            }
+        }
+        if self.n + needed > self.x.len() {
+            return Err(Error::Domain);
+        }
+        let mut change = ColumnsChange::default();
+        // Le statut de frontière de chaque face-colonne, avant.
+        let boundary = |m: &[u8], axis: usize, i: usize, j: usize| -> bool {
+            if axis == 0 {
+                i > 0 && i < nx && (m[j * nx + i - 1] != 0) != (m[j * nx + i] != 0)
+            } else {
+                j > 0 && j < ny && (m[(j - 1) * nx + i] != 0) != (m[j * nx + i] != 0)
+            }
+        };
+        // Les tampons, pris à la zone le temps de la bascule (aucune allocation).
+        let (mut old_mask, mut new_mask, mut geo) = {
+            let c = self.columns.as_mut().unwrap();
+            (core::mem::take(&mut c.old_mask), core::mem::take(&mut c.new_mask), core::mem::take(&mut c.geo))
+        };
+        old_mask.copy_from_slice(&self.columns.as_ref().unwrap().mask);
+        geo.fill(f64::NAN);
+        // (1) Particules → colonnes : les convertibles, leur hauteur géométrique.
+        for j in 0..ny {
+            for i in 0..nx {
+                let col = j * nx + i;
+                if old_mask[col] == 0 && mask[col] != 0 {
+                    match self.convertible_height(i, j) {
+                        Some(h) => geo[col] = h,
+                        None => change.refused += 1,
+                    }
+                }
+            }
+        }
+        new_mask.copy_from_slice(&old_mask);
+        for col in 0..nx * ny {
+            if geo[col].is_finite() {
+                new_mask[col] = 1;
+            } else if old_mask[col] != 0 && mask[col] == 0 {
+                new_mask[col] = 0;
+            }
+        }
+        // Les particules des colonnes converties : retirées, leur volume compté.
+        let mut k = 0;
+        let mut removed_volume = 0f64;
+        while k < self.n {
+            let (i, j, _) = self.cell_of(self.x[k]);
+            if geo[j * nx + i].is_finite() {
+                self.remove_particle(k);
+                removed_volume += vp;
+                change.removed += 1;
+            } else {
+                k += 1;
+            }
+        }
+        let converted = geo.iter().filter(|h| h.is_finite()).count();
+        change.to_columns = converted;
+        if converted > 0 {
+            let geo_volume: f64 = geo.iter().filter(|h| h.is_finite()).map(|h| h * area).sum();
+            let shift = (removed_volume - geo_volume) / (converted as f64 * area);
+            change.shift = shift as f32;
+            let c = self.columns.as_mut().unwrap();
+            for col in 0..nx * ny {
+                if geo[col].is_finite() {
+                    let h = geo[col] + shift;
+                    c.eta[col] = h as f32;
+                    c.eta_roundoff[col] = (c.eta[col] as f64 - h) as f32;
+                }
+            }
+        }
+        // (2) Colonnes → particules : ensemencées sous leur hauteur.
+        for j in 0..ny {
+            for i in 0..nx {
+                let col = j * nx + i;
+                if !(old_mask[col] != 0 && new_mask[col] == 0) {
+                    continue;
+                }
+                change.to_particles += 1;
+                let (h, (full, last)) = {
+                    let c = self.columns.as_ref().unwrap();
+                    let h = c.eta[col] as f64 - c.eta_roundoff[col] as f64;
+                    (h, plan(h))
+                };
+                let mut seeded = 0usize;
+                for sub in 0..full + usize::from(last > 0) {
+                    let z = ((sub as f64 + 0.5) * half) as f32;
+                    let count = if sub < full { 4 } else { last };
+                    for (a, (ox, oy)) in [(0.25f32, 0.25f32), (0.75, 0.75), (0.75, 0.25), (0.25, 0.75)].into_iter().enumerate() {
+                        if a >= count {
+                            break;
+                        }
+                        let p = [(i as f32 + ox) * dx, (j as f32 + oy) * dx, z];
+                        let (v, cm) = self.grid_affine(p);
+                        let m = self.n;
+                        self.x[m] = p;
+                        self.vel[m] = v;
+                        self.c[m] = cm;
+                        self.n += 1;
+                        seeded += 1;
+                    }
+                }
+                change.seeded += seeded;
+                let c = self.columns.as_mut().unwrap();
+                c.reserve += h * area - seeded as f64 * vp;
+                c.eta[col] = 0.;
+                c.eta_roundoff[col] = 0.;
+            }
+        }
+        // (3) Les soldes des faces qui cessent d'être frontière : à la réserve.
+        {
+            let c = self.columns.as_mut().unwrap();
+            for axis in 0..2 {
+                let (fx, fy) = if axis == 0 { (nx + 1, ny) } else { (nx, ny + 1) };
+                for fj in 0..fy {
+                    for fi in 0..fx {
+                        if boundary(&old_mask, axis, fi, fj) && !boundary(&new_mask, axis, fi, fj) {
+                            for l in 0..nz {
+                                let face = if axis == 0 { (l * ny + fj) * (nx + 1) + fi } else { (l * (ny + 1) + fj) * nx + fi };
+                                let solde = if axis == 0 { &mut c.solde_u[face] } else { &mut c.solde_v[face] };
+                                c.reserve += *solde;
+                                *solde = 0.;
+                            }
+                        }
+                    }
+                }
+            }
+            c.mask.copy_from_slice(&new_mask);
+            c.band = new_mask.iter().any(|m| *m == 0);
+            c.old_mask = old_mask;
+            c.new_mask = new_mask;
+            c.geo = geo;
+        }
+        Ok(change)
+    }
+
+    /// **S408 — la réserve réglée** : répartie à parts égales sur les soldes des faces-mailles de frontière **mouillées** (la
+    /// colonne de la zone y a de l'eau) ; sans elles, elle attend.
+    pub(crate) fn columns_settle_reserve(&mut self) {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let Some(c) = self.columns.as_mut() else { return };
+        if c.reserve == 0. {
+            return;
+        }
+        let wet = |c: &Columns3, axis: usize, fi: usize, fj: usize, l: usize| -> bool {
+            let (lo, hi) = if axis == 0 {
+                if fi == 0 || fi == nx { return false; }
+                (fj * nx + fi - 1, fj * nx + fi)
+            } else {
+                if fj == 0 || fj == ny { return false; }
+                ((fj - 1) * nx + fi, fj * nx + fi)
+            };
+            let (zl, zh) = (c.mask[lo] != 0, c.mask[hi] != 0);
+            zl != zh && ((l as f32 + 0.5) * dx) < c.eta[if zl { lo } else { hi }]
+        };
+        let mut count = 0usize;
+        for axis in 0..2 {
+            let (fx, fy) = if axis == 0 { (nx + 1, ny) } else { (nx, ny + 1) };
+            for l in 0..nz {
+                for fj in 0..fy {
+                    for fi in 0..fx {
+                        if wet(c, axis, fi, fj, l) {
+                            count += 1;
+                        }
+                    }
+                }
+            }
+        }
+        if count == 0 {
+            return;
+        }
+        let share = c.reserve / count as f64;
+        let mut given = 0f64;
+        for axis in 0..2 {
+            let (fx, fy) = if axis == 0 { (nx + 1, ny) } else { (nx, ny + 1) };
+            for l in 0..nz {
+                for fj in 0..fy {
+                    for fi in 0..fx {
+                        if wet(c, axis, fi, fj, l) {
+                            let face = if axis == 0 { (l * ny + fj) * (nx + 1) + fi } else { (l * (ny + 1) + fj) * nx + fi };
+                            if axis == 0 { c.solde_u[face] += share } else { c.solde_v[face] += share }
+                            given += share;
+                        }
+                    }
+                }
+            }
+        }
+        c.reserve -= given;
     }
 
     /// S406 : la face `idx` de l'axe `axis` est-elle une face de la zone — ses deux colonnes dans la zone (sa seule, au bord ou
