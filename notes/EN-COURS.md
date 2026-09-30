@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S418 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7c-2**, l'échange à
+Session : S418 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7c-2**, l'échange à
 la frontière sur la carte ([conception](../docs/validation/APIC-CARTE-S416.md) §8). Agent : Claude Code (Opus 5.5), au poste.
 
 **Ce que la référence fait** (`columns_exchange`, S399–S407), et comment la carte le fait. (1) **L'absorption** : une particule
@@ -93,7 +93,7 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
 - [x] **P5** — retrait et pose sur un fil ; le pas entier sur la cuve mixte ; critère 2.
 - [x] **P6** — le raccord sur la carte, 30 s ; critère 3.
 - [x] **P7** — suite entière ; preuve §10 ; liste, file, feuille de route, index.
-- [ ] **P8** — rituel.
+- [x] **P8** — rituel.
 
 ### Notes de reprise
 - **P2** — cœur : `columns_soldes`, `particle_capacity`. Carte : `isolde` (soldes en quanta), `pcount` (`n` résident, compteurs),
@@ -124,3 +124,4 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
   comparaison « ≤ témoin », sur deux échantillons, est manquée de peu, dans la même dispersion. Coût p99 2,84 ms, dont séparation +
   échange 0,88 (les deux fils : ≈ 0,7 ms).
 - **P7** — non-régression : B10 au caractère près (pas 54, 9,195 mm), tout en colonnes identique (0,003 mm, volume 0) ; suite **753**, zéro avertissement. Preuve §10 ; liste 4.19 (partiel), file, feuille de route, index. `--check` : 0.
+- **P8** — journal ; jeton libre ; maillons 6 (justifiés : S406) ; suivant : S419, C7c-3.

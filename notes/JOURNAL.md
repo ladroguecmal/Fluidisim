@@ -17978,3 +17978,17 @@ sous DX12, et FXC ne garantit pas le `mad` fusionné d'un double flottant. **Mes
 particule, la projection d'abord. Suite **753**, zéro avertissement. **Limites** : l'échange (C7c-2) non porté ; `dt` choisi par la
 référence. **Piège** : un `sed` sur `EN-COURS` l'a abîmé en entier — restauré depuis le commit ; les notes s'écrivent par fichier.
 **Rituel.** Maillons **5** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7c-2**, l'échange sur la carte.
+
+## S418 — 2026-10-01 — physique : C7c-2, l'échange à la frontière sur la carte
+
+**Entrée.** *« Continue »* — C7c-2. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §10) : `n` résident, soldes en quanta
+entiers chargés par le transport, compactage stable (exact), séparation tenue côté bande. **Décision** : l'échange de la référence
+dépend de l'ordre (le mélange aux faces : jusqu'à 1/64 de l'écart des vitesses) — la carte garde ses tableaux **indice pour
+indice** : absorbées listées en parallèle, traitées sur un fil dans l'ordre de visite de la référence (reconstruit à deux pointeurs),
+retraits et poses sur un fil, suppression par échange avec la dernière. **Mesuré** : un pas entier, cuve mixte, 2 à 90 pas de
+chauffe — gestes et `n` identiques, positions à 6·10⁻⁸ m indice pour indice. **Le raccord, 30 s** : volume **constant à 0
+quantum** ; période −0,036 % ; surface à **4,41 mm** — critère de 3 mm manqué ; **les témoins** (la référence contre elle-même,
+±10⁻⁶ et ±10⁻⁴ m/s) : 3,40 et 4,03 mm, même courbe ; l'ordre diverge au premier retrait (des particules à égale distance de la
+face, l'arrondi tranche). Reçu **à l'échelle du témoin**. B10, colonnes inchangés ; suite **753**, zéro avertissement. **Limites** :
+deux fils ≈ 0,7 ms (coloriage en C7e) ; un troisième témoin trancherait l'écart de 10 %. **Rituel.** Maillons **6** — justifié : la
+priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7c-3**, le fond sur la carte.
