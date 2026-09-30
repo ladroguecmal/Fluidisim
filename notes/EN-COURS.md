@@ -62,51 +62,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S419 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7c-3**, le fond de la
-bande sur la carte ([conception](../docs/validation/APIC-CARTE-S416.md) §8). Agent : Claude Code (Opus 5.5), au poste.
+Session : S420 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7c-4**, la bascule et
+le déplacement du fond sur la carte ; B10 en bande étroite, le critère de C7 ([conception](../docs/validation/APIC-CARTE-S416.md) §8).
 
-**Ce que la référence fait avec un fond** (S413, ADR-212) : sous le fond d'une colonne de la bande, l'eau est **à la grille** —
-`φ = z − fond`, mailles d'eau, faces advectées comme la zone, particules virtuelles jusqu'au fond pour la reconstruction ; le
-transport charge le **solde vertical** de la colonne (rangées sous le fond) ; l'échange absorbe une particule passée sous le fond
-(solde vertical, mélange aux faces à la grille) et règle le solde vertical (retrait de la plus basse, pose à `dx/16` au-dessus du
-fond) ; la frontière latérale se lit **maille par maille**. **Le déplacement du fond** (`move_band_floor`) est piloté par la bascule :
-il part avec elle en C7c-4 (déclaré ici, pas un oubli).
+**Ce que la référence fait** (`ColumnsSwitch::switch`, S408–S414) : la surface rafraîchie ; **la décision** par colonne — requise en
+particules si non convertible, atteinte par le corps (segment de l'horizon élargi de la marge), ou trop pentue ; dilatation de
+Chebyshev ; maintien (hystérésis dans le temps) ; **la bascule à masse exacte** — particules → colonnes par la voie mixte (la forme par
+`φ`, le niveau par la masse, décalage borné au quart de maille, l'excès à la réserve), colonnes → particules par ensemencement
+nominal, soldes des faces qui cessent d'être frontière à la réserve ; **le fond** placé (k mailles sous la première non-eau,
+hystérésis, prédiction du corps en option) puis déplacé (remonter absorbe, descendre ensemence). **Sur la carte** : la décision par
+colonne en parallèle ; les retraits et ensemencements sur un fil dans l'ordre de la référence (tableaux indice pour indice, comme
+l'échange) ; la masse et la réserve en quanta ; l'instant du maintien en microsecondes sur 32 bits (71 minutes : la production le
+prendra relatif, C7e).
 
-**Critères, écrits avant.** (1) Étages de la cuve en bande étroite (`APIC3D_FOND=4`, tout en bande, S413) à l'arrondi : `φ` et
-étiquettes, advection, projection, soldes verticaux après le transport (à l'écart que fixe la vitesse admise, S418) ; un pas entier :
-gestes, `n` identiques, positions à 10⁻⁵ m indice pour indice. (2) **Le ballottement en bande étroite**, 5 cm, 30 s : surface à
-3 mm de la référence **ou au plus au niveau du témoin** (±10⁻⁶ m/s, même instrument) ; volume de la carte constant exactement ;
-période publiée. (3) Raccord, B10, colonnes, ballottement inchangés ; suite ; zéro avertissement.
+**Critères, écrits avant.** (1) La décision : le masque demandé identique à celui de la référence sur des états de B10 en bande
+étroite (réglage retenu de R35 : maintien 0,3 s, fond 4, prédiction à 0,05 s). (2) Une bascule : masque, `n`, positions indice pour
+indice à 10⁻⁵ m, `η` à 10⁻⁶ m, fond identique, volume total de la carte **constant exactement**. (3) **B10 en bande étroite** sur la
+carte contre la référence : pincement au pas de la référence (ou à un pas, publié), écart de `φ` à l'interface pas à pas **au plus
+celui du témoin** (±10⁻⁶ m/s), volume exact ; coût publié. (4) Non-régression ; suite ; zéro avertissement. **Arrêt** : ce qui ne tient
+pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — cœur : accès au solde vertical. Carte : le fond (tampon, paramètre), étiquettes et `φ` sous le fond, virtuelles
-  jusqu'au fond, advection sous le fond ; banc `CAS=fond` : étages jusqu'à l'advection.
-- [x] **P3** — le transport sous le fond : soldes verticaux et latéraux des rangées à la grille ; banc.
-- [x] **P4** — l'échange avec un fond : absorption sous le fond, frontière maille par maille, solde vertical (retrait, pose) ; un pas
-  entier.
-- [x] **P5** — le ballottement en bande étroite, 30 s, et le témoin ; critère 2.
-- [x] **P6** — non-régression, suite ; preuve §11 ; liste, file, feuille de route, index.
-- [x] **P7** — rituel.
+- [ ] **P2** — la décision sur la carte : paramètres, état du critère, hauteurs convertibles, corps, pente, dilatation, maintien ;
+  banc : masque demandé contre la référence.
+- [ ] **P3** — la bascule : particules → colonnes (hauteurs, retraits sur un fil, voie mixte en quanta, réserve), colonnes →
+  particules (ensemencement sur un fil), soldes à la réserve ; la réserve réglée dans l'échange ; banc d'une bascule.
+- [ ] **P4** — le fond placé et déplacé (`place_floor`, `move_band_floor`) ; banc.
+- [ ] **P5** — B10 en bande étroite sur la carte, carte, référence et témoin ; critère 3.
+- [ ] **P6** — non-régression, suite ; preuve §12 ; liste, file, feuille de route, index.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-- **P2** — cœur `columns_solde_w`. Carte : `Params` à 176 octets (`floors`), le fond dans `cols[2C + 32 + col]`, `floor_of`, `below_floor`, `grid_at` ; sous le fond `φ = z − fond`, eau ; virtuelles jusqu'au fond ; advection des faces à la grille (une `w` au-dessus d'une maille sous le fond). `band_state` (`CAS=fond`, fond à 4 mailles sous le creux, 5 116 particules) : **`φ` 8,4·10⁻⁷ m, étiquettes identiques**, advection 1,8·10⁻⁷ m/s, projection 94/94, positions 1,2·10⁻⁷ m après advection. L'échange diffère (68 absorbées sous le fond, 32 posées côté référence) : P4.
-- **P3** — le transport sous le fond : à une frontière, les rangées sous le fond de la bande vont à son solde vertical ; entre deux colonnes de la bande à fond, les rangées à la grille (mailles pleines, sans mouillage) aux soldes verticaux et, sous le fond d'une seule, au solde latéral. Chaque face garde ses deux contributions (`to_low`, `to_high`) ; `floor_update` les rassemble par colonne — sans atomique. Bande étroite : **soldes à 8,2·10⁻¹⁰ m³** au pire sur 1,6·10⁻⁵ (882 quanta), sous la borne de l'écart de vitesse admis (≈ 3·10⁻⁹) ; raccord inchangé (retraits 32/32, 6·10⁻⁸ m).
-- **P4** — l'échange avec un fond : `absorb_mark` prend aussi les particules passées sous le fond ; `absorb_one` sous le fond (mélange
-  aux faces à la grille, `floor_face`, solde vertical) ; frontière latérale lue maille par maille (`grid_at`) ; (4) le solde vertical
-  (retrait de la plus basse au-dessus du fond, pose à `dx/16` au-dessus, sous-réseau le plus libre). Bande étroite, un pas après
-  5, 40, 70 pas : **gestes, `n` identiques, positions à 1,2·10⁻⁷ m indice pour indice** (absorbées 12 et 2, posées 8 et 4) ; raccord
-  inchangé. **Après 20 pas** (68 absorbées, 32 posées, identiques) : **3 posées sur 32** à l'emplacement miroir en `y` (même maille,
-  même hauteur, sous-réseau 0,25 ↔ 0,75) — critère 1 manqué pour elles. Cause : le cas est **invariant en `y`** (le mode (1, 0), un
-  réseau symétrique) ; les emplacements miroirs sont à des distances quasi égales, et les entrées diffèrent déjà de 1,2·10⁻⁷ m
-  (l'advection à l'arrondi). Essais : une tolérance « le premier gagne à 10⁻⁶ près » **aggrave** (7 sur 32 : la référence les
-  ordonne vraiment, à l'arrondi) — retirée ; les carrés évalués sans contraction (`square_sum`, barrière `bitcast`) : sans effet ici,
-  gardés (plus fidèles). Masse identique ; le jugement se fera sur la durée, contre le témoin (P5).
-- **P5** — `CAS=fond --apic3d-carte-ballottement` (le même instrument que le raccord ; `TEMOIN=`) : 30 s, 1 500 pas — **surface à
-  1,45 mm** au pire (t = 18,7 s ; maximum courant 0,02 mm à 4 s, 0,57 à 8 s, 1,02 à 12 s, 1,45 dès 20 s), **critère 2 tenu** (3 mm) ;
-  période 1,9969 s contre 1,9972 (−0,015 %) ; **volume de la carte constant à 0 quantum** (la référence : 0) ; gestes cumulés 5 617 /
-  5 541 absorbées, 360 / 352 retirées, 5 950 / 5 862 posées, `n` 5 093 / 5 089 ; l'ordre diverge au pas 14. **Témoins** : ±10⁻⁶ —
-  0,92 mm (−0,005 %) ; ±10⁻⁴ — 1,18 mm (0,000 %). La carte finit au-dessus des deux témoins, sous les 3 mm.
-- **P6** — non-régression : ballottement (0,456 mm), B10 (pas 54, 9,195 mm), colonnes (0,003 mm) identiques ; le raccord déplacé par `square_sum` dans sa dispersion (4,41 → 4,48 mm, 5 205 absorbées au lieu de 5 204). Suite **753**, zéro avertissement. Preuve §11 ; liste, file, feuille de route, index.
-- **P7** — journal ; jeton libre ; maillons 7 (justifiés : S406) ; suivant : S420, C7c-4.
