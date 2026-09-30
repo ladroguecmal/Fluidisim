@@ -252,6 +252,36 @@ impl Apic3 {
         self.vorticity(i, j, k)
     }
     /// Distance signée reconstruite aux centres des mailles (`x` le plus rapide, puis `y`, puis `z`).
+    /// S416 : les matrices affines des particules actives (banc de la carte).
+    pub fn affine(&self) -> &[[[f32; 3]; 3]] {
+        &self.c[..self.n]
+    }
+
+    /// S416 : les poids de transfert des faces, `u`, `v`, `w` (banc de la carte).
+    pub fn face_weights(&self) -> (&[f32], &[f32], &[f32]) {
+        (&self.wu, &self.wv, &self.ww)
+    }
+
+    /// S416 : la pression du dernier pas, aux centres des mailles (banc de la carte).
+    pub fn pressure(&self) -> &[f32] {
+        &self.p
+    }
+
+    /// S416 : le tri par maille du dernier `bin` — début de chaque maille (`cells + 1`), puis l'ordre des particules.
+    pub fn bins(&self) -> (&[u32], &[u32]) {
+        (&self.bin_start, &self.order[..self.n])
+    }
+
+    /// S416 : réglages de la reconstruction et de la séparation — rayon (m), noyau (mailles), séparation active.
+    pub fn settings(&self) -> (f32, f32, bool) {
+        (self.radius, self.kernel, self.separation)
+    }
+
+    /// S416 : densité et gravité fournies.
+    pub fn physics(&self) -> (f32, f32) {
+        (self.rho, self.g_eff)
+    }
+
     pub fn distance(&self) -> &[f32] {
         &self.phi
     }
@@ -711,15 +741,36 @@ pub struct ApicReport {
 }
 
 /// Tolérance du gradient conjugué, sur les carrés des normes : `‖r‖ ≤ 10⁻⁶·‖b‖`, la précision que `f32` permet (ADR-143).
-const PRESSURE_TOLERANCE2: f64 = 1e-12;
-const PRESSURE_MAX_ITERATIONS: u32 = 4000;
+pub const PRESSURE_TOLERANCE2: f64 = 1e-12;
+pub const PRESSURE_MAX_ITERATIONS: u32 = 4000;
 /// Couches d'extrapolation des vitesses vers l'air (S318).
-const EXTRAPOLATION_LAYERS: usize = 3;
+pub const EXTRAPOLATION_LAYERS: usize = 3;
 /// Séparation des particules : distance minimale en mailles, passes (S320 P3).
-const SEPARATION: f32 = 0.4;
-const SEPARATION_PASSES: usize = 2;
+pub const SEPARATION: f32 = 0.4;
+pub const SEPARATION_PASSES: usize = 2;
 /// Plancher de la fraction fantôme, comme en 2D.
-const THETA_MIN: f32 = 0.01;
+pub const THETA_MIN: f32 = 0.01;
+
+/// **S416 — les étages du pas**, pour qu'un banc (la carte, C7) compare la production à la référence étage par étage, sur le
+/// même état d'entrée. `step_upto(d, s)` exécute le pas jusqu'à l'étage `s` compris, puis s'arrête : l'état est alors celui
+/// d'un pas interrompu, que seul un banc lit. `Full` est le pas, au bit.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ApicStage {
+    /// Particules → grille.
+    ParticlesToGrid,
+    /// Tri par maille, surface reconstruite, étiquettes.
+    Reconstruct,
+    /// Gravité, parois, projection.
+    Project,
+    /// Extrapolation vers l'air.
+    Extrapolate,
+    /// Grille → particules.
+    GridToParticles,
+    /// Advection RK2.
+    Advect,
+    /// Le pas entier : séparation, corps, échange de la zone.
+    Full,
+}
 
 impl Apic3 {
     /// Le plus grand pas stable, µs, sous `max_us` : `0,5·dx / (max|v| + √(g·dx))`, comme en 2D.
@@ -736,6 +787,12 @@ impl Apic3 {
     /// extrapolation, grille → particules, advection RK2, séparation. Aucune allocation. Refus `NotFinite` si un champ
     /// cesse d'être fini — l'état est alors celui du pas interrompu (la référence n'est pas atomique).
     pub fn step(&mut self, duration_us: u64) -> Result<ApicReport, Error> {
+        self.step_upto(duration_us, ApicStage::Full)
+    }
+
+    /// **S416 — le pas jusqu'à l'étage `upto` compris** (banc de la carte, C7). `Full` est `step`, au bit ; avant `Full`,
+    /// le pas s'arrête sans ses contrôles de fin et rend ce qu'il a déjà mesuré.
+    pub fn step_upto(&mut self, duration_us: u64, upto: ApicStage) -> Result<ApicReport, Error> {
         if duration_us == 0 || duration_us > (1u64 << 40) {
             return Err(Error::NotFinite);
         }
@@ -744,10 +801,16 @@ impl Apic3 {
         // S398 : sans zone de colonnes, ces quatre appels ne font rien.
         self.columns_begin();
         self.particles_to_grid();
+        if upto == ApicStage::ParticlesToGrid {
+            return Ok(ApicReport::default());
+        }
         self.columns_advect(dt);
         self.reconstruct();
         self.columns_label();
         self.label_body();
+        if upto == ApicStage::Reconstruct {
+            return Ok(ApicReport::default());
+        }
         let gdt = (self.g_eff as f64 * duration_us as f64 * 1e-6) as f32;
         for w in self.w.iter_mut() {
             *w -= gdt;
@@ -756,11 +819,24 @@ impl Apic3 {
         self.impose_body();
         let (iterations, residual) = self.project(dt);
         let divergence = self.divergence_metric();
+        let partial = ApicReport { iterations, residual, divergence, max_speed: 0. };
+        if upto == ApicStage::Project {
+            return Ok(partial);
+        }
         self.extrapolate();
         self.impose_body();
+        if upto == ApicStage::Extrapolate {
+            return Ok(partial);
+        }
         self.columns_transport(dt);
         self.grid_to_particles();
+        if upto == ApicStage::GridToParticles {
+            return Ok(partial);
+        }
         self.advect(dt);
+        if upto == ApicStage::Advect {
+            return Ok(partial);
+        }
         if self.separation {
             self.separate();
         }

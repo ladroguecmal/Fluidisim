@@ -1134,3 +1134,34 @@ fn the_rotation_share_tells_a_vortex_from_a_strain_s415() {
     let (share, _) = a.rotation_share(3, 4, 4);
     assert!(share.abs() < 1e-5, "{share}");
 }
+
+/// S416 : `step_upto(Full)` est `step` au bit ; chaque arrêt laisse l'étage qu'il nomme et pas le suivant.
+#[test]
+fn the_step_stops_at_each_stage_s416() {
+    let make = || {
+        let (mut a, _) = apic(10, 3, 8, 0.1, 4000);
+        a.seed(&|p| p[2] < 0.4 + 0.05 * (p[0] * 3.).cos()).unwrap();
+        for _ in 0..3 {
+            a.step(10_000).unwrap();
+        }
+        a
+    };
+    let (mut a, mut b) = (make(), make());
+    let ra = a.step(10_000).unwrap();
+    let rb = b.step_upto(10_000, ApicStage::Full).unwrap();
+    assert_eq!(ra, rb);
+    assert_eq!(a.particles(), b.particles());
+    assert_eq!(a.affine(), b.affine());
+    // Arrêt après la projection : les faces d'air loin de l'eau ne sont pas encore remises à zéro, les particules n'ont pas bougé.
+    let mut c = make();
+    let before = c.particles().to_vec();
+    let r = c.step_upto(10_000, ApicStage::Project).unwrap();
+    assert!(r.iterations > 0 && r.residual <= 1e-6);
+    assert_eq!(c.particles(), &before[..]);
+    let mut d = make();
+    d.step_upto(10_000, ApicStage::Advect).unwrap();
+    assert_ne!(d.particles(), &before[..]);
+    let (start, order) = d.bins();
+    assert_eq!(start.len(), 10 * 3 * 8 + 1);
+    assert_eq!(*start.last().unwrap() as usize, order.len());
+}
