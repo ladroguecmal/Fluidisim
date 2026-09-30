@@ -83,7 +83,7 @@ s'explique avant C7c.
 - [x] **P2** — la carte : le corps (paramètres, étiquettes solides, faces imposées, images radiales, particules repoussées) ; banc des étages sur B10 ; critère 1.
 - [x] **P3** — B10 nu sur la carte contre la référence : pincement, air enfermé, cavité, `φ` à l'interface, coût ; critères 2 et 3.
 - [x] **P4** — conception de C7c : lecture de `apic3d_columns.rs`, découpage, critères (preuve §8).
-- [ ] **P5** — *ajoutée après P4, déclarée avant d'y toucher* : **C7c-1**, la zone sans échange. Tampons de la zone (masque,
+- [x] **P5** — *ajoutée après P4, déclarée avant d'y toucher* : **C7c-1**, la zone sans échange. Tampons de la zone (masque,
   `η` et son reste, table de lecture de S400) ; `columns_label` et les particules virtuelles dans la reconstruction ; banc des
   étages sur une cuve **mixte** (moitié colonnes, moitié particules : jusqu'à l'advection, l'échange n'intervient pas).
 - [ ] **P6** — `columns_begin` et `columns_advect` (la vitesse du pas précédent au pied de la caractéristique) ; banc.
@@ -111,3 +111,4 @@ C7c-2, en entiers).
   0,66 (54). **Témoins** : référence perturbée de ±10⁻⁶ m/s — **22,59 mm** (pas 49), 8,77 (52) ; ±10⁻⁴ — 21,22 (49), 7,87 (52) ;
   pincement identique partout. Critère 2 manqué tel qu'écrit, et intenable : la référence ne le tient pas contre elle-même ;
   remplacé pour C7c par « écart de la carte ≤ celui du témoin à 10⁻⁶, pas à pas ». Preuve §7.
+- **P5** — cœur : `columns_state` (masque, reste de `η`, table S400, bande). Carte : tampons `cols` (`η`, reste, table, débits) et `cmask`, `load` charge aussi les faces du pas précédent et la zone ; `reconstruct` : maille de colonne `φ = z − η lu`, particules virtuelles (`round` en `floor(x + 0,5)` : WGSL arrondit au pair). Banc `CAS=raccord` (`raccord_state`) : transfert 4,5·10⁻⁸ m/s, **`φ` 5,9·10⁻⁷ m, étiquettes identiques** ; projection à 0,11 m/s — attendu, l'advection de la zone manque (P6).

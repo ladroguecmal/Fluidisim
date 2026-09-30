@@ -14,7 +14,7 @@ struct Params {
     // S417 : le corps cinématique — centre au début du pas, vitesse, centre avancé (`move_body`).
     bcx: f32, bcy: f32, bcz: f32, bvx: f32,
     bvy: f32, bvz: f32, bmx: f32, bmy: f32,
-    bmz: f32, q0: f32, q1: f32, q2: f32,
+    bmz: f32, has_columns: f32, band: f32, q2: f32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
@@ -37,6 +37,10 @@ struct Params {
 @group(0) @binding(13) var<storage, read_write> partials: array<f32>;
 // Scalaires du gradient conjugué : b2, rz, rr, dq, alpha, beta, fini, itérations.
 @group(0) @binding(14) var<storage, read_write> scalars: array<f32>;
+// S417 — la zone des colonnes (C7c) : `η` [0, C), son reste [C, 2C), la table de lecture de S400 [2C, 2C + 32), puis les
+// débits en double flottant (C7c-1, P7).
+@group(0) @binding(15) var<storage, read_write> cols: array<f32>;
+@group(0) @binding(16) var<storage, read_write> cmask: array<u32>;
 
 const AIR: u32 = 0u;
 const WATER: u32 = 1u;
@@ -334,6 +338,17 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
     let eq = q - bc;
     let use_body = P.has_body != 0.0 && sqrt(eq.x * eq.x + eq.y * eq.y + eq.z * eq.z) < P.br + radius;
     let r = P.reach;
+    // S398 : une maille de la zone des colonnes prend `φ = z − η` (`columns_label`) ; rien à reconstruct.
+    if P.has_columns != 0.0 && cmask[j * P.nx + i] != 0u {
+        let phi_c = q.z - columns_read(cols[j * P.nx + i]);
+        cellf[c] = phi_c;
+        var lab_c = select(AIR, WATER, phi_c < 0.0);
+        if P.has_body != 0.0 && eq.x * eq.x + eq.y * eq.y + eq.z * eq.z < P.br * P.br {
+            lab_c = SOLID;
+        }
+        label[c] = lab_c;
+        return;
+    }
     let lo = vec3<u32>(select(0u, i - r, i >= r), select(0u, j - r, j >= r), select(0u, k - r, k >= r));
     let hi = vec3<u32>(min(i + r + 1u, P.nx), min(j + r + 1u, P.ny), min(k + r + 1u, P.nz));
     var sw = 0.0;
@@ -381,6 +396,12 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
                 }
             }
         }
+    }
+    // S399 : près de la zone, la reconstruction compte aussi les particules **virtuelles** des colonnes.
+    if P.has_columns != 0.0 {
+        let v = virtual_column_sums(q, i, j, radius, inv_r2, near_x0, near_x1, near_y0, near_y1, near_z0);
+        sw = sw + v.w;
+        sx = sx + v.xyz;
     }
     var phi = P.dx;
     if sw > 0.0 {
@@ -1022,4 +1043,79 @@ fn move_body(@builtin(global_invocation_id) g: vec3<u32>) {
         v = v + (wn - vn) * n;
     }
     pv[k] = vec4<f32>(v, 0.0);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **La zone des colonnes** (S398–S400, C7c-1).
+
+// `columns_read` (S400) : la hauteur que la pression voit, `η + e(η)`, `e` l'erreur que la bande ferait en lisant la même
+// surface (table périodique sur une maille) ; `η` sans bande.
+fn columns_read(eta: f32) -> f32 {
+    if P.band == 0.0 {
+        return eta;
+    }
+    let x = eta / P.dx - 0.5;
+    let o = (x - floor(x)) * 32.0;
+    let m = min(u32(floor(o)), 31u);
+    let t = o - f32(m);
+    let base = 2u * P.nx * P.ny;
+    let a = cols[base + m];
+    let b = cols[base + (m + 1u) % 32u];
+    return eta + a + t * (b - a);
+}
+
+// `virtual_column_sums` (S399) : chaque colonne de la zone à portée du noyau compte comme `2 × 2` particules par rangée,
+// `round(2η/dx)` rangées étirées sur `[0, η]` ; images aux parois comme les particules. Rend `(Σw·p, Σw)`.
+fn virtual_column_sums(q: vec3<f32>, i: u32, j: u32, radius: f32, inv_r2: f32, near_x0: bool, near_x1: bool,
+                       near_y0: bool, near_y1: bool, near_z0: bool) -> vec4<f32> {
+    let r = P.reach;
+    let images = vec3<f32>(1.0, -1.0, 2.0);
+    var sw = 0.0;
+    var sx = vec3<f32>(0.0);
+    let bl = select(0u, j - r, j >= r);
+    let bh = min(j + r + 1u, P.ny);
+    let al = select(0u, i - r, i >= r);
+    let ah = min(i + r + 1u, P.nx);
+    for (var b = bl; b < bh; b = b + 1u) {
+        for (var a = al; a < ah; a = a + 1u) {
+            let col = b * P.nx + a;
+            if cmask[col] == 0u {
+                continue;
+            }
+            let eta = max(cols[col], 0.0);
+            let rows = max(u32(floor(2.0 * eta / P.dx + 0.5)), 1u);
+            let pitch = eta / f32(rows);
+            let lo = u32(max(floor(max(q.z - radius, 0.0) / pitch - 0.5), 0.0));
+            let hi = min(u32(max(ceil((q.z + radius) / pitch - 0.5), 0.0)), rows - 1u);
+            for (var row = lo; row <= hi; row = row + 1u) {
+                let z = (f32(row) + 0.5) * pitch;
+                for (var o = 0u; o < 4u; o = o + 1u) {
+                    let ox = select(0.25, 0.75, (o & 1u) == 1u);
+                    let oy = select(0.25, 0.75, (o & 2u) == 2u);
+                    let p0 = vec3<f32>((f32(a) + ox) * P.dx, (f32(b) + oy) * P.dx, z);
+                    for (var mx = 0u; mx < 3u; mx = mx + 1u) {
+                        if image_on(mx, near_x0, near_x1) {
+                            for (var my = 0u; my < 3u; my = my + 1u) {
+                                if image_on(my, near_y0, near_y1) {
+                                    for (var mz = 0u; mz < 2u; mz = mz + 1u) {
+                                        if image_on(mz, near_z0, false) {
+                                            let p = vec3<f32>(mirror(p0.x, images[mx], P.lx), mirror(p0.y, images[my], P.ly),
+                                                mirror(p0.z, images[mz], 0.0));
+                                            let d = p - q;
+                                            let wt = smooth_kernel((d.x * d.x + d.y * d.y + d.z * d.z) * inv_r2);
+                                            if wt > 0.0 {
+                                                sw = sw + wt;
+                                                sx = sx + wt * p;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return vec4<f32>(sx, sw);
 }

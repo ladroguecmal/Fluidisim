@@ -70,6 +70,12 @@ pub struct ApicCarte {
     cellf: wgpu::Buffer,
     label: wgpu::Buffer,
     scalars: wgpu::Buffer,
+    /// S417 — la zone des colonnes : `η`, son reste, la table de lecture, les débits ; le masque.
+    cols: wgpu::Buffer,
+    cmask: wgpu::Buffer,
+    /// La zone est-elle active, une bande existe-t-elle ?
+    columns: bool,
+    band: bool,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
     query_resolve: wgpu::Buffer,
@@ -142,6 +148,10 @@ impl ApicCarte {
         let label = buffer(&device, (cells * 4) as u64, storage);
         let partials = buffer(&device, (2 * groups_cells.max(faces.div_ceil(SCAN as usize)) * 4) as u64, storage);
         let scalars = buffer(&device, 64, storage);
+        let ncol = nx * ny;
+        // `η`, reste, table (32), débits en double flottant (deux mots par face de colonnes `x` et `y`).
+        let cols = buffer(&device, ((2 * ncol + 32 + 2 * ((nx + 1) * ny + nx * (ny + 1))) * 4) as u64, storage);
+        let cmask = buffer(&device, (ncol * 4) as u64, storage);
         let largest = [3 * faces, 8 * cells, capacity * 12, cells + 1].into_iter().max().unwrap_or(1);
         let read = buffer(&device, (largest * 4) as u64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
         let query = (!features.is_empty()).then(|| {
@@ -152,7 +162,7 @@ impl ApicCarte {
 
         let all = [
             &params, &px, &pv, &pc, &shift, &count, &start, &order, &blocks, &faces_buf, &fflags, &cellf, &label, &partials,
-            &scalars,
+            &scalars, &cols, &cmask,
         ];
         let entries: Vec<_> = (0..all.len() as u32)
             .map(|binding| wgpu::BindGroupLayoutEntry {
@@ -218,6 +228,10 @@ impl ApicCarte {
             cellf,
             label,
             scalars,
+            cols,
+            cmask,
+            columns: false,
+            band: false,
             read,
             query,
             query_resolve,
@@ -261,6 +275,20 @@ impl ApicCarte {
         self.queue.write_buffer(&self.pv, 0, bytes(&v));
         self.queue.write_buffer(&self.pc, 0, bytes(&c));
         self.n = n;
+        // Les vitesses de la grille à la fin du pas précédent : la zone les advecte (S398).
+        let faces: Vec<f32> =
+            reference.velocity_u().iter().chain(reference.velocity_v()).chain(reference.velocity_w()).copied().collect();
+        self.queue.write_buffer(&self.faces_buf, 0, bytes(&faces));
+        // S417 — la zone des colonnes.
+        self.columns = false;
+        if let (Some((mask, roundoff, table, band)), Some(eta)) = (reference.columns_state(), reference.columns_surface()) {
+            let m: Vec<u32> = mask.iter().map(|x| *x as u32).collect();
+            let head: Vec<f32> = eta.iter().chain(roundoff).chain(table).copied().collect();
+            self.queue.write_buffer(&self.cmask, 0, u32_bytes(&m));
+            self.queue.write_buffer(&self.cols, 0, bytes(&head));
+            self.columns = true;
+            self.band = band;
+        }
         Ok(())
     }
 
@@ -284,7 +312,7 @@ impl ApicCarte {
         let has = if self.body.is_some() { 1. } else { 0. };
         let body = [
             has, b.radius, 0., b.center[0], b.center[1], b.center[2], b.velocity[0], b.velocity[1], b.velocity[2], moved[0],
-            moved[1], moved[2], 0., 0., 0.,
+            moved[1], moved[2], self.columns as u8 as f32, self.band as u8 as f32, 0.,
         ];
         let mut data = Vec::with_capacity(PARAMS_BYTES as usize);
         for v in u {
@@ -502,6 +530,11 @@ fn max_abs_diff(a: &[f32], b: &[f32]) -> f32 {
     a.iter().zip(b).fold(0f32, |m, (x, y)| m.max((x - y).abs()))
 }
 
+fn u32_bytes(v: &[u32]) -> &[u8] {
+    // SAFETY : `u32` n'a pas de remplissage.
+    unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, std::mem::size_of_val(v)) }
+}
+
 fn bytes(v: &[f32]) -> &[u8] {
     // SAFETY : `f32` n'a pas de remplissage ; la tranche est lue comme ses octets, sans changer d'alignement requis.
     unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, std::mem::size_of_val(v)) }
@@ -543,13 +576,15 @@ pub fn recevoir_etages() -> Result<(), String> {
                 let (mut a, t) = b.warm(warm)?;
                 a.set_body(Some(b.sphere(t))).map_err(|e| format!("{e:?}"))?;
                 Ok(a)
+            } else if cas == "raccord" || cas == "colonnes" {
+                raccord_state(dx, cas == "colonnes", warm)
             } else {
                 Ok(reference_state(dx, warm)?.0)
             }
         };
         let reference = fresh()?;
         let d = reference.domain();
-        let mut carte = ApicCarte::new(&reference, reference.particle_count()).await?;
+        let mut carte = ApicCarte::new(&reference, reference.particle_count().max(1)).await?;
         if let Some(cap) = std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()) {
             carte.set_iteration_cap(cap);
         }
@@ -1117,4 +1152,30 @@ pub fn recevoir_b10() -> Result<(), String> {
         println!("APIC_CARTE_B10_S417 cout_p99_ms total={p99:.3} par_particule_ns={:.1} {}", p99 * 1e6 / n as f64, per_stage.join(" "));
         Ok(())
     })
+}
+
+/// **Le raccord de S398–S407** (`examples/apic3d_raccord.rs`) : la cuve du ballottement (1, 0), la moitié `x ≥ Lx/2` en colonnes
+/// (toute la cuve si `all_columns`), l'autre en particules ; `warm` pas de la référence au pas stable.
+pub fn raccord_state(dx: f32, all_columns: bool, warm: usize) -> Result<Apic3, String> {
+    use crate::scene::host_impl;
+    use water_core::host::HostServices;
+    let (lx, ly, lz, h, amp) = (2.0f64, 0.2f64, 1.0f64, 0.5f64, 0.02f64);
+    let d = dx as f64;
+    let (nx, ny, nz) = ((lx / d).round() as usize, (ly / d).round() as usize, (lz / d).round() as usize);
+    let ib = nx / 2;
+    let k = std::f64::consts::PI / lx;
+    let profile = move |x: f64| h + amp * (k * x).cos();
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 31);
+    let mut host = HostServices { alloc: &mut arena, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink };
+    let mut a = Apic3::configure(&mut host, Domain3 { nx, ny, nz, dx }, 1000., 9.81, nx * ny * nz * 8).map_err(|e| format!("{e:?}"))?;
+    let mask: Vec<u8> = (0..nx * ny).map(|c| (all_columns || c % nx >= ib) as u8).collect();
+    a.enable_columns(&mut host, &mask).map_err(|e| format!("{e:?}"))?;
+    let eta: Vec<f32> = (0..nx * ny).map(|c| profile(((c % nx) as f64 + 0.5) * d) as f32).collect();
+    a.set_columns_surface(&eta).map_err(|e| format!("{e:?}"))?;
+    a.seed(&|p| !all_columns && (p[2] as f64) < profile(p[0] as f64) && (p[0] as f64) < ib as f64 * d).map_err(|e| format!("{e:?}"))?;
+    for _ in 0..warm {
+        let us = a.stable_step_us(20_000);
+        a.step(us).map_err(|e| format!("{e:?}"))?;
+    }
+    Ok(a)
 }
