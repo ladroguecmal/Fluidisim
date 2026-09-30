@@ -919,6 +919,19 @@ pub fn recevoir_etages() -> Result<(), String> {
                             "APIC_CARTE_S416 etage=echange ecart_position_max={dxm:.3e} ecart_vitesse_max={dvm:.3e} ecart_soldes_max_m3={ds:.3e} ecart_eta_max={de:.3e} ecart_faces_max={:.3e}",
                             max_abs_diff(&vel, &rvel)
                         );
+                        if same_n && dxm > 1e-5 {
+                            // Diagnostic : les particules qui diffèrent, indice pour indice.
+                            let bad: Vec<usize> = (0..x.len())
+                                .filter(|m| (0..3).any(|c| (x[*m][c] - r.particles()[*m][c]).abs() > 1e-5))
+                                .collect();
+                            for m in bad.iter().take(6) {
+                                println!(
+                                    "APIC_CARTE_S416 echange_diff indice={m} carte={:?} reference={:?}",
+                                    x[*m], r.particles()[*m]
+                                );
+                            }
+                            println!("APIC_CARTE_S416 echange_diff nombre={} sur n={}", bad.len(), x.len());
+                        }
                         if !same_n || dxm > 1e-5 || dvm > 1e-4 {
                             return Err("échange : écart au-delà du critère".into());
                         }

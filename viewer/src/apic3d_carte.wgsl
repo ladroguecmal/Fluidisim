@@ -1553,7 +1553,9 @@ fn absorb_mark(@builtin(global_invocation_id) g: vec3<u32>) {
         return;
     }
     let m = cell_of(px[k].xyz);
-    if cmask[m.y * P.nx + m.x] != 0u {
+    let col = m.y * P.nx + m.x;
+    // S413 : une particule passée sous le fond de sa colonne de la bande est absorbée aussi.
+    if cmask[col] != 0u || px[k].z < floor_of(col) {
         let slot = atomicAdd(&pcount[COUNT_LIST], 1u);
         plist[slot] = k;
     }
@@ -1589,6 +1591,30 @@ fn copy_particle(src: u32, dst: u32) {
 fn absorb_one(k: u32) {
     let p = px[k].xyz;
     let v = pv[k].xyz;
+    let cm = cell_of(p);
+    let col_p = cm.y * P.nx + cm.x;
+    if cmask[col_p] == 0u {
+        // S413 : sous le fond, la particule entre dans le contenant plein ; sa quantité de mouvement va aux faces à la grille qui
+        // l'entourent (S406), son volume au solde vertical de sa colonne.
+        for (var axis = 0u; axis < 3u; axis = axis + 1u) {
+            let l = lerp_of(p, axis);
+            let va = select(select(v.z, v.y, axis == 1u), v.x, axis == 0u);
+            for (var m = 0u; m < 8u; m = m + 1u) {
+                let sel = vec3<bool>((m & 1u) == 1u, ((m >> 1u) & 1u) == 1u, ((m >> 2u) & 1u) == 1u);
+                let idx = select(l.base, l.next, sel);
+                let wa = select(vec3<f32>(1.0) - l.frac, l.frac, sel);
+                let wt = wa.x * wa.y * wa.z;
+                if wt == 0.0 || !floor_face(axis, idx) {
+                    continue;
+                }
+                let f = face_global(axis, idx);
+                faces[f] = faces[f] + wt * (va - faces[f]) / 8.0;
+            }
+        }
+        solde_add(solde_w_index(col_p), vec2<u32>(VP_QUANTA, 0u));
+        atomicAdd(&pcount[COUNT_ABSORBED], 1u);
+        return;
+    }
     for (var axis = 0u; axis < 3u; axis = axis + 1u) {
         let l = lerp_of(p, axis);
         let va = select(select(v.z, v.y, axis == 1u), v.x, axis == 0u);
@@ -1751,8 +1777,9 @@ fn exchange_serial() {
                         }
                         lo = vec2<u32>(fi, fj - 1u);
                     }
-                    let zl = cmask[lo.y * P.nx + lo.x] != 0u;
-                    let zh = cmask[hi.y * P.nx + hi.x] != 0u;
+                    // S413 : la frontière se lit maille par maille — à la grille (la zone, ou sous le fond) d'un côté.
+                    let zl = grid_at(i32(lo.x), i32(lo.y), l);
+                    let zh = grid_at(i32(hi.x), i32(hi.y), l);
                     if zl == zh {
                         continue;
                     }
@@ -1842,12 +1869,12 @@ fn exchange_serial() {
                                 let m = order[s];
                                 if px[m].w == 0.0 {
                                     let d = px[m].xyz - p;
-                                    near = min(near, d.x * d.x + d.y * d.y + d.z * d.z);
+                                    near = min(near, square_sum(d));
                                 }
                             }
                             for (var q = first_new; q < n; q = q + 1u) {
                                 let d = px[q].xyz - p;
-                                near = min(near, d.x * d.x + d.y * d.y + d.z * d.z);
+                                near = min(near, square_sum(d));
                             }
                             if !have || near > best_near {
                                 have = true;
@@ -1861,6 +1888,92 @@ fn exchange_serial() {
                         atomicAdd(&pcount[COUNT_POSED], 1u);
                         solde_add(face, neg_i64(vec2<u32>(VP_QUANTA, 0u)));
                     }
+                }
+            }
+        }
+    }
+    // (4) S413 — le solde vertical de chaque colonne à fond : dû, la particule la plus basse au-dessus du fond est retirée ;
+    // reçu, une particule est posée à la face du fond (`dx/16`), au sous-réseau le plus libre.
+    if P.floors != 0.0 {
+        for (var j = 0u; j < P.ny; j = j + 1u) {
+            for (var i = 0u; i < P.nx; i = i + 1u) {
+                let col = j * P.nx + i;
+                let fond = floor_of(col);
+                if fond <= 0.0 {
+                    continue;
+                }
+                let kf = min(u32(floor(fond / P.dx + 0.5)), P.nz - 1u);
+                let sw = solde_w_index(col);
+                loop {
+                    if !solde_le_minus_vp(sw) {
+                        break;
+                    }
+                    var found = false;
+                    var pick = 0u;
+                    var pick_z = 0.0;
+                    for (var l = kf; l < P.nz; l = l + 1u) {
+                        let cell = cell_index(i, j, l);
+                        for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
+                            let m = order[s];
+                            if px[m].w == 0.0 && (!found || px[m].z < pick_z) {
+                                found = true;
+                                pick = m;
+                                pick_z = px[m].z;
+                            }
+                        }
+                        if found {
+                            break;
+                        }
+                    }
+                    if !found {
+                        break;
+                    }
+                    px[pick].w = 1.0;
+                    plist[marked] = pick;
+                    marked = marked + 1u;
+                    atomicAdd(&pcount[COUNT_REMOVED], 1u);
+                    solde_add(sw, vec2<u32>(VP_QUANTA, 0u));
+                }
+                loop {
+                    if !solde_ge_vp(sw) {
+                        break;
+                    }
+                    if n >= arrayLength(&plist) {
+                        atomicAdd(&pcount[COUNT_REFUSED], 1u);
+                        break;
+                    }
+                    let z = fond + P.dx / 16.0;
+                    let cell = cell_index(i, j, kf);
+                    var best_near = 0.0;
+                    var best_q = vec3<f32>(0.0);
+                    var have = false;
+                    for (var o = 0u; o < 4u; o = o + 1u) {
+                        let a = select(0.25, 0.75, (o & 1u) == 1u);
+                        let b = select(0.25, 0.75, (o & 2u) == 2u);
+                        let q = vec3<f32>((f32(i) + a) * P.dx, (f32(j) + b) * P.dx, z);
+                        var near = 3.4028234663852886e38;
+                        for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
+                            let m = order[s];
+                            if px[m].w == 0.0 {
+                                let d = px[m].xyz - q;
+                                near = min(near, square_sum(d));
+                            }
+                        }
+                        for (var r = first_new; r < n; r = r + 1u) {
+                            let d = px[r].xyz - q;
+                            near = min(near, square_sum(d));
+                        }
+                        if !have || near > best_near {
+                            have = true;
+                            best_near = near;
+                            best_q = q;
+                        }
+                    }
+                    px[n] = vec4<f32>(best_q, 0.0);
+                    grid_affine_at(best_q, n);
+                    n = n + 1u;
+                    atomicAdd(&pcount[COUNT_POSED], 1u);
+                    solde_add(sw, neg_i64(vec2<u32>(VP_QUANTA, 0u)));
                 }
             }
         }
@@ -1937,4 +2050,29 @@ fn floor_update(@builtin(global_invocation_id) g: vec3<u32>) {
     v = add_i64(v, ivol_get(base + 2u * yl + 1u));
     v = add_i64(v, ivol_get(base + 2u * (yl + P.nx)));
     solde_add(solde_w_index(col), v);
+}
+
+// `floor_face` (S413) : une face à la grille autour d'une particule absorbée sous le fond — une face `u` ou `v` dont l'une des
+// deux mailles est à la grille, une face `w` au-dessus d'une maille à la grille (ou dans une colonne de la zone).
+fn floor_face(axis: u32, idx: vec3<u32>) -> bool {
+    let i = i32(idx.x);
+    let j = i32(idx.y);
+    let k = idx.z;
+    if axis == 0u {
+        return grid_at(i - 1, j, k) || grid_at(i, j, k);
+    }
+    if axis == 1u {
+        return grid_at(i, j - 1, k) || grid_at(i, j, k);
+    }
+    return in_zone(i, j) || (k >= 1u && grid_at(i, j, k - 1u));
+}
+
+// S419 — `|d|²` évalué comme la référence, `(x² + y²) + z²` avec **trois produits arrondis** : un choix par le maximum (le
+// sous-réseau le plus libre) se joue sur des distances presque égales, et un `mad` fusionné par FXC (Rust n'en fait pas) le
+// tranche autrement. Le passage par les bits empêche la contraction.
+fn square_sum(d: vec3<f32>) -> f32 {
+    let x = bitcast<f32>(bitcast<u32>(d.x * d.x));
+    let y = bitcast<f32>(bitcast<u32>(d.y * d.y));
+    let z = bitcast<f32>(bitcast<u32>(d.z * d.z));
+    return (x + y) + z;
 }
