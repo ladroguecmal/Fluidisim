@@ -62,45 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S416 — **terminée**. Demande de l'utilisateur (2026-09-30) : *« Reprends le projet »* — la suite déclarée : **C7**, APIC
-sur la carte (conception S384 §5, ADR-211 D1, ADR-212 D5). Agent : Claude Code (Opus 5.5), au poste ; RTX 5070 Laptop.
+Session : S417 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7b puis C7c**
+([conception](../docs/validation/APIC-CARTE-S416.md) §1). Agent : Claude Code (Opus 5.5), au poste ; RTX 5070 Laptop.
 
-**Ce que C7 demande, et ce qu'une session en fait.** La référence de la bande étroite est `Apic3` avec sa zone de colonnes et
-son fond (≈ 3 100 lignes du cœur) ; la porter entière est plusieurs sessions. C7 se découpe (P2) ; **S416 fait C7a** : le pas
-d'APIC **nu** — particules triées par maille, particules → grille, surface reconstruite, gravité, parois, projection à fluide
-fantôme, extrapolation, grille → particules, advection RK2, séparation — sur la carte, contre la référence, étage par étage puis
-sur le ballottement (1, 0) de S388. Zone des colonnes, fond, corps : C7b et suivantes.
+**Ce que la session fait.** **C7b** : le corps cinématique de S393 sur la carte — mailles solides, faces imposées, images radiales
+dans la reconstruction, particules repoussées — puis **B10 nu** (APIC seul, sans bande) sur la carte contre la référence. Ensuite
+la **conception de C7c** (la zone des colonnes et le fond : ≈ 1 800 lignes du cœur, découpées), et son premier morceau si le temps
+le permet.
 
-**Critères, écrits avant.** (1) Chaque étage, sur le même état d'entrée, à l'arrondi `f32` de la référence : tri (comptes par
-maille identiques), vitesses de grille à 10⁻⁵ m/s, `φ` à 10⁻⁵ m, étiquettes identiques, vitesses corrigées à 10⁻⁴ m/s après
-projection (le solveur diffère : résidu relatif ≤ 10⁻⁵ des deux côtés). (2) **Le ballottement (1, 0) de S388** à 5 cm, 10 s :
-la surface de la carte à **3 mm** de la référence (le critère de production, ADR-175 D1), période à 0,5 %. (3) Le **coût par
-particule** publié, par étage, au 99ᵉ centile. (4) Zéro avertissement, suite du cœur inchangée. **Arrêt** : si un étage
-diverge au-delà de l'arrondi, le publier, ne pas avancer au suivant.
+**Critères, écrits avant.** (1) Les étages avec le corps, sur un état de B10 chauffé : étiquettes identiques (solides compris),
+`φ` à 10⁻⁵ m, vitesses de grille à 10⁻⁴ m/s après projection et après imposition, positions à 10⁻⁵ m après le corps. (2) **B10
+nu**, Fr = 2, D/dx = 8, quart de domaine : pincement **au même pas** que la référence (ou à un pas, publié), `φ` à **3 mm** de la
+référence dans la bande de l'interface (|φ| < dx) jusqu'au pincement, air enfermé et cavité au pincement publiés des deux côtés.
+(3) Coût par étage publié. (4) Zéro avertissement ; suite inchangée. **Arrêt** : un écart au-delà de l'arrondi se publie et
+s'explique avant C7c.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — conception de C7 : découpage (C7a nu, C7b corps, C7c zone et fond, C7d relative à B et critère de vitesse, C7e
-  budget), choix du transfert (tri par maille, collecte par face — déterministe, sans atomique flottant), critères.
-- [x] **P3** — le cœur : accès de banc au pas étage par étage (`step_stage`), à comportement inchangé ; essai.
-- [x] **P4** — la carte : module `apic3d_carte`, tampons, tri par maille (compte, préfixe, rangement) ; banc contre le cœur.
-- [x] **P5** — particules → grille, collecte par face ; banc.
-- [x] **P6** — surface reconstruite et étiquettes (reflets des parois) ; banc.
-- [x] **P7** — gravité, parois, projection (gradient conjugué préconditionné par la diagonale) ; banc.
-- [x] **P8** — extrapolation, grille → particules, advection, séparation ; le pas entier ; banc d'un pas.
-- [x] **P9** — le ballottement (1, 0) sur la carte contre la référence, 10 s ; coût par particule ; critères 2 et 3.
-- [x] **P10** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
-- [x] **P11** — rituel.
+- [ ] **P2** — la carte : le corps (paramètres, étiquettes solides, faces imposées, images radiales, particules repoussées) ; banc des étages sur B10 ; critère 1.
+- [ ] **P3** — B10 nu sur la carte contre la référence : pincement, air enfermé, cavité, `φ` à l'interface, coût ; critères 2 et 3.
+- [ ] **P4** — conception de C7c : lecture de `apic3d_columns.rs`, découpage, critères (preuve §7).
+- [ ] **P5** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2** — conception : [APIC-CARTE-S416](../docs/validation/APIC-CARTE-S416.md) §1 ; C7a à C7e ; Gao 2018 non relu (résumé seulement).
-- **P3** — `ApicStage`, `step_upto` (`step` = `step_upto(Full)`, au bit) ; accesseurs de banc `affine`, `face_weights`, `pressure`, `bins`, `settings`, `physics` ; constantes du pas rendues publiques. Essai `_s416`.
-- **P4** — `viewer/src/apic3d_carte.rs` + `.wgsl` ; banc `--apic3d-carte-etages` (DX, CHAUFFE) : ballottement (1, 0) à 5 cm, 20 pas de chauffe, 12 800 particules — **débuts et ordre identiques** à la référence ; tri 0,020 ms.
-- **P5** — collecte par face (poids bornés de `weights` en opérations vectorielles : FXC refuse l'écriture indexée dans un vecteur) : écart de vitesse **1,6·10⁻⁷ m/s** (vitesse max 0,13), poids 2,3·10⁻⁵ (sommes ≤ 8), mêmes faces alimentées ; tri + transfert 0,10 ms.
-- **P6** — reconstruction en collecte, reflets des parois : écart de φ **1,6·10⁻⁶ m**, étiquettes identiques (1 600 mailles d'eau) ; **0,39 ms** — chaque maille lit 125 mailles et leurs images : le poste de coût, pour C7e. Piège : le `!` d'un script en ligne casse le shell de l'outil — écrire les scripts par l'outil d'écriture.
-- **P7** — gravité, parois, gradient conjugué diagonal sur la carte (scalaires sur la carte, drapeau de fin lu uniformément par `workgroupUniformLoad`), correction : **94 itérations des deux côtés**, résidu 7,05·10⁻⁷ contre 7,04·10⁻⁷, pression à 5,4·10⁻³ Pa sur 4 694 (10⁻⁶), vitesses à **2,7·10⁻⁶ m/s**. Coût : **les dispatchs enregistrés**, même sautés — 4,07 ms au plafond de 400, 1,01 ms à 120 (`ITERATIONS=`) : la multigrille (C7e) est la voie.
-- **P8** — extrapolation (5 668 faces non nulles des deux côtés, écart 2,7·10⁻⁶ m/s), retour (vitesses 2,6·10⁻⁶ m/s, `C` 1,1·10⁻⁴ s⁻¹ — le gradient amplifie par 1/dx), advection (positions **1,2·10⁻⁷ m**), séparation (idem) ; 0,05 / 0,02 / 0,01 / 0,19 ms. Critère 1 tenu, tous les étages.
-- **P9** — `--apic3d-carte-ballottement` (DX, DUREE, ITERATIONS) : 5 cm, 10 s, 500 pas au pas de la référence : **surface à 0,456 mm** au pire (t = 7,14 s), période 1,9965 s contre 1,9964 (**+0,003 %**), 10 passages de chaque côté, itérations 93,5 des deux, aucune non convergée ; une particule isolée à 1,72 mm en fin (divergence des trajectoires, la surface tient). **Coût p99 2,05 ms, 160 ns par particule** : projection 1,39 (plafond de 200 itérations enregistrées), surface 0,41, séparation 0,15, transfert 0,10, le reste < 0,02. Critères 2 et 3. 2,5 cm, 2 s : au calcul.
-- **P10** — suite du cœur : **753 réussis** (752 + `_s416`), 19 ignorés, zéro avertissement ; afficheur zéro avertissement. 2,5 cm, 2 s : surface à 0,77 mm, 193 itérations des deux côtés, 4,77 ms pour 102 400 particules (47 ns). Preuve APIC-CARTE-S416 §3–6 ; liste 4.19 (état inchangé, partiel), file, feuille de route, index. `--check` : 0.
-- **P11** — journal ; jeton libre ; maillons 4 (justifiés : S406) ; suivant : S417, C7b puis C7c.

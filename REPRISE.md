@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-30 23:58 +02:00
+JETON            : occupé
+Battement        : 2026-10-01 00:03 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S417 — C7b** au poste : le corps cinématique sur la carte, B10 nu contre la référence ; puis la conception de C7c
 Dernière session : S416 — physique : **C7a** ([preuve](docs/validation/APIC-CARTE-S416.md)) — C7 découpé en cinq ; le pas d'APIC 3D nu sur la carte, étage par étage à l'arrondi de la référence ; le ballottement à 0,46 mm sur 10 s ; 4,77 ms pour 102 400 particules (47 ns), la projection d'abord. Avant : S415, C6c-3
 Session suivante : **S417 — C7b puis C7c** au poste ([conception](docs/validation/APIC-CARTE-S416.md) §1) : le corps cinématique sur la carte, puis la zone des colonnes et le fond — B10 en bande étroite à 3 mm de la référence ; ensuite C7d (relative à B), C7e (multigrille, budget) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 4 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
