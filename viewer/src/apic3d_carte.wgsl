@@ -10,7 +10,11 @@ struct Params {
     dx: f32, radius: f32, kr: f32, dt: f32,
     gdt: f32, rho: f32, theta_min: f32, dmin: f32,
     margin: f32, lx: f32, ly: f32, lz: f32,
-    tol2: f32, p0: f32, p1: f32, p2: f32,
+    tol2: f32, has_body: f32, br: f32, p2: f32,
+    // S417 : le corps cinématique — centre au début du pas, vitesse, centre avancé (`move_body`).
+    bcx: f32, bcy: f32, bcz: f32, bvx: f32,
+    bvy: f32, bvz: f32, bmx: f32, bmy: f32,
+    bmz: f32, q0: f32, q1: f32, q2: f32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
@@ -325,6 +329,10 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
     let near_y1 = q.y > P.ly - radius;
     let near_z0 = q.z < radius;
     let images = vec3<f32>(1.0, -1.0, 2.0);
+    // S393 : le corps reflète aussi, image radiale `c + (2R − d)·n`, cherchée seulement près de lui.
+    let bc = vec3<f32>(P.bcx, P.bcy, P.bcz);
+    let eq = q - bc;
+    let use_body = P.has_body != 0.0 && sqrt(eq.x * eq.x + eq.y * eq.y + eq.z * eq.z) < P.br + radius;
     let r = P.reach;
     let lo = vec3<u32>(select(0u, i - r, i >= r), select(0u, j - r, j >= r), select(0u, k - r, k >= r));
     let hi = vec3<u32>(min(i + r + 1u, P.nx), min(j + r + 1u, P.ny), min(k + r + 1u, P.nz));
@@ -350,6 +358,20 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
                                                 sw = sw + wt;
                                                 sx = sx + wt * p;
                                             }
+                                            if use_body {
+                                                let e = p - bc;
+                                                let de = sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
+                                                if de > 0.0 && de < 2.0 * P.br {
+                                                    let f = (2.0 * P.br - de) / de;
+                                                    let pi = bc + f * e;
+                                                    let di = pi - q;
+                                                    let wi = smooth_kernel((di.x * di.x + di.y * di.y + di.z * di.z) * inv_r2);
+                                                    if wi > 0.0 {
+                                                        sw = sw + wi;
+                                                        sx = sx + wi * pi;
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -366,7 +388,12 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
         phi = sqrt(m.x * m.x + m.y * m.y + m.z * m.z) - P.radius;
     }
     cellf[c] = phi;
-    label[c] = select(AIR, WATER, phi < 0.0);
+    var lab = select(AIR, WATER, phi < 0.0);
+    // `label_body` : une maille dont le centre est dans la sphère est solide.
+    if P.has_body != 0.0 && eq.x * eq.x + eq.y * eq.y + eq.z * eq.z < P.br * P.br {
+        lab = SOLID;
+    }
+    label[c] = lab;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -935,4 +962,64 @@ fn separate_apply(@builtin(global_invocation_id) g: vec3<u32>) {
         return;
     }
     px[k] = vec4<f32>(clamp_domain(px[k].xyz + shift[k].xyz), 0.0);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **Le corps** (S393) : `impose_body` — toute face qui touche une maille solide prend la vitesse du corps, une face de bord
+// reste une paroi ; `move_body` — les particules atteintes par le corps avancé sont repoussées à sa surface (plus 0,05 maille),
+// leur vitesse normale au moins égale à la sienne.
+
+@compute @workgroup_size(128)
+fn impose_body(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces || P.has_body == 0.0 {
+        return;
+    }
+    let fc = face_of(f);
+    let d = dims_of(fc.axis);
+    let along = vec3<u32>(select(0u, 1u, fc.axis == 0u), select(0u, 1u, fc.axis == 1u), select(0u, 1u, fc.axis == 2u));
+    let a = dot(fc.idx, along);
+    let top = dot(d, along) - 1u;
+    var touches = false;
+    if a > 0u {
+        let m = fc.idx - along;
+        touches = touches || label[cell_index(m.x, m.y, m.z)] == SOLID;
+    }
+    if a < top {
+        touches = touches || label[cell_index(fc.idx.x, fc.idx.y, fc.idx.z)] == SOLID;
+    }
+    if !touches {
+        return;
+    }
+    let vb = select(select(P.bvz, P.bvy, fc.axis == 1u), P.bvx, fc.axis == 0u);
+    faces[f] = select(vb, 0.0, on_wall(fc));
+}
+
+@compute @workgroup_size(128)
+fn move_body(@builtin(global_invocation_id) g: vec3<u32>) {
+    let k = g.x;
+    if k >= P.n || P.has_body == 0.0 {
+        return;
+    }
+    let c = vec3<f32>(P.bmx, P.bmy, P.bmz);
+    let reach = P.br + 0.05 * P.dx;
+    let p = px[k].xyz;
+    let e = p - c;
+    let d = sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
+    if d >= reach {
+        return;
+    }
+    var n = vec3<f32>(0.0, 0.0, 1.0);
+    if d > 0.0 {
+        n = e / d;
+    }
+    px[k] = vec4<f32>(clamp_domain(c + n * reach), 0.0);
+    var v = pv[k].xyz;
+    let bv = vec3<f32>(P.bvx, P.bvy, P.bvz);
+    let vn = v.x * n.x + v.y * n.y + v.z * n.z;
+    let wn = bv.x * n.x + bv.y * n.y + bv.z * n.z;
+    if vn < wn {
+        v = v + (wn - vn) * n;
+    }
+    pv[k] = vec4<f32>(v, 0.0);
 }

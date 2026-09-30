@@ -8,15 +8,15 @@
 //! Les transferts sont des **collectes** sur les particules triées par maille (aucun atomique flottant) ; le tri range chaque
 //! maille par indice de particule, l'ordre de la référence, et rend le pas déterministe.
 use crate::delta3d::buffer;
-use water_core::apic3d::{self, Apic3, ApicStage};
+use water_core::apic3d::{self, Apic3, ApicStage, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 27] = [
+const KERNELS: [&str; 29] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
-    "separate_shift", "separate_apply",
+    "separate_shift", "separate_apply", "impose_body", "move_body",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -40,8 +40,12 @@ const G2P: usize = 23;
 const ADVECT: usize = 24;
 const SEPARATE_SHIFT: usize = 25;
 const SEPARATE_APPLY: usize = 26;
+const IMPOSE_BODY: usize = 27;
+const MOVE_BODY: usize = 28;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
+/// Taille de `Params` : douze mots entiers, vingt-huit flottants.
+const PARAMS_BYTES: u64 = 160;
 /// Horodatages : début et fin de chaque étage.
 const STAMPS: u32 = 16;
 
@@ -79,6 +83,8 @@ pub struct ApicCarte {
     /// Itérations du gradient conjugué **enregistrées** par pas : le travail est borné, l'arrêt au critère de la référence
     /// se fait par un drapeau sur la carte (ADR-175 D2).
     iteration_cap: u32,
+    /// S417 : le corps cinématique, s'il y en a un ; le pas l'avance de `velocity·dt`, comme la référence.
+    body: Option<Sphere3>,
     pub adapter: String,
 }
 
@@ -121,7 +127,7 @@ impl ApicCarte {
         let info = adapter.get_info();
         let storage = wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC;
         let groups_cells = (cells as u32).div_ceil(SCAN) as usize;
-        let params = buffer(&device, 112, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
+        let params = buffer(&device, PARAMS_BYTES, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
         let px = buffer(&device, (capacity * 16) as u64, storage);
         let pv = buffer(&device, (capacity * 16) as u64, storage);
         let pc = buffer(&device, (capacity * 48) as u64, storage);
@@ -222,8 +228,19 @@ impl ApicCarte {
             rho,
             g_eff,
             iteration_cap: 400,
+            body: None,
             adapter: format!("{} ({:?})", info.name, info.backend),
         })
+    }
+
+    /// Le corps du prochain pas (S417), comme `Apic3::set_body`.
+    pub fn set_body(&mut self, body: Option<Sphere3>) {
+        self.body = body;
+    }
+
+    /// Le corps, avancé à la fin du dernier pas.
+    pub fn body(&self) -> Option<Sphere3> {
+        self.body
     }
 
     /// Itérations du gradient conjugué enregistrées par pas.
@@ -259,13 +276,21 @@ impl ApicCarte {
         ];
         let f = [
             dx, self.radius, self.kernel * dx, dt, gdt, self.rho, apic3d::THETA_MIN, apic3d::SEPARATION * dx, 1e-3 * dx,
-            nx as f32 * dx, ny as f32 * dx, nz as f32 * dx, apic3d::PRESSURE_TOLERANCE2 as f32, 0., 0., 0.,
+            nx as f32 * dx, ny as f32 * dx, nz as f32 * dx, apic3d::PRESSURE_TOLERANCE2 as f32,
         ];
-        let mut data = Vec::with_capacity(112);
+        // Le corps : centre au début du pas, vitesse, centre avancé — `b.center[a] += b.velocity[a]·dt`, comme la référence.
+        let b = self.body.unwrap_or(Sphere3 { center: [0.; 3], radius: 1., velocity: [0.; 3] });
+        let moved = [0, 1, 2].map(|a| b.center[a] + b.velocity[a] * dt);
+        let has = if self.body.is_some() { 1. } else { 0. };
+        let body = [
+            has, b.radius, 0., b.center[0], b.center[1], b.center[2], b.velocity[0], b.velocity[1], b.velocity[2], moved[0],
+            moved[1], moved[2], 0., 0., 0.,
+        ];
+        let mut data = Vec::with_capacity(PARAMS_BYTES as usize);
         for v in u {
             data.extend_from_slice(&v.to_le_bytes());
         }
-        for v in f {
+        for v in f.into_iter().chain(body) {
             data.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.params, 0, &data);
@@ -327,6 +352,7 @@ impl ApicCarte {
                 ApicStage::Project => {
                     let cells = self.domain.cells();
                     self.dispatch(&mut pass, GRAVITY_WALLS, self.faces, WG);
+                    self.dispatch(&mut pass, IMPOSE_BODY, self.faces, WG);
                     self.dispatch(&mut pass, ASSEMBLE, cells, SCAN);
                     self.dispatch(&mut pass, CG_INIT[0], cells, SCAN);
                     self.dispatch(&mut pass, CG_INIT[1], 1, 1);
@@ -346,6 +372,7 @@ impl ApicCarte {
                         self.dispatch(&mut pass, EXTRAP_LAYER, self.faces, WG);
                     }
                     self.dispatch(&mut pass, EXTRAP_ZERO, self.faces, WG);
+                    self.dispatch(&mut pass, IMPOSE_BODY, self.faces, WG);
                 }
                 ApicStage::GridToParticles => self.dispatch(&mut pass, G2P, self.n, WG),
                 ApicStage::Advect => self.dispatch(&mut pass, ADVECT, self.n, WG),
@@ -357,6 +384,7 @@ impl ApicCarte {
                             self.dispatch(&mut pass, SEPARATE_APPLY, self.n, WG);
                         }
                     }
+                    self.dispatch(&mut pass, MOVE_BODY, self.n, WG);
                 }
             }
             used = s as u32 + 1;
@@ -366,6 +394,14 @@ impl ApicCarte {
             encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16 * used as u64);
         }
         self.queue.submit([encoder.finish()]);
+        if upto == ApicStage::Full {
+            let dt = (duration_us as f64 * 1e-6) as f32;
+            if let Some(b) = self.body.as_mut() {
+                for a in 0..3 {
+                    b.center[a] += b.velocity[a] * dt;
+                }
+            }
+        }
         let mut times = StageTimes::default();
         if self.query.is_some() {
             let t = self.map_u64(&self.query_read, 2 * used as usize)?;
@@ -499,21 +535,35 @@ pub fn recevoir_etages() -> Result<(), String> {
     let dx: f32 = std::env::var("DX").ok().and_then(|v| v.parse().ok()).unwrap_or(0.05);
     let warm: usize = std::env::var("CHAUFFE").ok().and_then(|v| v.parse().ok()).unwrap_or(20);
     pollster::block_on(async {
-        let (reference, _) = reference_state(dx, warm)?;
+        let cas = std::env::var("CAS").unwrap_or_default();
+        // S417 : `CAS=b10` — un état de B10 (Fr = 2, D/dx = 8, quart) chauffé de `CHAUFFE` pas, le corps posé pour le pas comparé.
+        let fresh = || -> Result<Apic3, String> {
+            if cas == "b10" {
+                let b = B10::new(2., 8);
+                let (mut a, t) = b.warm(warm)?;
+                a.set_body(Some(b.sphere(t))).map_err(|e| format!("{e:?}"))?;
+                Ok(a)
+            } else {
+                Ok(reference_state(dx, warm)?.0)
+            }
+        };
+        let reference = fresh()?;
         let d = reference.domain();
         let mut carte = ApicCarte::new(&reference, reference.particle_count()).await?;
         if let Some(cap) = std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()) {
             carte.set_iteration_cap(cap);
         }
         println!(
-            "APIC_CARTE_S416 carte={:?} domaine={}x{}x{} dx={dx} particules={} chauffe={warm}",
-            carte.adapter, d.nx, d.ny, d.nz, reference.particle_count()
+            "APIC_CARTE_S416 carte={:?} cas={} domaine={}x{}x{} dx={} particules={} chauffe={warm} corps={:?}",
+            carte.adapter, if cas.is_empty() { "ballottement" } else { &cas }, d.nx, d.ny, d.nz, d.dx, reference.particle_count(),
+            reference.body()
         );
         // Le tri : la référence trie dans `reconstruct`.
-        let (mut r, _) = reference_state(dx, warm)?;
+        let mut r = fresh()?;
         let dt = r.stable_step_us(20_000);
         r.step_upto(dt, ApicStage::ParticlesToGrid).map_err(|e| format!("{e:?}"))?;
         carte.load(&reference)?;
+        carte.set_body(reference.body());
         let t = carte.step_upto(dt, ApicStage::ParticlesToGrid)?;
         // Particules → grille.
         let (vel, wgt) = carte.faces()?;
@@ -532,9 +582,10 @@ pub fn recevoir_etages() -> Result<(), String> {
             return Err("particules → grille : écart au-delà de l'arrondi".into());
         }
         // Le tri (la référence le fait dans `reconstruct`, sur les mêmes positions) et la surface.
-        let (mut r, _) = reference_state(dx, warm)?;
+        let mut r = fresh()?;
         r.step_upto(dt, ApicStage::Reconstruct).map_err(|e| format!("{e:?}"))?;
         carte.load(&reference)?;
+        carte.set_body(reference.body());
         let t = carte.step_upto(dt, ApicStage::Reconstruct)?;
         let (start, order) = carte.bins()?;
         let (rs, ro) = r.bins();
@@ -548,16 +599,18 @@ pub fn recevoir_etages() -> Result<(), String> {
         let flipped = labels.iter().zip(r.labels()).filter(|(a, b)| **a != **b as u32).count();
         let water = r.labels().iter().filter(|l| **l == apic3d::WATER).count();
         println!(
-            "APIC_CARTE_S416 etage=surface ecart_phi_max={dphi:.3e} etiquettes_differentes={flipped} eau={water} temps_ms={:?}",
+            "APIC_CARTE_S416 etage=surface ecart_phi_max={dphi:.3e} etiquettes_differentes={flipped} eau={water} solides={} temps_ms={:?}",
+            r.labels().iter().filter(|l| **l == apic3d::SOLID).count(),
             t.stages[1]
         );
         if dphi > 1e-5 || flipped > 0 {
             return Err("surface : écart au-delà de l'arrondi".into());
         }
         // Gravité, parois, projection.
-        let (mut r, _) = reference_state(dx, warm)?;
+        let mut r = fresh()?;
         let report = r.step_upto(dt, ApicStage::Project).map_err(|e| format!("{e:?}"))?;
         carte.load(&reference)?;
+        carte.set_body(reference.body());
         let t = carte.step_upto(dt, ApicStage::Project)?;
         let (p, it, residual, converged) = carte.pressure()?;
         let (vel, _) = carte.faces()?;
@@ -574,9 +627,10 @@ pub fn recevoir_etages() -> Result<(), String> {
         }
         // Extrapolation, retour aux particules, advection, séparation : chaque étage depuis le même état.
         for stage in [ApicStage::Extrapolate, ApicStage::GridToParticles, ApicStage::Advect, ApicStage::Full] {
-            let (mut r, _) = reference_state(dx, warm)?;
+            let mut r = fresh()?;
             r.step_upto(dt, stage).map_err(|e| format!("{e:?}"))?;
             carte.load(&reference)?;
+            carte.set_body(reference.body());
             let t = carte.step_upto(dt, stage)?;
             let index = stage as usize;
             match stage {
@@ -761,4 +815,84 @@ pub fn recevoir_ballottement() -> Result<(), String> {
         );
         Ok(())
     })
+}
+
+/// **B10 de S393** (`examples/apic3d_b10.rs`) : une sphère de diamètre `D` = 0,4 m, la base au ras de l'eau, descend à vitesse
+/// imposée `U = Fr·√(g·D)` jusqu'à `a = 3·Fr·D` ; l'eau sur `a + 2D`, l'air sur `2,5·D` ; **quart de domaine**, l'axe au coin,
+/// parois à `2·D`.
+#[derive(Clone, Copy, Debug)]
+pub struct B10 {
+    pub dx: f64,
+    pub r: f64,
+    pub u: f64,
+    pub a_arret: f64,
+    pub h: f64,
+    pub z0: f64,
+    pub nh: usize,
+    pub nz: usize,
+}
+
+impl B10 {
+    pub const D: f64 = 0.4;
+    pub const G: f64 = 9.81;
+
+    pub fn new(fr: f64, n_d: usize) -> Self {
+        let d = Self::D;
+        let dx = d / n_d as f64;
+        let r = 0.5 * d;
+        let a_arret = 3. * fr * d;
+        let h = a_arret + 2. * d;
+        let lz = h + 2.5 * d;
+        Self {
+            dx,
+            r,
+            u: fr * (Self::G * d).sqrt(),
+            a_arret,
+            h,
+            z0: h + r,
+            nh: (2. * d / dx).round() as usize,
+            nz: (lz / dx).round() as usize,
+        }
+    }
+
+    /// La sphère à l'instant `t`.
+    pub fn sphere(&self, t: f64) -> Sphere3 {
+        let descente = (self.u * t).min(self.a_arret);
+        let v = if self.u * t < self.a_arret { -self.u } else { 0. };
+        Sphere3 { center: [0., 0., (self.z0 - descente) as f32], radius: self.r as f32, velocity: [0., 0., v as f32] }
+    }
+
+    pub fn domain(&self) -> Domain3 {
+        Domain3 { nx: self.nh, ny: self.nh, nz: self.nz, dx: self.dx as f32 }
+    }
+
+    /// La référence ensemencée, le corps pas encore posé.
+    pub fn reference(&self) -> Result<Apic3, String> {
+        use crate::scene::host_impl;
+        use water_core::host::HostServices;
+        let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 33);
+        let mut host = HostServices { alloc: &mut arena, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink };
+        let sous_repos = self.nh * self.nh * ((self.h / self.dx).ceil() as usize);
+        let mut a = Apic3::configure(&mut host, self.domain(), 1000., Self::G as f32, sous_repos * 8).map_err(|e| format!("{e:?}"))?;
+        let (h, r, z0) = (self.h, self.r, self.z0);
+        a.seed(&|p| {
+            let (x, y, z) = (p[0] as f64, p[1] as f64, p[2] as f64 - z0);
+            (p[2] as f64) < h && x * x + y * y + z * z >= r * r
+        })
+        .map_err(|e| format!("{e:?}"))?;
+        Ok(a)
+    }
+
+    /// La référence après `steps` pas, le corps reposé à chaque pas comme dans l'exemple ; rend aussi l'instant atteint.
+    pub fn warm(&self, steps: usize) -> Result<(Apic3, f64), String> {
+        let mut a = self.reference()?;
+        let mut t = 0f64;
+        for _ in 0..steps {
+            a.set_body(Some(self.sphere(t))).map_err(|e| format!("{e:?}"))?;
+            let us = a.stable_step_us(20_000);
+            a.step(us).map_err(|e| format!("{e:?}"))?;
+            t += us as f64 * 1e-6;
+        }
+        Ok((a, t))
+    }
 }

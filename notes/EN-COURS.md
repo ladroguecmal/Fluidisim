@@ -80,10 +80,11 @@ s'explique avant C7c.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la carte : le corps (paramètres, étiquettes solides, faces imposées, images radiales, particules repoussées) ; banc des étages sur B10 ; critère 1.
+- [x] **P2** — la carte : le corps (paramètres, étiquettes solides, faces imposées, images radiales, particules repoussées) ; banc des étages sur B10 ; critère 1.
 - [ ] **P3** — B10 nu sur la carte contre la référence : pincement, air enfermé, cavité, `φ` à l'interface, coût ; critères 2 et 3.
 - [ ] **P4** — conception de C7c : lecture de `apic3d_columns.rs`, découpage, critères (preuve §7).
 - [ ] **P5** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2** — le corps sur la carte : `Params` à 160 octets (centre, vitesse, centre avancé), étiquettes solides et image radiale dans `reconstruct`, `impose_body` (après gravité et après extrapolation), `move_body` (fin du pas) ; `B10` (Fr, D/dx, quart) dans le banc ; `CAS=b10`. **B10, 15 pas de chauffe** (131 072 particules, corps à −3,96 m/s) : transfert 4,8·10⁻⁶ m/s (max 5,9), `φ` 4,7·10⁻⁶ m, étiquettes identiques (67 solides), **211 itérations des deux côtés**, vitesses 5,2·10⁻⁶ m/s, faces non nulles 49 248 contre 49 246 (deux faces à zéro d'un côté, dans l'écart), positions **2,4·10⁻⁷ m** après le corps. Ballottement inchangé. Critère 1 tenu. Le banc re-chauffe la référence à chaque étage : 2 min.
