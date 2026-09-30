@@ -90,7 +90,7 @@ s'explique avant C7c.
 - [x] **P7** — `columns_transport` : débits mouillés par face, une fois, appliqués aux deux colonnes avec des signes opposés ;
   `η` avancé en double flottant (`η` + reste, comme la référence) ; banc.
 - [x] **P8** — la cuve **tout en colonnes** (`APIC3D_COLONNES`, S398) : ballottement à 3 mm de la référence sur 10 s ; volume.
-- [ ] **P9** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
+- [x] **P9** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
 - [ ] **P10** — rituel.
 
 **Critères de C7c-1, écrits avant** (preuve §8.2) : étages à l'arrondi sur la cuve mixte — `φ` à 10⁻⁵ m et étiquettes identiques,
@@ -115,3 +115,4 @@ C7c-2, en entiers).
 - **P6** — `columns_begin` (vitesse du début du pas dans la copie des faces), `columns_advect` (une face `u`/`v` est de la zone si l'une de ses colonnes l'est — S406 ; `w` si sa colonne l'est) ; cuve mixte : **advection 7,8·10⁻⁸ m/s**, projection 94/94 itérations, vitesses 2,5·10⁻⁶ m/s, positions 1,2·10⁻⁷ m après advection. L'étage final diffère (0,13 m) : l'échange et la séparation tenue côté bande — C7c-2, attendu.
 - **P7** — `columns_flux` (un débit par face de colonnes, rangée par rangée, arrondi au quantum `dx³/8·2⁻²⁴`) et `columns_update` (le volume de la colonne en entiers sur deux mots, `η` relu en flottant) — **les volumes en entiers dès C7c-1** : FXC ne garantit pas le `mad` fusionné qu'exige un double flottant sans erreur ; en entiers, la conservation est exacte par construction. `η` à **2,4·10⁻⁷ m** (mixte) et **2,7·10⁻⁷ m** (tout en colonnes, 88/88 itérations). Critère d'étage tenu.
 - **P8** — `CAS=colonnes --apic3d-carte-ballottement` : 500 pas, **surface (`η`) à 0,003 mm** de la référence, période 1,9768 s des deux côtés (10 passages), itérations 89,1/89,1 ; **volume de la carte constant exactement** (dérive 0 en quanta ; la référence −3,3·10⁻¹⁶ m³) ; coût p99 1,46 ms, dont projection 1,39. Ballottement en particules inchangé (0,456 mm, +0,003 %) ; sa surface reconstruite mesurée 0,68 ms ce passage (0,41 avant) — variance de la carte, à surveiller en C7e.
+- **P9** — suite du cœur **753 réussis**, 19 ignorés, zéro avertissement (cœur et afficheur). Preuve §7 (C7b), §8 (conception de C7c), §9 (C7c-1) ; liste 4.19 (partiel, inchangé), file, feuille de route, index. `--check` : 0.

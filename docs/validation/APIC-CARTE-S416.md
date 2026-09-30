@@ -169,7 +169,8 @@ la carte (C3 : 6 à 8 cycles là où le gradient conjugué en demande 94), et un
 
 ## 6. Ce que ce document ne dit pas
 
-- **Ni la zone des colonnes, ni le fond** : C7c (§8). La bande étroite n'est pas encore sur la carte ; B10 nu l'est depuis S417 (§7).
+- **Ni l'échange, ni le fond, ni la bascule** : C7c-2 à C7c-4 (§8). La zone sans échange est sur la carte depuis S417 (§9), B10 nu
+  aussi (§7) ; la bande étroite pas encore.
 - **Le pas `dt`** est celui de la référence : la carte ne le choisit pas elle-même (C7e, diagnostics différés).
 - **Le budget** : 2,05 ms pour une cuve de 2 × 0,2 m est le budget entier de δ ; aucune conclusion de budget n'en sort avant la
   multigrille et la bande étroite, qui retire les particules profondes (÷ 4,7 à 7,7, S413).
@@ -266,3 +267,42 @@ son critère (`ColumnsSwitch`, S408–S415). Trois de ses gestes n'ont pas d'éq
 L'ordre protège une dépendance chaque fois : l'échange suppose la zone ; le fond réemploie l'échange tourné à la verticale
 (ADR-212 D3) ; la bascule manipule les trois. La décision de la bascule reste **sur la carte** : la production ne relit rien dans
 le pas (SPEC-004 §8.4).
+
+## 9. C7c-1 — la zone des colonnes sur la carte, sans échange (S417)
+
+**Reproduire** : `CAS=raccord ITERATIONS=200 … --apic3d-carte-etages` (la cuve mixte : la moitié `x ≥ Lx/2` en colonnes) et
+`CAS=colonnes` (tout en colonnes) ; `CAS=colonnes DUREE=10 ITERATIONS=200 … --apic3d-carte-ballottement` (12 s). Cœur :
+`Apic3::columns_state` (masque, reste de `η`, table de lecture de S400, bande) ; rien d'autre ne change.
+
+**La construction.** `load` charge aussi les vitesses de la grille du pas précédent et la zone. `columns_begin` garde la vitesse
+du début du pas ; `columns_advect` la porte au pied de la caractéristique sur les faces de la zone (une face `u` ou `v` l'est si
+l'une de ses colonnes l'est — S406 ; une face `w`, si sa colonne l'est) ; `reconstruct` donne à une maille de colonne
+`φ = z − (η + e(η))` (la lecture de S400) et ajoute, pour les autres, les **particules virtuelles** des colonnes voisines ;
+`columns_flux` et `columns_update` transportent `η` par les débits mouillés.
+
+**La masse en entiers, dès C7c-1.** La référence avance `η` en `f64` avec un reste en `f32`. Sur la carte, ni `f64` (§8.1), ni
+double flottant sûr : une transformation sans erreur exige un `mad` **fusionné**, que FXC ne garantit pas (L345 : le compilateur
+est dans la boucle). **Le volume de chaque colonne est donc un entier** de quanta `q = dx³/8 · 2⁻²⁴` (une particule vaut 2²⁴ quanta ;
+`q/dx²` = 3,7·10⁻¹⁰ m à 5 cm), sur deux mots de 32 bits en complément à deux ; chaque débit de rangée s'arrondit une fois au
+quantum, et le même entier sort d'une colonne et entre dans l'autre. **La conservation est exacte par construction** ; `η` se relit
+en flottant pour la surface. Une piège de plus : WGSL arrondit `round` au pair, la référence (`f32::round`) loin de zéro — les
+rangées virtuelles s'écrivent `floor(x + 0,5)`.
+
+**Critères** (écrits avant, EN-COURS S417) :
+
+| étage, cuve mixte (moitié colonnes) | écart | critère |
+|---|---|---|
+| surface (étiquettes des colonnes, virtuelles) | `φ` **5,9·10⁻⁷ m**, étiquettes identiques | 10⁻⁵ m |
+| advection de la zone | **7,8·10⁻⁸ m/s** | 10⁻⁵ m/s |
+| projection | 94 / 94 itérations, vitesses 2,5·10⁻⁶ m/s | 10⁻⁴ m/s |
+| transport de `η` | **2,4·10⁻⁷ m** (tout en colonnes : 2,7·10⁻⁷) | 10⁻⁶ m |
+| advection des particules | positions 1,2·10⁻⁷ m | 10⁻⁵ m |
+| fin du pas (séparation, échange) | non comparée : l'échange et la séparation tenue côté bande sont C7c-2 | — |
+
+**La cuve tout en colonnes, 10 s, 500 pas** : surface **à 0,003 mm** de la référence, période 1,9768 s des deux côtés, 10
+passages, 89,1 itérations des deux côtés ; **volume de la carte constant, exactement** (la référence : 3·10⁻¹⁶ m³). Coût p99 1,46 ms,
+dont 1,39 de projection (le plafond d'itérations enregistrées, toujours). **C7c-1 reçu** ; le ballottement en particules et B10
+sont inchangés au caractère près.
+
+**Ce qui reste de C7c** (§8.2) : l'échange (C7c-2, le raccord, `n` résident), le fond (C7c-3), la bascule (C7c-4, B10 en bande
+étroite contre le témoin).
