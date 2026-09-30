@@ -89,7 +89,7 @@ s'explique avant C7c.
 - [x] **P6** — `columns_begin` et `columns_advect` (la vitesse du pas précédent au pied de la caractéristique) ; banc.
 - [x] **P7** — `columns_transport` : débits mouillés par face, une fois, appliqués aux deux colonnes avec des signes opposés ;
   `η` avancé en double flottant (`η` + reste, comme la référence) ; banc.
-- [ ] **P8** — la cuve **tout en colonnes** (`APIC3D_COLONNES`, S398) : ballottement à 3 mm de la référence sur 10 s ; volume.
+- [x] **P8** — la cuve **tout en colonnes** (`APIC3D_COLONNES`, S398) : ballottement à 3 mm de la référence sur 10 s ; volume.
 - [ ] **P9** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
 - [ ] **P10** — rituel.
 
@@ -114,3 +114,4 @@ C7c-2, en entiers).
 - **P5** — cœur : `columns_state` (masque, reste de `η`, table S400, bande). Carte : tampons `cols` (`η`, reste, table, débits) et `cmask`, `load` charge aussi les faces du pas précédent et la zone ; `reconstruct` : maille de colonne `φ = z − η lu`, particules virtuelles (`round` en `floor(x + 0,5)` : WGSL arrondit au pair). Banc `CAS=raccord` (`raccord_state`) : transfert 4,5·10⁻⁸ m/s, **`φ` 5,9·10⁻⁷ m, étiquettes identiques** ; projection à 0,11 m/s — attendu, l'advection de la zone manque (P6).
 - **P6** — `columns_begin` (vitesse du début du pas dans la copie des faces), `columns_advect` (une face `u`/`v` est de la zone si l'une de ses colonnes l'est — S406 ; `w` si sa colonne l'est) ; cuve mixte : **advection 7,8·10⁻⁸ m/s**, projection 94/94 itérations, vitesses 2,5·10⁻⁶ m/s, positions 1,2·10⁻⁷ m après advection. L'étage final diffère (0,13 m) : l'échange et la séparation tenue côté bande — C7c-2, attendu.
 - **P7** — `columns_flux` (un débit par face de colonnes, rangée par rangée, arrondi au quantum `dx³/8·2⁻²⁴`) et `columns_update` (le volume de la colonne en entiers sur deux mots, `η` relu en flottant) — **les volumes en entiers dès C7c-1** : FXC ne garantit pas le `mad` fusionné qu'exige un double flottant sans erreur ; en entiers, la conservation est exacte par construction. `η` à **2,4·10⁻⁷ m** (mixte) et **2,7·10⁻⁷ m** (tout en colonnes, 88/88 itérations). Critère d'étage tenu.
+- **P8** — `CAS=colonnes --apic3d-carte-ballottement` : 500 pas, **surface (`η`) à 0,003 mm** de la référence, période 1,9768 s des deux côtés (10 passages), itérations 89,1/89,1 ; **volume de la carte constant exactement** (dérive 0 en quanta ; la référence −3,3·10⁻¹⁶ m³) ; coût p99 1,46 ms, dont projection 1,39. Ballottement en particules inchangé (0,456 mm, +0,003 %) ; sa surface reconstruite mesurée 0,68 ms ce passage (0,41 avant) — variance de la carte, à surveiller en C7e.

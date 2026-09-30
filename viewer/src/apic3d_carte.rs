@@ -827,17 +827,27 @@ pub fn recevoir_ballottement() -> Result<(), String> {
     let dx: f32 = std::env::var("DX").ok().and_then(|v| v.parse().ok()).unwrap_or(0.05);
     let duree: f64 = std::env::var("DUREE").ok().and_then(|v| v.parse().ok()).unwrap_or(10.);
     pollster::block_on(async {
-        let (mut a, _) = reference_state(dx, 0)?;
+        // S417 : `CAS=colonnes` — la cuve tout en colonnes (`APIC3D_COLONNES`, S398) : la surface est `η`.
+        let columns = std::env::var("CAS").is_ok_and(|c| c == "colonnes");
+        let mut a = if columns { raccord_state(dx, true, 0)? } else { reference_state(dx, 0)?.0 };
         let d = a.domain();
         let n = a.particle_count();
-        let mut carte = ApicCarte::new(&a, n).await?;
+        let mut carte = ApicCarte::new(&a, n.max(1)).await?;
         if let Some(cap) = std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()) {
             carte.set_iteration_cap(cap);
         }
         carte.load(&a)?;
         let lx = d.nx as f64 * d.dx as f64;
         let moment = |x: &[[f32; 3]]| -> f64 { x.iter().map(|p| p[0] as f64 - lx / 2.).sum() };
-        let (mut pr, mut pc) = (Period::new(moment(a.particles())), Period::new(moment(a.particles())));
+        // Tout en colonnes : le moment se lit sur `η` (S398).
+        let moment_eta = |e: &[f32]| -> f64 {
+            e.iter().enumerate().map(|(c, h)| (*h as f64 - 0.5) * (((c % d.nx) as f64 + 0.5) * d.dx as f64 - lx / 2.)).sum()
+        };
+        let m0 = if columns { moment_eta(a.columns_surface().unwrap_or(&[])) } else { moment(a.particles()) };
+        let (mut pr, mut pc) = (Period::new(m0), Period::new(m0));
+        let v0 = carte.columns_volume()?;
+        let r0 = if columns { a.columns_volume() } else { 0. };
+        let mut volume_drift = 0f64;
         let fin = (duree * 1e6) as u64;
         let (mut t, mut steps, mut worst, mut worst_t, mut unconverged) = (0u64, 0u64, 0f64, 0f64, 0u64);
         let mut stage_ms: Vec<Vec<f64>> = vec![Vec::new(); 7];
@@ -866,16 +876,27 @@ pub fn recevoir_ballottement() -> Result<(), String> {
                 }
             }
             total_ms.push(sum);
-            let (phi, _) = carte.surface()?;
-            let (hc, hr) = (column_heights(d, &phi), column_heights(d, a.distance()));
+            let (hc, hr) = if columns {
+                let e = carte.columns_eta()?;
+                (e.iter().map(|x| *x as f64).collect::<Vec<_>>(), a.columns_surface().unwrap_or(&[]).iter().map(|x| *x as f64).collect())
+            } else {
+                let (phi, _) = carte.surface()?;
+                (column_heights(d, &phi), column_heights(d, a.distance()))
+            };
             let gap = hc.iter().zip(&hr).fold(0f64, |m, (x, y)| m.max((x - y).abs()));
             if gap > worst {
                 worst = gap;
                 worst_t = t as f64 * 1e-6;
             }
-            let (x, _, _) = carte.particles()?;
-            pr.push(t as f64 * 1e-6, moment(a.particles()));
-            pc.push(t as f64 * 1e-6, moment(&x));
+            if columns {
+                pr.push(t as f64 * 1e-6, moment_eta(a.columns_surface().unwrap_or(&[])));
+                pc.push(t as f64 * 1e-6, moment_eta(&carte.columns_eta()?));
+                volume_drift = volume_drift.max((carte.columns_volume()? - v0).abs());
+            } else {
+                let (x, _, _) = carte.particles()?;
+                pr.push(t as f64 * 1e-6, moment(a.particles()));
+                pc.push(t as f64 * 1e-6, moment(&x));
+            }
             if steps % 100 == 0 {
                 println!(
                     "APIC_CARTE_BALLOTTEMENT_S416 progression t={:.2} pas={steps} ecart_surface_max={:.2} mm calcul_s={:.0}",
@@ -895,6 +916,12 @@ pub fn recevoir_ballottement() -> Result<(), String> {
             .map(|(name, v)| format!("{name}={:.3}", percentile(v, 0.99)))
             .collect();
         let p99 = percentile(&mut total_ms, 0.99);
+        if columns {
+            println!(
+                "APIC_CARTE_BALLOTTEMENT_S416 colonnes volume_carte_m3={v0:.9} derive_max_m3={volume_drift:e} derive_reference_m3={:e}",
+                a.columns_volume() - r0
+            );
+        }
         println!(
             "APIC_CARTE_BALLOTTEMENT_S416 pas={steps} ecart_surface_max_mm={:.3} a_t={worst_t:.2} periode_reference_s={tr:.4} periode_carte_s={tc:.4} ecart_periode={:+.3}% passages={}/{} ecart_particule_final_mm={:.2} iterations_moyennes_reference={:.1} carte={:.1} non_convergees={unconverged} calcul_s={:.0}",
             worst * 1e3,
@@ -908,7 +935,7 @@ pub fn recevoir_ballottement() -> Result<(), String> {
         );
         println!(
             "APIC_CARTE_BALLOTTEMENT_S416 cout_p99_ms total={p99:.3} par_particule_ns={:.1} {}",
-            p99 * 1e6 / n as f64,
+            if n > 0 { p99 * 1e6 / n as f64 } else { f64::NAN },
             per_stage.join(" ")
         );
         Ok(())
