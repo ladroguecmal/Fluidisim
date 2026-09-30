@@ -1450,3 +1450,168 @@ fn compact_copy(@builtin(global_invocation_id) g: vec3<u32>) {
 fn compact_finish() {
     atomicStore(&pcount[0], pblk[u32(P.q2)]);
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **L'échange à la frontière** (`columns_exchange`, S399–S407 ; C7c-2). La référence est séquentielle : elle visite les
+// particules en montant et retire par **échange avec la dernière** ; le mélange des vitesses aux faces dépend de l'ordre. La carte
+// reproduit ses tableaux **indice pour indice** : les marques se posent en parallèle, les gestes (rares) se font sur un fil, dans
+// l'ordre de la référence.
+
+const COUNT_N: u32 = 0u;
+const COUNT_START: u32 = 1u;
+const COUNT_LIST: u32 = 2u;
+const COUNT_ABSORBED: u32 = 3u;
+const COUNT_REMOVED: u32 = 4u;
+const COUNT_POSED: u32 = 5u;
+const COUNT_REFUSED: u32 = 6u;
+// Un volume de particule, en quanta : 2²⁴.
+const VP_QUANTA: u32 = 16777216u;
+
+@compute @workgroup_size(1)
+fn exchange_begin() {
+    atomicStore(&pcount[COUNT_START], np());
+    atomicStore(&pcount[COUNT_LIST], 0u);
+}
+
+// (1) Les particules entrées dans une colonne de la zone, listées (dans le désordre des atomiques ; le fil les trie).
+@compute @workgroup_size(128)
+fn absorb_mark(@builtin(global_invocation_id) g: vec3<u32>) {
+    let k = g.x;
+    if k >= np() || P.has_columns == 0.0 {
+        return;
+    }
+    let m = cell_of(px[k].xyz);
+    if cmask[m.y * P.nx + m.x] != 0u {
+        let slot = atomicAdd(&pcount[COUNT_LIST], 1u);
+        plist[slot] = k;
+    }
+}
+
+// `zone_face` : une face de la zone — ses deux colonnes dans la zone (sa seule, au bord ; une face `w`, sa colonne).
+fn zone_face(axis: u32, idx: vec3<u32>) -> bool {
+    let i = i32(idx.x);
+    let j = i32(idx.y);
+    if axis == 0u {
+        let a = in_zone(i - 1, j);
+        let b = in_zone(i, j);
+        return (a || idx.x == 0u) && (b || idx.x == P.nx) && (a || b);
+    }
+    if axis == 1u {
+        let a = in_zone(i, j - 1);
+        let b = in_zone(i, j);
+        return (a || idx.y == 0u) && (b || idx.y == P.ny) && (a || b);
+    }
+    return in_zone(i, j);
+}
+
+fn copy_particle(src: u32, dst: u32) {
+    px[dst] = px[src];
+    pv[dst] = pv[src];
+    pc[3u * dst] = pc[3u * src];
+    pc[3u * dst + 1u] = pc[3u * src + 1u];
+    pc[3u * dst + 2u] = pc[3u * src + 2u];
+}
+
+// Une particule absorbée : sa quantité de mouvement rendue aux faces de la zone (S406), son volume au solde de la face-maille
+// de frontière la plus proche — ou à `η`, loin de toute bande.
+fn absorb_one(k: u32) {
+    let p = px[k].xyz;
+    let v = pv[k].xyz;
+    for (var axis = 0u; axis < 3u; axis = axis + 1u) {
+        let l = lerp_of(p, axis);
+        let va = select(select(v.z, v.y, axis == 1u), v.x, axis == 0u);
+        for (var m = 0u; m < 8u; m = m + 1u) {
+            let sel = vec3<bool>((m & 1u) == 1u, ((m >> 1u) & 1u) == 1u, ((m >> 2u) & 1u) == 1u);
+            let idx = select(l.base, l.next, sel);
+            let wa = select(vec3<f32>(1.0) - l.frac, l.frac, sel);
+            let wt = wa.x * wa.y * wa.z;
+            if wt == 0.0 || !zone_face(axis, idx) {
+                continue;
+            }
+            let f = face_global(axis, idx);
+            faces[f] = faces[f] + wt * (va - faces[f]) / 8.0;
+        }
+    }
+    let c = cell_of(p);
+    var best_d = 0.0;
+    var best_face = 0xffffffffu;
+    for (var dir = 0u; dir < 4u; dir = dir + 1u) {
+        var di = 0;
+        var dj = 0;
+        if dir == 0u { di = -1; } else if dir == 1u { di = 1; } else if dir == 2u { dj = -1; } else { dj = 1; }
+        let a = i32(c.x) + di;
+        let b = i32(c.y) + dj;
+        if a < 0 || b < 0 || a >= i32(P.nx) || b >= i32(P.ny) || in_zone(a, b) {
+            continue;
+        }
+        let fi = c.x + select(0u, 1u, di > 0);
+        let fj = c.y + select(0u, 1u, dj > 0);
+        var d = 0.0;
+        var face = 0u;
+        if dir < 2u {
+            d = abs(p.x - f32(fi) * P.dx);
+            face = (c.z * P.ny + c.y) * (P.nx + 1u) + fi;
+        } else {
+            d = abs(p.y - f32(fj) * P.dx);
+            face = P.nu + (c.z * (P.ny + 1u) + fj) * P.nx + c.x;
+        }
+        if best_face == 0xffffffffu || d < best_d {
+            best_d = d;
+            best_face = face;
+        }
+    }
+    if best_face != 0xffffffffu {
+        solde_add(best_face, vec2<u32>(VP_QUANTA, 0u));
+    } else {
+        let col = c.y * P.nx + c.x;
+        let vol = add_i64(ivol_get(col), vec2<u32>(VP_QUANTA, 0u));
+        ivol_set(col, vol);
+        cols[col] = i64_to_f32(vol) * quantum_height();
+    }
+    atomicAdd(&pcount[COUNT_ABSORBED], 1u);
+}
+
+// (1) sur un fil : la liste triée, puis la visite de la référence — en montant ; une absorbée est remplacée par la dernière,
+// qui est examinée aussitôt.
+@compute @workgroup_size(1)
+fn absorb_serial() {
+    let len = atomicLoad(&pcount[COUNT_LIST]);
+    for (var s = 1u; s < len; s = s + 1u) {
+        let v = plist[s];
+        var t = s;
+        loop {
+            if t == 0u || plist[t - 1u] <= v {
+                break;
+            }
+            plist[t] = plist[t - 1u];
+            t = t - 1u;
+        }
+        plist[t] = v;
+    }
+    var n_cur = np();
+    var front = 0u;
+    var back = i32(len) - 1;
+    loop {
+        if front >= len || plist[front] >= n_cur || i32(front) > back {
+            break;
+        }
+        let a = plist[front];
+        front = front + 1u;
+        absorb_one(a);
+        loop {
+            let last = n_cur - 1u;
+            n_cur = last;
+            if last == a {
+                break;
+            }
+            copy_particle(last, a);
+            if back >= i32(front) && plist[u32(back)] == last {
+                back = back - 1;
+                absorb_one(a);
+                continue;
+            }
+            break;
+        }
+    }
+    atomicStore(&pcount[COUNT_N], n_cur);
+}

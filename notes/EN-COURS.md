@@ -89,7 +89,7 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
 - [x] **P2** — cœur : accès de banc aux soldes. Carte : `n` résident (noyaux par particule sur la capacité), soldes en quanta chargés
   par le transport aux faces de frontière ; banc : soldes après le transport ; tout l'existant inchangé.
 - [x] **P3** — le compactage stable des particules marquées (préfixe par blocs) ; la séparation tenue côté bande ; banc.
-- [ ] **P4** — l'absorption : marques en parallèle, liste triée, ordre de visite reconstruit, gestes sur un fil ; banc : nombres.
+- [x] **P4** — l'absorption : marques en parallèle, liste triée, ordre de visite reconstruit, gestes sur un fil ; banc : nombres.
 - [ ] **P5** — retrait et pose sur un fil ; le pas entier sur la cuve mixte ; critère 2.
 - [ ] **P6** — le raccord sur la carte, 30 s ; critère 3.
 - [ ] **P7** — suite entière ; preuve §10 ; liste, file, feuille de route, index.
@@ -103,3 +103,4 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
   déjà de 2,5·10⁻⁶ m/s après la projection (écart admis), soit une borne de 1,3·10⁻¹⁰ m³ ; l'observé est dessous. Tout l'existant
   inchangé (ballottement au caractère près ; `η` 2,4·10⁻⁷ et 2,7·10⁻⁷ m).
 - **P3** — marque `x.w ≠ 0` (le tri l'ignore) ; compactage stable (compte par groupe de 256, préfixe sur un fil, rangement par préfixe dans le groupe, recopie, `n`) ; séparation tenue côté bande (S400). Banc : une particule sur sept marquée — **ordre et valeurs identiques** au filtre attendu (10 971 et 5 541) ; l'existant inchangé.
+- **P4** — **décision** : la carte garde ses tableaux **indice pour indice** avec la référence — les retraits se font par échange avec la dernière, sur un fil, comme `remove_particle` (un compactage stable changerait les indices, donc l'ordre de visite suivant, donc le mélange). `exchange_begin`, `absorb_mark` (liste par atomiques), `absorb_serial` (tri de la liste, visite à deux pointeurs, `absorb_one` : mélange aux faces de la zone, solde de la face la plus proche ou volume de la colonne, échange avec la dernière). Cuve mixte, un pas : **16 absorbées des deux côtés**.

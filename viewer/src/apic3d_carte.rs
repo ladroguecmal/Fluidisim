@@ -12,12 +12,13 @@ use water_core::apic3d::{self, Apic3, ApicStage, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 38] = [
+const KERNELS: [&str; 41] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
     "separate_shift", "separate_apply", "impose_body", "move_body", "columns_begin", "columns_advect",
     "columns_flux", "columns_update", "compact_count", "compact_scan", "compact_scatter", "compact_copy", "compact_finish",
+    "exchange_begin", "absorb_mark", "absorb_serial",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -48,6 +49,9 @@ const COLUMNS_ADVECT: usize = 30;
 const COLUMNS_FLUX: usize = 31;
 const COLUMNS_UPDATE: usize = 32;
 const COMPACT: [usize; 5] = [33, 34, 35, 36, 37];
+const EXCHANGE_BEGIN: usize = 38;
+const ABSORB_MARK: usize = 39;
+const ABSORB_SERIAL: usize = 40;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, vingt-huit flottants.
@@ -502,6 +506,12 @@ impl ApicCarte {
                         }
                     }
                     self.dispatch(&mut pass, MOVE_BODY, self.capacity, WG);
+                    // S418 — l'échange à la frontière (C7c-2), s'il y a une zone.
+                    if self.columns {
+                        self.dispatch(&mut pass, EXCHANGE_BEGIN, 1, 1);
+                        self.dispatch(&mut pass, ABSORB_MARK, self.capacity, WG);
+                        self.dispatch(&mut pass, ABSORB_SERIAL, 1, 1);
+                    }
                 }
             }
             used = s as u32 + 1;
@@ -843,7 +853,15 @@ pub fn recevoir_etages() -> Result<(), String> {
                         }
                     }
                     if stage == ApicStage::Full && r.columns_surface().is_some() {
-                        println!("APIC_CARTE_S416 etage=separation non comparé : l'échange de la zone est C7c-2");
+                        // S418 : l'échange — les gestes comptés depuis la configuration de la référence, ceux de la carte depuis
+                        // le chargement (un pas).
+                        let before = fresh()?.columns_exchange_counts();
+                        let after = r.columns_exchange_counts();
+                        let k = carte.counts()?;
+                        println!(
+                            "APIC_CARTE_S416 etage=echange absorbees_carte={} reference={} n_carte={} n_reference={}",
+                            k[3], after[0] - before[0], k[0], r.particle_count()
+                        );
                         continue;
                     }
                     let (x, v, c) = carte.particles()?;
