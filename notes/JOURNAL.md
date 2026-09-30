@@ -17962,3 +17962,19 @@ la projection — les dispatchs **enregistrés**, même vides après convergence
 shell de l'outil. **Limites** : ni zone, ni fond, ni corps ; `dt` choisi par la référence ; DX12 seul. **Non fait** : Gao *et al.*
 (2018) non relu. **Rituel.** Maillons **4** — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel.
 Suivant : **C7b puis C7c** au poste — le corps, puis la zone et le fond ; B10 en bande étroite sur la carte, le critère de C7.
+
+## S417 — 2026-10-01 — physique : C7b et C7c-1, le corps et la zone des colonnes sur la carte
+
+**Entrée.** *« Continue »* — C7b puis C7c. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §7–9) : **C7b** — le corps
+cinématique sur la carte (mailles solides, image radiale, faces imposées, particules repoussées) ; étages de B10 à l'arrondi (211
+itérations des deux côtés) ; **B10 nu, pincement au pas 54 comme la référence, au chiffre près** (profondeur, air, cavité,
+couronne). L'écart de `φ` à l'interface, lui, pointe à 9,2 mm au col juste avant le pincement : **le témoin** (la référence contre
+elle-même, vitesses perturbées de 10⁻⁶ m/s) y fait 22,6 mm — `φ` est discontinu où le noyau ne voit presque plus de particule. Le
+critère de 3 mm, manqué tel qu'écrit, est intenable ; C7c-4 se jugera contre le témoin, pas à pas. **C7c conçu en quatre**
+(zone, échange, fond, bascule ; `n` résident). **C7c-1** — la zone sans échange : advection au pied de la caractéristique,
+étiquettes, particules virtuelles, transport de `η` ; **les volumes en entiers** (quantum `dx³/8·2⁻²⁴`) — wgpu n'offre pas `f64`
+sous DX12, et FXC ne garantit pas le `mad` fusionné d'un double flottant. **Mesuré** : cuve mixte à l'arrondi jusqu'à l'advection
+(`η` 2,4·10⁻⁷ m) ; tout en colonnes, 10 s, **surface à 0,003 mm, volume constant exactement**. Coût B10 : 6,42 ms, 49 ns par
+particule, la projection d'abord. Suite **753**, zéro avertissement. **Limites** : l'échange (C7c-2) non porté ; `dt` choisi par la
+référence. **Piège** : un `sed` sur `EN-COURS` l'a abîmé en entier — restauré depuis le commit ; les notes s'écrivent par fichier.
+**Rituel.** Maillons **5** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7c-2**, l'échange sur la carte.
