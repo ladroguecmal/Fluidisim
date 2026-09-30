@@ -17946,3 +17946,19 @@ la vague de Chen, vorticité absolue (la déformation fausse la vorticité de la
 rotation ne prend que le déferlement, et y hésite. **La voie** : la vitesse propre de δ, relative à B (ADR-198), gratuite sous la
 houle — avec C7. Suite **752 réussis**, zéro avertissement. **Rituel.** Maillons **3** — justifié : la demande de l'utilisateur, et
 la priorité du solveur (S406). Suivant : **C7** au poste, APIC sur la carte dans sa version étroite.
+
+## S416 — 2026-09-30 — physique : C7a, APIC nu sur la carte
+
+**Entrée.** *« Reprends le projet »* — jeton libre, branches synchronisées ; la suite déclarée : C7, APIC sur la carte. **Fait**
+([preuve](../docs/validation/APIC-CARTE-S416.md)) : C7 **découpé en cinq** — nu (C7a), corps (C7b), zone et fond (C7c), relatif à B
+(C7d), budget (C7e) — chaque morceau reçu contre la référence avant le suivant ; transferts en **collecte** sur les particules
+triées par maille (aucun atomique flottant ; chaque tranche triée par indice : l'ordre de la référence, un pas déterministe). Cœur :
+`step_upto` (le pas arrêté à un étage ; `Full` au bit) et accesseurs de banc. Carte : `apic3d_carte.rs`/`.wgsl`, vingt-sept noyaux.
+**Mesuré** : chaque étage à l'arrondi — tri identique, transfert 1,6·10⁻⁷ m/s, `φ` 1,6·10⁻⁶ m, **94 itérations du gradient
+conjugué des deux côtés**, positions 1,2·10⁻⁷ m ; **le ballottement (1, 0), 10 s : surface à 0,46 mm** de la référence, période
++0,003 % ; à 2,5 cm, 0,77 mm. **Coût** p99 : 2,05 ms pour 12 800 particules, **4,77 ms pour 102 400 (47 ns)** ; deux tiers dans
+la projection — les dispatchs **enregistrés**, même vides après convergence, non les calculs ; la reconstruction ensuite. Suite
+**753 réussis**, zéro avertissement. **Pièges** : FXC refuse `v[a] = …` indexé dynamiquement ; le `!` d'un script en ligne casse le
+shell de l'outil. **Limites** : ni zone, ni fond, ni corps ; `dt` choisi par la référence ; DX12 seul. **Non fait** : Gao *et al.*
+(2018) non relu. **Rituel.** Maillons **4** — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel.
+Suivant : **C7b puis C7c** au poste — le corps, puis la zone et le fond ; B10 en bande étroite sur la carte, le critère de C7.

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-30 23:30 +02:00
+JETON            : libre
+Battement        : 2026-09-30 23:58 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S416 — C7a** au poste : APIC 3D sur la carte, le pas nu (sans zone ni corps) contre la référence ; conception de C7 d'abord
-Dernière session : S415 — physique : **C6c-3** ([preuve](docs/validation/BANDE-ETROITE-S413.md) §6) — le fond qui suit l'écoulement (idée de l'utilisateur) : sur un tourbillon enfoui, la vitesse rend l'énergie d'APIC seul avec 2,4 à 3 fois moins de particules ; sous une houle, la vitesse relative à B reste à faire. R35 reçue. Avant : S414, C6c-2
-Session suivante : **S416 — C7** au poste (conception S384 §5) : APIC sur la carte, **dans sa version étroite** (ADR-211 D1, ADR-212 D5), la vitesse propre de δ relative à B pour le fond (§6.4) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 3 — justifié : la demande de l'utilisateur et la priorité du solveur (S406) ; 4.16 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S416 — physique : **C7a** ([preuve](docs/validation/APIC-CARTE-S416.md)) — C7 découpé en cinq ; le pas d'APIC 3D nu sur la carte, étage par étage à l'arrondi de la référence ; le ballottement à 0,46 mm sur 10 s ; 4,77 ms pour 102 400 particules (47 ns), la projection d'abord. Avant : S415, C6c-3
+Session suivante : **S417 — C7b puis C7c** au poste ([conception](docs/validation/APIC-CARTE-S416.md) §1) : le corps cinématique sur la carte, puis la zone des colonnes et le fond — B10 en bande étroite à 3 mm de la référence ; ensuite C7d (relative à B), C7e (multigrille, budget) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 4 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S416 — **en cours**. Demande de l'utilisateur (2026-09-30) : *« Reprends le projet »* — la suite déclarée : **C7**, APIC
+Session : S416 — **terminée**. Demande de l'utilisateur (2026-09-30) : *« Reprends le projet »* — la suite déclarée : **C7**, APIC
 sur la carte (conception S384 §5, ADR-211 D1, ADR-212 D5). Agent : Claude Code (Opus 5.5), au poste ; RTX 5070 Laptop.
 
 **Ce que C7 demande, et ce qu'une session en fait.** La référence de la bande étroite est `Apic3` avec sa zone de colonnes et
@@ -91,7 +91,7 @@ diverge au-delà de l'arrondi, le publier, ne pas avancer au suivant.
 - [x] **P8** — extrapolation, grille → particules, advection, séparation ; le pas entier ; banc d'un pas.
 - [x] **P9** — le ballottement (1, 0) sur la carte contre la référence, 10 s ; coût par particule ; critères 2 et 3.
 - [x] **P10** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
-- [ ] **P11** — rituel.
+- [x] **P11** — rituel.
 
 ### Notes de reprise
 - **P2** — conception : [APIC-CARTE-S416](../docs/validation/APIC-CARTE-S416.md) §1 ; C7a à C7e ; Gao 2018 non relu (résumé seulement).
@@ -103,3 +103,4 @@ diverge au-delà de l'arrondi, le publier, ne pas avancer au suivant.
 - **P8** — extrapolation (5 668 faces non nulles des deux côtés, écart 2,7·10⁻⁶ m/s), retour (vitesses 2,6·10⁻⁶ m/s, `C` 1,1·10⁻⁴ s⁻¹ — le gradient amplifie par 1/dx), advection (positions **1,2·10⁻⁷ m**), séparation (idem) ; 0,05 / 0,02 / 0,01 / 0,19 ms. Critère 1 tenu, tous les étages.
 - **P9** — `--apic3d-carte-ballottement` (DX, DUREE, ITERATIONS) : 5 cm, 10 s, 500 pas au pas de la référence : **surface à 0,456 mm** au pire (t = 7,14 s), période 1,9965 s contre 1,9964 (**+0,003 %**), 10 passages de chaque côté, itérations 93,5 des deux, aucune non convergée ; une particule isolée à 1,72 mm en fin (divergence des trajectoires, la surface tient). **Coût p99 2,05 ms, 160 ns par particule** : projection 1,39 (plafond de 200 itérations enregistrées), surface 0,41, séparation 0,15, transfert 0,10, le reste < 0,02. Critères 2 et 3. 2,5 cm, 2 s : au calcul.
 - **P10** — suite du cœur : **753 réussis** (752 + `_s416`), 19 ignorés, zéro avertissement ; afficheur zéro avertissement. 2,5 cm, 2 s : surface à 0,77 mm, 193 itérations des deux côtés, 4,77 ms pour 102 400 particules (47 ns). Preuve APIC-CARTE-S416 §3–6 ; liste 4.19 (état inchangé, partiel), file, feuille de route, index. `--check` : 0.
+- **P11** — journal ; jeton libre ; maillons 4 (justifiés : S406) ; suivant : S417, C7b puis C7c.
