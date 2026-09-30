@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S419 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7c-3**, le fond de la
+Session : S419 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7c-3**, le fond de la
 bande sur la carte ([conception](../docs/validation/APIC-CARTE-S416.md) §8). Agent : Claude Code (Opus 5.5), au poste.
 
 **Ce que la référence fait avec un fond** (S413, ADR-212) : sous le fond d'une colonne de la bande, l'eau est **à la grille** —
@@ -88,7 +88,7 @@ période publiée. (3) Raccord, B10, colonnes, ballottement inchangés ; suite ;
   entier.
 - [x] **P5** — le ballottement en bande étroite, 30 s, et le témoin ; critère 2.
 - [x] **P6** — non-régression, suite ; preuve §11 ; liste, file, feuille de route, index.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - **P2** — cœur `columns_solde_w`. Carte : `Params` à 176 octets (`floors`), le fond dans `cols[2C + 32 + col]`, `floor_of`, `below_floor`, `grid_at` ; sous le fond `φ = z − fond`, eau ; virtuelles jusqu'au fond ; advection des faces à la grille (une `w` au-dessus d'une maille sous le fond). `band_state` (`CAS=fond`, fond à 4 mailles sous le creux, 5 116 particules) : **`φ` 8,4·10⁻⁷ m, étiquettes identiques**, advection 1,8·10⁻⁷ m/s, projection 94/94, positions 1,2·10⁻⁷ m après advection. L'échange diffère (68 absorbées sous le fond, 32 posées côté référence) : P4.
@@ -109,3 +109,4 @@ période publiée. (3) Raccord, B10, colonnes, ballottement inchangés ; suite ;
   5 541 absorbées, 360 / 352 retirées, 5 950 / 5 862 posées, `n` 5 093 / 5 089 ; l'ordre diverge au pas 14. **Témoins** : ±10⁻⁶ —
   0,92 mm (−0,005 %) ; ±10⁻⁴ — 1,18 mm (0,000 %). La carte finit au-dessus des deux témoins, sous les 3 mm.
 - **P6** — non-régression : ballottement (0,456 mm), B10 (pas 54, 9,195 mm), colonnes (0,003 mm) identiques ; le raccord déplacé par `square_sum` dans sa dispersion (4,41 → 4,48 mm, 5 205 absorbées au lieu de 5 204). Suite **753**, zéro avertissement. Preuve §11 ; liste, file, feuille de route, index.
+- **P7** — journal ; jeton libre ; maillons 7 (justifiés : S406) ; suivant : S420, C7c-4.

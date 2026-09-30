@@ -17992,3 +17992,16 @@ quantum** ; période −0,036 % ; surface à **4,41 mm** — critère de 3 mm ma
 face, l'arrondi tranche). Reçu **à l'échelle du témoin**. B10, colonnes inchangés ; suite **753**, zéro avertissement. **Limites** :
 deux fils ≈ 0,7 ms (coloriage en C7e) ; un troisième témoin trancherait l'écart de 10 %. **Rituel.** Maillons **6** — justifié : la
 priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7c-3**, le fond sur la carte.
+
+## S419 — 2026-10-01 — physique : C7c-3, le fond de la bande sur la carte
+
+**Entrée.** *« Continue »* — C7c-3. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §11) : le fond par colonne sur la carte
+— `φ = z − fond` et l'eau dessous, virtuelles jusqu'au fond, faces à la grille advectées ; le transport charge les soldes verticaux
+(chaque face garde ses deux contributions, un noyau par colonne les rassemble, sans atomique) ; l'échange absorbe sous le fond, lit
+la frontière maille par maille, règle le solde vertical. Le déplacement du fond part avec la bascule (C7c-4). **Mesuré** : étages à
+l'arrondi (soldes verticaux 8,2·10⁻¹⁰ m³, sous la borne de la vitesse admise) ; un pas entier : gestes et `n` identiques, positions
+1,2·10⁻⁷ m — sauf, après 20 pas, 3 poses sur 32 au miroir en `y` : le cas est invariant en `y`, les emplacements miroirs à distances
+quasi égales (une tolérance aggrave ; l'évaluation sans `mad`, `square_sum`, gardée). **La bande étroite, 30 s : surface à 1,45 mm**,
+période −0,015 %, volume exact à 0 quantum ; témoins 0,92 et 1,18 mm. **C7c-3 reçu.** Ballottement, B10, colonnes identiques ; le
+raccord bouge dans sa dispersion (4,48 mm) ; suite **753**, zéro avertissement. **Rituel.** Maillons **7** — justifié : la priorité
+du solveur (S406) ; 4.19 reste partiel. Suivant : **C7c-4**, la bascule et le déplacement du fond — B10 en bande étroite, le critère de C7.
