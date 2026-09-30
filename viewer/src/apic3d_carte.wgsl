@@ -276,3 +276,94 @@ fn p2g(@builtin(global_invocation_id) g: vec3<u32>) {
     }
     faces[P.faces + f] = wsum;
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **La surface reconstruite** (`reconstruct`, Zhu et Bridson 2005) : aux centres des mailles, `φ = |q − x̄| − r`, `x̄` la
+// moyenne des particules à moins de `R = kernel·dx`, pondérée par `(1 − s²/R²)³` ; `φ = dx` sans voisine. Les parois
+// reflètent les particules (S389) ; le couvercle non. Puis les étiquettes : eau où `φ < 0`.
+
+fn smooth_kernel(s2: f32) -> f32 {
+    if s2 < 1.0 {
+        let t = 1.0 - s2;
+        return t * t * t;
+    }
+    return 0.0;
+}
+
+// Image : 1 — la particule ; −1 — reflétée par la paroi basse ; 2 — par la paroi haute.
+fn mirror(v: f32, m: f32, l: f32) -> f32 {
+    if m == 1.0 {
+        return v;
+    }
+    if m == -1.0 {
+        return -v;
+    }
+    return 2.0 * l - v;
+}
+
+// Les images cherchées : l'image `m` (0, 1, 2) d'un axe est prise si `m = 0`, ou si le centre est près de sa paroi.
+fn image_on(m: u32, near_low: bool, near_high: bool) -> bool {
+    return m == 0u || (m == 1u && near_low) || (m == 2u && near_high);
+}
+
+@compute @workgroup_size(128)
+fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
+    let c = g.x;
+    if c >= P.cells {
+        return;
+    }
+    let i = c % P.nx;
+    let j = (c / P.nx) % P.ny;
+    let k = c / (P.nx * P.ny);
+    let q = (vec3<f32>(f32(i), f32(j), f32(k)) + vec3<f32>(0.5)) * P.dx;
+    let radius = P.kr;
+    let inv_r2 = 1.0 / (radius * radius);
+    let near_x0 = q.x < radius;
+    let near_x1 = q.x > P.lx - radius;
+    let near_y0 = q.y < radius;
+    let near_y1 = q.y > P.ly - radius;
+    let near_z0 = q.z < radius;
+    let images = vec3<f32>(1.0, -1.0, 2.0);
+    let r = P.reach;
+    let lo = vec3<u32>(select(0u, i - r, i >= r), select(0u, j - r, j >= r), select(0u, k - r, k >= r));
+    let hi = vec3<u32>(min(i + r + 1u, P.nx), min(j + r + 1u, P.ny), min(k + r + 1u, P.nz));
+    var sw = 0.0;
+    var sx = vec3<f32>(0.0);
+    for (var cz = lo.z; cz < hi.z; cz = cz + 1u) {
+        for (var cy = lo.y; cy < hi.y; cy = cy + 1u) {
+            for (var cx = lo.x; cx < hi.x; cx = cx + 1u) {
+                let cell = cell_index(cx, cy, cz);
+                for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
+                    let p0 = px[order[s]].xyz;
+                    for (var ax = 0u; ax < 3u; ax = ax + 1u) {
+                        if image_on(ax, near_x0, near_x1) {
+                            for (var ay = 0u; ay < 3u; ay = ay + 1u) {
+                                if image_on(ay, near_y0, near_y1) {
+                                    for (var az = 0u; az < 2u; az = az + 1u) {
+                                        if image_on(az, near_z0, false) {
+                                            let p = vec3<f32>(mirror(p0.x, images[ax], P.lx), mirror(p0.y, images[ay], P.ly),
+                                                mirror(p0.z, images[az], 0.0));
+                                            let d = p - q;
+                                            let wt = smooth_kernel((d.x * d.x + d.y * d.y + d.z * d.z) * inv_r2);
+                                            if wt > 0.0 {
+                                                sw = sw + wt;
+                                                sx = sx + wt * p;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    var phi = P.dx;
+    if sw > 0.0 {
+        let m = sx / sw - q;
+        phi = sqrt(m.x * m.x + m.y * m.y + m.z * m.z) - P.radius;
+    }
+    cellf[c] = phi;
+    label[c] = select(AIR, WATER, phi < 0.0);
+}

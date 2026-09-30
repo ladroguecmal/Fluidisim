@@ -12,8 +12,8 @@ use water_core::apic3d::{self, Apic3, ApicStage};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 8] = [
-    "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g",
+const KERNELS: [&str; 9] = [
+    "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -23,6 +23,7 @@ const SCAN_ADD: usize = 4;
 const BIN_SCATTER: usize = 5;
 const BIN_SORT: usize = 6;
 const P2G: usize = 7;
+const RECONSTRUCT: usize = 8;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Horodatages : début et fin de chaque étage.
@@ -277,7 +278,7 @@ impl ApicCarte {
         };
         // Un passage horodaté par étage, dans l'ordre de `ApicStage` ; le tri se fait en tête, sur les positions du début du
         // pas (la référence le refait dans `reconstruct`, sur les mêmes positions).
-        let stages = [ApicStage::ParticlesToGrid];
+        let stages = [ApicStage::ParticlesToGrid, ApicStage::Reconstruct];
         let mut used = 0u32;
         for (s, stage) in stages.into_iter().enumerate() {
             if stage > upto {
@@ -290,6 +291,7 @@ impl ApicCarte {
                     self.encode_bin(&mut pass);
                     self.dispatch(&mut pass, P2G, self.faces, WG);
                 }
+                ApicStage::Reconstruct => self.dispatch(&mut pass, RECONSTRUCT, self.domain.cells(), WG),
                 _ => {}
             }
             used = s as u32 + 1;
@@ -361,6 +363,12 @@ impl ApicCarte {
         Ok((self.read_f32(&self.faces_buf, 0, self.faces)?, self.read_f32(&self.faces_buf, self.faces, self.faces)?))
     }
 
+    /// La distance reconstruite `φ` et les étiquettes.
+    pub fn surface(&self) -> Result<(Vec<f32>, Vec<u32>), String> {
+        let cells = self.domain.cells();
+        Ok((self.read_f32(&self.cellf, 0, cells)?, self.read_u32(&self.label, 0, cells)?))
+    }
+
     /// Le tri : début de chaque maille (`cells + 1`), puis l'ordre des particules.
     pub fn bins(&self) -> Result<(Vec<u32>, Vec<u32>), String> {
         let cells = self.domain.cells();
@@ -415,20 +423,9 @@ pub fn recevoir_etages() -> Result<(), String> {
         // Le tri : la référence trie dans `reconstruct`.
         let (mut r, _) = reference_state(dx, warm)?;
         let dt = r.stable_step_us(20_000);
-        r.step_upto(dt, ApicStage::Reconstruct).map_err(|e| format!("{e:?}"))?;
+        r.step_upto(dt, ApicStage::ParticlesToGrid).map_err(|e| format!("{e:?}"))?;
         carte.load(&reference)?;
         let t = carte.step_upto(dt, ApicStage::ParticlesToGrid)?;
-        let (start, order) = carte.bins()?;
-        let (rs, ro) = r.bins();
-        let starts_equal = start == rs;
-        let order_equal = order == ro;
-        println!(
-            "APIC_CARTE_S416 etage=tri debuts_identiques={starts_equal} ordre_identique={order_equal} temps_ms={:?}",
-            t.stages[0]
-        );
-        if !(starts_equal && order_equal) {
-            return Err("le tri de la carte diffère de la référence".into());
-        }
         // Particules → grille.
         let (vel, wgt) = carte.faces()?;
         let (wu, wv, ww) = r.face_weights();
@@ -444,6 +441,29 @@ pub fn recevoir_etages() -> Result<(), String> {
         );
         if dv > 1e-5 || fed > 0 {
             return Err("particules → grille : écart au-delà de l'arrondi".into());
+        }
+        // Le tri (la référence le fait dans `reconstruct`, sur les mêmes positions) et la surface.
+        let (mut r, _) = reference_state(dx, warm)?;
+        r.step_upto(dt, ApicStage::Reconstruct).map_err(|e| format!("{e:?}"))?;
+        carte.load(&reference)?;
+        let t = carte.step_upto(dt, ApicStage::Reconstruct)?;
+        let (start, order) = carte.bins()?;
+        let (rs, ro) = r.bins();
+        let (starts_equal, order_equal) = (start == rs, order == ro);
+        println!("APIC_CARTE_S416 etage=tri debuts_identiques={starts_equal} ordre_identique={order_equal}");
+        if !(starts_equal && order_equal) {
+            return Err("le tri de la carte diffère de la référence".into());
+        }
+        let (phi, labels) = carte.surface()?;
+        let dphi = max_abs_diff(&phi, r.distance());
+        let flipped = labels.iter().zip(r.labels()).filter(|(a, b)| **a != **b as u32).count();
+        let water = r.labels().iter().filter(|l| **l == apic3d::WATER).count();
+        println!(
+            "APIC_CARTE_S416 etage=surface ecart_phi_max={dphi:.3e} etiquettes_differentes={flipped} eau={water} temps_ms={:?}",
+            t.stages[1]
+        );
+        if dphi > 1e-5 || flipped > 0 {
+            return Err("surface : écart au-delà de l'arrondi".into());
         }
         Ok(())
     })
