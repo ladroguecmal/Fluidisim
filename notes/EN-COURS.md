@@ -85,7 +85,7 @@ diverge au-delà de l'arrondi, le publier, ne pas avancer au suivant.
   budget), choix du transfert (tri par maille, collecte par face — déterministe, sans atomique flottant), critères.
 - [x] **P3** — le cœur : accès de banc au pas étage par étage (`step_stage`), à comportement inchangé ; essai.
 - [x] **P4** — la carte : module `apic3d_carte`, tampons, tri par maille (compte, préfixe, rangement) ; banc contre le cœur.
-- [ ] **P5** — particules → grille, collecte par face ; banc.
+- [x] **P5** — particules → grille, collecte par face ; banc.
 - [ ] **P6** — surface reconstruite et étiquettes (reflets des parois) ; banc.
 - [ ] **P7** — gravité, parois, projection (gradient conjugué préconditionné par la diagonale) ; banc.
 - [ ] **P8** — extrapolation, grille → particules, advection, séparation ; le pas entier ; banc d'un pas.
@@ -97,3 +97,4 @@ diverge au-delà de l'arrondi, le publier, ne pas avancer au suivant.
 - **P2** — conception : [APIC-CARTE-S416](../docs/validation/APIC-CARTE-S416.md) §1 ; C7a à C7e ; Gao 2018 non relu (résumé seulement).
 - **P3** — `ApicStage`, `step_upto` (`step` = `step_upto(Full)`, au bit) ; accesseurs de banc `affine`, `face_weights`, `pressure`, `bins`, `settings`, `physics` ; constantes du pas rendues publiques. Essai `_s416`.
 - **P4** — `viewer/src/apic3d_carte.rs` + `.wgsl` ; banc `--apic3d-carte-etages` (DX, CHAUFFE) : ballottement (1, 0) à 5 cm, 20 pas de chauffe, 12 800 particules — **débuts et ordre identiques** à la référence ; tri 0,020 ms.
+- **P5** — collecte par face (poids bornés de `weights` en opérations vectorielles : FXC refuse l'écriture indexée dans un vecteur) : écart de vitesse **1,6·10⁻⁷ m/s** (vitesse max 0,13), poids 2,3·10⁻⁵ (sommes ≤ 8), mêmes faces alimentées ; tri + transfert 0,10 ms.

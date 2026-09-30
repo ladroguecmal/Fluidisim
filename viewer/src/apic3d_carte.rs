@@ -12,7 +12,9 @@ use water_core::apic3d::{self, Apic3, ApicStage};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 7] = ["bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort"];
+const KERNELS: [&str; 8] = [
+    "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g",
+];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
 const SCAN_LOCAL: usize = 2;
@@ -20,6 +22,7 @@ const SCAN_BLOCKS: usize = 3;
 const SCAN_ADD: usize = 4;
 const BIN_SCATTER: usize = 5;
 const BIN_SORT: usize = 6;
+const P2G: usize = 7;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Horodatages : début et fin de chaque étage.
@@ -272,14 +275,25 @@ impl ApicCarte {
                 end_of_pass_write_index: Some(2 * s + 1),
             })
         };
+        // Un passage horodaté par étage, dans l'ordre de `ApicStage` ; le tri se fait en tête, sur les positions du début du
+        // pas (la référence le refait dans `reconstruct`, sur les mêmes positions).
+        let stages = [ApicStage::ParticlesToGrid];
         let mut used = 0u32;
-        // Étage 0 (S416 P4) : le tri seul — `Reconstruct` le fera précéder de la reconstruction.
-        {
-            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(0) });
-            self.encode_bin(&mut pass);
-            used = used.max(1);
+        for (s, stage) in stages.into_iter().enumerate() {
+            if stage > upto {
+                break;
+            }
+            let mut pass =
+                encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(s as u32) });
+            match stage {
+                ApicStage::ParticlesToGrid => {
+                    self.encode_bin(&mut pass);
+                    self.dispatch(&mut pass, P2G, self.faces, WG);
+                }
+                _ => {}
+            }
+            used = s as u32 + 1;
         }
-        let _ = upto;
         if let Some(q) = self.query.as_ref() {
             encoder.resolve_query_set(q, 0..2 * used, &self.query_resolve, 0);
             encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16 * used as u64);
@@ -338,11 +352,24 @@ impl ApicCarte {
         Ok(self.read_words(src, offset, len)?.into_iter().map(u32::from_le_bytes).collect())
     }
 
+    fn read_f32(&self, src: &wgpu::Buffer, offset: usize, len: usize) -> Result<Vec<f32>, String> {
+        Ok(self.read_words(src, offset * 4, len)?.into_iter().map(f32::from_le_bytes).collect())
+    }
+
+    /// Vitesses et poids des faces, `u`, `v`, `w` à la suite.
+    pub fn faces(&self) -> Result<(Vec<f32>, Vec<f32>), String> {
+        Ok((self.read_f32(&self.faces_buf, 0, self.faces)?, self.read_f32(&self.faces_buf, self.faces, self.faces)?))
+    }
+
     /// Le tri : début de chaque maille (`cells + 1`), puis l'ordre des particules.
     pub fn bins(&self) -> Result<(Vec<u32>, Vec<u32>), String> {
         let cells = self.domain.cells();
         Ok((self.read_u32(&self.start, 0, cells + 1)?, self.read_u32(&self.order, 0, self.n)?))
     }
+}
+
+fn max_abs_diff(a: &[f32], b: &[f32]) -> f32 {
+    a.iter().zip(b).fold(0f32, |m, (x, y)| m.max((x - y).abs()))
 }
 
 fn bytes(v: &[f32]) -> &[u8] {
@@ -401,6 +428,22 @@ pub fn recevoir_etages() -> Result<(), String> {
         );
         if !(starts_equal && order_equal) {
             return Err("le tri de la carte diffère de la référence".into());
+        }
+        // Particules → grille.
+        let (vel, wgt) = carte.faces()?;
+        let (wu, wv, ww) = r.face_weights();
+        let rvel: Vec<f32> = r.velocity_u().iter().chain(r.velocity_v()).chain(r.velocity_w()).copied().collect();
+        let rwgt: Vec<f32> = wu.iter().chain(wv).chain(ww).copied().collect();
+        let dv = max_abs_diff(&vel, &rvel);
+        let dw = max_abs_diff(&wgt, &rwgt);
+        let umax = rvel.iter().fold(0f32, |m, x| m.max(x.abs()));
+        let fed = wgt.iter().zip(&rwgt).filter(|(a, b)| (**a > 0.) != (**b > 0.)).count();
+        println!(
+            "APIC_CARTE_S416 etage=transfert ecart_vitesse_max={dv:.3e} vitesse_max={umax:.4} ecart_poids_max={dw:.3e} alimentees_differentes={fed} temps_ms={:?}",
+            t.stages[0]
+        );
+        if dv > 1e-5 || fed > 0 {
+            return Err("particules → grille : écart au-delà de l'arrondi".into());
         }
         Ok(())
     })

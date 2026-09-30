@@ -157,3 +157,122 @@ fn bin_sort(@builtin(global_invocation_id) g: vec3<u32>) {
         order[t] = v;
     }
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Grilles décalées (`staggered`) : l'axe d'une face, ses indices, l'origine de son nœud (0, 0, 0) en mailles, ses dimensions.
+
+struct Face {
+    axis: u32,
+    idx: vec3<u32>,
+    local: u32,
+}
+
+fn dims_of(axis: u32) -> vec3<u32> {
+    if axis == 0u {
+        return vec3<u32>(P.nx + 1u, P.ny, P.nz);
+    }
+    if axis == 1u {
+        return vec3<u32>(P.nx, P.ny + 1u, P.nz);
+    }
+    return vec3<u32>(P.nx, P.ny, P.nz + 1u);
+}
+
+fn origin_of(axis: u32) -> vec3<f32> {
+    if axis == 0u {
+        return vec3<f32>(0.0, 0.5, 0.5);
+    }
+    if axis == 1u {
+        return vec3<f32>(0.5, 0.0, 0.5);
+    }
+    return vec3<f32>(0.5, 0.5, 0.0);
+}
+
+// Premier indice global de la famille `axis` dans les tampons de faces.
+fn face_base(axis: u32) -> u32 {
+    if axis == 0u {
+        return 0u;
+    }
+    if axis == 1u {
+        return P.nu;
+    }
+    return P.nu + P.nv;
+}
+
+fn face_of(f: u32) -> Face {
+    var axis = 2u;
+    var local = f - P.nu - P.nv;
+    if f < P.nu {
+        axis = 0u;
+        local = f;
+    } else if f < P.nu + P.nv {
+        axis = 1u;
+        local = f - P.nu;
+    }
+    let d = dims_of(axis);
+    return Face(axis, vec3<u32>(local % d.x, (local / d.x) % d.y, local / (d.x * d.y)), local);
+}
+
+// Les poids trilinéaires bornés d'un point sur la grille `axis` (`weights`) : base, fraction et nœud suivant par composante.
+struct Lerp {
+    base: vec3<u32>,
+    frac: vec3<f32>,
+    next: vec3<u32>,
+}
+
+fn lerp_of(p: vec3<f32>, axis: u32) -> Lerp {
+    let d = dims_of(axis);
+    let top = vec3<f32>(d - vec3<u32>(1u));
+    let f = clamp(p / P.dx - origin_of(axis), vec3<f32>(0.0), max(top - vec3<f32>(1e-4), vec3<f32>(0.0)));
+    let base = vec3<u32>(floor(f));
+    return Lerp(base, f - vec3<f32>(base), min(base + vec3<u32>(1u), d - vec3<u32>(1u)));
+}
+
+// Le poids du nœud `node` pour ce point : la somme des emplacements de `weights` qui le désignent.
+fn node_weight(l: Lerp, node: vec3<u32>) -> f32 {
+    let wa = select(vec3<f32>(0.0), vec3<f32>(1.0) - l.frac, node == l.base) + select(vec3<f32>(0.0), l.frac, node == l.next);
+    return wa.x * wa.y * wa.z;
+}
+
+// **Particules → grille**, APIC (`particles_to_grid`) : `u_f = Σ w·(v_a + C_a·(x_f − x_p)) / Σ w`, en collecte sur les mailles
+// qui peuvent atteindre la face — deux le long de son axe, trois dans les autres.
+@compute @workgroup_size(128)
+fn p2g(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces {
+        return;
+    }
+    let fc = face_of(f);
+    let xf = (vec3<f32>(fc.idx) + origin_of(fc.axis)) * P.dx;
+    let along = vec3<bool>(fc.axis == 0u, fc.axis == 1u, fc.axis == 2u);
+    let lo = max(vec3<i32>(fc.idx) - vec3<i32>(1), vec3<i32>(0));
+    let hi = min(select(vec3<i32>(fc.idx) + vec3<i32>(1), vec3<i32>(fc.idx), along),
+        vec3<i32>(i32(P.nx) - 1, i32(P.ny) - 1, i32(P.nz) - 1));
+    var sum = 0.0;
+    var wsum = 0.0;
+    for (var c = lo.z; c <= hi.z; c = c + 1) {
+        for (var b = lo.y; b <= hi.y; b = b + 1) {
+            for (var a = lo.x; a <= hi.x; a = a + 1) {
+                let cell = cell_index(u32(a), u32(b), u32(c));
+                for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
+                    let k = order[s];
+                    let p = px[k].xyz;
+                    let wt = node_weight(lerp_of(p, fc.axis), fc.idx);
+                    if wt == 0.0 {
+                        continue;
+                    }
+                    let row = pc[3u * k + fc.axis].xyz;
+                    let e = xf - p;
+                    let affine = row.x * e.x + row.y * e.y + row.z * e.z;
+                    sum = sum + wt * (pv[k][fc.axis] + affine);
+                    wsum = wsum + wt;
+                }
+            }
+        }
+    }
+    if wsum > 0.0 {
+        faces[f] = sum / wsum;
+    } else {
+        faces[f] = 0.0;
+    }
+    faces[P.faces + f] = wsum;
+}
