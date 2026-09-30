@@ -12,11 +12,11 @@ use water_core::apic3d::{self, Apic3, ApicStage, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 29] = [
+const KERNELS: [&str; 31] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
-    "separate_shift", "separate_apply", "impose_body", "move_body",
+    "separate_shift", "separate_apply", "impose_body", "move_body", "columns_begin", "columns_advect",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -42,6 +42,8 @@ const SEPARATE_SHIFT: usize = 25;
 const SEPARATE_APPLY: usize = 26;
 const IMPOSE_BODY: usize = 27;
 const MOVE_BODY: usize = 28;
+const COLUMNS_BEGIN: usize = 29;
+const COLUMNS_ADVECT: usize = 30;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, vingt-huit flottants.
@@ -373,10 +375,14 @@ impl ApicCarte {
                 encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(s as u32) });
             match stage {
                 ApicStage::ParticlesToGrid => {
+                    self.dispatch(&mut pass, COLUMNS_BEGIN, self.faces, WG);
                     self.encode_bin(&mut pass);
                     self.dispatch(&mut pass, P2G, self.faces, WG);
                 }
-                ApicStage::Reconstruct => self.dispatch(&mut pass, RECONSTRUCT, self.domain.cells(), WG),
+                ApicStage::Reconstruct => {
+                    self.dispatch(&mut pass, COLUMNS_ADVECT, self.faces, WG);
+                    self.dispatch(&mut pass, RECONSTRUCT, self.domain.cells(), WG);
+                }
                 ApicStage::Project => {
                     let cells = self.domain.cells();
                     self.dispatch(&mut pass, GRAVITY_WALLS, self.faces, WG);
@@ -630,6 +636,9 @@ pub fn recevoir_etages() -> Result<(), String> {
             return Err("le tri de la carte diffère de la référence".into());
         }
         let (phi, labels) = carte.surface()?;
+        let (vel, _) = carte.faces()?;
+        let rvel: Vec<f32> = r.velocity_u().iter().chain(r.velocity_v()).chain(r.velocity_w()).copied().collect();
+        println!("APIC_CARTE_S416 etage=advection_zone ecart_vitesse_max={:.3e}", max_abs_diff(&vel, &rvel));
         let dphi = max_abs_diff(&phi, r.distance());
         let flipped = labels.iter().zip(r.labels()).filter(|(a, b)| **a != **b as u32).count();
         let water = r.labels().iter().filter(|l| **l == apic3d::WATER).count();

@@ -1119,3 +1119,70 @@ fn virtual_column_sums(q: vec3<f32>, i: u32, j: u32, radius: f32, inv_r2: f32, n
     }
     return vec4<f32>(sx, sw);
 }
+
+// `columns_begin` : la vitesse de la grille au début du pas, gardée dans la copie `faces[2F..3F)` jusqu'à l'advection.
+@compute @workgroup_size(128)
+fn columns_begin(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces || P.has_columns == 0.0 {
+        return;
+    }
+    faces[2u * P.faces + f] = faces[f];
+}
+
+// `sample` : la vitesse du pas précédent, trilinéaire bornée, au point `p`.
+fn sample_prev(p: vec3<f32>) -> vec3<f32> {
+    var out = vec3<f32>(0.0);
+    for (var axis = 0u; axis < 3u; axis = axis + 1u) {
+        let l = lerp_of(p, axis);
+        var value = 0.0;
+        for (var m = 0u; m < 8u; m = m + 1u) {
+            let sel = vec3<bool>((m & 1u) == 1u, ((m >> 1u) & 1u) == 1u, ((m >> 2u) & 1u) == 1u);
+            let idx = select(l.base, l.next, sel);
+            let wa = select(vec3<f32>(1.0) - l.frac, l.frac, sel);
+            value = value + wa.x * wa.y * wa.z * faces[2u * P.faces + face_global(axis, idx)];
+        }
+        if axis == 0u {
+            out.x = value;
+        } else if axis == 1u {
+            out.y = value;
+        } else {
+            out.z = value;
+        }
+    }
+    return out;
+}
+
+fn in_zone(i: i32, j: i32) -> bool {
+    return i >= 0 && j >= 0 && i < i32(P.nx) && j < i32(P.ny) && cmask[u32(j) * P.nx + u32(i)] != 0u;
+}
+
+// `columns_advect` : les faces de la zone prennent la vitesse du pas précédent au pied de la caractéristique,
+// `u(x_f) ← u⁻(x_f − dt·u⁻(x_f))`. Une face `u` ou `v` en est si l'une de ses deux colonnes en est (S406 : la face de frontière
+// appartient à la zone) ; une face `w`, si sa colonne en est.
+@compute @workgroup_size(128)
+fn columns_advect(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces || P.has_columns == 0.0 {
+        return;
+    }
+    let fc = face_of(f);
+    let i = i32(fc.idx.x);
+    let j = i32(fc.idx.y);
+    var owned = false;
+    if fc.axis == 0u {
+        owned = in_zone(i - 1, j) || in_zone(i, j);
+    } else if fc.axis == 1u {
+        owned = in_zone(i, j - 1) || in_zone(i, j);
+    } else {
+        owned = in_zone(i, j);
+    }
+    if !owned {
+        return;
+    }
+    let x = (vec3<f32>(fc.idx) + origin_of(fc.axis)) * P.dx;
+    let v = sample_prev(x);
+    let foot = x - P.dt * v;
+    let a = sample_prev(foot);
+    faces[f] = select(select(a.z, a.y, fc.axis == 1u), a.x, fc.axis == 0u);
+}
