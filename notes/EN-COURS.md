@@ -92,7 +92,7 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
 - [x] **P4** — l'absorption : marques en parallèle, liste triée, ordre de visite reconstruit, gestes sur un fil ; banc : nombres.
 - [x] **P5** — retrait et pose sur un fil ; le pas entier sur la cuve mixte ; critère 2.
 - [x] **P6** — le raccord sur la carte, 30 s ; critère 3.
-- [ ] **P7** — suite entière ; preuve §10 ; liste, file, feuille de route, index.
+- [x] **P7** — suite entière ; preuve §10 ; liste, file, feuille de route, index.
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
@@ -123,3 +123,4 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
   **4,03 mm**, période −0,063 %. **La carte suit la courbe des témoins** et finit 10 % au-dessus du plus grand des deux : la
   comparaison « ≤ témoin », sur deux échantillons, est manquée de peu, dans la même dispersion. Coût p99 2,84 ms, dont séparation +
   échange 0,88 (les deux fils : ≈ 0,7 ms).
+- **P7** — non-régression : B10 au caractère près (pas 54, 9,195 mm), tout en colonnes identique (0,003 mm, volume 0) ; suite **753**, zéro avertissement. Preuve §10 ; liste 4.19 (partiel), file, feuille de route, index. `--check` : 0.

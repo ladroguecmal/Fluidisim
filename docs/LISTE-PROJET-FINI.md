@@ -325,7 +325,8 @@ pas recopiée ici (L137).
   **S416** : APIC 3D nu **sur la carte** (C7a), à 0,46 mm de la référence — 2,05 ms au 99ᵉ centile pour 12 800
   particules, 4,77 ms pour 102 400 (47 ns par particule), la projection d'abord ([preuve](validation/APIC-CARTE-S416.md)) ;
   **S417** : le corps (B10 nu, pincement au pas de la référence, 6,42 ms pour 131 072 particules) et la zone des colonnes sans
-  échange (volume exact en entiers) ([§7–9](validation/APIC-CARTE-S416.md)).
+  échange (volume exact en entiers) ([§7–9](validation/APIC-CARTE-S416.md)) ; **S418** : l'échange à la frontière, volume
+  exact à 0 quantum sur 30 s ([§10](validation/APIC-CARTE-S416.md)).
   Manquent 30 Hz stable à 10 cm, d'autres scènes, plusieurs domaines en direct, un 99ᵉ centile en direct.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *partiel* **depuis S369** :

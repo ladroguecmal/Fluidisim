@@ -169,8 +169,8 @@ la carte (C3 : 6 à 8 cycles là où le gradient conjugué en demande 94), et un
 
 ## 6. Ce que ce document ne dit pas
 
-- **Ni l'échange, ni le fond, ni la bascule** : C7c-2 à C7c-4 (§8). La zone sans échange est sur la carte depuis S417 (§9), B10 nu
-  aussi (§7) ; la bande étroite pas encore.
+- **Ni le fond, ni la bascule** : C7c-3 et C7c-4 (§8). La zone et son échange sont sur la carte (§9–10, S417–S418), B10 nu aussi
+  (§7) ; la bande étroite pas encore.
 - **Le pas `dt`** est celui de la référence : la carte ne le choisit pas elle-même (C7e, diagnostics différés).
 - **Le budget** : 2,05 ms pour une cuve de 2 × 0,2 m est le budget entier de δ ; aucune conclusion de budget n'en sort avant la
   multigrille et la bande étroite, qui retire les particules profondes (÷ 4,7 à 7,7, S413).
@@ -306,3 +306,49 @@ sont inchangés au caractère près.
 
 **Ce qui reste de C7c** (§8.2) : l'échange (C7c-2, le raccord, `n` résident), le fond (C7c-3), la bascule (C7c-4, B10 en bande
 étroite contre le témoin).
+
+## 10. C7c-2 — l'échange à la frontière sur la carte (S418)
+
+**Reproduire** : `CAS=raccord CHAUFFE=<2…90> ITERATIONS=200 … --apic3d-carte-etages` (un pas entier, ligne `etage=echange`) ;
+`CAS=raccord DUREE=30 ITERATIONS=200 … --apic3d-carte-ballottement` (80 s) ; les témoins : `TEMOIN=1e-6` ou `1e-4` (deux minutes,
+la carte n'est pas calculée). Cœur : `columns_soldes`, `particle_capacity`.
+
+**La construction.** `n` est **résident** (lu par les noyaux, lancés sur la capacité ; le dispatch indirect est C7e). Les soldes
+sont des **quanta entiers**, chargés par le transport au même entier que le débit. L'échange de la référence est séquentiel et
+**dépend de l'ordre** : le mélange `f += w·(v − f)/8` de deux absorbées dans l'ordre inverse diffère de `a·b·(v₂ − v₁)`, jusqu'à 1/64
+de l'écart des vitesses — pas un arrondi. La carte **garde donc ses tableaux indice pour indice avec la référence** : les
+absorbées sont listées en parallèle, triées, et un fil les traite dans **l'ordre de visite de la référence**, reconstruit à deux
+pointeurs (elle monte, et remplace une absorbée par la dernière, examinée aussitôt) ; un second fil règle les soldes face-maille
+par face-maille dans son ordre (retrait de la plus proche de la face, pose à `dx/16` au sous-réseau le plus libre), puis retire
+les marquées par échange avec la dernière, du plus grand indice au plus petit. Les gestes sont rares (une ligne de faces-mailles) ;
+les fils coûtent ≈ 0,7 ms, à paralléliser par coloriage en C7e. Un **compactage stable** (P3, exact) reste pour la bascule.
+
+**Un pas entier, cuve mixte** (critère 2), après 2 à 90 pas de chauffe : absorbées, retirées, posées et `n` **identiques** à chaque
+fois (retraits 32 et 12, poses 8 et 4, absorptions 16, 20, 4) ; **positions à 6·10⁻⁸ m indice pour indice** (3·10⁻⁷ au pire) ;
+vitesses ≤ 1,4·10⁻⁵ m/s ; soldes ≤ 1,1·10⁻¹⁰ m³ ; `η` ≤ 3·10⁻⁷ m. **Tenu.** Les soldes après le seul transport sont à 58 quanta
+(5,4·10⁻¹¹ m³) : le critère « au quantum près » était mal posé — un solde est `u·dx²·dt`, et `u` porte déjà l'écart admis de la
+projection (2,5·10⁻⁶ m/s, soit 1,3·10⁻¹⁰ m³ au plus).
+
+**Le raccord, 30 s** (critère 3) :
+
+| grandeur | carte | témoin ε = 10⁻⁶ | témoin ε = 10⁻⁴ |
+|---|---|---|---|
+| écart de surface, maximum courant, 4 s | 0,34 mm | 0,39 | 2,01 |
+| 10 s | 2,22 mm | 2,23 | 2,89 |
+| 22 s | 3,23 mm | 3,11 | 3,98 |
+| **30 s** | **4,41 mm** | **3,40** | **4,03** |
+| écart de période | −0,036 % | −0,043 % | −0,063 % |
+| volume | **constant, 0 quantum** | (référence : 2·10⁻¹⁶ m³) | |
+| gestes cumulés, carte / référence | absorbées 5 204 / 5 256, retirées 109 / 108, posées 5 303 / 5 356, `n` 6 574 / 6 576 | | |
+
+**Ce que cela dit.** *Faits* : les tableaux cessent d'être identiques indice pour indice **au pas 12**, le premier pas de retraits,
+et l'ensemble diffère alors d'une particule à 25 mm ; la surface, elle, s'écarte lentement, **sur la même courbe que les
+témoins** ; la carte finit à 4,41 mm, 10 % au-dessus du plus grand des deux témoins ; le volume de la carte ne varie pas d'un
+quantum en 1 500 pas. *Explication* : le retrait prend « la plus proche de la face », et sur le réseau d'ensemencement plusieurs
+particules en sont à **égale distance** — l'arrondi tranche l'égalité autrement, puis l'écoulement amplifie la différence comme il
+amplifie une perturbation de 10⁻⁶ m/s. **Le critère 3 (3 mm) est manqué, et la référence ne le tient pas contre elle-même
+(3,40 et 4,03 mm)** ; la comparaison « au plus le témoin » est manquée de peu sur deux échantillons, dans la même dispersion. La
+masse, elle, est exacte, ce que la référence n'est qu'à l'arrondi du `f64`. **C7c-2 reçu à l'échelle du témoin** ; un troisième
+témoin, ou une moyenne sur plusieurs, trancherait l'écart de 10 % — à faire avant de s'appuyer sur un écart plus fin.
+
+**Coût** (raccord, 6 584 particules, p99) : 2,84 ms — projection 1,40, séparation et échange 0,88, surface 0,52.
