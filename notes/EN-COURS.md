@@ -90,7 +90,7 @@ diverge au-delà de l'arrondi, le publier, ne pas avancer au suivant.
 - [x] **P7** — gravité, parois, projection (gradient conjugué préconditionné par la diagonale) ; banc.
 - [x] **P8** — extrapolation, grille → particules, advection, séparation ; le pas entier ; banc d'un pas.
 - [x] **P9** — le ballottement (1, 0) sur la carte contre la référence, 10 s ; coût par particule ; critères 2 et 3.
-- [ ] **P10** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
+- [x] **P10** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
 - [ ] **P11** — rituel.
 
 ### Notes de reprise
@@ -102,3 +102,4 @@ diverge au-delà de l'arrondi, le publier, ne pas avancer au suivant.
 - **P7** — gravité, parois, gradient conjugué diagonal sur la carte (scalaires sur la carte, drapeau de fin lu uniformément par `workgroupUniformLoad`), correction : **94 itérations des deux côtés**, résidu 7,05·10⁻⁷ contre 7,04·10⁻⁷, pression à 5,4·10⁻³ Pa sur 4 694 (10⁻⁶), vitesses à **2,7·10⁻⁶ m/s**. Coût : **les dispatchs enregistrés**, même sautés — 4,07 ms au plafond de 400, 1,01 ms à 120 (`ITERATIONS=`) : la multigrille (C7e) est la voie.
 - **P8** — extrapolation (5 668 faces non nulles des deux côtés, écart 2,7·10⁻⁶ m/s), retour (vitesses 2,6·10⁻⁶ m/s, `C` 1,1·10⁻⁴ s⁻¹ — le gradient amplifie par 1/dx), advection (positions **1,2·10⁻⁷ m**), séparation (idem) ; 0,05 / 0,02 / 0,01 / 0,19 ms. Critère 1 tenu, tous les étages.
 - **P9** — `--apic3d-carte-ballottement` (DX, DUREE, ITERATIONS) : 5 cm, 10 s, 500 pas au pas de la référence : **surface à 0,456 mm** au pire (t = 7,14 s), période 1,9965 s contre 1,9964 (**+0,003 %**), 10 passages de chaque côté, itérations 93,5 des deux, aucune non convergée ; une particule isolée à 1,72 mm en fin (divergence des trajectoires, la surface tient). **Coût p99 2,05 ms, 160 ns par particule** : projection 1,39 (plafond de 200 itérations enregistrées), surface 0,41, séparation 0,15, transfert 0,10, le reste < 0,02. Critères 2 et 3. 2,5 cm, 2 s : au calcul.
+- **P10** — suite du cœur : **753 réussis** (752 + `_s416`), 19 ignorés, zéro avertissement ; afficheur zéro avertissement. 2,5 cm, 2 s : surface à 0,77 mm, 193 itérations des deux côtés, 4,77 ms pour 102 400 particules (47 ns). Preuve APIC-CARTE-S416 §3–6 ; liste 4.19 (état inchangé, partiel), file, feuille de route, index. `--check` : 0.
