@@ -86,7 +86,7 @@ période publiée. (3) Raccord, B10, colonnes, ballottement inchangés ; suite ;
 - [x] **P3** — le transport sous le fond : soldes verticaux et latéraux des rangées à la grille ; banc.
 - [x] **P4** — l'échange avec un fond : absorption sous le fond, frontière maille par maille, solde vertical (retrait, pose) ; un pas
   entier.
-- [ ] **P5** — le ballottement en bande étroite, 30 s, et le témoin ; critère 2.
+- [x] **P5** — le ballottement en bande étroite, 30 s, et le témoin ; critère 2.
 - [ ] **P6** — non-régression, suite ; preuve §11 ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
@@ -103,3 +103,8 @@ période publiée. (3) Raccord, B10, colonnes, ballottement inchangés ; suite ;
   (l'advection à l'arrondi). Essais : une tolérance « le premier gagne à 10⁻⁶ près » **aggrave** (7 sur 32 : la référence les
   ordonne vraiment, à l'arrondi) — retirée ; les carrés évalués sans contraction (`square_sum`, barrière `bitcast`) : sans effet ici,
   gardés (plus fidèles). Masse identique ; le jugement se fera sur la durée, contre le témoin (P5).
+- **P5** — `CAS=fond --apic3d-carte-ballottement` (le même instrument que le raccord ; `TEMOIN=`) : 30 s, 1 500 pas — **surface à
+  1,45 mm** au pire (t = 18,7 s ; maximum courant 0,02 mm à 4 s, 0,57 à 8 s, 1,02 à 12 s, 1,45 dès 20 s), **critère 2 tenu** (3 mm) ;
+  période 1,9969 s contre 1,9972 (−0,015 %) ; **volume de la carte constant à 0 quantum** (la référence : 0) ; gestes cumulés 5 617 /
+  5 541 absorbées, 360 / 352 retirées, 5 950 / 5 862 posées, `n` 5 093 / 5 089 ; l'ordre diverge au pas 14. **Témoins** : ±10⁻⁶ —
+  0,92 mm (−0,005 %) ; ±10⁻⁴ — 1,18 mm (0,000 %). La carte finit au-dessus des deux témoins, sous les 3 mm.

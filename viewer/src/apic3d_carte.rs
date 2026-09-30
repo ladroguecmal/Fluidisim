@@ -1021,13 +1021,16 @@ pub fn recevoir_ballottement() -> Result<(), String> {
         // S417 : `CAS=colonnes` — la cuve tout en colonnes (`APIC3D_COLONNES`, S398) : la surface est `η`.
         let columns = std::env::var("CAS").is_ok_and(|c| c == "colonnes");
         // S418 : `CAS=raccord` — la moitié `x ≥ Lx/2` en colonnes, l'échange à la frontière (S399–S407).
-        let raccord = std::env::var("CAS").is_ok_and(|c| c == "raccord");
-        let mut a = if columns || raccord { raccord_state(dx, columns, 0)? } else { reference_state(dx, 0)?.0 };
+        // S419 : `CAS=fond` — toute la cuve en bande, le fond à quatre mailles sous le creux (S413) ; même instrument que le raccord.
+        let fond = std::env::var("CAS").is_ok_and(|c| c == "fond");
+        let raccord = fond || std::env::var("CAS").is_ok_and(|c| c == "raccord");
+        let build = || if fond { band_state(dx, 4., 0) } else { raccord_state(dx, false, 0) };
+        let mut a = if columns { raccord_state(dx, true, 0)? } else if raccord { build()? } else { reference_state(dx, 0)?.0 };
         // S418 : `TEMOIN=ε` (raccord) — à la place de la carte, une seconde référence aux vitesses initiales perturbées de ±ε.
         let eps: Option<f32> = std::env::var("TEMOIN").ok().and_then(|v| v.parse().ok()).filter(|_| raccord);
         let mut twin = match eps {
             Some(e) => {
-                let mut t = raccord_state(dx, false, 0)?;
+                let mut t = build()?;
                 t.set_particle_velocities(&|p| {
                     let h = ((p[0] * 12.9898 + p[1] * 78.233 + p[2] * 37.719).sin() * 43758.547).fract();
                     ([0., 0., e * (2. * h - 1.)], [[0.; 3]; 3])
