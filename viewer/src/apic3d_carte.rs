@@ -619,3 +619,146 @@ pub fn recevoir_etages() -> Result<(), String> {
         Ok(())
     })
 }
+
+/// La surface d'une colonne lue sur `φ` : l'iso-zéro au-dessus de la plus haute maille d'eau, interpolée ; 0 sans eau.
+fn column_heights(d: Domain3, phi: &[f32]) -> Vec<f64> {
+    let Domain3 { nx, ny, nz, dx } = d;
+    let dx = dx as f64;
+    let mut out = vec![0f64; nx * ny];
+    for j in 0..ny {
+        for i in 0..nx {
+            let at = |k: usize| phi[(k * ny + j) * nx + i] as f64;
+            if let Some(k) = (0..nz).rev().find(|k| at(*k) < 0.) {
+                out[j * nx + i] = if k + 1 < nz { (k as f64 + 0.5) * dx + dx * at(k) / (at(k) - at(k + 1)) } else { (k as f64 + 0.5) * dx };
+            }
+        }
+    }
+    out
+}
+
+/// Les passages par zéro d'un moment, interpolés, et la période moyenne entre le premier et le dernier (S388).
+struct Period {
+    previous: (f64, f64),
+    crossings: Vec<f64>,
+}
+
+impl Period {
+    fn new(m0: f64) -> Self {
+        Self { previous: (0., m0), crossings: Vec::new() }
+    }
+    fn push(&mut self, t: f64, m: f64) {
+        let (t0, m0) = self.previous;
+        if m0 != 0. && m0.signum() != m.signum() {
+            self.crossings.push(t0 + (t - t0) * m0 / (m0 - m));
+        }
+        self.previous = (t, m);
+    }
+    fn period(&self) -> f64 {
+        let c = &self.crossings;
+        if c.len() >= 3 { 2. * (c[c.len() - 1] - c[0]) / (c.len() - 1) as f64 } else { f64::NAN }
+    }
+}
+
+fn percentile(v: &mut [f64], q: f64) -> f64 {
+    if v.is_empty() {
+        return f64::NAN;
+    }
+    v.sort_by(|a, b| a.total_cmp(b));
+    v[((v.len() - 1) as f64 * q).round() as usize]
+}
+
+/// **Banc S416 — le ballottement (1, 0) de S388 sur la carte** (`--apic3d-carte-ballottement`) : la carte et la référence
+/// partent du même ensemencement et avancent du même pas — celui que la référence choisit (`stable_step_us`), la vitesse
+/// maximale pour le choisir sur la carte relevant de C7e. À chaque pas, la surface de chaque colonne lue sur `φ` des deux
+/// côtés ; le moment de la masse, la période. Coût par étage, au 99ᵉ centile. Lignes `APIC_CARTE_BALLOTTEMENT_S416`.
+pub fn recevoir_ballottement() -> Result<(), String> {
+    let dx: f32 = std::env::var("DX").ok().and_then(|v| v.parse().ok()).unwrap_or(0.05);
+    let duree: f64 = std::env::var("DUREE").ok().and_then(|v| v.parse().ok()).unwrap_or(10.);
+    pollster::block_on(async {
+        let (mut a, _) = reference_state(dx, 0)?;
+        let d = a.domain();
+        let n = a.particle_count();
+        let mut carte = ApicCarte::new(&a, n).await?;
+        if let Some(cap) = std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()) {
+            carte.set_iteration_cap(cap);
+        }
+        carte.load(&a)?;
+        let lx = d.nx as f64 * d.dx as f64;
+        let moment = |x: &[[f32; 3]]| -> f64 { x.iter().map(|p| p[0] as f64 - lx / 2.).sum() };
+        let (mut pr, mut pc) = (Period::new(moment(a.particles())), Period::new(moment(a.particles())));
+        let fin = (duree * 1e6) as u64;
+        let (mut t, mut steps, mut worst, mut worst_t, mut unconverged) = (0u64, 0u64, 0f64, 0f64, 0u64);
+        let mut stage_ms: Vec<Vec<f64>> = vec![Vec::new(); 7];
+        let mut total_ms = Vec::new();
+        let (mut it_ref, mut it_carte) = (0u64, 0u64);
+        let start = std::time::Instant::now();
+        println!(
+            "APIC_CARTE_BALLOTTEMENT_S416 carte={:?} domaine={}x{}x{} dx={dx} particules={n} duree_s={duree}",
+            carte.adapter, d.nx, d.ny, d.nz
+        );
+        while t < fin {
+            let us = a.stable_step_us(20_000).min(fin - t);
+            let r = a.step(us).map_err(|e| format!("{e:?}"))?;
+            let times = carte.step_upto(us, ApicStage::Full)?;
+            t += us;
+            steps += 1;
+            it_ref += r.iterations as u64;
+            let (_, it, _, converged) = carte.pressure()?;
+            it_carte += it as u64;
+            unconverged += (!converged) as u64;
+            let mut sum = 0.;
+            for (s, v) in times.stages.iter().take(7).enumerate() {
+                if let Some(ms) = v {
+                    stage_ms[s].push(*ms);
+                    sum += ms;
+                }
+            }
+            total_ms.push(sum);
+            let (phi, _) = carte.surface()?;
+            let (hc, hr) = (column_heights(d, &phi), column_heights(d, a.distance()));
+            let gap = hc.iter().zip(&hr).fold(0f64, |m, (x, y)| m.max((x - y).abs()));
+            if gap > worst {
+                worst = gap;
+                worst_t = t as f64 * 1e-6;
+            }
+            let (x, _, _) = carte.particles()?;
+            pr.push(t as f64 * 1e-6, moment(a.particles()));
+            pc.push(t as f64 * 1e-6, moment(&x));
+            if steps % 100 == 0 {
+                println!(
+                    "APIC_CARTE_BALLOTTEMENT_S416 progression t={:.2} pas={steps} ecart_surface_max={:.2} mm calcul_s={:.0}",
+                    t as f64 * 1e-6, worst * 1e3, start.elapsed().as_secs_f64()
+                );
+            }
+        }
+        let (x, _, _) = carte.particles()?;
+        let dpos = x.iter().zip(a.particles()).fold(0f64, |m, (p, q)| {
+            m.max(((p[0] - q[0]) as f64).hypot((p[1] - q[1]) as f64).hypot((p[2] - q[2]) as f64))
+        });
+        let (tr, tc) = (pr.period(), pc.period());
+        let names = ["transfert", "surface", "projection", "extrapolation", "retour", "advection", "separation"];
+        let per_stage: Vec<String> = names
+            .iter()
+            .zip(stage_ms.iter_mut())
+            .map(|(name, v)| format!("{name}={:.3}", percentile(v, 0.99)))
+            .collect();
+        let p99 = percentile(&mut total_ms, 0.99);
+        println!(
+            "APIC_CARTE_BALLOTTEMENT_S416 pas={steps} ecart_surface_max_mm={:.3} a_t={worst_t:.2} periode_reference_s={tr:.4} periode_carte_s={tc:.4} ecart_periode={:+.3}% passages={}/{} ecart_particule_final_mm={:.2} iterations_moyennes_reference={:.1} carte={:.1} non_convergees={unconverged} calcul_s={:.0}",
+            worst * 1e3,
+            100. * (tc / tr - 1.),
+            pr.crossings.len(),
+            pc.crossings.len(),
+            dpos * 1e3,
+            it_ref as f64 / steps as f64,
+            it_carte as f64 / steps as f64,
+            start.elapsed().as_secs_f64()
+        );
+        println!(
+            "APIC_CARTE_BALLOTTEMENT_S416 cout_p99_ms total={p99:.3} par_particule_ns={:.1} {}",
+            p99 * 1e6 / n as f64,
+            per_stage.join(" ")
+        );
+        Ok(())
+    })
+}
