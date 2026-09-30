@@ -410,6 +410,11 @@ impl Apic3 {
     /// La surface des colonnes, s'il y a une zone.
     /// **S417 — banc de la carte (C7c)** : le masque de la zone, le reste de `η` (somme compensée), la table de lecture de la
     /// bande (S400) et le drapeau « une bande existe ».
+    /// **S419 — banc de la carte (C7c-3)** : le solde vertical de chaque colonne, m³.
+    pub fn columns_solde_w(&self) -> Option<&[f64]> {
+        self.columns.as_ref().map(|c| &c.solde_w[..])
+    }
+
     /// **S418 — banc de la carte (C7c-2)** : les soldes des faces-mailles de frontière, `u` puis `v`, m³.
     pub fn columns_soldes(&self) -> Option<(&[f64], &[f64])> {
         self.columns.as_ref().map(|c| (&c.solde_u[..], &c.solde_v[..]))

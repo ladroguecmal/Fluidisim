@@ -15,6 +15,8 @@ struct Params {
     bcx: f32, bcy: f32, bcz: f32, bvx: f32,
     bvy: f32, bvz: f32, bmx: f32, bmy: f32,
     bmz: f32, has_columns: f32, band: f32, q2: f32,
+    // S419 : un fond de bande existe-t-il (C7c-3) ?
+    floors: f32, r0: f32, r1: f32, r2: f32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
@@ -366,6 +368,17 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
             lab_c = SOLID;
         }
         label[c] = lab_c;
+        return;
+    }
+    // S413 : sous le fond de la bande, l'eau est à la grille — `φ = z − fond` (`columns_label`).
+    let fl = floor_of(j * P.nx + i);
+    if q.z < fl {
+        cellf[c] = q.z - fl;
+        var lab_f = WATER;
+        if P.has_body != 0.0 && eq.x * eq.x + eq.y * eq.y + eq.z * eq.z < P.br * P.br {
+            lab_f = SOLID;
+        }
+        label[c] = lab_f;
         return;
     }
     let lo = vec3<u32>(select(0u, i - r, i >= r), select(0u, j - r, j >= r), select(0u, k - r, k >= r));
@@ -1108,10 +1121,15 @@ fn virtual_column_sums(q: vec3<f32>, i: u32, j: u32, radius: f32, inv_r2: f32, n
     for (var b = bl; b < bh; b = b + 1u) {
         for (var a = al; a < ah; a = a + 1u) {
             let col = b * P.nx + a;
-            if cmask[col] == 0u {
+            // S413 : une colonne de la bande à fond compte ses virtuelles jusqu'à son fond — la sienne comprise.
+            var eta = 0.0;
+            if cmask[col] != 0u {
+                eta = max(cols[col], 0.0);
+            } else if floor_of(col) > 0.0 {
+                eta = floor_of(col);
+            } else {
                 continue;
             }
-            let eta = max(cols[col], 0.0);
             let rows = max(u32(floor(2.0 * eta / P.dx + 0.5)), 1u);
             let pitch = eta / f32(rows);
             let lo = u32(max(floor(max(q.z - radius, 0.0) / pitch - 0.5), 0.0));
@@ -1198,13 +1216,15 @@ fn columns_advect(@builtin(global_invocation_id) g: vec3<u32>) {
     let fc = face_of(f);
     let i = i32(fc.idx.x);
     let j = i32(fc.idx.y);
+    let k = fc.idx.z;
     var owned = false;
     if fc.axis == 0u {
-        owned = in_zone(i - 1, j) || in_zone(i, j);
+        owned = grid_at(i - 1, j, k) || grid_at(i, j, k);
     } else if fc.axis == 1u {
-        owned = in_zone(i, j - 1) || in_zone(i, j);
+        owned = grid_at(i, j - 1, k) || grid_at(i, j, k);
     } else {
-        owned = in_zone(i, j);
+        // S413 : la face au-dessus d'une maille sous le fond lui appartient — la dernière comprise.
+        owned = in_zone(i, j) || below_floor(i, j, max(k, 1u) - 1u);
     }
     if !owned {
         return;
@@ -1813,4 +1833,28 @@ fn exchange_serial() {
         n = last;
     }
     atomicStore(&pcount[COUNT_N], n);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **Le fond de la bande** (S413, C7c-3) : par colonne de particules, `cols[2C + 32 + col]`, sur une face de maille ; zéro dans la zone.
+
+fn floor_of(col: u32) -> f32 {
+    if P.floors == 0.0 || cmask[col] != 0u {
+        return 0.0;
+    }
+    return cols[2u * P.nx * P.ny + 32u + col];
+}
+
+// Une maille sous le fond d'une colonne de la bande (son centre).
+fn below_floor(i: i32, j: i32, k: u32) -> bool {
+    if P.floors == 0.0 || i < 0 || j < 0 || i >= i32(P.nx) || j >= i32(P.ny) {
+        return false;
+    }
+    let col = u32(j) * P.nx + u32(i);
+    return cmask[col] == 0u && (f32(k) + 0.5) * P.dx < floor_of(col);
+}
+
+// `grid_cell` : une maille à la grille — dans la zone, ou sous le fond.
+fn grid_at(i: i32, j: i32, k: u32) -> bool {
+    return in_zone(i, j) || below_floor(i, j, k);
 }

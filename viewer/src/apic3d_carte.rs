@@ -55,8 +55,8 @@ const ABSORB_SERIAL: usize = 40;
 const EXCHANGE_SERIAL: usize = 41;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
-/// Taille de `Params` : douze mots entiers, vingt-huit flottants.
-const PARAMS_BYTES: u64 = 160;
+/// Taille de `Params` : douze mots entiers, trente-deux flottants.
+const PARAMS_BYTES: u64 = 176;
 /// Horodatages : début et fin de chaque étage.
 const STAMPS: u32 = 16;
 
@@ -92,6 +92,8 @@ pub struct ApicCarte {
     /// La zone est-elle active, une bande existe-t-elle ?
     columns: bool,
     band: bool,
+    /// S419 : un fond de bande existe-t-il ?
+    floors: bool,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
     query_resolve: wgpu::Buffer,
@@ -259,6 +261,7 @@ impl ApicCarte {
             pcount,
             columns: false,
             band: false,
+            floors: false,
             read,
             query,
             query_resolve,
@@ -343,6 +346,10 @@ impl ApicCarte {
             }
             self.columns = true;
             self.band = band;
+            // S419 : le fond de la bande, après `η`, son reste et la table.
+            let floor = reference.band_floor().unwrap_or(&[]);
+            self.floors = floor.iter().any(|f| *f > 0.);
+            self.queue.write_buffer(&self.cols, ((2 * eta.len() + 32) * 4) as u64, bytes(floor));
         }
         Ok(())
     }
@@ -368,7 +375,7 @@ impl ApicCarte {
         let body = [
             has, b.radius, 0., b.center[0], b.center[1], b.center[2], b.velocity[0], b.velocity[1], b.velocity[2], moved[0],
             moved[1], moved[2], self.columns as u8 as f32, self.band as u8 as f32,
-            self.capacity.div_ceil(SCAN as usize) as f32,
+            self.capacity.div_ceil(SCAN as usize) as f32, self.floors as u8 as f32, 0., 0., 0.,
         ];
         let mut data = Vec::with_capacity(PARAMS_BYTES as usize);
         for v in u {
@@ -725,6 +732,8 @@ pub fn recevoir_etages() -> Result<(), String> {
                 Ok(a)
             } else if cas == "raccord" || cas == "colonnes" {
                 raccord_state(dx, cas == "colonnes", warm)
+            } else if cas == "fond" {
+                band_state(dx, 4., warm)
             } else {
                 Ok(reference_state(dx, warm)?.0)
             }
@@ -1526,4 +1535,28 @@ fn set_gap(a: &[[f32; 3]], b: &[[f32; 3]]) -> f64 {
             .sqrt()
     };
     one(a, b).max(one(b, a))
+}
+
+/// **La bande étroite de S413** (`APIC3D_FOND=4 … apic3d_raccord -- <dx> seul`) : la cuve du ballottement (1, 0) toute en bande,
+/// le fond à `floor_cells` mailles sous le creux, les particules au-dessus ; `warm` pas de la référence.
+pub fn band_state(dx: f32, floor_cells: f64, warm: usize) -> Result<Apic3, String> {
+    use crate::scene::host_impl;
+    use water_core::host::HostServices;
+    let (lx, ly, lz, h, amp) = (2.0f64, 0.2f64, 1.0f64, 0.5f64, 0.02f64);
+    let d = dx as f64;
+    let (nx, ny, nz) = ((lx / d).round() as usize, (ly / d).round() as usize, (lz / d).round() as usize);
+    let k = std::f64::consts::PI / lx;
+    let profile = move |x: f64| h + amp * (k * x).cos();
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 31);
+    let mut host = HostServices { alloc: &mut arena, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink };
+    let mut a = Apic3::configure(&mut host, Domain3 { nx, ny, nz, dx }, 1000., 9.81, nx * ny * nz * 8).map_err(|e| format!("{e:?}"))?;
+    a.enable_columns(&mut host, &vec![0u8; nx * ny]).map_err(|e| format!("{e:?}"))?;
+    let floor = ((h - amp - floor_cells * d) / d).round() * d;
+    a.set_band_floor(&vec![floor as f32; nx * ny]).map_err(|e| format!("{e:?}"))?;
+    a.seed(&|p| (p[2] as f64) >= floor && (p[2] as f64) < profile(p[0] as f64)).map_err(|e| format!("{e:?}"))?;
+    for _ in 0..warm {
+        let us = a.stable_step_us(20_000);
+        a.step(us).map_err(|e| format!("{e:?}"))?;
+    }
+    Ok(a)
 }
