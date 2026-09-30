@@ -91,7 +91,7 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
 - [x] **P3** — le compactage stable des particules marquées (préfixe par blocs) ; la séparation tenue côté bande ; banc.
 - [x] **P4** — l'absorption : marques en parallèle, liste triée, ordre de visite reconstruit, gestes sur un fil ; banc : nombres.
 - [x] **P5** — retrait et pose sur un fil ; le pas entier sur la cuve mixte ; critère 2.
-- [ ] **P6** — le raccord sur la carte, 30 s ; critère 3.
+- [x] **P6** — le raccord sur la carte, 30 s ; critère 3.
 - [ ] **P7** — suite entière ; preuve §10 ; liste, file, feuille de route, index.
 - [ ] **P8** — rituel.
 
@@ -110,3 +110,16 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
   bascule. Cuve mixte, un pas après 2 à 90 pas de chauffe : **absorbées, retirées, posées, `n` identiques** à chaque fois
   (retraits 32 et 12, poses 8, 4, 4, absorptions 16, 20, 4), **positions à 6·10⁻⁸ m indice pour indice** (3·10⁻⁷ au pire),
   vitesses ≤ 1,4·10⁻⁵ m/s, soldes ≤ 1,1·10⁻¹⁰ m³, `η` ≤ 3·10⁻⁷ m. Critère 2 tenu (le volume exact : P6).
+- **P6, 1 s** — `CAS=raccord --apic3d-carte-ballottement` ; `total_quanta` (particules × 2²⁴ + colonnes + soldes). 1 s : gestes
+  identiques (399 absorbées, 97 retirées, 156 posées), **volume de la carte constant à 0 quantum**, surface à 0,001 mm. **L'ordre
+  diverge au pas 12** — le premier pas de retraits — et l'ensemble diffère d'une particule à 25 mm : le retrait prend « la plus
+  proche de la face », et sur le réseau d'ensemencement plusieurs particules en sont **à égale distance** ; un écart d'arrondi
+  tranche l'égalité autrement. Choix discret entre candidates équivalentes, sans effet de masse. 30 s : au calcul.
+- **P6** — 30 s, 1 500 pas : **volume de la carte constant à 0 quantum** (référence : 2·10⁻¹⁶ m³) ; gestes cumulés 5 204 / 5 256
+  absorbées, 109 / 108 retirées, 5 303 / 5 356 posées, `n` 6 574 / 6 576 (carte / référence) ; période −0,036 % ; itérations 92,0 des
+  deux. **Surface** (pire colonne ; `η` dans la zone, `φ` dans la bande), maximum courant : 0,34 mm (4 s), 2,22 (10 s), 2,70 (14 s),
+  3,23 (22 s), **4,41 mm (30 s)** — critère 3 (3 mm) manqué. **Témoins** (la référence contre elle-même, vitesses initiales
+  ±ε, `TEMOIN=`) : ε = 10⁻⁶ — 0,39, 2,23, 2,65, 3,11, **3,40 mm**, période −0,043 % ; ε = 10⁻⁴ — 2,01 (4 s), 2,89, 2,89, 3,98,
+  **4,03 mm**, période −0,063 %. **La carte suit la courbe des témoins** et finit 10 % au-dessus du plus grand des deux : la
+  comparaison « ≤ témoin », sur deux échantillons, est manquée de peu, dans la même dispersion. Coût p99 2,84 ms, dont séparation +
+  échange 0,88 (les deux fils : ≈ 0,7 ms).

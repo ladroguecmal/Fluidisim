@@ -638,6 +638,18 @@ impl ApicCarte {
         Ok(w.chunks_exact(2).map(|p| ((p[1] as u64) << 32 | p[0] as u64) as i64 as f64 * quantum).collect())
     }
 
+    /// **S418** — le volume total en quanta : particules (2²⁴ chacune), colonnes, soldes. Constant exactement si l'échange est
+    /// à masse exacte.
+    pub fn total_quanta(&self) -> Result<i128, String> {
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        let ncol = nx * ny;
+        let words = |v: Vec<u32>| -> i128 { v.chunks_exact(2).map(|w| ((w[1] as u64) << 32 | w[0] as u64) as i64 as i128).sum() };
+        let n = self.counts()?[0] as i128;
+        let cols = words(self.read_u32(&self.ivol, 0, 2 * ncol)?);
+        let soldes = words(self.read_u32(&self.isolde, 0, 2 * ((nx + 1) * ny * nz + nx * (ny + 1) * nz))?);
+        Ok(n * (1i128 << 24) + cols + soldes)
+    }
+
     /// La surface des colonnes `η`, m (S417).
     pub fn columns_eta(&self) -> Result<Vec<f32>, String> {
         self.read_f32(&self.cols, 0, self.domain.nx * self.domain.ny)
@@ -973,10 +985,27 @@ pub fn recevoir_ballottement() -> Result<(), String> {
     pollster::block_on(async {
         // S417 : `CAS=colonnes` — la cuve tout en colonnes (`APIC3D_COLONNES`, S398) : la surface est `η`.
         let columns = std::env::var("CAS").is_ok_and(|c| c == "colonnes");
-        let mut a = if columns { raccord_state(dx, true, 0)? } else { reference_state(dx, 0)?.0 };
+        // S418 : `CAS=raccord` — la moitié `x ≥ Lx/2` en colonnes, l'échange à la frontière (S399–S407).
+        let raccord = std::env::var("CAS").is_ok_and(|c| c == "raccord");
+        let mut a = if columns || raccord { raccord_state(dx, columns, 0)? } else { reference_state(dx, 0)?.0 };
+        // S418 : `TEMOIN=ε` (raccord) — à la place de la carte, une seconde référence aux vitesses initiales perturbées de ±ε.
+        let eps: Option<f32> = std::env::var("TEMOIN").ok().and_then(|v| v.parse().ok()).filter(|_| raccord);
+        let mut twin = match eps {
+            Some(e) => {
+                let mut t = raccord_state(dx, false, 0)?;
+                t.set_particle_velocities(&|p| {
+                    let h = ((p[0] * 12.9898 + p[1] * 78.233 + p[2] * 37.719).sin() * 43758.547).fract();
+                    ([0., 0., e * (2. * h - 1.)], [[0.; 3]; 3])
+                })
+                .map_err(|e| format!("{e:?}"))?;
+                println!("APIC_CARTE_BALLOTTEMENT_S416 temoin=reference_perturbee eps_m_s={e:e} (la carte n'est pas calculée)");
+                Some(t)
+            }
+            None => None,
+        };
         let d = a.domain();
         let n = a.particle_count();
-        let mut carte = ApicCarte::new(&a, n.max(1)).await?;
+        let mut carte = ApicCarte::new(&a, a.particle_capacity().max(1)).await?;
         if let Some(cap) = std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()) {
             carte.set_iteration_cap(cap);
         }
@@ -990,6 +1019,24 @@ pub fn recevoir_ballottement() -> Result<(), String> {
         let m0 = if columns { moment_eta(a.columns_surface().unwrap_or(&[])) } else { moment(a.particles()) };
         let (mut pr, mut pc) = (Period::new(m0), Period::new(m0));
         let v0 = carte.columns_volume()?;
+        let q0 = carte.total_quanta()?;
+        let rv0 = a.total_volume();
+        let (mut quanta_drift, mut ref_drift) = (0i128, 0f64);
+        let mask: Vec<u8> = a.columns_state().map(|m| m.0.to_vec()).unwrap_or_default();
+        // Le raccord : la surface d'une colonne est `η` dans la zone, l'iso-zéro de `φ` dans la bande.
+        let heights = |eta: &[f32], phi: &[f32]| -> Vec<f64> {
+            let from_phi = column_heights(d, phi);
+            (0..d.nx * d.ny).map(|c| if mask[c] != 0 { eta[c] as f64 } else { from_phi[c] }).collect()
+        };
+        let moment_h = |h: &[f64]| -> f64 {
+            h.iter().enumerate().map(|(c, x)| (x - 0.5) * (((c % d.nx) as f64 + 0.5) * d.dx as f64 - lx / 2.)).sum()
+        };
+        // `φ` n'existe qu'après un pas : le moment du raccord commence au premier (zéro : aucun passage compté).
+        if raccord {
+            (pr, pc) = (Period::new(0.), Period::new(0.));
+        }
+        // S418 : le premier pas où les tableaux cessent d'être identiques indice pour indice (à 1 mm), et l'écart en ensemble.
+        let mut first_reorder: Option<u64> = None;
         let r0 = if columns { a.columns_volume() } else { 0. };
         let mut volume_drift = 0f64;
         let fin = (duree * 1e6) as u64;
@@ -1005,13 +1052,21 @@ pub fn recevoir_ballottement() -> Result<(), String> {
         while t < fin {
             let us = a.stable_step_us(20_000).min(fin - t);
             let r = a.step(us).map_err(|e| format!("{e:?}"))?;
-            let times = carte.step_upto(us, ApicStage::Full)?;
+            let times = match twin.as_mut() {
+                Some(tw) => {
+                    tw.step(us).map_err(|e| format!("{e:?}"))?;
+                    StageTimes::default()
+                }
+                None => carte.step_upto(us, ApicStage::Full)?,
+            };
             t += us;
             steps += 1;
             it_ref += r.iterations as u64;
-            let (_, it, _, converged) = carte.pressure()?;
-            it_carte += it as u64;
-            unconverged += (!converged) as u64;
+            if twin.is_none() {
+                let (_, it, _, converged) = carte.pressure()?;
+                it_carte += it as u64;
+                unconverged += (!converged) as u64;
+            }
             let mut sum = 0.;
             for (s, v) in times.stages.iter().take(7).enumerate() {
                 if let Some(ms) = v {
@@ -1020,7 +1075,13 @@ pub fn recevoir_ballottement() -> Result<(), String> {
                 }
             }
             total_ms.push(sum);
-            let (hc, hr) = if columns {
+            let (hc, hr) = if let Some(tw) = twin.as_ref() {
+                (heights(tw.columns_surface().unwrap_or(&[]), tw.distance()), heights(a.columns_surface().unwrap_or(&[]), a.distance()))
+            } else if raccord {
+                let e = carte.columns_eta()?;
+                let (phi, _) = carte.surface()?;
+                (heights(&e, &phi), heights(a.columns_surface().unwrap_or(&[]), a.distance()))
+            } else if columns {
                 let e = carte.columns_eta()?;
                 (e.iter().map(|x| *x as f64).collect::<Vec<_>>(), a.columns_surface().unwrap_or(&[]).iter().map(|x| *x as f64).collect())
             } else {
@@ -1032,7 +1093,30 @@ pub fn recevoir_ballottement() -> Result<(), String> {
                 worst = gap;
                 worst_t = t as f64 * 1e-6;
             }
-            if columns {
+            if raccord && twin.is_some() {
+                pr.push(t as f64 * 1e-6, moment_h(&hr));
+                pc.push(t as f64 * 1e-6, moment_h(&hc));
+            } else if raccord {
+                if first_reorder.is_none() {
+                    let (x, _, _) = carte.particles()?;
+                    let same = x.len() == a.particle_count()
+                        && x.iter().zip(a.particles()).all(|(p, q)| (0..3).all(|m| (p[m] - q[m]).abs() < 1e-3));
+                    if !same {
+                        first_reorder = Some(steps);
+                        println!(
+                            "APIC_CARTE_BALLOTTEMENT_S416 raccord ordre_diverge_au_pas={steps} t={:.3} ecart_ensemble_mm={:.3} n={}/{}",
+                            t as f64 * 1e-6, set_gap(&x, a.particles()) * 1e3, x.len(), a.particle_count()
+                        );
+                    }
+                }
+                pr.push(t as f64 * 1e-6, moment_h(&hr));
+                pc.push(t as f64 * 1e-6, moment_h(&hc));
+                let dq = carte.total_quanta()? - q0;
+                if dq.abs() > quanta_drift.abs() {
+                    quanta_drift = dq;
+                }
+                ref_drift = ref_drift.max((a.total_volume() - rv0).abs());
+            } else if columns {
                 pr.push(t as f64 * 1e-6, moment_eta(a.columns_surface().unwrap_or(&[])));
                 pc.push(t as f64 * 1e-6, moment_eta(&carte.columns_eta()?));
                 volume_drift = volume_drift.max((carte.columns_volume()? - v0).abs());
@@ -1048,7 +1132,10 @@ pub fn recevoir_ballottement() -> Result<(), String> {
                 );
             }
         }
-        let (x, _, _) = carte.particles()?;
+        let x = match twin.as_ref() {
+            Some(tw) => tw.particles().to_vec(),
+            None => carte.particles()?.0,
+        };
         let dpos = x.iter().zip(a.particles()).fold(0f64, |m, (p, q)| {
             m.max(((p[0] - q[0]) as f64).hypot((p[1] - q[1]) as f64).hypot((p[2] - q[2]) as f64))
         });
@@ -1060,6 +1147,16 @@ pub fn recevoir_ballottement() -> Result<(), String> {
             .map(|(name, v)| format!("{name}={:.3}", percentile(v, 0.99)))
             .collect();
         let p99 = percentile(&mut total_ms, 0.99);
+        if raccord && twin.is_none() {
+            let (x, _, _) = carte.particles()?;
+            println!("APIC_CARTE_BALLOTTEMENT_S416 raccord ecart_ensemble_final_mm={:.3}", set_gap(&x, a.particles()) * 1e3);
+            let k = carte.counts()?;
+            let r = a.columns_exchange_counts();
+            println!(
+                "APIC_CARTE_BALLOTTEMENT_S416 raccord absorbees={}/{} retirees={}/{} posees={}/{} refusees={} n={}/{} derive_volume_carte_quanta={quanta_drift} derive_volume_reference_m3={ref_drift:e}",
+                k[3], r[0], k[4], r[1], k[5], r[2], k[6], k[0], a.particle_count()
+            );
+        }
         if columns {
             println!(
                 "APIC_CARTE_BALLOTTEMENT_S416 colonnes volume_carte_m3={v0:.9} derive_max_m3={volume_drift:e} derive_reference_m3={:e}",
@@ -1412,4 +1509,21 @@ pub fn raccord_state(dx: f32, all_columns: bool, warm: usize) -> Result<Apic3, S
         a.step(us).map_err(|e| format!("{e:?}"))?;
     }
     Ok(a)
+}
+
+/// L'écart **en ensemble** de deux nuages : pour chaque particule de l'un, la plus proche de l'autre ; le pire, dans les deux sens
+/// (m). Brut, O(n²) : un banc.
+fn set_gap(a: &[[f32; 3]], b: &[[f32; 3]]) -> f64 {
+    let one = |a: &[[f32; 3]], b: &[[f32; 3]]| {
+        a.iter()
+            .map(|p| {
+                b.iter().fold(f64::MAX, |m, q| {
+                    let d: f64 = (0..3).map(|k| ((p[k] - q[k]) as f64).powi(2)).sum();
+                    m.min(d)
+                })
+            })
+            .fold(0f64, f64::max)
+            .sqrt()
+    };
+    one(a, b).max(one(b, a))
 }
