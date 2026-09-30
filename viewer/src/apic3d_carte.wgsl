@@ -36,6 +36,7 @@ struct Params {
 
 const AIR: u32 = 0u;
 const WATER: u32 = 1u;
+const SOLID: u32 = 2u;
 const WG: u32 = 128u;
 const SCAN: u32 = 256u;
 
@@ -366,4 +367,353 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
     }
     cellf[c] = phi;
     label[c] = select(AIR, WATER, phi < 0.0);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Gravité et parois (`step`, `walls`) : `w −= g·dt` partout, puis vitesse normale nulle sur le bord du domaine.
+
+fn on_wall(fc: Face) -> bool {
+    let d = dims_of(fc.axis);
+    let along = select(select(fc.idx.z, fc.idx.y, fc.axis == 1u), fc.idx.x, fc.axis == 0u);
+    let top = select(select(d.z, d.y, fc.axis == 1u), d.x, fc.axis == 0u) - 1u;
+    return along == 0u || along == top;
+}
+
+@compute @workgroup_size(128)
+fn gravity_walls(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces {
+        return;
+    }
+    let fc = face_of(f);
+    if fc.axis == 2u {
+        faces[f] = faces[f] - P.gdt;
+    }
+    if on_wall(fc) {
+        faces[f] = 0.0;
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **La projection** (`project`) : `A·p = −(ρ·dx²/dt)·div u*` sur l'eau, gradient conjugué préconditionné par la diagonale,
+// scalaires gardés sur la carte ; puis `u −= (dt/(ρ·dx))·∇p` sur les faces intérieures qui touchent l'eau, la pression
+// d'air nulle à `θ·dx`. Champs de `cellf` : φ 0, p 1, rhs 2, r 3, z 4, d 5, q 6, diag 7.
+
+const F_PHI: u32 = 0u;
+const F_P: u32 = 1u;
+const F_RHS: u32 = 2u;
+const F_R: u32 = 3u;
+const F_Z: u32 = 4u;
+const F_D: u32 = 5u;
+const F_Q: u32 = 6u;
+const F_DIAG: u32 = 7u;
+// Scalaires.
+const S_B2: u32 = 0u;
+const S_RZ: u32 = 1u;
+const S_RR: u32 = 2u;
+const S_DQ: u32 = 3u;
+const S_ALPHA: u32 = 4u;
+const S_BETA: u32 = 5u;
+const S_DONE: u32 = 6u;
+const S_IT: u32 = 7u;
+
+fn field(which: u32, c: u32) -> u32 {
+    return which * P.cells + c;
+}
+
+// La fraction fantôme de la maille d'eau `c` vers sa voisine d'air `a` (`theta`).
+fn theta(c: u32, a: u32) -> f32 {
+    let fc = cellf[field(F_PHI, c)];
+    let fa = cellf[field(F_PHI, a)];
+    return max(fc / (fc - fa), P.theta_min);
+}
+
+// Voisine `m` (0 : −x, 1 : +x, 2 : −y, 3 : +y, 4 : −z, 5 : +z) de la maille `(i, j, k)`, et la face qui les sépare ;
+// `valid` faux hors du domaine (`neighbours`).
+struct Nb {
+    valid: bool,
+    cell: u32,
+    face: u32,
+}
+
+fn neighbour(i: u32, j: u32, k: u32, m: u32) -> Nb {
+    let fu = (k * P.ny + j) * (P.nx + 1u) + i;
+    let fv = P.nu + (k * (P.ny + 1u) + j) * P.nx + i;
+    let fw = P.nu + P.nv + (k * P.ny + j) * P.nx + i;
+    switch m {
+        case 0u: { return Nb(i > 0u, cell_index(max(i, 1u) - 1u, j, k), fu); }
+        case 1u: { return Nb(i + 1u < P.nx, cell_index(min(i + 1u, P.nx - 1u), j, k), fu + 1u); }
+        case 2u: { return Nb(j > 0u, cell_index(i, max(j, 1u) - 1u, k), fv); }
+        case 3u: { return Nb(j + 1u < P.ny, cell_index(i, min(j + 1u, P.ny - 1u), k), fv + P.nx); }
+        case 4u: { return Nb(k > 0u, cell_index(i, j, max(k, 1u) - 1u), fw); }
+        default: { return Nb(k + 1u < P.nz, cell_index(i, j, min(k + 1u, P.nz - 1u)), fw + P.nx * P.ny); }
+    }
+}
+
+// La face `m` d'une maille, même hors du domaine (une paroi), pour la divergence.
+fn face_value(i: u32, j: u32, k: u32, m: u32) -> f32 {
+    return faces[neighbour(i, j, k, m).face];
+}
+
+@compute @workgroup_size(256)
+fn assemble(@builtin(global_invocation_id) g: vec3<u32>) {
+    let c = g.x;
+    if c >= P.cells {
+        return;
+    }
+    cellf[field(F_P, c)] = 0.0;
+    if label[c] != WATER {
+        cellf[field(F_RHS, c)] = 0.0;
+        cellf[field(F_DIAG, c)] = 0.0;
+        cellf[field(F_R, c)] = 0.0;
+        cellf[field(F_Z, c)] = 0.0;
+        cellf[field(F_D, c)] = 0.0;
+        return;
+    }
+    let i = c % P.nx;
+    let j = (c / P.nx) % P.ny;
+    let k = c / (P.nx * P.ny);
+    let scale = -P.rho * P.dx * P.dx / P.dt;
+    var div = 0.0;
+    var diag = 0.0;
+    for (var m = 0u; m < 6u; m = m + 1u) {
+        let sign = select(1.0, -1.0, m % 2u == 0u);
+        let nb = neighbour(i, j, k, m);
+        div = div + sign * faces[nb.face];
+        if nb.valid {
+            let l = label[nb.cell];
+            if l == WATER {
+                diag = diag + 1.0;
+            } else if l == AIR {
+                diag = diag + 1.0 / theta(c, nb.cell);
+            }
+        }
+    }
+    let rhs = scale * div / P.dx;
+    cellf[field(F_RHS, c)] = rhs;
+    cellf[field(F_DIAG, c)] = diag;
+    cellf[field(F_R, c)] = rhs;
+    var z = 0.0;
+    if diag > 0.0 {
+        z = rhs / diag;
+    }
+    cellf[field(F_Z, c)] = z;
+    cellf[field(F_D, c)] = z;
+}
+
+var<workgroup> red_a: array<f32, 256>;
+var<workgroup> red_b: array<f32, 256>;
+var<workgroup> wg_done: f32;
+
+// Somme des deux produits du groupe dans `partials` (deux par groupe).
+fn reduce_pair(l: u32, w: u32, a: f32, b: f32) {
+    red_a[l] = a;
+    red_b[l] = b;
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if l < s {
+            red_a[l] = red_a[l] + red_a[l + s];
+            red_b[l] = red_b[l] + red_b[l + s];
+        }
+        workgroupBarrier();
+    }
+    if l == 0u {
+        partials[2u * w] = red_a[0];
+        partials[2u * w + 1u] = red_b[0];
+    }
+}
+
+// Somme des `partials` de tous les groupes, par un seul groupe : rend les deux sommes au fil 0.
+fn gather_pair(l: u32) -> vec2<f32> {
+    let parts = (P.cells + 255u) / 256u;
+    var a = 0.0;
+    var b = 0.0;
+    for (var w = l; w < parts; w = w + 256u) {
+        a = a + partials[2u * w];
+        b = b + partials[2u * w + 1u];
+    }
+    red_a[l] = a;
+    red_b[l] = b;
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if l < s {
+            red_a[l] = red_a[l] + red_a[l + s];
+            red_b[l] = red_b[l] + red_b[l + s];
+        }
+        workgroupBarrier();
+    }
+    return vec2<f32>(red_a[0], red_b[0]);
+}
+
+// Le drapeau de fin, lu uniformément dans le groupe.
+fn done_uniform(l: u32) -> bool {
+    if l == 0u {
+        wg_done = scalars[S_DONE];
+    }
+    return workgroupUniformLoad(&wg_done) != 0.0;
+}
+
+@compute @workgroup_size(256)
+fn cg_init_reduce(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+                  @builtin(workgroup_id) w: vec3<u32>) {
+    let c = g.x;
+    var a = 0.0;
+    var b = 0.0;
+    if c < P.cells {
+        let rhs = cellf[field(F_RHS, c)];
+        a = rhs * rhs;
+        b = cellf[field(F_R, c)] * cellf[field(F_Z, c)];
+    }
+    reduce_pair(l.x, w.x, a, b);
+}
+
+@compute @workgroup_size(256)
+fn cg_init_finish(@builtin(local_invocation_id) l: vec3<u32>) {
+    let s = gather_pair(l.x);
+    if l.x == 0u {
+        scalars[S_B2] = s.x;
+        scalars[S_RZ] = s.y;
+        scalars[S_RR] = s.x;
+        scalars[S_IT] = 0.0;
+        scalars[S_DONE] = select(0.0, 1.0, !(s.x > 0.0));
+    }
+}
+
+// `q = A·d` et le produit `d·q` : `Σ (d_c − d_n)` vers l'eau, `d_c/θ` vers l'air, rien vers une paroi (`apply`).
+@compute @workgroup_size(256)
+fn cg_apply(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+            @builtin(workgroup_id) w: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let c = g.x;
+    var dq = 0.0;
+    if c < P.cells {
+        var s = 0.0;
+        if label[c] == WATER {
+            let i = c % P.nx;
+            let j = (c / P.nx) % P.ny;
+            let k = c / (P.nx * P.ny);
+            let dc = cellf[field(F_D, c)];
+            for (var m = 0u; m < 6u; m = m + 1u) {
+                let nb = neighbour(i, j, k, m);
+                if nb.valid {
+                    let lb = label[nb.cell];
+                    if lb == WATER {
+                        s = s + (dc - cellf[field(F_D, nb.cell)]);
+                    } else if lb == AIR {
+                        s = s + dc / theta(c, nb.cell);
+                    }
+                }
+            }
+        }
+        cellf[field(F_Q, c)] = s;
+        dq = cellf[field(F_D, c)] * s;
+    }
+    reduce_pair(l.x, w.x, dq, 0.0);
+}
+
+@compute @workgroup_size(256)
+fn cg_alpha(@builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let s = gather_pair(l.x);
+    if l.x == 0u {
+        scalars[S_DQ] = s.x;
+        if !(s.x > 0.0) {
+            scalars[S_DONE] = 1.0;
+        } else {
+            scalars[S_ALPHA] = scalars[S_RZ] / s.x;
+        }
+    }
+}
+
+@compute @workgroup_size(256)
+fn cg_update(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+             @builtin(workgroup_id) w: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let c = g.x;
+    var rz = 0.0;
+    var rr = 0.0;
+    if c < P.cells {
+        let alpha = scalars[S_ALPHA];
+        cellf[field(F_P, c)] = cellf[field(F_P, c)] + alpha * cellf[field(F_D, c)];
+        let r = cellf[field(F_R, c)] - alpha * cellf[field(F_Q, c)];
+        cellf[field(F_R, c)] = r;
+        let diag = cellf[field(F_DIAG, c)];
+        var z = 0.0;
+        if diag > 0.0 {
+            z = r / diag;
+        }
+        cellf[field(F_Z, c)] = z;
+        rz = r * z;
+        rr = r * r;
+    }
+    reduce_pair(l.x, w.x, rz, rr);
+}
+
+@compute @workgroup_size(256)
+fn cg_beta(@builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let s = gather_pair(l.x);
+    if l.x == 0u {
+        scalars[S_BETA] = s.x / scalars[S_RZ];
+        scalars[S_RZ] = s.x;
+        scalars[S_RR] = s.y;
+        let it = scalars[S_IT] + 1.0;
+        scalars[S_IT] = it;
+        if s.y <= P.tol2 * scalars[S_B2] || it >= f32(P.max_it) {
+            scalars[S_DONE] = 1.0;
+        }
+    }
+}
+
+@compute @workgroup_size(256)
+fn cg_direction(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let c = g.x;
+    if c < P.cells {
+        cellf[field(F_D, c)] = cellf[field(F_Z, c)] + scalars[S_BETA] * cellf[field(F_D, c)];
+    }
+}
+
+// La correction : chaque face intérieure entre `c` (côté négatif) et `n` ; une paroi n'est jamais corrigée.
+@compute @workgroup_size(128)
+fn correct(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces {
+        return;
+    }
+    let fc = face_of(f);
+    if on_wall(fc) {
+        return;
+    }
+    let along = vec3<u32>(select(0u, 1u, fc.axis == 0u), select(0u, 1u, fc.axis == 1u), select(0u, 1u, fc.axis == 2u));
+    let cm = fc.idx - along;
+    let c = cell_index(cm.x, cm.y, cm.z);
+    let n = cell_index(fc.idx.x, fc.idx.y, fc.idx.z);
+    if label[c] == SOLID || label[n] == SOLID {
+        return;
+    }
+    let wc = label[c] == WATER;
+    let wn = label[n] == WATER;
+    var grad = 0.0;
+    if wc && wn {
+        grad = cellf[field(F_P, n)] - cellf[field(F_P, c)];
+    } else if wc {
+        grad = -cellf[field(F_P, c)] / theta(c, n);
+    } else if wn {
+        grad = cellf[field(F_P, n)] / theta(n, c);
+    } else {
+        return;
+    }
+    let k1 = P.dt / (P.rho * P.dx);
+    faces[f] = faces[f] - k1 * grad;
 }

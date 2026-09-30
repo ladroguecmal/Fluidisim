@@ -12,8 +12,10 @@ use water_core::apic3d::{self, Apic3, ApicStage};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 9] = [
+const KERNELS: [&str; 19] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
+    "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
+    "cg_direction", "correct",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -24,6 +26,11 @@ const BIN_SCATTER: usize = 5;
 const BIN_SORT: usize = 6;
 const P2G: usize = 7;
 const RECONSTRUCT: usize = 8;
+const GRAVITY_WALLS: usize = 9;
+const ASSEMBLE: usize = 10;
+const CG_INIT: [usize; 2] = [11, 12];
+const CG_ITERATION: [usize; 5] = [13, 14, 15, 16, 17];
+const CORRECT: usize = 18;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Horodatages : début et fin de chaque étage.
@@ -61,6 +68,9 @@ pub struct ApicCarte {
     separation: bool,
     rho: f32,
     g_eff: f32,
+    /// Itérations du gradient conjugué **enregistrées** par pas : le travail est borné, l'arrêt au critère de la référence
+    /// se fait par un drapeau sur la carte (ADR-175 D2).
+    iteration_cap: u32,
     pub adapter: String,
 }
 
@@ -203,8 +213,14 @@ impl ApicCarte {
             separation,
             rho,
             g_eff,
+            iteration_cap: 400,
             adapter: format!("{} ({:?})", info.name, info.backend),
         })
+    }
+
+    /// Itérations du gradient conjugué enregistrées par pas.
+    pub fn set_iteration_cap(&mut self, cap: u32) {
+        self.iteration_cap = cap.max(1);
     }
 
     /// Charge l'état des particules de la référence : positions, vitesses, matrices affines.
@@ -278,7 +294,7 @@ impl ApicCarte {
         };
         // Un passage horodaté par étage, dans l'ordre de `ApicStage` ; le tri se fait en tête, sur les positions du début du
         // pas (la référence le refait dans `reconstruct`, sur les mêmes positions).
-        let stages = [ApicStage::ParticlesToGrid, ApicStage::Reconstruct];
+        let stages = [ApicStage::ParticlesToGrid, ApicStage::Reconstruct, ApicStage::Project];
         let mut used = 0u32;
         for (s, stage) in stages.into_iter().enumerate() {
             if stage > upto {
@@ -292,6 +308,21 @@ impl ApicCarte {
                     self.dispatch(&mut pass, P2G, self.faces, WG);
                 }
                 ApicStage::Reconstruct => self.dispatch(&mut pass, RECONSTRUCT, self.domain.cells(), WG),
+                ApicStage::Project => {
+                    let cells = self.domain.cells();
+                    self.dispatch(&mut pass, GRAVITY_WALLS, self.faces, WG);
+                    self.dispatch(&mut pass, ASSEMBLE, cells, SCAN);
+                    self.dispatch(&mut pass, CG_INIT[0], cells, SCAN);
+                    self.dispatch(&mut pass, CG_INIT[1], 1, 1);
+                    for _ in 0..self.iteration_cap {
+                        for (m, kernel) in CG_ITERATION.into_iter().enumerate() {
+                            // Les noyaux de scalaires tiennent en un groupe.
+                            let threads = if m % 2 == 1 { 1 } else { cells };
+                            self.dispatch(&mut pass, kernel, threads, SCAN);
+                        }
+                    }
+                    self.dispatch(&mut pass, CORRECT, self.faces, WG);
+                }
                 _ => {}
             }
             used = s as u32 + 1;
@@ -363,6 +394,16 @@ impl ApicCarte {
         Ok((self.read_f32(&self.faces_buf, 0, self.faces)?, self.read_f32(&self.faces_buf, self.faces, self.faces)?))
     }
 
+    /// La pression, et le gradient conjugué : itérations, résidu relatif `‖r‖/‖b‖`, arrêt au critère (et non au plafond).
+    pub fn pressure(&self) -> Result<(Vec<f32>, u32, f64, bool), String> {
+        let cells = self.domain.cells();
+        let p = self.read_f32(&self.cellf, cells, cells)?;
+        let s = self.read_f32(&self.scalars, 0, 8)?;
+        let it = s[7] as u32;
+        let residual = if s[0] > 0. { (s[2] as f64 / s[0] as f64).sqrt() } else { 0. };
+        Ok((p, it, residual, s[6] != 0. && it < self.iteration_cap))
+    }
+
     /// La distance reconstruite `φ` et les étiquettes.
     pub fn surface(&self) -> Result<(Vec<f32>, Vec<u32>), String> {
         let cells = self.domain.cells();
@@ -416,6 +457,9 @@ pub fn recevoir_etages() -> Result<(), String> {
         let (reference, _) = reference_state(dx, warm)?;
         let d = reference.domain();
         let mut carte = ApicCarte::new(&reference, reference.particle_count()).await?;
+        if let Some(cap) = std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()) {
+            carte.set_iteration_cap(cap);
+        }
         println!(
             "APIC_CARTE_S416 carte={:?} domaine={}x{}x{} dx={dx} particules={} chauffe={warm}",
             carte.adapter, d.nx, d.ny, d.nz, reference.particle_count()
@@ -464,6 +508,24 @@ pub fn recevoir_etages() -> Result<(), String> {
         );
         if dphi > 1e-5 || flipped > 0 {
             return Err("surface : écart au-delà de l'arrondi".into());
+        }
+        // Gravité, parois, projection.
+        let (mut r, _) = reference_state(dx, warm)?;
+        let report = r.step_upto(dt, ApicStage::Project).map_err(|e| format!("{e:?}"))?;
+        carte.load(&reference)?;
+        let t = carte.step_upto(dt, ApicStage::Project)?;
+        let (p, it, residual, converged) = carte.pressure()?;
+        let (vel, _) = carte.faces()?;
+        let rvel: Vec<f32> = r.velocity_u().iter().chain(r.velocity_v()).chain(r.velocity_w()).copied().collect();
+        let dv = max_abs_diff(&vel, &rvel);
+        let dp = max_abs_diff(&p, r.pressure());
+        let pmax = r.pressure().iter().fold(0f32, |m, x| m.max(x.abs()));
+        println!(
+            "APIC_CARTE_S416 etage=projection iterations_carte={it} iterations_reference={} residu_carte={residual:.2e} residu_reference={:.2e} arret_au_critere={converged} ecart_pression_max={dp:.3e} pression_max={pmax:.1} ecart_vitesse_max={dv:.3e} temps_ms={:?}",
+            report.iterations, report.residual, t.stages[2]
+        );
+        if dv > 1e-4 {
+            return Err("projection : écart de vitesse au-delà du critère".into());
         }
         Ok(())
     })

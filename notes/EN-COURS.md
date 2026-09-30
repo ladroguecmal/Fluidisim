@@ -87,7 +87,7 @@ diverge au-delà de l'arrondi, le publier, ne pas avancer au suivant.
 - [x] **P4** — la carte : module `apic3d_carte`, tampons, tri par maille (compte, préfixe, rangement) ; banc contre le cœur.
 - [x] **P5** — particules → grille, collecte par face ; banc.
 - [x] **P6** — surface reconstruite et étiquettes (reflets des parois) ; banc.
-- [ ] **P7** — gravité, parois, projection (gradient conjugué préconditionné par la diagonale) ; banc.
+- [x] **P7** — gravité, parois, projection (gradient conjugué préconditionné par la diagonale) ; banc.
 - [ ] **P8** — extrapolation, grille → particules, advection, séparation ; le pas entier ; banc d'un pas.
 - [ ] **P9** — le ballottement (1, 0) sur la carte contre la référence, 10 s ; coût par particule ; critères 2 et 3.
 - [ ] **P10** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
@@ -99,3 +99,4 @@ diverge au-delà de l'arrondi, le publier, ne pas avancer au suivant.
 - **P4** — `viewer/src/apic3d_carte.rs` + `.wgsl` ; banc `--apic3d-carte-etages` (DX, CHAUFFE) : ballottement (1, 0) à 5 cm, 20 pas de chauffe, 12 800 particules — **débuts et ordre identiques** à la référence ; tri 0,020 ms.
 - **P5** — collecte par face (poids bornés de `weights` en opérations vectorielles : FXC refuse l'écriture indexée dans un vecteur) : écart de vitesse **1,6·10⁻⁷ m/s** (vitesse max 0,13), poids 2,3·10⁻⁵ (sommes ≤ 8), mêmes faces alimentées ; tri + transfert 0,10 ms.
 - **P6** — reconstruction en collecte, reflets des parois : écart de φ **1,6·10⁻⁶ m**, étiquettes identiques (1 600 mailles d'eau) ; **0,39 ms** — chaque maille lit 125 mailles et leurs images : le poste de coût, pour C7e. Piège : le `!` d'un script en ligne casse le shell de l'outil — écrire les scripts par l'outil d'écriture.
+- **P7** — gravité, parois, gradient conjugué diagonal sur la carte (scalaires sur la carte, drapeau de fin lu uniformément par `workgroupUniformLoad`), correction : **94 itérations des deux côtés**, résidu 7,05·10⁻⁷ contre 7,04·10⁻⁷, pression à 5,4·10⁻³ Pa sur 4 694 (10⁻⁶), vitesses à **2,7·10⁻⁶ m/s**. Coût : **les dispatchs enregistrés**, même sautés — 4,07 ms au plafond de 400, 1,01 ms à 120 (`ITERATIONS=`) : la multigrille (C7e) est la voie.
