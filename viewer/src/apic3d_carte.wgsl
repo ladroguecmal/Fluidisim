@@ -52,6 +52,9 @@ struct Params {
 @group(0) @binding(19) var<storage, read_write> pcount: array<atomic<u32>>;
 // S418 — la liste des absorbées, puis l'ordre de visite (C7c-2).
 @group(0) @binding(20) var<storage, read_write> plist: array<u32>;
+// S418 — le compactage : vivantes par groupe de 256 (préfixe), et un tampon de passage (x, v, trois lignes de C).
+@group(0) @binding(21) var<storage, read_write> pblk: array<u32>;
+@group(0) @binding(22) var<storage, read_write> pscratch: array<vec4<f32>>;
 
 // Le nombre de particules, résident.
 fn np() -> u32 {
@@ -89,7 +92,7 @@ fn bin_clear(@builtin(global_invocation_id) g: vec3<u32>) {
 @compute @workgroup_size(128)
 fn bin_count(@builtin(global_invocation_id) g: vec3<u32>) {
     let k = g.x;
-    if k >= np() {
+    if k >= np() || px[k].w != 0.0 {
         return;
     }
     let m = cell_of(px[k].xyz);
@@ -151,7 +154,7 @@ fn scan_add(@builtin(global_invocation_id) g: vec3<u32>, @builtin(workgroup_id) 
 @compute @workgroup_size(128)
 fn bin_scatter(@builtin(global_invocation_id) g: vec3<u32>) {
     let k = g.x;
-    if k >= np() {
+    if k >= np() || px[k].w != 0.0 {
         return;
     }
     let m = cell_of(px[k].xyz);
@@ -998,7 +1001,17 @@ fn separate_apply(@builtin(global_invocation_id) g: vec3<u32>) {
     if k >= np() {
         return;
     }
-    px[k] = vec4<f32>(clamp_domain(px[k].xyz + shift[k].xyz), 0.0);
+    let p = px[k].xyz;
+    var q = clamp_domain(p + shift[k].xyz);
+    // S400 : une particule que la séparation pousserait dans une colonne de la zone garde sa position horizontale.
+    if P.has_columns != 0.0 {
+        let a = cell_of(q);
+        let b = cell_of(p);
+        if cmask[a.y * P.nx + a.x] != 0u && cmask[b.y * P.nx + b.x] == 0u {
+            q = vec3<f32>(p.x, p.y, q.z);
+        }
+    }
+    px[k] = vec4<f32>(q, px[k].w);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1352,4 +1365,88 @@ fn solde_add(face: u32, v: vec2<u32>) {
     let r = add_i64(solde_get(face), v);
     isolde[2u * face] = r.x;
     isolde[2u * face + 1u] = r.y;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **Le compactage stable** (S418) : les particules marquées (`x.w ≠ 0`) sortent, les vivantes gardent leur ordre. Compte par
+// groupe de 256, préfixe des groupes sur un fil, rangement dans le tampon de passage, recopie, nouveau `n`.
+
+var<workgroup> alive_mem: array<u32, 256>;
+
+fn is_alive(k: u32) -> bool {
+    return k < np() && px[k].w == 0.0;
+}
+
+@compute @workgroup_size(256)
+fn compact_count(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+                 @builtin(workgroup_id) w: vec3<u32>) {
+    alive_mem[l.x] = select(0u, 1u, is_alive(g.x));
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if l.x < s {
+            alive_mem[l.x] = alive_mem[l.x] + alive_mem[l.x + s];
+        }
+        workgroupBarrier();
+    }
+    if l.x == 0u {
+        pblk[w.x] = alive_mem[0];
+    }
+}
+
+// Le préfixe des groupes ; le total va à `pblk[groupes]`. `groups` : la capacité sur 256, passée par `P.q2`.
+@compute @workgroup_size(1)
+fn compact_scan() {
+    let groups = u32(P.q2);
+    var s = 0u;
+    for (var b = 0u; b < groups; b = b + 1u) {
+        let v = pblk[b];
+        pblk[b] = s;
+        s = s + v;
+    }
+    pblk[groups] = s;
+}
+
+@compute @workgroup_size(256)
+fn compact_scatter(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+                   @builtin(workgroup_id) w: vec3<u32>) {
+    let k = g.x;
+    let own = select(0u, 1u, is_alive(k));
+    alive_mem[l.x] = own;
+    workgroupBarrier();
+    for (var s = 1u; s < 256u; s = s * 2u) {
+        var add = 0u;
+        if l.x >= s {
+            add = alive_mem[l.x - s];
+        }
+        workgroupBarrier();
+        alive_mem[l.x] = alive_mem[l.x] + add;
+        workgroupBarrier();
+    }
+    if own == 1u {
+        let dst = pblk[w.x] + alive_mem[l.x] - 1u;
+        pscratch[5u * dst] = vec4<f32>(px[k].xyz, 0.0);
+        pscratch[5u * dst + 1u] = pv[k];
+        pscratch[5u * dst + 2u] = pc[3u * k];
+        pscratch[5u * dst + 3u] = pc[3u * k + 1u];
+        pscratch[5u * dst + 4u] = pc[3u * k + 2u];
+    }
+}
+
+@compute @workgroup_size(128)
+fn compact_copy(@builtin(global_invocation_id) g: vec3<u32>) {
+    let k = g.x;
+    let groups = u32(P.q2);
+    if k >= pblk[groups] {
+        return;
+    }
+    px[k] = pscratch[5u * k];
+    pv[k] = pscratch[5u * k + 1u];
+    pc[3u * k] = pscratch[5u * k + 2u];
+    pc[3u * k + 1u] = pscratch[5u * k + 3u];
+    pc[3u * k + 2u] = pscratch[5u * k + 4u];
+}
+
+@compute @workgroup_size(1)
+fn compact_finish() {
+    atomicStore(&pcount[0], pblk[u32(P.q2)]);
 }

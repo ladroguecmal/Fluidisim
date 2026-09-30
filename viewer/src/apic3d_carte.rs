@@ -12,12 +12,12 @@ use water_core::apic3d::{self, Apic3, ApicStage, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 33] = [
+const KERNELS: [&str; 38] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
     "separate_shift", "separate_apply", "impose_body", "move_body", "columns_begin", "columns_advect",
-    "columns_flux", "columns_update",
+    "columns_flux", "columns_update", "compact_count", "compact_scan", "compact_scatter", "compact_copy", "compact_finish",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -47,6 +47,7 @@ const COLUMNS_BEGIN: usize = 29;
 const COLUMNS_ADVECT: usize = 30;
 const COLUMNS_FLUX: usize = 31;
 const COLUMNS_UPDATE: usize = 32;
+const COMPACT: [usize; 5] = [33, 34, 35, 36, 37];
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, vingt-huit flottants.
@@ -168,6 +169,8 @@ impl ApicCarte {
         let isolde = buffer(&device, ((nu + nv) * 8) as u64, storage);
         let pcount = buffer(&device, 64, storage);
         let plist = buffer(&device, (capacity * 4) as u64, storage);
+        let pblk = buffer(&device, ((capacity.div_ceil(SCAN as usize) + 1) * 4) as u64, storage);
+        let pscratch = buffer(&device, (capacity * 80) as u64, storage);
         let largest = [3 * faces, 8 * cells, capacity * 12, cells + 1].into_iter().max().unwrap_or(1);
         let read = buffer(&device, (largest * 4) as u64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
         let query = (!features.is_empty()).then(|| {
@@ -178,7 +181,7 @@ impl ApicCarte {
 
         let all = [
             &params, &px, &pv, &pc, &shift, &count, &start, &order, &blocks, &faces_buf, &fflags, &cellf, &label, &partials,
-            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist,
+            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist, &pblk, &pscratch,
         ];
         let entries: Vec<_> = (0..all.len() as u32)
             .map(|binding| wgpu::BindGroupLayoutEntry {
@@ -359,7 +362,8 @@ impl ApicCarte {
         let has = if self.body.is_some() { 1. } else { 0. };
         let body = [
             has, b.radius, 0., b.center[0], b.center[1], b.center[2], b.velocity[0], b.velocity[1], b.velocity[2], moved[0],
-            moved[1], moved[2], self.columns as u8 as f32, self.band as u8 as f32, 0.,
+            moved[1], moved[2], self.columns as u8 as f32, self.band as u8 as f32,
+            self.capacity.div_ceil(SCAN as usize) as f32,
         ];
         let mut data = Vec::with_capacity(PARAMS_BYTES as usize);
         for v in u {
@@ -375,6 +379,35 @@ impl ApicCarte {
         pass.set_pipeline(&self.pipelines[kernel]);
         pass.set_bind_group(0, &self.bind, &[]);
         pass.dispatch_workgroups((threads as u32).div_ceil(group).max(1), 1, 1);
+    }
+
+    /// S418 — le compactage stable des particules marquées.
+    fn encode_compact(&self, pass: &mut wgpu::ComputePass) {
+        self.dispatch(pass, COMPACT[0], self.capacity, SCAN);
+        self.dispatch(pass, COMPACT[1], 1, 1);
+        self.dispatch(pass, COMPACT[2], self.capacity, SCAN);
+        self.dispatch(pass, COMPACT[3], self.capacity, WG);
+        self.dispatch(pass, COMPACT[4], 1, 1);
+    }
+
+    /// **Banc S418** : marque les particules `k` telles que `dead(k)` et compacte ; rend `n` après.
+    pub fn compact_for_bench(&mut self, reference: &Apic3, dead: &dyn Fn(usize) -> bool) -> Result<usize, String> {
+        self.load(reference)?;
+        let x: Vec<f32> = reference
+            .particles()
+            .iter()
+            .enumerate()
+            .flat_map(|(k, p)| [p[0], p[1], p[2], if dead(k) { 1. } else { 0. }])
+            .collect();
+        self.queue.write_buffer(&self.px, 0, bytes(&x));
+        self.write_params(1);
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            self.encode_compact(&mut pass);
+        }
+        self.queue.submit([encoder.finish()]);
+        Ok(self.counts()?[0] as usize)
     }
 
     /// Le tri par maille : compte, préfixe, rangement, tri de chaque tranche.
@@ -750,6 +783,18 @@ pub fn recevoir_etages() -> Result<(), String> {
         );
         if dv > 1e-4 {
             return Err("projection : écart de vitesse au-delà du critère".into());
+        }
+        // S418 : le compactage — une particule sur sept marquée ; l'ordre des vivantes doit être celui de la référence.
+        let n_after = carte.compact_for_bench(&reference, &|k| k % 7 == 3)?;
+        let (xc, vc, cc) = carte.particles()?;
+        let keep: Vec<usize> = (0..reference.particle_count()).filter(|k| k % 7 != 3).collect();
+        let same = n_after == keep.len()
+            && keep.iter().enumerate().all(|(m, k)| {
+                xc[m] == reference.particles()[*k] && vc[m] == reference.velocities()[*k] && cc[m] == reference.affine()[*k]
+            });
+        println!("APIC_CARTE_S416 etage=compactage n_apres={n_after} attendu={} ordre_et_valeurs_identiques={same}", keep.len());
+        if !same {
+            return Err("compactage : l'ordre ou les valeurs diffèrent".into());
         }
         // Extrapolation, retour aux particules, advection, séparation : chaque étage depuis le même état.
         for stage in [ApicStage::Extrapolate, ApicStage::GridToParticles, ApicStage::Advect, ApicStage::Full] {
