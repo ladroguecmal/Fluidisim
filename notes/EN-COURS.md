@@ -87,7 +87,7 @@ période publiée. (3) Raccord, B10, colonnes, ballottement inchangés ; suite ;
 - [x] **P4** — l'échange avec un fond : absorption sous le fond, frontière maille par maille, solde vertical (retrait, pose) ; un pas
   entier.
 - [x] **P5** — le ballottement en bande étroite, 30 s, et le témoin ; critère 2.
-- [ ] **P6** — non-régression, suite ; preuve §11 ; liste, file, feuille de route, index.
+- [x] **P6** — non-régression, suite ; preuve §11 ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -108,3 +108,4 @@ période publiée. (3) Raccord, B10, colonnes, ballottement inchangés ; suite ;
   période 1,9969 s contre 1,9972 (−0,015 %) ; **volume de la carte constant à 0 quantum** (la référence : 0) ; gestes cumulés 5 617 /
   5 541 absorbées, 360 / 352 retirées, 5 950 / 5 862 posées, `n` 5 093 / 5 089 ; l'ordre diverge au pas 14. **Témoins** : ±10⁻⁶ —
   0,92 mm (−0,005 %) ; ±10⁻⁴ — 1,18 mm (0,000 %). La carte finit au-dessus des deux témoins, sous les 3 mm.
+- **P6** — non-régression : ballottement (0,456 mm), B10 (pas 54, 9,195 mm), colonnes (0,003 mm) identiques ; le raccord déplacé par `square_sum` dans sa dispersion (4,41 → 4,48 mm, 5 205 absorbées au lieu de 5 204). Suite **753**, zéro avertissement. Preuve §11 ; liste, file, feuille de route, index.

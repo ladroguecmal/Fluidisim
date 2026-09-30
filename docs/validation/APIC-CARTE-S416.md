@@ -169,8 +169,8 @@ la carte (C3 : 6 à 8 cycles là où le gradient conjugué en demande 94), et un
 
 ## 6. Ce que ce document ne dit pas
 
-- **Ni le fond, ni la bascule** : C7c-3 et C7c-4 (§8). La zone et son échange sont sur la carte (§9–10, S417–S418), B10 nu aussi
-  (§7) ; la bande étroite pas encore.
+- **Ni la bascule, ni le déplacement du fond** : C7c-4 (§8). La zone, son échange et le fond fixe sont sur la carte (§9–11,
+  S417–S419), B10 nu aussi (§7) ; B10 en bande étroite pas encore.
 - **Le pas `dt`** est celui de la référence : la carte ne le choisit pas elle-même (C7e, diagnostics différés).
 - **Le budget** : 2,05 ms pour une cuve de 2 × 0,2 m est le budget entier de δ ; aucune conclusion de budget n'en sort avant la
   multigrille et la bande étroite, qui retire les particules profondes (÷ 4,7 à 7,7, S413).
@@ -352,3 +352,39 @@ masse, elle, est exacte, ce que la référence n'est qu'à l'arrondi du `f64`. *
 témoin, ou une moyenne sur plusieurs, trancherait l'écart de 10 % — à faire avant de s'appuyer sur un écart plus fin.
 
 **Coût** (raccord, 6 584 particules, p99) : 2,84 ms — projection 1,40, séparation et échange 0,88, surface 0,52.
+
+## 11. C7c-3 — le fond de la bande sur la carte (S419)
+
+**Reproduire** : `CAS=fond CHAUFFE=<5…70> ITERATIONS=200 … --apic3d-carte-etages` ; `CAS=fond DUREE=30 ITERATIONS=200 …
+--apic3d-carte-ballottement` (70 s) ; témoins `TEMOIN=1e-6`, `1e-4`. `band_state` reproduit la bande étroite de S413 (toute la cuve
+en bande, fond à quatre mailles sous le creux). Cœur : `columns_solde_w`.
+
+**La construction.** Le fond par colonne (`cols[2C + 32 + col]`, paramètre `floors`) ; sous le fond, `φ = z − fond` et l'eau ; les
+virtuelles jusqu'au fond ; les faces à la grille advectées (une face `w` au-dessus d'une maille sous le fond comprise) ; le
+transport charge les **soldes verticaux** — chaque face de colonnes garde ses deux contributions (côté bas, côté haut), qu'un
+noyau par colonne rassemble, sans atomique ; l'échange absorbe sous le fond (mélange aux faces à la grille, `floor_face`), lit la
+frontière latérale maille par maille, et règle le solde vertical (retrait de la plus basse, pose à `dx/16` au-dessus du fond). Le
+volume compte l'eau sous le fond en mailles entières. **Le déplacement du fond** (`move_band_floor`) part avec la bascule (C7c-4).
+
+**Étages et pas entier** (critère 1) : `φ` 8,4·10⁻⁷ m, étiquettes identiques, projection 94/94, soldes verticaux à 8,2·10⁻¹⁰ m³ (sur
+1,6·10⁻⁵ ; la borne de l'écart de vitesse admis ≈ 3·10⁻⁹) ; un pas entier après 5, 40, 70 pas : gestes et `n` identiques, positions
+à 1,2·10⁻⁷ m indice pour indice. **Après 20 pas, 3 poses sur 32 tombent à l'emplacement miroir en `y`** (même maille, même hauteur,
+sous-réseau 0,25 ↔ 0,75) : ce cas est **invariant en `y`** — les emplacements miroirs y sont à des distances quasi égales, et les
+entrées diffèrent déjà à l'arrondi de l'advection. Une tolérance « le premier gagne » aggrave (7 sur 32 : la référence les ordonne
+vraiment) ; les carrés évalués sans contraction en `mad` (`square_sum`) ne changent rien ici et sont gardés, plus fidèles — ils
+déplacent le raccord de §10 à l'intérieur de sa dispersion (4,41 → 4,48 mm à 30 s).
+
+**Le ballottement en bande étroite, 30 s** (critère 2) :
+
+| grandeur | carte | témoin ±10⁻⁶ m/s | témoin ±10⁻⁴ m/s |
+|---|---|---|---|
+| écart de surface, maximum courant, 8 s | 0,57 mm | 0,43 | 0,56 |
+| 20 s | 1,45 mm | 0,44 | 0,77 |
+| **30 s** | **1,45 mm** | **0,92** | **1,18** |
+| écart de période | −0,015 % | −0,005 % | 0,000 % |
+| volume | **constant, 0 quantum** | | |
+| gestes cumulés, carte / référence | absorbées 5 617 / 5 541, retirées 360 / 352, posées 5 950 / 5 862, `n` 5 093 / 5 089 | | |
+
+**Critère 2 tenu** : la surface reste à 1,45 mm de la référence, sous les 3 mm, la période à 0,015 %, la masse exacte. La carte
+finit au-dessus des deux témoins (0,92 et 1,18 mm) : l'arrondi de la carte pèse ici un peu plus qu'une perturbation de 10⁻⁴ m/s,
+sans approcher la tolérance. **C7c-3 reçu.**
