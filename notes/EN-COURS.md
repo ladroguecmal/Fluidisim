@@ -90,7 +90,7 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
   par le transport aux faces de frontière ; banc : soldes après le transport ; tout l'existant inchangé.
 - [x] **P3** — le compactage stable des particules marquées (préfixe par blocs) ; la séparation tenue côté bande ; banc.
 - [x] **P4** — l'absorption : marques en parallèle, liste triée, ordre de visite reconstruit, gestes sur un fil ; banc : nombres.
-- [ ] **P5** — retrait et pose sur un fil ; le pas entier sur la cuve mixte ; critère 2.
+- [x] **P5** — retrait et pose sur un fil ; le pas entier sur la cuve mixte ; critère 2.
 - [ ] **P6** — le raccord sur la carte, 30 s ; critère 3.
 - [ ] **P7** — suite entière ; preuve §10 ; liste, file, feuille de route, index.
 - [ ] **P8** — rituel.
@@ -104,3 +104,9 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
   inchangé (ballottement au caractère près ; `η` 2,4·10⁻⁷ et 2,7·10⁻⁷ m).
 - **P3** — marque `x.w ≠ 0` (le tri l'ignore) ; compactage stable (compte par groupe de 256, préfixe sur un fil, rangement par préfixe dans le groupe, recopie, `n`) ; séparation tenue côté bande (S400). Banc : une particule sur sept marquée — **ordre et valeurs identiques** au filtre attendu (10 971 et 5 541) ; l'existant inchangé.
 - **P4** — **décision** : la carte garde ses tableaux **indice pour indice** avec la référence — les retraits se font par échange avec la dernière, sur un fil, comme `remove_particle` (un compactage stable changerait les indices, donc l'ordre de visite suivant, donc le mélange). `exchange_begin`, `absorb_mark` (liste par atomiques), `absorb_serial` (tri de la liste, visite à deux pointeurs, `absorb_one` : mélange aux faces de la zone, solde de la face la plus proche ou volume de la colonne, échange avec la dernière). Cuve mixte, un pas : **16 absorbées des deux côtés**.
+- **P5** — `exchange_serial` (un fil) : chaque face-maille de frontière, dans l'ordre de la référence — retrait (la plus proche de
+  la face, profondeur par profondeur), pose (à `dx/16` de la face, sous-réseau le plus libre, vitesse et `C` de la grille), puis
+  les marquées retirées du plus grand indice au plus petit, par échange avec la dernière ; la réserve (S408) est nulle sans
+  bascule. Cuve mixte, un pas après 2 à 90 pas de chauffe : **absorbées, retirées, posées, `n` identiques** à chaque fois
+  (retraits 32 et 12, poses 8, 4, 4, absorptions 16, 20, 4), **positions à 6·10⁻⁸ m indice pour indice** (3·10⁻⁷ au pire),
+  vitesses ≤ 1,4·10⁻⁵ m/s, soldes ≤ 1,1·10⁻¹⁰ m³, `η` ≤ 3·10⁻⁷ m. Critère 2 tenu (le volume exact : P6).

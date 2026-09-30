@@ -12,13 +12,13 @@ use water_core::apic3d::{self, Apic3, ApicStage, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 41] = [
+const KERNELS: [&str; 42] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
     "separate_shift", "separate_apply", "impose_body", "move_body", "columns_begin", "columns_advect",
     "columns_flux", "columns_update", "compact_count", "compact_scan", "compact_scatter", "compact_copy", "compact_finish",
-    "exchange_begin", "absorb_mark", "absorb_serial",
+    "exchange_begin", "absorb_mark", "absorb_serial", "exchange_serial",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -52,6 +52,7 @@ const COMPACT: [usize; 5] = [33, 34, 35, 36, 37];
 const EXCHANGE_BEGIN: usize = 38;
 const ABSORB_MARK: usize = 39;
 const ABSORB_SERIAL: usize = 40;
+const EXCHANGE_SERIAL: usize = 41;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, vingt-huit flottants.
@@ -511,6 +512,9 @@ impl ApicCarte {
                         self.dispatch(&mut pass, EXCHANGE_BEGIN, 1, 1);
                         self.dispatch(&mut pass, ABSORB_MARK, self.capacity, WG);
                         self.dispatch(&mut pass, ABSORB_SERIAL, 1, 1);
+                        // La réserve de la bascule (S408) est nulle tant que la bascule n'est pas sur la carte (C7c-4).
+                        self.encode_bin(&mut pass);
+                        self.dispatch(&mut pass, EXCHANGE_SERIAL, 1, 1);
                     }
                 }
             }
@@ -859,9 +863,31 @@ pub fn recevoir_etages() -> Result<(), String> {
                         let after = r.columns_exchange_counts();
                         let k = carte.counts()?;
                         println!(
-                            "APIC_CARTE_S416 etage=echange absorbees_carte={} reference={} n_carte={} n_reference={}",
-                            k[3], after[0] - before[0], k[0], r.particle_count()
+                            "APIC_CARTE_S416 etage=echange absorbees={}/{} retirees={}/{} posees={}/{} refusees={} n={}/{} (carte/reference)",
+                            k[3], after[0] - before[0], k[4], after[1] - before[1], k[5], after[2] - before[2], k[6], k[0],
+                            r.particle_count()
                         );
+                        let (x, v, _) = carte.particles()?;
+                        let flat = |a: &[[f32; 3]]| a.iter().flatten().copied().collect::<Vec<f32>>();
+                        let same_n = x.len() == r.particle_count();
+                        let dxm = if same_n { max_abs_diff(&flat(&x), &flat(r.particles())) } else { f32::NAN };
+                        let dvm = if same_n { max_abs_diff(&flat(&v), &flat(r.velocities())) } else { f32::NAN };
+                        let (su, sv) = r.columns_soldes().ok_or("soldes")?;
+                        let rs: Vec<f64> = su.iter().chain(sv).copied().collect();
+                        let ds = carte.soldes()?.iter().zip(&rs).fold(0f64, |m, (a, b)| m.max((a - b).abs()));
+                        let e = carte.columns_eta()?;
+                        let mask = r.columns_state().map(|m| m.0.to_vec()).unwrap_or_default();
+                        let eta = r.columns_surface().unwrap_or(&[]);
+                        let de = e.iter().zip(eta).zip(&mask).filter(|(_, m)| **m != 0).fold(0f32, |m, ((a, b), _)| m.max((a - b).abs()));
+                        let (vel, _) = carte.faces()?;
+                        let rvel: Vec<f32> = r.velocity_u().iter().chain(r.velocity_v()).chain(r.velocity_w()).copied().collect();
+                        println!(
+                            "APIC_CARTE_S416 etage=echange ecart_position_max={dxm:.3e} ecart_vitesse_max={dvm:.3e} ecart_soldes_max_m3={ds:.3e} ecart_eta_max={de:.3e} ecart_faces_max={:.3e}",
+                            max_abs_diff(&vel, &rvel)
+                        );
+                        if !same_n || dxm > 1e-5 || dvm > 1e-4 {
+                            return Err("échange : écart au-delà du critère".into());
+                        }
                         continue;
                     }
                     let (x, v, c) = carte.particles()?;

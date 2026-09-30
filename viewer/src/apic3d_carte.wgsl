@@ -1615,3 +1615,202 @@ fn absorb_serial() {
     }
     atomicStore(&pcount[COUNT_N], n_cur);
 }
+
+fn solde_le_minus_vp(face: u32) -> bool {
+    // solde ≤ −vp  ⇔  −solde ≥ vp : sur deux mots signés.
+    let s = solde_get(face);
+    let hi = bitcast<i32>(s.y);
+    if hi >= 0 {
+        return false;
+    }
+    let m = neg_i64(s);
+    return m.y > 0u || m.x >= VP_QUANTA;
+}
+
+fn solde_ge_vp(face: u32) -> bool {
+    let s = solde_get(face);
+    let hi = bitcast<i32>(s.y);
+    return hi > 0 || (hi == 0 && s.x >= VP_QUANTA);
+}
+
+// La vitesse et `C` que la grille donne en un point (`grid_affine`).
+fn grid_affine_at(p: vec3<f32>, k: u32) {
+    let a = interp(0u, p);
+    let b = interp(1u, p);
+    let c = interp(2u, p);
+    pv[k] = vec4<f32>(a.x, b.x, c.x, 0.0);
+    pc[3u * k] = vec4<f32>(a.yzw, 0.0);
+    pc[3u * k + 1u] = vec4<f32>(b.yzw, 0.0);
+    pc[3u * k + 2u] = vec4<f32>(c.yzw, 0.0);
+}
+
+// (2) et (3) sur un fil : chaque face-maille de frontière règle son solde, dans l'ordre de la référence — retrait de la
+// particule de la bande la plus proche de la face (à cette profondeur d'abord), pose contre la face au sous-réseau le plus libre ;
+// puis les marquées retirées, du plus grand indice au plus petit, par échange avec la dernière.
+@compute @workgroup_size(1)
+fn exchange_serial() {
+    if P.has_columns == 0.0 {
+        return;
+    }
+    var n = np();
+    let first_new = n;
+    var marked = 0u;
+    let vp_depth = P.dx / 16.0;
+    for (var axis = 0u; axis < 2u; axis = axis + 1u) {
+        var fx = P.nx + 1u;
+        var fy = P.ny;
+        if axis == 1u {
+            fx = P.nx;
+            fy = P.ny + 1u;
+        }
+        for (var l = 0u; l < P.nz; l = l + 1u) {
+            for (var fj = 0u; fj < fy; fj = fj + 1u) {
+                for (var fi = 0u; fi < fx; fi = fi + 1u) {
+                    var lo = vec2<u32>(0u, 0u);
+                    var hi = vec2<u32>(fi, fj);
+                    if axis == 0u {
+                        if fi == 0u || fi == P.nx {
+                            continue;
+                        }
+                        lo = vec2<u32>(fi - 1u, fj);
+                    } else {
+                        if fj == 0u || fj == P.ny {
+                            continue;
+                        }
+                        lo = vec2<u32>(fi, fj - 1u);
+                    }
+                    let zl = cmask[lo.y * P.nx + lo.x] != 0u;
+                    let zh = cmask[hi.y * P.nx + hi.x] != 0u;
+                    if zl == zh {
+                        continue;
+                    }
+                    var face = 0u;
+                    var plane = 0.0;
+                    if axis == 0u {
+                        face = (l * P.ny + fj) * (P.nx + 1u) + fi;
+                        plane = f32(fi) * P.dx;
+                    } else {
+                        face = P.nu + (l * (P.ny + 1u) + fj) * P.nx + fi;
+                        plane = f32(fj) * P.dx;
+                    }
+                    let band = select(lo, hi, zl);
+                    let side = select(-1.0, 1.0, zl);
+                    // (2) Retirer ce qui est dû.
+                    loop {
+                        if !solde_le_minus_vp(face) {
+                            break;
+                        }
+                        var found = false;
+                        var pick = 0u;
+                        var pick_d = 0.0;
+                        for (var dk = 0u; dk < P.nz; dk = dk + 1u) {
+                            for (var side_k = 0u; side_k < 2u; side_k = side_k + 1u) {
+                                if dk == 0u && side_k == 1u {
+                                    continue;
+                                }
+                                var k = i32(l) - i32(dk);
+                                if side_k == 1u {
+                                    k = i32(l) + i32(dk);
+                                }
+                                if k < 0 || k >= i32(P.nz) {
+                                    continue;
+                                }
+                                let cell = cell_index(band.x, band.y, u32(k));
+                                for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
+                                    let m = order[s];
+                                    if px[m].w != 0.0 {
+                                        continue;
+                                    }
+                                    let p = px[m].xyz;
+                                    let d = abs(select(p.y, p.x, axis == 0u) - plane);
+                                    // (dk, d) lexicographique : dk ne décroît pas dans la boucle, seul `d` départage.
+                                    if !found || d < pick_d {
+                                        found = true;
+                                        pick = m;
+                                        pick_d = d;
+                                    }
+                                }
+                            }
+                            if found {
+                                break;
+                            }
+                        }
+                        if !found {
+                            break;
+                        }
+                        px[pick].w = 1.0;
+                        plist[marked] = pick;
+                        marked = marked + 1u;
+                        atomicAdd(&pcount[COUNT_REMOVED], 1u);
+                        solde_add(face, vec2<u32>(VP_QUANTA, 0u));
+                    }
+                    // (3) Poser ce qui est reçu, à la face (S407).
+                    loop {
+                        if !solde_ge_vp(face) {
+                            break;
+                        }
+                        if n >= arrayLength(&plist) {
+                            atomicAdd(&pcount[COUNT_REFUSED], 1u);
+                            break;
+                        }
+                        let offset = plane + side * vp_depth;
+                        let cell = cell_index(band.x, band.y, l);
+                        var best_near = 0.0;
+                        var best_p = vec3<f32>(0.0);
+                        var have = false;
+                        for (var o = 0u; o < 4u; o = o + 1u) {
+                            let a = select(0.25, 0.75, (o & 1u) == 1u);
+                            let b = select(0.25, 0.75, (o & 2u) == 2u);
+                            var p = vec3<f32>(offset, (f32(band.y) + a) * P.dx, (f32(l) + b) * P.dx);
+                            if axis == 1u {
+                                p = vec3<f32>((f32(band.x) + a) * P.dx, offset, (f32(l) + b) * P.dx);
+                            }
+                            var near = 3.4028234663852886e38;
+                            for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
+                                let m = order[s];
+                                if px[m].w == 0.0 {
+                                    let d = px[m].xyz - p;
+                                    near = min(near, d.x * d.x + d.y * d.y + d.z * d.z);
+                                }
+                            }
+                            for (var q = first_new; q < n; q = q + 1u) {
+                                let d = px[q].xyz - p;
+                                near = min(near, d.x * d.x + d.y * d.y + d.z * d.z);
+                            }
+                            if !have || near > best_near {
+                                have = true;
+                                best_near = near;
+                                best_p = p;
+                            }
+                        }
+                        px[n] = vec4<f32>(best_p, 0.0);
+                        grid_affine_at(best_p, n);
+                        n = n + 1u;
+                        atomicAdd(&pcount[COUNT_POSED], 1u);
+                        solde_add(face, neg_i64(vec2<u32>(VP_QUANTA, 0u)));
+                    }
+                }
+            }
+        }
+    }
+    // Les marquées, du plus grand indice au plus petit (tri décroissant de la liste), par échange avec la dernière.
+    for (var s = 1u; s < marked; s = s + 1u) {
+        let v = plist[s];
+        var t = s;
+        loop {
+            if t == 0u || plist[t - 1u] >= v {
+                break;
+            }
+            plist[t] = plist[t - 1u];
+            t = t - 1u;
+        }
+        plist[t] = v;
+    }
+    for (var s = 0u; s < marked; s = s + 1u) {
+        let m = plist[s];
+        let last = n - 1u;
+        copy_particle(last, m);
+        n = last;
+    }
+    atomicStore(&pcount[COUNT_N], n);
+}
