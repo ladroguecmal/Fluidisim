@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-01 01:14 +02:00
+JETON            : occupé
+Battement        : 2026-10-01 01:17 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S419 — C7c-3** au poste : le fond de la bande sur la carte, reçu sur le ballottement en bande étroite contre un témoin
 Dernière session : S418 — physique : **C7c-2** ([preuve](docs/validation/APIC-CARTE-S416.md) §10) — l'échange à la frontière sur la carte, fidèle à l'ordre de la référence ; le raccord sur 30 s, volume exact à 0 quantum, surface à 4,4 mm sur la courbe des témoins (3,4 et 4,0). Avant : S417, C7b et C7c-1
 Session suivante : **S419 — C7c-3** au poste ([conception](docs/validation/APIC-CARTE-S416.md) §8) : le fond de la bande sur la carte — étiquettes et advection sous le fond, solde vertical en quanta, absorption sous le fond, pose au-dessus, `move_band_floor` ; reçu sur le ballottement en bande étroite (`APIC3D_FOND=4`) contre la référence **et un témoin** (trois témoins sur le raccord si l'écart de 10 % de §10 doit porter une décision) ; puis C7c-4 (bascule : B10 en bande étroite), C7d, C7e ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 6 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
