@@ -41,6 +41,10 @@ struct Params {
 // débits en double flottant (C7c-1, P7).
 @group(0) @binding(15) var<storage, read_write> cols: array<f32>;
 @group(0) @binding(16) var<storage, read_write> cmask: array<u32>;
+// S417 — **les volumes en entiers** : le volume de chaque colonne [0, 2C), les débits des faces `x` [2C, 2C + 2Fx) puis `y`,
+// en quanta `q = dx³/8 · 2⁻²⁴` (un volume de particule vaut 2²⁴ quanta), sur deux mots (bas, haut), complément à deux.
+// Chaque débit s'arrondit une fois au quantum et s'ajoute d'un côté, se retranche de l'autre : la conservation est exacte.
+@group(0) @binding(17) var<storage, read_write> ivol: array<u32>;
 
 const AIR: u32 = 0u;
 const WATER: u32 = 1u;
@@ -1185,4 +1189,135 @@ fn columns_advect(@builtin(global_invocation_id) g: vec3<u32>) {
     let foot = x - P.dt * v;
     let a = sample_prev(foot);
     faces[f] = select(select(a.z, a.y, fc.axis == 1u), a.x, fc.axis == 0u);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// `columns_transport` (S398, S408) : `η` transporté par les débits mouillés entre colonnes de la zone — hauteur de face moyenne
+// des deux colonnes, la colonne seule à une frontière — en entiers (ci-dessus).
+
+// Le quantum rapporté à une maille de hauteur : `q / dx² = dx · 2⁻²⁷`.
+fn quantum_height() -> f32 {
+    return P.dx * 7.450580596923828e-9;
+}
+
+// Un flottant de quanta (|x| < 2⁵⁵), arrondi à l'entier le plus proche, en complément à deux sur deux mots.
+fn to_i64(x: f32) -> vec2<u32> {
+    let a = abs(x);
+    let hi = floor(a / 4294967296.0);
+    let lo = floor(a - hi * 4294967296.0 + 0.5);
+    var r = vec2<u32>(u32(min(lo, 4294967295.0)), u32(hi));
+    if x < 0.0 {
+        r = add_i64(vec2<u32>(~r.x, ~r.y), vec2<u32>(1u, 0u));
+    }
+    return r;
+}
+
+fn add_i64(a: vec2<u32>, b: vec2<u32>) -> vec2<u32> {
+    let lo = a.x + b.x;
+    let carry = select(0u, 1u, lo < a.x);
+    return vec2<u32>(lo, a.y + b.y + carry);
+}
+
+fn neg_i64(a: vec2<u32>) -> vec2<u32> {
+    return add_i64(vec2<u32>(~a.x, ~a.y), vec2<u32>(1u, 0u));
+}
+
+// L'entier, en flottant.
+fn i64_to_f32(a: vec2<u32>) -> f32 {
+    return f32(bitcast<i32>(a.y)) * 4294967296.0 + f32(a.x);
+}
+
+fn ivol_get(k: u32) -> vec2<u32> {
+    return vec2<u32>(ivol[2u * k], ivol[2u * k + 1u]);
+}
+
+fn ivol_set(k: u32, v: vec2<u32>) {
+    ivol[2u * k] = v.x;
+    ivol[2u * k + 1u] = v.y;
+}
+
+// Le débit d'une face de colonnes : `e` d'abord les faces `x` (`(nx + 1)·ny`), puis `y` (`nx·(ny + 1)`) ; une face de mur, ou
+// entre deux colonnes de particules, ne porte rien.
+@compute @workgroup_size(128)
+fn columns_flux(@builtin(global_invocation_id) g: vec3<u32>) {
+    let fx = (P.nx + 1u) * P.ny;
+    let fy = P.nx * (P.ny + 1u);
+    let e = g.x;
+    if e >= fx + fy || P.has_columns == 0.0 {
+        return;
+    }
+    let ncol = P.nx * P.ny;
+    var axis = 0u;
+    var i = 0u;
+    var j = 0u;
+    if e < fx {
+        i = e % (P.nx + 1u);
+        j = e / (P.nx + 1u);
+    } else {
+        axis = 1u;
+        i = (e - fx) % P.nx;
+        j = (e - fx) / P.nx;
+    }
+    var q = vec2<u32>(0u, 0u);
+    let wall = (axis == 0u && (i == 0u || i == P.nx)) || (axis == 1u && (j == 0u || j == P.ny));
+    if !wall {
+        var low_col = 0u;
+        if axis == 0u {
+            low_col = j * P.nx + i - 1u;
+        } else {
+            low_col = (j - 1u) * P.nx + i;
+        }
+        let high_col = j * P.nx + i;
+        let low = cmask[low_col] != 0u;
+        let high = cmask[high_col] != 0u;
+        if low || high {
+            var surface = 0.0;
+            if low && high {
+                surface = 0.5 * (cols[low_col] + cols[high_col]);
+            } else if low {
+                surface = cols[low_col];
+            } else {
+                surface = cols[high_col];
+            }
+            let per_quantum = 1.0 / (P.dx * P.dx * P.dx * 0.125 * 5.960464477539063e-8);
+            for (var k = 0u; k < P.nz; k = k + 1u) {
+                let wet = clamp((surface - f32(k) * P.dx) / P.dx, 0.0, 1.0);
+                if wet == 0.0 {
+                    break;
+                }
+                var face = 0u;
+                if axis == 0u {
+                    face = (k * P.ny + j) * (P.nx + 1u) + i;
+                } else {
+                    face = P.nu + (k * (P.ny + 1u) + j) * P.nx + i;
+                }
+                // Volume vers les `+`, m³, en quanta.
+                let volume = faces[face] * P.dx * wet * P.dx * P.dt;
+                q = add_i64(q, to_i64(volume * per_quantum));
+            }
+        }
+    }
+    ivol_set(ncol + e, q);
+}
+
+// `η ← η − (Σ débits sortants)/dx²`, en entiers, puis lu en flottant pour la surface.
+@compute @workgroup_size(128)
+fn columns_update(@builtin(global_invocation_id) g: vec3<u32>) {
+    let col = g.x;
+    let ncol = P.nx * P.ny;
+    if col >= ncol || P.has_columns == 0.0 || cmask[col] == 0u {
+        return;
+    }
+    let i = col % P.nx;
+    let j = col / P.nx;
+    let fx = (P.nx + 1u) * P.ny;
+    let xl = ncol + j * (P.nx + 1u) + i;
+    let yl = ncol + fx + j * P.nx + i;
+    var v = ivol_get(col);
+    v = add_i64(v, ivol_get(xl));
+    v = add_i64(v, neg_i64(ivol_get(xl + 1u)));
+    v = add_i64(v, ivol_get(yl));
+    v = add_i64(v, neg_i64(ivol_get(yl + P.nx)));
+    ivol_set(col, v);
+    cols[col] = i64_to_f32(v) * quantum_height();
 }

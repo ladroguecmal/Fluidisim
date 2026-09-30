@@ -87,7 +87,7 @@ s'explique avant C7c.
   `η` et son reste, table de lecture de S400) ; `columns_label` et les particules virtuelles dans la reconstruction ; banc des
   étages sur une cuve **mixte** (moitié colonnes, moitié particules : jusqu'à l'advection, l'échange n'intervient pas).
 - [x] **P6** — `columns_begin` et `columns_advect` (la vitesse du pas précédent au pied de la caractéristique) ; banc.
-- [ ] **P7** — `columns_transport` : débits mouillés par face, une fois, appliqués aux deux colonnes avec des signes opposés ;
+- [x] **P7** — `columns_transport` : débits mouillés par face, une fois, appliqués aux deux colonnes avec des signes opposés ;
   `η` avancé en double flottant (`η` + reste, comme la référence) ; banc.
 - [ ] **P8** — la cuve **tout en colonnes** (`APIC3D_COLONNES`, S398) : ballottement à 3 mm de la référence sur 10 s ; volume.
 - [ ] **P9** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
@@ -113,3 +113,4 @@ C7c-2, en entiers).
   remplacé pour C7c par « écart de la carte ≤ celui du témoin à 10⁻⁶, pas à pas ». Preuve §7.
 - **P5** — cœur : `columns_state` (masque, reste de `η`, table S400, bande). Carte : tampons `cols` (`η`, reste, table, débits) et `cmask`, `load` charge aussi les faces du pas précédent et la zone ; `reconstruct` : maille de colonne `φ = z − η lu`, particules virtuelles (`round` en `floor(x + 0,5)` : WGSL arrondit au pair). Banc `CAS=raccord` (`raccord_state`) : transfert 4,5·10⁻⁸ m/s, **`φ` 5,9·10⁻⁷ m, étiquettes identiques** ; projection à 0,11 m/s — attendu, l'advection de la zone manque (P6).
 - **P6** — `columns_begin` (vitesse du début du pas dans la copie des faces), `columns_advect` (une face `u`/`v` est de la zone si l'une de ses colonnes l'est — S406 ; `w` si sa colonne l'est) ; cuve mixte : **advection 7,8·10⁻⁸ m/s**, projection 94/94 itérations, vitesses 2,5·10⁻⁶ m/s, positions 1,2·10⁻⁷ m après advection. L'étage final diffère (0,13 m) : l'échange et la séparation tenue côté bande — C7c-2, attendu.
+- **P7** — `columns_flux` (un débit par face de colonnes, rangée par rangée, arrondi au quantum `dx³/8·2⁻²⁴`) et `columns_update` (le volume de la colonne en entiers sur deux mots, `η` relu en flottant) — **les volumes en entiers dès C7c-1** : FXC ne garantit pas le `mad` fusionné qu'exige un double flottant sans erreur ; en entiers, la conservation est exacte par construction. `η` à **2,4·10⁻⁷ m** (mixte) et **2,7·10⁻⁷ m** (tout en colonnes, 88/88 itérations). Critère d'étage tenu.

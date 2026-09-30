@@ -12,11 +12,12 @@ use water_core::apic3d::{self, Apic3, ApicStage, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 31] = [
+const KERNELS: [&str; 33] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
     "separate_shift", "separate_apply", "impose_body", "move_body", "columns_begin", "columns_advect",
+    "columns_flux", "columns_update",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -44,6 +45,8 @@ const IMPOSE_BODY: usize = 27;
 const MOVE_BODY: usize = 28;
 const COLUMNS_BEGIN: usize = 29;
 const COLUMNS_ADVECT: usize = 30;
+const COLUMNS_FLUX: usize = 31;
+const COLUMNS_UPDATE: usize = 32;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, vingt-huit flottants.
@@ -75,6 +78,8 @@ pub struct ApicCarte {
     /// S417 — la zone des colonnes : `η`, son reste, la table de lecture, les débits ; le masque.
     cols: wgpu::Buffer,
     cmask: wgpu::Buffer,
+    /// S417 — les volumes des colonnes et les débits, en quanta entiers (`apic3d_carte.wgsl`).
+    ivol: wgpu::Buffer,
     /// La zone est-elle active, une bande existe-t-elle ?
     columns: bool,
     band: bool,
@@ -154,6 +159,7 @@ impl ApicCarte {
         // `η`, reste, table (32), débits en double flottant (deux mots par face de colonnes `x` et `y`).
         let cols = buffer(&device, ((2 * ncol + 32 + 2 * ((nx + 1) * ny + nx * (ny + 1))) * 4) as u64, storage);
         let cmask = buffer(&device, (ncol * 4) as u64, storage);
+        let ivol = buffer(&device, ((ncol + (nx + 1) * ny + nx * (ny + 1)) * 8) as u64, storage);
         let largest = [3 * faces, 8 * cells, capacity * 12, cells + 1].into_iter().max().unwrap_or(1);
         let read = buffer(&device, (largest * 4) as u64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
         let query = (!features.is_empty()).then(|| {
@@ -164,7 +170,7 @@ impl ApicCarte {
 
         let all = [
             &params, &px, &pv, &pc, &shift, &count, &start, &order, &blocks, &faces_buf, &fflags, &cellf, &label, &partials,
-            &scalars, &cols, &cmask,
+            &scalars, &cols, &cmask, &ivol,
         ];
         let entries: Vec<_> = (0..all.len() as u32)
             .map(|binding| wgpu::BindGroupLayoutEntry {
@@ -232,6 +238,7 @@ impl ApicCarte {
             scalars,
             cols,
             cmask,
+            ivol,
             columns: false,
             band: false,
             read,
@@ -288,6 +295,18 @@ impl ApicCarte {
             let head: Vec<f32> = eta.iter().chain(roundoff).chain(table).copied().collect();
             self.queue.write_buffer(&self.cmask, 0, u32_bytes(&m));
             self.queue.write_buffer(&self.cols, 0, bytes(&head));
+            // Le volume de chaque colonne en quanta, `(η − reste)·dx²/q`, `q = dx³/8·2⁻²⁴`.
+            let dx = self.domain.dx as f64;
+            let quantum = dx * dx * dx / 8. / (1u64 << 24) as f64;
+            let v: Vec<u32> = eta
+                .iter()
+                .zip(roundoff)
+                .flat_map(|(e, r)| {
+                    let q = ((*e as f64 - *r as f64) * dx * dx / quantum).round() as i64 as u64;
+                    [q as u32, (q >> 32) as u32]
+                })
+                .collect();
+            self.queue.write_buffer(&self.ivol, 0, u32_bytes(&v));
             self.columns = true;
             self.band = band;
         }
@@ -408,7 +427,12 @@ impl ApicCarte {
                     self.dispatch(&mut pass, EXTRAP_ZERO, self.faces, WG);
                     self.dispatch(&mut pass, IMPOSE_BODY, self.faces, WG);
                 }
-                ApicStage::GridToParticles => self.dispatch(&mut pass, G2P, self.n, WG),
+                ApicStage::GridToParticles => {
+                    let Domain3 { nx, ny, .. } = self.domain;
+                    self.dispatch(&mut pass, COLUMNS_FLUX, (nx + 1) * ny + nx * (ny + 1), WG);
+                    self.dispatch(&mut pass, COLUMNS_UPDATE, nx * ny, WG);
+                    self.dispatch(&mut pass, G2P, self.n, WG);
+                }
                 ApicStage::Advect => self.dispatch(&mut pass, ADVECT, self.n, WG),
                 ApicStage::Full => {
                     if self.separation {
@@ -523,6 +547,21 @@ impl ApicCarte {
     pub fn surface(&self) -> Result<(Vec<f32>, Vec<u32>), String> {
         let cells = self.domain.cells();
         Ok((self.read_f32(&self.cellf, 0, cells)?, self.read_u32(&self.label, 0, cells)?))
+    }
+
+    /// La surface des colonnes `η`, m (S417).
+    pub fn columns_eta(&self) -> Result<Vec<f32>, String> {
+        self.read_f32(&self.cols, 0, self.domain.nx * self.domain.ny)
+    }
+
+    /// Le volume des colonnes de la zone, m³, compté en quanta entiers (S417) : exact, sans arrondi de somme.
+    pub fn columns_volume(&self) -> Result<f64, String> {
+        let ncol = self.domain.nx * self.domain.ny;
+        let v = self.read_u32(&self.ivol, 0, 2 * ncol)?;
+        let dx = self.domain.dx as f64;
+        let quantum = dx * dx * dx / 8. / (1u64 << 24) as f64;
+        let total: i128 = v.chunks_exact(2).map(|w| ((w[1] as u64) << 32 | w[0] as u64) as i64 as i128).sum();
+        Ok(total as f64 * quantum)
     }
 
     /// Le tri : début de chaque maille (`cells + 1`), puis l'ordre des particules.
@@ -692,6 +731,21 @@ pub fn recevoir_etages() -> Result<(), String> {
                     }
                 }
                 _ => {
+                    if stage == ApicStage::GridToParticles {
+                        if let Some(eta) = r.columns_surface() {
+                            let e = carte.columns_eta()?;
+                            let mask = r.columns_state().map(|m| m.0.to_vec()).unwrap_or_default();
+                            let de = e.iter().zip(eta).zip(&mask).filter(|(_, m)| **m != 0).fold(0f32, |m, ((a, b), _)| m.max((a - b).abs()));
+                            println!("APIC_CARTE_S416 etage=transport_zone ecart_eta_max={de:.3e}");
+                            if de > 1e-6 {
+                                return Err("transport de la zone : écart de η au-delà du critère".into());
+                            }
+                        }
+                    }
+                    if stage == ApicStage::Full && r.columns_surface().is_some() {
+                        println!("APIC_CARTE_S416 etage=separation non comparé : l'échange de la zone est C7c-2");
+                        continue;
+                    }
                     let (x, v, c) = carte.particles()?;
                     let flat = |a: &[[f32; 3]]| a.iter().flatten().copied().collect::<Vec<f32>>();
                     let dx_max = max_abs_diff(&flat(&x), &flat(r.particles()));
