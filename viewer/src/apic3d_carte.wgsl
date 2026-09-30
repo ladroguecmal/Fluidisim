@@ -45,6 +45,18 @@ struct Params {
 // en quanta `q = dx³/8 · 2⁻²⁴` (un volume de particule vaut 2²⁴ quanta), sur deux mots (bas, haut), complément à deux.
 // Chaque débit s'arrondit une fois au quantum et s'ajoute d'un côté, se retranche de l'autre : la conservation est exacte.
 @group(0) @binding(17) var<storage, read_write> ivol: array<u32>;
+// S418 — les soldes des faces-mailles de frontière, en quanta sur deux mots : faces `u` [0, nu), puis `v`.
+@group(0) @binding(18) var<storage, read_write> isolde: array<u32>;
+// S418 — `n` résident et les compteurs de l'échange : n, n au début de l'échange, longueur de la liste des absorbées,
+// absorbées, retirées, posées, refusées.
+@group(0) @binding(19) var<storage, read_write> pcount: array<atomic<u32>>;
+// S418 — la liste des absorbées, puis l'ordre de visite (C7c-2).
+@group(0) @binding(20) var<storage, read_write> plist: array<u32>;
+
+// Le nombre de particules, résident.
+fn np() -> u32 {
+    return atomicLoad(&pcount[0]);
+}
 
 const AIR: u32 = 0u;
 const WATER: u32 = 1u;
@@ -77,7 +89,7 @@ fn bin_clear(@builtin(global_invocation_id) g: vec3<u32>) {
 @compute @workgroup_size(128)
 fn bin_count(@builtin(global_invocation_id) g: vec3<u32>) {
     let k = g.x;
-    if k >= P.n {
+    if k >= np() {
         return;
     }
     let m = cell_of(px[k].xyz);
@@ -139,7 +151,7 @@ fn scan_add(@builtin(global_invocation_id) g: vec3<u32>, @builtin(workgroup_id) 
 @compute @workgroup_size(128)
 fn bin_scatter(@builtin(global_invocation_id) g: vec3<u32>) {
     let k = g.x;
-    if k >= P.n {
+    if k >= np() {
         return;
     }
     let m = cell_of(px[k].xyz);
@@ -913,7 +925,7 @@ fn grid_velocity(p: vec3<f32>) -> vec3<f32> {
 @compute @workgroup_size(128)
 fn g2p(@builtin(global_invocation_id) g: vec3<u32>) {
     let k = g.x;
-    if k >= P.n {
+    if k >= np() {
         return;
     }
     let p = px[k].xyz;
@@ -933,7 +945,7 @@ fn clamp_domain(p: vec3<f32>) -> vec3<f32> {
 @compute @workgroup_size(128)
 fn advect(@builtin(global_invocation_id) g: vec3<u32>) {
     let k = g.x;
-    if k >= P.n {
+    if k >= np() {
         return;
     }
     let p = px[k].xyz;
@@ -950,7 +962,7 @@ fn advect(@builtin(global_invocation_id) g: vec3<u32>) {
 @compute @workgroup_size(128)
 fn separate_shift(@builtin(global_invocation_id) g: vec3<u32>) {
     let a = g.x;
-    if a >= P.n {
+    if a >= np() {
         return;
     }
     let xa = px[a].xyz;
@@ -983,7 +995,7 @@ fn separate_shift(@builtin(global_invocation_id) g: vec3<u32>) {
 @compute @workgroup_size(128)
 fn separate_apply(@builtin(global_invocation_id) g: vec3<u32>) {
     let k = g.x;
-    if k >= P.n {
+    if k >= np() {
         return;
     }
     px[k] = vec4<f32>(clamp_domain(px[k].xyz + shift[k].xyz), 0.0);
@@ -1023,7 +1035,7 @@ fn impose_body(@builtin(global_invocation_id) g: vec3<u32>) {
 @compute @workgroup_size(128)
 fn move_body(@builtin(global_invocation_id) g: vec3<u32>) {
     let k = g.x;
-    if k >= P.n || P.has_body == 0.0 {
+    if k >= np() || P.has_body == 0.0 {
         return;
     }
     let c = vec3<f32>(P.bmx, P.bmy, P.bmz);
@@ -1293,7 +1305,17 @@ fn columns_flux(@builtin(global_invocation_id) g: vec3<u32>) {
                 }
                 // Volume vers les `+`, m³, en quanta.
                 let volume = faces[face] * P.dx * wet * P.dx * P.dt;
-                q = add_i64(q, to_i64(volume * per_quantum));
+                let vq = to_i64(volume * per_quantum);
+                q = add_i64(q, vq);
+                // S399 : à une frontière, le volume qui passe va au solde de la face-maille, dû par la bande ou à elle —
+                // `solde −= vers la zone`.
+                if low != high {
+                    var into_zone = vq;
+                    if low {
+                        into_zone = neg_i64(vq);
+                    }
+                    solde_add(face, neg_i64(into_zone));
+                }
             }
         }
     }
@@ -1320,4 +1342,14 @@ fn columns_update(@builtin(global_invocation_id) g: vec3<u32>) {
     v = add_i64(v, neg_i64(ivol_get(yl + P.nx)));
     ivol_set(col, v);
     cols[col] = i64_to_f32(v) * quantum_height();
+}
+
+fn solde_get(face: u32) -> vec2<u32> {
+    return vec2<u32>(isolde[2u * face], isolde[2u * face + 1u]);
+}
+
+fn solde_add(face: u32, v: vec2<u32>) {
+    let r = add_i64(solde_get(face), v);
+    isolde[2u * face] = r.x;
+    isolde[2u * face + 1u] = r.y;
 }

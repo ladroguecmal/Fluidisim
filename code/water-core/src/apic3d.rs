@@ -184,6 +184,11 @@ impl Apic3 {
     pub fn velocities(&self) -> &[[f32; 3]] {
         &self.vel[..self.n]
     }
+    /// S418 : la capacité réservée, en particules (banc de la carte).
+    pub fn particle_capacity(&self) -> usize {
+        self.x.len()
+    }
+
     pub fn particle_count(&self) -> usize {
         self.n
     }

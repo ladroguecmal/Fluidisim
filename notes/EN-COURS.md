@@ -86,7 +86,7 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — cœur : accès de banc aux soldes. Carte : `n` résident (noyaux par particule sur la capacité), soldes en quanta chargés
+- [x] **P2** — cœur : accès de banc aux soldes. Carte : `n` résident (noyaux par particule sur la capacité), soldes en quanta chargés
   par le transport aux faces de frontière ; banc : soldes après le transport ; tout l'existant inchangé.
 - [ ] **P3** — le compactage stable des particules marquées (préfixe par blocs) ; la séparation tenue côté bande ; banc.
 - [ ] **P4** — l'absorption : marques en parallèle, liste triée, ordre de visite reconstruit, gestes sur un fil ; banc : nombres.
@@ -96,3 +96,9 @@ cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi
 - [ ] **P8** — rituel.
 
 ### Notes de reprise
+- **P2** — cœur : `columns_soldes`, `particle_capacity`. Carte : `isolde` (soldes en quanta), `pcount` (`n` résident, compteurs),
+  `plist` ; noyaux par particule lancés sur la capacité, `n` lu sur la carte ; le transport charge `solde −= vers la zone` par rangée
+  de frontière, le même entier que le débit. Cuve mixte : **soldes à 58 quanta** au pire (5,4·10⁻¹¹ m³ sur 4·10⁻⁶, 44 faces-mailles
+  non nulles) — critère 1 « au quantum près » **manqué tel qu'écrit, et mal posé** : le solde d'un pas est `u·dx²·dt`, et `u` diffère
+  déjà de 2,5·10⁻⁶ m/s après la projection (écart admis), soit une borne de 1,3·10⁻¹⁰ m³ ; l'observé est dessous. Tout l'existant
+  inchangé (ballottement au caractère près ; `η` 2,4·10⁻⁷ et 2,7·10⁻⁷ m).
