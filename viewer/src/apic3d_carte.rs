@@ -8,17 +8,18 @@
 //! Les transferts sont des **collectes** sur les particules triées par maille (aucun atomique flottant) ; le tri range chaque
 //! maille par indice de particule, l'ordre de la référence, et rend le pas déterministe.
 use crate::delta3d::buffer;
-use water_core::apic3d::{self, Apic3, ApicStage, Sphere3};
+use water_core::apic3d::{self, Apic3, ApicStage, ColumnsSwitch, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 43] = [
+const KERNELS: [&str; 47] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
     "separate_shift", "separate_apply", "impose_body", "move_body", "columns_begin", "columns_advect",
     "columns_flux", "columns_update", "compact_count", "compact_scan", "compact_scatter", "compact_copy", "compact_finish",
     "exchange_begin", "absorb_mark", "absorb_serial", "exchange_serial", "floor_update",
+    "switch_need", "switch_slope", "switch_spread", "switch_request",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -54,10 +55,11 @@ const ABSORB_MARK: usize = 39;
 const ABSORB_SERIAL: usize = 40;
 const EXCHANGE_SERIAL: usize = 41;
 const FLOOR_UPDATE: usize = 42;
+const SWITCH_DECIDE: [usize; 4] = [43, 44, 45, 46];
 const WG: u32 = 128;
 const SCAN: u32 = 256;
-/// Taille de `Params` : douze mots entiers, trente-deux flottants.
-const PARAMS_BYTES: u64 = 176;
+/// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
+const PARAMS_BYTES: u64 = 224;
 /// Horodatages : début et fin de chaque étage.
 const STAMPS: u32 = 16;
 
@@ -95,6 +97,10 @@ pub struct ApicCarte {
     band: bool,
     /// S419 : un fond de bande existe-t-il ?
     floors: bool,
+    /// S420 — l'état du critère de bascule, et ses réglages (ceux de `ColumnsSwitch`), l'instant courant, µs.
+    swb: wgpu::Buffer,
+    switch: SwitchSettings,
+    now_us: u64,
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
     query_resolve: wgpu::Buffer,
@@ -181,6 +187,7 @@ impl ApicCarte {
         let plist = buffer(&device, (capacity * 4) as u64, storage);
         let pblk = buffer(&device, ((capacity.div_ceil(SCAN as usize) + 1) * 4) as u64, storage);
         let pscratch = buffer(&device, (capacity * 80) as u64, storage);
+        let swb = buffer(&device, (7 * ncol * 4) as u64, storage);
         let largest = [3 * faces, 8 * cells, capacity * 12, cells + 1].into_iter().max().unwrap_or(1);
         let read = buffer(&device, (largest * 4) as u64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
         let query = (!features.is_empty()).then(|| {
@@ -191,7 +198,7 @@ impl ApicCarte {
 
         let all = [
             &params, &px, &pv, &pc, &shift, &count, &start, &order, &blocks, &faces_buf, &fflags, &cellf, &label, &partials,
-            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist, &pblk, &pscratch,
+            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist, &pblk, &pscratch, &swb,
         ];
         let entries: Vec<_> = (0..all.len() as u32)
             .map(|binding| wgpu::BindGroupLayoutEntry {
@@ -265,6 +272,9 @@ impl ApicCarte {
             columns: false,
             band: false,
             floors: false,
+            swb,
+            switch: SwitchSettings::default(),
+            now_us: 0,
             read,
             query,
             query_resolve,
@@ -288,6 +298,42 @@ impl ApicCarte {
     /// Le corps, avancé à la fin du dernier pas.
     pub fn body(&self) -> Option<Sphere3> {
         self.body
+    }
+
+    /// **S420** — charge le critère de bascule : ses réglages et son état (l'instant où chaque colonne a été requise).
+    pub fn load_switch(&mut self, s: &ColumnsSwitch) {
+        self.switch = SwitchSettings::of(s);
+        let (at, target) = s.switch_state();
+        let ncol = self.domain.nx * self.domain.ny;
+        let a: Vec<u32> = at.iter().map(|t| if *t == u64::MAX { u32::MAX } else { *t as u32 }).collect();
+        self.queue.write_buffer(&self.swb, 0, u32_bytes(&a));
+        let t: Vec<u32> = target.iter().map(|x| x.to_bits()).collect();
+        self.queue.write_buffer(&self.swb, (6 * ncol * 4) as u64, u32_bytes(&t));
+    }
+
+    /// **S420** — la décision de la bascule à l'instant `now_us`, sur l'état présent : la surface rafraîchie (tri, reconstruction,
+    /// étiquettes, corps), puis le masque demandé. Rend le masque demandé (banc).
+    pub fn decide_for_bench(&mut self, now_us: u64) -> Result<Vec<u32>, String> {
+        self.now_us = now_us;
+        self.write_params(1);
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            self.encode_decide(&mut pass);
+        }
+        self.queue.submit([encoder.finish()]);
+        let ncol = self.domain.nx * self.domain.ny;
+        self.read_u32(&self.swb, 5 * ncol * 4, ncol)
+    }
+
+    /// La surface rafraîchie et la décision.
+    fn encode_decide(&self, pass: &mut wgpu::ComputePass) {
+        let ncol = self.domain.nx * self.domain.ny;
+        self.encode_bin(pass);
+        self.dispatch(pass, RECONSTRUCT, self.domain.cells(), WG);
+        for k in SWITCH_DECIDE {
+            self.dispatch(pass, k, ncol, WG);
+        }
     }
 
     /// Itérations du gradient conjugué enregistrées par pas.
@@ -382,11 +428,24 @@ impl ApicCarte {
             moved[1], moved[2], self.columns as u8 as f32, self.band as u8 as f32,
             self.capacity.div_ceil(SCAN as usize) as f32, self.floors as u8 as f32, 0., 0., 0.,
         ];
+        // S420 — le critère de bascule.
+        let s = self.switch;
+        let su = [
+            self.now_us as u32, s.hold_us as u32, s.dilation as u32, s.floor_cells.unwrap_or(0) as u32, s.floor_hysteresis as u32,
+            s.floor_prediction as u32, s.floor_cells.is_some() as u32, 0,
+        ];
+        let sf = [s.slope_max, s.slope_release.unwrap_or(-1.), s.body_margin, s.body_horizon];
         let mut data = Vec::with_capacity(PARAMS_BYTES as usize);
         for v in u {
             data.extend_from_slice(&v.to_le_bytes());
         }
         for v in f.into_iter().chain(body) {
+            data.extend_from_slice(&v.to_le_bytes());
+        }
+        for v in su {
+            data.extend_from_slice(&v.to_le_bytes());
+        }
+        for v in sf {
             data.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.params, 0, &data);
@@ -1588,4 +1647,121 @@ pub fn band_state(dx: f32, floor_cells: f64, warm: usize) -> Result<Apic3, Strin
         a.step(us).map_err(|e| format!("{e:?}"))?;
     }
     Ok(a)
+}
+
+/// **S420** — les réglages du critère de bascule, copiés de `ColumnsSwitch` (les critères d'écoulement de S415 ne sont pas portés :
+/// C7d).
+#[derive(Clone, Copy, Debug)]
+pub struct SwitchSettings {
+    pub slope_max: f32,
+    pub slope_release: Option<f32>,
+    pub body_margin: f32,
+    pub body_horizon: f32,
+    pub dilation: usize,
+    pub hold_us: u64,
+    pub floor_cells: Option<usize>,
+    pub floor_hysteresis: usize,
+    pub floor_prediction: bool,
+}
+
+impl Default for SwitchSettings {
+    fn default() -> Self {
+        Self {
+            slope_max: 1.,
+            slope_release: None,
+            body_margin: 0.,
+            body_horizon: 0.2,
+            dilation: 2,
+            hold_us: 500_000,
+            floor_cells: None,
+            floor_hysteresis: 2,
+            floor_prediction: false,
+        }
+    }
+}
+
+impl SwitchSettings {
+    pub fn of(s: &ColumnsSwitch) -> Self {
+        Self {
+            slope_max: s.slope_max,
+            slope_release: s.slope_release,
+            body_margin: s.body_margin,
+            body_horizon: s.body_horizon,
+            dilation: s.dilation,
+            hold_us: s.hold_us,
+            floor_cells: s.floor_cells,
+            floor_hysteresis: s.floor_hysteresis,
+            floor_prediction: s.floor_prediction,
+        }
+    }
+}
+
+/// **B10 en bande étroite** (S414, le réglage retenu de R35 : maintien 0,3 s, fond 4) : la référence avec sa zone et son critère,
+/// menée `warm` pas (corps reposé, pas, bascule), puis **un pas de plus sans bascule** — l'état que la bascule suivante lit. Rend
+/// la référence, le critère, l'instant du pas (µs) et le temps (s).
+pub fn b10_band_state(b: &B10, warm: usize) -> Result<(Apic3, ColumnsSwitch, u64, f64), String> {
+    use crate::scene::host_impl;
+    use water_core::host::HostServices;
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 33);
+    let mut host = HostServices { alloc: &mut arena, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink };
+    let d = b.domain();
+    let sous_repos = b.nh * b.nh * ((b.h / b.dx).ceil() as usize);
+    let mut a = Apic3::configure(&mut host, d, 1000., B10::G as f32, sous_repos * 8 + b.nh * b.nh * 8).map_err(|e| format!("{e:?}"))?;
+    let (h, r, z0) = (b.h, b.r, b.z0);
+    a.seed(&|p| {
+        let (x, y, z) = (p[0] as f64, p[1] as f64, p[2] as f64 - z0);
+        (p[2] as f64) < h && x * x + y * y + z * z >= r * r
+    })
+    .map_err(|e| format!("{e:?}"))?;
+    a.enable_columns(&mut host, &vec![0u8; d.nx * d.ny]).map_err(|e| format!("{e:?}"))?;
+    let mut s = ColumnsSwitch::with_capacity(&mut host, d).map_err(|e| format!("{e:?}"))?;
+    s.hold_us = 300_000;
+    s.floor_cells = Some(4);
+    a.set_body(Some(b.sphere(0.))).map_err(|e| format!("{e:?}"))?;
+    s.switch(0, &mut a).map_err(|e| format!("{e:?}"))?;
+    s.clear_counts();
+    let (mut t, mut t_us) = (0f64, 0u64);
+    for step in 0..=warm {
+        a.set_body(Some(b.sphere(t))).map_err(|e| format!("{e:?}"))?;
+        let us = a.stable_step_us(20_000);
+        a.step(us).map_err(|e| format!("{e:?}"))?;
+        t_us += us;
+        t += us as f64 * 1e-6;
+        if step < warm {
+            s.switch(t_us, &mut a).map_err(|e| format!("{e:?}"))?;
+        }
+    }
+    Ok((a, s, t_us, t))
+}
+
+/// **Banc S420 — la décision de la bascule** (`--apic3d-carte-decision`) : sur B10 en bande étroite après `CHAUFFE` pas, le masque
+/// demandé par la carte contre celui de la référence. Lignes `APIC_CARTE_BASCULE_S420`.
+pub fn recevoir_decision() -> Result<(), String> {
+    let list: Vec<usize> = std::env::var("CHAUFFES")
+        .ok()
+        .map(|v| v.split(',').filter_map(|x| x.parse().ok()).collect())
+        .unwrap_or_else(|| vec![0, 10, 30, 50, 60]);
+    pollster::block_on(async {
+        let b = B10::new(2., 8);
+        for warm in list {
+            let (mut a, mut s, t_us, _) = b10_band_state(&b, warm)?;
+            let mut carte = ApicCarte::new(&a, a.particle_capacity()).await?;
+            carte.load(&a)?;
+            carte.set_body(a.body());
+            carte.load_switch(&s);
+            let mask = carte.decide_for_bench(t_us)?;
+            s.switch(t_us, &mut a).map_err(|e| format!("{e:?}"))?;
+            let reference = s.requested();
+            let differ = mask.iter().zip(reference).filter(|(x, y)| **x != **y as u32).count();
+            let band = reference.iter().filter(|x| **x == 0).count();
+            println!(
+                "APIC_CARTE_BASCULE_S420 decision chauffe={warm} colonnes={} bande_demandee={band} differentes={differ}",
+                reference.len()
+            );
+            if differ > 0 {
+                return Err("décision : le masque demandé diffère".into());
+            }
+        }
+        Ok(())
+    })
 }

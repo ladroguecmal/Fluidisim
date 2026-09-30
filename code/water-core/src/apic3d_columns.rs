@@ -1739,6 +1739,12 @@ impl ColumnsSwitch {
         self.calls = 0;
     }
 
+    /// **S420 — banc de la carte (C7c-4)** : l'instant, µs, où chaque colonne a été requise pour la dernière fois (`u64::MAX` :
+    /// jamais), et le fond demandé au dernier `switch`, m.
+    pub fn switch_state(&self) -> (&[u64], &[f32]) {
+        (&self.required_at, &self.floor_target)
+    }
+
     /// Le masque demandé au dernier `switch` (1 : colonnes ; 0 : particules).
     pub fn requested(&self) -> &[u8] {
         &self.request

@@ -17,6 +17,11 @@ struct Params {
     bmz: f32, has_columns: f32, band: f32, q2: f32,
     // S419 : un fond de bande existe-t-il (C7c-3) ?
     floors: f32, r0: f32, r1: f32, r2: f32,
+    // S420 — le critère de bascule (`ColumnsSwitch`) : instant (µs, 32 bits), maintien (µs), dilatation, fond en mailles et son
+    // hystérésis, prédiction du corps, fond demandé ; pente, pente de relâche (négative : aucune), marge du corps, horizon.
+    s_now: u32, s_hold: u32, s_dil: u32, s_fcells: u32,
+    s_fhyst: u32, s_pred: u32, s_has_fcells: u32, s_pad: u32,
+    s_slope: f32, s_release: f32, s_margin: f32, s_horizon: f32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
@@ -57,6 +62,9 @@ struct Params {
 // S418 — le compactage : vivantes par groupe de 256 (préfixe), et un tampon de passage (x, v, trois lignes de C).
 @group(0) @binding(21) var<storage, read_write> pblk: array<u32>;
 @group(0) @binding(22) var<storage, read_write> pscratch: array<vec4<f32>>;
+// S420 — l'état du critère, par colonne : instant requis [0, C), besoin, dilatation, gardée, hauteur (bits), demande, fond demandé
+// (bits) — sept tranches de C.
+@group(0) @binding(23) var<storage, read_write> swb: array<u32>;
 
 // Le nombre de particules, résident.
 fn np() -> u32 {
@@ -2075,4 +2083,205 @@ fn square_sum(d: vec3<f32>) -> f32 {
     let y = bitcast<f32>(bitcast<u32>(d.y * d.y));
     let z = bitcast<f32>(bitcast<u32>(d.z * d.z));
     return (x + y) + z;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **La décision de la bascule** (`ColumnsSwitch::decide`, S408–S410 ; C7c-4), sur la surface rafraîchie (tri et `reconstruct`).
+
+const SW_AT: u32 = 0u;
+const SW_NEED: u32 = 1u;
+const SW_SPREAD: u32 = 2u;
+const SW_KEEP: u32 = 3u;
+const SW_HEIGHT: u32 = 4u;
+const SW_REQUEST: u32 = 5u;
+const SW_FLOOR: u32 = 6u;
+const NEVER: u32 = 0xffffffffu;
+
+fn sw(which: u32, col: u32) -> u32 {
+    return which * P.nx * P.ny + col;
+}
+
+fn nan_f32() -> f32 {
+    return bitcast<f32>(0x7fc00000u);
+}
+
+fn is_finite_f32(x: f32) -> bool {
+    return (bitcast<u32>(x) & 0x7f800000u) != 0x7f800000u;
+}
+
+// `convertible_height` : un seul segment d'eau posé sur le fond, aucune maille solide, mailles occupées d'un seul tenant depuis le
+// fond ; la hauteur à l'iso-zéro. NaN sinon.
+fn convertible_height(i: u32, j: u32) -> f32 {
+    var filled = 0u;
+    var run = true;
+    var top_count = 0u;
+    var neg_run = true;
+    for (var k = 0u; k < P.nz; k = k + 1u) {
+        let c = cell_index(i, j, k);
+        if label[c] == SOLID {
+            return nan_f32();
+        }
+        let occupied = start[c + 1u] > start[c] || grid_at(i32(i), i32(j), k);
+        if run && occupied {
+            filled = filled + 1u;
+        } else {
+            run = false;
+            if occupied {
+                return nan_f32();
+            }
+        }
+        let neg = cellf[field(F_PHI, c)] < 0.0;
+        if neg_run && neg {
+            top_count = top_count + 1u;
+        } else {
+            neg_run = false;
+            if neg {
+                return nan_f32();
+            }
+        }
+    }
+    if !(cellf[field(F_PHI, cell_index(i, j, 0u))] < 0.0) || filled == 0u || top_count >= P.nz {
+        return nan_f32();
+    }
+    let top = top_count - 1u;
+    let a = cellf[field(F_PHI, cell_index(i, j, top))];
+    let b = cellf[field(F_PHI, cell_index(i, j, top + 1u))];
+    return (f32(top) + 0.5) * P.dx + P.dx * a / (a - b);
+}
+
+// (1) les hauteurs et les colonnes non convertibles ; (2) le corps : le segment de l'horizon, élargi de la marge.
+@compute @workgroup_size(128)
+fn switch_need(@builtin(global_invocation_id) g: vec3<u32>) {
+    let col = g.x;
+    if col >= P.nx * P.ny {
+        return;
+    }
+    let i = col % P.nx;
+    let j = col / P.nx;
+    swb[sw(SW_KEEP, col)] = 0u;
+    var need = 0u;
+    var h = 0.0;
+    if cmask[col] != 0u {
+        h = cols[col];
+    } else {
+        h = convertible_height(i, j);
+        if !is_finite_f32(h) {
+            need = 1u;
+        }
+    }
+    if P.has_body != 0.0 {
+        let d = vec3<f32>(P.bvx, P.bvy, P.bvz) * P.s_horizon;
+        let reach = P.br + P.s_margin;
+        let low = min(P.bcz, P.bcz + d.z) - P.br;
+        let len2 = d.x * d.x + d.y * d.y;
+        let x = (f32(i) + 0.5) * P.dx - P.bcx;
+        let y = (f32(j) + 0.5) * P.dx - P.bcy;
+        var s = 0.0;
+        if len2 > 0.0 {
+            s = clamp((x * d.x + y * d.y) / len2, 0.0, 1.0);
+        }
+        let ex = x - s * d.x;
+        let ey = y - s * d.y;
+        var surface = f32(P.nz) * P.dx;
+        if is_finite_f32(h) {
+            surface = h;
+        }
+        if ex * ex + ey * ey <= reach * reach && low <= surface + P.s_margin {
+            need = 1u;
+        }
+    }
+    swb[sw(SW_NEED, col)] = need;
+    swb[sw(SW_HEIGHT, col)] = bitcast<u32>(h);
+}
+
+fn height_at(x: i32, y: i32) -> f32 {
+    if x < 0 || y < 0 || x >= i32(P.nx) || y >= i32(P.ny) {
+        return nan_f32();
+    }
+    return bitcast<f32>(swb[sw(SW_HEIGHT, u32(y) * P.nx + u32(x))]);
+}
+
+fn slope_of(here: f32, lo: f32, hi: f32) -> f32 {
+    let l = is_finite_f32(lo);
+    let h = is_finite_f32(hi);
+    if l && h {
+        return (hi - lo) / (2.0 * P.dx);
+    }
+    if l {
+        return (here - lo) / P.dx;
+    }
+    if h {
+        return (hi - here) / P.dx;
+    }
+    return 0.0;
+}
+
+// (3) la pente : différences centrées sur les hauteurs connues, décentrées à côté d'une inconnue.
+@compute @workgroup_size(128)
+fn switch_slope(@builtin(global_invocation_id) g: vec3<u32>) {
+    let col = g.x;
+    if col >= P.nx * P.ny {
+        return;
+    }
+    let i = i32(col % P.nx);
+    let j = i32(col / P.nx);
+    let here = bitcast<f32>(swb[sw(SW_HEIGHT, col)]);
+    if swb[sw(SW_NEED, col)] != 0u || !is_finite_f32(here) {
+        return;
+    }
+    let sx = slope_of(here, height_at(i - 1, j), height_at(i + 1, j));
+    let sy = slope_of(here, height_at(i, j - 1), height_at(i, j + 1));
+    let s2 = sx * sx + sy * sy;
+    if s2 > P.s_slope * P.s_slope {
+        swb[sw(SW_NEED, col)] = 1u;
+    } else if cmask[col] == 0u && P.s_release >= 0.0 && s2 > P.s_release * P.s_release {
+        swb[sw(SW_KEEP, col)] = 1u;
+    }
+}
+
+// (4) la dilatation de Chebyshev, séparable : d'abord en `x`.
+@compute @workgroup_size(128)
+fn switch_spread(@builtin(global_invocation_id) g: vec3<u32>) {
+    let col = g.x;
+    if col >= P.nx * P.ny {
+        return;
+    }
+    let i = col % P.nx;
+    let j = col / P.nx;
+    let r = P.s_dil;
+    let lo = select(0u, i - r, i >= r);
+    let hi = min(i + r + 1u, P.nx);
+    var any = 0u;
+    for (var a = lo; a < hi; a = a + 1u) {
+        if swb[sw(SW_NEED, j * P.nx + a)] != 0u {
+            any = 1u;
+        }
+    }
+    swb[sw(SW_SPREAD, col)] = any;
+}
+
+// puis en `y`, et le maintien : une colonne repasse aux colonnes après `hold` sans être requise.
+@compute @workgroup_size(128)
+fn switch_request(@builtin(global_invocation_id) g: vec3<u32>) {
+    let col = g.x;
+    if col >= P.nx * P.ny {
+        return;
+    }
+    let i = col % P.nx;
+    let j = col / P.nx;
+    let r = P.s_dil;
+    let lo = select(0u, j - r, j >= r);
+    let hi = min(j + r + 1u, P.ny);
+    var required = swb[sw(SW_KEEP, col)] != 0u;
+    for (var b = lo; b < hi; b = b + 1u) {
+        if swb[sw(SW_SPREAD, b * P.nx + i)] != 0u {
+            required = true;
+        }
+    }
+    if required {
+        swb[sw(SW_AT, col)] = P.s_now;
+    }
+    let at = swb[sw(SW_AT, col)];
+    let band = required || (at != NEVER && P.s_now - at < P.s_hold);
+    swb[sw(SW_REQUEST, col)] = select(1u, 0u, band);
 }

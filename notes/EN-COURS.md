@@ -85,7 +85,7 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la décision sur la carte : paramètres, état du critère, hauteurs convertibles, corps, pente, dilatation, maintien ;
+- [x] **P2** — la décision sur la carte : paramètres, état du critère, hauteurs convertibles, corps, pente, dilatation, maintien ;
   banc : masque demandé contre la référence.
 - [ ] **P3** — la bascule : particules → colonnes (hauteurs, retraits sur un fil, voie mixte en quanta, réserve), colonnes →
   particules (ensemencement sur un fil), soldes à la réserve ; la réserve réglée dans l'échange ; banc d'une bascule.
@@ -95,3 +95,4 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+- **P2** — cœur : `ColumnsSwitch::switch_state` (instants requis, fond demandé). Carte : `Params` à 224 octets (critère), `swb` (sept tranches par colonne), `switch_need` (hauteur convertible, corps), `switch_slope`, `switch_spread`, `switch_request` (maintien sur 32 bits) ; `load_switch`, `decide_for_bench` (tri + reconstruction + décision). `b10_band_state` (B10, maintien 0,3 s, fond 4 ; un pas de plus sans bascule). `--apic3d-carte-decision` : **masque identique** à 0, 10, 30, 50, 60 pas (56 à 59 colonnes en bande sur 256). Critère 1 tenu. Banc lent (3 min : la référence rechauffée à chaque instant).
