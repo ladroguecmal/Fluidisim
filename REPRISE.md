@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-01 00:34 +02:00
+JETON            : occupé
+Battement        : 2026-10-01 00:40 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S418 — C7c-2** au poste : l'échange à la frontière sur la carte, reçu sur le raccord
 Dernière session : S417 — physique : **C7b et C7c-1** ([preuve](docs/validation/APIC-CARTE-S416.md) §7–9) — B10 nu sur la carte, pincement au pas de la référence (l'écart de φ au col sous celui du témoin) ; la zone des colonnes sans échange, à 0,003 mm, volume exact en entiers ; C7c découpé en quatre. Avant : S416, C7a
 Session suivante : **S418 — C7c-2** au poste ([conception](docs/validation/APIC-CARTE-S416.md) §8) : l'échange à la frontière sur la carte — absorption, soldes en quanta entiers, retrait, pose, réserve ; `n` résident, compactage stable, dispatch indirect ; reçu sur le raccord (S399–S407) ; puis C7c-3 (fond), C7c-4 (bascule : B10 en bande étroite contre le témoin) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 5 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal

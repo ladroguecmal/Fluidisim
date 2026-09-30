@@ -62,58 +62,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S417 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7b puis C7c**
-([conception](../docs/validation/APIC-CARTE-S416.md) §1). Agent : Claude Code (Opus 5.5), au poste ; RTX 5070 Laptop.
+Session : S418 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7c-2**, l'échange à
+la frontière sur la carte ([conception](../docs/validation/APIC-CARTE-S416.md) §8). Agent : Claude Code (Opus 5.5), au poste.
 
-**Ce que la session fait.** **C7b** : le corps cinématique de S393 sur la carte — mailles solides, faces imposées, images radiales
-dans la reconstruction, particules repoussées — puis **B10 nu** (APIC seul, sans bande) sur la carte contre la référence. Ensuite
-la **conception de C7c** (la zone des colonnes et le fond : ≈ 1 800 lignes du cœur, découpées), et son premier morceau si le temps
-le permet.
+**Ce que la référence fait** (`columns_exchange`, S399–S407), et comment la carte le fait. (1) **L'absorption** : une particule
+entrée dans une colonne de la zone paie le solde de la face-maille de frontière la plus proche (ou `η`, loin de toute bande) et rend
+sa quantité de mouvement aux faces de la zone, `f += w·(v − f)/8` — **un mélange qui dépend de l'ordre** (deux particules dans
+l'ordre inverse : écart `a·b·(v₂ − v₁)`, jusqu'à 1/64 de l'écart des vitesses, pas un arrondi). La référence visite les particules
+en montant et retire par échange avec la dernière : l'ordre de visite se **reconstruit** exactement à partir de la liste triée des
+absorbées (deux pointeurs), puis un fil applique les gestes dans cet ordre. (2) **Le retrait** d'un solde dû, (3) **la pose** d'un
+solde reçu : séquentiels et rares (une ligne de faces-mailles) — un fil, dans l'ordre de la référence. Les soldes : **quanta
+entiers** (une particule = 2²⁴), chargés par le transport aux faces de frontière. `n` **résident** sur la carte, lu par les noyaux ;
+dispatch à la capacité (l'indirect est C7e) ; **compactage stable** des particules retirées. La séparation tenue côté bande (S400).
 
-**Critères, écrits avant.** (1) Les étages avec le corps, sur un état de B10 chauffé : étiquettes identiques (solides compris),
-`φ` à 10⁻⁵ m, vitesses de grille à 10⁻⁴ m/s après projection et après imposition, positions à 10⁻⁵ m après le corps. (2) **B10
-nu**, Fr = 2, D/dx = 8, quart de domaine : pincement **au même pas** que la référence (ou à un pas, publié), `φ` à **3 mm** de la
-référence dans la bande de l'interface (|φ| < dx) jusqu'au pincement, air enfermé et cavité au pincement publiés des deux côtés.
-(3) Coût par étage publié. (4) Zéro avertissement ; suite inchangée. **Arrêt** : un écart au-delà de l'arrondi se publie et
-s'explique avant C7c.
+**Critères, écrits avant.** (1) Étages de la cuve mixte à l'arrondi jusqu'à l'advection, **soldes** après le transport au quantum
+près de la référence (au plus un quantum par rangée d'écart d'arrondi). (2) **Un pas entier** sur la cuve mixte : mêmes nombres
+d'absorbées, retirées, posées ; même `n` ; positions triées à 10⁻⁵ m ; soldes et `η` à l'arrondi ; volume total de la carte
+**constant exactement** en quanta. (3) **Le raccord** (`apic3d_raccord`, S399–S407), 5 cm, 30 s : surface à **3 mm** de la
+référence (pire colonne, `η` dans la zone, `φ` dans la bande), période et niveaux publiés, écart ≤ celui du témoin si la
+reconstruction décroche ; volume exact ; coût de l'échange publié. (4) Zéro avertissement ; suite inchangée ; ballottement, B10 et
+cuve tout en colonnes inchangés. **Arrêt** : un écart qui n'est pas d'arrondi se publie et s'explique avant P6.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la carte : le corps (paramètres, étiquettes solides, faces imposées, images radiales, particules repoussées) ; banc des étages sur B10 ; critère 1.
-- [x] **P3** — B10 nu sur la carte contre la référence : pincement, air enfermé, cavité, `φ` à l'interface, coût ; critères 2 et 3.
-- [x] **P4** — conception de C7c : lecture de `apic3d_columns.rs`, découpage, critères (preuve §8).
-- [x] **P5** — *ajoutée après P4, déclarée avant d'y toucher* : **C7c-1**, la zone sans échange. Tampons de la zone (masque,
-  `η` et son reste, table de lecture de S400) ; `columns_label` et les particules virtuelles dans la reconstruction ; banc des
-  étages sur une cuve **mixte** (moitié colonnes, moitié particules : jusqu'à l'advection, l'échange n'intervient pas).
-- [x] **P6** — `columns_begin` et `columns_advect` (la vitesse du pas précédent au pied de la caractéristique) ; banc.
-- [x] **P7** — `columns_transport` : débits mouillés par face, une fois, appliqués aux deux colonnes avec des signes opposés ;
-  `η` avancé en double flottant (`η` + reste, comme la référence) ; banc.
-- [x] **P8** — la cuve **tout en colonnes** (`APIC3D_COLONNES`, S398) : ballottement à 3 mm de la référence sur 10 s ; volume.
-- [x] **P9** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
-- [x] **P10** — rituel.
-
-**Critères de C7c-1, écrits avant** (preuve §8.2) : étages à l'arrondi sur la cuve mixte — `φ` à 10⁻⁵ m et étiquettes identiques,
-vitesses advectées à 10⁻⁵ m/s, `η` à 10⁻⁶ m après transport ; la cuve tout en colonnes : surface à **3 mm** sur 10 s, période à
-0,5 %, dérive de volume publiée (la conservation se fait en double flottant, pas au bit : la masse exacte vient avec l'échange,
-C7c-2, en entiers).
+- [ ] **P2** — cœur : accès de banc aux soldes. Carte : `n` résident (noyaux par particule sur la capacité), soldes en quanta chargés
+  par le transport aux faces de frontière ; banc : soldes après le transport ; tout l'existant inchangé.
+- [ ] **P3** — le compactage stable des particules marquées (préfixe par blocs) ; la séparation tenue côté bande ; banc.
+- [ ] **P4** — l'absorption : marques en parallèle, liste triée, ordre de visite reconstruit, gestes sur un fil ; banc : nombres.
+- [ ] **P5** — retrait et pose sur un fil ; le pas entier sur la cuve mixte ; critère 2.
+- [ ] **P6** — le raccord sur la carte, 30 s ; critère 3.
+- [ ] **P7** — suite entière ; preuve §10 ; liste, file, feuille de route, index.
+- [ ] **P8** — rituel.
 
 ### Notes de reprise
-- **P2** — le corps sur la carte : `Params` à 160 octets (centre, vitesse, centre avancé), étiquettes solides et image radiale dans `reconstruct`, `impose_body` (après gravité et après extrapolation), `move_body` (fin du pas) ; `B10` (Fr, D/dx, quart) dans le banc ; `CAS=b10`. **B10, 15 pas de chauffe** (131 072 particules, corps à −3,96 m/s) : transfert 4,8·10⁻⁶ m/s (max 5,9), `φ` 4,7·10⁻⁶ m, étiquettes identiques (67 solides), **211 itérations des deux côtés**, vitesses 5,2·10⁻⁶ m/s, faces non nulles 49 248 contre 49 246 (deux faces à zéro d'un côté, dans l'écart), positions **2,4·10⁻⁷ m** après le corps. Ballottement inchangé. Critère 1 tenu. Le banc re-chauffe la référence à chaque étage : 2 min.
-- **P3** — `--apic3d-carte-b10` (FR, ND, ITERATIONS, TEMOIN) : Fr 2, D/dx 8, 131 072 particules, 71 pas. **Pincement
-  identique au chiffre près** (pas 54, t = 2,1308 √(R/g), profondeur 1,312 D, air 0,0781 D³, cavité 1,937 D, couronne 0,205 D),
-  itérations 207,4 / 207,5, aucune non convergée ; coût p99 6,42 ms, 49 ns/particule (projection 4,18 au plafond 600). **Mais**
-  l'écart de `φ` dans la bande |φ| < dx monte à 0,005 mm (pas 20), 0,35 (pas 40), **9,2 mm** à t = 1,454 √(D/g), juste avant le
-  pincement : critère 2 (3 mm) manqué sur `φ`. Hypothèse, à éprouver avant de conclure : `φ` est discontinu là où le noyau ne voit
-  presque plus de particule (x̄ porté par une seule, ou `φ = dx` sans voisine) — au col de la cavité. Témoin : une seconde
-  référence aux vitesses initiales perturbées (`TEMOIN=1e-6`, `1e-4`), au calcul.
-- **P3** — série par pas (déterministe : 9,195 deux fois) : ≤ 0,32 mm jusqu'au pas 44, puis 1,08 (48), 1,70 (49), 9,20 (52), 2,58,
-  0,66 (54). **Témoins** : référence perturbée de ±10⁻⁶ m/s — **22,59 mm** (pas 49), 8,77 (52) ; ±10⁻⁴ — 21,22 (49), 7,87 (52) ;
-  pincement identique partout. Critère 2 manqué tel qu'écrit, et intenable : la référence ne le tient pas contre elle-même ;
-  remplacé pour C7c par « écart de la carte ≤ celui du témoin à 10⁻⁶, pas à pas ». Preuve §7.
-- **P5** — cœur : `columns_state` (masque, reste de `η`, table S400, bande). Carte : tampons `cols` (`η`, reste, table, débits) et `cmask`, `load` charge aussi les faces du pas précédent et la zone ; `reconstruct` : maille de colonne `φ = z − η lu`, particules virtuelles (`round` en `floor(x + 0,5)` : WGSL arrondit au pair). Banc `CAS=raccord` (`raccord_state`) : transfert 4,5·10⁻⁸ m/s, **`φ` 5,9·10⁻⁷ m, étiquettes identiques** ; projection à 0,11 m/s — attendu, l'advection de la zone manque (P6).
-- **P6** — `columns_begin` (vitesse du début du pas dans la copie des faces), `columns_advect` (une face `u`/`v` est de la zone si l'une de ses colonnes l'est — S406 ; `w` si sa colonne l'est) ; cuve mixte : **advection 7,8·10⁻⁸ m/s**, projection 94/94 itérations, vitesses 2,5·10⁻⁶ m/s, positions 1,2·10⁻⁷ m après advection. L'étage final diffère (0,13 m) : l'échange et la séparation tenue côté bande — C7c-2, attendu.
-- **P7** — `columns_flux` (un débit par face de colonnes, rangée par rangée, arrondi au quantum `dx³/8·2⁻²⁴`) et `columns_update` (le volume de la colonne en entiers sur deux mots, `η` relu en flottant) — **les volumes en entiers dès C7c-1** : FXC ne garantit pas le `mad` fusionné qu'exige un double flottant sans erreur ; en entiers, la conservation est exacte par construction. `η` à **2,4·10⁻⁷ m** (mixte) et **2,7·10⁻⁷ m** (tout en colonnes, 88/88 itérations). Critère d'étage tenu.
-- **P8** — `CAS=colonnes --apic3d-carte-ballottement` : 500 pas, **surface (`η`) à 0,003 mm** de la référence, période 1,9768 s des deux côtés (10 passages), itérations 89,1/89,1 ; **volume de la carte constant exactement** (dérive 0 en quanta ; la référence −3,3·10⁻¹⁶ m³) ; coût p99 1,46 ms, dont projection 1,39. Ballottement en particules inchangé (0,456 mm, +0,003 %) ; sa surface reconstruite mesurée 0,68 ms ce passage (0,41 avant) — variance de la carte, à surveiller en C7e.
-- **P9** — suite du cœur **753 réussis**, 19 ignorés, zéro avertissement (cœur et afficheur). Preuve §7 (C7b), §8 (conception de C7c), §9 (C7c-1) ; liste 4.19 (partiel, inchangé), file, feuille de route, index. `--check` : 0.
-- **P10** — journal ; jeton libre ; maillons 5 (justifiés : S406) ; suivant : S418, C7c-2.
