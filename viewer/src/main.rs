@@ -2629,6 +2629,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--apic3d-carte-ballottement") {
         return apic3d_carte::recevoir_ballottement();
     }
+    if args.iter().any(|a| a == "--apic3d-carte-b10") {
+        return apic3d_carte::recevoir_b10();
+    }
     if args.iter().any(|a| a == "--delta3d-operateur") {
         return delta3d::verifier();
     }

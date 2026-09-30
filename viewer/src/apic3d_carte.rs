@@ -896,3 +896,225 @@ impl B10 {
         Ok((a, t))
     }
 }
+
+/// Les mesures de B10 (`examples/apic3d_b10.rs`, quart de domaine, sans zone) sur l'occupation des mailles par les particules :
+/// air enfermé (m³, le quart compté quatre fois), haut de la bulle (m), cavité ouverte la plus profonde sous le repos (m).
+fn b10_measures(b: &B10, x: &[[f32; 3]], body: Sphere3) -> (f64, f64, f64) {
+    let Domain3 { nx, ny, nz, .. } = b.domain();
+    let (dx, r, h, d) = (b.dx, b.r, b.h, B10::D);
+    let mut occupation = vec![0u32; nx * ny * nz];
+    for p in x {
+        let f = |v: f32, m: usize| ((v as f64 / dx).max(0.) as usize).min(m - 1);
+        occupation[(f(p[2], nz) * ny + f(p[1], ny)) * nx + f(p[0], nx)] += 1;
+    }
+    let (cx, cy, cz) = (body.center[0] as f64, body.center[1] as f64, body.center[2] as f64);
+    let centre = |i: usize| (i as f64 + 0.5) * dx;
+    let solid = |i: usize, j: usize, k: usize| {
+        let (x, y, z) = (centre(i) - cx, centre(j) - cy, centre(k) - cz);
+        x * x + y * y + z * z < r * r
+    };
+    let air = |i: usize, j: usize, k: usize| occupation[(k * ny + j) * nx + i] == 0 && !solid(i, j, k);
+    let mut reached = vec![false; nx * ny * nz];
+    let mut stack = Vec::new();
+    for j in 0..ny {
+        for i in 0..nx {
+            if air(i, j, nz - 1) {
+                reached[((nz - 1) * ny + j) * nx + i] = true;
+                stack.push((i, j, nz - 1));
+            }
+        }
+    }
+    while let Some((i, j, k)) = stack.pop() {
+        let around = [
+            (i.wrapping_sub(1), j, k),
+            (i + 1, j, k),
+            (i, j.wrapping_sub(1), k),
+            (i, j + 1, k),
+            (i, j, k.wrapping_sub(1)),
+            (i, j, k + 1),
+        ];
+        for (a, bb, c) in around {
+            if a >= nx || bb >= ny || c >= nz {
+                continue;
+            }
+            let m = (c * ny + bb) * nx + a;
+            if !reached[m] && air(a, bb, c) {
+                reached[m] = true;
+                stack.push((a, bb, c));
+            }
+        }
+    }
+    let (mut enclosed, mut top, mut cavity) = (0f64, f64::NAN, 0f64);
+    for k in 0..nz {
+        let z = centre(k);
+        if z >= h || z < cz + r {
+            continue;
+        }
+        for j in 0..ny {
+            for i in 0..nx {
+                let (x, y) = (centre(i), centre(j));
+                if x * x + y * y > d * d || !air(i, j, k) {
+                    continue;
+                }
+                if reached[(k * ny + j) * nx + i] {
+                    cavity = cavity.max(h - z);
+                } else {
+                    enclosed += dx * dx * dx * 4.;
+                    top = if top.is_nan() { z } else { top.max(z) };
+                }
+            }
+        }
+    }
+    (enclosed, top, cavity)
+}
+
+/// **Banc S417 — B10 nu sur la carte** (`--apic3d-carte-b10`) : Fr = `FR` (2), D/dx = `ND` (8), quart de domaine ; la carte et
+/// la référence partent du même ensemencement, le corps reposé à chaque pas des deux côtés, le pas choisi par la référence.
+/// Pincement (premier pas où l'air enfermé dépasse D³/32), cavité, couronne, et l'écart de `φ` dans la bande de l'interface
+/// (|φ| < dx d'un côté) jusqu'au premier pincement. Lignes `APIC_CARTE_B10_S417`.
+pub fn recevoir_b10() -> Result<(), String> {
+    let fr: f64 = std::env::var("FR").ok().and_then(|v| v.parse().ok()).unwrap_or(2.);
+    let n_d: usize = std::env::var("ND").ok().and_then(|v| v.parse().ok()).unwrap_or(8);
+    pollster::block_on(async {
+        let b = B10::new(fr, n_d);
+        let mut a = b.reference()?;
+        let n = a.particle_count();
+        let mut carte = ApicCarte::new(&a, n).await?;
+        carte.set_iteration_cap(std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(600));
+        carte.load(&a)?;
+        // **Le témoin** (`TEMOIN=ε`, m/s) : à la place de la carte, une seconde référence dont les vitesses initiales sont
+        // perturbées de ±ε — la sensibilité de la référence à elle-même, l'incertitude vraie de la mesure (METHODE, L371).
+        let eps: Option<f32> = std::env::var("TEMOIN").ok().and_then(|v| v.parse().ok());
+        let mut twin = match eps {
+            Some(e) => {
+                let mut t = b.reference()?;
+                t.set_particle_velocities(&|p| {
+                    let h = ((p[0] * 12.9898 + p[1] * 78.233 + p[2] * 37.719).sin() * 43758.547).fract();
+                    ([0., 0., e * (2. * h - 1.)], [[0.; 3]; 3])
+                })
+                .map_err(|e| format!("{e:?}"))?;
+                Some(t)
+            }
+            None => None,
+        };
+        let d = b.domain();
+        let echelle = (B10::D / B10::G).sqrt();
+        let (t_max, threshold) = (4. * echelle, B10::D.powi(3) / 32.);
+        println!(
+            "APIC_CARTE_B10_S417 carte={:?} fr={fr} d_sur_dx={n_d} domaine={}x{}x{} particules={n}",
+            carte.adapter, d.nx, d.ny, d.nz
+        );
+        struct Side {
+            pinch: Option<(u64, f64, f64, f64, f64)>, // (pas, t, profondeur, air, base)
+            cavity_max: f64,
+            crown: f64,
+        }
+        let mut sides = [0, 1].map(|_| Side { pinch: None, cavity_max: 0., crown: f64::MIN });
+        let (mut t, mut steps, mut worst_phi, mut worst_at, mut unconverged, mut it_ref, mut it_carte) =
+            (0f64, 0u64, 0f64, 0f64, 0u64, 0u64, 0u64);
+        let mut stage_ms: Vec<Vec<f64>> = vec![Vec::new(); 7];
+        let mut total_ms = Vec::new();
+        let mut gaps: Vec<(u64, f64)> = Vec::new();
+        let start = std::time::Instant::now();
+        if let Some(e) = eps {
+            println!("APIC_CARTE_B10_S417 temoin=reference_perturbee eps_m_s={e:e} (la carte n'est pas calculée)");
+        }
+        while t < t_max {
+            a.set_body(Some(b.sphere(t))).map_err(|e| format!("{e:?}"))?;
+            carte.set_body(Some(b.sphere(t)));
+            let us = a.stable_step_us(20_000);
+            let rep = a.step(us).map_err(|e| format!("{e:?}"))?;
+            let times = match twin.as_mut() {
+                Some(tw) => {
+                    tw.set_body(Some(b.sphere(t))).map_err(|e| format!("{e:?}"))?;
+                    tw.step(us).map_err(|e| format!("{e:?}"))?;
+                    StageTimes::default()
+                }
+                None => carte.step_upto(us, ApicStage::Full)?,
+            };
+            t += us as f64 * 1e-6;
+            steps += 1;
+            it_ref += rep.iterations as u64;
+            if twin.is_none() {
+                let (_, it, _, converged) = carte.pressure()?;
+                it_carte += it as u64;
+                unconverged += (!converged) as u64;
+            }
+            let mut sum = 0.;
+            for (k, v) in times.stages.iter().take(7).enumerate() {
+                if let Some(ms) = v {
+                    stage_ms[k].push(*ms);
+                    sum += ms;
+                }
+            }
+            total_ms.push(sum);
+            // `φ` à l'interface, tant qu'aucun côté n'a pincé.
+            if sides.iter().all(|s| s.pinch.is_none()) {
+                let phi = match twin.as_ref() {
+                    Some(tw) => tw.distance().to_vec(),
+                    None => carte.surface()?.0,
+                };
+                let lim = b.dx as f32;
+                let gap = phi
+                    .iter()
+                    .zip(a.distance())
+                    .filter(|(p, q)| p.abs() < lim || q.abs() < lim)
+                    .fold(0f32, |m, (p, q)| m.max((p - q).abs())) as f64;
+                if gap > worst_phi {
+                    worst_phi = gap;
+                    worst_at = t;
+                }
+                gaps.push((steps, gap));
+            }
+            let (x, body_carte) = match twin.as_ref() {
+                Some(tw) => (tw.particles().to_vec(), tw.body().ok_or("corps")?),
+                None => (carte.particles()?.0, carte.body().ok_or("corps")?),
+            };
+            let body_ref = a.body().ok_or("corps")?;
+            for (side, (xs, body)) in sides.iter_mut().zip([(a.particles(), body_ref), (&x[..], body_carte)]) {
+                if side.pinch.is_some() {
+                    continue;
+                }
+                let (enclosed, top, cavity) = b10_measures(&b, xs, body);
+                side.cavity_max = side.cavity_max.max(cavity);
+                side.crown = side.crown.max(xs.iter().fold(f64::MIN, |m, p| m.max(p[2] as f64)));
+                if enclosed > threshold {
+                    side.pinch = Some((steps, t, b.h - top, enclosed, b.h - (body.center[2] as f64 - b.r)));
+                }
+            }
+            if steps % 20 == 0 {
+                println!(
+                    "APIC_CARTE_B10_S417 progression t_sur_rac_d_g={:.3} pas={steps} ecart_phi_interface_mm={:.3} calcul_s={:.0}",
+                    t / echelle, worst_phi * 1e3, start.elapsed().as_secs_f64()
+                );
+            }
+            let last = sides.iter().filter_map(|s| s.pinch.map(|p| p.1)).fold(None, |m: Option<f64>, x| Some(m.map_or(x, |m| m.max(x))));
+            if sides.iter().all(|s| s.pinch.is_some()) && last.is_some_and(|tp| t > tp + 0.3 * echelle) {
+                break;
+            }
+        }
+        let show = |s: &Side| match s.pinch {
+            Some((k, tp, prof, air, base)) => format!(
+                "pas={k} t_sur_rac_r_g={:.4} profondeur_sur_d={:.3} air_sur_d3={:.4} base_sur_d={:.3} cavite_max_sur_d={:.3} couronne_sur_d={:.3}",
+                tp / (b.r / B10::G).sqrt(), prof / B10::D, air / B10::D.powi(3), base / B10::D, s.cavity_max / B10::D,
+                (s.crown - b.h) / B10::D
+            ),
+            None => "pas de pincement".into(),
+        };
+        println!("APIC_CARTE_B10_S417 reference {}", show(&sides[0]));
+        println!("APIC_CARTE_B10_S417 {}     {}", if eps.is_some() { "temoin" } else { "carte" }, show(&sides[1]));
+        let series: Vec<String> = gaps.iter().filter(|(k, _)| k % 4 == 0 || *k + 6 > gaps.len() as u64).map(|(k, g)| format!("{k}:{:.2}", g * 1e3)).collect();
+        println!("APIC_CARTE_B10_S417 ecart_phi_interface_par_pas_mm {}", series.join(" "));
+        let names = ["transfert", "surface", "projection", "extrapolation", "retour", "advection", "separation_corps"];
+        let per_stage: Vec<String> =
+            names.iter().zip(stage_ms.iter_mut()).map(|(name, v)| format!("{name}={:.3}", percentile(v, 0.99))).collect();
+        let p99 = percentile(&mut total_ms, 0.99);
+        println!(
+            "APIC_CARTE_B10_S417 pas={steps} ecart_phi_interface_max_mm={:.3} a_t_sur_rac_d_g={:.3} iterations_moyennes_reference={:.1} carte={:.1} non_convergees={unconverged} calcul_s={:.0}",
+            worst_phi * 1e3, worst_at / echelle, it_ref as f64 / steps as f64, it_carte as f64 / steps as f64,
+            start.elapsed().as_secs_f64()
+        );
+        println!("APIC_CARTE_B10_S417 cout_p99_ms total={p99:.3} par_particule_ns={:.1} {}", p99 * 1e6 / n as f64, per_stage.join(" "));
+        Ok(())
+    })
+}

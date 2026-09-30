@@ -169,8 +169,100 @@ la carte (C3 : 6 à 8 cycles là où le gradient conjugué en demande 94), et un
 
 ## 6. Ce que ce document ne dit pas
 
-- **Ni la zone des colonnes, ni le fond, ni le corps** : C7b et C7c. La bande étroite n'est pas encore sur la carte ; B10 non plus.
+- **Ni la zone des colonnes, ni le fond** : C7c (§8). La bande étroite n'est pas encore sur la carte ; B10 nu l'est depuis S417 (§7).
 - **Le pas `dt`** est celui de la référence : la carte ne le choisit pas elle-même (C7e, diagnostics différés).
 - **Le budget** : 2,05 ms pour une cuve de 2 × 0,2 m est le budget entier de δ ; aucune conclusion de budget n'en sort avant la
   multigrille et la bande étroite, qui retire les particules profondes (÷ 4,7 à 7,7, S413).
 - **Une seule cible** : DX12 sur ce poste.
+
+## 7. C7b — le corps sur la carte (S417)
+
+**Reproduire** : commit de S417 P3 ou plus récent ; `CAS=b10 CHAUFFE=15 ITERATIONS=400 … --apic3d-carte-etages` (2 min) ;
+`… --apic3d-carte-b10` (une minute ; `FR=`, `ND=`, `ITERATIONS=` : 2, 8, 600) ; le témoin : `TEMOIN=1e-6 … --apic3d-carte-b10`
+(deux minutes, la carte n'est pas calculée).
+
+**La construction.** Le corps cinématique de S393 : `Params` porte le centre au début du pas, la vitesse et le centre avancé ;
+`reconstruct` ajoute l'image radiale du corps et marque solides les mailles dont le centre est dans la sphère ; `impose_body`
+(après la gravité, après l'extrapolation) donne sa vitesse à toute face qui touche une maille solide, une face de bord restant
+une paroi ; `move_body` (fin du pas) repousse les particules atteintes. Le banc reproduit B10 de `examples/apic3d_b10.rs` (Fr = 2,
+D/dx = 8, quart de domaine, 16 × 16 × 84 mailles, 131 072 particules), le corps reposé à chaque pas des deux côtés.
+
+**Critère 1 — les étages avec le corps**, sur B10 chauffé de 15 pas (corps à −3,96 m/s, 67 mailles solides) : transfert 4,8·10⁻⁶
+m/s (vitesse max 5,9) ; `φ` 4,7·10⁻⁶ m, étiquettes identiques ; **211 itérations des deux côtés**, vitesses 5,2·10⁻⁶ m/s ; faces
+non nulles après extrapolation 49 248 contre 49 246 (deux faces nulles d'un seul côté, dans l'écart de vitesse) ; retour 7,8·10⁻⁶
+m/s ; positions **2,4·10⁻⁷ m** après le corps. **Tenu.** Le ballottement de C7a est inchangé au caractère près.
+
+**Critère 2 — B10 nu, 71 pas.**
+
+| | carte | référence |
+|---|---|---|
+| pincement | **pas 54**, t = 2,1308 √(R/g) | **pas 54**, 2,1308 |
+| profondeur du pincement | 1,312 D | 1,312 D |
+| air enfermé au pincement | 0,0781 D³ | 0,0781 D³ |
+| base du corps | 3,013 D | 3,013 D |
+| cavité maximale | 1,937 D | 1,937 D |
+| couronne | 0,205 D | 0,205 D |
+| itérations moyennes | 207,5 | 207,4 |
+
+**Le pincement est celui de la référence au chiffre près** — et celui de S414 (1,937 D, 0,078 D³). **L'écart de `φ` dans la bande
+de l'interface** (|φ| < dx d'un côté), lui, **manque les 3 mm écrits** : ≤ 0,32 mm jusqu'au pas 44, puis des pointes d'un pas —
+1,08 (pas 48), 1,70 (49), **9,20 (52)**, 2,58 (53), 0,66 (54).
+
+**Le témoin** (METHODE : l'incertitude vraie est la sensibilité à une perturbation minime, L371) : une **seconde référence**, dont
+les vitesses initiales sont perturbées de ±ε (pseudo-aléatoire par position), contre la première, par le même instrument.
+
+| ε | écart de `φ` max | pas 48 | pas 49 | pas 52 | pincement |
+|---|---|---|---|---|---|
+| **carte** (ε = 0, l'arrondi de la carte) | **9,20 mm** | 1,08 | 1,70 | 9,20 | pas 54, identique |
+| 10⁻⁶ m/s | **22,59 mm** | 0,50 | 22,59 | 8,77 | pas 54, identique |
+| 10⁻⁴ m/s | **21,22 mm** | 0,68 | 21,22 | 7,87 | pas 54, identique |
+
+**Ce que cela dit** (fait mesuré, puis explication, séparés — L177). *Fait* : la référence s'écarte d'elle-même de 21 à 23 mm sous
+une perturbation de 10⁻⁶ m/s, aux mêmes pas que la carte, et la carte en reste plus près (9,2 mm) ; hors de ces pas, carte et
+témoins sont au même niveau (0,2 à 0,5 mm au pas 40). *Explication* : `φ = |q − x̄| − r` est **discontinu** là où le noyau ne voit
+presque plus de particule — x̄ porté par une ou deux particules lointaines, ou `φ = dx` sans voisine — ce qu'est le col de la
+cavité juste avant qu'il se ferme. **Le critère 2, tel qu'écrit, est manqué ; il ne peut être tenu par aucune implémentation de
+cette référence**, qui ne le tient pas contre elle-même. Il n'est pas relevé : il est remplacé, pour les réceptions suivantes
+(C7c), par un critère écrit avant elles — **l'écart de la carte ne dépasse pas celui du témoin à 10⁻⁶ m/s, pas à pas**, et le
+pincement tombe au même pas. Sur B10 nu, la carte le tient à chaque pas publié sauf au pas 48 (1,08 contre 0,50 mm), sous le
+millimètre dans les deux cas.
+
+**Critère 3 — le coût**, au 99ᵉ centile, 131 072 particules : **6,42 ms, 49 ns par particule** — transfert 0,68, surface 0,82,
+**projection 4,18** (plafond de 600 itérations enregistrées pour 207 utiles), séparation et corps 0,80, le reste 0,09. Le même
+constat qu'en C7a : la projection d'abord, par ses dispatchs enregistrés.
+
+## 8. La conception de C7c — la zone des colonnes et le fond sur la carte (S417)
+
+### 8.1 Ce que la référence fait, et ce qui ne se transporte pas tel quel
+
+`apic3d_columns.rs` (≈ 1 800 lignes) porte quatre choses : **la zone** (masque, `η` par colonne, vitesses eulériennes advectées au
+pied de la caractéristique, `φ = z − η`, particules virtuelles dans la reconstruction, `η` transporté par les débits mouillés —
+S398) ; **l'échange** à la frontière latérale (absorption, soldes par face-maille, retrait de la particule la plus proche, pose
+à la face — S399–S407) ; **le fond** de la bande (S413–S414 : contenant plein, solde vertical, déplacement) ; **la bascule** et
+son critère (`ColumnsSwitch`, S408–S415). Trois de ses gestes n'ont pas d'équivalent direct sur la carte :
+
+- **La masse en `f64`.** Soldes, débits et volumes sont en `f64` dans la référence, pour que la masse se compte au bit. **wgpu 30
+  n'offre `SHADER_F64` que sous Vulkan** (lu dans `wgpu-hal`), et le poste tourne en DX12 (S211). **Décision** : sur la carte, les
+  volumes de l'échange se comptent **en entiers** — un quantum fixe, fraction exacte du volume d'une particule (`dx³/8`), sur deux
+  mots de 32 bits ; un débit s'arrondit **une fois**, au quantum, et le même entier s'ajoute d'un côté et se retranche de l'autre.
+  La conservation est alors **exacte par construction**, ce que le `f64` n'assure qu'à l'arrondi ; l'écart à la référence est
+  celui de l'arrondi d'un débit au quantum, qui se publie.
+- **Le nombre de particules change pendant le pas** (absorption, retrait, pose, bascule). Sur la carte, `n` devient **résident** :
+  les noyaux par particule se lancent en **dispatch indirect**, leur taille calculée sur la carte ; une particule retirée se
+  marque, puis un **compactage stable** (préfixe sur les vivantes) la supprime ; les poses s'allouent par **préfixe** sur les
+  faces-mailles qui posent — aucune allocation par atomique, donc un ordre déterministe, comme le tri de C7a.
+- **Les choix séquentiels** (« la particule la plus proche de la face », « le sous-réseau le plus libre ») sont **locaux à une
+  face-maille** : un fil par face-maille, sur les particules triées par maille, les rend en parallèle sans changer la règle.
+
+### 8.2 Découpage
+
+| | contenu | reçu si |
+|---|---|---|
+| **C7c-1** | la zone **sans échange** : tampons, `columns_begin`, `columns_advect`, `columns_label` (lecture tabulée de S400 comprise), particules virtuelles dans la reconstruction, `columns_transport` en quanta entiers | étages à l'arrondi sur une cuve mixte ; **la cuve tout en colonnes** (`APIC3D_COLONNES`, S398) : ballottement à 3 mm de la référence sur 10 s, volume conservé exactement |
+| **C7c-2** | **l'échange** latéral : absorption, soldes, retrait, pose, réserve ; `n` résident, compactage, dispatch indirect | le **raccord** (`apic3d_raccord`, S399–S407) : ballottement à 3 mm sur 30 s ; volume exact ; densité au raccord dans la tolérance de S407 |
+| **C7c-3** | **le fond** : étiquettes sous le fond, solde vertical, absorption sous le fond, déplacement (`move_band_floor`) | le ballottement en bande étroite (`APIC3D_FOND=4`, S413) à 3 mm ; volume exact |
+| **C7c-4** | **la bascule et son critère** (`ColumnsSwitch` : pente, corps, dilatation, maintien, fond placé) sur la carte | **B10 en bande étroite** contre la référence : pincement au même pas, écart de `φ` à l'interface **pas plus grand que celui du témoin à 10⁻⁶ m/s, pas à pas** (§7 : le critère de 3 mm n'est pas tenable au col de la cavité) — **le critère de C7** |
+
+L'ordre protège une dépendance chaque fois : l'échange suppose la zone ; le fond réemploie l'échange tourné à la verticale
+(ADR-212 D3) ; la bascule manipule les trois. La décision de la bascule reste **sur la carte** : la production ne relit rien dans
+le pas (SPEC-004 §8.4).

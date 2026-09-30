@@ -81,10 +81,21 @@ s'explique avant C7c.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la carte : le corps (paramètres, étiquettes solides, faces imposées, images radiales, particules repoussées) ; banc des étages sur B10 ; critère 1.
-- [ ] **P3** — B10 nu sur la carte contre la référence : pincement, air enfermé, cavité, `φ` à l'interface, coût ; critères 2 et 3.
+- [x] **P3** — B10 nu sur la carte contre la référence : pincement, air enfermé, cavité, `φ` à l'interface, coût ; critères 2 et 3.
 - [ ] **P4** — conception de C7c : lecture de `apic3d_columns.rs`, découpage, critères (preuve §7).
 - [ ] **P5** — suite entière, zéro avertissement ; preuve ; liste, file, feuille de route, index.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
 - **P2** — le corps sur la carte : `Params` à 160 octets (centre, vitesse, centre avancé), étiquettes solides et image radiale dans `reconstruct`, `impose_body` (après gravité et après extrapolation), `move_body` (fin du pas) ; `B10` (Fr, D/dx, quart) dans le banc ; `CAS=b10`. **B10, 15 pas de chauffe** (131 072 particules, corps à −3,96 m/s) : transfert 4,8·10⁻⁶ m/s (max 5,9), `φ` 4,7·10⁻⁶ m, étiquettes identiques (67 solides), **211 itérations des deux côtés**, vitesses 5,2·10⁻⁶ m/s, faces non nulles 49 248 contre 49 246 (deux faces à zéro d'un côté, dans l'écart), positions **2,4·10⁻⁷ m** après le corps. Ballottement inchangé. Critère 1 tenu. Le banc re-chauffe la référence à chaque étage : 2 min.
+- **P3** — `--apic3d-carte-b10` (FR, ND, ITERATIONS, TEMOIN) : Fr 2, D/dx 8, 131 072 particules, 71 pas. **Pincement
+  identique au chiffre près** (pas 54, t = 2,1308 √(R/g), profondeur 1,312 D, air 0,0781 D³, cavité 1,937 D, couronne 0,205 D),
+  itérations 207,4 / 207,5, aucune non convergée ; coût p99 6,42 ms, 49 ns/particule (projection 4,18 au plafond 600). **Mais**
+  l'écart de `φ` dans la bande |φ| < dx monte à 0,005 mm (pas 20), 0,35 (pas 40), **9,2 mm** à t = 1,454 √(D/g), juste avant le
+  pincement : critère 2 (3 mm) manqué sur `φ`. Hypothèse, à éprouver avant de conclure : `φ` est discontinu là où le noyau ne voit
+  presque plus de particule (x̄ porté par une seule, ou `φ = dx` sans voisine) — au col de la cavité. Témoin : une seconde
+  référence aux vitesses initiales perturbées (`TEMOIN=1e-6`, `1e-4`), au calcul.
+- **P3** — série par pas (déterministe : 9,195 deux fois) : ≤ 0,32 mm jusqu'au pas 44, puis 1,08 (48), 1,70 (49), 9,20 (52), 2,58,
+  0,66 (54). **Témoins** : référence perturbée de ±10⁻⁶ m/s — **22,59 mm** (pas 49), 8,77 (52) ; ±10⁻⁴ — 21,22 (49), 7,87 (52) ;
+  pincement identique partout. Critère 2 manqué tel qu'écrit, et intenable : la référence ne le tient pas contre elle-même ;
+  remplacé pour C7c par « écart de la carte ≤ celui du témoin à 10⁻⁶, pas à pas ». Preuve §7.
