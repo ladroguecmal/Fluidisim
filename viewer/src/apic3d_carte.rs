@@ -12,13 +12,13 @@ use water_core::apic3d::{self, Apic3, ApicStage, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 42] = [
+const KERNELS: [&str; 43] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
     "separate_shift", "separate_apply", "impose_body", "move_body", "columns_begin", "columns_advect",
     "columns_flux", "columns_update", "compact_count", "compact_scan", "compact_scatter", "compact_copy", "compact_finish",
-    "exchange_begin", "absorb_mark", "absorb_serial", "exchange_serial",
+    "exchange_begin", "absorb_mark", "absorb_serial", "exchange_serial", "floor_update",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -53,6 +53,7 @@ const EXCHANGE_BEGIN: usize = 38;
 const ABSORB_MARK: usize = 39;
 const ABSORB_SERIAL: usize = 40;
 const EXCHANGE_SERIAL: usize = 41;
+const FLOOR_UPDATE: usize = 42;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants.
@@ -170,10 +171,12 @@ impl ApicCarte {
         // `η`, reste, table (32), débits en double flottant (deux mots par face de colonnes `x` et `y`).
         let cols = buffer(&device, ((2 * ncol + 32 + 2 * ((nx + 1) * ny + nx * (ny + 1))) * 4) as u64, storage);
         let cmask = buffer(&device, (ncol * 4) as u64, storage);
-        let ivol = buffer(&device, ((ncol + (nx + 1) * ny + nx * (ny + 1)) * 8) as u64, storage);
+        // Volumes des colonnes, débits, puis (S419) deux contributions au solde vertical par face de colonnes.
+        let ivol = buffer(&device, ((ncol + 3 * ((nx + 1) * ny + nx * (ny + 1))) * 8) as u64, storage);
         let nu = (nx + 1) * ny * nz;
         let nv = nx * (ny + 1) * nz;
-        let isolde = buffer(&device, ((nu + nv) * 8) as u64, storage);
+        // Soldes latéraux `u`, `v`, puis (S419) le solde vertical de chaque colonne.
+        let isolde = buffer(&device, ((nu + nv + ncol) * 8) as u64, storage);
         let pcount = buffer(&device, 64, storage);
         let plist = buffer(&device, (capacity * 4) as u64, storage);
         let pblk = buffer(&device, ((capacity.div_ceil(SCAN as usize) + 1) * 4) as u64, storage);
@@ -334,9 +337,11 @@ impl ApicCarte {
             self.queue.write_buffer(&self.ivol, 0, u32_bytes(&v));
             // S418 : les soldes, en quanta.
             if let Some((su, sv)) = reference.columns_soldes() {
+                let sw = reference.columns_solde_w().unwrap_or(&[]);
                 let w: Vec<u32> = su
                     .iter()
                     .chain(sv)
+                    .chain(sw)
                     .flat_map(|x| {
                         let q = (x / quantum).round() as i64 as u64;
                         [q as u32, (q >> 32) as u32]
@@ -502,6 +507,7 @@ impl ApicCarte {
                     let Domain3 { nx, ny, .. } = self.domain;
                     self.dispatch(&mut pass, COLUMNS_FLUX, (nx + 1) * ny + nx * (ny + 1), WG);
                     self.dispatch(&mut pass, COLUMNS_UPDATE, nx * ny, WG);
+                    self.dispatch(&mut pass, FLOOR_UPDATE, nx * ny, WG);
                     self.dispatch(&mut pass, G2P, self.capacity, WG);
                 }
                 ApicStage::Advect => self.dispatch(&mut pass, ADVECT, self.capacity, WG),
@@ -635,10 +641,10 @@ impl ApicCarte {
         self.read_u32(&self.pcount, 0, 7)
     }
 
-    /// S418 : les soldes des faces-mailles, `u` puis `v`, m³.
+    /// S418 : les soldes des faces-mailles, `u` puis `v`, puis (S419) le solde vertical de chaque colonne, m³.
     pub fn soldes(&self) -> Result<Vec<f64>, String> {
         let Domain3 { nx, ny, nz, dx } = self.domain;
-        let len = (nx + 1) * ny * nz + nx * (ny + 1) * nz;
+        let len = (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny;
         let w = self.read_u32(&self.isolde, 0, 2 * len)?;
         let dx = dx as f64;
         let quantum = dx * dx * dx / 8. / (1u64 << 24) as f64;
@@ -653,8 +659,15 @@ impl ApicCarte {
         let words = |v: Vec<u32>| -> i128 { v.chunks_exact(2).map(|w| ((w[1] as u64) << 32 | w[0] as u64) as i64 as i128).sum() };
         let n = self.counts()?[0] as i128;
         let cols = words(self.read_u32(&self.ivol, 0, 2 * ncol)?);
-        let soldes = words(self.read_u32(&self.isolde, 0, 2 * ((nx + 1) * ny * nz + nx * (ny + 1) * nz))?);
-        Ok(n * (1i128 << 24) + cols + soldes)
+        let soldes = words(self.read_u32(&self.isolde, 0, 2 * ((nx + 1) * ny * nz + nx * (ny + 1) * nz + ncol))?);
+        // S419 : l'eau sous le fond, en mailles entières (huit particules chacune).
+        let floor = self.read_f32(&self.cols, 2 * ncol + 32, ncol)?;
+        let under: i128 = if self.floors {
+            floor.iter().map(|f| (*f / self.domain.dx).round() as i128 * 8 * (1i128 << 24)).sum()
+        } else {
+            0
+        };
+        Ok(n * (1i128 << 24) + cols + soldes + under)
     }
 
     /// La surface des colonnes `η`, m (S417).
@@ -863,7 +876,7 @@ pub fn recevoir_etages() -> Result<(), String> {
                             if let Some((su, sv)) = r.columns_soldes() {
                                 let dx = d.dx as f64;
                                 let quantum = dx * dx * dx / 8. / (1u64 << 24) as f64;
-                                let rs: Vec<f64> = su.iter().chain(sv).copied().collect();
+                                let rs: Vec<f64> = su.iter().chain(sv).chain(r.columns_solde_w().unwrap_or(&[])).copied().collect();
                                 let cs = carte.soldes()?;
                                 let ds = cs.iter().zip(&rs).fold(0f64, |m, (a, b)| m.max((a - b).abs()));
                                 let nonzero = rs.iter().filter(|x| **x != 0.).count();
@@ -894,7 +907,7 @@ pub fn recevoir_etages() -> Result<(), String> {
                         let dxm = if same_n { max_abs_diff(&flat(&x), &flat(r.particles())) } else { f32::NAN };
                         let dvm = if same_n { max_abs_diff(&flat(&v), &flat(r.velocities())) } else { f32::NAN };
                         let (su, sv) = r.columns_soldes().ok_or("soldes")?;
-                        let rs: Vec<f64> = su.iter().chain(sv).copied().collect();
+                        let rs: Vec<f64> = su.iter().chain(sv).chain(r.columns_solde_w().unwrap_or(&[])).copied().collect();
                         let ds = carte.soldes()?.iter().zip(&rs).fold(0f64, |m, (a, b)| m.max((a - b).abs()));
                         let e = carte.columns_eta()?;
                         let mask = r.columns_state().map(|m| m.0.to_vec()).unwrap_or_default();

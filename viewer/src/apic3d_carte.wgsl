@@ -1304,6 +1304,9 @@ fn columns_flux(@builtin(global_invocation_id) g: vec3<u32>) {
         j = (e - fx) / P.nx;
     }
     var q = vec2<u32>(0u, 0u);
+    // S419 : les contributions de la face aux soldes verticaux de sa colonne basse et de sa colonne haute.
+    var to_low = vec2<u32>(0u, 0u);
+    var to_high = vec2<u32>(0u, 0u);
     let wall = (axis == 0u && (i == 0u || i == P.nx)) || (axis == 1u && (j == 0u || j == P.ny));
     if !wall {
         var low_col = 0u;
@@ -1347,12 +1350,61 @@ fn columns_flux(@builtin(global_invocation_id) g: vec3<u32>) {
                     if low {
                         into_zone = neg_i64(vq);
                     }
-                    solde_add(face, neg_i64(into_zone));
+                    // S413 : une rangée sous le fond de la bande va de contenant à contenant — au solde vertical de la colonne
+                    // de la bande, et non à la frontière latérale.
+                    var band_col = low_col;
+                    if low {
+                        band_col = high_col;
+                    }
+                    if P.floors != 0.0 && (f32(k) + 0.5) * P.dx < floor_of(band_col) {
+                        if low {
+                            to_high = add_i64(to_high, neg_i64(into_zone));
+                        } else {
+                            to_low = add_i64(to_low, neg_i64(into_zone));
+                        }
+                    } else {
+                        solde_add(face, neg_i64(into_zone));
+                    }
+                }
+            }
+        } else if P.floors != 0.0 && (floor_of(low_col) > 0.0 || floor_of(high_col) > 0.0) {
+            // S413 : entre deux colonnes de la bande, une rangée sous le fond des deux va de contenant à contenant ; sous le fond
+            // d'une seule, d'un contenant aux particules de l'autre (son solde vertical et le solde latéral). Mailles pleines.
+            let per_quantum = 1.0 / (P.dx * P.dx * P.dx * 0.125 * 5.960464477539063e-8);
+            for (var k = 0u; k < P.nz; k = k + 1u) {
+                let z = (f32(k) + 0.5) * P.dx;
+                let gl = z < floor_of(low_col);
+                let gh = z < floor_of(high_col);
+                if !gl && !gh {
+                    break;
+                }
+                var face = 0u;
+                if axis == 0u {
+                    face = (k * P.ny + j) * (P.nx + 1u) + i;
+                } else {
+                    face = P.nu + (k * (P.ny + 1u) + j) * P.nx + i;
+                }
+                let vq = to_i64(faces[face] * P.dx * P.dx * P.dt * per_quantum);
+                if gl {
+                    to_low = add_i64(to_low, neg_i64(vq));
+                }
+                if gh {
+                    to_high = add_i64(to_high, vq);
+                }
+                if gl != gh {
+                    if gl {
+                        solde_add(face, vq);
+                    } else {
+                        solde_add(face, neg_i64(vq));
+                    }
                 }
             }
         }
     }
     ivol_set(ncol + e, q);
+    let fx_fy = (P.nx + 1u) * P.ny + P.nx * (P.ny + 1u);
+    ivol_set(ncol + fx_fy + 2u * e, to_low);
+    ivol_set(ncol + fx_fy + 2u * e + 1u, to_high);
 }
 
 // `η ← η − (Σ débits sortants)/dx²`, en entiers, puis lu en flottant pour la surface.
@@ -1857,4 +1909,32 @@ fn below_floor(i: i32, j: i32, k: u32) -> bool {
 // `grid_cell` : une maille à la grille — dans la zone, ou sous le fond.
 fn grid_at(i: i32, j: i32, k: u32) -> bool {
     return in_zone(i, j) || below_floor(i, j, k);
+}
+
+fn solde_w_index(col: u32) -> u32 {
+    return P.nu + P.nv + col;
+}
+
+// S419 — le solde vertical de chaque colonne à fond : la somme des contributions de ses quatre faces (haute de la face à sa
+// gauche, basse de celle à sa droite, de même en `y`).
+@compute @workgroup_size(128)
+fn floor_update(@builtin(global_invocation_id) g: vec3<u32>) {
+    let col = g.x;
+    let ncol = P.nx * P.ny;
+    if col >= ncol || P.floors == 0.0 || cmask[col] != 0u {
+        return;
+    }
+    let i = col % P.nx;
+    let j = col / P.nx;
+    let fx = (P.nx + 1u) * P.ny;
+    let fx_fy = fx + P.nx * (P.ny + 1u);
+    let base = ncol + fx_fy;
+    let xl = j * (P.nx + 1u) + i;
+    let yl = fx + j * P.nx + i;
+    var v = vec2<u32>(0u, 0u);
+    v = add_i64(v, ivol_get(base + 2u * xl + 1u));
+    v = add_i64(v, ivol_get(base + 2u * (xl + 1u)));
+    v = add_i64(v, ivol_get(base + 2u * yl + 1u));
+    v = add_i64(v, ivol_get(base + 2u * (yl + P.nx)));
+    solde_add(solde_w_index(col), v);
 }

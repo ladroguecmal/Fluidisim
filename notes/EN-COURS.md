@@ -83,7 +83,7 @@ période publiée. (3) Raccord, B10, colonnes, ballottement inchangés ; suite ;
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — cœur : accès au solde vertical. Carte : le fond (tampon, paramètre), étiquettes et `φ` sous le fond, virtuelles
   jusqu'au fond, advection sous le fond ; banc `CAS=fond` : étages jusqu'à l'advection.
-- [ ] **P3** — le transport sous le fond : soldes verticaux et latéraux des rangées à la grille ; banc.
+- [x] **P3** — le transport sous le fond : soldes verticaux et latéraux des rangées à la grille ; banc.
 - [ ] **P4** — l'échange avec un fond : absorption sous le fond, frontière maille par maille, solde vertical (retrait, pose) ; un pas
   entier.
 - [ ] **P5** — le ballottement en bande étroite, 30 s, et le témoin ; critère 2.
@@ -92,3 +92,4 @@ période publiée. (3) Raccord, B10, colonnes, ballottement inchangés ; suite ;
 
 ### Notes de reprise
 - **P2** — cœur `columns_solde_w`. Carte : `Params` à 176 octets (`floors`), le fond dans `cols[2C + 32 + col]`, `floor_of`, `below_floor`, `grid_at` ; sous le fond `φ = z − fond`, eau ; virtuelles jusqu'au fond ; advection des faces à la grille (une `w` au-dessus d'une maille sous le fond). `band_state` (`CAS=fond`, fond à 4 mailles sous le creux, 5 116 particules) : **`φ` 8,4·10⁻⁷ m, étiquettes identiques**, advection 1,8·10⁻⁷ m/s, projection 94/94, positions 1,2·10⁻⁷ m après advection. L'échange diffère (68 absorbées sous le fond, 32 posées côté référence) : P4.
+- **P3** — le transport sous le fond : à une frontière, les rangées sous le fond de la bande vont à son solde vertical ; entre deux colonnes de la bande à fond, les rangées à la grille (mailles pleines, sans mouillage) aux soldes verticaux et, sous le fond d'une seule, au solde latéral. Chaque face garde ses deux contributions (`to_low`, `to_high`) ; `floor_update` les rassemble par colonne — sans atomique. Bande étroite : **soldes à 8,2·10⁻¹⁰ m³** au pire sur 1,6·10⁻⁵ (882 quanta), sous la borne de l'écart de vitesse admis (≈ 3·10⁻⁹) ; raccord inchangé (retraits 32/32, 6·10⁻⁸ m).
