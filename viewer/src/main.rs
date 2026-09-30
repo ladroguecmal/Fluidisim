@@ -9,6 +9,7 @@ mod reflection;
 mod counting;
 mod delta;
 mod delta3d;
+mod apic3d_carte;
 mod delta3d_projection;
 mod delta3d_background;
 mod delta3d_step;
@@ -2621,6 +2622,9 @@ fn run() -> Result<(), String> {
     let args = args;
     if args.iter().any(|a| a == "--ecume-loi") {
         return rendu_cretes::loi_jacobien();
+    }
+    if args.iter().any(|a| a == "--apic3d-carte-etages") {
+        return apic3d_carte::recevoir_etages();
     }
     if args.iter().any(|a| a == "--delta3d-operateur") {
         return delta3d::verifier();
