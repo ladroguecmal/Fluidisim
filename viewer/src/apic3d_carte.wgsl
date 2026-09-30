@@ -717,3 +717,222 @@ fn correct(@builtin(global_invocation_id) g: vec3<u32>) {
     let k1 = P.dt / (P.rho * P.dx);
     faces[f] = faces[f] - k1 * grad;
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **L'extrapolation** (`extrapolate`) : valide, une face qui touche une maille d'eau ; trois couches, chaque face invalide
+// prend la moyenne de ses six voisines valides de la couche précédente ; au-delà, zéro — sauf les faces qu'une particule a
+// alimentées ; puis les parois. Copies dans `faces[2F..3F)` et `fflags[F..2F)`.
+
+fn face_global(axis: u32, idx: vec3<u32>) -> u32 {
+    let d = dims_of(axis);
+    return face_base(axis) + (idx.z * d.y + idx.y) * d.x + idx.x;
+}
+
+fn water_at(a: i32, b: i32, c: i32) -> bool {
+    if a < 0 || b < 0 || c < 0 || a >= i32(P.nx) || b >= i32(P.ny) || c >= i32(P.nz) {
+        return false;
+    }
+    return label[cell_index(u32(a), u32(b), u32(c))] == WATER;
+}
+
+@compute @workgroup_size(128)
+fn extrap_valid(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces {
+        return;
+    }
+    let fc = face_of(f);
+    let q = vec3<i32>(fc.idx);
+    var lower = q;
+    if fc.axis == 0u {
+        lower = q - vec3<i32>(1, 0, 0);
+    } else if fc.axis == 1u {
+        lower = q - vec3<i32>(0, 1, 0);
+    } else {
+        lower = q - vec3<i32>(0, 0, 1);
+    }
+    let ok = water_at(lower.x, lower.y, lower.z) || water_at(q.x, q.y, q.z);
+    fflags[f] = select(0u, 1u, ok);
+}
+
+@compute @workgroup_size(128)
+fn extrap_copy(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces {
+        return;
+    }
+    faces[2u * P.faces + f] = faces[f];
+    fflags[P.faces + f] = fflags[f];
+}
+
+@compute @workgroup_size(128)
+fn extrap_layer(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces {
+        return;
+    }
+    if fflags[P.faces + f] != 0u {
+        return;
+    }
+    let fc = face_of(f);
+    let d = vec3<i32>(dims_of(fc.axis));
+    let q = vec3<i32>(fc.idx);
+    var s = 0.0;
+    var n = 0u;
+    for (var m = 0u; m < 6u; m = m + 1u) {
+        var o = vec3<i32>(0);
+        let sign = select(1, -1, m % 2u == 0u);
+        if m < 2u {
+            o = vec3<i32>(sign, 0, 0);
+        } else if m < 4u {
+            o = vec3<i32>(0, sign, 0);
+        } else {
+            o = vec3<i32>(0, 0, sign);
+        }
+        let t = q + o;
+        if all(t >= vec3<i32>(0)) && all(t < d) {
+            let h = face_global(fc.axis, vec3<u32>(t));
+            if fflags[P.faces + h] != 0u {
+                s = s + faces[2u * P.faces + h];
+                n = n + 1u;
+            }
+        }
+    }
+    if n > 0u {
+        faces[f] = s / f32(n);
+        fflags[f] = 1u;
+    }
+}
+
+@compute @workgroup_size(128)
+fn extrap_zero(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces {
+        return;
+    }
+    if fflags[f] == 0u && faces[P.faces + f] == 0.0 {
+        faces[f] = 0.0;
+    }
+    if on_wall(face_of(f)) {
+        faces[f] = 0.0;
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **Grille → particules** (`grid_to_particles`) et **advection** RK2 (`advect`, `grid_velocity`) : les huit emplacements
+// de `weights`, dans son ordre.
+
+// La valeur interpolée sur la grille `axis` au point `p`, et `Σ ∂w·u` (la ligne de `C`).
+fn interp(axis: u32, p: vec3<f32>) -> vec4<f32> {
+    let l = lerp_of(p, axis);
+    let inv = 1.0 / P.dx;
+    var value = 0.0;
+    var grad = vec3<f32>(0.0);
+    for (var m = 0u; m < 8u; m = m + 1u) {
+        let sel = vec3<bool>((m & 1u) == 1u, ((m >> 1u) & 1u) == 1u, ((m >> 2u) & 1u) == 1u);
+        let idx = select(l.base, l.next, sel);
+        let wa = select(vec3<f32>(1.0) - l.frac, l.frac, sel);
+        let ga = select(vec3<f32>(-inv), vec3<f32>(inv), sel);
+        let wt = wa.x * wa.y * wa.z;
+        let gw = vec3<f32>(ga.x * wa.y * wa.z, wa.x * ga.y * wa.z, wa.x * wa.y * ga.z);
+        let f = faces[face_global(axis, idx)];
+        value = value + wt * f;
+        grad = grad + gw * f;
+    }
+    return vec4<f32>(value, grad);
+}
+
+fn interp_value(axis: u32, p: vec3<f32>) -> f32 {
+    let l = lerp_of(p, axis);
+    var value = 0.0;
+    for (var m = 0u; m < 8u; m = m + 1u) {
+        let sel = vec3<bool>((m & 1u) == 1u, ((m >> 1u) & 1u) == 1u, ((m >> 2u) & 1u) == 1u);
+        let idx = select(l.base, l.next, sel);
+        let wa = select(vec3<f32>(1.0) - l.frac, l.frac, sel);
+        value = value + wa.x * wa.y * wa.z * faces[face_global(axis, idx)];
+    }
+    return value;
+}
+
+fn grid_velocity(p: vec3<f32>) -> vec3<f32> {
+    return vec3<f32>(interp_value(0u, p), interp_value(1u, p), interp_value(2u, p));
+}
+
+@compute @workgroup_size(128)
+fn g2p(@builtin(global_invocation_id) g: vec3<u32>) {
+    let k = g.x;
+    if k >= P.n {
+        return;
+    }
+    let p = px[k].xyz;
+    let a = interp(0u, p);
+    let b = interp(1u, p);
+    let c = interp(2u, p);
+    pv[k] = vec4<f32>(a.x, b.x, c.x, 0.0);
+    pc[3u * k] = vec4<f32>(a.yzw, 0.0);
+    pc[3u * k + 1u] = vec4<f32>(b.yzw, 0.0);
+    pc[3u * k + 2u] = vec4<f32>(c.yzw, 0.0);
+}
+
+fn clamp_domain(p: vec3<f32>) -> vec3<f32> {
+    return clamp(p, vec3<f32>(P.margin), vec3<f32>(P.lx, P.ly, P.lz) - vec3<f32>(P.margin));
+}
+
+@compute @workgroup_size(128)
+fn advect(@builtin(global_invocation_id) g: vec3<u32>) {
+    let k = g.x;
+    if k >= P.n {
+        return;
+    }
+    let p = px[k].xyz;
+    let v1 = grid_velocity(p);
+    let mid = p + 0.5 * P.dt * v1;
+    let v2 = grid_velocity(mid);
+    px[k] = vec4<f32>(clamp_domain(p + P.dt * v2), 0.0);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **La séparation** (`separate`) : deux particules plus proches que 0,4 maille s'écartent chacune du quart de leur
+// recouvrement ; en collecte, chaque particule somme les poussées de ses voisines — la somme par paires de la référence.
+
+@compute @workgroup_size(128)
+fn separate_shift(@builtin(global_invocation_id) g: vec3<u32>) {
+    let a = g.x;
+    if a >= P.n {
+        return;
+    }
+    let xa = px[a].xyz;
+    let m = cell_of(xa);
+    let lo = vec3<u32>(select(0u, m.x - 1u, m.x > 0u), select(0u, m.y - 1u, m.y > 0u), select(0u, m.z - 1u, m.z > 0u));
+    let hi = min(m + vec3<u32>(2u), vec3<u32>(P.nx, P.ny, P.nz));
+    var sh = vec3<f32>(0.0);
+    for (var cz = lo.z; cz < hi.z; cz = cz + 1u) {
+        for (var cy = lo.y; cy < hi.y; cy = cy + 1u) {
+            for (var cx = lo.x; cx < hi.x; cx = cx + 1u) {
+                let cell = cell_index(cx, cy, cz);
+                for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
+                    let b = order[s];
+                    if b == a {
+                        continue;
+                    }
+                    let e = px[b].xyz - xa;
+                    let d = sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
+                    if d < P.dmin && d > 1e-6 * P.dx {
+                        let w = 0.25 * (P.dmin - d) / d;
+                        sh = sh - w * e;
+                    }
+                }
+            }
+        }
+    }
+    shift[a] = vec4<f32>(sh, 0.0);
+}
+
+@compute @workgroup_size(128)
+fn separate_apply(@builtin(global_invocation_id) g: vec3<u32>) {
+    let k = g.x;
+    if k >= P.n {
+        return;
+    }
+    px[k] = vec4<f32>(clamp_domain(px[k].xyz + shift[k].xyz), 0.0);
+}

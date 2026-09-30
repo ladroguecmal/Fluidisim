@@ -12,10 +12,11 @@ use water_core::apic3d::{self, Apic3, ApicStage};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 19] = [
+const KERNELS: [&str; 27] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
-    "cg_direction", "correct",
+    "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
+    "separate_shift", "separate_apply",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -31,13 +32,20 @@ const ASSEMBLE: usize = 10;
 const CG_INIT: [usize; 2] = [11, 12];
 const CG_ITERATION: [usize; 5] = [13, 14, 15, 16, 17];
 const CORRECT: usize = 18;
+const EXTRAP_VALID: usize = 19;
+const EXTRAP_COPY: usize = 20;
+const EXTRAP_LAYER: usize = 21;
+const EXTRAP_ZERO: usize = 22;
+const G2P: usize = 23;
+const ADVECT: usize = 24;
+const SEPARATE_SHIFT: usize = 25;
+const SEPARATE_APPLY: usize = 26;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Horodatages : début et fin de chaque étage.
 const STAMPS: u32 = 16;
 
 /// Le pas d'APIC 3D nu, résident sur la carte.
-#[allow(dead_code)] // S416 : les tampons des étages suivants sont réservés dès P4 ; levé quand le pas est entier (P8).
 pub struct ApicCarte {
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -294,7 +302,15 @@ impl ApicCarte {
         };
         // Un passage horodaté par étage, dans l'ordre de `ApicStage` ; le tri se fait en tête, sur les positions du début du
         // pas (la référence le refait dans `reconstruct`, sur les mêmes positions).
-        let stages = [ApicStage::ParticlesToGrid, ApicStage::Reconstruct, ApicStage::Project];
+        let stages = [
+            ApicStage::ParticlesToGrid,
+            ApicStage::Reconstruct,
+            ApicStage::Project,
+            ApicStage::Extrapolate,
+            ApicStage::GridToParticles,
+            ApicStage::Advect,
+            ApicStage::Full,
+        ];
         let mut used = 0u32;
         for (s, stage) in stages.into_iter().enumerate() {
             if stage > upto {
@@ -323,7 +339,25 @@ impl ApicCarte {
                     }
                     self.dispatch(&mut pass, CORRECT, self.faces, WG);
                 }
-                _ => {}
+                ApicStage::Extrapolate => {
+                    self.dispatch(&mut pass, EXTRAP_VALID, self.faces, WG);
+                    for _ in 0..apic3d::EXTRAPOLATION_LAYERS {
+                        self.dispatch(&mut pass, EXTRAP_COPY, self.faces, WG);
+                        self.dispatch(&mut pass, EXTRAP_LAYER, self.faces, WG);
+                    }
+                    self.dispatch(&mut pass, EXTRAP_ZERO, self.faces, WG);
+                }
+                ApicStage::GridToParticles => self.dispatch(&mut pass, G2P, self.n, WG),
+                ApicStage::Advect => self.dispatch(&mut pass, ADVECT, self.n, WG),
+                ApicStage::Full => {
+                    if self.separation {
+                        for _ in 0..apic3d::SEPARATION_PASSES {
+                            self.encode_bin(&mut pass);
+                            self.dispatch(&mut pass, SEPARATE_SHIFT, self.n, WG);
+                            self.dispatch(&mut pass, SEPARATE_APPLY, self.n, WG);
+                        }
+                    }
+                }
             }
             used = s as u32 + 1;
         }
@@ -402,6 +436,17 @@ impl ApicCarte {
         let it = s[7] as u32;
         let residual = if s[0] > 0. { (s[2] as f64 / s[0] as f64).sqrt() } else { 0. };
         Ok((p, it, residual, s[6] != 0. && it < self.iteration_cap))
+    }
+
+    /// Les particules : positions, vitesses, matrices affines (trois lignes par particule).
+    pub fn particles(&self) -> Result<(Vec<[f32; 3]>, Vec<[f32; 3]>, Vec<[[f32; 3]; 3]>), String> {
+        let n = self.n;
+        let three = |v: Vec<f32>| v.chunks_exact(4).map(|q| [q[0], q[1], q[2]]).collect::<Vec<_>>();
+        let x = three(self.read_f32(&self.px, 0, 4 * n)?);
+        let v = three(self.read_f32(&self.pv, 0, 4 * n)?);
+        let rows = three(self.read_f32(&self.pc, 0, 12 * n)?);
+        let c = rows.chunks_exact(3).map(|r| [r[0], r[1], r[2]]).collect();
+        Ok((x, v, c))
     }
 
     /// La distance reconstruite `φ` et les étiquettes.
@@ -526,6 +571,50 @@ pub fn recevoir_etages() -> Result<(), String> {
         );
         if dv > 1e-4 {
             return Err("projection : écart de vitesse au-delà du critère".into());
+        }
+        // Extrapolation, retour aux particules, advection, séparation : chaque étage depuis le même état.
+        for stage in [ApicStage::Extrapolate, ApicStage::GridToParticles, ApicStage::Advect, ApicStage::Full] {
+            let (mut r, _) = reference_state(dx, warm)?;
+            r.step_upto(dt, stage).map_err(|e| format!("{e:?}"))?;
+            carte.load(&reference)?;
+            let t = carte.step_upto(dt, stage)?;
+            let index = stage as usize;
+            match stage {
+                ApicStage::Extrapolate => {
+                    let (vel, _) = carte.faces()?;
+                    let rvel: Vec<f32> = r.velocity_u().iter().chain(r.velocity_v()).chain(r.velocity_w()).copied().collect();
+                    let dv = max_abs_diff(&vel, &rvel);
+                    let nonzero = |v: &[f32]| v.iter().filter(|x| **x != 0.).count();
+                    println!(
+                        "APIC_CARTE_S416 etage=extrapolation ecart_vitesse_max={dv:.3e} faces_non_nulles_carte={} reference={} temps_ms={:?}",
+                        nonzero(&vel), nonzero(&rvel), t.stages[index]
+                    );
+                    if dv > 1e-4 {
+                        return Err("extrapolation : écart au-delà du critère".into());
+                    }
+                }
+                _ => {
+                    let (x, v, c) = carte.particles()?;
+                    let flat = |a: &[[f32; 3]]| a.iter().flatten().copied().collect::<Vec<f32>>();
+                    let dx_max = max_abs_diff(&flat(&x), &flat(r.particles()));
+                    let dv_max = max_abs_diff(&flat(&v), &flat(r.velocities()));
+                    let rc: Vec<f32> = r.affine().iter().flatten().flatten().copied().collect();
+                    let cc: Vec<f32> = c.iter().flatten().flatten().copied().collect();
+                    let dc_max = max_abs_diff(&cc, &rc);
+                    let name = match stage {
+                        ApicStage::GridToParticles => "retour",
+                        ApicStage::Advect => "advection",
+                        _ => "separation",
+                    };
+                    println!(
+                        "APIC_CARTE_S416 etage={name} ecart_position_max={dx_max:.3e} ecart_vitesse_max={dv_max:.3e} ecart_affine_max={dc_max:.3e} temps_ms={:?}",
+                        t.stages[index]
+                    );
+                    if dv_max > 1e-4 || dx_max > 1e-5 {
+                        return Err(format!("{name} : écart au-delà du critère"));
+                    }
+                }
+            }
         }
         Ok(())
     })
