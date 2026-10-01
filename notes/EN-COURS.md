@@ -62,33 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S426 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
-([preuve](../docs/validation/APIC-CARTE-S416.md) §17 : B10 en bande étroite, pas + bascule 2,45 ms au p99 ; les fils de l'absorption et
-de l'échange 0,40 + 0,55, ≈ 2 µs par geste).
+Session : S427 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
+([preuve](../docs/validation/APIC-CARTE-S416.md) §18 : B10 en bande étroite, pas + bascule 2,31 ms au p99 ; le fil de l'échange 0,49,
+24 + 1,7 µs par geste, surtout des poses).
 
-**Ce que la session fait.** (1) **L'absorption par vagues.** La visite de la référence (en montant, échange avec la dernière) fixe
-un ordre de traitement des absorbées ; le fil 0 le calcule d'avance, sans toucher aux données (l'identité traitée à chaque rang est
-connue : une place n'est écrite qu'après avoir été traitée). Deux absorbées ne se gênent que si elles partagent une face de mélange
-(leurs mailles à moins de deux d'écart sur chaque axe) ou une colonne (solde, volume) : chaque vague traite, en parallèle, les
-absorbées dont toutes les devancières en conflit sont faites — chaque face reçoit ses mélanges dans l'ordre de la référence, **au bit**.
-Les vingt-quatre mélanges d'une absorbée se répartissent entre les fils ; le retrait final à forme close (S423). Au-delà de 512
-absorbées, l'ancien fil. (2) **L'échange** : le tri par insertion des marquées et leur retrait sur le fil 0, en fin de noyau —
-par rang et à forme close si l'arrangement de la référence s'y prête ; puis, s'il reste du temps, les vagues pour l'échange. (3) Mesurer.
+**Ce que la session fait.** (1) **Les poses d'une face-maille (et d'une colonne à fond) d'un coup.** Les quatre emplacements candidats
+sont fixes pour la face-maille ; la distance de chacun à la plus proche particule (de la maille de bande, non marquée, et des posées
+du pas) se calcule une fois par une réduction de groupe ; chaque pose ne fait ensuite que la diminuer par un minimum exact avec la
+particule qu'elle ajoute — le fil 0 enchaîne les choix sans barrière, la suite des choix est celle de la référence, au bit ; puis les
+posées prennent leur vitesse à la grille en parallèle, le solde change d'un coup (entiers). (2) **Les retraits d'une face-maille
+d'un coup** : ce sont les K plus petites clés (profondeur, distance, côté, rang) parmi les particules non marquées ; les rassembler une
+fois, les ranger par rang. (3) Mesurer ; la projection si le temps reste.
 
-**Critères, écrits avant.** (1) Issues identiques à S425 au chiffre près (étages, gestes, B10 en bande étroite et nu, bascules
-forcées, ballottement, raccord, bande) — le parallélisme ne doit rien changer. (2) Le coût des fils publié avant et après, le nombre de
-vagues par pas ; **visé : pas + bascule ≤ 2 ms au p99** (2,45). (3) Suite, zéro avertissement.
+**Critères, écrits avant.** (1) Issues identiques à S426 au chiffre près — gestes, étages, B10 en bande étroite et nu, bascules
+forcées, raccord, bande ; sinon, l'écart isolé au bit (`DUMP`, L345). (2) Le coût du fil de l'échange publié avant et après ; **visé :
+pas + bascule ≤ 2 ms au p99** (2,31). (3) Suite, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'absorption par vagues ; issues, mesure, vagues par pas.
-- [x] **P3** — l'échange : les marquées par rang et à forme close ; mesure ; les vagues de l'échange si le temps reste.
-- [x] **P4** — non-régression, suite ; preuve §18 ; registres.
-- [x] **P5** — rituel.
+- [ ] **P2** — les poses groupées ; issues, mesure.
+- [ ] **P3** — les retraits groupés ; issues, mesure.
+- [ ] **P4** — non-régression, suite ; preuve §19 ; registres.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2** — l'absorption sans fil séquentiel (`absorb_faces`) : le fil 0 calcule d'avance l'ordre de la visite (sans geste : l'identité traitée à chaque rang est connue), puis tout en parallèle, au bit. **Essai 1, des vagues d'absorbées à faces disjointes** : identique, mais 45 vagues pour ≈ 100 absorbées (106 au plus) à ≈ 3,8 µs — les voisines partagent presque toujours une face ; médiane 0,205 → 0,166, p99 inchangé. **Essai 2, un fil par face touchée** : la première absorbée qui touche une face (dans l'ordre de la visite) en est propriétaire et y applique, dans l'ordre, les mélanges de toutes celles qui la touchent — identique, mais **cinq fois plus lent** (le test « touche-t-elle cette face » recalculait huit nœuds en global). **Retenu** : le test rendu immédiat — `n − base ∈ {0,1}³` désigne le nœud, un masque de 24 bits par absorbée (en mémoire de groupe) dit s'il est mélangé ; et les soldes et volumes (entiers) par cible : la première absorbée de chaque cible ajoute toutes celles de la cible d'un coup. Étage de l'échange, raccord 30 s (gestes 5 289 / 109 / 5 385, 4,015 mm), B10 en bande étroite : **identiques**. ≈ 276 faces touchées par pas. **Fil de l'absorption : médiane 0,205 → 0,132 ms, p99 0,40 → 0,29** ; **pas p99 2,11 ms, + bascule 0,23 = 2,35**.
-- **P3** — l'échange : les marquées (≈ 140 par pas) étaient triées par insertion sur le fil 0, en mémoire globale ; **triées par rang** en mémoire de groupe (chaque fil compte les indices marqués plus grands ; l'ancien tri au-delà de 512). Étage du fond et B10 en bande étroite identiques. **Fil de l'échange : médiane 0,28 → 0,244 ms, p99 0,55 → 0,494** (24 + 1,7 µs par geste). **Les vagues de l'échange ne sont pas faites** : les gestes sont surtout des poses (B10 : 2 558 posées pour 1 048 retirées au pas 34), et chaque pose choisit l'emplacement le plus libre en comptant les poses précédentes — une dépendance réelle, à traiter à part (les retraits d'une face-maille, eux, sont les K plus petites clés : groupables). **Pas p99 2,07 ms + bascule 0,24 = 2,30** — visé 2 : manqué de 0,3.
-- **P4** — non-régression : étages, cycle, bascules forcées, B10 nu et en bande étroite, ballottement 0,447, colonnes 0,002, raccord 4,015 (gestes compris) **identiques** ; suite 753 / 19 / 0. **La bande sur 30 s ne l'est pas** : 1,210 mm, gestes 5 500 / 360 / 5 829 (S425 : 1,318, 5 478 / 354 / 5 795). **Isolé** : l'ancien fil (`AW_REPLI=1`, `AW_MAX` devenu constante de pipeline) rend 1,318 ; les mélanges faits en séquence dans le nouveau noyau avec la fonction d'origine rendent 1,210 comme la version parallèle — ni les soldes ni l'ordre ; comparés au bit après un pas (`DUMP=`), les chemins diffèrent sur 8 / 3 / 0 des 41 120 valeurs (instants 20 / 60 / 40), **d'une unité du dernier chiffre** : FXC arrondit la même formule autrement dans un autre noyau (L345), 30 s de bande l'amplifient. Le critère 1 (« identiques au chiffre près ») est donc tenu partout sauf sur ce cas chaotique, où l'écart est d'arrondi, dans la dispersion connue (1,45 · 1,71 · 1,318 selon les sessions). Preuve §18 ; registres.
-- **P5** — journal ; jeton libre ; maillons 14 (justifiés : S406) ; suivant : S427, C7e — les poses de l'échange, la projection.

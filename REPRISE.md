@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-01 18:29 +02:00
+JETON            : occupé
+Battement        : 2026-10-01 22:03 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S427 — C7e** au poste : les gestes de l'échange groupés par face-maille, au bit
 Dernière session : S426 — physique : **C7e, l'absorption face par face** ([preuve](docs/validation/APIC-CARTE-S416.md) §18) — un fil par face touchée, à l'ordre de la référence ; les marquées de l'échange par rang : pas + bascule 2,31 ms au p99 ; issues identiques sauf la bande sur 30 s, isolée à une unité du dernier chiffre (arrondi de FXC). Avant : S425, la fin du pas profilée
 Session suivante : **S427 — C7e** au poste ([preuve](docs/validation/APIC-CARTE-S416.md) §18) : le fil de l'échange (0,49 ms au p99 — les poses, dépendantes entre elles ; les retraits d'une face-maille groupables), la projection (0,887 : le groupe des niveaux grossiers) ; reçu si B10 en bande étroite garde son pincement et **δ ≤ 2 ms au 99ᵉ centile** (2,31 aujourd'hui) ; puis C7d (relative à B) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 14 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
