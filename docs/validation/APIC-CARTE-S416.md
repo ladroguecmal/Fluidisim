@@ -706,3 +706,41 @@ Visé : 2 ms — **manqué de 0,31**. **Ce qui reste** : la projection (0,887 au
 chaque pose choisit l'emplacement le plus libre en comptant les poses précédentes — une dépendance réelle ; les retraits d'une
 face-maille, eux, sont les K plus petites clés, groupables) ; le fil de l'absorption (0,29 : la plus longue chaîne de mélanges d'une
 face, et la visite calculée sur le fil 0).
+
+## 19. C7e, septième temps — les gestes de l'échange groupés, et une course trouvée (S427)
+
+**Reproduire** : `DUMP_B10=<préfixe> BANDE=1 … --apic3d-carte-b10` écrit l'état de la carte (faces, positions, vitesses) après
+chaque pas — deux exécutions comparées fichier à fichier disent si le noyau est déterministe, deux binaires disent où ils divergent.
+
+**Les poses d'un solde d'un coup** (`xg_pose_all`). `xg_most_free` réduisait, à chaque pose, la distance de chacun des quatre
+emplacements à la plus proche particule ; entre deux poses du même solde, seul change l'ensemble des posées, d'une particule. La
+réduction se fait une fois ; le fil 0 enchaîne les choix en diminuant les distances par un minimum exact avec chaque posée ; les
+posées prennent leur vitesse à la grille en parallèle. **Les retraits d'un solde d'un coup** (`xg_remove_all`) : les K plus petites
+clés (niveau, distance, côté, rang) parmi les non marquées, rassemblées niveau par niveau, rangées par rang ; la boucle d'origine
+finit ce qui reste (au-delà de 256 candidates, ou quand elles manquent).
+
+**Une course, trouvée en chemin.** Avec les poses groupées, B10 en bande étroite a pincé au pas 54 (tous les témoins : 55). Deux
+exécutions du même binaire divergeaient au pas 36 ; l'ancien était déterministe. Isolé par moitiés : faces-mailles seules,
+déterministe ; colonnes à fond, non ; ni les vitesses en parallèle ni la forme de la boucle. **La cause : `workgroupUniformLoad` sur un
+élément de tableau de groupe** (`xg_cols[q]`, et `xg_due`) dans la boucle des colonnes dues — code de S425 (§17), déterministe jusque-là
+par chance de cadence. Remplacé par la diffusion du fil 0 (`xg_bcast`) : **trois exécutions identiques au bit sur 74 pas**. Aucun autre
+`workgroupUniformLoad` sur un élément de tableau ne reste dans le nuanceur.
+
+**Les issues.** Étages du fond comparés au bit à l'ancien binaire (instants 20, 40, 60, dont 32 poses) : identiques. Sur B10, contre
+le binaire précédent : une composante de vitesse d'une posée, d'une unité du dernier chiffre, au pas 15 (poses), au pas 27 (retraits) —
+FXC recompile `grid_affine_at` dès que le noyau change (L345) ; aucun calcul nouveau n'est en cause (les retraits n'en font aucun).
+B10 en bande étroite au pincement de la référence (pas 55, 4 126 particules, volume exact) ; B10 nu (pas 54) ; étages ; bascules
+forcées ; ballottement 0,447 ; colonnes 0,002 ; raccord 4,015 mm et bande 1,210 mm, gestes compris : identiques à S426. Suite 753,
+zéro avertissement.
+
+**Le coût**, B10 en bande étroite (ms) :
+
+| | S426, médiane · p99 | **S427, médiane · p99** |
+|---|---|---|
+| fil de l'échange | 0,246 · 0,491 | **0,195 · 0,381** (53 + 1,02 µs par geste) |
+| **le pas, p99** | **2,07** | **1,93** |
+| **pas + bascule, p99** | **2,31** | **2,16** |
+
+Visé : 2 ms — **manqué de 0,16**. **Ce qui reste** : la projection (0,886 au p99, le groupe des niveaux grossiers 18 µs par
+itération) ; le fil de l'échange (0,38 : sa part fixe, 53 µs — une diffusion et une réduction par face-maille active ou colonne
+due, même sans geste) ; le fil de l'absorption (0,29).
