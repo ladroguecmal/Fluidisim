@@ -2155,6 +2155,13 @@ pub fn recevoir_b10() -> Result<(), String> {
                 }
             }
             steps += 1;
+            // Banc S427 : `DUMP_B10=<préfixe>` écrit, après chaque pas (bascule comprise), faces, positions et vitesses de la carte.
+            if let (Ok(prefix), None) = (std::env::var("DUMP_B10"), twin.as_ref()) {
+                let (fv, _) = carte.faces()?;
+                let (x, v, _) = carte.particles()?;
+                let all: Vec<f32> = fv.iter().copied().chain(x.iter().flatten().copied()).chain(v.iter().flatten().copied()).collect();
+                std::fs::write(format!("{prefix}{steps}.bin"), bytes(&all)).map_err(|e| e.to_string())?;
+            }
             it_ref += rep.iterations as u64;
             if twin.is_none() {
                 let (_, it, _, converged) = carte.pressure()?;

@@ -81,9 +81,10 @@ pas + bascule ≤ 2 ms au p99** (2,31). (3) Suite, zéro avertissement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les poses groupées ; issues, mesure.
+- [x] **P2** — les poses groupées ; issues, mesure.
 - [ ] **P3** — les retraits groupés ; issues, mesure.
 - [ ] **P4** — non-régression, suite ; preuve §19 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — `xg_pose_all` : les poses d'un solde d'un coup (réduction une fois, choix du fil 0 par minimums exacts, vitesses à la grille en parallèle), aux faces-mailles et aux colonnes à fond. Étages du fond (instants 20, 40, 60, dont 32 poses) **identiques au bit** (`DUMP`). **Incident 1** : sur B10, pincement au pas 54 (témoins : tous au pas 55) — **le noyau n'était plus déterministe** : deux exécutions divergeaient au pas 36 (`DUMP_B10=<préfixe>`, nouveau : l'état après chaque pas) ; l'ancien, si. Isolé par moitiés : faces-mailles seules, déterministe ; colonnes, non ; ni les vitesses en parallèle ni la boucle d'un tour (essais) ; **la course venait de `workgroupUniformLoad` sur un élément de tableau de groupe** (`xg_cols[q]`, et `xg_due`) dans la boucle des colonnes dues — code de S425 P4b, déterministe jusque-là par chance de cadence ; remplacé par la diffusion `xg_bcast` : **trois exécutions identiques au bit sur 74 pas**. Contre l'ancien binaire : une vitesse de posée d'une unité du dernier chiffre au pas 15 (`grid_affine_at` compilé dans un autre contexte, L345). **Issues** : B10 en bande étroite au pincement de la référence (pas 55, 4 126 particules, volume exact), bande 30 s identique à S426 (1,210 mm, mêmes gestes). **Fil de l'échange : médiane 0,246 → 0,198 ms, p99 0,49 → 0,40** (51 + 1,08 µs par geste) ; **pas p99 1,95 ms + bascule 0,25 = 2,19**.

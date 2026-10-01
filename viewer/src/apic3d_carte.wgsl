@@ -3680,6 +3680,80 @@ fn xg_most_free(t: u32, c0: vec3<f32>, c1: vec3<f32>, c2: vec3<f32>, c3: vec3<f3
     return p;
 }
 
+// **S427 — les poses d'un solde d'un coup.** `xg_most_free` réduisait, à chaque pose, la distance de chacun des quatre emplacements
+// à la plus proche particule (de la maille, non marquée, et des posées du pas). Entre deux poses du même solde, seul change l'ensemble
+// des posées, d'une particule — celle que la pose ajoute : la réduction se fait une fois, puis le fil 0 enchaîne les choix en
+// diminuant les distances par un minimum exact avec chaque posée (même valeur que la réduction, la position étant stockée telle
+// quelle) — la suite des choix est celle de `xg_most_free`, au bit. Les posées prennent ensuite leur vitesse à la grille en
+// parallèle (l'échange ne touche pas aux faces). La place manque : un refus compté, comme `xg_pose_due`.
+fn xg_pose_all(t: u32, c0: vec3<f32>, c1: vec3<f32>, c2: vec3<f32>, c3: vec3<f32>, cell: u32, first_new: u32, solde: u32) {
+    {
+        // En ligne droite — la réduction se fait même sans pose à faire (le fil 0 n'en pose alors aucune) : une boucle d'un tour à
+        // sortie anticipée autour des barrières rendait le noyau non déterministe sous FXC (S427).
+        let n_now = xg_bcast(t, xg_n);
+        var near = vec4<f32>(3.4028234663852886e38);
+        for (var s = start[cell] + t; s < start[cell + 1u]; s = s + XG) {
+            let m = order[s];
+            if px[m].w == 0.0 {
+                let p = px[m].xyz;
+                near = min(near, vec4<f32>(square_sum(p - c0), square_sum(p - c1), square_sum(p - c2), square_sum(p - c3)));
+            }
+        }
+        for (var q = first_new + t; q < n_now; q = q + XG) {
+            let p = px[q].xyz;
+            near = min(near, vec4<f32>(square_sum(p - c0), square_sum(p - c1), square_sum(p - c2), square_sum(p - c3)));
+        }
+        xg_near[t] = near;
+        workgroupBarrier();
+        for (var r = XG / 2u; r > 0u; r = r / 2u) {
+            if t < r {
+                xg_near[t] = min(xg_near[t], xg_near[t + r]);
+            }
+            workgroupBarrier();
+        }
+        if t == 0u {
+            var nr = xg_near[0];
+            var n = n_now;
+            loop {
+                if !solde_ge_vp(solde) {
+                    break;
+                }
+                if n >= arrayLength(&plist) {
+                    atomicAdd(&pcount[COUNT_REFUSED], 1u);
+                    break;
+                }
+                var best = c0;
+                var best_near = nr.x;
+                if nr.y > best_near {
+                    best = c1;
+                    best_near = nr.y;
+                }
+                if nr.z > best_near {
+                    best = c2;
+                    best_near = nr.z;
+                }
+                if nr.w > best_near {
+                    best = c3;
+                }
+                px[n] = vec4<f32>(best, 0.0);
+                nr = min(nr, vec4<f32>(square_sum(best - c0), square_sum(best - c1), square_sum(best - c2), square_sum(best - c3)));
+                n = n + 1u;
+                atomicAdd(&pcount[COUNT_POSED], 1u);
+                solde_add(solde, neg_i64(vec2<u32>(VP_QUANTA, 0u)));
+            }
+            xg_n = n;
+        }
+        storageBarrier();
+        workgroupBarrier();
+        let n_end = xg_bcast(t, xg_n);
+        for (var q = n_now + t; q < n_end; q = q + XG) {
+            grid_affine_at(px[q].xyz, q);
+        }
+        storageBarrier();
+        workgroupBarrier();
+    }
+}
+
 // Le fil 0 marque une particule retirée.
 fn xg_mark(t: u32, m: u32, solde: u32) {
     if t == 0u {
@@ -3799,10 +3873,7 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
             }
             xg_mark(t, m, e);
         }
-        loop {
-            if !xg_pose_due(t, e) {
-                break;
-            }
+        {
             let offset = plane + side * vp_depth;
             let cell = cell_index(band.x, band.y, l);
             var c0 = vec3<f32>(offset, (f32(band.y) + 0.25) * P.dx, (f32(l) + 0.25) * P.dx);
@@ -3815,9 +3886,7 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
                 c2 = vec3<f32>((f32(band.x) + 0.25) * P.dx, offset, (f32(l) + 0.75) * P.dx);
                 c3 = vec3<f32>((f32(band.x) + 0.75) * P.dx, offset, (f32(l) + 0.75) * P.dx);
             }
-            let n_now = xg_bcast(t, xg_n);
-            let p = xg_most_free(t, c0, c1, c2, c3, cell, first_new, n_now);
-            xg_pose(t, p, e);
+            xg_pose_all(t, c0, c1, c2, c3, cell, first_new, e);
         }
     }
     // (4) S413 — le solde vertical de chaque colonne à fond. S425 : les colonnes par morceaux de 64, chaque fil la sienne ; seules
@@ -3838,9 +3907,9 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
             if due == 1u {
                 xg_cols[at] = mine;
             }
-            let count = workgroupUniformLoad(&xg_due);
+            let count = xg_bcast(t, xg_due);
             for (var q = 0u; q < count; q = q + 1u) {
-                let col = workgroupUniformLoad(&xg_cols[q]);
+                let col = xg_bcast(t, xg_cols[q]);
                 let i = col % P.nx;
                 let j = col / P.nx;
                 let fond = floor_of(col);
@@ -3856,19 +3925,14 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
                     }
                     xg_mark(t, m, sw);
                 }
-                loop {
-                    if !xg_pose_due(t, sw) {
-                        break;
-                    }
+                {
                     let z = fond + P.dx / 16.0;
-                    let n_now = xg_bcast(t, xg_n);
-                    let p = xg_most_free(t,
+                    xg_pose_all(t,
                         vec3<f32>((f32(i) + 0.25) * P.dx, (f32(j) + 0.25) * P.dx, z),
                         vec3<f32>((f32(i) + 0.75) * P.dx, (f32(j) + 0.25) * P.dx, z),
                         vec3<f32>((f32(i) + 0.25) * P.dx, (f32(j) + 0.75) * P.dx, z),
                         vec3<f32>((f32(i) + 0.75) * P.dx, (f32(j) + 0.75) * P.dx, z),
-                        cell_index(i, j, kf), first_new, n_now);
-                    xg_pose(t, p, sw);
+                        cell_index(i, j, kf), first_new, sw);
                 }
             }
         }
