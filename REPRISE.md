@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-01 01:55 +02:00
+JETON            : libre
+Battement        : 2026-10-01 02:50 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S420 — C7c-4** au poste : la bascule et le déplacement du fond sur la carte ; B10 en bande étroite
-Dernière session : S419 — physique : **C7c-3** ([preuve](docs/validation/APIC-CARTE-S416.md) §11) — le fond de la bande sur la carte : la bande étroite à 1,45 mm de la référence sur 30 s, volume exact ; témoins 0,92 et 1,18 mm. Avant : S418, C7c-2
-Session suivante : **S420 — C7c-4** au poste ([conception](docs/validation/APIC-CARTE-S416.md) §8) : la bascule colonnes ↔ particules (`ColumnsSwitch` : pente, corps, dilatation, maintien, fond placé) et le déplacement du fond (`move_band_floor`) sur la carte ; **B10 en bande étroite** contre la référence et le témoin, pas à pas — le critère de C7 ; puis C7d (relative à B), C7e (multigrille, fils de l'échange parallélisés, dispatch indirect, budget) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 7 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S420 — physique : **C7c-4** ([preuve](docs/validation/APIC-CARTE-S416.md) §12) — la bascule et le fond placé sur la carte : B10 en bande étroite au pincement de la référence, au chiffre près, volume exact ; `φ` au col dans l'enveloppe de trois témoins ; 28,7 ms. Avant : S419, C7c-3
+Session suivante : **S421 — C7e** au poste ([preuve](docs/validation/APIC-CARTE-S416.md) §5, §12) : le coût de la bande étroite sur la carte — l'échange et la bascule parallélisés (coloriage des faces-mailles, gestes par colonne), la multigrille de C3 pour la projection, le dispatch indirect, le pas choisi sur la carte (diagnostics différés), l'instant relatif ; reçu si B10 en bande étroite garde son pincement et **δ ≤ 2 ms au 99ᵉ centile** ; puis C7d (relative à B) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 8 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

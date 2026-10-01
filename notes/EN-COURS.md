@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S420 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7c-4**, la bascule et
+Session : S420 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7c-4**, la bascule et
 le déplacement du fond sur la carte ; B10 en bande étroite, le critère de C7 ([conception](../docs/validation/APIC-CARTE-S416.md) §8).
 
 **Ce que la référence fait** (`ColumnsSwitch::switch`, S408–S414) : la surface rafraîchie ; **la décision** par colonne — requise en
@@ -92,7 +92,7 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
 - [x] **P4** — le fond placé et déplacé (`place_floor`, `move_band_floor`) ; banc.
 - [x] **P5** — B10 en bande étroite sur la carte, carte, référence et témoin ; critère 3.
 - [x] **P6** — non-régression, suite ; preuve §12 ; liste, file, feuille de route, index.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - **P2** — cœur : `ColumnsSwitch::switch_state` (instants requis, fond demandé). Carte : `Params` à 224 octets (critère), `swb` (sept tranches par colonne), `switch_need` (hauteur convertible, corps), `switch_slope`, `switch_spread`, `switch_request` (maintien sur 32 bits) ; `load_switch`, `decide_for_bench` (tri + reconstruction + décision). `b10_band_state` (B10, maintien 0,3 s, fond 4 ; un pas de plus sans bascule). `--apic3d-carte-decision` : **masque identique** à 0, 10, 30, 50, 60 pas (56 à 59 colonnes en bande sur 256). Critère 1 tenu. Banc lent (3 min : la référence rechauffée à chaque instant).
@@ -120,3 +120,4 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
   manqué ; **contre l'enveloppe des trois témoins : la carte est dedans à chaque pas publié** (égale au plus grand aux pas 51 et 54).
   Coût p99 **28,7 ms** dont la fin du pas (séparation, corps, échange sur un fil) 23,6 ms ; la bascule ≈ 5,5 ms au mur — C7e.
 - **P6** — non-régression : ballottement 0,456 mm, B10 nu au pas 54, colonnes 0,003 mm, raccord 4,48 mm, bande étroite 1,45 mm — identiques à S419 ; suite **753**, zéro avertissement. Preuve §12 ; liste 4.19, file, feuille de route, index.
+- **P7** — journal ; jeton libre ; maillons 8 (justifiés : S406) ; suivant : S421, C7e.

@@ -18005,3 +18005,16 @@ quasi égales (une tolérance aggrave ; l'évaluation sans `mad`, `square_sum`, 
 période −0,015 %, volume exact à 0 quantum ; témoins 0,92 et 1,18 mm. **C7c-3 reçu.** Ballottement, B10, colonnes identiques ; le
 raccord bouge dans sa dispersion (4,48 mm) ; suite **753**, zéro avertissement. **Rituel.** Maillons **7** — justifié : la priorité
 du solveur (S406) ; 4.19 reste partiel. Suivant : **C7c-4**, la bascule et le déplacement du fond — B10 en bande étroite, le critère de C7.
+
+## S420 — 2026-10-01 — physique : C7c-4, la bascule sur la carte ; B10 en bande étroite
+
+**Entrée.** *« Continue »* — C7c-4. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §12) : la décision de la bascule par
+colonne en parallèle ; la bascule sur un fil dans l'ordre de la référence — voie mixte en quanta, ensemencement, réserve exacte ; le
+fond placé et déplacé ; la liste des retirées construite triée en parallèle (le tri sur un fil faisait tomber la carte à la bascule
+initiale, 120 000 particules). **Mesuré** : décisions identiques à 21 instants ; bascules forcées (186 colonnes ensemencées, 3
+converties, la bascule initiale de 200) aux positions de la référence indice pour indice, volume à 0 quantum ; `η` 1,9·10⁻⁶ m à la
+bascule initiale (critère de 10⁻⁶ plus serré que `φ`, sa source). **B10 en bande étroite : pincement identique au chiffre près**
+(pas 55, cavité 1,937 D, air 0,0781 D³), volume exact ; `φ` au col 50 mm, **dans l'enveloppe de trois témoins** (2,5 / 50 / 197 mm),
+manqué contre le seul témoin à 10⁻⁶ nommé. Premier écart : une pose au pas 35 (un solde au seuil). **Coût : 28,7 ms** (l'échange et
+la bascule sur un fil). Non-régression complète ; suite **753**, zéro avertissement. **Rituel.** Maillons **8** — justifié : la
+priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e**, le coût — δ ≤ 2 ms avec la bande.
