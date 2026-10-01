@@ -22,6 +22,10 @@
 //! puis `ColumnsSwitch` après chaque pas. **La crête courte** (`courte`) : `ε` modulé le long de la crête, de 0,55 au milieu à
 //! 0,275 aux parois (sous le seuil de déferlement).
 //!
+//! **S429 — C7d-1, le fond B** (`fond_b=1`) : le critère de vitesse (`vitesse`) lit la vitesse propre de δ, `u − U_B`, B étant le
+//! champ du premier ordre qui initialise l'eau, propagé (`LinearSwell` : `a = ε/k`, `ω = √(gk)·(1 + ε²/2)`, phase `−π/2`, niveau
+//! moyen 1 m).
+//!
 //!     cargo run -p water-core --release --offline --example apic3d_deferlement -- [mailles_par_lambda] [ny] [courte]
 //!     APIC3D_BASCULE= cargo run -p water-core --release --offline --example apic3d_deferlement -- 40 4
 
@@ -30,7 +34,7 @@
 mod host_impl;
 
 use std::time::Instant;
-use water_core::apic3d::{Apic3, ColumnsSwitch};
+use water_core::apic3d::{Apic3, ColumnsSwitch, LinearSwell};
 use water_core::delta3d::Domain3;
 use water_core::host::HostServices;
 
@@ -105,6 +109,16 @@ fn main() {
                 "vitesse" => s.floor_speed = Some(x as f32),
                 "rotation" => s.floor_rotation = Some(x as f32),
                 "rotation_gradient" => s.floor_rotation_gradient = x as f32,
+                // S429 : le fond B (C7d-1).
+                "fond_b" => {
+                    s.background = (x != 0.).then(|| LinearSwell {
+                        amplitude: (eps0 / k) as f32,
+                        wavenumber: k as f32,
+                        omega: ((G * k).sqrt() * (1. + 0.5 * eps0 * eps0)) as f32,
+                        phase: -std::f32::consts::FRAC_PI_2,
+                        mean_level: PROFONDEUR as f32,
+                    })
+                }
                 _ => panic!("clé inconnue : {cle}"),
             }
         }
@@ -130,6 +144,9 @@ fn main() {
     let mut retournement: Option<(f64, f64, f64, f64)> = None;
     let mut impact: Option<(f64, f64, f64)> = None;
     let mut part_au_retournement = f64::NAN;
+    // S429 : les colonnes de la fenêtre en particules — au retournement (part), et leur plus grand nombre après le premier pas.
+    let (mut part_fenetre_au_retournement, mut fenetre_max, mut fenetre_max_t) = (f64::NAN, 0usize, f64::NAN);
+    let fenetre_colonnes = (i1 - i0) * ny;
     let t_max = 2.5 * tau;
     let trace = std::env::var("APIC3D_TRACE").is_ok();
     // `APIC3D_PAS=` multiplie le pas stable : la sensibilité au chemin numérique (L371), autre que celle aux données.
@@ -155,6 +172,10 @@ fn main() {
             ecart_volume = ecart_volume.max((a.total_volume() / v0 - 1.).abs());
             particules_max = particules_max.max(a.particle_count());
             if pas > 1 {
+                let n_fenetre = (0..ny).map(|j| (i0..i1).filter(|&i| !a.is_column(i, j)).count()).sum::<usize>();
+                if n_fenetre > fenetre_max {
+                    (fenetre_max, fenetre_max_t) = (n_fenetre, t_us as f64 * 1e-6 / tau);
+                }
                 let n_bord = (0..nx * ny).filter(|&c| bord(c / nx) && !a.is_column(c % nx, c / nx)).count();
                 if n_bord > bord_max {
                     (bord_max, bord_t) = (n_bord, t_us as f64 * 1e-6 / tau);
@@ -230,6 +251,8 @@ fn main() {
                         let part = (0..nx * ny).filter(|&c| !a.is_column(c % nx, c / nx)).count() as f64 / (nx * ny) as f64;
                         retournement = Some((t, centre(i), avance, part));
                         part_au_retournement = part;
+                        part_fenetre_au_retournement = (0..ny).map(|j2| (i0..i1).filter(|&i2| !a.is_column(i2, j2)).count()).sum::<usize>()
+                            as f64 / fenetre_colonnes as f64;
                     }
                 }
             }
@@ -344,9 +367,11 @@ fn main() {
             "APIC3D_DEFERLEMENT_BASCULE cles={} pente={} relache={} dilatation={} maintien_s={} part_bande_moy={:.3} \
              part_au_retournement={part_au_retournement:.3} avance_bande_sur_retournement_s={avance:.4} \
              avance_sur_tau={:.3} bascules_max={} volume_relatif_max={ecart_volume:.2e} particules_fin={} \
-             particules_max={particules_max} poses_refusees={} bord_bande_max={bord_max} bord_t_sur_tau={bord_t:.3}              colonnes_du_bord={} deplacements_du_fond_max={}",
+             particules_max={particules_max} poses_refusees={} bord_bande_max={bord_max} bord_t_sur_tau={bord_t:.3}              colonnes_du_bord={} deplacements_du_fond_max={} fond_b={} part_fenetre_au_retournement={part_fenetre_au_retournement:.3} \
+             fenetre_max={fenetre_max}/{fenetre_colonnes} fenetre_max_t_sur_tau={fenetre_max_t:.3}",
             cles.as_deref().unwrap_or(""), s.slope_max, s.slope_release.unwrap_or(s.slope_max), s.dilation, s.hold_us as f64 * 1e-6, s.mean_band_fraction(),
-            avance / tau, s.max_switches(), a.particle_count(), a.columns_refused(), nx * (ny / 8) * 2, s.max_floor_moves()
+            avance / tau, s.max_switches(), a.particle_count(), a.columns_refused(), nx * (ny / 8) * 2, s.max_floor_moves(),
+            s.background.is_some()
         );
         // Les colonnes qui basculent le plus : abscisse, puis instants (t/τ, P : vers les particules, C : vers les colonnes).
         let mut ordre: Vec<usize> = (0..nx * ny).filter(|&c| c / nx == ny / 2).collect();
