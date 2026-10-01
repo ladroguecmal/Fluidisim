@@ -662,3 +662,47 @@ Visé : **pas + bascule ≤ 2,5 ms au p99 — tenu (2,45)**.
 **Ce qui reste pour δ ≤ 2 ms** : la projection (0,885), les deux fils (0,55 + 0,40 au p99 : ≈ 2 µs par geste, ≈ 100 absorbées et
 140 gestes d'échange par pas — l'ordre de la référence fait le mélange des vitesses aux faces ; des vagues de particules à faces
 disjointes le garderaient au bit), la séparation (0,14).
+
+## 18. C7e, sixième temps — l'absorption face par face (S426)
+
+**Reproduire** : `BANDE=1 PROFIL=1 … --apic3d-carte-b10` (la ligne `faces_absorption` : les faces touchées par pas) ;
+`AW_REPLI=1` rend l'ancien fil de l'absorption ; `DUMP=<fichier> CAS=fond CHAUFFE=<n> … --apic3d-carte-etages` écrit les faces,
+positions et vitesses de la carte après un pas, pour les comparer au bit.
+
+**L'absorption sans fil séquentiel** (`absorb_faces`). La visite de la référence (en montant, échange avec la dernière) fixe l'ordre
+de traitement ; le fil 0 le calcule d'avance sans geste — l'identité traitée à chaque rang est connue, une place n'étant écrite
+qu'après avoir été traitée. Seuls les mélanges aux faces dépendent de l'ordre, et seulement entre absorbées qui partagent une face.
+
+- **Des vagues** d'absorbées à faces disjointes, essayées d'abord : 45 vagues pour ≈ 100 absorbées — les voisines partagent presque
+  toujours une face. Pas de gain.
+- **Un fil par face touchée**, retenu : la première absorbée qui touche une face en est la propriétaire et y applique, dans l'ordre de
+  la visite, les mélanges de toutes celles qui la touchent. Le test « touche-t-elle ce nœud » est immédiat : `n − base ∈ {0,1}³`
+  désigne l'emplacement, un masque de 24 bits par absorbée (en mémoire de groupe) dit s'il est mélangé. Un premier essai qui
+  recalculait les huit nœuds en global était cinq fois plus lent.
+- **Les soldes et volumes**, des entiers : la première absorbée de chaque cible y ajoute toutes celles de la cible d'un coup.
+- **Le retrait** à forme close (`sg_remove`, S423). Au-delà de 512 absorbées, l'ancien fil.
+
+**L'échange** : les marquées (≈ 140 par pas) triées par rang en mémoire de groupe au lieu d'un tri par insertion sur le fil 0.
+
+**Les issues.** Ordre et sémantique de la référence gardés ; étages, cycle, bascules forcées, B10 nu (pas 54) et en bande étroite (pas
+55, volume exact, même premier écart de gestes), ballottement 0,447, colonnes 0,002, raccord 4,015 mm (gestes 5 289 / 109 / 5 385) :
+**identiques à S425**. **La bande sur 30 s, non** : 1,210 mm et 5 500 / 360 / 5 829 gestes (S425 : 1,318 et 5 478 / 354 / 5 795 ;
+référence 5 541 / 352 / 5 862 ; témoins 0,92 et 1,18). **Isolé** : l'ancien fil (`AW_REPLI=1`) rend 1,318 ; les mélanges faits *en
+séquence* dans le nouveau noyau, avec la fonction d'origine, rendent 1,210 comme la version parallèle ; comparés au bit après un pas
+(`DUMP`), les deux chemins diffèrent sur **8 des 41 120 valeurs, d'une unité du dernier chiffre** (instant 20), 3 (instant 60), aucune
+(instant 40). Même formule, même ordre, compilée par FXC dans un autre noyau : l'arrondi change (L345), et 30 s de bande, chaotiques,
+l'amplifient. L'écart reste dans la dispersion connue de ce cas (1,45 en S419, 1,71 en S422, 1,318 en S423–S425).
+
+**Le coût**, B10 en bande étroite (ms) :
+
+| | S425, médiane · p99 | **S426, médiane · p99** |
+|---|---|---|
+| fil de l'absorption | 0,205 · 0,400 | **0,137 · 0,288** (1,43 µs par absorbée ; 276 faces touchées par pas) |
+| fil de l'échange | 0,280 · 0,552 | **0,246 · 0,491** |
+| **le pas, p99** | **2,21** | **2,07** |
+| **pas + bascule, p99** | **2,45** | **2,31** |
+
+Visé : 2 ms — **manqué de 0,31**. **Ce qui reste** : la projection (0,887 au p99) ; le fil de l'échange (0,49 : surtout des poses, et
+chaque pose choisit l'emplacement le plus libre en comptant les poses précédentes — une dépendance réelle ; les retraits d'une
+face-maille, eux, sont les K plus petites clés, groupables) ; le fil de l'absorption (0,29 : la plus longue chaîne de mélanges d'une
+face, et la visite calculée sur le fil 0).

@@ -3192,7 +3192,7 @@ fn absorb_rest(k: u32) {
 // sur le fil 0, dans l'ordre de la visite ; puis le retrait à forme close (`sg_remove`, S423). Au-delà de `AW_MAX` absorbées, l'ancien
 // fil (`absorb_group`).
 
-const AW_MAX: u32 = 512u;
+override AW_MAX: u32 = 512u;
 // Les faces touchées au dernier pas ; `NONE` : l'ancien fil a fait l'absorption.
 const COUNT_WAVES: u32 = 15u;
 var<workgroup> aw_ord: array<u32, 512>;

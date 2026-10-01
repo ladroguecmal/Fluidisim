@@ -339,7 +339,9 @@ impl ApicCarte {
         let make = |entry: &'static str, par: f64| {
             // Banc : `TEMPS_PIPELINES=1` imprime le temps de création (de compilation) de chaque pipeline.
             let _t = PipelineTimer::new(entry);
-            let constants = [("MG_NC", nc), ("CG_PAR", par)];
+            // Banc S426 : `AW_REPLI=1` — l'absorption par l'ancien fil.
+            let aw_max = if std::env::var("AW_REPLI").is_ok() { 0. } else { 512. };
+            let constants = [("MG_NC", nc), ("CG_PAR", par), ("AW_MAX", aw_max)];
             device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
                 label: Some(entry),
                 layout: Some(&pipeline_layout),
@@ -1496,6 +1498,12 @@ pub fn recevoir_etages() -> Result<(), String> {
                             r.particle_count()
                         );
                         let (x, v, _) = carte.particles()?;
+                        // Banc : `DUMP=<fichier>` écrit les faces, positions et vitesses de la carte après le pas (comparaisons au bit).
+                        if let Ok(path) = std::env::var("DUMP") {
+                            let (fv, _) = carte.faces()?;
+                            let all: Vec<f32> = fv.iter().copied().chain(x.iter().flatten().copied()).chain(v.iter().flatten().copied()).collect();
+                            std::fs::write(&path, bytes(&all)).map_err(|e| e.to_string())?;
+                        }
                         let flat = |a: &[[f32; 3]]| a.iter().flatten().copied().collect::<Vec<f32>>();
                         let same_n = x.len() == r.particle_count();
                         let dxm = if same_n { max_abs_diff(&flat(&x), &flat(r.particles())) } else { f32::NAN };
