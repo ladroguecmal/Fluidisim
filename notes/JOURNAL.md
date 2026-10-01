@@ -18129,3 +18129,17 @@ des poses sautée sans pose. Un essai retiré (l'échange avec la dernière calc
 45 µs, projection p99 0,886 → 0,785 ms ; **pas + bascule 2,16 → 2,07 ms** (visé 2 : manqué de 0,07). **Issues identiques à S427, B10
 au bit sur 74 pas, déterministe.** Suite **753**, zéro avertissement. **Rituel.** Maillons **16** — justifié : la priorité du solveur
 (S406) ; 4.19 reste partiel. Suivant : **C7e** — les dispatchs indirects taillés sur `n` (les noyaux lancés sur la capacité).
+
+## S429 — 2026-10-02 — physique : C7e reçu ; C7d conçue, C7d-1 en partie
+
+**Entrée.** *« On accepte ce petit surplus au critère, continue »* — **C7e reçu** à 2,07 ms au p99 par décision de l'utilisateur
+(mesuré sur B10 en bande étroite, non sur la scène de la porte B). **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §21) :
+**la conception de C7d** — la production GPU n'a pas le mode relatif d'ADR-198, A320 est ouverte, la bande simule l'eau totale ;
+**C7d-1** le critère relatif en référence, **C7d-2** sur la carte, **C7d-3** la bande dans la production couplée après sa propre
+conception. **C7d-1** : `LinearSwell` et `ColumnsSwitch::background` — le seuil de vitesse du fond sur `|u − U_B|` ; un essai (la
+houle ne demande rien, le jet enfoui est pris). **Mesuré** sur la vague de Chen, B le premier ordre qui l'initialise : **sous une
+houle calme, rien** (0/200 dans la fenêtre, quand la vitesse absolue prenait tout en oscillant) ; **sous la houle raide, 0,94 de la
+fenêtre** (critère : sous 0,5 — manqué), à 0,58 aux seuils 0,4 et 0,6 avec des oscillations : B linéaire n'a pas les harmoniques que
+δ porte (ADR-198 D3), la vitesse propre est grande sans déformation. Suite **754**, zéro avertissement. **Écarts** : trois battements
+mal recopiés dans des messages de commit locaux, corrigés. **Rituel.** Maillons **17** — justifié : la priorité du solveur (S406) ;
+4.19 reste partiel. Suivant : **C7d-1** — la déformation propre de δ (le gradient de `u − U_B`), mêmes critères.

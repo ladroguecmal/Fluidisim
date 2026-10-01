@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S429 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« On accepte ce petit surplus au critère, continue »* —
+Session : S429 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« On accepte ce petit surplus au critère, continue »* —
 **C7e est reçu** à 2,07 ms au p99 (pas + bascule, B10 en bande étroite ; critère 2 ms) par décision de l'utilisateur ; la suite
 déclarée : **C7d, relative à B** ([preuve](../docs/validation/APIC-CARTE-S416.md) §1.1 : *« la bande sur la production couplée
 (ADR-198), le fond qui suit la vitesse propre de δ (BANDE-ETROITE-S413 §6.4) — reçu si la vague de Chen sous B : particules seulement
@@ -95,7 +95,7 @@ du cœur, zéro avertissement. Les parois réfléchissent (le bassin n'est pas p
 - [x] **P4** — C7d-1 : le fond B analytique dans `ColumnsSwitch`, le critère relatif ; essais du cœur.
 - [x] **P5** — C7d-1 mesuré sur la vague de Chen (`ε` 0,55 et 0,1) ; critères.
 - [x] **P6** — suite ; preuve ; registres.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - **P2** — C7e reçu, consigné : preuve §20 (la décision et sa portée : 2,07 ms mesurés sur B10 en bande étroite, non sur la scène de la porte B ; les dispatchs indirects restent désignés), liste 4.19, file (`C7d`, §21).
@@ -103,3 +103,4 @@ du cœur, zéro avertissement. Les parois réfléchissent (le bassin n'est pas p
 - **P4** — `LinearSwell` (houle linéaire progressive, profondeur infinie : `a`, `k`, `ω`, `φ`, niveau moyen ; `velocity(x, z, t)`) et `ColumnsSwitch::background` : avec un fond B, le seuil de vitesse du fond porte sur `|u − U_B|` au centre de la maille (`Apic3::cell_speed_relative`, les mêmes moyennes de faces que `cell_speed`) à l'instant de la décision ; `None` par défaut, S415 au bit. Essai `the_speed_threshold_reads_the_own_velocity_of_delta_s429` : une houle (0,26 m/s en surface, seuil 0,1) — la vitesse totale prend les 32 colonnes, relative à B aucune ; un jet enfoui ajouté, pris lui seul (colonnes 11 à 20 : 13 à 18 dilatées). Les essais de S415 inchangés.
 - **P5** — C7d-1 mesuré (vague de Chen, 40 mailles par λ, `ny` 4, maintien 0,3 s, fond 4 ; `fond_b=1` ; nouvelles sorties : part de la **fenêtre** au retournement, maximum de colonnes de la fenêtre en particules après le premier pas). **ε = 0,55** — forme seule : part de la fenêtre au retournement 0,620 (bassin 0,550 ; moyenne 0,501, S415), retournement 0,702 τ ; vitesse absolue 0,2 : 1,000, 0,665 τ (S415 retrouvé) ; **vitesse relative 0,2 : 0,940**, 0,7015 τ ; relative 0,4 : 0,580 (25 retours rapides) ; relative 0,6 : 0,580 (72). **ε = 0,1** — forme seule : 0/200 ; vitesse absolue : 200/200, 321 retours rapides ; **relative 0,2, 0,4, 0,6 : 0/200** dans la fenêtre (bassin 0,065 à 0,2 : les réflexions des parois). **Critères** : (b) **tenu** — rien sous une houle calme ; (c) **tenu** — sans fond B, S415 ; (a) **manqué** — sous la houle raide, la vitesse propre de δ dépasse le seuil presque partout (vitesse orbitale ≈ 1,1 m/s ; B linéaire n'a ni les harmoniques de Stokes ni la dérive, qu'ADR-198 D3 laisse à δ), et un seuil plus haut fait osciller sans descendre sous la forme seule. Le retournement, lui, reste à l'instant de la forme seule (0,7015 contre 0,7021, à un pas). **Voie suivante, non faite** : un critère sur la **déformation propre** de δ (le gradient de `u − U_B`), non sur sa vitesse.
 - **P6** — suite du cœur **754** (un essai de plus) / 19 ignorés / 0 avertissement. Preuve §21.1 (C7d-1 mesuré, ce que cela dit, la voie de la déformation propre) ; liste 4.19, feuille de route (les « suivantes » remises à jour : C7e n'y est plus), index.
+- **P7** — journal ; jeton libre ; maillons 17 (justifiés : S406) ; suivant : S430, C7d-1 — la déformation propre de δ.
