@@ -1423,10 +1423,19 @@ pub fn recevoir_ballottement() -> Result<(), String> {
         // S419 : `CAS=fond` — toute la cuve en bande, le fond à quatre mailles sous le creux (S413) ; même instrument que le raccord.
         let fond = std::env::var("CAS").is_ok_and(|c| c == "fond");
         let raccord = fond || std::env::var("CAS").is_ok_and(|c| c == "raccord");
-        let build = || if fond { band_state(dx, 4., 0) } else { raccord_state(dx, false, 0) };
-        let mut a = if columns { raccord_state(dx, true, 0)? } else if raccord { build()? } else { reference_state(dx, 0)?.0 };
-        // S418 : `TEMOIN=ε` (raccord) — à la place de la carte, une seconde référence aux vitesses initiales perturbées de ±ε.
-        let eps: Option<f32> = std::env::var("TEMOIN").ok().and_then(|v| v.parse().ok()).filter(|_| raccord);
+        let build = || {
+            if fond {
+                band_state(dx, 4., 0)
+            } else if raccord {
+                raccord_state(dx, false, 0)
+            } else {
+                Ok(reference_state(dx, 0)?.0)
+            }
+        };
+        let mut a = if columns { raccord_state(dx, true, 0)? } else { build()? };
+        // S418 : `TEMOIN=ε` (raccord ; S423 : le ballottement aussi) — à la place de la carte, une seconde référence aux vitesses
+        // initiales perturbées de ±ε.
+        let eps: Option<f32> = std::env::var("TEMOIN").ok().and_then(|v| v.parse().ok()).filter(|_| !columns);
         let mut twin = match eps {
             Some(e) => {
                 let mut t = build()?;
@@ -1515,8 +1524,10 @@ pub fn recevoir_ballottement() -> Result<(), String> {
                 }
             }
             total_ms.push(sum);
-            let (hc, hr) = if let Some(tw) = twin.as_ref() {
+            let (hc, hr) = if let Some(tw) = twin.as_ref().filter(|_| raccord) {
                 (heights(tw.columns_surface().unwrap_or(&[]), tw.distance()), heights(a.columns_surface().unwrap_or(&[]), a.distance()))
+            } else if let Some(tw) = twin.as_ref() {
+                (column_heights(d, tw.distance()), column_heights(d, a.distance()))
             } else if raccord {
                 let e = carte.columns_eta()?;
                 let (phi, _) = carte.surface()?;
@@ -1561,7 +1572,10 @@ pub fn recevoir_ballottement() -> Result<(), String> {
                 pc.push(t as f64 * 1e-6, moment_eta(&carte.columns_eta()?));
                 volume_drift = volume_drift.max((carte.columns_volume()? - v0).abs());
             } else {
-                let (x, _, _) = carte.particles()?;
+                let x = match twin.as_ref() {
+                    Some(tw) => tw.particles().to_vec(),
+                    None => carte.particles()?.0,
+                };
                 pr.push(t as f64 * 1e-6, moment(a.particles()));
                 pc.push(t as f64 * 1e-6, moment(&x));
             }

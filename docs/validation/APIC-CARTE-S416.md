@@ -505,3 +505,68 @@ loin), période identique ; B10 nu, pincement au pas de la référence, `φ` au 
 1 ms : dix-sept dispatchs par itération, quatorze itérations. **Ce qui reste pour δ ≤ 2 ms** : la projection (1,45 — fusionner les
 dispatchs du cycle, ou lisser davantage pour moins d'itérations), la bascule (1,9 — en groupe, comme l'échange), la surface
 (0,73 — près de l'interface seulement), la séparation (0,39).
+
+## 15. C7e, troisième temps — la bascule en groupe, la surface en coopération, la multigrille par défaut (S423)
+
+**Reproduire** : `BANDE=1 … --apic3d-carte-b10` (20 s ; lignes `cout_median_ms` et `cout_p99_ms`) ; `--apic3d-carte-decision`
+(`INITIAL=1` ; `PENTE=0.02 MAINTIEN=0`) ; **la multigrille et le plafond adaptatif sont désormais par défaut** — `MULTIGRILLE=0`,
+`ADAPTATIF=0` rendent la diagonale et le plafond fixe ; le témoin du ballottement simple : `TEMOIN=1e-6|1e-5|1e-4 DUREE=10 …
+--apic3d-carte-ballottement` (il n'existait que pour le raccord).
+
+**Ce qui a changé, dans l'ordre des pas de la session.**
+
+- **La bascule en groupe** (`switch_apply_group`, puis `floor_move`) : 256 fils ; capacité, colonnes converties, décalage, faces qui
+  cessent d'être frontière, masque, en parallèle ; réductions entières dans le groupe (l'ordre n'y change rien).
+- **Le retrait à forme close** (`sg_remove`) : la visite de la référence — en montant, une retirée remplacée par la dernière, examinée
+  aussitôt — laisse un arrangement connu d'avance. Avec `R` la liste triée des retirées et `n' = n − |R|`, la k-ième plus petite place
+  retirée sous `n'` reçoit la k-ième plus grande gardée de `[n', n)` ; chaque gardée trouve son rang par dichotomie dans `R`. Pour la
+  bascule et le fond, le traitement d'une retirée n'est qu'un compte (par colonne pour le fond, par atomiques). L'absorption garde sa
+  visite : son mélange des vitesses aux faces dépend de l'ordre.
+- **L'ensemencement par graine** : préfixe des graines par morceau de colonnes (l'ordre des colonnes de la référence), puis chaque fil
+  prend des graines, retrouve le morceau par dichotomie et la colonne dans le morceau. Par colonne, un fil faisait encore toute une
+  colonne profonde (application p99 0,54 ms) ; par graine, 0,14.
+- **La multigrille** : le niveau 1 dans le groupe des niveaux grossiers, essayé — plus lent (1,38 → 1,89 ms), retiré ; le nombre de
+  niveaux ≥ 2 en **constante de pipeline** (`override MG_NC`) : plus de phases à barrière vides ; plafond adaptatif avec la multigrille
+  : pire des huit derniers pas + 2, repli à 40.
+- **La surface en coopération** (`reconstruct_coop`) : 32 fils par maille, mailles voisines et colonnes virtuelles réparties, sommes
+  réduites dans le groupe. Le temps était celui du fil le plus long (≈ 5 000 mailles de la bande, 125 voisines et 25 colonnes chacune).
+  Le **réemploi** de la surface de la décision au pas suivant (maille par maille : aucune colonne à portée basculée ni au fond déplacé,
+  le même corps à 10⁻⁶ maille) est exact mais sans gain mesurable sur B10 — le fond y bouge presque à chaque pas ; gardé.
+
+**Les issues** (multigrille par défaut) :
+
+| | carte | référence, témoins | |
+|---|---|---|---|
+| étages (ballottement, raccord, fond, B10) | `φ` 1,6 · 1,1 · 1,3 · 4,6·10⁻⁶ m ; étiquettes, tri, compactage identiques | | à l'arrondi |
+| bascules forcées (`INITIAL`, `PENTE`, `MAINTIEN`), 5 instants chacune | `n`, positions, masque, fonds, réserve **identiques** ; volume 0 quantum | | exact |
+| symétrie du cycle (ballottement, raccord, B10) | 1,6 · 2,3 · 1,2·10⁻⁷ ; positivité tenue | | |
+| **B10 en bande étroite** | pincement au pas 55, cavité 1,937 D, air 0,0781 D³ — **au chiffre près** ; volume 0 quantum ; `φ` max 6,8 mm (S420 : dans l'enveloppe des témoins) | identiques | tenu |
+| B10 nu | pincement au pas 54, identique ; `φ` à l'interface max 2,6 mm | | tenu |
+| tout en colonnes, 10 s | 0,002 mm ; volume exact | | tenu |
+| raccord, 30 s | **4,02 mm** ; 0 quantum | témoins 3,40 et 4,03 | tenu |
+| bande (`CAS=fond`), 30 s | **1,32 mm** ; 0 quantum | témoins 0,92 et 1,18 | comme S419–S422, au-dessus de peu |
+| **ballottement, 10 s** | **0,447 mm** à t = 7,14 s (0,055 en S422) | **témoins 0,036 · 0,336 · 0,439** (ε = 10⁻⁶ · 10⁻⁵ · 10⁻⁴ m/s) | voir ci-dessous |
+
+**Le ballottement de 0,055 à 0,447 mm.** Isolé : avec l'ancienne reconstruction (sommes dans l'ordre de la référence) le banc rend
+0,055 ; la coopérative change l'ordre des sommes, `φ` bouge de 1,6·10⁻⁶ m, et le banc tombe sur l'événement de t = 7,14 s que le
+gradient diagonal donnait déjà (0,454 mm). Un déplacement de 1,6·10⁻⁶ m par pas, c'est une vitesse de ≈ 10⁻⁴ m/s sur 20 ms : la
+carte est au niveau du témoin ε = 10⁻⁴ (0,439), 2 % au-dessus. **0,055 était l'ordre de sommation de la référence, pas une précision
+de la méthode** ; la non-régression se juge à l'échelle du témoin (L345).
+
+**Le coût**, B10 en bande étroite (ms) :
+
+| | S422, p99 | S423, médiane | **S423, p99** |
+|---|---|---|---|
+| transfert · surface | — · 0,73 | 0,17 · 0,09 | 0,20 · **0,11** |
+| projection | 1,45 | 1,28 | **1,35** |
+| séparation · absorption · échange (fils compris) | 0,39 · 0,53 · 0,79 | 0,33 · 0,30 · 0,48 | 0,40 · 0,50 · 0,79 |
+| **le pas** | **3,90** | ≈ 2,7 | **3,26** |
+| bascule : décision · application · fond | 0,86 · 0,63 · 0,42 | 0,22 · 0,10 · 0,11 | 0,26 · 0,14 · 0,11 |
+| **la bascule** | **1,9** | ≈ 0,43 | **0,48** |
+
+Visé par la session : bascule ≤ 0,8 ms (**0,48**), pas + bascule ≤ 4 ms (**3,74**) — tenus ; projection ≤ 1 ms — **non** (1,35).
+
+**Ce qui reste pour δ ≤ 2 ms au 99ᵉ centile** (3,74 aujourd'hui) : **la projection** (1,35 : ≈ 14 itérations à ≈ 75 µs, dix-sept
+dispatchs chacune — fusionner des noyaux : mise à jour et premier lissage, restriction et premier lissage du niveau 1) ; **les fils
+de l'échange et de l'absorption** (0,59 + 0,40 au p99 : la visite séquentielle, dont l'ordre fait le mélange aux faces) ; **la
+séparation** (0,40) ; la bascule ne s'exécute pas à chaque pas — sa part au p99 d'un pas moyen est moindre que 0,48.
