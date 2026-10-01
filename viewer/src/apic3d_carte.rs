@@ -69,7 +69,7 @@ const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
 const PARAMS_BYTES: u64 = 224;
 /// Horodatages : début et fin de chaque étage.
-const STAMPS: u32 = 16;
+const STAMPS: u32 = 32;
 
 /// Le pas d'APIC 3D nu, résident sur la carte.
 pub struct ApicCarte {
@@ -130,7 +130,8 @@ pub struct ApicCarte {
 /// Durées de la carte par étage, ms (horodatages ; `None` sans la fonction).
 #[derive(Clone, Copy, Debug, Default)]
 pub struct StageTimes {
-    pub stages: [Option<f64>; 8],
+    /// S421 : 0–5 les étages jusqu'à l'advection ; 6 séparation et corps ; 7 absorption ; 8 échange ; 9 à 11 la bascule.
+    pub stages: [Option<f64>; 16],
 }
 
 impl ApicCarte {
@@ -337,18 +338,32 @@ impl ApicCarte {
 
     /// **S420** — la bascule entière à l'instant `now_us` (décision, puis masque appliqué à masse exacte), comme
     /// `ColumnsSwitch::switch` sans le fond (P4). Banc.
-    pub fn switch_for_bench(&mut self, now_us: u64) -> Result<(), String> {
+    pub fn switch_for_bench(&mut self, now_us: u64) -> Result<StageTimes, String> {
         self.now_us = now_us;
         self.write_params(1);
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        // S421 : trois passages horodatés — décision (9), application (10), fond (11).
+        let stamp = |s: u32| {
+            self.query.as_ref().map(|q| wgpu::ComputePassTimestampWrites {
+                query_set: q,
+                beginning_of_pass_write_index: Some(2 * s),
+                end_of_pass_write_index: Some(2 * s + 1),
+            })
+        };
         {
-            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(9) });
             self.encode_decide(&mut pass);
+        }
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(10) });
             self.dispatch(&mut pass, SWITCH_APPLY[0], 1, 1);
             self.dispatch(&mut pass, LIST_MODE_CONVERT, 1, 1);
             self.encode_list(&mut pass);
             self.dispatch(&mut pass, SWITCH_APPLY[2], 1, 1);
+        }
+        {
             // S414 : le fond, sur les étiquettes de la surface fraîche, après le masque.
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(11) });
             if self.switch.floor_cells.is_some() {
                 self.dispatch(&mut pass, FLOOR_PLACE, self.domain.nx * self.domain.ny, WG);
                 self.dispatch(&mut pass, LIST_MODE_RAISE, 1, 1);
@@ -356,8 +371,20 @@ impl ApicCarte {
                 self.dispatch(&mut pass, FLOOR_MOVE, 1, 1);
             }
         }
+        if let Some(q) = self.query.as_ref() {
+            encoder.resolve_query_set(q, 18..24, &self.query_resolve, 0);
+            encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 48);
+        }
         self.queue.submit([encoder.finish()]);
-        Ok(())
+        let mut times = StageTimes::default();
+        if self.query.is_some() {
+            let t = self.map_u64(&self.query_read, 6)?;
+            let period = self.queue.get_timestamp_period() as f64 / 1e6;
+            for s in 0..3 {
+                times.stages[9 + s] = t[2 * s + 1].checked_sub(t[2 * s]).map(|d| d as f64 * period);
+            }
+        }
+        Ok(times)
     }
 
     /// Le fond de la bande, m (banc).
@@ -639,16 +666,26 @@ impl ApicCarte {
                         }
                     }
                     self.dispatch(&mut pass, MOVE_BODY, self.capacity, WG);
-                    // S418 — l'échange à la frontière (C7c-2), s'il y a une zone.
+                    drop(pass);
+                    // S418 — l'échange à la frontière (C7c-2), s'il y a une zone ; S421 : l'absorption et l'échange, chacun son
+                    // passage horodaté (7 et 8).
                     if self.columns {
-                        self.dispatch(&mut pass, EXCHANGE_BEGIN, 1, 1);
-                        self.dispatch(&mut pass, LIST_MODE_ABSORB, 1, 1);
-                        self.encode_list(&mut pass);
-                        self.dispatch(&mut pass, ABSORB_SERIAL, 1, 1);
-                        // La réserve de la bascule (S408) est nulle tant que la bascule n'est pas sur la carte (C7c-4).
-                        self.encode_bin(&mut pass);
-                        self.dispatch(&mut pass, EXCHANGE_SERIAL, 1, 1);
+                        {
+                            let mut p =
+                                encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(7) });
+                            self.dispatch(&mut p, EXCHANGE_BEGIN, 1, 1);
+                            self.dispatch(&mut p, LIST_MODE_ABSORB, 1, 1);
+                            self.encode_list(&mut p);
+                            self.dispatch(&mut p, ABSORB_SERIAL, 1, 1);
+                        }
+                        let mut p = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(8) });
+                        self.encode_bin(&mut p);
+                        self.dispatch(&mut p, EXCHANGE_SERIAL, 1, 1);
+                        used = 9;
+                    } else {
+                        used = 7;
                     }
+                    continue;
                 }
             }
             used = s as u32 + 1;
@@ -1514,7 +1551,7 @@ pub fn recevoir_b10() -> Result<(), String> {
         if let Some(s) = sw.as_mut() {
             carte.load_switch(s);
             carte.set_body(a.body());
-            carte.switch_for_bench(0)?;
+            let _ = carte.switch_for_bench(0)?;
             s.switch(0, &mut a).map_err(|e| format!("{e:?}"))?;
             s.clear_counts();
         }
@@ -1562,7 +1599,7 @@ pub fn recevoir_b10() -> Result<(), String> {
         let mut sides = [0, 1].map(|_| Side { pinch: None, cavity_max: 0., crown: f64::MIN });
         let (mut t, mut steps, mut worst_phi, mut worst_at, mut unconverged, mut it_ref, mut it_carte) =
             (0f64, 0u64, 0f64, 0f64, 0u64, 0u64, 0u64);
-        let mut stage_ms: Vec<Vec<f64>> = vec![Vec::new(); 7];
+        let mut stage_ms: Vec<Vec<f64>> = vec![Vec::new(); 12];
         let mut total_ms = Vec::new();
         let mut switch_ms: Vec<f64> = Vec::new();
         let mut diverged = false;
@@ -1595,10 +1632,16 @@ pub fn recevoir_b10() -> Result<(), String> {
                         ts.switch(t_us, tw).map_err(|e| format!("{e:?}"))?;
                     }
                     _ => {
-                        let start_switch = std::time::Instant::now();
-                        carte.switch_for_bench(t_us)?;
+                        let sw_times = carte.switch_for_bench(t_us)?;
                         let k = carte.counts()?;
-                        switch_ms.push(start_switch.elapsed().as_secs_f64() * 1e3);
+                        let mut sw_sum = 0.;
+                        for s in 9..12 {
+                            if let Some(ms) = sw_times.stages[s] {
+                                stage_ms[s].push(ms);
+                                sw_sum += ms;
+                            }
+                        }
+                        switch_ms.push(sw_sum);
                         // Le premier pas où la carte cesse de suivre la référence : `n`, masque, fond.
                         if !diverged {
                             let mask_c = carte.mask()?;
@@ -1628,7 +1671,7 @@ pub fn recevoir_b10() -> Result<(), String> {
                 unconverged += (!converged) as u64;
             }
             let mut sum = 0.;
-            for (k, v) in times.stages.iter().take(7).enumerate() {
+            for (k, v) in times.stages.iter().take(9).enumerate() {
                 if let Some(ms) = v {
                     stage_ms[k].push(*ms);
                     sum += ms;
@@ -1721,7 +1764,10 @@ pub fn recevoir_b10() -> Result<(), String> {
         println!("APIC_CARTE_B10_S417 {}     {}", if eps.is_some() { "temoin" } else { "carte" }, show(&sides[1]));
         let series: Vec<String> = gaps.iter().filter(|(k, _)| k % 4 == 0 || *k + 6 > gaps.len() as u64).map(|(k, g)| format!("{k}:{:.2}", g * 1e3)).collect();
         println!("APIC_CARTE_B10_S417 ecart_phi_interface_par_pas_mm {}", series.join(" "));
-        let names = ["transfert", "surface", "projection", "extrapolation", "retour", "advection", "separation_corps"];
+        let names = [
+            "transfert", "surface", "projection", "extrapolation", "retour", "advection", "separation_corps", "absorption", "echange",
+            "bascule_decision", "bascule_application", "bascule_fond",
+        ];
         let per_stage: Vec<String> =
             names.iter().zip(stage_ms.iter_mut()).map(|(name, v)| format!("{name}={:.3}", percentile(v, 0.99))).collect();
         let p99 = percentile(&mut total_ms, 0.99);
@@ -1735,7 +1781,7 @@ pub fn recevoir_b10() -> Result<(), String> {
             let q = carte.total_quanta()?;
             let k = carte.counts()?;
             println!(
-                "APIC_CARTE_B10_S417 bande particules={}/{} bascule_mur_p99_ms={:.3} derive_volume_carte_quanta={} volume_reference_m3={:.9} bascule_refusee={}",
+                "APIC_CARTE_B10_S417 bande particules={}/{} bascule_carte_p99_ms={:.3} derive_volume_carte_quanta={} volume_reference_m3={:.9} bascule_refusee={}",
                 k[0], a.particle_count(), percentile(&mut switch_ms, 0.99), q - q_start, a.total_volume(), k[7]
             );
         }

@@ -81,7 +81,7 @@ est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'instrument : horodatages par sous-étage (fin du pas : séparation, corps, absorption, échange ; bascule : décision,
+- [x] **P2** — l'instrument : horodatages par sous-étage (fin du pas : séparation, corps, absorption, échange ; bascule : décision,
   application, fond) ; mesure de B10 en bande étroite.
 - [ ] **P3** — l'échange : listes ordonnées des faces-mailles et des colonnes actives ; la réserve en parallèle ; mesure ; critère 1.
 - [ ] **P4** — la bascule : les boucles séquentielles réduites (soldes des faces changées, …) ; mesure ; critère 1.
@@ -91,3 +91,4 @@ est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+- **P2** — horodatages par sous-étage (32 requêtes ; fin du pas en trois passages : séparation et corps 6, absorption 7, échange 8 ; bascule : décision 9, application 10, fond 11). B10 en bande étroite, résultats **inchangés au caractère près** (pincement, série de `φ`, divergence au pas 35). **p99 (ms)** : transfert 0,20, surface 0,74, **projection 5,93**, extrapolation 0,03, retour 0,07, advection 0,004, séparation et corps 0,40, **absorption 2,14**, **échange 21,44** ; bascule 1,93 (décision 0,88, application 0,64, fond 0,42). Total pas 29,0 + bascule 1,9.
