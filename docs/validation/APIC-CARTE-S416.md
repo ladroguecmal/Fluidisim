@@ -439,3 +439,34 @@ sens** — pincement, cavité, couronne, masse ; **sans objet au col**, où la r
 des perturbations de 10⁻⁶ à 10⁻⁴ m/s). **Le coût, lui, ne l'est pas** : 28,7 ms au 99ᵉ centile pour 4 000 particules et 21 504 mailles,
 dont 23,6 ms pour la fin du pas (séparation, corps, échange sur un fil) et ≈ 5,5 ms de bascule — **C7e** : l'échange par coloriage, la
 bascule en parallèle, la multigrille, le dispatch indirect. *« δ ≤ 2 ms avec la bande »* reste à faire.
+
+## 13. C7e, premier temps — le coût de la bande étroite (S421)
+
+**Reproduire** : `ADAPTATIF=1 BANDE=1 … --apic3d-carte-b10` (20 s) — la ligne `cout_p99_ms` donne chaque sous-étage ; `DEBUG_SOLDES=1`
+ajoute la réserve, les faces-mailles mouillées et actives par pas.
+
+**La méthode.** Mesurer d'abord, par sous-étage (horodatages : la fin du pas en séparation, absorption et échange, chacun séparé de
+son fil ; la bascule en décision, application, fond), puis réduire **à sémantique exacte** — chaque réduction garde le pincement, les
+gestes, `n`, le volume et les pas entiers comparés à la référence (raccord après 11, 17, 60 pas ; bande après 5, 40, 70 pas).
+
+| B10 en bande étroite, p99 (ms) | S420 | après | ce qui a changé |
+|---|---|---|---|
+| échange | 21,44 | **0,20 + 0,59** | la réserve réglée en parallèle ; une **liste ordonnée des faces-mailles actives** (frontière, solde au-delà d'une particule) au lieu des ≈ 45 000 ; la pose en un parcours pour quatre emplacements (elle relisait quatre fois toutes les particules posées dans l'échange) ; puis le fil en **groupe de 64** : retrait et pose par minimums de groupe, exacts quel que soit l'ordre (clé du retrait : distance, côté, rang dans la maille — le départage de la référence) |
+| absorption | 2,14 | **0,12 + 0,41** | les 24 faces qu'une absorbée met à jour sont distinctes : 24 fils, la visite de la référence gardée par le fil 0 |
+| projection | 5,93 | **2,5 à 3,0** | **plafond d'itérations adaptatif** — 1,25 fois le plus grand des huit derniers pas, plus huit ; retour au plafond fixe après un pas non convergé ; aucun ne l'a été. Le dispatch indirect nul après convergence est refusé par wgpu (tampon d'arguments lié en écriture au même dispatch) |
+| surface, séparation, transfert, le reste | 1,47 | 1,47 | — |
+| **le pas** | **29,0** | **4,9** | ÷ 5,9 |
+| bascule (décision, application, fond) | 1,93 | 1,91 | — (décision 0,86, dont la surface rafraîchie ; application 0,63 et fond 0,42 sur un fil) |
+
+**Les bits, eux, bougent** — et ce n'est pas la sémantique. La réserve réglée en parallèle donne exactement les entiers du règlement
+séquentiel à chaque pas (vérifié : −4 855 quanta au pas 37, puis 0), mais la série de `φ` passait de 1,25 à 1,24 mm au pas 44 ; **un
+appel séquentiel sans effet remis dans le noyau de l'échange rendait les bits de S420**. FXC compile le flottant d'un noyau autrement
+quand son code change (L345 : *le compilateur est dans la boucle*) : « au bit près » n'est pas un instrument de non-régression tenable
+sur cette cible ; la non-régression se juge sur les issues discrètes et contre la référence. (Après la pose en un parcours, la série
+est revenue à 1,25 — FXC encore.)
+
+**Ce qui reste pour δ ≤ 2 ms au 99ᵉ centile** sur B10 en bande étroite (4 000 particules, 21 504 mailles) : **la projection** (2,5 à
+3,0 ms : 207 itérations du gradient conjugué, cinq dispatchs chacune — la multigrille de C3, portée à l'opérateur à fluide fantôme
+d'APIC, est le levier : 6 à 8 cycles là où le gradient conjugué en demande 207) ; **la bascule** (1,9 ms : application et fond sur un fil
+— même traitement que l'échange ; la surface rafraîchie, 0,7 ms, que la référence recalcule aussi) ; **la surface** (0,73 ms : chaque
+maille lit 125 mailles et leurs images ; ne reconstruire que près de l'interface). Somme visée de ces trois : ≈ 1 ms ; le reste ≈ 1,5 ms.
