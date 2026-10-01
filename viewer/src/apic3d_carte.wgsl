@@ -3754,6 +3754,137 @@ fn xg_pose_all(t: u32, c0: vec3<f32>, c1: vec3<f32>, c2: vec3<f32>, c3: vec3<f32
     }
 }
 
+// **S427 — les retraits d'un solde d'un coup.** `xg_pick_removal` (`xg_pick_lowest`) prenait, à chaque retrait, la plus petite clé
+// parmi les particules non marquées — niveau d'abord (profondeur `dk` de part et d'autre de la face-maille ; hauteur au-dessus du
+// fond), puis (distance, côté, rang dans la maille). Les K retraits successifs sont donc les K plus petites clés : rassemblées niveau
+// par niveau jusqu'à en avoir K (le dernier niveau entier), rangées par rang, marquées dans l'ordre par le fil 0. Au-delà de 256
+// candidates, rien n'est fait ici : la boucle d'origine, appelée ensuite, fait tout.
+var<workgroup> xr_key: array<vec4<u32>, 256>;
+var<workgroup> xr_m: array<u32, 256>;
+var<workgroup> xr_sorted: array<u32, 256>;
+var<workgroup> xr_cnt: atomic<u32>;
+
+fn key4_less(a: vec4<u32>, b: vec4<u32>) -> bool {
+    if a.x != b.x {
+        return a.x < b.x;
+    }
+    if a.y != b.y {
+        return a.y < b.y;
+    }
+    if a.z != b.z {
+        return a.z < b.z;
+    }
+    return a.w < b.w;
+}
+
+// solde ≤ −vp, sur une valeur.
+fn value_le_minus_vp(sv: vec2<u32>) -> bool {
+    let hi = bitcast<i32>(sv.y);
+    var r = false;
+    if hi < 0 {
+        let m = neg_i64(sv);
+        r = m.y > 0u || m.x >= VP_QUANTA;
+    }
+    return r;
+}
+
+// `mode` 0 : la face-maille (`band`, rangée `l`, `axis`, `plane`) ; 1 : la colonne `band` au-dessus du fond `l`.
+fn xg_remove_all(t: u32, mode: u32, band: vec2<u32>, l: u32, axis: u32, plane: f32, solde: u32) {
+    var k = 0u;
+    if t == 0u {
+        var sv = solde_get(solde);
+        loop {
+            if k >= 256u || !value_le_minus_vp(sv) {
+                break;
+            }
+            sv = add_i64(sv, vec2<u32>(VP_QUANTA, 0u));
+            k = k + 1u;
+        }
+        atomicStore(&xr_cnt, 0u);
+    }
+    let want = xg_bcast(t, k);
+    var total = 0u;
+    var dk = 0u;
+    loop {
+        if want == 0u || total >= want || total > 256u || dk >= P.nz {
+            break;
+        }
+        for (var side_k = 0u; side_k < 2u; side_k = side_k + 1u) {
+            var lev = -1;
+            if mode == 0u {
+                if !(dk == 0u && side_k == 1u) {
+                    var kk = i32(l) - i32(dk);
+                    if side_k == 1u {
+                        kk = i32(l) + i32(dk);
+                    }
+                    if kk >= 0 && kk < i32(P.nz) {
+                        lev = kk;
+                    }
+                }
+            } else if side_k == 0u && l + dk < P.nz {
+                lev = i32(l + dk);
+            }
+            if lev >= 0 {
+                let cell = cell_index(band.x, band.y, u32(lev));
+                for (var s = start[cell] + t; s < start[cell + 1u]; s = s + XG) {
+                    let m = order[s];
+                    if px[m].w == 0.0 {
+                        let p = px[m].xyz;
+                        var d = p.z;
+                        if mode == 0u {
+                            d = abs(select(p.y, p.x, axis == 0u) - plane);
+                        }
+                        let c = atomicAdd(&xr_cnt, 1u);
+                        if c < 256u {
+                            xr_key[c] = vec4<u32>(dk, bitcast<u32>(d), side_k, s);
+                            xr_m[c] = m;
+                        }
+                    }
+                }
+            }
+        }
+        workgroupBarrier();
+        var c = 0u;
+        if t == 0u {
+            c = atomicLoad(&xr_cnt);
+        }
+        total = xg_bcast(t, c);
+        dk = dk + 1u;
+    }
+    loop {
+        if want == 0u || total > 256u {
+            break;
+        }
+        let got = min(want, total);
+        for (var c = t; c < total; c = c + XG) {
+            let kc = xr_key[c];
+            var r = 0u;
+            for (var u = 0u; u < total; u = u + 1u) {
+                if key4_less(xr_key[u], kc) {
+                    r = r + 1u;
+                }
+            }
+            if r < got {
+                xr_sorted[r] = xr_m[c];
+            }
+        }
+        workgroupBarrier();
+        if t == 0u {
+            for (var r = 0u; r < got; r = r + 1u) {
+                let m = xr_sorted[r];
+                px[m].w = 1.0;
+                plist[xg_marked] = m;
+                xg_marked = xg_marked + 1u;
+                atomicAdd(&pcount[COUNT_REMOVED], 1u);
+                solde_add(solde, vec2<u32>(VP_QUANTA, 0u));
+            }
+        }
+        storageBarrier();
+        workgroupBarrier();
+        break;
+    }
+}
+
 // Le fil 0 marque une particule retirée.
 fn xg_mark(t: u32, m: u32, solde: u32) {
     if t == 0u {
@@ -3863,6 +3994,9 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
         }
         let band = select(lo, hi, zl);
         let side = select(-1.0, 1.0, zl);
+        // S427 : les retraits d'un coup ; la boucle d'origine finit ce qu'il reste (rien, sauf au-delà de 256 candidates ou quand
+        // les candidates manquent).
+        xg_remove_all(t, 0u, band, l, axis, plane, e);
         loop {
             if !xg_remove_due(t, e) {
                 break;
@@ -3915,6 +4049,7 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
                 let fond = floor_of(col);
                 let kf = xg_bcast(t, min(u32(floor(fond / P.dx + 0.5)), P.nz - 1u));
                 let sw = solde_w_index(col);
+                xg_remove_all(t, 1u, vec2<u32>(i, j), kf, 0u, 0.0, sw);
                 loop {
                     if !xg_remove_due(t, sw) {
                         break;
