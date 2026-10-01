@@ -230,11 +230,12 @@ impl ApicCarte {
         let pscratch = buffer(&device, (capacity * 80) as u64, storage);
         let swb = buffer(&device, (7 * ncol * 4) as u64, storage);
         let flist = buffer(&device, ((nu + nv) * 4) as u64, storage);
-        // S422 — la hiérarchie : on divise par deux (arrondi au-dessus) tant qu'une dimension dépasse 2, huit niveaux au plus.
+        // S422 — la hiérarchie : on divise par deux (arrondi au-dessus) tant que le niveau dépasse 64 mailles, six niveaux au plus
+        // (le groupe des niveaux grossiers en porte quatre ; des niveaux filiformes ne servent à rien).
         let mut mg_levels = vec![[nx, ny, nz]];
-        while mg_levels.len() < 8 {
+        while mg_levels.len() < 6 {
             let [a, b, c] = *mg_levels.last().unwrap();
-            if a.max(b).max(c) <= 2 {
+            if a * b * c <= 64 {
                 break;
             }
             mg_levels.push([a.div_ceil(2), b.div_ceil(2), c.div_ceil(2)]);

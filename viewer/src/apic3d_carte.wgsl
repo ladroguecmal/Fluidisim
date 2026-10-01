@@ -3750,12 +3750,14 @@ fn mg_l1_xt(@builtin(global_invocation_id) g: vec3<u32>) {
 fn mg_coarse(@builtin(local_invocation_id) lid: vec3<u32>) {
     let t = lid.x;
     // Après convergence, chaque fil saute son travail. FXC refuse une barrière dans une boucle de bornes non constantes dès
-    // qu'elle en porte plusieurs : toutes les boucles à barrières ont des bornes constantes (huit niveaux au plus, sept
-    // lissages), le travail est gardé.
+    // qu'elle en porte plusieurs : toutes les boucles à barrières ont des bornes constantes (quatre niveaux dans le groupe), le
+    // travail est gardé. Trois phases par niveau à la descente — restriction, premier lissage, second —, six lissages de plus au
+    // plus grossier (huit en tout), trois à la remontée — prolongation, deux lissages.
     let skip = mg_done();
     let levels = mg_levels();
     let last = levels - 1u;
-    for (var l = 2u; l < 8u; l = l + 1u) {
+    for (var s = 0u; s < 4u; s = s + 1u) {
+        let l = s + 2u;
         let on = l < levels && !skip;
         let cells = select(0u, lv_get(min(l, 7u), 3u), on);
         for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
@@ -3774,22 +3776,30 @@ fn mg_coarse(@builtin(local_invocation_id) lid: vec3<u32>) {
         }
         storageBarrier();
         workgroupBarrier();
-        // Deux lissages en tout, huit au plus grossier ; le résultat finit dans `x`.
-        let sweeps = select(1u, 7u, l == last);
-        for (var q = 0u; q < 7u; q = q + 1u) {
-            let odd = q % 2u == 1u;
-            for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
-                let c = t + 256u * bb;
-                if c < cells && q < sweeps {
-                    coarse_smooth(l, select(lv_get(l, 7u), lv_get(l, 5u), odd), select(lv_get(l, 5u), lv_get(l, 7u), odd), c);
-                }
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < cells {
+                coarse_smooth(l, lv_get(l, 7u), lv_get(l, 5u), c);
             }
-            storageBarrier();
-            workgroupBarrier();
         }
+        storageBarrier();
+        workgroupBarrier();
+    }
+    // Le plus grossier : six lissages de plus, `x → t → x …`, le résultat dans `x`.
+    let ccells = select(0u, lv_get(min(last, 7u), 3u), last >= 2u && !skip);
+    for (var q = 0u; q < 6u; q = q + 1u) {
+        let odd = q % 2u == 1u;
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < ccells {
+                coarse_smooth(last, select(lv_get(last, 5u), lv_get(last, 7u), odd), select(lv_get(last, 7u), lv_get(last, 5u), odd), c);
+            }
+        }
+        storageBarrier();
+        workgroupBarrier();
     }
     // La remontée : du plus grossier au niveau 2, prolongation vers le niveau inférieur, deux lissages s'il est au-delà du 1.
-    for (var s = 0u; s < 6u; s = s + 1u) {
+    for (var s = 0u; s < 4u; s = s + 1u) {
         let l = last - min(s, last);
         let on = s + 2u < levels && !skip;
         let f = max(l, 1u) - 1u;
