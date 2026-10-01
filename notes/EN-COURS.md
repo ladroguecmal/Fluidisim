@@ -87,7 +87,7 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la décision sur la carte : paramètres, état du critère, hauteurs convertibles, corps, pente, dilatation, maintien ;
   banc : masque demandé contre la référence.
-- [ ] **P3** — la bascule : particules → colonnes (hauteurs, retraits sur un fil, voie mixte en quanta, réserve), colonnes →
+- [x] **P3** — la bascule : particules → colonnes (hauteurs, retraits sur un fil, voie mixte en quanta, réserve), colonnes →
   particules (ensemencement sur un fil), soldes à la réserve ; la réserve réglée dans l'échange ; banc d'une bascule.
 - [ ] **P4** — le fond placé et déplacé (`place_floor`, `move_band_floor`) ; banc.
 - [ ] **P5** — B10 en bande étroite sur la carte, carte, référence et témoin ; critère 3.
@@ -96,3 +96,15 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
 
 ### Notes de reprise
 - **P2** — cœur : `ColumnsSwitch::switch_state` (instants requis, fond demandé). Carte : `Params` à 224 octets (critère), `swb` (sept tranches par colonne), `switch_need` (hauteur convertible, corps), `switch_slope`, `switch_spread`, `switch_request` (maintien sur 32 bits) ; `load_switch`, `decide_for_bench` (tri + reconstruction + décision). `b10_band_state` (B10, maintien 0,3 s, fond 4 ; un pas de plus sans bascule). `--apic3d-carte-decision` : **masque identique** à 0, 10, 30, 50, 60 pas (56 à 59 colonnes en bande sur 256). Critère 1 tenu. Banc lent (3 min : la référence rechauffée à chaque instant).
+- **P3** — cœur `columns_reserve`. Carte : `switch_begin`, `switch_apply` sur un fil (capacité ; retraits des converties par la visite
+  de la référence ; eau sous le fond et solde vertical comptés ; voie mixte en quanta, décalage borné à 2²⁵ quanta, le reste exact à
+  la réserve ; ensemencement nominal en ordre de colonnes ; soldes des faces qui cessent d'être frontière à la réserve ; masque) ;
+  `settle_reserve` au début de l'échange ; le drapeau de bande résident (`pcount[8]`). **La liste des retirées construite triée en
+  parallèle** (`list_count`, `compact_scan`, `list_scatter`) pour l'absorption comme pour la bascule : le tri par insertion sur un fil
+  faisait tomber la carte (délai de garde du pilote) à la bascule initiale, 120 000 particules. Bancs (`--apic3d-carte-decision`,
+  `INITIAL`, `PENTE`, `MAINTIEN`) : à 21 instants sans bascule, tout identique ; **ensemencements forcés** (`PENTE=0.02` : 186 et 166
+  colonnes, 98 537 et 89 590 particules) — positions **identiques**, réserves égales (1,761·10⁻⁵, 8,683·10⁻⁵ m³) ; **conversions**
+  (`MAINTIEN=0` : 3 colonnes) — positions identiques, `η` 7,2·10⁻⁷ m, réserve égale ; **la bascule initiale** (200 colonnes vers les
+  colonnes) — `n` 28 672 des deux côtés, positions identiques, **`η` à 1,9·10⁻⁶ m** (critère 2 « 10⁻⁶ » manqué : `η` se lit sur `φ`,
+  admis à 10⁻⁵ — le critère était plus serré que sa source), réserve 6·10⁻¹¹ contre 0 (le reste de la division du décalage) ; volume
+  de la carte **constant à 0 quantum** partout. Raccord inchangé.

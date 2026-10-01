@@ -1101,7 +1101,7 @@ fn move_body(@builtin(global_invocation_id) g: vec3<u32>) {
 // `columns_read` (S400) : la hauteur que la pression voit, `η + e(η)`, `e` l'erreur que la bande ferait en lisant la même
 // surface (table périodique sur une maille) ; `η` sans bande.
 fn columns_read(eta: f32) -> f32 {
-    if P.band == 0.0 {
+    if atomicLoad(&pcount[COUNT_BAND]) == 0u {
         return eta;
     }
     let x = eta / P.dx - 0.5;
@@ -1544,6 +1544,11 @@ const COUNT_ABSORBED: u32 = 3u;
 const COUNT_REMOVED: u32 = 4u;
 const COUNT_POSED: u32 = 5u;
 const COUNT_REFUSED: u32 = 6u;
+// S420 : la bascule refusée (capacité), une bande existe-t-elle (le masque change avec la bascule).
+const COUNT_SWITCH_REFUSED: u32 = 7u;
+const COUNT_BAND: u32 = 8u;
+// S420 : le prédicat de la liste ordonnée — 0 : absorbée (échange) ; 1 : dans une colonne convertie (bascule).
+const COUNT_LIST_MODE: u32 = 9u;
 // Un volume de particule, en quanta : 2²⁴.
 const VP_QUANTA: u32 = 16777216u;
 
@@ -1681,19 +1686,16 @@ fn absorb_one(k: u32) {
 // qui est examinée aussitôt.
 @compute @workgroup_size(1)
 fn absorb_serial() {
+    visit_remove(0u);
+}
+
+// La liste triée, puis la visite de la référence — en montant ; une particule listée est remplacée par la dernière, examinée
+// aussitôt. `mode` 0 : absorbée (`absorb_one`) ; 1 : retirée par la bascule (comptée). Rend le nombre de retirées.
+fn visit_remove(mode: u32) -> u32 {
+    var removed = 0u;
+    // S420 : la liste arrive triée (`list_count`, `list_scatter`) — un tri par insertion sur un fil dépassait le délai de garde du
+    // pilote pour la bascule initiale (120 000 particules).
     let len = atomicLoad(&pcount[COUNT_LIST]);
-    for (var s = 1u; s < len; s = s + 1u) {
-        let v = plist[s];
-        var t = s;
-        loop {
-            if t == 0u || plist[t - 1u] <= v {
-                break;
-            }
-            plist[t] = plist[t - 1u];
-            t = t - 1u;
-        }
-        plist[t] = v;
-    }
     var n_cur = np();
     var front = 0u;
     var back = i32(len) - 1;
@@ -1703,7 +1705,10 @@ fn absorb_serial() {
         }
         let a = plist[front];
         front = front + 1u;
-        absorb_one(a);
+        if mode == 0u {
+            absorb_one(a);
+        }
+        removed = removed + 1u;
         loop {
             let last = n_cur - 1u;
             n_cur = last;
@@ -1713,13 +1718,17 @@ fn absorb_serial() {
             copy_particle(last, a);
             if back >= i32(front) && plist[u32(back)] == last {
                 back = back - 1;
-                absorb_one(a);
+                if mode == 0u {
+                    absorb_one(a);
+                }
+                removed = removed + 1u;
                 continue;
             }
             break;
         }
     }
     atomicStore(&pcount[COUNT_N], n_cur);
+    return removed;
 }
 
 fn solde_le_minus_vp(face: u32) -> bool {
@@ -1758,6 +1767,7 @@ fn exchange_serial() {
     if P.has_columns == 0.0 {
         return;
     }
+    settle_reserve();
     var n = np();
     let first_new = n;
     var marked = 0u;
@@ -2284,4 +2294,366 @@ fn switch_request(@builtin(global_invocation_id) g: vec3<u32>) {
     let at = swb[sw(SW_AT, col)];
     let band = required || (at != NEVER && P.s_now - at < P.s_hold);
     swb[sw(SW_REQUEST, col)] = select(1u, 0u, band);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **La bascule à masse exacte** (`apply_columns_mask`, S408, S414 ; C7c-4), en quanta, sur un fil dans l'ordre de la référence.
+
+fn reserve_index() -> u32 {
+    return P.nu + P.nv + P.nx * P.ny;
+}
+
+fn converted(col: u32) -> bool {
+    return cmask[col] == 0u && swb[sw(SW_REQUEST, col)] != 0u && is_finite_f32(bitcast<f32>(swb[sw(SW_HEIGHT, col)]));
+}
+
+@compute @workgroup_size(1)
+fn switch_begin() {
+    atomicStore(&pcount[COUNT_LIST], 0u);
+    atomicStore(&pcount[COUNT_SWITCH_REFUSED], 0u);
+}
+
+// Les particules des colonnes converties, listées.
+@compute @workgroup_size(128)
+fn convert_mark(@builtin(global_invocation_id) g: vec3<u32>) {
+    let k = g.x;
+    if k >= np() {
+        return;
+    }
+    let m = cell_of(px[k].xyz);
+    if converted(m.y * P.nx + m.x) {
+        let slot = atomicAdd(&pcount[COUNT_LIST], 1u);
+        plist[slot] = k;
+    }
+}
+
+// Ce qu'ensemence une colonne de hauteur `h` : sous-couches pleines, puis la dernière au plus près (0 à 4).
+fn plan_full(h: f32) -> u32 {
+    let half = 0.5 * P.dx;
+    return min(u32(max(floor(h / half), 0.0)), 2u * P.nz);
+}
+
+fn plan_last(h: f32, full: u32) -> u32 {
+    if full >= 2u * P.nz {
+        return 0u;
+    }
+    let half = 0.5 * P.dx;
+    let rest = h - f32(full) * half;
+    return u32(clamp(floor(rest / half * 4.0 + 0.5), 0.0, 4.0));
+}
+
+fn column_height(col: u32) -> f32 {
+    return i64_to_f32(ivol_get(col)) * quantum_height();
+}
+
+fn i64_is_zero(a: vec2<u32>) -> bool {
+    return a.x == 0u && a.y == 0u;
+}
+
+@compute @workgroup_size(1)
+fn switch_apply() {
+    let ncol = P.nx * P.ny;
+    // (0) La capacité : l'ensemencement des colonnes qui repassent aux particules.
+    var needed = 0u;
+    for (var col = 0u; col < ncol; col = col + 1u) {
+        if cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u {
+            let h = column_height(col);
+            let full = plan_full(h);
+            needed = needed + 4u * full + plan_last(h, full);
+        }
+    }
+    if np() + needed > arrayLength(&plist) {
+        atomicStore(&pcount[COUNT_SWITCH_REFUSED], 1u);
+        return;
+    }
+    // (1) Particules → colonnes : les particules des converties retirées (l'ordre de la référence), leur volume compté.
+    let removed = visit_remove(1u);
+    var total = vec2<u32>(0u, 0u);
+    for (var r = 0u; r < removed; r = r + 1u) {
+        total = add_i64(total, vec2<u32>(VP_QUANTA, 0u));
+    }
+    var count = 0u;
+    var geo_sum = vec2<u32>(0u, 0u);
+    for (var col = 0u; col < ncol; col = col + 1u) {
+        if !converted(col) {
+            continue;
+        }
+        // S414 : l'eau sous le fond et le solde vertical comptent avec les particules ; le fond s'efface.
+        let fond = floor_of(col);
+        if fond > 0.0 {
+            let cells = u32(floor(fond / P.dx + 0.5));
+            for (var c = 0u; c < 8u * cells; c = c + 1u) {
+                total = add_i64(total, vec2<u32>(VP_QUANTA, 0u));
+            }
+            total = add_i64(total, solde_get(solde_w_index(col)));
+            cols[2u * ncol + 32u + col] = 0.0;
+            let z = solde_w_index(col);
+            isolde[2u * z] = 0u;
+            isolde[2u * z + 1u] = 0u;
+        }
+        let h = bitcast<f32>(swb[sw(SW_HEIGHT, col)]);
+        let gq = to_i64(h / quantum_height());
+        ivol_set(col, gq);
+        geo_sum = add_i64(geo_sum, gq);
+        count = count + 1u;
+    }
+    if count > 0u {
+        // Le niveau par la masse, à un quart de maille au plus (2²⁵ quanta) ; le reste à la réserve, exactement.
+        let wanted = i64_to_f32(add_i64(total, neg_i64(geo_sum))) / f32(count);
+        let shift = to_i64(clamp(wanted, -33554432.0, 33554432.0));
+        var given = vec2<u32>(0u, 0u);
+        for (var col = 0u; col < ncol; col = col + 1u) {
+            if converted(col) {
+                let v = add_i64(ivol_get(col), shift);
+                ivol_set(col, v);
+                cols[col] = i64_to_f32(v) * quantum_height();
+                given = add_i64(given, v);
+            }
+        }
+        solde_add(reserve_index(), add_i64(total, neg_i64(given)));
+    }
+    // (2) Colonnes → particules : ensemencées sous leur hauteur, en ordre de colonnes.
+    var n = np();
+    let offsets = array<vec2<f32>, 4>(vec2<f32>(0.25, 0.25), vec2<f32>(0.75, 0.75), vec2<f32>(0.75, 0.25), vec2<f32>(0.25, 0.75));
+    for (var col = 0u; col < ncol; col = col + 1u) {
+        if !(cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u) {
+            continue;
+        }
+        let i = col % P.nx;
+        let j = col / P.nx;
+        let v0 = ivol_get(col);
+        let h = i64_to_f32(v0) * quantum_height();
+        let full = plan_full(h);
+        let last = plan_last(h, full);
+        var seeded = 0u;
+        var subs = full;
+        if last > 0u {
+            subs = full + 1u;
+        }
+        for (var sub = 0u; sub < subs; sub = sub + 1u) {
+            let z = (f32(sub) + 0.5) * (0.5 * P.dx);
+            var cnt = 4u;
+            if sub >= full {
+                cnt = last;
+            }
+            for (var a = 0u; a < cnt; a = a + 1u) {
+                let o = offsets[a];
+                let p = vec3<f32>((f32(i) + o.x) * P.dx, (f32(j) + o.y) * P.dx, z);
+                px[n] = vec4<f32>(p, 0.0);
+                grid_affine_at(p, n);
+                n = n + 1u;
+                seeded = seeded + 1u;
+            }
+        }
+        var rest = v0;
+        for (var s = 0u; s < seeded; s = s + 1u) {
+            rest = add_i64(rest, neg_i64(vec2<u32>(VP_QUANTA, 0u)));
+        }
+        solde_add(reserve_index(), rest);
+        ivol_set(col, vec2<u32>(0u, 0u));
+        cols[col] = 0.0;
+    }
+    atomicStore(&pcount[COUNT_N], n);
+    // (3) Les soldes des faces qui cessent d'être frontière : à la réserve. Puis le masque.
+    for (var axis = 0u; axis < 2u; axis = axis + 1u) {
+        var fx = P.nx + 1u;
+        var fy = P.ny;
+        if axis == 1u {
+            fx = P.nx;
+            fy = P.ny + 1u;
+        }
+        for (var fj = 0u; fj < fy; fj = fj + 1u) {
+            for (var fi = 0u; fi < fx; fi = fi + 1u) {
+                var lo = 0u;
+                var hi = 0u;
+                if axis == 0u {
+                    if fi == 0u || fi == P.nx {
+                        continue;
+                    }
+                    lo = fj * P.nx + fi - 1u;
+                    hi = fj * P.nx + fi;
+                } else {
+                    if fj == 0u || fj == P.ny {
+                        continue;
+                    }
+                    lo = (fj - 1u) * P.nx + fi;
+                    hi = fj * P.nx + fi;
+                }
+                let before = (cmask[lo] != 0u) != (cmask[hi] != 0u);
+                let after = (new_mask(lo) != 0u) != (new_mask(hi) != 0u);
+                if before && !after {
+                    for (var l = 0u; l < P.nz; l = l + 1u) {
+                        var face = 0u;
+                        if axis == 0u {
+                            face = (l * P.ny + fj) * (P.nx + 1u) + fi;
+                        } else {
+                            face = P.nu + (l * (P.ny + 1u) + fj) * P.nx + fi;
+                        }
+                        solde_add(reserve_index(), solde_get(face));
+                        isolde[2u * face] = 0u;
+                        isolde[2u * face + 1u] = 0u;
+                    }
+                }
+            }
+        }
+    }
+    var band = 0u;
+    for (var col = 0u; col < ncol; col = col + 1u) {
+        let m = new_mask(col);
+        swb[sw(SW_SPREAD, col)] = m;
+        if m == 0u {
+            band = 1u;
+        }
+    }
+    for (var col = 0u; col < ncol; col = col + 1u) {
+        cmask[col] = swb[sw(SW_SPREAD, col)];
+    }
+    atomicStore(&pcount[COUNT_BAND], band);
+}
+
+// Le masque après la bascule : une convertie devient colonne ; une colonne demandée en particules le devient ; sinon l'ancien.
+fn new_mask(col: u32) -> u32 {
+    if converted(col) {
+        return 1u;
+    }
+    if cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u {
+        return 0u;
+    }
+    return cmask[col];
+}
+
+// **La réserve réglée** (`columns_settle_reserve`, S408) : à parts égales sur les faces-mailles de frontière mouillées.
+fn settle_reserve() {
+    let r = solde_get(reserve_index());
+    if i64_is_zero(r) {
+        return;
+    }
+    var count = 0u;
+    for (var round_k = 0u; round_k < 2u; round_k = round_k + 1u) {
+        var share = vec2<u32>(0u, 0u);
+        if round_k == 1u {
+            if count == 0u {
+                return;
+            }
+            share = to_i64(i64_to_f32(r) / f32(count));
+        }
+        for (var axis = 0u; axis < 2u; axis = axis + 1u) {
+            var fx = P.nx + 1u;
+            var fy = P.ny;
+            if axis == 1u {
+                fx = P.nx;
+                fy = P.ny + 1u;
+            }
+            for (var l = 0u; l < P.nz; l = l + 1u) {
+                for (var fj = 0u; fj < fy; fj = fj + 1u) {
+                    for (var fi = 0u; fi < fx; fi = fi + 1u) {
+                        var lo = 0u;
+                        var hi = 0u;
+                        if axis == 0u {
+                            if fi == 0u || fi == P.nx {
+                                continue;
+                            }
+                            lo = fj * P.nx + fi - 1u;
+                            hi = fj * P.nx + fi;
+                        } else {
+                            if fj == 0u || fj == P.ny {
+                                continue;
+                            }
+                            lo = (fj - 1u) * P.nx + fi;
+                            hi = fj * P.nx + fi;
+                        }
+                        let zl = cmask[lo] != 0u;
+                        let zh = cmask[hi] != 0u;
+                        if zl == zh {
+                            continue;
+                        }
+                        let zone = select(hi, lo, zl);
+                        if !((f32(l) + 0.5) * P.dx < cols[zone]) {
+                            continue;
+                        }
+                        if round_k == 0u {
+                            count = count + 1u;
+                        } else {
+                            var face = 0u;
+                            if axis == 0u {
+                                face = (l * P.ny + fj) * (P.nx + 1u) + fi;
+                            } else {
+                                face = P.nu + (l * (P.ny + 1u) + fj) * P.nx + fi;
+                            }
+                            solde_add(face, share);
+                            solde_add(reserve_index(), neg_i64(share));
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **La liste ordonnée** (S420) : les particules qui vérifient le prédicat du mode, par indice croissant — compte par groupe, préfixe
+// des groupes (`compact_scan`), rangement par préfixe dans le groupe.
+
+fn listed(k: u32) -> bool {
+    if k >= np() {
+        return false;
+    }
+    let m = cell_of(px[k].xyz);
+    let col = m.y * P.nx + m.x;
+    if atomicLoad(&pcount[COUNT_LIST_MODE]) == 0u {
+        return P.has_columns != 0.0 && (cmask[col] != 0u || px[k].z < floor_of(col));
+    }
+    return converted(col);
+}
+
+@compute @workgroup_size(1)
+fn list_mode_absorb() {
+    atomicStore(&pcount[COUNT_LIST_MODE], 0u);
+}
+
+@compute @workgroup_size(1)
+fn list_mode_convert() {
+    atomicStore(&pcount[COUNT_LIST_MODE], 1u);
+}
+
+@compute @workgroup_size(256)
+fn list_count(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+              @builtin(workgroup_id) w: vec3<u32>) {
+    alive_mem[l.x] = select(0u, 1u, listed(g.x));
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if l.x < s {
+            alive_mem[l.x] = alive_mem[l.x] + alive_mem[l.x + s];
+        }
+        workgroupBarrier();
+    }
+    if l.x == 0u {
+        pblk[w.x] = alive_mem[0];
+    }
+}
+
+@compute @workgroup_size(256)
+fn list_scatter(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+                @builtin(workgroup_id) w: vec3<u32>) {
+    let k = g.x;
+    let own = select(0u, 1u, listed(k));
+    alive_mem[l.x] = own;
+    workgroupBarrier();
+    for (var s = 1u; s < 256u; s = s * 2u) {
+        var add = 0u;
+        if l.x >= s {
+            add = alive_mem[l.x - s];
+        }
+        workgroupBarrier();
+        alive_mem[l.x] = alive_mem[l.x] + add;
+        workgroupBarrier();
+    }
+    if own == 1u {
+        plist[pblk[w.x] + alive_mem[l.x] - 1u] = k;
+    }
+}
+
+@compute @workgroup_size(1)
+fn list_finish() {
+    atomicStore(&pcount[COUNT_LIST], pblk[u32(P.q2)]);
 }

@@ -12,14 +12,15 @@ use water_core::apic3d::{self, Apic3, ApicStage, ColumnsSwitch, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 47] = [
+const KERNELS: [&str; 55] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
     "separate_shift", "separate_apply", "impose_body", "move_body", "columns_begin", "columns_advect",
     "columns_flux", "columns_update", "compact_count", "compact_scan", "compact_scatter", "compact_copy", "compact_finish",
     "exchange_begin", "absorb_mark", "absorb_serial", "exchange_serial", "floor_update",
-    "switch_need", "switch_slope", "switch_spread", "switch_request",
+    "switch_need", "switch_slope", "switch_spread", "switch_request", "switch_begin", "convert_mark", "switch_apply",
+    "list_mode_absorb", "list_mode_convert", "list_count", "list_scatter", "list_finish",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -51,11 +52,14 @@ const COLUMNS_FLUX: usize = 31;
 const COLUMNS_UPDATE: usize = 32;
 const COMPACT: [usize; 5] = [33, 34, 35, 36, 37];
 const EXCHANGE_BEGIN: usize = 38;
-const ABSORB_MARK: usize = 39;
 const ABSORB_SERIAL: usize = 40;
 const EXCHANGE_SERIAL: usize = 41;
 const FLOOR_UPDATE: usize = 42;
 const SWITCH_DECIDE: [usize; 4] = [43, 44, 45, 46];
+const SWITCH_APPLY: [usize; 3] = [47, 48, 49];
+const LIST_MODE_ABSORB: usize = 50;
+const LIST_MODE_CONVERT: usize = 51;
+const LIST_BUILD: [usize; 3] = [52, 53, 54];
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
@@ -182,7 +186,8 @@ impl ApicCarte {
         let nu = (nx + 1) * ny * nz;
         let nv = nx * (ny + 1) * nz;
         // Soldes latéraux `u`, `v`, puis (S419) le solde vertical de chaque colonne.
-        let isolde = buffer(&device, ((nu + nv + ncol) * 8) as u64, storage);
+        // … et (S420) la réserve de la bascule.
+        let isolde = buffer(&device, ((nu + nv + ncol + 1) * 8) as u64, storage);
         let pcount = buffer(&device, 64, storage);
         let plist = buffer(&device, (capacity * 4) as u64, storage);
         let pblk = buffer(&device, ((capacity.div_ceil(SCAN as usize) + 1) * 4) as u64, storage);
@@ -326,6 +331,29 @@ impl ApicCarte {
         self.read_u32(&self.swb, 5 * ncol * 4, ncol)
     }
 
+    /// **S420** — la bascule entière à l'instant `now_us` (décision, puis masque appliqué à masse exacte), comme
+    /// `ColumnsSwitch::switch` sans le fond (P4). Banc.
+    pub fn switch_for_bench(&mut self, now_us: u64) -> Result<(), String> {
+        self.now_us = now_us;
+        self.write_params(1);
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            self.encode_decide(&mut pass);
+            self.dispatch(&mut pass, SWITCH_APPLY[0], 1, 1);
+            self.dispatch(&mut pass, LIST_MODE_CONVERT, 1, 1);
+            self.encode_list(&mut pass);
+            self.dispatch(&mut pass, SWITCH_APPLY[2], 1, 1);
+        }
+        self.queue.submit([encoder.finish()]);
+        Ok(())
+    }
+
+    /// Le masque de la zone (banc).
+    pub fn mask(&self) -> Result<Vec<u32>, String> {
+        self.read_u32(&self.cmask, 0, self.domain.nx * self.domain.ny)
+    }
+
     /// La surface rafraîchie et la décision.
     fn encode_decide(&self, pass: &mut wgpu::ComputePass) {
         let ncol = self.domain.nx * self.domain.ny;
@@ -357,6 +385,8 @@ impl ApicCarte {
         // S418 : `n` résident ; compteurs de l'échange à zéro.
         let mut counts = [0u32; 16];
         counts[0] = n as u32;
+        // S420 : une bande existe-t-elle ? (résident : la bascule le change)
+        counts[8] = reference.columns_state().is_some_and(|m| m.3) as u32;
         self.queue.write_buffer(&self.pcount, 0, u32_bytes(&counts));
         // Les vitesses de la grille à la fin du pas précédent : la zone les advecte (S398).
         let faces: Vec<f32> =
@@ -384,10 +414,12 @@ impl ApicCarte {
             // S418 : les soldes, en quanta.
             if let Some((su, sv)) = reference.columns_soldes() {
                 let sw = reference.columns_solde_w().unwrap_or(&[]);
+                let reserve = [reference.columns_reserve()];
                 let w: Vec<u32> = su
                     .iter()
                     .chain(sv)
                     .chain(sw)
+                    .chain(&reserve)
                     .flat_map(|x| {
                         let q = (x / quantum).round() as i64 as u64;
                         [q as u32, (q >> 32) as u32]
@@ -455,6 +487,14 @@ impl ApicCarte {
         pass.set_pipeline(&self.pipelines[kernel]);
         pass.set_bind_group(0, &self.bind, &[]);
         pass.dispatch_workgroups((threads as u32).div_ceil(group).max(1), 1, 1);
+    }
+
+    /// S420 — la liste ordonnée des particules du prédicat courant (absorbées, ou dans une colonne convertie).
+    fn encode_list(&self, pass: &mut wgpu::ComputePass) {
+        self.dispatch(pass, LIST_BUILD[0], self.capacity, SCAN);
+        self.dispatch(pass, COMPACT[1], 1, 1);
+        self.dispatch(pass, LIST_BUILD[1], self.capacity, SCAN);
+        self.dispatch(pass, LIST_BUILD[2], 1, 1);
     }
 
     /// S418 — le compactage stable des particules marquées.
@@ -582,7 +622,8 @@ impl ApicCarte {
                     // S418 — l'échange à la frontière (C7c-2), s'il y a une zone.
                     if self.columns {
                         self.dispatch(&mut pass, EXCHANGE_BEGIN, 1, 1);
-                        self.dispatch(&mut pass, ABSORB_MARK, self.capacity, WG);
+                        self.dispatch(&mut pass, LIST_MODE_ABSORB, 1, 1);
+                        self.encode_list(&mut pass);
                         self.dispatch(&mut pass, ABSORB_SERIAL, 1, 1);
                         // La réserve de la bascule (S408) est nulle tant que la bascule n'est pas sur la carte (C7c-4).
                         self.encode_bin(&mut pass);
@@ -697,13 +738,13 @@ impl ApicCarte {
     /// S418 : `n` et les compteurs de l'échange, lus sur la carte : `[n, n au début de l'échange, liste, absorbées, retirées,
     /// posées, refusées]`.
     pub fn counts(&self) -> Result<Vec<u32>, String> {
-        self.read_u32(&self.pcount, 0, 7)
+        self.read_u32(&self.pcount, 0, 9)
     }
 
     /// S418 : les soldes des faces-mailles, `u` puis `v`, puis (S419) le solde vertical de chaque colonne, m³.
     pub fn soldes(&self) -> Result<Vec<f64>, String> {
         let Domain3 { nx, ny, nz, dx } = self.domain;
-        let len = (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny;
+        let len = (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny + 1;
         let w = self.read_u32(&self.isolde, 0, 2 * len)?;
         let dx = dx as f64;
         let quantum = dx * dx * dx / 8. / (1u64 << 24) as f64;
@@ -718,7 +759,7 @@ impl ApicCarte {
         let words = |v: Vec<u32>| -> i128 { v.chunks_exact(2).map(|w| ((w[1] as u64) << 32 | w[0] as u64) as i64 as i128).sum() };
         let n = self.counts()?[0] as i128;
         let cols = words(self.read_u32(&self.ivol, 0, 2 * ncol)?);
-        let soldes = words(self.read_u32(&self.isolde, 0, 2 * ((nx + 1) * ny * nz + nx * (ny + 1) * nz + ncol))?);
+        let soldes = words(self.read_u32(&self.isolde, 0, 2 * ((nx + 1) * ny * nz + nx * (ny + 1) * nz + ncol + 1))?);
         // S419 : l'eau sous le fond, en mailles entières (huit particules chacune).
         let floor = self.read_f32(&self.cols, 2 * ncol + 32, ncol)?;
         let under: i128 = if self.floors {
@@ -1699,7 +1740,8 @@ impl SwitchSettings {
 /// **B10 en bande étroite** (S414, le réglage retenu de R35 : maintien 0,3 s, fond 4) : la référence avec sa zone et son critère,
 /// menée `warm` pas (corps reposé, pas, bascule), puis **un pas de plus sans bascule** — l'état que la bascule suivante lit. Rend
 /// la référence, le critère, l'instant du pas (µs) et le temps (s).
-pub fn b10_band_state(b: &B10, warm: usize) -> Result<(Apic3, ColumnsSwitch, u64, f64), String> {
+/// `initial` : la référence rendue **avant** la bascule initiale (tout en bande, `t = 0`) — la conversion de masse.
+pub fn b10_band_state_from(b: &B10, warm: usize, initial: bool) -> Result<(Apic3, ColumnsSwitch, u64, f64), String> {
     use crate::scene::host_impl;
     use water_core::host::HostServices;
     let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 33);
@@ -1718,6 +1760,9 @@ pub fn b10_band_state(b: &B10, warm: usize) -> Result<(Apic3, ColumnsSwitch, u64
     s.hold_us = 300_000;
     s.floor_cells = Some(4);
     a.set_body(Some(b.sphere(0.))).map_err(|e| format!("{e:?}"))?;
+    if initial {
+        return Ok((a, s, 0, 0.));
+    }
     s.switch(0, &mut a).map_err(|e| format!("{e:?}"))?;
     s.clear_counts();
     let (mut t, mut t_us) = (0f64, 0u64);
@@ -1743,14 +1788,51 @@ pub fn recevoir_decision() -> Result<(), String> {
         .unwrap_or_else(|| vec![0, 10, 30, 50, 60]);
     pollster::block_on(async {
         let b = B10::new(2., 8);
+        // `INITIAL=1` : la bascule initiale (tout en bande → colonnes) ; `PENTE=`, `MAINTIEN=` (s) : le réglage du pas comparé,
+        // pour forcer des bascules (une pente quasi nulle ensemence, un maintien nul convertit).
+        let initial = std::env::var("INITIAL").is_ok();
+        let slope: Option<f32> = std::env::var("PENTE").ok().and_then(|v| v.parse().ok());
+        let hold: Option<f64> = std::env::var("MAINTIEN").ok().and_then(|v| v.parse().ok());
         for warm in list {
-            let (mut a, mut s, t_us, _) = b10_band_state(&b, warm)?;
+            let (mut a, mut s, t_us, _) = b10_band_state_from(&b, warm, initial)?;
+            if let Some(p) = slope {
+                s.slope_max = p;
+            }
+            if let Some(h) = hold {
+                s.hold_us = (h * 1e6).round() as u64;
+            }
             let mut carte = ApicCarte::new(&a, a.particle_capacity()).await?;
             carte.load(&a)?;
             carte.set_body(a.body());
             carte.load_switch(&s);
             let mask = carte.decide_for_bench(t_us)?;
+            // P3 : la bascule appliquée, sans le fond (P4) — la référence de même.
+            let q0 = carte.total_quanta()?;
+            let mask_before = carte.mask()?;
+            s.floor_cells = None;
+            carte.load_switch(&s);
+            carte.switch_for_bench(t_us)?;
             s.switch(t_us, &mut a).map_err(|e| format!("{e:?}"))?;
+            let k = carte.counts()?;
+            let (x, _, _) = carte.particles()?;
+            let flat = |v: &[[f32; 3]]| v.iter().flatten().copied().collect::<Vec<f32>>();
+            let same_n = x.len() == a.particle_count();
+            let dxm = if same_n { max_abs_diff(&flat(&x), &flat(a.particles())) } else { f32::NAN };
+            let cmask_after = carte.mask()?;
+            let (rmask, _, _, _) = a.columns_state().ok_or("zone")?;
+            let mask_diff = cmask_after.iter().zip(rmask).filter(|(p, q)| **p != **q as u32).count();
+            let to_columns = mask_before.iter().zip(&cmask_after).filter(|(p, q)| **p == 0 && **q != 0).count();
+            let to_particles = mask_before.iter().zip(&cmask_after).filter(|(p, q)| **p != 0 && **q == 0).count();
+            println!("APIC_CARTE_BASCULE_S420 bascule chauffe={warm} vers_colonnes={to_columns} vers_particules={to_particles}");
+            let e = carte.columns_eta()?;
+            let de = e.iter().zip(a.columns_surface().unwrap_or(&[])).zip(rmask).filter(|(_, m)| **m != 0).fold(0f32, |m, ((p, q), _)| m.max((p - q).abs()));
+            let dq = carte.total_quanta()? - q0;
+            let quantum = (b.dx).powi(3) / 8. / (1u64 << 24) as f64;
+            let reserve_carte = carte.soldes()?.last().copied().unwrap_or(0.);
+            println!(
+                "APIC_CARTE_BASCULE_S420 bascule chauffe={warm} refusee={} n={}/{} masque_different={mask_diff} ecart_position_max={dxm:.3e} ecart_eta_max={de:.3e} reserve_m3={reserve_carte:.3e}/{:.3e} derive_volume_carte_quanta={dq} ({:.1e} m3)",
+                k[7], x.len(), a.particle_count(), a.columns_reserve(), dq as f64 * quantum
+            );
             let reference = s.requested();
             let differ = mask.iter().zip(reference).filter(|(x, y)| **x != **y as u32).count();
             let band = reference.iter().filter(|x| **x == 0).count();
