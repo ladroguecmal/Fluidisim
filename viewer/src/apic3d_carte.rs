@@ -13,7 +13,7 @@ use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 88] = [
+const KERNELS: [&str; 89] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -27,7 +27,7 @@ const KERNELS: [&str; 88] = [
     // S422 — la multigrille.
     "mg_kind1", "mg_kind_coarse", "mg_f_first", "mg_f_qz", "mg_f_zq", "mg_restrict1", "mg_l1_first", "mg_l1_tx",
     "mg_l1_xt", "mg_coarse", "mg_prolong0", "mg_f_qz_fold", "mg_cg_reset", "mg_cg_init_finish", "mg_cg_direction_first", "mg_cg_update", "mg_cg_beta",
-    "switch_apply_group", "mark_fresh", "clear_fresh", "reconstruct_coop",
+    "switch_apply_group", "mark_fresh", "clear_fresh", "reconstruct_coop", "mg_coarse_shared",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -90,6 +90,9 @@ const SWITCH_APPLY_GROUP: usize = 84;
 const MARK_FRESH: usize = 85;
 const CLEAR_FRESH: usize = 86;
 const RECONSTRUCT_COOP: usize = 87;
+const MG_COARSE_SHARED: usize = 88;
+/// S424 — les mailles des niveaux ≥ 2 que la mémoire de groupe tient (`MG_SH` du nuanceur).
+const MG_SHARED_CELLS: usize = 1024;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
@@ -135,6 +138,8 @@ pub struct ApicCarte {
     #[allow(dead_code)]
     mgl: wgpu::Buffer,
     mg_levels: Vec<[usize; 3]>,
+    /// S424 — les niveaux ≥ 2 tiennent dans la mémoire de groupe (`MG_GLOBAL=1` aux bancs : la version globale).
+    mg_shared: bool,
     multigrid: bool,
     /// S423 — le corps de la surface rafraîchie par la dernière décision ; le pas suivant la réemploie si son corps est le même.
     refresh_body: Option<Option<Sphere3>>,
@@ -313,15 +318,35 @@ impl ApicCarte {
         let module = device.create_shader_module(wgpu::include_wgsl!("apic3d_carte.wgsl"));
         // S423 — le nombre de niveaux ≥ 2 de la multigrille, constante de pipeline.
         let mg_nc = [("MG_NC", mg_levels.len().saturating_sub(2).max(1) as f64)];
+        // S424 — banc : `PIPELINE_SEULE=<entrée>` compile cette seule pipeline, imprime son temps et quitte.
+        if let Ok(only) = std::env::var("PIPELINE_SEULE") {
+            let entry = KERNELS.iter().find(|e| **e == only).ok_or("PIPELINE_SEULE : entrée inconnue")?;
+            let _t = PipelineTimer::new(entry);
+            let _ = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some(entry),
+                layout: Some(&pipeline_layout),
+                module: &module,
+                entry_point: Some(entry),
+                compilation_options: wgpu::PipelineCompilationOptions { constants: &mg_nc, zero_initialize_workgroup_memory: false },
+                cache: None,
+            });
+            drop(_t);
+            std::process::exit(0);
+        }
         let pipelines = KERNELS
             .iter()
             .map(|entry| {
+                // S424 — banc : `TEMPS_PIPELINES=1` imprime le temps de création (de compilation) de chaque pipeline.
+                let _t = PipelineTimer::new(entry);
                 device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
                     label: Some(entry),
                     layout: Some(&pipeline_layout),
                     module: &module,
                     entry_point: Some(entry),
-                    compilation_options: wgpu::PipelineCompilationOptions { constants: &mg_nc, ..Default::default() },
+                    // S424 : sans la mise à zéro de la mémoire de groupe — FXC déroule l'initialisation élément par élément (283 s
+                    // pour `mg_coarse_shared`, 15 s pour `switch_apply_group`) ; chaque noyau écrit sa mémoire de groupe avant de
+                    // la lire (réductions, drapeaux du fil 0, niveaux chargés).
+                    compilation_options: wgpu::PipelineCompilationOptions { constants: &mg_nc, zero_initialize_workgroup_memory: false },
                     cache: None,
                 })
             })
@@ -361,6 +386,8 @@ impl ApicCarte {
             mgl,
             // S423 : la multigrille et le plafond adaptatif par défaut (`MULTIGRILLE=0`, `ADAPTATIF=0` aux bancs : la diagonale).
             multigrid: mg_levels.len() >= 3,
+            mg_shared: mg_levels.iter().skip(2).map(|d| d[0] * d[1] * d[2]).sum::<usize>() <= MG_SHARED_CELLS
+                && std::env::var("MG_GLOBAL").is_err(),
             mg_levels,
             switch: SwitchSettings::default(),
             now_us: 0,
@@ -756,6 +783,8 @@ impl ApicCarte {
             if skip_coarse && kernel == MG_VCYCLE[5] {
                 continue;
             }
+            // S424 : les niveaux ≥ 2 en mémoire de groupe quand ils y tiennent.
+            let kernel = if kernel == MG_VCYCLE[5] && self.mg_shared { MG_COARSE_SHARED } else { kernel };
             self.dispatch(pass, kernel, threads, group);
         }
     }
@@ -2354,4 +2383,21 @@ pub fn recevoir_mg_cycle() -> Result<(), String> {
         }
         Ok(())
     })
+}
+
+/// S424 — le temps de création d'une pipeline, imprimé à la fin de sa portée si `TEMPS_PIPELINES` est posée.
+struct PipelineTimer(&'static str, std::time::Instant);
+
+impl PipelineTimer {
+    fn new(entry: &'static str) -> Self {
+        PipelineTimer(entry, std::time::Instant::now())
+    }
+}
+
+impl Drop for PipelineTimer {
+    fn drop(&mut self) {
+        if std::env::var("TEMPS_PIPELINES").is_ok() {
+            println!("APIC_CARTE_PIPELINE entree={} ms={:.0}", self.0, self.1.elapsed().as_secs_f64() * 1e3);
+        }
+    }
 }

@@ -83,9 +83,10 @@ la session dit ce qui en reste. (3) Suite, zéro avertissement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les niveaux grossiers en mémoire de groupe ; symétrie, issues, mesure.
+- [x] **P2** — les niveaux grossiers en mémoire de groupe ; symétrie, issues, mesure.
 - [ ] **P3** — les noyaux fusionnés (`α` et premier lissage ; restriction et premier lissage du niveau 1 ; `β` et direction) ; mesure.
 - [ ] **P4** — non-régression, suite ; preuve §16 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — `mg_coarse_shared` : les niveaux ≥ 2 en mémoire de groupe quand ils tiennent dans 1 024 mailles (B10 : 380), `MG_GLOBAL=1` rend la version globale. **Incident** : la pipeline mettait **283 s** à se créer — FXC déroule élément par élément la mise à zéro de la mémoire de groupe que wgpu ajoute (`TEMPS_PIPELINES=1`, `PIPELINE_SEULE=<entrée>` pour le voir) ; elle coûtait déjà 15 s à `switch_apply_group`. **Coupée pour toutes les pipelines** (chaque noyau écrit sa mémoire de groupe avant de la lire — audit des 26 variables) : création des 89 pipelines **≈ 80 → 27 s**, `mg_coarse_shared` 3,2 s ; à revérifier par toute la non-régression (P4). Cycle : résidu, symétrie, itérations **identiques au chiffre près** à la version globale (ballottement, raccord, B10). B10 en bande étroite : pincement identique, volume exact ; **projection médiane 1,28 → 1,15 ms, p99 1,35 → 1,22** (≈ 9 µs par itération : moins que les ≈ 40 attendus — les phases à barrière coûtent encore).

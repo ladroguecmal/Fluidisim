@@ -3896,6 +3896,203 @@ fn mg_coarse(@builtin(local_invocation_id) lid: vec3<u32>) {
     }
 }
 
+// **S424 — les niveaux ≥ 2 en mémoire de groupe.** Le groupe ci-dessus fait dix-huit phases à barrière, chacune un aller-retour en
+// mémoire globale (≈ 40 µs par cycle sur B10). Quand les niveaux ≥ 2 tiennent dans `MG_SH` mailles (B10 : 336 + 44), `x`, `t`, `r`
+// et la nature vivent dans la mémoire du groupe : la restriction lit le niveau 1 en global, la prolongation vers lui y écrit, le reste
+// ne quitte pas le groupe. Même arithmétique, même ordre que `mg_coarse` ; l'hôte choisit à la création.
+const MG_SH: u32 = 1024u;
+// `x` [0, SH), `t` [SH, 2·SH), `r` [2·SH, 3·SH).
+var<workgroup> sh_v: array<f32, 3072>;
+var<workgroup> sh_k: array<f32, 1024>;
+
+// L'origine du niveau `l ≥ 2` dans la mémoire du groupe.
+fn sh_off(l: u32) -> u32 {
+    var o = 0u;
+    for (var q = 2u; q < l; q = q + 1u) {
+        o = o + lv_get(q, 3u);
+    }
+    return o;
+}
+
+// `mg_row` sur la mémoire du groupe : `src` 0 (`x`) ou 1 (`t`).
+fn sh_row(l: u32, src: u32, c: u32) -> vec2<f32> {
+    let o = sh_off(l);
+    let base = src * MG_SH + o;
+    var acc = 0.0;
+    var dg = 0.0;
+    if sh_k[o + c] > 0.0 {
+        let nx = lv_get(l, 0u);
+        let ny = lv_get(l, 1u);
+        let nz = lv_get(l, 2u);
+        let plane = nx * ny;
+        let i = c % nx;
+        let j = (c / nx) % ny;
+        let k = c / plane;
+        let pc = sh_v[base + c];
+        for (var f = 0u; f < 6u; f = f + 1u) {
+            var inside = false;
+            var n = 0u;
+            if f == 0u { inside = i > 0u; n = c - 1u; }
+            else if f == 1u { inside = i + 1u < nx; n = c + 1u; }
+            else if f == 2u { inside = j > 0u; n = c - nx; }
+            else if f == 3u { inside = j + 1u < ny; n = c + nx; }
+            else if f == 4u { inside = k > 0u; n = c - plane; }
+            else { inside = k + 1u < nz; n = c + plane; }
+            if inside {
+                let km = sh_k[o + n];
+                if km > 0.0 {
+                    acc = acc + (pc - sh_v[base + n]);
+                    dg = dg + 1.0;
+                } else if km < 0.0 {
+                    acc = acc + 2.0 * pc;
+                    dg = dg + 2.0;
+                }
+            }
+        }
+    }
+    let inv = mg_inv(l);
+    return vec2<f32>(acc * inv, dg * inv);
+}
+
+fn sh_smooth(l: u32, src: u32, dst: u32, c: u32) {
+    let a = sh_row(l, src, c);
+    let o = sh_off(l);
+    if a.y > 0.0 {
+        sh_v[dst * MG_SH + o + c] = sh_v[src * MG_SH + o + c] + MG_OMEGA * (sh_v[2u * MG_SH + o + c] - a.x) / a.y;
+    } else {
+        sh_v[dst * MG_SH + o + c] = 0.0;
+    }
+}
+
+fn sh_first(l: u32, c: u32) {
+    let a = sh_row(l, 0u, c);
+    let o = sh_off(l);
+    if a.y > 0.0 {
+        sh_v[MG_SH + o + c] = MG_OMEGA * sh_v[2u * MG_SH + o + c] / a.y;
+    } else {
+        sh_v[MG_SH + o + c] = 0.0;
+    }
+}
+
+// La restriction vers `l ≥ 2` : depuis le niveau 1 en global, ou depuis le niveau `l − 1` du groupe.
+fn sh_restrict(l: u32, cc: u32) {
+    let nx = lv_get(l, 0u);
+    let ny = lv_get(l, 1u);
+    let i = cc % nx;
+    let j = (cc / nx) % ny;
+    let k = cc / (nx * ny);
+    let f = l - 1u;
+    let fo = sh_off(f);
+    var s = 0.0;
+    for (var d = 0u; d < 8u; d = d + 1u) {
+        let fc = mg_child(lv_get(f, 0u), lv_get(f, 1u), lv_get(f, 2u), i, j, k, d);
+        if fc != NONE {
+            if f == 1u {
+                s = s + mgb[lv_get(f, 6u) + fc] - mg_row(f, lv_get(f, 5u), fc).x;
+            } else {
+                s = s + sh_v[2u * MG_SH + fo + fc] - sh_row(f, 0u, fc).x;
+            }
+        }
+    }
+    sh_v[2u * MG_SH + sh_off(l) + cc] = 0.125 * s;
+}
+
+// La prolongation de `l` vers `l − 1` : vers le niveau 1 en global, ou dans le groupe.
+fn sh_prolong(l: u32, fc: u32) {
+    let f = l - 1u;
+    let fnx = lv_get(f, 0u);
+    let fny = lv_get(f, 1u);
+    let i = fc % fnx;
+    let j = (fc / fnx) % fny;
+    let k = fc / (fnx * fny);
+    let parent = ((k / 2u) * lv_get(l, 1u) + j / 2u) * lv_get(l, 0u) + i / 2u;
+    let up = sh_v[sh_off(l) + parent];
+    if f == 1u {
+        mgb[lv_get(f, 5u) + fc] = mgb[lv_get(f, 5u) + fc] + up;
+    } else {
+        let o = sh_off(f);
+        sh_v[o + fc] = sh_v[o + fc] + up;
+    }
+}
+
+@compute @workgroup_size(256)
+fn mg_coarse_shared(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
+    let skip = mg_done();
+    let levels = mg_levels();
+    let last = levels - 1u;
+    // Les natures, une fois par cycle.
+    for (var l = 2u; l < levels; l = l + 1u) {
+        let o = sh_off(l);
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < lv_get(l, 3u) {
+                sh_k[o + c] = mgb[lv_get(l, 4u) + c];
+            }
+        }
+    }
+    workgroupBarrier();
+    for (var s = 0u; s < MG_NC; s = s + 1u) {
+        let l = s + 2u;
+        let on = l < levels && !skip;
+        let cells = select(0u, lv_get(min(l, 7u), 3u), on);
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < cells {
+                sh_restrict(l, c);
+            }
+        }
+        workgroupBarrier();
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < cells {
+                sh_first(l, c);
+            }
+        }
+        workgroupBarrier();
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < cells {
+                sh_smooth(l, 1u, 0u, c);
+            }
+        }
+        workgroupBarrier();
+    }
+    let ccells = select(0u, lv_get(min(last, 7u), 3u), last >= 2u && !skip);
+    for (var q = 0u; q < 6u; q = q + 1u) {
+        let odd = q % 2u == 1u;
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < ccells {
+                sh_smooth(last, select(0u, 1u, odd), select(1u, 0u, odd), c);
+            }
+        }
+        workgroupBarrier();
+    }
+    for (var s = 0u; s < MG_NC; s = s + 1u) {
+        let l = last - min(s, last);
+        let on = s + 2u < levels && !skip;
+        let f = max(l, 1u) - 1u;
+        let fcells = select(0u, lv_get(f, 3u), on);
+        for (var bb = 0u; bb < mg_blocks() * 8u; bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < fcells {
+                sh_prolong(l, c);
+            }
+        }
+        workgroupBarrier();
+        for (var q = 0u; q < 2u; q = q + 1u) {
+            for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+                let c = t + 256u * bb;
+                if c < fcells && f >= 2u {
+                    sh_smooth(f, select(0u, 1u, q == 1u), select(1u, 0u, q == 1u), c);
+                }
+            }
+            workgroupBarrier();
+        }
+    }
+}
+
 // La prolongation du niveau 1 vers le niveau fin : `z += x₁(mère)` sur l'eau ; zéro ailleurs.
 @compute @workgroup_size(128)
 fn mg_prolong0(@builtin(global_invocation_id) g: vec3<u32>) {
