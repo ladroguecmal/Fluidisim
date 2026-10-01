@@ -3687,9 +3687,16 @@ fn xg_most_free(t: u32, c0: vec3<f32>, c1: vec3<f32>, c2: vec3<f32>, c3: vec3<f3
 // quelle) — la suite des choix est celle de `xg_most_free`, au bit. Les posées prennent ensuite leur vitesse à la grille en
 // parallèle (l'échange ne touche pas aux faces). La place manque : un refus compté, comme `xg_pose_due`.
 fn xg_pose_all(t: u32, c0: vec3<f32>, c1: vec3<f32>, c2: vec3<f32>, c3: vec3<f32>, cell: u32, first_new: u32, solde: u32) {
-    {
-        // En ligne droite — la réduction se fait même sans pose à faire (le fil 0 n'en pose alors aucune) : une boucle d'un tour à
-        // sortie anticipée autour des barrières rendait le noyau non déterministe sous FXC (S427).
+    loop {
+        // S428 : rien à poser (une face-maille qui retire) — une diffusion, pas de réduction. (La course de S427 n'était pas cette
+        // sortie anticipée — la version sans elle divergeait aussi — mais `workgroupUniformLoad` sur un élément de tableau.)
+        var due = 0u;
+        if t == 0u && solde_ge_vp(solde) {
+            due = 1u;
+        }
+        if xg_bcast(t, due) == 0u {
+            break;
+        }
         let n_now = xg_bcast(t, xg_n);
         var near = vec4<f32>(3.4028234663852886e38);
         for (var s = start[cell] + t; s < start[cell + 1u]; s = s + XG) {
@@ -3751,6 +3758,7 @@ fn xg_pose_all(t: u32, c0: vec3<f32>, c1: vec3<f32>, c2: vec3<f32>, c3: vec3<f32
         }
         storageBarrier();
         workgroupBarrier();
+        break;
     }
 }
 
@@ -4448,6 +4456,80 @@ fn mg_prolong1(@builtin(global_invocation_id) g: vec3<u32>) {
         return;
     }
     coarse_prolong(2u, g.x);
+}
+
+// **S428 — les restrictions en coopération** : huit fils par maille grossière, un par fille (son `A·z`, ou son `L₁·x₁`), puis le
+// premier des huit somme dans l'ordre des filles — l'expression de `mg_restrict1` et `mg_restrict2`, `(s + r) − A·x`. Elles
+// remplacent la paire `mg_fine_az` + `mg_restrict1` et la paire `mg_l1_ax` + `mg_restrict2` : deux dispatchs de moins par itération.
+var<workgroup> rq_r: array<f32, 128>;
+var<workgroup> rq_a: array<f32, 128>;
+var<workgroup> rq_ok: array<u32, 128>;
+
+@compute @workgroup_size(128)
+fn mg_restrict1_coop(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+    let cc = g.x / 8u;
+    let d = g.x % 8u;
+    let on = cc < lv_get(1u, 3u) && !mg_done();
+    var ok = 0u;
+    var rv = 0.0;
+    var av = 0.0;
+    if on {
+        let nx = lv_get(1u, 0u);
+        let ny = lv_get(1u, 1u);
+        let fc = mg_child(P.nx, P.ny, P.nz, cc % nx, (cc / nx) % ny, cc / (nx * ny), d);
+        if fc != NONE {
+            ok = 1u;
+            rv = cellf[field(F_R, fc)];
+            av = fine_apply(F_Z, fc);
+        }
+    }
+    rq_r[lid.x] = rv;
+    rq_a[lid.x] = av;
+    rq_ok[lid.x] = ok;
+    workgroupBarrier();
+    if on && d == 0u {
+        var s = 0.0;
+        for (var dd = 0u; dd < 8u; dd = dd + 1u) {
+            if rq_ok[lid.x + dd] == 1u {
+                s = s + rq_r[lid.x + dd] - rq_a[lid.x + dd];
+            }
+        }
+        mgb[lv_get(1u, 6u) + cc] = 0.125 * s;
+        coarse_first(1u, cc);
+    }
+}
+
+@compute @workgroup_size(128)
+fn mg_restrict2_coop(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+    let cc = g.x / 8u;
+    let d = g.x % 8u;
+    let on = cc < lv_get(2u, 3u) && !mg_done();
+    var ok = 0u;
+    var rv = 0.0;
+    var av = 0.0;
+    if on {
+        let nx = lv_get(2u, 0u);
+        let ny = lv_get(2u, 1u);
+        let fc = mg_child(lv_get(1u, 0u), lv_get(1u, 1u), lv_get(1u, 2u), cc % nx, (cc / nx) % ny, cc / (nx * ny), d);
+        if fc != NONE {
+            ok = 1u;
+            rv = mgb[lv_get(1u, 6u) + fc];
+            av = mg_row(1u, lv_get(1u, 5u), fc).x;
+        }
+    }
+    rq_r[lid.x] = rv;
+    rq_a[lid.x] = av;
+    rq_ok[lid.x] = ok;
+    workgroupBarrier();
+    if on && d == 0u {
+        var s = 0.0;
+        for (var dd = 0u; dd < 8u; dd = dd + 1u) {
+            if rq_ok[lid.x + dd] == 1u {
+                s = s + rq_r[lid.x + dd] - rq_a[lid.x + dd];
+            }
+        }
+        mgb[lv_get(2u, 6u) + cc] = 0.125 * s;
+    }
 }
 
 // Restriction vers le niveau 1 : la moyenne des résidus fins `r − A·z` des filles.

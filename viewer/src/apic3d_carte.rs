@@ -13,7 +13,7 @@ use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 98] = [
+const KERNELS: [&str; 100] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -30,6 +30,7 @@ const KERNELS: [&str; 98] = [
     "switch_apply_group", "mark_fresh", "clear_fresh", "reconstruct_coop", "mg_coarse_shared",
     "mg_cg_update_alpha", "mg_cg_beta_direction", "mg_fine_az", "mg_restrict2", "mg_prolong1", "mg_l1_ax",
     "bin_rank", "bin_place", "absorb_faces",
+    "mg_restrict1_coop", "mg_restrict2_coop",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -95,15 +96,16 @@ const MG_COARSE_SHARED: usize = 88;
 // S424 — les noyaux fusionnés ; chacun a une seconde pipeline à `CG_PAR = 1` (`par1`).
 const MG_CG_UPDATE_ALPHA: usize = 89;
 const MG_CG_BETA_DIRECTION: usize = 90;
-const MG_FINE_AZ: usize = 91;
-const MG_RESTRICT2: usize = 92;
+// S428 : `mg_fine_az` (91), `mg_restrict2` (92), `mg_l1_ax` (94) remplacés par les restrictions en coopération ; gardés pour les indices.
 const MG_PROLONG1: usize = 93;
-const MG_L1_AX: usize = 94;
 // S425 — le tri par rang (`bin_sort`, 6, gardé dans la liste pour les indices).
 const BIN_RANK: usize = 95;
 const BIN_PLACE: usize = 96;
 // S426 — l'absorption face par face (l'ancien fil, `absorb_group`, en repli).
 const ABSORB_FACES: usize = 97;
+// S428 — les restrictions en coopération (huit fils par maille grossière).
+const MG_RESTRICT1_COOP: usize = 98;
+const MG_RESTRICT2_COOP: usize = 99;
 /// S424 — les mailles des niveaux ≥ 2 que la mémoire de groupe tient (`MG_SH` du nuanceur).
 const MG_SHARED_CELLS: usize = 1024;
 const WG: u32 = 128;
@@ -790,22 +792,21 @@ impl ApicCarte {
     /// Le cycle en V, `z = M⁻¹·r` ; `first` : le premier lissage fin en tête (au départ ; aux itérations, la mise à jour le fait).
     fn encode_vcycle(&self, pass: &mut wgpu::ComputePass, first: bool) {
         let (cells, l1) = (self.domain.cells(), self.mg_cells(1));
-        let [f_first, f_qz, restrict1, _, l1_tx, coarse, l1_xt, _, prolong0, f_zq, fold] = MG_VCYCLE;
+        let [f_first, f_qz, _, _, l1_tx, coarse, l1_xt, _, prolong0, f_zq, fold] = MG_VCYCLE;
         // Banc S423 : `SANS_GROSSIERS=1` saute le groupe des niveaux ≥ 2 (pour mesurer ce qu'il coûte).
         let skip_coarse = std::env::var("SANS_GROSSIERS").is_ok();
         if first {
             self.dispatch(pass, f_first, cells, WG);
         }
         self.dispatch(pass, f_qz, cells, WG);
-        // S424 : `A·z` par maille fine, puis la restriction (et le premier lissage du niveau 1).
-        self.dispatch(pass, MG_FINE_AZ, cells, WG);
-        self.dispatch(pass, restrict1, l1, WG);
+        // S424 : `A·z` par maille fine, puis la restriction (et le premier lissage du niveau 1) ; S428 : en coopération, un dispatch.
+        self.dispatch(pass, MG_RESTRICT1_COOP, 8 * l1, WG);
         self.dispatch(pass, l1_tx, l1, WG);
         if !skip_coarse {
             if self.mg_shared {
                 // S424 : les niveaux ≥ 2 en mémoire de groupe ; la restriction vers le 2 et la prolongation vers le 1 en dispatchs.
-                self.dispatch(pass, MG_L1_AX, l1, WG);
-                self.dispatch(pass, MG_RESTRICT2, self.mg_cells(2), WG);
+                // S428 : `L₁·x₁` et la restriction vers le niveau 2 en coopération, un dispatch.
+                self.dispatch(pass, MG_RESTRICT2_COOP, 8 * self.mg_cells(2), WG);
                 self.dispatch(pass, MG_COARSE_SHARED, 512, 512);
                 self.dispatch(pass, MG_PROLONG1, l1, WG);
             } else {
@@ -840,15 +841,13 @@ impl ApicCarte {
     pub fn profile_iteration(&mut self, reps: usize) -> Result<Vec<(&'static str, f64)>, String> {
         let (cells, l1) = (self.domain.cells(), self.mg_cells(1));
         let l2 = self.mg_cells(2);
-        let list: [(usize, usize, u32); 16] = [
+        let list: [(usize, usize, u32); 14] = [
             (CG_ITERATION[0], cells, SCAN),
             (MG_CG_UPDATE_ALPHA, cells, SCAN),
             (MG_VCYCLE[1], cells, WG),
-            (MG_FINE_AZ, cells, WG),
-            (MG_VCYCLE[2], l1, WG),
+            (MG_RESTRICT1_COOP, 8 * l1, WG),
             (MG_VCYCLE[4], l1, WG),
-            (MG_L1_AX, l1, WG),
-            (MG_RESTRICT2, l2, WG),
+            (MG_RESTRICT2_COOP, 8 * l2, WG),
             if self.mg_shared { (MG_COARSE_SHARED, 512, 512) } else { (MG_VCYCLE[5], SCAN as usize, SCAN) },
             (MG_PROLONG1, l1, WG),
             (MG_VCYCLE[6], l1, WG),
