@@ -13,7 +13,7 @@ use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 95] = [
+const KERNELS: [&str; 97] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -29,6 +29,7 @@ const KERNELS: [&str; 95] = [
     "mg_l1_xt", "mg_coarse", "mg_prolong0", "mg_f_qz_fold", "mg_cg_reset", "mg_cg_init_finish", "mg_cg_direction_first", "mg_cg_update", "mg_cg_beta",
     "switch_apply_group", "mark_fresh", "clear_fresh", "reconstruct_coop", "mg_coarse_shared",
     "mg_cg_update_alpha", "mg_cg_beta_direction", "mg_fine_az", "mg_restrict2", "mg_prolong1", "mg_l1_ax",
+    "bin_rank", "bin_place",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -36,7 +37,7 @@ const SCAN_LOCAL: usize = 2;
 const SCAN_BLOCKS: usize = 3;
 const SCAN_ADD: usize = 4;
 const BIN_SCATTER: usize = 5;
-const BIN_SORT: usize = 6;
+// S425 : `bin_sort` (6) remplacé par le tri par rang ; gardé dans la liste pour les indices.
 const P2G: usize = 7;
 // S423 : `reconstruct` (8) remplacé par `reconstruct_coop` ; gardé dans la liste pour les indices.
 const GRAVITY_WALLS: usize = 9;
@@ -98,6 +99,9 @@ const MG_FINE_AZ: usize = 91;
 const MG_RESTRICT2: usize = 92;
 const MG_PROLONG1: usize = 93;
 const MG_L1_AX: usize = 94;
+// S425 — le tri par rang (`bin_sort`, 6, gardé dans la liste pour les indices).
+const BIN_RANK: usize = 95;
+const BIN_PLACE: usize = 96;
 /// S424 — les mailles des niveaux ≥ 2 que la mémoire de groupe tient (`MG_SH` du nuanceur).
 const MG_SHARED_CELLS: usize = 1024;
 const WG: u32 = 128;
@@ -859,14 +863,15 @@ impl ApicCarte {
     /// d'un noyau est la différence de deux préfixes.
     pub fn profile_end_of_step(&mut self, reps: usize) -> Result<Vec<(&'static str, f64)>, String> {
         let (cells, cap, span) = (self.domain.cells(), self.capacity, self.list_span());
-        let list: [(usize, usize, u32); 22] = [
+        let list: [(usize, usize, u32); 23] = [
             (BIN_CLEAR, cells, WG),
             (BIN_COUNT, cap, WG),
             (SCAN_LOCAL, cells, SCAN),
             (SCAN_BLOCKS, 1, 1),
             (SCAN_ADD, cells, SCAN),
             (BIN_SCATTER, cap, WG),
-            (BIN_SORT, cells, WG),
+            (BIN_RANK, cap, WG),
+            (BIN_PLACE, cap, WG),
             (SEPARATE_SHIFT, cap, WG),
             (SEPARATE_APPLY, cap, WG),
             (MOVE_BODY, cap, WG),
@@ -975,7 +980,8 @@ impl ApicCarte {
         self.dispatch(pass, SCAN_BLOCKS, 1, 1);
         self.dispatch(pass, SCAN_ADD, cells, SCAN);
         self.dispatch(pass, BIN_SCATTER, self.capacity, WG);
-        self.dispatch(pass, BIN_SORT, cells, WG);
+        self.dispatch(pass, BIN_RANK, self.capacity, WG);
+        self.dispatch(pass, BIN_PLACE, self.capacity, WG);
     }
 
     /// Le pas jusqu'à l'étage `upto` compris, comme `Apic3::step_upto`, un passage de calcul horodaté par étage.
@@ -2293,6 +2299,16 @@ pub fn recevoir_b10() -> Result<(), String> {
         }
         // S424 — `PROFIL=1` : le coût de chaque noyau d'une itération de la projection, sur l'état final.
         if std::env::var("PROFIL").is_ok() && twin.is_none() {
+            // L'occupation des mailles (le tri du dernier pas, avant les profils) : la plus peuplée, et combien dépassent 16.
+            let cells = d.nx * d.ny * d.nz;
+            let st = carte.read_u32(&carte.start, 0, cells + 1)?;
+            let occ: Vec<u32> = (0..cells).map(|c| st[c + 1] - st[c]).collect();
+            let mut top = occ.clone();
+            top.sort_unstable_by(|a, b| b.cmp(a));
+            println!(
+                "APIC_CARTE_B10_S425 occupation max={} plus_de_16={} plus_de_32={} dix_premieres={:?} particules_triees={}",
+                top[0], occ.iter().filter(|&&o| o > 16).count(), occ.iter().filter(|&&o| o > 32).count(), &top[..10], st[cells]
+            );
             let line: Vec<String> =
                 carte.profile_iteration(50)?.into_iter().map(|(name, us)| format!("{name}={us:.2}")).collect();
             println!("APIC_CARTE_B10_S424 profil_iteration_us {}", line.join(" "));

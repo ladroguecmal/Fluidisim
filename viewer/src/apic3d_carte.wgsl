@@ -233,6 +233,38 @@ fn bin_sort(@builtin(global_invocation_id) g: vec3<u32>) {
     }
 }
 
+// S425 — le tri par rang : chaque particule rangée compte, dans la tranche de sa maille, les indices plus petits que le sien, et
+// s'écrit à ce rang (dans `pscratch`, libre hors du compactage), puis la tranche revient dans `order`. Même ordre que le tri par
+// insertion d'une maille sur un fil — qui coûtait 64 µs sur B10, quelques mailles portant 30 à 50 particules.
+@compute @workgroup_size(128)
+fn bin_rank(@builtin(global_invocation_id) g: vec3<u32>) {
+    let s = g.x;
+    if s >= start[P.cells] {
+        return;
+    }
+    let v = order[s];
+    let m = cell_of(px[v].xyz);
+    let c = cell_index(m.x, m.y, m.z);
+    let a = start[c];
+    let b = start[c + 1u];
+    var r = 0u;
+    for (var t = a; t < b; t = t + 1u) {
+        if order[t] < v {
+            r = r + 1u;
+        }
+    }
+    pscratch[a + r].x = bitcast<f32>(v);
+}
+
+@compute @workgroup_size(128)
+fn bin_place(@builtin(global_invocation_id) g: vec3<u32>) {
+    let s = g.x;
+    if s >= start[P.cells] {
+        return;
+    }
+    order[s] = bitcast<u32>(pscratch[s].x);
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 // Grilles décalées (`staggered`) : l'axe d'une face, ses indices, l'origine de son nœud (0, 0, 0) en mailles, ses dimensions.
 
@@ -1047,8 +1079,15 @@ fn separate_shift(@builtin(global_invocation_id) g: vec3<u32>) {
     }
     let xa = px[a].xyz;
     let m = cell_of(xa);
-    let lo = vec3<u32>(select(0u, m.x - 1u, m.x > 0u), select(0u, m.y - 1u, m.y > 0u), select(0u, m.z - 1u, m.z > 0u));
-    let hi = min(m + vec3<u32>(2u), vec3<u32>(P.nx, P.ny, P.nz));
+    // S425 : une maille voisine n'est lue que si la particule est à moins de `dmin` (plus 10⁻⁴ maille, pour l'arrondi) de leur
+    // frontière commune — au-delà, aucune de ses particules n'est assez proche pour compter : même somme, même ordre, moins de
+    // lectures (les mailles de 30 à 50 particules coûtaient 100 µs au fil le plus long).
+    let frac = xa / P.dx - vec3<f32>(m);
+    let reach = P.dmin / P.dx + 1e-4;
+    let down = vec3<bool>(m.x > 0u && frac.x <= reach, m.y > 0u && frac.y <= reach, m.z > 0u && frac.z <= reach);
+    let up = vec3<bool>(1.0 - frac.x <= reach, 1.0 - frac.y <= reach, 1.0 - frac.z <= reach);
+    let lo = select(m, m - vec3<u32>(1u), down);
+    let hi = min(select(m + vec3<u32>(1u), m + vec3<u32>(2u), up), vec3<u32>(P.nx, P.ny, P.nz));
     var sh = vec3<f32>(0.0);
     for (var cz = lo.z; cz < hi.z; cz = cz + 1u) {
         for (var cy = lo.y; cy < hi.y; cy = cy + 1u) {
