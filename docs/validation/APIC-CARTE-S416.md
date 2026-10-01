@@ -878,3 +878,33 @@ s'y ajoute ne pouvait le tenir. **Réécrit, avant la mesure suivante** : *au re
 0,1 à la part de la forme seule, et pas plus de retours rapides qu'elle* ; (b) inchangé (rien sous une houle calme). Sous cette lecture,
 la **vitesse propre à 0,4 m/s** (S429 : 0,58 au retournement, sous la forme seule ; rien sous la houle calme) tiendrait — **sauf ses 25
 retours rapides**. La suite : une hystérésis du seuil de vitesse (entrer à 0,4, sortir plus bas), comme la pente en S410.
+
+### 21.3 C7d-1 reçu : la vitesse propre de δ avec une relâche (S431)
+
+**Reproduire** : `APIC3D_BASCULE=maintien=0.3,fond=4,vitesse=0.3,vitesse_relache=0.15,fond_b=1` sur le banc de la vague de Chen
+(`APIC3D_EPS=0.55` et `0.1`, `-- 40 4`) ; l'essai `a_band_column_is_kept_between_the_speed_release_and_the_threshold_s431`.
+
+**La construction** : `ColumnsSwitch::floor_speed_release` — une colonne **de la bande** dont une maille d'eau dépasse la relâche
+(relativement à B) sans atteindre le seuil est **gardée**, ni requise ni dilatée, comme la pente en S410 ; le fond descend aussi sous
+ces mailles. L'essai : un jet ralenti entre les deux seuils garde ses colonnes sans dilatation, les rend sous la relâche, et la
+relâche ne prend jamais.
+
+| `ε` = 0,55, fond B | part de la fenêtre au retournement | retours rapides | retournement (t/τ) | particules à la fin | calcul |
+|---|---:|---:|---:|---:|---:|
+| la forme seule | 0,620 | 0 | 0,7021 | 12 262 | 31 s |
+| vitesse propre 0,4, sans relâche (S429) | 0,580 | 25 | 0,7025 | 33 422 | 43 s |
+| 0,4 / 0,2 · 0,4 / 0,3 | 0,580 · 0,580 | 11 · 18 | 0,7024 · 0,7025 | 56 860 · 41 198 | 62 · 53 s |
+| **0,3 / 0,15** | **0,640** | **0** | **0,7022** | 72 835 | 88 s |
+
+À `ε` = 0,1 (houle calme), **aucune colonne de la fenêtre en particules**, pour tous les couples.
+
+**C7d-1 est reçu** avec le couple **entrée 0,3 / relâche 0,15 m/s**, sur les critères écrits avant la mesure (S430) : au retournement,
+0,02 de plus que la forme seule (au plus 0,1), aucun retour rapide, le retournement au même pas ; rien sous une houle calme ; sans les
+clés, S430 au chiffre près. Suite du cœur 756, zéro avertissement.
+
+**Publié, non jugé** : après le déferlement, la bande garde l'eau agitée — six fois plus de particules à la fin que la forme seule,
+part moyenne 0,81 (0,50) — ; l'impact est détecté plus tard (1,56 τ contre 1,22 : l'instrument lit l'air enfermé sur l'occupation des
+particules). C'est ce que δ déforme vraiment ; le coût se jugera sur la carte (C7d-2) et dans la scène (C7d-3, C10).
+
+**La suite** : **C7d-2** — le seuil de vitesse propre, sa relâche et le fond B sur la carte (la décision de la bascule ne porte encore
+aucun critère d'écoulement) ; reçu si les décisions forcées sont identiques à la référence avec fond B, et C7e tenu.
