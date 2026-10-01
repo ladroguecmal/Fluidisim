@@ -2713,64 +2713,93 @@ fn raise_one(k: u32) {
     solde_add(solde_w_index(m.y * P.nx + m.x), vec2<u32>(VP_QUANTA, 0u));
 }
 
-@compute @workgroup_size(1)
-fn floor_move() {
-    if P.s_has_fcells == 0u || atomicLoad(&pcount[COUNT_SWITCH_REFUSED]) != 0u {
-        return;
-    }
+// S423 — en groupe de 256 fils : capacité et comptes en parallèle, le retrait à forme close (`sg_remove`), le solde vertical par
+// colonne (ses retirées comptées par atomiques — une somme d'entiers), l'ensemencement par préfixe en ordre de colonnes.
+@compute @workgroup_size(256)
+fn floor_move(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
     let ncol = P.nx * P.ny;
-    var needed = 0u;
-    for (var col = 0u; col < ncol; col = col + 1u) {
-        if cmask[col] == 0u {
-            needed = needed + 8u * sat_sub(floor_cells_now(col), floor_cells_target(col));
-        }
+    var skip = 0u;
+    if t == 0u && (P.s_has_fcells == 0u || atomicLoad(&pcount[COUNT_SWITCH_REFUSED]) != 0u) {
+        skip = 1u;
     }
-    if np() + needed > arrayLength(&plist) {
-        atomicStore(&pcount[COUNT_SWITCH_REFUSED], 2u);
+    if sg_bcast(t, skip) != 0u {
         return;
     }
-    // Remonter : les particules sous le nouveau fond, dans l'ordre de la référence.
-    let raised = visit_remove(2u);
-    var moved = raised > 0u;
-    var n = np();
-    for (var col = 0u; col < ncol; col = col + 1u) {
-        if cmask[col] != 0u {
-            continue;
-        }
-        let i = col % P.nx;
-        let j = col / P.nx;
-        let was = floor_cells_now(col);
-        let to = floor_cells_target(col);
-        if to > was {
-            // Les mailles prises au fond : pleines — l'écart au volume absorbé, au solde vertical.
-            for (var c = 0u; c < 8u * (to - was); c = c + 1u) {
-                solde_add(solde_w_index(col), neg_i64(vec2<u32>(VP_QUANTA, 0u)));
-            }
-        } else if to < was {
-            // Descendre : les mailles libérées, ensemencées au réseau nominal.
-            for (var l = to; l < was; l = l + 1u) {
-                for (var a = 0u; a < 8u; a = a + 1u) {
-                    let ax = f32(a % 2u);
-                    let ay = f32((a / 2u) % 2u);
-                    let az = f32(a / 4u);
-                    let q = vec3<f32>((f32(i) + (ax + 0.5) * 0.5) * P.dx, (f32(j) + (ay + 0.5) * 0.5) * P.dx,
-                        (f32(l) + (az + 0.5) * 0.5) * P.dx);
-                    px[n] = vec4<f32>(q, 0.0);
-                    grid_affine_at(q, n);
-                    n = n + 1u;
-                }
+    let n0 = np();
+    var needed = 0u;
+    for (var b = 0u; b < sg_blocks(); b = b + 1u) {
+        let col = t + SG * b;
+        if col < ncol {
+            atomicStore(&count[col], 0u);
+            if cmask[col] == 0u {
+                needed = needed + 8u * sat_sub(floor_cells_now(col), floor_cells_target(col));
             }
         }
-        if to != was {
-            moved = true;
-            swb[sw(SW_KEEP, col)] = 1u;
-        }
-        cols[2u * ncol + 32u + col] = f32(to) * P.dx;
     }
-    atomicStore(&pcount[COUNT_N], n);
-    // S423 : un fond déplacé rend la surface périmée autour de sa colonne (marquée ci-dessus) ; les particules retirées en
-    // remontant sont dans ces colonnes.
-    _ = moved;
+    let need_all = sg_sum_u32(t, needed);
+    var refuse = 0u;
+    if t == 0u && n0 + need_all > arrayLength(&plist) {
+        atomicStore(&pcount[COUNT_SWITCH_REFUSED], 2u);
+        refuse = 1u;
+    }
+    if sg_bcast(t, refuse) != 0u {
+        return;
+    }
+    // Remonter : les particules sous le nouveau fond, comptées par colonne, puis retirées.
+    let len = atomicLoad(&pcount[COUNT_LIST]);
+    for (var k = t; k < len; k = k + SG) {
+        let m = cell_of(px[plist[k]].xyz);
+        atomicAdd(&count[m.y * P.nx + m.x], 1u);
+    }
+    storageBarrier();
+    workgroupBarrier();
+    let n = sg_remove(t, n0, len);
+    // Les colonnes de chaque fil, d'un seul tenant : l'ordre des colonnes est l'ordre des fils ; puis les graines réparties.
+    let c0 = min(t * sg_blocks(), ncol);
+    let c1 = min(c0 + sg_blocks(), ncol);
+    var seeds = 0u;
+    for (var col = c0; col < c1; col = col + 1u) {
+        seeds = seeds + seeds_floor(col);
+    }
+    sg_pre[t] = sg_scan_u32(t, seeds);
+    let seeds_all = sg_sum_u32(t, seeds);
+    // Descendre : les mailles libérées, ensemencées au réseau nominal.
+    for (var g = t; g < seeds_all; g = g + SG) {
+        let cl = seed_place(g, 1u);
+        let i = cl.x % P.nx;
+        let j = cl.x / P.nx;
+        let l = floor_cells_target(cl.x) + cl.y / 8u;
+        let a = cl.y % 8u;
+        let ax = f32(a % 2u);
+        let ay = f32((a / 2u) % 2u);
+        let az = f32(a / 4u);
+        let q = vec3<f32>((f32(i) + (ax + 0.5) * 0.5) * P.dx, (f32(j) + (ay + 0.5) * 0.5) * P.dx,
+            (f32(l) + (az + 0.5) * 0.5) * P.dx);
+        px[n + g] = vec4<f32>(q, 0.0);
+        grid_affine_at(q, n + g);
+    }
+    storageBarrier();
+    workgroupBarrier();
+    for (var col = c0; col < c1; col = col + 1u) {
+        if cmask[col] == 0u {
+            let was = floor_cells_now(col);
+            let to = floor_cells_target(col);
+            if to > was {
+                // Les mailles prises au fond : pleines — l'écart au volume absorbé, au solde vertical.
+                let absorbed = mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), atomicLoad(&count[col]));
+                solde_add(solde_w_index(col), add_i64(absorbed, neg_i64(mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), 8u * (to - was)))));
+            }
+            if to != was {
+                // S423 : un fond déplacé rend la surface périmée autour de sa colonne.
+                swb[sw(SW_KEEP, col)] = 1u;
+            }
+            cols[2u * ncol + 32u + col] = f32(to) * P.dx;
+        }
+    }
+    if t == 0u {
+        atomicStore(&pcount[COUNT_N], n + seeds_all);
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -4015,6 +4044,120 @@ fn sg_bcast(t: u32, v: u32) -> u32 {
     return r;
 }
 
+// Le préfixe exclusif des fils (bornes constantes : FXC).
+fn sg_scan_u32(t: u32, v: u32) -> u32 {
+    sg_u32[t] = v;
+    workgroupBarrier();
+    for (var r = 1u; r < SG; r = r * 2u) {
+        var add = 0u;
+        if t >= r {
+            add = sg_u32[t - r];
+        }
+        workgroupBarrier();
+        sg_u32[t] = sg_u32[t] + add;
+        workgroupBarrier();
+    }
+    let x = sg_u32[t] - v;
+    workgroupBarrier();
+    return x;
+}
+
+// Les graines réparties par graine, non par colonne (une colonne profonde sur un fil faisait le temps) : `sg_pre[u]`, le préfixe
+// exclusif des graines du morceau de colonnes du fil `u` ; la graine `g` appartient au dernier morceau dont le préfixe est ≤ `g`
+// (un morceau vide a le préfixe du suivant, il n'est donc jamais choisi).
+var<workgroup> sg_pre: array<u32, 256>;
+
+fn sg_owner(g: u32) -> u32 {
+    var lo = 0u;
+    var hi = SG;
+    loop {
+        if hi - lo <= 1u {
+            break;
+        }
+        let mid = (lo + hi) / 2u;
+        if sg_pre[mid] <= g {
+            lo = mid;
+        } else {
+            hi = mid;
+        }
+    }
+    return lo;
+}
+
+// Les graines d'une colonne : la bascule (colonne → particules), le fond qui descend.
+fn seeds_switch(col: u32) -> u32 {
+    if cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u {
+        let h = i64_to_f32(ivol_get(col)) * quantum_height();
+        let full = plan_full(h);
+        return 4u * full + plan_last(h, full);
+    }
+    return 0u;
+}
+
+fn seeds_floor(col: u32) -> u32 {
+    if cmask[col] == 0u {
+        return 8u * sat_sub(floor_cells_now(col), floor_cells_target(col));
+    }
+    return 0u;
+}
+
+// La colonne et le rang dans la colonne de la graine `g` (`kind` 0 : bascule, 1 : fond).
+fn seed_place(g: u32, kind: u32) -> vec2<u32> {
+    let u = sg_owner(g);
+    var col = u * sg_blocks();
+    var local = g - sg_pre[u];
+    loop {
+        var c = 0u;
+        if kind == 0u {
+            c = seeds_switch(col);
+        } else {
+            c = seeds_floor(col);
+        }
+        if local < c {
+            break;
+        }
+        local = local - c;
+        col = col + 1u;
+    }
+    return vec2<u32>(col, local);
+}
+
+// Le nombre d'entrées de la liste triée `plist[0, len)` inférieures ou égales à `i`.
+fn list_count_le(i: u32, len: u32) -> u32 {
+    var lo = 0u;
+    var hi = len;
+    loop {
+        if lo >= hi {
+            break;
+        }
+        let mid = (lo + hi) / 2u;
+        if plist[mid] <= i {
+            lo = mid + 1u;
+        } else {
+            hi = mid;
+        }
+    }
+    return lo;
+}
+
+// **Le retrait à forme close** (bascule et fond ; l'absorption garde sa visite, son mélange dépend de l'ordre). La visite de la
+// référence — en montant, une retirée remplacée par la dernière, examinée aussitôt — laisse un arrangement connu d'avance : avec `R`
+// la liste triée des retirées et `n' = n − |R|`, la k-ième plus petite place retirée sous `n'` reçoit la k-ième plus grande
+// particule gardée de `[n', n)`. Chaque gardée de `[n', n)` trouve son rang par dichotomie dans `R` ; départs et arrivées sont
+// disjoints. Rend `n'` ; `n0` et la liste ont été lus avant tout geste.
+fn sg_remove(t: u32, n0: u32, len: u32) -> u32 {
+    let n2 = n0 - len;
+    for (var i = n2 + t; i < n0; i = i + SG) {
+        let le = list_count_le(i, len);
+        if !(le > 0u && plist[le - 1u] == i) {
+            copy_particle(i, plist[(n0 - 1u - i) - (len - le)]);
+        }
+    }
+    storageBarrier();
+    workgroupBarrier();
+    return n2;
+}
+
 // Les colonnes de chaque fil : `col = t + 256·b`, `b < sg_blocks()` — un nombre de tours uniforme.
 fn sg_blocks() -> u32 {
     return (P.nx * P.ny + SG - 1u) / SG;
@@ -4029,6 +4172,7 @@ fn sg_face_blocks() -> u32 {
 fn switch_apply_group(@builtin(local_invocation_id) lid: vec3<u32>) {
     let t = lid.x;
     let ncol = P.nx * P.ny;
+    let n0 = np();
     // (0) La capacité.
     var needed = 0u;
     for (var b = 0u; b < sg_blocks(); b = b + 1u) {
@@ -4048,13 +4192,9 @@ fn switch_apply_group(@builtin(local_invocation_id) lid: vec3<u32>) {
     if sg_bcast(t, refuse) != 0u {
         return;
     }
-    // (1) Particules → colonnes : les retraits par la visite de la référence (fil 0), puis les colonnes en parallèle.
-    var removed = 0u;
-    if t == 0u {
-        removed = visit_remove(1u);
-    }
-    storageBarrier();
-    workgroupBarrier();
+    // (1) Particules → colonnes : le retrait à forme close, puis les colonnes en parallèle.
+    let removed = atomicLoad(&pcount[COUNT_LIST]);
+    let n1 = sg_remove(t, n0, removed);
     var part_total = vec2<u32>(0u, 0u);
     var part_geo = vec2<u32>(0u, 0u);
     var part_count = 0u;
@@ -4078,7 +4218,7 @@ fn switch_apply_group(@builtin(local_invocation_id) lid: vec3<u32>) {
             part_count = part_count + 1u;
         }
     }
-    let total = add_i64(sg_sum_i64(t, part_total), mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), sg_bcast(t, removed)));
+    let total = add_i64(sg_sum_i64(t, part_total), mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), removed));
     let geo_sum = sg_sum_i64(t, part_geo);
     let count = sg_sum_u32(t, part_count);
     // Le niveau par la masse, à un quart de maille au plus ; le reste à la réserve, exactement. Sans conversion, tout est nul (pas
@@ -4111,15 +4251,7 @@ fn switch_apply_group(@builtin(local_invocation_id) lid: vec3<u32>) {
     }
     storageBarrier();
     workgroupBarrier();
-    // (2) Colonnes → particules : l'ensemencement en ordre de colonnes, au fil 0, s'il y en a.
-    var seeding = 0u;
-    for (var b = 0u; b < sg_blocks(); b = b + 1u) {
-        let col = t + SG * b;
-        if col < ncol && cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u {
-            seeding = seeding + 1u;
-        }
-    }
-    let seeding_all = sg_sum_u32(t, seeding);
+    // (2) Colonnes → particules : l'ensemencement en ordre de colonnes, par préfixe — les colonnes de chaque fil d'un seul tenant.
     // S423 : les colonnes qui basculent rendent la surface périmée autour d'elles.
     for (var b = 0u; b < sg_blocks(); b = b + 1u) {
         let col = t + SG * b;
@@ -4127,46 +4259,38 @@ fn switch_apply_group(@builtin(local_invocation_id) lid: vec3<u32>) {
             swb[sw(SW_KEEP, col)] = 1u;
         }
     }
+    let c0 = min(t * sg_blocks(), ncol);
+    let c1 = min(c0 + sg_blocks(), ncol);
+    var seeds = 0u;
+    for (var col = c0; col < c1; col = col + 1u) {
+        seeds = seeds + seeds_switch(col);
+    }
+    sg_pre[t] = sg_scan_u32(t, seeds);
+    let seeds_all = sg_sum_u32(t, seeds);
+    let offsets = array<vec2<f32>, 4>(vec2<f32>(0.25, 0.25), vec2<f32>(0.75, 0.75), vec2<f32>(0.75, 0.25), vec2<f32>(0.25, 0.75));
+    for (var g = t; g < seeds_all; g = g + SG) {
+        let cl = seed_place(g, 0u);
+        let o = offsets[cl.y % 4u];
+        let z = (f32(cl.y / 4u) + 0.5) * (0.5 * P.dx);
+        let p = vec3<f32>((f32(cl.x % P.nx) + o.x) * P.dx, (f32(cl.x / P.nx) + o.y) * P.dx, z);
+        px[n1 + g] = vec4<f32>(p, 0.0);
+        grid_affine_at(p, n1 + g);
+    }
     storageBarrier();
     workgroupBarrier();
-    if seeding_all > 0u && t == 0u {
-        var n = np();
-        let offsets = array<vec2<f32>, 4>(vec2<f32>(0.25, 0.25), vec2<f32>(0.75, 0.75), vec2<f32>(0.75, 0.25), vec2<f32>(0.25, 0.75));
-        for (var col = 0u; col < ncol; col = col + 1u) {
-            if !(cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u) {
-                continue;
-            }
-            let i = col % P.nx;
-            let j = col / P.nx;
-            let v0 = ivol_get(col);
-            let h = i64_to_f32(v0) * quantum_height();
-            let full = plan_full(h);
-            let last = plan_last(h, full);
-            var seeded = 0u;
-            var subs = full;
-            if last > 0u {
-                subs = full + 1u;
-            }
-            for (var sub = 0u; sub < subs; sub = sub + 1u) {
-                let z = (f32(sub) + 0.5) * (0.5 * P.dx);
-                var cnt = 4u;
-                if sub >= full {
-                    cnt = last;
-                }
-                for (var a = 0u; a < cnt; a = a + 1u) {
-                    let o = offsets[a];
-                    let p = vec3<f32>((f32(i) + o.x) * P.dx, (f32(j) + o.y) * P.dx, z);
-                    px[n] = vec4<f32>(p, 0.0);
-                    grid_affine_at(p, n);
-                    n = n + 1u;
-                    seeded = seeded + 1u;
-                }
-            }
-            solde_add(reserve_index(), add_i64(v0, neg_i64(mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), seeded))));
+    var part_rest = vec2<u32>(0u, 0u);
+    for (var col = c0; col < c1; col = col + 1u) {
+        if cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u {
+            let c = seeds_switch(col);
+            part_rest = add_i64(part_rest, add_i64(ivol_get(col), neg_i64(mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), c))));
             ivol_set(col, vec2<u32>(0u, 0u));
             cols[col] = 0.0;
         }
-        atomicStore(&pcount[COUNT_N], n);
+    }
+    let rest = sg_sum_i64(t, part_rest);
+    if t == 0u {
+        solde_add(reserve_index(), rest);
+        atomicStore(&pcount[COUNT_N], n1 + seeds_all);
     }
     storageBarrier();
     workgroupBarrier();

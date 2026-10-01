@@ -359,8 +359,9 @@ impl ApicCarte {
             swb,
             refresh_body: None,
             mgl,
+            // S423 : la multigrille et le plafond adaptatif par défaut (`MULTIGRILLE=0`, `ADAPTATIF=0` aux bancs : la diagonale).
+            multigrid: mg_levels.len() >= 3,
             mg_levels,
-            multigrid: false,
             switch: SwitchSettings::default(),
             now_us: 0,
             read,
@@ -375,7 +376,7 @@ impl ApicCarte {
             iteration_cap: 400,
             cap_max: 400,
             recent: [0; 8],
-            adaptive: false,
+            adaptive: true,
             body: None,
             adapter: format!("{} ({:?})", info.name, info.backend),
         })
@@ -451,7 +452,8 @@ impl ApicCarte {
                 self.dispatch(&mut pass, FLOOR_PLACE, self.domain.nx * self.domain.ny, WG);
                 self.dispatch(&mut pass, LIST_MODE_RAISE, 1, 1);
                 self.encode_list(&mut pass);
-                self.dispatch(&mut pass, FLOOR_MOVE, 1, 1);
+                // S423 : en groupe de 256 fils.
+                self.dispatch(&mut pass, FLOOR_MOVE, SCAN as usize, SCAN);
             }
         }
         if let Some(q) = self.query.as_ref() {
@@ -1153,7 +1155,7 @@ pub fn recevoir_etages() -> Result<(), String> {
         if let Some(cap) = std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()) {
             carte.set_iteration_cap(cap);
         }
-        carte.set_multigrid(std::env::var("MULTIGRILLE").is_ok());
+        carte.set_multigrid(std::env::var("MULTIGRILLE").map_or(true, |v| v != "0"));
         println!(
             "APIC_CARTE_S416 carte={:?} cas={} domaine={}x{}x{} dx={} particules={} chauffe={warm} corps={:?}",
             carte.adapter, if cas.is_empty() { "ballottement" } else { &cas }, d.nx, d.ny, d.nz, d.dx, reference.particle_count(),
@@ -1445,8 +1447,8 @@ pub fn recevoir_ballottement() -> Result<(), String> {
             carte.set_iteration_cap(cap);
         }
         carte.load(&a)?;
-        carte.set_adaptive_cap(std::env::var("ADAPTATIF").is_ok());
-        carte.set_multigrid(std::env::var("MULTIGRILLE").is_ok());
+        carte.set_adaptive_cap(std::env::var("ADAPTATIF").map_or(true, |v| v != "0"));
+        carte.set_multigrid(std::env::var("MULTIGRILLE").map_or(true, |v| v != "0"));
         let lx = d.nx as f64 * d.dx as f64;
         let moment = |x: &[[f32; 3]]| -> f64 { x.iter().map(|p| p[0] as f64 - lx / 2.).sum() };
         // Tout en colonnes : le moment se lit sur `η` (S398).
@@ -1793,8 +1795,8 @@ pub fn recevoir_b10() -> Result<(), String> {
         let n = a.particle_count();
         let mut carte = ApicCarte::new(&a, a.particle_capacity()).await?;
         carte.set_iteration_cap(std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(600));
-        carte.set_adaptive_cap(std::env::var("ADAPTATIF").is_ok());
-        carte.set_multigrid(std::env::var("MULTIGRILLE").is_ok());
+        carte.set_adaptive_cap(std::env::var("ADAPTATIF").map_or(true, |v| v != "0"));
+        carte.set_multigrid(std::env::var("MULTIGRILLE").map_or(true, |v| v != "0"));
         carte.load(&a)?;
         if let Some(s) = sw.as_mut() {
             carte.load_switch(s);
