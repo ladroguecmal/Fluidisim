@@ -783,3 +783,40 @@ non faits.
 rangements et rangs du tri, corps, séparation — 2 à 3 µs chacun, une vingtaine par pas et bascule. Des dispatchs indirects taillés sur
 `n` : les arguments écrits par un noyau dans un tampon lié, copiés entre deux passages vers un tampon d'arguments non lié (wgpu refuse
 un tampon d'arguments lié en écriture au même dispatch, S421).
+
+## 21. La conception de C7d — relative à B (S429)
+
+**Ce que C7d demande** (§1.1) : *la bande sur la production couplée* ([ADR-198](../adr/ADR-198-la-voie-d-a289.md)) et *le fond qui
+suit la vitesse propre de δ* ([BANDE-ETROITE-S413](BANDE-ETROITE-S413.md) §6.4) ; reçu si *la vague de Chen sous B : particules
+seulement où δ se déforme ; rien sous une houle calme*. S415 l'a motivé : aucun critère d'écoulement ne faisait les deux — la vitesse
+absolue prend toute la houle (part de la bande 1,000 sur la vague de Chen), la vorticité absolue aussi (0,998) ; la vitesse orbitale de
+la houle est à B, non à δ.
+
+**Ce qui existe, ce qui manque.**
+
+| | état |
+|---|---|
+| δ relatif à B dans la **référence** (`Volume3::set_relative_background(RELATIVE_ALL)`) | fait (S369), pas le défaut du cœur |
+| δ relatif à B dans la **production** GPU (`delta3d_step.wgsl`) | **non** — ADR-198 D1 : « les deux basculent ensemble », travail daté |
+| **A320** : en mode relatif, une perturbation de δ croît sous houle raide (`u'·∇U`) | **ouverte** — et la vague de Chen *est* une houle raide |
+| la bande (APIC + zone + fond) | simule l'eau **totale**, sans B, en référence comme sur la carte |
+| les critères d'écoulement de S415 (vitesse, vorticité, part de rotation) | en référence ; **pas sur la carte** (S420 n'a porté que la forme, le corps, le maintien, le fond) |
+
+**Le découpage**, chaque morceau reçu avant le suivant (L343) :
+
+| | contenu | lieu | reçu si |
+|---|---|---|---|
+| **C7d-1** | **le critère relatif en référence** : `ColumnsSwitch` reçoit un fond B analytique (houle linéaire : `a`, `k`, `ω`, phase, niveau moyen) ; le critère de vitesse du fond porte sur `|u − U_B(x, t)|` ; éteint par défaut | référence (sans carte) | vague de Chen (40 mailles par λ, `ny` 4, maintien 0,3 s, fond 4, vitesse 0,2 m/s) : `ε` = 0,55 — part de la fenêtre en particules au retournement **sous 0,5**, retournement au même instant que la forme seule (à un pas près) ; `ε` = 0,1 — **aucune colonne de la fenêtre en particules** après le premier pas, sur 2,5 τ ; sans fond B, S415 au chiffre près |
+| **C7d-2** | **le même critère sur la carte** : la vitesse des mailles (et, s'il sert, la vorticité) dans la décision de la bascule, relative à B | poste | décisions forcées identiques à la référence avec fond B (le banc de S420) ; C7e tenu (pas + bascule ≤ 2,1 ms au p99 sur B10) |
+| **C7d-3** | **la bande dans la production couplée** : B et W en fond, δ relatif à B ; dans la bande, les particules portent la vitesse propre de δ, advectées par `U + u'`, projetées avec δ | référence, puis poste | sa conception d'abord (une session), qui dira l'ordre avec **le mode relatif sur la carte** (ADR-198 D1) et **A320** (le remède d'ADR-198 D4, la forme de Bernoulli `∇(U·u')`, à éprouver) — puis : la vague de Chen *dans* une houle B, particules seulement où δ se déforme ; rien sous une houle calme ; δ ≤ 2 ms sur la scène de la porte B |
+
+**Pourquoi cet ordre.** C7d-1 isole l'idée — le critère relatif fait-il le tri attendu ? — sur un banc reçu (S410), sans dépendre
+du couplage ni d'A320 : B y est analytique, la bande simule l'eau totale, seul le critère change. Si elle échoue, C7d-3 n'a pas de
+critère de fond. C7d-2 porte un critère, comme S420 a porté les autres. C7d-3 est l'intégration ; elle dépend de deux pièces que la
+campagne n'a pas encore (le mode relatif sur la carte, A320), qu'aucune session de C7 n'a le droit d'esquiver.
+
+**Le fond B de C7d-1.** Le banc initialise l'eau par le champ du premier ordre de la houle de Stokes, `u = aω·e^{kζ}·cos θ`,
+`w = aω·e^{kζ}·sin θ`, `ω = √(gk)·(1 + ε²/2)` ; B est ce champ, propagé (`θ = kx − ωt − π/2`). Au départ `u − U_B = 0` dans l'eau ;
+la vitesse propre de δ naît là où l'écoulement quitte la houle progressive : le déferlement, les harmoniques liés que B n'a pas
+(ADR-198 D3), et **les parois** — le bassin n'est pas périodique, la houle s'y réfléchit. D'où la fenêtre des mesures (S410), loin des
+parois pendant la seconde utile ; la part hors fenêtre est publiée, pas jugée.
