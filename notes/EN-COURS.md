@@ -62,34 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S430 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-1**
-([preuve](../docs/validation/APIC-CARTE-S416.md) §21.1 : la vitesse propre de δ ne demande rien sous une houle calme, mais prend 0,94
-de la fenêtre sous la houle raide — grande sans déformation).
+Session : S431 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-1**, l'hystérésis
+du seuil de vitesse propre ([preuve](../docs/validation/APIC-CARTE-S416.md) §21.2 : la vitesse propre à 0,4 m/s tiendrait le critère
+réécrit — 0,58 au retournement sous la forme seule, rien sous la houle calme —, sauf ses 25 retours rapides).
 
-**Ce que la session fait.** (1) **La déformation propre de δ** comme critère du fond : `floor_deformation` (s⁻¹), la norme de
-Frobenius du gradient de la vitesse **relative à B** (`u − U_B` ramenée aux centres des mailles, puis les différences centrées de
-`vorticity` — le gradient discret de B s'en retranche, non seulement l'analytique) ; sans fond B, le gradient de la vitesse totale.
-Éteint par défaut (S429 au bit). Un essai : une houle posée sur la grille ne déforme rien relativement à elle-même ; un cisaillement
-enfoui ajouté est pris. (2) **Mesurer** sur la vague de Chen, avec les critères de S429 — et, pour situer, la norme du gradient de B
-lui-même : `√2·kaω`, ≈ 5 s⁻¹ en surface à `ε` = 0,55, ≈ 0,8 s⁻¹ à 0,1.
+**Ce que la session fait.** `floor_speed_release` (m/s), comme `slope_release` (S410) : une colonne **de la bande** dont une maille
+d'eau va plus vite que la relâche (relativement à B s'il y en a un), sans atteindre le seuil d'entrée, est **gardée** — ni requise, ni
+dilatée — ; le fond descend aussi sous ces mailles, pour ne pas remonter sous des particules gardées. `None` par défaut (S430 au bit).
+Un essai : une colonne prise par un jet reste en bande quand le jet ralentit entre les deux seuils, repasse aux colonnes sous la relâche ;
+elle n'est pas prise si elle ne l'était pas.
 
-**Critères, écrits avant** (vague de Chen, 40 mailles par λ, `ny` 4, maintien 0,3 s, fond 4, `fond_b=1`, **déformation 1 et 2
-s⁻¹**, sans seuil de vitesse) : (a) `ε` = 0,55 — part de la fenêtre en particules au retournement **sous 0,5**, retournement à l'instant
-de la forme seule (à un pas) ; (b) `ε` = 0,1 — **rien dans la fenêtre** après le premier pas, sur 2,5 τ ; (c) sans la clé, S429 au
-chiffre près ; (d) aucun retour rapide de plus que la forme seule ; (e) suite du cœur, zéro avertissement. Si (a) manque encore, la
-session publie où la déformation propre se loge (au retournement : les colonnes prises, leur distance à la crête) — sans changer de
-critère en cours de mesure.
+**Critères, écrits avant** (le critère réécrit en S430 ; vague de Chen, 40 mailles par λ, `ny` 4, maintien 0,3 s, fond 4, `fond_b=1` ;
+couples entrée / relâche **0,4 / 0,2**, **0,4 / 0,3**, **0,3 / 0,15** m/s) : (a) `ε` = 0,55 — au retournement, la part de la fenêtre en
+particules **n'excède pas celle de la forme seule de plus de 0,1** (0,62 → au plus 0,72), **aucun retour rapide de plus que la forme
+seule** (0), retournement à l'instant de la forme seule (à un pas) ; (b) `ε` = 0,1 — **rien dans la fenêtre** après le premier pas ;
+(c) sans la clé, S430 au chiffre près ; (d) suite du cœur, zéro avertissement. **C7d-1 est reçu** si un couple tient (a) et (b).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `floor_deformation` relative à B ; essai du cœur.
-- [x] **P3** — mesures sur la vague de Chen ; critères.
-- [x] **P4** — suite ; preuve §21.2 ; registres.
-- [x] **P5** — rituel.
+- [ ] **P2** — `floor_speed_release` ; essai du cœur ; clé du banc.
+- [ ] **P3** — mesures sur la vague de Chen ; critères ; C7d-1 reçu ou non.
+- [ ] **P4** — suite ; preuve §21.3 ; registres.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2** — `Apic3::deformation` (la norme de Frobenius du gradient de `u − U_B` aux centres, mêmes différences que `vorticity` ; sans B, de la vitesse totale) et `ColumnsSwitch::floor_deformation` (s⁻¹), éteint par défaut ; la clé `deformation` du banc. Essai `the_own_deformation_of_delta_is_read_relative_to_b_s430` : une houle de gradient 2,9 s⁻¹ en surface, seuil 1 — le gradient total prend les 32 colonnes, relatif à B aucune ; un cisaillement enfoui ajouté, pris lui seul (10 à 21).
-- **P3** — mesures (vague de Chen, 40 mailles par λ, `ny` 4, maintien 0,3 s, fond 4, `fond_b=1`). **Déformation propre** : `ε` 0,55 — part de la fenêtre au retournement **1,000** à 1 et à 2 s⁻¹ (toute la fenêtre dès 0,04 et 0,27 τ ; retournement détecté à 0,666 et 0,568 τ) ; `ε` 0,1 — 1 s⁻¹ : **200/200**, 187 retours rapides ; 2 s⁻¹ : 0/200, 8 retours rapides. **Vitesse propre 0,2 rejouée** : 0,940 et 0/200, S429 au chiffre près (critère c tenu). **La déformation propre fait pire que la vitesse propre** : le gradient de la grille est bruité près de la surface (vitesses extrapolées dans l'air, bord de la zone) — S415 l'avait vu sur la vorticité ; même relative à B, il dépasse 1 s⁻¹ sous une houle de 0,8 s⁻¹. **Un défaut du critère (a), trouvé en relisant** : son seuil de 0,5 venait de la part *moyenne* de la forme seule (0,501, S415) ; au retournement, la forme seule prend déjà **0,62** de la fenêtre, et elle est toujours active — (a) était inatteignable par tout critère qui s'y ajoute. Non changé en cours de mesure ; **réécrit pour la suite** : *le critère d'écoulement n'ajoute pas plus de 0,1 à la forme seule au retournement, sans retour rapide de plus qu'elle*. Sous cette lecture, la **vitesse propre à 0,4 m/s** (S429 : 0,58 ≤ 0,62, rien sous la houle calme) passerait — sauf ses **25 retours rapides** : une hystérésis du seuil de vitesse (entrée 0,4, sortie plus basse), comme la pente (S410), est la suite.
-- **P4** — suite du cœur **755** / 19 / 0 avertissement. Preuve §21.2 ; liste 4.19, feuille de route, index.
-- **P5** — journal ; jeton libre ; maillons 18 (justifiés : S406) ; suivant : S431, C7d-1 — l'hystérésis du seuil de vitesse propre.
