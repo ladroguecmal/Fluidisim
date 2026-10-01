@@ -470,3 +470,38 @@ est revenue à 1,25 — FXC encore.)
 d'APIC, est le levier : 6 à 8 cycles là où le gradient conjugué en demande 207) ; **la bascule** (1,9 ms : application et fond sur un fil
 — même traitement que l'échange ; la surface rafraîchie, 0,7 ms, que la référence recalcule aussi) ; **la surface** (0,73 ms : chaque
 maille lit 125 mailles et leurs images ; ne reconstruire que près de l'interface). Somme visée de ces trois : ≈ 1 ms ; le reste ≈ 1,5 ms.
+
+## 14. C7e, deuxième temps — la multigrille de la projection (S422)
+
+**Reproduire** : `CAS=|raccord|b10 … --apic3d-carte-mg-cycle` (la symétrie du cycle) ; `MULTIGRILLE=1` (et `ADAPTATIF=1`) devant
+`--apic3d-carte-etages`, `--apic3d-carte-ballottement`, `--apic3d-carte-b10` ; sans la variable, le gradient conjugué diagonal,
+inchangé (ballottement 0,456 mm au caractère près).
+
+**La construction** — la recette de C1/C3a (S385, S390) transposée à APIC : gradient conjugué préconditionné par un cycle en V ;
+Jacobi amorti ω = 6/7, deux lissages avant et deux après, huit au plus grossier ; restriction par la moyenne des huit filles,
+prolongation par injection (adjointes à un facteur 8 près : le cycle est symétrique) ; niveaux grossiers rediscrétisés à chaque
+projection, l'opérateur divisé par 4 par niveau. Le niveau fin est l'opérateur exact (fluide fantôme `θ`, solide sans flux) ; une
+maille grossière est active si une fille est d'eau, d'air (Dirichlet à demi-maille) si une fille est d'air, solide sinon ; le
+domaine est clos ; la hiérarchie s'arrête à 64 mailles. Le niveau fin et le niveau 1 par dispatchs ; **les niveaux suivants dans un
+seul groupe** de 256 fils — onze dispatchs par cycle, dix-sept par itération.
+
+**FXC, appris en chemin** (L345) : il refuse une barrière dans une boucle bornée par une valeur lue en mémoire, après un `continue`
+qui dépend du fil, et **dès qu'une boucle de bornes non constantes porte plus d'une barrière** — toutes les boucles à barrières du
+groupe ont donc des bornes constantes (quatre niveaux, six lissages), le travail gardé ; les fonctions qu'il inline, à sortie unique.
+
+| | ballottement | raccord | B10 (bande étroite) |
+|---|---|---|---|
+| symétrie relative `⟨u, M⁻¹v⟩ − ⟨M⁻¹u, v⟩`, positivité | 1,9·10⁻⁷, tenue | 1,8·10⁻⁷, tenue | 9,4·10⁻⁸, tenue |
+| itérations au critère de la référence (diagonale) | 9 (94) | 9 (94) | 11–14 (207) |
+| vitesses corrigées, écart à la référence | 3,5·10⁻⁶ m/s | 2,3·10⁻⁶ | 5,2·10⁻⁶ |
+| **projection, p99** | **0,71 ms** (1,4) | 0,72 ms | **1,45 ms** (2,5 à 3,0) |
+
+**Les issues** (critère 3) : ballottement 10 s, surface à **0,055 mm** (0,456 au gradient diagonal — la projection converge plus
+loin), période identique ; B10 nu, pincement au pas de la référence, `φ` au col 22,1 mm (témoins 22,6 et 21,2) ; tout en colonnes
+0,002 mm ; raccord 30 s **4,18 mm** (4,48 avant ; témoins 3,40 et 4,03), volume à 0 quantum ; bande 30 s **1,71 mm** ; **B10 en bande
+étroite : pincement identique au chiffre près**, volume exact, `φ` au col 0,6 mm aux pas où il valait 50 et 36 mm.
+
+**Le coût** : B10 en bande étroite **3,90 ms par pas** (4,9 en S421, 29,0 en S420) + 1,9 de bascule. La projection n'atteint pas
+1 ms : dix-sept dispatchs par itération, quatorze itérations. **Ce qui reste pour δ ≤ 2 ms** : la projection (1,45 — fusionner les
+dispatchs du cycle, ou lisser davantage pour moins d'itérations), la bascule (1,9 — en groupe, comme l'échange), la surface
+(0,73 — près de l'interface seulement), la séparation (0,39).

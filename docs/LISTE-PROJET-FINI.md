@@ -329,7 +329,8 @@ pas recopiée ici (L137).
   exact à 0 quantum sur 30 s ([§10](validation/APIC-CARTE-S416.md)) ; **S419** : le fond de la bande — la bande étroite à 1,45 mm
   de la référence sur 30 s ([§11](validation/APIC-CARTE-S416.md)) ; **S420** : la bascule — B10 en bande étroite, pincement au pas de la
   référence, volume exact, mais 28,7 ms (l'échange et la bascule sur un fil) ([§12](validation/APIC-CARTE-S416.md)) ; **S421** :
-  29,0 → **4,9 ms** par pas à sémantique exacte (+ 1,9 de bascule) ; restent la projection, la bascule, la surface ([§13](validation/APIC-CARTE-S416.md)).
+  29,0 → **4,9 ms** par pas à sémantique exacte (+ 1,9 de bascule) ; restent la projection, la bascule, la surface ([§13](validation/APIC-CARTE-S416.md)) ;
+  **S422** : la multigrille sur la carte — 11 à 14 itérations au lieu de 207, **3,9 ms** par pas ([§14](validation/APIC-CARTE-S416.md)).
   Manquent 30 Hz stable à 10 cm, d'autres scènes, plusieurs domaines en direct, un 99ᵉ centile en direct.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *partiel* **depuis S369** :
