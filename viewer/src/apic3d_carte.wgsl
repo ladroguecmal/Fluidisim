@@ -144,16 +144,48 @@ fn scan_local(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invoca
     }
 }
 
-// Préfixe exclusif des sommes de groupe, par un seul fil : `nblocks` est petit (une maille sur 256).
-@compute @workgroup_size(1)
-fn scan_blocks() {
-    var s = 0u;
-    for (var b = 0u; b < P.nblocks; b = b + 1u) {
+// S425 — le préfixe d'un tableau par un groupe de 256 fils : chaque fil prend un morceau contigu, le groupe fait le préfixe des
+// sommes de morceaux, chaque fil écrit le sien. Sur un fil, la boucle coûtait ≈ 0,16 µs par mot (latence de la mémoire) : 13,5 µs
+// pour les 84 blocs du tri de B10, 80 µs pour les ≈ 500 groupes d'une liste ordonnée. Entiers : le résultat est le même.
+var<workgroup> pre_mem: array<u32, 256>;
+
+// Le préfixe inclusif des sommes de morceaux ; rend le préfixe exclusif du morceau du fil `t`.
+fn pre_group(t: u32, sum: u32) -> u32 {
+    pre_mem[t] = sum;
+    workgroupBarrier();
+    for (var r = 1u; r < 256u; r = r * 2u) {
+        var add = 0u;
+        if t >= r {
+            add = pre_mem[t - r];
+        }
+        workgroupBarrier();
+        pre_mem[t] = pre_mem[t] + add;
+        workgroupBarrier();
+    }
+    return pre_mem[t] - sum;
+}
+
+// Préfixe exclusif des sommes de groupe ; le total à `start[cells]`.
+@compute @workgroup_size(256)
+fn scan_blocks(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
+    let len = P.nblocks;
+    let chunk = (len + 255u) / 256u;
+    let lo = min(t * chunk, len);
+    let hi = min(lo + chunk, len);
+    var sum = 0u;
+    for (var b = lo; b < hi; b = b + 1u) {
+        sum = sum + blocks[b];
+    }
+    var s = pre_group(t, sum);
+    for (var b = lo; b < hi; b = b + 1u) {
         let v = blocks[b];
         blocks[b] = s;
         s = s + v;
     }
-    start[P.cells] = s;
+    if t == 255u {
+        start[P.cells] = pre_mem[255];
+    }
 }
 
 // Ajoute le préfixe du groupe ; remet le compte à zéro pour qu'il serve de curseur au rangement.
@@ -1497,17 +1529,27 @@ fn compact_count(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_inv
     }
 }
 
-// Le préfixe des groupes ; le total va à `pblk[groupes]`. `groups` : la capacité sur 256, passée par `P.q2`.
-@compute @workgroup_size(1)
-fn compact_scan() {
-    let groups = u32(P.q2);
-    var s = 0u;
-    for (var b = 0u; b < groups; b = b + 1u) {
+// Le préfixe des groupes ; le total va à `pblk[groupes]`. `groups` : la capacité sur 256, passée par `P.q2`. S425 : en groupe.
+@compute @workgroup_size(256)
+fn compact_scan(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
+    let len = u32(P.q2);
+    let chunk = (len + 255u) / 256u;
+    let lo = min(t * chunk, len);
+    let hi = min(lo + chunk, len);
+    var sum = 0u;
+    for (var b = lo; b < hi; b = b + 1u) {
+        sum = sum + pblk[b];
+    }
+    var s = pre_group(t, sum);
+    for (var b = lo; b < hi; b = b + 1u) {
         let v = pblk[b];
         pblk[b] = s;
         s = s + v;
     }
-    pblk[groups] = s;
+    if t == 255u {
+        pblk[len] = pre_mem[255];
+    }
 }
 
 @compute @workgroup_size(256)
