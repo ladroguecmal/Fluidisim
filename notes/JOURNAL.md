@@ -18104,3 +18104,16 @@ au lieu de 1,318) — **isolé au bit** (`AW_REPLI`, `DUMP`) : une unité du der
 arrondie autrement par FXC dans un autre noyau (L345), amplifiée par 30 s chaotiques. Suite **753**, zéro avertissement.
 **Rituel.** Maillons **14** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — les poses de
 l'échange, la projection : δ ≤ 2 ms (2,31).
+
+## S427 — 2026-10-01 — physique : C7e, les gestes de l'échange groupés, une course trouvée
+
+**Entrée.** *« Continue »* — C7e. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §19) : les poses d'un solde d'un coup
+(une réduction, puis les choix du fil 0 par minimums exacts, les vitesses en parallèle) et les retraits d'un coup (les K plus petites
+clés, rangées par rang) — au bit. **Une course trouvée** : B10 a pincé au pas 54 ; le noyau n'était plus déterministe (`DUMP_B10`,
+nouveau : l'état après chaque pas) ; isolée par moitiés jusqu'à `workgroupUniformLoad` sur un élément de tableau de groupe, dans la
+boucle des colonnes dues de S425 — déterministe jusque-là par chance de cadence ; remplacé par la diffusion du fil 0 : trois
+exécutions identiques au bit. **Mesuré**, B10 en bande étroite au p99 : fil de l'échange 0,49 → 0,38 ; **pas 1,93 ms, pas + bascule
+2,16** (visé 2 : manqué de 0,16). **Issues identiques à S426** (étages, bascules forcées, B10 nu et en bande, ballottement, raccord,
+bande, gestes) ; contre le binaire précédent, une vitesse de posée d'une unité du dernier chiffre (FXC, L345). Suite **753**, zéro
+avertissement. **Rituel.** Maillons **15** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — la
+projection (0,886), la part fixe de l'échange (53 µs) : δ ≤ 2 ms.

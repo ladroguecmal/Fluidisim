@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S427 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
+Session : S427 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
 ([preuve](../docs/validation/APIC-CARTE-S416.md) §18 : B10 en bande étroite, pas + bascule 2,31 ms au p99 ; le fil de l'échange 0,49,
 24 + 1,7 µs par geste, surtout des poses).
 
@@ -84,9 +84,10 @@ pas + bascule ≤ 2 ms au p99** (2,31). (3) Suite, zéro avertissement.
 - [x] **P2** — les poses groupées ; issues, mesure.
 - [x] **P3** — les retraits groupés ; issues, mesure.
 - [x] **P4** — non-régression, suite ; preuve §19 ; registres.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — `xg_pose_all` : les poses d'un solde d'un coup (réduction une fois, choix du fil 0 par minimums exacts, vitesses à la grille en parallèle), aux faces-mailles et aux colonnes à fond. Étages du fond (instants 20, 40, 60, dont 32 poses) **identiques au bit** (`DUMP`). **Incident 1** : sur B10, pincement au pas 54 (témoins : tous au pas 55) — **le noyau n'était plus déterministe** : deux exécutions divergeaient au pas 36 (`DUMP_B10=<préfixe>`, nouveau : l'état après chaque pas) ; l'ancien, si. Isolé par moitiés : faces-mailles seules, déterministe ; colonnes, non ; ni les vitesses en parallèle ni la boucle d'un tour (essais) ; **la course venait de `workgroupUniformLoad` sur un élément de tableau de groupe** (`xg_cols[q]`, et `xg_due`) dans la boucle des colonnes dues — code de S425 P4b, déterministe jusque-là par chance de cadence ; remplacé par la diffusion `xg_bcast` : **trois exécutions identiques au bit sur 74 pas**. Contre l'ancien binaire : une vitesse de posée d'une unité du dernier chiffre au pas 15 (`grid_affine_at` compilé dans un autre contexte, L345). **Issues** : B10 en bande étroite au pincement de la référence (pas 55, 4 126 particules, volume exact), bande 30 s identique à S426 (1,210 mm, mêmes gestes). **Fil de l'échange : médiane 0,246 → 0,198 ms, p99 0,49 → 0,40** (51 + 1,08 µs par geste) ; **pas p99 1,95 ms + bascule 0,25 = 2,19**.
 - **P3** — `xg_remove_all` : les retraits d'un solde d'un coup — les K plus petites clés (niveau, distance, côté, rang) parmi les non marquées, rassemblées niveau par niveau (le dernier entier), rangées par rang, marquées dans l'ordre par le fil 0 ; au-delà de 256 candidates ou quand elles manquent, la boucle d'origine, appelée ensuite, finit. Aucun calcul flottant nouveau : contre P2, une seule différence sur 74 pas de B10 — une vitesse de posée d'une unité du dernier chiffre au pas 27 (FXC recompile `grid_affine_at` dès que le noyau change, L345). **Deux exécutions identiques au bit** ; raccord 30 s et bande 30 s identiques à S426 (gestes compris) ; B10 au pincement de la référence. Fil de l'échange : médiane 0,198 → 0,195, **p99 0,40 → 0,38** — les retraits pesaient peu. **Pas p99 1,93 ms + bascule 0,23 = 2,16.**
 - **P4** — non-régression : étages, bascules forcées (10 instants), B10 nu (pas 54) et en bande étroite (pas 55), ballottement 0,447, colonnes 0,002, raccord 4,015, bande 1,210 (gestes compris) **identiques à S426** ; suite 753 / 19 / 0. Preuve §19 ; liste 4.19, feuille de route, index, file.
+- **P5** — journal ; jeton libre ; maillons 15 (justifiés : S406) ; suivant : S428, C7e — la projection, la part fixe de l'échange.
