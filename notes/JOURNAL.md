@@ -18117,3 +18117,15 @@ exécutions identiques au bit. **Mesuré**, B10 en bande étroite au p99 : fil d
 bande, gestes) ; contre le binaire précédent, une vitesse de posée d'une unité du dernier chiffre (FXC, L345). Suite **753**, zéro
 avertissement. **Rituel.** Maillons **15** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — la
 projection (0,886), la part fixe de l'échange (53 µs) : δ ≤ 2 ms.
+
+## S428 — 2026-10-01 — physique : C7e, la projection resserrée, au bit
+
+**Entrée.** *« Continue »* — C7e. **Écart à la procédure, déclaré** : un essai écrit et mesuré avant le plan — le départ chaud de la
+projection (13,9 → 13,4 itérations, p99 inchangé ; plus proche de la référence, pas plus rapide) — retiré, consigné dans le plan et la
+preuve. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §20), à arithmétique identique : le groupe des niveaux grossiers
+sans ses barrières à vide (18 → 17 µs : les barrières coûtent peu), puis à **512 fils** (13,8 µs) ; **les restrictions en
+coopération** (huit fils par maille grossière, la somme dans l'ordre des filles) — deux dispatchs de moins par itération ; la réduction
+des poses sautée sans pose. Un essai retiré (l'échange avec la dernière calculé d'avance : aucun gain). **Mesuré** : itération 51 →
+45 µs, projection p99 0,886 → 0,785 ms ; **pas + bascule 2,16 → 2,07 ms** (visé 2 : manqué de 0,07). **Issues identiques à S427, B10
+au bit sur 74 pas, déterministe.** Suite **753**, zéro avertissement. **Rituel.** Maillons **16** — justifié : la priorité du solveur
+(S406) ; 4.19 reste partiel. Suivant : **C7e** — les dispatchs indirects taillés sur `n` (les noyaux lancés sur la capacité).

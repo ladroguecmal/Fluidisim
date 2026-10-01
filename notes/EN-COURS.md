@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S428 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
+Session : S428 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
 ([preuve](../docs/validation/APIC-CARTE-S416.md) §19 : B10 en bande étroite, pas + bascule 2,16 ms au p99 ; la projection 0,886 —
 le groupe des niveaux grossiers, 18 µs par itération ; la part fixe du fil de l'échange, 53 µs).
 
@@ -89,9 +89,10 @@ avertissement.
 - [x] **P2** — les barrières à vide du groupe des niveaux grossiers ; identité, mesure.
 - [x] **P3** — la part fixe de l'échange ; identité, déterminisme, mesure.
 - [x] **P4** — non-régression, suite ; preuve §20 ; registres.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — le groupe des niveaux grossiers : les natures et `r₂` chargés en une phase, le niveau 2 sans phase de restriction, la remontée sans ses deux phases de lissage vides (quatre barrières de moins) : 18,0 → 17,0 µs seulement — les barrières coûtent peu, chaque phase vaut le travail de son fil le plus chargé ; **puis 512 fils** (une maille du niveau 2 par fil au lieu de deux) : **13,8 µs**. Cycle (symétrie, résidu, itérations) identique au chiffre près ; B10 en bande étroite **identique au bit à S427 sur 74 pas** (`DUMP_B10`), deux exécutions identiques. **Projection p99 0,886 → 0,818 ms** ; **pas p99 1,86 + bascule 0,23 = 2,10**.
 - **P3** — la part fixe de l'échange : la réduction des poses sautée quand le solde ne demande aucune pose (une diffusion) — fil de l'échange médiane 0,194 → 0,183 ms. **Essai, retiré** : l'échange avec la dernière calculé d'avance (le fil 0 ne suit que des indices, les copies en parallèle) — exact et déterministe, mais aucun gain mesurable (0,187) : la boucle des copies ne coûtait pas. **Ajouté au pas, déclaré** (la projection, même règle d'exactitude) : les restrictions en coopération — huit fils par maille grossière, un par fille, le premier somme dans l'ordre des filles, la même expression — à la place des paires `mg_fine_az` + `mg_restrict1` et `mg_l1_ax` + `mg_restrict2` : deux dispatchs de moins par itération, ≈ 45 µs par itération. Cycle identique au chiffre près ; B10 en bande étroite **identique au bit à S427 sur 74 pas**, deux exécutions identiques. **Projection p99 0,818 → 0,785 ms** ; **pas p99 1,82 + bascule 0,25 = 2,07** — la cible de 2 manquée de 0,07. **Ce qui reste, désigné** : les noyaux lancés sur la capacité (≈ 130 000 fils pour ≈ 4 000 particules : comptes, rangements, rangs du tri, corps — 2 à 3 µs chacun, une vingtaine par pas et bascule) — des dispatchs indirects taillés sur `n` (les arguments écrits par un noyau, copiés entre deux passages : wgpu refuse un tampon d'arguments lié en écriture au même dispatch).
 - **P4** — non-régression : étages, cycle (dont la version globale), bascules forcées, B10 nu (pas 54), ballottement 0,447 (diagonale 0,454), colonnes 0,002, raccord 4,015, bande 1,210 (gestes compris) **identiques à S427** ; suite 753 / 19 / 0. Preuve §20 ; liste 4.19, feuille de route, index, file.
+- **P5** — journal ; jeton libre ; maillons 16 (justifiés : S406) ; suivant : S429, C7e — les dispatchs indirects taillés sur `n`.
