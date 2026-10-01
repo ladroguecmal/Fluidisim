@@ -84,9 +84,10 @@ est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
 - [x] **P2** — l'instrument : horodatages par sous-étage (fin du pas : séparation, corps, absorption, échange ; bascule : décision,
   application, fond) ; mesure de B10 en bande étroite.
 - [x] **P3** — l'échange : listes ordonnées des faces-mailles et des colonnes actives ; la réserve en parallèle ; mesure ; critère 1.
-- [ ] **P4** — la bascule : les boucles séquentielles réduites (soldes des faces changées, …) ; mesure ; critère 1.
-- [ ] **P5** — la projection : ce que coûtent les itérations enregistrées vides, et sa réduction (dispatch indirect nul après
-  convergence, ou plafond) ; mesure.
+- [ ] **P4** — *réordonné après la mesure de P2–P3 (projection 4,8 ms, échange 6,8, absorption 2,0, bascule 1,9)* : la projection —
+  les itérations après convergence lancées en **dispatch indirect nul** (les arguments mis à zéro par le noyau qui conclut) ; mesure.
+- [ ] **P5** — l'intérieur de l'échange et de l'absorption sur leur fil (ce qui y coûte, mesuré par essais) ; la bascule si le temps
+  le permet ; mesure.
 - [ ] **P6** — B10 en bande étroite, coût final ; non-régression ; suite ; preuve §13 ; registres.
 - [ ] **P7** — rituel.
 
