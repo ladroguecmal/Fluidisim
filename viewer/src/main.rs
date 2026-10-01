@@ -2635,6 +2635,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--apic3d-carte-decision") {
         return apic3d_carte::recevoir_decision();
     }
+    if args.iter().any(|a| a == "--apic3d-carte-mg-cycle") {
+        return apic3d_carte::recevoir_mg_cycle();
+    }
     if args.iter().any(|a| a == "--delta3d-operateur") {
         return delta3d::verifier();
     }

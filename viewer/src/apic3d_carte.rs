@@ -10,9 +10,10 @@
 use crate::delta3d::buffer;
 use water_core::apic3d::{self, Apic3, ApicStage, ColumnsSwitch, Sphere3};
 use water_core::delta3d::Domain3;
+use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 67] = [
+const KERNELS: [&str; 84] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -23,6 +24,9 @@ const KERNELS: [&str; 67] = [
     "list_mode_absorb", "list_mode_convert", "list_count", "list_scatter", "list_finish", "floor_place", "list_mode_raise",
     "floor_move", "flist_count", "flist_scatter", "flist_finish", "settle_count", "settle_reset", "settle_share", "settle_add",
     "absorb_group", "exchange_group",
+    // S422 — la multigrille.
+    "mg_kind1", "mg_kind_coarse", "mg_f_first", "mg_f_qz", "mg_f_zq", "mg_restrict1", "mg_l1_first", "mg_l1_tx",
+    "mg_l1_xt", "mg_coarse", "mg_prolong0", "mg_f_qz_fold", "mg_cg_reset", "mg_cg_init_finish", "mg_cg_direction_first", "mg_cg_update", "mg_cg_beta",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -72,6 +76,15 @@ const SETTLE_SHARE: usize = 63;
 const SETTLE_ADD: usize = 64;
 const ABSORB_GROUP: usize = 65;
 const EXCHANGE_GROUP: usize = 66;
+// S422 — la multigrille, dans l'ordre de `KERNELS`.
+const MG_KIND1: usize = 67;
+const MG_KIND_COARSE: usize = 68;
+const MG_VCYCLE: [usize; 11] = [69, 70, 72, 73, 74, 76, 75, 74, 77, 71, 78];
+const MG_CG_RESET: usize = 79;
+const MG_CG_INIT_FINISH: usize = 80;
+const MG_CG_DIRECTION_FIRST: usize = 81;
+const MG_CG_UPDATE: usize = 82;
+const MG_CG_BETA: usize = 83;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
@@ -113,6 +126,11 @@ pub struct ApicCarte {
     band: bool,
     /// S419 : un fond de bande existe-t-il ?
     floors: bool,
+    /// S422 — la multigrille : la table des niveaux (gardée en vie : liée au groupe), leurs dimensions ; active ?
+    #[allow(dead_code)]
+    mgl: wgpu::Buffer,
+    mg_levels: Vec<[usize; 3]>,
+    multigrid: bool,
     /// S420 — l'état du critère de bascule, et ses réglages (ceux de `ColumnsSwitch`), l'instant courant, µs.
     swb: wgpu::Buffer,
     switch: SwitchSettings,
@@ -212,6 +230,38 @@ impl ApicCarte {
         let pscratch = buffer(&device, (capacity * 80) as u64, storage);
         let swb = buffer(&device, (7 * ncol * 4) as u64, storage);
         let flist = buffer(&device, ((nu + nv) * 4) as u64, storage);
+        // S422 — la hiérarchie : on divise par deux (arrondi au-dessus) tant qu'une dimension dépasse 2, huit niveaux au plus.
+        let mut mg_levels = vec![[nx, ny, nz]];
+        while mg_levels.len() < 8 {
+            let [a, b, c] = *mg_levels.last().unwrap();
+            if a.max(b).max(c) <= 2 {
+                break;
+            }
+            mg_levels.push([a.div_ceil(2), b.div_ceil(2), c.div_ceil(2)]);
+        }
+        let mut table = vec![0u32; 8 + 8 * mg_levels.len()];
+        table[0] = mg_levels.len() as u32;
+        let mut offset = 0usize;
+        for (l, d) in mg_levels.iter().enumerate() {
+            let cells_l = d[0] * d[1] * d[2];
+            let row = &mut table[8 + 8 * l..16 + 8 * l];
+            row[0] = d[0] as u32;
+            row[1] = d[1] as u32;
+            row[2] = d[2] as u32;
+            row[3] = cells_l as u32;
+            if l > 0 {
+                for (f, slot) in row[4..8].iter_mut().enumerate() {
+                    *slot = (offset + f * cells_l) as u32;
+                }
+                offset += 4 * cells_l;
+            }
+        }
+        let mgb = buffer(&device, (offset.max(1) * 4) as u64, storage);
+        let mgl = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: None,
+            contents: u32_bytes(&table),
+            usage: storage,
+        });
         let largest = [3 * faces, 8 * cells, capacity * 12, cells + 1].into_iter().max().unwrap_or(1);
         let read = buffer(&device, (largest * 4) as u64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
         let query = (!features.is_empty()).then(|| {
@@ -222,7 +272,7 @@ impl ApicCarte {
 
         let all = [
             &params, &px, &pv, &pc, &shift, &count, &start, &order, &blocks, &faces_buf, &fflags, &cellf, &label, &partials,
-            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist, &pblk, &pscratch, &swb, &flist,
+            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist, &pblk, &pscratch, &swb, &flist, &mgb, &mgl,
         ];
         let entries: Vec<_> = (0..all.len() as u32)
             .map(|binding| wgpu::BindGroupLayoutEntry {
@@ -297,6 +347,9 @@ impl ApicCarte {
             band: false,
             floors: false,
             swb,
+            mgl,
+            mg_levels,
+            multigrid: false,
             switch: SwitchSettings::default(),
             now_us: 0,
             read,
@@ -540,7 +593,9 @@ impl ApicCarte {
             self.list_span().div_ceil(SCAN as usize) as f32,
             // Le fond existe, ou la bascule peut en poser un.
             (self.floors || self.switch.floor_cells.is_some()) as u8 as f32,
-            0., 0., 0.,
+            // S422 : le nombre de niveaux de la multigrille.
+            self.mg_levels.len() as f32,
+            self.mg_levels.get(2).map_or(0, |d| (d[0] * d[1] * d[2]).div_ceil(256)) as f32, 0.,
         ];
         // S420 — le critère de bascule.
         let s = self.switch;
@@ -614,6 +669,61 @@ impl ApicCarte {
         Ok(self.counts()?[0] as usize)
     }
 
+    /// **S422** — la multigrille de la projection, si la hiérarchie a trois niveaux au moins ; rend si elle est active.
+    pub fn set_multigrid(&mut self, on: bool) -> bool {
+        self.multigrid = on && self.mg_levels.len() >= 3;
+        self.multigrid
+    }
+
+    /// Les dimensions des niveaux de la multigrille.
+    pub fn mg_levels(&self) -> &[[usize; 3]] {
+        &self.mg_levels
+    }
+
+    fn mg_cells(&self, l: usize) -> usize {
+        let d = self.mg_levels[l];
+        d[0] * d[1] * d[2]
+    }
+
+    /// La nature des mailles grossières, une fois par projection.
+    fn encode_mg_geometry(&self, pass: &mut wgpu::ComputePass) {
+        self.dispatch(pass, MG_KIND1, self.mg_cells(1), WG);
+        self.dispatch(pass, MG_KIND_COARSE, SCAN as usize, SCAN);
+    }
+
+    /// Le cycle en V, `z = M⁻¹·r`.
+    fn encode_vcycle(&self, pass: &mut wgpu::ComputePass) {
+        let (cells, l1) = (self.domain.cells(), self.mg_cells(1));
+        // f_first, f_qz, restrict1, l1_first, l1_tx, coarse, l1_xt, l1_tx, prolong0, f_zq, f_qz_fold.
+        let sizes = [
+            (cells, WG), (cells, WG), (l1, WG), (l1, WG), (l1, WG), (SCAN as usize, SCAN), (l1, WG), (l1, WG), (cells, WG),
+            (cells, WG), (cells, SCAN),
+        ];
+        for (kernel, (threads, group)) in MG_VCYCLE.into_iter().zip(sizes) {
+            self.dispatch(pass, kernel, threads, group);
+        }
+    }
+
+    /// **Banc S422** — `M⁻¹·r` sur l'état de la dernière projection (étiquettes, diagonale, natures) ; `r` nul hors de l'eau.
+    pub fn vcycle_for_bench(&mut self, r: &[f32]) -> Result<Vec<f32>, String> {
+        let cells = self.domain.cells();
+        self.queue.write_buffer(&self.cellf, (3 * cells * 4) as u64, bytes(r));
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            self.encode_mg_geometry(&mut pass);
+            self.dispatch(&mut pass, MG_CG_RESET, 1, 1);
+            self.encode_vcycle(&mut pass);
+        }
+        self.queue.submit([encoder.finish()]);
+        self.read_f32(&self.cellf, 4 * cells, cells)
+    }
+
+    /// Les étiquettes de la carte (banc).
+    pub fn labels(&self) -> Result<Vec<u32>, String> {
+        self.read_u32(&self.label, 0, self.domain.cells())
+    }
+
     /// Le tri par maille : compte, préfixe, rangement, tri de chaque tranche.
     fn encode_bin(&self, pass: &mut wgpu::ComputePass) {
         let cells = self.domain.cells();
@@ -670,6 +780,22 @@ impl ApicCarte {
                     self.dispatch(&mut pass, GRAVITY_WALLS, self.faces, WG);
                     self.dispatch(&mut pass, IMPOSE_BODY, self.faces, WG);
                     self.dispatch(&mut pass, ASSEMBLE, cells, SCAN);
+                    if self.multigrid {
+                        // S422 — le gradient conjugué préconditionné par le cycle en V.
+                        self.encode_mg_geometry(&mut pass);
+                        self.dispatch(&mut pass, MG_CG_RESET, 1, 1);
+                        self.encode_vcycle(&mut pass);
+                        self.dispatch(&mut pass, MG_CG_INIT_FINISH, SCAN as usize, SCAN);
+                        self.dispatch(&mut pass, MG_CG_DIRECTION_FIRST, cells, WG);
+                        for _ in 0..self.iteration_cap {
+                            self.dispatch(&mut pass, CG_ITERATION[0], cells, SCAN);
+                            self.dispatch(&mut pass, CG_ITERATION[1], 1, 1);
+                            self.dispatch(&mut pass, MG_CG_UPDATE, cells, WG);
+                            self.encode_vcycle(&mut pass);
+                            self.dispatch(&mut pass, MG_CG_BETA, SCAN as usize, SCAN);
+                            self.dispatch(&mut pass, CG_ITERATION[4], cells, SCAN);
+                        }
+                    } else {
                     self.dispatch(&mut pass, CG_INIT[0], cells, SCAN);
                     self.dispatch(&mut pass, CG_INIT[1], 1, 1);
                     for _ in 0..self.iteration_cap {
@@ -678,6 +804,7 @@ impl ApicCarte {
                             let threads = if m % 2 == 1 { 1 } else { cells };
                             self.dispatch(&mut pass, kernel, threads, SCAN);
                         }
+                    }
                     }
                     self.dispatch(&mut pass, CORRECT, self.faces, WG);
                 }
@@ -2087,6 +2214,60 @@ pub fn recevoir_decision() -> Result<(), String> {
             if differ > 0 {
                 return Err("décision : le masque demandé diffère".into());
             }
+        }
+        Ok(())
+    })
+}
+
+/// **Banc S422 — le cycle en V** (`--apic3d-carte-mg-cycle`) : sur la cuve du ballottement (`CAS=` vide), le raccord ou B10 en bande
+/// étroite (`CAS=b10`), après une projection de la carte : la symétrie `⟨u, M⁻¹v⟩ = ⟨M⁻¹u, v⟩` et la positivité `⟨u, M⁻¹u⟩ > 0` sur
+/// des résidus aléatoires portés par l'eau. Lignes `APIC_CARTE_MG_S422`.
+pub fn recevoir_mg_cycle() -> Result<(), String> {
+    let cas = std::env::var("CAS").unwrap_or_default();
+    pollster::block_on(async {
+        let (reference, warm_body) = if cas == "b10" {
+            let (a, _, _, _) = b10_band_state_from(&B10::new(2., 8), 20, false)?;
+            let body = a.body();
+            (a, body)
+        } else if cas == "raccord" {
+            (raccord_state(0.05, false, 20)?, None)
+        } else {
+            (reference_state(0.05, 20)?.0, None)
+        };
+        let mut carte = ApicCarte::new(&reference, reference.particle_capacity()).await?;
+        let on = carte.set_multigrid(true);
+        carte.load(&reference)?;
+        carte.set_body(warm_body);
+        let dt = reference.stable_step_us(20_000);
+        carte.step_upto(dt, ApicStage::Project)?;
+        let (_, it, residual, converged) = carte.pressure()?;
+        let d = reference.domain();
+        let labels = carte.labels()?;
+        let water: Vec<bool> = labels.iter().map(|l| *l == apic3d::WATER as u32).collect();
+        let rnd = |seed: u64| -> Vec<f32> {
+            let mut s = seed;
+            water
+                .iter()
+                .map(|w| {
+                    s ^= s << 13;
+                    s ^= s >> 7;
+                    s ^= s << 17;
+                    if *w { ((s >> 11) as f64 / (1u64 << 53) as f64 * 2. - 1.) as f32 } else { 0. }
+                })
+                .collect()
+        };
+        let (u, v) = (rnd(0x9e37_79b9_7f4a_7c15), rnd(0x2545_f491_4f6c_dd1d));
+        let (mu, mv) = (carte.vcycle_for_bench(&u)?, carte.vcycle_for_bench(&v)?);
+        let dot = |a: &[f32], b: &[f32]| -> f64 { a.iter().zip(b).map(|(x, y)| *x as f64 * *y as f64).sum() };
+        let (uv, vu) = (dot(&u, &mv), dot(&mu, &v));
+        let sym = (uv - vu).abs() / uv.abs().max(vu.abs());
+        let (pu, pv) = (dot(&u, &mu), dot(&v, &mv));
+        println!(
+            "APIC_CARTE_MG_S422 cas={} domaine={}x{}x{} niveaux={:?} multigrille={on} eau={} projection_iterations={it} residu={residual:.2e} convergee={converged} symetrie_relative={sym:.2e} positivite={:.3e},{:.3e}",
+            if cas.is_empty() { "ballottement" } else { &cas }, d.nx, d.ny, d.nz, carte.mg_levels(), water.iter().filter(|w| **w).count(), pu, pv
+        );
+        if !(sym < 1e-5 && pu > 0. && pv > 0.) {
+            return Err("le cycle n'est pas symétrique défini positif".into());
         }
         Ok(())
     })

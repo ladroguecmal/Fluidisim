@@ -84,11 +84,21 @@ publié, visé ≤ 1 ms. (5) Suite, zéro avertissement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la hiérarchie : niveaux, tampons, natures des mailles (niveau 1 depuis les étiquettes, les suivants dans un groupe).
-- [ ] **P3** — le cycle en V (fin, niveau 1, le groupe des niveaux grossiers) ; banc de symétrie et de positivité ; critère 1.
+- [x] **P2** — la hiérarchie : niveaux, tampons, natures des mailles (niveau 1 depuis les étiquettes, les suivants dans un groupe).
+- [x] **P3** — le cycle en V (fin, niveau 1, le groupe des niveaux grossiers) ; banc de symétrie et de positivité ; critère 1.
 - [ ] **P4** — le gradient conjugué préconditionné par le cycle, option `MULTIGRILLE=1` ; étages ; critère 2.
 - [ ] **P5** — les issues et le coût ; critères 3 et 4.
 - [ ] **P6** — non-régression, suite ; preuve §14 ; registres.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+- **P2** — la hiérarchie : niveaux divisés par deux (arrondi au-dessus) tant qu'une dimension dépasse 2, huit au plus (ballottement
+  40×4×20 : six niveaux ; B10 16×16×84 : sept) ; `mgb` (nature, x, r, t par niveau grossier), `mgl` (la table) ; `mg_kind1` depuis les
+  étiquettes, `mg_kind_coarse` dans un groupe. Le nombre de niveaux et les blocs du niveau 2 passent par l'uniforme.
+- **P3** — le cycle en V : `mg_f_first`, `mg_f_qz`, `mg_restrict1`, `mg_l1_first`, `mg_l1_tx`, **`mg_coarse` (niveaux ≥ 2 dans un groupe
+  de 256 fils)**, `mg_l1_xt`, `mg_l1_tx`, `mg_prolong0`, `mg_f_zq`, `mg_f_qz_fold` (onze dispatchs). **FXC, appris** : il refuse une
+  barrière (X3663, X4026) dans une boucle dont la borne vient de la mémoire, après un `continue` qui dépend du fil, et — le dernier
+  verrou — **dès qu'une boucle de bornes non constantes porte plus d'une barrière** ; toutes les boucles à barrières de `mg_coarse` ont
+  donc des bornes constantes (huit niveaux, sept lissages), le travail gardé ; `mg_row` et `mg_child` à sortie unique. Banc
+  `--apic3d-carte-mg-cycle` (`CAS=`, `raccord`, `b10`) : **symétrie relative 9,5·10⁻⁸, 1,8·10⁻⁷, 2,5·10⁻⁷ ; positivité tenue** ; la
+  projection converge au critère de la référence en **9, 9 et 11 itérations** (diagonale : 94, 94, 207). Critère 1 tenu.

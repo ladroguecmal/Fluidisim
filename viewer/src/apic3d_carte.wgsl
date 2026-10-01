@@ -67,6 +67,9 @@ struct Params {
 @group(0) @binding(23) var<storage, read_write> swb: array<u32>;
 // S421 — la liste ordonnée des faces-mailles actives de l'échange.
 @group(0) @binding(24) var<storage, read_write> flist: array<u32>;
+// S422 — la multigrille : les niveaux grossiers (nature, x, r, t), et leur table.
+@group(0) @binding(25) var<storage, read_write> mgb: array<f32>;
+@group(0) @binding(26) var<storage, read_write> mgl: array<u32>;
 
 // Le nombre de particules, résident.
 fn np() -> u32 {
@@ -3416,5 +3419,496 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
             n = last;
         }
         atomicStore(&pcount[COUNT_N], n);
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **S422 — la multigrille de la projection d'APIC** (C7e). La recette de C1/C3a (`delta3d_mg.wgsl`) transposée : gradient conjugué
+// préconditionné par un cycle en V ; Jacobi amorti ω = 6/7, deux lissages avant et après, huit au plus grossier ; restriction par
+// la moyenne des huit filles, prolongation par injection — adjointes à un facteur 8 près, le préconditionneur reste symétrique ;
+// niveaux grossiers rediscrétisés à chaque projection, l'opérateur divisé par 4 à chaque niveau. Le niveau fin est l'opérateur
+// exact (fluide fantôme `θ`, solide sans flux). Une maille grossière est active si une fille est d'eau ; d'air (Dirichlet à
+// demi-maille) si une fille est d'air ; solide (sans flux) sinon. Le domaine est clos. Le niveau fin et le niveau 1 par dispatchs ;
+// **les niveaux suivants dans un seul groupe** de 256 fils (le coût dominant est le nombre de dispatchs, S421).
+//
+// `mgl` : [niveaux, 7 mots libres, puis par niveau : nx, ny, nz, mailles, nature, x, r, t] (décalages dans `mgb`).
+
+const MG_OMEGA: f32 = 0.85714287;
+const MG_ACTIVE: f32 = 1.0;
+const MG_AIR: f32 = -1.0;
+
+fn lv_get(l: u32, f: u32) -> u32 {
+    return mgl[8u + 8u * l + f];
+}
+
+// Le nombre de niveaux, par l'uniforme : FXC refuse une barrière dans une boucle bornée par une valeur lue en mémoire.
+fn mg_levels() -> u32 {
+    return u32(P.r0);
+}
+
+// Les blocs de 256 mailles du niveau 2, le plus grand de ceux qu'un groupe traite : un nombre de tours uniforme (FXC).
+fn mg_blocks() -> u32 {
+    return u32(P.r1);
+}
+
+fn mg_inv(l: u32) -> f32 {
+    var s = 1.0;
+    for (var q = 0u; q < l; q = q + 1u) {
+        s = s * 0.25;
+    }
+    return s;
+}
+
+fn mg_done() -> bool {
+    return scalars[S_DONE] != 0.0;
+}
+
+// `(L·x)_c` sur le niveau grossier `l` et sa diagonale ; `x` lu à `src`. Voisin actif : différence ; d'air : `2·x` ; solide, hors du
+// domaine : rien. Zéro hors maille active.
+fn mg_row(l: u32, src: u32, c: u32) -> vec2<f32> {
+    // Une seule sortie : FXC tient pour variable tout le flot qui suit un `return` anticipé d'une fonction inlinée.
+    let kind = lv_get(l, 4u);
+    var acc = 0.0;
+    var dg = 0.0;
+    if mgb[kind + c] > 0.0 {
+        let nx = lv_get(l, 0u);
+        let ny = lv_get(l, 1u);
+        let nz = lv_get(l, 2u);
+        let plane = nx * ny;
+        let i = c % nx;
+        let j = (c / nx) % ny;
+        let k = c / plane;
+        let pc = mgb[src + c];
+        for (var f = 0u; f < 6u; f = f + 1u) {
+            var inside = false;
+            var n = 0u;
+            if f == 0u { inside = i > 0u; n = c - 1u; }
+            else if f == 1u { inside = i + 1u < nx; n = c + 1u; }
+            else if f == 2u { inside = j > 0u; n = c - nx; }
+            else if f == 3u { inside = j + 1u < ny; n = c + nx; }
+            else if f == 4u { inside = k > 0u; n = c - plane; }
+            else { inside = k + 1u < nz; n = c + plane; }
+            if inside {
+                let km = mgb[kind + n];
+                if km > 0.0 {
+                    acc = acc + (pc - mgb[src + n]);
+                    dg = dg + 1.0;
+                } else if km < 0.0 {
+                    acc = acc + 2.0 * pc;
+                    dg = dg + 2.0;
+                }
+            }
+        }
+    }
+    let inv = mg_inv(l);
+    return vec2<f32>(acc * inv, dg * inv);
+}
+
+// La fille `d` (0 à 7) de la maille `(i, j, k)` dans une grille `nx × ny × nz` ; `NONE` hors du domaine (dimensions impaires).
+fn mg_child(nx: u32, ny: u32, nz: u32, i: u32, j: u32, k: u32, d: u32) -> u32 {
+    let a = 2u * i + (d & 1u);
+    let b = 2u * j + ((d >> 1u) & 1u);
+    let c = 2u * k + ((d >> 2u) & 1u);
+    return select((c * ny + b) * nx + a, NONE, a >= nx || b >= ny || c >= nz);
+}
+
+// `(A·x)_c` au niveau fin, `x` dans la tranche `which` de `cellf` : l'opérateur de la projection (`cg_apply`).
+fn fine_apply(which: u32, c: u32) -> f32 {
+    if label[c] != WATER {
+        return 0.0;
+    }
+    let i = c % P.nx;
+    let j = (c / P.nx) % P.ny;
+    let k = c / (P.nx * P.ny);
+    let xc = cellf[field(which, c)];
+    var s = 0.0;
+    for (var m = 0u; m < 6u; m = m + 1u) {
+        let nb = neighbour(i, j, k, m);
+        if nb.valid {
+            let lb = label[nb.cell];
+            if lb == WATER {
+                s = s + (xc - cellf[field(which, nb.cell)]);
+            } else if lb == AIR {
+                s = s + xc / theta(c, nb.cell);
+            }
+        }
+    }
+    return s;
+}
+
+// Un lissage de Jacobi amorti au niveau fin, de la tranche `src` vers `dst`.
+fn fine_smooth(src: u32, dst: u32, c: u32) {
+    let diag = cellf[field(F_DIAG, c)];
+    if label[c] == WATER && diag > 0.0 {
+        let x = cellf[field(src, c)];
+        cellf[field(dst, c)] = x + MG_OMEGA * (cellf[field(F_R, c)] - fine_apply(src, c)) / diag;
+    } else {
+        cellf[field(dst, c)] = 0.0;
+    }
+}
+
+// Un lissage grossier sur le niveau `l`, de `src` vers `dst` (décalages dans `mgb`).
+fn coarse_smooth(l: u32, src: u32, dst: u32, c: u32) {
+    let a = mg_row(l, src, c);
+    if a.y > 0.0 {
+        mgb[dst + c] = mgb[src + c] + MG_OMEGA * (mgb[lv_get(l, 6u) + c] - a.x) / a.y;
+    } else {
+        mgb[dst + c] = 0.0;
+    }
+}
+
+// Le premier lissage d'un niveau grossier, depuis `x = 0` : `t = ω·r/diag`.
+fn coarse_first(l: u32, c: u32) {
+    let a = mg_row(l, lv_get(l, 5u), c);
+    let t = lv_get(l, 7u);
+    if a.y > 0.0 {
+        mgb[t + c] = MG_OMEGA * mgb[lv_get(l, 6u) + c] / a.y;
+    } else {
+        mgb[t + c] = 0.0;
+    }
+}
+
+// La restriction vers le niveau `l ≥ 2` depuis le niveau grossier `l − 1` : la moyenne des résidus `r − L·x` des filles.
+fn coarse_restrict(l: u32, cc: u32) {
+    let nx = lv_get(l, 0u);
+    let ny = lv_get(l, 1u);
+    let i = cc % nx;
+    let j = (cc / nx) % ny;
+    let k = cc / (nx * ny);
+    let f = l - 1u;
+    var s = 0.0;
+    for (var d = 0u; d < 8u; d = d + 1u) {
+        let fc = mg_child(lv_get(f, 0u), lv_get(f, 1u), lv_get(f, 2u), i, j, k, d);
+        if fc != NONE {
+            s = s + mgb[lv_get(f, 6u) + fc] - mg_row(f, lv_get(f, 5u), fc).x;
+        }
+    }
+    mgb[lv_get(l, 6u) + cc] = 0.125 * s;
+}
+
+// La prolongation du niveau `l` vers `l − 1 ≥ 1` : chaque fille ajoute la valeur de sa mère.
+fn coarse_prolong(l: u32, fc: u32) {
+    let f = l - 1u;
+    let fnx = lv_get(f, 0u);
+    let fny = lv_get(f, 1u);
+    let i = fc % fnx;
+    let j = (fc / fnx) % fny;
+    let k = fc / (fnx * fny);
+    let parent = ((k / 2u) * lv_get(l, 1u) + j / 2u) * lv_get(l, 0u) + i / 2u;
+    mgb[lv_get(f, 5u) + fc] = mgb[lv_get(f, 5u) + fc] + mgb[lv_get(l, 5u) + parent];
+}
+
+// ── La géométrie, une fois par projection ─────────────────────────────────────────────────────────────────────────────
+
+// La nature des mailles du niveau 1, depuis les étiquettes : active si une fille est d'eau, d'air si une l'est, solide sinon.
+@compute @workgroup_size(128)
+fn mg_kind1(@builtin(global_invocation_id) g: vec3<u32>) {
+    let cc = g.x;
+    if cc >= lv_get(1u, 3u) {
+        return;
+    }
+    let nx = lv_get(1u, 0u);
+    let ny = lv_get(1u, 1u);
+    let i = cc % nx;
+    let j = (cc / nx) % ny;
+    let k = cc / (nx * ny);
+    var any_water = false;
+    var any_air = false;
+    for (var d = 0u; d < 8u; d = d + 1u) {
+        let fc = mg_child(P.nx, P.ny, P.nz, i, j, k, d);
+        if fc != NONE {
+            let lb = label[fc];
+            if lb == WATER {
+                any_water = true;
+            } else if lb == AIR {
+                any_air = true;
+            }
+        }
+    }
+    mgb[lv_get(1u, 4u) + cc] = select(select(0.0, MG_AIR, any_air), MG_ACTIVE, any_water);
+}
+
+// Les natures des niveaux 2 et suivants, dans un groupe.
+@compute @workgroup_size(256)
+fn mg_kind_coarse(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
+    let levels = mg_levels();
+    for (var l = 2u; l < levels; l = l + 1u) {
+        let nx = lv_get(l, 0u);
+        let ny = lv_get(l, 1u);
+        let f = l - 1u;
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let cc = t + 256u * bb;
+            if cc < lv_get(l, 3u) {
+            let i = cc % nx;
+            let j = (cc / nx) % ny;
+            let k = cc / (nx * ny);
+            var any_water = false;
+            var any_air = false;
+            for (var d = 0u; d < 8u; d = d + 1u) {
+                let fc = mg_child(lv_get(f, 0u), lv_get(f, 1u), lv_get(f, 2u), i, j, k, d);
+                if fc != NONE {
+                    let v = mgb[lv_get(f, 4u) + fc];
+                    if v > 0.0 {
+                        any_water = true;
+                    } else if v < 0.0 {
+                        any_air = true;
+                    }
+                }
+            }
+            mgb[lv_get(l, 4u) + cc] = select(select(0.0, MG_AIR, any_air), MG_ACTIVE, any_water);
+        }
+        }
+        storageBarrier();
+        workgroupBarrier();
+    }
+}
+
+// ── Le cycle en V : `z = M⁻¹·r` (tranches `F_R` → `F_Z`, `F_Q` de travail) ─────────────────────────────────────────────
+
+// Premier lissage fin depuis `z = 0` : `q = ω·r/diag`.
+@compute @workgroup_size(128)
+fn mg_f_first(@builtin(global_invocation_id) g: vec3<u32>) {
+    let c = g.x;
+    if c >= P.cells || mg_done() {
+        return;
+    }
+    let diag = cellf[field(F_DIAG, c)];
+    if label[c] == WATER && diag > 0.0 {
+        cellf[field(F_Q, c)] = MG_OMEGA * cellf[field(F_R, c)] / diag;
+    } else {
+        cellf[field(F_Q, c)] = 0.0;
+    }
+}
+
+@compute @workgroup_size(128)
+fn mg_f_qz(@builtin(global_invocation_id) g: vec3<u32>) {
+    if g.x >= P.cells || mg_done() {
+        return;
+    }
+    fine_smooth(F_Q, F_Z, g.x);
+}
+
+@compute @workgroup_size(128)
+fn mg_f_zq(@builtin(global_invocation_id) g: vec3<u32>) {
+    if g.x >= P.cells || mg_done() {
+        return;
+    }
+    fine_smooth(F_Z, F_Q, g.x);
+}
+
+// Restriction vers le niveau 1 : la moyenne des résidus fins `r − A·z` des filles.
+@compute @workgroup_size(128)
+fn mg_restrict1(@builtin(global_invocation_id) g: vec3<u32>) {
+    let cc = g.x;
+    if cc >= lv_get(1u, 3u) || mg_done() {
+        return;
+    }
+    let nx = lv_get(1u, 0u);
+    let ny = lv_get(1u, 1u);
+    let i = cc % nx;
+    let j = (cc / nx) % ny;
+    let k = cc / (nx * ny);
+    var s = 0.0;
+    for (var d = 0u; d < 8u; d = d + 1u) {
+        let fc = mg_child(P.nx, P.ny, P.nz, i, j, k, d);
+        if fc != NONE {
+            s = s + cellf[field(F_R, fc)] - fine_apply(F_Z, fc);
+        }
+    }
+    mgb[lv_get(1u, 6u) + cc] = 0.125 * s;
+}
+
+@compute @workgroup_size(128)
+fn mg_l1_first(@builtin(global_invocation_id) g: vec3<u32>) {
+    if g.x >= lv_get(1u, 3u) || mg_done() {
+        return;
+    }
+    coarse_first(1u, g.x);
+}
+
+@compute @workgroup_size(128)
+fn mg_l1_tx(@builtin(global_invocation_id) g: vec3<u32>) {
+    if g.x >= lv_get(1u, 3u) || mg_done() {
+        return;
+    }
+    coarse_smooth(1u, lv_get(1u, 7u), lv_get(1u, 5u), g.x);
+}
+
+@compute @workgroup_size(128)
+fn mg_l1_xt(@builtin(global_invocation_id) g: vec3<u32>) {
+    if g.x >= lv_get(1u, 3u) || mg_done() {
+        return;
+    }
+    coarse_smooth(1u, lv_get(1u, 5u), lv_get(1u, 7u), g.x);
+}
+
+
+// Les niveaux 2 et suivants, dans un groupe : la descente (restriction, deux lissages ; huit au plus grossier), la remontée
+// (prolongation, deux lissages), jusqu'à la prolongation vers le niveau 1.
+@compute @workgroup_size(256)
+fn mg_coarse(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
+    // Après convergence, chaque fil saute son travail. FXC refuse une barrière dans une boucle de bornes non constantes dès
+    // qu'elle en porte plusieurs : toutes les boucles à barrières ont des bornes constantes (huit niveaux au plus, sept
+    // lissages), le travail est gardé.
+    let skip = mg_done();
+    let levels = mg_levels();
+    let last = levels - 1u;
+    for (var l = 2u; l < 8u; l = l + 1u) {
+        let on = l < levels && !skip;
+        let cells = select(0u, lv_get(min(l, 7u), 3u), on);
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < cells {
+                coarse_restrict(l, c);
+            }
+        }
+        storageBarrier();
+        workgroupBarrier();
+        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < cells {
+                coarse_first(l, c);
+            }
+        }
+        storageBarrier();
+        workgroupBarrier();
+        // Deux lissages en tout, huit au plus grossier ; le résultat finit dans `x`.
+        let sweeps = select(1u, 7u, l == last);
+        for (var q = 0u; q < 7u; q = q + 1u) {
+            let odd = q % 2u == 1u;
+            for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+                let c = t + 256u * bb;
+                if c < cells && q < sweeps {
+                    coarse_smooth(l, select(lv_get(l, 7u), lv_get(l, 5u), odd), select(lv_get(l, 5u), lv_get(l, 7u), odd), c);
+                }
+            }
+            storageBarrier();
+            workgroupBarrier();
+        }
+    }
+    // La remontée : du plus grossier au niveau 2, prolongation vers le niveau inférieur, deux lissages s'il est au-delà du 1.
+    for (var s = 0u; s < 6u; s = s + 1u) {
+        let l = last - min(s, last);
+        let on = s + 2u < levels && !skip;
+        let f = max(l, 1u) - 1u;
+        let fcells = select(0u, lv_get(f, 3u), on);
+        for (var bb = 0u; bb < mg_blocks() * 8u; bb = bb + 1u) {
+            let c = t + 256u * bb;
+            if c < fcells {
+                coarse_prolong(l, c);
+            }
+        }
+        storageBarrier();
+        workgroupBarrier();
+        for (var q = 0u; q < 2u; q = q + 1u) {
+            for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
+                let c = t + 256u * bb;
+                if c < fcells && f >= 2u {
+                    coarse_smooth(f, select(lv_get(f, 5u), lv_get(f, 7u), q == 1u), select(lv_get(f, 7u), lv_get(f, 5u), q == 1u), c);
+                }
+            }
+            storageBarrier();
+            workgroupBarrier();
+        }
+    }
+}
+
+// La prolongation du niveau 1 vers le niveau fin : `z += x₁(mère)` sur l'eau ; zéro ailleurs.
+@compute @workgroup_size(128)
+fn mg_prolong0(@builtin(global_invocation_id) g: vec3<u32>) {
+    let c = g.x;
+    if c >= P.cells || mg_done() {
+        return;
+    }
+    if label[c] != WATER {
+        cellf[field(F_Z, c)] = 0.0;
+        return;
+    }
+    let i = c % P.nx;
+    let j = (c / P.nx) % P.ny;
+    let k = c / (P.nx * P.ny);
+    let parent = ((k / 2u) * lv_get(1u, 1u) + j / 2u) * lv_get(1u, 0u) + i / 2u;
+    cellf[field(F_Z, c)] = cellf[field(F_Z, c)] + mgb[lv_get(1u, 5u) + parent];
+}
+
+// Le dernier lissage fin, `q → z`, et les produits `r·z`, `r·r` repliés.
+@compute @workgroup_size(256)
+fn mg_f_qz_fold(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+                @builtin(workgroup_id) w: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let c = g.x;
+    var rz = 0.0;
+    var rr = 0.0;
+    if c < P.cells {
+        fine_smooth(F_Q, F_Z, c);
+        let r = cellf[field(F_R, c)];
+        rz = r * cellf[field(F_Z, c)];
+        rr = r * r;
+    }
+    reduce_pair(l.x, w.x, rz, rr);
+}
+
+// ── Le gradient conjugué préconditionné par le cycle ─────────────────────────────────────────────────────────────────
+
+@compute @workgroup_size(1)
+fn mg_cg_reset() {
+    scalars[S_DONE] = 0.0;
+    scalars[S_IT] = 0.0;
+}
+
+// Le départ : `r = b` (assemblé), `z = M⁻¹·b` ; les sommes repliées donnent `r·z` et `b·b`.
+@compute @workgroup_size(256)
+fn mg_cg_init_finish(@builtin(local_invocation_id) l: vec3<u32>) {
+    let s = gather_pair(l.x);
+    if l.x == 0u {
+        scalars[S_B2] = s.y;
+        scalars[S_RZ] = s.x;
+        scalars[S_RR] = s.y;
+        scalars[S_IT] = 0.0;
+        scalars[S_DONE] = select(0.0, 1.0, !(s.y > 0.0));
+    }
+}
+
+@compute @workgroup_size(128)
+fn mg_cg_direction_first(@builtin(global_invocation_id) g: vec3<u32>) {
+    let c = g.x;
+    if c >= P.cells {
+        return;
+    }
+    cellf[field(F_D, c)] = cellf[field(F_Z, c)];
+}
+
+// `p += α·d`, `r −= α·q` ; le préconditionnement suit.
+@compute @workgroup_size(128)
+fn mg_cg_update(@builtin(global_invocation_id) g: vec3<u32>) {
+    let c = g.x;
+    if c >= P.cells || mg_done() {
+        return;
+    }
+    let alpha = scalars[S_ALPHA];
+    cellf[field(F_P, c)] = cellf[field(F_P, c)] + alpha * cellf[field(F_D, c)];
+    cellf[field(F_R, c)] = cellf[field(F_R, c)] - alpha * cellf[field(F_Q, c)];
+}
+
+// `β = (r·z)/(r·z)ₚᵣéc`, l'arrêt au critère de la référence ou au plafond.
+@compute @workgroup_size(256)
+fn mg_cg_beta(@builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let s = gather_pair(l.x);
+    if l.x == 0u {
+        scalars[S_BETA] = s.x / scalars[S_RZ];
+        scalars[S_RZ] = s.x;
+        scalars[S_RR] = s.y;
+        let it = scalars[S_IT] + 1.0;
+        scalars[S_IT] = it;
+        if s.y <= P.tol2 * scalars[S_B2] || it >= f32(P.max_it) {
+            scalars[S_DONE] = 1.0;
+        }
     }
 }
