@@ -622,3 +622,43 @@ Visé : **projection ≤ 1 ms au p99 — tenu** (0,885). Pas + bascule au p99 : 
 **Ce qui reste pour δ ≤ 2 ms au 99ᵉ centile** : les fils de l'échange et de l'absorption (0,62 + 0,40 au p99 : la visite
 séquentielle de la référence, dont l'ordre fait le mélange des vitesses aux faces) ; la séparation (0,41) ; la projection encore
 (le groupe des niveaux grossiers, 18 µs par itération : seize phases à barrière ≈ 1 µs) ; transfert et surface (0,30).
+
+## 17. C7e, cinquième temps — la fin du pas profilée (S425)
+
+**Reproduire** : `BANDE=1 PROFIL=1 … --apic3d-carte-b10` — trois lignes de plus : `gestes_par_pas` (absorbées, retirées + posées,
+faces-mailles actives), `fils_us` (le coût des deux fils ajusté par moindres carrés sur les gestes du pas), `profil_fin_du_pas_us`
+(chaque **préfixe** de la suite de la fin du pas répété 50 fois, le coût d'un noyau par différence : un noyau du tri répété seul
+corrompt les tranches, et le premier essai a fait perdre la carte) ; et `occupation` (la maille la plus peuplée).
+
+**Ce que le profil a désigné** — pas ce que la session attendait : les fils comptent (2 µs par geste), mais quatre noyaux d'un seul
+fil ou d'un seul long fil coûtaient davantage.
+
+| B10 en bande étroite | avant | après | comment, à résultat identique |
+|---|---|---|---|
+| `compact_scan` (le préfixe de chaque liste ordonnée : absorbées, faces-mailles actives, bascule, fond) | 80 µs × 4 par pas | 2,2 | un groupe de 256 fils, morceaux contigus ; entiers |
+| `scan_blocks` (le préfixe du tri, trois à quatre tris par pas) | 13,5 µs | 1,2 | idem |
+| `bin_sort` (le tri de chaque tranche par indice) | 64 µs | 4,7 | **par rang** : chaque particule compte les indices plus petits de sa tranche et s'y écrit ; quelques mailles portent 30 à 50 particules (8 nominales), le tri par insertion d'un fil y passait son temps |
+| `separate_shift` | 102 µs | 50 | une maille voisine n'est lue que si la particule est à moins de `dmin` (+ 10⁻⁴ maille) de leur frontière ; les autres ne contribuaient rien — même somme, même ordre |
+| fil de l'échange, part fixe | 66 µs | 30 | le solde vertical ne visite que les colonnes dont le solde dépasse une particule (préfixe sur 64 fils, dans l'ordre des colonnes) ; les autres ne faisaient rien |
+
+**Les issues** : **identiques à S424 au chiffre près** — étages (tri, compactage, séparation 1,19·10⁻⁷ et 2,38·10⁻⁷ m, échange),
+cycle, bascules forcées, B10 nu (pas 54) et en bande étroite (pas 55, volume exact, même premier écart de gestes au pas 34),
+ballottement 0,447 (diagonale 0,454), colonnes 0,002, raccord 4,015 et bande 1,318 mm, gestes cumulés compris. Suite 753, zéro
+avertissement.
+
+**Le coût**, B10 en bande étroite (ms) :
+
+| | S424, médiane · p99 | **S425, médiane · p99** |
+|---|---|---|
+| transfert · séparation | 0,165 · 0,190 · 0,327 · 0,392 | 0,099 · 0,113 · **0,106 · 0,136** |
+| absorption (liste) · échange (réserve, liste) | 0,091 · 0,166 | 0,013 · 0,035 |
+| fil de l'échange · fil de l'absorption | 0,334 · 0,612 · 0,203 · 0,400 | 0,280 · 0,552 · 0,205 · 0,400 |
+| **le pas, p99** | **2,75** | **2,21** |
+| bascule : décision · application · fond, médianes | 0,218 · 0,099 · 0,107 | 0,148 · 0,022 · 0,029 |
+| **la bascule, p99** | **0,48** | **0,23** |
+
+Visé : **pas + bascule ≤ 2,5 ms au p99 — tenu (2,45)**.
+
+**Ce qui reste pour δ ≤ 2 ms** : la projection (0,885), les deux fils (0,55 + 0,40 au p99 : ≈ 2 µs par geste, ≈ 100 absorbées et
+140 gestes d'échange par pas — l'ordre de la référence fait le mélange des vitesses aux faces ; des vagues de particules à faces
+disjointes le garderaient au bit), la séparation (0,14).
