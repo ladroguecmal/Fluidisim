@@ -1420,7 +1420,7 @@ impl B10 {
 
 /// Les mesures de B10 (`examples/apic3d_b10.rs`, quart de domaine, sans zone) sur l'occupation des mailles par les particules :
 /// air enfermé (m³, le quart compté quatre fois), haut de la bulle (m), cavité ouverte la plus profonde sous le repos (m).
-fn b10_measures(b: &B10, x: &[[f32; 3]], body: Sphere3) -> (f64, f64, f64) {
+fn b10_measures(b: &B10, x: &[[f32; 3]], body: Sphere3, grid_water: &dyn Fn(usize, usize, usize) -> bool) -> (f64, f64, f64) {
     let Domain3 { nx, ny, nz, .. } = b.domain();
     let (dx, r, h, d) = (b.dx, b.r, b.h, B10::D);
     let mut occupation = vec![0u32; nx * ny * nz];
@@ -1434,7 +1434,8 @@ fn b10_measures(b: &B10, x: &[[f32; 3]], body: Sphere3) -> (f64, f64, f64) {
         let (x, y, z) = (centre(i) - cx, centre(j) - cy, centre(k) - cz);
         x * x + y * y + z * z < r * r
     };
-    let air = |i: usize, j: usize, k: usize| occupation[(k * ny + j) * nx + i] == 0 && !solid(i, j, k);
+    // S420 : dans une colonne de la zone, l'eau est sous `η` ; sous le fond, à la grille (comme l'exemple, S408, S414).
+    let air = |i: usize, j: usize, k: usize| occupation[(k * ny + j) * nx + i] == 0 && !solid(i, j, k) && !grid_water(i, j, k);
     let mut reached = vec![false; nx * ny * nz];
     let mut stack = Vec::new();
     for j in 0..ny {
@@ -1498,23 +1499,51 @@ pub fn recevoir_b10() -> Result<(), String> {
     let n_d: usize = std::env::var("ND").ok().and_then(|v| v.parse().ok()).unwrap_or(8);
     pollster::block_on(async {
         let b = B10::new(fr, n_d);
-        let mut a = b.reference()?;
+        // S420 : `BANDE=1` — B10 en bande étroite (R35 : maintien 0,3 s, fond 4), la bascule après chaque pas des deux côtés.
+        let band = std::env::var("BANDE").is_ok();
+        let (mut a, mut sw) = if band {
+            let (a, s, _, _) = b10_band_state_from(&b, 0, true)?;
+            (a, Some(s))
+        } else {
+            (b.reference()?, None)
+        };
         let n = a.particle_count();
-        let mut carte = ApicCarte::new(&a, n).await?;
+        let mut carte = ApicCarte::new(&a, a.particle_capacity()).await?;
         carte.set_iteration_cap(std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(600));
         carte.load(&a)?;
+        if let Some(s) = sw.as_mut() {
+            carte.load_switch(s);
+            carte.set_body(a.body());
+            carte.switch_for_bench(0)?;
+            s.switch(0, &mut a).map_err(|e| format!("{e:?}"))?;
+            s.clear_counts();
+        }
+        let q_start = carte.total_quanta()?;
         // **Le témoin** (`TEMOIN=ε`, m/s) : à la place de la carte, une seconde référence dont les vitesses initiales sont
         // perturbées de ±ε — la sensibilité de la référence à elle-même, l'incertitude vraie de la mesure (METHODE, L371).
         let eps: Option<f32> = std::env::var("TEMOIN").ok().and_then(|v| v.parse().ok());
         let mut twin = match eps {
             Some(e) => {
-                let mut t = b.reference()?;
+                let (mut t, ts) = if band {
+                    let (t, s, _, _) = b10_band_state_from(&b, 0, true)?;
+                    (t, Some(s))
+                } else {
+                    (b.reference()?, None)
+                };
                 t.set_particle_velocities(&|p| {
                     let h = ((p[0] * 12.9898 + p[1] * 78.233 + p[2] * 37.719).sin() * 43758.547).fract();
                     ([0., 0., e * (2. * h - 1.)], [[0.; 3]; 3])
                 })
                 .map_err(|e| format!("{e:?}"))?;
-                Some(t)
+                let ts = match ts {
+                    Some(mut s) => {
+                        s.switch(0, &mut t).map_err(|e| format!("{e:?}"))?;
+                        s.clear_counts();
+                        Some(s)
+                    }
+                    None => None,
+                };
+                Some((t, ts))
             }
             None => None,
         };
@@ -1535,6 +1564,9 @@ pub fn recevoir_b10() -> Result<(), String> {
             (0f64, 0u64, 0f64, 0f64, 0u64, 0u64, 0u64);
         let mut stage_ms: Vec<Vec<f64>> = vec![Vec::new(); 7];
         let mut total_ms = Vec::new();
+        let mut switch_ms: Vec<f64> = Vec::new();
+        let mut diverged = false;
+        let mut t_us = 0u64;
         let mut gaps: Vec<(u64, f64)> = Vec::new();
         let start = std::time::Instant::now();
         if let Some(e) = eps {
@@ -1546,7 +1578,7 @@ pub fn recevoir_b10() -> Result<(), String> {
             let us = a.stable_step_us(20_000);
             let rep = a.step(us).map_err(|e| format!("{e:?}"))?;
             let times = match twin.as_mut() {
-                Some(tw) => {
+                Some((tw, _)) => {
                     tw.set_body(Some(b.sphere(t))).map_err(|e| format!("{e:?}"))?;
                     tw.step(us).map_err(|e| format!("{e:?}"))?;
                     StageTimes::default()
@@ -1554,6 +1586,40 @@ pub fn recevoir_b10() -> Result<(), String> {
                 None => carte.step_upto(us, ApicStage::Full)?,
             };
             t += us as f64 * 1e-6;
+            t_us += us;
+            // S420 : la bascule après le pas, des deux côtés.
+            if let Some(s) = sw.as_mut() {
+                s.switch(t_us, &mut a).map_err(|e| format!("{e:?}"))?;
+                match twin.as_mut() {
+                    Some((tw, Some(ts))) => {
+                        ts.switch(t_us, tw).map_err(|e| format!("{e:?}"))?;
+                    }
+                    _ => {
+                        let start_switch = std::time::Instant::now();
+                        carte.switch_for_bench(t_us)?;
+                        let k = carte.counts()?;
+                        switch_ms.push(start_switch.elapsed().as_secs_f64() * 1e3);
+                        // Le premier pas où la carte cesse de suivre la référence : `n`, masque, fond.
+                        if !diverged {
+                            let mask_c = carte.mask()?;
+                            let mask_r = a.columns_state().map(|m| m.0.to_vec()).unwrap_or_default();
+                            let floor_c = carte.floor()?;
+                            let floor_r = a.band_floor().map(|f| f.to_vec()).unwrap_or_default();
+                            let dm = mask_c.iter().zip(&mask_r).filter(|(p, q)| **p != **q as u32).count();
+                            let df: Vec<usize> = (0..floor_c.len()).filter(|c| floor_c[*c] != floor_r[*c]).collect();
+                            let ex = a.columns_exchange_counts();
+                            if dm > 0 || !df.is_empty() || k[0] as usize != a.particle_count() {
+                                diverged = true;
+                                println!(
+                                    "APIC_CARTE_B10_S417 divergence pas={} n={}/{} masque_different={dm} fonds_differents={} premier_fond={:?} gestes_carte={:?} gestes_reference={ex:?}",
+                                    steps + 1, k[0], a.particle_count(), df.len(),
+                                    df.first().map(|c| (c % d.nx, c / d.nx, floor_c[*c], floor_r[*c])), &k[3..6]
+                                );
+                            }
+                        }
+                    }
+                }
+            }
             steps += 1;
             it_ref += rep.iterations as u64;
             if twin.is_none() {
@@ -1572,7 +1638,7 @@ pub fn recevoir_b10() -> Result<(), String> {
             // `φ` à l'interface, tant qu'aucun côté n'a pincé.
             if sides.iter().all(|s| s.pinch.is_none()) {
                 let phi = match twin.as_ref() {
-                    Some(tw) => tw.distance().to_vec(),
+                    Some((tw, _)) => tw.distance().to_vec(),
                     None => carte.surface()?.0,
                 };
                 let lim = b.dx as f32;
@@ -1588,15 +1654,44 @@ pub fn recevoir_b10() -> Result<(), String> {
                 gaps.push((steps, gap));
             }
             let (x, body_carte) = match twin.as_ref() {
-                Some(tw) => (tw.particles().to_vec(), tw.body().ok_or("corps")?),
+                Some((tw, _)) => (tw.particles().to_vec(), tw.body().ok_or("corps")?),
                 None => (carte.particles()?.0, carte.body().ok_or("corps")?),
             };
             let body_ref = a.body().ok_or("corps")?;
-            for (side, (xs, body)) in sides.iter_mut().zip([(a.particles(), body_ref), (&x[..], body_carte)]) {
+            // L'eau à la grille de chaque côté : colonnes de la zone sous `η`, mailles sous le fond.
+            let grid_of = |mask: Vec<u8>, eta: Vec<f32>, floor: Vec<f32>| {
+                move |i: usize, j: usize, k: usize| -> bool {
+                    let col = j * d.nx + i;
+                    let z = (k as f32 + 0.5) * d.dx;
+                    (!mask.is_empty() && mask[col] != 0 && z < eta[col]) || (!floor.is_empty() && z < floor[col])
+                }
+            };
+            let ref_grid = grid_of(
+                a.columns_state().map(|m| m.0.to_vec()).unwrap_or_default(),
+                a.columns_surface().map(|e| e.to_vec()).unwrap_or_default(),
+                a.band_floor().map(|f| f.to_vec()).unwrap_or_default(),
+            );
+            let other_grid = match twin.as_ref() {
+                Some((tw, _)) => grid_of(
+                    tw.columns_state().map(|m| m.0.to_vec()).unwrap_or_default(),
+                    tw.columns_surface().map(|e| e.to_vec()).unwrap_or_default(),
+                    tw.band_floor().map(|f| f.to_vec()).unwrap_or_default(),
+                ),
+                None if band => grid_of(
+                    carte.mask()?.iter().map(|m| *m as u8).collect(),
+                    carte.columns_eta()?,
+                    carte.floor()?,
+                ),
+                None => grid_of(Vec::new(), Vec::new(), Vec::new()),
+            };
+            for (side, (xs, body, grid)) in sides.iter_mut().zip([
+                (a.particles(), body_ref, &ref_grid as &dyn Fn(usize, usize, usize) -> bool),
+                (&x[..], body_carte, &other_grid as &dyn Fn(usize, usize, usize) -> bool),
+            ]) {
                 if side.pinch.is_some() {
                     continue;
                 }
-                let (enclosed, top, cavity) = b10_measures(&b, xs, body);
+                let (enclosed, top, cavity) = b10_measures(&b, xs, body, grid);
                 side.cavity_max = side.cavity_max.max(cavity);
                 side.crown = side.crown.max(xs.iter().fold(f64::MIN, |m, p| m.max(p[2] as f64)));
                 if enclosed > threshold {
@@ -1636,6 +1731,14 @@ pub fn recevoir_b10() -> Result<(), String> {
             start.elapsed().as_secs_f64()
         );
         println!("APIC_CARTE_B10_S417 cout_p99_ms total={p99:.3} par_particule_ns={:.1} {}", p99 * 1e6 / n as f64, per_stage.join(" "));
+        if band && twin.is_none() {
+            let q = carte.total_quanta()?;
+            let k = carte.counts()?;
+            println!(
+                "APIC_CARTE_B10_S417 bande particules={}/{} bascule_mur_p99_ms={:.3} derive_volume_carte_quanta={} volume_reference_m3={:.9} bascule_refusee={}",
+                k[0], a.particle_count(), percentile(&mut switch_ms, 0.99), q - q_start, a.total_volume(), k[7]
+            );
+        }
         Ok(())
     })
 }

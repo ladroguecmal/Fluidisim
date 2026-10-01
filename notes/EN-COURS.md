@@ -90,7 +90,7 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
 - [x] **P3** — la bascule : particules → colonnes (hauteurs, retraits sur un fil, voie mixte en quanta, réserve), colonnes →
   particules (ensemencement sur un fil), soldes à la réserve ; la réserve réglée dans l'échange ; banc d'une bascule.
 - [x] **P4** — le fond placé et déplacé (`place_floor`, `move_band_floor`) ; banc.
-- [ ] **P5** — B10 en bande étroite sur la carte, carte, référence et témoin ; critère 3.
+- [x] **P5** — B10 en bande étroite sur la carte, carte, référence et témoin ; critère 3.
 - [ ] **P6** — non-régression, suite ; preuve §12 ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
@@ -109,3 +109,13 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
   admis à 10⁻⁵ — le critère était plus serré que sa source), réserve 6·10⁻¹¹ contre 0 (le reste de la division du décalage) ; volume
   de la carte **constant à 0 quantum** partout. Raccord inchangé.
 - **P4** — `floor_place` (par colonne : `k` sous la première non-eau des étiquettes rafraîchies, prédiction du corps en option, hystérésis), `floor_move` sur un fil (capacité ; remonter : retraits par la visite de la référence, chacun au solde vertical de sa colonne ; les mailles prises pleines au solde ; descendre : huit particules par maille libérée au réseau nominal). Mots réservés WGSL rencontrés : `pass`, `target`, `from`. Bascule entière avec le fond, 0 (initiale), 10, 40, 60 pas : **fonds identiques** (56 à 59 colonnes à fond), masque, `n`, positions identiques, volume de la carte **constant à 0 quantum** (l'instrument comptait l'eau sous le fond seulement si la carte avait été chargée avec un fond — corrigé). Critère 2 tenu, sauf `η` 1,9·10⁻⁶ m à la bascule initiale (P3).
+- **P5** — `BANDE=1 --apic3d-carte-b10` (bascule initiale puis après chaque pas, des deux côtés ; mesures qui comptent l'eau des
+  colonnes et sous le fond ; ligne `divergence`). **Pincement identique au chiffre près** : pas 55, t = 2,1676 √(R/g), profondeur
+  1,438 D, air 0,0781 D³, cavité 1,937 D, couronne 0,199 D (S414 : cavité 1,937, air 0,078) ; itérations 207,6 / 207,8 ; **volume
+  de la carte constant à 0 quantum** ; aucune bascule refusée. **Divergence au pas 35** : une pose de plus sur la carte (2 690 contre
+  2 689 ; masques et fonds identiques) — un solde au seuil d'une particule, à quelques quanta (les soldes portent l'écart de vitesse
+  admis) ; particules en fin 4 115 / 4 122. **`φ` à l'interface**, pas à pas (mm), carte : 0,17 (28), 0,56 (36), 1,25 (44), 0,58 (48),
+  3,71 (50), **50,0 (51)**, 1,46, 0,70, 36,3 (54), 5,1 (55). **Témoins** : ±10⁻⁶ — max 2,46 mm ; ±10⁻⁵ — 50,0 (50, 51), 36,3 (54),
+  air au pincement 0,0859 ; ±10⁻⁴ — **197 mm** (36), 42,9 (52), air 0,0859. Contre le seul témoin à 10⁻⁶ écrit dans le critère :
+  manqué ; **contre l'enveloppe des trois témoins : la carte est dedans à chaque pas publié** (égale au plus grand aux pas 51 et 54).
+  Coût p99 **28,7 ms** dont la fin du pas (séparation, corps, échange sur un fil) 23,6 ms ; la bascule ≈ 5,5 ms au mur — C7e.
