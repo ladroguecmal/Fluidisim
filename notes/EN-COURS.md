@@ -62,48 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S423 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
-([preuve](../docs/validation/APIC-CARTE-S416.md) §14 : B10 en bande étroite 3,9 ms par pas + 1,9 de bascule ; restent la bascule, les
-dispatchs du cycle, la surface).
+Session : S424 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
+([preuve](../docs/validation/APIC-CARTE-S416.md) §15 : B10 en bande étroite 3,26 ms par pas + 0,48 de bascule au p99 ; la projection
+1,35 ms, ≈ 14 itérations à ≈ 75 µs, dix-sept dispatchs chacune).
 
-**Ce que la session fait, dans l'ordre du gain attendu.** (1) **La bascule en groupe** : `switch_apply` et `floor_move` parcourent
-les colonnes et les faces sur un fil (≈ 1 ms quand rien ne bascule) ; leurs boucles sont indépendantes par colonne ou par face, leurs
-sommes sont des entiers (l'ordre n'y change rien) — un groupe de 256 fils, les gestes ordonnés (retraits par la visite de la
-référence, ensemencements en ordre de colonnes) gardés au fil 0 et sautés quand il n'y en a pas. (2) **Les dispatchs du cycle** :
-le niveau 1 dans le groupe des niveaux grossiers (quatre dispatchs de moins par cycle) ; mesurer aussi un lissage V(3,3), moins
-d'itérations contre plus de lissages. (3) **La surface** : mesurer ce qui coûte dans `reconstruct` (les images aux parois, les
-mailles loin de toute particule) avant d'y toucher. (4) **La multigrille par défaut** si toutes les issues tiennent.
+**Ce que la session fait, dans l'ordre du gain attendu.** (1) **Les niveaux grossiers en mémoire de groupe** : S423 a mesuré que le
+groupe des niveaux ≥ 2 coûte ≈ 40 µs par cycle (sur ≈ 75) — dix-huit phases à barrière, chacune un aller-retour en mémoire globale.
+Sur B10, les niveaux 2 et 3 font 380 mailles : `x`, `t`, `r` et la nature tiennent dans 6 Ko de mémoire de groupe ; la restriction
+lit le niveau 1 en global, la prolongation y écrit, tout le reste dans le groupe. Même arithmétique, même ordre ; la version globale
+reste quand les niveaux ne tiennent pas (choisie à la création). (2) **Les noyaux fusionnés**, à arithmétique identique : `α` calculé
+dans chaque groupe de la mise à jour (le repli des produits est déterministe) et le premier lissage fin dans la même passe ; le
+premier lissage du niveau 1 dans la restriction ; `β` dans la direction, le scalaire `r·z` en double tampon selon la parité de
+l'itération (deux pipelines par constante) — dix-sept dispatchs → treize. (3) Mesurer ; ce qui reste dit.
 
-**Critères, écrits avant.** (1) Issues inchangées : B10 en bande étroite au pincement de la référence, gestes et `n` comme S422,
-volume exact ; bascules forcées (`--apic3d-carte-decision`, `INITIAL`, `PENTE`, `MAINTIEN`) identiques à la référence ; raccord, bande,
-ballottement dans leurs tolérances. (2) Le coût publié par sous-étage avant et après ; **visé : bascule ≤ 0,8 ms, projection ≤ 1 ms,
-pas + bascule ≤ 4 ms** sur B10 en bande étroite ; δ ≤ 2 ms reste l'objectif de C7e, la session dit ce qui en reste. (3) Suite, zéro
-avertissement.
+**Critères, écrits avant.** (1) Issues inchangées : étages à l'arrondi, symétrie du cycle, itérations comme S423 ; B10 en bande
+étroite au pincement de la référence, volume exact ; ballottement, raccord, bande dans leurs témoins. (2) Le coût par itération et la
+projection publiés avant et après ; **visé : projection ≤ 1 ms au p99** sur B10 en bande étroite ; δ ≤ 2 ms reste l'objectif de C7e,
+la session dit ce qui en reste. (3) Suite, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `switch_apply` en groupe ; bascules forcées identiques ; mesure.
-- [x] **P3** — *réordonné après la mesure des médianes (S423)* : au pas ordinaire, projection 1,38 ms, surface 0,68 + décision 0,81
-  (dont la surface rafraîchie), séparation 0,32 ; application 0,10 et fond 0,17 (0,60 et 0,42 au 99ᵉ centile : les pas qui
-  basculent). D'abord **la multigrille** : le niveau 1 dans le groupe, V(3,3) mesuré ; symétrie, issues, mesure.
-- [x] **P4** — **la surface** (`reconstruct`, deux fois par pas) : mesurer ce qui coûte, réduction exacte si elle se trouve.
-- [x] **P5** — les pas qui basculent : le retrait parallèle à forme close et l'ensemencement par préfixe ; la multigrille par défaut.
-- [x] **P6** — non-régression, suite ; preuve §15 ; registres.
-- [x] **P7** — rituel.
+- [ ] **P2** — les niveaux grossiers en mémoire de groupe ; symétrie, issues, mesure.
+- [ ] **P3** — les noyaux fusionnés (`α` et premier lissage ; restriction et premier lissage du niveau 1 ; `β` et direction) ; mesure.
+- [ ] **P4** — non-régression, suite ; preuve §16 ; registres.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2** — `switch_apply_group` (256 fils : capacité, colonnes converties, décalage, faces qui cessent d'être frontière, masque, en
-  parallèle ; réductions entières dans le groupe ; retraits et ensemencements au fil 0 ; aucune barrière sous condition — FXC).
-  Bascules forcées (`INITIAL`, `PENTE`, `MAINTIEN`) **identiques à la référence** (positions, fonds, réserves, volume à 0 quantum) ;
-  B10 en bande étroite inchangé. **Mais** l'application ne passe que de 0,63 à 0,60 ms : essai — sans le noyau, 0,095 ms (la liste) ;
-  le noyau, ≈ 0,5 ms au 99ᵉ centile, vient des pas où des colonnes basculent : le fil 0 y retire des centaines de particules une à une.
-  **Réorientation de P3** (déclarée avant) : le retrait parallèle à forme close — la visite de la référence (échange avec la dernière)
-  met dans la k-ième plus petite place retirée sous le nouveau `n` la k-ième plus grande particule gardée au-delà ; pour la bascule et
-  le fond, le traitement d'une retirée n'est qu'un compte (par colonne pour le fond) — puis l'ensemencement par préfixe sur les colonnes.
-- **Médianes** (B10 en bande étroite, multigrille) : transfert 0,17, surface 0,68, projection 1,38, séparation 0,32, absorption 0,09 + 0,19, échange 0,16 + 0,32 ; bascule : décision 0,81, application 0,10, fond 0,17. Le banc les imprime (`cout_median_ms`).
-- **P3** — la multigrille. **Essai 1, le niveau 1 dans le groupe** (sept dispatchs par cycle au lieu de onze) : **plus lent**, projection médiane 1,38 → 1,89 ms — un seul groupe traite 2 688 mailles moins vite que quatre dispatchs ; revenu en arrière. **Mesure** (`SANS_GROSSIERS=1`) : sans le groupe des niveaux ≥ 2, 38,8 itérations à ≈ 34 µs ; avec, 13,9 à ≈ 74 µs — le groupe coûte ≈ 40 µs par cycle, surtout en phases à barrière vides. **Retenu** : le nombre de niveaux ≥ 2 en **constante de pipeline** (`override MG_NC`, fixée à la création — une constante pour FXC, sans phases vides) ; plafond adaptatif avec la multigrille : pire des huit derniers + 2, repli à 40. Symétrie inchangée (≤ 1,95·10⁻⁷), issues de B10 identiques. **Projection médiane 1,28 ms, p99 1,35** (1,38 et 1,45). Reste ≈ 75 µs par itération × 16 : fusionner des noyaux (mise à jour + premier lissage, restriction + premier lissage du niveau 1), ou un autre cycle — non fait.
-- **P4** — la surface. **Réemploi** de la surface de la décision au pas suivant, maille par maille (aucune colonne à portée convertie, ensemencée ou au fond déplacé — `swb[SW_KEEP]` marqué par la bascule — et le même corps, confirmé par l'hôte à 10⁻⁶ maille, `TOL_CORPS=`) : exact, mais **sans gain mesurable sur B10** (le fond suit la cavité presque à chaque pas ; et la position recalculée du corps dérive de ≈ 10⁻⁶ m de sa position intégrée) ; gardé. **Essai** : sans la reconstruction, le passage tombe à 0,014 ms — c'est elle (0,6 ms), dont le temps est celui du fil le plus long (≈ 5 000 mailles de la bande, chacune 125 mailles voisines et 25 colonnes virtuelles). **`reconstruct_coop`** : 32 fils par maille, voisines et colonnes réparties, sommes réduites — l'ordre des sommes change, à l'arrondi ; étages : `φ` 1,6·10⁻⁶ m (ballottement), 1,1·10⁻⁶ (bande), 4,6·10⁻⁶ (B10), étiquettes identiques. B10 en bande étroite : **surface 0,69 → 0,09 ms, décision 0,81 → 0,22** (médianes) ; pincement identique, volume exact ; `φ` à l'interface max 6,8 mm (t = 0,869 √(D/g)), dans l'enveloppe des témoins (S420). **Pas p99 3,20 ms + bascule 1,25** ; médianes ≈ 2,7 + 0,5.
-- **P5** — les pas qui basculent. **Retrait à forme close** (`sg_remove`, bascule et fond ; l'absorption garde sa visite) : chaque gardée de `[n', n)` trouve sa place par dichotomie dans la liste triée ; le solde vertical du fond par colonne, ses retirées comptées par atomiques. **Ensemencement par préfixe**, d'abord par colonne — un fil y faisait encore toute une colonne profonde (application p99 0,54) — puis **par graine** (`sg_pre`, `seed_place` : le morceau de colonnes par dichotomie, la colonne et le rang dans le morceau). `floor_move` en groupe de 256 fils. Bascules forcées (`INITIAL`, `PENTE`, `MAINTIEN`) **identiques à la référence** (`n`, positions, réserves, fonds, volume à 0 quantum) ; B10 en bande étroite : pincement identique, volume exact. **Bascule p99 1,25 → 0,48 ms** (application 0,60 → 0,14, fond 0,42 → 0,11). **La multigrille et le plafond adaptatif par défaut** (`MULTIGRILLE=0`, `ADAPTATIF=0` : la diagonale) — les issues revérifiées en P6.
-- **P6** — non-régression, multigrille par défaut : étages à l'arrondi (`φ` ≤ 4,6·10⁻⁶ m), symétrie du cycle ≤ 2,3·10⁻⁷, bascules forcées identiques, B10 en bande étroite et nu au pincement de la référence, colonnes 0,002 mm, raccord 4,02 mm, bande 1,32 mm, volumes exacts. **Le ballottement passe de 0,055 à 0,447 mm** : isolé — l'ancienne reconstruction (ordre des sommes de la référence) rend 0,055 ; la coopérative déplace `φ` de 1,6·10⁻⁶ m et le banc tombe sur l'événement de t = 7,14 s de la diagonale. **Témoin du ballottement** ajouté (`TEMOIN=` hors raccord) : 0,036 · 0,336 · 0,439 mm à ε = 10⁻⁶ · 10⁻⁵ · 10⁻⁴ — la carte au niveau de ε = 10⁻⁴. Suite du cœur 753 / 19 ignorés / 0 avertissement. Preuve §15, registres.
-- **P7** — journal ; jeton libre ; maillons 11 (justifiés : S406) ; suivant : S424, C7e — la projection, les fils de l'échange, la séparation.
