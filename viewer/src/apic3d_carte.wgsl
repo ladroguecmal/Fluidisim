@@ -1707,6 +1707,8 @@ fn visit_remove(mode: u32) -> u32 {
         front = front + 1u;
         if mode == 0u {
             absorb_one(a);
+        } else if mode == 2u {
+            raise_one(a);
         }
         removed = removed + 1u;
         loop {
@@ -1720,6 +1722,8 @@ fn visit_remove(mode: u32) -> u32 {
                 back = back - 1;
                 if mode == 0u {
                     absorb_one(a);
+                } else if mode == 2u {
+                    raise_one(a);
                 }
                 removed = removed + 1u;
                 continue;
@@ -2600,8 +2604,14 @@ fn listed(k: u32) -> bool {
     }
     let m = cell_of(px[k].xyz);
     let col = m.y * P.nx + m.x;
-    if atomicLoad(&pcount[COUNT_LIST_MODE]) == 0u {
+    let mode = atomicLoad(&pcount[COUNT_LIST_MODE]);
+    if mode == 0u {
         return P.has_columns != 0.0 && (cmask[col] != 0u || px[k].z < floor_of(col));
+    }
+    if mode == 2u {
+        // S414 : sous le nouveau fond d'une colonne qui monte.
+        let to = floor_cells_target(col);
+        return cmask[col] == 0u && to > floor_cells_now(col) && px[k].z < f32(to) * P.dx;
     }
     return converted(col);
 }
@@ -2656,4 +2666,129 @@ fn list_scatter(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invo
 @compute @workgroup_size(1)
 fn list_finish() {
     atomicStore(&pcount[COUNT_LIST], pblk[u32(P.q2)]);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **Le fond placé et déplacé** (`place_floor`, `move_band_floor`, S414 ; C7c-4).
+
+fn floor_cells_now(col: u32) -> u32 {
+    return min(u32(floor(cols[2u * P.nx * P.ny + 32u + col] / P.dx + 0.5)), P.nz);
+}
+
+fn floor_cells_target(col: u32) -> u32 {
+    return min(u32(floor(bitcast<f32>(swb[sw(SW_FLOOR, col)]) / P.dx + 0.5)), P.nz);
+}
+
+fn sat_sub(a: u32, b: u32) -> u32 {
+    return select(0u, a - b, a >= b);
+}
+
+// La cible de chaque colonne de la bande : `k` sous la première maille non-eau depuis le bas (étiquettes de la surface
+// rafraîchie) ; avec la prédiction, sous le point le plus bas que le corps atteindra ; l'hystérésis.
+@compute @workgroup_size(128)
+fn floor_place(@builtin(global_invocation_id) g: vec3<u32>) {
+    let col = g.x;
+    if col >= P.nx * P.ny || P.s_has_fcells == 0u {
+        return;
+    }
+    if cmask[col] != 0u {
+        swb[sw(SW_FLOOR, col)] = bitcast<u32>(0.0);
+        return;
+    }
+    let i = col % P.nx;
+    let j = col / P.nx;
+    var low = P.nz;
+    for (var l = 0u; l < P.nz; l = l + 1u) {
+        if label[cell_index(i, j, l)] != WATER {
+            low = l;
+            break;
+        }
+    }
+    var aim = sat_sub(low, P.s_fcells);
+    if P.s_pred != 0u && P.has_body != 0.0 {
+        let d = vec3<f32>(P.bvx, P.bvy, P.bvz) * P.s_horizon;
+        let lowest = min(P.bcz, P.bcz + d.z) - P.br;
+        let reach = P.br + P.s_margin;
+        let x = (f32(i) + 0.5) * P.dx - P.bcx;
+        let y = (f32(j) + 0.5) * P.dx - P.bcy;
+        let len2 = d.x * d.x + d.y * d.y;
+        var s = 0.0;
+        if len2 > 0.0 {
+            s = clamp((x * d.x + y * d.y) / len2, 0.0, 1.0);
+        }
+        let ex = x - s * d.x;
+        let ey = y - s * d.y;
+        if ex * ex + ey * ey <= reach * reach {
+            aim = min(aim, sat_sub(u32(max(floor(lowest / P.dx), 0.0)), P.s_fcells));
+        }
+    }
+    let now = floor_cells_now(col);
+    var next = now;
+    if aim < now || aim > now + P.s_fhyst {
+        next = aim;
+    }
+    swb[sw(SW_FLOOR, col)] = bitcast<u32>(f32(next) * P.dx);
+}
+
+@compute @workgroup_size(1)
+fn list_mode_raise() {
+    atomicStore(&pcount[COUNT_LIST_MODE], 2u);
+}
+
+// Une particule sous le nouveau fond : absorbée, elle paie le solde vertical de sa colonne.
+fn raise_one(k: u32) {
+    let m = cell_of(px[k].xyz);
+    solde_add(solde_w_index(m.y * P.nx + m.x), vec2<u32>(VP_QUANTA, 0u));
+}
+
+@compute @workgroup_size(1)
+fn floor_move() {
+    if P.s_has_fcells == 0u || atomicLoad(&pcount[COUNT_SWITCH_REFUSED]) != 0u {
+        return;
+    }
+    let ncol = P.nx * P.ny;
+    var needed = 0u;
+    for (var col = 0u; col < ncol; col = col + 1u) {
+        if cmask[col] == 0u {
+            needed = needed + 8u * sat_sub(floor_cells_now(col), floor_cells_target(col));
+        }
+    }
+    if np() + needed > arrayLength(&plist) {
+        atomicStore(&pcount[COUNT_SWITCH_REFUSED], 2u);
+        return;
+    }
+    // Remonter : les particules sous le nouveau fond, dans l'ordre de la référence.
+    visit_remove(2u);
+    var n = np();
+    for (var col = 0u; col < ncol; col = col + 1u) {
+        if cmask[col] != 0u {
+            continue;
+        }
+        let i = col % P.nx;
+        let j = col / P.nx;
+        let was = floor_cells_now(col);
+        let to = floor_cells_target(col);
+        if to > was {
+            // Les mailles prises au fond : pleines — l'écart au volume absorbé, au solde vertical.
+            for (var c = 0u; c < 8u * (to - was); c = c + 1u) {
+                solde_add(solde_w_index(col), neg_i64(vec2<u32>(VP_QUANTA, 0u)));
+            }
+        } else if to < was {
+            // Descendre : les mailles libérées, ensemencées au réseau nominal.
+            for (var l = to; l < was; l = l + 1u) {
+                for (var a = 0u; a < 8u; a = a + 1u) {
+                    let ax = f32(a % 2u);
+                    let ay = f32((a / 2u) % 2u);
+                    let az = f32(a / 4u);
+                    let q = vec3<f32>((f32(i) + (ax + 0.5) * 0.5) * P.dx, (f32(j) + (ay + 0.5) * 0.5) * P.dx,
+                        (f32(l) + (az + 0.5) * 0.5) * P.dx);
+                    px[n] = vec4<f32>(q, 0.0);
+                    grid_affine_at(q, n);
+                    n = n + 1u;
+                }
+            }
+        }
+        cols[2u * ncol + 32u + col] = f32(to) * P.dx;
+    }
+    atomicStore(&pcount[COUNT_N], n);
 }

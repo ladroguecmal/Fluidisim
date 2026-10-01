@@ -12,7 +12,7 @@ use water_core::apic3d::{self, Apic3, ApicStage, ColumnsSwitch, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 55] = [
+const KERNELS: [&str; 58] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -20,7 +20,8 @@ const KERNELS: [&str; 55] = [
     "columns_flux", "columns_update", "compact_count", "compact_scan", "compact_scatter", "compact_copy", "compact_finish",
     "exchange_begin", "absorb_mark", "absorb_serial", "exchange_serial", "floor_update",
     "switch_need", "switch_slope", "switch_spread", "switch_request", "switch_begin", "convert_mark", "switch_apply",
-    "list_mode_absorb", "list_mode_convert", "list_count", "list_scatter", "list_finish",
+    "list_mode_absorb", "list_mode_convert", "list_count", "list_scatter", "list_finish", "floor_place", "list_mode_raise",
+    "floor_move",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -60,6 +61,9 @@ const SWITCH_APPLY: [usize; 3] = [47, 48, 49];
 const LIST_MODE_ABSORB: usize = 50;
 const LIST_MODE_CONVERT: usize = 51;
 const LIST_BUILD: [usize; 3] = [52, 53, 54];
+const FLOOR_PLACE: usize = 55;
+const LIST_MODE_RAISE: usize = 56;
+const FLOOR_MOVE: usize = 57;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
@@ -344,9 +348,22 @@ impl ApicCarte {
             self.dispatch(&mut pass, LIST_MODE_CONVERT, 1, 1);
             self.encode_list(&mut pass);
             self.dispatch(&mut pass, SWITCH_APPLY[2], 1, 1);
+            // S414 : le fond, sur les étiquettes de la surface fraîche, après le masque.
+            if self.switch.floor_cells.is_some() {
+                self.dispatch(&mut pass, FLOOR_PLACE, self.domain.nx * self.domain.ny, WG);
+                self.dispatch(&mut pass, LIST_MODE_RAISE, 1, 1);
+                self.encode_list(&mut pass);
+                self.dispatch(&mut pass, FLOOR_MOVE, 1, 1);
+            }
         }
         self.queue.submit([encoder.finish()]);
         Ok(())
+    }
+
+    /// Le fond de la bande, m (banc).
+    pub fn floor(&self) -> Result<Vec<f32>, String> {
+        let ncol = self.domain.nx * self.domain.ny;
+        self.read_f32(&self.cols, 2 * ncol + 32, ncol)
     }
 
     /// Le masque de la zone (banc).
@@ -458,7 +475,10 @@ impl ApicCarte {
         let body = [
             has, b.radius, 0., b.center[0], b.center[1], b.center[2], b.velocity[0], b.velocity[1], b.velocity[2], moved[0],
             moved[1], moved[2], self.columns as u8 as f32, self.band as u8 as f32,
-            self.capacity.div_ceil(SCAN as usize) as f32, self.floors as u8 as f32, 0., 0., 0.,
+            self.capacity.div_ceil(SCAN as usize) as f32,
+            // Le fond existe, ou la bascule peut en poser un.
+            (self.floors || self.switch.floor_cells.is_some()) as u8 as f32,
+            0., 0., 0.,
         ];
         // S420 — le critère de bascule.
         let s = self.switch;
@@ -762,11 +782,8 @@ impl ApicCarte {
         let soldes = words(self.read_u32(&self.isolde, 0, 2 * ((nx + 1) * ny * nz + nx * (ny + 1) * nz + ncol + 1))?);
         // S419 : l'eau sous le fond, en mailles entières (huit particules chacune).
         let floor = self.read_f32(&self.cols, 2 * ncol + 32, ncol)?;
-        let under: i128 = if self.floors {
-            floor.iter().map(|f| (*f / self.domain.dx).round() as i128 * 8 * (1i128 << 24)).sum()
-        } else {
-            0
-        };
+        // S420 : tel qu'il est sur la carte (la bascule peut en poser un sur une carte chargée sans fond).
+        let under: i128 = floor.iter().map(|f| (*f / self.domain.dx).round() as i128 * 8 * (1i128 << 24)).sum();
         Ok(n * (1i128 << 24) + cols + soldes + under)
     }
 
@@ -1809,7 +1826,9 @@ pub fn recevoir_decision() -> Result<(), String> {
             // P3 : la bascule appliquée, sans le fond (P4) — la référence de même.
             let q0 = carte.total_quanta()?;
             let mask_before = carte.mask()?;
-            s.floor_cells = None;
+            if std::env::var("SANS_FOND").is_ok() {
+                s.floor_cells = None;
+            }
             carte.load_switch(&s);
             carte.switch_for_bench(t_us)?;
             s.switch(t_us, &mut a).map_err(|e| format!("{e:?}"))?;
@@ -1832,6 +1851,13 @@ pub fn recevoir_decision() -> Result<(), String> {
             println!(
                 "APIC_CARTE_BASCULE_S420 bascule chauffe={warm} refusee={} n={}/{} masque_different={mask_diff} ecart_position_max={dxm:.3e} ecart_eta_max={de:.3e} reserve_m3={reserve_carte:.3e}/{:.3e} derive_volume_carte_quanta={dq} ({:.1e} m3)",
                 k[7], x.len(), a.particle_count(), a.columns_reserve(), dq as f64 * quantum
+            );
+            let fc = carte.floor()?;
+            let fr = a.band_floor().unwrap_or(&[]);
+            let floor_diff = fc.iter().zip(fr).filter(|(p, q)| **p != **q).count();
+            println!(
+                "APIC_CARTE_BASCULE_S420 fond chauffe={warm} colonnes_a_fond={} fonds_differents={floor_diff}",
+                fr.iter().filter(|f| **f > 0.).count()
             );
             let reference = s.requested();
             let differ = mask.iter().zip(reference).filter(|(x, y)| **x != **y as u32).count();

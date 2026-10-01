@@ -89,7 +89,7 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
   banc : masque demandé contre la référence.
 - [x] **P3** — la bascule : particules → colonnes (hauteurs, retraits sur un fil, voie mixte en quanta, réserve), colonnes →
   particules (ensemencement sur un fil), soldes à la réserve ; la réserve réglée dans l'échange ; banc d'une bascule.
-- [ ] **P4** — le fond placé et déplacé (`place_floor`, `move_band_floor`) ; banc.
+- [x] **P4** — le fond placé et déplacé (`place_floor`, `move_band_floor`) ; banc.
 - [ ] **P5** — B10 en bande étroite sur la carte, carte, référence et témoin ; critère 3.
 - [ ] **P6** — non-régression, suite ; preuve §12 ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
@@ -108,3 +108,4 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
   colonnes) — `n` 28 672 des deux côtés, positions identiques, **`η` à 1,9·10⁻⁶ m** (critère 2 « 10⁻⁶ » manqué : `η` se lit sur `φ`,
   admis à 10⁻⁵ — le critère était plus serré que sa source), réserve 6·10⁻¹¹ contre 0 (le reste de la division du décalage) ; volume
   de la carte **constant à 0 quantum** partout. Raccord inchangé.
+- **P4** — `floor_place` (par colonne : `k` sous la première non-eau des étiquettes rafraîchies, prédiction du corps en option, hystérésis), `floor_move` sur un fil (capacité ; remonter : retraits par la visite de la référence, chacun au solde vertical de sa colonne ; les mailles prises pleines au solde ; descendre : huit particules par maille libérée au réseau nominal). Mots réservés WGSL rencontrés : `pass`, `target`, `from`. Bascule entière avec le fond, 0 (initiale), 10, 40, 60 pas : **fonds identiques** (56 à 59 colonnes à fond), masque, `n`, positions identiques, volume de la carte **constant à 0 quantum** (l'instrument comptait l'eau sous le fond seulement si la carte avait été chargée avec un fond — corrigé). Critère 2 tenu, sauf `η` 1,9·10⁻⁶ m à la bascule initiale (P3).
