@@ -306,6 +306,8 @@ impl ApicCarte {
             immediate_size: 0,
         });
         let module = device.create_shader_module(wgpu::include_wgsl!("apic3d_carte.wgsl"));
+        // S423 — le nombre de niveaux ≥ 2 de la multigrille, constante de pipeline.
+        let mg_nc = [("MG_NC", mg_levels.len().saturating_sub(2).max(1) as f64)];
         let pipelines = KERNELS
             .iter()
             .map(|entry| {
@@ -314,7 +316,7 @@ impl ApicCarte {
                     layout: Some(&pipeline_layout),
                     module: &module,
                     entry_point: Some(entry),
-                    compilation_options: Default::default(),
+                    compilation_options: wgpu::PipelineCompilationOptions { constants: &mg_nc, ..Default::default() },
                     cache: None,
                 })
             })
@@ -503,9 +505,16 @@ impl ApicCarte {
         self.recent[0] = iterations;
         let worst = self.recent.iter().copied().max().unwrap_or(0);
         // S422 : avec la multigrille, une marge de deux (une itération coûte dix-sept dispatchs, et il en faut une dizaine).
-        let margin = if self.multigrid { 2 } else { 8 };
-        let floor = if self.multigrid { 4 } else { 16 };
-        self.iteration_cap = if converged { (worst * 5 / 4 + margin).clamp(floor, self.cap_max) } else { self.cap_max };
+        // S423 : avec la multigrille, le pire des huit derniers plus deux, et un plafond de repli de 40 (un pas non convergé au
+        // plafond fixe de la diagonale enregistrerait des milliers de dispatchs).
+        self.iteration_cap = if self.multigrid {
+            let fallback = self.cap_max.min(40);
+            if converged { (worst + 2).clamp(4, fallback) } else { fallback }
+        } else if converged {
+            (worst * 5 / 4 + 8).clamp(16, self.cap_max)
+        } else {
+            self.cap_max
+        };
     }
 
     /// Charge l'état des particules de la référence : positions, vitesses, matrices affines.
@@ -706,7 +715,12 @@ impl ApicCarte {
             (cells, WG), (cells, WG), (l1, WG), (l1, WG), (l1, WG), (SCAN as usize, SCAN), (l1, WG), (l1, WG), (cells, WG),
             (cells, WG), (cells, SCAN),
         ];
+        // Banc S423 : `SANS_GROSSIERS=1` saute le groupe des niveaux ≥ 2 (pour mesurer ce qu'il coûte).
+        let skip_coarse = std::env::var("SANS_GROSSIERS").is_ok();
         for (kernel, (threads, group)) in MG_VCYCLE.into_iter().zip(sizes) {
+            if skip_coarse && kernel == MG_VCYCLE[5] {
+                continue;
+            }
             self.dispatch(pass, kernel, threads, group);
         }
     }

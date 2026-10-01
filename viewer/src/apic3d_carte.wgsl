@@ -3434,6 +3434,9 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
 // `mgl` : [niveaux, 7 mots libres, puis par niveau : nx, ny, nz, mailles, nature, x, r, t] (décalages dans `mgb`).
 
 const MG_OMEGA: f32 = 0.85714287;
+// S423 — le nombre de niveaux ≥ 2, **constante de pipeline** fixée à la création : une borne constante pour FXC, sans les phases à
+// barrière vides des niveaux qui n'existent pas.
+override MG_NC: u32 = 4u;
 const MG_ACTIVE: f32 = 1.0;
 const MG_AIR: f32 = -1.0;
 
@@ -3756,7 +3759,7 @@ fn mg_coarse(@builtin(local_invocation_id) lid: vec3<u32>) {
     let skip = mg_done();
     let levels = mg_levels();
     let last = levels - 1u;
-    for (var s = 0u; s < 4u; s = s + 1u) {
+    for (var s = 0u; s < MG_NC; s = s + 1u) {
         let l = s + 2u;
         let on = l < levels && !skip;
         let cells = select(0u, lv_get(min(l, 7u), 3u), on);
@@ -3799,7 +3802,7 @@ fn mg_coarse(@builtin(local_invocation_id) lid: vec3<u32>) {
         workgroupBarrier();
     }
     // La remontée : du plus grossier au niveau 2, prolongation vers le niveau inférieur, deux lissages s'il est au-delà du 1.
-    for (var s = 0u; s < 4u; s = s + 1u) {
+    for (var s = 0u; s < MG_NC; s = s + 1u) {
         let l = last - min(s, last);
         let on = s + 2u < levels && !skip;
         let f = max(l, 1u) - 1u;

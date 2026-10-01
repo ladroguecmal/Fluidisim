@@ -84,7 +84,7 @@ avertissement.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `switch_apply` en groupe ; bascules forcées identiques ; mesure.
-- [ ] **P3** — *réordonné après la mesure des médianes (S423)* : au pas ordinaire, projection 1,38 ms, surface 0,68 + décision 0,81
+- [x] **P3** — *réordonné après la mesure des médianes (S423)* : au pas ordinaire, projection 1,38 ms, surface 0,68 + décision 0,81
   (dont la surface rafraîchie), séparation 0,32 ; application 0,10 et fond 0,17 (0,60 et 0,42 au 99ᵉ centile : les pas qui
   basculent). D'abord **la multigrille** : le niveau 1 dans le groupe, V(3,3) mesuré ; symétrie, issues, mesure.
 - [ ] **P4** — **la surface** (`reconstruct`, deux fois par pas) : mesurer ce qui coûte, réduction exacte si elle se trouve.
@@ -102,3 +102,4 @@ avertissement.
   met dans la k-ième plus petite place retirée sous le nouveau `n` la k-ième plus grande particule gardée au-delà ; pour la bascule et
   le fond, le traitement d'une retirée n'est qu'un compte (par colonne pour le fond) — puis l'ensemencement par préfixe sur les colonnes.
 - **Médianes** (B10 en bande étroite, multigrille) : transfert 0,17, surface 0,68, projection 1,38, séparation 0,32, absorption 0,09 + 0,19, échange 0,16 + 0,32 ; bascule : décision 0,81, application 0,10, fond 0,17. Le banc les imprime (`cout_median_ms`).
+- **P3** — la multigrille. **Essai 1, le niveau 1 dans le groupe** (sept dispatchs par cycle au lieu de onze) : **plus lent**, projection médiane 1,38 → 1,89 ms — un seul groupe traite 2 688 mailles moins vite que quatre dispatchs ; revenu en arrière. **Mesure** (`SANS_GROSSIERS=1`) : sans le groupe des niveaux ≥ 2, 38,8 itérations à ≈ 34 µs ; avec, 13,9 à ≈ 74 µs — le groupe coûte ≈ 40 µs par cycle, surtout en phases à barrière vides. **Retenu** : le nombre de niveaux ≥ 2 en **constante de pipeline** (`override MG_NC`, fixée à la création — une constante pour FXC, sans phases vides) ; plafond adaptatif avec la multigrille : pire des huit derniers + 2, repli à 40. Symétrie inchangée (≤ 1,95·10⁻⁷), issues de B10 identiques. **Projection médiane 1,28 ms, p99 1,35** (1,38 et 1,45). Reste ≈ 75 µs par itération × 16 : fusionner des noyaux (mise à jour + premier lissage, restriction + premier lissage du niveau 1), ou un autre cycle — non fait.
