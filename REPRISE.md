@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-01 15:14 +02:00
+JETON            : occupé
+Battement        : 2026-10-01 15:47 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S425 — C7e** au poste : la fin du pas — séparation, absorption, échange — profilée, puis réduite
 Dernière session : S424 — physique : **C7e, la projection sous la milliseconde** ([preuve](docs/validation/APIC-CARTE-S416.md) §16) — profil par noyau, niveaux grossiers en mémoire de groupe, restrictions et prolongation hors du groupe : projection 0,885 ms au p99 (1,35), pas + bascule 3,25 ms ; création des pipelines 80 → 27 s ; issues identiques au chiffre près. Avant : S423, la bascule et la surface
 Session suivante : **S425 — C7e** au poste ([preuve](docs/validation/APIC-CARTE-S416.md) §16) : les fils de l'échange et de l'absorption (0,62 + 0,40 ms au p99 — la visite séquentielle de la référence ; profiler d'abord, comme la projection), la séparation (0,41) ; reçu si B10 en bande étroite garde son pincement et **δ ≤ 2 ms au 99ᵉ centile** (3,25 aujourd'hui) ; puis C7d (relative à B) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 12 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal

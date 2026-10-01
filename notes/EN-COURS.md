@@ -62,34 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S424 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
-([preuve](../docs/validation/APIC-CARTE-S416.md) §15 : B10 en bande étroite 3,26 ms par pas + 0,48 de bascule au p99 ; la projection
-1,35 ms, ≈ 14 itérations à ≈ 75 µs, dix-sept dispatchs chacune).
+Session : S425 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
+([preuve](../docs/validation/APIC-CARTE-S416.md) §16 : B10 en bande étroite, pas + bascule 3,25 ms au p99 ; la projection à 0,885 ;
+restent les fils de l'échange et de l'absorption, 0,62 + 0,40, la séparation, 0,41).
 
-**Ce que la session fait, dans l'ordre du gain attendu.** (1) **Les niveaux grossiers en mémoire de groupe** : S423 a mesuré que le
-groupe des niveaux ≥ 2 coûte ≈ 40 µs par cycle (sur ≈ 75) — dix-huit phases à barrière, chacune un aller-retour en mémoire globale.
-Sur B10, les niveaux 2 et 3 font 380 mailles : `x`, `t`, `r` et la nature tiennent dans 6 Ko de mémoire de groupe ; la restriction
-lit le niveau 1 en global, la prolongation y écrit, tout le reste dans le groupe. Même arithmétique, même ordre ; la version globale
-reste quand les niveaux ne tiennent pas (choisie à la création). (2) **Les noyaux fusionnés**, à arithmétique identique : `α` calculé
-dans chaque groupe de la mise à jour (le repli des produits est déterministe) et le premier lissage fin dans la même passe ; le
-premier lissage du niveau 1 dans la restriction ; `β` dans la direction, le scalaire `r·z` en double tampon selon la parité de
-l'itération (deux pipelines par constante) — dix-sept dispatchs → treize. (3) Mesurer ; ce qui reste dit.
+**Ce que la session fait.** (1) **Profiler la fin du pas** comme la projection en S424 : chaque noyau de la séparation, de
+l'absorption et de l'échange, répété dans un passage horodaté ; et le nombre de gestes par pas (absorbées, retirées, posées), pour
+savoir ce que coûtent les fils séquentiels par geste. Soupçon à vérifier : la séparation et le tri lancent leurs noyaux sur la
+**capacité** (≈ 130 000 fils) quand la bande n'a que ≈ 4 000 particules vivantes. (2) **Réduire ce que le profil désigne**, dans
+l'ordre du gain, à sémantique exacte — pour les lancements à la capacité, un dispatch indirect taillé sur `n` (arguments écrits par
+un noyau, copiés entre deux passages) ; pour les fils, ce qui garde l'ordre de la référence là où il fait le résultat. (3) Mesurer ;
+ce qui reste dit.
 
-**Critères, écrits avant.** (1) Issues inchangées : étages à l'arrondi, symétrie du cycle, itérations comme S423 ; B10 en bande
-étroite au pincement de la référence, volume exact ; ballottement, raccord, bande dans leurs témoins. (2) Le coût par itération et la
-projection publiés avant et après ; **visé : projection ≤ 1 ms au p99** sur B10 en bande étroite ; δ ≤ 2 ms reste l'objectif de C7e,
-la session dit ce qui en reste. (3) Suite, zéro avertissement.
+**Critères, écrits avant.** (1) Issues inchangées : étages à l'arrondi, gestes et `n` comme S424, B10 en bande étroite au pincement de
+la référence, volume exact, bascules forcées identiques, ballottement, raccord, bande dans leurs témoins. (2) Le coût par sous-étage
+publié avant et après ; **visé : pas + bascule ≤ 2,5 ms au p99** sur B10 en bande étroite (3,25) ; δ ≤ 2 ms reste l'objectif de C7e.
+(3) Suite, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les niveaux grossiers en mémoire de groupe ; symétrie, issues, mesure.
-- [x] **P3** — les noyaux fusionnés (`α` et premier lissage ; restriction et premier lissage du niveau 1 ; `β` et direction) ; mesure.
-- [x] **P4** — non-régression, suite ; preuve §16 ; registres.
-- [x] **P5** — rituel.
+- [ ] **P2** — le profil de la fin du pas et les gestes par pas.
+- [ ] **P3** — la première réduction que le profil désigne ; issues, mesure.
+- [ ] **P4** — la seconde ; issues, mesure.
+- [ ] **P5** — non-régression, suite ; preuve §17 ; registres.
+- [ ] **P6** — rituel.
 
 ### Notes de reprise
-- **P2** — `mg_coarse_shared` : les niveaux ≥ 2 en mémoire de groupe quand ils tiennent dans 1 024 mailles (B10 : 380), `MG_GLOBAL=1` rend la version globale. **Incident** : la pipeline mettait **283 s** à se créer — FXC déroule élément par élément la mise à zéro de la mémoire de groupe que wgpu ajoute (`TEMPS_PIPELINES=1`, `PIPELINE_SEULE=<entrée>` pour le voir) ; elle coûtait déjà 15 s à `switch_apply_group`. **Coupée pour toutes les pipelines** (chaque noyau écrit sa mémoire de groupe avant de la lire — audit des 26 variables) : création des 89 pipelines **≈ 80 → 27 s**, `mg_coarse_shared` 3,2 s ; à revérifier par toute la non-régression (P4). Cycle : résidu, symétrie, itérations **identiques au chiffre près** à la version globale (ballottement, raccord, B10). B10 en bande étroite : pincement identique, volume exact ; **projection médiane 1,28 → 1,15 ms, p99 1,35 → 1,22** (≈ 9 µs par itération : moins que les ≈ 40 attendus — les phases à barrière coûtent encore).
-- **P3** — les noyaux fusionnés, à arithmétique identique : `α` dans chaque groupe de la mise à jour avec le premier lissage fin (`mg_cg_update_alpha`), le premier lissage du niveau 1 dans la restriction, `β` dans la direction (`mg_cg_beta_direction`, `r·z` en double tampon, deux pipelines par la constante `CG_PAR`) : 17 → 12 dispatchs, mais **4 µs par itération seulement** (médiane 1,15 → 1,09 ms) — le nombre de dispatchs n'est pas le coût. **Profil** (`PROFIL=1`, banc B10 : chaque noyau répété 50 fois, horodaté) : le groupe des niveaux grossiers **34 µs**, `mg_restrict1` 10,9, les autres 1 à 3. Isolé par une constante d'essai (retirée) : la restriction vers le niveau 2, faite par le seul groupe, 13 µs ; les six lissages du plus grossier 3,7 (≈ 0,6 µs par phase) ; la géométrie relue en global, rien (mise en mémoire de groupe quand même). **Sortis du groupe**, en dispatchs parallèles et à expression identique : `A·z` fin par maille (`mg_fine_az`, dans `F_Q`) puis la restriction vers le niveau 1 ; `L₁·x₁` par maille (`mg_l1_ax`, dans `t₁`) puis la restriction vers le niveau 2 ; la prolongation vers le niveau 1 (`mg_prolong1`). Cycle : résidu, symétrie, itérations identiques au chiffre près. **Itération ≈ 52 µs** (69) : groupe 17,9, restriction 1 : 2,6 + 2,1, restriction 2 : 1,9 + 1,4. B10 en bande étroite : pincement identique, volume exact ; **projection médiane 0,84 ms, p99 0,885** (1,35 en S423) ; pas p99 2,77 ms.
-- **P4** — non-régression, la mise à zéro coupée partout : **identique à S423 au chiffre près** — étages (ballottement, raccord, bande, B10), cycle (symétrie, résidu, itérations), bascules forcées (10 instants), B10 nu (pas 54) et en bande étroite (pas 55, volume exact), ballottement 0,447 (diagonale 0,454), colonnes 0,002, raccord 4,015, bande 1,318 mm, gestes compris. Suite du cœur 753 / 19 / 0 avertissement. Preuve §16 ; liste 4.19, feuille de route, index, file.
-- **P5** — journal ; jeton libre ; maillons 12 (justifiés : S406) ; suivant : S425, C7e — les fils de l'échange et de l'absorption, la séparation.
