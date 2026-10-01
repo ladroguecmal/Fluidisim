@@ -13,7 +13,7 @@ use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 84] = [
+const KERNELS: [&str; 85] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -27,6 +27,7 @@ const KERNELS: [&str; 84] = [
     // S422 — la multigrille.
     "mg_kind1", "mg_kind_coarse", "mg_f_first", "mg_f_qz", "mg_f_zq", "mg_restrict1", "mg_l1_first", "mg_l1_tx",
     "mg_l1_xt", "mg_coarse", "mg_prolong0", "mg_f_qz_fold", "mg_cg_reset", "mg_cg_init_finish", "mg_cg_direction_first", "mg_cg_update", "mg_cg_beta",
+    "switch_apply_group",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -85,6 +86,7 @@ const MG_CG_INIT_FINISH: usize = 80;
 const MG_CG_DIRECTION_FIRST: usize = 81;
 const MG_CG_UPDATE: usize = 82;
 const MG_CG_BETA: usize = 83;
+const SWITCH_APPLY_GROUP: usize = 84;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
@@ -430,7 +432,8 @@ impl ApicCarte {
             self.dispatch(&mut pass, SWITCH_APPLY[0], 1, 1);
             self.dispatch(&mut pass, LIST_MODE_CONVERT, 1, 1);
             self.encode_list(&mut pass);
-            self.dispatch(&mut pass, SWITCH_APPLY[2], 1, 1);
+            // S423 : en groupe de 256 fils.
+            self.dispatch(&mut pass, SWITCH_APPLY_GROUP, SCAN as usize, SCAN);
         }
         {
             // S414 : le fond, sur les étiquettes de la surface fraîche, après le masque.

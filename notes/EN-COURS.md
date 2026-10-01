@@ -83,11 +83,19 @@ avertissement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `switch_apply` en groupe ; bascules forcées identiques ; mesure.
-- [ ] **P3** — `floor_move` en groupe ; mêmes bancs ; mesure.
+- [x] **P2** — `switch_apply` en groupe ; bascules forcées identiques ; mesure.
+- [ ] **P3** — *réorienté après P2* : le retrait parallèle à forme close (bascule, fond) et l'ensemencement par préfixe sur les colonnes (bascule, fond) ; `floor_move` en groupe ; mêmes bancs ; mesure.
 - [ ] **P4** — la multigrille : le niveau 1 dans le groupe ; V(3,3) mesuré ; symétrie, issues, mesure.
 - [ ] **P5** — la surface : mesure de ce qui coûte, réduction exacte si elle se trouve ; la multigrille par défaut.
 - [ ] **P6** — non-régression, suite ; preuve §15 ; registres.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
+- **P2** — `switch_apply_group` (256 fils : capacité, colonnes converties, décalage, faces qui cessent d'être frontière, masque, en
+  parallèle ; réductions entières dans le groupe ; retraits et ensemencements au fil 0 ; aucune barrière sous condition — FXC).
+  Bascules forcées (`INITIAL`, `PENTE`, `MAINTIEN`) **identiques à la référence** (positions, fonds, réserves, volume à 0 quantum) ;
+  B10 en bande étroite inchangé. **Mais** l'application ne passe que de 0,63 à 0,60 ms : essai — sans le noyau, 0,095 ms (la liste) ;
+  le noyau, ≈ 0,5 ms au 99ᵉ centile, vient des pas où des colonnes basculent : le fil 0 y retire des centaines de particules une à une.
+  **Réorientation de P3** (déclarée avant) : le retrait parallèle à forme close — la visite de la référence (échange avec la dernière)
+  met dans la k-ième plus petite place retirée sous le nouveau `n` la k-ième plus grande particule gardée au-delà ; pour la bascule et
+  le fond, le traitement d'une retirée n'est qu'un compte (par colonne pour le fond) — puis l'ensemencement par préfixe sur les colonnes.

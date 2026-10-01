@@ -3922,3 +3922,280 @@ fn mg_cg_beta(@builtin(local_invocation_id) l: vec3<u32>) {
         }
     }
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **S423 — la bascule en groupe** (C7e). `switch_apply` et `floor_move` parcouraient colonnes et faces sur un fil ; leurs boucles
+// sont indépendantes par colonne ou par face, leurs sommes des entiers (l'ordre n'y change rien) : 256 fils, réductions dans le
+// groupe. Les gestes ordonnés — retraits par la visite de la référence, ensemencements en ordre de colonnes — restent au fil 0, et
+// sont sautés quand il n'y en a pas. Toutes les boucles à barrières ont des bornes constantes ou uniformes (FXC, S422).
+
+const SG: u32 = 256u;
+var<workgroup> sg_i64: array<vec2<u32>, 256>;
+var<workgroup> sg_u32: array<u32, 256>;
+var<workgroup> sg_flag: u32;
+var<workgroup> sg_shift: vec2<u32>;
+
+fn sg_sum_i64(t: u32, v: vec2<u32>) -> vec2<u32> {
+    sg_i64[t] = v;
+    workgroupBarrier();
+    for (var r = SG / 2u; r > 0u; r = r / 2u) {
+        if t < r {
+            sg_i64[t] = add_i64(sg_i64[t], sg_i64[t + r]);
+        }
+        workgroupBarrier();
+    }
+    let s = sg_i64[0];
+    workgroupBarrier();
+    return s;
+}
+
+fn sg_sum_u32(t: u32, v: u32) -> u32 {
+    sg_u32[t] = v;
+    workgroupBarrier();
+    for (var r = SG / 2u; r > 0u; r = r / 2u) {
+        if t < r {
+            sg_u32[t] = sg_u32[t] + sg_u32[t + r];
+        }
+        workgroupBarrier();
+    }
+    let s = sg_u32[0];
+    workgroupBarrier();
+    return s;
+}
+
+// Diffuse un mot du fil 0 (uniforme).
+fn sg_bcast(t: u32, v: u32) -> u32 {
+    if t == 0u {
+        sg_flag = v;
+    }
+    let r = workgroupUniformLoad(&sg_flag);
+    workgroupBarrier();
+    return r;
+}
+
+// Les colonnes de chaque fil : `col = t + 256·b`, `b < sg_blocks()` — un nombre de tours uniforme.
+fn sg_blocks() -> u32 {
+    return (P.nx * P.ny + SG - 1u) / SG;
+}
+
+// Les faces de colonnes `x` puis `y`.
+fn sg_face_blocks() -> u32 {
+    return ((P.nx + 1u) * P.ny + P.nx * (P.ny + 1u) + SG - 1u) / SG;
+}
+
+@compute @workgroup_size(256)
+fn switch_apply_group(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
+    let ncol = P.nx * P.ny;
+    // (0) La capacité.
+    var needed = 0u;
+    for (var b = 0u; b < sg_blocks(); b = b + 1u) {
+        let col = t + SG * b;
+        if col < ncol && cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u {
+            let h = column_height(col);
+            let full = plan_full(h);
+            needed = needed + 4u * full + plan_last(h, full);
+        }
+    }
+    let need_all = sg_sum_u32(t, needed);
+    var refuse = 0u;
+    if t == 0u && np() + need_all > arrayLength(&plist) {
+        atomicStore(&pcount[COUNT_SWITCH_REFUSED], 1u);
+        refuse = 1u;
+    }
+    if sg_bcast(t, refuse) != 0u {
+        return;
+    }
+    // (1) Particules → colonnes : les retraits par la visite de la référence (fil 0), puis les colonnes en parallèle.
+    var removed = 0u;
+    if t == 0u {
+        removed = visit_remove(1u);
+    }
+    storageBarrier();
+    workgroupBarrier();
+    var part_total = vec2<u32>(0u, 0u);
+    var part_geo = vec2<u32>(0u, 0u);
+    var part_count = 0u;
+    for (var b = 0u; b < sg_blocks(); b = b + 1u) {
+        let col = t + SG * b;
+        if col < ncol && converted(col) {
+            let fond = floor_of(col);
+            if fond > 0.0 {
+                let cells = u32(floor(fond / P.dx + 0.5));
+                part_total = add_i64(part_total, mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), 8u * cells));
+                part_total = add_i64(part_total, solde_get(solde_w_index(col)));
+                cols[2u * ncol + 32u + col] = 0.0;
+                let z = solde_w_index(col);
+                isolde[2u * z] = 0u;
+                isolde[2u * z + 1u] = 0u;
+            }
+            let h = bitcast<f32>(swb[sw(SW_HEIGHT, col)]);
+            let gq = to_i64(h / quantum_height());
+            ivol_set(col, gq);
+            part_geo = add_i64(part_geo, gq);
+            part_count = part_count + 1u;
+        }
+    }
+    let total = add_i64(sg_sum_i64(t, part_total), mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), sg_bcast(t, removed)));
+    let geo_sum = sg_sum_i64(t, part_geo);
+    let count = sg_sum_u32(t, part_count);
+    // Le niveau par la masse, à un quart de maille au plus ; le reste à la réserve, exactement. Sans conversion, tout est nul (pas
+    // de barrière sous condition : FXC).
+    if t == 0u {
+        var sh = vec2<u32>(0u, 0u);
+        if count > 0u {
+            let wanted = i64_to_f32(add_i64(total, neg_i64(geo_sum))) / f32(count);
+            sh = to_i64(clamp(wanted, -33554432.0, 33554432.0));
+        }
+        sg_shift = sh;
+    }
+    workgroupBarrier();
+    let shift = sg_shift;
+    storageBarrier();
+    workgroupBarrier();
+    var part_given = vec2<u32>(0u, 0u);
+    for (var b = 0u; b < sg_blocks(); b = b + 1u) {
+        let col = t + SG * b;
+        if col < ncol && converted(col) {
+            let v = add_i64(ivol_get(col), shift);
+            ivol_set(col, v);
+            cols[col] = i64_to_f32(v) * quantum_height();
+            part_given = add_i64(part_given, v);
+        }
+    }
+    let given = sg_sum_i64(t, part_given);
+    if t == 0u && count > 0u {
+        solde_add(reserve_index(), add_i64(total, neg_i64(given)));
+    }
+    storageBarrier();
+    workgroupBarrier();
+    // (2) Colonnes → particules : l'ensemencement en ordre de colonnes, au fil 0, s'il y en a.
+    var seeding = 0u;
+    for (var b = 0u; b < sg_blocks(); b = b + 1u) {
+        let col = t + SG * b;
+        if col < ncol && cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u {
+            seeding = seeding + 1u;
+        }
+    }
+    if sg_sum_u32(t, seeding) > 0u && t == 0u {
+        var n = np();
+        let offsets = array<vec2<f32>, 4>(vec2<f32>(0.25, 0.25), vec2<f32>(0.75, 0.75), vec2<f32>(0.75, 0.25), vec2<f32>(0.25, 0.75));
+        for (var col = 0u; col < ncol; col = col + 1u) {
+            if !(cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u) {
+                continue;
+            }
+            let i = col % P.nx;
+            let j = col / P.nx;
+            let v0 = ivol_get(col);
+            let h = i64_to_f32(v0) * quantum_height();
+            let full = plan_full(h);
+            let last = plan_last(h, full);
+            var seeded = 0u;
+            var subs = full;
+            if last > 0u {
+                subs = full + 1u;
+            }
+            for (var sub = 0u; sub < subs; sub = sub + 1u) {
+                let z = (f32(sub) + 0.5) * (0.5 * P.dx);
+                var cnt = 4u;
+                if sub >= full {
+                    cnt = last;
+                }
+                for (var a = 0u; a < cnt; a = a + 1u) {
+                    let o = offsets[a];
+                    let p = vec3<f32>((f32(i) + o.x) * P.dx, (f32(j) + o.y) * P.dx, z);
+                    px[n] = vec4<f32>(p, 0.0);
+                    grid_affine_at(p, n);
+                    n = n + 1u;
+                    seeded = seeded + 1u;
+                }
+            }
+            solde_add(reserve_index(), add_i64(v0, neg_i64(mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), seeded))));
+            ivol_set(col, vec2<u32>(0u, 0u));
+            cols[col] = 0.0;
+        }
+        atomicStore(&pcount[COUNT_N], n);
+    }
+    storageBarrier();
+    workgroupBarrier();
+    // (3) Les soldes des faces qui cessent d'être frontière : à la réserve, en parallèle par face de colonnes.
+    let fx = (P.nx + 1u) * P.ny;
+    let nfaces = fx + P.nx * (P.ny + 1u);
+    var part_res = vec2<u32>(0u, 0u);
+    for (var b = 0u; b < sg_face_blocks(); b = b + 1u) {
+        let e = t + SG * b;
+        if e < nfaces {
+            var lo = 0u;
+            var hi = 0u;
+            var ok = false;
+            var axis = 0u;
+            var fi = 0u;
+            var fj = 0u;
+            if e < fx {
+                fi = e % (P.nx + 1u);
+                fj = e / (P.nx + 1u);
+                ok = fi > 0u && fi < P.nx;
+                if ok {
+                    lo = fj * P.nx + fi - 1u;
+                    hi = fj * P.nx + fi;
+                }
+            } else {
+                axis = 1u;
+                fi = (e - fx) % P.nx;
+                fj = (e - fx) / P.nx;
+                ok = fj > 0u && fj < P.ny;
+                if ok {
+                    lo = (fj - 1u) * P.nx + fi;
+                    hi = fj * P.nx + fi;
+                }
+            }
+            if ok {
+                let before = (cmask[lo] != 0u) != (cmask[hi] != 0u);
+                let after = (new_mask(lo) != 0u) != (new_mask(hi) != 0u);
+                if before && !after {
+                    for (var l = 0u; l < P.nz; l = l + 1u) {
+                        var face = 0u;
+                        if axis == 0u {
+                            face = (l * P.ny + fj) * (P.nx + 1u) + fi;
+                        } else {
+                            face = P.nu + (l * (P.ny + 1u) + fj) * P.nx + fi;
+                        }
+                        part_res = add_i64(part_res, solde_get(face));
+                        isolde[2u * face] = 0u;
+                        isolde[2u * face + 1u] = 0u;
+                    }
+                }
+            }
+        }
+    }
+    let res = sg_sum_i64(t, part_res);
+    if t == 0u {
+        solde_add(reserve_index(), res);
+    }
+    storageBarrier();
+    workgroupBarrier();
+    // Le masque, puis le drapeau de bande.
+    var band = 0u;
+    for (var b = 0u; b < sg_blocks(); b = b + 1u) {
+        let col = t + SG * b;
+        if col < ncol {
+            let m = new_mask(col);
+            swb[sw(SW_SPREAD, col)] = m;
+            if m == 0u {
+                band = 1u;
+            }
+        }
+    }
+    storageBarrier();
+    workgroupBarrier();
+    for (var b = 0u; b < sg_blocks(); b = b + 1u) {
+        let col = t + SG * b;
+        if col < ncol {
+            cmask[col] = swb[sw(SW_SPREAD, col)];
+        }
+    }
+    let any_band = sg_sum_u32(t, band);
+    if t == 0u {
+        atomicStore(&pcount[COUNT_BAND], select(0u, 1u, any_band > 0u));
+    }
+}
