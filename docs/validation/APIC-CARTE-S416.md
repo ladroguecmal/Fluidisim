@@ -820,3 +820,35 @@ campagne n'a pas encore (le mode relatif sur la carte, A320), qu'aucune session 
 la vitesse propre de δ naît là où l'écoulement quitte la houle progressive : le déferlement, les harmoniques liés que B n'a pas
 (ADR-198 D3), et **les parois** — le bassin n'est pas périodique, la houle s'y réfléchit. D'où la fenêtre des mesures (S410), loin des
 parois pendant la seconde utile ; la part hors fenêtre est publiée, pas jugée.
+
+### 21.1 C7d-1 mesuré (S429)
+
+**Reproduire** : `APIC3D_EPS=<0.55|0.1> APIC3D_BASCULE=maintien=0.3,fond=4,vitesse=<v>[,fond_b=1] cargo run -p water-core --release
+--offline --example apic3d_deferlement -- 40 4` (11 à 80 s) ; l'essai `the_speed_threshold_reads_the_own_velocity_of_delta_s429`.
+
+**La construction** : `LinearSwell` (houle linéaire progressive, profondeur infinie) et `ColumnsSwitch::background` — avec un fond
+B, le seuil de vitesse du fond porte sur `|u − U_B|` au centre de la maille, à l'instant de la décision ; sans lui, S415 au bit.
+L'essai : une houle de 0,26 m/s en surface, seuil 0,1 — la vitesse totale prend les 32 colonnes, relative à B aucune ; un jet
+enfoui ajouté est pris, lui seul.
+
+| `ε` | critère du fond | part de la fenêtre au retournement | fenêtre en particules, au plus (après le 1er pas) | retournement (t/τ) | retours rapides |
+|---|---|---:|---:|---:|---:|
+| 0,55 | la forme seule (S414) | 0,620 | 160 / 200 | 0,702 | 0 |
+| 0,55 | vitesse absolue 0,2 m/s (S415) | 1,000 | 200 / 200 | 0,665 | 0 |
+| 0,55 | **vitesse propre 0,2 m/s** | **0,940** | 200 / 200 | **0,7015** | 0 |
+| 0,55 | vitesse propre 0,4 · 0,6 m/s | 0,580 · 0,580 | 200 / 200 | 0,703 · 0,702 | 25 · 72 |
+| 0,1 | la forme seule | — | 0 / 200 | — | 0 |
+| 0,1 | vitesse absolue 0,2 m/s | — | **200 / 200** | — | **321** |
+| 0,1 | **vitesse propre 0,2 · 0,4 · 0,6 m/s** | — | **0 / 200** | — | 0 |
+
+**Les critères** : (b) **tenu** — sous une houle calme, rien dans la fenêtre (les parois, qui réfléchissent, en portent un peu :
+0,065 du bassin en moyenne), quand la vitesse absolue prenait tout en oscillant ; (c) **tenu** — sans fond B, S415 au chiffre près
+(0,501 et 1,000) ; (a) **manqué** — sous la houle raide, la vitesse propre de δ dépasse 0,2 m/s presque partout (0,94 de la fenêtre).
+Le retournement reste à l'instant de la forme seule, à un pas près.
+
+**Ce que cela dit.** Sous `ε` = 0,55, la vitesse orbitale vaut ≈ 1,1 m/s ; le champ réel s'écarte du premier ordre de 20 % et plus
+partout sur la crête — harmoniques de Stokes, dérive, cambrure —, ce qu'ADR-198 D3 laisse à δ en production. **La vitesse propre de
+δ y est grande sans que δ se déforme** : un seuil plus haut descend à 0,58, à peine sous la forme seule, et fait osciller. La vitesse
+fait le tri de la houle calme, pas celui de la houle raide. **La voie suivante** : un critère sur la **déformation propre** de δ — le
+gradient de `u − U_B` (ses parts de rotation et de cisaillement), qu'une houle progressive, même raide, n'a pas loin du déferlement ;
+à mesurer sur ce même banc, avec les mêmes critères, avant C7d-2.
