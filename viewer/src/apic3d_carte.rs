@@ -13,7 +13,7 @@ use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 97] = [
+const KERNELS: [&str; 98] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -29,7 +29,7 @@ const KERNELS: [&str; 97] = [
     "mg_l1_xt", "mg_coarse", "mg_prolong0", "mg_f_qz_fold", "mg_cg_reset", "mg_cg_init_finish", "mg_cg_direction_first", "mg_cg_update", "mg_cg_beta",
     "switch_apply_group", "mark_fresh", "clear_fresh", "reconstruct_coop", "mg_coarse_shared",
     "mg_cg_update_alpha", "mg_cg_beta_direction", "mg_fine_az", "mg_restrict2", "mg_prolong1", "mg_l1_ax",
-    "bin_rank", "bin_place",
+    "bin_rank", "bin_place", "absorb_faces",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -102,6 +102,8 @@ const MG_L1_AX: usize = 94;
 // S425 — le tri par rang (`bin_sort`, 6, gardé dans la liste pour les indices).
 const BIN_RANK: usize = 95;
 const BIN_PLACE: usize = 96;
+// S426 — l'absorption face par face (l'ancien fil, `absorb_group`, en repli).
+const ABSORB_FACES: usize = 97;
 /// S424 — les mailles des niveaux ≥ 2 que la mémoire de groupe tient (`MG_SH` du nuanceur).
 const MG_SHARED_CELLS: usize = 1024;
 const WG: u32 = 128;
@@ -1099,6 +1101,7 @@ impl ApicCarte {
                             // S421 : le fil de l'absorption, à part (13).
                             let mut p =
                                 encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(13) });
+                            self.dispatch(&mut p, ABSORB_FACES, 1, 1);
                             self.dispatch(&mut p, ABSORB_GROUP, 1, 1);
                         }
                         let mut p = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(8) });
@@ -1231,7 +1234,7 @@ impl ApicCarte {
     /// S418 : `n` et les compteurs de l'échange, lus sur la carte : `[n, n au début de l'échange, liste, absorbées, retirées,
     /// posées, refusées]`.
     pub fn counts(&self) -> Result<Vec<u32>, String> {
-        self.read_u32(&self.pcount, 0, 14)
+        self.read_u32(&self.pcount, 0, 16)
     }
 
     /// S418 : les soldes des faces-mailles, `u` puis `v`, puis (S419) le solde vertical de chaque colonne, m³.
@@ -2073,6 +2076,8 @@ pub fn recevoir_b10() -> Result<(), String> {
             gestes_avant = [k[3], k[4], k[5]];
         }
         let mut par_pas: Vec<(u32, u32, u32, f64, f64)> = Vec::new();
+        // S426 : les faces touchées par l'absorption, par pas (`u32::MAX` : l'ancien fil).
+        let mut vagues: Vec<u32> = Vec::new();
         while t < t_max {
             a.set_body(Some(b.sphere(t))).map_err(|e| format!("{e:?}"))?;
             carte.set_body(Some(b.sphere(t)));
@@ -2108,6 +2113,7 @@ pub fn recevoir_b10() -> Result<(), String> {
                             let d: Vec<u32> = (3..6).map(|i| k[i] - gestes_avant[i - 3]).collect();
                             gestes_avant = [k[3], k[4], k[5]];
                             par_pas.push((d[0], d[1] + d[2], k[10], times.stages[13].unwrap_or(0.), times.stages[12].unwrap_or(0.)));
+                            vagues.push(k[15]);
                         }
                         let sw_times = carte.switch_for_bench(t_us)?;
                         let k = carte.counts()?;
@@ -2295,6 +2301,13 @@ pub fn recevoir_b10() -> Result<(), String> {
             );
             println!(
                 "APIC_CARTE_B10_S425 fils_us absorption={a0:.1}+{a1:.2}*absorbees echange={e0:.1}+{e1:.2}*gestes echange={f0:.1}+{f1:.2}*faces_actives"
+            );
+            let repli = vagues.iter().filter(|&&v| v == u32::MAX).count();
+            let mut v: Vec<f64> = vagues.iter().filter(|&&v| v != u32::MAX).map(|&v| v as f64).collect();
+            let (w0, w1) = fit(&par_pas.iter().zip(&vagues).filter(|(_, &v)| v != u32::MAX).map(|(p, &v)| (v as f64, p.3 * 1e3)).collect::<Vec<_>>());
+            println!(
+                "APIC_CARTE_B10_S426 faces_absorption mediane={:.0} max={:.0} repli={repli} absorption_us={w0:.1}+{w1:.2}*faces",
+                percentile(&mut v, 0.5), percentile(&mut v, 1.)
             );
         }
         // S424 — `PROFIL=1` : le coût de chaque noyau d'une itération de la projection, sur l'état final.

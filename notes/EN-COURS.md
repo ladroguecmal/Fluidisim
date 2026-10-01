@@ -82,9 +82,10 @@ vagues par pas ; **visé : pas + bascule ≤ 2 ms au p99** (2,45). (3) Suite, z�
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'absorption par vagues ; issues, mesure, vagues par pas.
+- [x] **P2** — l'absorption par vagues ; issues, mesure, vagues par pas.
 - [ ] **P3** — l'échange : les marquées par rang et à forme close ; mesure ; les vagues de l'échange si le temps reste.
 - [ ] **P4** — non-régression, suite ; preuve §18 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — l'absorption sans fil séquentiel (`absorb_faces`) : le fil 0 calcule d'avance l'ordre de la visite (sans geste : l'identité traitée à chaque rang est connue), puis tout en parallèle, au bit. **Essai 1, des vagues d'absorbées à faces disjointes** : identique, mais 45 vagues pour ≈ 100 absorbées (106 au plus) à ≈ 3,8 µs — les voisines partagent presque toujours une face ; médiane 0,205 → 0,166, p99 inchangé. **Essai 2, un fil par face touchée** : la première absorbée qui touche une face (dans l'ordre de la visite) en est propriétaire et y applique, dans l'ordre, les mélanges de toutes celles qui la touchent — identique, mais **cinq fois plus lent** (le test « touche-t-elle cette face » recalculait huit nœuds en global). **Retenu** : le test rendu immédiat — `n − base ∈ {0,1}³` désigne le nœud, un masque de 24 bits par absorbée (en mémoire de groupe) dit s'il est mélangé ; et les soldes et volumes (entiers) par cible : la première absorbée de chaque cible ajoute toutes celles de la cible d'un coup. Étage de l'échange, raccord 30 s (gestes 5 289 / 109 / 5 385, 4,015 mm), B10 en bande étroite : **identiques**. ≈ 276 faces touchées par pas. **Fil de l'absorption : médiane 0,205 → 0,132 ms, p99 0,40 → 0,29** ; **pas p99 2,11 ms, + bascule 0,23 = 2,35**.

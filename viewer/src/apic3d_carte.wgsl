@@ -3181,15 +3181,300 @@ fn absorb_rest(k: u32) {
     atomicAdd(&pcount[COUNT_ABSORBED], 1u);
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+// **S426 — l'absorption face par face.** La visite de la référence fixe l'ordre de traitement des absorbées ; le fil 0 le calcule
+// d'avance sans toucher aux données — l'identité traitée à chaque rang est connue (une place n'est écrite qu'après avoir été
+// traitée ; la dernière n'a jamais été écrite). Seuls les mélanges aux faces dépendent de l'ordre, et seulement entre absorbées qui
+// partagent une face. **Un fil par face touchée** : la première absorbée (dans l'ordre de la visite) qui touche une face en est la
+// propriétaire et applique à cette face, dans l'ordre, les mélanges de toutes les absorbées qui la touchent — au bit, les faces en
+// parallèle. (Des vagues d'absorbées à faces disjointes, essayées d'abord : 45 vagues pour ≈ 100 absorbées, les voisines partagent
+// presque toujours une face — pas de gain.) Les soldes et volumes (`absorb_rest` : des entiers, qui ne lisent pas les faces) suivent,
+// sur le fil 0, dans l'ordre de la visite ; puis le retrait à forme close (`sg_remove`, S423). Au-delà de `AW_MAX` absorbées, l'ancien
+// fil (`absorb_group`).
+
+const AW_MAX: u32 = 512u;
+// Les faces touchées au dernier pas ; `NONE` : l'ancien fil a fait l'absorption.
+const COUNT_WAVES: u32 = 15u;
+var<workgroup> aw_ord: array<u32, 512>;
+// Les nœuds de base des trois familles de faces, empaquetés (dix bits par axe).
+var<workgroup> aw_b0: array<u32, 512>;
+var<workgroup> aw_b1: array<u32, 512>;
+var<workgroup> aw_b2: array<u32, 512>;
+// Les nœuds mélangés de chaque absorbée : un bit par (famille, nœud), 24 bits.
+var<workgroup> aw_mask: array<u32, 512>;
+// La cible du volume de chaque absorbée (`absorb_target`).
+var<workgroup> aw_tgt: array<u32, 512>;
+
+const AW_IVOL: u32 = 0x80000000u;
+
+// Où va le volume d'une absorbée (`absorb_rest`) : un indice de solde (vertical sous le fond ; de la face de frontière la plus
+// proche dans la zone), ou `AW_IVOL | colonne` loin de toute bande.
+fn absorb_target(k: u32) -> u32 {
+    let p = px[k].xyz;
+    let c = cell_of(p);
+    let col = c.y * P.nx + c.x;
+    if cmask[col] == 0u {
+        return solde_w_index(col);
+    }
+    var best_d = 0.0;
+    var best_face = NONE;
+    for (var dir = 0u; dir < 4u; dir = dir + 1u) {
+        var di = 0;
+        var dj = 0;
+        if dir == 0u { di = -1; } else if dir == 1u { di = 1; } else if dir == 2u { dj = -1; } else { dj = 1; }
+        let a = i32(c.x) + di;
+        let b = i32(c.y) + dj;
+        if a < 0 || b < 0 || a >= i32(P.nx) || b >= i32(P.ny) || in_zone(a, b) {
+            continue;
+        }
+        let fi = c.x + select(0u, 1u, di > 0);
+        let fj = c.y + select(0u, 1u, dj > 0);
+        var d = 0.0;
+        var face = 0u;
+        if dir < 2u {
+            d = abs(p.x - f32(fi) * P.dx);
+            face = (c.z * P.ny + c.y) * (P.nx + 1u) + fi;
+        } else {
+            d = abs(p.y - f32(fj) * P.dx);
+            face = P.nu + (c.z * (P.ny + 1u) + fj) * P.nx + c.x;
+        }
+        if best_face == NONE || d < best_d {
+            best_d = d;
+            best_face = face;
+        }
+    }
+    return select(AW_IVOL | col, best_face, best_face != NONE);
+}
+var<workgroup> aw_cnt: atomic<u32>;
+var<workgroup> aw_k: u32;
+var<workgroup> aw_go: u32;
+
+fn aw_unpack(a: u32) -> vec3<u32> {
+    return vec3<u32>(a & 1023u, (a >> 10u) & 1023u, a >> 20u);
+}
+
+fn aw_pack(m: vec3<u32>) -> u32 {
+    return m.x | (m.y << 10u) | (m.z << 20u);
+}
+
+// Des nœuds de base à au plus un d'écart sur chaque axe : des nœuds communs possibles.
+fn aw_near(a: u32, b: u32) -> bool {
+    let pa = aw_unpack(a);
+    let pb = aw_unpack(b);
+    let d = max(pa, pb) - min(pa, pb);
+    return d.x <= 1u && d.y <= 1u && d.z <= 1u;
+}
+
+fn aw_base(axis: u32, q: u32) -> u32 {
+    if axis == 0u {
+        return aw_b0[q];
+    }
+    if axis == 1u {
+        return aw_b1[q];
+    }
+    return aw_b2[q];
+}
+
+// Le nœud `m` de la famille `axis` pour l'absorbée de rang `q` : (face, poids en bits) ; `NONE` si son poids est nul ou si la
+// face n'est pas mélangée (`absorb_blend_slot`).
+fn aw_slot(q: u32, axis: u32, m: u32) -> vec2<u32> {
+    let k = aw_ord[q];
+    let p = px[k].xyz;
+    let l = lerp_of(p, axis);
+    let sel = vec3<bool>((m & 1u) == 1u, ((m >> 1u) & 1u) == 1u, ((m >> 2u) & 1u) == 1u);
+    let idx = select(l.base, l.next, sel);
+    let wa = select(vec3<f32>(1.0) - l.frac, l.frac, sel);
+    let wt = wa.x * wa.y * wa.z;
+    let c = cell_of(p);
+    let below = cmask[c.y * P.nx + c.x] == 0u;
+    var ok = wt != 0.0;
+    if ok {
+        if below {
+            ok = floor_face(axis, idx);
+        } else {
+            ok = zone_face(axis, idx);
+        }
+    }
+    return select(vec2<u32>(NONE, 0u), vec2<u32>(face_global(axis, idx), bitcast<u32>(wt)), ok);
+}
+
+// Le nœud `node` de la famille `axis` est-il un nœud mélangé de l'absorbée `r` ? Rend son emplacement (0 à 7), `NONE` sinon :
+// `node − base ∈ {0, 1}³` le désigne, le masque dit s'il est mélangé.
+fn aw_touch(r: u32, axis: u32, node: vec3<u32>) -> u32 {
+    let b = aw_unpack(aw_base(axis, r));
+    let d = vec3<i32>(node) - vec3<i32>(b);
+    var m = NONE;
+    if all(d >= vec3<i32>(0)) && all(d <= vec3<i32>(1)) {
+        let slot = u32(d.x) | (u32(d.y) << 1u) | (u32(d.z) << 2u);
+        if ((aw_mask[r] >> (axis * 8u + slot)) & 1u) == 1u {
+            m = slot;
+        }
+    }
+    return m;
+}
+
+@compute @workgroup_size(256)
+fn absorb_faces(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
+    if t == 0u {
+        let len = atomicLoad(&pcount[COUNT_LIST]);
+        var go = len <= AW_MAX && P.nx < 1024u && P.ny < 1024u && P.nz < 1024u;
+        var q = 0u;
+        if go {
+            // L'ordre de la visite (`visit_remove`), sans les gestes.
+            var n_cur = np();
+            var front = 0u;
+            var back = i32(len) - 1;
+            loop {
+                if front >= len || plist[front] >= n_cur || i32(front) > back {
+                    break;
+                }
+                let a = plist[front];
+                front = front + 1u;
+                aw_ord[q] = a;
+                q = q + 1u;
+                loop {
+                    let last = n_cur - 1u;
+                    n_cur = last;
+                    if last == a {
+                        break;
+                    }
+                    if back >= i32(front) && plist[u32(back)] == last {
+                        back = back - 1;
+                        aw_ord[q] = last;
+                        q = q + 1u;
+                        continue;
+                    }
+                    break;
+                }
+            }
+            // Toutes les listées sont traitées ; sinon (jamais vu), l'ancien fil.
+            go = q == len;
+        }
+        aw_go = select(0u, 1u, go);
+        aw_k = q;
+        if !go {
+            atomicStore(&pcount[COUNT_WAVES], NONE);
+        }
+    }
+    if workgroupUniformLoad(&aw_go) == 0u {
+        return;
+    }
+    let len = workgroupUniformLoad(&aw_k);
+    let n0 = np();
+    for (var q = t; q < len; q = q + 256u) {
+        let x = px[aw_ord[q]].xyz;
+        aw_b0[q] = aw_pack(lerp_of(x, 0u).base);
+        aw_b1[q] = aw_pack(lerp_of(x, 1u).base);
+        aw_b2[q] = aw_pack(lerp_of(x, 2u).base);
+        var mask = 0u;
+        for (var sl = 0u; sl < 24u; sl = sl + 1u) {
+            if aw_slot(q, sl / 8u, sl % 8u).x != NONE {
+                mask = mask | (1u << sl);
+            }
+        }
+        aw_mask[q] = mask;
+        aw_tgt[q] = absorb_target(aw_ord[q]);
+    }
+    workgroupBarrier();
+    if t == 0u {
+        atomicStore(&aw_cnt, 0u);
+    }
+    workgroupBarrier();
+    // Un fil par (absorbée, nœud) ; la propriétaire de la face applique, dans l'ordre de la visite, les mélanges de toutes les
+    // absorbées qui la touchent.
+    for (var x = t; x < 24u * len; x = x + 256u) {
+        let q = x / 24u;
+        let axis = (x % 24u) / 8u;
+        let m = x % 8u;
+        if ((aw_mask[q] >> (x % 24u)) & 1u) == 1u {
+            let sel = vec3<bool>((m & 1u) == 1u, ((m >> 1u) & 1u) == 1u, ((m >> 2u) & 1u) == 1u);
+            let node = aw_unpack(aw_base(axis, q)) + select(vec3<u32>(0u), vec3<u32>(1u), sel);
+            var owner = true;
+            for (var r = 0u; r < q; r = r + 1u) {
+                if aw_touch(r, axis, node) != NONE {
+                    owner = false;
+                    break;
+                }
+            }
+            if owner {
+                atomicAdd(&aw_cnt, 1u);
+                let f = face_global(axis, node);
+                for (var r = q; r < len; r = r + 1u) {
+                    let mr = aw_touch(r, axis, node);
+                    if mr != NONE {
+                        // Le mélange de `absorb_blend_slot`, à l'identique.
+                        let k = aw_ord[r];
+                        let p = px[k].xyz;
+                        let v = pv[k].xyz;
+                        let l = lerp_of(p, axis);
+                        let va = select(select(v.z, v.y, axis == 1u), v.x, axis == 0u);
+                        let sr = vec3<bool>((mr & 1u) == 1u, ((mr >> 1u) & 1u) == 1u, ((mr >> 2u) & 1u) == 1u);
+                        let wa = select(vec3<f32>(1.0) - l.frac, l.frac, sr);
+                        let wt = wa.x * wa.y * wa.z;
+                        faces[f] = faces[f] + wt * (va - faces[f]) / 8.0;
+                    }
+                }
+            }
+        }
+    }
+    storageBarrier();
+    workgroupBarrier();
+    // Les soldes et volumes : des entiers, l'ordre n'y change rien — la première absorbée de chaque cible y ajoute toutes celles
+    // de la cible d'un coup.
+    for (var q = t; q < len; q = q + 256u) {
+        let g = aw_tgt[q];
+        var first = true;
+        for (var r = 0u; r < q; r = r + 1u) {
+            if aw_tgt[r] == g {
+                first = false;
+                break;
+            }
+        }
+        if first {
+            var cnt = 0u;
+            for (var r = q; r < len; r = r + 1u) {
+                if aw_tgt[r] == g {
+                    cnt = cnt + 1u;
+                }
+            }
+            let add = mul_i64_u32(vec2<u32>(VP_QUANTA, 0u), cnt);
+            if (g & AW_IVOL) != 0u {
+                let col = g & ~AW_IVOL;
+                let vol = add_i64(ivol_get(col), add);
+                ivol_set(col, vol);
+                cols[col] = i64_to_f32(vol) * quantum_height();
+            } else {
+                solde_add(g, add);
+            }
+        }
+    }
+    if t == 0u {
+        atomicAdd(&pcount[COUNT_ABSORBED], len);
+    }
+    storageBarrier();
+    workgroupBarrier();
+    let n2 = sg_remove(t, n0, len);
+    if t == 0u {
+        atomicStore(&pcount[COUNT_N], n2);
+        atomicStore(&pcount[COUNT_WAVES], atomicLoad(&aw_cnt));
+    }
+}
+
 @compute @workgroup_size(32)
 fn absorb_group(@builtin(local_invocation_id) lid: vec3<u32>) {
     let t = lid.x;
     let len = atomicLoad(&pcount[COUNT_LIST]);
+    // S426 : les vagues ont fait l'absorption, sauf repli.
+    let handled = atomicLoad(&pcount[COUNT_WAVES]) != NONE;
     if t == 0u {
         ab_front = 0u;
         ab_back = i32(len) - 1;
         ab_n = np();
-        ab_slot = ab_next_front(len);
+        ab_slot = NONE;
+        if !handled {
+            ab_slot = ab_next_front(len);
+        }
     }
     loop {
         let a = workgroupUniformLoad(&ab_slot);
@@ -3226,7 +3511,7 @@ fn absorb_group(@builtin(local_invocation_id) lid: vec3<u32>) {
         storageBarrier();
         workgroupBarrier();
     }
-    if t == 0u {
+    if t == 0u && !handled {
         atomicStore(&pcount[COUNT_N], ab_n);
     }
 }
