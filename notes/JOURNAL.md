@@ -18062,3 +18062,17 @@ l'événement que la diagonale donnait déjà ; **témoin du ballottement** ajou
 0,055 était l'ordre de la référence, pas une précision. Suite **753**, zéro avertissement. **Rituel.** Maillons **11** — justifié :
 la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — la projection (fusionner les noyaux du cycle), les fils de
 l'échange et de l'absorption, la séparation : δ ≤ 2 ms (3,74 aujourd'hui).
+
+## S424 — 2026-10-01 — physique : C7e, la projection sous la milliseconde
+
+**Entrée.** *« Continue »* — C7e. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §16) : les niveaux ≥ 2 de la
+multigrille en mémoire de groupe ; les noyaux fusionnés (`α` dans la mise à jour, `β` dans la direction, `r·z` en double tampon par
+la parité de l'itération) — dix-sept dispatchs → douze pour 4 µs seulement : le nombre de dispatchs n'était pas le coût ; **un profil
+par noyau** (`PROFIL=1`) : le groupe des niveaux grossiers 34 µs, dont 13 pour la restriction vers le niveau 2 faite par un seul
+groupe ; **sortis du groupe** en dispatchs parallèles, à expression identique, `A·z` fin, `L₁·x₁`, les deux restrictions, la
+prolongation vers le niveau 1. **Incident** : la pipeline en mémoire de groupe mettait 283 s à se créer — FXC déroule la mise à zéro de
+la mémoire de groupe que wgpu ajoute ; coupée partout (chaque noyau écrit avant de lire) : **création des pipelines 80 → 27 s**.
+**Mesuré** : itération 69 → 51 µs ; B10 en bande étroite, **projection 1,35 → 0,885 ms au p99** (visé 1 : tenu), pas 2,77 ms, pas +
+bascule 3,25. **Issues identiques à S423 au chiffre près** (étages, cycle, bascules forcées, B10 nu et en bande, ballottement,
+raccord, bande, gestes). Suite **753**, zéro avertissement. **Rituel.** Maillons **12** — justifié : la priorité du solveur (S406) ;
+4.19 reste partiel. Suivant : **C7e** — les fils de l'échange et de l'absorption (0,62 + 0,40), la séparation (0,41) : δ ≤ 2 ms.
