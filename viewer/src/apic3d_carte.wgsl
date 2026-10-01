@@ -3708,6 +3708,10 @@ fn xg_pose(t: u32, p: vec3<f32>, solde: u32) {
 }
 
 // Encore un solde à régler, et la place pour poser ? (0 : non ; 1 : retirer ; 2 : poser ; 3 : poser refusé)
+// S426 — les marquées de l'échange, triées par rang (au plus `XR_MAX`).
+const XR_MAX: u32 = 512u;
+var<workgroup> xr_v: array<u32, 512>;
+
 // S425 — le rang de chaque fil parmi ceux qui ont une colonne à visiter (préfixe exclusif sur 64), le total dans `xg_due`.
 var<workgroup> xg_cols: array<u32, 64>;
 var<workgroup> xg_pre: array<u32, 64>;
@@ -3869,21 +3873,44 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
             }
         }
     }
-    // Les marquées, du plus grand indice au plus petit, par échange avec la dernière (le fil 0 : elles sont peu nombreuses).
+    // Les marquées, du plus grand indice au plus petit, par échange avec la dernière. S426 : triées par rang en mémoire de groupe
+    // (chaque fil compte les marquées d'indice plus grand que les siennes) — le tri par insertion du fil 0, O(K²) en mémoire globale
+    // pour ≈ 140 marquées par pas, au-delà de `XR_MAX` seulement.
+    let marked_all = xg_bcast(t, xg_marked);
+    if marked_all <= XR_MAX {
+        for (var s = t; s < marked_all; s = s + XG) {
+            xr_v[s] = plist[s];
+        }
+        workgroupBarrier();
+        for (var s = t; s < marked_all; s = s + XG) {
+            let v = xr_v[s];
+            var r = 0u;
+            for (var u = 0u; u < marked_all; u = u + 1u) {
+                if xr_v[u] > v {
+                    r = r + 1u;
+                }
+            }
+            plist[r] = v;
+        }
+        storageBarrier();
+        workgroupBarrier();
+    }
     if t == 0u {
         let marked = xg_marked;
         var n = xg_n;
-        for (var s = 1u; s < marked; s = s + 1u) {
-            let v = plist[s];
-            var q = s;
-            loop {
-                if q == 0u || plist[q - 1u] >= v {
-                    break;
+        if marked > XR_MAX {
+            for (var s = 1u; s < marked; s = s + 1u) {
+                let v = plist[s];
+                var q = s;
+                loop {
+                    if q == 0u || plist[q - 1u] >= v {
+                        break;
+                    }
+                    plist[q] = plist[q - 1u];
+                    q = q - 1u;
                 }
-                plist[q] = plist[q - 1u];
-                q = q - 1u;
+                plist[q] = v;
             }
-            plist[q] = v;
         }
         for (var s = 0u; s < marked; s = s + 1u) {
             let m = plist[s];
