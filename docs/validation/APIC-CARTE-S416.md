@@ -774,6 +774,11 @@ zéro avertissement.
 **Le coût**, B10 en bande étroite : une itération 51 → **45 µs** ; projection p99 0,886 → **0,785 ms** (médiane 0,748) ; **pas p99
 1,82 ms, pas + bascule 2,07** (2,16). Visé 2 : **manqué de 0,07**.
 
+**C7e reçu** — par décision de l'utilisateur, le 2026-10-02 (S429) : *« On accepte ce petit surplus au critère, continue »*. Le
+critère de C7e (« δ ≤ 2 ms au 99ᵉ centile avec la bande ») est tenu à 2,07 ms, mesuré sur B10 en bande étroite — non sur la scène de
+la porte B, que C7d et C10 rejoueront avec la bande dans la production. Les dispatchs indirects taillés sur `n` restent désignés,
+non faits.
+
 **Ce qui reste, désigné** : les noyaux lancés sur la **capacité** — ≈ 130 000 fils pour ≈ 4 000 particules vivantes : comptes,
 rangements et rangs du tri, corps, séparation — 2 à 3 µs chacun, une vingtaine par pas et bascule. Des dispatchs indirects taillés sur
 `n` : les arguments écrits par un noyau dans un tampon lié, copiés entre deux passages vers un tampon d'arguments non lié (wgpu refuse
