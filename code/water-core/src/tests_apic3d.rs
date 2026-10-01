@@ -1161,6 +1161,62 @@ fn the_speed_threshold_reads_the_own_velocity_of_delta_s429() {
     assert!(!jet.contains(&0) && !jet.contains(&31), "loin du jet, rien");
 }
 
+/// **S430, C7d-1** — la déformation propre : une houle posée sur la grille déforme au-delà du seuil près de la surface (le
+/// gradient de la vitesse totale prend toute la largeur) ; relative à cette houle comme fond B, rien ; un cisaillement enfoui ajouté
+/// (rangées alternées) est pris, lui seul.
+#[test]
+fn the_own_deformation_of_delta_is_read_relative_to_b_s430() {
+    let (nx, ny, nz, dx) = (32usize, 4usize, 16usize, 0.05f32);
+    let k = std::f32::consts::TAU / 0.8;
+    let swell = LinearSwell { amplitude: 0.03, wavenumber: k, omega: (9.81 * k).sqrt(), phase: -std::f32::consts::FRAC_PI_2, mean_level: 0.5 };
+    let run = |background: Option<LinearSwell>, shear: bool| {
+        let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+        a.enable_columns(&mut host, &vec![0u8; nx * ny]).unwrap();
+        a.seed(&|p| p[2] < 0.5).unwrap();
+        for kk in 0..nz {
+            for j in 0..ny {
+                for i in 0..=nx {
+                    a.u[(kk * ny + j) * (nx + 1) + i] = swell.velocity(i as f32 * dx, (kk as f32 + 0.5) * dx, 0.)[0];
+                }
+            }
+        }
+        for kk in 0..=nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    a.w[(kk * ny + j) * nx + i] = swell.velocity((i as f32 + 0.5) * dx, kk as f32 * dx, 0.)[2];
+                }
+            }
+        }
+        if shear {
+            for kk in 2..5 {
+                for j in 0..ny {
+                    for i in 14..=18 {
+                        a.u[(kk * ny + j) * (nx + 1) + i] += if kk % 2 == 0 { 0.5 } else { -0.5 };
+                    }
+                }
+            }
+        }
+        let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+        s.floor_cells = Some(4);
+        s.floor_deformation = Some(1.);
+        s.background = background;
+        s.switch(0, &mut a).unwrap();
+        (0..nx).filter(|&i| !a.is_column(i, 1)).collect::<Vec<usize>>()
+    };
+    let gradient = std::f32::consts::SQRT_2 * k * swell.amplitude * swell.omega;
+    println!("S430 houle : gradient de B en surface {gradient} s⁻¹, seuil 1");
+    assert!(gradient > 1.5);
+    assert_eq!(run(None, false).len(), nx, "le gradient total prend toute la houle");
+    assert!(run(Some(swell), false).is_empty(), "relative à B, la houle ne se déforme pas");
+    let shear = run(Some(swell), true);
+    println!("S430 houle et cisaillement enfoui : bande {shear:?}");
+    for i in 14..18 {
+        assert!(shear.contains(&i), "colonne {i} du cisaillement");
+    }
+    assert!(!shear.contains(&0) && !shear.contains(&31), "loin du cisaillement, rien");
+}
+
 /// **S415** — la part de rotation : 1 pour une rotation solide, 0 pour une déformation pure (`u = γz`, `w = γx` : symétrique),
 /// le gradient à l'échelle de la vorticité pour la rotation (2Ω).
 #[test]

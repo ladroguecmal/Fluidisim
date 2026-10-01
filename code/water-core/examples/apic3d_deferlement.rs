@@ -109,6 +109,8 @@ fn main() {
                 "vitesse" => s.floor_speed = Some(x as f32),
                 "rotation" => s.floor_rotation = Some(x as f32),
                 "rotation_gradient" => s.floor_rotation_gradient = x as f32,
+                // S430 : la déformation propre (C7d-1).
+                "deformation" => s.floor_deformation = Some(x as f32),
                 // S429 : le fond B (C7d-1).
                 "fond_b" => {
                     s.background = (x != 0.).then(|| LinearSwell {

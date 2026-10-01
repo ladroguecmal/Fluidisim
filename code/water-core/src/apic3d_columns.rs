@@ -1510,6 +1510,31 @@ impl Apic3 {
         (if s2 + o2 > 0. { o2 / (s2 + o2) } else { 0. }, norm * std::f32::consts::SQRT_2)
     }
 
+    /// **S430 — C7d-1 : la déformation propre de δ** au centre de la maille, s⁻¹ : la norme de Frobenius du gradient de la vitesse
+    /// **relative au fond B** (`u − U_B` aux centres, puis les différences centrées de `vorticity` — le gradient discret de B s'en
+    /// retranche, non seulement l'analytique) ; sans B, celui de la vitesse totale.
+    pub(crate) fn deformation(&self, i: usize, j: usize, k: usize, b: Option<&LinearSwell>, t_s: f64) -> f32 {
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        let bu = |i: usize, k: usize| b.map_or([0.; 3], |b| b.velocity((i as f32 + 0.5) * dx, (k as f32 + 0.5) * dx, t_s));
+        let uc = |i: usize, j: usize, k: usize| {
+            0.5 * (self.u[(k * ny + j) * (nx + 1) + i] + self.u[(k * ny + j) * (nx + 1) + i + 1]) - bu(i, k)[0]
+        };
+        let vc = |i: usize, j: usize, k: usize| 0.5 * (self.v[(k * (ny + 1) + j) * nx + i] + self.v[(k * (ny + 1) + j + 1) * nx + i]);
+        let wc = |i: usize, j: usize, k: usize| {
+            0.5 * (self.w[(k * ny + j) * nx + i] + self.w[((k + 1) * ny + j) * nx + i]) - bu(i, k)[2]
+        };
+        let d = |f: &dyn Fn(usize) -> f32, x: usize, n: usize| {
+            let (lo, hi) = (x.saturating_sub(1), (x + 1).min(n - 1));
+            if hi == lo { 0. } else { (f(hi) - f(lo)) / ((hi - lo) as f32 * dx) }
+        };
+        let g = [
+            [d(&|x| uc(x, j, k), i, nx), d(&|y| uc(i, y, k), j, ny), d(&|z| uc(i, j, z), k, nz)],
+            [d(&|x| vc(x, j, k), i, nx), d(&|y| vc(i, y, k), j, ny), d(&|z| vc(i, j, z), k, nz)],
+            [d(&|x| wc(x, j, k), i, nx), d(&|y| wc(i, y, k), j, ny), d(&|z| wc(i, j, z), k, nz)],
+        ];
+        g.iter().flatten().map(|v| v * v).sum::<f32>().sqrt()
+    }
+
     /// **S415** — la vitesse de la grille au centre d'une maille, m/s (moyenne des deux faces de chaque axe).
     pub(crate) fn cell_speed(&self, i: usize, j: usize, k: usize) -> f32 {
         let Domain3 { nx, ny, .. } = self.domain;
@@ -1622,6 +1647,11 @@ pub struct ColumnsSwitch {
     /// sillage) demande des particules (BANDE-ETROITE-S413 §6.4). La vorticité de B est nulle (irrotationnelle) : `floor_vorticity`
     /// n'en dépend pas. `None`, le défaut : la vitesse totale de S415, au bit.
     pub background: Option<LinearSwell>,
+    /// **S430 — C7d-1 : la déformation propre de δ**, s⁻¹ : `Some(d)` — une maille d'eau dont le gradient de la vitesse relative à
+    /// B (`Apic3::deformation` ; sans B, de la vitesse totale) dépasse `d` en norme de Frobenius demande des particules, le fond sous
+    /// elle. Une houle qui est B n'a pas de déformation propre, même raide ; un déferlement, un jet, un sillage en ont. `None`, le
+    /// défaut.
+    pub floor_deformation: Option<f32>,
     /// L'instant de la décision en cours (`switch`), µs — pour B.
     now_us: u64,
     domain: Domain3,
@@ -1667,6 +1697,7 @@ impl ColumnsSwitch {
             floor_rotation: None,
             floor_rotation_gradient: 0.5,
             background: None,
+            floor_deformation: None,
             now_us: 0,
             domain,
             required_at: vec![u64::MAX; cols],
@@ -1731,6 +1762,10 @@ impl ColumnsSwitch {
         if self.floor_vorticity.is_some_and(|limit| a.vorticity(i, j, k) > limit) {
             return true;
         }
+        // S430 : la déformation propre.
+        if self.floor_deformation.is_some_and(|limit| a.deformation(i, j, k, self.background.as_ref(), self.now_us as f64 * 1e-6) > limit) {
+            return true;
+        }
         if let Some(limit) = self.floor_speed {
             // S429 : relative à B, s'il y en a un.
             let speed = match &self.background {
@@ -1772,7 +1807,7 @@ impl ColumnsSwitch {
                 let low = (0..nz).find(|&l| a.label[a.cell(i, j, l)] != WATER).unwrap_or(nz);
                 let mut target = low.saturating_sub(k);
                 // S415 : sous la plus basse maille d'eau qui tourbillonne, ou qui va vite.
-                if self.floor_vorticity.is_some() || self.floor_speed.is_some() || self.floor_rotation.is_some() {
+                if self.floor_vorticity.is_some() || self.floor_speed.is_some() || self.floor_rotation.is_some() || self.floor_deformation.is_some() {
                     if let Some(l) = (0..nz).find(|&l| self.flow_needs(a, i, j, l)) {
                         target = target.min(l.saturating_sub(k));
                     }
@@ -1893,7 +1928,7 @@ impl ColumnsSwitch {
             }
         }
         // (3b) S415 : l'eau qui tourbillonne, ou qui va vite, demande des particules.
-        if self.floor_vorticity.is_some() || self.floor_speed.is_some() || self.floor_rotation.is_some() {
+        if self.floor_vorticity.is_some() || self.floor_speed.is_some() || self.floor_rotation.is_some() || self.floor_deformation.is_some() {
             for j in 0..ny {
                 for i in 0..nx {
                     let col = j * nx + i;

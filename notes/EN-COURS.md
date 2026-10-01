@@ -83,9 +83,10 @@ critère en cours de mesure.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `floor_deformation` relative à B ; essai du cœur.
+- [x] **P2** — `floor_deformation` relative à B ; essai du cœur.
 - [ ] **P3** — mesures sur la vague de Chen ; critères.
 - [ ] **P4** — suite ; preuve §21.2 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — `Apic3::deformation` (la norme de Frobenius du gradient de `u − U_B` aux centres, mêmes différences que `vorticity` ; sans B, de la vitesse totale) et `ColumnsSwitch::floor_deformation` (s⁻¹), éteint par défaut ; la clé `deformation` du banc. Essai `the_own_deformation_of_delta_is_read_relative_to_b_s430` : une houle de gradient 2,9 s⁻¹ en surface, seuil 1 — le gradient total prend les 32 colonnes, relatif à B aucune ; un cisaillement enfoui ajouté, pris lui seul (10 à 21).
