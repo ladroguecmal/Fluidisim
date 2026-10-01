@@ -18032,3 +18032,17 @@ sémantique change** : un appel sans effet remis dans un noyau rendait les bits 
 code (L345) ; « au bit près » n'est pas un instrument tenable ici. Suite **753**, zéro avertissement. **Limites** : δ ≤ 2 ms non atteint
 — restent la projection (2,5–3 ms, la multigrille), la bascule (1,9), la surface (0,7). **Rituel.** Maillons **9** — justifié : la
 priorité du solveur (S406), confirmée par « Continue » après S420 ; 4.19 reste partiel. Suivant : **C7e**, la multigrille.
+
+## S422 — 2026-10-01 — physique : C7e, la multigrille de la projection d'APIC sur la carte
+
+**Entrée.** *« Continue »* — C7e. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §14) : la recette de C1/C3a transposée à
+APIC — gradient conjugué préconditionné par un cycle en V (Jacobi 6/7, 2 + 2 lissages, 8 au plus grossier ; restriction par la
+moyenne, prolongation par injection), le niveau fin exact (fluide fantôme, solide), les grossiers rediscrétisés (active si une fille
+est d'eau, d'air sinon, solide si toutes le sont), la hiérarchie arrêtée à 64 mailles ; **les niveaux ≥ 2 dans un seul groupe**.
+**FXC** : il refuse plusieurs barrières dans une boucle de bornes non constantes (et après un `continue` qui dépend du fil) — bornes
+constantes, travail gardé. **Mesuré** : cycle symétrique (≤ 1,9·10⁻⁷) et positif ; 9 à 14 itérations au lieu de 94 et 207, vitesses à
+≤ 5,2·10⁻⁶ m/s de la référence ; issues : ballottement 0,055 mm (0,456), raccord 4,18 mm (4,48 ; témoins 3,40–4,03), bande 1,71 mm,
+B10 nu et en bande étroite au pincement de la référence, volumes exacts. **Coût** : B10 en bande étroite 3,9 ms par pas (+ 1,9 de
+bascule) ; projection 1,45 ms — dix-sept dispatchs par itération, l'objectif d'1 ms manqué. Suite **753**, zéro avertissement.
+**Limites** : la multigrille est une option (`MULTIGRILLE=1`) ; le défaut reste le gradient diagonal. **Rituel.** Maillons **10** —
+justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — la bascule en groupe, la surface, les dispatchs.

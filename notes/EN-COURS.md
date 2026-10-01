@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S422 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**, la multigrille
+Session : S422 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**, la multigrille
 pour la projection d'APIC sur la carte ([preuve](../docs/validation/APIC-CARTE-S416.md) §13 : la projection pèse 2,5 à 3 ms sur
 B10 en bande étroite, 207 itérations du gradient conjugué diagonal, cinq dispatchs chacune).
 
@@ -89,7 +89,7 @@ publié, visé ≤ 1 ms. (5) Suite, zéro avertissement.
 - [x] **P4** — le gradient conjugué préconditionné par le cycle, option `MULTIGRILLE=1` ; étages ; critère 2.
 - [x] **P5** — les issues et le coût ; critères 3 et 4.
 - [x] **P6** — non-régression, suite ; preuve §14 ; registres.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - **P2** — la hiérarchie : niveaux divisés par deux (arrondi au-dessus) tant qu'une dimension dépasse 2, huit au plus (ballottement
@@ -106,3 +106,4 @@ publié, visé ≤ 1 ms. (5) Suite, zéro avertissement.
 - **P5 (a)** — B10 en bande étroite, multigrille et plafond adaptatif : **pincement identique** (pas 55, cavité 1,937 D, air 0,0781 D³), volume exact, `φ` au col maintenant 0,56 / 0,61 mm aux pas 51 / 54 (50 et 36 mm avant), max 4,81 mm à t = 0,869 √(D/g) ; **projection 1,68 ms** (11,7 itérations), pas 4,05 ms. **Élagage** : la hiérarchie s'arrête à 64 mailles (B10 : quatre niveaux au lieu de sept, les filiformes 1×1×6… supprimés ; ballottement : trois), le groupe des niveaux grossiers en trois phases par niveau et six lissages de plus au plus grossier (≈ 30 phases à barrière au lieu de ≈ 80) : symétrie 1,9·10⁻⁷ et 9,4·10⁻⁸, positif ; **projection 1,45 ms** (13,9 itérations), **pas 3,90 ms** + bascule 1,9. Critère 4 (≤ 1 ms) manqué : dix-sept dispatchs par itération.
 - **P5 (b)** — les issues avec la multigrille (`MULTIGRILLE=1 ADAPTATIF=1`) : ballottement 10 s **0,055 mm** (0,456 au gradient diagonal), période identique, 9,5 itérations, projection 0,71 ms ; B10 nu, pincement au pas 54 identique, `φ` au col 22,1 mm (témoins 22,6 et 21,2) ; colonnes 0,002 mm ; raccord 30 s **4,18 mm** (4,48 avant ; témoins 3,40 et 4,03), période −0,027 %, volume à 0 quantum ; bande 30 s **1,71 mm** (critère 3 mm), période −0,024 %. Critère 3 tenu ; critère 4 (projection ≤ 1 ms sur B10) manqué : 1,45 ms.
 - **P6** — suite **753**, zéro avertissement ; chemin par défaut inchangé (ballottement 0,456 mm, étages sans erreur). Preuve §14 ; liste 4.19, feuille de route, index (la file inchangée : C7e continue).
+- **P7** — journal ; jeton libre ; maillons 10 (justifiés : S406) ; suivant : S423, C7e — bascule, surface, dispatchs.
