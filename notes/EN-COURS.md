@@ -83,7 +83,7 @@ est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'instrument : horodatages par sous-étage (fin du pas : séparation, corps, absorption, échange ; bascule : décision,
   application, fond) ; mesure de B10 en bande étroite.
-- [ ] **P3** — l'échange : listes ordonnées des faces-mailles et des colonnes actives ; la réserve en parallèle ; mesure ; critère 1.
+- [x] **P3** — l'échange : listes ordonnées des faces-mailles et des colonnes actives ; la réserve en parallèle ; mesure ; critère 1.
 - [ ] **P4** — la bascule : les boucles séquentielles réduites (soldes des faces changées, …) ; mesure ; critère 1.
 - [ ] **P5** — la projection : ce que coûtent les itérations enregistrées vides, et sa réduction (dispatch indirect nul après
   convergence, ou plafond) ; mesure.
@@ -92,3 +92,12 @@ est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
 
 ### Notes de reprise
 - **P2** — horodatages par sous-étage (32 requêtes ; fin du pas en trois passages : séparation et corps 6, absorption 7, échange 8 ; bascule : décision 9, application 10, fond 11). B10 en bande étroite, résultats **inchangés au caractère près** (pincement, série de `φ`, divergence au pas 35). **p99 (ms)** : transfert 0,20, surface 0,74, **projection 5,93**, extrapolation 0,03, retour 0,07, advection 0,004, séparation et corps 0,40, **absorption 2,14**, **échange 21,44** ; bascule 1,93 (décision 0,88, application 0,64, fond 0,42). Total pas 29,0 + bascule 1,9.
+- **P3** — l'échange : la réserve réglée en parallèle (`settle_reset`, `settle_count`, `settle_share`, `settle_add` ; la part comme
+  la référence, `réserve / compte` ; la soustraction par `mul_i64_u32`) ; **la liste ordonnée des faces-mailles actives** (`flist`,
+  frontière maille par maille et solde au-delà d'une particule, dans l'ordre `u` puis `v` de la référence), que le fil parcourt au
+  lieu des ≈ 45 000 faces-mailles. B10 en bande étroite : **échange 21,4 → 6,8 ms**, total du pas 29,0 → **13,9 ms** ; pincement,
+  gestes, `n`, divergence au pas 35, volume exact : **identiques** ; la série de `φ` change au pas 44 (1,25 → 1,24 mm). **Isolé** : la
+  part et la réserve sont les mêmes entiers à chaque pas (−4 855 quanta au pas 37, puis 0) ; les soldes divergent au pas 42 sans
+  que la réserve bouge ; **un appel séquentiel sans effet remis dans `exchange_serial` rend les bits de S420** — FXC compile le
+  flottant du noyau autrement quand son code change (L345). Critère 1 « au bit près » : **intenable comme instrument** ; jugé sur
+  les issues discrètes (pincement, gestes, `n`, volume) et sur la référence. Le banc garde `DEBUG_SOLDES`.

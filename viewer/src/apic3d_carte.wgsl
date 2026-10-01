@@ -65,6 +65,8 @@ struct Params {
 // S420 — l'état du critère, par colonne : instant requis [0, C), besoin, dilatation, gardée, hauteur (bits), demande, fond demandé
 // (bits) — sept tranches de C.
 @group(0) @binding(23) var<storage, read_write> swb: array<u32>;
+// S421 — la liste ordonnée des faces-mailles actives de l'échange.
+@group(0) @binding(24) var<storage, read_write> flist: array<u32>;
 
 // Le nombre de particules, résident.
 fn np() -> u32 {
@@ -1771,49 +1773,35 @@ fn exchange_serial() {
     if P.has_columns == 0.0 {
         return;
     }
-    settle_reserve();
     var n = np();
     let first_new = n;
     var marked = 0u;
     let vp_depth = P.dx / 16.0;
-    for (var axis = 0u; axis < 2u; axis = axis + 1u) {
-        var fx = P.nx + 1u;
-        var fy = P.ny;
-        if axis == 1u {
-            fx = P.nx;
-            fy = P.ny + 1u;
+    // S421 : seules les faces-mailles **actives** (frontière, solde au-delà d'une particule), dans l'ordre de la référence — un
+    // solde ne change que par ses propres gestes : la liste, faite avant, est exacte.
+    let n_active = atomicLoad(&pcount[COUNT_FLIST]);
+    for (var e_k = 0u; e_k < n_active; e_k = e_k + 1u) {
+        let e = flist[e_k];
+        let fc = face_cell_of(e);
+        let axis = fc.x;
+        let l = fc.y;
+        let fj = fc.z;
+        let fi = fc.w;
+        var lo = vec2<u32>(0u, 0u);
+        let hi = vec2<u32>(fi, fj);
+        if axis == 0u {
+            lo = vec2<u32>(fi - 1u, fj);
+        } else {
+            lo = vec2<u32>(fi, fj - 1u);
         }
-        for (var l = 0u; l < P.nz; l = l + 1u) {
-            for (var fj = 0u; fj < fy; fj = fj + 1u) {
-                for (var fi = 0u; fi < fx; fi = fi + 1u) {
-                    var lo = vec2<u32>(0u, 0u);
-                    var hi = vec2<u32>(fi, fj);
-                    if axis == 0u {
-                        if fi == 0u || fi == P.nx {
-                            continue;
-                        }
-                        lo = vec2<u32>(fi - 1u, fj);
-                    } else {
-                        if fj == 0u || fj == P.ny {
-                            continue;
-                        }
-                        lo = vec2<u32>(fi, fj - 1u);
-                    }
-                    // S413 : la frontière se lit maille par maille — à la grille (la zone, ou sous le fond) d'un côté.
-                    let zl = grid_at(i32(lo.x), i32(lo.y), l);
-                    let zh = grid_at(i32(hi.x), i32(hi.y), l);
-                    if zl == zh {
-                        continue;
-                    }
-                    var face = 0u;
-                    var plane = 0.0;
-                    if axis == 0u {
-                        face = (l * P.ny + fj) * (P.nx + 1u) + fi;
-                        plane = f32(fi) * P.dx;
-                    } else {
-                        face = P.nu + (l * (P.ny + 1u) + fj) * P.nx + fi;
-                        plane = f32(fj) * P.dx;
-                    }
+        let zl = grid_at(i32(lo.x), i32(lo.y), l);
+        var face = e;
+        var plane = 0.0;
+        if axis == 0u {
+            plane = f32(fi) * P.dx;
+        } else {
+            plane = f32(fj) * P.dx;
+        }
                     let band = select(lo, hi, zl);
                     let side = select(-1.0, 1.0, zl);
                     // (2) Retirer ce qui est dû.
@@ -1910,9 +1898,6 @@ fn exchange_serial() {
                         atomicAdd(&pcount[COUNT_POSED], 1u);
                         solde_add(face, neg_i64(vec2<u32>(VP_QUANTA, 0u)));
                     }
-                }
-            }
-        }
     }
     // (4) S413 — le solde vertical de chaque colonne à fond : dû, la particule la plus basse au-dessus du fond est retirée ;
     // reçu, une particule est posée à la face du fond (`dx/16`), au sous-réseau le plus libre.
@@ -2791,4 +2776,163 @@ fn floor_move() {
         cols[2u * ncol + 32u + col] = f32(to) * P.dx;
     }
     atomicStore(&pcount[COUNT_N], n);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **S421 — l'échange sans parcours séquentiel des faces-mailles** (C7e).
+
+const COUNT_FLIST: u32 = 10u;
+const COUNT_WET: u32 = 11u;
+const COUNT_SHARE_LO: u32 = 12u;
+const COUNT_SHARE_HI: u32 = 13u;
+
+// Une face-maille par son indice de solde (faces `u`, puis `v` : l'ordre de la boucle de la référence) : (axe, rangée, fj, fi).
+fn face_cell_of(e: u32) -> vec4<u32> {
+    if e < P.nu {
+        return vec4<u32>(0u, e / ((P.nx + 1u) * P.ny), (e / (P.nx + 1u)) % P.ny, e % (P.nx + 1u));
+    }
+    let f = e - P.nu;
+    return vec4<u32>(1u, f / (P.nx * (P.ny + 1u)), (f / P.nx) % (P.ny + 1u), f % P.nx);
+}
+
+// La face-maille `e` est-elle intérieure, ses deux côtés (lo, hi) ?
+fn face_sides(e: u32) -> vec4<u32> {
+    let fc = face_cell_of(e);
+    if fc.x == 0u {
+        if fc.w == 0u || fc.w == P.nx {
+            return vec4<u32>(0u, 0u, 0u, 0u);
+        }
+        return vec4<u32>(1u, fc.z * P.nx + fc.w - 1u, fc.z * P.nx + fc.w, fc.y);
+    }
+    if fc.z == 0u || fc.z == P.ny {
+        return vec4<u32>(0u, 0u, 0u, 0u);
+    }
+    return vec4<u32>(1u, (fc.z - 1u) * P.nx + fc.w, fc.z * P.nx + fc.w, fc.y);
+}
+
+// Active pour l'échange : frontière lue maille par maille (la zone, ou sous le fond), et un geste à faire.
+fn face_active(e: u32) -> bool {
+    if e >= P.nu + P.nv {
+        return false;
+    }
+    let sd = face_sides(e);
+    if sd.x == 0u {
+        return false;
+    }
+    let zl = grid_at(i32(sd.y % P.nx), i32(sd.y / P.nx), sd.w);
+    let zh = grid_at(i32(sd.z % P.nx), i32(sd.z / P.nx), sd.w);
+    return zl != zh && (solde_le_minus_vp(e) || solde_ge_vp(e));
+}
+
+// Mouillée pour la réserve (`columns_settle_reserve`) : frontière par le masque, l'eau de la colonne de la zone à cette rangée.
+fn face_wet(e: u32) -> bool {
+    if e >= P.nu + P.nv {
+        return false;
+    }
+    let sd = face_sides(e);
+    if sd.x == 0u {
+        return false;
+    }
+    let zl = cmask[sd.y] != 0u;
+    let zh = cmask[sd.z] != 0u;
+    if zl == zh {
+        return false;
+    }
+    let zone = select(sd.z, sd.y, zl);
+    return (f32(sd.w) + 0.5) * P.dx < cols[zone];
+}
+
+@compute @workgroup_size(256)
+fn flist_count(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+               @builtin(workgroup_id) w: vec3<u32>) {
+    alive_mem[l.x] = select(0u, 1u, face_active(g.x));
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if l.x < s {
+            alive_mem[l.x] = alive_mem[l.x] + alive_mem[l.x + s];
+        }
+        workgroupBarrier();
+    }
+    if l.x == 0u {
+        pblk[w.x] = alive_mem[0];
+    }
+}
+
+@compute @workgroup_size(256)
+fn flist_scatter(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+                 @builtin(workgroup_id) w: vec3<u32>) {
+    let e = g.x;
+    let own = select(0u, 1u, face_active(e));
+    alive_mem[l.x] = own;
+    workgroupBarrier();
+    for (var s = 1u; s < 256u; s = s * 2u) {
+        var add = 0u;
+        if l.x >= s {
+            add = alive_mem[l.x - s];
+        }
+        workgroupBarrier();
+        alive_mem[l.x] = alive_mem[l.x] + add;
+        workgroupBarrier();
+    }
+    if own == 1u {
+        flist[pblk[w.x] + alive_mem[l.x] - 1u] = e;
+    }
+}
+
+@compute @workgroup_size(1)
+fn flist_finish() {
+    atomicStore(&pcount[COUNT_FLIST], pblk[u32(P.q2)]);
+}
+
+// La réserve : les faces-mailles mouillées comptées, la part (comme la référence : `réserve / compte`), puis ajoutée à chacune.
+@compute @workgroup_size(128)
+fn settle_count(@builtin(global_invocation_id) g: vec3<u32>) {
+    if face_wet(g.x) && !i64_is_zero(solde_get(reserve_index())) {
+        atomicAdd(&pcount[COUNT_WET], 1u);
+    }
+}
+
+@compute @workgroup_size(1)
+fn settle_reset() {
+    atomicStore(&pcount[COUNT_WET], 0u);
+    atomicStore(&pcount[COUNT_SHARE_LO], 0u);
+    atomicStore(&pcount[COUNT_SHARE_HI], 0u);
+}
+
+fn mul_i64_u32(a: vec2<u32>, c: u32) -> vec2<u32> {
+    // (hi·2³² + lo)·c, modulo 2⁶⁴ : `lo·c` sur 64 bits par moitiés de 16 bits.
+    let lo0 = a.x & 0xffffu;
+    let lo1 = a.x >> 16u;
+    let c0 = c & 0xffffu;
+    let c1 = c >> 16u;
+    let p00 = lo0 * c0;
+    let p01 = lo0 * c1;
+    let p10 = lo1 * c0;
+    let p11 = lo1 * c1;
+    let mid = (p00 >> 16u) + (p01 & 0xffffu) + (p10 & 0xffffu);
+    let low = (p00 & 0xffffu) | (mid << 16u);
+    let high = p11 + (p01 >> 16u) + (p10 >> 16u) + (mid >> 16u);
+    return vec2<u32>(low, high + a.y * c);
+}
+
+@compute @workgroup_size(1)
+fn settle_share() {
+    let r = solde_get(reserve_index());
+    let count = atomicLoad(&pcount[COUNT_WET]);
+    if i64_is_zero(r) || count == 0u {
+        return;
+    }
+    let share = to_i64(i64_to_f32(r) / f32(count));
+    atomicStore(&pcount[COUNT_SHARE_LO], share.x);
+    atomicStore(&pcount[COUNT_SHARE_HI], share.y);
+    solde_add(reserve_index(), neg_i64(mul_i64_u32(share, count)));
+}
+
+@compute @workgroup_size(128)
+fn settle_add(@builtin(global_invocation_id) g: vec3<u32>) {
+    let share = vec2<u32>(atomicLoad(&pcount[COUNT_SHARE_LO]), atomicLoad(&pcount[COUNT_SHARE_HI]));
+    if i64_is_zero(share) || !face_wet(g.x) {
+        return;
+    }
+    solde_add(g.x, share);
 }

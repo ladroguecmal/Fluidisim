@@ -12,7 +12,7 @@ use water_core::apic3d::{self, Apic3, ApicStage, ColumnsSwitch, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 58] = [
+const KERNELS: [&str; 65] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -21,7 +21,7 @@ const KERNELS: [&str; 58] = [
     "exchange_begin", "absorb_mark", "absorb_serial", "exchange_serial", "floor_update",
     "switch_need", "switch_slope", "switch_spread", "switch_request", "switch_begin", "convert_mark", "switch_apply",
     "list_mode_absorb", "list_mode_convert", "list_count", "list_scatter", "list_finish", "floor_place", "list_mode_raise",
-    "floor_move",
+    "floor_move", "flist_count", "flist_scatter", "flist_finish", "settle_count", "settle_reset", "settle_share", "settle_add",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -64,6 +64,11 @@ const LIST_BUILD: [usize; 3] = [52, 53, 54];
 const FLOOR_PLACE: usize = 55;
 const LIST_MODE_RAISE: usize = 56;
 const FLOOR_MOVE: usize = 57;
+const FLIST: [usize; 3] = [58, 59, 60];
+const SETTLE_COUNT: usize = 61;
+const SETTLE_RESET: usize = 62;
+const SETTLE_SHARE: usize = 63;
+const SETTLE_ADD: usize = 64;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
@@ -195,9 +200,11 @@ impl ApicCarte {
         let isolde = buffer(&device, ((nu + nv + ncol + 1) * 8) as u64, storage);
         let pcount = buffer(&device, 64, storage);
         let plist = buffer(&device, (capacity * 4) as u64, storage);
-        let pblk = buffer(&device, ((capacity.div_ceil(SCAN as usize) + 1) * 4) as u64, storage);
+        // S421 : les groupes de préfixe couvrent les particules et les faces-mailles.
+        let pblk = buffer(&device, ((capacity.max(nu + nv).div_ceil(SCAN as usize) + 1) * 4) as u64, storage);
         let pscratch = buffer(&device, (capacity * 80) as u64, storage);
         let swb = buffer(&device, (7 * ncol * 4) as u64, storage);
+        let flist = buffer(&device, ((nu + nv) * 4) as u64, storage);
         let largest = [3 * faces, 8 * cells, capacity * 12, cells + 1].into_iter().max().unwrap_or(1);
         let read = buffer(&device, (largest * 4) as u64, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
         let query = (!features.is_empty()).then(|| {
@@ -208,7 +215,7 @@ impl ApicCarte {
 
         let all = [
             &params, &px, &pv, &pc, &shift, &count, &start, &order, &blocks, &faces_buf, &fflags, &cellf, &label, &partials,
-            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist, &pblk, &pscratch, &swb,
+            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist, &pblk, &pscratch, &swb, &flist,
         ];
         let entries: Vec<_> = (0..all.len() as u32)
             .map(|binding| wgpu::BindGroupLayoutEntry {
@@ -502,7 +509,7 @@ impl ApicCarte {
         let body = [
             has, b.radius, 0., b.center[0], b.center[1], b.center[2], b.velocity[0], b.velocity[1], b.velocity[2], moved[0],
             moved[1], moved[2], self.columns as u8 as f32, self.band as u8 as f32,
-            self.capacity.div_ceil(SCAN as usize) as f32,
+            self.list_span().div_ceil(SCAN as usize) as f32,
             // Le fond existe, ou la bascule peut en poser un.
             (self.floors || self.switch.floor_cells.is_some()) as u8 as f32,
             0., 0., 0.,
@@ -536,19 +543,25 @@ impl ApicCarte {
         pass.dispatch_workgroups((threads as u32).div_ceil(group).max(1), 1, 1);
     }
 
+    /// S421 — l'étendue des listes ordonnées : particules et faces-mailles.
+    fn list_span(&self) -> usize {
+        let Domain3 { nx, ny, nz, .. } = self.domain;
+        self.capacity.max((nx + 1) * ny * nz + nx * (ny + 1) * nz)
+    }
+
     /// S420 — la liste ordonnée des particules du prédicat courant (absorbées, ou dans une colonne convertie).
     fn encode_list(&self, pass: &mut wgpu::ComputePass) {
-        self.dispatch(pass, LIST_BUILD[0], self.capacity, SCAN);
+        self.dispatch(pass, LIST_BUILD[0], self.list_span(), SCAN);
         self.dispatch(pass, COMPACT[1], 1, 1);
-        self.dispatch(pass, LIST_BUILD[1], self.capacity, SCAN);
+        self.dispatch(pass, LIST_BUILD[1], self.list_span(), SCAN);
         self.dispatch(pass, LIST_BUILD[2], 1, 1);
     }
 
     /// S418 — le compactage stable des particules marquées.
     fn encode_compact(&self, pass: &mut wgpu::ComputePass) {
-        self.dispatch(pass, COMPACT[0], self.capacity, SCAN);
+        self.dispatch(pass, COMPACT[0], self.list_span(), SCAN);
         self.dispatch(pass, COMPACT[1], 1, 1);
-        self.dispatch(pass, COMPACT[2], self.capacity, SCAN);
+        self.dispatch(pass, COMPACT[2], self.list_span(), SCAN);
         self.dispatch(pass, COMPACT[3], self.capacity, WG);
         self.dispatch(pass, COMPACT[4], 1, 1);
     }
@@ -679,7 +692,17 @@ impl ApicCarte {
                             self.dispatch(&mut p, ABSORB_SERIAL, 1, 1);
                         }
                         let mut p = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(8) });
+                        // S421 : la réserve réglée en parallèle, puis la liste des faces-mailles actives.
+                        let span = self.list_span();
+                        self.dispatch(&mut p, SETTLE_RESET, 1, 1);
+                        self.dispatch(&mut p, SETTLE_COUNT, span, WG);
+                        self.dispatch(&mut p, SETTLE_SHARE, 1, 1);
+                        self.dispatch(&mut p, SETTLE_ADD, span, WG);
                         self.encode_bin(&mut p);
+                        self.dispatch(&mut p, FLIST[0], span, SCAN);
+                        self.dispatch(&mut p, COMPACT[1], 1, 1);
+                        self.dispatch(&mut p, FLIST[1], span, SCAN);
+                        self.dispatch(&mut p, FLIST[2], 1, 1);
                         self.dispatch(&mut p, EXCHANGE_SERIAL, 1, 1);
                         used = 9;
                     } else {
@@ -795,7 +818,7 @@ impl ApicCarte {
     /// S418 : `n` et les compteurs de l'échange, lus sur la carte : `[n, n au début de l'échange, liste, absorbées, retirées,
     /// posées, refusées]`.
     pub fn counts(&self) -> Result<Vec<u32>, String> {
-        self.read_u32(&self.pcount, 0, 9)
+        self.read_u32(&self.pcount, 0, 14)
     }
 
     /// S418 : les soldes des faces-mailles, `u` puis `v`, puis (S419) le solde vertical de chaque colonne, m³.
@@ -1632,6 +1655,12 @@ pub fn recevoir_b10() -> Result<(), String> {
                         ts.switch(t_us, tw).map_err(|e| format!("{e:?}"))?;
                     }
                     _ => {
+                        if std::env::var("DEBUG_SOLDES").is_ok() {
+                            let so = carte.soldes()?;
+                            let sum: f64 = so.iter().map(|x| x.abs()).sum();
+                            let kk = carte.counts()?;
+                            println!("DEBUG_SOLDES pas={} reserve={:e} somme_abs={:.15e} mouillees={} part={},{} actives={}", steps + 1, so.last().copied().unwrap_or(0.), sum, kk[11], kk[12], kk[13], kk[10]);
+                        }
                         let sw_times = carte.switch_for_bench(t_us)?;
                         let k = carte.counts()?;
                         let mut sw_sum = 0.;
