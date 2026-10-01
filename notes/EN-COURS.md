@@ -84,7 +84,7 @@ est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
 - [x] **P2** — l'instrument : horodatages par sous-étage (fin du pas : séparation, corps, absorption, échange ; bascule : décision,
   application, fond) ; mesure de B10 en bande étroite.
 - [x] **P3** — l'échange : listes ordonnées des faces-mailles et des colonnes actives ; la réserve en parallèle ; mesure ; critère 1.
-- [ ] **P4** — *réordonné après la mesure de P2–P3 (projection 4,8 ms, échange 6,8, absorption 2,0, bascule 1,9)* : la projection —
+- [x] **P4** — *réordonné après la mesure de P2–P3 (projection 4,8 ms, échange 6,8, absorption 2,0, bascule 1,9)* : la projection —
   les itérations après convergence lancées en **dispatch indirect nul** (les arguments mis à zéro par le noyau qui conclut) ; mesure.
 - [ ] **P5** — l'intérieur de l'échange et de l'absorption sur leur fil (ce qui y coûte, mesuré par essais) ; la bascule si le temps
   le permet ; mesure.
@@ -102,3 +102,4 @@ est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
   que la réserve bouge ; **un appel séquentiel sans effet remis dans `exchange_serial` rend les bits de S420** — FXC compile le
   flottant du noyau autrement quand son code change (L345). Critère 1 « au bit près » : **intenable comme instrument** ; jugé sur
   les issues discrètes (pincement, gestes, `n`, volume) et sur la référence. Le banc garde `DEBUG_SOLDES`.
+- **P4** — le dispatch indirect nul après convergence est **refusé par wgpu** (un tampon lié en écriture et lu comme arguments dans le même dispatch ; deux tampons alternés ne sautent qu'une itération vide sur deux) — abandonné, revenu en arrière. **Plafond adaptatif** à la place (`set_adaptive_cap`, `observe_iterations` ; `ADAPTATIF=1`) : 1,25 × le plus grand des huit derniers pas + 8, retour au plafond fixe après un pas non convergé ; la production le lira en différé (ADR-175 D3). B10 en bande étroite : **projection 4,78 → 2,99 ms**, aucune non-convergence, issues identiques ; pas 12,2 ms.

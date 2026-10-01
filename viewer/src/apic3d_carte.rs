@@ -127,6 +127,10 @@ pub struct ApicCarte {
     /// Itérations du gradient conjugué **enregistrées** par pas : le travail est borné, l'arrêt au critère de la référence
     /// se fait par un drapeau sur la carte (ADR-175 D2).
     iteration_cap: u32,
+    /// S421 — le plafond adaptatif (diagnostics différés, ADR-175 D3) : le plafond fixe de départ, et les itérations des derniers pas.
+    cap_max: u32,
+    recent: [u32; 8],
+    adaptive: bool,
     /// S417 : le corps cinématique, s'il y en a un ; le pas l'avance de `velocity·dt`, comme la référence.
     body: Option<Sphere3>,
     pub adapter: String,
@@ -302,6 +306,9 @@ impl ApicCarte {
             rho,
             g_eff,
             iteration_cap: 400,
+            cap_max: 400,
+            recent: [0; 8],
+            adaptive: false,
             body: None,
             adapter: format!("{} ({:?})", info.name, info.backend),
         })
@@ -418,6 +425,24 @@ impl ApicCarte {
     /// Itérations du gradient conjugué enregistrées par pas.
     pub fn set_iteration_cap(&mut self, cap: u32) {
         self.iteration_cap = cap.max(1);
+        self.cap_max = self.iteration_cap;
+    }
+
+    /// **S421 — le plafond adaptatif** : chaque itération enregistrée coûte, même vide après convergence (§5). Le plafond suit
+    /// les pas récents — 1,25 fois le plus grand nombre d'itérations des huit derniers, plus huit — et revient au plafond fixe
+    /// après un pas qui ne converge pas. Ce que lit la production en différé (ADR-175 D3) ; le banc le lit tout de suite.
+    pub fn set_adaptive_cap(&mut self, on: bool) {
+        self.adaptive = on;
+    }
+
+    pub fn observe_iterations(&mut self, iterations: u32, converged: bool) {
+        if !self.adaptive {
+            return;
+        }
+        self.recent.rotate_right(1);
+        self.recent[0] = iterations;
+        let worst = self.recent.iter().copied().max().unwrap_or(0);
+        self.iteration_cap = if converged { (worst * 5 / 4 + 8).clamp(16, self.cap_max) } else { self.cap_max };
     }
 
     /// Charge l'état des particules de la référence : positions, vitesses, matrices affines.
@@ -1225,6 +1250,7 @@ pub fn recevoir_ballottement() -> Result<(), String> {
             carte.set_iteration_cap(cap);
         }
         carte.load(&a)?;
+        carte.set_adaptive_cap(std::env::var("ADAPTATIF").is_ok());
         let lx = d.nx as f64 * d.dx as f64;
         let moment = |x: &[[f32; 3]]| -> f64 { x.iter().map(|p| p[0] as f64 - lx / 2.).sum() };
         // Tout en colonnes : le moment se lit sur `η` (S398).
@@ -1279,6 +1305,7 @@ pub fn recevoir_ballottement() -> Result<(), String> {
             it_ref += r.iterations as u64;
             if twin.is_none() {
                 let (_, it, _, converged) = carte.pressure()?;
+                carte.observe_iterations(it, converged);
                 it_carte += it as u64;
                 unconverged += (!converged) as u64;
             }
@@ -1570,6 +1597,7 @@ pub fn recevoir_b10() -> Result<(), String> {
         let n = a.particle_count();
         let mut carte = ApicCarte::new(&a, a.particle_capacity()).await?;
         carte.set_iteration_cap(std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(600));
+        carte.set_adaptive_cap(std::env::var("ADAPTATIF").is_ok());
         carte.load(&a)?;
         if let Some(s) = sw.as_mut() {
             carte.load_switch(s);
@@ -1696,6 +1724,7 @@ pub fn recevoir_b10() -> Result<(), String> {
             it_ref += rep.iterations as u64;
             if twin.is_none() {
                 let (_, it, _, converged) = carte.pressure()?;
+                carte.observe_iterations(it, converged);
                 it_carte += it as u64;
                 unconverged += (!converged) as u64;
             }
