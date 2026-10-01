@@ -84,9 +84,11 @@ avertissement.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `switch_apply` en groupe ; bascules forcées identiques ; mesure.
-- [ ] **P3** — *réorienté après P2* : le retrait parallèle à forme close (bascule, fond) et l'ensemencement par préfixe sur les colonnes (bascule, fond) ; `floor_move` en groupe ; mêmes bancs ; mesure.
-- [ ] **P4** — la multigrille : le niveau 1 dans le groupe ; V(3,3) mesuré ; symétrie, issues, mesure.
-- [ ] **P5** — la surface : mesure de ce qui coûte, réduction exacte si elle se trouve ; la multigrille par défaut.
+- [ ] **P3** — *réordonné après la mesure des médianes (S423)* : au pas ordinaire, projection 1,38 ms, surface 0,68 + décision 0,81
+  (dont la surface rafraîchie), séparation 0,32 ; application 0,10 et fond 0,17 (0,60 et 0,42 au 99ᵉ centile : les pas qui
+  basculent). D'abord **la multigrille** : le niveau 1 dans le groupe, V(3,3) mesuré ; symétrie, issues, mesure.
+- [ ] **P4** — **la surface** (`reconstruct`, deux fois par pas) : mesurer ce qui coûte, réduction exacte si elle se trouve.
+- [ ] **P5** — les pas qui basculent : le retrait parallèle à forme close et l'ensemencement par préfixe ; la multigrille par défaut.
 - [ ] **P6** — non-régression, suite ; preuve §15 ; registres.
 - [ ] **P7** — rituel.
 
@@ -99,3 +101,4 @@ avertissement.
   **Réorientation de P3** (déclarée avant) : le retrait parallèle à forme close — la visite de la référence (échange avec la dernière)
   met dans la k-ième plus petite place retirée sous le nouveau `n` la k-ième plus grande particule gardée au-delà ; pour la bascule et
   le fond, le traitement d'une retirée n'est qu'un compte (par colonne pour le fond) — puis l'ensemencement par préfixe sur les colonnes.
+- **Médianes** (B10 en bande étroite, multigrille) : transfert 0,17, surface 0,68, projection 1,38, séparation 0,32, absorption 0,09 + 0,19, échange 0,16 + 0,32 ; bascule : décision 0,81, application 0,10, fond 0,17. Le banc les imprime (`cout_median_ms`).

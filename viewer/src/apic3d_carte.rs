@@ -1977,6 +1977,14 @@ pub fn recevoir_b10() -> Result<(), String> {
         let per_stage: Vec<String> =
             names.iter().zip(stage_ms.iter_mut()).map(|(name, v)| format!("{name}={:.3}", percentile(v, 0.99))).collect();
         let p99 = percentile(&mut total_ms, 0.99);
+        // S423 : médianes, pour séparer le coût ordinaire des pas exceptionnels.
+        let medians: Vec<String> = names
+            .iter()
+            .zip(stage_ms.iter_mut())
+            .filter(|(_, v)| !v.is_empty())
+            .map(|(name, v)| format!("{name}={:.3}", percentile(v, 0.5)))
+            .collect();
+        println!("APIC_CARTE_B10_S417 cout_median_ms {}", medians.join(" "));
         println!(
             "APIC_CARTE_B10_S417 pas={steps} ecart_phi_interface_max_mm={:.3} a_t_sur_rac_d_g={:.3} iterations_moyennes_reference={:.1} carte={:.1} non_convergees={unconverged} calcul_s={:.0}",
             worst_phi * 1e3, worst_at / echelle, it_ref as f64 / steps as f64, it_carte as f64 / steps as f64,
