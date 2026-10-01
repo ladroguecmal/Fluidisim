@@ -498,7 +498,10 @@ impl ApicCarte {
         self.recent.rotate_right(1);
         self.recent[0] = iterations;
         let worst = self.recent.iter().copied().max().unwrap_or(0);
-        self.iteration_cap = if converged { (worst * 5 / 4 + 8).clamp(16, self.cap_max) } else { self.cap_max };
+        // S422 : avec la multigrille, une marge de deux (une itération coûte dix-sept dispatchs, et il en faut une dizaine).
+        let margin = if self.multigrid { 2 } else { 8 };
+        let floor = if self.multigrid { 4 } else { 16 };
+        self.iteration_cap = if converged { (worst * 5 / 4 + margin).clamp(floor, self.cap_max) } else { self.cap_max };
     }
 
     /// Charge l'état des particules de la référence : positions, vitesses, matrices affines.
@@ -1097,6 +1100,7 @@ pub fn recevoir_etages() -> Result<(), String> {
         if let Some(cap) = std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()) {
             carte.set_iteration_cap(cap);
         }
+        carte.set_multigrid(std::env::var("MULTIGRILLE").is_ok());
         println!(
             "APIC_CARTE_S416 carte={:?} cas={} domaine={}x{}x{} dx={} particules={} chauffe={warm} corps={:?}",
             carte.adapter, if cas.is_empty() { "ballottement" } else { &cas }, d.nx, d.ny, d.nz, d.dx, reference.particle_count(),
@@ -1389,6 +1393,7 @@ pub fn recevoir_ballottement() -> Result<(), String> {
         }
         carte.load(&a)?;
         carte.set_adaptive_cap(std::env::var("ADAPTATIF").is_ok());
+        carte.set_multigrid(std::env::var("MULTIGRILLE").is_ok());
         let lx = d.nx as f64 * d.dx as f64;
         let moment = |x: &[[f32; 3]]| -> f64 { x.iter().map(|p| p[0] as f64 - lx / 2.).sum() };
         // Tout en colonnes : le moment se lit sur `η` (S398).
@@ -1736,6 +1741,7 @@ pub fn recevoir_b10() -> Result<(), String> {
         let mut carte = ApicCarte::new(&a, a.particle_capacity()).await?;
         carte.set_iteration_cap(std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(600));
         carte.set_adaptive_cap(std::env::var("ADAPTATIF").is_ok());
+        carte.set_multigrid(std::env::var("MULTIGRILLE").is_ok());
         carte.load(&a)?;
         if let Some(s) = sw.as_mut() {
             carte.load_switch(s);

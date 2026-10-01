@@ -86,7 +86,7 @@ publié, visé ≤ 1 ms. (5) Suite, zéro avertissement.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la hiérarchie : niveaux, tampons, natures des mailles (niveau 1 depuis les étiquettes, les suivants dans un groupe).
 - [x] **P3** — le cycle en V (fin, niveau 1, le groupe des niveaux grossiers) ; banc de symétrie et de positivité ; critère 1.
-- [ ] **P4** — le gradient conjugué préconditionné par le cycle, option `MULTIGRILLE=1` ; étages ; critère 2.
+- [x] **P4** — le gradient conjugué préconditionné par le cycle, option `MULTIGRILLE=1` ; étages ; critère 2.
 - [ ] **P5** — les issues et le coût ; critères 3 et 4.
 - [ ] **P6** — non-régression, suite ; preuve §14 ; registres.
 - [ ] **P7** — rituel.
@@ -102,3 +102,4 @@ publié, visé ≤ 1 ms. (5) Suite, zéro avertissement.
   donc des bornes constantes (huit niveaux, sept lissages), le travail gardé ; `mg_row` et `mg_child` à sortie unique. Banc
   `--apic3d-carte-mg-cycle` (`CAS=`, `raccord`, `b10`) : **symétrie relative 9,5·10⁻⁸, 1,8·10⁻⁷, 2,5·10⁻⁷ ; positivité tenue** ; la
   projection converge au critère de la référence en **9, 9 et 11 itérations** (diagonale : 94, 94, 207). Critère 1 tenu.
+- **P4** — `MULTIGRILLE=1` dans les bancs (étages, ballottement, B10) ; plafond adaptatif à marge 2 avec la multigrille. Étages, au plafond fixe : **9 / 95, 9 / 94, 9 / 95, 11 / 211 itérations** (carte / référence) ; résidus 2,8 à 3,6·10⁻⁷ ; **vitesses corrigées à 3,5·10⁻⁶, 2,3·10⁻⁶, 2,2·10⁻⁶, 5,2·10⁻⁶ m/s** (ballottement, raccord, bande, B10) ; pas entiers du raccord et de la bande identiques en gestes. Critère 2 tenu.
