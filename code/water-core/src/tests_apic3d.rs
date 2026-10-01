@@ -1217,6 +1217,53 @@ fn the_own_deformation_of_delta_is_read_relative_to_b_s430() {
     assert!(!shear.contains(&0) && !shear.contains(&31), "loin du cisaillement, rien");
 }
 
+/// **S431, C7d-1** — la relâche du seuil de vitesse : un jet à 0,5 m/s prend ses colonnes (dilatées) ; ralenti à 0,3 m/s, entre la
+/// relâche (0,2) et le seuil (0,4), ses colonnes sont **gardées**, sans dilatation — sans relâche, elles repassent aux colonnes ;
+/// ralenti à 0,1, il les rend. Un jet à 0,3 m/s ne prend pas une colonne qui n'était pas en bande (la zone, posée toute en bande,
+/// rendue d'abord aux colonnes à l'arrêt).
+#[test]
+fn a_band_column_is_kept_between_the_speed_release_and_the_threshold_s431() {
+    let (nx, ny, nz, dx) = (32usize, 4usize, 16usize, 0.05f32);
+    let set_jet = |a: &mut Apic3, speed: f32| {
+        for k in 2..5 {
+            for j in 0..ny {
+                for i in 0..=nx {
+                    a.u[(k * ny + j) * (nx + 1) + i] = if (14..=18).contains(&i) { speed } else { 0. };
+                }
+            }
+        }
+    };
+    let run = |release: Option<f32>, speeds: &[f32]| {
+        let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+        a.enable_columns(&mut host, &vec![0u8; nx * ny]).unwrap();
+        a.seed(&|p| p[2] < 0.5).unwrap();
+        let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+        s.floor_cells = Some(4);
+        s.floor_speed = Some(0.4);
+        s.floor_speed_release = release;
+        s.hold_us = 0;
+        let mut bands = Vec::new();
+        for (n, &v) in speeds.iter().enumerate() {
+            set_jet(&mut a, v);
+            s.switch(n as u64 * 1000, &mut a).unwrap();
+            bands.push((0..nx).filter(|&i| !a.is_column(i, 1)).collect::<Vec<usize>>());
+        }
+        bands
+    };
+    let with = run(Some(0.2), &[0.5, 0.3, 0.1]);
+    let without = run(None, &[0.5, 0.3, 0.1]);
+    println!("S431 relâche 0,2 : {with:?} ; sans : {without:?}");
+    assert_eq!(with[0], without[0]);
+    assert!(with[0].len() > 4, "le jet à 0,5 prend ses colonnes, dilatées");
+    assert_eq!(with[1], vec![14, 15, 16, 17], "ralenti entre les seuils : gardées, sans dilatation");
+    assert!(without[1].is_empty(), "sans relâche, rendues");
+    assert!(with[2].is_empty(), "sous la relâche, rendues");
+    // La zone part toute en bande : un premier passage à l'arrêt la rend aux colonnes.
+    let calm_then_slow = run(Some(0.2), &[0., 0.3]);
+    assert!(calm_then_slow[0].is_empty() && calm_then_slow[1].is_empty(), "la relâche ne prend pas : {calm_then_slow:?}");
+}
+
 /// **S415** — la part de rotation : 1 pour une rotation solide, 0 pour une déformation pure (`u = γz`, `w = γx` : symétrique),
 /// le gradient à l'échelle de la vorticité pour la rotation (2Ω).
 #[test]

@@ -1652,6 +1652,11 @@ pub struct ColumnsSwitch {
     /// elle. Une houle qui est B n'a pas de déformation propre, même raide ; un déferlement, un jet, un sillage en ont. `None`, le
     /// défaut.
     pub floor_deformation: Option<f32>,
+    /// **S431 — C7d-1 : la relâche du seuil de vitesse**, m/s, comme `slope_release` (S410) : une colonne **de la bande** dont une
+    /// maille d'eau va plus vite que la relâche (relativement à B s'il y en a un) sans atteindre `floor_speed` est **gardée** — ni
+    /// requise, ni dilatée — ; le fond descend aussi sous ces mailles. Sans elle, une colonne au voisinage du seuil entre et sort
+    /// (S429 : 25 retours rapides à 0,4 m/s). `None`, le défaut.
+    pub floor_speed_release: Option<f32>,
     /// L'instant de la décision en cours (`switch`), µs — pour B.
     now_us: u64,
     domain: Domain3,
@@ -1698,6 +1703,7 @@ impl ColumnsSwitch {
             floor_rotation_gradient: 0.5,
             background: None,
             floor_deformation: None,
+            floor_speed_release: None,
             now_us: 0,
             domain,
             required_at: vec![u64::MAX; cols],
@@ -1767,12 +1773,7 @@ impl ColumnsSwitch {
             return true;
         }
         if let Some(limit) = self.floor_speed {
-            // S429 : relative à B, s'il y en a un.
-            let speed = match &self.background {
-                Some(b) => a.cell_speed_relative(i, j, k, b, self.now_us as f64 * 1e-6),
-                None => a.cell_speed(i, j, k),
-            };
-            if speed > limit {
+            if self.own_speed(a, i, j, k) > limit {
                 return true;
             }
         }
@@ -1780,6 +1781,19 @@ impl ColumnsSwitch {
             let (share, gradient) = a.rotation_share(i, j, k);
             share > limit && gradient > self.floor_rotation_gradient
         })
+    }
+
+    /// **S429** — la vitesse d'une maille pour le seuil de vitesse : relative à B, s'il y en a un ; sinon la vitesse totale.
+    fn own_speed(&self, a: &Apic3, i: usize, j: usize, k: usize) -> f32 {
+        match &self.background {
+            Some(b) => a.cell_speed_relative(i, j, k, b, self.now_us as f64 * 1e-6),
+            None => a.cell_speed(i, j, k),
+        }
+    }
+
+    /// **S431** — une maille d'eau garde-t-elle sa colonne de la bande : au-delà de la relâche du seuil de vitesse ?
+    fn speed_keeps(&self, a: &Apic3, i: usize, j: usize, k: usize) -> bool {
+        a.label[a.cell(i, j, k)] == WATER && self.floor_speed_release.is_some_and(|r| self.own_speed(a, i, j, k) > r)
     }
 
     /// **S414** — le plus grand nombre de déplacements du fond d'une colonne (l'hystérésis du fond).
@@ -1808,7 +1822,8 @@ impl ColumnsSwitch {
                 let mut target = low.saturating_sub(k);
                 // S415 : sous la plus basse maille d'eau qui tourbillonne, ou qui va vite.
                 if self.floor_vorticity.is_some() || self.floor_speed.is_some() || self.floor_rotation.is_some() || self.floor_deformation.is_some() {
-                    if let Some(l) = (0..nz).find(|&l| self.flow_needs(a, i, j, l)) {
+                    // S431 : et sous les mailles qui gardent la colonne (la relâche du seuil de vitesse).
+                    if let Some(l) = (0..nz).find(|&l| self.flow_needs(a, i, j, l) || self.speed_keeps(a, i, j, l)) {
                         target = target.min(l.saturating_sub(k));
                     }
                 }
@@ -1934,6 +1949,9 @@ impl ColumnsSwitch {
                     let col = j * nx + i;
                     if self.need[col] == 0 && (0..nz).any(|k| self.flow_needs(a, i, j, k)) {
                         self.need[col] = 1;
+                    } else if self.need[col] == 0 && c.mask[col] == 0 && (0..nz).any(|k| self.speed_keeps(a, i, j, k)) {
+                        // S431 : gardée par la relâche — ni requise, ni dilatée.
+                        self.keep[col] = 1;
                     }
                 }
             }

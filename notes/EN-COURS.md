@@ -81,9 +81,10 @@ seule** (0), retournement à l'instant de la forme seule (à un pas) ; (b) `ε` 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `floor_speed_release` ; essai du cœur ; clé du banc.
+- [x] **P2** — `floor_speed_release` ; essai du cœur ; clé du banc.
 - [ ] **P3** — mesures sur la vague de Chen ; critères ; C7d-1 reçu ou non.
 - [ ] **P4** — suite ; preuve §21.3 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — `floor_speed_release` : une colonne de la bande dont une maille d'eau dépasse la relâche (relativement à B s'il y en a un) sans atteindre `floor_speed` est gardée (`keep`, comme la pente en S410), le fond aussi sous ces mailles ; `own_speed` partagé par l'entrée et la relâche (sans relâche, mêmes appels qu'avant). Clé `vitesse_relache` du banc. Essai `a_band_column_is_kept_between_the_speed_release_and_the_threshold_s431` : jet 0,5 → colonnes 12 à 19 ; ralenti à 0,3 → gardées 14 à 17 sans dilatation (sans relâche : rendues) ; 0,1 → rendues ; à 0,3 depuis l'arrêt, rien pris. *Une erreur de mon essai, corrigée* : la zone est posée toute en bande, il fallait un premier passage à l'arrêt. Essais d'`apic3d` (38) verts.
