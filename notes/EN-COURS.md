@@ -62,37 +62,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S428 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
-([preuve](../docs/validation/APIC-CARTE-S416.md) §19 : B10 en bande étroite, pas + bascule 2,16 ms au p99 ; la projection 0,886 —
-le groupe des niveaux grossiers, 18 µs par itération ; la part fixe du fil de l'échange, 53 µs).
+Session : S429 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« On accepte ce petit surplus au critère, continue »* —
+**C7e est reçu** à 2,07 ms au p99 (pas + bascule, B10 en bande étroite ; critère 2 ms) par décision de l'utilisateur ; la suite
+déclarée : **C7d, relative à B** ([preuve](../docs/validation/APIC-CARTE-S416.md) §1.1 : *« la bande sur la production couplée
+(ADR-198), le fond qui suit la vitesse propre de δ (BANDE-ETROITE-S413 §6.4) — reçu si la vague de Chen sous B : particules seulement
+où δ se déforme ; rien sous une houle calme »*).
 
-**Avant ce plan — un écart à la procédure, déclaré.** Un essai a été écrit et mesuré avant que le plan ne soit posé : **le départ
-chaud** de la projection (partir de la pression du pas précédent, `r = b − A·p`, même critère d'arrêt que la référence). Mesuré sur
-B10 en bande étroite : 13,9 → 13,4 itérations, projection médiane 0,844 → 0,831 ms, p99 inchangé — la pression change trop d'un pas
-à l'autre ; il rapproche la carte de la référence (premier écart de gestes au pas 50 au lieu de 34, `φ` max 4,8 mm au lieu de 6,8)
-mais n'apporte rien au coût. **Retiré** (rien n'en est commité) ; consigné ici et dans la preuve.
+**Ce que la session trouve en entrant.** C7d n'est pas un portage : la production GPU ne porte pas encore le mode relatif d'ADR-198
+(D1 : « travail daté ») ; A320 (une perturbation de δ croît sous houle raide, en mode relatif) est ouverte ; la bande d'APIC simule
+l'eau totale, sans B. **Mais son critère de réception se mesure en référence dès maintenant** : le banc de la vague de Chen
+(`apic3d_deferlement`) initialise l'eau par le champ linéaire de Stokes ; pris pour B et propagé, il donne `u − U_B = 0` au départ —
+la vitesse propre de δ ne naît que là où l'écoulement quitte la houle progressive.
 
-**Ce que la session fait.** (1) **Les barrières à vide du groupe des niveaux grossiers** : la boucle de remontée a des bornes
-constantes (FXC) et, au dernier tour (vers le niveau 1), deux phases de lissage sans travail mais avec leurs barrières ; le
-chargement des natures et celui de `r₂` sont deux phases qui peuvent n'en faire qu'une — même arithmétique, moins de barrières.
-(2) **La part fixe du fil de l'échange** : par face-maille active, une seule décision diffusée (retirer, poser, rien), et seulement la
-partie qui sert — aujourd'hui `xg_remove_all`, la boucle de retrait d'origine et la réduction des poses s'exécutent toutes, chacune avec
-ses diffusions. (3) Mesurer ; vérifier le déterminisme (`DUMP_B10`, deux exécutions).
+**Ce que la session fait.** (1) **C7e reçu** : consigné (preuve §20, registres, liste). (2) **La conception de C7d** (preuve §21) :
+ce qu'elle demande, ses dépendances (le mode relatif sur la carte, A320), son découpage — **C7d-1** le critère relatif en référence
+sur la vague de Chen ; **C7d-2** le même sur la carte ; **C7d-3** la bande dans la production couplée, après le mode relatif sur la
+carte — chacun avec son « reçu si » écrit avant. (3) **C7d-1** : `ColumnsSwitch` reçoit un fond B analytique (houle linéaire : `a`,
+`k`, `ω`, phase, niveau moyen) ; le critère de vitesse du fond (`floor_speed`, S415) porte alors sur `|u − U_B(x, t)|` ; éteint
+par défaut (au bit sans lui).
 
-**Critères, écrits avant.** (1) Issues identiques à S427 (gestes, étages, B10 en bande étroite et nu, bascules forcées, raccord,
-bande) ; sinon l'écart isolé au bit. (2) Déterministe. (3) **Visé : pas + bascule ≤ 2 ms au p99** (2,16). (4) Suite, zéro
-avertissement.
+**Critères de C7d-1, écrits avant.** Sur la vague de Chen (40 mailles par longueur d'onde, `ny` 4, maintien 0,3 s, fond 4, vitesse
+0,2 m/s) : (a) **`ε` = 0,55** — la part des colonnes de la fenêtre en particules au retournement **sous 0,5** (vitesse absolue :
+1,000 ; la forme seule : 0,50), le retournement **au même instant** que la forme seule (à un pas près) ; (b) **`ε` = 0,1, houle calme**
+— **aucune colonne de la fenêtre en particules** après le premier pas, sur 2,5 τ ; (c) sans fond B, S415 au chiffre près ; (d) suite
+du cœur, zéro avertissement. Les parois réfléchissent (le bassin n'est pas périodique) : la part hors fenêtre est publiée, pas jugée.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul (et l'essai du départ chaud, déclaré).
-- [x] **P2** — les barrières à vide du groupe des niveaux grossiers ; identité, mesure.
-- [x] **P3** — la part fixe de l'échange ; identité, déterminisme, mesure.
-- [x] **P4** — non-régression, suite ; preuve §20 ; registres.
-- [x] **P5** — rituel.
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — C7e reçu : preuve §20, registres, liste.
+- [ ] **P3** — la conception de C7d : preuve §21.
+- [ ] **P4** — C7d-1 : le fond B analytique dans `ColumnsSwitch`, le critère relatif ; essais du cœur.
+- [ ] **P5** — C7d-1 mesuré sur la vague de Chen (`ε` 0,55 et 0,1) ; critères.
+- [ ] **P6** — suite ; preuve ; registres.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-- **P2** — le groupe des niveaux grossiers : les natures et `r₂` chargés en une phase, le niveau 2 sans phase de restriction, la remontée sans ses deux phases de lissage vides (quatre barrières de moins) : 18,0 → 17,0 µs seulement — les barrières coûtent peu, chaque phase vaut le travail de son fil le plus chargé ; **puis 512 fils** (une maille du niveau 2 par fil au lieu de deux) : **13,8 µs**. Cycle (symétrie, résidu, itérations) identique au chiffre près ; B10 en bande étroite **identique au bit à S427 sur 74 pas** (`DUMP_B10`), deux exécutions identiques. **Projection p99 0,886 → 0,818 ms** ; **pas p99 1,86 + bascule 0,23 = 2,10**.
-- **P3** — la part fixe de l'échange : la réduction des poses sautée quand le solde ne demande aucune pose (une diffusion) — fil de l'échange médiane 0,194 → 0,183 ms. **Essai, retiré** : l'échange avec la dernière calculé d'avance (le fil 0 ne suit que des indices, les copies en parallèle) — exact et déterministe, mais aucun gain mesurable (0,187) : la boucle des copies ne coûtait pas. **Ajouté au pas, déclaré** (la projection, même règle d'exactitude) : les restrictions en coopération — huit fils par maille grossière, un par fille, le premier somme dans l'ordre des filles, la même expression — à la place des paires `mg_fine_az` + `mg_restrict1` et `mg_l1_ax` + `mg_restrict2` : deux dispatchs de moins par itération, ≈ 45 µs par itération. Cycle identique au chiffre près ; B10 en bande étroite **identique au bit à S427 sur 74 pas**, deux exécutions identiques. **Projection p99 0,818 → 0,785 ms** ; **pas p99 1,82 + bascule 0,25 = 2,07** — la cible de 2 manquée de 0,07. **Ce qui reste, désigné** : les noyaux lancés sur la capacité (≈ 130 000 fils pour ≈ 4 000 particules : comptes, rangements, rangs du tri, corps — 2 à 3 µs chacun, une vingtaine par pas et bascule) — des dispatchs indirects taillés sur `n` (les arguments écrits par un noyau, copiés entre deux passages : wgpu refuse un tampon d'arguments lié en écriture au même dispatch).
-- **P4** — non-régression : étages, cycle (dont la version globale), bascules forcées, B10 nu (pas 54), ballottement 0,447 (diagonale 0,454), colonnes 0,002, raccord 4,015, bande 1,210 (gestes compris) **identiques à S427** ; suite 753 / 19 / 0. Preuve §20 ; liste 4.19, feuille de route, index, file.
-- **P5** — journal ; jeton libre ; maillons 16 (justifiés : S406) ; suivant : S429, C7e — les dispatchs indirects taillés sur `n`.

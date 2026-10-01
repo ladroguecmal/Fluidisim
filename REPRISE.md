@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 00:00 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 00:04 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S429 — C7e reçu, C7d** : la conception de C7d, puis C7d-1 en référence — le fond qui suit la vitesse propre de δ
 Dernière session : S428 — physique : **C7e, la projection resserrée** ([preuve](docs/validation/APIC-CARTE-S416.md) §20) — niveaux grossiers à 512 fils sans barrières vides, restrictions en coopération, au bit : pas + bascule 2,07 ms au p99, B10 identique au bit à S427 ; le départ chaud essayé avant le plan, déclaré, retiré. Avant : S427, les gestes de l'échange groupés
 Session suivante : **S429 — C7e** au poste ([preuve](docs/validation/APIC-CARTE-S416.md) §20) : **les dispatchs indirects taillés sur `n`** — les noyaux lancés sur la capacité (≈ 130 000 fils pour ≈ 4 000 particules : tri, corps, séparation ; 2 à 3 µs chacun, une vingtaine par pas) ; arguments écrits par un noyau, copiés entre deux passages vers un tampon non lié ; reçu si B10 en bande étroite garde son pincement et **δ ≤ 2 ms au 99ᵉ centile** (2,07 aujourd'hui) ; vérifier le déterminisme (`DUMP_B10`) ; puis C7d (relative à B) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 16 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
