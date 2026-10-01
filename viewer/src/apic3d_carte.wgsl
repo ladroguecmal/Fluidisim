@@ -1864,34 +1864,18 @@ fn exchange_serial() {
                         }
                         let offset = plane + side * vp_depth;
                         let cell = cell_index(band.x, band.y, l);
-                        var best_near = 0.0;
-                        var best_p = vec3<f32>(0.0);
-                        var have = false;
-                        for (var o = 0u; o < 4u; o = o + 1u) {
-                            let a = select(0.25, 0.75, (o & 1u) == 1u);
-                            let b = select(0.25, 0.75, (o & 2u) == 2u);
-                            var p = vec3<f32>(offset, (f32(band.y) + a) * P.dx, (f32(l) + b) * P.dx);
-                            if axis == 1u {
-                                p = vec3<f32>((f32(band.x) + a) * P.dx, offset, (f32(l) + b) * P.dx);
-                            }
-                            var near = 3.4028234663852886e38;
-                            for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
-                                let m = order[s];
-                                if px[m].w == 0.0 {
-                                    let d = px[m].xyz - p;
-                                    near = min(near, square_sum(d));
-                                }
-                            }
-                            for (var q = first_new; q < n; q = q + 1u) {
-                                let d = px[q].xyz - p;
-                                near = min(near, square_sum(d));
-                            }
-                            if !have || near > best_near {
-                                have = true;
-                                best_near = near;
-                                best_p = p;
-                            }
+                        // S421 : les quatre emplacements en un seul parcours (le minimum ne dépend pas de l'ordre).
+                        var c0 = vec3<f32>(offset, (f32(band.y) + 0.25) * P.dx, (f32(l) + 0.25) * P.dx);
+                        var c1 = vec3<f32>(offset, (f32(band.y) + 0.75) * P.dx, (f32(l) + 0.25) * P.dx);
+                        var c2 = vec3<f32>(offset, (f32(band.y) + 0.25) * P.dx, (f32(l) + 0.75) * P.dx);
+                        var c3 = vec3<f32>(offset, (f32(band.y) + 0.75) * P.dx, (f32(l) + 0.75) * P.dx);
+                        if axis == 1u {
+                            c0 = vec3<f32>((f32(band.x) + 0.25) * P.dx, offset, (f32(l) + 0.25) * P.dx);
+                            c1 = vec3<f32>((f32(band.x) + 0.75) * P.dx, offset, (f32(l) + 0.25) * P.dx);
+                            c2 = vec3<f32>((f32(band.x) + 0.25) * P.dx, offset, (f32(l) + 0.75) * P.dx);
+                            c3 = vec3<f32>((f32(band.x) + 0.75) * P.dx, offset, (f32(l) + 0.75) * P.dx);
                         }
+                        let best_p = most_free(c0, c1, c2, c3, cell, first_new, n);
                         px[n] = vec4<f32>(best_p, 0.0);
                         grid_affine_at(best_p, n);
                         n = n + 1u;
@@ -1951,31 +1935,12 @@ fn exchange_serial() {
                     }
                     let z = fond + P.dx / 16.0;
                     let cell = cell_index(i, j, kf);
-                    var best_near = 0.0;
-                    var best_q = vec3<f32>(0.0);
-                    var have = false;
-                    for (var o = 0u; o < 4u; o = o + 1u) {
-                        let a = select(0.25, 0.75, (o & 1u) == 1u);
-                        let b = select(0.25, 0.75, (o & 2u) == 2u);
-                        let q = vec3<f32>((f32(i) + a) * P.dx, (f32(j) + b) * P.dx, z);
-                        var near = 3.4028234663852886e38;
-                        for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
-                            let m = order[s];
-                            if px[m].w == 0.0 {
-                                let d = px[m].xyz - q;
-                                near = min(near, square_sum(d));
-                            }
-                        }
-                        for (var r = first_new; r < n; r = r + 1u) {
-                            let d = px[r].xyz - q;
-                            near = min(near, square_sum(d));
-                        }
-                        if !have || near > best_near {
-                            have = true;
-                            best_near = near;
-                            best_q = q;
-                        }
-                    }
+                    let best_q = most_free(
+                        vec3<f32>((f32(i) + 0.25) * P.dx, (f32(j) + 0.25) * P.dx, z),
+                        vec3<f32>((f32(i) + 0.75) * P.dx, (f32(j) + 0.25) * P.dx, z),
+                        vec3<f32>((f32(i) + 0.25) * P.dx, (f32(j) + 0.75) * P.dx, z),
+                        vec3<f32>((f32(i) + 0.75) * P.dx, (f32(j) + 0.75) * P.dx, z),
+                        cell, first_new, n);
                     px[n] = vec4<f32>(best_q, 0.0);
                     grid_affine_at(best_q, n);
                     n = n + 1u;
@@ -2935,4 +2900,181 @@ fn settle_add(@builtin(global_invocation_id) g: vec3<u32>) {
         return;
     }
     solde_add(g.x, share);
+}
+
+// S421 — **le sous-réseau le plus libre** des quatre emplacements : pour chacun, la distance carrée à la plus proche des particules
+// vivantes de la maille et des particules posées depuis le début de l'échange ; le plus grand l'emporte, le premier en cas
+// d'égalité (la règle de la référence). Un seul parcours pour les quatre : chaque particule lue une fois au lieu de quatre.
+fn most_free(c0: vec3<f32>, c1: vec3<f32>, c2: vec3<f32>, c3: vec3<f32>, cell: u32, first_new: u32, n: u32) -> vec3<f32> {
+    var near = vec4<f32>(3.4028234663852886e38);
+    for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
+        let m = order[s];
+        if px[m].w == 0.0 {
+            let p = px[m].xyz;
+            near = min(near, vec4<f32>(square_sum(p - c0), square_sum(p - c1), square_sum(p - c2), square_sum(p - c3)));
+        }
+    }
+    for (var q = first_new; q < n; q = q + 1u) {
+        let p = px[q].xyz;
+        near = min(near, vec4<f32>(square_sum(p - c0), square_sum(p - c1), square_sum(p - c2), square_sum(p - c3)));
+    }
+    var best = c0;
+    var best_near = near.x;
+    if near.y > best_near {
+        best = c1;
+        best_near = near.y;
+    }
+    if near.z > best_near {
+        best = c2;
+        best_near = near.z;
+    }
+    if near.w > best_near {
+        best = c3;
+    }
+    return best;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **S421 — l'absorption en groupe** : la visite de la référence reste séquentielle (le fil 0), mais les vingt-quatre faces qu'une
+// absorbée met à jour sont **distinctes** — huit nœuds par axe, trois familles — : vingt-quatre fils les traitent ensemble, sans
+// changer le résultat. Le fil 0 fait le reste (solde, échange avec la dernière) et choisit la suivante.
+
+const NONE: u32 = 0xffffffffu;
+var<workgroup> ab_slot: u32;
+var<workgroup> ab_front: u32;
+var<workgroup> ab_back: i32;
+var<workgroup> ab_n: u32;
+
+// La particule suivante de la visite, par le front ; `NONE` à la fin.
+fn ab_next_front(len: u32) -> u32 {
+    if ab_front >= len || plist[ab_front] >= ab_n || i32(ab_front) > ab_back {
+        return NONE;
+    }
+    let a = plist[ab_front];
+    ab_front = ab_front + 1u;
+    return a;
+}
+
+// Le mélange d'un nœud (`t` : axe `t / 8`, emplacement `t % 8`) pour la particule `k`.
+fn absorb_blend_slot(k: u32, t: u32, below: bool) {
+    let p = px[k].xyz;
+    let v = pv[k].xyz;
+    let axis = t / 8u;
+    let m = t % 8u;
+    let l = lerp_of(p, axis);
+    let va = select(select(v.z, v.y, axis == 1u), v.x, axis == 0u);
+    let sel = vec3<bool>((m & 1u) == 1u, ((m >> 1u) & 1u) == 1u, ((m >> 2u) & 1u) == 1u);
+    let idx = select(l.base, l.next, sel);
+    let wa = select(vec3<f32>(1.0) - l.frac, l.frac, sel);
+    let wt = wa.x * wa.y * wa.z;
+    if wt == 0.0 {
+        return;
+    }
+    if below {
+        if !floor_face(axis, idx) {
+            return;
+        }
+    } else if !zone_face(axis, idx) {
+        return;
+    }
+    let f = face_global(axis, idx);
+    faces[f] = faces[f] + wt * (va - faces[f]) / 8.0;
+}
+
+// Ce que fait `absorb_one` hors du mélange : le solde (vertical sous le fond ; de la face de frontière la plus proche, ou le volume
+// de la colonne, dans la zone) et le compte.
+fn absorb_rest(k: u32) {
+    let p = px[k].xyz;
+    let c = cell_of(p);
+    let col = c.y * P.nx + c.x;
+    if cmask[col] == 0u {
+        solde_add(solde_w_index(col), vec2<u32>(VP_QUANTA, 0u));
+        atomicAdd(&pcount[COUNT_ABSORBED], 1u);
+        return;
+    }
+    var best_d = 0.0;
+    var best_face = NONE;
+    for (var dir = 0u; dir < 4u; dir = dir + 1u) {
+        var di = 0;
+        var dj = 0;
+        if dir == 0u { di = -1; } else if dir == 1u { di = 1; } else if dir == 2u { dj = -1; } else { dj = 1; }
+        let a = i32(c.x) + di;
+        let b = i32(c.y) + dj;
+        if a < 0 || b < 0 || a >= i32(P.nx) || b >= i32(P.ny) || in_zone(a, b) {
+            continue;
+        }
+        let fi = c.x + select(0u, 1u, di > 0);
+        let fj = c.y + select(0u, 1u, dj > 0);
+        var d = 0.0;
+        var face = 0u;
+        if dir < 2u {
+            d = abs(p.x - f32(fi) * P.dx);
+            face = (c.z * P.ny + c.y) * (P.nx + 1u) + fi;
+        } else {
+            d = abs(p.y - f32(fj) * P.dx);
+            face = P.nu + (c.z * (P.ny + 1u) + fj) * P.nx + c.x;
+        }
+        if best_face == NONE || d < best_d {
+            best_d = d;
+            best_face = face;
+        }
+    }
+    if best_face != NONE {
+        solde_add(best_face, vec2<u32>(VP_QUANTA, 0u));
+    } else {
+        let vol = add_i64(ivol_get(col), vec2<u32>(VP_QUANTA, 0u));
+        ivol_set(col, vol);
+        cols[col] = i64_to_f32(vol) * quantum_height();
+    }
+    atomicAdd(&pcount[COUNT_ABSORBED], 1u);
+}
+
+@compute @workgroup_size(32)
+fn absorb_group(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
+    let len = atomicLoad(&pcount[COUNT_LIST]);
+    if t == 0u {
+        ab_front = 0u;
+        ab_back = i32(len) - 1;
+        ab_n = np();
+        ab_slot = ab_next_front(len);
+    }
+    loop {
+        let a = workgroupUniformLoad(&ab_slot);
+        if a == NONE {
+            break;
+        }
+        // Le mélange, vingt-quatre fils sur vingt-quatre faces distinctes.
+        let c = cell_of(px[a].xyz);
+        let below = cmask[c.y * P.nx + c.x] == 0u;
+        if t < 24u {
+            absorb_blend_slot(a, t, below);
+        }
+        storageBarrier();
+        workgroupBarrier();
+        if t == 0u {
+            absorb_rest(a);
+            // La référence : la dernière prend la place de l'absorbée ; absorbée elle-même, elle est traitée aussitôt.
+            let last = ab_n - 1u;
+            ab_n = last;
+            var next = NONE;
+            if last != a {
+                copy_particle(last, a);
+                if ab_back >= i32(ab_front) && plist[u32(ab_back)] == last {
+                    ab_back = ab_back - 1;
+                    next = a;
+                } else {
+                    next = ab_next_front(len);
+                }
+            } else {
+                next = ab_next_front(len);
+            }
+            ab_slot = next;
+        }
+        storageBarrier();
+        workgroupBarrier();
+    }
+    if t == 0u {
+        atomicStore(&pcount[COUNT_N], ab_n);
+    }
 }

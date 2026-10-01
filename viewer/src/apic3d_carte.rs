@@ -12,7 +12,7 @@ use water_core::apic3d::{self, Apic3, ApicStage, ColumnsSwitch, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 65] = [
+const KERNELS: [&str; 66] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -22,6 +22,7 @@ const KERNELS: [&str; 65] = [
     "switch_need", "switch_slope", "switch_spread", "switch_request", "switch_begin", "convert_mark", "switch_apply",
     "list_mode_absorb", "list_mode_convert", "list_count", "list_scatter", "list_finish", "floor_place", "list_mode_raise",
     "floor_move", "flist_count", "flist_scatter", "flist_finish", "settle_count", "settle_reset", "settle_share", "settle_add",
+    "absorb_group",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -53,7 +54,7 @@ const COLUMNS_FLUX: usize = 31;
 const COLUMNS_UPDATE: usize = 32;
 const COMPACT: [usize; 5] = [33, 34, 35, 36, 37];
 const EXCHANGE_BEGIN: usize = 38;
-const ABSORB_SERIAL: usize = 40;
+// S421 : `absorb_serial` (40) remplacé par `absorb_group` ; gardé dans la liste pour les indices.
 const EXCHANGE_SERIAL: usize = 41;
 const FLOOR_UPDATE: usize = 42;
 const SWITCH_DECIDE: [usize; 4] = [43, 44, 45, 46];
@@ -69,6 +70,7 @@ const SETTLE_COUNT: usize = 61;
 const SETTLE_RESET: usize = 62;
 const SETTLE_SHARE: usize = 63;
 const SETTLE_ADD: usize = 64;
+const ABSORB_GROUP: usize = 65;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
@@ -714,7 +716,12 @@ impl ApicCarte {
                             self.dispatch(&mut p, EXCHANGE_BEGIN, 1, 1);
                             self.dispatch(&mut p, LIST_MODE_ABSORB, 1, 1);
                             self.encode_list(&mut p);
-                            self.dispatch(&mut p, ABSORB_SERIAL, 1, 1);
+                        }
+                        {
+                            // S421 : le fil de l'absorption, à part (13).
+                            let mut p =
+                                encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(13) });
+                            self.dispatch(&mut p, ABSORB_GROUP, 1, 1);
                         }
                         let mut p = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(8) });
                         // S421 : la réserve réglée en parallèle, puis la liste des faces-mailles actives.
@@ -728,8 +735,11 @@ impl ApicCarte {
                         self.dispatch(&mut p, COMPACT[1], 1, 1);
                         self.dispatch(&mut p, FLIST[1], span, SCAN);
                         self.dispatch(&mut p, FLIST[2], 1, 1);
+                        drop(p);
+                        // S421 : le fil de l'échange, à part (12).
+                        let mut p = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(12) });
                         self.dispatch(&mut p, EXCHANGE_SERIAL, 1, 1);
-                        used = 9;
+                        used = 14;
                     } else {
                         used = 7;
                     }
@@ -1650,7 +1660,7 @@ pub fn recevoir_b10() -> Result<(), String> {
         let mut sides = [0, 1].map(|_| Side { pinch: None, cavity_max: 0., crown: f64::MIN });
         let (mut t, mut steps, mut worst_phi, mut worst_at, mut unconverged, mut it_ref, mut it_carte) =
             (0f64, 0u64, 0f64, 0f64, 0u64, 0u64, 0u64);
-        let mut stage_ms: Vec<Vec<f64>> = vec![Vec::new(); 12];
+        let mut stage_ms: Vec<Vec<f64>> = vec![Vec::new(); 14];
         let mut total_ms = Vec::new();
         let mut switch_ms: Vec<f64> = Vec::new();
         let mut diverged = false;
@@ -1729,7 +1739,7 @@ pub fn recevoir_b10() -> Result<(), String> {
                 unconverged += (!converged) as u64;
             }
             let mut sum = 0.;
-            for (k, v) in times.stages.iter().take(9).enumerate() {
+            for (k, v) in times.stages.iter().take(14).enumerate().filter(|(k, _)| !(9..12).contains(k)) {
                 if let Some(ms) = v {
                     stage_ms[k].push(*ms);
                     sum += ms;
@@ -1824,7 +1834,7 @@ pub fn recevoir_b10() -> Result<(), String> {
         println!("APIC_CARTE_B10_S417 ecart_phi_interface_par_pas_mm {}", series.join(" "));
         let names = [
             "transfert", "surface", "projection", "extrapolation", "retour", "advection", "separation_corps", "absorption", "echange",
-            "bascule_decision", "bascule_application", "bascule_fond",
+            "bascule_decision", "bascule_application", "bascule_fond", "echange_fil", "absorption_fil",
         ];
         let per_stage: Vec<String> =
             names.iter().zip(stage_ms.iter_mut()).map(|(name, v)| format!("{name}={:.3}", percentile(v, 0.99))).collect();

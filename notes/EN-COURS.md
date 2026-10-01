@@ -86,7 +86,7 @@ est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
 - [x] **P3** — l'échange : listes ordonnées des faces-mailles et des colonnes actives ; la réserve en parallèle ; mesure ; critère 1.
 - [x] **P4** — *réordonné après la mesure de P2–P3 (projection 4,8 ms, échange 6,8, absorption 2,0, bascule 1,9)* : la projection —
   les itérations après convergence lancées en **dispatch indirect nul** (les arguments mis à zéro par le noyau qui conclut) ; mesure.
-- [ ] **P5** — l'intérieur de l'échange et de l'absorption sur leur fil (ce qui y coûte, mesuré par essais) ; la bascule si le temps
+- [x] **P5** — l'intérieur de l'échange et de l'absorption sur leur fil (ce qui y coûte, mesuré par essais) ; la bascule si le temps
   le permet ; mesure.
 - [ ] **P6** — B10 en bande étroite, coût final ; non-régression ; suite ; preuve §13 ; registres.
 - [ ] **P7** — rituel.
@@ -103,3 +103,4 @@ est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
   flottant du noyau autrement quand son code change (L345). Critère 1 « au bit près » : **intenable comme instrument** ; jugé sur
   les issues discrètes (pincement, gestes, `n`, volume) et sur la référence. Le banc garde `DEBUG_SOLDES`.
 - **P4** — le dispatch indirect nul après convergence est **refusé par wgpu** (un tampon lié en écriture et lu comme arguments dans le même dispatch ; deux tampons alternés ne sautent qu'une itération vide sur deux) — abandonné, revenu en arrière. **Plafond adaptatif** à la place (`set_adaptive_cap`, `observe_iterations` ; `ADAPTATIF=1`) : 1,25 × le plus grand des huit derniers pas + 8, retour au plafond fixe après un pas non convergé ; la production le lira en différé (ADR-175 D3). B10 en bande étroite : **projection 4,78 → 2,99 ms**, aucune non-convergence, issues identiques ; pas 12,2 ms.
+- **P5 (a)** — le fil de l'échange et de l'absorption séparés de leur préparation (horodatages 12, 13) : préparations 0,1 et 0,2 ms, **fils 6,6 et 2,0 ms**. Compté (diagnostic retiré) : la pose parcourait toutes les particules posées depuis le début de l'échange, **quatre fois** — ≈ 20 000 lectures par pas en fin de B10. `most_free` : un parcours, quatre minima (exact) → **fil de l'échange 1,97 ms**. `absorb_group` (32 fils) : la visite séquentielle par le fil 0, les 24 faces d'une absorbée (distinctes) par 24 fils → **fil de l'absorption 0,40 ms**. B10 en bande étroite : **pas 6,3 ms** + bascule 1,9 ; issues identiques ; raccord un pas inchangé.
