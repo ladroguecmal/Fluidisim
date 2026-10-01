@@ -850,10 +850,83 @@ impl ApicCarte {
             (MG_VCYCLE[10], cells, SCAN),
             (MG_CG_BETA_DIRECTION, cells, SCAN),
         ];
+        self.profile_kernels(&list, reps, true)
+    }
+
+    /// **Banc S425** — le profil de la fin du pas : le tri, la séparation, le corps, la liste des absorbées, la réserve et la liste des
+    /// faces-mailles actives (les deux fils, dont le travail dépend de l'état, sont mesurés par pas : `PROFIL=1` du banc B10). Un
+    /// noyau du tri répété seul corrompt les tranches (le compte s'accumule) : chaque **préfixe** de la suite est répété, le coût
+    /// d'un noyau est la différence de deux préfixes.
+    pub fn profile_end_of_step(&mut self, reps: usize) -> Result<Vec<(&'static str, f64)>, String> {
+        let (cells, cap, span) = (self.domain.cells(), self.capacity, self.list_span());
+        let list: [(usize, usize, u32); 22] = [
+            (BIN_CLEAR, cells, WG),
+            (BIN_COUNT, cap, WG),
+            (SCAN_LOCAL, cells, SCAN),
+            (SCAN_BLOCKS, 1, 1),
+            (SCAN_ADD, cells, SCAN),
+            (BIN_SCATTER, cap, WG),
+            (BIN_SORT, cells, WG),
+            (SEPARATE_SHIFT, cap, WG),
+            (SEPARATE_APPLY, cap, WG),
+            (MOVE_BODY, cap, WG),
+            (EXCHANGE_BEGIN, 1, 1),
+            (LIST_BUILD[0], span, SCAN),
+            (COMPACT[1], 1, 1),
+            (LIST_BUILD[1], span, SCAN),
+            (LIST_BUILD[2], 1, 1),
+            (SETTLE_RESET, 1, 1),
+            (SETTLE_COUNT, span, WG),
+            (SETTLE_SHARE, 1, 1),
+            (SETTLE_ADD, span, WG),
+            (FLIST[0], span, SCAN),
+            (FLIST[1], span, SCAN),
+            (FLIST[2], 1, 1),
+        ];
+        let mut out = Vec::new();
+        let mut before = 0.;
+        for k in 0..list.len() {
+            let total = self.profile_sequence(&list[..=k], reps)?;
+            out.push((KERNELS[list[k].0], total - before));
+            before = total;
+        }
+        Ok(out)
+    }
+
+    /// La suite `seq` répétée `reps` fois dans un passage horodaté : le temps moyen d'une suite, µs.
+    fn profile_sequence(&self, seq: &[(usize, usize, u32)], reps: usize) -> Result<f64, String> {
+        let Some(q) = self.query.as_ref() else { return Err("pas d'horodatage".into()) };
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+                label: None,
+                timestamp_writes: Some(wgpu::ComputePassTimestampWrites {
+                    query_set: q,
+                    beginning_of_pass_write_index: Some(0),
+                    end_of_pass_write_index: Some(1),
+                }),
+            });
+            for _ in 0..reps {
+                for &(kernel, threads, group) in seq {
+                    self.dispatch(&mut pass, kernel, threads, group);
+                }
+            }
+        }
+        encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
+        encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
+        self.queue.submit([encoder.finish()]);
+        let t = self.map_u64(&self.query_read, 2)?;
+        let period = self.queue.get_timestamp_period() as f64 / 1e3;
+        Ok(t[1].saturating_sub(t[0]) as f64 * period / reps as f64)
+    }
+
+    /// Chaque noyau de `list` répété `reps` fois dans un passage horodaté, le temps moyen en µs ; `reset` : le drapeau d'arrêt du
+    /// gradient conjugué remis à zéro avant chaque répétition (son coût mesuré seul et retranché). L'état est perdu.
+    fn profile_kernels(&self, list: &[(usize, usize, u32)], reps: usize, reset: bool) -> Result<Vec<(&'static str, f64)>, String> {
         let Some(q) = self.query.as_ref() else { return Err("pas d'horodatage".into()) };
         let mut out = Vec::new();
         let mut base = 0.;
-        for (m, (kernel, threads, group)) in std::iter::once((MG_CG_RESET, 1, 1)).chain(list).enumerate() {
+        for (m, &(kernel, threads, group)) in std::iter::once(&(MG_CG_RESET, 1, 1)).chain(list).enumerate() {
             let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
             {
                 let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
@@ -865,7 +938,9 @@ impl ApicCarte {
                     }),
                 });
                 for _ in 0..reps {
-                    self.dispatch(&mut pass, MG_CG_RESET, 1, 1);
+                    if reset {
+                        self.dispatch(&mut pass, MG_CG_RESET, 1, 1);
+                    }
                     if m > 0 {
                         self.dispatch(&mut pass, kernel, threads, group);
                     }
@@ -1984,6 +2059,14 @@ pub fn recevoir_b10() -> Result<(), String> {
         if let Some(e) = eps {
             println!("APIC_CARTE_B10_S417 temoin=reference_perturbee eps_m_s={e:e} (la carte n'est pas calculée)");
         }
+        // S425 — `PROFIL=1` : par pas, (absorbées, retirées + posées, faces-mailles actives, fil de l'absorption, fil de l'échange).
+        let profil = std::env::var("PROFIL").is_ok();
+        let mut gestes_avant = [0u32; 3];
+        if profil {
+            let k = carte.counts()?;
+            gestes_avant = [k[3], k[4], k[5]];
+        }
+        let mut par_pas: Vec<(u32, u32, u32, f64, f64)> = Vec::new();
         while t < t_max {
             a.set_body(Some(b.sphere(t))).map_err(|e| format!("{e:?}"))?;
             carte.set_body(Some(b.sphere(t)));
@@ -2012,6 +2095,13 @@ pub fn recevoir_b10() -> Result<(), String> {
                             let sum: f64 = so.iter().map(|x| x.abs()).sum();
                             let kk = carte.counts()?;
                             println!("DEBUG_SOLDES pas={} reserve={:e} somme_abs={:.15e} mouillees={} part={},{} actives={}", steps + 1, so.last().copied().unwrap_or(0.), sum, kk[11], kk[12], kk[13], kk[10]);
+                        }
+                        // S425 : les gestes du pas (comptes cumulés de l'échange, avant la bascule) et les deux fils.
+                        if profil {
+                            let k = carte.counts()?;
+                            let d: Vec<u32> = (3..6).map(|i| k[i] - gestes_avant[i - 3]).collect();
+                            gestes_avant = [k[3], k[4], k[5]];
+                            par_pas.push((d[0], d[1] + d[2], k[10], times.stages[13].unwrap_or(0.), times.stages[12].unwrap_or(0.)));
                         }
                         let sw_times = carte.switch_for_bench(t_us)?;
                         let k = carte.counts()?;
@@ -2175,11 +2265,40 @@ pub fn recevoir_b10() -> Result<(), String> {
                 k[0], a.particle_count(), percentile(&mut switch_ms, 0.99), q - q_start, a.total_volume(), k[7]
             );
         }
+        // S425 — les gestes par pas, et le coût des fils rapporté aux gestes (moindres carrés : temps = a + b·gestes).
+        if !par_pas.is_empty() {
+            let fit = |pts: &[(f64, f64)]| -> (f64, f64) {
+                let n = pts.len() as f64;
+                let (sx, sy) = pts.iter().fold((0., 0.), |(a, b), (x, y)| (a + x, b + y));
+                let (mx, my) = (sx / n, sy / n);
+                let (sxy, sxx) = pts.iter().fold((0., 0.), |(a, b), (x, y)| (a + (x - mx) * (y - my), b + (x - mx) * (x - mx)));
+                let slope = if sxx > 0. { sxy / sxx } else { 0. };
+                (my - slope * mx, slope)
+            };
+            let col = |f: &dyn Fn(&(u32, u32, u32, f64, f64)) -> f64| -> Vec<f64> { par_pas.iter().map(f).collect() };
+            let mut absorbees = col(&|p| p.0 as f64);
+            let mut gestes = col(&|p| p.1 as f64);
+            let mut actives = col(&|p| p.2 as f64);
+            let (a0, a1) = fit(&par_pas.iter().map(|p| (p.0 as f64, p.3 * 1e3)).collect::<Vec<_>>());
+            let (e0, e1) = fit(&par_pas.iter().map(|p| (p.1 as f64, p.4 * 1e3)).collect::<Vec<_>>());
+            let (f0, f1) = fit(&par_pas.iter().map(|p| (p.2 as f64, p.4 * 1e3)).collect::<Vec<_>>());
+            println!(
+                "APIC_CARTE_B10_S425 gestes_par_pas absorbees_mediane={:.0} max={:.0} retirees_posees_mediane={:.0} max={:.0} faces_actives_mediane={:.0} max={:.0}",
+                percentile(&mut absorbees, 0.5), percentile(&mut absorbees, 1.), percentile(&mut gestes, 0.5), percentile(&mut gestes, 1.),
+                percentile(&mut actives, 0.5), percentile(&mut actives, 1.)
+            );
+            println!(
+                "APIC_CARTE_B10_S425 fils_us absorption={a0:.1}+{a1:.2}*absorbees echange={e0:.1}+{e1:.2}*gestes echange={f0:.1}+{f1:.2}*faces_actives"
+            );
+        }
         // S424 — `PROFIL=1` : le coût de chaque noyau d'une itération de la projection, sur l'état final.
         if std::env::var("PROFIL").is_ok() && twin.is_none() {
             let line: Vec<String> =
                 carte.profile_iteration(50)?.into_iter().map(|(name, us)| format!("{name}={us:.2}")).collect();
             println!("APIC_CARTE_B10_S424 profil_iteration_us {}", line.join(" "));
+            let line: Vec<String> =
+                carte.profile_end_of_step(50)?.into_iter().map(|(name, us)| format!("{name}={us:.2}")).collect();
+            println!("APIC_CARTE_B10_S425 profil_fin_du_pas_us {}", line.join(" "));
         }
         Ok(())
     })

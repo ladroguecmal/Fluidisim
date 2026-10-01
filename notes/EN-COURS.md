@@ -82,10 +82,11 @@ publié avant et après ; **visé : pas + bascule ≤ 2,5 ms au p99** sur B10 en
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le profil de la fin du pas et les gestes par pas.
+- [x] **P2** — le profil de la fin du pas et les gestes par pas.
 - [ ] **P3** — la première réduction que le profil désigne ; issues, mesure.
 - [ ] **P4** — la seconde ; issues, mesure.
 - [ ] **P5** — non-régression, suite ; preuve §17 ; registres.
 - [ ] **P6** — rituel.
 
 ### Notes de reprise
+- **P2** — le profil (`PROFIL=1`, banc B10 en bande étroite). **Les fils, par pas** (moindres carrés sur les pas) : absorption **6 + 2,0 µs par absorbée** (médiane 98 par pas, 210 au plus) ; échange **66 + 2,05 µs par geste** (retirées + posées : médiane 139, 266 au plus ; faces-mailles actives 46, 127 au plus). **La fin du pas, noyau par noyau** (chaque préfixe de la suite répété 50 fois, différences — un noyau du tri répété seul corrompt les tranches et a fait perdre la carte au premier essai) : **`compact_scan` 80 µs** (le préfixe des groupes sur un fil, ≈ 500 groupes à la capacité) — il sert à chaque liste ordonnée : absorbées, faces-mailles actives, bascule, fond, soit ≈ 4 × 80 µs par pas ; **`scan_blocks` 13,5 µs** (le même motif dans le tri, 84 blocs), trois à quatre tris par pas ; **`separate_shift` 101 µs**, **`bin_sort` 64 µs** ; le reste 0,3 à 6 µs. **Réordonné** (P3, P4 du plan : « ce que le profil désigne ») : **P3 — les préfixes en groupe** (entiers : exact) ; **P4 — la séparation et le tri par maille** ; les fils (parallélisme par vagues de non-conflit, à faces disjointes) ensuite si le temps reste.
