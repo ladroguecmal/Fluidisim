@@ -4593,6 +4593,14 @@ var<workgroup> sh_k: array<f32, 1024>;
 var<workgroup> sh_g: array<vec4<u32>, 8>;
 var<workgroup> sh_h: array<vec4<u32>, 8>;
 
+// S428 — 512 fils : une maille du niveau 2 par fil (336 sur B10), au lieu de deux — le temps d'une phase est celui du fil le plus
+// chargé. Les tours par fil, sur les mailles du niveau 2 (le plus grand du groupe).
+const MGS: u32 = 512u;
+
+fn sh_blocks() -> u32 {
+    return (lv_get(2u, 3u) + MGS - 1u) / MGS;
+}
+
 // L'origine du niveau `l ≥ 2` dans la mémoire du groupe.
 fn sh_off(l: u32) -> u32 {
     return sh_g[l].w;
@@ -4695,7 +4703,7 @@ fn sh_prolong(l: u32, fc: u32) {
     sh_v[o + fc] = sh_v[o + fc] + sh_v[sh_off(l) + parent];
 }
 
-@compute @workgroup_size(256)
+@compute @workgroup_size(512)
 fn mg_coarse_shared(@builtin(local_invocation_id) lid: vec3<u32>) {
     let t = lid.x;
     let skip = mg_done();
@@ -4715,36 +4723,60 @@ fn mg_coarse_shared(@builtin(local_invocation_id) lid: vec3<u32>) {
         }
     }
     workgroupBarrier();
+    // S428 : les natures et `r₂` (la restriction vers le niveau 2, faite par `mg_restrict2`) en une seule phase ; le niveau 2 sans
+    // phase de restriction ; la remontée sans les deux phases de lissage vides du dernier tour — même arithmétique, quatre barrières
+    // de moins par cycle sur B10.
     for (var l = 2u; l < levels; l = l + 1u) {
         let o = sh_g[l].w;
-        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
-            let c = t + 256u * bb;
+        for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+            let c = t + MGS * bb;
             if c < sh_h[l].x {
                 sh_k[o + c] = mgb[sh_h[l].y + c];
             }
         }
     }
+    let cells2 = select(0u, sh_h[2].x, 2u < levels && !skip);
+    for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+        let c = t + MGS * bb;
+        if c < cells2 {
+            sh_restrict(2u, c);
+        }
+    }
     workgroupBarrier();
-    for (var s = 0u; s < MG_NC; s = s + 1u) {
+    for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+        let c = t + MGS * bb;
+        if c < cells2 {
+            sh_first(2u, c);
+        }
+    }
+    workgroupBarrier();
+    for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+        let c = t + MGS * bb;
+        if c < cells2 {
+            sh_smooth(2u, 1u, 0u, c);
+        }
+    }
+    workgroupBarrier();
+    for (var s = 1u; s < MG_NC; s = s + 1u) {
         let l = s + 2u;
         let on = l < levels && !skip;
         let cells = select(0u, sh_h[min(l, 7u)].x, on);
-        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
-            let c = t + 256u * bb;
+        for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+            let c = t + MGS * bb;
             if c < cells {
                 sh_restrict(l, c);
             }
         }
         workgroupBarrier();
-        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
-            let c = t + 256u * bb;
+        for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+            let c = t + MGS * bb;
             if c < cells {
                 sh_first(l, c);
             }
         }
         workgroupBarrier();
-        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
-            let c = t + 256u * bb;
+        for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+            let c = t + MGS * bb;
             if c < cells {
                 sh_smooth(l, 1u, 0u, c);
             }
@@ -4754,41 +4786,42 @@ fn mg_coarse_shared(@builtin(local_invocation_id) lid: vec3<u32>) {
     let ccells = select(0u, sh_h[min(last, 7u)].x, last >= 2u && !skip);
     for (var q = 0u; q < 6u; q = q + 1u) {
         let odd = q % 2u == 1u;
-        for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
-            let c = t + 256u * bb;
+        for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+            let c = t + MGS * bb;
             if c < ccells {
                 sh_smooth(last, select(0u, 1u, odd), select(1u, 0u, odd), c);
             }
         }
         workgroupBarrier();
     }
-    for (var s = 0u; s < MG_NC; s = s + 1u) {
+    // La remontée jusqu'au niveau 2 (les niveaux d'arrivée sont ≥ 2).
+    for (var s = 0u; s + 1u < MG_NC; s = s + 1u) {
         let l = last - min(s, last);
         let on = s + 2u < levels && !skip;
         let f = max(l, 1u) - 1u;
         let fcells = select(0u, sh_h[f].x, on);
-        // Vers le niveau 1 : `x₂` rendu en global, `mg_prolong1` prolonge.
-        let back = f == 1u;
-        let pcells = select(fcells, select(0u, sh_h[2].x, on), back);
-        for (var bb = 0u; bb < mg_blocks() * 8u; bb = bb + 1u) {
-            let c = t + 256u * bb;
-            if c < pcells {
-                if back {
-                    mgb[lv_get(2u, 5u) + c] = sh_v[sh_off(2u) + c];
-                } else {
-                    sh_prolong(l, c);
-                }
+        for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+            let c = t + MGS * bb;
+            if c < fcells {
+                sh_prolong(l, c);
             }
         }
         workgroupBarrier();
         for (var q = 0u; q < 2u; q = q + 1u) {
-            for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
-                let c = t + 256u * bb;
+            for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+                let c = t + MGS * bb;
                 if c < fcells && f >= 2u {
                     sh_smooth(f, select(0u, 1u, q == 1u), select(1u, 0u, q == 1u), c);
                 }
             }
             workgroupBarrier();
+        }
+    }
+    // `x₂` rendu en global ; `mg_prolong1` prolonge vers le niveau 1.
+    for (var bb = 0u; bb < sh_blocks(); bb = bb + 1u) {
+        let c = t + MGS * bb;
+        if c < cells2 {
+            mgb[lv_get(2u, 5u) + c] = sh_v[sh_off(2u) + c];
         }
     }
 }

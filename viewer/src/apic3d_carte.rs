@@ -806,7 +806,7 @@ impl ApicCarte {
                 // S424 : les niveaux ≥ 2 en mémoire de groupe ; la restriction vers le 2 et la prolongation vers le 1 en dispatchs.
                 self.dispatch(pass, MG_L1_AX, l1, WG);
                 self.dispatch(pass, MG_RESTRICT2, self.mg_cells(2), WG);
-                self.dispatch(pass, MG_COARSE_SHARED, SCAN as usize, SCAN);
+                self.dispatch(pass, MG_COARSE_SHARED, 512, 512);
                 self.dispatch(pass, MG_PROLONG1, l1, WG);
             } else {
                 self.dispatch(pass, coarse, SCAN as usize, SCAN);
@@ -849,7 +849,7 @@ impl ApicCarte {
             (MG_VCYCLE[4], l1, WG),
             (MG_L1_AX, l1, WG),
             (MG_RESTRICT2, l2, WG),
-            (if self.mg_shared { MG_COARSE_SHARED } else { MG_VCYCLE[5] }, SCAN as usize, SCAN),
+            if self.mg_shared { (MG_COARSE_SHARED, 512, 512) } else { (MG_VCYCLE[5], SCAN as usize, SCAN) },
             (MG_PROLONG1, l1, WG),
             (MG_VCYCLE[6], l1, WG),
             (MG_VCYCLE[7], l1, WG),

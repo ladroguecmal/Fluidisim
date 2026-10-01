@@ -86,9 +86,10 @@ avertissement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul (et l'essai du départ chaud, déclaré).
-- [ ] **P2** — les barrières à vide du groupe des niveaux grossiers ; identité, mesure.
+- [x] **P2** — les barrières à vide du groupe des niveaux grossiers ; identité, mesure.
 - [ ] **P3** — la part fixe de l'échange ; identité, déterminisme, mesure.
 - [ ] **P4** — non-régression, suite ; preuve §20 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — le groupe des niveaux grossiers : les natures et `r₂` chargés en une phase, le niveau 2 sans phase de restriction, la remontée sans ses deux phases de lissage vides (quatre barrières de moins) : 18,0 → 17,0 µs seulement — les barrières coûtent peu, chaque phase vaut le travail de son fil le plus chargé ; **puis 512 fils** (une maille du niveau 2 par fil au lieu de deux) : **13,8 µs**. Cycle (symétrie, résidu, itérations) identique au chiffre près ; B10 en bande étroite **identique au bit à S427 sur 74 pas** (`DUMP_B10`), deux exécutions identiques. **Projection p99 0,886 → 0,818 ms** ; **pas p99 1,86 + bascule 0,23 = 2,10**.
