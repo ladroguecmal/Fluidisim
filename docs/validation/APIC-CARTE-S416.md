@@ -744,3 +744,37 @@ zéro avertissement.
 Visé : 2 ms — **manqué de 0,16**. **Ce qui reste** : la projection (0,886 au p99, le groupe des niveaux grossiers 18 µs par
 itération) ; le fil de l'échange (0,38 : sa part fixe, 53 µs — une diffusion et une réduction par face-maille active ou colonne
 due, même sans geste) ; le fil de l'absorption (0,29).
+
+## 20. C7e, huitième temps — la projection resserrée, au bit (S428)
+
+**Reproduire** : `BANDE=1 PROFIL=1 … --apic3d-carte-b10` (profil d'une itération) ; `DUMP_B10=<préfixe>` (comparaison au bit, déterminisme).
+
+**Un essai fait avant le plan, déclaré et retiré** : le départ chaud de la projection (partir de la pression du pas précédent, `r = b −
+A·p`, même critère que la référence). 13,9 → 13,4 itérations, projection médiane 0,844 → 0,831 ms, p99 inchangé — la pression change
+trop d'un pas à l'autre. Il rapprochait la carte de la référence (premier écart de gestes au pas 50 au lieu de 34, `φ` max 4,8 mm au
+lieu de 6,8) sans rien apporter au coût.
+
+**Ce qui a changé, à arithmétique identique.**
+
+| | avant | après |
+|---|---|---|
+| groupe des niveaux grossiers : quatre barrières à vide de moins (natures et `r₂` en une phase, niveau 2 sans restriction, remontée sans ses lissages vides) | 18,0 µs | 17,0 |
+| … puis 512 fils (une maille du niveau 2 par fil, au lieu de deux) | 17,0 | **13,8** |
+| restrictions en coopération (huit fils par maille grossière, un par fille ; le premier somme dans l'ordre des filles) au lieu de `mg_fine_az` + `mg_restrict1` et `mg_l1_ax` + `mg_restrict2` | 2,7 + 2,2 · 2,0 + 1,5 | **4,0 · 2,5** |
+| fil de l'échange : la réduction des poses sautée quand le solde n'en demande aucune | 0,194 ms (médiane) | 0,183 |
+
+**Essai retiré** : l'échange avec la dernière calculé d'avance (le fil 0 ne suit que des indices, les copies en parallèle) — exact,
+déterministe, aucun gain mesurable.
+
+**Les issues** : B10 en bande étroite **identique au bit à S427 sur 74 pas** (`DUMP_B10`), deux exécutions identiques ; cycle
+(symétrie, résidu, itérations, en mémoire de groupe et en global) identique au chiffre près ; étages, bascules forcées, B10 nu (pas
+54), ballottement 0,447 (diagonale 0,454), colonnes 0,002, raccord 4,015 et bande 1,210 mm, gestes compris : identiques. Suite 753,
+zéro avertissement.
+
+**Le coût**, B10 en bande étroite : une itération 51 → **45 µs** ; projection p99 0,886 → **0,785 ms** (médiane 0,748) ; **pas p99
+1,82 ms, pas + bascule 2,07** (2,16). Visé 2 : **manqué de 0,07**.
+
+**Ce qui reste, désigné** : les noyaux lancés sur la **capacité** — ≈ 130 000 fils pour ≈ 4 000 particules vivantes : comptes,
+rangements et rangs du tri, corps, séparation — 2 à 3 µs chacun, une vingtaine par pas et bascule. Des dispatchs indirects taillés sur
+`n` : les arguments écrits par un noyau dans un tampon lié, copiés entre deux passages vers un tampon d'arguments non lié (wgpu refuse
+un tampon d'arguments lié en écriture au même dispatch, S421).
