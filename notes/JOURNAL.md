@@ -18046,3 +18046,19 @@ B10 nu et en bande étroite au pincement de la référence, volumes exacts. **Co
 bascule) ; projection 1,45 ms — dix-sept dispatchs par itération, l'objectif d'1 ms manqué. Suite **753**, zéro avertissement.
 **Limites** : la multigrille est une option (`MULTIGRILLE=1`) ; le défaut reste le gradient diagonal. **Rituel.** Maillons **10** —
 justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — la bascule en groupe, la surface, les dispatchs.
+
+## S423 — 2026-10-01 — physique : C7e, la bascule en groupe, la surface en coopération, la multigrille par défaut
+
+**Entrée.** *« Continue »* — C7e. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §15) : la bascule et le fond en groupe
+de 256 fils ; **le retrait à forme close** — la visite de la référence (échange avec la dernière) laisse un arrangement connu
+d'avance, chaque gardée trouve sa place par dichotomie dans la liste triée des retirées ; **l'ensemencement par graine** (préfixe des
+morceaux de colonnes, dichotomie) ; la surface en coopération (32 fils par maille) et son réemploi local (exact, sans gain sur B10) ;
+la multigrille : le nombre de niveaux en constante de pipeline (le niveau 1 dans le groupe, essayé, plus lent, retiré) ; **la
+multigrille et le plafond adaptatif par défaut**. **Mesuré**, B10 en bande étroite au p99 : **pas 3,26 ms + bascule 0,48** (3,90 +
+1,9 en S422) ; surface 0,73 → 0,11 ; projection 1,35 (visé 1 : manqué). **Issues** : bascules forcées identiques à la référence,
+B10 nu et en bande étroite au pincement de la référence, raccord 4,02 mm, bande 1,32, colonnes 0,002, volumes exacts. **Le
+ballottement passe de 0,055 à 0,447 mm** : l'ordre des sommes de la surface coopérative (1,6·10⁻⁶ m) suffit à faire tomber sur
+l'événement que la diagonale donnait déjà ; **témoin du ballottement** ajouté : 0,036 · 0,336 · 0,439 mm à ε = 10⁻⁶ · 10⁻⁵ · 10⁻⁴ —
+0,055 était l'ordre de la référence, pas une précision. Suite **753**, zéro avertissement. **Rituel.** Maillons **11** — justifié :
+la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — la projection (fusionner les noyaux du cycle), les fils de
+l'échange et de l'absorption, la séparation : δ ≤ 2 ms (3,74 aujourd'hui).

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S423 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
+Session : S423 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
 ([preuve](../docs/validation/APIC-CARTE-S416.md) §14 : B10 en bande étroite 3,9 ms par pas + 1,9 de bascule ; restent la bascule, les
 dispatchs du cycle, la surface).
 
@@ -90,7 +90,7 @@ avertissement.
 - [x] **P4** — **la surface** (`reconstruct`, deux fois par pas) : mesurer ce qui coûte, réduction exacte si elle se trouve.
 - [x] **P5** — les pas qui basculent : le retrait parallèle à forme close et l'ensemencement par préfixe ; la multigrille par défaut.
 - [x] **P6** — non-régression, suite ; preuve §15 ; registres.
-- [ ] **P7** — rituel.
+- [x] **P7** — rituel.
 
 ### Notes de reprise
 - **P2** — `switch_apply_group` (256 fils : capacité, colonnes converties, décalage, faces qui cessent d'être frontière, masque, en
@@ -106,3 +106,4 @@ avertissement.
 - **P4** — la surface. **Réemploi** de la surface de la décision au pas suivant, maille par maille (aucune colonne à portée convertie, ensemencée ou au fond déplacé — `swb[SW_KEEP]` marqué par la bascule — et le même corps, confirmé par l'hôte à 10⁻⁶ maille, `TOL_CORPS=`) : exact, mais **sans gain mesurable sur B10** (le fond suit la cavité presque à chaque pas ; et la position recalculée du corps dérive de ≈ 10⁻⁶ m de sa position intégrée) ; gardé. **Essai** : sans la reconstruction, le passage tombe à 0,014 ms — c'est elle (0,6 ms), dont le temps est celui du fil le plus long (≈ 5 000 mailles de la bande, chacune 125 mailles voisines et 25 colonnes virtuelles). **`reconstruct_coop`** : 32 fils par maille, voisines et colonnes réparties, sommes réduites — l'ordre des sommes change, à l'arrondi ; étages : `φ` 1,6·10⁻⁶ m (ballottement), 1,1·10⁻⁶ (bande), 4,6·10⁻⁶ (B10), étiquettes identiques. B10 en bande étroite : **surface 0,69 → 0,09 ms, décision 0,81 → 0,22** (médianes) ; pincement identique, volume exact ; `φ` à l'interface max 6,8 mm (t = 0,869 √(D/g)), dans l'enveloppe des témoins (S420). **Pas p99 3,20 ms + bascule 1,25** ; médianes ≈ 2,7 + 0,5.
 - **P5** — les pas qui basculent. **Retrait à forme close** (`sg_remove`, bascule et fond ; l'absorption garde sa visite) : chaque gardée de `[n', n)` trouve sa place par dichotomie dans la liste triée ; le solde vertical du fond par colonne, ses retirées comptées par atomiques. **Ensemencement par préfixe**, d'abord par colonne — un fil y faisait encore toute une colonne profonde (application p99 0,54) — puis **par graine** (`sg_pre`, `seed_place` : le morceau de colonnes par dichotomie, la colonne et le rang dans le morceau). `floor_move` en groupe de 256 fils. Bascules forcées (`INITIAL`, `PENTE`, `MAINTIEN`) **identiques à la référence** (`n`, positions, réserves, fonds, volume à 0 quantum) ; B10 en bande étroite : pincement identique, volume exact. **Bascule p99 1,25 → 0,48 ms** (application 0,60 → 0,14, fond 0,42 → 0,11). **La multigrille et le plafond adaptatif par défaut** (`MULTIGRILLE=0`, `ADAPTATIF=0` : la diagonale) — les issues revérifiées en P6.
 - **P6** — non-régression, multigrille par défaut : étages à l'arrondi (`φ` ≤ 4,6·10⁻⁶ m), symétrie du cycle ≤ 2,3·10⁻⁷, bascules forcées identiques, B10 en bande étroite et nu au pincement de la référence, colonnes 0,002 mm, raccord 4,02 mm, bande 1,32 mm, volumes exacts. **Le ballottement passe de 0,055 à 0,447 mm** : isolé — l'ancienne reconstruction (ordre des sommes de la référence) rend 0,055 ; la coopérative déplace `φ` de 1,6·10⁻⁶ m et le banc tombe sur l'événement de t = 7,14 s de la diagonale. **Témoin du ballottement** ajouté (`TEMOIN=` hors raccord) : 0,036 · 0,336 · 0,439 mm à ε = 10⁻⁶ · 10⁻⁵ · 10⁻⁴ — la carte au niveau de ε = 10⁻⁴. Suite du cœur 753 / 19 ignorés / 0 avertissement. Preuve §15, registres.
+- **P7** — journal ; jeton libre ; maillons 11 (justifiés : S406) ; suivant : S424, C7e — la projection, les fils de l'échange, la séparation.
