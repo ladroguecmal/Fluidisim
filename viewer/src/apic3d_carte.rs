@@ -12,7 +12,7 @@ use water_core::apic3d::{self, Apic3, ApicStage, ColumnsSwitch, Sphere3};
 use water_core::delta3d::Domain3;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 66] = [
+const KERNELS: [&str; 67] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -22,7 +22,7 @@ const KERNELS: [&str; 66] = [
     "switch_need", "switch_slope", "switch_spread", "switch_request", "switch_begin", "convert_mark", "switch_apply",
     "list_mode_absorb", "list_mode_convert", "list_count", "list_scatter", "list_finish", "floor_place", "list_mode_raise",
     "floor_move", "flist_count", "flist_scatter", "flist_finish", "settle_count", "settle_reset", "settle_share", "settle_add",
-    "absorb_group",
+    "absorb_group", "exchange_group",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -55,7 +55,7 @@ const COLUMNS_UPDATE: usize = 32;
 const COMPACT: [usize; 5] = [33, 34, 35, 36, 37];
 const EXCHANGE_BEGIN: usize = 38;
 // S421 : `absorb_serial` (40) remplacé par `absorb_group` ; gardé dans la liste pour les indices.
-const EXCHANGE_SERIAL: usize = 41;
+// S421 : `exchange_serial` (41) remplacé par `exchange_group` ; gardé dans la liste pour les indices.
 const FLOOR_UPDATE: usize = 42;
 const SWITCH_DECIDE: [usize; 4] = [43, 44, 45, 46];
 const SWITCH_APPLY: [usize; 3] = [47, 48, 49];
@@ -71,6 +71,7 @@ const SETTLE_RESET: usize = 62;
 const SETTLE_SHARE: usize = 63;
 const SETTLE_ADD: usize = 64;
 const ABSORB_GROUP: usize = 65;
+const EXCHANGE_GROUP: usize = 66;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
@@ -738,7 +739,7 @@ impl ApicCarte {
                         drop(p);
                         // S421 : le fil de l'échange, à part (12).
                         let mut p = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: stamp(12) });
-                        self.dispatch(&mut p, EXCHANGE_SERIAL, 1, 1);
+                        self.dispatch(&mut p, EXCHANGE_GROUP, 1, 1);
                         used = 14;
                     } else {
                         used = 7;

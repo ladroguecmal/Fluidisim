@@ -3078,3 +3078,343 @@ fn absorb_group(@builtin(local_invocation_id) lid: vec3<u32>) {
         atomicStore(&pcount[COUNT_N], ab_n);
     }
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **S421 — l'échange en groupe** (64 fils). Le contrôle est celui d'`exchange_serial` — les faces-mailles actives dans l'ordre
+// de la référence, puis le solde vertical colonne par colonne — tenu par le fil 0 et diffusé uniformément ; les deux recherches
+// coûteuses deviennent des minimums de groupe, exacts quel que soit l'ordre : le retrait sur la clé (distance, côté, rang dans
+// la maille) — le départage de la référence —, la pose sur les quatre distances.
+
+const XG: u32 = 64u;
+var<workgroup> xg_u: u32;
+var<workgroup> xg_p: vec3<f32>;
+var<workgroup> xg_key: array<vec4<u32>, 64>;
+var<workgroup> xg_near: array<vec4<f32>, 64>;
+var<workgroup> xg_n: u32;
+var<workgroup> xg_marked: u32;
+
+// Diffuse la valeur du fil 0 à tout le groupe (uniforme).
+fn xg_bcast(t: u32, v: u32) -> u32 {
+    if t == 0u {
+        xg_u = v;
+    }
+    let r = workgroupUniformLoad(&xg_u);
+    workgroupBarrier();
+    return r;
+}
+
+fn key_less(a: vec4<u32>, b: vec4<u32>) -> bool {
+    if a.x != b.x {
+        return a.x < b.x;
+    }
+    if a.y != b.y {
+        return a.y < b.y;
+    }
+    return a.z < b.z;
+}
+
+// Le retrait : la particule vivante de la bande la plus proche de la face, à cette profondeur d'abord, puis aux voisines ;
+// `NONE` sans particule. Clé : (distance en bits — positive, donc ordonnée —, côté l − dk avant l + dk, rang dans la maille).
+fn xg_pick_removal(t: u32, band: vec2<u32>, l: u32, axis: u32, plane: f32) -> u32 {
+    for (var dk = 0u; dk < P.nz; dk = dk + 1u) {
+        var best = vec4<u32>(NONE, NONE, NONE, NONE);
+        for (var side_k = 0u; side_k < 2u; side_k = side_k + 1u) {
+            if dk == 0u && side_k == 1u {
+                continue;
+            }
+            var k = i32(l) - i32(dk);
+            if side_k == 1u {
+                k = i32(l) + i32(dk);
+            }
+            if k < 0 || k >= i32(P.nz) {
+                continue;
+            }
+            let cell = cell_index(band.x, band.y, u32(k));
+            for (var s = start[cell] + t; s < start[cell + 1u]; s = s + XG) {
+                let m = order[s];
+                if px[m].w != 0.0 {
+                    continue;
+                }
+                let p = px[m].xyz;
+                let d = abs(select(p.y, p.x, axis == 0u) - plane);
+                let key = vec4<u32>(bitcast<u32>(d), side_k, s, m);
+                if key_less(key, best) {
+                    best = key;
+                }
+            }
+        }
+        xg_key[t] = best;
+        workgroupBarrier();
+        for (var r = XG / 2u; r > 0u; r = r / 2u) {
+            if t < r && key_less(xg_key[t + r], xg_key[t]) {
+                xg_key[t] = xg_key[t + r];
+            }
+            workgroupBarrier();
+        }
+        var found = NONE;
+        if t == 0u {
+            found = xg_key[0].w;
+        }
+        let m = xg_bcast(t, found);
+        if m != NONE {
+            return m;
+        }
+    }
+    return NONE;
+}
+
+// Le retrait au solde vertical : la particule vivante la plus basse au-dessus du fond, maille par maille vers le haut. Clé :
+// (hauteur en bits, rang).
+fn xg_pick_lowest(t: u32, i: u32, j: u32, kf: u32) -> u32 {
+    for (var l = kf; l < P.nz; l = l + 1u) {
+        var best = vec4<u32>(NONE, NONE, NONE, NONE);
+        let cell = cell_index(i, j, l);
+        for (var s = start[cell] + t; s < start[cell + 1u]; s = s + XG) {
+            let m = order[s];
+            if px[m].w == 0.0 {
+                // La hauteur est positive : ses bits sont ordonnés.
+                let key = vec4<u32>(bitcast<u32>(px[m].z), 0u, s, m);
+                if key_less(key, best) {
+                    best = key;
+                }
+            }
+        }
+        xg_key[t] = best;
+        workgroupBarrier();
+        for (var r = XG / 2u; r > 0u; r = r / 2u) {
+            if t < r && key_less(xg_key[t + r], xg_key[t]) {
+                xg_key[t] = xg_key[t + r];
+            }
+            workgroupBarrier();
+        }
+        var found = NONE;
+        if t == 0u {
+            found = xg_key[0].w;
+        }
+        let m = xg_bcast(t, found);
+        if m != NONE {
+            return m;
+        }
+    }
+    return NONE;
+}
+
+// La pose : le sous-réseau le plus libre (`most_free`) en groupe.
+fn xg_most_free(t: u32, c0: vec3<f32>, c1: vec3<f32>, c2: vec3<f32>, c3: vec3<f32>, cell: u32, first_new: u32, n: u32) -> vec3<f32> {
+    var near = vec4<f32>(3.4028234663852886e38);
+    for (var s = start[cell] + t; s < start[cell + 1u]; s = s + XG) {
+        let m = order[s];
+        if px[m].w == 0.0 {
+            let p = px[m].xyz;
+            near = min(near, vec4<f32>(square_sum(p - c0), square_sum(p - c1), square_sum(p - c2), square_sum(p - c3)));
+        }
+    }
+    for (var q = first_new + t; q < n; q = q + XG) {
+        let p = px[q].xyz;
+        near = min(near, vec4<f32>(square_sum(p - c0), square_sum(p - c1), square_sum(p - c2), square_sum(p - c3)));
+    }
+    xg_near[t] = near;
+    workgroupBarrier();
+    for (var r = XG / 2u; r > 0u; r = r / 2u) {
+        if t < r {
+            xg_near[t] = min(xg_near[t], xg_near[t + r]);
+        }
+        workgroupBarrier();
+    }
+    if t == 0u {
+        let nr = xg_near[0];
+        var best = c0;
+        var best_near = nr.x;
+        if nr.y > best_near {
+            best = c1;
+            best_near = nr.y;
+        }
+        if nr.z > best_near {
+            best = c2;
+            best_near = nr.z;
+        }
+        if nr.w > best_near {
+            best = c3;
+        }
+        xg_p = best;
+    }
+    let p = workgroupUniformLoad(&xg_p);
+    workgroupBarrier();
+    return p;
+}
+
+// Le fil 0 marque une particule retirée.
+fn xg_mark(t: u32, m: u32, solde: u32) {
+    if t == 0u {
+        px[m].w = 1.0;
+        plist[xg_marked] = m;
+        xg_marked = xg_marked + 1u;
+        atomicAdd(&pcount[COUNT_REMOVED], 1u);
+        solde_add(solde, vec2<u32>(VP_QUANTA, 0u));
+    }
+    storageBarrier();
+    workgroupBarrier();
+}
+
+// Le fil 0 pose une particule.
+fn xg_pose(t: u32, p: vec3<f32>, solde: u32) {
+    if t == 0u {
+        let n = xg_n;
+        px[n] = vec4<f32>(p, 0.0);
+        grid_affine_at(p, n);
+        xg_n = n + 1u;
+        atomicAdd(&pcount[COUNT_POSED], 1u);
+        solde_add(solde, neg_i64(vec2<u32>(VP_QUANTA, 0u)));
+    }
+    storageBarrier();
+    workgroupBarrier();
+}
+
+// Encore un solde à régler, et la place pour poser ? (0 : non ; 1 : retirer ; 2 : poser ; 3 : poser refusé)
+fn xg_remove_due(t: u32, solde: u32) -> bool {
+    var v = 0u;
+    if t == 0u && solde_le_minus_vp(solde) {
+        v = 1u;
+    }
+    return xg_bcast(t, v) == 1u;
+}
+
+fn xg_pose_due(t: u32, solde: u32) -> bool {
+    var v = 0u;
+    if t == 0u && solde_ge_vp(solde) {
+        if xg_n >= arrayLength(&plist) {
+            atomicAdd(&pcount[COUNT_REFUSED], 1u);
+        } else {
+            v = 1u;
+        }
+    }
+    return xg_bcast(t, v) == 1u;
+}
+
+@compute @workgroup_size(64)
+fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
+    let t = lid.x;
+    if t == 0u {
+        xg_n = np();
+        xg_marked = 0u;
+    }
+    let first_new = xg_bcast(t, np());
+    let n_active = xg_bcast(t, atomicLoad(&pcount[COUNT_FLIST]));
+    let vp_depth = P.dx / 16.0;
+    // (2) et (3) : les faces-mailles actives, dans l'ordre de la référence.
+    for (var e_k = 0u; e_k < n_active; e_k = e_k + 1u) {
+        let e = xg_bcast(t, flist[e_k]);
+        let fc = face_cell_of(e);
+        let axis = fc.x;
+        let l = fc.y;
+        let fj = fc.z;
+        let fi = fc.w;
+        var lo = vec2<u32>(0u, 0u);
+        let hi = vec2<u32>(fi, fj);
+        if axis == 0u {
+            lo = vec2<u32>(fi - 1u, fj);
+        } else {
+            lo = vec2<u32>(fi, fj - 1u);
+        }
+        let zl = grid_at(i32(lo.x), i32(lo.y), l);
+        var plane = f32(fj) * P.dx;
+        if axis == 0u {
+            plane = f32(fi) * P.dx;
+        }
+        let band = select(lo, hi, zl);
+        let side = select(-1.0, 1.0, zl);
+        loop {
+            if !xg_remove_due(t, e) {
+                break;
+            }
+            let m = xg_pick_removal(t, band, l, axis, plane);
+            if m == NONE {
+                break;
+            }
+            xg_mark(t, m, e);
+        }
+        loop {
+            if !xg_pose_due(t, e) {
+                break;
+            }
+            let offset = plane + side * vp_depth;
+            let cell = cell_index(band.x, band.y, l);
+            var c0 = vec3<f32>(offset, (f32(band.y) + 0.25) * P.dx, (f32(l) + 0.25) * P.dx);
+            var c1 = vec3<f32>(offset, (f32(band.y) + 0.75) * P.dx, (f32(l) + 0.25) * P.dx);
+            var c2 = vec3<f32>(offset, (f32(band.y) + 0.25) * P.dx, (f32(l) + 0.75) * P.dx);
+            var c3 = vec3<f32>(offset, (f32(band.y) + 0.75) * P.dx, (f32(l) + 0.75) * P.dx);
+            if axis == 1u {
+                c0 = vec3<f32>((f32(band.x) + 0.25) * P.dx, offset, (f32(l) + 0.25) * P.dx);
+                c1 = vec3<f32>((f32(band.x) + 0.75) * P.dx, offset, (f32(l) + 0.25) * P.dx);
+                c2 = vec3<f32>((f32(band.x) + 0.25) * P.dx, offset, (f32(l) + 0.75) * P.dx);
+                c3 = vec3<f32>((f32(band.x) + 0.75) * P.dx, offset, (f32(l) + 0.75) * P.dx);
+            }
+            let n_now = xg_bcast(t, xg_n);
+            let p = xg_most_free(t, c0, c1, c2, c3, cell, first_new, n_now);
+            xg_pose(t, p, e);
+        }
+    }
+    // (4) S413 — le solde vertical de chaque colonne à fond.
+    if P.floors != 0.0 {
+        for (var j = 0u; j < P.ny; j = j + 1u) {
+            for (var i = 0u; i < P.nx; i = i + 1u) {
+                let col = j * P.nx + i;
+                let fond = floor_of(col);
+                let has_floor = xg_bcast(t, select(0u, 1u, fond > 0.0));
+                if has_floor == 0u {
+                    continue;
+                }
+                let kf = xg_bcast(t, min(u32(floor(fond / P.dx + 0.5)), P.nz - 1u));
+                let sw = solde_w_index(col);
+                loop {
+                    if !xg_remove_due(t, sw) {
+                        break;
+                    }
+                    let m = xg_pick_lowest(t, i, j, kf);
+                    if m == NONE {
+                        break;
+                    }
+                    xg_mark(t, m, sw);
+                }
+                loop {
+                    if !xg_pose_due(t, sw) {
+                        break;
+                    }
+                    let z = fond + P.dx / 16.0;
+                    let n_now = xg_bcast(t, xg_n);
+                    let p = xg_most_free(t,
+                        vec3<f32>((f32(i) + 0.25) * P.dx, (f32(j) + 0.25) * P.dx, z),
+                        vec3<f32>((f32(i) + 0.75) * P.dx, (f32(j) + 0.25) * P.dx, z),
+                        vec3<f32>((f32(i) + 0.25) * P.dx, (f32(j) + 0.75) * P.dx, z),
+                        vec3<f32>((f32(i) + 0.75) * P.dx, (f32(j) + 0.75) * P.dx, z),
+                        cell_index(i, j, kf), first_new, n_now);
+                    xg_pose(t, p, sw);
+                }
+            }
+        }
+    }
+    // Les marquées, du plus grand indice au plus petit, par échange avec la dernière (le fil 0 : elles sont peu nombreuses).
+    if t == 0u {
+        let marked = xg_marked;
+        var n = xg_n;
+        for (var s = 1u; s < marked; s = s + 1u) {
+            let v = plist[s];
+            var q = s;
+            loop {
+                if q == 0u || plist[q - 1u] >= v {
+                    break;
+                }
+                plist[q] = plist[q - 1u];
+                q = q - 1u;
+            }
+            plist[q] = v;
+        }
+        for (var s = 0u; s < marked; s = s + 1u) {
+            let m = plist[s];
+            let last = n - 1u;
+            copy_particle(last, m);
+            n = last;
+        }
+        atomicStore(&pcount[COUNT_N], n);
+    }
+}
