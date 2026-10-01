@@ -13,7 +13,7 @@ use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 85] = [
+const KERNELS: [&str; 88] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -27,7 +27,7 @@ const KERNELS: [&str; 85] = [
     // S422 — la multigrille.
     "mg_kind1", "mg_kind_coarse", "mg_f_first", "mg_f_qz", "mg_f_zq", "mg_restrict1", "mg_l1_first", "mg_l1_tx",
     "mg_l1_xt", "mg_coarse", "mg_prolong0", "mg_f_qz_fold", "mg_cg_reset", "mg_cg_init_finish", "mg_cg_direction_first", "mg_cg_update", "mg_cg_beta",
-    "switch_apply_group",
+    "switch_apply_group", "mark_fresh", "clear_fresh", "reconstruct_coop",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -37,7 +37,7 @@ const SCAN_ADD: usize = 4;
 const BIN_SCATTER: usize = 5;
 const BIN_SORT: usize = 6;
 const P2G: usize = 7;
-const RECONSTRUCT: usize = 8;
+// S423 : `reconstruct` (8) remplacé par `reconstruct_coop` ; gardé dans la liste pour les indices.
 const GRAVITY_WALLS: usize = 9;
 const ASSEMBLE: usize = 10;
 const CG_INIT: [usize; 2] = [11, 12];
@@ -87,6 +87,9 @@ const MG_CG_DIRECTION_FIRST: usize = 81;
 const MG_CG_UPDATE: usize = 82;
 const MG_CG_BETA: usize = 83;
 const SWITCH_APPLY_GROUP: usize = 84;
+const MARK_FRESH: usize = 85;
+const CLEAR_FRESH: usize = 86;
+const RECONSTRUCT_COOP: usize = 87;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
@@ -133,6 +136,8 @@ pub struct ApicCarte {
     mgl: wgpu::Buffer,
     mg_levels: Vec<[usize; 3]>,
     multigrid: bool,
+    /// S423 — le corps de la surface rafraîchie par la dernière décision ; le pas suivant la réemploie si son corps est le même.
+    refresh_body: Option<Option<Sphere3>>,
     /// S420 — l'état du critère de bascule, et ses réglages (ceux de `ColumnsSwitch`), l'instant courant, µs.
     swb: wgpu::Buffer,
     switch: SwitchSettings,
@@ -352,6 +357,7 @@ impl ApicCarte {
             band: false,
             floors: false,
             swb,
+            refresh_body: None,
             mgl,
             mg_levels,
             multigrid: false,
@@ -415,6 +421,7 @@ impl ApicCarte {
     /// `ColumnsSwitch::switch` sans le fond (P4). Banc.
     pub fn switch_for_bench(&mut self, now_us: u64) -> Result<StageTimes, String> {
         self.now_us = now_us;
+        self.refresh_body = Some(self.body);
         self.write_params(1);
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         // S421 : trois passages horodatés — décision (9), application (10), fond (11).
@@ -478,7 +485,10 @@ impl ApicCarte {
     fn encode_decide(&self, pass: &mut wgpu::ComputePass) {
         let ncol = self.domain.nx * self.domain.ny;
         self.encode_bin(pass);
-        self.dispatch(pass, RECONSTRUCT, self.domain.cells(), WG);
+        // La surface rafraîchie : toujours recalculée (le drapeau est d'abord baissé), puis marquée valable.
+        self.dispatch(pass, CLEAR_FRESH, 1, 1);
+        self.dispatch_reconstruct(pass);
+        self.dispatch(pass, MARK_FRESH, 1, 1);
         for k in SWITCH_DECIDE {
             self.dispatch(pass, k, ncol, WG);
         }
@@ -530,6 +540,7 @@ impl ApicCarte {
         self.queue.write_buffer(&self.pv, 0, bytes(&v));
         self.queue.write_buffer(&self.pc, 0, bytes(&c));
         self.n = n;
+        self.refresh_body = None;
         // S418 : `n` résident ; compteurs de l'échange à zéro.
         let mut counts = [0u32; 16];
         counts[0] = n as u32;
@@ -611,7 +622,10 @@ impl ApicCarte {
             (self.floors || self.switch.floor_cells.is_some()) as u8 as f32,
             // S422 : le nombre de niveaux de la multigrille.
             self.mg_levels.len() as f32,
-            self.mg_levels.get(2).map_or(0, |d| (d[0] * d[1] * d[2]).div_ceil(256)) as f32, 0.,
+            self.mg_levels.get(2).map_or(0, |d| (d[0] * d[1] * d[2]).div_ceil(256)) as f32,
+            // S423 : la surface de la décision réemployable — même corps (à un millionième de maille près, l'arrondi entre la
+            // position recalculée par l'hôte et la position intégrée).
+            self.reuse_surface() as u8 as f32,
         ];
         // S420 — le critère de bascule.
         let s = self.switch;
@@ -634,6 +648,14 @@ impl ApicCarte {
             data.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.params, 0, &data);
+    }
+
+    /// S423 — la surface reconstruite en coopération : un groupe de 32 fils par maille, en deux dimensions au-delà de 65 535.
+    fn dispatch_reconstruct(&self, pass: &mut wgpu::ComputePass) {
+        let cells = self.domain.cells() as u32;
+        pass.set_pipeline(&self.pipelines[RECONSTRUCT_COOP]);
+        pass.set_bind_group(0, &self.bind, &[]);
+        pass.dispatch_workgroups(cells.min(65_535), cells.div_ceil(65_535), 1);
     }
 
     fn dispatch(&self, pass: &mut wgpu::ComputePass, kernel: usize, threads: usize, group: u32) {
@@ -683,6 +705,17 @@ impl ApicCarte {
         }
         self.queue.submit([encoder.finish()]);
         Ok(self.counts()?[0] as usize)
+    }
+
+    fn reuse_surface(&self) -> bool {
+        match (self.refresh_body, self.body) {
+            (Some(None), None) => true,
+            (Some(Some(a)), Some(b)) => {
+                let tol = std::env::var("TOL_CORPS").ok().and_then(|v| v.parse::<f32>().ok()).unwrap_or(1e-6) * self.domain.dx;
+                a.radius == b.radius && (0..3).all(|k| (a.center[k] - b.center[k]).abs() <= tol)
+            }
+            _ => false,
+        }
     }
 
     /// **S422** — la multigrille de la projection, si la hiérarchie a trois niveaux au moins ; rend si elle est active.
@@ -794,7 +827,9 @@ impl ApicCarte {
                 }
                 ApicStage::Reconstruct => {
                     self.dispatch(&mut pass, COLUMNS_ADVECT, self.faces, WG);
-                    self.dispatch(&mut pass, RECONSTRUCT, self.domain.cells(), WG);
+                    self.dispatch_reconstruct(&mut pass);
+                    // S423 : la surface de la décision est consommée (ou recalculée) ; le pas va déplacer les particules.
+                    self.dispatch(&mut pass, CLEAR_FRESH, 1, 1);
                 }
                 ApicStage::Project => {
                     let cells = self.domain.cells();

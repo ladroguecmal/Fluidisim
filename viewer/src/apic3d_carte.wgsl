@@ -355,6 +355,25 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
     if c >= P.cells {
         return;
     }
+    // S423 : la surface rafraîchie par la décision de la bascule vaut encore pour cette maille si aucune colonne à portée du noyau
+    // n'a changé depuis (convertie, ensemencée, fond déplacé : `swb[SW_KEEP]`, marqué par la bascule) et si le corps est le même
+    // (l'hôte le confirme, `P.r2`) — `φ` ne dépend que de son voisinage.
+    if P.r2 != 0.0 && atomicLoad(&pcount[COUNT_FRESH]) != 0u {
+        let ci = c % P.nx;
+        let cj = (c / P.nx) % P.ny;
+        let rr = P.reach;
+        var dirty = false;
+        for (var b = select(0u, cj - rr, cj >= rr); b < min(cj + rr + 1u, P.ny); b = b + 1u) {
+            for (var a = select(0u, ci - rr, ci >= rr); a < min(ci + rr + 1u, P.nx); a = a + 1u) {
+                if swb[sw(SW_KEEP, b * P.nx + a)] != 0u {
+                    dirty = true;
+                }
+            }
+        }
+        if !dirty {
+            return;
+        }
+    }
     let i = c % P.nx;
     let j = (c / P.nx) % P.ny;
     let k = c / (P.nx * P.ny);
@@ -2711,7 +2730,8 @@ fn floor_move() {
         return;
     }
     // Remonter : les particules sous le nouveau fond, dans l'ordre de la référence.
-    visit_remove(2u);
+    let raised = visit_remove(2u);
+    var moved = raised > 0u;
     var n = np();
     for (var col = 0u; col < ncol; col = col + 1u) {
         if cmask[col] != 0u {
@@ -2741,9 +2761,16 @@ fn floor_move() {
                 }
             }
         }
+        if to != was {
+            moved = true;
+            swb[sw(SW_KEEP, col)] = 1u;
+        }
         cols[2u * ncol + 32u + col] = f32(to) * P.dx;
     }
     atomicStore(&pcount[COUNT_N], n);
+    // S423 : un fond déplacé rend la surface périmée autour de sa colonne (marquée ci-dessus) ; les particules retirées en
+    // remontant sont dans ces colonnes.
+    _ = moved;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -2753,6 +2780,18 @@ const COUNT_FLIST: u32 = 10u;
 const COUNT_WET: u32 = 11u;
 const COUNT_SHARE_LO: u32 = 12u;
 const COUNT_SHARE_HI: u32 = 13u;
+// S423 : la surface de la décision vaut encore pour le pas suivant (rien n'a basculé).
+const COUNT_FRESH: u32 = 14u;
+
+@compute @workgroup_size(1)
+fn mark_fresh() {
+    atomicStore(&pcount[COUNT_FRESH], 1u);
+}
+
+@compute @workgroup_size(1)
+fn clear_fresh() {
+    atomicStore(&pcount[COUNT_FRESH], 0u);
+}
 
 // Une face-maille par son indice de solde (faces `u`, puis `v` : l'ordre de la boucle de la référence) : (axe, rangée, fj, fi).
 fn face_cell_of(e: u32) -> vec4<u32> {
@@ -4080,7 +4119,17 @@ fn switch_apply_group(@builtin(local_invocation_id) lid: vec3<u32>) {
             seeding = seeding + 1u;
         }
     }
-    if sg_sum_u32(t, seeding) > 0u && t == 0u {
+    let seeding_all = sg_sum_u32(t, seeding);
+    // S423 : les colonnes qui basculent rendent la surface périmée autour d'elles.
+    for (var b = 0u; b < sg_blocks(); b = b + 1u) {
+        let col = t + SG * b;
+        if col < ncol && (converted(col) || (cmask[col] != 0u && swb[sw(SW_REQUEST, col)] == 0u)) {
+            swb[sw(SW_KEEP, col)] = 1u;
+        }
+    }
+    storageBarrier();
+    workgroupBarrier();
+    if seeding_all > 0u && t == 0u {
         var n = np();
         let offsets = array<vec2<f32>, 4>(vec2<f32>(0.25, 0.25), vec2<f32>(0.75, 0.75), vec2<f32>(0.75, 0.25), vec2<f32>(0.25, 0.75));
         for (var col = 0u; col < ncol; col = col + 1u) {
@@ -4202,3 +4251,218 @@ fn switch_apply_group(@builtin(local_invocation_id) lid: vec3<u32>) {
         atomicStore(&pcount[COUNT_BAND], select(0u, 1u, any_band > 0u));
     }
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
+// **S423 — la surface reconstruite en coopération** : un groupe de 32 fils par maille. La reconstruction d'une maille de la bande
+// parcourt les 125 mailles voisines et les rangées virtuelles de 25 colonnes : sur un fil, c'est le fil le plus long qui fait le
+// temps (≈ 0,6 ms sur B10). Les fils se répartissent les mailles voisines et les colonnes, les sommes se réduisent dans le groupe —
+// seul l'ordre des sommes change, à l'arrondi. Les mailles de la zone, sous le fond, ou dont la surface vaut encore, se règlent au
+// fil 0, comme `reconstruct`.
+
+const RC: u32 = 32u;
+var<workgroup> rc_mode: u32;
+var<workgroup> rc_w: array<f32, 32>;
+var<workgroup> rc_x: array<vec3<f32>, 32>;
+
+// Les sommes d'une colonne virtuelle `(a, b)` pour le centre `q` (le corps de la boucle de `virtual_column_sums`).
+fn virtual_one(a: u32, b: u32, q: vec3<f32>, radius: f32, inv_r2: f32, nx0: bool, nx1: bool, ny0: bool, ny1: bool, nz0: bool) -> vec4<f32> {
+    let col = b * P.nx + a;
+    var eta = 0.0;
+    if cmask[col] != 0u {
+        eta = max(cols[col], 0.0);
+    } else {
+        eta = floor_of(col);
+    }
+    var sw = 0.0;
+    var sx = vec3<f32>(0.0);
+    if eta > 0.0 {
+        let images = vec3<f32>(1.0, -1.0, 2.0);
+        let rows = max(u32(floor(2.0 * eta / P.dx + 0.5)), 1u);
+        let pitch = eta / f32(rows);
+        let lo = u32(max(floor(max(q.z - radius, 0.0) / pitch - 0.5), 0.0));
+        let hi = min(u32(max(ceil((q.z + radius) / pitch - 0.5), 0.0)), rows - 1u);
+        for (var row = lo; row <= hi; row = row + 1u) {
+            let z = (f32(row) + 0.5) * pitch;
+            for (var o = 0u; o < 4u; o = o + 1u) {
+                let ox = select(0.25, 0.75, (o & 1u) == 1u);
+                let oy = select(0.25, 0.75, (o & 2u) == 2u);
+                let p0 = vec3<f32>((f32(a) + ox) * P.dx, (f32(b) + oy) * P.dx, z);
+                for (var mx = 0u; mx < 3u; mx = mx + 1u) {
+                    if image_on(mx, nx0, nx1) {
+                        for (var my = 0u; my < 3u; my = my + 1u) {
+                            if image_on(my, ny0, ny1) {
+                                for (var mz = 0u; mz < 2u; mz = mz + 1u) {
+                                    if image_on(mz, nz0, false) {
+                                        let p = vec3<f32>(mirror(p0.x, images[mx], P.lx), mirror(p0.y, images[my], P.ly),
+                                            mirror(p0.z, images[mz], 0.0));
+                                        let d = p - q;
+                                        let wt = smooth_kernel((d.x * d.x + d.y * d.y + d.z * d.z) * inv_r2);
+                                        if wt > 0.0 {
+                                            sw = sw + wt;
+                                            sx = sx + wt * p;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return vec4<f32>(sx, sw);
+}
+
+@compute @workgroup_size(32)
+fn reconstruct_coop(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invocation_id) lid: vec3<u32>) {
+    let c = wid.x + wid.y * 65535u;
+    let t = lid.x;
+    if t == 0u {
+        var mode = 0u;
+        if c >= P.cells {
+            mode = 1u;
+        } else {
+            let i = c % P.nx;
+            let j = (c / P.nx) % P.ny;
+            let k = c / (P.nx * P.ny);
+            let q = (vec3<f32>(f32(i), f32(j), f32(k)) + vec3<f32>(0.5)) * P.dx;
+            let bc = vec3<f32>(P.bcx, P.bcy, P.bcz);
+            let eq = q - bc;
+            let solid = P.has_body != 0.0 && eq.x * eq.x + eq.y * eq.y + eq.z * eq.z < P.br * P.br;
+            if P.has_columns != 0.0 && cmask[j * P.nx + i] != 0u {
+                let phi_c = q.z - columns_read(cols[j * P.nx + i]);
+                cellf[c] = phi_c;
+                label[c] = select(select(AIR, WATER, phi_c < 0.0), SOLID, solid);
+                mode = 1u;
+            } else {
+                let fl = floor_of(j * P.nx + i);
+                if q.z < fl {
+                    cellf[c] = q.z - fl;
+                    label[c] = select(WATER, SOLID, solid);
+                    mode = 1u;
+                } else if P.r2 != 0.0 && atomicLoad(&pcount[COUNT_FRESH]) != 0u {
+                    // La surface de la décision vaut encore si aucune colonne à portée n'a changé.
+                    let rr = P.reach;
+                    var dirty = false;
+                    for (var b = select(0u, j - rr, j >= rr); b < min(j + rr + 1u, P.ny); b = b + 1u) {
+                        for (var a = select(0u, i - rr, i >= rr); a < min(i + rr + 1u, P.nx); a = a + 1u) {
+                            if swb[sw(SW_KEEP, b * P.nx + a)] != 0u {
+                                dirty = true;
+                            }
+                        }
+                    }
+                    if !dirty {
+                        mode = 1u;
+                    }
+                }
+            }
+        }
+        rc_mode = mode;
+    }
+    if workgroupUniformLoad(&rc_mode) != 0u {
+        return;
+    }
+    let i = c % P.nx;
+    let j = (c / P.nx) % P.ny;
+    let k = c / (P.nx * P.ny);
+    let q = (vec3<f32>(f32(i), f32(j), f32(k)) + vec3<f32>(0.5)) * P.dx;
+    let radius = P.kr;
+    let inv_r2 = 1.0 / (radius * radius);
+    let near_x0 = q.x < radius;
+    let near_x1 = q.x > P.lx - radius;
+    let near_y0 = q.y < radius;
+    let near_y1 = q.y > P.ly - radius;
+    let near_z0 = q.z < radius;
+    let images = vec3<f32>(1.0, -1.0, 2.0);
+    let bc = vec3<f32>(P.bcx, P.bcy, P.bcz);
+    let eq = q - bc;
+    let use_body = P.has_body != 0.0 && sqrt(eq.x * eq.x + eq.y * eq.y + eq.z * eq.z) < P.br + radius;
+    let r = P.reach;
+    let lo = vec3<u32>(select(0u, i - r, i >= r), select(0u, j - r, j >= r), select(0u, k - r, k >= r));
+    let hi = vec3<u32>(min(i + r + 1u, P.nx), min(j + r + 1u, P.ny), min(k + r + 1u, P.nz));
+    let span = hi - lo;
+    var sw = 0.0;
+    var sx = vec3<f32>(0.0);
+    // Les mailles voisines, réparties entre les fils.
+    for (var n = t; n < span.x * span.y * span.z; n = n + RC) {
+        let cx = lo.x + n % span.x;
+        let cy = lo.y + (n / span.x) % span.y;
+        let cz = lo.z + n / (span.x * span.y);
+        let cell = cell_index(cx, cy, cz);
+        for (var s = start[cell]; s < start[cell + 1u]; s = s + 1u) {
+            let p0 = px[order[s]].xyz;
+            for (var ax = 0u; ax < 3u; ax = ax + 1u) {
+                if image_on(ax, near_x0, near_x1) {
+                    for (var ay = 0u; ay < 3u; ay = ay + 1u) {
+                        if image_on(ay, near_y0, near_y1) {
+                            for (var az = 0u; az < 2u; az = az + 1u) {
+                                if image_on(az, near_z0, false) {
+                                    let p = vec3<f32>(mirror(p0.x, images[ax], P.lx), mirror(p0.y, images[ay], P.ly),
+                                        mirror(p0.z, images[az], 0.0));
+                                    let d = p - q;
+                                    let wt = smooth_kernel((d.x * d.x + d.y * d.y + d.z * d.z) * inv_r2);
+                                    if wt > 0.0 {
+                                        sw = sw + wt;
+                                        sx = sx + wt * p;
+                                    }
+                                    if use_body {
+                                        let e = p - bc;
+                                        let de = sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
+                                        if de > 0.0 && de < 2.0 * P.br {
+                                            let f = (2.0 * P.br - de) / de;
+                                            let pi = bc + f * e;
+                                            let di = pi - q;
+                                            let wi = smooth_kernel((di.x * di.x + di.y * di.y + di.z * di.z) * inv_r2);
+                                            if wi > 0.0 {
+                                                sw = sw + wi;
+                                                sx = sx + wi * pi;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // Les colonnes virtuelles à portée, réparties entre les fils.
+    if P.has_columns != 0.0 {
+        let al = select(0u, i - r, i >= r);
+        let ah = min(i + r + 1u, P.nx);
+        let bl = select(0u, j - r, j >= r);
+        let bh = min(j + r + 1u, P.ny);
+        let wa = ah - al;
+        for (var v = t; v < wa * (bh - bl); v = v + RC) {
+            let s4 = virtual_one(al + v % wa, bl + v / wa, q, radius, inv_r2, near_x0, near_x1, near_y0, near_y1, near_z0);
+            sw = sw + s4.w;
+            sx = sx + s4.xyz;
+        }
+    }
+    rc_w[t] = sw;
+    rc_x[t] = sx;
+    workgroupBarrier();
+    for (var h = RC / 2u; h > 0u; h = h / 2u) {
+        if t < h {
+            rc_w[t] = rc_w[t] + rc_w[t + h];
+            rc_x[t] = rc_x[t] + rc_x[t + h];
+        }
+        workgroupBarrier();
+    }
+    if t == 0u {
+        let tw = rc_w[0];
+        var phi = P.dx;
+        if tw > 0.0 {
+            let m = rc_x[0] / tw - q;
+            phi = sqrt(m.x * m.x + m.y * m.y + m.z * m.z) - P.radius;
+        }
+        cellf[c] = phi;
+        var lab = select(AIR, WATER, phi < 0.0);
+        if P.has_body != 0.0 && eq.x * eq.x + eq.y * eq.y + eq.z * eq.z < P.br * P.br {
+            lab = SOLID;
+        }
+        label[c] = lab;
+    }
+}
+
