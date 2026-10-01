@@ -3423,6 +3423,31 @@ fn xg_pose(t: u32, p: vec3<f32>, solde: u32) {
 }
 
 // Encore un solde à régler, et la place pour poser ? (0 : non ; 1 : retirer ; 2 : poser ; 3 : poser refusé)
+// S425 — le rang de chaque fil parmi ceux qui ont une colonne à visiter (préfixe exclusif sur 64), le total dans `xg_due`.
+var<workgroup> xg_cols: array<u32, 64>;
+var<workgroup> xg_pre: array<u32, 64>;
+var<workgroup> xg_due: u32;
+
+fn xg_scan_due(t: u32, v: u32) -> u32 {
+    xg_pre[t] = v;
+    workgroupBarrier();
+    for (var r = 1u; r < XG; r = r * 2u) {
+        var add = 0u;
+        if t >= r {
+            add = xg_pre[t - r];
+        }
+        workgroupBarrier();
+        xg_pre[t] = xg_pre[t] + add;
+        workgroupBarrier();
+    }
+    if t == XG - 1u {
+        xg_due = xg_pre[t];
+    }
+    let x = xg_pre[t] - v;
+    workgroupBarrier();
+    return x;
+}
+
 fn xg_remove_due(t: u32, solde: u32) -> bool {
     var v = 0u;
     if t == 0u && solde_le_minus_vp(solde) {
@@ -3506,16 +3531,30 @@ fn exchange_group(@builtin(local_invocation_id) lid: vec3<u32>) {
             xg_pose(t, p, e);
         }
     }
-    // (4) S413 — le solde vertical de chaque colonne à fond.
+    // (4) S413 — le solde vertical de chaque colonne à fond. S425 : les colonnes par morceaux de 64, chaque fil la sienne ; seules
+    // celles dont le solde dépasse une particule (dans un sens ou l'autre) sont visitées, dans l'ordre des colonnes — les autres ne
+    // faisaient rien, et le parcours de toutes, trois diffusions par colonne, coûtait ≈ 66 µs par pas sur B10.
     if P.floors != 0.0 {
-        for (var j = 0u; j < P.ny; j = j + 1u) {
-            for (var i = 0u; i < P.nx; i = i + 1u) {
-                let col = j * P.nx + i;
-                let fond = floor_of(col);
-                let has_floor = xg_bcast(t, select(0u, 1u, fond > 0.0));
-                if has_floor == 0u {
-                    continue;
+        let ncol = P.nx * P.ny;
+        for (var base = 0u; base < ncol; base = base + XG) {
+            let mine = base + t;
+            var due = 0u;
+            if mine < ncol && floor_of(mine) > 0.0 {
+                let sw0 = solde_w_index(mine);
+                if solde_le_minus_vp(sw0) || solde_ge_vp(sw0) {
+                    due = 1u;
                 }
+            }
+            let at = xg_scan_due(t, due);
+            if due == 1u {
+                xg_cols[at] = mine;
+            }
+            let count = workgroupUniformLoad(&xg_due);
+            for (var q = 0u; q < count; q = q + 1u) {
+                let col = workgroupUniformLoad(&xg_cols[q]);
+                let i = col % P.nx;
+                let j = col / P.nx;
+                let fond = floor_of(col);
                 let kf = xg_bcast(t, min(u32(floor(fond / P.dx + 0.5)), P.nz - 1u));
                 let sw = solde_w_index(col);
                 loop {
