@@ -91,7 +91,7 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
   particules (ensemencement sur un fil), soldes à la réserve ; la réserve réglée dans l'échange ; banc d'une bascule.
 - [x] **P4** — le fond placé et déplacé (`place_floor`, `move_band_floor`) ; banc.
 - [x] **P5** — B10 en bande étroite sur la carte, carte, référence et témoin ; critère 3.
-- [ ] **P6** — non-régression, suite ; preuve §12 ; liste, file, feuille de route, index.
+- [x] **P6** — non-régression, suite ; preuve §12 ; liste, file, feuille de route, index.
 - [ ] **P7** — rituel.
 
 ### Notes de reprise
@@ -119,3 +119,4 @@ pas se publie ; la session s'arrête à l'étape achevée, le reste au jeton.
   air au pincement 0,0859 ; ±10⁻⁴ — **197 mm** (36), 42,9 (52), air 0,0859. Contre le seul témoin à 10⁻⁶ écrit dans le critère :
   manqué ; **contre l'enveloppe des trois témoins : la carte est dedans à chaque pas publié** (égale au plus grand aux pas 51 et 54).
   Coût p99 **28,7 ms** dont la fin du pas (séparation, corps, échange sur un fil) 23,6 ms ; la bascule ≈ 5,5 ms au mur — C7e.
+- **P6** — non-régression : ballottement 0,456 mm, B10 nu au pas 54, colonnes 0,003 mm, raccord 4,48 mm, bande étroite 1,45 mm — identiques à S419 ; suite **753**, zéro avertissement. Preuve §12 ; liste 4.19, file, feuille de route, index.

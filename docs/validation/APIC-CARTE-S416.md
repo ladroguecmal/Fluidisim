@@ -169,8 +169,8 @@ la carte (C3 : 6 à 8 cycles là où le gradient conjugué en demande 94), et un
 
 ## 6. Ce que ce document ne dit pas
 
-- **Ni la bascule, ni le déplacement du fond** : C7c-4 (§8). La zone, son échange et le fond fixe sont sur la carte (§9–11,
-  S417–S419), B10 nu aussi (§7) ; B10 en bande étroite pas encore.
+- **Le budget** : la bande étroite entière est sur la carte (§9–12, S417–S420), mais 28,7 ms sur B10 — C7e ; la vitesse relative à B et
+  les critères d'écoulement de S415 — C7d.
 - **Le pas `dt`** est celui de la référence : la carte ne le choisit pas elle-même (C7e, diagnostics différés).
 - **Le budget** : 2,05 ms pour une cuve de 2 × 0,2 m est le budget entier de δ ; aucune conclusion de budget n'en sort avant la
   multigrille et la bande étroite, qui retire les particules profondes (÷ 4,7 à 7,7, S413).
@@ -388,3 +388,54 @@ déplacent le raccord de §10 à l'intérieur de sa dispersion (4,41 → 4,48 mm
 **Critère 2 tenu** : la surface reste à 1,45 mm de la référence, sous les 3 mm, la période à 0,015 %, la masse exacte. La carte
 finit au-dessus des deux témoins (0,92 et 1,18 mm) : l'arrondi de la carte pèse ici un peu plus qu'une perturbation de 10⁻⁴ m/s,
 sans approcher la tolérance. **C7c-3 reçu.**
+
+## 12. C7c-4 — la bascule et le fond placé sur la carte ; B10 en bande étroite (S420)
+
+**Reproduire** : `--apic3d-carte-decision` (`CHAUFFES=0,10,…` ; `INITIAL=1` la bascule initiale ; `PENTE=0.02`, `MAINTIEN=0` des
+bascules forcées ; `SANS_FOND=1`) ; `BANDE=1 … --apic3d-carte-b10` (20 s) ; témoins `BANDE=1 TEMOIN=1e-6|1e-5|1e-4` (30 s). Le réglage
+de B10 en bande étroite est celui de R35 (maintien 0,3 s, fond 4). Cœur : `ColumnsSwitch::switch_state`, `Apic3::columns_reserve`.
+
+**La construction.** **La décision** par colonne, en parallèle (`switch_need` : hauteur convertible et corps ; `switch_slope` ;
+`switch_spread` et `switch_request` : dilatation de Chebyshev séparable, maintien sur un instant de 32 bits — 71 minutes, à rendre
+relatif en C7e) sur la surface rafraîchie. **La bascule** sur un fil, dans l'ordre de la référence (`switch_apply`) : les particules des
+converties retirées par la visite de la référence, l'eau sous le fond et le solde vertical comptés, **la voie mixte en quanta** (le
+décalage borné à 2²⁵ quanta, un quart de maille ; le reste à la réserve, exactement), l'ensemencement nominal des colonnes qui
+repassent aux particules, les soldes des faces qui cessent d'être frontière à la réserve ; **la réserve réglée** au début de l'échange ;
+le drapeau « une bande existe » résident. **Le fond** placé par colonne (`floor_place`) et déplacé sur un fil (`floor_move`). **La
+liste des retirées** se construit **triée, en parallèle** (préfixe par blocs) : le tri par insertion sur un fil, tenable pour quelques
+absorbées, faisait tomber la carte (délai de garde du pilote) à la bascule initiale — 120 000 particules. Trois mots réservés de WGSL
+rencontrés : `pass`, `target`, `from`.
+
+**Une décision, une bascule** (critères 1 et 2), B10 en bande étroite :
+
+| cas | colonnes basculées | écart |
+|---|---|---|
+| 21 instants ordinaires (0 à 70 pas) | aucune (la bande de B10 est stable) | masque demandé, `n`, positions, fonds **identiques** |
+| ensemencements forcés (pente 0,02) | 186 et 166 vers les particules, 98 537 et 89 590 particules | positions **identiques indice pour indice**, réserves égales |
+| conversions forcées (maintien nul) | 3 vers les colonnes | positions identiques, `η` 7,2·10⁻⁷ m, réserve égale |
+| la bascule initiale, avec le fond | 200 vers les colonnes, 56 fonds posés | `n` 1 784, positions et fonds identiques, **`η` 1,9·10⁻⁶ m** |
+
+Le volume de la carte est constant **à 0 quantum** dans tous les cas. Le critère « `η` à 10⁻⁶ m » est manqué à la bascule initiale
+(1,9·10⁻⁶) : `η` s'y lit sur `φ`, admis à 10⁻⁵ — le critère était plus serré que sa source.
+
+**B10 en bande étroite** (critère 3) :
+
+| | carte | référence | témoin ±10⁻⁶ | ±10⁻⁵ | ±10⁻⁴ |
+|---|---|---|---|---|---|
+| pincement | **pas 55**, 2,1676 √(R/g) | pas 55, 2,1676 | pas 55 | pas 55 | pas 55 |
+| profondeur / air / cavité / couronne | 1,438 D / 0,0781 D³ / 1,937 D / 0,199 D | identiques | identiques | air 0,0859 | air 0,0859 |
+| `φ` à l'interface, max avant le pincement | **50,0 mm** (pas 51) | — | 2,46 mm | 50,0 mm | **197 mm** |
+| volume | **0 quantum** | | | | |
+
+Pas à pas (mm) — carte : 0,17 (28), 0,56 (36), 1,25 (44), 0,58 (48), 3,71 (50), 50,0 (51), 1,46 (52), 0,70 (53), 36,3 (54), 5,1 (55) ;
+l'enveloppe des trois témoins : 1,22, 197, 4,59, 10,9, 50,0, 50,0, 42,9, 20,7, 36,3, 13,7. **La carte est dans l'enveloppe à chaque
+pas publié** — égale au plus grand témoin aux pas 51 et 54 —, et son pincement est celui de la référence au chiffre près, quand deux
+témoins changent l'air enfermé. Contre le seul témoin à ±10⁻⁶ que nommait le critère, c'est **manqué** : un témoin unique ne mesure pas
+une dispersion (S418 l'annonçait ; trois la bornent). **Le premier écart** est au pas 35 : une pose de plus sur la carte (un solde au
+seuil d'une particule, à quelques quanta ; les soldes portent l'écart de vitesse admis), masques et fonds identiques.
+
+**Le critère de C7, pour ce qui touche à la précision** (*« B10 de la production à 3 mm de la référence »*, S384) : **tenu là où il a un
+sens** — pincement, cavité, couronne, masse ; **sans objet au col**, où la référence ne se tient pas à 3 mm d'elle-même (2,5 à 197 mm sous
+des perturbations de 10⁻⁶ à 10⁻⁴ m/s). **Le coût, lui, ne l'est pas** : 28,7 ms au 99ᵉ centile pour 4 000 particules et 21 504 mailles,
+dont 23,6 ms pour la fin du pas (séparation, corps, échange sur un fil) et ≈ 5,5 ms de bascule — **C7e** : l'échange par coloriage, la
+bascule en parallèle, la multigrille, le dispatch indirect. *« δ ≤ 2 ms avec la bande »* reste à faire.
