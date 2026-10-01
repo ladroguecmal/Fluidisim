@@ -84,9 +84,10 @@ critère en cours de mesure.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `floor_deformation` relative à B ; essai du cœur.
-- [ ] **P3** — mesures sur la vague de Chen ; critères.
+- [x] **P3** — mesures sur la vague de Chen ; critères.
 - [ ] **P4** — suite ; preuve §21.2 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — `Apic3::deformation` (la norme de Frobenius du gradient de `u − U_B` aux centres, mêmes différences que `vorticity` ; sans B, de la vitesse totale) et `ColumnsSwitch::floor_deformation` (s⁻¹), éteint par défaut ; la clé `deformation` du banc. Essai `the_own_deformation_of_delta_is_read_relative_to_b_s430` : une houle de gradient 2,9 s⁻¹ en surface, seuil 1 — le gradient total prend les 32 colonnes, relatif à B aucune ; un cisaillement enfoui ajouté, pris lui seul (10 à 21).
+- **P3** — mesures (vague de Chen, 40 mailles par λ, `ny` 4, maintien 0,3 s, fond 4, `fond_b=1`). **Déformation propre** : `ε` 0,55 — part de la fenêtre au retournement **1,000** à 1 et à 2 s⁻¹ (toute la fenêtre dès 0,04 et 0,27 τ ; retournement détecté à 0,666 et 0,568 τ) ; `ε` 0,1 — 1 s⁻¹ : **200/200**, 187 retours rapides ; 2 s⁻¹ : 0/200, 8 retours rapides. **Vitesse propre 0,2 rejouée** : 0,940 et 0/200, S429 au chiffre près (critère c tenu). **La déformation propre fait pire que la vitesse propre** : le gradient de la grille est bruité près de la surface (vitesses extrapolées dans l'air, bord de la zone) — S415 l'avait vu sur la vorticité ; même relative à B, il dépasse 1 s⁻¹ sous une houle de 0,8 s⁻¹. **Un défaut du critère (a), trouvé en relisant** : son seuil de 0,5 venait de la part *moyenne* de la forme seule (0,501, S415) ; au retournement, la forme seule prend déjà **0,62** de la fenêtre, et elle est toujours active — (a) était inatteignable par tout critère qui s'y ajoute. Non changé en cours de mesure ; **réécrit pour la suite** : *le critère d'écoulement n'ajoute pas plus de 0,1 à la forme seule au retournement, sans retour rapide de plus qu'elle*. Sous cette lecture, la **vitesse propre à 0,4 m/s** (S429 : 0,58 ≤ 0,62, rien sous la houle calme) passerait — sauf ses **25 retours rapides** : une hystérésis du seuil de vitesse (entrée 0,4, sortie plus basse), comme la pente (S410), est la suite.
