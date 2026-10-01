@@ -1104,6 +1104,63 @@ fn a_buried_jet_is_taken_by_the_speed_threshold_s415() {
     assert_eq!(run(None, None), 0);
 }
 
+/// **S429, C7d-1** — le fond B : une houle linéaire posée sur la grille (sous le niveau moyen) va plus vite que le seuil partout
+/// près de la surface — la vitesse totale prend toute la largeur ; relative à cette même houle comme fond B, elle ne demande rien ;
+/// un jet enfoui ajouté à la houle est pris, lui seul (dilaté). Sans fond B, S415 au bit (les autres essais).
+#[test]
+fn the_speed_threshold_reads_the_own_velocity_of_delta_s429() {
+    let (nx, ny, nz, dx) = (32usize, 4usize, 16usize, 0.05f32);
+    let swell = LinearSwell { amplitude: 0.03, wavenumber: std::f32::consts::TAU / 0.8, omega: 0., phase: -std::f32::consts::FRAC_PI_2, mean_level: 0.5 };
+    let swell = LinearSwell { omega: (9.81 * swell.wavenumber).sqrt(), ..swell };
+    let run = |background: Option<LinearSwell>, jet: bool| {
+        let (mut a, mut arena) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+        a.enable_columns(&mut host, &vec![0u8; nx * ny]).unwrap();
+        a.seed(&|p| p[2] < 0.5).unwrap();
+        // La houle aux faces : `u` aux faces `x` (centre en `z`), `w` aux faces `z` (centre en `x`).
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..=nx {
+                    a.u[(k * ny + j) * (nx + 1) + i] = swell.velocity(i as f32 * dx, (k as f32 + 0.5) * dx, 0.)[0];
+                }
+            }
+        }
+        for k in 0..=nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    a.w[(k * ny + j) * nx + i] = swell.velocity((i as f32 + 0.5) * dx, k as f32 * dx, 0.)[2];
+                }
+            }
+        }
+        if jet {
+            for k in 2..5 {
+                for j in 0..ny {
+                    for i in 14..=18 {
+                        a.u[(k * ny + j) * (nx + 1) + i] += 0.5;
+                    }
+                }
+            }
+        }
+        let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+        s.floor_cells = Some(4);
+        s.floor_speed = Some(0.1);
+        s.background = background;
+        s.switch(0, &mut a).unwrap();
+        (0..nx).filter(|&i| !a.is_column(i, 1)).collect::<Vec<usize>>()
+    };
+    let crest = swell.amplitude * swell.omega;
+    println!("S429 houle : vitesse orbitale en surface {crest} m/s, seuil 0,1");
+    assert!(crest > 0.2);
+    assert_eq!(run(None, false).len(), nx, "la vitesse totale prend toute la houle");
+    assert!(run(Some(swell), false).is_empty(), "relative à B, la houle ne demande rien");
+    let jet = run(Some(swell), true);
+    println!("S429 houle et jet enfoui : bande {jet:?}");
+    for i in 14..18 {
+        assert!(jet.contains(&i), "colonne {i} du jet");
+    }
+    assert!(!jet.contains(&0) && !jet.contains(&31), "loin du jet, rien");
+}
+
 /// **S415** — la part de rotation : 1 pour une rotation solide, 0 pour une déformation pure (`u = γz`, `w = γx` : symétrique),
 /// le gradient à l'échelle de la vorticité pour la rotation (2Ω).
 #[test]

@@ -92,7 +92,7 @@ du cœur, zéro avertissement. Les parois réfléchissent (le bassin n'est pas p
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — C7e reçu : preuve §20, registres, liste.
 - [x] **P3** — la conception de C7d : preuve §21.
-- [ ] **P4** — C7d-1 : le fond B analytique dans `ColumnsSwitch`, le critère relatif ; essais du cœur.
+- [x] **P4** — C7d-1 : le fond B analytique dans `ColumnsSwitch`, le critère relatif ; essais du cœur.
 - [ ] **P5** — C7d-1 mesuré sur la vague de Chen (`ε` 0,55 et 0,1) ; critères.
 - [ ] **P6** — suite ; preuve ; registres.
 - [ ] **P7** — rituel.
@@ -100,3 +100,4 @@ du cœur, zéro avertissement. Les parois réfléchissent (le bassin n'est pas p
 ### Notes de reprise
 - **P2** — C7e reçu, consigné : preuve §20 (la décision et sa portée : 2,07 ms mesurés sur B10 en bande étroite, non sur la scène de la porte B ; les dispatchs indirects restent désignés), liste 4.19, file (`C7d`, §21).
 - **P3** — la conception de C7d, preuve §21 : ce qui existe et manque (le mode relatif en référence seulement ; A320 ouverte, et la vague de Chen est une houle raide ; la bande simule l'eau totale ; les critères d'écoulement de S415 absents de la carte) ; **C7d-1** le critère relatif en référence sur la vague de Chen, **C7d-2** le même sur la carte, **C7d-3** la bande dans la production couplée, après sa propre conception (le mode relatif sur la carte, A320 d'abord) — chacun avec son « reçu si ».
+- **P4** — `LinearSwell` (houle linéaire progressive, profondeur infinie : `a`, `k`, `ω`, `φ`, niveau moyen ; `velocity(x, z, t)`) et `ColumnsSwitch::background` : avec un fond B, le seuil de vitesse du fond porte sur `|u − U_B|` au centre de la maille (`Apic3::cell_speed_relative`, les mêmes moyennes de faces que `cell_speed`) à l'instant de la décision ; `None` par défaut, S415 au bit. Essai `the_speed_threshold_reads_the_own_velocity_of_delta_s429` : une houle (0,26 m/s en surface, seuil 0,1) — la vitesse totale prend les 32 colonnes, relative à B aucune ; un jet enfoui ajouté, pris lui seul (colonnes 11 à 20 : 13 à 18 dilatées). Les essais de S415 inchangés.

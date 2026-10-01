@@ -1519,9 +1519,50 @@ impl Apic3 {
         (u * u + v * v + w * w).sqrt()
     }
 
+    /// **S429 — C7d-1** — la vitesse de la grille au centre d'une maille **moins celle du fond B** au même point, m/s : la vitesse
+    /// propre de δ (ADR-198 : δ relatif à B). Mêmes moyennes de faces que `cell_speed`.
+    pub(crate) fn cell_speed_relative(&self, i: usize, j: usize, k: usize, b: &LinearSwell, t_s: f64) -> f32 {
+        let Domain3 { nx, ny, dx, .. } = self.domain;
+        let u = 0.5 * (self.u[(k * ny + j) * (nx + 1) + i] + self.u[(k * ny + j) * (nx + 1) + i + 1]);
+        let v = 0.5 * (self.v[(k * (ny + 1) + j) * nx + i] + self.v[(k * (ny + 1) + j + 1) * nx + i]);
+        let w = 0.5 * (self.w[(k * ny + j) * nx + i] + self.w[((k + 1) * ny + j) * nx + i]);
+        let ub = b.velocity((i as f32 + 0.5) * dx, (k as f32 + 0.5) * dx, t_s);
+        let (du, dw) = (u - ub[0], w - ub[2]);
+        (du * du + v * v + dw * dw).sqrt()
+    }
+
     /// Une colonne de la zone ? (pour les essais et le banc)
     pub fn is_column(&self, i: usize, j: usize) -> bool {
         self.column_of(i, j)
+    }
+}
+
+/// **S429 — C7d-1 : un fond B analytique**, la houle linéaire progressive selon `x` en profondeur infinie :
+/// `η_B = a·cos θ`, `θ = k·x − ω·t + φ`, vitesses `u = aω·e^{kζ}·cos θ`, `w = aω·e^{kζ}·sin θ`, `ζ = z − niveau moyen` (au-dessus
+/// du niveau moyen, l'exponentielle prolongée). En production, δ est relatif à B ([ADR-198](../../../docs/adr/ADR-198-la-voie-d-a289.md)) ;
+/// ici B est donné, la bande simule toujours l'eau totale — seul le critère du fond lit la vitesse propre `u − U_B`.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct LinearSwell {
+    /// `a`, m.
+    pub amplitude: f32,
+    /// `k`, rad/m.
+    pub wavenumber: f32,
+    /// `ω`, rad/s.
+    pub omega: f32,
+    /// `φ`, rad.
+    pub phase: f32,
+    /// Le niveau moyen, m.
+    pub mean_level: f32,
+}
+
+impl LinearSwell {
+    /// La vitesse de B au point `(x, ·, z)` à l'instant `t_s`, m/s (`y` nulle).
+    pub fn velocity(&self, x: f32, z: f32, t_s: f64) -> [f32; 3] {
+        let (a, k, w) = (self.amplitude as f64, self.wavenumber as f64, self.omega as f64);
+        let theta = k * x as f64 - w * t_s + self.phase as f64;
+        let amp = a * w * (k * (z as f64 - self.mean_level as f64)).exp();
+        let (s, c) = theta.sin_cos();
+        [(amp * c) as f32, 0., (amp * s) as f32]
     }
 }
 
@@ -1576,6 +1617,13 @@ pub struct ColumnsSwitch {
     /// Le gradient en dessous duquel la part de rotation ne compte pas (l'eau immobile, où `Ω` et `S` sont tous deux du bruit) ;
     /// défaut 0,5 s⁻¹, *à calibrer*.
     pub floor_rotation_gradient: f32,
+    /// **S429 — C7d-1 : le fond B** : `Some(B)` — le seuil de vitesse (`floor_speed`) porte sur la **vitesse propre de δ**,
+    /// `|u − U_B|`, non sur la vitesse totale : une houle qui est B ne demande rien, ce qui s'en écarte (déferlement, jet,
+    /// sillage) demande des particules (BANDE-ETROITE-S413 §6.4). La vorticité de B est nulle (irrotationnelle) : `floor_vorticity`
+    /// n'en dépend pas. `None`, le défaut : la vitesse totale de S415, au bit.
+    pub background: Option<LinearSwell>,
+    /// L'instant de la décision en cours (`switch`), µs — pour B.
+    now_us: u64,
     domain: Domain3,
     required_at: Vec<u64>,
     need: Vec<u8>,
@@ -1618,6 +1666,8 @@ impl ColumnsSwitch {
             floor_speed: None,
             floor_rotation: None,
             floor_rotation_gradient: 0.5,
+            background: None,
+            now_us: 0,
             domain,
             required_at: vec![u64::MAX; cols],
             need: vec![0; cols],
@@ -1645,6 +1695,7 @@ impl ColumnsSwitch {
             return Err(Error::Shape);
         }
         a.refresh_surface();
+        self.now_us = now_us;
         self.decide(now_us, a);
         self.before.copy_from_slice(&a.columns.as_ref().unwrap().mask);
         let change = a.apply_columns_mask(&self.request)?;
@@ -1680,8 +1731,15 @@ impl ColumnsSwitch {
         if self.floor_vorticity.is_some_and(|limit| a.vorticity(i, j, k) > limit) {
             return true;
         }
-        if self.floor_speed.is_some_and(|limit| a.cell_speed(i, j, k) > limit) {
-            return true;
+        if let Some(limit) = self.floor_speed {
+            // S429 : relative à B, s'il y en a un.
+            let speed = match &self.background {
+                Some(b) => a.cell_speed_relative(i, j, k, b, self.now_us as f64 * 1e-6),
+                None => a.cell_speed(i, j, k),
+            };
+            if speed > limit {
+                return true;
+            }
         }
         self.floor_rotation.is_some_and(|limit| {
             let (share, gradient) = a.rotation_share(i, j, k);
