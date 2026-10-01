@@ -18018,3 +18018,17 @@ bascule initiale (critère de 10⁻⁶ plus serré que `φ`, sa source). **B10 e
 manqué contre le seul témoin à 10⁻⁶ nommé. Premier écart : une pose au pas 35 (un solde au seuil). **Coût : 28,7 ms** (l'échange et
 la bascule sur un fil). Non-régression complète ; suite **753**, zéro avertissement. **Rituel.** Maillons **8** — justifié : la
 priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e**, le coût — δ ≤ 2 ms avec la bande.
+
+## S421 — 2026-10-01 — physique : C7e, premier temps — le coût de la bande étroite sur la carte
+
+**Entrée.** *« Continue »* — après le signal d'un compteur de maillons élevé (S420), lu comme la confirmation de la priorité du
+solveur. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §13) : l'instrument d'abord (horodatage par sous-étage, fils
+séparés de leur préparation) ; puis, à sémantique exacte : la réserve réglée en parallèle, la **liste ordonnée des faces-mailles
+actives**, la pose en un parcours (elle relisait quatre fois toutes les particules posées), l'**absorption en groupe** (24 faces
+distinctes par absorbée), l'**échange en groupe de 64 fils** (minimums de groupe sur la clé de départage de la référence), le **plafond
+d'itérations adaptatif** (le dispatch indirect nul est refusé par wgpu). **Mesuré** : B10 en bande étroite, **29,0 → 4,9 ms** par pas
+(+ 1,9 de bascule) ; pincement, gestes, `n`, volume, pas entiers du raccord et de la bande identiques. **Les bits bougent sans que la
+sémantique change** : un appel sans effet remis dans un noyau rendait les bits d'avant — FXC compile le flottant d'un noyau selon son
+code (L345) ; « au bit près » n'est pas un instrument tenable ici. Suite **753**, zéro avertissement. **Limites** : δ ≤ 2 ms non atteint
+— restent la projection (2,5–3 ms, la multigrille), la bascule (1,9), la surface (0,7). **Rituel.** Maillons **9** — justifié : la
+priorité du solveur (S406), confirmée par « Continue » après S420 ; 4.19 reste partiel. Suivant : **C7e**, la multigrille.

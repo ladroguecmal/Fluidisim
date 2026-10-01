@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-01 08:36 +02:00
+JETON            : libre
+Battement        : 2026-10-01 09:36 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S421 — C7e** au poste : le coût de la bande étroite sur la carte, mesuré puis réduit à sémantique exacte
-Dernière session : S420 — physique : **C7c-4** ([preuve](docs/validation/APIC-CARTE-S416.md) §12) — la bascule et le fond placé sur la carte : B10 en bande étroite au pincement de la référence, au chiffre près, volume exact ; `φ` au col dans l'enveloppe de trois témoins ; 28,7 ms. Avant : S419, C7c-3
-Session suivante : **S421 — C7e** au poste ([preuve](docs/validation/APIC-CARTE-S416.md) §5, §12) : le coût de la bande étroite sur la carte — l'échange et la bascule parallélisés (coloriage des faces-mailles, gestes par colonne), la multigrille de C3 pour la projection, le dispatch indirect, le pas choisi sur la carte (diagnostics différés), l'instant relatif ; reçu si B10 en bande étroite garde son pincement et **δ ≤ 2 ms au 99ᵉ centile** ; puis C7d (relative à B) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 8 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S421 — physique : **C7e, premier temps** ([preuve](docs/validation/APIC-CARTE-S416.md) §13) — B10 en bande étroite sur la carte de 29,0 à 4,9 ms par pas à sémantique exacte (échange et absorption en groupe, faces-mailles actives, plafond adaptatif) ; + 1,9 ms de bascule. Avant : S420, C7c-4
+Session suivante : **S422 — C7e** au poste ([preuve](docs/validation/APIC-CARTE-S416.md) §13) : **la multigrille** pour la projection d'APIC sur la carte (celle de C3, portée à l'opérateur à fluide fantôme, étiquettes changeantes) ; puis la bascule en groupe et la surface près de l'interface ; reçu si B10 en bande étroite garde son pincement et **δ ≤ 2 ms au 99ᵉ centile** ; puis C7d (relative à B) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 9 — justifié : la priorité du solveur passe avant la règle (S406), confirmée par « Continue » après S420 ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
