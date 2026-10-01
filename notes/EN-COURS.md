@@ -62,48 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S422 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**, la multigrille
-pour la projection d'APIC sur la carte ([preuve](../docs/validation/APIC-CARTE-S416.md) §13 : la projection pèse 2,5 à 3 ms sur
-B10 en bande étroite, 207 itérations du gradient conjugué diagonal, cinq dispatchs chacune).
+Session : S423 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
+([preuve](../docs/validation/APIC-CARTE-S416.md) §14 : B10 en bande étroite 3,9 ms par pas + 1,9 de bascule ; restent la bascule, les
+dispatchs du cycle, la surface).
 
-**La recette** — celle de C1/C3a (S385, S390), transposée : gradient conjugué **préconditionné par un cycle en V** ; Jacobi amorti
-ω = 6/7, deux lissages avant et deux après, huit au plus grossier ; restriction par la moyenne des huit filles, prolongation par
-injection (adjointes à un facteur près : le préconditionneur reste symétrique défini positif) ; niveaux grossiers rediscrétisés à
-chaque projection, l'opérateur divisé par 4 à chaque niveau. **Pour APIC** : le niveau fin est l'opérateur exact (fluide fantôme
-`θ`, solide sans flux) ; une maille grossière est active si une fille est d'eau, d'air (Dirichlet à demi-maille) sinon, solide (sans
-flux) si toutes ses filles le sont ; le domaine est clos ; dimensions impaires : les filles hors du domaine sont ignorées. **Pour les
-dispatchs** (le coût dominant, S421) : le niveau fin et le premier niveau grossier par dispatchs, **tous les niveaux suivants dans un
-seul groupe** de 256 fils, barrières entre phases. Arrêt au même critère que la référence (`‖r‖² ≤ tol²·‖b‖²`) ; plafond adaptatif.
+**Ce que la session fait, dans l'ordre du gain attendu.** (1) **La bascule en groupe** : `switch_apply` et `floor_move` parcourent
+les colonnes et les faces sur un fil (≈ 1 ms quand rien ne bascule) ; leurs boucles sont indépendantes par colonne ou par face, leurs
+sommes sont des entiers (l'ordre n'y change rien) — un groupe de 256 fils, les gestes ordonnés (retraits par la visite de la
+référence, ensemencements en ordre de colonnes) gardés au fil 0 et sautés quand il n'y en a pas. (2) **Les dispatchs du cycle** :
+le niveau 1 dans le groupe des niveaux grossiers (quatre dispatchs de moins par cycle) ; mesurer aussi un lissage V(3,3), moins
+d'itérations contre plus de lissages. (3) **La surface** : mesurer ce qui coûte dans `reconstruct` (les images aux parois, les
+mailles loin de toute particule) avant d'y toucher. (4) **La multigrille par défaut** si toutes les issues tiennent.
 
-**Critères, écrits avant.** (1) Le cycle est **symétrique** (`⟨u, M⁻¹v⟩ = ⟨M⁻¹u, v⟩` à 10⁻⁵ relatif) et positif, sur la carte. (2)
-Étages : la projection converge au critère de la référence, vitesses corrigées à **10⁻⁴ m/s** de la référence (cuve du
-ballottement, raccord, B10). (3) Les issues : ballottement, raccord, bande, B10 nu et en bande étroite — pincement au pas de la
-référence, surfaces dans leurs tolérances (3 mm ou témoin), volume exact. (4) **Le coût de la projection** sur B10 en bande étroite :
-publié, visé ≤ 1 ms. (5) Suite, zéro avertissement.
+**Critères, écrits avant.** (1) Issues inchangées : B10 en bande étroite au pincement de la référence, gestes et `n` comme S422,
+volume exact ; bascules forcées (`--apic3d-carte-decision`, `INITIAL`, `PENTE`, `MAINTIEN`) identiques à la référence ; raccord, bande,
+ballottement dans leurs tolérances. (2) Le coût publié par sous-étage avant et après ; **visé : bascule ≤ 0,8 ms, projection ≤ 1 ms,
+pas + bascule ≤ 4 ms** sur B10 en bande étroite ; δ ≤ 2 ms reste l'objectif de C7e, la session dit ce qui en reste. (3) Suite, zéro
+avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la hiérarchie : niveaux, tampons, natures des mailles (niveau 1 depuis les étiquettes, les suivants dans un groupe).
-- [x] **P3** — le cycle en V (fin, niveau 1, le groupe des niveaux grossiers) ; banc de symétrie et de positivité ; critère 1.
-- [x] **P4** — le gradient conjugué préconditionné par le cycle, option `MULTIGRILLE=1` ; étages ; critère 2.
-- [x] **P5** — les issues et le coût ; critères 3 et 4.
-- [x] **P6** — non-régression, suite ; preuve §14 ; registres.
-- [x] **P7** — rituel.
+- [ ] **P2** — `switch_apply` en groupe ; bascules forcées identiques ; mesure.
+- [ ] **P3** — `floor_move` en groupe ; mêmes bancs ; mesure.
+- [ ] **P4** — la multigrille : le niveau 1 dans le groupe ; V(3,3) mesuré ; symétrie, issues, mesure.
+- [ ] **P5** — la surface : mesure de ce qui coûte, réduction exacte si elle se trouve ; la multigrille par défaut.
+- [ ] **P6** — non-régression, suite ; preuve §15 ; registres.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-- **P2** — la hiérarchie : niveaux divisés par deux (arrondi au-dessus) tant qu'une dimension dépasse 2, huit au plus (ballottement
-  40×4×20 : six niveaux ; B10 16×16×84 : sept) ; `mgb` (nature, x, r, t par niveau grossier), `mgl` (la table) ; `mg_kind1` depuis les
-  étiquettes, `mg_kind_coarse` dans un groupe. Le nombre de niveaux et les blocs du niveau 2 passent par l'uniforme.
-- **P3** — le cycle en V : `mg_f_first`, `mg_f_qz`, `mg_restrict1`, `mg_l1_first`, `mg_l1_tx`, **`mg_coarse` (niveaux ≥ 2 dans un groupe
-  de 256 fils)**, `mg_l1_xt`, `mg_l1_tx`, `mg_prolong0`, `mg_f_zq`, `mg_f_qz_fold` (onze dispatchs). **FXC, appris** : il refuse une
-  barrière (X3663, X4026) dans une boucle dont la borne vient de la mémoire, après un `continue` qui dépend du fil, et — le dernier
-  verrou — **dès qu'une boucle de bornes non constantes porte plus d'une barrière** ; toutes les boucles à barrières de `mg_coarse` ont
-  donc des bornes constantes (huit niveaux, sept lissages), le travail gardé ; `mg_row` et `mg_child` à sortie unique. Banc
-  `--apic3d-carte-mg-cycle` (`CAS=`, `raccord`, `b10`) : **symétrie relative 9,5·10⁻⁸, 1,8·10⁻⁷, 2,5·10⁻⁷ ; positivité tenue** ; la
-  projection converge au critère de la référence en **9, 9 et 11 itérations** (diagonale : 94, 94, 207). Critère 1 tenu.
-- **P4** — `MULTIGRILLE=1` dans les bancs (étages, ballottement, B10) ; plafond adaptatif à marge 2 avec la multigrille. Étages, au plafond fixe : **9 / 95, 9 / 94, 9 / 95, 11 / 211 itérations** (carte / référence) ; résidus 2,8 à 3,6·10⁻⁷ ; **vitesses corrigées à 3,5·10⁻⁶, 2,3·10⁻⁶, 2,2·10⁻⁶, 5,2·10⁻⁶ m/s** (ballottement, raccord, bande, B10) ; pas entiers du raccord et de la bande identiques en gestes. Critère 2 tenu.
-- **P5 (a)** — B10 en bande étroite, multigrille et plafond adaptatif : **pincement identique** (pas 55, cavité 1,937 D, air 0,0781 D³), volume exact, `φ` au col maintenant 0,56 / 0,61 mm aux pas 51 / 54 (50 et 36 mm avant), max 4,81 mm à t = 0,869 √(D/g) ; **projection 1,68 ms** (11,7 itérations), pas 4,05 ms. **Élagage** : la hiérarchie s'arrête à 64 mailles (B10 : quatre niveaux au lieu de sept, les filiformes 1×1×6… supprimés ; ballottement : trois), le groupe des niveaux grossiers en trois phases par niveau et six lissages de plus au plus grossier (≈ 30 phases à barrière au lieu de ≈ 80) : symétrie 1,9·10⁻⁷ et 9,4·10⁻⁸, positif ; **projection 1,45 ms** (13,9 itérations), **pas 3,90 ms** + bascule 1,9. Critère 4 (≤ 1 ms) manqué : dix-sept dispatchs par itération.
-- **P5 (b)** — les issues avec la multigrille (`MULTIGRILLE=1 ADAPTATIF=1`) : ballottement 10 s **0,055 mm** (0,456 au gradient diagonal), période identique, 9,5 itérations, projection 0,71 ms ; B10 nu, pincement au pas 54 identique, `φ` au col 22,1 mm (témoins 22,6 et 21,2) ; colonnes 0,002 mm ; raccord 30 s **4,18 mm** (4,48 avant ; témoins 3,40 et 4,03), période −0,027 %, volume à 0 quantum ; bande 30 s **1,71 mm** (critère 3 mm), période −0,024 %. Critère 3 tenu ; critère 4 (projection ≤ 1 ms sur B10) manqué : 1,45 ms.
-- **P6** — suite **753**, zéro avertissement ; chemin par défaut inchangé (ballottement 0,456 mm, étages sans erreur). Preuve §14 ; liste 4.19, feuille de route, index (la file inchangée : C7e continue).
-- **P7** — journal ; jeton libre ; maillons 10 (justifiés : S406) ; suivant : S423, C7e — bascule, surface, dispatchs.
