@@ -18091,3 +18091,16 @@ ajouté au plan en cours de session, déclaré dans les notes. **Mesuré**, B10 
 B10 nu et en bande, ballottement, raccord, bande, gestes). Suite **753**, zéro avertissement. **Rituel.** Maillons **13** —
 justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — les fils par vagues à faces disjointes (0,55 +
 0,40 au p99), la projection (0,885) : δ ≤ 2 ms.
+
+## S426 — 2026-10-01 — physique : C7e, l'absorption face par face
+
+**Entrée.** *« Continue »* — C7e. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §18) : l'absorption sans fil séquentiel
+— l'ordre de la visite calculé d'avance, sans geste ; des vagues d'absorbées à faces disjointes essayées d'abord (45 vagues pour
+≈ 100 absorbées : pas de gain) ; **un fil par face touchée**, sa propriétaire y appliquant les mélanges dans l'ordre de la visite (un
+premier essai cinq fois plus lent, puis le test de nœud rendu immédiat par un masque de 24 bits) ; soldes par cible, retrait à forme
+close. L'échange : les marquées triées par rang. **Mesuré**, B10 en bande étroite au p99 : fil de l'absorption 0,40 → 0,29, de
+l'échange 0,55 → 0,49 ; **pas + bascule 2,45 → 2,31 ms** (visé 2 : manqué). **Issues identiques sauf la bande sur 30 s** (1,210 mm
+au lieu de 1,318) — **isolé au bit** (`AW_REPLI`, `DUMP`) : une unité du dernier chiffre sur 8 des 41 120 valeurs, la même formule
+arrondie autrement par FXC dans un autre noyau (L345), amplifiée par 30 s chaotiques. Suite **753**, zéro avertissement.
+**Rituel.** Maillons **14** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — les poses de
+l'échange, la projection : δ ≤ 2 ms (2,31).
