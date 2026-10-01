@@ -852,3 +852,29 @@ partout sur la crête — harmoniques de Stokes, dérive, cambrure —, ce qu'AD
 fait le tri de la houle calme, pas celui de la houle raide. **La voie suivante** : un critère sur la **déformation propre** de δ — le
 gradient de `u − U_B` (ses parts de rotation et de cisaillement), qu'une houle progressive, même raide, n'a pas loin du déferlement ;
 à mesurer sur ce même banc, avec les mêmes critères, avant C7d-2.
+
+### 21.2 La déformation propre de δ, et un critère mal posé (S430)
+
+**Reproduire** : `APIC3D_BASCULE=maintien=0.3,fond=4,deformation=<s⁻¹>,fond_b=1` sur le même banc ; l'essai
+`the_own_deformation_of_delta_is_read_relative_to_b_s430`.
+
+**La construction** : `Apic3::deformation` — la norme de Frobenius du gradient de `u − U_B`, la vitesse relative ramenée aux centres
+puis les différences centrées de `vorticity` (le gradient discret de B s'en retranche) ; `ColumnsSwitch::floor_deformation`, éteint
+par défaut. L'essai : une houle de gradient 2,9 s⁻¹ ne se déforme pas relativement à elle-même ; un cisaillement enfoui est pris.
+
+| `ε` | critère du fond (avec fond B) | part de la fenêtre au retournement | fenêtre en particules, au plus | retours rapides |
+|---|---|---:|---:|---:|
+| 0,55 | déformation propre 1 · 2 s⁻¹ | **1,000 · 1,000** | 200 · 200 | 0 · 0 |
+| 0,1 | déformation propre 1 · 2 s⁻¹ | — | **200** · 0 | 187 · 8 |
+| 0,55 · 0,1 | vitesse propre 0,2 m/s (S429 rejoué) | 0,940 · — | 200 · 0 | 0 · 0 |
+
+**La déformation propre fait pire que la vitesse propre** : sous la houle calme, son gradient de 0,8 s⁻¹ dépasse 1 s⁻¹ relativement
+à B — le gradient de la grille est bruité près de la surface (vitesses extrapolées dans l'air, bord de la zone), ce que S415 avait
+vu sur la vorticité ; sous la houle raide, elle prend toute la fenêtre dès les premiers pas. Écartée comme critère du fond.
+
+**Le critère (a) de C7d-1 était mal posé.** Son seuil, « sous 0,5 », venait de la part *moyenne dans le temps* de la forme seule
+(0,501, S415) ; or au retournement la forme seule prend déjà **0,62** de la fenêtre, et elle est toujours active : aucun critère qui
+s'y ajoute ne pouvait le tenir. **Réécrit, avant la mesure suivante** : *au retournement, le critère d'écoulement n'ajoute pas plus de
+0,1 à la part de la forme seule, et pas plus de retours rapides qu'elle* ; (b) inchangé (rien sous une houle calme). Sous cette lecture,
+la **vitesse propre à 0,4 m/s** (S429 : 0,58 au retournement, sous la forme seule ; rien sous la houle calme) tiendrait — **sauf ses 25
+retours rapides**. La suite : une hystérésis du seuil de vitesse (entrer à 0,4, sortir plus bas), comme la pente en S410.
