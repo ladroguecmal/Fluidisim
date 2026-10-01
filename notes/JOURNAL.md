@@ -18076,3 +18076,18 @@ la mémoire de groupe que wgpu ajoute ; coupée partout (chaque noyau écrit ava
 bascule 3,25. **Issues identiques à S423 au chiffre près** (étages, cycle, bascules forcées, B10 nu et en bande, ballottement,
 raccord, bande, gestes). Suite **753**, zéro avertissement. **Rituel.** Maillons **12** — justifié : la priorité du solveur (S406) ;
 4.19 reste partiel. Suivant : **C7e** — les fils de l'échange et de l'absorption (0,62 + 0,40), la séparation (0,41) : δ ≤ 2 ms.
+
+## S425 — 2026-10-01 — physique : C7e, la fin du pas profilée
+
+**Entrée.** *« Continue »* — C7e. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §17) : le profil de la fin du pas
+(`PROFIL=1` : chaque préfixe de la suite répété, différences — un noyau du tri répété seul a fait perdre la carte au premier essai),
+les gestes par pas et le coût des fils par geste (2 µs), l'occupation des mailles (30 à 50 particules dans quelques-unes). **Le profil
+a désigné autre chose que les fils** : le préfixe des listes ordonnées sur un fil (80 µs, quatre fois par pas) et celui du tri
+(13,5) — **en groupe**, 2,2 et 1,2 ; le tri par insertion des tranches (64) — **par rang**, 4,7 ; la séparation (102) — **élaguée**
+aux mailles voisines à moins de `dmin`, 50 ; le solde vertical du fil de l'échange qui visitait les 256 colonnes (66 µs fixes) —
+**les seules colonnes dues**, 30. Tout à résultat identique (entiers ; mêmes sommes dans le même ordre ; termes nuls omis). P4b
+ajouté au plan en cours de session, déclaré dans les notes. **Mesuré**, B10 en bande étroite au p99 : **pas 2,75 → 2,21 ms, bascule
+0,48 → 0,23 ; pas + bascule 2,45** (visé 2,5 : tenu). **Issues identiques à S424 au chiffre près** (étages, cycle, bascules forcées,
+B10 nu et en bande, ballottement, raccord, bande, gestes). Suite **753**, zéro avertissement. **Rituel.** Maillons **13** —
+justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7e** — les fils par vagues à faces disjointes (0,55 +
+0,40 au p99), la projection (0,885) : δ ≤ 2 ms.

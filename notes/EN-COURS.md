@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S425 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
+Session : S425 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**
 ([preuve](../docs/validation/APIC-CARTE-S416.md) §16 : B10 en bande étroite, pas + bascule 3,25 ms au p99 ; la projection à 0,885 ;
 restent les fils de l'échange et de l'absorption, 0,62 + 0,40, la séparation, 0,41).
 
@@ -87,7 +87,7 @@ publié avant et après ; **visé : pas + bascule ≤ 2,5 ms au p99** sur B10 en
 - [x] **P4** — la seconde ; issues, mesure.
 - [x] **P4b** — *ajouté en cours de session (après P4)* : le fil de l'échange — ne visiter que les colonnes à fond dont le solde dépasse une particule.
 - [x] **P5** — non-régression, suite ; preuve §17 ; registres.
-- [ ] **P6** — rituel.
+- [x] **P6** — rituel.
 
 ### Notes de reprise
 - **P2** — le profil (`PROFIL=1`, banc B10 en bande étroite). **Les fils, par pas** (moindres carrés sur les pas) : absorption **6 + 2,0 µs par absorbée** (médiane 98 par pas, 210 au plus) ; échange **66 + 2,05 µs par geste** (retirées + posées : médiane 139, 266 au plus ; faces-mailles actives 46, 127 au plus). **La fin du pas, noyau par noyau** (chaque préfixe de la suite répété 50 fois, différences — un noyau du tri répété seul corrompt les tranches et a fait perdre la carte au premier essai) : **`compact_scan` 80 µs** (le préfixe des groupes sur un fil, ≈ 500 groupes à la capacité) — il sert à chaque liste ordonnée : absorbées, faces-mailles actives, bascule, fond, soit ≈ 4 × 80 µs par pas ; **`scan_blocks` 13,5 µs** (le même motif dans le tri, 84 blocs), trois à quatre tris par pas ; **`separate_shift` 101 µs**, **`bin_sort` 64 µs** ; le reste 0,3 à 6 µs. **Réordonné** (P3, P4 du plan : « ce que le profil désigne ») : **P3 — les préfixes en groupe** (entiers : exact) ; **P4 — la séparation et le tri par maille** ; les fils (parallélisme par vagues de non-conflit, à faces disjointes) ensuite si le temps reste.
@@ -95,3 +95,4 @@ publié avant et après ; **visé : pas + bascule ≤ 2,5 ms au p99** sur B10 en
 - **P4** — **l'occupation** (nouvelle ligne du profil) : quelques mailles portent 30 à 50 particules (8 nominales) ; le tri par insertion sur un fil et la séparation (27 mailles voisines, un fil par particule) y passaient leur temps. **Tri par rang** (`bin_rank`, `bin_place` : chaque particule compte les indices plus petits de sa tranche et s'écrit à ce rang dans `pscratch`, libre hors du compactage) : même ordre, **64 → 4,7 µs**. **Séparation élaguée** : une maille voisine n'est lue que si la particule est à moins de `dmin` (+ 10⁻⁴ maille) de leur frontière ; les autres ne contribuent rien — même somme, même ordre : `separate_shift` **102 → 50 µs** au profil. Étages identiques (tri, séparation 1,19·10⁻⁷ et 2,38·10⁻⁷ m comme avant) ; B10 en bande étroite : pincement identique, volume exact, même premier écart de gestes. Médianes : séparation 0,327 → **0,106 ms**, transfert 0,165 → 0,103, décision 0,218 → 0,147. **Pas p99 2,29 ms, bascule p99 0,25** — 2,54 pour 2,5 visés. Restent les fils (0,61 + 0,41 au p99) et la projection (0,88).
 - **P4b** — ajouté au plan après P4 (le profil des fils : 66 µs fixes au fil de l'échange, même sans geste). Le solde vertical parcourait les 256 colonnes une à une, trois diffusions chacune ; une colonne dont le solde ne dépasse une particule dans aucun sens ne fait rien, sans effet de bord : par morceaux de 64 colonnes, chaque fil teste la sienne, un préfixe range les colonnes dues dans l'ordre, seules elles sont visitées. Étage du fond et bande 30 s **identiques** (gestes cumulés compris : 5 478 / 354 / 5 795, 1,318 mm) ; B10 en bande étroite : pincement identique, volume exact. Fil de l'échange **66 + 2,05 → 30 + 1,90 µs par geste** ; médiane 0,33 → 0,28 ms. **Pas p99 2,21 ms + bascule 0,23 = 2,45 ms : la cible de 2,5 est tenue.**
 - **P5** — non-régression **identique à S424 au chiffre près** : étages (tri, compactage, séparation, échange, projection), cycle, bascules forcées (10 instants), B10 nu (pas 54), ballottement 0,447 (diagonale 0,454), colonnes 0,002, raccord 4,015 mm (gestes 5 289 / 109 / 5 385), bande 1,318 (P4b). Suite du cœur 753 / 19 / 0 avertissement. Preuve §17 ; liste 4.19, feuille de route, index, file.
+- **P6** — journal ; jeton libre ; maillons 13 (justifiés : S406) ; suivant : S426, C7e — les fils par vagues, la projection.
