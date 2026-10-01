@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 00:23 +02:00
+JETON            : libre
+Battement        : 2026-10-02 00:33 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S430 — C7d-1** en référence : la déformation propre de δ, `|∇(u − U_B)|`, critère du fond
-Dernière session : S429 — physique : **C7e reçu** (l'utilisateur : le surplus de 0,07 ms accepté) ; **C7d conçue** ([preuve](docs/validation/APIC-CARTE-S416.md) §21) ; **C7d-1 en partie** — la vitesse propre de δ (`u − U_B`) : rien sous une houle calme, mais 0,94 de la crête raide. Avant : S428, la projection resserrée
-Session suivante : **S430 — C7d-1** ([preuve](docs/validation/APIC-CARTE-S416.md) §21.1) : un critère sur la **déformation propre** de δ — le gradient de `u − U_B` (rotation, cisaillement) — sur la vague de Chen, mêmes critères (`ε` 0,55 : part de la fenêtre au retournement sous 0,5, retournement à l'instant de la forme seule ; `ε` 0,1 : rien dans la fenêtre) ; en référence, sans carte ; puis C7d-2 (la carte) et la conception de C7d-3 (le mode relatif sur la carte, A320) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 17 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S430 — physique : **C7d-1, la déformation propre de δ** ([preuve](docs/validation/APIC-CARTE-S416.md) §21.2) — écartée (pire que la vitesse propre : le gradient de la grille bruité en surface) ; le critère (a) de C7d-1 trouvé mal posé (la forme seule prend déjà 0,62 au retournement), réécrit. Avant : S429, C7e reçu, C7d conçue
+Session suivante : **S431 — C7d-1** ([preuve](docs/validation/APIC-CARTE-S416.md) §21.2) : **l'hystérésis du seuil de vitesse propre** (entrer à 0,4 m/s, sortir plus bas, comme la pente en S410) ; reçu si, sur la vague de Chen avec fond B, le critère d'écoulement n'ajoute pas plus de 0,1 à la part de la forme seule au retournement ni de retour rapide de plus qu'elle, et rien dans la fenêtre sous une houle calme (`ε` 0,1) ; puis C7d-2 (la carte) et la conception de C7d-3 (le mode relatif sur la carte, A320) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 18 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

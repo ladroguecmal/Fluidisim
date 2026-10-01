@@ -18143,3 +18143,15 @@ fenêtre** (critère : sous 0,5 — manqué), à 0,58 aux seuils 0,4 et 0,6 avec
 δ porte (ADR-198 D3), la vitesse propre est grande sans déformation. Suite **754**, zéro avertissement. **Écarts** : trois battements
 mal recopiés dans des messages de commit locaux, corrigés. **Rituel.** Maillons **17** — justifié : la priorité du solveur (S406) ;
 4.19 reste partiel. Suivant : **C7d-1** — la déformation propre de δ (le gradient de `u − U_B`), mêmes critères.
+
+## S430 — 2026-10-02 — physique : C7d-1, la déformation propre de δ, et un critère mal posé
+
+**Entrée.** *« Continue »* — C7d-1. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §21.2) : `Apic3::deformation` (le
+gradient de `u − U_B`, le gradient discret de B retranché) et `floor_deformation` ; un essai (la houle ne se déforme pas relativement
+à B, le cisaillement enfoui est pris). **Mesuré** sur la vague de Chen : pire que la vitesse propre — toute la fenêtre sous la houle
+raide, et la houle calme prise à 1 s⁻¹ (187 retours rapides) : le gradient de la grille est bruité près de la surface. Écartée.
+**Trouvé en relisant** : le critère (a) de C7d-1 (S429) comparait la part au retournement à une part *moyenne dans le temps* ; la
+forme seule prend déjà 0,62 de la fenêtre au retournement — (a) était inatteignable. Non changé en cours de mesure ; **réécrit pour la
+suite** : le critère d'écoulement n'ajoute pas plus de 0,1 à la forme seule, ni de retour rapide de plus. Sous cette lecture, la
+vitesse propre à 0,4 m/s tiendrait (0,58), sauf ses 25 retours rapides. Suite **755**, zéro avertissement. **Rituel.** Maillons
+**18** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7d-1** — l'hystérésis du seuil de vitesse propre.
