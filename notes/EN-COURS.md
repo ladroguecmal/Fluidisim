@@ -62,48 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S421 — **terminée**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**, le coût
-([preuve](../docs/validation/APIC-CARTE-S416.md) §5, §12 : 28,7 ms sur B10 en bande étroite, dont 23,6 pour la fin du pas et ≈ 5,5 de
-bascule, sur un fil).
+Session : S422 — **en cours**. Demande de l'utilisateur (2026-10-01) : *« Continue »* — la suite déclarée : **C7e**, la multigrille
+pour la projection d'APIC sur la carte ([preuve](../docs/validation/APIC-CARTE-S416.md) §13 : la projection pèse 2,5 à 3 ms sur
+B10 en bande étroite, 207 itérations du gradient conjugué diagonal, cinq dispatchs chacune).
 
-**Méthode.** Mesurer d'abord, par sous-étage (horodatages), puis réduire **à sémantique exacte** : chaque réduction doit rendre B10 en
-bande étroite, le raccord et la bande du ballottement **au bit près** — mêmes pincements, mêmes séries d'écart, mêmes gestes — que
-S420. La principale idée : le fil de l'échange parcourt toutes les faces-mailles de frontière (≈ 45 000 sur B10) pour n'en traiter
-qu'une poignée ; une **liste ordonnée des faces-mailles actives** (solde au-delà d'une particule), construite en parallèle dans
-l'ordre de la référence, lui laisse le même travail utile, dans le même ordre — exact, puisqu'un solde ne change que par ses propres
-gestes. De même pour le solde vertical, la réserve (en parallèle, en entiers) et les soldes de la bascule.
+**La recette** — celle de C1/C3a (S385, S390), transposée : gradient conjugué **préconditionné par un cycle en V** ; Jacobi amorti
+ω = 6/7, deux lissages avant et deux après, huit au plus grossier ; restriction par la moyenne des huit filles, prolongation par
+injection (adjointes à un facteur près : le préconditionneur reste symétrique défini positif) ; niveaux grossiers rediscrétisés à
+chaque projection, l'opérateur divisé par 4 à chaque niveau. **Pour APIC** : le niveau fin est l'opérateur exact (fluide fantôme
+`θ`, solide sans flux) ; une maille grossière est active si une fille est d'eau, d'air (Dirichlet à demi-maille) sinon, solide (sans
+flux) si toutes ses filles le sont ; le domaine est clos ; dimensions impaires : les filles hors du domaine sont ignorées. **Pour les
+dispatchs** (le coût dominant, S421) : le niveau fin et le premier niveau grossier par dispatchs, **tous les niveaux suivants dans un
+seul groupe** de 256 fils, barrières entre phases. Arrêt au même critère que la référence (`‖r‖² ≤ tol²·‖b‖²`) ; plafond adaptatif.
 
-**Critères, écrits avant.** (1) Résultats inchangés au bit près sur B10 en bande étroite (pincement, série de `φ`, gestes, `n`,
-volume), le raccord et la bande du ballottement (écarts de surface et gestes identiques à S419–S420). (2) Le coût publié par
-sous-étage avant et après. (3) **δ ≤ 2 ms au 99ᵉ centile sur B10 en bande étroite** — visé ; s'il n'est pas atteint, ce qui reste
-est nommé, chiffré, et la suite le porte. (4) Suite, zéro avertissement.
+**Critères, écrits avant.** (1) Le cycle est **symétrique** (`⟨u, M⁻¹v⟩ = ⟨M⁻¹u, v⟩` à 10⁻⁵ relatif) et positif, sur la carte. (2)
+Étages : la projection converge au critère de la référence, vitesses corrigées à **10⁻⁴ m/s** de la référence (cuve du
+ballottement, raccord, B10). (3) Les issues : ballottement, raccord, bande, B10 nu et en bande étroite — pincement au pas de la
+référence, surfaces dans leurs tolérances (3 mm ou témoin), volume exact. (4) **Le coût de la projection** sur B10 en bande étroite :
+publié, visé ≤ 1 ms. (5) Suite, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'instrument : horodatages par sous-étage (fin du pas : séparation, corps, absorption, échange ; bascule : décision,
-  application, fond) ; mesure de B10 en bande étroite.
-- [x] **P3** — l'échange : listes ordonnées des faces-mailles et des colonnes actives ; la réserve en parallèle ; mesure ; critère 1.
-- [x] **P4** — *réordonné après la mesure de P2–P3 (projection 4,8 ms, échange 6,8, absorption 2,0, bascule 1,9)* : la projection —
-  les itérations après convergence lancées en **dispatch indirect nul** (les arguments mis à zéro par le noyau qui conclut) ; mesure.
-- [x] **P5** — l'intérieur de l'échange et de l'absorption sur leur fil (ce qui y coûte, mesuré par essais) ; la bascule si le temps
-  le permet ; mesure.
-- [x] **P6** — B10 en bande étroite, coût final ; non-régression ; suite ; preuve §13 ; registres.
-- [x] **P7** — rituel.
+- [ ] **P2** — la hiérarchie : niveaux, tampons, natures des mailles (niveau 1 depuis les étiquettes, les suivants dans un groupe).
+- [ ] **P3** — le cycle en V (fin, niveau 1, le groupe des niveaux grossiers) ; banc de symétrie et de positivité ; critère 1.
+- [ ] **P4** — le gradient conjugué préconditionné par le cycle, option `MULTIGRILLE=1` ; étages ; critère 2.
+- [ ] **P5** — les issues et le coût ; critères 3 et 4.
+- [ ] **P6** — non-régression, suite ; preuve §14 ; registres.
+- [ ] **P7** — rituel.
 
 ### Notes de reprise
-- **P2** — horodatages par sous-étage (32 requêtes ; fin du pas en trois passages : séparation et corps 6, absorption 7, échange 8 ; bascule : décision 9, application 10, fond 11). B10 en bande étroite, résultats **inchangés au caractère près** (pincement, série de `φ`, divergence au pas 35). **p99 (ms)** : transfert 0,20, surface 0,74, **projection 5,93**, extrapolation 0,03, retour 0,07, advection 0,004, séparation et corps 0,40, **absorption 2,14**, **échange 21,44** ; bascule 1,93 (décision 0,88, application 0,64, fond 0,42). Total pas 29,0 + bascule 1,9.
-- **P3** — l'échange : la réserve réglée en parallèle (`settle_reset`, `settle_count`, `settle_share`, `settle_add` ; la part comme
-  la référence, `réserve / compte` ; la soustraction par `mul_i64_u32`) ; **la liste ordonnée des faces-mailles actives** (`flist`,
-  frontière maille par maille et solde au-delà d'une particule, dans l'ordre `u` puis `v` de la référence), que le fil parcourt au
-  lieu des ≈ 45 000 faces-mailles. B10 en bande étroite : **échange 21,4 → 6,8 ms**, total du pas 29,0 → **13,9 ms** ; pincement,
-  gestes, `n`, divergence au pas 35, volume exact : **identiques** ; la série de `φ` change au pas 44 (1,25 → 1,24 mm). **Isolé** : la
-  part et la réserve sont les mêmes entiers à chaque pas (−4 855 quanta au pas 37, puis 0) ; les soldes divergent au pas 42 sans
-  que la réserve bouge ; **un appel séquentiel sans effet remis dans `exchange_serial` rend les bits de S420** — FXC compile le
-  flottant du noyau autrement quand son code change (L345). Critère 1 « au bit près » : **intenable comme instrument** ; jugé sur
-  les issues discrètes (pincement, gestes, `n`, volume) et sur la référence. Le banc garde `DEBUG_SOLDES`.
-- **P4** — le dispatch indirect nul après convergence est **refusé par wgpu** (un tampon lié en écriture et lu comme arguments dans le même dispatch ; deux tampons alternés ne sautent qu'une itération vide sur deux) — abandonné, revenu en arrière. **Plafond adaptatif** à la place (`set_adaptive_cap`, `observe_iterations` ; `ADAPTATIF=1`) : 1,25 × le plus grand des huit derniers pas + 8, retour au plafond fixe après un pas non convergé ; la production le lira en différé (ADR-175 D3). B10 en bande étroite : **projection 4,78 → 2,99 ms**, aucune non-convergence, issues identiques ; pas 12,2 ms.
-- **P5 (a)** — le fil de l'échange et de l'absorption séparés de leur préparation (horodatages 12, 13) : préparations 0,1 et 0,2 ms, **fils 6,6 et 2,0 ms**. Compté (diagnostic retiré) : la pose parcourait toutes les particules posées depuis le début de l'échange, **quatre fois** — ≈ 20 000 lectures par pas en fin de B10. `most_free` : un parcours, quatre minima (exact) → **fil de l'échange 1,97 ms**. `absorb_group` (32 fils) : la visite séquentielle par le fil 0, les 24 faces d'une absorbée (distinctes) par 24 fils → **fil de l'absorption 0,40 ms**. B10 en bande étroite : **pas 6,3 ms** + bascule 1,9 ; issues identiques ; raccord un pas inchangé.
-- **P5 (b)** — `exchange_group` (64 fils) : contrôle séquentiel diffusé (`xg_bcast`), retrait par minimum de groupe sur la clé (distance, côté, rang — le départage de la référence), retrait vertical sur (hauteur, rang), pose par minimum de groupe des quatre distances ; le fil 0 marque, pose, retire par échange. **Fil de l'échange 1,97 → 0,59 ms** ; B10 en bande étroite : **pas 4,9 ms** + bascule 1,9 ; pincement, série, gestes identiques ; pas entiers du raccord (11, 17, 60) et de la bande (5, 40, 70) identiques à la référence. Reste (p99, ms) : projection 2,5–3,0, bascule 1,9 (décision 0,86 dont la surface rafraîchie, application 0,63, fond 0,42), surface 0,73, échange 0,6 + 0,2, absorption 0,4 + 0,1, séparation 0,39, transfert 0,2.
-- **P6** — non-régression : ballottement 0,456 mm, B10 nu au pas 54, colonnes 0,003 mm, raccord 4,48 mm, bande 1,45 mm, B10 en bande étroite identiques ; suite **753**, zéro avertissement. Preuve §13 ; liste 4.19, file, feuille de route, index.
-- **P7** — journal ; jeton libre ; maillons 9 (justifiés : S406, « Continue ») ; suivant : S422, C7e — la multigrille.

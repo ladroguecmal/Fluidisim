@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-01 09:36 +02:00
+JETON            : occupé
+Battement        : 2026-10-01 09:40 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S422 — C7e** au poste : la multigrille pour la projection d'APIC sur la carte
 Dernière session : S421 — physique : **C7e, premier temps** ([preuve](docs/validation/APIC-CARTE-S416.md) §13) — B10 en bande étroite sur la carte de 29,0 à 4,9 ms par pas à sémantique exacte (échange et absorption en groupe, faces-mailles actives, plafond adaptatif) ; + 1,9 ms de bascule. Avant : S420, C7c-4
 Session suivante : **S422 — C7e** au poste ([preuve](docs/validation/APIC-CARTE-S416.md) §13) : **la multigrille** pour la projection d'APIC sur la carte (celle de C3, portée à l'opérateur à fluide fantôme, étiquettes changeantes) ; puis la bascule en groupe et la surface près de l'interface ; reçu si B10 en bande étroite garde son pincement et **δ ≤ 2 ms au 99ᵉ centile** ; puis C7d (relative à B) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 9 — justifié : la priorité du solveur passe avant la règle (S406), confirmée par « Continue » après S420 ; 4.19 reste partiel ; journal
