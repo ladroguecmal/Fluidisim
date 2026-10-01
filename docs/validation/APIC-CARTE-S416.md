@@ -570,3 +570,55 @@ Visé par la session : bascule ≤ 0,8 ms (**0,48**), pas + bascule ≤ 4 ms (**
 dispatchs chacune — fusionner des noyaux : mise à jour et premier lissage, restriction et premier lissage du niveau 1) ; **les fils
 de l'échange et de l'absorption** (0,59 + 0,40 au p99 : la visite séquentielle, dont l'ordre fait le mélange aux faces) ; **la
 séparation** (0,40) ; la bascule ne s'exécute pas à chaque pas — sa part au p99 d'un pas moyen est moindre que 0,48.
+
+## 16. C7e, quatrième temps — la projection sous la milliseconde (S424)
+
+**Reproduire** : `BANDE=1 PROFIL=1 … --apic3d-carte-b10` (la ligne `profil_iteration_us` : chaque noyau d'une itération répété 50
+fois dans un passage horodaté, le coût du drapeau d'arrêt remis à zéro retranché) ; `MG_GLOBAL=1` rend le groupe des niveaux
+grossiers en mémoire globale ; `TEMPS_PIPELINES=1` imprime le temps de création de chaque pipeline, `PIPELINE_SEULE=<entrée>` n'en
+crée qu'une et quitte.
+
+**Ce qui a changé.**
+
+- **Les niveaux ≥ 2 en mémoire de groupe** (`mg_coarse_shared`) quand ils tiennent dans 1 024 mailles (B10 : 336 + 44) ; la version
+  globale reste au-delà.
+- **La mise à zéro de la mémoire de groupe, coupée pour toutes les pipelines.** wgpu l'ajoute à chaque noyau ; FXC la déroule élément
+  par élément : 283 s pour créer `mg_coarse_shared`, 15 s pour `switch_apply_group`. Chaque noyau écrit sa mémoire de groupe avant de
+  la lire (vérifié sur les 26 variables : réductions, drapeaux du fil 0, niveaux chargés). **La création des pipelines passe de ≈ 80 à
+  27 s** — au démarrage de chaque banc, et demain de la scène.
+- **Les noyaux fusionnés** : `α` calculé dans chaque groupe de la mise à jour, avec le premier lissage fin ; `β` dans chaque groupe de
+  la direction, `r·z` en double tampon selon la parité de l'itération (constante de pipeline `CG_PAR`) ; le premier lissage du niveau
+  1 dans la restriction. Dix-sept dispatchs → douze, **pour 4 µs par itération seulement** : le nombre de dispatchs n'était pas le
+  coût.
+- **Le profil**, puis l'isolement par une constante d'essai : la restriction vers le niveau 2, faite par le seul groupe des niveaux
+  grossiers, coûtait 13 µs ; les six lissages du plus grossier, 3,7 (≈ 0,6 µs par phase à barrière). **Sortis du groupe**, en
+  dispatchs parallèles : `A·z` fin par maille, puis la restriction vers le niveau 1 (elle relisait huit `A·z` par maille grossière sur
+  2 688 fils) ; `L₁·x₁` par maille, puis la restriction vers le niveau 2 ; la prolongation vers le niveau 1. Les valeurs
+  intermédiaires vont dans des tranches libres à ce moment du cycle (`F_Q`, `t₁`) ; chaque somme garde son expression,
+  `(s + r) − A·x`.
+
+**Les issues** : **identiques à S423 au chiffre près**. Symétrie du cycle, résidu, itérations (ballottement, raccord, B10, en mémoire
+de groupe et en global) ; étages ; bascules forcées (`n`, positions, réserves, fonds, volume à 0 quantum) ; B10 nu (pincement au pas
+54) ; B10 en bande étroite (pincement au pas 55, volume exact, `φ` max 6,8 mm) ; ballottement 0,447 mm (0,454 en diagonale),
+colonnes 0,002, raccord 4,015, bande 1,318 mm, gestes compris. Suite du cœur 753, zéro avertissement.
+
+**Le coût**, B10 en bande étroite :
+
+| itération (µs), profil | après les fusions | **après la sortie du groupe** |
+|---|---|---|
+| groupe des niveaux ≥ 2 | 34,0 (restriction vers le niveau 2 et prolongation vers le 1 comprises) | **17,9** |
+| restriction vers le niveau 1 · vers le 2 · prolongation vers le 1 | 10,9 · — · — | 2,6 + 2,1 · 1,9 + 1,4 · 1,1 |
+| le reste (dix noyaux) | 23,7 | 23,5 |
+| **une itération** | **68,6** (12 dispatchs) | **50,5** (16) |
+
+| ms | S423, médiane · p99 | **S424, médiane · p99** |
+|---|---|---|
+| projection | 1,28 · 1,35 | **0,84 · 0,885** |
+| le pas | ≈ 2,7 · 3,26 | ≈ 2,3 · **2,77** |
+| la bascule | ≈ 0,43 · 0,48 | ≈ 0,42 · 0,48 |
+
+Visé : **projection ≤ 1 ms au p99 — tenu** (0,885). Pas + bascule au p99 : **3,25 ms** (3,74).
+
+**Ce qui reste pour δ ≤ 2 ms au 99ᵉ centile** : les fils de l'échange et de l'absorption (0,62 + 0,40 au p99 : la visite
+séquentielle de la référence, dont l'ordre fait le mélange des vitesses aux faces) ; la séparation (0,41) ; la projection encore
+(le groupe des niveaux grossiers, 18 µs par itération : seize phases à barrière ≈ 1 µs) ; transfert et surface (0,30).

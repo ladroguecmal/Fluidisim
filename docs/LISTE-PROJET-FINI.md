@@ -330,7 +330,7 @@ pas recopiée ici (L137).
   de la référence sur 30 s ([§11](validation/APIC-CARTE-S416.md)) ; **S420** : la bascule — B10 en bande étroite, pincement au pas de la
   référence, volume exact, mais 28,7 ms (l'échange et la bascule sur un fil) ([§12](validation/APIC-CARTE-S416.md)) ; **S421** :
   29,0 → **4,9 ms** par pas à sémantique exacte (+ 1,9 de bascule) ; restent la projection, la bascule, la surface ([§13](validation/APIC-CARTE-S416.md)) ;
-  **S422** : la multigrille sur la carte — 11 à 14 itérations au lieu de 207, **3,9 ms** par pas ([§14](validation/APIC-CARTE-S416.md)). **S423** : la bascule en groupe (retrait à forme close, ensemencement par graine), la surface en coopération, la multigrille par défaut — **3,26 ms** par pas + **0,48** de bascule au p99, issues tenues ([§15](validation/APIC-CARTE-S416.md)) ; reste la projection (1,35).
+  **S422** : la multigrille sur la carte — 11 à 14 itérations au lieu de 207, **3,9 ms** par pas ([§14](validation/APIC-CARTE-S416.md)). **S423** : la bascule en groupe (retrait à forme close, ensemencement par graine), la surface en coopération, la multigrille par défaut — **3,26 ms** par pas + **0,48** de bascule au p99, issues tenues ([§15](validation/APIC-CARTE-S416.md)). **S424** : la projection à **0,885 ms** au p99 (niveaux grossiers en mémoire de groupe, restrictions hors du groupe), issues identiques ; pas + bascule **3,25 ms** ([§16](validation/APIC-CARTE-S416.md)).
   Manquent 30 Hz stable à 10 cm, d'autres scènes, plusieurs domaines en direct, un 99ᵉ centile en direct.
 - [ ] **4.20 Changement de solveur pendant une simulation** (ADR-007) — *absent*, conçu.
 - [ ] **4.21 Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine** — *partiel* **depuis S369** :
