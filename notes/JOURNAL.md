@@ -18155,3 +18155,14 @@ forme seule prend déjà 0,62 de la fenêtre au retournement — (a) était inat
 suite** : le critère d'écoulement n'ajoute pas plus de 0,1 à la forme seule, ni de retour rapide de plus. Sous cette lecture, la
 vitesse propre à 0,4 m/s tiendrait (0,58), sauf ses 25 retours rapides. Suite **755**, zéro avertissement. **Rituel.** Maillons
 **18** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7d-1** — l'hystérésis du seuil de vitesse propre.
+
+## S431 — 2026-10-02 — physique : C7d-1 reçu, la vitesse propre de δ avec relâche
+
+**Entrée.** *« Continue »* — C7d-1. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §21.3) : `floor_speed_release`
+— une colonne de la bande au-delà de la relâche, sous le seuil, est gardée sans dilatation, comme la pente (S410) ; un essai (une
+erreur de construction de l'essai corrigée : la zone est posée toute en bande). **Mesuré** sur la vague de Chen avec fond B, contre le
+critère réécrit en S430 : 0,4 / 0,2 et 0,4 / 0,3 oscillent encore (11 et 18 retours rapides) ; **0,3 / 0,15 tient** — 0,64 de la
+fenêtre au retournement (forme seule 0,62), aucun retour rapide, le retournement au même pas, rien sous une houle calme. **C7d-1
+reçu.** Publié : après le déferlement, la bande garde l'eau agitée (six fois les particules de la forme seule). Suite **756**, zéro
+avertissement. **Rituel.** Maillons **19** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7d-2** —
+le seuil de vitesse propre, sa relâche et le fond B sur la carte.

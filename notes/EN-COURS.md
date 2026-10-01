@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S431 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-1**, l'hystérésis
+Session : S431 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-1**, l'hystérésis
 du seuil de vitesse propre ([preuve](../docs/validation/APIC-CARTE-S416.md) §21.2 : la vitesse propre à 0,4 m/s tiendrait le critère
 réécrit — 0,58 au retournement sous la forme seule, rien sous la houle calme —, sauf ses 25 retours rapides).
 
@@ -84,9 +84,10 @@ seule** (0), retournement à l'instant de la forme seule (à un pas) ; (b) `ε` 
 - [x] **P2** — `floor_speed_release` ; essai du cœur ; clé du banc.
 - [x] **P3** — mesures sur la vague de Chen ; critères ; C7d-1 reçu ou non.
 - [x] **P4** — suite ; preuve §21.3 ; registres.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — `floor_speed_release` : une colonne de la bande dont une maille d'eau dépasse la relâche (relativement à B s'il y en a un) sans atteindre `floor_speed` est gardée (`keep`, comme la pente en S410), le fond aussi sous ces mailles ; `own_speed` partagé par l'entrée et la relâche (sans relâche, mêmes appels qu'avant). Clé `vitesse_relache` du banc. Essai `a_band_column_is_kept_between_the_speed_release_and_the_threshold_s431` : jet 0,5 → colonnes 12 à 19 ; ralenti à 0,3 → gardées 14 à 17 sans dilatation (sans relâche : rendues) ; 0,1 → rendues ; à 0,3 depuis l'arrêt, rien pris. *Une erreur de mon essai, corrigée* : la zone est posée toute en bande, il fallait un premier passage à l'arrêt. Essais d'`apic3d` (38) verts.
 - **P3** — mesures (vague de Chen, 40 mailles par λ, `ny` 4, maintien 0,3 s, fond 4, `fond_b=1`). `ε` 0,55 : forme seule 0,620 au retournement, 0 retour rapide, 0,7021 τ, 12 262 particules à la fin ; vitesse 0,4 sans relâche 0,580, **25** retours (S429 rejoué : critère c) ; 0,4 / 0,2 : 0,580, **11** ; 0,4 / 0,3 : 0,580, **18** ; **0,3 / 0,15 : 0,640 (≤ 0,72), 0 retour rapide, 0,7022 τ** (le même pas), 72 835 particules à la fin, 88 s de calcul (31). `ε` 0,1 : **0/200** pour tous les couples. **C7d-1 reçu** avec le couple **0,3 / 0,15 m/s** : (a), (b), (c) tenus. **Publié, non jugé** : après le déferlement, la bande garde l'eau agitée — 6 fois plus de particules à la fin que la forme seule, part moyenne 0,81 (0,50) ; l'impact détecté plus tard (1,56 τ contre 1,22 : l'instrument de l'impact lit l'air enfermé sur l'occupation des particules).
 - **P4** — suite du cœur **756** / 19 / 0 avertissement. Preuve §21.3 ; liste 4.19, feuille de route, index.
+- **P5** — journal ; jeton libre ; maillons 19 (justifiés : S406) ; suivant : S432, C7d-2 — le critère de vitesse propre sur la carte.
