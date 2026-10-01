@@ -3768,6 +3768,57 @@ fn mg_f_zq(@builtin(global_invocation_id) g: vec3<u32>) {
     fine_smooth(F_Z, F_Q, g.x);
 }
 
+// S424 — `A·z` au niveau fin, une maille par fil, dans `F_Q` (libre entre `mg_f_qz` et `mg_f_zq`) : la restriction le lisait huit
+// fois par maille grossière, sur 2 688 fils seulement (11 µs sur B10).
+@compute @workgroup_size(128)
+fn mg_fine_az(@builtin(global_invocation_id) g: vec3<u32>) {
+    if g.x >= P.cells || mg_done() {
+        return;
+    }
+    cellf[field(F_Q, g.x)] = fine_apply(F_Z, g.x);
+}
+
+// S424 — la restriction vers le niveau 2 et la prolongation du niveau 2 vers le niveau 1, en dispatchs : dans le groupe des niveaux
+// grossiers (un seul groupe), elles coûtaient 13 µs et plus. Mêmes fonctions qu'en `mg_coarse`.
+// `L₁·x₁` par maille du niveau 1, dans `t₁` (libre entre `mg_l1_tx` et `mg_l1_xt`), puis la somme des filles : même expression que
+// `coarse_restrict`, `(s + r) − L·x`.
+@compute @workgroup_size(128)
+fn mg_l1_ax(@builtin(global_invocation_id) g: vec3<u32>) {
+    if g.x >= lv_get(1u, 3u) || mg_done() {
+        return;
+    }
+    mgb[lv_get(1u, 7u) + g.x] = mg_row(1u, lv_get(1u, 5u), g.x).x;
+}
+
+@compute @workgroup_size(128)
+fn mg_restrict2(@builtin(global_invocation_id) g: vec3<u32>) {
+    let cc = g.x;
+    if cc >= lv_get(2u, 3u) || mg_done() {
+        return;
+    }
+    let nx = lv_get(2u, 0u);
+    let ny = lv_get(2u, 1u);
+    let i = cc % nx;
+    let j = (cc / nx) % ny;
+    let k = cc / (nx * ny);
+    var s = 0.0;
+    for (var d = 0u; d < 8u; d = d + 1u) {
+        let fc = mg_child(lv_get(1u, 0u), lv_get(1u, 1u), lv_get(1u, 2u), i, j, k, d);
+        if fc != NONE {
+            s = s + mgb[lv_get(1u, 6u) + fc] - mgb[lv_get(1u, 7u) + fc];
+        }
+    }
+    mgb[lv_get(2u, 6u) + cc] = 0.125 * s;
+}
+
+@compute @workgroup_size(128)
+fn mg_prolong1(@builtin(global_invocation_id) g: vec3<u32>) {
+    if g.x >= lv_get(1u, 3u) || mg_done() {
+        return;
+    }
+    coarse_prolong(2u, g.x);
+}
+
 // Restriction vers le niveau 1 : la moyenne des résidus fins `r − A·z` des filles.
 @compute @workgroup_size(128)
 fn mg_restrict1(@builtin(global_invocation_id) g: vec3<u32>) {
@@ -3784,10 +3835,12 @@ fn mg_restrict1(@builtin(global_invocation_id) g: vec3<u32>) {
     for (var d = 0u; d < 8u; d = d + 1u) {
         let fc = mg_child(P.nx, P.ny, P.nz, i, j, k, d);
         if fc != NONE {
-            s = s + cellf[field(F_R, fc)] - fine_apply(F_Z, fc);
+            s = s + cellf[field(F_R, fc)] - cellf[field(F_Q, fc)];
         }
     }
     mgb[lv_get(1u, 6u) + cc] = 0.125 * s;
+    // S424 : le premier lissage du niveau 1 (`mg_l1_first`), sur la même maille.
+    coarse_first(1u, cc);
 }
 
 @compute @workgroup_size(128)
@@ -3898,32 +3951,33 @@ fn mg_coarse(@builtin(local_invocation_id) lid: vec3<u32>) {
 
 // **S424 — les niveaux ≥ 2 en mémoire de groupe.** Le groupe ci-dessus fait dix-huit phases à barrière, chacune un aller-retour en
 // mémoire globale (≈ 40 µs par cycle sur B10). Quand les niveaux ≥ 2 tiennent dans `MG_SH` mailles (B10 : 336 + 44), `x`, `t`, `r`
-// et la nature vivent dans la mémoire du groupe : la restriction lit le niveau 1 en global, la prolongation vers lui y écrit, le reste
-// ne quitte pas le groupe. Même arithmétique, même ordre que `mg_coarse` ; l'hôte choisit à la création.
+// et la nature vivent dans la mémoire du groupe ; la restriction vers le niveau 2 (`mg_restrict2`) et la prolongation vers le niveau 1
+// (`mg_prolong1`) se font en dispatchs, parallèles. Même arithmétique, même ordre que `mg_coarse` ; l'hôte choisit à la création.
 const MG_SH: u32 = 1024u;
 // `x` [0, SH), `t` [SH, 2·SH), `r` [2·SH, 3·SH).
 var<workgroup> sh_v: array<f32, 3072>;
 var<workgroup> sh_k: array<f32, 1024>;
+// La géométrie des niveaux, chargée une fois par cycle (elle était relue en global à chaque appel) : (nx, ny, nz, origine) et
+// (mailles, nature, facteur `4⁻ˡ` en bits, `r` en global).
+var<workgroup> sh_g: array<vec4<u32>, 8>;
+var<workgroup> sh_h: array<vec4<u32>, 8>;
 
 // L'origine du niveau `l ≥ 2` dans la mémoire du groupe.
 fn sh_off(l: u32) -> u32 {
-    var o = 0u;
-    for (var q = 2u; q < l; q = q + 1u) {
-        o = o + lv_get(q, 3u);
-    }
-    return o;
+    return sh_g[l].w;
 }
 
 // `mg_row` sur la mémoire du groupe : `src` 0 (`x`) ou 1 (`t`).
 fn sh_row(l: u32, src: u32, c: u32) -> vec2<f32> {
-    let o = sh_off(l);
+    let gl = sh_g[l];
+    let o = gl.w;
     let base = src * MG_SH + o;
     var acc = 0.0;
     var dg = 0.0;
     if sh_k[o + c] > 0.0 {
-        let nx = lv_get(l, 0u);
-        let ny = lv_get(l, 1u);
-        let nz = lv_get(l, 2u);
+        let nx = gl.x;
+        let ny = gl.y;
+        let nz = gl.z;
         let plane = nx * ny;
         let i = c % nx;
         let j = (c / nx) % ny;
@@ -3950,7 +4004,7 @@ fn sh_row(l: u32, src: u32, c: u32) -> vec2<f32> {
             }
         }
     }
-    let inv = mg_inv(l);
+    let inv = bitcast<f32>(sh_h[l].z);
     return vec2<f32>(acc * inv, dg * inv);
 }
 
@@ -3974,45 +4028,40 @@ fn sh_first(l: u32, c: u32) {
     }
 }
 
-// La restriction vers `l ≥ 2` : depuis le niveau 1 en global, ou depuis le niveau `l − 1` du groupe.
+// La restriction vers `l ≥ 3`, depuis le niveau `l − 1` du groupe ; vers le niveau 2, `r₂` est lu en global (`mg_restrict2`).
 fn sh_restrict(l: u32, cc: u32) {
-    let nx = lv_get(l, 0u);
-    let ny = lv_get(l, 1u);
+    let nx = sh_g[l].x;
+    let ny = sh_g[l].y;
     let i = cc % nx;
     let j = (cc / nx) % ny;
     let k = cc / (nx * ny);
     let f = l - 1u;
-    let fo = sh_off(f);
-    var s = 0.0;
-    for (var d = 0u; d < 8u; d = d + 1u) {
-        let fc = mg_child(lv_get(f, 0u), lv_get(f, 1u), lv_get(f, 2u), i, j, k, d);
-        if fc != NONE {
-            if f == 1u {
-                s = s + mgb[lv_get(f, 6u) + fc] - mg_row(f, lv_get(f, 5u), fc).x;
-            } else {
+    if f == 1u {
+        sh_v[2u * MG_SH + sh_off(l) + cc] = mgb[sh_h[l].w + cc];
+    } else {
+        let fo = sh_off(f);
+        var s = 0.0;
+        for (var d = 0u; d < 8u; d = d + 1u) {
+            let fc = mg_child(sh_g[f].x, sh_g[f].y, sh_g[f].z, i, j, k, d);
+            if fc != NONE {
                 s = s + sh_v[2u * MG_SH + fo + fc] - sh_row(f, 0u, fc).x;
             }
         }
+        sh_v[2u * MG_SH + sh_off(l) + cc] = 0.125 * s;
     }
-    sh_v[2u * MG_SH + sh_off(l) + cc] = 0.125 * s;
 }
 
-// La prolongation de `l` vers `l − 1` : vers le niveau 1 en global, ou dans le groupe.
+// La prolongation de `l` vers `l − 1 ≥ 2`, dans le groupe ; vers le niveau 1, `mg_prolong1`.
 fn sh_prolong(l: u32, fc: u32) {
     let f = l - 1u;
-    let fnx = lv_get(f, 0u);
-    let fny = lv_get(f, 1u);
+    let fnx = sh_g[f].x;
+    let fny = sh_g[f].y;
     let i = fc % fnx;
     let j = (fc / fnx) % fny;
     let k = fc / (fnx * fny);
-    let parent = ((k / 2u) * lv_get(l, 1u) + j / 2u) * lv_get(l, 0u) + i / 2u;
-    let up = sh_v[sh_off(l) + parent];
-    if f == 1u {
-        mgb[lv_get(f, 5u) + fc] = mgb[lv_get(f, 5u) + fc] + up;
-    } else {
-        let o = sh_off(f);
-        sh_v[o + fc] = sh_v[o + fc] + up;
-    }
+    let parent = ((k / 2u) * sh_g[l].y + j / 2u) * sh_g[l].x + i / 2u;
+    let o = sh_off(f);
+    sh_v[o + fc] = sh_v[o + fc] + sh_v[sh_off(l) + parent];
 }
 
 @compute @workgroup_size(256)
@@ -4021,13 +4070,26 @@ fn mg_coarse_shared(@builtin(local_invocation_id) lid: vec3<u32>) {
     let skip = mg_done();
     let levels = mg_levels();
     let last = levels - 1u;
-    // Les natures, une fois par cycle.
+    // La géométrie des niveaux, puis les natures, une fois par cycle.
+    if t == 0u {
+        var o = 0u;
+        for (var l = 0u; l < 8u; l = l + 1u) {
+            if l < levels {
+                sh_g[l] = vec4<u32>(lv_get(l, 0u), lv_get(l, 1u), lv_get(l, 2u), o);
+                sh_h[l] = vec4<u32>(lv_get(l, 3u), lv_get(l, 4u), bitcast<u32>(mg_inv(l)), lv_get(l, 6u));
+                if l >= 2u {
+                    o = o + lv_get(l, 3u);
+                }
+            }
+        }
+    }
+    workgroupBarrier();
     for (var l = 2u; l < levels; l = l + 1u) {
-        let o = sh_off(l);
+        let o = sh_g[l].w;
         for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
             let c = t + 256u * bb;
-            if c < lv_get(l, 3u) {
-                sh_k[o + c] = mgb[lv_get(l, 4u) + c];
+            if c < sh_h[l].x {
+                sh_k[o + c] = mgb[sh_h[l].y + c];
             }
         }
     }
@@ -4035,7 +4097,7 @@ fn mg_coarse_shared(@builtin(local_invocation_id) lid: vec3<u32>) {
     for (var s = 0u; s < MG_NC; s = s + 1u) {
         let l = s + 2u;
         let on = l < levels && !skip;
-        let cells = select(0u, lv_get(min(l, 7u), 3u), on);
+        let cells = select(0u, sh_h[min(l, 7u)].x, on);
         for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
             let c = t + 256u * bb;
             if c < cells {
@@ -4058,7 +4120,7 @@ fn mg_coarse_shared(@builtin(local_invocation_id) lid: vec3<u32>) {
         }
         workgroupBarrier();
     }
-    let ccells = select(0u, lv_get(min(last, 7u), 3u), last >= 2u && !skip);
+    let ccells = select(0u, sh_h[min(last, 7u)].x, last >= 2u && !skip);
     for (var q = 0u; q < 6u; q = q + 1u) {
         let odd = q % 2u == 1u;
         for (var bb = 0u; bb < mg_blocks(); bb = bb + 1u) {
@@ -4073,11 +4135,18 @@ fn mg_coarse_shared(@builtin(local_invocation_id) lid: vec3<u32>) {
         let l = last - min(s, last);
         let on = s + 2u < levels && !skip;
         let f = max(l, 1u) - 1u;
-        let fcells = select(0u, lv_get(f, 3u), on);
+        let fcells = select(0u, sh_h[f].x, on);
+        // Vers le niveau 1 : `x₂` rendu en global, `mg_prolong1` prolonge.
+        let back = f == 1u;
+        let pcells = select(fcells, select(0u, sh_h[2].x, on), back);
         for (var bb = 0u; bb < mg_blocks() * 8u; bb = bb + 1u) {
             let c = t + 256u * bb;
-            if c < fcells {
-                sh_prolong(l, c);
+            if c < pcells {
+                if back {
+                    mgb[lv_get(2u, 5u) + c] = sh_v[sh_off(2u) + c];
+                } else {
+                    sh_prolong(l, c);
+                }
             }
         }
         workgroupBarrier();
@@ -4170,6 +4239,80 @@ fn mg_cg_update(@builtin(global_invocation_id) g: vec3<u32>) {
     let alpha = scalars[S_ALPHA];
     cellf[field(F_P, c)] = cellf[field(F_P, c)] + alpha * cellf[field(F_D, c)];
     cellf[field(F_R, c)] = cellf[field(F_R, c)] - alpha * cellf[field(F_Q, c)];
+}
+
+// **S424 — les noyaux fusionnés.** `α` se calcule dans chaque groupe de la mise à jour (le repli des produits est déterministe : même
+// valeur partout, au bit), le premier lissage fin suit dans la même passe ; `β` se calcule dans chaque groupe de la direction. Le
+// scalaire `r·z` est lu par tous et écrit par le groupe 0 dans la même passe : en double tampon, selon la parité de l'itération
+// (constante de pipeline `CG_PAR` ; deux pipelines par noyau). Douze dispatchs par itération au lieu de dix-sept.
+override CG_PAR: u32 = 0u;
+const S_RZ2: u32 = 8u;
+
+fn rz_cur() -> u32 {
+    return select(S_RZ, S_RZ2, CG_PAR == 1u);
+}
+
+fn rz_next() -> u32 {
+    return select(S_RZ2, S_RZ, CG_PAR == 1u);
+}
+
+// `α = (r·z)/(d·q)` (`cg_alpha`), puis `p += α·d`, `r −= α·q` (`mg_cg_update`), puis `q = ω·r/diag` (`mg_f_first`).
+@compute @workgroup_size(256)
+fn mg_cg_update_alpha(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let s = gather_pair(l.x);
+    if !(s.x > 0.0) {
+        // Tous les groupes voient la même somme : tous s'arrêtent ici.
+        if g.x == 0u {
+            scalars[S_DQ] = s.x;
+            scalars[S_DONE] = 1.0;
+        }
+        return;
+    }
+    let alpha = scalars[rz_cur()] / s.x;
+    if g.x == 0u {
+        scalars[S_DQ] = s.x;
+        scalars[S_ALPHA] = alpha;
+    }
+    let c = g.x;
+    if c < P.cells {
+        cellf[field(F_P, c)] = cellf[field(F_P, c)] + alpha * cellf[field(F_D, c)];
+        let r = cellf[field(F_R, c)] - alpha * cellf[field(F_Q, c)];
+        cellf[field(F_R, c)] = r;
+        let diag = cellf[field(F_DIAG, c)];
+        if label[c] == WATER && diag > 0.0 {
+            cellf[field(F_Q, c)] = MG_OMEGA * r / diag;
+        } else {
+            cellf[field(F_Q, c)] = 0.0;
+        }
+    }
+}
+
+// `β` et l'arrêt (`mg_cg_beta`, au groupe 0), puis `d = z + β·d` (`cg_direction`) — faite aussi au pas qui s'arrête : `d` ne sert
+// plus.
+@compute @workgroup_size(256)
+fn mg_cg_beta_direction(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let s = gather_pair(l.x);
+    let beta = s.x / scalars[rz_cur()];
+    if g.x == 0u {
+        scalars[S_BETA] = beta;
+        scalars[rz_next()] = s.x;
+        scalars[S_RR] = s.y;
+        let it = scalars[S_IT] + 1.0;
+        scalars[S_IT] = it;
+        if s.y <= P.tol2 * scalars[S_B2] || it >= f32(P.max_it) {
+            scalars[S_DONE] = 1.0;
+        }
+    }
+    let c = g.x;
+    if c < P.cells {
+        cellf[field(F_D, c)] = cellf[field(F_Z, c)] + beta * cellf[field(F_D, c)];
+    }
 }
 
 // `β = (r·z)/(r·z)ₚᵣéc`, l'arrêt au critère de la référence ou au plafond.

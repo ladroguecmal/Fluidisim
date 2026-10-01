@@ -13,7 +13,7 @@ use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 89] = [
+const KERNELS: [&str; 95] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -28,6 +28,7 @@ const KERNELS: [&str; 89] = [
     "mg_kind1", "mg_kind_coarse", "mg_f_first", "mg_f_qz", "mg_f_zq", "mg_restrict1", "mg_l1_first", "mg_l1_tx",
     "mg_l1_xt", "mg_coarse", "mg_prolong0", "mg_f_qz_fold", "mg_cg_reset", "mg_cg_init_finish", "mg_cg_direction_first", "mg_cg_update", "mg_cg_beta",
     "switch_apply_group", "mark_fresh", "clear_fresh", "reconstruct_coop", "mg_coarse_shared",
+    "mg_cg_update_alpha", "mg_cg_beta_direction", "mg_fine_az", "mg_restrict2", "mg_prolong1", "mg_l1_ax",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -84,13 +85,19 @@ const MG_VCYCLE: [usize; 11] = [69, 70, 72, 73, 74, 76, 75, 74, 77, 71, 78];
 const MG_CG_RESET: usize = 79;
 const MG_CG_INIT_FINISH: usize = 80;
 const MG_CG_DIRECTION_FIRST: usize = 81;
-const MG_CG_UPDATE: usize = 82;
-const MG_CG_BETA: usize = 83;
+// S424 : `mg_cg_update` (82) et `mg_cg_beta` (83) remplacés par les noyaux fusionnés ; gardés dans la liste pour les indices.
 const SWITCH_APPLY_GROUP: usize = 84;
 const MARK_FRESH: usize = 85;
 const CLEAR_FRESH: usize = 86;
 const RECONSTRUCT_COOP: usize = 87;
 const MG_COARSE_SHARED: usize = 88;
+// S424 — les noyaux fusionnés ; chacun a une seconde pipeline à `CG_PAR = 1` (`par1`).
+const MG_CG_UPDATE_ALPHA: usize = 89;
+const MG_CG_BETA_DIRECTION: usize = 90;
+const MG_FINE_AZ: usize = 91;
+const MG_RESTRICT2: usize = 92;
+const MG_PROLONG1: usize = 93;
+const MG_L1_AX: usize = 94;
 /// S424 — les mailles des niveaux ≥ 2 que la mémoire de groupe tient (`MG_SH` du nuanceur).
 const MG_SHARED_CELLS: usize = 1024;
 const WG: u32 = 128;
@@ -110,6 +117,8 @@ pub struct ApicCarte {
     faces: usize,
     nblocks: usize,
     pipelines: Vec<wgpu::ComputePipeline>,
+    /// S424 — `mg_cg_update_alpha` et `mg_cg_beta_direction` à `CG_PAR = 1`.
+    par1: [wgpu::ComputePipeline; 2],
     bind: wgpu::BindGroup,
     params: wgpu::Buffer,
     px: wgpu::Buffer,
@@ -317,40 +326,32 @@ impl ApicCarte {
         });
         let module = device.create_shader_module(wgpu::include_wgsl!("apic3d_carte.wgsl"));
         // S423 — le nombre de niveaux ≥ 2 de la multigrille, constante de pipeline.
-        let mg_nc = [("MG_NC", mg_levels.len().saturating_sub(2).max(1) as f64)];
-        // S424 — banc : `PIPELINE_SEULE=<entrée>` compile cette seule pipeline, imprime son temps et quitte.
-        if let Ok(only) = std::env::var("PIPELINE_SEULE") {
-            let entry = KERNELS.iter().find(|e| **e == only).ok_or("PIPELINE_SEULE : entrée inconnue")?;
+        let nc = mg_levels.len().saturating_sub(2).max(1) as f64;
+        // S424 : sans la mise à zéro de la mémoire de groupe — FXC déroule l'initialisation élément par élément (283 s pour
+        // `mg_coarse_shared`, 15 s pour `switch_apply_group`) ; chaque noyau écrit sa mémoire de groupe avant de la lire (réductions,
+        // drapeaux du fil 0, niveaux chargés). `CG_PAR` : la parité des noyaux fusionnés du gradient conjugué.
+        let make = |entry: &'static str, par: f64| {
+            // Banc : `TEMPS_PIPELINES=1` imprime le temps de création (de compilation) de chaque pipeline.
             let _t = PipelineTimer::new(entry);
-            let _ = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+            let constants = [("MG_NC", nc), ("CG_PAR", par)];
+            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
                 label: Some(entry),
                 layout: Some(&pipeline_layout),
                 module: &module,
                 entry_point: Some(entry),
-                compilation_options: wgpu::PipelineCompilationOptions { constants: &mg_nc, zero_initialize_workgroup_memory: false },
+                compilation_options: wgpu::PipelineCompilationOptions { constants: &constants, zero_initialize_workgroup_memory: false },
                 cache: None,
-            });
-            drop(_t);
+            })
+        };
+        // Banc : `PIPELINE_SEULE=<entrée>` compile cette seule pipeline, imprime son temps et quitte.
+        if let Ok(only) = std::env::var("PIPELINE_SEULE") {
+            let entry = KERNELS.iter().find(|e| **e == only).ok_or("PIPELINE_SEULE : entrée inconnue")?;
+            let _ = make(entry, 0.);
             std::process::exit(0);
         }
-        let pipelines = KERNELS
-            .iter()
-            .map(|entry| {
-                // S424 — banc : `TEMPS_PIPELINES=1` imprime le temps de création (de compilation) de chaque pipeline.
-                let _t = PipelineTimer::new(entry);
-                device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-                    label: Some(entry),
-                    layout: Some(&pipeline_layout),
-                    module: &module,
-                    entry_point: Some(entry),
-                    // S424 : sans la mise à zéro de la mémoire de groupe — FXC déroule l'initialisation élément par élément (283 s
-                    // pour `mg_coarse_shared`, 15 s pour `switch_apply_group`) ; chaque noyau écrit sa mémoire de groupe avant de
-                    // la lire (réductions, drapeaux du fil 0, niveaux chargés).
-                    compilation_options: wgpu::PipelineCompilationOptions { constants: &mg_nc, zero_initialize_workgroup_memory: false },
-                    cache: None,
-                })
-            })
-            .collect();
+        let pipelines = KERNELS.iter().map(|entry| make(entry, 0.)).collect();
+        // S424 — les noyaux fusionnés à la parité impaire.
+        let par1 = [make(KERNELS[MG_CG_UPDATE_ALPHA], 1.), make(KERNELS[MG_CG_BETA_DIRECTION], 1.)];
         let (radius, kernel, separation) = reference.settings();
         let (rho, g_eff) = reference.physics();
         Ok(Self {
@@ -362,6 +363,7 @@ impl ApicCarte {
             faces,
             nblocks,
             pipelines,
+            par1,
             bind,
             params,
             px,
@@ -687,6 +689,14 @@ impl ApicCarte {
         pass.dispatch_workgroups(cells.min(65_535), cells.div_ceil(65_535), 1);
     }
 
+    /// S424 — un noyau fusionné du gradient conjugué, à la parité de l'itération (`CG_PAR`).
+    fn dispatch_par(&self, pass: &mut wgpu::ComputePass, kernel: usize, par: bool, threads: usize) {
+        let pipeline = if par { &self.par1[kernel - MG_CG_UPDATE_ALPHA] } else { &self.pipelines[kernel] };
+        pass.set_pipeline(pipeline);
+        pass.set_bind_group(0, &self.bind, &[]);
+        pass.dispatch_workgroups((threads as u32).div_ceil(SCAN).max(1), 1, 1);
+    }
+
     fn dispatch(&self, pass: &mut wgpu::ComputePass, kernel: usize, threads: usize, group: u32) {
         pass.set_pipeline(&self.pipelines[kernel]);
         pass.set_bind_group(0, &self.bind, &[]);
@@ -769,24 +779,36 @@ impl ApicCarte {
         self.dispatch(pass, MG_KIND_COARSE, SCAN as usize, SCAN);
     }
 
-    /// Le cycle en V, `z = M⁻¹·r`.
-    fn encode_vcycle(&self, pass: &mut wgpu::ComputePass) {
+    /// Le cycle en V, `z = M⁻¹·r` ; `first` : le premier lissage fin en tête (au départ ; aux itérations, la mise à jour le fait).
+    fn encode_vcycle(&self, pass: &mut wgpu::ComputePass, first: bool) {
         let (cells, l1) = (self.domain.cells(), self.mg_cells(1));
-        // f_first, f_qz, restrict1, l1_first, l1_tx, coarse, l1_xt, l1_tx, prolong0, f_zq, f_qz_fold.
-        let sizes = [
-            (cells, WG), (cells, WG), (l1, WG), (l1, WG), (l1, WG), (SCAN as usize, SCAN), (l1, WG), (l1, WG), (cells, WG),
-            (cells, WG), (cells, SCAN),
-        ];
+        let [f_first, f_qz, restrict1, _, l1_tx, coarse, l1_xt, _, prolong0, f_zq, fold] = MG_VCYCLE;
         // Banc S423 : `SANS_GROSSIERS=1` saute le groupe des niveaux ≥ 2 (pour mesurer ce qu'il coûte).
         let skip_coarse = std::env::var("SANS_GROSSIERS").is_ok();
-        for (kernel, (threads, group)) in MG_VCYCLE.into_iter().zip(sizes) {
-            if skip_coarse && kernel == MG_VCYCLE[5] {
-                continue;
-            }
-            // S424 : les niveaux ≥ 2 en mémoire de groupe quand ils y tiennent.
-            let kernel = if kernel == MG_VCYCLE[5] && self.mg_shared { MG_COARSE_SHARED } else { kernel };
-            self.dispatch(pass, kernel, threads, group);
+        if first {
+            self.dispatch(pass, f_first, cells, WG);
         }
+        self.dispatch(pass, f_qz, cells, WG);
+        // S424 : `A·z` par maille fine, puis la restriction (et le premier lissage du niveau 1).
+        self.dispatch(pass, MG_FINE_AZ, cells, WG);
+        self.dispatch(pass, restrict1, l1, WG);
+        self.dispatch(pass, l1_tx, l1, WG);
+        if !skip_coarse {
+            if self.mg_shared {
+                // S424 : les niveaux ≥ 2 en mémoire de groupe ; la restriction vers le 2 et la prolongation vers le 1 en dispatchs.
+                self.dispatch(pass, MG_L1_AX, l1, WG);
+                self.dispatch(pass, MG_RESTRICT2, self.mg_cells(2), WG);
+                self.dispatch(pass, MG_COARSE_SHARED, SCAN as usize, SCAN);
+                self.dispatch(pass, MG_PROLONG1, l1, WG);
+            } else {
+                self.dispatch(pass, coarse, SCAN as usize, SCAN);
+            }
+        }
+        self.dispatch(pass, l1_xt, l1, WG);
+        self.dispatch(pass, l1_tx, l1, WG);
+        self.dispatch(pass, prolong0, cells, WG);
+        self.dispatch(pass, f_zq, cells, WG);
+        self.dispatch(pass, fold, cells, SCAN);
     }
 
     /// **Banc S422** — `M⁻¹·r` sur l'état de la dernière projection (étiquettes, diagonale, natures) ; `r` nul hors de l'eau.
@@ -798,10 +820,70 @@ impl ApicCarte {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
             self.encode_mg_geometry(&mut pass);
             self.dispatch(&mut pass, MG_CG_RESET, 1, 1);
-            self.encode_vcycle(&mut pass);
+            self.encode_vcycle(&mut pass, true);
         }
         self.queue.submit([encoder.finish()]);
         self.read_f32(&self.cellf, 4 * cells, cells)
+    }
+
+    /// **Banc S424** — le coût de chaque noyau d'une itération du gradient conjugué préconditionné, sur l'état présent : chaque
+    /// noyau répété `reps` fois dans un passage horodaté (le drapeau d'arrêt remis à zéro avant : sinon les noyaux sautent leur
+    /// travail ; avant chaque répétition, son coût mesuré seul et retranché), le temps moyen en µs. Les valeurs calculées n'ont pas de sens ; l'état de la projection est perdu.
+    pub fn profile_iteration(&mut self, reps: usize) -> Result<Vec<(&'static str, f64)>, String> {
+        let (cells, l1) = (self.domain.cells(), self.mg_cells(1));
+        let l2 = self.mg_cells(2);
+        let list: [(usize, usize, u32); 16] = [
+            (CG_ITERATION[0], cells, SCAN),
+            (MG_CG_UPDATE_ALPHA, cells, SCAN),
+            (MG_VCYCLE[1], cells, WG),
+            (MG_FINE_AZ, cells, WG),
+            (MG_VCYCLE[2], l1, WG),
+            (MG_VCYCLE[4], l1, WG),
+            (MG_L1_AX, l1, WG),
+            (MG_RESTRICT2, l2, WG),
+            (if self.mg_shared { MG_COARSE_SHARED } else { MG_VCYCLE[5] }, SCAN as usize, SCAN),
+            (MG_PROLONG1, l1, WG),
+            (MG_VCYCLE[6], l1, WG),
+            (MG_VCYCLE[7], l1, WG),
+            (MG_VCYCLE[8], cells, WG),
+            (MG_VCYCLE[9], cells, WG),
+            (MG_VCYCLE[10], cells, SCAN),
+            (MG_CG_BETA_DIRECTION, cells, SCAN),
+        ];
+        let Some(q) = self.query.as_ref() else { return Err("pas d'horodatage".into()) };
+        let mut out = Vec::new();
+        let mut base = 0.;
+        for (m, (kernel, threads, group)) in std::iter::once((MG_CG_RESET, 1, 1)).chain(list).enumerate() {
+            let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+            {
+                let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+                    label: None,
+                    timestamp_writes: Some(wgpu::ComputePassTimestampWrites {
+                        query_set: q,
+                        beginning_of_pass_write_index: Some(0),
+                        end_of_pass_write_index: Some(1),
+                    }),
+                });
+                for _ in 0..reps {
+                    self.dispatch(&mut pass, MG_CG_RESET, 1, 1);
+                    if m > 0 {
+                        self.dispatch(&mut pass, kernel, threads, group);
+                    }
+                }
+            }
+            encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
+            encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
+            self.queue.submit([encoder.finish()]);
+            let t = self.map_u64(&self.query_read, 2)?;
+            let period = self.queue.get_timestamp_period() as f64 / 1e3;
+            let us = t[1].saturating_sub(t[0]) as f64 * period / reps as f64;
+            if m == 0 {
+                base = us;
+            } else {
+                out.push((KERNELS[kernel], us - base));
+            }
+        }
+        Ok(out)
     }
 
     /// Les étiquettes de la carte (banc).
@@ -871,16 +953,16 @@ impl ApicCarte {
                         // S422 — le gradient conjugué préconditionné par le cycle en V.
                         self.encode_mg_geometry(&mut pass);
                         self.dispatch(&mut pass, MG_CG_RESET, 1, 1);
-                        self.encode_vcycle(&mut pass);
+                        self.encode_vcycle(&mut pass, true);
                         self.dispatch(&mut pass, MG_CG_INIT_FINISH, SCAN as usize, SCAN);
                         self.dispatch(&mut pass, MG_CG_DIRECTION_FIRST, cells, WG);
-                        for _ in 0..self.iteration_cap {
+                        // S424 : α dans la mise à jour, β dans la direction, `r·z` en double tampon par parité.
+                        for k in 0..self.iteration_cap {
+                            let par = k % 2 == 1;
                             self.dispatch(&mut pass, CG_ITERATION[0], cells, SCAN);
-                            self.dispatch(&mut pass, CG_ITERATION[1], 1, 1);
-                            self.dispatch(&mut pass, MG_CG_UPDATE, cells, WG);
-                            self.encode_vcycle(&mut pass);
-                            self.dispatch(&mut pass, MG_CG_BETA, SCAN as usize, SCAN);
-                            self.dispatch(&mut pass, CG_ITERATION[4], cells, SCAN);
+                            self.dispatch_par(&mut pass, MG_CG_UPDATE_ALPHA, par, cells);
+                            self.encode_vcycle(&mut pass, false);
+                            self.dispatch_par(&mut pass, MG_CG_BETA_DIRECTION, par, cells);
                         }
                     } else {
                     self.dispatch(&mut pass, CG_INIT[0], cells, SCAN);
@@ -2092,6 +2174,12 @@ pub fn recevoir_b10() -> Result<(), String> {
                 "APIC_CARTE_B10_S417 bande particules={}/{} bascule_carte_p99_ms={:.3} derive_volume_carte_quanta={} volume_reference_m3={:.9} bascule_refusee={}",
                 k[0], a.particle_count(), percentile(&mut switch_ms, 0.99), q - q_start, a.total_volume(), k[7]
             );
+        }
+        // S424 — `PROFIL=1` : le coût de chaque noyau d'une itération de la projection, sur l'état final.
+        if std::env::var("PROFIL").is_ok() && twin.is_none() {
+            let line: Vec<String> =
+                carte.profile_iteration(50)?.into_iter().map(|(name, us)| format!("{name}={us:.2}")).collect();
+            println!("APIC_CARTE_B10_S424 profil_iteration_us {}", line.join(" "));
         }
         Ok(())
     })
