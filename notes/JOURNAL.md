@@ -18343,3 +18343,12 @@ demi-période (**manqué tel qu'écrit**), dont l'éponge et la bande de B expli
 largeur (0,576 à 0,846 s) — critère mal posé ; sous une houle calme, 42 colonnes en particules (la bascule à ses défauts). **c3 non
 reçu**, première session. Suite **762**. **Rituel** (allégé). Maillons **5** — justifié : la priorité du solveur (S406). Suivant : **c3**
 — le témoin juste (la bande sur toute la mer), la bascule avec les réglages de C7d-1/C7d-2.
+
+## S449 — 2026-10-02 — physique : c3, seconde session — plafonné
+
+**Entrée.** *« Continue »* — c3. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §23.6) : le témoin juste (la bande sur
+toute la mer), la bascule réglée (C7d-1/C7d-2), la même fenêtre partout, 1 m d'air ; l'essai de la hauteur lue sur les colonnes de
+particules (`set_particle_heights`, éteint). **Mesuré** : retournement dans la mer 0,482 s contre 0,562 s au témoin (**14 %**, manqué) ;
+part de la fenêtre et masse au raccord tenues ; sous une houle calme, la mer devient instable au bord de la bande (manqué). Deux
+exigences du raccord se contredisent au bord des colonnes de particules. **c3 plafonné** (ADR-213 D2). Suite **762**. **Rituel**
+(allégé). Maillons **6** — justifié : la priorité du solveur (S406). Suivant proposé : **la surface continue** (ADR-211 D2).

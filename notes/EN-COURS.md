@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S449 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c3, seconde session**
+Session : S449 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c3, seconde session**
 (ADR-213 D2 ; [preuve](../docs/validation/APIC-CARTE-S416.md) §23.5).
 
 **Ce que la session fait.** Le banc `deferlement_en_mer` : (1) **le témoin juste** — la bande étendue à **toute la mer** (24 m),
@@ -80,7 +80,7 @@ houle calme (`ε` = 0,1 partout), **aucune colonne en particules après 1 s**, d
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le témoin sur toute la mer ; la bascule réglée ; mesures ; critères.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `deferlement_en_mer` : le témoin sur toute la mer (24 m, bords nourris par B seul) ; la bascule réglée (§21.3) ; la même
@@ -91,4 +91,4 @@ houle calme (`ε` = 0,1 partout), **aucune colonne en particules après 1 s**, d
   **0,562 s**, 13,25 m, part 0,925 ; masse au raccord ≈ 0 (1,9·10⁻⁷ m³). (1) **manqué** (14 % ; l'abscisse à 0,20 m, la limite) ; (2)
   tenu (0,075) ; (3) tenu ; (4) **manqué** : sous une houle calme et la bascule réglée, la mer refuse à 2,2 s (la dent de scie au bord
   de la bande). Suite **762**. **c3 plafonné** (ADR-213 D2).
-
+- **P3** — APIC-CARTE §23.6 ; journal ; jeton libre ; maillons 6 (justifiés : S406) ; suivant : S450, la surface continue (ADR-211 D2), proposée.

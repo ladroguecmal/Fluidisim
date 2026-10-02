@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 17:35 +02:00
+JETON            : libre
+Battement        : 2026-10-02 17:49 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S449 — c3, seconde session** : le témoin juste (la bande sur toute la mer), la bascule réglée
-Dernière session : S448 — le lot des registres ; **le raccord dans le système** (`BandInSea`) ; c3 premier jet ([preuve](docs/validation/APIC-CARTE-S416.md) §23.5) — le déferlement dans la mer, masse au raccord ≈ 0 ; le témoin mal posé ; sous houle calme, des colonnes en particules. Avant : S447
-Session suivante : **S449 — c3, seconde session** (ADR-213 D2) : critères réécrits avant la mesure — **le témoin juste** : la bande étendue à toute la mer (24 m, bords ouverts nourris par B seul, sans raccord) ; le retournement de la bande de 8 m dans la mer à 10 % du sien ; **la bascule avec les réglages reçus** en C7d-1/C7d-2 (vitesse propre relative à B, `vitesse` 0,3, `vitesse_relache` 0,15, `fond_b`) — sous une houle calme, aucune colonne en particules après 1 s ; la masse au raccord sous 0,1 % ; banc `deferlement_en_mer` (20 s) ; puis c4 (la carte) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 5 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
+Session en cours : aucune
+Dernière session : S449 — c3 **plafonné** ([preuve](docs/validation/APIC-CARTE-S416.md) §23.6) — la bande déferle dans la mer, la masse se tient, mais le retournement à 14 % du témoin et le raccord instable à son bord sous houle calme. Avant : S448
+Session suivante : **S450 — la surface continue** (ADR-211 D2, proposée ; c3 plafonné, ADR-213 D2) : dans l'afficheur, la surface de la bande par la distance `φ` qu'elle reconstruit, raccordée à `η` des colonnes, sans interstice, seuls les jets détachés — sur la carte de la bande (`apic3d_carte`), B10 ; reçu si une image de revue la montre continue (l'utilisateur la juge) et le coût du rendu tient l'image ; puis C10 ; la stabilité du raccord au bord des colonnes de particules reste ouverte (déclencheur : une scène où une bande déferle dans la mer)
+Maillons        : 6 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
 Registres       : dernier lot S448 (ADR-213 D3) ; le prochain au plus tard en S451
 ```
 

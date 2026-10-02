@@ -1204,3 +1204,26 @@ raccord, ≈ 0). **(4) manqué** : sous une houle calme, des colonnes restent en
 réglages reçus en C7d-1 et C7d-2 (la vitesse propre relative à B, sa relâche). **c3 n'est pas reçu ; première session.** Le témoin juste :
 **la bande étendue à toute la mer**, sans raccord, sous le même B ; et la bascule avec les réglages reçus.
 
+### 23.6 c3, seconde session (S449) — plafonné
+
+2026-10-02. Critères écrits avant : le retournement dans la mer à 10 % (instant) et à 0,2 m (abscisse) de celui du **témoin juste** — la
+bande étendue à toute la mer (24 m, bords nourris par B seul) — ; la part de la fenêtre à 0,1 près ; la masse au raccord sous 0,1 % ;
+sous une houle calme, aucune colonne en particules après 1 s. La bascule avec les réglages reçus (§21.3).
+
+**Reproduire** : `cargo run -p water-core --release --offline --example deferlement_en_mer -- 0.55 0.2 1.5` et `-- 0.1 0.1 3` ;
+`RACCORD_HAUTEUR_LUE=1` (l'essai) ; `DEFERLEMENT_DEFAUTS=1` (la bascule à ses défauts) ; `DEFERLEMENT_TEMOIN=parois8|parois16`.
+
+| | premier retournement | part de la fenêtre | masse au raccord |
+|---|---|---:|---:|
+| dans la mer (bande de 8 m) | **0,482 s**, 13,05 m | 1,000 | 1,9·10⁻⁷ m³ |
+| témoin, la bande sur toute la mer | **0,562 s**, 13,25 m | 0,925 | — |
+
+**Verdict** : (1) **manqué** — 14 % sur l'instant (l'abscisse à 0,20 m, la limite) ; (2) tenu ; (3) tenu ; (4) **manqué** — sous une
+houle calme et la bascule réglée, **la mer devient instable au bord de la bande** (une dent de scie de 0,7 à 1,9 m dans ses colonnes de
+marge, refus à 2,2 s). **Ce qui est appris.** Le raccord tient la masse et le déferlement passe ; mais **deux exigences du raccord se
+contredisent au bord** : la mer qui garde sa propre hauteur sur les colonnes de particules emballe sa surface sous un jet (S449, avec
+0,6 m d'air : refus au pas 59) ; la mer qui reçoit leur hauteur équivalente au volume (`BandInSea::set_particle_heights`, essai) devient
+instable au bord, même au calme. **c3 est plafonné** (ADR-213 D2), après S448 et S449 : la bande déferle dans la mer, la masse se tient,
+mais le raccord n'est pas robuste à son bord. Ce qui reste ouvert, avec son déclencheur : la stabilité du raccord à côté de colonnes de
+particules — avant toute scène où une bande déferle dans la mer (C10).
+
