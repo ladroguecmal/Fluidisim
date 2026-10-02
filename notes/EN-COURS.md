@@ -62,37 +62,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S446 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c2, le raccord bande ↔
-mer** ([ADR-214](../docs/adr/ADR-214-b-entre-dans-la-bande.md), note de S445).
+Session : S447 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c2, le raccord
+conservatif**, seconde et dernière session ([preuve](../docs/validation/APIC-CARTE-S416.md) §23.3).
 
-**La conception.** Un domaine `Apic3` en eau totale, posé dans un domaine `Volume3` en δ relatif, sur la même grille (même maille,
-mêmes couches, décalage entier en `x`). Le raccord passe par **la zone des colonnes** d'`Apic3` — une surface à hauteur de colonne,
-comme le pas couplé —, la bande de particules restant à l'intérieur. (1) **Bords ouverts** (`Apic3::enable_open_boundaries`,
-`set_open_boundaries`) : sur les faces latérales du domaine, la vitesse normale est **imposée** au lieu de nulle — la projection la
-prend déjà comme donnée de Neumann ; le transport des colonnes compte son débit, mouillé à la hauteur de la colonne du bord. Sans
-bords ouverts : au bit. (2) **Chaque pas** (banc `raccord_bande_mer`) : la mer avance ; la bande reçoit à ses bords `B + δ` aux faces ;
-la bande avance ; la mer reçoit, à l'intérieur de la bande (à deux colonnes de ses bords), `δ = total − B` — hauteurs et vitesses.
+**La conception.** **La mer est la seule comptable de la masse de δ** : son pas avance toutes ses colonnes, intérieur de la bande
+compris, par ses propres débits — conservatifs. À l'intérieur de la bande, elle ne reçoit plus la hauteur de la bande telle quelle,
+mais sa **forme** : `δη = (η_bande − η_B) + c`, `c` uniforme, choisi pour que le volume de δ de l'intérieur reste celui que la mer vient de
+calculer ; la bande reçoit le même `c` sur les mêmes colonnes, pour que les deux ne divergent pas. Les vitesses, comme en S446.
+`RACCORD_CONSERVATIF=0` rend le raccord de S446.
 
-**Critères, écrits avant.** **c2 reçu** si, sous B seul (houle de 5 cm, 4 m, 25 cm), sur **10 s** : (1) le δ créé dans la mer **hors** de
-la bande reste sous **1 cm** ; (2) la masse : le volume de δ de la mer, sa dérive, sous 1 % du volume que la houle fait passer par une
-face de la bande en une demi-période ; (3) sans bords ouverts, `Apic3` au bit (la suite) ; zéro avertissement. Bancs courts (D4).
+**Critères, écrits avant.** Ceux de S446 : sous B seul (5 cm, 4 m), 10 s — (1) δ hors de la bande sous **1 cm** ; (2) la dérive du
+volume de δ de la mer sous **1 %** du volume d'une demi-période (3,2·10⁻² m³) ; la suite, zéro avertissement. Reçu : c2 ; sinon, c2 plafonné
+(ADR-213 D2), la limite écrite, et c3 commence quand même avec le raccord mesuré.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les bords ouverts d'`Apic3` ; la vitesse de grille imposable ; essais.
-- [x] **P3** — le banc `raccord_bande_mer` ; mesures ; critères.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — le raccord conservatif au banc ; mesures ; critères.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `Apic3::enable_open_boundaries`, `set_open_boundaries` (les faces `u` des bords `i = 0` et `i = nx`, vitesse normale imposée
-  par `walls`), le débit de bord dans `columns_transport` (mouillé à la hauteur de la colonne du bord), `set_grid_velocities`. Essai
-  `open_boundaries_carry_their_flux_s446` : le volume change exactement de ce que les bords font passer (entrée seule : 2,5721·10⁻² m³
-  pour 2,5721·10⁻² ; vitesses égales : 1,1766·10⁻³ pour 1,1766·10⁻³ — les hauteurs mouillées diffèrent).
-- **P3** — banc `raccord_bande_mer` (mer `Volume3` 16 m relative, bande `Apic3` 4 m en eau totale, zone de colonnes seule, bords
-  ouverts ; houle de 5 cm, 4 m ; 10 s, 14 s de calcul) : marge 2 — δ hors de la bande **9,86 mm** au plus (plafonne dès ≈ 5 s) ; la
-  dérive du volume de δ de la mer **1,4·10⁻³ m³**, qui oscille, **4,4 %** du volume d'une demi-période (3,2·10⁻² m³) ; la bande à 5 mm de
-  B en son milieu. Marge 0 : 10,8 cm, 35 % ; 1 : 12,5 mm, 7,5 % ; 4 : 9,1 mm, 7,2 %. **(1) tenu, (2) manqué** : le flux de l'interface
-  n'est pas compté pareil des deux côtés (la mer le mouille à la moyenne de deux colonnes, la bande à sa colonne de bord ; et la
-  marge recouvre). c2, première session. Suite **762**, zéro avertissement.
-- **P4** — APIC-CARTE §23.3 ; journal ; jeton libre ; maillons 3 (justifiés : S406) ; suivant : S447, c2 — le raccord conservatif.

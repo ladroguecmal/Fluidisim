@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 17:13 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 17:15 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S447 — c2, le raccord conservatif** (seconde session, ADR-213 D2)
 Dernière session : S446 — c2, première session ([preuve](docs/validation/APIC-CARTE-S416.md) §23.3) — `Apic3` aux bords ouverts, banc `raccord_bande_mer` : δ hors de la bande 9,9 mm (tenu), la masse à 4,4 % (manqué). Avant : S445, c1 plafonné
 Session suivante : **S447 — c2, le raccord conservatif** (seconde session, ADR-213 D2) : un même flux d'interface, compté une fois, des deux côtés — la mer prend à la face d'interface le débit que la bande a fait passer (ou l'inverse), sans recouvrement de masse ; mêmes critères (δ hors de la bande sous 1 cm, dérive du volume sous 1 % d'une demi-période, 10 s) ; puis c3 (la vague de Chen dans une houle) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 3 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
