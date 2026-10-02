@@ -90,7 +90,7 @@ dans cette session sans un critère écrit avant.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `MER_SPECTRE` au banc.
 - [x] **P3** — mesures : le spectre à 25 cm ; le taux à quatre mailles ; la conclusion selon les critères.
-- [ ] **P4** — preuve (MER-S369 §7) ; A320 ; registres ; suite.
+- [x] **P4** — preuve (MER-S369 §7) ; A320 ; registres ; suite.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
@@ -107,4 +107,4 @@ dans cette session sans un critère écrit avant.
   maille (54 % de l'énergie sous `4·dx` à 2 s). Seuil net : houle de 6 cm, rien ; 6,5 cm, ×8 en 1 s (73 % sous `4·dx`, pic à
   `k` = 10 K) — **la demi-maille, 6,25 cm** : la surface de B franchit un centre de maille de δ. Masque 0 : pas de seuil. Le témoin
   (sans germe) reste nul. Nouvel angle mort, **A324** ; il précède le mode relatif sur la carte (C7d-3b).
-
+- **P4** — MER-S369 §7, APIC-CARTE §22.6 ; A320 annotée, **A324** ouverte ; index, liste, feuille de route ; suite 757, zéro avertissement.

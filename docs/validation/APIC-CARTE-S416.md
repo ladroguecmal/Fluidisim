@@ -994,3 +994,13 @@ La forme de Bernoulli des termes croisés, éprouvée en référence ([MER-S369]
 ne freine A320 que de 15 à 20 % (0,115 → 0,097 s⁻¹ sous la houle de 7,5 cm ; le paquet à 6,4 fois son amplitude) ; le terme d'ADR-209
 n'y fait rien ; la bisection montre que ni la partie gradient ni la partie rotationnelle seule ne croissent — leur somme, oui.
 **C7d-3a n'est pas reçu** ; l'ordre de §22.3 tient (rien de la bande relative avant lui). Les pistes suivantes sont dans MER-S369 §6.
+
+### 22.6 C7d-3a, la question physique (S435)
+
+([MER-S369](MER-S369.md) §7.) A320 croît **à la longueur d'onde de la houle** (99 % de l'énergie de δ dans la bande de Benjamin-Feir,
+rien à l'échelle de la maille) ; son taux, 0,084 à 0,112 s⁻¹ selon la maille, s'extrapole à 0,056 s⁻¹, deux fois Benjamin-Feir — une
+modulation d'ordre `ω(ak)²`, que la linéarisation autour d'Airy, fausse à cet ordre, ne fixe pas. Le critère de C7d-3a (« < 0,01 s⁻¹ »)
+était mal posé : il sera réécrit, rapporté à Benjamin-Feir. **Un second défaut, A324** : quand la surface de B franchit un centre de
+maille de δ (houle de plus d'une demi-maille), le mode relatif amplifie δ huit fois en une seconde à l'échelle de la maille. **A324
+passe avant C7d-3b** : sans elle, le mode relatif ne tient pas une vraie mer.
+

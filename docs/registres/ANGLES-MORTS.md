@@ -4440,6 +4440,12 @@ Bernoulli. Déclencheur : la prochaine session du lot 2.
 freine la croissance que de 15 à 20 % (0,115 → 0,097 s⁻¹) ; le terme d'ADR-209 n'y fait rien ; ni sa partie gradient ni sa partie
 rotationnelle seule ne croissent, leur somme oui : **l'hypothèse ci-dessus est réfutée**. A320 reste ouverte ; elle bloque C7d-3a.
 
+*Note du 2026-10-02, S435* ([MER-S369](../validation/MER-S369.md) §7) : δ croît **à la longueur d'onde de la houle** (99 % de son
+énergie dans la bande de Benjamin-Feir, rien sous `4·dx`) ; taux de 0,084 à 0,112 s⁻¹ de 15,6 à 50 cm, 0,056 extrapolé à maille
+nulle (2,05 fois Benjamin-Feir) ; indépendant de la longueur du domaine. **Pas une instabilité de grille** : une modulation d'ordre
+`ω(ak)²`, celui-là même où δ, linéarisé autour d'Airy, est faux. Le critère « < 0,01 s⁻¹ » de C7d-3a était mal posé (une vraie houle de
+7,5 cm module à 0,027) : à réécrire, rapporté à Benjamin-Feir ; essai suivant, B cohérent au second ordre (Stokes).
+
 **A321 — S390, 2026-09-26 (sévérité 3, **corrigée S391**). À 30 Hz, la scène de la porte B explose en 24 à 40 s, quel que soit le
 solveur de pression.** Pas de 33,333 ms, `Config::review`, 1 800 pas : la surface publiée cesse d'être finie au pas 930 avec
 Jacobi 512 et au pas 1 050 avec la multigrille à 24 cycles — deux projections **convergées** (résidu relatif ≈ 10⁻⁷) —, au
@@ -4474,3 +4480,12 @@ référence à 27 µm : c'est **le schéma**, pas la carte. Non attribué. Cons�
 verrait ses ballottements croître d'environ 19 % d'amplitude en deux minutes. Déclencheur : **avant tout contenant δ fermé
 à pas long** (C10, la lame du déversoir) et tout critère de dissipation lu sur une cuve. Témoins à faire : 1 ms sur la même
 durée, termes du pas éteints un à un. [Preuve](../validation/MULTIGRILLE-3D-S385.md) §6.5.
+
+**A324 — S435, 2026-10-02 (sévérité 3, ouverte). En mode relatif, la surface de B qui franchit un centre de maille amplifie δ.**
+Banc `transfert_oriente mer`, 12,5 cm, masque 7, germe de 1 mm : sous une houle de 6 cm, rien ; sous **6,5 cm**, δ passe de 1 à
+8,6 mm en une seconde, en pics isolés loin du germe, à l'échelle de la maille (73 % de l'énergie sous `4·dx`, pic à 10 fois le nombre
+d'onde de la houle). **Le seuil est la demi-maille** (6,25 cm) : au-delà, la surface de B traverse des centres de mailles de δ. Le
+témoin sans germe reste nul (le défaut multiplie δ) ; masque 0 : pas de seuil. **Conséquence** : toute vraie mer à 25 cm (houle de plus
+de 12,5 cm) sort du domaine où le mode relatif a été éprouvé — il est inutilisable en l'état hors du banc. Déclencheur : **avant
+C7d-3b** (le mode relatif sur la carte) et toute bande relative (C7d-3c, C7d-3d). Premier suspect : l'échantillonnage de B aux faces que
+sa surface traverse. [Preuve](../validation/MER-S369.md) §7.

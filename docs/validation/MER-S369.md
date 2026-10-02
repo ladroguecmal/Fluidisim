@@ -149,3 +149,57 @@ seule leur somme — le terme croisé entier — porte la croissance ; ce n'est 
 gradient `∂(U·u′)` n'est absorbé par la projection qu'à l'intérieur) ; l'intégration en temps du couplage — le taux ne dépend pas du pas
 (S369) ; et la question de fond : une interaction physique d'ondes courtes portées par une houle, que le mode relatif linéaire laisse sans
 borne. Un témoin à 12,5 cm (≈ 2 h de calcul) avant toute conclusion sur la maille.
+
+## 7. S435 — la question physique : où croît δ, et vers quoi quand la maille s'affine
+
+2026-10-02, au poste, sans carte. C7d-3a, suite. Critères écrits avant (`notes/EN-COURS.md`, S435 P1) : **Benjamin-Feir** si (a) à
+25 cm, plus de la moitié de l'énergie de δ en fin de calcul tombe dans la bande instable `|k − K| ≤ 2√2·ak·K`, et (b) le taux
+extrapolé à maille nulle est entre la moitié et le double de `ω(ak)²/2` ; **numérique** si l'énergie est d'abord sous `4·dx`, ou si la
+limite est sous 0,01 s⁻¹ ; autrement, indécis.
+
+**Reproduire** : `MER_RELATIF=7 MER_GERME=0.001 MER_DUREE=95 MER_TRACE=1 MER_SPECTRE=1 … transfert_oriente -- mer <dx> <houle>` ;
+`MER_SPECTRE` donne le spectre de δ hors des éponges en fin de calcul et, dans la trace, l'amplitude de δ dans la bande et sous `4·dx`
+chaque seconde ; `MER_PROLONGEMENT=<m>` allonge le domaine (10 m par défaut, au bit). Le taux est celui de l'amplitude de la bande,
+ajusté de 35 à 59 s.
+
+| houle 7,5 cm (`ak` = 0,118, `ω(ak)²/2` = 0,0273 s⁻¹) | taux de la bande (s⁻¹) | part de la bande en fin | sous `4·dx` | pic `k/K` |
+|---|---:|---:|---:|---:|
+| 50 cm | 0,093 | 0,90 | 0,003 | 1,18 |
+| 31,25 cm | 0,112 | 0,99 | 0,003 | 0,97 |
+| 25 cm | 0,106 (δ max : 0,1151, le témoin d'A320 au chiffre près) | **0,996** | 0,001 | 0,96 |
+| 15,625 cm | 0,084 | 0,99 | 0,000 | 0,97 |
+| 25 cm, domaine allongé de 40 m | δ max : 0,116 | — | — | — |
+
+37,5 cm ne se mesure pas : la surface au repos n'y tombe pas sur une face, le point fixe se perd dès 2 s. À 12,5 cm, un autre défaut
+(ci-dessous) contamine la mesure. Amplitude, à 25 cm (taux maximal de δ sur 20 s, δ < 5 cm) : 2,5 cm, rien en 95 s ; 5 cm, 0,074 ;
+7,5 cm, 0,128 ; 10 cm, 0,162 (le domaine refuse à 61 s).
+
+**Verdict, tel qu'écrit.** (a) **tenu** : δ croît **à la longueur d'onde de la houle** — 99 % de son énergie dans la bande, rien à
+l'échelle de la maille. (b) : l'ajustement en `dx` sur les trois mailles les plus fines donne **0,056 s⁻¹ à maille nulle, 2,05 fois**
+Benjamin-Feir, juste hors de la fourchette : **indécis**. Et **pas numérique** : rien sous `4·dx`, une limite bien au-dessus de 0,01.
+Le domaine allongé ne change rien : pas une boucle par les bords.
+
+**Ce que cela dit.** A320 n'est pas une instabilité de grille : l'advection antisymétrique, qui borne l'énergie des modes de maille,
+**n'est plus la piste**. C'est une instabilité de modulation de la houle portée par δ, d'ordre `ω(ak)²`, dont le taux baisse d'un
+cinquième de 25 à 15,6 cm. Une raison de fond la rend attendue : δ est linéarisé autour d'**Airy**, qui n'est solution qu'au premier
+ordre ; l'opérateur de δ autour de B est donc faux en `(ak)²` — l'ordre même de Benjamin-Feir. Le taux d'une modulation de δ autour
+d'Airy n'a de sens que par son ordre de grandeur. **Le critère de C7d-3a était mal posé** : sous 7,5 cm, une vraie houle module à
+0,027 s⁻¹ ; « < 0,01 » y est hors d'atteinte de toute physique. À réécrire avant la prochaine mesure, rapporté à Benjamin-Feir. En eau
+profonde, la houle de Stokes ne diffère d'Airy, jusqu'au troisième ordre, que par sa surface (harmoniques 2 et 3) et sa fréquence
+`Ω(1 + (ak)²/2)` — son potentiel reste celui d'Airy : un essai de B cohérent au second ordre, pour une composante, est à portée.
+
+### Un second défaut : la surface de B franchit un centre de maille (A324)
+
+À 12,5 cm sous 7,5 cm de houle, δ saute de 1 à 10 mm **en une seconde**, en pics isolés, loin du germe, à l'échelle de la maille
+(54 % de l'énergie sous `4·dx`). Le témoin, sans germe, reste nul : le défaut multiplie δ. **Le seuil est net** :
+
+| 12,5 cm, germe 1 mm, à 1 s | δ max | sous `4·dx` | pic `k/K` |
+|---|---:|---:|---:|
+| houle 6 cm, masque 7 | 1,1 mm | 0,000 | 2,0 (le germe) |
+| houle 6,5 cm, masque 7 | **8,6 mm** | **0,73** | **10** |
+| houle 6 cm · 6,5 cm, masque 0 | 6,6 · 8,1 mm | 0,04 · 0,05 | 2,0 · 2,0 |
+
+6,25 cm est **la demi-maille** : au-delà, la surface de B franchit les centres de mailles de δ. Le mode relatif seul y est sensible.
+Toute vraie mer à 25 cm a des houles de plus de 12,5 cm : **le mode relatif est inutilisable en l'état hors du banc** — cela précède
+C7d-3b (le mode relatif sur la carte). Non attribué ; l'échantillonnage de B aux faces que sa surface traverse est le premier suspect.
+
