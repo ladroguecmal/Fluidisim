@@ -115,3 +115,37 @@ Une composante, une tranche de deux rangées, quatre amplitudes ; la croissance 
 Bernoulli n'est pas essayée. Le fond plat
 et une surface qui ne franchit pas de centre de maille rendent le point fixe exact ; ailleurs, l'erreur de surface est
 interpolée entre deux colonnes (ordre `dx²`). La production GPU (`delta3d_step.wgsl`) garde le pas de S297.
+
+## 6. S434 — la forme de Bernoulli éprouvée (C7d-3a) : elle ne suffit pas
+
+2026-10-02, au poste, sans carte. **C7d-3a** de la campagne ([APIC-CARTE-S416](APIC-CARTE-S416.md) §22.3) : A320, le remède nommé par
+ADR-198 D4.
+
+**Reproduire** : `MER_RELATIF=7 MER_GERME=0.001 MER_DUREE=95 MER_TRACE=1 … transfert_oriente -- mer 0.25 <houle>`, plus
+`MER_BERNOULLI=1` (la forme), `MER_LW=1` (le terme de second ordre d'ADR-209, actif en production), `MER_BERNOULLI_ESSAI=1|2` (G seule,
+R seule — des amputations d'essai) ; `mer_paquet` pour le paquet. Essai `zero_delta_stays_zero_with_the_bernoulli_cross_terms_s434`.
+
+**La forme** (`Volume3::set_cross_bernoulli`, éteinte par défaut) : B étant irrotationnel, les termes croisés de la face d'axe `a`,
+`U·∇u′_a + u′·∇U_a`, s'écrivent `∂_a(U·u′) + Σ_b U_b (∂_b u′_a − ∂_a u′_b)` ; **G**, la différence de `φ = U·u′` entre les deux mailles de
+la face (un gradient discret exact) ; **R**, la partie rotationnelle. Aux faces du sommet et dans un ensemble épars, l'ancienne forme.
+δ nul reste nul au bit sous B seul avec elle.
+
+| 25 cm, masque 7, germe de 1 mm (sauf mention) | taux 35–59 s (s⁻¹) | δ en fin |
+|---|---:|---:|
+| houle 7,5 cm — témoin (S433, la forme de S369) | 0,115 | 32 mm à 59 s |
+| — **Bernoulli** | **0,097** (60–95 s : 0,066) | 17,6 cm à 94 s |
+| — le terme d'ADR-209 seul | 0,114 | 20 cm à 94 s |
+| — Bernoulli et ADR-209 | 0,0955 | 17,7 cm à 94 s |
+| — **G seule** · **R seule** (amputations) | **−0,005 · −0,005** | 0,8 · 0,9 mm à 59 s |
+| houle 5 cm — Bernoulli | 0,009 ; 60–95 s : **0,050** | 6,4 mm (S369 sans : 12,7) |
+| paquet de l'ordre C, houle 5 cm — Bernoulli | — | 12,8 cm : **6,4 fois** le paquet (S369 : 7,4) |
+| 12,5 cm, houle 7,5 cm — Bernoulli | arrêté à 35 s (≈ 40 min) | 16 mm, un saut à 11 mm dès 5 s, sans témoin à cette maille |
+
+**Les critères de C7d-3a** (germe : taux < 0,01 s⁻¹ sur 95 s ; paquet : au plus 1,5 fois) : **manqués**. La forme freine A320 de 15 à
+20 %, pas davantage. **Ce que cela dit.** (1) Le terme de second ordre d'ADR-209 n'y fait rien : A320 **n'est pas** l'instabilité FTCS
+d'A321. (2) **La bisection réfute l'hypothèse de S369** : ni la partie gradient seule ni la partie rotationnelle seule ne croissent ;
+seule leur somme — le terme croisé entier — porte la croissance ; ce n'est pas un défaut de forme d'un des deux termes. **Restent à
+éprouver** : la forme antisymétrique (conservative de l'énergie) de l'advection de `u′` par `U` ; la condition dynamique de surface (le
+gradient `∂(U·u′)` n'est absorbé par la projection qu'à l'intérieur) ; l'intégration en temps du couplage — le taux ne dépend pas du pas
+(S369) ; et la question de fond : une interaction physique d'ondes courtes portées par une houle, que le mode relatif linéaire laisse sans
+borne. Un témoin à 12,5 cm (≈ 2 h de calcul) avant toute conclusion sur la maille.

@@ -4436,6 +4436,10 @@ cisaillement `u'·∇U`** : lui seul retiré, plus rien ([preuve](../validation/
 gradient `∇(U·u')` qu'ils sont pour deux écoulements irrotationnels. Remède à éprouver d'abord : cette forme de
 Bernoulli. Déclencheur : la prochaine session du lot 2.
 
+*Note du 2026-10-02, S434* ([MER-S369](../validation/MER-S369.md) §6) : la forme de Bernoulli (le remède nommé) éprouvée — elle ne
+freine la croissance que de 15 à 20 % (0,115 → 0,097 s⁻¹) ; le terme d'ADR-209 n'y fait rien ; ni sa partie gradient ni sa partie
+rotationnelle seule ne croissent, leur somme oui : **l'hypothèse ci-dessus est réfutée**. A320 reste ouverte ; elle bloque C7d-3a.
+
 **A321 — S390, 2026-09-26 (sévérité 3, **corrigée S391**). À 30 Hz, la scène de la porte B explose en 24 à 40 s, quel que soit le
 solveur de pression.** Pas de 33,333 ms, `Config::review`, 1 800 pas : la surface publiée cesse d'être finie au pas 930 avec
 Jacobi 512 et au pas 1 050 avec la multigrille à 24 cycles — deux projections **convergées** (résidu relatif ≈ 10⁻⁷) —, au

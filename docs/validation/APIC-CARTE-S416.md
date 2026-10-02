@@ -987,3 +987,10 @@ relative ; C7d-3c en référence avant la carte (ADR-175 D1). **C7d-3a et C7d-3c
 - La surface de la bande lue sur la surface **totale** (B + δ) ; le fond de la bande, relatif à elle — à écrire en C7d-3c.
 - La bande dans un domaine épars et à travers un changement de niveau (C8) — après C7d-3d.
 - **A322** (10 cm à 30 Hz) reste avant C10, indépendante de C7d.
+
+### 22.5 C7d-3a, premier essai : non reçu (S434)
+
+La forme de Bernoulli des termes croisés, éprouvée en référence ([MER-S369](MER-S369.md) §6) : elle garde δ nul au bit sous B seul, mais
+ne freine A320 que de 15 à 20 % (0,115 → 0,097 s⁻¹ sous la houle de 7,5 cm ; le paquet à 6,4 fois son amplitude) ; le terme d'ADR-209
+n'y fait rien ; la bisection montre que ni la partie gradient ni la partie rotationnelle seule ne croissent — leur somme, oui.
+**C7d-3a n'est pas reçu** ; l'ordre de §22.3 tient (rien de la bande relative avant lui). Les pistes suivantes sont dans MER-S369 §6.
