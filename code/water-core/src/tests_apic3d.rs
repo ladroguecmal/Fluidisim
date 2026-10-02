@@ -1325,3 +1325,42 @@ fn the_step_stops_at_each_stage_s416() {
     assert_eq!(start.len(), 10 * 3 * 8 + 1);
     assert_eq!(*start.last().unwrap() as usize, order.len());
 }
+
+/// **S444 (C7d-3c, c1, ADR-214)** — `LinearSwell` complet : le gradient exact contre des différences finies, sans divergence ni
+/// rotationnel, et la pression dynamique cohérente avec `∂U/∂t = −∇p_dyn/ρ` (ω² = g·k).
+#[test]
+fn linear_swell_gradient_and_pressure_s444() {
+    use super::LinearSwell;
+    let (g, rho) = (9.81f32, 1025f32);
+    let k = core::f32::consts::TAU / 4.;
+    let b = LinearSwell { amplitude: 0.05, wavenumber: k, omega: (g * k).sqrt(), phase: 0.3, mean_level: 2.0 };
+    let h = 1e-3f32;
+    let mut pire = (0f32, 0f32, 0f32, 0f32);
+    for &(x, z, t) in &[(0.3f32, 1.7f32, 0.2f64), (1.1, 1.95, 1.3), (2.9, 1.2, 2.7), (3.7, 2.0, 0.05)] {
+        let gr = b.velocity_gradient(x, z, t);
+        let fx = |dx: f32, dz: f32| b.velocity(x + dx, z + dz, t);
+        let (up, um, wp, wm) = (fx(h, 0.), fx(-h, 0.), fx(0., h), fx(0., -h));
+        let echelle = gr.iter().flatten().fold(0f32, |m, v| m.max(v.abs()));
+        for i in [0usize, 2] {
+            let ddx = (up[i] - um[i]) / (2. * h);
+            let ddz = (wp[i] - wm[i]) / (2. * h);
+            pire.0 = pire.0.max((ddx - gr[i][0]).abs() / echelle).max((ddz - gr[i][2]).abs() / echelle);
+        }
+        pire.1 = pire.1.max((gr[0][0] + gr[2][2]).abs() / echelle);
+        pire.2 = pire.2.max((gr[0][2] - gr[2][0]).abs() / echelle);
+        // ∂U/∂t = −∇p_dyn/ρ, composantes x et z.
+        let dt = 1e-4f64;
+        let (a, bm) = (b.velocity(x, z, t + dt), b.velocity(x, z, t - dt));
+        let p = |dx: f32, dz: f32| b.dynamic_pressure(x + dx, z + dz, t, rho, g);
+        let dpx = (p(h, 0.) - p(-h, 0.)) / (2. * h);
+        let dpz = (p(0., h) - p(0., -h)) / (2. * h);
+        let acc = ((a[0] - bm[0]) as f64 / (2. * dt)) as f32;
+        let acz = ((a[2] - bm[2]) as f64 / (2. * dt)) as f32;
+        let ref_acc = (dpx / rho).abs().max(dpz / rho).max(1e-6);
+        pire.3 = pire.3.max((acc + dpx / rho).abs() / ref_acc).max((acz + dpz / rho).abs() / ref_acc);
+    }
+    println!("S444 LinearSwell : gradient {:.1e}, divergence {:.1e}, rotationnel {:.1e}, quantité de mouvement {:.1e}", pire.0, pire.1, pire.2, pire.3);
+    assert!(pire.0 <= 1e-3 && pire.1 <= 1e-4 && pire.2 <= 1e-4 && pire.3 <= 1e-3, "{pire:?}");
+    assert!((b.elevation(0.3, 0.2) - 0.05 * ((k * 0.3 - (g * k).sqrt() * 0.2 + 0.3) as f64).cos() as f32).abs() < 1e-6);
+}
+

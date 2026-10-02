@@ -81,8 +81,11 @@ Suite du cœur, zéro avertissement.
 ### Plan
 
 - [x] **P1** — ADR-214 ; jeton, plan seul.
-- [ ] **P2** — `LinearSwell` complet ; essais.
+- [x] **P2** — `LinearSwell` complet ; essais.
 - [ ] **P3** — `Apic3` relatif, sans zone ; essais ; mesures (3), (4).
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `LinearSwell::elevation`, `velocity_gradient` (exact), `dynamic_pressure` ; essai `linear_swell_gradient_and_pressure_s444` :
+  gradient 8,1·10⁻⁵ des différences finies, divergence et rotationnel nuls, quantité de mouvement 7,6·10⁻⁴ — (1) tenu.
+

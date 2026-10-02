@@ -1589,6 +1589,34 @@ impl LinearSwell {
         let (s, c) = theta.sin_cos();
         [(amp * c) as f32, 0., (amp * s) as f32]
     }
+
+    /// **S444 (C7d-3c, c1)** — la phase `θ` et l'amplitude locale `a·e^{kζ}`, en `f64`.
+    fn local(&self, x: f32, z: f32, t_s: f64) -> (f64, f64) {
+        let (a, k, w) = (self.amplitude as f64, self.wavenumber as f64, self.omega as f64);
+        let theta = k * x as f64 - w * t_s + self.phase as f64;
+        (theta, a * (k * (z as f64 - self.mean_level as f64)).exp())
+    }
+
+    /// S444 : l'élévation de B, `η_B = a·cos θ`, m (au-dessus du niveau moyen).
+    pub fn elevation(&self, x: f32, t_s: f64) -> f32 {
+        let (theta, _) = self.local(x, self.mean_level, t_s);
+        (self.amplitude as f64 * theta.cos()) as f32
+    }
+
+    /// S444 : le gradient **exact** de la vitesse de B, `g[i][j] = ∂u_i/∂x_j`, s⁻¹ — irrotationnel et sans divergence.
+    pub fn velocity_gradient(&self, x: f32, z: f32, t_s: f64) -> [[f32; 3]; 3] {
+        let (theta, local) = self.local(x, z, t_s);
+        let (s, c) = theta.sin_cos();
+        let g = local * self.omega as f64 * self.wavenumber as f64;
+        [[(-g * s) as f32, 0., (g * c) as f32], [0.; 3], [(g * c) as f32, 0., (g * s) as f32]]
+    }
+
+    /// S444 : la pression dynamique de B, `p_dyn = ρ·g·a·e^{kζ}·cos θ`, Pa — la pression totale est `−ρ·g·ζ + p_dyn`. À l'ordre
+    /// linéaire, `∂U/∂t = −∇p_dyn/ρ` quand `ω² = g·k`.
+    pub fn dynamic_pressure(&self, x: f32, z: f32, t_s: f64, rho: f32, gravity: f32) -> f32 {
+        let (theta, local) = self.local(x, z, t_s);
+        (rho as f64 * gravity as f64 * local * theta.cos()) as f32
+    }
 }
 
 /// **S408 — le critère de bascule** (C6a) : quelles colonnes d'un `Apic3` sont portées par les particules. Une colonne de la
