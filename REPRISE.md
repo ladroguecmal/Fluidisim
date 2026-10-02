@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 00:48 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 07:06 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S432 — C7d-2** au poste : le seuil de vitesse propre, sa relâche et le fond B dans la décision de la carte
 Dernière session : S431 — physique : **C7d-1 reçu** ([preuve](docs/validation/APIC-CARTE-S416.md) §21.3) — la vitesse propre de δ (`u − U_B`) avec relâche, entrée 0,3 / relâche 0,15 m/s : sur la vague de Chen, 0,64 de la fenêtre au retournement (forme seule 0,62), aucun retour rapide, rien sous une houle calme. Avant : S430, la déformation propre écartée
 Session suivante : **S432 — C7d-2** au poste ([preuve](docs/validation/APIC-CARTE-S416.md) §21.3) : le seuil de vitesse propre, sa relâche et le fond B (`LinearSwell`) dans la décision de la bascule sur la carte, qui ne porte encore aucun critère d'écoulement ; reçu si les décisions forcées sont identiques à la référence avec fond B (le banc de S420) et C7e tenu (pas + bascule ≤ 2,1 ms au p99 sur B10) ; puis la conception de C7d-3 (le mode relatif sur la carte, A320) ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 19 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
