@@ -78,9 +78,10 @@ exacte, `φ` fini jusqu'à `t·√(g/D)` = 4, le coût d'un pas de la carte publ
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le lot des registres.
+- [x] **P2** — le lot des registres.
 - [ ] **P3** — la conception de C10.
 - [ ] **P4** — C10-1 : B10 en domaine entier ; mesures (1) à (3) ; images.
 - [ ] **P5** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — feuille de route, liste, file active pour S451–S453 (la surface continue reçue, R37, et en direct ; « A322 avant C10 » retiré : levée en S442) ; `Registres` : dernier lot S454, le prochain au plus tard en S457.
