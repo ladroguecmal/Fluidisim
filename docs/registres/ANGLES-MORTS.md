@@ -4488,4 +4488,4 @@ d'onde de la houle). **Le seuil est la demi-maille** (6,25 cm) : au-delà, la su
 témoin sans germe reste nul (le défaut multiplie δ) ; masque 0 : pas de seuil. **Conséquence** : toute vraie mer à 25 cm (houle de plus
 de 12,5 cm) sort du domaine où le mode relatif a été éprouvé — il est inutilisable en l'état hors du banc. Déclencheur : **avant
 C7d-3b** (le mode relatif sur la carte) et toute bande relative (C7d-3c, C7d-3d). Premier suspect : l'échantillonnage de B aux faces que
-sa surface traverse. [Preuve](../validation/MER-S369.md) §7.
+sa surface traverse. Parente d'A297 (la hauteur de δ discontinue au passage d'un centre de maille). [Preuve](../validation/MER-S369.md) §7.

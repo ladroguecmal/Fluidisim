@@ -18199,3 +18199,16 @@ rotationnelle) ; δ nul reste nul au bit (un essai). **Mesuré** : la forme ne f
 **l'hypothèse de S369 est réfutée**. C7d-3a **non reçu** ; A320 annotée. Un calcul à 12,5 cm arrêté (trop long, sans témoin).
 Suite **757**, zéro avertissement. **Rituel.** Maillons **22** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel.
 Suivant : **C7d-3a** — l'advection antisymétrique de `u′` par `U`, la condition de surface, la question physique.
+
+## S435 — 2026-10-02 — physique : A320, la question physique ; A324
+
+**Entrée.** *« Continue »* — C7d-3a, A320. **Fait** ([preuve](../docs/validation/MER-S369.md) §7) : `MER_SPECTRE` (le spectre de δ,
+la bande de Benjamin-Feir, la part sous `4·dx`, tracés chaque seconde), `MER_PROLONGEMENT`. **Mesuré**, houle de 7,5 cm, germe de
+1 mm : δ croît **à la longueur d'onde de la houle** (99 % de son énergie dans la bande, rien sous `4·dx`) ; taux 0,093 · 0,112 · 0,106 ·
+0,084 s⁻¹ à 50 · 31,25 · 25 · 15,6 cm ; 0,056 extrapolé à maille nulle, **2,05 fois** Benjamin-Feir — indécis, tel qu'écrit ; pas
+numérique ; le domaine allongé n'y change rien. A320 est une modulation d'ordre `ω(ak)²`, l'ordre où δ, linéarisé autour d'Airy, est
+faux : l'advection antisymétrique n'est plus la piste ; **le critère « < 0,01 s⁻¹ » de C7d-3a était mal posé** (une vraie houle de
+7,5 cm module à 0,027). **Trouvé en route, A324** (sévérité 3) : en mode relatif, quand la surface de B franchit un centre de maille
+(houle de plus d'une demi-maille), δ est amplifié huit fois en une seconde à l'échelle de la maille — seuil net entre 6 et 6,5 cm à
+12,5 cm. Suite **757**, zéro avertissement. **Rituel.** Maillons **23** — justifié : la priorité du solveur (S406) ; 4.19 reste
+partiel. Suivant : **A324**, puis C7d-3a (le critère rapporté à Benjamin-Feir, B de Stokes).

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S435 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, A320
+Session : S435 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, A320
 ([preuve](../docs/validation/MER-S369.md) §6), les pistes restantes.
 
 **Ce que la session trouve en entrant.** La forme de Bernoulli ne freine A320 que de 15 à 20 % (S434) ; la bisection réfute un
@@ -91,7 +91,7 @@ dans cette session sans un critère écrit avant.
 - [x] **P2** — `MER_SPECTRE` au banc.
 - [x] **P3** — mesures : le spectre à 25 cm ; le taux à quatre mailles ; la conclusion selon les critères.
 - [x] **P4** — preuve (MER-S369 §7) ; A320 ; registres ; suite.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — `MER_SPECTRE=1` : le spectre de δ hors des éponges en fin de calcul (part dans la bande de Benjamin-Feir, part sous `4·dx`).
@@ -108,3 +108,4 @@ dans cette session sans un critère écrit avant.
   `k` = 10 K) — **la demi-maille, 6,25 cm** : la surface de B franchit un centre de maille de δ. Masque 0 : pas de seuil. Le témoin
   (sans germe) reste nul. Nouvel angle mort, **A324** ; il précède le mode relatif sur la carte (C7d-3b).
 - **P4** — MER-S369 §7, APIC-CARTE §22.6 ; A320 annotée, **A324** ouverte ; index, liste, feuille de route ; suite 757, zéro avertissement.
+- **P5** — journal ; jeton libre ; maillons 23 (justifiés : S406) ; suivant : S436, A324, puis C7d-3a.
