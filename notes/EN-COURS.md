@@ -81,7 +81,15 @@ le pas de S297 tant que C7d-3a n'est pas reçu.
 ### Plan
 
 - [x] **P1** — jeton, plan seul ; l'arbitrage inscrit.
-- [ ] **P2** — `RELATIF` au banc d'A321 ; le témoin ; le mode relatif ; critères.
+- [x] **P2** — `RELATIF` au banc d'A321 ; le témoin ; le mode relatif ; critères.
 - [ ] **P3** — preuve ; A322 ; registres ; rituel.
 
 ### Notes de reprise
+- **P2** — `--delta3d-a321` : `RELATIF=1`. `MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8`, 30 Hz. **Témoin** : explose au pas
+  **1 860** (62 s), comme en S409 — (1) tenu ; avant, `max_u` ≤ 1,92 m/s, part de maille de `w` > 0,05 trois secondes sur 60 (0,115
+  au plus). **Mode relatif** : **tient 120 s** (3 600 pas) ; `max_u` ≤ **1,25 m/s** ; divergence ≤ 1,4·10⁻³, résidu ≤ 6,8·10⁻⁵ (le
+  témoin : 2,3·10⁻³ et 8,8·10⁻⁵) — (3) tenu ; mais **la part de l'échelle de la maille de `w` dépasse 0,05 pendant 65 secondes sur
+  120** (jusqu'à 0,62 à 67 s, `max_u` 0,61 m/s sur une face `w` près de la surface) — (2) **manqué**. Des bouffées transitoires à la
+  surface, qui retombent en quelques secondes. **A322 non levée telle qu'écrite** : l'explosion disparaît sous le mode relatif ;
+  apparaissent des bouffées à l'échelle de la maille, à 10 cm, que le pas de S297 n'a pas avant d'exploser.
+
