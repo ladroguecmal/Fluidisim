@@ -83,9 +83,22 @@ du cœur qui garde le cas. Si la cause n'est pas trouvée, elle est écrite tell
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — localisation (instrument, bisection).
+- [x] **P2** — localisation (instrument, bisection).
 - [ ] **P3** — correction, mesures, critères.
 - [ ] **P4** — essai ; suite ; preuve ; A324 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — banc `a324_franchissement` (20 m à 12,5 cm, pas à pas, témoin à côté). **Correction de S435** : le banc `mer` ne fait pas
+  avancer son témoin en mode germe (seulement avec le paquet) — son zéro ne prouvait rien. **Ici, le témoin ne reste pas nul** sous
+  6,5 cm (1 mm en 50 ms, 1 cm en 0,3 s, des jets de 0,2 m/s) ; sous 6 cm, nul au bit. A324 est donc **une rupture du point fixe** du
+  mode relatif. Bits d'essai 8, 16, 32 : rien ne change ; 64 (la pression croisée) : refus au premier pas. **La cause** : le fantôme
+  latéral (`prepare_background3`, entre une colonne mouillée et une sèche au même étage — il n'existe que si la surface franchit un
+  centre entre elles) retranche l'erreur de B **interpolée entre les colonnes**, alors que ce qu'il corrige est la pression de B **au
+  point de surface** : sous B seul, un reste d'ordre `dx²` divisé par `θ`. Essai 1 (l'erreur prise au point de B) : oubliait le terme
+  `ρg(z − repos)` de `ghost_side3` — pire. Essai 2 (avec lui) : le témoin nul au bit, mais le germe à 4,6 mm sous 6,5 cm — la bascule
+  entre deux formules quand δ déplace le franchissement. Essai 3 (le point de B prolongé, continu) : 6,9 mm — le point de franchissement
+  se divise par la pente de B, nulle aux crêtes : c'est là que 6,5 cm franchit. **Essai 4, retenu** : en mode relatif, le fantôme latéral
+  interpole entre les deux colonnes ce que porte leur fantôme vertical (`ρgη′ + ghost_bg_up`, nul au bit à δ nul) — il ne lit plus la
+  pression de B au point latéral. `Volume3::set_lateral_own_ghost`, éteint par défaut ; `MER_A324`, `A324_PROPRE`.
+

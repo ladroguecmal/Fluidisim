@@ -1966,6 +1966,9 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     // `MER_BERNOULLI=1` (S434, C7d-3a) : les termes croisés sous la forme de Bernoulli.
     let bernoulli = std::env::var("MER_BERNOULLI").is_ok();
     v.set_cross_bernoulli(bernoulli);
+    // `MER_A324=1` (S436) : l'erreur de B aux fantômes latéraux prise au point de surface de B.
+    let a324 = std::env::var("MER_A324").is_ok();
+    v.set_lateral_own_ghost(a324);
     // `MER_BERNOULLI_ESSAI=1|2` (S434) : G seule, R seule — des amputations, pour la bisection d'A320.
     v.set_cross_bernoulli_trial(std::env::var("MER_BERNOULLI_ESSAI").ok().and_then(|x| x.parse().ok()).unwrap_or(0));
     // `MER_LW=1` (S434) : le terme de second ordre de l'advection (ADR-209, A321), actif par défaut dans la production.
@@ -1991,6 +1994,7 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         .map_err(|e| format!("témoin {e:?}"))?;
     temoin.set_relative_background(relatif).map_err(|e| format!("relatif {e:?}"))?;
     temoin.set_cross_bernoulli(bernoulli);
+    temoin.set_lateral_own_ghost(a324);
     if lax_wendroff {
         temoin.enable_advection_correction();
     }

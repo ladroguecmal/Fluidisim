@@ -119,6 +119,8 @@ pub struct Volume3 {
     cross_bernoulli: bool,
     /// S434 — **essais seulement** : 1, la partie gradient seule (G) ; 2, la partie rotationnelle seule (R) ; 0, les deux.
     cross_bernoulli_trial: u8,
+    /// **S436, A324 — l'erreur de B aux fantômes latéraux, prise au point de surface de B** (`set_lateral_own_ghost`).
+    lateral_own_ghost: bool,
     /// **S391, A321 — le terme de second ordre de l'advection** (ADR-209), éteint par défaut : le pas d'avant au bit.
     advection_correction: bool,
     /// L'erreur de pression de B à sa propre surface, par colonne (S369) : `ρ·g·η_B − p_B(repos + η_B)`.
@@ -260,6 +262,7 @@ impl Volume3 {
             relative_background: 0,
             cross_bernoulli: false,
             cross_bernoulli_trial: 0,
+            lateral_own_ghost: false,
             advection_correction: false,
             ghost_bg_error: vec![0.; cols],
             pressure_base: vec![0.; cells],

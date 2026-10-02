@@ -109,6 +109,16 @@ impl Volume3 {
         self.cross_bernoulli_trial = part;
     }
 
+    /// **S436 — A324.** Aux faces latérales entre une colonne mouillée et une sèche (la surface franchit un centre de maille
+    /// entre elles), le fantôme relatif retranche l'erreur de B **interpolée entre les deux colonnes** ; or la valeur qu'il
+    /// corrige est la pression de B **au point de surface** sur la face. Les deux ne coïncident pas : sous B seul, δ nul reçoit
+    /// un reste (S436 : 1 mm en 50 ms, des jets de 0,2 m/s, dès que la houle dépasse la demi-maille). Allumé, et là où la surface
+    /// de B seule franchit elle aussi ce centre entre ces deux colonnes, l'erreur retranchée est la même expression prise au
+    /// point de surface de B : à δ nul, le fantôme est nul au bit. Ailleurs, l'interpolation d'avant. Éteint, le défaut : au bit.
+    pub fn set_lateral_own_ghost(&mut self, on: bool) {
+        self.lateral_own_ghost = on;
+    }
+
     /// S434 : la vitesse de δ au centre de la maille `(i, j, k)` (moyennes de faces), et celle de B (moyenne des deux faces `w`).
     fn centre_velocities3(&self, bg: &BackgroundFaces3<'_>, i: usize, j: usize, k: usize) -> ([f32; 3], [f32; 3]) {
         let d = [
@@ -194,7 +204,18 @@ impl Volume3 {
                         let theta = ((wet - (k as f32 + 0.5) * dx) / (wet - dry))
                             .max(crate::delta_projection::SURFACE_THETA_MIN);
                         let mut value = -(s.p_dyn + sign * (theta - 0.5) * dx * s.grad_p_dyn[axis]);
-                        if surface {
+                        // S436 (A324) : en mode relatif, le fantôme latéral ne lit plus la pression de B au point de surface —
+                        // la différence de deux grandeurs presque égales, divisée par la pente de B, qui s'annule aux crêtes.
+                        // Il interpole entre les deux colonnes ce que porte leur fantôme vertical : `ρ·g·η′` et le reste de B
+                        // (`ghost_bg_up`, nul au bit à δ nul). `ghost_side3` y ajoute `ρ·g·(z − repos)` : on le retranche.
+                        if surface && self.lateral_own_ghost {
+                            let (cw, cd) = if left { (self.col(x, y), self.col(i, j)) } else { (self.col(i, j), self.col(x, y)) };
+                            let up = |c: usize| {
+                                self.rho * self.g_eff * ((self.eta[c] - self.rest) - self.eta_roundoff[c]) + self.ghost_bg_up[c]
+                            };
+                            let (uw, ud) = (up(cw), up(cd));
+                            value = (uw + theta * (ud - uw)) - self.rho * self.g_eff * ((k as f32 + 0.5) * dx - self.rest);
+                        } else if surface {
                             // S369 : l'erreur de B au point de surface, interpolée entre la colonne mouillée et
                             // l'autre à la même fraction θ — exacte au bit seulement là où la mouillure de B seul
                             // est déjà celle-ci.
