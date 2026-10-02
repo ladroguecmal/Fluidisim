@@ -62,42 +62,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S438 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, localiser le
-défaut d'A320 près de la surface ([preuve](../docs/validation/MER-S369.md) §9).
+Session : S439 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3b**
+([preuve](../docs/validation/APIC-CARTE-S416.md) §22.3, §22.9), sans la bascule des défauts.
 
-**Ce que la session trouve en entrant.** À 25 cm, sous la houle de 4 m (16 mailles par longueur d'onde), le taux dépend de la place
-du repos dans la maille (0,106 sur une face, 0,036 au centre, sous 7,5 cm) ; sous la houle de 8 m (32 mailles), rien au-delà de
-Benjamin-Feir. **Une hypothèse écartée avant tout code** : une quasi-résonance de triades, ouverte par l'écart entre la dispersion
-discrète de δ et celle, exacte, de B — en eau profonde, les triades sont loin de résonner (un écart d'ordre `Ω/2`) ; quelques pourcents
-de dispersion n'y suffisent pas. **L'hypothèse retenue** : le taux de Benjamin-Feir passe par la réponse liée du second ordre — l'onde
-`2K`, collée à la surface (`e^{2Kz}` : 32 cm sous la houle de 4 m, **à peine plus d'une maille de 25 cm**) ; mal résolue, elle fausse
-le coefficient cubique, et sa valeur dépend de la place de la surface dans la maille. Si c'est cela, **l'excès est une fonction du seul
-nombre de mailles par longueur d'onde de la houle**, `λ_B/dx`.
+**Ce que la session trouve en entrant.** Le pas résident (`viewer/src/delta3d_step.rs`, `delta3d_step.wgsl`, et `couple_columns`,
+`couple_rhs` de `delta3d_background.wgsl`) porte le pas de S297 : le résidu de quantité de mouvement de B dans la prédiction, la
+bande de B entière dans le transport, les fantômes de pression avec l'erreur entière de B. Le mode relatif de la référence
+(`RELATIVE_ALL`, S369, plus le fantôme latéral d'A324, S436) change quatre choses : (1) la prédiction sans le résidu ; (2) la bande moins
+celle de B seul (`own = repos + η_B`) ; (3) le fantôme du haut moins l'erreur de B à sa propre surface ; (4) le fantôme latéral interpolé
+des fantômes verticaux des deux colonnes — au second membre (`couple_rhs`) comme à la correction (`correct`).
 
-**Ce que la session fait.** L'épreuve de cette échelle, sans code nouveau : la houle de **8 m à 50 cm** et celle de **2 m à 12,5 cm**
-(16 mailles par longueur d'onde, comme 4 m à 25 cm), à la même cambrure (`ak` = 0,118), repos sur une face et au centre ; germe à la
-longueur d'onde de la houle.
+**Ce que la session fait.** Une constante de compilation `RELATIVE` dans les deux sources, éteinte par défaut ; des pipelines à part,
+compilés à la demande (`Step3::enable_relative`) — le procédé de S391 : la production garde son code, donc ses bits (L345). Le banc
+`--delta3d-trajectoire` gagne `RELATIF=1` (la référence en `RELATIVE_ALL`, la carte en mode relatif) et `TEMOIN=1` (aucune
+perturbation initiale).
 
-**Critères, écrits avant.** **L'échelle est confirmée** si, aux deux nouvelles paires (16 mailles), le taux sur une face est au moins
-2,5 fois Benjamin-Feir **et** au moins deux fois celui du centre — comme à 4 m et 25 cm. **Réfutée** si l'une des deux paires reste sous
-1,5 fois Benjamin-Feir aux deux places. Autrement, indécis. Confirmée, la suite proposée est un remède de production : ne coupler δ qu'aux
-composantes de B qu'il résout (`λ ≥ 32·dx`), les plus courtes restant portées par B seul — à concevoir et à éprouver, non à décider ici.
+**Critères, écrits avant.** **Reçu si** : (1) **la production au bit** — le banc de trajectoire sans `RELATIF` rend les mêmes lignes
+qu'avant le changement ; (2) **le témoin** — en mode relatif, sans perturbation, sous la mer de S298, la surface publiée et les vitesses
+de la carte restent **nulles au bit** sur tout le banc ; (3) **la trajectoire** — en mode relatif, la carte suit la référence au moins
+aussi bien que le pas de S297 suit la sienne : horizon du millimètre au moins aussi tardif, écart avant l'horizon au plus deux fois
+celui du pas de S297 ; (4) la suite du cœur, zéro avertissement ; l'afficheur compile sans avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — mesures : 8 m à 50 cm, 2 m à 12,5 cm ; deux places ; critères.
-- [x] **P3** — preuve ; A320 ; registres ; suite.
-- [x] **P4** — rituel.
+- [ ] **P2** — la ligne de base du banc de trajectoire (S297).
+- [ ] **P3** — le mode relatif sur la carte : sources, pipelines, banc.
+- [ ] **P4** — mesures ; critères.
+- [ ] **P5** — preuve ; registres ; rituel.
 
 ### Notes de reprise
-- **P2** — `ak` = 0,118, germe de 1 mm à `2K`, masque 7, 95 s ; taux de la bande 35–59 s (et, entre parenthèses, la phase linéaire) :
-  **8 m à 50 cm** (16 mailles) : face **0,042** (2,2 fois Benjamin-Feir, 0,0193 ; 0,059 en fin), centre 0,010 (0,5 fois) ;
-  **2 m à 12,5 cm** (16 mailles) : face 0,073 — fenêtre saturée, le domaine refuse à 55 s (phase linéaire 10–30 s : **0,207**, 5,4 fois
-  Benjamin-Feir, 0,0386), centre **0,074** (1,9 fois) ; **8 m à 25 cm** (32 mailles), germe à `2K` : 0,0085 · 0,010 (sous
-  Benjamin-Feir). **Verdict, tel qu'écrit : indécis** — ni « au moins 2,5 fois sur une face » à la fenêtre écrite (2,2 ; saturée), ni la
-  réfutation (une paire sous 1,5 fois aux deux places). Le motif « face ≫ centre » tient aux trois paires à 16 mailles (rapport 2,8 à
-  4,2) ; mais l'échelle en `λ_B/dx` n'est pas propre : la houle de 4 m à 12,5 cm (32 mailles, sur une face, 6 cm, S436) montait à
-  3,1 fois. La cause n'est pas trouvée en une session : la règle déclarée en S437 s'applique — le constat s'écrit, C7d-3b vient.
-- **P3** — MER-S369 §10, APIC-CARTE §22.9 ; A320 annotée ; index, liste, feuille de route, questions ; aucun code du cœur changé (suite 758).
-- **P4** — journal ; jeton libre ; maillons 26 (justifiés : S406) ; suivant : S439, C7d-3b.
