@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 09:46 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 10:41 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S436 — A324**, sans carte : la surface de B qui franchit un centre de maille amplifie δ — localiser, corriger
 Dernière session : S435 — physique : **A320, la question physique** ([preuve](docs/validation/MER-S369.md) §7) — δ croît à la longueur d'onde de la houle, pas à celle de la maille ; 0,056 s⁻¹ à maille nulle, deux fois Benjamin-Feir ; le critère de C7d-3a était mal posé ; **A324** ouverte (la surface de B qui franchit un centre de maille amplifie δ). Avant : S434, la forme de Bernoulli
 Session suivante : **S436 — A324**, sans carte ([preuve](docs/validation/MER-S369.md) §7) : en mode relatif, sous une houle de plus d'une demi-maille (12,5 cm, 6,5 cm de houle, `transfert_oriente mer`), δ est amplifié huit fois en une seconde à l'échelle de la maille — localiser (l'échantillonnage de B aux faces que sa surface traverse ; parente d'A297), corriger ; reçu si 6,5 et 7,5 cm à 12,5 cm ne montrent plus rien sous `4·dx` et si le témoin reste nul au bit ; puis **C7d-3a** : le critère réécrit, rapporté à Benjamin-Feir, et l'essai d'un B de Stokes ; puis C7d-3b, C7d-3c, C7d-3d ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 23 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal

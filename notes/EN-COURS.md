@@ -62,50 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S435 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, A320
-([preuve](../docs/validation/MER-S369.md) §6), les pistes restantes.
+Session : S436 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **A324**
+([preuve](../docs/validation/MER-S369.md) §7), avant C7d-3b.
 
-**Ce que la session trouve en entrant.** La forme de Bernoulli ne freine A320 que de 15 à 20 % (S434) ; la bisection réfute un
-défaut de forme. S369 avait noté : taux ≈ `a²`, ≈ 4,5 fois Benjamin-Feir (`ω(ak)²/2`), **plus lent à maille fine** (0,052 → 0,033
-de 25 à 12,5 cm, sous 5 cm), convectif (×e tous les ≈ 18 m). Une extrapolation linéaire en `dx` de ces deux points donne
-≈ 0,014 s⁻¹ — l'ordre de Benjamin-Feir (0,012). **La question physique décide donc de la suite** : si A320 est, au fond, la
-modulation de Benjamin-Feir de la houle portée par δ, plus un excès de discrétisation, le critère « < 0,01 s⁻¹ » de C7d-3a est mal
-posé à 7,5 cm (Benjamin-Feir y vaut 0,027) et l'advection antisymétrique ne viserait que l'excès ; si elle est à l'échelle de la
-maille, elle est numérique et l'advection antisymétrique est la piste.
+**Ce que la session trouve en entrant.** Banc `transfert_oriente mer`, 12,5 cm, masque 7, germe de 1 mm : sous 6 cm de houle, δ à
+1,1 mm après 1 s ; sous 6,5 cm, 8,6 mm, 73 % de l'énergie sous `4·dx`. La demi-maille est le seuil : δ porte sa surface **totale**
+(`surface_total = eta + η_B`, `prepare_background3`) ; la mouillure de ses mailles suit donc la houle, et une maille s'ouvre ou se
+ferme quand la surface de B franchit son centre — sous B seul, les termes relatifs l'annulent au bit ; sous δ non nul, quelque chose
+l'amplifie.
 
-**Ce que la session fait.** (1) `MER_SPECTRE=1` au banc `mer` : en fin de calcul, le spectre de l'élévation de δ hors des éponges
-(transformée discrète, fenêtre de Hann) — l'énergie par bande de nombre d'onde, rapportée à celui de la houle `K`. (2) Le germe de
-1 mm sous 7,5 cm de houle, masque 7, à **50, 37,5, 25 et 12,5 cm** (la dernière en arrière-plan, ≈ 2 h) : le taux de 35 à 59 s et
-sa limite quand la maille s'affine. (3) La conclusion, puis, selon elle, l'advection antisymétrique ou la refonte du critère.
+**Ce que la session fait.** (1) Localiser : à chaque pas, où δ saute, et si c'est sur une colonne dont la mouillure vient de changer ;
+la bisection par les bits d'essai (8 à 64) et par les étapes du pas (prédiction, projection, extrapolation, transport). (2) Corriger
+la cause trouvée, sous un réglage éteint par défaut tant qu'il n'est pas reçu, puis par défaut s'il l'est.
 
-**Critères, écrits avant.** **Benjamin-Feir** si les deux tiennent : (a) à 25 cm, plus de la moitié de l'énergie de δ en fin de
-calcul dans la bande instable de Benjamin-Feir autour de la houle, `|k − K| ≤ 2√2·ak·K` (ak = 0,118 : 0,52 rad/m autour de
-`K` = 1,57) ; (b) le taux extrapolé à maille nulle (ajustement en `dx` sur les trois mailles les plus fines) entre la moitié et le
-double de `ω(ak)²/2` = 0,027 s⁻¹. **Numérique** si l'énergie est d'abord aux longueurs d'onde de moins de `4·dx`, ou si la limite
-est sous 0,01 s⁻¹ (la croissance disparaît avec la maille). Autrement : indécis, écrit tel quel. Rien du pas couplé n'est changé
-dans cette session sans un critère écrit avant.
+**Critères, écrits avant.** **Reçu si** : (1) à 12,5 cm sous 6,5 et 7,5 cm de houle, germe de 1 mm : δ max ≤ 1,5 mm à 1 s et part
+sous `4·dx` ≤ 1 % à 2 s ; (2) le témoin (δ nul) reste nul au bit ; (3) à 25 cm sous 7,5 cm (aucun franchissement), le pas **au bit**
+— le taux d'A320 inchangé (0,1151) ; (4) l'essai `zero_delta_stays_zero…` et la suite du cœur, zéro avertissement ; (5) un essai
+du cœur qui garde le cas. Si la cause n'est pas trouvée, elle est écrite telle quelle (ce qui est écarté, ce qui reste).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `MER_SPECTRE` au banc.
-- [x] **P3** — mesures : le spectre à 25 cm ; le taux à quatre mailles ; la conclusion selon les critères.
-- [x] **P4** — preuve (MER-S369 §7) ; A320 ; registres ; suite.
-- [x] **P5** — rituel.
+- [ ] **P2** — localisation (instrument, bisection).
+- [ ] **P3** — correction, mesures, critères.
+- [ ] **P4** — essai ; suite ; preuve ; A324 ; registres.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2** — `MER_SPECTRE=1` : le spectre de δ hors des éponges en fin de calcul (part dans la bande de Benjamin-Feir, part sous `4·dx`).
-- **P3** — le banc : `spectre_delta` ; avec `MER_SPECTRE`, la trace donne chaque seconde l'amplitude de δ dans la bande et sous `4·dx` ;
-  `MER_PROLONGEMENT` (la longueur du domaine). Germe de 1 mm, houle de 7,5 cm, masque 7, 95 s — **taux de la bande, 35–59 s** :
-  50 cm 0,093 · 31,25 cm 0,112 · 25 cm 0,106 · 15,625 cm 0,084 s⁻¹ ; la part de la bande en fin : 0,90 · 0,99 · 0,996 · 0,99 ; sous
-  `4·dx` : ≤ 0,3 %. 37,5 cm refusé (la surface au repos hors d'une face). **Critère (a) tenu** ; **(b)** : l'ajustement en `dx` sur
-  31,25, 25 et 15,625 cm donne **0,056 s⁻¹ à maille nulle, 2,05 fois** Benjamin-Feir (0,0273) — juste hors de la fourchette écrite
-  (le double) : **indécis**, tel qu'écrit ; pas numérique non plus (rien sous `4·dx`, limite > 0,01). Le domaine allongé de 40 m
-  (`MER_PROLONGEMENT=50`) : même taux (0,116) — pas une boucle par les bords. Amplitude, à 25 cm (taux maximal sur 20 s, δ < 5 cm) :
-  2,5 cm rien · 5 cm 0,074 · 7,5 cm 0,128 · 10 cm 0,162 (puis le domaine refuse à 61 s).
-  **Un second défaut, distinct, à 12,5 cm** : sous 7,5 cm de houle, δ saute de 1 à 10 mm en 1 s, en pics isolés, à l'échelle de la
-  maille (54 % de l'énergie sous `4·dx` à 2 s). Seuil net : houle de 6 cm, rien ; 6,5 cm, ×8 en 1 s (73 % sous `4·dx`, pic à
-  `k` = 10 K) — **la demi-maille, 6,25 cm** : la surface de B franchit un centre de maille de δ. Masque 0 : pas de seuil. Le témoin
-  (sans germe) reste nul. Nouvel angle mort, **A324** ; il précède le mode relatif sur la carte (C7d-3b).
-- **P4** — MER-S369 §7, APIC-CARTE §22.6 ; A320 annotée, **A324** ouverte ; index, liste, feuille de route ; suite 757, zéro avertissement.
-- **P5** — journal ; jeton libre ; maillons 23 (justifiés : S406) ; suivant : S436, A324, puis C7d-3a.
