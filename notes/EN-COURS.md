@@ -62,36 +62,35 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S434 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**
-([preuve](../docs/validation/APIC-CARTE-S416.md) §22.3), A320.
+Session : S435 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, A320
+([preuve](../docs/validation/MER-S369.md) §6), les pistes restantes.
 
-**Ce que la session trouve en entrant.** `extra3` (`delta3d_coupling.rs`) donne à la face d'axe `a` les termes croisés
-`U·∇u′_a + u′·∇U_a` : le premier par **différences centrées** de `u′`, le second avec le **gradient analytique** de B — deux
-discrétisations qui, ensemble, ne forment plus le gradient discret qu'elles sont pour deux écoulements irrotationnels (l'hypothèse de
-S369). Témoin S433 : un germe de 1 mm croît à 0,1151 s⁻¹ sous la houle de 7,5 cm.
+**Ce que la session trouve en entrant.** La forme de Bernoulli ne freine A320 que de 15 à 20 % (S434) ; la bisection réfute un
+défaut de forme. S369 avait noté : taux ≈ `a²`, ≈ 4,5 fois Benjamin-Feir (`ω(ak)²/2`), **plus lent à maille fine** (0,052 → 0,033
+de 25 à 12,5 cm, sous 5 cm), convectif (×e tous les ≈ 18 m). Une extrapolation linéaire en `dx` de ces deux points donne
+≈ 0,014 s⁻¹ — l'ordre de Benjamin-Feir (0,012). **La question physique décide donc de la suite** : si A320 est, au fond, la
+modulation de Benjamin-Feir de la houle portée par δ, plus un excès de discrétisation, le critère « < 0,01 s⁻¹ » de C7d-3a est mal
+posé à 7,5 cm (Benjamin-Feir y vaut 0,027) et l'advection antisymétrique ne viserait que l'excès ; si elle est à l'échelle de la
+maille, elle est numérique et l'advection antisymétrique est la piste.
 
-**Ce que la session fait.** `Volume3::set_cross_bernoulli(bool)`, éteint par défaut (au bit) : pour B irrotationnel
-(`∂_b U_a = ∂_a U_b`), `U·∇u′_a + u′·∇U_a = ∂_a(U·u′) + Σ_b U_b (∂_b u′_a − ∂_a u′_b)`. **G** : la différence, entre les deux mailles
-de la face, de `φ = U·u′` pris aux centres (U des échantillons de B, `u′` des moyennes de faces) — un gradient discret exact, que la
-projection absorbe ; **R** : `Σ_b U_b (∂_b u′_a − ∂_a u′_b)`, les différences de `u′` aux centres le long de `a`, nul quand δ est
-irrotationnel. Aux faces du sommet (une seule maille), l'ancienne forme. Le banc `transfert_oriente mer` : `MER_BERNOULLI=1`.
+**Ce que la session fait.** (1) `MER_SPECTRE=1` au banc `mer` : en fin de calcul, le spectre de l'élévation de δ hors des éponges
+(transformée discrète, fenêtre de Hann) — l'énergie par bande de nombre d'onde, rapportée à celui de la houle `K`. (2) Le germe de
+1 mm sous 7,5 cm de houle, masque 7, à **50, 37,5, 25 et 12,5 cm** (la dernière en arrière-plan, ≈ 2 h) : le taux de 35 à 59 s et
+sa limite quand la maille s'affine. (3) La conclusion, puis, selon elle, l'advection antisymétrique ou la refonte du critère.
 
-**Critères, écrits avant** (C7d-3a, preuve §22.3) : (1) le germe de 1 mm sous la houle de **7,5 cm et de 5 cm**, 25 cm, masque 7 :
-**taux < 0,01 s⁻¹ sur 95 s** ; (2) le même à **12,5 cm** (au moins 7,5 cm de houle) ; (3) **δ nul reste nul** sous B seul avec la forme
-(un essai, sur le modèle de S369) ; (4) le paquet de l'ordre C sous la houle de 5 cm (`mer_paquet`) : δ maximal **au plus 1,5 fois**
-l'amplitude du paquet ; (5) sans la forme, S369 au bit (le témoin) ; suite du cœur, zéro avertissement.
+**Critères, écrits avant.** **Benjamin-Feir** si les deux tiennent : (a) à 25 cm, plus de la moitié de l'énergie de δ en fin de
+calcul dans la bande instable de Benjamin-Feir autour de la houle, `|k − K| ≤ 2√2·ak·K` (ak = 0,118 : 0,52 rad/m autour de
+`K` = 1,57) ; (b) le taux extrapolé à maille nulle (ajustement en `dx` sur les trois mailles les plus fines) entre la moitié et le
+double de `ω(ak)²/2` = 0,027 s⁻¹. **Numérique** si l'énergie est d'abord aux longueurs d'onde de moins de `4·dx`, ou si la limite
+est sous 0,01 s⁻¹ (la croissance disparaît avec la maille). Autrement : indécis, écrit tel quel. Rien du pas couplé n'est changé
+dans cette session sans un critère écrit avant.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `set_cross_bernoulli` ; l'essai du point fixe ; la clé du banc.
-- [x] **P3** — mesures : germes 7,5 et 5 cm à 25 cm, 12,5 cm ; le paquet ; critères.
-- [x] **P4** — suite ; preuve (MER-S369 §6 et APIC-CARTE §22.5) ; A320 ; registres.
-- [x] **P5** — rituel.
+- [ ] **P2** — `MER_SPECTRE` au banc.
+- [ ] **P3** — mesures : le spectre à 25 cm ; le taux à quatre mailles ; la conclusion selon les critères.
+- [ ] **P4** — preuve (MER-S369 §7) ; A320 ; registres ; suite.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2** — `Volume3::set_cross_bernoulli` (éteint par défaut, au bit) : à chaque face prédite entre deux mailles du domaine (pas au sommet, pas dans un ensemble épars), **G** `= (φ(haut) − φ(bas))/dx`, `φ = U·u′` aux centres (U : moyenne des deux faces `w` de B ; `u′` : moyennes de faces), plus **R** `= Σ_{b≠a} U_b (∂_b u′_a − (u′_b(haut) − u′_b(bas))/dx)`, plus le résidu de B s'il n'est pas retiré. Essai `zero_delta_stays_zero_with_the_bernoulli_cross_terms_s434` : δ nul reste nul au bit sous B seul avec la forme ; sur un germe de 1 mm, les deux formes s'écartent (3,3 µm en 1,5 s). L'essai de S369 inchangé. Banc : `MER_BERNOULLI=1`.
-- **P3** — mesures (25 cm, masque 7, germe de 1 mm, 95 s ; taux par moindres carrés sur `ln δ_max`). **Houle de 7,5 cm** : sans rien (S433) 0,115 s⁻¹ de 35 à 59 s ; **Bernoulli** 0,097 (60–95 s : 0,066), δ **17,6 cm** à 94 s ; **la correction d'ADR-209 seule** (`MER_LW=1`, active par défaut en production, absente du banc) 0,114 — **A320 n'est pas l'instabilité FTCS d'A321** ; Bernoulli + ADR-209 0,0955, 17,7 cm. **Houle de 5 cm** : Bernoulli 0,0088 de 35 à 59 s puis **0,050** de 60 à 95 s, 6,4 mm (S369 sans : 0,060, 12,7 mm). **Paquet** de l'ordre C sous 5 cm, Bernoulli : δ max **12,8 cm**, 6,4 fois son amplitude (S369 : 7,4 ; critère : 1,5). **12,5 cm**, Bernoulli, 7,5 cm : arrêté à 35 s (≈ 40 min de calcul), δ 16 mm, avec un saut à 11 mm dès 5 s — sans témoin à cette maille, non interprété. **C7d-3a non reçu** : la forme de Bernoulli ne freine A320 que de 15 à 20 % ; l'hypothèse de S369 (deux discrétisations qui ne forment pas un gradient) n'en est pas la cause principale. **Pistes, non essayées** : la surface — le gradient `∂(U·u′)` n'est absorbé par la projection qu'à l'intérieur, la condition dynamique de surface libre (la pression croisée, le fantôme) le reçoit ou non ; bisection G seul / R seul ; un témoin à 12,5 cm.
-- **P3 (suite) — bisection de la forme de Bernoulli** (amputations d'essai, `MER_BERNOULLI_ESSAI`, comme les bits `TRIAL` de S369 ; houle de 7,5 cm, 25 cm, 60 s) : **G seule** (la partie gradient) : δ 0,8 mm à 59 s, taux **−0,0052 s⁻¹** — rien ne croît ; **R seule** (la partie rotationnelle) : 0,9 mm, **−0,0047 s⁻¹** ; **G + R** : **0,097**. **Ni l'une ni l'autre ne porte l'instabilité : elle naît de leur somme**, le terme croisé entier — cohérent avec S369 (retirer `u′·∇U` l'éteint), mais **l'hypothèse d'un défaut de forme est réfutée** : la croissance n'est pas une erreur de discrétisation propre à l'un des deux termes. Restent : l'intégration en temps du couplage (explicite, mais le taux ne dépend pas du pas), la forme antisymétrique (conservative de l'énergie) de l'advection par `U`, la condition de surface ; et la question de fond — une instabilité physique (des ondes courtes portées par une houle) que le relatif linéaire rend sans borne. Suite du cœur **757** / 19 / 0.
-- **P4** — preuve : MER-S369 §6 (la forme éprouvée, la bisection, les pistes) ; APIC-CARTE §22.5 (C7d-3a non reçu) ; une note datée à A320 (ANGLES-MORTS : l'hypothèse réfutée) ; liste 4.19, feuille de route, index. Suite du cœur 757 / 19 / 0.
-- **P5** — journal ; jeton libre ; maillons 22 (justifiés : S406) ; suivant : S435, C7d-3a — A320, les pistes de MER-S369 §6.
