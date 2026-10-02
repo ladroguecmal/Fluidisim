@@ -82,10 +82,21 @@ Suite du cœur, zéro avertissement.
 
 - [x] **P1** — ADR-214 ; jeton, plan seul.
 - [x] **P2** — `LinearSwell` complet ; essais.
-- [ ] **P3** — `Apic3` relatif, sans zone ; essais ; mesures (3), (4).
+- [x] **P3** — `Apic3` relatif, sans zone ; essais ; mesures (3), (4).
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `LinearSwell::elevation`, `velocity_gradient` (exact), `dynamic_pressure` ; essai `linear_swell_gradient_and_pressure_s444` :
   gradient 8,1·10⁻⁵ des différences finies, divergence et rotationnel nuls, quantité de mouvement 7,6·10⁻⁴ — (1) tenu.
+- **P3** — `Apic3::set_relative_background(s)` (une ou deux composantes superposées ; refus avec une zone de colonnes) :
+  particules en `u′` déplacées par `U + u′` (RK2, B à l'instant du début puis du milieu du pas) ; `relative_strain` (`−dt·u′·∇U`,
+  gradient exact, au lieu de la gravité) ; `surface_pressure` (la valeur de `p′` au point de surface, au second membre et à la
+  correction) ; l'horloge de B. **Mesures** : houle progressive dans une cuve fermée — `u′ = −U` (97 % de `aω`) : B traverse les
+  parois, les particules non ; **houle stationnaire** (deux composantes opposées, vitesse horizontale nulle aux parois) : départ à
+  l'amplitude maximale — 90 % de `aω`, proportionnel à `a` : la nappe semée sur le réseau des particules s'écarte de la surface de B
+  d'une demi-maille de réseau (6 cm), une vraie `η′` ; **départ à plat** — `|u′|` croît de 2 à 10 cm/s en 4,5 s (54 % de `aω`), les
+  surfaces à 16 mm de l'eau totale : **critère (3) manqué**. Hypothèse : la lecture de la surface des particules (≤ 2,5 % de maille,
+  S389), écart forcé au nombre d'onde et à la fréquence de B — en résonance avec δ, qui croît dans le temps ; le pas couplé n'a pas ce
+  défaut (sa surface est analytique). L'essai long devient un instrument ignoré ; essai rapide : sans houle, `|u′|` ≤ 10⁻⁵. Sans
+  fond, `Apic3` au bit (ses essais inchangés). Suite **761**, zéro avertissement.
 

@@ -93,6 +93,11 @@ pub struct Apic3 {
     pub(crate) body: Option<Sphere3>,
     /// La zone des colonnes (S398), si elle est active : surface `η`, vitesse eulérienne advectée.
     pub(crate) columns: Option<columns::Columns3>,
+    /// **S444 (C7d-3c, c1, ADR-214) — le fond B et le mode relatif** : `Some(B)`, les particules et la grille portent `u′`, la
+    /// vitesse propre de δ ; les particules se déplacent avec `U + u′`. `None`, le défaut : l'eau totale, au bit.
+    pub(crate) background: [Option<LinearSwell>; 2],
+    /// L'instant de B au début du prochain pas, s.
+    pub(crate) background_time_s: f64,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -171,6 +176,8 @@ impl Apic3 {
             kernel: KERNEL_CELLS,
             body: None,
             columns: None,
+            background: [None; 2],
+            background_time_s: 0.,
         })
     }
 
@@ -219,6 +226,70 @@ impl Apic3 {
     }
     /// **Le corps cinématique** (S393) : sa position au début du prochain pas et sa vitesse, que l'hôte impose ; `None`
     /// l'enlève. Refus `NotFinite` si une grandeur n'est pas finie, `Domain` si le rayon n'est pas positif.
+    /// **S444 (C7d-3c, c1, ADR-214) — le mode relatif à B.** `Some(B)` : la grille et les particules portent la vitesse propre `u′`
+    /// de δ ; les particules se déplacent avec `U + u′` (leur position est celle de l'eau) ; la grille reçoit `−dt·u′·∇U` (gradient
+    /// exact de B) et plus la gravité en volume ; la pression est `p′ = p − p_B`, dont la valeur à la surface totale est
+    /// `−p_B(z_s)` moins l'erreur de B à sa propre surface (ADR-198, la forme d'A324). `t_s` est l'instant de B au prochain pas. Sans
+    /// zone de colonnes seulement (c1) : avec une zone, refus (`Domain`). `None` : l'eau totale, le pas d'avant au bit.
+    pub fn set_relative_background(&mut self, background: Option<LinearSwell>, t_s: f64) -> Result<(), Error> {
+        self.set_relative_backgrounds(&background.into_iter().collect::<Vec<_>>(), t_s)
+    }
+
+    /// S444 : le mode relatif sur **une ou deux composantes** de B, superposées (linéaires) — deux houles opposées font une
+    /// houle stationnaire, dont la vitesse horizontale s'annule aux parois. Une liste vide : l'eau totale. Plus de deux : refus.
+    pub fn set_relative_backgrounds(&mut self, components: &[LinearSwell], t_s: f64) -> Result<(), Error> {
+        if components.len() > 2 || (!components.is_empty() && self.columns.is_some()) {
+            return Err(Error::Domain);
+        }
+        self.background = [components.first().copied(), components.get(1).copied()];
+        self.background_time_s = t_s;
+        Ok(())
+    }
+
+    /// S444 : vrai en mode relatif.
+    pub fn is_relative(&self) -> bool {
+        self.background[0].is_some()
+    }
+
+    /// S444 : la vitesse de B (la somme de ses composantes) au point `(x, ·, z)`.
+    pub fn background_velocity(&self, x: f32, z: f32, t_s: f64) -> [f32; 3] {
+        let mut u = [0f32; 3];
+        for b in self.background.iter().flatten() {
+            let v = b.velocity(x, z, t_s);
+            for a in 0..3 {
+                u[a] += v[a];
+            }
+        }
+        u
+    }
+
+    /// S444 : le gradient exact de la vitesse de B.
+    fn background_gradient(&self, x: f32, z: f32, t_s: f64) -> [[f32; 3]; 3] {
+        let mut g = [[0f32; 3]; 3];
+        for b in self.background.iter().flatten() {
+            let h = b.velocity_gradient(x, z, t_s);
+            for i in 0..3 {
+                for j in 0..3 {
+                    g[i][j] += h[i][j];
+                }
+            }
+        }
+        g
+    }
+
+    /// S444 : l'élévation de B au-dessus de son niveau moyen.
+    pub fn background_elevation(&self, x: f32, t_s: f64) -> f32 {
+        self.background.iter().flatten().map(|b| b.elevation(x, t_s)).sum()
+    }
+
+    /// S444 : la pression totale de B, `−ρ·g·ζ + Σ p_dyn`, Pa (en `f64`).
+    fn background_pressure(&self, x: f32, z: f32, t_s: f64) -> f64 {
+        let Some(first) = self.background[0] else { return 0. };
+        let rg = self.rho as f64 * self.g_eff as f64;
+        -rg * (z - first.mean_level) as f64
+            + self.background.iter().flatten().map(|b| b.dynamic_pressure(x, z, t_s, self.rho, self.g_eff) as f64).sum::<f64>()
+    }
+
     pub fn set_body(&mut self, body: Option<Sphere3>) -> Result<(), Error> {
         if let Some(b) = body {
             if !b.center.iter().chain(b.velocity.iter()).chain([b.radius].iter()).all(|x| x.is_finite()) {
@@ -816,9 +887,14 @@ impl Apic3 {
         if upto == ApicStage::Reconstruct {
             return Ok(ApicReport::default());
         }
-        let gdt = (self.g_eff as f64 * duration_us as f64 * 1e-6) as f32;
-        for w in self.w.iter_mut() {
-            *w -= gdt;
+        if self.is_relative() {
+            // S444 : en mode relatif, `−dt·u′·∇U` sur la grille ; la gravité est dans la pression de B.
+            self.relative_strain(dt);
+        } else {
+            let gdt = (self.g_eff as f64 * duration_us as f64 * 1e-6) as f32;
+            for w in self.w.iter_mut() {
+                *w -= gdt;
+            }
         }
         self.walls();
         self.impose_body();
@@ -860,6 +936,9 @@ impl Apic3 {
             return Err(Error::NotFinite);
         }
         self.iterations = iterations;
+        if self.is_relative() {
+            self.background_time_s += dt as f64;
+        }
         Ok(ApicReport { iterations, residual, divergence, max_speed })
     }
 
@@ -1035,6 +1114,7 @@ impl Apic3 {
                     }
                     let mut div = 0f32;
                     let mut diag = 0f32;
+                    let mut ghost = 0f32;
                     for (m, nb) in self.neighbours(i, j, k).into_iter().enumerate() {
                         let sign = if m % 2 == 0 { -1. } else { 1. };
                         let face = match m {
@@ -1049,12 +1129,17 @@ impl Apic3 {
                         if let Some((n, _, _)) = nb {
                             match self.label[n] {
                                 WATER => diag += 1.,
-                                AIR => diag += 1. / self.theta(c, n),
+                                AIR => {
+                                    let t = self.theta(c, n);
+                                    diag += 1. / t;
+                                    // S444 : la valeur de `p′` à la surface, en mode relatif (nulle sans fond).
+                                    ghost += self.surface_pressure(c, n) / t;
+                                }
                                 _ => {}
                             }
                         }
                     }
-                    self.rhs[c] = scale * div / dx;
+                    self.rhs[c] = scale * div / dx + ghost;
                     self.diag[c] = diag;
                 }
             }
@@ -1113,9 +1198,9 @@ impl Apic3 {
                         let grad = if wc && wn {
                             self.p[n] - self.p[c]
                         } else if wc {
-                            -self.p[c] / self.theta(c, n)
+                            (self.surface_pressure(c, n) - self.p[c]) / self.theta(c, n)
                         } else if wn {
-                            self.p[n] / self.theta(n, c)
+                            (self.p[n] - self.surface_pressure(n, c)) / self.theta(n, c)
                         } else {
                             continue;
                         };
@@ -1130,6 +1215,62 @@ impl Apic3 {
             }
         }
         (it, if b2 > 0. { (rr / b2).sqrt() } else { 0. })
+    }
+
+    /// **S444 — la valeur de `p′` au point de surface** entre la maille d'eau `w` et sa voisine d'air `a` : `−p_B` au point, moins
+    /// l'erreur de B à sa propre surface à la même abscisse, `p_B(x, niveau + η_B)` — nulle quand la surface de l'eau est celle de
+    /// B. Sans fond : 0 (la surface libre de l'eau totale).
+    fn surface_pressure(&self, w: usize, a: usize) -> f32 {
+        let Some(first) = self.background[0] else { return 0. };
+        let Domain3 { nx, ny, dx, .. } = self.domain;
+        let centre = |c: usize| {
+            let (i, k) = (c % nx, c / (nx * ny));
+            [(i as f32 + 0.5) * dx, (k as f32 + 0.5) * dx]
+        };
+        let (cw, ca) = (centre(w), centre(a));
+        let t = self.theta(w, a);
+        let (x, z) = (cw[0] + t * (ca[0] - cw[0]), cw[1] + t * (ca[1] - cw[1]));
+        let ts = self.background_time_s;
+        let own = first.mean_level + self.background_elevation(x, ts);
+        (self.background_pressure(x, own, ts) - self.background_pressure(x, z, ts)) as f32
+    }
+
+    /// **S444 — `−dt·u′·∇U` sur la grille**, avec le gradient exact de B à chaque face ; `u′` lu par `grid_velocity` au point
+    /// de la face (les trois composantes interpolées). Les incréments sont calculés avant d'être appliqués.
+    fn relative_strain(&mut self, dt: f32) {
+        if !self.is_relative() {
+            return;
+        }
+        let ts = self.background_time_s;
+        let Domain3 { nx, ny, nz, dx } = self.domain;
+        for axis in 0..3 {
+            let dims = [nx + usize::from(axis == 0), ny + usize::from(axis == 1), nz + usize::from(axis == 2)];
+            let mut increments = core::mem::take(&mut self.old_u);
+            for k in 0..dims[2] {
+                for j in 0..dims[1] {
+                    for i in 0..dims[0] {
+                        let q = [
+                            (i as f32 + if axis == 0 { 0. } else { 0.5 }) * dx,
+                            (j as f32 + if axis == 1 { 0. } else { 0.5 }) * dx,
+                            (k as f32 + if axis == 2 { 0. } else { 0.5 }) * dx,
+                        ];
+                        let v = self.grid_velocity(q);
+                        let g = self.background_gradient(q[0], q[2], ts);
+                        let f = (k * dims[1] + j) * dims[0] + i;
+                        increments[f] = -dt * (v[0] * g[axis][0] + v[1] * g[axis][1] + v[2] * g[axis][2]);
+                    }
+                }
+            }
+            let field = match axis {
+                0 => &mut self.u,
+                1 => &mut self.v,
+                _ => &mut self.w,
+            };
+            for (f, x) in field.iter_mut().enumerate() {
+                *x += increments[f];
+            }
+            self.old_u = increments;
+        }
     }
 
     /// `max |div u|·dx / max|u|` sur les mailles d'eau dont aucune voisine n'est d'air.
@@ -1240,11 +1381,21 @@ impl Apic3 {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         let (lx, ly, lz) = (nx as f32 * dx, ny as f32 * dx, nz as f32 * dx);
         let margin = 1e-3 * dx;
+        // S444 : en mode relatif, la vitesse de l'eau est `U + u′` — B à l'instant du début du pas, puis du milieu.
+        let t0 = self.background_time_s;
+        let relative = self.is_relative();
+        let with_b = |a: &Self, v: [f32; 3], q: [f32; 3], t: f64| {
+            if !relative {
+                return v;
+            }
+            let u = a.background_velocity(q[0], q[2], t);
+            [v[0] + u[0], v[1] + u[1], v[2] + u[2]]
+        };
         for k in 0..self.n {
             let p = self.x[k];
-            let v1 = self.grid_velocity(p);
+            let v1 = with_b(self, self.grid_velocity(p), p, t0);
             let mid = [p[0] + 0.5 * dt * v1[0], p[1] + 0.5 * dt * v1[1], p[2] + 0.5 * dt * v1[2]];
-            let v2 = self.grid_velocity(mid);
+            let v2 = with_b(self, self.grid_velocity(mid), mid, t0 + 0.5 * dt as f64);
             self.x[k] = [
                 (p[0] + dt * v2[0]).clamp(margin, lx - margin),
                 (p[1] + dt * v2[1]).clamp(margin, ly - margin),

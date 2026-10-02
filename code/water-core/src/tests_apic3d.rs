@@ -1364,3 +1364,113 @@ fn linear_swell_gradient_and_pressure_s444() {
     assert!((b.elevation(0.3, 0.2) - 0.05 * ((k * 0.3 - (g * k).sqrt() * 0.2 + 0.3) as f64).cos() as f32).abs() < 1e-6);
 }
 
+/// **S444 (C7d-3c, c1, ADR-214)** — `Apic3` en mode relatif **sous B seul** : une nappe de particules posée sous la surface de B,
+/// `u′` = 0, une houle de 5 cm et 4 m à 25 cm, 5 s. La vitesse propre reste petite devant `aω` (les particules suivent `U`, non la
+/// surface linéaire exacte : un reste d'ordre `ak`) ; mesurée hors d'un quart de longueur d'onde de chaque paroi en `x`, que B
+/// traverse et que les particules ne traversent pas. Témoin : la même nappe en eau totale, initialisée à `U` ; les surfaces lues
+/// au milieu du domaine s'accordent à quelques millimètres. **Non reçu en S444** : `|u′|` croît jusqu'à 54 % de `aω` en 5 s, les
+/// surfaces s'écartent de 16 mm — hypothèse, la lecture de la surface des particules (2,5 % de maille au plus, S389) forcée à la
+/// fréquence et au nombre d'onde de B, en résonance. Un instrument, ignoré par défaut : `cargo test … -- --ignored`.
+#[test]
+#[ignore]
+fn relative_sheet_under_a_swell_s444() {
+    use super::LinearSwell;
+    let (nx, ny, nz, dx) = (32usize, 2usize, 16usize, 0.25f32);
+    let (g, level) = (9.81f32, 2.0f32);
+    let k = core::f32::consts::TAU / 4.;
+    // Une houle **stationnaire** — deux houles opposées de 2,5 cm : sa vitesse horizontale s'annule aux parois en `x` (8 m, deux
+    // longueurs d'onde), que les particules ne traversent pas. Une houle progressive y ferait `u′ = −U` (mesuré : 97 % de `aω`).
+    let w0 = (g * k).sqrt();
+    // `S444_A=<m>` (diagnostic) : l'amplitude de la houle stationnaire (5 cm par défaut).
+    let amp: f32 = std::env::var("S444_A").ok().and_then(|v| v.parse().ok()).unwrap_or(0.05);
+    let pair = [
+        LinearSwell { amplitude: 0.5 * amp, wavenumber: k, omega: w0, phase: 0., mean_level: level },
+        LinearSwell { amplitude: 0.5 * amp, wavenumber: k, omega: -w0, phase: 0., mean_level: level },
+    ];
+    let aw = amp.max(1e-6) * w0;
+    let elev = |x: f32, t: f64| pair[0].elevation(x, t) + pair[1].elevation(x, t);
+    let vel = |x: f32, z: f32, t: f64| {
+        let (p, q) = (pair[0].velocity(x, z, t), pair[1].velocity(x, z, t));
+        [p[0] + q[0], 0., p[2] + q[2]]
+    };
+    let grad = |x: f32, z: f32, t: f64| {
+        let (p, q) = (pair[0].velocity_gradient(x, z, t), pair[1].velocity_gradient(x, z, t));
+        let mut g = [[0f32; 3]; 3];
+        for i in 0..3 {
+            for j in 0..3 {
+                g[i][j] = p[i][j] + q[i][j];
+            }
+        }
+        g
+    };
+    // Le départ à l'instant où la houle stationnaire est **plate** (`cos ωt = 0`) : la nappe semée sur le réseau des particules y
+    // a exactement la surface de B. À un autre instant, la surface semée s'écarte de celle de B d'au plus une demi-maille du
+    // réseau (6 cm ici) — une vraie perturbation `η′`, qui oscille ensuite (mesuré : `|u′|` à 90 % de `aω`, proportionnel à `a`).
+    let t0 = core::f64::consts::FRAC_PI_2 / w0 as f64;
+    let run = |relative: bool| -> (f32, f32, Vec<f32>) {
+        let (mut a, _) = apic(nx, ny, nz, dx, nx * ny * nz * 8);
+        a.seed(&|p| p[2] < level + elev(p[0], t0)).unwrap();
+        if relative {
+            a.set_relative_backgrounds(&pair, t0).unwrap();
+        } else {
+            a.set_particle_velocities(&|p| (vel(p[0], p[2], t0), grad(p[0], p[2], t0))).unwrap();
+        }
+        let (mut t, mut interieur, mut partout) = (0u64, 0f32, 0f32);
+        while t < 5_000_000 {
+            let us = a.stable_step_us(20_000).min(5_000_000 - t);
+            a.step(us).unwrap();
+            t += us;
+            if relative && std::env::var("S444_DIAG").is_ok() && t % 500_000 < us {
+                let mut s: Vec<(f32, [f32; 3])> = a.particles().iter().zip(a.velocities())
+                    .map(|(q, v)| ((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt(), *q)).collect();
+                s.sort_by(|x, y| y.0.partial_cmp(&x.0).unwrap());
+                let rms = (s.iter().map(|x| x.0 * x.0).sum::<f32>() / s.len() as f32).sqrt();
+                let surf = |x: f32| level + elev(x, t0 + t as f64 * 1e-6);
+                println!("S444_DIAG t={:.2} rms={rms:.2e} p99={:.2e} max={:.2e} en x={:.2} z={:.2} (surface {:.2}) ; 5e {:.2e}",
+                    t as f64 * 1e-6, s[s.len() / 100].0, s[0].0, s[0].1[0], s[0].1[2], surf(s[0].1[0]), s[4].0);
+            }
+            if relative {
+                let marge = 1.0;
+                for (q, v) in a.particles().iter().zip(a.velocities()) {
+                    let s = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
+                    partout = partout.max(s);
+                    if q[0] > marge && q[0] < nx as f32 * dx - marge {
+                        interieur = interieur.max(s);
+                    }
+                }
+            }
+        }
+        a.reconstruct();
+        let hauteurs = (12..20).map(|i| read_height(&a, i, 0)).collect();
+        (interieur, partout, hauteurs)
+    };
+    let (interieur, partout, h_rel) = run(true);
+    let (_, _, h_tot) = run(false);
+    let ecart = h_rel.iter().zip(&h_tot).fold(0f32, |m, (x, y)| m.max((x - y).abs()));
+    println!("S444 relatif sous B seul : |u′| max {:.2e} m/s à l'intérieur ({:.2} % de aω), {:.2e} partout ; surfaces contre l'eau totale               au milieu : {:.2} mm", interieur, 100. * interieur / aw, partout, 1e3 * ecart);
+    assert!(interieur.is_finite() && ecart.is_finite());
+}
+
+/// **S444 (C7d-3c, c1)** — le mode relatif d'`Apic3` sous une houle d'amplitude nulle : la nappe au repos reste au repos (la
+/// vitesse propre sous 10⁻⁵ m/s en 1 s) ; et la bascule ne touche pas l'eau totale (les autres essais d'`Apic3`, au bit).
+#[test]
+fn relative_sheet_without_swell_stays_at_rest_s444() {
+    use super::LinearSwell;
+    let (mut a, _) = apic(16, 2, 12, 0.25, 16 * 2 * 12 * 8);
+    a.seed(&|p| p[2] < 2.0).unwrap();
+    let k = core::f32::consts::TAU / 4.;
+    let b = LinearSwell { amplitude: 0., wavenumber: k, omega: (9.81 * k).sqrt(), phase: 0., mean_level: 2.0 };
+    a.set_relative_background(Some(b), 0.).unwrap();
+    assert!(a.is_relative());
+    let mut t = 0u64;
+    let mut pire = 0f32;
+    while t < 1_000_000 {
+        let us = a.stable_step_us(20_000).min(1_000_000 - t);
+        pire = pire.max(a.step(us).unwrap().max_speed);
+        t += us;
+    }
+    println!("S444 relatif sans houle : |u′| max {pire:.2e} m/s");
+    assert!(pire <= 1e-5, "{pire}");
+    // Trois composantes : refus.
+    assert!(a.set_relative_backgrounds(&[b, b, b], 0.).is_err());
+}
