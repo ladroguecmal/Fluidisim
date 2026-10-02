@@ -86,7 +86,7 @@ germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : déc
 
 - [x] **P1** — jeton, plan seul, le critère réécrit.
 - [x] **P2** — `MER_DECALAGE`, `MER_TEMOIN` au banc.
-- [ ] **P3** — mesures : 25 cm, deux houles, quatre décalages ; le point fixe ; conclusion.
+- [x] **P3** — mesures : 25 cm, deux houles, quatre décalages ; le point fixe ; conclusion.
 - [ ] **P4** — preuve ; A320 ; registres ; suite.
 - [ ] **P5** — rituel.
 
@@ -103,4 +103,13 @@ germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : déc
   Le régime « repos près d'une face » n'existe que sous une houle de moins d'une demi-maille ; une vraie mer balaie toutes les places :
   `MER_TP`, `MER_PROFONDEUR` — houle de 16 m, 30 cm (`ak` = 0,118, Benjamin-Feir 0,0137 s⁻¹, critère 0,021), 8 m d'eau, 25 cm,
   repos 0, ¼, ½.
+- **P3** — la houle de 16 m (30 cm) abandonnée : le germe de 2 m n'y sème rien à `K`, et e-folder Benjamin-Feir y prend 73 s ;
+  `MER_GERME_LAMBDA` (le germe à la longueur d'onde voulue), la trace de la bande en notation scientifique. **Houle de 8 m**
+  (`MER_TP=4.527`, 4 m d'eau, germe de 8 m), 25 cm, 95 s : le germe sort en ≈ 30 s ; ensuite la bande ne croît qu'à **≈ 0,007 · 0,004**
+  s⁻¹ sous 15 cm (repos sur une face · au centre ; Benjamin-Feir 0,019 — la surface de B franchit des centres dans les deux cas) et
+  **≈ 0,009 · ≈ 0** sous 10 cm (Benjamin-Feir 0,0086 ; sur une face, aucun franchissement). **Au plus Benjamin-Feir, aux deux places.**
+  **Conclusion.** Le critère, tel qu'écrit (la houle de 4 m du banc, toute place du repos), est **manqué** : 0,077 et 0,106 sur une
+  face. Mais l'excès d'A320 dépend de la place du repos — un défaut de discrétisation près de la surface, pas une physique — et il
+  **n'apparaît qu'à 16 mailles par longueur d'onde de la houle** (4 m à 25 cm) ; à 32 (8 m à 25 cm), rien au-delà de Benjamin-Feir.
+  C7d-3a **non reçu** ; A320 ramenée à une houle mal résolue. Suite 758.
 

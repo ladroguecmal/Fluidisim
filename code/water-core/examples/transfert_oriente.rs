@@ -2003,6 +2003,11 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         let mut petit = cas(dx, lambda, 1.5);
         petit.a = a;
         petit.h0 = h0;
+        // `MER_GERME_LAMBDA=<m>` (S437) : la longueur d'onde du germe (2 m par défaut), même enveloppe.
+        if let Some(l) = std::env::var("MER_GERME_LAMBDA").ok().and_then(|v| v.parse::<f32>().ok()) {
+            petit.k = core::f32::consts::TAU / l;
+            petit.omega = (G * petit.k).sqrt();
+        }
         pose_paquet(&mut v, domain, &petit)?;
     } else {
         v.set_free_surface(&vec![h0; domain.columns()], h0).map_err(|e| format!("surface {e:?}"))?;
@@ -2114,7 +2119,7 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
                         courtes += e;
                     }
                 }
-                format!(" bande_bf_m={:.5} moins_de_4dx_m={:.5}", 4. * bf.sqrt() / n_int, 4. * courtes.sqrt() / n_int)
+                format!(" bande_bf_m={:.4e} moins_de_4dx_m={:.4e}", 4. * bf.sqrt() / n_int, 4. * courtes.sqrt() / n_int)
             } else {
                 String::new()
             };
