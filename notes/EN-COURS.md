@@ -62,34 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S454 — **terminée**. *« Continue »* — le lot des registres (ADR-213 D3, dû en S454), puis **C10, les scènes**
-(campagne §6 : le joueur qui saute à 5 cm, la gerbe d'étrave, la lame du déversoir ; le critère d'arrêt du §3.4).
+Session : S455 — **en cours**. Sans « Continue » (ADR-215 D1) : l'étape 2 d'ADR-215 D4, **le temps réel à 4 m**.
 
-**Ce que la session fait.** (1) Le lot des registres pour S451–S453. (2) **La conception de C10** : son découpage en lots, chacun avec
-son critère (`docs/validation/C10-SCENES-S454.md`). (3) **C10-1, le saut du joueur** — jusqu'ici B10 n'existe qu'en quart (deux plans de
-symétrie, 0,8 m de côté) : B10 sur **un domaine entier**, la sphère au centre, mené par la carte seule et rendu par `surface_carte`
-(sans réflexion) ; d'abord le quart déplié (1,6 m), puis **une scène de 4 m × 4 m**.
+**Le constat (S454).** La scène de 4 m (80 × 80 × 114 mailles, 3,2 m d'eau, 2,5 m d'air) coûte **27 ms de carte par pas** pour un pas
+de **4,7 ms simulées** ; avec les relectures, 44 ms au mur ; la fenêtre tient **0,11** du temps réel.
 
-**Critères, écrits avant.** (1) **le quart déplié** (domaine entier de 1,6 m, sphère au centre) reproduit le quart : la profondeur de
-la cavité à t = 1 et la hauteur du jet à t = 2 à une maille près (5 cm) de celles du quart ; (2) **la scène de 4 m** : masse en quanta
-exacte, `φ` fini jusqu'à `t·√(g/D)` = 4, le coût d'un pas de la carte publié (médiane) et quatre images ; (3) la fenêtre
-`--surface-direct` sur la scène de 4 m (`COTE=4`).
+**Ce que la session fait.** (1) **Le profil** : la durée de chaque étage de la carte sur la scène de 4 m (médianes sur le saut entier).
+(2) **Les réductions**, par ordre de gain attendu, chacune mesurée : la profondeur (3,2 m d'eau, imposés par l'arrêt de B10 à
+`3·Fr·D` ; une scène de jeu n'en demande pas tant), l'air (2,5 m), les étages qui balaient toute la grille ou toutes les faces alors
+que la bande en occupe un sixième, les relectures du pas stable (une réduction sur la carte au lieu de 4 n mots relus).
+
+**Critères, écrits avant.** (1) le profil publié, étage par étage ; (2) **simulé / réel ≥ 0,9** dans la fenêtre à 4 m, la masse exacte et
+la scène stable jusqu'à t = 16 ; (3) si (2) n'est pas atteint, le gain obtenu et ce qui reste, chiffrés.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le lot des registres.
-- [x] **P3** — la conception de C10.
-- [x] **P4** — C10-1 : B10 en domaine entier ; mesures (1) à (3) ; images.
-- [x] **P5** — preuve ; rituel (allégé).
+- [ ] **P2** — le profil des étages.
+- [ ] **P3** — les réductions, mesurées une à une.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — feuille de route, liste, file active pour S451–S453 (la surface continue reçue, R37, et en direct ; « A322 avant C10 » retiré : levée en S442) ; `Registres` : dernier lot S454, le prochain au plus tard en S457.
-- **P3** — `docs/validation/C10-SCENES-S454.md` : C10 en cinq lots — C10-1 le saut sur un domaine entier ; C10-2 le saut dans la mer (le raccord sur la carte, ses marges gardées en colonnes) ; C10-3 la coque et la gerbe d'étrave ; C10-4 la lame du déversoir ; C10-5 la scène du §3.4.
-- **Décision de l'utilisateur** (2026-10-03) : *« que tu ne t'arrêtes pas de travailler jusqu'à une v1 solide visuellement, et
-  physiquement, prends les décisions »* — [ADR-215](../docs/adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) (la v1 solide définie, D3 ; l'ordre, D4).
-- **P4** — `B10::entier`, le rendu d'un domaine entier, le banc `--c10-saut` ([preuve](../docs/validation/C10-SCENES-S454.md) §3) :
-  (1) cavité tenue (0,75 maille), jet sur l'axe 2,7 mailles plus haut que le quart (témoin 0,06) — tranché, ADR-215 D2 ; (2) la scène de
-  4 m, masse exacte jusqu'à t = 16 **après correction du plafond** (la nappe plaquée divergeait ; 2,5 m d'air) ; 27 ms par pas ;
-  (3) la fenêtre à 4 m : simulé / réel 0,11. Images envoyées.
-- **P5** — C10-SCENES-S454 §3 ; journal ; jeton libre ; maillons 11 (justifiés : S406) ; suivant : S455, le temps réel à 4 m (ADR-215 D4).
