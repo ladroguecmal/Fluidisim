@@ -19,6 +19,7 @@ mod host_impl;
 
 use water_core::apic3d::Apic3;
 use water_core::background::{Background, SeaState};
+use water_core::band_in_sea::BandInSea;
 use water_core::delta3d::{BackgroundGrid3, Domain3, Sponge3, Volume3};
 use water_core::host::HostServices;
 use water_core::{SimTime, WorldPos};
@@ -60,6 +61,8 @@ fn main() -> Result<(), String> {
     bande.enable_columns(&mut hote, &vec![1u8; NA * NY]).map_err(|e| format!("{e:?}"))?;
     bande.enable_open_boundaries(&mut hote).map_err(|e| format!("{e:?}"))?;
     let eponge = Sponge3 { width_x: 3., width_y: 0., rate_per_s: 2. };
+    let mut raccord = BandInSea::configure(&mut hote, dv, da, I0, MARGE).map_err(|e| format!("{e:?}"))?;
+    raccord.set_conservative(std::env::var("RACCORD_CONSERVATIF").map_or(true, |v| v != "0"));
 
     // Les indices de faces de la mer.
     let fu = |i: usize, j: usize, k: usize| (k * NY + j) * (NX + 1) + i;
@@ -110,64 +113,12 @@ fn main() -> Result<(), String> {
         let t = SimTime(n * DT_US);
         grille.sample(&houle, t).map_err(|e| format!("{e:?}"))?;
         let bg = grille.view().ok_or("fond")?;
-        // (1) La mer reçoit `δ = total − B` à l'intérieur de la bande.
+        // (1) La mer reçoit l'état de la bande dans son intérieur ; (2) la bande reçoit à ses bords `B + δ` — le raccord du système
+        // (`BandInSea`, S448), celui que S447 a retenu.
         if n > 0 {
-            let mut eta = mer.surface().to_vec();
-            let (mut u, mut v, mut w) = (mer.velocity_u().to_vec(), mer.velocity_v().to_vec(), mer.velocity_w().to_vec());
-            let mut colonnes = bande.columns_surface().ok_or("zone")?.to_vec();
-            let (ua, va, wa) = (bande.velocity_u().to_vec(), bande.velocity_v().to_vec(), bande.velocity_w().to_vec());
-            // S447 — le raccord conservatif : la mer est seule comptable de la masse de δ. L'intérieur de la bande reçoit la forme de
-            // la bande, décalée de `c` uniforme pour garder le volume de δ que la mer vient de calculer ; la bande reçoit le même `c`.
-            let conservatif = std::env::var("RACCORD_CONSERVATIF").map_or(true, |v| v != "0");
-            let (mut v_mer, mut v_bande, mut nc) = (0f64, 0f64, 0usize);
-            for j in 0..NY {
-                for i in MARGE..NA - MARGE {
-                    v_mer += (eta[j * NX + I0 + i] - H0) as f64;
-                    v_bande += (colonnes[j * NA + i] - bg.w[fw(I0 + i, j, 0)].eta - H0) as f64;
-                    nc += 1;
-                }
-            }
-            let c = if conservatif { ((v_mer - v_bande) / nc as f64) as f32 } else { 0. };
-            for j in 0..NY {
-                for i in MARGE..NA - MARGE {
-                    colonnes[j * NA + i] += c;
-                    eta[j * NX + I0 + i] = colonnes[j * NA + i] - bg.w[fw(I0 + i, j, 0)].eta;
-                }
-            }
-            if conservatif {
-                bande.set_columns_surface(&colonnes).map_err(|e| format!("pas {n} : {e:?}"))?;
-            }
-            for k in 0..nz {
-                for j in 0..NY {
-                    for i in MARGE..=NA - MARGE {
-                        u[fu(I0 + i, j, k)] = ua[au(i, j, k)] - bg.u[fu(I0 + i, j, k)].u[0];
-                    }
-                }
-                for j in 1..NY {
-                    for i in MARGE..NA - MARGE {
-                        v[fv(I0 + i, j, k)] = va[av(i, j, k)] - bg.v[fv(I0 + i, j, k)].u[1];
-                    }
-                }
-            }
-            for k in 1..nz {
-                for j in 0..NY {
-                    for i in MARGE..NA - MARGE {
-                        w[fw(I0 + i, j, k)] = wa[aw(i, j, k)] - bg.w[fw(I0 + i, j, k)].u[2];
-                    }
-                }
-            }
-            mer.set_surface(&eta).map_err(|e| format!("pas {n} : {e:?}"))?;
-            mer.set_velocity(&u, &v, &w).map_err(|e| format!("pas {n} : {e:?}"))?;
+            raccord.feed_sea(&mut mer, &mut bande, &bg).map_err(|e| format!("pas {n} : {e:?}"))?;
         }
-        // (2) La bande reçoit à ses bords la vitesse normale `B + δ`.
-        let (mu, mut gauche, mut droite) = (mer.velocity_u(), vec![0f32; NY * nz], vec![0f32; NY * nz]);
-        for k in 0..nz {
-            for j in 0..NY {
-                gauche[k * NY + j] = bg.u[fu(I0, j, k)].u[0] + mu[fu(I0, j, k)];
-                droite[k * NY + j] = bg.u[fu(I0 + NA, j, k)].u[0] + mu[fu(I0 + NA, j, k)];
-            }
-        }
-        bande.set_open_boundaries(&gauche, &droite).map_err(|e| format!("{e:?}"))?;
+        raccord.feed_band(&mer, &mut bande, &bg).map_err(|e| format!("{e:?}"))?;
         // (3) La bande avance ; (4) la mer avance.
         bande.step(DT_US).map_err(|e| format!("bande, pas {n} : {e:?}"))?;
         mer.step_perturbation_mobile(t, DT_US, 4000, &bg, eponge, &jobs).map_err(|e| format!("mer, pas {n} : {e:?}"))?;

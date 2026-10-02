@@ -86,3 +86,7 @@ par longueur d'onde.
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, index pour S445–S447 ; `Registres` : dernier lot S448, le prochain au plus tard en S451.
+- **P3a** — le raccord porté du banc dans le système : `water_core::band_in_sea::BandInSea` (`configure`, `feed_sea`, `feed_band`,
+  `set_conservative` ; tampons réservés ; une colonne de particules de la bande garde la hauteur de la mer, ses vitesses passent) ;
+  `Volume3::rest`. Le banc `raccord_bande_mer` passe par lui : **les chiffres de S447 au bit** (9,4218 mm, 1,126·10⁻³ m³, 3,943·10⁻⁶ m³).
+

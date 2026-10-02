@@ -630,6 +630,11 @@ impl Volume3 {
         self.domain
     }
 
+    /// S448 : le niveau de repos de la surface mobile, m.
+    pub fn rest(&self) -> f32 {
+        self.rest
+    }
+
     /// Élévation de surface par colonne ; `η ≡ z₀` est le repos. Réinitialise le reste d'arrondi.
     pub fn set_surface(&mut self, eta: &[f32]) -> Result<(), Error> {
         if eta.len() != self.eta.len() {
