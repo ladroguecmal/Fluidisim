@@ -18352,3 +18352,12 @@ particules (`set_particle_heights`, éteint). **Mesuré** : retournement dans la
 part de la fenêtre et masse au raccord tenues ; sous une houle calme, la mer devient instable au bord de la bande (manqué). Deux
 exigences du raccord se contredisent au bord des colonnes de particules. **c3 plafonné** (ADR-213 D2). Suite **762**. **Rituel**
 (allégé). Maillons **6** — justifié : la priorité du solveur (S406). Suivant proposé : **la surface continue** (ADR-211 D2).
+
+## S450 — 2026-10-02 — rendu : la surface continue, une première image
+
+**Entrée.** *« Continue »* — la surface continue (ADR-211 D2). **Fait** ([preuve](../docs/validation/SURFACE-CONTINUE-S450.md)) :
+le banc `surface_continue` — l'isosurface du champ unique `φ` d'`Apic3` (colonnes et bande d'un même champ) par tétraèdres marchants,
+un rendu logiciel en PPM ; B10 (une sphère entre dans l'eau) en bande étroite. **Mesuré** : **0 arête ouverte** (le maillage est étanche) ;
+**le saut au raccord bande | colonnes, 0,34 maille** (manqué, au plus un quart) — **visible en marches carrées** autour de la zone agitée ;
+28 s. Quatre images envoyées à l'utilisateur. Suite **762**. **Rituel** (allégé). Maillons **7** — justifié : la priorité du solveur
+(S406). Suivant : raccorder `φ` à la frontière pour le rendu, des normales lissées ; le lot des registres (S451).

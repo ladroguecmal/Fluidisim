@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S450 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite proposée : **la surface continue**
+Session : S450 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite proposée : **la surface continue**
 ([ADR-211](../docs/adr/ADR-211-les-trucages-retenus.md) D2 : l'utilisateur juge C10 sur une surface sans interstice, dont seuls les
 jets se détachent).
 
@@ -86,7 +86,7 @@ minutes.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le banc `surface_continue` : isosurface, rendu, PPM ; mesures (1), (2), (4).
-- [ ] **P3** — les images à l'utilisateur ; preuve ; rituel (allégé).
+- [x] **P3** — les images à l'utilisateur ; preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — banc `surface_continue` (B10 en quart, `Fr` = 2, `D/dx` = 8, bande étroite `fond` = 4 ; tétraèdres marchants ; rendu
@@ -94,4 +94,4 @@ minutes.
   96 à 160 : le plan réfléchi n'était pas compté comme bord de l'échantillonnage) ; (2) **le saut au raccord bande | colonnes : 0,32 maille
   brut, 0,34 corrigé de la pente — manqué** (un quart) ; il se voit : des **marches carrées** dessinent la frontière autour de la zone
   agitée ; (4) **28 s** — tenu. Images : `captures/s450/b10_t{0.5,1.0,2.0,3.0}.png` (le cratère et la sphère, puis le jet de Worthington).
-
+- **P3** — `docs/validation/SURFACE-CONTINUE-S450.md` ; les images envoyées à l'utilisateur ; journal ; jeton libre ; maillons 7 (justifiés : S406) ; suivant : S451, le raccord de `φ` pour le rendu et le lot des registres.
