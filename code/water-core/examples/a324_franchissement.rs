@@ -6,7 +6,7 @@
 //!
 //!     cargo run -p water-core --release --offline --example a324_franchissement -- <houle_m> [pas] [germe_m]
 //!
-//! `A324_DUREE=<s>` (1 s par défaut) ; `A324_MASQUE` (7 par défaut) ; `A324_PROPRE=1`, le remède de S436. Le témoin, sans germe, tourne à côté : il doit rester nul au bit.
+//! `A324_DUREE=<s>` (1 s par défaut) ; `A324_MASQUE` (7 par défaut) ; `A324_ANCIEN=1`, le fantôme latéral d'avant le remède de S436. Le témoin, sans germe, tourne à côté : il doit rester nul au bit.
 
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
@@ -50,8 +50,8 @@ fn main() -> Result<(), String> {
         }
         v.set_free_surface(&surface, h0).map_err(|e| format!("{e:?}"))?;
         v.set_relative_background(masque).map_err(|e| format!("{e:?}"))?;
-        // `A324_PROPRE=1` : l'erreur de B aux fantômes latéraux prise au point de surface de B (S436).
-        v.set_lateral_own_ghost(std::env::var("A324_PROPRE").is_ok());
+        // `A324_ANCIEN=1` : le fantôme latéral de S369 (le défaut avant S436), pour comparaison.
+        v.set_lateral_own_ghost(std::env::var("A324_ANCIEN").is_err());
         volumes.push(v);
     }
     let sponge = Sponge3 { width_x: 3., width_y: 0., rate_per_s: 2. };

@@ -84,7 +84,7 @@ du cœur qui garde le cas. Si la cause n'est pas trouvée, elle est écrite tell
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — localisation (instrument, bisection).
-- [ ] **P3** — correction, mesures, critères.
+- [x] **P3** — correction, mesures, critères.
 - [ ] **P4** — essai ; suite ; preuve ; A324 ; registres.
 - [ ] **P5** — rituel.
 
@@ -101,4 +101,11 @@ du cœur qui garde le cas. Si la cause n'est pas trouvée, elle est écrite tell
   se divise par la pente de B, nulle aux crêtes : c'est là que 6,5 cm franchit. **Essai 4, retenu** : en mode relatif, le fantôme latéral
   interpole entre les deux colonnes ce que porte leur fantôme vertical (`ρgη′ + ghost_bg_up`, nul au bit à δ nul) — il ne lit plus la
   pression de B au point latéral. `Volume3::set_lateral_own_ghost`, éteint par défaut ; `MER_A324`, `A324_PROPRE`.
+- **P3** — banc `mer`, 12,5 cm, germe de 1 mm, à 1 s / part sous `4·dx` à 2 s : houle 6 cm 1,1 mm / 0 ; **6,5 cm 1,1 mm / 0** (avant :
+  8,6 mm / 73 %) ; **7,5 cm 1,1 mm / 0** — **critère (1) tenu**. Banc `a324` : le témoin nul au bit aux 100 pas, `u′` ≤ 5 mm/s (avant
+  0,2 m/s) — **(2) tenu**. 25 cm sous 7,5 cm, 95 s : traces **identiques au bit jusqu'à 70 s** (δ y atteint 14,5 cm : δ seul fait
+  alors franchir des centres), taux d'A320 **0,1151**, inchangé — **(3) tenu** ; en fin, sous `4·dx` 0,000 contre 0,001. Essai
+  `zero_delta_stays_zero_when_b_crosses_a_cell_centre_s436` (avec : nul au bit ; sans : 4,7 mm en 1 s ; germe ≤ 1,01 mm) — **(5)**.
+  **Reçu** : `lateral_own_ghost` allumé par défaut (sans effet hors du mode relatif) ; `MER_A324=0`, `A324_ANCIEN=1` rendent l'ancien.
+  Suite **758**, zéro avertissement — **(4)**. La production GPU ne porte pas encore le mode relatif : à porter avec C7d-3b.
 

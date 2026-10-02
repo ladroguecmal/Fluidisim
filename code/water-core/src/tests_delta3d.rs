@@ -1741,6 +1741,55 @@ fn zero_delta_stays_zero_with_the_bernoulli_cross_terms_s434() {
     assert!(ecart > 0., "la forme ne change rien");
 }
 
+/// **S436, A324** — sous une houle de plus d'une demi-maille (6,5 cm à 12,5 cm), la surface de B franchit des centres de mailles ;
+/// le fantôme latéral d'avant rompait le point fixe du mode relatif (δ nul ne restait pas nul). Avec `set_lateral_own_ghost`, δ nul
+/// reste nul au bit ; sans, il ne l'est plus — le défaut, gardé comme témoin ; et un germe de 1 mm ne dépasse pas 1,5 mm en 1 s.
+#[test]
+fn zero_delta_stays_zero_when_b_crosses_a_cell_centre_s436() {
+    use crate::{background::{Background, SeaState}, SimTime, WorldPos};
+    let (dx, h0) = (0.125f32, 2.5f32);
+    let d = Domain3 { nx: 96, ny: 2, nz: (h0 / dx) as usize + 2, dx };
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    let sea = SeaState { hs: 0.065 * 2. * 2f32.sqrt(), tp: 3.2, theta_turns: 0., components: 1, graine: 7 };
+    let houle = Background::configure(&mut host, sea, WorldPos::from_units(0, 0, 0)).unwrap();
+    let mut grid = BackgroundGrid3::configure(&mut host, d, [0., 0., -h0], 1025.).unwrap();
+    // 0 : nul, remède ; 1 : nul, sans ; 2 : germe, remède.
+    let mut volumes = [(false, true), (false, false), (true, true)].map(|(seed, own)| {
+        let mut v = Volume3::configure(&mut host, d, 1025., houle.gravity()).unwrap();
+        let mut surface = vec![h0; d.columns()];
+        if seed {
+            for i in 38..58 {
+                for j in 0..d.ny {
+                    surface[j * d.nx + i] = h0 + 0.001 * ((i as f32 - 48.) * 0.3).cos();
+                }
+            }
+        }
+        v.set_free_surface(&surface, h0).unwrap();
+        v.set_relative_background(Volume3::RELATIVE_ALL).unwrap();
+        v.set_lateral_own_ghost(own);
+        v
+    });
+    let sponge = Sponge3 { width_x: 2., width_y: 0., rate_per_s: 2. };
+    let mut germe_max = 0f32;
+    for n in 0..100u64 {
+        let time = SimTime(n * 10_000);
+        grid.sample(&houle, time).unwrap();
+        let bg = grid.view().unwrap();
+        for v in &mut volumes {
+            v.step_perturbation_mobile(time, 10_000, 200, &bg, sponge, &Jobs).unwrap();
+        }
+        let v = &volumes[0];
+        assert!(v.eta.iter().all(|e| e.to_bits() == h0.to_bits()), "pas {n}");
+        assert!(v.u.iter().chain(&v.v).chain(&v.w).chain(&v.p).all(|x| *x == 0.), "pas {n}");
+        germe_max = germe_max.max(volumes[2].eta.iter().fold(0f32, |m, e| m.max((e - h0).abs())));
+    }
+    let sans = volumes[1].eta.iter().fold(0f32, |m, e| m.max((e - h0).abs()));
+    println!("S436 : δ nul reste nul au bit avec le remède ; sans, {sans:.2e} m en 1 s ; germe de 1 mm : {germe_max:.2e} m au plus");
+    assert!(sans > 1e-4, "le défaut d'avant ne se montre plus : le cas ne franchit plus de centre");
+    assert!(germe_max <= 1.5e-3, "germe à {germe_max:.2e} m");
+}
+
 /// S375 (ADR-200 D2) — **l'entrée de volume par colonne**. Le volume de perturbation change de `Σ dh·dx²` (critère 1 :
 /// ≤ 10⁻⁹ m³ par ajout, compensé) ; pression et vitesses intactes au bit ; sans ajout, un domaine au repos reste au repos
 /// au bit ; refus atomiques (longueur, non fini, surface hors bornes).

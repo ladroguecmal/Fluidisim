@@ -112,9 +112,10 @@ impl Volume3 {
     /// **S436 — A324.** Aux faces latérales entre une colonne mouillée et une sèche (la surface franchit un centre de maille
     /// entre elles), le fantôme relatif retranche l'erreur de B **interpolée entre les deux colonnes** ; or la valeur qu'il
     /// corrige est la pression de B **au point de surface** sur la face. Les deux ne coïncident pas : sous B seul, δ nul reçoit
-    /// un reste (S436 : 1 mm en 50 ms, des jets de 0,2 m/s, dès que la houle dépasse la demi-maille). Allumé, et là où la surface
-    /// de B seule franchit elle aussi ce centre entre ces deux colonnes, l'erreur retranchée est la même expression prise au
-    /// point de surface de B : à δ nul, le fantôme est nul au bit. Ailleurs, l'interpolation d'avant. Éteint, le défaut : au bit.
+    /// un reste (S436 : 1 mm en 50 ms, des jets de 0,2 m/s, dès que la houle dépasse la demi-maille). Allumé — **le défaut depuis
+    /// S436** —, le fantôme latéral interpole entre les deux colonnes ce que porte leur fantôme vertical (`ρ·g·η′` et le reste de
+    /// B) : à δ nul, il est nul au bit, et il ne lit plus la pression de B au point latéral, qui se divise par la pente de B (nulle
+    /// aux crêtes). Éteint : l'interpolation de S369, gardée pour comparaison. Sans effet hors du mode relatif.
     pub fn set_lateral_own_ghost(&mut self, on: bool) {
         self.lateral_own_ghost = on;
     }
