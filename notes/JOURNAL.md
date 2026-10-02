@@ -18188,3 +18188,14 @@ Bernoulli exacte pour tout δ. Découpage : **C7d-3a** A320 en référence, **C7
 défauts, **C7d-3c** la bande relative en référence, **C7d-3d** sur la carte — chacun son « reçu si ». **Mesuré** : le témoin d'A320
 rejoué au chiffre près (0,1151 s⁻¹, 32,3 mm à 59 s). Aucun code changé. **Rituel.** Maillons **21** — justifié : la priorité du solveur
 (S406) ; 4.19 reste partiel. Suivant : **C7d-3a** — A320, la forme `∇(U·u′) − U×ω′`, sans carte.
+
+## S434 — 2026-10-02 — physique : C7d-3a, la forme de Bernoulli éprouvée — non reçu
+
+**Entrée.** *« Continue »* — C7d-3a, A320. **Fait** ([preuve](../docs/validation/MER-S369.md) §6) : `set_cross_bernoulli` — les
+termes croisés du pas couplé relatif sous la forme `∂_a(U·u′) + Σ_b U_b (∂_b u′_a − ∂_a u′_b)` (G gradient discret exact, R
+rotationnelle) ; δ nul reste nul au bit (un essai). **Mesuré** : la forme ne freine A320 que de 15 à 20 % (0,115 → 0,097 s⁻¹ sous
+7,5 cm ; 0,050 sous 5 cm ; le paquet à 6,4 fois son amplitude) ; **le terme d'ADR-209**, actif en production mais absent du banc,
+**n'y fait rien** — A320 n'est pas l'instabilité FTCS d'A321 ; **la bisection** : G seule et R seule ne croissent pas, leur somme oui —
+**l'hypothèse de S369 est réfutée**. C7d-3a **non reçu** ; A320 annotée. Un calcul à 12,5 cm arrêté (trop long, sans témoin).
+Suite **757**, zéro avertissement. **Rituel.** Maillons **22** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel.
+Suivant : **C7d-3a** — l'advection antisymétrique de `u′` par `U`, la condition de surface, la question physique.

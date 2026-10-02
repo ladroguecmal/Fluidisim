@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 07:59 +02:00
+JETON            : libre
+Battement        : 2026-10-02 08:28 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S434 — C7d-3a**, sans carte : A320 — les termes croisés du pas couplé relatif sous la forme de Bernoulli
-Dernière session : S433 — physique : **la conception de C7d-3** ([preuve](docs/validation/APIC-CARTE-S416.md) §22) — la bande entre dans le pas couplé, ses particules portent la vitesse propre `u′` ; C7d-3a (A320), C7d-3b (le mode relatif sur la carte), C7d-3c et C7d-3d (la bande relative) ; le témoin d'A320 rejoué (0,1151 s⁻¹). Avant : S432, C7d-2 reçu
-Session suivante : **S434 — C7d-3a**, sans carte ([preuve](docs/validation/APIC-CARTE-S416.md) §22.3) : **A320** — les termes croisés du pas couplé relatif (`delta3d_coupling.rs`, `extra3`) sous la forme `∇(U·u′) − U×ω′` ; reçu si le germe de 1 mm sous la houle de 7,5 et de 5 cm ne croît plus (taux < 0,01 s⁻¹ sur 95 s, témoin 0,1151), à 12,5 cm aussi, δ nul reste nul sous B seul, et le paquet de l'ordre C reste sous 1,5 fois son amplitude ; puis C7d-3b (la carte), C7d-3c, C7d-3d ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 21 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S434 — physique : **C7d-3a non reçu** ([preuve](docs/validation/MER-S369.md) §6) — la forme de Bernoulli des termes croisés ne freine A320 que de 15 à 20 % ; le terme d'ADR-209 n'y fait rien ; G seule et R seule stables, leur somme non : l'hypothèse de S369 réfutée. Avant : S433, la conception de C7d-3
+Session suivante : **S435 — C7d-3a**, sans carte ([preuve](docs/validation/MER-S369.md) §6) : A320, les pistes restantes — l'advection de `u′` par `U` sous la forme antisymétrique (conservative de l'énergie), la condition dynamique de surface (le gradient `∂(U·u′)` hors de l'intérieur), un témoin à 12,5 cm, et la question physique (des ondes courtes sur une houle) ; mêmes critères (germe < 0,01 s⁻¹ sur 95 s, paquet ≤ 1,5 fois) ; puis C7d-3b, C7d-3c, C7d-3d ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 22 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
