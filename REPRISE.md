@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 16:35 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 16:41 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S444 — C7d-3c, c1** : ADR-214 (B entre dans la bande) ; `LinearSwell` complet ; `Apic3` relatif, premier jet
 Dernière session : S443 — **ADR-213** (accélérer, décision de l'utilisateur) ; **la bascule des défauts : C7d-3b reçu en entier** ([preuve](docs/validation/APIC-CARTE-S416.md) §22.11) — δ naît relatif à B, référence et carte ; S297 au bit sous `RELATIF=0` ; coût 3,67 ms contre 3,73. Avant : S442, A322 levée
 Session suivante : **S444 — C7d-3c**, sans carte ([preuve](docs/validation/APIC-CARTE-S416.md) §22.3) : la bande étroite APIC dans le pas couplé relatif, en référence — ses particules portent la vitesse propre `u′` et se déplacent avec `U + u′` ; A320 plafonnée (ADR-213 D2), rien ne l'attend ; puis C7d-3d (la carte) ; **les registres au plus tard en S445** (ADR-213 D3 : feuille de route, liste, file active, index, angles morts — tout ce qui a changé depuis S442) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 0 — C7d-3b reçu (S443) : δ relatif dans la production, chemin `Step3`, preuve APIC-CARTE §22.11 ; journal

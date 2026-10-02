@@ -62,36 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S443 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« J'accepte ta proposition »* (la bascule sans attendre C7d-3a),
-puis, sur les quatre propositions pour accélérer, *« Ok go »* — [ADR-213](../docs/adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md)
-(tolérance de 5 %, plafond de deux sessions, registres par lots de trois, bancs courts).
+Session : S444 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »*, puis, à la question de la voie de C7d-3c,
+*« (B) B dans la bande »* — [ADR-214](../docs/adr/ADR-214-b-entre-dans-la-bande.md) (remplace D1 de S433).
 
-**Ce que la session fait.** **La bascule des défauts** (C7d-3b, seconde moitié) : `Volume3` naît en mode relatif (`RELATIVE_ALL`,
-fantôme latéral d'A324, bande sous Lax-Wendroff) ; `Step3` aussi (pipelines relatifs compilés à la création). Le pas de S297 reste
-atteignable (`set_relative_background(0)`, `set_relative(false)`, `RELATIF=0` aux bancs). Les essais du cœur qui mesurent le pas de S297
-l'épinglent explicitement.
+**Ce que la session fait (c1, en référence).** (1) `LinearSwell` complet : l'élévation `η_B(x, t)`, le gradient exact de la vitesse,
+la pression dynamique `p_dyn` (Airy en profondeur infinie : `p = −ρg·ζ + ρg·a·e^{kζ}·cos θ`). (2) `Apic3` en mode relatif
+(`set_relative_background`), sans zone de colonnes : particules en `u′`, déplacées par `U + u′` ; `−dt·u′·∇U` sur la grille ; pas de
+gravité en volume ; la valeur de pression aux mailles d'air voisines de l'eau, `p′ = ρg(z_s − niveau) − p_dyn(z_s)` moins l'erreur de B
+à sa propre surface — dans le second membre et la correction. Sans fond : `Apic3` au bit.
 
-**Critères, écrits avant.** (1) La suite du cœur passe, zéro avertissement ; chaque essai épinglé au pas de S297 est nommé. (2) Le pas
-de S297 reste **au bit** : `RELATIF=0 --delta3d-trajectoire` identique à la ligne de base de S439. (3) Sous les nouveaux défauts : la
-trajectoire carte–référence tient le critère de S439 (écart avant l'horizon ≤ 1,53·10⁻⁴ m) ; le témoin nul au bit ; `--delta3d-cas2`
-(porte B, critère 2 : la carte suit la référence sous 3 mm) tenu. (4) **Le coût** : le pas relatif de la scène de revue à 25 cm au plus
-5 % plus cher que celui de S297 (ADR-213 D1 en sus). (5) La scène de revue à 25 cm et 30 Hz tient 120 s. Bancs courts (D4).
+**Critères, écrits avant.** (1) `LinearSwell` : gradient contre différences finies (écart relatif ≤ 10⁻³), divergence et rotationnel
+nuls (≤ 10⁻⁴ de `|∇U|`), `p_dyn` cohérente avec `∂U/∂t = −∇p_dyn/ρ` à l'ordre linéaire (≤ 10⁻³). (2) Sans fond, `Apic3` au bit (la
+suite et un essai). (3) **Sous B seul**, une nappe de particules au repos relatif (`u′` = 0), houle de 5 cm, 4 m, 25 cm : `|u′|` maximal
+sur 5 s sous 2 % de `aω` — le reste vient de ce que les particules suivent `U` et non la surface linéaire exacte (ordre `ak`). (4) La
+même nappe **sans** le mode relatif mais initialisée à `U` (l'eau totale) sert de témoin : écart des surfaces au plus 5 mm sur 5 s.
+Suite du cœur, zéro avertissement.
 
 ### Plan
 
-- [x] **P1** — ADR-213 ; jeton, plan seul.
-- [x] **P2** — la bascule : cœur et carte ; suite.
-- [x] **P3** — les rejeux ; le coût.
-- [x] **P4** — preuve ; rituel (allégé, ADR-213 D3).
+- [x] **P1** — ADR-214 ; jeton, plan seul.
+- [ ] **P2** — `LinearSwell` complet ; essais.
+- [ ] **P3** — `Apic3` relatif, sans zone ; essais ; mesures (3), (4).
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `Volume3` naît en `RELATIVE_ALL` ; `Step3` appelle `set_relative(true)` à sa création. Épinglés au pas de S297 (ils
-  le mesurent) : `coupled_geometry_zero_and_oblique_ghosts_s297` (un fantôme non nul sous la seule élévation de B) et
-  `coupled_transverse_invariance_and_rotation_s297` (δ qui croît depuis zéro sous B seul — nul en mode relatif). Bancs : `RELATIF=0`
-  rend le pas de S297 (`--delta3d-trajectoire`, `--delta3d-a321`, `--delta3d-cout-scene`). Suite **759**, zéro avertissement.
-- **P3** — (2) `RELATIF=0 --delta3d-trajectoire` **identique au bit** à la ligne de base de S439 ; (3) sous les nouveaux défauts :
-  trajectoire carte–référence **1,44·10⁻⁵ m**, le millimètre jamais atteint ; témoin **nul au bit** ; `--delta3d-cas2` : **7,6·10⁻⁷ m**
-  (critère 3 mm) ; (4) **le coût**, scène de revue à 25 cm, 600 pas : **3,673 ms** (relatif) contre **3,732** (S297) — 1,6 % de moins ;
-  création du pas 7,6 s dans les deux cas ; (5) la scène de revue à 25 cm et 30 Hz (mg 8) **tient 120 s**. **Tous tenus : C7d-3b reçu en
-  entier**, la bascule faite.
-- **P4** — APIC-CARTE §22.11, note datée d'ADR-198 ; registres au prochain lot (ADR-213 D3, au plus tard S445) ; journal ; jeton libre ; maillons 0 ; suivant : S444, C7d-3c.
