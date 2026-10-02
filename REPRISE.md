@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 12:10 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 12:11 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S437 — C7d-3a**, sans carte : le critère d'A320 réécrit ; le repos déplacé dans la maille, à 25 cm
 Dernière session : S436 — physique : **A324 corrigée** ([preuve](docs/validation/MER-S369.md) §8) — le point fixe du mode relatif se rompait au fantôme latéral ; il interpole désormais les fantômes verticaux (le défaut) ; A320 à 12,5 cm : 1,0 à 1,8 fois Benjamin-Feir. Avant : S435, A320 à la longueur d'onde de la houle
 Session suivante : **S437 — C7d-3a**, sans carte ([preuve](docs/validation/MER-S369.md) §7–8) : A320 — réécrire le critère, rapporté à Benjamin-Feir (`ω(ak)²/2`) et à la maille de la production, avant toute mesure ; puis séparer, à 12,5 cm, l'effet du franchissement de celui du remède d'A324 (0,027 sous 7,5 cm contre ≈ 0,07 attendu de 6 cm), et l'essai d'un B de Stokes ; puis C7d-3b (le mode relatif sur la carte, **avec le fantôme latéral d'A324**), C7d-3c, C7d-3d ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 24 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal

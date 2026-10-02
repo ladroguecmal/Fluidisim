@@ -62,54 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S436 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **A324**
-([preuve](../docs/validation/MER-S369.md) §7), avant C7d-3b.
+Session : S437 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, A320
+([preuve](../docs/validation/MER-S369.md) §7–8).
 
-**Ce que la session trouve en entrant.** Banc `transfert_oriente mer`, 12,5 cm, masque 7, germe de 1 mm : sous 6 cm de houle, δ à
-1,1 mm après 1 s ; sous 6,5 cm, 8,6 mm, 73 % de l'énergie sous `4·dx`. La demi-maille est le seuil : δ porte sa surface **totale**
-(`surface_total = eta + η_B`, `prepare_background3`) ; la mouillure de ses mailles suit donc la houle, et une maille s'ouvre ou se
-ferme quand la surface de B franchit son centre — sous B seul, les termes relatifs l'annulent au bit ; sous δ non nul, quelque chose
-l'amplifie.
+**Le critère de C7d-3a, réécrit avant toute mesure.** L'ancien (« taux < 0,01 s⁻¹ ») était hors d'atteinte de toute physique sous
+7,5 cm (S435). **Nouveau** : C7d-3a est reçu si, **à la maille de la production (25 cm)**, germe de 1 mm, masque 7, 95 s, le taux de
+l'amplitude de δ dans la bande de Benjamin-Feir (35 à 59 s) est **au plus 1,5 fois `ω(ak)²/2`** sous 6 et 7,5 cm de houle (0,026 et
+0,041 s⁻¹), **quelle que soit la place du repos dans la maille** ; δ nul reste nul au bit ; le paquet de l'ordre C sous 5 cm reste sous
+1,5 fois son amplitude (S434). Aujourd'hui : 0,077 et 0,106 — manqué d'un facteur 3.
 
-**Ce que la session fait.** (1) Localiser : à chaque pas, où δ saute, et si c'est sur une colonne dont la mouillure vient de changer ;
-la bisection par les bits d'essai (8 à 64) et par les étapes du pas (prédiction, projection, extrapolation, transport). (2) Corriger
-la cause trouvée, sous un réglage éteint par défaut tant qu'il n'est pas reçu, puis par défaut s'il l'est.
+**Ce que la session trouve en entrant.** À 12,5 cm, A320 croît à 0,054 s⁻¹ sous 6 cm (la surface de B ne franchit aucun centre de
+maille) mais à **0,028 sous 6,5 cm** (elle en franchit) — deux fois moins vite pour une houle plus forte. Un comportement aussi
+discontinu à la demi-maille dit qu'un des deux régimes est faux. Hypothèse : celui où la surface de B reste dans la maille de
+surface — le régime de toutes les mesures d'A320 à 25 cm, où le repos tombe sur une face.
 
-**Critères, écrits avant.** **Reçu si** : (1) à 12,5 cm sous 6,5 et 7,5 cm de houle, germe de 1 mm : δ max ≤ 1,5 mm à 1 s et part
-sous `4·dx` ≤ 1 % à 2 s ; (2) le témoin (δ nul) reste nul au bit ; (3) à 25 cm sous 7,5 cm (aucun franchissement), le pas **au bit**
-— le taux d'A320 inchangé (0,1151) ; (4) l'essai `zero_delta_stays_zero…` et la suite du cœur, zéro avertissement ; (5) un essai
-du cœur qui garde le cas. Si la cause n'est pas trouvée, elle est écrite telle quelle (ce qui est écarté, ce qui reste).
+**Ce que la session fait.** (1) `MER_DECALAGE=<f>` : le repos déplacé de `f·dx` dans la maille (0 : sur une face, le banc d'avant au
+bit ; 0,5 : au centre — la surface de B franchit alors un centre à toute amplitude) ; `MER_TEMOIN=1` : le témoin avance aussi en mode
+germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : décalages 0, ¼, ½, ¾. Le point fixe y est mis à l'épreuve
+(A324 le garantit désormais hors d'une face). (3) Conclure : si le taux tombe sous le critère au centre et pas sur la face, le régime
+« sans franchissement » porte l'excès — le localiser ensuite ; sinon, écrire ce qui est écarté.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — localisation (instrument, bisection).
-- [x] **P3** — correction, mesures, critères.
-- [x] **P4** — essai ; suite ; preuve ; A324 ; registres.
-- [x] **P5** — rituel.
+- [x] **P1** — jeton, plan seul, le critère réécrit.
+- [ ] **P2** — `MER_DECALAGE`, `MER_TEMOIN` au banc.
+- [ ] **P3** — mesures : 25 cm, deux houles, quatre décalages ; le point fixe ; conclusion.
+- [ ] **P4** — preuve ; A320 ; registres ; suite.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2** — banc `a324_franchissement` (20 m à 12,5 cm, pas à pas, témoin à côté). **Correction de S435** : le banc `mer` ne fait pas
-  avancer son témoin en mode germe (seulement avec le paquet) — son zéro ne prouvait rien. **Ici, le témoin ne reste pas nul** sous
-  6,5 cm (1 mm en 50 ms, 1 cm en 0,3 s, des jets de 0,2 m/s) ; sous 6 cm, nul au bit. A324 est donc **une rupture du point fixe** du
-  mode relatif. Bits d'essai 8, 16, 32 : rien ne change ; 64 (la pression croisée) : refus au premier pas. **La cause** : le fantôme
-  latéral (`prepare_background3`, entre une colonne mouillée et une sèche au même étage — il n'existe que si la surface franchit un
-  centre entre elles) retranche l'erreur de B **interpolée entre les colonnes**, alors que ce qu'il corrige est la pression de B **au
-  point de surface** : sous B seul, un reste d'ordre `dx²` divisé par `θ`. Essai 1 (l'erreur prise au point de B) : oubliait le terme
-  `ρg(z − repos)` de `ghost_side3` — pire. Essai 2 (avec lui) : le témoin nul au bit, mais le germe à 4,6 mm sous 6,5 cm — la bascule
-  entre deux formules quand δ déplace le franchissement. Essai 3 (le point de B prolongé, continu) : 6,9 mm — le point de franchissement
-  se divise par la pente de B, nulle aux crêtes : c'est là que 6,5 cm franchit. **Essai 4, retenu** : en mode relatif, le fantôme latéral
-  interpole entre les deux colonnes ce que porte leur fantôme vertical (`ρgη′ + ghost_bg_up`, nul au bit à δ nul) — il ne lit plus la
-  pression de B au point latéral. `Volume3::set_lateral_own_ghost`, éteint par défaut ; `MER_A324`, `A324_PROPRE`.
-- **P3** — banc `mer`, 12,5 cm, germe de 1 mm, à 1 s / part sous `4·dx` à 2 s : houle 6 cm 1,1 mm / 0 ; **6,5 cm 1,1 mm / 0** (avant :
-  8,6 mm / 73 %) ; **7,5 cm 1,1 mm / 0** — **critère (1) tenu**. Banc `a324` : le témoin nul au bit aux 100 pas, `u′` ≤ 5 mm/s (avant
-  0,2 m/s) — **(2) tenu**. 25 cm sous 7,5 cm, 95 s : traces **identiques au bit jusqu'à 70 s** (δ y atteint 14,5 cm : δ seul fait
-  alors franchir des centres), taux d'A320 **0,1151**, inchangé — **(3) tenu** ; en fin, sous `4·dx` 0,000 contre 0,001. Essai
-  `zero_delta_stays_zero_when_b_crosses_a_cell_centre_s436` (avec : nul au bit ; sans : 4,7 mm en 1 s ; germe ≤ 1,01 mm) — **(5)**.
-  **Reçu** : `lateral_own_ghost` allumé par défaut (sans effet hors du mode relatif) ; `MER_A324=0`, `A324_ANCIEN=1` rendent l'ancien.
-  Suite **758**, zéro avertissement — **(4)**. La production GPU ne porte pas encore le mode relatif : à porter avec C7d-3b.
-- **P4** — MER-S369 §8 (et la correction datée du §7), APIC-CARTE §22.7 ; A324 corrigée, A320 annotée ; index, liste, feuille de route,
-  questions ; suite 758. **A320 à maille fine** (germe 1 mm, taux de la bande 35–59 s) : sous 7,5 cm à 12,5 cm, **0,027** (1,0 fois
-  Benjamin-Feir ; 25 cm : 0,106) ; 6,5 cm : 0,028 ; sous **6 cm** sans franchissement, 0,077 · 0,062 · 0,054 à 25 · 15,6 · 12,5 cm,
-  ≈ 0,031 à maille nulle (1,8 fois). Données d'entrée de C7d-3a.
-- **P5** — journal ; jeton libre ; maillons 24 (justifiés : S406) ; suivant : S437, C7d-3a.
