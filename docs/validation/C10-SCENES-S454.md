@@ -61,3 +61,27 @@ maille. La scène se joue sur un domaine entier ; le quart reste un banc. Le cri
 **Ce qui se voit** (`captures/s454/long/scene_t{1.0,2.0,3.0,6.0}.png`) : la cavité, le jet et sa goutte détachée, puis les ondes en
 anneau qui s'étendent sur la scène. **Suite** (ADR-215 D4) : le temps réel à 4 m — 27 ms de carte par pas de 4,7 ms simulées.
 
+## 4. Le temps réel à 4 m (S455, ADR-215 D4 étape 2)
+
+2026-10-03. **Reproduire** : `C10_SCENE_SEULE=1 … --c10-saut` imprime le profil (`profil_ms`, médianes par étage) ; la scène de jeu :
+`COURANT=1.0 C10_ARRET=0.6 C10_AIR=1.5 COTE=4 DUREE=20 … --surface-direct` (le bilan de la fenêtre à la fermeture).
+
+| étape | pas de carte | mur par pas | fenêtre : simulé / réel (saut) |
+|---|---:|---:|---:|
+| S454 (3,2 m d'eau, 2,5 m d'air, Courant 0,5) | 24,7 ms | 46 ms | 0,11 |
+| la vitesse maximale réduite sur la carte | 25,0 ms | 31,5 ms | — |
+| la scène de jeu (1,4 m d'eau, 1,5 m d'air) | 12,0 ms | 18,5 ms | 0,87 (0,35) |
+| les horodatages éteints | — | — | 0,87 (0,35) |
+| **Courant 1,0** | 13,7 ms | 16,9 ms | **0,98 (0,83)** |
+
+**Le profil** (S454, médianes) : la projection 13,9 ms sur 24,7 — le gradient conjugué multigrille sur toute l'eau, colonnes
+comprises ; la reconstruction 1,85 ; la décision de la bascule 1,64 ; le reste sous 1 ms chacun. **Le pas stable** se réduit
+désormais sur la carte (deux noyaux, un mot relu) : il est le même, au pas près, que celui des relectures (S453 : 125 pas, inchangés).
+**Le nombre de Courant 1,0** (0,5 dans la référence) : stable jusqu'à t = 16, masse exacte ; l'image à t = 2 diffère de celle à 0,5 sur
+0,3 % des pixels. **Tranché (ADR-215 D2)** : la scène vivante tourne à Courant 1,0 ; les bancs de réception gardent 0,5.
+
+**Verdict** (critères de S455) : (1) le profil publié — tenu ; (2) simulé / réel ≥ 0,9 dans la fenêtre à 4 m — **tenu en moyenne
+(0,98)**, **0,83 pendant le saut** ; masse exacte et scène stable jusqu'à t = 16 — tenu ; image au 99ᵉ centile 37,6 ms (ADR-215 D3 :
+33). **Ce qui reste** : la projection (le solveur entier sur l'eau des colonnes) ; la voie d'échelle est la bande dans la mer δ (C10-2),
+où la mer coûte un solveur de hauteurs, non un solveur volumique.
+

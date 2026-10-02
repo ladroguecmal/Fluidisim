@@ -18395,3 +18395,12 @@ cinq lots ; **C10-1** ([preuve](../docs/validation/C10-SCENES-S454.md) §3) — 
 quart déplié s'accorde au quart (cavité 0,75 maille ; le jet sur l'axe 2,7 mailles plus haut — tranché) ; la scène de 4 m **divergeait
 au plafond** (une nappe plaquée) — avec 2,5 m d'air, stable jusqu'à t = 16, masse exacte ; 27 ms par pas, simulé / réel 0,11. Suite
 **762**. **Rituel** (allégé). Maillons **11** — justifié : la priorité du solveur (S406). Suivant : le temps réel à 4 m.
+
+## S455 — 2026-10-03 — le temps réel à 4 m
+
+**Entrée.** ADR-215 D4, étape 2, sans « Continue ». **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §4) : le profil des
+étages (la projection, 13,9 ms sur 24,7) ; la vitesse maximale réduite sur la carte (le pas stable sans relecture, identique au pas
+près) ; une scène de jeu (1,4 m d'eau, 1,5 m d'air) ; les horodatages éteints en direct ; le nombre de Courant 1,0, stable et
+indiscernable à l'image (tranché). **Mesuré** : la fenêtre à 4 m passe de **0,11 à 0,98** du temps réel (0,83 pendant le saut) ; masse
+exacte, stable jusqu'à t = 16. Suite **762**. **Rituel** (allégé). Maillons **12** — justifié : la priorité du solveur (S406).
+Suivant : la houle.

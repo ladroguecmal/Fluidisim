@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S455 — **en cours**. Sans « Continue » (ADR-215 D1) : l'étape 2 d'ADR-215 D4, **le temps réel à 4 m**.
+Session : S455 — **terminée**. Sans « Continue » (ADR-215 D1) : l'étape 2 d'ADR-215 D4, **le temps réel à 4 m**.
 
 **Le constat (S454).** La scène de 4 m (80 × 80 × 114 mailles, 3,2 m d'eau, 2,5 m d'air) coûte **27 ms de carte par pas** pour un pas
 de **4,7 ms simulées** ; avec les relectures, 44 ms au mur ; la fenêtre tient **0,11** du temps réel.
@@ -80,7 +80,7 @@ la scène stable jusqu'à t = 16 ; (3) si (2) n'est pas atteint, le gain obtenu 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le profil des étages.
 - [x] **P3** — les réductions, mesurées une à une.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — le profil (scène de 4 m, 3,2 m d'eau, 2,5 m d'air ; médianes, ms) : **projection 13,9** ; reconstruction 1,85 ; décision
@@ -93,4 +93,4 @@ la scène stable jusqu'à t = 16 ; (3) si (2) n'est pas atteint, le gain obtenu 
   la boucle vivante (`set_timing`). (d) **le nombre de Courant** (`set_courant`, `COURANT=`) : 0,8 et 1,0 stables jusqu'à t = 16,
   masse exacte ; à 1,0, l'image à t = 2 ne change que sur 0,3 % des pixels — **retenu pour la scène vivante** (ADR-215 D2). La fenêtre
   (20 s, 4 m) : **simulé / réel 0,98** (0,83 sur les 3 premières secondes, le saut) ; image 16,7 ms en médiane, 37,6 ms au 99e centile.
-
+- **P4** — C10-SCENES-S454 §4 ; journal ; jeton libre ; maillons 12 (justifiés : S406) ; suivant : S456, la houle (ADR-215 D4 étape 3).
