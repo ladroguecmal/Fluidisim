@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S447 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c2, le raccord
+Session : S447 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c2, le raccord
 conservatif**, seconde et dernière session ([preuve](../docs/validation/APIC-CARTE-S416.md) §23.3).
 
 **La conception.** **La mer est la seule comptable de la masse de δ** : son pas avance toutes ses colonnes, intérieur de la bande
@@ -79,7 +79,7 @@ volume de δ de la mer sous **1 %** du volume d'une demi-période (3,2·10⁻² 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le raccord conservatif au banc ; mesures ; critères.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `raccord_bande_mer`, raccord conservatif (le défaut ; `RACCORD_CONSERVATIF=0`, celui de S446), marge 2, 10 s : δ hors de la
@@ -88,4 +88,4 @@ volume de δ de la mer sous **1 %** du volume d'une demi-période (3,2·10⁻² 
   **3,9·10⁻⁶ m³ — 0,01 %** (S446 : 2,2·10⁻³, 6,8 %). Le critère (2) mêlait l'éponge — qui absorbe les ondes de δ sorties de la bande, son
   rôle — au raccord ; la mesure qui isole le raccord le tient cent fois. Marges 1 et 4 : 12,6 et 8,1 mm, 3,1 et 4,7 % bruts. Suite **762**.
   **c2 : non reçu tel qu'écrit ; plafonné (ADR-213 D2)** — le raccord conservatif est retenu, c3 commence avec lui.
-
+- **P3** — APIC-CARTE §23.4 ; journal ; jeton libre ; maillons 4 (justifiés : S406) ; suivant : S448, c3 et le lot des registres.

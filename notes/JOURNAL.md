@@ -18324,3 +18324,12 @@ la priorité du solveur (S406). Suivant : **c2**, la conception du raccord.
 seul (5 cm, 4 m, 10 s) : δ hors de la bande **9,86 mm** (tenu, sous 1 cm ; il plafonne) ; la masse oscille de **4,4 %** d'une
 demi-période (manqué, sous 1 %) — le flux de l'interface n'est pas compté pareil des deux côtés. Suite **762**. **Rituel** (allégé).
 Maillons **3** — justifié : la priorité du solveur (S406). Suivant : **c2**, le raccord conservatif (seconde session, ADR-213 D2).
+
+## S447 — 2026-10-02 — physique : c2, le raccord conservatif — la masse au raccord à 0,01 %
+
+**Entrée.** *« Continue »* — c2, seconde session. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §23.4) : le raccord
+conservatif — la mer seule comptable de la masse de δ, la forme de la bande décalée d'un `c` uniforme, le même `c` rendu à la bande ; le
+banc publie le bilan du pas de la mer. **Mesuré** (5 cm, 4 m, 10 s) : δ hors de la bande **9,4 mm** (tenu) ; dérive brute 3,5 % d'une
+demi-période (**manqué tel qu'écrit**), dont l'éponge et la bande de B expliquent tout sauf **3,9·10⁻⁶ m³ — 0,01 % au raccord** (S446 :
+6,8 %). Le critère (2) mêlait l'éponge au raccord. **c2 plafonné, le raccord retenu.** Suite **762**. **Rituel** (allégé). Maillons
+**4** — justifié : la priorité du solveur (S406). Suivant : **c3**, la vague de Chen dans une houle ; le lot des registres (S448).

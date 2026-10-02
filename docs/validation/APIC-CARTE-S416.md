@@ -1159,3 +1159,24 @@ tenu, (2) manqué**. Le δ hors de la bande plafonne (≈ 5 s), ne croît pas ; 
 **conservatif** — la mer mouille le flux de l'interface à la moyenne de deux colonnes, la bande à sa colonne de bord, et la marge
 recouvre les deux domaines ; le même flux, compté une fois, des deux côtés. c2, première session.
 
+### 23.4 c2, le raccord conservatif (S447) — la masse au raccord à 0,01 %
+
+2026-10-02. **Le raccord conservatif** (banc `raccord_bande_mer`, le défaut ; `RACCORD_CONSERVATIF=0`, celui de S446) : **la mer est seule
+comptable de la masse de δ** — son pas avance toutes ses colonnes, intérieur de la bande compris, par ses propres débits ; l'intérieur de
+la bande lui donne sa **forme**, `δη = (η_bande − η_B) + c`, `c` uniforme qui garde le volume de δ que la mer vient de calculer, et la
+bande reçoit le même `c`. Le banc publie aussi le bilan du pas de la mer (`Balance3` : la bande de B aux faces extérieures, l'éponge) et
+ce qui reste au raccord.
+
+**Reproduire** : `cargo run -p water-core --release --offline --example raccord_bande_mer -- 0.05 10` ; 14 s.
+
+| raccord | δ hors de la bande | dérive brute du volume de δ | expliquée par l'éponge et la bande de B | **reste au raccord** |
+|---|---:|---:|---:|---:|
+| S446 (hauteur de la bande telle quelle) | 9,86 mm | 1,42·10⁻³ m³ (4,4 %) | 1,75·10⁻³ m³ | 2,2·10⁻³ m³ (**6,8 %**) |
+| **S447, conservatif** | **9,42 mm** | 1,13·10⁻³ m³ (3,5 %) | 8,5·10⁻⁴ m³ | **3,9·10⁻⁶ m³ (0,01 %)** |
+
+**Verdict, tel qu'écrit** : (1) tenu ; (2) — « la dérive du volume de δ de la mer sous 1 % d'une demi-période » — **manqué** (3,5 %).
+Mais ce critère mêlait au raccord l'éponge, qui absorbe les ondes de δ sorties de la bande (son rôle) ; **la mesure qui isole le
+raccord le tient cent fois** (0,01 %). c2, seconde session : **plafonné** (ADR-213 D2) ; **le raccord conservatif est retenu** et c3 (la
+vague de Chen dans une houle) commence avec lui. Le critère (2), réécrit sur le reste au raccord, recevrait c2 — à la décision de
+l'utilisateur.
+
