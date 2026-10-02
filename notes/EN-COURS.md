@@ -62,34 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S433 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **la conception de C7d-3**
-([preuve](../docs/validation/APIC-CARTE-S416.md) §21 : « sa conception d'abord (une session), qui dira l'ordre avec le mode relatif sur
-la carte et A320 »).
+Session : S434 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**
+([preuve](../docs/validation/APIC-CARTE-S416.md) §22.3), A320.
 
-**Ce que la session trouve en entrant.** Deux solveurs : le **pas couplé de production** (`Volume3`, `delta3d_coupling.rs` — grille MAC
-à fonction hauteur, couplée à B+W par ses faces, éponge, épars, niveaux, faces coupées ; sa production GPU, `delta3d_step.wgsl`, au pas
-de S297, **sans** le mode relatif) ; **la bande** (`Apic3` + zone + fond + échange + bascule — S398–S432, ≈ 3 100 lignes en référence,
-portée sur la carte), qui simule l'eau totale **sans B**. **A320** ouverte : en mode relatif, le terme croisé `u'·∇U`, discrétisé seul,
-fait croître une perturbation sous houle raide ; le remède nommé (ADR-198 D4), la forme de Bernoulli `∇(U·u')`, n'est pas essayé.
+**Ce que la session trouve en entrant.** `extra3` (`delta3d_coupling.rs`) donne à la face d'axe `a` les termes croisés
+`U·∇u′_a + u′·∇U_a` : le premier par **différences centrées** de `u′`, le second avec le **gradient analytique** de B — deux
+discrétisations qui, ensemble, ne forment plus le gradient discret qu'elles sont pour deux écoulements irrotationnels (l'hypothèse de
+S369). Témoin S433 : un germe de 1 mm croît à 0,1151 s⁻¹ sous la houle de 7,5 cm.
 
-**Ce que la session fait.** (1) **La conception** (preuve §22) : où vit la bande (dans le pas couplé, A1 de la campagne — non B dans
-`Apic3`), ce que portent les particules (la vitesse propre `u'`, advectée par `U + u'`), où vont les termes croisés, l'ordre et les
-critères des morceaux — A320 d'abord, le mode relatif sur la carte, la bande relative en référence puis sur la carte. (2) **Le témoin
-d'A320 rejoué** (le germe de 1 mm sous la houle de 7,5 cm, masque 7, 25 cm : S369 mesurait 0,115 s⁻¹ de 35 à 59 s) — l'état de départ
-de la session qui le traitera, au chiffre près ou l'écart dit.
+**Ce que la session fait.** `Volume3::set_cross_bernoulli(bool)`, éteint par défaut (au bit) : pour B irrotationnel
+(`∂_b U_a = ∂_a U_b`), `U·∇u′_a + u′·∇U_a = ∂_a(U·u′) + Σ_b U_b (∂_b u′_a − ∂_a u′_b)`. **G** : la différence, entre les deux mailles
+de la face, de `φ = U·u′` pris aux centres (U des échantillons de B, `u′` des moyennes de faces) — un gradient discret exact, que la
+projection absorbe ; **R** : `Σ_b U_b (∂_b u′_a − ∂_a u′_b)`, les différences de `u′` aux centres le long de `a`, nul quand δ est
+irrotationnel. Aux faces du sommet (une seule maille), l'ancienne forme. Le banc `transfert_oriente mer` : `MER_BERNOULLI=1`.
 
-**Critères, écrits avant.** La conception dit, pour chaque morceau, son contenu, son lieu (référence sans carte ou poste), son « reçu
-si » écrit avant, et la dépendance qu'il protège ; elle nomme ce qu'elle laisse ouvert. Le témoin rejoue S369 (même taux à 5 % près),
-sinon l'écart est publié avant tout remède.
+**Critères, écrits avant** (C7d-3a, preuve §22.3) : (1) le germe de 1 mm sous la houle de **7,5 cm et de 5 cm**, 25 cm, masque 7 :
+**taux < 0,01 s⁻¹ sur 95 s** ; (2) le même à **12,5 cm** (au moins 7,5 cm de houle) ; (3) **δ nul reste nul** sous B seul avec la forme
+(un essai, sur le modèle de S369) ; (4) le paquet de l'ordre C sous la houle de 5 cm (`mer_paquet`) : δ maximal **au plus 1,5 fois**
+l'amplitude du paquet ; (5) sans la forme, S369 au bit (le témoin) ; suite du cœur, zéro avertissement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le témoin d'A320 rejoué.
-- [x] **P3** — la conception de C7d-3 (preuve §22) ; registres.
-- [x] **P4** — rituel.
+- [ ] **P2** — `set_cross_bernoulli` ; l'essai du point fixe ; la clé du banc.
+- [ ] **P3** — mesures : germes 7,5 et 5 cm à 25 cm, 12,5 cm ; le paquet ; critères.
+- [ ] **P4** — suite ; preuve (MER-S369 §6 et APIC-CARTE §22.5) ; A320 ; registres.
+- [ ] **P5** — rituel.
 
 ### Notes de reprise
-- **P2** — le témoin d'A320 rejoué : `MER_RELATIF=7 MER_GERME=0.001 MER_DUREE=60 MER_TRACE=1 … transfert_oriente -- mer 0.25 0.075` (4 min 11 s) : taux de 35 à 59 s (moindres carrés sur `ln δ_max`) **0,1151 s⁻¹**, δ à 59 s **32,3 mm** — S369 : 0,115 s⁻¹ et 32 mm. **A320 intacte**, l'état de départ de C7d-3a.
-- **P3** — la conception de C7d-3, preuve §22 : **D1** la bande entre dans le pas couplé (`Volume3`, qui porte la production), non B dans `Apic3` (qui reste le banc) ; **D2** les particules portent la vitesse propre `u′`, se déplacent avec `U + u′` — le long d'une particule, le seul terme croisé qui reste est `u′·∇U`, celui d'A320 ; **l'identité** `U·∇u′ + u′·∇U = ∇(U·u′) − U×ω′` (B irrotationnel) : la forme de Bernoulli est exacte pour tout δ si l'on garde `U×ω′`. Découpage : **C7d-3a** A320 en référence (germe : taux < 0,01 s⁻¹ sur 95 s à 7,5 et 5 cm, et à 12,5 cm ; paquet : au plus 1,5 fois son amplitude — le critère de volume remplacé, ADR-198 D5), **C7d-3b** le mode relatif sur la carte et la bascule des défauts (un ADR), **C7d-3c** la bande relative en référence (`u′·∇U` sur les particules au gradient exact de B, ou Bernoulli sur la grille, choisi sur mesure), **C7d-3d** sur la carte (δ ≤ 2 ms sur la scène de la porte B avec la bande). Registres : liste 4.19, feuille de route, index, file (90 mots).
-- **P4** — journal ; jeton libre ; maillons 21 (justifiés : S406) ; suivant : S434, C7d-3a — A320.
