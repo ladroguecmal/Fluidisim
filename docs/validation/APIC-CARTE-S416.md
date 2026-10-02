@@ -1004,3 +1004,11 @@ modulation d'ordre `ω(ak)²`, que la linéarisation autour d'Airy, fausse à ce
 maille de δ (houle de plus d'une demi-maille), le mode relatif amplifie δ huit fois en une seconde à l'échelle de la maille. **A324
 passe avant C7d-3b** : sans elle, le mode relatif ne tient pas une vraie mer.
 
+### 22.7 A324 corrigée (S436)
+
+([MER-S369](MER-S369.md) §8.) Ce n'était pas une amplification de δ, mais **une rupture du point fixe** du mode relatif : le
+fantôme latéral, entre une colonne mouillée et une sèche, retranchait l'erreur de B interpolée entre les colonnes, non celle du point
+de surface. Il interpole désormais les fantômes verticaux des deux colonnes (`set_lateral_own_ghost`, le défaut) : δ nul reste nul au
+bit sous une houle de plus d'une demi-maille, le germe ne bouge plus, et le pas est inchangé au bit là où rien ne franchit. **C7d-3b
+devra porter ce fantôme** sur la carte avec le mode relatif.
+

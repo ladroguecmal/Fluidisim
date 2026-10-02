@@ -85,7 +85,7 @@ du cœur qui garde le cas. Si la cause n'est pas trouvée, elle est écrite tell
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — localisation (instrument, bisection).
 - [x] **P3** — correction, mesures, critères.
-- [ ] **P4** — essai ; suite ; preuve ; A324 ; registres.
+- [x] **P4** — essai ; suite ; preuve ; A324 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
@@ -108,4 +108,8 @@ du cœur qui garde le cas. Si la cause n'est pas trouvée, elle est écrite tell
   `zero_delta_stays_zero_when_b_crosses_a_cell_centre_s436` (avec : nul au bit ; sans : 4,7 mm en 1 s ; germe ≤ 1,01 mm) — **(5)**.
   **Reçu** : `lateral_own_ghost` allumé par défaut (sans effet hors du mode relatif) ; `MER_A324=0`, `A324_ANCIEN=1` rendent l'ancien.
   Suite **758**, zéro avertissement — **(4)**. La production GPU ne porte pas encore le mode relatif : à porter avec C7d-3b.
+- **P4** — MER-S369 §8 (et la correction datée du §7), APIC-CARTE §22.7 ; A324 corrigée, A320 annotée ; index, liste, feuille de route,
+  questions ; suite 758. **A320 à maille fine** (germe 1 mm, taux de la bande 35–59 s) : sous 7,5 cm à 12,5 cm, **0,027** (1,0 fois
+  Benjamin-Feir ; 25 cm : 0,106) ; 6,5 cm : 0,028 ; sous **6 cm** sans franchissement, 0,077 · 0,062 · 0,054 à 25 · 15,6 · 12,5 cm,
+  ≈ 0,031 à maille nulle (1,8 fois). Données d'entrée de C7d-3a.
 

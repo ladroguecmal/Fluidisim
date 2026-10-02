@@ -200,6 +200,48 @@ profonde, la houle de Stokes ne diffère d'Airy, jusqu'au troisième ordre, que 
 | houle 6 cm · 6,5 cm, masque 0 | 6,6 · 8,1 mm | 0,04 · 0,05 | 2,0 · 2,0 |
 
 6,25 cm est **la demi-maille** : au-delà, la surface de B franchit les centres de mailles de δ. Le mode relatif seul y est sensible.
+*Correction du 2026-10-02, S436* (§8) : « le témoin, sans germe, reste nul » était faux — en mode germe, le banc `mer` ne fait pas
+avancer son témoin ; un banc pas à pas le montre non nul : A324 est une rupture du point fixe.
 Toute vraie mer à 25 cm a des houles de plus de 12,5 cm : **le mode relatif est inutilisable en l'état hors du banc** — cela précède
 C7d-3b (le mode relatif sur la carte). Non attribué ; l'échantillonnage de B aux faces que sa surface traverse est le premier suspect.
+
+## 8. S436 — A324 : le fantôme latéral du mode relatif (corrigée)
+
+2026-10-02, au poste, sans carte. Critères écrits avant (`notes/EN-COURS.md`, S436 P1) : à 12,5 cm sous 6,5 et 7,5 cm, germe de 1 mm,
+δ max ≤ 1,5 mm à 1 s et part sous `4·dx` ≤ 1 % à 2 s ; le témoin nul au bit ; à 25 cm sous 7,5 cm (aucun franchissement), le pas au
+bit et le taux d'A320 inchangé ; la suite ; un essai du cœur.
+
+**Reproduire** : `cargo run -p water-core --release --offline --example a324_franchissement -- <houle_m>` (20 m × 2 rangées à
+12,5 cm, pas à pas, le témoin à côté ; `A324_ANCIEN=1`, le fantôme d'avant) ; `transfert_oriente -- mer 0.125 <houle>` avec
+`MER_RELATIF=7 MER_GERME=0.001 MER_SPECTRE=1` (`MER_A324=0`, l'ancien). Essai `zero_delta_stays_zero_when_b_crosses_a_cell_centre_s436`.
+
+**Ce qui se passait.** Au §7, A324 était décrite comme une amplification de δ, le témoin restant nul. C'était faux : en mode germe,
+le banc `mer` ne fait pas avancer son témoin. Pas à pas, **le témoin ne reste pas nul** sous 6,5 cm : 1 mm en 50 ms, 1 cm en 0,3 s,
+des jets de 0,2 m/s — sous 6 cm, nul au bit. **Le point fixe du mode relatif se rompt.** Les bits d'essai qui amputent l'advection
+(8, 16) et la bande croisée (32) n'y changent rien. **La cause** : entre une colonne mouillée et une sèche au même étage — une face qui
+n'existe que si la surface franchit un centre de maille entre elles —, le fantôme de pression latéral retranchait l'erreur de B
+**interpolée entre les deux colonnes**, alors que la valeur qu'il corrige est la pression de B **au point de surface** sur la face :
+sous B seul, un reste d'ordre `dx²`, divisé par `θ` dans l'opérateur. S369 le savait exact « seulement là où la mouillure de B seul est
+déjà celle-ci » ; sous une houle d'au plus une demi-maille, elle l'est partout.
+
+**Le remède, au quatrième essai.** (1) L'erreur prise au point de B, sans le terme `ρg(z − repos)` que `ghost_side3` ajoute : pire.
+(2) Avec lui : le témoin nul au bit, mais le germe à 4,6 mm — une bascule entre deux formules quand δ déplace le franchissement. (3) Le
+point de B prolongé, continu : 6,9 mm — ce point se divise par la pente de B, nulle aux crêtes, et c'est aux crêtes que 6,5 cm franchit.
+(4) **Retenu** (`Volume3::set_lateral_own_ghost`, **le défaut depuis S436**) : en mode relatif, le fantôme latéral **interpole entre
+les deux colonnes ce que porte leur fantôme vertical** — `ρgη′` et le reste de B, nul au bit à δ nul — et ne lit plus la pression de
+B au point latéral.
+
+| 12,5 cm, germe 1 mm | δ max à 1 s | sous `4·dx` à 2 s |
+|---|---:|---:|
+| houle 6 cm (aucun franchissement) | 1,1 mm | 0 |
+| houle 6,5 cm — avant · **après** | 8,6 mm · **1,1 mm** | 0,73 · **0** |
+| houle 7,5 cm — avant · **après** | 10 mm · **1,1 mm** | 0,54 · **0** |
+| banc `a324`, témoin sous 6,5 cm, 100 pas — avant · **après** | 8 mm · **0 au bit** | `u′` 0,2 m/s · **5 mm/s** (germe) |
+
+À 25 cm sous 7,5 cm, sur 95 s : les traces sont **identiques au bit jusqu'à 70 s** — δ y atteint 14,5 cm et fait alors franchir des
+centres à lui seul — ; le taux d'A320, **0,1151**, inchangé. **Les cinq critères sont tenus : A324 est corrigée.** Suite 758, zéro
+avertissement. **A320 à 12,5 cm, enfin mesurable** (germe de 1 mm, houle de 7,5 cm, taux de la bande de 35 à 59 s) : **0,027 s⁻¹, 1,0 fois Benjamin-Feir** (0,0273) — contre 0,106 à 25 cm ; sous 6,5 cm, 0,028 (1,4 fois). Pour séparer la maille du franchissement : sous **6 cm** (aucun franchissement, le remède sans objet), 0,077 · 0,062 · 0,054 s⁻¹ à 25 · 15,6 · 12,5 cm, soit ≈ 0,031 extrapolé à maille nulle — **1,8 fois** Benjamin-Feir (0,0175), dans la fourchette de S435. La maille fine ralentit A320 vers l'ordre de Benjamin-Feir ; le franchissement (la mouillure de δ qui suit la houle) la ralentit davantage — reste à le séparer du remède. Ces chiffres sont les données d'entrée de C7d-3a.
+
+**Limites.** Le fond plat, une composante, deux rangées ; les faces coupées (`cut`) ne sont pas éprouvées sous le remède. La
+production GPU ne porte pas encore le mode relatif : le fantôme latéral est à porter avec lui (C7d-3b).
 

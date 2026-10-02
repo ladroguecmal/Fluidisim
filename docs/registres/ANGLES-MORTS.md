@@ -4446,6 +4446,10 @@ nulle (2,05 fois Benjamin-Feir) ; indépendant de la longueur du domaine. **Pas 
 `ω(ak)²`, celui-là même où δ, linéarisé autour d'Airy, est faux. Le critère « < 0,01 s⁻¹ » de C7d-3a était mal posé (une vraie houle de
 7,5 cm module à 0,027) : à réécrire, rapporté à Benjamin-Feir ; essai suivant, B cohérent au second ordre (Stokes).
 
+*Note du 2026-10-02, S436* ([MER-S369](../validation/MER-S369.md) §8) : A324 corrigée, 12,5 cm devient mesurable. Sous 6 cm (sans
+franchissement) : 0,077 · 0,062 · 0,054 s⁻¹ à 25 · 15,6 · 12,5 cm, ≈ 0,031 à maille nulle, **1,8 fois** Benjamin-Feir ; sous 7,5 cm à
+12,5 cm (la mouillure suit la houle) : **0,027, 1,0 fois**. La maille fine ramène A320 vers l'ordre de Benjamin-Feir.
+
 **A321 — S390, 2026-09-26 (sévérité 3, **corrigée S391**). À 30 Hz, la scène de la porte B explose en 24 à 40 s, quel que soit le
 solveur de pression.** Pas de 33,333 ms, `Config::review`, 1 800 pas : la surface publiée cesse d'être finie au pas 930 avec
 Jacobi 512 et au pas 1 050 avec la multigrille à 24 cycles — deux projections **convergées** (résidu relatif ≈ 10⁻⁷) —, au
@@ -4481,7 +4485,7 @@ verrait ses ballottements croître d'environ 19 % d'amplitude en deux minutes. D
 à pas long** (C10, la lame du déversoir) et tout critère de dissipation lu sur une cuve. Témoins à faire : 1 ms sur la même
 durée, termes du pas éteints un à un. [Preuve](../validation/MULTIGRILLE-3D-S385.md) §6.5.
 
-**A324 — S435, 2026-10-02 (sévérité 3, ouverte). En mode relatif, la surface de B qui franchit un centre de maille amplifie δ.**
+**A324 — S435, 2026-10-02 (sévérité 3, **corrigée S436**). En mode relatif, la surface de B qui franchit un centre de maille amplifie δ.**
 Banc `transfert_oriente mer`, 12,5 cm, masque 7, germe de 1 mm : sous une houle de 6 cm, rien ; sous **6,5 cm**, δ passe de 1 à
 8,6 mm en une seconde, en pics isolés loin du germe, à l'échelle de la maille (73 % de l'énergie sous `4·dx`, pic à 10 fois le nombre
 d'onde de la houle). **Le seuil est la demi-maille** (6,25 cm) : au-delà, la surface de B traverse des centres de mailles de δ. Le
@@ -4489,3 +4493,10 @@ témoin sans germe reste nul (le défaut multiplie δ) ; masque 0 : pas de seuil
 de 12,5 cm) sort du domaine où le mode relatif a été éprouvé — il est inutilisable en l'état hors du banc. Déclencheur : **avant
 C7d-3b** (le mode relatif sur la carte) et toute bande relative (C7d-3c, C7d-3d). Premier suspect : l'échantillonnage de B aux faces que
 sa surface traverse. Parente d'A297 (la hauteur de δ discontinue au passage d'un centre de maille). [Preuve](../validation/MER-S369.md) §7.
+
+*Correction et clôture du 2026-10-02, S436* ([MER-S369](../validation/MER-S369.md) §8) : « le témoin sans germe reste nul » était
+faux (le banc `mer` ne fait pas avancer son témoin en mode germe) ; pas à pas, il ne l'est pas : **le point fixe du mode relatif se
+rompait**. Cause : le fantôme latéral retranchait l'erreur de B interpolée entre les colonnes, non celle du point de surface.
+**Corrigée** : il interpole les fantômes verticaux des deux colonnes (`Volume3::set_lateral_own_ghost`, le défaut) ; δ nul reste nul au
+bit sous 6,5 cm à 12,5 cm, le germe y reste à 1,1 mm, rien sous `4·dx` ; 25 cm au bit tant que rien ne franchit. Essai
+`zero_delta_stays_zero_when_b_crosses_a_cell_centre_s436`. Reste : le porter sur la carte avec le mode relatif (C7d-3b).
