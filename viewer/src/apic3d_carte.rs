@@ -13,7 +13,7 @@ use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 101] = [
+const KERNELS: [&str; 103] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -31,6 +31,8 @@ const KERNELS: [&str; 101] = [
     "mg_cg_update_alpha", "mg_cg_beta_direction", "mg_fine_az", "mg_restrict2", "mg_prolong1", "mg_l1_ax",
     "bin_rank", "bin_place", "absorb_faces",
     "mg_restrict1_coop", "mg_restrict2_coop", "switch_flow",
+    // S455 — la vitesse maximale (le pas stable) sur la carte.
+    "speed_max", "speed_max_finish",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -107,6 +109,11 @@ const ABSORB_FACES: usize = 97;
 // S428 — les restrictions en coopération (huit fils par maille grossière).
 const MG_RESTRICT1_COOP: usize = 98;
 const MG_RESTRICT2_COOP: usize = 99;
+// S455 — la vitesse maximale des particules et des faces, réduite sur la carte (`scalars[15]`) : le pas stable sans relecture.
+const SPEED_MAX: usize = 101;
+const SPEED_MAX_FINISH: usize = 102;
+/// Groupes de `speed_max` (chacun réduit un pas de `SPEED_GROUPS · 256` particules ou faces).
+const SPEED_GROUPS: usize = 256;
 /// S424 — les mailles des niveaux ≥ 2 que la mémoire de groupe tient (`MG_SH` du nuanceur).
 const MG_SHARED_CELLS: usize = 1024;
 const WG: u32 = 128;
@@ -187,6 +194,10 @@ pub struct ApicCarte {
     pub adapter: String,
     /// S453 : l'adaptateur (les capacités d'une surface de fenêtre).
     pub(crate) adapter_handle: wgpu::Adapter,
+    /// S455 : les horodatages sont-ils relus (`set_timing`) ?
+    timing: bool,
+    /// S455 : le nombre de Courant du pas stable (0,5, celui de la référence ; `set_courant`).
+    courant: f64,
 }
 
 /// Durées de la carte par étage, ms (horodatages ; `None` sans la fonction).
@@ -433,6 +444,8 @@ impl ApicCarte {
             body: None,
             adapter: format!("{} ({:?})", info.name, info.backend),
             adapter_handle: adapter,
+            timing: true,
+            courant: 0.5,
         })
     }
 
@@ -481,7 +494,7 @@ impl ApicCarte {
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         // S421 : trois passages horodatés — décision (9), application (10), fond (11).
         let stamp = |s: u32| {
-            self.query.as_ref().map(|q| wgpu::ComputePassTimestampWrites {
+            self.query.as_ref().filter(|_| self.timing).map(|q| wgpu::ComputePassTimestampWrites {
                 query_set: q,
                 beginning_of_pass_write_index: Some(2 * s),
                 end_of_pass_write_index: Some(2 * s + 1),
@@ -510,13 +523,13 @@ impl ApicCarte {
                 self.dispatch(&mut pass, FLOOR_MOVE, SCAN as usize, SCAN);
             }
         }
-        if let Some(q) = self.query.as_ref() {
+        if let Some(q) = self.query.as_ref().filter(|_| self.timing) {
             encoder.resolve_query_set(q, 18..24, &self.query_resolve, 0);
             encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 48);
         }
         self.queue.submit([encoder.finish()]);
         let mut times = StageTimes::default();
-        if self.query.is_some() {
+        if self.query.is_some() && self.timing {
             let t = self.map_u64(&self.query_read, 6)?;
             let period = self.queue.get_timestamp_period() as f64 / 1e6;
             for s in 0..3 {
@@ -554,14 +567,17 @@ impl ApicCarte {
     /// `v_max` la plus grande composante des vitesses des particules et des faces (la référence prend toutes les faces dès qu'une
     /// zone de colonnes existe) —, sur l'état relu de la carte. La carte avance alors sans référence.
     pub fn stable_step_us(&self, max_us: u64) -> Result<u64, String> {
-        let n = self.counts()?[0] as usize;
-        let v = self.read_f32(&self.pv, 0, 4 * n)?;
-        let mut vmax = v.chunks_exact(4).fold(0f32, |m, q| m.max(q[0].abs()).max(q[1].abs()).max(q[2].abs()));
-        if self.columns {
-            vmax = self.read_f32(&self.faces_buf, 0, self.faces)?.iter().fold(vmax, |m, x| m.max(x.abs()));
+        // S455 : la réduction sur la carte (deux noyaux), un seul mot relu — au lieu de `4n` vitesses et de toutes les faces.
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            self.dispatch(&mut pass, SPEED_MAX, SPEED_GROUPS * SCAN as usize, SCAN);
+            self.dispatch(&mut pass, SPEED_MAX_FINISH, 1, 1);
         }
+        self.queue.submit([encoder.finish()]);
+        let vmax = self.read_f32(&self.scalars, 15, 1)?[0];
         let dx = self.domain.dx as f64;
-        let dt = 0.5 * dx / (vmax as f64 + (self.g_eff.abs() as f64 * dx).sqrt());
+        let dt = self.courant * dx / (vmax as f64 + (self.g_eff.abs() as f64 * dx).sqrt());
         Ok(((dt * 1e6) as u64).clamp(1, max_us))
     }
 
@@ -1046,7 +1062,7 @@ impl ApicCarte {
         self.write_params(duration_us);
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         let stamp = |s: u32| {
-            self.query.as_ref().map(|q| wgpu::ComputePassTimestampWrites {
+            self.query.as_ref().filter(|_| self.timing).map(|q| wgpu::ComputePassTimestampWrites {
                 query_set: q,
                 beginning_of_pass_write_index: Some(2 * s),
                 end_of_pass_write_index: Some(2 * s + 1),
@@ -1184,7 +1200,7 @@ impl ApicCarte {
             }
             used = s as u32 + 1;
         }
-        if let Some(q) = self.query.as_ref() {
+        if let Some(q) = self.query.as_ref().filter(|_| self.timing) {
             encoder.resolve_query_set(q, 0..2 * used, &self.query_resolve, 0);
             encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16 * used as u64);
         }
@@ -1198,16 +1214,27 @@ impl ApicCarte {
             }
         }
         let mut times = StageTimes::default();
-        if self.query.is_some() {
+        if self.query.is_some() && self.timing {
             let t = self.map_u64(&self.query_read, 2 * used as usize)?;
             let period = self.queue.get_timestamp_period() as f64 / 1e6;
             for s in 0..used as usize {
                 times.stages[s] = t[2 * s + 1].checked_sub(t[2 * s]).map(|d| d as f64 * period);
             }
-        } else {
+        } else if self.query.is_none() {
             self.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| e.to_string())?;
         }
         Ok(times)
+    }
+
+    /// **S455** — les horodatages du pas et de la bascule (vrai par défaut). Éteints (la boucle vivante), le pas et la bascule
+    /// ne relisent rien et n'attendent pas : la seule attente est la relecture du pas stable.
+    pub fn set_timing(&mut self, on: bool) {
+        self.timing = on;
+    }
+
+    /// **S455** — le nombre de Courant de `stable_step_us` : `C·dx / (v_max + √(|g|·dx))` ; 0,5 par défaut (la référence).
+    pub fn set_courant(&mut self, c: f64) {
+        self.courant = c;
     }
 
     fn map_u64(&self, buf: &wgpu::Buffer, len: usize) -> Result<Vec<u64>, String> {
@@ -1267,6 +1294,14 @@ impl ApicCarte {
         let it = s[7] as u32;
         let residual = if s[0] > 0. { (s[2] as f64 / s[0] as f64).sqrt() } else { 0. };
         Ok((p, it, residual, s[6] != 0. && it < self.iteration_cap))
+    }
+
+    /// S455 — le gradient conjugué seul : itérations, résidu relatif, arrêt au critère (huit mots relus, non la pression).
+    pub fn pressure_stats(&self) -> Result<(u32, f64, bool), String> {
+        let s = self.read_f32(&self.scalars, 0, 8)?;
+        let it = s[7] as u32;
+        let residual = if s[0] > 0. { (s[2] as f64 / s[0] as f64).sqrt() } else { 0. };
+        Ok((it, residual, s[6] != 0. && it < self.iteration_cap))
     }
 
     /// Les particules : positions, vitesses, matrices affines (trois lignes par particule).
@@ -1948,6 +1983,13 @@ impl B10 {
         // L'air au-dessus du repos : `2,5·D` (1 m) dans le quart ; **2,5 m** sur un domaine entier (S454) — sans plans de symétrie, le
         // jet de Worthington monte plus haut et touchait le plafond à 1 m, où une nappe plaquée diverge (C10-SCENES-S454 §3).
         // `C10_AIR=<m>` (banc) l'ajuste.
+        // S455 — `C10_ARRET=<m>` : la descente de la sphère avant son arrêt (`3·Fr·D` = 2,4 m dans B10) ; l'eau a `arrêt + 2·D` de
+        // profondeur. Une scène de jeu n'a pas besoin de 3,2 m d'eau.
+        if let Some(arret) = std::env::var("C10_ARRET").ok().and_then(|v| v.parse::<f64>().ok()) {
+            b.a_arret = arret;
+            b.h = arret + 2. * Self::D;
+            b.z0 = b.h + b.r;
+        }
         let air = std::env::var("C10_AIR").ok().and_then(|v| v.parse::<f64>().ok()).unwrap_or(2.5);
         b.nz = ((b.h + air) / b.dx).round() as usize;
         b

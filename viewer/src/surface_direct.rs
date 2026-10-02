@@ -36,6 +36,8 @@ struct Vivant {
     quanta: i128,
     /// S454 — le témoin (METHODE, L371) : les vitesses initiales perturbées de ±ε m/s.
     temoin: Option<f32>,
+    /// S455 — les durées des étages du dernier pas, ms (le pas : 0–8, 12, 13 ; la bascule : 9–11).
+    etages: [Option<f64>; 16],
 }
 
 impl Vivant {
@@ -63,9 +65,13 @@ impl Vivant {
         carte.set_iteration_cap(600);
         carte.set_adaptive_cap(true);
         carte.set_multigrid(true);
+        // S455 : `COURANT=<c>` — le nombre de Courant du pas (0,5 par défaut).
+        if let Some(c) = std::env::var("COURANT").ok().and_then(|v| v.parse::<f64>().ok()) {
+            carte.set_courant(c);
+        }
         let mut rendu = SurfaceCarte::with_format(&carte, w, h, format);
         rendu.set_quart(b.quart());
-        let mut v = Self { b, carte, rendu, t_us: 0, pas: 0, quanta: 0, temoin: None };
+        let mut v = Self { b, carte, rendu, t_us: 0, pas: 0, quanta: 0, temoin: None, etages: [None; 16] };
         v.relancer()?;
         Ok(v)
     }
@@ -99,12 +105,14 @@ impl Vivant {
     fn avancer(&mut self) -> Result<u64, String> {
         self.carte.set_body(Some(self.b.sphere(self.t())));
         let us = self.carte.stable_step_us(PAS_MAX_US).map_err(|e| format!("pas stable : {e}"))?;
-        self.carte.step_upto(us, ApicStage::Full).map_err(|e| format!("pas : {e}"))?;
-        let (_, it, residu, converged) = self.carte.pressure().map_err(|e| format!("pression : {e}"))?;
+        let times = self.carte.step_upto(us, ApicStage::Full).map_err(|e| format!("pas : {e}"))?;
+        let (it, residu, converged) = self.carte.pressure_stats().map_err(|e| format!("pression : {e}"))?;
         self.carte.observe_iterations(it, converged);
         self.t_us += us;
         self.pas += 1;
-        let _ = self.carte.switch_for_bench(self.t_us).map_err(|e| format!("bascule : {e}"))?;
+        let st = self.carte.switch_for_bench(self.t_us).map_err(|e| format!("bascule : {e}"))?;
+        self.etages = times.stages;
+        self.etages[9..12].copy_from_slice(&st.stages[9..12]);
         // `C10_TRACE=<t>` : chaque pas après `t·√(D/g)` — le pas, `n`, les colonnes en bande, le gradient conjugué.
         if let Some(t0) = std::env::var("C10_TRACE").ok().and_then(|v| v.parse::<f64>().ok()) {
             if self.t() / (B10::D / B10::G).sqrt() > t0 {
@@ -279,6 +287,8 @@ struct Fenetre {
     images_ms: Vec<f64>,
     rendus_ms: Vec<f64>,
     simule_s: f64,
+    /// S455 : le temps simulé atteint après 3 s réelles (le saut).
+    simule_3s: Option<f64>,
     erreur: Option<String>,
 }
 
@@ -322,6 +332,9 @@ impl Fenetre {
             if n == PAS_PAR_IMAGE {
                 self.retard = self.retard.min(0.);
             }
+        }
+        if self.simule_3s.is_none() && (maintenant - self.debut).as_secs_f64() >= 3. {
+            self.simule_3s = Some(self.simule_s);
         }
         let rendu_debut = Instant::now();
         v.rendu.set_view(&orbite.camera(), Some(v.b.sphere(v.t())));
@@ -394,6 +407,9 @@ impl ApplicationHandler for Fenetre {
             None => return self.echouer(e, "surface non prise en charge par l'adaptateur de la carte"),
         };
         config.format = format;
+        // S455 : la boucle vivante ne relit pas les horodatages (une attente de moins par pas et par bascule).
+        let mut vivant = vivant;
+        vivant.carte.set_timing(false);
         config.present_mode = if self.duree.is_some() { wgpu::PresentMode::AutoNoVsync } else { wgpu::PresentMode::AutoVsync };
         surface.configure(vivant.carte.gpu().0, &config);
         println!(
@@ -504,6 +520,7 @@ pub fn fenetre() -> Result<(), String> {
         images_ms: Vec::new(),
         rendus_ms: Vec::new(),
         simule_s: 0.,
+        simule_3s: None,
         erreur: None,
     };
     e.run_app(&mut app).map_err(|e| e.to_string())?;
@@ -519,10 +536,11 @@ pub fn fenetre() -> Result<(), String> {
     let (p99, pire) = if im.is_empty() { (f64::NAN, f64::NAN) } else { (im[im.len() * 99 / 100], im[im.len() - 1]) };
     println!(
         "SURFACE_DIRECT_S453 bilan_fenetre images={images} image_ms_mediane={med:.2} image_ms_p99={p99:.2} image_ms_max={pire:.2} \
-         rendu_ms_mediane={:.3} simule_s={:.3} reel_s={reel:.2} rapport_simule_reel={:.2} pas={}",
+         rendu_ms_mediane={:.3} simule_s={:.3} reel_s={reel:.2} rapport_simule_reel={:.2} rapport_3_premieres_s={:.2} pas={}",
         mediane(&mut app.rendus_ms),
         app.simule_s,
         app.simule_s / reel.max(1e-9),
+        app.simule_3s.map_or(f64::NAN, |s| s / 3.),
         app.vivant.as_ref().map_or(0, |v| v.pas)
     );
     Ok(())
@@ -684,6 +702,7 @@ pub fn c10_saut() -> Result<(), String> {
             camera.oeil = [b.centre[0] as f32, b.centre[1] as f32 - 0.5, b.h as f32 + 7.];
         }
         let (mut pas_ms, mut etapes) = (Vec::new(), Vec::new());
+        let mut par_etage: Vec<Vec<f64>> = vec![Vec::new(); 16];
         println!(
             "C10_SAUT_S454 scene cote_m={:.2} domaine={}x{}x{} mailles={} quanta_initiaux={}",
             d.nx as f64 * b.dx,
@@ -701,6 +720,11 @@ pub fn c10_saut() -> Result<(), String> {
                 let t0 = Instant::now();
                 v.avancer()?;
                 pas_ms.push(t0.elapsed().as_secs_f64() * 1e3);
+                for (e, d) in par_etage.iter_mut().zip(v.etages) {
+                    if let Some(d) = d {
+                        e.push(d);
+                    }
+                }
             }
             // Le coût de la carte, horodaté, sur un pas de plus (étages du pas et de la bascule).
             v.carte.set_body(Some(v.b.sphere(v.t())));
@@ -716,6 +740,9 @@ pub fn c10_saut() -> Result<(), String> {
             let (phi, _) = v.carte.surface()?;
             let finie = phi.iter().all(|x| x.is_finite());
             let mask = v.carte.mask()?;
+            // S455 : la plus haute eau (la surface lue sur `φ`) et la marge sous le plafond.
+            let plus_haute = hauteurs(&phi, d.nx, d.ny, d.nz, b.dx).iter().filter(|x| !x.is_nan()).fold(f64::MIN, |m, x| m.max(*x));
+            println!("C10_SAUT_S454 scene plus_haute_eau_m={plus_haute:.3} plafond_m={:.3}", d.nz as f64 * b.dx);
             if std::env::var("C10_OU").is_ok() {
                 let hs = hauteurs(&phi, d.nx, d.ny, d.nz, b.dx);
                 let sans = hs.iter().filter(|x| x.is_nan()).count();
@@ -745,6 +772,14 @@ pub fn c10_saut() -> Result<(), String> {
                 mask.iter().filter(|m| **m == 0).count()
             );
         }
+        // S455 — le profil : la médiane de chaque étage sur tous les pas.
+        const NOMS: [&str; 14] = [
+            "p2g", "reconstruction", "projection", "extrapolation", "g2p", "advection", "separation_corps", "absorption", "echange",
+            "bascule_decision", "bascule_application", "bascule_fond", "fil_echange", "fil_absorption",
+        ];
+        let profil: Vec<String> =
+            NOMS.iter().zip(par_etage.iter_mut()).map(|(n, e)| format!("{n}={:.2}", if e.is_empty() { 0. } else { mediane(e) })).collect();
+        println!("C10_SAUT_S454 scene profil_ms {}", profil.join(" "));
         println!(
             "C10_SAUT_S454 scene bilan pas={} pas_mur_ms_mediane={:.2} pas_carte_ms_mediane={:.2} pas_moyen_us={:.0}",
             v.pas,

@@ -78,8 +78,19 @@ la scène stable jusqu'à t = 16 ; (3) si (2) n'est pas atteint, le gain obtenu 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le profil des étages.
-- [ ] **P3** — les réductions, mesurées une à une.
+- [x] **P2** — le profil des étages.
+- [x] **P3** — les réductions, mesurées une à une.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — le profil (scène de 4 m, 3,2 m d'eau, 2,5 m d'air ; médianes, ms) : **projection 13,9** ; reconstruction 1,85 ; décision
+  de la bascule 1,64 ; fil de l'échange 0,94 ; séparation et corps 0,84 ; P2G 0,78 ; le reste sous 0,6. Au mur, **46 ms** par pas
+  pour 25 ms de carte : les relectures du pas stable (toutes les vitesses de particules et de faces) et de la pression entière.
+- **P3** — (a) **la vitesse maximale sur la carte** (`speed_max`, `speed_max_finish` ; un mot relu) et `pressure_stats` (huit mots) :
+  le pas stable identique au pas près (S453 : 125 pas, pas moyen 4 856 µs, inchangés) ; mur 46 → **31,5 ms**. (b) **une scène de jeu**
+  (`C10_ARRET=0.6` : la sphère s'arrête à 0,6 m, 1,4 m d'eau ; `C10_AIR=1.5`) : 80 × 80 × 58 mailles, pas de carte **12 ms**
+  (projection 6,7), l'eau au plus haut à 2,11 m sous un plafond à 2,9 m ; stable jusqu'à t = 16. (c) **les horodatages éteints** dans
+  la boucle vivante (`set_timing`). (d) **le nombre de Courant** (`set_courant`, `COURANT=`) : 0,8 et 1,0 stables jusqu'à t = 16,
+  masse exacte ; à 1,0, l'image à t = 2 ne change que sur 0,3 % des pixels — **retenu pour la scène vivante** (ADR-215 D2). La fenêtre
+  (20 s, 4 m) : **simulé / réel 0,98** (0,83 sur les 3 premières secondes, le saut) ; image 16,7 ms en médiane, 37,6 ms au 99e centile.
+

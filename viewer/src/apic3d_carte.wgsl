@@ -5739,3 +5739,51 @@ fn reconstruct_coop(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invoca
     }
 }
 
+// S455 — **la vitesse maximale**, pour le pas stable (`Apic3::stable_step_us`) : la plus grande composante des vitesses des
+// particules résidentes et, si la zone des colonnes existe, des faces. `speed_max` : chaque groupe réduit sa part (pas de
+// `256 · groupes`) dans `partials[groupe]` ; `speed_max_finish` : un groupe réduit les parts dans `scalars[15]`. Le maximum ne
+// dépend pas de l'ordre : le résultat est celui du CPU, au bit.
+const SPEED_GROUPS: u32 = 256u;
+
+@compute @workgroup_size(256)
+fn speed_max(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+             @builtin(workgroup_id) w: vec3<u32>) {
+    let pas = SPEED_GROUPS * 256u;
+    let n = atomicLoad(&pcount[COUNT_N]);
+    var m = 0.0;
+    for (var q = g.x; q < n; q = q + pas) {
+        let v = pv[q];
+        m = max(m, max(abs(v.x), max(abs(v.y), abs(v.z))));
+    }
+    if P.has_columns != 0.0 {
+        for (var f = g.x; f < P.faces; f = f + pas) {
+            m = max(m, abs(faces[f]));
+        }
+    }
+    red_a[l.x] = m;
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if l.x < s {
+            red_a[l.x] = max(red_a[l.x], red_a[l.x + s]);
+        }
+        workgroupBarrier();
+    }
+    if l.x == 0u {
+        partials[w.x] = red_a[0];
+    }
+}
+
+@compute @workgroup_size(256)
+fn speed_max_finish(@builtin(local_invocation_id) l: vec3<u32>) {
+    red_a[l.x] = partials[l.x];
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if l.x < s {
+            red_a[l.x] = max(red_a[l.x], red_a[l.x + s]);
+        }
+        workgroupBarrier();
+    }
+    if l.x == 0u {
+        scalars[15] = red_a[0];
+    }
+}
