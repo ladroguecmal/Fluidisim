@@ -81,7 +81,7 @@ trajectoire carte–référence tient le critère de S439 (écart avant l'horizo
 
 - [x] **P1** — ADR-213 ; jeton, plan seul.
 - [x] **P2** — la bascule : cœur et carte ; suite.
-- [ ] **P3** — les rejeux ; le coût.
+- [x] **P3** — les rejeux ; le coût.
 - [ ] **P4** — preuve ; rituel (allégé, ADR-213 D3).
 
 ### Notes de reprise
@@ -89,4 +89,9 @@ trajectoire carte–référence tient le critère de S439 (écart avant l'horizo
   le mesurent) : `coupled_geometry_zero_and_oblique_ghosts_s297` (un fantôme non nul sous la seule élévation de B) et
   `coupled_transverse_invariance_and_rotation_s297` (δ qui croît depuis zéro sous B seul — nul en mode relatif). Bancs : `RELATIF=0`
   rend le pas de S297 (`--delta3d-trajectoire`, `--delta3d-a321`, `--delta3d-cout-scene`). Suite **759**, zéro avertissement.
+- **P3** — (2) `RELATIF=0 --delta3d-trajectoire` **identique au bit** à la ligne de base de S439 ; (3) sous les nouveaux défauts :
+  trajectoire carte–référence **1,44·10⁻⁵ m**, le millimètre jamais atteint ; témoin **nul au bit** ; `--delta3d-cas2` : **7,6·10⁻⁷ m**
+  (critère 3 mm) ; (4) **le coût**, scène de revue à 25 cm, 600 pas : **3,673 ms** (relatif) contre **3,732** (S297) — 1,6 % de moins ;
+  création du pas 7,6 s dans les deux cas ; (5) la scène de revue à 25 cm et 30 Hz (mg 8) **tient 120 s**. **Tous tenus : C7d-3b reçu en
+  entier**, la bascule faite.
 
