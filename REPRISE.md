@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 18:05 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 18:08 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S452 — la surface continue en direct, sur la carte** (R37 reçu)
 Dernière session : S451 — la surface continue après R36 ([preuve](docs/validation/SURFACE-CONTINUE-S450.md)) — `φ` fondu au raccord (0,08 maille), normales lissées ; R37 envoyé, en attente. Avant : S450
 Session suivante : **S452 — selon R37** : reçu, **le rendu en direct** — la même isosurface sur la carte de la bande (`apic3d_carte`), dans l'afficheur (ADR-211 D2), puis C10 ; non reçu, ce que l'utilisateur désigne ; la stabilité du raccord bande ↔ mer reste ouverte (déclencheur : une scène où une bande déferle dans la mer)
 Maillons        : 8 — justifié : la priorité du solveur passe avant la règle (S406) ; journal

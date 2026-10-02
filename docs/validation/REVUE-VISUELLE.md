@@ -1451,5 +1451,7 @@ de 0,34 à 0,08 maille, l'ombrage par pixel.
 |---|---|
 | `captures/s451/b10_t{0.5,1.0,2.0,3.0}.png` | le cratère, puis le jet — lisses |
 
-**La question :** voit-on encore des divisions — faces planes ou marches ? **Verdict** : en attente.
+**La question :** voit-on encore des divisions — faces planes ou marches ? **Verdict R37 — reçu le 2026-10-02 (S452)** : *« Je valide le
+render »*. **Reçu** : la surface continue — l'isosurface du champ unique `φ`, fondue au raccord, ombrée par pixel — est le rendu retenu
+; suite, le rendu en direct sur la carte (S452).
 

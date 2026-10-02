@@ -62,31 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S451 — **terminée**. Verdict de l'utilisateur (2026-10-02) sur les images de S450 (**R36**) : *« Alors le problème est que l'on
-voit des divisions faces plane »* — non reçu ([REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md) §41).
+Session : S452 — **en cours**. Verdict de l'utilisateur (2026-10-02) : *« Je valide le render »* — **R37 reçu** (REVUE-VISUELLE §42).
 
-**Ce que la session fait.** (1) Le lot des registres (ADR-213 D3, dû en S451). (2) **Les deux causes de R36** au banc
-`surface_continue` : **l'ombrage à facettes** — une normale par sommet, le gradient de `φ` (différences centrées sur la grille, interpolé
-en trilinéaire au point du sommet), puis interpolée **par pixel** (ombrage de Phong) ; **les marches au raccord** — pour le rendu, `φ`
-**fondu** sur les deux colonnes de chaque côté d'une frontière bande | colonnes : la moyenne pondérée de `φ` de la bande et de `z − η`
-de la colonne voisine, le poids allant de 0 à 1 sur ces quatre colonnes. Le calcul (`Apic3`) n'est pas touché : c'est le rendu.
+**Ce que la session fait — le rendu en direct, sur la carte.** Le module `surface_carte` de l'afficheur, sur le device de la carte de
+la bande (`ApicCarte`), lit `φ` (`cellf`) et le masque des colonnes (`cmask`) sans retour au CPU : (1) **une passe de calcul** fond `φ`
+au raccord bande | colonnes — le `champ_rendu` de S451, porté (deux passes d'une moyenne 3 × 3 sur les colonnes à moins de deux mailles
+d'une frontière) ; (2) **une passe de fragments** — un rayon par pixel dans le champ fondu (le quart reflété en entier, échantillonnage
+trilinéaire aux centres des mailles), le premier zéro par pas d'une demi-maille puis bissection, la normale au gradient, l'ombrage de
+R37 (Lambert, Fresnel de Schlick, reflet du ciel, reflet du soleil), la sphère en gris (intersection analytique). Le banc
+`--surface-carte` mène B10 en bande étroite sur la carte (la référence donne le pas) et capture une image aux instants de R37.
 
-**Critères, écrits avant.** (1) le saut au raccord, mesuré sur le champ rendu, **sous un quart de maille** (corrigé de la pente) ;
-(2) le maillage toujours étanche (0 arête ouverte) ; (3) les images de S450 refaites aux mêmes instants, montrées à l'utilisateur (R37) :
-**ni facettes ni marches** visibles — son jugement.
+**Critères, écrits avant.** (1) **le fondu porté** : le champ rendu de la carte égale le `champ_rendu` du CPU sur le même `φ` à 10⁻⁵
+près ; (2) **le coût** : le rendu d'une image de 960 × 600 en **1 ms au plus** (médiane, sur la carte) ; (3) quatre images de la
+carte, aux instants de R37, **comparables à R37** — montrées à l'utilisateur.
 
 ### Plan
 
-- [x] **P1** — R36 inscrit ; jeton, plan seul.
-- [x] **P2** — le lot des registres.
-- [x] **P3** — normales lissées, `φ` fondu au raccord ; mesures ; images.
-- [x] **P4** — preuve ; rituel (allégé).
+- [x] **P1** — R37 inscrit ; jeton, plan seul.
+- [ ] **P2** — `surface_carte` (le fondu, le lancer de rayons) ; le banc `--surface-carte` ; mesures ; images.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — feuille de route, liste, file active pour S448–S450 ; `Registres` : dernier lot S451, le prochain au plus tard en S454.
-- **P3** — `surface_continue` : `champ_rendu` (φ fondu au raccord : deux passes d'une moyenne horizontale 3 × 3 sur les colonnes à
-  moins de deux mailles d'une frontière bande | colonnes ; `SURFACE_SANS_FONDU=1`, celui de S450) ; normales par sommet (le gradient de
-  `φ`, interpolé le long de l'arête) et ombrage par pixel. **Mesuré** : le saut au raccord corrigé de la pente **0,083 maille** (S450 :
-  0,337) — (1) tenu ; **0 arête ouverte** — (2) tenu ; les images `captures/s451/b10_t{0.5,1.0,2.0,3.0}.png` : le cratère et le jet
-  lisses, ni facettes ni marches — envoyées à l'utilisateur (R37), (3) à son jugement. 28 s. Suite **762**.
-- **P4** — SURFACE-CONTINUE-S450 (§ S451), REVUE-VISUELLE §42 (R37) ; journal ; jeton libre ; maillons 8 (justifiés : S406) ; suivant : S452, selon R37.

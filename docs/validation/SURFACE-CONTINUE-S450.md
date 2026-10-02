@@ -51,3 +51,4 @@ coordonnées barycentriques **par pixel** (Phong). **Reproduire** : comme ci-des
 
 Les images `captures/s451/b10_t{0.5,1.0,2.0,3.0}.png` : le cratère et le jet de Worthington lisses, sans les marches carrées.
 
+*2026-10-02, S452 — l'utilisateur* : *« Je valide le render »* — **R37 reçu**.
