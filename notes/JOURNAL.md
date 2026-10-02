@@ -18166,3 +18166,14 @@ fenêtre au retournement (forme seule 0,62), aucun retour rapide, le retournemen
 reçu.** Publié : après le déferlement, la bande garde l'eau agitée (six fois les particules de la forme seule). Suite **756**, zéro
 avertissement. **Rituel.** Maillons **19** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7d-2** —
 le seuil de vitesse propre, sa relâche et le fond B sur la carte.
+
+## S432 — 2026-10-02 — physique : C7d-2 reçu, la vitesse propre de δ sur la carte
+
+**Entrée.** *« continue »* — C7d-2. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §21.4) : le seuil de vitesse
+propre, sa relâche et le fond B dans la décision de la bascule sur la carte — paramètres à 256 octets, `switch_flow` entre la pente et
+la dilatation, `floor_place` sous les mailles rapides ; `SwitchSettings` refuse les critères d'écoulement non portés. **Mesuré** : le
+banc de décision **identique à la référence** dans les quatre séries, avec et sans les clés (le critère y travaille : jusqu'à 44 070
+particules contre 8 686) ; B10 en bande étroite sans les clés **identique au bit à S428**, 2,06 ms (C7e tenu) ; avec les clés, la carte
+suit la référence au chiffre près (pincement au pas 53 des deux côtés). Non-régression identique ; suite **756**, zéro avertissement.
+**Écart** : P2 et P3 en un seul commit. **Rituel.** Maillons **20** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel.
+Suivant : **la conception de C7d-3** — la bande dans la production couplée ; le mode relatif sur la carte (ADR-198 D1) et A320.
