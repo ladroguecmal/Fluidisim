@@ -18245,3 +18245,14 @@ l'excès viendrait de l'onde liée `2K`, collée à la surface et mal résolue �
 mais 4 m à 12,5 cm (32 mailles) montait à 3,1 fois (S436). **Indécis**, tel qu'écrit ; la cause n'est pas trouvée. La règle déclarée en
 S437 s'applique : le constat et l'enveloppe à 25 cm s'écrivent, **C7d-3b vient, sans la bascule des défauts**. Aucun code du cœur
 changé. **Rituel.** Maillons **26** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7d-3b**.
+
+## S439 — 2026-10-02 — physique : C7d-3b, le mode relatif sur la carte — non reçu tel qu'écrit, d'un cheveu
+
+**Entrée.** *« Continue »* — C7d-3b. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §22.10) : `RELATIVE` dans le pas
+et le couplage de la carte (prédiction sans le résidu de B, bande relative, fantômes moins l'erreur de B, fantôme latéral d'A324),
+pipelines compilés à la demande (`Step3::set_relative`) ; bancs `RELATIF`, `TEMOIN`, `--delta3d-temoin-relatif`. **Trouvé** : la bande
+`band(surface) − band(own)` laissait 9·10⁻¹¹ m (une somme réassociée par le compilateur, L345) ; réécrite entre les deux surfaces, en
+différences exactes. **Mesuré** : production **au bit** ; témoin **nul au bit** sur 400 pas ; horizon du millimètre 260 contre 130 ;
+mais l'écart avant l'horizon, 2,0003 fois celui du pas de S297 — **manqué de 0,01 %**, sur des fenêtres inégales (sur la même, 500 fois
+mieux). **Non reçu tel qu'écrit.** Cœur inchangé. **Rituel.** Maillons **27** — justifié : la priorité du solveur (S406) ; 4.19 reste
+partiel. Suivant : **C7d-3b**, le critère (3) réécrit sur une même fenêtre, puis rejoué.

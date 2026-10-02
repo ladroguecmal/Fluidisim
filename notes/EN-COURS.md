@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S439 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3b**
+Session : S439 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3b**
 ([preuve](../docs/validation/APIC-CARTE-S416.md) §22.3, §22.9), sans la bascule des défauts.
 
 **Ce que la session trouve en entrant.** Le pas résident (`viewer/src/delta3d_step.rs`, `delta3d_step.wgsl`, et `couple_columns`,
@@ -89,7 +89,7 @@ celui du pas de S297 ; (4) la suite du cœur, zéro avertissement ; l'afficheur 
 - [x] **P2** — la ligne de base du banc de trajectoire (S297).
 - [x] **P3** — le mode relatif sur la carte : sources, pipelines, banc.
 - [x] **P4** — mesures ; critères.
-- [ ] **P5** — preuve ; registres ; rituel.
+- [x] **P5** — preuve ; registres ; rituel.
 
 ### Notes de reprise
 - **P2** — `PAS=400 PERIODE=50 CYCLES=64 water-viewer --delta3d-trajectoire` (32 × 24 × 36 à 25 cm, la mer de S298, bosse de 18 cm,
@@ -113,4 +113,4 @@ celui du pas de S297 ; (4) la suite du cœur, zéro avertissement ; l'afficheur 
   même fenêtre (pas 1 à 129), la carte relative s'écarte de **1,5·10⁻⁷ m** contre 7,65·10⁻⁵ pour le pas de S297 — 500 fois moins.
   **C7d-3b non reçu tel qu'écrit** ; le critère (3), mal posé, est à réécrire avant la prochaine mesure (même fenêtre). (4) L'afficheur
   compile sans avertissement ; le cœur n'a pas changé (suite 758).
-
+- **P5** — APIC-CARTE §22.10 ; registres ; journal ; jeton libre ; maillons 27 (justifiés : S406) ; suivant : S440, C7d-3b — le critère (3) réécrit.

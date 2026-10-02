@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 14:46 +02:00
+JETON            : libre
+Battement        : 2026-10-02 15:16 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S439 — C7d-3b**, sur la carte : le mode relatif de δ porté au pas résident, avec le fantôme latéral d'A324
-Dernière session : S438 — physique : A320, l'échelle en mailles par longueur d'onde éprouvée — **indécise** ([preuve](docs/validation/MER-S369.md) §10) ; cause non trouvée, enveloppe à 25 cm écrite ; C7d-3b passe sans la bascule des défauts. Avant : S437, le critère réécrit
-Session suivante : **S439 — C7d-3b**, sur la carte ([preuve](docs/validation/APIC-CARTE-S416.md) §22.3, §22.9) : porter le mode relatif de δ (`RELATIVE_ALL`, `Volume3::step_perturbation_mobile`) sur la carte, **avec le fantôme latéral d'A324** — reçu si la carte suit la référence CPU sous la houle (témoin nul au bit, germe à l'arrondi près) ; **la bascule des défauts attend C7d-3a** (A320 ouverte, MER-S369 §9–10) ; puis C7d-3c, C7d-3d après C7d-3a ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 26 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S439 — physique : **C7d-3b non reçu tel qu'écrit** ([preuve](docs/validation/APIC-CARTE-S416.md) §22.10) — le mode relatif porté sur la carte : production au bit, témoin nul au bit, horizon du millimètre doublé ; l'écart avant l'horizon manqué de 0,01 % sur des fenêtres inégales. Avant : S438, A320 indécise
+Session suivante : **S440 — C7d-3b**, sur la carte ([preuve](docs/validation/APIC-CARTE-S416.md) §22.10) : réécrire le critère (3) sur une même fenêtre (l'écart de la carte relative à sa référence, sur les pas où le pas de S297 tient sous le millimètre, au plus deux fois le sien), puis le rejouer (`RELATIF=1 PAS=400 CYCLES=64 --delta3d-trajectoire`) — sauf si l'utilisateur accepte l'écart ; **la bascule des défauts attend C7d-3a** (A320 ouverte) ; C7d-3c, C7d-3d après C7d-3a ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 27 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
