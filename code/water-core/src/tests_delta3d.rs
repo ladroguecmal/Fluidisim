@@ -521,6 +521,8 @@ fn mobile_ghost_coefficients_and_jacobi_match_matrix_s296() {
 fn coupled_geometry_zero_and_oblique_ghosts_s297() {
     use crate::background::BackgroundSample;
     let (mut v,_) = volume(5,4,8,0.25,9.81);
+    // S443 : le pas de S297, que cet essai mesure — le mode relatif est le défaut depuis la bascule.
+    v.set_relative_background(0).unwrap();
     let u=vec![BackgroundSample::default();v.u.len()];let vv=vec![BackgroundSample::default();v.v.len()];
     let mut w=vec![BackgroundSample::default();v.w.len()];
     let eta:Vec<_>=(0..20).map(|c|1.2+0.2*(c as f32).sin()).collect();v.set_free_surface(&eta,1.2).unwrap();
@@ -614,6 +616,8 @@ fn standing_samples297(v:&Volume3,time:f64,axis:usize)->(Vec<BackgroundSample>,V
 fn coupled_transverse_invariance_and_rotation_s297() {
     use crate::SimTime;
     let (mut a,_) = volume(16,4,20,0.125,9.81);let (mut b,_) = volume(4,16,20,0.125,9.81);
+    // S443 : le pas de S297, dont δ croît sous B seul — en mode relatif (le défaut), il resterait nul.
+    a.set_relative_background(0).unwrap();b.set_relative_background(0).unwrap();
     a.set_free_surface(&[2.;64],2.).unwrap();b.set_free_surface(&[2.;64],2.).unwrap();
     let (mut transverse,mut rotated)=(0f32,0f32);
     for n in 0..400 {

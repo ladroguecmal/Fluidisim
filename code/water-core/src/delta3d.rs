@@ -266,7 +266,8 @@ impl Volume3 {
             ghost_bg_up: vec![0.; cols],
             ghost_bg_x: vec![0.; nu],
             ghost_bg_y: vec![0.; nv],
-            relative_background: 0,
+            // S443 (C7d-3b, la bascule des défauts) : δ naît relatif à B — le pas de S297 reste à `set_relative_background(0)`.
+            relative_background: Self::RELATIVE_ALL,
             cross_bernoulli: false,
             cross_bernoulli_trial: 0,
             lateral_own_ghost: true,

@@ -509,7 +509,7 @@ impl Step3 {
             })
             .collect();
         let device_ring = device.clone();
-        let this = Self {
+        let mut this = Self {
             device,
             queue,
             capacity: domain,
@@ -573,6 +573,8 @@ impl Step3 {
             backend: format!("{:?}", info.backend),
         };
         this.write_step_uniform(domain.z0(), 0., Sponge3::default());
+        // S443 (C7d-3b, la bascule des défauts) : δ naît relatif à B, comme `Volume3` ; `set_relative(false)`, le pas de S297.
+        this.set_relative(true);
         Ok(this)
     }
 
@@ -2031,9 +2033,10 @@ pub fn trajectoire() -> Result<(), String> {
         let sponge = Sponge3 { width_x: 1., width_y: 1., rate_per_s: 2. };
         let duration = 5_000u64;
         let columns = domain.columns();
-        // S439 (C7d-3b) : `RELATIF=1`, la référence en mode relatif (S369, A324) et la carte aussi ; `TEMOIN=1`, sans la bosse —
-        // le point fixe : δ nul doit rester nul au bit, sur la carte comme dans la référence.
-        let relatif = std::env::var("RELATIF").is_ok();
+        // S439 (C7d-3b) : le mode relatif (S369, A324), dans la référence et sur la carte — le défaut depuis S443 ; `RELATIF=0`,
+        // le pas de S297. `TEMOIN=1`, sans la bosse — le point fixe : δ nul doit rester nul au bit, sur la carte comme dans la
+        // référence.
+        let relatif = std::env::var("RELATIF").map_or(true, |v| v != "0");
         let temoin = std::env::var("TEMOIN").is_ok();
         let mut eta = vec![rest; columns];
         for j in 0..domain.ny {
@@ -2050,8 +2053,8 @@ pub fn trajectoire() -> Result<(), String> {
             .map_err(|e| format!("volume {e:?}"))?;
         // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
         volume.enable_advection_correction();
-        if relatif {
-            volume.set_relative_background(Volume3::RELATIVE_ALL).map_err(|e| format!("relatif {e:?}"))?;
+        if !relatif {
+            volume.set_relative_background(0).map_err(|e| format!("relatif {e:?}"))?;
         }
         // S441 : la bande relative sous Lax-Wendroff, dans la référence et sur la carte ; le défaut depuis S442, `BANDE_LW=0`
         // rend la bande centrée.
@@ -2564,6 +2567,11 @@ pub fn cout_scene() -> Result<(), String> {
         let carte = Step3::new(background, config.domain, config.origin, crate::delta3d_scene::RHO, crate::delta3d_scene::G).await?;
         println!("DELTA3D_COUT_S341 creation_du_pas_s={:.1}", debut.elapsed().as_secs_f64());
         let mut carte = carte;
+        // S443 : le mode relatif est le défaut ; `RELATIF=0`, le pas de S297, pour comparer les coûts.
+        if std::env::var("RELATIF").is_ok_and(|v| v == "0") {
+            carte.set_relative(false);
+        }
+        println!("DELTA3D_COUT_S443 relatif={}", !std::env::var("RELATIF").is_ok_and(|v| v == "0"));
         carte.set_step(config.step_us, config.rest, config.sponge)?;
         carte.set_state(&u, &v, &w, &eta)?;
         // S342 : `FOND=faces` mesure avec le noyau face par face ; sinon, celui du pas (par tuiles).

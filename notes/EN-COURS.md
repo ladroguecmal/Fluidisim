@@ -80,8 +80,13 @@ trajectoire carte–référence tient le critère de S439 (écart avant l'horizo
 ### Plan
 
 - [x] **P1** — ADR-213 ; jeton, plan seul.
-- [ ] **P2** — la bascule : cœur et carte ; suite.
+- [x] **P2** — la bascule : cœur et carte ; suite.
 - [ ] **P3** — les rejeux ; le coût.
 - [ ] **P4** — preuve ; rituel (allégé, ADR-213 D3).
 
 ### Notes de reprise
+- **P2** — `Volume3` naît en `RELATIVE_ALL` ; `Step3` appelle `set_relative(true)` à sa création. Épinglés au pas de S297 (ils
+  le mesurent) : `coupled_geometry_zero_and_oblique_ghosts_s297` (un fantôme non nul sous la seule élévation de B) et
+  `coupled_transverse_invariance_and_rotation_s297` (δ qui croît depuis zéro sous B seul — nul en mode relatif). Bancs : `RELATIF=0`
+  rend le pas de S297 (`--delta3d-trajectoire`, `--delta3d-a321`, `--delta3d-cout-scene`). Suite **759**, zéro avertissement.
+

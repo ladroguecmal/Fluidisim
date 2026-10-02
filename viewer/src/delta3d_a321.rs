@@ -64,7 +64,8 @@ pub fn banc() -> Result<(), String> {
         }
         carte.set_switches_for_bench(commutateurs);
         // S440 (A322) : `RELATIF=1`, le mode relatif de δ (S369, A324, `Step3::set_relative`).
-        let relatif = env("RELATIF").is_some();
+        // S443 : le défaut ; `RELATIF=0`, le pas de S297.
+        let relatif = env("RELATIF").is_none_or(|v| v != "0");
         // S441 : la bande relative sous Lax-Wendroff — le défaut depuis S442 ; `BANDE_LW=0`, la bande centrée.
         carte.set_relative_band_lax_wendroff(env("BANDE_LW").is_none_or(|v| v != "0"));
         carte.set_relative(relatif);
