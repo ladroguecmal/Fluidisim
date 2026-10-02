@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 17:49 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 17:52 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S450 — la surface continue** (ADR-211 D2) : une première image, hors ligne
 Dernière session : S449 — c3 **plafonné** ([preuve](docs/validation/APIC-CARTE-S416.md) §23.6) — la bande déferle dans la mer, la masse se tient, mais le retournement à 14 % du témoin et le raccord instable à son bord sous houle calme. Avant : S448
 Session suivante : **S450 — la surface continue** (ADR-211 D2, proposée ; c3 plafonné, ADR-213 D2) : dans l'afficheur, la surface de la bande par la distance `φ` qu'elle reconstruit, raccordée à `η` des colonnes, sans interstice, seuls les jets détachés — sur la carte de la bande (`apic3d_carte`), B10 ; reçu si une image de revue la montre continue (l'utilisateur la juge) et le coût du rendu tient l'image ; puis C10 ; la stabilité du raccord au bord des colonnes de particules reste ouverte (déclencheur : une scène où une bande déferle dans la mer)
 Maillons        : 6 — justifié : la priorité du solveur passe avant la règle (S406) ; journal

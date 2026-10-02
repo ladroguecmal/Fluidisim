@@ -62,33 +62,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S449 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c3, seconde session**
-(ADR-213 D2 ; [preuve](../docs/validation/APIC-CARTE-S416.md) §23.5).
+Session : S450 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite proposée : **la surface continue**
+([ADR-211](../docs/adr/ADR-211-les-trucages-retenus.md) D2 : l'utilisateur juge C10 sur une surface sans interstice, dont seuls les
+jets se détachent).
 
-**Ce que la session fait.** Le banc `deferlement_en_mer` : (1) **le témoin juste** — la bande étendue à **toute la mer** (24 m),
-ses bords ouverts nourris par B seul, sans raccord, le même groupe au même endroit ; il remplace la bande seule à parois ; (2) **la
-bascule avec les réglages reçus** en C7d-1/C7d-2 (§21.3) : `maintien` 0,3 s, `fond` 4 mailles, `vitesse` 0,3 m/s, `vitesse_relache`
-0,15 m/s, `fond_b` — le B linéaire de la mer (`LinearSwell` à sa phase), dans la mer comme dans le témoin.
+**Ce que la session trouve en entrant.** La carte de la bande (`apic3d_carte`) n'a pas de rendu : elle ne sert qu'aux calculs et à
+leurs bancs. Mais le champ `φ` d'`Apic3` est **déjà le champ unique** : `z − η` dans la zone des colonnes, la reconstruction des
+particules dans la bande, `z − fond` sous le fond (`columns_label`). Une isosurface de ce champ seul est continue par construction —
+l'interstice viendrait d'un rendu qui dessinerait colonnes et bande séparément.
 
-**Critères, écrits avant.** **c3 reçu** si : (1) le premier retournement de la bande de 8 m dans la mer tombe **à 10 % près** de
-l'instant de celui du témoin, et **à 0,2 m** (un dixième de longueur d'onde) de son abscisse ; (2) la part de la fenêtre en particules
-au retournement à **0,1 près** de celle du témoin ; (3) **la masse au raccord** sous 0,1 % du volume d'une demi-période ; (4) sous une
-houle calme (`ε` = 0,1 partout), **aucune colonne en particules après 1 s**, dans la mer. Sinon, c3 plafonné (ADR-213 D2), la limite
-écrite, c4 conçu.
+**Ce que la session fait — une première image, hors ligne** (le rendu en direct sur la carte viendra après le verdict). Le banc
+`surface_continue` (cœur, sans carte) : B10 en quart (une sphère entre dans l'eau, `Fr` = 2, `D/dx` = 8), la zone des colonnes et la
+bascule (S408) ; aux instants choisis, l'isosurface `φ = 0` par **tétraèdres marchants** (sans table d'ambiguïté), le quart reflété en
+entier ; un rendu logiciel (perspective, tampon de profondeur, ombrage de Lambert et reflet du ciel), la sphère en gris ; un PPM par
+instant (`captures/s450/`, ADR-124), son aperçu PNG par `outils/apercu_ppm.py`.
+
+**Critères, écrits avant.** (1) le maillage n'a **aucune arête ouverte à l'intérieur** du domaine échantillonné ; (2) **au raccord**
+bande | colonnes, la hauteur de la surface lue sur `φ` de part et d'autre d'une face de frontière ne saute pas de plus d'**un quart de
+maille**, sur tout le calcul ; (3) quatre images, montrées à l'utilisateur, qui juge la continuité (revue) ; (4) le banc sous deux
+minutes.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le témoin sur toute la mer ; la bascule réglée ; mesures ; critères.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — le banc `surface_continue` : isosurface, rendu, PPM ; mesures (1), (2), (4).
+- [ ] **P3** — les images à l'utilisateur ; preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `deferlement_en_mer` : le témoin sur toute la mer (24 m, bords nourris par B seul) ; la bascule réglée (§21.3) ; la même
-  fenêtre physique dans tous les modes ; 1 m d'air (les jets montaient au-dessus de ce que la mer admet). `BandInSea::set_particle_heights`
-  (essai, éteint) : une colonne de particules donne à la mer la hauteur équivalente à son volume d'eau (lu sur `φ`, l'eau sous le fond
-  comprise) — **instable** au bord de la bande (une dent de scie de la mer à 1,3–1,7 s, même sous une houle calme) ; éteint (la mer garde
-  sa hauteur), le déferlement passe 1,5 s. **Mesures** (défaut) : retournement dans la mer **0,482 s**, 13,05 m, part 1,000 ; témoin
-  **0,562 s**, 13,25 m, part 0,925 ; masse au raccord ≈ 0 (1,9·10⁻⁷ m³). (1) **manqué** (14 % ; l'abscisse à 0,20 m, la limite) ; (2)
-  tenu (0,075) ; (3) tenu ; (4) **manqué** : sous une houle calme et la bascule réglée, la mer refuse à 2,2 s (la dent de scie au bord
-  de la bande). Suite **762**. **c3 plafonné** (ADR-213 D2).
-- **P3** — APIC-CARTE §23.6 ; journal ; jeton libre ; maillons 6 (justifiés : S406) ; suivant : S450, la surface continue (ADR-211 D2), proposée.
