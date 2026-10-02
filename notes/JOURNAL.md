@@ -18177,3 +18177,14 @@ particules contre 8 686) ; B10 en bande étroite sans les clés **identique au b
 suit la référence au chiffre près (pincement au pas 53 des deux côtés). Non-régression identique ; suite **756**, zéro avertissement.
 **Écart** : P2 et P3 en un seul commit. **Rituel.** Maillons **20** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel.
 Suivant : **la conception de C7d-3** — la bande dans la production couplée ; le mode relatif sur la carte (ADR-198 D1) et A320.
+
+## S433 — 2026-10-02 — physique : la conception de C7d-3
+
+**Entrée.** *« Continue »* — la conception de C7d-3. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §22) : **la bande
+entre dans le pas couplé** (`Volume3`, qui porte la production : couplage, éponge, épars, niveaux, faces coupées, production GPU) — non
+B dans `Apic3`, qui reste le banc ; **les particules portent la vitesse propre `u′`** et se déplacent avec `U + u′` — le long d'une
+particule ne reste que `u′·∇U`, le terme d'A320 ; l'identité `U·∇u′ + u′·∇U = ∇(U·u′) − U×ω′` (B irrotationnel) rend la forme de
+Bernoulli exacte pour tout δ. Découpage : **C7d-3a** A320 en référence, **C7d-3b** le mode relatif sur la carte et la bascule des
+défauts, **C7d-3c** la bande relative en référence, **C7d-3d** sur la carte — chacun son « reçu si ». **Mesuré** : le témoin d'A320
+rejoué au chiffre près (0,1151 s⁻¹, 32,3 mm à 59 s). Aucun code changé. **Rituel.** Maillons **21** — justifié : la priorité du solveur
+(S406) ; 4.19 reste partiel. Suivant : **C7d-3a** — A320, la forme `∇(U·u′) − U×ω′`, sans carte.

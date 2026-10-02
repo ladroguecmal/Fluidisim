@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 07:44 +02:00
+JETON            : libre
+Battement        : 2026-10-02 07:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S433 — la conception de C7d-3** : la bande dans la production couplée, relative à B
-Dernière session : S432 — physique : **C7d-2 reçu** ([preuve](docs/validation/APIC-CARTE-S416.md) §21.4) — le seuil de vitesse propre, sa relâche et le fond B dans la décision de la carte : décisions identiques à la référence, B10 sans les clés identique au bit (2,06 ms), avec les clés au pincement de la référence. Avant : S431, C7d-1 reçu
-Session suivante : **S433 — la conception de C7d-3** ([preuve](docs/validation/APIC-CARTE-S416.md) §21) : la bande dans la production couplée, relative à B — B et W en fond, δ relatif à B, dans la bande les particules portent la vitesse propre de δ ; elle dira l'ordre du **mode relatif sur la carte** (ADR-198 D1 : la production GPU ne le porte pas) et d'**A320** (une perturbation de δ croît sous houle raide — la forme de Bernoulli `∇(U·u')` à éprouver), avec leurs « reçu si » écrits avant ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 20 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S433 — physique : **la conception de C7d-3** ([preuve](docs/validation/APIC-CARTE-S416.md) §22) — la bande entre dans le pas couplé, ses particules portent la vitesse propre `u′` ; C7d-3a (A320), C7d-3b (le mode relatif sur la carte), C7d-3c et C7d-3d (la bande relative) ; le témoin d'A320 rejoué (0,1151 s⁻¹). Avant : S432, C7d-2 reçu
+Session suivante : **S434 — C7d-3a**, sans carte ([preuve](docs/validation/APIC-CARTE-S416.md) §22.3) : **A320** — les termes croisés du pas couplé relatif (`delta3d_coupling.rs`, `extra3`) sous la forme `∇(U·u′) − U×ω′` ; reçu si le germe de 1 mm sous la houle de 7,5 et de 5 cm ne croît plus (taux < 0,01 s⁻¹ sur 95 s, témoin 0,1151), à 12,5 cm aussi, δ nul reste nul sous B seul, et le paquet de l'ordre C reste sous 1,5 fois son amplitude ; puis C7d-3b (la carte), C7d-3c, C7d-3d ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 21 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
