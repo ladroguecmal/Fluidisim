@@ -62,36 +62,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S453 — **terminée**. *« Continue »* — la suite de S452 : le rendu dans la boucle vivante (ADR-211 D2).
+Session : S454 — **en cours**. *« Continue »* — le lot des registres (ADR-213 D3, dû en S454), puis **C10, les scènes**
+(campagne §6 : le joueur qui saute à 5 cm, la gerbe d'étrave, la lame du déversoir ; le critère d'arrêt du §3.4).
 
-**Ce que la session fait.** (1) **La carte seule** : jusqu'ici la référence CPU choisissait le pas de la carte (`stable_step_us`) ;
-la carte le choisit elle-même — la même formule, `0,5·dx / (v_max + √(g·dx))`, sur la vitesse maximale relue des faces et des
-particules de la carte. B10 en bande étroite avance alors **sans référence**, bascule comprise. (2) **La fenêtre** : `--surface-direct`
-ouvre une fenêtre sur le device de la carte ; à chaque image, la simulation avance avec le temps (quelques pas au plus), puis
-`surface_carte` rend dans l'image de la fenêtre ; caméra en orbite (souris, flèches, molette), pause, relance.
+**Ce que la session fait.** (1) Le lot des registres pour S451–S453. (2) **La conception de C10** : son découpage en lots, chacun avec
+son critère (`docs/validation/C10-SCENES-S454.md`). (3) **C10-1, le saut du joueur** — jusqu'ici B10 n'existe qu'en quart (deux plans de
+symétrie, 0,8 m de côté) : B10 sur **un domaine entier**, la sphère au centre, mené par la carte seule et rendu par `surface_carte`
+(sans réflexion) ; d'abord le quart déplié (1,6 m), puis **une scène de 4 m × 4 m**.
 
-**Critères, écrits avant.** (1) **la carte seule tient** jusqu'à `t·√(g/D)` = 3 : la masse en quanta exacte, `φ` fini, et aux instants
-de R37 des images que l'œil ne distingue pas de celles de S452 (cratère, jet) ; (2) **la boucle** : une image toutes les 33 ms au plus
-(médiane, pas de simulation compris), le rapport temps simulé / temps réel publié ; (3) la commande donnée à l'utilisateur — son
-jugement.
+**Critères, écrits avant.** (1) **le quart déplié** (domaine entier de 1,6 m, sphère au centre) reproduit le quart : la profondeur de
+la cavité à t = 1 et la hauteur du jet à t = 2 à une maille près (5 cm) de celles du quart ; (2) **la scène de 4 m** : masse en quanta
+exacte, `φ` fini jusqu'à `t·√(g/D)` = 4, le coût d'un pas de la carte publié (médiane) et quatre images ; (3) la fenêtre
+`--surface-direct` sur la scène de 4 m (`COTE=4`).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la carte seule : le pas choisi sur la carte ; banc `--surface-direct-banc` ; mesures (1).
-- [x] **P3** — la fenêtre `--surface-direct` ; mesures (2).
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — le lot des registres.
+- [ ] **P3** — la conception de C10.
+- [ ] **P4** — C10-1 : B10 en domaine entier ; mesures (1) à (3) ; images.
+- [ ] **P5** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `ApicCarte::stable_step_us` (la formule de la référence sur les vitesses relues de la carte), `ApicCarte::with_instance`
-  (un adaptateur compatible avec une fenêtre) ; `viewer/src/surface_direct.rs` : B10 sur la carte seule (`Vivant`), banc
-  `--surface-direct-banc` (49 s, dont la compilation). **Mesuré** : 125 pas jusqu'à `t·√(g/D)` = 3 (pas moyen 4,9 ms, au plus bas
-  1,8 ms), **masse en quanta exacte** (écart 0), `φ` fini ; les images `captures/s453/direct_t*.ppm` contre celles de S452 : **identiques**
-  à t = 0,5 et 1, 0,1 % puis 0,05 % des pixels changés de plus de 8 niveaux à t = 2 et 3 — (1) tenu. Pas de la carte : 7,3 ms au mur
-  (médiane, relectures comprises).
-- **P3** — `--surface-direct` : la fenêtre sur le device de la carte (format non sRGB, `Bgra8Unorm`), la simulation au temps réel
-  (deux pas au plus par image), `surface_carte` rendu dans l'image de la fenêtre ; orbite (glisser, flèches), distance (molette,
-  Page haut / bas), Espace, R, Échap ; `DUREE=` pour le banc. **Mesuré** (deux essais de 15 s, sans vsync) : image **1,3 ms** en
-  médiane, **14 ms** au 99e centile (les images qui portent un pas), 133 ms au plus (une fois, au départ) ; rendu 1,1 ms (acquisition
-  comprise) ; **simulé / réel = 0,97** ; 1 052 pas sans incident (B10 continue au-delà de son essai) — (2) tenu.
-- **P4** — SURFACE-CONTINUE-S450 (§ S453) ; journal ; jeton libre ; maillons 10 (justifiés : S406) ; suivant : S454, le lot des registres puis C10 (ou le verdict de l'utilisateur sur la fenêtre).

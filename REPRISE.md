@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 18:28 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 18:33 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S454 — le lot des registres ; C10 conçue, C10-1 : le saut du joueur sur un domaine entier**
 Dernière session : S453 — la surface continue dans la boucle vivante ([preuve](docs/validation/SURFACE-CONTINUE-S450.md)) — la carte seule (son pas), la fenêtre `--surface-direct` : 1,3 ms par image, simulé / réel 0,97. Avant : S452
 Session suivante : **S454 — le lot des registres** (ADR-213 D3, dû en S454) **puis C10** (les scènes jugées sur la surface continue) — ou ce que l'utilisateur désigne après avoir vu la fenêtre ; la stabilité du raccord bande ↔ mer reste ouverte (déclencheur : une scène où une bande déferle dans la mer)
 Maillons        : 10 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
-Registres       : dernier lot S451 (ADR-213 D3) ; le prochain au plus tard en S454
+Registres       : dernier lot S454 (ADR-213 D3) ; le prochain au plus tard en S457
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
