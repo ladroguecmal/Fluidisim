@@ -155,7 +155,7 @@ pub struct Step3 {
     /// S441 — les étages du pas relatif avec les commutateurs de banc (S391), pour attribuer un terme en mode relatif.
     relative_bench: Option<Vec<wgpu::ComputePipeline>>,
     relative_on: std::cell::Cell<bool>,
-    /// S441 — la bande relative sous Lax-Wendroff : les pipelines relatifs compilés avec `BAND_LW` = 1.
+    /// S441 — la bande relative sous Lax-Wendroff : les pipelines relatifs compilés avec `BAND_LW` = 1 ; le défaut depuis S442.
     band_lw: bool,
     step_source: (wgpu::ShaderModule, wgpu::BindGroupLayout),
     bg_source: (wgpu::ShaderModule, wgpu::BindGroupLayout),
@@ -553,7 +553,7 @@ impl Step3 {
             relative: None,
             relative_bench: None,
             relative_on: std::cell::Cell::new(false),
-            band_lw: false,
+            band_lw: true,
             step_source: (step_module, step_layout),
             bg_source: (bg_module, bg_layout),
             read,
@@ -2053,8 +2053,9 @@ pub fn trajectoire() -> Result<(), String> {
         if relatif {
             volume.set_relative_background(Volume3::RELATIVE_ALL).map_err(|e| format!("relatif {e:?}"))?;
         }
-        // S441 : `BANDE_LW=1`, la bande relative sous Lax-Wendroff, dans la référence et sur la carte.
-        let bande_lw = std::env::var("BANDE_LW").is_ok();
+        // S441 : la bande relative sous Lax-Wendroff, dans la référence et sur la carte ; le défaut depuis S442, `BANDE_LW=0`
+        // rend la bande centrée.
+        let bande_lw = std::env::var("BANDE_LW").map_or(true, |v| v != "0");
         volume.set_relative_band_lax_wendroff(bande_lw);
         volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
         let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)

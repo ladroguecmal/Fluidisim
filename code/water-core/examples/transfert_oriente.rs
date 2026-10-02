@@ -1988,6 +1988,9 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     // `MER_A324=0` (S436) : le fantôme latéral de S369, pour comparaison (le remède est le défaut).
     let a324 = std::env::var("MER_A324").map_or(true, |v| v != "0");
     v.set_lateral_own_ghost(a324);
+    // `MER_BANDE_LW=0` (S442) : la bande relative centrée de S369 (Lax-Wendroff est le défaut depuis S442).
+    let bande_lw = std::env::var("MER_BANDE_LW").map_or(true, |v| v != "0");
+    v.set_relative_band_lax_wendroff(bande_lw);
     // `MER_SURFACE_ESSAI=1|2` (S437) : les termes croisés, ou le seul cisaillement, retirés aux faces de surface — des amputations.
     v.set_cross_surface_trial(std::env::var("MER_SURFACE_ESSAI").ok().and_then(|x| x.parse().ok()).unwrap_or(0));
     // `MER_BERNOULLI_ESSAI=1|2` (S434) : G seule, R seule — des amputations, pour la bisection d'A320.
@@ -2022,6 +2025,7 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     temoin.set_relative_background(relatif).map_err(|e| format!("relatif {e:?}"))?;
     temoin.set_cross_bernoulli(bernoulli);
     temoin.set_lateral_own_ghost(a324);
+    temoin.set_relative_band_lax_wendroff(bande_lw);
     if lax_wendroff {
         temoin.enable_advection_correction();
     }

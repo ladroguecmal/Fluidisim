@@ -131,7 +131,8 @@ impl Volume3 {
     /// est explicite : un schéma FTCS, instable par nature (croissance `C²/2` par pas, `C = U·dt/dx` — mesuré S441 : des bouffées
     /// à l'échelle de la maille à 10 cm et 30 Hz, éteintes avec la bande). Allumé, aux faces intérieures, la perturbation de face
     /// devient `½(η′_g + η′_d) − (C/2)(η′_d − η′_g)`, `U` la vitesse de B de la couche où tombe la surface de B : Lax-Wendroff,
-    /// stable pour `C ≤ 1`, du second ordre. À δ nul, au bit la même. Éteint, le défaut : au bit.
+    /// stable pour `C ≤ 1`, du second ordre. À δ nul, au bit la même. **Allumé par défaut depuis S442** ; éteint, la bande
+    /// centrée de S369, pour comparaison.
     pub fn set_relative_band_lax_wendroff(&mut self, on: bool) {
         self.band_lax_wendroff = on;
     }

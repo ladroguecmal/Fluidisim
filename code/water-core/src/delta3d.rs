@@ -122,7 +122,8 @@ pub struct Volume3 {
     /// **S436, A324 — le fantôme latéral du mode relatif, interpolé des fantômes verticaux** (`set_lateral_own_ghost`) ; allumé
     /// par défaut depuis sa réception (S436) ; sans effet hors du mode relatif.
     lateral_own_ghost: bool,
-    /// **S441, A322 — la bande relative sous Lax-Wendroff** (`set_relative_band_lax_wendroff`), éteinte par défaut.
+    /// **S441, A322 — la bande relative sous Lax-Wendroff** (`set_relative_band_lax_wendroff`) ; **le défaut depuis S442** (A322
+    /// levée, l'écart accepté par l'utilisateur) ; sans effet hors du mode relatif.
     band_lax_wendroff: bool,
     /// **S437, A320 — essai** (`set_cross_surface_trial`) : 0 (défaut, au bit) ; 1, les termes croisés retirés aux faces de
     /// surface (une maille voisine sèche) ; 2, le seul cisaillement `u′·∇U` retiré là. Des amputations, pour localiser.
@@ -269,7 +270,7 @@ impl Volume3 {
             cross_bernoulli: false,
             cross_bernoulli_trial: 0,
             lateral_own_ghost: true,
-            band_lax_wendroff: false,
+            band_lax_wendroff: true,
             cross_surface_trial: 0,
             advection_correction: false,
             ghost_bg_error: vec![0.; cols],

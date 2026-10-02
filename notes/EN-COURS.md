@@ -79,8 +79,12 @@ du repos : 0,026 et 0,041 s⁻¹) ; autrement, ce que le remède change d'A320 s
 ### Plan
 
 - [x] **P1** — jeton, plan seul ; l'arbitrage inscrit.
-- [ ] **P2** — Lax-Wendroff par défaut ; production au bit, témoin, suite.
+- [x] **P2** — Lax-Wendroff par défaut ; production au bit, témoin, suite.
 - [ ] **P3** — A320 sous Lax-Wendroff.
 - [ ] **P4** — preuve ; registres ; rituel.
 
 ### Notes de reprise
+- **P2** — `Volume3::band_lax_wendroff` et `Step3::band_lw` vrais par défaut ; `MER_BANDE_LW=0`, `BANDE_LW=0` rendent la bande centrée.
+  **Production au bit** (la sortie du banc de trajectoire identique à la ligne de base de S439) ; **témoin relatif nul au bit** sur
+  400 pas, carte et référence ; trajectoire relative à 1,44·10⁻⁵ m de sa référence ; suite **759**, zéro avertissement — (1) tenu.
+
