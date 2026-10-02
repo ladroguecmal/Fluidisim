@@ -694,6 +694,18 @@ const F_GRAD_P_Z: u32 = 22u;
 
 fn total_height(c: u32) -> f32 { return cells_out[c]; }
 
+/// S439 (C7d-3b) — **le mode relatif** (S369, A324) dans les étages du couplage, vrai seulement dans les pipelines compilés pour
+/// lui : le fantôme du haut moins l'erreur de B à sa propre surface ; le fantôme latéral du second membre interpolé des fantômes
+/// verticaux. La production garde son code (L345).
+override RELATIVE: f32 = 0.0;
+
+/// S439 : la valeur du fantôme vertical d'une colonne, comme `column_up` de `delta3d_step.wgsl`.
+fn column_up(c: u32) -> f32 {
+    let plane = columns();
+    let roundoff = cells_in[plane + cells() + c];
+    return params.rho * params.g_eff * (difference(cells_in[c], params.rest) - roundoff) + cells_out[plane + c];
+}
+
 /// Surface totale et fantôme du haut, une invocation par colonne.
 @compute @workgroup_size(64)
 fn couple_columns(@builtin(global_invocation_id) id: vec3<u32>) {
@@ -719,6 +731,25 @@ fn couple_columns(@builtin(global_invocation_id) id: vec3<u32>) {
             ghost = params.rho * params.g_eff * eta_bg - (p + dz * gz);
             break;
         }
+    }
+    if (RELATIVE != 0.0) {
+        // S369 : l'erreur de B à sa propre surface, la même expression ; à δ nul, les mêmes opérandes.
+        let own = params.rest + elevation;
+        var error = 0.0;
+        var q = params.nz;
+        loop {
+            if (q == 0u) { break; }
+            q = q - 1u;
+            if ((f32(q) + 0.5) * params.dx < own) {
+                let dz = own - f32(q + 1u) * params.dx;
+                let eta_bg = face_w(i, j, q + 1u, F_ETA);
+                let p = face_w(i, j, q + 1u, F_P_DYN);
+                let gz = face_w(i, j, q + 1u, F_GRAD_P_Z);
+                error = params.rho * params.g_eff * eta_bg - (p + dz * gz);
+                break;
+            }
+        }
+        ghost = ghost - error;
     }
     cells_out[columns() + c] = ghost;
 }
@@ -780,7 +811,13 @@ fn couple_rhs(@builtin(global_invocation_id) id: vec3<u32>) {
             let theta = max((h - zc) / (h - other), params.theta_min);
             let a = 1.0 / theta;
             diag = diag + a;
-            let bg = -(bg_p + sign * (theta - 0.5) * params.dx * bg_g);
+            var bg = -(bg_p + sign * (theta - 0.5) * params.dx * bg_g);
+            if (RELATIVE != 0.0) {
+                // S439 : le fantôme latéral d'A324, interpolé des fantômes verticaux des deux colonnes.
+                let uw = column_up(col);
+                let ud = column_up(other_col);
+                bg = (uw + theta * (ud - uw)) - side_base;
+            }
             b = b + (side_base + bg) * a * inv;
         }
     }

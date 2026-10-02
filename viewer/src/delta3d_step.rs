@@ -148,6 +148,13 @@ pub struct Step3 {
     published_prev: wgpu::Buffer,
     step: Vec<wgpu::ComputePipeline>,
     step_bench: Vec<wgpu::ComputePipeline>,
+    /// S439 (C7d-3b) — **le mode relatif** (S369, A324) : les étages du pas et ceux du couplage compilés avec `RELATIVE` = 1,
+    /// à la demande (`enable_relative`) ; absents par défaut, et le pas est alors celui d'avant, au bit. Les modules et les
+    /// dispositions sont gardés pour les compiler.
+    relative: Option<(Vec<wgpu::ComputePipeline>, Vec<wgpu::ComputePipeline>)>,
+    relative_on: std::cell::Cell<bool>,
+    step_source: (wgpu::ShaderModule, wgpu::BindGroupLayout),
+    bg_source: (wgpu::ShaderModule, wgpu::BindGroupLayout),
     read: wgpu::Buffer,
     query: Option<wgpu::QuerySet>,
     query_resolve: wgpu::Buffer,
@@ -539,6 +546,10 @@ impl Step3 {
             published_prev,
             step,
             step_bench,
+            relative: None,
+            relative_on: std::cell::Cell::new(false),
+            step_source: (step_module, step_layout),
+            bg_source: (bg_module, bg_layout),
             read,
             query,
             query_resolve,
@@ -834,9 +845,9 @@ impl Step3 {
             pass.set_pipeline(&self.step_pipes()[DIVERGENCE]);
             pass.dispatch_workgroups(cells, 1, 1);
             pass.set_bind_group(0, &self.bg_bind, &[]);
-            pass.set_pipeline(&self.bg[1]);
+            pass.set_pipeline(&self.couple_pipes()[1]);
             pass.dispatch_workgroups(columns, 1, 1);
-            pass.set_pipeline(&self.bg[2]);
+            pass.set_pipeline(&self.couple_pipes()[2]);
             pass.dispatch_workgroups(cells, 1, 1);
         }
         // Surface totale → géométrie de l'opérateur ; second membre et préconditionneur couplés
@@ -1473,9 +1484,36 @@ impl Step3 {
         self.write_step_uniform(self.rest.get(), self.dt.get(), self.sponge.get());
     }
 
-    /// S391 : les étages du pas — ceux de banc quand un commutateur est allumé, ceux de production sinon.
+    /// S391 : les étages du pas — ceux de banc quand un commutateur est allumé, ceux de production sinon. S439 : ceux du mode
+    /// relatif quand il est allumé.
     fn step_pipes(&self) -> &[wgpu::ComputePipeline] {
+        if let Some((step, _)) = self.relative.as_ref().filter(|_| self.relative_on.get()) {
+            return step;
+        }
         if self.switches.get() != 0 { &self.step_bench } else { &self.step }
+    }
+
+    /// S439 : les étages du couplage (`couple_columns`, `couple_rhs`) — ceux du mode relatif quand il est allumé.
+    fn couple_pipes(&self) -> &[wgpu::ComputePipeline] {
+        match self.relative.as_ref().filter(|_| self.relative_on.get()) {
+            Some((_, bg)) => bg,
+            None => &self.bg,
+        }
+    }
+
+    /// **S439 (C7d-3b) — le mode relatif sur la carte** : compile, une fois, les étages du pas et du couplage avec `RELATIVE`
+    /// = 1 — la prédiction sans le résidu de B, la bande moins celle de B seul, les fantômes moins l'erreur de B (le fantôme
+    /// latéral d'A324) —, puis l'allume ou l'éteint. Éteint (le défaut), le pas de S297, au bit. La référence est
+    /// `Volume3::set_relative_background(RELATIVE_ALL)` avec `set_lateral_own_ghost(true)` (son défaut).
+    pub fn set_relative(&mut self, on: bool) {
+        if on && self.relative.is_none() {
+            let (step_module, step_layout) = &self.step_source;
+            let (bg_module, bg_layout) = &self.bg_source;
+            let step = pipelines_zeroed(&self.device, step_layout, step_module, &STEP, &[("RELATIVE", 1.0)]);
+            let bg = pipelines_with(&self.device, bg_layout, bg_module, &BG, &[("COMPACT", 1.0), ("RELATIVE", 1.0)]);
+            self.relative = Some((step, bg));
+        }
+        self.relative_on.set(on);
     }
 
     /// **Banc S390** : une tranche de la projection (`x, r, z, d, q, m, b` : 0 à 6), forme courante.
@@ -1954,19 +1992,28 @@ pub fn trajectoire() -> Result<(), String> {
         let sponge = Sponge3 { width_x: 1., width_y: 1., rate_per_s: 2. };
         let duration = 5_000u64;
         let columns = domain.columns();
+        // S439 (C7d-3b) : `RELATIF=1`, la référence en mode relatif (S369, A324) et la carte aussi ; `TEMOIN=1`, sans la bosse —
+        // le point fixe : δ nul doit rester nul au bit, sur la carte comme dans la référence.
+        let relatif = std::env::var("RELATIF").is_ok();
+        let temoin = std::env::var("TEMOIN").is_ok();
         let mut eta = vec![rest; columns];
         for j in 0..domain.ny {
             for i in 0..domain.nx {
                 let x = (i as f32 + 0.5) * domain.dx - 3.;
                 let y = (j as f32 + 0.5) * domain.dx - 2.5;
                 let r = (x * x + y * y) / (2. * 0.55 * 0.55);
-                eta[j * domain.nx + i] += 0.18 * (1. - r) * (-r).exp();
+                if !temoin {
+                    eta[j * domain.nx + i] += 0.18 * (1. - r) * (-r).exp();
+                }
             }
         }
         let mut volume = Volume3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, rho, g)
             .map_err(|e| format!("volume {e:?}"))?;
         // S391 (ADR-209) : la production porte le terme de second ordre de l'advection ; sa référence aussi.
         volume.enable_advection_correction();
+        if relatif {
+            volume.set_relative_background(Volume3::RELATIVE_ALL).map_err(|e| format!("relatif {e:?}"))?;
+        }
         volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
         let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
             .map_err(|e| format!("grille {e:?}"))?;
@@ -1982,7 +2029,8 @@ pub fn trajectoire() -> Result<(), String> {
         let (u0, v0, w0) = (volume.velocity_u().to_vec(), volume.velocity_v().to_vec(), volume.velocity_w().to_vec());
         let mut cartes = Vec::new();
         for _ in &variantes {
-            let carte = Step3::new(&background, domain, origin, rho, g).await?;
+            let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+            carte.set_relative(relatif);
             carte.set_step(duration, rest, sponge)?;
             carte.set_state(&u0, &v0, &w0, &eta)?;
             cartes.push(carte);
@@ -2008,7 +2056,21 @@ pub fn trajectoire() -> Result<(), String> {
         let mut horizons: Vec<Option<u64>> = vec![None; variantes.len()];
         let mut avant_horizon = vec![0f32; variantes.len()];
         let (mut iter_max, mut affinages) = (0u32, 0u32);
+        // S439 : le témoin — pas où la carte, puis la référence, cessent d'être nulles au bit.
+        let (mut carte_non_nulle, mut coeur_non_nul): (Option<u64>, Option<u64>) = (None, None);
         for n in 0..=pas_total {
+            if temoin && n % 10 == 0 {
+                let carte_nulle = cartes[0].published()?.iter().all(|x| x.to_bits() == 0)
+                    && cartes[0].velocities()?.iter().all(|x| x.to_bits() == 0);
+                let coeur_nul = volume.surface().iter().all(|e| e.to_bits() == rest.to_bits())
+                    && volume.velocity_u().iter().chain(volume.velocity_v()).chain(volume.velocity_w()).all(|x| x.to_bits() == 0);
+                if !carte_nulle && carte_non_nulle.is_none() {
+                    carte_non_nulle = Some(n);
+                }
+                if !coeur_nul && coeur_non_nul.is_none() {
+                    coeur_non_nul = Some(n);
+                }
+            }
             if n % 10 == 0 {
                 let coeur: Vec<f32> = volume
                     .surface()
@@ -2102,6 +2164,11 @@ pub fn trajectoire() -> Result<(), String> {
             );
         }
         println!("DELTA3D_TRAJECTOIRE_S301 coeur iterations_max={iter_max} affinages={affinages}");
+        if temoin {
+            println!(
+                "DELTA3D_TRAJECTOIRE_S439 temoin relatif={relatif} carte_non_nulle_au_pas={carte_non_nulle:?} coeur_non_nul_au_pas={coeur_non_nul:?}"
+            );
+        }
         Ok(())
     })
 }

@@ -37,6 +37,13 @@ struct Step {
 override BENCH_SWITCHES: f32 = 0.0;
 fn switched(bit: u32) -> bool { return BENCH_SWITCHES != 0.0 && (s.switches & bit) != 0u; }
 
+/// S439 (C7d-3b) — **le mode relatif** de la référence (`Volume3::set_relative_background(RELATIVE_ALL)`, S369, et le fantôme
+/// latéral d'A324, S436), vrai seulement dans les pipelines compilés pour lui (`Step3::enable_relative`) : (1) la prédiction sans
+/// le résidu de quantité de mouvement de B ; (2) la bande moins celle de B seul ; (3) le fantôme latéral interpolé des fantômes
+/// verticaux des deux colonnes (le fantôme du haut, lui, arrive de `couple_columns`, déjà relatif). Comme `BENCH_SWITCHES`, une
+/// constante : la production garde son code, donc ses bits (L345).
+override RELATIVE: f32 = 0.0;
+
 // Vitesses aux faces : [u | v | w] courantes, puis [u | v | w] prédites, même rangement que le
 // cœur. L'indice d'une face est aussi celui de son échantillon de fond dans `faces`.
 @group(0) @binding(0) var<storage, read_write> vel: array<f32>;
@@ -190,6 +197,12 @@ fn extra(f: u32, axis: u32, v0: f32, v1: f32, v2: f32, d0: f32, d1: f32, d2: f32
         + bg(f, 5u) * d1 + v1 * bg(f, g + 1u);
 }
 
+/// S439 — `extra3` du cœur sans le résidu (`residual = false`) : même ordre de sommation, le résidu nul retiré.
+fn extra_relative(f: u32, axis: u32, v0: f32, v1: f32, v2: f32, d0: f32, d1: f32, d2: f32) -> f32 {
+    let g = 10u + 3u * axis;
+    return bg(f, 4u) * d0 + bg(f, 6u) * d2 + v0 * bg(f, g) + v2 * bg(f, g + 2u) + bg(f, 5u) * d1 + v1 * bg(f, g + 1u);
+}
+
 /// S391 — **banc** : `extra` terme par terme, selon `s.switches`. Le chemin de production garde `extra` tel quel.
 fn extra_switched(f: u32, axis: u32, v0: f32, v1: f32, v2: f32, d0: f32, d1: f32, d2: f32) -> f32 {
     let g = 10u + 3u * axis;
@@ -265,6 +278,7 @@ fn predict(@builtin(global_invocation_id) id: vec3<u32>) {
         let d1 = derivative(axis, 1u, p, end);
         let d2 = derivative(axis, 2u, p, end);
         var add = s.dt * extra(slot, axis, v0, v1, v2, d0, d1, d2);
+        if (RELATIVE != 0.0) { add = s.dt * extra_relative(slot, axis, v0, v1, v2, d0, d1, d2); }
         if (BENCH_SWITCHES != 0.0 && s.switches != 0u) { add = s.dt * extra_switched(slot, axis, v0, v1, v2, d0, d1, d2); }
         // S391 (A321, ADR-209) : le terme de second ordre de l'advection, que l'Euler explicite omet. Le commutateur de banc
         // 64 le retire : le schéma d'avant, pour les témoins.
@@ -316,8 +330,21 @@ fn ghost_side(wi: u32, wj: u32, di: u32, dj: u32, k: u32, f: u32, axis: u32, sig
     let zc = (f32(k) + 0.5) * s.dx;
     let h = height(wi, wj);
     let theta = max((h - zc) / (h - height(di, dj)), s.theta_min);
+    if (RELATIVE != 0.0) {
+        // S439 : le fantôme latéral d'A324 — entre les deux colonnes, ce que porte leur fantôme vertical.
+        let side = s.rho * s.g_eff * (zc - s.rest);
+        let uw = column_up(wj * s.nx + wi);
+        let ud = column_up(dj * s.nx + di);
+        return vec2<f32>(1.0 / theta, side + ((uw + theta * (ud - uw)) - side));
+    }
     let background = -(bg(f, 19u) + sign * (theta - 0.5) * s.dx * bg(f, 20u + axis));
     return vec2<f32>(1.0 / theta, s.rho * s.g_eff * (zc - s.rest) + background);
+}
+
+/// S439 : la valeur du fantôme vertical d'une colonne — `ρ·g·η′` compensé plus le fond (`up` de `prepare_background3`).
+fn column_up(col: u32) -> f32 {
+    let roundoff = cells_in[columns() + cells() + col];
+    return s.rho * s.g_eff * (difference(cells_in[col], s.rest) - roundoff) + cells_out[columns() + col];
 }
 
 /// `ghost_up3` : couvercle de la colonne, perturbation compensée plus le fond.
@@ -488,6 +515,16 @@ fn fluxes(@builtin(global_invocation_id) id: vec3<u32>) {
     } else {
         surface = 0.5 * (cells_out[lo] + cells_out[hi]);
     }
+    // S439 : la surface de B seule, formée comme la totale — aux bords, celle de la face ; dedans, la moyenne des deux colonnes.
+    var own = 0.0;
+    if (RELATIVE != 0.0) {
+        let wbase = n_u() + n_v();
+        if (a == 0u || a == n) {
+            own = s.rest + bg(edge_face, 0u);
+        } else {
+            own = 0.5 * ((s.rest + bg(wbase + lo, 0u)) + (s.rest + bg(wbase + hi, 0u)));
+        }
+    }
     var flux = 0.0;
     var total_band = 0.0;
     for (var k = 0u; k < s.nz; k = k + 1u) {
@@ -496,7 +533,10 @@ fn fluxes(@builtin(global_invocation_id) id: vec3<u32>) {
             let wet_part = clamp((surface - f32(k) * s.dx) / s.dx, 0.0, 1.0);
             if (wet_part > 0.0) { flux = flux + vel[f] * s.dx * wet_part; }
         }
-        if (!switched(16u)) { total_band = total_band + band(f, axis, k, surface); }
+        if (RELATIVE != 0.0) {
+            // S439 : la bande moins celle de B seul, sa surface formée comme la totale (S369).
+            total_band = total_band + (band(f, axis, k, surface) - band(f, axis, k, own));
+        } else if (!switched(16u)) { total_band = total_band + band(f, axis, k, surface); }
     }
     let base = select(0u, 2u * x_faces(), axis == 1u);
     let span = select(x_faces(), y_faces(), axis == 1u);

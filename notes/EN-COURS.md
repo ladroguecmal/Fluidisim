@@ -87,7 +87,7 @@ celui du pas de S297 ; (4) la suite du cœur, zéro avertissement ; l'afficheur 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la ligne de base du banc de trajectoire (S297).
-- [ ] **P3** — le mode relatif sur la carte : sources, pipelines, banc.
+- [x] **P3** — le mode relatif sur la carte : sources, pipelines, banc.
 - [ ] **P4** — mesures ; critères.
 - [ ] **P5** — preuve ; registres ; rituel.
 
@@ -95,4 +95,10 @@ celui du pas de S297 ; (4) la suite du cœur, zéro avertissement ; l'afficheur 
 - **P2** — `PAS=400 PERIODE=50 CYCLES=64 water-viewer --delta3d-trajectoire` (32 × 24 × 36 à 25 cm, la mer de S298, bosse de 18 cm,
   5 ms) : horizon du millimètre **au pas 130**, écart avant lui **7,65·10⁻⁵ m**, écart global 7,1 mm au pas 140 ; référence : 132
   itérations au plus. Sortie gardée pour le critère (1).
+- **P3** — `delta3d_step.wgsl` : `override RELATIVE` ; `extra_relative` (la prédiction sans le résidu, même ordre) ; `column_up` ;
+  `ghost_side` relatif (le fantôme latéral d'A324) ; la bande moins celle de B seul (`own`, formée comme au cœur). `delta3d_background.wgsl` :
+  `override RELATIVE` ; `couple_columns` retranche l'erreur de B à sa propre surface ; `couple_rhs`, le fantôme latéral d'A324.
+  `Step3::set_relative` compile à la demande les étages du pas (`pipelines_zeroed`, comme le banc de S391) et du couplage avec
+  `RELATIVE` = 1 ; `step_pipes`, `couple_pipes` les choisissent. Banc `--delta3d-trajectoire` : `RELATIF=1`, `TEMOIN=1`. L'afficheur
+  compile sans avertissement.
 
