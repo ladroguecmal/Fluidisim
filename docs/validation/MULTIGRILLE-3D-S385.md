@@ -388,3 +388,7 @@ dépasse 0,05 dix secondes, mais sur un champ presque éteint, où une part rela
 ont disparu (vitesses divisées par plus de dix). Un critère en amplitude absolue serait le bon ; à écrire avant la mesure suivante,
 ou l'écart accepté par l'utilisateur.
 
+**2026-10-02, S442 — l'utilisateur** : *« J'accepte et continue »* — l'écart du critère en part relative est **accepté** : **A322 est
+levée en mode relatif**, avec la bande sous Lax-Wendroff, qui en devient le défaut. La production par défaut (le pas de S297) reste
+sans mode relatif tant que C7d-3a n'est pas reçu.
+
