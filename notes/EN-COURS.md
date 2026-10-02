@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S441 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **A322**, les bouffées du
+Session : S441 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **A322**, les bouffées du
 mode relatif à 10 cm ([preuve](../docs/validation/MULTIGRILLE-3D-S385.md) §7).
 
 **Ce que la session trouve en entrant.** Scène de revue à 10 cm (80 × 80 × 70, repos 3,5 m — la face `k` = 35), 30 Hz, mg 8 : en mode
@@ -83,7 +83,7 @@ et 30 Hz sur 120 s, part de maille sous 0,05, sans changer la production (sans `
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les quatre discriminants.
 - [x] **P3** — l'instrument, selon eux ; un remède s'il se montre.
-- [ ] **P4** — preuve ; A322 ; registres ; rituel.
+- [x] **P4** — preuve ; A322 ; registres ; rituel.
 
 ### Notes de reprise
 - **P2** — mode relatif, 120 s, part de maille de `w` (secondes au-dessus de 0,05 · maximum) : témoin S440 (10 cm, 30 Hz, mg 8)
@@ -103,4 +103,4 @@ et 30 Hz sur 120 s, part de maille sous 0,05, sans changer la production (sans `
   critère, une **part** relative, fluctue quand le champ s'éteint ; **manqué tel qu'écrit**. La production **au bit** ; le témoin relatif
   sous Lax-Wendroff **nul au bit** (carte et référence) ; la trajectoire relative suit sa référence à **1,4·10⁻⁵ m** sur 400 pas (sans
   Lax-Wendroff : 1,5·10⁻⁴, l'horizon du millimètre au pas 260 ; avec : jamais). Suite **759**, zéro avertissement.
-
+- **P4** — MULTIGRILLE-3D-S385 §8 ; A322 annotée ; registres ; journal ; jeton libre ; maillons 29 (justifiés : S406) ; suivant : S442, A322 — le critère en amplitude absolue.

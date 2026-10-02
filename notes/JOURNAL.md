@@ -18266,3 +18266,14 @@ résidu dans l'ordre du témoin) — le résidu du fond retiré, comme l'attribu
 l'échelle de la maille** dans `w`, près de la surface (jusqu'à 0,6 m/s ; part de maille > 0,05 pendant 65 s sur 120). **A322 non levée
 telle qu'écrite**, transformée. Cœur inchangé. **Rituel.** Maillons **28** — justifié : la priorité du solveur (S406) ; 4.19 reste
 partiel. Suivant : **A322** — localiser les bouffées du mode relatif à 10 cm.
+
+## S441 — 2026-10-02 — physique : A322, les bouffées du mode relatif — la bande FTCS ; Lax-Wendroff
+
+**Entrée.** *« Continue »* — A322. **Mesuré** ([preuve](../docs/validation/MULTIGRILLE-3D-S385.md) §8) : les bouffées presque éteintes
+à 60 Hz, absentes sans paquet (δ nul au bit sur la scène entière) et à 25 cm, inchangées à 24 cycles — une limite de pas ; attribution
+(les commutateurs de S391 en mode relatif) : aucun terme d'advection ; **la bande relative**, éteinte, les éteint toutes. **Cause** :
+`η′` transporté à la vitesse de B, hauteur de face centrée, pas explicite — **FTCS** (`C²/2` par pas, `C` ≈ 0,3). **Fait** : la bande
+sous Lax-Wendroff, référence et carte, éteinte par défaut ; essai du point fixe. **Mesuré** : la scène tient 120 s, 10 s au-dessus de
+0,05 (contre 65), sur un champ presque nul ; la trajectoire suit sa référence à 1,4·10⁻⁵ m ; production au bit. **A322 non levée telle
+qu'écrite** (le critère en part relative, mal posé). Suite **759**. **Rituel.** Maillons **29** — justifié : la priorité du solveur
+(S406) ; 4.19 reste partiel. Suivant : **A322** — le critère en amplitude absolue, ou l'écart accepté.

@@ -4490,6 +4490,11 @@ la carte depuis S439), la scène à 10 cm et 30 Hz **tient 120 s** (le témoin e
 l'échelle de la maille** dans `w`, près de la surface, y montent à 0,6 m/s (part de maille > 0,05 pendant 65 s sur 120). A322 reste
 ouverte, transformée : à localiser avant toute scène à 10 cm.
 
+*Note du 2026-10-02, S441, sur A322* ([MULTIGRILLE-3D-S385](../validation/MULTIGRILLE-3D-S385.md) §8) : les bouffées du mode relatif
+viennent de **la bande relative, un schéma FTCS** (`η′` transporté à la vitesse de B, hauteur de face centrée, pas explicite) ; sous
+Lax-Wendroff (`set_relative_band_lax_wendroff`, éteint par défaut), elles disparaissent (vitesses divisées par plus de dix) ; il reste
+dix secondes où la part de maille d'un champ presque nul dépasse 0,05 — le critère, en part relative, est mal posé.
+
 **A323 — S409, 2026-09-27 (sévérité 2, ouverte). Au pas long, la cuve fermée gagne de l'énergie.** Cuve de S305 (`nx` = 32,
 25 cm, mode (1, 1) de 5 cm, murs, sans éponge), référence CPU : **+41 % en deux minutes à 33 ms** (100,6 → 141,9 J), **+45 %
 sans le terme d'ADR-209**, +15,8 % en 60 s à 16,7 ms ; l'amplitude modale le confirme (5,32 cm à 100 s pour 5). À 1 ms, la

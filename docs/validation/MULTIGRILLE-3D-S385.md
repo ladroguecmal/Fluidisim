@@ -361,3 +361,30 @@ la maille** dans `w`, près de la surface (`max_u` jusqu'à 0,61 m/s), qui retom
 son explosion. À 10 cm, la surface de la mer franchit des centres de maille presque partout : le chemin du fantôme latéral d'A324 y est
 la règle, non l'exception. À localiser avant toute scène à 10 cm.
 
+## 8. S441 — les bouffées du mode relatif : la bande, un schéma FTCS
+
+2026-10-02, au poste. **Discriminants** (mode relatif, 120 s ; secondes où la part de maille de `w` dépasse 0,05 · maximum) : la scène
+de §7, **65 · 0,62** ; **60 Hz** 3 · 0,15 ; **sans le paquet**, δ nul au bit sur 120 s ; **24 cycles** 65 · 0,61 ; **25 cm** 0 · 0,022 —
+une limite de pas, ni la projection ni le point fixe. **Attribution** (les commutateurs de S391 portés au mode relatif) : sans
+`u′·∇u′` 66, sans `U·∇u′` 36, sans `u′·∇U` 70, sans le terme d'ADR-209 explose à 7 s, **sans la bande relative 0 · 0,033**.
+
+**La cause.** La bande relative transporte la perturbation de hauteur à la vitesse de B (`∂η′/∂t = −∇·(U·η′)`), hauteur de face
+centrée, pas explicite : **le schéma FTCS**, instable par nature — croissance `C²/2` par pas, `C = U·dt/dx`, ≈ 0,3 à 10 cm et 30 Hz,
+deux à trois fois moins à 60 Hz ou à 25 cm. Le pendant, pour la surface, d'A321 (ADR-209) sur les vitesses.
+
+**Le remède** (`Volume3::set_relative_band_lax_wendroff`, `Step3::set_relative_band_lax_wendroff`, éteints par défaut) : la perturbation
+de face sous Lax-Wendroff, `½(η′_g + η′_d) − (C/2)(η′_d − η′_g)`, `U` celle de B dans la couche où tombe sa surface ; à δ nul, au bit
+la même (essai `zero_delta_stays_zero_with_the_lax_wendroff_band_s441`). **Reproduire** : `BANDE_LW=1` aux bancs `--delta3d-a321` et
+`--delta3d-trajectoire`.
+
+| mode relatif | 10 cm, 30 Hz, 120 s : secondes > 0,05 · maximum | `max_u` dans ces secondes | trajectoire (400 pas) : écart à la référence |
+|---|---:|---:|---:|
+| bande centrée (S439) | 65 · 0,62 | jusqu'à 0,61 m/s | 1,5·10⁻⁴ m avant le millimètre, atteint au pas 260 |
+| **bande sous Lax-Wendroff** | **10 · 0,115** | **3 à 5 cm/s** (δ à 1–2 mm) | **1,4·10⁻⁵ m**, le millimètre jamais atteint |
+
+La production (sans `RELATIF`) reste **au bit** ; le témoin relatif sous Lax-Wendroff est **nul au bit**, carte et référence.
+**Verdict, tel qu'écrit** : la localisation est faite ; A322 **n'est pas levée** — le critère, une **part** de l'échelle de la maille,
+dépasse 0,05 dix secondes, mais sur un champ presque éteint, où une part relative ne dit plus rien d'un danger. Les bouffées, elles,
+ont disparu (vitesses divisées par plus de dix). Un critère en amplitude absolue serait le bon ; à écrire avant la mesure suivante,
+ou l'écart accepté par l'utilisateur.
+
