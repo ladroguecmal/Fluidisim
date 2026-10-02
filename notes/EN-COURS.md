@@ -85,9 +85,13 @@ germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : déc
 ### Plan
 
 - [x] **P1** — jeton, plan seul, le critère réécrit.
-- [ ] **P2** — `MER_DECALAGE`, `MER_TEMOIN` au banc.
+- [x] **P2** — `MER_DECALAGE`, `MER_TEMOIN` au banc.
 - [ ] **P3** — mesures : 25 cm, deux houles, quatre décalages ; le point fixe ; conclusion.
 - [ ] **P4** — preuve ; A320 ; registres ; suite.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — le banc `mer` : `MER_DECALAGE=<f>` (le repos `f·dx` au-dessus de la face, le germe posé dessus), `MER_TEMOIN=1` (le témoin
+  avance en mode germe ; la trace dit `temoin_nul_au_bit`), `MER_AIR=<n>` (des mailles d'air de plus : à ¾ de maille sous 7,5 cm, la
+  surface sort sinon des bornes du pas au premier pas).
+

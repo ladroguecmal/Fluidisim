@@ -1914,14 +1914,22 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     // tient-elle à la longueur du domaine ?
     let prolongement: f32 = std::env::var("MER_PROLONGEMENT").ok().and_then(|v| v.parse().ok()).unwrap_or(10.0);
     let (lambda, separation) = (2.0f32, 20.0f32);
-    let c = cas(dx, lambda, 1.5);
+    // `MER_DECALAGE=<f>` (S437, A320) : le repos déplacé de `f·dx` au-dessus de la face où le banc le pose (0 par défaut, au bit) ;
+    // à 0,5, il tombe au centre d'une maille, et la surface de B franchit un centre à toute amplitude.
+    let decalage: f32 = std::env::var("MER_DECALAGE").ok().and_then(|v| v.parse().ok()).unwrap_or(0.0);
+    let mut c = cas(dx, lambda, 1.5);
+    if decalage != 0. {
+        c.h0 += decalage * dx;
+    }
     let Cas { h0, sigma, x0, eponge, k, omega, .. } = c;
     let cg_pose = 0.5 * omega / k;
     let ligne1_m = x0 + 4. * sigma;
+    // `MER_AIR=<n>` (S437) : `n` mailles d'air de plus au-dessus du repos (0 par défaut).
+    let air: usize = std::env::var("MER_AIR").ok().and_then(|v| v.parse().ok()).unwrap_or(0);
     let domain = Domain3 {
         nx: ((ligne1_m + separation + prolongement + eponge) / dx) as usize,
         ny: 2,
-        nz: (h0 / dx) as usize + 2,
+        nz: (h0 / dx) as usize + 2 + air,
         dx,
     };
     let (nx, ny) = (domain.nx, domain.ny);
@@ -1981,6 +1989,7 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     } else if let Some(a) = germe {
         let mut petit = cas(dx, lambda, 1.5);
         petit.a = a;
+        petit.h0 = h0;
         pose_paquet(&mut v, domain, &petit)?;
     } else {
         v.set_free_surface(&vec![h0; domain.columns()], h0).map_err(|e| format!("surface {e:?}"))?;
@@ -2031,6 +2040,12 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         let q_g = v.control_flux_x(ligne_g, dt).map_err(|e| format!("{e:?}"))?;
         let v_int = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
         let b = v.balance();
+        // `MER_TEMOIN=1` (S437) : en mode germe aussi, le témoin avance — sinon son zéro ne prouve rien (S436).
+        if !avec_paquet && std::env::var("MER_TEMOIN").is_ok() {
+            temoin
+                .step_perturbation_mobile(time, dt_us, 60_000, &bg, sponge, &jobs)
+                .map_err(|e| format!("témoin {n}: {e:?}"))?;
+        }
         if avec_paquet {
             temoin
                 .step_perturbation_mobile(time, dt_us, 60_000, &bg, sponge, &jobs)
@@ -2069,6 +2084,9 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         // Une trace par seconde simulée, quel que soit le pas (S322) ; à 10 ms, tous les cent pas.
         if std::env::var("MER_TRACE").is_ok() && n % (1_000_000 / dt_us) == 0 {
             let tmax = temoin.surface().iter().fold(0f32, |m, e| m.max((e - h0).abs()));
+            // S437 : le témoin nul au bit (surface au repos au bit, sans aucune vitesse) ?
+            let temoin_bits = temoin.surface().iter().all(|e| e.to_bits() == h0.to_bits())
+                && temoin.velocity_u().iter().chain(temoin.velocity_v()).chain(temoin.velocity_w()).all(|x| *x == 0.);
             // S435 : avec `MER_SPECTRE`, l'amplitude équivalente de δ dans la bande de Benjamin-Feir et sous `4·dx` (m).
             let bandes = if std::env::var("MER_SPECTRE").is_ok() {
                 let marge = (eponge / dx).ceil() as usize;
@@ -2087,7 +2105,11 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
             } else {
                 String::new()
             };
-            eprintln!("TRACE t={:.1} delta_max={pmax:.4} temoin_max={tmax:.4}{bandes}", (n + 1) as f64 * dt);
+            eprintln!(
+                "TRACE t={:.1} delta_max={pmax:.4} temoin_max={tmax:.4} temoin_nul_au_bit={}{bandes}",
+                (n + 1) as f64 * dt,
+                u8::from(temoin_bits)
+            );
         }
         for (i, m) in profil.iter_mut().enumerate() {
             *m = m.max((v.surface()[i] - h0).abs() as f64);
