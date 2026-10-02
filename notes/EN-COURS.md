@@ -83,8 +83,16 @@ session.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
-- [ ] **P3** — c1 : les lois ; un remède s'il se montre ; sinon, la conception de l'eau totale dans la bande.
+- [x] **P3** — c1 : les lois ; un remède s'il se montre ; sinon, la conception de l'eau totale dans la bande.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, index, file active (la campagne), angles morts (A320) pour S443–S444 ; `Registres` : dernier lot S445, le prochain au plus tard en S448.
+- **P3** — départ à plat, 5 s, `|u′|` max (part de `aω`) : 25 cm — 1,25 cm **57 %**, 2,5 cm **56 %**, 5 cm **54 %** ; 12,5 cm, 5 cm —
+  **39 %** (facteur 1,37). **∝ `a`**, peu sensible à la maille : ni une physique du second ordre, ni la seule lecture de la surface (le
+  facteur 1,5 manqué) — **une erreur du premier ordre du schéma discret appliqué à B** (la surface que les particules transportent ne
+  suit pas exactement la surface analytique), au nombre d'onde et à la fréquence de B, qui force δ en résonance ; le pas couplé l'évite
+  parce que sa surface de B est analytique. **c1 non reçu** ; seconde session : **le plafond (ADR-213 D2)**. **La voie suivante** :
+  l'eau totale dans la bande — ce qu'`Apic3` fait déjà (le témoin de S444 suit la houle à 1,2 mm) — et B à sa seule frontière, le
+  raccord avec la mer relative (`Step3`). Le mode relatif d'`Apic3` reste, éteint par défaut, comme instrument.
+

@@ -1375,7 +1375,9 @@ fn linear_swell_gradient_and_pressure_s444() {
 #[ignore]
 fn relative_sheet_under_a_swell_s444() {
     use super::LinearSwell;
-    let (nx, ny, nz, dx) = (32usize, 2usize, 16usize, 0.25f32);
+    // `S444_DX=<m>` (S445, diagnostic) : la maille (25 cm par défaut), le domaine gardé (8 × 4 m).
+    let dx: f32 = std::env::var("S444_DX").ok().and_then(|v| v.parse().ok()).unwrap_or(0.25);
+    let (nx, ny, nz) = ((8. / dx).round() as usize, 2usize, (4. / dx).round() as usize);
     let (g, level) = (9.81f32, 2.0f32);
     let k = core::f32::consts::TAU / 4.;
     // Une houle **stationnaire** — deux houles opposées de 2,5 cm : sa vitesse horizontale s'annule aux parois en `x` (8 m, deux
@@ -1441,7 +1443,7 @@ fn relative_sheet_under_a_swell_s444() {
             }
         }
         a.reconstruct();
-        let hauteurs = (12..20).map(|i| read_height(&a, i, 0)).collect();
+        let hauteurs = (3 * nx / 8..5 * nx / 8).map(|i| read_height(&a, i, 0)).collect();
         (interieur, partout, hauteurs)
     };
     let (interieur, partout, h_rel) = run(true);
