@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S444 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »*, puis, à la question de la voie de C7d-3c,
+Session : S444 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »*, puis, à la question de la voie de C7d-3c,
 *« (B) B dans la bande »* — [ADR-214](../docs/adr/ADR-214-b-entre-dans-la-bande.md) (remplace D1 de S433).
 
 **Ce que la session fait (c1, en référence).** (1) `LinearSwell` complet : l'élévation `η_B(x, t)`, le gradient exact de la vitesse,
@@ -83,7 +83,7 @@ Suite du cœur, zéro avertissement.
 - [x] **P1** — ADR-214 ; jeton, plan seul.
 - [x] **P2** — `LinearSwell` complet ; essais.
 - [x] **P3** — `Apic3` relatif, sans zone ; essais ; mesures (3), (4).
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `LinearSwell::elevation`, `velocity_gradient` (exact), `dynamic_pressure` ; essai `linear_swell_gradient_and_pressure_s444` :
@@ -99,4 +99,4 @@ Suite du cœur, zéro avertissement.
   S389), écart forcé au nombre d'onde et à la fréquence de B — en résonance avec δ, qui croît dans le temps ; le pas couplé n'a pas ce
   défaut (sa surface est analytique). L'essai long devient un instrument ignoré ; essai rapide : sans houle, `|u′|` ≤ 10⁻⁵. Sans
   fond, `Apic3` au bit (ses essais inchangés). Suite **761**, zéro avertissement.
-
+- **P4** — APIC-CARTE §23.1 ; journal ; jeton libre ; maillons 1 ; suivant : S445, c1 suite et le lot des registres (ADR-213 D3).

@@ -1082,3 +1082,32 @@ S439) ; le même sans `RELATIF` ; `TEMOIN=1` ; `--delta3d-cas2` ; `PAS=600 --del
 10 cm tenue (A322) ; le chemin qui le consomme : `Step3`, le pas de la scène (`delta3d_scene`) ; A320 reste ouverte (MER-S369 §9–11),
 plafonnée (ADR-213 D2) : C7d-3c et C7d-3d ne l'attendent plus.
 
+## 23. C7d-3c selon ADR-214 : B entre dans la bande
+
+### 23.1 c1, premier jet (S444) — non reçu
+
+2026-10-02. **L'utilisateur** choisit la voie (B) ([ADR-214](../adr/ADR-214-b-entre-dans-la-bande.md)) : B entre dans la bande, D1 de
+§22.1 est remplacée. **Fait** : `LinearSwell` complet (élévation, gradient exact, pression dynamique ; essai
+`linear_swell_gradient_and_pressure_s444` : gradient à 8·10⁻⁵ des différences finies, divergence et rotationnel nuls) ; `Apic3` en mode
+relatif (`set_relative_background(s)`, une ou deux composantes) — particules en `u′` déplacées par `U + u′`, `−dt·u′·∇U` sur la grille
+au lieu de la gravité, la valeur de `p′` au point de surface (`−p_B` moins l'erreur de B à sa propre surface) au second membre et à la
+correction. Sans fond, au bit.
+
+**Reproduire** : `cargo test --release -p water-core --lib relative_sheet_under_a_swell_s444 -- --ignored --nocapture`
+(`S444_A=<m>`, `S444_DIAG=1`) ; `relative_sheet_without_swell_stays_at_rest_s444`.
+
+| nappe de particules, 8 m × 2 m d'eau, 25 cm, 5 s | `|u′|` max (part de `aω`) | surfaces contre l'eau totale |
+|---|---:|---:|
+| houle progressive, cuve fermée | 97 % | — (B traverse les parois, les particules non : `u′ = −U`) |
+| houle stationnaire, départ à l'amplitude maximale | 90 %, ∝ `a` (sans houle : 4·10⁻⁶ m/s) | 1,2 mm |
+| **houle stationnaire, départ à plat** | **54 %**, croissant (2 → 10 cm/s) | **16 mm** |
+
+**Ce qui est compris.** Les deux premières lignes sont des fautes du banc : une cuve fermée sous une houle qui la traverse ; une nappe
+semée sur le réseau des particules (2 par axe et par maille) dont la surface s'écarte de celle de B d'une demi-maille de réseau. La
+troisième ne l'est pas : partie à plat, la vitesse propre **croît**. **Hypothèse, non éprouvée** : la surface lue sur les particules
+s'écarte de la surface analytique de B de quelques millimètres (≤ 2,5 % de maille, S389), selon la place des particules sur la
+surface mouvante — un écart au nombre d'onde et à la fréquence de B, qui force δ **en résonance** ; le pas couplé n'a pas ce défaut,
+sa surface est analytique. **c1 n'est pas reçu.** Pistes : l'éprouver (densité des particules, noyau de lecture) ; le corriger
+(lire la surface de B comme les particules la liraient) ; ou, si deux sessions n'y suffisent pas (ADR-213 D2), l'eau **totale** dans
+la bande, B n'entrant qu'à sa frontière.
+

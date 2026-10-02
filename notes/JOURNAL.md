@@ -18296,3 +18296,13 @@ de 5 %, plafond de deux sessions, registres par lots de trois, bancs courts. **F
 au bit sous `RELATIF=0` ; trajectoire 1,4·10⁻⁵ m ; témoin nul au bit ; cas 2 à 7,6·10⁻⁷ m ; coût 3,67 ms contre 3,73 ; la scène de
 revue tient 120 s ; suite **759**. **C7d-3b reçu.** **Ce qui devient possible** : δ relatif dans la production — point fixe exact sous B,
 la scène à 10 cm tenue ; **chemin** : `Step3`, le pas de la scène. **Rituel** (allégé). Maillons **0**. Suivant : **C7d-3c**.
+
+## S444 — 2026-10-02 — physique : C7d-3c, voie (B) — c1 non reçu
+
+**Entrée.** *« Continue »* ; à la question de la voie de C7d-3c, *« (B) B dans la bande »* — **ADR-214** (remplace D1 de S433 : la
+bande n'entre pas dans le pas couplé, B entre dans la bande ; 3 à 5 sessions estimées au lieu de 8 à 12). **Fait**
+([preuve](../docs/validation/APIC-CARTE-S416.md) §23.1) : `LinearSwell` complet ; `Apic3` en mode relatif (particules en `u′` déplacées
+par `U + u′`, `u′·∇U` exact, `p′` de surface), une ou deux composantes de B. **Mesuré** : une houle progressive dans une cuve fermée
+fait `u′ = −U` (faute du banc) ; une houle stationnaire partie à plat — `|u′|` croît jusqu'à 54 % de `aω` en 5 s, 16 mm d'écart à l'eau
+totale. **c1 non reçu** ; hypothèse : la lecture de la surface des particules forcée en résonance avec B. Suite **761**. **Rituel**
+(allégé). Maillons **1**. Suivant : c1 — éprouver l'hypothèse, ou l'eau totale dans la bande (ADR-213 D2) ; **le lot des registres**.
