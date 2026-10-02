@@ -86,8 +86,9 @@ sinon l'écart est publié avant tout remède.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le témoin d'A320 rejoué.
-- [ ] **P3** — la conception de C7d-3 (preuve §22) ; registres.
+- [x] **P3** — la conception de C7d-3 (preuve §22) ; registres.
 - [ ] **P4** — rituel.
 
 ### Notes de reprise
 - **P2** — le témoin d'A320 rejoué : `MER_RELATIF=7 MER_GERME=0.001 MER_DUREE=60 MER_TRACE=1 … transfert_oriente -- mer 0.25 0.075` (4 min 11 s) : taux de 35 à 59 s (moindres carrés sur `ln δ_max`) **0,1151 s⁻¹**, δ à 59 s **32,3 mm** — S369 : 0,115 s⁻¹ et 32 mm. **A320 intacte**, l'état de départ de C7d-3a.
+- **P3** — la conception de C7d-3, preuve §22 : **D1** la bande entre dans le pas couplé (`Volume3`, qui porte la production), non B dans `Apic3` (qui reste le banc) ; **D2** les particules portent la vitesse propre `u′`, se déplacent avec `U + u′` — le long d'une particule, le seul terme croisé qui reste est `u′·∇U`, celui d'A320 ; **l'identité** `U·∇u′ + u′·∇U = ∇(U·u′) − U×ω′` (B irrotationnel) : la forme de Bernoulli est exacte pour tout δ si l'on garde `U×ω′`. Découpage : **C7d-3a** A320 en référence (germe : taux < 0,01 s⁻¹ sur 95 s à 7,5 et 5 cm, et à 12,5 cm ; paquet : au plus 1,5 fois son amplitude — le critère de volume remplacé, ADR-198 D5), **C7d-3b** le mode relatif sur la carte et la bascule des défauts (un ADR), **C7d-3c** la bande relative en référence (`u′·∇U` sur les particules au gradient exact de B, ou Bernoulli sur la grille, choisi sur mesure), **C7d-3d** sur la carte (δ ≤ 2 ms sur la scène de la porte B avec la bande). Registres : liste 4.19, feuille de route, index, file (90 mots).

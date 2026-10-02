@@ -931,3 +931,59 @@ bascule 0,40 = 1,98 ms (la décision, 0,29 ms au p99 : le parcours des mailles d
 
 **C7d-2 est reçu.** **La suite : la conception de C7d-3** — la bande dans la production couplée, relative à B : elle dira l'ordre du
 mode relatif sur la carte (ADR-198 D1) et d'A320 (ouverte : une perturbation de δ croît sous houle raide).
+
+## 22. La conception de C7d-3 — la bande dans la production couplée (S433)
+
+**Ce qui est à faire** (§21) : B et W en fond, δ relatif à B ; dans la bande, les particules portent la vitesse propre de δ ; reçu
+si la vague de Chen *dans* une houle B ne demande de particules que là où δ se déforme, rien sous une houle calme, et δ ≤ 2 ms sur la
+scène de la porte B.
+
+### 22.1 Deux solveurs : la bande entre dans le pas couplé
+
+| | le pas couplé (`Volume3`, `delta3d_coupling.rs`) | la bande (`Apic3`, `apic3d_columns.rs`) |
+|---|---|---|
+| représentation | grille MAC, fonction hauteur ; colonnes | grille MAC ; particules APIC ; une zone de colonnes simplifiée (`η` transporté) |
+| B | couplé par ses faces (B+W sommés), éponge ; **mode relatif** en référence (S369) | **aucun** |
+| ce qui le porte déjà | domaine épars et niveaux (C8), faces coupées et corps (porte D), ordonnanceur ; production GPU reçue à la porte C | zone, fond, échange à masse exacte, bascule (S398–S432) ; sur la carte (C7a–C7d-2) |
+| ce qui lui manque | la bande | B, et tout ce que porte l'autre colonne |
+
+**D1 — la bande entre dans le pas couplé**, non B dans `Apic3` : c'est A1 et §4.2 de la campagne (« une grille, trois
+représentations » ; « dans la bande, les particules APIC »), et c'est le pas couplé qui porte la production — porter B dans `Apic3`
+dupliquerait couplage, éponge, épars, niveaux, faces coupées. **Ce que D1 coûte** : la logique de la bande (≈ 3 100 lignes en référence,
+et leur portage sur la carte) doit lire et écrire l'état du pas couplé. **Ce qui l'aide** : la même disposition MAC (mailles
+`(k·ny + j)·nx + i`, faces `u`, `v`, `w` à la suite) ; la frontière colonnes ↔ particules d'`Apic3` (échange, soldes, fond) devient
+celle entre les colonnes du pas couplé et les particules. `Apic3` reste le banc d'essai (B10, la vague de Chen) — pas la production.
+
+### 22.2 Ce que portent les particules, où vont les termes croisés
+
+**D2 — les particules portent la vitesse propre `u′`**, non la vitesse totale : δ est relatif à B (ADR-198) ; une particule portant
+`U + u′` recevrait ce que B linéaire laisse de ses propres équations — la croissance de S319 reviendrait par les particules. **Elles se
+déplacent avec `U + u′`** : leur position est celle de l'eau. L'équation de δ relatif, `∂u′/∂t + U·∇u′ + u′·∇U + u′·∇u′ = −∇p′/ρ`,
+devient le long d'une particule `Du′/Dt = −u′·∇U − ∇p′/ρ` : **le seul terme croisé qui reste, `u′·∇U`, est celui d'A320.** `C` porte
+`∇u′`. La projection est celle de δ, sur la surface totale (fluide fantôme), comme le pas couplé la fait déjà.
+
+**L'identité qui sert** (B irrotationnel) : `U·∇u′ + u′·∇U = ∇(U·u′) − U×ω′`, `ω′ = ∇×u′`. Sur la grille (les colonnes), les deux
+termes croisés, discrétisés ensemble sous cette forme, ne sont plus qu'un **gradient** — que la projection absorbe, sauf à la surface —
+et `U×ω′`, nul là où δ est irrotationnel : c'est la forme de Bernoulli d'ADR-198 D4, **exacte pour tout δ** dès lors qu'on garde
+`U×ω′`. Sur les particules, `u′·∇U` peut se calculer avec le **gradient exact** de B (B est analytique en tout point) : aucun gradient
+discret de `U` — à mesurer, pas à supposer (C7d-3c).
+
+### 22.3 Le découpage
+
+| | contenu | lieu | reçu si |
+|---|---|---|---|
+| **C7d-3a** | **A320** : les termes croisés du pas couplé relatif sous la forme `∇(U·u′) − U×ω′` | référence, sans carte | le germe de 1 mm sous la houle de 7,5 cm et de 5 cm (25 cm) : **taux < 0,01 s⁻¹ sur 95 s** (témoin S433 : 0,1151 s⁻¹ à 7,5 cm) ; à 12,5 cm aussi ; δ nul reste nul sous B seul (l'essai de S369) ; le paquet de l'ordre C sous la houle de 5 cm : δ maximal sur 95 s **au plus 1,5 fois** l'amplitude du paquet (S369 : 7,4 fois — le critère de volume, mal posé dans une mer, est remplacé, ADR-198 D5) |
+| **C7d-3b** | **le mode relatif sur la carte** (`delta3d_step.wgsl`), avec la forme de C7d-3a ; puis **le défaut du cœur et de la production basculent ensemble** (ADR-198 D1) — un ADR le consigne | poste | production = référence à 3 mm (E1, E2, la scène de la porte B) ; δ ≤ 2 ms au 99ᵉ centile sur la scène de la porte B ; la porte C rejouée |
+| **C7d-3c** | **la bande relative en référence** : le pas couplé reçoit la bande (zone, fond, échange, bascule sur son état) ; les particules portent `u′`, vont à `U + u′` ; `u′·∇U` sur les particules (gradient exact de B) **ou** sous la forme de Bernoulli sur la grille — l'un des deux, choisi sur mesure ; le critère du fond de C7d-1 avec le B du couplage | référence, sans carte | sous B seul, δ nul reste nul **avec la bande** ; la vague de Chen dans le pas couplé, B sa composante linéaire : au retournement, la bande n'ajoute pas plus de 0,1 à la forme seule, aucun retour rapide ; sous une houle calme, rien ; masse exacte ; le germe de C7d-3a ne croît pas davantage dans la bande |
+| **C7d-3d** | **sur la carte** | poste | production = référence (décisions, pincements, volume, comme C7c et C7d-2) ; **δ ≤ 2 ms au 99ᵉ centile sur la scène de la porte B avec la bande** — le critère de C7e, sur sa vraie scène |
+
+**L'ordre protège une dépendance chaque fois** : C7d-3a avant tout, parce que la vague de Chen *est* une houle raide — sans lui, toute
+mesure de la bande relative mêlerait la bande et A320 ; C7d-3b avant C7d-3d, parce que la bande sur la carte s'appuie sur la production
+relative ; C7d-3c en référence avant la carte (ADR-175 D1). **C7d-3a et C7d-3c se font sans carte.**
+
+### 22.4 Ce qui reste ouvert
+
+- La forme de `u′·∇U` dans la bande (particules, gradient exact ; ou grille, Bernoulli) — tranchée par la mesure en C7d-3c.
+- La surface de la bande lue sur la surface **totale** (B + δ) ; le fond de la bande, relatif à elle — à écrire en C7d-3c.
+- La bande dans un domaine épars et à travers un changement de niveau (C8) — après C7d-3d.
+- **A322** (10 cm à 30 Hz) reste avant C10, indépendante de C7d.
