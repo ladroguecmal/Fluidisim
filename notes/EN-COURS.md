@@ -78,8 +78,15 @@ jugement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la carte seule : le pas choisi sur la carte ; banc `--surface-direct-banc` ; mesures (1).
+- [x] **P2** — la carte seule : le pas choisi sur la carte ; banc `--surface-direct-banc` ; mesures (1).
 - [ ] **P3** — la fenêtre `--surface-direct` ; mesures (2).
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `ApicCarte::stable_step_us` (la formule de la référence sur les vitesses relues de la carte), `ApicCarte::with_instance`
+  (un adaptateur compatible avec une fenêtre) ; `viewer/src/surface_direct.rs` : B10 sur la carte seule (`Vivant`), banc
+  `--surface-direct-banc` (49 s, dont la compilation). **Mesuré** : 125 pas jusqu'à `t·√(g/D)` = 3 (pas moyen 4,9 ms, au plus bas
+  1,8 ms), **masse en quanta exacte** (écart 0), `φ` fini ; les images `captures/s453/direct_t*.ppm` contre celles de S452 : **identiques**
+  à t = 0,5 et 1, 0,1 % puis 0,05 % des pixels changés de plus de 8 niveaux à t = 2 et 3 — (1) tenu. Pas de la carte : 7,3 ms au mur
+  (médiane, relectures comprises).
+

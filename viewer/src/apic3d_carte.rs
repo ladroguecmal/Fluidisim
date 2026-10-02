@@ -185,6 +185,8 @@ pub struct ApicCarte {
     /// S417 : le corps cinématique, s'il y en a un ; le pas l'avance de `velocity·dt`, comme la référence.
     body: Option<Sphere3>,
     pub adapter: String,
+    /// S453 : l'adaptateur (les capacités d'une surface de fenêtre).
+    pub(crate) adapter_handle: wgpu::Adapter,
 }
 
 /// Durées de la carte par étage, ms (horodatages ; `None` sans la fonction).
@@ -197,6 +199,17 @@ pub struct StageTimes {
 impl ApicCarte {
     /// Réserve tout pour `domain` et `capacity` particules, avec les réglages de `reference`.
     pub async fn new(reference: &Apic3, capacity: usize) -> Result<Self, String> {
+        Self::with_instance(reference, capacity, &crate::instance(), None).await
+    }
+
+    /// **S453** — sur une instance donnée et, s'il y en a une, un adaptateur compatible avec `surface` : la fenêtre de
+    /// `--surface-direct` présente alors sur le device de la carte.
+    pub async fn with_instance(
+        reference: &Apic3,
+        capacity: usize,
+        instance: &wgpu::Instance,
+        surface: Option<&wgpu::Surface<'_>>,
+    ) -> Result<Self, String> {
         let domain = reference.domain();
         let Domain3 { nx, ny, nz, .. } = domain;
         let cells = nx * ny * nz;
@@ -205,10 +218,10 @@ impl ApicCarte {
         }
         let faces = (nx + 1) * ny * nz + nx * (ny + 1) * nz + nx * ny * (nz + 1);
         let nblocks = cells.div_ceil(SCAN as usize);
-        let instance = crate::instance();
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::HighPerformance,
+                compatible_surface: surface,
                 ..Default::default()
             })
             .await
@@ -419,6 +432,7 @@ impl ApicCarte {
             adaptive: true,
             body: None,
             adapter: format!("{} ({:?})", info.name, info.backend),
+            adapter_handle: adapter,
         })
     }
 
@@ -534,6 +548,21 @@ impl ApicCarte {
 
     pub(crate) fn grid(&self) -> Domain3 {
         self.domain
+    }
+
+    /// **S453 — le pas stable, choisi sur la carte** : la formule de `Apic3::stable_step_us` — `0,5·dx / (v_max + √(|g|·dx))`,
+    /// `v_max` la plus grande composante des vitesses des particules et des faces (la référence prend toutes les faces dès qu'une
+    /// zone de colonnes existe) —, sur l'état relu de la carte. La carte avance alors sans référence.
+    pub fn stable_step_us(&self, max_us: u64) -> Result<u64, String> {
+        let n = self.counts()?[0] as usize;
+        let v = self.read_f32(&self.pv, 0, 4 * n)?;
+        let mut vmax = v.chunks_exact(4).fold(0f32, |m, q| m.max(q[0].abs()).max(q[1].abs()).max(q[2].abs()));
+        if self.columns {
+            vmax = self.read_f32(&self.faces_buf, 0, self.faces)?.iter().fold(vmax, |m, x| m.max(x.abs()));
+        }
+        let dx = self.domain.dx as f64;
+        let dt = 0.5 * dx / (vmax as f64 + (self.g_eff.abs() as f64 * dx).sqrt());
+        Ok(((dt * 1e6) as u64).clamp(1, max_us))
     }
 
     /// Le masque de la zone (banc).

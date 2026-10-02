@@ -11,6 +11,7 @@ mod delta;
 mod delta3d;
 mod apic3d_carte;
 mod surface_carte;
+mod surface_direct;
 mod delta3d_projection;
 mod delta3d_background;
 mod delta3d_step;
@@ -2629,6 +2630,12 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--apic3d-carte-ballottement") {
         return apic3d_carte::recevoir_ballottement();
+    }
+    if args.iter().any(|a| a == "--surface-direct-banc") {
+        return surface_direct::banc();
+    }
+    if args.iter().any(|a| a == "--surface-direct") {
+        return surface_direct::fenetre();
     }
     if args.iter().any(|a| a == "--surface-carte") {
         return surface_carte::banc();

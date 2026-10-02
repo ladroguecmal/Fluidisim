@@ -72,6 +72,11 @@ fn entree(binding: u32, visibility: wgpu::ShaderStages, ty: wgpu::BufferBindingT
 
 impl SurfaceCarte {
     pub fn new(carte: &ApicCarte, w: u32, h: u32) -> Self {
+        Self::with_format(carte, w, h, FORMAT)
+    }
+
+    /// S453 : la cible au format donné — celui d'une fenêtre (non sRGB : le nuanceur encode le gamma lui-même).
+    pub fn with_format(carte: &ApicCarte, w: u32, h: u32, format: wgpu::TextureFormat) -> Self {
         let (device, queue) = carte.gpu();
         let (device, queue) = (device.clone(), queue.clone());
         let d = carte.grid();
@@ -123,7 +128,7 @@ impl SurfaceCarte {
                 module: &module,
                 entry_point: Some("fs"),
                 compilation_options: Default::default(),
-                targets: &[Some(wgpu::ColorTargetState { format: FORMAT, blend: None, write_mask: wgpu::ColorWrites::ALL })],
+                targets: &[Some(wgpu::ColorTargetState { format, blend: None, write_mask: wgpu::ColorWrites::ALL })],
             }),
             multiview_mask: None,
             cache: None,
@@ -157,7 +162,7 @@ impl SurfaceCarte {
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
-            format: FORMAT,
+            format,
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
             view_formats: &[],
         });
@@ -215,8 +220,20 @@ impl SurfaceCarte {
         self.queue.write_buffer(&self.uniform, 0, octets);
     }
 
-    /// Enregistre une image : le fondu (deux passes) puis le lancer de rayons, horodatés de bout en bout si la carte le permet.
+    /// S453 : la taille de l'image (celle de la fenêtre) ; la caméra la lit au prochain `set_view`.
+    pub fn set_size(&mut self, w: u32, h: u32) {
+        self.w = w.max(1);
+        self.h = h.max(1);
+    }
+
+    /// Enregistre une image dans la cible du banc.
     pub fn encode(&self, encoder: &mut wgpu::CommandEncoder) {
+        self.encode_to(encoder, &self.vue);
+    }
+
+    /// Enregistre une image dans `vue` : le fondu (deux passes) puis le lancer de rayons, horodatés de bout en bout si la carte le
+    /// permet.
+    pub fn encode_to(&self, encoder: &mut wgpu::CommandEncoder, vue: &wgpu::TextureView) {
         let cells = self.dims[0] * self.dims[1] * self.dims[2];
         for (q, lien) in self.passes.iter().enumerate() {
             let stamp = self.query.as_ref().filter(|_| q == 0).map(|(set, _, _)| wgpu::ComputePassTimestampWrites {
@@ -232,7 +249,7 @@ impl SurfaceCarte {
         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("surface continue"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &self.vue,
+                view: vue,
                 depth_slice: None,
                 resolve_target: None,
                 ops: wgpu::Operations { load: wgpu::LoadOp::Clear(wgpu::Color::BLACK), store: wgpu::StoreOp::Store },
