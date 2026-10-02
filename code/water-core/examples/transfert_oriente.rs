@@ -2047,6 +2047,56 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         let ligne: Vec<String> = (0..nx).step_by(pas_x).map(|i| format!("{:.1}:{:.4}", (i as f32 + 0.5) * dx, profil[i])).collect();
         eprintln!("PROFIL_MAX_ABS_DELTA eponge_m={eponge} ligne_g_m={x_g} ligne_d_m={x_d} {}", ligne.join(" "));
     }
+    // `MER_SPECTRE=1` (S435, A320) : le spectre de l'élévation de δ en fin de calcul, hors des éponges (moyenne des rangées,
+    // fenêtre de Hann, transformée discrète) — l'énergie par nombre d'onde, la part dans la bande instable de Benjamin-Feir
+    // `|k − K| ≤ 2√2·ak·K` autour de la houle, et la part aux longueurs d'onde de moins de `4·dx`.
+    if std::env::var("MER_SPECTRE").is_ok() {
+        let marge = (eponge / dx).ceil() as usize;
+        let (i0, i1) = (marge, nx - marge);
+        let n = i1 - i0;
+        let eta: Vec<f64> = (i0..i1)
+            .map(|i| {
+                let hann = 0.5 - 0.5 * (core::f64::consts::TAU * (i - i0) as f64 / (n - 1) as f64).cos();
+                let moyenne = (0..ny).map(|j| (v.surface()[j * nx + i] - h0) as f64).sum::<f64>() / ny as f64;
+                hann * moyenne
+            })
+            .collect();
+        let (lon, bande_bf) = (n as f64 * dx as f64, 2. * 2f64.sqrt() * a_b * k_b * k_b);
+        let (mut total, mut dans_bf, mut courtes, mut pic) = (0f64, 0f64, 0f64, (0f64, 0f64));
+        let mut lignes = Vec::new();
+        for m in 1..=n / 2 {
+            let k = core::f64::consts::TAU * m as f64 / lon;
+            let (mut re, mut im) = (0f64, 0f64);
+            for (q, e) in eta.iter().enumerate() {
+                let phase = core::f64::consts::TAU * (m * q) as f64 / n as f64;
+                re += e * phase.cos();
+                im -= e * phase.sin();
+            }
+            let energie = re * re + im * im;
+            total += energie;
+            if (k - k_b).abs() <= bande_bf {
+                dans_bf += energie;
+            }
+            if k > core::f64::consts::TAU / (4. * dx as f64) {
+                courtes += energie;
+            }
+            if energie > pic.1 {
+                pic = (k, energie);
+            }
+            lignes.push((k, energie));
+        }
+        let pas_m = (lignes.len() / 48).max(1);
+        let spectre: Vec<String> =
+            lignes.iter().step_by(pas_m).map(|(k, e)| format!("{:.2}:{:.2e}", k / k_b, e / total.max(1e-300))).collect();
+        eprintln!("SPECTRE k/K:part {}", spectre.join(" "));
+        println!(
+            "MER_SPECTRE dx={dx} a_houle={a_houle} longueur_m={lon:.1} houle_k={k_b:.4} bande_bf={bande_bf:.4} \
+             part_bande_bf={:.3} part_moins_de_4dx={:.3} pic_k_sur_K={:.3}",
+            dans_bf / total.max(1e-300),
+            courtes / total.max(1e-300),
+            pic.0 / k_b,
+        );
+    }
     let duree_calcul = depart.elapsed().as_secs_f64();
     let v_int = v.perturbation_volume_x(ligne_g, ligne_d).map_err(|e| format!("{e:?}"))?;
     // Pour échelle : le transport de Stokes de la houle sur la largeur du domaine et la durée.
