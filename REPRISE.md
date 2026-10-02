@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 17:03 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 17:06 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S446 — c2, le raccord bande ↔ mer** : `Apic3` (eau totale) aux bords ouverts, posé dans `Volume3` (δ relatif)
 Dernière session : S445 — le lot des registres ; **c1 plafonné** ([preuve](docs/validation/APIC-CARTE-S416.md) §23.2) — le mode relatif dans la bande résonne avec B (erreur du premier ordre) ; **la bande simule l'eau totale, B à sa frontière** (note d'ADR-214). Avant : S444, ADR-214
 Session suivante : **S446 — c2, le raccord bande ↔ mer** ([ADR-214](docs/adr/ADR-214-b-entre-dans-la-bande.md), note de S445) : concevoir puis éprouver en référence un domaine `Apic3` (eau totale) dans un domaine `Volume3` (δ relatif) — ce que la mer donne à la bande à son bord (hauteur et vitesses `B + δ`), ce que la bande rend à la mer (`δ = total − B`), la masse ; reçu si, sous B seul, la bande posée dans la mer n'y crée pas plus de 1 cm de δ en 10 s et la masse se tient ; bancs courts (ADR-213 D4) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 2 — justifié : la priorité du solveur passe avant la règle (S406) ; journal

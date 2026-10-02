@@ -62,37 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S445 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : le lot des registres
-(ADR-213 D3), puis c1, sa seconde et dernière session (ADR-213 D2).
+Session : S446 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c2, le raccord bande ↔
+mer** ([ADR-214](../docs/adr/ADR-214-b-entre-dans-la-bande.md), note de S445).
 
-**Ce que la session trouve en entrant.** `Apic3` en mode relatif, sous une houle stationnaire partie à plat : `|u′|` croît jusqu'à
-54 % de `aω` en 5 s ([preuve](../docs/validation/APIC-CARTE-S416.md) §23.1). Hypothèse : la lecture de la surface des particules,
-forcée en résonance avec B.
+**La conception.** Un domaine `Apic3` en eau totale, posé dans un domaine `Volume3` en δ relatif, sur la même grille (même maille,
+mêmes couches, décalage entier en `x`). Le raccord passe par **la zone des colonnes** d'`Apic3` — une surface à hauteur de colonne,
+comme le pas couplé —, la bande de particules restant à l'intérieur. (1) **Bords ouverts** (`Apic3::enable_open_boundaries`,
+`set_open_boundaries`) : sur les faces latérales du domaine, la vitesse normale est **imposée** au lieu de nulle — la projection la
+prend déjà comme donnée de Neumann ; le transport des colonnes compte son débit, mouillé à la hauteur de la colonne du bord. Sans
+bords ouverts : au bit. (2) **Chaque pas** (banc `raccord_bande_mer`) : la mer avance ; la bande reçoit à ses bords `B + δ` aux faces ;
+la bande avance ; la mer reçoit, à l'intérieur de la bande (à deux colonnes de ses bords), `δ = total − B` — hauteurs et vitesses.
 
-**Ce que la session fait.** (1) **Le lot des registres** — feuille de route, liste, file active, index, angles morts — pour S443 et S444.
-(2) **c1** : départ à plat, l'instrument de S444 (`S444_A`, plus `S444_DX`) ; la loi de `|u′|` en amplitude (1,25, 2,5, 5 cm) et en
-maille (25 et 12,5 cm).
-
-**Critères, écrits avant.** **L'hypothèse de la lecture** tient si `|u′|` décroît avec la maille (au moins d'un facteur 1,5 de 25 à
-12,5 cm) ; **une faute de couplage** si `|u′|` croît comme `a` et ne dépend pas de la maille ; **une physique du second ordre** (la
-cinématique des particules contre la surface linéaire) si `|u′|` croît comme `a²`. **c1 reçu** si un remède ramène `|u′|` sous 2 % de
-`aω` sur 5 s (ADR-213 D1 : 5 % de tolérance) ; sinon, **l'eau totale dans la bande** devient la voie (ADR-213 D2), conçue en fin de
-session.
+**Critères, écrits avant.** **c2 reçu** si, sous B seul (houle de 5 cm, 4 m, 25 cm), sur **10 s** : (1) le δ créé dans la mer **hors** de
+la bande reste sous **1 cm** ; (2) la masse : le volume de δ de la mer, sa dérive, sous 1 % du volume que la houle fait passer par une
+face de la bande en une demi-période ; (3) sans bords ouverts, `Apic3` au bit (la suite) ; zéro avertissement. Bancs courts (D4).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le lot des registres.
-- [x] **P3** — c1 : les lois ; un remède s'il se montre ; sinon, la conception de l'eau totale dans la bande.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — les bords ouverts d'`Apic3` ; la vitesse de grille imposable ; essais.
+- [ ] **P3** — le banc `raccord_bande_mer` ; mesures ; critères.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — feuille de route, liste, index, file active (la campagne), angles morts (A320) pour S443–S444 ; `Registres` : dernier lot S445, le prochain au plus tard en S448.
-- **P3** — départ à plat, 5 s, `|u′|` max (part de `aω`) : 25 cm — 1,25 cm **57 %**, 2,5 cm **56 %**, 5 cm **54 %** ; 12,5 cm, 5 cm —
-  **39 %** (facteur 1,37). **∝ `a`**, peu sensible à la maille : ni une physique du second ordre, ni la seule lecture de la surface (le
-  facteur 1,5 manqué) — **une erreur du premier ordre du schéma discret appliqué à B** (la surface que les particules transportent ne
-  suit pas exactement la surface analytique), au nombre d'onde et à la fréquence de B, qui force δ en résonance ; le pas couplé l'évite
-  parce que sa surface de B est analytique. **c1 non reçu** ; seconde session : **le plafond (ADR-213 D2)**. **La voie suivante** :
-  l'eau totale dans la bande — ce qu'`Apic3` fait déjà (le témoin de S444 suit la houle à 1,2 mm) — et B à sa seule frontière, le
-  raccord avec la mer relative (`Step3`). Le mode relatif d'`Apic3` reste, éteint par défaut, comme instrument.
-- **P4** — APIC-CARTE §23.2, note datée d'ADR-214 ; journal ; jeton libre ; maillons 2 (justifiés : S406) ; suivant : S446, c2 — la conception du raccord.
