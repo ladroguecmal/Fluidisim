@@ -342,3 +342,22 @@ deux minutes** (100,6 → 141,9 J ; +0,34 %/s), **+45 % sans le terme d'ADR-209*
 - **Un seul domaine, une seule mer**, sans rendu concurrent (chaque pas soumis et attendu, domaine du chiffre de S341) ; pas
   de coque, pas d'APIC (C7).
 - L'**explication** d'A322 et d'A323 : deux hypothèses, aucune démontrée.
+
+## 7. S440 — A322 sous le mode relatif
+
+2026-10-02, au poste. Le mode relatif de δ est sur la carte (S439, C7d-3b reçu) ; il retire le résidu de quantité de mouvement du fond,
+qui seul retiré supprimait l'explosion (§6.4). **Reproduire** : `MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8 SECONDES=120
+RELATIF=1 water-viewer --delta3d-a321` (sans `RELATIF`, le témoin). **Critères, écrits avant** : le témoin explose encore ; le mode
+relatif tient 120 s à 30 Hz, `max_u` sous 3 m/s et la part de l'échelle de la maille de `w` sous 0,05 à chaque seconde ; divergence et
+résidu dans l'ordre du témoin.
+
+| 10 cm, 80 × 80, 30 Hz, mg 8 | issue | `max_u` | part de maille de `w` > 0,05 | divergence · résidu, au plus |
+|---|---|---:|---:|---:|
+| témoin (le pas de S297) | **explose au pas 1 860** (62 s) | 1,92 m/s avant | 3 s sur 60 (0,115) | 2,3·10⁻³ · 8,8·10⁻⁵ |
+| **mode relatif** | **tient 120 s** | **1,25 m/s** | **65 s sur 120** (0,62 à 67 s) | 1,4·10⁻³ · 6,8·10⁻⁵ |
+
+**Verdict, tel qu'écrit : A322 n'est pas levée.** L'explosion disparaît sous le mode relatif, mais il porte des **bouffées à l'échelle de
+la maille** dans `w`, près de la surface (`max_u` jusqu'à 0,61 m/s), qui retombent en quelques secondes — absentes du pas de S297 avant
+son explosion. À 10 cm, la surface de la mer franchit des centres de maille presque partout : le chemin du fantôme latéral d'A324 y est
+la règle, non l'exception. À localiser avant toute scène à 10 cm.
+

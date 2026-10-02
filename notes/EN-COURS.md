@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S440 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue sinon j'accepte l'écart »* — **C7d-3b reçu**,
+Session : S440 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue sinon j'accepte l'écart »* — **C7d-3b reçu**,
 l'écart de 0,01 % accepté ([preuve](../docs/validation/APIC-CARTE-S416.md) §22.10) ; puis la suite de la campagne.
 
 **Ce que la session trouve en entrant.** C7d-3a est bloqué (A320, cause non trouvée) ; C7d-3c et C7d-3d l'attendent. **A322** (à 10 cm,
@@ -82,7 +82,7 @@ le pas de S297 tant que C7d-3a n'est pas reçu.
 
 - [x] **P1** — jeton, plan seul ; l'arbitrage inscrit.
 - [x] **P2** — `RELATIF` au banc d'A321 ; le témoin ; le mode relatif ; critères.
-- [ ] **P3** — preuve ; A322 ; registres ; rituel.
+- [x] **P3** — preuve ; A322 ; registres ; rituel.
 
 ### Notes de reprise
 - **P2** — `--delta3d-a321` : `RELATIF=1`. `MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8`, 30 Hz. **Témoin** : explose au pas
@@ -92,4 +92,4 @@ le pas de S297 tant que C7d-3a n'est pas reçu.
   120** (jusqu'à 0,62 à 67 s, `max_u` 0,61 m/s sur une face `w` près de la surface) — (2) **manqué**. Des bouffées transitoires à la
   surface, qui retombent en quelques secondes. **A322 non levée telle qu'écrite** : l'explosion disparaît sous le mode relatif ;
   apparaissent des bouffées à l'échelle de la maille, à 10 cm, que le pas de S297 n'a pas avant d'exploser.
-
+- **P3** — MULTIGRILLE-3D-S385 §7, APIC-CARTE §22.10 (l'arbitrage) ; A322 annotée ; registres ; journal ; jeton libre ; maillons 28 (justifiés : S406) ; suivant : S441, A322 — les bouffées.

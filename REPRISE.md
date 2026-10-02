@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 15:27 +02:00
+JETON            : libre
+Battement        : 2026-10-02 15:31 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S440 — C7d-3b reçu (l'écart accepté) ; A322 sous le mode relatif**, sur la carte
-Dernière session : S439 — physique : **C7d-3b non reçu tel qu'écrit** ([preuve](docs/validation/APIC-CARTE-S416.md) §22.10) — le mode relatif porté sur la carte : production au bit, témoin nul au bit, horizon du millimètre doublé ; l'écart avant l'horizon manqué de 0,01 % sur des fenêtres inégales. Avant : S438, A320 indécise
-Session suivante : **S440 — C7d-3b**, sur la carte ([preuve](docs/validation/APIC-CARTE-S416.md) §22.10) : réécrire le critère (3) sur une même fenêtre (l'écart de la carte relative à sa référence, sur les pas où le pas de S297 tient sous le millimètre, au plus deux fois le sien), puis le rejouer (`RELATIF=1 PAS=400 CYCLES=64 --delta3d-trajectoire`) — sauf si l'utilisateur accepte l'écart ; **la bascule des défauts attend C7d-3a** (A320 ouverte) ; C7d-3c, C7d-3d après C7d-3a ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 27 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S440 — physique : **C7d-3b reçu** (l'écart accepté par l'utilisateur) ; A322 sous le mode relatif ([preuve](docs/validation/MULTIGRILLE-3D-S385.md) §7) — tient 120 s à 10 cm et 30 Hz (le témoin explose au pas 1 860), mais des bouffées à l'échelle de la maille dans `w`. Avant : S439, le mode relatif sur la carte
+Session suivante : **S441 — A322**, sur la carte ([preuve](docs/validation/MULTIGRILLE-3D-S385.md) §7) : localiser les bouffées à l'échelle de la maille du mode relatif à 10 cm (`RELATIF=1 MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8 --delta3d-a321`, 15–23 s et 61–72 s) — la face, l'étage du pas, le rôle du fantôme latéral d'A324 (la surface franchit des centres presque partout à 10 cm), la référence CPU au même endroit ; reçu si la part de maille de `w` reste sous 0,05 sur 120 s ; C7d-3a reste ouvert (A320) ; C7d-3c, C7d-3d après lui ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 28 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

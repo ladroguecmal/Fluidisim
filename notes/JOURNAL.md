@@ -18256,3 +18256,13 @@ différences exactes. **Mesuré** : production **au bit** ; témoin **nul au bit
 mais l'écart avant l'horizon, 2,0003 fois celui du pas de S297 — **manqué de 0,01 %**, sur des fenêtres inégales (sur la même, 500 fois
 mieux). **Non reçu tel qu'écrit.** Cœur inchangé. **Rituel.** Maillons **27** — justifié : la priorité du solveur (S406) ; 4.19 reste
 partiel. Suivant : **C7d-3b**, le critère (3) réécrit sur une même fenêtre, puis rejoué.
+
+## S440 — 2026-10-02 — physique : C7d-3b reçu ; A322 sous le mode relatif
+
+**Entrée.** *« Continue sinon j'accepte l'écart »* — **C7d-3b reçu**, l'écart de 0,01 % accepté. **Fait**
+([preuve](../docs/validation/MULTIGRILLE-3D-S385.md) §7) : le banc d'A321 gagne `RELATIF=1`. **Mesuré**, la scène d'A322 (10 cm,
+80 × 80, 30 Hz, mg 8) : le témoin explose toujours au pas 1 860 ; **le mode relatif tient 120 s** (`max_u` ≤ 1,25 m/s, divergence et
+résidu dans l'ordre du témoin) — le résidu du fond retiré, comme l'attribution de S409 le laissait prévoir ; mais **des bouffées à
+l'échelle de la maille** dans `w`, près de la surface (jusqu'à 0,6 m/s ; part de maille > 0,05 pendant 65 s sur 120). **A322 non levée
+telle qu'écrite**, transformée. Cœur inchangé. **Rituel.** Maillons **28** — justifié : la priorité du solveur (S406) ; 4.19 reste
+partiel. Suivant : **A322** — localiser les bouffées du mode relatif à 10 cm.

@@ -4485,6 +4485,11 @@ de 10 cm sous 2 ms par image tient 5,6 m de côté à 60 Hz, contre 8 m à 30 Hz
 10 cm** (C10), et avant de régler la cadence d'un domaine par sa maille. Remèdes à éprouver : un sous-pas quand le nombre de
 Courant dépasse un seuil, un limiteur sur le terme de second ordre. [Preuve](../validation/MULTIGRILLE-3D-S385.md) §6.4.
 
+*Note du 2026-10-02, S440, sur A322* ([MULTIGRILLE-3D-S385](../validation/MULTIGRILLE-3D-S385.md) §7) : sous le **mode relatif** (sur
+la carte depuis S439), la scène à 10 cm et 30 Hz **tient 120 s** (le témoin explose toujours au pas 1 860) ; mais des **bouffées à
+l'échelle de la maille** dans `w`, près de la surface, y montent à 0,6 m/s (part de maille > 0,05 pendant 65 s sur 120). A322 reste
+ouverte, transformée : à localiser avant toute scène à 10 cm.
+
 **A323 — S409, 2026-09-27 (sévérité 2, ouverte). Au pas long, la cuve fermée gagne de l'énergie.** Cuve de S305 (`nx` = 32,
 25 cm, mode (1, 1) de 5 cm, murs, sans éponge), référence CPU : **+41 % en deux minutes à 33 ms** (100,6 → 141,9 J), **+45 %
 sans le terme d'ADR-209**, +15,8 % en 60 s à 16,7 ms ; l'amplitude modale le confirme (5,32 cm à 100 s pour 5). À 1 ms, la
