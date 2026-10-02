@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S446 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c2, le raccord bande ↔
+Session : S446 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c2, le raccord bande ↔
 mer** ([ADR-214](../docs/adr/ADR-214-b-entre-dans-la-bande.md), note de S445).
 
 **La conception.** Un domaine `Apic3` en eau totale, posé dans un domaine `Volume3` en δ relatif, sur la même grille (même maille,
@@ -82,7 +82,7 @@ face de la bande en une demi-période ; (3) sans bords ouverts, `Apic3` au bit (
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les bords ouverts d'`Apic3` ; la vitesse de grille imposable ; essais.
 - [x] **P3** — le banc `raccord_bande_mer` ; mesures ; critères.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `Apic3::enable_open_boundaries`, `set_open_boundaries` (les faces `u` des bords `i = 0` et `i = nx`, vitesse normale imposée
@@ -95,4 +95,4 @@ face de la bande en une demi-période ; (3) sans bords ouverts, `Apic3` au bit (
   B en son milieu. Marge 0 : 10,8 cm, 35 % ; 1 : 12,5 mm, 7,5 % ; 4 : 9,1 mm, 7,2 %. **(1) tenu, (2) manqué** : le flux de l'interface
   n'est pas compté pareil des deux côtés (la mer le mouille à la moyenne de deux colonnes, la bande à sa colonne de bord ; et la
   marge recouvre). c2, première session. Suite **762**, zéro avertissement.
-
+- **P4** — APIC-CARTE §23.3 ; journal ; jeton libre ; maillons 3 (justifiés : S406) ; suivant : S447, c2 — le raccord conservatif.

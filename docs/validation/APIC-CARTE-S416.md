@@ -1136,3 +1136,26 @@ la houle stationnaire) ; B n'y entre plus qu'**à sa frontière**, où la bande 
 rend à la mer (`δ = total − B`) —, que D2 d'ADR-214 laissait à plus tard. Le mode relatif d'`Apic3` reste, éteint par défaut, comme
 instrument.
 
+### 23.3 c2, le raccord bande ↔ mer, première session (S446)
+
+2026-10-02. **Fait** : `Apic3` aux **bords ouverts** en `x` (`enable_open_boundaries`, `set_open_boundaries` : la vitesse normale imposée,
+que la projection prend comme donnée ; le débit de bord dans le transport des colonnes) — essai `open_boundaries_carry_their_flux_s446` :
+le volume change exactement de ce que les bords font passer ; `set_grid_velocities`. **Banc** `raccord_bande_mer` : une bande `Apic3`
+en eau totale (sa zone de colonnes, 4 m) posée dans une mer `Volume3` relative (16 m), même grille ; à chaque pas, la mer reçoit
+`δ = total − B` dans l'intérieur de la bande (à `MARGE` colonnes de ses bords), la bande reçoit `B + δ` à ses bords.
+
+**Reproduire** : `cargo run -p water-core --release --offline --example raccord_bande_mer -- 0.05 10` (`RACCORD_MARGE=<n>`,
+`RACCORD_TRACE=1`) ; 14 s.
+
+| marge | δ hors de la bande, max (10 s) | dérive du volume de δ (part d'une demi-période) | bande contre B, au milieu |
+|---:|---:|---:|---:|
+| 0 | 10,8 cm | 35 % | 18,8 mm |
+| 1 | 12,5 mm | 7,5 % | 5,4 mm |
+| **2** | **9,86 mm** | **4,4 %** | 5,2 mm |
+| 4 | 9,1 mm | 7,2 % | 5,6 mm |
+
+**Verdict, tel qu'écrit** (critères de S446 : δ hors de la bande sous 1 cm ; dérive du volume sous 1 % d'une demi-période) : **(1)
+tenu, (2) manqué**. Le δ hors de la bande plafonne (≈ 5 s), ne croît pas ; la masse oscille. **Ce qui manque** : un raccord
+**conservatif** — la mer mouille le flux de l'interface à la moyenne de deux colonnes, la bande à sa colonne de bord, et la marge
+recouvre les deux domaines ; le même flux, compté une fois, des deux côtés. c2, première session.
+

@@ -18315,3 +18315,12 @@ totale. **c1 non reçu** ; hypothèse : la lecture de la surface des particules 
 B analytique), une bande de particules non. **c1 non reçu, plafonné** (ADR-213 D2). **Décidé** (note d'ADR-214) : la bande simule
 l'eau totale, B n'entre qu'à sa frontière ; le raccord avec la mer relative devient c2. **Rituel** (allégé). Maillons **2** — justifié :
 la priorité du solveur (S406). Suivant : **c2**, la conception du raccord.
+
+## S446 — 2026-10-02 — physique : c2, le raccord bande ↔ mer — première session
+
+**Entrée.** *« Continue »* — c2. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md) §23.3) : `Apic3` aux bords ouverts en `x`
+(vitesse normale imposée, débit de bord compté ; essai : le volume change exactement de ce qui passe) ; `set_grid_velocities` ; banc
+`raccord_bande_mer` — une bande `Apic3` en eau totale (4 m, zone de colonnes) dans une mer `Volume3` relative (16 m). **Mesuré** sous B
+seul (5 cm, 4 m, 10 s) : δ hors de la bande **9,86 mm** (tenu, sous 1 cm ; il plafonne) ; la masse oscille de **4,4 %** d'une
+demi-période (manqué, sous 1 %) — le flux de l'interface n'est pas compté pareil des deux côtés. Suite **762**. **Rituel** (allégé).
+Maillons **3** — justifié : la priorité du solveur (S406). Suivant : **c2**, le raccord conservatif (seconde session, ADR-213 D2).
