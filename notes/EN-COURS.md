@@ -86,9 +86,13 @@ celui du pas de S297 ; (4) la suite du cœur, zéro avertissement ; l'afficheur 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la ligne de base du banc de trajectoire (S297).
+- [x] **P2** — la ligne de base du banc de trajectoire (S297).
 - [ ] **P3** — le mode relatif sur la carte : sources, pipelines, banc.
 - [ ] **P4** — mesures ; critères.
 - [ ] **P5** — preuve ; registres ; rituel.
 
 ### Notes de reprise
+- **P2** — `PAS=400 PERIODE=50 CYCLES=64 water-viewer --delta3d-trajectoire` (32 × 24 × 36 à 25 cm, la mer de S298, bosse de 18 cm,
+  5 ms) : horizon du millimètre **au pas 130**, écart avant lui **7,65·10⁻⁵ m**, écart global 7,1 mm au pas 140 ; référence : 132
+  itérations au plus. Sortie gardée pour le critère (1).
+
