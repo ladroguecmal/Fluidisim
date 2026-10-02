@@ -22,6 +22,10 @@ struct Params {
     s_now: u32, s_hold: u32, s_dil: u32, s_fcells: u32,
     s_fhyst: u32, s_pred: u32, s_has_fcells: u32, s_pad: u32,
     s_slope: f32, s_release: f32, s_margin: f32, s_horizon: f32,
+    // S432 — C7d-2 : le seuil de vitesse propre et sa relâche (négatifs : éteints), le fond B (houle linéaire : `a`, `k`, `ω`, `φ`,
+    // niveau moyen ; `b_on` : présent).
+    fs_speed: f32, fs_release: f32, b_amp: f32, b_k: f32,
+    b_omega: f32, b_phase: f32, b_level: f32, b_on: f32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
@@ -2327,6 +2331,53 @@ fn switch_spread(@builtin(global_invocation_id) g: vec3<u32>) {
     swb[sw(SW_SPREAD, col)] = any;
 }
 
+// **S432 — C7d-2 : la vitesse propre de δ** au centre d'une maille (`ColumnsSwitch::own_speed`) : les moyennes de faces de
+// `cell_speed`, moins la vitesse du fond B s'il y en a un (`LinearSwell::velocity`, à l'instant de la décision).
+fn own_speed(i: u32, j: u32, k: u32) -> f32 {
+    let u = 0.5 * (faces[face_global(0u, vec3<u32>(i, j, k))] + faces[face_global(0u, vec3<u32>(i + 1u, j, k))]);
+    let v = 0.5 * (faces[face_global(1u, vec3<u32>(i, j, k))] + faces[face_global(1u, vec3<u32>(i, j + 1u, k))]);
+    let w = 0.5 * (faces[face_global(2u, vec3<u32>(i, j, k))] + faces[face_global(2u, vec3<u32>(i, j, k + 1u))]);
+    var du = u;
+    var dw = w;
+    if P.b_on != 0.0 {
+        let x = (f32(i) + 0.5) * P.dx;
+        let z = (f32(k) + 0.5) * P.dx;
+        let theta = P.b_k * x - P.b_omega * (f32(P.s_now) * 1e-6) + P.b_phase;
+        let amp = P.b_amp * P.b_omega * exp(P.b_k * (z - P.b_level));
+        du = u - amp * cos(theta);
+        dw = w - amp * sin(theta);
+    }
+    return sqrt(du * du + v * v + dw * dw);
+}
+
+// (3b) S432 — l'écoulement (`ColumnsSwitch::decide`, (3b), la vitesse seule) : une maille d'eau au-delà du seuil rend la colonne
+// requise ; sinon, une colonne de la bande au-delà de la relâche est gardée.
+@compute @workgroup_size(128)
+fn switch_flow(@builtin(global_invocation_id) g: vec3<u32>) {
+    let col = g.x;
+    if col >= P.nx * P.ny || P.fs_speed < 0.0 || swb[sw(SW_NEED, col)] != 0u {
+        return;
+    }
+    let i = col % P.nx;
+    let j = col / P.nx;
+    var keep = false;
+    for (var k = 0u; k < P.nz; k = k + 1u) {
+        if label[cell_index(i, j, k)] == WATER {
+            let sp = own_speed(i, j, k);
+            if sp > P.fs_speed {
+                swb[sw(SW_NEED, col)] = 1u;
+                return;
+            }
+            if P.fs_release >= 0.0 && sp > P.fs_release {
+                keep = true;
+            }
+        }
+    }
+    if keep && cmask[col] == 0u {
+        swb[sw(SW_KEEP, col)] = 1u;
+    }
+}
+
 // puis en `y`, et le maintien : une colonne repasse aux colonnes après `hold` sans être requise.
 @compute @workgroup_size(128)
 fn switch_request(@builtin(global_invocation_id) g: vec3<u32>) {
@@ -2758,6 +2809,18 @@ fn floor_place(@builtin(global_invocation_id) g: vec3<u32>) {
         }
     }
     var aim = sat_sub(low, P.s_fcells);
+    // S432 : sous la plus basse maille d'eau au-delà du seuil de vitesse propre, ou de sa relâche (`place_floor`).
+    if P.fs_speed >= 0.0 {
+        for (var l = 0u; l < P.nz; l = l + 1u) {
+            if label[cell_index(i, j, l)] == WATER {
+                let sp = own_speed(i, j, l);
+                if sp > P.fs_speed || (P.fs_release >= 0.0 && sp > P.fs_release) {
+                    aim = min(aim, sat_sub(l, P.s_fcells));
+                    break;
+                }
+            }
+        }
+    }
     if P.s_pred != 0u && P.has_body != 0.0 {
         let d = vec3<f32>(P.bvx, P.bvy, P.bvz) * P.s_horizon;
         let lowest = min(P.bcz, P.bcz + d.z) - P.br;

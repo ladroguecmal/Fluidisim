@@ -8,12 +8,12 @@
 //! Les transferts sont des **collectes** sur les particules triées par maille (aucun atomique flottant) ; le tri range chaque
 //! maille par indice de particule, l'ordre de la référence, et rend le pas déterministe.
 use crate::delta3d::buffer;
-use water_core::apic3d::{self, Apic3, ApicStage, ColumnsSwitch, Sphere3};
+use water_core::apic3d::{self, Apic3, ApicStage, ColumnsSwitch, LinearSwell, Sphere3};
 use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 100] = [
+const KERNELS: [&str; 101] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -30,7 +30,7 @@ const KERNELS: [&str; 100] = [
     "switch_apply_group", "mark_fresh", "clear_fresh", "reconstruct_coop", "mg_coarse_shared",
     "mg_cg_update_alpha", "mg_cg_beta_direction", "mg_fine_az", "mg_restrict2", "mg_prolong1", "mg_l1_ax",
     "bin_rank", "bin_place", "absorb_faces",
-    "mg_restrict1_coop", "mg_restrict2_coop",
+    "mg_restrict1_coop", "mg_restrict2_coop", "switch_flow",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -65,7 +65,8 @@ const EXCHANGE_BEGIN: usize = 38;
 // S421 : `absorb_serial` (40) remplacé par `absorb_group` ; gardé dans la liste pour les indices.
 // S421 : `exchange_serial` (41) remplacé par `exchange_group` ; gardé dans la liste pour les indices.
 const FLOOR_UPDATE: usize = 42;
-const SWITCH_DECIDE: [usize; 4] = [43, 44, 45, 46];
+// S432 : `switch_flow` (100) entre la pente (44) et la dilatation (45).
+const SWITCH_DECIDE: [usize; 5] = [43, 44, 100, 45, 46];
 const SWITCH_APPLY: [usize; 3] = [47, 48, 49];
 const LIST_MODE_ABSORB: usize = 50;
 const LIST_MODE_CONVERT: usize = 51;
@@ -111,7 +112,7 @@ const MG_SHARED_CELLS: usize = 1024;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
-const PARAMS_BYTES: u64 = 224;
+const PARAMS_BYTES: u64 = 256;
 /// Horodatages : début et fin de chaque étage.
 const STAMPS: u32 = 32;
 
@@ -675,6 +676,12 @@ impl ApicCarte {
             s.floor_prediction as u32, s.floor_cells.is_some() as u32, 0,
         ];
         let sf = [s.slope_max, s.slope_release.unwrap_or(-1.), s.body_margin, s.body_horizon];
+        // S432 — C7d-2 : le seuil de vitesse propre, sa relâche, le fond B.
+        let b = s.background.unwrap_or(LinearSwell { amplitude: 0., wavenumber: 0., omega: 0., phase: 0., mean_level: 0. });
+        let sb = [
+            s.floor_speed.unwrap_or(-1.), s.floor_speed_release.unwrap_or(-1.), b.amplitude, b.wavenumber, b.omega, b.phase,
+            b.mean_level, s.background.is_some() as u8 as f32,
+        ];
         let mut data = Vec::with_capacity(PARAMS_BYTES as usize);
         for v in u {
             data.extend_from_slice(&v.to_le_bytes());
@@ -685,7 +692,7 @@ impl ApicCarte {
         for v in su {
             data.extend_from_slice(&v.to_le_bytes());
         }
-        for v in sf {
+        for v in sf.into_iter().chain(sb) {
             data.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.params, 0, &data);
@@ -2427,6 +2434,10 @@ pub struct SwitchSettings {
     pub floor_cells: Option<usize>,
     pub floor_hysteresis: usize,
     pub floor_prediction: bool,
+    /// S432 — C7d-2 : le seuil de vitesse propre, sa relâche, le fond B (`ColumnsSwitch`).
+    pub floor_speed: Option<f32>,
+    pub floor_speed_release: Option<f32>,
+    pub background: Option<LinearSwell>,
 }
 
 impl Default for SwitchSettings {
@@ -2441,12 +2452,20 @@ impl Default for SwitchSettings {
             floor_cells: None,
             floor_hysteresis: 2,
             floor_prediction: false,
+            floor_speed: None,
+            floor_speed_release: None,
+            background: None,
         }
     }
 }
 
 impl SwitchSettings {
     pub fn of(s: &ColumnsSwitch) -> Self {
+        // S432 : des critères d'écoulement, seule la vitesse est portée sur la carte.
+        assert!(
+            s.floor_vorticity.is_none() && s.floor_rotation.is_none() && s.floor_deformation.is_none(),
+            "la carte ne porte que le seuil de vitesse propre (vorticité, part de rotation, déformation : non portées)"
+        );
         Self {
             slope_max: s.slope_max,
             slope_release: s.slope_release,
@@ -2457,6 +2476,9 @@ impl SwitchSettings {
             floor_cells: s.floor_cells,
             floor_hysteresis: s.floor_hysteresis,
             floor_prediction: s.floor_prediction,
+            floor_speed: s.floor_speed,
+            floor_speed_release: s.floor_speed_release,
+            background: s.background,
         }
     }
 }
@@ -2483,6 +2505,14 @@ pub fn b10_band_state_from(b: &B10, warm: usize, initial: bool) -> Result<(Apic3
     let mut s = ColumnsSwitch::with_capacity(&mut host, d).map_err(|e| format!("{e:?}"))?;
     s.hold_us = 300_000;
     s.floor_cells = Some(4);
+    // S432 — C7d-2 : `VITESSE=`, `RELACHE=` (m/s), `FOND_B=1` (une houle de 2 cm, λ 2 m, au niveau de l'eau : B10 n'en a pas, la
+    // décision se compare quand même).
+    s.floor_speed = std::env::var("VITESSE").ok().and_then(|v| v.parse().ok());
+    s.floor_speed_release = std::env::var("RELACHE").ok().and_then(|v| v.parse().ok());
+    if std::env::var("FOND_B").is_ok() {
+        let k = std::f32::consts::TAU / 2.;
+        s.background = Some(LinearSwell { amplitude: 0.02, wavenumber: k, omega: (B10::G as f32 * k).sqrt(), phase: 0., mean_level: h as f32 });
+    }
     a.set_body(Some(b.sphere(0.))).map_err(|e| format!("{e:?}"))?;
     if initial {
         return Ok((a, s, 0, 0.));
