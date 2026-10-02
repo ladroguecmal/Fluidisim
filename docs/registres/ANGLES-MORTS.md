@@ -4455,6 +4455,10 @@ maille** (houle de 4 m, 7,5 cm : 0,106 sur une face, 0,036 au centre) — un dé
 de surface ni dans la bande ; sous une houle de 8 m (32 mailles par longueur d'onde), rien au-delà de Benjamin-Feir. A320 reste ouverte,
 **ramenée à une houle de 16 mailles par longueur d'onde** ; C7d-3a non reçu (critère réécrit : 1,5 fois Benjamin-Feir).
 
+*Note du 2026-10-02, S438* ([MER-S369](../validation/MER-S369.md) §10) : l'échelle en mailles par longueur d'onde de la houle, éprouvée —
+indécise (8 m à 50 cm : 2,2 fois Benjamin-Feir sur une face, 0,5 au centre ; 2 m à 12,5 cm : 5,4 et 1,9 fois ; mais 4 m à 12,5 cm,
+32 mailles, montait à 3,1 fois). Cause non trouvée ; A320 reste ouverte, avec son enveloppe ; C7d-3b passe sans la bascule des défauts.
+
 **A321 — S390, 2026-09-26 (sévérité 3, **corrigée S391**). À 30 Hz, la scène de la porte B explose en 24 à 40 s, quel que soit le
 solveur de pression.** Pas de 33,333 ms, `Config::review`, 1 800 pas : la surface publiée cesse d'être finie au pas 930 avec
 Jacobi 512 et au pas 1 050 avec la multigrille à 24 cycles — deux projections **convergées** (résidu relatif ≈ 10⁻⁷) —, au

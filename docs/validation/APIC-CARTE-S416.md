@@ -1020,3 +1020,11 @@ dépendance à la place du repos désigne un défaut de discrétisation près de
 d'onde), rien au-delà de Benjamin-Feir, aux deux places. **C7d-3a n'est pas reçu** ; son excès ne touche qu'une houle de 16 mailles par
 longueur d'onde.
 
+### 22.9 C7d-3a : la cause d'A320 non trouvée ; C7d-3b passe, sans la bascule des défauts (S438)
+
+([MER-S369](MER-S369.md) §10.) L'échelle en mailles par longueur d'onde de la houle, éprouvée : indécise (le motif « surface sur une
+face ≫ au centre » se retrouve, l'échelle n'est pas propre). Après trois sessions sur A320, la règle déclarée en S437 s'applique :
+**C7d-3b vient** — le mode relatif porté sur la carte, avec le fantôme latéral d'A324, au bit près de la référence ; **la bascule des
+défauts vers le mode relatif attend C7d-3a**, et la bande relative (C7d-3c, C7d-3d) aussi (§22.3). A320 reste ouverte, avec son
+enveloppe mesurée.
+

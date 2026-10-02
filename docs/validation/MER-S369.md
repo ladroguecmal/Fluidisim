@@ -278,3 +278,33 @@ critère n'est pas déplacé après coup. Mais A320 change de nature : son excè
 ne se montre qu'à 16 mailles par longueur d'onde de la houle** (4 m à 25 cm) ; à 32 il disparaît. **Limites** : une composante, deux
 rangées ; sous 8 m, les taux se lisent sur un plateau après la sortie du germe — un signe de croissance absente, non une mesure fine.
 
+## 10. S438 — l'excès d'A320, une affaire de mailles par longueur d'onde ? Indécis
+
+2026-10-02, au poste, sans carte. **Hypothèse** : le taux de Benjamin-Feir passe par la réponse liée du second ordre, l'onde `2K` collée
+à la surface (`e^{2Kz}` : 32 cm sous la houle de 4 m, à peine plus d'une maille de 25 cm) ; mal résolue, elle fausserait le coefficient
+cubique, selon la place de la surface dans la maille — l'excès serait alors une fonction de `λ_B/dx` seul. (Une autre hypothèse fut
+écartée avant tout code : une quasi-résonance de triades ouverte par la dispersion discrète de δ — en eau profonde, les triades sont
+loin de résonner, d'un écart d'ordre `Ω/2`.) **Critères, écrits avant** : l'échelle est confirmée si, à deux nouvelles paires de
+16 mailles par longueur d'onde, le taux sur une face est au moins 2,5 fois Benjamin-Feir et au moins deux fois celui du centre ;
+réfutée si une paire reste sous 1,5 fois aux deux places.
+
+**Reproduire** : `transfert_oriente -- mer <dx> <houle>` avec `MER_RELATIF=7 MER_GERME=0.001 MER_DUREE=95 MER_TRACE=1 MER_SPECTRE=1
+MER_AIR=1`, `MER_DECALAGE=0|0.5`, `MER_TP`, `MER_PROFONDEUR`, `MER_GERME_LAMBDA` (le germe à `2K`).
+
+| `ak` = 0,118, taux de la bande (s⁻¹) | `λ_B/dx` | sur une face | au centre | Benjamin-Feir |
+|---|---:|---:|---:|---:|
+| 4 m à 25 cm, 7,5 cm (S437) | 16 | 0,106 (3,9 fois) | 0,036 (1,3) | 0,0273 |
+| **8 m à 50 cm**, 15 cm | 16 | **0,042** (2,2 fois ; 0,059 en fin) | 0,010 (0,5) | 0,0193 |
+| **2 m à 12,5 cm**, 3,75 cm | 16 | fenêtre 35–59 s saturée (refus à 55 s) ; phase linéaire **0,207** (5,4 fois) | **0,074** (1,9) | 0,0386 |
+| 8 m à 25 cm, 15 cm, germe à `2K` | 32 | 0,0085 | 0,010 | 0,0193 |
+| 4 m à 12,5 cm, 6 cm (S436) | 32 | 0,054 (3,1 fois) | — | 0,0175 |
+
+**Verdict, tel qu'écrit : indécis.** Le motif « sur une face ≫ au centre » tient aux trois paires de 16 mailles (rapport 2,8 à 4,2),
+mais 8 m à 50 cm reste à 2,2 fois sur la fenêtre écrite, et la fenêtre de 2 m à 12,5 cm est saturée. Surtout, **l'échelle en `λ_B/dx`
+n'est pas propre** : à 32 mailles, 8 m à 25 cm reste sous Benjamin-Feir, mais 4 m à 12,5 cm montait à 3,1 fois. **La cause n'est pas
+trouvée.** Ce qui est établi, sur trois sessions : A320 est **une instabilité de modulation à la longueur d'onde de la houle**, d'un
+ordre `ω(ak)²` ; son excès sur Benjamin-Feir **dépend de la place de la surface dans la maille** (un défaut de discrétisation près de la
+surface) ; ni la forme des termes croisés (S434), ni les termes croisés aux faces de surface, ni la bande (S437) ne le portent seuls.
+**Enveloppe mesurée à 25 cm** (la maille de la production) : sous une houle de 8 m, au plus Benjamin-Feir ; sous une houle de 4 m et
+6 à 7,5 cm, 0,04 à 0,11 s⁻¹ selon la place du repos.
+
