@@ -92,6 +92,29 @@ impl Volume3 {
         Ok(())
     }
 
+    /// **S434 — C7d-3a, A320 : les termes croisés sous la forme de Bernoulli.** `extra3` donne à la face d'axe `a`
+    /// `U·∇u′_a + u′·∇U_a` : le premier par différences centrées de `u′`, le second avec le gradient analytique de B — deux
+    /// discrétisations qui ne forment plus, ensemble, le gradient discret qu'elles sont pour deux écoulements irrotationnels (S369,
+    /// l'hypothèse d'A320). B étant irrotationnel (`∂_b U_a = ∂_a U_b`), la même somme s'écrit
+    /// `∂_a(U·u′) + Σ_b U_b (∂_b u′_a − ∂_a u′_b)` : **G**, la différence entre les deux mailles de la face de `φ = U·u′` pris aux
+    /// centres — un gradient discret exact, que la projection absorbe — ; **R**, la partie rotationnelle, nulle quand δ est
+    /// irrotationnel. Aux faces du sommet (une seule maille) et dans un domaine épars, l'ancienne forme. `false`, le défaut : au bit.
+    pub fn set_cross_bernoulli(&mut self, on: bool) {
+        self.cross_bernoulli = on;
+    }
+
+    /// S434 : la vitesse de δ au centre de la maille `(i, j, k)` (moyennes de faces), et celle de B (moyenne des deux faces `w`).
+    fn centre_velocities3(&self, bg: &BackgroundFaces3<'_>, i: usize, j: usize, k: usize) -> ([f32; 3], [f32; 3]) {
+        let d = [
+            0.5 * (self.u[self.fu(i, j, k)] + self.u[self.fu(i + 1, j, k)]),
+            0.5 * (self.v[self.fv(i, j, k)] + self.v[self.fv(i, j + 1, k)]),
+            0.5 * (self.w[self.fw(i, j, k)] + self.w[self.fw(i, j, k + 1)]),
+        ];
+        let (lo, hi) = (&bg.w[self.fw(i, j, k)], &bg.w[self.fw(i, j, k + 1)]);
+        let b = [0.5 * (lo.u[0] + hi.u[0]), 0.5 * (lo.u[1] + hi.u[1]), 0.5 * (lo.u[2] + hi.u[2])];
+        (d, b)
+    }
+
     pub(super) fn prepare_background3(&mut self, bg: &BackgroundFaces3<'_>) -> Result<(), Error> {
         let Domain3 { nx, ny, nz, dx } = self.domain;
         for j in 0..ny {
@@ -427,7 +450,26 @@ impl Volume3 {
                         };
                         let residual = self.relative_background & Self::RELATIVE_RESIDUAL == 0;
                         let trials = self.relative_background & (Self::TRIAL_NO_CARRY | Self::TRIAL_NO_STRAIN);
-                        let add = dt as f32 * extra3(sample, axis, vel, dv, self.rho, residual, trials)?;
+                        // S434 : la forme de Bernoulli entre deux mailles du domaine (pas au sommet, pas dans un ensemble épars).
+                        let interior = !(axis == 2 && k == nz);
+                        let add = if self.cross_bernoulli && interior && self.sparse.is_none() && trials == 0 {
+                            let mut lo = p;
+                            lo[axis] -= 1;
+                            let (dl, bl) = self.centre_velocities3(bg, lo[0], lo[1], lo[2]);
+                            let (dh, bh) = self.centre_velocities3(bg, p[0], p[1], p[2]);
+                            let phi = |d: [f32; 3], b: [f32; 3]| b[0] * d[0] + b[1] * d[1] + b[2] * d[2];
+                            let g = (phi(dh, bh) - phi(dl, bl)) / dx;
+                            let mut rot = 0f32;
+                            for b in 0..3 {
+                                if b != axis {
+                                    rot += sample.u[b] * (dv[b] - (dh[b] - dl[b]) / dx);
+                                }
+                            }
+                            let r = if residual { sample.momentum_residual(self.rho, 0.).map_err(|_| Error::NotFinite)?[axis] } else { 0. };
+                            dt as f32 * (g + rot + r)
+                        } else {
+                            dt as f32 * extra3(sample, axis, vel, dv, self.rho, residual, trials)?
+                        };
                         let factor = self.sponge_factor3(sponge, axis, p, dt);
                         let out = match axis {
                             0 => &mut self.us,

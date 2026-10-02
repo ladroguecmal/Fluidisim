@@ -114,6 +114,9 @@ pub struct Volume3 {
     ghost_bg_y: Vec<f32>,
     /// **S369, A289 : les termes propres à B retirés du pas couplé** — masque de `RELATIVE_*` ; 0, le pas de S297.
     relative_background: u8,
+    /// **S434, A320 — les termes croisés sous la forme de Bernoulli** (`set_cross_bernoulli`), éteinte par défaut : le pas
+    /// d'avant au bit.
+    cross_bernoulli: bool,
     /// **S391, A321 — le terme de second ordre de l'advection** (ADR-209), éteint par défaut : le pas d'avant au bit.
     advection_correction: bool,
     /// L'erreur de pression de B à sa propre surface, par colonne (S369) : `ρ·g·η_B − p_B(repos + η_B)`.
@@ -253,6 +256,7 @@ impl Volume3 {
             ghost_bg_x: vec![0.; nu],
             ghost_bg_y: vec![0.; nv],
             relative_background: 0,
+            cross_bernoulli: false,
             advection_correction: false,
             ghost_bg_error: vec![0.; cols],
             pressure_base: vec![0.; cells],

@@ -84,9 +84,10 @@ l'amplitude du paquet ; (5) sans la forme, S369 au bit (le témoin) ; suite du c
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `set_cross_bernoulli` ; l'essai du point fixe ; la clé du banc.
+- [x] **P2** — `set_cross_bernoulli` ; l'essai du point fixe ; la clé du banc.
 - [ ] **P3** — mesures : germes 7,5 et 5 cm à 25 cm, 12,5 cm ; le paquet ; critères.
 - [ ] **P4** — suite ; preuve (MER-S369 §6 et APIC-CARTE §22.5) ; A320 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — `Volume3::set_cross_bernoulli` (éteint par défaut, au bit) : à chaque face prédite entre deux mailles du domaine (pas au sommet, pas dans un ensemble épars), **G** `= (φ(haut) − φ(bas))/dx`, `φ = U·u′` aux centres (U : moyenne des deux faces `w` de B ; `u′` : moyennes de faces), plus **R** `= Σ_{b≠a} U_b (∂_b u′_a − (u′_b(haut) − u′_b(bas))/dx)`, plus le résidu de B s'il n'est pas retiré. Essai `zero_delta_stays_zero_with_the_bernoulli_cross_terms_s434` : δ nul reste nul au bit sous B seul avec la forme ; sur un germe de 1 mm, les deux formes s'écartent (3,3 µm en 1,5 s). L'essai de S369 inchangé. Banc : `MER_BERNOULLI=1`.

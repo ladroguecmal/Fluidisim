@@ -1934,6 +1934,9 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     // `MER_GERME` (S369) : en E1, le paquet de l'ordre C réduit à cette amplitude, m — un germe, pour la stabilité.
     let germe: Option<f32> = std::env::var("MER_GERME").ok().and_then(|v| v.parse().ok());
     v.set_relative_background(relatif).map_err(|e| format!("relatif {e:?}"))?;
+    // `MER_BERNOULLI=1` (S434, C7d-3a) : les termes croisés sous la forme de Bernoulli.
+    let bernoulli = std::env::var("MER_BERNOULLI").is_ok();
+    v.set_cross_bernoulli(bernoulli);
     if avec_paquet {
         pose_paquet(&mut v, domain, &c)?;
     } else if let Some(a) = germe {
@@ -1951,6 +1954,7 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         .set_free_surface(&vec![h0; domain.columns()], h0)
         .map_err(|e| format!("témoin {e:?}"))?;
     temoin.set_relative_background(relatif).map_err(|e| format!("relatif {e:?}"))?;
+    temoin.set_cross_bernoulli(bernoulli);
     let (mut region_dg, mut region_dd) = (region(x_g, -1., x_g)?, region(x_d, 1., longueur - x_d)?);
     let (mut registre_dg, mut registre_dd) = (Ledger3::default(), Ledger3::default());
     let sponge = Sponge3 { width_x: eponge, width_y: 0., rate_per_s: 10. * cg_pose / eponge };
