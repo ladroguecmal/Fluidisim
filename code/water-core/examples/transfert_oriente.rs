@@ -1879,12 +1879,41 @@ fn restitution(dx: f32, amplitude: f32) -> Result<(), String> {
 /// Ce qui se publie : le flux net à chaque ligne, ce que chaque région reçoit, la bande `band_in`,
 /// le bilan de l'intérieur, et — pour échelle — le transport de Stokes de la houle, `a²ω/2` par
 /// mètre de crête et par seconde, que B linéaire ne porte pas.
+/// S435, A320 : le spectre de l'élévation de δ hors de `marge` mailles à chaque bout (moyenne des rangées, fenêtre de Hann,
+/// transformée discrète) — `(k, énergie)` pour `m = 1 … n/2`. L'amplitude d'une onde pure `a` donne une énergie `(a·n/4)²`.
+fn spectre_delta(surface: &[f32], nx: usize, ny: usize, h0: f32, dx: f32, marge: usize) -> Vec<(f64, f64)> {
+    let (i0, i1) = (marge, nx - marge);
+    let n = i1 - i0;
+    let eta: Vec<f64> = (i0..i1)
+        .map(|i| {
+            let hann = 0.5 - 0.5 * (core::f64::consts::TAU * (i - i0) as f64 / (n - 1) as f64).cos();
+            let moyenne = (0..ny).map(|j| (surface[j * nx + i] - h0) as f64).sum::<f64>() / ny as f64;
+            hann * moyenne
+        })
+        .collect();
+    let lon = n as f64 * dx as f64;
+    (1..=n / 2)
+        .map(|m| {
+            let (mut re, mut im) = (0f64, 0f64);
+            for (q, e) in eta.iter().enumerate() {
+                let phase = core::f64::consts::TAU * (m * q) as f64 / n as f64;
+                re += e * phase.cos();
+                im -= e * phase.sin();
+            }
+            (core::f64::consts::TAU * m as f64 / lon, re * re + im * im)
+        })
+        .collect()
+}
+
 fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     use water_core::background::{Background, SeaState};
     use water_core::delta3d::BackgroundGrid3;
     use water_core::regional_level::{RegionSpec, RegionalLevel};
     use water_core::WorldPos;
-    let (lambda, separation, prolongement) = (2.0f32, 20.0f32, 10.0f32);
+    // `MER_PROLONGEMENT` (S435, A320) : la longueur ajoutée au-delà de la ligne de droite, m (10 par défaut) — la croissance
+    // tient-elle à la longueur du domaine ?
+    let prolongement: f32 = std::env::var("MER_PROLONGEMENT").ok().and_then(|v| v.parse().ok()).unwrap_or(10.0);
+    let (lambda, separation) = (2.0f32, 20.0f32);
     let c = cas(dx, lambda, 1.5);
     let Cas { h0, sigma, x0, eponge, k, omega, .. } = c;
     let cg_pose = 0.5 * omega / k;
@@ -2036,7 +2065,25 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
         // Une trace par seconde simulée, quel que soit le pas (S322) ; à 10 ms, tous les cent pas.
         if std::env::var("MER_TRACE").is_ok() && n % (1_000_000 / dt_us) == 0 {
             let tmax = temoin.surface().iter().fold(0f32, |m, e| m.max((e - h0).abs()));
-            eprintln!("TRACE t={:.1} delta_max={pmax:.4} temoin_max={tmax:.4}", (n + 1) as f64 * dt);
+            // S435 : avec `MER_SPECTRE`, l'amplitude équivalente de δ dans la bande de Benjamin-Feir et sous `4·dx` (m).
+            let bandes = if std::env::var("MER_SPECTRE").is_ok() {
+                let marge = (eponge / dx).ceil() as usize;
+                let n_int = (nx - 2 * marge) as f64;
+                let bande_bf = 2. * 2f64.sqrt() * a_b * k_b * k_b;
+                let (mut bf, mut courtes) = (0f64, 0f64);
+                for (k, e) in spectre_delta(v.surface(), nx, ny, h0, dx, marge) {
+                    if (k - k_b).abs() <= bande_bf {
+                        bf += e;
+                    }
+                    if k > core::f64::consts::TAU / (4. * dx as f64) {
+                        courtes += e;
+                    }
+                }
+                format!(" bande_bf_m={:.5} moins_de_4dx_m={:.5}", 4. * bf.sqrt() / n_int, 4. * courtes.sqrt() / n_int)
+            } else {
+                String::new()
+            };
+            eprintln!("TRACE t={:.1} delta_max={pmax:.4} temoin_max={tmax:.4}{bandes}", (n + 1) as f64 * dt);
         }
         for (i, m) in profil.iter_mut().enumerate() {
             *m = m.max((v.surface()[i] - h0).abs() as f64);
@@ -2052,27 +2099,11 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     // `|k − K| ≤ 2√2·ak·K` autour de la houle, et la part aux longueurs d'onde de moins de `4·dx`.
     if std::env::var("MER_SPECTRE").is_ok() {
         let marge = (eponge / dx).ceil() as usize;
-        let (i0, i1) = (marge, nx - marge);
-        let n = i1 - i0;
-        let eta: Vec<f64> = (i0..i1)
-            .map(|i| {
-                let hann = 0.5 - 0.5 * (core::f64::consts::TAU * (i - i0) as f64 / (n - 1) as f64).cos();
-                let moyenne = (0..ny).map(|j| (v.surface()[j * nx + i] - h0) as f64).sum::<f64>() / ny as f64;
-                hann * moyenne
-            })
-            .collect();
-        let (lon, bande_bf) = (n as f64 * dx as f64, 2. * 2f64.sqrt() * a_b * k_b * k_b);
+        let lignes = spectre_delta(v.surface(), nx, ny, h0, dx, marge);
+        let lon = (nx - 2 * marge) as f64 * dx as f64;
+        let bande_bf = 2. * 2f64.sqrt() * a_b * k_b * k_b;
         let (mut total, mut dans_bf, mut courtes, mut pic) = (0f64, 0f64, 0f64, (0f64, 0f64));
-        let mut lignes = Vec::new();
-        for m in 1..=n / 2 {
-            let k = core::f64::consts::TAU * m as f64 / lon;
-            let (mut re, mut im) = (0f64, 0f64);
-            for (q, e) in eta.iter().enumerate() {
-                let phase = core::f64::consts::TAU * (m * q) as f64 / n as f64;
-                re += e * phase.cos();
-                im -= e * phase.sin();
-            }
-            let energie = re * re + im * im;
+        for &(k, energie) in &lignes {
             total += energie;
             if (k - k_b).abs() <= bande_bf {
                 dans_bf += energie;
@@ -2083,7 +2114,6 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
             if energie > pic.1 {
                 pic = (k, energie);
             }
-            lignes.push((k, energie));
         }
         let pas_m = (lignes.len() / 48).max(1);
         let spectre: Vec<String> =

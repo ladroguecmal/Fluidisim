@@ -88,9 +88,23 @@ dans cette session sans un critère écrit avant.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `MER_SPECTRE` au banc.
-- [ ] **P3** — mesures : le spectre à 25 cm ; le taux à quatre mailles ; la conclusion selon les critères.
+- [x] **P2** — `MER_SPECTRE` au banc.
+- [x] **P3** — mesures : le spectre à 25 cm ; le taux à quatre mailles ; la conclusion selon les critères.
 - [ ] **P4** — preuve (MER-S369 §7) ; A320 ; registres ; suite.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
+- **P2** — `MER_SPECTRE=1` : le spectre de δ hors des éponges en fin de calcul (part dans la bande de Benjamin-Feir, part sous `4·dx`).
+- **P3** — le banc : `spectre_delta` ; avec `MER_SPECTRE`, la trace donne chaque seconde l'amplitude de δ dans la bande et sous `4·dx` ;
+  `MER_PROLONGEMENT` (la longueur du domaine). Germe de 1 mm, houle de 7,5 cm, masque 7, 95 s — **taux de la bande, 35–59 s** :
+  50 cm 0,093 · 31,25 cm 0,112 · 25 cm 0,106 · 15,625 cm 0,084 s⁻¹ ; la part de la bande en fin : 0,90 · 0,99 · 0,996 · 0,99 ; sous
+  `4·dx` : ≤ 0,3 %. 37,5 cm refusé (la surface au repos hors d'une face). **Critère (a) tenu** ; **(b)** : l'ajustement en `dx` sur
+  31,25, 25 et 15,625 cm donne **0,056 s⁻¹ à maille nulle, 2,05 fois** Benjamin-Feir (0,0273) — juste hors de la fourchette écrite
+  (le double) : **indécis**, tel qu'écrit ; pas numérique non plus (rien sous `4·dx`, limite > 0,01). Le domaine allongé de 40 m
+  (`MER_PROLONGEMENT=50`) : même taux (0,116) — pas une boucle par les bords. Amplitude, à 25 cm (taux maximal sur 20 s, δ < 5 cm) :
+  2,5 cm rien · 5 cm 0,074 · 7,5 cm 0,128 · 10 cm 0,162 (puis le domaine refuse à 61 s).
+  **Un second défaut, distinct, à 12,5 cm** : sous 7,5 cm de houle, δ saute de 1 à 10 mm en 1 s, en pics isolés, à l'échelle de la
+  maille (54 % de l'énergie sous `4·dx` à 2 s). Seuil net : houle de 6 cm, rien ; 6,5 cm, ×8 en 1 s (73 % sous `4·dx`, pic à
+  `k` = 10 K) — **la demi-maille, 6,25 cm** : la surface de B franchit un centre de maille de δ. Masque 0 : pas de seuil. Le témoin
+  (sans germe) reste nul. Nouvel angle mort, **A324** ; il précède le mode relatif sur la carte (C7d-3b).
+
