@@ -18286,3 +18286,13 @@ production au bit ; témoin relatif nul au bit ; trajectoire relative à 1,4·10
 ([preuve](../docs/validation/MER-S369.md) §11) : inchangée au chiffre près (7,5 cm : 0,106 sur une face, 0,035 au centre) — le FTCS de la
 bande n'en est pas la cause (`C` ≈ 0,01 à 25 cm). **C7d-3a non reçu.** **Rituel.** Maillons **30** — justifié : la priorité du solveur
 (S406) ; 4.19 reste partiel. Suivant : **la bascule des défauts vers le mode relatif**, proposée sans attendre C7d-3a.
+
+## S443 — 2026-10-02 — méthode et physique : ADR-213 ; la bascule des défauts — C7d-3b reçu en entier
+
+**Entrée.** *« J'accepte ta proposition »* (la bascule sans attendre C7d-3a) ; *« où cela bloque »* — expliqué (A320, cinq sessions ;
+un verrou en chaîne ; des calculs longs ; un rituel lourd ; deux arrêts pour des écarts infimes) ; *« Ok go »* — **ADR-213** : tolérance
+de 5 %, plafond de deux sessions, registres par lots de trois, bancs courts. **Fait** ([preuve](../docs/validation/APIC-CARTE-S416.md)
+§22.11) : `Volume3` et `Step3` naissent en mode relatif ; deux essais épinglés au pas de S297 ; `RELATIF=0` aux bancs. **Mesuré** : S297
+au bit sous `RELATIF=0` ; trajectoire 1,4·10⁻⁵ m ; témoin nul au bit ; cas 2 à 7,6·10⁻⁷ m ; coût 3,67 ms contre 3,73 ; la scène de
+revue tient 120 s ; suite **759**. **C7d-3b reçu.** **Ce qui devient possible** : δ relatif dans la production — point fixe exact sous B,
+la scène à 10 cm tenue ; **chemin** : `Step3`, le pas de la scène. **Rituel** (allégé). Maillons **0**. Suivant : **C7d-3c**.

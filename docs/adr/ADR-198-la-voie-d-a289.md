@@ -48,3 +48,8 @@ avant la mesure, sur la durée ou sur le transport propre de δ.
 
 Elle ne change ni B, ni W, ni aucun invariant ; elle ne lève pas le blocage de l'ordre E (D4) ; elle ne touche pas la
 production GPU, dont la bascule est un travail daté.
+
+*Note du 2026-10-02, S443* : **le mode relatif devient le défaut** de `Volume3` et de `Step3` (C7d-3b, décision de l'utilisateur :
+*« J'accepte ta proposition »*), avec le fantôme latéral d'A324 et la bande sous Lax-Wendroff d'A322 ; le pas de S297 reste
+atteignable (`set_relative_background(0)`). [Preuve](../validation/APIC-CARTE-S416.md) §22.11.
+

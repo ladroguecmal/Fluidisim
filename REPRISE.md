@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 16:19 +02:00
+JETON            : libre
+Battement        : 2026-10-02 16:35 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S443 — ADR-213 (accélérer) ; la bascule des défauts vers le mode relatif**, référence et carte
-Dernière session : S442 — physique : **A322 levée en mode relatif** (l'écart accepté par l'utilisateur), la bande relative sous Lax-Wendroff par défaut ; A320 inchangée ([preuve](docs/validation/MER-S369.md) §11). Avant : S441, la bande FTCS
-Session suivante : **S443 — la bascule des défauts vers le mode relatif** (C7d-3b, sa seconde moitié), **proposée sans attendre C7d-3a** : sur tout ce qui est mesuré, le mode relatif vaut mieux que le pas de S297 — point fixe exact sous B seul (le pas de S297 fait croître δ jusqu'à trois fois la houle, A289), A322 levée à 10 cm, trajectoire carte–référence dix fois plus serrée ; A320 n'est pas propre au mode relatif (la source de S297 la masquait, MER-S369 §3) ; à concevoir : quelles réceptions rejouer sous le nouveau défaut (porte B, B10, la scène de revue), et leurs critères ; **acceptée par l'utilisateur le 2026-10-02** (*« J'accepte ta proposition »*) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 30 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S443 — **ADR-213** (accélérer, décision de l'utilisateur) ; **la bascule des défauts : C7d-3b reçu en entier** ([preuve](docs/validation/APIC-CARTE-S416.md) §22.11) — δ naît relatif à B, référence et carte ; S297 au bit sous `RELATIF=0` ; coût 3,67 ms contre 3,73. Avant : S442, A322 levée
+Session suivante : **S444 — C7d-3c**, sans carte ([preuve](docs/validation/APIC-CARTE-S416.md) §22.3) : la bande étroite APIC dans le pas couplé relatif, en référence — ses particules portent la vitesse propre `u′` et se déplacent avec `U + u′` ; A320 plafonnée (ADR-213 D2), rien ne l'attend ; puis C7d-3d (la carte) ; **les registres au plus tard en S445** (ADR-213 D3 : feuille de route, liste, file active, index, angles morts — tout ce qui a changé depuis S442) ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 0 — C7d-3b reçu (S443) : δ relatif dans la production, chemin `Step3`, preuve APIC-CARTE §22.11 ; journal
 Registres       : dernier lot S442 (ADR-213 D3) ; le prochain au plus tard en S445
 ```
 

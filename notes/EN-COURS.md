@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S443 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« J'accepte ta proposition »* (la bascule sans attendre C7d-3a),
+Session : S443 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« J'accepte ta proposition »* (la bascule sans attendre C7d-3a),
 puis, sur les quatre propositions pour accélérer, *« Ok go »* — [ADR-213](../docs/adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md)
 (tolérance de 5 %, plafond de deux sessions, registres par lots de trois, bancs courts).
 
@@ -82,7 +82,7 @@ trajectoire carte–référence tient le critère de S439 (écart avant l'horizo
 - [x] **P1** — ADR-213 ; jeton, plan seul.
 - [x] **P2** — la bascule : cœur et carte ; suite.
 - [x] **P3** — les rejeux ; le coût.
-- [ ] **P4** — preuve ; rituel (allégé, ADR-213 D3).
+- [x] **P4** — preuve ; rituel (allégé, ADR-213 D3).
 
 ### Notes de reprise
 - **P2** — `Volume3` naît en `RELATIVE_ALL` ; `Step3` appelle `set_relative(true)` à sa création. Épinglés au pas de S297 (ils
@@ -94,4 +94,4 @@ trajectoire carte–référence tient le critère de S439 (écart avant l'horizo
   (critère 3 mm) ; (4) **le coût**, scène de revue à 25 cm, 600 pas : **3,673 ms** (relatif) contre **3,732** (S297) — 1,6 % de moins ;
   création du pas 7,6 s dans les deux cas ; (5) la scène de revue à 25 cm et 30 Hz (mg 8) **tient 120 s**. **Tous tenus : C7d-3b reçu en
   entier**, la bascule faite.
-
+- **P4** — APIC-CARTE §22.11, note datée d'ADR-198 ; registres au prochain lot (ADR-213 D3, au plus tard S445) ; journal ; jeton libre ; maillons 0 ; suivant : S444, C7d-3c.

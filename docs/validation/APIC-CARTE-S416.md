@@ -1056,3 +1056,29 @@ suivante, ou l'écart accepté par l'utilisateur.
 **C7d-3b est reçu** (le mode relatif sur la carte, `Step3::set_relative`). La bascule des défauts vers le mode relatif attend toujours
 C7d-3a (A320).
 
+### 22.11 La bascule des défauts : δ naît relatif à B (S443) — C7d-3b reçu en entier
+
+2026-10-02. **L'utilisateur** : *« J'accepte ta proposition »* — la bascule sans attendre C7d-3a (A320 n'est pas propre au mode relatif ;
+la source du pas de S297 la masquait). **Fait** : `Volume3` naît en `RELATIVE_ALL` (fantôme latéral d'A324, bande sous Lax-Wendroff
+d'A322) ; `Step3` compile et allume ses pipelines relatifs à sa création. Le pas de S297 reste atteignable : `set_relative_background(0)`,
+`set_relative(false)`, `RELATIF=0` aux bancs ; deux essais du cœur, qui le mesurent, l'épinglent
+(`coupled_geometry_zero_and_oblique_ghosts_s297`, `coupled_transverse_invariance_and_rotation_s297`).
+
+**Reproduire** : `RELATIF=0 PAS=400 PERIODE=50 CYCLES=64 water-viewer --delta3d-trajectoire` (identique au bit à la ligne de base de
+S439) ; le même sans `RELATIF` ; `TEMOIN=1` ; `--delta3d-cas2` ; `PAS=600 --delta3d-cout-scene` avec et sans `RELATIF=0` ;
+`MULTIGRILLE=1 CYCLES=8 SECONDES=120 --delta3d-a321`.
+
+| critère (écrit avant) | mesure |
+|---|---|
+| le pas de S297 au bit sous `RELATIF=0` | **identique** |
+| trajectoire carte–référence (≤ 1,53·10⁻⁴ m avant l'horizon) | **1,44·10⁻⁵ m**, le millimètre jamais atteint |
+| témoin, sans perturbation | **nul au bit**, carte et référence |
+| porte B, cas 2 (sous 3 mm) | **7,6·10⁻⁷ m** |
+| coût, scène de revue à 25 cm (au plus +5 %) | **3,673 ms** contre 3,732 — 1,6 % de moins |
+| la scène de revue, 25 cm, 30 Hz, 120 s | **tient** |
+| suite du cœur | **759**, zéro avertissement |
+
+**C7d-3b est reçu en entier.** Ce qui devient possible : δ relatif dans la production — point fixe exact sous B seul (A289), la scène à
+10 cm tenue (A322) ; le chemin qui le consomme : `Step3`, le pas de la scène (`delta3d_scene`) ; A320 reste ouverte (MER-S369 §9–11),
+plafonnée (ADR-213 D2) : C7d-3c et C7d-3d ne l'attendent plus.
+
