@@ -94,4 +94,13 @@ germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : déc
 - **P2** — le banc `mer` : `MER_DECALAGE=<f>` (le repos `f·dx` au-dessus de la face, le germe posé dessus), `MER_TEMOIN=1` (le témoin
   avance en mode germe ; la trace dit `temoin_nul_au_bit`), `MER_AIR=<n>` (des mailles d'air de plus : à ¾ de maille sous 7,5 cm, la
   surface sort sinon des bornes du pas au premier pas).
+- **P3 (en cours)** — 25 cm, germe de 1 mm, taux de la bande 35–59 s ; le témoin avance : **nul au bit à chaque seconde, partout**
+  (A324 tient hors d'une face). Repos sur une face (0), ¼, au centre (½), ¾ : **6 cm** 0,077 · 0,066 · **0,018** · 0,080 (le domaine
+  refuse à 64 s) ; **7,5 cm** 0,106 · 0,068 · **0,036** · décroît. `MER_AIR=1` au bit. **Le taux dépend de la place du repos dans la
+  maille — une physique ne le ferait pas** ; au centre, le critère est tenu (6 cm : 1,0 fois Benjamin-Feir ; 7,5 cm : 1,3 fois).
+  Amputations aux faces de surface (`set_cross_surface_trial`, `MER_SURFACE_ESSAI`) : tous les termes croisés · le seul cisaillement,
+  sur la face 0,095 · 0,092, au centre 0,026 · 0,026 — **pas là**. La bande prend déjà la pente verticale de B (`band3`) — pas là non plus.
+  Le régime « repos près d'une face » n'existe que sous une houle de moins d'une demi-maille ; une vraie mer balaie toutes les places :
+  `MER_TP`, `MER_PROFONDEUR` — houle de 16 m, 30 cm (`ak` = 0,118, Benjamin-Feir 0,0137 s⁻¹, critère 0,021), 8 m d'eau, 25 cm,
+  repos 0, ¼, ½.
 

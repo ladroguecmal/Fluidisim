@@ -1918,6 +1918,10 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     // à 0,5, il tombe au centre d'une maille, et la surface de B franchit un centre à toute amplitude.
     let decalage: f32 = std::env::var("MER_DECALAGE").ok().and_then(|v| v.parse().ok()).unwrap_or(0.0);
     let mut c = cas(dx, lambda, 1.5);
+    // `MER_PROFONDEUR=<m>` (S437) : la profondeur de repos (2,5 m par défaut) — une houle longue veut de l'eau profonde.
+    if let Some(h) = std::env::var("MER_PROFONDEUR").ok().and_then(|v| v.parse::<f32>().ok()) {
+        c.h0 = h;
+    }
     if decalage != 0. {
         c.h0 += decalage * dx;
     }
@@ -1955,7 +1959,14 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
     let houle = Background::configure(
         &mut hote,
-        SeaState { hs: a_houle * 2. * 2f32.sqrt(), tp: 3.2, theta_turns: 0., components: 1, graine: 7 },
+        // `MER_TP=<s>` (S437) : 3,2 s par défaut (λ_B = 4 m) ; 6,4 s donne λ_B = 16 m.
+        SeaState {
+            hs: a_houle * 2. * 2f32.sqrt(),
+            tp: std::env::var("MER_TP").ok().and_then(|v| v.parse().ok()).unwrap_or(3.2),
+            theta_turns: 0.,
+            components: 1,
+            graine: 7,
+        },
         WorldPos::from_units(0, 0, 0),
     )
     .map_err(|e| format!("houle {e:?}"))?;
@@ -1977,6 +1988,8 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     // `MER_A324=0` (S436) : le fantôme latéral de S369, pour comparaison (le remède est le défaut).
     let a324 = std::env::var("MER_A324").map_or(true, |v| v != "0");
     v.set_lateral_own_ghost(a324);
+    // `MER_SURFACE_ESSAI=1|2` (S437) : les termes croisés, ou le seul cisaillement, retirés aux faces de surface — des amputations.
+    v.set_cross_surface_trial(std::env::var("MER_SURFACE_ESSAI").ok().and_then(|x| x.parse().ok()).unwrap_or(0));
     // `MER_BERNOULLI_ESSAI=1|2` (S434) : G seule, R seule — des amputations, pour la bisection d'A320.
     v.set_cross_bernoulli_trial(std::env::var("MER_BERNOULLI_ESSAI").ok().and_then(|x| x.parse().ok()).unwrap_or(0));
     // `MER_LW=1` (S434) : le terme de second ordre de l'advection (ADR-209, A321), actif par défaut dans la production.

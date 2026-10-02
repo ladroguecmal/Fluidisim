@@ -120,6 +120,12 @@ impl Volume3 {
         self.lateral_own_ghost = on;
     }
 
+    /// **S437 — A320, essai de localisation** : 1, les termes croisés retirés aux faces de surface (une des deux mailles de la
+    /// face sèche, ou la face du sommet) ; 2, le seul cisaillement `u′·∇U` retiré là. 0, le défaut : au bit. Pas une physique.
+    pub fn set_cross_surface_trial(&mut self, part: u8) {
+        self.cross_surface_trial = part;
+    }
+
     /// S434 : la vitesse de δ au centre de la maille `(i, j, k)` (moyennes de faces), et celle de B (moyenne des deux faces `w`).
     fn centre_velocities3(&self, bg: &BackgroundFaces3<'_>, i: usize, j: usize, k: usize) -> ([f32; 3], [f32; 3]) {
         let d = [
@@ -477,10 +483,21 @@ impl Volume3 {
                             _ => &bg.w[f],
                         };
                         let residual = self.relative_background & Self::RELATIVE_RESIDUAL == 0;
-                        let trials = self.relative_background & (Self::TRIAL_NO_CARRY | Self::TRIAL_NO_STRAIN);
+                        let mut trials = self.relative_background & (Self::TRIAL_NO_CARRY | Self::TRIAL_NO_STRAIN);
+                        // S437 : l'essai de surface — la face touche-t-elle une maille sèche ?
+                        let surface_face = self.cross_surface_trial != 0 && {
+                            let mut lo = p;
+                            lo[axis] -= 1;
+                            !(p[axis] < dims[axis] && self.wet3(lo[0], lo[1], lo[2]) && self.wet3(p[0], p[1], p[2]))
+                        };
+                        if surface_face && self.cross_surface_trial == 2 {
+                            trials |= Self::TRIAL_NO_STRAIN;
+                        }
                         // S434 : la forme de Bernoulli entre deux mailles du domaine (pas au sommet, pas dans un ensemble épars).
                         let interior = !(axis == 2 && k == nz);
-                        let add = if self.cross_bernoulli && interior && self.sparse.is_none() && trials == 0 {
+                        let add = if surface_face && self.cross_surface_trial == 1 {
+                            0.
+                        } else if self.cross_bernoulli && interior && self.sparse.is_none() && trials == 0 {
                             let mut lo = p;
                             lo[axis] -= 1;
                             let (dl, bl) = self.centre_velocities3(bg, lo[0], lo[1], lo[2]);

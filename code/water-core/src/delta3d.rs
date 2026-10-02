@@ -122,6 +122,9 @@ pub struct Volume3 {
     /// **S436, A324 — le fantôme latéral du mode relatif, interpolé des fantômes verticaux** (`set_lateral_own_ghost`) ; allumé
     /// par défaut depuis sa réception (S436) ; sans effet hors du mode relatif.
     lateral_own_ghost: bool,
+    /// **S437, A320 — essai** (`set_cross_surface_trial`) : 0 (défaut, au bit) ; 1, les termes croisés retirés aux faces de
+    /// surface (une maille voisine sèche) ; 2, le seul cisaillement `u′·∇U` retiré là. Des amputations, pour localiser.
+    cross_surface_trial: u8,
     /// **S391, A321 — le terme de second ordre de l'advection** (ADR-209), éteint par défaut : le pas d'avant au bit.
     advection_correction: bool,
     /// L'erreur de pression de B à sa propre surface, par colonne (S369) : `ρ·g·η_B − p_B(repos + η_B)`.
@@ -264,6 +267,7 @@ impl Volume3 {
             cross_bernoulli: false,
             cross_bernoulli_trial: 0,
             lateral_own_ghost: true,
+            cross_surface_trial: 0,
             advection_correction: false,
             ghost_bg_error: vec![0.; cols],
             pressure_base: vec![0.; cells],
