@@ -44,6 +44,10 @@ fn switched(bit: u32) -> bool { return BENCH_SWITCHES != 0.0 && (s.switches & bi
 /// constante : la production garde son code, donc ses bits (L345).
 override RELATIVE: f32 = 0.0;
 
+/// S441 (A322) — la bande relative sous Lax-Wendroff (`Volume3::set_relative_band_lax_wendroff`), dans les pipelines relatifs
+/// compilés pour elle (`Step3::set_relative_band_lax_wendroff`).
+override BAND_LW: f32 = 0.0;
+
 // Vitesses aux faces : [u | v | w] courantes, puis [u | v | w] prédites, même rangement que le
 // cœur. L'indice d'une face est aussi celui de son échantillon de fond dans `faces`.
 @group(0) @binding(0) var<storage, read_write> vel: array<f32>;
@@ -541,7 +545,17 @@ fn fluxes(@builtin(global_invocation_id) id: vec3<u32>) {
             top = own + difference(cells_in[lo], s.rest);
         } else {
             own = 0.5 * ((s.rest + bg(wbase + lo, 0u)) + (s.rest + bg(wbase + hi, 0u)));
-            top = own + 0.5 * (difference(cells_in[lo], s.rest) + difference(cells_in[hi], s.rest));
+            let el = difference(cells_in[lo], s.rest);
+            let eh = difference(cells_in[hi], s.rest);
+            if (BAND_LW != 0.0) {
+                // S441 : la perturbation de face sous Lax-Wendroff, `U` celle de B dans la couche de la surface de B.
+                let layer = min(u32(max(floor(own / s.dx), 0.0)), s.nz - 1u);
+                let fl = select(fu(a, b, layer), fv(b, a, layer), axis == 1u);
+                let c = bg(fl, 4u + axis) * s.transport;
+                top = own + (0.5 * (el + eh) - 0.5 * c * (eh - el));
+            } else {
+                top = own + 0.5 * (el + eh);
+            }
         }
     }
     var flux = 0.0;
@@ -554,8 +568,9 @@ fn fluxes(@builtin(global_invocation_id) id: vec3<u32>) {
         }
         if (RELATIVE != 0.0) {
             // S439 : la bande moins celle de B seul (S369) — écrite comme le débit de B entre sa surface et la totale, la même
-            // formule que `band3(surface) − band3(own)`, sans la différence de deux grandeurs presque égales.
-            total_band = total_band + band_between(f, axis, k, own, top);
+            // formule que `band3(surface) − band3(own)`, sans la différence de deux grandeurs presque égales. S441 : le
+            // commutateur de banc 16 l'éteint aussi en mode relatif.
+            if (!switched(16u)) { total_band = total_band + band_between(f, axis, k, own, top); }
         } else if (!switched(16u)) { total_band = total_band + band(f, axis, k, surface); }
     }
     let base = select(0u, 2u * x_faces(), axis == 1u);

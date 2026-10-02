@@ -155,6 +155,8 @@ pub struct Step3 {
     /// S441 — les étages du pas relatif avec les commutateurs de banc (S391), pour attribuer un terme en mode relatif.
     relative_bench: Option<Vec<wgpu::ComputePipeline>>,
     relative_on: std::cell::Cell<bool>,
+    /// S441 — la bande relative sous Lax-Wendroff : les pipelines relatifs compilés avec `BAND_LW` = 1.
+    band_lw: bool,
     step_source: (wgpu::ShaderModule, wgpu::BindGroupLayout),
     bg_source: (wgpu::ShaderModule, wgpu::BindGroupLayout),
     read: wgpu::Buffer,
@@ -551,6 +553,7 @@ impl Step3 {
             relative: None,
             relative_bench: None,
             relative_on: std::cell::Cell::new(false),
+            band_lw: false,
             step_source: (step_module, step_layout),
             bg_source: (bg_module, bg_layout),
             read,
@@ -1518,11 +1521,24 @@ impl Step3 {
     /// = 1 — la prédiction sans le résidu de B, la bande moins celle de B seul, les fantômes moins l'erreur de B (le fantôme
     /// latéral d'A324) —, puis l'allume ou l'éteint. Éteint (le défaut), le pas de S297, au bit. La référence est
     /// `Volume3::set_relative_background(RELATIVE_ALL)` avec `set_lateral_own_ghost(true)` (son défaut).
+    /// **S441 (A322)** : la bande relative sous Lax-Wendroff — la référence est `Volume3::set_relative_band_lax_wendroff`. Les
+    /// pipelines relatifs sont recompilés au prochain `set_relative(true)`.
+    pub fn set_relative_band_lax_wendroff(&mut self, on: bool) {
+        if on != self.band_lw {
+            self.band_lw = on;
+            self.relative = None;
+            self.relative_bench = None;
+            let was = self.relative_on.get();
+            self.set_relative(was);
+        }
+    }
+
     pub fn set_relative(&mut self, on: bool) {
         if on && self.relative.is_none() {
             let (step_module, step_layout) = &self.step_source;
             let (bg_module, bg_layout) = &self.bg_source;
-            let step = pipelines_zeroed(&self.device, step_layout, step_module, &STEP, &[("RELATIVE", 1.0)]);
+            let lw = if self.band_lw { 1.0 } else { 0.0 };
+            let step = pipelines_zeroed(&self.device, step_layout, step_module, &STEP, &[("RELATIVE", 1.0), ("BAND_LW", lw)]);
             let bg = pipelines_with(&self.device, bg_layout, bg_module, &BG, &[("COMPACT", 1.0), ("RELATIVE", 1.0)]);
             self.relative = Some((step, bg));
             // S441 : les mêmes, avec les commutateurs de banc — compilés seulement pour les bancs qui en allument.
@@ -1532,7 +1548,7 @@ impl Step3 {
                     step_layout,
                     step_module,
                     &STEP,
-                    &[("RELATIVE", 1.0), ("BENCH_SWITCHES", 1.0)],
+                    &[("RELATIVE", 1.0), ("BENCH_SWITCHES", 1.0), ("BAND_LW", lw)],
                 ));
             }
         }
@@ -2037,6 +2053,9 @@ pub fn trajectoire() -> Result<(), String> {
         if relatif {
             volume.set_relative_background(Volume3::RELATIVE_ALL).map_err(|e| format!("relatif {e:?}"))?;
         }
+        // S441 : `BANDE_LW=1`, la bande relative sous Lax-Wendroff, dans la référence et sur la carte.
+        let bande_lw = std::env::var("BANDE_LW").is_ok();
+        volume.set_relative_band_lax_wendroff(bande_lw);
         volume.set_free_surface(&eta, rest).map_err(|e| format!("surface {e:?}"))?;
         let mut grille = BackgroundGrid3::configure(&mut HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink }, domain, origin, rho)
             .map_err(|e| format!("grille {e:?}"))?;
@@ -2053,6 +2072,7 @@ pub fn trajectoire() -> Result<(), String> {
         let mut cartes = Vec::new();
         for _ in &variantes {
             let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+            carte.set_relative_band_lax_wendroff(bande_lw);
             carte.set_relative(relatif);
             carte.set_step(duration, rest, sponge)?;
             carte.set_state(&u0, &v0, &w0, &eta)?;

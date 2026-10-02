@@ -1790,6 +1790,51 @@ fn zero_delta_stays_zero_when_b_crosses_a_cell_centre_s436() {
     assert!(germe_max <= 1.5e-3, "germe à {germe_max:.2e} m");
 }
 
+/// **S441, A322** — la bande relative sous Lax-Wendroff : δ nul reste nul au bit sous une houle qui franchit des centres de
+/// maille ; avec un germe, la bande change bien le pas (les deux formes s'écartent).
+#[test]
+fn zero_delta_stays_zero_with_the_lax_wendroff_band_s441() {
+    use crate::{background::{Background, SeaState}, SimTime, WorldPos};
+    let (dx, h0) = (0.125f32, 2.5f32);
+    let d = Domain3 { nx: 96, ny: 2, nz: (h0 / dx) as usize + 2, dx };
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    let sea = SeaState { hs: 0.075 * 2. * 2f32.sqrt(), tp: 3.2, theta_turns: 0., components: 1, graine: 7 };
+    let houle = Background::configure(&mut host, sea, WorldPos::from_units(0, 0, 0)).unwrap();
+    let mut grid = BackgroundGrid3::configure(&mut host, d, [0., 0., -h0], 1025.).unwrap();
+    // 0 : nul, Lax-Wendroff ; 1 : germe, sans ; 2 : germe, Lax-Wendroff.
+    let mut volumes = [(false, true), (true, false), (true, true)].map(|(seed, lw)| {
+        let mut v = Volume3::configure(&mut host, d, 1025., houle.gravity()).unwrap();
+        let mut surface = vec![h0; d.columns()];
+        if seed {
+            for i in 38..58 {
+                for j in 0..d.ny {
+                    surface[j * d.nx + i] = h0 + 0.001 * ((i as f32 - 48.) * 0.3).cos();
+                }
+            }
+        }
+        v.set_free_surface(&surface, h0).unwrap();
+        v.set_relative_background(Volume3::RELATIVE_ALL).unwrap();
+        v.set_relative_band_lax_wendroff(lw);
+        v
+    });
+    let sponge = Sponge3 { width_x: 2., width_y: 0., rate_per_s: 2. };
+    for n in 0..60u64 {
+        let time = SimTime(n * 10_000);
+        grid.sample(&houle, time).unwrap();
+        let bg = grid.view().unwrap();
+        for v in &mut volumes {
+            v.step_perturbation_mobile(time, 10_000, 200, &bg, sponge, &Jobs).unwrap();
+        }
+        let v = &volumes[0];
+        assert!(v.eta.iter().all(|e| e.to_bits() == h0.to_bits()), "pas {n}");
+        assert!(v.u.iter().chain(&v.v).chain(&v.w).chain(&v.p).all(|x| *x == 0.), "pas {n}");
+    }
+    let ecart = volumes[1].eta.iter().zip(&volumes[2].eta).fold(0f32, |m, (a, b)| m.max((a - b).abs()));
+    println!("S441 : δ nul reste nul avec la bande sous Lax-Wendroff ; un germe de 1 mm, les deux formes s'écartent de {ecart:.3e} m en 0,6 s");
+    assert!(ecart > 0., "la bande sous Lax-Wendroff ne change rien");
+}
+
 /// S375 (ADR-200 D2) — **l'entrée de volume par colonne**. Le volume de perturbation change de `Σ dh·dx²` (critère 1 :
 /// ≤ 10⁻⁹ m³ par ajout, compensé) ; pression et vitesses intactes au bit ; sans ajout, un domaine au repos reste au repos
 /// au bit ; refus atomiques (longueur, non fini, surface hors bornes).

@@ -126,6 +126,16 @@ impl Volume3 {
         self.cross_surface_trial = part;
     }
 
+    /// **S441 — A322 : la bande relative sous Lax-Wendroff.** En mode relatif, la bande transporte la perturbation de hauteur
+    /// à la vitesse de B entre la surface de B et la totale ; la hauteur de face y est la moyenne des deux colonnes, et le pas
+    /// est explicite : un schéma FTCS, instable par nature (croissance `C²/2` par pas, `C = U·dt/dx` — mesuré S441 : des bouffées
+    /// à l'échelle de la maille à 10 cm et 30 Hz, éteintes avec la bande). Allumé, aux faces intérieures, la perturbation de face
+    /// devient `½(η′_g + η′_d) − (C/2)(η′_d − η′_g)`, `U` la vitesse de B de la couche où tombe la surface de B : Lax-Wendroff,
+    /// stable pour `C ≤ 1`, du second ordre. À δ nul, au bit la même. Éteint, le défaut : au bit.
+    pub fn set_relative_band_lax_wendroff(&mut self, on: bool) {
+        self.band_lax_wendroff = on;
+    }
+
     /// S434 : la vitesse de δ au centre de la maille `(i, j, k)` (moyennes de faces), et celle de B (moyenne des deux faces `w`).
     fn centre_velocities3(&self, bg: &BackgroundFaces3<'_>, i: usize, j: usize, k: usize) -> ([f32; 3], [f32; 3]) {
         let d = [
@@ -596,6 +606,15 @@ impl Volume3 {
                     } else {
                         0.5 * ((self.rest + bg.w[col(a - 1)].eta) + (self.rest + bg.w[col(a)].eta))
                     };
+                    // S441 (A322) : la surface de la bande relative sous Lax-Wendroff, reformée depuis celle de B seul.
+                    let band_top = if relative && self.band_lax_wendroff && a > 0 && a < n && wall.is_none() {
+                        let (el, eh) = (self.eta[col(a - 1)] - self.rest, self.eta[col(a)] - self.rest);
+                        let layer = ((own / dx).floor().max(0.) as usize).min(nz - 1);
+                        let c = sample(layer).u[axis] * transport;
+                        own + (0.5 * (el + eh) - 0.5 * c * (eh - el))
+                    } else {
+                        surface
+                    };
                     let (mut flux, mut band, mut bord) = (0f32, 0f32, 0f32);
                     for k in 0..nz {
                         let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
@@ -615,7 +634,7 @@ impl Volume3 {
                         }
                         if self.relative_background & Self::TRIAL_NO_CROSS_BAND != 0 {
                         } else if relative {
-                            band += band3(sample(k), axis, k, dx, self.rest, surface)
+                            band += band3(sample(k), axis, k, dx, self.rest, band_top)
                                 - band3(sample(k), axis, k, dx, self.rest, own);
                         } else {
                             band += band3(sample(k), axis, k, dx, self.rest, surface);

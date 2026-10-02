@@ -82,7 +82,7 @@ et 30 Hz sur 120 s, part de maille sous 0,05, sans changer la production (sans `
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les quatre discriminants.
-- [ ] **P3** — l'instrument, selon eux ; un remède s'il se montre.
+- [x] **P3** — l'instrument, selon eux ; un remède s'il se montre.
 - [ ] **P4** — preuve ; A322 ; registres ; rituel.
 
 ### Notes de reprise
@@ -92,4 +92,15 @@ et 30 Hz sur 120 s, part de maille sous 0,05, sans changer la production (sans `
   **Les bouffées viennent de la dynamique de δ au pas long, à 10 cm** — une limite de pas, ni la projection, ni le point fixe.
   Pour attribuer le terme : les commutateurs de banc de S391 en mode relatif (`relative_bench`, compilés quand `COMMUTATEURS` est
   posé ; `extra_switched` retire le résidu en mode relatif).
+- **P3** — attribution en mode relatif (commutateurs de S391, 10 cm, 30 Hz, 120 s ; secondes > 0,05 · maximum) : rien d'éteint
+  (pipelines de banc) 65 · 0,61 ; sans `u′·∇u′` 66 ; sans `U·∇u′` 36 ; sans `u′·∇U` 70 ; sans le terme d'ADR-209 : explose à 7 s ;
+  **sans la bande relative (16) : 0 · 0,033** — **la localisation est faite** : la bande relative transporte `η′` à la vitesse de B,
+  hauteur de face centrée, pas explicite — **FTCS**, croissance `C²/2` par pas (`C = U·dt/dx` ≈ 0,3 à 10 cm et 30 Hz ; deux à trois
+  fois moins à 60 Hz ou à 25 cm). **Remède** : `Volume3::set_relative_band_lax_wendroff` (référence) et `Step3::set_relative_band_lax_wendroff`
+  (carte, `override BAND_LW`), éteints par défaut — la perturbation de face sous Lax-Wendroff ; à δ nul, au bit la même ; essai
+  `zero_delta_stays_zero_with_the_lax_wendroff_band_s441`. **Mesures** : la scène à 10 cm, 30 Hz : tient 120 s, **10 s sur 120** au-dessus
+  de 0,05 (0,115 au plus) — mais δ y est presque nul (1 à 2 mm, `max_u` 3 à 5 cm/s, contre 0,6 m/s dans les bouffées d'avant) : le
+  critère, une **part** relative, fluctue quand le champ s'éteint ; **manqué tel qu'écrit**. La production **au bit** ; le témoin relatif
+  sous Lax-Wendroff **nul au bit** (carte et référence) ; la trajectoire relative suit sa référence à **1,4·10⁻⁵ m** sur 400 pas (sans
+  Lax-Wendroff : 1,5·10⁻⁴, l'horizon du millimètre au pas 260 ; avec : jamais). Suite **759**, zéro avertissement.
 

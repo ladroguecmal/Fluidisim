@@ -65,6 +65,8 @@ pub fn banc() -> Result<(), String> {
         carte.set_switches_for_bench(commutateurs);
         // S440 (A322) : `RELATIF=1`, le mode relatif de δ (S369, A324, `Step3::set_relative`).
         let relatif = env("RELATIF").is_some();
+        // S441 : `BANDE_LW=1`, la bande relative sous Lax-Wendroff.
+        carte.set_relative_band_lax_wendroff(env("BANDE_LW").is_some());
         carte.set_relative(relatif);
         let Domain3 { nx, ny, nz, .. } = config.domain;
         let pas = (secondes * 1e6 / pas_us as f64).round() as u64;
