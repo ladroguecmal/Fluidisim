@@ -152,6 +152,8 @@ pub struct Step3 {
     /// à la demande (`enable_relative`) ; absents par défaut, et le pas est alors celui d'avant, au bit. Les modules et les
     /// dispositions sont gardés pour les compiler.
     relative: Option<(Vec<wgpu::ComputePipeline>, Vec<wgpu::ComputePipeline>)>,
+    /// S441 — les étages du pas relatif avec les commutateurs de banc (S391), pour attribuer un terme en mode relatif.
+    relative_bench: Option<Vec<wgpu::ComputePipeline>>,
     relative_on: std::cell::Cell<bool>,
     step_source: (wgpu::ShaderModule, wgpu::BindGroupLayout),
     bg_source: (wgpu::ShaderModule, wgpu::BindGroupLayout),
@@ -547,6 +549,7 @@ impl Step3 {
             step,
             step_bench,
             relative: None,
+            relative_bench: None,
             relative_on: std::cell::Cell::new(false),
             step_source: (step_module, step_layout),
             bg_source: (bg_module, bg_layout),
@@ -1493,6 +1496,11 @@ impl Step3 {
     /// relatif quand il est allumé.
     fn step_pipes(&self) -> &[wgpu::ComputePipeline] {
         if let Some((step, _)) = self.relative.as_ref().filter(|_| self.relative_on.get()) {
+            if self.switches.get() != 0 {
+                if let Some(bench) = self.relative_bench.as_ref() {
+                    return bench;
+                }
+            }
             return step;
         }
         if self.switches.get() != 0 { &self.step_bench } else { &self.step }
@@ -1517,6 +1525,16 @@ impl Step3 {
             let step = pipelines_zeroed(&self.device, step_layout, step_module, &STEP, &[("RELATIVE", 1.0)]);
             let bg = pipelines_with(&self.device, bg_layout, bg_module, &BG, &[("COMPACT", 1.0), ("RELATIVE", 1.0)]);
             self.relative = Some((step, bg));
+            // S441 : les mêmes, avec les commutateurs de banc — compilés seulement pour les bancs qui en allument.
+            if std::env::var("COMMUTATEURS").is_ok_and(|v| v != "0") {
+                self.relative_bench = Some(pipelines_zeroed(
+                    &self.device,
+                    step_layout,
+                    step_module,
+                    &STEP,
+                    &[("RELATIVE", 1.0), ("BENCH_SWITCHES", 1.0)],
+                ));
+            }
         }
         self.relative_on.set(on);
     }

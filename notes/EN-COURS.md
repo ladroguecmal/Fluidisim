@@ -81,8 +81,15 @@ et 30 Hz sur 120 s, part de maille sous 0,05, sans changer la production (sans `
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les quatre discriminants.
+- [x] **P2** — les quatre discriminants.
 - [ ] **P3** — l'instrument, selon eux ; un remède s'il se montre.
 - [ ] **P4** — preuve ; A322 ; registres ; rituel.
 
 ### Notes de reprise
+- **P2** — mode relatif, 120 s, part de maille de `w` (secondes au-dessus de 0,05 · maximum) : témoin S440 (10 cm, 30 Hz, mg 8)
+  **65 · 0,62** ; (a) **60 Hz** : **3 · 0,15** (aucune au-dessus de 0,2) ; (b) **sans le paquet** : δ **nul au bit** sur 120 s — la scène
+  entière tient le point fixe ; (c) **24 cycles** : 65 · 0,61 (divergence 1,5·10⁻⁶) — pas la projection ; (d) **25 cm** : 0 · 0,022.
+  **Les bouffées viennent de la dynamique de δ au pas long, à 10 cm** — une limite de pas, ni la projection, ni le point fixe.
+  Pour attribuer le terme : les commutateurs de banc de S391 en mode relatif (`relative_bench`, compilés quand `COMMUTATEURS` est
+  posé ; `extra_switched` retire le résidu en mode relatif).
+

@@ -208,7 +208,8 @@ fn extra_switched(f: u32, axis: u32, v0: f32, v1: f32, v2: f32, d0: f32, d1: f32
     let g = 10u + 3u * axis;
     let cu = select(1.0, 0.0, (s.switches & 2u) != 0u);
     let cv = select(1.0, 0.0, (s.switches & 4u) != 0u);
-    let cr = select(1.0, 0.0, (s.switches & 8u) != 0u);
+    // S441 : en mode relatif, le résidu est retiré quoi qu'il arrive.
+    let cr = select(1.0, 0.0, (s.switches & 8u) != 0u || RELATIVE != 0.0);
     let advection = (bg(f, 4u) * bg(f, g) + bg(f, 5u) * bg(f, g + 1u)) + bg(f, 6u) * bg(f, g + 2u);
     let residual = (bg(f, 7u + axis) + bg(f, 20u + axis) / s.rho) + advection;
     return cu * (bg(f, 4u) * d0 + bg(f, 6u) * d2 + bg(f, 5u) * d1)
