@@ -79,9 +79,10 @@ exacte, `φ` fini jusqu'à `t·√(g/D)` = 4, le coût d'un pas de la carte publ
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
-- [ ] **P3** — la conception de C10.
+- [x] **P3** — la conception de C10.
 - [ ] **P4** — C10-1 : B10 en domaine entier ; mesures (1) à (3) ; images.
 - [ ] **P5** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, file active pour S451–S453 (la surface continue reçue, R37, et en direct ; « A322 avant C10 » retiré : levée en S442) ; `Registres` : dernier lot S454, le prochain au plus tard en S457.
+- **P3** — `docs/validation/C10-SCENES-S454.md` : C10 en cinq lots — C10-1 le saut sur un domaine entier ; C10-2 le saut dans la mer (le raccord sur la carte, ses marges gardées en colonnes) ; C10-3 la coque et la gerbe d'étrave ; C10-4 la lame du déversoir ; C10-5 la scène du §3.4.
