@@ -2631,6 +2631,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--apic3d-carte-ballottement") {
         return apic3d_carte::recevoir_ballottement();
     }
+    if args.iter().any(|a| a == "--c10-saut") {
+        return surface_direct::c10_saut();
+    }
     if args.iter().any(|a| a == "--surface-direct-banc") {
         return surface_direct::banc();
     }

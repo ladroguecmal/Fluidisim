@@ -9,7 +9,7 @@
 //    interpolé (comme les normales lissées de S451) ; l'ombrage de R37 ; la sphère en gris (intersection analytique).
 
 struct Rendu {
-    dims: vec4<u32>,   // nx, ny, nz, —
+    dims: vec4<u32>,   // nx, ny, nz, quart (S454 : 1, le quart reflété ; 0, un domaine entier)
     img: vec4<u32>,    // largeur, hauteur, —, —
     s: vec4<f32>,      // dx, f (1 / tan(fov / 2)), aspect, —
     oeil: vec4<f32>,
@@ -75,9 +75,17 @@ fn grille(i: i32, j: i32, k: i32) -> f32 {
     return champ[(z * R.dims.y + y) * R.dims.x + x];
 }
 
-// `φ` au point `p` (le domaine entier, reflété dans le quart), trilinéaire aux centres des mailles.
+// Le point `p` dans la grille : reflété dans le quart (S452), ou tel quel sur un domaine entier (S454).
+fn dans_grille(p: vec3<f32>) -> vec3<f32> {
+    if R.dims.w != 0u {
+        return vec3<f32>(abs(p.x), abs(p.y), p.z) / R.s.x - 0.5;
+    }
+    return p / R.s.x - 0.5;
+}
+
+// `φ` au point `p`, trilinéaire aux centres des mailles.
 fn phi(p: vec3<f32>) -> f32 {
-    let g = vec3<f32>(abs(p.x), abs(p.y), p.z) / R.s.x - 0.5;
+    let g = dans_grille(p);
     let b = floor(g);
     let f = g - b;
     let i = vec3<i32>(b);
@@ -105,7 +113,7 @@ fn gradient_grille(i: i32, j: i32, k: i32) -> vec3<f32> {
 
 // La normale lissée au point `p` : le gradient aux huit points voisins, interpolé ; le signe rendu au quart d'origine.
 fn normale(p: vec3<f32>) -> vec3<f32> {
-    let g = vec3<f32>(abs(p.x), abs(p.y), p.z) / R.s.x - 0.5;
+    let g = dans_grille(p);
     let b = floor(g);
     let f = g - b;
     let i = vec3<i32>(b);
@@ -114,6 +122,9 @@ fn normale(p: vec3<f32>) -> vec3<f32> {
     let c01 = mix(gradient_grille(i.x, i.y, i.z + 1), gradient_grille(i.x + 1, i.y, i.z + 1), f.x);
     let c11 = mix(gradient_grille(i.x, i.y + 1, i.z + 1), gradient_grille(i.x + 1, i.y + 1, i.z + 1), f.x);
     let n = mix(mix(c00, c10, f.y), mix(c01, c11, f.y), f.z);
+    if R.dims.w == 0u {
+        return n;
+    }
     return vec3<f32>(select(n.x, -n.x, p.x < 0.0), select(n.y, -n.y, p.y < 0.0), n.z);
 }
 
@@ -171,16 +182,20 @@ fn fs(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
             }
         }
     }
-    // La boîte échantillonnée : le quart reflété, des centres extrêmes des mailles.
+    // La boîte échantillonnée, des centres extrêmes des mailles : le quart reflété, ou le domaine entier.
     let dx = R.s.x;
     let hi = vec3<f32>((f32(R.dims.x) - 0.5) * dx, (f32(R.dims.y) - 0.5) * dx, (f32(R.dims.z) - 0.5) * dx);
-    let lo = vec3<f32>(-hi.x, -hi.y, 0.5 * dx);
+    var lo = vec3<f32>(0.5 * dx);
+    if R.dims.w != 0u {
+        lo = vec3<f32>(-hi.x, -hi.y, 0.5 * dx);
+    }
     let inv = 1.0 / dir;
     let t0 = (lo - o) * inv;
     let t1 = (hi - o) * inv;
     let entree = max(max(min(t0.x, t1.x), min(t0.y, t1.y)), max(min(t0.z, t1.z), 0.0));
     let sortie = min(min(max(t0.x, t1.x), max(t0.y, t1.y)), min(max(t0.z, t1.z), t_corps));
     var touche = false;
+    var pas_faits = 0u;
     if entree < sortie {
         let pas = 0.5 * dx;
         var ta = entree;

@@ -80,9 +80,16 @@ exacte, `φ` fini jusqu'à `t·√(g/D)` = 4, le coût d'un pas de la carte publ
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
 - [x] **P3** — la conception de C10.
-- [ ] **P4** — C10-1 : B10 en domaine entier ; mesures (1) à (3) ; images.
+- [x] **P4** — C10-1 : B10 en domaine entier ; mesures (1) à (3) ; images.
 - [ ] **P5** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, file active pour S451–S453 (la surface continue reçue, R37, et en direct ; « A322 avant C10 » retiré : levée en S442) ; `Registres` : dernier lot S454, le prochain au plus tard en S457.
 - **P3** — `docs/validation/C10-SCENES-S454.md` : C10 en cinq lots — C10-1 le saut sur un domaine entier ; C10-2 le saut dans la mer (le raccord sur la carte, ses marges gardées en colonnes) ; C10-3 la coque et la gerbe d'étrave ; C10-4 la lame du déversoir ; C10-5 la scène du §3.4.
+- **Décision de l'utilisateur** (2026-10-03) : *« que tu ne t'arrêtes pas de travailler jusqu'à une v1 solide visuellement, et
+  physiquement, prends les décisions »* — [ADR-215](../docs/adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) (la v1 solide définie, D3 ; l'ordre, D4).
+- **P4** — `B10::entier`, le rendu d'un domaine entier, le banc `--c10-saut` ([preuve](../docs/validation/C10-SCENES-S454.md) §3) :
+  (1) cavité tenue (0,75 maille), jet sur l'axe 2,7 mailles plus haut que le quart (témoin 0,06) — tranché, ADR-215 D2 ; (2) la scène de
+  4 m, masse exacte jusqu'à t = 16 **après correction du plafond** (la nappe plaquée divergeait ; 2,5 m d'air) ; 27 ms par pas ;
+  (3) la fenêtre à 4 m : simulé / réel 0,11. Images envoyées.
+

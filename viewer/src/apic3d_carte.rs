@@ -1904,8 +1904,12 @@ pub struct B10 {
     pub a_arret: f64,
     pub h: f64,
     pub z0: f64,
-    pub nh: usize,
     pub nz: usize,
+    /// S454 (C10-1) — le domaine horizontal, mailles, et l'axe de la sphère, m : le quart (`2·D` de côté, l'axe au coin) ou un
+    /// domaine entier, la sphère au centre (`B10::entier`).
+    pub nx: usize,
+    pub ny: usize,
+    pub centre: [f64; 2],
 }
 
 impl B10 {
@@ -1926,20 +1930,43 @@ impl B10 {
             a_arret,
             h,
             z0: h + r,
-            nh: (2. * d / dx).round() as usize,
             nz: (lz / dx).round() as usize,
+            nx: (2. * d / dx).round() as usize,
+            ny: (2. * d / dx).round() as usize,
+            centre: [0., 0.],
         }
+    }
+
+    /// **S454 (C10-1)** — B10 sur **un domaine entier** de `cote` m de côté (arrondi à la maille), la sphère au centre, sans plan
+    /// de symétrie : `cote` = 4·D, le quart déplié ; plus grand, une scène.
+    pub fn entier(fr: f64, n_d: usize, cote: f64) -> Self {
+        let mut b = Self::new(fr, n_d);
+        let n = (cote / b.dx).round() as usize;
+        b.nx = n;
+        b.ny = n;
+        b.centre = [0.5 * n as f64 * b.dx; 2];
+        // L'air au-dessus du repos : `2,5·D` (1 m) dans le quart ; **2,5 m** sur un domaine entier (S454) — sans plans de symétrie, le
+        // jet de Worthington monte plus haut et touchait le plafond à 1 m, où une nappe plaquée diverge (C10-SCENES-S454 §3).
+        // `C10_AIR=<m>` (banc) l'ajuste.
+        let air = std::env::var("C10_AIR").ok().and_then(|v| v.parse::<f64>().ok()).unwrap_or(2.5);
+        b.nz = ((b.h + air) / b.dx).round() as usize;
+        b
+    }
+
+    /// Le domaine est-il un quart (l'axe au coin, deux plans de symétrie) ?
+    pub fn quart(&self) -> bool {
+        self.centre == [0., 0.]
     }
 
     /// La sphère à l'instant `t`.
     pub fn sphere(&self, t: f64) -> Sphere3 {
         let descente = (self.u * t).min(self.a_arret);
         let v = if self.u * t < self.a_arret { -self.u } else { 0. };
-        Sphere3 { center: [0., 0., (self.z0 - descente) as f32], radius: self.r as f32, velocity: [0., 0., v as f32] }
+        Sphere3 { center: [self.centre[0] as f32, self.centre[1] as f32, (self.z0 - descente) as f32], radius: self.r as f32, velocity: [0., 0., v as f32] }
     }
 
     pub fn domain(&self) -> Domain3 {
-        Domain3 { nx: self.nh, ny: self.nh, nz: self.nz, dx: self.dx as f32 }
+        Domain3 { nx: self.nx, ny: self.ny, nz: self.nz, dx: self.dx as f32 }
     }
 
     /// La référence ensemencée, le corps pas encore posé.
@@ -1948,11 +1975,11 @@ impl B10 {
         use water_core::host::HostServices;
         let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 33);
         let mut host = HostServices { alloc: &mut arena, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink };
-        let sous_repos = self.nh * self.nh * ((self.h / self.dx).ceil() as usize);
+        let sous_repos = self.nx * self.ny * ((self.h / self.dx).ceil() as usize);
         let mut a = Apic3::configure(&mut host, self.domain(), 1000., Self::G as f32, sous_repos * 8).map_err(|e| format!("{e:?}"))?;
-        let (h, r, z0) = (self.h, self.r, self.z0);
+        let (h, r, z0, c) = (self.h, self.r, self.z0, self.centre);
         a.seed(&|p| {
-            let (x, y, z) = (p[0] as f64, p[1] as f64, p[2] as f64 - z0);
+            let (x, y, z) = (p[0] as f64 - c[0], p[1] as f64 - c[1], p[2] as f64 - z0);
             (p[2] as f64) < h && x * x + y * y + z * z >= r * r
         })
         .map_err(|e| format!("{e:?}"))?;
@@ -2540,11 +2567,11 @@ pub fn b10_band_state_from(b: &B10, warm: usize, initial: bool) -> Result<(Apic3
     let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 33);
     let mut host = HostServices { alloc: &mut arena, jobs: &host_impl::SequentialJobs, sink: &host_impl::StderrSink };
     let d = b.domain();
-    let sous_repos = b.nh * b.nh * ((b.h / b.dx).ceil() as usize);
-    let mut a = Apic3::configure(&mut host, d, 1000., B10::G as f32, sous_repos * 8 + b.nh * b.nh * 8).map_err(|e| format!("{e:?}"))?;
-    let (h, r, z0) = (b.h, b.r, b.z0);
+    let sous_repos = b.nx * b.ny * ((b.h / b.dx).ceil() as usize);
+    let mut a = Apic3::configure(&mut host, d, 1000., B10::G as f32, sous_repos * 8 + b.nx * b.ny * 8).map_err(|e| format!("{e:?}"))?;
+    let (h, r, z0, c) = (b.h, b.r, b.z0, b.centre);
     a.seed(&|p| {
-        let (x, y, z) = (p[0] as f64, p[1] as f64, p[2] as f64 - z0);
+        let (x, y, z) = (p[0] as f64 - c[0], p[1] as f64 - c[1], p[2] as f64 - z0);
         (p[2] as f64) < h && x * x + y * y + z * z >= r * r
     })
     .map_err(|e| format!("{e:?}"))?;

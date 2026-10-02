@@ -27,3 +27,37 @@ exacte, **et l'utilisateur juge le rendu convaincant** — sur la surface contin
 
 **L'ordre** : C10-1 d'abord — il ne dépend que de ce qui est reçu et donne à l'utilisateur une première scène à juger ; C10-2 répond au
 déclencheur laissé ouvert par c3 ; C10-3 et C10-4 sont indépendants l'un de l'autre.
+
+## 3. C10-1 — le saut du joueur sur un domaine entier (S454)
+
+2026-10-03. `B10::entier(fr, n_d, cote)` : la sphère au centre d'un domaine entier, sans plan de symétrie ; `surface_carte` rend un
+domaine entier (`set_quart(false)`) ; `surface_direct.rs` mène B10 sur **la carte seule** (S453) et porte le banc `--c10-saut`.
+
+**Reproduire** : depuis la racine, `viewer/target/release/water-viewer.exe --c10-saut` (trois minutes : le quart, le quart déplié, le
+témoin, puis la scène de 4 m jusqu'à t = 4) ; `C10_LONG=1` (la scène jusqu'à t = 16), `C10_SCENE_SEULE=1`, `COTE=<m>`, `C10_AIR=<m>`
+(l'air au-dessus du repos, 2,5 m par défaut), `C10_TRACE=<t>` (chaque pas après t : le pas, `n`, la bande, la vitesse maximale et sa
+place), `C10_OU=1`, `C10_DESSUS=1` (vue de dessus) ; la fenêtre : `COTE=4 … --surface-direct`.
+
+| critère (écrit avant) | mesure (RTX 5070 portable) | |
+|---|---|---|
+| (1) le quart déplié (1,6 m) reproduit le quart : la cavité à t = 1, le jet à t = 2, à une maille | hauteurs des colonnes : écart médian **0,006** et **0,016** maille ; hors des colonnes qui traversent la sphère, **0,75** maille au plus à t = 1 ; **la pointe du jet sur l'axe : 2,7 mailles** plus haute (3,29–3,38 m contre 3,23 m) ; le témoin à 10⁻⁶ m/s : 0,02 et 0,06 maille | cavité tenue ; **jet manqué**, tranché (ci-dessous) |
+| (2) la scène de 4 m : masse exacte, `φ` fini jusqu'à t = 4, coût publié, images | quanta : écart **0** jusqu'à **t = 16** (3,25 s) ; `φ` fini ; pas de la carte **27 ms** (17,6 ms avec 1 m d'air) pour 4,7 ms simulées | tenu |
+| (3) la fenêtre à 4 m | elle tourne ; **simulé / réel 0,11**, 91 ms par image | à faire : le temps réel |
+
+**Le plafond.** Avec 1 m d'air (celui du quart), la scène entière **diverge peu après t = 4** : le pas tombe à 1 µs. `C10_TRACE` place la
+vitesse qui croît **sur des particules plaquées au plafond** (z = 4,20 m, la dernière maille) : sans plans de symétrie, le jet de
+Worthington monte plus haut et l'atteint ; la nappe collée au plafond diverge en quelques dizaines de pas (le quart déplié de 1,6 m
+aussi, avant t = 3,5). **Avec 2,5 m d'air** (le défaut de `B10::entier`), le quart déplié et la scène de 4 m tiennent jusqu'à t = 16.
+Le défaut reste ouvert — **une nappe au plafond diverge** — avec son déclencheur : toute scène où l'eau peut toucher le haut du domaine
+(une ouverture du plafond, les particules sorties comptées, en serait la correction).
+
+**Tranché (ADR-215 D2) — le jet du quart.** L'écart n'est pas une incertitude : le témoin est trente fois plus petit. Il est **sur
+l'axe seulement**, là où le quart a deux parois en coin et le domaine entier aucune ; ailleurs, les deux s'accordent au centième de
+maille. La scène se joue sur un domaine entier ; le quart reste un banc. Le critère (1) est reçu pour la cavité, l'écart du jet inscrit.
+
+**Une première série d'images fausses**, deux passages : seule la zone de la bande apparaissait. Ni le champ (égal au CPU à 7·10⁻⁷) ni
+`φ` (aucune colonne sans surface) n'étaient en cause ; le défaut ne s'est plus reproduit en quatre passages, cause non établie.
+
+**Ce qui se voit** (`captures/s454/long/scene_t{1.0,2.0,3.0,6.0}.png`) : la cavité, le jet et sa goutte détachée, puis les ondes en
+anneau qui s'étendent sur la scène. **Suite** (ADR-215 D4) : le temps réel à 4 m — 27 ms de carte par pas de 4,7 ms simulées.
+

@@ -29,7 +29,17 @@ pub struct Camera {
 impl Camera {
     /// La caméra du banc `surface_continue` (R36, R37) : de côté et d'au-dessus, vers le point d'entrée.
     pub fn b10(niveau: f32) -> Self {
-        Self { oeil: [1.7, -2.1, niveau + 1.1], cible: [0., 0., niveau - 0.15], fov_deg: 40., soleil: [0.4, -0.3, 0.85] }
+        Self::b10_en([0., 0.], niveau)
+    }
+
+    /// S454 : la même, autour d'un point d'entrée en `axe` (le centre d'un domaine entier).
+    pub fn b10_en(axe: [f32; 2], niveau: f32) -> Self {
+        Self {
+            oeil: [axe[0] + 1.7, axe[1] - 2.1, niveau + 1.1],
+            cible: [axe[0], axe[1], niveau - 0.15],
+            fov_deg: 40.,
+            soleil: [0.4, -0.3, 0.85],
+        }
     }
 }
 
@@ -40,6 +50,8 @@ pub struct SurfaceCarte {
     dx: f32,
     w: u32,
     h: u32,
+    /// S454 : le quart reflété (B10 en quart) ou un domaine entier.
+    quart: bool,
     fondu: wgpu::ComputePipeline,
     rendu: wgpu::RenderPipeline,
     uniform: wgpu::Buffer,
@@ -182,6 +194,7 @@ impl SurfaceCarte {
             dx: d.dx,
             w,
             h,
+            quart: true,
             fondu,
             rendu,
             uniform,
@@ -208,7 +221,7 @@ impl SurfaceCarte {
         let sphere = corps.map_or([0.; 4], |s| [s.center[0], s.center[1], s.center[2], s.radius]);
         let soleil = norm(camera.soleil);
         let mut u = Vec::with_capacity(36);
-        u.extend([self.dims[0], self.dims[1], self.dims[2], 0].map(f32::from_bits));
+        u.extend([self.dims[0], self.dims[1], self.dims[2], self.quart as u32].map(f32::from_bits));
         u.extend([self.w, self.h, 0, 0].map(f32::from_bits));
         u.extend([self.dx, f, self.w as f32 / self.h as f32, 0.]);
         for v in [camera.oeil, avant, droite, haut, soleil] {
@@ -218,6 +231,11 @@ impl SurfaceCarte {
         // SAFETY : `f32` n'a pas de remplissage.
         let octets = unsafe { std::slice::from_raw_parts(u.as_ptr() as *const u8, u.len() * 4) };
         self.queue.write_buffer(&self.uniform, 0, octets);
+    }
+
+    /// S454 : le domaine est-il un quart à refléter (le défaut) ou un domaine entier ?
+    pub fn set_quart(&mut self, quart: bool) {
+        self.quart = quart;
     }
 
     /// S453 : la taille de l'image (celle de la fenêtre) ; la caméra la lit au prochain `set_view`.
@@ -345,7 +363,7 @@ impl SurfaceCarte {
 }
 
 /// Le `champ_rendu` du banc `surface_continue` (S451), sur un `φ` et un masque donnés — la référence du critère (1).
-fn champ_cpu(phi: &[f32], mask: &[u32], nx: usize, ny: usize, nz: usize) -> Vec<f32> {
+pub(crate) fn champ_cpu(phi: &[f32], mask: &[u32], nx: usize, ny: usize, nz: usize) -> Vec<f32> {
     let mut f = phi.to_vec();
     let col = |i: usize, j: usize| mask[j * nx + i] != 0;
     let pres = |i: usize, j: usize| -> bool {
