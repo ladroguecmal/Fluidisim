@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 12:11 +02:00
+JETON            : libre
+Battement        : 2026-10-02 13:28 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S437 — C7d-3a**, sans carte : le critère d'A320 réécrit ; le repos déplacé dans la maille, à 25 cm
-Dernière session : S436 — physique : **A324 corrigée** ([preuve](docs/validation/MER-S369.md) §8) — le point fixe du mode relatif se rompait au fantôme latéral ; il interpole désormais les fantômes verticaux (le défaut) ; A320 à 12,5 cm : 1,0 à 1,8 fois Benjamin-Feir. Avant : S435, A320 à la longueur d'onde de la houle
-Session suivante : **S437 — C7d-3a**, sans carte ([preuve](docs/validation/MER-S369.md) §7–8) : A320 — réécrire le critère, rapporté à Benjamin-Feir (`ω(ak)²/2`) et à la maille de la production, avant toute mesure ; puis séparer, à 12,5 cm, l'effet du franchissement de celui du remède d'A324 (0,027 sous 7,5 cm contre ≈ 0,07 attendu de 6 cm), et l'essai d'un B de Stokes ; puis C7d-3b (le mode relatif sur la carte, **avec le fantôme latéral d'A324**), C7d-3c, C7d-3d ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 24 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S437 — physique : **C7d-3a non reçu** sous le critère réécrit ([preuve](docs/validation/MER-S369.md) §9) — à 25 cm, le taux d'A320 dépend de la place du repos dans la maille (0,106 sur une face, 0,036 au centre, houle de 4 m) ; sous une houle de 8 m, rien au-delà de Benjamin-Feir. Avant : S436, A324 corrigée
+Session suivante : **S438 — C7d-3a**, sans carte ([preuve](docs/validation/MER-S369.md) §9) : localiser le défaut près de la surface — houle de 4 m, 7,5 cm, 25 cm, repos sur une face (0,106) contre au centre (0,036), `MER_DECALAGE` ; bisection par les étapes du pas (prédiction, projection et fantômes, extrapolation, transport) et par les étages (`set_cross_surface_trial` élargi) ; même critère (1,5 fois Benjamin-Feir, toute place) ; si la cause n'est pas trouvée en une session, la limite « 16 mailles par longueur d'onde » s'écrit, et C7d-3b vient ; puis C7d-3b (le mode relatif sur la carte, **avec le fantôme latéral d'A324**), C7d-3c, C7d-3d ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 25 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

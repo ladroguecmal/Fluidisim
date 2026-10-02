@@ -18224,3 +18224,14 @@ verticaux des deux colonnes (`set_lateral_own_ghost`, **le défaut**). **Mesuré
 **A320, enfin mesurable à 12,5 cm** : 0,027 s⁻¹ sous 7,5 cm (1,0 fois Benjamin-Feir ; 25 cm : 0,106) ; sous 6 cm sans franchissement,
 ≈ 0,031 à maille nulle (1,8 fois). Suite **758**, zéro avertissement. **Rituel.** Maillons **24** — justifié : la priorité du solveur
 (S406) ; 4.19 reste partiel. Suivant : **C7d-3a** — le critère rapporté à Benjamin-Feir, à la maille de la production.
+
+## S437 — 2026-10-02 — physique : C7d-3a, le critère réécrit — non reçu ; A320 tient à la place de la surface
+
+**Entrée.** *« Continue »* — C7d-3a. **Le critère réécrit avant mesure** : à 25 cm, au plus 1,5 fois Benjamin-Feir sous 6 et 7,5 cm,
+toute place du repos dans la maille. **Fait** ([preuve](../docs/validation/MER-S369.md) §9) : le banc `mer` gagne `MER_DECALAGE`,
+`MER_TEMOIN` (le témoin avance enfin en mode germe), `MER_AIR`, `MER_TP`, `MER_PROFONDEUR`, `MER_GERME_LAMBDA` ; un essai d'amputation
+aux faces de surface (`set_cross_surface_trial`). **Mesuré** : le témoin nul au bit partout ; sous la houle de 4 m, **le taux dépend de
+la place du repos** — 7,5 cm : 0,106 sur une face, 0,068 à ¼, **0,036 au centre** ; 6 cm : 0,077 · 0,066 · **0,018** — un défaut de
+discrétisation près de la surface ; ni les termes croisés aux faces de surface, ni la bande. Sous une **houle de 8 m** (32 mailles par
+longueur d'onde), rien au-delà de Benjamin-Feir, aux deux places. **C7d-3a non reçu**, le critère tenu tel qu'écrit. Suite **758**.
+**Rituel.** Maillons **25** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7d-3a** — localiser le défaut.

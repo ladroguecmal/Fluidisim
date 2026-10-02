@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S437 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, A320
+Session : S437 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, A320
 ([preuve](../docs/validation/MER-S369.md) §7–8).
 
 **Le critère de C7d-3a, réécrit avant toute mesure.** L'ancien (« taux < 0,01 s⁻¹ ») était hors d'atteinte de toute physique sous
@@ -88,7 +88,7 @@ germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : déc
 - [x] **P2** — `MER_DECALAGE`, `MER_TEMOIN` au banc.
 - [x] **P3** — mesures : 25 cm, deux houles, quatre décalages ; le point fixe ; conclusion.
 - [x] **P4** — preuve ; A320 ; registres ; suite.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — le banc `mer` : `MER_DECALAGE=<f>` (le repos `f·dx` au-dessus de la face, le germe posé dessus), `MER_TEMOIN=1` (le témoin
@@ -113,3 +113,4 @@ germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : déc
   **n'apparaît qu'à 16 mailles par longueur d'onde de la houle** (4 m à 25 cm) ; à 32 (8 m à 25 cm), rien au-delà de Benjamin-Feir.
   C7d-3a **non reçu** ; A320 ramenée à une houle mal résolue. Suite 758.
 - **P4** — MER-S369 §9, APIC-CARTE §22.8 ; A320 annotée ; index, liste, feuille de route, questions ; suite 758.
+- **P5** — journal ; jeton libre ; maillons 25 (justifiés : S406) ; suivant : S438, C7d-3a — localiser le défaut près de la surface.
