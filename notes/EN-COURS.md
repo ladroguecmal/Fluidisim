@@ -62,30 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S447 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c2, le raccord
-conservatif**, seconde et dernière session ([preuve](../docs/validation/APIC-CARTE-S416.md) §23.3).
+Session : S448 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* (sans réponse sur le critère (2) de c2 : c2 reste
+plafonné, le raccord conservatif retenu) — la suite déclarée : le lot des registres (ADR-213 D3, dû en S448), puis **c3**.
 
-**La conception.** **La mer est la seule comptable de la masse de δ** : son pas avance toutes ses colonnes, intérieur de la bande
-compris, par ses propres débits — conservatifs. À l'intérieur de la bande, elle ne reçoit plus la hauteur de la bande telle quelle,
-mais sa **forme** : `δη = (η_bande − η_B) + c`, `c` uniforme, choisi pour que le volume de δ de l'intérieur reste celui que la mer vient de
-calculer ; la bande reçoit le même `c` sur les mêmes colonnes, pour que les deux ne divergent pas. Les vitesses, comme en S446.
-`RACCORD_CONSERVATIF=0` rend le raccord de S446.
+**c3, la conception.** Le banc `deferlement_en_mer` : la vague de Chen (S410, `apic3d_deferlement` — Stokes d'ordre 3, `ε` = 0,55,
+`λ` = 2 m, 1 m d'eau) dans une bande `Apic3` **en eau totale**, avec ses particules et la bascule (S408–S432), posée par le **raccord
+conservatif** (S447) dans une mer `Volume3` relative dont B est la composante linéaire de la vague (`a = ε/k`, `λ` = 2 m) ; la même
+bande seule, à parois, en témoin (la forme seule). Le raccord passe à la zone des colonnes : la bande garde une couronne de colonnes à
+ses bords.
 
-**Critères, écrits avant.** Ceux de S446 : sous B seul (5 cm, 4 m), 10 s — (1) δ hors de la bande sous **1 cm** ; (2) la dérive du
-volume de δ de la mer sous **1 %** du volume d'une demi-période (3,2·10⁻² m³) ; la suite, zéro avertissement. Reçu : c2 ; sinon, c2 plafonné
-(ADR-213 D2), la limite écrite, et c3 commence quand même avec le raccord mesuré.
+**Critères, écrits avant** (le « reçu si » de C7d-3c, §22.3, réduit à ce que le raccord change) : (1) **le retournement** — l'instant
+et l'abscisse du premier retournement dans la fenêtre à 10 % de ceux de la bande seule ; (2) **la part de la fenêtre en particules** au
+retournement à 0,1 près de celle de la bande seule ; (3) **la masse au raccord** sous 0,1 % du volume d'une demi-période ; (4) sous une
+houle calme (`ε` = 0,1, sans déferlement) : **aucune colonne en particules**. Bancs courts (D4) : une seule résolution, 20 mailles
+par longueur d'onde.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le raccord conservatif au banc ; mesures ; critères.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — le lot des registres (S446–S447).
+- [ ] **P3** — le banc `deferlement_en_mer` ; mesures ; critères.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `raccord_bande_mer`, raccord conservatif (le défaut ; `RACCORD_CONSERVATIF=0`, celui de S446), marge 2, 10 s : δ hors de la
-  bande **9,42 mm** — (1) tenu ; dérive brute du volume de δ **1,13·10⁻³ m³, 3,5 %** d'une demi-période — (2) **manqué tel qu'écrit** ;
-  mais le bilan du pas de la mer l'explique : l'éponge et la bande de B aux faces extérieures, **8,5·10⁻⁴ m³** ; ce qui reste au raccord,
-  **3,9·10⁻⁶ m³ — 0,01 %** (S446 : 2,2·10⁻³, 6,8 %). Le critère (2) mêlait l'éponge — qui absorbe les ondes de δ sorties de la bande, son
-  rôle — au raccord ; la mesure qui isole le raccord le tient cent fois. Marges 1 et 4 : 12,6 et 8,1 mm, 3,1 et 4,7 % bruts. Suite **762**.
-  **c2 : non reçu tel qu'écrit ; plafonné (ADR-213 D2)** — le raccord conservatif est retenu, c3 commence avec lui.
-- **P3** — APIC-CARTE §23.4 ; journal ; jeton libre ; maillons 4 (justifiés : S406) ; suivant : S448, c3 et le lot des registres.

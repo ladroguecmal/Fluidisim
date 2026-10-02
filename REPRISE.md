@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 17:20 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 17:24 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S448 — le lot des registres ; c3, la vague de Chen dans la mer** (premier jet)
 Dernière session : S447 — c2, le raccord conservatif ([preuve](docs/validation/APIC-CARTE-S416.md) §23.4) — δ hors de la bande 9,4 mm ; la masse au raccord à 0,01 % (S446 : 6,8 %) ; le critère brut (3,5 %) mêlait l'éponge — plafonné, le raccord retenu. Avant : S446
 Session suivante : **S448 — le lot des registres** (ADR-213 D3, dû en S448) **puis c3** : la vague de Chen dans une houle — la bande `Apic3` en eau totale avec ses particules (la bascule de S408–S432) dans la mer relative, par le raccord conservatif (`raccord_bande_mer`) ; reçu si, au retournement, la bande n'ajoute pas plus de 0,1 à la forme seule, aucun retour rapide, rien sous une houle calme, la masse au raccord sous 0,1 % ; le raccord à porter du banc dans le système ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 4 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
