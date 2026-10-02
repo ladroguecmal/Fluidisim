@@ -79,8 +79,14 @@ de la colonne voisine, le poids allant de 0 à 1 sur ces quatre colonnes. Le cal
 
 - [x] **P1** — R36 inscrit ; jeton, plan seul.
 - [x] **P2** — le lot des registres.
-- [ ] **P3** — normales lissées, `φ` fondu au raccord ; mesures ; images.
+- [x] **P3** — normales lissées, `φ` fondu au raccord ; mesures ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, file active pour S448–S450 ; `Registres` : dernier lot S451, le prochain au plus tard en S454.
+- **P3** — `surface_continue` : `champ_rendu` (φ fondu au raccord : deux passes d'une moyenne horizontale 3 × 3 sur les colonnes à
+  moins de deux mailles d'une frontière bande | colonnes ; `SURFACE_SANS_FONDU=1`, celui de S450) ; normales par sommet (le gradient de
+  `φ`, interpolé le long de l'arête) et ombrage par pixel. **Mesuré** : le saut au raccord corrigé de la pente **0,083 maille** (S450 :
+  0,337) — (1) tenu ; **0 arête ouverte** — (2) tenu ; les images `captures/s451/b10_t{0.5,1.0,2.0,3.0}.png` : le cratère et le jet
+  lisses, ni facettes ni marches — envoyées à l'utilisateur (R37), (3) à son jugement. 28 s. Suite **762**.
+

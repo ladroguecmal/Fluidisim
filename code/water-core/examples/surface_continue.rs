@@ -45,11 +45,52 @@ fn norm(a: V3) -> V3 {
     [a[0] / l, a[1] / l, a[2] / l]
 }
 
-/// Un triangle à rendre : trois sommets, sa normale (vers l'air), eau ou corps.
+/// Un triangle à rendre : trois sommets, **leurs normales** (vers l'air ; S451, le gradient de `φ` au sommet), eau ou corps.
 struct Tri {
     p: [V3; 3],
-    n: V3,
+    n: [V3; 3],
     eau: bool,
+}
+
+/// **S451 (R36) — le champ rendu** : `φ` d'`Apic3`, **fondu au raccord** — sur les colonnes à moins de deux mailles d'une frontière
+/// bande | colonnes, deux passes d'une moyenne horizontale 3 × 3, maille par maille (réflexion aux plans de symétrie) : la surface des
+/// particules et `η` des colonnes, qui ne se rejoignaient qu'à un tiers de maille près, s'y raccordent. Le calcul n'en est pas touché.
+/// `SURFACE_SANS_FONDU=1` : `φ` tel quel (S450).
+fn champ_rendu(a: &Apic3, nx: usize, ny: usize, nz: usize) -> Vec<f32> {
+    let mut f = a.distance().to_vec();
+    if std::env::var("SURFACE_SANS_FONDU").is_ok() {
+        return f;
+    }
+    let col = |i: usize, j: usize| a.is_column(i, j);
+    let pres = |i: usize, j: usize| -> bool {
+        let (i0, i1, j0, j1) = (i.saturating_sub(2), (i + 2).min(nx - 1), j.saturating_sub(2), (j + 2).min(ny - 1));
+        (i0..=i1).any(|x| (j0..=j1).any(|y| col(x, y) != col(i, j)))
+    };
+    let zone: Vec<bool> = (0..nx * ny).map(|c| pres(c % nx, c / nx)).collect();
+    for _ in 0..2 {
+        let g = f.clone();
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    if !zone[j * nx + i] {
+                        continue;
+                    }
+                    let mut somme = 0f32;
+                    for dj in -1i64..=1 {
+                        for di in -1i64..=1 {
+                            // Réflexion aux plans x = 0 et y = 0 (l'indice −1 est l'image de 0) ; au bord lointain, la dernière.
+                            let x = (i as i64 + di).max(-1).min(nx as i64 - 1);
+                            let y = (j as i64 + dj).max(-1).min(ny as i64 - 1);
+                            let (x, y) = (if x < 0 { 0 } else { x as usize }, if y < 0 { 0 } else { y as usize });
+                            somme += g[(k * ny + y) * nx + x];
+                        }
+                    }
+                    f[(k * ny + j) * nx + i] = somme / 9.;
+                }
+            }
+        }
+    }
+    f
 }
 
 fn main() -> Result<(), String> {
@@ -100,7 +141,8 @@ fn main() -> Result<(), String> {
         s.switch(t_us, &mut a).map_err(|e| format!("{e:?}"))?;
         // Le saut au raccord, à chaque pas : la hauteur lue sur `φ` (la première traversée depuis le fond) de part et d'autre d'une
         // face bande | colonnes ; brut, et corrigé de la pente locale (la moyenne des différences voisines de chaque côté).
-        let phi = a.distance();
+        let rendu = champ_rendu(&a, nx, ny, nz);
+        let phi = &rendu[..];
         let lue = |i: usize, j: usize| -> Option<f64> {
             let f = |k: usize| phi[(k * ny + j) * nx + i] as f64;
             let k = (0..nz - 1).find(|&k| f(k) < 0. && f(k + 1) >= 0.)?;
@@ -123,7 +165,7 @@ fn main() -> Result<(), String> {
             continue;
         }
         // L'isosurface.
-        let (tris, ouvertes) = isosurface(&a, nx, ny, nz, dx);
+        let (tris, ouvertes) = isosurface(&rendu, nx, ny, nz, dx);
         ouvertes_max = ouvertes_max.max(ouvertes);
         let c = sphere(t).center;
         let nom = format!("{sortie}/b10_t{:.1}.ppm", instants[prochain]);
@@ -151,8 +193,7 @@ fn main() -> Result<(), String> {
 /// L'isosurface `φ = 0` par tétraèdres marchants, sur les centres des mailles, une couche réfléchie aux plans `x = 0` et `y = 0`
 /// (indice −1 lu comme 0). Rend les triangles du quart et le nombre d'arêtes ouvertes **à l'intérieur** (hors du bord de
 /// l'échantillonnage).
-fn isosurface(a: &Apic3, nx: usize, ny: usize, nz: usize, dx: f64) -> (Vec<Tri>, usize) {
-    let phi = a.distance();
+fn isosurface(phi: &[f32], nx: usize, ny: usize, nz: usize, dx: f64) -> (Vec<Tri>, usize) {
     // Les points de la grille d'échantillonnage : `i` de −1 à nx − 1 (le −1, la réflexion de 0).
     let (mx, my, mz) = (nx + 1, ny + 1, nz);
     let id = |i: usize, j: usize, k: usize| (k * my + j) * mx + i;
@@ -161,6 +202,22 @@ fn isosurface(a: &Apic3, nx: usize, ny: usize, nz: usize, dx: f64) -> (Vec<Tri>,
         phi[(k * ny + jj) * nx + ii] as f64
     };
     let pos = |i: usize, j: usize, k: usize| -> V3 { [(i as f64 - 0.5) * dx, (j as f64 - 0.5) * dx, (k as f64 + 0.5) * dx] };
+    // S451 : le gradient de `φ` à un point de la grille (différences centrées, décentrées au bord) — la normale lissée.
+    let grad = |i: usize, j: usize, k: usize| -> V3 {
+        let d = |a_: usize, b_: usize, lo: usize, hi: usize, m: usize| -> (usize, usize, f64) {
+            let (l, h) = (if a_ > lo { a_ - 1 } else { a_ }, if a_ + 1 < m { a_ + 1 } else { a_ });
+            let _ = (b_, hi);
+            (l, h, (h - l) as f64)
+        };
+        let (xl, xh, sx) = d(i, 0, 0, 0, mx);
+        let (yl, yh, sy) = d(j, 0, 0, 0, my);
+        let (zl, zh, sz) = d(k, 0, 0, 0, mz);
+        [
+            (val(xh, j, k) - val(xl, j, k)) / sx.max(1.),
+            (val(i, yh, k) - val(i, yl, k)) / sy.max(1.),
+            (val(i, j, zh) - val(i, j, zl)) / sz.max(1.),
+        ]
+    };
     const COIN: [[usize; 3]; 8] = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
     const TETS: [[usize; 4]; 6] = [[0, 5, 1, 6], [0, 1, 2, 6], [0, 2, 3, 6], [0, 3, 7, 6], [0, 7, 4, 6], [0, 4, 5, 6]];
     let mut tris = Vec::new();
@@ -169,21 +226,22 @@ fn isosurface(a: &Apic3, nx: usize, ny: usize, nz: usize, dx: f64) -> (Vec<Tri>,
     for k in 0..mz - 1 {
         for j in 0..my - 1 {
             for i in 0..mx - 1 {
-                let g: [(usize, V3, f64); 8] = COIN.map(|c| {
+                let g: [(usize, V3, f64, V3); 8] = COIN.map(|c| {
                     let (a_, b_, c_) = (i + c[0], j + c[1], k + c[2]);
-                    (id(a_, b_, c_), pos(a_, b_, c_), val(a_, b_, c_))
+                    (id(a_, b_, c_), pos(a_, b_, c_), val(a_, b_, c_), grad(a_, b_, c_))
                 });
                 for t in TETS {
                     let v = t.map(|q| g[q]);
                     let dedans: Vec<usize> = (0..4).filter(|&q| v[q].2 < 0.).collect();
                     let dehors: Vec<usize> = (0..4).filter(|&q| v[q].2 >= 0.).collect();
-                    let point = |p: usize, q: usize| -> ((usize, usize), V3) {
+                    let point = |p: usize, q: usize| -> ((usize, usize), V3, V3) {
                         let (a_, b_) = (v[p], v[q]);
                         let s = a_.2 / (a_.2 - b_.2);
                         let cle = if a_.0 < b_.0 { (a_.0, b_.0) } else { (b_.0, a_.0) };
-                        (cle, [a_.1[0] + s * (b_.1[0] - a_.1[0]), a_.1[1] + s * (b_.1[1] - a_.1[1]), a_.1[2] + s * (b_.1[2] - a_.1[2])])
+                        let l = |x: V3, y: V3| [x[0] + s * (y[0] - x[0]), x[1] + s * (y[1] - x[1]), x[2] + s * (y[2] - x[2])];
+                        (cle, l(a_.1, b_.1), norm(l(a_.3, b_.3)))
                     };
-                    let mut poly: Vec<((usize, usize), V3)> = Vec::new();
+                    let mut poly: Vec<((usize, usize), V3, V3)> = Vec::new();
                     match dedans.len() {
                         1 | 3 => {
                             let (seul, autres) = if dedans.len() == 1 { (dedans[0], dehors.clone()) } else { (dehors[0], dedans.clone()) };
@@ -224,7 +282,8 @@ fn isosurface(a: &Apic3, nx: usize, ny: usize, nz: usize, dx: f64) -> (Vec<Tri>,
                             let cle = if x < y { (x, y) } else { (y, x) };
                             *aretes.entry(cle).or_insert(0) += 1;
                         }
-                        tris.push(Tri { p, n, eau: true });
+                        let _ = n;
+                        tris.push(Tri { p, n: [poly[f[0]].2, poly[f[1]].2, poly[f[2]].2], eau: true });
                     }
                 }
             }
@@ -254,7 +313,11 @@ fn rendre(tris: &[Tri], centre: V3, rayon: f64, niveau: f64, nom: &str) -> Resul
                 if sx * sy < 0. {
                     p.swap(1, 2);
                 }
-                tout.push(Tri { p, n: [t.n[0] * sx, t.n[1] * sy, t.n[2]], eau: true });
+                let mut n = t.n.map(|n| [n[0] * sx, n[1] * sy, n[2]]);
+                if sx * sy < 0. {
+                    n.swap(1, 2);
+                }
+                tout.push(Tri { p, n, eau: true });
             }
         }
     }
@@ -269,8 +332,7 @@ fn rendre(tris: &[Tri], centre: V3, rayon: f64, niveau: f64, nom: &str) -> Resul
         for b in 0..nm {
             let (p0, p1, p2, p3) = (sp(a, b), sp(a + 1, b), sp(a + 1, b + 1), sp(a, b + 1));
             for p in [[p0, p1, p2], [p0, p2, p3]] {
-                let c = [(p[0][0] + p[1][0] + p[2][0]) / 3., (p[0][1] + p[1][1] + p[2][1]) / 3., (p[0][2] + p[1][2] + p[2][2]) / 3.];
-                tout.push(Tri { p, n: norm(sub(c, centre)), eau: false });
+                tout.push(Tri { p, n: p.map(|q| norm(sub(q, centre))), eau: false });
             }
         }
     }
@@ -314,28 +376,30 @@ fn rendre(tris: &[Tri], centre: V3, rayon: f64, niveau: f64, nom: &str) -> Resul
         let Some(a) = projeter(t.p[0]) else { continue };
         let Some(b) = projeter(t.p[1]) else { continue };
         let Some(c) = projeter(t.p[2]) else { continue };
-        let centre_t = [(t.p[0][0] + t.p[1][0] + t.p[2][0]) / 3., (t.p[0][1] + t.p[1][1] + t.p[2][1]) / 3., (t.p[0][2] + t.p[1][2] + t.p[2][2]) / 3.];
-        let vue = norm(sub(oeil, centre_t));
-        let mut n = t.n;
-        if dot(n, vue) < 0. {
-            n = [-n[0], -n[1], -n[2]];
-        }
-        let couleur = if t.eau {
-            let cos = dot(n, vue).clamp(0., 1.);
-            let fresnel = 0.02 + 0.98 * (1. - cos).powi(5);
-            let refl = sub([2. * dot(n, vue) * n[0], 2. * dot(n, vue) * n[1], 2. * dot(n, vue) * n[2]], vue);
-            let sky = ciel(norm(refl));
-            let lambert = dot(n, soleil).max(0.);
-            let fond = [0.02 + 0.10 * lambert, 0.16 + 0.18 * lambert, 0.24 + 0.20 * lambert];
-            let spec = dot(norm(refl), soleil).max(0.).powi(60) * 0.8;
-            [
-                fond[0] * (1. - fresnel) + sky[0] * fresnel + spec,
-                fond[1] * (1. - fresnel) + sky[1] * fresnel + spec,
-                fond[2] * (1. - fresnel) + sky[2] * fresnel + spec,
-            ]
-        } else {
-            let l = 0.25 + 0.65 * dot(n, soleil).max(0.);
-            [0.55 * l, 0.55 * l, 0.58 * l]
+        // S451 (R36) : l'ombrage **par pixel** — la normale et le point interpolés aux coordonnées barycentriques (Phong).
+        let ombre = |n: V3, p: V3| -> V3 {
+            let vue = norm(sub(oeil, p));
+            let mut n = norm(n);
+            if dot(n, vue) < 0. {
+                n = [-n[0], -n[1], -n[2]];
+            }
+            if t.eau {
+                let cos = dot(n, vue).clamp(0., 1.);
+                let fresnel = 0.02 + 0.98 * (1. - cos).powi(5);
+                let refl = sub([2. * dot(n, vue) * n[0], 2. * dot(n, vue) * n[1], 2. * dot(n, vue) * n[2]], vue);
+                let sky = ciel(norm(refl));
+                let lambert = dot(n, soleil).max(0.);
+                let fond = [0.02 + 0.10 * lambert, 0.16 + 0.18 * lambert, 0.24 + 0.20 * lambert];
+                let spec = dot(norm(refl), soleil).max(0.).powi(60) * 0.8;
+                [
+                    fond[0] * (1. - fresnel) + sky[0] * fresnel + spec,
+                    fond[1] * (1. - fresnel) + sky[1] * fresnel + spec,
+                    fond[2] * (1. - fresnel) + sky[2] * fresnel + spec,
+                ]
+            } else {
+                let l = 0.25 + 0.65 * dot(n, soleil).max(0.);
+                [0.55 * l, 0.55 * l, 0.58 * l]
+            }
         };
         let (x0, x1) = (a[0].min(b[0]).min(c[0]).floor().max(0.) as usize, a[0].max(b[0]).max(c[0]).ceil().min(W as f64 - 1.) as usize);
         let (y0, y1) = (a[1].min(b[1]).min(c[1]).floor().max(0.) as usize, a[1].max(b[1]).max(c[1]).ceil().min(H as f64 - 1.) as usize);
@@ -356,7 +420,14 @@ fn rendre(tris: &[Tri], centre: V3, rayon: f64, niveau: f64, nom: &str) -> Resul
                 let q = y * W + x;
                 if z < prof[q] {
                     prof[q] = z;
-                    image[q] = couleur;
+                    let mix = |u: [V3; 3]| -> V3 {
+                        [
+                            w0 * u[0][0] + w1 * u[1][0] + w2 * u[2][0],
+                            w0 * u[0][1] + w1 * u[1][1] + w2 * u[2][1],
+                            w0 * u[0][2] + w1 * u[1][2] + w2 * u[2][2],
+                        ]
+                    };
+                    image[q] = ombre(mix(t.n), mix(t.p));
                 }
             }
         }
