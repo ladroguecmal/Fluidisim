@@ -80,8 +80,9 @@ par longueur d'onde.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le lot des registres (S446–S447).
+- [x] **P2** — le lot des registres (S446–S447).
 - [ ] **P3** — le banc `deferlement_en_mer` ; mesures ; critères.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — feuille de route, liste, index pour S445–S447 ; `Registres` : dernier lot S448, le prochain au plus tard en S451.
