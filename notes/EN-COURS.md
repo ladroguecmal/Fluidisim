@@ -85,8 +85,9 @@ sinon l'écart est publié avant tout remède.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le témoin d'A320 rejoué.
+- [x] **P2** — le témoin d'A320 rejoué.
 - [ ] **P3** — la conception de C7d-3 (preuve §22) ; registres.
 - [ ] **P4** — rituel.
 
 ### Notes de reprise
+- **P2** — le témoin d'A320 rejoué : `MER_RELATIF=7 MER_GERME=0.001 MER_DUREE=60 MER_TRACE=1 … transfert_oriente -- mer 0.25 0.075` (4 min 11 s) : taux de 35 à 59 s (moindres carrés sur `ln δ_max`) **0,1151 s⁻¹**, δ à 59 s **32,3 mm** — S369 : 0,115 s⁻¹ et 32 mm. **A320 intacte**, l'état de départ de C7d-3a.
