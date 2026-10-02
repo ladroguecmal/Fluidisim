@@ -18277,3 +18277,12 @@ sous Lax-Wendroff, référence et carte, éteinte par défaut ; essai du point f
 0,05 (contre 65), sur un champ presque nul ; la trajectoire suit sa référence à 1,4·10⁻⁵ m ; production au bit. **A322 non levée telle
 qu'écrite** (le critère en part relative, mal posé). Suite **759**. **Rituel.** Maillons **29** — justifié : la priorité du solveur
 (S406) ; 4.19 reste partiel. Suivant : **A322** — le critère en amplitude absolue, ou l'écart accepté.
+
+## S442 — 2026-10-02 — physique : A322 levée en mode relatif ; Lax-Wendroff par défaut ; A320 inchangée
+
+**Entrée.** *« J'accepte et continue »* — **A322 levée en mode relatif**, l'écart accepté. **Fait** : la bande relative sous
+Lax-Wendroff devient le défaut du mode relatif, référence et carte (`MER_BANDE_LW=0`, `BANDE_LW=0` rendent l'ancienne). **Mesuré** :
+production au bit ; témoin relatif nul au bit ; trajectoire relative à 1,4·10⁻⁵ m ; suite **759**. **A320 sous Lax-Wendroff**
+([preuve](../docs/validation/MER-S369.md) §11) : inchangée au chiffre près (7,5 cm : 0,106 sur une face, 0,035 au centre) — le FTCS de la
+bande n'en est pas la cause (`C` ≈ 0,01 à 25 cm). **C7d-3a non reçu.** **Rituel.** Maillons **30** — justifié : la priorité du solveur
+(S406) ; 4.19 reste partiel. Suivant : **la bascule des défauts vers le mode relatif**, proposée sans attendre C7d-3a.

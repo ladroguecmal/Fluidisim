@@ -4459,6 +4459,9 @@ de surface ni dans la bande ; sous une houle de 8 m (32 mailles par longueur d'o
 indécise (8 m à 50 cm : 2,2 fois Benjamin-Feir sur une face, 0,5 au centre ; 2 m à 12,5 cm : 5,4 et 1,9 fois ; mais 4 m à 12,5 cm,
 32 mailles, montait à 3,1 fois). Cause non trouvée ; A320 reste ouverte, avec son enveloppe ; C7d-3b passe sans la bascule des défauts.
 
+*Note du 2026-10-02, S442* ([MER-S369](../validation/MER-S369.md) §11) : la bande relative sous Lax-Wendroff (A322) ne change rien à A320
+(0,106 sur une face, 0,035 au centre, sous 7,5 cm) : le FTCS de la bande n'en est pas la cause.
+
 **A321 — S390, 2026-09-26 (sévérité 3, **corrigée S391**). À 30 Hz, la scène de la porte B explose en 24 à 40 s, quel que soit le
 solveur de pression.** Pas de 33,333 ms, `Config::review`, 1 800 pas : la surface publiée cesse d'être finie au pas 930 avec
 Jacobi 512 et au pas 1 050 avec la multigrille à 24 cycles — deux projections **convergées** (résidu relatif ≈ 10⁻⁷) —, au

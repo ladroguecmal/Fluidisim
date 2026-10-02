@@ -308,3 +308,10 @@ surface) ; ni la forme des termes croisés (S434), ni les termes croisés aux fa
 **Enveloppe mesurée à 25 cm** (la maille de la production) : sous une houle de 8 m, au plus Benjamin-Feir ; sous une houle de 4 m et
 6 à 7,5 cm, 0,04 à 0,11 s⁻¹ selon la place du repos.
 
+## 11. S442 — A320 sous la bande Lax-Wendroff : inchangée
+
+2026-10-02. La bande relative est sous Lax-Wendroff par défaut depuis S442 (A322, [MULTIGRILLE-3D-S385](MULTIGRILLE-3D-S385.md) §8).
+Même banc qu'au §9 (`MER_BANDE_LW=0` rend la bande centrée) : sous 7,5 cm, **0,1057** sur une face, **0,0676** à ¼, **0,0345** au
+centre ; sous 6 cm, **0,0768** et **0,0197** — au chiffre près ceux de S437. Le témoin nul au bit partout. À 25 cm, `C = U·dt/dx`
+≈ 0,01 : le FTCS de la bande n'y pèse rien, et **n'est pas la cause d'A320**. C7d-3a n'est pas reçu.
+

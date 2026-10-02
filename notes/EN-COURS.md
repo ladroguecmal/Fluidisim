@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S442 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« J'accepte et continue »* — **A322 levée en mode relatif**,
+Session : S442 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« J'accepte et continue »* — **A322 levée en mode relatif**,
 l'écart accepté ([preuve](../docs/validation/MULTIGRILLE-3D-S385.md) §8).
 
 **Ce que la session fait.** (1) **La bande sous Lax-Wendroff devient le défaut du mode relatif** — `Volume3` (`band_lax_wendroff`
@@ -81,7 +81,7 @@ du repos : 0,026 et 0,041 s⁻¹) ; autrement, ce que le remède change d'A320 s
 - [x] **P1** — jeton, plan seul ; l'arbitrage inscrit.
 - [x] **P2** — Lax-Wendroff par défaut ; production au bit, témoin, suite.
 - [x] **P3** — A320 sous Lax-Wendroff.
-- [ ] **P4** — preuve ; registres ; rituel.
+- [x] **P4** — preuve ; registres ; rituel.
 
 ### Notes de reprise
 - **P2** — `Volume3::band_lax_wendroff` et `Step3::band_lw` vrais par défaut ; `MER_BANDE_LW=0`, `BANDE_LW=0` rendent la bande centrée.
@@ -91,4 +91,4 @@ du repos : 0,026 et 0,041 s⁻¹) ; autrement, ce que le remède change d'A320 s
   7,5 cm — sur une face **0,1057** (0,1059), à ¼ **0,0676** (0,0680), au centre **0,0345** (0,036) ; 6 cm — sur une face **0,0768**
   (0,0769), au centre **0,0197** (0,018). Le témoin nul au bit partout. **A320 inchangée** : à 25 cm, `C` est trop petit pour que le
   FTCS de la bande y pèse. **C7d-3a non reçu.**
-
+- **P4** — MER-S369 §11, MULTIGRILLE-3D-S385 (l'arbitrage) ; A320 annotée, A322 levée ; registres ; journal ; jeton libre ; maillons 30 (justifiés : S406) ; suivant : S443, la bascule des défauts proposée.

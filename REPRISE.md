@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 15:56 +02:00
+JETON            : libre
+Battement        : 2026-10-02 16:12 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S442 — A322 levée (l'écart accepté) ; la bande sous Lax-Wendroff par défaut ; son effet sur A320**
-Dernière session : S441 — physique : A322, les bouffées du mode relatif attribuées à **la bande relative, un schéma FTCS** ([preuve](docs/validation/MULTIGRILLE-3D-S385.md) §8) ; sous Lax-Wendroff (éteint par défaut), elles disparaissent ; le critère en part relative, manqué sur un champ presque nul. Avant : S440, C7d-3b reçu
-Session suivante : **S442 — A322**, sur la carte ([preuve](docs/validation/MULTIGRILLE-3D-S385.md) §8) : écrire le critère en **amplitude absolue** de l'échelle de la maille (un instrument au banc d'A321 : l'amplitude RMS de `Δ²w/4`, en m/s) avant de rejouer `RELATIF=1 BANDE_LW=1 MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8 --delta3d-a321` — sauf si l'utilisateur accepte l'écart ; reçue, la bande sous Lax-Wendroff devient le défaut du mode relatif ; puis l'effet de Lax-Wendroff sur A320 (MER-S369 §9) ; C7d-3a reste ouvert ; C7d-3c, C7d-3d après lui ; la surface continue avant C10 (ADR-211 D2)
-Maillons        : 29 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Session en cours : aucune
+Dernière session : S442 — physique : **A322 levée en mode relatif** (l'écart accepté par l'utilisateur), la bande relative sous Lax-Wendroff par défaut ; A320 inchangée ([preuve](docs/validation/MER-S369.md) §11). Avant : S441, la bande FTCS
+Session suivante : **S443 — la bascule des défauts vers le mode relatif** (C7d-3b, sa seconde moitié), **proposée sans attendre C7d-3a** : sur tout ce qui est mesuré, le mode relatif vaut mieux que le pas de S297 — point fixe exact sous B seul (le pas de S297 fait croître δ jusqu'à trois fois la houle, A289), A322 levée à 10 cm, trajectoire carte–référence dix fois plus serrée ; A320 n'est pas propre au mode relatif (la source de S297 la masquait, MER-S369 §3) ; à concevoir : quelles réceptions rejouer sous le nouveau défaut (porte B, B10, la scène de revue), et leurs critères ; **l'utilisateur peut s'y opposer** — sinon, C7d-3a reste ouvert et C7d-3c, C7d-3d l'attendent ; la surface continue avant C10 (ADR-211 D2)
+Maillons        : 30 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
