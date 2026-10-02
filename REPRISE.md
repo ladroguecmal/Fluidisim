@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 13:28 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 14:00 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S438 — C7d-3a**, sans carte : le défaut d'A320 près de la surface — une affaire de mailles par longueur d'onde ?
 Dernière session : S437 — physique : **C7d-3a non reçu** sous le critère réécrit ([preuve](docs/validation/MER-S369.md) §9) — à 25 cm, le taux d'A320 dépend de la place du repos dans la maille (0,106 sur une face, 0,036 au centre, houle de 4 m) ; sous une houle de 8 m, rien au-delà de Benjamin-Feir. Avant : S436, A324 corrigée
 Session suivante : **S438 — C7d-3a**, sans carte ([preuve](docs/validation/MER-S369.md) §9) : localiser le défaut près de la surface — houle de 4 m, 7,5 cm, 25 cm, repos sur une face (0,106) contre au centre (0,036), `MER_DECALAGE` ; bisection par les étapes du pas (prédiction, projection et fantômes, extrapolation, transport) et par les étages (`set_cross_surface_trial` élargi) ; même critère (1,5 fois Benjamin-Feir, toute place) ; si la cause n'est pas trouvée en une session, la limite « 16 mailles par longueur d'onde » s'écrit, et C7d-3b vient ; puis C7d-3b (le mode relatif sur la carte, **avec le fantôme latéral d'A324**), C7d-3c, C7d-3d ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 25 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal

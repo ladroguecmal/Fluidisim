@@ -62,55 +62,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S437 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, A320
-([preuve](../docs/validation/MER-S369.md) §7–8).
+Session : S438 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, localiser le
+défaut d'A320 près de la surface ([preuve](../docs/validation/MER-S369.md) §9).
 
-**Le critère de C7d-3a, réécrit avant toute mesure.** L'ancien (« taux < 0,01 s⁻¹ ») était hors d'atteinte de toute physique sous
-7,5 cm (S435). **Nouveau** : C7d-3a est reçu si, **à la maille de la production (25 cm)**, germe de 1 mm, masque 7, 95 s, le taux de
-l'amplitude de δ dans la bande de Benjamin-Feir (35 à 59 s) est **au plus 1,5 fois `ω(ak)²/2`** sous 6 et 7,5 cm de houle (0,026 et
-0,041 s⁻¹), **quelle que soit la place du repos dans la maille** ; δ nul reste nul au bit ; le paquet de l'ordre C sous 5 cm reste sous
-1,5 fois son amplitude (S434). Aujourd'hui : 0,077 et 0,106 — manqué d'un facteur 3.
+**Ce que la session trouve en entrant.** À 25 cm, sous la houle de 4 m (16 mailles par longueur d'onde), le taux dépend de la place
+du repos dans la maille (0,106 sur une face, 0,036 au centre, sous 7,5 cm) ; sous la houle de 8 m (32 mailles), rien au-delà de
+Benjamin-Feir. **Une hypothèse écartée avant tout code** : une quasi-résonance de triades, ouverte par l'écart entre la dispersion
+discrète de δ et celle, exacte, de B — en eau profonde, les triades sont loin de résonner (un écart d'ordre `Ω/2`) ; quelques pourcents
+de dispersion n'y suffisent pas. **L'hypothèse retenue** : le taux de Benjamin-Feir passe par la réponse liée du second ordre — l'onde
+`2K`, collée à la surface (`e^{2Kz}` : 32 cm sous la houle de 4 m, **à peine plus d'une maille de 25 cm**) ; mal résolue, elle fausse
+le coefficient cubique, et sa valeur dépend de la place de la surface dans la maille. Si c'est cela, **l'excès est une fonction du seul
+nombre de mailles par longueur d'onde de la houle**, `λ_B/dx`.
 
-**Ce que la session trouve en entrant.** À 12,5 cm, A320 croît à 0,054 s⁻¹ sous 6 cm (la surface de B ne franchit aucun centre de
-maille) mais à **0,028 sous 6,5 cm** (elle en franchit) — deux fois moins vite pour une houle plus forte. Un comportement aussi
-discontinu à la demi-maille dit qu'un des deux régimes est faux. Hypothèse : celui où la surface de B reste dans la maille de
-surface — le régime de toutes les mesures d'A320 à 25 cm, où le repos tombe sur une face.
+**Ce que la session fait.** L'épreuve de cette échelle, sans code nouveau : la houle de **8 m à 50 cm** et celle de **2 m à 12,5 cm**
+(16 mailles par longueur d'onde, comme 4 m à 25 cm), à la même cambrure (`ak` = 0,118), repos sur une face et au centre ; germe à la
+longueur d'onde de la houle.
 
-**Ce que la session fait.** (1) `MER_DECALAGE=<f>` : le repos déplacé de `f·dx` dans la maille (0 : sur une face, le banc d'avant au
-bit ; 0,5 : au centre — la surface de B franchit alors un centre à toute amplitude) ; `MER_TEMOIN=1` : le témoin avance aussi en mode
-germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : décalages 0, ¼, ½, ¾. Le point fixe y est mis à l'épreuve
-(A324 le garantit désormais hors d'une face). (3) Conclure : si le taux tombe sous le critère au centre et pas sur la face, le régime
-« sans franchissement » porte l'excès — le localiser ensuite ; sinon, écrire ce qui est écarté.
+**Critères, écrits avant.** **L'échelle est confirmée** si, aux deux nouvelles paires (16 mailles), le taux sur une face est au moins
+2,5 fois Benjamin-Feir **et** au moins deux fois celui du centre — comme à 4 m et 25 cm. **Réfutée** si l'une des deux paires reste sous
+1,5 fois Benjamin-Feir aux deux places. Autrement, indécis. Confirmée, la suite proposée est un remède de production : ne coupler δ qu'aux
+composantes de B qu'il résout (`λ ≥ 32·dx`), les plus courtes restant portées par B seul — à concevoir et à éprouver, non à décider ici.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul, le critère réécrit.
-- [x] **P2** — `MER_DECALAGE`, `MER_TEMOIN` au banc.
-- [x] **P3** — mesures : 25 cm, deux houles, quatre décalages ; le point fixe ; conclusion.
-- [x] **P4** — preuve ; A320 ; registres ; suite.
-- [x] **P5** — rituel.
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — mesures : 8 m à 50 cm, 2 m à 12,5 cm ; deux places ; critères.
+- [ ] **P3** — preuve ; A320 ; registres ; suite.
+- [ ] **P4** — rituel.
 
 ### Notes de reprise
-- **P2** — le banc `mer` : `MER_DECALAGE=<f>` (le repos `f·dx` au-dessus de la face, le germe posé dessus), `MER_TEMOIN=1` (le témoin
-  avance en mode germe ; la trace dit `temoin_nul_au_bit`), `MER_AIR=<n>` (des mailles d'air de plus : à ¾ de maille sous 7,5 cm, la
-  surface sort sinon des bornes du pas au premier pas).
-- **P3 (en cours)** — 25 cm, germe de 1 mm, taux de la bande 35–59 s ; le témoin avance : **nul au bit à chaque seconde, partout**
-  (A324 tient hors d'une face). Repos sur une face (0), ¼, au centre (½), ¾ : **6 cm** 0,077 · 0,066 · **0,018** · 0,080 (le domaine
-  refuse à 64 s) ; **7,5 cm** 0,106 · 0,068 · **0,036** · décroît. `MER_AIR=1` au bit. **Le taux dépend de la place du repos dans la
-  maille — une physique ne le ferait pas** ; au centre, le critère est tenu (6 cm : 1,0 fois Benjamin-Feir ; 7,5 cm : 1,3 fois).
-  Amputations aux faces de surface (`set_cross_surface_trial`, `MER_SURFACE_ESSAI`) : tous les termes croisés · le seul cisaillement,
-  sur la face 0,095 · 0,092, au centre 0,026 · 0,026 — **pas là**. La bande prend déjà la pente verticale de B (`band3`) — pas là non plus.
-  Le régime « repos près d'une face » n'existe que sous une houle de moins d'une demi-maille ; une vraie mer balaie toutes les places :
-  `MER_TP`, `MER_PROFONDEUR` — houle de 16 m, 30 cm (`ak` = 0,118, Benjamin-Feir 0,0137 s⁻¹, critère 0,021), 8 m d'eau, 25 cm,
-  repos 0, ¼, ½.
-- **P3** — la houle de 16 m (30 cm) abandonnée : le germe de 2 m n'y sème rien à `K`, et e-folder Benjamin-Feir y prend 73 s ;
-  `MER_GERME_LAMBDA` (le germe à la longueur d'onde voulue), la trace de la bande en notation scientifique. **Houle de 8 m**
-  (`MER_TP=4.527`, 4 m d'eau, germe de 8 m), 25 cm, 95 s : le germe sort en ≈ 30 s ; ensuite la bande ne croît qu'à **≈ 0,007 · 0,004**
-  s⁻¹ sous 15 cm (repos sur une face · au centre ; Benjamin-Feir 0,019 — la surface de B franchit des centres dans les deux cas) et
-  **≈ 0,009 · ≈ 0** sous 10 cm (Benjamin-Feir 0,0086 ; sur une face, aucun franchissement). **Au plus Benjamin-Feir, aux deux places.**
-  **Conclusion.** Le critère, tel qu'écrit (la houle de 4 m du banc, toute place du repos), est **manqué** : 0,077 et 0,106 sur une
-  face. Mais l'excès d'A320 dépend de la place du repos — un défaut de discrétisation près de la surface, pas une physique — et il
-  **n'apparaît qu'à 16 mailles par longueur d'onde de la houle** (4 m à 25 cm) ; à 32 (8 m à 25 cm), rien au-delà de Benjamin-Feir.
-  C7d-3a **non reçu** ; A320 ramenée à une houle mal résolue. Suite 758.
-- **P4** — MER-S369 §9, APIC-CARTE §22.8 ; A320 annotée ; index, liste, feuille de route, questions ; suite 758.
-- **P5** — journal ; jeton libre ; maillons 25 (justifiés : S406) ; suivant : S438, C7d-3a — localiser le défaut près de la surface.
