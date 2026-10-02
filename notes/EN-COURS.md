@@ -78,8 +78,9 @@ de la colonne voisine, le poids allant de 0 à 1 sur ces quatre colonnes. Le cal
 ### Plan
 
 - [x] **P1** — R36 inscrit ; jeton, plan seul.
-- [ ] **P2** — le lot des registres.
+- [x] **P2** — le lot des registres.
 - [ ] **P3** — normales lissées, `φ` fondu au raccord ; mesures ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — feuille de route, liste, file active pour S448–S450 ; `Registres` : dernier lot S451, le prochain au plus tard en S454.
