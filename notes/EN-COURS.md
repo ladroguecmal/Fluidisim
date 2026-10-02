@@ -85,7 +85,13 @@ minutes.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le banc `surface_continue` : isosurface, rendu, PPM ; mesures (1), (2), (4).
+- [x] **P2** — le banc `surface_continue` : isosurface, rendu, PPM ; mesures (1), (2), (4).
 - [ ] **P3** — les images à l'utilisateur ; preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — banc `surface_continue` (B10 en quart, `Fr` = 2, `D/dx` = 8, bande étroite `fond` = 4 ; tétraèdres marchants ; rendu
+  logiciel ; 28 s) : (1) **0 arête ouverte à l'intérieur** aux quatre instants — le maillage est étanche (un premier compte en trouvait
+  96 à 160 : le plan réfléchi n'était pas compté comme bord de l'échantillonnage) ; (2) **le saut au raccord bande | colonnes : 0,32 maille
+  brut, 0,34 corrigé de la pente — manqué** (un quart) ; il se voit : des **marches carrées** dessinent la frontière autour de la zone
+  agitée ; (4) **28 s** — tenu. Images : `captures/s450/b10_t{0.5,1.0,2.0,3.0}.png` (le cratère et la sphère, puis le jet de Worthington).
+
