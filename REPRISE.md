@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 07:41 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 07:44 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S433 — la conception de C7d-3** : la bande dans la production couplée, relative à B
 Dernière session : S432 — physique : **C7d-2 reçu** ([preuve](docs/validation/APIC-CARTE-S416.md) §21.4) — le seuil de vitesse propre, sa relâche et le fond B dans la décision de la carte : décisions identiques à la référence, B10 sans les clés identique au bit (2,06 ms), avec les clés au pincement de la référence. Avant : S431, C7d-1 reçu
 Session suivante : **S433 — la conception de C7d-3** ([preuve](docs/validation/APIC-CARTE-S416.md) §21) : la bande dans la production couplée, relative à B — B et W en fond, δ relatif à B, dans la bande les particules portent la vitesse propre de δ ; elle dira l'ordre du **mode relatif sur la carte** (ADR-198 D1 : la production GPU ne le porte pas) et d'**A320** (une perturbation de δ croît sous houle raide — la forme de Bernoulli `∇(U·u')` à éprouver), avec leurs « reçu si » écrits avant ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 20 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal

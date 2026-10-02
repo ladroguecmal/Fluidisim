@@ -62,34 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S432 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« continue »* — la suite déclarée : **C7d-2**
-([preuve](../docs/validation/APIC-CARTE-S416.md) §21.3 : C7d-1 reçu en référence — la vitesse propre de δ, entrée 0,3 / relâche 0,15
-m/s ; la décision de la bascule sur la carte ne porte encore aucun critère d'écoulement).
+Session : S433 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **la conception de C7d-3**
+([preuve](../docs/validation/APIC-CARTE-S416.md) §21 : « sa conception d'abord (une session), qui dira l'ordre avec le mode relatif sur
+la carte et A320 »).
 
-**Ce que la session fait.** (1) La carte reçoit le critère de C7d-1 : huit flottants de plus dans les paramètres (seuil, relâche, fond
-B : `a`, `k`, `ω`, `φ`, niveau moyen, présence) ; un noyau **`switch_flow`** entre la pente et la dilatation — comme l'étape (3b) de
-`ColumnsSwitch::decide` : une colonne dont une maille d'eau dépasse le seuil (vitesse propre, relative à B s'il y en a un) est
-requise ; sinon, en bande, au-delà de la relâche, gardée — ; **`floor_place`** descend aussi sous ces mailles, comme `place_floor`.
-`SwitchSettings::of` les recopie (la vorticité, la part de rotation, la déformation ne sont pas portées : refusées si posées). (2) Les
-clés `VITESSE`, `RELACHE`, `FOND_B` dans l'état B10 commun aux bancs (un fond B arbitraire : la houle de `a` 2 cm, `λ` 2 m, au niveau
-de l'eau — B10 n'en a pas, la décision se compare quand même).
+**Ce que la session trouve en entrant.** Deux solveurs : le **pas couplé de production** (`Volume3`, `delta3d_coupling.rs` — grille MAC
+à fonction hauteur, couplée à B+W par ses faces, éponge, épars, niveaux, faces coupées ; sa production GPU, `delta3d_step.wgsl`, au pas
+de S297, **sans** le mode relatif) ; **la bande** (`Apic3` + zone + fond + échange + bascule — S398–S432, ≈ 3 100 lignes en référence,
+portée sur la carte), qui simule l'eau totale **sans B**. **A320** ouverte : en mode relatif, le terme croisé `u'·∇U`, discrétisé seul,
+fait croître une perturbation sous houle raide ; le remède nommé (ADR-198 D4), la forme de Bernoulli `∇(U·u')`, n'est pas essayé.
 
-**Critères, écrits avant.** (1) Le banc de décision (`--apic3d-carte-decision`, cinq instants, la bascule initiale et les bascules
-forcées) avec **`VITESSE=0.3 RELACHE=0.15 FOND_B=1`** : masque demandé **identique** à la référence, fonds identiques, positions et
-volume comme S420 ; et sans les clés, comme S427. (2) **C7e tenu** : B10 en bande étroite sans les clés, pas + bascule ≤ 2,1 ms au p99,
-identique au bit à S428 (`DUMP_B10`) sauf ce que le nouveau noyau change dans la compilation (isolé s'il y en a) ; avec les clés, le coût
-publié. (3) Suites, zéro avertissement.
+**Ce que la session fait.** (1) **La conception** (preuve §22) : où vit la bande (dans le pas couplé, A1 de la campagne — non B dans
+`Apic3`), ce que portent les particules (la vitesse propre `u'`, advectée par `U + u'`), où vont les termes croisés, l'ordre et les
+critères des morceaux — A320 d'abord, le mode relatif sur la carte, la bande relative en référence puis sur la carte. (2) **Le témoin
+d'A320 rejoué** (le germe de 1 mm sous la houle de 7,5 cm, masque 7, 25 cm : S369 mesurait 0,115 s⁻¹ de 35 à 59 s) — l'état de départ
+de la session qui le traitera, au chiffre près ou l'écart dit.
+
+**Critères, écrits avant.** La conception dit, pour chaque morceau, son contenu, son lieu (référence sans carte ou poste), son « reçu
+si » écrit avant, et la dépendance qu'il protège ; elle nomme ce qu'elle laisse ouvert. Le témoin rejoue S369 (même taux à 5 % près),
+sinon l'écart est publié avant tout remède.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les paramètres, `switch_flow`, `floor_place`, `SwitchSettings` ; les clés des bancs.
-- [x] **P3** — le banc de décision avec et sans les clés ; B10 en bande étroite (coût, identité) ; C7d-2 reçu ou non.
-- [x] **P4** — non-régression, suites ; preuve §21.4 ; registres.
-- [x] **P5** — rituel.
+- [ ] **P2** — le témoin d'A320 rejoué.
+- [ ] **P3** — la conception de C7d-3 (preuve §22) ; registres.
+- [ ] **P4** — rituel.
 
 ### Notes de reprise
-- **P2** — paramètres (256 octets : seuil, relâche, fond B), `own_speed` (les moyennes de faces de `cell_speed`, moins B), **`switch_flow`** entre la pente et la dilatation (requise au-delà du seuil ; sinon, en bande, gardée au-delà de la relâche), **`floor_place`** sous ces mailles ; `SwitchSettings` recopie seuil, relâche et fond B, et **refuse** vorticité, part de rotation et déformation (non portées). Clés `VITESSE`, `RELACHE`, `FOND_B` dans `b10_band_state_from` (la houle de 2 cm, λ 2 m, au niveau de l'eau). Compilé sans avertissement.
-- **P3** — **le banc de décision, identique à la référence dans les quatre séries** (masque demandé, fonds, positions, réserve, volume à 0 quantum) : avec les clés — bascule initiale, bascules forcées (14 887 à 44 070 particules : le critère travaille ; sans lui 5 998 à 8 686), réglage par défaut — et sans elles (S427 au chiffre près). **B10 en bande étroite sans les clés : identique au bit à S428 sur 74 pas**, pas p99 1,83 + bascule 0,24 = **2,06 ms** (C7e tenu). **Avec les clés** : la carte suit la référence au chiffre près — **les deux pincent au pas 53** (le critère change la physique de la référence aussi), 44 104 particules de part et d'autre ; pas p99 1,58 + bascule 0,40 = 1,98 ms (la décision 0,29 : le parcours des mailles ; les fils de l'échange presque vides, le fond étant bas). **C7d-2 reçu.**
-- **P4** — non-régression **identique à S428** (étages, cycle, B10 nu au pas 54, ballottement 0,447, colonnes 0,002, raccord 4,015 et bande 1,210 mm, gestes compris) ; suite du cœur 756 / 19 / 0. Preuve §21.4 ; liste 4.19, feuille de route, index. **Écart** : P2 et P3 commités ensemble (un seul commit, « P2–P3 »).
-- **P5** — journal ; jeton libre ; maillons 20 (justifiés : S406) ; suivant : S433, la conception de C7d-3.
