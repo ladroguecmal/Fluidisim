@@ -18369,3 +18369,11 @@ un rendu logiciel en PPM ; B10 (une sphère entre dans l'eau) en bande étroite.
 colonnes et des normales lissées, ombrées par pixel — le calcul n'est pas touché. **Mesuré** : le saut au raccord **0,083 maille**
 (S450 : 0,337) ; **0 arête ouverte** ; les images lisses, sans marches. **R37** envoyé à l'utilisateur. Suite **762**. **Rituel**
 (allégé). Maillons **8** — justifié : la priorité du solveur (S406). Suivant : selon R37 — le rendu en direct sur la carte, puis C10.
+
+## S452 — 2026-10-02 — rendu : la surface continue en direct, sur la carte
+
+**Entrée.** **R37** : *« Je valide le render »* — reçu. **Fait** ([preuve](../docs/validation/SURFACE-CONTINUE-S450.md) § S452) :
+`surface_carte` dans l'afficheur — le fondu de S451 en deux passes de calcul et un lancer de rayons par pixel dans `φ`, sur le device de
+la carte, sans retour au CPU ; le banc `--surface-carte` (B10 en bande étroite). **Mesuré** : le fondu égal à celui du CPU à
+**7·10⁻⁷** ; **0,23 ms** par image de 960 × 600 ; quatre images comparables à R37, envoyées. Suite **762**. **Rituel** (allégé).
+Maillons **9** — justifié : la priorité du solveur (S406). Suivant : le rendu dans la boucle vivante de l'afficheur, puis C10.

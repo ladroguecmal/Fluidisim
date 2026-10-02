@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S452 — **en cours**. Verdict de l'utilisateur (2026-10-02) : *« Je valide le render »* — **R37 reçu** (REVUE-VISUELLE §42).
+Session : S452 — **terminée**. Verdict de l'utilisateur (2026-10-02) : *« Je valide le render »* — **R37 reçu** (REVUE-VISUELLE §42).
 
 **Ce que la session fait — le rendu en direct, sur la carte.** Le module `surface_carte` de l'afficheur, sur le device de la carte de
 la bande (`ApicCarte`), lit `φ` (`cellf`) et le masque des colonnes (`cmask`) sans retour au CPU : (1) **une passe de calcul** fond `φ`
@@ -80,7 +80,7 @@ carte, aux instants de R37, **comparables à R37** — montrées à l'utilisateu
 
 - [x] **P1** — R37 inscrit ; jeton, plan seul.
 - [x] **P2** — `surface_carte` (le fondu, le lancer de rayons) ; le banc `--surface-carte` ; mesures ; images.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `viewer/src/surface_carte.{rs,wgsl}` : le fondu (deux passes de calcul, `cellf` → `tmp` → `champ`), le lancer de rayons
@@ -88,4 +88,4 @@ carte, aux instants de R37, **comparables à R37** — montrées à l'utilisateu
   (`gpu`, `phi_buffer`, `mask_buffer`, `grid`) ; le banc `--surface-carte` (B10 en bande étroite, 68 s). **Mesuré** (RTX 5070, Dx12) :
   (1) écart du fondu **7,2·10⁻⁷** — tenu (10⁻⁵) ; (2) **0,23 ms** par image, horodatée (médiane de 200 ; mur 0,69 ms) — tenu (1 ms) ;
   (3) `captures/s452/carte_t{0.5,1.0,2.0,3.0}.png` — à l'œil, celles de R37 (le cratère, le jet), un peu plus lisses — envoyées.
-
+- **P3** — SURFACE-CONTINUE-S450 (§ S452) ; journal ; jeton libre ; maillons 9 (justifiés : S406) ; suivant : S453, le rendu dans la boucle vivante de l'afficheur, puis C10.

@@ -52,3 +52,27 @@ coordonnées barycentriques **par pixel** (Phong). **Reproduire** : comme ci-des
 Les images `captures/s451/b10_t{0.5,1.0,2.0,3.0}.png` : le cratère et le jet de Worthington lisses, sans les marches carrées.
 
 *2026-10-02, S452 — l'utilisateur* : *« Je valide le render »* — **R37 reçu**.
+
+## S452 — en direct, sur la carte
+
+2026-10-02. Le rendu reçu (R37), porté dans l'afficheur sur le device de la carte de la bande (`ApicCarte`), sans retour au CPU :
+`viewer/src/surface_carte.{rs,wgsl}`. **Le fondu** — deux passes de calcul, le `champ_rendu` de S451 maille par maille, dans le
+même ordre des sommes ; **le lancer de rayons** — une passe de fragments : un rayon par pixel dans le champ fondu (le quart reflété,
+trilinéaire aux centres des mailles), le premier changement de signe par pas d'une demi-maille puis huit bissections, la normale
+lissée (le gradient de `φ` aux points de la grille, interpolé — celui de S451), l'ombrage de R37, la sphère en intersection analytique.
+Pas de maillage : l'isosurface trilinéaire remplace les tétraèdres marchants.
+
+**Reproduire** : `cargo build --release` dans `viewer/`, puis, depuis la racine, `viewer/target/release/water-viewer.exe
+--surface-carte` (68 s ; `SORTIE`, `FR`, `ND`) et `python outils/apercu_ppm.py captures/s452/<image>.ppm`. Attendu :
+`ecart_fondu_max=7.153e-7`, `rendu_carte_ms_mediane≈0.23`.
+
+| critère (écrit avant) | mesure (RTX 5070 portable, Dx12) | |
+|---|---|---|
+| (1) le champ fondu de la carte égale le fondu du CPU sur le même `φ`, à 10⁻⁵ | **7,2·10⁻⁷** aux quatre instants | tenu |
+| (2) une image de 960 × 600 en 1 ms au plus (médiane, sur la carte) | **0,23 ms** horodatée, fondu compris (mur : 0,69 ms) | tenu |
+| (3) quatre images aux instants de R37, comparables | `captures/s452/carte_t{0.5,1.0,2.0,3.0}.png` | envoyées |
+
+**Ce qui se voit** : les images de R37 — le cratère et la sphère, puis le jet de Worthington —, un peu plus lisses (l'interpolation
+trilinéaire ne marque pas les arêtes des tétraèdres). **Ce qui reste** : brancher ce rendu dans la boucle vivante de l'afficheur (la
+fenêtre, la caméra libre) — puis C10.
+
