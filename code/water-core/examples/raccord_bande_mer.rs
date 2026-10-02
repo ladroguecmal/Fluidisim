@@ -4,7 +4,9 @@
 //! **δ relatif** (le défaut depuis S443), sur la même grille : 25 cm, 2 rangées, 2,5 m d'eau ; la mer fait 16 m, la bande 4 m au
 //! milieu. B : la houle de S369 (une composante, 4 m, `T` = 1,6 s). À chaque pas : (1) la mer reçoit, à l'intérieur de la bande (à
 //! `MARGE` colonnes de ses bords), `δ = total − B` — hauteurs et vitesses ; (2) la bande reçoit à ses bords la vitesse normale
-//! `B + δ` ; (3) la bande avance ; (4) la mer avance.
+//! `B + δ` ; (3) la bande avance ; (4) la mer avance. **S447 — le raccord conservatif** (le défaut ; `RACCORD_CONSERVATIF=0`, celui
+//! de S446) : la mer est seule comptable de la masse de δ ; l'intérieur de la bande lui donne sa forme, décalée d'un `c` uniforme
+//! qui garde le volume calculé par la mer, et la bande reçoit le même `c`.
 //!
 //!     cargo run -p water-core --release --offline --example raccord_bande_mer -- [houle_m] [durée_s]
 //!
@@ -102,6 +104,8 @@ fn main() -> Result<(), String> {
     let pas = (duree * 1e6 / DT_US as f64).round() as u64;
     let volume = |m: &Volume3| m.surface().iter().map(|e| (*e - H0) as f64).sum::<f64>() * (DX * DX) as f64;
     let (mut dehors_max, mut quand, mut derive_max, mut milieu_max) = (0f32, 0f64, 0f64, 0f32);
+    // S447 : ce que le bilan du pas de la mer explique — la bande de B aux faces extérieures, l'éponge — et ce qui reste au raccord.
+    let (mut apports, mut raccord_max) = (0f64, 0f64);
     for n in 0..pas {
         let t = SimTime(n * DT_US);
         grille.sample(&houle, t).map_err(|e| format!("{e:?}"))?;
@@ -110,12 +114,28 @@ fn main() -> Result<(), String> {
         if n > 0 {
             let mut eta = mer.surface().to_vec();
             let (mut u, mut v, mut w) = (mer.velocity_u().to_vec(), mer.velocity_v().to_vec(), mer.velocity_w().to_vec());
-            let colonnes = bande.columns_surface().ok_or("zone")?;
-            let (ua, va, wa) = (bande.velocity_u(), bande.velocity_v(), bande.velocity_w());
+            let mut colonnes = bande.columns_surface().ok_or("zone")?.to_vec();
+            let (ua, va, wa) = (bande.velocity_u().to_vec(), bande.velocity_v().to_vec(), bande.velocity_w().to_vec());
+            // S447 — le raccord conservatif : la mer est seule comptable de la masse de δ. L'intérieur de la bande reçoit la forme de
+            // la bande, décalée de `c` uniforme pour garder le volume de δ que la mer vient de calculer ; la bande reçoit le même `c`.
+            let conservatif = std::env::var("RACCORD_CONSERVATIF").map_or(true, |v| v != "0");
+            let (mut v_mer, mut v_bande, mut nc) = (0f64, 0f64, 0usize);
             for j in 0..NY {
                 for i in MARGE..NA - MARGE {
+                    v_mer += (eta[j * NX + I0 + i] - H0) as f64;
+                    v_bande += (colonnes[j * NA + i] - bg.w[fw(I0 + i, j, 0)].eta - H0) as f64;
+                    nc += 1;
+                }
+            }
+            let c = if conservatif { ((v_mer - v_bande) / nc as f64) as f32 } else { 0. };
+            for j in 0..NY {
+                for i in MARGE..NA - MARGE {
+                    colonnes[j * NA + i] += c;
                     eta[j * NX + I0 + i] = colonnes[j * NA + i] - bg.w[fw(I0 + i, j, 0)].eta;
                 }
+            }
+            if conservatif {
+                bande.set_columns_surface(&colonnes).map_err(|e| format!("pas {n} : {e:?}"))?;
             }
             for k in 0..nz {
                 for j in 0..NY {
@@ -164,6 +184,9 @@ fn main() -> Result<(), String> {
             }
         }
         derive_max = derive_max.max(volume(&mer).abs());
+        let b = mer.balance();
+        apports += b.band_in + b.perturbation_in - b.sponge_out;
+        raccord_max = raccord_max.max((volume(&mer) - apports).abs());
         // L'écart de la bande à B en son milieu, au début du pas suivant : lu après le prochain échantillon ; ici, au pas courant.
         let colonnes = bande.columns_surface().ok_or("zone")?;
         grille.sample(&houle, SimTime((n + 1) * DT_US)).map_err(|e| format!("{e:?}"))?;
@@ -183,8 +206,9 @@ fn main() -> Result<(), String> {
     println!(
         "RACCORD_S446 houle_m={a_houle} duree_s={duree} dx={DX} mer={NX}x{NY}x{nz} bande={NA} colonnes en {I0} marge={MARGE} \
          delta_hors_bande_max_m={dehors_max:.4e} a_t={quand:.2} derive_volume_max_m3={derive_max:.3e} demi_periode_m3={demi:.3e} \
-         part={:.3} bande_contre_b_milieu_max_m={milieu_max:.4e}",
-        derive_max / demi
+         part={:.3} bande_contre_b_milieu_max_m={milieu_max:.4e} apports_eponge_bande_m3={apports:.3e}          raccord_max_m3={raccord_max:.3e} part_raccord={:.4}",
+        derive_max / demi,
+        raccord_max / demi
     );
     Ok(())
 }

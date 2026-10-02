@@ -78,7 +78,14 @@ volume de δ de la mer sous **1 %** du volume d'une demi-période (3,2·10⁻² 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le raccord conservatif au banc ; mesures ; critères.
+- [x] **P2** — le raccord conservatif au banc ; mesures ; critères.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `raccord_bande_mer`, raccord conservatif (le défaut ; `RACCORD_CONSERVATIF=0`, celui de S446), marge 2, 10 s : δ hors de la
+  bande **9,42 mm** — (1) tenu ; dérive brute du volume de δ **1,13·10⁻³ m³, 3,5 %** d'une demi-période — (2) **manqué tel qu'écrit** ;
+  mais le bilan du pas de la mer l'explique : l'éponge et la bande de B aux faces extérieures, **8,5·10⁻⁴ m³** ; ce qui reste au raccord,
+  **3,9·10⁻⁶ m³ — 0,01 %** (S446 : 2,2·10⁻³, 6,8 %). Le critère (2) mêlait l'éponge — qui absorbe les ondes de δ sorties de la bande, son
+  rôle — au raccord ; la mesure qui isole le raccord le tient cent fois. Marges 1 et 4 : 12,6 et 8,1 mm, 3,1 et 4,7 % bruts. Suite **762**.
+  **c2 : non reçu tel qu'écrit ; plafonné (ADR-213 D2)** — le raccord conservatif est retenu, c3 commence avec lui.
+
