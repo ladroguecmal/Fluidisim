@@ -76,3 +76,27 @@ Pas de maillage : l'isosurface trilinéaire remplace les tétraèdres marchants.
 trilinéaire ne marque pas les arêtes des tétraèdres). **Ce qui reste** : brancher ce rendu dans la boucle vivante de l'afficheur (la
 fenêtre, la caméra libre) — puis C10.
 
+## S453 — dans la boucle vivante, la carte seule
+
+2026-10-02. **La carte seule** : jusqu'ici la référence CPU choisissait le pas de la carte ; `ApicCarte::stable_step_us` applique la même
+formule (`0,5·dx / (v_max + √(|g|·dx))`) aux vitesses relues sur la carte — particules et faces. B10 avance alors **sans référence**
+(elle ne sert plus qu'à l'ensemencement et aux réglages de la bascule). **La fenêtre** (`viewer/src/surface_direct.rs`) : sur le
+device de la carte (`ApicCarte::with_instance`, un adaptateur compatible avec la fenêtre), la simulation suit le temps réel (deux pas
+au plus par image), puis `surface_carte` rend dans l'image de la fenêtre.
+
+**Reproduire** : depuis la racine, `viewer/target/release/water-viewer.exe --surface-direct-banc` (49 s, dont ~47 s de mise en route :
+l'ensemencement et la compilation des pipelines de la carte) ; attendu `quanta_ecart=0` aux quatre instants, `ecart_s452_moyen` 0,00 /
+0,00 / 0,07 / 0,04. La fenêtre : `viewer/target/release/water-viewer.exe --surface-direct` (`DUREE=15` : se ferme seule et imprime
+le bilan).
+
+| critère (écrit avant) | mesure (RTX 5070 portable, Dx12) | |
+|---|---|---|
+| (1) la carte seule tient jusqu'à t = 3 : masse exacte, `φ` fini, images de S452 à l'œil | quanta : écart **0** ; `φ` fini ; pixels changés de plus de 8 niveaux : **0 %**, 0 %, 0,1 %, 0,05 % | tenu |
+| (2) une image en 33 ms au plus (médiane, pas compris) ; simulé / réel publié | **1,3 ms** (99e centile 14 ms, une fois 133 ms au départ) ; **0,97** | tenu |
+| (3) la commande à l'utilisateur | `--surface-direct` | à son jugement |
+
+**Ce qui se voit** : les images du banc (`captures/s453/direct_t*.ppm`) sont celles de S452 — la carte seule suit le chemin qu'elle
+suivait au pas de la référence. Le pas de la carte coûte 7,3 ms au mur (médiane, relectures comprises) pour 4,9 ms simulées : la
+simulation tient le temps réel parce que la plupart des images n'en portent pas. **Ce qui reste** : la relecture des vitesses (le pas
+stable) se ferait sur la carte par une réduction ; C10.
+

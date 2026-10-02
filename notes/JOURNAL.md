@@ -18377,3 +18377,12 @@ colonnes et des normales lissées, ombrées par pixel — le calcul n'est pas to
 la carte, sans retour au CPU ; le banc `--surface-carte` (B10 en bande étroite). **Mesuré** : le fondu égal à celui du CPU à
 **7·10⁻⁷** ; **0,23 ms** par image de 960 × 600 ; quatre images comparables à R37, envoyées. Suite **762**. **Rituel** (allégé).
 Maillons **9** — justifié : la priorité du solveur (S406). Suivant : le rendu dans la boucle vivante de l'afficheur, puis C10.
+
+## S453 — 2026-10-02 — rendu : la surface continue dans la boucle vivante
+
+**Entrée.** *« Continue »*. **Fait** ([preuve](../docs/validation/SURFACE-CONTINUE-S450.md) § S453) : la carte choisit son pas
+(`ApicCarte::stable_step_us`, la formule de la référence) — B10 avance **sans référence CPU** ; la fenêtre `--surface-direct`
+(`surface_direct.rs`) : la simulation au temps réel sur la carte, `surface_carte` rendu à chaque image, orbite, pause, relance.
+**Mesuré** : masse en quanta exacte, images de S452 à 0,1 % des pixels près ; image 1,3 ms en médiane (14 ms au 99e centile),
+simulé / réel 0,97. Suite **762**. **Rituel** (allégé). Maillons **10** — justifié : la priorité du solveur (S406). Suivant : le lot
+des registres (dû en S454), puis C10 ou le verdict de l'utilisateur sur la fenêtre.

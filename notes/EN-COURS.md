@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S453 — **en cours**. *« Continue »* — la suite de S452 : le rendu dans la boucle vivante (ADR-211 D2).
+Session : S453 — **terminée**. *« Continue »* — la suite de S452 : le rendu dans la boucle vivante (ADR-211 D2).
 
 **Ce que la session fait.** (1) **La carte seule** : jusqu'ici la référence CPU choisissait le pas de la carte (`stable_step_us`) ;
 la carte le choisit elle-même — la même formule, `0,5·dx / (v_max + √(g·dx))`, sur la vitesse maximale relue des faces et des
@@ -80,7 +80,7 @@ jugement.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la carte seule : le pas choisi sur la carte ; banc `--surface-direct-banc` ; mesures (1).
 - [x] **P3** — la fenêtre `--surface-direct` ; mesures (2).
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `ApicCarte::stable_step_us` (la formule de la référence sur les vitesses relues de la carte), `ApicCarte::with_instance`
@@ -94,4 +94,4 @@ jugement.
   Page haut / bas), Espace, R, Échap ; `DUREE=` pour le banc. **Mesuré** (deux essais de 15 s, sans vsync) : image **1,3 ms** en
   médiane, **14 ms** au 99e centile (les images qui portent un pas), 133 ms au plus (une fois, au départ) ; rendu 1,1 ms (acquisition
   comprise) ; **simulé / réel = 0,97** ; 1 052 pas sans incident (B10 continue au-delà de son essai) — (2) tenu.
-
+- **P4** — SURFACE-CONTINUE-S450 (§ S453) ; journal ; jeton libre ; maillons 10 (justifiés : S406) ; suivant : S454, le lot des registres puis C10 (ou le verdict de l'utilisateur sur la fenêtre).
