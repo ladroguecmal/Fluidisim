@@ -449,10 +449,13 @@ pub fn fenetre() -> Result<(), String> {
     // La première image (création, compilation) n'est pas comptée.
     let reel = app.images_ms.iter().skip(1).sum::<f64>() * 1e-3;
     let images = app.images_ms.len();
+    let mut im: Vec<f64> = app.images_ms.iter().skip(1).copied().collect();
+    let med = mediane(&mut im);
+    // Les images qui portent des pas sont les plus longues : le 99e centile et la plus longue.
+    let (p99, pire) = if im.is_empty() { (f64::NAN, f64::NAN) } else { (im[im.len() * 99 / 100], im[im.len() - 1]) };
     println!(
-        "SURFACE_DIRECT_S453 bilan_fenetre images={images} image_ms_mediane={:.2} rendu_ms_mediane={:.3} simule_s={:.3} reel_s={reel:.2} \
-         rapport_simule_reel={:.2} pas={}",
-        mediane(&mut app.images_ms.iter().skip(1).copied().collect::<Vec<_>>()),
+        "SURFACE_DIRECT_S453 bilan_fenetre images={images} image_ms_mediane={med:.2} image_ms_p99={p99:.2} image_ms_max={pire:.2} \
+         rendu_ms_mediane={:.3} simule_s={:.3} reel_s={reel:.2} rapport_simule_reel={:.2} pas={}",
         mediane(&mut app.rendus_ms),
         app.simule_s,
         app.simule_s / reel.max(1e-9),

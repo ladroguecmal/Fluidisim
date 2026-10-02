@@ -79,7 +79,7 @@ jugement.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la carte seule : le pas choisi sur la carte ; banc `--surface-direct-banc` ; mesures (1).
-- [ ] **P3** — la fenêtre `--surface-direct` ; mesures (2).
+- [x] **P3** — la fenêtre `--surface-direct` ; mesures (2).
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
@@ -89,4 +89,9 @@ jugement.
   1,8 ms), **masse en quanta exacte** (écart 0), `φ` fini ; les images `captures/s453/direct_t*.ppm` contre celles de S452 : **identiques**
   à t = 0,5 et 1, 0,1 % puis 0,05 % des pixels changés de plus de 8 niveaux à t = 2 et 3 — (1) tenu. Pas de la carte : 7,3 ms au mur
   (médiane, relectures comprises).
+- **P3** — `--surface-direct` : la fenêtre sur le device de la carte (format non sRGB, `Bgra8Unorm`), la simulation au temps réel
+  (deux pas au plus par image), `surface_carte` rendu dans l'image de la fenêtre ; orbite (glisser, flèches), distance (molette,
+  Page haut / bas), Espace, R, Échap ; `DUREE=` pour le banc. **Mesuré** (deux essais de 15 s, sans vsync) : image **1,3 ms** en
+  médiane, **14 ms** au 99e centile (les images qui portent un pas), 133 ms au plus (une fois, au départ) ; rendu 1,1 ms (acquisition
+  comprise) ; **simulé / réel = 0,97** ; 1 052 pas sans incident (B10 continue au-delà de son essai) — (2) tenu.
 
