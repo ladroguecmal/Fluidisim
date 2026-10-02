@@ -1028,3 +1028,27 @@ face ≫ au centre » se retrouve, l'échelle n'est pas propre). Après trois se
 défauts vers le mode relatif attend C7d-3a**, et la bande relative (C7d-3c, C7d-3d) aussi (§22.3). A320 reste ouverte, avec son
 enveloppe mesurée.
 
+### 22.10 C7d-3b, le mode relatif sur la carte (S439) — non reçu tel qu'écrit, d'un cheveu
+
+2026-10-02. **Fait** : `override RELATIVE` dans `delta3d_step.wgsl` et `delta3d_background.wgsl` — la prédiction sans le résidu de B
+(`extra_relative`), la bande relative (`band_between`, le débit de B entre sa surface et la totale, celle-ci reformée depuis la
+première en différences exactes), le fantôme du haut moins l'erreur de B à sa propre surface (`couple_columns`), le fantôme latéral
+d'A324 au second membre (`couple_rhs`) et à la correction (`ghost_side`). `Step3::set_relative` compile ces pipelines à la demande ;
+éteint, le pas de S297. Bancs : `--delta3d-trajectoire` avec `RELATIF=1`, `TEMOIN=1` ; `--delta3d-temoin-relatif` (étage par étage).
+**Trouvé en route** : la bande relative écrite `band(surface) − band(own)` laissait 9·10⁻¹¹ m au premier pas — `own`, une somme que le
+compilateur réassocie, ne retombait plus au bit sur la surface totale (L345).
+
+| 32 × 24 × 36 à 25 cm, mer de S298, 400 pas de 5 ms, 64 cycles | pas de S297 | mode relatif |
+|---|---:|---:|
+| la production (sans `RELATIF`) | — | **au bit** de la ligne de base |
+| témoin (sans perturbation) | — | **nul au bit** sur 400 pas, carte et référence |
+| horizon du millimètre | pas 130 | **pas 260** |
+| écart avant l'horizon | 7,65·10⁻⁵ m | 1,5308·10⁻⁴ m (sur 260 pas) |
+| écart sur les pas 1 à 129 | 7,65·10⁻⁵ m | **1,5·10⁻⁷ m** |
+| écart global | 7,1 mm | 3,2 mm |
+
+**Verdict, tel qu'écrit** : (1), (2), (4) tenus ; (3) — « écart avant l'horizon au plus deux fois celui du pas de S297 » — **manqué de
+0,01 %** (2,0003 fois). La clause compare des maxima pris sur des fenêtres inégales ; sur la même fenêtre, la carte relative suit sa
+référence 500 fois mieux. **C7d-3b n'est pas reçu tel qu'écrit** : le critère (3) sera réécrit sur une même fenêtre, avant la mesure
+suivante, ou l'écart accepté par l'utilisateur.
+
