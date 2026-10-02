@@ -62,34 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S440 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue sinon j'accepte l'écart »* — **C7d-3b reçu**,
-l'écart de 0,01 % accepté ([preuve](../docs/validation/APIC-CARTE-S416.md) §22.10) ; puis la suite de la campagne.
+Session : S441 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **A322**, les bouffées du
+mode relatif à 10 cm ([preuve](../docs/validation/MULTIGRILLE-3D-S385.md) §7).
 
-**Ce que la session trouve en entrant.** C7d-3a est bloqué (A320, cause non trouvée) ; C7d-3c et C7d-3d l'attendent. **A322** (à 10 cm,
-30 Hz explose vers 62 s, la mer seule) précède toute scène à 10 cm (C10). Son attribution (S409, MULTIGRILLE-3D-S385 §6.4) : retirer
-**le résidu de quantité de mouvement du fond** suffit à la supprimer — **ce que fait le mode relatif**, désormais sur la carte.
+**Ce que la session trouve en entrant.** Scène de revue à 10 cm (80 × 80 × 70, repos 3,5 m — la face `k` = 35), 30 Hz, mg 8 : en mode
+relatif, elle tient 120 s ; mais la part de l'échelle de la maille de `w` dépasse 0,05 pendant 65 s (0,62 au plus), sur des faces `w`
+entre `k` = 38 et 46, au-dessus du repos — sous les crêtes de la mer. Pas de référence CPU pour cette scène (448 000 mailles).
 
-**Ce que la session fait.** Le banc d'A321 (`--delta3d-a321`) gagne `RELATIF=1` (`Step3::set_relative`). La scène d'A322 :
-`MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8`, 30 Hz : le témoin (le pas de S297) rejoué, puis le mode relatif.
+**Ce que la session fait.** D'abord quatre discriminants, sur la carte, en mode relatif, 120 s : (a) **60 Hz** (`PAS_US=16667`) — une
+limite de pas ? (b) **sans le paquet** (`PAQUET=0`) — la mer seule ? (c) **24 cycles** de projection — une projection mal convergée ?
+(d) **la scène à 25 cm** (sans `MAILLE`), où la surface franchit aussi des centres — propre à 10 cm ? Puis, selon eux, un instrument
+sur la face d'une bouffée (étage du pas, fantômes, mouillure), et la référence CPU sur une fenêtre réduite si la question le demande.
 
-**Critères, écrits avant.** **A322 levée sous le mode relatif** si : (1) le témoin explose encore (vers 62 s) ; (2) en mode relatif, la
-scène tient **120 s** à 30 Hz, `max_u` de δ sous 3 m/s à chaque seconde et la part de l'échelle de la maille de `w` sous 0,05 ;
-(3) la divergence et le résidu de la projection restent dans leur ordre de grandeur du témoin avant son explosion. Autrement : A322
-reste ouverte, avec ce qui a été mesuré. A322 étant levée, elle ne l'est que **dans le mode relatif** : la production par défaut garde
-le pas de S297 tant que C7d-3a n'est pas reçu.
+**Critères, écrits avant.** La localisation est **faite** quand une variante éteint les bouffées (part de maille de `w` sous 0,05 sur
+120 s) et qu'un instrument les attache à un terme ou un étage du pas. **A322 levée** si un remède fait tenir la scène relative à 10 cm
+et 30 Hz sur 120 s, part de maille sous 0,05, sans changer la production (sans `RELATIF`) au bit. Autrement, ce qui est écarté s'écrit.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul ; l'arbitrage inscrit.
-- [x] **P2** — `RELATIF` au banc d'A321 ; le témoin ; le mode relatif ; critères.
-- [x] **P3** — preuve ; A322 ; registres ; rituel.
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — les quatre discriminants.
+- [ ] **P3** — l'instrument, selon eux ; un remède s'il se montre.
+- [ ] **P4** — preuve ; A322 ; registres ; rituel.
 
 ### Notes de reprise
-- **P2** — `--delta3d-a321` : `RELATIF=1`. `MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8`, 30 Hz. **Témoin** : explose au pas
-  **1 860** (62 s), comme en S409 — (1) tenu ; avant, `max_u` ≤ 1,92 m/s, part de maille de `w` > 0,05 trois secondes sur 60 (0,115
-  au plus). **Mode relatif** : **tient 120 s** (3 600 pas) ; `max_u` ≤ **1,25 m/s** ; divergence ≤ 1,4·10⁻³, résidu ≤ 6,8·10⁻⁵ (le
-  témoin : 2,3·10⁻³ et 8,8·10⁻⁵) — (3) tenu ; mais **la part de l'échelle de la maille de `w` dépasse 0,05 pendant 65 secondes sur
-  120** (jusqu'à 0,62 à 67 s, `max_u` 0,61 m/s sur une face `w` près de la surface) — (2) **manqué**. Des bouffées transitoires à la
-  surface, qui retombent en quelques secondes. **A322 non levée telle qu'écrite** : l'explosion disparaît sous le mode relatif ;
-  apparaissent des bouffées à l'échelle de la maille, à 10 cm, que le pas de S297 n'a pas avant d'exploser.
-- **P3** — MULTIGRILLE-3D-S385 §7, APIC-CARTE §22.10 (l'arbitrage) ; A322 annotée ; registres ; journal ; jeton libre ; maillons 28 (justifiés : S406) ; suivant : S441, A322 — les bouffées.
