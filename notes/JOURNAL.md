@@ -18386,3 +18386,12 @@ Maillons **9** — justifié : la priorité du solveur (S406). Suivant : le rend
 **Mesuré** : masse en quanta exacte, images de S452 à 0,1 % des pixels près ; image 1,3 ms en médiane (14 ms au 99e centile),
 simulé / réel 0,97. Suite **762**. **Rituel** (allégé). Maillons **10** — justifié : la priorité du solveur (S406). Suivant : le lot
 des registres (dû en S454), puis C10 ou le verdict de l'utilisateur sur la fenêtre.
+
+## S454 — 2026-10-03 — C10 conçue ; C10-1, le saut sur un domaine entier ; ADR-215
+
+**Entrée.** *« Continue »*, puis la décision : *« ne t'arrête pas de travailler jusqu'à une v1 solide visuellement et physiquement,
+prends les décisions »* — [ADR-215](../docs/adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md). **Fait** : le lot des registres ; C10 en
+cinq lots ; **C10-1** ([preuve](../docs/validation/C10-SCENES-S454.md) §3) — B10 sur un domaine entier, carte seule. **Mesuré** : le
+quart déplié s'accorde au quart (cavité 0,75 maille ; le jet sur l'axe 2,7 mailles plus haut — tranché) ; la scène de 4 m **divergeait
+au plafond** (une nappe plaquée) — avec 2,5 m d'air, stable jusqu'à t = 16, masse exacte ; 27 ms par pas, simulé / réel 0,11. Suite
+**762**. **Rituel** (allégé). Maillons **11** — justifié : la priorité du solveur (S406). Suivant : le temps réel à 4 m.

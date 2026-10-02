@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S454 — **en cours**. *« Continue »* — le lot des registres (ADR-213 D3, dû en S454), puis **C10, les scènes**
+Session : S454 — **terminée**. *« Continue »* — le lot des registres (ADR-213 D3, dû en S454), puis **C10, les scènes**
 (campagne §6 : le joueur qui saute à 5 cm, la gerbe d'étrave, la lame du déversoir ; le critère d'arrêt du §3.4).
 
 **Ce que la session fait.** (1) Le lot des registres pour S451–S453. (2) **La conception de C10** : son découpage en lots, chacun avec
@@ -81,7 +81,7 @@ exacte, `φ` fini jusqu'à `t·√(g/D)` = 4, le coût d'un pas de la carte publ
 - [x] **P2** — le lot des registres.
 - [x] **P3** — la conception de C10.
 - [x] **P4** — C10-1 : B10 en domaine entier ; mesures (1) à (3) ; images.
-- [ ] **P5** — preuve ; rituel (allégé).
+- [x] **P5** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, file active pour S451–S453 (la surface continue reçue, R37, et en direct ; « A322 avant C10 » retiré : levée en S442) ; `Registres` : dernier lot S454, le prochain au plus tard en S457.
@@ -92,4 +92,4 @@ exacte, `φ` fini jusqu'à `t·√(g/D)` = 4, le coût d'un pas de la carte publ
   (1) cavité tenue (0,75 maille), jet sur l'axe 2,7 mailles plus haut que le quart (témoin 0,06) — tranché, ADR-215 D2 ; (2) la scène de
   4 m, masse exacte jusqu'à t = 16 **après correction du plafond** (la nappe plaquée divergeait ; 2,5 m d'air) ; 27 ms par pas ;
   (3) la fenêtre à 4 m : simulé / réel 0,11. Images envoyées.
-
+- **P5** — C10-SCENES-S454 §3 ; journal ; jeton libre ; maillons 11 (justifiés : S406) ; suivant : S455, le temps réel à 4 m (ADR-215 D4).

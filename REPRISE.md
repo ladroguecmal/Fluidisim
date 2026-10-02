@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-02 18:33 +02:00
+JETON            : libre
+Battement        : 2026-10-03 01:10 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S454 — le lot des registres ; C10 conçue, C10-1 : le saut du joueur sur un domaine entier**
-Dernière session : S453 — la surface continue dans la boucle vivante ([preuve](docs/validation/SURFACE-CONTINUE-S450.md)) — la carte seule (son pas), la fenêtre `--surface-direct` : 1,3 ms par image, simulé / réel 0,97. Avant : S452
-Session suivante : **S454 — le lot des registres** (ADR-213 D3, dû en S454) **puis C10** (les scènes jugées sur la surface continue) — ou ce que l'utilisateur désigne après avoir vu la fenêtre ; la stabilité du raccord bande ↔ mer reste ouverte (déclencheur : une scène où une bande déferle dans la mer)
-Maillons        : 10 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
+Session en cours : aucune
+Dernière session : S454 — C10 conçue ; C10-1, le saut sur une scène de 4 m ([preuve](docs/validation/C10-SCENES-S454.md)) — stable jusqu'à t = 16 après le plafond relevé ; ADR-215 (autonomie jusqu'à une v1 solide). Avant : S453
+Session suivante : **S455 — le temps réel à 4 m** (ADR-215 D4, étape 2) : 27 ms de carte par pas de 4,7 ms simulées — profiler les étages, réduire (profondeur, air, colonnes hors du solveur, relectures du pas stable) ; reçu si simulé / réel ≥ 0,9 ; puis la houle, la lumière de l'eau, la scène `--v1`. **Sans attendre de « Continue »** (ADR-215 D1)
+Maillons        : 11 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
 Registres       : dernier lot S454 (ADR-213 D3) ; le prochain au plus tard en S457
 ```
 
