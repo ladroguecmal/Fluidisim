@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S445 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : le lot des registres
+Session : S445 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : le lot des registres
 (ADR-213 D3), puis c1, sa seconde et dernière session (ADR-213 D2).
 
 **Ce que la session trouve en entrant.** `Apic3` en mode relatif, sous une houle stationnaire partie à plat : `|u′|` croît jusqu'à
@@ -84,7 +84,7 @@ session.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
 - [x] **P3** — c1 : les lois ; un remède s'il se montre ; sinon, la conception de l'eau totale dans la bande.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, index, file active (la campagne), angles morts (A320) pour S443–S444 ; `Registres` : dernier lot S445, le prochain au plus tard en S448.
@@ -95,4 +95,4 @@ session.
   parce que sa surface de B est analytique. **c1 non reçu** ; seconde session : **le plafond (ADR-213 D2)**. **La voie suivante** :
   l'eau totale dans la bande — ce qu'`Apic3` fait déjà (le témoin de S444 suit la houle à 1,2 mm) — et B à sa seule frontière, le
   raccord avec la mer relative (`Step3`). Le mode relatif d'`Apic3` reste, éteint par défaut, comme instrument.
-
+- **P4** — APIC-CARTE §23.2, note datée d'ADR-214 ; journal ; jeton libre ; maillons 2 (justifiés : S406) ; suivant : S446, c2 — la conception du raccord.

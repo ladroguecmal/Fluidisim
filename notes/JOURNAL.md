@@ -18306,3 +18306,12 @@ par `U + u′`, `u′·∇U` exact, `p′` de surface), une ou deux composantes 
 fait `u′ = −U` (faute du banc) ; une houle stationnaire partie à plat — `|u′|` croît jusqu'à 54 % de `aω` en 5 s, 16 mm d'écart à l'eau
 totale. **c1 non reçu** ; hypothèse : la lecture de la surface des particules forcée en résonance avec B. Suite **761**. **Rituel**
 (allégé). Maillons **1**. Suivant : c1 — éprouver l'hypothèse, ou l'eau totale dans la bande (ADR-213 D2) ; **le lot des registres**.
+
+## S445 — 2026-10-02 — physique : le lot des registres ; c1 plafonné — l'eau totale dans la bande
+
+**Entrée.** *« Continue »*. **Fait** : le lot des registres (ADR-213 D3) pour S443–S444. **Mesuré**
+([preuve](../docs/validation/APIC-CARTE-S416.md) §23.2), `Apic3` relatif, départ à plat : `|u′|` ∝ `a` (57, 56, 54 % de `aω` pour 1,25,
+2,5, 5 cm), 39 % à 12,5 cm — une erreur du premier ordre du schéma discret appliqué à B, en résonance ; le pas couplé l'évite (surface de
+B analytique), une bande de particules non. **c1 non reçu, plafonné** (ADR-213 D2). **Décidé** (note d'ADR-214) : la bande simule
+l'eau totale, B n'entre qu'à sa frontière ; le raccord avec la mer relative devient c2. **Rituel** (allégé). Maillons **2** — justifié :
+la priorité du solveur (S406). Suivant : **c2**, la conception du raccord.

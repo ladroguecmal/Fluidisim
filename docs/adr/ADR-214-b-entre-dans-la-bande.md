@@ -34,3 +34,11 @@ la vague de Chen dans une houle, en référence (le critère de C7d-3c) ; **c4**
 ## 3. Ce qui ne change pas
 
 Le pas couplé, ses défauts et ses réceptions ; A320, ouverte et plafonnée (ADR-213 D2) ; `Apic3` sans fond, au bit.
+
+*Note du 2026-10-02, S445* ([APIC-CARTE-S416](../validation/APIC-CARTE-S416.md) §23.1–23.2) : **D1 se resserre**. Le mode relatif dans
+la bande (c1) fait croître δ en résonance avec B — une erreur du premier ordre du schéma discret appliqué à B, que la surface des
+particules ne peut pas éviter (`|u′|` ∝ `a`, 39 à 57 % de `aω` en 5 s) ; plafonné après deux sessions (ADR-213 D2). **La bande simule
+l'eau totale ; B n'entre qu'à sa frontière** : le raccord avec la mer relative (D2) devient le cœur de C7d-3c. Le découpage devient :
+**c2** — le raccord bande (eau totale) ↔ mer (δ relatif), conçu puis éprouvé en référence ; **c3** — la vague de Chen dans une houle ;
+**c4** — la carte.
+

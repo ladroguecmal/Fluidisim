@@ -1111,3 +1111,28 @@ sa surface est analytique. **c1 n'est pas reçu.** Pistes : l'éprouver (densit�
 (lire la surface de B comme les particules la liraient) ; ou, si deux sessions n'y suffisent pas (ADR-213 D2), l'eau **totale** dans
 la bande, B n'entrant qu'à sa frontière.
 
+### 23.2 c1, seconde session (S445) — plafonné ; l'eau totale dans la bande
+
+2026-10-02. Critères écrits avant : la lecture de la surface si `|u′|` décroît d'au moins 1,5 fois de 25 à 12,5 cm ; une faute de couplage
+si `|u′|` ∝ `a` sans dépendre de la maille ; une physique du second ordre si ∝ `a²`. **Reproduire** : `S444_DX=<m> S444_A=<m> cargo
+test --release -p water-core --lib relative_sheet_under_a_swell_s444 -- --ignored --nocapture` (départ à plat).
+
+| maille | houle | `|u′|` max sur 5 s | part de `aω` |
+|---:|---:|---:|---:|
+| 25 cm | 1,25 cm | 2,8 cm/s | 57 % |
+| 25 cm | 2,5 cm | 5,5 cm/s | 56 % |
+| 25 cm | 5 cm | 10,5 cm/s | 54 % |
+| 12,5 cm | 5 cm | 7,7 cm/s | 39 % |
+
+**Ce que cela dit.** `|u′|` ∝ `a` et ne baisse que de 1,37 fois quand la maille est divisée par deux : ni une physique du second ordre,
+ni la seule lecture de la surface. C'est **une erreur du premier ordre du schéma discret appliqué à B** — la surface que les particules
+transportent ne suit pas exactement la surface analytique, au nombre d'onde et à la fréquence de B, et elle force δ **en résonance**.
+Le pas couplé l'évite parce que la surface de B y est analytique (`surface_total = eta + η_B`) ; une bande de particules, dont la
+surface est celle des particules, ne le peut pas. **c1 n'est pas reçu ; deuxième session : plafonné** (ADR-213 D2).
+
+**La voie suivante — l'eau totale dans la bande.** `Apic3` simule déjà l'eau totale, et la suit bien (le témoin de S444 : 1,2 mm de
+la houle stationnaire) ; B n'y entre plus qu'**à sa frontière**, où la bande rencontre la mer relative (`Step3`) : l'eau totale y vaut
+`B + δ`. Ce qui reste à concevoir est **le raccord** — ce que la mer donne à la bande à son bord (hauteur, vitesses), ce que la bande
+rend à la mer (`δ = total − B`) —, que D2 d'ADR-214 laissait à plus tard. Le mode relatif d'`Apic3` reste, éteint par défaut, comme
+instrument.
+
