@@ -10,13 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 16:12 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 16:19 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S443 — ADR-213 (accélérer) ; la bascule des défauts vers le mode relatif**, référence et carte
 Dernière session : S442 — physique : **A322 levée en mode relatif** (l'écart accepté par l'utilisateur), la bande relative sous Lax-Wendroff par défaut ; A320 inchangée ([preuve](docs/validation/MER-S369.md) §11). Avant : S441, la bande FTCS
 Session suivante : **S443 — la bascule des défauts vers le mode relatif** (C7d-3b, sa seconde moitié), **proposée sans attendre C7d-3a** : sur tout ce qui est mesuré, le mode relatif vaut mieux que le pas de S297 — point fixe exact sous B seul (le pas de S297 fait croître δ jusqu'à trois fois la houle, A289), A322 levée à 10 cm, trajectoire carte–référence dix fois plus serrée ; A320 n'est pas propre au mode relatif (la source de S297 la masquait, MER-S369 §3) ; à concevoir : quelles réceptions rejouer sous le nouveau défaut (porte B, B10, la scène de revue), et leurs critères ; **acceptée par l'utilisateur le 2026-10-02** (*« J'accepte ta proposition »*) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 30 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
+Registres       : dernier lot S442 (ADR-213 D3) ; le prochain au plus tard en S445
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
@@ -149,7 +150,11 @@ n'écrit pas dans les registres.
    ou synchroniser les copies selon **AGENTS.md**, sans recopier sa procédure ici.
 
 **Seulement si l'état a changé** — une capacité reçue ou perdue, un critère de porte, un point de
-la liste, une décision de l'utilisateur, un défaut bloquant :
+la liste, une décision de l'utilisateur, un défaut bloquant —, et **par lots de trois sessions**
+([ADR-213](docs/adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md) D3) : la troisième session depuis le
+dernier lot (ligne `Registres`) fait les points 6 à 8 pour tout ce qui a changé depuis ; plus tôt seulement
+pour une porte reçue ou perdue ou un angle mort nouveau de sévérité 3. Une décision de l'utilisateur va
+toujours, tout de suite, dans la preuve et l'ADR qui la porte :
 
 6. Feuille de route, file active, liste : les lignes touchées, **en remplacement** de leur état
    périmé. Les états antérieurs restent dans Git et le journal.

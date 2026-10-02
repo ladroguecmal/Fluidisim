@@ -61,6 +61,12 @@ l'invisibilité sur des chiffres seuls : un rendu se juge par l'utilisateur (REV
 Continuer les étapes autorisées sans attendre de relance, et solliciter l'utilisateur pour un
 jugement visuel ou une vraie décision.
 
+**Accélérer** *(décision de l'utilisateur, 2026-10-02, [ADR-213](../docs/adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md))*.
+Un critère manqué de moins de 5 %, ou sur un champ négligeable, est accepté sans consulter, et la preuve le dit (D1) — jamais une
+garantie de fonctionnement. Un problème sans cause après deux sessions s'arrête sur sa limite mesurée, et rien en aval ne l'attend
+(D2). Les registres se mettent à jour par lots de trois sessions (D3). Le banc le plus court qui tranche ; plus de trente minutes de
+calcul se justifient dans le plan (D4).
+
 Avant de poursuivre un même sujet une troisième session, comparer sa suite à au moins une
 capacité de la file encore absente — **à commencer par la voie de la v1** (porte D). Une grande
 amélioration locale peut ne plus être prioritaire une fois son usage débloqué.

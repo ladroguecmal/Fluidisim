@@ -62,33 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S442 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« J'accepte et continue »* — **A322 levée en mode relatif**,
-l'écart accepté ([preuve](../docs/validation/MULTIGRILLE-3D-S385.md) §8).
+Session : S443 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« J'accepte ta proposition »* (la bascule sans attendre C7d-3a),
+puis, sur les quatre propositions pour accélérer, *« Ok go »* — [ADR-213](../docs/adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md)
+(tolérance de 5 %, plafond de deux sessions, registres par lots de trois, bancs courts).
 
-**Ce que la session fait.** (1) **La bande sous Lax-Wendroff devient le défaut du mode relatif** — `Volume3` (`band_lax_wendroff`
-vrai) et `Step3` (`band_lw` vrai) ; sans effet hors du mode relatif ; `BANDE_LW=0`, `MER_BANDE_LW=0` rendent l'ancienne pour
-comparaison. (2) **Son effet sur A320** : le germe de 1 mm sous la houle de 4 m à 25 cm — 7,5 cm, repos sur une face et au centre ;
-6 cm sur une face — contre S437 (0,106 · 0,036 · 0,077 s⁻¹). La bande croisée retirée ne freinait A320 que de 20 % (S369) ; mais le
-FTCS est de ceux qui dépendent de la place de la surface.
+**Ce que la session fait.** **La bascule des défauts** (C7d-3b, seconde moitié) : `Volume3` naît en mode relatif (`RELATIVE_ALL`,
+fantôme latéral d'A324, bande sous Lax-Wendroff) ; `Step3` aussi (pipelines relatifs compilés à la création). Le pas de S297 reste
+atteignable (`set_relative_background(0)`, `set_relative(false)`, `RELATIF=0` aux bancs). Les essais du cœur qui mesurent le pas de S297
+l'épinglent explicitement.
 
-**Critères, écrits avant.** (1) **La bascule** : la production (sans `RELATIF`) au bit ; le témoin relatif nul au bit (carte et
-référence) ; la suite du cœur, zéro avertissement. (2) **A320** : mesuré et écrit ; **C7d-3a reçu** si, avec la bande sous
-Lax-Wendroff, le taux de la bande de Benjamin-Feir tient le critère de S437 (au plus 1,5 fois `ω(ak)²/2` sous 6 et 7,5 cm, toute place
-du repos : 0,026 et 0,041 s⁻¹) ; autrement, ce que le remède change d'A320 s'écrit.
+**Critères, écrits avant.** (1) La suite du cœur passe, zéro avertissement ; chaque essai épinglé au pas de S297 est nommé. (2) Le pas
+de S297 reste **au bit** : `RELATIF=0 --delta3d-trajectoire` identique à la ligne de base de S439. (3) Sous les nouveaux défauts : la
+trajectoire carte–référence tient le critère de S439 (écart avant l'horizon ≤ 1,53·10⁻⁴ m) ; le témoin nul au bit ; `--delta3d-cas2`
+(porte B, critère 2 : la carte suit la référence sous 3 mm) tenu. (4) **Le coût** : le pas relatif de la scène de revue à 25 cm au plus
+5 % plus cher que celui de S297 (ADR-213 D1 en sus). (5) La scène de revue à 25 cm et 30 Hz tient 120 s. Bancs courts (D4).
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul ; l'arbitrage inscrit.
-- [x] **P2** — Lax-Wendroff par défaut ; production au bit, témoin, suite.
-- [x] **P3** — A320 sous Lax-Wendroff.
-- [x] **P4** — preuve ; registres ; rituel.
+- [x] **P1** — ADR-213 ; jeton, plan seul.
+- [ ] **P2** — la bascule : cœur et carte ; suite.
+- [ ] **P3** — les rejeux ; le coût.
+- [ ] **P4** — preuve ; rituel (allégé, ADR-213 D3).
 
 ### Notes de reprise
-- **P2** — `Volume3::band_lax_wendroff` et `Step3::band_lw` vrais par défaut ; `MER_BANDE_LW=0`, `BANDE_LW=0` rendent la bande centrée.
-  **Production au bit** (la sortie du banc de trajectoire identique à la ligne de base de S439) ; **témoin relatif nul au bit** sur
-  400 pas, carte et référence ; trajectoire relative à 1,44·10⁻⁵ m de sa référence ; suite **759**, zéro avertissement — (1) tenu.
-- **P3** — 25 cm, houle de 4 m, germe de 1 mm, taux de la bande 35–59 s, la bande sous Lax-Wendroff (S437 entre parenthèses) :
-  7,5 cm — sur une face **0,1057** (0,1059), à ¼ **0,0676** (0,0680), au centre **0,0345** (0,036) ; 6 cm — sur une face **0,0768**
-  (0,0769), au centre **0,0197** (0,018). Le témoin nul au bit partout. **A320 inchangée** : à 25 cm, `C` est trop petit pour que le
-  FTCS de la bande y pèse. **C7d-3a non reçu.**
-- **P4** — MER-S369 §11, MULTIGRILLE-3D-S385 (l'arbitrage) ; A320 annotée, A322 levée ; registres ; journal ; jeton libre ; maillons 30 (justifiés : S406) ; suivant : S443, la bascule des défauts proposée.
