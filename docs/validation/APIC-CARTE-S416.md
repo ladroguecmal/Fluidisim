@@ -1012,3 +1012,11 @@ de surface. Il interpole désormais les fantômes verticaux des deux colonnes (`
 bit sous une houle de plus d'une demi-maille, le germe ne bouge plus, et le pas est inchangé au bit là où rien ne franchit. **C7d-3b
 devra porter ce fantôme** sur la carte avec le mode relatif.
 
+### 22.8 C7d-3a, le critère réécrit : non reçu, A320 ramenée à une houle mal résolue (S437)
+
+([MER-S369](MER-S369.md) §9.) Critère réécrit avant mesure : à 25 cm, au plus 1,5 fois Benjamin-Feir, toute place du repos dans la
+maille. Sous la houle de 4 m, le taux va de 0,036 (repos au centre d'une maille) à 0,106 s⁻¹ (sur une face) : **manqué**, et la
+dépendance à la place du repos désigne un défaut de discrétisation près de la surface. Sous une houle de 8 m (32 mailles par longueur
+d'onde), rien au-delà de Benjamin-Feir, aux deux places. **C7d-3a n'est pas reçu** ; son excès ne touche qu'une houle de 16 mailles par
+longueur d'onde.
+

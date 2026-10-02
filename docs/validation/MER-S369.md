@@ -245,3 +245,36 @@ avertissement. **A320 à 12,5 cm, enfin mesurable** (germe de 1 mm, houle de 7,5
 **Limites.** Le fond plat, une composante, deux rangées ; les faces coupées (`cut`) ne sont pas éprouvées sous le remède. La
 production GPU ne porte pas encore le mode relatif : le fantôme latéral est à porter avec lui (C7d-3b).
 
+## 9. S437 — A320 tient à la place de la surface dans la maille, et à une houle mal résolue
+
+2026-10-02, au poste, sans carte. **Le critère de C7d-3a, réécrit avant toute mesure** (`notes/EN-COURS.md`, S437 P1) — l'ancien,
+« < 0,01 s⁻¹ », était hors d'atteinte de toute physique (§7) : reçu si, **à 25 cm**, le taux de la bande d'un germe de 1 mm sous 6 et
+7,5 cm de houle est **au plus 1,5 fois `ω(ak)²/2`** (0,026 et 0,041 s⁻¹), **quelle que soit la place du repos dans la maille** ; δ nul
+reste nul au bit ; le paquet de l'ordre C sous 5 cm, au plus 1,5 fois son amplitude.
+
+**Reproduire** : `transfert_oriente -- mer 0.25 <houle>` avec `MER_RELATIF=7 MER_GERME=0.001 MER_DUREE=95 MER_TRACE=1 MER_SPECTRE=1`,
+plus `MER_DECALAGE=<f>` (le repos `f·dx` au-dessus d'une face), `MER_TEMOIN=1` (le témoin avance ; la trace dit s'il est nul au bit),
+`MER_AIR=<n>`, et, pour la houle longue, `MER_TP=4.527 MER_PROFONDEUR=4 MER_GERME_LAMBDA=8`. Essai de localisation :
+`MER_SURFACE_ESSAI=1|2` (`Volume3::set_cross_surface_trial`, des amputations).
+
+| 25 cm, houle de 4 m, taux de la bande 35–59 s (s⁻¹) | repos sur une face | ¼ | au centre | ¾ |
+|---|---:|---:|---:|---:|
+| 6 cm (Benjamin-Feir 0,0175 ; critère 0,026) | 0,077 | 0,066 | **0,018** | 0,080 (refus à 64 s) |
+| 7,5 cm (Benjamin-Feir 0,0273 ; critère 0,041) | 0,106 | 0,068 | **0,036** | décroît |
+
+**Le témoin est nul au bit à chaque seconde, à toutes les places** : A324 corrigée tient hors d'une face. **Le taux dépend de la place
+du repos dans la maille** — une physique ne le ferait pas : l'excès d'A320 est un défaut de discrétisation au voisinage de la surface.
+Ni les termes croisés aux faces de surface (amputés : 0,095 sur une face, 0,026 au centre), ni la bande (`band3` prend déjà la pente
+verticale de B) ne le portent seuls.
+
+**Une vraie mer.** Le régime « repos près d'une face, sans franchissement » n'existe que sous une houle de moins d'une demi-maille.
+Sous une **houle de 8 m** (32 mailles par longueur d'onde à 25 cm ; 4 m d'eau ; germe de 8 m, qui sort du domaine en ≈ 30 s), la bande
+ne croît ensuite qu'à ≈ 0,007 (sur une face) et ≈ 0,004 s⁻¹ (au centre) sous 15 cm — Benjamin-Feir 0,019, la surface de B franchit des
+centres dans les deux cas —, et à ≈ 0,009 et ≈ 0 sous 10 cm (Benjamin-Feir 0,0086 ; sur une face, sans franchissement) : **au plus
+Benjamin-Feir, aux deux places**.
+
+**Verdict.** Le critère, tel qu'écrit pour la houle de 4 m du banc, est **manqué** sur une face : **C7d-3a n'est pas reçu**, et le
+critère n'est pas déplacé après coup. Mais A320 change de nature : son excès est **un défaut de discrétisation près de la surface, qui
+ne se montre qu'à 16 mailles par longueur d'onde de la houle** (4 m à 25 cm) ; à 32 il disparaît. **Limites** : une composante, deux
+rangées ; sous 8 m, les taux se lisent sur un plateau après la sortie du germe — un signe de croissance absente, non une mesure fine.
+

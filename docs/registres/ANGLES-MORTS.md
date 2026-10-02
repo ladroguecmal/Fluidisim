@@ -4450,6 +4450,11 @@ nulle (2,05 fois Benjamin-Feir) ; indépendant de la longueur du domaine. **Pas 
 franchissement) : 0,077 · 0,062 · 0,054 s⁻¹ à 25 · 15,6 · 12,5 cm, ≈ 0,031 à maille nulle, **1,8 fois** Benjamin-Feir ; sous 7,5 cm à
 12,5 cm (la mouillure suit la houle) : **0,027, 1,0 fois**. La maille fine ramène A320 vers l'ordre de Benjamin-Feir.
 
+*Note du 2026-10-02, S437* ([MER-S369](../validation/MER-S369.md) §9) : à 25 cm, le taux dépend de **la place du repos dans la
+maille** (houle de 4 m, 7,5 cm : 0,106 sur une face, 0,036 au centre) — un défaut de discrétisation près de la surface, ni aux faces
+de surface ni dans la bande ; sous une houle de 8 m (32 mailles par longueur d'onde), rien au-delà de Benjamin-Feir. A320 reste ouverte,
+**ramenée à une houle de 16 mailles par longueur d'onde** ; C7d-3a non reçu (critère réécrit : 1,5 fois Benjamin-Feir).
+
 **A321 — S390, 2026-09-26 (sévérité 3, **corrigée S391**). À 30 Hz, la scène de la porte B explose en 24 à 40 s, quel que soit le
 solveur de pression.** Pas de 33,333 ms, `Config::review`, 1 800 pas : la surface publiée cesse d'être finie au pas 930 avec
 Jacobi 512 et au pas 1 050 avec la multigrille à 24 cycles — deux projections **convergées** (résidu relatif ≈ 10⁻⁷) —, au

@@ -87,7 +87,7 @@ germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : déc
 - [x] **P1** — jeton, plan seul, le critère réécrit.
 - [x] **P2** — `MER_DECALAGE`, `MER_TEMOIN` au banc.
 - [x] **P3** — mesures : 25 cm, deux houles, quatre décalages ; le point fixe ; conclusion.
-- [ ] **P4** — preuve ; A320 ; registres ; suite.
+- [x] **P4** — preuve ; A320 ; registres ; suite.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
@@ -112,4 +112,4 @@ germe et la trace dit s'il est nul au bit. (2) À 25 cm, sous 6 et 7,5 cm : déc
   face. Mais l'excès d'A320 dépend de la place du repos — un défaut de discrétisation près de la surface, pas une physique — et il
   **n'apparaît qu'à 16 mailles par longueur d'onde de la houle** (4 m à 25 cm) ; à 32 (8 m à 25 cm), rien au-delà de Benjamin-Feir.
   C7d-3a **non reçu** ; A320 ramenée à une houle mal résolue. Suite 758.
-
+- **P4** — MER-S369 §9, APIC-CARTE §22.8 ; A320 annotée ; index, liste, feuille de route, questions ; suite 758.
