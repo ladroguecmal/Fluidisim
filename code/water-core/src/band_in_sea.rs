@@ -7,7 +7,10 @@
 //! - **`feed_sea`** — la mer reçoit l'état de la bande dans son **intérieur** (à `margin` colonnes de ses bords) : les vitesses
 //!   `u′ = u − U` sur toutes les faces de l'intérieur ; la hauteur `δη = (η − η_B) + c` sur les colonnes que la bande porte en
 //!   **zone de colonnes**, `c` uniforme qui garde le volume de δ que la mer vient de calculer — **la mer est seule comptable de la
-//!   masse de δ** —, et la bande reçoit le même `c` ; une colonne de particules garde la hauteur de la mer ;
+//!   masse de δ** —, et la bande reçoit le même `c` ; une colonne de particules garde la hauteur de la mer (le défaut) ou, avec
+//!   `set_particle_heights(true)` (S449, essai), reçoit la hauteur équivalente au volume d'eau lu sur `φ` — **instable** au bord de la
+//!   bande (S449 : une dent de scie de la mer en 1,3 à 1,7 s, même sous une houle calme) ; sans elle, la mer emballe sa hauteur sous
+//!   un déferlement (refus au pas 59) — la limite de c3 ([APIC-CARTE-S416](../../docs/validation/APIC-CARTE-S416.md) §23.6) ;
 //! - **`feed_band`** — la bande reçoit à ses bords ouverts en `x` la vitesse normale `U + u′`.
 //!
 //! L'ordre d'un pas, depuis l'instant `t` où le fond est échantillonné : `feed_sea` (sauf au premier), `feed_band`, la bande avance,
@@ -24,6 +27,7 @@ pub struct BandInSea {
     i0: usize,
     margin: usize,
     conservative: bool,
+    particle_heights: bool,
     eta: Vec<f32>,
     u: Vec<f32>,
     v: Vec<f32>,
@@ -55,6 +59,7 @@ impl BandInSea {
             i0,
             margin,
             conservative: true,
+            particle_heights: false,
             eta: vec![0.; sea.columns()],
             u: vec![0.; nu],
             v: vec![0.; nv],
@@ -68,6 +73,13 @@ impl BandInSea {
     /// `false` : le raccord de S446 — la hauteur de la bande telle quelle, sans le `c` qui garde la masse. Le défaut : `true`.
     pub fn set_conservative(&mut self, on: bool) {
         self.conservative = on;
+    }
+
+    /// **S449, essai** : `true` — une colonne de particules de l'intérieur donne à la mer la hauteur équivalente à son volume d'eau
+    /// (lu sur `φ`, l'eau sous le fond d'une bande étroite comprise). Instable au bord de la bande (S449). Le défaut : `false`, la
+    /// mer garde sa hauteur.
+    pub fn set_particle_heights(&mut self, on: bool) {
+        self.particle_heights = on;
     }
 
     /// **La mer reçoit l'état de la bande** dans son intérieur ; rend `c`, m. La bande doit porter une zone de colonnes.
@@ -89,24 +101,52 @@ impl BandInSea {
         self.w.copy_from_slice(sea.velocity_w());
         self.columns.copy_from_slice(band.columns_surface().ok_or(Error::Domain)?);
         let (i0, m, rest) = (self.i0, self.margin, sea.rest());
-        // Le volume de δ que la mer vient de calculer sur les colonnes de zone de l'intérieur, et celui que la bande y porte.
+        // S449 : la hauteur d'une colonne de particules, lue sur `φ` — **équivalente à son volume d'eau** : chaque maille compte la
+        // part de sa hauteur sous l'iso-zéro, `clamp(½ − φ/dx, 0, 1)`. La plus haute eau prenait une goutte projetée pour la
+        // surface (mesuré : 1,9 m sous un jet) ; le volume, lui, est celui que la mer doit porter.
+        // Sous le fond d'une bande étroite (ADR-212), l'eau est à la grille, pleine : elle compte entière, `φ` ne la voit pas.
+        let phi = band.distance();
+        let dx = s.dx;
+        let floors = band.band_floor();
+        let height = |i: usize, j: usize| -> f32 {
+            let floor = floors.map_or(0., |f| f[j * na + i]);
+            floor
+                + (0..nz)
+                    .filter(|&k| (k as f32 + 0.5) * dx > floor)
+                    .map(|k| (0.5 - phi[(k * ny + j) * na + i] / dx).clamp(0., 1.))
+                    .sum::<f32>()
+                    * dx
+        };
+        let lue = self.particle_heights;
+        let total = |s: &Self, i: usize, j: usize| {
+            if band.is_column(i, j) {
+                s.columns[j * na + i]
+            } else if lue {
+                height(i, j)
+            } else {
+                s.eta[j * nx + i0 + i] + bg.w[fw(i0 + i, j, 0)].eta
+            }
+        };
+        // Le volume de δ que la mer vient de calculer sur l'intérieur, et celui que la bande y porte.
         let (mut v_sea, mut v_band, mut count) = (0f64, 0f64, 0usize);
         for j in 0..ny {
             for i in m..na - m {
-                if band.is_column(i, j) {
-                    v_sea += (self.eta[j * nx + i0 + i] - rest) as f64;
-                    v_band += (self.columns[j * na + i] - bg.w[fw(i0 + i, j, 0)].eta - rest) as f64;
-                    count += 1;
-                }
+                v_sea += (self.eta[j * nx + i0 + i] - rest) as f64;
+                v_band += (total(self, i, j) - bg.w[fw(i0 + i, j, 0)].eta - rest) as f64;
+                count += 1;
             }
         }
         let c = if self.conservative && count > 0 { ((v_sea - v_band) / count as f64) as f32 } else { 0. };
+        // Le pas mobile de la mer refuse une surface hors de `[2·dx, (nz − 1)·dx]` (`mobile_in_bounds`) : la hauteur donnée y est
+        // bornée — un jet de la bande peut monter plus haut que la mer ne sait le porter.
+        let (low, high) = (2.01 * dx, (nz as f32 - 1.01) * dx);
         for j in 0..ny {
             for i in m..na - m {
+                let h = (total(self, i, j) + c).clamp(low, high);
                 if band.is_column(i, j) {
-                    self.columns[j * na + i] += c;
-                    self.eta[j * nx + i0 + i] = self.columns[j * na + i] - bg.w[fw(i0 + i, j, 0)].eta;
+                    self.columns[j * na + i] = h;
                 }
+                self.eta[j * nx + i0 + i] = h - bg.w[fw(i0 + i, j, 0)].eta;
             }
         }
         let (ua, va, wa) = (band.velocity_u(), band.velocity_v(), band.velocity_w());

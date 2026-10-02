@@ -79,7 +79,16 @@ houle calme (`ε` = 0,1 partout), **aucune colonne en particules après 1 s**, d
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le témoin sur toute la mer ; la bascule réglée ; mesures ; critères.
+- [x] **P2** — le témoin sur toute la mer ; la bascule réglée ; mesures ; critères.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `deferlement_en_mer` : le témoin sur toute la mer (24 m, bords nourris par B seul) ; la bascule réglée (§21.3) ; la même
+  fenêtre physique dans tous les modes ; 1 m d'air (les jets montaient au-dessus de ce que la mer admet). `BandInSea::set_particle_heights`
+  (essai, éteint) : une colonne de particules donne à la mer la hauteur équivalente à son volume d'eau (lu sur `φ`, l'eau sous le fond
+  comprise) — **instable** au bord de la bande (une dent de scie de la mer à 1,3–1,7 s, même sous une houle calme) ; éteint (la mer garde
+  sa hauteur), le déferlement passe 1,5 s. **Mesures** (défaut) : retournement dans la mer **0,482 s**, 13,05 m, part 1,000 ; témoin
+  **0,562 s**, 13,25 m, part 0,925 ; masse au raccord ≈ 0 (1,9·10⁻⁷ m³). (1) **manqué** (14 % ; l'abscisse à 0,20 m, la limite) ; (2)
+  tenu (0,075) ; (3) tenu ; (4) **manqué** : sous une houle calme et la bascule réglée, la mer refuse à 2,2 s (la dent de scie au bord
+  de la bande). Suite **762**. **c3 plafonné** (ADR-213 D2).
+

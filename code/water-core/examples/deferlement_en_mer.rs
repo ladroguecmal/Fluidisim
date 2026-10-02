@@ -19,7 +19,7 @@
 #[allow(dead_code)]
 mod host_impl;
 
-use water_core::apic3d::{Apic3, ColumnsSwitch};
+use water_core::apic3d::{Apic3, ColumnsSwitch, LinearSwell};
 use water_core::background::{Background, SeaState};
 use water_core::band_in_sea::BandInSea;
 use water_core::delta3d::{BackgroundGrid3, Domain3, Sponge3, Volume3};
@@ -30,7 +30,8 @@ const G: f64 = 9.81;
 const LAMBDA: f64 = 2.;
 const DX: f64 = 0.1;
 const PROFONDEUR: f64 = 1.;
-const AIR: f64 = 0.6;
+/// S449 : un mètre d'air — les jets d'un déferlement montent plus haut que les 0,6 m de Chen et al. ne le laissaient à la mer.
+const AIR: f64 = 1.0;
 const NX_MER: usize = 240;
 const NA: usize = 80;
 const I0: usize = 80;
@@ -53,10 +54,14 @@ fn main() -> Result<(), String> {
     let eps0: f64 = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(0.55);
     let eps_b: f64 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(0.2);
     let duree: f64 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(1.5);
-    let mer = run(eps0, eps_b, duree, true, NA, I0)?;
-    // `DEFERLEMENT_TEMOIN_ETROIT=1` : le témoin de la largeur de la bande (le premier jet de S448).
-    let (na_t, i0_t) = if std::env::var("DEFERLEMENT_TEMOIN_ETROIT").is_ok() { (NA, I0) } else { (2 * NA, I0 - NA / 2) };
-    let seule = run(eps0, eps_b, duree, false, na_t, i0_t)?;
+    let mer = run(eps0, eps_b, duree, Mode::Mer, NA, I0)?;
+    // S449 : le témoin juste — la bande sur toute la mer, ses bords nourris par B seul. `DEFERLEMENT_TEMOIN=parois8|parois16` : les
+    // témoins à parois de S448.
+    let seule = match std::env::var("DEFERLEMENT_TEMOIN").ok().as_deref() {
+        Some("parois8") => run(eps0, eps_b, duree, Mode::Parois, NA, I0)?,
+        Some("parois16") => run(eps0, eps_b, duree, Mode::Parois, 2 * NA, I0 - NA / 2)?,
+        _ => run(eps0, eps_b, duree, Mode::Partout, NX_MER, 0)?,
+    };
     let k = std::f64::consts::TAU / LAMBDA;
     let demi = 2. * (eps_b / k) / k * (NY as f64 * DX);
     let f = |r: Option<(f64, f64, f64)>| match r {
@@ -64,15 +69,26 @@ fn main() -> Result<(), String> {
         None => "aucun".into(),
     };
     println!(
-        "DEFERLEMENT_EN_MER_S448 eps0={eps0} eps_b={eps_b} duree_s={duree} dx={DX} | mer : retournement {} particules_max={} \
-         apres_1s={} raccord_m3={:.3e} part_demi_periode={:.4} | seule : retournement {} particules_max={} apres_1s={}",
+        "DEFERLEMENT_EN_MER_S449 eps0={eps0} eps_b={eps_b} duree_s={duree} dx={DX} | mer : retournement {} particules_max={} \
+         apres_1s={} raccord_m3={:.3e} part_demi_periode={:.4} | temoin : retournement {} particules_max={} apres_1s={}",
         f(mer.retournement), mer.particules_max, mer.apres_une_seconde, mer.raccord, mer.raccord / demi, f(seule.retournement),
         seule.particules_max, seule.apres_une_seconde
     );
     Ok(())
 }
 
-fn run(eps0: f64, eps_b: f64, duree: f64, en_mer: bool, na: usize, i0: usize) -> Result<Issue, String> {
+#[derive(Clone, Copy, PartialEq)]
+enum Mode {
+    /// La bande dans la mer, par le raccord.
+    Mer,
+    /// La bande sur toute la mer, ses bords ouverts nourris par B seul — le témoin (S449).
+    Partout,
+    /// La bande seule, à parois — les témoins de S448.
+    Parois,
+}
+
+fn run(eps0: f64, eps_b: f64, duree: f64, mode: Mode, na: usize, i0: usize) -> Result<Issue, String> {
+    let en_mer = mode == Mode::Mer;
     let k = std::f64::consts::TAU / LAMBDA;
     let nz = ((PROFONDEUR + AIR) / DX).round() as usize;
     let dv = Domain3 { nx: NX_MER, ny: NY, nz, dx: DX as f32 };
@@ -104,7 +120,8 @@ fn run(eps0: f64, eps_b: f64, duree: f64, en_mer: bool, na: usize, i0: usize) ->
     };
     // La bande : ses coordonnées partent de sa colonne 0, à `i0·dx` dans la mer.
     let x0 = i0 as f64 * DX;
-    let xc = x0 + na as f64 * DX / 2.;
+    // Le centre du groupe : le milieu de la mer, quelle que soit la bande.
+    let xc = NX_MER as f64 * DX / 2.;
     let eps = |x: f64| eps_b + (eps0 - eps_b) * (-((x - xc) / SIGMA).powi(2)).exp();
     let theta = |x: f64| k * x + phi;
     let eta = |x: f64| {
@@ -153,18 +170,39 @@ fn run(eps0: f64, eps_b: f64, duree: f64, en_mer: bool, na: usize, i0: usize) ->
         a.set_grid_velocities(&u, &v, &w).map_err(|e| format!("{e:?}"))?;
     }
     let mut bascule = ColumnsSwitch::with_capacity(&mut hote, a.domain()).map_err(|e| format!("{e:?}"))?;
+    // S449 : les réglages reçus en C7d-1/C7d-2 (§21.3) — `DEFERLEMENT_DEFAUTS=1` garde les défauts de S448.
+    if std::env::var("DEFERLEMENT_DEFAUTS").is_err() {
+        bascule.hold_us = 300_000;
+        bascule.floor_cells = Some(4);
+        bascule.floor_speed = Some(0.3);
+        bascule.floor_speed_release = Some(0.15);
+        bascule.background = Some(LinearSwell {
+            amplitude: (eps_b / k) as f32,
+            wavenumber: k as f32,
+            omega: (G * k).sqrt() as f32,
+            phase: (phi + k * x0) as f32,
+            mean_level: PROFONDEUR as f32,
+        });
+    }
     let mut mer = Volume3::configure(&mut hote, dv, RHO, G as f32).map_err(|e| format!("{e:?}"))?;
     mer.set_free_surface(&vec![PROFONDEUR as f32; dv.columns()], PROFONDEUR as f32).map_err(|e| format!("{e:?}"))?;
     let eponge = Sponge3 { width_x: 4., width_y: 0., rate_per_s: 2. };
-    let mut raccord = if en_mer {
+    if mode != Mode::Parois {
         a.enable_open_boundaries(&mut hote).map_err(|e| format!("{e:?}"))?;
-        Some(BandInSea::configure(&mut hote, dv, da, i0, MARGE).map_err(|e| format!("{e:?}"))?)
+    }
+    let mut raccord = if en_mer {
+        let mut r = BandInSea::configure(&mut hote, dv, da, i0, MARGE).map_err(|e| format!("{e:?}"))?;
+        // `RACCORD_HAUTEUR_LUE=1` : les colonnes de particules donnent leur hauteur lue (S449, essai, instable au bord).
+        r.set_particle_heights(std::env::var("RACCORD_HAUTEUR_LUE").is_ok());
+        Some(r)
     } else {
         None
     };
+    let (mut gauche, mut droite) = (vec![0f32; NY * nz], vec![0f32; NY * nz]);
 
     // La fenêtre centrale de 4 m.
-    let (f0, f1) = (na / 4, 3 * na / 4);
+    // S449 : la même fenêtre physique dans tous les modes — 4 m autour du centre du groupe.
+    let (f0, f1) = (((xc - 2. - x0) / DX).round() as usize, ((xc + 2. - x0) / DX).round() as usize);
     let mut occupation = vec![0u32; na * NY * nz];
     let (mut t_us, mut pas) = (0u64, 0u64);
     let (mut retournement, mut particules_max, mut apres_une_seconde) = (None, 0usize, 0usize);
@@ -181,9 +219,26 @@ fn run(eps0: f64, eps_b: f64, duree: f64, en_mer: bool, na: usize, i0: usize) ->
             }
             r.feed_band(&mer, &mut a, &bg).map_err(|e| format!("{e:?}"))?;
         }
+        if mode == Mode::Partout {
+            // Les bords de la bande sur toute la mer : la vitesse normale de B seul.
+            for kk in 0..nz {
+                for j in 0..NY {
+                    gauche[kk * NY + j] = bg.u[(kk * NY + j) * (NX_MER + 1)].u[0];
+                    droite[kk * NY + j] = bg.u[(kk * NY + j) * (NX_MER + 1) + NX_MER].u[0];
+                }
+            }
+            a.set_open_boundaries(&gauche, &droite).map_err(|e| format!("{e:?}"))?;
+        }
         a.step(us).map_err(|e| format!("bande, pas {pas} : {e:?}"))?;
         if en_mer {
-            mer.step_perturbation_mobile(t, us, 4000, &bg, eponge, &jobs).map_err(|e| format!("mer, pas {pas} : {e:?}"))?;
+            if let Err(e) = mer.step_perturbation_mobile(t, us, 4000, &bg, eponge, &jobs) {
+                // Diagnostic : la colonne la plus haute et la plus basse de la mer (surface totale), avant le pas refusé.
+                let tot: Vec<f32> = (0..NX_MER * NY).map(|c| mer.surface()[c] + bg.w[c].eta).collect();
+                let (imax, hmax) = tot.iter().enumerate().fold((0, f32::MIN), |m, (i, h)| if *h > m.1 { (i, *h) } else { m });
+                let (imin, hmin) = tot.iter().enumerate().fold((0, f32::MAX), |m, (i, h)| if *h < m.1 { (i, *h) } else { m });
+                return Err(format!("mer, pas {pas} : {e:?} ; plus haute {hmax:.3} m en {} ; plus basse {hmin:.3} m en {} ; bande {i0}..{}",
+                    imax % NX_MER, imin % NX_MER, i0 + na));
+            }
             let b = mer.balance();
             apports += b.band_in + b.perturbation_in - b.sponge_out;
             raccord_max = raccord_max.max((volume(&mer) - apports).abs());
