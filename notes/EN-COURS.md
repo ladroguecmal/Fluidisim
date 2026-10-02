@@ -62,38 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S448 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* (sans réponse sur le critère (2) de c2 : c2 reste
-plafonné, le raccord conservatif retenu) — la suite déclarée : le lot des registres (ADR-213 D3, dû en S448), puis **c3**.
+Session : S449 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **c3, seconde session**
+(ADR-213 D2 ; [preuve](../docs/validation/APIC-CARTE-S416.md) §23.5).
 
-**c3, la conception.** Le banc `deferlement_en_mer` : la vague de Chen (S410, `apic3d_deferlement` — Stokes d'ordre 3, `ε` = 0,55,
-`λ` = 2 m, 1 m d'eau) dans une bande `Apic3` **en eau totale**, avec ses particules et la bascule (S408–S432), posée par le **raccord
-conservatif** (S447) dans une mer `Volume3` relative dont B est la composante linéaire de la vague (`a = ε/k`, `λ` = 2 m) ; la même
-bande seule, à parois, en témoin (la forme seule). Le raccord passe à la zone des colonnes : la bande garde une couronne de colonnes à
-ses bords.
+**Ce que la session fait.** Le banc `deferlement_en_mer` : (1) **le témoin juste** — la bande étendue à **toute la mer** (24 m),
+ses bords ouverts nourris par B seul, sans raccord, le même groupe au même endroit ; il remplace la bande seule à parois ; (2) **la
+bascule avec les réglages reçus** en C7d-1/C7d-2 (§21.3) : `maintien` 0,3 s, `fond` 4 mailles, `vitesse` 0,3 m/s, `vitesse_relache`
+0,15 m/s, `fond_b` — le B linéaire de la mer (`LinearSwell` à sa phase), dans la mer comme dans le témoin.
 
-**Critères, écrits avant** (le « reçu si » de C7d-3c, §22.3, réduit à ce que le raccord change) : (1) **le retournement** — l'instant
-et l'abscisse du premier retournement dans la fenêtre à 10 % de ceux de la bande seule ; (2) **la part de la fenêtre en particules** au
-retournement à 0,1 près de celle de la bande seule ; (3) **la masse au raccord** sous 0,1 % du volume d'une demi-période ; (4) sous une
-houle calme (`ε` = 0,1, sans déferlement) : **aucune colonne en particules**. Bancs courts (D4) : une seule résolution, 20 mailles
-par longueur d'onde.
+**Critères, écrits avant.** **c3 reçu** si : (1) le premier retournement de la bande de 8 m dans la mer tombe **à 10 % près** de
+l'instant de celui du témoin, et **à 0,2 m** (un dixième de longueur d'onde) de son abscisse ; (2) la part de la fenêtre en particules
+au retournement à **0,1 près** de celle du témoin ; (3) **la masse au raccord** sous 0,1 % du volume d'une demi-période ; (4) sous une
+houle calme (`ε` = 0,1 partout), **aucune colonne en particules après 1 s**, dans la mer. Sinon, c3 plafonné (ADR-213 D2), la limite
+écrite, c4 conçu.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le lot des registres (S446–S447).
-- [x] **P3** — le banc `deferlement_en_mer` ; mesures ; critères.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — le témoin sur toute la mer ; la bascule réglée ; mesures ; critères.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — feuille de route, liste, index pour S445–S447 ; `Registres` : dernier lot S448, le prochain au plus tard en S451.
-- **P3a** — le raccord porté du banc dans le système : `water_core::band_in_sea::BandInSea` (`configure`, `feed_sea`, `feed_band`,
-  `set_conservative` ; tampons réservés ; une colonne de particules de la bande garde la hauteur de la mer, ses vitesses passent) ;
-  `Volume3::rest`. Le banc `raccord_bande_mer` passe par lui : **les chiffres de S447 au bit** (9,4218 mm, 1,126·10⁻³ m³, 3,943·10⁻⁶ m³).
-- **P3b** — banc `deferlement_en_mer` (houle calme `ε_B` = 0,2 dans une mer de 24 m ; bande de 8 m, groupe de Stokes d'ordre 3 à
-  `ε₀` = 0,55 au centre ; 20 mailles par longueur d'onde ; 20 s de calcul) : **dans la mer** — retournement **0,736 s** à 13,65 m, part
-  de la fenêtre en particules 0,350, masse au raccord **3,4·10⁻⁷ m³** (≈ 0) ; **bande seule de 8 m** (parois à 4 m du centre) — 0,846 s,
-  13,95 m, 0,375 ; **bande seule de 16 m** — 0,576 s, 13,25 m, 0,125. **(1) mal posé** : la forme seule dépend de la largeur de sa bande
-  (un groupe modulé n'est pas une solution ; son évolution dépend de ce qui l'entoure) — la mer tombe entre les deux. **(3) tenu.**
-  **(4) manqué** : sous une houle calme (`ε` = 0,1), 42 colonnes en particules après 1 s (bande seule : 20) — la bascule à ses défauts,
-  non avec les réglages reçus en C7d-1/C7d-2 (la vitesse propre relative à B). Suite **762**. **c3, première session : non reçu.**
-- **P4** — APIC-CARTE §23.5 ; journal ; jeton libre ; maillons 5 (justifiés : S406) ; suivant : S449, c3 — le témoin juste et la bascule réglée.

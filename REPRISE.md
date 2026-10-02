@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 17:33 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 17:35 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S449 — c3, seconde session** : le témoin juste (la bande sur toute la mer), la bascule réglée
 Dernière session : S448 — le lot des registres ; **le raccord dans le système** (`BandInSea`) ; c3 premier jet ([preuve](docs/validation/APIC-CARTE-S416.md) §23.5) — le déferlement dans la mer, masse au raccord ≈ 0 ; le témoin mal posé ; sous houle calme, des colonnes en particules. Avant : S447
 Session suivante : **S449 — c3, seconde session** (ADR-213 D2) : critères réécrits avant la mesure — **le témoin juste** : la bande étendue à toute la mer (24 m, bords ouverts nourris par B seul, sans raccord) ; le retournement de la bande de 8 m dans la mer à 10 % du sien ; **la bascule avec les réglages reçus** en C7d-1/C7d-2 (vitesse propre relative à B, `vitesse` 0,3, `vitesse_relache` 0,15, `fond_b`) — sous une houle calme, aucune colonne en particules après 1 s ; la masse au raccord sous 0,1 % ; banc `deferlement_en_mer` (20 s) ; puis c4 (la carte) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 5 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
