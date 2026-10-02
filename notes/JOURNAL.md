@@ -18333,3 +18333,13 @@ banc publie le bilan du pas de la mer. **Mesuré** (5 cm, 4 m, 10 s) : δ hors d
 demi-période (**manqué tel qu'écrit**), dont l'éponge et la bande de B expliquent tout sauf **3,9·10⁻⁶ m³ — 0,01 % au raccord** (S446 :
 6,8 %). Le critère (2) mêlait l'éponge au raccord. **c2 plafonné, le raccord retenu.** Suite **762**. **Rituel** (allégé). Maillons
 **4** — justifié : la priorité du solveur (S406). Suivant : **c3**, la vague de Chen dans une houle ; le lot des registres (S448).
+
+## S448 — 2026-10-02 — physique : le lot des registres ; le raccord dans le système ; c3, premier jet
+
+**Entrée.** *« Continue »*. **Fait** : le lot des registres (ADR-213 D3) ; **le raccord dans le système** —
+`water_core::band_in_sea::BandInSea`, les chiffres de S447 au bit ([preuve](../docs/validation/APIC-CARTE-S416.md) §23.5) ; le banc
+`deferlement_en_mer` — un groupe de Stokes qui déferle au milieu d'une bande de 8 m, dans une mer de 24 m sous une houle calme.
+**Mesuré** : retournement dans la mer à 0,736 s ; masse au raccord ≈ 0 (3,4·10⁻⁷ m³) ; mais le témoin (la bande seule) dépend de sa
+largeur (0,576 à 0,846 s) — critère mal posé ; sous une houle calme, 42 colonnes en particules (la bascule à ses défauts). **c3 non
+reçu**, première session. Suite **762**. **Rituel** (allégé). Maillons **5** — justifié : la priorité du solveur (S406). Suivant : **c3**
+— le témoin juste (la bande sur toute la mer), la bascule avec les réglages de C7d-1/C7d-2.

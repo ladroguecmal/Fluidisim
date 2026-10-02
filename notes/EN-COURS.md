@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S448 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* (sans réponse sur le critère (2) de c2 : c2 reste
+Session : S448 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* (sans réponse sur le critère (2) de c2 : c2 reste
 plafonné, le raccord conservatif retenu) — la suite déclarée : le lot des registres (ADR-213 D3, dû en S448), puis **c3**.
 
 **c3, la conception.** Le banc `deferlement_en_mer` : la vague de Chen (S410, `apic3d_deferlement` — Stokes d'ordre 3, `ε` = 0,55,
@@ -82,7 +82,7 @@ par longueur d'onde.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres (S446–S447).
 - [x] **P3** — le banc `deferlement_en_mer` ; mesures ; critères.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, index pour S445–S447 ; `Registres` : dernier lot S448, le prochain au plus tard en S451.
@@ -96,4 +96,4 @@ par longueur d'onde.
   (un groupe modulé n'est pas une solution ; son évolution dépend de ce qui l'entoure) — la mer tombe entre les deux. **(3) tenu.**
   **(4) manqué** : sous une houle calme (`ε` = 0,1), 42 colonnes en particules après 1 s (bande seule : 20) — la bascule à ses défauts,
   non avec les réglages reçus en C7d-1/C7d-2 (la vitesse propre relative à B). Suite **762**. **c3, première session : non reçu.**
-
+- **P4** — APIC-CARTE §23.5 ; journal ; jeton libre ; maillons 5 (justifiés : S406) ; suivant : S449, c3 — le témoin juste et la bascule réglée.

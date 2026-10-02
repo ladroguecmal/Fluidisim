@@ -1180,3 +1180,27 @@ raccord le tient cent fois** (0,01 %). c2, seconde session : **plafonné** (ADR-
 vague de Chen dans une houle) commence avec lui. Le critère (2), réécrit sur le reste au raccord, recevrait c2 — à la décision de
 l'utilisateur.
 
+### 23.5 Le raccord dans le système ; c3, premier jet (S448)
+
+2026-10-02. **Le raccord porté du banc dans le système** : `water_core::band_in_sea::BandInSea` (`feed_sea`, `feed_band`, la masse gardée
+par la mer ; une colonne de particules de la bande garde la hauteur de la mer) ; le banc `raccord_bande_mer` passe par lui — les chiffres
+de §23.4 au bit. **c3, le banc `deferlement_en_mer`** : une houle calme (`ε_B` = 0,2, `λ` = 2 m, 1 m d'eau) dans une mer de 24 m ; une
+bande de 8 m au milieu, un **groupe de Stokes d'ordre 3** à la phase de B dont la cambrure monte à `ε₀` = 0,55 au centre (les formules
+de Chen et al., `σ` = 1,5 m) ; particules et bascule à ses défauts ; 20 mailles par longueur d'onde.
+
+**Reproduire** : `cargo run -p water-core --release --offline --example deferlement_en_mer -- 0.55 0.2 1.5` (20 s) ; `-- 0.1 0.1 3`
+(houle calme) ; `DEFERLEMENT_TEMOIN_ETROIT=1` (le témoin de 8 m).
+
+| | premier retournement | part de la fenêtre en particules | colonnes en particules après 1 s | masse au raccord |
+|---|---|---:|---:|---:|
+| **dans la mer** (bande de 8 m) | **0,736 s**, 13,65 m | 0,350 | 82 | **3,4·10⁻⁷ m³** |
+| bande seule de 8 m (parois à 4 m) | 0,846 s, 13,95 m | 0,375 | 62 | — |
+| bande seule de 16 m | 0,576 s, 13,25 m | 0,125 | 70 | — |
+| houle calme `ε` = 0,1, dans la mer · seule | aucun · aucun | — | **42** · 20 | 3,5·10⁻⁷ m³ |
+
+**Verdict** (critères de S448) : **(1) mal posé** — la forme seule dépend de la largeur de sa bande, de 0,576 à 0,846 s : un groupe modulé
+n'est pas une solution, et ce qui l'entoure change son évolution ; la mer tombe entre les deux. (2) idem. **(3) tenu** (la masse au
+raccord, ≈ 0). **(4) manqué** : sous une houle calme, des colonnes restent en particules — la bascule tourne à ses défauts, non avec les
+réglages reçus en C7d-1 et C7d-2 (la vitesse propre relative à B, sa relâche). **c3 n'est pas reçu ; première session.** Le témoin juste :
+**la bande étendue à toute la mer**, sans raccord, sous le même B ; et la bascule avec les réglages reçus.
+
