@@ -82,8 +82,9 @@ session.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le lot des registres.
+- [x] **P2** — le lot des registres.
 - [ ] **P3** — c1 : les lois ; un remède s'il se montre ; sinon, la conception de l'eau totale dans la bande.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — feuille de route, liste, index, file active (la campagne), angles morts (A320) pour S443–S444 ; `Registres` : dernier lot S445, le prochain au plus tard en S448.

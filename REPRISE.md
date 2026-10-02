@@ -17,7 +17,7 @@ Session en cours : **S445 — le lot des registres ; c1, seconde et dernière se
 Dernière session : S444 — **ADR-214** (décision de l'utilisateur : B entre dans la bande) ; c1 **non reçu** ([preuve](docs/validation/APIC-CARTE-S416.md) §23.1) — `Apic3` en mode relatif ; sous une houle stationnaire, δ croît (54 % de `aω` en 5 s). Avant : S443, la bascule des défauts
 Session suivante : **S445 — le lot des registres** (ADR-213 D3 : feuille de route, liste, file active, index, angles morts — tout ce qui a changé depuis S442 : ADR-213, ADR-214, C7d-3b reçu, A322 levée, la bascule), **puis c1, seconde et dernière session** (ADR-213 D2) : éprouver l'hypothèse de la résonance (deux fois plus de particules par axe, ou le noyau de lecture) sur `relative_sheet_under_a_swell_s444` ; si elle tient et se corrige, c2 ; sinon, **l'eau totale dans la bande**, B à sa seule frontière ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 1 — S444 : c1 non reçu ; journal
-Registres       : dernier lot S442 (ADR-213 D3) ; le prochain au plus tard en S445
+Registres       : dernier lot S445 (ADR-213 D3) ; le prochain au plus tard en S448
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
