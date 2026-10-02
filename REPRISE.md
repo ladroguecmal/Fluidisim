@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 18:17 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 18:19 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S453 — la surface continue dans la boucle vivante** (la carte seule, la fenêtre)
 Dernière session : S452 — la surface continue en direct sur la carte ([preuve](docs/validation/SURFACE-CONTINUE-S450.md)) — fondu porté (7·10⁻⁷), lancer de rayons 0,23 ms par image ; R37 reçu. Avant : S451
 Session suivante : **S453 — le rendu dans la boucle vivante** : `surface_carte` dans la fenêtre de l'afficheur, caméra libre, B10 en direct (ADR-211 D2) — reçu si l'image suit la simulation pas à pas ; puis C10 ; la stabilité du raccord bande ↔ mer reste ouverte (déclencheur : une scène où une bande déferle dans la mer)
 Maillons        : 9 — justifié : la priorité du solveur passe avant la règle (S406) ; journal

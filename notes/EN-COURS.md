@@ -62,30 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S452 — **terminée**. Verdict de l'utilisateur (2026-10-02) : *« Je valide le render »* — **R37 reçu** (REVUE-VISUELLE §42).
+Session : S453 — **en cours**. *« Continue »* — la suite de S452 : le rendu dans la boucle vivante (ADR-211 D2).
 
-**Ce que la session fait — le rendu en direct, sur la carte.** Le module `surface_carte` de l'afficheur, sur le device de la carte de
-la bande (`ApicCarte`), lit `φ` (`cellf`) et le masque des colonnes (`cmask`) sans retour au CPU : (1) **une passe de calcul** fond `φ`
-au raccord bande | colonnes — le `champ_rendu` de S451, porté (deux passes d'une moyenne 3 × 3 sur les colonnes à moins de deux mailles
-d'une frontière) ; (2) **une passe de fragments** — un rayon par pixel dans le champ fondu (le quart reflété en entier, échantillonnage
-trilinéaire aux centres des mailles), le premier zéro par pas d'une demi-maille puis bissection, la normale au gradient, l'ombrage de
-R37 (Lambert, Fresnel de Schlick, reflet du ciel, reflet du soleil), la sphère en gris (intersection analytique). Le banc
-`--surface-carte` mène B10 en bande étroite sur la carte (la référence donne le pas) et capture une image aux instants de R37.
+**Ce que la session fait.** (1) **La carte seule** : jusqu'ici la référence CPU choisissait le pas de la carte (`stable_step_us`) ;
+la carte le choisit elle-même — la même formule, `0,5·dx / (v_max + √(g·dx))`, sur la vitesse maximale relue des faces et des
+particules de la carte. B10 en bande étroite avance alors **sans référence**, bascule comprise. (2) **La fenêtre** : `--surface-direct`
+ouvre une fenêtre sur le device de la carte ; à chaque image, la simulation avance avec le temps (quelques pas au plus), puis
+`surface_carte` rend dans l'image de la fenêtre ; caméra en orbite (souris, flèches, molette), pause, relance.
 
-**Critères, écrits avant.** (1) **le fondu porté** : le champ rendu de la carte égale le `champ_rendu` du CPU sur le même `φ` à 10⁻⁵
-près ; (2) **le coût** : le rendu d'une image de 960 × 600 en **1 ms au plus** (médiane, sur la carte) ; (3) quatre images de la
-carte, aux instants de R37, **comparables à R37** — montrées à l'utilisateur.
+**Critères, écrits avant.** (1) **la carte seule tient** jusqu'à `t·√(g/D)` = 3 : la masse en quanta exacte, `φ` fini, et aux instants
+de R37 des images que l'œil ne distingue pas de celles de S452 (cratère, jet) ; (2) **la boucle** : une image toutes les 33 ms au plus
+(médiane, pas de simulation compris), le rapport temps simulé / temps réel publié ; (3) la commande donnée à l'utilisateur — son
+jugement.
 
 ### Plan
 
-- [x] **P1** — R37 inscrit ; jeton, plan seul.
-- [x] **P2** — `surface_carte` (le fondu, le lancer de rayons) ; le banc `--surface-carte` ; mesures ; images.
-- [x] **P3** — preuve ; rituel (allégé).
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — la carte seule : le pas choisi sur la carte ; banc `--surface-direct-banc` ; mesures (1).
+- [ ] **P3** — la fenêtre `--surface-direct` ; mesures (2).
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `viewer/src/surface_carte.{rs,wgsl}` : le fondu (deux passes de calcul, `cellf` → `tmp` → `champ`), le lancer de rayons
-  (une passe de fragments : pas d'une demi-maille, bissection, normale lissée, ombrage de R37, sphère analytique) ; accès de la carte
-  (`gpu`, `phi_buffer`, `mask_buffer`, `grid`) ; le banc `--surface-carte` (B10 en bande étroite, 68 s). **Mesuré** (RTX 5070, Dx12) :
-  (1) écart du fondu **7,2·10⁻⁷** — tenu (10⁻⁵) ; (2) **0,23 ms** par image, horodatée (médiane de 200 ; mur 0,69 ms) — tenu (1 ms) ;
-  (3) `captures/s452/carte_t{0.5,1.0,2.0,3.0}.png` — à l'œil, celles de R37 (le cratère, le jet), un peu plus lisses — envoyées.
-- **P3** — SURFACE-CONTINUE-S450 (§ S452) ; journal ; jeton libre ; maillons 9 (justifiés : S406) ; suivant : S453, le rendu dans la boucle vivante de l'afficheur, puis C10.
