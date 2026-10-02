@@ -86,8 +86,17 @@ composantes de B qu'il résout (`λ ≥ 32·dx`), les plus courtes restant port�
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — mesures : 8 m à 50 cm, 2 m à 12,5 cm ; deux places ; critères.
+- [x] **P2** — mesures : 8 m à 50 cm, 2 m à 12,5 cm ; deux places ; critères.
 - [ ] **P3** — preuve ; A320 ; registres ; suite.
 - [ ] **P4** — rituel.
 
 ### Notes de reprise
+- **P2** — `ak` = 0,118, germe de 1 mm à `2K`, masque 7, 95 s ; taux de la bande 35–59 s (et, entre parenthèses, la phase linéaire) :
+  **8 m à 50 cm** (16 mailles) : face **0,042** (2,2 fois Benjamin-Feir, 0,0193 ; 0,059 en fin), centre 0,010 (0,5 fois) ;
+  **2 m à 12,5 cm** (16 mailles) : face 0,073 — fenêtre saturée, le domaine refuse à 55 s (phase linéaire 10–30 s : **0,207**, 5,4 fois
+  Benjamin-Feir, 0,0386), centre **0,074** (1,9 fois) ; **8 m à 25 cm** (32 mailles), germe à `2K` : 0,0085 · 0,010 (sous
+  Benjamin-Feir). **Verdict, tel qu'écrit : indécis** — ni « au moins 2,5 fois sur une face » à la fenêtre écrite (2,2 ; saturée), ni la
+  réfutation (une paire sous 1,5 fois aux deux places). Le motif « face ≫ centre » tient aux trois paires à 16 mailles (rapport 2,8 à
+  4,2) ; mais l'échelle en `λ_B/dx` n'est pas propre : la houle de 4 m à 12,5 cm (32 mailles, sur une face, 6 cm, S436) montait à
+  3,1 fois. La cause n'est pas trouvée en une session : la règle déclarée en S437 s'applique — le constat s'écrit, C7d-3b vient.
+
