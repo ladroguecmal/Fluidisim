@@ -672,6 +672,26 @@ impl Apic3 {
                 }
             }
         }
+        // S446 : les bords ouverts en `x` — le débit des faces `i = 0` et `i = nx`, mouillé à la hauteur de la colonne du bord.
+        if self.open_x.is_some() {
+            for j in 0..ny {
+                for (i, col) in [(0usize, j * nx), (nx, j * nx + nx - 1)] {
+                    if c.mask[col] == 0 {
+                        continue;
+                    }
+                    let surface = c.eta[col];
+                    let mut q = 0f64;
+                    for k in 0..nz {
+                        let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
+                        if wet == 0. {
+                            break;
+                        }
+                        q += (u[(k * ny + j) * (nx + 1) + i] * dx * wet) as f64 * dx as f64 * dt as f64;
+                    }
+                    c.flux_x[j * (nx + 1) + i] = q;
+                }
+            }
+        }
         for j in 0..ny {
             for i in 0..nx {
                 let col = j * nx + i;

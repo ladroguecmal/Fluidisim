@@ -1476,3 +1476,43 @@ fn relative_sheet_without_swell_stays_at_rest_s444() {
     // Trois composantes : refus.
     assert!(a.set_relative_backgrounds(&[b, b, b], 0.).is_err());
 }
+
+/// **S446 (C7d-3c, c2)** — les bords ouverts d'une zone de colonnes : à débit égal aux deux bords, le volume se tient ; avec une
+/// entrée seule, il croît du volume entré (la somme des débits de bord, comptée en `f64`) ; sans bords ouverts, des parois.
+#[test]
+fn open_boundaries_carry_their_flux_s446() {
+    let (nx, ny, nz, dx) = (8usize, 2usize, 8usize, 0.25f32);
+    let run = |left: f32, right: f32| -> (f64, f64) {
+        let (mut a, mut arena) = apic(nx, ny, nz, dx, 64);
+        let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+        a.enable_columns(&mut host, &vec![1u8; nx * ny]).unwrap();
+        a.enable_open_boundaries(&mut host).unwrap();
+        a.set_columns_surface(&vec![1.0f32; nx * ny]).unwrap();
+        a.set_open_boundaries(&vec![left; ny * nz], &vec![right; ny * nz]).unwrap();
+        let v0 = a.columns_volume();
+        let mut entre = 0f64;
+        for _ in 0..50 {
+            // Le volume qui entre par la gauche et sort par la droite, mouillé à la hauteur des colonnes du bord.
+            let (eta, _) = (a.columns_surface().unwrap().to_vec(), 0);
+            for j in 0..ny {
+                let (hl, hr) = (eta[j * nx], eta[j * nx + nx - 1]);
+                entre += (left as f64 * hl.min(nz as f32 * dx) as f64 - right as f64 * hr.min(nz as f32 * dx) as f64) * dx as f64 * 0.01;
+            }
+            a.step(10_000).unwrap();
+        }
+        (a.columns_volume() - v0, entre)
+    };
+    // À vitesses égales, l'eau monte à l'entrée et baisse à la sortie : les hauteurs mouillées diffèrent, le volume change pour de
+    // vrai — il doit égaler ce que les bords ont fait passer.
+    let (dv, passe) = run(0.1, 0.1);
+    let (dv_in, entre) = run(0.1, 0.);
+    println!("S446 bords ouverts : vitesses égales, {dv:.4e} m³ pour {passe:.4e} passés ; entrée seule, {dv_in:.4e} m³ pour {entre:.4e} entrés");
+    assert!((dv - passe).abs() <= 1e-6 + 0.02 * passe.abs(), "{dv} contre {passe}");
+    assert!((dv_in - entre).abs() <= 0.02 * entre, "{dv_in} contre {entre}");
+    let (mut a, mut arena) = apic(nx, ny, nz, dx, 64);
+    assert!(a.set_open_boundaries(&[0.; 16], &[0.; 16]).is_err());
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    a.enable_open_boundaries(&mut host).unwrap();
+    assert!(a.set_open_boundaries(&[0.; 3], &[0.; 16]).is_err());
+}
+

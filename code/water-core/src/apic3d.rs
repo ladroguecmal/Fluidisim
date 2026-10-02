@@ -98,6 +98,9 @@ pub struct Apic3 {
     pub(crate) background: [Option<LinearSwell>; 2],
     /// L'instant de B au début du prochain pas, s.
     pub(crate) background_time_s: f64,
+    /// **S446 (C7d-3c, c2) — les bords ouverts en `x`** : la vitesse normale imposée sur les faces `u` des bords `i = 0` (les `ny·nz`
+    /// premières, rangées `k·ny + j`) puis `i = nx` ; `None`, des parois — au bit.
+    pub(crate) open_x: Option<Vec<f32>>,
 }
 
 /// Flottants (4 octets) et octets que la configuration réserve pour `domain` et `capacity` particules.
@@ -178,6 +181,7 @@ impl Apic3 {
             columns: None,
             background: [None; 2],
             background_time_s: 0.,
+            open_x: None,
         })
     }
 
@@ -243,6 +247,54 @@ impl Apic3 {
         }
         self.background = [components.first().copied(), components.get(1).copied()];
         self.background_time_s = t_s;
+        Ok(())
+    }
+
+    /// **S446 (C7d-3c, c2) — les bords ouverts en `x`**, réservés à la configuration (I-06) : les faces `u` des bords `i = 0` et
+    /// `i = nx` portent une vitesse normale imposée (`set_open_boundaries`), nulle d'abord ; la projection la prend comme donnée, le
+    /// transport des colonnes compte son débit, mouillé à la hauteur de la colonne du bord. Le raccord d'un domaine de bande à la mer
+    /// qui l'entoure (ADR-214). Sans eux : des parois, au bit.
+    pub fn enable_open_boundaries(&mut self, host: &mut HostServices) -> Result<(), Error> {
+        if self.open_x.is_some() {
+            return Err(Error::Domain);
+        }
+        let Domain3 { ny, nz, .. } = self.domain;
+        let n = 2 * ny * nz;
+        host.alloc.alloc_persistent(n * 4).map_err(|e| match e {
+            AllocError::Sealed | AllocError::OutOfArena => Error::Domain,
+        })?;
+        self.open_x = Some(vec![0.; n]);
+        Ok(())
+    }
+
+    /// S446 : les vitesses normales des bords ouverts, `left` en `i = 0` et `right` en `i = nx`, chacune `ny·nz` valeurs rangées
+    /// `k·ny + j`. Refus : sans bords ouverts (`Domain`), longueur (`Shape`), valeur non finie.
+    pub fn set_open_boundaries(&mut self, left: &[f32], right: &[f32]) -> Result<(), Error> {
+        let Domain3 { ny, nz, .. } = self.domain;
+        let o = self.open_x.as_mut().ok_or(Error::Domain)?;
+        if left.len() != ny * nz || right.len() != ny * nz {
+            return Err(Error::Shape);
+        }
+        if left.iter().chain(right).any(|x| !x.is_finite()) {
+            return Err(Error::NotFinite);
+        }
+        o[..ny * nz].copy_from_slice(left);
+        o[ny * nz..].copy_from_slice(right);
+        Ok(())
+    }
+
+    /// S446 : impose la vitesse de la grille (faces `u`, `v`, `w`) — l'état d'une zone de colonnes, pour un raccord ou une
+    /// réception. Refus : longueur (`Shape`), valeur non finie.
+    pub fn set_grid_velocities(&mut self, u: &[f32], v: &[f32], w: &[f32]) -> Result<(), Error> {
+        if u.len() != self.u.len() || v.len() != self.v.len() || w.len() != self.w.len() {
+            return Err(Error::Shape);
+        }
+        if u.iter().chain(v).chain(w).any(|x| !x.is_finite()) {
+            return Err(Error::NotFinite);
+        }
+        self.u.copy_from_slice(u);
+        self.v.copy_from_slice(v);
+        self.w.copy_from_slice(w);
         Ok(())
     }
 
@@ -947,8 +999,13 @@ impl Apic3 {
         let Domain3 { nx, ny, nz, .. } = self.domain;
         for k in 0..nz {
             for j in 0..ny {
-                self.u[(k * ny + j) * (nx + 1)] = 0.;
-                self.u[(k * ny + j) * (nx + 1) + nx] = 0.;
+                // S446 : un bord ouvert impose sa vitesse normale.
+                let (left, right) = match &self.open_x {
+                    Some(o) => (o[k * ny + j], o[ny * nz + k * ny + j]),
+                    None => (0., 0.),
+                };
+                self.u[(k * ny + j) * (nx + 1)] = left;
+                self.u[(k * ny + j) * (nx + 1) + nx] = right;
             }
             for i in 0..nx {
                 self.v[(k * (ny + 1)) * nx + i] = 0.;

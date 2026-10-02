@@ -80,8 +80,13 @@ face de la bande en une demi-période ; (3) sans bords ouverts, `Apic3` au bit (
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les bords ouverts d'`Apic3` ; la vitesse de grille imposable ; essais.
+- [x] **P2** — les bords ouverts d'`Apic3` ; la vitesse de grille imposable ; essais.
 - [ ] **P3** — le banc `raccord_bande_mer` ; mesures ; critères.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `Apic3::enable_open_boundaries`, `set_open_boundaries` (les faces `u` des bords `i = 0` et `i = nx`, vitesse normale imposée
+  par `walls`), le débit de bord dans `columns_transport` (mouillé à la hauteur de la colonne du bord), `set_grid_velocities`. Essai
+  `open_boundaries_carry_their_flux_s446` : le volume change exactement de ce que les bords font passer (entrée seule : 2,5721·10⁻² m³
+  pour 2,5721·10⁻² ; vitesses égales : 1,1766·10⁻³ pour 1,1766·10⁻³ — les hauteurs mouillées diffèrent).
+
