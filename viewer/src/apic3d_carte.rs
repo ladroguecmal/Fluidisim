@@ -518,6 +518,24 @@ impl ApicCarte {
         self.read_f32(&self.cols, 2 * ncol + 32, ncol)
     }
 
+    /// **S452** — ce que lit le rendu de la surface continue (`surface_carte`), sans retour au CPU : le device et sa file, `φ` (les
+    /// `cells` premiers mots de `cellf`), le masque des colonnes (`cmask`, non nul : une colonne), le domaine.
+    pub(crate) fn gpu(&self) -> (&wgpu::Device, &wgpu::Queue) {
+        (&self.device, &self.queue)
+    }
+
+    pub(crate) fn phi_buffer(&self) -> &wgpu::Buffer {
+        &self.cellf
+    }
+
+    pub(crate) fn mask_buffer(&self) -> &wgpu::Buffer {
+        &self.cmask
+    }
+
+    pub(crate) fn grid(&self) -> Domain3 {
+        self.domain
+    }
+
     /// Le masque de la zone (banc).
     pub fn mask(&self) -> Result<Vec<u32>, String> {
         self.read_u32(&self.cmask, 0, self.domain.nx * self.domain.ny)

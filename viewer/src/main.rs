@@ -10,6 +10,7 @@ mod counting;
 mod delta;
 mod delta3d;
 mod apic3d_carte;
+mod surface_carte;
 mod delta3d_projection;
 mod delta3d_background;
 mod delta3d_step;
@@ -2628,6 +2629,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--apic3d-carte-ballottement") {
         return apic3d_carte::recevoir_ballottement();
+    }
+    if args.iter().any(|a| a == "--surface-carte") {
+        return surface_carte::banc();
     }
     if args.iter().any(|a| a == "--apic3d-carte-b10") {
         return apic3d_carte::recevoir_b10();

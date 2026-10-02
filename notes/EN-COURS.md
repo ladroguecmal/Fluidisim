@@ -79,7 +79,13 @@ carte, aux instants de R37, **comparables à R37** — montrées à l'utilisateu
 ### Plan
 
 - [x] **P1** — R37 inscrit ; jeton, plan seul.
-- [ ] **P2** — `surface_carte` (le fondu, le lancer de rayons) ; le banc `--surface-carte` ; mesures ; images.
+- [x] **P2** — `surface_carte` (le fondu, le lancer de rayons) ; le banc `--surface-carte` ; mesures ; images.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `viewer/src/surface_carte.{rs,wgsl}` : le fondu (deux passes de calcul, `cellf` → `tmp` → `champ`), le lancer de rayons
+  (une passe de fragments : pas d'une demi-maille, bissection, normale lissée, ombrage de R37, sphère analytique) ; accès de la carte
+  (`gpu`, `phi_buffer`, `mask_buffer`, `grid`) ; le banc `--surface-carte` (B10 en bande étroite, 68 s). **Mesuré** (RTX 5070, Dx12) :
+  (1) écart du fondu **7,2·10⁻⁷** — tenu (10⁻⁵) ; (2) **0,23 ms** par image, horodatée (médiane de 200 ; mur 0,69 ms) — tenu (1 ms) ;
+  (3) `captures/s452/carte_t{0.5,1.0,2.0,3.0}.png` — à l'œil, celles de R37 (le cratère, le jet), un peu plus lisses — envoyées.
+
