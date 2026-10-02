@@ -85,9 +85,10 @@ publié. (3) Suites, zéro avertissement.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les paramètres, `switch_flow`, `floor_place`, `SwitchSettings` ; les clés des bancs.
 - [x] **P3** — le banc de décision avec et sans les clés ; B10 en bande étroite (coût, identité) ; C7d-2 reçu ou non.
-- [ ] **P4** — non-régression, suites ; preuve §21.4 ; registres.
+- [x] **P4** — non-régression, suites ; preuve §21.4 ; registres.
 - [ ] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — paramètres (256 octets : seuil, relâche, fond B), `own_speed` (les moyennes de faces de `cell_speed`, moins B), **`switch_flow`** entre la pente et la dilatation (requise au-delà du seuil ; sinon, en bande, gardée au-delà de la relâche), **`floor_place`** sous ces mailles ; `SwitchSettings` recopie seuil, relâche et fond B, et **refuse** vorticité, part de rotation et déformation (non portées). Clés `VITESSE`, `RELACHE`, `FOND_B` dans `b10_band_state_from` (la houle de 2 cm, λ 2 m, au niveau de l'eau). Compilé sans avertissement.
 - **P3** — **le banc de décision, identique à la référence dans les quatre séries** (masque demandé, fonds, positions, réserve, volume à 0 quantum) : avec les clés — bascule initiale, bascules forcées (14 887 à 44 070 particules : le critère travaille ; sans lui 5 998 à 8 686), réglage par défaut — et sans elles (S427 au chiffre près). **B10 en bande étroite sans les clés : identique au bit à S428 sur 74 pas**, pas p99 1,83 + bascule 0,24 = **2,06 ms** (C7e tenu). **Avec les clés** : la carte suit la référence au chiffre près — **les deux pincent au pas 53** (le critère change la physique de la référence aussi), 44 104 particules de part et d'autre ; pas p99 1,58 + bascule 0,40 = 1,98 ms (la décision 0,29 : le parcours des mailles ; les fils de l'échange presque vides, le fond étant bas). **C7d-2 reçu.**
+- **P4** — non-régression **identique à S428** (étages, cycle, B10 nu au pas 54, ballottement 0,447, colonnes 0,002, raccord 4,015 et bande 1,210 mm, gestes compris) ; suite du cœur 756 / 19 / 0. Preuve §21.4 ; liste 4.19, feuille de route, index. **Écart** : P2 et P3 commités ensemble (un seul commit, « P2–P3 »).

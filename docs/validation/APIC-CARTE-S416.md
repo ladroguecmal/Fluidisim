@@ -908,3 +908,26 @@ particules). C'est ce que δ déforme vraiment ; le coût se jugera sur la carte
 
 **La suite** : **C7d-2** — le seuil de vitesse propre, sa relâche et le fond B sur la carte (la décision de la bascule ne porte encore
 aucun critère d'écoulement) ; reçu si les décisions forcées sont identiques à la référence avec fond B, et C7e tenu.
+
+### 21.4 C7d-2 reçu : la vitesse propre de δ sur la carte (S432)
+
+**Reproduire** : `VITESSE=0.3 RELACHE=0.15 FOND_B=1` devant `--apic3d-carte-decision` (`INITIAL=1` ; `PENTE=0.02 MAINTIEN=0`) et
+`BANDE=1 … --apic3d-carte-b10` — les clés règlent le critère de la référence dans l'état B10 commun aux bancs (`b10_band_state_from` ;
+le fond B, une houle de 2 cm et de 2 m de longueur d'onde au niveau de l'eau : B10 n'en a pas, la décision se compare quand même).
+
+**La construction** : huit flottants de plus dans les paramètres (256 octets) ; `own_speed`, les moyennes de faces de `cell_speed`
+moins la vitesse de B à l'instant de la décision ; **`switch_flow`**, entre la pente et la dilatation — l'étape (3b) de
+`ColumnsSwitch::decide` : requise au-delà du seuil, sinon gardée en bande au-delà de la relâche ; **`floor_place`** descend aussi sous
+ces mailles, comme `place_floor`. `SwitchSettings::of` recopie seuil, relâche et fond B, et **refuse** la vorticité, la part de
+rotation et la déformation, qui ne sont pas portées.
+
+**Les issues.** Le banc de décision : **masque demandé, fonds, positions, réserve et volume identiques à la référence** dans les quatre
+séries — avec les clés (bascule initiale ; bascules forcées, 14 887 à 44 070 particules contre 5 998 à 8 686 sans elles : le critère
+travaille ; réglage par défaut), et sans (S427 au chiffre près). **B10 en bande étroite sans les clés : identique au bit à S428 sur 74
+pas**, pas p99 1,83 + bascule 0,24 = **2,06 ms** (C7e tenu). **Avec les clés** : la carte suit la référence au chiffre près — les deux
+pincent **au pas 53** (le critère change aussi la physique de la référence), 44 104 particules de part et d'autre ; pas p99 1,58 +
+bascule 0,40 = 1,98 ms (la décision, 0,29 ms au p99 : le parcours des mailles de chaque colonne). Non-régression identique à S428
+(étages, cycle, B10 nu, ballottement, colonnes, raccord, bande) ; suite du cœur 756.
+
+**C7d-2 est reçu.** **La suite : la conception de C7d-3** — la bande dans la production couplée, relative à B : elle dira l'ordre du
+mode relatif sur la carte (ADR-198 D1) et d'A320 (ouverte : une perturbation de δ croît sous houle raide).
