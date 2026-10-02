@@ -18212,3 +18212,15 @@ faux : l'advection antisymétrique n'est plus la piste ; **le critère « < 0,01
 (houle de plus d'une demi-maille), δ est amplifié huit fois en une seconde à l'échelle de la maille — seuil net entre 6 et 6,5 cm à
 12,5 cm. Suite **757**, zéro avertissement. **Rituel.** Maillons **23** — justifié : la priorité du solveur (S406) ; 4.19 reste
 partiel. Suivant : **A324**, puis C7d-3a (le critère rapporté à Benjamin-Feir, B de Stokes).
+
+## S436 — 2026-10-02 — physique : A324 corrigée ; A320 à maille fine
+
+**Entrée.** *« Continue »* — A324. **Fait** ([preuve](../docs/validation/MER-S369.md) §8) : un banc pas à pas
+(`a324_franchissement`) **corrige S435** — le banc `mer` ne fait pas avancer son témoin en mode germe ; pas à pas, il n'est pas nul :
+A324 est **une rupture du point fixe** du mode relatif. Cause : le fantôme latéral (entre une colonne mouillée et une sèche) retranchait
+l'erreur de B interpolée entre les colonnes, non celle du point de surface. Quatre essais ; **retenu** : il interpole les fantômes
+verticaux des deux colonnes (`set_lateral_own_ghost`, **le défaut**). **Mesuré** : à 12,5 cm sous 6,5 et 7,5 cm, le germe reste à
+1,1 mm (avant : 8,6 et 10 mm), rien sous `4·dx` ; le témoin nul au bit ; 25 cm au bit jusqu'à 70 s, A320 inchangée. **A324 corrigée.**
+**A320, enfin mesurable à 12,5 cm** : 0,027 s⁻¹ sous 7,5 cm (1,0 fois Benjamin-Feir ; 25 cm : 0,106) ; sous 6 cm sans franchissement,
+≈ 0,031 à maille nulle (1,8 fois). Suite **758**, zéro avertissement. **Rituel.** Maillons **24** — justifié : la priorité du solveur
+(S406) ; 4.19 reste partiel. Suivant : **C7d-3a** — le critère rapporté à Benjamin-Feir, à la maille de la production.

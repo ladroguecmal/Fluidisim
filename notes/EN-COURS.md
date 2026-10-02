@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S436 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **A324**
+Session : S436 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **A324**
 ([preuve](../docs/validation/MER-S369.md) §7), avant C7d-3b.
 
 **Ce que la session trouve en entrant.** Banc `transfert_oriente mer`, 12,5 cm, masque 7, germe de 1 mm : sous 6 cm de houle, δ à
@@ -86,7 +86,7 @@ du cœur qui garde le cas. Si la cause n'est pas trouvée, elle est écrite tell
 - [x] **P2** — localisation (instrument, bisection).
 - [x] **P3** — correction, mesures, critères.
 - [x] **P4** — essai ; suite ; preuve ; A324 ; registres.
-- [ ] **P5** — rituel.
+- [x] **P5** — rituel.
 
 ### Notes de reprise
 - **P2** — banc `a324_franchissement` (20 m à 12,5 cm, pas à pas, témoin à côté). **Correction de S435** : le banc `mer` ne fait pas
@@ -112,4 +112,4 @@ du cœur qui garde le cas. Si la cause n'est pas trouvée, elle est écrite tell
   questions ; suite 758. **A320 à maille fine** (germe 1 mm, taux de la bande 35–59 s) : sous 7,5 cm à 12,5 cm, **0,027** (1,0 fois
   Benjamin-Feir ; 25 cm : 0,106) ; 6,5 cm : 0,028 ; sous **6 cm** sans franchissement, 0,077 · 0,062 · 0,054 à 25 · 15,6 · 12,5 cm,
   ≈ 0,031 à maille nulle (1,8 fois). Données d'entrée de C7d-3a.
-
+- **P5** — journal ; jeton libre ; maillons 24 (justifiés : S406) ; suivant : S437, C7d-3a.
