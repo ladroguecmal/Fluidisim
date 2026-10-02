@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 17:57 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 18:00 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S451 — la surface continue, seconde session** (R36 : « des divisions faces planes ») ; le lot des registres
 Dernière session : S450 — la surface continue, une première image ([preuve](docs/validation/SURFACE-CONTINUE-S450.md)) — l'isosurface du champ unique `φ`, étanche ; des marches de 0,34 maille au raccord bande | colonnes. Avant : S449, c3 plafonné
 Session suivante : **S451 — le lot des registres** (ADR-213 D3, dû en S451) **puis la surface continue, seconde session** : le verdict de l'utilisateur sur les images de S450 s'il en donne un ; raccorder `φ` à la frontière bande | colonnes pour le rendu (un fondu sur deux colonnes) et lisser les normales — reçu si le saut au raccord tombe sous un quart de maille et que les marches disparaissent de l'image ; puis le rendu en direct (la carte), C10
 Maillons        : 7 — justifié : la priorité du solveur passe avant la règle (S406) ; journal

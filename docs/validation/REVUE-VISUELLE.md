@@ -1427,3 +1427,18 @@ pleine et calcule deux fois plus vite. Comme R34 : un instrument en 2D, pas le r
 **Verdict R35 — reçu le 2026-09-27 (S415)** : *« Je valides R35, continue avec ta recomandation »*. **Reçu** : la bande étroite
 déferle comme APIC seul et la bande pleine. Le réglage retenu — maintien 0,3 s, fond à quatre mailles, prédiction du corps à
 horizon court — devient celui de la suite (C6c-3, C7) ; les défauts du code restent ceux de S408 jusqu'à ce que C7 les porte.
+
+## 41. R36 — la surface continue, premier rendu, S450
+
+Le banc `surface_continue` ([SURFACE-CONTINUE-S450](SURFACE-CONTINUE-S450.md)) : B10 — une sphère de 0,4 m entre dans l'eau —,
+l'isosurface du champ unique `φ` d'`Apic3` (colonnes et bande de particules d'un même champ), étanche, en rendu logiciel. Quatre
+instants : le cratère (t = 0,5 et 1 `√(D/g)`), le jet de Worthington (t = 2 et 3).
+
+| image | ce qu'elle montre |
+|---|---|
+| `captures/s450/b10_t{0.5,1.0,2.0,3.0}.png` | la surface continue, la sphère en gris |
+
+**Verdict R36 — reçu le 2026-10-02 (S451)** : *« Alors le problème est que l'on voit des divisions faces plane »*. **Non reçu.** Deux
+causes, mesurées : l'**ombrage à facettes** (une normale par triangle) et les **marches au raccord** bande | colonnes (0,34 maille, S450).
+Suite : S451 — des normales lissées (le gradient de `φ`, interpolé par pixel) et le raccord de `φ` à la frontière pour le rendu.
+

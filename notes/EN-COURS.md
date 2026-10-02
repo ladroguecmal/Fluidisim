@@ -62,36 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S450 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite proposée : **la surface continue**
-([ADR-211](../docs/adr/ADR-211-les-trucages-retenus.md) D2 : l'utilisateur juge C10 sur une surface sans interstice, dont seuls les
-jets se détachent).
+Session : S451 — **en cours**. Verdict de l'utilisateur (2026-10-02) sur les images de S450 (**R36**) : *« Alors le problème est que l'on
+voit des divisions faces plane »* — non reçu ([REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md) §41).
 
-**Ce que la session trouve en entrant.** La carte de la bande (`apic3d_carte`) n'a pas de rendu : elle ne sert qu'aux calculs et à
-leurs bancs. Mais le champ `φ` d'`Apic3` est **déjà le champ unique** : `z − η` dans la zone des colonnes, la reconstruction des
-particules dans la bande, `z − fond` sous le fond (`columns_label`). Une isosurface de ce champ seul est continue par construction —
-l'interstice viendrait d'un rendu qui dessinerait colonnes et bande séparément.
+**Ce que la session fait.** (1) Le lot des registres (ADR-213 D3, dû en S451). (2) **Les deux causes de R36** au banc
+`surface_continue` : **l'ombrage à facettes** — une normale par sommet, le gradient de `φ` (différences centrées sur la grille, interpolé
+en trilinéaire au point du sommet), puis interpolée **par pixel** (ombrage de Phong) ; **les marches au raccord** — pour le rendu, `φ`
+**fondu** sur les deux colonnes de chaque côté d'une frontière bande | colonnes : la moyenne pondérée de `φ` de la bande et de `z − η`
+de la colonne voisine, le poids allant de 0 à 1 sur ces quatre colonnes. Le calcul (`Apic3`) n'est pas touché : c'est le rendu.
 
-**Ce que la session fait — une première image, hors ligne** (le rendu en direct sur la carte viendra après le verdict). Le banc
-`surface_continue` (cœur, sans carte) : B10 en quart (une sphère entre dans l'eau, `Fr` = 2, `D/dx` = 8), la zone des colonnes et la
-bascule (S408) ; aux instants choisis, l'isosurface `φ = 0` par **tétraèdres marchants** (sans table d'ambiguïté), le quart reflété en
-entier ; un rendu logiciel (perspective, tampon de profondeur, ombrage de Lambert et reflet du ciel), la sphère en gris ; un PPM par
-instant (`captures/s450/`, ADR-124), son aperçu PNG par `outils/apercu_ppm.py`.
-
-**Critères, écrits avant.** (1) le maillage n'a **aucune arête ouverte à l'intérieur** du domaine échantillonné ; (2) **au raccord**
-bande | colonnes, la hauteur de la surface lue sur `φ` de part et d'autre d'une face de frontière ne saute pas de plus d'**un quart de
-maille**, sur tout le calcul ; (3) quatre images, montrées à l'utilisateur, qui juge la continuité (revue) ; (4) le banc sous deux
-minutes.
+**Critères, écrits avant.** (1) le saut au raccord, mesuré sur le champ rendu, **sous un quart de maille** (corrigé de la pente) ;
+(2) le maillage toujours étanche (0 arête ouverte) ; (3) les images de S450 refaites aux mêmes instants, montrées à l'utilisateur (R37) :
+**ni facettes ni marches** visibles — son jugement.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — le banc `surface_continue` : isosurface, rendu, PPM ; mesures (1), (2), (4).
-- [x] **P3** — les images à l'utilisateur ; preuve ; rituel (allégé).
+- [x] **P1** — R36 inscrit ; jeton, plan seul.
+- [ ] **P2** — le lot des registres.
+- [ ] **P3** — normales lissées, `φ` fondu au raccord ; mesures ; images.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — banc `surface_continue` (B10 en quart, `Fr` = 2, `D/dx` = 8, bande étroite `fond` = 4 ; tétraèdres marchants ; rendu
-  logiciel ; 28 s) : (1) **0 arête ouverte à l'intérieur** aux quatre instants — le maillage est étanche (un premier compte en trouvait
-  96 à 160 : le plan réfléchi n'était pas compté comme bord de l'échantillonnage) ; (2) **le saut au raccord bande | colonnes : 0,32 maille
-  brut, 0,34 corrigé de la pente — manqué** (un quart) ; il se voit : des **marches carrées** dessinent la frontière autour de la zone
-  agitée ; (4) **28 s** — tenu. Images : `captures/s450/b10_t{0.5,1.0,2.0,3.0}.png` (le cratère et la sphère, puis le jet de Worthington).
-- **P3** — `docs/validation/SURFACE-CONTINUE-S450.md` ; les images envoyées à l'utilisateur ; journal ; jeton libre ; maillons 7 (justifiés : S406) ; suivant : S451, le raccord de `φ` pour le rendu et le lot des registres.
