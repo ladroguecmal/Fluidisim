@@ -62,55 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S439 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3b**
-([preuve](../docs/validation/APIC-CARTE-S416.md) §22.3, §22.9), sans la bascule des défauts.
+Session : S440 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue sinon j'accepte l'écart »* — **C7d-3b reçu**,
+l'écart de 0,01 % accepté ([preuve](../docs/validation/APIC-CARTE-S416.md) §22.10) ; puis la suite de la campagne.
 
-**Ce que la session trouve en entrant.** Le pas résident (`viewer/src/delta3d_step.rs`, `delta3d_step.wgsl`, et `couple_columns`,
-`couple_rhs` de `delta3d_background.wgsl`) porte le pas de S297 : le résidu de quantité de mouvement de B dans la prédiction, la
-bande de B entière dans le transport, les fantômes de pression avec l'erreur entière de B. Le mode relatif de la référence
-(`RELATIVE_ALL`, S369, plus le fantôme latéral d'A324, S436) change quatre choses : (1) la prédiction sans le résidu ; (2) la bande moins
-celle de B seul (`own = repos + η_B`) ; (3) le fantôme du haut moins l'erreur de B à sa propre surface ; (4) le fantôme latéral interpolé
-des fantômes verticaux des deux colonnes — au second membre (`couple_rhs`) comme à la correction (`correct`).
+**Ce que la session trouve en entrant.** C7d-3a est bloqué (A320, cause non trouvée) ; C7d-3c et C7d-3d l'attendent. **A322** (à 10 cm,
+30 Hz explose vers 62 s, la mer seule) précède toute scène à 10 cm (C10). Son attribution (S409, MULTIGRILLE-3D-S385 §6.4) : retirer
+**le résidu de quantité de mouvement du fond** suffit à la supprimer — **ce que fait le mode relatif**, désormais sur la carte.
 
-**Ce que la session fait.** Une constante de compilation `RELATIVE` dans les deux sources, éteinte par défaut ; des pipelines à part,
-compilés à la demande (`Step3::enable_relative`) — le procédé de S391 : la production garde son code, donc ses bits (L345). Le banc
-`--delta3d-trajectoire` gagne `RELATIF=1` (la référence en `RELATIVE_ALL`, la carte en mode relatif) et `TEMOIN=1` (aucune
-perturbation initiale).
+**Ce que la session fait.** Le banc d'A321 (`--delta3d-a321`) gagne `RELATIF=1` (`Step3::set_relative`). La scène d'A322 :
+`MAILLE=0.1 EMPRISE=80,80 MULTIGRILLE=1 CYCLES=8`, 30 Hz : le témoin (le pas de S297) rejoué, puis le mode relatif.
 
-**Critères, écrits avant.** **Reçu si** : (1) **la production au bit** — le banc de trajectoire sans `RELATIF` rend les mêmes lignes
-qu'avant le changement ; (2) **le témoin** — en mode relatif, sans perturbation, sous la mer de S298, la surface publiée et les vitesses
-de la carte restent **nulles au bit** sur tout le banc ; (3) **la trajectoire** — en mode relatif, la carte suit la référence au moins
-aussi bien que le pas de S297 suit la sienne : horizon du millimètre au moins aussi tardif, écart avant l'horizon au plus deux fois
-celui du pas de S297 ; (4) la suite du cœur, zéro avertissement ; l'afficheur compile sans avertissement.
+**Critères, écrits avant.** **A322 levée sous le mode relatif** si : (1) le témoin explose encore (vers 62 s) ; (2) en mode relatif, la
+scène tient **120 s** à 30 Hz, `max_u` de δ sous 3 m/s à chaque seconde et la part de l'échelle de la maille de `w` sous 0,05 ;
+(3) la divergence et le résidu de la projection restent dans leur ordre de grandeur du témoin avant son explosion. Autrement : A322
+reste ouverte, avec ce qui a été mesuré. A322 étant levée, elle ne l'est que **dans le mode relatif** : la production par défaut garde
+le pas de S297 tant que C7d-3a n'est pas reçu.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — la ligne de base du banc de trajectoire (S297).
-- [x] **P3** — le mode relatif sur la carte : sources, pipelines, banc.
-- [x] **P4** — mesures ; critères.
-- [x] **P5** — preuve ; registres ; rituel.
+- [x] **P1** — jeton, plan seul ; l'arbitrage inscrit.
+- [ ] **P2** — `RELATIF` au banc d'A321 ; le témoin ; le mode relatif ; critères.
+- [ ] **P3** — preuve ; A322 ; registres ; rituel.
 
 ### Notes de reprise
-- **P2** — `PAS=400 PERIODE=50 CYCLES=64 water-viewer --delta3d-trajectoire` (32 × 24 × 36 à 25 cm, la mer de S298, bosse de 18 cm,
-  5 ms) : horizon du millimètre **au pas 130**, écart avant lui **7,65·10⁻⁵ m**, écart global 7,1 mm au pas 140 ; référence : 132
-  itérations au plus. Sortie gardée pour le critère (1).
-- **P3** — `delta3d_step.wgsl` : `override RELATIVE` ; `extra_relative` (la prédiction sans le résidu, même ordre) ; `column_up` ;
-  `ghost_side` relatif (le fantôme latéral d'A324) ; la bande moins celle de B seul (`own`, formée comme au cœur). `delta3d_background.wgsl` :
-  `override RELATIVE` ; `couple_columns` retranche l'erreur de B à sa propre surface ; `couple_rhs`, le fantôme latéral d'A324.
-  `Step3::set_relative` compile à la demande les étages du pas (`pipelines_zeroed`, comme le banc de S391) et du couplage avec
-  `RELATIVE` = 1 ; `step_pipes`, `couple_pipes` les choisissent. Banc `--delta3d-trajectoire` : `RELATIF=1`, `TEMOIN=1`. L'afficheur
-  compile sans avertissement.
-- **P4** — premier passage : la production au bit, mais **le témoin de la carte non nul** dès le pas 10 (1,2·10⁻⁹ m). Banc
-  `--delta3d-temoin-relatif` (étage par étage) : fantômes, second membre et vitesses nuls au bit, **la surface publiée non** au premier
-  pas (9·10⁻¹¹ m) — la bande : `own = 0,5·((repos + a) + (repos + b))`, réassocié par le compilateur (L345), ne retombait plus au bit sur
-  la surface totale lue en mémoire. **Remède** : la bande relative écrite comme le débit de B **entre** sa surface et la totale
-  (`band_between`, la même formule que `band3(surface) − band3(own)`), la totale reformée depuis `own` par la perturbation en
-  différences exactes (`difference`, S358) — nulle au bit quand δ l'est. **Mesures** (400 pas, 64 cycles) : (1) **production au bit**
-  (sortie identique à la ligne de base) ; (2) **témoin nul au bit** sur 400 pas, carte et référence ; (3) horizon du millimètre au pas
-  **260** (base : 130), écart global 3,2 mm (base : 7,1), mais l'écart avant l'horizon **1,5308·10⁻⁴ m contre 1,5306·10⁻⁴** (deux fois
-  la base) : **manqué de 0,01 %**, tel qu'écrit. La clause compare des maxima sur des fenêtres inégales (260 pas contre 130) : sur la
-  même fenêtre (pas 1 à 129), la carte relative s'écarte de **1,5·10⁻⁷ m** contre 7,65·10⁻⁵ pour le pas de S297 — 500 fois moins.
-  **C7d-3b non reçu tel qu'écrit** ; le critère (3), mal posé, est à réécrire avant la prochaine mesure (même fenêtre). (4) L'afficheur
-  compile sans avertissement ; le cœur n'a pas changé (suite 758).
-- **P5** — APIC-CARTE §22.10 ; registres ; journal ; jeton libre ; maillons 27 (justifiés : S406) ; suivant : S440, C7d-3b — le critère (3) réécrit.

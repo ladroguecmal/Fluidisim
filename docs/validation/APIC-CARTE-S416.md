@@ -1052,3 +1052,7 @@ compilateur réassocie, ne retombait plus au bit sur la surface totale (L345).
 référence 500 fois mieux. **C7d-3b n'est pas reçu tel qu'écrit** : le critère (3) sera réécrit sur une même fenêtre, avant la mesure
 suivante, ou l'écart accepté par l'utilisateur.
 
+**2026-10-02, S440 — l'utilisateur** : *« Continue sinon j'accepte l'écart »* — l'écart de 0,01 % du critère (3) est **accepté** :
+**C7d-3b est reçu** (le mode relatif sur la carte, `Step3::set_relative`). La bascule des défauts vers le mode relatif attend toujours
+C7d-3a (A320).
+

@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-02 15:16 +02:00
+JETON            : occupé
+Battement        : 2026-10-02 15:27 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S440 — C7d-3b reçu (l'écart accepté) ; A322 sous le mode relatif**, sur la carte
 Dernière session : S439 — physique : **C7d-3b non reçu tel qu'écrit** ([preuve](docs/validation/APIC-CARTE-S416.md) §22.10) — le mode relatif porté sur la carte : production au bit, témoin nul au bit, horizon du millimètre doublé ; l'écart avant l'horizon manqué de 0,01 % sur des fenêtres inégales. Avant : S438, A320 indécise
 Session suivante : **S440 — C7d-3b**, sur la carte ([preuve](docs/validation/APIC-CARTE-S416.md) §22.10) : réécrire le critère (3) sur une même fenêtre (l'écart de la carte relative à sa référence, sur les pas où le pas de S297 tient sous le millimètre, au plus deux fois le sien), puis le rejouer (`RELATIF=1 PAS=400 CYCLES=64 --delta3d-trajectoire`) — sauf si l'utilisateur accepte l'écart ; **la bascule des défauts attend C7d-3a** (A320 ouverte) ; C7d-3c, C7d-3d après C7d-3a ; **A322 avant toute scène à 10 cm** (C10) ; la surface continue avant C10 (ADR-211 D2)
 Maillons        : 27 — justifié : la priorité du solveur passe avant la règle (S406) ; 4.19 reste partiel ; journal
