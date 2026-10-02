@@ -62,41 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S444 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »*, puis, à la question de la voie de C7d-3c,
-*« (B) B dans la bande »* — [ADR-214](../docs/adr/ADR-214-b-entre-dans-la-bande.md) (remplace D1 de S433).
+Session : S445 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : le lot des registres
+(ADR-213 D3), puis c1, sa seconde et dernière session (ADR-213 D2).
 
-**Ce que la session fait (c1, en référence).** (1) `LinearSwell` complet : l'élévation `η_B(x, t)`, le gradient exact de la vitesse,
-la pression dynamique `p_dyn` (Airy en profondeur infinie : `p = −ρg·ζ + ρg·a·e^{kζ}·cos θ`). (2) `Apic3` en mode relatif
-(`set_relative_background`), sans zone de colonnes : particules en `u′`, déplacées par `U + u′` ; `−dt·u′·∇U` sur la grille ; pas de
-gravité en volume ; la valeur de pression aux mailles d'air voisines de l'eau, `p′ = ρg(z_s − niveau) − p_dyn(z_s)` moins l'erreur de B
-à sa propre surface — dans le second membre et la correction. Sans fond : `Apic3` au bit.
+**Ce que la session trouve en entrant.** `Apic3` en mode relatif, sous une houle stationnaire partie à plat : `|u′|` croît jusqu'à
+54 % de `aω` en 5 s ([preuve](../docs/validation/APIC-CARTE-S416.md) §23.1). Hypothèse : la lecture de la surface des particules,
+forcée en résonance avec B.
 
-**Critères, écrits avant.** (1) `LinearSwell` : gradient contre différences finies (écart relatif ≤ 10⁻³), divergence et rotationnel
-nuls (≤ 10⁻⁴ de `|∇U|`), `p_dyn` cohérente avec `∂U/∂t = −∇p_dyn/ρ` à l'ordre linéaire (≤ 10⁻³). (2) Sans fond, `Apic3` au bit (la
-suite et un essai). (3) **Sous B seul**, une nappe de particules au repos relatif (`u′` = 0), houle de 5 cm, 4 m, 25 cm : `|u′|` maximal
-sur 5 s sous 2 % de `aω` — le reste vient de ce que les particules suivent `U` et non la surface linéaire exacte (ordre `ak`). (4) La
-même nappe **sans** le mode relatif mais initialisée à `U` (l'eau totale) sert de témoin : écart des surfaces au plus 5 mm sur 5 s.
-Suite du cœur, zéro avertissement.
+**Ce que la session fait.** (1) **Le lot des registres** — feuille de route, liste, file active, index, angles morts — pour S443 et S444.
+(2) **c1** : départ à plat, l'instrument de S444 (`S444_A`, plus `S444_DX`) ; la loi de `|u′|` en amplitude (1,25, 2,5, 5 cm) et en
+maille (25 et 12,5 cm).
+
+**Critères, écrits avant.** **L'hypothèse de la lecture** tient si `|u′|` décroît avec la maille (au moins d'un facteur 1,5 de 25 à
+12,5 cm) ; **une faute de couplage** si `|u′|` croît comme `a` et ne dépend pas de la maille ; **une physique du second ordre** (la
+cinématique des particules contre la surface linéaire) si `|u′|` croît comme `a²`. **c1 reçu** si un remède ramène `|u′|` sous 2 % de
+`aω` sur 5 s (ADR-213 D1 : 5 % de tolérance) ; sinon, **l'eau totale dans la bande** devient la voie (ADR-213 D2), conçue en fin de
+session.
 
 ### Plan
 
-- [x] **P1** — ADR-214 ; jeton, plan seul.
-- [x] **P2** — `LinearSwell` complet ; essais.
-- [x] **P3** — `Apic3` relatif, sans zone ; essais ; mesures (3), (4).
-- [x] **P4** — preuve ; rituel (allégé).
+- [x] **P1** — jeton, plan seul.
+- [ ] **P2** — le lot des registres.
+- [ ] **P3** — c1 : les lois ; un remède s'il se montre ; sinon, la conception de l'eau totale dans la bande.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `LinearSwell::elevation`, `velocity_gradient` (exact), `dynamic_pressure` ; essai `linear_swell_gradient_and_pressure_s444` :
-  gradient 8,1·10⁻⁵ des différences finies, divergence et rotationnel nuls, quantité de mouvement 7,6·10⁻⁴ — (1) tenu.
-- **P3** — `Apic3::set_relative_background(s)` (une ou deux composantes superposées ; refus avec une zone de colonnes) :
-  particules en `u′` déplacées par `U + u′` (RK2, B à l'instant du début puis du milieu du pas) ; `relative_strain` (`−dt·u′·∇U`,
-  gradient exact, au lieu de la gravité) ; `surface_pressure` (la valeur de `p′` au point de surface, au second membre et à la
-  correction) ; l'horloge de B. **Mesures** : houle progressive dans une cuve fermée — `u′ = −U` (97 % de `aω`) : B traverse les
-  parois, les particules non ; **houle stationnaire** (deux composantes opposées, vitesse horizontale nulle aux parois) : départ à
-  l'amplitude maximale — 90 % de `aω`, proportionnel à `a` : la nappe semée sur le réseau des particules s'écarte de la surface de B
-  d'une demi-maille de réseau (6 cm), une vraie `η′` ; **départ à plat** — `|u′|` croît de 2 à 10 cm/s en 4,5 s (54 % de `aω`), les
-  surfaces à 16 mm de l'eau totale : **critère (3) manqué**. Hypothèse : la lecture de la surface des particules (≤ 2,5 % de maille,
-  S389), écart forcé au nombre d'onde et à la fréquence de B — en résonance avec δ, qui croît dans le temps ; le pas couplé n'a pas ce
-  défaut (sa surface est analytique). L'essai long devient un instrument ignoré ; essai rapide : sans houle, `|u′|` ≤ 10⁻⁵. Sans
-  fond, `Apic3` au bit (ses essais inchangés). Suite **761**, zéro avertissement.
-- **P4** — APIC-CARTE §23.1 ; journal ; jeton libre ; maillons 1 ; suivant : S445, c1 suite et le lot des registres (ADR-213 D3).
