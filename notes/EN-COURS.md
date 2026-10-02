@@ -62,35 +62,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S455 — **terminée**. Sans « Continue » (ADR-215 D1) : l'étape 2 d'ADR-215 D4, **le temps réel à 4 m**.
+Session : S456 — **en cours**. Sans « Continue » (ADR-215 D1) : l'étape 3 d'ADR-215 D4, **la houle**.
 
-**Le constat (S454).** La scène de 4 m (80 × 80 × 114 mailles, 3,2 m d'eau, 2,5 m d'air) coûte **27 ms de carte par pas** pour un pas
-de **4,7 ms simulées** ; avec les relectures, 44 ms au mur ; la fenêtre tient **0,11** du temps réel.
+**Ce que la session fait.** Le bord ouvert de S446 (`Apic3::enable_open_boundaries`, CPU) porté sur la carte : les faces `u` des
+bords `i = 0` et `i = nx` portent la vitesse normale de la houle B (`LinearSwell`, eau profonde), sous sa surface ; la projection la
+prend comme donnée ; les colonnes des bords comptent le débit en quanta ; le volume entré se cumule sur la carte (`open_quanta`). L'état
+initial porte B (l'eau ensemencée sous sa surface, ses vitesses aux particules et à la grille), sinon le bord de sortie crée sa propre
+onde. Le banc `--c10-houle` : la scène de 4 m (1,4 m d'eau), une houle de 4 cm et de 2 m, sans corps, 10 s.
 
-**Ce que la session fait.** (1) **Le profil** : la durée de chaque étage de la carte sur la scène de 4 m (médianes sur le saut entier).
-(2) **Les réductions**, par ordre de gain attendu, chacune mesurée : la profondeur (3,2 m d'eau, imposés par l'arrêt de B10 à
-`3·Fr·D` ; une scène de jeu n'en demande pas tant), l'air (2,5 m), les étages qui balaient toute la grille ou toutes les faces alors
-que la bande en occupe un sixième, les relectures du pas stable (une réduction sur la carte au lieu de 4 n mots relus).
-
-**Critères, écrits avant.** (1) le profil publié, étage par étage ; (2) **simulé / réel ≥ 0,9** dans la fenêtre à 4 m, la masse exacte et
-la scène stable jusqu'à t = 16 ; (3) si (2) n'est pas atteint, le gain obtenu et ce qui reste, chiffrés.
+**Critères, écrits avant.** (1) **la masse comptée** : `quanta − initiaux − entrés par les bords = 0` à chaque mesure ; (2) **la houle
+ne s'amortit pas** de plus de 10 % sur 10 s (amplitude sur la rangée du milieu, à 10 s contre 1 s) ; (3) l'écart à l'élévation de B
+publié (la dispersion numérique) ; (4) avec le saut : la scène stable, la fenêtre montrée.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le profil des étages.
-- [x] **P3** — les réductions, mesurées une à une.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — le bord ouvert sur la carte ; l'état initial de B ; le banc ; mesures (1) à (3).
+- [ ] **P3** — le saut sous la houle ; images ; mesure (4).
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — le profil (scène de 4 m, 3,2 m d'eau, 2,5 m d'air ; médianes, ms) : **projection 13,9** ; reconstruction 1,85 ; décision
-  de la bascule 1,64 ; fil de l'échange 0,94 ; séparation et corps 0,84 ; P2G 0,78 ; le reste sous 0,6. Au mur, **46 ms** par pas
-  pour 25 ms de carte : les relectures du pas stable (toutes les vitesses de particules et de faces) et de la pression entière.
-- **P3** — (a) **la vitesse maximale sur la carte** (`speed_max`, `speed_max_finish` ; un mot relu) et `pressure_stats` (huit mots) :
-  le pas stable identique au pas près (S453 : 125 pas, pas moyen 4 856 µs, inchangés) ; mur 46 → **31,5 ms**. (b) **une scène de jeu**
-  (`C10_ARRET=0.6` : la sphère s'arrête à 0,6 m, 1,4 m d'eau ; `C10_AIR=1.5`) : 80 × 80 × 58 mailles, pas de carte **12 ms**
-  (projection 6,7), l'eau au plus haut à 2,11 m sous un plafond à 2,9 m ; stable jusqu'à t = 16. (c) **les horodatages éteints** dans
-  la boucle vivante (`set_timing`). (d) **le nombre de Courant** (`set_courant`, `COURANT=`) : 0,8 et 1,0 stables jusqu'à t = 16,
-  masse exacte ; à 1,0, l'image à t = 2 ne change que sur 0,3 % des pixels — **retenu pour la scène vivante** (ADR-215 D2). La fenêtre
-  (20 s, 4 m) : **simulé / réel 0,98** (0,83 sur les 3 premières secondes, le saut) ; image 16,7 ms en médiane, 37,6 ms au 99e centile.
-- **P4** — C10-SCENES-S454 §4 ; journal ; jeton libre ; maillons 12 (justifiés : S406) ; suivant : S456, la houle (ADR-215 D4 étape 3).

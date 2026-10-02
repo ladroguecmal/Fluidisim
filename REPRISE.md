@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 01:38 +02:00
+JETON            : occupé
+Battement        : 2026-10-03 01:44 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S456 — la houle** (ADR-215 D4, étape 3)
 Dernière session : S455 — le temps réel à 4 m ([preuve](docs/validation/C10-SCENES-S454.md) §4) — la fenêtre de 0,11 à 0,98 du temps réel (0,83 pendant le saut). Avant : S454
 Session suivante : **S456 — la houle** (ADR-215 D4, étape 3) : B entre dans la scène de la carte par ses bords en `x` (le bord ouvert de S446 porté sur la carte : la vitesse normale de B imposée, son débit compté dans les colonnes) — reçu si la houle traverse la scène sans s'amortir de plus de 10 % sur 10 s, la masse comptée ; puis la lumière de l'eau, la scène `--v1`. **Sans attendre de « Continue »** (ADR-215 D1)
 Maillons        : 12 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
