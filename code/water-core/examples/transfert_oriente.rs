@@ -1937,6 +1937,8 @@ fn mer(dx: f32, avec_paquet: bool, a_houle: f32) -> Result<(), String> {
     // `MER_BERNOULLI=1` (S434, C7d-3a) : les termes croisés sous la forme de Bernoulli.
     let bernoulli = std::env::var("MER_BERNOULLI").is_ok();
     v.set_cross_bernoulli(bernoulli);
+    // `MER_BERNOULLI_ESSAI=1|2` (S434) : G seule, R seule — des amputations, pour la bisection d'A320.
+    v.set_cross_bernoulli_trial(std::env::var("MER_BERNOULLI_ESSAI").ok().and_then(|x| x.parse().ok()).unwrap_or(0));
     // `MER_LW=1` (S434) : le terme de second ordre de l'advection (ADR-209, A321), actif par défaut dans la production.
     let lax_wendroff = std::env::var("MER_LW").is_ok();
     if lax_wendroff {

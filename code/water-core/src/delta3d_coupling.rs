@@ -103,6 +103,12 @@ impl Volume3 {
         self.cross_bernoulli = on;
     }
 
+    /// **Essais seulement** (S434, A320) : amputer la forme de Bernoulli d'une de ses parties, pour nommer celle qui porte
+    /// l'instabilité — 1 : G seule, 2 : R seule ; 0 : les deux. Aucune n'est une physique.
+    pub fn set_cross_bernoulli_trial(&mut self, part: u8) {
+        self.cross_bernoulli_trial = part;
+    }
+
     /// S434 : la vitesse de δ au centre de la maille `(i, j, k)` (moyennes de faces), et celle de B (moyenne des deux faces `w`).
     fn centre_velocities3(&self, bg: &BackgroundFaces3<'_>, i: usize, j: usize, k: usize) -> ([f32; 3], [f32; 3]) {
         let d = [
@@ -466,6 +472,11 @@ impl Volume3 {
                                 }
                             }
                             let r = if residual { sample.momentum_residual(self.rho, 0.).map_err(|_| Error::NotFinite)?[axis] } else { 0. };
+                            let (g, rot) = match self.cross_bernoulli_trial {
+                                1 => (g, 0.),
+                                2 => (0., rot),
+                                _ => (g, rot),
+                            };
                             dt as f32 * (g + rot + r)
                         } else {
                             dt as f32 * extra3(sample, axis, vel, dv, self.rho, residual, trials)?
