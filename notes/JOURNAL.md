@@ -18235,3 +18235,13 @@ la place du repos** — 7,5 cm : 0,106 sur une face, 0,068 à ¼, **0,036 au cen
 discrétisation près de la surface ; ni les termes croisés aux faces de surface, ni la bande. Sous une **houle de 8 m** (32 mailles par
 longueur d'onde), rien au-delà de Benjamin-Feir, aux deux places. **C7d-3a non reçu**, le critère tenu tel qu'écrit. Suite **758**.
 **Rituel.** Maillons **25** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7d-3a** — localiser le défaut.
+
+## S438 — 2026-10-02 — physique : A320, l'échelle en mailles par longueur d'onde — indécise ; C7d-3b passe
+
+**Entrée.** *« Continue »* — C7d-3a, localiser le défaut. **Écartée avant tout code** : une quasi-résonance de triades ouverte par la
+dispersion discrète (en eau profonde, l'écart est d'ordre `Ω/2`). **Éprouvée** ([preuve](../docs/validation/MER-S369.md) §10) :
+l'excès viendrait de l'onde liée `2K`, collée à la surface et mal résolue — une fonction de `λ_B/dx` seul. **Mesuré**, `ak` = 0,118,
+16 mailles par longueur d'onde : 8 m à 50 cm, 2,2 fois Benjamin-Feir sur une face, 0,5 au centre ; 2 m à 12,5 cm, 5,4 et 1,9 fois ;
+mais 4 m à 12,5 cm (32 mailles) montait à 3,1 fois (S436). **Indécis**, tel qu'écrit ; la cause n'est pas trouvée. La règle déclarée en
+S437 s'applique : le constat et l'enveloppe à 25 cm s'écrivent, **C7d-3b vient, sans la bascule des défauts**. Aucun code du cœur
+changé. **Rituel.** Maillons **26** — justifié : la priorité du solveur (S406) ; 4.19 reste partiel. Suivant : **C7d-3b**.

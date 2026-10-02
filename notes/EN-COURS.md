@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S438 — **en cours**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, localiser le
+Session : S438 — **terminée**. Demande de l'utilisateur (2026-10-02) : *« Continue »* — la suite déclarée : **C7d-3a**, localiser le
 défaut d'A320 près de la surface ([preuve](../docs/validation/MER-S369.md) §9).
 
 **Ce que la session trouve en entrant.** À 25 cm, sous la houle de 4 m (16 mailles par longueur d'onde), le taux dépend de la place
@@ -88,7 +88,7 @@ composantes de B qu'il résout (`λ ≥ 32·dx`), les plus courtes restant port�
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — mesures : 8 m à 50 cm, 2 m à 12,5 cm ; deux places ; critères.
 - [x] **P3** — preuve ; A320 ; registres ; suite.
-- [ ] **P4** — rituel.
+- [x] **P4** — rituel.
 
 ### Notes de reprise
 - **P2** — `ak` = 0,118, germe de 1 mm à `2K`, masque 7, 95 s ; taux de la bande 35–59 s (et, entre parenthèses, la phase linéaire) :
@@ -100,3 +100,4 @@ composantes de B qu'il résout (`λ ≥ 32·dx`), les plus courtes restant port�
   4,2) ; mais l'échelle en `λ_B/dx` n'est pas propre : la houle de 4 m à 12,5 cm (32 mailles, sur une face, 6 cm, S436) montait à
   3,1 fois. La cause n'est pas trouvée en une session : la règle déclarée en S437 s'applique — le constat s'écrit, C7d-3b vient.
 - **P3** — MER-S369 §10, APIC-CARTE §22.9 ; A320 annotée ; index, liste, feuille de route, questions ; aucun code du cœur changé (suite 758).
+- **P4** — journal ; jeton libre ; maillons 26 (justifiés : S406) ; suivant : S439, C7d-3b.
