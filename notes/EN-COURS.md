@@ -81,7 +81,7 @@ par longueur d'onde.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres (S446–S447).
-- [ ] **P3** — le banc `deferlement_en_mer` ; mesures ; critères.
+- [x] **P3** — le banc `deferlement_en_mer` ; mesures ; critères.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
@@ -89,4 +89,11 @@ par longueur d'onde.
 - **P3a** — le raccord porté du banc dans le système : `water_core::band_in_sea::BandInSea` (`configure`, `feed_sea`, `feed_band`,
   `set_conservative` ; tampons réservés ; une colonne de particules de la bande garde la hauteur de la mer, ses vitesses passent) ;
   `Volume3::rest`. Le banc `raccord_bande_mer` passe par lui : **les chiffres de S447 au bit** (9,4218 mm, 1,126·10⁻³ m³, 3,943·10⁻⁶ m³).
+- **P3b** — banc `deferlement_en_mer` (houle calme `ε_B` = 0,2 dans une mer de 24 m ; bande de 8 m, groupe de Stokes d'ordre 3 à
+  `ε₀` = 0,55 au centre ; 20 mailles par longueur d'onde ; 20 s de calcul) : **dans la mer** — retournement **0,736 s** à 13,65 m, part
+  de la fenêtre en particules 0,350, masse au raccord **3,4·10⁻⁷ m³** (≈ 0) ; **bande seule de 8 m** (parois à 4 m du centre) — 0,846 s,
+  13,95 m, 0,375 ; **bande seule de 16 m** — 0,576 s, 13,25 m, 0,125. **(1) mal posé** : la forme seule dépend de la largeur de sa bande
+  (un groupe modulé n'est pas une solution ; son évolution dépend de ce qui l'entoure) — la mer tombe entre les deux. **(3) tenu.**
+  **(4) manqué** : sous une houle calme (`ε` = 0,1), 42 colonnes en particules après 1 s (bande seule : 20) — la bascule à ses défauts,
+  non avec les réglages reçus en C7d-1/C7d-2 (la vitesse propre relative à B). Suite **762**. **c3, première session : non reçu.**
 
