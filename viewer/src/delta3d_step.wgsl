@@ -482,6 +482,16 @@ fn band(f: u32, axis: u32, k: u32, surface: f32) -> f32 {
     return (end - start) * (bg(f, 4u + axis) + bg(f, 10u + 3u * axis + 2u) * (0.5 * (end + start) - (f32(k) + 0.5) * s.dx));
 }
 
+/// S439 : le débit de fond entre deux hauteurs `low` et `high` dans la couche `k` — `band(high) − band(low)` sous forme exacte :
+/// nul au bit quand `high == low`.
+fn band_between(f: u32, axis: u32, k: u32, low: f32, high: f32) -> f32 {
+    let lower = f32(k) * s.dx;
+    let upper = f32(k + 1u) * s.dx;
+    let start = clamp(low, lower, upper);
+    let end = clamp(high, lower, upper);
+    return (end - start) * (bg(f, 4u + axis) + bg(f, 10u + 3u * axis + 2u) * (0.5 * (end + start) - (f32(k) + 0.5) * s.dx));
+}
+
 @compute @workgroup_size(64)
 fn fluxes(@builtin(global_invocation_id) id: vec3<u32>) {
     let slot = id.x;
@@ -515,14 +525,22 @@ fn fluxes(@builtin(global_invocation_id) id: vec3<u32>) {
     } else {
         surface = 0.5 * (cells_out[lo] + cells_out[hi]);
     }
-    // S439 : la surface de B seule, formée comme la totale — aux bords, celle de la face ; dedans, la moyenne des deux colonnes.
+    // S439 : la surface de B seule, formée comme la totale — aux bords, celle de la face ; dedans, la moyenne des deux colonnes —,
+    // et la surface totale reformée **depuis elle** par la perturbation, en différences exactes : à δ nul, l'écart entre les deux
+    // est nul au bit, quoi que le compilateur fasse de la somme qui forme `own` (L345 ; mesuré S439 : 9·10⁻¹¹ m au premier pas).
     var own = 0.0;
+    var top = 0.0;
     if (RELATIVE != 0.0) {
         let wbase = n_u() + n_v();
-        if (a == 0u || a == n) {
+        if (a == 0u) {
             own = s.rest + bg(edge_face, 0u);
+            top = own + difference(cells_in[hi], s.rest);
+        } else if (a == n) {
+            own = s.rest + bg(edge_face, 0u);
+            top = own + difference(cells_in[lo], s.rest);
         } else {
             own = 0.5 * ((s.rest + bg(wbase + lo, 0u)) + (s.rest + bg(wbase + hi, 0u)));
+            top = own + 0.5 * (difference(cells_in[lo], s.rest) + difference(cells_in[hi], s.rest));
         }
     }
     var flux = 0.0;
@@ -534,8 +552,9 @@ fn fluxes(@builtin(global_invocation_id) id: vec3<u32>) {
             if (wet_part > 0.0) { flux = flux + vel[f] * s.dx * wet_part; }
         }
         if (RELATIVE != 0.0) {
-            // S439 : la bande moins celle de B seul, sa surface formée comme la totale (S369).
-            total_band = total_band + (band(f, axis, k, surface) - band(f, axis, k, own));
+            // S439 : la bande moins celle de B seul (S369) — écrite comme le débit de B entre sa surface et la totale, la même
+            // formule que `band3(surface) − band3(own)`, sans la différence de deux grandeurs presque égales.
+            total_band = total_band + band_between(f, axis, k, own, top);
         } else if (!switched(16u)) { total_band = total_band + band(f, axis, k, surface); }
     }
     let base = select(0u, 2u * x_faces(), axis == 1u);

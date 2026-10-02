@@ -88,7 +88,7 @@ celui du pas de S297 ; (4) la suite du cœur, zéro avertissement ; l'afficheur 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la ligne de base du banc de trajectoire (S297).
 - [x] **P3** — le mode relatif sur la carte : sources, pipelines, banc.
-- [ ] **P4** — mesures ; critères.
+- [x] **P4** — mesures ; critères.
 - [ ] **P5** — preuve ; registres ; rituel.
 
 ### Notes de reprise
@@ -101,4 +101,16 @@ celui du pas de S297 ; (4) la suite du cœur, zéro avertissement ; l'afficheur 
   `Step3::set_relative` compile à la demande les étages du pas (`pipelines_zeroed`, comme le banc de S391) et du couplage avec
   `RELATIVE` = 1 ; `step_pipes`, `couple_pipes` les choisissent. Banc `--delta3d-trajectoire` : `RELATIF=1`, `TEMOIN=1`. L'afficheur
   compile sans avertissement.
+- **P4** — premier passage : la production au bit, mais **le témoin de la carte non nul** dès le pas 10 (1,2·10⁻⁹ m). Banc
+  `--delta3d-temoin-relatif` (étage par étage) : fantômes, second membre et vitesses nuls au bit, **la surface publiée non** au premier
+  pas (9·10⁻¹¹ m) — la bande : `own = 0,5·((repos + a) + (repos + b))`, réassocié par le compilateur (L345), ne retombait plus au bit sur
+  la surface totale lue en mémoire. **Remède** : la bande relative écrite comme le débit de B **entre** sa surface et la totale
+  (`band_between`, la même formule que `band3(surface) − band3(own)`), la totale reformée depuis `own` par la perturbation en
+  différences exactes (`difference`, S358) — nulle au bit quand δ l'est. **Mesures** (400 pas, 64 cycles) : (1) **production au bit**
+  (sortie identique à la ligne de base) ; (2) **témoin nul au bit** sur 400 pas, carte et référence ; (3) horizon du millimètre au pas
+  **260** (base : 130), écart global 3,2 mm (base : 7,1), mais l'écart avant l'horizon **1,5308·10⁻⁴ m contre 1,5306·10⁻⁴** (deux fois
+  la base) : **manqué de 0,01 %**, tel qu'écrit. La clause compare des maxima sur des fenêtres inégales (260 pas contre 130) : sur la
+  même fenêtre (pas 1 à 129), la carte relative s'écarte de **1,5·10⁻⁷ m** contre 7,65·10⁻⁵ pour le pas de S297 — 500 fois moins.
+  **C7d-3b non reçu tel qu'écrit** ; le critère (3), mal posé, est à réécrire avant la prochaine mesure (même fenêtre). (4) L'afficheur
+  compile sans avertissement ; le cœur n'a pas changé (suite 758).
 

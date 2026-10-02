@@ -1344,6 +1344,11 @@ impl Step3 {
     }
 
     /// **Banc S342** : tous les champs de toutes les faces, relus par morceaux.
+    /// **Banc S439** : la sortie du couplage — surface totale (colonnes), fantôme du haut (colonnes), second membre (mailles).
+    pub fn couple_out_for_bench(&self) -> Result<Vec<f32>, String> {
+        self.relire(&self.cells_out, 0, 2 * self.columns() + self.cells())
+    }
+
     pub fn faces_values(&self) -> Result<Vec<f32>, String> {
         let total = self.face_total() * STEP_FIELDS;
         let morceau = (self.read.size() / 4) as usize;
@@ -2167,6 +2172,54 @@ pub fn trajectoire() -> Result<(), String> {
         if temoin {
             println!(
                 "DELTA3D_TRAJECTOIRE_S439 temoin relatif={relatif} carte_non_nulle_au_pas={carte_non_nulle:?} coeur_non_nul_au_pas={coeur_non_nul:?}"
+            );
+        }
+        Ok(())
+    })
+}
+
+/// **S439 (C7d-3b) — le témoin du mode relatif, étage par étage.** Le domaine et la mer de `trajectoire`, sans perturbation,
+/// la carte en mode relatif : à chaque pas, le plus grand fantôme du haut, le plus grand second membre, la plus grande vitesse
+/// prédite puis corrigée, et la surface publiée — tant qu'ils sont nuls au bit, le point fixe tient à cet étage.
+/// `PAS=` (40).
+pub fn temoin_relatif() -> Result<(), String> {
+    use crate::scene::host_impl;
+    pollster::block_on(async {
+        let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 28);
+        let background = fond_s298(&mut alloc)?;
+        let domain = Domain3 { nx: 32, ny: 24, nz: 36, dx: 0.25 };
+        let (rho, g, rest) = (1025_f32, 9.81_f32, 8_f32);
+        let origin = [0., 0., -rest];
+        let sponge = Sponge3 { width_x: 1., width_y: 1., rate_per_s: 2. };
+        let duration = 5_000u64;
+        let pas: u64 = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(40);
+        let mut carte = Step3::new(&background, domain, origin, rho, g).await?;
+        carte.set_relative(true);
+        carte.set_step(duration, rest, sponge)?;
+        let (nu, nv, nw) = (
+            (domain.nx + 1) * domain.ny * domain.nz,
+            domain.nx * (domain.ny + 1) * domain.nz,
+            domain.nx * domain.ny * (domain.nz + 1),
+        );
+        carte.set_state(&vec![0.; nu], &vec![0.; nv], &vec![0.; nw], &vec![rest; domain.columns()])?;
+        let max = |v: &[f32]| v.iter().enumerate().fold((0f32, 0usize), |m, (i, x)| if x.abs() > m.0 { (x.abs(), i) } else { m });
+        for n in 0..pas {
+            let time = water_core::SimTime(n * duration);
+            carte.publish_time(&background, time)?;
+            let etat = carte.velocities()?;
+            carte.run_for_bench(64, Upto::Projection)?;
+            let sortie = carte.couple_out_for_bench()?;
+            let cols = domain.columns();
+            let (g_max, g_lieu) = max(&sortie[cols..2 * cols]);
+            let (b_max, b_lieu) = max(&sortie[2 * cols..]);
+            let (p_max, _) = max(&carte.predicted()?);
+            carte.write_velocities(&etat)?;
+            carte.run_for_bench(64, Upto::Full)?;
+            let (v_max, v_lieu) = max(&carte.velocities()?);
+            let (e_max, _) = max(&carte.published()?);
+            println!(
+                "TEMOIN_S439 pas={n} fantome_haut={g_max:.3e}@{g_lieu} second_membre={b_max:.3e}@({},{},{}) predite={p_max:.3e} vitesse={v_max:.3e}@{v_lieu} publiee={e_max:.3e}",
+                b_lieu % domain.nx, (b_lieu / domain.nx) % domain.ny, b_lieu / cols
             );
         }
         Ok(())
