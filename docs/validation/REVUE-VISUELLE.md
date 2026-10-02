@@ -1442,3 +1442,14 @@ instants : le cratère (t = 0,5 et 1 `√(D/g)`), le jet de Worthington (t = 2 e
 causes, mesurées : l'**ombrage à facettes** (une normale par triangle) et les **marches au raccord** bande | colonnes (0,34 maille, S450).
 Suite : S451 — des normales lissées (le gradient de `φ`, interpolé par pixel) et le raccord de `φ` à la frontière pour le rendu.
 
+## 42. R37 — la surface continue, normales lissées et raccord fondu, S451
+
+Les mêmes instants que R36, après les deux corrections ([SURFACE-CONTINUE-S450](SURFACE-CONTINUE-S450.md), S451) : le saut au raccord
+de 0,34 à 0,08 maille, l'ombrage par pixel.
+
+| image | ce qu'elle montre |
+|---|---|
+| `captures/s451/b10_t{0.5,1.0,2.0,3.0}.png` | le cratère, puis le jet — lisses |
+
+**La question :** voit-on encore des divisions — faces planes ou marches ? **Verdict** : en attente.
+

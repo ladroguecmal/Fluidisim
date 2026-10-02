@@ -18361,3 +18361,11 @@ un rendu logiciel en PPM ; B10 (une sphère entre dans l'eau) en bande étroite.
 **le saut au raccord bande | colonnes, 0,34 maille** (manqué, au plus un quart) — **visible en marches carrées** autour de la zone agitée ;
 28 s. Quatre images envoyées à l'utilisateur. Suite **762**. **Rituel** (allégé). Maillons **7** — justifié : la priorité du solveur
 (S406). Suivant : raccorder `φ` à la frontière pour le rendu, des normales lissées ; le lot des registres (S451).
+
+## S451 — 2026-10-02 — rendu : la surface continue, après R36
+
+**Entrée.** **R36** : *« Alors le problème est que l'on voit des divisions faces plane »* — non reçu. **Fait** : le lot des registres
+(ADR-213 D3) ; au banc `surface_continue` ([preuve](../docs/validation/SURFACE-CONTINUE-S450.md) § S451), `φ` fondu au raccord bande |
+colonnes et des normales lissées, ombrées par pixel — le calcul n'est pas touché. **Mesuré** : le saut au raccord **0,083 maille**
+(S450 : 0,337) ; **0 arête ouverte** ; les images lisses, sans marches. **R37** envoyé à l'utilisateur. Suite **762**. **Rituel**
+(allégé). Maillons **8** — justifié : la priorité du solveur (S406). Suivant : selon R37 — le rendu en direct sur la carte, puis C10.

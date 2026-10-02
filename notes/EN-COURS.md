@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S451 — **en cours**. Verdict de l'utilisateur (2026-10-02) sur les images de S450 (**R36**) : *« Alors le problème est que l'on
+Session : S451 — **terminée**. Verdict de l'utilisateur (2026-10-02) sur les images de S450 (**R36**) : *« Alors le problème est que l'on
 voit des divisions faces plane »* — non reçu ([REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md) §41).
 
 **Ce que la session fait.** (1) Le lot des registres (ADR-213 D3, dû en S451). (2) **Les deux causes de R36** au banc
@@ -80,7 +80,7 @@ de la colonne voisine, le poids allant de 0 à 1 sur ces quatre colonnes. Le cal
 - [x] **P1** — R36 inscrit ; jeton, plan seul.
 - [x] **P2** — le lot des registres.
 - [x] **P3** — normales lissées, `φ` fondu au raccord ; mesures ; images.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, file active pour S448–S450 ; `Registres` : dernier lot S451, le prochain au plus tard en S454.
@@ -89,4 +89,4 @@ de la colonne voisine, le poids allant de 0 à 1 sur ces quatre colonnes. Le cal
   `φ`, interpolé le long de l'arête) et ombrage par pixel. **Mesuré** : le saut au raccord corrigé de la pente **0,083 maille** (S450 :
   0,337) — (1) tenu ; **0 arête ouverte** — (2) tenu ; les images `captures/s451/b10_t{0.5,1.0,2.0,3.0}.png` : le cratère et le jet
   lisses, ni facettes ni marches — envoyées à l'utilisateur (R37), (3) à son jugement. 28 s. Suite **762**.
-
+- **P4** — SURFACE-CONTINUE-S450 (§ S451), REVUE-VISUELLE §42 (R37) ; journal ; jeton libre ; maillons 8 (justifiés : S406) ; suivant : S452, selon R37.

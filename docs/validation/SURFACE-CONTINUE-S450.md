@@ -33,3 +33,21 @@ et 3). Mais **des marches carrées** dessinent la frontière bande | colonnes au
 maille : la surface reconstruite des particules et `η` des colonnes ne se rejoignent pas exactement. L'ombrage est à facettes (une normale
 par triangle). **Ce qui reste** : raccorder `φ` à la frontière pour le rendu (un fondu sur deux colonnes), des normales lissées — puis le
 rendu en direct sur la carte, et le jugement de l'utilisateur.
+
+## S451 — après R36 : normales lissées, `φ` fondu au raccord
+
+2026-10-02. **R36** (l'utilisateur) : *« Alors le problème est que l'on voit des divisions faces plane »* — deux causes : l'ombrage à
+facettes, les marches au raccord. **Fait** au banc (le calcul n'est pas touché) : **le champ rendu** — `φ` fondu au raccord, deux passes
+d'une moyenne horizontale 3 × 3 sur les colonnes à moins de deux mailles d'une frontière bande | colonnes (`SURFACE_SANS_FONDU=1` rend
+`φ` tel quel) ; **des normales lissées** — le gradient de `φ` aux points de la grille, interpolé le long de l'arête au sommet, puis aux
+coordonnées barycentriques **par pixel** (Phong). **Reproduire** : comme ci-dessus, sortie `captures/s451` ; attendu
+`saut_raccord_corrige_max_sur_dx=0.083`, `aretes_ouvertes_max=0`.
+
+| critère (écrit avant) | S450 | **S451** |
+|---|---:|---:|
+| saut au raccord, corrigé de la pente (au plus ¼ de maille) | 0,337 | **0,083** — tenu |
+| arêtes ouvertes à l'intérieur | 0 | **0** — tenu |
+| ni facettes ni marches visibles | R36 : non | **R37 : au jugement de l'utilisateur** |
+
+Les images `captures/s451/b10_t{0.5,1.0,2.0,3.0}.png` : le cratère et le jet de Worthington lisses, sans les marches carrées.
+
