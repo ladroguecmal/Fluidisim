@@ -62,32 +62,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S464 — **terminée**. En autonomie (décision du 2026-10-03) : le lot des registres (ADR-213 D3, dû en S460), puis **le direct**.
+Session : S465 — **en cours**. En autonomie : la pluie d'ADR-205, reçue sur la piscine et la mer (R28 à R33), sur la scène du saut.
 
-**Ce que la session fait.** (1) Le lot des registres pour S457–S463. (2) **Le direct** : la scène du saut dans Godot **sans
-enregistrement**. **Tranché (ADR-215 D2)** — un lien local plutôt qu'une bibliothèque dans le processus de Godot (godot-rust demande une
-dépendance que le dépôt ne porte pas, hors ligne) : `water-viewer --v1-direct` calcule la scène au temps réel sur la carte et pousse
-chaque image (le champ `φ` sur 8 bits, la carte des caustiques, l'instant, le corps) sur `127.0.0.1:47011` ; `saut.tscn -- --direct`
-s'y connecte et affiche la dernière image reçue. Godot ne calcule toujours rien (I-01).
+**Ce que la session fait.** Dans `saut.tscn` : **les rides** (`pluie.gdshaderinc`, `pluie_rides`) sur la normale de l'eau du domaine et
+de la mer au-delà, sur une horloge de pluie à part (l'enregistrement boucle, la pluie non) ; **le ciel couvert** (`couvert` : le ciel,
+l'éclairement, l'éclat et les caustiques éteints) ; **les gouttes dans l'air** (`pluie_air.gd`) et **les gerbes** (`gerbes.gd`) sur la
+nappe de la mer ; **l'extinction** par les gouttes (la brume, `Pluie.extinction`). `PLUIE=<mm/h>` ou la touche P (0, 2, 10, 50).
 
-**Critères, écrits avant.** (1) la scène tourne dans Godot, l'afficheur sans fenêtre, sans fichier entre eux ; (2) le temps simulé suit
-le temps réel (0,9 au moins) et Godot reçoit 25 images/s au moins ; (3) une capture du direct montrée.
+**Critères, écrits avant.** (1) le taux des anneaux celui de `pluie.gd` (Marshall-Palmer × Atlas, publié) ; (2) sous la pluie, plus
+d'éclat ni de caustiques (le soleil direct éteint) ; (3) 60 images/s au moins sous 10 mm/h ; (4) les images montrées (10 mm/h).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le lot des registres.
-- [x] **P3** — le direct (`--v1-direct`, `--direct`) ; mesures ; capture.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — la pluie dans `saut.tscn` ; mesures ; images.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — feuille de route, liste, file active pour S457–S463 (la v1 reçue, C10-2 plafonné, C11) ; `Registres` : dernier lot S464, le prochain au plus tard en S467.
-- **P3** — `water-viewer --v1-direct` (la scène au temps réel sur la carte, poussée sur `127.0.0.1:47011` : `FST1` et l'en-tête,
-  puis `IMG1`, l'instant, le corps, `φ` sur 8 bits, les caustiques) ; `saut.tscn -- --direct` (la connexion, la dernière image complète
-  appliquée) ; `encoder_image` commun à l'export et au direct ; `SurfaceCarte::demander_couches` / `couches_pretes` (la relecture sans
-  attente, deux tampons). **Mesuré**, Godot affiché : d'abord **0,55** du temps réel et 13 à 19 images/s — la relecture du champ entier
-  (15 ms), l'encodage (12 ms) et l'envoi (2 ms) dans la boucle ; encodage et envoi sur un fil à part : 0,78, 23,5/s ; la relecture sans
-  attente : **0,3 ms** ; puis un défaut : **`φ` reçu nul** (le fondu lit ses dimensions dans l'uniforme, jamais écrit sans `set_view`)
-  — la vue posée au départ : **0,939 du temps réel, 28,2 images/s** — (1), (2) tenus ; (3) captures `godot/captures/saut_direct_{0,1,2}.png`
-  (le joueur qui remonte, l'eau qui ruisselle) envoyées.
-- **P4** — C10-SCENES-S454 §13 ; journal ; jeton libre ; maillons 0 — capacité reçue (le direct : la simulation jouée dans Godot en temps réel ; le chemin, la pluie et R39 ; la preuve, §13) ; suivant : S465, la pluie sur la scène du saut.

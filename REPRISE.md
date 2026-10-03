@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 21:11 +02:00
+JETON            : occupé
+Battement        : 2026-10-03 21:13 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S465 — C11 : la pluie sur la scène du saut**
 Dernière session : S464 — le direct ([preuve](docs/validation/C10-SCENES-S454.md) §13) — la scène du saut calculée par l'afficheur et jouée dans Godot en temps réel (0,94, 28 images/s). Avant : S463 (la surface fine)
 Session suivante : **S465 — la pluie sur la scène du saut** (ADR-205 : les rides factices, les gouttes dans l'air, le ciel couvert — reçus sur la piscine et la mer, R28 à R33) portée dans `saut.tscn` ; puis le joueur rendu (un corps, pas une sphère) ; R39 passe d'abord s'il vient. **Sans attendre de « Continue »**
 Maillons        : 0 — capacité reçue (S464 : le direct, C10-SCENES-S454 §13) ; journal
