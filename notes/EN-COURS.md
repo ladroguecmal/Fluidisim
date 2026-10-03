@@ -62,26 +62,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S469 — **terminée**. En autonomie : **le direct avec le joueur debout**.
+Session : S470 — **en cours**. En autonomie : le lot des registres (dû), puis la caméra qui suit le joueur.
 
-**Ce que la session fait.** Le direct de S464 (`water-viewer --v1-direct` → `saut.tscn -- --direct`) mesuré de nouveau, la scène
-ayant changé depuis : le joueur debout (S466), son éclairage (S467), son ombre (S468). L'en-tête du direct porte déjà
-`demi_longueur` ; Godot en tire la capsule. Ce qui casse se corrige ici.
+**Ce que la session fait.** (1) **Le lot des registres** (ADR-213 D3) pour S467–S469. (2) **La caméra qui suit le joueur** dans
+`saut.tscn` : la cible de l'orbite monte avec le corps — à mi-chemin entre le niveau de l'eau et son centre quand il est en l'air,
+au point d'entrée sinon —, lissée en jeu (une constante de temps d'un tiers de seconde), posée d'un coup pour les captures ; la
+touche C la coupe (`SUIVRE=0`). À 5,80 s, le joueur en l'air sortait du cadre.
 
-**Critères, écrits avant.** (1) la capsule dans Godot en direct (maillage, ombre) ; (2) la cadence de S464 tenue à 10 % près :
-0,85 du temps réel et 25 images reçues par seconde au moins ; (3) les images montrées.
+**Critères, écrits avant.** (1) les registres à jour, `--check` à 0 ; (2) à 5,80 s le joueur entier dans le cadre, l'eau dessous ;
+(3) le rejeu et le direct inchangés hors de la caméra ; (4) les images montrées.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le direct mesuré ; corrections ; images.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — le lot des registres.
+- [ ] **P3** — la caméra qui suit ; images.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — **Deux défauts corrigés** dans `saut.gd` : (a) en direct, `_ready` attend l'en-tête et `_process` tourne déjà ; depuis
-  S465, l'horloge de la pluie y appelait les matériaux nuls (une erreur par image) — `prete`, posée à la fin de `_ready` ; (b)
-  l'afficheur parti (`DUREE`), le lien fermé était lu à chaque image (`!is_open()`) — `recevoir` s'arrête si le lien n'est plus
-  connecté. **Mesuré** : (1) la capsule en direct, son ombre au fond — `saut_direct_{0,1,2}.png` ; (2) **0,995 du temps réel,
-  29,9 images/s envoyées** sur 30 s (S464 : 0,939, 28,2) ; Godot en reçoit 68 sur 70 dans la fenêtre de `--cout` ; (3) image
-  `saut_direct_1.png` envoyée.
-- **P3** — C10-SCENES-S454 §18 ; journal ; jeton libre ; maillons 1 ; suivant : S470, la caméra libre autour du joueur en direct (suivre le corps) et le lot des registres.

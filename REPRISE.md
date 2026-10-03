@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 23:24 +02:00
+JETON            : occupé
+Battement        : 2026-10-03 23:25 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S470 — le lot des registres ; la caméra qui suit le joueur**
 Dernière session : S469 — le direct avec le joueur debout ([preuve](docs/validation/C10-SCENES-S454.md) §18) — 0,995 du temps réel, deux défauts de `saut.gd` corrigés. Avant : S468 (l'ombre du joueur)
 Session suivante : **S470 — le lot des registres** (dû, S467–S469) **et la caméra qui suit le joueur** dans `saut.tscn` (la cible sur le corps, en direct comme en rejeu). **Sans attendre de « Continue »**
 Maillons        : 1 — journal
