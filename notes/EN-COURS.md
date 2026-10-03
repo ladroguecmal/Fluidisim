@@ -81,3 +81,4 @@ le temps réel (0,9 au moins) et Godot reçoit 25 images/s au moins ; (3) une ca
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — feuille de route, liste, file active pour S457–S463 (la v1 reçue, C10-2 plafonné, C11) ; `Registres` : dernier lot S464, le prochain au plus tard en S467.

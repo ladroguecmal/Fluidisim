@@ -17,7 +17,7 @@ Session en cours : **S464 — le lot des registres ; C11, le direct** (la scène
 Dernière session : S463 — la surface fine sur la scène du saut dans Godot ([preuve](docs/validation/C10-SCENES-S454.md) §12) — 391 images/s. Avant : S462 (les caustiques)
 Session suivante : **S464 — le lot des registres** (ADR-213 D3, dû en S460) **puis le direct** : la simulation dans le processus de Godot — l'afficheur en bibliothèque (godot-rust, GDExtension) ou un lien local ; reçu si la scène du saut tourne dans Godot sans enregistrement. **Sans attendre de « Continue »** (décision du 2026-10-03)
 Maillons        : 2 — journal
-Registres       : dernier lot S457 (ADR-213 D3) ; le prochain au plus tard en S460
+Registres       : dernier lot S464 (ADR-213 D3) ; le prochain au plus tard en S467
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
