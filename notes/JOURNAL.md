@@ -18404,3 +18404,12 @@ près) ; une scène de jeu (1,4 m d'eau, 1,5 m d'air) ; les horodatages éteints
 indiscernable à l'image (tranché). **Mesuré** : la fenêtre à 4 m passe de **0,11 à 0,98** du temps réel (0,83 pendant le saut) ; masse
 exacte, stable jusqu'à t = 16. Suite **762**. **Rituel** (allégé). Maillons **12** — justifié : la priorité du solveur (S406).
 Suivant : la houle.
+
+## S456 — 2026-10-03 — la houle
+
+**Entrée.** ADR-215 D4, étape 3. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §5) : le bord ouvert sur la carte (B imposée
+aux faces des bords, son débit compté dans les colonnes, le volume entré cumulé) ; l'état initial de B ; les zones de relaxation —
+la surface seule (ramener les vitesses faisait dériver le niveau, écarté). **Mesuré** : masse exacte ; la houle sans décroissance
+(0,84 à 1,05 `a`, modulation de ±10 % inscrite — tranché) ; l'écart à B sous 0,25 `a` ; le saut sous la houle stable, la fenêtre à 0,98
+du temps réel. Suite **762**. **Rituel** (allégé). Maillons **13** — justifié : la priorité du solveur (S406). Suivant : le lot des
+registres, puis la lumière de l'eau.

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-03 01:44 +02:00
+JETON            : libre
+Battement        : 2026-10-03 02:17 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S456 — la houle** (ADR-215 D4, étape 3)
-Dernière session : S455 — le temps réel à 4 m ([preuve](docs/validation/C10-SCENES-S454.md) §4) — la fenêtre de 0,11 à 0,98 du temps réel (0,83 pendant le saut). Avant : S454
-Session suivante : **S456 — la houle** (ADR-215 D4, étape 3) : B entre dans la scène de la carte par ses bords en `x` (le bord ouvert de S446 porté sur la carte : la vitesse normale de B imposée, son débit compté dans les colonnes) — reçu si la houle traverse la scène sans s'amortir de plus de 10 % sur 10 s, la masse comptée ; puis la lumière de l'eau, la scène `--v1`. **Sans attendre de « Continue »** (ADR-215 D1)
-Maillons        : 12 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
+Session en cours : aucune
+Dernière session : S456 — la houle ([preuve](docs/validation/C10-SCENES-S454.md) §5) — le bord ouvert sur la carte, la relaxation de la surface ; le saut sous la houle à 0,98 du temps réel, masse exacte. Avant : S455
+Session suivante : **S457 — le lot des registres** (ADR-213 D3, dû en S457) **puis la lumière de l'eau** (ADR-215 D4, étape 4) : la couleur et la lumière reçues (R20, R24 : absorption, ciel, Fresnel, soleil) portées dans `surface_carte` — reçu sur images montrées ; puis la scène `--v1`. **Sans attendre de « Continue »** (ADR-215 D1)
+Maillons        : 13 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
 Registres       : dernier lot S454 (ADR-213 D3) ; le prochain au plus tard en S457
 ```
 

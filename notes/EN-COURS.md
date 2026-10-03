@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S456 — **en cours**. Sans « Continue » (ADR-215 D1) : l'étape 3 d'ADR-215 D4, **la houle**.
+Session : S456 — **terminée**. Sans « Continue » (ADR-215 D1) : l'étape 3 d'ADR-215 D4, **la houle**.
 
 **Ce que la session fait.** Le bord ouvert de S446 (`Apic3::enable_open_boundaries`, CPU) porté sur la carte : les faces `u` des
 bords `i = 0` et `i = nx` portent la vitesse normale de la houle B (`LinearSwell`, eau profonde), sous sa surface ; la projection la
@@ -79,7 +79,7 @@ publié (la dispersion numérique) ; (4) avec le saut : la scène stable, la fen
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le bord ouvert sur la carte ; l'état initial de B ; le banc ; mesures (1) à (3).
 - [x] **P3** — le saut sous la houle ; images ; mesure (4).
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `open_value` (la vitesse de B sur les faces `u` des bords, aux trois endroits qui remettaient les parois à zéro), le débit
@@ -93,4 +93,4 @@ publié (la dispersion numérique) ; (4) avec le saut : la scène stable, la fen
   creux d'une modulation de ±10 % : tranché (ADR-215 D2), la houle ne s'amortit pas, la modulation inscrite.
 - **P3** — le saut sous la houle (4 cm, 2 m) : masse exacte jusqu'à t = 16, `φ` fini ; la fenêtre : simulé / réel **0,98** (0,84 pendant
   le saut), 33,7 ms au 99e centile. Images `captures/s456/scene_t{1.0,2.0,3.0,6.0}.png` envoyées.
-
+- **P4** — C10-SCENES-S454 §5 ; journal ; jeton libre ; maillons 13 (justifiés : S406) ; suivant : S457, le lot des registres puis la lumière de l'eau (ADR-215 D4 étape 4).

@@ -85,3 +85,30 @@ désormais sur la carte (deux noyaux, un mot relu) : il est le même, au pas pr�
 33). **Ce qui reste** : la projection (le solveur entier sur l'eau des colonnes) ; la voie d'échelle est la bande dans la mer δ (C10-2),
 où la mer coûte un solveur de hauteurs, non un solveur volumique.
 
+## 5. La houle (S456, ADR-215 D4 étape 3)
+
+2026-10-03. Le bord ouvert de S446 (CPU) **porté sur la carte** : les faces `u` des bords `i = 0` et `i = nx` portent la vitesse normale
+de la houle B (`LinearSwell`, eau profonde) sous sa surface — `open_value`, aux trois endroits qui remettaient les parois à zéro —,
+la projection la prend comme donnée, les colonnes des bords comptent son débit en quanta, et le volume entré se cumule sur la carte
+(`open_count`, `open_quanta`). L'état initial porte B (`B10::houle` : l'eau sous sa surface, ses vitesses aux particules — gradient
+compris — et à la grille). **Les zones de relaxation** (Jacobsen, Fuhrman et Fredsøe 2012) sur 0,8 m à chaque bord : la surface des
+colonnes ramenée vers B au début du pas, d'un poids `(e^{c^3,5} − 1)/(e − 1)`, le volume compté avec celui des bords.
+
+**Reproduire** : `COURANT=1.0 C10_ARRET=0.6 C10_AIR=1.5 … --c10-houle` (la houle seule, 10 s ; `HOULE=a,λ`, 0,04,2 par défaut ;
+`C10_RELAX=<m>`, `C10_RELAX_MODE=` 2 / 3 / 0 pour les variantes écartées, `C10_FERME=1` pour des parois) ; le saut sous la houle :
+`HOULE=0.04,2 … C10_LONG=1 C10_SCENE_SEULE=1 --c10-saut` ; la fenêtre : `HOULE=0.04,2 COURANT=1.0 C10_ARRET=0.6 C10_AIR=1.5 COTE=4 …
+--surface-direct`.
+
+| | amplitude au milieu (`a`) | écart à B (`a`) | masse |
+|---|---|---:|---|
+| parois (`C10_FERME`) | 1,51 → 0,44 (ondes stationnaires) | 0,86 à 3 s | exacte |
+| bords ouverts, sans relaxation | 0,81 à 1,37, battement | 0,41 | exacte |
+| relaxation des vitesses et de la surface | 0,95 à 1,43 | 1,47 — le niveau intérieur dérive de −20 mm | exacte |
+| **relaxation de la surface seule** (le défaut) | **0,84 à 1,05, sans décroissance** | **0,25** | **exacte** |
+
+**Verdict** (critères de S456) : (1) masse comptée — tenu (un faux écart d'abord : la relecture du volume entré au mauvais décalage) ;
+(2) l'amplitude à 10 s contre 1 s : **0,80 tel qu'écrit**, au creux d'une modulation de ±10 % ; en moyenne sur 1–3 s et 8–10 s, 0,96 et
+0,97 — **tranché (ADR-215 D2)** : la houle ne s'amortit pas, la modulation (une réflexion qui reste) inscrite ; (3) l'écart à B, 0,25 `a`
+au plus ; (4) le saut sous la houle : masse exacte et stable jusqu'à t = 16 ; la fenêtre à **0,98** du temps réel (0,84 pendant le
+saut), 33,7 ms au 99ᵉ centile. Images : `captures/s456/scene_t{1.0,2.0,3.0,6.0}.png`.
+
