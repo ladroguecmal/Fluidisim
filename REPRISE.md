@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-04 01:22 +02:00
+JETON            : occupé
+Battement        : 2026-10-04 01:25 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S472 — les scènes miroirs (ADR-216 D4) : V1, V5, V6 contre la mer de Godot**
 Dernière session : S471 — le banc visuel (ADR-216, décision de l'utilisateur) : R39 reçu, six références vidéo mesurées ([preuve](docs/validation/REFERENCES-VIDEO-S471.md)). Avant : S470 (la caméra qui suit le joueur)
 Session suivante : **S472 — les scènes miroirs** (ADR-216 D4) : dans Godot, la mer calme vue de la plage (V1), d'un quai (V5), sous l'eau (V6), en séquences, mesurées par `banc_visuel.py` à la largeur réduite des références ; le premier rapport d'écarts. Puis D7 (vues de contrôle, sondes), D5 (non-régression) ; le plafond du domaine ensuite. **Sans attendre de « Continue »**
 Maillons        : 1 — journal

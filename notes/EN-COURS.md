@@ -62,36 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S471 — **terminée**. **Décision de l'utilisateur** (2026-10-04) : *« Je valide ce banc »* — le banc visuel proposé après
-R39 (mesurer plutôt que regarder) passe avant le plafond du domaine. Il fournit six vidéos de référence.
+Session : S472 — **en cours**. En autonomie : **les scènes miroirs** (ADR-216 D4) — les références que nos scènes peuvent déjà
+montrer, mesurées contre elles.
 
-**Ce que la session fait.** (1) **R39 reçu** : *« Tous les verdicts sont validés, mais pas définitifs, car toujours peaufinables »*.
-(2) **Le registre des références vidéo** (`docs/validation/REFERENCES-VIDEO-S471.md`) : les six vidéos, ce que l'utilisateur en dit,
-ce qu'elles mesurent, ce que nos scènes peuvent leur opposer aujourd'hui. (3) **ADR-216, le banc visuel** : des grandeurs comparables
-sans connaître la prise de vue (celles de `cible_image.py`, S308) étendues au temps — mouvement, période, scintillement, écume — sur
-des séquences ; les références mesurées dans le navigateur (la page lit l'image de la vidéo : vérifié, 480 × 854), seuls des nombres
-entrent dans le dépôt ; nos scènes mesurées par le même calcul en Python ; les verdicts reçus deviennent des images de
-non-régression ; les remarques de l'utilisateur deviennent des critères. (4) **La mesure des références** : `outils/banc_visuel.js`,
-les six vidéos mesurées, les nombres inscrits.
+**Ce que la session fait.** Dans `mer.tscn` (la mer de B de R14, la scène côtière, les poses sous l'eau) : (1) une **mer calme**
+exportée par l'afficheur (`--meilleur --vent=3,5` : Hs 0,26 m, Tp 2,6 s ; `MER_DONNEES=`) — la mer de R14 est une mer du large ;
+(2) les poses des références : **plage** (V1 : l'œil à 1,7 m, l'horizon à 4 % du haut du cadre), **quai** (V5 : l'horizon au milieu),
+**sous l'eau** (V6 : la pose de S365 vers le haut) ; un cadre **portrait** à la résolution servie de la référence, un champ vertical
+de 65° (un téléphone tenu droit) ; (3) une **séquence** (`SEQUENCE_FPS`, `SEQUENCE_DUREE`) au pas fixe, à la cadence de mesure de la
+référence ; (4) `banc_visuel.py` sur les mêmes zones, à la même largeur réduite ; (5) **le rapport d'écarts** : chaque grandeur
+contre sa référence et sa classe de sensibilité (S471).
 
-**Critères, écrits avant.** (1) R39 inscrit ; (2) le registre et ADR-216 écrits, `--check` à 0 ; (3) les six vidéos mesurées — au moins
-les grandeurs statiques normalisées et l'énergie de mouvement, par zone ; (4) le calcul JavaScript et le calcul Python d'accord sur une
-même image à 1 % près, ou l'écart dit.
+**Critères, écrits avant.** (1) les trois séquences capturées, l'horizon au même rang que dans la référence à 2 % du cadre près ;
+(2) le rapport écrit : pour chaque grandeur, l'écart et s'il dépasse la sensibilité de sa classe ; (3) les écarts qui dépassent
+nommés et classés (ce qu'ils disent du rendu, ce qui les corrigerait) — **aucun réglage du rendu dans cette session** : elle mesure ;
+(4) les images montrées, côte à côte avec ce que dit la référence.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — R39 ; le registre des références ; ADR-216.
-- [x] **P3** — `outils/banc_visuel.js` et `outils/banc_visuel.py` (le même calcul) ; les six références mesurées.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — la mer calme, les poses, le cadre portrait, la séquence ; les captures.
+- [ ] **P3** — les mesures et le rapport d'écarts.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — R39 inscrit (REVUE-VISUELLE §44) ; ADR-216 ; le registre `docs/validation/REFERENCES-VIDEO-S471.md` (les propos de l'utilisateur mot pour mot, ce que chaque vidéo montre, ce que nos scènes peuvent lui opposer).
-- **P3** — `outils/banc_visuel.py` (numpy) et `outils/banc_visuel.js` (la page) : le même calcul ; **égalité** sur 24 images de Godot
-  (deux zones, toutes les grandeurs, le spectre compris) : **écart nul à quatre chiffres** — et la période de la suite répétée
-  (1,2 s) retrouvée. Le code injecté dans YouTube : **le fichier du dépôt, même empreinte SHA-256**. Deux défauts trouvés en
-  mesurant, corrigés dans les deux : le « plus long plan » partait de la vidéo entière ; une zone immobile (le ciel) prenait le bruit
-  de compression pour des coupes (seuil : 5 % de la luminance en plus). **Les six vidéos mesurées** (nombres seuls :
-  `docs/validation/references-video/*.json`). **Constat** : la même vidéo servie en 720 puis en 360 pixels varie de moins de 4 %
-  (période, teintes) à 32 % (contraste, mouvement, clairs) — la règle : comparer à largeur réduite égale.
-- **P4** — la preuve : REFERENCES-VIDEO-S471 ; journal ; jeton libre ; maillons 1 ; suivant : S472, les scènes miroirs (V1, V5, V6) mesurées contre leurs références.
