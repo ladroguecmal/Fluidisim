@@ -62,32 +62,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S462 — **terminée**. *« … puis continue »* — l'utilisateur a lancé l'afficheur (`--surface-direct` : 0,96 du temps réel,
-16,8 ms au 99e centile chez lui) ; la commande de Godot donnée pour bash ne passait pas sous PowerShell (l'opérateur `&` manquait) —
-corrigée dans la réponse. R39 sans verdict : la suite par défaut, **les caustiques**.
+Session : S463 — **en cours**. *« Continue en autonomie »* — les sessions s'enchaînent sans « Continue » (ADR-215 D1, D2), sur la
+suite de C11 ; inscrit aux décisions.
 
-**Ce que la session fait.** Les caustiques sur le sable de `saut.tscn`, comme S361 les pose sous B : l'éclairement direct du fond
-multiplié par la focalisation de la surface. **Dans le domaine** : l'afficheur calcule, à chaque image enregistrée, la hauteur des
-colonnes sur `φ` (la première traversée depuis le haut), sa hessienne, et la focalisation `C = 1/|det(I + D·Hess η)|`,
-`D = H·(1 − 1/n)` (la profondeur sous la surface, l'indice) ; une carte de 80 × 80 sur 8 bits, aux coordonnées de la surface ; le sable
-la lit au point de surface d'où vient son soleil réfracté. **Au-delà** : la même formule sur B, analytique.
+**Ce que la session fait.** **La surface fine** de S360 sur la scène du saut : les deux cascades FFT de la queue de B (`detail.gd`,
+32 m et 4 m, calculées sur la carte de Godot depuis `donnees/detail_h0.bin`) ajoutent leurs pentes à la normale de la surface simulée
+et de la mer au-delà. **Tranché (ADR-215 D2)** : la queue exportée est celle de la mer de R14 (un vent établi) ; la scène du saut est
+une mer calme — ses pentes sont échelonnées (`FORCE_DETAIL`, 0,5 par défaut), à juger sur image.
 
-**Critères, écrits avant.** (1) la focalisation moyenne sur le domaine à 1 près de 5 % (l'énergie se conserve : une caustique
-déplace la lumière, ne la crée pas) ; (2) le raccord domaine | mer de B sans saut visible des caustiques ; (3) toujours 60 images/s au
-moins ; (4) les images montrées.
+**Critères, écrits avant.** (1) la pente quadratique moyenne ajoutée publiée (la cascade × l'échelle) ; (2) le raccord domaine | mer
+de B sans saut de texture (la même surface fine des deux côtés) ; (3) toujours 60 images/s au moins ; (4) les images montrées.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — la carte des caustiques à l'enregistrement ; sa lecture dans Godot ; mesures ; images.
-- [x] **P3** — preuve ; rituel (allégé).
+- [x] **P1** — jeton, plan seul ; décision inscrite.
+- [ ] **P2** — les cascades dans `saut.tscn` ; mesures ; images.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — l'export (`saut_caustiques.bin`, une carte de 80 × 80 sur 8 bits par image) ; dans Godot, `focalisation()` dans
-  `saut_optique.gdshaderinc` (la carte au point de surface d'où vient le soleil réfracté ; au-delà, B analytique) et sa texture dans
-  `saut.gd` (`CAUSTIQUES=0` : sans). **Mesuré** : la formule ponctuelle `1/|det(I + D·Hess η)|` donnait une focalisation moyenne de
-  **1,10 à 1,96** — fausse : lue sur la surface, elle ne conserve pas l'énergie (là où les rayons se croisent) ; **le dépôt** (4 × 4
-  échantillons par cellule, déposés en bilinéaire au point du fond) : **0,979 à 0,995** — (1) tenu (la perte : la lumière sortie par les
-  bords) ; (2) au raccord, le motif change un peu (le domaine perd sa lumière de bord, B n'en dépose pas) — presque ; (3) **405
-  images/s** — tenu ; (4) images envoyées.
-- **P3** — C10-SCENES-S454 §11 ; journal ; jeton libre ; maillons 1 ; suivant : S463, la suite de C11 (la surface fine), ou ce que R39 désigne.

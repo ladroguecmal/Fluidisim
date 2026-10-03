@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 20:39 +02:00
+JETON            : occupé
+Battement        : 2026-10-03 20:40 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S463 — C11 : la surface fine sur la scène du saut**
 Dernière session : S462 — les caustiques sur le sable de la scène du saut dans Godot ([preuve](docs/validation/C10-SCENES-S454.md) §11) — la focalisation déposée par l'afficheur, 405 images/s. Avant : S461
 Session suivante : **S463 — la suite de C11** : par défaut, **la surface fine** (les ondes courtes de la queue de B, FFT de S360, sur la surface simulée et la mer au-delà), puis la pluie, le direct ; R39 (REVUE-VISUELLE §44) passe d'abord s'il vient
 Maillons        : 1 — journal
