@@ -18438,3 +18438,11 @@ R38, puis C10-2 ; **la preuve** : §7. Maillons **0**. Suite **762**. **Rituel**
 vitesses ; le banc `saut_en_mer`. **Mesuré** : masse au raccord 10⁻⁷ ; **la mer refuse à 0,7 s sous le jet**, quoi qu'on donne à
 l'intérieur ; le témoin du cratère mal posé (parois). Suite verte (+1). **Rituel** (allégé). Maillons **1**. Suivant : localiser le
 refus de la mer.
+
+## S460 — 2026-10-03 — C10-2, seconde session : le refus localisé, plafonné
+
+**Entrée.** *« Continue »*, puis *« Continue par la suite avec le branchement dans godot »*. **Fait**
+([preuve](../docs/validation/C10-SCENES-S454.md) §9) : le refus de la mer localisé — sous les colonnes de particules, où la mer gardait
+sa hauteur, poussée par le jet ; corrigé (`set_particle_rest`) ; l'instabilité passe alors à la marge du raccord (la dent de scie de
+S449). **Plafonné** (ADR-213 D2, troisième session). Suite verte. **Rituel** (allégé). Maillons **2**. Suivant : C11, la scène `--v1`
+dans Godot.

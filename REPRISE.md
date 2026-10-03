@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-03 19:45 +02:00
+JETON            : libre
+Battement        : 2026-10-03 20:16 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S460 — C10-2, seconde session : le refus de la mer sous le jet**
-Dernière session : S459 — C10-2 au CPU ([preuve](docs/validation/C10-SCENES-S454.md) §8) — la couronne épinglée, masse au raccord 10⁻⁷ ; la mer refuse à 0,7 s sous le jet. Avant : S458 (la v1, R38 reçu)
-Session suivante : **S460 — C10-2, seconde session** : localiser le refus de la mer sous le jet (la colonne, la hauteur, dans la bande ou dehors ; un banc plus court) et le corriger ; le témoin du cratère refait (la bande à parois aussi longue que la mer). Au troisième échec, plafond (ADR-213 D2). C11 (δ dans Godot) peut passer avant, à la demande
-Maillons        : 1 — journal
+Session en cours : aucune
+Dernière session : S460 — C10-2 plafonné ([preuve](docs/validation/C10-SCENES-S454.md) §9) — la cause intérieure corrigée, la dent de scie de la marge reste. Avant : S459
+Session suivante : **S461 — C11, la scène `--v1` dans Godot** (décision de l'utilisateur, S460) : la scène enregistrée par l'afficheur (`φ` fondu, le corps, la houle) et rejouée dans Godot avec son rendu (la lumière, la colonne d'eau, le fond, les caustiques, AgX) — Godot ne recalcule rien (I-01), comme la piscine ; reçu sur images à l'utilisateur
+Maillons        : 2 — journal
 Registres       : dernier lot S457 (ADR-213 D3) ; le prochain au plus tard en S460
 ```
 

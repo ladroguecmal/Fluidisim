@@ -194,3 +194,26 @@ témoin : la bande à parois aussi longue que la mer. Le volume déplacé compt�
 il reste juste pour la masse. **Le coût** : au CPU, 3 à 25 min par passage — la suite se fera plus vite sur la carte, ou en
 découpant le banc.
 
+## 9. C10-2, seconde session : le refus localisé — plafonné (S460)
+
+2026-10-03. **Reproduire** : `SAUT_TRACE=1 SAUT_HOULE_SEULE=1 … saut_en_mer 0.0628 0.8` (les extrêmes de la mer à chaque pas après
+0,55 s) ; `SAUT_REPOS=1 SAUT_ANNEAU=4 SAUT_HOULE_SEULE=1 … saut_en_mer 0.0628 3` (≈ 15 min) ; `Mode::Longue` (le témoin long du
+cratère : la bande à parois de 4,8 m) écrit.
+
+| | refus | où, juste avant |
+|---|---|---|
+| S459, le raccord tel quel | 0,70 s | — |
+| **S460, trace** | — | **au centre de la bande** : 2,27 m (repos 1,4 m), croissant à chaque pas, sous des colonnes de particules |
+| `set_particle_rest` (la mer à la hauteur de B sous les particules) + l'anneau des vitesses | **0,63 s** | **dans la marge du raccord** : 2,13 m et 0,69 m en deux colonnes voisines |
+
+**Ce qui est appris.** (1) **La cause du refus de S459** : sous les colonnes de particules de l'intérieur, la mer garde sa propre
+hauteur, et les vitesses que la bande lui donne la font sortir de ses bornes sous le jet. (2) Corrigée (`BandInSea::set_particle_rest`),
+**l'instabilité passe au bord** : une dent de scie dans les colonnes de marge, celle de S449 — même sans colonnes de particules au
+raccord (la couronne épinglée tient). Le raccord bande ↔ mer n'est pas stable à son bord sous un écoulement fort.
+
+**Plafonné (ADR-213 D2)** — trois sessions sur la stabilité du raccord (S449, S459, S460). Ce qui tient : la masse au raccord à
+10⁻⁷, la couronne épinglée, la cause intérieure corrigée. Ce qui reste ouvert, avec son déclencheur : **la dent de scie de la marge**
+sous un écoulement fort — toute scène où une bande APIC vit dans la mer δ ; d'ici là, la scène `--v1` (le domaine APIC entier, ses
+bords ouverts à B) est la voie retenue. **Décision de l'utilisateur** (2026-10-03) : *« Continue par la suite avec le branchement dans
+godot »* — C11 passe avant.
+

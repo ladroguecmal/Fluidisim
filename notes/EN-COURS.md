@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S460 — **en cours**. *« Continue »* — C10-2, seconde session ([C10-SCENES-S454](../docs/validation/C10-SCENES-S454.md) §8).
+Session : S460 — **terminée**. *« Continue »* — C10-2, seconde session ([C10-SCENES-S454](../docs/validation/C10-SCENES-S454.md) §8).
 
 **Ce que la session fait.** (1) **Localiser le refus** de la mer à 0,7 s : le refus « Domain » du pas mobile est une borne de la
 surface (deux mailles au-dessus du fond, `nz − 1` mailles au plus ; avant le pas, après, ou aux bords) ; le banc imprime, au refus,
@@ -76,7 +76,7 @@ maille du bon témoin. Au troisième échec de la stabilité (après S459 et S46
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le diagnostic ; la correction ; le témoin long ; mesures.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **Décision de l'utilisateur** (pendant P2) : *« Continue par la suite avec le branchement dans godot »* — après S460, C11 (δ dans
@@ -87,4 +87,4 @@ maille du bon témoin. Au troisième échec de la stabilité (après S459 et S46
   l'anneau des vitesses : le refus recule à **0,63 s** et **change de place** — une dent de scie dans les colonnes de **marge** du raccord
   (2,13 m contre 0,69 m, voisines) : l'instabilité de bord de S449. (2) **manqué** ; troisième session sur la stabilité du raccord
   (S449, S459, S460) : **plafond** (ADR-213 D2). Le témoin long (`Mode::Longue`) écrit, non mesuré (l'aval plafonné).
-
+- **P3** — C10-SCENES-S454 §9 ; décision inscrite ; journal ; jeton libre ; maillons 2 ; suivant : S461, C11 — la scène `--v1` dans Godot.
