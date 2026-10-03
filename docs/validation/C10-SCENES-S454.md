@@ -301,3 +301,22 @@ images/s — **tenu** (0,939, 28,2 ; Godot affiché, la carte partagée) ; (3) l
 joueur qui remonte, l'eau qui ruisselle de lui — envoyées. **Une leçon** : les trois défauts de la session étaient des états non posés
 ou des attentes — le temps de calcul de la carte n'a jamais été la limite.
 
+## 14. C11 : la pluie (S465)
+
+2026-10-03. La pluie d'ADR-205, reçue sur la piscine et la mer (R28 à R33), sur la scène du saut : les rides (`pluie_rides`, sur une horloge
+à part — l'enregistrement boucle, la pluie non), le ciel couvert (l'éclairement, l'éclat et les caustiques éteints), les gouttes dans
+l'air (`pluie_air.gd`) et les gerbes (`gerbes.gd`) sur la nappe de la mer, l'extinction (la brume).
+
+**Reproduire** : `PLUIE=10 <godot> --path godot res://saut.tscn` (ou la touche P : 0, 2, 10, 50 mm/h ; `COUVERT=` force la couverture),
+`-- --captures` (suffixe `_pluie10`), `-- --cout`.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) le taux des anneaux celui de `pluie.gd` | **447 m⁻²·s⁻¹** à 10 mm/h (Marshall-Palmer × Atlas) | tenu |
+| (2) sous la pluie, ni éclat ni caustiques | `couvert` = 1 : le soleil direct éteint | tenu |
+| (3) 60 images/s sous 10 mm/h | **174** (à 50 mm/h : **60**, tout juste) | tenu |
+| (4) les images | `godot/captures/saut_t{0.85,1.60,6.30}_pluie10.png` | envoyées |
+
+**Ce qui reste** : la variance des rides (rendue en rugosité sur la mer et la piscine) n'est pas portée — seule leur pente ; à 50 mm/h,
+le coût des rides, évaluées deux fois (le domaine et la mer), fait tomber la scène à 60 images/s.
+

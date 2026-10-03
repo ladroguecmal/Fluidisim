@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S465 — **en cours**. En autonomie : la pluie d'ADR-205, reçue sur la piscine et la mer (R28 à R33), sur la scène du saut.
+Session : S465 — **terminée**. En autonomie : la pluie d'ADR-205, reçue sur la piscine et la mer (R28 à R33), sur la scène du saut.
 
 **Ce que la session fait.** Dans `saut.tscn` : **les rides** (`pluie.gdshaderinc`, `pluie_rides`) sur la normale de l'eau du domaine et
 de la mer au-delà, sur une horloge de pluie à part (l'enregistrement boucle, la pluie non) ; **le ciel couvert** (`couvert` : le ciel,
@@ -76,7 +76,7 @@ d'éclat ni de caustiques (le soleil direct éteint) ; (3) 60 images/s au moins 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la pluie dans `saut.tscn` ; mesures ; images.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `saut_optique.gdshaderinc` : `pluie_rides` sur la normale (horloge `temps_pluie`), l'éclat et les caustiques éteints sous le
@@ -84,4 +84,4 @@ d'éclat ni de caustiques (le soleil direct éteint) ; (3) 60 images/s au moins 
   `PLUIE=`, la touche P. **Mesuré** : (1) le taux des anneaux de `pluie.gd`, **447 m⁻²·s⁻¹ à 10 mm/h** — tenu ; (2) sous la pluie,
   `couvert` = 1 : plus d'éclat ni de caustiques — tenu ; (3) **174 images/s à 10 mm/h** (60 à 50 mm/h) — tenu ; (4) images
   `godot/captures/saut_t{0.85,1.60,6.30}_pluie10.png` envoyées.
-
+- **P3** — C10-SCENES-S454 §14 ; journal ; jeton libre ; maillons 1 ; suivant : S466, le joueur — une capsule debout au lieu de la sphère, dans la physique et le rendu.

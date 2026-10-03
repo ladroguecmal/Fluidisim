@@ -18477,3 +18477,10 @@ direct** — l'afficheur calcule la scène au temps réel et la pousse à Godot 
 de 0,55 à **0,939** du temps réel et **28 images/s** — la relecture sans attente, l'encodage sur un fil, et un `φ` nul (l'uniforme du
 fondu jamais écrit) corrigé. **Ce qui devient possible** : la simulation jouée dans Godot en temps réel ; **le chemin** : la pluie, R39 ;
 **la preuve** : §13. Maillons **0**. Suite verte. **Rituel** (allégé). Suivant : la pluie.
+
+## S465 — 2026-10-03 — C11 : la pluie
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §14) : la pluie d'ADR-205 sur la scène du saut dans
+Godot — les rides, le ciel couvert, les gouttes, les gerbes, l'extinction. **Mesuré** : 447 anneaux/m²/s à 10 mm/h ; ni éclat ni
+caustiques sous le couvert ; 174 images/s à 10 mm/h, 60 à 50 mm/h. Images envoyées. Suite verte. **Rituel** (allégé). Maillons **1**.
+Suivant : le joueur (une capsule debout).
