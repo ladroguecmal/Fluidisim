@@ -62,26 +62,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S465 — **terminée**. En autonomie : la pluie d'ADR-205, reçue sur la piscine et la mer (R28 à R33), sur la scène du saut.
+Session : S466 — **en cours**. En autonomie : **le joueur** — une capsule debout au lieu de la sphère de B10.
 
-**Ce que la session fait.** Dans `saut.tscn` : **les rides** (`pluie.gdshaderinc`, `pluie_rides`) sur la normale de l'eau du domaine et
-de la mer au-delà, sur une horloge de pluie à part (l'enregistrement boucle, la pluie non) ; **le ciel couvert** (`couvert` : le ciel,
-l'éclairement, l'éclat et les caustiques éteints) ; **les gouttes dans l'air** (`pluie_air.gd`) et **les gerbes** (`gerbes.gd`) sur la
-nappe de la mer ; **l'extinction** par les gouttes (la brume, `Pluie.extinction`). `PLUIE=<mm/h>` ou la touche P (0, 2, 10, 50).
+**Ce que la session fait.** Le corps de la carte devient une **capsule** : un axe unitaire, une demi-longueur `L`, un rayon ; chaque
+formule de la sphère (la reconstruction et ses images, les étiquettes, l'éloignement des particules) mesure la distance au **point le
+plus proche de l'axe**, `c + a·clamp((q − c)·a, −L, L)` ; l'empreinte de la bascule s'abaisse de `L·|a_z|` et s'élargit de `L·|a_xy|`.
+`L = 0` : la sphère, au bit. **Le joueur** (`JOUEUR=debout`, le défaut de `--v1` si la scène tient ; `JOUEUR=boule` : la sphère) : une
+capsule verticale de 0,3 m de diamètre et 1,7 m, qui saute pieds en avant. Le rendu suit (l'afficheur, Godot, l'export).
 
-**Critères, écrits avant.** (1) le taux des anneaux celui de `pluie.gd` (Marshall-Palmer × Atlas, publié) ; (2) sous la pluie, plus
-d'éclat ni de caustiques (le soleil direct éteint) ; (3) 60 images/s au moins sous 10 mm/h ; (4) les images montrées (10 mm/h).
+**Critères, écrits avant.** (1) `L = 0` rend la sphère au bit (le banc `--surface-direct-banc` inchangé : 125 pas, images identiques) ;
+(2) la scène `--v1` avec le joueur debout : 60 s, masse exacte, sans arrêt ; (3) les images montrées.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la pluie dans `saut.tscn` ; mesures ; images.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — la capsule dans la carte ; le joueur dans la scène et le rendu ; mesures ; images.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `saut_optique.gdshaderinc` : `pluie_rides` sur la normale (horloge `temps_pluie`), l'éclat et les caustiques éteints sous le
-  ciel couvert ; `saut.gd` : `regler_pluie` (les uniformes de `pluie.gd`, `couvert`, `pluie_air.gd`, `gerbes.gd`, l'extinction),
-  `PLUIE=`, la touche P. **Mesuré** : (1) le taux des anneaux de `pluie.gd`, **447 m⁻²·s⁻¹ à 10 mm/h** — tenu ; (2) sous la pluie,
-  `couvert` = 1 : plus d'éclat ni de caustiques — tenu ; (3) **174 images/s à 10 mm/h** (60 à 50 mm/h) — tenu ; (4) images
-  `godot/captures/saut_t{0.85,1.60,6.30}_pluie10.png` envoyées.
-- **P3** — C10-SCENES-S454 §14 ; journal ; jeton libre ; maillons 1 ; suivant : S466, le joueur — une capsule debout au lieu de la sphère, dans la physique et le rendu.
