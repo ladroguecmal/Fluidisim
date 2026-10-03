@@ -18499,3 +18499,10 @@ la scène divergeait (15 à 31 s) ; les zones de relaxation en `y`, essayées, l
 (FEUILLE-DE-ROUTE, LISTE, REPRISE ; prochain au plus tard S470) ; le joueur éclairé par notre nuanceur (`joueur.gdshader`), le même
 albédo que le corps vu à travers l'eau — un gris continu à travers la surface. Images envoyées. **Rituel** (allégé). Maillons **1**.
 Suivant : l'ombre du joueur.
+
+## S468 — 2026-10-03 — l'ombre du joueur
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §17) : le soleil direct occulté par le joueur,
+sur le fond (chemin réfracté), ses caustiques, le corps d'eau et l'éclat, dans Godot. **Mesuré** : l'ombre vers le sud-est, à
+l'opposé du soleil ; ciel couvert identique au bit ; 397 images/s (−2 %). Image envoyée. **Rituel** (allégé). Maillons **1**.
+Suivant : le direct avec le joueur debout.

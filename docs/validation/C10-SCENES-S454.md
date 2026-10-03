@@ -362,3 +362,19 @@ couvert compris ; `couleur_corps` lit le même albédo (`ALBEDO_JOUEUR` de `saut
 **Ce qui reste** : l'ombre propre du joueur sur l'eau et le fond (ni `soleil_vu` ni caustiques occultées par lui) ; un joueur
 qui ressemble à une personne (le maillage du jeu).
 
+## 17. L'ombre du joueur (S468)
+
+2026-10-03. `ombre_corps(q)` (`saut_optique.gdshaderinc`) : 0 si la lumière directe du soleil jusqu'à `q` touche le corps. Sous l'eau,
+son chemin réfracté — de `q` à la surface, prise au niveau moyen, le long du soleil réfracté, puis le soleil dans l'air ; au-dessus,
+le soleil dans l'air. Elle éteint la part directe de l'éclairement du fond et ses caustiques, du corps d'eau et de l'éclat.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) l'ombre où la géométrie la met | du pied du joueur vers le sud-est, à l'opposé du soleil (le plan disait nord-ouest : erreur d'écriture) ; un masque de contrôle la montre de la forme de la capsule | tenu |
+| (2) ciel couvert inchangé | `COUVERT=1` : six images identiques au bit | tenu |
+| (3) la cadence sous 10 % de perte | `--cout` : 405 → **397** images/s (−2 %) | tenu |
+| (4) les images | `godot/captures/saut_t1.60.png` | envoyée |
+
+**Ce qui reste** : la surface prise plane (au niveau moyen) pour le chemin réfracté ; une ombre nette (le soleil ponctuel, pas de
+pénombre) ; l'afficheur (le banc) sans ombre.
+
