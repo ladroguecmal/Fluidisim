@@ -6,6 +6,9 @@
 
 #include "res://ciel.gdshaderinc"
 #include "res://optique_eau.gdshaderinc"
+// S465 : les rides de la pluie (ADR-202 D3, S379), leur horloge à part.
+#include "res://pluie.gdshaderinc"
+uniform float temps_pluie = 0.0;
 
 // Le corps (le joueur) : centre (B) et rayon ; rayon nul : pas de corps.
 uniform vec4 corps = vec4(0.0);
@@ -46,7 +49,8 @@ uniform bool caustiques = true;
 
 // La focalisation au point `q` du fond (B) : le motif d'une lumière verticale, décalé de l'obliquité du soleil réfracté.
 float focalisation(vec3 q) {
-    if (!caustiques) {
+    // S465 : sous le ciel couvert, le soleil direct est éteint, les caustiques avec lui.
+    if (!caustiques || couvert >= 1.0) {
         return 1.0;
     }
     vec3 r = refract(-normalize(SOLEIL_B), vec3(0.0, 0.0, 1.0), 1.0 / indice);
@@ -117,8 +121,13 @@ vec3 couleur_sable(vec3 p) {
 // à cette distance, m.
 vec3 couleur_eau(vec3 p, vec3 n0, vec3 d, float empreinte) {
     vec3 n = normalize(n0);
-    // S463 : la surface fine, sur ce qui regarde vers le haut.
+    // S463 : la surface fine, sur ce qui regarde vers le haut ; S465 : les rides de la pluie (leur variance non rendue).
     vec2 s_fine = pente_fine(p.xy, empreinte);
+    if (pluie.x > 0.0) {
+        vec3 cv_pluie;
+        float coeur_pluie;
+        s_fine += pluie_rides(p.xy, temps_pluie, vec2(empreinte, 0.0), vec2(0.0, empreinte), cv_pluie, coeur_pluie);
+    }
     n = normalize(n + vec3(-s_fine, 0.0) * max(n.z, 0.0));
     if (dot(n, d) > 0.0) {
         n = -n;
@@ -144,7 +153,8 @@ vec3 couleur_eau(vec3 p, vec3 n0, vec3 d, float empreinte) {
     }
     vec3 corps_eau = R0 * gain_eau * eclairage(n, soleil, 1.0);
     vec3 sous = corps_eau * (1.0 - t_col) + vu;
-    return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2;
+    // S465 : sous le ciel couvert, plus d'éclat (`soleil_direct`).
+    return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2 * soleil_direct();
 }
 
 // La surface de B : `h + a·cos(k·x − ω·t + φ)` et sa pente en x.

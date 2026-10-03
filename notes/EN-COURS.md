@@ -75,7 +75,13 @@ d'éclat ni de caustiques (le soleil direct éteint) ; (3) 60 images/s au moins 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la pluie dans `saut.tscn` ; mesures ; images.
+- [x] **P2** — la pluie dans `saut.tscn` ; mesures ; images.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `saut_optique.gdshaderinc` : `pluie_rides` sur la normale (horloge `temps_pluie`), l'éclat et les caustiques éteints sous le
+  ciel couvert ; `saut.gd` : `regler_pluie` (les uniformes de `pluie.gd`, `couvert`, `pluie_air.gd`, `gerbes.gd`, l'extinction),
+  `PLUIE=`, la touche P. **Mesuré** : (1) le taux des anneaux de `pluie.gd`, **447 m⁻²·s⁻¹ à 10 mm/h** — tenu ; (2) sous la pluie,
+  `couvert` = 1 : plus d'éclat ni de caustiques — tenu ; (3) **174 images/s à 10 mm/h** (60 à 50 mm/h) — tenu ; (4) images
+  `godot/captures/saut_t{0.85,1.60,6.30}_pluie10.png` envoyées.
+

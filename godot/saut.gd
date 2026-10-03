@@ -5,7 +5,8 @@ extends Node3D
 ## (`saut_eau.gdshader`) ; la mer de B au-delà (`saut_mer.gdshader`) ; le joueur, une sphère ; le ciel de la scène (`ciel.gdshader`),
 ## la tonalité AgX et le halo de Godot.
 ##
-## Lancer : `Godot --path godot res://saut.tscn` — glisser : orbite, molette : distance, Espace : pause, Échap : quitter.
+## Lancer : `Godot --path godot res://saut.tscn` — glisser : orbite, molette : distance, Espace : pause, Échap : quitter ;
+## S465 : P, la pluie (0, 2, 10, 50 mm/h ; `PLUIE=<mm/h>`).
 ## `-- --captures` : les images aux instants de R38 (`captures/saut_t<t>.png`), puis quitte. `-- --cout` : 600 images sans
 ## synchronisation verticale, la cadence imprimée, puis quitte.
 ##
@@ -47,6 +48,14 @@ var lien: StreamPeerTCP
 var tampon := PackedByteArray()
 var taille_lien := 0
 var recues := 0
+## S465 — la pluie : l'intensité (mm/h ; `PLUIE=`, touche P), son horloge, les gouttes dans l'air, les gerbes, le ciel.
+const Pluie = preload("res://pluie.gd")
+var pluie_mm_h := 0.0
+var t_pluie := 0.0
+var pluie_air: Node3D
+var gerbes: Node3D
+var materiau_ciel: ShaderMaterial
+var monde_env: Environment
 
 
 static func b_vers_godot(p: Vector3) -> Vector3:
@@ -162,6 +171,20 @@ func _ready() -> void:
 						force * force * (float(detail.mss_realisee[0]) + float(detail.mss_realisee[1]))])
 			else:
 				detail = null
+	# S465 — la pluie : les gouttes s'arrêtent à la mer (une nappe de 400 m au niveau moyen), les gerbes autour de la scène.
+	pluie_air = load("res://pluie_air.gd").new()
+	add_child(pluie_air)
+	pluie_air.plancher = 0.0
+	pluie_air.nappes = [Vector4(-200.0, -200.0, 200.0, 200.0)]
+	pluie_air.niveaux = [niveau]
+	gerbes = load("res://gerbes.gd").new()
+	add_child(gerbes)
+	gerbes.nappes = pluie_air.nappes
+	gerbes.niveaux = pluie_air.niveaux
+	gerbes.fenetre = Vector4(-20.0, -20.0, 20.0, 20.0)
+	if OS.get_environment("PLUIE") != "":
+		pluie_mm_h = float(OS.get_environment("PLUIE"))
+	regler_pluie()
 	placer_camera()
 	if not direct:
 		charger(0)
@@ -173,6 +196,28 @@ func _ready() -> void:
 			captures()
 	elif "--cout" in args:
 		cout()
+
+
+## S465 — la pluie à `pluie_mm_h` : les uniformes des rides (`pluie.gd`), le ciel couvert, les gouttes, les gerbes, l'extinction.
+func regler_pluie() -> void:
+	var couvert := 1.0 if pluie_mm_h > 0.0 else 0.0
+	if OS.get_environment("COUVERT") != "":
+		couvert = float(OS.get_environment("COUVERT"))
+	for m in [mat_eau, mat_mer, materiau_ciel]:
+		m.set_shader_parameter("pluie", Pluie.uniformes(pluie_mm_h))
+		m.set_shader_parameter("couvert", couvert)
+	pluie_air.couvert = couvert
+	pluie_air.configurer(pluie_mm_h)
+	gerbes.couvert = couvert
+	gerbes.configurer(pluie_mm_h)
+	var beta := Pluie.extinction(pluie_mm_h)
+	monde_env.fog_enabled = beta > 0.0
+	if beta > 0.0:
+		monde_env.fog_density = beta
+		monde_env.fog_aerial_perspective = 1.0
+		monde_env.fog_sky_affect = 0.0
+	print("SAUT_GODOT_S465 pluie mm_h=%.1f taux_anneaux_m2_s=%.1f couvert=%.1f extinction_m=%.5f" % [pluie_mm_h,
+			Pluie.taux_anneaux(pluie_mm_h), couvert, beta])
 
 
 ## S464 — la connexion au direct : l'en-tête (`FST1`, sa longueur, le JSON).
@@ -226,7 +271,7 @@ func recevoir() -> void:
 func environnement() -> void:
 	var env := Environment.new()
 	var ciel := Sky.new()
-	var materiau_ciel := ShaderMaterial.new()
+	materiau_ciel = ShaderMaterial.new()
 	materiau_ciel.shader = load("res://ciel.gdshader")
 	ciel.sky_material = materiau_ciel
 	env.background_mode = Environment.BG_SKY
@@ -238,6 +283,7 @@ func environnement() -> void:
 	var monde := WorldEnvironment.new()
 	monde.environment = env
 	add_child(monde)
+	monde_env = env
 	# Le soleil de la scène (`SOLEIL_B`).
 	var vers_soleil := b_vers_godot(Vector3(-0.4, 0.3, 0.8)).normalized()
 	var soleil := DirectionalLight3D.new()
@@ -303,6 +349,13 @@ func image_a(s: float) -> int:
 
 
 func _process(delta: float) -> void:
+	# S465 : la pluie a sa propre horloge (l'enregistrement boucle, la pluie non).
+	t_pluie += delta
+	for m in [mat_eau, mat_mer]:
+		m.set_shader_parameter("temps_pluie", t_pluie)
+	if pluie_mm_h > 0.0:
+		pluie_air.suivre(camera, t_pluie)
+		gerbes.suivre(camera, t_pluie)
 	if direct:
 		if lien != null and not en_pause:
 			recevoir()
@@ -336,6 +389,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_SPACE:
 			en_pause = not en_pause
+		elif event.keycode == KEY_P:
+			pluie_mm_h = {0.0: 2.0, 2.0: 10.0, 10.0: 50.0}.get(pluie_mm_h, 0.0)
+			regler_pluie()
 		elif event.keycode == KEY_ESCAPE:
 			get_tree().quit()
 
@@ -347,7 +403,8 @@ func captures() -> void:
 		for _i in 8:
 			await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
-		var chemin := ProjectSettings.globalize_path("res://captures/saut_t%.2f.png" % s)
+		var suffixe := "_pluie%d" % int(pluie_mm_h) if pluie_mm_h > 0.0 else ""
+		var chemin := ProjectSettings.globalize_path("res://captures/saut_t%.2f%s.png" % [s, suffixe])
 		image.save_png(chemin)
 		print("SAUT_GODOT_S461 capture t=%.2f image=%d instant=%.3f %s" % [s, courante, float(images[courante][0]), chemin])
 	get_tree().quit()
