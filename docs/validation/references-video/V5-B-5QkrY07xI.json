@@ -1,0 +1,119 @@
+{
+ "video": "B-5QkrY07xI",
+ "largeur": 360,
+ "hauteur": 640,
+ "facteur": 2,
+ "fps": 15,
+ "debut": 0,
+ "fin": 20,
+ "duree_video": 23.861,
+ "zones": {
+  "ciel": [
+   0.05,
+   0.03,
+   0.95,
+   0.35
+  ],
+  "eau_lointaine": [
+   0.02,
+   0.55,
+   0.98,
+   0.68
+  ],
+  "eau_proche": [
+   0.02,
+   0.75,
+   0.98,
+   0.95
+  ]
+ },
+ "mesures": {
+  "ciel": {
+   "statiques": {
+    "p05": 0.7247,
+    "p25": 0.8308,
+    "p75": 1.296,
+    "p95": 1.888,
+    "p99": 2.271,
+    "contraste": 0.0347,
+    "creux_BsurG": 2.247,
+    "creux_BsurR": 3.874,
+    "cretes_BsurG": 1.13,
+    "cretes_BsurR": 1.112,
+    "claire": 0,
+    "ecume": 0.03356,
+    "hf_part": 0.1669,
+    "anisotropie": 1.088,
+    "p50_absolu": 0.3658
+   },
+   "temporelles": {
+    "mouvement_par_s": 0.7612,
+    "periode_s": 10.03,
+    "periode_nettete": 6820,
+    "renouvellement_clairs_par_s": null,
+    "coupes": 0,
+    "plan_s": 20.07,
+    "images": 301,
+    "dt": 0.06667
+   }
+  },
+  "eau_lointaine": {
+   "statiques": {
+    "p05": 0.6597,
+    "p25": 0.8657,
+    "p75": 1.14,
+    "p95": 1.332,
+    "p99": 1.445,
+    "contraste": 0.116,
+    "creux_BsurG": 1.156,
+    "creux_BsurR": 1.581,
+    "cretes_BsurG": 1.087,
+    "cretes_BsurR": 1.298,
+    "claire": 0,
+    "ecume": 0,
+    "hf_part": 0.7282,
+    "anisotropie": 3.155,
+    "p50_absolu": 0.2304
+   },
+   "temporelles": {
+    "mouvement_par_s": 1.337,
+    "periode_s": 10.03,
+    "periode_nettete": 47420,
+    "renouvellement_clairs_par_s": null,
+    "coupes": 0,
+    "plan_s": 20.07,
+    "images": 301,
+    "dt": 0.06667
+   }
+  },
+  "eau_proche": {
+   "statiques": {
+    "p05": 0.674,
+    "p25": 0.8261,
+    "p75": 1.276,
+    "p95": 1.718,
+    "p99": 2.035,
+    "contraste": 0.2274,
+    "creux_BsurG": 0.8804,
+    "creux_BsurR": 1.294,
+    "cretes_BsurG": 0.9756,
+    "cretes_BsurR": 1.261,
+    "claire": 0,
+    "ecume": 0.0009935,
+    "hf_part": 0.6733,
+    "anisotropie": 2.149,
+    "p50_absolu": 0.1171
+   },
+   "temporelles": {
+    "mouvement_par_s": 3.599,
+    "periode_s": 10.03,
+    "periode_nettete": 4604,
+    "renouvellement_clairs_par_s": 15,
+    "coupes": 0,
+    "plan_s": 20.07,
+    "images": 301,
+    "dt": 0.06667
+   }
+  }
+ }
+}

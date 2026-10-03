@@ -1,0 +1,84 @@
+{
+ "video": "I3NdxKg5RKM",
+ "largeur": 360,
+ "hauteur": 640,
+ "facteur": 2,
+ "fps": 15,
+ "debut": 0,
+ "fin": 6.2,
+ "duree_video": 6.261,
+ "zones": {
+  "eau_mince": [
+   0.05,
+   0.3,
+   0.95,
+   0.6
+  ],
+  "rivage": [
+   0.05,
+   0.6,
+   0.95,
+   0.85
+  ]
+ },
+ "mesures": {
+  "eau_mince": {
+   "statiques": {
+    "p05": 0.2826,
+    "p25": 0.5939,
+    "p75": 1.474,
+    "p95": 1.965,
+    "p99": 2.147,
+    "contraste": 0.1653,
+    "creux_BsurG": 1.207,
+    "creux_BsurR": 1.459,
+    "cretes_BsurG": 1.456,
+    "cretes_BsurR": 1.805,
+    "claire": 0,
+    "ecume": 0,
+    "hf_part": 0.2576,
+    "anisotropie": 2.878,
+    "p50_absolu": 0.3386
+   },
+   "temporelles": {
+    "mouvement_par_s": 3.402,
+    "periode_s": 2.089,
+    "periode_nettete": 515.9,
+    "renouvellement_clairs_par_s": null,
+    "coupes": 0,
+    "plan_s": 6.267,
+    "images": 94,
+    "dt": 0.06667
+   }
+  },
+  "rivage": {
+   "statiques": {
+    "p05": 0.2811,
+    "p25": 0.5805,
+    "p75": 1.646,
+    "p95": 3.131,
+    "p99": 4.248,
+    "contraste": 0.1474,
+    "creux_BsurG": 0.7513,
+    "creux_BsurR": 0.8328,
+    "cretes_BsurG": 1.335,
+    "cretes_BsurR": 1.498,
+    "claire": 0.01404,
+    "ecume": 0.02562,
+    "hf_part": 0.2669,
+    "anisotropie": 1.625,
+    "p50_absolu": 0.04942
+   },
+   "temporelles": {
+    "mouvement_par_s": 7.075,
+    "periode_s": 2.089,
+    "periode_nettete": 600.8,
+    "renouvellement_clairs_par_s": 10.74,
+    "coupes": 0,
+    "plan_s": 6.267,
+    "images": 94,
+    "dt": 0.06667
+   }
+  }
+ }
+}

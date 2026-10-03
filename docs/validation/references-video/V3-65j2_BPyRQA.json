@@ -1,0 +1,119 @@
+{
+ "video": "65j2_BPyRQA",
+ "largeur": 480,
+ "hauteur": 854,
+ "facteur": 2,
+ "fps": 15,
+ "debut": 0,
+ "fin": 10.8,
+ "duree_video": 10.861,
+ "zones": {
+  "cadre": [
+   0.02,
+   0.02,
+   0.98,
+   0.98
+  ],
+  "gerbe": [
+   0.02,
+   0.08,
+   0.7,
+   0.45
+  ],
+  "bas": [
+   0.02,
+   0.55,
+   0.98,
+   0.95
+  ]
+ },
+ "mesures": {
+  "cadre": {
+   "statiques": {
+    "p05": 0.03561,
+    "p25": 0.3735,
+    "p75": 1.574,
+    "p95": 2.5,
+    "p99": 2.937,
+    "contraste": 0.2049,
+    "creux_BsurG": 1.966,
+    "creux_BsurR": 3.691,
+    "cretes_BsurG": 1.413,
+    "cretes_BsurR": 1.916,
+    "claire": 0,
+    "ecume": 0.005343,
+    "hf_part": 0.3058,
+    "anisotropie": 1.736,
+    "p50_absolu": 0.2915
+   },
+   "temporelles": {
+    "mouvement_par_s": 3.577,
+    "periode_s": 5.433,
+    "periode_nettete": 26780,
+    "renouvellement_clairs_par_s": 10.51,
+    "coupes": 0,
+    "plan_s": 10.87,
+    "images": 163,
+    "dt": 0.06667
+   }
+  },
+  "gerbe": {
+   "statiques": {
+    "p05": 0.1652,
+    "p25": 0.4069,
+    "p75": 2.064,
+    "p95": 2.846,
+    "p99": 4.338,
+    "contraste": 0.3286,
+    "creux_BsurG": 1.926,
+    "creux_BsurR": 3.408,
+    "cretes_BsurG": 1.503,
+    "cretes_BsurR": 2.114,
+    "claire": 0.01478,
+    "ecume": 0.001467,
+    "hf_part": 0.4562,
+    "anisotropie": 1.832,
+    "p50_absolu": 0.1601
+   },
+   "temporelles": {
+    "mouvement_par_s": 6.262,
+    "periode_s": 5.433,
+    "periode_nettete": 5442,
+    "renouvellement_clairs_par_s": 8.771,
+    "coupes": 0,
+    "plan_s": 10.87,
+    "images": 163,
+    "dt": 0.06667
+   }
+  },
+  "bas": {
+   "statiques": {
+    "p05": 0.1818,
+    "p25": 0.6436,
+    "p75": 1.324,
+    "p95": 1.947,
+    "p99": 2.284,
+    "contraste": 0.2283,
+    "creux_BsurG": 1.826,
+    "creux_BsurR": 3.064,
+    "cretes_BsurG": 1.317,
+    "cretes_BsurR": 1.834,
+    "claire": 0,
+    "ecume": 0.003519,
+    "hf_part": 0.3253,
+    "anisotropie": 1.254,
+    "p50_absolu": 0.3896
+   },
+   "temporelles": {
+    "mouvement_par_s": 3.31,
+    "periode_s": 2.717,
+    "periode_nettete": 1150,
+    "renouvellement_clairs_par_s": 2.082,
+    "coupes": 0,
+    "plan_s": 10.87,
+    "images": 163,
+    "dt": 0.06667
+   }
+  }
+ }
+}

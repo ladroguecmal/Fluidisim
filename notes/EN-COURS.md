@@ -82,8 +82,15 @@ même image à 1 % près, ou l'écart dit.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — R39 ; le registre des références ; ADR-216.
-- [ ] **P3** — `outils/banc_visuel.js` et `outils/banc_visuel.py` (le même calcul) ; les six références mesurées.
+- [x] **P3** — `outils/banc_visuel.js` et `outils/banc_visuel.py` (le même calcul) ; les six références mesurées.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — R39 inscrit (REVUE-VISUELLE §44) ; ADR-216 ; le registre `docs/validation/REFERENCES-VIDEO-S471.md` (les propos de l'utilisateur mot pour mot, ce que chaque vidéo montre, ce que nos scènes peuvent lui opposer).
+- **P3** — `outils/banc_visuel.py` (numpy) et `outils/banc_visuel.js` (la page) : le même calcul ; **égalité** sur 24 images de Godot
+  (deux zones, toutes les grandeurs, le spectre compris) : **écart nul à quatre chiffres** — et la période de la suite répétée
+  (1,2 s) retrouvée. Le code injecté dans YouTube : **le fichier du dépôt, même empreinte SHA-256**. Deux défauts trouvés en
+  mesurant, corrigés dans les deux : le « plus long plan » partait de la vidéo entière ; une zone immobile (le ciel) prenait le bruit
+  de compression pour des coupes (seuil : 5 % de la luminance en plus). **Les six vidéos mesurées** (nombres seuls :
+  `docs/validation/references-video/*.json`). **Constat** : la même vidéo servie en 720 puis en 360 pixels varie de moins de 4 %
+  (période, teintes) à 32 % (contraste, mouvement, clairs) — la règle : comparer à largeur réduite égale.

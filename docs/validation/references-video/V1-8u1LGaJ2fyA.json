@@ -1,0 +1,49 @@
+{
+ "video": "8u1LGaJ2fyA",
+ "largeur": 480,
+ "hauteur": 854,
+ "facteur": 2,
+ "fps": 15,
+ "debut": 0,
+ "fin": 8.991,
+ "duree_video": 9.041,
+ "zones": {
+  "mer_lointaine": [
+   0.05,
+   0.06,
+   0.95,
+   0.3
+  ]
+ },
+ "mesures": {
+  "mer_lointaine": {
+   "statiques": {
+    "p05": 0.5124,
+    "p25": 0.8235,
+    "p75": 1.186,
+    "p95": 1.606,
+    "p99": 2.634,
+    "contraste": 0.1656,
+    "creux_BsurG": 2.492,
+    "creux_BsurR": 90.31,
+    "cretes_BsurG": 2.064,
+    "cretes_BsurR": 19.95,
+    "claire": 0,
+    "ecume": 0,
+    "hf_part": 0.4505,
+    "anisotropie": 9.701,
+    "p50_absolu": 0.1162
+   },
+   "temporelles": {
+    "mouvement_par_s": 0.4359,
+    "periode_s": 4.5,
+    "periode_nettete": 420.1,
+    "renouvellement_clairs_par_s": null,
+    "coupes": 0,
+    "plan_s": 9,
+    "images": 135,
+    "dt": 0.06667
+   }
+  }
+ }
+}

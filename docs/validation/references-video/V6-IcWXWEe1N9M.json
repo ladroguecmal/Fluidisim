@@ -1,0 +1,119 @@
+{
+ "video": "IcWXWEe1N9M",
+ "largeur": 360,
+ "hauteur": 640,
+ "facteur": 2,
+ "fps": 10,
+ "debut": 0,
+ "fin": 40,
+ "duree_video": 124.201,
+ "zones": {
+  "cadre": [
+   0.02,
+   0.02,
+   0.98,
+   0.98
+  ],
+  "haut": [
+   0.05,
+   0.02,
+   0.95,
+   0.35
+  ],
+  "bas": [
+   0.05,
+   0.6,
+   0.95,
+   0.95
+  ]
+ },
+ "mesures": {
+  "cadre": {
+   "statiques": {
+    "p05": 0.1744,
+    "p25": 0.5009,
+    "p75": 1.917,
+    "p95": 4.001,
+    "p99": 6.733,
+    "contraste": 0.3651,
+    "creux_BsurG": 1.632,
+    "creux_BsurR": 19.34,
+    "cretes_BsurG": 1.219,
+    "cretes_BsurR": 4.303,
+    "claire": 0.05006,
+    "ecume": 0,
+    "hf_part": 0.2799,
+    "anisotropie": 1.456,
+    "p50_absolu": 0.06182
+   },
+   "temporelles": {
+    "mouvement_par_s": 7.539,
+    "periode_s": 20,
+    "periode_nettete": 2154,
+    "renouvellement_clairs_par_s": 7.11,
+    "coupes": 0,
+    "plan_s": 40,
+    "images": 400,
+    "dt": 0.1
+   }
+  },
+  "haut": {
+   "statiques": {
+    "p05": 0.3939,
+    "p25": 0.6175,
+    "p75": 1.678,
+    "p95": 3.461,
+    "p99": 5.285,
+    "contraste": 0.1734,
+    "creux_BsurG": 1.956,
+    "creux_BsurR": 36.31,
+    "cretes_BsurG": 1.493,
+    "cretes_BsurR": 9.233,
+    "claire": 0.03133,
+    "ecume": 0,
+    "hf_part": 0.3306,
+    "anisotropie": 1.487,
+    "p50_absolu": 0.05003
+   },
+   "temporelles": {
+    "mouvement_par_s": 3.324,
+    "periode_s": 16.1,
+    "periode_nettete": 1905,
+    "renouvellement_clairs_par_s": 6.894,
+    "coupes": 17,
+    "plan_s": 32.2,
+    "images": 400,
+    "dt": 0.1
+   }
+  },
+  "bas": {
+   "statiques": {
+    "p05": 0.1848,
+    "p25": 0.463,
+    "p75": 1.805,
+    "p95": 3.964,
+    "p99": 5.939,
+    "contraste": 0.4482,
+    "creux_BsurG": 1.22,
+    "creux_BsurR": 12.47,
+    "cretes_BsurG": 1.099,
+    "cretes_BsurR": 3.159,
+    "claire": 0.04872,
+    "ecume": 0,
+    "hf_part": 0.2843,
+    "anisotropie": 1.41,
+    "p50_absolu": 0.0786
+   },
+   "temporelles": {
+    "mouvement_par_s": 8.437,
+    "periode_s": 13.33,
+    "periode_nettete": 735.1,
+    "renouvellement_clairs_par_s": 8.502,
+    "coupes": 0,
+    "plan_s": 40,
+    "images": 400,
+    "dt": 0.1
+   }
+  }
+ }
+}
