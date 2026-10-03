@@ -76,8 +76,9 @@ au même point avant l'eau (même formule, même albédo — lu dans le code) ; 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le lot des registres.
+- [x] **P2** — le lot des registres.
 - [ ] **P3** — le joueur éclairé comme l'eau ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — FEUILLE-DE-ROUTE (S464–S466, la suite), LISTE (S461–S466), REPRISE (dernier lot S467, prochain S470) ; QUESTIONS-OUVERTES : la ligne de la campagne reste juste (C11 dans Godot), inchangée.

@@ -17,7 +17,7 @@ Session en cours : **S467 — le lot des registres ; le joueur éclairé comme l
 Dernière session : S466 — le joueur, une capsule debout ([preuve](docs/validation/C10-SCENES-S454.md) §15) — 60 s, masse exacte. Avant : S465 (la pluie dans Godot)
 Session suivante : **S467 — le lot des registres** (dû, ADR-213 D3 : FEUILLE-DE-ROUTE, LISTE, QUESTIONS-OUVERTES depuis S464), puis la couleur du corps sous l'eau (`couleur_corps` contre le matériau de Godot). **Sans attendre de « Continue »**
 Maillons        : 1 — journal
-Registres       : dernier lot S464 (ADR-213 D3) ; le prochain au plus tard en S467
+Registres       : dernier lot S467 (ADR-213 D3) ; le prochain au plus tard en S470
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton
