@@ -42,6 +42,11 @@ const POSES := {
 	"demi_soleil": [Vector3(0.0, 0.0, 20.0), 0.0, 0.9273],
 	"demi_dessus": [Vector3(0.0, 0.04, 20.0), -0.12],
 	"demi_dessous": [Vector3(0.0, -0.04, 20.0), 0.12],
+	## S472 — les poses des scènes miroirs (ADR-216 D4), pour un champ vertical de 65° (un téléphone tenu droit) : **plage**
+	## (V1), l'œil à 1,7 m, l'horizon à 4 % du haut du cadre (tan θ = 0,92 · tan 32,5°) ; **quai** (V5), l'œil à 1,5 m,
+	## l'horizon à 52 % du haut (la caméra relevée de 1,5°).
+	"plage": [Vector3(0.0, 1.7, 20.0), -0.531],
+	"quai": [Vector3(0.0, 1.5, 20.0), 0.0255],
 }
 ## S359 — la scène côtière (`--cote`) : un fond de sable sous la mer, pour voir l'eau selon la profondeur. Étendue
 ## et pas de la grille du fond, m.
@@ -131,7 +136,9 @@ func couvert_voulu() -> float:
 func _ready() -> void:
 	if OS.get_environment("PLUIE") != "":
 		pluie_mm_h = float(OS.get_environment("PLUIE"))
-	var fichier := FileAccess.open("res://donnees/mer_b.json", FileAccess.READ)
+	# S472 : `MER_DONNEES=<fichier>` (dans `donnees/`) — une autre mer exportée, la mer calme des scènes miroirs (ADR-216 D4).
+	var nom_donnees := OS.get_environment("MER_DONNEES") if OS.get_environment("MER_DONNEES") != "" else "mer_b.json"
+	var fichier := FileAccess.open("res://donnees/" + nom_donnees, FileAccess.READ)
 	if fichier == null:
 		push_error("donnees/mer_b.json absent : lancer l'afficheur avec --meilleur --export-godot")
 		get_tree().quit(1)
@@ -1045,6 +1052,26 @@ func captures() -> void:
 		if pluie_mm_h > 0.0:
 			suffixe += "_pluie%d" % int(pluie_mm_h)
 		var chemin := ProjectSettings.globalize_path("res://captures/godot_%s%s_12s.%s" % [nom, suffixe, "pfm" if hdr else "png"])
+		# S472 — `SEQUENCE_FPS=f SEQUENCE_DUREE=d` : une séquence au pas fixe 1/f pendant d s, depuis l'instant de l'export, dans
+		# `captures/miroir/<pose><suffixe>_<k>.png` — les scènes miroirs, mesurées par `outils/banc_visuel.py` (ADR-216 D4).
+		if OS.get_environment("SEQUENCE_FPS") != "":
+			var fps := float(OS.get_environment("SEQUENCE_FPS"))
+			var n_images := int(round(float(OS.get_environment("SEQUENCE_DUREE")) * fps))
+			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures/miroir"))
+			for k in n_images:
+				temps = t0 + k / fps
+				phases(temps)
+				immersion(temps)
+				if detail != null:
+					detail.calculer(temps)
+				for _i in 3:
+					await RenderingServer.frame_post_draw
+				get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path(
+						"res://captures/miroir/%s%s_%03d.png" % [nom, suffixe, k]))
+			print("SEQUENCE_GODOT_S472 pose=%s images=%d fps=%.1f %dx%d" % [nom, n_images, fps, image.get_width(), image.get_height()])
+			temps = t0
+			phases(temps)
+			continue
 		# S368 : `SEQUENCE=n` — n images de la même pose, espacées de 2 s ; l'écume avance entre elles (la durée se juge
 		# dans le temps). Les suivantes s'écrivent `_12s_2.png`, `_12s_4.png`…
 		var suite_n := int(OS.get_environment("SEQUENCE")) if OS.get_environment("SEQUENCE") != "" else 1

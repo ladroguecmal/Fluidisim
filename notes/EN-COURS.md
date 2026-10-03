@@ -81,8 +81,14 @@ nommés et classés (ce qu'ils disent du rendu, ce qui les corrigerait) — **au
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la mer calme, les poses, le cadre portrait, la séquence ; les captures.
+- [x] **P2** — la mer calme, les poses, le cadre portrait, la séquence ; les captures.
 - [ ] **P3** — les mesures et le rapport d'écarts.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `mer.gd` : `MER_DONNEES=` ; les poses `plage` et `quai` ; `SEQUENCE_FPS`, `SEQUENCE_DUREE` (le pas fixe, `captures/miroir/`).
+  La mer calme : `--meilleur --vent=3.5 --export-godot=…` (Hs 0,26 m, Tp 2,56 s ; **à 3 m/s l'afficheur refuse** : « densité de queue
+  Band ») → `godot/donnees/mer_calme.json` (non versionné). **Capturé** (`--cote`, champ de 65°, cadre de la référence) : plage
+  480 × 854, 135 images à 15/s (l'horizon à 4,1 % du haut, la référence à 4 %) ; quai 360 × 640, 300 images à 15/s (l'horizon à 52 %) ;
+  sous l'eau 360 × 640, 400 images à 10/s.
+
