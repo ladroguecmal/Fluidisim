@@ -79,8 +79,9 @@ houle — montrées à l'utilisateur.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le lot des registres.
+- [x] **P2** — le lot des registres.
 - [ ] **P3** — la lumière reçue, la mer au-delà ; mesures ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — feuille de route, liste, file active pour S454–S456 (C10-1, la v1 solide, ADR-215) ; `Registres` : dernier lot S457, le prochain au plus tard en S460.
