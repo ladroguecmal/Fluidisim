@@ -314,79 +314,12 @@ pub fn banc_v1() -> Result<(), String> {
                     v.rendu.set_view(&camera, v.corps_a(v.t()));
                     v.rendu.render().map_err(|e| format!("export, rendu : {e}"))?;
                     let champ = v.rendu.field().map_err(|e| format!("export, champ : {e}"))?;
-                    let echelle_q = 127.5 / (2. * v.b.dx as f32);
-                    let mut octets = Vec::with_capacity(d.nx * d.ny * (k1 - k0));
-                    for k in k0..k1 {
-                        for c in 0..d.nx * d.ny {
-                            let p = champ[k * d.nx * d.ny + c];
-                            let o = (p * echelle_q + 127.5).round().clamp(0., 255.);
-                            if p.abs() < 1.9 * v.b.dx as f32 {
-                                erreur_quantif = erreur_quantif.max(((o - 127.5) / echelle_q - p).abs() as f64);
-                            }
-                            octets.push(o as u8);
-                        }
-                    }
+                    let (octets, carte, err, moy) = encoder_image(&champ, 0, &v.b, d, k0, k1);
+                    erreur_quantif = erreur_quantif.max(err);
                     f.write_all(&octets).map_err(|e| e.to_string())?;
-                    // S462 — **les caustiques** : la hauteur de chaque colonne (la première traversée de `φ` depuis le haut ; sans
-                    // surface, le niveau), sa hessienne, et la focalisation de la lumière réfractée au fond,
-                    // `C = 1/|det(I + D·Hess η)|`, `D = η·(1 − 1/n)` — la profondeur sous la surface, l'indice 1,34 ; bornée à 8.
                     if let Some(fc) = flux_c.as_mut() {
-                        let (nx, ny, dxf) = (d.nx, d.ny, v.b.dx);
-                        let eta: Vec<f64> = (0..nx * ny)
-                            .map(|c| {
-                                let ph = |k: usize| champ[k * nx * ny + c] as f64;
-                                (0..d.nz - 1)
-                                    .rev()
-                                    .find(|&k| ph(k) < 0. && ph(k + 1) >= 0.)
-                                    .map_or(v.b.h, |k| (k as f64 + 0.5) * dxf + dxf * ph(k) / (ph(k) - ph(k + 1)))
-                            })
-                            .collect();
-                        let at = |i: isize, j: isize| eta[(j.clamp(0, ny as isize - 1) as usize) * nx + i.clamp(0, nx as isize - 1) as usize];
-                        // Le dépôt (conservatif par construction) : 4 × 4 échantillons par cellule de surface, chacun portant `1/16` de
-                        // la lumière d'une cellule, déposé en bilinéaire au point du fond où son rayon arrive, `q = p + D·∇η` (la
-                        // lumière verticale ; l'obliquité du soleil décale le motif entier, Godot l'applique à la lecture).
-                        let mut depot = vec![0f64; nx * ny];
-                        let sous = 4usize;
-                        let grad = |i: isize, j: isize| ((at(i + 1, j) - at(i - 1, j)) / (2. * dxf), (at(i, j + 1) - at(i, j - 1)) / (2. * dxf));
-                        for j in 0..ny as isize {
-                            for i in 0..nx as isize {
-                                for b in 0..sous {
-                                    for a in 0..sous {
-                                        // L'échantillon, en cellules depuis le centre de la cellule (i, j) : η et ∇η en bilinéaire.
-                                        let (fx, fy) = ((a as f64 + 0.5) / sous as f64 - 0.5, (b as f64 + 0.5) / sous as f64 - 0.5);
-                                        let (i2, j2) = (if fx < 0. { i - 1 } else { i + 1 }, if fy < 0. { j - 1 } else { j + 1 });
-                                        let (wx, wy) = (fx.abs(), fy.abs());
-                                        let bil = |f: &dyn Fn(isize, isize) -> f64| {
-                                            (1. - wx) * (1. - wy) * f(i, j) + wx * (1. - wy) * f(i2, j) + (1. - wx) * wy * f(i, j2) + wx * wy * f(i2, j2)
-                                        };
-                                        let e = bil(&|x, y| at(x, y));
-                                        let gx = bil(&|x, y| grad(x, y).0);
-                                        let gy = bil(&|x, y| grad(x, y).1);
-                                        let dd = e * (1. - 1. / 1.34);
-                                        // Le point du fond, en cellules (centres à des entiers).
-                                        let qx = i as f64 + fx + dd * gx / dxf;
-                                        let qy = j as f64 + fy + dd * gy / dxf;
-                                        let (x0, y0) = (qx.floor(), qy.floor());
-                                        let (tx, ty) = (qx - x0, qy - y0);
-                                        let poids = 1. / (sous * sous) as f64;
-                                        for (ox, oy, w) in [(0., 0., (1. - tx) * (1. - ty)), (1., 0., tx * (1. - ty)), (0., 1., (1. - tx) * ty), (1., 1., tx * ty)] {
-                                            let (cx, cy) = (x0 + ox, y0 + oy);
-                                            if cx >= 0. && cy >= 0. && (cx as usize) < nx && (cy as usize) < ny {
-                                                depot[cy as usize * nx + cx as usize] += w * poids;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        let mut carte = Vec::with_capacity(nx * ny);
-                        let mut somme = 0f64;
-                        for c in depot.iter().copied() {
-                            somme += c;
-                            carte.push((c.min(8.) / 8. * 255.).round() as u8);
-                        }
-                        moyennes_c.push(somme / (nx * ny) as f64);
                         fc.write_all(&carte).map_err(|e| e.to_string())?;
+                        moyennes_c.push(moy);
                     }
                     let corps = v.corps_a(v.t()).map_or([0.; 3], |s| s.center);
                     images_export.push(format!("[{:.5},{:.4},{:.4},{:.4}]", v.t(), corps[0], corps[1], corps[2]));
@@ -459,6 +392,225 @@ pub fn banc_v1() -> Result<(), String> {
             debut.elapsed().as_secs_f64()
         );
         Ok(())
+    })
+}
+
+/// **S461–S464 — une image de la scène pour Godot** : le champ fondu `φ` sur 8 bits (`φ = (o − 127,5)/127,5 · 2·dx`) dans la fenêtre
+/// `[k0, k1)`, et (S462) la carte des caustiques — la focalisation de la lumière réfractée au fond, déposée (conservative). Rend
+/// (les octets de `φ`, la carte, l'erreur de quantification sous `|φ| < 1,9 dx`, la focalisation moyenne). L'export (`EXPORT_GODOT`)
+/// et le direct (`--v1-direct`) l'emploient.
+fn encoder_image(champ: &[f32], k_base: usize, b: &B10, d: water_core::delta3d::Domain3, k0: usize, k1: usize) -> (Vec<u8>, Vec<u8>, f64, f64) {
+    let mut erreur = 0f64;
+    let carte_c;
+    let moyenne_c;
+    let echelle_q = 127.5 / (2. * b.dx as f32);
+    let mut octets = Vec::with_capacity(d.nx * d.ny * (k1 - k0));
+    for k in k0..k1 {
+        for c in 0..d.nx * d.ny {
+            let p = champ[(k - k_base) * d.nx * d.ny + c];
+            let o = (p * echelle_q + 127.5).round().clamp(0., 255.);
+            if p.abs() < 1.9 * b.dx as f32 {
+                erreur = erreur.max(((o - 127.5) / echelle_q - p).abs() as f64);
+            }
+            octets.push(o as u8);
+        }
+    }
+    // S462 — **les caustiques** : la hauteur de chaque colonne (la première traversée de `φ` depuis le haut ; sans
+    // surface, le niveau), sa hessienne, et la focalisation de la lumière réfractée au fond,
+    // `C = 1/|det(I + D·Hess η)|`, `D = η·(1 − 1/n)` — la profondeur sous la surface, l'indice 1,34 ; bornée à 8.
+    {
+        let (nx, ny, dxf) = (d.nx, d.ny, b.dx);
+        let eta: Vec<f64> = (0..nx * ny)
+            .map(|c| {
+                let ph = |k: usize| champ[(k - k_base) * nx * ny + c] as f64;
+                (k_base..k_base + champ.len() / (nx * ny) - 1)
+                    .rev()
+                    .find(|&k| ph(k) < 0. && ph(k + 1) >= 0.)
+                    .map_or(b.h, |k| (k as f64 + 0.5) * dxf + dxf * ph(k) / (ph(k) - ph(k + 1)))
+            })
+            .collect();
+        let at = |i: isize, j: isize| eta[(j.clamp(0, ny as isize - 1) as usize) * nx + i.clamp(0, nx as isize - 1) as usize];
+        // Le dépôt (conservatif par construction) : 4 × 4 échantillons par cellule de surface, chacun portant `1/16` de
+        // la lumière d'une cellule, déposé en bilinéaire au point du fond où son rayon arrive, `q = p + D·∇η` (la
+        // lumière verticale ; l'obliquité du soleil décale le motif entier, Godot l'applique à la lecture).
+        let mut depot = vec![0f64; nx * ny];
+        let sous = 4usize;
+        // S464 : les pentes précalculées une fois (le direct : l'encodage passait 12 ms à les recalculer par échantillon).
+        let gxs: Vec<f64> = (0..nx * ny).map(|c| (at(c as isize % nx as isize + 1, (c / nx) as isize) - at(c as isize % nx as isize - 1, (c / nx) as isize)) / (2. * dxf)).collect();
+        let gys: Vec<f64> = (0..nx * ny).map(|c| (at((c % nx) as isize, (c / nx) as isize + 1) - at((c % nx) as isize, (c / nx) as isize - 1)) / (2. * dxf)).collect();
+        let lire = |v: &Vec<f64>, i: isize, j: isize| v[(j.clamp(0, ny as isize - 1) as usize) * nx + i.clamp(0, nx as isize - 1) as usize];
+        for j in 0..ny as isize {
+            for i in 0..nx as isize {
+                for b in 0..sous {
+                    for a in 0..sous {
+                        // L'échantillon, en cellules depuis le centre de la cellule (i, j) : η et ∇η en bilinéaire.
+                        let (fx, fy) = ((a as f64 + 0.5) / sous as f64 - 0.5, (b as f64 + 0.5) / sous as f64 - 0.5);
+                        let (i2, j2) = (if fx < 0. { i - 1 } else { i + 1 }, if fy < 0. { j - 1 } else { j + 1 });
+                        let (wx, wy) = (fx.abs(), fy.abs());
+                        let (w00, w10, w01, w11) = ((1. - wx) * (1. - wy), wx * (1. - wy), (1. - wx) * wy, wx * wy);
+                        let e = w00 * at(i, j) + w10 * at(i2, j) + w01 * at(i, j2) + w11 * at(i2, j2);
+                        let gx = w00 * lire(&gxs, i, j) + w10 * lire(&gxs, i2, j) + w01 * lire(&gxs, i, j2) + w11 * lire(&gxs, i2, j2);
+                        let gy = w00 * lire(&gys, i, j) + w10 * lire(&gys, i2, j) + w01 * lire(&gys, i, j2) + w11 * lire(&gys, i2, j2);
+                        let dd = e * (1. - 1. / 1.34);
+                        // Le point du fond, en cellules (centres à des entiers).
+                        let qx = i as f64 + fx + dd * gx / dxf;
+                        let qy = j as f64 + fy + dd * gy / dxf;
+                        let (x0, y0) = (qx.floor(), qy.floor());
+                        let (tx, ty) = (qx - x0, qy - y0);
+                        let poids = 1. / (sous * sous) as f64;
+                        for (ox, oy, w) in [(0., 0., (1. - tx) * (1. - ty)), (1., 0., tx * (1. - ty)), (0., 1., (1. - tx) * ty), (1., 1., tx * ty)] {
+                            let (cx, cy) = (x0 + ox, y0 + oy);
+                            if cx >= 0. && cy >= 0. && (cx as usize) < nx && (cy as usize) < ny {
+                                depot[cy as usize * nx + cx as usize] += w * poids;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        let mut carte = Vec::with_capacity(nx * ny);
+        let mut somme = 0f64;
+        for c in depot.iter().copied() {
+            somme += c;
+            carte.push((c.min(8.) / 8. * 255.).round() as u8);
+        }
+        moyenne_c = somme / (nx * ny) as f64;
+        carte_c = carte;
+    }
+    (octets, carte_c, erreur, moyenne_c)
+}
+
+/// **S464 — le direct** (`--v1-direct`) : la scène `--v1` calculée au temps réel sur la carte, sans fenêtre, et poussée image par image
+/// à Godot (`saut.tscn -- --direct`) sur `127.0.0.1:47011` (`V1_PORT`). À la connexion : `FST1`, la longueur, l'en-tête JSON (celui de
+/// `saut.json`, sans la liste des images) ; puis, à 30 images/s du temps simulé : `IMG1`, l'instant et le centre du corps (quatre
+/// `f32`), le champ `φ` sur 8 bits, la carte des caustiques. Godot ne calcule rien (I-01). Le client parti, la scène attend le suivant
+/// et repart du début ; `DUREE=<s>` : un seul client, le bilan imprimé après ce temps.
+pub fn direct_v1() -> Result<(), String> {
+    use std::io::Write;
+    reglages_v1();
+    let port: u16 = std::env::var("V1_PORT").ok().and_then(|v| v.parse().ok()).unwrap_or(47011);
+    let duree: Option<f64> = std::env::var("DUREE").ok().and_then(|v| v.parse().ok());
+    pollster::block_on(async {
+        let instance = crate::instance();
+        let mut v = Vivant::new(&instance, None, 64, 64, wgpu::TextureFormat::Rgba8Unorm).await?;
+        v.carte.set_timing(false);
+        // L'uniforme du fondu (ses dimensions) s'écrit avec la vue : sans elle, le fondu ne touche aucune maille (S464 : `φ` nul reçu).
+        v.rendu.set_view(&camera_b10(&v.b), None);
+        let d = v.b.domain();
+        let (k0, k1) = (((v.b.h - 0.8) / v.b.dx).floor().max(0.) as usize, (((v.b.h + 1.0) / v.b.dx).ceil() as usize).min(d.nz));
+        let w = v.b.houle.map_or([0.; 4], |w| [w.amplitude, w.wavenumber, w.omega, w.phase]);
+        let entete = format!(
+            "{{\"source\": \"water-viewer --v1-direct (S464)\", \"nx\": {}, \"ny\": {}, \"nz\": {}, \"k0\": {k0}, \"k1\": {k1}, \"dx\": {},              \"niveau\": {}, \"rayon\": {}, \"houle\": [{}, {}, {}, {}], \"images_par_s\": 30}}",
+            d.nx, d.ny, d.nz, d.dx, v.b.h, v.b.r, w[0], w[1], w[2], w[3]
+        );
+        let ecoute = std::net::TcpListener::bind(("127.0.0.1", port)).map_err(|e| format!("127.0.0.1:{port} : {e}"))?;
+        println!("V1_DIRECT en attente de Godot sur 127.0.0.1:{port}");
+        loop {
+            let (mut flux, _) = ecoute.accept().map_err(|e| e.to_string())?;
+            flux.set_nodelay(true).map_err(|e| e.to_string())?;
+            let mut debut_message = b"FST1".to_vec();
+            debut_message.extend_from_slice(&(entete.len() as u32).to_le_bytes());
+            debut_message.extend_from_slice(entete.as_bytes());
+            flux.write_all(&debut_message).map_err(|e| e.to_string())?;
+            // S464 : l'encodage (les caustiques) et l'envoi sur un fil à part — la simulation n'attend que la relecture ; si le fil est
+            // encore occupé, l'image est sautée (la suivante part à sa place).
+            let (vers_fil, du_calcul) = std::sync::mpsc::sync_channel::<(Vec<f32>, f32, [f32; 3])>(1);
+            let fil_parti = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+            let fil_couts = std::sync::Arc::new(std::sync::Mutex::new([0f64; 3]));
+            let (b_fil, parti_fil, couts_fil) = (v.b, fil_parti.clone(), fil_couts.clone());
+            let fil = std::thread::spawn(move || {
+                for (champ, t, corps) in du_calcul {
+                    let t1 = Instant::now();
+                    let (octets, carte, _, _) = encoder_image(&champ, k0, &b_fil, d, k0, k1);
+                    let t2 = Instant::now();
+                    let mut image = Vec::with_capacity(20 + octets.len() + carte.len());
+                    image.extend_from_slice(b"IMG1");
+                    for x in [t, corps[0], corps[1], corps[2]] {
+                        image.extend_from_slice(&x.to_le_bytes());
+                    }
+                    image.extend_from_slice(&octets);
+                    image.extend_from_slice(&carte);
+                    if flux.write_all(&image).is_err() {
+                        parti_fil.store(true, std::sync::atomic::Ordering::SeqCst);
+                        return;
+                    }
+                    let mut c = couts_fil.lock().unwrap();
+                    c[1] += (t2 - t1).as_secs_f64() * 1e3;
+                    c[2] += t2.elapsed().as_secs_f64() * 1e3;
+                    c[0] += 1.;
+                }
+            });
+            v.relancer()?;
+            println!("V1_DIRECT Godot connecté");
+            let debut = Instant::now();
+            let (mut prochaine, mut envoyees, mut prochain_bilan) = (0f64, 0u64, 5f64);
+            // Les coûts cumulés d'une image, ms : le fondu et la relecture, l'encodage (les caustiques), l'envoi.
+            let mut couts = [0f64; 3];
+            let mut demandes: std::collections::VecDeque<(f32, [f32; 3])> = std::collections::VecDeque::new();
+            let _fil = fil;
+            let mut parti = false;
+            while !parti {
+                let reel = debut.elapsed().as_secs_f64();
+                if duree.is_some_and(|du| reel >= du) {
+                    println!(
+                        "V1_DIRECT bilan reel_s={reel:.2} simule_s={:.2} rapport_simule_reel={:.3} images_envoyees={envoyees} images_par_s={:.1} pas={}",
+                        v.t(),
+                        v.t() / reel,
+                        envoyees as f64 / reel,
+                        v.pas
+                    );
+                    return Ok(());
+                }
+                if fil_parti.load(std::sync::atomic::Ordering::SeqCst) {
+                    let n = envoyees.max(1) as f64;
+                    let c = *fil_couts.lock().unwrap();
+                    let m = c[0].max(1.);
+                    println!(
+                        "V1_DIRECT Godot parti à t={:.2} s (réel {:.2} s) ; images relues={envoyees}, envoyées={} ; par_image_ms : releve={:.2} \
+                         encodage={:.2} envoi={:.2}",
+                        v.t(),
+                        debut.elapsed().as_secs_f64(),
+                        c[0],
+                        couts[0] / n,
+                        c[1] / m,
+                        c[2] / m
+                    );
+                    parti = true;
+                    continue;
+                }
+                if v.t() < reel {
+                    v.avancer()?;
+                    // S464 : la relecture sans attente — les couches demandées à l'image, rendues au pas suivant.
+                    if let Some(champ) = v.rendu.couches_pretes() {
+                        if let Some((t_demande, corps)) = demandes.pop_front() {
+                            let _ = vers_fil.try_send((champ, t_demande, corps));
+                        }
+                    }
+                    if v.t() >= prochaine {
+                        let t0 = Instant::now();
+                        if v.rendu.demander_couches(k0, k1) {
+                            demandes.push_back((v.t() as f32, v.corps_a(v.t()).map_or([0.; 3], |s| s.center)));
+                        }
+                        couts[0] += t0.elapsed().as_secs_f64() * 1e3;
+                        envoyees += 1;
+                        prochaine += 1. / 30.;
+                    }
+                } else {
+                    std::thread::sleep(std::time::Duration::from_millis(1));
+                }
+                if reel >= prochain_bilan {
+                    let n = envoyees.max(1) as f64;
+                    println!(
+                        "V1_DIRECT t_reel={reel:.1} t_simule={:.2} images={envoyees} par_image_ms : releve={:.2} encodage={:.2} envoi={:.2}",
+                        v.t(),
+                        couts[0] / n,
+                        couts[1] / n,
+                        couts[2] / n
+                    );
+                    prochain_bilan += 5.;
+                }
+            }
+        }
     })
 }
 

@@ -9,6 +9,10 @@ extends Node3D
 ## `-- --captures` : les images aux instants de R38 (`captures/saut_t<t>.png`), puis quitte. `-- --cout` : 600 images sans
 ## synchronisation verticale, la cadence imprimée, puis quitte.
 ##
+## S464 — **le direct** : `-- --direct` se connecte à `water-viewer --v1-direct` (127.0.0.1:47011, `V1_PORT`), qui calcule la scène
+## au temps réel et pousse chaque image ; ce script affiche la dernière reçue. Avec `--captures` : trois images du direct
+## (`captures/saut_direct_<n>.png`) ; avec `--cout` : la cadence et les images reçues par seconde.
+##
 ## Axes : ceux de B dans l'export (x à l'est, y au nord, z en haut) ; dans Godot, un point (x, y, z) de B est (x, z, −y).
 
 var entete: Dictionary
@@ -37,6 +41,12 @@ var elevation := 0.0
 var distance := 3.0
 var cible := Vector3.ZERO
 var glisse := false
+## S464 — le direct : la connexion, ce qui est reçu et pas encore lu, la taille d'une image du lien, les images reçues.
+var direct := false
+var lien: StreamPeerTCP
+var tampon := PackedByteArray()
+var taille_lien := 0
+var recues := 0
 
 
 static func b_vers_godot(p: Vector3) -> Vector3:
@@ -44,25 +54,33 @@ static func b_vers_godot(p: Vector3) -> Vector3:
 
 
 func _ready() -> void:
-	var fichier := FileAccess.open("res://donnees/saut.json", FileAccess.READ)
-	if fichier == null:
-		push_error("donnees/saut.json absent : `water-viewer --v1-banc` avec EXPORT_GODOT=godot/donnees")
-		get_tree().quit(1)
-		return
-	entete = JSON.parse_string(fichier.get_as_text())
-	octets = FileAccess.get_file_as_bytes("res://donnees/saut.bin")
-	if FileAccess.file_exists("res://donnees/saut_caustiques.bin"):
-		octets_c = FileAccess.get_file_as_bytes("res://donnees/saut_caustiques.bin")
+	direct = "--direct" in OS.get_cmdline_user_args()
+	if direct:
+		if not await connecter():
+			get_tree().quit(1)
+			return
+	else:
+		var fichier := FileAccess.open("res://donnees/saut.json", FileAccess.READ)
+		if fichier == null:
+			push_error("donnees/saut.json absent : `water-viewer --v1-banc` avec EXPORT_GODOT=godot/donnees")
+			get_tree().quit(1)
+			return
+		entete = JSON.parse_string(fichier.get_as_text())
+		octets = FileAccess.get_file_as_bytes("res://donnees/saut.bin")
+		if FileAccess.file_exists("res://donnees/saut_caustiques.bin"):
+			octets_c = FileAccess.get_file_as_bytes("res://donnees/saut_caustiques.bin")
 	nx = int(entete["nx"])
 	ny = int(entete["ny"])
 	nfen = int(entete["k1"]) - int(entete["k0"])
 	taille = nx * ny * nfen
-	images = entete["images"]
-	if octets.size() != taille * images.size():
-		push_error("saut.bin : taille inattendue")
-		get_tree().quit(1)
-		return
-	duree = float(images[images.size() - 1][0])
+	taille_lien = 20 + taille + nx * ny
+	if not direct:
+		images = entete["images"]
+		if octets.size() != taille * images.size():
+			push_error("saut.bin : taille inattendue")
+			get_tree().quit(1)
+			return
+		duree = float(images[images.size() - 1][0])
 	var dx := float(entete["dx"])
 	var niveau := float(entete["niveau"])
 	environnement()
@@ -99,7 +117,7 @@ func _ready() -> void:
 		m.set_shader_parameter("etendue", Vector2((nx - 0.5) * dx, (ny - 0.5) * dx))
 		m.set_shader_parameter("domaine", Vector2(nx * dx, ny * dx))
 		# `CAUSTIQUES=0` : sans elles (l'image de S461).
-		m.set_shader_parameter("caustiques", octets_c.size() == nx * ny * images.size() and OS.get_environment("CAUSTIQUES") != "0")
+		m.set_shader_parameter("caustiques", (direct or octets_c.size() == nx * ny * images.size()) and OS.get_environment("CAUSTIQUES") != "0")
 	# Le joueur.
 	joueur = MeshInstance3D.new()
 	var sm := SphereMesh.new()
@@ -145,12 +163,64 @@ func _ready() -> void:
 			else:
 				detail = null
 	placer_camera()
-	charger(0)
+	if not direct:
+		charger(0)
 	var args := OS.get_cmdline_user_args()
 	if "--captures" in args:
-		captures()
+		if direct:
+			captures_direct()
+		else:
+			captures()
 	elif "--cout" in args:
 		cout()
+
+
+## S464 — la connexion au direct : l'en-tête (`FST1`, sa longueur, le JSON).
+func connecter() -> bool:
+	var port := int(OS.get_environment("V1_PORT")) if OS.get_environment("V1_PORT") != "" else 47011
+	lien = StreamPeerTCP.new()
+	if lien.connect_to_host("127.0.0.1", port) != OK:
+		push_error("direct : connexion impossible à 127.0.0.1:%d" % port)
+		return false
+	var attente := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - attente < 20000:
+		lien.poll()
+		if lien.get_status() == StreamPeerTCP.STATUS_CONNECTED and lien.get_available_bytes() > 0:
+			tampon.append_array(lien.get_data(lien.get_available_bytes())[1])
+		if tampon.size() >= 8:
+			var n := tampon.decode_u32(4)
+			if tampon.slice(0, 4).get_string_from_ascii() != "FST1":
+				push_error("direct : en-tête inattendu")
+				return false
+			if tampon.size() >= 8 + n:
+				entete = JSON.parse_string(tampon.slice(8, 8 + n).get_string_from_utf8())
+				tampon = tampon.slice(8 + n)
+				print("SAUT_GODOT_S464 direct connecté à 127.0.0.1:%d" % port)
+				return true
+		await get_tree().process_frame
+	push_error("direct : pas d'en-tête de `water-viewer --v1-direct` sur 127.0.0.1:%d" % port)
+	return false
+
+
+## S464 — ce qui est arrivé : la dernière image complète appliquée, les plus anciennes sautées.
+func recevoir() -> void:
+	lien.poll()
+	var n := lien.get_available_bytes()
+	if n > 0:
+		tampon.append_array(lien.get_data(n)[1])
+	var completes := tampon.size() / taille_lien
+	if completes == 0:
+		return
+	var debut := (completes - 1) * taille_lien
+	if tampon.slice(debut, debut + 4).get_string_from_ascii() != "IMG1":
+		push_error("direct : image désalignée")
+		tampon = PackedByteArray()
+		return
+	var instant := tampon.decode_float(debut + 4)
+	var centre := Vector3(tampon.decode_float(debut + 8), tampon.decode_float(debut + 12), tampon.decode_float(debut + 16))
+	appliquer(tampon.slice(debut + 20, debut + 20 + taille), tampon.slice(debut + 20 + taille, debut + taille_lien), instant, centre)
+	recues += completes
+	tampon = tampon.slice(completes * taille_lien)
 
 
 func environnement() -> void:
@@ -189,32 +259,37 @@ func charger(i: int) -> void:
 	if i == courante:
 		return
 	courante = i
+	var carte := PackedByteArray()
+	if octets_c.size() == nx * ny * images.size():
+		carte = octets_c.slice(i * nx * ny, (i + 1) * nx * ny)
+	var e: Array = images[i]
+	appliquer(octets.slice(i * taille, (i + 1) * taille), carte, float(e[0]), Vector3(float(e[1]), float(e[2]), float(e[3])))
+
+
+## Une image (enregistrée ou reçue) : `φ` sur 8 bits, la carte des caustiques (vide : aucune), l'instant, le centre du corps (B).
+func appliquer(phi_octets: PackedByteArray, carte_octets: PackedByteArray, instant: float, centre: Vector3) -> void:
 	var couches: Array[Image] = []
-	var base := i * taille
 	for k in nfen:
-		var debut := base + k * nx * ny
-		couches.append(Image.create_from_data(nx, ny, false, Image.FORMAT_R8, octets.slice(debut, debut + nx * ny)))
+		couches.append(Image.create_from_data(nx, ny, false, Image.FORMAT_R8, phi_octets.slice(k * nx * ny, (k + 1) * nx * ny)))
 	if texture_phi == null:
 		texture_phi = ImageTexture3D.new()
 		texture_phi.create(Image.FORMAT_R8, nx, ny, nfen, false, couches)
 		mat_eau.set_shader_parameter("phi_tex", texture_phi)
 	else:
 		texture_phi.update(couches)
-	if octets_c.size() == nx * ny * images.size():
-		var carte := Image.create_from_data(nx, ny, false, Image.FORMAT_R8, octets_c.slice(i * nx * ny, (i + 1) * nx * ny))
+	if carte_octets.size() == nx * ny:
+		var carte := Image.create_from_data(nx, ny, false, Image.FORMAT_R8, carte_octets)
 		if texture_c == null:
 			texture_c = ImageTexture.create_from_image(carte)
 			for m in [mat_eau, mat_mer]:
 				m.set_shader_parameter("caustiques_tex", texture_c)
 		else:
 			texture_c.update(carte)
-	var e: Array = images[i]
-	var centre := Vector3(float(e[1]), float(e[2]), float(e[3]))
 	joueur.position = b_vers_godot(centre)
 	if detail != null:
-		detail.calculer(float(e[0]))
+		detail.calculer(instant)
 	for m in [mat_eau, mat_mer]:
-		m.set_shader_parameter("temps", float(e[0]))
+		m.set_shader_parameter("temps", instant)
 		m.set_shader_parameter("corps", Vector4(centre.x, centre.y, centre.z, float(entete["rayon"])))
 
 
@@ -228,6 +303,10 @@ func image_a(s: float) -> int:
 
 
 func _process(delta: float) -> void:
+	if direct:
+		if lien != null and not en_pause:
+			recevoir()
+		return
 	if en_pause or "--captures" in OS.get_cmdline_user_args():
 		return
 	t += delta
@@ -274,9 +353,25 @@ func captures() -> void:
 	get_tree().quit()
 
 
+## S464 : trois images du direct, à 1,5 s d'intervalle après 2 s.
+func captures_direct() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures"))
+	var depart := Time.get_ticks_msec()
+	for n in 3:
+		while Time.get_ticks_msec() - depart < 2000 + 1500 * n:
+			await get_tree().process_frame
+		var image := get_viewport().get_texture().get_image()
+		var chemin := ProjectSettings.globalize_path("res://captures/saut_direct_%d.png" % n)
+		image.save_png(chemin)
+		print("SAUT_GODOT_S464 capture direct %d images_recues=%d %s" % [n, recues, chemin])
+	get_tree().quit()
+
+
 func cout() -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	var durees: Array[float] = []
+	var recues_avant := recues
+	var debut := Time.get_ticks_usec()
 	var avant := Time.get_ticks_usec()
 	for _i in 600:
 		await RenderingServer.frame_post_draw
@@ -286,4 +381,8 @@ func cout() -> void:
 	durees.sort()
 	print("SAUT_GODOT_S461 cout images=600 image_ms_mediane=%.2f image_ms_p99=%.2f images_par_s=%.0f" % [
 			durees[300], durees[594], 1000.0 / durees[300]])
+	if direct:
+		var secondes := (Time.get_ticks_usec() - debut) * 1e-6
+		print("SAUT_GODOT_S464 direct images_recues=%d en %.2f s, soit %.1f par seconde" % [recues - recues_avant, secondes,
+				float(recues - recues_avant) / secondes])
 	get_tree().quit()

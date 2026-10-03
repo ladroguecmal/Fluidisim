@@ -77,8 +77,17 @@ le temps réel (0,9 au moins) et Godot reçoit 25 images/s au moins ; (3) une ca
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
-- [ ] **P3** — le direct (`--v1-direct`, `--direct`) ; mesures ; capture.
+- [x] **P3** — le direct (`--v1-direct`, `--direct`) ; mesures ; capture.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, file active pour S457–S463 (la v1 reçue, C10-2 plafonné, C11) ; `Registres` : dernier lot S464, le prochain au plus tard en S467.
+- **P3** — `water-viewer --v1-direct` (la scène au temps réel sur la carte, poussée sur `127.0.0.1:47011` : `FST1` et l'en-tête,
+  puis `IMG1`, l'instant, le corps, `φ` sur 8 bits, les caustiques) ; `saut.tscn -- --direct` (la connexion, la dernière image complète
+  appliquée) ; `encoder_image` commun à l'export et au direct ; `SurfaceCarte::demander_couches` / `couches_pretes` (la relecture sans
+  attente, deux tampons). **Mesuré**, Godot affiché : d'abord **0,55** du temps réel et 13 à 19 images/s — la relecture du champ entier
+  (15 ms), l'encodage (12 ms) et l'envoi (2 ms) dans la boucle ; encodage et envoi sur un fil à part : 0,78, 23,5/s ; la relecture sans
+  attente : **0,3 ms** ; puis un défaut : **`φ` reçu nul** (le fondu lit ses dimensions dans l'uniforme, jamais écrit sans `set_view`)
+  — la vue posée au départ : **0,939 du temps réel, 28,2 images/s** — (1), (2) tenus ; (3) captures `godot/captures/saut_direct_{0,1,2}.png`
+  (le joueur qui remonte, l'eau qui ruisselle) envoyées.
+

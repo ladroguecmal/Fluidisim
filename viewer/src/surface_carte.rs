@@ -67,6 +67,9 @@ pub struct SurfaceCarte {
     cible: wgpu::Texture,
     lecture: wgpu::Buffer,
     query: Option<(wgpu::QuerySet, wgpu::Buffer, wgpu::Buffer)>,
+    /// S464 — la relecture asynchrone des couches (le direct) : deux tampons alternés, chacun avec son drapeau « lu » et « en cours ».
+    relectures: Vec<(wgpu::Buffer, std::sync::Arc<std::sync::atomic::AtomicBool>, bool)>,
+    relecture_suivante: usize,
 }
 
 fn norm(a: [f32; 3]) -> [f32; 3] {
@@ -214,6 +217,8 @@ impl SurfaceCarte {
             cible,
             lecture,
             query,
+            relectures: Vec::new(),
+            relecture_suivante: 0,
         }
     }
 
@@ -373,6 +378,64 @@ impl SurfaceCarte {
             }
         }
         Ok(rvb)
+    }
+
+    /// **S464 — la relecture sans attente** : le fondu puis la copie des couches `k0..k1` dans l'un de deux tampons, sa projection
+    /// demandée sans attendre ; `couches_pretes` la rend quand la carte l'a faite (le pas suivant, qui attend la carte de toute façon).
+    /// Faux si les deux tampons sont encore pris (l'image est sautée).
+    pub fn demander_couches(&mut self, k0: usize, k1: usize) -> bool {
+        let couche = (self.dims[0] * self.dims[1]) as u64;
+        let n = (k1 - k0) as u64 * couche * 4;
+        if self.relectures.is_empty() {
+            for _ in 0..2 {
+                let b = buffer(&self.device, n, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
+                self.relectures.push((b, std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)), false));
+            }
+        }
+        let i = self.relecture_suivante;
+        if self.relectures[i].2 {
+            return false;
+        }
+        let cells = self.dims[0] * self.dims[1] * self.dims[2];
+        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        for lien in &self.passes {
+            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
+            pass.set_pipeline(&self.fondu);
+            pass.set_bind_group(0, lien, &[]);
+            pass.dispatch_workgroups(cells.div_ceil(WG), 1, 1);
+        }
+        encoder.copy_buffer_to_buffer(&self.champ, k0 as u64 * couche * 4, &self.relectures[i].0, 0, n);
+        self.queue.submit([encoder.finish()]);
+        let pret = self.relectures[i].1.clone();
+        pret.store(false, std::sync::atomic::Ordering::SeqCst);
+        self.relectures[i].0.slice(..).map_async(wgpu::MapMode::Read, move |r| {
+            if r.is_ok() {
+                pret.store(true, std::sync::atomic::Ordering::SeqCst);
+            }
+        });
+        self.relectures[i].2 = true;
+        self.relecture_suivante = 1 - i;
+        true
+    }
+
+    /// S464 : les couches demandées que la carte a rendues, la plus ancienne d'abord (aucune attente).
+    pub fn couches_pretes(&mut self) -> Option<Vec<f32>> {
+        let _ = self.device.poll(wgpu::PollType::Poll);
+        for k in 0..2 {
+            // `relecture_suivante` est la plus ancienne des deux demandes quand les deux sont en cours.
+            let i = (self.relecture_suivante + k) % 2;
+            let pret = self.relectures.get(i).is_some_and(|r| r.2 && r.1.load(std::sync::atomic::Ordering::SeqCst));
+            if pret {
+                let donnees: Vec<f32> = {
+                    let vue = self.relectures[i].0.slice(..).get_mapped_range().ok()?;
+                    vue.chunks_exact(4).map(|b| f32::from_le_bytes(b.try_into().unwrap())).collect()
+                };
+                self.relectures[i].0.unmap();
+                self.relectures[i].2 = false;
+                return Some(donnees);
+            }
+        }
+        None
     }
 
     /// Le champ fondu de la dernière image (banc).

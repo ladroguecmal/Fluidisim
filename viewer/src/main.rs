@@ -2632,6 +2632,9 @@ fn run() -> Result<(), String> {
         return apic3d_carte::recevoir_ballottement();
     }
     // S458 — la scène `--v1` (ADR-215 D3) : la fenêtre, ou son banc.
+    if args.iter().any(|a| a == "--v1-direct") {
+        return surface_direct::direct_v1();
+    }
     if args.iter().any(|a| a == "--v1-banc") {
         return surface_direct::banc_v1();
     }
