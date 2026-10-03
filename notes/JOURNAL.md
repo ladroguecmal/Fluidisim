@@ -18484,3 +18484,11 @@ fondu jamais écrit) corrigé. **Ce qui devient possible** : la simulation joué
 Godot — les rides, le ciel couvert, les gouttes, les gerbes, l'extinction. **Mesuré** : 447 anneaux/m²/s à 10 mm/h ; ni éclat ni
 caustiques sous le couvert ; 174 images/s à 10 mm/h, 60 à 50 mm/h. Images envoyées. Suite verte. **Rituel** (allégé). Maillons **1**.
 Suivant : le joueur (une capsule debout).
+
+## S466 — 2026-10-03 — le joueur : une capsule debout
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §15) : le corps de la carte en capsule (la
+sphère au bit pour `L = 0`) ; le joueur de `--v1` debout, 0,3 × 1,7 m, qui saute pieds en avant, freine et s'arrête à 0,5 m du
+fond ; le rendu suit (l'afficheur, Godot, l'export). **Mesuré** : 60 s, 3118 pas, écart de masse 0. Arrêté net à 0,2 m du fond,
+la scène divergeait (15 à 31 s) ; les zones de relaxation en `y`, essayées, la cassaient : retirées. Images envoyées. **Rituel**
+(allégé). Maillons **1**. Suivant : le lot des registres.

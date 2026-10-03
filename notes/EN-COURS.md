@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S466 — **en cours**. En autonomie : **le joueur** — une capsule debout au lieu de la sphère de B10.
+Session : S466 — **terminée**. En autonomie : **le joueur** — une capsule debout au lieu de la sphère de B10.
 
 **Ce que la session fait.** Le corps de la carte devient une **capsule** : un axe unitaire, une demi-longueur `L`, un rayon ; chaque
 formule de la sphère (la reconstruction et ses images, les étiquettes, l'éloignement des particules) mesure la distance au **point le
@@ -77,7 +77,7 @@ capsule verticale de 0,3 m de diamètre et 1,7 m, qui saute pieds en avant. Le r
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la capsule dans la carte ; le joueur dans la scène et le rendu ; mesures ; images.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — la carte : `body_point` (le point de l'axe le plus proche) dans la reconstruction, ses images, les étiquettes,
@@ -90,4 +90,4 @@ capsule verticale de 0,3 m de diamètre et 1,7 m, qui saute pieds en avant. Le r
   0,2 m du fond (quatre mailles) — divergence à la deuxième, troisième ou quatrième entrée (15 à 31 s) ; le freinage seul ne
   suffit pas (22 s) ; les pieds à 0,5 m suffisent, au rayon prévu (0,15 m). Des zones de relaxation le long des parois `y`,
   essayées, cassaient la scène dès 4 s (au coin du bord ouvert) : retirées.
-
+- **P3** — C10-SCENES-S454 §15 ; journal ; jeton libre ; maillons 1 ; suivant : S467, le lot des registres (dû) et la couleur du corps sous l'eau.

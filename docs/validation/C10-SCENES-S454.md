@@ -320,3 +320,29 @@ l'air (`pluie_air.gd`) et les gerbes (`gerbes.gd`) sur la nappe de la mer, l'ext
 **Ce qui reste** : la variance des rides (rendue en rugosité sur la mer et la piscine) n'est pas portée — seule leur pente ; à 50 mm/h,
 le coût des rides, évaluées deux fois (le domaine et la mer), fait tomber la scène à 60 images/s.
 
+## 15. Le joueur : une capsule debout (S466)
+
+2026-10-03. Le corps de la carte n'est plus seulement une sphère : une **capsule** (un axe unitaire, une demi-longueur `L`, un rayon).
+Chaque formule de la sphère — la reconstruction et ses images, les étiquettes, l'éloignement des particules — mesure la distance au
+point de l'axe le plus proche, `c + a·clamp((q − c)·a, −L, L)` ; l'empreinte de la bascule s'abaisse de `L·|a_z|`. `L = 0` : la
+sphère, au bit. **Le joueur** de `--v1` (`JOUEUR=debout`, le défaut ; `JOUEUR=boule` : la sphère de B10) : 0,3 m de diamètre,
+1,7 m de haut, qui saute pieds en avant à 4 m/s, **freine** dans l'eau d'une décélération constante, s'arrête les pieds à **0,5 m
+du fond** (`JOUEUR_FOND`), remonte à 0,6 m/s.
+
+**Reproduire** : `water-viewer --v1-banc` (60 s) ; `EXPORT_GODOT=godot/donnees DUREE=12 water-viewer --v1-banc`, puis
+`<godot> --path godot res://saut.tscn -- --captures`.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) `L = 0` : la sphère au bit | `--surface-direct-banc` : 125 pas, écart de masse 0, inchangé | tenu |
+| (2) `--v1` debout : 60 s, masse exacte | **3118 pas, écart 0**, pas médian 14,7 ms | tenu |
+| (3) les images | `godot/captures/saut_t{0.30,0.55,1.60}.png` | envoyées |
+
+**Ce qui a cassé, et pourquoi le réglage.** Les pieds arrêtés net à 4 m/s à 0,2 m du fond (quatre mailles) : la scène diverge à
+une entrée ultérieure (15 à 31 s selon l'essai), l'eau pincée entre les pieds et le fond. Le freinage seul ne suffit pas (22 s) ;
+les pieds à 0,5 m, si — au rayon prévu de 0,15 m. Des zones de relaxation le long des parois `y` (pour amortir les vagues du
+joueur), essayées : la scène cassait dès 4 s au coin du bord ouvert ; retirées.
+
+**Ce qui reste** : sous l'eau, le corps vu par réfraction est plus clair que le maillage au-dessus (deux éclairages : la couleur
+de `couleur_corps` et le matériau de Godot) ; un corps rigide réel (6.1) et le joueur du jeu (9.3) remplaceront le corps imposé.
+

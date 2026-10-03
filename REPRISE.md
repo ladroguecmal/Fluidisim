@@ -10,12 +10,12 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-03 21:15 +02:00
+JETON            : libre
+Battement        : 2026-10-03 23:05 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S466 — le joueur : une capsule debout** (la physique de la carte et le rendu)
-Dernière session : S465 — la pluie sur la scène du saut dans Godot ([preuve](docs/validation/C10-SCENES-S454.md) §14) — 174 images/s à 10 mm/h. Avant : S464 (le direct)
-Session suivante : **S466 — le joueur** : une capsule debout (0,3 m de diamètre, 1,7 m) au lieu de la sphère de B10, dans la physique de la carte (le corps imposé, les étiquettes, la reconstruction, la bascule) et dans le rendu — le saut pieds en avant ; reçu si la masse reste exacte et la scène stable 60 s. **Sans attendre de « Continue »**
+Session en cours : aucune
+Dernière session : S466 — le joueur, une capsule debout ([preuve](docs/validation/C10-SCENES-S454.md) §15) — 60 s, masse exacte. Avant : S465 (la pluie dans Godot)
+Session suivante : **S467 — le lot des registres** (dû, ADR-213 D3 : FEUILLE-DE-ROUTE, LISTE, QUESTIONS-OUVERTES depuis S464), puis la couleur du corps sous l'eau (`couleur_corps` contre le matériau de Godot). **Sans attendre de « Continue »**
 Maillons        : 1 — journal
 Registres       : dernier lot S464 (ADR-213 D3) ; le prochain au plus tard en S467
 ```
