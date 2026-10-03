@@ -278,3 +278,26 @@ queue exportée est celle de la mer de R14 (vent de 7,8 m/s) ; la scène est cal
 
 **Ce qui se voit** : l'eau ridée, les éclats du soleil, le sable et ses caustiques à travers, le jet et les anneaux du saut.
 
+## 13. C11 : le direct (S464)
+
+2026-10-03. La scène du saut dans Godot **sans enregistrement**. **Tranché (ADR-215 D2)** : un lien local plutôt qu'une bibliothèque dans
+le processus de Godot (godot-rust demande une dépendance que le dépôt ne porte pas). `water-viewer --v1-direct` calcule la scène au temps
+réel sur la carte, sans fenêtre, et pousse chaque image sur `127.0.0.1:47011` (`V1_PORT`) : `FST1`, la longueur et l'en-tête JSON ;
+puis, à 30 images/s du temps simulé, `IMG1`, l'instant et le centre du corps, `φ` sur 8 bits, la carte des caustiques. `saut.tscn --
+--direct` s'y connecte et applique la dernière image complète reçue. Godot ne calcule toujours rien (I-01).
+
+**Reproduire** : `viewer/target/release/water-viewer.exe --v1-direct` (une minute de mise en route ; `DUREE=<s>` : le bilan après ce
+temps), puis `<godot> --path godot res://saut.tscn -- --direct` (`--captures` : trois images à 2, 3,5 et 5 s ; `--cout` : la cadence).
+
+| étape | temps simulé / réel | images reçues par s |
+|---|---:|---:|
+| la relecture du champ entier, l'encodage et l'envoi dans la boucle (15 + 12 + 2 ms par image) | 0,55 | 13 à 19 |
+| l'encodage et l'envoi sur un fil à part | 0,78 | 23,5 |
+| la relecture sans attente (deux tampons ; 0,3 ms) | 0,855 | 25,7 |
+| **`φ` reçu nul corrigé** (la vue posée au départ : le fondu lit ses dimensions dans l'uniforme) | **0,939** | **28,2** |
+
+**Verdict** (critères de S464) : (1) la scène dans Godot, l'afficheur sans fenêtre, sans fichier — tenu ; (2) 0,9 du temps réel et 25
+images/s — **tenu** (0,939, 28,2 ; Godot affiché, la carte partagée) ; (3) les captures `godot/captures/saut_direct_{0,1,2}.png` — le
+joueur qui remonte, l'eau qui ruisselle de lui — envoyées. **Une leçon** : les trois défauts de la session étaient des états non posés
+ou des attentes — le temps de calcul de la carte n'a jamais été la limite.
+

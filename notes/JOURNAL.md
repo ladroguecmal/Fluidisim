@@ -18469,3 +18469,11 @@ ou ce que R39 désigne.
 S360 sur la scène du saut, à mi-force (tranché : la mer de la scène est calme). **Mesuré** : pente quadratique ajoutée 0,0087 ; le
 raccord ne se voit plus ; 391 images/s ; images envoyées. Suite verte. **Rituel** (allégé). Maillons **2**. Suivant : le lot des
 registres (en retard d'une session), puis le direct.
+
+## S464 — 2026-10-03 — le lot des registres ; C11, le direct
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §13) : le lot des registres (S457–S463) ; **le
+direct** — l'afficheur calcule la scène au temps réel et la pousse à Godot par un lien local (tranché, plutôt que godot-rust). **Mesuré** :
+de 0,55 à **0,939** du temps réel et **28 images/s** — la relecture sans attente, l'encodage sur un fil, et un `φ` nul (l'uniforme du
+fondu jamais écrit) corrigé. **Ce qui devient possible** : la simulation jouée dans Godot en temps réel ; **le chemin** : la pluie, R39 ;
+**la preuve** : §13. Maillons **0**. Suite verte. **Rituel** (allégé). Suivant : la pluie.

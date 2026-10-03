@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S464 — **en cours**. En autonomie (décision du 2026-10-03) : le lot des registres (ADR-213 D3, dû en S460), puis **le direct**.
+Session : S464 — **terminée**. En autonomie (décision du 2026-10-03) : le lot des registres (ADR-213 D3, dû en S460), puis **le direct**.
 
 **Ce que la session fait.** (1) Le lot des registres pour S457–S463. (2) **Le direct** : la scène du saut dans Godot **sans
 enregistrement**. **Tranché (ADR-215 D2)** — un lien local plutôt qu'une bibliothèque dans le processus de Godot (godot-rust demande une
@@ -78,7 +78,7 @@ le temps réel (0,9 au moins) et Godot reçoit 25 images/s au moins ; (3) une ca
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
 - [x] **P3** — le direct (`--v1-direct`, `--direct`) ; mesures ; capture.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, file active pour S457–S463 (la v1 reçue, C10-2 plafonné, C11) ; `Registres` : dernier lot S464, le prochain au plus tard en S467.
@@ -90,4 +90,4 @@ le temps réel (0,9 au moins) et Godot reçoit 25 images/s au moins ; (3) une ca
   attente : **0,3 ms** ; puis un défaut : **`φ` reçu nul** (le fondu lit ses dimensions dans l'uniforme, jamais écrit sans `set_view`)
   — la vue posée au départ : **0,939 du temps réel, 28,2 images/s** — (1), (2) tenus ; (3) captures `godot/captures/saut_direct_{0,1,2}.png`
   (le joueur qui remonte, l'eau qui ruisselle) envoyées.
-
+- **P4** — C10-SCENES-S454 §13 ; journal ; jeton libre ; maillons 0 — capacité reçue (le direct : la simulation jouée dans Godot en temps réel ; le chemin, la pluie et R39 ; la preuve, §13) ; suivant : S465, la pluie sur la scène du saut.

@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-03 20:43 +02:00
+JETON            : libre
+Battement        : 2026-10-03 21:11 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S464 — le lot des registres ; C11, le direct** (la scène du saut dans Godot sans enregistrement)
-Dernière session : S463 — la surface fine sur la scène du saut dans Godot ([preuve](docs/validation/C10-SCENES-S454.md) §12) — 391 images/s. Avant : S462 (les caustiques)
-Session suivante : **S464 — le lot des registres** (ADR-213 D3, dû en S460) **puis le direct** : la simulation dans le processus de Godot — l'afficheur en bibliothèque (godot-rust, GDExtension) ou un lien local ; reçu si la scène du saut tourne dans Godot sans enregistrement. **Sans attendre de « Continue »** (décision du 2026-10-03)
-Maillons        : 2 — journal
+Session en cours : aucune
+Dernière session : S464 — le direct ([preuve](docs/validation/C10-SCENES-S454.md) §13) — la scène du saut calculée par l'afficheur et jouée dans Godot en temps réel (0,94, 28 images/s). Avant : S463 (la surface fine)
+Session suivante : **S465 — la pluie sur la scène du saut** (ADR-205 : les rides factices, les gouttes dans l'air, le ciel couvert — reçus sur la piscine et la mer, R28 à R33) portée dans `saut.tscn` ; puis le joueur rendu (un corps, pas une sphère) ; R39 passe d'abord s'il vient. **Sans attendre de « Continue »**
+Maillons        : 0 — capacité reçue (S464 : le direct, C10-SCENES-S454 §13) ; journal
 Registres       : dernier lot S464 (ADR-213 D3) ; le prochain au plus tard en S467
 ```
 
