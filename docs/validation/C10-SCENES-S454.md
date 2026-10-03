@@ -378,3 +378,18 @@ le soleil dans l'air. Elle éteint la part directe de l'éclairement du fond et 
 **Ce qui reste** : la surface prise plane (au niveau moyen) pour le chemin réfracté ; une ombre nette (le soleil ponctuel, pas de
 pénombre) ; l'afficheur (le banc) sans ombre.
 
+## 18. Le direct avec le joueur debout (S469)
+
+2026-10-03. Le direct de §13 mesuré de nouveau sur la scène d'aujourd'hui (le joueur debout, éclairé comme l'eau, son ombre). **Deux
+défauts de `saut.gd`, corrigés** : en direct, `_ready` attend l'en-tête de l'afficheur pendant que `_process` tourne — depuis S465,
+l'horloge de la pluie y touchait des matériaux pas encore créés (une erreur par image) ; et, l'afficheur parti, le lien fermé était
+lu à chaque image. Le premier n'était pas vu : les sessions S465–S468 ont rejoué l'enregistrement, pas le direct.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) la capsule en direct (maillage, ombre) | `godot/captures/saut_direct_{0,1,2}.png` | tenu |
+| (2) 0,85 du temps réel, 25 images/s | **0,995**, **29,9** envoyées sur 30 s (S464 : 0,939, 28,2) ; 68 reçues sur 70 dans la fenêtre de `--cout` | tenu |
+| (3) les images | `saut_direct_1.png` | envoyée |
+
+**Une leçon** : un chemin que les sessions n'exercent plus casse sans bruit — le direct se remesure dès que la scène change.
+

@@ -18506,3 +18506,10 @@ Suivant : l'ombre du joueur.
 sur le fond (chemin réfracté), ses caustiques, le corps d'eau et l'éclat, dans Godot. **Mesuré** : l'ombre vers le sud-est, à
 l'opposé du soleil ; ciel couvert identique au bit ; 397 images/s (−2 %). Image envoyée. **Rituel** (allégé). Maillons **1**.
 Suivant : le direct avec le joueur debout.
+
+## S469 — 2026-10-03 — le direct avec le joueur debout
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §18) : le direct remesuré sur la scène du joueur
+debout — **0,995 du temps réel, 29,9 images/s**. Deux défauts de `saut.gd` corrigés (des matériaux nuls touchés avant l'en-tête,
+depuis S465 ; le lien fermé lu). Image envoyée. **Rituel** (allégé). Maillons **1**. Suivant : la caméra qui suit le joueur ; le
+lot des registres (dû en S470).
