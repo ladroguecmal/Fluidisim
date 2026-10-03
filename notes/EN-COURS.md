@@ -74,7 +74,14 @@ ayant changé depuis : le joueur debout (S466), son éclairage (S467), son ombre
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le direct mesuré ; corrections ; images.
+- [x] **P2** — le direct mesuré ; corrections ; images.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — **Deux défauts corrigés** dans `saut.gd` : (a) en direct, `_ready` attend l'en-tête et `_process` tourne déjà ; depuis
+  S465, l'horloge de la pluie y appelait les matériaux nuls (une erreur par image) — `prete`, posée à la fin de `_ready` ; (b)
+  l'afficheur parti (`DUREE`), le lien fermé était lu à chaque image (`!is_open()`) — `recevoir` s'arrête si le lien n'est plus
+  connecté. **Mesuré** : (1) la capsule en direct, son ombre au fond — `saut_direct_{0,1,2}.png` ; (2) **0,995 du temps réel,
+  29,9 images/s envoyées** sur 30 s (S464 : 0,939, 28,2) ; Godot en reçoit 68 sur 70 dans la fenêtre de `--cout` ; (3) image
+  `saut_direct_1.png` envoyée.
+

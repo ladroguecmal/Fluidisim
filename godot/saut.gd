@@ -59,6 +59,9 @@ var pluie_air: Node3D
 var gerbes: Node3D
 var materiau_ciel: ShaderMaterial
 var monde_env: Environment
+## S469 — la scène montée : en direct, `_ready` attend l'en-tête, et `_process` tourne déjà — sans les matériaux (S465 : l'horloge
+## de la pluie les appelait nuls).
+var prete := false
 
 
 static func b_vers_godot(p: Vector3) -> Vector3:
@@ -202,6 +205,7 @@ func _ready() -> void:
 	placer_camera()
 	if not direct:
 		charger(0)
+	prete = true
 	var args := OS.get_cmdline_user_args()
 	if "--captures" in args:
 		if direct:
@@ -265,6 +269,9 @@ func connecter() -> bool:
 ## S464 — ce qui est arrivé : la dernière image complète appliquée, les plus anciennes sautées.
 func recevoir() -> void:
 	lien.poll()
+	# S469 : l'afficheur parti (`DUREE`), le lien fermé — la dernière image reste, sans erreur à chaque image.
+	if lien.get_status() != StreamPeerTCP.STATUS_CONNECTED:
+		return
 	var n := lien.get_available_bytes()
 	if n > 0:
 		tampon.append_array(lien.get_data(n)[1])
@@ -364,6 +371,8 @@ func image_a(s: float) -> int:
 
 
 func _process(delta: float) -> void:
+	if not prete:
+		return
 	# S465 : la pluie a sa propre horloge (l'enregistrement boucle, la pluie non).
 	t_pluie += delta
 	for m in [mat_eau, mat_mer]:
