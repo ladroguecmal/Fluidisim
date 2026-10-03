@@ -1,0 +1,43 @@
+{
+ "pose": "plage",
+ "cadre": "480 × 854, 135 images à 15/s, réduites par 2",
+ "zones": {
+  "mer_lointaine": [
+   0.05,
+   0.06,
+   0.95,
+   0.3
+  ]
+ },
+ "mesures": {
+  "mer_lointaine": {
+   "statiques": {
+    "p05": 0.5778,
+    "p25": 0.8222,
+    "p75": 1.139,
+    "p95": 1.281,
+    "p99": 1.369,
+    "contraste": 0.1483,
+    "creux_BsurG": 1.74,
+    "creux_BsurR": 5.266,
+    "cretes_BsurG": 1.295,
+    "cretes_BsurR": 1.986,
+    "claire": 0.0,
+    "ecume": 0.0,
+    "hf_part": 0.7427,
+    "anisotropie": 2.389,
+    "p50_absolu": 0.2777
+   },
+   "temporelles": {
+    "mouvement_par_s": 1.807,
+    "periode_s": 2.25,
+    "periode_nettete": 344.6,
+    "renouvellement_clairs_par_s": NaN,
+    "coupes": 0.0,
+    "plan_s": 9.0,
+    "images": 135.0,
+    "dt": 0.06667
+   }
+  }
+ }
+}

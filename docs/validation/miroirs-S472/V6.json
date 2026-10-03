@@ -1,0 +1,113 @@
+{
+ "pose": "sous_eau",
+ "cadre": "360 × 640, 400 images à 10/s, réduites par 2",
+ "zones": {
+  "cadre": [
+   0.02,
+   0.02,
+   0.98,
+   0.98
+  ],
+  "haut": [
+   0.05,
+   0.02,
+   0.95,
+   0.35
+  ],
+  "bas": [
+   0.05,
+   0.6,
+   0.95,
+   0.95
+  ]
+ },
+ "mesures": {
+  "cadre": {
+   "statiques": {
+    "p05": 0.7256,
+    "p25": 0.8811,
+    "p75": 1.13,
+    "p95": 1.605,
+    "p99": 2.502,
+    "contraste": 0.1031,
+    "creux_BsurG": 4.413,
+    "creux_BsurR": 717.9,
+    "cretes_BsurG": 2.304,
+    "cretes_BsurR": 19.06,
+    "claire": 0.0004895,
+    "ecume": 0.0,
+    "hf_part": 0.6629,
+    "anisotropie": 1.868,
+    "p50_absolu": 0.1172
+   },
+   "temporelles": {
+    "mouvement_par_s": 1.353,
+    "periode_s": 2.5,
+    "periode_nettete": 241.2,
+    "renouvellement_clairs_par_s": 10.0,
+    "coupes": 0.0,
+    "plan_s": 40.0,
+    "images": 400.0,
+    "dt": 0.1
+   }
+  },
+  "haut": {
+   "statiques": {
+    "p05": 0.7328,
+    "p25": 0.8706,
+    "p75": 1.135,
+    "p95": 1.356,
+    "p99": 2.631,
+    "contraste": 0.1391,
+    "creux_BsurG": 4.56,
+    "creux_BsurR": 2486.0,
+    "cretes_BsurG": 3.402,
+    "cretes_BsurR": 25.63,
+    "claire": 0.0001165,
+    "ecume": 0.0,
+    "hf_part": 0.8624,
+    "anisotropie": 1.85,
+    "p50_absolu": 0.1056
+   },
+   "temporelles": {
+    "mouvement_par_s": 1.8,
+    "periode_s": 2.5,
+    "periode_nettete": 838.0,
+    "renouvellement_clairs_par_s": 10.0,
+    "coupes": 0.0,
+    "plan_s": 40.0,
+    "images": 400.0,
+    "dt": 0.1
+   }
+  },
+  "bas": {
+   "statiques": {
+    "p05": 0.7521,
+    "p25": 0.8846,
+    "p75": 1.179,
+    "p95": 1.819,
+    "p99": 2.596,
+    "contraste": 0.2009,
+    "creux_BsurG": 3.737,
+    "creux_BsurR": 4279.0,
+    "cretes_BsurG": 1.763,
+    "cretes_BsurR": 13.19,
+    "claire": 0.0007165,
+    "ecume": 0.0,
+    "hf_part": 0.6625,
+    "anisotropie": 1.886,
+    "p50_absolu": 0.123
+   },
+   "temporelles": {
+    "mouvement_par_s": 1.734,
+    "periode_s": 13.33,
+    "periode_nettete": 130.0,
+    "renouvellement_clairs_par_s": 10.0,
+    "coupes": 0.0,
+    "plan_s": 40.0,
+    "images": 400.0,
+    "dt": 0.1
+   }
+  }
+ }
+}

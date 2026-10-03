@@ -20,6 +20,10 @@ L'image est réduite par moyenne de blocs `f × f` des valeurs linéaires.
 
     python outils/banc_visuel.py --zones='{"mer": [0, 0.5, 1, 1]}' --dt=0.0333 --facteur=4 images/*.png
     python outils/banc_visuel.py --egalite=<json de banc_visuel.js> --zones=... --facteur=... image.png
+    python outils/banc_visuel.py --contre=<json de référence> <json de nos mesures>
+
+`--contre` (S472, ADR-216 D4) : chaque grandeur de nos mesures contre la référence, zone par zone, et sa **classe de sensibilité**
+(S471 : la même vidéo servie à deux résolutions) — l'écart n'est un défaut que s'il dépasse la tolérance de sa classe.
 """
 
 import json
@@ -184,12 +188,56 @@ def egalite(js, py):
     return pire
 
 
+# S471 (REFERENCES-VIDEO-S471) : l'écart relatif d'une même vidéo servie en 720 puis en 360 pixels, arrondi au-dessus — la
+# tolérance d'une grandeur ; au-delà, l'écart dit quelque chose du rendu.
+CLASSES = {
+    "robuste": (0.05, ("periode_s", "creux_BsurG", "cretes_BsurG", "p05")),
+    "moyenne": (0.12, ("renouvellement_clairs_par_s", "p25", "p75", "cretes_BsurR", "anisotropie", "p95")),
+    "fine": (0.35, ("p99", "periode_nettete", "creux_BsurR", "hf_part", "contraste", "mouvement_par_s", "claire", "ecume")),
+}
+
+
+def classe(k):
+    for nom, (tol, ks) in CLASSES.items():
+        if k in ks:
+            return nom, tol
+    return None, None
+
+
+def contre(ref, nous):
+    """Les lignes du rapport : (zone, grandeur, référence, nous, rapport, classe, hors tolérance)."""
+    lignes = []
+    for zone, m in nous.items():
+        if zone not in ref:
+            continue
+        for groupe in ("statiques", "temporelles"):
+            for k, v in m[groupe].items():
+                w = ref[zone][groupe].get(k)
+                nom, tol = classe(k)
+                if nom is None or w is None or v is None or v != v or w != w:
+                    continue
+                if abs(w) < 1e-9 and abs(v) < 1e-9:
+                    lignes.append((zone, k, w, v, 1.0, nom, False))
+                    continue
+                r = v / w if abs(w) > 1e-12 else float("inf")
+                lignes.append((zone, k, w, v, r, nom, not (1 - tol <= r <= 1 / (1 - tol))))
+    return lignes
+
+
 def main(argv):
     opts = {a.split("=", 1)[0]: a.split("=", 1)[1] for a in argv[1:] if a.startswith("--") and "=" in a}
     chemins = [a for a in argv[1:] if not a.startswith("--")]
-    if not chemins or "--zones" not in opts:
+    sys.stdout.reconfigure(encoding="utf-8")
+    if not chemins or ("--zones" not in opts and "--contre" not in opts):
         print(__doc__)
         return 1
+    if "--contre" in opts:
+        ref = json.load(open(opts["--contre"], encoding="utf-8"))
+        nous = json.load(open(chemins[0], encoding="utf-8"))
+        for zone, k, w, v, r, nom, hors in contre(ref.get("mesures", ref), nous.get("mesures", nous)):
+            print(f"BANC_VISUEL contre zone={zone} {k} reference={w:.4g} nous={v:.4g} rapport={r:.3g} classe={nom}"
+                  f"{' HORS_TOLERANCE' if hors else ''}")
+        return 0
     zones = json.loads(opts["--zones"])
     res = arrondir(mesurer_suite(chemins, zones, float(opts.get("--dt", "0.1")), int(opts.get("--facteur", "2"))))
     if "--egalite" in opts:

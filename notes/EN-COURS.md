@@ -82,7 +82,7 @@ nommés et classés (ce qu'ils disent du rendu, ce qui les corrigerait) — **au
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la mer calme, les poses, le cadre portrait, la séquence ; les captures.
-- [ ] **P3** — les mesures et le rapport d'écarts.
+- [x] **P3** — les mesures et le rapport d'écarts.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
@@ -91,4 +91,10 @@ nommés et classés (ce qu'ils disent du rendu, ce qui les corrigerait) — **au
   Band ») → `godot/donnees/mer_calme.json` (non versionné). **Capturé** (`--cote`, champ de 65°, cadre de la référence) : plage
   480 × 854, 135 images à 15/s (l'horizon à 4,1 % du haut, la référence à 4 %) ; quai 360 × 640, 300 images à 15/s (l'horizon à 52 %) ;
   sous l'eau 360 × 640, 400 images à 10/s.
+- **P3** — `banc_visuel.py --contre` (chaque grandeur contre la référence, sa classe de sensibilité, hors tolérance ou non) ; le
+  rapport `docs/validation/MIROIRS-S472.md` et nos mesures (`docs/validation/miroirs-S472/`). **Hors tolérance** : V1 11 sur 17, V5 20
+  sur 52, V6 49 sur 54. **Écarts nommés** : E1 la couleur dépend du type d'eau (V1 plus bleue, V5 verdâtre, la nôtre fixe) ; E2 notre
+  mer calme bouge et grésille trop (mouvement × 4 ; deux causes possibles, l'essai qui les sépare écrit) ; E3 sous l'eau, la lumière
+  forte manque (clairs ÷ 100) ; E4 le ciel immobile. **Une hypothèse corrigée avant d'écrire** : E2 n'est pas sûrement le détail
+  fin — il est déjà filtré par l'empreinte (mipmaps, LEAN).
 
