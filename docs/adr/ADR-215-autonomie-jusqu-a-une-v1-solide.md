@@ -43,3 +43,5 @@ pluie dans la scène — la suite après la v1.
 ([C10-SCENES-S454](../validation/C10-SCENES-S454.md) §7). Reste **le jugement de l'utilisateur** (R38, REVUE-VISUELLE §43) : la v1
 est solide à son verdict.
 
+**Note, 2026-10-03 — R38 reçu** : *« Correct pour une V1 »*. La v1 de D3 est atteinte ; le travail en continu de D1 s'achève avec elle. La suite
+(C10-2, la bande dans la mer δ ; C10-3, la coque) reprend au rythme des sessions, à la demande de l'utilisateur.

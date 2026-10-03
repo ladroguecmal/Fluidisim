@@ -11,11 +11,11 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : libre
-Battement        : 2026-10-03 02:53 +02:00
+Battement        : 2026-10-03 08:49 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
 Session en cours : aucune
 Dernière session : S458 — la scène `--v1` ([preuve](docs/validation/C10-SCENES-S454.md) §7) — sauts répétés sous la houle, 60 s sans arrêt, masse exacte, 0,99 du temps réel, 22,8 ms au 99e centile ; R38 posée. Avant : S457
-Session suivante : **le verdict R38** (REVUE-VISUELLE §43) — la v1 d'ADR-215 D3 attend le jugement de l'utilisateur ; reçu, la suite après la v1 (C10-2 : la bande dans la mer δ ; la coque, C10-3) ; non reçu, ce qu'il nomme. Les défauts ouverts : le plafond, la modulation de la houle, la texture au raccord, les parois en `y`
+Session suivante : **S459 — après la v1** (R38 reçu : *« Correct pour une V1 »*) : **C10-2**, le saut dans la mer δ — la bande de la carte dans la mer δ + B, le raccord porté sur la carte, ses colonnes de marge gardées en colonnes ([C10-SCENES-S454](docs/validation/C10-SCENES-S454.md) §2) ; puis C10-3, la coque. Les défauts ouverts de la v1 : le plafond, la modulation de la houle, la texture au raccord, les parois en `y`
 Maillons        : 0 — capacité reçue (S458 : la scène `--v1`, C10-SCENES-S454 §7) ; journal
 Registres       : dernier lot S457 (ADR-213 D3) ; le prochain au plus tard en S460
 ```

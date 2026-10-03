@@ -165,3 +165,4 @@ pluie dans la scène ; et, ouverts : le plafond (une nappe d'eau qui le touche d
 changement de texture des reflets au raccord domaine | mer de B (§6), les parois en `y` du domaine (les anneaux du saut s'y
 réfléchissent).
 
+*2026-10-03 — l'utilisateur* : *« Correct pour une V1 »* — **R38 reçu** ; la v1 d'ADR-215 D3 est atteinte.

@@ -1469,5 +1469,6 @@ reçue ; simulée et rendue en direct sur la carte, au temps réel (0,99), masse
 
 En mouvement : `viewer/target/release/water-viewer.exe --v1`.
 
-**La question :** la v1 est-elle solide, à l'image et en mouvement ? Qu'est-ce qui gêne le plus ? **Verdict** : en attente.
+**La question :** la v1 est-elle solide, à l'image et en mouvement ? Qu'est-ce qui gêne le plus ? **Verdict R38 — reçu le 2026-10-03** :
+*« Correct pour une V1 »*. **Reçu** : la v1 d'ADR-215 D3 — la scène `--v1` — est solide ; aucun défaut nommé.
 
