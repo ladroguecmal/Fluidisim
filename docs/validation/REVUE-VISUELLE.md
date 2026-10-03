@@ -1472,3 +1472,19 @@ En mouvement : `viewer/target/release/water-viewer.exe --v1`.
 **La question :** la v1 est-elle solide, à l'image et en mouvement ? Qu'est-ce qui gêne le plus ? **Verdict R38 — reçu le 2026-10-03** :
 *« Correct pour une V1 »*. **Reçu** : la v1 d'ADR-215 D3 — la scène `--v1` — est solide ; aucun défaut nommé.
 
+## 44. R39 — la v1 dans Godot, S461
+
+La scène `--v1` enregistrée par l'afficheur et rejouée dans Godot 4.4 ([C10-SCENES-S454](C10-SCENES-S454.md) §10) : la même eau, la
+même optique, la tonalité AgX et le halo de Godot ; 416 images/s.
+
+| image | ce qu'elle montre |
+|---|---|
+| `godot/captures/saut_t0.30.png`, `saut_t0.55.png` | l'entrée, la cavité |
+| `godot/captures/saut_t0.85.png`, `saut_t1.60.png` | le jet, les anneaux |
+| `godot/captures/saut_t5.80.png`, `saut_t6.30.png` | le deuxième saut |
+
+En mouvement : `<godot> --path godot res://saut.tscn`.
+
+**La question :** le rendu de Godot est-il celui que vous attendiez pour la v1 ? Qu'ajouter d'abord — les caustiques sur le sable, la
+surface fine, la pluie, le direct ? **Verdict** : en attente.
+

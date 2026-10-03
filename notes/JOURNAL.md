@@ -18446,3 +18446,11 @@ refus de la mer.
 sa hauteur, poussée par le jet ; corrigé (`set_particle_rest`) ; l'instabilité passe alors à la marge du raccord (la dent de scie de
 S449). **Plafonné** (ADR-213 D2, troisième session). Suite verte. **Rituel** (allégé). Maillons **2**. Suivant : C11, la scène `--v1`
 dans Godot.
+
+## S461 — 2026-10-03 — C11 : la scène `--v1` dans Godot
+
+**Entrée.** La décision de S460 : Godot. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §10) : l'enregistrement de la
+scène par l'afficheur (`EXPORT_GODOT` : `φ` sur 8 bits, 30 images/s) et son rejeu dans Godot (`saut.tscn` : lancer de rayons dans la
+texture 3D, la mer de B au-delà, l'optique reçue, AgX). **Mesuré** : quantification 0,39 mm ; 416 images/s ; images envoyées, R39
+posée. **Ce qui devient possible** : le rendu de Godot sur la simulation ; **le chemin** : R39, la suite de C11 ; **la preuve** : §10.
+Maillons **0**. Suite verte. **Rituel** (allégé). Suivant : selon R39.

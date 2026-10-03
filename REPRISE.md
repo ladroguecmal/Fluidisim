@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-03 20:18 +02:00
+JETON            : libre
+Battement        : 2026-10-03 20:31 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S461 — C11, la scène `--v1` dans Godot** (décision de l'utilisateur, S460)
-Dernière session : S460 — C10-2 plafonné ([preuve](docs/validation/C10-SCENES-S454.md) §9) — la cause intérieure corrigée, la dent de scie de la marge reste. Avant : S459
-Session suivante : **S461 — C11, la scène `--v1` dans Godot** (décision de l'utilisateur, S460) : la scène enregistrée par l'afficheur (`φ` fondu, le corps, la houle) et rejouée dans Godot avec son rendu (la lumière, la colonne d'eau, le fond, les caustiques, AgX) — Godot ne recalcule rien (I-01), comme la piscine ; reçu sur images à l'utilisateur
-Maillons        : 2 — journal
+Session en cours : aucune
+Dernière session : S461 — C11, la scène `--v1` dans Godot ([preuve](docs/validation/C10-SCENES-S454.md) §10) — enregistrée par l'afficheur, rejouée dans Godot, 416 images/s ; R39 posée. Avant : S460 (C10-2 plafonné)
+Session suivante : **S462 — la suite de C11, selon R39** (REVUE-VISUELLE §44) : par défaut, les caustiques sur le sable (la carte de S361 sur la surface rejouée), puis la surface fine, la pluie, le direct (le calcul dans le processus de Godot) ; ce que l'utilisateur désigne passe d'abord
+Maillons        : 0 — capacité reçue (S461 : la v1 dans Godot, C10-SCENES-S454 §10) ; journal
 Registres       : dernier lot S457 (ADR-213 D3) ; le prochain au plus tard en S460
 ```
 

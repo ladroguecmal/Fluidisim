@@ -217,3 +217,27 @@ sous un écoulement fort — toute scène où une bande APIC vit dans la mer δ 
 bords ouverts à B) est la voie retenue. **Décision de l'utilisateur** (2026-10-03) : *« Continue par la suite avec le branchement dans
 godot »* — C11 passe avant.
 
+## 10. C11, premier pas : la scène `--v1` dans Godot (S461)
+
+2026-10-03. **Décision de l'utilisateur** (S460) : *« Continue par la suite avec le branchement dans godot »*. Comme la piscine (S374–S375),
+**l'afficheur calcule et enregistre, Godot rejoue** sans rien recalculer (I-01) : `--v1-banc` avec `EXPORT_GODOT=godot/donnees`
+écrit `saut.json` (dimensions, fenêtre, houle, l'instant et le corps de chaque image) et `saut.bin` (le champ fondu `φ`, 8 bits,
+±2 mailles, 30 images/s). La scène `godot/saut.tscn` : l'eau du domaine par un rayon par pixel dans la texture 3D de `φ`
+(`saut_eau.gdshader`), la mer de B au-delà (`saut_mer.gdshader`), le joueur, le ciel de la scène, l'optique reçue
+(`saut_optique.gdshaderinc` sur `ciel.gdshaderinc` et `optique_eau.gdshaderinc`), la tonalité AgX et le halo de Godot.
+
+**Reproduire** : `EXPORT_GODOT=godot/donnees DUREE=12 viewer/target/release/water-viewer.exe --v1-banc` (12 s, 361 images, 85 Mo,
+non versionnés), puis `<godot> --path godot res://saut.tscn` (en mouvement ; glisser, molette, Espace, Échap), `-- --captures`,
+`-- --cout`.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) la surface rejouée à une maille de celle de l'afficheur | quantification **0,39 mm** ; l'image rejouée à moins d'un pas de l'instant demandé | tenu |
+| (2) 60 images/s dans Godot | **416** (médiane 2,4 ms, 99ᵉ centile 2,8 ms) | tenu |
+| (3) les images montrées | `godot/captures/saut_t{0.30,0.55,0.85,1.60,5.80,6.30}.png` | envoyées |
+
+**En chemin** : dans l'afficheur, un rendu lancé avant que la caméra soit posée (uniforme nul, rayon NaN) bouclait sans fin et perdait
+la carte — la caméra posée avant le rendu, la marche du nuanceur bornée à 4 096 pas. **Ce qui reste** (la suite de C11) : les
+caustiques sur le sable (`caustiques.gdshader`, la carte de S361), la surface fine (FFT, S360), la pluie, le rejeu en direct (le
+calcul dans le processus de Godot, par godot-rust, ou un lien), le raccord à la mer de B de Godot (son spectre, non la houle seule).
+

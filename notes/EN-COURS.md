@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S461 — **en cours**. Décision de l'utilisateur (S460) : *« Continue par la suite avec le branchement dans godot »* —
+Session : S461 — **terminée**. Décision de l'utilisateur (S460) : *« Continue par la suite avec le branchement dans godot »* —
 **C11** ([campagne](../docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md) §6), premier pas.
 
 **Ce que la session fait.** Comme la piscine (S374–S375) : **l'afficheur calcule et enregistre, Godot rejoue** sans rien recalculer
@@ -82,7 +82,7 @@ l'utilisateur — son jugement.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'enregistrement (`EXPORT_GODOT`).
 - [x] **P3** — la scène Godot ; mesures ; images.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `EXPORT_GODOT=<dossier>` dans `--v1-banc` : `saut.json` (dimensions, fenêtre `k0..k1`, `dx`, niveau, rayon, houle, et pour
@@ -94,4 +94,4 @@ l'utilisateur — son jugement.
   `saut_optique.gdshaderinc` (l'optique commune, sur `ciel.gdshaderinc` et `optique_eau.gdshaderinc`). **Mesuré** : (1) le rejeu fidèle —
   quantification 0,39 mm, l'image rejouée à moins d'un pas de l'instant demandé (0,305 pour 0,30 ; 0,838 pour 0,85) ; (2) **416
   images/s** (médiane 2,4 ms, 99e centile 2,8 ms) ; (3) images `godot/captures/saut_t{0.30,0.55,0.85,1.60,5.80,6.30}.png` envoyées.
-
+- **P4** — C10-SCENES-S454 §10 ; REVUE-VISUELLE §44 (R39) ; journal ; jeton libre ; maillons 0 — capacité reçue (la v1 dans Godot : ce qui devient possible, le rendu de Godot sur la simulation ; le chemin, R39 et la suite de C11 ; la preuve, §10) ; suivant : S462, la suite de C11 selon R39.
