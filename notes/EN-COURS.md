@@ -62,29 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S458 — **terminée**. Sans « Continue » (ADR-215 D1) : l'étape 5 d'ADR-215 D4, **la scène `--v1`**.
+Session : S459 — **en cours**. *« Parfait continue »* (après R38) — **C10-2, le saut dans la mer δ**
+([C10-SCENES-S454](../docs/validation/C10-SCENES-S454.md) §2), premier pas, au CPU, avec le raccord qui existe (`BandInSea`).
 
-**Ce que la session fait.** La scène vivante d'ADR-215 D3 en une commande, `--v1` : 4 m, 1,4 m d'eau, la houle (4 cm, 2 m), la
-lumière reçue, Courant 1. **Des sauts répétés** : le corps (le joueur, une sphère de 0,4 m) tombe de 0,5 m au-dessus de l'eau à
-4 m/s, s'arrête à 0,6 m sous la surface, y reste une seconde, remonte à 0,6 m/s, attend deux secondes hors de l'eau, et recommence —
-un cycle d'environ 5 s. Le banc `--v1-banc` : la même scène sans fenêtre, 60 s simulées, et ses images.
+**Une question de l'utilisateur, répondue** : les rendus n'ont pas tous le même moteur — l'afficheur (R14–R18), Godot (R19–R33 :
+fond, caustiques, pluie), des bancs (R34–R37), puis le lancer de rayons sur la carte (S452–S458, R38 : la lumière de Godot portée à
+la main, sans caustiques, surface fine, pluie ni AgX). Voulu : la campagne du solveur vit dans l'afficheur ; δ entre dans Godot en C11
+(S386). Proposé : avancer C11 si l'utilisateur veut juger la v1 sous le rendu Godot complet.
 
-**Critères, écrits avant** (ADR-215 D3). (1) **60 s simulées** enchaînant les sauts **sans refus ni arrêt**, `φ` fini, **masse exacte**
-(le volume des bords compté) ; (2) la fenêtre : **simulé / réel ≥ 0,9** et **33 ms au 99ᵉ centile** sur 60 s ; (3) les images montrées
-et la commande donnée — le jugement de l'utilisateur.
+**Ce que la session fait.** Le banc `saut_en_mer` : une mer `Volume3` relative à B (4,8 m × 1,6 m, 1,4 m d'eau, 5 cm), au milieu
+une bande `Apic3` de 1,6 m en eau totale, raccordée par `BandInSea` ; le saut de B10 au centre de la bande. **La réponse au déclencheur
+de c3** (§23.6 : la mer instable au bord quand des colonnes de particules touchent le raccord) : **les colonnes de la couronne du
+raccord épinglées en colonnes** (`ColumnsSwitch::pinned_columns`, nouveau) — jamais de particules au raccord.
+
+**Critères, écrits avant.** (1) **la masse au raccord** sous 0,1 % du volume de la bande ; (2) **la mer stable** au bord de la bande :
+aucun refus sur 3 s, sous une houle calme (2 cm, 2 m) et sous le saut ; aucune colonne épinglée en particules ; (3) **le cratère** à
+`t·√(g/D)` = 1 à une maille de celui de la bande seule (même bande, parois), hors des colonnes qui traversent le corps.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les sauts répétés ; `--v1`, `--v1-banc` ; mesures (1), (2) ; images.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — `pinned_columns` (et son test) ; le banc `saut_en_mer` ; mesures (1) à (3).
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `sphere_saut` (le cycle de 5 s : chute à 4 m/s depuis 0,5 m, arrêt à 0,6 m, une seconde, remontée à 0,6 m/s, deux
-  secondes hors de l'eau), `Vivant::corps_a`, `reglages_v1`, `--v1`, `--v1-banc` ; `ApicCarte::set_tolerance` ; les statistiques du
-  gradient conjugué relues un pas sur quatre ; un budget de pas par image (18 ms). **Mesuré** : (1) **60 s, une douzaine de sauts,
-  masse exacte à chaque bilan, `φ` fini, aucun arrêt** ; (2) la fenêtre, d'abord **0,83** du temps réel et 36,7 ms au 99e centile
-  (Courant 1, 10⁻⁶) ; la projection à 10⁻⁴ : 0,94, 36,8 ms — les images à deux pas ; Courant 1,5 (stable 60 s, masse exacte, image
-  plausible) et un seul pas par image en régime courant : **0,99 du temps réel (0,95 pendant les sauts), 22,8 ms au 99e centile** —
-  tenu. Tranché (ADR-215 D2) : `--v1` tourne à Courant 1,5 et à 10⁻⁴. (3) Images `captures/s458/v1_t*.png` envoyées ; R38 posée.
-- **P3** — C10-SCENES-S454 §7 ; REVUE-VISUELLE §43 (R38) ; note d'ADR-215 ; journal ; jeton libre ; maillons 0 — **capacité reçue** (la scène `--v1` : ce qui devient possible, la scène vivante jouée en temps réel ; le chemin qui la consomme, R38 et C10-2 ; la preuve, §7) ; suivant : le verdict R38.
