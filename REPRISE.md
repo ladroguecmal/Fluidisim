@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-03 20:40 +02:00
+JETON            : libre
+Battement        : 2026-10-03 20:42 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S463 — C11 : la surface fine sur la scène du saut**
-Dernière session : S462 — les caustiques sur le sable de la scène du saut dans Godot ([preuve](docs/validation/C10-SCENES-S454.md) §11) — la focalisation déposée par l'afficheur, 405 images/s. Avant : S461
-Session suivante : **S463 — la suite de C11** : par défaut, **la surface fine** (les ondes courtes de la queue de B, FFT de S360, sur la surface simulée et la mer au-delà), puis la pluie, le direct ; R39 (REVUE-VISUELLE §44) passe d'abord s'il vient
-Maillons        : 1 — journal
+Session en cours : aucune
+Dernière session : S463 — la surface fine sur la scène du saut dans Godot ([preuve](docs/validation/C10-SCENES-S454.md) §12) — 391 images/s. Avant : S462 (les caustiques)
+Session suivante : **S464 — le lot des registres** (ADR-213 D3, dû en S460) **puis le direct** : la simulation dans le processus de Godot — l'afficheur en bibliothèque (godot-rust, GDExtension) ou un lien local ; reçu si la scène du saut tourne dans Godot sans enregistrement. **Sans attendre de « Continue »** (décision du 2026-10-03)
+Maillons        : 2 — journal
 Registres       : dernier lot S457 (ADR-213 D3) ; le prochain au plus tard en S460
 ```
 

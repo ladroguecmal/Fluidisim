@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S463 — **en cours**. *« Continue en autonomie »* — les sessions s'enchaînent sans « Continue » (ADR-215 D1, D2), sur la
+Session : S463 — **terminée**. *« Continue en autonomie »* — les sessions s'enchaînent sans « Continue » (ADR-215 D1, D2), sur la
 suite de C11 ; inscrit aux décisions.
 
 **Ce que la session fait.** **La surface fine** de S360 sur la scène du saut : les deux cascades FFT de la queue de B (`detail.gd`,
@@ -77,7 +77,7 @@ de B sans saut de texture (la même surface fine des deux côtés) ; (3) toujour
 
 - [x] **P1** — jeton, plan seul ; décision inscrite.
 - [x] **P2** — les cascades dans `saut.tscn` ; mesures ; images.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `pente_fine()` dans `saut_optique.gdshaderinc` (les deux cascades au niveau de détail de l'empreinte du pixel, ajoutées à la
@@ -85,4 +85,4 @@ de B sans saut de texture (la même surface fine des deux côtés) ; (3) toujour
   à l'instant de chaque image (`DETAIL=0`, `FORCE_DETAIL=`). **Mesuré** : (1) pente quadratique ajoutée **0,0087** (les cascades : 0,0091
   et 0,0257, × 0,5²) ; (2) le raccord domaine | mer de B ne se voit plus (la même surface fine des deux côtés) — tenu ; (3) **391
   images/s** — tenu ; (4) images envoyées.
-
+- **P3** — C10-SCENES-S454 §12 ; journal ; jeton libre ; maillons 2 ; registres : le lot dû en S460 fait en S464 ; suivant : S464, le lot des registres puis le direct.

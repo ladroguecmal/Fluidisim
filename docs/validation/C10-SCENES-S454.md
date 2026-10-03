@@ -260,3 +260,21 @@ décale le motif entier). **Au-delà**, B : `1/|1 + D·η_xx|`, analytique.
 
 **Ce qui se voit** : sous le saut, les anneaux de lumière qui s'étendent sur le sable ; ailleurs, les bandes de la houle.
 
+## 12. C11 : la surface fine (S463)
+
+2026-10-03. *« Continue en autonomie »*. Les deux cascades FFT de la queue de B (S360, `detail.gd` : 32 m et 4 m, calculées sur la carte de
+Godot depuis `donnees/detail_h0.bin`) ajoutent leurs pentes à la normale de la surface simulée et de la mer au-delà
+(`pente_fine()`, au niveau de détail de l'empreinte du pixel ; les faces tournées vers le haut seulement). **Tranché (ADR-215 D2)** : la
+queue exportée est celle de la mer de R14 (vent de 7,8 m/s) ; la scène est calme — ses pentes à **0,5** (`FORCE_DETAIL`).
+
+**Reproduire** : `<godot> --path godot res://saut.tscn` (`DETAIL=0` : sans ; `FORCE_DETAIL=1` : la queue entière).
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) la pente quadratique ajoutée publiée | **0,0087** (cascades 0,0091 + 0,0257, × 0,5²) | publié |
+| (2) le raccord domaine \| mer de B sans saut de texture | la même surface fine des deux côtés : il ne se voit plus | tenu |
+| (3) 60 images/s | **391** | tenu |
+| (4) les images | `godot/captures/saut_t{0.55,0.85,1.60,6.30}.png` | envoyées |
+
+**Ce qui se voit** : l'eau ridée, les éclats du soleil, le sable et ses caustiques à travers, le jet et les anneaux du saut.
+

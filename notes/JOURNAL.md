@@ -18462,3 +18462,10 @@ Maillons **0**. Suite verte. **Rituel** (allégé). Suivant : selon R39.
 enregistrée, lue par le sable dans Godot ; B analytique au-delà. **Mesuré** : la formule ponctuelle ne conservait pas l'énergie (1,1 à
 2) ; le dépôt, 0,98 à 1 ; 405 images/s ; images envoyées. Suite verte. **Rituel** (allégé). Maillons **1**. Suivant : la surface fine,
 ou ce que R39 désigne.
+
+## S463 — 2026-10-03 — C11 : la surface fine
+
+**Entrée.** *« Continue en autonomie »* (inscrit). **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §12) : les cascades FFT de
+S360 sur la scène du saut, à mi-force (tranché : la mer de la scène est calme). **Mesuré** : pente quadratique ajoutée 0,0087 ; le
+raccord ne se voit plus ; 391 images/s ; images envoyées. Suite verte. **Rituel** (allégé). Maillons **2**. Suivant : le lot des
+registres (en retard d'une session), puis le direct.
