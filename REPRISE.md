@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 19:43 +02:00
+JETON            : occupé
+Battement        : 2026-10-03 19:45 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S460 — C10-2, seconde session : le refus de la mer sous le jet**
 Dernière session : S459 — C10-2 au CPU ([preuve](docs/validation/C10-SCENES-S454.md) §8) — la couronne épinglée, masse au raccord 10⁻⁷ ; la mer refuse à 0,7 s sous le jet. Avant : S458 (la v1, R38 reçu)
 Session suivante : **S460 — C10-2, seconde session** : localiser le refus de la mer sous le jet (la colonne, la hauteur, dans la bande ou dehors ; un banc plus court) et le corriger ; le témoin du cratère refait (la bande à parois aussi longue que la mer). Au troisième échec, plafond (ADR-213 D2). C11 (δ dans Godot) peut passer avant, à la demande
 Maillons        : 1 — journal

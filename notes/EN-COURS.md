@@ -62,36 +62,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S459 — **terminée**. *« Parfait continue »* (après R38) — **C10-2, le saut dans la mer δ**
-([C10-SCENES-S454](../docs/validation/C10-SCENES-S454.md) §2), premier pas, au CPU, avec le raccord qui existe (`BandInSea`).
+Session : S460 — **en cours**. *« Continue »* — C10-2, seconde session ([C10-SCENES-S454](../docs/validation/C10-SCENES-S454.md) §8).
 
-**Une question de l'utilisateur, répondue** : les rendus n'ont pas tous le même moteur — l'afficheur (R14–R18), Godot (R19–R33 :
-fond, caustiques, pluie), des bancs (R34–R37), puis le lancer de rayons sur la carte (S452–S458, R38 : la lumière de Godot portée à
-la main, sans caustiques, surface fine, pluie ni AgX). Voulu : la campagne du solveur vit dans l'afficheur ; δ entre dans Godot en C11
-(S386). Proposé : avancer C11 si l'utilisateur veut juger la v1 sous le rendu Godot complet.
+**Ce que la session fait.** (1) **Localiser le refus** de la mer à 0,7 s : le refus « Domain » du pas mobile est une borne de la
+surface (deux mailles au-dessus du fond, `nz − 1` mailles au plus ; avant le pas, après, ou aux bords) ; le banc imprime, au refus,
+la plus haute et la plus basse colonne de la mer, leur place (dans la bande, son anneau, dehors) et l'état de la bande. (2) **Le
+corriger** selon la cause. (3) **Le témoin du cratère refait** : la bande à parois aussi longue que la mer (4,8 m).
 
-**Ce que la session fait.** Le banc `saut_en_mer` : une mer `Volume3` relative à B (4,8 m × 1,6 m, 1,4 m d'eau, 5 cm), au milieu
-une bande `Apic3` de 1,6 m en eau totale, raccordée par `BandInSea` ; le saut de B10 au centre de la bande. **La réponse au déclencheur
-de c3** (§23.6 : la mer instable au bord quand des colonnes de particules touchent le raccord) : **les colonnes de la couronne du
-raccord épinglées en colonnes** (`ColumnsSwitch::pinned_columns`, nouveau) — jamais de particules au raccord.
-
-**Critères, écrits avant.** (1) **la masse au raccord** sous 0,1 % du volume de la bande ; (2) **la mer stable** au bord de la bande :
-aucun refus sur 3 s, sous une houle calme (2 cm, 2 m) et sous le saut ; aucune colonne épinglée en particules ; (3) **le cratère** à
-`t·√(g/D)` = 1 à une maille de celui de la bande seule (même bande, parois), hors des colonnes qui traversent le corps.
+**Critères, écrits avant.** (1) la cause nommée, mesurée ; (2) la mer stable 3 s sous la houle et le saut ; (3) le cratère à une
+maille du bon témoin. Au troisième échec de la stabilité (après S459 et S460), plafond (ADR-213 D2), sa limite écrite.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — `pinned_columns` (et son test) ; le banc `saut_en_mer` ; mesures (1) à (3).
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — le diagnostic ; la correction ; le témoin long ; mesures.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `ColumnsSwitch::pinned_columns` (+ test `pinned_columns_stay_columns_under_the_body_s459`) ; `BandInSea::set_displaced`
-  (le volume que le corps déplace, sa variation portée par la mer) et `set_velocity_ring` (les vitesses de la bande sur un anneau) ;
-  le banc `saut_en_mer` (CPU, 3 à 25 min par passage). **Mesuré** : (1) masse au raccord **10⁻⁷ à 6·10⁻⁷** du volume de la bande — tenu ;
-  aucune colonne épinglée en particules — tenu ; (2) **la mer refuse** (« Domain ») vers **t = 0,70 s**, au jet de Worthington, sous la
-  houle — la hauteur lue sous les particules (0,58 s), l'anneau des vitesses (0,70 s) n'y changent rien — **manqué**, cause à localiser ;
-  (3) le cratère : écart médian **0,35 maille** contre la bande seule à parois — **témoin mal posé** : dans 1,6 m × 1,6 m à parois, le
-  volume que la sphère déplace monte le niveau de ≈ 1,3 cm, dans la mer il s'étale ; le volume déplacé compté ne change rien (0,354).
-  Suite verte, un test de plus.
-- **P3** — C10-SCENES-S454 §8 ; journal ; jeton libre ; maillons 1 ; suivant : S460, localiser le refus de la mer sous le jet (C10-2).
