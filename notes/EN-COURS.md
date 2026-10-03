@@ -62,29 +62,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S460 — **terminée**. *« Continue »* — C10-2, seconde session ([C10-SCENES-S454](../docs/validation/C10-SCENES-S454.md) §8).
+Session : S461 — **en cours**. Décision de l'utilisateur (S460) : *« Continue par la suite avec le branchement dans godot »* —
+**C11** ([campagne](../docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md) §6), premier pas.
 
-**Ce que la session fait.** (1) **Localiser le refus** de la mer à 0,7 s : le refus « Domain » du pas mobile est une borne de la
-surface (deux mailles au-dessus du fond, `nz − 1` mailles au plus ; avant le pas, après, ou aux bords) ; le banc imprime, au refus,
-la plus haute et la plus basse colonne de la mer, leur place (dans la bande, son anneau, dehors) et l'état de la bande. (2) **Le
-corriger** selon la cause. (3) **Le témoin du cratère refait** : la bande à parois aussi longue que la mer (4,8 m).
+**Ce que la session fait.** Comme la piscine (S374–S375) : **l'afficheur calcule et enregistre, Godot rejoue** sans rien recalculer
+(I-01). (1) **L'enregistrement** : `--v1-banc` avec `EXPORT_GODOT=<dossier>` écrit à 30 images/s le champ fondu `φ` de la scène `--v1`
+(le champ que rend `surface_carte`), quantifié sur 8 bits (±2 mailles) dans une fenêtre verticale autour de la surface, la place du
+corps et l'instant ; un en-tête JSON. (2) **La scène Godot** `saut.tscn` : l'eau du domaine par lancer de rayons dans une texture 3D
+de `φ` (`saut_eau.gdshader`) ; la mer de B au-delà (`saut_mer.gdshader`) ; le joueur (une sphère) ; le ciel de la scène
+(`ciel.gdshader`), l'optique de l'eau reçue (`ciel.gdshaderinc`, `optique_eau.gdshaderinc` : `R(0⁻)`, `E/π`, `Kd`, Fresnel, la colonne
+d'eau sur le sable), la tonalité AgX et le halo de Godot. Les caustiques, la surface fine et la pluie viendront ensuite.
 
-**Critères, écrits avant.** (1) la cause nommée, mesurée ; (2) la mer stable 3 s sous la houle et le saut ; (3) le cratère à une
-maille du bon témoin. Au troisième échec de la stabilité (après S459 et S460), plafond (ADR-213 D2), sa limite écrite.
+**Critères, écrits avant.** (1) l'enregistrement relu : la surface rejouée dans Godot à une maille de celle de l'afficheur (hauteurs
+des colonnes, aux instants de R38) ; (2) la scène tourne à 60 images/s dans Godot ; (3) les images aux instants de R38, montrées à
+l'utilisateur — son jugement.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le diagnostic ; la correction ; le témoin long ; mesures.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — l'enregistrement (`EXPORT_GODOT`).
+- [ ] **P3** — la scène Godot ; mesures ; images.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **Décision de l'utilisateur** (pendant P2) : *« Continue par la suite avec le branchement dans godot »* — après S460, C11 (δ dans
-  Godot) passe avant la suite de C10-2.
-- **P2** — le diagnostic (`SAUT_TRACE`, les extrêmes de la mer au refus) : **la mer sort de ses bornes sous les colonnes de particules
-  de l'intérieur** (2,27 m en 0,59 s, croissant à chaque pas, au centre de la bande, où elle gardait sa propre hauteur, poussée par les
-  vitesses du jet) — (1) cause nommée. **Correction** `BandInSea::set_particle_rest` (la mer à la hauteur de B sous ces colonnes), avec
-  l'anneau des vitesses : le refus recule à **0,63 s** et **change de place** — une dent de scie dans les colonnes de **marge** du raccord
-  (2,13 m contre 0,69 m, voisines) : l'instabilité de bord de S449. (2) **manqué** ; troisième session sur la stabilité du raccord
-  (S449, S459, S460) : **plafond** (ADR-213 D2). Le témoin long (`Mode::Longue`) écrit, non mesuré (l'aval plafonné).
-- **P3** — C10-SCENES-S454 §9 ; décision inscrite ; journal ; jeton libre ; maillons 2 ; suivant : S461, C11 — la scène `--v1` dans Godot.

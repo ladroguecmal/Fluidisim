@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 20:16 +02:00
+JETON            : occupé
+Battement        : 2026-10-03 20:18 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S461 — C11, la scène `--v1` dans Godot** (décision de l'utilisateur, S460)
 Dernière session : S460 — C10-2 plafonné ([preuve](docs/validation/C10-SCENES-S454.md) §9) — la cause intérieure corrigée, la dent de scie de la marge reste. Avant : S459
 Session suivante : **S461 — C11, la scène `--v1` dans Godot** (décision de l'utilisateur, S460) : la scène enregistrée par l'afficheur (`φ` fondu, le corps, la houle) et rejouée dans Godot avec son rendu (la lumière, la colonne d'eau, le fond, les caustiques, AgX) — Godot ne recalcule rien (I-01), comme la piscine ; reçu sur images à l'utilisateur
 Maillons        : 2 — journal
