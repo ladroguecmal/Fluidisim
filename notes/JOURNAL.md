@@ -18529,3 +18529,11 @@ ce banc »* — avec six vidéos. **Fait** ([ADR-216](../docs/adr/ADR-216-le-ban
 exacte) ; les six vidéos mesurées dans la page de YouTube (l'image lue dans un canevas), nombres seuls. **Constats** : deux défauts du
 calcul trouvés en mesurant ; la résolution servie fait varier les grandeurs fines jusqu'à 32 %. **Rituel** (allégé). Maillons **1**.
 Suivant : les scènes miroirs.
+
+## S472 — 2026-10-04 — les scènes miroirs
+
+**Entrée.** En autonomie (ADR-216 D4). **Fait** ([preuve](../docs/validation/MIROIRS-S472.md)) : dans `mer.tscn`, une mer calme
+exportée (vent 3,5 m/s ; à 3 m/s l'export refuse), les poses plage et quai, des séquences au pas fixe en cadre portrait ; V1, V5 et V6
+mesurées contre leurs références par `banc_visuel.py --contre`. **Constats** : E1 la couleur selon le type d'eau ; E2 notre mer calme
+trop agitée ; E3 la lumière forte manque sous l'eau ; E4 le ciel immobile. Aucun réglage : la session mesure. Images envoyées.
+**Rituel** (allégé). Maillons **1**. Suivant : E2.

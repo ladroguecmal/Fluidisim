@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S472 — **en cours**. En autonomie : **les scènes miroirs** (ADR-216 D4) — les références que nos scènes peuvent déjà
+Session : S472 — **terminée**. En autonomie : **les scènes miroirs** (ADR-216 D4) — les références que nos scènes peuvent déjà
 montrer, mesurées contre elles.
 
 **Ce que la session fait.** Dans `mer.tscn` (la mer de B de R14, la scène côtière, les poses sous l'eau) : (1) une **mer calme**
@@ -83,7 +83,7 @@ nommés et classés (ce qu'ils disent du rendu, ce qui les corrigerait) — **au
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la mer calme, les poses, le cadre portrait, la séquence ; les captures.
 - [x] **P3** — les mesures et le rapport d'écarts.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `mer.gd` : `MER_DONNEES=` ; les poses `plage` et `quai` ; `SEQUENCE_FPS`, `SEQUENCE_DUREE` (le pas fixe, `captures/miroir/`).
@@ -97,4 +97,4 @@ nommés et classés (ce qu'ils disent du rendu, ce qui les corrigerait) — **au
   mer calme bouge et grésille trop (mouvement × 4 ; deux causes possibles, l'essai qui les sépare écrit) ; E3 sous l'eau, la lumière
   forte manque (clairs ÷ 100) ; E4 le ciel immobile. **Une hypothèse corrigée avant d'écrire** : E2 n'est pas sûrement le détail
   fin — il est déjà filtré par l'empreinte (mipmaps, LEAN).
-
+- **P4** — la preuve : MIROIRS-S472 ; journal ; jeton libre ; maillons 1 ; suivant : S473, E2 (l'essai qui sépare ses deux causes, puis la correction).
