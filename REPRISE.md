@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-03 02:29 +02:00
+JETON            : libre
+Battement        : 2026-10-03 02:53 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S458 — la scène `--v1`** (ADR-215 D4, étape 5)
-Dernière session : S457 — la lumière de l'eau ([preuve](docs/validation/C10-SCENES-S454.md) §6) — la lumière reçue dans `surface_carte`, la mer de B au-delà du domaine ; le lot des registres. Avant : S456
-Session suivante : **S458 — la scène `--v1`** (ADR-215 D4, étape 5) : la scène vivante d'ADR-215 D3 en une commande — 4 m, 1,4 m d'eau, la houle, la lumière reçue, Courant 1 ; des sauts répétés (le corps relancé) ; reçu si soixante secondes simulées sans arrêt, masse exacte, simulé / réel ≥ 0,9, 33 ms au 99e centile — puis le jugement de l'utilisateur. **Sans attendre de « Continue »** (ADR-215 D1)
-Maillons        : 14 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
+Session en cours : aucune
+Dernière session : S458 — la scène `--v1` ([preuve](docs/validation/C10-SCENES-S454.md) §7) — sauts répétés sous la houle, 60 s sans arrêt, masse exacte, 0,99 du temps réel, 22,8 ms au 99e centile ; R38 posée. Avant : S457
+Session suivante : **le verdict R38** (REVUE-VISUELLE §43) — la v1 d'ADR-215 D3 attend le jugement de l'utilisateur ; reçu, la suite après la v1 (C10-2 : la bande dans la mer δ ; la coque, C10-3) ; non reçu, ce qu'il nomme. Les défauts ouverts : le plafond, la modulation de la houle, la texture au raccord, les parois en `y`
+Maillons        : 0 — capacité reçue (S458 : la scène `--v1`, C10-SCENES-S454 §7) ; journal
 Registres       : dernier lot S457 (ADR-213 D3) ; le prochain au plus tard en S460
 ```
 

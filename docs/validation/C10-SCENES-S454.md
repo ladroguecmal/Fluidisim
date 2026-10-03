@@ -135,3 +135,33 @@ l'horizon ; les zones de relaxation (§5) y ramènent la surface simulée. L'omb
 le corps vu sous l'eau, le jet. **Suite** : la scène `--v1` (ADR-215 D3 : soixante secondes, plusieurs sauts, les mesures, le
 jugement de l'utilisateur).
 
+## 7. La scène `--v1` (S458, ADR-215 D3) — la v1 solide, au jugement de l'utilisateur
+
+2026-10-03. **La scène**, en une commande : 4 m × 4 m, 1,4 m d'eau sur du sable, 1,5 m d'air, la houle B de 4 cm et 2 m qui entre et sort
+par les bords ouverts (zones de relaxation), la mer de B jusqu'à l'horizon, la lumière reçue (R14, R20, R24) ; **le joueur** — une
+sphère de 0,4 m — qui saute à répétition : chute à 4 m/s depuis 0,5 m au-dessus de l'eau, arrêt à 0,6 m sous la surface, une seconde,
+remontée à 0,6 m/s, deux secondes hors de l'eau (un cycle de 5 s, `sphere_saut`). La bande APIC naît autour de lui et se referme en
+colonnes derrière ; la carte seule calcule tout.
+
+**Reproduire** : `viewer/target/release/water-viewer.exe --v1` (la fenêtre ; une minute de mise en route ; glisser : orbite, molette :
+distance, Espace : pause, R : relance, Échap ; `DUREE=60` : se ferme seule et imprime le bilan) ; `--v1-banc` (sans fenêtre, 60 s
+simulées, bilans toutes les 5 s, images `captures/s458/`) ; `V1_LENTS=<ms>` trace les pas lents.
+
+| exigence (ADR-215 D3) | mesure (RTX 5070 portable) | |
+|---|---|---|
+| 60 s simulées enchaînant les sauts, sans refus ni arrêt ; masse exacte | **60 s, une douzaine de sauts** ; quanta : écart **0** à chaque bilan (le volume des bords compté) ; `φ` fini | tenu |
+| la houle sans s'amortir de plus de 10 % sur 10 s | §5 : 0,84 à 1,05 `a`, sans décroissance (modulation de ±10 % inscrite) | tenu (tranché) |
+| simulé / réel ≥ 0,9 | **0,99** sur 60 s ; **0,95** pendant les sauts | tenu |
+| une image en 33 ms au plus au 99ᵉ centile | **22,8 ms** (médiane 4 ms) | tenu |
+| le jugement de l'utilisateur | images `captures/s458/v1_t{0.30,0.55,0.85,1.60,20.70,21.20}.png`, la commande — R38 | **en attente** |
+
+**Le chemin du temps réel, dans cette session.** Courant 1 et projection à 10⁻⁶ : 0,83 du temps réel, 36,7 ms au 99ᵉ centile — la
+répétition des sauts garde les vitesses hautes. La projection à 10⁻⁴ : 0,94, mais 36,8 ms — les images qui portent deux pas.
+**Courant 1,5** (stable 60 s, masse exacte, image plausible) et un budget de 18 ms de pas par image : 0,99 et 22,8 ms. **Tranché
+(ADR-215 D2)** : la scène vivante tourne à Courant 1,5 et à 10⁻⁴ ; les bancs de réception gardent 0,5 et 10⁻⁶.
+
+**Ce qui n'y est pas** (ADR-215 D3) : la coque et la gerbe d'étrave (C10-3), la lame du déversoir (C10-4), Godot (C11), l'écume, la
+pluie dans la scène ; et, ouverts : le plafond (une nappe d'eau qui le touche diverge, §3), la modulation de la houle (§5), le léger
+changement de texture des reflets au raccord domaine | mer de B (§6), les parois en `y` du domaine (les anneaux du saut s'y
+réfléchissent).
+

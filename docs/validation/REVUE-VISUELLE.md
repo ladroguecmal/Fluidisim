@@ -1455,3 +1455,19 @@ de 0,34 à 0,08 maille, l'ombrage par pixel.
 render »*. **Reçu** : la surface continue — l'isosurface du champ unique `φ`, fondue au raccord, ombrée par pixel — est le rendu retenu
 ; suite, le rendu en direct sur la carte (S452).
 
+## 43. R38 — la v1 : le saut sous la houle, en direct, S458
+
+La scène `--v1` ([C10-SCENES-S454](C10-SCENES-S454.md) §7, [ADR-215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) D3) : un joueur
+(une sphère de 0,4 m) saute à répétition dans 1,4 m d'eau, sous une houle de 4 cm, la mer jusqu'à l'horizon, la lumière de l'eau
+reçue ; simulée et rendue en direct sur la carte, au temps réel (0,99), masse exacte.
+
+| image | ce qu'elle montre |
+|---|---|
+| `captures/s458/v1_t0.30.png`, `v1_t0.55.png` | l'entrée, la cavité |
+| `captures/s458/v1_t0.85.png`, `v1_t1.60.png` | le jet de Worthington, puis les anneaux |
+| `captures/s458/v1_t20.70.png`, `v1_t21.20.png` | le cinquième saut |
+
+En mouvement : `viewer/target/release/water-viewer.exe --v1`.
+
+**La question :** la v1 est-elle solide, à l'image et en mouvement ? Qu'est-ce qui gêne le plus ? **Verdict** : en attente.
+

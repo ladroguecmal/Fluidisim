@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S458 — **en cours**. Sans « Continue » (ADR-215 D1) : l'étape 5 d'ADR-215 D4, **la scène `--v1`**.
+Session : S458 — **terminée**. Sans « Continue » (ADR-215 D1) : l'étape 5 d'ADR-215 D4, **la scène `--v1`**.
 
 **Ce que la session fait.** La scène vivante d'ADR-215 D3 en une commande, `--v1` : 4 m, 1,4 m d'eau, la houle (4 cm, 2 m), la
 lumière reçue, Courant 1. **Des sauts répétés** : le corps (le joueur, une sphère de 0,4 m) tombe de 0,5 m au-dessus de l'eau à
@@ -77,7 +77,7 @@ et la commande donnée — le jugement de l'utilisateur.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les sauts répétés ; `--v1`, `--v1-banc` ; mesures (1), (2) ; images.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `sphere_saut` (le cycle de 5 s : chute à 4 m/s depuis 0,5 m, arrêt à 0,6 m, une seconde, remontée à 0,6 m/s, deux
@@ -87,4 +87,4 @@ et la commande donnée — le jugement de l'utilisateur.
   (Courant 1, 10⁻⁶) ; la projection à 10⁻⁴ : 0,94, 36,8 ms — les images à deux pas ; Courant 1,5 (stable 60 s, masse exacte, image
   plausible) et un seul pas par image en régime courant : **0,99 du temps réel (0,95 pendant les sauts), 22,8 ms au 99e centile** —
   tenu. Tranché (ADR-215 D2) : `--v1` tourne à Courant 1,5 et à 10⁻⁴. (3) Images `captures/s458/v1_t*.png` envoyées ; R38 posée.
-
+- **P3** — C10-SCENES-S454 §7 ; REVUE-VISUELLE §43 (R38) ; note d'ADR-215 ; journal ; jeton libre ; maillons 0 — **capacité reçue** (la scène `--v1` : ce qui devient possible, la scène vivante jouée en temps réel ; le chemin qui la consomme, R38 et C10-2 ; la preuve, §7) ; suivant : le verdict R38.

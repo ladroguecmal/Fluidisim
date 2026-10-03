@@ -18421,3 +18421,11 @@ la lumière reçue (R14, R20, R24) portée de Godot dans `surface_carte` — le 
 Maritorena sur un fond de sable ; la mer de B analytique au-delà du domaine (tranché). **Mesuré** : le champ inchangé ; 1,2 ms par
 image ; le raccord corrigé d'un trait d'une demi-maille ; images envoyées. Suite **762**. **Rituel** (allégé). Maillons **14** —
 justifié : la priorité du solveur (S406). Suivant : la scène `--v1`.
+
+## S458 — 2026-10-03 — la scène `--v1`
+
+**Entrée.** ADR-215 D4, étape 5. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §7) : les sauts répétés (`sphere_saut`),
+`--v1` et `--v1-banc`, la tolérance de la projection réglable, un budget de pas par image. **Mesuré** : 60 s, une douzaine de sauts,
+masse exacte, aucun arrêt ; la fenêtre de 0,83 à **0,99** du temps réel (0,95 pendant les sauts), **22,8 ms** au 99e centile —
+Courant 1,5 et 10⁻⁴ tranchés. **Ce qui devient possible** : la scène vivante jouée en temps réel ; **le chemin qui la consomme** :
+R38, puis C10-2 ; **la preuve** : §7. Maillons **0**. Suite **762**. **Rituel** (allégé). Suivant : le verdict R38.

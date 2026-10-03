@@ -37,3 +37,9 @@ pluie dans la scène — la suite après la v1.
 - REPRISE, `Session suivante`, porte toujours la prochaine étape de D4 : une reprise après coupure continue sans question.
 - Le rituel reste celui d'ADR-213 D3 (allégé, registres par lots de trois).
 - Revenir dessus : l'utilisateur peut à tout moment arrêter, réorienter ou juger ; son message passe avant le plan.
+
+**Note, 2026-10-03 (S458).** Les cinq étapes de D4 sont faites (S454–S458) : la scène `--v1` tient les exigences mesurables de D3 —
+60 s de sauts sans arrêt, masse exacte, la houle sans décroissance, 0,99 du temps réel, 22,8 ms au 99ᵉ centile
+([C10-SCENES-S454](../validation/C10-SCENES-S454.md) §7). Reste **le jugement de l'utilisateur** (R38, REVUE-VISUELLE §43) : la v1
+est solide à son verdict.
+
