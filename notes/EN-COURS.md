@@ -62,32 +62,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S466 — **terminée**. En autonomie : **le joueur** — une capsule debout au lieu de la sphère de B10.
+Session : S467 — **en cours**. En autonomie : le lot des registres (dû), puis le joueur éclairé comme l'eau.
 
-**Ce que la session fait.** Le corps de la carte devient une **capsule** : un axe unitaire, une demi-longueur `L`, un rayon ; chaque
-formule de la sphère (la reconstruction et ses images, les étiquettes, l'éloignement des particules) mesure la distance au **point le
-plus proche de l'axe**, `c + a·clamp((q − c)·a, −L, L)` ; l'empreinte de la bascule s'abaisse de `L·|a_z|` et s'élargit de `L·|a_xy|`.
-`L = 0` : la sphère, au bit. **Le joueur** (`JOUEUR=debout`, le défaut de `--v1` si la scène tient ; `JOUEUR=boule` : la sphère) : une
-capsule verticale de 0,3 m de diamètre et 1,7 m, qui saute pieds en avant. Le rendu suit (l'afficheur, Godot, l'export).
+**Ce que la session fait.** (1) **Le lot des registres** (ADR-213 D3) pour S464–S466 : FEUILLE-DE-ROUTE, LISTE, REPRISE.
+(2) **Le joueur dans les unités de l'eau** : au-dessus de l'eau, le maillage de Godot (éclairé par Godot) est sombre et bleu ; vu
+par réfraction, le corps (`couleur_corps`, éclairé par notre nuanceur) est clair. Comme les parois de la piscine (S374), le joueur
+reçoit un nuanceur `unshaded` qui l'éclaire par `eclairage` de `ciel.gdshaderinc` — la même formule, le même albédo, des deux
+côtés de la surface ; le ciel couvert suit.
 
-**Critères, écrits avant.** (1) `L = 0` rend la sphère au bit (le banc `--surface-direct-banc` inchangé : 125 pas, images identiques) ;
-(2) la scène `--v1` avec le joueur debout : 60 s, masse exacte, sans arrêt ; (3) les images montrées.
+**Critères, écrits avant.** (1) les registres à jour, `--check` à 0 ; (2) au-dessus et au-dessous de la surface, la même couleur
+au même point avant l'eau (même formule, même albédo — lu dans le code) ; (3) les images montrées.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la capsule dans la carte ; le joueur dans la scène et le rendu ; mesures ; images.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — le lot des registres.
+- [ ] **P3** — le joueur éclairé comme l'eau ; images.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — la carte : `body_point` (le point de l'axe le plus proche) dans la reconstruction, ses images, les étiquettes,
-  l'éloignement des particules, l'empreinte de la bascule ; `ApicCarte::set_body_shape`. La scène : `JOUEUR=debout` (le défaut de
-  `--v1`), le saut pieds en avant qui **freine** dans l'eau (décélération constante, des pieds à la surface jusqu'en bas) et
-  s'arrête les pieds à **0,5 m du fond** (`JOUEUR_FOND`). Le rendu : la capsule de Quílez dans `surface_carte.wgsl` et
-  `saut_optique.gdshaderinc`, un `CapsuleMesh` dans `saut.gd`, `demi_longueur` dans l'en-tête de l'export et du direct.
-  **Mesuré** : (1) `L = 0` : le banc S453, 125 pas, écart de masse 0, inchangé ; (2) `--v1-banc` : **60 s, 3118 pas, écart de
-  masse 0** ; (3) images Godot `saut_t{0.30,0.55,1.60}.png` envoyées. **Ce qui a cassé avant** : arrêt net à 4 m/s les pieds à
-  0,2 m du fond (quatre mailles) — divergence à la deuxième, troisième ou quatrième entrée (15 à 31 s) ; le freinage seul ne
-  suffit pas (22 s) ; les pieds à 0,5 m suffisent, au rayon prévu (0,15 m). Des zones de relaxation le long des parois `y`,
-  essayées, cassaient la scène dès 4 s (au coin du bord ouvert) : retirées.
-- **P3** — C10-SCENES-S454 §15 ; journal ; jeton libre ; maillons 1 ; suivant : S467, le lot des registres (dû) et la couleur du corps sous l'eau.
