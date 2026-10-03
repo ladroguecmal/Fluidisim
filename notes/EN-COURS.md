@@ -62,36 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S461 — **terminée**. Décision de l'utilisateur (S460) : *« Continue par la suite avec le branchement dans godot »* —
-**C11** ([campagne](../docs/registres/CAMPAGNE-SOLVEUR-3D-S384.md) §6), premier pas.
+Session : S462 — **en cours**. *« … puis continue »* — l'utilisateur a lancé l'afficheur (`--surface-direct` : 0,96 du temps réel,
+16,8 ms au 99e centile chez lui) ; la commande de Godot donnée pour bash ne passait pas sous PowerShell (l'opérateur `&` manquait) —
+corrigée dans la réponse. R39 sans verdict : la suite par défaut, **les caustiques**.
 
-**Ce que la session fait.** Comme la piscine (S374–S375) : **l'afficheur calcule et enregistre, Godot rejoue** sans rien recalculer
-(I-01). (1) **L'enregistrement** : `--v1-banc` avec `EXPORT_GODOT=<dossier>` écrit à 30 images/s le champ fondu `φ` de la scène `--v1`
-(le champ que rend `surface_carte`), quantifié sur 8 bits (±2 mailles) dans une fenêtre verticale autour de la surface, la place du
-corps et l'instant ; un en-tête JSON. (2) **La scène Godot** `saut.tscn` : l'eau du domaine par lancer de rayons dans une texture 3D
-de `φ` (`saut_eau.gdshader`) ; la mer de B au-delà (`saut_mer.gdshader`) ; le joueur (une sphère) ; le ciel de la scène
-(`ciel.gdshader`), l'optique de l'eau reçue (`ciel.gdshaderinc`, `optique_eau.gdshaderinc` : `R(0⁻)`, `E/π`, `Kd`, Fresnel, la colonne
-d'eau sur le sable), la tonalité AgX et le halo de Godot. Les caustiques, la surface fine et la pluie viendront ensuite.
+**Ce que la session fait.** Les caustiques sur le sable de `saut.tscn`, comme S361 les pose sous B : l'éclairement direct du fond
+multiplié par la focalisation de la surface. **Dans le domaine** : l'afficheur calcule, à chaque image enregistrée, la hauteur des
+colonnes sur `φ` (la première traversée depuis le haut), sa hessienne, et la focalisation `C = 1/|det(I + D·Hess η)|`,
+`D = H·(1 − 1/n)` (la profondeur sous la surface, l'indice) ; une carte de 80 × 80 sur 8 bits, aux coordonnées de la surface ; le sable
+la lit au point de surface d'où vient son soleil réfracté. **Au-delà** : la même formule sur B, analytique.
 
-**Critères, écrits avant.** (1) l'enregistrement relu : la surface rejouée dans Godot à une maille de celle de l'afficheur (hauteurs
-des colonnes, aux instants de R38) ; (2) la scène tourne à 60 images/s dans Godot ; (3) les images aux instants de R38, montrées à
-l'utilisateur — son jugement.
+**Critères, écrits avant.** (1) la focalisation moyenne sur le domaine à 1 près de 5 % (l'énergie se conserve : une caustique
+déplace la lumière, ne la crée pas) ; (2) le raccord domaine | mer de B sans saut visible des caustiques ; (3) toujours 60 images/s au
+moins ; (4) les images montrées.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'enregistrement (`EXPORT_GODOT`).
-- [x] **P3** — la scène Godot ; mesures ; images.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — la carte des caustiques à l'enregistrement ; sa lecture dans Godot ; mesures ; images.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `EXPORT_GODOT=<dossier>` dans `--v1-banc` : `saut.json` (dimensions, fenêtre `k0..k1`, `dx`, niveau, rayon, houle, et pour
-  chaque image l'instant et le centre du corps) et `saut.bin` (`φ` fondu sur 8 bits, image par image). 12 s : **361 images, 85 Mo**,
-  fenêtre 11..48, **erreur de quantification 0,39 mm** (sous `|φ| < 1,9 dx`). En chemin : un rendu lancé sans caméra posée (uniforme
-  nul, rayon NaN) bouclait sans fin et perdait la carte — la caméra posée avant, et la marche du nuanceur bornée à 4 096 pas.
-- **P3** — `godot/saut.tscn`, `saut.gd` (le rejeu : la texture 3D de `φ` mise à jour à l'image, le corps, l'orbite ; `--captures`,
-  `--cout`), `saut_eau.gdshader` (le lancer de rayons dans `φ`, la profondeur écrite), `saut_mer.gdshader` (la mer de B au-delà),
-  `saut_optique.gdshaderinc` (l'optique commune, sur `ciel.gdshaderinc` et `optique_eau.gdshaderinc`). **Mesuré** : (1) le rejeu fidèle —
-  quantification 0,39 mm, l'image rejouée à moins d'un pas de l'instant demandé (0,305 pour 0,30 ; 0,838 pour 0,85) ; (2) **416
-  images/s** (médiane 2,4 ms, 99e centile 2,8 ms) ; (3) images `godot/captures/saut_t{0.30,0.55,0.85,1.60,5.80,6.30}.png` envoyées.
-- **P4** — C10-SCENES-S454 §10 ; REVUE-VISUELLE §44 (R39) ; journal ; jeton libre ; maillons 0 — capacité reçue (la v1 dans Godot : ce qui devient possible, le rendu de Godot sur la simulation ; le chemin, R39 et la suite de C11 ; la preuve, §10) ; suivant : S462, la suite de C11 selon R39.

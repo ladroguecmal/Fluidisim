@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 20:31 +02:00
+JETON            : occupé
+Battement        : 2026-10-03 20:33 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S462 — C11 : les caustiques sur le sable de la scène du saut**
 Dernière session : S461 — C11, la scène `--v1` dans Godot ([preuve](docs/validation/C10-SCENES-S454.md) §10) — enregistrée par l'afficheur, rejouée dans Godot, 416 images/s ; R39 posée. Avant : S460 (C10-2 plafonné)
 Session suivante : **S462 — la suite de C11, selon R39** (REVUE-VISUELLE §44) : par défaut, les caustiques sur le sable (la carte de S361 sur la surface rejouée), puis la surface fine, la pluie, le direct (le calcul dans le processus de Godot) ; ce que l'utilisateur désigne passe d'abord
 Maillons        : 0 — capacité reçue (S461 : la v1 dans Godot, C10-SCENES-S454 §10) ; journal
