@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S457 — **en cours**. Sans « Continue » (ADR-215 D1) : le lot des registres (ADR-213 D3, dû en S457), puis l'étape 4
+Session : S457 — **terminée**. Sans « Continue » (ADR-215 D1) : le lot des registres (ADR-213 D3, dû en S457), puis l'étape 4
 d'ADR-215 D4, **la lumière de l'eau**.
 
 **Ce que la session fait.** (1) Le lot des registres pour S454–S456. (2) **La lumière reçue portée dans `surface_carte`** — celle
@@ -81,7 +81,7 @@ houle — montrées à l'utilisateur.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
 - [x] **P3** — la lumière reçue, la mer au-delà ; mesures ; images.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, file active pour S454–S456 (C10-1, la v1 solide, ADR-215) ; `Registres` : dernier lot S457, le prochain au plus tard en S460.
@@ -92,4 +92,4 @@ houle — montrées à l'utilisateur.
   acquisition comprise — tenu ; (3) le raccord : un trait d'une demi-maille (la boîte marchée s'arrête aux centres des mailles, la mer
   de B commençait au bord) — corrigé ; reste un changement de texture des reflets au raccord, léger ; (4) images
   `captures/s457/scene_t{0.5,1.0,2.0,4.0}.png` envoyées. La fenêtre : 0,97 du temps réel.
-
+- **P4** — C10-SCENES-S454 §6 ; journal ; jeton libre ; maillons 14 (justifiés : S406) ; suivant : S458, la scène `--v1` (ADR-215 D4 étape 5).

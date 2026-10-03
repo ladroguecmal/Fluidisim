@@ -18413,3 +18413,11 @@ la surface seule (ramener les vitesses faisait dériver le niveau, écarté). **
 (0,84 à 1,05 `a`, modulation de ±10 % inscrite — tranché) ; l'écart à B sous 0,25 `a` ; le saut sous la houle stable, la fenêtre à 0,98
 du temps réel. Suite **762**. **Rituel** (allégé). Maillons **13** — justifié : la priorité du solveur (S406). Suivant : le lot des
 registres, puis la lumière de l'eau.
+
+## S457 — 2026-10-03 — le lot des registres ; la lumière de l'eau
+
+**Entrée.** ADR-215 D4, étape 4. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §6) : le lot des registres (S454–S456) ;
+la lumière reçue (R14, R20, R24) portée de Godot dans `surface_carte` — le ciel de la photographie, Fresnel, la colonne d'eau de
+Maritorena sur un fond de sable ; la mer de B analytique au-delà du domaine (tranché). **Mesuré** : le champ inchangé ; 1,2 ms par
+image ; le raccord corrigé d'un trait d'une demi-maille ; images envoyées. Suite **762**. **Rituel** (allégé). Maillons **14** —
+justifié : la priorité du solveur (S406). Suivant : la scène `--v1`.

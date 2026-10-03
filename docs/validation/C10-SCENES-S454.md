@@ -112,3 +112,26 @@ colonnes ramenée vers B au début du pas, d'un poids `(e^{c^3,5} − 1)/(e − 
 au plus ; (4) le saut sous la houle : masse exacte et stable jusqu'à t = 16 ; la fenêtre à **0,98** du temps réel (0,84 pendant le
 saut), 33,7 ms au 99ᵉ centile. Images : `captures/s456/scene_t{1.0,2.0,3.0,6.0}.png`.
 
+## 6. La lumière de l'eau (S457, ADR-215 D4 étape 4)
+
+2026-10-03. **La lumière reçue** (R14, R20, R24 ; ADR-177, ADR-194) portée de `godot/ciel.gdshaderinc`, `optique_eau.gdshaderinc` et
+`eau.gdshaderinc` dans `surface_carte.wgsl` : le ciel calé sur la photographie de référence (nuages, soleil), le corps d'eau `R(0⁻)`
+de Pope & Fry et Morel sous `E/π = 2`, Fresnel exact (indice 1,34), l'éclat du soleil, et la colonne d'eau de Maritorena, Morel et
+Gentili sur le trajet oblique, `fond·T + corps·(1 − T)`, `T = e^(−Kd·(H + L))`, jusqu'au fond de sable — ou au corps — par
+réfraction. **La mer au-delà du domaine** (tranché, ADR-215 D2) : hors du domaine simulé, la surface de B analytique jusqu'à
+l'horizon ; les zones de relaxation (§5) y ramènent la surface simulée. L'ombrage de R37 reste celui des bancs de S452 et S453.
+
+**Reproduire** : `HOULE=0.04,2 COURANT=1.0 C10_ARRET=0.6 C10_AIR=1.5 C10_SCENE_SEULE=1 SORTIE=captures/s457 … --c10-saut` ;
+`LUMIERE=0` : l'ombrage de R37 ; la fenêtre : `HOULE=0.04,2 COURANT=1.0 C10_ARRET=0.6 C10_AIR=1.5 COTE=4 … --surface-direct`.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) le champ fondu inchangé | 7,2·10⁻⁷ (`--surface-carte`) | tenu |
+| (2) une image sous 2 ms | **1,2 ms** au mur en direct, acquisition comprise | tenu |
+| (3) le raccord domaine \| mer de B invisible | un trait d'une demi-maille (la boîte marchée s'arrête aux centres des mailles) — corrigé ; reste un léger changement de texture des reflets | presque |
+| (4) les images montrées | `captures/s457/scene_t{0.5,1.0,2.0,4.0}.png` | envoyées |
+
+**Ce qui se voit** : une eau turquoise peu profonde sur le sable, les nuages dans les reflets, la houle jusqu'à l'horizon ; la cavité,
+le corps vu sous l'eau, le jet. **Suite** : la scène `--v1` (ADR-215 D3 : soixante secondes, plusieurs sauts, les mesures, le
+jugement de l'utilisateur).
+
