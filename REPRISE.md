@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 23:26 +02:00
+JETON            : occupé
+Battement        : 2026-10-04 01:02 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S471 — le banc visuel (V1) : R39, les six références vidéo, ADR-216, leur mesure**
 Dernière session : S470 — registres ; la caméra qui suit le joueur ([preuve](docs/validation/C10-SCENES-S454.md) §19). Avant : S469 (le direct avec le joueur debout)
 Session suivante : **S471 — le plafond du domaine** : une nappe d'eau qui touche le plafond de la carte ne doit plus diverger (défaut connu depuis S454, revu en S466). **Sans attendre de « Continue »**
 Maillons        : 1 — journal

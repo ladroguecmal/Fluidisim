@@ -62,26 +62,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S470 — **terminée**. En autonomie : le lot des registres (dû), puis la caméra qui suit le joueur.
+Session : S471 — **en cours**. **Décision de l'utilisateur** (2026-10-04) : *« Je valide ce banc »* — le banc visuel proposé après
+R39 (mesurer plutôt que regarder) passe avant le plafond du domaine. Il fournit six vidéos de référence.
 
-**Ce que la session fait.** (1) **Le lot des registres** (ADR-213 D3) pour S467–S469. (2) **La caméra qui suit le joueur** dans
-`saut.tscn` : la cible de l'orbite monte avec le corps — à mi-chemin entre le niveau de l'eau et son centre quand il est en l'air,
-au point d'entrée sinon —, lissée en jeu (une constante de temps d'un tiers de seconde), posée d'un coup pour les captures ; la
-touche C la coupe (`SUIVRE=0`). À 5,80 s, le joueur en l'air sortait du cadre.
+**Ce que la session fait.** (1) **R39 reçu** : *« Tous les verdicts sont validés, mais pas définitifs, car toujours peaufinables »*.
+(2) **Le registre des références vidéo** (`docs/validation/REFERENCES-VIDEO-S471.md`) : les six vidéos, ce que l'utilisateur en dit,
+ce qu'elles mesurent, ce que nos scènes peuvent leur opposer aujourd'hui. (3) **ADR-216, le banc visuel** : des grandeurs comparables
+sans connaître la prise de vue (celles de `cible_image.py`, S308) étendues au temps — mouvement, période, scintillement, écume — sur
+des séquences ; les références mesurées dans le navigateur (la page lit l'image de la vidéo : vérifié, 480 × 854), seuls des nombres
+entrent dans le dépôt ; nos scènes mesurées par le même calcul en Python ; les verdicts reçus deviennent des images de
+non-régression ; les remarques de l'utilisateur deviennent des critères. (4) **La mesure des références** : `outils/banc_visuel.js`,
+les six vidéos mesurées, les nombres inscrits.
 
-**Critères, écrits avant.** (1) les registres à jour, `--check` à 0 ; (2) à 5,80 s le joueur entier dans le cadre, l'eau dessous ;
-(3) le rejeu et le direct inchangés hors de la caméra ; (4) les images montrées.
+**Critères, écrits avant.** (1) R39 inscrit ; (2) le registre et ADR-216 écrits, `--check` à 0 ; (3) les six vidéos mesurées — au moins
+les grandeurs statiques normalisées et l'énergie de mouvement, par zone ; (4) le calcul JavaScript et le calcul Python d'accord sur une
+même image à 1 % près, ou l'écart dit.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le lot des registres.
-- [x] **P3** — la caméra qui suit ; images.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — R39 ; le registre des références ; ADR-216.
+- [ ] **P3** — `outils/banc_visuel.js` et `outils/banc_visuel.py` (le même calcul) ; les six références mesurées.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — FEUILLE-DE-ROUTE (S467–S469 ; la suite : la caméra, le plafond du domaine), LISTE (S461–S469), REPRISE (dernier lot S470, prochain S473) ; QUESTIONS-OUVERTES inchangée (juste).
-- **P3** — `saut.gd` : la cible monte des 4/5 de la hauteur du corps au-dessus de l'eau, la caméra recule d'un quart de distance par
-  mètre ; lissées en jeu, posées d'un coup pour les captures ; touche C, `SUIVRE=0`. **Mesuré** : (2) à 5,80 s le joueur entier dans
-  le cadre, l'eau dessous ; (3) `SUIVRE=0` : les six captures identiques au bit à celles d'avant ; `--cout` 403 images/s.
-- **P4** — C10-SCENES-S454 §19 ; journal ; jeton libre ; maillons 1 ; suivant : S471, le plafond du domaine (une nappe qui le touche ne doit plus diverger).
