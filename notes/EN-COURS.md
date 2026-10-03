@@ -77,8 +77,13 @@ au même point avant l'eau (même formule, même albédo — lu dans le code) ; 
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
-- [ ] **P3** — le joueur éclairé comme l'eau ; images.
+- [x] **P3** — le joueur éclairé comme l'eau ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — FEUILLE-DE-ROUTE (S464–S466, la suite), LISTE (S461–S466), REPRISE (dernier lot S467, prochain S470) ; QUESTIONS-OUVERTES : la ligne de la campagne reste juste (C11 dans Godot), inchangée.
+- **P3** — `joueur.gdshader` (`unshaded`, `albedo · gain_eau · eclairage(n)`, le ciel couvert suivi) ; `couleur_corps` lit le même
+  albédo (`corps_albedo`) ; `saut.gd` : `ALBEDO_JOUEUR`, passé aux deux. **Mesuré** : (2) la même formule et le même albédo des
+  deux côtés — lu dans le code (`joueur.gdshader`, `couleur_corps`) ; (3) images `saut_t0.55.png`, `saut_t1.60_pluie10.png`
+  envoyées : un gris continu à travers la surface, teinté par l'eau dessous.
+

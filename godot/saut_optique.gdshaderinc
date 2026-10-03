@@ -14,6 +14,8 @@ uniform float temps_pluie = 0.0;
 // capsule ; 0 : la sphère).
 uniform vec4 corps = vec4(0.0);
 uniform float corps_demi_longueur = 0.0;
+// S467 : son albédo — celui du maillage au-dessus de l'eau (`joueur.gdshader`, `ALBEDO_JOUEUR` de `saut.gd`).
+uniform vec3 corps_albedo = vec3(0.22, 0.22, 0.24);
 // La houle B (`a`, `k`, `ω`, `φ`), le niveau moyen et l'instant.
 uniform vec4 houle = vec4(0.0);
 uniform float niveau = 1.4;
@@ -131,7 +133,7 @@ float touche_corps(vec3 o, vec3 d) {
 }
 
 vec3 couleur_corps(vec3 p) {
-    return vec3(0.22, 0.22, 0.24) * gain_eau * eclairage(normalize(p - axe_corps(p)), normalize(SOLEIL_B), 1.0);
+    return corps_albedo * gain_eau * eclairage(normalize(p - axe_corps(p)), normalize(SOLEIL_B), 1.0);
 }
 
 float bruit_sable(vec2 q) {

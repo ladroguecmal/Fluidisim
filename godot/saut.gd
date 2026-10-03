@@ -32,6 +32,9 @@ var detail: Node
 var mat_eau: ShaderMaterial
 var mat_mer: ShaderMaterial
 var joueur: MeshInstance3D
+## S467 — l'albédo du joueur, le même au-dessus de l'eau (`joueur.gdshader`) et vu à travers elle (`couleur_corps`).
+const ALBEDO_JOUEUR := Vector3(0.22, 0.22, 0.24)
+var mat_joueur: ShaderMaterial
 var camera: Camera3D
 var t := 0.0
 var duree := 0.0
@@ -142,10 +145,12 @@ func _ready() -> void:
 		joueur.mesh = sm
 	for m in [mat_eau, mat_mer]:
 		m.set_shader_parameter("corps_demi_longueur", demi)
-	var mj := StandardMaterial3D.new()
-	mj.albedo_color = Color(0.42, 0.42, 0.45)
-	mj.roughness = 0.6
-	joueur.material_override = mj
+		m.set_shader_parameter("corps_albedo", ALBEDO_JOUEUR)
+	# S467 : éclairé par notre nuanceur, dans les unités de l'eau (comme les parois de la piscine, S374), et non par Godot.
+	mat_joueur = ShaderMaterial.new()
+	mat_joueur.shader = load("res://joueur.gdshader")
+	mat_joueur.set_shader_parameter("albedo", ALBEDO_JOUEUR)
+	joueur.material_override = mat_joueur
 	add_child(joueur)
 	# La caméra de R38 : de côté et d'au-dessus, vers le point d'entrée.
 	camera = Camera3D.new()
@@ -215,6 +220,7 @@ func regler_pluie() -> void:
 	for m in [mat_eau, mat_mer, materiau_ciel]:
 		m.set_shader_parameter("pluie", Pluie.uniformes(pluie_mm_h))
 		m.set_shader_parameter("couvert", couvert)
+	mat_joueur.set_shader_parameter("couvert", couvert)
 	pluie_air.couvert = couvert
 	pluie_air.configurer(pluie_mm_h)
 	gerbes.couvert = couvert
