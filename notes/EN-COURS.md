@@ -62,27 +62,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S463 — **terminée**. *« Continue en autonomie »* — les sessions s'enchaînent sans « Continue » (ADR-215 D1, D2), sur la
-suite de C11 ; inscrit aux décisions.
+Session : S464 — **en cours**. En autonomie (décision du 2026-10-03) : le lot des registres (ADR-213 D3, dû en S460), puis **le direct**.
 
-**Ce que la session fait.** **La surface fine** de S360 sur la scène du saut : les deux cascades FFT de la queue de B (`detail.gd`,
-32 m et 4 m, calculées sur la carte de Godot depuis `donnees/detail_h0.bin`) ajoutent leurs pentes à la normale de la surface simulée
-et de la mer au-delà. **Tranché (ADR-215 D2)** : la queue exportée est celle de la mer de R14 (un vent établi) ; la scène du saut est
-une mer calme — ses pentes sont échelonnées (`FORCE_DETAIL`, 0,5 par défaut), à juger sur image.
+**Ce que la session fait.** (1) Le lot des registres pour S457–S463. (2) **Le direct** : la scène du saut dans Godot **sans
+enregistrement**. **Tranché (ADR-215 D2)** — un lien local plutôt qu'une bibliothèque dans le processus de Godot (godot-rust demande une
+dépendance que le dépôt ne porte pas, hors ligne) : `water-viewer --v1-direct` calcule la scène au temps réel sur la carte et pousse
+chaque image (le champ `φ` sur 8 bits, la carte des caustiques, l'instant, le corps) sur `127.0.0.1:47011` ; `saut.tscn -- --direct`
+s'y connecte et affiche la dernière image reçue. Godot ne calcule toujours rien (I-01).
 
-**Critères, écrits avant.** (1) la pente quadratique moyenne ajoutée publiée (la cascade × l'échelle) ; (2) le raccord domaine | mer
-de B sans saut de texture (la même surface fine des deux côtés) ; (3) toujours 60 images/s au moins ; (4) les images montrées.
+**Critères, écrits avant.** (1) la scène tourne dans Godot, l'afficheur sans fenêtre, sans fichier entre eux ; (2) le temps simulé suit
+le temps réel (0,9 au moins) et Godot reçoit 25 images/s au moins ; (3) une capture du direct montrée.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul ; décision inscrite.
-- [x] **P2** — les cascades dans `saut.tscn` ; mesures ; images.
-- [x] **P3** — preuve ; rituel (allégé).
+- [x] **P1** — jeton, plan seul.
+- [x] **P2** — le lot des registres.
+- [ ] **P3** — le direct (`--v1-direct`, `--direct`) ; mesures ; capture.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `pente_fine()` dans `saut_optique.gdshaderinc` (les deux cascades au niveau de détail de l'empreinte du pixel, ajoutées à la
-  normale des faces tournées vers le haut), `couleur_eau(…, empreinte)` ; `saut.gd` charge `detail.gd` depuis `mer_b.json` et le calcule
-  à l'instant de chaque image (`DETAIL=0`, `FORCE_DETAIL=`). **Mesuré** : (1) pente quadratique ajoutée **0,0087** (les cascades : 0,0091
-  et 0,0257, × 0,5²) ; (2) le raccord domaine | mer de B ne se voit plus (la même surface fine des deux côtés) — tenu ; (3) **391
-  images/s** — tenu ; (4) images envoyées.
-- **P3** — C10-SCENES-S454 §12 ; journal ; jeton libre ; maillons 2 ; registres : le lot dû en S460 fait en S464 ; suivant : S464, le lot des registres puis le direct.
