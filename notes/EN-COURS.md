@@ -81,7 +81,7 @@ l'utilisateur — son jugement.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'enregistrement (`EXPORT_GODOT`).
-- [ ] **P3** — la scène Godot ; mesures ; images.
+- [x] **P3** — la scène Godot ; mesures ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
@@ -89,4 +89,9 @@ l'utilisateur — son jugement.
   chaque image l'instant et le centre du corps) et `saut.bin` (`φ` fondu sur 8 bits, image par image). 12 s : **361 images, 85 Mo**,
   fenêtre 11..48, **erreur de quantification 0,39 mm** (sous `|φ| < 1,9 dx`). En chemin : un rendu lancé sans caméra posée (uniforme
   nul, rayon NaN) bouclait sans fin et perdait la carte — la caméra posée avant, et la marche du nuanceur bornée à 4 096 pas.
+- **P3** — `godot/saut.tscn`, `saut.gd` (le rejeu : la texture 3D de `φ` mise à jour à l'image, le corps, l'orbite ; `--captures`,
+  `--cout`), `saut_eau.gdshader` (le lancer de rayons dans `φ`, la profondeur écrite), `saut_mer.gdshader` (la mer de B au-delà),
+  `saut_optique.gdshaderinc` (l'optique commune, sur `ciel.gdshaderinc` et `optique_eau.gdshaderinc`). **Mesuré** : (1) le rejeu fidèle —
+  quantification 0,39 mm, l'image rejouée à moins d'un pas de l'instant demandé (0,305 pour 0,30 ; 0,838 pour 0,85) ; (2) **416
+  images/s** (médiane 2,4 ms, 99e centile 2,8 ms) ; (3) images `godot/captures/saut_t{0.30,0.55,0.85,1.60,5.80,6.30}.png` envoyées.
 
