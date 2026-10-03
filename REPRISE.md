@@ -17,7 +17,7 @@ Session en cours : **S470 — le lot des registres ; la caméra qui suit le joue
 Dernière session : S469 — le direct avec le joueur debout ([preuve](docs/validation/C10-SCENES-S454.md) §18) — 0,995 du temps réel, deux défauts de `saut.gd` corrigés. Avant : S468 (l'ombre du joueur)
 Session suivante : **S470 — le lot des registres** (dû, S467–S469) **et la caméra qui suit le joueur** dans `saut.tscn` (la cible sur le corps, en direct comme en rejeu). **Sans attendre de « Continue »**
 Maillons        : 1 — journal
-Registres       : dernier lot S467 (ADR-213 D3) ; le prochain au plus tard en S470
+Registres       : dernier lot S470 (ADR-213 D3) ; le prochain au plus tard en S473
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

@@ -75,8 +75,9 @@ touche C la coupe (`SUIVRE=0`). À 5,80 s, le joueur en l'air sortait du cadre.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le lot des registres.
+- [x] **P2** — le lot des registres.
 - [ ] **P3** — la caméra qui suit ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — FEUILLE-DE-ROUTE (S467–S469 ; la suite : la caméra, le plafond du domaine), LISTE (S461–S469), REPRISE (dernier lot S470, prochain S473) ; QUESTIONS-OUVERTES inchangée (juste).
