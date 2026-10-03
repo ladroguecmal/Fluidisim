@@ -1486,5 +1486,9 @@ même optique, la tonalité AgX et le halo de Godot ; 416 images/s.
 En mouvement : `<godot> --path godot res://saut.tscn`.
 
 **La question :** le rendu de Godot est-il celui que vous attendiez pour la v1 ? Qu'ajouter d'abord — les caustiques sur le sable, la
-surface fine, la pluie, le direct ? **Verdict** : en attente.
+surface fine, la pluie, le direct ? **Verdict R39 — reçu le 2026-10-04** : *« Tous les verdict sont validés mais pas définitif car
+toujours peaufinable »*. **Reçu** : R39 et tout ce qui a été montré depuis (S462–S470 : les caustiques, la surface fine, le direct, la
+pluie, le joueur debout, son ombre, la caméra) — validés, pas définitifs. **Ce qu'il déclenche** : la question de la façon de juger un
+rendu, et le banc visuel ([ADR-216](../adr/ADR-216-le-banc-visuel.md)) : *« Je valide ce banc »*, avec six vidéos de référence
+([REFERENCES-VIDEO-S471](REFERENCES-VIDEO-S471.md)).
 

@@ -81,8 +81,9 @@ même image à 1 % près, ou l'écart dit.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — R39 ; le registre des références ; ADR-216.
+- [x] **P2** — R39 ; le registre des références ; ADR-216.
 - [ ] **P3** — `outils/banc_visuel.js` et `outils/banc_visuel.py` (le même calcul) ; les six références mesurées.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — R39 inscrit (REVUE-VISUELLE §44) ; ADR-216 ; le registre `docs/validation/REFERENCES-VIDEO-S471.md` (les propos de l'utilisateur mot pour mot, ce que chaque vidéo montre, ce que nos scènes peuvent lui opposer).
