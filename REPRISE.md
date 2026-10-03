@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 23:08 +02:00
+JETON            : occupé
+Battement        : 2026-10-03 23:09 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S468 — l'ombre du joueur** (sur l'eau, le fond, les caustiques ; Godot)
 Dernière session : S467 — le lot des registres ; le joueur éclairé comme l'eau ([preuve](docs/validation/C10-SCENES-S454.md) §16). Avant : S466 (le joueur, une capsule debout)
 Session suivante : **S468 — l'ombre du joueur** : sur l'eau, le fond et les caustiques (le soleil occulté par la capsule, dans `saut_optique.gdshaderinc` et l'afficheur). **Sans attendre de « Continue »**
 Maillons        : 1 — journal

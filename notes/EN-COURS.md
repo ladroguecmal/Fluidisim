@@ -62,28 +62,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S467 — **terminée**. En autonomie : le lot des registres (dû), puis le joueur éclairé comme l'eau.
+Session : S468 — **en cours**. En autonomie : **l'ombre du joueur**.
 
-**Ce que la session fait.** (1) **Le lot des registres** (ADR-213 D3) pour S464–S466 : FEUILLE-DE-ROUTE, LISTE, REPRISE.
-(2) **Le joueur dans les unités de l'eau** : au-dessus de l'eau, le maillage de Godot (éclairé par Godot) est sombre et bleu ; vu
-par réfraction, le corps (`couleur_corps`, éclairé par notre nuanceur) est clair. Comme les parois de la piscine (S374), le joueur
-reçoit un nuanceur `unshaded` qui l'éclaire par `eclairage` de `ciel.gdshaderinc` — la même formule, le même albédo, des deux
-côtés de la surface ; le ciel couvert suit.
+**Ce que la session fait.** Le soleil direct occulté par la capsule, dans `saut_optique.gdshaderinc` (le rendu final, Godot,
+ADR-192 ; l'afficheur, banc, n'en a pas besoin) : `ombre_corps(q)` — 0 si le chemin de la lumière jusqu'à `q` touche le corps, 1
+sinon ; au fond, le chemin réfracté (de `q` à la surface le long du soleil réfracté, puis le soleil dans l'air, la surface prise
+au niveau moyen) ; à la surface, le soleil dans l'air. Il éteint la part directe : de l'éclairement du fond (et ses caustiques),
+du corps d'eau, de l'éclat. Sous le ciel couvert, rien ne change (le soleil direct est déjà éteint).
 
-**Critères, écrits avant.** (1) les registres à jour, `--check` à 0 ; (2) au-dessus et au-dessous de la surface, la même couleur
-au même point avant l'eau (même formule, même albédo — lu dans le code) ; (3) les images montrées.
+**Critères, écrits avant.** (1) l'ombre là où la géométrie la met : sur le fond, partant du pied du joueur le long du soleil
+réfracté (vers le nord-ouest… à l'opposé du soleil) — vérifié sur une image ; (2) ciel couvert : l'image inchangée au bit hors
+du corps (lu dans le code : `soleil_direct` déjà nul) ; (3) la cadence de `--cout` sous 10 % de perte ; (4) les images montrées.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le lot des registres.
-- [x] **P3** — le joueur éclairé comme l'eau ; images.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — l'ombre ; mesures ; images.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — FEUILLE-DE-ROUTE (S464–S466, la suite), LISTE (S461–S466), REPRISE (dernier lot S467, prochain S470) ; QUESTIONS-OUVERTES : la ligne de la campagne reste juste (C11 dans Godot), inchangée.
-- **P3** — `joueur.gdshader` (`unshaded`, `albedo · gain_eau · eclairage(n)`, le ciel couvert suivi) ; `couleur_corps` lit le même
-  albédo (`corps_albedo`) ; `saut.gd` : `ALBEDO_JOUEUR`, passé aux deux. **Mesuré** : (2) la même formule et le même albédo des
-  deux côtés — lu dans le code (`joueur.gdshader`, `couleur_corps`) ; (3) images `saut_t0.55.png`, `saut_t1.60_pluie10.png`
-  envoyées : un gris continu à travers la surface, teinté par l'eau dessous.
-- **P4** — C10-SCENES-S454 §16 ; journal ; jeton libre ; maillons 1 ; suivant : S468, l'ombre du joueur sur l'eau et le fond.
