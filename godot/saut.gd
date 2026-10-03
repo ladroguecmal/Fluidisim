@@ -19,6 +19,9 @@ var ny := 0
 var nfen := 0
 var taille := 0
 var texture_phi: ImageTexture3D
+## S462 : les caustiques enregistrées (`saut_caustiques.bin`), une carte par image.
+var octets_c: PackedByteArray
+var texture_c: ImageTexture
 var mat_eau: ShaderMaterial
 var mat_mer: ShaderMaterial
 var joueur: MeshInstance3D
@@ -46,6 +49,8 @@ func _ready() -> void:
 		return
 	entete = JSON.parse_string(fichier.get_as_text())
 	octets = FileAccess.get_file_as_bytes("res://donnees/saut.bin")
+	if FileAccess.file_exists("res://donnees/saut_caustiques.bin"):
+		octets_c = FileAccess.get_file_as_bytes("res://donnees/saut_caustiques.bin")
 	nx = int(entete["nx"])
 	ny = int(entete["ny"])
 	nfen = int(entete["k1"]) - int(entete["k0"])
@@ -90,6 +95,9 @@ func _ready() -> void:
 		m.set_shader_parameter("houle", Vector4(float(h[0]), float(h[1]), float(h[2]), float(h[3])))
 		m.set_shader_parameter("niveau", niveau)
 		m.set_shader_parameter("etendue", Vector2((nx - 0.5) * dx, (ny - 0.5) * dx))
+		m.set_shader_parameter("domaine", Vector2(nx * dx, ny * dx))
+		# `CAUSTIQUES=0` : sans elles (l'image de S461).
+		m.set_shader_parameter("caustiques", octets_c.size() == nx * ny * images.size() and OS.get_environment("CAUSTIQUES") != "0")
 	# Le joueur.
 	joueur = MeshInstance3D.new()
 	var sm := SphereMesh.new()
@@ -168,6 +176,14 @@ func charger(i: int) -> void:
 		mat_eau.set_shader_parameter("phi_tex", texture_phi)
 	else:
 		texture_phi.update(couches)
+	if octets_c.size() == nx * ny * images.size():
+		var carte := Image.create_from_data(nx, ny, false, Image.FORMAT_R8, octets_c.slice(i * nx * ny, (i + 1) * nx * ny))
+		if texture_c == null:
+			texture_c = ImageTexture.create_from_image(carte)
+			for m in [mat_eau, mat_mer]:
+				m.set_shader_parameter("caustiques_tex", texture_c)
+		else:
+			texture_c.update(carte)
 	var e: Array = images[i]
 	var centre := Vector3(float(e[1]), float(e[2]), float(e[3]))
 	joueur.position = b_vers_godot(centre)

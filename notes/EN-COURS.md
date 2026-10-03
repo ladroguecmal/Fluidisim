@@ -79,7 +79,15 @@ moins ; (4) les images montrées.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la carte des caustiques à l'enregistrement ; sa lecture dans Godot ; mesures ; images.
+- [x] **P2** — la carte des caustiques à l'enregistrement ; sa lecture dans Godot ; mesures ; images.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — l'export (`saut_caustiques.bin`, une carte de 80 × 80 sur 8 bits par image) ; dans Godot, `focalisation()` dans
+  `saut_optique.gdshaderinc` (la carte au point de surface d'où vient le soleil réfracté ; au-delà, B analytique) et sa texture dans
+  `saut.gd` (`CAUSTIQUES=0` : sans). **Mesuré** : la formule ponctuelle `1/|det(I + D·Hess η)|` donnait une focalisation moyenne de
+  **1,10 à 1,96** — fausse : lue sur la surface, elle ne conserve pas l'énergie (là où les rayons se croisent) ; **le dépôt** (4 × 4
+  échantillons par cellule, déposés en bilinéaire au point du fond) : **0,979 à 0,995** — (1) tenu (la perte : la lumière sortie par les
+  bords) ; (2) au raccord, le motif change un peu (le domaine perd sa lumière de bord, B n'en dépose pas) — presque ; (3) **405
+  images/s** — tenu ; (4) images envoyées.
+

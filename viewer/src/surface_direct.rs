@@ -282,6 +282,14 @@ pub fn banc_v1() -> Result<(), String> {
             }
             None => None,
         };
+        // S462 : les caustiques — une carte de 80 × 80 sur 8 bits par image (`C/8`), aux coordonnées de la surface.
+        let mut flux_c = match export.as_ref() {
+            Some(dossier) => Some(std::io::BufWriter::new(
+                std::fs::File::create(format!("{dossier}/saut_caustiques.bin")).map_err(|e| e.to_string())?,
+            )),
+            None => None,
+        };
+        let mut moyennes_c: Vec<f64> = Vec::new();
         let (mut images_export, mut prochaine_export, mut erreur_quantif) = (Vec::<String>::new(), 0f64, 0f64);
         let (mut pas_ms, mut pire_pas_ms) = (Vec::new(), 0f64);
         let debut = Instant::now();
@@ -319,6 +327,67 @@ pub fn banc_v1() -> Result<(), String> {
                         }
                     }
                     f.write_all(&octets).map_err(|e| e.to_string())?;
+                    // S462 — **les caustiques** : la hauteur de chaque colonne (la première traversée de `φ` depuis le haut ; sans
+                    // surface, le niveau), sa hessienne, et la focalisation de la lumière réfractée au fond,
+                    // `C = 1/|det(I + D·Hess η)|`, `D = η·(1 − 1/n)` — la profondeur sous la surface, l'indice 1,34 ; bornée à 8.
+                    if let Some(fc) = flux_c.as_mut() {
+                        let (nx, ny, dxf) = (d.nx, d.ny, v.b.dx);
+                        let eta: Vec<f64> = (0..nx * ny)
+                            .map(|c| {
+                                let ph = |k: usize| champ[k * nx * ny + c] as f64;
+                                (0..d.nz - 1)
+                                    .rev()
+                                    .find(|&k| ph(k) < 0. && ph(k + 1) >= 0.)
+                                    .map_or(v.b.h, |k| (k as f64 + 0.5) * dxf + dxf * ph(k) / (ph(k) - ph(k + 1)))
+                            })
+                            .collect();
+                        let at = |i: isize, j: isize| eta[(j.clamp(0, ny as isize - 1) as usize) * nx + i.clamp(0, nx as isize - 1) as usize];
+                        // Le dépôt (conservatif par construction) : 4 × 4 échantillons par cellule de surface, chacun portant `1/16` de
+                        // la lumière d'une cellule, déposé en bilinéaire au point du fond où son rayon arrive, `q = p + D·∇η` (la
+                        // lumière verticale ; l'obliquité du soleil décale le motif entier, Godot l'applique à la lecture).
+                        let mut depot = vec![0f64; nx * ny];
+                        let sous = 4usize;
+                        let grad = |i: isize, j: isize| ((at(i + 1, j) - at(i - 1, j)) / (2. * dxf), (at(i, j + 1) - at(i, j - 1)) / (2. * dxf));
+                        for j in 0..ny as isize {
+                            for i in 0..nx as isize {
+                                for b in 0..sous {
+                                    for a in 0..sous {
+                                        // L'échantillon, en cellules depuis le centre de la cellule (i, j) : η et ∇η en bilinéaire.
+                                        let (fx, fy) = ((a as f64 + 0.5) / sous as f64 - 0.5, (b as f64 + 0.5) / sous as f64 - 0.5);
+                                        let (i2, j2) = (if fx < 0. { i - 1 } else { i + 1 }, if fy < 0. { j - 1 } else { j + 1 });
+                                        let (wx, wy) = (fx.abs(), fy.abs());
+                                        let bil = |f: &dyn Fn(isize, isize) -> f64| {
+                                            (1. - wx) * (1. - wy) * f(i, j) + wx * (1. - wy) * f(i2, j) + (1. - wx) * wy * f(i, j2) + wx * wy * f(i2, j2)
+                                        };
+                                        let e = bil(&|x, y| at(x, y));
+                                        let gx = bil(&|x, y| grad(x, y).0);
+                                        let gy = bil(&|x, y| grad(x, y).1);
+                                        let dd = e * (1. - 1. / 1.34);
+                                        // Le point du fond, en cellules (centres à des entiers).
+                                        let qx = i as f64 + fx + dd * gx / dxf;
+                                        let qy = j as f64 + fy + dd * gy / dxf;
+                                        let (x0, y0) = (qx.floor(), qy.floor());
+                                        let (tx, ty) = (qx - x0, qy - y0);
+                                        let poids = 1. / (sous * sous) as f64;
+                                        for (ox, oy, w) in [(0., 0., (1. - tx) * (1. - ty)), (1., 0., tx * (1. - ty)), (0., 1., (1. - tx) * ty), (1., 1., tx * ty)] {
+                                            let (cx, cy) = (x0 + ox, y0 + oy);
+                                            if cx >= 0. && cy >= 0. && (cx as usize) < nx && (cy as usize) < ny {
+                                                depot[cy as usize * nx + cx as usize] += w * poids;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        let mut carte = Vec::with_capacity(nx * ny);
+                        let mut somme = 0f64;
+                        for c in depot.iter().copied() {
+                            somme += c;
+                            carte.push((c.min(8.) / 8. * 255.).round() as u8);
+                        }
+                        moyennes_c.push(somme / (nx * ny) as f64);
+                        fc.write_all(&carte).map_err(|e| e.to_string())?;
+                    }
                     let corps = v.corps_a(v.t()).map_or([0.; 3], |s| s.center);
                     images_export.push(format!("[{:.5},{:.4},{:.4},{:.4}]", v.t(), corps[0], corps[1], corps[2]));
                     prochaine_export += 1. / 30.;
@@ -357,6 +426,11 @@ pub fn banc_v1() -> Result<(), String> {
         if let (Some(dossier), Some(mut f)) = (export.as_ref(), flux.take()) {
             use std::io::Write;
             f.flush().map_err(|e| e.to_string())?;
+            if let Some(mut fc) = flux_c.take() {
+                fc.flush().map_err(|e| e.to_string())?;
+            }
+            let (cmin, cmax) = moyennes_c.iter().fold((f64::MAX, f64::MIN), |m, c| (m.0.min(*c), m.1.max(*c)));
+            println!("V1_S458 caustiques focalisation_moyenne min={cmin:.3} max={cmax:.3} (1 : l'énergie conservée)");
             let w = v.b.houle.map_or([0.; 4], |w| [w.amplitude, w.wavenumber, w.omega, w.phase]);
             let entete = format!(
                 "{{

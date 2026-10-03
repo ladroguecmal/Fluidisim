@@ -18,6 +18,28 @@ uniform vec2 etendue = vec2(4.0, 4.0);
 
 const vec3 SABLE = vec3(0.34, 0.30, 0.24);
 
+// S462 — **les caustiques** : la focalisation de la lumière par la surface simulée (l'afficheur, `saut_caustiques.bin` : `C/8` sur
+// 8 bits, aux coordonnées du fond, pour une lumière verticale), et `domaine` son étendue (m) ; au-delà, celle de B, analytique.
+uniform sampler2D caustiques_tex : filter_linear, repeat_disable;
+uniform vec2 domaine = vec2(4.0, 4.0);
+uniform bool caustiques = true;
+
+// La focalisation au point `q` du fond (B) : le motif d'une lumière verticale, décalé de l'obliquité du soleil réfracté.
+float focalisation(vec3 q) {
+    if (!caustiques) {
+        return 1.0;
+    }
+    vec3 r = refract(-normalize(SOLEIL_B), vec3(0.0, 0.0, 1.0), 1.0 / indice);
+    vec2 p = q.xy - r.xy * (niveau / -r.z);
+    if (p.x > 0.0 && p.y > 0.0 && p.x < domaine.x && p.y < domaine.y) {
+        return texture(caustiques_tex, p / domaine).r * 8.0;
+    }
+    // B : `1/|1 + D·η_xx|`, `D = h·(1 − 1/n)`.
+    float theta = houle.y * p.x - houle.z * temps + houle.w;
+    float exx = -houle.x * houle.y * houle.y * cos(theta);
+    return min(1.0 / max(abs(1.0 + niveau * (1.0 - 1.0 / indice) * exx), 0.125), 8.0);
+}
+
 vec3 b_vers_godot(vec3 p) {
     return vec3(p.x, p.z, -p.y);
 }
@@ -67,7 +89,8 @@ float bruit_sable(vec2 q) {
 
 vec3 couleur_sable(vec3 p) {
     float variation = 0.85 + 0.3 * (0.6 * bruit_sable(p.xy * 0.9) + 0.4 * bruit_sable(p.xy * 3.7));
-    return SABLE * variation * gain_eau * eclairage(vec3(0.0, 0.0, 1.0), normalize(SOLEIL_B), 1.0);
+    // S462 : la part directe de l'éclairement focalisée (comme `sol.gdshader`, S361).
+    return SABLE * variation * gain_eau * eclairage(vec3(0.0, 0.0, 1.0), normalize(SOLEIL_B), focalisation(p));
 }
 
 // La surface de l'eau au point `p`, normale `n0` (vers l'air), vue dans la direction `d` (B).
