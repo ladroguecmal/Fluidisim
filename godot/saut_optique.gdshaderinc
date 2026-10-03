@@ -132,6 +132,27 @@ float touche_corps(vec3 o, vec3 d) {
     return t > 1e-4 ? t : 1e30;
 }
 
+// S468 — **l'ombre du joueur** : 0 si la lumière directe du soleil jusqu'à `q` touche le corps, 1 sinon. Sous l'eau, son chemin
+// réfracté — de `q` à la surface (prise au niveau moyen) le long du soleil réfracté, puis le soleil dans l'air ; au-dessus, le
+// soleil dans l'air.
+float ombre_corps(vec3 q) {
+    if (corps.w <= 0.0) {
+        return 1.0;
+    }
+    vec3 soleil = normalize(SOLEIL_B);
+    vec3 o = q;
+    if (q.z < niveau) {
+        // Vers le soleil sous l'eau : l'opposé du rayon réfracté qui descend.
+        vec3 monte = -refract(-soleil, vec3(0.0, 0.0, 1.0), 1.0 / indice);
+        float t_surface = (niveau - q.z) / max(monte.z, 1e-3);
+        if (touche_corps(q, monte) < t_surface) {
+            return 0.0;
+        }
+        o = q + monte * t_surface;
+    }
+    return touche_corps(o, soleil) < 1e29 ? 0.0 : 1.0;
+}
+
 vec3 couleur_corps(vec3 p) {
     return corps_albedo * gain_eau * eclairage(normalize(p - axe_corps(p)), normalize(SOLEIL_B), 1.0);
 }
@@ -150,7 +171,8 @@ float bruit_sable(vec2 q) {
 vec3 couleur_sable(vec3 p) {
     float variation = 0.85 + 0.3 * (0.6 * bruit_sable(p.xy * 0.9) + 0.4 * bruit_sable(p.xy * 3.7));
     // S462 : la part directe de l'éclairement focalisée (comme `sol.gdshader`, S361).
-    return SABLE * variation * gain_eau * eclairage(vec3(0.0, 0.0, 1.0), normalize(SOLEIL_B), focalisation(p));
+    // S468 : à l'ombre du joueur, ni soleil direct ni caustiques.
+    return SABLE * variation * gain_eau * eclairage(vec3(0.0, 0.0, 1.0), normalize(SOLEIL_B), focalisation(p) * ombre_corps(p));
 }
 
 // La surface de l'eau au point `p`, normale `n0` (vers l'air), vue dans la direction `d` (B) ; `empreinte` : la taille du pixel
@@ -187,10 +209,12 @@ vec3 couleur_eau(vec3 p, vec3 n0, vec3 d, float empreinte) {
         t_col = exp(-kd * (max(p.z - q.z, 0.0) + length(q - p)));
         vu = c * t_col;
     }
-    vec3 corps_eau = R0 * gain_eau * eclairage(n, soleil, 1.0);
+    // S468 : à l'ombre du joueur, le corps d'eau sans soleil direct, et pas d'éclat.
+    float ombre = ombre_corps(p);
+    vec3 corps_eau = R0 * gain_eau * eclairage(n, soleil, ombre);
     vec3 sous = corps_eau * (1.0 - t_col) + vu;
     // S465 : sous le ciel couvert, plus d'éclat (`soleil_direct`).
-    return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2 * soleil_direct();
+    return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2 * soleil_direct() * ombre;
 }
 
 // La surface de B : `h + a·cos(k·x − ω·t + φ)` et sa pente en x.

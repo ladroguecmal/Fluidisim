@@ -77,7 +77,13 @@ du corps (lu dans le code : `soleil_direct` déjà nul) ; (3) la cadence de `--c
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'ombre ; mesures ; images.
+- [x] **P2** — l'ombre ; mesures ; images.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `ombre_corps` dans `saut_optique.gdshaderinc` ; elle éteint la part directe du fond (et ses caustiques), du corps d'eau
+  et de l'éclat. **Mesuré** : (1) l'ombre part du pied du joueur **vers le sud-est** — à l'opposé du soleil, au nord-ouest (le plan
+  disait « nord-ouest » : une erreur d'écriture, la géométrie est celle-ci) — vers la caméra de R38 ; un masque de contrôle
+  (surface, fond) l'a montrée de la forme de la capsule sur la surface à 5,80 s ; (2) ciel couvert (`COUVERT=1`) : les six images
+  **identiques au bit** à celles d'avant ; (3) `--cout` : 405 → **397 images/s** (−2 %) ; (4) image `saut_t1.60.png` envoyée.
+
