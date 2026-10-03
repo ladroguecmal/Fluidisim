@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S471 — **en cours**. **Décision de l'utilisateur** (2026-10-04) : *« Je valide ce banc »* — le banc visuel proposé après
+Session : S471 — **terminée**. **Décision de l'utilisateur** (2026-10-04) : *« Je valide ce banc »* — le banc visuel proposé après
 R39 (mesurer plutôt que regarder) passe avant le plafond du domaine. Il fournit six vidéos de référence.
 
 **Ce que la session fait.** (1) **R39 reçu** : *« Tous les verdicts sont validés, mais pas définitifs, car toujours peaufinables »*.
@@ -83,7 +83,7 @@ même image à 1 % près, ou l'écart dit.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — R39 ; le registre des références ; ADR-216.
 - [x] **P3** — `outils/banc_visuel.js` et `outils/banc_visuel.py` (le même calcul) ; les six références mesurées.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — R39 inscrit (REVUE-VISUELLE §44) ; ADR-216 ; le registre `docs/validation/REFERENCES-VIDEO-S471.md` (les propos de l'utilisateur mot pour mot, ce que chaque vidéo montre, ce que nos scènes peuvent lui opposer).
@@ -94,3 +94,4 @@ même image à 1 % près, ou l'écart dit.
   de compression pour des coupes (seuil : 5 % de la luminance en plus). **Les six vidéos mesurées** (nombres seuls :
   `docs/validation/references-video/*.json`). **Constat** : la même vidéo servie en 720 puis en 360 pixels varie de moins de 4 %
   (période, teintes) à 32 % (contraste, mouvement, clairs) — la règle : comparer à largeur réduite égale.
+- **P4** — la preuve : REFERENCES-VIDEO-S471 ; journal ; jeton libre ; maillons 1 ; suivant : S472, les scènes miroirs (V1, V5, V6) mesurées contre leurs références.

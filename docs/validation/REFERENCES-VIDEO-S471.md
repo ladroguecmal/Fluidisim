@@ -9,6 +9,13 @@ qu'il l'a écrit ; ce que la vidéo montre et ce que nos scènes peuvent lui opp
 de la zone** — l'exposition et la balance des blancs d'une vidéo publiée sont inconnues. Les définitions : l'en-tête de
 `outils/banc_visuel.py`.
 
+**Reproduire.** Ouvrir la vidéo dans le navigateur ; coller `outils/banc_visuel.js` dans la page — sous YouTube, ses *Trusted Types*
+demandent une politique : `trustedTypes.createPolicy('banc', {createScript: s => s})`, puis `eval(politique.createScript(texte))` ;
+puis `BancVisuel.lancer(document.querySelector('video'), {zones, fps, debut, fin, facteur})` avec les réglages de la fiche, et relire
+`window.__banc`. Les nombres de chaque fiche : `docs/validation/references-video/<V>-<id>.json`. L'égalité avec le calcul de nos
+rendus : servir le dépôt (`python -m http.server`), ouvrir une page qui charge `/outils/banc_visuel.js`, `BancVisuel.images(urls,
+zones, dt, facteur)` sur des captures, puis `python outils/banc_visuel.py --egalite=<json> --zones=… --dt=… --facteur=… <captures>`.
+
 **Limites, dites.**
 - Une vidéo publiée est compressée et étalonnée. Le débit servi change d'une lecture à l'autre (360 à 720 pixels de large) : la part
   haute fréquence en dépend.

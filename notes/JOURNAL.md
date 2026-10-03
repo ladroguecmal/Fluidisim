@@ -18519,3 +18519,13 @@ lot des registres (dû en S470).
 **Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §19) : le lot des registres pour S467–S469
 (prochain au plus tard S473) ; la caméra de `saut.tscn` suit le joueur (cible et recul lissés, touche C) ; `SUIVRE=0` identique au
 bit. **Rituel** (allégé). Maillons **1**. Suivant : le plafond du domaine.
+
+## S471 — 2026-10-04 — le banc visuel : R39, six références, leur mesure
+
+**Entrée.** R39 reçu : *« Tous les verdict sont validés mais pas définitif car toujours peaufinable »* ; l'utilisateur demande une
+meilleure façon de juger un rendu que de regarder des pixels ; le banc proposé (mesurer plutôt que regarder) est reçu — *« Je valide
+ce banc »* — avec six vidéos. **Fait** ([ADR-216](../docs/adr/ADR-216-le-banc-visuel.md),
+[REFERENCES-VIDEO-S471](../docs/validation/REFERENCES-VIDEO-S471.md)) : `banc_visuel.py` et `banc_visuel.js`, le même calcul (égalité
+exacte) ; les six vidéos mesurées dans la page de YouTube (l'image lue dans un canevas), nombres seuls. **Constats** : deux défauts du
+calcul trouvés en mesurant ; la résolution servie fait varier les grandeurs fines jusqu'à 32 %. **Rituel** (allégé). Maillons **1**.
+Suivant : les scènes miroirs.
