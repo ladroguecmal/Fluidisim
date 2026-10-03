@@ -33,6 +33,8 @@ pub struct BandInSea {
     displaced_carried: f64,
     /// S459 : la largeur de l'anneau où la mer reçoit les vitesses de la bande (`set_velocity_ring`) ; `None` : tout l'intérieur.
     ring: Option<usize>,
+    /// S460 : sous les colonnes de particules de l'intérieur, la mer à la hauteur de B (`set_particle_rest`).
+    particle_rest: bool,
     eta: Vec<f32>,
     u: Vec<f32>,
     v: Vec<f32>,
@@ -68,6 +70,7 @@ impl BandInSea {
             displaced: 0.,
             displaced_carried: 0.,
             ring: None,
+            particle_rest: false,
             eta: vec![0.; sea.columns()],
             u: vec![0.; nu],
             v: vec![0.; nv],
@@ -105,6 +108,13 @@ impl BandInSea {
     /// pas. `None`, le défaut : tout l'intérieur, au bit.
     pub fn set_velocity_ring(&mut self, largeur: Option<usize>) {
         self.ring = largeur;
+    }
+
+    /// **S460 (C10-2)** — sous les colonnes de particules de l'intérieur, la mer prend la hauteur de B (δ nul) au lieu de garder la
+    /// sienne : sous un jet, celle-ci, poussée par les vitesses de la bande, sortait des bornes du pas mobile (S460 : 2,27 m en
+    /// 0,6 s, au centre de la bande). La mer n'a rien à porter là ; le `c` conservatif répartit le volume. Défaut : non, au bit.
+    pub fn set_particle_rest(&mut self, on: bool) {
+        self.particle_rest = on;
     }
 
     /// **La mer reçoit l'état de la bande** dans son intérieur ; rend `c`, m. La bande doit porter une zone de colonnes.
@@ -148,6 +158,8 @@ impl BandInSea {
                 s.columns[j * na + i]
             } else if lue {
                 height(i, j)
+            } else if s.particle_rest {
+                bg.w[fw(i0 + i, j, 0)].eta + rest
             } else {
                 s.eta[j * nx + i0 + i] + bg.w[fw(i0 + i, j, 0)].eta
             }

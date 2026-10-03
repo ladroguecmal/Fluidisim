@@ -75,7 +75,16 @@ maille du bon témoin. Au troisième échec de la stabilité (après S459 et S46
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le diagnostic ; la correction ; le témoin long ; mesures.
+- [x] **P2** — le diagnostic ; la correction ; le témoin long ; mesures.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **Décision de l'utilisateur** (pendant P2) : *« Continue par la suite avec le branchement dans godot »* — après S460, C11 (δ dans
+  Godot) passe avant la suite de C10-2.
+- **P2** — le diagnostic (`SAUT_TRACE`, les extrêmes de la mer au refus) : **la mer sort de ses bornes sous les colonnes de particules
+  de l'intérieur** (2,27 m en 0,59 s, croissant à chaque pas, au centre de la bande, où elle gardait sa propre hauteur, poussée par les
+  vitesses du jet) — (1) cause nommée. **Correction** `BandInSea::set_particle_rest` (la mer à la hauteur de B sous ces colonnes), avec
+  l'anneau des vitesses : le refus recule à **0,63 s** et **change de place** — une dent de scie dans les colonnes de **marge** du raccord
+  (2,13 m contre 0,69 m, voisines) : l'instabilité de bord de S449. (2) **manqué** ; troisième session sur la stabilité du raccord
+  (S449, S459, S460) : **plafond** (ADR-213 D2). Le témoin long (`Mode::Longue`) écrit, non mesuré (l'aval plafonné).
+

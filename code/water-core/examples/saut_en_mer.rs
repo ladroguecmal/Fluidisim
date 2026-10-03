@@ -43,6 +43,8 @@ const ARRET: f64 = 0.6;
 enum Mode {
     Mer,
     Seule,
+    /// S460 : le témoin long — la bande seule, à parois, aussi longue que la mer, la sphère au même endroit.
+    Longue,
 }
 
 struct Issue {
@@ -72,32 +74,40 @@ fn main() -> Result<(), String> {
     }
     let a = run(1e-4, 1.5 * echelle, Mode::Mer)?;
     let b = run(1e-4, 1.5 * echelle, Mode::Seule)?;
-    // Le cratère : (A) contre (B), hors des colonnes dont la surface lue tombe dans le corps.
+    // S460 : le témoin long (la bande à parois aussi longue que la mer) ; `SAUT_SANS_LONGUE=1` : sans lui.
+    let l = if std::env::var("SAUT_SANS_LONGUE").is_ok() { None } else { Some(run(1e-4, 1.5 * echelle, Mode::Longue)?) };
+    // Le cratère : (A) contre un témoin, hors des colonnes dont la surface lue tombe dans le corps. `largeur`, `decalage` : la
+    // disposition des colonnes du témoin (la bande de la mer y commence à `decalage`).
     let r = 0.5 * D;
     let corps_z = PROFONDEUR + r - (FR * (G * D).sqrt() * echelle).min(ARRET);
-    let (mut max, mut ecarts) = (0f64, Vec::new());
-    for j in 0..NY {
-        for i in 0..NA {
-            let c = j * NA + i;
-            let (ha, hb) = (a.hauteurs[c], b.hauteurs[c]);
-            if ha.is_nan() || hb.is_nan() {
-                continue;
+    let comparer = |temoin: &[f64], largeur: usize, decalage: usize, nom: &str| {
+        let (mut max, mut ecarts) = (0f64, Vec::new());
+        for j in 0..NY {
+            for i in 0..NA {
+                let (ha, hb) = (a.hauteurs[j * NA + i], temoin[j * largeur + decalage + i]);
+                if ha.is_nan() || hb.is_nan() {
+                    continue;
+                }
+                let (x, y) = ((i as f64 + 0.5) * DX - NA as f64 * DX / 2., (j as f64 + 0.5) * DX - NY as f64 * DX / 2.);
+                if (x * x + y * y).sqrt() < r + DX && (hb - corps_z).abs() < r + DX {
+                    continue;
+                }
+                max = f64::max(max, (ha - hb).abs());
+                ecarts.push((ha - hb).abs());
             }
-            let (x, y) = ((i as f64 + 0.5) * DX - NA as f64 * DX / 2., (j as f64 + 0.5) * DX - NY as f64 * DX / 2.);
-            if (x * x + y * y).sqrt() < r + DX && (hb - corps_z).abs() < r + DX {
-                continue;
-            }
-            max = f64::max(max, (ha - hb).abs());
-            ecarts.push((ha - hb).abs());
         }
+        ecarts.sort_by(|x, y| x.total_cmp(y));
+        println!(
+            "SAUT_EN_MER_S459 cratere_t1 temoin={nom} ecart_max_sur_dx={:.3} ecart_median_sur_dx={:.4} colonnes={}",
+            max / DX,
+            ecarts.get(ecarts.len() / 2).copied().unwrap_or(f64::NAN) / DX,
+            ecarts.len()
+        );
+    };
+    comparer(&b.hauteurs, NA, 0, "bande_seule");
+    if let Some(l) = l.as_ref() {
+        comparer(&l.hauteurs, NX_MER, I0, "bande_longue");
     }
-    ecarts.sort_by(|x, y| x.total_cmp(y));
-    println!(
-        "SAUT_EN_MER_S459 cratere_t1 ecart_max_sur_dx={:.3} ecart_median_sur_dx={:.4} colonnes={}",
-        max / DX,
-        ecarts.get(ecarts.len() / 2).copied().unwrap_or(f64::NAN) / DX,
-        ecarts.len()
-    );
     for (nom, x) in [("mer_sans_houle", &a), ("seule", &b)] {
         println!(
             "SAUT_EN_MER_S459 passage={nom} raccord_sur_volume={:.2e} epinglees_en_particules={} refus={:?} pas={} calcul_s={:.1}",
@@ -120,10 +130,12 @@ fn main() -> Result<(), String> {
 fn run(eps_b: f64, duree: f64, mode: Mode) -> Result<Issue, String> {
     let debut = std::time::Instant::now();
     let en_mer = mode == Mode::Mer;
+    let (na, i0) = if mode == Mode::Longue { (NX_MER, 0) } else { (NA, I0) };
     let k = std::f64::consts::TAU / LAMBDA;
     let nz = ((PROFONDEUR + AIR) / DX).round() as usize;
     let dv = Domain3 { nx: NX_MER, ny: NY, nz, dx: DX as f32 };
-    let da = Domain3 { nx: NA, ny: NY, nz, dx: DX as f32 };
+    let da = Domain3 { nx: na, ny: NY, nz, dx: DX as f32 };
+    let _ = i0;
     let (jobs, sink) = (host_impl::SequentialJobs, host_impl::StderrSink);
     let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 32);
     let mut hote = HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink };
@@ -147,7 +159,7 @@ fn run(eps_b: f64, duree: f64, mode: Mode) -> Result<Issue, String> {
         }
         (-s).atan2(c)
     };
-    let x0 = I0 as f64 * DX;
+    let x0 = i0 as f64 * DX;
     let ab = eps_b / k;
     let omega = (G * k).sqrt();
     let eta = |x: f64| PROFONDEUR + ab * (k * x + phi).cos();
@@ -158,13 +170,14 @@ fn run(eps_b: f64, duree: f64, mode: Mode) -> Result<Issue, String> {
     };
     // Le corps : au centre de la bande, la descente de B10 arrêtée à `ARRET`.
     let (r, u) = (0.5 * D, FR * (G * D).sqrt());
-    let (cx, cy, z0) = (NA as f64 * DX / 2., NY as f64 * DX / 2., PROFONDEUR + r);
+    // Le centre de la bande de la mer, dans les coordonnées de cette bande-ci.
+    let (cx, cy, z0) = ((I0 as f64 + NA as f64 / 2.) * DX - x0, NY as f64 * DX / 2., PROFONDEUR + r);
     let sphere = |t: f64| {
         let descente = (u * t).min(ARRET);
         let v = if u * t < ARRET { -u } else { 0. };
         Sphere3 { center: [cx as f32, cy as f32, (z0 - descente) as f32], radius: r as f32, velocity: [0., 0., v as f32] }
     };
-    let capacite = NA * NY * ((PROFONDEUR / DX).ceil() as usize + 4) * 8 * 2;
+    let capacite = na * NY * ((PROFONDEUR / DX).ceil() as usize + 4) * 8 * 2;
     let mut a = Apic3::configure(&mut hote, da, RHO, G as f32, capacite).map_err(|e| format!("{e:?}"))?;
     a.seed(&|p| {
         let (x, y, z) = (p[0] as f64 - cx, p[1] as f64 - cy, p[2] as f64 - z0);
@@ -179,29 +192,29 @@ fn run(eps_b: f64, duree: f64, mode: Mode) -> Result<Issue, String> {
     })
     .map_err(|e| format!("{e:?}"))?;
     // La zone : la couronne du raccord ; le reste en particules jusqu'à la première bascule.
-    let couronne = |c: usize| c % NA < ANNEAU || c % NA >= NA - ANNEAU;
-    let mask: Vec<u8> = (0..NA * NY).map(|c| u8::from(couronne(c))).collect();
+    let couronne = |c: usize| c % na < ANNEAU || c % na >= na - ANNEAU;
+    let mask: Vec<u8> = (0..na * NY).map(|c| u8::from(couronne(c))).collect();
     a.enable_columns(&mut hote, &mask).map_err(|e| format!("{e:?}"))?;
-    let surface: Vec<f32> = (0..NA * NY).map(|c| eta((c % NA) as f64 * DX + 0.5 * DX + x0) as f32).collect();
+    let surface: Vec<f32> = (0..na * NY).map(|c| eta((c % na) as f64 * DX + 0.5 * DX + x0) as f32).collect();
     a.set_columns_surface(&surface).map_err(|e| format!("{e:?}"))?;
     {
-        let (mut uu, v, mut ww) = (vec![0f32; (NA + 1) * NY * nz], vec![0f32; NA * (NY + 1) * nz], vec![0f32; NA * NY * (nz + 1)]);
+        let (mut uu, v, mut ww) = (vec![0f32; (na + 1) * NY * nz], vec![0f32; na * (NY + 1) * nz], vec![0f32; na * NY * (nz + 1)]);
         for kk in 0..nz {
             for j in 0..NY {
-                for i in 0..=NA {
+                for i in 0..=na {
                     let (x, z) = (i as f64 * DX + x0, (kk as f64 + 0.5) * DX);
                     if z <= eta(x) {
-                        uu[(kk * NY + j) * (NA + 1) + i] = vitesse(x, z).0 as f32;
+                        uu[(kk * NY + j) * (na + 1) + i] = vitesse(x, z).0 as f32;
                     }
                 }
             }
         }
         for kk in 1..nz {
             for j in 0..NY {
-                for i in 0..NA {
+                for i in 0..na {
                     let (x, z) = ((i as f64 + 0.5) * DX + x0, kk as f64 * DX);
                     if z <= eta(x) {
-                        ww[(kk * NY + j) * NA + i] = vitesse(x, z).1 as f32;
+                        ww[(kk * NY + j) * na + i] = vitesse(x, z).1 as f32;
                     }
                 }
             }
@@ -222,7 +235,7 @@ fn run(eps_b: f64, duree: f64, mode: Mode) -> Result<Issue, String> {
         mean_level: PROFONDEUR as f32,
     });
     // S459 : la couronne du raccord, épinglée en colonnes (dans la mer comme dans le témoin : la même bascule).
-    bascule.pinned_columns = Some((0..NA * NY).map(couronne).collect());
+    bascule.pinned_columns = Some((0..na * NY).map(couronne).collect());
     let mut mer = Volume3::configure(&mut hote, dv, RHO, G as f32).map_err(|e| format!("{e:?}"))?;
     mer.set_free_surface(&vec![PROFONDEUR as f32; dv.columns()], PROFONDEUR as f32).map_err(|e| format!("{e:?}"))?;
     let eponge = Sponge3 { width_x: 0.8, width_y: 0., rate_per_s: 2. };
@@ -236,11 +249,13 @@ fn run(eps_b: f64, duree: f64, mode: Mode) -> Result<Issue, String> {
         rc.set_particle_heights(std::env::var("SAUT_HAUTEUR_LUE").is_ok());
         // `SAUT_ANNEAU=<colonnes>` : la mer ne reçoit les vitesses de la bande que sur cet anneau (S459).
         rc.set_velocity_ring(std::env::var("SAUT_ANNEAU").ok().and_then(|v| v.parse().ok()));
+        // `SAUT_REPOS=1` : sous les colonnes de particules, la mer à la hauteur de B (S460).
+        rc.set_particle_rest(std::env::var("SAUT_REPOS").is_ok());
         Some(rc)
     } else {
         None
     };
-    let volume_bande = NA as f64 * NY as f64 * DX * DX * PROFONDEUR;
+    let volume_bande = na as f64 * NY as f64 * DX * DX * PROFONDEUR;
     let echelle = (D / G).sqrt();
     let (mut t_us, mut pas) = (0u64, 0u64);
     let (mut apports, mut raccord_max, mut epinglees) = (0f64, 0f64, 0usize);
@@ -282,8 +297,33 @@ fn run(eps_b: f64, duree: f64, mode: Mode) -> Result<Issue, String> {
             break;
         }
         if en_mer {
+            // S460 — le diagnostic : la plus haute et la plus basse colonne de la mer (surface totale), et leur place.
+            let extremes = |mer: &Volume3| {
+                let tot: Vec<f32> = (0..NX_MER * NY).map(|c| mer.surface()[c] + bg.w[c].eta).collect();
+                let (imax, hmax) = tot.iter().enumerate().fold((0, f32::MIN), |m, (i, h)| if *h > m.1 { (i, *h) } else { m });
+                let (imin, hmin) = tot.iter().enumerate().fold((0, f32::MAX), |m, (i, h)| if *h < m.1 { (i, *h) } else { m });
+                let place = |c: usize| {
+                    let i = c % NX_MER;
+                    let lieu = if i < I0 || i >= I0 + NA {
+                        "dehors"
+                    } else if i < I0 + MARGE || i >= I0 + NA - MARGE {
+                        "marge"
+                    } else if i < I0 + ANNEAU || i >= I0 + NA - ANNEAU {
+                        "couronne"
+                    } else {
+                        "interieur"
+                    };
+                    format!("({},{}) {lieu}", i, c / NX_MER)
+                };
+                format!("plus_haute={hmax:.3} m en {} ; plus_basse={hmin:.3} m en {}", place(imax), place(imin))
+            };
+            if std::env::var("SAUT_TRACE").is_ok() && t > 0.55 {
+                let zmax = a.particles().iter().fold(f32::MIN, |m, p| m.max(p[2]));
+                println!("SAUT_TRACE pas={pas} t={t:.3} {} ; particule_la_plus_haute={zmax:.3} m", extremes(&mer));
+            }
             if let Err(e) = mer.step_perturbation_mobile(ts, us, 4000, &bg, eponge, &jobs) {
-                refus = Some(format!("mer, pas {pas} : {e:?}"));
+                refus = Some(format!("mer, pas {pas} : {e:?} ; avant le pas : {} ; bornes [{:.3}, {:.3}] m", extremes(&mer),
+                    2. * DX, (nz - 1) as f64 * DX));
                 break;
             }
             let b = mer.balance();
@@ -296,12 +336,12 @@ fn run(eps_b: f64, duree: f64, mode: Mode) -> Result<Issue, String> {
         if pas == 1 {
             bascule.clear_counts();
         }
-        epinglees = epinglees.max((0..NA * NY).filter(|&c| couronne(c) && !a.is_column(c % NA, c / NA)).count());
+        epinglees = epinglees.max((0..na * NY).filter(|&c| couronne(c) && !a.is_column(c % na, c / na)).count());
         if hauteurs.is_empty() && t_us as f64 * 1e-6 >= echelle {
             let phi_c = a.distance();
-            hauteurs = (0..NA * NY)
+            hauteurs = (0..na * NY)
                 .map(|c| {
-                    let f = |kk: usize| phi_c[kk * NA * NY + c] as f64;
+                    let f = |kk: usize| phi_c[kk * na * NY + c] as f64;
                     (0..nz - 1)
                         .rev()
                         .find(|&kk| f(kk) < 0. && f(kk + 1) >= 0.)
