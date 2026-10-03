@@ -378,10 +378,14 @@ impl SurfaceCarte {
     /// Le champ fondu de la dernière image (banc).
     pub fn field(&self) -> Result<Vec<f32>, String> {
         let cells = (self.dims[0] * self.dims[1] * self.dims[2]) as u64;
+        let portee = self.device.push_error_scope(wgpu::ErrorFilter::Validation);
         let lecture = buffer(&self.device, cells * 4, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
         let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         encoder.copy_buffer_to_buffer(&self.champ, 0, &lecture, 0, cells * 4);
         self.queue.submit([encoder.finish()]);
+        if let Some(e) = pollster::block_on(portee.pop()) {
+            return Err(format!("validation : {e}"));
+        }
         let o = self.lire(&lecture, cells * 4)?;
         Ok(o.chunks_exact(4).map(|b| f32::from_le_bytes(b.try_into().unwrap())).collect())
     }

@@ -270,6 +270,19 @@ pub fn banc_v1() -> Result<(), String> {
         // Les images : au premier saut (la cavité, le jet), puis au cinquième.
         let images = [0.30, 0.55, 0.85, 1.6, 20.7, 21.2];
         let (mut prochaine_image, mut prochain_bilan) = (0usize, 5.0);
+        // S461 — C11 : `EXPORT_GODOT=<dossier>` enregistre la scène pour Godot (`saut.json`, `saut.bin`) — à 30 images/s, le champ
+        // fondu `φ` (celui que rend `surface_carte`), quantifié sur 8 bits (`φ = (o − 127,5)/127,5 · 2·dx`) dans la fenêtre verticale
+        // `[k0, k1)` ; le corps et l'instant de chaque image dans l'en-tête.
+        let export = std::env::var("EXPORT_GODOT").ok();
+        let (k0, k1) = (((v.b.h - 0.8) / v.b.dx).floor().max(0.) as usize, (((v.b.h + 1.0) / v.b.dx).ceil() as usize).min(d.nz));
+        let mut flux = match export.as_ref() {
+            Some(dossier) => {
+                std::fs::create_dir_all(dossier).map_err(|e| e.to_string())?;
+                Some(std::io::BufWriter::new(std::fs::File::create(format!("{dossier}/saut.bin")).map_err(|e| e.to_string())?))
+            }
+            None => None,
+        };
+        let (mut images_export, mut prochaine_export, mut erreur_quantif) = (Vec::<String>::new(), 0f64, 0f64);
         let (mut pas_ms, mut pire_pas_ms) = (Vec::new(), 0f64);
         let debut = Instant::now();
         while v.t() < duree {
@@ -283,6 +296,32 @@ pub fn banc_v1() -> Result<(), String> {
                 if ms > seuil {
                     let e: Vec<String> = v.etages.iter().take(14).map(|x| format!("{:.1}", x.unwrap_or(0.))).collect();
                     println!("V1_LENT pas={} t={:.3} mur_ms={ms:.1} etages_ms={}", v.pas, v.t(), e.join(","));
+                }
+            }
+            if let Some(f) = flux.as_mut() {
+                if v.t() >= prochaine_export {
+                    use std::io::Write;
+                    // La caméra d'abord : sans elle, l'uniforme est nul et le rayon NaN (S461 : la carte perdue).
+                    v.rendu.set_instant(v.t() as f32);
+                    v.rendu.set_view(&camera, v.corps_a(v.t()));
+                    v.rendu.render().map_err(|e| format!("export, rendu : {e}"))?;
+                    let champ = v.rendu.field().map_err(|e| format!("export, champ : {e}"))?;
+                    let echelle_q = 127.5 / (2. * v.b.dx as f32);
+                    let mut octets = Vec::with_capacity(d.nx * d.ny * (k1 - k0));
+                    for k in k0..k1 {
+                        for c in 0..d.nx * d.ny {
+                            let p = champ[k * d.nx * d.ny + c];
+                            let o = (p * echelle_q + 127.5).round().clamp(0., 255.);
+                            if p.abs() < 1.9 * v.b.dx as f32 {
+                                erreur_quantif = erreur_quantif.max(((o - 127.5) / echelle_q - p).abs() as f64);
+                            }
+                            octets.push(o as u8);
+                        }
+                    }
+                    f.write_all(&octets).map_err(|e| e.to_string())?;
+                    let corps = v.corps_a(v.t()).map_or([0.; 3], |s| s.center);
+                    images_export.push(format!("[{:.5},{:.4},{:.4},{:.4}]", v.t(), corps[0], corps[1], corps[2]));
+                    prochaine_export += 1. / 30.;
                 }
             }
             if prochaine_image < images.len() && v.t() >= images[prochaine_image] {
@@ -315,6 +354,28 @@ pub fn banc_v1() -> Result<(), String> {
             t.sort_by(|a, b| a.total_cmp(b));
             t[t.len() * 99 / 100]
         };
+        if let (Some(dossier), Some(mut f)) = (export.as_ref(), flux.take()) {
+            use std::io::Write;
+            f.flush().map_err(|e| e.to_string())?;
+            let w = v.b.houle.map_or([0.; 4], |w| [w.amplitude, w.wavenumber, w.omega, w.phase]);
+            let entete = format!(
+                "{{
+  \"source\": \"water-viewer --v1-banc (S461, C11)\",
+  \"nx\": {}, \"ny\": {}, \"nz\": {}, \"k0\": {k0}, \"k1\": {k1},
+                   \"dx\": {}, \"niveau\": {}, \"rayon\": {}, \"houle\": [{}, {}, {}, {}],
+  \"images_par_s\": 30,
+                   \"images\": [{}]
+}}
+",
+                d.nx, d.ny, d.nz, d.dx, v.b.h, v.b.r, w[0], w[1], w[2], w[3], images_export.join(",")
+            );
+            std::fs::write(format!("{dossier}/saut.json"), entete).map_err(|e| e.to_string())?;
+            println!(
+                "V1_S458 export dossier={dossier} images={} fenetre_k={k0}..{k1} octets_par_image={} erreur_quantification_max_m={erreur_quantif:.2e}",
+                images_export.len(),
+                d.nx * d.ny * (k1 - k0)
+            );
+        }
         println!(
             "V1_S458 bilan t_s={:.2} pas={} pas_mur_ms_mediane={:.2} pas_mur_ms_p99={p99:.1} pas_mur_ms_max={pire_pas_ms:.1} pas_moyen_ms={:.2} calcul_s={:.1}",
             v.t(),

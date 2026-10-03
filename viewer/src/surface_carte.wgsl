@@ -369,7 +369,8 @@ fn fs(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
         let pas = 0.5 * dx;
         var ta = entree;
         var fa = phi(o + dir * ta);
-        loop {
+        // S461 : la marche bornée — un rayon NaN (une caméra non posée) ne doit pas bloquer la carte.
+        for (var garde = 0u; garde < 4096u; garde++) {
             let tb = min(ta + pas, sortie);
             let fb = phi(o + dir * tb);
             if (fa < 0.0) != (fb < 0.0) {

@@ -80,8 +80,13 @@ l'utilisateur — son jugement.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'enregistrement (`EXPORT_GODOT`).
+- [x] **P2** — l'enregistrement (`EXPORT_GODOT`).
 - [ ] **P3** — la scène Godot ; mesures ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `EXPORT_GODOT=<dossier>` dans `--v1-banc` : `saut.json` (dimensions, fenêtre `k0..k1`, `dx`, niveau, rayon, houle, et pour
+  chaque image l'instant et le centre du corps) et `saut.bin` (`φ` fondu sur 8 bits, image par image). 12 s : **361 images, 85 Mo**,
+  fenêtre 11..48, **erreur de quantification 0,39 mm** (sous `|φ| < 1,9 dx`). En chemin : un rendu lancé sans caméra posée (uniforme
+  nul, rayon NaN) bouclait sans fin et perdait la carte — la caméra posée avant, et la marche du nuanceur bornée à 4 096 pas.
+
