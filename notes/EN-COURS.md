@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S462 — **en cours**. *« … puis continue »* — l'utilisateur a lancé l'afficheur (`--surface-direct` : 0,96 du temps réel,
+Session : S462 — **terminée**. *« … puis continue »* — l'utilisateur a lancé l'afficheur (`--surface-direct` : 0,96 du temps réel,
 16,8 ms au 99e centile chez lui) ; la commande de Godot donnée pour bash ne passait pas sous PowerShell (l'opérateur `&` manquait) —
 corrigée dans la réponse. R39 sans verdict : la suite par défaut, **les caustiques**.
 
@@ -80,7 +80,7 @@ moins ; (4) les images montrées.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la carte des caustiques à l'enregistrement ; sa lecture dans Godot ; mesures ; images.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — l'export (`saut_caustiques.bin`, une carte de 80 × 80 sur 8 bits par image) ; dans Godot, `focalisation()` dans
@@ -90,4 +90,4 @@ moins ; (4) les images montrées.
   échantillons par cellule, déposés en bilinéaire au point du fond) : **0,979 à 0,995** — (1) tenu (la perte : la lumière sortie par les
   bords) ; (2) au raccord, le motif change un peu (le domaine perd sa lumière de bord, B n'en dépose pas) — presque ; (3) **405
   images/s** — tenu ; (4) images envoyées.
-
+- **P3** — C10-SCENES-S454 §11 ; journal ; jeton libre ; maillons 1 ; suivant : S463, la suite de C11 (la surface fine), ou ce que R39 désigne.

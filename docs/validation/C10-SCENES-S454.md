@@ -241,3 +241,22 @@ la carte — la caméra posée avant le rendu, la marche du nuanceur bornée à 
 caustiques sur le sable (`caustiques.gdshader`, la carte de S361), la surface fine (FFT, S360), la pluie, le rejeu en direct (le
 calcul dans le processus de Godot, par godot-rust, ou un lien), le raccord à la mer de B de Godot (son spectre, non la houle seule).
 
+## 11. C11 : les caustiques sur le sable (S462)
+
+2026-10-03. Comme S361 sous B : la part directe de l'éclairement du fond multipliée par la focalisation de la surface. **Dans le domaine**,
+l'afficheur la calcule à chaque image enregistrée (`saut_caustiques.bin`) : la hauteur des colonnes lue sur `φ`, son gradient, et **le
+dépôt** de la lumière — 4 × 4 échantillons par cellule de surface, chacun déposé en bilinéaire au point du fond où son rayon réfracté
+arrive, `q = p + D·∇η`, `D = η·(1 − 1/n)` (une lumière verticale) ; Godot lit la carte au point d'où vient le soleil réfracté (l'obliquité
+décale le motif entier). **Au-delà**, B : `1/|1 + D·η_xx|`, analytique.
+
+**Reproduire** : l'export de §10 (il écrit aussi la carte) ; `CAUSTIQUES=0 <godot> --path godot res://saut.tscn` : sans.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) la focalisation moyenne à 1 près de 5 % | la formule ponctuelle `1/|det(I + D·Hess η)|` : **1,10 à 1,96** (lue sur la surface, elle ne conserve pas l'énergie là où les rayons se croisent) ; **le dépôt : 0,979 à 0,995** (la perte : la lumière sortie par les bords) | tenu |
+| (2) le raccord sans saut visible | le motif change un peu au bord : le domaine y perd sa lumière, B n'y en dépose pas | presque |
+| (3) 60 images/s | **405** (sans caustiques : 396) | tenu |
+| (4) les images | `godot/captures/saut_t{0.55,0.85,1.60,6.30}.png` | envoyées |
+
+**Ce qui se voit** : sous le saut, les anneaux de lumière qui s'étendent sur le sable ; ailleurs, les bandes de la houle.
+

@@ -18454,3 +18454,11 @@ scène par l'afficheur (`EXPORT_GODOT` : `φ` sur 8 bits, 30 images/s) et son re
 texture 3D, la mer de B au-delà, l'optique reçue, AgX). **Mesuré** : quantification 0,39 mm ; 416 images/s ; images envoyées, R39
 posée. **Ce qui devient possible** : le rendu de Godot sur la simulation ; **le chemin** : R39, la suite de C11 ; **la preuve** : §10.
 Maillons **0**. Suite verte. **Rituel** (allégé). Suivant : selon R39.
+
+## S462 — 2026-10-03 — C11 : les caustiques sur le sable
+
+**Entrée.** *« … puis continue »* (la commande de Godot corrigée pour PowerShell). **Fait**
+([preuve](../docs/validation/C10-SCENES-S454.md) §11) : la focalisation de la surface simulée, déposée par l'afficheur à chaque image
+enregistrée, lue par le sable dans Godot ; B analytique au-delà. **Mesuré** : la formule ponctuelle ne conservait pas l'énergie (1,1 à
+2) ; le dépôt, 0,98 à 1 ; 405 images/s ; images envoyées. Suite verte. **Rituel** (allégé). Maillons **1**. Suivant : la surface fine,
+ou ce que R39 désigne.
