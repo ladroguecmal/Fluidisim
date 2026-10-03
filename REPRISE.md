@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-03 02:17 +02:00
+JETON            : occupé
+Battement        : 2026-10-03 02:20 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S457 — le lot des registres ; la lumière de l'eau** (ADR-215 D4, étape 4)
 Dernière session : S456 — la houle ([preuve](docs/validation/C10-SCENES-S454.md) §5) — le bord ouvert sur la carte, la relaxation de la surface ; le saut sous la houle à 0,98 du temps réel, masse exacte. Avant : S455
 Session suivante : **S457 — le lot des registres** (ADR-213 D3, dû en S457) **puis la lumière de l'eau** (ADR-215 D4, étape 4) : la couleur et la lumière reçues (R20, R24 : absorption, ciel, Fresnel, soleil) portées dans `surface_carte` — reçu sur images montrées ; puis la scène `--v1`. **Sans attendre de « Continue »** (ADR-215 D1)
 Maillons        : 13 — justifié : la priorité du solveur passe avant la règle (S406) ; journal
