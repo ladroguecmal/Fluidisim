@@ -28,6 +28,6 @@ void fragment() {
     }
     float resolue = exp(-pow(t * angle_pixel * houle.y * 0.5, 2.0));
     vec2 hb = hauteur_b(p.x);
-    ALBEDO = couleur_eau(p, vec3(-hb.y * resolue, 0.0, 1.0), d);
+    ALBEDO = couleur_eau(p, vec3(-hb.y * resolue, 0.0, 1.0), d, t * angle_pixel);
     DEPTH = profondeur_ecran(p, VIEW_MATRIX, PROJECTION_MATRIX);
 }

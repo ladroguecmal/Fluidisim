@@ -18,6 +18,26 @@ uniform vec2 etendue = vec2(4.0, 4.0);
 
 const vec3 SABLE = vec3(0.34, 0.30, 0.24);
 
+// S463 — **la surface fine** de S360 : les pentes des deux cascades FFT de la queue de B (`detail.gd`, 32 m et 4 m), lues au niveau
+// de détail de l'empreinte du pixel, échelonnées par `force_detail` (la queue exportée est celle d'un vent établi ; la scène est
+// calme — 0,5 par défaut, tranché S463) et ajoutées à la normale des faces tournées vers le haut.
+uniform sampler2D detail_a0 : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D detail_a1 : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform vec2 detail_cotes = vec2(32.0, 4.0);
+uniform float detail_texels = 256.0;
+uniform float force_detail = 0.5;
+uniform bool detail_actif = false;
+
+vec2 pente_fine(vec2 p, float empreinte) {
+    if (!detail_actif) {
+        return vec2(0.0);
+    }
+    float l0 = log2(max(empreinte * detail_texels / detail_cotes.x, 1.0));
+    float l1 = log2(max(empreinte * detail_texels / detail_cotes.y, 1.0));
+    vec2 s = textureLod(detail_a0, p / detail_cotes.x, l0).xy + textureLod(detail_a1, p / detail_cotes.y, l1).xy;
+    return force_detail * s;
+}
+
 // S462 — **les caustiques** : la focalisation de la lumière par la surface simulée (l'afficheur, `saut_caustiques.bin` : `C/8` sur
 // 8 bits, aux coordonnées du fond, pour une lumière verticale), et `domaine` son étendue (m) ; au-delà, celle de B, analytique.
 uniform sampler2D caustiques_tex : filter_linear, repeat_disable;
@@ -93,9 +113,13 @@ vec3 couleur_sable(vec3 p) {
     return SABLE * variation * gain_eau * eclairage(vec3(0.0, 0.0, 1.0), normalize(SOLEIL_B), focalisation(p));
 }
 
-// La surface de l'eau au point `p`, normale `n0` (vers l'air), vue dans la direction `d` (B).
-vec3 couleur_eau(vec3 p, vec3 n0, vec3 d) {
+// La surface de l'eau au point `p`, normale `n0` (vers l'air), vue dans la direction `d` (B) ; `empreinte` : la taille du pixel
+// à cette distance, m.
+vec3 couleur_eau(vec3 p, vec3 n0, vec3 d, float empreinte) {
     vec3 n = normalize(n0);
+    // S463 : la surface fine, sur ce qui regarde vers le haut.
+    vec2 s_fine = pente_fine(p.xy, empreinte);
+    n = normalize(n + vec3(-s_fine, 0.0) * max(n.z, 0.0));
     if (dot(n, d) > 0.0) {
         n = -n;
     }

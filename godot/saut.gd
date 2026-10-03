@@ -22,6 +22,8 @@ var texture_phi: ImageTexture3D
 ## S462 : les caustiques enregistrées (`saut_caustiques.bin`), une carte par image.
 var octets_c: PackedByteArray
 var texture_c: ImageTexture
+## S463 : la surface fine (`detail.gd`, les cascades FFT de S360, depuis `donnees/mer_b.json`).
+var detail: Node
 var mat_eau: ShaderMaterial
 var mat_mer: ShaderMaterial
 var joueur: MeshInstance3D
@@ -121,6 +123,27 @@ func _ready() -> void:
 	distance = r.length()
 	azimut = atan2(r.x, r.z)
 	elevation = asin(r.y / distance)
+	# S463 — la surface fine : les cascades de la mer de R14 (`mer_b.json`), échelonnées (`FORCE_DETAIL`, 0,5) ; `DETAIL=0` : sans.
+	var fm := FileAccess.open("res://donnees/mer_b.json", FileAccess.READ)
+	if fm != null and OS.get_environment("DETAIL") != "0":
+		var mer_b: Dictionary = JSON.parse_string(fm.get_as_text())
+		if mer_b.has("detail"):
+			detail = load("res://detail.gd").new()
+			add_child(detail)
+			if detail.charger(mer_b["detail"]):
+				detail.calculer(0.0)
+				var force := float(OS.get_environment("FORCE_DETAIL")) if OS.get_environment("FORCE_DETAIL") != "" else 0.5
+				for m in [mat_eau, mat_mer]:
+					m.set_shader_parameter("detail_a0", detail.textures[0][0])
+					m.set_shader_parameter("detail_a1", detail.textures[1][0])
+					m.set_shader_parameter("detail_cotes", Vector2(float(detail.cotes[0]), float(detail.cotes[1])))
+					m.set_shader_parameter("detail_texels", float(detail.N))
+					m.set_shader_parameter("force_detail", force)
+					m.set_shader_parameter("detail_actif", true)
+				print("SAUT_GODOT_S463 detail mss_cascades=%s force=%.2f mss_ajoutee=%.4f" % [str(detail.mss_realisee), force,
+						force * force * (float(detail.mss_realisee[0]) + float(detail.mss_realisee[1]))])
+			else:
+				detail = null
 	placer_camera()
 	charger(0)
 	var args := OS.get_cmdline_user_args()
@@ -156,8 +179,9 @@ func placer_camera() -> void:
 	var r := Vector3(sin(azimut) * cos(elevation), sin(elevation), cos(azimut) * cos(elevation)) * distance
 	camera.look_at_from_position(cible + r, cible, Vector3.UP)
 	var pixel := 2.0 * tan(deg_to_rad(camera.fov) * 0.5) / float(get_viewport().get_visible_rect().size.y)
-	if mat_mer != null:
-		mat_mer.set_shader_parameter("angle_pixel", pixel)
+	for m in [mat_eau, mat_mer]:
+		if m != null:
+			m.set_shader_parameter("angle_pixel", pixel)
 
 
 ## L'image `i` de l'enregistrement : la texture de `φ`, l'instant, le corps.
@@ -187,6 +211,8 @@ func charger(i: int) -> void:
 	var e: Array = images[i]
 	var centre := Vector3(float(e[1]), float(e[2]), float(e[3]))
 	joueur.position = b_vers_godot(centre)
+	if detail != null:
+		detail.calculer(float(e[0]))
 	for m in [mat_eau, mat_mer]:
 		m.set_shader_parameter("temps", float(e[0]))
 		m.set_shader_parameter("corps", Vector4(centre.x, centre.y, centre.z, float(entete["rayon"])))

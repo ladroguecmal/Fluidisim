@@ -12,6 +12,8 @@ uniform sampler3D phi_tex : filter_linear, repeat_disable;
 uniform vec3 dims = vec3(80.0, 80.0, 58.0);
 uniform vec2 fenetre = vec2(11.0, 48.0);
 uniform float dx = 0.05;
+// L'empreinte angulaire d'un pixel, `2·tan(fov/2)/hauteur`.
+uniform float angle_pixel = 0.0013;
 
 float phi(vec3 p) {
     float zk = p.z / dx;
@@ -78,6 +80,6 @@ void fragment() {
     if (!touche) {
         discard;
     }
-    ALBEDO = couleur_eau(p, gradient(p), d);
+    ALBEDO = couleur_eau(p, gradient(p), d, length(p - o) * angle_pixel);
     DEPTH = profondeur_ecran(p, VIEW_MATRIX, PROJECTION_MATRIX);
 }

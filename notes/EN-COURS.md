@@ -76,7 +76,13 @@ de B sans saut de texture (la même surface fine des deux côtés) ; (3) toujour
 ### Plan
 
 - [x] **P1** — jeton, plan seul ; décision inscrite.
-- [ ] **P2** — les cascades dans `saut.tscn` ; mesures ; images.
+- [x] **P2** — les cascades dans `saut.tscn` ; mesures ; images.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `pente_fine()` dans `saut_optique.gdshaderinc` (les deux cascades au niveau de détail de l'empreinte du pixel, ajoutées à la
+  normale des faces tournées vers le haut), `couleur_eau(…, empreinte)` ; `saut.gd` charge `detail.gd` depuis `mer_b.json` et le calcule
+  à l'instant de chaque image (`DETAIL=0`, `FORCE_DETAIL=`). **Mesuré** : (1) pente quadratique ajoutée **0,0087** (les cascades : 0,0091
+  et 0,0257, × 0,5²) ; (2) le raccord domaine | mer de B ne se voit plus (la même surface fine des deux côtés) — tenu ; (3) **391
+  images/s** — tenu ; (4) images envoyées.
+
