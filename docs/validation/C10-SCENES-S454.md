@@ -393,3 +393,16 @@ lu à chaque image. Le premier n'était pas vu : les sessions S465–S468 ont re
 
 **Une leçon** : un chemin que les sessions n'exercent plus casse sans bruit — le direct se remesure dès que la scène change.
 
+## 19. La caméra qui suit le joueur (S470)
+
+2026-10-03. Dans `saut.tscn`, la cible de l'orbite monte des quatre cinquièmes de la hauteur du corps au-dessus de l'eau et la caméra
+recule d'un quart de distance par mètre ; lissées en jeu (un tiers de seconde), posées d'un coup pour les captures. Touche C ;
+`SUIVRE=0` : la caméra fixe d'avant.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) les registres à jour | lot S470 (S467–S469) ; `--check` 0 | tenu |
+| (2) à 5,80 s le joueur entier, l'eau dessous | `godot/captures/saut_t5.80.png` | tenu |
+| (3) rejeu inchangé hors de la caméra | `SUIVRE=0` : six captures identiques au bit ; `--cout` 403 images/s | tenu |
+| (4) les images | `saut_t5.80.png` | à montrer |
+

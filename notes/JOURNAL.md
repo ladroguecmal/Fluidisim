@@ -18513,3 +18513,9 @@ Suivant : le direct avec le joueur debout.
 debout — **0,995 du temps réel, 29,9 images/s**. Deux défauts de `saut.gd` corrigés (des matériaux nuls touchés avant l'en-tête,
 depuis S465 ; le lien fermé lu). Image envoyée. **Rituel** (allégé). Maillons **1**. Suivant : la caméra qui suit le joueur ; le
 lot des registres (dû en S470).
+
+## S470 — 2026-10-03 — le lot des registres ; la caméra qui suit le joueur
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §19) : le lot des registres pour S467–S469
+(prochain au plus tard S473) ; la caméra de `saut.tscn` suit le joueur (cible et recul lissés, touche C) ; `SUIVRE=0` identique au
+bit. **Rituel** (allégé). Maillons **1**. Suivant : le plafond du domaine.

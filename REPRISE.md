@@ -10,12 +10,12 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-03 23:25 +02:00
+JETON            : libre
+Battement        : 2026-10-03 23:26 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S470 — le lot des registres ; la caméra qui suit le joueur**
-Dernière session : S469 — le direct avec le joueur debout ([preuve](docs/validation/C10-SCENES-S454.md) §18) — 0,995 du temps réel, deux défauts de `saut.gd` corrigés. Avant : S468 (l'ombre du joueur)
-Session suivante : **S470 — le lot des registres** (dû, S467–S469) **et la caméra qui suit le joueur** dans `saut.tscn` (la cible sur le corps, en direct comme en rejeu). **Sans attendre de « Continue »**
+Session en cours : aucune
+Dernière session : S470 — registres ; la caméra qui suit le joueur ([preuve](docs/validation/C10-SCENES-S454.md) §19). Avant : S469 (le direct avec le joueur debout)
+Session suivante : **S471 — le plafond du domaine** : une nappe d'eau qui touche le plafond de la carte ne doit plus diverger (défaut connu depuis S454, revu en S466). **Sans attendre de « Continue »**
 Maillons        : 1 — journal
 Registres       : dernier lot S470 (ADR-213 D3) ; le prochain au plus tard en S473
 ```

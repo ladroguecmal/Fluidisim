@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S470 — **en cours**. En autonomie : le lot des registres (dû), puis la caméra qui suit le joueur.
+Session : S470 — **terminée**. En autonomie : le lot des registres (dû), puis la caméra qui suit le joueur.
 
 **Ce que la session fait.** (1) **Le lot des registres** (ADR-213 D3) pour S467–S469. (2) **La caméra qui suit le joueur** dans
 `saut.tscn` : la cible de l'orbite monte avec le corps — à mi-chemin entre le niveau de l'eau et son centre quand il est en l'air,
@@ -77,11 +77,11 @@ touche C la coupe (`SUIVRE=0`). À 5,80 s, le joueur en l'air sortait du cadre.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
 - [x] **P3** — la caméra qui suit ; images.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — FEUILLE-DE-ROUTE (S467–S469 ; la suite : la caméra, le plafond du domaine), LISTE (S461–S469), REPRISE (dernier lot S470, prochain S473) ; QUESTIONS-OUVERTES inchangée (juste).
 - **P3** — `saut.gd` : la cible monte des 4/5 de la hauteur du corps au-dessus de l'eau, la caméra recule d'un quart de distance par
   mètre ; lissées en jeu, posées d'un coup pour les captures ; touche C, `SUIVRE=0`. **Mesuré** : (2) à 5,80 s le joueur entier dans
   le cadre, l'eau dessous ; (3) `SUIVRE=0` : les six captures identiques au bit à celles d'avant ; `--cout` 403 images/s.
-
+- **P4** — C10-SCENES-S454 §19 ; journal ; jeton libre ; maillons 1 ; suivant : S471, le plafond du domaine (une nappe qui le touche ne doit plus diverger).
