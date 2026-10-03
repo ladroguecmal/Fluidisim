@@ -57,6 +57,8 @@ pub struct SurfaceCarte {
     houle: [f32; 4],
     niveau: f32,
     instant: f32,
+    /// S466 : la demi-longueur de l'axe vertical du corps (une capsule ; 0 : la sphère).
+    demi_longueur: f32,
     fondu: wgpu::ComputePipeline,
     rendu: wgpu::RenderPipeline,
     uniform: wgpu::Buffer,
@@ -207,6 +209,7 @@ impl SurfaceCarte {
             houle: [0.; 4],
             niveau: 0.,
             instant: 0.,
+            demi_longueur: 0.,
             fondu,
             rendu,
             uniform,
@@ -243,7 +246,7 @@ impl SurfaceCarte {
         }
         u.extend(sphere);
         u.extend(self.houle);
-        u.extend([self.niveau, self.instant, self.lumiere as u32 as f32, 0.]);
+        u.extend([self.niveau, self.instant, self.lumiere as u32 as f32, self.demi_longueur]);
         // SAFETY : `f32` n'a pas de remplissage.
         let octets = unsafe { std::slice::from_raw_parts(u.as_ptr() as *const u8, u.len() * 4) };
         self.queue.write_buffer(&self.uniform, 0, octets);
@@ -256,6 +259,11 @@ impl SurfaceCarte {
         self.lumiere = on;
         self.houle = houle;
         self.niveau = niveau;
+    }
+
+    /// S466 : le corps en capsule verticale, de demi-longueur `l` (0 : la sphère).
+    pub fn set_demi_longueur(&mut self, l: f32) {
+        self.demi_longueur = l;
     }
 
     /// S457 : l'instant de l'image (la phase de B), s.

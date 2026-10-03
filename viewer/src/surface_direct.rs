@@ -85,8 +85,11 @@ impl Vivant {
         if let Some(c) = std::env::var("COURANT").ok().and_then(|v| v.parse::<f64>().ok()) {
             carte.set_courant(c);
         }
+        // S466 : le joueur debout, une capsule verticale.
+        carte.set_body_shape([0., 0., 1.], b.demi_longueur as f32);
         let mut rendu = SurfaceCarte::with_format(&carte, w, h, format);
         rendu.set_quart(b.quart());
+        rendu.set_demi_longueur(b.demi_longueur as f32);
         // S457 : la scène (domaine entier) sous la lumière de l'eau reçue ; `LUMIERE=0` : l'ombrage de R37.
         if !b.quart() && std::env::var("LUMIERE").map_or(true, |v| v != "0") {
             let houle = b.houle.map_or([0.; 4], |w| [w.amplitude, w.wavenumber, w.omega, w.phase]);
@@ -190,6 +193,7 @@ fn b10_de_l_environnement() -> B10 {
         None => B10::new(fr, n_d),
     };
     houle_de_l_environnement(&mut b);
+    joueur_de_l_environnement(&mut b);
     b
 }
 
@@ -205,6 +209,16 @@ fn houle_de_l_environnement(b: &mut B10) {
     b.houle = Some(LinearSwell { amplitude: p[0], wavenumber: k, omega: (B10::G as f32 * k).sqrt(), phase: 0., mean_level: b.h as f32 });
 }
 
+/// **S466 — le joueur** : `JOUEUR=debout` — une capsule verticale de 0,3 m de diamètre et 1,7 m (rayon 0,15 m, demi-longueur de
+/// l'axe 0,7 m ; `JOUEUR_R=<m>` change le rayon, la hauteur reste 1,7 m) ; `JOUEUR=boule` ou rien : la sphère de B10 (domaine
+/// entier seulement).
+fn joueur_de_l_environnement(b: &mut B10) {
+    if std::env::var("JOUEUR").as_deref() == Ok("debout") && !b.quart() {
+        b.r = std::env::var("JOUEUR_R").ok().and_then(|v| v.parse().ok()).unwrap_or(0.15);
+        b.demi_longueur = 0.85 - b.r;
+    }
+}
+
 /// La caméra de R37 autour du point d'entrée de `b`.
 fn camera_b10(b: &B10) -> Camera {
     Camera::b10_en([b.centre[0] as f32, b.centre[1] as f32], b.h as f32)
@@ -214,16 +228,29 @@ fn camera_b10(b: &B10) -> Camera {
 /// à la vitesse de B10 (`Fr·√(g·D)`, 4 m/s), s'arrête à `arrêt` sous la surface, y reste 1 s, remonte à 0,6 m/s jusqu'à son départ,
 /// attend 2 s hors de l'eau, et recommence. Un mouvement imposé, comme celui de B10 : la vitesse est celle de la phase.
 fn sphere_saut(b: &B10, t: f64) -> Sphere3 {
+    // S466 : `etendue` — la demi-hauteur du corps (le rayon, plus la demi-longueur d'une capsule). Le joueur debout plonge les pieds
+    // jusqu'à `JOUEUR_FOND` du fond ; la boule s'arrête à `a_arret` sous la surface (S458).
     let (u, r) = (b.u, b.r);
-    let haut = b.h + r + 0.5;
-    let bas = b.h + r - b.a_arret;
+    let etendue = r + b.demi_longueur;
+    let haut = b.h + etendue + 0.5;
+    // `JOUEUR_FOND=<m>` : la hauteur des pieds au-dessus du fond, en bas du saut (0,5 m : à 0,2 m — quatre mailles —, l'eau
+    // pincée entre les pieds et le fond faisait diverger la scène à la quatrième entrée).
+    let fond: f64 = std::env::var("JOUEUR_FOND").ok().and_then(|v| v.parse().ok()).unwrap_or(0.5);
+    let bas = if b.demi_longueur > 0. { fond + etendue } else { b.h + r - b.a_arret };
     let (repos, montee_v, pause) = (1.0, 0.6, 2.0);
-    let descente = (haut - bas) / u;
+    // S466 : le joueur entre à `u` puis freine, d'une décélération constante, des pieds à la surface jusqu'en bas (un arrêt net à
+    // 4 m/s, 1,2 m sous l'eau, levait des vagues que les parois renvoyaient jusqu'au plafond) ; la boule garde sa descente à `u`.
+    let entree = if b.demi_longueur > 0. { (b.h + etendue).min(haut) } else { bas };
+    let (t_air, t_eau) = ((haut - entree) / u, 2. * (entree - bas) / u);
+    let descente = t_air + t_eau;
     let montee = (haut - bas) / montee_v;
     let cycle = descente + repos + montee + pause;
     let tc = t.rem_euclid(cycle);
-    let (z, v) = if tc < descente {
+    let (z, v) = if tc < t_air {
         (haut - u * tc, -u)
+    } else if tc < descente {
+        let tau = tc - t_air;
+        (entree - u * tau + 0.5 * u * tau * tau / t_eau, -u * (1. - tau / t_eau))
     } else if tc < descente + repos {
         (bas, 0.)
     } else if tc < descente + repos + montee {
@@ -246,6 +273,8 @@ pub fn reglages_v1() {
         ("TOLERANCE", "1e-4"),
         ("HOULE", "0.04,2"),
         ("C10_SAUTS", "1"),
+        // S466 : le joueur debout (`JOUEUR=boule` : la sphère).
+        ("JOUEUR", "debout"),
     ] {
         if std::env::var(k).is_err() {
             std::env::set_var(k, v);
@@ -369,12 +398,12 @@ pub fn banc_v1() -> Result<(), String> {
                 "{{
   \"source\": \"water-viewer --v1-banc (S461, C11)\",
   \"nx\": {}, \"ny\": {}, \"nz\": {}, \"k0\": {k0}, \"k1\": {k1},
-                   \"dx\": {}, \"niveau\": {}, \"rayon\": {}, \"houle\": [{}, {}, {}, {}],
+                   \"dx\": {}, \"niveau\": {}, \"rayon\": {}, \"demi_longueur\": {}, \"houle\": [{}, {}, {}, {}],
   \"images_par_s\": 30,
                    \"images\": [{}]
 }}
 ",
-                d.nx, d.ny, d.nz, d.dx, v.b.h, v.b.r, w[0], w[1], w[2], w[3], images_export.join(",")
+                d.nx, d.ny, d.nz, d.dx, v.b.h, v.b.r, v.b.demi_longueur, w[0], w[1], w[2], w[3], images_export.join(",")
             );
             std::fs::write(format!("{dossier}/saut.json"), entete).map_err(|e| e.to_string())?;
             println!(
@@ -500,8 +529,8 @@ pub fn direct_v1() -> Result<(), String> {
         let (k0, k1) = (((v.b.h - 0.8) / v.b.dx).floor().max(0.) as usize, (((v.b.h + 1.0) / v.b.dx).ceil() as usize).min(d.nz));
         let w = v.b.houle.map_or([0.; 4], |w| [w.amplitude, w.wavenumber, w.omega, w.phase]);
         let entete = format!(
-            "{{\"source\": \"water-viewer --v1-direct (S464)\", \"nx\": {}, \"ny\": {}, \"nz\": {}, \"k0\": {k0}, \"k1\": {k1}, \"dx\": {},              \"niveau\": {}, \"rayon\": {}, \"houle\": [{}, {}, {}, {}], \"images_par_s\": 30}}",
-            d.nx, d.ny, d.nz, d.dx, v.b.h, v.b.r, w[0], w[1], w[2], w[3]
+            "{{\"source\": \"water-viewer --v1-direct (S464)\", \"nx\": {}, \"ny\": {}, \"nz\": {}, \"k0\": {k0}, \"k1\": {k1}, \"dx\": {},              \"niveau\": {}, \"rayon\": {}, \"demi_longueur\": {}, \"houle\": [{}, {}, {}, {}], \"images_par_s\": 30}}",
+            d.nx, d.ny, d.nz, d.dx, v.b.h, v.b.r, v.b.demi_longueur, w[0], w[1], w[2], w[3]
         );
         let ecoute = std::net::TcpListener::bind(("127.0.0.1", port)).map_err(|e| format!("127.0.0.1:{port} : {e}"))?;
         println!("V1_DIRECT en attente de Godot sur 127.0.0.1:{port}");

@@ -18,7 +18,8 @@ struct Rendu {
     haut: vec4<f32>,
     soleil: vec4<f32>,
     sphere: vec4<f32>, // centre, rayon (0 : pas de corps)
-    // S457 — la houle B (`a`, `k`, `ω`, `φ`) et la mer : niveau moyen, instant, lumière reçue (1) ou ombrage de R37 (0).
+    // S457 — la houle B (`a`, `k`, `ω`, `φ`) et la mer : niveau moyen, instant, lumière reçue (1) ou ombrage de R37 (0) ; S466 :
+    // la demi-longueur de l'axe vertical du corps (une capsule ; 0 : la sphère).
     houle: vec4<f32>,
     mer: vec4<f32>,
 };
@@ -242,25 +243,56 @@ fn fresnel_exact(c: f32, n: f32) -> f32 {
     return 0.5 * (rs * rs + rp * rp);
 }
 
-// La distance au corps le long de `o + t·d` (1e30 : manqué).
+// S466 — le point de l'axe du corps le plus proche de `p` (une capsule verticale ; la sphère si la demi-longueur est nulle).
+fn axe_corps(p: vec3<f32>) -> vec3<f32> {
+    let l = R.mer.w;
+    return vec3<f32>(R.sphere.x, R.sphere.y, clamp(p.z, R.sphere.z - l, R.sphere.z + l));
+}
+
+// La distance au corps le long de `o + t·d` (1e30 : manqué) : une capsule verticale (Quílez), la sphère si `L = 0`.
 fn touche_corps(o: vec3<f32>, d: vec3<f32>) -> f32 {
-    if R.sphere.w <= 0.0 {
+    let r = R.sphere.w;
+    if r <= 0.0 {
         return 1e30;
     }
-    let oc = o - R.sphere.xyz;
-    let b = dot(oc, d);
-    let c = dot(oc, oc) - R.sphere.w * R.sphere.w;
-    let disc = b * b - c;
-    if disc < 0.0 {
+    let pa = R.sphere.xyz - vec3<f32>(0.0, 0.0, R.mer.w);
+    let pb = R.sphere.xyz + vec3<f32>(0.0, 0.0, R.mer.w);
+    let ba = pb - pa;
+    let oa = o - pa;
+    let baba = dot(ba, ba);
+    let bard = dot(ba, d);
+    let baoa = dot(ba, oa);
+    let rdoa = dot(d, oa);
+    let oaoa = dot(oa, oa);
+    let a = baba - bard * bard;
+    let b = baba * rdoa - baoa * bard;
+    let c = baba * oaoa - baoa * baoa - r * r * baba;
+    let h = b * b - a * c;
+    if baba > 0.0 && h >= 0.0 {
+        let t = (-b - sqrt(h)) / a;
+        let y = baoa + t * bard;
+        if y > 0.0 && y < baba && t > 1e-4 {
+            return t;
+        }
+    }
+    // Les calottes : la sphère de l'extrémité la plus proche du rayon.
+    var oc = oa;
+    if baba > 0.0 && baoa + (-b / max(a, 1e-12)) * bard > 0.5 * baba {
+        oc = o - pb;
+    }
+    let bb = dot(oc, d);
+    let cc = dot(oc, oc) - r * r;
+    let hh = bb * bb - cc;
+    if hh < 0.0 {
         return 1e30;
     }
-    let t = -b - sqrt(disc);
+    let t = -bb - sqrt(hh);
     return select(1e30, t, t > 1e-4);
 }
 
 // Le corps (le joueur), gris, sous l'éclairement de la scène.
 fn couleur_corps(p: vec3<f32>) -> vec3<f32> {
-    return vec3<f32>(0.22, 0.22, 0.24) * GAIN_EAU * eclairage(normalize(p - R.sphere.xyz));
+    return vec3<f32>(0.22, 0.22, 0.24) * GAIN_EAU * eclairage(normalize(p - axe_corps(p)));
 }
 
 // Le fond de sable au point `p` (z = 0).
@@ -337,20 +369,8 @@ fn fs(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
     if lumiere {
         couleur = ciel_b(dir, 4u);
     }
-    var t_corps = 1e30;
-    // La sphère.
-    if R.sphere.w > 0.0 {
-        let oc = o - R.sphere.xyz;
-        let b = dot(oc, dir);
-        let c = dot(oc, oc) - R.sphere.w * R.sphere.w;
-        let disc = b * b - c;
-        if disc >= 0.0 {
-            let t = -b - sqrt(disc);
-            if t > 0.0 {
-                t_corps = t;
-            }
-        }
-    }
+    // Le corps : une sphère, ou (S466) une capsule verticale.
+    let t_corps = touche_corps(o, dir);
     // La boîte échantillonnée, des centres extrêmes des mailles : le quart reflété, ou le domaine entier.
     let dx = R.s.x;
     let hi = vec3<f32>((f32(R.dims.x) - 0.5) * dx, (f32(R.dims.y) - 0.5) * dx, (f32(R.dims.z) - 0.5) * dx);
@@ -425,7 +445,7 @@ fn fs(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
         if lumiere {
             couleur = couleur_corps(p);
         } else {
-            couleur = ombre(p - R.sphere.xyz, p, false);
+            couleur = ombre(p - axe_corps(p), p, false);
         }
     }
     return vec4<f32>(pow(clamp(couleur, vec3<f32>(0.0), vec3<f32>(1.0)), vec3<f32>(1.0 / 2.2)), 1.0);

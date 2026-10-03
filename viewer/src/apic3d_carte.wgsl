@@ -28,9 +28,21 @@ struct Params {
     b_omega: f32, b_phase: f32, b_level: f32, b_on: f32,
     // S456 : la largeur des zones de relaxation des bords ouverts, m (0 : aucune).
     relax_w: f32, relax_p1: f32, relax_p2: f32, relax_p3: f32,
+    // S466 : le corps est une capsule — son axe (unitaire) et sa demi-longueur (0 : la sphère, au bit).
+    b_ax: f32, b_ay: f32, b_az: f32, b_half: f32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
+
+// S466 — **le point du corps le plus proche de `q`** : le centre `c` pour une sphère ; pour une capsule, le point de son axe,
+// `c + a·clamp((q − c)·a, −L, L)`. Toute formule de la sphère (distance, normale, image) se lit depuis ce point.
+fn body_point(q: vec3<f32>, c: vec3<f32>) -> vec3<f32> {
+    if P.b_half <= 0.0 {
+        return c;
+    }
+    let a = vec3<f32>(P.b_ax, P.b_ay, P.b_az);
+    return c + a * clamp(dot(q - c, a), -P.b_half, P.b_half);
+}
 @group(0) @binding(1) var<storage, read_write> px: array<vec4<f32>>;
 @group(0) @binding(2) var<storage, read_write> pv: array<vec4<f32>>;
 // C par particule : trois lignes `C[axe]`, à la suite.
@@ -458,7 +470,7 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
     let images = vec3<f32>(1.0, -1.0, 2.0);
     // S393 : le corps reflète aussi, image radiale `c + (2R − d)·n`, cherchée seulement près de lui.
     let bc = vec3<f32>(P.bcx, P.bcy, P.bcz);
-    let eq = q - bc;
+    let eq = q - body_point(q, bc);
     let use_body = P.has_body != 0.0 && sqrt(eq.x * eq.x + eq.y * eq.y + eq.z * eq.z) < P.br + radius;
     let r = P.reach;
     // S398 : une maille de la zone des colonnes prend `φ = z − η` (`columns_label`) ; rien à reconstruct.
@@ -508,11 +520,12 @@ fn reconstruct(@builtin(global_invocation_id) g: vec3<u32>) {
                                                 sx = sx + wt * p;
                                             }
                                             if use_body {
-                                                let e = p - bc;
+                                                let bp = body_point(p, bc);
+                                                let e = p - bp;
                                                 let de = sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
                                                 if de > 0.0 && de < 2.0 * P.br {
                                                     let f = (2.0 * P.br - de) / de;
-                                                    let pi = bc + f * e;
+                                                    let pi = bp + f * e;
                                                     let di = pi - q;
                                                     let wi = smooth_kernel((di.x * di.x + di.y * di.y + di.z * di.z) * inv_r2);
                                                     if wi > 0.0 {
@@ -1237,9 +1250,9 @@ fn move_body(@builtin(global_invocation_id) g: vec3<u32>) {
     if k >= np() || P.has_body == 0.0 {
         return;
     }
-    let c = vec3<f32>(P.bmx, P.bmy, P.bmz);
-    let reach = P.br + 0.05 * P.dx;
     let p = px[k].xyz;
+    let c = body_point(p, vec3<f32>(P.bmx, P.bmy, P.bmz));
+    let reach = P.br + 0.05 * P.dx;
     let e = p - c;
     let d = sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
     if d >= reach {
@@ -2326,8 +2339,9 @@ fn switch_need(@builtin(global_invocation_id) g: vec3<u32>) {
     }
     if P.has_body != 0.0 {
         let d = vec3<f32>(P.bvx, P.bvy, P.bvz) * P.s_horizon;
-        let reach = P.br + P.s_margin;
-        let low = min(P.bcz, P.bcz + d.z) - P.br;
+        // S466 : la capsule s'étend de `L·|a_z|` vers le bas et de `L·|a_xy|` à l'horizontale.
+        let reach = P.br + P.s_margin + P.b_half * length(vec2<f32>(P.b_ax, P.b_ay));
+        let low = min(P.bcz, P.bcz + d.z) - P.br - P.b_half * abs(P.b_az);
         let len2 = d.x * d.x + d.y * d.y;
         let x = (f32(i) + 0.5) * P.dx - P.bcx;
         let y = (f32(j) + 0.5) * P.dx - P.bcy;
@@ -2907,8 +2921,8 @@ fn floor_place(@builtin(global_invocation_id) g: vec3<u32>) {
     }
     if P.s_pred != 0u && P.has_body != 0.0 {
         let d = vec3<f32>(P.bvx, P.bvy, P.bvz) * P.s_horizon;
-        let lowest = min(P.bcz, P.bcz + d.z) - P.br;
-        let reach = P.br + P.s_margin;
+        let lowest = min(P.bcz, P.bcz + d.z) - P.br - P.b_half * abs(P.b_az);
+        let reach = P.br + P.s_margin + P.b_half * length(vec2<f32>(P.b_ax, P.b_ay));
         let x = (f32(i) + 0.5) * P.dx - P.bcx;
         let y = (f32(j) + 0.5) * P.dx - P.bcy;
         let len2 = d.x * d.x + d.y * d.y;
@@ -5684,7 +5698,7 @@ fn reconstruct_coop(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invoca
             let k = c / (P.nx * P.ny);
             let q = (vec3<f32>(f32(i), f32(j), f32(k)) + vec3<f32>(0.5)) * P.dx;
             let bc = vec3<f32>(P.bcx, P.bcy, P.bcz);
-            let eq = q - bc;
+            let eq = q - body_point(q, bc);
             let solid = P.has_body != 0.0 && eq.x * eq.x + eq.y * eq.y + eq.z * eq.z < P.br * P.br;
             if P.has_columns != 0.0 && cmask[j * P.nx + i] != 0u {
                 let phi_c = q.z - columns_read(cols[j * P.nx + i]);
@@ -5732,7 +5746,7 @@ fn reconstruct_coop(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invoca
     let near_z0 = q.z < radius;
     let images = vec3<f32>(1.0, -1.0, 2.0);
     let bc = vec3<f32>(P.bcx, P.bcy, P.bcz);
-    let eq = q - bc;
+    let eq = q - body_point(q, bc);
     let use_body = P.has_body != 0.0 && sqrt(eq.x * eq.x + eq.y * eq.y + eq.z * eq.z) < P.br + radius;
     let r = P.reach;
     let lo = vec3<u32>(select(0u, i - r, i >= r), select(0u, j - r, j >= r), select(0u, k - r, k >= r));
@@ -5763,11 +5777,12 @@ fn reconstruct_coop(@builtin(workgroup_id) wid: vec3<u32>, @builtin(local_invoca
                                         sx = sx + wt * p;
                                     }
                                     if use_body {
-                                        let e = p - bc;
+                                        let bp = body_point(p, bc);
+                                        let e = p - bp;
                                         let de = sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
                                         if de > 0.0 && de < 2.0 * P.br {
                                             let f = (2.0 * P.br - de) / de;
-                                            let pi = bc + f * e;
+                                            let pi = bp + f * e;
                                             let di = pi - q;
                                             let wi = smooth_kernel((di.x * di.x + di.y * di.y + di.z * di.z) * inv_r2);
                                             if wi > 0.0 {

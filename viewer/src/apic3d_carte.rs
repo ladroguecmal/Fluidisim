@@ -123,8 +123,8 @@ const MG_SHARED_CELLS: usize = 1024;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
-// S456 : seize octets de plus — la largeur des zones de relaxation des bords ouverts.
-const PARAMS_BYTES: u64 = 272;
+// S456 : seize octets de plus — la largeur des zones de relaxation des bords ouverts ; S466 : seize encore, la capsule.
+const PARAMS_BYTES: u64 = 288;
 /// Horodatages : début et fin de chaque étage.
 const STAMPS: u32 = 32;
 
@@ -208,6 +208,8 @@ pub struct ApicCarte {
     relax_m: f32,
     /// S458 : le carré du résidu relatif où le gradient conjugué s'arrête (celui de la référence par défaut ; `set_tolerance`).
     tolerance2: f64,
+    /// S466 : la forme du corps — l'axe unitaire et la demi-longueur d'une capsule (`set_body_shape` ; 0 : la sphère).
+    body_shape: [f32; 4],
 }
 
 /// Durées de la carte par étage, ms (horodatages ; `None` sans la fonction).
@@ -460,6 +462,7 @@ impl ApicCarte {
             open_x: false,
             relax_m: 0.,
             tolerance2: apic3d::PRESSURE_TOLERANCE2,
+            body_shape: [0., 0., 1., 0.],
         })
     }
 
@@ -783,6 +786,10 @@ impl ApicCarte {
         // `C10_RELAX_MODE` (banc) : 2, les vitesses seules ; 3, la surface et les vitesses profondes ; 0, les deux.
         let mode: f32 = std::env::var("C10_RELAX_MODE").ok().and_then(|v| v.parse().ok()).unwrap_or(1.);
         for v in [self.relax_m, mode, 0., 0.] {
+            data.extend_from_slice(&v.to_le_bytes());
+        }
+        // S466 : la capsule — l'axe et la demi-longueur (0 : la sphère).
+        for v in self.body_shape {
             data.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.params, 0, &data);
@@ -1286,6 +1293,13 @@ impl ApicCarte {
         // `read_u32` prend un décalage en octets : le mot double `k` commence à l'octet `8k`.
         let w = self.read_u32(&self.ivol, 8 * k, 2)?;
         Ok(((w[1] as u64) << 32 | w[0] as u64) as i64 as i128)
+    }
+
+    /// **S466 — le corps en capsule** : l'axe (normalisé ici) et la demi-longueur `L` du segment autour du centre ; le rayon reste
+    /// celui de `Sphere3`. Chaque formule de la sphère se lit depuis le point de l'axe le plus proche ; `L = 0` : la sphère, au bit.
+    pub fn set_body_shape(&mut self, axe: [f32; 3], demi_longueur: f32) {
+        let n = (axe[0] * axe[0] + axe[1] * axe[1] + axe[2] * axe[2]).sqrt().max(1e-12);
+        self.body_shape = [axe[0] / n, axe[1] / n, axe[2] / n, demi_longueur.max(0.)];
     }
 
     /// **S458** — le résidu relatif `‖r‖/‖b‖` où la projection s'arrête (10⁻⁶ par défaut, celui de la référence). La masse ne
@@ -2013,6 +2027,8 @@ pub struct B10 {
     /// S456 — une houle B (`LinearSwell`) : l'eau ensemencée sous sa surface, ses vitesses données (`b10_band_state_from`), la
     /// bascule la lit ; la carte l'impose à ses bords ouverts. `None` : B10, au bit.
     pub houle: Option<LinearSwell>,
+    /// S466 — la demi-longueur de l'axe vertical du corps (une capsule ; 0 : la sphère de B10).
+    pub demi_longueur: f64,
 }
 
 impl B10 {
@@ -2038,6 +2054,7 @@ impl B10 {
             ny: (2. * d / dx).round() as usize,
             centre: [0., 0.],
             houle: None,
+            demi_longueur: 0.,
         }
     }
 

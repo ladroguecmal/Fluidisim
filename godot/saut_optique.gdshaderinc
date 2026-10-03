@@ -10,8 +10,10 @@
 #include "res://pluie.gdshaderinc"
 uniform float temps_pluie = 0.0;
 
-// Le corps (le joueur) : centre (B) et rayon ; rayon nul : pas de corps.
+// Le corps (le joueur) : centre (B) et rayon ; rayon nul : pas de corps. S466 : la demi-longueur de son axe vertical (une
+// capsule ; 0 : la sphère).
 uniform vec4 corps = vec4(0.0);
+uniform float corps_demi_longueur = 0.0;
 // La houle B (`a`, `k`, `ω`, `φ`), le niveau moyen et l'instant.
 uniform vec4 houle = vec4(0.0);
 uniform float niveau = 1.4;
@@ -80,24 +82,56 @@ float fresnel_exact(float c, float n) {
     return 0.5 * (rs * rs + rp * rp);
 }
 
-// La distance au corps le long de `o + t·d` (1e30 : manqué).
+// S466 — le point de l'axe du corps le plus proche de `p` (une capsule verticale ; le centre si la demi-longueur est nulle).
+vec3 axe_corps(vec3 p) {
+    float l = corps_demi_longueur;
+    return vec3(corps.xy, clamp(p.z, corps.z - l, corps.z + l));
+}
+
+// La distance au corps le long de `o + t·d` (1e30 : manqué) : une capsule verticale (Quílez), la sphère si `L = 0` — celle de
+// `surface_carte.wgsl`.
 float touche_corps(vec3 o, vec3 d) {
-    if (corps.w <= 0.0) {
+    float r = corps.w;
+    if (r <= 0.0) {
         return 1e30;
     }
-    vec3 oc = o - corps.xyz;
-    float b = dot(oc, d);
-    float c = dot(oc, oc) - corps.w * corps.w;
-    float disc = b * b - c;
-    if (disc < 0.0) {
+    vec3 pa = corps.xyz - vec3(0.0, 0.0, corps_demi_longueur);
+    vec3 pb = corps.xyz + vec3(0.0, 0.0, corps_demi_longueur);
+    vec3 ba = pb - pa;
+    vec3 oa = o - pa;
+    float baba = dot(ba, ba);
+    float bard = dot(ba, d);
+    float baoa = dot(ba, oa);
+    float rdoa = dot(d, oa);
+    float oaoa = dot(oa, oa);
+    float a = baba - bard * bard;
+    float b = baba * rdoa - baoa * bard;
+    float c = baba * oaoa - baoa * baoa - r * r * baba;
+    float h = b * b - a * c;
+    if (baba > 0.0 && h >= 0.0) {
+        float t = (-b - sqrt(h)) / a;
+        float y = baoa + t * bard;
+        if (y > 0.0 && y < baba && t > 1e-4) {
+            return t;
+        }
+    }
+    // Les calottes : la sphère de l'extrémité la plus proche du rayon.
+    vec3 oc = oa;
+    if (baba > 0.0 && baoa + (-b / max(a, 1e-12)) * bard > 0.5 * baba) {
+        oc = o - pb;
+    }
+    float bb = dot(oc, d);
+    float cc = dot(oc, oc) - r * r;
+    float hh = bb * bb - cc;
+    if (hh < 0.0) {
         return 1e30;
     }
-    float t = -b - sqrt(disc);
+    float t = -bb - sqrt(hh);
     return t > 1e-4 ? t : 1e30;
 }
 
 vec3 couleur_corps(vec3 p) {
-    return vec3(0.22, 0.22, 0.24) * gain_eau * eclairage(normalize(p - corps.xyz), normalize(SOLEIL_B), 1.0);
+    return vec3(0.22, 0.22, 0.24) * gain_eau * eclairage(normalize(p - axe_corps(p)), normalize(SOLEIL_B), 1.0);
 }
 
 float bruit_sable(vec2 q) {

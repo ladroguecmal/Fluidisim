@@ -2,8 +2,8 @@ extends Node3D
 ## S461 — C11 : **la scène `--v1` rejouée dans Godot** (décision de l'utilisateur, S460 ; C10-SCENES-S454 §10). L'afficheur calcule
 ## et enregistre (`water-viewer --v1-banc` avec `EXPORT_GODOT=godot/donnees` : `saut.json`, `saut.bin`) ; ce script **rejoue**,
 ## comme la piscine (S374–S375), et ne recalcule rien (I-01). L'eau du domaine : un rayon par pixel dans le champ `φ`
-## (`saut_eau.gdshader`) ; la mer de B au-delà (`saut_mer.gdshader`) ; le joueur, une sphère ; le ciel de la scène (`ciel.gdshader`),
-## la tonalité AgX et le halo de Godot.
+## (`saut_eau.gdshader`) ; la mer de B au-delà (`saut_mer.gdshader`) ; le joueur, une capsule debout (S466 ; une sphère avant) ;
+## le ciel de la scène (`ciel.gdshader`), la tonalité AgX et le halo de Godot.
 ##
 ## Lancer : `Godot --path godot res://saut.tscn` — glisser : orbite, molette : distance, Espace : pause, Échap : quitter ;
 ## S465 : P, la pluie (0, 2, 10, 50 mm/h ; `PLUIE=<mm/h>`).
@@ -127,12 +127,21 @@ func _ready() -> void:
 		m.set_shader_parameter("domaine", Vector2(nx * dx, ny * dx))
 		# `CAUSTIQUES=0` : sans elles (l'image de S461).
 		m.set_shader_parameter("caustiques", (direct or octets_c.size() == nx * ny * images.size()) and OS.get_environment("CAUSTIQUES") != "0")
-	# Le joueur.
+	# Le joueur : S466, une capsule debout (`demi_longueur` de l'en-tête ; absente ou nulle : la sphère).
 	joueur = MeshInstance3D.new()
-	var sm := SphereMesh.new()
-	sm.radius = float(entete["rayon"])
-	sm.height = 2.0 * sm.radius
-	joueur.mesh = sm
+	var demi := float(entete.get("demi_longueur", 0.0))
+	if demi > 0.0:
+		var cm := CapsuleMesh.new()
+		cm.radius = float(entete["rayon"])
+		cm.height = 2.0 * (cm.radius + demi)
+		joueur.mesh = cm
+	else:
+		var sm := SphereMesh.new()
+		sm.radius = float(entete["rayon"])
+		sm.height = 2.0 * sm.radius
+		joueur.mesh = sm
+	for m in [mat_eau, mat_mer]:
+		m.set_shader_parameter("corps_demi_longueur", demi)
 	var mj := StandardMaterial3D.new()
 	mj.albedo_color = Color(0.42, 0.42, 0.45)
 	mj.roughness = 0.6
