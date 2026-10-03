@@ -80,8 +80,16 @@ houle — montrées à l'utilisateur.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
-- [ ] **P3** — la lumière reçue, la mer au-delà ; mesures ; images.
+- [x] **P3** — la lumière reçue, la mer au-delà ; mesures ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — feuille de route, liste, file active pour S454–S456 (C10-1, la v1 solide, ADR-215) ; `Registres` : dernier lot S457, le prochain au plus tard en S460.
+- **P3** — `surface_carte.wgsl` : la lumière reçue (le ciel de la photographie, nuages, soleil ; `R(0⁻)·E/π` ; Fresnel exact ;
+  l'éclat ; la colonne de Maritorena jusqu'au sable — ou au corps — par réfraction) en mode `mer.z = 1`, l'ombrage de R37 gardé pour
+  les bancs (mode 0) ; la mer de B analytique hors du domaine (Newton depuis le plan moyen ; sa pente éteinte selon l'empreinte du
+  pixel) ; `set_lumiere`, `set_instant`. **Mesuré** : (1) le champ fondu inchangé (7,2·10⁻⁷) ; (2) le rendu en direct 1,2 ms au mur,
+  acquisition comprise — tenu ; (3) le raccord : un trait d'une demi-maille (la boîte marchée s'arrête aux centres des mailles, la mer
+  de B commençait au bord) — corrigé ; reste un changement de texture des reflets au raccord, léger ; (4) images
+  `captures/s457/scene_t{0.5,1.0,2.0,4.0}.png` envoyées. La fenêtre : 0,97 du temps réel.
+

@@ -79,6 +79,11 @@ impl Vivant {
         }
         let mut rendu = SurfaceCarte::with_format(&carte, w, h, format);
         rendu.set_quart(b.quart());
+        // S457 : la scène (domaine entier) sous la lumière de l'eau reçue ; `LUMIERE=0` : l'ombrage de R37.
+        if !b.quart() && std::env::var("LUMIERE").map_or(true, |v| v != "0") {
+            let houle = b.houle.map_or([0.; 4], |w| [w.amplitude, w.wavenumber, w.omega, w.phase]);
+            rendu.set_lumiere(true, houle, b.h as f32);
+        }
         let mut v = Self { b, carte, rendu, t_us: 0, pas: 0, quanta: 0, temoin: None, etages: [None; 16], corps: std::env::var("C10_SANS_CORPS").is_err() };
         v.relancer()?;
         Ok(v)
@@ -248,6 +253,7 @@ pub fn banc() -> Result<(), String> {
             if v.t() / echelle + 1e-9 < instants[prochain] {
                 continue;
             }
+            v.rendu.set_instant(v.t() as f32);
             v.rendu.set_view(&camera, Some(v.b.sphere(v.t())));
             v.rendu.render()?;
             let rvb = v.rendu.image()?;
@@ -359,6 +365,7 @@ impl Fenetre {
             self.simule_3s = Some(self.simule_s);
         }
         let rendu_debut = Instant::now();
+        v.rendu.set_instant(v.t() as f32);
         v.rendu.set_view(&orbite.camera(), Some(v.b.sphere(v.t())));
         let (_, queue) = v.carte.gpu();
         match surface.get_current_texture() {
@@ -772,6 +779,7 @@ pub fn c10_saut() -> Result<(), String> {
                 let coin = &phi[(0..d.nz).map(|k| k * d.nx * d.ny).collect::<Vec<_>>()[60]..][..1];
                 println!("C10_OU scene colonnes_sans_surface={sans} hauteur_coin={:.3} phi_coin_k60={:?}", hs[0], coin);
             }
+            v.rendu.set_instant(v.t() as f32);
             v.rendu.set_view(&camera, Some(v.b.sphere(v.t())));
             v.rendu.render()?;
             if std::env::var("C10_OU").is_ok() {

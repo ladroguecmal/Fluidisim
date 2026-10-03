@@ -52,6 +52,11 @@ pub struct SurfaceCarte {
     h: u32,
     /// S454 : le quart reflété (B10 en quart) ou un domaine entier.
     quart: bool,
+    /// S457 : la lumière de l'eau reçue (sinon l'ombrage de R37), la houle B (`a`, `k`, `ω`, `φ`), le niveau moyen et l'instant.
+    lumiere: bool,
+    houle: [f32; 4],
+    niveau: f32,
+    instant: f32,
     fondu: wgpu::ComputePipeline,
     rendu: wgpu::RenderPipeline,
     uniform: wgpu::Buffer,
@@ -96,7 +101,7 @@ impl SurfaceCarte {
         let storage = wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC | wgpu::BufferUsages::COPY_DST;
         let tmp = buffer(&device, (cells * 4) as u64, storage);
         let champ = buffer(&device, (cells * 4) as u64, storage);
-        let uniform = buffer(&device, 144, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
+        let uniform = buffer(&device, 176, wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST);
         let module = device.create_shader_module(wgpu::include_wgsl!("surface_carte.wgsl"));
         let (c, f) = (wgpu::ShaderStages::COMPUTE, wgpu::ShaderStages::FRAGMENT);
         let ro = wgpu::BufferBindingType::Storage { read_only: true };
@@ -195,6 +200,10 @@ impl SurfaceCarte {
             w,
             h,
             quart: true,
+            lumiere: false,
+            houle: [0.; 4],
+            niveau: 0.,
+            instant: 0.,
             fondu,
             rendu,
             uniform,
@@ -228,9 +237,25 @@ impl SurfaceCarte {
             u.extend([v[0], v[1], v[2], 0.]);
         }
         u.extend(sphere);
+        u.extend(self.houle);
+        u.extend([self.niveau, self.instant, self.lumiere as u32 as f32, 0.]);
         // SAFETY : `f32` n'a pas de remplissage.
         let octets = unsafe { std::slice::from_raw_parts(u.as_ptr() as *const u8, u.len() * 4) };
         self.queue.write_buffer(&self.uniform, 0, octets);
+    }
+
+    /// **S457 — la lumière de l'eau reçue** (R14, R20, R24) : le ciel de la photographie, le corps d'eau, Fresnel, la colonne
+    /// d'eau sur un fond de sable ; hors du domaine (entier), la mer de B. `houle` : `a`, `k`, `ω`, `φ` (zéro : une mer plate) ;
+    /// `niveau` : le niveau moyen, m.
+    pub fn set_lumiere(&mut self, on: bool, houle: [f32; 4], niveau: f32) {
+        self.lumiere = on;
+        self.houle = houle;
+        self.niveau = niveau;
+    }
+
+    /// S457 : l'instant de l'image (la phase de B), s.
+    pub fn set_instant(&mut self, t: f32) {
+        self.instant = t;
     }
 
     /// S454 : le domaine est-il un quart à refléter (le défaut) ou un domaine entier ?
