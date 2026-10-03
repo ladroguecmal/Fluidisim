@@ -26,6 +26,8 @@ struct Params {
     // niveau moyen ; `b_on` : présent).
     fs_speed: f32, fs_release: f32, b_amp: f32, b_k: f32,
     b_omega: f32, b_phase: f32, b_level: f32, b_on: f32,
+    // S456 : la largeur des zones de relaxation des bords ouverts, m (0 : aucune).
+    relax_w: f32, relax_p1: f32, relax_p2: f32, relax_p3: f32,
 }
 
 @group(0) @binding(0) var<uniform> P: Params;
@@ -559,6 +561,46 @@ fn on_wall(fc: Face) -> bool {
     return along == 0u || along == top;
 }
 
+// S456 — **le bord ouvert en `x`** (`Apic3::enable_open_boundaries`, S446, porté) : sur les faces `u` de `i = 0` et `i = nx`, la
+// vitesse normale de la houle B (`LinearSwell::velocity`, au milieu du pas), sous sa surface ; nulle au-dessus et sur toute autre
+// paroi. `s_pad` : les bords sont ouverts.
+fn open_value(fc: Face) -> f32 {
+    if P.s_pad == 0u || P.b_on == 0.0 || fc.axis != 0u {
+        return 0.0;
+    }
+    let x = f32(fc.idx.x) * P.dx;
+    let z = (f32(fc.idx.z) + 0.5) * P.dx;
+    let t = f32(P.s_now) * 1e-6 + 0.5 * P.dt;
+    let theta = P.b_k * x - P.b_omega * t + P.b_phase;
+    if z > P.b_level + P.b_amp * cos(theta) {
+        return 0.0;
+    }
+    return P.b_amp * P.b_omega * exp(P.b_k * (z - P.b_level)) * cos(theta);
+}
+
+// S456 — le poids de la relaxation à l'abscisse `x` : `(e^{c^3,5} − 1)/(e − 1)`, `c` de 1 au bord ouvert à 0 à `relax_w` de lui.
+fn relax_weight(x: f32) -> f32 {
+    if P.s_pad == 0u || P.b_on == 0.0 || P.relax_w <= 0.0 {
+        return 0.0;
+    }
+    let d = min(x, P.lx - x);
+    if d >= P.relax_w {
+        return 0.0;
+    }
+    let c = 1.0 - max(d, 0.0) / P.relax_w;
+    return (exp(pow(c, 3.5)) - 1.0) / (exp(1.0) - 1.0);
+}
+
+// S456 — la vitesse de B (`LinearSwell::velocity`) au point `(x, z)`, à l'instant `t`, sous sa surface ; nulle au-dessus.
+fn swell_velocity(x: f32, z: f32, t: f32) -> vec2<f32> {
+    let theta = P.b_k * x - P.b_omega * t + P.b_phase;
+    if z > P.b_level + P.b_amp * cos(theta) {
+        return vec2<f32>(0.0, 0.0);
+    }
+    let amp = P.b_amp * P.b_omega * exp(P.b_k * (z - P.b_level));
+    return vec2<f32>(amp * cos(theta), amp * sin(theta));
+}
+
 @compute @workgroup_size(128)
 fn gravity_walls(@builtin(global_invocation_id) g: vec3<u32>) {
     let f = g.x;
@@ -569,8 +611,32 @@ fn gravity_walls(@builtin(global_invocation_id) g: vec3<u32>) {
     if fc.axis == 2u {
         faces[f] = faces[f] - P.gdt;
     }
+    // S456 : dans les zones de relaxation, la vitesse ramenée vers B (avant la projection, qui rend le champ sans divergence).
+    if P.s_pad != 0u && P.relax_w > 0.0 && !on_wall(fc) && P.relax_p1 != 1.0 {
+        var x = (f32(fc.idx.x) + 0.5) * P.dx;
+        var z = (f32(fc.idx.z) + 0.5) * P.dx;
+        if fc.axis == 0u {
+            x = f32(fc.idx.x) * P.dx;
+        } else if fc.axis == 2u {
+            z = f32(fc.idx.z) * P.dx;
+        }
+        let a = relax_weight(x);
+        // `relax_p1` = 3 : les faces profondes seules (sous `h − 2a`) — près de la surface, la colonne et B ne mouillent pas les
+        // mêmes faces.
+        let profonde = z < P.b_level - 2.0 * P.b_amp;
+        if a > 0.0 && (P.relax_p1 != 3.0 || profonde) {
+            let ub = swell_velocity(x, z, f32(P.s_now) * 1e-6 + 0.5 * P.dt);
+            var cible = 0.0;
+            if fc.axis == 0u {
+                cible = ub.x;
+            } else if fc.axis == 2u {
+                cible = ub.y;
+            }
+            faces[f] = a * cible + (1.0 - a) * faces[f];
+        }
+    }
     if on_wall(fc) {
-        faces[f] = 0.0;
+        faces[f] = open_value(fc);
     }
 }
 
@@ -994,7 +1060,7 @@ fn extrap_zero(@builtin(global_invocation_id) g: vec3<u32>) {
         faces[f] = 0.0;
     }
     if on_wall(face_of(f)) {
-        faces[f] = 0.0;
+        faces[f] = open_value(face_of(f));
     }
 }
 
@@ -1162,7 +1228,7 @@ fn impose_body(@builtin(global_invocation_id) g: vec3<u32>) {
         return;
     }
     let vb = select(select(P.bvz, P.bvy, fc.axis == 1u), P.bvx, fc.axis == 0u);
-    faces[f] = select(vb, 0.0, on_wall(fc));
+    faces[f] = select(vb, open_value(fc), on_wall(fc));
 }
 
 @compute @workgroup_size(128)
@@ -1505,6 +1571,24 @@ fn columns_flux(@builtin(global_invocation_id) g: vec3<u32>) {
                         solde_add(face, neg_i64(vq));
                     }
                 }
+            }
+        }
+    } else if axis == 0u && P.s_pad != 0u && P.b_on != 0.0 {
+        // S456 : le bord ouvert — le débit de la face, mouillé à la hauteur de la colonne du bord (`columns_transport`, S446).
+        var col = j * P.nx;
+        if i == P.nx {
+            col = j * P.nx + P.nx - 1u;
+        }
+        if cmask[col] != 0u {
+            let per_quantum = 1.0 / (P.dx * P.dx * P.dx * 0.125 * 5.960464477539063e-8);
+            let surface = cols[col];
+            for (var k = 0u; k < P.nz; k = k + 1u) {
+                let wet = clamp((surface - f32(k) * P.dx) / P.dx, 0.0, 1.0);
+                if wet == 0.0 {
+                    break;
+                }
+                let face = (k * P.ny + j) * (P.nx + 1u) + i;
+                q = add_i64(q, to_i64(faces[face] * P.dx * wet * P.dx * P.dt * per_quantum));
             }
         }
     }
@@ -5786,4 +5870,44 @@ fn speed_max_finish(@builtin(local_invocation_id) l: vec3<u32>) {
     if l.x == 0u {
         scalars[15] = red_a[0];
     }
+}
+
+// S456 — le volume entré par les bords ouverts, cumulé : `Σ_j` (débit de la face `i = 0` − débit de la face `i = nx`), en quanta,
+// ajouté au mot double qui suit les débits de `ivol`. Un seul fil : l'ordre est fixe, la somme exacte.
+@compute @workgroup_size(1)
+fn open_count() {
+    let ncol = P.nx * P.ny;
+    let fx = (P.nx + 1u) * P.ny;
+    let fy = P.nx * (P.ny + 1u);
+    let slot = ncol + 3u * (fx + fy);
+    var total = ivol_get(slot);
+    for (var j = 0u; j < P.ny; j = j + 1u) {
+        total = add_i64(total, ivol_get(ncol + j * (P.nx + 1u)));
+        total = add_i64(total, neg_i64(ivol_get(ncol + j * (P.nx + 1u) + P.nx)));
+    }
+    // S456 — les zones de relaxation : la surface des colonnes, au début du pas (le transport y ajoute ensuite le débit du pas),
+    // ramenée vers celle de B au même instant ; le volume ajouté compté.
+    if P.relax_w > 0.0 && P.relax_p1 != 2.0 {
+        let per_quantum = 1.0 / (P.dx * P.dx * P.dx * 0.125 * 5.960464477539063e-8);
+        let t = f32(P.s_now) * 1e-6;
+        for (var i = 0u; i < P.nx; i = i + 1u) {
+            let x = (f32(i) + 0.5) * P.dx;
+            let a = relax_weight(x);
+            if a <= 0.0 {
+                continue;
+            }
+            let cible = P.b_level + P.b_amp * cos(P.b_k * x - P.b_omega * t + P.b_phase);
+            for (var j = 0u; j < P.ny; j = j + 1u) {
+                let col = j * P.nx + i;
+                if cmask[col] == 0u {
+                    continue;
+                }
+                let eta = i64_to_f32(ivol_get(col)) * quantum_height();
+                let dq = to_i64(a * (cible - eta) * P.dx * P.dx * per_quantum);
+                ivol_set(col, add_i64(ivol_get(col), dq));
+                total = add_i64(total, dq);
+            }
+        }
+    }
+    ivol_set(slot, total);
 }

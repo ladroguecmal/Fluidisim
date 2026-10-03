@@ -12,7 +12,7 @@ use crate::apic3d_carte::{b10_band_state_from, ApicCarte, B10};
 use crate::surface_carte::{Camera, SurfaceCarte};
 use std::sync::Arc;
 use std::time::Instant;
-use water_core::apic3d::ApicStage;
+use water_core::apic3d::{ApicStage, LinearSwell};
 use winit::{
     application::ApplicationHandler,
     event::{ElementState, MouseButton, MouseScrollDelta, WindowEvent},
@@ -38,6 +38,8 @@ struct Vivant {
     temoin: Option<f32>,
     /// S455 — les durées des étages du dernier pas, ms (le pas : 0–8, 12, 13 ; la bascule : 9–11).
     etages: [Option<f64>; 16],
+    /// S456 : le corps est-il posé (`C10_SANS_CORPS=1` : non — la houle seule) ?
+    corps: bool,
 }
 
 impl Vivant {
@@ -65,13 +67,19 @@ impl Vivant {
         carte.set_iteration_cap(600);
         carte.set_adaptive_cap(true);
         carte.set_multigrid(true);
+        // S456 : la houle entre et sort par les bords en `x`.
+        carte.set_open_x(b.houle.is_some() && std::env::var("C10_FERME").is_err());
+        // S456 : `C10_RELAX=<m>` — la largeur des zones de relaxation (0,8 m par défaut sous une houle).
+        if b.houle.is_some() {
+            carte.set_relax(std::env::var("C10_RELAX").ok().and_then(|v| v.parse().ok()).unwrap_or(0.8));
+        }
         // S455 : `COURANT=<c>` — le nombre de Courant du pas (0,5 par défaut).
         if let Some(c) = std::env::var("COURANT").ok().and_then(|v| v.parse::<f64>().ok()) {
             carte.set_courant(c);
         }
         let mut rendu = SurfaceCarte::with_format(&carte, w, h, format);
         rendu.set_quart(b.quart());
-        let mut v = Self { b, carte, rendu, t_us: 0, pas: 0, quanta: 0, temoin: None, etages: [None; 16] };
+        let mut v = Self { b, carte, rendu, t_us: 0, pas: 0, quanta: 0, temoin: None, etages: [None; 16], corps: std::env::var("C10_SANS_CORPS").is_err() };
         v.relancer()?;
         Ok(v)
     }
@@ -89,7 +97,7 @@ impl Vivant {
         }
         self.carte.load(&a)?;
         self.carte.load_switch(&s);
-        self.carte.set_body(a.body());
+        self.carte.set_body(if self.corps { a.body() } else { None });
         let _ = self.carte.switch_for_bench(0)?;
         self.t_us = 0;
         self.pas = 0;
@@ -103,7 +111,7 @@ impl Vivant {
 
     /// Un pas de la carte seule : le corps à l'instant, le pas stable relu, le pas, la bascule. Rend sa durée, µs.
     fn avancer(&mut self) -> Result<u64, String> {
-        self.carte.set_body(Some(self.b.sphere(self.t())));
+        self.carte.set_body(if self.corps { Some(self.b.sphere(self.t())) } else { None });
         let us = self.carte.stable_step_us(PAS_MAX_US).map_err(|e| format!("pas stable : {e}"))?;
         let times = self.carte.step_upto(us, ApicStage::Full).map_err(|e| format!("pas : {e}"))?;
         let (it, residu, converged) = self.carte.pressure_stats().map_err(|e| format!("pression : {e}"))?;
@@ -150,10 +158,24 @@ impl Vivant {
 fn b10_de_l_environnement() -> B10 {
     let fr: f64 = std::env::var("FR").ok().and_then(|v| v.parse().ok()).unwrap_or(2.);
     let n_d: usize = std::env::var("ND").ok().and_then(|v| v.parse().ok()).unwrap_or(8);
-    match std::env::var("COTE").ok().and_then(|v| v.parse::<f64>().ok()) {
+    let mut b = match std::env::var("COTE").ok().and_then(|v| v.parse::<f64>().ok()) {
         Some(c) => B10::entier(fr, n_d, c),
         None => B10::new(fr, n_d),
+    };
+    houle_de_l_environnement(&mut b);
+    b
+}
+
+/// S456 — `HOULE=<a>,<λ>` (m) : une houle B en eau profonde (`ω² = g·k`), au niveau du repos, qui entre et sort par les bords en
+/// `x` (domaine entier seulement).
+fn houle_de_l_environnement(b: &mut B10) {
+    let Some(v) = std::env::var("HOULE").ok() else { return };
+    let p: Vec<f32> = v.split(',').filter_map(|x| x.trim().parse().ok()).collect();
+    if p.len() != 2 || b.quart() {
+        return;
     }
+    let k = std::f32::consts::TAU / p[1];
+    b.houle = Some(LinearSwell { amplitude: p[0], wavenumber: k, omega: (B10::G as f32 * k).sqrt(), phase: 0., mean_level: b.h as f32 });
 }
 
 /// La caméra de R37 autour du point d'entrée de `b`.
@@ -694,7 +716,8 @@ pub fn c10_saut() -> Result<(), String> {
             return Ok(());
         }
         // (2) La scène.
-        let b = B10::entier(2., 8, cote);
+        let mut b = B10::entier(2., 8, cote);
+        houle_de_l_environnement(&mut b);
         let mut v = Vivant::with_b10(b, &instance, None, w, h, wgpu::TextureFormat::Rgba8Unorm).await?;
         let d = b.domain();
         let mut camera = camera_b10(&b);
@@ -768,7 +791,8 @@ pub fn c10_saut() -> Result<(), String> {
                  image={nom}",
                 v.t() / echelle,
                 v.pas,
-                v.carte.total_quanta()? - v.quanta,
+                // S456 : le volume échangé par les bords ouverts (et leurs zones de relaxation) à part.
+                v.carte.total_quanta()? - v.quanta - v.carte.open_quanta()?,
                 mask.iter().filter(|m| **m == 0).count()
             );
         }
@@ -785,6 +809,104 @@ pub fn c10_saut() -> Result<(), String> {
             v.pas,
             mediane(&mut pas_ms),
             mediane(&mut etapes),
+            v.t_us as f64 / v.pas as f64
+        );
+        Ok(())
+    })
+}
+
+/// **S456 — la houle** (`--c10-houle`) : la scène de `COTE` m (4 par défaut ; `C10_ARRET`, `C10_AIR`, `COURANT` comme la fenêtre)
+/// sous la houle `HOULE=a,λ` (0,04 m et 2 m par défaut), **sans corps**, pendant 10 s : toutes les 0,5 s, le long de la rangée du
+/// milieu, l'amplitude (demi-écart de `η`) et l'écart quadratique à l'élévation de B, en fraction de `a` ; la masse comptée (le volume
+/// entré par les bords ouverts à part).
+pub fn c10_houle() -> Result<(), String> {
+    if std::env::var("HOULE").is_err() {
+        std::env::set_var("HOULE", "0.04,2");
+    }
+    std::env::set_var("C10_SANS_CORPS", "1");
+    let cote: f64 = std::env::var("COTE").ok().and_then(|v| v.parse().ok()).unwrap_or(4.);
+    pollster::block_on(async {
+        let instance = crate::instance();
+        let mut b = B10::entier(2., 8, cote);
+        houle_de_l_environnement(&mut b);
+        let w = b.houle.ok_or("HOULE illisible")?;
+        let mut v = Vivant::with_b10(b, &instance, None, 64, 64, wgpu::TextureFormat::Rgba8Unorm).await?;
+        let d = b.domain();
+        println!(
+            "C10_HOULE_S456 domaine={}x{}x{} a_m={} lambda_m={:.3} periode_s={:.3} quanta_initiaux={}",
+            d.nx, d.ny, d.nz, w.amplitude, std::f32::consts::TAU / w.wavenumber, std::f32::consts::TAU / w.omega, v.quanta
+        );
+        let mut mesures: Vec<(f64, f64, f64)> = Vec::new();
+        let mut prochain = 0.5;
+        while prochain <= 10.0 + 1e-9 {
+            while v.t() + 1e-9 < prochain {
+                v.avancer()?;
+                if std::env::var("C10_PAS").is_ok() && v.pas <= 40 {
+                    let k = v.carte.counts()?;
+                    let bande = v.carte.mask()?.iter().filter(|m| **m == 0).count();
+                    println!(
+                        "C10_PAS pas={} ecart={} entre={} n={} bande={bande} compteurs={:?}",
+                        v.pas,
+                        v.carte.total_quanta()? - v.quanta,
+                        v.carte.open_quanta()?,
+                        k[0],
+                        &k[1..12]
+                    );
+                }
+            }
+            let eta = v.carte.columns_eta()?;
+            let mask = v.carte.mask()?;
+            let j = d.ny / 2;
+            let (mut lo, mut hi, mut e2, mut n) = (f64::MAX, f64::MIN, 0f64, 0usize);
+            // Hors des zones de relaxation : la houle libre.
+            let relax: f32 = std::env::var("C10_RELAX").ok().and_then(|v| v.parse().ok()).unwrap_or(0.8);
+            for i in 0..d.nx {
+                let c = j * d.nx + i;
+                let x = (i as f32 + 0.5) * d.dx;
+                if mask[c] == 0 || x < relax || x > d.nx as f32 * d.dx - relax {
+                    continue;
+                }
+                let e = eta[c] as f64 - b.h;
+                lo = lo.min(e);
+                hi = hi.max(e);
+                e2 += (e - w.elevation(x, v.t()) as f64).powi(2);
+                n += 1;
+            }
+            if std::env::var("C10_OU").is_ok() && (v.t() - 1.0).abs() < 0.01 {
+                let ligne: Vec<String> = (0..d.nx)
+                    .step_by(4)
+                    .map(|i| {
+                        let x = (i as f32 + 0.5) * d.dx;
+                        format!("{:.0}/{:.0}", 1000. * (eta[j * d.nx + i] as f64 - b.h), 1000. * w.elevation(x, v.t()) as f64)
+                    })
+                    .collect();
+                println!("C10_OU ligne_mm(eta/B) {}", ligne.join(" "));
+            }
+            let amplitude = 0.5 * (hi - lo);
+            let ecart = (e2 / n.max(1) as f64).sqrt() / w.amplitude as f64;
+            let entre = v.carte.open_quanta()?;
+            let bilan = v.carte.total_quanta()? - v.quanta - entre;
+            if std::env::var("C10_OU").is_ok() {
+                let k = v.carte.counts()?;
+                println!("C10_OU entre_quanta={entre} n={} absorbees={} retirees={} posees={} refusees={}", k[0], k[3], k[4], k[5], k[6]);
+            }
+            let bande = mask.iter().filter(|m| **m == 0).count();
+            println!(
+                "C10_HOULE_S456 t_s={:.2} amplitude_m={amplitude:.4} sur_a={:.3} ecart_a_B_sur_a={ecart:.3} masse_ecart_quanta={bilan}                  colonnes_en_bande={bande} pas={}",
+                v.t(),
+                amplitude / w.amplitude as f64,
+                v.pas
+            );
+            mesures.push((v.t(), amplitude, ecart));
+            prochain += 0.5;
+        }
+        let premiere = mesures.iter().find(|m| m.0 >= 1.0).map_or(f64::NAN, |m| m.1);
+        let derniere = mesures.last().map_or(f64::NAN, |m| m.1);
+        println!(
+            "C10_HOULE_S456 bilan amplitude_10s_sur_1s={:.3} ecart_a_B_max_sur_a={:.3} pas={} pas_moyen_us={:.0}",
+            derniere / premiere,
+            mesures.iter().map(|m| m.2).fold(0., f64::max),
+            v.pas,
             v.t_us as f64 / v.pas as f64
         );
         Ok(())

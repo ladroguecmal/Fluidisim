@@ -77,8 +77,20 @@ publié (la dispersion numérique) ; (4) avec le saut : la scène stable, la fen
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le bord ouvert sur la carte ; l'état initial de B ; le banc ; mesures (1) à (3).
-- [ ] **P3** — le saut sous la houle ; images ; mesure (4).
+- [x] **P2** — le bord ouvert sur la carte ; l'état initial de B ; le banc ; mesures (1) à (3).
+- [x] **P3** — le saut sous la houle ; images ; mesure (4).
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `open_value` (la vitesse de B sur les faces `u` des bords, aux trois endroits qui remettaient les parois à zéro), le débit
+  des bords dans `columns_flux`, `open_count` (le volume entré cumulé, un mot double après les débits de `ivol`), `set_open_x`,
+  `open_quanta` ; `B10::houle` (l'eau sous la surface de B, ses vitesses aux particules et à la grille) ; `HOULE=a,λ` ; le banc
+  `--c10-houle`. **Mesuré** : (1) **masse exacte** (écart 0 à chaque mesure) — après un faux écart : `open_quanta` lisait au mauvais
+  décalage (`read_u32` prend des octets) ; (2) sans relaxation, la houle bat (0,8 à 1,37 `a`) : un bord à vitesse imposée renvoie ce qui
+  ne colle pas à B. **Les zones de relaxation** (Jacobsen, 0,8 m) : ramener **les vitesses** vers B fait dériver le niveau intérieur
+  (−20 mm) — écarté ; ramener **la surface seule** : l'amplitude au milieu entre 0,84 et 1,05 `a`, **sans décroissance** (moyenne 0,96
+  sur 1–3 s, 0,97 sur 8–10 s), l'écart à B sous 0,25 `a` (3). Le critère (2) tel qu'écrit — l'instant 10 s contre 1 s — donne 0,80, au
+  creux d'une modulation de ±10 % : tranché (ADR-215 D2), la houle ne s'amortit pas, la modulation inscrite.
+- **P3** — le saut sous la houle (4 cm, 2 m) : masse exacte jusqu'à t = 16, `φ` fini ; la fenêtre : simulé / réel **0,98** (0,84 pendant
+  le saut), 33,7 ms au 99e centile. Images `captures/s456/scene_t{1.0,2.0,3.0,6.0}.png` envoyées.
+

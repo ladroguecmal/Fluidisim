@@ -13,7 +13,7 @@ use water_core::delta3d::Domain3;
 use wgpu::util::DeviceExt;
 
 /// Noyaux de `apic3d_carte.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 103] = [
+const KERNELS: [&str; 104] = [
     "bin_clear", "bin_count", "scan_local", "scan_blocks", "scan_add", "bin_scatter", "bin_sort", "p2g", "reconstruct",
     "gravity_walls", "assemble", "cg_init_reduce", "cg_init_finish", "cg_apply", "cg_alpha", "cg_update", "cg_beta",
     "cg_direction", "correct", "extrap_valid", "extrap_copy", "extrap_layer", "extrap_zero", "g2p", "advect",
@@ -33,6 +33,8 @@ const KERNELS: [&str; 103] = [
     "mg_restrict1_coop", "mg_restrict2_coop", "switch_flow",
     // S455 — la vitesse maximale (le pas stable) sur la carte.
     "speed_max", "speed_max_finish",
+    // S456 — le débit des bords ouverts, cumulé.
+    "open_count",
 ];
 const BIN_CLEAR: usize = 0;
 const BIN_COUNT: usize = 1;
@@ -112,6 +114,8 @@ const MG_RESTRICT2_COOP: usize = 99;
 // S455 — la vitesse maximale des particules et des faces, réduite sur la carte (`scalars[15]`) : le pas stable sans relecture.
 const SPEED_MAX: usize = 101;
 const SPEED_MAX_FINISH: usize = 102;
+// S456 — le volume entré par les bords ouverts, cumulé en quanta (un mot double après les débits de `ivol`).
+const OPEN_COUNT: usize = 103;
 /// Groupes de `speed_max` (chacun réduit un pas de `SPEED_GROUPS · 256` particules ou faces).
 const SPEED_GROUPS: usize = 256;
 /// S424 — les mailles des niveaux ≥ 2 que la mémoire de groupe tient (`MG_SH` du nuanceur).
@@ -119,7 +123,8 @@ const MG_SHARED_CELLS: usize = 1024;
 const WG: u32 = 128;
 const SCAN: u32 = 256;
 /// Taille de `Params` : douze mots entiers, trente-deux flottants, puis le critère de bascule (huit entiers, quatre flottants).
-const PARAMS_BYTES: u64 = 256;
+// S456 : seize octets de plus — la largeur des zones de relaxation des bords ouverts.
+const PARAMS_BYTES: u64 = 272;
 /// Horodatages : début et fin de chaque étage.
 const STAMPS: u32 = 32;
 
@@ -198,6 +203,9 @@ pub struct ApicCarte {
     timing: bool,
     /// S455 : le nombre de Courant du pas stable (0,5, celui de la référence ; `set_courant`).
     courant: f64,
+    /// S456 : les bords ouverts en `x` (`set_open_x`) et la largeur de leurs zones de relaxation, m (`set_relax`).
+    open_x: bool,
+    relax_m: f32,
 }
 
 /// Durées de la carte par étage, ms (horodatages ; `None` sans la fonction).
@@ -271,7 +279,8 @@ impl ApicCarte {
         let cols = buffer(&device, ((2 * ncol + 32 + 2 * ((nx + 1) * ny + nx * (ny + 1))) * 4) as u64, storage);
         let cmask = buffer(&device, (ncol * 4) as u64, storage);
         // Volumes des colonnes, débits, puis (S419) deux contributions au solde vertical par face de colonnes.
-        let ivol = buffer(&device, ((ncol + 3 * ((nx + 1) * ny + nx * (ny + 1))) * 8) as u64, storage);
+        // S456 : un mot double de plus, le volume cumulé des bords ouverts.
+        let ivol = buffer(&device, ((ncol + 3 * ((nx + 1) * ny + nx * (ny + 1)) + 1) * 8) as u64, storage);
         let nu = (nx + 1) * ny * nz;
         let nv = nx * (ny + 1) * nz;
         // Soldes latéraux `u`, `v`, puis (S419) le solde vertical de chaque colonne.
@@ -446,6 +455,8 @@ impl ApicCarte {
             adapter_handle: adapter,
             timing: true,
             courant: 0.5,
+            open_x: false,
+            relax_m: 0.,
         })
     }
 
@@ -675,6 +686,10 @@ impl ApicCarte {
                 })
                 .collect();
             self.queue.write_buffer(&self.ivol, 0, u32_bytes(&v));
+            // S456 : le volume cumulé des bords ouverts repart de zéro.
+            let Domain3 { nx, ny, .. } = self.domain;
+            let slot = nx * ny + 3 * ((nx + 1) * ny + nx * (ny + 1));
+            self.queue.write_buffer(&self.ivol, (slot * 8) as u64, u32_bytes(&[0, 0]));
             // S418 : les soldes, en quanta.
             if let Some((su, sv)) = reference.columns_soldes() {
                 let sw = reference.columns_solde_w().unwrap_or(&[]);
@@ -736,7 +751,9 @@ impl ApicCarte {
         let s = self.switch;
         let su = [
             self.now_us as u32, s.hold_us as u32, s.dilation as u32, s.floor_cells.unwrap_or(0) as u32, s.floor_hysteresis as u32,
-            s.floor_prediction as u32, s.floor_cells.is_some() as u32, 0,
+            s.floor_prediction as u32, s.floor_cells.is_some() as u32,
+            // S456 : les bords ouverts en `x` (la houle B de la bascule y entre et en sort).
+            (self.open_x && s.background.is_some()) as u32,
         ];
         let sf = [s.slope_max, s.slope_release.unwrap_or(-1.), s.body_margin, s.body_horizon];
         // S432 — C7d-2 : le seuil de vitesse propre, sa relâche, le fond B.
@@ -756,6 +773,13 @@ impl ApicCarte {
             data.extend_from_slice(&v.to_le_bytes());
         }
         for v in sf.into_iter().chain(sb) {
+            data.extend_from_slice(&v.to_le_bytes());
+        }
+        // S456 : la largeur des zones de relaxation (m ; 0 : aucune).
+        // `relax_p1` : 1, la surface seule (le défaut, S456 : les vitesses ramenées vers B font dériver le niveau intérieur) ;
+        // `C10_RELAX_MODE` (banc) : 2, les vitesses seules ; 3, la surface et les vitesses profondes ; 0, les deux.
+        let mode: f32 = std::env::var("C10_RELAX_MODE").ok().and_then(|v| v.parse().ok()).unwrap_or(1.);
+        for v in [self.relax_m, mode, 0., 0.] {
             data.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.params, 0, &data);
@@ -1143,6 +1167,9 @@ impl ApicCarte {
                 ApicStage::GridToParticles => {
                     let Domain3 { nx, ny, .. } = self.domain;
                     self.dispatch(&mut pass, COLUMNS_FLUX, (nx + 1) * ny + nx * (ny + 1), WG);
+                    if self.open_x {
+                        self.dispatch(&mut pass, OPEN_COUNT, 1, 1);
+                    }
                     self.dispatch(&mut pass, COLUMNS_UPDATE, nx * ny, WG);
                     self.dispatch(&mut pass, FLOOR_UPDATE, nx * ny, WG);
                     self.dispatch(&mut pass, G2P, self.capacity, WG);
@@ -1230,6 +1257,32 @@ impl ApicCarte {
     /// ne relisent rien et n'attendent pas : la seule attente est la relecture du pas stable.
     pub fn set_timing(&mut self, on: bool) {
         self.timing = on;
+    }
+
+    /// **S456 — les bords ouverts en `x`** (le bord ouvert de S446 porté sur la carte) : les faces `u` de `i = 0` et `i = nx`
+    /// portent la vitesse normale de la houle B de la bascule (`ColumnsSwitch::background`, chargée par `load_switch`) — sous sa
+    /// surface, nulle au-dessus —, la projection la prend comme donnée, les colonnes des bords comptent son débit, et le volume
+    /// entré se cumule en quanta (`open_quanta`). Sans B, ou éteints : des parois, au bit.
+    pub fn set_open_x(&mut self, on: bool) {
+        self.open_x = on;
+    }
+
+    /// **S456 — les zones de relaxation** (Jacobsen, Fuhrman et Fredsøe 2012) : sur `largeur` m le long de chaque bord ouvert, la
+    /// surface des colonnes et les vitesses de la grille sont ramenées vers B à chaque pas, d'un poids `(e^{c^3,5} − 1)/(e − 1)`
+    /// (`c` : 1 au bord, 0 au bout de la zone) — ce qui ne colle pas à B y meurt au lieu de s'y réfléchir. Le volume que la
+    /// relaxation ajoute ou retire est compté avec celui des bords (`open_quanta`).
+    pub fn set_relax(&mut self, largeur: f32) {
+        self.relax_m = largeur;
+    }
+
+    /// S456 : le volume entré par les bords ouverts depuis le chargement, en quanta (`total_quanta` le compte à part).
+    pub fn open_quanta(&self) -> Result<i128, String> {
+        // (relaxation comprise)
+        let Domain3 { nx, ny, .. } = self.domain;
+        let k = nx * ny + 3 * ((nx + 1) * ny + nx * (ny + 1));
+        // `read_u32` prend un décalage en octets : le mot double `k` commence à l'octet `8k`.
+        let w = self.read_u32(&self.ivol, 8 * k, 2)?;
+        Ok(((w[1] as u64) << 32 | w[0] as u64) as i64 as i128)
     }
 
     /// **S455** — le nombre de Courant de `stable_step_us` : `C·dx / (v_max + √(|g|·dx))` ; 0,5 par défaut (la référence).
@@ -1350,6 +1403,9 @@ impl ApicCarte {
         let floor = self.read_f32(&self.cols, 2 * ncol + 32, ncol)?;
         // S420 : tel qu'il est sur la carte (la bascule peut en poser un sur une carte chargée sans fond).
         let under: i128 = floor.iter().map(|f| (*f / self.domain.dx).round() as i128 * 8 * (1i128 << 24)).sum();
+        if std::env::var("QUANTA_TERMES").is_ok() {
+            println!("QUANTA_TERMES particules={} colonnes={cols} soldes={soldes} fond={under}", n * (1i128 << 24));
+        }
         Ok(n * (1i128 << 24) + cols + soldes + under)
     }
 
@@ -1945,6 +2001,9 @@ pub struct B10 {
     pub nx: usize,
     pub ny: usize,
     pub centre: [f64; 2],
+    /// S456 — une houle B (`LinearSwell`) : l'eau ensemencée sous sa surface, ses vitesses données (`b10_band_state_from`), la
+    /// bascule la lit ; la carte l'impose à ses bords ouverts. `None` : B10, au bit.
+    pub houle: Option<LinearSwell>,
 }
 
 impl B10 {
@@ -1969,6 +2028,7 @@ impl B10 {
             nx: (2. * d / dx).round() as usize,
             ny: (2. * d / dx).round() as usize,
             centre: [0., 0.],
+            houle: None,
         }
     }
 
@@ -2612,11 +2672,46 @@ pub fn b10_band_state_from(b: &B10, warm: usize, initial: bool) -> Result<(Apic3
     let sous_repos = b.nx * b.ny * ((b.h / b.dx).ceil() as usize);
     let mut a = Apic3::configure(&mut host, d, 1000., B10::G as f32, sous_repos * 8 + b.nx * b.ny * 8).map_err(|e| format!("{e:?}"))?;
     let (h, r, z0, c) = (b.h, b.r, b.z0, b.centre);
+    let houle = b.houle;
     a.seed(&|p| {
         let (x, y, z) = (p[0] as f64 - c[0], p[1] as f64 - c[1], p[2] as f64 - z0);
-        (p[2] as f64) < h && x * x + y * y + z * z >= r * r
+        // S456 : sous la surface de B, s'il y en a une.
+        let surface = h + houle.map_or(0., |w| w.elevation(p[0], 0.) as f64);
+        (p[2] as f64) < surface && x * x + y * y + z * z >= r * r
     })
     .map_err(|e| format!("{e:?}"))?;
+    if let Some(w) = houle {
+        // S456 : les vitesses de B — particules (vitesse et gradient : l'APIC porte la déformation de B) et grille (faces mouillées
+        // sous la surface de B, nulles au-dessus).
+        a.set_particle_velocities(&|p| (w.velocity(p[0], p[2], 0.), w.velocity_gradient(p[0], p[2], 0.)))
+            .map_err(|e| format!("{e:?}"))?;
+        let (nx, ny, nz, dx) = (d.nx, d.ny, d.nz, d.dx);
+        let mouillee = |x: f32, z: f32| z <= h as f32 + w.elevation(x, 0.);
+        let mut u = vec![0f32; (nx + 1) * ny * nz];
+        let v = vec![0f32; nx * (ny + 1) * nz];
+        let mut ww = vec![0f32; nx * ny * (nz + 1)];
+        for k in 0..nz {
+            for j in 0..ny {
+                for i in 0..=nx {
+                    let (x, z) = (i as f32 * dx, (k as f32 + 0.5) * dx);
+                    if mouillee(x, z) {
+                        u[(k * ny + j) * (nx + 1) + i] = w.velocity(x, z, 0.)[0];
+                    }
+                }
+            }
+        }
+        for k in 0..=nz {
+            for j in 0..ny {
+                for i in 0..nx {
+                    let (x, z) = ((i as f32 + 0.5) * dx, k as f32 * dx);
+                    if k > 0 && k < nz && mouillee(x, z) {
+                        ww[(k * ny + j) * nx + i] = w.velocity(x, z, 0.)[2];
+                    }
+                }
+            }
+        }
+        a.set_grid_velocities(&u, &v, &ww).map_err(|e| format!("{e:?}"))?;
+    }
     a.enable_columns(&mut host, &vec![0u8; d.nx * d.ny]).map_err(|e| format!("{e:?}"))?;
     let mut s = ColumnsSwitch::with_capacity(&mut host, d).map_err(|e| format!("{e:?}"))?;
     s.hold_us = 300_000;
@@ -2628,6 +2723,9 @@ pub fn b10_band_state_from(b: &B10, warm: usize, initial: bool) -> Result<(Apic3
     if std::env::var("FOND_B").is_ok() {
         let k = std::f32::consts::TAU / 2.;
         s.background = Some(LinearSwell { amplitude: 0.02, wavenumber: k, omega: (B10::G as f32 * k).sqrt(), phase: 0., mean_level: h as f32 });
+    }
+    if houle.is_some() {
+        s.background = houle;
     }
     a.set_body(Some(b.sphere(0.))).map_err(|e| format!("{e:?}"))?;
     if initial {
