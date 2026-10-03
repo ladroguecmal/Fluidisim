@@ -12,7 +12,7 @@ use crate::apic3d_carte::{b10_band_state_from, ApicCarte, B10};
 use crate::surface_carte::{Camera, SurfaceCarte};
 use std::sync::Arc;
 use std::time::Instant;
-use water_core::apic3d::{ApicStage, LinearSwell};
+use water_core::apic3d::{ApicStage, LinearSwell, Sphere3};
 use winit::{
     application::ApplicationHandler,
     event::{ElementState, MouseButton, MouseScrollDelta, WindowEvent},
@@ -25,6 +25,8 @@ use winit::{
 const PAS_MAX_US: u64 = 20_000;
 /// Pas de simulation au plus par image.
 const PAS_PAR_IMAGE: usize = 2;
+/// S458 : le budget des pas d'une image, ms (le rendu et la présentation prennent le reste des 33 ms).
+const BUDGET_IMAGE_MS: f64 = 18.;
 
 /// B10 sur la carte seule, et son rendu.
 struct Vivant {
@@ -40,6 +42,8 @@ struct Vivant {
     etages: [Option<f64>; 16],
     /// S456 : le corps est-il posé (`C10_SANS_CORPS=1` : non — la houle seule) ?
     corps: bool,
+    /// S458 : les sauts répétés (`C10_SAUTS=1`, la scène `--v1`) au lieu de la descente unique de B10.
+    sauts: bool,
 }
 
 impl Vivant {
@@ -73,6 +77,10 @@ impl Vivant {
         if b.houle.is_some() {
             carte.set_relax(std::env::var("C10_RELAX").ok().and_then(|v| v.parse().ok()).unwrap_or(0.8));
         }
+        // S458 : `TOLERANCE=<r>` — le résidu relatif de la projection (10⁻⁶ par défaut).
+        if let Some(r) = std::env::var("TOLERANCE").ok().and_then(|v| v.parse::<f64>().ok()) {
+            carte.set_tolerance(r);
+        }
         // S455 : `COURANT=<c>` — le nombre de Courant du pas (0,5 par défaut).
         if let Some(c) = std::env::var("COURANT").ok().and_then(|v| v.parse::<f64>().ok()) {
             carte.set_courant(c);
@@ -84,7 +92,8 @@ impl Vivant {
             let houle = b.houle.map_or([0.; 4], |w| [w.amplitude, w.wavenumber, w.omega, w.phase]);
             rendu.set_lumiere(true, houle, b.h as f32);
         }
-        let mut v = Self { b, carte, rendu, t_us: 0, pas: 0, quanta: 0, temoin: None, etages: [None; 16], corps: std::env::var("C10_SANS_CORPS").is_err() };
+        let mut v = Self { b, carte, rendu, t_us: 0, pas: 0, quanta: 0, temoin: None, etages: [None; 16], corps: std::env::var("C10_SANS_CORPS").is_err(),
+            sauts: std::env::var("C10_SAUTS").is_ok() };
         v.relancer()?;
         Ok(v)
     }
@@ -102,7 +111,7 @@ impl Vivant {
         }
         self.carte.load(&a)?;
         self.carte.load_switch(&s);
-        self.carte.set_body(if self.corps { a.body() } else { None });
+        self.carte.set_body(self.corps_a(0.));
         let _ = self.carte.switch_for_bench(0)?;
         self.t_us = 0;
         self.pas = 0;
@@ -114,13 +123,26 @@ impl Vivant {
         self.t_us as f64 * 1e-6
     }
 
+    /// Le corps à l'instant `t` : la descente de B10, ou (S458) les sauts répétés ; aucun sans corps.
+    fn corps_a(&self, t: f64) -> Option<Sphere3> {
+        if !self.corps {
+            return None;
+        }
+        Some(if self.sauts { sphere_saut(&self.b, t) } else { self.b.sphere(t) })
+    }
+
     /// Un pas de la carte seule : le corps à l'instant, le pas stable relu, le pas, la bascule. Rend sa durée, µs.
     fn avancer(&mut self) -> Result<u64, String> {
-        self.carte.set_body(if self.corps { Some(self.b.sphere(self.t())) } else { None });
+        self.carte.set_body(self.corps_a(self.t()));
         let us = self.carte.stable_step_us(PAS_MAX_US).map_err(|e| format!("pas stable : {e}"))?;
         let times = self.carte.step_upto(us, ApicStage::Full).map_err(|e| format!("pas : {e}"))?;
-        let (it, residu, converged) = self.carte.pressure_stats().map_err(|e| format!("pression : {e}"))?;
-        self.carte.observe_iterations(it, converged);
+        // S458 : les statistiques du gradient conjugué relues un pas sur quatre (une attente de moins ; le plafond adaptatif suit
+        // les pas récents) — chaque pas sous `C10_TRACE`.
+        let (mut it, mut residu, mut converged) = (0, 0., true);
+        if self.pas % 4 == 0 || std::env::var("C10_TRACE").is_ok() {
+            (it, residu, converged) = self.carte.pressure_stats().map_err(|e| format!("pression : {e}"))?;
+            self.carte.observe_iterations(it, converged);
+        }
         self.t_us += us;
         self.pas += 1;
         let st = self.carte.switch_for_bench(self.t_us).map_err(|e| format!("bascule : {e}"))?;
@@ -186,6 +208,123 @@ fn houle_de_l_environnement(b: &mut B10) {
 /// La caméra de R37 autour du point d'entrée de `b`.
 fn camera_b10(b: &B10) -> Camera {
     Camera::b10_en([b.centre[0] as f32, b.centre[1] as f32], b.h as f32)
+}
+
+/// **S458 — les sauts répétés** (la scène `--v1`) : le corps (une sphère de `D`, le joueur) part de 0,5 m au-dessus de l'eau, tombe
+/// à la vitesse de B10 (`Fr·√(g·D)`, 4 m/s), s'arrête à `arrêt` sous la surface, y reste 1 s, remonte à 0,6 m/s jusqu'à son départ,
+/// attend 2 s hors de l'eau, et recommence. Un mouvement imposé, comme celui de B10 : la vitesse est celle de la phase.
+fn sphere_saut(b: &B10, t: f64) -> Sphere3 {
+    let (u, r) = (b.u, b.r);
+    let haut = b.h + r + 0.5;
+    let bas = b.h + r - b.a_arret;
+    let (repos, montee_v, pause) = (1.0, 0.6, 2.0);
+    let descente = (haut - bas) / u;
+    let montee = (haut - bas) / montee_v;
+    let cycle = descente + repos + montee + pause;
+    let tc = t.rem_euclid(cycle);
+    let (z, v) = if tc < descente {
+        (haut - u * tc, -u)
+    } else if tc < descente + repos {
+        (bas, 0.)
+    } else if tc < descente + repos + montee {
+        (bas + montee_v * (tc - descente - repos), montee_v)
+    } else {
+        (haut, 0.)
+    };
+    Sphere3 { center: [b.centre[0] as f32, b.centre[1] as f32, z as f32], radius: r as f32, velocity: [0., 0., v as f32] }
+}
+
+/// **S458 — la scène `--v1`** (ADR-215 D3) : ses réglages, sauf ceux que l'environnement donne déjà — 4 m, 1,4 m d'eau, 1,5 m
+/// d'air, Courant 1, la houle de 4 cm et 2 m, les sauts répétés.
+pub fn reglages_v1() {
+    for (k, v) in [
+        ("COTE", "4"),
+        ("C10_ARRET", "0.6"),
+        ("C10_AIR", "1.5"),
+        // S458 : Courant 1,5 et la projection à 10⁻⁴ (tranché, ADR-215 D2 : stables 60 s, masse exacte).
+        ("COURANT", "1.5"),
+        ("TOLERANCE", "1e-4"),
+        ("HOULE", "0.04,2"),
+        ("C10_SAUTS", "1"),
+    ] {
+        if std::env::var(k).is_err() {
+            std::env::set_var(k, v);
+        }
+    }
+}
+
+/// **S458 — le banc de la scène `--v1`** (`--v1-banc`) : la scène sans fenêtre, `DUREE` s simulées (60 par défaut) ; toutes les
+/// 5 s, la masse (le volume des bords à part), `φ` fini, la bande ; des images aux instants des sauts (`captures/s458/`).
+pub fn banc_v1() -> Result<(), String> {
+    reglages_v1();
+    let duree: f64 = std::env::var("DUREE").ok().and_then(|v| v.parse().ok()).unwrap_or(60.);
+    let sortie = std::env::var("SORTIE").unwrap_or_else(|_| "captures/s458".into());
+    std::fs::create_dir_all(&sortie).map_err(|e| e.to_string())?;
+    let (w, h) = (960u32, 600u32);
+    pollster::block_on(async {
+        let instance = crate::instance();
+        let mut v = Vivant::new(&instance, None, w, h, wgpu::TextureFormat::Rgba8Unorm).await?;
+        let d = v.b.domain();
+        let camera = camera_b10(&v.b);
+        println!("V1_S458 domaine={}x{}x{} duree_s={duree} quanta_initiaux={}", d.nx, d.ny, d.nz, v.quanta);
+        // Les images : au premier saut (la cavité, le jet), puis au cinquième.
+        let images = [0.30, 0.55, 0.85, 1.6, 20.7, 21.2];
+        let (mut prochaine_image, mut prochain_bilan) = (0usize, 5.0);
+        let (mut pas_ms, mut pire_pas_ms) = (Vec::new(), 0f64);
+        let debut = Instant::now();
+        while v.t() < duree {
+            let t0 = Instant::now();
+            v.avancer()?;
+            let ms = t0.elapsed().as_secs_f64() * 1e3;
+            pire_pas_ms = pire_pas_ms.max(ms);
+            pas_ms.push(ms);
+            // Les pas lents, étage par étage (`V1_LENTS=<ms>`).
+            if let Some(seuil) = std::env::var("V1_LENTS").ok().and_then(|x| x.parse::<f64>().ok()) {
+                if ms > seuil {
+                    let e: Vec<String> = v.etages.iter().take(14).map(|x| format!("{:.1}", x.unwrap_or(0.))).collect();
+                    println!("V1_LENT pas={} t={:.3} mur_ms={ms:.1} etages_ms={}", v.pas, v.t(), e.join(","));
+                }
+            }
+            if prochaine_image < images.len() && v.t() >= images[prochaine_image] {
+                v.rendu.set_instant(v.t() as f32);
+                v.rendu.set_view(&camera, v.corps_a(v.t()));
+                v.rendu.render()?;
+                let rvb = v.rendu.image()?;
+                let nom = format!("{sortie}/v1_t{:.2}.ppm", images[prochaine_image]);
+                let mut ppm = format!("P6\n{w} {h}\n255\n").into_bytes();
+                ppm.extend_from_slice(&rvb);
+                std::fs::write(&nom, &ppm).map_err(|e| e.to_string())?;
+                prochaine_image += 1;
+            }
+            if v.t() >= prochain_bilan {
+                let (phi, _) = v.carte.surface()?;
+                let bilan = v.carte.total_quanta()? - v.quanta - v.carte.open_quanta()?;
+                let bande = v.carte.mask()?.iter().filter(|m| **m == 0).count();
+                println!(
+                    "V1_S458 t_s={:.2} pas={} masse_ecart_quanta={bilan} phi_fini={} colonnes_en_bande={bande} n={}",
+                    v.t(),
+                    v.pas,
+                    phi.iter().all(|x| x.is_finite()),
+                    v.carte.counts()?[0]
+                );
+                prochain_bilan += 5.0;
+            }
+        }
+        let p99 = {
+            let mut t = pas_ms.clone();
+            t.sort_by(|a, b| a.total_cmp(b));
+            t[t.len() * 99 / 100]
+        };
+        println!(
+            "V1_S458 bilan t_s={:.2} pas={} pas_mur_ms_mediane={:.2} pas_mur_ms_p99={p99:.1} pas_mur_ms_max={pire_pas_ms:.1} pas_moyen_ms={:.2} calcul_s={:.1}",
+            v.t(),
+            v.pas,
+            mediane(&mut pas_ms),
+            v.t_us as f64 / v.pas as f64 * 1e-3,
+            debut.elapsed().as_secs_f64()
+        );
+        Ok(())
+    })
 }
 
 /// La caméra en orbite autour du point d'entrée (au départ, celle de R37).
@@ -254,7 +393,7 @@ pub fn banc() -> Result<(), String> {
                 continue;
             }
             v.rendu.set_instant(v.t() as f32);
-            v.rendu.set_view(&camera, Some(v.b.sphere(v.t())));
+            v.rendu.set_view(&camera, v.corps_a(v.t()));
             v.rendu.render()?;
             let rvb = v.rendu.image()?;
             let nom = format!("{sortie}/direct_t{:.1}.ppm", instants[prochain]);
@@ -317,6 +456,8 @@ struct Fenetre {
     simule_s: f64,
     /// S455 : le temps simulé atteint après 3 s réelles (le saut).
     simule_3s: Option<f64>,
+    /// S458 : la durée du dernier pas, ms (le budget de l'image).
+    dernier_pas_ms: f64,
     erreur: Option<String>,
 }
 
@@ -343,11 +484,18 @@ impl Fenetre {
         if !self.pause {
             self.retard = (self.retard + ecoule).min(0.1);
             let mut n = 0;
-            while self.retard > 0. && n < PAS_PAR_IMAGE {
+            // S458 : un second pas seulement s'il tient dans le budget d'une image (le dernier pas en donne la durée) — les images
+            // à deux pas faisaient le 99e centile.
+            while self.retard > 0.
+                && n < PAS_PAR_IMAGE
+                && (n == 0 || maintenant.elapsed().as_secs_f64() * 1e3 + self.dernier_pas_ms < BUDGET_IMAGE_MS)
+            {
+                let debut_pas = Instant::now();
                 match v.avancer() {
                     Ok(us) => {
                         self.retard -= us as f64 * 1e-6;
                         self.simule_s += us as f64 * 1e-6;
+                        self.dernier_pas_ms = debut_pas.elapsed().as_secs_f64() * 1e3;
                     }
                     Err(err) => {
                         let msg = format!("pas {} : {err}", v.pas);
@@ -357,7 +505,7 @@ impl Fenetre {
                 }
                 n += 1;
             }
-            if n == PAS_PAR_IMAGE {
+            if self.retard > 0. {
                 self.retard = self.retard.min(0.);
             }
         }
@@ -366,7 +514,7 @@ impl Fenetre {
         }
         let rendu_debut = Instant::now();
         v.rendu.set_instant(v.t() as f32);
-        v.rendu.set_view(&orbite.camera(), Some(v.b.sphere(v.t())));
+        v.rendu.set_view(&orbite.camera(), v.corps_a(v.t()));
         let (_, queue) = v.carte.gpu();
         match surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(sortie) | wgpu::CurrentSurfaceTexture::Suboptimal(sortie) => {
@@ -550,6 +698,7 @@ pub fn fenetre() -> Result<(), String> {
         rendus_ms: Vec::new(),
         simule_s: 0.,
         simule_3s: None,
+        dernier_pas_ms: 0.,
         erreur: None,
     };
     e.run_app(&mut app).map_err(|e| e.to_string())?;
@@ -757,7 +906,7 @@ pub fn c10_saut() -> Result<(), String> {
                 }
             }
             // Le coût de la carte, horodaté, sur un pas de plus (étages du pas et de la bascule).
-            v.carte.set_body(Some(v.b.sphere(v.t())));
+            v.carte.set_body(v.corps_a(v.t()));
             let us = v.carte.stable_step_us(PAS_MAX_US)?;
             let times = v.carte.step_upto(us, ApicStage::Full)?;
             let (_, it, _, converged) = v.carte.pressure()?;
@@ -780,7 +929,7 @@ pub fn c10_saut() -> Result<(), String> {
                 println!("C10_OU scene colonnes_sans_surface={sans} hauteur_coin={:.3} phi_coin_k60={:?}", hs[0], coin);
             }
             v.rendu.set_instant(v.t() as f32);
-            v.rendu.set_view(&camera, Some(v.b.sphere(v.t())));
+            v.rendu.set_view(&camera, v.corps_a(v.t()));
             v.rendu.render()?;
             if std::env::var("C10_OU").is_ok() {
                 let attendu = crate::surface_carte::champ_cpu(&phi, &mask, d.nx, d.ny, d.nz);

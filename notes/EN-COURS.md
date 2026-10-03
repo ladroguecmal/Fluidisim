@@ -76,7 +76,15 @@ et la commande donnée — le jugement de l'utilisateur.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — les sauts répétés ; `--v1`, `--v1-banc` ; mesures (1), (2) ; images.
+- [x] **P2** — les sauts répétés ; `--v1`, `--v1-banc` ; mesures (1), (2) ; images.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `sphere_saut` (le cycle de 5 s : chute à 4 m/s depuis 0,5 m, arrêt à 0,6 m, une seconde, remontée à 0,6 m/s, deux
+  secondes hors de l'eau), `Vivant::corps_a`, `reglages_v1`, `--v1`, `--v1-banc` ; `ApicCarte::set_tolerance` ; les statistiques du
+  gradient conjugué relues un pas sur quatre ; un budget de pas par image (18 ms). **Mesuré** : (1) **60 s, une douzaine de sauts,
+  masse exacte à chaque bilan, `φ` fini, aucun arrêt** ; (2) la fenêtre, d'abord **0,83** du temps réel et 36,7 ms au 99e centile
+  (Courant 1, 10⁻⁶) ; la projection à 10⁻⁴ : 0,94, 36,8 ms — les images à deux pas ; Courant 1,5 (stable 60 s, masse exacte, image
+  plausible) et un seul pas par image en régime courant : **0,99 du temps réel (0,95 pendant les sauts), 22,8 ms au 99e centile** —
+  tenu. Tranché (ADR-215 D2) : `--v1` tourne à Courant 1,5 et à 10⁻⁴. (3) Images `captures/s458/v1_t*.png` envoyées ; R38 posée.
+

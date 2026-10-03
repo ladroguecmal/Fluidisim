@@ -2631,6 +2631,14 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--apic3d-carte-ballottement") {
         return apic3d_carte::recevoir_ballottement();
     }
+    // S458 — la scène `--v1` (ADR-215 D3) : la fenêtre, ou son banc.
+    if args.iter().any(|a| a == "--v1-banc") {
+        return surface_direct::banc_v1();
+    }
+    if args.iter().any(|a| a == "--v1") {
+        surface_direct::reglages_v1();
+        return surface_direct::fenetre();
+    }
     if args.iter().any(|a| a == "--c10-houle") {
         return surface_direct::c10_houle();
     }

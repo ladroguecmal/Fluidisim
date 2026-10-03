@@ -206,6 +206,8 @@ pub struct ApicCarte {
     /// S456 : les bords ouverts en `x` (`set_open_x`) et la largeur de leurs zones de relaxation, m (`set_relax`).
     open_x: bool,
     relax_m: f32,
+    /// S458 : le carré du résidu relatif où le gradient conjugué s'arrête (celui de la référence par défaut ; `set_tolerance`).
+    tolerance2: f64,
 }
 
 /// Durées de la carte par étage, ms (horodatages ; `None` sans la fonction).
@@ -457,6 +459,7 @@ impl ApicCarte {
             courant: 0.5,
             open_x: false,
             relax_m: 0.,
+            tolerance2: apic3d::PRESSURE_TOLERANCE2,
         })
     }
 
@@ -728,7 +731,7 @@ impl ApicCarte {
         ];
         let f = [
             dx, self.radius, self.kernel * dx, dt, gdt, self.rho, apic3d::THETA_MIN, apic3d::SEPARATION * dx, 1e-3 * dx,
-            nx as f32 * dx, ny as f32 * dx, nz as f32 * dx, apic3d::PRESSURE_TOLERANCE2 as f32,
+            nx as f32 * dx, ny as f32 * dx, nz as f32 * dx, self.tolerance2 as f32,
         ];
         // Le corps : centre au début du pas, vitesse, centre avancé — `b.center[a] += b.velocity[a]·dt`, comme la référence.
         let b = self.body.unwrap_or(Sphere3 { center: [0.; 3], radius: 1., velocity: [0.; 3] });
@@ -1283,6 +1286,12 @@ impl ApicCarte {
         // `read_u32` prend un décalage en octets : le mot double `k` commence à l'octet `8k`.
         let w = self.read_u32(&self.ivol, 8 * k, 2)?;
         Ok(((w[1] as u64) << 32 | w[0] as u64) as i64 as i128)
+    }
+
+    /// **S458** — le résidu relatif `‖r‖/‖b‖` où la projection s'arrête (10⁻⁶ par défaut, celui de la référence). La masse ne
+    /// dépend pas de lui (elle se compte en quanta) ; une tolérance plus lâche laisse une divergence résiduelle plus grande.
+    pub fn set_tolerance(&mut self, relative: f64) {
+        self.tolerance2 = relative * relative;
     }
 
     /// **S455** — le nombre de Courant de `stable_step_us` : `C·dx / (v_max + √(|g|·dx))` ; 0,5 par défaut (la référence).
