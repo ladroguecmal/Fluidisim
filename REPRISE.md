@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-10-03 02:29 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S458 — la scène `--v1`** (ADR-215 D4, étape 5)
 Dernière session : S457 — la lumière de l'eau ([preuve](docs/validation/C10-SCENES-S454.md) §6) — la lumière reçue dans `surface_carte`, la mer de B au-delà du domaine ; le lot des registres. Avant : S456
 Session suivante : **S458 — la scène `--v1`** (ADR-215 D4, étape 5) : la scène vivante d'ADR-215 D3 en une commande — 4 m, 1,4 m d'eau, la houle, la lumière reçue, Courant 1 ; des sauts répétés (le corps relancé) ; reçu si soixante secondes simulées sans arrêt, masse exacte, simulé / réel ≥ 0,9, 33 ms au 99e centile — puis le jugement de l'utilisateur. **Sans attendre de « Continue »** (ADR-215 D1)
 Maillons        : 14 — justifié : la priorité du solveur passe avant la règle (S406) ; journal

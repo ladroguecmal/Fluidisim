@@ -62,34 +62,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S457 — **terminée**. Sans « Continue » (ADR-215 D1) : le lot des registres (ADR-213 D3, dû en S457), puis l'étape 4
-d'ADR-215 D4, **la lumière de l'eau**.
+Session : S458 — **en cours**. Sans « Continue » (ADR-215 D1) : l'étape 5 d'ADR-215 D4, **la scène `--v1`**.
 
-**Ce que la session fait.** (1) Le lot des registres pour S454–S456. (2) **La lumière reçue portée dans `surface_carte`** — celle
-de R14, R20 et R24 (`godot/ciel.gdshaderinc`, `optique_eau.gdshaderinc`, `eau.gdshaderinc`) : le ciel calé sur la photographie de
-référence, le corps d'eau `R(0⁻)` de Pope & Fry et Morel sous `E/π = 2`, Fresnel exact, l'éclat du soleil, la colonne d'eau de
-Maritorena sur un fond de sable vu par réfraction (le corps compris). (3) **La mer au-delà du domaine** (décision, ADR-215 D2) : hors
-du domaine simulé, la surface de B analytique jusqu'à l'horizon — la scène n'est plus une boîte ; les zones de relaxation ramènent
-la surface simulée à B au raccord.
+**Ce que la session fait.** La scène vivante d'ADR-215 D3 en une commande, `--v1` : 4 m, 1,4 m d'eau, la houle (4 cm, 2 m), la
+lumière reçue, Courant 1. **Des sauts répétés** : le corps (le joueur, une sphère de 0,4 m) tombe de 0,5 m au-dessus de l'eau à
+4 m/s, s'arrête à 0,6 m sous la surface, y reste une seconde, remonte à 0,6 m/s, attend deux secondes hors de l'eau, et recommence —
+un cycle d'environ 5 s. Le banc `--v1-banc` : la même scène sans fenêtre, 60 s simulées, et ses images.
 
-**Critères, écrits avant.** (1) le champ fondu inchangé (la passe de calcul n'est pas touchée) ; (2) le coût d'une image sous 2 ms
-(médiane, 960 × 600) ; (3) le raccord domaine | mer de B invisible sur la houle calme ; (4) les images de la scène — le saut sous la
-houle — montrées à l'utilisateur.
+**Critères, écrits avant** (ADR-215 D3). (1) **60 s simulées** enchaînant les sauts **sans refus ni arrêt**, `φ` fini, **masse exacte**
+(le volume des bords compté) ; (2) la fenêtre : **simulé / réel ≥ 0,9** et **33 ms au 99ᵉ centile** sur 60 s ; (3) les images montrées
+et la commande donnée — le jugement de l'utilisateur.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le lot des registres.
-- [x] **P3** — la lumière reçue, la mer au-delà ; mesures ; images.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — les sauts répétés ; `--v1`, `--v1-banc` ; mesures (1), (2) ; images.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — feuille de route, liste, file active pour S454–S456 (C10-1, la v1 solide, ADR-215) ; `Registres` : dernier lot S457, le prochain au plus tard en S460.
-- **P3** — `surface_carte.wgsl` : la lumière reçue (le ciel de la photographie, nuages, soleil ; `R(0⁻)·E/π` ; Fresnel exact ;
-  l'éclat ; la colonne de Maritorena jusqu'au sable — ou au corps — par réfraction) en mode `mer.z = 1`, l'ombrage de R37 gardé pour
-  les bancs (mode 0) ; la mer de B analytique hors du domaine (Newton depuis le plan moyen ; sa pente éteinte selon l'empreinte du
-  pixel) ; `set_lumiere`, `set_instant`. **Mesuré** : (1) le champ fondu inchangé (7,2·10⁻⁷) ; (2) le rendu en direct 1,2 ms au mur,
-  acquisition comprise — tenu ; (3) le raccord : un trait d'une demi-maille (la boîte marchée s'arrête aux centres des mailles, la mer
-  de B commençait au bord) — corrigé ; reste un changement de texture des reflets au raccord, léger ; (4) images
-  `captures/s457/scene_t{0.5,1.0,2.0,4.0}.png` envoyées. La fenêtre : 0,97 du temps réel.
-- **P4** — C10-SCENES-S454 §6 ; journal ; jeton libre ; maillons 14 (justifiés : S406) ; suivant : S458, la scène `--v1` (ADR-215 D4 étape 5).
