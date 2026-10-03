@@ -28,6 +28,11 @@ pub struct BandInSea {
     margin: usize,
     conservative: bool,
     particle_heights: bool,
+    /// S459 : le volume que le corps de la bande déplace sous la surface, m³ (`set_displaced`), et celui que la mer porte déjà.
+    displaced: f64,
+    displaced_carried: f64,
+    /// S459 : la largeur de l'anneau où la mer reçoit les vitesses de la bande (`set_velocity_ring`) ; `None` : tout l'intérieur.
+    ring: Option<usize>,
     eta: Vec<f32>,
     u: Vec<f32>,
     v: Vec<f32>,
@@ -60,6 +65,9 @@ impl BandInSea {
             margin,
             conservative: true,
             particle_heights: false,
+            displaced: 0.,
+            displaced_carried: 0.,
+            ring: None,
             eta: vec![0.; sea.columns()],
             u: vec![0.; nu],
             v: vec![0.; nv],
@@ -80,6 +88,23 @@ impl BandInSea {
     /// mer garde sa hauteur.
     pub fn set_particle_heights(&mut self, on: bool) {
         self.particle_heights = on;
+    }
+
+    /// **S459 (C10-2) — le volume déplacé par le corps de la bande**, m³ (la part immergée, donnée par l'appelant à chaque pas) : la
+    /// mer ne voit pas le corps, et le raccord conservatif, qui tient le volume de δ de la bande égal au sien, retirait à la bande ce
+    /// que le corps déplace (S459 : 1,7 cm sur la bande, la sphère de B10). `feed_sea` ajoute au volume de δ de la mer **la variation**
+    /// du volume déplacé depuis le pas précédent (la mer garde ensuite ce qu'elle a reçu) et la rend : l'appelant la compte comme un
+    /// apport de la mer. Défaut : 0, au bit.
+    pub fn set_displaced(&mut self, volume_m3: f64) {
+        self.displaced = volume_m3;
+    }
+
+    /// **S459 (C10-2) — l'anneau des vitesses** : la mer ne reçoit les vitesses de la bande que sur `largeur` colonnes au bord de
+    /// l'intérieur ; au-delà, la vitesse propre nulle (la mer n'y porte que B). Sous un jet, la mer recevait des vitesses de 4 m/s
+    /// sur l'intérieur, que son propre pas faisait sortir de ses bornes (S459 : refus à 0,7 s) — or cet intérieur est réécrit à chaque
+    /// pas. `None`, le défaut : tout l'intérieur, au bit.
+    pub fn set_velocity_ring(&mut self, largeur: Option<usize>) {
+        self.ring = largeur;
     }
 
     /// **La mer reçoit l'état de la bande** dans son intérieur ; rend `c`, m. La bande doit porter une zone de colonnes.
@@ -136,7 +161,10 @@ impl BandInSea {
                 count += 1;
             }
         }
-        let c = if self.conservative && count > 0 { ((v_sea - v_band) / count as f64) as f32 } else { 0. };
+        // S459 : la bande porte, en plus de l'eau de la mer, ce que son corps a déplacé depuis le pas précédent.
+        let deplace = (self.displaced - self.displaced_carried) / (dx as f64 * dx as f64);
+        self.displaced_carried = self.displaced;
+        let c = if self.conservative && count > 0 { ((v_sea + deplace - v_band) / count as f64) as f32 } else { 0. };
         // Le pas mobile de la mer refuse une surface hors de `[2·dx, (nz − 1)·dx]` (`mobile_in_bounds`) : la hauteur donnée y est
         // bornée — un jet de la bande peut monter plus haut que la mer ne sait le porter.
         let (low, high) = (2.01 * dx, (nz as f32 - 1.01) * dx);
@@ -150,22 +178,27 @@ impl BandInSea {
             }
         }
         let (ua, va, wa) = (band.velocity_u(), band.velocity_v(), band.velocity_w());
+        // S459 : hors de l'anneau, la vitesse propre nulle — la vitesse de la bande y est remplacée par celle de B.
+        let ring = self.ring;
+        let dans_anneau = |i: usize| ring.map_or(true, |r| i < m + r || i >= na - m - r);
         for k in 0..nz {
             for j in 0..ny {
                 for i in m..=na - m {
-                    self.u[fu(i0 + i, j, k)] = ua[au(i, j, k)] - bg.u[fu(i0 + i, j, k)].u[0];
+                    // Une face `u` est dans l'anneau si l'une des deux colonnes qu'elle sépare y est.
+                    let dedans = dans_anneau(i) || (i > 0 && dans_anneau(i - 1));
+                    self.u[fu(i0 + i, j, k)] = if dedans { ua[au(i, j, k)] - bg.u[fu(i0 + i, j, k)].u[0] } else { 0. };
                 }
             }
             for j in 1..ny {
                 for i in m..na - m {
-                    self.v[fv(i0 + i, j, k)] = va[av(i, j, k)] - bg.v[fv(i0 + i, j, k)].u[1];
+                    self.v[fv(i0 + i, j, k)] = if dans_anneau(i) { va[av(i, j, k)] - bg.v[fv(i0 + i, j, k)].u[1] } else { 0. };
                 }
             }
         }
         for k in 1..nz {
             for j in 0..ny {
                 for i in m..na - m {
-                    self.w[fw(i0 + i, j, k)] = wa[aw(i, j, k)] - bg.w[fw(i0 + i, j, k)].u[2];
+                    self.w[fw(i0 + i, j, k)] = if dans_anneau(i) { wa[aw(i, j, k)] - bg.w[fw(i0 + i, j, k)].u[2] } else { 0. };
                 }
             }
         }

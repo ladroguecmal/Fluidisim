@@ -1705,6 +1705,11 @@ pub struct ColumnsSwitch {
     /// requise, ni dilatée — ; le fond descend aussi sous ces mailles. Sans elle, une colonne au voisinage du seuil entre et sort
     /// (S429 : 25 retours rapides à 0,4 m/s). `None`, le défaut.
     pub floor_speed_release: Option<f32>,
+    /// **S459 — C10-2 : les colonnes épinglées** (`nx·ny`, rangées `j·nx + i`) : une colonne épinglée **reste en colonnes** tant
+    /// qu'elle est convertible, quoi que demandent le corps, la pente, l'écoulement ou la dilatation — la couronne d'un raccord bande ↔
+    /// mer, où des colonnes de particules rendent la mer instable (c3, S449). Une épinglée non convertible reste en particules.
+    /// `None`, le défaut : le critère de S408, au bit.
+    pub pinned_columns: Option<Vec<bool>>,
     /// L'instant de la décision en cours (`switch`), µs — pour B.
     now_us: u64,
     domain: Domain3,
@@ -1752,6 +1757,7 @@ impl ColumnsSwitch {
             background: None,
             floor_deformation: None,
             floor_speed_release: None,
+            pinned_columns: None,
             now_us: 0,
             domain,
             required_at: vec![u64::MAX; cols],
@@ -2022,7 +2028,9 @@ impl ColumnsSwitch {
                 }
                 let at = self.required_at[col];
                 let band = required || (at != u64::MAX && now_us.saturating_sub(at) < self.hold_us);
-                self.request[col] = u8::from(!band);
+                // S459 : une colonne épinglée et convertible reste en colonnes.
+                let pinned = self.pinned_columns.as_ref().is_some_and(|p| p.get(col).copied().unwrap_or(false));
+                self.request[col] = u8::from(!band || (pinned && self.height[col].is_finite()));
             }
         }
     }

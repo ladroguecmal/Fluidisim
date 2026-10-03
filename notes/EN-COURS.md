@@ -82,7 +82,16 @@ aucun refus sur 3 s, sous une houle calme (2 cm, 2 m) et sous le saut ; aucune c
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `pinned_columns` (et son test) ; le banc `saut_en_mer` ; mesures (1) à (3).
+- [x] **P2** — `pinned_columns` (et son test) ; le banc `saut_en_mer` ; mesures (1) à (3).
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `ColumnsSwitch::pinned_columns` (+ test `pinned_columns_stay_columns_under_the_body_s459`) ; `BandInSea::set_displaced`
+  (le volume que le corps déplace, sa variation portée par la mer) et `set_velocity_ring` (les vitesses de la bande sur un anneau) ;
+  le banc `saut_en_mer` (CPU, 3 à 25 min par passage). **Mesuré** : (1) masse au raccord **10⁻⁷ à 6·10⁻⁷** du volume de la bande — tenu ;
+  aucune colonne épinglée en particules — tenu ; (2) **la mer refuse** (« Domain ») vers **t = 0,70 s**, au jet de Worthington, sous la
+  houle — la hauteur lue sous les particules (0,58 s), l'anneau des vitesses (0,70 s) n'y changent rien — **manqué**, cause à localiser ;
+  (3) le cratère : écart médian **0,35 maille** contre la bande seule à parois — **témoin mal posé** : dans 1,6 m × 1,6 m à parois, le
+  volume que la sphère déplace monte le niveau de ≈ 1,3 cm, dans la mer il s'étale ; le volume déplacé compté ne change rien (0,354).
+  Suite verte, un test de plus.
+

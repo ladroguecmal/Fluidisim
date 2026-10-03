@@ -713,6 +713,37 @@ fn the_switch_follows_the_body_and_holds_the_band_s408() {
     assert!((fraction - 3. * expected as f64 / (4. * (n * n) as f64)).abs() < 1e-12, "{fraction}");
 }
 
+/// **S459 (C10-2)** : les colonnes épinglées restent en colonnes quand le corps demanderait leur passage aux particules ; les
+/// autres suivent le critère de S408 ; le volume est exact.
+#[test]
+fn pinned_columns_stay_columns_under_the_body_s459() {
+    let (n, nz, dx) = (16, 16, 0.05f32);
+    let (mut a, mut arena) = apic(n, n, nz, dx, n * n * nz * 8);
+    let mut host = HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs };
+    a.enable_columns(&mut host, &vec![0u8; n * n]).unwrap();
+    a.seed(&|p| p[2] < 0.4).unwrap();
+    let mut s = ColumnsSwitch::with_capacity(&mut host, a.domain()).unwrap();
+    // Épinglées : les cinq premières rangées en `x`.
+    s.pinned_columns = Some((0..n * n).map(|c| c % n < 5).collect());
+    let v0 = a.total_volume();
+    s.switch(0, &mut a).unwrap();
+    a.set_body(Some(Sphere3 { center: [0.4, 0.4, 0.55], radius: 0.1, velocity: [0., 0., -1.] })).unwrap();
+    let core = |i: usize, j: usize| {
+        let (x, y) = ((i as f32 + 0.5) * dx - 0.4, (j as f32 + 0.5) * dx - 0.4);
+        x * x + y * y <= 0.2 * 0.2
+    };
+    let band = |i: usize, j: usize| (i.saturating_sub(2)..=(i + 2).min(n - 1)).any(|x| (j.saturating_sub(2)..=(j + 2).min(n - 1)).any(|y| core(x, y)));
+    s.switch(100_000, &mut a).unwrap();
+    let mut pinned_in_band = 0;
+    for c in 0..n * n {
+        let (i, j) = (c % n, c / n);
+        assert_eq!(a.is_column(i, j), !band(i, j) || i < 5, "colonne ({i}, {j})");
+        pinned_in_band += usize::from(band(i, j) && i < 5);
+    }
+    assert!(pinned_in_band > 0, "le corps doit atteindre des épinglées");
+    assert!((a.total_volume() / v0 - 1.).abs() <= 1e-9);
+}
+
 #[test]
 fn the_switch_takes_the_steep_and_the_folded_to_particles_s408() {
     // Une marche de 0,2 m dans la surface (pente 2 à ses deux colonnes) et une poche d'air (mailles occupées discontinues) sont
