@@ -10,13 +10,13 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-03 08:56 +02:00
+JETON            : libre
+Battement        : 2026-10-03 19:43 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S459 — C10-2, le saut dans la mer δ** (premier pas, au CPU)
-Dernière session : S458 — la scène `--v1` ([preuve](docs/validation/C10-SCENES-S454.md) §7) — sauts répétés sous la houle, 60 s sans arrêt, masse exacte, 0,99 du temps réel, 22,8 ms au 99e centile ; R38 posée. Avant : S457
-Session suivante : **S459 — après la v1** (R38 reçu : *« Correct pour une V1 »*) : **C10-2**, le saut dans la mer δ — la bande de la carte dans la mer δ + B, le raccord porté sur la carte, ses colonnes de marge gardées en colonnes ([C10-SCENES-S454](docs/validation/C10-SCENES-S454.md) §2) ; puis C10-3, la coque. Les défauts ouverts de la v1 : le plafond, la modulation de la houle, la texture au raccord, les parois en `y`
-Maillons        : 0 — capacité reçue (S458 : la scène `--v1`, C10-SCENES-S454 §7) ; journal
+Session en cours : aucune
+Dernière session : S459 — C10-2 au CPU ([preuve](docs/validation/C10-SCENES-S454.md) §8) — la couronne épinglée, masse au raccord 10⁻⁷ ; la mer refuse à 0,7 s sous le jet. Avant : S458 (la v1, R38 reçu)
+Session suivante : **S460 — C10-2, seconde session** : localiser le refus de la mer sous le jet (la colonne, la hauteur, dans la bande ou dehors ; un banc plus court) et le corriger ; le témoin du cratère refait (la bande à parois aussi longue que la mer). Au troisième échec, plafond (ADR-213 D2). C11 (δ dans Godot) peut passer avant, à la demande
+Maillons        : 1 — journal
 Registres       : dernier lot S457 (ADR-213 D3) ; le prochain au plus tard en S460
 ```
 

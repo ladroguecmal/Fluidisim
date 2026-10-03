@@ -18429,3 +18429,12 @@ justifié : la priorité du solveur (S406). Suivant : la scène `--v1`.
 masse exacte, aucun arrêt ; la fenêtre de 0,83 à **0,99** du temps réel (0,95 pendant les sauts), **22,8 ms** au 99e centile —
 Courant 1,5 et 10⁻⁴ tranchés. **Ce qui devient possible** : la scène vivante jouée en temps réel ; **le chemin qui la consomme** :
 R38, puis C10-2 ; **la preuve** : §7. Maillons **0**. Suite **762**. **Rituel** (allégé). Suivant : le verdict R38.
+
+## S459 — 2026-10-03 — C10-2, premier pas : le saut dans la mer δ, au CPU
+
+**Entrée.** R38 reçu (*« Correct pour une V1 »*), puis *« Parfait continue »*, avec une question sur les moteurs de rendu
+(répondue : l'afficheur, Godot, les bancs, le lancer de rayons — voulu, δ entre dans Godot en C11). **Fait**
+([preuve](../docs/validation/C10-SCENES-S454.md) §8) : la couronne du raccord épinglée en colonnes, le volume déplacé, l'anneau des
+vitesses ; le banc `saut_en_mer`. **Mesuré** : masse au raccord 10⁻⁷ ; **la mer refuse à 0,7 s sous le jet**, quoi qu'on donne à
+l'intérieur ; le témoin du cratère mal posé (parois). Suite verte (+1). **Rituel** (allégé). Maillons **1**. Suivant : localiser le
+refus de la mer.

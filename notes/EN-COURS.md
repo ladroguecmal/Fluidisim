@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S459 — **en cours**. *« Parfait continue »* (après R38) — **C10-2, le saut dans la mer δ**
+Session : S459 — **terminée**. *« Parfait continue »* (après R38) — **C10-2, le saut dans la mer δ**
 ([C10-SCENES-S454](../docs/validation/C10-SCENES-S454.md) §2), premier pas, au CPU, avec le raccord qui existe (`BandInSea`).
 
 **Une question de l'utilisateur, répondue** : les rendus n'ont pas tous le même moteur — l'afficheur (R14–R18), Godot (R19–R33 :
@@ -83,7 +83,7 @@ aucun refus sur 3 s, sous une houle calme (2 cm, 2 m) et sous le saut ; aucune c
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `pinned_columns` (et son test) ; le banc `saut_en_mer` ; mesures (1) à (3).
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `ColumnsSwitch::pinned_columns` (+ test `pinned_columns_stay_columns_under_the_body_s459`) ; `BandInSea::set_displaced`
@@ -94,4 +94,4 @@ aucun refus sur 3 s, sous une houle calme (2 cm, 2 m) et sous le saut ; aucune c
   (3) le cratère : écart médian **0,35 maille** contre la bande seule à parois — **témoin mal posé** : dans 1,6 m × 1,6 m à parois, le
   volume que la sphère déplace monte le niveau de ≈ 1,3 cm, dans la mer il s'étale ; le volume déplacé compté ne change rien (0,354).
   Suite verte, un test de plus.
-
+- **P3** — C10-SCENES-S454 §8 ; journal ; jeton libre ; maillons 1 ; suivant : S460, localiser le refus de la mer sous le jet (C10-2).

@@ -166,3 +166,31 @@ changement de texture des reflets au raccord domaine | mer de B (§6), les paroi
 réfléchissent).
 
 *2026-10-03 — l'utilisateur* : *« Correct pour une V1 »* — **R38 reçu** ; la v1 d'ADR-215 D3 est atteinte.
+
+## 8. C10-2, premier pas : le saut dans la mer δ, au CPU (S459)
+
+2026-10-03. Le banc `saut_en_mer` (`code/water-core/examples/saut_en_mer.rs`) : une mer `Volume3` relative à B (4,8 m × 1,6 m, 1,4 m
+d'eau, 1,5 m d'air, 5 cm), au milieu une bande `Apic3` de 1,6 m en eau totale raccordée par `BandInSea`, le saut de B10 au centre.
+**Nouveau** : `ColumnsSwitch::pinned_columns` — la couronne du raccord (4 colonnes de chaque bord en `x`) **épinglée en colonnes**,
+la réponse au déclencheur de c3 (§23.6 d'APIC-CARTE-S416) ; `BandInSea::set_displaced` (le volume que le corps déplace, dont la mer
+porte la variation) ; `BandInSea::set_velocity_ring` (la mer ne reçoit les vitesses de la bande que sur un anneau).
+
+**Reproduire** : `cargo build --release -p water-core --offline --example saut_en_mer`, puis `code/target/release/examples/saut_en_mer
+[eps_b] [durée_s]` (≈ 20 min : (A) mer sans houle, (B) bande seule à parois, (C) mer sous la houle) ; `SAUT_SANS_HOULE=1`,
+`SAUT_HOULE_SEULE=1`, `SAUT_HAUTEUR_LUE=1`, `SAUT_ANNEAU=<colonnes>`, `SAUT_SANS_DEPLACE=1`.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) la masse au raccord sous 0,1 % du volume de la bande | **1·10⁻⁷** (sans houle), **3 à 6·10⁻⁷** (houle) | tenu |
+| (2) la mer stable 3 s sous la houle et le saut ; aucune épinglée en particules | aucune épinglée en particules ; **refus de la mer** (« Domain ») à **t = 0,70 s** — le jet ; hauteur lue sous les particules : 0,58 s ; anneau des vitesses de 4 colonnes : 0,70 s | **manqué** |
+| (3) le cratère à une maille de la bande seule | écart médian **0,35 maille**, 7,4 au plus | **témoin mal posé** |
+
+**Ce qui est appris.** (a) La couronne épinglée tient : le raccord ne voit plus de colonnes de particules, et la masse se compte à
+10⁻⁷ près. (b) **Le refus de la mer ne vient ni des colonnes de particules au raccord, ni des vitesses reçues sur l'intérieur** : il
+arrive au jet de Worthington (0,6 à 0,85 s) quoi qu'on donne à l'intérieur — à localiser (la colonne, la hauteur, dans la bande ou
+dehors) : c'est la suite. (c) **Le témoin du cratère** — la même bande, seule, à parois — est faux : dans 1,6 m × 1,6 m fermés, le
+volume que la sphère déplace (0,034 m³) monte le niveau de ≈ 1,3 cm, soit l'écart médian mesuré ; dans la mer, il s'étale. Le bon
+témoin : la bande à parois aussi longue que la mer. Le volume déplacé compté par le raccord ne change rien au cratère (0,354 maille) ;
+il reste juste pour la masse. **Le coût** : au CPU, 3 à 25 min par passage — la suite se fera plus vite sur la carte, ou en
+découpant le banc.
+
