@@ -6,7 +6,7 @@ extends Node3D
 ## le ciel de la scène (`ciel.gdshader`), la tonalité AgX et le halo de Godot.
 ##
 ## Lancer : `Godot --path godot res://saut.tscn` — glisser : orbite, molette : distance, Espace : pause, Échap : quitter ;
-## S465 : P, la pluie (0, 2, 10, 50 mm/h ; `PLUIE=<mm/h>`).
+## S465 : P, la pluie (0, 2, 10, 50 mm/h ; `PLUIE=<mm/h>`). S470 : C, la caméra suit le joueur ou non (`SUIVRE=0`).
 ## `-- --captures` : les images aux instants de R38 (`captures/saut_t<t>.png`), puis quitte. `-- --cout` : 600 images sans
 ## synchronisation verticale, la cadence imprimée, puis quitte.
 ##
@@ -62,6 +62,12 @@ var monde_env: Environment
 ## S469 — la scène montée : en direct, `_ready` attend l'en-tête, et `_process` tourne déjà — sans les matériaux (S465 : l'horloge
 ## de la pluie les appelait nuls).
 var prete := false
+## S470 — la caméra suit le joueur (touche C ; `SUIVRE=0` : non) : la cible de l'orbite, visée et lissée.
+var suivre := true
+var cible_visee := Vector3.ZERO
+## Le recul de la caméra (un facteur de la distance), visé et lissé comme la cible.
+var recul := 1.0
+var recul_vise := 1.0
 
 
 static func b_vers_godot(p: Vector3) -> Vector3:
@@ -162,6 +168,8 @@ func _ready() -> void:
 	add_child(camera)
 	var centre_b := Vector3(0.5 * nx * dx, 0.5 * ny * dx, niveau - 0.15)
 	cible = b_vers_godot(centre_b)
+	cible_visee = cible
+	suivre = OS.get_environment("SUIVRE") != "0"
 	var oeil := b_vers_godot(centre_b + Vector3(1.7, -2.1, 1.25))
 	var r := oeil - cible
 	distance = r.length()
@@ -314,7 +322,7 @@ func environnement() -> void:
 
 
 func placer_camera() -> void:
-	var r := Vector3(sin(azimut) * cos(elevation), sin(elevation), cos(azimut) * cos(elevation)) * distance
+	var r := Vector3(sin(azimut) * cos(elevation), sin(elevation), cos(azimut) * cos(elevation)) * distance * recul
 	camera.look_at_from_position(cible + r, cible, Vector3.UP)
 	var pixel := 2.0 * tan(deg_to_rad(camera.fov) * 0.5) / float(get_viewport().get_visible_rect().size.y)
 	for m in [mat_eau, mat_mer]:
@@ -354,6 +362,12 @@ func appliquer(phi_octets: PackedByteArray, carte_octets: PackedByteArray, insta
 		else:
 			texture_c.update(carte)
 	joueur.position = b_vers_godot(centre)
+	# S470 : la cible de la caméra — le point d'entrée ; le corps en l'air, elle monte des quatre cinquièmes de sa hauteur au-dessus
+	# de l'eau et la caméra recule d'un quart de distance par mètre : le joueur entier dans le cadre, l'eau dessous.
+	var niveau_eau := float(entete["niveau"])
+	var dessus := maxf(centre.z - niveau_eau, 0.0)
+	cible_visee = b_vers_godot(Vector3(centre.x, centre.y, niveau_eau - 0.15 + 0.8 * dessus))
+	recul_vise = 1.0 + 0.25 * dessus
 	if detail != null:
 		detail.calculer(instant)
 	for m in [mat_eau, mat_mer]:
@@ -373,6 +387,12 @@ func image_a(s: float) -> int:
 func _process(delta: float) -> void:
 	if not prete:
 		return
+	# S470 : la caméra suit, lissée (un tiers de seconde).
+	if suivre and not (cible.is_equal_approx(cible_visee) and is_equal_approx(recul, recul_vise)):
+		var a := 1.0 - exp(-3.0 * delta)
+		cible = cible.lerp(cible_visee, a)
+		recul = lerpf(recul, recul_vise, a)
+		placer_camera()
 	# S465 : la pluie a sa propre horloge (l'enregistrement boucle, la pluie non).
 	t_pluie += delta
 	for m in [mat_eau, mat_mer]:
@@ -413,6 +433,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_SPACE:
 			en_pause = not en_pause
+		elif event.keycode == KEY_C:
+			suivre = not suivre
+			if not suivre:
+				recul = 1.0
+				placer_camera()
 		elif event.keycode == KEY_P:
 			pluie_mm_h = {0.0: 2.0, 2.0: 10.0, 10.0: 50.0}.get(pluie_mm_h, 0.0)
 			regler_pluie()
@@ -424,6 +449,11 @@ func captures() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures"))
 	for s in [0.30, 0.55, 0.85, 1.60, 5.80, 6.30]:
 		charger(image_a(s))
+		# S470 : la caméra posée sur sa cible d'un coup (les captures ne dépendent pas de la cadence).
+		if suivre:
+			cible = cible_visee
+			recul = recul_vise
+			placer_camera()
 		for _i in 8:
 			await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()

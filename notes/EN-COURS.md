@@ -76,8 +76,12 @@ touche C la coupe (`SUIVRE=0`). À 5,80 s, le joueur en l'air sortait du cadre.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
-- [ ] **P3** — la caméra qui suit ; images.
+- [x] **P3** — la caméra qui suit ; images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — FEUILLE-DE-ROUTE (S467–S469 ; la suite : la caméra, le plafond du domaine), LISTE (S461–S469), REPRISE (dernier lot S470, prochain S473) ; QUESTIONS-OUVERTES inchangée (juste).
+- **P3** — `saut.gd` : la cible monte des 4/5 de la hauteur du corps au-dessus de l'eau, la caméra recule d'un quart de distance par
+  mètre ; lissées en jeu, posées d'un coup pour les captures ; touche C, `SUIVRE=0`. **Mesuré** : (2) à 5,80 s le joueur entier dans
+  le cadre, l'eau dessous ; (3) `SUIVRE=0` : les six captures identiques au bit à celles d'avant ; `--cout` 403 images/s.
+
