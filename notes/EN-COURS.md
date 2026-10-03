@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S467 — **en cours**. En autonomie : le lot des registres (dû), puis le joueur éclairé comme l'eau.
+Session : S467 — **terminée**. En autonomie : le lot des registres (dû), puis le joueur éclairé comme l'eau.
 
 **Ce que la session fait.** (1) **Le lot des registres** (ADR-213 D3) pour S464–S466 : FEUILLE-DE-ROUTE, LISTE, REPRISE.
 (2) **Le joueur dans les unités de l'eau** : au-dessus de l'eau, le maillage de Godot (éclairé par Godot) est sombre et bleu ; vu
@@ -78,7 +78,7 @@ au même point avant l'eau (même formule, même albédo — lu dans le code) ; 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le lot des registres.
 - [x] **P3** — le joueur éclairé comme l'eau ; images.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — FEUILLE-DE-ROUTE (S464–S466, la suite), LISTE (S461–S466), REPRISE (dernier lot S467, prochain S470) ; QUESTIONS-OUVERTES : la ligne de la campagne reste juste (C11 dans Godot), inchangée.
@@ -86,4 +86,4 @@ au même point avant l'eau (même formule, même albédo — lu dans le code) ; 
   albédo (`corps_albedo`) ; `saut.gd` : `ALBEDO_JOUEUR`, passé aux deux. **Mesuré** : (2) la même formule et le même albédo des
   deux côtés — lu dans le code (`joueur.gdshader`, `couleur_corps`) ; (3) images `saut_t0.55.png`, `saut_t1.60_pluie10.png`
   envoyées : un gris continu à travers la surface, teinté par l'eau dessous.
-
+- **P4** — C10-SCENES-S454 §16 ; journal ; jeton libre ; maillons 1 ; suivant : S468, l'ombre du joueur sur l'eau et le fond.

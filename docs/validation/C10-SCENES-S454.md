@@ -346,3 +346,19 @@ joueur), essayées : la scène cassait dès 4 s au coin du bord ouvert ; retiré
 **Ce qui reste** : sous l'eau, le corps vu par réfraction est plus clair que le maillage au-dessus (deux éclairages : la couleur
 de `couleur_corps` et le matériau de Godot) ; un corps rigide réel (6.1) et le joueur du jeu (9.3) remplaceront le corps imposé.
 
+## 16. Le joueur éclairé comme l'eau (S467)
+
+2026-10-03. Au-dessus de l'eau, le maillage du joueur était éclairé par Godot (sombre, bleu) ; vu par réfraction, par notre nuanceur
+(`couleur_corps`, clair) — deux couleurs pour un même corps, cassées à la surface (§15, *ce qui reste*). Comme les parois de la
+piscine (S374), le joueur reçoit `joueur.gdshader` : `unshaded`, `albédo · E/π · eclairage(n)` de `ciel.gdshaderinc`, le ciel
+couvert compris ; `couleur_corps` lit le même albédo (`ALBEDO_JOUEUR` de `saut.gd`, 0,22 / 0,22 / 0,24).
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) les registres à jour | lot S467 (S464–S466) ; `--check` 0 | tenu |
+| (2) la même couleur des deux côtés | la même formule, le même albédo (`joueur.gdshader`, `couleur_corps`) | tenu |
+| (3) les images | `godot/captures/saut_t0.55.png`, `saut_t1.60_pluie10.png` | envoyées |
+
+**Ce qui reste** : l'ombre propre du joueur sur l'eau et le fond (ni `soleil_vu` ni caustiques occultées par lui) ; un joueur
+qui ressemble à une personne (le maillage du jeu).
+

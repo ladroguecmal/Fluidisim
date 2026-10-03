@@ -18492,3 +18492,10 @@ sphère au bit pour `L = 0`) ; le joueur de `--v1` debout, 0,3 × 1,7 m, qui sau
 fond ; le rendu suit (l'afficheur, Godot, l'export). **Mesuré** : 60 s, 3118 pas, écart de masse 0. Arrêté net à 0,2 m du fond,
 la scène divergeait (15 à 31 s) ; les zones de relaxation en `y`, essayées, la cassaient : retirées. Images envoyées. **Rituel**
 (allégé). Maillons **1**. Suivant : le lot des registres.
+
+## S467 — 2026-10-03 — le lot des registres ; le joueur éclairé comme l'eau
+
+**Entrée.** En autonomie. **Fait** ([preuve](../docs/validation/C10-SCENES-S454.md) §16) : le lot des registres pour S464–S466
+(FEUILLE-DE-ROUTE, LISTE, REPRISE ; prochain au plus tard S470) ; le joueur éclairé par notre nuanceur (`joueur.gdshader`), le même
+albédo que le corps vu à travers l'eau — un gris continu à travers la surface. Images envoyées. **Rituel** (allégé). Maillons **1**.
+Suivant : l'ombre du joueur.
