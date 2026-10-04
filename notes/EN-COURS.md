@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S478 — **en cours**. En autonomie (« Ok » de l'utilisateur au plan) : **K2, la conception**.
+Session : S478 — **terminée**. En autonomie (« Ok » de l'utilisateur au plan) : **K2, la conception**.
 
 **Ce que la session fait.** Relire où en sont les dix points de K2 (4.16, 4.1, 4.12, 4.20, 7.2–7.5, 3.3, 3.1), les anomalies qui les
 tiennent (A311 : l'air enfermé à pression nulle, qui arrête le calcul fin ; A312 : jet et couronne qui suivent la maille), ADR-015
@@ -77,7 +77,7 @@ référence publiée ou une mesure ; (2) ADR-220 écrite et indexée ; `--check`
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la conception ; ADR-220.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `docs/registres/CAMPAGNE-K2-S478.md` : douze sessions (K2-1 à K2-12, ≈ 30), chaque point de K2 dans au moins une, chaque
@@ -85,4 +85,4 @@ référence publiée ou une mesure ; (2) ADR-220 écrite et indexée ; `--check`
   C13, C20, C07) ; **relu : aucun modèle d'air n'existe dans APIC** — A311 commande tout ce qui suit le pincement, d'où K2-1 en
   premier. ADR-220 (indexée) : l'air enfermé en poche T2 (ADR-015), la nappe rompue en gouttes sous une maille, 4.20 par la voie
   d'ADR-007, le vide dans V.
-
+- **P3** — la preuve : CAMPAGNE-K2-S478 ; journal ; jeton libre ; maillons 1 ; suivant : S479, K2-1 — l'air enfermé, référence.

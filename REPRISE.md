@@ -10,12 +10,12 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-10-04 10:55 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S478 — K2 : la conception de la campagne de la surface non graphe**
-Dernière session : S477 — K1 : le type d'eau dans l'espace ([preuve](docs/validation/TYPE-EAU-S474.md) §5) — sans carte au bit, surcoût 0,044 ms. Avant : S476 (ADR-219 : le jeu est DyingStar)
-Session suivante : **S478 — K2 : la surface non graphe (4.16)**, le point qui en débloque le plus (22 en aval) : relire où en est 4.16 (partiel depuis S393 ; la bande APIC de la carte, S416–S470), écrire la conception de K2 — δ qui se retourne, se sépare et se referme, la cavité, la gerbe, les bulles — et son découpage en sessions, critères de fin par point (4.16, 4.1, 4.12, 4.20, 7.2–7.5, 3.1, 3.3). **Sans attendre de « Continue »**
+Session en cours : aucune
+Dernière session : S478 — K2 conçue ([conception](docs/registres/CAMPAGNE-K2-S478.md), ADR-220) : douze sessions, l'air enfermé d'abord. Avant : S477 (le type d'eau dans l'espace)
+Session suivante : **S479 — K2-1 : l'air enfermé, référence** ([conception](docs/registres/CAMPAGNE-K2-S478.md) §2, ADR-220 D1) : dans `apic3d.rs`, les composantes d'air enfermé (remplissage depuis l'air libre), leur volume sur la surface reconstruite, leur pression adiabatique posée dans la projection ; B10 3D à `D/dx` = 16 et 24 au bout (A311), la fréquence de la bulle contre Minnaert à 15 %, masse exacte. **Sans attendre de « Continue »**
 Maillons        : 1 — journal
 Registres       : dernier lot S477 (ADR-213 D3) ; le prochain au plus tard en S480
 ```
