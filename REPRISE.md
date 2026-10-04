@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-04 01:32 +02:00
+JETON            : occupé
+Battement        : 2026-10-04 09:38 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S473 — ADR-217 (le type d'eau, option de la carte ; le ciel à l'atmosphère) ; E2, la mer calme trop agitée**
 Dernière session : S472 — les scènes miroirs (ADR-216 D4) : V1, V5, V6 contre la mer de Godot, quatre écarts nommés ([preuve](docs/validation/MIROIRS-S472.md)). Avant : S471 (le banc visuel, les six références)
 Session suivante : **S473 — E2, la mer calme trop agitée** (MIROIRS-S472) : la séquence de V1 sans le détail (`DETAIL=0`) puis avec une mer de houle seule, pour séparer les deux causes ; corriger celle qui l'est ; critère : le mouvement et la part haute fréquence de V1 dans la tolérance. Ensuite E1 (le type d'eau), E3, E4 ; D7, D5 ; le plafond du domaine. **Sans attendre de « Continue »**
 Maillons        : 1 — journal

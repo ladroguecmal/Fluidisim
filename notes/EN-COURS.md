@@ -62,39 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S472 — **terminée**. En autonomie : **les scènes miroirs** (ADR-216 D4) — les références que nos scènes peuvent déjà
-montrer, mesurées contre elles.
+Session : S473 — **en cours**. **Réponses de l'utilisateur** aux écarts des miroirs : *« Le type d'eau va être une option d'edition
+dans la création de la map du jeu […] »* ; *« Ne prends pas en compte le mouvement des nuages […] »*.
 
-**Ce que la session fait.** Dans `mer.tscn` (la mer de B de R14, la scène côtière, les poses sous l'eau) : (1) une **mer calme**
-exportée par l'afficheur (`--meilleur --vent=3,5` : Hs 0,26 m, Tp 2,6 s ; `MER_DONNEES=`) — la mer de R14 est une mer du large ;
-(2) les poses des références : **plage** (V1 : l'œil à 1,7 m, l'horizon à 4 % du haut du cadre), **quai** (V5 : l'horizon au milieu),
-**sous l'eau** (V6 : la pose de S365 vers le haut) ; un cadre **portrait** à la résolution servie de la référence, un champ vertical
-de 65° (un téléphone tenu droit) ; (3) une **séquence** (`SEQUENCE_FPS`, `SEQUENCE_DUREE`) au pas fixe, à la cadence de mesure de la
-référence ; (4) `banc_visuel.py` sur les mêmes zones, à la même largeur réduite ; (5) **le rapport d'écarts** : chaque grandeur
-contre sa référence et sa classe de sensibilité (S471).
+**Ce que la session fait.** (1) **ADR-217** : le type d'eau, propriété éditée de la carte qui varie dans l'espace (E1 devient ce
+chantier, chaque préréglage jugé contre sa référence) ; le ciel qui bouge, au système d'atmosphère et de climat, après l'eau (E4
+retiré). (2) **E2** (MIROIRS-S472) : la séquence de V1 sans le détail (`DETAIL=0`), et l'export d'une mer plus calme (le refus à
+3 m/s : la coupure de la queue au-dessus du partage fixe des cascades, `K_CASCADE` = 12 rad/m), pour séparer les deux causes ; la
+correction de celle qui l'est.
 
-**Critères, écrits avant.** (1) les trois séquences capturées, l'horizon au même rang que dans la référence à 2 % du cadre près ;
-(2) le rapport écrit : pour chaque grandeur, l'écart et s'il dépasse la sensibilité de sa classe ; (3) les écarts qui dépassent
-nommés et classés (ce qu'ils disent du rendu, ce qui les corrigerait) — **aucun réglage du rendu dans cette session** : elle mesure ;
-(4) les images montrées, côte à côte avec ce que dit la référence.
+**Critères, écrits avant.** (1) ADR-217 écrite et indexée, `--check` à 0 ; (2) l'essai rendu : le mouvement et la part haute fréquence
+de V1 sans le détail, et avec la mer plus calme — la cause dite ; (3) la correction, si la cause est le rendu : le mouvement et la part
+haute fréquence de V1 dans leur tolérance (35 %) ; si la cause est la mer : l'export d'une mer de 3 m/s ou moins, et la mesure redite.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la mer calme, les poses, le cadre portrait, la séquence ; les captures.
-- [x] **P3** — les mesures et le rapport d'écarts.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — ADR-217.
+- [ ] **P3** — E2 : l'essai, la cause, la correction ; la mesure.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `mer.gd` : `MER_DONNEES=` ; les poses `plage` et `quai` ; `SEQUENCE_FPS`, `SEQUENCE_DUREE` (le pas fixe, `captures/miroir/`).
-  La mer calme : `--meilleur --vent=3.5 --export-godot=…` (Hs 0,26 m, Tp 2,56 s ; **à 3 m/s l'afficheur refuse** : « densité de queue
-  Band ») → `godot/donnees/mer_calme.json` (non versionné). **Capturé** (`--cote`, champ de 65°, cadre de la référence) : plage
-  480 × 854, 135 images à 15/s (l'horizon à 4,1 % du haut, la référence à 4 %) ; quai 360 × 640, 300 images à 15/s (l'horizon à 52 %) ;
-  sous l'eau 360 × 640, 400 images à 10/s.
-- **P3** — `banc_visuel.py --contre` (chaque grandeur contre la référence, sa classe de sensibilité, hors tolérance ou non) ; le
-  rapport `docs/validation/MIROIRS-S472.md` et nos mesures (`docs/validation/miroirs-S472/`). **Hors tolérance** : V1 11 sur 17, V5 20
-  sur 52, V6 49 sur 54. **Écarts nommés** : E1 la couleur dépend du type d'eau (V1 plus bleue, V5 verdâtre, la nôtre fixe) ; E2 notre
-  mer calme bouge et grésille trop (mouvement × 4 ; deux causes possibles, l'essai qui les sépare écrit) ; E3 sous l'eau, la lumière
-  forte manque (clairs ÷ 100) ; E4 le ciel immobile. **Une hypothèse corrigée avant d'écrire** : E2 n'est pas sûrement le détail
-  fin — il est déjà filtré par l'empreinte (mipmaps, LEAN).
-- **P4** — la preuve : MIROIRS-S472 ; journal ; jeton libre ; maillons 1 ; suivant : S473, E2 (l'essai qui sépare ses deux causes, puis la correction).
