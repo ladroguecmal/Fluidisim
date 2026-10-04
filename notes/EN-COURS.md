@@ -62,43 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S479 — **terminée**. En autonomie, K2-1 ([conception](../docs/registres/CAMPAGNE-K2-S478.md), ADR-220 D1) : **l'air
-enfermé dans la référence APIC** (`code/water-core/src/apic3d.rs`).
+Session : S480 — **en cours**. **Décision de l'utilisateur** (« Ok ») sur la proposition faite à ses questions — reprendre depuis une
+autre conversation, les défauts de méthode, la structure de gestion (*« avoir en contexte les choses essentielles nouvelles mais
+aussi les intentions initiales […] pour ne pas travailler dans le flou »*). K2-2 passe en S481.
 
-**Ce que la session fait.** `Apic3::enable_air_pockets` (mémoire réservée à la configuration, I-06) : à chaque pas, après les
-étiquettes, les **composantes d'air enfermé** — les mailles d'air que l'air libre (la rangée du haut) n'atteint pas, par remplissage —,
-suivies d'un pas à l'autre par recouvrement (fusion : leurs airs s'ajoutent ; scission : l'air se partage au volume) ; leur volume
-sur la surface reconstruite (fraction d'air `0,5 + φ/dx`) ; à la naissance, la pression de l'eau qui les borde. **L'invariant de
-chaque poche** : `a = V·P^(1/γ)`, γ = 1,4 (adiabatique). **Dans la projection, chaque poche est une inconnue** : la loi linéarisée
-`P^(n+1) − Pⁿ = −(γPⁿ/Vⁿ)·ΔV`, `ΔV` le flux de ses faces après correction, donne une ligne `(s + Σ1/θ)·p_b − Σ p_c/θ = s·p_bⁿ −
-(ρ·dx/dt)·Σ u*_sortant`, `s = ρ·Vⁿ/(γPⁿ·dt²·dx)`, symétrique avec les lignes de l'eau voisine : le système reste défini positif, le
-même gradient conjugué le résout — implicite, donc stable quel que soit le pas devant la raideur de la poche. Sans
-`enable_air_pockets`, le pas au bit.
+**Ce que la session fait.** (1) **`BOUSSOLE.md`** — deux pages lues en premier : pourquoi (l'eau de DyingStar, une surprise), les
+intentions d'origine, les décisions en vigueur en une ligne chacune, ce que l'utilisateur juge et ce qui se tranche ici, ce qui
+attend l'utilisateur. (2) **Trois registres générés** (un outil chacun, un `--check` tenu par `etat_projet.py`) : le **tableau de
+bord vers 100 %** (les points par campagne, l'historique du décompte), les **décisions en vigueur** (les ADR, leur statut, qui en
+remplace ou en précise qui), les **anomalies ouvertes** (celles dont l'en-tête porte un statut). (3) **Le journal découpé** : les
+entrées avant S470 archivées. (4) **Les calculs longs** : `outils/calcul.py` les lance hors de la conversation, sortie dans
+`calculs/` (non versionné), registre `notes/CALCULS.md` versionné. (5) **Le rituel outillé** : `outils/rituel.py debut|fin`.
+(6) **REPRISE** : l'ordre de lecture et l'état renvoient à la boussole et au tableau de bord (son §4 décrivait encore S351) ; la
+règle « le plan déclare ses entrées et comment il les vérifie ».
 
-**Critères, écrits avant.** (1) sans poches, au bit (les tests d'APIC 3D, dont S393 et S389) ; (2) une bulle immobile en eau calme
-garde son volume à 1 % sur une seconde et remonte (elle ne s'effondre plus) ; masse d'eau exacte ; (3) **Minnaert** : une bulle
-lâchée en surpression oscille à `f = (1/2πR)·√(3γP/ρ)` à 15 % ; (4) **A311** : B10 3D (`apic3d_b10`) va au bout à `D/dx` = 16 avec
-les poches, et la bulle pincée vit (son volume après le pincement, tracé) ; `D/dx` = 24 si le temps le permet (dit sinon).
+**Critères, écrits avant.** (1) une session froide trouve en deux pages le pourquoi, les décisions en vigueur et la suite ; (2) les
+trois registres régénérés à l'identique par leur outil, `--check` à 0 ; (3) le journal archivé sans perte (le nombre d'entrées
+avant = après) ; (4) un calcul lancé par `calcul.py` survit à la conversation et se retrouve par le registre ; (5) le rituel de
+fin de S480 fait par `rituel.py`.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — les poches dans `apic3d.rs` ; les essais (1) à (3).
-- [x] **P3** — B10 avec poches (4) ; mesures.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — la boussole ; REPRISE et AGENTS.
+- [ ] **P3** — les trois registres générés, tenus par `--check`.
+- [ ] **P4** — le journal archivé ; `calcul.py` ; `rituel.py`.
+- [ ] **P5** — preuve ; rituel (par `rituel.py`).
 
 ### Notes de reprise
-- **P2** — `code/water-core/src/apic3d_poches.rs` : `enable_air_pockets`, la détection (remplissage), le suivi (recouvrement : fusion,
-  scission), la naissance à la pression de l'eau voisine, l'invariant `V·P^(1/γ)`, la poche comme inconnue de la projection
-  (`project_with_pockets`, une seconde projection : le chemin sans poches au bit, par construction). **Trouvé en chemin** : le volume
-  géométrique seul saute de 1 % quand des mailles changent d'étiquette (trois mailles d'un coup) — chaque saut frappe la poche ;
-  la première bulle oscillait à 56 Hz (× 1,34). **Remède** : le volume suivi par le flux de la projection, rappelé vers la
-  géométrie en 0,1 s. **Mesuré** : (1) les 43 tests d'APIC 3D passent (le nouveau `air_pocket_holds_a_bubble_s479` compris) ;
-  (2) la bulle (R = 0,08 m, R/dx = 4, à 0,3 m de fond) remonte (son centre de 0,258 à 0,300 m en 0,15 s), son volume moyen
-  comprimé de 1,6 % (l'adiabatique sous la charge en attend 2,0 %), oscillation de ± 1,3 %, masse exacte ; (3) **42,5 Hz contre
-  41,6 de Minnaert (× 1,021)** — la cuve, par la méthode des images, attendrait 38,4 (× 1,107) : dans les 15 % des deux.
-- **P3** — B10 avec poches : à `D/dx` = 8, au bout (la bulle : 0,262 D³, 98 à 142 kPa) ; **à 16, au bout en 31 min**, pincement
-  2,084 √(R/g) (S393 : 2,08), la bulle vit 1,5 √(D/g) après (0,283 D³ au plus, 0,231 à la fin, 82 à 155 kPa). `D/dx` = 24 lancé
-  (≈ 2 h 30), consigné à son arrivée. La bulle dans une cuve deux fois plus grande : en cours (trois millions de particules).
-  A311 : note datée (remède éprouvé ; ouverte jusqu'à la carte).
-- **P4** — la preuve : POCHES-AIR-S479 ; LISTE (4.12, 7.4) ; journal ; jeton libre ; maillons 1 ; suivant : S480, K2-2 — les poches sur la carte ; consigner `D/dx` = 24 et la grande cuve à leur arrivée.
