@@ -50,13 +50,16 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
 | écume | reprise, d'après les vidéos V2 et V3 | ADR-219 D5 |
 | hors périmètre | les eaux souterraines (5.11) | ADR-197 D4 |
 | air | poches adiabatiques (T2), jamais un solveur diphasique | ADR-015, ADR-220 |
+| méthode | elle se révise elle-même toutes les cinq sessions ; une décision technique que la mesure contredit est remplacée sans demander ; à l'utilisateur : ambition, rendus, téléchargements, configuration de sa machine | ADR-222 |
 | structure | la boussole d'abord ; l'état dans les registres générés ; les calculs longs par `calcul.py` ; le rituel par `rituel.py` | ADR-221 |
 
 ## Ce que l'utilisateur décide, et ce qui attend de lui
 
 - **Il juge** : les rendus, aux jalons (avec les mesures du banc) ; le périmètre du jeu ; toute réduction d'ambition.
 - **Il accorde** : chaque téléchargement — au moment de 13.4 : **Godot 4.5 en double précision et une copie locale de DyingStar**.
-- **En attente de lui aujourd'hui** : rien. Une question nouvelle s'inscrit ici, une ligne, et se retire quand il a répondu.
+- **En attente de lui aujourd'hui** (S481, [ADR-222](docs/adr/ADR-222-la-methode-se-revise-elle-meme.md) §3) : une **relance planifiée**
+  (« Reprends le projet » quand le jeton est libre ou interrompu) ; les **téléchargements anticipés** (Godot 4.5 double, DyingStar).
+  Une question nouvelle s'inscrit ici, une ligne, et se retire quand il a répondu.
 
 ## Comment on travaille — l'essentiel
 
@@ -64,7 +67,7 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
   vérifie** (S480 — la leçon de S472, où une mer lisait le détail d'une autre).
 - Une étape par commit `S<n> P<k> — …` ; la preuve dans `docs/validation/` ; le rituel de fin par `python outils/rituel.py fin`.
 - Une propriété numérique revendiquée s'écrit en code et se mesure, contre une référence publiée.
-- Les calculs longs se lancent par `python outils/calcul.py lancer` — ils survivent à la conversation, leur trace est dans
+- Les calculs longs se lancent par `python outils/calcul.py lancer` — hors de la session (WMI, S481), ils survivent à la conversation ; leur trace est dans
   [`notes/CALCULS.md`](notes/CALCULS.md).
 
 ## Les pièges connus
