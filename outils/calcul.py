@@ -121,6 +121,9 @@ def lancer(nom: str, session: str, commande: list, env: dict | None = None) -> P
 def executer(d: Path, commande: list) -> int:
     """Dans le processus détaché : exécute la commande, puis écrit fin.txt — même si elle échoue."""
     (d / "pid").write_text(str(os.getpid()), encoding="utf-8")
+    # Un programme donné par un chemin relatif au dépôt (S481 : `viewer/target/release/…` introuvable sous Windows sans shell).
+    if commande and (ROOT / commande[0]).is_file():
+        commande = [str(ROOT / commande[0])] + commande[1:]
     try:
         # les poignées explicites : un processus détaché n'a pas de console, la commande écrirait dans le vide (S480)
         env = dict(os.environ, PYTHONIOENCODING="utf-8")

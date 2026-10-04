@@ -92,7 +92,7 @@ dans la session est dit, et passe à S482.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'état des poches exporté par la référence ; `apic3d_poches.wgsl`, ses tampons ; la détection ; essai (2).
 - [x] **P3** — le bilan par poche : listes, réductions, héritage, naissance, rappel, résorption ; contre la référence sur un même état.
-- [ ] **P4** — la projection avec poches ; la bulle, essai (3).
+- [x] **P4** — la projection avec poches ; la bulle, essai (3).
 - [ ] **P5** — B10 (4) ; `--v1` (5) par `calcul.py`.
 - [ ] **P6** — preuve ; rituel (par `rituel.py`).
 
@@ -113,3 +113,9 @@ dans la session est dit, et passe à S482.
   tableau local de structure : `bord_new` sans tableau. **Mesuré** (banc `--apic3d-poches`) : nombre de poches identique partout ;
   écart de volume ≤ 6·10⁻⁶, de pression ≤ 7·10⁻⁶ (bulle 8 pas ; trois bulles et une cheminée ; trois bulles sous pression après
   4 pas de chauffe — la naissance — ; la bulle d'une maille résorbée des deux côtés).
+- **P4** — `pk_faces` (LF : faces eau | poche, `1/θ` et flux sortant), `pk_rows`, `pk_cg_init_finish`, `pk_cg_apply`, `pk_cg_rows`
+  (`A·d` des poches, un groupe par poche), `pk_cg_alpha`, `pk_cg_beta`, `pk_correct`, `pk_post` ; `assemble`, `cg_init_reduce`,
+  `cg_update`, `cg_direction` repris ; avec poches, la diagonale (la multigrille ne les voit pas encore). **Mesuré** (`MODE=suivi`,
+  `calculs/20261004-221515-s481-bulle-suivi`) : 300 pas, volume à 2,9·10⁻⁵, pression à 4,1·10⁻⁵ de la référence ; **42,47 Hz contre
+  42,50** ; 151 itérations au plus, toutes convergées ; masse exacte. Critère (3) tenu. `calcul.py` résout un programme donné par un
+  chemin relatif au dépôt. L'instrumentation de P5 (`APIC3D_POCHES=1` sur B10 et `--v1`) est dans ce commit, compilée, non lancée.

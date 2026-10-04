@@ -87,6 +87,10 @@ impl Vivant {
         }
         // S466 : le joueur debout, une capsule verticale.
         carte.set_body_shape([0., 0., 1.], b.demi_longueur as f32);
+        // S481 : `APIC3D_POCHES=1` — l'air enfermé sur la carte (K2-2).
+        if std::env::var("APIC3D_POCHES").is_ok() {
+            carte.enable_air_pockets()?;
+        }
         let mut rendu = SurfaceCarte::with_format(&carte, w, h, format);
         rendu.set_quart(b.quart());
         rendu.set_demi_longueur(b.demi_longueur as f32);
@@ -321,6 +325,8 @@ pub fn banc_v1() -> Result<(), String> {
         let mut moyennes_c: Vec<f64> = Vec::new();
         let (mut images_export, mut prochaine_export, mut erreur_quantif) = (Vec::<String>::new(), 0f64, 0f64);
         let (mut pas_ms, mut pire_pas_ms) = (Vec::new(), 0f64);
+        // S481 : les poches (relues un pas sur huit) — au plus, les relevés qui en ont, le plus grand volume, les pressions.
+        let (mut poches_max, mut pas_avec_poche, mut volume_max, mut p_min, mut p_max) = (0usize, 0usize, 0f64, f64::MAX, 0f64);
         let debut = Instant::now();
         while v.t() < duree {
             let t0 = Instant::now();
@@ -366,6 +372,16 @@ pub fn banc_v1() -> Result<(), String> {
                 std::fs::write(&nom, &ppm).map_err(|e| e.to_string())?;
                 prochaine_image += 1;
             }
+            if v.carte.air_pockets_enabled() && v.pas % 8 == 0 {
+                let pc = v.carte.air_pockets()?;
+                poches_max = poches_max.max(pc.len());
+                if !pc.is_empty() {
+                    pas_avec_poche += 1;
+                    volume_max = pc.iter().map(|p| p.volume).fold(volume_max, f64::max);
+                    p_min = pc.iter().map(|p| p.pressure).fold(p_min, f64::min);
+                    p_max = pc.iter().map(|p| p.pressure).fold(p_max, f64::max);
+                }
+            }
             if v.t() >= prochain_bilan {
                 let (phi, _) = v.carte.surface()?;
                 let bilan = v.carte.total_quanta()? - v.quanta - v.carte.open_quanta()?;
@@ -410,6 +426,12 @@ pub fn banc_v1() -> Result<(), String> {
                 "V1_S458 export dossier={dossier} images={} fenetre_k={k0}..{k1} octets_par_image={} erreur_quantification_max_m={erreur_quantif:.2e}",
                 images_export.len(),
                 d.nx * d.ny * (k1 - k0)
+            );
+        }
+        if v.carte.air_pockets_enabled() {
+            println!(
+                "V1_POCHES_S481 poches_au_plus={poches_max} releves_avec_poche={pas_avec_poche} volume_max_m3={volume_max:.3e} pression_min_pa={:.0} pression_max_pa={p_max:.0}",
+                if p_min == f64::MAX { 0. } else { p_min }
             );
         }
         println!(

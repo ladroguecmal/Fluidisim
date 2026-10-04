@@ -10,8 +10,10 @@ use crate::apic3d_carte::ApicCarte;
 use water_core::apic3d::{Apic3, MAX_POCKETS};
 
 /// Noyaux de `apic3d_poches.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 10] = [
+const KERNELS: [&str; 19] = [
     "pk_init", "pk_merge", "pk_flatten", "pk_number", "pk_assign", "pk_lists", "pk_overlap", "pk_reduce", "pk_scalars", "pk_remap",
+    // P4 — la projection.
+    "pk_faces", "pk_rows", "pk_cg_init_finish", "pk_cg_apply", "pk_cg_rows", "pk_cg_alpha", "pk_cg_beta", "pk_correct", "pk_post",
 ];
 const PK_INIT: usize = 0;
 const PK_MERGE: usize = 1;
@@ -23,6 +25,15 @@ const PK_OVERLAP: usize = 6;
 const PK_REDUCE: usize = 7;
 const PK_SCALARS: usize = 8;
 const PK_REMAP: usize = 9;
+const PK_FACES: usize = 10;
+const PK_ROWS: usize = 11;
+const PK_CG_INIT_FINISH: usize = 12;
+const PK_CG_APPLY: usize = 13;
+const PK_CG_ROWS: usize = 14;
+const PK_CG_ALPHA: usize = 15;
+const PK_CG_BETA: usize = 16;
+const PK_CORRECT: usize = 17;
+const PK_POST: usize = 18;
 /// Les grandeurs de chaque poche dans `pkf` (`PF_*` du nuanceur), une tranche de `MAX_POCKETS` chacune.
 const PF_AIR: usize = 0;
 const PF_VFLUX: usize = 2;
@@ -88,6 +99,8 @@ impl ApicCarte {
             })
             .collect();
         self.poches = Some(PochesCarte { pipelines });
+        // La projection avec poches est celle de la diagonale (la multigrille ne les voit pas encore).
+        self.multigrid = false;
         Ok(())
     }
 
@@ -119,6 +132,30 @@ impl ApicCarte {
         self.dispatch_pk(pass, PK_REDUCE, MAX_POCKETS * 256, 256);
         self.dispatch_pk(pass, PK_SCALARS, 1, 1);
         self.dispatch_pk(pass, PK_REMAP, cells, 128);
+    }
+
+    /// **La projection avec poches** (`project_with_pockets`) : `assemble`, `cg_init_reduce`, `cg_update` et `cg_direction` du pas
+    /// d'avant ; les noyaux qui voient les poches à leur place. Les itérations sont enregistrées jusqu'au plafond ; l'arrêt au critère
+    /// se fait par le drapeau de la carte, comme sans poches.
+    pub(crate) fn encode_pockets_project(&self, pass: &mut wgpu::ComputePass) {
+        use crate::apic3d_carte::{ASSEMBLE, CG_INIT, CG_ITERATION};
+        let (cells, faces) = (self.grid().cells(), self.faces_count());
+        let groups = MAX_POCKETS * 256;
+        self.dispatch(pass, ASSEMBLE, cells, 256);
+        self.dispatch_pk(pass, PK_FACES, 256, 256);
+        self.dispatch_pk(pass, PK_ROWS, groups, 256);
+        self.dispatch(pass, CG_INIT[0], cells, 256);
+        self.dispatch_pk(pass, PK_CG_INIT_FINISH, 256, 256);
+        for _ in 0..self.iteration_cap {
+            self.dispatch_pk(pass, PK_CG_APPLY, cells, 256);
+            self.dispatch_pk(pass, PK_CG_ROWS, groups, 256);
+            self.dispatch_pk(pass, PK_CG_ALPHA, 256, 256);
+            self.dispatch(pass, CG_ITERATION[2], cells, 256);
+            self.dispatch_pk(pass, PK_CG_BETA, 256, 256);
+            self.dispatch(pass, CG_ITERATION[4], cells, 256);
+        }
+        self.dispatch_pk(pass, PK_CORRECT, faces, 128);
+        self.dispatch_pk(pass, PK_POST, 1, 1);
     }
 
     /// Charge l'état des poches de la référence — la poche de chaque maille, leur nombre, leur air et leur volume suivi, le dernier
@@ -241,6 +278,9 @@ pub fn banc_poches() -> Result<(), String> {
             "POCHES_CARTE_S481 carte={} cas={cas} domaine={}x{}x{} dx={} particules={} pas_us={pas_us}",
             carte.adapter, d.nx, d.ny, d.nz, d.dx, a.particle_count()
         );
+        if std::env::var("MODE").as_deref() == Ok("suivi") {
+            return suivi(&mut a, &mut carte, pas_us);
+        }
         let (mut ecart_etiquettes, mut ecart_poches, mut max_poches, mut ecart_propre) = (0usize, 0usize, 0usize, 0usize);
         let (mut pire_v, mut pire_p, mut nombres_differents) = (0f64, 0f64, 0usize);
         for s in 0..pas {
@@ -293,4 +333,74 @@ pub fn banc_poches() -> Result<(), String> {
         );
         Ok(())
     })
+}
+
+/// La fréquence d'une série `(t, V)` : les passages par sa moyenne vers le haut, après le premier dixième (`apic3d_bulle`).
+fn frequence(serie: &[(f64, f64)]) -> f64 {
+    let debut = serie.len() / 10;
+    let moy = serie[debut..].iter().map(|s| s.1).sum::<f64>() / (serie.len() - debut) as f64;
+    let mut passages = Vec::new();
+    for w in serie[debut..].windows(2) {
+        let (a0, a1) = (w[0].1 - moy, w[1].1 - moy);
+        if a0 < 0. && a1 >= 0. {
+            passages.push(w[0].0 + (w[1].0 - w[0].0) * (-a0) / (a1 - a0));
+        }
+    }
+    if passages.len() < 2 {
+        return f64::NAN;
+    }
+    (passages.len() - 1) as f64 / (passages[passages.len() - 1] - passages[0])
+}
+
+/// **Le suivi** (`MODE=suivi`, critère 3) : la référence et la carte partent du même état puis avancent chacune de son côté
+/// pendant `DUREE` s ; la première poche se compare pas à pas (volume, pression), puis les fréquences ; la masse de la carte.
+fn suivi(a: &mut Apic3, carte: &mut ApicCarte, pas_us: u64) -> Result<(), String> {
+    use water_core::apic3d::{AirPocket, ApicStage};
+    let duree: f64 = std::env::var("DUREE").ok().and_then(|v| v.parse().ok()).unwrap_or(0.15);
+    carte.set_iteration_cap(std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(400));
+    carte.set_adaptive_cap(false);
+    carte.load(a)?;
+    let n0 = carte.counts()?[0];
+    let (mut t, mut sr, mut sc) = (0f64, Vec::new(), Vec::new());
+    let (mut pire_v, mut pire_p, mut non_converges, mut it_max) = (0f64, 0f64, 0usize, 0u32);
+    let mut pr = [AirPocket::default(); MAX_POCKETS];
+    let debut = std::time::Instant::now();
+    while t < duree {
+        a.step(pas_us).map_err(|e| format!("{e:?}"))?;
+        carte.step_upto(pas_us, ApicStage::Full)?;
+        t += pas_us as f64 * 1e-6;
+        let nr = a.air_pockets(&mut pr);
+        let pc = carte.air_pockets()?;
+        let (_, it, _, converge) = carte.pressure_stats_full()?;
+        it_max = it_max.max(it);
+        if !converge {
+            non_converges += 1;
+        }
+        if nr == 0 || pc.is_empty() {
+            println!("POCHES_CARTE_S481 suivi t={t:.4} poches_ref={nr} poches_carte={}", pc.len());
+            continue;
+        }
+        let (r, c) = (pr[0], pc[0]);
+        let ev = (c.volume - r.volume).abs() / r.volume;
+        let ep = (c.pressure - r.pressure).abs() / r.pressure;
+        pire_v = pire_v.max(ev);
+        pire_p = pire_p.max(ep);
+        sr.push((t, r.volume));
+        sc.push((t, c.volume));
+        if std::env::var("TRACE").is_ok() {
+            println!(
+                "POCHES_CARTE_S481 suivi t={t:.4} V_ref={:.6e} V_carte={:.6e} ecart_V={ev:.2e} P_ref={:.1} P_carte={:.1} ecart_P={ep:.2e} iterations={it}",
+                r.volume, c.volume, r.pressure, c.pressure
+            );
+        }
+    }
+    let (fr, fc) = (frequence(&sr), frequence(&sc));
+    let n1 = carte.counts()?[0];
+    println!(
+        "POCHES_CARTE_S481 bilan suivi duree_s={duree} pas={} pire_ecart_V={pire_v:.2e} pire_ecart_P={pire_p:.2e} f_ref_hz={fr:.2} f_carte_hz={fc:.2} ecart_f={:.2e} iterations_max={it_max} non_converges={non_converges} particules={n0}->{n1} calcul_s={:.1}",
+        sr.len(),
+        (fc - fr).abs() / fr,
+        debut.elapsed().as_secs_f64()
+    );
+    Ok(())
 }

@@ -46,9 +46,9 @@ const BIN_SCATTER: usize = 5;
 const P2G: usize = 7;
 // S423 : `reconstruct` (8) remplacé par `reconstruct_coop` ; gardé dans la liste pour les indices.
 const GRAVITY_WALLS: usize = 9;
-const ASSEMBLE: usize = 10;
-const CG_INIT: [usize; 2] = [11, 12];
-const CG_ITERATION: [usize; 5] = [13, 14, 15, 16, 17];
+pub(crate) const ASSEMBLE: usize = 10;
+pub(crate) const CG_INIT: [usize; 2] = [11, 12];
+pub(crate) const CG_ITERATION: [usize; 5] = [13, 14, 15, 16, 17];
 const CORRECT: usize = 18;
 const EXTRAP_VALID: usize = 19;
 const EXTRAP_COPY: usize = 20;
@@ -170,7 +170,7 @@ pub struct ApicCarte {
     mg_levels: Vec<[usize; 3]>,
     /// S424 — les niveaux ≥ 2 tiennent dans la mémoire de groupe (`MG_GLOBAL=1` aux bancs : la version globale).
     mg_shared: bool,
-    multigrid: bool,
+    pub(crate) multigrid: bool,
     /// S423 — le corps de la surface rafraîchie par la dernière décision ; le pas suivant la réemploie si son corps est le même.
     refresh_body: Option<Option<Sphere3>>,
     /// S420 — l'état du critère de bascule, et ses réglages (ceux de `ColumnsSwitch`), l'instant courant, µs.
@@ -189,7 +189,7 @@ pub struct ApicCarte {
     g_eff: f32,
     /// Itérations du gradient conjugué **enregistrées** par pas : le travail est borné, l'arrêt au critère de la référence
     /// se fait par un drapeau sur la carte (ADR-175 D2).
-    iteration_cap: u32,
+    pub(crate) iteration_cap: u32,
     /// S421 — le plafond adaptatif (diagnostics différés, ADR-175 D3) : le plafond fixe de départ, et les itérations des derniers pas.
     cap_max: u32,
     recent: [u32; 8],
@@ -588,6 +588,11 @@ impl ApicCarte {
 
     pub(crate) fn mask_buffer(&self) -> &wgpu::Buffer {
         &self.cmask
+    }
+
+    /// S481 : le nombre de faces.
+    pub(crate) fn faces_count(&self) -> usize {
+        self.faces
     }
 
     /// S481 : les champs des mailles (φ, p, …), pour les poches.
@@ -1164,6 +1169,10 @@ impl ApicCarte {
                     let cells = self.domain.cells();
                     self.dispatch(&mut pass, GRAVITY_WALLS, self.faces, WG);
                     self.dispatch(&mut pass, IMPOSE_BODY, self.faces, WG);
+                    if self.poches.is_some() {
+                        // S481 — la projection avec poches (le gradient conjugué diagonal, une ligne par poche).
+                        self.encode_pockets_project(&mut pass);
+                    } else {
                     self.dispatch(&mut pass, ASSEMBLE, cells, SCAN);
                     if self.multigrid {
                         // S422 — le gradient conjugué préconditionné par le cycle en V.
@@ -1192,6 +1201,7 @@ impl ApicCarte {
                     }
                     }
                     self.dispatch(&mut pass, CORRECT, self.faces, WG);
+                    }
                 }
                 ApicStage::Extrapolate => {
                     self.dispatch(&mut pass, EXTRAP_VALID, self.faces, WG);
@@ -1391,6 +1401,14 @@ impl ApicCarte {
     }
 
     /// La pression, et le gradient conjugué : itérations, résidu relatif `‖r‖/‖b‖`, arrêt au critère (et non au plafond).
+    /// S481 : itérations, résidu relatif, arrêt au critère — sans relire la pression.
+    pub fn pressure_stats_full(&self) -> Result<((), u32, f64, bool), String> {
+        let s = self.read_f32(&self.scalars, 0, 8)?;
+        let it = s[7] as u32;
+        let residual = if s[0] > 0. { (s[2] as f64 / s[0] as f64).sqrt() } else { 0. };
+        Ok(((), it, residual, s[6] != 0. && it < self.iteration_cap))
+    }
+
     pub fn pressure(&self) -> Result<(Vec<f32>, u32, f64, bool), String> {
         let cells = self.domain.cells();
         let p = self.read_f32(&self.cellf, cells, cells)?;
@@ -2139,6 +2157,10 @@ impl B10 {
             (p[2] as f64) < h && x * x + y * y + z * z >= r * r
         })
         .map_err(|e| format!("{e:?}"))?;
+        // S481 : `APIC3D_POCHES=1` — l'air enfermé (S479), comme l'exemple `apic3d_b10`.
+        if std::env::var("APIC3D_POCHES").is_ok() {
+            a.enable_air_pockets(&mut host).map_err(|e| format!("{e:?}"))?;
+        }
         Ok(a)
     }
 
@@ -2250,6 +2272,12 @@ pub fn recevoir_b10() -> Result<(), String> {
         carte.set_iteration_cap(std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(600));
         carte.set_adaptive_cap(std::env::var("ADAPTATIF").map_or(true, |v| v != "0"));
         carte.set_multigrid(std::env::var("MULTIGRILLE").map_or(true, |v| v != "0"));
+        // S481 : `APIC3D_POCHES=1` — les poches des deux côtés.
+        let poches = std::env::var("APIC3D_POCHES").is_ok();
+        if poches {
+            carte.enable_air_pockets()?;
+        }
+        let mut suivi_poches = [(0f64, 0f64, 0usize); 2]; // (volume max, volume final, poches au plus), référence puis carte
         carte.load(&a)?;
         if let Some(s) = sw.as_mut() {
             carte.load_switch(s);
@@ -2405,6 +2433,18 @@ pub fn recevoir_b10() -> Result<(), String> {
                 it_carte += it as u64;
                 unconverged += (!converged) as u64;
             }
+            if poches {
+                let mut pr = [water_core::apic3d::AirPocket::default(); water_core::apic3d::MAX_POCKETS];
+                let nr = a.air_pockets(&mut pr);
+                let pc = carte.air_pockets()?;
+                for (k, vols) in [pr[..nr].iter().map(|p| p.volume).collect::<Vec<_>>(), pc.iter().map(|p| p.volume).collect()]
+                    .into_iter()
+                    .enumerate()
+                {
+                    let v = vols.iter().copied().fold(0., f64::max);
+                    suivi_poches[k] = (suivi_poches[k].0.max(v), v, suivi_poches[k].2.max(vols.len()));
+                }
+            }
             let mut sum = 0.;
             for (k, v) in times.stages.iter().take(14).enumerate().filter(|(k, _)| !(9..12).contains(k)) {
                 if let Some(ms) = v {
@@ -2495,6 +2535,15 @@ pub fn recevoir_b10() -> Result<(), String> {
             ),
             None => "pas de pincement".into(),
         };
+        if poches {
+            let d3 = B10::D.powi(3);
+            println!(
+                "APIC_CARTE_B10_POCHES_S481 reference poche_max_sur_d3={:.5} poche_fin_sur_d3={:.5} poches_au_plus={} carte poche_max_sur_d3={:.5} poche_fin_sur_d3={:.5} poches_au_plus={} ecart_max={:.2e} ecart_fin={:.2e}",
+                suivi_poches[0].0 / d3, suivi_poches[0].1 / d3, suivi_poches[0].2, suivi_poches[1].0 / d3, suivi_poches[1].1 / d3,
+                suivi_poches[1].2, (suivi_poches[1].0 - suivi_poches[0].0).abs() / suivi_poches[0].0.max(1e-30),
+                (suivi_poches[1].1 - suivi_poches[0].1).abs() / suivi_poches[0].1.max(1e-30)
+            );
+        }
         println!("APIC_CARTE_B10_S417 reference {}", show(&sides[0]));
         println!("APIC_CARTE_B10_S417 {}     {}", if eps.is_some() { "temoin" } else { "carte" }, show(&sides[1]));
         let series: Vec<String> = gaps.iter().filter(|(k, _)| k % 4 == 0 || *k + 6 > gaps.len() as u64).map(|(k, g)| format!("{k}:{:.2}", g * 1e3)).collect();

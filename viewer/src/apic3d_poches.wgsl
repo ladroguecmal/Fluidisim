@@ -545,3 +545,467 @@ fn pk_remap(@builtin(global_invocation_id) g: vec3<u32>) {
         atomicStore(&pko[P.cells + c], atomicLoad(&pko[pk_h() + H_REMAP + b - 1u]));
     }
 }
+
+// =====================================================================================================================
+// **La projection avec poches** (S481 P4 ; `project_with_pockets`). Le gradient conjugué diagonal de la carte, plus une inconnue
+// par poche : sa pression relative `x_b` (Pa). Les lignes des mailles d'eau ne changent pas (`assemble` : la poche voisine compte
+// `1/θ` dans la diagonale) ; seul `A·d` y voit `d_b` au lieu de zéro. La ligne d'une poche :
+// `(s + Σ 1/θ)·x_b − Σ d_c/θ = s·(P_b − P_atm) + (scale/dx)·Σ u*_sortant`, `s = ρ·V/(γ·P·dt²·dx)` — symétrique avec celles de
+// l'eau : le système reste défini positif. `A·d` des poches : une réduction par poche sur LF, les faces eau | poche, dans un ordre
+// fixe. Les noyaux d'`apic3d_carte.wgsl` qui ne voient pas les poches (`assemble`, `cg_init_reduce`, `cg_update`, `cg_direction`)
+// sont repris tels quels ; ceux-ci les remplacent dans la séquence.
+
+@group(0) @binding(9) var<storage, read_write> faces: array<f32>;
+@group(0) @binding(13) var<storage, read_write> partials: array<f32>;
+@group(0) @binding(14) var<storage, read_write> scalars: array<f32>;
+
+const F_RHS: u32 = 2u;
+const F_R: u32 = 3u;
+const F_Z: u32 = 4u;
+const F_D: u32 = 5u;
+const F_Q: u32 = 6u;
+const F_DIAG: u32 = 7u;
+const S_B2: u32 = 0u;
+const S_RZ: u32 = 1u;
+const S_RR: u32 = 2u;
+const S_DQ: u32 = 3u;
+const S_ALPHA: u32 = 4u;
+const S_BETA: u32 = 5u;
+const S_DONE: u32 = 6u;
+const S_IT: u32 = 7u;
+// Grandeurs des poches pour le gradient conjugué.
+const PF_DIAG: u32 = 13u;
+const PF_RHS: u32 = 14u;
+const PF_X: u32 = 15u;
+const PF_R: u32 = 16u;
+const PF_Z: u32 = 17u;
+const PF_D: u32 = 18u;
+const PF_Q: u32 = 19u;
+const PF_DV: u32 = 22u;
+// `PF_SCAL` : [1] Σ r·z des poches, [2] Σ r·r, au dernier α.
+const PK_LF_PAYLOAD: u32 = 2048u; // 32·MAXP : `1/θ` et le flux sortant de chaque face de LF, deux mots
+
+fn cf(field: u32, c: u32) -> u32 {
+    return field * P.cells + c;
+}
+
+// `theta` d'`apic3d_carte.wgsl`.
+fn theta(c: u32, a: u32) -> f32 {
+    let fc = cellf[cf(F_PHI, c)];
+    let fa = cellf[cf(F_PHI, a)];
+    return max(fc / (fc - fa), P.theta_min);
+}
+
+// La face de la voisine `m` (`neighbour` d'`apic3d_carte.wgsl`), même au bord.
+fn face_of_nb(c: u32, m: u32) -> u32 {
+    let q = cell_ijk(c);
+    let fu = (q.z * P.ny + q.y) * (P.nx + 1u) + q.x;
+    let fv = P.nu + (q.z * (P.ny + 1u) + q.y) * P.nx + q.x;
+    let fw = P.nu + P.nv + (q.z * P.ny + q.y) * P.nx + q.x;
+    switch m {
+        case 0u: { return fu; }
+        case 1u: { return fu + 1u; }
+        case 2u: { return fv; }
+        case 3u: { return fv + P.nx; }
+        case 4u: { return fw; }
+        default: { return fw + P.nx * P.ny; }
+    }
+}
+
+// La poche de la voisine `m` d'une maille d'eau (0 : aucune).
+fn pocket_nb(c: u32, m: u32) -> u32 {
+    let a = nb_cell(c, m);
+    if a == NONE || label[a] != AIR {
+        return 0u;
+    }
+    return of_at(a);
+}
+
+// LF, les faces eau | poche, dans l'ordre des mailles puis des voisines : (maille, poche + 8·voisine) ; `1/θ` et le flux sortant
+// de la poche par cette face (`−signe·u*`) dans `pkf`.
+@compute @workgroup_size(256)
+fn pk_faces(@builtin(local_invocation_id) l: vec3<u32>) {
+    let t = l.x;
+    let chunk = (P.cells + 255u) / 256u;
+    let lo = min(t * chunk, P.cells);
+    let hi = min(lo + chunk, P.cells);
+    var n = 0u;
+    for (var c = lo; c < hi; c = c + 1u) {
+        if label[c] != WATER {
+            continue;
+        }
+        for (var m = 0u; m < 6u; m = m + 1u) {
+            if pocket_nb(c, m) != 0u {
+                n = n + 1u;
+            }
+        }
+    }
+    pk_scan[t] = n;
+    workgroupBarrier();
+    for (var s = 1u; s < 256u; s = s * 2u) {
+        var v = 0u;
+        if t >= s {
+            v = pk_scan[t - s];
+        }
+        workgroupBarrier();
+        pk_scan[t] = pk_scan[t] + v;
+        workgroupBarrier();
+    }
+    var at = pk_scan[t] - n;
+    var ovf = false;
+    for (var c = lo; c < hi; c = c + 1u) {
+        if label[c] != WATER {
+            continue;
+        }
+        for (var m = 0u; m < 6u; m = m + 1u) {
+            let b = pocket_nb(c, m);
+            if b == 0u {
+                continue;
+            }
+            if at < P.cells {
+                atomicStore(&pko[lf_base() + 2u * at], c);
+                atomicStore(&pko[lf_base() + 2u * at + 1u], b + 8u * m);
+                let sign = select(1.0, -1.0, m % 2u == 0u);
+                pkf[PK_LF_PAYLOAD + 2u * at] = 1.0 / theta(c, nb_cell(c, m));
+                pkf[PK_LF_PAYLOAD + 2u * at + 1u] = -sign * faces[face_of_nb(c, m)];
+            } else {
+                ovf = true;
+            }
+            at = at + 1u;
+        }
+    }
+    if ovf {
+        atomicStore(&pko[pk_h() + H_LIST_OVF], 1u);
+    }
+    if t == 255u {
+        atomicStore(&pko[pk_h() + H_LF], min(pk_scan[255], P.cells));
+    }
+}
+
+fn lf_pocket(e: u32) -> u32 {
+    return atomicLoad(&pko[lf_base() + 2u * e + 1u]) % 8u;
+}
+
+// Une somme par poche sur LF, un groupe par poche : `Σ 1/θ` et `Σ flux` (`quoi` = 0), ou `Σ d_c/θ` (`quoi` = 1).
+var<workgroup> pk_red2: array<vec2<f32>, 256>;
+
+fn lf_sum(t: u32, b: u32, quoi: u32) -> vec2<f32> {
+    var s = vec2<f32>(0.0, 0.0);
+    let n = atomicLoad(&pko[pk_h() + H_LF]);
+    for (var e = t; e < n; e = e + 256u) {
+        if lf_pocket(e) != b + 1u {
+            continue;
+        }
+        let it = pkf[PK_LF_PAYLOAD + 2u * e];
+        if quoi == 0u {
+            s = s + vec2<f32>(it, pkf[PK_LF_PAYLOAD + 2u * e + 1u]);
+        } else {
+            s.x = s.x + it * cellf[cf(F_D, atomicLoad(&pko[lf_base() + 2u * e]))];
+        }
+    }
+    pk_red2[t] = s;
+    workgroupBarrier();
+    for (var h = 128u; h > 0u; h = h / 2u) {
+        if t < h {
+            pk_red2[t] = pk_red2[t] + pk_red2[t + h];
+        }
+        workgroupBarrier();
+    }
+    return pk_red2[0];
+}
+
+// Les lignes des poches, et leur départ : `x = 0`, `r = rhs`, `z = d = r/diag`.
+@compute @workgroup_size(256)
+fn pk_rows(@builtin(local_invocation_id) l: vec3<u32>, @builtin(workgroup_id) w: vec3<u32>) {
+    let t = l.x;
+    let b = w.x;
+    if t == 0u {
+        pk_n = atomicLoad(&pko[pk_h() + H_COUNT]);
+    }
+    if b >= workgroupUniformLoad(&pk_n) {
+        return;
+    }
+    let sums = lf_sum(t, b, 0u);
+    if t == 0u {
+        let vol = pkf[pf(PF_VOL, b)];
+        let pres = pkf[pf(PF_P, b)];
+        let s = P.rho * vol / (GAMMA_AIR * pres * P.dt * P.dt * P.dx);
+        let scale = -P.rho * P.dx * P.dx / P.dt;
+        let diag = s + sums.x;
+        let rhs = s * (pres - P_ATM) + (scale / P.dx) * sums.y;
+        pkf[pf(PF_DIAG, b)] = diag;
+        pkf[pf(PF_RHS, b)] = rhs;
+        pkf[pf(PF_X, b)] = 0.0;
+        pkf[pf(PF_R, b)] = rhs;
+        pkf[pf(PF_Z, b)] = rhs / diag;
+        pkf[pf(PF_D, b)] = rhs / diag;
+    }
+}
+
+// Les sommes du gradient conjugué (`reduce_pair`, `gather_pair`, `done_uniform` d'`apic3d_carte.wgsl`).
+var<workgroup> red_a: array<f32, 256>;
+var<workgroup> red_b: array<f32, 256>;
+var<workgroup> wg_done: f32;
+
+fn reduce_pair(l: u32, w: u32, a: f32, b: f32) {
+    red_a[l] = a;
+    red_b[l] = b;
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if l < s {
+            red_a[l] = red_a[l] + red_a[l + s];
+            red_b[l] = red_b[l] + red_b[l + s];
+        }
+        workgroupBarrier();
+    }
+    if l == 0u {
+        partials[2u * w] = red_a[0];
+        partials[2u * w + 1u] = red_b[0];
+    }
+}
+
+fn gather_pair(l: u32) -> vec2<f32> {
+    let parts = (P.cells + 255u) / 256u;
+    var a = 0.0;
+    var b = 0.0;
+    for (var w = l; w < parts; w = w + 256u) {
+        a = a + partials[2u * w];
+        b = b + partials[2u * w + 1u];
+    }
+    red_a[l] = a;
+    red_b[l] = b;
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if l < s {
+            red_a[l] = red_a[l] + red_a[l + s];
+            red_b[l] = red_b[l] + red_b[l + s];
+        }
+        workgroupBarrier();
+    }
+    return vec2<f32>(red_a[0], red_b[0]);
+}
+
+fn done_uniform(l: u32) -> bool {
+    if l == 0u {
+        wg_done = scalars[S_DONE];
+    }
+    return workgroupUniformLoad(&wg_done) != 0.0;
+}
+
+// `cg_init_finish`, poches comprises.
+@compute @workgroup_size(256)
+fn pk_cg_init_finish(@builtin(local_invocation_id) l: vec3<u32>) {
+    let s = gather_pair(l.x);
+    if l.x == 0u {
+        var b2 = s.x;
+        var rz = s.y;
+        let n = atomicLoad(&pko[pk_h() + H_COUNT]);
+        for (var b = 0u; b < n; b = b + 1u) {
+            let r = pkf[pf(PF_R, b)];
+            b2 = b2 + r * r;
+            rz = rz + r * pkf[pf(PF_Z, b)];
+        }
+        scalars[S_B2] = b2;
+        scalars[S_RZ] = rz;
+        scalars[S_RR] = b2;
+        scalars[S_IT] = 0.0;
+        scalars[S_DONE] = select(0.0, 1.0, !(b2 > 0.0));
+    }
+}
+
+// `cg_apply`, la poche voisine lue dans `d_b`.
+@compute @workgroup_size(256)
+fn pk_cg_apply(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+               @builtin(workgroup_id) w: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let c = g.x;
+    var dq = 0.0;
+    if c < P.cells {
+        var s = 0.0;
+        if label[c] == WATER {
+            let dc = cellf[cf(F_D, c)];
+            for (var m = 0u; m < 6u; m = m + 1u) {
+                let n = nb_cell(c, m);
+                if n == NONE {
+                    continue;
+                }
+                let lb = label[n];
+                if lb == WATER {
+                    s = s + (dc - cellf[cf(F_D, n)]);
+                } else if lb == AIR {
+                    let b = of_at(n);
+                    var db = 0.0;
+                    if b != 0u {
+                        db = pkf[pf(PF_D, b - 1u)];
+                    }
+                    s = s + (dc - db) / theta(c, n);
+                }
+            }
+        }
+        cellf[cf(F_Q, c)] = s;
+        dq = cellf[cf(F_D, c)] * s;
+    }
+    reduce_pair(l.x, w.x, dq, 0.0);
+}
+
+// `A·d` des poches : `q_b = diag_b·d_b − Σ d_c/θ`.
+@compute @workgroup_size(256)
+fn pk_cg_rows(@builtin(local_invocation_id) l: vec3<u32>, @builtin(workgroup_id) w: vec3<u32>) {
+    let t = l.x;
+    let b = w.x;
+    if t == 0u {
+        pk_n = atomicLoad(&pko[pk_h() + H_COUNT]);
+    }
+    let n = workgroupUniformLoad(&pk_n);
+    if done_uniform(t) || b >= n {
+        return;
+    }
+    let sums = lf_sum(t, b, 1u);
+    if t == 0u {
+        pkf[pf(PF_Q, b)] = pkf[pf(PF_DIAG, b)] * pkf[pf(PF_D, b)] - sums.x;
+    }
+}
+
+// `cg_alpha`, poches comprises ; puis la mise à jour des poches (`x`, `r`, `z`) et leurs sommes `r·z`, `r·r`.
+@compute @workgroup_size(256)
+fn pk_cg_alpha(@builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let s = gather_pair(l.x);
+    if l.x == 0u {
+        let n = atomicLoad(&pko[pk_h() + H_COUNT]);
+        var dq = s.x;
+        for (var b = 0u; b < n; b = b + 1u) {
+            dq = dq + pkf[pf(PF_D, b)] * pkf[pf(PF_Q, b)];
+        }
+        scalars[S_DQ] = dq;
+        if !(dq > 0.0) {
+            scalars[S_DONE] = 1.0;
+            return;
+        }
+        let alpha = scalars[S_RZ] / dq;
+        scalars[S_ALPHA] = alpha;
+        var rz = 0.0;
+        var rr = 0.0;
+        for (var b = 0u; b < n; b = b + 1u) {
+            pkf[pf(PF_X, b)] = pkf[pf(PF_X, b)] + alpha * pkf[pf(PF_D, b)];
+            let r = pkf[pf(PF_R, b)] - alpha * pkf[pf(PF_Q, b)];
+            pkf[pf(PF_R, b)] = r;
+            let z = r / pkf[pf(PF_DIAG, b)];
+            pkf[pf(PF_Z, b)] = z;
+            rz = rz + r * z;
+            rr = rr + r * r;
+        }
+        pkf[pf(PF_SCAL, 1u)] = rz;
+        pkf[pf(PF_SCAL, 2u)] = rr;
+    }
+}
+
+// `cg_beta`, poches comprises ; puis la direction des poches.
+@compute @workgroup_size(256)
+fn pk_cg_beta(@builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let s = gather_pair(l.x);
+    if l.x == 0u {
+        let rz = s.x + pkf[pf(PF_SCAL, 1u)];
+        let rr = s.y + pkf[pf(PF_SCAL, 2u)];
+        let beta = rz / scalars[S_RZ];
+        scalars[S_BETA] = beta;
+        scalars[S_RZ] = rz;
+        scalars[S_RR] = rr;
+        let it = scalars[S_IT] + 1.0;
+        scalars[S_IT] = it;
+        if rr <= P.tol2 * scalars[S_B2] || it >= f32(P.max_it) {
+            scalars[S_DONE] = 1.0;
+        }
+        let n = atomicLoad(&pko[pk_h() + H_COUNT]);
+        for (var b = 0u; b < n; b = b + 1u) {
+            pkf[pf(PF_D, b)] = pkf[pf(PF_Z, b)] + beta * pkf[pf(PF_D, b)];
+        }
+    }
+}
+
+// `correct`, la pression de la poche du côté de l'air (zéro pour l'air libre).
+fn on_wall_pk(axis: u32, idx: vec3<u32>) -> bool {
+    if axis == 0u {
+        return idx.x == 0u || idx.x == P.nx;
+    }
+    if axis == 1u {
+        return idx.y == 0u || idx.y == P.ny;
+    }
+    return idx.z == 0u || idx.z == P.nz;
+}
+
+fn air_pressure(a: u32) -> f32 {
+    let b = of_at(a);
+    if b == 0u {
+        return 0.0;
+    }
+    return pkf[pf(PF_X, b - 1u)];
+}
+
+@compute @workgroup_size(128)
+fn pk_correct(@builtin(global_invocation_id) g: vec3<u32>) {
+    let f = g.x;
+    if f >= P.faces {
+        return;
+    }
+    // La face `f` : son axe et son indice (`face_of` d'`apic3d_carte.wgsl`).
+    var axis = 0u;
+    var local = f;
+    var dims = vec3<u32>(P.nx + 1u, P.ny, P.nz);
+    if f >= P.nu + P.nv {
+        axis = 2u;
+        local = f - P.nu - P.nv;
+        dims = vec3<u32>(P.nx, P.ny, P.nz + 1u);
+    } else if f >= P.nu {
+        axis = 1u;
+        local = f - P.nu;
+        dims = vec3<u32>(P.nx, P.ny + 1u, P.nz);
+    }
+    let idx = vec3<u32>(local % dims.x, (local / dims.x) % dims.y, local / (dims.x * dims.y));
+    if on_wall_pk(axis, idx) {
+        return;
+    }
+    let along = vec3<u32>(select(0u, 1u, axis == 0u), select(0u, 1u, axis == 1u), select(0u, 1u, axis == 2u));
+    let cm = idx - along;
+    let c = (cm.z * P.ny + cm.y) * P.nx + cm.x;
+    let n = (idx.z * P.ny + idx.y) * P.nx + idx.x;
+    if label[c] == SOLID || label[n] == SOLID {
+        return;
+    }
+    let wc = label[c] == WATER;
+    let wn = label[n] == WATER;
+    var grad = 0.0;
+    if wc && wn {
+        grad = cellf[cf(F_P, n)] - cellf[cf(F_P, c)];
+    } else if wc {
+        grad = (air_pressure(n) - cellf[cf(F_P, c)]) / theta(c, n);
+    } else if wn {
+        grad = (cellf[cf(F_P, n)] - air_pressure(c)) / theta(n, c);
+    } else {
+        return;
+    }
+    faces[f] = faces[f] - P.dt / (P.rho * P.dx) * grad;
+}
+
+// Au bout du pas : la variation de volume que la loi linéarisée prévoit, la pression, le volume suivi, le dernier pas.
+@compute @workgroup_size(1)
+fn pk_post() {
+    let n = atomicLoad(&pko[pk_h() + H_COUNT]);
+    for (var b = 0u; b < n; b = b + 1u) {
+        let vol = pkf[pf(PF_VOL, b)];
+        let pres = pkf[pf(PF_P, b)];
+        let x = pkf[pf(PF_X, b)];
+        let dv = -(x - (pres - P_ATM)) * vol / (GAMMA_AIR * pres);
+        pkf[pf(PF_DV, b)] = dv;
+        pkf[pf(PF_P, b)] = P_ATM + x;
+        pkf[pf(PF_VFLUX, b)] = vol + dv;
+    }
+    pkf[pf(PF_SCAL, 0u)] = P.dt;
+}
