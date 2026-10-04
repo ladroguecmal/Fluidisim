@@ -62,58 +62,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S480 — **terminée**. **Décision de l'utilisateur** (« Ok ») sur la proposition faite à ses questions — reprendre depuis une
-autre conversation, les défauts de méthode, la structure de gestion (*« avoir en contexte les choses essentielles nouvelles mais
-aussi les intentions initiales […] pour ne pas travailler dans le flou »*). K2-2 passe en S481.
+Session : S481 — **en cours**. En autonomie (ADR-215), **K2-2 — l'air enfermé sur la carte** ([conception](../docs/registres/CAMPAGNE-K2-S478.md),
+ADR-220 D1 ; la référence : `code/water-core/src/apic3d_poches.rs`, [POCHES-AIR-S479](../docs/validation/POCHES-AIR-S479.md)).
 
-**Ce que la session fait.** (1) **`BOUSSOLE.md`** — deux pages lues en premier : pourquoi (l'eau de DyingStar, une surprise), les
-intentions d'origine, les décisions en vigueur en une ligne chacune, ce que l'utilisateur juge et ce qui se tranche ici, ce qui
-attend l'utilisateur. (2) **Trois registres générés** (un outil chacun, un `--check` tenu par `etat_projet.py`) : le **tableau de
-bord vers 100 %** (les points par campagne, l'historique du décompte), les **décisions en vigueur** (les ADR, leur statut, qui en
-remplace ou en précise qui), les **anomalies ouvertes** (celles dont l'en-tête porte un statut). (3) **Le journal découpé** : les
-entrées avant S470 archivées. (4) **Les calculs longs** : `outils/calcul.py` les lance hors de la conversation, sortie dans
-`calculs/` (non versionné), registre `notes/CALCULS.md` versionné. (5) **Le rituel outillé** : `outils/rituel.py debut|fin`.
-(6) **REPRISE** : l'ordre de lecture et l'état renvoient à la boussole et au tableau de bord (son §4 décrivait encore S351) ; la
-règle « le plan déclare ses entrées et comment il les vérifie ».
+**Ce que la session fait.** Les poches de S479 portées sur la carte (`viewer/src/apic3d_carte.rs`), **dans un module à part**
+(`apic3d_poches.wgsl`, mêmes liaisons, deux tampons de plus) : le chemin sans poches n'est pas touché. (1) **La détection** : une
+union-find sans verrou sur les mailles d'air (l'accrochage toujours vers la plus petite étiquette, l'air libre = 0 : les mailles
+d'air de la rangée du haut), puis l'aplatissement ; la racine d'une composante enfermée est sa plus petite maille, et les poches se
+numérotent dans l'ordre des mailles — **l'ordre de la référence**, qui remplit depuis la première maille rencontrée. (2) **Le bilan
+par poche** : les listes (les mailles d'air de chaque poche ; les mailles d'eau qui la bordent, une fois par poche), une réduction
+par poche dans un ordre fixe (un groupe par poche, aucun atomique flottant) ; l'héritage par recouvrement (des compteurs entiers),
+la naissance, le rappel du volume, la résorption. (3) **La projection** : le gradient conjugué diagonal, une ligne par poche ; `A·d`
+des poches par une réduction par poche sur la liste des faces eau | poche, à chaque itération. (4) Le saut de `--v1` avec poches.
 
-**Critères, écrits avant.** (1) une session froide trouve en deux pages le pourquoi, les décisions en vigueur et la suite ; (2) les
-trois registres régénérés à l'identique par leur outil, `--check` à 0 ; (3) le journal archivé sans perte (le nombre d'entrées
-avant = après) ; (4) un calcul lancé par `calcul.py` survit à la conversation et se retrouve par le registre ; (5) le rituel de
-fin de S480 fait par `rituel.py`.
+**Entrées, et comment elles se vérifient (REPRISE §2).** L'état de départ de chaque essai est un `Apic3` construit dans le banc
+(la bulle d'`apic3d_bulle`, B10 de `b10_band_state_from`) et chargé sur la carte par `load` ; les étiquettes de la carte se
+comparent à celles de la référence avant toute poche (`labels()`), et l'état des poches de la référence (`of`, air, volume suivi,
+dernier pas) est exporté par un accesseur et chargé avec lui — un essai qui partirait d'un état de poches différent le dirait.
+
+**Critères, écrits avant.** (1) sans poches, au bit : le chemin d'avant n'est pas modifié (les bancs de la carte inchangés) ; (2) la
+poche de chaque maille, sur la carte, **identique** à la référence (la bulle, et B10 au pincement) ; (3) la bulle de S479 sur la
+carte : volume et pression **à 1 %** de la référence pas à pas sur 0,15 s, sa fréquence à 2 % de celle de la référence ; masse
+exacte ; (4) B10 à 16 mailles avec poches sur la carte va au bout, la bulle vit (son volume après le pincement à 5 % de la
+référence) ; (5) `--v1` stable 60 s avec poches, masse exacte, le coût des poches mesuré et inscrit (ADR-131). Ce qui ne tient pas
+dans la session est dit, et passe à S482.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la boussole ; REPRISE et AGENTS.
-- [x] **P3** — les trois registres générés, tenus par `--check`.
-- [x] **P4** — le journal archivé (P4a) ; `calcul.py` (P4b) ; `rituel.py` (P4c) — trois commits.
-- [x] **P5** — preuve ; rituel (par `rituel.py`).
+- [ ] **P2** — l'état des poches exporté par la référence ; `apic3d_poches.wgsl`, ses tampons ; la détection ; essai (2).
+- [ ] **P3** — le bilan par poche : listes, réductions, héritage, naissance, rappel, résorption ; contre la référence sur un même état.
+- [ ] **P4** — la projection avec poches ; la bulle, essai (3).
+- [ ] **P5** — B10 (4) ; `--v1` (5) par `calcul.py`.
+- [ ] **P6** — preuve ; rituel (par `rituel.py`).
 
 ### Notes de reprise
-- **P2** — `BOUSSOLE.md` (le pourquoi, DyingStar et la surprise, la fin à 100 %, l'architecture en quatre lignes, quinze décisions
-  en vigueur, ce que l'utilisateur décide et ce qui attend de lui, la méthode, les pièges) ; AGENTS : la boussole d'abord ; REPRISE :
-  §2 la règle des entrées vérifiées et des calculs longs, §3 l'ordre de lecture (boussole, tableau de bord, plan de complétion,
-  décisions et anomalies générées), §4 renvoie au tableau de bord (il décrivait encore S351).
-- **P3** — reprise à chaud à 16:37 (battement 12:03) : P2 complétée (diff cohérent, coché), committée. Trois outils, un registre
-  chacun, `ecarts` appelé par `etat_projet.py --check` : `tableau_de_bord.py` (120 points, 3 validés, 74 partiels, 43 absents ; 0 hors
-  campagne), `decisions.py` (220 ADR lus en tête : 169 actées, 49 proposées, 2 rétractées en partie ; colonnes « nomme » et « nommé
-  par » ; 38 Ko), `anomalies.py` (39 entrées à statut d'ANGLES-MORTS, 24 ouvertes). **Trouvé** : la levée d'A322 (S442) n'avait
-  jamais été écrite au registre source — note datée ajoutée. Pièges de lecture levés : titre dans un second gras, une note sur A324
-  écrite sous A320 (une note qui nomme une autre anomalie ne tranche plus), A303 donné deux fois (« A303 bis »).
-- **P4a** — le journal : 1,36 Mo → 7 Ko (S470–S479) ; S01–S469 dans `notes/journal/`, cinq archives par centaine (99 + 100 + 100
-  + 100 + 70 + 10 vivantes = 479 entrées, avant comme après ; texte identique à l'espacement près) ; liens relatifs recalés d'un
-  niveau, 0 lien mort dans les archives.
-- **P4b** — `outils/calcul.py` (lancer, etat, garder) ; `calculs/` ignoré par git, `notes/CALCULS.md` versionné. Essai : un calcul
-  de 45 s lancé, le shell qui l'a lancé fermé aussitôt, retrouvé « terminé » par le registre ; la sortie d'un processus détaché
-  n'arrivait pas au journal (pas de console) — poignées explicites. **Les sorties de S479 mises à l'abri** (`calculs/…-s479-b10-bulle`) :
-  `b10_p24.txt` est **vide** (le calcul est mort avec sa conversation) ; `bulle_b.txt` : la grande cuve (80×80×68, dx 2 cm, R 8 cm)
-  oscille à **47,84 Hz contre 42,22** de Minnaert (rapport 1,133, six périodes, volume moyen 2,03·10⁻³ contre 2,14 pour la sphère) —
-  à consigner dans POCHES-AIR-S479 par K2-2 ; B10 à `D/dx` = 24 est à relancer, par `calcul.py`.
-- **P4c** — `outils/rituel.py` : `debut` (l'amorce, le jeton et son avis, le plan, le tableau, les calculs), `fin` (vérifie cases et
-  journal, régénère les trois registres, libère le jeton, coche, `etat_projet --check`) ; essai du refus : P4 non cochée et pas
-  d'entrée S480 → deux MANQUE, rien d'écrit. `calcul.py` : `VAR=valeur` avant `--`, inscrits avec la commande. **B10 à `D/dx` = 24
-  relancé** par l'outil à 16:52 (`calculs/20261004-165215-b10-poches-p24`, ≈ 2 h 30) : K2-2 le consigne à son arrivée.
-- **P5** — preuve STRUCTURE-S480 ; ADR-221 (la décision) ; le lot des registres (index : boussole, registres générés, plan de
-  complétion, K2, POCHES-AIR-S479, STRUCTURE-S480, ADR-221, archives du journal ; file active : la décision du jour ; feuille de route :
-  S478–S480 ; boussole : la ligne « structure ») ; journal ; rituel par `rituel.py fin --lot`.
-
