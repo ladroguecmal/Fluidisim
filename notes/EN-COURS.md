@@ -62,40 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S474 — **terminée**. En autonomie : **le type d'eau** (ADR-217), premier temps.
+Session : S475 — **en cours**. **Décision de l'utilisateur** : *« l'objectif est de finir le système complet de l'eau, à ce moment
+précis la feuille to do list devra être validée à 100% pas moins mais plus possible ou changement durant le processus »*.
 
-**Ce que la session fait.** (1) **Le modèle** : les propriétés optiques d'une eau tirées de trois constituants — le phytoplancton
-(`Chl`, Morel et Maritorena 2001, Table 2), la matière dissoute (`a_g(440)`, pente de Babin et al. 2003), les particules minérales
-(`MES`, Babin et al. 2003) — ajoutés à l'eau pure d'ADR-177 dans `a`, `b`, `b_b` ; d'où `R0`, `kd`, `c` et la visibilité.
-`outils/type_eau.py` (la référence) et `godot/type_eau.gd` (le rendu), le même calcul. (2) **Les préréglages** (eau pure, océan clair,
-Méditerranée, côtier, lac, rivière, eau trouble), choisis dans les plages publiées ; `TYPE_EAU=<nom>` dans `mer.tscn` et `saut.tscn`.
-(3) **Jugés** contre V1 (Méditerranée) et V5 (côtier), compressés comme la référence (ADR-216 D8). **Le champ qui varie dans
-l'espace** (une texture de concentrations lue par fragment) : le second temps, S475.
+**Ce que la session fait.** (1) **ADR-218** : la fin du système = la liste validée à 100 % sur son périmètre final ; elle peut grandir
+ou changer, tracé ; remplace le critère d'arrêt d'ADR-215. (2) **L'actualisation de la liste** (la dernière complète : S350) : le
+journal de S351 à S474 relu contre elle, les catégories et le décompte vérifiés, l'« État au » refait. (3) **Le plan de complétion**
+(`docs/registres/PLAN-COMPLETION-S475.md`) : chaque point ouvert dans une campagne, dans l'ordre des dépendances, avec une
+estimation ; les faits que seul l'utilisateur peut fournir, une recommandation pour chacun. Le type d'eau dans l'espace passe en
+S476 (le seul déplacement du plan convenu : l'objectif nouveau demande d'abord de savoir où on en est).
 
-**Critères, écrits avant.** (1) `type_eau.gd` et `type_eau.py` d'accord à 10⁻⁶ près sur tous les préréglages ; le préréglage `pure`
-redonne l'eau d'ADR-177 (`kd` et `c` exacts, `R0` à l'arrondi de la table) ; sans `TYPE_EAU`, les images au bit ; (2) les
-visibilités dans les plages publiées des milieux ; (3) **V5** : avec le préréglage côtier (réglé dans les plages publiées), les
-teintes de l'eau proche (B/G, B/R des creux et des crêtes) dans leur tolérance ; (4) **V1** : l'eau pure est la plus bleue possible
-(ADR-177 D4) et V1 est plus bleue que notre eau pure — **le type d'eau ne peut pas fermer cet écart** ; le dire, mesuré, et nommer ce
-qui le peut (le ciel reflété, l'étalonnage du téléphone) ; (5) les images montrées.
+**Critères, écrits avant.** (1) ADR-218 écrite et indexée ; (2) chaque point ouvert du périmètre dans exactement une campagne
+(vérifié par un calcul, pas à l'œil) ; (3) l'« État au » de la liste refait, le décompte vérifié par `--check` ; (4) les faits
+extérieurs nommés avec une recommandation chacun.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — le modèle (Python, GDScript), les préréglages, `TYPE_EAU` ; l'égalité ; le défaut au bit.
-- [x] **P3** — V5 et V1 mesurées par préréglage ; le réglage du côtier ; les images.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — ADR-218 ; le plan de complétion ; l'actualisation de la liste.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `outils/type_eau.py` (la référence, sources dans l'en-tête), `godot/type_eau.gd` (le rendu) ; `TYPE_EAU=<préréglage>` ou
-  `<Chl>,<a_g(440)>,<MES>` dans `mer.tscn` (l'eau, le fond, le ciel sous l'eau) et `saut.tscn`. **Égalité** : 126 valeurs, écart
-  relatif 4,5·10⁻⁶ — **le critère (1) disait 10⁻⁶, trop strict pour les `Vector3` de Godot (flottants de 32 bits) ; porté à 10⁻⁵**.
-  `pure` : `kd`, `c` exacts, `R0` à 0,00069 contre 0,00068 (l'arrondi de la table d'ADR-177). **Sans `TYPE_EAU`, au bit** :
-  `saut.tscn` (six captures), `mer.tscn` (proche, sous l'eau). **Visibilités** (4,8/c(550)) : océan clair 53 m, Méditerranée 35 m,
-  côtier 2,8 m, lac 1,5 m, rivière 0,5 m, trouble 0,2 m.
-- **P3** — **V5** : le côtier réglé par une grille dans les plages publiées → **Chl 3, a_g 0,05, MES 6** (visibilité 1,15 m) ; l'eau
-  proche : B/G des creux × 0,985, des crêtes × 1,006, B/R des creux × 1,38 — **dans la tolérance** ; B/R des crêtes × 1,21 hors (le
-  ciel reflété domine les crêtes et l'eau lointaine, que le type d'eau ne bouge pas). **V1** : aucune eau ne l'atteint (l'eau pure est
-  la plus bleue ; V1 a un rouge à 1 % du bleu) — très probablement étalonnée (« Aesthetic Video […] for Editing Practice ») : V1 pour
-  la texture et le mouvement, pas la couleur. Image `captures/types_eau_S474.png` envoyée (pure, côtier, rivière).
-- **P4** — la preuve : TYPE-EAU-S474 ; journal ; jeton libre ; maillons 1 ; suivant : S475, le champ du type d'eau dans l'espace.
