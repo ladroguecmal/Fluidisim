@@ -10,12 +10,27 @@ use crate::apic3d_carte::ApicCarte;
 use water_core::apic3d::{Apic3, MAX_POCKETS};
 
 /// Noyaux de `apic3d_poches.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 5] = ["pk_init", "pk_merge", "pk_flatten", "pk_number", "pk_assign"];
+const KERNELS: [&str; 10] = [
+    "pk_init", "pk_merge", "pk_flatten", "pk_number", "pk_assign", "pk_lists", "pk_overlap", "pk_reduce", "pk_scalars", "pk_remap",
+];
 const PK_INIT: usize = 0;
 const PK_MERGE: usize = 1;
 const PK_FLATTEN: usize = 2;
 const PK_NUMBER: usize = 3;
 const PK_ASSIGN: usize = 4;
+const PK_LISTS: usize = 5;
+const PK_OVERLAP: usize = 6;
+const PK_REDUCE: usize = 7;
+const PK_SCALARS: usize = 8;
+const PK_REMAP: usize = 9;
+/// Les grandeurs de chaque poche dans `pkf` (`PF_*` du nuanceur), une tranche de `MAX_POCKETS` chacune.
+const PF_AIR: usize = 0;
+const PF_VFLUX: usize = 2;
+const PF_VOL: usize = 4;
+const PF_P: usize = 6;
+const PF_CX: usize = 7;
+const PF_CELLS: usize = 10;
+const PF_SCAL: usize = 31;
 
 /// L'en-tête de `pko`, après ses quatre tranches de mailles (`H_*` du nuanceur) : compteurs, la table de renumérotation, les
 /// recouvrements (nouvelle × ancienne).
@@ -99,19 +114,54 @@ impl ApicCarte {
         self.dispatch_pk(pass, PK_FLATTEN, cells, 128);
         self.dispatch_pk(pass, PK_NUMBER, 256, 256);
         self.dispatch_pk(pass, PK_ASSIGN, cells, 128);
+        self.dispatch_pk(pass, PK_LISTS, 256, 256);
+        self.dispatch_pk(pass, PK_OVERLAP, cells, 128);
+        self.dispatch_pk(pass, PK_REDUCE, MAX_POCKETS * 256, 256);
+        self.dispatch_pk(pass, PK_SCALARS, 1, 1);
+        self.dispatch_pk(pass, PK_REMAP, cells, 128);
     }
 
-    /// Charge l'état des poches de la référence (la poche de chaque maille, leur nombre) : le pas suivant de la carte en hérite
-    /// comme celui de la référence. Sans poches sur la référence : aucune.
+    /// Charge l'état des poches de la référence — la poche de chaque maille, leur nombre, leur air et leur volume suivi, le dernier
+    /// pas — et sa pression (la naissance d'une poche la lit) : le pas suivant de la carte en hérite comme celui de la référence.
+    /// Sans poches sur la référence : aucune.
     pub(crate) fn load_pockets(&mut self, reference: &Apic3) {
+        use crate::apic3d_carte::{bytes, u32_bytes};
         let cells = self.grid().cells();
+        let mut f = vec![0f32; 32 * MAX_POCKETS];
         let (of, count): (Vec<u32>, u32) = match reference.air_pocket_state() {
-            Some(s) => (s.of.to_vec(), s.air.len() as u32),
+            Some(s) => {
+                for b in 0..s.air.len() {
+                    f[PF_AIR * MAX_POCKETS + b] = s.air[b] as f32;
+                    f[PF_VFLUX * MAX_POCKETS + b] = s.vol_flux[b] as f32;
+                }
+                f[PF_SCAL * MAX_POCKETS] = s.last_dt as f32;
+                (s.of.to_vec(), s.air.len() as u32)
+            }
             None => (vec![0; cells], 0),
         };
         let (_, queue) = self.gpu();
-        queue.write_buffer(&self.pko, (cells * 4) as u64, crate::apic3d_carte::u32_bytes(&of));
-        queue.write_buffer(&self.pko, (4 * cells * 4) as u64, crate::apic3d_carte::u32_bytes(&[count, 0, 0, 0]));
+        queue.write_buffer(&self.pko, (cells * 4) as u64, u32_bytes(&of));
+        queue.write_buffer(&self.pko, (4 * cells * 4) as u64, u32_bytes(&[count, 0, 0, 0]));
+        queue.write_buffer(&self.pkf, 0, bytes(&f));
+        if self.poches.is_some() {
+            queue.write_buffer(self.cellf_buffer(), (cells * 4) as u64, bytes(reference.pressure()));
+        }
+    }
+
+    /// Banc : les poches du dernier pas, comme `Apic3::air_pockets` (volume, pression, centre, mailles).
+    pub fn air_pockets(&self) -> Result<Vec<water_core::apic3d::AirPocket>, String> {
+        let cells = self.grid().cells();
+        let n = self.read_u32(&self.pko, 4 * cells * 4, 1)?[0] as usize;
+        let f = self.read_f32(&self.pkf, 0, 32 * MAX_POCKETS)?;
+        let at = |field: usize, b: usize| f[field * MAX_POCKETS + b] as f64;
+        Ok((0..n)
+            .map(|b| water_core::apic3d::AirPocket {
+                volume: at(PF_VOL, b),
+                pressure: at(PF_P, b),
+                centroid: [at(PF_CX, b), at(PF_CX + 1, b), at(PF_CX + 2, b)],
+                cells: at(PF_CELLS, b) as u32,
+            })
+            .collect())
     }
 
     /// Banc : la poche de chaque maille (0 : aucune, `b + 1`) et le nombre de poches détectées au dernier pas.
@@ -125,7 +175,7 @@ impl ApicCarte {
 
 /// Une cuve de côté `l` (m), de l'eau sur `h`, et des bulles `(centre, rayon)` ; `cheminee` : une colonne d'air de la bulle 0 à la
 /// surface (sa poche rejoint l'air libre). La référence a ses poches actives.
-fn cuve_a_bulles(dx: f64, l: f64, h: f64, bulles: &[([f64; 3], f64)], cheminee: bool) -> Result<Apic3, String> {
+fn cuve_a_bulles(dx: f64, l: f64, h: f64, bulles: &[([f64; 3], f64)], cheminee: bool, chauffe: usize) -> Result<Apic3, String> {
     use crate::scene::host_impl;
     use water_core::delta3d::Domain3;
     use water_core::host::HostServices;
@@ -154,6 +204,10 @@ fn cuve_a_bulles(dx: f64, l: f64, h: f64, bulles: &[([f64; 3], f64)], cheminee: 
         true
     })
     .map_err(|e| format!("{e:?}"))?;
+    // La chauffe, sans poches : l'eau a une pression quand elles naissent.
+    for _ in 0..chauffe {
+        a.step(500).map_err(|e| format!("{e:?}"))?;
+    }
     a.enable_air_pockets(&mut host).map_err(|e| format!("{e:?}"))?;
     Ok(a)
 }
@@ -167,15 +221,17 @@ pub fn banc_poches() -> Result<(), String> {
     let pas: usize = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(5);
     let pas_us: u64 = std::env::var("PAS_US").ok().and_then(|v| v.parse().ok()).unwrap_or(500);
     let dx = 0.02;
+    let chauffe: usize = std::env::var("CHAUFFE").ok().and_then(|v| v.parse().ok()).unwrap_or(0);
     let mut a = match cas.as_str() {
         "plusieurs" => cuve_a_bulles(
             dx,
             0.8,
             0.6,
-            &[([0.4, 0.4, 0.3], 0.08), ([0.2, 0.2, 0.15], 0.05), ([0.6, 0.25, 0.2], 0.006), ([0.25, 0.6, 0.4], 0.06)],
+            &[([0.4, 0.4, 0.3], 0.08), ([0.2, 0.2, 0.15], 0.05), ([0.6, 0.25, 0.2], 0.012), ([0.25, 0.6, 0.4], 0.06)],
             std::env::var("CHEMINEE").map_or(true, |v| v != "0"),
+            chauffe,
         )?,
-        _ => cuve_a_bulles(dx, 0.8, 0.6, &[([0.4, 0.4, 0.3], 0.08)], false)?,
+        _ => cuve_a_bulles(dx, 0.8, 0.6, &[([0.4, 0.4, 0.3], 0.08)], false, chauffe)?,
     };
     pollster::block_on(async {
         let mut carte = ApicCarte::new(&a, a.particle_capacity()).await?;
@@ -186,6 +242,7 @@ pub fn banc_poches() -> Result<(), String> {
             carte.adapter, d.nx, d.ny, d.nz, d.dx, a.particle_count()
         );
         let (mut ecart_etiquettes, mut ecart_poches, mut max_poches, mut ecart_propre) = (0usize, 0usize, 0usize, 0usize);
+        let (mut pire_v, mut pire_p, mut nombres_differents) = (0f64, 0f64, 0usize);
         for s in 0..pas {
             carte.load(&a)?;
             a.step_upto(pas_us, water_core::apic3d::ApicStage::Reconstruct).map_err(|e| format!("{e:?}"))?;
@@ -203,10 +260,28 @@ pub fn banc_poches() -> Result<(), String> {
                 .filter(|((x, y), (l, m))| x != y && **l == **m as u32)
                 .count();
             println!(
-                "POCHES_CARTE_S481 pas={s} etiquettes_differentes={de} poches_carte={n} poches_reference={} mailles_differentes={dp}                  dont_a_etiquettes_egales={propres}",
+                "POCHES_CARTE_S481 pas={s} etiquettes_differentes={de} poches_carte={n} poches_reference={} mailles_differentes={dp} dont_a_etiquettes_egales={propres}",
                 reference.air.len()
             );
             ecart_propre += propres;
+            // Les grandeurs de chaque poche (même numérotation).
+            let pc = carte.air_pockets()?;
+            let mut pr = [water_core::apic3d::AirPocket::default(); MAX_POCKETS];
+            let nr = a.air_pockets(&mut pr);
+            if pc.len() != nr {
+                nombres_differents += 1;
+            }
+            for (x, y) in pc.iter().zip(&pr[..nr]) {
+                let rv = (x.volume - y.volume).abs() / y.volume;
+                let rp = (x.pressure - y.pressure).abs() / y.pressure;
+                let dc = (0..3).map(|m| (x.centroid[m] - y.centroid[m]).abs()).fold(0., f64::max);
+                println!(
+                    "POCHES_CARTE_S481 pas={s} V_carte={:.6e} V_ref={:.6e} ecart_V={rv:.2e} P_carte={:.1} P_ref={:.1} ecart_P={rp:.2e} ecart_centre_m={dc:.2e} mailles={}/{}",
+                    x.volume, y.volume, x.pressure, y.pressure, x.cells, y.cells
+                );
+                pire_v = pire_v.max(rv);
+                pire_p = pire_p.max(rp);
+            }
             ecart_etiquettes += de;
             ecart_poches += dp;
             max_poches = max_poches.max(n as usize);
@@ -214,8 +289,7 @@ pub fn banc_poches() -> Result<(), String> {
             a.step(pas_us).map_err(|e| format!("{e:?}"))?;
         }
         println!(
-            "POCHES_CARTE_S481 bilan detection cas={cas} pas={pas} etiquettes_differentes={ecart_etiquettes} \
-             mailles_de_poche_differentes={ecart_poches} dont_a_etiquettes_egales={ecart_propre} poches_max={max_poches}"
+            "POCHES_CARTE_S481 bilan detection cas={cas} pas={pas} etiquettes_differentes={ecart_etiquettes} mailles_de_poche_differentes={ecart_poches} dont_a_etiquettes_egales={ecart_propre} poches_max={max_poches} nombres_differents={nombres_differents} pire_ecart_V={pire_v:.2e} pire_ecart_P={pire_p:.2e}"
         );
         Ok(())
     })

@@ -590,6 +590,11 @@ impl ApicCarte {
         &self.cmask
     }
 
+    /// S481 : les champs des mailles (φ, p, …), pour les poches.
+    pub(crate) fn cellf_buffer(&self) -> &wgpu::Buffer {
+        &self.cellf
+    }
+
     /// S481 : le groupe de liaisons (le module des poches s'y lie).
     pub(crate) fn bind_group(&self) -> &wgpu::BindGroup {
         &self.bind

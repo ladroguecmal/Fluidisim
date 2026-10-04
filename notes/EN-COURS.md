@@ -91,7 +91,7 @@ dans la session est dit, et passe à S482.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — l'état des poches exporté par la référence ; `apic3d_poches.wgsl`, ses tampons ; la détection ; essai (2).
-- [ ] **P3** — le bilan par poche : listes, réductions, héritage, naissance, rappel, résorption ; contre la référence sur un même état.
+- [x] **P3** — le bilan par poche : listes, réductions, héritage, naissance, rappel, résorption ; contre la référence sur un même état.
 - [ ] **P4** — la projection avec poches ; la bulle, essai (3).
 - [ ] **P5** — B10 (4) ; `--v1` (5) par `calcul.py`.
 - [ ] **P6** — preuve ; rituel (par `rituel.py`).
@@ -106,3 +106,10 @@ dans la session est dit, et passe à S482.
   n'a pas révélé d'écart car la bulle de 6 mm n'est pas résolue à dx = 2 cm. Le module se compile sous Dx12.
 - **Pause demandée par l'utilisateur** à 21:29 (« fais pause, je reprendrai plus tard ») : reprendre à P3. B10 à 24 mailles tourne
   détaché (`python outils/calcul.py etat`).
+- **Reprise** à 21:31 (« Reprends le projet ») : jeton repris, P3. B10 à 24 mailles toujours en cours (l'exemple n'écrit qu'à la fin).
+- **P3** — `pk_lists` (LA, LW dans l'ordre des mailles, un groupe), `pk_overlap` (compteurs entiers), `pk_reduce` (un groupe par
+  poche, arbre fixe : volume, centre, mailles, pression de bord), `pk_scalars` (héritage, naissance, rappel, pression, résorption),
+  `pk_remap` ; `load` charge air, volume suivi, dernier pas et la pression de la référence. **FXC** refuse l'écriture indexée dans un
+  tableau local de structure : `bord_new` sans tableau. **Mesuré** (banc `--apic3d-poches`) : nombre de poches identique partout ;
+  écart de volume ≤ 6·10⁻⁶, de pression ≤ 7·10⁻⁶ (bulle 8 pas ; trois bulles et une cheminée ; trois bulles sous pression après
+  4 pas de chauffe — la naissance — ; la bulle d'une maille résorbée des deux côtés).

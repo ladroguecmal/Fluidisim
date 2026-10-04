@@ -90,6 +90,11 @@ fn pk_init(@builtin(global_invocation_id) g: vec3<u32>) {
     let c = g.x;
     if c == 0u {
         atomicStore(&pko[pk_h() + H_OLD_COUNT], atomicLoad(&pko[pk_h() + H_COUNT]));
+        atomicStore(&pko[pk_h() + 8u], 0u);
+    }
+    // Les recouvrements du pas (`pk_overlap`) repartent de zéro.
+    if c < MAXP * MAXP {
+        atomicStore(&pko[pk_h() + 128u + c], 0u);
     }
     if c >= P.cells {
         return;
@@ -203,4 +208,340 @@ fn pk_assign(@builtin(global_invocation_id) g: vec3<u32>) {
         }
     }
     atomicStore(&pko[P.cells + c], b);
+}
+
+// =====================================================================================================================
+// **Le bilan par poche** (S481 P3 ; `pockets_detect`, étapes 3 à 6 de la référence).
+//
+// Deux listes dans l'ordre des mailles : LA, les mailles d'air de chaque poche (maille, poche) ; LW, les mailles d'eau qui bordent
+// une poche, une entrée par poche distincte (la référence compte une maille d'eau une fois par poche). Puis un groupe par poche
+// somme, dans un ordre fixe, son volume (la fraction d'air `clamp(0,5 + φ/dx, 0, 1)` de ses mailles et des mailles d'eau qui la
+// bordent), son centre, ses mailles, et la pression de l'eau qui la borde (sa naissance). Les recouvrements avec les poches d'avant
+// sont des compteurs entiers. Un fil fait ensuite l'héritage, la naissance, le rappel du volume et la résorption.
+
+const F_PHI: u32 = 0u;
+const F_P: u32 = 1u;
+const H_LA: u32 = 4u;        // longueur de LA
+const H_LW: u32 = 5u;        // longueur de LW
+const H_LF: u32 = 6u;        // longueur de LF (la projection, P4)
+const H_LIST_OVF: u32 = 8u;  // une liste a débordé (drapeau)
+const H_REMAP: u32 = 16u;    // la poche gardée de chaque poche détectée (0 : résorbée), MAXP mots
+const H_OVERLAP: u32 = 128u; // recouvrements, (nouvelle × MAXP + ancienne)
+const HEADER_WORDS: u32 = 4224u; // 128 + MAXP·MAXP
+
+// Les grandeurs de chaque poche dans `pkf`, une tranche de MAXP chacune.
+const PF_AIR: u32 = 0u;
+const PF_VFLUX: u32 = 2u;
+const PF_VOL: u32 = 4u;
+const PF_GEO: u32 = 5u;
+const PF_P: u32 = 6u;
+const PF_CX: u32 = 7u;
+const PF_CELLS: u32 = 10u;
+const PF_SP: u32 = 11u;
+const PF_NP: u32 = 12u;
+const PF_SCAL: u32 = 31u;    // [0] le dernier pas, s
+
+const P_ATM: f32 = 101325.0;
+const GAMMA_AIR: f32 = 1.4;
+const RAPPEL_VOLUME_S: f32 = 0.1;
+
+fn pf(field: u32, b: u32) -> u32 {
+    return field * MAXP + b;
+}
+
+fn la_base() -> u32 {
+    return pk_h() + HEADER_WORDS;
+}
+
+fn lw_base() -> u32 {
+    return la_base() + 2u * P.cells;
+}
+
+fn lf_base() -> u32 {
+    return lw_base() + 2u * P.cells;
+}
+
+fn of_at(c: u32) -> u32 {
+    return atomicLoad(&pko[P.cells + c]);
+}
+
+// La voisine `m` (0 : −x, 1 : +x, 2 : −y, 3 : +y, 4 : −z, 5 : +z) ; NONE hors du domaine.
+fn nb_cell(c: u32, m: u32) -> u32 {
+    let q = cell_ijk(c);
+    switch m {
+        case 0u: { return select(NONE, c - 1u, q.x > 0u); }
+        case 1u: { return select(NONE, c + 1u, q.x + 1u < P.nx); }
+        case 2u: { return select(NONE, c - P.nx, q.y > 0u); }
+        case 3u: { return select(NONE, c + P.nx, q.y + 1u < P.ny); }
+        case 4u: { return select(NONE, c - P.nx * P.ny, q.z > 0u); }
+        default: { return select(NONE, c + P.nx * P.ny, q.z + 1u < P.nz); }
+    }
+}
+
+// La poche de la voisine `m` de la maille d'eau `c` (0 : aucune — pas d'eau, pas d'air, ou de l'air libre).
+fn bord_b(c: u32, m: u32) -> u32 {
+    let a = nb_cell(c, m);
+    if a == NONE || label[a] != AIR {
+        return 0u;
+    }
+    return of_at(a);
+}
+
+// La voisine `m` apporte-t-elle une poche que les précédentes n'ont pas ? Les poches distinctes que borde une maille d'eau, dans
+// l'ordre des voisines, sans tableau local (FXC refuse l'écriture indexée dans un tableau de structure).
+fn bord_new(c: u32, m: u32) -> bool {
+    let b = bord_b(c, m);
+    if b == 0u {
+        return false;
+    }
+    for (var k = 0u; k < m; k = k + 1u) {
+        if bord_b(c, k) == b {
+            return false;
+        }
+    }
+    return true;
+}
+
+fn bord_n(c: u32) -> u32 {
+    if label[c] != WATER {
+        return 0u;
+    }
+    var n = 0u;
+    for (var m = 0u; m < 6u; m = m + 1u) {
+        if bord_new(c, m) {
+            n = n + 1u;
+        }
+    }
+    return n;
+}
+
+// Les deux listes, par un groupe : compte par tranche, préfixe, écriture — l'ordre des mailles.
+var<workgroup> pk_scan2: array<vec2<u32>, 256>;
+
+@compute @workgroup_size(256)
+fn pk_lists(@builtin(local_invocation_id) l: vec3<u32>) {
+    let t = l.x;
+    let chunk = (P.cells + 255u) / 256u;
+    let lo = min(t * chunk, P.cells);
+    let hi = min(lo + chunk, P.cells);
+    var n = vec2<u32>(0u, 0u);
+    for (var c = lo; c < hi; c = c + 1u) {
+        if of_at(c) != 0u {
+            n.x = n.x + 1u;
+        }
+        n.y = n.y + bord_n(c);
+    }
+    pk_scan2[t] = n;
+    workgroupBarrier();
+    for (var s = 1u; s < 256u; s = s * 2u) {
+        var v = vec2<u32>(0u, 0u);
+        if t >= s {
+            v = pk_scan2[t - s];
+        }
+        workgroupBarrier();
+        pk_scan2[t] = pk_scan2[t] + v;
+        workgroupBarrier();
+    }
+    var at = pk_scan2[t] - n;
+    var ovf = false;
+    for (var c = lo; c < hi; c = c + 1u) {
+        let b = of_at(c);
+        if b != 0u {
+            atomicStore(&pko[la_base() + 2u * at.x], c);
+            atomicStore(&pko[la_base() + 2u * at.x + 1u], b);
+            at.x = at.x + 1u;
+        }
+        if label[c] == WATER {
+            for (var m = 0u; m < 6u; m = m + 1u) {
+                if !bord_new(c, m) {
+                    continue;
+                }
+                if at.y < P.cells {
+                    atomicStore(&pko[lw_base() + 2u * at.y], c);
+                    atomicStore(&pko[lw_base() + 2u * at.y + 1u], bord_b(c, m));
+                } else {
+                    ovf = true;
+                }
+                at.y = at.y + 1u;
+            }
+        }
+    }
+    if ovf {
+        atomicStore(&pko[pk_h() + H_LIST_OVF], 1u);
+    }
+    if t == 255u {
+        atomicStore(&pko[pk_h() + H_LA], pk_scan2[255].x);
+        atomicStore(&pko[pk_h() + H_LW], min(pk_scan2[255].y, P.cells));
+    }
+}
+
+// Les recouvrements avec les poches d'avant (compteurs entiers ; remis à zéro par `pk_init`).
+@compute @workgroup_size(128)
+fn pk_overlap(@builtin(global_invocation_id) g: vec3<u32>) {
+    let c = g.x;
+    if c >= P.cells {
+        return;
+    }
+    let b = of_at(c);
+    let o = atomicLoad(&pko[2u * P.cells + c]);
+    if b != 0u && o != 0u {
+        atomicAdd(&pko[pk_h() + H_OVERLAP + (b - 1u) * MAXP + o - 1u], 1u);
+    }
+}
+
+fn frac(c: u32) -> f32 {
+    return clamp(0.5 + cellf[F_PHI * P.cells + c] / P.dx, 0.0, 1.0);
+}
+
+// La somme par poche : un groupe par poche, chaque fil une tranche fixe des listes, puis l'arbre — un ordre fixe.
+var<workgroup> pk_red: array<array<f32, 7>, 256>;
+var<workgroup> pk_n: u32;
+
+@compute @workgroup_size(256)
+fn pk_reduce(@builtin(local_invocation_id) l: vec3<u32>, @builtin(workgroup_id) w: vec3<u32>) {
+    let t = l.x;
+    let b = w.x;
+    if t == 0u {
+        pk_n = atomicLoad(&pko[pk_h() + H_COUNT]);
+    }
+    if b >= workgroupUniformLoad(&pk_n) {
+        return;
+    }
+    let cell_volume = P.dx * P.dx * P.dx;
+    var s = array<f32, 7>(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    let na = atomicLoad(&pko[pk_h() + H_LA]);
+    for (var e = t; e < na; e = e + 256u) {
+        if atomicLoad(&pko[la_base() + 2u * e + 1u]) != b + 1u {
+            continue;
+        }
+        let c = atomicLoad(&pko[la_base() + 2u * e]);
+        let f = frac(c) * cell_volume;
+        let q = (vec3<f32>(cell_ijk(c)) + vec3<f32>(0.5)) * P.dx;
+        s[0] = s[0] + f;
+        s[1] = s[1] + f * q.x;
+        s[2] = s[2] + f * q.y;
+        s[3] = s[3] + f * q.z;
+        s[4] = s[4] + 1.0;
+        // La pression de l'eau qui la borde, au pas d'avant (la naissance).
+        for (var m = 0u; m < 6u; m = m + 1u) {
+            let n = nb_cell(c, m);
+            if n != NONE && label[n] == WATER {
+                s[5] = s[5] + cellf[F_P * P.cells + n];
+                s[6] = s[6] + 1.0;
+            }
+        }
+    }
+    let nw = atomicLoad(&pko[pk_h() + H_LW]);
+    for (var e = t; e < nw; e = e + 256u) {
+        if atomicLoad(&pko[lw_base() + 2u * e + 1u]) == b + 1u {
+            s[0] = s[0] + frac(atomicLoad(&pko[lw_base() + 2u * e])) * cell_volume;
+        }
+    }
+    pk_red[t] = s;
+    workgroupBarrier();
+    for (var h = 128u; h > 0u; h = h / 2u) {
+        if t < h {
+            for (var k = 0u; k < 7u; k = k + 1u) {
+                pk_red[t][k] = pk_red[t][k] + pk_red[t + h][k];
+            }
+        }
+        workgroupBarrier();
+    }
+    if t == 0u {
+        let r = pk_red[0];
+        pkf[pf(PF_GEO, b)] = r[0];
+        let inv = select(0.0, 1.0 / r[0], r[0] > 0.0);
+        pkf[pf(PF_CX, b)] = r[1] * inv;
+        pkf[pf(PF_CX + 1u, b)] = r[2] * inv;
+        pkf[pf(PF_CX + 2u, b)] = r[3] * inv;
+        pkf[pf(PF_CELLS, b)] = r[4];
+        pkf[pf(PF_SP, b)] = r[5];
+        pkf[pf(PF_NP, b)] = r[6];
+    }
+}
+
+// L'héritage, la naissance, le rappel, la pression et la résorption, par un fil (MAXP poches).
+@compute @workgroup_size(1)
+fn pk_scalars() {
+    let h = pk_h();
+    let n = atomicLoad(&pko[h + H_COUNT]);
+    let on = atomicLoad(&pko[h + H_OLD_COUNT]);
+    var old_air: array<f32, 64>;
+    var old_vf: array<f32, 64>;
+    for (var o = 0u; o < on; o = o + 1u) {
+        old_air[o] = pkf[pf(PF_AIR, o)];
+        old_vf[o] = pkf[pf(PF_VFLUX, o)];
+    }
+    var air: array<f32, 64>;
+    var vf: array<f32, 64>;
+    for (var b = 0u; b < n; b = b + 1u) {
+        air[b] = 0.0;
+        vf[b] = 0.0;
+    }
+    // 4. L'air hérité : l'air de chaque poche d'avant partagé au prorata des mailles recouvertes.
+    for (var o = 0u; o < on; o = o + 1u) {
+        var total = 0u;
+        for (var b = 0u; b < n; b = b + 1u) {
+            total = total + atomicLoad(&pko[h + H_OVERLAP + b * MAXP + o]);
+        }
+        if total == 0u {
+            continue;
+        }
+        for (var b = 0u; b < n; b = b + 1u) {
+            let wgt = atomicLoad(&pko[h + H_OVERLAP + b * MAXP + o]);
+            if wgt > 0u {
+                let part = f32(wgt) / f32(total);
+                air[b] = air[b] + old_air[o] * part;
+                vf[b] = vf[b] + old_vf[o] * part;
+            }
+        }
+    }
+    let rappel = min(pkf[pf(PF_SCAL, 0u)] / RAPPEL_VOLUME_S, 1.0);
+    let cell_volume = P.dx * P.dx * P.dx;
+    var kept = 0u;
+    for (var b = 0u; b < n; b = b + 1u) {
+        let geo = pkf[pf(PF_GEO, b)];
+        // 5. La naissance : la pression de l'eau qui la borde, plus l'atmosphère.
+        if air[b] <= 0.0 {
+            let np_ = pkf[pf(PF_NP, b)];
+            var p0 = P_ATM;
+            if np_ > 0.0 {
+                p0 = p0 + pkf[pf(PF_SP, b)] / np_;
+            }
+            p0 = max(p0, 0.1 * P_ATM);
+            air[b] = geo * pow(p0, 1.0 / GAMMA_AIR);
+            vf[b] = geo;
+        }
+        let vol = vf[b] + (geo - vf[b]) * rappel;
+        // 6. La résorption des poches de moins d'une maille ; les gardées se rangent dans l'ordre.
+        if geo < cell_volume {
+            atomicStore(&pko[h + H_REMAP + b], 0u);
+            continue;
+        }
+        atomicStore(&pko[h + H_REMAP + b], kept + 1u);
+        pkf[pf(PF_VOL, kept)] = vol;
+        pkf[pf(PF_GEO, kept)] = geo;
+        pkf[pf(PF_CELLS, kept)] = pkf[pf(PF_CELLS, b)];
+        for (var a = 0u; a < 3u; a = a + 1u) {
+            pkf[pf(PF_CX + a, kept)] = pkf[pf(PF_CX + a, b)];
+        }
+        pkf[pf(PF_AIR, kept)] = air[b];
+        pkf[pf(PF_VFLUX, kept)] = vf[b];
+        pkf[pf(PF_P, kept)] = pow(air[b] / vol, GAMMA_AIR);
+        kept = kept + 1u;
+    }
+    atomicStore(&pko[h + H_COUNT], kept);
+}
+
+// La poche gardée de chaque maille (0 : résorbée, l'air y redevient libre).
+@compute @workgroup_size(128)
+fn pk_remap(@builtin(global_invocation_id) g: vec3<u32>) {
+    let c = g.x;
+    if c >= P.cells {
+        return;
+    }
+    let b = of_at(c);
+    if b != 0u {
+        atomicStore(&pko[P.cells + c], atomicLoad(&pko[pk_h() + H_REMAP + b - 1u]));
+    }
 }
