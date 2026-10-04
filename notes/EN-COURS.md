@@ -62,28 +62,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S476 — **terminée**. **Réponses de l'utilisateur** aux six faits du plan de complétion (F1 à F6) : le réseau à nous ; un
-seul ordinateur, celui-ci ; le jeu sera **DyingStar** (<https://github.com/DyingStar-game>), **une surprise pour l'équipe** ; pas
-d'outil de terrain en tête ; l'écume par les vidéos ; les verdicts aux jalons.
+Session : S477 — **en cours**. En autonomie, plan de complétion K1 : **le type d'eau dans l'espace** (ADR-217 D1, second temps).
 
-**Ce que la session fait.** (1) **ADR-219** : les six réponses ; les points à second matériel reformulés sur ce PC ; ce que les dépôts
-publics de DyingStar disent (lus seulement — aucun contact : la surprise) ; un point ajouté, **13.4 — l'eau dans le jeu**. (2) **La
-liste** : les reformulations aux points, 13.4, le décompte. (3) **Le registre des dépendances** : les attentes extérieures levées, les
-fronts recalculés. (4) **Le plan de complétion** : §3 résolu, 13.4 en K13. Le type d'eau dans l'espace passe en S477.
+**Ce que la session fait.** Une **carte des constituants** (Chl, a_g(440), MES par texel, sur un rectangle de la carte en coordonnées
+de B) lue **par fragment** : une structure `Optique` (R0, kd, c) que `optique_en(xy)` calcule — le modèle de `type_eau.py` porté dans
+le nuanceur — et que les fonctions de la lumière de l'eau reçoivent en paramètre (Godot n'a pas de variable globale modifiable :
+vérifié). L'eau (surface vue d'en haut et d'en dessous), le fond, le ciel sous l'eau de `mer.tscn` ; `saut.tscn` prêt à la lire. Sans
+carte, `optique_en` rend les uniformes de la scène. Une scène d'essai : un panache de rivière qui entre dans la mer
+(`TYPE_EAU_CARTE=panache`).
 
-**Critères, écrits avant.** (1) ADR-219 écrite et indexée ; (2) la liste et le registre d'accord (`--check` à 0), 13.4 compté ;
-(3) chaque point ouvert dans exactement une campagne (le calcul de S475 refait) ; (4) aucune action vers DyingStar ni son équipe.
+**Critères, écrits avant.** (1) sans carte, les images **au bit** (`mer.tscn` : proche, sous l'eau ; `saut.tscn` : six captures) ;
+(2) le modèle du nuanceur égal à `type_eau.py` : une carte uniforme d'un préréglage donne les mêmes images que `TYPE_EAU=<préréglage>`
+(à l'arrondi des flottants près : écart ≤ 1/255 par canal) ; (3) la transition montrée (images) ; (4) le surcoût GPU mesuré, ≤ 0,3 ms
+par image à 1280 × 720.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-219 ; la liste ; le registre ; le plan.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — `Optique`, `optique_en`, les fonctions qui la reçoivent ; la carte dans `mer.gd` ; le panache ; mesures ; images.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — ADR-219 (indexée). DyingStar lu dans ses dépôts publics seulement (pages et API publique de GitHub, en lecture) — Godot
-  4.5, C#, double précision, Jolt, Wwise, serveur Horizon en Rust, planètes de 6 356 km en tuiles HEALPix ; **aucune action vers le
-  jeu ni son équipe**. La liste : 1.7, 9.10, 10.2, 10.3, 11.5 reformulés sur ce PC ; 7.1 la suspension levée ; 7.8 par Wwise ; 12.4 le
-  terrain du jeu ; **13.4 ajouté** — 121 points, 120 au périmètre. Le registre : onze attentes levées, **46 points au front 0** (36
-  avant), 13 en E. Le plan : §3 répondu, 13.4 en K13 ; **117 points ouverts, chacun dans une seule campagne** (le calcul refait).
-- **P3** — la preuve : ADR-219 et le plan de complétion ; journal ; jeton libre ; maillons 1 ; suivant : S477, K1 — le type d'eau dans l'espace.
