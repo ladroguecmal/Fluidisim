@@ -4206,6 +4206,11 @@ tombe à 3·10⁻⁵ s : le calcul complet de B10 a tourné 13 h sans finir, pou
 fermeture n'est pas exclue. **Conséquence nouvelle** : la vie de la bulle n'est pas seulement fausse,
 elle **arrête le calcul** à maille fine ; le remède d'A311 précède toute maille fine de production.
 
+**A311 — note datée du 2026-10-04 (S479). Le remède, éprouvé dans la référence 3D.** L'air enfermé est une poche adiabatique,
+inconnue de la projection ([POCHES-AIR-S479](../validation/POCHES-AIR-S479.md), ADR-220 D1) : une bulle oscille à la fréquence de
+Minnaert (× 1,02), B10 3D va au bout à `D/dx` = 16 et la bulle y vit après le pincement. **Reste ouverte** jusqu'à la carte (K2-2)
+et au cas fin de S326 (le banc 2D à 32 mailles, sans poches dans le banc 2D).
+
 **A312 — S320, 2026-09-22 (sévérité 2, ouverte). La couronne et le jet d'un impact sont des grandeurs
 de la maille.** De `D/dx` = 8 à 16, ils changent de 40 à 60 %, dans un sens ou dans l'autre, alors que
 le temps de pincement et la cavité maximale convergent à 10 % près

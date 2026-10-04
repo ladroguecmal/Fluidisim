@@ -84,7 +84,7 @@ les poches, et la bulle pincée vit (son volume après le pincement, tracé) ; `
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les poches dans `apic3d.rs` ; les essais (1) à (3).
-- [ ] **P3** — B10 avec poches (4) ; mesures.
+- [x] **P3** — B10 avec poches (4) ; mesures.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
@@ -97,4 +97,8 @@ les poches, et la bulle pincée vit (son volume après le pincement, tracé) ; `
   (2) la bulle (R = 0,08 m, R/dx = 4, à 0,3 m de fond) remonte (son centre de 0,258 à 0,300 m en 0,15 s), son volume moyen
   comprimé de 1,6 % (l'adiabatique sous la charge en attend 2,0 %), oscillation de ± 1,3 %, masse exacte ; (3) **42,5 Hz contre
   41,6 de Minnaert (× 1,021)** — la cuve, par la méthode des images, attendrait 38,4 (× 1,107) : dans les 15 % des deux.
+- **P3** — B10 avec poches : à `D/dx` = 8, au bout (la bulle : 0,262 D³, 98 à 142 kPa) ; **à 16, au bout en 31 min**, pincement
+  2,084 √(R/g) (S393 : 2,08), la bulle vit 1,5 √(D/g) après (0,283 D³ au plus, 0,231 à la fin, 82 à 155 kPa). `D/dx` = 24 lancé
+  (≈ 2 h 30), consigné à son arrivée. La bulle dans une cuve deux fois plus grande : en cours (trois millions de particules).
+  A311 : note datée (remède éprouvé ; ouverte jusqu'à la carte).
 
