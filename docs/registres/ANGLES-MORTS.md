@@ -4211,6 +4211,10 @@ inconnue de la projection ([POCHES-AIR-S479](../validation/POCHES-AIR-S479.md), 
 Minnaert (× 1,02), B10 3D va au bout à `D/dx` = 16 et la bulle y vit après le pincement. **Reste ouverte** jusqu'à la carte (K2-2)
 et au cas fin de S326 (le banc 2D à 32 mailles, sans poches dans le banc 2D).
 
+*Note du 2026-10-04, S481, sur A311* ([POCHES-CARTE-S481](../validation/POCHES-CARTE-S481.md)) : le remède porté sur la carte (la bulle à
+4·10⁻⁵ de la référence) ; une poche de moins de huit mailles se résorbe désormais (`POCHE_MAILLES_MIN`) — les poches d'une maille
+emballaient la scène `--v1`. A311 reste ouverte jusqu'à la production au temps réel avec poches (K2-2b).
+
 **A312 — S320, 2026-09-22 (sévérité 2, ouverte). La couronne et le jet d'un impact sont des grandeurs
 de la maille.** De `D/dx` = 8 à 16, ils changent de 40 à 60 %, dans un sens ou dans l'autre, alors que
 le temps de pincement et la cavité maximale convergent à 10 % près

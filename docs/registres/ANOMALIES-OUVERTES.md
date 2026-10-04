@@ -30,7 +30,7 @@ tard, 2 = refonte d'un sous-système, 3 = travail localisé.
 | A303 bis | 2 | S312 | Personne n'avait demandé à W ce qu'il sait faire | — |
 | A305 | 2 | S313 | Le résidu du cas ouvert est d'un seul signe | — |
 | A309 | 2 | S316 | La direction que lit le raccord est biaisée, et le biais ne converge pas | — |
-| A311 | 2 | S320 | L'air n'est pas modélisé : une bulle enfermée est à pression nulle | S479 : Le remède, éprouvé dans la référence 3D |
+| A311 | 2 | S320 | L'air n'est pas modélisé : une bulle enfermée est à pression nulle | S481 : le remède porté sur la carte (la bulle à 4·10⁻⁵ de la référence) ; une poche de moins de huit mailles se résorbe désormais (POCHE_MAILLES_MIN) — les poches … |
 | A312 | 2 | S320 | La couronne et le jet d'un impact sont des grandeurs de la maille | S326 : Le contraste ci-dessus ne tient qu'à moitié : à trois mailles, le temps de pincement ne converge pas non plus — 2,20 → 2,30 → 2,40 √(D/g) — et la cavité … |
 | A314 | 2 | S323 | La surface d'APIC dépend de l'arrangement de ses particules | — |
 | A319 | 2 | S351 | « Rétrécir ou détruire un domaine perturbatif est visuellement gratuit » n'a jamais été mesuré | — |

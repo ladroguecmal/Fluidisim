@@ -128,3 +128,12 @@ dans la session est dit, et passe à S482.
   sans poches (témoin, même binaire) — reconstruction +11 ms (détection et listes par un seul groupe), projection +≈ 40 ms (la
   diagonale à la place de la multigrille). À inscrire (ADR-131) ; remèdes : les poches dans la multigrille (préconditionneur par
   blocs), sauter les noyaux quand aucun air n'est enfermé, les parcours à plusieurs groupes. B10 à 16 mailles lancé.
+- **P5b** — **à 23:46, B10 à 16 mailles (S481) et B10 à 24 mailles (lancé en S480, 7 h de calcul) sont morts ensemble**, code
+  0xC000013A (Ctrl+C) : lancés par `calcul.py`, ils restaient dans l'objet de tâche de la session (la sortie, `BREAKAWAY_FROM_JOB`,
+  est refusée). **Corrigé** : sous Windows, le lanceur est créé par WMI (`Win32_Process.Create`, parent : le service WMI), lit sa
+  commande et son environnement dans `lancement.json`, écrit lui-même `sortie.log` ; `detache.txt` dit s'il est hors de la session ;
+  le registre traduit les codes de sortie. Essais : environnement transmis, sortie écrite. B10 à 16 mailles relancé à 23:50.
+- **Question de l'utilisateur à 23:46** (« d'autres pistes d'amélioration […] que tu prennes toi-même les solutions ») : répondu — cinq
+  pistes décidées (calculs hors session, référence CPU parallèle, banc de non-régression dans le rituel, révision de méthode tous
+  les cinq sessions, scènes fines pour les poches) ; deux en attente de son accord (relance planifiée, téléchargements anticipés).
+  À écrire en P6 : ADR-222.
