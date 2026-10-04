@@ -60,18 +60,25 @@ acquise. **Depuis S254, l'utilisateur supervise les rendus visuels** : lui deman
 réelles quand un rendu doit être jugé, selon [REVUE-VISUELLE](docs/validation/REVUE-VISUELLE.md). La méthode de choix du lot et de validation vit dans [METHODE](notes/METHODE.md).
 
 Plan avant travail dans [EN-COURS](notes/EN-COURS.md), committé seul ; une étape par commit
-`S<n> P<k> — …`, moins d'un quart d'heure par étape. Déclarer un découpage si nécessaire.
+`S<n> P<k> — …`, moins d'un quart d'heure par étape. Déclarer un découpage si nécessaire. **Le plan
+déclare ses entrées et comment il les vérifie** (S480 : en S472, une mer lisait le détail d'une autre,
+et trois séries de mesures étaient fausses). Un calcul de plus de dix minutes se lance par
+`python outils/calcul.py lancer` (sortie dans `calculs/`, trace dans [CALCULS](notes/CALCULS.md)) :
+le dossier temporaire d'une conversation disparaît avec elle.
 
 ## 3. Où est la connaissance — lecture à froid
 
 Après l'amorce Git et la prise du jeton, lire dans cet ordre — ≈ 70 Ko, pas davantage
 ([ADR-187](docs/adr/ADR-187-methode-refondue-s321.md) D2) :
 
+0. [BOUSSOLE](BOUSSOLE.md) — déjà lue par l'amorce — et le [tableau de bord](docs/registres/TABLEAU-DE-BORD.md) (généré) :
+   la liste à 100 %, campagne par campagne.
 1. La **dernière entrée seulement** de [JOURNAL](notes/JOURNAL.md).
 2. [Invariants](docs/01_INVARIANTS.md), puis [ADR-001](docs/adr/ADR-001-decomposition-en-couches.md) §2.
-3. [Feuille de route §3 bis](docs/FEUILLE-DE-ROUTE.md) — les portes — et, dans la
-   [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active), les **décisions** en tête et
-   les lignes de la porte en cours.
+3. Le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md) et la conception de la campagne en cours ; dans la
+   [file active](docs/registres/QUESTIONS-OUVERTES.md#file-active), les **décisions** en tête. Les décisions en vigueur, ADR par
+   ADR : [DECISIONS-EN-VIGUEUR](docs/registres/DECISIONS-EN-VIGUEUR.md) (généré) ; les anomalies ouvertes :
+   [ANOMALIES-OUVERTES](docs/registres/ANOMALIES-OUVERTES.md) (généré).
 4. [Méthode](notes/METHODE.md), **ses protections actives d'abord**.
 5. Pour le lot choisi : ses ADR, spécifications et preuves, **avant de le modifier**.
 
@@ -80,6 +87,11 @@ tête ; la feuille de route et la file entières ; le journal, les leçons, les 
 reprise à chaud suit uniquement EN-COURS et le diff.
 
 ## 4. Où en est le projet
+
+**Depuis S480, l'état courant ne s'écrit plus ici** : il est dans le [tableau de bord](docs/registres/TABLEAU-DE-BORD.md),
+régénéré par `python outils/tableau_de_bord.py` (la liste, point par point, campagne par campagne, et l'historique du décompte), et
+la suite dans le jeton ci-dessus. Ce qui suit est l'état au 2026-09-24 (S351), gardé pour l'histoire de la v1 ; il ne fait plus
+foi sur l'état présent.
 
 État au 2026-09-24 (S351), en bref ; le détail par jalon et par porte est dans la
 [feuille de route](docs/FEUILLE-DE-ROUTE.md) et ne se recopie pas ici.

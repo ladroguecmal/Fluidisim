@@ -15,9 +15,10 @@ de validation et des candidats δ, en Rust, sans aucune dépendance.
 
 ## Ce que tu fais en premier, sans exception
 
-1. **Lis [`REPRISE.md`](REPRISE.md) en entier.** Il contient ton rôle, les règles de travail, la
-   carte de la connaissance, l'état du projet, les arbitrages en attente et le rituel de fin de
-   session. Il fait foi sur toute mémoire privée et sur tout souvenir de conversation.
+1. **Lis [`BOUSSOLE.md`](BOUSSOLE.md)** (deux pages, depuis S480) — pourquoi le projet existe, vers quoi il va, les
+   décisions en vigueur, ce qui attend l'utilisateur — **puis [`REPRISE.md`](REPRISE.md) en entier.** REPRISE contient ton rôle,
+   les règles de travail, la carte de la connaissance, le jeton et le rituel de fin de session. Les deux font foi sur toute
+   mémoire privée et sur tout souvenir de conversation.
 
 2. **Vérifie l'état réel** avant de croire quoi que ce soit, dans cet ordre :
 

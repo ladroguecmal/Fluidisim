@@ -84,9 +84,14 @@ fin de S480 fait par `rituel.py`.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — la boussole ; REPRISE et AGENTS.
+- [x] **P2** — la boussole ; REPRISE et AGENTS.
 - [ ] **P3** — les trois registres générés, tenus par `--check`.
 - [ ] **P4** — le journal archivé ; `calcul.py` ; `rituel.py`.
 - [ ] **P5** — preuve ; rituel (par `rituel.py`).
 
 ### Notes de reprise
+- **P2** — `BOUSSOLE.md` (le pourquoi, DyingStar et la surprise, la fin à 100 %, l'architecture en quatre lignes, quinze décisions
+  en vigueur, ce que l'utilisateur décide et ce qui attend de lui, la méthode, les pièges) ; AGENTS : la boussole d'abord ; REPRISE :
+  §2 la règle des entrées vérifiées et des calculs longs, §3 l'ordre de lecture (boussole, tableau de bord, plan de complétion,
+  décisions et anomalies générées), §4 renvoie au tableau de bord (il décrivait encore S351).
+
