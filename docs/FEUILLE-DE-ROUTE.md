@@ -347,6 +347,10 @@ et questions : bilan §5 et §6 ; rien n'est retiré de l'ambition.
 
 ## 3 ter. Après la v1 — la liste entière, par fronts
 
+**Depuis S475 ([ADR-218](adr/ADR-218-le-systeme-de-l-eau-complet.md), décision de l'utilisateur) : la liste validée à 100 % est la
+condition de fin du système de l'eau. L'ordre est celui du [plan de complétion](registres/PLAN-COMPLETION-S475.md)** — treize
+campagnes (K1 à K13), les faits que seul l'utilisateur peut fournir (F1 à F6) ; ce qui suit garde l'histoire de l'ordre par fronts.
+
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et
 tenu par `etat_projet.py --check`. Ici, l'ordre. Les jalons du §2 et les portes E et F restent vrais : ils disent les

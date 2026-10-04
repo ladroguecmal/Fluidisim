@@ -12,7 +12,10 @@ spécifications, des [cas canoniques](validation/CAS-CANONIQUES.md) et des
 **Objectif des sessions après la v1** (décision de l'utilisateur, S351,
 [ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md)) : ses 120 points validés, chacun sur son
 périmètre final ; l'ordre reste celui de la feuille de route (§3 ter), qui le tire du
-[registre des dépendances](registres/DEPENDANCES-LISTE.md).
+[registre des dépendances](registres/DEPENDANCES-LISTE.md). **Depuis S475, la condition de fin du système
+de l'eau** (décision de l'utilisateur, [ADR-218](adr/ADR-218-le-systeme-de-l-eau-complet.md)) : *« la feuille
+to do list devra être validée à 100% pas moins mais plus possible ou changement durant le processus »* —
+119 points (5.11 hors du périmètre), dans l'ordre du [plan de complétion](registres/PLAN-COMPLETION-S475.md).
 
 **Remplissage à la demande de l'utilisateur.** Chaque remplissage met à jour les états touchés et la
 ligne « État au » ci-dessous. La trajectoire et l'ordre des travaux restent dans la
@@ -27,6 +30,14 @@ coche et on pointe, sans recopier (L137).
 
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
+
+**État au S475, 2026-10-04** — actualisation complète (ADR-218 D5) : le journal de S351 à S474 relu
+contre la liste. **Aucun point n'a changé de catégorie depuis S408** (4.10 passé à partiel) : les
+sessions S409–S474 (la campagne du solveur 3D sur la carte, la surface continue, la v1, Godot, le banc
+visuel, le type d'eau) ont fait avancer des points déjà partiels — reportés par les lots de registres —
+sans en amener un à son périmètre final. **3 validés, 73 partiels, 44 absents dont 5.11 hors du
+périmètre : 116 points ouverts sur 119.** Le constat et l'ordre pour la suite : le
+[plan de complétion](registres/PLAN-COMPLETION-S475.md) §1–2.
 
 **État au S350, 2026-09-24** — actualisation demandée par l'utilisateur à la reprise de S350
 (« mets à jour le document de la to do list »). **Seuls les points que S309–S349 ont réellement

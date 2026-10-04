@@ -79,7 +79,14 @@ extérieurs nommés avec une recommandation chacun.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-218 ; le plan de complétion ; l'actualisation de la liste.
+- [x] **P2** — ADR-218 ; le plan de complétion ; l'actualisation de la liste.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — ADR-218 (indexée ; note à ADR-215) ; `docs/registres/PLAN-COMPLETION-S475.md` : **treize campagnes, 116 points ouverts,
+  chacun dans exactement une** (vérifié par un calcul contre le registre des dépendances : 10.7, validé, retiré d'une plage) ; ≈ 310
+  sessions, ordres de grandeur ; six faits de l'utilisateur (F1 réseau, F2 second matériel et serveur, F3 objets du jeu, F4 outil de
+  terrain, F5 écume — les vidéos V2 et V3 la fournissent, F6 verdicts), une recommandation chacun. La liste : « État au S475 » —
+  aucun changement de catégorie depuis S408, **3 / 73 / 44, 116 ouverts sur 119** ; l'objectif de fin écrit en tête ; la feuille de
+  route renvoie au plan.
+

@@ -45,3 +45,7 @@ est solide à son verdict.
 
 **Note, 2026-10-03 — R38 reçu** : *« Correct pour une V1 »*. La v1 de D3 est atteinte ; le travail en continu de D1 s'achève avec elle. La suite
 (C10-2, la bande dans la mer δ ; C10-3, la coque) reprend au rythme des sessions, à la demande de l'utilisateur.
+
+**Note du 2026-10-04 (S475).** Le critère d'arrêt de D3 (la v1 solide, atteinte en S458, R38 reçu) est remplacé par
+[ADR-218](ADR-218-le-systeme-de-l-eau-complet.md) : le système de l'eau est fini quand la liste du projet fini est validée à 100 %. D1
+et D2 restent.
