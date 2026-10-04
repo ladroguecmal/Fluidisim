@@ -62,27 +62,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S478 — **terminée**. En autonomie (« Ok » de l'utilisateur au plan) : **K2, la conception**.
+Session : S479 — **en cours**. En autonomie, K2-1 ([conception](../docs/registres/CAMPAGNE-K2-S478.md), ADR-220 D1) : **l'air
+enfermé dans la référence APIC** (`code/water-core/src/apic3d.rs`).
 
-**Ce que la session fait.** Relire où en sont les dix points de K2 (4.16, 4.1, 4.12, 4.20, 7.2–7.5, 3.3, 3.1), les anomalies qui les
-tiennent (A311 : l'air enfermé à pression nulle, qui arrête le calcul fin ; A312 : jet et couronne qui suivent la maille), ADR-015
-(l'air en poches T2) et ADR-007 (pas de transfert d'état entre solveurs) ; écrire la conception
-(`docs/registres/CAMPAGNE-K2-S478.md`) — les sessions dans l'ordre des dépendances, chacune avec sa référence publiée et son critère —
-et les décisions techniques (ADR-220).
+**Ce que la session fait.** `Apic3::enable_air_pockets` (mémoire réservée à la configuration, I-06) : à chaque pas, après les
+étiquettes, les **composantes d'air enfermé** — les mailles d'air que l'air libre (la rangée du haut) n'atteint pas, par remplissage —,
+suivies d'un pas à l'autre par recouvrement (fusion : leurs airs s'ajoutent ; scission : l'air se partage au volume) ; leur volume
+sur la surface reconstruite (fraction d'air `0,5 + φ/dx`) ; à la naissance, la pression de l'eau qui les borde. **L'invariant de
+chaque poche** : `a = V·P^(1/γ)`, γ = 1,4 (adiabatique). **Dans la projection, chaque poche est une inconnue** : la loi linéarisée
+`P^(n+1) − Pⁿ = −(γPⁿ/Vⁿ)·ΔV`, `ΔV` le flux de ses faces après correction, donne une ligne `(s + Σ1/θ)·p_b − Σ p_c/θ = s·p_bⁿ −
+(ρ·dx/dt)·Σ u*_sortant`, `s = ρ·Vⁿ/(γPⁿ·dt²·dx)`, symétrique avec les lignes de l'eau voisine : le système reste défini positif, le
+même gradient conjugué le résout — implicite, donc stable quel que soit le pas devant la raideur de la poche. Sans
+`enable_air_pockets`, le pas au bit.
 
-**Critères, écrits avant.** (1) chaque point de K2 dans au moins une session, avec un critère de réception chiffré contre une
-référence publiée ou une mesure ; (2) ADR-220 écrite et indexée ; `--check` à 0.
+**Critères, écrits avant.** (1) sans poches, au bit (les tests d'APIC 3D, dont S393 et S389) ; (2) une bulle immobile en eau calme
+garde son volume à 1 % sur une seconde et remonte (elle ne s'effondre plus) ; masse d'eau exacte ; (3) **Minnaert** : une bulle
+lâchée en surpression oscille à `f = (1/2πR)·√(3γP/ρ)` à 15 % ; (4) **A311** : B10 3D (`apic3d_b10`) va au bout à `D/dx` = 16 avec
+les poches, et la bulle pincée vit (son volume après le pincement, tracé) ; `D/dx` = 24 si le temps le permet (dit sinon).
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — la conception ; ADR-220.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — les poches dans `apic3d.rs` ; les essais (1) à (3).
+- [ ] **P3** — B10 avec poches (4) ; mesures.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — `docs/registres/CAMPAGNE-K2-S478.md` : douze sessions (K2-1 à K2-12, ≈ 30), chaque point de K2 dans au moins une, chaque
-  critère contre une référence (Minnaert, Davies et Taylor, Chen 1999, Deane et Stokes 2002, la loi de Willis, ADR-015 §3 et §5,
-  C13, C20, C07) ; **relu : aucun modèle d'air n'existe dans APIC** — A311 commande tout ce qui suit le pincement, d'où K2-1 en
-  premier. ADR-220 (indexée) : l'air enfermé en poche T2 (ADR-015), la nappe rompue en gouttes sous une maille, 4.20 par la voie
-  d'ADR-007, le vide dans V.
-- **P3** — la preuve : CAMPAGNE-K2-S478 ; journal ; jeton libre ; maillons 1 ; suivant : S479, K2-1 — l'air enfermé, référence.

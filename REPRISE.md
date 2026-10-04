@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-04 10:55 +02:00
+JETON            : occupé
+Battement        : 2026-10-04 10:57 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S479 — K2-1 : l'air enfermé, référence (A311, ADR-220 D1)**
 Dernière session : S478 — K2 conçue ([conception](docs/registres/CAMPAGNE-K2-S478.md), ADR-220) : douze sessions, l'air enfermé d'abord. Avant : S477 (le type d'eau dans l'espace)
 Session suivante : **S479 — K2-1 : l'air enfermé, référence** ([conception](docs/registres/CAMPAGNE-K2-S478.md) §2, ADR-220 D1) : dans `apic3d.rs`, les composantes d'air enfermé (remplissage depuis l'air libre), leur volume sur la surface reconstruite, leur pression adiabatique posée dans la projection ; B10 3D à `D/dx` = 16 et 24 au bout (A311), la fréquence de la bulle contre Minnaert à 15 %, masse exacte. **Sans attendre de « Continue »**
 Maillons        : 1 — journal
