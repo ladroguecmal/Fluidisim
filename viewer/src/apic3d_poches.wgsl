@@ -29,6 +29,7 @@ const H_COUNT: u32 = 0u;      // poches détectées (avant la résorption), au p
 const H_OLD_COUNT: u32 = 1u;  // celles du pas d'avant
 const H_OVERFLOW: u32 = 2u;   // poches laissées libres au-delà de MAXP, cumulées
 const H_ROOTS: u32 = 3u;      // racines enfermées trouvées ce pas (toutes, même au-delà de MAXP)
+const H_ANY: u32 = 9u;        // S482 : racines enfermées comptées par l'aplatissement (0 : rien d'enfermé, les parcours sautent)
 
 fn pk_h() -> u32 {
     return 4u * P.cells;
@@ -91,6 +92,7 @@ fn pk_init(@builtin(global_invocation_id) g: vec3<u32>) {
     if c == 0u {
         atomicStore(&pko[pk_h() + H_OLD_COUNT], atomicLoad(&pko[pk_h() + H_COUNT]));
         atomicStore(&pko[pk_h() + 8u], 0u);
+        atomicStore(&pko[pk_h() + H_ANY], 0u);
     }
     // Les recouvrements du pas (`pk_overlap`) repartent de zéro.
     if c < MAXP * MAXP {
@@ -137,7 +139,11 @@ fn pk_flatten(@builtin(global_invocation_id) g: vec3<u32>) {
     if c >= P.cells || label[c] != AIR {
         return;
     }
-    atomicStore(&pko[c], uf_find(c + 1u));
+    let r = uf_find(c + 1u);
+    atomicStore(&pko[c], r);
+    if r == c + 1u {
+        atomicAdd(&pko[pk_h() + H_ANY], 1u);
+    }
 }
 
 // 4. La numérotation, par un groupe : les racines enfermées (`pko[c] == c + 1`) dans l'ordre des mailles. Chaque fil compte celles
@@ -149,9 +155,26 @@ fn is_root(c: u32) -> bool {
     return label[c] == AIR && atomicLoad(&pko[c]) == c + 1u;
 }
 
+var<workgroup> pk_any: u32;
+
+// S482 : rien d'enfermé (le compte de l'aplatissement), les parcours par un groupe sortent aussitôt.
+fn nothing_enclosed(t: u32) -> bool {
+    if t == 0u {
+        pk_any = atomicLoad(&pko[pk_h() + H_ANY]);
+    }
+    return workgroupUniformLoad(&pk_any) == 0u;
+}
+
 @compute @workgroup_size(256)
 fn pk_number(@builtin(local_invocation_id) l: vec3<u32>) {
     let t = l.x;
+    if nothing_enclosed(t) {
+        if t == 0u {
+            atomicStore(&pko[pk_h() + H_ROOTS], 0u);
+            atomicStore(&pko[pk_h() + H_COUNT], 0u);
+        }
+        return;
+    }
     let chunk = (P.cells + 255u) / 256u;
     let lo = min(t * chunk, P.cells);
     let hi = min(lo + chunk, P.cells);
@@ -323,6 +346,13 @@ var<workgroup> pk_scan2: array<vec2<u32>, 256>;
 @compute @workgroup_size(256)
 fn pk_lists(@builtin(local_invocation_id) l: vec3<u32>) {
     let t = l.x;
+    if nothing_enclosed(t) {
+        if t == 0u {
+            atomicStore(&pko[pk_h() + H_LA], 0u);
+            atomicStore(&pko[pk_h() + H_LW], 0u);
+        }
+        return;
+    }
     let chunk = (P.cells + 255u) / 256u;
     let lo = min(t * chunk, P.cells);
     let hi = min(lo + chunk, P.cells);
@@ -628,6 +658,16 @@ fn pocket_nb(c: u32, m: u32) -> u32 {
 @compute @workgroup_size(256)
 fn pk_faces(@builtin(local_invocation_id) l: vec3<u32>) {
     let t = l.x;
+    // S482 : sans poche gardée, aucune face.
+    if t == 0u {
+        pk_any = atomicLoad(&pko[pk_h() + H_COUNT]);
+    }
+    if workgroupUniformLoad(&pk_any) == 0u {
+        if t == 0u {
+            atomicStore(&pko[pk_h() + H_LF], 0u);
+        }
+        return;
+    }
     let chunk = (P.cells + 255u) / 256u;
     let lo = min(t * chunk, P.cells);
     let hi = min(lo + chunk, P.cells);

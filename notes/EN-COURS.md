@@ -83,10 +83,13 @@ stables, masse exacte ; (4) la détection identique (banc `--apic3d-poches`, 0 �
 ### Plan
 
 - [x] **P1** — jeton, plan seul ; les réponses et les téléchargements consignés.
-- [ ] **P2** — rien quand rien n'est enfermé ; mesure.
+- [x] **P2** — rien quand rien n'est enfermé ; mesure.
 - [ ] **P3** — les parcours à plusieurs groupes ; (4) ; mesure.
 - [ ] **P4** — les poches dans la multigrille ; (2) ; mesure.
 - [ ] **P5** — `--v1` 60 s (1), (3) ; preuve.
 - [ ] **P6** — rituel (par `rituel.py`).
 
 ### Notes de reprise
+- **P2** — `H_ANY` : l'aplatissement compte les racines enfermées ; `pk_number`, `pk_lists` sortent aussitôt sans elles, `pk_faces`
+  sans poche gardée. Détection inchangée (banc : 0 écart à étiquettes égales, mêmes écarts V/P qu'en S481). `--v1` avec poches, 6 s :
+  reconstruction **2,7 ms** en moyenne (≈ 12 avant), projection 10,9 ms ; pas médian 31 ms (71 sur 60 s en S481, à remesurer sur 60 s).
