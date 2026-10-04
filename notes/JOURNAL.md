@@ -107,3 +107,16 @@ la bulle de la grande cuve oscille à 47,84 Hz contre 42,22 (× 1,13 ; la petite
 `calcul.py` (16:52, ≈ 2 h 30). **Lot des registres** (dû en S480) : index, file active, feuille de route, boussole. **Rituel** par
 `rituel.py`. Maillons **2** — la structure n'avance aucun point de la liste ; K2-2 fait avancer 7.4. Suivant : **S481, K2-2**.
 
+## S481 — 2026-10-05 — K2-2 : l'air enfermé sur la carte
+
+**Entrée.** En autonomie (ADR-215) ; une pause demandée après P2, reprise le soir. **Fait** ([preuve](../docs/validation/POCHES-CARTE-S481.md)) : les
+poches de S479 sur la carte, dans un module à part (`viewer/src/apic3d_poches.{rs,wgsl}`) — union-find sans verrou numérotée dans
+l'ordre de la référence, bilan par poche sans atomique flottant, une ligne par poche dans le gradient conjugué. **Mesuré** : la poche
+de chaque maille identique à étiquettes égales ; la bulle suit la référence à 4·10⁻⁵ sur 300 pas, **42,47 Hz contre 42,50** ; B10 à
+16 mailles au bout, la bulle à 1,2 % ; `--v1` 60 s stable, masse exacte. **Trouvé** : les poches d'une maille emballaient `--v1`
+(283 kPa) — `POCHE_MAILLES_MIN` = 8, référence et carte ; deux calculs longs tués ensemble par la session — `calcul.py` lance par WMI.
+**Limite** : le coût, 71 ms contre 16,7 par pas (la diagonale à la place de la multigrille ; la détection par un seul groupe), inscrit
+(ADR-131). **Décision de l'utilisateur** : l'autonomie de méthode, [ADR-222](../docs/adr/ADR-222-la-methode-se-revise-elle-meme.md) ;
+deux questions en attente (relance planifiée, téléchargements). **Capacité reçue** : l'air enfermé en production sur la carte ; le
+chemin : `--v1` (`APIC3D_POCHES=1`) ; la preuve ci-dessus. Maillons **0**. Suivant : **S482, K2-2b — le coût des poches**.
+

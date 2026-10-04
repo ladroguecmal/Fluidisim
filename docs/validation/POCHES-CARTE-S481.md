@@ -42,7 +42,7 @@ ses pipelines n'existent qu'après `ApicCarte::enable_air_pockets`. Sans cet app
 | (1) sans poches, au bit | le module est à part, ses pipelines n'existent qu'après `enable_air_pockets` ; sans eux, le pas enregistre les mêmes noyaux dans le même ordre (le seul ajout, `encode_pockets_detect`, ne fait rien) ; le témoin `--v1` : 60 s, masse exacte, pas médian 16,7 ms. Non vérifié au bit contre un binaire d'avant | tenu par construction |
 | (2) la poche de chaque maille identique à la référence | **0 maille différente à étiquettes égales** (la bulle 8 pas, trois bulles avec et sans cheminée, sous pression) ; les seuls écarts (4 mailles, bulle, un pas) suivent 4 étiquettes que la reconstruction de la carte donne déjà autrement | tenu |
 | (3) la bulle : volume et pression à 1 % pas à pas sur 0,15 s, fréquence à 2 %, masse exacte | 300 pas : volume à **2,9·10⁻⁵**, pression à **4,1·10⁻⁵** ; **42,47 Hz contre 42,50** (7·10⁻⁴) ; 151 itérations au plus, toutes convergées ; masse exacte | tenu |
-| (4) B10 à 16 mailles avec poches sur la carte au bout, la bulle à 5 % de la référence | voir §3 | — |
+| (4) B10 à 16 mailles avec poches sur la carte au bout, la bulle à 5 % de la référence | au bout ; pincement **2,0843 √(R/g)** des deux côtés ; la bulle : **0,0709 contre 0,0700 D³** au plus (1,2 %), **0,0515 contre 0,0511** à la fin (0,75 %) | tenu |
 | (5) `--v1` stable 60 s avec poches, masse exacte, coût mesuré | 60 s stables, masse exacte au quantum, une poche (1,87·10⁻³ m³ ≈ 15 dx³, 107 kPa) — après la règle des 8 mailles (§2 bis) ; coût §4 | tenu, au minimum |
 
 Le banc du même état (P3), avant la projection : nombre de poches identique partout ; volume à ≤ 6·10⁻⁶, pression à ≤ 7·10⁻⁶ — la
@@ -59,7 +59,14 @@ moins de huit mailles d'air (un cube de 2 × 2 × 2) se résorbe, dans la réfé
 
 ## 3. B10 avec poches
 
-*(à l'arrivée du calcul `s481-b10-p16-poches`)*
+`APIC3D_POCHES=1 ND=16 --apic3d-carte-b10` (quart de domaine, 32 × 32 × 168, 1 048 576 particules ; `calculs/20261004-235007-s481-b10-p16-poches-3`,
+17 min) : la référence et la carte vont au bout (4 √(D/g)). Pincement au pas 100, **2,0843 √(R/g)** des deux côtés, profondeur 1,094 D,
+cavité 1,906 D, couronne 0,305 contre 0,304 D. Une poche de chaque côté ; son volume (quart de domaine) **0,0700 D³ au plus** pour la
+référence, **0,0709** pour la carte, **0,0511** et **0,0515** à la fin. Le quadruple, 0,280 et 0,204 D³, retrouve S479 (0,283 et 0,231 avec
+`APIC3D_APRES` = 1,5).
+
+Le premier lancement est mort à 23:46 avec B10 à 24 mailles (lancé en S480, 7 h de calcul), code 0xC000013A : les deux restaient dans
+l'objet de tâche de la session. `calcul.py` lance désormais par WMI, hors de la session ([ADR-222](../adr/ADR-222-la-methode-se-revise-elle-meme.md) D1).
 
 ## 4. Le coût — un dépassement, inscrit (ADR-131)
 
@@ -75,4 +82,4 @@ par maille). Elles sont K2-2b.
 
 - **K2-2b** : le coût (§4) ; la carte de retour au temps réel avec poches.
 - La grande cuve de S479 (47,8 Hz contre 42,2 de Minnaert, × 1,13, quand la petite donnait × 1,02) : à attribuer.
-- B10 à `D/dx` = 24 (référence, lancé en S480 ; en cours).
+- B10 à `D/dx` = 24 (référence) : mort avec la session (§3) ; à relancer par `calcul.py`, désormais hors de la session.

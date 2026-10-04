@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S481 — **en cours**. En autonomie (ADR-215), **K2-2 — l'air enfermé sur la carte** ([conception](../docs/registres/CAMPAGNE-K2-S478.md),
+Session : S481 — **terminée**. En autonomie (ADR-215), **K2-2 — l'air enfermé sur la carte** ([conception](../docs/registres/CAMPAGNE-K2-S478.md),
 ADR-220 D1 ; la référence : `code/water-core/src/apic3d_poches.rs`, [POCHES-AIR-S479](../docs/validation/POCHES-AIR-S479.md)).
 
 **Ce que la session fait.** Les poches de S479 portées sur la carte (`viewer/src/apic3d_carte.rs`), **dans un module à part**
@@ -93,8 +93,8 @@ dans la session est dit, et passe à S482.
 - [x] **P2** — l'état des poches exporté par la référence ; `apic3d_poches.wgsl`, ses tampons ; la détection ; essai (2).
 - [x] **P3** — le bilan par poche : listes, réductions, héritage, naissance, rappel, résorption ; contre la référence sur un même état.
 - [x] **P4** — la projection avec poches ; la bulle, essai (3).
-- [>] **P5** — B10 (4) ; `--v1` (5) par `calcul.py`.
-- [ ] **P6** — preuve ; rituel (par `rituel.py`).
+- [x] **P5** — B10 (4) ; `--v1` (5) par `calcul.py`.
+- [x] **P6** — preuve ; rituel (par `rituel.py`).
 
 ### Notes de reprise
 - **P2** — `AirPocketState` (référence : `air_pocket_state`) ; `viewer/src/apic3d_poches.{rs,wgsl}` (module à part, `Params` pris au
@@ -137,3 +137,6 @@ dans la session est dit, et passe à S482.
   pistes décidées (calculs hors session, référence CPU parallèle, banc de non-régression dans le rituel, révision de méthode tous
   les cinq sessions, scènes fines pour les poches) ; deux en attente de son accord (relance planifiée, téléchargements anticipés).
   À écrire en P6 : ADR-222.
+- **P5** — B10 à 16 mailles avec poches (hors session) : au bout, pincement 2,0843 √(R/g) des deux côtés, la bulle à 1,2 % (max) et
+  0,75 % (fin) de la référence. Critère (4) tenu.
+- **P6** — preuve POCHES-CARTE-S481 complétée ; 7.4 (partiel, la carte) et A311 notés ; journal ; rituel par `rituel.py`.
