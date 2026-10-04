@@ -62,33 +62,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S473 — **terminée**. **Réponses de l'utilisateur** aux écarts des miroirs : *« Le type d'eau va être une option d'edition
-dans la création de la map du jeu […] »* ; *« Ne prends pas en compte le mouvement des nuages […] »*.
+Session : S474 — **en cours**. En autonomie : **le type d'eau** (ADR-217), premier temps.
 
-**Ce que la session fait.** (1) **ADR-217** : le type d'eau, propriété éditée de la carte qui varie dans l'espace (E1 devient ce
-chantier, chaque préréglage jugé contre sa référence) ; le ciel qui bouge, au système d'atmosphère et de climat, après l'eau (E4
-retiré). (2) **E2** (MIROIRS-S472) : la séquence de V1 sans le détail (`DETAIL=0`), et l'export d'une mer plus calme (le refus à
-3 m/s : la coupure de la queue au-dessus du partage fixe des cascades, `K_CASCADE` = 12 rad/m), pour séparer les deux causes ; la
-correction de celle qui l'est.
+**Ce que la session fait.** (1) **Le modèle** : les propriétés optiques d'une eau tirées de trois constituants — le phytoplancton
+(`Chl`, Morel et Maritorena 2001, Table 2), la matière dissoute (`a_g(440)`, pente de Babin et al. 2003), les particules minérales
+(`MES`, Babin et al. 2003) — ajoutés à l'eau pure d'ADR-177 dans `a`, `b`, `b_b` ; d'où `R0`, `kd`, `c` et la visibilité.
+`outils/type_eau.py` (la référence) et `godot/type_eau.gd` (le rendu), le même calcul. (2) **Les préréglages** (eau pure, océan clair,
+Méditerranée, côtier, lac, rivière, eau trouble), choisis dans les plages publiées ; `TYPE_EAU=<nom>` dans `mer.tscn` et `saut.tscn`.
+(3) **Jugés** contre V1 (Méditerranée) et V5 (côtier), compressés comme la référence (ADR-216 D8). **Le champ qui varie dans
+l'espace** (une texture de concentrations lue par fragment) : le second temps, S475.
 
-**Critères, écrits avant.** (1) ADR-217 écrite et indexée, `--check` à 0 ; (2) l'essai rendu : le mouvement et la part haute fréquence
-de V1 sans le détail, et avec la mer plus calme — la cause dite ; (3) la correction, si la cause est le rendu : le mouvement et la part
-haute fréquence de V1 dans leur tolérance (35 %) ; si la cause est la mer : l'export d'une mer de 3 m/s ou moins, et la mesure redite.
+**Critères, écrits avant.** (1) `type_eau.gd` et `type_eau.py` d'accord à 10⁻⁶ près sur tous les préréglages ; le préréglage `pure`
+redonne l'eau d'ADR-177 (`kd` et `c` exacts, `R0` à l'arrondi de la table) ; sans `TYPE_EAU`, les images au bit ; (2) les
+visibilités dans les plages publiées des milieux ; (3) **V5** : avec le préréglage côtier (réglé dans les plages publiées), les
+teintes de l'eau proche (B/G, B/R des creux et des crêtes) dans leur tolérance ; (4) **V1** : l'eau pure est la plus bleue possible
+(ADR-177 D4) et V1 est plus bleue que notre eau pure — **le type d'eau ne peut pas fermer cet écart** ; le dire, mesuré, et nommer ce
+qui le peut (le ciel reflété, l'étalonnage du téléphone) ; (5) les images montrées.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-217.
-- [x] **P3** — E2 : l'essai, la cause, la correction ; la mesure.
-- [x] **P4** — preuve ; rituel (allégé).
+- [ ] **P2** — le modèle (Python, GDScript), les préréglages, `TYPE_EAU` ; l'égalité ; le défaut au bit.
+- [ ] **P3** — V5 et V1 mesurées par préréglage ; le réglage du côtier ; les images.
+- [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — ADR-217 écrite, indexée ; MIROIRS-S472 annotée (E4 retiré, E1 devient le chantier du type d'eau).
-- **P3** — **Trois causes à E2, dont deux de la mesure** (MIROIRS-S472 §S473) : (1) **mon erreur de S472** — toute mer exportée
-  écrivait son détail sous `detail_h0.bin` ; la mer calme lisait le détail de la mer du large ; corrigé (le binaire porte le nom de
-  sa mer), les grandeurs fines de S472 à refaire ; (2) l'export refusé sous 3,5 m/s (le partage des cascades), corrigé, défaut au bit ;
-  (3) **le codec de la référence** (V1 : AV1, 590 kbit/s) — notre séquence compressée dans le navigateur (WebCodecs) : le mouvement
-  tombe de 1,29 à 0,28–0,76 selon le codec ; ADR-216 D8 ; `outils/banc_visuel_codec.js` ; (4) la houle longue de 2 m toujours ajoutée
-  — `HOULE_LONGUE`. La mer de Méditerranée (houle 0,3 m sur 7 s, vent 2 m/s) : **mouvement × 1,03 compressée en AV1, part haute
-  fréquence × 1,01 brute — E2 levé à la précision de la mesure**. Reste **E5** : le contraste local de la mer lointaine ÷ 2.
-- **P4** — la preuve : MIROIRS-S472 §S473 ; journal ; jeton libre ; maillons 1 ; suivant : S474, le type d'eau (ADR-217) — le champ de la carte, les préréglages, jugés contre V1 et V5.
