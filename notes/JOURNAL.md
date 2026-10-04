@@ -18537,3 +18537,13 @@ exportée (vent 3,5 m/s ; à 3 m/s l'export refuse), les poses plage et quai, de
 mesurées contre leurs références par `banc_visuel.py --contre`. **Constats** : E1 la couleur selon le type d'eau ; E2 notre mer calme
 trop agitée ; E3 la lumière forte manque sous l'eau ; E4 le ciel immobile. Aucun réglage : la session mesure. Images envoyées.
 **Rituel** (allégé). Maillons **1**. Suivant : E2.
+
+## S473 — 2026-10-04 — ADR-217 ; E2 levé
+
+**Entrée.** Réponses de l'utilisateur : *« Le type d'eau va être une option d'edition dans la création de la map du jeu »* ; *« Ne
+prends pas en compte le mouvement des nuages »* → [ADR-217](../docs/adr/ADR-217-le-type-d-eau-une-option-de-la-carte.md). **Fait**
+([preuve](../docs/validation/MIROIRS-S472.md) §S473) : E2 avait trois causes, dont deux de la mesure — **une erreur de S472** (la mer
+calme lisait le détail de la mer du large ; corrigée, les mesures fines de S472 à refaire), **le codec de la référence** (ADR-216 D8 :
+comparer à traitement égal, notre séquence compressée dans le navigateur) — et la houle longue de 2 m toujours ajoutée (réglable).
+La mer de Méditerranée : mouvement × 1,03, part haute fréquence × 1,01. Reste E5, le contraste local. **Rituel** (allégé). Maillons
+**1**. Suivant : le type d'eau.

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S473 — **en cours**. **Réponses de l'utilisateur** aux écarts des miroirs : *« Le type d'eau va être une option d'edition
+Session : S473 — **terminée**. **Réponses de l'utilisateur** aux écarts des miroirs : *« Le type d'eau va être une option d'edition
 dans la création de la map du jeu […] »* ; *« Ne prends pas en compte le mouvement des nuages […] »*.
 
 **Ce que la session fait.** (1) **ADR-217** : le type d'eau, propriété éditée de la carte qui varie dans l'espace (E1 devient ce
@@ -80,7 +80,7 @@ haute fréquence de V1 dans leur tolérance (35 %) ; si la cause est la mer : l'
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-217.
 - [x] **P3** — E2 : l'essai, la cause, la correction ; la mesure.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — ADR-217 écrite, indexée ; MIROIRS-S472 annotée (E4 retiré, E1 devient le chantier du type d'eau).
@@ -91,4 +91,4 @@ haute fréquence de V1 dans leur tolérance (35 %) ; si la cause est la mer : l'
   tombe de 1,29 à 0,28–0,76 selon le codec ; ADR-216 D8 ; `outils/banc_visuel_codec.js` ; (4) la houle longue de 2 m toujours ajoutée
   — `HOULE_LONGUE`. La mer de Méditerranée (houle 0,3 m sur 7 s, vent 2 m/s) : **mouvement × 1,03 compressée en AV1, part haute
   fréquence × 1,01 brute — E2 levé à la précision de la mesure**. Reste **E5** : le contraste local de la mer lointaine ÷ 2.
-
+- **P4** — la preuve : MIROIRS-S472 §S473 ; journal ; jeton libre ; maillons 1 ; suivant : S474, le type d'eau (ADR-217) — le champ de la carte, les préréglages, jugés contre V1 et V5.
