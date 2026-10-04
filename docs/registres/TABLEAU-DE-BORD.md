@@ -1,0 +1,162 @@
+# Tableau de bord — la liste à 100 %
+
+*Généré par `python outils/tableau_de_bord.py --ecrire` (S480) — ne pas modifier à la main.* La liste du projet fini dit l'état de
+chaque point ; le plan de complétion, sa campagne ; ce tableau les croise. La fin du système de l'eau : tous les points validés
+([ADR-218](../adr/ADR-218-le-systeme-de-l-eau-complet.md)).
+
+**Périmètre : 120 points** (5.11 hors). **Validés : 3** (2.5 %) — partiels : 74 — absents : 43.
+
+## Par campagne
+
+Légende : ✅ validé, ◐ partiel, · absent. L'ordre est celui du [plan de complétion](PLAN-COMPLETION-S475.md).
+
+| campagne | validés | partiels | absents | points |
+|---|---:|---:|---:|---|
+| **K1** Rendu final et banc visuel | 0 | 9 | 0 | ◐8.1 ◐8.2 ◐8.3 ◐8.5 ◐8.6 ◐8.8 ◐8.9 ◐8.7 ◐8.10 |
+| **K2** La surface non graphe | 0 | 5 | 5 | ◐4.16 ◐4.1 ◐4.12 ·4.20 ◐7.4 ·7.5 ·7.2 ·7.3 ·3.3 ◐3.1 |
+| **K3** Le fond et la côte | 0 | 6 | 5 | ◐2.7 ◐2.9 ·3.6 ◐3.2 ·3.5 ·4.14 ◐4.15 ◐6.5 ·2.6 ·3.9 ◐4.6 |
+| **K4** Les eaux intérieures | 0 | 0 | 4 | ·2.3 ·2.4 ·2.5 ·12.2 |
+| **K5** δ, le système | 0 | 10 | 4 | ◐4.2 ◐4.3 ·4.4 ◐4.5 ◐4.7 ◐4.8 ◐4.9 ◐4.10 ·4.11 ·4.17 ◐4.18 ◐4.19 ◐4.21 ·1.6 |
+| **K6** Les solides | 0 | 6 | 3 | ◐6.1 ◐6.2 ◐6.3 ◐6.4 ·6.7 ·6.8 ·6.6 ◐4.13 ◐1.3 |
+| **K7** Les volumes finis | 0 | 5 | 4 | ◐5.2 ◐5.3 ◐5.4 ·5.6 ·5.7 ·5.8 ·5.9 ◐5.10 ◐5.12 |
+| **K8** Activation, prédiction, budget | 0 | 13 | 4 | ◐9.1 ◐9.2 ◐9.3 ·9.4 ◐9.5 ·9.6 ◐9.7 ◐9.8 ◐9.9 ·9.10 ◐9.11 ◐9.12 ·9.13 ◐1.4 ◐1.7 ◐1.8 ◐11.4 |
+| **K9** Réseau et persistance | 0 | 9 | 2 | ◐10.1 ◐10.2 ◐10.3 ◐10.4 ·10.5 ◐10.6 ◐10.8 ◐10.9 ·1.5 ◐3.7 ◐3.8 |
+| **K10** Grande échelle | 0 | 3 | 3 | ◐11.1 ·11.2 ·11.3 ·3.4 ◐2.1 ◐2.2 |
+| **K11** Outillage | 0 | 1 | 3 | ◐12.1 ·12.3 ·12.4 ·12.5 |
+| **K12** La fin de l'eau | 0 | 3 | 4 | ·2.8 ◐7.1 ·7.6 ·7.7 ·7.8 ◐5.5 ◐8.4 |
+| **K13** La validation du système, et l'eau dans le jeu | 0 | 4 | 2 | ◐13.1 ◐13.2 ◐13.3 ·13.4 ◐1.1 ·11.5 |
+
+**Points ouverts hors de toute campagne : 0**.
+
+## Les points ouverts, un par ligne
+
+| point | état | titre |
+|---|---|---|
+| 1.1 | partiel | Eau = somme de quatre couches B, W, δ, V, dans le code |
+| 1.3 | partiel | Interfaces de SPEC-004 |
+| 1.4 | partiel | Point d'entrée unique, orchestrateur des régimes |
+| 1.5 | absent | Grille 3D de référence stable |
+| 1.6 | absent | Cellules, domaines et solveurs distincts, niveaux d'activité des cellules |
+| 1.7 | partiel | Horloge de simulation entière et phases déterministes |
+| 1.8 | partiel | Référentiels, précision f32 locale, `g_eff` injectée |
+| 2.1 | partiel | Mer et océan : état de mer spectral déterministe, sans état par cellule |
+| 2.2 | partiel | Houles longues, mers croisées, marée, niveau moyen variable |
+| 2.3 | absent | Lacs |
+| 2.4 | absent | Rivières |
+| 2.5 | absent | Canaux |
+| 2.6 | absent | Courants macroscopiques à niveau de détail propre |
+| 2.7 | partiel | Bathymétrie |
+| 2.8 | absent | Précalcul côtier et météo |
+| 2.9 | partiel | Dérivées du fond pour les couches volumiques |
+| 3.1 | partiel | Anneaux d'impact dispersifs |
+| 3.2 | partiel | Sillages de bateaux |
+| 3.3 | absent | Explosions de surface et sous-marines |
+| 3.4 | absent | Tsunamis |
+| 3.5 | absent | Déferlement |
+| 3.6 | absent | Réfraction bathymétrique des ondes |
+| 3.7 | partiel | Événements horodatés, journaux, instantanés et restauration avec perte connue |
+| 3.8 | partiel | Composition B+W sans refus sur toute scène |
+| 3.9 | absent | Couches W fournies au-dessus du plan moyen pour δ |
+| 4.1 | partiel | Solveur volumique 3D à surface libre |
+| 4.2 | partiel | Plusieurs domaines actifs simultanés |
+| 4.3 | partiel | Subdivision adaptative anisotrope, blocs épars |
+| 4.4 | absent | Profondeur adaptative |
+| 4.5 | partiel | Création, croissance, réduction et disparition visuellement gratuites |
+| 4.6 | partiel | Entrée des vagues de B/W dans le domaine |
+| 4.7 | partiel | Frontière sans réflexion ni rupture visible |
+| 4.8 | partiel | Sortie des perturbations vers W |
+| 4.9 | partiel | Fusion et séparation de domaines |
+| 4.10 | partiel | Adaptation interne |
+| 4.11 | absent | Régime substitutif |
+| 4.12 | partiel | Cavité et gerbe d'impact |
+| 4.13 | partiel | Proche-coque et gerbe d'étrave |
+| 4.14 | absent | Plage |
+| 4.15 | partiel | Rochers et obstacles immergés |
+| 4.16 | partiel | Surface non graphe |
+| 4.17 | absent | Référentiel accéléré et invariance galiléenne |
+| 4.18 | partiel | Conservation de la masse et de l'énergie |
+| 4.19 | partiel | Coût de δ compatible avec le budget |
+| 4.20 | absent | Changement de solveur pendant une simulation |
+| 4.21 | partiel | Cohérence de phase entre δ et B+W sur la durée de vie d'un domaine |
+| 5.2 | partiel | Géométrie réelle des contenants |
+| 5.3 | partiel | Fuites, transferts et débordements entre contenants |
+| 5.4 | partiel | Vannes et pompes |
+| 5.5 | partiel | Pluie selon l'exposition au ciel, absorption par le sol |
+| 5.6 | absent | Seuil adaptatif à l'échelle du contenant |
+| 5.7 | absent | Plusieurs liquides |
+| 5.8 | absent | Réseau fermé sous pression |
+| 5.9 | absent | Compartiments, brèches, inondation de navire, limitée par l'air |
+| 5.10 | partiel | Articulation V↔δ |
+| 5.12 | partiel | Capture et restauration de V |
+| 6.1 | partiel | Flottabilité des objets importants |
+| 6.2 | partiel | Forces de l'eau sur les objets |
+| 6.3 | partiel | Un objet en mouvement produit son sillage |
+| 6.4 | partiel | Parois et corps mobiles dans δ |
+| 6.5 | partiel | Décor fixe comme frontière imposée |
+| 6.6 | absent | Grands navires |
+| 6.7 | absent | Acteur poussé, renversé ou déplacé par l'eau |
+| 6.8 | absent | Impulsion d'entrée dans l'eau |
+| 7.1 | partiel | Écume et moutons |
+| 7.2 | absent | Spray, embruns, gouttelettes |
+| 7.3 | absent | Microbulles visuelles |
+| 7.4 | partiel | Grosses bulles et poches d'air physiques |
+| 7.5 | absent | Air comprimé, vide, eau dans le vide |
+| 7.6 | absent | Glace et vapeur |
+| 7.7 | absent | Danger et traversabilité |
+| 7.8 | absent | Audio de l'eau |
+| 8.1 | partiel | Rendu temps réel de la surface sur GPU |
+| 8.2 | partiel | LOD de la géométrie de surface |
+| 8.3 | partiel | LOD par source |
+| 8.4 | partiel | Écume, spray, gouttes, bulles rendus, chacun avec son LOD |
+| 8.5 | partiel | Transparence, réfraction, caustiques, particules sous-marines |
+| 8.6 | partiel | Vue sous-marine et passage de la surface |
+| 8.7 | partiel | Rendu de δ raccordé à B+W sans rupture visible |
+| 8.8 | partiel | Lointain et horizon sans artefact |
+| 8.9 | partiel | Détails artificiels bon marché |
+| 8.10 | partiel | Crédibilité perçue validée par un regard humain |
+| 9.1 | partiel | Activation multicritère |
+| 9.2 | partiel | Domaine prédictif orienté devant le joueur |
+| 9.3 | partiel | Prédiction d'objets balistiques |
+| 9.4 | absent | Objets contrôlables : paliers de confiance |
+| 9.5 | partiel | Événement prédit, confirmé ou rétracté |
+| 9.6 | absent | Précalcul avant l'impact |
+| 9.7 | partiel | Hors caméra : quatre niveaux |
+| 9.8 | partiel | Aucun solveur ne dépasse son budget |
+| 9.9 | partiel | Dégradation contrôlée dans l'ordre prescrit |
+| 9.10 | absent | Profils de qualité, adaptation au matériel et à la charge |
+| 9.11 | partiel | 60 images/s avec 2 ms pour l'eau sur une scène représentative |
+| 9.12 | partiel | Aucune allocation à l'exécution |
+| 9.13 | absent | Dépassement critique temporaire |
+| 10.1 | partiel | Réplication des événements sources, jamais de l'état |
+| 10.2 | partiel | Le serveur n'exécute que V |
+| 10.3 | partiel | Déterminisme bit à bit entre plateformes pour B, W répliqué et V |
+| 10.4 | partiel | δ sans autorité de jeu, aucun chemin d'énergie du client vers le monde, grandeurs
+  dérivées autoritaires |
+| 10.5 | absent | Grandes formes cohérentes entre clients, détails locaux libres |
+| 10.6 | partiel | Sauvegarde, reconnexion, arrivée en cours de partie |
+| 10.8 | partiel | Chemin poussé de SPEC-006 |
+| 10.9 | partiel | Requêtes de jeu |
+| 11.1 | partiel | Monde planétaire |
+| 11.2 | absent | Nombreuses régions de mer décrites par descripteur |
+| 11.3 | absent | Très grands événements |
+| 11.4 | partiel | Nombreuses sources simultanées à coût maîtrisé |
+| 11.5 | absent | Matériel cible de livraison et seconde cible |
+| 12.1 | partiel | Cuisson reproductible, empreintes, obsolescence détectée |
+| 12.2 | absent | Éditeur de rivières |
+| 12.3 | absent | Précalcul côtier stocké |
+| 12.4 | absent | Eau en amont du terrain, géoïde dans l'outil de terrain |
+| 12.5 | absent | Portée d'une modification bornée par partition |
+| 13.1 | partiel | Harnais de validation |
+| 13.2 | partiel | Les 23 cas canoniques passent sur le système |
+| 13.3 | partiel | Les onze bancs rendent leur verdict |
+| 13.4 | absent | L'eau dans le jeu |
+
+## Historique du décompte
+
+Une ligne par session qui a écrit le tableau avec `--session`.
+
+<!-- historique -->
+| session | date | validés | partiels | absents | périmètre |
+|---|---|---:|---:|---:|---:|
+| S480 | 2026-10-04 | 3 | 74 | 43 | 120 |
+<!-- fin de l'historique -->

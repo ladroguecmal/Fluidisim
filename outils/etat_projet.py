@@ -16,6 +16,9 @@ import sys
 from urllib.parse import unquote
 
 import dependances_liste  # S352 : le registre des dépendances suit la liste (ADR-190 D3)
+import anomalies  # S480 : les registres générés suivent leurs sources
+import decisions
+import tableau_de_bord
 
 ROOT = Path(__file__).resolve().parent.parent
 ACTIVE = ("REPRISE.md", "README.md", "docs/00_INDEX.md", "notes/METHODE.md",
@@ -333,7 +336,12 @@ def inspect(since: int | None) -> dict:
                                            texts.get(dependances_liste.REGISTRE, ""))
                 + reproduce(first_sessions(commits, paths, latest), texts)
                 + journal(texts["notes/JOURNAL.md"])
-                + adr_heads(texts))
+                + adr_heads(texts)
+                + tableau_de_bord.ecarts(texts["docs/LISTE-PROJET-FINI.md"], texts[tableau_de_bord.PLAN],
+                                         texts.get(tableau_de_bord.TABLEAU, ""))
+                + decisions.ecarts({p: t for p, t in texts.items() if re.fullmatch(r"docs/adr/ADR-\d+[^/]*\.md", p)},
+                                   texts.get(decisions.REGISTRE, ""))
+                + anomalies.ecarts(texts[anomalies.SOURCE], texts.get(anomalies.REGISTRE, "")))
     return dict(head=git("rev-parse", "--short", "HEAD").strip(),
                 note="Fichiers suivis présents ; lignes brutes, tests/commentaires inclus. "
                      "Ajouts Git sans renommages ; ni temps, ni productivité, ni capacités. "
@@ -381,7 +389,7 @@ def main() -> int:
         print(f"Battement du jeton : {len(result['battement'])} anomalie(s)")
         for anomaly in result["battement"]:
             print(anomaly)
-        print(f"Contrôles (EN-COURS, encodage, fichiers produits, liste, dépendances, preuves, journal, ADR) : "
+        print(f"Contrôles (EN-COURS, encodage, fichiers produits, liste, dépendances, preuves, journal, ADR, registres générés) : "
               f"{len(result['controles'])} anomalie(s)")
         for anomaly in result["controles"]:
             print(anomaly)

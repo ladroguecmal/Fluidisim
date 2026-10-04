@@ -85,7 +85,7 @@ fin de S480 fait par `rituel.py`.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la boussole ; REPRISE et AGENTS.
-- [ ] **P3** — les trois registres générés, tenus par `--check`.
+- [x] **P3** — les trois registres générés, tenus par `--check`.
 - [ ] **P4** — le journal archivé ; `calcul.py` ; `rituel.py`.
 - [ ] **P5** — preuve ; rituel (par `rituel.py`).
 
@@ -94,4 +94,9 @@ fin de S480 fait par `rituel.py`.
   en vigueur, ce que l'utilisateur décide et ce qui attend de lui, la méthode, les pièges) ; AGENTS : la boussole d'abord ; REPRISE :
   §2 la règle des entrées vérifiées et des calculs longs, §3 l'ordre de lecture (boussole, tableau de bord, plan de complétion,
   décisions et anomalies générées), §4 renvoie au tableau de bord (il décrivait encore S351).
-
+- **P3** — reprise à chaud à 16:37 (battement 12:03) : P2 complétée (diff cohérent, coché), committée. Trois outils, un registre
+  chacun, `ecarts` appelé par `etat_projet.py --check` : `tableau_de_bord.py` (120 points, 3 validés, 74 partiels, 43 absents ; 0 hors
+  campagne), `decisions.py` (220 ADR lus en tête : 169 actées, 49 proposées, 2 rétractées en partie ; colonnes « nomme » et « nommé
+  par » ; 38 Ko), `anomalies.py` (39 entrées à statut d'ANGLES-MORTS, 24 ouvertes). **Trouvé** : la levée d'A322 (S442) n'avait
+  jamais été écrite au registre source — note datée ajoutée. Pièges de lecture levés : titre dans un second gras, une note sur A324
+  écrite sous A320 (une note qui nomme une autre anomalie ne tranche plus), A303 donné deux fois (« A303 bis »).

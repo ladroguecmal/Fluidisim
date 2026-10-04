@@ -4506,6 +4506,10 @@ viennent de **la bande relative, un schéma FTCS** (`η′` transporté à la vi
 Lax-Wendroff (`set_relative_band_lax_wendroff`, éteint par défaut), elles disparaissent (vitesses divisées par plus de dix) ; il reste
 dix secondes où la part de maille d'un champ presque nul dépasse 0,05 — le critère, en part relative, est mal posé.
 
+*Note du 2026-10-04, S480, sur A322* ([journal](../../notes/JOURNAL.md), S442) : **levée en S442 en mode relatif, l'écart accepté** — décision de l'utilisateur, *« J'accepte et continue »* ; la bande relative sous Lax-Wendroff est depuis le défaut du mode relatif
+(production au bit, trajectoire à 1,4·10⁻⁵ m). Cette note n'avait pas été écrite ici en S442 ; le registre généré des anomalies
+ouvertes (S480) l'a révélé. Le mode absolu à 10 cm et 30 Hz reste instable au pas 1 860 : il n'est plus la production (S443).
+
 **A323 — S409, 2026-09-27 (sévérité 2, ouverte). Au pas long, la cuve fermée gagne de l'énergie.** Cuve de S305 (`nx` = 32,
 25 cm, mode (1, 1) de 5 cm, murs, sans éponge), référence CPU : **+41 % en deux minutes à 33 ms** (100,6 → 141,9 J), **+45 %
 sans le terme d'ADR-209**, +15,8 % en 60 s à 16,7 ms ; l'amplitude modale le confirme (5,32 cm à 100 s pour 5). À 1 ms, la
