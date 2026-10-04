@@ -201,3 +201,59 @@ mouvement des nuages relève du système d'atmosphère et de climat, après l'ea
 
 **La suite** (sessions de rendu, ADR-191) : E2 puis E1 — la mer de tous les jours — ; E3 ; E4. Chacune a pour critère de ramener
 ses grandeurs dans la tolérance, ou de dire pourquoi elles ne le peuvent pas.
+
+## S473 — E2 repris : trois causes, dont deux de la mesure
+
+2026-10-04. L'essai prévu (la séquence de V1 sans le détail, puis une mer plus calme) a trouvé **trois causes**, mesurées une à une sur
+V1 (`mer_lointaine`). **Reproduire** : les exports, depuis `viewer/` : `water-viewer --meilleur --vent=<U> --export-godot=../godot/donnees/mer_vent<U>.json` ;
+la mer de Méditerranée : `HOULE_LONGUE=0.3,7 water-viewer --meilleur --vent=2 --export-godot=../godot/donnees/mer_mediterranee.json` ;
+la séquence à 30 images/s : la commande de V1 avec `MER_DONNEES=<mer>` et `SEQUENCE_FPS=30` ; le codec : servir le dépôt, ouvrir
+`/outils/banc_visuel_codec.html`, `BancCodec.lancer({…, codec: 'av01.0.04M.08', debit: 590000, pas: 2})`.
+
+**1. Une erreur de S472, corrigée : le détail d'une autre mer.** L'afficheur écrivait le détail fin de toute mer exportée sous le même
+nom, `detail_h0.bin` ; copiée dans `godot/donnees/`, la mer calme de S472 lisait **le détail de la mer du large** (celui de
+`mer_b.json`). **Les mesures de S472 sont donc faites avec un détail trop fort** — les grandeurs fines de V1, V5 et V6 sont à refaire.
+Corrigé : le binaire porte le nom de sa mer (`mer_calme.json` → `mer_calme_detail_h0.bin`) ; la mer par défaut garde le sien.
+Avec le bon détail (vent 3,5 m/s), la part haute fréquence de V1 rentre dans la tolérance : **× 1,34** au lieu de × 1,65 (et × 1,02
+à 2 m/s).
+
+**2. Le refus d'export sous 3,5 m/s, corrigé.** Sous un vent faible, la queue du spectre commence au-dessus du partage fixe des deux
+cascades du détail (12 rad/m) ; l'intervalle de la première s'inversait (« densité de queue Band »). Le partage suit maintenant le
+début de la queue (la cascade de 32 m reste vide) ; les exports à 3, 2 et 1,5 m/s passent ; l'export par défaut est inchangé au bit
+(même binaire, même JSON).
+
+**3. Le codec de la référence — la règle de comparaison change.** V1 est servie en AV1 (480 × 854 à 30 images/s, environ 590 kbit/s :
+`getStatsForNerds` de la page). Une compression lisse le scintillement fin de l'eau ; notre séquence, compressée **dans le
+navigateur** (WebCodecs, rien de téléchargé) puis remesurée :
+
+| notre séquence (vent 3 m/s) | mouvement par s | part haute fréquence | contraste |
+|---|---:|---:|---:|
+| non compressée | 1,29 | 0,57 | 0,107 |
+| H.264, 1 Mbit/s | 0,45 | 0,22 | 0,057 |
+| VP9, 0,63 Mbit/s | 0,76 | 0,36 | 0,080 |
+| H.264, 0,44 Mbit/s | 0,28 | 0,16 | 0,046 |
+| AV1, 0,61 Mbit/s (le codec de V1) | 0,73 | 0,28 | 0,073 |
+| **V1** | **0,44** | **0,45** | **0,166** |
+
+**Les grandeurs fines et temporelles d'une vidéo compressée ne se comparent qu'à une séquence passée par le même codec** — et l'encodeur
+de YouTube (hors ligne, depuis une source plus fine) n'est pas celui du navigateur : l'écart entre codecs (0,28 à 0,76) est de l'ordre
+de ce qu'on mesure. ADR-216 prend la règle (D8).
+
+**4. La mer elle-même.** Avec `--meilleur`, la scène ajoute toujours une houle longue de **2 m et 12 s** à la mer de vent : la mer
+« calme » de S472 ne l'était pas. `HOULE_LONGUE=<hs>,<tp>` la règle. **La mer de Méditerranée** (houle 0,3 m, 7 s ; vent 2 m/s,
+Hs 0,09 m) :
+
+| V1, `mer_lointaine` | référence | nous, brut | rapport | nous, AV1 0,60 Mbit/s | rapport |
+|---|---:|---:|---:|---:|---:|
+| mouvement par s | 0,436 | 0,906 | 2,08 | **0,448** | **1,03** |
+| part haute fréquence | 0,451 | 0,456 | **1,01** | 0,209 | 0,46 |
+| contraste local | 0,166 | 0,083 | 0,50 | 0,052 | 0,31 |
+| anisotropie | 9,70 | 1,55 | 0,16 | 3,40 | 0,35 |
+| B/G des creux | 2,49 | 1,66 | 0,67 | 1,62 | 0,65 |
+
+**Verdict sur E2** : **levé à la précision de la mesure** — le mouvement dans la tolérance une fois compressé comme la référence, la
+part haute fréquence dans la tolérance brute ; le codec exact de YouTube encadre la vérité entre les deux. **Ce qui reste, et devient
+E5** : le **contraste local** de la mer lointaine, deux fois plus faible que celui de V1, brut comme compressé (le seul écart que le
+codec n'explique pas : il ne peut que baisser), et son anisotropie (les rides vues en raccourci, alignées sur l'horizon) ; la couleur
+est E1, le type d'eau (ADR-217).
+

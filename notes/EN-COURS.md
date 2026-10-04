@@ -79,8 +79,16 @@ haute fréquence de V1 dans leur tolérance (35 %) ; si la cause est la mer : l'
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-217.
-- [ ] **P3** — E2 : l'essai, la cause, la correction ; la mesure.
+- [x] **P3** — E2 : l'essai, la cause, la correction ; la mesure.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — ADR-217 écrite, indexée ; MIROIRS-S472 annotée (E4 retiré, E1 devient le chantier du type d'eau).
+- **P3** — **Trois causes à E2, dont deux de la mesure** (MIROIRS-S472 §S473) : (1) **mon erreur de S472** — toute mer exportée
+  écrivait son détail sous `detail_h0.bin` ; la mer calme lisait le détail de la mer du large ; corrigé (le binaire porte le nom de
+  sa mer), les grandeurs fines de S472 à refaire ; (2) l'export refusé sous 3,5 m/s (le partage des cascades), corrigé, défaut au bit ;
+  (3) **le codec de la référence** (V1 : AV1, 590 kbit/s) — notre séquence compressée dans le navigateur (WebCodecs) : le mouvement
+  tombe de 1,29 à 0,28–0,76 selon le codec ; ADR-216 D8 ; `outils/banc_visuel_codec.js` ; (4) la houle longue de 2 m toujours ajoutée
+  — `HOULE_LONGUE`. La mer de Méditerranée (houle 0,3 m sur 7 s, vent 2 m/s) : **mouvement × 1,03 compressée en AV1, part haute
+  fréquence × 1,01 brute — E2 levé à la précision de la mesure**. Reste **E5** : le contraste local de la mer lointaine ÷ 2.
+

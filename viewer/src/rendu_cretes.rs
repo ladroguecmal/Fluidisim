@@ -114,7 +114,7 @@ fn echantillon(bande: &[Onde], queue: &[Onde], q: [f64; 2], t: f64, h: f32, m: f
 }
 
 /// **S360 — la queue de B réalisée densément, pour la FFT de Godot.** Deux cascades de 256 × 256 composantes, 32 m et
-/// 4 m de côté, se partagent la plage de la queue en `k` (coupure à `K_CASCADE`) : dans chaque case `k` de la grille,
+/// 4 m de côté, se partagent la plage de la queue en `k` (coupure à `K_CASCADE`, ou au début de la queue s'il est au-dessus, S473) : dans chaque case `k` de la grille,
 /// la densité continue du cœur (`equilibrium_tail_density`, la loi même dont la queue discrète intègre ses cellules),
 /// convertie en nombre d'onde (eau profonde, `x = √(gk)/(2π·fp)`), étalée par Elfouhaily et al. (1997) et **repliée
 /// sous le vent** — `(1/π)·[1 + Δ·cos 2φ]` pour `cos φ > 0` : mêmes moments d'ordre deux, des vagues qui courent avec
@@ -136,7 +136,10 @@ pub fn export_detail(scene: &Scene, fichier: &std::path::Path) -> Result<String,
     let (k_bas, k_haut) = (k_de(scene.tail_bounds[0] as f64), k_de(scene.tail_bounds[1] as f64));
     let theta = r.sea.theta_turns as f64 * TAU;
     let vent = [theta.cos(), theta.sin()];
-    let cascades = [(32.0f64, k_bas, K_CASCADE), (4.0f64, K_CASCADE, k_haut)];
+    // S473 : sous un vent faible (3 m/s : la queue commence à 12,6 rad/m), la queue commence au-dessus du partage des cascades ;
+    // le partage la suit, la cascade de 32 m reste vide (l'export refusait : « densité de queue Band »).
+    let k_partage = K_CASCADE.max(k_bas);
+    let cascades = [(32.0f64, k_bas, k_partage), (4.0f64, k_partage, k_haut)];
     let densite = |k: f64| -> Result<f64, String> {
         let x = (g * k).sqrt() / (TAU * fp);
         let e = equilibrium_tail_density(r, x as f32).map_err(|e| format!("densité de queue {e:?}"))? as f64;
@@ -180,7 +183,7 @@ pub fn export_detail(scene: &Scene, fichier: &std::path::Path) -> Result<String,
         }
         let pas = 8000;
         let mut mss_continu = 0f64;
-        for i in 0..pas {
+        for i in 0..if kb > ka { pas } else { 0 } {
             let k = ka * (kb / ka).powf((i as f64 + 0.5) / pas as f64);
             mss_continu += k * k * densite(k)? * k * (kb / ka).ln() / pas as f64;
         }
@@ -411,10 +414,14 @@ pub fn export_godot(scene: &Scene, asym: Option<&Asymmetry>, m: f32, chemin: &st
     let seuils = mer.seuils(w, 0x5356_0001, 20_000);
     let seuils_deferlement = mer.seuils_deferlement(w, 0x5360_0001, 20_000);
     // Contrôle : η linéaire de la bande en cinq points, calculé par le cœur à t₀ + 3 s.
-    let detail = export_detail(
-        scene,
-        &std::path::Path::new(chemin).with_file_name("detail_h0.bin"),
-    )?;
+    // S473 : le binaire du détail porte le nom de sa mer (`mer_calme.json` → `mer_calme_detail_h0.bin`) — deux mers exportées
+    // dans un même dossier partageaient `detail_h0.bin`, la dernière écrasant l'autre ; la mer par défaut garde le sien.
+    let source = std::path::Path::new(chemin);
+    let nom_detail = match source.file_stem().and_then(|f| f.to_str()) {
+        Some("mer_b") | None => "detail_h0.bin".to_string(),
+        Some(nom) => format!("{nom}_detail_h0.bin"),
+    };
+    let detail = export_detail(scene, &source.with_file_name(nom_detail))?;
     let t1 = SimTime(t0.0 + 3_000_000);
     let bande_t1 = lignes(&scene.background, usize::MAX, t1)?;
     let points = [[0.0f64, 0.0], [12.5, -7.0], [-40.0, 33.0], [250.0, 180.0], [-600.0, -410.0]];

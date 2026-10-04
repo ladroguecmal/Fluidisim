@@ -44,6 +44,12 @@ visuelle vérifiable sans lui.
 **D7 — Les vues de contrôle et les sondes.** Dans Godot, une grandeur à la fois en fausses couleurs (ombre, profondeur, normales,
 caustiques, mouillure) et des sondes chiffrées en des points fixes du monde : le diagnostic d'un défaut se lit sans l'interpréter.
 
+**D8 — À traitement égal (S473).** Une référence publiée est compressée ; la compression lisse le scintillement fin de l'eau (le
+mouvement mesuré d'une même séquence varie de 0,28 à 1,29 par seconde selon le codec et le débit, MIROIRS-S472 §S473). Avant de
+comparer les grandeurs **fines et temporelles**, notre séquence passe par le codec et le débit de la référence (lus dans sa page),
+dans le navigateur (`outils/banc_visuel_codec.js`) ; on rapporte les deux mesures, brute et compressée — l'encodeur de la référence
+n'est pas le nôtre, la vérité est entre elles.
+
 ## 3. Conséquences
 
 - L'utilisateur juge aux jalons ; entre eux, l'agent compare des nombres à des références qu'il a fournies.

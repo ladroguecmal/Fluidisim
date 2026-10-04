@@ -88,8 +88,17 @@ impl Scene {
             TAIL_RATIO
         };
         let (cooked, tail_cooked) = if houle {
+            // S473 — `HOULE_LONGUE=<hs>,<tp>` (m, s) : la houle longue de la scène (2 m, 12 s par défaut) ; une mer calme de
+            // Méditerranée en porte une de quelques décimètres (ADR-216, les scènes miroirs).
+            let (hs_houle, tp_houle) = std::env::var("HOULE_LONGUE")
+                .ok()
+                .and_then(|v| {
+                    let mut p = v.split(',').map(|x| x.trim().parse::<f32>());
+                    Some((p.next()?.ok()?, p.next()?.ok()?))
+                })
+                .unwrap_or((2., 12.));
             let swell = Recipe {
-                sea: SeaState { hs: 2., tp: 12., theta_turns: 0., components: 32, graine: 202 },
+                sea: SeaState { hs: hs_houle, tp: tp_houle, theta_turns: 0., components: 32, graine: 202 },
                 gravity: 9.81,
                 gamma: 7.,
                 min_ratio: 0.7,
