@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-04 10:44 +02:00
+JETON            : libre
+Battement        : 2026-10-04 10:51 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S477 — K1 : le type d'eau dans l'espace (ADR-217 D1)**
-Dernière session : S476 — les réponses du 2026-10-04 ([ADR-219](docs/adr/ADR-219-reponses-du-2026-10-04.md)) : le jeu est DyingStar (une surprise : aucun contact), un seul PC, 13.4 ajouté. Avant : S475 (la liste à 100 %, le plan)
-Session suivante : **S477 — K1 : le type d'eau dans l'espace** (ADR-217 D1) : une texture de concentrations (Chl, a_g, MES) sur la carte, lue par fragment par l'eau, le fond et le ciel sous l'eau de `mer.tscn` (puis `saut.tscn`) — le modèle porté dans le nuanceur, égal à `type_eau.py` ; une rivière qui se jette dans la mer ; le coût mesuré. Puis l'ordre du [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md) (K1 en alternance avec K2 et K3). **Sans attendre de « Continue »**
+Session en cours : aucune
+Dernière session : S477 — K1 : le type d'eau dans l'espace ([preuve](docs/validation/TYPE-EAU-S474.md) §5) — sans carte au bit, surcoût 0,044 ms. Avant : S476 (ADR-219 : le jeu est DyingStar)
+Session suivante : **S478 — K2 : la surface non graphe (4.16)**, le point qui en débloque le plus (22 en aval) : relire où en est 4.16 (partiel depuis S393 ; la bande APIC de la carte, S416–S470), écrire la conception de K2 — δ qui se retourne, se sépare et se referme, la cavité, la gerbe, les bulles — et son découpage en sessions, critères de fin par point (4.16, 4.1, 4.12, 4.20, 7.2–7.5, 3.1, 3.3). **Sans attendre de « Continue »**
 Maillons        : 1 — journal
-Registres       : dernier lot S470 (ADR-213 D3) ; le prochain au plus tard en S473
+Registres       : dernier lot S477 (ADR-213 D3) ; le prochain au plus tard en S480
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

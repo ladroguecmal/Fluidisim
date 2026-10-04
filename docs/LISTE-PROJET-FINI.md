@@ -481,7 +481,9 @@ pas recopiée ici (L137).
   ([preuve](validation/EPAISSEUR-EAU-S359.md), ADR-194) ; **S361** : les caustiques sur le fond, méthode directe, exactes
   à 5 % et l'énergie à 1 % ([preuve](validation/CAUSTIQUES-S361.md)), **validées en R22** (S367). Manquent les
   particules, les eaux chargées, les caustiques sur les objets et dans l'eau (piste : un volume de caustiques par
-  tranches, [comparable](COMPARABLES-EXTERNES.md) lu en S400).
+  tranches, [comparable](COMPARABLES-EXTERNES.md) lu en S400). **S474–S477** : le type d'eau — sept préréglages tirés de trois
+  constituants, une carte qui le fait varier dans l'espace, le côtier réglé contre une vidéo de référence
+  ([TYPE-EAU-S474](validation/TYPE-EAU-S474.md)).
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *partiel* depuis S365 : dans Godot, la
   caméra sous l'eau — la surface vue d'en dessous, **fenêtre de Snell** rendue à 0,05° de `arcsin(1/n)` et réflexion
   totale au-delà ; le milieu, `exp(−c·d)` par canal à 0,004 près, la lumière de l'eau, le fond et ses caustiques
@@ -655,7 +657,9 @@ pas recopiée ici (L137).
 
 ## 13. Validation du système
 
-- [ ] **13.1 Harnais de validation** (SPEC-003) — *partiel* : étages H1 et H3, scénarios C02 et C18.
+- [ ] **13.1 Harnais de validation** (SPEC-003) — *partiel* : étages H1 et H3, scénarios C02 et C18. **S471–S473** : le banc
+  visuel ([ADR-216](adr/ADR-216-le-banc-visuel.md)) — six vidéos de référence mesurées, nos scènes contre elles, à traitement égal
+  ([REFERENCES-VIDEO-S471](validation/REFERENCES-VIDEO-S471.md), [MIROIRS-S472](validation/MIROIRS-S472.md)).
 - [ ] **13.2 Les 23 cas canoniques passent sur le système** — *partiel* : sur le système, C02 (B),
   C12 (V), la branche V de C19 et **C10 depuis S331** — tirant à 0,02 %, période à 2·10⁻⁶, rapport
   avec masse ajoutée 1,408 pour 1,414 ± 15 %, par le corps rigide du cœur

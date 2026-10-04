@@ -18572,3 +18572,10 @@ pour l'équipe ; pas d'outil de terrain ; l'écume par les vidéos ; les verdict
 **Fait** : DyingStar lu dans ses dépôts publics (Godot 4.5, C#, double précision, Jolt, Wwise, Horizon en Rust, planètes de 6 356 km) —
 aucun contact ; cinq points reformulés sur ce PC ; **13.4, l'eau dans le jeu, ajouté** (120 points au périmètre) ; onze attentes
 extérieures levées, 46 points au front 0. **Rituel** (allégé). Maillons **1**. Suivant : le type d'eau dans l'espace.
+
+## S477 — 2026-10-04 — K1 : le type d'eau dans l'espace
+
+**Entrée.** En autonomie (plan de complétion, K1). **Fait** ([preuve](../docs/validation/TYPE-EAU-S474.md) §5) : une carte des
+constituants lue par fragment par l'eau, le fond et le ciel sous l'eau — le modèle porté dans le nuanceur ; sans carte au bit ; égal au
+modèle à 1/255 ; surcoût 0,044 ms ; un panache de rivière montré. Le lot des registres (en retard) fait. **Rituel** (allégé). Maillons
+**1**. Suivant : K2, la surface non graphe.

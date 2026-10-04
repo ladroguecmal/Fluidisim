@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S477 — **en cours**. En autonomie, plan de complétion K1 : **le type d'eau dans l'espace** (ADR-217 D1, second temps).
+Session : S477 — **terminée**. En autonomie, plan de complétion K1 : **le type d'eau dans l'espace** (ADR-217 D1, second temps).
 
 **Ce que la session fait.** Une **carte des constituants** (Chl, a_g(440), MES par texel, sur un rectangle de la carte en coordonnées
 de B) lue **par fragment** : une structure `Optique` (R0, kd, c) que `optique_en(xy)` calcule — le modèle de `type_eau.py` porté dans
@@ -80,9 +80,9 @@ par image à 1280 × 720.
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — `Optique`, `optique_en`, les fonctions qui la reçoivent ; la carte dans `mer.gd` ; le panache ; mesures ; images.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — (1) sans carte au bit (mer et saut) ; (2) carte uniforme contre préréglage : ≤ 1/255 — après un premier contrôle mal posé
   (la grille de 12 km dépasse la carte de 5 km) ; (3) le panache montré ; (4) surcoût **0,044 ms**. Preuve : TYPE-EAU-S474 §5.
-
+- **P3** — la preuve : TYPE-EAU-S474 §5 ; **le lot des registres** (en retard : dû en S473) pour S471–S477 — LISTE (8.5, 13.1), FEUILLE-DE-ROUTE ; QUESTIONS-OUVERTES inchangée ; journal ; jeton libre ; maillons 1 ; suivant : S478, K2.
