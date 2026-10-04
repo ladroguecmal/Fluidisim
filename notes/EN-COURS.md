@@ -77,7 +77,13 @@ fronts recalculés. (4) **Le plan de complétion** : §3 résolu, 13.4 en K13. L
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-219 ; la liste ; le registre ; le plan.
+- [x] **P2** — ADR-219 ; la liste ; le registre ; le plan.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — ADR-219 (indexée). DyingStar lu dans ses dépôts publics seulement (pages et API publique de GitHub, en lecture) — Godot
+  4.5, C#, double précision, Jolt, Wwise, serveur Horizon en Rust, planètes de 6 356 km en tuiles HEALPix ; **aucune action vers le
+  jeu ni son équipe**. La liste : 1.7, 9.10, 10.2, 10.3, 11.5 reformulés sur ce PC ; 7.1 la suspension levée ; 7.8 par Wwise ; 12.4 le
+  terrain du jeu ; **13.4 ajouté** — 121 points, 120 au périmètre. Le registre : onze attentes levées, **46 points au front 0** (36
+  avant), 13 en E. Le plan : §3 répondu, 13.4 en K13 ; **117 points ouverts, chacun dans une seule campagne** (le calcul refait).
+

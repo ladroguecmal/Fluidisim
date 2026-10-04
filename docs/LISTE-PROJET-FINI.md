@@ -15,7 +15,8 @@ périmètre final ; l'ordre reste celui de la feuille de route (§3 ter), qui le
 [registre des dépendances](registres/DEPENDANCES-LISTE.md). **Depuis S475, la condition de fin du système
 de l'eau** (décision de l'utilisateur, [ADR-218](adr/ADR-218-le-systeme-de-l-eau-complet.md)) : *« la feuille
 to do list devra être validée à 100% pas moins mais plus possible ou changement durant le processus »* —
-119 points (5.11 hors du périmètre), dans l'ordre du [plan de complétion](registres/PLAN-COMPLETION-S475.md).
+119 points (5.11 hors du périmètre), dans l'ordre du [plan de complétion](registres/PLAN-COMPLETION-S475.md) ; **120 depuis
+S476** — 13.4, l'eau dans le jeu DyingStar, ajouté ([ADR-219](adr/ADR-219-reponses-du-2026-10-04.md)).
 
 **Remplissage à la demande de l'utilisateur.** Chaque remplissage met à jour les états touchés et la
 ligne « État au » ci-dessous. La trajectoire et l'ordre des travaux restent dans la
@@ -85,7 +86,9 @@ pas recopiée ici (L137).
 - [ ] **1.6 Cellules, domaines et solveurs distincts, niveaux d'activité des cellules** — *absent*,
   conçu (ADR-006).
 - [ ] **1.7 Horloge de simulation entière et phases déterministes** (ADR-003) — *partiel* : temps
-  entier en µs, phases en virgule fixe ; déterminisme reçu localement, pas entre plateformes.
+  entier en µs, phases en virgule fixe ; déterminisme reçu localement, pas entre plateformes. **Depuis S476** (un seul PC,
+  [ADR-219](adr/ADR-219-reponses-du-2026-10-04.md) D2) : « entre plateformes » se lit entre les chemins d'exécution de ce PC
+  (processeur et carte graphique, Vulkan et DirectX 12, compilations, simple et double précision).
 - [ ] **1.8 Référentiels, précision f32 locale, `g_eff` injectée** (ADR-002, I-07, I-08) — *partiel* :
   positions monde et ancres locales, `g_eff` par volume. Manquent les référentiels mobiles et la
   planète sphérique.
@@ -437,6 +440,8 @@ pas recopiée ici (L137).
   **S368**, produit sur la carte de Godot au même pas, décroissance à 10⁻⁵ ([preuve](validation/ECUME-GODOT-S368.md)).
   Manquent les sources de W, de δ et du vent, demi-vies et transfert calés (B9), la zone de surf et le sillage
   (scénarios 2 et 3 de B9) ; suspendu par l'utilisateur sauf références photographiques (2026-09-26).
+  **Depuis S476** ([ADR-219](adr/ADR-219-reponses-du-2026-10-04.md) D5) : la suspension levée — les vidéos V2 (déferlement) et V3
+  (impact) sont la référence du banc.
 - [ ] **7.2 Spray, embruns, gouttelettes** — *absent*.
 - [ ] **7.3 Microbulles visuelles** — *absent*.
 - [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *absent*.
@@ -444,7 +449,8 @@ pas recopiée ici (L137).
 - [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *absent*. L'évaporation et le gel des contenants, par V
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
 - [ ] **7.7 Danger et traversabilité**, publiés par tuiles (ADR-018, SPEC-006 §5) — *absent*.
-- [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin**, par l'audio de Godot (ADR-197 D5).
+- [ ] **7.8 Audio de l'eau** (ADR-016, SPEC-006 §4.2) — *absent* ; **à la fin** (ADR-197 D5), par **Wwise**, l'audio du jeu
+  DyingStar (ADR-219).
 
 ## 8. Rendu et niveaux de détail visuels
 
@@ -585,7 +591,8 @@ pas recopiée ici (L137).
   ([ATTRIBUTION-RETRECISSEMENT-S285](validation/ATTRIBUTION-RETRECISSEMENT-S285.md)) : construit, non reçu,
   il ne compte pas. **S350** : en 3D, le redimensionnement
   est reçu au bit et le coût suit la surface (§6) — le moyen dont le rang 1 se sert.
-- [ ] **9.10 Profils de qualité, adaptation au matériel et à la charge** (I-16) — *absent*.
+- [ ] **9.10 Profils de qualité, adaptation au matériel et à la charge** (I-16) — *absent*. **Depuis S476** (un seul PC,
+  ADR-219 D2) : l'adaptation se mesure sur ce PC en bridant le budget, la résolution et le pilote (WARP comme matériel faible).
 - [ ] **9.11 60 images/s avec 2 ms pour l'eau sur une scène représentative** (ADR-125) — *partiel* :
   scène filtrée S267 : GPU eau médian ~1,74 ms en 1280×720, cuisson 0,574–0,585 ms,
   pointe 2,962 ms au premier passage ; CPU ~4,1 ms, pointes ~26 ms
@@ -602,9 +609,11 @@ pas recopiée ici (L137).
 - [ ] **10.1 Réplication des événements sources, jamais de l'état** (ADR-009) — *partiel* :
   événements versionnés et instantanés. Le transport manque.
 - [ ] **10.2 Le serveur n'exécute que V** (I-10) — *partiel* : V s'exécute seul, déterministe en
-  local. Aucun serveur réel.
+  local. Aucun serveur réel. **Depuis S476** (ADR-219 D2) : un processus serveur sans fenêtre sur ce PC, puis le serveur
+  du jeu (Horizon) en local.
 - [ ] **10.3 Déterminisme bit à bit entre plateformes pour B, W répliqué et V** (I-03, A98) —
-  *partiel* : répétabilité locale. Aucune seconde cible.
+  *partiel* : répétabilité locale. Aucune seconde cible. **Depuis S476** (un seul PC, ADR-219 D2) : entre les chemins
+  d'exécution de ce PC, comme 1.7.
 - [ ] **10.4 δ sans autorité de jeu, aucun chemin d'énergie du client vers le monde, grandeurs
   dérivées autoritaires** (I-04, I-11, I-15) — *partiel* : tenu par construction du cœur, et
   **éprouvé pour un corps** : trajectoire de jeu identique au bit avec ou sans δ (S332 ; S333, 800 pas
@@ -631,7 +640,8 @@ pas recopiée ici (L137).
 - [ ] **11.4 Nombreuses sources simultanées à coût maîtrisé** — *partiel* : mutualisation des
   sillages d'un journal, table de Bessel partagée (S222, S235), filtre spectral B/sillage
   reçu (S249), cuisson optimisée (S267). Manquent la généralisation et le LOD temporel.
-- [ ] **11.5 Matériel cible de livraison et seconde cible** (B7 complet, A98) — *absent*.
+- [ ] **11.5 Matériel cible de livraison et seconde cible** (B7 complet, A98) — *absent*. **Depuis S476** (ADR-219 D2) :
+  ce PC est la cible de livraison ; la seconde cible devient le bridage de 9.10.
 
 ## 12. Outillage auteur et données cuites
 
@@ -639,7 +649,8 @@ pas recopiée ici (L137).
   spectre cuit et empreintes. Détection d'obsolescence absente.
 - [ ] **12.2 Éditeur de rivières** : dessin, validation bloquante, gravure (SPEC-005 §5) — *absent*.
 - [ ] **12.3 Précalcul côtier stocké** (SPEC-005 §6) — *absent*.
-- [ ] **12.4 Eau en amont du terrain, géoïde dans l'outil de terrain** (SPEC-005 §3–4) — *absent*.
+- [ ] **12.4 Eau en amont du terrain, géoïde dans l'outil de terrain** (SPEC-005 §3–4) — *absent*. **Depuis S476**
+  (ADR-219 D4) : le terrain est celui de DyingStar (ses tuiles HEALPix) ; pour nos scènes, une carte de hauteurs qui l'imite.
 - [ ] **12.5 Portée d'une modification bornée par partition** (SPEC-005 §8) — *absent*.
 
 ## 13. Validation du système
@@ -662,6 +673,9 @@ pas recopiée ici (L137).
   depuis S320 — la cavité sur le banc 2D d'APIC, dont le temps de pincement ne converge pas à trois
   mailles, couronne et jet de maille ([B10](validation/B10-APIC-S320.md)). Les autres attendent leurs
   composants, dont B8, que la porte A nomme.
+- [ ] **13.4 L'eau dans le jeu** ([ADR-219](adr/ADR-219-reponses-du-2026-10-04.md) D7, ajouté en S476) — *absent* : le système
+  intégré à une copie locale de **DyingStar** (Godot 4.5, double précision, C#, Jolt, serveur Horizon), sur une planète du jeu, sans
+  régression du jeu — une surprise pour son équipe : rien ne se publie.
 
 ---
 
@@ -681,8 +695,8 @@ pas recopiée ici (L137).
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
-| 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **120** | **3** | **73** | **44** |
+| 13. Validation | 4 | 0 | 3 | 1 |
+| **total** | **121** | **3** | **73** | **45** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

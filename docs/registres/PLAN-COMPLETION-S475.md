@@ -36,17 +36,22 @@ des campagnes. Les sessions de rendu continuent d'alterner avec la physique (ADR
 | **K6** | **Les solides** — flottabilité, forces, sillage, corps mobiles, acteur poussé, slamming, grands navires, proche-coque | 6.1, 6.2, 6.3, 6.4, 6.7, 6.8, 6.6, 4.13, 1.3 | K2, K3 | 25 |
 | **K7** | **Les volumes finis** — contenants réels, fuites, vannes, seuils, plusieurs liquides, réseau sous pression, brèches et inondation de navire, articulation V↔δ, capture | 5.2, 5.3, 5.4, 5.6, 5.7, 5.8, 5.9, 5.10, 5.12 | K6 (5.9) | 25 |
 | **K8** | **Activation, prédiction, budget** — multicritère, prédiction, précalcul avant l'impact, hors caméra, budgets, dégradation, profils, 60 images/s, aucune allocation, dépassement critique | 9.1–9.13, 1.4, 1.7, 1.8, 11.4 | K5 | 25 |
-| **K9** | **Réseau et persistance** — réplication par événements, serveur V seul, déterminisme entre plateformes, sauvegarde et reconnexion, requêtes de jeu | 10.1–10.6, 10.8, 10.9, 1.5, 3.7, 3.8 | fait F1, F2 | 25 |
+| **K9** | **Réseau et persistance** — réplication par événements (notre format), serveur V seul (un processus sur ce PC), déterminisme entre les chemins d'exécution, sauvegarde et reconnexion, requêtes de jeu | 10.1–10.6, 10.8, 10.9, 1.5, 3.7, 3.8 | — | 25 |
 | **K10** | **Grande échelle** — la planète, les régions de mer, tsunamis, très grands événements, sources nombreuses | 11.1, 11.2, 11.3, 3.4, 2.1, 2.2 | K3, K6 | 20 |
-| **K11** | **Outillage** — cuisson reproductible, précalcul côtier stocké, terrain et géoïde, portée bornée | 12.1, 12.3, 12.4, 12.5 | fait F4 | 12 |
+| **K11** | **Outillage** — cuisson reproductible, précalcul côtier stocké, terrain (celui de DyingStar) et géoïde, portée bornée | 12.1, 12.3, 12.4, 12.5 | — | 12 |
 | **K12** | **La fin de l'eau** — la part de l'eau dans la météo, glace et vapeur, danger et traversabilité, l'écume (7.1), l'audio de l'eau | 2.8, 7.1, 7.6, 7.7, 7.8, 5.5, 8.4 | K1–K7 | 20 |
-| **K13** | **La validation du système** — le harnais, les 23 cas canoniques, les onze bancs, les quatre couches réunies, la cible de livraison | 13.1, 13.2, 13.3, 1.1, 11.5 | tout ; fait F2 | 15 |
-| | **total** | **116 points ouverts** | | **≈ 310** |
+| **K13** | **La validation du système, et l'eau dans le jeu** — le harnais, les 23 cas canoniques, les onze bancs, les quatre couches réunies, la cible de livraison ; le système intégré à une copie locale de DyingStar (ADR-219) | 13.1, 13.2, 13.3, 13.4, 1.1, 11.5 | tout | 25 |
+| | **total** | **117 points ouverts** (13.4 ajouté en S476) | | **≈ 320** |
 
 L'ordre de départ : **K1** (en cours : le type d'eau) en alternance avec **K2** et **K3** — les deux points qui commandent le plus
 (4.16 : 22 points en aval ; 2.7 : 20) ; K5 et K6 ensuite ; K9 dès que F1 est tranché ; K12 et K13 en dernier.
 
 ## 3. Les faits que seul l'utilisateur peut fournir
+
+**Répondus le 2026-10-04 ([ADR-219](../adr/ADR-219-reponses-du-2026-10-04.md))** : F1 d'accord (notre réseau, local) ; F2 un seul
+ordinateur (les points à second matériel reformulés sur ce PC) ; **F3 le jeu est DyingStar, une surprise pour son équipe** (aucun
+contact, rien de publié ; un point ajouté, 13.4) ; F4 pas d'outil — le terrain du jeu ; F5 oui (l'écume par V2 et V3) ; F6 aux jalons.
+Le tableau ci-dessous garde les questions telles que posées en S475.
 
 Chacun avec la recommandation de l'agent ; **aucun ne bloque le travail d'aujourd'hui** (36 points au front 0). Ils se demandent
 quand leur campagne arrive (ADR-218, conséquences).
