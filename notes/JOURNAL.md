@@ -18564,3 +18564,11 @@ list devra être validée à 100% pas moins »* → [ADR-218](../docs/adr/ADR-21
 ouverts sur 119) ; le plan de complétion — treize campagnes, chaque point ouvert dans une seule, ≈ 310 sessions ; six faits que seul
 l'utilisateur peut fournir, une recommandation chacun. **Rituel** (allégé). Maillons **1**. Suivant : K1, le type d'eau dans
 l'espace.
+
+## S476 — 2026-10-04 — les réponses : le jeu est DyingStar
+
+**Entrée.** Réponses de l'utilisateur aux six faits : le réseau à nous ; un seul ordinateur ; le jeu sera **DyingStar**, une surprise
+pour l'équipe ; pas d'outil de terrain ; l'écume par les vidéos ; les verdicts aux jalons → [ADR-219](../docs/adr/ADR-219-reponses-du-2026-10-04.md).
+**Fait** : DyingStar lu dans ses dépôts publics (Godot 4.5, C#, double précision, Jolt, Wwise, Horizon en Rust, planètes de 6 356 km) —
+aucun contact ; cinq points reformulés sur ce PC ; **13.4, l'eau dans le jeu, ajouté** (120 points au périmètre) ; onze attentes
+extérieures levées, 46 points au front 0. **Rituel** (allégé). Maillons **1**. Suivant : le type d'eau dans l'espace.

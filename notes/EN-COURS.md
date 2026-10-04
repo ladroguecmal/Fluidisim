@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S476 — **en cours**. **Réponses de l'utilisateur** aux six faits du plan de complétion (F1 à F6) : le réseau à nous ; un
+Session : S476 — **terminée**. **Réponses de l'utilisateur** aux six faits du plan de complétion (F1 à F6) : le réseau à nous ; un
 seul ordinateur, celui-ci ; le jeu sera **DyingStar** (<https://github.com/DyingStar-game>), **une surprise pour l'équipe** ; pas
 d'outil de terrain en tête ; l'écume par les vidéos ; les verdicts aux jalons.
 
@@ -78,7 +78,7 @@ fronts recalculés. (4) **Le plan de complétion** : §3 résolu, 13.4 en K13. L
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — ADR-219 ; la liste ; le registre ; le plan.
-- [ ] **P3** — preuve ; rituel (allégé).
+- [x] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — ADR-219 (indexée). DyingStar lu dans ses dépôts publics seulement (pages et API publique de GitHub, en lecture) — Godot
@@ -86,4 +86,4 @@ fronts recalculés. (4) **Le plan de complétion** : §3 résolu, 13.4 en K13. L
   jeu ni son équipe**. La liste : 1.7, 9.10, 10.2, 10.3, 11.5 reformulés sur ce PC ; 7.1 la suspension levée ; 7.8 par Wwise ; 12.4 le
   terrain du jeu ; **13.4 ajouté** — 121 points, 120 au périmètre. Le registre : onze attentes levées, **46 points au front 0** (36
   avant), 13 en E. Le plan : §3 répondu, 13.4 en K13 ; **117 points ouverts, chacun dans une seule campagne** (le calcul refait).
-
+- **P3** — la preuve : ADR-219 et le plan de complétion ; journal ; jeton libre ; maillons 1 ; suivant : S477, K1 — le type d'eau dans l'espace.
