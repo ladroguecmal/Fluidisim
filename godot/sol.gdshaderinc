@@ -105,12 +105,14 @@ void fragment() {
     // `eau.gdshader` qui l'applique —, puis les `d` mètres d'eau jusqu'à l'œil (`a_travers_l_eau`).
     // S371 : le milieu du pixel, décidé à l'objectif (`surface_b.gdshaderinc`) ; dans la transition, les deux vues.
     vec3 monde = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+    // S477 : les propriétés optiques au-dessus de ce point du fond (la carte du type d'eau, ou la scène).
+    Optique op = optique_en(vec2(monde.x, -monde.z));
     float d = length(monde - CAMERA_POSITION_WORLD);
     vec3 milieu = milieu_du_pixel(CAMERA_POSITION_WORLD, normalize(monde - CAMERA_POSITION_WORLD));
     if (milieu.x > 0.0) {
         vec3 vue = normalize(monde - CAMERA_POSITION_WORLD);
         vec3 omega = vec3(vue.x, -vue.z, vue.y);
-        vec3 dessous = a_travers_l_eau(ALBEDO * exp(-kd * max(profondeur_fond, 0.0)), d, omega, milieu.y);
+        vec3 dessous = a_travers_l_eau_o(op, ALBEDO * exp(-op.kd * max(profondeur_fond, 0.0)), d, omega, milieu.y);
         ALBEDO = milieu.x >= 1.0 ? dessous : mix(ALBEDO, dessous, milieu.x);
     }
 #ifdef BRUME_PAR_PIXEL
@@ -122,7 +124,7 @@ void fragment() {
     if (controle_milieu) {
         ALBEDO = vec3(milieu.x, 0.0, 0.0);
     } else if (controle == 3) {
-        ALBEDO = exp(-attenuation_c * d);
+        ALBEDO = exp(-op.c * d);
     } else if (controle == 1) {
         ALBEDO = vec3(c / 4.0, fract(10.0 * c), 0.0);
     } else if (controle == 2) {

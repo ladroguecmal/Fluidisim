@@ -39,13 +39,82 @@ vec3 soleil_dans_l_eau() {
     return vec3(s.xy / max(h, 1e-6) * st, sqrt(max(1.0 - st * st, 0.0)));
 }
 
+// S477 — **LE TYPE D'EAU DANS L'ESPACE** (ADR-217 D1). Les propriétés optiques d'un point — `R0`, `kd`, `c` — dans une structure,
+// que les fonctions de la lumière de l'eau reçoivent (Godot n'a pas de variable globale modifiable). `optique_en(xy)` la lit dans la
+// **carte des constituants** — par texel, Chl (mg/m³), a_g(440) (m⁻¹), MES (g/m³), sur le rectangle `type_eau_zone` de B — et la
+// calcule par le modèle de `outils/type_eau.py` (ses sources, son en-tête) ; hors de la carte, ou sans elle, les uniformes de la scène,
+// au bit. Les constituants s'interpolent linéairement entre texels — une approximation : `Chl^e` n'est pas linéaire.
+struct Optique {
+    vec3 R0;
+    vec3 kd;
+    vec3 c;
+};
+uniform bool type_eau_carte_active = false;
+uniform sampler2D type_eau_carte : filter_linear, repeat_disable;
+uniform vec4 type_eau_zone = vec4(0.0, 0.0, 1.0, 1.0);
+
+/// Les uniformes de la scène (l'eau pure d'ADR-177, ou `TYPE_EAU`).
+Optique optique_scene() {
+    return Optique(R0, kd, attenuation_c);
+}
+
+/// Le modèle de `type_eau.py` : l'eau pure d'ADR-177 plus le phytoplancton (Morel et Maritorena 2001), la matière dissoute et les
+/// particules minérales (Babin et al. 2003), aux bandes 650, 550, 450 nm.
+Optique optique_constituants(vec3 k) {
+    const vec3 A_EAU = vec3(0.340, 0.0565, 0.00922);
+    const vec3 BB_EAU = vec3(0.00071, 0.00145, 0.00344);
+    const vec3 LAMBDA = vec3(650.0, 550.0, 450.0);
+    const vec3 CHI = vec3(0.04500, 0.04111, 0.10165);
+    const vec3 EXPO = vec3(0.67200, 0.64927, 0.67692);
+    const float MU_D = 0.8;
+    float chl = max(k.x, 0.0);
+    float ag = max(k.y, 0.0);
+    float mes = max(k.z, 0.0);
+    vec3 a = A_EAU;
+    vec3 bb = BB_EAU;
+    vec3 b = 2.0 * BB_EAU;
+    if (chl > 0.0) {
+        float l10 = log(chl) / log(10.0);
+        float bp550 = 0.416 * pow(chl, 0.766);
+        float nu = chl <= 2.0 ? 0.5 * (clamp(l10, log(0.02) / log(10.0), log(2.0) / log(10.0)) - 0.3) : 0.0;
+        vec3 bbp = (0.002 + 0.01 * (0.5 - 0.25 * l10) * pow(LAMBDA / 550.0, vec3(nu))) * bp550;
+        a += max(MU_D * CHI * pow(vec3(chl), EXPO) - bbp, vec3(0.0));
+        bb += bbp;
+        b += bp550 * 550.0 / LAMBDA;
+    }
+    a += ag * exp(-0.0176 * (LAMBDA - 440.0));
+    if (mes > 0.0) {
+        a += 0.04 * mes * exp(-0.0123 * (LAMBDA - 443.0));
+        vec3 bpm = 0.5 * mes * 555.0 / LAMBDA;
+        b += bpm;
+        bb += 0.018 * bpm;
+    }
+    return Optique(0.33 * bb / (a + bb), (a + bb) / MU_D, a + b);
+}
+
+/// Les propriétés optiques au point `xy` de B : la carte, ou la scène.
+Optique optique_en(vec2 xy) {
+    if (!type_eau_carte_active) {
+        return optique_scene();
+    }
+    vec2 uv = (xy - type_eau_zone.xy) / (type_eau_zone.zw - type_eau_zone.xy);
+    if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) {
+        return optique_scene();
+    }
+    return optique_constituants(textureLod(type_eau_carte, uv, 0.0).rgb);
+}
+
 /// La radiance d'une ligne de visée infinie dans l'eau, direction `omega` (B, unitaire), à la profondeur `z` (m).
-vec3 eau_infinie(vec3 omega, float z) {
+vec3 eau_infinie_o(Optique op, vec3 omega, float z) {
     vec3 o = normalize(vec3(omega.xy + vec2(1e-5, 0.0), min(omega.z, 0.0)));
     vec3 s = soleil_dans_l_eau();
     float f = 1.0 - lobe.y * henyey_greenstein(lobe.z, -s.z) + lobe.x * (1.0 + o.z)
         + lobe.y * henyey_greenstein(lobe.z, dot(o, s));
-    return R0 * gain_eau * exp(-kd * max(z, 0.0)) * f;
+    return op.R0 * gain_eau * exp(-op.kd * max(z, 0.0)) * f;
+}
+
+vec3 eau_infinie(vec3 omega, float z) {
+    return eau_infinie_o(optique_scene(), omega, z);
 }
 
 /// Ce qu'on voit à travers `d` mètres d'eau depuis l'œil, à la profondeur `z0`, dans la direction `omega` (B). La lumière
@@ -53,12 +122,16 @@ vec3 eau_infinie(vec3 omega, float z) {
 /// `z = z0 + g·s`, `g = −ω_z` : `∫₀^d L∞(z0)·e^(−Kd·g·s)·c·e^(−c·s) ds = L∞(z0)·c·d·φ((c + Kd·g)·d)`, `φ(x) = (1 − e^(−x))/x`
 /// — exact pour ce modèle. S365 P3 : la profondeur **moyenne** du trajet traçait une ligne entre le fond lointain et le
 /// fond du ciel ; la lumière diffusée vient du premier `1/c` mètres, pas du milieu du trajet.
-vec3 a_travers_l_eau(vec3 couleur, float d, vec3 omega, float z0) {
+vec3 a_travers_l_eau_o(Optique op, vec3 couleur, float d, vec3 omega, float z0) {
     d = max(d, 0.0);
-    vec3 x = (attenuation_c + kd * (-omega.z)) * d;
+    vec3 x = (op.c + op.kd * (-omega.z)) * d;
     vec3 phi = vec3(0.0);
     for (int i = 0; i < 3; i++) {
         phi[i] = abs(x[i]) < 1e-4 ? 1.0 - 0.5 * x[i] : (1.0 - exp(-x[i])) / x[i];
     }
-    return couleur * exp(-attenuation_c * d) + eau_infinie(omega, z0) * attenuation_c * d * phi;
+    return couleur * exp(-op.c * d) + eau_infinie_o(op, omega, z0) * op.c * d * phi;
+}
+
+vec3 a_travers_l_eau(vec3 couleur, float d, vec3 omega, float z0) {
+    return a_travers_l_eau_o(optique_scene(), couleur, d, omega, z0);
 }

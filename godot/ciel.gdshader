@@ -18,7 +18,9 @@ void sky() {
     vec3 dessus = vec3(0.0);
     // Ligne infinie : `a_travers_l_eau` à très grande distance, la pente de la ligne bornée à l'horizontale.
     if (milieu.x > 0.0) {
-        dessous = a_travers_l_eau(vec3(0.0), 1e6, vec3(dir.xy, min(dir.z, 0.0)), milieu.y);
+        // S477 : l'eau autour de l'œil (la carte du type d'eau, ou la scène).
+        dessous = a_travers_l_eau_o(optique_en(vec2(camera_position.x, -camera_position.z)), vec3(0.0), 1e6,
+            vec3(dir.xy, min(dir.z, 0.0)), milieu.y);
     }
     if (milieu.x < 1.0) {
         dessus = ciel_b(dir, 4);

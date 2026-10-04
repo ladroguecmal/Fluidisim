@@ -265,6 +265,10 @@ func _ready() -> void:
 		controle_ligne_eau()
 	if "--cout-pluie" in args:
 		cout_pluie()
+	if "--cout-type-eau" in args:
+		anime = false
+		cout_type_eau()
+		return
 	if "--cout-demi" in args:
 		anime = false
 		cout_demi()
@@ -478,6 +482,40 @@ func suivre_carte(centre_force = null) -> void:
 	materiau_sol.set_shader_parameter("carte_origine", centre)
 
 
+## S477 — une carte des constituants (Chl, a_g(440), MES par texel, flottants) et son rectangle dans B : `panache` — une rivière
+## (le préréglage du même nom) qui entre dans une mer de Méditerranée par la gauche de la caméra et s'y dilue en s'étalant ;
+## `uniforme:<préréglage>` — le préréglage partout (le contrôle : les mêmes images que `TYPE_EAU=<préréglage>`). Vide : aucune.
+func carte_type_eau(nom: String) -> Dictionary:
+	if nom == "":
+		return {}
+	var TypeEau = load("res://type_eau.gd")
+	var n := 256
+	var image := Image.create(n, n, false, Image.FORMAT_RGBF)
+	var zone := Vector4(-100.0, -40.0, 200.0, 260.0)
+	if nom.begins_with("uniforme:"):
+		zone = Vector4(-5000.0, -5000.0, 5000.0, 5000.0)
+		var k: Vector3 = TypeEau.PRESETS[nom.trim_prefix("uniforme:")]
+		image.fill(Color(k.x, k.y, k.z))
+	elif nom == "panache":
+		var mer_k: Vector3 = TypeEau.PRESETS["mediterranee"]
+		var riviere_k: Vector3 = TypeEau.PRESETS["riviere"]
+		for j in n:
+			for i in n:
+				var x := zone.x + (zone.z - zone.x) * (i + 0.5) / n
+				var y := zone.y + (zone.w - zone.y) * (j + 0.5) / n
+				# L'embouchure à (−60, 40) ; le panache dérive vers la droite, s'élargit, et sa charge décroît sur 120 m.
+				var s := maxf(x + 60.0, 0.0)
+				var axe := 40.0 + 0.1 * s + 6.0 * sin(s / 30.0)
+				var largeur := 5.0 + 0.12 * s
+				var f := exp(-pow((y - axe) / largeur, 2.0)) * exp(-s / 120.0) if x >= -60.0 else 0.0
+				var k := mer_k.lerp(riviere_k, f)
+				image.set_pixel(i, j, Color(k.x, k.y, k.z))
+	else:
+		push_error("TYPE_EAU_CARTE inconnue : " + nom)
+		return {}
+	return {"texture": ImageTexture.create_from_image(image), "zone": zone}
+
+
 func pose(nom: String) -> void:
 	var p: Array = POSES[nom]
 	camera.position = p[0]
@@ -564,6 +602,15 @@ func uniformes_fixes() -> void:
 				m.set_shader_parameter("attenuation_c", p["c"])
 		print("TYPE_EAU_S474 scene constituants=%s R0=%s kd=%s c=%s visibilite_m=%.2f" % [constituants, p["R0"], p["kd"], p["c"],
 				4.8 / p["c"].y])
+	# S477, ADR-217 D1 — la carte des constituants (`TYPE_EAU_CARTE`) : lue par fragment par l'eau, le fond et le ciel sous l'eau.
+	var carte := carte_type_eau(OS.get_environment("TYPE_EAU_CARTE"))
+	if not carte.is_empty():
+		for m in [materiau, materiau_sol, materiau_ciel]:
+			if m != null:
+				m.set_shader_parameter("type_eau_carte_active", true)
+				m.set_shader_parameter("type_eau_carte", carte["texture"])
+				m.set_shader_parameter("type_eau_zone", carte["zone"])
+		print("TYPE_EAU_S477 carte=%s zone=%s" % [OS.get_environment("TYPE_EAU_CARTE"), carte["zone"]])
 	# S365 : `CONTROLE_EAU=4` — la surface vue d'en dessous rend son coefficient de Fresnel eau → air (1 au-delà de l'angle
 	# critique), relu par `outils/fenetre_snell.py --fresnel`.
 	if OS.get_environment("CONTROLE_EAU") != "":
@@ -1335,6 +1382,32 @@ func cout_pluie() -> void:
 			t.sort()
 			ligne_cout += " gpu_ms_%d=%.3f" % [int(r), float(t[120])]
 		print(ligne_cout)
+	get_tree().quit()
+
+
+## S477 — `-- --cout-type-eau` (avec `TYPE_EAU_CARTE`) : le temps GPU médian de 240 images, la carte lue puis éteinte, pose haute.
+func cout_type_eau() -> void:
+	var vp := get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	pose("haute")
+	mer.global_position = Vector3(camera.global_position.x, 0.0, camera.global_position.z)
+	phases(temps)
+	var medianes := []
+	for active in [true, false, true, false]:
+		for m in [materiau, materiau_sol, materiau_ciel]:
+			if m != null:
+				m.set_shader_parameter("type_eau_carte_active", active)
+		for _i in 30:
+			await RenderingServer.frame_post_draw
+		var t := []
+		for _i in 240:
+			await RenderingServer.frame_post_draw
+			t.append(RenderingServer.viewport_get_measured_render_time_gpu(vp))
+		t.sort()
+		medianes.append(float(t[120]))
+	print("COUT_TYPE_EAU_S477 gpu_ms_carte=%.3f,%.3f gpu_ms_sans=%.3f,%.3f surcout_ms=%.3f" % [medianes[0], medianes[2], medianes[1],
+			medianes[3], 0.5 * (medianes[0] + medianes[2] - medianes[1] - medianes[3])])
 	get_tree().quit()
 
 

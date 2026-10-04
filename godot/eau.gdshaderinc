@@ -181,7 +181,7 @@ vec3 transport_covariance(vec3 c, vec3 g) {
 
 /// `sample_light` de l'afficheur pour la pente `pente` (B) et le rayon `rayon` (B) : sous la surface, le corps d'eau et
 /// le fond vu ; au-dessus, le ciel réfléchi ; Fresnel exact entre les deux ; l'éclat du soleil.
-vec3 lumiere(vec2 pente, vec3 rayon, vec3 fond_vu, vec3 t_colonne) {
+vec3 lumiere(Optique op, vec2 pente, vec3 rayon, vec3 fond_vu, vec3 t_colonne) {
     vec3 n = normalize(vec3(-pente, 1.0));
     vec3 soleil = normalize(SOLEIL_B);
     float f = fresnel(clamp(dot(-rayon, n), 0.0, 1.0), indice);
@@ -191,7 +191,7 @@ vec3 lumiere(vec2 pente, vec3 rayon, vec3 fond_vu, vec3 t_colonne) {
     if (couvert > 0.0) {
         eclat *= soleil_direct();
     }
-    vec3 corps = R0 * gain_eau * eclairage(n, soleil, 1.0);
+    vec3 corps = op.R0 * gain_eau * eclairage(n, soleil, 1.0);
     vec3 sous = corps * (1.0 - t_colonne) + fond_vu;
     return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2;
 }
@@ -224,22 +224,22 @@ float bords_cellules(vec2 q) {
 /// air ; dans la **fenêtre de Snell**, le ciel réfracté, radiance multipliée par n² (`L/n²` se conserve à travers
 /// l'interface) ; au-delà de l'angle critique `arcsin(1/n)`, **réflexion totale** : l'eau elle-même, vue dans la direction
 /// réfléchie. Non portés : le fond ou un objet vus dans ce miroir, la face inférieure de l'écume.
-vec3 lumiere_dessous(vec2 pente, vec3 rayon) {
+vec3 lumiere_dessous(Optique op, vec2 pente, vec3 rayon) {
     vec3 n = normalize(vec3(-pente, 1.0));
     float c = dot(rayon, n);
     // Incidence rasante, ou facette vue par-derrière : réflexion totale. (Sans ce garde, Fresnel y vaut 0/0 : S365 P3,
     // des pixels noirs vers l'horizon de la surface vue d'en dessous.)
     float f = c > 1e-4 ? fresnel(min(c, 1.0), 1.0 / indice) : 1.0;
-    vec3 eau = eau_infinie(reflect(rayon, n), 0.0);
+    vec3 eau = eau_infinie_o(op, reflect(rayon, n), 0.0);
     if (f >= 1.0) { return eau; }
     return (1.0 - f) * indice * indice * ciel_b(refract(rayon, -n, indice), 2) + f * eau;
 }
 
 /// La lumière intégrée sur la pente non résolue (ADR-161) : Cholesky de sa covariance `cv`, 3 × 3 nœuds de Gauss-Hermite ;
 /// vue d'en dessous ou d'au-dessus.
-vec3 integree(vec2 pente, vec3 rayon, vec3 cv, bool dessous, vec3 fond_vu, vec3 t_colonne) {
+vec3 integree(Optique op, vec2 pente, vec3 rayon, vec3 cv, bool dessous, vec3 fond_vu, vec3 t_colonne) {
     if (cv.x + cv.z <= 0.0) {
-        return dessous ? lumiere_dessous(pente, rayon) : lumiere(pente, rayon, fond_vu, t_colonne);
+        return dessous ? lumiere_dessous(op, pente, rayon) : lumiere(op, pente, rayon, fond_vu, t_colonne);
     }
     float l00 = sqrt(max(cv.x, 0.0));
     float l10 = l00 > 0.0 ? cv.y / l00 : 0.0;
@@ -251,7 +251,7 @@ vec3 integree(vec2 pente, vec3 rayon, vec3 cv, bool dessous, vec3 fond_vu, vec3 
         for (int i = 0; i < 3; i++) {
             vec2 p = pente + vec2(l00 * noeuds[i], l10 * noeuds[i] + l11 * noeuds[j]);
             couleur += poids_gh[i] * poids_gh[j]
-                * (dessous ? lumiere_dessous(p, rayon) : lumiere(p, rayon, fond_vu, t_colonne));
+                * (dessous ? lumiere_dessous(op, p, rayon) : lumiere(op, p, rayon, fond_vu, t_colonne));
         }
     }
     return couleur;
@@ -377,6 +377,8 @@ void fragment() {
     // celle de `lumiere`. Non portés : la réduction de l'éclairement du fond par (1 − F) du soleil (≈ 2 %), la
     // focalisation par les vagues (caustiques).
     vec3 surface = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+    // S477 : les propriétés optiques du point de surface (la carte du type d'eau, ou la scène).
+    Optique op = optique_en(vec2(surface.x, -surface.z));
     // S371 — **le milieu du pixel** (`surface_b.gdshaderinc`) : décidé à l'objectif, là où le rayon traverse le plan
     // proche — part d'eau `milieu.x`, profondeur de l'objectif `milieu.y`. Hors de la zone des vagues, celui de l'œil,
     // d'un bloc (S365). Dans la transition, les deux vues se mélangent.
@@ -388,9 +390,9 @@ void fragment() {
     if (milieu.x > 0.0) {
         vec3 vue_d = normalize(surface - CAMERA_POSITION_WORLD);
         vec3 rayon_d = vec3(vue_d.x, -vue_d.z, vue_d.y);
-        vec3 lum = integree(pente, rayon_d, transport_covariance(cov_t, g), true, vec3(0.0), vec3(0.0));
+        vec3 lum = integree(op, pente, rayon_d, transport_covariance(cov_t, g), true, vec3(0.0), vec3(0.0));
         float d = length(surface - CAMERA_POSITION_WORLD);
-        vu_dessous = a_travers_l_eau(lum, d, rayon_d, milieu.y);
+        vu_dessous = a_travers_l_eau_o(op, lum, d, rayon_d, milieu.y);
         if (controle == 4) {
             // Contrôle S365 : le coefficient de Fresnel eau → air, sans la ligne de visée.
             float c4 = dot(rayon_d, normalize(vec3(-pente, 1.0)));
@@ -421,7 +423,7 @@ void fragment() {
         }
     }
     float h_fond = max(surface.y - fond.y, 0.0);
-    vec3 t_colonne = exp(-kd * (h_fond + length(fond - surface)));
+    vec3 t_colonne = exp(-op.kd * (h_fond + length(fond - surface)));
     // S379 : la variance de la pluie étale le fond vu, comme au bassin (`bassin.gdshader`).
     float lod_pluie = 0.0;
     if (variance_pluie > 0.0) {
@@ -431,7 +433,7 @@ void fragment() {
     vec3 fond_vu = textureLod(ecran, uv_r, lod_pluie).rgb * t_colonne;
     // La lumière, pente non résolue intégrée (ADR-161) : Cholesky de sa covariance, 3 × 3 nœuds de Gauss-Hermite.
     vec3 rayon = vec3(vue.x, -vue.z, vue.y);
-    vec3 couleur = integree(pente, rayon, transport_covariance(cov_t, g), false, fond_vu, t_colonne);
+    vec3 couleur = integree(op, pente, rayon, transport_covariance(cov_t, g), false, fond_vu, t_colonne);
     // Les crêtes (S356, `cretes_couleur`) : la lumière qui traverse ce qui se comprime, vue du côté du soleil ; l'écume.
     vec3 soleil = normalize(SOLEIL_B);
     float eclaire = gain_eau * eclairage(normalize(vec3(-pente, 1.0)), soleil, 1.0);

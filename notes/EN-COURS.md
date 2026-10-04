@@ -79,7 +79,10 @@ par image à 1280 × 720.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — `Optique`, `optique_en`, les fonctions qui la reçoivent ; la carte dans `mer.gd` ; le panache ; mesures ; images.
+- [x] **P2** — `Optique`, `optique_en`, les fonctions qui la reçoivent ; la carte dans `mer.gd` ; le panache ; mesures ; images.
 - [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — (1) sans carte au bit (mer et saut) ; (2) carte uniforme contre préréglage : ≤ 1/255 — après un premier contrôle mal posé
+  (la grille de 12 km dépasse la carte de 5 km) ; (3) le panache montré ; (4) surcoût **0,044 ms**. Preuve : TYPE-EAU-S474 §5.
+

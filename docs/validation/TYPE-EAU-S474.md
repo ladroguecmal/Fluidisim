@@ -75,3 +75,26 @@ la couleur** ; la Méditerranée garde des concentrations publiées (Chl 0,1, a_
 ## 4. Images
 
 `captures/types_eau_S474.png` (non versionnée) : la même mer calme, le même ciel, vus du quai — eau pure, côtière, rivière.
+
+## 5. Le type d'eau dans l'espace (S477)
+
+2026-10-04. ADR-217 D1, second temps : une **carte des constituants** (Chl, a_g(440), MES par texel, flottants, sur un rectangle de B) lue
+**par fragment** — une structure `Optique` (R0, kd, c) que `optique_en(xy)` calcule par le modèle de `type_eau.py` porté dans le
+nuanceur (`optique_eau.gdshaderinc`), et que les fonctions de la lumière de l'eau reçoivent en paramètre (Godot n'a pas de variable
+globale modifiable : vérifié). Lue par l'eau (vue d'en haut et d'en dessous), le fond et le ciel sous l'eau de `mer.tscn` ;
+`saut.tscn` la lit aussi (`couleur_eau`). Hors de la carte, ou sans elle : les uniformes de la scène.
+
+**Reproduire** : `MER_DONNEES=mer_mediterranee.json TYPE_EAU=mediterranee TYPE_EAU_CARTE=panache POSES=haute <godot> --path godot
+res://mer.tscn -- --captures --cote` ; le coût : `… -- --cout-type-eau --cote` ; le contrôle : `TYPE_EAU_CARTE=uniforme:<préréglage>`.
+
+| critère (écrit avant) | mesure | |
+|---|---|---|
+| (1) sans carte, au bit | `mer.tscn` (proche, sous l'eau) et `saut.tscn` (six captures) : identiques | tenu |
+| (2) le nuanceur égal au modèle | une carte uniforme « côtier » contre `TYPE_EAU=cotier` : **au plus 1/255**, sur 1 à 35 pixels (quai, proche, sous l'eau) | tenu |
+| (3) la transition montrée | `captures/panache_S477.png` : une rivière qui entre par la gauche et se dilue vers la droite | montrée |
+| (4) le surcoût GPU ≤ 0,3 ms | **0,044 ms** par image à 1280 × 720 (1,98 contre 1,94 ms) | tenu |
+
+**Une erreur de contrôle évitée** : le premier contrôle (2) montrait 386 pixels sous l'eau jusqu'à 58/255 — la grille de la mer
+s'étend à 12 km, au-delà de la carte (5 km), où l'eau de la scène (pure) s'appliquait ; refait avec le même préréglage hors de la carte.
+**Ce qui reste** : les constituants s'interpolent linéairement entre texels (`Chl^e` ne l'est pas) ; l'éditeur de carte qui écrira la
+carte (ADR-217 : la donnée est prête pour lui) ; la carte dans `saut.gd` (le nuanceur la lit, le script ne la pose pas encore).

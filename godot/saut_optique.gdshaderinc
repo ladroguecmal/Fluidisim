@@ -178,6 +178,8 @@ vec3 couleur_sable(vec3 p) {
 // La surface de l'eau au point `p`, normale `n0` (vers l'air), vue dans la direction `d` (B) ; `empreinte` : la taille du pixel
 // à cette distance, m.
 vec3 couleur_eau(vec3 p, vec3 n0, vec3 d, float empreinte) {
+    // S477 : les propriétés optiques du point (la carte du type d'eau, ou la scène).
+    Optique op = optique_en(p.xy);
     vec3 n = normalize(n0);
     // S463 : la surface fine, sur ce qui regarde vers le haut ; S465 : les rides de la pluie (leur variance non rendue).
     vec2 s_fine = pente_fine(p.xy, empreinte);
@@ -206,12 +208,12 @@ vec3 couleur_eau(vec3 p, vec3 n0, vec3 d, float empreinte) {
             q = p + r * t_c;
             c = couleur_corps(q);
         }
-        t_col = exp(-kd * (max(p.z - q.z, 0.0) + length(q - p)));
+        t_col = exp(-op.kd * (max(p.z - q.z, 0.0) + length(q - p)));
         vu = c * t_col;
     }
     // S468 : à l'ombre du joueur, le corps d'eau sans soleil direct, et pas d'éclat.
     float ombre = ombre_corps(p);
-    vec3 corps_eau = R0 * gain_eau * eclairage(n, soleil, ombre);
+    vec3 corps_eau = op.R0 * gain_eau * eclairage(n, soleil, ombre);
     vec3 sous = corps_eau * (1.0 - t_col) + vu;
     // S465 : sous le ciel couvert, plus d'éclat (`soleil_direct`).
     return mix(sous, ciel_b(reflet, 2), f) + vec3(1.0, 0.95, 0.85) * eclat * 1.2 * soleil_direct() * ombre;
