@@ -20,13 +20,17 @@ const KERNELS: [&str; 22] = [
 const PK_INIT: usize = 0;
 const PK_MERGE: usize = 1;
 const PK_FLATTEN: usize = 2;
+// S482 : `pk_number`, `pk_lists`, `pk_faces` (un seul groupe) remplacés par les compactions ; gardés pour les indices.
+#[allow(dead_code)]
 const PK_NUMBER: usize = 3;
 const PK_ASSIGN: usize = 4;
+#[allow(dead_code)]
 const PK_LISTS: usize = 5;
 const PK_OVERLAP: usize = 6;
 const PK_REDUCE: usize = 7;
 const PK_SCALARS: usize = 8;
 const PK_REMAP: usize = 9;
+#[allow(dead_code)]
 const PK_FACES: usize = 10;
 const PK_ROWS: usize = 11;
 const PK_CG_INIT_FINISH: usize = 12;
@@ -56,7 +60,8 @@ const HEADER_WORDS: usize = 128 + MAX_POCKETS * MAX_POCKETS;
 /// poches (deux mots par entrée, au plus une par maille), les mailles d'eau qui les bordent (deux mots, `cells` entrées), les
 /// faces eau | poche (deux mots, `2·cells` entrées).
 pub(crate) fn pko_words(cells: usize) -> usize {
-    4 * cells + HEADER_WORDS + 2 * cells + 2 * cells + 4 * cells
+    // S482 : puis les comptes des blocs de 256 mailles, quatre sortes (`pk_blk_*`).
+    4 * cells + HEADER_WORDS + 2 * cells + 2 * cells + 4 * cells + 4 * cells.div_ceil(256)
 }
 
 /// Mots de `pkf` : trente-deux grandeurs par poche, puis une par face eau | poche.
@@ -69,7 +74,15 @@ pub(crate) struct PochesCarte {
     pipelines: Vec<wgpu::ComputePipeline>,
     /// `pk_mg_update_alpha` et `pk_mg_beta_direction` à `CG_PAR = 1`.
     par1: [wgpu::ComputePipeline; 2],
+    /// S482 — les compactions à plusieurs groupes : compte, préfixe, écriture, pour chaque sorte (`KIND` 0 à 3).
+    blk: Vec<[wgpu::ComputePipeline; 3]>,
 }
+
+/// Les sortes de compaction (`KIND` du nuanceur).
+const KIND_RACINES: usize = 0;
+const KIND_LA: usize = 1;
+const KIND_LW: usize = 2;
+const KIND_LF: usize = 3;
 
 /// Le texte du module : la structure `Params` et sa liaison, prises au nuanceur principal (une seule définition), puis les noyaux.
 fn module_source() -> String {
@@ -92,22 +105,25 @@ impl ApicCarte {
             label: Some("apic3d_poches"),
             source: wgpu::ShaderSource::Wgsl(module_source().into()),
         });
-        let make = |entry: &str, par: f64| {
+        let make = |entry: &str, par: f64, kind: f64| {
             device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
                 label: Some(entry),
                 layout: Some(&self.pipeline_layout),
                 module: &module,
                 entry_point: Some(entry),
                 compilation_options: wgpu::PipelineCompilationOptions {
-                    constants: &[("CG_PAR", par)],
+                    constants: &[("CG_PAR", par), ("KIND", kind)],
                     zero_initialize_workgroup_memory: false,
                 },
                 cache: None,
             })
         };
-        let pipelines = KERNELS.iter().map(|entry| make(entry, 0.)).collect();
-        let par1 = [make(KERNELS[PK_MG_UPDATE_ALPHA], 1.), make(KERNELS[PK_MG_BETA_DIRECTION], 1.)];
-        self.poches = Some(PochesCarte { pipelines, par1 });
+        let pipelines = KERNELS.iter().map(|entry| make(entry, 0., 0.)).collect();
+        let par1 = [make(KERNELS[PK_MG_UPDATE_ALPHA], 1., 0.), make(KERNELS[PK_MG_BETA_DIRECTION], 1., 0.)];
+        let blk = (0..4)
+            .map(|k| ["pk_blk_count", "pk_blk_scan", "pk_blk_write"].map(|e| make(e, 0., k as f64)))
+            .collect();
+        self.poches = Some(PochesCarte { pipelines, par1, blk });
         Ok(())
     }
 
@@ -128,6 +144,17 @@ impl ApicCarte {
         pass.dispatch_workgroups((threads as u32).div_ceil(group).max(1), 1, 1);
     }
 
+    /// S482 — une compaction dans l'ordre des mailles : le compte de chaque bloc, le préfixe des blocs, l'écriture.
+    fn encode_compaction(&self, pass: &mut wgpu::ComputePass, kind: usize) {
+        let Some(ps) = &self.poches else { return };
+        let cells = self.grid().cells() as u32;
+        for (k, groups) in [cells.div_ceil(256), 1, cells.div_ceil(256)].into_iter().enumerate() {
+            pass.set_pipeline(&ps.blk[kind][k]);
+            pass.set_bind_group(0, self.bind_group(), &[]);
+            pass.dispatch_workgroups(groups.max(1), 1, 1);
+        }
+    }
+
     /// La détection (`pockets_detect`), après les étiquettes ; rien sans poches.
     pub(crate) fn encode_pockets_detect(&self, pass: &mut wgpu::ComputePass) {
         if self.poches.is_none() {
@@ -137,9 +164,11 @@ impl ApicCarte {
         self.dispatch_pk(pass, PK_INIT, cells, 128);
         self.dispatch_pk(pass, PK_MERGE, cells, 128);
         self.dispatch_pk(pass, PK_FLATTEN, cells, 128);
-        self.dispatch_pk(pass, PK_NUMBER, 256, 256);
+        // S482 : la numérotation et les listes par compaction à plusieurs groupes (`PK_NUMBER`, `PK_LISTS` : un seul groupe).
+        self.encode_compaction(pass, KIND_RACINES);
         self.dispatch_pk(pass, PK_ASSIGN, cells, 128);
-        self.dispatch_pk(pass, PK_LISTS, 256, 256);
+        self.encode_compaction(pass, KIND_LA);
+        self.encode_compaction(pass, KIND_LW);
         self.dispatch_pk(pass, PK_OVERLAP, cells, 128);
         self.dispatch_pk(pass, PK_REDUCE, MAX_POCKETS * 256, 256);
         self.dispatch_pk(pass, PK_SCALARS, 1, 1);
@@ -154,7 +183,7 @@ impl ApicCarte {
         let (cells, faces) = (self.grid().cells(), self.faces_count());
         let groups = MAX_POCKETS * 256;
         self.dispatch(pass, ASSEMBLE, cells, 256);
-        self.dispatch_pk(pass, PK_FACES, 256, 256);
+        self.encode_compaction(pass, KIND_LF);
         self.dispatch_pk(pass, PK_ROWS, groups, 256);
         if self.multigrid {
             // S482 — le préconditionneur par blocs : le cycle en V sur les mailles, la diagonale sur les poches.
@@ -303,7 +332,10 @@ pub fn banc_poches() -> Result<(), String> {
     };
     pollster::block_on(async {
         let mut carte = ApicCarte::new(&a, a.particle_capacity()).await?;
-        carte.enable_air_pockets()?;
+        // S482 : `SANS_POCHES=1` — le témoin du coût (la carte sans poches, sur le même état).
+        if std::env::var("SANS_POCHES").is_err() {
+            carte.enable_air_pockets()?;
+        }
         let d = a.domain();
         println!(
             "POCHES_CARTE_S481 carte={} cas={cas} domaine={}x{}x{} dx={} particules={} pas_us={pas_us}",
@@ -311,6 +343,9 @@ pub fn banc_poches() -> Result<(), String> {
         );
         if std::env::var("MODE").as_deref() == Ok("suivi") {
             return suivi(&mut a, &mut carte, pas_us);
+        }
+        if std::env::var("MODE").as_deref() == Ok("cout") {
+            return cout(&a, &mut carte, pas_us);
         }
         let (mut ecart_etiquettes, mut ecart_poches, mut max_poches, mut ecart_propre) = (0usize, 0usize, 0usize, 0usize);
         let (mut pire_v, mut pire_p, mut nombres_differents) = (0f64, 0f64, 0usize);
@@ -434,6 +469,35 @@ fn suivi(a: &mut Apic3, carte: &mut ApicCarte, pas_us: u64) -> Result<(), String
         sr.len(),
         (fc - fr).abs() / fr,
         debut.elapsed().as_secs_f64()
+    );
+    Ok(())
+}
+
+/// **Le coût** (`MODE=cout`, S482) : la carte seule, `PAS` pas depuis l'état chargé, les étages horodatés ; le pas médian et la part
+/// de la reconstruction (la détection) et de la projection. `SANS_POCHES=1` : le témoin.
+fn cout(a: &Apic3, carte: &mut ApicCarte, pas_us: u64) -> Result<(), String> {
+    use water_core::apic3d::ApicStage;
+    let n: usize = std::env::var("PAS").ok().and_then(|v| v.parse().ok()).unwrap_or(60);
+    carte.load(a)?;
+    let (mut tot, mut rec, mut proj) = (Vec::new(), Vec::new(), Vec::new());
+    for _ in 0..n {
+        let t = carte.step_upto(pas_us, ApicStage::Full)?;
+        let st: Vec<f64> = t.stages.iter().take(14).map(|x| x.unwrap_or(0.)).collect();
+        tot.push(st.iter().sum::<f64>());
+        rec.push(st[1]);
+        proj.push(st[2]);
+    }
+    let med = |v: &mut Vec<f64>| {
+        v.sort_by(|x, y| x.total_cmp(y));
+        v[v.len() / 2]
+    };
+    let poches = if carte.air_pockets_enabled() { carte.air_pockets()?.len() } else { 0 };
+    println!(
+        "POCHES_CARTE_S482 cout pas={n} poches_actives={} poches_fin={poches} pas_median_ms={:.3} reconstruction_ms={:.3} projection_ms={:.3}",
+        carte.air_pockets_enabled(),
+        med(&mut tot),
+        med(&mut rec),
+        med(&mut proj)
     );
     Ok(())
 }

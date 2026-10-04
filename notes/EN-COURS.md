@@ -84,9 +84,9 @@ stables, masse exacte ; (4) la détection identique (banc `--apic3d-poches`, 0 �
 
 - [x] **P1** — jeton, plan seul ; les réponses et les téléchargements consignés.
 - [x] **P2** — rien quand rien n'est enfermé ; mesure.
-- [ ] **P3** — les parcours à plusieurs groupes ; (4) ; mesure.
+- [x] **P3** — les parcours à plusieurs groupes ; (4) ; mesure.
 - [x] **P4** — les poches dans la multigrille ; (2) ; mesure.
-- [ ] **P5** — `--v1` 60 s (1), (3) ; preuve.
+- [>] **P5** — `--v1` 60 s (1), (3) ; preuve.
 - [ ] **P6** — rituel (par `rituel.py`).
 
 ### Notes de reprise
@@ -97,3 +97,7 @@ stables, masse exacte ; (4) la détection identique (banc `--apic3d-poches`, 0 �
   parités) : le cycle en V sur les mailles, la diagonale sur les poches. Bulle, 300 pas : volume 2,9·10⁻⁵, pression 4,1·10⁻⁵, **42,47 Hz
   contre 42,50**, **14 itérations au plus** (151 en diagonale), masse exacte — critère (2) tenu. `--v1` avec poches, 6 s : pas médian
   **14,9 ms** (projection 5,6, reconstruction 2,6). `MULTIGRILLE=0` au banc : la diagonale de S481.
+- **P3** — `pk_blk_count`, `pk_blk_scan`, `pk_blk_write` (constante `KIND` : racines, LA, LW, LF) remplacent `pk_number`, `pk_lists`,
+  `pk_faces` (un seul groupe) ; le même ordre des mailles — détection et bilan identiques au chiffre près (critère (4)). Coût, carte
+  seule (`MODE=cout`), poche présente : reconstruction **≈ +0,2 ms** au lieu de +1,7 à 2 (60 000 mailles). FXC : pas de `switch` qui
+  retourne dans chaque branche.

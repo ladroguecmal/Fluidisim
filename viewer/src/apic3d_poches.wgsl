@@ -1177,3 +1177,240 @@ fn pk_mg_beta_direction(@builtin(global_invocation_id) g: vec3<u32>, @builtin(lo
         cellf[cf(F_D, c)] = cellf[cf(F_Z, c)] + beta * cellf[cf(F_D, c)];
     }
 }
+
+// =====================================================================================================================
+// **S482 — les compactions à plusieurs groupes** (K2-2b). `pk_number`, `pk_lists` et `pk_faces` parcouraient toutes les mailles avec
+// un seul groupe (≈ 2 ms à 60 000 mailles, ≈ 10 à 371 000). Ici, la même compaction en trois passes — le compte de chaque bloc de 256
+// mailles, le préfixe des blocs (un groupe, sur `cells/256` entrées), l'écriture (le préfixe dans le bloc) — **dans le même ordre des
+// mailles**, donc les mêmes listes, au mot près. Quatre sortes (`KIND`, constante de pipeline) : 0 les racines enfermées (leur rang),
+// 1 les mailles d'air des poches (LA), 2 les mailles d'eau qui les bordent (LW), 3 les faces eau | poche (LF).
+
+override KIND: u32 = 0u;
+const H_TOT: u32 = 100u; // totaux des quatre sortes
+
+fn nblocks() -> u32 {
+    return (P.cells + 255u) / 256u;
+}
+
+fn blk_base() -> u32 {
+    return lf_base() + 4u * P.cells;
+}
+
+// Les entrées que la maille `c` apporte à la sorte `KIND`.
+fn cell_count(c: u32) -> u32 {
+    // Des `if` et un seul retour : FXC refuse un `switch` dont les branches retournent.
+    var n = 0u;
+    if KIND == 0u {
+        n = select(0u, 1u, is_root(c));
+    } else if KIND == 1u {
+        n = select(0u, 1u, of_at(c) != 0u);
+    } else if KIND == 2u {
+        n = bord_n(c);
+    } else if label[c] == WATER {
+        for (var m = 0u; m < 6u; m = m + 1u) {
+            if pocket_nb(c, m) != 0u {
+                n = n + 1u;
+            }
+        }
+    }
+    return n;
+}
+
+// Les écrit à partir du rang `at` ; rend vrai si une liste a débordé.
+fn cell_write(c: u32, at0: u32) -> bool {
+    var at = at0;
+    var ovf = false;
+    switch KIND {
+        case 0u: {
+            if is_root(c) {
+                atomicStore(&pko[3u * P.cells + c], select(NONE, at, at < MAXP));
+            }
+        }
+        case 1u: {
+            let b = of_at(c);
+            if b != 0u {
+                atomicStore(&pko[la_base() + 2u * at], c);
+                atomicStore(&pko[la_base() + 2u * at + 1u], b);
+            }
+        }
+        case 2u: {
+            if label[c] == WATER {
+                for (var m = 0u; m < 6u; m = m + 1u) {
+                    if !bord_new(c, m) {
+                        continue;
+                    }
+                    if at < P.cells {
+                        atomicStore(&pko[lw_base() + 2u * at], c);
+                        atomicStore(&pko[lw_base() + 2u * at + 1u], bord_b(c, m));
+                    } else {
+                        ovf = true;
+                    }
+                    at = at + 1u;
+                }
+            }
+        }
+        default: {
+            if label[c] == WATER {
+                for (var m = 0u; m < 6u; m = m + 1u) {
+                    let b = pocket_nb(c, m);
+                    if b == 0u {
+                        continue;
+                    }
+                    if at < P.cells {
+                        atomicStore(&pko[lf_base() + 2u * at], c);
+                        atomicStore(&pko[lf_base() + 2u * at + 1u], b + 8u * m);
+                        let sign = select(1.0, -1.0, m % 2u == 0u);
+                        pkf[PK_LF_PAYLOAD + 2u * at] = 1.0 / theta(c, nb_cell(c, m));
+                        pkf[PK_LF_PAYLOAD + 2u * at + 1u] = -sign * faces[face_of_nb(c, m)];
+                    } else {
+                        ovf = true;
+                    }
+                    at = at + 1u;
+                }
+            }
+        }
+    }
+    return ovf;
+}
+
+// Rien à compacter : rien d'enfermé (sortes 0 à 2), aucune poche gardée (sorte 3). Uniforme dans le groupe.
+fn blk_skip(t: u32) -> bool {
+    if t == 0u {
+        if KIND == 3u {
+            pk_any = atomicLoad(&pko[pk_h() + H_COUNT]);
+        } else {
+            pk_any = atomicLoad(&pko[pk_h() + H_ANY]);
+        }
+    }
+    return workgroupUniformLoad(&pk_any) == 0u;
+}
+
+// 1. Le compte de chaque bloc.
+@compute @workgroup_size(256)
+fn pk_blk_count(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+                @builtin(workgroup_id) w: vec3<u32>) {
+    let t = l.x;
+    if blk_skip(t) {
+        return;
+    }
+    var n = 0u;
+    if g.x < P.cells {
+        n = cell_count(g.x);
+    }
+    pk_scan[t] = n;
+    workgroupBarrier();
+    for (var s = 128u; s > 0u; s = s / 2u) {
+        if t < s {
+            pk_scan[t] = pk_scan[t] + pk_scan[t + s];
+        }
+        workgroupBarrier();
+    }
+    if t == 0u {
+        atomicStore(&pko[blk_base() + KIND * nblocks() + w.x], pk_scan[0]);
+    }
+}
+
+// 2. Le préfixe exclusif des blocs, par un groupe (chaque fil une tranche contiguë) ; le total, et ce qu'il commande.
+@compute @workgroup_size(256)
+fn pk_blk_scan(@builtin(local_invocation_id) l: vec3<u32>) {
+    let t = l.x;
+    let h = pk_h();
+    if blk_skip(t) {
+        if t == 0u {
+            atomicStore(&pko[h + H_TOT + KIND], 0u);
+            switch KIND {
+                case 0u: {
+                    atomicStore(&pko[h + H_ROOTS], 0u);
+                    atomicStore(&pko[h + H_COUNT], 0u);
+                }
+                case 1u: { atomicStore(&pko[h + H_LA], 0u); }
+                case 2u: { atomicStore(&pko[h + H_LW], 0u); }
+                default: { atomicStore(&pko[h + H_LF], 0u); }
+            }
+        }
+        return;
+    }
+    let nb = nblocks();
+    let base = blk_base() + KIND * nb;
+    let chunk = (nb + 255u) / 256u;
+    let lo = min(t * chunk, nb);
+    let hi = min(lo + chunk, nb);
+    var n = 0u;
+    for (var k = lo; k < hi; k = k + 1u) {
+        n = n + atomicLoad(&pko[base + k]);
+    }
+    pk_scan[t] = n;
+    workgroupBarrier();
+    for (var s = 1u; s < 256u; s = s * 2u) {
+        var v = 0u;
+        if t >= s {
+            v = pk_scan[t - s];
+        }
+        workgroupBarrier();
+        pk_scan[t] = pk_scan[t] + v;
+        workgroupBarrier();
+    }
+    var at = pk_scan[t] - n;
+    for (var k = lo; k < hi; k = k + 1u) {
+        let m = atomicLoad(&pko[base + k]);
+        atomicStore(&pko[base + k], at);
+        at = at + m;
+    }
+    if t == 255u {
+        let total = pk_scan[255];
+        atomicStore(&pko[h + H_TOT + KIND], total);
+        switch KIND {
+            case 0u: {
+                atomicStore(&pko[h + H_ROOTS], total);
+                atomicStore(&pko[h + H_COUNT], min(total, MAXP));
+                if total > MAXP {
+                    atomicAdd(&pko[h + H_OVERFLOW], total - MAXP);
+                }
+            }
+            case 1u: { atomicStore(&pko[h + H_LA], total); }
+            case 2u: {
+                atomicStore(&pko[h + H_LW], min(total, P.cells));
+                if total > P.cells {
+                    atomicStore(&pko[h + H_LIST_OVF], 1u);
+                }
+            }
+            default: {
+                atomicStore(&pko[h + H_LF], min(total, P.cells));
+                if total > P.cells {
+                    atomicStore(&pko[h + H_LIST_OVF], 1u);
+                }
+            }
+        }
+    }
+}
+
+// 3. L'écriture : le préfixe dans le bloc, plus celui du bloc.
+@compute @workgroup_size(256)
+fn pk_blk_write(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>,
+                @builtin(workgroup_id) w: vec3<u32>) {
+    let t = l.x;
+    if blk_skip(t) {
+        return;
+    }
+    var n = 0u;
+    if g.x < P.cells {
+        n = cell_count(g.x);
+    }
+    pk_scan[t] = n;
+    workgroupBarrier();
+    for (var s = 1u; s < 256u; s = s * 2u) {
+        var v = 0u;
+        if t >= s {
+            v = pk_scan[t - s];
+        }
+        workgroupBarrier();
+        pk_scan[t] = pk_scan[t] + v;
+        workgroupBarrier();
+    }
+    if g.x < P.cells && n > 0u {
+        let at = atomicLoad(&pko[blk_base() + KIND * nblocks() + w.x]) + pk_scan[t] - n;
+        if cell_write(g.x, at) {
+            atomicStore(&pko[pk_h() + H_LIST_OVF], 1u);
+        }
+    }
+}
