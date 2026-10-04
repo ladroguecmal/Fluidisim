@@ -85,7 +85,7 @@ stables, masse exacte ; (4) la détection identique (banc `--apic3d-poches`, 0 �
 - [x] **P1** — jeton, plan seul ; les réponses et les téléchargements consignés.
 - [x] **P2** — rien quand rien n'est enfermé ; mesure.
 - [ ] **P3** — les parcours à plusieurs groupes ; (4) ; mesure.
-- [ ] **P4** — les poches dans la multigrille ; (2) ; mesure.
+- [x] **P4** — les poches dans la multigrille ; (2) ; mesure.
 - [ ] **P5** — `--v1` 60 s (1), (3) ; preuve.
 - [ ] **P6** — rituel (par `rituel.py`).
 
@@ -93,3 +93,7 @@ stables, masse exacte ; (4) la détection identique (banc `--apic3d-poches`, 0 �
 - **P2** — `H_ANY` : l'aplatissement compte les racines enfermées ; `pk_number`, `pk_lists` sortent aussitôt sans elles, `pk_faces`
   sans poche gardée. Détection inchangée (banc : 0 écart à étiquettes égales, mêmes écarts V/P qu'en S481). `--v1` avec poches, 6 s :
   reconstruction **2,7 ms** en moyenne (≈ 12 avant), projection 10,9 ms ; pas médian 31 ms (71 sur 60 s en S481, à remesurer sur 60 s).
+- **P4** (avant P3 : la projection était le gros du coût) — `pk_mg_init_finish`, `pk_mg_update_alpha`, `pk_mg_beta_direction` (deux
+  parités) : le cycle en V sur les mailles, la diagonale sur les poches. Bulle, 300 pas : volume 2,9·10⁻⁵, pression 4,1·10⁻⁵, **42,47 Hz
+  contre 42,50**, **14 itérations au plus** (151 en diagonale), masse exacte — critère (2) tenu. `--v1` avec poches, 6 s : pas médian
+  **14,9 ms** (projection 5,6, reconstruction 2,6). `MULTIGRILLE=0` au banc : la diagonale de S481.

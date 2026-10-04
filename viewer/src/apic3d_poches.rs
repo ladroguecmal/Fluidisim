@@ -10,10 +10,12 @@ use crate::apic3d_carte::ApicCarte;
 use water_core::apic3d::{Apic3, MAX_POCKETS};
 
 /// Noyaux de `apic3d_poches.wgsl`, dans l'ordre de ce tableau.
-const KERNELS: [&str; 19] = [
+const KERNELS: [&str; 22] = [
     "pk_init", "pk_merge", "pk_flatten", "pk_number", "pk_assign", "pk_lists", "pk_overlap", "pk_reduce", "pk_scalars", "pk_remap",
     // P4 — la projection.
     "pk_faces", "pk_rows", "pk_cg_init_finish", "pk_cg_apply", "pk_cg_rows", "pk_cg_alpha", "pk_cg_beta", "pk_correct", "pk_post",
+    // S482 — les poches dans la multigrille (les deux noyaux fusionnés ont aussi leur pipeline à `CG_PAR = 1`).
+    "pk_mg_init_finish", "pk_mg_update_alpha", "pk_mg_beta_direction",
 ];
 const PK_INIT: usize = 0;
 const PK_MERGE: usize = 1;
@@ -34,6 +36,9 @@ const PK_CG_ALPHA: usize = 15;
 const PK_CG_BETA: usize = 16;
 const PK_CORRECT: usize = 17;
 const PK_POST: usize = 18;
+const PK_MG_INIT_FINISH: usize = 19;
+const PK_MG_UPDATE_ALPHA: usize = 20;
+const PK_MG_BETA_DIRECTION: usize = 21;
 /// Les grandeurs de chaque poche dans `pkf` (`PF_*` du nuanceur), une tranche de `MAX_POCKETS` chacune.
 const PF_AIR: usize = 0;
 const PF_VFLUX: usize = 2;
@@ -62,6 +67,8 @@ pub(crate) fn pkf_words(cells: usize) -> usize {
 /// Les pipelines des poches, une fois `enable_air_pockets` appelée.
 pub(crate) struct PochesCarte {
     pipelines: Vec<wgpu::ComputePipeline>,
+    /// `pk_mg_update_alpha` et `pk_mg_beta_direction` à `CG_PAR = 1`.
+    par1: [wgpu::ComputePipeline; 2],
 }
 
 /// Le texte du module : la structure `Params` et sa liaison, prises au nuanceur principal (une seule définition), puis les noyaux.
@@ -85,22 +92,22 @@ impl ApicCarte {
             label: Some("apic3d_poches"),
             source: wgpu::ShaderSource::Wgsl(module_source().into()),
         });
-        let pipelines = KERNELS
-            .iter()
-            .map(|entry| {
-                device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-                    label: Some(entry),
-                    layout: Some(&self.pipeline_layout),
-                    module: &module,
-                    entry_point: Some(entry),
-                    compilation_options: wgpu::PipelineCompilationOptions { constants: &[], zero_initialize_workgroup_memory: false },
-                    cache: None,
-                })
+        let make = |entry: &str, par: f64| {
+            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some(entry),
+                layout: Some(&self.pipeline_layout),
+                module: &module,
+                entry_point: Some(entry),
+                compilation_options: wgpu::PipelineCompilationOptions {
+                    constants: &[("CG_PAR", par)],
+                    zero_initialize_workgroup_memory: false,
+                },
+                cache: None,
             })
-            .collect();
-        self.poches = Some(PochesCarte { pipelines });
-        // La projection avec poches est celle de la diagonale (la multigrille ne les voit pas encore).
-        self.multigrid = false;
+        };
+        let pipelines = KERNELS.iter().map(|entry| make(entry, 0.)).collect();
+        let par1 = [make(KERNELS[PK_MG_UPDATE_ALPHA], 1.), make(KERNELS[PK_MG_BETA_DIRECTION], 1.)];
+        self.poches = Some(PochesCarte { pipelines, par1 });
         Ok(())
     }
 
@@ -110,8 +117,13 @@ impl ApicCarte {
     }
 
     fn dispatch_pk(&self, pass: &mut wgpu::ComputePass, kernel: usize, threads: usize, group: u32) {
+        self.dispatch_pk_par(pass, kernel, false, threads, group);
+    }
+
+    fn dispatch_pk_par(&self, pass: &mut wgpu::ComputePass, kernel: usize, par: bool, threads: usize, group: u32) {
         let Some(ps) = &self.poches else { return };
-        pass.set_pipeline(&ps.pipelines[kernel]);
+        let pipeline = if par { &ps.par1[kernel - PK_MG_UPDATE_ALPHA] } else { &ps.pipelines[kernel] };
+        pass.set_pipeline(pipeline);
         pass.set_bind_group(0, self.bind_group(), &[]);
         pass.dispatch_workgroups((threads as u32).div_ceil(group).max(1), 1, 1);
     }
@@ -138,12 +150,31 @@ impl ApicCarte {
     /// d'avant ; les noyaux qui voient les poches à leur place. Les itérations sont enregistrées jusqu'au plafond ; l'arrêt au critère
     /// se fait par le drapeau de la carte, comme sans poches.
     pub(crate) fn encode_pockets_project(&self, pass: &mut wgpu::ComputePass) {
-        use crate::apic3d_carte::{ASSEMBLE, CG_INIT, CG_ITERATION};
+        use crate::apic3d_carte::{ASSEMBLE, CG_INIT, CG_ITERATION, MG_CG_DIRECTION_FIRST, MG_CG_RESET};
         let (cells, faces) = (self.grid().cells(), self.faces_count());
         let groups = MAX_POCKETS * 256;
         self.dispatch(pass, ASSEMBLE, cells, 256);
         self.dispatch_pk(pass, PK_FACES, 256, 256);
         self.dispatch_pk(pass, PK_ROWS, groups, 256);
+        if self.multigrid {
+            // S482 — le préconditionneur par blocs : le cycle en V sur les mailles, la diagonale sur les poches.
+            self.encode_mg_geometry(pass);
+            self.dispatch(pass, MG_CG_RESET, 1, 1);
+            self.encode_vcycle(pass, true);
+            self.dispatch_pk(pass, PK_MG_INIT_FINISH, 256, 256);
+            self.dispatch(pass, MG_CG_DIRECTION_FIRST, cells, 128);
+            for k in 0..self.iteration_cap {
+                let par = k % 2 == 1;
+                self.dispatch_pk(pass, PK_CG_APPLY, cells, 256);
+                self.dispatch_pk(pass, PK_CG_ROWS, groups, 256);
+                self.dispatch_pk_par(pass, PK_MG_UPDATE_ALPHA, par, cells, 256);
+                self.encode_vcycle(pass, false);
+                self.dispatch_pk_par(pass, PK_MG_BETA_DIRECTION, par, cells, 256);
+            }
+            self.dispatch_pk(pass, PK_CORRECT, faces, 128);
+            self.dispatch_pk(pass, PK_POST, 1, 1);
+            return;
+        }
         self.dispatch(pass, CG_INIT[0], cells, 256);
         self.dispatch_pk(pass, PK_CG_INIT_FINISH, 256, 256);
         for _ in 0..self.iteration_cap {
@@ -359,6 +390,8 @@ fn suivi(a: &mut Apic3, carte: &mut ApicCarte, pas_us: u64) -> Result<(), String
     let duree: f64 = std::env::var("DUREE").ok().and_then(|v| v.parse().ok()).unwrap_or(0.15);
     carte.set_iteration_cap(std::env::var("ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(400));
     carte.set_adaptive_cap(false);
+    // S482 : `MULTIGRILLE=0` — la diagonale (le chemin de S481).
+    carte.set_multigrid(std::env::var("MULTIGRILLE").map_or(true, |v| v != "0"));
     carte.load(a)?;
     let n0 = carte.counts()?[0];
     let (mut t, mut sr, mut sc) = (0f64, Vec::new(), Vec::new());

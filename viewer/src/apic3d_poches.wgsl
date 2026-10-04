@@ -1051,3 +1051,129 @@ fn pk_post() {
     }
     pkf[pf(PF_SCAL, 0u)] = P.dt;
 }
+
+// =====================================================================================================================
+// **S482 — les poches dans la multigrille** (K2-2b). Le préconditionneur par blocs : le cycle en V d'`apic3d_carte.wgsl` sur les
+// mailles (l'air des poches y reste une condition nulle, comme l'air libre), la diagonale sur les poches. `M` reste symétrique défini
+// positif, le gradient conjugué reste valide ; il ne voit pas le couplage maille | poche, que l'opérateur, lui, porte (`pk_cg_apply`,
+// `pk_cg_rows`). Les noyaux fusionnés de S424 (`mg_cg_update_alpha`, `mg_cg_beta_direction`) ont ici leur variante : chaque groupe
+// replie les mêmes produits — mailles, puis poches dans l'ordre des poches — et calcule le même `α`, le même `β`, au bit ; le
+// groupe 0 met à jour les poches. `r·z` en double tampon selon la parité (`CG_PAR`), comme les originaux.
+
+override CG_PAR: u32 = 0u;
+const S_RZ2: u32 = 8u;
+const MG_OMEGA: f32 = 0.85714287;
+
+fn rz_cur() -> u32 {
+    return select(S_RZ, S_RZ2, CG_PAR == 1u);
+}
+
+fn rz_next() -> u32 {
+    return select(S_RZ2, S_RZ, CG_PAR == 1u);
+}
+
+fn pocket_count() -> u32 {
+    return atomicLoad(&pko[pk_h() + H_COUNT]);
+}
+
+// Le départ (`mg_cg_init_finish`), poches comprises : `r·z` et `b·b` des mailles (le dernier noyau du cycle) plus ceux des poches.
+@compute @workgroup_size(256)
+fn pk_mg_init_finish(@builtin(local_invocation_id) l: vec3<u32>) {
+    let s = gather_pair(l.x);
+    if l.x == 0u {
+        var rz = s.x;
+        var b2 = s.y;
+        let n = pocket_count();
+        for (var b = 0u; b < n; b = b + 1u) {
+            let r = pkf[pf(PF_R, b)];
+            rz = rz + r * pkf[pf(PF_Z, b)];
+            b2 = b2 + r * r;
+        }
+        scalars[S_B2] = b2;
+        scalars[S_RZ] = rz;
+        scalars[S_RR] = b2;
+        scalars[S_IT] = 0.0;
+        scalars[S_DONE] = select(0.0, 1.0, !(b2 > 0.0));
+    }
+}
+
+// `α = (r·z)/(d·q)`, poches comprises ; `p += α·d`, `r −= α·q`, `q = ω·r/diag` sur les mailles ; au groupe 0, les poches.
+@compute @workgroup_size(256)
+fn pk_mg_update_alpha(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let s = gather_pair(l.x);
+    let n = pocket_count();
+    var dq = s.x;
+    for (var b = 0u; b < n; b = b + 1u) {
+        dq = dq + pkf[pf(PF_D, b)] * pkf[pf(PF_Q, b)];
+    }
+    if !(dq > 0.0) {
+        if g.x == 0u {
+            scalars[S_DQ] = dq;
+            scalars[S_DONE] = 1.0;
+        }
+        return;
+    }
+    let alpha = scalars[rz_cur()] / dq;
+    if g.x == 0u {
+        scalars[S_DQ] = dq;
+        scalars[S_ALPHA] = alpha;
+        var rz = 0.0;
+        var rr = 0.0;
+        for (var b = 0u; b < n; b = b + 1u) {
+            pkf[pf(PF_X, b)] = pkf[pf(PF_X, b)] + alpha * pkf[pf(PF_D, b)];
+            let r = pkf[pf(PF_R, b)] - alpha * pkf[pf(PF_Q, b)];
+            pkf[pf(PF_R, b)] = r;
+            let z = r / pkf[pf(PF_DIAG, b)];
+            pkf[pf(PF_Z, b)] = z;
+            rz = rz + r * z;
+            rr = rr + r * r;
+        }
+        pkf[pf(PF_SCAL, 1u)] = rz;
+        pkf[pf(PF_SCAL, 2u)] = rr;
+    }
+    let c = g.x;
+    if c < P.cells {
+        cellf[cf(F_P, c)] = cellf[cf(F_P, c)] + alpha * cellf[cf(F_D, c)];
+        let r = cellf[cf(F_R, c)] - alpha * cellf[cf(F_Q, c)];
+        cellf[cf(F_R, c)] = r;
+        let diag = cellf[cf(F_DIAG, c)];
+        if label[c] == WATER && diag > 0.0 {
+            cellf[cf(F_Q, c)] = MG_OMEGA * r / diag;
+        } else {
+            cellf[cf(F_Q, c)] = 0.0;
+        }
+    }
+}
+
+// `β`, l'arrêt (au groupe 0), `d = z + β·d` sur les mailles ; au groupe 0, la direction des poches.
+@compute @workgroup_size(256)
+fn pk_mg_beta_direction(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_id) l: vec3<u32>) {
+    if done_uniform(l.x) {
+        return;
+    }
+    let s = gather_pair(l.x);
+    let rz = s.x + pkf[pf(PF_SCAL, 1u)];
+    let rr = s.y + pkf[pf(PF_SCAL, 2u)];
+    let beta = rz / scalars[rz_cur()];
+    if g.x == 0u {
+        scalars[S_BETA] = beta;
+        scalars[rz_next()] = rz;
+        scalars[S_RR] = rr;
+        let it = scalars[S_IT] + 1.0;
+        scalars[S_IT] = it;
+        if rr <= P.tol2 * scalars[S_B2] || it >= f32(P.max_it) {
+            scalars[S_DONE] = 1.0;
+        }
+        let n = pocket_count();
+        for (var b = 0u; b < n; b = b + 1u) {
+            pkf[pf(PF_D, b)] = pkf[pf(PF_Z, b)] + beta * pkf[pf(PF_D, b)];
+        }
+    }
+    let c = g.x;
+    if c < P.cells {
+        cellf[cf(F_D, c)] = cellf[cf(F_Z, c)] + beta * cellf[cf(F_D, c)];
+    }
+}

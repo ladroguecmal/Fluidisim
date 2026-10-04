@@ -23,3 +23,4 @@ dépôt). Ce qu'une session tire d'une sortie va dans sa preuve (`docs/validatio
 | `20261004-234907-essai-wmi` | S481 | essai-wmi | `ESSAI=7 python -c "import os,time; time.sleep(3); print('ok', os.environ['ESSAI'])"` | terminé, 2026-10-04 23:49 |
 | `20261004-234949-essai-wmi2` | S481 | essai-wmi2 | `ESSAI=8 python -c "import os,time; time.sleep(3); print('ok', os.environ['ESSAI'])"` | terminé, 2026-10-04 23:49 |
 | `20261004-235007-s481-b10-p16-poches-3` | S481 | s481-b10-p16-poches-3 | `APIC3D_POCHES=1 ND=16 viewer/target/release/water-viewer.exe --apic3d-carte-b10` | terminé, 2026-10-05 00:07 |
+| `20261005-003206-s482-bulle-suivi-mg` | S482 | s482-bulle-suivi-mg | `CAS=bulle MODE=suivi DUREE=0.15 viewer/target/release/water-viewer.exe --apic3d-poches` | terminé, 2026-10-05 00:42 |

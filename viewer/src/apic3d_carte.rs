@@ -89,9 +89,9 @@ const EXCHANGE_GROUP: usize = 66;
 const MG_KIND1: usize = 67;
 const MG_KIND_COARSE: usize = 68;
 const MG_VCYCLE: [usize; 11] = [69, 70, 72, 73, 74, 76, 75, 74, 77, 71, 78];
-const MG_CG_RESET: usize = 79;
+pub(crate) const MG_CG_RESET: usize = 79;
 const MG_CG_INIT_FINISH: usize = 80;
-const MG_CG_DIRECTION_FIRST: usize = 81;
+pub(crate) const MG_CG_DIRECTION_FIRST: usize = 81;
 // S424 : `mg_cg_update` (82) et `mg_cg_beta` (83) remplacés par les noyaux fusionnés ; gardés dans la liste pour les indices.
 const SWITCH_APPLY_GROUP: usize = 84;
 const MARK_FRESH: usize = 85;
@@ -919,13 +919,13 @@ impl ApicCarte {
     }
 
     /// La nature des mailles grossières, une fois par projection.
-    fn encode_mg_geometry(&self, pass: &mut wgpu::ComputePass) {
+    pub(crate) fn encode_mg_geometry(&self, pass: &mut wgpu::ComputePass) {
         self.dispatch(pass, MG_KIND1, self.mg_cells(1), WG);
         self.dispatch(pass, MG_KIND_COARSE, SCAN as usize, SCAN);
     }
 
     /// Le cycle en V, `z = M⁻¹·r` ; `first` : le premier lissage fin en tête (au départ ; aux itérations, la mise à jour le fait).
-    fn encode_vcycle(&self, pass: &mut wgpu::ComputePass, first: bool) {
+    pub(crate) fn encode_vcycle(&self, pass: &mut wgpu::ComputePass, first: bool) {
         let (cells, l1) = (self.domain.cells(), self.mg_cells(1));
         let [f_first, f_qz, _, _, l1_tx, coarse, l1_xt, _, prolong0, f_zq, fold] = MG_VCYCLE;
         // Banc S423 : `SANS_GROSSIERS=1` saute le groupe des niveaux ≥ 2 (pour mesurer ce qu'il coûte).
