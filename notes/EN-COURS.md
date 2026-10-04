@@ -83,7 +83,7 @@ qui le peut (le ciel reflété, l'étalonnage du téléphone) ; (5) les images m
 
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — le modèle (Python, GDScript), les préréglages, `TYPE_EAU` ; l'égalité ; le défaut au bit.
-- [ ] **P3** — V5 et V1 mesurées par préréglage ; le réglage du côtier ; les images.
+- [x] **P3** — V5 et V1 mesurées par préréglage ; le réglage du côtier ; les images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
@@ -93,4 +93,9 @@ qui le peut (le ciel reflété, l'étalonnage du téléphone) ; (5) les images m
   `pure` : `kd`, `c` exacts, `R0` à 0,00069 contre 0,00068 (l'arrondi de la table d'ADR-177). **Sans `TYPE_EAU`, au bit** :
   `saut.tscn` (six captures), `mer.tscn` (proche, sous l'eau). **Visibilités** (4,8/c(550)) : océan clair 53 m, Méditerranée 35 m,
   côtier 2,8 m, lac 1,5 m, rivière 0,5 m, trouble 0,2 m.
+- **P3** — **V5** : le côtier réglé par une grille dans les plages publiées → **Chl 3, a_g 0,05, MES 6** (visibilité 1,15 m) ; l'eau
+  proche : B/G des creux × 0,985, des crêtes × 1,006, B/R des creux × 1,38 — **dans la tolérance** ; B/R des crêtes × 1,21 hors (le
+  ciel reflété domine les crêtes et l'eau lointaine, que le type d'eau ne bouge pas). **V1** : aucune eau ne l'atteint (l'eau pure est
+  la plus bleue ; V1 a un rouge à 1 % du bleu) — très probablement étalonnée (« Aesthetic Video […] for Editing Practice ») : V1 pour
+  la texture et le mouvement, pas la couleur. Image `captures/types_eau_S474.png` envoyée (pure, côtier, rivière).
 

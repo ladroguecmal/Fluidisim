@@ -39,7 +39,8 @@ PRESETS = {
     "pure": (0.0, 0.0, 0.0),
     "ocean_clair": (0.03, 0.0, 0.0),
     "mediterranee": (0.1, 0.01, 0.0),
-    "cotier": (1.5, 0.1, 2.0),
+    # S474 : réglé contre V5 (la baie côtière : les teintes de l'eau proche), dans les plages publiées.
+    "cotier": (3.0, 0.05, 6.0),
     "lac": (5.0, 0.5, 3.0),
     "riviere": (3.0, 1.5, 15.0),
     "trouble": (2.0, 0.5, 50.0),
