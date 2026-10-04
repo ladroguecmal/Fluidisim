@@ -62,81 +62,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S481 — **terminée**. En autonomie (ADR-215), **K2-2 — l'air enfermé sur la carte** ([conception](../docs/registres/CAMPAGNE-K2-S478.md),
-ADR-220 D1 ; la référence : `code/water-core/src/apic3d_poches.rs`, [POCHES-AIR-S479](../docs/validation/POCHES-AIR-S479.md)).
+Session : S482 — **en cours**. En autonomie (ADR-215, ADR-222), **K2-2b — le coût des poches** ([POCHES-CARTE-S481](../docs/validation/POCHES-CARTE-S481.md)
+§4 : 71 ms par pas avec poches contre 16,7 sans, sur `--v1`). Avant le plan, sur la réponse de l'utilisateur (*« non pour la 1 sinon
+oui »*) : pas de relance planifiée ; les téléchargements faits (Godot 4.7 mono double de DyingStar, DyingStar `develop`) dans
+`C:/Users/antoi/FluidisimExterne/` ; DyingStar est passé à Godot 4.7 (ADR-219 et ADR-222, notes ; boussole).
 
-**Ce que la session fait.** Les poches de S479 portées sur la carte (`viewer/src/apic3d_carte.rs`), **dans un module à part**
-(`apic3d_poches.wgsl`, mêmes liaisons, deux tampons de plus) : le chemin sans poches n'est pas touché. (1) **La détection** : une
-union-find sans verrou sur les mailles d'air (l'accrochage toujours vers la plus petite étiquette, l'air libre = 0 : les mailles
-d'air de la rangée du haut), puis l'aplatissement ; la racine d'une composante enfermée est sa plus petite maille, et les poches se
-numérotent dans l'ordre des mailles — **l'ordre de la référence**, qui remplit depuis la première maille rencontrée. (2) **Le bilan
-par poche** : les listes (les mailles d'air de chaque poche ; les mailles d'eau qui la bordent, une fois par poche), une réduction
-par poche dans un ordre fixe (un groupe par poche, aucun atomique flottant) ; l'héritage par recouvrement (des compteurs entiers),
-la naissance, le rappel du volume, la résorption. (3) **La projection** : le gradient conjugué diagonal, une ligne par poche ; `A·d`
-des poches par une réduction par poche sur la liste des faces eau | poche, à chaque itération. (4) Le saut de `--v1` avec poches.
+**Ce que la session fait.** (1) **Rien quand rien n'est enfermé** : les racines enfermées se comptent en parallèle ; sans elles, les
+parcours par un groupe (numérotation, listes, faces) ne parcourent rien. (2) **Les parcours à plusieurs groupes** : compte par bloc de
+256 mailles, préfixe des blocs, écriture — le même ordre des mailles, donc le même résultat. (3) **Les poches dans la multigrille** :
+un préconditionneur par blocs — le cycle en V sur les mailles, la diagonale sur les poches —, défini positif ; les noyaux fusionnés du
+gradient conjugué de la multigrille, dans des variantes du module des poches.
 
-**Entrées, et comment elles se vérifient (REPRISE §2).** L'état de départ de chaque essai est un `Apic3` construit dans le banc
-(la bulle d'`apic3d_bulle`, B10 de `b10_band_state_from`) et chargé sur la carte par `load` ; les étiquettes de la carte se
-comparent à celles de la référence avant toute poche (`labels()`), et l'état des poches de la référence (`of`, air, volume suivi,
-dernier pas) est exporté par un accesseur et chargé avec lui — un essai qui partirait d'un état de poches différent le dirait.
+**Entrées, et comment elles se vérifient.** Le témoin `--v1` sans poches (S481 : 16,7 ms, 60 s, masse exacte) et la bulle de S481
+(`MODE=suivi`, 4·10⁻⁵, 42,47 Hz) : rejoués avant et après chaque étape avec le même binaire ; les étages par `V1_LENTS`.
 
-**Critères, écrits avant.** (1) sans poches, au bit : le chemin d'avant n'est pas modifié (les bancs de la carte inchangés) ; (2) la
-poche de chaque maille, sur la carte, **identique** à la référence (la bulle, et B10 au pincement) ; (3) la bulle de S479 sur la
-carte : volume et pression **à 1 %** de la référence pas à pas sur 0,15 s, sa fréquence à 2 % de celle de la référence ; masse
-exacte ; (4) B10 à 16 mailles avec poches sur la carte va au bout, la bulle vit (son volume après le pincement à 5 % de la
-référence) ; (5) `--v1` stable 60 s avec poches, masse exacte, le coût des poches mesuré et inscrit (ADR-131). Ce qui ne tient pas
-dans la session est dit, et passe à S482.
+**Critères, écrits avant.** (1) sans poches, le témoin inchangé (pas médian à 5 %, masse exacte) ; (2) la bulle carte contre référence
+toujours à 10⁻⁴ (volume, pression), sa fréquence à 10⁻³ ; (3) `--v1` avec poches : **pas médian à 20 % du témoin** (≤ 20 ms), 60 s
+stables, masse exacte ; (4) la détection identique (banc `--apic3d-poches`, 0 écart à étiquettes égales). Ce qui ne tient pas est dit.
 
 ### Plan
 
-- [x] **P1** — jeton, plan seul.
-- [x] **P2** — l'état des poches exporté par la référence ; `apic3d_poches.wgsl`, ses tampons ; la détection ; essai (2).
-- [x] **P3** — le bilan par poche : listes, réductions, héritage, naissance, rappel, résorption ; contre la référence sur un même état.
-- [x] **P4** — la projection avec poches ; la bulle, essai (3).
-- [x] **P5** — B10 (4) ; `--v1` (5) par `calcul.py`.
-- [x] **P6** — preuve ; rituel (par `rituel.py`).
+- [x] **P1** — jeton, plan seul ; les réponses et les téléchargements consignés.
+- [ ] **P2** — rien quand rien n'est enfermé ; mesure.
+- [ ] **P3** — les parcours à plusieurs groupes ; (4) ; mesure.
+- [ ] **P4** — les poches dans la multigrille ; (2) ; mesure.
+- [ ] **P5** — `--v1` 60 s (1), (3) ; preuve.
+- [ ] **P6** — rituel (par `rituel.py`).
 
 ### Notes de reprise
-- **P2** — `AirPocketState` (référence : `air_pocket_state`) ; `viewer/src/apic3d_poches.{rs,wgsl}` (module à part, `Params` pris au
-  texte du nuanceur principal ; liaisons 27 `pko`, 28 `pkf`, réservées à la configuration) ; détection : `pk_init`, `pk_merge`
-  (union-find, accrochage vers le plus petit, air libre = 0), `pk_flatten`, `pk_number` (un groupe, préfixe par tranches),
-  `pk_assign` ; banc `--apic3d-poches` (`CAS=bulle|plusieurs`, `CHEMINEE=0`). **Mesuré** : 0 maille de poche différente à
-  étiquettes égales (bulle 6 pas, plusieurs 6 pas, sans cheminée 2 pas) ; les seuls écarts (4 mailles, bulle, pas 1) sont des
-  étiquettes qui diffèrent déjà (la reconstruction de la carte). La carte ne fait pas encore la résorption (P3) : le cas « plusieurs »
-  n'a pas révélé d'écart car la bulle de 6 mm n'est pas résolue à dx = 2 cm. Le module se compile sous Dx12.
-- **Pause demandée par l'utilisateur** à 21:29 (« fais pause, je reprendrai plus tard ») : reprendre à P3. B10 à 24 mailles tourne
-  détaché (`python outils/calcul.py etat`).
-- **Reprise** à 21:31 (« Reprends le projet ») : jeton repris, P3. B10 à 24 mailles toujours en cours (l'exemple n'écrit qu'à la fin).
-- **P3** — `pk_lists` (LA, LW dans l'ordre des mailles, un groupe), `pk_overlap` (compteurs entiers), `pk_reduce` (un groupe par
-  poche, arbre fixe : volume, centre, mailles, pression de bord), `pk_scalars` (héritage, naissance, rappel, pression, résorption),
-  `pk_remap` ; `load` charge air, volume suivi, dernier pas et la pression de la référence. **FXC** refuse l'écriture indexée dans un
-  tableau local de structure : `bord_new` sans tableau. **Mesuré** (banc `--apic3d-poches`) : nombre de poches identique partout ;
-  écart de volume ≤ 6·10⁻⁶, de pression ≤ 7·10⁻⁶ (bulle 8 pas ; trois bulles et une cheminée ; trois bulles sous pression après
-  4 pas de chauffe — la naissance — ; la bulle d'une maille résorbée des deux côtés).
-- **P4** — `pk_faces` (LF : faces eau | poche, `1/θ` et flux sortant), `pk_rows`, `pk_cg_init_finish`, `pk_cg_apply`, `pk_cg_rows`
-  (`A·d` des poches, un groupe par poche), `pk_cg_alpha`, `pk_cg_beta`, `pk_correct`, `pk_post` ; `assemble`, `cg_init_reduce`,
-  `cg_update`, `cg_direction` repris ; avec poches, la diagonale (la multigrille ne les voit pas encore). **Mesuré** (`MODE=suivi`,
-  `calculs/20261004-221515-s481-bulle-suivi`) : 300 pas, volume à 2,9·10⁻⁵, pression à 4,1·10⁻⁵ de la référence ; **42,47 Hz contre
-  42,50** ; 151 itérations au plus, toutes convergées ; masse exacte. Critère (3) tenu. `calcul.py` résout un programme donné par un
-  chemin relatif au dépôt. L'instrumentation de P5 (`APIC3D_POCHES=1` sur B10 et `--v1`) est dans ce commit, compilée, non lancée.
-- **P5a** — `--v1` avec poches (`APIC3D_POCHES=1`) : **emballement vers t = 8,33 s** (le pas stable tombe à 1 ms, puis la carte est
-  perdue) ; tracé : une quinzaine de poches d'une ou deux mailles (dx = 5 cm) dans l'eau brassée sous la cavité, pression jusqu'à
-  283 kPa. **Tranché** : `POCHE_MAILLES_MIN` = 8 dans la référence et la carte (une poche de moins de 8 mailles d'air se résorbe ; la
-  règle `V < dx³` ne les attrapait pas, leur volume compte la part d'air des mailles d'eau voisines) ; 43 essais d'APIC 3D passent.
-  Puis 60 s **stables**, masse exacte au quantum, une poche observée (1,87·10⁻³ m³ ≈ 15 dx³, 107 kPa) — le critère (5) tenu au
-  minimum : à dx = 5 cm, la scène ne fait presque que des poches de moins de 8 mailles. **Coût** : pas médian 71,4 ms contre 16,7
-  sans poches (témoin, même binaire) — reconstruction +11 ms (détection et listes par un seul groupe), projection +≈ 40 ms (la
-  diagonale à la place de la multigrille). À inscrire (ADR-131) ; remèdes : les poches dans la multigrille (préconditionneur par
-  blocs), sauter les noyaux quand aucun air n'est enfermé, les parcours à plusieurs groupes. B10 à 16 mailles lancé.
-- **P5b** — **à 23:46, B10 à 16 mailles (S481) et B10 à 24 mailles (lancé en S480, 7 h de calcul) sont morts ensemble**, code
-  0xC000013A (Ctrl+C) : lancés par `calcul.py`, ils restaient dans l'objet de tâche de la session (la sortie, `BREAKAWAY_FROM_JOB`,
-  est refusée). **Corrigé** : sous Windows, le lanceur est créé par WMI (`Win32_Process.Create`, parent : le service WMI), lit sa
-  commande et son environnement dans `lancement.json`, écrit lui-même `sortie.log` ; `detache.txt` dit s'il est hors de la session ;
-  le registre traduit les codes de sortie. Essais : environnement transmis, sortie écrite. B10 à 16 mailles relancé à 23:50.
-- **Question de l'utilisateur à 23:46** (« d'autres pistes d'amélioration […] que tu prennes toi-même les solutions ») : répondu — cinq
-  pistes décidées (calculs hors session, référence CPU parallèle, banc de non-régression dans le rituel, révision de méthode tous
-  les cinq sessions, scènes fines pour les poches) ; deux en attente de son accord (relance planifiée, téléchargements anticipés).
-  À écrire en P6 : ADR-222.
-- **P5** — B10 à 16 mailles avec poches (hors session) : au bout, pincement 2,0843 √(R/g) des deux côtés, la bulle à 1,2 % (max) et
-  0,75 % (fin) de la référence. Critère (4) tenu.
-- **P6** — preuve POCHES-CARTE-S481 complétée ; 7.4 (partiel, la carte) et A311 notés ; journal ; rituel par `rituel.py`.

@@ -682,7 +682,7 @@ pas recopiée ici (L137).
   mailles, couronne et jet de maille ([B10](validation/B10-APIC-S320.md)). Les autres attendent leurs
   composants, dont B8, que la porte A nomme.
 - [ ] **13.4 L'eau dans le jeu** ([ADR-219](adr/ADR-219-reponses-du-2026-10-04.md) D7, ajouté en S476) — *absent* : le système
-  intégré à une copie locale de **DyingStar** (Godot 4.5, double précision, C#, Jolt, serveur Horizon), sur une planète du jeu, sans
+  intégré à une copie locale de **DyingStar** (Godot 4.7 depuis 2026 — 4.5 en S476 —, double précision, C#, Jolt, serveur Horizon ; copie et moteur téléchargés en S482), sur une planète du jeu, sans
   régression du jeu — une surprise pour son équipe : rien ne se publie.
 
 ---

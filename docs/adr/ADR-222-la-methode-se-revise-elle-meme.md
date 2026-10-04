@@ -39,3 +39,12 @@ plus fine que les 5 cm de `--v1`, qui n'en fait presque que de moins de huit mai
 
 - Une **relance planifiée** (une tâche qui envoie « Reprends le projet » quand le jeton est libre ou interrompu) : configuration persistante.
 - Les **téléchargements anticipés** — Godot 4.5 en double précision, une copie locale de DyingStar — maintenant plutôt qu'au point 13.4.
+
+## Note du 2026-10-05 (S482) — les réponses
+
+L'utilisateur : *« non pour la 1 sinon oui »* — **pas de relance planifiée** ; **les téléchargements accordés**. Faits : le Godot de
+DyingStar (`Godot_v4.7-stable_mono_win64.zip`, 114,6 Mo, `DyingStar-game/godotandaddons`, version
+`4.7.stable.mono.double.custom_build.5b4e0cb0f`) et DyingStar (`develop`, profondeur 1, sans les fichiers LFS, 3,6 Go), dans
+`C:/Users/antoi/FluidisimExterne/`. **Fait nouveau** : DyingStar est passé de Godot 4.5 à **4.7** ; son rendu de bureau est Forward+, comme le nôtre
+(GL Compatibility n'est que son réglage mobile). Le C# demande le SDK .NET 9, non installé.
+

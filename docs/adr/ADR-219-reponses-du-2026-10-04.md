@@ -62,3 +62,5 @@ du jeu. Le périmètre passe à **120 points** (121 moins 5.11).
 - 5.7 (plusieurs liquides) prend un sens concret : les lacs d'acide et de méthane du jeu.
 - 11.1 (le monde planétaire) a sa cible : une planète de 6 356 km, en double précision.
 - Une copie locale de DyingStar et Godot 4.5 se téléchargeront le moment venu, **avec l'accord de l'utilisateur** à ce moment-là.
+
+*Note corrective du 2026-10-05 (S482)* : DyingStar est passé à **Godot 4.7** (son propre build mono en double précision, `DyingStar-game/godotandaddons`) ; « Godot 4.5 » ci-dessus se lit 4.7. Le moteur et une copie de DyingStar sont téléchargés, avec l'accord de l'utilisateur ([ADR-222](ADR-222-la-methode-se-revise-elle-meme.md), note).
