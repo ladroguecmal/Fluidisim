@@ -86,7 +86,7 @@ fin de S480 fait par `rituel.py`.
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — la boussole ; REPRISE et AGENTS.
 - [x] **P3** — les trois registres générés, tenus par `--check`.
-- [ ] **P4** — le journal archivé ; `calcul.py` ; `rituel.py`.
+- [>] **P4** — le journal archivé (P4a) ; `calcul.py` (P4b) ; `rituel.py` (P4c) — trois commits.
 - [ ] **P5** — preuve ; rituel (par `rituel.py`).
 
 ### Notes de reprise
@@ -100,3 +100,6 @@ fin de S480 fait par `rituel.py`.
   par » ; 38 Ko), `anomalies.py` (39 entrées à statut d'ANGLES-MORTS, 24 ouvertes). **Trouvé** : la levée d'A322 (S442) n'avait
   jamais été écrite au registre source — note datée ajoutée. Pièges de lecture levés : titre dans un second gras, une note sur A324
   écrite sous A320 (une note qui nomme une autre anomalie ne tranche plus), A303 donné deux fois (« A303 bis »).
+- **P4a** — le journal : 1,36 Mo → 7 Ko (S470–S479) ; S01–S469 dans `notes/journal/`, cinq archives par centaine (99 + 100 + 100
+  + 100 + 70 + 10 vivantes = 479 entrées, avant comme après ; texte identique à l'espacement près) ; liens relatifs recalés d'un
+  niveau, 0 lien mort dans les archives.

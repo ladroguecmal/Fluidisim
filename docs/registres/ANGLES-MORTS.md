@@ -4506,7 +4506,7 @@ viennent de **la bande relative, un schéma FTCS** (`η′` transporté à la vi
 Lax-Wendroff (`set_relative_band_lax_wendroff`, éteint par défaut), elles disparaissent (vitesses divisées par plus de dix) ; il reste
 dix secondes où la part de maille d'un champ presque nul dépasse 0,05 — le critère, en part relative, est mal posé.
 
-*Note du 2026-10-04, S480, sur A322* ([journal](../../notes/JOURNAL.md), S442) : **levée en S442 en mode relatif, l'écart accepté** — décision de l'utilisateur, *« J'accepte et continue »* ; la bande relative sous Lax-Wendroff est depuis le défaut du mode relatif
+*Note du 2026-10-04, S480, sur A322* ([journal](../../notes/journal/JOURNAL-S400-S469.md), S442) : **levée en S442 en mode relatif, l'écart accepté** — décision de l'utilisateur, *« J'accepte et continue »* ; la bande relative sous Lax-Wendroff est depuis le défaut du mode relatif
 (production au bit, trajectoire à 1,4·10⁻⁵ m). Cette note n'avait pas été écrite ici en S442 ; le registre généré des anomalies
 ouvertes (S480) l'a révélé. Le mode absolu à 10 cm et 30 Hz reste instable au pas 1 860 : il n'est plus la production (S443).
 
