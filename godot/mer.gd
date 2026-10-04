@@ -134,6 +134,17 @@ func couvert_voulu() -> float:
 
 
 func _ready() -> void:
+	# S474 — `-- --controle-type-eau` : les propriétés de chaque préréglage (`type_eau.gd`), pour `outils/type_eau.py --egalite`.
+	if "--controle-type-eau" in OS.get_cmdline_user_args():
+		var TypeEau = load("res://type_eau.gd")
+		for nom in TypeEau.PRESETS:
+			var p: Dictionary = TypeEau.proprietes(TypeEau.PRESETS[nom])
+			for cle in ["a", "b", "bb", "R0", "kd", "c"]:
+				var v: Vector3 = p[cle]
+				print("TYPE_EAU_S474 %s %s %s %s %s" % [nom, cle, String.num_scientific(v.x), String.num_scientific(v.y),
+						String.num_scientific(v.z)])
+		get_tree().quit()
+		return
 	if OS.get_environment("PLUIE") != "":
 		pluie_mm_h = float(OS.get_environment("PLUIE"))
 	# S472 : `MER_DONNEES=<fichier>` (dans `donnees/`) — une autre mer exportée, la mer calme des scènes miroirs (ADR-216 D4).
@@ -540,6 +551,19 @@ func uniformes_fixes() -> void:
 			m.set_shader_parameter("kd", (ABSORPTION + RETRODIFFUSION) / MU_D)
 			m.set_shader_parameter("attenuation_c", ABSORPTION + 2.0 * RETRODIFFUSION)
 			m.set_shader_parameter("lobe", LOBE_TYLER if OS.get_environment("LOBE") != "0" else Vector3(2.0, 0.0, 0.5))
+	# S474, ADR-217 — le type d'eau de la scène (`TYPE_EAU`) : `R0`, `kd`, `c` tirés de ses constituants ; sans lui, l'eau pure
+	# d'avant, au bit.
+	var TypeEau = load("res://type_eau.gd")
+	var constituants = TypeEau.de_l_environnement()
+	if constituants != null:
+		var p: Dictionary = TypeEau.proprietes(constituants)
+		for m in [materiau, materiau_sol, materiau_ciel]:
+			if m != null:
+				m.set_shader_parameter("R0", p["R0"])
+				m.set_shader_parameter("kd", p["kd"])
+				m.set_shader_parameter("attenuation_c", p["c"])
+		print("TYPE_EAU_S474 scene constituants=%s R0=%s kd=%s c=%s visibilite_m=%.2f" % [constituants, p["R0"], p["kd"], p["c"],
+				4.8 / p["c"].y])
 	# S365 : `CONTROLE_EAU=4` — la surface vue d'en dessous rend son coefficient de Fresnel eau → air (1 au-delà de l'angle
 	# critique), relu par `outils/fenetre_snell.py --fresnel`.
 	if OS.get_environment("CONTROLE_EAU") != "":

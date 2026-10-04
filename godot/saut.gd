@@ -130,6 +130,15 @@ func _ready() -> void:
 	mat_mer.shader = load("res://saut_mer.gdshader")
 	mat_mer.set_shader_parameter("debut", 0.5 * dx)
 	mer.material_override = mat_mer
+	# S474, ADR-217 — le type d'eau de la scène (`TYPE_EAU`) ; sans lui, l'eau pure d'avant, au bit.
+	var TypeEau = load("res://type_eau.gd")
+	var constituants = TypeEau.de_l_environnement()
+	if constituants != null:
+		var p: Dictionary = TypeEau.proprietes(constituants)
+		for m in [mat_eau, mat_mer]:
+			m.set_shader_parameter("R0", p["R0"])
+			m.set_shader_parameter("kd", p["kd"])
+			m.set_shader_parameter("attenuation_c", p["c"])
 	add_child(mer)
 	var h: Array = entete["houle"]
 	for m in [mat_eau, mat_mer]:

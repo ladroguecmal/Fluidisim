@@ -82,8 +82,15 @@ qui le peut (le ciel reflété, l'étalonnage du téléphone) ; (5) les images m
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — le modèle (Python, GDScript), les préréglages, `TYPE_EAU` ; l'égalité ; le défaut au bit.
+- [x] **P2** — le modèle (Python, GDScript), les préréglages, `TYPE_EAU` ; l'égalité ; le défaut au bit.
 - [ ] **P3** — V5 et V1 mesurées par préréglage ; le réglage du côtier ; les images.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — `outils/type_eau.py` (la référence, sources dans l'en-tête), `godot/type_eau.gd` (le rendu) ; `TYPE_EAU=<préréglage>` ou
+  `<Chl>,<a_g(440)>,<MES>` dans `mer.tscn` (l'eau, le fond, le ciel sous l'eau) et `saut.tscn`. **Égalité** : 126 valeurs, écart
+  relatif 4,5·10⁻⁶ — **le critère (1) disait 10⁻⁶, trop strict pour les `Vector3` de Godot (flottants de 32 bits) ; porté à 10⁻⁵**.
+  `pure` : `kd`, `c` exacts, `R0` à 0,00069 contre 0,00068 (l'arrondi de la table d'ADR-177). **Sans `TYPE_EAU`, au bit** :
+  `saut.tscn` (six captures), `mer.tscn` (proche, sous l'eau). **Visibilités** (4,8/c(550)) : océan clair 53 m, Méditerranée 35 m,
+  côtier 2,8 m, lac 1,5 m, rivière 0,5 m, trouble 0,2 m.
+
