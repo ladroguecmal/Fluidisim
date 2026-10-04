@@ -444,7 +444,9 @@ pas recopiée ici (L137).
   (impact) sont la référence du banc.
 - [ ] **7.2 Spray, embruns, gouttelettes** — *absent*.
 - [ ] **7.3 Microbulles visuelles** — *absent*.
-- [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *absent*.
+- [ ] **7.4 Grosses bulles et poches d'air physiques** (C13, ADR-015) — *partiel* depuis S479 : l'air enfermé en poches
+  adiabatiques dans la référence APIC 3D, inconnues de la projection ; une bulle oscille à la fréquence de Minnaert (× 1,02) et
+  remonte ([POCHES-AIR-S479](validation/POCHES-AIR-S479.md)). Manquent la carte, la vitesse terminale, la fragmentation, C13.
 - [ ] **7.5 Air comprimé, vide, eau dans le vide** (ADR-015) — *absent*.
 - [ ] **7.6 Glace et vapeur** (C15, ADR-017) — *absent*. L'évaporation et le gel des contenants, par V
   ([ADR-203](adr/ADR-203-reponses-aux-zones-d-ombre-d-adr-202.md) D6).
@@ -693,14 +695,14 @@ pas recopiée ici (L137).
 | 4. Volumique (δ) | 21 | 0 | 16 | 5 |
 | 5. Volumes finis (V) | 12 | 1 | 6 | 5 |
 | 6. Solides | 8 | 0 | 5 | 3 |
-| 7. Secondaires | 8 | 0 | 1 | 7 |
+| 7. Secondaires | 8 | 0 | 2 | 6 |
 | 8. Rendu | 10 | 0 | 10 | 0 |
 | 9. Activation et budget | 13 | 0 | 9 | 4 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 4 | 0 | 3 | 1 |
-| **total** | **121** | **3** | **73** | **45** |
+| **total** | **121** | **3** | **74** | **44** |
 
 *Recompté en S321, 2026-09-22* : 4.8 (S316) et 4.12 (S320) étaient passés à partiel sans que ce
 tableau suive — 51 et 66 affichés pour 53 et 64 réels. Depuis S321, `python outils/etat_projet.py

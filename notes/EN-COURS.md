@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S479 — **en cours**. En autonomie, K2-1 ([conception](../docs/registres/CAMPAGNE-K2-S478.md), ADR-220 D1) : **l'air
+Session : S479 — **terminée**. En autonomie, K2-1 ([conception](../docs/registres/CAMPAGNE-K2-S478.md), ADR-220 D1) : **l'air
 enfermé dans la référence APIC** (`code/water-core/src/apic3d.rs`).
 
 **Ce que la session fait.** `Apic3::enable_air_pockets` (mémoire réservée à la configuration, I-06) : à chaque pas, après les
@@ -85,7 +85,7 @@ les poches, et la bulle pincée vit (son volume après le pincement, tracé) ; `
 - [x] **P1** — jeton, plan seul.
 - [x] **P2** — les poches dans `apic3d.rs` ; les essais (1) à (3).
 - [x] **P3** — B10 avec poches (4) ; mesures.
-- [ ] **P4** — preuve ; rituel (allégé).
+- [x] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
 - **P2** — `code/water-core/src/apic3d_poches.rs` : `enable_air_pockets`, la détection (remplissage), le suivi (recouvrement : fusion,
@@ -101,4 +101,4 @@ les poches, et la bulle pincée vit (son volume après le pincement, tracé) ; `
   2,084 √(R/g) (S393 : 2,08), la bulle vit 1,5 √(D/g) après (0,283 D³ au plus, 0,231 à la fin, 82 à 155 kPa). `D/dx` = 24 lancé
   (≈ 2 h 30), consigné à son arrivée. La bulle dans une cuve deux fois plus grande : en cours (trois millions de particules).
   A311 : note datée (remède éprouvé ; ouverte jusqu'à la carte).
-
+- **P4** — la preuve : POCHES-AIR-S479 ; LISTE (4.12, 7.4) ; journal ; jeton libre ; maillons 1 ; suivant : S480, K2-2 — les poches sur la carte ; consigner `D/dx` = 24 et la grande cuve à leur arrivée.

@@ -18585,3 +18585,11 @@ modèle à 1/255 ; surcoût 0,044 ms ; un panache de rivière montré. Le lot de
 **Entrée.** « Ok » de l'utilisateur au plan. **Fait** ([conception](../docs/registres/CAMPAGNE-K2-S478.md),
 [ADR-220](../docs/adr/ADR-220-la-campagne-k2.md)) : la campagne de la surface non graphe en douze sessions ; relu, aucun modèle d'air
 n'existe dans APIC — l'air enfermé (A311) passe en premier. **Rituel** (allégé). Maillons **1**. Suivant : K2-1.
+
+## S479 — 2026-10-04 — K2-1 : l'air enfermé
+
+**Entrée.** En autonomie (K2). **Fait** ([preuve](../docs/validation/POCHES-AIR-S479.md)) : l'air enfermé devient une poche
+adiabatique, une inconnue de pression chacune dans la projection (implicite, le système reste défini positif). **Trouvé** : le
+volume géométrique saute à chaque changement d'étiquette ; le volume suivi par le flux, rappelé vers la géométrie. **Mesuré** : une
+bulle à 42,5 Hz contre 41,6 de Minnaert ; B10 3D au bout à 16 mailles, la bulle vivante après le pincement (A311 : remède éprouvé).
+**7.4 passe à partiel** (3 / 74 / 44). **Rituel** (allégé). Maillons **1**. Suivant : K2-2, la carte.
