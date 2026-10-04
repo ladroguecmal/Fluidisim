@@ -10,10 +10,10 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-10-04 10:26 +02:00
+JETON            : occupé
+Battement        : 2026-10-04 10:41 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : aucune
+Session en cours : **S476 — les réponses du 2026-10-04 (ADR-219) : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos**
 Dernière session : S475 — ADR-218 (la liste à 100 %, décision de l'utilisateur) ; la liste actualisée ; le plan de complétion ([plan](docs/registres/PLAN-COMPLETION-S475.md)). Avant : S474 (le type d'eau, premier temps)
 Session suivante : **S476 — K1 : le type d'eau dans l'espace** (ADR-217 D1) : une texture de concentrations (Chl, a_g, MES) sur la carte, lue par fragment par l'eau, le fond et le ciel sous l'eau de `mer.tscn` (puis `saut.tscn`) — le modèle porté dans le nuanceur, égal à `type_eau.py` ; une rivière qui se jette dans la mer ; le coût mesuré. Puis l'ordre du [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md) (K1 en alternance avec K2 et K3). **Sans attendre de « Continue »**
 Maillons        : 1 — journal

@@ -62,31 +62,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S475 — **terminée**. **Décision de l'utilisateur** : *« l'objectif est de finir le système complet de l'eau, à ce moment
-précis la feuille to do list devra être validée à 100% pas moins mais plus possible ou changement durant le processus »*.
+Session : S476 — **en cours**. **Réponses de l'utilisateur** aux six faits du plan de complétion (F1 à F6) : le réseau à nous ; un
+seul ordinateur, celui-ci ; le jeu sera **DyingStar** (<https://github.com/DyingStar-game>), **une surprise pour l'équipe** ; pas
+d'outil de terrain en tête ; l'écume par les vidéos ; les verdicts aux jalons.
 
-**Ce que la session fait.** (1) **ADR-218** : la fin du système = la liste validée à 100 % sur son périmètre final ; elle peut grandir
-ou changer, tracé ; remplace le critère d'arrêt d'ADR-215. (2) **L'actualisation de la liste** (la dernière complète : S350) : le
-journal de S351 à S474 relu contre elle, les catégories et le décompte vérifiés, l'« État au » refait. (3) **Le plan de complétion**
-(`docs/registres/PLAN-COMPLETION-S475.md`) : chaque point ouvert dans une campagne, dans l'ordre des dépendances, avec une
-estimation ; les faits que seul l'utilisateur peut fournir, une recommandation pour chacun. Le type d'eau dans l'espace passe en
-S476 (le seul déplacement du plan convenu : l'objectif nouveau demande d'abord de savoir où on en est).
+**Ce que la session fait.** (1) **ADR-219** : les six réponses ; les points à second matériel reformulés sur ce PC ; ce que les dépôts
+publics de DyingStar disent (lus seulement — aucun contact : la surprise) ; un point ajouté, **13.4 — l'eau dans le jeu**. (2) **La
+liste** : les reformulations aux points, 13.4, le décompte. (3) **Le registre des dépendances** : les attentes extérieures levées, les
+fronts recalculés. (4) **Le plan de complétion** : §3 résolu, 13.4 en K13. Le type d'eau dans l'espace passe en S477.
 
-**Critères, écrits avant.** (1) ADR-218 écrite et indexée ; (2) chaque point ouvert du périmètre dans exactement une campagne
-(vérifié par un calcul, pas à l'œil) ; (3) l'« État au » de la liste refait, le décompte vérifié par `--check` ; (4) les faits
-extérieurs nommés avec une recommandation chacun.
+**Critères, écrits avant.** (1) ADR-219 écrite et indexée ; (2) la liste et le registre d'accord (`--check` à 0), 13.4 compté ;
+(3) chaque point ouvert dans exactement une campagne (le calcul de S475 refait) ; (4) aucune action vers DyingStar ni son équipe.
 
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [x] **P2** — ADR-218 ; le plan de complétion ; l'actualisation de la liste.
-- [x] **P3** — preuve ; rituel (allégé).
+- [ ] **P2** — ADR-219 ; la liste ; le registre ; le plan.
+- [ ] **P3** — preuve ; rituel (allégé).
 
 ### Notes de reprise
-- **P2** — ADR-218 (indexée ; note à ADR-215) ; `docs/registres/PLAN-COMPLETION-S475.md` : **treize campagnes, 116 points ouverts,
-  chacun dans exactement une** (vérifié par un calcul contre le registre des dépendances : 10.7, validé, retiré d'une plage) ; ≈ 310
-  sessions, ordres de grandeur ; six faits de l'utilisateur (F1 réseau, F2 second matériel et serveur, F3 objets du jeu, F4 outil de
-  terrain, F5 écume — les vidéos V2 et V3 la fournissent, F6 verdicts), une recommandation chacun. La liste : « État au S475 » —
-  aucun changement de catégorie depuis S408, **3 / 73 / 44, 116 ouverts sur 119** ; l'objectif de fin écrit en tête ; la feuille de
-  route renvoie au plan.
-- **P3** — la preuve : PLAN-COMPLETION-S475 ; journal ; jeton libre ; maillons 1 ; suivant : S476, K1 — le type d'eau dans l'espace.
