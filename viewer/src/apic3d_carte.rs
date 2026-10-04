@@ -210,6 +210,12 @@ pub struct ApicCarte {
     tolerance2: f64,
     /// S466 : la forme du corps — l'axe unitaire et la demi-longueur d'une capsule (`set_body_shape` ; 0 : la sphère).
     body_shape: [f32; 4],
+    /// S481 — la disposition des liaisons (le module des poches s'y compile), les deux tampons des poches, et leurs pipelines
+    /// (`None` : sans poches, le pas d'avant).
+    pub(crate) pipeline_layout: wgpu::PipelineLayout,
+    pub(crate) pko: wgpu::Buffer,
+    pub(crate) pkf: wgpu::Buffer,
+    pub(crate) poches: Option<crate::apic3d_poches::PochesCarte>,
 }
 
 /// Durées de la carte par étage, ms (horodatages ; `None` sans la fonction).
@@ -337,10 +343,14 @@ impl ApicCarte {
         });
         let query_resolve = buffer(&device, STAMPS as u64 * 8, wgpu::BufferUsages::QUERY_RESOLVE | wgpu::BufferUsages::COPY_SRC);
         let query_read = buffer(&device, STAMPS as u64 * 8, wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ);
+        // S481 — les poches d'air enfermé (`apic3d_poches.rs`) : réservées à la configuration (I-06), servies seulement après
+        // `enable_air_pockets`.
+        let pko = buffer(&device, (crate::apic3d_poches::pko_words(cells) * 4) as u64, storage);
+        let pkf = buffer(&device, (crate::apic3d_poches::pkf_words(cells) * 4) as u64, storage);
 
         let all = [
             &params, &px, &pv, &pc, &shift, &count, &start, &order, &blocks, &faces_buf, &fflags, &cellf, &label, &partials,
-            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist, &pblk, &pscratch, &swb, &flist, &mgb, &mgl,
+            &scalars, &cols, &cmask, &ivol, &isolde, &pcount, &plist, &pblk, &pscratch, &swb, &flist, &mgb, &mgl, &pko, &pkf,
         ];
         let entries: Vec<_> = (0..all.len() as u32)
             .map(|binding| wgpu::BindGroupLayoutEntry {
@@ -463,6 +473,10 @@ impl ApicCarte {
             relax_m: 0.,
             tolerance2: apic3d::PRESSURE_TOLERANCE2,
             body_shape: [0., 0., 1., 0.],
+            pipeline_layout,
+            pko,
+            pkf,
+            poches: None,
         })
     }
 
@@ -574,6 +588,11 @@ impl ApicCarte {
 
     pub(crate) fn mask_buffer(&self) -> &wgpu::Buffer {
         &self.cmask
+    }
+
+    /// S481 : le groupe de liaisons (le module des poches s'y lie).
+    pub(crate) fn bind_group(&self) -> &wgpu::BindGroup {
+        &self.bind
     }
 
     pub(crate) fn grid(&self) -> Domain3 {
@@ -719,6 +738,8 @@ impl ApicCarte {
             self.floors = floor.iter().any(|f| *f > 0.);
             self.queue.write_buffer(&self.cols, ((2 * eta.len() + 32) * 4) as u64, bytes(floor));
         }
+        // S481 : l'état des poches de la référence (aucune sans elles).
+        self.load_pockets(reference);
         Ok(())
     }
 
@@ -811,7 +832,7 @@ impl ApicCarte {
         pass.dispatch_workgroups((threads as u32).div_ceil(SCAN).max(1), 1, 1);
     }
 
-    fn dispatch(&self, pass: &mut wgpu::ComputePass, kernel: usize, threads: usize, group: u32) {
+    pub(crate) fn dispatch(&self, pass: &mut wgpu::ComputePass, kernel: usize, threads: usize, group: u32) {
         pass.set_pipeline(&self.pipelines[kernel]);
         pass.set_bind_group(0, &self.bind, &[]);
         pass.dispatch_workgroups((threads as u32).div_ceil(group).max(1), 1, 1);
@@ -1131,6 +1152,8 @@ impl ApicCarte {
                     self.dispatch_reconstruct(&mut pass);
                     // S423 : la surface de la décision est consommée (ou recalculée) ; le pas va déplacer les particules.
                     self.dispatch(&mut pass, CLEAR_FRESH, 1, 1);
+                    // S481 : les poches d'air enfermé, après les étiquettes (rien sans `enable_air_pockets`).
+                    self.encode_pockets_detect(&mut pass);
                 }
                 ApicStage::Project => {
                     let cells = self.domain.cells();
@@ -1349,11 +1372,11 @@ impl ApicCarte {
         Ok(out)
     }
 
-    fn read_u32(&self, src: &wgpu::Buffer, offset: usize, len: usize) -> Result<Vec<u32>, String> {
+    pub(crate) fn read_u32(&self, src: &wgpu::Buffer, offset: usize, len: usize) -> Result<Vec<u32>, String> {
         Ok(self.read_words(src, offset, len)?.into_iter().map(u32::from_le_bytes).collect())
     }
 
-    fn read_f32(&self, src: &wgpu::Buffer, offset: usize, len: usize) -> Result<Vec<f32>, String> {
+    pub(crate) fn read_f32(&self, src: &wgpu::Buffer, offset: usize, len: usize) -> Result<Vec<f32>, String> {
         Ok(self.read_words(src, offset * 4, len)?.into_iter().map(f32::from_le_bytes).collect())
     }
 
@@ -1459,12 +1482,12 @@ fn max_abs_diff(a: &[f32], b: &[f32]) -> f32 {
     a.iter().zip(b).fold(0f32, |m, (x, y)| m.max((x - y).abs()))
 }
 
-fn u32_bytes(v: &[u32]) -> &[u8] {
+pub(crate) fn u32_bytes(v: &[u32]) -> &[u8] {
     // SAFETY : `u32` n'a pas de remplissage.
     unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, std::mem::size_of_val(v)) }
 }
 
-fn bytes(v: &[f32]) -> &[u8] {
+pub(crate) fn bytes(v: &[f32]) -> &[u8] {
     // SAFETY : `f32` n'a pas de remplissage ; la tranche est lue comme ses octets, sans changer d'alignement requis.
     unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, std::mem::size_of_val(v)) }
 }

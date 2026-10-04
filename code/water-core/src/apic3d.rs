@@ -1536,7 +1536,7 @@ impl Apic3 {
 mod columns;
 #[path = "apic3d_poches.rs"]
 mod poches;
-pub use poches::{pockets_reserved_bytes, AirPocket, GAMMA_AIR, MAX_POCKETS, P_ATM};
+pub use poches::{pockets_reserved_bytes, AirPocket, AirPocketState, GAMMA_AIR, MAX_POCKETS, P_ATM, RAPPEL_VOLUME_S};
 pub use columns::{columns_reserved_bytes, ColumnsChange, ColumnsSwitch, FloorChange, LinearSwell};
 
 #[cfg(test)]

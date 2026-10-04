@@ -46,6 +46,19 @@ pub struct AirPocket {
     pub cells: u32,
 }
 
+/// S481 — l'état des poches entre deux pas (`Apic3::air_pocket_state`).
+#[derive(Clone, Copy, Debug)]
+pub struct AirPocketState<'a> {
+    /// La poche de chaque maille : 0 aucune, `b + 1` la poche `b`.
+    pub of: &'a [u32],
+    /// L'air de chaque poche, `V·P^(1/γ)`.
+    pub air: &'a [f64],
+    /// Le volume de chaque poche suivi par le flux, m³.
+    pub vol_flux: &'a [f64],
+    /// Le dernier pas, s (le rappel du volume en dépend).
+    pub last_dt: f64,
+}
+
 pub(crate) struct Poches {
     /// La poche de chaque maille (0 : aucune ; `b + 1`) ; celle du pas d'avant.
     pub(crate) of: Vec<u32>,
@@ -152,6 +165,19 @@ impl Apic3 {
     /// Diagnostic : la variation de volume de la première poche que la dernière projection a prévue (m³).
     pub fn air_pocket_predicted_dv(&self) -> f64 {
         self.poches.as_ref().map_or(0., |p| p.dv_prevu[0])
+    }
+
+    /// **S481 (K2-2)** — l'état des poches entre deux pas, celui que la carte charge pour reprendre au même point : la poche de
+    /// chaque maille (0 : aucune, `b + 1`), et pour chaque poche son air `a = V·P^(1/γ)` et son volume suivi par le flux ; le
+    /// dernier pas, s. `None` sans `enable_air_pockets`.
+    pub fn air_pocket_state(&self) -> Option<AirPocketState<'_>> {
+        let ps = self.poches.as_ref()?;
+        Some(AirPocketState {
+            of: &ps.of,
+            air: &ps.air[..ps.count],
+            vol_flux: &ps.vol_flux[..ps.count],
+            last_dt: ps.last_dt,
+        })
     }
 
     /// Poches au-delà de `MAX_POCKETS`, laissées libres, depuis la mise en route.

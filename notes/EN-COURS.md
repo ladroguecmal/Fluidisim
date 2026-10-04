@@ -90,10 +90,19 @@ dans la session est dit, et passe à S482.
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — l'état des poches exporté par la référence ; `apic3d_poches.wgsl`, ses tampons ; la détection ; essai (2).
+- [x] **P2** — l'état des poches exporté par la référence ; `apic3d_poches.wgsl`, ses tampons ; la détection ; essai (2).
 - [ ] **P3** — le bilan par poche : listes, réductions, héritage, naissance, rappel, résorption ; contre la référence sur un même état.
 - [ ] **P4** — la projection avec poches ; la bulle, essai (3).
 - [ ] **P5** — B10 (4) ; `--v1` (5) par `calcul.py`.
 - [ ] **P6** — preuve ; rituel (par `rituel.py`).
 
 ### Notes de reprise
+- **P2** — `AirPocketState` (référence : `air_pocket_state`) ; `viewer/src/apic3d_poches.{rs,wgsl}` (module à part, `Params` pris au
+  texte du nuanceur principal ; liaisons 27 `pko`, 28 `pkf`, réservées à la configuration) ; détection : `pk_init`, `pk_merge`
+  (union-find, accrochage vers le plus petit, air libre = 0), `pk_flatten`, `pk_number` (un groupe, préfixe par tranches),
+  `pk_assign` ; banc `--apic3d-poches` (`CAS=bulle|plusieurs`, `CHEMINEE=0`). **Mesuré** : 0 maille de poche différente à
+  étiquettes égales (bulle 6 pas, plusieurs 6 pas, sans cheminée 2 pas) ; les seuls écarts (4 mailles, bulle, pas 1) sont des
+  étiquettes qui diffèrent déjà (la reconstruction de la carte). La carte ne fait pas encore la résorption (P3) : le cas « plusieurs »
+  n'a pas révélé d'écart car la bulle de 6 mm n'est pas résolue à dx = 2 cm. Le module se compile sous Dx12.
+- **Pause demandée par l'utilisateur** à 21:29 (« fais pause, je reprendrai plus tard ») : reprendre à P3. B10 à 24 mailles tourne
+  détaché (`python outils/calcul.py etat`).

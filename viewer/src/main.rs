@@ -10,6 +10,7 @@ mod counting;
 mod delta;
 mod delta3d;
 mod apic3d_carte;
+mod apic3d_poches;
 mod surface_carte;
 mod surface_direct;
 mod delta3d_projection;
@@ -2656,6 +2657,10 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--surface-carte") {
         return surface_carte::banc();
+    }
+    // S481 — K2-2 : les poches d'air enfermé sur la carte, contre la référence.
+    if args.iter().any(|a| a == "--apic3d-poches") {
+        return apic3d_poches::banc_poches();
     }
     if args.iter().any(|a| a == "--apic3d-carte-b10") {
         return apic3d_carte::recevoir_b10();
