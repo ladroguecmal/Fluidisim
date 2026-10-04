@@ -351,7 +351,8 @@ et questions : bilan §5 et §6 ; rien n'est retiré de l'ambition.
 condition de fin du système de l'eau. L'ordre est celui du [plan de complétion](registres/PLAN-COMPLETION-S475.md)** — treize
 campagnes (K1 à K13), les faits que seul l'utilisateur peut fournir (F1 à F6, répondus en S476 : [ADR-219](adr/ADR-219-reponses-du-2026-10-04.md) — le jeu est
 DyingStar) ; ce qui suit garde l'histoire de l'ordre par fronts. **S471–S477** : le banc visuel (ADR-216), le type d'eau (ADR-217 ; K1 en
-cours), la liste à 100 % (ADR-218).
+cours), la liste à 100 % (ADR-218). **S478–S480** : K2 conçue (ADR-220), K2-1 — l'air enfermé dans la référence APIC (A311 : le remède
+éprouvé) ; la structure du projet (ADR-221 : la boussole, le [tableau de bord](registres/TABLEAU-DE-BORD.md), le rituel outillé).
 
 *Écrit en S352, 2026-09-24* ([ADR-190](adr/ADR-190-apres-la-v1-la-liste-entiere.md) D3). Ce que chaque point attend et
 débloque est dans [DEPENDANCES-LISTE](registres/DEPENDANCES-LISTE.md), calculé par `outils/dependances_liste.py` et

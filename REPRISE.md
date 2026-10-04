@@ -10,14 +10,14 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-10-04 16:51 +02:00
+JETON            : libre
+Battement        : 2026-10-04 17:12 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
-Session en cours : **S480 — la structure du projet : la boussole, le tableau de bord, les registres générés, les calculs longs, le rituel outillé**
-Dernière session : S479 — K2-1 : l'air enfermé dans APIC 3D ([preuve](docs/validation/POCHES-AIR-S479.md)) — Minnaert à 2 %, B10 au bout à 16 mailles ; 7.4 partiel. Avant : S478 (K2 conçue)
-Session suivante : **S480 — K2-2 : les poches sur la carte** ([conception](docs/registres/CAMPAGNE-K2-S478.md)) : la détection et le suivi des poches, leurs lignes dans la projection (le gradient conjugué et la multigrille de la carte), le volume suivi par le flux ; la carte contre la référence (volume et pression à 1 %) ; le saut de `--v1` stable 60 s avec une poche. D'abord : consigner B10 à `D/dx` = 24 et la bulle de la grande cuve (scratchpad, `b10_p24.txt`, `bulle_b.txt`) dans POCHES-AIR-S479. **Sans attendre de « Continue »**
-Maillons        : 1 — journal
-Registres       : dernier lot S477 (ADR-213 D3) ; le prochain au plus tard en S480
+Session en cours : aucune
+Dernière session : S480 — la structure du projet : la boussole, les registres générés, le rituel outillé ([journal](notes/JOURNAL.md)). Avant : S479 (K2-1 : l'air enfermé dans APIC 3D)
+Session suivante : **S481 — K2-2 : les poches sur la carte** ([conception](docs/registres/CAMPAGNE-K2-S478.md)) : la détection et le suivi des poches, leurs lignes dans la projection (le gradient conjugué et la multigrille de la carte), le volume suivi par le flux ; la carte contre la référence (volume et pression à 1 %) ; le saut de `--v1` stable 60 s avec une poche. D'abord : `python outils/calcul.py etat` — B10 à `D/dx` = 24 (`calculs/20261004-165215-b10-poches-p24`) et la bulle de la grande cuve (`calculs/20261004-164944-s479-b10-bulle`, 47,84 Hz contre 42,22 : à attribuer) dans POCHES-AIR-S479. **Sans attendre de « Continue »**
+Maillons        : 2 — S480 (la structure, décision de l'utilisateur) ; K2-2 fait avancer 7.4
+Registres       : dernier lot S480 (ADR-213 D3) ; le prochain au plus tard en S483
 ```
 
 **Avant de décider d'une reprise, vérifier les copies et branches selon AGENTS.md.** Le jeton

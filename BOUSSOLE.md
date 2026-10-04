@@ -50,6 +50,7 @@ L'ordre : le [plan de complétion](docs/registres/PLAN-COMPLETION-S475.md), trei
 | écume | reprise, d'après les vidéos V2 et V3 | ADR-219 D5 |
 | hors périmètre | les eaux souterraines (5.11) | ADR-197 D4 |
 | air | poches adiabatiques (T2), jamais un solveur diphasique | ADR-015, ADR-220 |
+| structure | la boussole d'abord ; l'état dans les registres générés ; les calculs longs par `calcul.py` ; le rituel par `rituel.py` | ADR-221 |
 
 ## Ce que l'utilisateur décide, et ce qui attend de lui
 

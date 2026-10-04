@@ -5,7 +5,7 @@ et ce qui précède sa première section). **Un ADR ne se réécrit jamais** : s
 nomment en tête — colonne « nommé par ». Le résumé des décisions qui gouvernent le travail aujourd'hui est dans la
 [boussole](../../BOUSSOLE.md) ; ce registre est le détail, pour vérifier qu'une décision n'a pas été remplacée.
 
-**220 ADR** — actée : 169, proposée : 49, rétractée en partie : 2.
+**221 ADR** — actée : 170, proposée : 49, rétractée en partie : 2.
 Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des premières sessions, avant que l'usage n'écrive
 « actée » : une proposée nommée par des ADR actés est en pratique appliquée.
 
@@ -137,7 +137,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [124](../adr/ADR-124-image-budget-et-effets-bornes.md) | Image, budget, puis effets volumiques bornés | actée | S201 | 001 007 127 | 125 126 127 191 192 |
 | [125](../adr/ADR-125-budget-image-60hz-deux-ms.md) | Profil initial : 60 images/s, eau2 ms par image | actée | S202 | 007 012 120 124 | 126 127 131 174 |
 | [126](../adr/ADR-126-emprise-d-un-impact-visible.md) | L'emprise d'un impact visible se dimensionne par ses coutures | actée | S203 | 060 124 125 | 127 128 132 142 |
-| [127](../adr/ADR-127-ambition-complete-construction-progressive.md) | Ambition finale complète, construction progressive par versions de plus en plus capables | actée | S204 | 124 125 126 | 131 141 149 174 178 179 180 181 182 183 185 186 187 188 189 190 191 192 193 197 |
+| [127](../adr/ADR-127-ambition-complete-construction-progressive.md) | Ambition finale complète, construction progressive par versions de plus en plus capables | actée | S204 | 124 125 126 | 131 141 149 174 178 179 180 181 182 183 185 186 187 188 189 190 191 192 193 197 221 |
 | [128](../adr/ADR-128-le-budget-de-pente-borne-les-perturbations.md) | Le budget de pente borne ce que les perturbations ajoutent, pas la mer | actée | S205 | 062 080 095 098 126 | 133 142 |
 | [129](../adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md) | Le chemin d'image de W radial passe par une table de Bessel précalculée | actée | S206 | 012 |  |
 | [130](../adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md) | La version interactive J1 rend l'eau sur GPU, par un hôte séparé | actée | S207 | 003 012 020 | 148 192 |
@@ -197,7 +197,7 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [184](../adr/ADR-184-seconde-representation-en-parallele.md) | La seconde représentation avance en parallèle du lot 2, par sessions alternées | actée | S316 | 178 | 186 187 188 189 |
 | [185](../adr/ADR-185-ordre-d-receveur-sous-i15.md) | L'ordre D : le volume net de δ reçoit un receveur, et ce receveur n'est pas répliqué | actée | S317 | 127 179 180 181 183 |  |
 | [186](../adr/ADR-186-apic-seconde-representation.md) | APIC est la seconde représentation de surface libre | actée | S319 | 127 175 178 184 | 187 188 200 207 220 |
-| [187](../adr/ADR-187-methode-refondue-s321.md) | La méthode refondue sur l'analyse de S321 : un rituel en deux parties, une lecture bornée, des protections plutôt que des leçons, des réceptions reproductibles | actée | S321 | 027 127 174 178 184 186 | 190 213 |
+| [187](../adr/ADR-187-methode-refondue-s321.md) | La méthode refondue sur l'analyse de S321 : un rituel en deux parties, une lecture bornée, des protections plutôt que des leçons, des réceptions reproductibles | actée | S321 | 027 127 174 178 184 186 | 190 213 221 |
 | [188](../adr/ADR-188-lot-3-a-la-place-du-lot-2-bloque.md) | Le lot 3 prend la place du lot 2 dans l'alternance, tant que l'ordre E est bloqué | actée | S324 | 127 174 178 184 186 | 189 |
 | [189](../adr/ADR-189-la-v1-d-abord.md) | La v1 d'abord | actée | S329 | 008 127 174 178 184 188 | 190 |
 | [190](../adr/ADR-190-apres-la-v1-la-liste-entiere.md) | Après la v1, la liste du projet fini entière | actée | S351 | 127 174 178 187 189 | 191 197 218 |
@@ -223,11 +223,12 @@ Le statut est lu par mots (voir l'outil) ; « proposée » vient souvent des pre
 | [210](../adr/ADR-210-changer-de-niveau-par-transfert-d-etat.md) | Changer un domaine de niveau par transfert d'état | actée | S402 | 005 006 012 207 |  |
 | [211](../adr/ADR-211-les-trucages-retenus.md) | Les trucages retenus : la bande étroite, la surface continue, les courants ensuite, le calcul d'avance au loin | actée | S412 | 207 212 | 212 |
 | [212](../adr/ADR-212-la-bande-etroite-en-profondeur.md) | La bande étroite en profondeur : une hauteur eulérienne sous les particules | actée | S412 | 207 211 |  |
-| [213](../adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md) | Accélérer : tolérance, plafond, rituel allégé, bancs courts | actée | S443 | 187 | 214 215 |
+| [213](../adr/ADR-213-accelerer-tolerance-plafond-rituel-bancs.md) | Accélérer : tolérance, plafond, rituel allégé, bancs courts | actée | S443 | 187 | 214 215 221 |
 | [214](../adr/ADR-214-b-entre-dans-la-bande.md) | B entre dans la bande : `Apic3` et sa carte reçoivent le couplage relatif | actée | S444 | 198 207 213 |  |
 | [215](../adr/ADR-215-autonomie-jusqu-a-une-v1-solide.md) | Autonomie jusqu'à une v1 solide | actée | S454 | 213 | 216 218 220 |
 | [216](../adr/ADR-216-le-banc-visuel.md) | Le banc visuel : mesurer plutôt que regarder | actée | S471 | 215 | 217 |
 | [217](../adr/ADR-217-le-type-d-eau-une-option-de-la-carte.md) | Le type d'eau, une option d'édition de la carte ; le ciel qui bouge, à l'atmosphère | actée | S473 | 197 216 |  |
-| [218](../adr/ADR-218-le-systeme-de-l-eau-complet.md) | L'objectif : le système de l'eau complet, la liste validée à 100 % | actée | S475 | 190 215 | 219 |
+| [218](../adr/ADR-218-le-systeme-de-l-eau-complet.md) | L'objectif : le système de l'eau complet, la liste validée à 100 % | actée | S475 | 190 215 | 219 221 |
 | [219](../adr/ADR-219-reponses-du-2026-10-04.md) | Réponses du 2026-10-04 : notre réseau, ce seul PC, le jeu DyingStar, l'écume par les vidéos | actée | S476 | 197 218 |  |
 | [220](../adr/ADR-220-la-campagne-k2.md) | La campagne K2 : l'air enfermé d'abord, la nappe rompue en gouttes, la voie d'ADR-007 | actée | S478 | 007 015 186 215 |  |
+| [221](../adr/ADR-221-la-structure-du-projet.md) | La structure du projet : la boussole, les registres générés, les calculs longs, le rituel outillé | actée | S480 | 127 187 213 218 |  |

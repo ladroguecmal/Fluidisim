@@ -339,8 +339,7 @@ def inspect(since: int | None) -> dict:
                 + adr_heads(texts)
                 + tableau_de_bord.ecarts(texts["docs/LISTE-PROJET-FINI.md"], texts[tableau_de_bord.PLAN],
                                          texts.get(tableau_de_bord.TABLEAU, ""))
-                + decisions.ecarts({p: t for p, t in texts.items() if re.fullmatch(r"docs/adr/ADR-\d+[^/]*\.md", p)},
-                                   texts.get(decisions.REGISTRE, ""))
+                + decisions.ecarts(decisions.lire_adrs(), texts.get(decisions.REGISTRE, ""))  # le disque : un ADR pas encore suivi compte
                 + anomalies.ecarts(texts[anomalies.SOURCE], texts.get(anomalies.REGISTRE, "")))
     return dict(head=git("rev-parse", "--short", "HEAD").strip(),
                 note="Fichiers suivis présents ; lignes brutes, tests/commentaires inclus. "

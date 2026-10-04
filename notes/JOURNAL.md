@@ -93,3 +93,17 @@ adiabatique, une inconnue de pression chacune dans la projection (implicite, le 
 volume géométrique saute à chaque changement d'étiquette ; le volume suivi par le flux, rappelé vers la géométrie. **Mesuré** : une
 bulle à 42,5 Hz contre 41,6 de Minnaert ; B10 3D au bout à 16 mailles, la bulle vivante après le pincement (A311 : remède éprouvé).
 **7.4 passe à partiel** (3 / 74 / 44). **Rituel** (allégé). Maillons **1**. Suivant : K2-2, la carte.
+
+## S480 — 2026-10-04 — la structure du projet : la boussole, les registres générés, le rituel outillé
+
+**Entrée.** Décision de l'utilisateur (*« Ok »*) sur la structure proposée ([ADR-221](../docs/adr/ADR-221-la-structure-du-projet.md)).
+Coupée après P1 (12:03), **reprise à chaud** à 16:37 : P2 écrite et cochée, non committée — complétée. **Fait**
+([preuve](../docs/validation/STRUCTURE-S480.md)) : `BOUSSOLE.md`, lue en premier ; trois registres générés tenus par `etat_projet --check`
+— [tableau de bord](../docs/registres/TABLEAU-DE-BORD.md) (3 validés sur 120), décisions ADR par ADR, anomalies ouvertes (24) ; le
+journal archivé par centaine dans `notes/journal/` (479 entrées avant comme après) ; `outils/calcul.py` (les calculs longs, détachés,
+registre [CALCULS](CALCULS.md)) ; `outils/rituel.py` (debut, fin). **Trouvé** : la levée d'A322 (S442) jamais écrite au registre —
+notée ; les sorties de S479 n'existaient que dans un dossier temporaire — gardées : B10 à 24 mailles était mort avec sa conversation,
+la bulle de la grande cuve oscille à 47,84 Hz contre 42,22 (× 1,13 ; la petite donnait × 1,02). **Relancé** : B10 à 24 mailles par
+`calcul.py` (16:52, ≈ 2 h 30). **Lot des registres** (dû en S480) : index, file active, feuille de route, boussole. **Rituel** par
+`rituel.py`. Maillons **2** — la structure n'avance aucun point de la liste ; K2-2 fait avancer 7.4. Suivant : **S481, K2-2**.
+

@@ -62,7 +62,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S480 — **en cours**. **Décision de l'utilisateur** (« Ok ») sur la proposition faite à ses questions — reprendre depuis une
+Session : S480 — **terminée**. **Décision de l'utilisateur** (« Ok ») sur la proposition faite à ses questions — reprendre depuis une
 autre conversation, les défauts de méthode, la structure de gestion (*« avoir en contexte les choses essentielles nouvelles mais
 aussi les intentions initiales […] pour ne pas travailler dans le flou »*). K2-2 passe en S481.
 
@@ -87,7 +87,7 @@ fin de S480 fait par `rituel.py`.
 - [x] **P2** — la boussole ; REPRISE et AGENTS.
 - [x] **P3** — les trois registres générés, tenus par `--check`.
 - [x] **P4** — le journal archivé (P4a) ; `calcul.py` (P4b) ; `rituel.py` (P4c) — trois commits.
-- [ ] **P5** — preuve ; rituel (par `rituel.py`).
+- [x] **P5** — preuve ; rituel (par `rituel.py`).
 
 ### Notes de reprise
 - **P2** — `BOUSSOLE.md` (le pourquoi, DyingStar et la surprise, la fin à 100 %, l'architecture en quatre lignes, quinze décisions
@@ -113,3 +113,7 @@ fin de S480 fait par `rituel.py`.
   journal, régénère les trois registres, libère le jeton, coche, `etat_projet --check`) ; essai du refus : P4 non cochée et pas
   d'entrée S480 → deux MANQUE, rien d'écrit. `calcul.py` : `VAR=valeur` avant `--`, inscrits avec la commande. **B10 à `D/dx` = 24
   relancé** par l'outil à 16:52 (`calculs/20261004-165215-b10-poches-p24`, ≈ 2 h 30) : K2-2 le consigne à son arrivée.
+- **P5** — preuve STRUCTURE-S480 ; ADR-221 (la décision) ; le lot des registres (index : boussole, registres générés, plan de
+  complétion, K2, POCHES-AIR-S479, STRUCTURE-S480, ADR-221, archives du journal ; file active : la décision du jour ; feuille de route :
+  S478–S480 ; boussole : la ligne « structure ») ; journal ; rituel par `rituel.py fin --lot`.
+
