@@ -11,7 +11,7 @@ bornée, rituel en deux parties ; version précédente à `2f275cd2`.
 
 ```
 JETON            : occupé
-Battement        : 2026-10-04 22:29 +02:00
+Battement        : 2026-10-04 22:54 +02:00
 Agent            : Claude Code (Opus 5.5), application de bureau, **au poste** (fichiers, git, cargo, Python, RTX 5070 Laptop ; Godot non utilisé) — branche `poste`
 Session en cours : **S481 — K2-2 : l'air enfermé sur la carte**
 Dernière session : S480 — la structure du projet : la boussole, les registres générés, le rituel outillé ([journal](notes/JOURNAL.md)). Avant : S479 (K2-1 : l'air enfermé dans APIC 3D)

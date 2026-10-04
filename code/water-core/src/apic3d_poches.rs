@@ -19,7 +19,7 @@
 //!   défini positif et le même gradient conjugué le résout. **Implicite** : stable quel que soit le pas devant la raideur de
 //!   la poche.
 //!
-//! Une poche de moins d'une maille d'air (`V < dx³`) se résorbe — l'air y redevient libre — : sa raideur n'a plus de sens à
+//! Une poche de moins d'une maille d'air (`V < dx³`), ou de moins de `POCHE_MAILLES_MIN` mailles (S481), se résorbe — l'air y redevient libre — : sa raideur n'a plus de sens à
 //! cette échelle (les microbulles, K2-7, la prendront). Plus de `MAX_POCKETS` poches : les suivantes restent libres, comptées.
 
 use super::*;
@@ -30,6 +30,11 @@ pub const MAX_POCKETS: usize = 64;
 pub const P_ATM: f64 = 101_325.;
 /// L'exposant adiabatique de l'air.
 pub const GAMMA_AIR: f64 = 1.4;
+/// **S481** — les mailles d'air au moins d'une poche gardée : en deçà (un cube de 2 × 2 × 2), elle se résorbe. Mesuré sur la scène
+/// `--v1` (dx = 5 cm) : des poches d'une ou deux mailles, nées dans l'eau brassée sous la cavité, sautent de volume à chaque changement
+/// d'étiquette et la pression y bondit (283 kPa) jusqu'à l'emballement ; leur raideur n'a pas de sens à cette échelle (les microbulles,
+/// K2-7). Leur volume compte la part d'air des mailles d'eau voisines : la règle du volume (`V < dx³`) ne les attrapait pas.
+pub const POCHE_MAILLES_MIN: u32 = 8;
 /// Le temps de rappel du volume suivi par le flux vers le volume géométrique, s (voir le volume, en tête).
 pub const RAPPEL_VOLUME_S: f64 = 0.1;
 
@@ -355,7 +360,7 @@ impl Apic3 {
         let mut kept = 0usize;
         let mut remap = [0u32; MAX_POCKETS];
         for b in 0..count {
-            if ps.geo[b] < cell_volume {
+            if ps.geo[b] < cell_volume || ps.cells[b] < POCHE_MAILLES_MIN {
                 remap[b] = LIBRE;
                 continue;
             }

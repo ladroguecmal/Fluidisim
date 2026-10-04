@@ -372,6 +372,18 @@ pub fn banc_v1() -> Result<(), String> {
                 std::fs::write(&nom, &ppm).map_err(|e| e.to_string())?;
                 prochaine_image += 1;
             }
+            // S481 : `V1_POCHES_TRACE=<t>` — chaque poche à chaque pas après `t` s.
+            if let Some(t0) = std::env::var("V1_POCHES_TRACE").ok().and_then(|x| x.parse::<f64>().ok()) {
+                if v.t() > t0 && v.carte.air_pockets_enabled() {
+                    for (b, p) in v.carte.air_pockets()?.iter().enumerate() {
+                        println!(
+                            "V1_POCHE pas={} t={:.4} poche={b} V={:.4e} P={:.0} mailles={} centre=({:.3},{:.3},{:.3}) corps_z={:.3}",
+                            v.pas, v.t(), p.volume, p.pressure, p.cells, p.centroid[0], p.centroid[1], p.centroid[2],
+                            v.corps_a(v.t()).map_or(0., |s| s.center[2])
+                        );
+                    }
+                }
+            }
             if v.carte.air_pockets_enabled() && v.pas % 8 == 0 {
                 let pc = v.carte.air_pockets()?;
                 poches_max = poches_max.max(pc.len());

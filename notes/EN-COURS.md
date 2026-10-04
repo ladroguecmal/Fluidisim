@@ -93,7 +93,7 @@ dans la session est dit, et passe à S482.
 - [x] **P2** — l'état des poches exporté par la référence ; `apic3d_poches.wgsl`, ses tampons ; la détection ; essai (2).
 - [x] **P3** — le bilan par poche : listes, réductions, héritage, naissance, rappel, résorption ; contre la référence sur un même état.
 - [x] **P4** — la projection avec poches ; la bulle, essai (3).
-- [ ] **P5** — B10 (4) ; `--v1` (5) par `calcul.py`.
+- [>] **P5** — B10 (4) ; `--v1` (5) par `calcul.py`.
 - [ ] **P6** — preuve ; rituel (par `rituel.py`).
 
 ### Notes de reprise
@@ -119,3 +119,12 @@ dans la session est dit, et passe à S482.
   `calculs/20261004-221515-s481-bulle-suivi`) : 300 pas, volume à 2,9·10⁻⁵, pression à 4,1·10⁻⁵ de la référence ; **42,47 Hz contre
   42,50** ; 151 itérations au plus, toutes convergées ; masse exacte. Critère (3) tenu. `calcul.py` résout un programme donné par un
   chemin relatif au dépôt. L'instrumentation de P5 (`APIC3D_POCHES=1` sur B10 et `--v1`) est dans ce commit, compilée, non lancée.
+- **P5a** — `--v1` avec poches (`APIC3D_POCHES=1`) : **emballement vers t = 8,33 s** (le pas stable tombe à 1 ms, puis la carte est
+  perdue) ; tracé : une quinzaine de poches d'une ou deux mailles (dx = 5 cm) dans l'eau brassée sous la cavité, pression jusqu'à
+  283 kPa. **Tranché** : `POCHE_MAILLES_MIN` = 8 dans la référence et la carte (une poche de moins de 8 mailles d'air se résorbe ; la
+  règle `V < dx³` ne les attrapait pas, leur volume compte la part d'air des mailles d'eau voisines) ; 43 essais d'APIC 3D passent.
+  Puis 60 s **stables**, masse exacte au quantum, une poche observée (1,87·10⁻³ m³ ≈ 15 dx³, 107 kPa) — le critère (5) tenu au
+  minimum : à dx = 5 cm, la scène ne fait presque que des poches de moins de 8 mailles. **Coût** : pas médian 71,4 ms contre 16,7
+  sans poches (témoin, même binaire) — reconstruction +11 ms (détection et listes par un seul groupe), projection +≈ 40 ms (la
+  diagonale à la place de la multigrille). À inscrire (ADR-131) ; remèdes : les poches dans la multigrille (préconditionneur par
+  blocs), sauter les noyaux quand aucun air n'est enfermé, les parcours à plusieurs groupes. B10 à 16 mailles lancé.

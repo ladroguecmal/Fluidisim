@@ -244,6 +244,8 @@ const PF_SCAL: u32 = 31u;    // [0] le dernier pas, s
 const P_ATM: f32 = 101325.0;
 const GAMMA_AIR: f32 = 1.4;
 const RAPPEL_VOLUME_S: f32 = 0.1;
+// `POCHE_MAILLES_MIN` de la référence (S481).
+const POCHE_MAILLES_MIN: f32 = 8.0;
 
 fn pf(field: u32, b: u32) -> u32 {
     return field * MAXP + b;
@@ -514,7 +516,7 @@ fn pk_scalars() {
         }
         let vol = vf[b] + (geo - vf[b]) * rappel;
         // 6. La résorption des poches de moins d'une maille ; les gardées se rangent dans l'ordre.
-        if geo < cell_volume {
+        if geo < cell_volume || pkf[pf(PF_CELLS, b)] < POCHE_MAILLES_MIN {
             atomicStore(&pko[h + H_REMAP + b], 0u);
             continue;
         }
