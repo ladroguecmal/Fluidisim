@@ -78,8 +78,9 @@ haute fréquence de V1 dans leur tolérance (35 %) ; si la cause est la mer : l'
 ### Plan
 
 - [x] **P1** — jeton, plan seul.
-- [ ] **P2** — ADR-217.
+- [x] **P2** — ADR-217.
 - [ ] **P3** — E2 : l'essai, la cause, la correction ; la mesure.
 - [ ] **P4** — preuve ; rituel (allégé).
 
 ### Notes de reprise
+- **P2** — ADR-217 écrite, indexée ; MIROIRS-S472 annotée (E4 retiré, E1 devient le chantier du type d'eau).

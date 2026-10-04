@@ -195,5 +195,9 @@ des nuages plus doux.
 p99), sa part haute fréquence, son anisotropie et son mouvement ; le renouvellement des reflets de l'eau proche (15 par seconde des
 deux côtés) ; la teinte du ciel clair (B/G 2,26 contre 2,25).
 
+**Réponses de l'utilisateur (S473, [ADR-217](../adr/ADR-217-le-type-d-eau-une-option-de-la-carte.md))** : le type d'eau sera une option
+d'édition de la carte, variable d'un endroit à l'autre — E1 devient ce chantier, chaque préréglage jugé contre sa référence ; le
+mouvement des nuages relève du système d'atmosphère et de climat, après l'eau — **E4 retiré**.
+
 **La suite** (sessions de rendu, ADR-191) : E2 puis E1 — la mer de tous les jours — ; E3 ; E4. Chacune a pour critère de ramener
 ses grandeurs dans la tolérance, ou de dire pourquoi elles ne le peuvent pas.
